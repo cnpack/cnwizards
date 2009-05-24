@@ -46,6 +46,8 @@ See http://www.suigeneris.org/want/ for details.
   <property name="exe.D14"        value="${env.D14}" if="env.D14" />
   <property name="exe.D14"        value="${ProgramFiles}\CodeGear\RAD Studio\7.0\Bin\DCC32.EXE" unless="env.D14" />
   <property name="exe.brcc32"     value="%{BRCC32}" />
+  <property name="exe.svn"        value="${env.svn}" if="env.svn" />
+  <property name="exe.svn"        value="${ProgramFiles}\Subversion\bin\svn.exe" unless="env.svn" />
 
   <!-- 根据发布类型设置相关属性，发布类型由命令行传入，如 want -Dpreview=true -->
   <property name="release.type"   value="_Unstable" if="unstable" />
@@ -113,7 +115,7 @@ See http://www.suigeneris.org/want/ for details.
   <!-- 设置安装程序文件名 -->
   <property name="Installer.Name"       value="CnWizards_${Ver.Str.Major}.${Ver.Str.Minor}.exe" />
   <property name="zipname"              value="CnWizards_Src_${Ver.Str.Major}.${Ver.Str.Minor}.zip" />
-  <property name="zipfile"              value="${root}/../${zipname}" />
+  <property name="zipfile"              value="${root}/${zipname}" />
 
   <!-- 取得日期时间 -->
   <tstamp>
@@ -122,7 +124,7 @@ See http://www.suigeneris.org/want/ for details.
   </tstamp>
 
   <!-- 定义目录名变量 -->
-  <property name="root"           value="${basedir}" />
+  <property name="root"           value="${basedir}/.." />
   <property name="bin"            value="${basedir}/Bin" />
   <property name="dcu"            value="${basedir}/Dcu" />
   <property name="doc"            value="${basedir}/Doc" />
@@ -133,8 +135,8 @@ See http://www.suigeneris.org/want/ for details.
   <property name="make"           value="${basedir}/Make" />
   <property name="src"            value="${basedir}/Source" />
   <property name="tools"          value="${basedir}/Tools" />
-  <property name="cnpack"         value="${basedir}/../cnpack" />
-  <property name="cnpack.src"     value="${cnpack}/Source" />
+  <property name="cnvcl"          value="${basedir}/../cnvcl" />
+  <property name="cnvcl.src"      value="${cnvcl}/Source" />
 
   <!-- 显示帮助信息 -->
   <target name="help" description="Show help text." >
@@ -145,7 +147,7 @@ Usage: want [target-name] [-Dname=value]
     cleanbin   - Clean output files.
     cleanobj   - Clean temp files.
     clean      - Clean output and temp files.
-    cvsupdate  - Update all files.
+    svnupdate  - Update all files.
     d5         - Compile CnWizards for Delphi 5.
                  (d6, d7, d9, d10, d11, d12, d14, cb5, cb6 also)
     cnwizards  - Compile all CnWizards DLLs (D5, D6, etc.).
@@ -166,8 +168,8 @@ Usage: want [target-name] [-Dname=value]
     help_enu   - Compile English chm help.
     makehelp   - Compile all chm help files.
     makeinst   - Build CnWizards Installer.
-    all        - All above tasks except cvsupdate.
-    allcvs     - All above tasks.
+    all        - All above tasks except svnupdate.
+    allsvn     - All above tasks.
     upload     - Upload Installer to Server (Master only).
     incbuild   - Increase build and commit (Master only).
     publish    - Publish a new version (Master only).
@@ -193,6 +195,7 @@ Usage: want [target-name] [-Dname=value]
 
   <target name="cleanbin" description="Clean output files." >
     <delete dir="${bin}" >
+       <exclude name="?svn" />
        <include name="*.*" />
        <include name="Help/*.chm" />
     </delete>
@@ -200,6 +203,7 @@ Usage: want [target-name] [-Dname=value]
 
   <target name="cleanobj" description="Clean temp files." >
     <delete dir="${dcu}" >
+       <exclude name="?svn" />
        <include name="*.*" />
        <exclude name="Readme.txt" />
     </delete>
@@ -217,7 +221,7 @@ Usage: want [target-name] [-Dname=value]
        <include name="**/*.mak" />
        <exclude name="**/*.template.*" />
     </delete>
-    <delete dir="${cnpack.src}" >
+    <delete dir="${cnvcl.src}" >
        <include name="**/*.hpp" />
        <include name="**/*.drc" />
        <include name="**/*.rc" />
@@ -229,15 +233,18 @@ Usage: want [target-name] [-Dname=value]
     </delete>
   </target>
 
-  <!-- 更新 cvs 源码 -->
-  <target name="cvsupdate" ifndef="nocvs" description="Update all files." >
-    <cvs dest="${root}" command="-z9 -q update -C -d" if="ismaster" />
-    <cvs dest="${cnpack}" command="-z9 -q update -C -d" if="ismaster"/>
-    <cvs dest="${root}" command="-z9 -q update -d" unless="ismaster" />
-    <cvs dest="${cnpack}" command="-z9 -q update -d" unless="ismaster"/>
-    <delete dir="${root}" if="ismaster" >
-       <include name="**/.#*" />
-    </delete>
+  <!-- 更新 svn 源码 -->
+  <target name="svnupdate" ifndef="nosvn" description="Update all files." >
+    <exec basedir="${root}" errorlevel="1" defaultfilters="true"
+          executable="${exe.svn}" if="ismaster" >
+      <arg value="-R" />
+      <arg value="revert" />
+      <arg value="*.*" />
+    </exec>
+    <exec basedir="${root}" errorlevel="1" defaultfilters="true"
+          executable="${exe.svn}" >
+      <arg value="update" />
+    </exec>
   </target>
 
   <!-- 编译 CnWizards DLLs -->
@@ -263,6 +270,7 @@ Usage: want [target-name] [-Dname=value]
 
   <target name="-cw_final" >
     <delete dir="${dcu}" >
+       <exclude name="?svn" />
        <include name="*.*" />
        <exclude name="Readme.txt" />
     </delete>
@@ -459,6 +467,7 @@ Usage: want [target-name] [-Dname=value]
 
   <target name="-cb5" depends="-cw_prepare" >
     <delete dir="${dcu}" >
+       <exclude name="?svn" />
        <include name="*.*" />
        <exclude name="Readme.txt" />
     </delete>
@@ -504,6 +513,7 @@ Usage: want [target-name] [-Dname=value]
 
   <target name="-cb6" depends="-cw_prepare" >
     <delete dir="${dcu}" >
+       <exclude name="?svn" />
        <include name="*.*" />
        <exclude name="Readme.txt" />
     </delete>
@@ -590,7 +600,7 @@ Usage: want [target-name] [-Dname=value]
     <copy tofile="${tools}/CnZipWrapper/CnZipWrapper.res.old" >
        <include name="${tools}/CnZipWrapper/CnZipWrapper.res" />
     </copy>
-    <echo input="${tools}/CnTools.template.rc" file="${tools}/CnZipWrapper/CnZipWrapper.rc" />
+    <echo input="${tools}/CnDll.template.rc" file="${tools}/CnZipWrapper/CnZipWrapper.rc" />
     <brcc file="${tools}/CnZipWrapper/CnZipWrapper.rc" output="${tools}/CnZipWrapper/CnZipWrapper.res" />
     <dcc basedir="${tools}/CnZipWrapper" source="CnZipWrapper.dpr" versions="5" usecfg="true" />
     <delete dir="${tools}/CnZipWrapper">
@@ -606,6 +616,7 @@ Usage: want [target-name] [-Dname=value]
   <!-- 编译附加工具 -->
   <target name="tools" depends="-prepare,cnconfigio,cndebugviewer,cndfm6to5,cnascii,cnidebr,cnmanagewiz,cnselectlang,cnsmr,cnwizsetup" description="Compile Tools (CnDfm6To5, CnWizSetup, etc.)." >
     <delete dir="${dcu}" >
+       <exclude name="?svn" />
        <include name="*.*" />
        <exclude name="Readme.txt" />
     </delete>
@@ -856,11 +867,11 @@ Usage: want [target-name] [-Dname=value]
   -->
 
   <!-- 完整构建 -->
-  <target name="all" depends="-prepare,clean,cnwizards,resdll,cnzipdll,tools,makehelp,makeinst" description="All above tasks except cvsupdate." >
+  <target name="all" depends="-prepare,clean,cnwizards,resdll,cnzipdll,tools,makehelp,makeinst" description="All above tasks except svnupdate." >
   </target>
 
-  <!-- 带 cvs 更新的完整构建 -->
-  <target name="allcvs" depends="-prepare,clean,cvsupdate,cnwizards,resdll,cnzipdll,tools,makehelp,makeinst" description="All above tasks." >
+  <!-- 带 svn 更新的完整构建 -->
+  <target name="allsvn" depends="-prepare,clean,svnupdate,cnwizards,resdll,cnzipdll,tools,makehelp,makeinst" description="All above tasks." >
   </target>
 
   <!-- FTP 上传服务器 -->
@@ -880,10 +891,17 @@ Usage: want [target-name] [-Dname=value]
       <write section="Version" key="Build" value="${Ver.Build}" />
       <write section="Version" key="LastDate" value="${date.curr}" />
     </ini>
-    <cvs dest="${root}" command='commit -m "Commit version files: ${Ver.Str.Major}.${Ver.Str.Minor}" Make/release.ini Source/Version.inc Install/Src/release.inc' />
+    <exec basedir="${basedir}" errorlevel="1" defaultfilters="true"
+          executable="${exe.svn}" >
+      <arg value='-m "Commit version files: ${Ver.Str.Major}.${Ver.Str.Minor}"' />
+      <arg value="commit" />
+      <arg value="Make/release.ini" />
+      <arg value="Source/Version.inc" />
+      <arg value="Install/Src/release.inc" />
+    </exec>
   </target>
 
   <!-- 完整构建并发布 -->
-  <target name="publish" depends="allcvs,incbuild,upload" description="Publish a new version (Master only)." >
+  <target name="publish" depends="allsvn,incbuild,upload" description="Publish a new version (Master only)." >
   </target>
 </project>
