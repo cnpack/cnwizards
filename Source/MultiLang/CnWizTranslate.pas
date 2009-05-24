@@ -917,6 +917,7 @@ begin
   TranslateStr(SCnProjExtBackupFileCount, 'SCnProjExtBackupFileCount');
   TranslateStr(SCnProjExtBackupNoFile, 'SCnProjExtBackupNoFile');
   TranslateStr(SCnProjExtBackupMustZip, 'SCnProjExtBackupMustZip');
+  TranslateStr(SCnProjExtBackupDllMissCorrupt, 'SCnProjExtBackupDllMissCorrupt');
   TranslateStr(SCnProjExtBackupErrorCompressor, 'SCnProjExtBackupErrorCompressor');
   TranslateStr(SCnProjExtBackupSuccFmt, 'SCnProjExtBackupSuccFmt');
 
