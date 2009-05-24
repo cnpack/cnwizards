@@ -34,20 +34,21 @@ See http://www.suigeneris.org/want/ for details.
   <!-- 从环境变量中取得系统参数 -->
   <property name="ProgramFiles"   value="%{ProgramFiles}" />
 
-  <property name="env.D9"         value="%{DCC_DELPHI9}" />
-  <property name="exe.D9"         value="${env.D9}" if="env.D9" />
+  <property name="exe.D9"         value="%{env.D9}" if="env.D9" />
   <property name="exe.D9"         value="${ProgramFiles}\Borland\BDS\3.0\Bin\DCC32.EXE" unless="env.D9" />
-  <property name="exe.D10"        value="${env.D10}" if="env.D10" />
+  <property name="exe.D10"        value="%{env.D10}" if="env.D10" />
   <property name="exe.D10"        value="${ProgramFiles}\Borland\BDS\4.0\Bin\DCC32.EXE" unless="env.D10" />
-  <property name="exe.D11"        value="${env.D11}" if="env.D11" />
+  <property name="exe.D11"        value="%{env.D11}" if="env.D11" />
   <property name="exe.D11"        value="${ProgramFiles}\CodeGear\RAD Studio\5.0\Bin\DCC32.EXE" unless="env.D11" />
-  <property name="exe.D12"        value="${env.D12}" if="env.D12" />
+  <property name="exe.D12"        value="%{env.D12}" if="env.D12" />
   <property name="exe.D12"        value="${ProgramFiles}\CodeGear\RAD Studio\6.0\Bin\DCC32.EXE" unless="env.D12" />
-  <property name="exe.D14"        value="${env.D14}" if="env.D14" />
+  <property name="exe.D14"        value="%{env.D14}" if="env.D14" />
   <property name="exe.D14"        value="${ProgramFiles}\CodeGear\RAD Studio\7.0\Bin\DCC32.EXE" unless="env.D14" />
   <property name="exe.brcc32"     value="%{BRCC32}" />
-  <property name="exe.svn"        value="${env.svn}" if="env.svn" />
+  <property name="exe.svn"        value="%{env.svn}" if="env.svn" />
   <property name="exe.svn"        value="${ProgramFiles}\Subversion\bin\svn.exe" unless="env.svn" />
+  <property name="exe.python"     value="%{env.python}" if="env.python" />
+  <property name="exe.python"     value="C:\Python26\python.exe" unless="env.python" />
 
   <!-- 根据发布类型设置相关属性，发布类型由命令行传入，如 want -Dpreview=true -->
   <property name="release.type"   value="_Unstable" if="unstable" />
@@ -59,6 +60,17 @@ See http://www.suigeneris.org/want/ for details.
   <property name="release.type"   value="_RC4"      if="rc4" />
   <property name="release.type"   value="_RC5"      if="rc5" />
   <property name="release.type"   value=""          if="release" />
+
+  <property name="release.labels"   value="Unstable"   if="unstable" />
+  <property name="release.labels"   value="Debug"      if="debug" />
+  <property name="release.labels"   value="Preview"    if="preview" />
+  <property name="release.labels"   value="RC"         if="rc1" />
+  <property name="release.labels"   value="RC"         if="rc2" />
+  <property name="release.labels"   value="RC"         if="rc3" />
+  <property name="release.labels"   value="RC"         if="rc4" />
+  <property name="release.labels"   value="RC"         if="rc5" />
+  <property name="release.labels"   value="Release"    if="release" />
+  <property name="release.labels"   value="Release"    unless="release.labels" />
 
   <property name="ftpdir"  value="/download.cnpack.org/unstable"  if="unstable" />
   <property name="ftpdir"  value="/download.cnpack.org/debug"     if="debug" />
@@ -875,13 +887,34 @@ Usage: want [target-name] [-Dname=value]
   </target>
 
   <!-- FTP 上传服务器 -->
-  <target name="upload" depends="-prepare" if="ismaster" description="Upload Installer to Server (Master only)." >
+  <target name="upload_ftp" depends="-prepare" if="ismaster" description="Upload Installer to FTP Server (Master only)." >
     <ftp server="www.cnpack.org" userid="?{${master.ini}:Master:ftpuser}" password="?{${master.ini}:Master:ftppass}" >
       <cd dir="${ftpdir}" />
       <put basedir="${install.output}" src="${Installer.Name}" />
     </ftp>
   </target>
 
+  <!-- 上传到 Google Code 服务器 -->
+  <target name="upload_google" depends="-prepare" if="ismaster" description="Upload Installer to Google Code Server (Master only)." >
+    <exec basedir="${basedir}" errorlevel="1" defaultfilters="true"
+          executable="${exe.python}" >
+      <arg value="Make/googlecode_upload.py" />
+      <arg value="-s" />
+      <arg value="${Installer.Name}" />
+      <arg value="-p" />
+      <arg value="cnpack" />
+      <arg value="-u" />
+      <arg value="?{${master.ini}:GoogleCode:user}" />
+      <arg value="-w" />
+      <arg value="?{${master.ini}:GoogleCode:password}" />
+      <arg value="-l" />
+      <arg value="${release.labels}" />
+      <arg value="Install/Output/${Installer.Name}" />
+    </exec>
+  </target>
+
+  <target name="upload" depends="-prepare,upload_ftp,upload_google" if="ismaster" description="Upload Installer to FTP and Google Code Servers (Master only)." />
+  
   <!-- 更新 build 号及提交文件 -->
   <target name="incbuild" depends="-prepare" if="ismaster" description="Increase build and commit (Master only)." >
     <ini file="${ini}" >
@@ -893,7 +926,8 @@ Usage: want [target-name] [-Dname=value]
     </ini>
     <exec basedir="${basedir}" errorlevel="1" defaultfilters="true"
           executable="${exe.svn}" >
-      <arg value='-m "Commit version files: ${Ver.Str.Major}.${Ver.Str.Minor}"' />
+      <arg value="-m" />
+      <arg value="Commit version files: ${Ver.Str.Major}.${Ver.Str.Minor}" />
       <arg value="commit" />
       <arg value="Make/release.ini" />
       <arg value="Source/Version.inc" />

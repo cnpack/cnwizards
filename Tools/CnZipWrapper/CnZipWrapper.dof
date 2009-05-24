@@ -40,7 +40,7 @@ ImageBase=4194304
 ExeDescription=
 [Directories]
 OutputDir=..\..\Bin
-UnitOutputDir=
+UnitOutputDir=..\..\Dcu
 PackageDLLOutputDir=
 PackageDCPOutputDir=
 SearchPath=..\..\Source\ThirdParty\TPAbbrevia
@@ -93,8 +93,9 @@ Item1=..\..\ThirdParty\TPAbbrevia
 Item2=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript;Utils;ScriptWizard
 Item3=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript;Utils
 [HistoryLists\hlUnitOutputDirectory]
-Count=1
-Item0=..\Dcu
+Count=2
+Item0=..\..\Dcu
+Item1=..\Dcu
 [HistoryLists\hlOutputDirectorry]
 Count=2
 Item0=..\..\Bin
