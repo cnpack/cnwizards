@@ -298,7 +298,6 @@ const
 {$ENDIF COMPILER11}
 
 {$IFDEF COMPILER12}
-var
   CorIdeLibName: PWideChar = 'coreide120.bpl';
   DphIdeLibName: PWideChar = 'delphicoreide120.bpl';
   dccLibName: PWideChar = 'dcc120.dll';
@@ -314,25 +313,4 @@ var
 
 implementation
 
-{$IFDEF COMPILER12}
-
-uses
-  CnWizIdeUtils;
-
-// 这段修补 D2010 测试版中无 VER210 定义导致无法直接区分 120 和 140 系列 DLL 的问题
-
-procedure CheckD14DllNames;
-begin
-  if IdeIsD14Beta then
-  begin
-    CorIdeLibName := 'coreide140.bpl';
-    DphIdeLibName := 'delphicoreide140.bpl';
-    dccLibName := 'dcc140.dll';
-  end;
-end;
-
-initialization
-  CheckD14DllNames;
-
-{$ENDIF COMPILER12}
 end.

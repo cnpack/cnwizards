@@ -221,10 +221,6 @@ var
   {* 标记当前是否是嵌入式设计窗体模式，initiliazation 时被初始化，请勿手工修改其值。
      使用此全局变量可以避免频繁调用 IdeGetIsEmbeddedDesigner 函数}
 
-  IdeIsD14Beta: Boolean = False;
-  {* D2010 beta 版未定义 VER210，导致光通过编译指令无法区分 D2009 和 D2010 beta
-     此处采用这个变量来说明}
-
 //==============================================================================
 // 修改自 GExperts Src 1.12 的 IDE 相关函数
 //==============================================================================
@@ -1907,10 +1903,6 @@ end;
 initialization
   IdeIsEmbeddedDesigner := IdeGetIsEmbeddedDesigner;
   // 使用此全局变量可以避免频繁调用 IdeGetIsEmbeddedDesigner 函数
-
-{$IFDEF COMPILER12}
-  IdeIsD14Beta := GetFileVersionNumber(Application.ExeName).Major = 14;
-{$ENDIF COMPILER12}
 
 finalization
 {$IFDEF DEBUG}

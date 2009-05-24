@@ -319,14 +319,18 @@ type
   TCustomControlHack = class(TCustomControl);
 
 {$IFDEF BDS}
-var
+const
 {$IFDEF BDS2005}
-  CnWideControlCanvasOffset: Integer = $230;
+  CnWideControlCanvasOffset = $230;
   // BDS 2005 下 EditControl 的 Canvas 属性的偏移量
 {$ELSE}
+  {$IFDEF BDS2010}
+  // BDS 2010 Beta 的偏移量
+  CnWideControlCanvasOffset = $268;
+  {$ELSE}
   // BDS 2006/2007/2009 下 EditControl 的 Canvas 属性的偏移量
-  CnWideControlCanvasOffset: Integer = $260;
-  // BDS 2010 Beta 的偏移量在 initialization 处处理，正式版将改回来
+  CnWideControlCanvasOffset = $260;
+  {$ENDIF}
 {$ENDIF}
 {$ENDIF}
 
@@ -1624,10 +1628,6 @@ end;
 
 initialization
   InitializeCriticalSection(PaintLineLock);
-{$IFDEF BDS}
-  if IdeIsD14Beta then
-    CnWideControlCanvasOffset := $268; // D2010 下 Canvas 的偏移量
-{$ENDIF}
 
 finalization
 {$IFDEF DEBUG}
