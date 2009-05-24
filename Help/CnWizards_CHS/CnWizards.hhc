@@ -1,0 +1,471 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
+<!-- Sitemap 1.0 -->
+</HEAD><BODY>
+<OBJECT type="text/site properties">
+	<param name="FrameName" value="right">
+	<param name="Window Styles" value="0x800025">
+</OBJECT>
+<UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="CnPack 简介">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="欢迎使用 CnPack IDE 专家包">
+			<param name="Local" value="cnpack/index.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="关于 CnPack 开发包">
+			<param name="Local" value="cnpack/about.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="许可协议">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="CnPack IDE 专家包许可协议">
+			<param name="Local" value="licenses/license.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="其他引用的协议">
+			</OBJECT>
+		<UL>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="GExperts 使用许可协议">
+				<param name="Local" value="licenses\gelicense.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Mozilla Public License 1.1">
+				<param name="Local" value="licenses\MPL-1.1.txt">
+				</OBJECT>
+		</UL>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="IDE 专家">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="IDE 专家基本操作">
+			<param name="Local" value="wizards/wizards.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="窗体设计专家">
+			<param name="Local" value="wizards/alignsizewizards.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="MessageBox 设计器">
+			<param name="Local" value="wizards/msgboxwizards.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="组件选择器">
+			<param name="Local" value="wizards/componentselector.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Tab Order 专家">
+			<param name="Local" value="wizards/taborderwizard.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="书签浏览专家">
+			<param name="Local" value="wizards/bookmarkwizards.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="打开高版本窗体工具">
+			<param name="Local" value="wizards/dfm6to5wizards.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="源码模板专家">
+			<param name="Local" value="wizards\srctemplates.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="MSDN 帮助专家">
+			<param name="Local" value="wizards/msdnwizards.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="带格式代码输出工具">
+			<param name="Local" value="wizards/pas2htmlwizards.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="批量文件替换专家">
+			<param name="Local" value="wizards/replacewizards.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="源代码比较专家">
+			<param name="Local" value="wizards/sourcediffwizards.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="源代码统计专家">
+			<param name="Local" value="wizards/sourcestatwizards.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="组件前缀专家">
+			<param name="Local" value="wizards/prefixwizard.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="属性修改器">
+			<param name="Local" value="wizards/corprop.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="删除注释专家">
+			<param name="Local" value="wizards/commcropwizard.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="历史文件快照专家">
+			<param name="Local" value="wizards\projext\filesnapshot.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Repository 向导列表">
+			<param name="Local" value="wizards\repository.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="文件管理器专家">
+			<param name="Local" value="wizards\explorer.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="函数过程列表">
+			<param name="Local" value="wizards\cnproclistwizard.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="引用单元清理专家">
+			<param name="Local" value="wizards\cnusescleaner.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="IDE 配置备份恢复工具">
+			<param name="Local" value="wizards\cnidebrtool.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="脚本扩展专家">
+			<param name="Local" value="wizards\scriptwizard.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="IDE 专家管理工具">
+			<param name="Local" value="wizards\cnmanagewiz.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="工程扩展工具">
+			</OBJECT>
+		<UL>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="常用工具">
+				<param name="Local" value="wizards\projext\projectexwizard.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="工程组单元列表">
+				<param name="Local" value="wizards\projext\unitslist.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="工程组窗体列表">
+				<param name="Local" value="wizards\projext\formslist.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="引用单元列表">
+				<param name="Local" value="wizards\projext\uselist.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Frame 列表">
+				<param name="Local" value="wizards\projext\frameslist.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="已引用单元列表">
+				<param name="Local" value="wizards\projext\listused.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="工程备份工具">
+				<param name="Local" value="wizards\projext\projbackup.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="清除工程临时文件">
+				<param name="Local" value="wizards\projext\cleantmp.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="工程目录创建器">
+				<param name="Local" value="wizards\projext\dirbuilder.htm">
+				</OBJECT>
+		</UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="代码编辑器专家">
+			</OBJECT>
+		<UL>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="代码编辑器设置">
+				<param name="Local" value="wizards/editors/wizeditors.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="赋值交换工具">
+				<param name="Local" value="wizards/editors/editorcodeswap.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="打开文件工具">
+				<param name="Local" value="wizards/editors/editoropenfile.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="代码窗口全屏切换工具">
+				<param name="Local" value="wizards/editors/editorfullscreen.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="代码转字符串工具">
+				<param name="Local" value="wizards/editors/editorcodetostring.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="删除空行工具">
+				<param name="Local" value="wizards\editors\editorcodedelblank.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="代码块注释工具">
+				<param name="Local" value="wizards\editors\editorcodecomment.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="代码块取消注释工具">
+				<param name="Local" value="wizards\editors\editorcodeuncomment.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="代码块注释反转工具">
+				<param name="Local" value="wizards\editors\editorcodetogglecomment.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="代码块缩进工具">
+				<param name="Local" value="wizards\editors\editorcodeindent.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="代码块反缩进工具">
+				<param name="Local" value="wizards\editors\editorcodeunindent.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="ASCII 字符表">
+				<param name="Local" value="wizards\editors\asciichart.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="插入颜色工具">
+				<param name="Local" value="wizards\editors\editorinsertcolor.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="插入日期时间工具">
+				<param name="Local" value="wizards\editors\editorinserttime.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="收集面板">
+				<param name="Local" value="wizards\editors\editorcollector.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="选择行排序工具">
+				<param name="Local" value="wizards\editors\editorsortlines.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="切换引用区">
+				<param name="Local" value="wizards\editors\editortoggleuses.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="切换局部变量编辑区">
+				<param name="Local" value="wizards\editors\editortogglevar.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="跳至上一信息行工具">
+				<param name="Local" value="wizards\editors\editorprevmsg.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="跳至下一信息行工具">
+				<param name="Local" value="wizards\editors\editorjumpmsg.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="跳至声明区工具">
+				<param name="Local" value="wizards\editors\editorjumpintf.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="跳至实现区工具">
+				<param name="Local" value="wizards\editors\editorjumpimpl.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="跳至匹配关键字工具">
+				<param name="Local" value="wizards\editors\editorjumpkeyword.htm">
+				</OBJECT>
+		</UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="代码编辑器扩展">
+			</OBJECT>
+		<UL>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="代码编辑器扩展专家">
+				<param name="Local" value="srcedtenh\srcedtenh.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="编辑器快捷菜单扩展">
+				<param name="Local" value="srcedtenh\srcedtpopupmenu.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="源代码只读保护">
+				<param name="Local" value="srcedtenh\srcedtautoro.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="代码编辑器工具栏">
+				<param name="Local" value="srcedtenh\srcedttoolbar.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="行号显示面板">
+				<param name="Local" value="srcedtenh\srcedtgutter.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="前进后退扩展">
+				<param name="Local" value="srcedtenh\srcedtnav.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="源代码标签扩展">
+				<param name="Local" value="srcedtenh\srcedttab.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="选择块浮动按钮">
+				<param name="Local" value="srcedtenh\srcedtblocktools.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="源代码自动保存">
+				<param name="Local" value="srcedtenh\srcedtautosave.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="其它增强">
+				<param name="Local" value="srcedtenh\srcedtothers.htm">
+				</OBJECT>
+		</UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="IDE 功能扩展专家">
+			</OBJECT>
+		<UL>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="FastCode 优化专家">
+				<param name="Local" value="ideenhance\fastcodeopt.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="窗体设计器扩展专家">
+				<param name="Local" value="ideenhance/formdesigner.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="IDE 主窗体扩展专家">
+				<param name="Local" value="ideenhance/palette.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="CPU 窗口扩展专家">
+				<param name="Local" value="ideenhance/cpuwin.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="对象查看器扩展专家">
+				<param name="Local" value="ideenhance\objinspector.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="窗口置顶与折叠扩展专家">
+				<param name="Local" value="ideenhance\wintoproller.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="代码输入助手">
+				<param name="Local" value="ideenhance\inputhelper.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="源代码高亮扩展专家">
+				<param name="Local" value="ideenhance\srchighlight.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="版本信息扩展专家">
+				<param name="Local" value="ideenhance\verenh.htm">
+				</OBJECT>
+		</UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Repository 专家">
+			</OBJECT>
+		<UL>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="DUnit 测试用例生成向导">
+				<param name="Local" value="wizards\repository\dunitwizard.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="INI 读写单元生成向导">
+				<param name="Local" value="wizards\repository\inifilerwizard.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="CnMemProf 工程向导">
+				<param name="Local" value="wizards\repository\cnmemprof.htm">
+				</OBJECT>
+		</UL>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="属性、组件编辑器">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="属性编辑器">
+			<param name="Local" value="propeditor/propeditor.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="多行文本编辑器">
+			<param name="Local" value="propeditor/propstring.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Constraints 编辑器">
+			<param name="Local" value="propeditor/propsize.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="专家包设置">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="IDE 专家设置">
+			<param name="Local" value="options/wizconfig.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="属性、组件编辑器设置">
+			<param name="Local" value="options/propconfig.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="环境及升级设置">
+			<param name="Local" value="options/otherconfig.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="CnPack IDE 专家包更新提示">
+			<param name="Local" value="options/upgrade.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="命令行参数">
+			<param name="Local" value="options/cmdline.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="CnDebugger 调试工具">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="CnDebug 使用说明">
+			<param name="Local" value="debug\cndebug.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="CnDebugViewer 使用说明">
+			<param name="Local" value="debug\cndebugviewer.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="其他专家工具">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="源码模块关系分析工具">
+			<param name="Local" value="cnsmr\cnsmr.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="附录">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="历史更新记录">
+			<param name="Local" value="other/history.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="有贡献人员名单">
+			<param name="Local" value="other/credits.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="与我们联系">
+			<param name="Local" value="other/contact.htm">
+			</OBJECT>
+	</UL>
+</UL>
+</BODY></HTML>

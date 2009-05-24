@@ -1,0 +1,121 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>屬性修改器</title>
+<meta http-equiv="Content-Type" content="text/html; charset=big5">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4" id="table1">
+  <tr>
+    <td class="head" height="16">屬性修改器</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">屬性修改器</p>
+<p class="text" align="left"> 該專家用於在表單上通過一定的自定義規則來批量修改一些控制項的屬性，支援一些簡單的條件判斷規則，並支援子控制項屬性修改。修改物件可以是當前表單上的所有控制項（包括表單本身），也可以是當前工程或工程組中的所有表單。</p>
+<p class="text" align="left"> 屬性修改器主介面如圖所示：</p>
+
+<p align="center"> <img src="corpropmain.png"></p>
+<ul>
+  <li>
+    <p class="text"><b>當前表單：</b>對當前表單本身、當前表單上所有的控制項及子控制項進行處理。</p>
+  </li>
+  <li>
+    <p class="text"><b>所有打開的表單：</b>對所有打開的表單本身以及其上的所有控制項及子控制項進行處理。</p>
+  </li>
+  <li>
+    <p class="text"><b>當前工程所有表單：</b>對當前工程中所有表單以及其上所有的控制項及子控制項進行處理。</p>
+  </li>
+  <li>
+    <p class="text"><b>當前工程組所有表單：</b>對當前工程組中所有表單上所有的控制項及子控制項進行處理。</p>
+  </li>
+  <li>
+    <p class="text"><b>查找修正：</b>按照現存規則對待處理物件進行查找修改處理。</p>
+  </li>
+  <li>
+    <p class="text"><b>全部確認：</b>全部確認修改結果中的“需要確認”項。</p>
+  </li>
+  <li>
+    <p class="text"><b>撤銷修改：</b>撤銷已經進行的選中條目的修改。</p>
+  </li>
+  <li>
+    <p class="text"><b>設置：</b>可以自定義簡單的元件屬性修改的規則。</p>
+  </li>
+  <li>
+    <p class="text"><b>關閉：</b>關閉屬性修改器主表單。</p>
+  </li>
+</ul>
+
+<p class="text" align="left">當點擊查找按鈕後，屬性修改器專家會搜尋所有待搜尋的元件，如果遇見符合規則的元件屬性並且規則中的處理動作是“自動修改”，則會自動修改該屬性並顯示在下面的列表框中，當規則中的處理動作是“提示”時，用戶需要右鍵點擊列表框中選中的條目，在彈出的功能表中選擇“確認修改”才會修改該屬性。右鍵功能表中的“定位該控制項”可以在表單上選中該元件。“撤銷修改”功能表則用來撤銷已經進行的改動。</p>
+<p class="title" align="left">參數設置</p>
+<p class="text" align="left">當點擊設置按鈕時，系統會彈出如下圖的規則設置對話方塊：</p>
+<p class="text" align="center">
+<img src="corpropcfg.png"></p>
+  <p class="text" align="left"> </p>
+
+<ul>
+  <li>
+    <p class="text"><b>添加：</b>添加新的屬性修改規則。</p>
+  </li>
+  <li>
+    <p class="text"><b>編輯：</b>編輯規則列表框中選中的某條規則。</p>
+  </li>
+  <li>
+    <p class="text"><b>刪除：</b>刪除規則列表框中選中的某條規則。</p>
+  </li>
+  <li>
+    <p class="text"><b>導入：</b>從外部檔中導入規則，導入的規則會覆蓋現存的規則。</p>
+  </li>
+  <li>
+    <p class="text"><b>導出：</b>將列表框中的所有規則導出保存成外部檔。</p>
+  </li>
+</ul>
+<p class="text">　其中，規則列表中左邊的核取方塊表示該條規則在處理中是否有效。</p>
+<p class="title">具體規則設置</p>
+
+<p class="text">當點擊添加或編輯按鈕時，系統會彈出規則編輯介面，如下圖所示：</p>
+  <p align="center">
+    <img src="corproprules.png"></p>
+
+<p class="text" align="left">一條屬性修改規則可以這樣直觀地理解：當某個元件類的屬性的屬性值滿足條件時，則可以修改為自定義的新屬性值，當然根據動作的不同可以自動修改或者等待用戶確認後修改。</p>
+<ul>
+  <p>　</p>
+  <li>
+    <p class="text"><b>組件類：</b>需要指定的元件類名，可以從包含了所有元件類名的下拉清單中選擇，不能為空。</p>
+  </li>
+  <li>
+    <p class="text"><b>屬性：</b>需要指定的該元件類的屬性名，不能為空。</p>
+  </li>
+  <li>
+    <p class="text"><b>條件：</b>屬性名和屬性值需要滿足的條件的運算符。</p>
+  </li>
+  <li>
+    <p class="text"><b>屬性值：</b>用來和屬性名比較的值。</p>
+  </li>
+  <li>
+    <p class="text"><b>動作：</b>當滿足條件時，應該如何處理，可以選擇“自動更正”或“提示”。</p>
+  </li>
+  <li>
+    <p class="text"><b>修改為：</b>滿足條件時修改而成的目的值。</p>
+  </li>
+  <li>
+    <p class="text"><b>規則有效：</b>選中時表示改規則在查找修改過程中有效，否則不起作用。</p>
+  </li>
+</ul>
+
+<p class="title" align="left">　<p class="title" align="left">相關主題
+  <p class="text" align="left"> <a href="wizards.htm">IDE 專家基本操作</a>
+  <p class="text" align="left"> <a href="../options/wizconfig.htm">IDE 專家設置</a>
+  <p class="text" align="left"> <a href="../cnpack/index.htm">關於 IDE 專家包</a>
+  <p class="text" align="left">　
+  <hr>
+  <p class="text" align="center"><a href="http://www.cnpack.org">(C)版權所有 2001-2009 CnPack 開發組</a></p>
+</body>
+</html>

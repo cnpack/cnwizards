@@ -1,0 +1,121 @@
+**********************************************************************
+                     CnPack For Delphi/C++Builder
+                    中国人自己的开放源码第三方开发包
+                  (C)Copyright 2001-2009 CnPack 开发组
+**********************************************************************
+
+                          定制编译CnWizards的方法
+                            Revision 1.0.0.0
+                       =========================
+                        作者：刘啸 2007.08.02
+
+
+    随着开发步伐的前进与规模的发展，CnPack IDE 专家包（CnWizards）的功
+能也越来越多，也许有的用户只钟爱其中一部分功能，而不愿意其他基本用不上
+的功能也存在于专家包中占用着宝贵的计算机资源，尽管专家包的专家提供了禁
+用和不创建的运行期自定义方式，但对于用户来讲，编译出自定义的专家包才是
+最彻底的定制方法。
+
+    CnPack IDE 专家包的源码支持定制方式的编译构建。CnWizards 中的各个专
+家是否参与编译都通过编译开关统一由源码中的 cnwizards\Source\CnWizards.inc 
+文件控制。CnWizards 源码中提供了一工具 CnCustBuild，该工具能够以可视化的
+方式供用户选择需要编译的专家并将选择写入 CnWizards.inc 文件，从而达到选
+择性地编译某些专家的目的。
+
+具体步骤如下：
+
+一、从 CnPack 开发网站上下载 CnWizards 最新安装包并进行安装，推荐下载最
+    新的每日构建版。http://www.cnpack.org/downbuilds.php
+
+二、从 CnPack 开发网站的 CVS 上将 cnpack 与 cnwizards 两个模块的全部内
+    容下载到同一目录下。
+    
+    CVSROOT:
+    :pserver:anoncvs@www.cnpack.org:/var/cvshome/cnpack
+    密码：
+    anoncvs
+    模块名：
+    cnpack
+    cnwizards
+    
+    关于具体如何使用 CnPack 的 CVS，请参考 CnPack 开发网站上的
+    《CVS使用说明》http://www.cnpack.org/showdetail.php?id=155
+
+三、启动 Delphi，打开 cnwizards\Tools\CnCustBuild\CnCustBuild.dpr，编译
+    运行。
+
+四、在 CnCustBuild 的主界面中勾选需要的专家后，点击“写入”按钮。
+    此时，自定义编译条件便被写入了 cnwizards\Source\CnWizards.inc
+    文件中。
+
+五、打开 cnwizards\Source 目录下的工程文件重新编译 CnWizards（注意 IDE 
+    版本要对应）。编译成功后在 cnwizards\Bin 目录下能看到编译出的 DLL
+    文件。
+
+六、复制此 DLL 文件到 CnWizards 安装目录下，覆盖原有文件。
+    如 C:\Program Files\CnPack\CnWizards
+
+七、启动 IDE，此时您就拥有了一份自己定制的 CnWizards 了。
+
+附加说明：
+
+一、部分专家在特定版本的 IDE 下无效，因而此处的选择不会对它们不支持的
+    IDE 造成影响。
+二、可定制的部分以具体的专家为单位，而类似于框架、运行支持库、多语、
+    帮助、第三方工具等内容目前还不支持定制。
+三、部分专家可能存在着互相引用的关系，如果您发现特定组合的专家造成编译
+    通不过，请联系我们(master@cnpack.org)，我们将努力改进它。
+
+
+***********************************************************************
+
+
+               How to Get a Customized Build of CnWizards?
+
+
+CnWizards' latest source code on CnPack CVS supports Customized 
+Building. We provide a Tool CnCustBuild to control the file 
+'cnwizards\Source\CnWizards.inc' to define the compile directives 
+to include or exclude the Wizards.
+
+If you want to get a customized build of CnWizards that only contains
+the features you want, you can follow these steps:
+
+1. Download latest (nightly-build) installer of CnWizards and install it.
+   http://www.cnpack.org/downbuilds.php
+
+2. Download latest source code from CnPack CVS to one directory.
+
+   CVSROOT:
+     :pserver:anoncvs@www.cnpack.org:/var/cvshome/cnpack
+   Password:
+     anoncvs
+   Module Name:
+     cnpack
+     cnwizards
+
+3. Start Delphi, Open cnwizards\Tools\CnCustBuild\CnCustBuild.dpr and Run.
+
+4. In CnCustBuild Window, Select the Wizards you want, and Press 'Save' 
+   to save the CnWizards.inc file.
+
+5. Close CnCustBuild, Open CnWizards Project file CnWizards_Dx.dpr in
+   cnwizards\Source and Build.
+   If you use C++Builder, Open CnWizards Project file CnWizards_cbx.bpr
+   in cnwizards\Source and Build.
+
+5. Copy the DLL file from cnwizards\Bin to installation directory,
+   e.g. C:\Program Files\CnPack\CnWizards to overwrite the original one.
+
+6. Start IDE. Now you can see the customized build of CnWizards in your IDE.
+
+NOTE:
+
+1. Some wizards can NOT support all versions of IDE in spite of checked
+   or not.
+2. Only Wizards can be customized. Other parts, such as framework, 
+   multi-lang support, run-time library and Help file do not support it.
+
+3. Some wizards maybe has dependency. If you can not compile the CnWizards
+   project when you select some wizards in CnCustBuild window, 
+   please tell us (master@cnpack.org). We'll try to improve it.

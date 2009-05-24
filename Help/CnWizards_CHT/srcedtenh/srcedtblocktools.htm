@@ -1,0 +1,294 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>選擇塊浮動按鈕</title>
+<meta http-equiv="Content-Type" content="text/html; charset=big5">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4" id="table1">
+  <tr>
+    <td class="head" height="16">選擇塊浮動按鈕</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">選擇塊浮動按鈕</p>
+<p class="text">該工具提供了一組與選擇文本相關功能的快捷操作方式。當用戶在代碼編輯器中選擇了一段文本時，會自動在編輯器左邊顯示一個浮動按鈕，點擊該按鍵下拉出相關的操作功能表。</p>
+<p class="text">使用介面如下圖所示：</p>
+<p class="text" align="center">
+<img src="srcedtblocktools.png"></p>
+<p class="text"><b>編輯功能表</b></p>
+<ul>
+	<li>
+	<p class="text"><b>複製到剪帖板</b>：複製當前選擇塊。</p></li>
+	<li>
+	<p class="text"><b>追加複製到剪貼板</b>：複製當前選擇塊並追加到剪貼板。</p></li>
+	<li>
+	<p class="text"><b>剪切到剪貼板</b>：剪切當前選擇塊。</p></li>
+	<li>
+	<p class="text"><b>追加剪切到剪貼板</b>：剪切當前選擇塊並追加到剪貼板。</p></li>
+	<li>
+	<p class="text"><b>在當前位置重複</b>：將當前選擇塊原樣複製一份在當前位置並保持塊選擇。</p></li>
+	<li>
+	<p class="text"><b>刪除</b>：刪除選擇塊。</p></li>
+	<li>
+	<p class="text"><b>複製 HTML 到剪帖板</b>：將當前選擇塊內容以語法高亮的 HTML 格式複製到剪貼板，見
+	<a href="../wizards/pas2htmlwizards.htm">帶格式代碼輸出工具</a>。</p></li>
+	<li>
+	<p class="text"><b>保存到檔</b>：將當前選擇塊內容保存到檔中。</p></li>
+</ul>
+<p class="text" align="center">
+<img src="srcedtblockedit.png">&nbsp;&nbsp;&nbsp;
+<img src="srcedtblockcase.png"></p>
+<p class="text"><b>大小寫轉換菜單</b></p>
+<ul>
+	<li>
+	<p class="text"><b>轉換為小寫</b>：將當前選擇文本全部轉換成小寫。</p></li>
+	<li>
+	<p class="text"><b>轉換為大寫</b>：將當前選擇文本全部轉換成大寫。</p></li>
+	<li>
+	<p class="text"><b>大小寫互換</b>：將當前選擇文本大小寫互換。</p></li>
+</ul>
+<p class="text"><b><br>
+格式處理功能表</b></p>
+<ul>
+	<li>
+	<p class="text"><b>代碼縮進</b>：使用 IDE 中設置的縮進量縮進當前選擇塊，可使用 Tab 鍵快速縮進。</p></li>
+	<li>
+	<p class="text"><b>代碼縮進指定列</b>：使用指定的縮進量縮進當前選擇塊。</p></li>
+</ul>
+<ul>
+	<li>
+	<p class="text"><b>代碼反縮進</b>：使用 IDE 中設置的縮進量反縮進當前選擇塊，可使用 Shift+Tab 鍵快速反縮進。</p>
+	</li>
+	<li>
+	<p class="text"><b>代碼反縮進指定列</b>：使用指定的縮進量反縮進當前選擇塊。</p></li>
+</ul>
+<p class="text" align="center">
+<img src="srcedtblockformat.png">&nbsp;&nbsp;&nbsp;
+<img src="srcedtblockcomment.png"></p>
+<p class="text"><b>代碼注釋功能表</b></p>
+<ul>
+	<li>
+	<p class="text"><b>注釋代碼塊</b>：使用 // 注釋當前選擇塊。見
+	<a href="../wizards/editors/editorcodecomment.htm">代碼注釋工具</a>。</p></li>
+	<li>
+	<p class="text"><b>取消代碼塊注釋</b>：取消使用 // 的注釋塊。見
+	<a href="../wizards/editors/editorcodeuncomment.htm">取消代碼注釋工具</a>。</p></li>
+	<li>
+	<p class="text"><b>反轉代碼塊注釋</b>：反轉選擇塊的代碼注釋。見
+	<a href="../wizards/editors/editorcodetogglecomment.htm">反轉代碼注釋工具</a>。</p>
+	</li>
+</ul>
+<p align="center">
+<img src="srcedtblockwrap.png"></p>
+<p class="text" align="left">
+<b>代碼嵌入功能表</b></p>
+<ul>
+	<li>
+	<p class="text"><b>嵌入到代碼中</b>：根據需要將當前選擇的代碼塊縮進並嵌入到指定的語句中。</p>
+	</li>
+	<li>
+	<p class="text"><b>設置</b>：顯示代碼嵌入設置對話方塊如下圖所示</span>。</li>
+</ul>
+<p class="text" align="center">
+<img src="srcedtblockwrapconf.png"></p>
+<ul>
+	<li>
+	<p class="text"><b>項目列表</b></li>
+	<ul>
+	<li>
+	<p class="text"><b>增加</b>：增加一項新的內容。</li>
+	<li>
+	<p class="text"><b>刪除</b>：刪除當前選擇的項目。</li>
+	<li>
+	<p class="text"><b>上、下</b>：向上或向下移動當前選擇的項目。</li>
+	<li>
+	<p class="text"><b>導入</b>：從檔中導入專案到當前列表，可以選擇替換或追加方式。</li>
+	<li>
+	<p class="text"><b>導出</b>：將當前列表中的項目導出到資料檔案。</li>
+	</ul>
+</ul>
+<ul>
+	<li>
+	<p class="text"><b>代碼嵌入項</b><ul>
+	<li>
+	<p class="text"><b>標題</b>：顯示在功能表中的標題。</li>
+	<li>
+	<p class="text"><b>快捷鍵</b>：定義當前項目的快捷鍵。</li>
+	<li>
+	<p class="text"><b>代碼塊</b>：
+	如果選擇了“行塊處理模式”，則在執行代碼嵌入時將選擇區域首尾擴展到整行進行處理。在行塊模式下，可以設置塊縮進級數來對代碼塊進行縮進。</li>
+	<li>
+	<p class="text"><b>頭部</b>：插入到選擇塊前面的代碼。如果是行塊模組，可以選擇自動縮進和縮進級數。使用<span lang="en-us">
+	&quot;|&quot; </span>可以定位游標。</li>
+	<li>
+	<p class="text"><b>尾部</b>：插入到選擇塊後面的代碼。如果是行塊模組，可以選擇自動縮進和縮進級數。使用<span lang="en-us">
+	&quot;|&quot; </span>可以定位游標。</li>
+	</ul>
+</ul>
+<ul>
+	<li>
+	<p class="text"><b>確定、取消</b>：保存或取消當前的設置。</li>
+	<li>
+	<p class="text"><b>說明</b>：顯示說明頁面。</li>
+</ul>
+<p align="center">
+<img src="srcedtblockreplace.png"></p>
+<p class="text" align="left">
+<b>組替換菜單</b></p>
+<ul>
+	<li>
+	<p class="text"><b>組替換功能</b>：根據設置對當前選擇塊中的內容執行批量替換。</p>
+	</li>
+	<li>
+	<p class="text"><b>設置</b>：顯示組替換設置對話方塊如下圖所示</span>。</li>
+</ul>
+<p class="text" align="center">
+<img src="srcedtblockreplaceconf.png"></p>
+<ul>
+	<li>
+	<p class="text"><b>項目列表</b></li>
+	<ul>
+	<li>
+	<p class="text"><b>增加</b>：增加一項新的內容。</li>
+	<li>
+	<p class="text"><b>刪除</b>：刪除當前選擇的項目。</li>
+	<li>
+	<p class="text"><b>上、下</b>：向上或向下移動當前選擇的項目。</li>
+	<li>
+	<p class="text"><b>導入</b>：從檔中導入專案到當前列表，可以選擇替換或追加方式。</li>
+	<li>
+	<p class="text"><b>導出</b>：將當前列表中的項目導出到資料檔案。</li>
+	</ul>
+</ul>
+<ul>
+	<li>
+	<p class="text"><b>組替換項</b><ul>
+	<li>
+	<p class="text"><b>標題</b>：顯示在功能表中的標題。</li>
+	<li>
+	<p class="text"><b>快捷鍵</b>：定義當前項目的快捷鍵。</li>
+	<li>
+	<p class="text"><b>替換項</b>：列出需要執行替換的內容。</li>
+	<li>
+	<p class="text"><b>增加</b>：增加一項新的內容。</li>
+	<li>
+	<p class="text"><b>刪除</b>：刪除當前選擇的項目。</li>
+	<li>
+	<p class="text"><b>上、下</b>：向上或向下移動當前選擇的項目。</li>
+	<li>
+	<p class="text"><b>源文本</b>：需要進行替換的源字串。</li>
+	<li>
+	<p class="text"><b>替換為</b>：替換後的目標字串。</li>
+	<li>
+	<p class="text"><b>忽略大小寫：</b>替換當前項時是否忽略大小寫。</li>
+	<li>
+	<p class="text"><b>整詞匹配：</b>替換時是否要求匹配的文本為獨立的單詞。</li>
+	</ul>
+</ul>
+<ul>
+	<li>
+	<p class="text"><b>確定、取消</b>：保存或取消當前的設置。</li>
+	<li>
+	<p class="text"><b>說明</b>：顯示說明頁面。</li>
+</ul>
+<p align="center">
+<img src="srcedtblocksearch.png"></p>
+<p class="text" align="left">
+<b>Web 搜索菜單</b></p>
+<ul>
+	<li>
+	<p class="text"><b>Web 搜索功能</b>：打開搜索鏈結頁面，查找當前選擇的內容。</p>
+	</li>
+	<li>
+	<p class="text"><b>設置</b>：顯示 Web 搜索設置對話方塊如下圖所示</span>。</li>
+</ul>
+<p class="text" align="center">
+<img src="srcedtblocksearchconf.png"></p>
+<ul>
+	<li>
+	<p class="text"><b>項目列表</b></li>
+	<ul>
+	<li>
+	<p class="text"><b>增加</b>：增加一項新的內容。</li>
+	<li>
+	<p class="text"><b>刪除</b>：刪除當前選擇的項目。</li>
+	<li>
+	<p class="text"><b>上、下</b>：向上或向下移動當前選擇的項目。</li>
+	<li>
+	<p class="text"><b>導入</b>：從檔中導入專案到當前列表，可以選擇替換或追加方式。</li>
+	<li>
+	<p class="text"><b>導出</b>：將當前列表中的項目導出到資料檔案。</li>
+	</ul>
+</ul>
+<ul>
+	<li>
+	<p class="text"><b>Web 搜索項</b><ul>
+	<li>
+	<p class="text"><b>標題</b>：顯示在功能表中的標題。</li>
+	<li>
+	<p class="text"><b>快捷鍵</b>：定義當前項目的快捷鍵。</li>
+	<li>
+	<p class="text"><b>搜索鏈結</b>：指定進行搜索的可執行檔或網頁鏈結，%s 表示當前選擇內容。</li>
+	</ul>
+</ul>
+<ul>
+	<li>
+	<p class="text"><b>確定、取消</b>：保存或取消當前的設置。</li>
+	<li>
+	<p class="text"><b>說明</b>：顯示說明頁面。</li>
+</ul>
+<p class="text" align="center">
+　</p>
+<p class="text"><b>其他菜單</b></p>
+<ul>
+	<li>
+	<p class="text"><b>賦值交換</b>：將當前選擇的源代碼中的賦值代碼左右交換，即將 A := B 的代碼變換為 B := A。見
+	<a href="../wizards/editors/editorcodeswap.htm">賦值交換工具</a>。</p></li>
+	<li>
+	<p class="text"><b>轉換為字串</b>：將當前選擇的源代碼轉換成多行字串常量，這樣可以省去輸入引號和換行字元的麻煩。見
+	<a href="../wizards/editors/editorcodetostring.htm">轉換為字串工具</a>。</p></li>
+</ul>
+<ul>
+	<li>
+	<p class="text"><b>插入顏色</b>：打開顏色對話方塊並用選擇的顏色值替換當前選擇的文本。見
+	<a href="../wizards/editors/editorinsertcolor.htm">插入顏色工具</a>。</p></li>
+	<li>
+	<p class="text"><b>插入日期時間</b>：打開插入日期對話框並用日期時間值替換當前選擇的文本。見 
+	<a href="../wizards/editors/editorinserttime.htm">插入日期時間工具</a>。</p></li>
+	<li>
+	<p class="text"><b>轉換為字串</b>：將當前選擇的代碼行按字母排序。見
+	
+	<a href="../wizards/editors/editorsortlines.htm">選擇行排序工具</a>。</p></li>
+</ul>
+<p class="text" align="center">
+<img src="srcedtblockmisc.png"></p>
+<p class="text">　</p>
+<p class="text"><b>工具設置</b></p>
+<p class="text">其設置介面如下圖所示：</p>
+<p class="text" align="center">
+<img src="srcedtehnconf3.png"></p>
+<ul>
+  <li>
+    <p class="text"><b>塊選擇時顯示浮動工具按鈕</b>：是否啟動選擇塊浮動工具按鈕功能。</p>
+  </li>
+  <li>
+    <p class="text"><b>在編輯器右鍵菜單中顯示浮動工具按鈕下拉菜單</b>：是否在編輯器右鍵菜單中插入一項子菜單，其內容是浮動工具按鈕下拉菜單中的菜單項，供右鍵菜單調用。</p>
+  </li>
+</ul>
+<p class="text">　</p>
+<p class="title" align="left">相關主題
+<p class="text" align="left">
+<a href="srcedtenh.htm">代碼編輯器擴展</a><p class="text" align="left">
+<a href="srcedttab.htm">源代碼標籤擴展</a><p class="text" align="left">
+<a href="../cnpack/index.htm">關於 IDE 專家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版權所有 2001-2009 CnPack 開發組</a></p>
+</body>
+</html>

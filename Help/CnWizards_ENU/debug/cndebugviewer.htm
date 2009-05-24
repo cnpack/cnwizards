@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>CnDebugViewer Help</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">CnDebugViewer Help</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="text">Welcome to use the log debugging tool "CnDebug/CnDebugViewer", which is developed by CnPack team. CnDebugViewer is an EXE tool running in Windows / x86 platform. It can be used to recieve, display and save/load the debug information output by CnDebug.pas. And it also can recieve Debug information from OutputDebugString API.</p>
+
+<p class="text">&nbsp;</p>
+<p class="title" align="left">CnDebugViewer Introduction</p>
+
+<p class="text" align="left">CnDebugViewer can recieve the debug and timming information output from CnDebug.pas. Debug information is displayed in a tree in the main window. They can be filtered to display, and also can be saved to XML file and re-loaded. The snapshot of CnDebugViewer's main window is as below:</p>
+<p class="text" align="center"><img src="cndebugviewer.png"></p>
+<p class="text" align="left">&nbsp;</p>
+<p class="text" align="left">When CnDebugViewer starting up, a share memory map will be created and initilized to a queue for debug information retrieving. And a thread will be launched to read the information output from CnDebug. Information will also be put to different windows by the sender's process id. The switching tab over statusbar shows the sender's exe file name and the process id. Clicking the tab, you can switch to corresponding sender.</p>
+<p class="text" align="left">Debug information are displayed in the treeview in the middle of the window. Timing result is in right. The bottom panel shows the detailed information of selected item. Toolbar buttons has the same functions as the menu items. please reference below:</p>
+<p class="text" align="left">&nbsp;</p>
+<p class="title" align="left">Menu: File</p>
+<ul>
+  <li><p class="text"><b>New Window</b>: Create a new, empty window. If a process output some debug information through CnDebug, it will be captured by this new, empty window if the read thread of CnDebugViewer is running.</li>
+  <li><p class="text"><b>Open</b>: Open and load a XML file or a CnDebug Dump file (*.cdd). It should be saved by CnDebugViewer before. Note: the read thread must stop.</li>
+  <li><p class="text"><b>Close Window</b>: Close current window. No hint to save the message.</li>
+  <li><p class="text"><b>Save</b>: Save the debug messages in current window to XML file. Note: Only debug information and bookmarks are saved. Timing result is not.</li>
+  <li><p class="text"><b>Export</b>: Export the debug messages in current window to other file format, including TXT, CSV or HTM etc.</li>  	
+  <li><p class="text"><b>Exit</b>: Exit CnDebugViewer.</li>
+</ul>
+<p class="text" align="left">&nbsp;</p>
+<p class="title" align="left">Menu: Edit</p>
+<ul>
+  <li><p class="text"><b>Clear Display</b>: Clear the debug information display.</li>
+  <li><p class="text"><b>Clear Time</b>: Clear the timing result display</li>
+  <li><p class="text"><b>Copy</b>: Copy the detailed information of selected item to clipboard.</li>
+  <li><p class="text"><b>Toggle Bookmark</b>: Toggle the bookmark status of selected item in debug information tree.</li>
+  <li><p class="text"><b>Jump to Bookmakr</b>: When any bookmark exists, this meunitem will show the bookmarks as its submenu item. Click to jump to the corresponding bookmark.</li>
+  <li><p class="text"><b>Previous Bookmark</b>: Jump to previous bookmark. If no previous bookmark, keep unmoved.</li>
+  <li><p class="text"><b>Next Bookmark</b>: Jump to next bookmark. If no next bookmark, keep unmoved, too.</li>
+  <li><p class="text"><b>Clear Bookmarks</b>: Delete all bookmarks in current window.</li>
+  <li><p class="text"><b>Expand All</b>: Expand the message tree.</li>
+  <li><p class="text"><b>Find</b>: A search dialog will popup when clicking this menu item. You can search text in the messages in current window.</li>
+  <li><p class="text"><b>Find Next</b>: Search the next text.</li>
+</ul>
+<p class="text" align="left">&nbsp;</p>
+<p class="title" align="left">Menu: View</p>
+<ul>
+  <li><p class="text"><b>Time</b>: Show/Hide the timing result panel.</li>
+  <li><p class="text"><b>Details</b>: Show/Hide the detailed information area.</li>
+  <li><p class="text"><b>First</b>: Jump to the first message in current window.</li>
+  <li><p class="text"><b>Previous</b>: Jump to the previous message of current selected one in current window.</li>
+  <li><p class="text"><b>Next</b>: Jump to the next message of current selected one in current window.</li>
+  <li><p class="text"><b>Last</b>: Jump to the last message in current window.</li>
+  <li><p class="text"><b>Previous Separator</b>: Jump to the previous separator in current window. If no, keep unmoved.</li>
+  <li><p class="text"><b>Next Separator</b>: Jump to the next separator in current window. If no, keep unmoved, too.</li>
+  <li><p class="text"><b>Auto Scroll</b>: Whether auto scroll to last message in display area.</li>
+</ul>
+<p class="text">Note: Separator is a type in CnDebug Unit. It can be sent using LogSeparator or TraceSeparator method of Cndebugger.</p>
+<p class="text">&nbsp;</p>
+<p class="title">Menu: Control</p>
+<ul>
+  <li><p class="text"><b>Start</b>: Start the reading thread. CnDebugViewer starts it automatically.</li>
+  <li><p class="text"><b>Pause</b>: Pause the reading thread. The information message from CnDebug will stay in memory map queue.</li>
+  <li><p class="text"><b>Stop</b>: Stop the reading thread. The information message from CnDebug will stay in memory map queue, too.</li>
+</ul>
+<p class="text">&nbsp;</p>
+<p class="title">Menu: Options</p>
+<ul>
+  <li><p class="text"><b>General Options</b>: Show the General Options dialog as below:</li>
+</ul>
+<p align="center" class="text"><img src="settings.png"></p>
+<ul>
+  <blockquote>
+    <li><p class="text"><b>HotKey to Show</b>: Specify a global Hotkey to show the main window of CnDebugViewer. Default is Ctrl+Alt+V。</li>
+    <li><p class="text"><b>Minimize when Startup</b>: Whether minimize the main window when startup. Default is NOT.</li>
+    <li><p class="text"><b>Show Tray Icon</b>: Whether show CnDebugViewer icon in system tray.</li>
+    <li><p class="text"><b>Minimize to Tray Icon</b>: If show tray icon, this item is used to set whether to minimize CnDebugViewer to system tray without displaying a button in task bar.</li>
+    <li><p class="text"><b>Close to Tray Icon</b>: If show tray icon and checked, CnDebug will minimize to system tray without displaying a button in task bar when Close button in main window clicked, otherwise exit normally.</li>
+  <li><p class="text"><b>Save Window State/Position</b>: If checked, CnDebugViewer will save the window state and position when exiting, and restore it when next running.</li>
+    <li><p class="text"><b>Capture "OutputDebugString" API</b>: Whether capture the output of debug API <b>OutputDebugString</b>. Default is not. To make this change into effect, a restarting of CnDebugViewer needed.</li>
+    <li><p class="text"><b>OK</b>: Save settings and close this dialog.</li>
+    <li><p class="text"><b>Cancel</b>: Close this dialog and do nothing.</li>
+  </blockquote>
+</ul>
+<ul>
+  <li><p class="text"><b>Filter Options</b>: Show the Sender Filter Options dialog to let user set the Sender Filter to CnDebug. Sender Filter can be used in CnDebug side to block unnecessary messages to be sent to CnDebugViewer's share memory map queue. The dialog is shown as below:</li>
+</ul>
+<p align="center" class="text"><img src="senderfilter.png"></p>
+<ul>
+  <blockquote>
+    <li><p class="text"><b>Enable Sender Filter</b>: Check this box to enable Sender Filter conditions below.</li>
+    <li><p class="text"><b>Level</b>: You can set the output message Level range.</li>
+    <li><p class="text"><b>Tag</b>: You can set the output message's Tag. Empty means allow all tags.</li>
+    <li><p class="text"><b>Allowed Message Type</b>: You can select the output message's type. Multi-selecting supported.</li>
+    <li><p class="text"><b>OK</b>: Close this dialog and set the filter to CnDebug sender.</li>
+    <li><p class="text"><b>Cancel</b>: Close this dialog and do nothing.</li>
+  </blockquote>
+  <li><p class="text"><b>Language</b>: CnDebugViewer's user interface is designed to multi-language. You can choose supported language in this submenu item. Now Chinese Simplified, Chinese Traditional and English are supported.</li>
+</ul>
+<p class="text">&nbsp;</p>
+<p class="title">Menu: Help</p>
+<ul>
+  <li><p class="text"><b>Content</b>: Show this help information.</li>
+  <li><p class="text"><b>About</b>: Show the About dialog</li>
+</ul>
+<p class="text">&nbsp;</p>
+<p class="title">Display Filter</p>
+<p class="text">There's some filter control in the top of each window. They can be used to filter the display of messages. Note: Here the Filter is only about display, it's different with Sender Filter.</p>
+<ul>
+  <li><p class="text"><b>Find Box</b>: You can enter text and press Search Button or Enter to search the message tree in current window. The search history is stored in this combobox's dropdown list.</li>
+  <li><p class="text"><b>Filter by Type</b>: You can select the type of debug message for display. Only single selection supported now.</li>
+  <li><p class="text"><b>Filter by Level</b>: You can select the level range for display.</li>
+  <li><p class="text"><b>Filter by Thread ID</b>: You can select the thread ID that send the debug message, or select * to display all threads. All thread IDs output by CnDebug will be displayed in this combobox's dropdown list. Note: if Enter and Leave methods of Cndebugger are called in different threads. The indent may messed up when display all threads. This time you can select only one thread to restore the normal indent of the message tree.</li>
+  <li><p class="text"><b>Filter by Tag</b>: You can select the tag to display the message with certain tag, or select * to display all messages. All tags output by CnDebug will be displayed in this combobox's dropdown list.</li>
+</ul>
+<p class="text">&nbsp;</p>
+<p class="text" align="left">Any questions or suggestions, please contact us: <a href="mailto:master@cnpack.org?subject=About CnPack">master@cnpack.org</a>, We'll try our best to help you.<p class="text" align="left">&nbsp;<p class="title" align="left">Links<p class="text" align="left">
+<a href="cndebug.htm">CnDebug Help</a><p class="text" align="left">
+<a href="../licenses/license.htm">CnPack IDE Wizards License</a><p class="text" align="left">
+<a href="../cnpack/about.htm">About CnPack</a><p class="text" align="left">&nbsp;<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">Copyrights 2001-2009 CnPack Team</a></p>
+</body>
+</html>

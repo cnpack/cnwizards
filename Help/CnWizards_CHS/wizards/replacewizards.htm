@@ -1,0 +1,78 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>批量文件替换专家</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">批量文件替换专家</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">批量文件替换专家</p>
+<p class="text" align="left"> 该专家用于同时在多个文件中进行查找和替换。如果文件在 IDE 
+中打开，替换将在编辑器缓冲区中进行，替换完成后用户需要自己保存。</p>
+<p class="text" align="left"> 该工具不支持对 IDE 中打开的窗体文本进行操作，如果确实需要，请使用指定目录方式来进行替换。</p>
+<p class="text" align="left"> 
+批量替换的操作是有危险性的，而替换时不会有提示，建议用户在执行批量替换前先用批量查找工具确认要替换的内容是正确的。</p>
+<p class="text" align="center"> 
+  <img src="Replacewizards.png">
+<ul>
+<li><p class="text"><b>文本</b>：查找与替换的内容，其中“查找文本”可以使用正则表达式，但不支持多行文本。</p></li>
+<li><p class="text"><b>选项</b>：设置查找与匹配方式。</p>
+<ul>
+  <li><p class="text"><b>区分大小写</b>：查找时区分大小写字母。</p></li>
+  <li><p class="text"><b>只匹配整个单词</b>：只替换与查找文本整个单词匹配的文本。</p></li>
+  <li><p class="text"><b>查找内容支持正则表达式</b>：查找文本中允许使用正则表达式（见后）。</p></li>
+  <li><p class="text"><b>Ansi兼容方式查找</b>：文本匹配时使用 Ansi 
+  兼容方式，对某些字符集的文本执行查找操作时可能需要指定该选项。</p></li>
+</ul>
+</li>
+<li><p class="text"><b>范围</b>：指定查找范围是当前文件还是当前工程文件等，如果选择指定目录则下面的指定目录才有效。</p></li>
+<li><p class="text"><b>指定目录</b>：当“范围”为指定目录时，在此设置要处理的目录名及文件掩码。</p></li>
+</ul>
+<p class="title">　</p>
+<p class="title">正则表达式</p>
+<p class="text" align="left"> 正则表达式允许用户使用特定的标记进行复杂的查找。例如，如果要查找所有 <b>unit</b> 和 
+<b>init</b> ，可以使用表达式 <b>[ui]nit</b>。</p>
+<p class="text" align="left"> 批量文件替换专家不支持 * 号和 ? 号通配符，以下是它支持的标记：</p>
+<ul>
+  <li>
+<p class="text" align="left"> \：反斜杆强制转换符，它后面的字符代表其原含义，如 \\ 表示 \，\[ 表示 [。</p>
+  </li>
+  <li>
+<p class="text" align="left"> ^：表示匹配文本行的行首。</p>
+  </li>
+  <li>
+<p class="text" align="left"> $：表示匹配文本行的行末。</p>
+  </li>
+  <li>
+<p class="text" align="left"> .：点号匹配任何一个字符，如 'f.r' 可以匹配 'for' 或 'far'。</p>
+  </li>
+  <li>
+<p class="text" align="left"> :：冒号匹配同一类字符，':a' 匹配所有字母，':d' 匹配一个阿拉伯数字，':n' 
+匹配一个字母或数字，': '（冒号、空格）匹配一个空格、制表符或其它的控制字符或标点符号（ASCII 码 0x01-0x40）。</p>
+  </li>
+  <li>
+<p class="text" align="left"> [...]：使用一对方括号括起来的标记，匹配标记中任何一个字符（不是全部），如果标记内第一个字符是 
+'^' 号，表示匹配除了回车（ASCII 0x0D）和换行（ASCII 0x0A）以及标志内字符以外的其它所有字符。如 '[xyz] '匹配 x、y 或 z，而 
+'[^xyz]' 则匹配 a 而不匹配 x、y 和 z。此外，两个用 '-' 连接起来的字符串匹配一个字符范围，如 [a-z] 匹配字母，而 [z-a] 
+则什么也不匹配。标记中使用特殊字符不需要用强制转换符，因为它们已经作为字符处理过了。另，方括号标记不支持嵌套。</p>
+  </li>
+</ul>
+<p class="title" align="left">　</p><p class="title" align="left">相关主题<p class="text" align="left">
+<a href="wizards.htm">IDE 专家基本操作</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">IDE 专家设置</a><p class="text" align="left">
+<a href="../cnpack/index.htm">关于 IDE 专家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版权所有 2001-2009 CnPack 开发组</a></p>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<Symbols PropFormat="node">
+  <Item>
+    <Name>@author</Name>
+    <Kind>skComment</Kind>
+    <Description>Author tag in JavaDoc style.</Description>
+    <Text>@author |</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>@authorMacro</Name>
+    <Kind>skComment</Kind>
+    <Description>Author tag and user name.</Description>
+    <Text>@author %User%</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>@comment</Name>
+    <Kind>skComment</Kind>
+    <Description>Comment in JavaDoc style.</Description>
+    <Text>@comment |</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>@deprecated</Name>
+    <Kind>skComment</Kind>
+    <Description>Deprecated tag in JavaDoc style.</Description>
+    <Text>@deprecated |</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>@exception</Name>
+    <Kind>skComment</Kind>
+    <Description>Exception tag in JavaDoc style.</Description>
+    <Text>@exception |</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>@param</Name>
+    <Kind>skComment</Kind>
+    <Description>Parameter tag in JavaDoc style.</Description>
+    <Text>@param |</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>@return</Name>
+    <Kind>skComment</Kind>
+    <Description>Return tag in JavaDoc style.</Description>
+    <Text>@return |</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>@see</Name>
+    <Kind>skComment</Kind>
+    <Description>See also tag in JavaDoc style.</Description>
+    <Text>@see |</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>@serial</Name>
+    <Kind>skComment</Kind>
+    <Description>Serial tag in JavaDoc style.</Description>
+    <Text>@serial |</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>@serialData</Name>
+    <Kind>skComment</Kind>
+    <Description>Serial Data tag in JavaDoc style.</Description>
+    <Text>@serialData |</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>@serialField</Name>
+    <Kind>skComment</Kind>
+    <Description>Serial Field tag in JavaDoc style.</Description>
+    <Text>@serialField |</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>@since</Name>
+    <Kind>skComment</Kind>
+    <Description>Since tag in JavaDoc style.</Description>
+    <Text>@since |</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>@throws</Name>
+    <Kind>skComment</Kind>
+    <Description>Throws tag in JavaDoc style.</Description>
+    <Text>@throws |</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>@todo</Name>
+    <Kind>skComment</Kind>
+    <Description>Todo tag in JavaDoc style.</Description>
+    <Text>@todo |</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>@version</Name>
+    <Kind>skComment</Kind>
+    <Description>Version tag in JavaDoc style.</Description>
+    <Text>@version |</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>@versionDate</Name>
+    <Kind>skComment</Kind>
+    <Description>Version and Date in JavaDoc style.</Description>
+    <Text>@version %Year%/%Month%/%Day% |</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>{*</Name>
+    <Kind>skComment</Kind>
+    <Text>{*</Text>
+    <ScopeRate>7</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>1</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>{*---</Name>
+    <Kind>skComment</Kind>
+    <Description>Comment block in JavaDoc style.</Description>
+    <Text>{*------------------------------------------------------------------------------
+  |
+-------------------------------------------------------------------------------}
+</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>{*func</Name>
+    <Kind>skComment</Kind>
+    <Description>Function comment in JavaDoc style.</Description>
+    <Text>{*------------------------------------------------------------------------------
+  |
+
+%ArgList:  @param $n
+%%RetType:  @return
+%-------------------------------------------------------------------------------}
+</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>{*unit</Name>
+    <Kind>skComment</Kind>
+    <Description>Unit comment in JavaDoc style.</Description>
+    <Text>{*------------------------------------------------------------------------------
+  |
+
+  @author  %User%
+  @version %Year%/%Month%/%Day% 1.0 Initial revision.
+  @todo
+  @comment
+-------------------------------------------------------------------------------}
+</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+</Symbols>

@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>源代码统计专家</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">源代码统计专家</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">源代码统计专家</p>
+<p class="text" align="left">
+源代码统计专家能对 Delphi 以及 C++Builder 环境下的 Pascal 代码或 C++ 代码进行统计并输出统计结果。它提供了以下几种统计方式：</p>
+
+<ul>
+  <li>
+<p class="text" align="left">
+直接统计打开的当前源文件。</p>
+
+  </li>
+  <li>
+<p class="text" align="left">
+统计当前工程组中包含的所有源文件。</p>
+
+  </li>
+  <li>
+<p class="text" align="left">
+统计当前工程中包含的所有源文件。</p>
+
+  </li>
+  <li>
+<p class="text" align="left">
+当前在IDE中打开的所有源文件。</p>
+
+  </li>
+  <li>
+<p class="text" align="left">
+按指定目录和指定文件扩展名搜索所有文件并进行统计。</p>
+
+  </li>
+</ul>
+<p class="text" align="left">
+当单击“CnPack”菜单中的“源代码统计...”菜单项时，会弹出下图所示的窗口询问进行统计的方式：</p>
+
+<p class="text" align="center">
+<img src="SourceStat.png"></p>
+
+<p class="text" align="left">选择统计方式后，源代码统计专家能够对被统计文件进行搜索，并统计出以下结果：</p>
+<ul>
+  <li>对于单个源代码文件，可以统计其字节数、行数、注释行数、代码行数、有效行数、空行数、代码字节数、注释字节数、注释块数等。</li>
+  <li> 对于工程组与工程，源代码统计专家能统计出该工程组或工程的所有文件的以上统计结果。</li>
+  <li> Delphi 的工程组文件以及 C++Builder 的工程文件、工程组文件因为不是有效的源代码文件，因此不参与统计。</li>
+</ul>
+<p class="text" align="left">　</p>
+<p class="text" align="left">源代码统计专家界面如下图所示：</p>
+<p class="text" align="center">
+<img src="SourceStatResult.png"></p>
+
+<p class="text" align="left">状态栏中显示的是当前参与统计的所有文件的数目、字节总数和有效行总数等。其中，有效行数指源代码文件中去除空行之外所余下的包含有效代码或者注释的行数，如果某一行既有代码又有注释，则同时计入代码行和注释行。</p>
+
+<p class="text" align="left">另外，Pascal 代码中的编译指令 {$...} 被计入注释，C++代码中的编译指令 #... 
+被计入代码。</p>
+
+<p class="title" align="left">　</p>
+
+<p class="title" align="left">功能介绍</p>
+
+<p class="text" align="left">源代码统计专家窗口中提供了一系列功能用来进行统计与处理统计结果，可以弹出询问窗口进行再一次统计，也可以直接对当前打开的源文件、当前工程组中包含的所有源文件、当前工程中包含的所有源文件，或当前在IDE中打开的所有源文件进行新的统计。</p>
+
+<p class="text" align="left">被统计文件可以通过双击的方式在 IDE 中打开。单个统计结果或所有统计可以保存成文件，包括 TXT 文本格式，逗号分割的 CSV 文本格式，Tab 分割的 TSV 
+文本格式等。</p>
+
+<p class="text" align="left">当被统计文件过多时，还可以利用文件名查找的方式来迅速定位需要寻找的被统计文件。</p>
+<p class="title">　</p>
+<p class="title">相关主题</p>
+<p class="text" align="left">
+<a href="wizards.htm">IDE 专家基本操作</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">IDE 专家设置</a><p class="text" align="left">
+<a href="../cnpack/index.htm">关于 IDE 专家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版权所有 2001-2009 CnPack 开发组</a></p>
+</body>
+</html>

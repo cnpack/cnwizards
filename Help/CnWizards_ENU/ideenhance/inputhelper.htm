@@ -1,0 +1,250 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Code Input Helper</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">Code Input Helper</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">Code Input Helper</p>
+<p class="text">Code Input Helper provides a way to fast inputting code. When user inputs characters in Code Editor, the List Window will popup automatically and the matched symbols will be listed in it. Now the tool only supports Delphi. About C++Builder, it can only popup IDE's code insight instead.</p>
+<p class="text">List Window and its context menu show as below:</p>  
+<p class="text" align="center">
+<img src="inputhelper.png"> 
+</p>
+<p class="text">Now, if you input character continue, the mismatched item will be discarded. You can use Up, Down, PageUp, PageDown, Shift+Home, Shift+End and Left Button to select current item. Left and Right key can select the matched position of identifier. BackSpace and Delete key can update the list also. When press Enter, Space, Tab, Double-Click or one of the special characters in settings, the content of selected item will send to the editor. Esc, Ctrl and other function keys can close the list.</p>
+<p class="text">Code Input Helper can also input following special contents except normal identifiers:</p>
+<ul>
+  <li>
+    <p class="text">When input in the uses section, all unit names available will be listed.</p>
+  </li>
+  <li>
+	<p class="text">Compiler directives. When input '{$', all compiler directives will be listed.</p></li>
+	<li>
+	<p class="text">Comments in XML Style. When input '///', all comment templates in XML Style will be listed.</p></li>
+	<li>
+	<p class="text">Comments in JavaDoc Style. When input '{*', all comment templates in 
+	JavaDoc Style will be listed.</p></li>
+	<li>
+	<p class="text">Code Templates defined in IDE. Such as trycf, forb and etc.</p></li>
+	<li>
+	<p class="text">User-defined identifiers, compiler directives, comment templates, code templates and etc.</p></li>
+	<li>
+	<p class="text">Macros are supported in code template.</p></li>
+</ul>
+<p class="text"><b>Tip</b>: If you feel Code Input Helper is better then IDE's Code Completion, you can disable IDE's Code Completion, then Input Helper will be used when input dot. This is useful in Delphi 5 specially.</p>
+<p class="text">&nbsp;</p>  
+<p class="text"><b>Context Menu</b></p> 
+<div align="center">
+</div>
+<ul>
+  <li>
+    <p class="text"><b>Auto Popup</b>: Enable or disable the auto popup feature when input code.</p>
+  </li>
+	<li>
+    <p class="text"><b>Display Speed Buttons</b>: Display speed buttons on the right of List Window or not.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Sort Style</b>: Automatic style uses scope value of items to sort. By Text, Length and Kind styles sort items by their contents.</p>
+  </li>
+  <li>
+    <p class="text"><b>Explain of Images</b>: Display the meaning of images, and may used to select which kinds of items can appear in list.</p>
+  </li>
+	<li>
+    <p class="text"><b>Add a User-defined Symbol</b>: Add current symbol to user-defined symbol list.</p>
+  </li>
+  <li>
+    <p class="text"><b>Settings</b>: Show the settings dialog.</p>
+  </li>
+</ul>
+<p class="text">The speed buttons on the right are: Add a User-defined Symbol, Settings and Tool's Help.</p>
+<p class="text">&nbsp;</p>
+<p class="text"><b>Settings</b></p>
+<p class="text">You can open the settings dialog from its context menu or the main settings dialog of CnWizards. The dialog shows as below:</p>
+<p align="center" class="text"><img src="inputhelperconf.png"></p>
+<ul>
+	<p class="text">&nbsp;</p>
+	<li>
+	<p class="text"><b>Auto-Settings</b></p></li>
+	<ul>
+	<li>
+	<p class="text"><b>Auto Popup Input Helper</b>: Enable or disable the auto popup feature when input code.</p></li>
+	<li>
+	<p class="text"><b>Popup after How Many characters Input</b>: Auto popup after only input given number characters continuously. The valid characters include all letter, number, underline and the inner BackSpace and Delete of identifier.</li>
+	<li>
+	<p class="text"><b>Delay before Popup</b>: Delay before popup, if a new key pressed, then restart delay.</p></li>
+	<li>
+	<p class="text"><b>Intelligent Popup</b>: If switch it on, then don't popup list when current identifier is just the same of one of the list.</li>
+	<li>
+	<p class="text"><b>Replace Code Insight when Later is Disabled</b>: If you want to replace IDE's Code Completion, switch it on and disable IDE's Code Completion.</li>
+	<li>
+	<p class="text"><b>Shortcut to Toggle Auto-Popup</b>: Define the shortcut to toggle Auto-Popup feature.</p></li>
+	<li>
+	<p class="text"><b>Shortcut to Popup List Manually</b>: Define the shortcut to popup list in valid position manually.</p></li>
+	<li>
+	<p class="text"><b>Disable Input Helper when IME Opened</b>: Switch whether disables Input Helper when IME opened.</p></li>
+	</ul>
+</ul>
+<ul>
+<li><p class="text"><b>Output Settings</b></p></li>
+<ul>
+	<li>
+	<p class="text"><b>Input Current Item when Press</b>: 
+	When the list showing, if press one of these characters, then send the content of current item to editor.</p></li>
+	<li>
+	<p class="text"><b>DO NOT popup after these characters</b>: 
+	If you want't to display list window after pressing some characters, you can add them to these list(Use comma to seperate).</p></li>
+  <li> 
+    <p class="text"><b>Symbol Output Style</b>: 
+	When the cursor is in the middle of current identifier, the output is affected by this setting. Automatic style will replace the left side or whole identifier by match degree.</p>
+  </li>
+	<li> 
+    <p class="text"><b>Allow Inputting Current Item by Pressing Space</b>: When the list showing, whether send content of current item to editor by pressing Space key.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Ignore Space Char after Inputting Current Item.</b>: Whether Ignore the Space Char itself after sending content of current item to editor by pressing Space key. If not, there will be a space char after entered current item in Editor.</p>
+  </li>
+	<li> 
+    <p class="text"><b>Select and Input Middle-Matched Symbol Only when Pressing Enter</b>: If current item is Middle-Matched for the input identifier, whether send it to editor only by pressing Enter.</p>
+  </li>
+	<li>
+	<p class="text"><b>Auto Line Feed after Keyword when Pressing Enter</b>: When press Enter after inputting full keyword, whether auto inserts a new line.</p></li>
+	<li>
+	<p class="text"><b>Auto Insert Brackets for Function Having Parameters</b>: 
+	If current item is a function or procedure having parameters, whether auto 
+	insert brackets and call parameter hint.</p></li>
+</ul>
+</ul>
+
+</ul>
+<p align="center">
+<img src="inputhelperconf1.png"> </p>
+<ul>
+	<li>
+	<p class="text"><b>List Settings</b></p></li>
+	<ul>
+	<li>
+	<p class="text"><b>List sorted by</b>:  
+	Automatic style uses scope value of items to sort. By Text, Length and Kind styles sort items by their contents.</p></li>
+  <li> 
+    <p class="text"><b>List Font</b>: Set the font name and size used in symbol list.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Min Length of Symbol</b>: Symbols can displayed in list only when their length is great than or equal to this number.</p>
+  </li>
+	<li> 
+    <p class="text"><b>Reserved Words</b>: Set the capitalization style for 
+	reserved words.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Display Middle-Matched Symbols</b>:  
+	Whether keep the symbols which Middle-Matched to current symbol. If enable, the matched part will be highlighted, else only First-Matched symbols will be kept.</p>
+  </li>
+	<li> 
+    <p class="text"><b>Remove Duplicate Symbols</b>: Whether remove other 
+	duplicate symbols and keep one only. It will lose a little performance.</p>
+  </li>
+	<li>
+    <p class="text"><b>Adjust Priority Automatically according to the Frequency</b>: If enable, the symbols which user input frequency will displayed in the top of list.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Use the Compatible Way to Obtain Symbols</b>: If Input Helper causes IDE or compiler unstable in some versions, you may try to enable this switch. It will be a little slower.</p>
+  </li>
+</ul>
+</ul>
+<ul>
+  <li> 
+    <p class="text"><b>Content Settings</b></p>
+  </li>
+  <ul>  
+  <li><b>Symbol Provider List</b>: Select the symbol providers which you want to used.</li>
+	<li><b>Symbol Types</b>: Select the symbol types which you want to used.</li>
+  </ul>
+  </ul>
+  <p class="text" align="center">
+	<img src="inputhelperconf2.png"></p>
+<ul>
+  <li> 
+    <p class="text"><b>Symbol List</b>: Display all User-defined symbols.</p>
+  </li>
+  <ul>
+  
+  <li><b>List</b>: Select current list to modify.</li>
+  
+  <li><b>Add</b>: Add a new symbol, may be normal identifier, compiler directive, comment, template, etc.</li>
+	<li><b>Duplicate</b>: Copy current item to a new item.</li>
+	<li><b>Delete</b>: Delete current item.</li>
+	<li><b>Default</b>: Restore current list&#39;s context to default.</li>
+	<li><b>Edit</b>: Modify current item.</li>
+	<li><b>Import</b>: Import symbols from data file. Can select replace or append mode.</li>
+	<li><b>Export</b>: Export all symbols to data file.</li>  
+  </ul>
+  </ul>
+  <ul>
+  <li>
+    <p class="text"><b>Code Template</b>: Edit current code template, only used in "Comment" and "Template" type.</p>
+  </li>
+  <ul>
+  
+  <li><b>Insert Macro</b>: Insert a pre-defined macro in current position. When click this button, a macro list menu will displayed.</li>
+	<li><b>User Macro</b>: Insert a user-defined macro in current position. When a template include User-defined macro execute, user may input the value in macro dialog.</li>
+	<li><b>Cursor</b>: Insert a cursor flag in current position, namely "|". If more than one flag exist, only the first one is valid.</li>
+	<li><b>Clear</b>: Clear the template.</li>  
+  </ul>
+  </ul>
+<ul>
+  <li>
+	<p class="text"><b>OK</b>: Save current settings and close the dialog.</p></li>
+	<li>
+	<p class="text"><b>Cancel</b>: Cancel the dialog.</p></li>
+  </ul>
+<ul>
+  <li> 
+    <p class="text"><b>Help</b>: Show this help.</p>
+  </li>
+</ul>
+<p class="text" align="left">&nbsp;</p>
+<p class="text" align="left"><b>Customize Symbol</b></p>
+<p class="text" align="left">When add or edit symbol, the dialog shows as below: </p>
+<p class="text" align="center">
+<img src="inputhelperedit.png"></p>
+<ul>
+	<li>
+	<p class="text" align="left"><b>Name</b>: The name of the symbol, is a string used to input symbol, may be normal identifier, //xxx or {$xx or other symbol which means it is a comment or compiler directive.</p></li>
+	<li>
+	<p class="text" align="left"><b>Type</b>: The kind of the symbol.</p></li>
+	<li>
+	<p class="text" align="left"><b>Description</b>: The description of the symbol, displayed in list.</p></li>
+	<li>
+	<p class="text" align="left"><b>Scope</b>: The scope of the symbol. Small scope mean the symbol will more keep to the top of list.</p></li>
+	<li>
+	<p class="text" align="left"><b>Auto Indent when Multi-Line</b>: If a template is Multi-Line and this switch is on, then every line will indent automatically when output.</p>
+	</li>
+	<li>
+	<p class="text" align="left"><b>Always Popup Even Inputting Text is Full 
+	Match</b>: Whether ignore &quot;<b>Intelligent Popup</b>&quot; switch for this symbol.</p>
+	</li>
+</ul>
+<p class="text">&nbsp;</p>
+<p class="title" align="left">Links<p class="text" align="left">
+<p class="text" align="left"> <a href="formdesigner.htm">Form Designer Enhancements</a>
+<p class="text" align="left"> <a href="palette.htm">IDE Main Form Enhancements</a>
+<p class="text" align="left"> <a href="cpuwin.htm">CPU Window Enhancements</a>
+<p class="text" align="left"> <a href="objinspector.htm">Object Inspector Enhancements</a><p class="text" align="left">
+<p class="text" align="left"> <a href="wintoproller.htm">Caption Button Enhancements</a><p class="text" align="left">
+<a href="../cnpack/index.htm">About CnWizards</a><p class="text" align="left"><hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">Copyrights 2001-2009 CnPack Team</a></p>
+</body>
+</html>

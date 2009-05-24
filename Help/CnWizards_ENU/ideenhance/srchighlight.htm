@@ -1,0 +1,159 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Source Highlight Enhancements Wizard</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">Source Highlight Enhancements Wizard</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">Source Highlight Enhancements Wizard</p>
+<p class="text">Source Highlight Enhancements contain Bracket Highlight and Code Structure Highlight feature.
+Brackets ( ), [ ], { } are supported. But { } only valid in C/C++. Code Structure's keyword Highlight only supports Pascal files.</p>
+<p class="text">Bracket highlighted source code shows as below:</p>
+<p align="center" class="text">
+<img src="srchighlight.png"></p>
+<p class="text">Structure highlighted source code shows as below:</p>
+<p align="center" class="text">
+<img src="srchighlight1.png"></p>
+<ul>
+  <p class="text">&nbsp;</p>
+</ul>
+    <p class="text">The settings dialog shows as below:</p>
+<p class="text" align="center">
+<img src="srchighlightconf.png"></p>
+<p class="text">&nbsp;</p>
+<ul>
+  <li>
+<p class="text"><b>Bracket Highlight</b></p>
+  <ul>
+  <li>
+<p class="text"><b>Enable Highlighting Matched Brackets</b>: Whether highlight matched brackets.</p>
+  </li>
+  <li>
+<p class="text"><b>Color Settings</b>: Set foreground, background and frame colors.</p>
+  </li>
+  <li>
+<p class="text"><b>Bracket Bold</b>: Whether use bold font to draw bracket.</p>
+  </li>
+  <li>
+<p class="text"><b>Highlight when Cursor is between Brackets</b>: Whether highlight brackets when cursor is between brackets.</p>
+  </li>
+  </ul>
+  <li>
+<p class="text"><b>Code Structure Highlight</b></p>
+  <ul>
+  <li>
+<p class="text"><b>Enable Background Highlight Keyword Structure at Cursor.</b>: Whether Enable Background Highlight Keyword Structure at Cursor. If checked and cursor is at "begin", the background of "begin" and its corresponding "end" will be painted as highlight color, default is yellow and can be customized.</p>
+  </li>
+  <li>
+<p class="text"><b>Enable Background Highlight Current Identifier at Cursor.</b>: Whether Enable Background Highlight Current Identifier at Cursor. If checked and cursor is at a identifier, the background of all the same identifiers in current range will be painted as highlight color, default is yellow and can be customized.</p>
+  </li>
+<li>
+<p class="text"><b>Background Color</b>: The background color of Highlight Keyword Structure and Current Identifier at Cursor, defaultly Yellow.</p>
+  </li>
+  <li>
+<p class="text"><b>Enable Background Highlight Current Line.</b>: Whether Enable Background Highlight Current Line at Cursor. If checked, the background of current line will be painted as highlight color, like BDS. The default background highlight color is coming from the Editor color settings and can be customized here.</p>
+  </li>  
+  <li>
+<p class="text"><b>Enable Highlight Keyword Structure</b>: Whether Enable Keyword Structure Highlight in IDE Editor.</p>
+  </li>
+  <li>
+<p class="text"><b>Enable Lines</b>: Whether Enable Lines Structure Highlight in IDE Editor.</p>
+  </li>
+  <li>
+<p class="text"><b>Line Settings</b>: Settings of Drawing Lines. The dialog is shown as below:</p>
+<p align="center" class="text"><img src="srchighlightlineconf.png"></p>
+  </li>
+  <ul>
+  <li>
+<p class="text"><b>Line Type</b>: Line Type, default solid line.</p>
+  </li>
+  <li>
+<p class="text"><b>Width</b>: Line Width, default 1 pixel.</p>
+  </li>
+  <li>
+<p class="text"><b>Draw "[" at Line Ends</b>: Whether draw a "[" at the beginning of keyword.</p>
+  </li>
+  <li>
+<p class="text"><b>Draw Horizontal Line when in Different Columns</b>: Whether draw a horizontal line at the bottom of a line when keywords are in different columns.</p>
+  </li>
+  <li>
+<p class="text"><b>Use Tiny Dot to Draw the Horizontal Lines</b>: Whether use tiny dot to draw the horizontal lines. If not, use the line type setting.</p>
+  </li>
+  <li>
+<p class="text"><b>Ignore class/interface/record Declaration in Lines</b>: Whether Ignore class/interface/dispinterface/record Declarations and DO NOT draw lines on them.</p>
+  </li>
+</ul>
+  <li>
+<p class="text"><b>Highlight Range</b>: This option specifies the highlight range in editor, including Unit, Procedure/Function, Whole Block, Current Block.</p>
+  <ul>
+  <li>
+<p class="text"><b>Unit</b>: Highlight range is the whole implementation part of unit. Note: Performance maybe decreased if the unit size is too large.</p>
+  </li>
+  <li>
+<p class="text"><b>Procedure/Function</b>: Highlight range is current procedure/function where the cursor stays at, including nested procedure/function.</p>
+  </li>
+  <li>
+<p class="text"><b>Whole Block</b>: Highlight range is the outermost block around the cursor, e.g. current procedure/function, but excluding nested procedure/function.</p>
+  </li>
+  <li>
+<p class="text"><b>Current Block</b>: Highlight range is the innermost current block around the cursor.</p>
+  </li>
+  </ui>
+  </li>
+  <li>
+<p class="text"><b>Colors by Level</b>: This option specifies the colors for different levels. Click the block to select color. The "Reset" button can reset all colors to default settings.</p>
+  </li>
+  <li>
+<p class="text"><b>Highlight Delay</b>: It requires re-parse and update the editor after editor changed or cursor moved. This option specifies the delay mode for editor update after changing.</p>
+  </li>
+  <ul>
+  <li>
+<p class="text"><b>Immediately</b>: Re-parse and refresh editor in a very short while after editor changed. Note: Performance maybe decreased if file size is too large and changed frequently.</p>
+  </li>
+  <li>
+<p class="text"><b>Delay for</b>: Delay for a second defaultly after the last change of editor.</p>
+  </li>
+  <li>
+<p class="text"><b>Only Show when Hotkey</b>: Do not highlight code structure until the hotkey pressed. Default is Ctrl+Shift+H. This hotkey can be also used to re-parse and refresh editor manually though the hotkey option is disabled.</p>
+  </li>
+  </ul>
+  <li>
+<p class="text"><b>Disable Highlight when Unit Lines Exceeds</b>: When a unit file size is too large, the frequent change maybe cause performance decreasing. This option can specifies a line count, when the file line count exceeds this value, highlight will be disabled. The default value is 15000.</p>
+  </li>
+  </ul>
+  <li>
+<p class="text"><b>OK</b>: Save settings and close dialog.</p>
+  </li>
+  <li>
+<p class="text"><b>Cancel</b>: Cancel settings and close dialog.</p>
+  </li>
+</ul>
+<p class="text">&nbsp;</p>
+<p class="title" align="left">Links<p class="text" align="left">
+<p class="text" align="left"> <a href="formdesigner.htm">Form Designer 
+Enhancements</a>
+<p class="text" align="left"> <a href="palette.htm">Palette &amp; Other Enhancements</a>
+<p class="text" align="left"> <a href="cpuwin.htm">CPU Window Enhancements</a>
+<p class="text" align="left"> <a href="objinspector.htm">Object Inspector 
+Enhancements</a><p class="text" align="left">
+<p class="text" align="left"> <a href="wintoproller.htm">Caption Button 
+Enhancements</a><p class="text" align="left">
+<p class="text" align="left"> <a href="inputhelper.htm">Code Input Helper</a><p class="text" align="left">
+<a href="../cnpack/index.htm">About CnWizards</a><p class="text" align="left"><hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">Copyrights 
+2001-2009 CnPack Team</a></p>
+</body>
+</html>

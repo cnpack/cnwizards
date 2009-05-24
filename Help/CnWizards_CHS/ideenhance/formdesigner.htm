@@ -1,0 +1,184 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>窗体设计器扩展专家</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">窗体设计器扩展专家</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">窗体设计器扩展专家</p>
+<p class="text">窗体设计器器扩展专家为 IDE 的窗体设计器提供了浮动工具面板扩展和浮动属性编辑条功能。这些工具面板上的按钮可以定制以方便使用，用户还可以定义任意多的工具面板。
+属性编辑条则允许用户快速修改控件的常用属性。此扩展专家在 Delphi/C++Builder 下都有效，但在 BDS 中只在 VCL 类型的工程中、并且环境选项中 VCL Designer 是非 Embedded Designer 的情况下才有效。 </p>
+<p class="text">这些工具面板可以停靠在设计期窗体边缘上，与窗体一起移动，也可以在不停靠时使用鼠标拖动标题栏来移动其位置。当设计窗体隐藏或最小化时，浮动工具面板也随之隐藏，如下图所示。</p>
+<p></p>
+<p class="text" align="center">
+<img src="flatform.png"></p>
+<p class="text" align="left">
+浮动属性编辑条允许用户快速编辑当前选择控件的属性，左边的下拉框可以选择属性名，右边的下拉框可以修改属性。按钮可用来切换显示全部或常用属性，以及弹出组件重命名对话框。</p>
+<p class="text">右键点击一个工具面板，弹出右键菜单内容如下：</p>
+<ul>
+  <li>
+    <p class="text"><b>关闭</b>：关闭该工具面板。关闭后，还可在该专家的设置对话框中重新打开它。</p>
+  </li>
+  <li>
+<p class="text"><b>工具面板位置</b>：设定工具面板的停放位置，如果停靠在上下位置，工具栏为水平摆放，如果停靠在左右位置，则垂直摆放。</p>
+  </li>
+	<li>
+<p class="text"><b>允许拖动工具栏</b>：是否不自动停靠，而是显示一个标题栏允许用户拖动。</p>
+  </li>
+  <li>
+<p class="text"><b>从文件中导入</b>：从设置文件中导入工具面板。</p>
+  </li>
+  <li>
+<p class="text"><b>导出到文件</b>：将当前的工具面板设置导出到文件。</p>
+  </li>
+  <li>
+<p class="text"><b>定制工具面板</b>：自定义工具面板上的按钮及相关设置。</p>
+  </li>
+	<li>
+<p class="text"><b>设置</b>：显示设置对话框。</p>
+  </li>
+</ul>
+<p class="text">　</p>
+<p class="title">窗体设计器扩展设置</p>
+<p class="text">通过浮动工具面板的右键菜单，或者在 CnPack“设置”菜单中的“专家设置”中，可以打开窗体设计器扩展的设置对话框，如下图所示：</p>
+<p align="center" class="text"><img src="formehnconf.png"></p>
+<ul>
+  <li> 
+    <p class="text"><b>浮动工具面板</b></p>
+  </li>
+	<ul>
+	<li>
+    <p class="text"><b>浮动工具面板列表</b>：列出所有的浮动工具面板，选择一项后可以修改设置。</p>
+  </li>
+	<li> 
+    <p class="text"><b>添加</b>：添加一个新的浮动工具面板，点击后打开工具面板定制对话框。</p>
+  </li>
+	<li> 
+    <p class="text"><b>删除</b>：删除当前选择的浮动工具面板。</p>
+  </li>
+	<li> 
+    <p class="text"><b>默认</b>：恢复工具面板到安装时默认的状态。</p>
+  </li>
+	<li> 
+    <p class="text"><b>显示此浮动工具面板</b>：是否在当前设计的窗体上显示选择的浮动工具面板。</p>
+  </li>
+	<li> 
+    <p class="text"><b>工具面板名称</b>：当前选择的浮动工具面板的标题。</p>
+  </li>
+  <li> 
+    <p class="text"><b>允许拖动此浮动工具面板</b>：允许使用鼠标拖动浮动工具面板，此时自动停靠功能无效。</p>
+  </li>
+	<li> 
+    <p class="text"><b>自动停靠到设计窗体附近</b>：当设计窗体移动时，工具面板也随之移动。</p>
+  </li>
+  <li> 
+    <p class="text"><b>停靠位置</b>：浮动工具面板的自动停靠的显示位置，允许有八种不同的停靠位置。</p>
+  </li>
+	<li> 
+    <p class="text"><b>水平偏移、垂直偏移</b>：自动停靠时与设计窗体的相对位置偏移量。</p>
+  </li>
+  <li> 
+    <p class="text"><b>定制面板</b>：对浮动工具面板进行定制。</p>
+  </li>
+  <li> 
+    <p class="text"><b>导出</b>：将浮动工具面板的设置导出到数据文件中。</p>
+  </li>
+  <li> 
+    <p class="text"><b>导入</b>：从数据文件中导入浮动工具面板的设置。</p>
+  </li>
+	</ul>
+	<li> 
+    <p class="text"><b>浮动属性编辑条</b></p>
+  </li>
+	<ul>
+	<li>
+    <p class="text"><b>显示浮动属性编辑条</b>：为设计期窗体显示快速属性编辑条。</p>
+  </li>
+	<li> 
+    <p class="text"><b>属性名宽度</b>：属性名称下拉框控件宽度。</p>
+  </li>
+	<li> 
+    <p class="text"><b>属性值宽度</b>：属性值下拉框控件宽度。</p>
+  </li>
+  <li> 
+    <p class="text"><b>允许拖动浮动属性编辑条</b>：允许使用鼠标拖动浮动属性编辑条，此时自动停靠功能无效。</p>
+  </li>
+	<li> 
+    <p class="text"><b>自动停靠到设计窗体附近</b>：当设计窗体移动时，属性编辑条也随之移动。</p>
+  </li>
+  <li> 
+    <p class="text"><b>停靠位置</b>：浮动属性编辑条的自动停靠的显示位置，允许有八种不同的停靠位置。</p>
+  </li>
+	<li> 
+    <p class="text"><b>水平偏移、垂直偏移</b>：自动停靠时与设计窗体的相对位置偏移量。</p>
+  </li>
+  <li> 
+    <p class="text"><b>常用属性列表</b>：设置常用属性名称列表，定义当编辑条常用属性按钮按下时，显示的属性，排在前面的优先显示。</p>
+  </li>
+	</ul>
+	<li> 
+    <p class="text"><b>关闭</b>：关闭设置对话框。</p>
+  </li>
+	<li> 
+    <p class="text"><b>帮助</b>：显示帮助信息。</p>
+  </li>
+</ul>
+<p class="text">提示：对工具栏的设置是实时生效的，如果在设置时工具栏是显示的，则可以直接看到调整后的效果。</p>
+<p class="text">　</p>
+<p class="title">浮动工具面板定制</p>
+<p class="text">在工具面板右键菜单或设置对话框中，可以定制工具面板中的按钮。工具面板定制窗口如下图所示：</p>
+<p class="text" align="center">
+<img src="flatformcustomize.png"></p>
+<ul>
+  <li>
+    <p class="text"><strong>类别</strong>：显示当前 IDE 中可供使用的按钮分类。</p>
+  </li>
+  <li>
+    <p class="text"><strong>可用的按钮</strong>：显示当前选择的分类下的按钮集。</p>
+  </li>
+  <li>
+    <p class="text"><strong>工具面板按钮</strong>：显示在放置在浮动工具面板上的按钮。</p>
+  </li>
+  <li>
+    <p class="text"><strong>添加删除和重置按钮</strong>：允许调整和重新设置浮动工具面板上的按钮。</p>
+  </li>
+  <li>
+    <p class="text"><strong>工具面板行数</strong>：设置浮动工具面板分几行显示，最多允许四行。</p>
+  </li>
+  <li>
+    <p class="text"><strong>按钮先上下后左右排列</strong>：当浮动工具面板多行显示时，是否先从第一列从上向下排列，再依次向右排列。</p>
+  </li>
+  <li>
+    <p class="text"><strong>确定</strong>：确定当前的修改。</p>
+  </li>
+  <li>
+    <p class="text"><strong>取消</strong>：取消当前的修改。</p>
+  </li>
+  <li>
+    <p class="text"><strong>帮助</strong>：显示帮助信息。</p>
+  </li>
+</ul>
+<p class="text">　</p>
+<p class="title" align="left">相关主题 
+<p class="text" align="left"> <a href="palette.htm">IDE 主窗体扩展专家</a>
+<p class="text" align="left"> <a href="cpuwin.htm">CPU 窗口扩展专家</a>
+<p class="text" align="left"> <a href="objinspector.htm">对象查看器扩展专家</a><p class="text" align="left">
+<p class="text" align="left"> <a href="wintoproller.htm">窗口置顶与折叠扩展专家</a><p class="text" align="left">
+<p class="text" align="left"> <a href="inputhelper.htm">代码输入助手</a><p class="text" align="left">
+<a href="../cnpack/index.htm">关于 IDE 专家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版权所有 2001-2009 CnPack 开发组</a></p>
+</body>
+</html>

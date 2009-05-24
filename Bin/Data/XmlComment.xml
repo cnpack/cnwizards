@@ -1,0 +1,255 @@
+<Symbols PropFormat="node">
+  <Item>
+    <Name>///</Name>
+    <Kind>skComment</Kind>
+    <Description>Comment in XML style</Description>
+    <Text>///</Text>
+    <ScopeRate>7</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>1</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>///author</Name>
+    <Kind>skComment</Kind>
+    <Description>Author in XML style.</Description>
+    <Text>/// &lt;author&gt;|&lt;/author&gt;</Text>
+    <ScopeRate>13</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>///code</Name>
+    <Kind>skComment</Kind>
+    <Description>Example Code in XML style.</Description>
+    <Text>/// &lt;code&gt;
+/// |
+/// &lt;/code&gt;</Text>
+    <ScopeRate>13</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>///date</Name>
+    <Kind>skComment</Kind>
+    <Description>Date in XML style.</Description>
+    <Text>/// &lt;date&gt;|&lt;/date&gt;</Text>
+    <ScopeRate>13</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>///example</Name>
+    <Kind>skComment</Kind>
+    <Description>Example in XML style.</Description>
+    <Text>/// &lt;example&gt;|
+/// &lt;code&gt;
+///
+/// &lt;/code&gt;
+/// &lt;/example&gt;</Text>
+    <ScopeRate>13</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>///exception</Name>
+    <Kind>skComment</Kind>
+    <Description>Exception comment in XML style.</Description>
+    <Text>/// &lt;exception cref="|"&gt;&lt;/exception&gt;
+</Text>
+    <ScopeRate>13</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>///func</Name>
+    <Kind>skComment</Kind>
+    <Description>Function Comments in XML Style.</Description>
+    <Text>/// &lt;summary&gt;
+/// |
+/// &lt;/summary&gt;
+%ArgList:/// &lt;param name="$n"&gt;&lt;/param&gt;
+%%RetType:/// &lt;returns&gt;&lt;/returns&gt;%</Text>
+    <ScopeRate>13</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>///list_bullet</Name>
+    <Kind>skComment</Kind>
+    <Description>Bullet list in XML style.</Description>
+    <Text>/// &lt;list type="bullet"&gt;
+/// &lt;item&gt;
+/// &lt;description&gt;|&lt;/description&gt;
+/// &lt;/item&gt;
+/// &lt;item&gt;
+/// &lt;description&gt;&lt;/description&gt;
+/// &lt;/item&gt;
+/// &lt;/list&gt;</Text>
+    <ScopeRate>13</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>///list_bullet_term</Name>
+    <Kind>skComment</Kind>
+    <Description>Bullet list with terms in XML style.</Description>
+    <Text>/// &lt;list type="bullet"&gt;
+/// &lt;item&gt;
+/// &lt;term&gt;|&lt;/term&gt;
+/// &lt;description&gt;&lt;/description&gt;
+/// &lt;/item&gt;
+/// &lt;item&gt;
+/// &lt;term&gt;&lt;/term&gt;
+/// &lt;description&gt;&lt;/description&gt;
+/// &lt;/item&gt;
+/// &lt;/list&gt;</Text>
+    <ScopeRate>13</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>///list_number</Name>
+    <Kind>skComment</Kind>
+    <Description>Number list in XML style.</Description>
+    <Text>/// &lt;list type="number"&gt;
+/// &lt;item&gt;
+/// &lt;description&gt;|&lt;/description&gt;
+/// &lt;/item&gt;
+/// &lt;item&gt;
+/// &lt;description&gt;&lt;/description&gt;
+/// &lt;/item&gt;
+/// &lt;/list&gt;</Text>
+    <ScopeRate>13</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>///list_number_term</Name>
+    <Kind>skComment</Kind>
+    <Description>Number list with terms in XML style.</Description>
+    <Text>/// &lt;list type="number"&gt;
+/// &lt;item&gt;
+/// &lt;term&gt;|&lt;/term&gt;
+/// &lt;description&gt;&lt;/description&gt;
+/// &lt;/item&gt;
+/// &lt;item&gt;
+/// &lt;term&gt;&lt;/term&gt;
+/// &lt;description&gt;&lt;/description&gt;
+/// &lt;/item&gt;
+/// &lt;/list&gt;</Text>
+    <ScopeRate>13</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>///list_table</Name>
+    <Kind>skComment</Kind>
+    <Description>Table in XML style.</Description>
+    <Text>/// &lt;list type="table"&gt;
+/// &lt;listheader&gt;
+/// &lt;description&gt;|&lt;/description&gt;
+/// &lt;/listheader&gt;
+/// &lt;item&gt;
+/// &lt;description&gt;&lt;/description&gt;
+/// &lt;/item&gt;
+/// &lt;item&gt;
+/// &lt;description&gt;&lt;/description&gt;
+/// &lt;/item&gt;
+/// &lt;/list&gt;</Text>
+    <ScopeRate>13</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>///list_table_term</Name>
+    <Kind>skComment</Kind>
+    <Description>Table with terms in XML style.</Description>
+    <Text>/// &lt;list type="table"&gt;
+/// &lt;listheader&gt;
+/// &lt;term&gt;|&lt;/term&gt;
+/// &lt;description&gt;|&lt;/description&gt;
+/// &lt;/listheader&gt;
+/// &lt;item&gt;
+/// &lt;term&gt;&lt;/term&gt;
+/// &lt;description&gt;&lt;/description&gt;
+/// &lt;/item&gt;
+/// &lt;item&gt;
+/// &lt;term&gt;&lt;/term&gt;
+/// &lt;description&gt;&lt;/description&gt;
+/// &lt;/item&gt;
+/// &lt;/list&gt;</Text>
+    <ScopeRate>13</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>///param</Name>
+    <Kind>skComment</Kind>
+    <Description>Parameter in XML style.</Description>
+    <Text>/// &lt;param name="|"&gt;&lt;/param&gt;</Text>
+    <ScopeRate>13</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>///permission</Name>
+    <Kind>skComment</Kind>
+    <Description>Permission in XML style.</Description>
+    <Text>/// &lt;permission cref="|"&gt;&lt;/permission&gt;
+</Text>
+    <ScopeRate>13</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>///remarks</Name>
+    <Kind>skComment</Kind>
+    <Description>Remarks in XML style.</Description>
+    <Text>/// &lt;remarks&gt;
+/// |
+/// &lt;/remarks&gt;
+</Text>
+    <ScopeRate>13</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>///returns</Name>
+    <Kind>skComment</Kind>
+    <Description>Returns in XML style.</Description>
+    <Text>/// &lt;returns&gt;|&lt;/returns&gt;</Text>
+    <ScopeRate>13</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>///seealso</Name>
+    <Kind>skComment</Kind>
+    <Description>See also in XML style.</Description>
+    <Text>/// &lt;seealso&gt;|&lt;/seealso&gt;</Text>
+    <ScopeRate>13</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>///summary</Name>
+    <Kind>skComment</Kind>
+    <Description>Summary in XML style.</Description>
+    <Text>/// &lt;summary&gt;
+/// |
+/// &lt;/summary&gt;
+</Text>
+    <ScopeRate>13</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>///value</Name>
+    <Kind>skComment</Kind>
+    <Description>Value in XML style.</Description>
+    <Text>/// &lt;value&gt;|&lt;/value&gt;</Text>
+    <ScopeRate>13</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+</Symbols>

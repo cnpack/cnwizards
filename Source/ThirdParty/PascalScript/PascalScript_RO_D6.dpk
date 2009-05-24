@@ -1,0 +1,43 @@
+package PascalScript_RO_D6;
+
+{$R *.res}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO ON}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION ON}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES ON}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DESCRIPTION 'RemObjects Pascal Script - RemObjects SDK 4.0 Integration'}
+{$IMPLICITBUILD OFF}
+
+requires
+  rtl,
+  indy,
+  PascalScript_Core_D6,
+  RemObjects_Core_D6,
+  RemObjects_Indy_D6,
+  dbrtl,
+  vcl,
+  vclx;
+
+contains
+  PascalScript_RO_Reg in 'PascalScript_RO_Reg.pas',
+  uROPSServerLink in 'uROPSServerLink.pas',
+  uROPSImports in 'uROPSImports.pas';
+
+end.

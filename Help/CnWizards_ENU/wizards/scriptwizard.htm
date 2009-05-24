@@ -1,0 +1,204 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Script Wizard</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">Script Wizard</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">Script Wizard</p>
+<p class="text" align="left"> Script Wizard provides scripting support of dynamic Pascal compiling and execution in IDE by RemObjects Pascal Script, including Script Window and Script Library. Script items can be called in menu item or triggered by some Events.</p>
+<p class="title">Script Window</p>
+<p class="text" align="left"> Users can use IDE Edit Window to edit a Pascal script file and use Script Window to compile and run it. The window contains toolbar and messages area. It is as below: </p>
+<p class="text" align="center"> 
+  <img src="scriptwindow.png"> </p>
+<ul>
+  <li>
+<p class="text" align="left"><b>New a Script</b>: New a script outline in IDE Edit Window for writting.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Load from File</b>: Browse and open a Pascal file in IDE Edit Window.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Add to Script Library</b>: Add current script to the list of Script Library.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Show Script Library</b>: Show Script Library Window.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Compile Script</b>: Compile the source file in current IDE Edit Window. Messages will be printed in messages area below.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Run Script</b>: Compile and run the source file in current IDE Edit Window.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Help</b>: Show this Help or Show PSDecl/PSDemo content from drop down menu.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Close</b>: Close Script Window.</p>
+  </li>
+</ul>
+<p class="text" align="left"></p>
+<p class="title">&nbsp;</p>
+<p class="title">Script Library</p>
+<p class="text" align="left">Script Library allows user to manage sripts files and settings. Script items are shown in Script Wizard menu item. The Script Library window contains toolbar, script list and script item area. It is as below: </p>
+<p class="text" align="center">&nbsp;<img src="scriptlib.png"></p>
+<p class="text" align="left"> 
+<ul>
+  <li>
+<p class="text" align="left"><b>Add</b>: Add a new script item to edit.</p>
+  </li>
+	<li>
+<p class="text" align="left"><b>Delete</b>: Delete selected script item.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Clear</b>: Clear list. Delete all script items.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Import from File</b>: Import script items from XML file.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Export to File</b>: Export script items and save them to a XML file.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Move Up</b>: Move selected script item up.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Move Down</b>: Move selected script item down.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Help</b>: Show this Help.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Close</b>: Close Script Library Window.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Name</b>: The name of script item that displayed in menu and script list.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Desc</b>: Description of script item.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Filename</b>: The script file name of this script item.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Icon</b>: Icon displayed in menu item. If no icon specified, no icon displayed.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Shortcut</b>: Shortcut to execute the script item.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Script Enabled</b>: Whether the script is enabled to run, compile or triggered.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Confirm when Manual Run</b>: Whether need confirmation when executing script item maually. It does not affecet the scripts run by events.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Select Events</b>: You can select the IDE triggers/events in the treeview to run current script item.</p>
+<ul>
+  <li><p class="text" align="left"><b>smManual</b>: Called manually.</p>
+  </li>
+  <li><p class="text" align="left"><b>smIDELoaded</b>: Event after IDE starting.</p>
+  </li>
+  <li><p class="text" align="left"><b>smBeforeCompile</b>: Event before compiling.</p>
+  </li>
+  <li><p class="text" align="left"><b>smAfterCompile</b>: Event after compiling.</p>
+  </li>
+  <li><p class="text" align="left"><b>smFileNotify</b>: Event of File operations, include below: </p>
+  </li>
+  <ul>
+  	<li><p class="text" align="left"><b>ofnFileOpening</b>: Event of opening a file.</p></li>
+  	<li><p class="text" align="left"><b>ofnFileOpened</b>: Event after opening a file.</p></li>
+  	<li><p class="text" align="left"><b>ofnFileClosing</b>: Event of  closing a file.</p></li>
+  	<li><p class="text" align="left"><b>ofnDefaultDesktopLoad</b>: Event of default desktop settings load.</p></li>
+  	<li><p class="text" align="left"><b>ofnDefaultDesktopSave</b>: Event of default desktop settings save.</p></li>
+  	<li><p class="text" align="left"><b>ofnProjectDesktopLoad</b>: Event of current project desktop settings load.</p></li>
+  	<li><p class="text" align="left"><b>ofnProjectDesktopSave</b>: Event of current project desktop settings save.</p></li>
+  	<li><p class="text" align="left"><b>ofnPackageInstalled</b>: Event after a package installed.</p></li>
+  	<li><p class="text" align="left"><b>ofnPackageUninstalled</b>: Event after a package uninstalled.</p></li>
+  </ul>	
+  <li><p class="text" align="left"><b>smSourceEditorNotify</b>: Event of Source Editor operations, include below:</p>
+  <ul>
+  	<li><p class="text" align="left"><b>setOpened</b>: Event after a source editor open a file.</p></li>
+  	<li><p class="text" align="left"><b>setClosing</b>: Event before a source editor close a file.</p></li>
+  	<li><p class="text" align="left"><b>setModified</b>: Event when a source editor modified.</p></li>
+  	<li><p class="text" align="left"><b>setEditViewInsert</b>: Event when create an EditView and insert it into a source editor.</p></li>
+  	<li><p class="text" align="left"><b>setEditViewRemove</b>: Event when remove an EditView from a source editor.</p></li>
+  	<li><p class="text" align="left"><b>setEditViewActivated</b>: Event when activate an EditView in source editor.</p></li>
+  </ul>
+  </li>
+  <li><p class="text" align="left"><b>smFormEditorNotify</b>: Event of Form Editor operations, include below:</p>
+  <ul>
+  <li><p class="text" align="left"><b>fetOpened</b>: Event after a form editor open a form file.</p></li>
+  <li><p class="text" align="left"><b>fetClosing</b>: Event before a form editor close a form file.</p></li>
+  <li><p class="text" align="left"><b>fetModified</b>: Event when a form editor modified.</p></li>
+  <li><p class="text" align="left"><b>fetActivated</b>: Event when a form editor activated.</p></li>
+  <li><p class="text" align="left"><b>fetSaving</b>: Event when save a form editor.</p></li>
+  <li><p class="text" align="left"><b>fetComponentCreating</b>: Event when create a component in form editor.</p></li>
+  <li><p class="text" align="left"><b>fetComponentCreated</b>: Event after create a component in form editor.</p></li>
+  <li><p class="text" align="left"><b>fetComponentDestorying</b>: Event when delete a component in form editor.</p></li>
+  <li><p class="text" align="left"><b>fetComponentRenamed</b>: Event when renaming a component in form editor.</p></li>
+  </ul>
+  </li>
+</ul>
+  </li>
+  <li>
+<p class="text" align="left"><b>Script Search Path</b>: Specify the search path when compile Pascal script.</p>
+  </li>
+</ul>
+<p class="text" align="left"></p>
+<p class="title">&nbsp;</p>
+<p class="title">What's the Grammar of PascalScript?</p>
+<p class="text" align="left">PascalScript Grammar is almost the same with Object Pascal. But below are to be specified: </p>
+<ul>
+	<li>
+<p class="text" align="left">Convertion from Integer to TObject, e.g. TObject(0) is not supported by PascalScript. You can use an alternative function to do it: function CnIntToObject(AInt: Integer): TObject; </p>
+  </li>
+  <li>
+<p class="text" align="left">Default Parameter in function calling, and overload functions, are not supported by PascalScript. </p>
+  </li>
+  <li>
+<p class="text" align="left">Interface Property is not supported by PascalScript. You can use the Get/Set method instead. </p>
+  </li>
+  <li>
+<p class="text" align="left">Declaration of DLL functions is supported by PascalScript.</p>
+  </li>
+  <li>
+<p class="text" align="left">Procedure Readln are implemented as an InputBox to recieve user input. Output of Procedure Writeln will be redirected to Script Window's Message Area.</p>
+  </li>
+</ul>
+<p class="text" align="left">&nbsp;</p>
+<p class="title">How to use Libraries?</p>
+<p class="text" align="left">Functions or Procedures that can be called in CnWizards' PascalScript environment should be registered in CnWizards while compiling. Now CnWizards has registered some system functions including Sysutils, Classes, Windows and ToolsApi, etc. The registered list is in PSDecl directory in CnWizards installation destination. Note: The list Pascal files are not used in runtime in CnWizards, only for reference. They come from VCL source but only interface part left for registering and maybe modified for PascalScript grammar. Those functions or procedures listed in the PSDecl files can be called in PascalScript environment in CnWizards. For the details help of a function or procedure in the listed files, users can search Delphi's help for they're the same prototypes.
+</p>
+<p class="text" align="left">Some PascalScript Demos are placed in PSDemo directory in CnWizards installation destination. Users can read them.</p>
+<p class="text" align="left">Contents in both directory are in continuous development. Welcome to write customized PascalScript to enhance CnWizards and IDE.</p>
+<p class="text" align="left">&nbsp;</p>
+<p class="title">How to Write Code?</p>
+<p class="text" align="left">You can use your favorite editor to write PascalScript code. Certainly, IDE's Code Editor is a good choice. You can write a script just like write Object Pascal code, and use the Code Input Helper of CnWizards to help your writing in IDE's Code Editor. Note: To use Code Input Helper or IDE's Code Insight, you need to add all needed path to your IDE Search Path. For example, if ToolsApi was used, "Source\ToolsAPI" directory need to be added. And if CnWizUtils.pas was used, "PSDeclEx" directory should also be added.</p>
+<p class="text" align="left">&nbsp;</p>
+<p class="title">How to Play with Event?</p>
+<p class="text" align="left">A Pascal Script can be called manually or by event(s). You can use the global object "Event" to obtain the event type or parameters. Event is an instance of TCnScriptEvent. Its Mode property represents the event type, corresponding to smManual, smIDELoaded, smBeforeCompile, smAfterCompile, smFileNotify, smSourceEditorNotify, smFormEditorNotify. So we can know the event type if we check Event.Mode value in script. Some events contains not only the event type, but also some other information, e.g. filename, source editor, etc. In this situation, Event is an instance of TCnScriptEvent's sub class. We can use a typecast to convert Event to TCnScriptEvent's sub class to get more parameters.</p>
+<p class="text" align="left">More information, please refer to PSDeclEx\ScriptEvent.pas and other Event demos in PSDemo directory.</p>
+<p class="text" align="left">&nbsp;</p>
+<p class="title">Links</p>
+<p class="text" align="left"><a href="wizards.htm">Basic Operation</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">CnWizards Settings</a><p class="text" align="left">
+<a href="../cnpack/index.htm">About CnWizards</a>
+<p class="text" align="left">&nbsp; 
+<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">Copyrights 2001-2009 CnPack Team</a></p>
+</body>
+</html>

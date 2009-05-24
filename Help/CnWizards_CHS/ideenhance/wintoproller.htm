@@ -1,0 +1,201 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>窗口置顶与折叠扩展专家</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">窗口置顶与折叠扩展专家</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">窗口置顶与折叠扩展专家</p>
+<p class="text">窗口置顶与折叠扩展专家能为 IDE 中的非模态窗口的标题栏增加置顶和折叠等按钮（折叠按钮的功能是将窗口缩小至标题栏大小以少占用桌面空间），默认会增加三个按钮：选项下拉菜单按钮、折叠按钮和置顶按钮。下图是 
+  Object Inspector 增加标题栏按钮后的效果：</p>  
+<p class="text" align="center"> <img src="capbuttons.png"></p>
+<ul>
+  <li> 
+    <p class="text"><b>选项下拉菜单</b>：点击此按钮后弹出有关于标题栏按钮的下拉菜单。</p>
+  </li>
+  <li>
+    <p class="text"><b>折叠按钮：</b>点击此按钮后，窗口会折叠缩小至标题栏大小，再点击一次还原。部分窗体可能因为本身设置了 AutoSize 或 Constraints 属性导致不能缩小至标题栏大小，使用时请注意。</li>
+  <li> 
+    <p class="text"><b>置顶按钮</b>：点击此按钮后本窗口将置顶，再点击一次还原。</p>
+  </li>
+  <li><p class="text"><b>将此窗体加入屏蔽列表：</b>本专家允许用户设置根据窗体类名来决定是否显示标题栏按钮的过滤器，本菜单项的功能是将本窗体的类名加入过滤列表以阻止显示标题栏按钮。</li>
+  <li> 
+    <p class="text"><b>设置</b>：点击此按钮后将弹出设置窗口。</p>
+  </li>
+</ul>
+<p class="text">本专家的设置窗口如下图所示：</p> 
+<div align="center"> <img src="wintoproller.png"></div>
+<p class="text">　</p>
+<ul>
+  <li> 
+    <p class="text"><b>按钮类型</b>：控制在标题栏中增加的按钮类型，包括是否显示置顶、折叠、设置按钮等。</p>
+  </li>
+  <li> 
+    <p class="text"><b>忽略标题栏文字宽度：</b>如不勾上此选项，按钮将显示在标题栏文字之后，如窗体标题栏文字过长，按钮则不显示。勾上此选项后将忽略标题栏文字的长度，而总在右边显示标题栏按钮。</li>
+  <li> 
+    <p class="text"><b>窗口折叠使用动画效果</b>：控制是否在窗口的折叠过程中使用动画缩进展开效果。</p>
+  </li>
+  <li><b>启用自定义窗体类名过滤以阻止部分窗口显示扩展按钮：</b>部分非模态窗体是不需要显示置顶等按钮的，如 IDE 主窗体等，而且用户也可能不需要某些类型的窗体显示其标题栏按钮。这里提供了根据窗体类名的过滤功能，凡是在列表中并且勾上的过滤规则都会生效，和规则中标识的窗体类名相同的窗体，都不会显示标题栏按钮。两下拉框的下拉列表里预置了 
+    IDE 中常见的窗口类名和其注释，列表如下：</li>
+</ul>
+<table width="75%" border="1" align="center" cellpadding="3" cellspacing="0" bordercolor="#666666">
+  <tr bgcolor="#FFFF00"> 
+    <td width="46%"><strong>类名</strong></td>
+    <td width="54%"><strong>注释</strong></td>
+  </tr>
+  <tr> 
+    <td>TAppBuilder</td>
+    <td>IDE Main Window</td>
+  </tr>
+  <tr> 
+    <td>TObjectTreeView</td>
+    <td>Object TreeView</td>
+  </tr>
+  <tr> 
+    <td>TPropertyInspector</td>
+    <td>Object Inspector</td>
+  </tr>
+  <tr> 
+    <td>TEditWindow</td>
+    <td>Source Editor</td>
+  </tr>
+  <tr> 
+    <td>TPasModExpForm</td>
+    <td>Code Explorer</td>
+  </tr>
+  <tr> 
+    <td>TProjectManagerForm</td>
+    <td>Project Manager</td>
+  </tr>
+  <tr> 
+    <td>TToDoListWindow</td>
+    <td>ToDo List</td>
+  </tr>
+  <tr> 
+    <td>TAlignPalette</td>
+    <td>Align Palette</td>
+  </tr>
+  <tr> 
+    <td>TSynbolExplorer</td>
+    <td>Browse Synbol</td>
+  </tr>
+  <tr> 
+    <td>TCompListForm</td>
+    <td>Component List</td>
+  </tr>
+  <tr> 
+    <td>TMessageHintFrm</td>
+    <td>Message Hint</td>
+  </tr>
+  <tr> 
+    <td>TBPWindow</td>
+    <td>Break Points</td>
+  </tr>
+  <tr> 
+    <td>TCallStackWindow</td>
+    <td>Call Stack</td>
+  </tr>
+  <tr> 
+    <td>TWatchWindow</td>
+    <td>Watches</td>
+  </tr>
+  <tr> 
+    <td>TLocalVarsWindow</td>
+    <td>Local Variables</td>
+  </tr>
+  <tr> 
+    <td>TThreadStatus</td>
+    <td>Threads</td>
+  </tr>
+  <tr> 
+    <td>TModulesView</td>
+    <td>Modules</td>
+  </tr>
+  <tr> 
+    <td>TDebugLogView</td>
+    <td>Event Log</td>
+  </tr>
+  <tr> 
+    <td>TDisassemblyView</td>
+    <td>CPU Window</td>
+  </tr>
+  <tr> 
+    <td> TFPUWindow</td>
+    <td>FPU Window</td>
+  </tr>
+  <tr> 
+    <td>TCustomizeDlg</td>
+    <td>Toolbar Customize</td>
+  </tr>
+  <tr> 
+    <td>TEvalDialog</td>
+    <td>Evaluate/Modify</td>
+  </tr>
+  <tr> 
+    <td>TDbExplorerForm</td>
+    <td>DataBase Explorer</td>
+  </tr>
+  <tr> 
+    <td>TMenuBuilder</td>
+    <td>Menu Designer</td>
+  </tr>
+  <tr> 
+    <td>TActionListDesigner</td>
+    <td>ActionList Designer</td>
+  </tr>
+  <tr> 
+    <td>TFieldsEditor</td>
+    <td>Fields Editor</td>
+  </tr>
+  <tr>
+    <td>TCollectionEditor</td>
+    <td>Collection Editor</td>
+  </tr>
+  <tr> 
+    <td>TCustomizeActnEditDesigner</td>
+    <td>ActionManager Editor</td>
+  </tr>
+</table>
+<p>　</p>
+<ul>
+  <li> 
+    <p class="text"><b>替换</b>：将两个下拉框中编辑的规则类名和注释替换选中的规则。</p>
+  </li>
+  <li> 
+    <p class="text"><b>添加：</b>将两个下拉框中编辑的规则类名和注释作为一条新规则加入到规则列表中。</li>
+  <li> 
+    <p class="text"><b>删除</b>：删除规则列表中的选中规则。</p>
+  </li>
+  <li> 
+    <p class="text"><b>确定</b>：关闭此窗口，保存选项设置内容并更新生效。</p>
+  </li>
+  <li> 
+    <p class="text"><b>取消：</b>关闭此窗口，忽略修改的选项内容。</li>
+  <li> 
+    <p class="text"><b>帮助</b>：显示帮助信息。</p>
+  </li>
+</ul>
+<p class="title" align="left">&nbsp;
+<p class="title" align="left">相关主题 
+<p class="text" align="left"> <a href="formdesigner.htm">窗体设计器扩展专家</a>
+<p class="text" align="left"> <a href="palette.htm">IDE 主窗体扩展专家</a>
+<p class="text" align="left"> <a href="cpuwin.htm">CPU 窗口扩展专家</a>
+<p class="text" align="left"> <a href="objinspector.htm">对象查看器扩展专家</a><p class="text" align="left">
+<p class="text" align="left"> <a href="inputhelper.htm">代码输入助手</a><p class="text" align="left">
+<a href="../cnpack/index.htm">关于 IDE 专家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版权所有 2001-2009 CnPack 开发组</a></p>
+</body>
+</html>

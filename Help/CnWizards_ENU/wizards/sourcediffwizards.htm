@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Source Compare Wizard</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">Source Compare Wizard</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">Source Compare Wizard</p>
+<p class="text" align="left">
+This wizard is used to compare two source files or contents between editor and disk. Both Delphi/C++Builder are supported.</p>
+<p class="text" align="left">
+The screenshot below shows the difference between editor and disk of a single source file.</p>
+<p class="text" align="left">
+The main area shows the two source file and their difference. The thin right panel shows the thumbnail. You can locate the positon by clicking this panel.</p>
+<p class="text" align="center">
+<img src="sourcediff1.png"></p>
+<p class="title">
+&nbsp;</p>
+<p class="title">
+Menus</p>
+<ul>
+  <li>
+<p class="text"><b>File</b></p>
+<ul>
+<li><p class="text"><b>Open File 1</b>: Open a file in left window.</p></li>
+<li><p class="text"><b>Open File 2</b>: Open a file in right window.</p></li>
+<li><p class="text"><b>Save Merged File</b>: Save merged content to a file. It's only enabled when in merging mode.</p></li>
+<li><p class="text"><b>Exit</b>: Close this window.</p></li>
+</ul>
+  </li>
+  <li>
+<p class="text">
+<b>Options</b></p>
+<ul>
+<li><p class="text"><b>Ignore Blank Space</b>: Whether ignore blank space when comparing.</p></li>
+<li><p class="text"><b>Ignore Case</b>: Whether ignore case when comparing.</p></li>
+<li><p class="text"><b>Only Difference</b>: If this was selected, only different part wil be show in windows. This time merging function is not supported.</p></li>
+<li><p class="text"><b>Horizontal Split</b>: Split the two window horizontally or vertically.</p></li>
+<li><p class="text"><b>Highlight Color</b>: You can set the color for display of 'Added', 'Modified' and 'Deleted' lines. It can be done by clicking the bottom-left rectangles, too.</p></li>
+<li><p class="text"><b>Font</b>: Set display font.</p></li>
+</ul></li>
+  <li>
+<p class="text">
+<b>Operation</b></p>
+  <ul>
+<li><p class="text"><b>Source Code Compare</b>: Compare the sources. Shortcut is F9.</p></li>
+<li><p class="text"><b>Refresh and Re-compare</b>: Reload sources and redo the compare operation.</p></li>
+<li><p class="text"><b>Abort Comparison</b>: Cancel operation when comparing.</p></li>
+<li><p class="text"><b>Previous Difference</b>: Goto the previous difference in souce window.</p></li>
+<li><p class="text"><b>Next Difference</b>: Goto the next difference in souce window.</p></li>
+<li><p class="text"><b>Return to Source Code Editor</b>: Open the selecte source file in IDE's source editor and goto the current line. Double clicking the source also can goto source editor when not in merging mode.</p></li>
+<li><p class="text"><b>Merge Files</b>: Merge two files. You can select how to merge: Left/right file is primary or use intersection.</p></li>
+<li><p class="text"><b>Merge Current Text</b>: This function is used to copy selected line to merge result window when source file window is focused. Double clicking source file window also can do this in merging mode.
+</p></li>
+<li><p class="text"><b>Edit Current Text</b>: Edit current line when merging result window is focused. Double clicking result window also can do this in merging mode.</p></li>
+</ul></li>
+  <li>
+<p class="text">
+<b>Help</b></p>
+  <ul>
+<li><p class="text"><b>Display Help</b>: Show this help.</p></li>
+</ul></li>
+</ul>
+<p class="text">
+&nbsp;</p>
+<p class="title">
+Toolbar butttons</p>
+<p class="text">
+The functions of toolbar buttons are the same as menu items.</p>
+<p class="text">
+&nbsp;</p>
+<p class="title">
+Buttons on the top of source windows</p>
+<ul>
+  <li>
+<p class="text">
+<b>Left Button</b>: Open source file.</p>
+  </li>
+  <li>
+<p class="text">
+<b>Saved File/Editor Buffer/Backup File</b>: You can select which file to load. They can be saved file or content in current source editor or backup files, such as *.~pas.</p>
+  </li>
+  <li>
+<p class="text">
+<b>Right Button</b>: Some operations in dropdown menu, including refresh, open file list all files in IDE and history files.</p>
+  </li>
+</ul>
+<p class="text" align="left">
+&nbsp;</p>
+<p class="title">
+Merge Files</p>
+<p class="text" align="left">
+Beside comparison, merging is also supported as below:</p>
+<p class="text" align="center">
+<img src="sourcediff2.png"></p>
+<p class="text" align="left">
+For Operations' details, you can see 'Menus'.</p>
+<p class="text" align="left">
+Merging result window is show as below:</p>
+<p class="text" align="center">
+<img src="sourcediff3.png"></p>
+<p class="text" align="left">
+Note: Line count after editing must be identical as before editing. Blank lines will be auto added when lacking, and the surplus will be truncated.</p>
+
+<p class="title" align="left">&nbsp;
+<p class="title">Links</p>
+<p class="text" align="left">
+<a href="wizards.htm">Basic Operation</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">CnWizards Settings</a><p class="text" align="left">
+<a href="../cnpack/index.htm">About CnWizards</a>
+<p class="text" align="left">&nbsp; 
+<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">Copyrights 2001-2009 CnPack Team</a></p>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<TCnEditorCollection PropFormat="node">
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>0</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOF</InsertPos>
+    <Caption>普通单元头</Caption>
+    <Content>//*****************************************************//
+//                                                     //
+//      %软件名%%ColPos56%//
+//                                                     //
+//      版权所有 (C) %Year% %公司名%%ColPos56%//
+//                                                     //
+//*****************************************************//
+
+</Content>
+    <Hint>普通单元头</Hint>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>24764</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOL</InsertPos>
+    <Caption>粗框注释分隔条</Caption>
+    <Content>//==============================================================================
+// %注释%
+//==============================================================================
+
+</Content>
+    <Hint>粗边框的注释块</Hint>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>24766</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOL</InsertPos>
+    <Caption>细框注释分隔条</Caption>
+    <Content>//------------------------------------------------------------------------------
+// %注释%
+//------------------------------------------------------------------------------
+
+</Content>
+    <Hint>细框注释分隔条</Hint>
+  </o>
+</TCnEditorCollection>

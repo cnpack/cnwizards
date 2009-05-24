@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Tab Order 专家</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">Tab Order 专家</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">Tab Order 专家</p>
+<p class="text" align="left"> 该设计器用于在窗体上通过标签来直观的显示控件的 TabOrder 属性的值，支持 
+Delphi/C++Builder。当 IDE 当前编辑对象为窗体编辑器时，该工具可用。绘制时会根据控件的嵌套层数不同而采用不同的标签颜色。当控件的 TabStop 值为 False 的时候，使用虚线绘制标签边框，以表示 Tab 键不停留。</p>
+<p class="text" align="left"> 专家菜单如图所示：</p>
+  <p align="center">
+  <img src="TabOrder.png"></p>
+<ul>
+<li><p class="text"><b>已选择的控件：</b>对当前选择的控件进行处理
+，如果当前选择的控件为容器控件，则处理容器控件的所有子控件，否则处理选择控件同级的所有控件。</p></li>
+<li><p class="text"><b>当前窗体所有控件：</b>对窗体上所有的控件及子控件进行处理。</p></li>
+<li><p class="text"><b>所有打开的窗体：</b>对当前打开的所有窗体上所有的控件及子控件进行处理。</p></li>
+<li><p class="text"><b>当前工程所有窗体：</b>对当前工程中所有窗体上所有的控件及子控件进行处理。</p></li>
+<li><p class="text"><b>当前工程组所有窗体：</b>对当前工程组中所有窗体上所有的控件及子控件进行处理。</p></li>
+<li><p class="text"><b>移动控件自动设置：</b>当控件在窗体上发生移动时，专家将根据设定方式自动改变控件的 TabOrder 属性的值。</p></li>
+<li><p class="text"><b>显示控件Tab Order：</b>打开/关闭控件的 Tab Order 标签的显示。</p></li>
+</ul>
+  <p class="text" align="left">下图显示了一个正在设计期并使用 Tab Order 专家设置后的窗体：</p>
+<p class="text" align="center">
+<img src="TabOrderDemo.png"></p>
+  <p class="text" align="left"> </p>
+  <p class="title">　</p>
+  <p class="title">参数设置</p>
+  <p class="text">Tab Order 专家的设置界面如下图所示：</p>
+  <p align="center">
+    <img src="TabOrderSetup.png"></p>
+  <p class="text" align="left"></p>
+<ul>  
+<li><p class="text"><b>排序方式</b></p>
+<ul>
+<li><p class="text"><b>先水平再垂直</b>：设置 Tab Order 
+时以垂直方向从上到下（正向）排列，如果在同一水平方向上有多个控件，再按照水平方向排列。也就是先水平排列，再垂直排列。</p></li>
+<li><p class="text"><b>先垂直再水平</b>：设置 Tab Order 
+时以水平方向从左到右（正向）排列，如果在同一垂直方向上有多个控件，再按照垂直方向排列。也就是先垂直排列，再水平排列。</p></li>
+</ul></li>
+<li><p class="text"><b>附加处理</b></p>
+<ul>
+<li><p class="text"><b>反向排序</b>：设置 Tab Order 
+时使用反方向排列，即从下到上（垂直方向为主）或从右到左（水平方向为主）。</p></li>
+<li><p class="text"><b>组件分组处理</b>：如果选择分组处理，专家在排序控件时会将高、宽相同且位置邻近的控件作为一组来处理，保证其 
+Tab Order 连续。</p></li>
+</ul></li>
+<li><p class="text"><b>Tab Order标签</b>：设置 Tab Order 标签的显示位置、字体及颜色。</p></li>
+<li><p class="text"><b>其它设置</b></p>
+<ul>
+<li><p class="text"><b>移动控件时自动更新 Tab Order</b>：当控件在窗体上发生移动时，专家将根据设定方式自动改变控件的 TabOrder 属性的值。</p></li>
+<li><p class="text"><b>处理控件时包含所有子控件</b>：当处理容器类控件时，同时处理其所有子控件。</p></li>
+<li><p class="text"><b>计算位置时根据控件中心来判断</b>：
+根据控件中心点位置来对控件进行排序。如果不选择，默认使用其排序方向的边缘位置，如从上到下时以控件 Top 属性来排序。</p></li>
+<li><p class="text"><b>设置快捷键</b>：设置子菜单项的快捷键。</p></li>
+</ul></li>
+</ul>
+
+<p class="title" align="left">　<p class="title" align="left">相关主题 
+  <p class="text" align="left"> <a href="wizards.htm">IDE 专家基本操作</a> 
+  <p class="text" align="left"> <a href="../options/wizconfig.htm">IDE 专家设置</a> 
+  <p class="text" align="left"> <a href="../cnpack/index.htm">关于 IDE 专家包</a> 
+  <p class="text" align="left">　 
+  <hr>
+  <p class="text" align="center"><a href="http://www.cnpack.org">(C)版权所有 2001-2009 CnPack 开发组</a></p>
+</body>
+</html>

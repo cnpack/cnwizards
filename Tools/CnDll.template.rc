@@ -1,0 +1,31 @@
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION ${Ver.Comma}
+PRODUCTVERSION ${Ver.Comma}
+FILEFLAGSMASK 0x3fL
+FILEFLAGS 0x0L
+FILEOS 0x4L
+FILETYPE 0x1L
+FILESUBTYPE 0x0L
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "080904B0"
+    BEGIN
+      VALUE "FileDescription", "${Ver.FileDescription}\0"
+      VALUE "FileVersion", "${Ver.Dot}\0"
+      VALUE "InternalName", "${Ver.InternalName}\0"
+      VALUE "LegalCopyright", "${Ver.LegalCopyright}\0"
+      VALUE "LegalTrademarks", "${Ver.LegalTrademarks}\0"
+      VALUE "OriginalFilename", "${Ver.OriginalFilename}\0"
+      VALUE "ProductName", "${Ver.ProductName}\0"
+      VALUE "ProductVersion","${Ver.ProductVersion}\0"
+      VALUE "Comments", "${Ver.Comments}\0"
+      VALUE "CompanyName", "${Ver.CompanyName}\0"
+    END
+  END
+
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x809,1200
+  END
+END

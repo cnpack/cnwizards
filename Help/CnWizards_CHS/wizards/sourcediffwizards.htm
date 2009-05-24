@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>源代码比较专家</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">源代码比较专家</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">源代码比较专家</p>
+<p class="text" align="left">
+该专家用于比较两个源代码文件或同一源代码文件在编辑器中和存盘、备份文件之间的差异，支持 Delphi/C++Builder。</p>
+<p class="text" align="left">
+下图显示了同一个单元在编辑器内存中的代码及存盘文件之间的差异：</p>
+<p class="text" align="left">
+主区域显示了两份源代码及其差异，右边的竖条显示了整个源代码的差异分布，单击可快速定位于相应的位置。</p>
+<p class="text" align="center">
+<img src="sourcediff1.png"></p>
+<p class="title">
+　</p>
+<p class="title">
+主菜单操作</p>
+<ul>
+  <li>
+<p class="text"><b>文件菜单</b></p>
+<ul>
+<li><p class="text"><b>打开文件1</b>：在左窗口中打开文件。</p></li>
+<li><p class="text"><b>打开文件2</b>：在右窗口中打开文件。</p></li>
+<li><p class="text"><b>保存拼合后的文件</b>：将当前编辑的拼合文本保存到文件中，仅在拼合模式下有效。</p></li>
+<li><p class="text"><b>关闭</b>：关闭专家窗口。</p></li>
+</ul>
+  </li>
+  <li>
+<p class="text">
+<b>设置菜单</b></p>
+<ul>
+<li><p class="text"><b>忽略空白字符</b>：比较文本时忽略空格符。</p></li>
+<li><p class="text"><b>忽略大小写</b>：比较文本时忽略大小写。</p></li>
+<li><p class="text"><b>只显示不同之处</b>：在窗口中只显示文件之间不同之处，在该模式下不支持拼合功能。</p></li>
+<li><p class="text"><b>水平/垂直分割</b>：设置两个主窗口的分割方式。</p></li>
+<li><p class="text"><b>高亮显示颜色</b>：设置“新增”、“修改”、“删除”三种状态下文本行的颜色，也可通过点击左下角的小色框来设置。</p></li>
+<li><p class="text"><b>字体</b>：设置文本显示的字体。</p></li>
+</ul></li>
+  <li>
+<p class="text">
+<b>操作菜单</b></p>
+  <ul>
+<li><p class="text"><b>源代码比较</b>：对当前选择的源代码执行比较操作。</p></li>
+<li><p class="text"><b>刷新文件并重新比较</b>：重新装载当前选择的源代码并执行比较操作。</p></li>
+<li><p class="text"><b>中断比较</b>：在源代码比较时中断处理。</p></li>
+<li><p class="text"><b>上一处不同</b>：在源代码中定位上一处不相同的地方。</p></li>
+<li><p class="text"><b>下一处不同</b>：在源代码中定位下一处不相同的地方。</p></li>
+<li><p class="text"><b>转到源代码编辑器中</b>：在源代码编辑器中打开当前获得焦点的源代码文件并定位到当前行处。在非拼合模式下，双击上方窗口源代码执行该功能。</p></li>
+<li><p class="text"><b>拼合文件</b>：对当前选择的源代码执行拼合操作，可以选择以左/右文件或两个文件的交集为主。</p></li>
+<li><p class="text"><b>拼合当前文本</b>：当焦点位于上方源代码窗口中时，用于将当前窗口中选择的文本复制到拼合窗口相同位置处。
+在拼合模式下，双击上方窗口源代码执行该功能。</p></li>
+<li><p class="text"><b>编辑当前文本</b>：
+当焦点位于下方拼合窗口时，编辑当前选择的源代码。在拼合模式下，双击下方拼合窗口源代码执行该功能。</p></li>
+</ul></li>
+  <li>
+<p class="text">
+<b>帮助菜单</b></p>
+  <ul>
+<li><p class="text"><b>显示帮助</b>：打开本说明文件。</p></li>
+</ul></li>
+</ul>
+<p class="text">
+　</p>
+<p class="title">
+工具栏按钮</p>
+<p class="text">
+工具栏按钮功能同相应的菜单项。</p>
+<p class="text">
+　</p>
+<p class="title">
+源代码窗口上方的按钮</p>
+<ul>
+  <li>
+<p class="text">
+<b>左按钮</b>：打开源代码文件。</p>
+  </li>
+  <li>
+<p class="text">
+<b>内存/文件/备份</b>：选择当前源代码文件的类型，可以是正在编辑器缓冲区中的代码、已保存的文件或备份文件(*.~pas 等)。</p>
+  </li>
+  <li>
+<p class="text">
+<b>右按钮</b>：下拉菜单，包含刷新当前文件、打开文件、列出当前 IDE 中打开的文件以及历史文件等菜单项。</p>
+  </li>
+</ul>
+<p class="text" align="left">
+　</p>
+<p class="title">
+代码拼合功能</p>
+<p class="text" align="left">
+除了支持文本比较，该专家还支持代码拼合功能，下图显示了一个正在拼合的代码：</p>
+<p class="text" align="center">
+<img src="sourcediff2.png"></p>
+<p class="text" align="left">
+拼合时可用的操作见“主菜单操作”。</p>
+<p class="text" align="left">
+下图为编辑拼合文本窗口：</p>
+<p class="text" align="center">
+<img src="sourcediff3.png"></p>
+<p class="text" align="left">
+编辑时请注意，编辑后的文本行数必须与原文本保持一致，超过原文本行数的内容将自动截去，不足的自动以空行补足。</p>
+<p class="text" align="left">
+　</p>
+<p class="title" align="left">相关主题<p class="text" align="left">
+<a href="wizards.htm">IDE 专家基本操作</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">IDE 专家设置</a><p class="text" align="left">
+<a href="../cnpack/index.htm">关于 IDE 专家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版权所有 2001-2009 CnPack 开发组</a></p>
+</body>
+</html>

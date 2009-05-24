@@ -1,0 +1,68 @@
+0.6.4:
+- Updated Uppercase, StrToInt32, AnsiStringReplace to the latest version
+
+0.6.3:
+- Fastcode Functions in Fastcode.pas are now exported.
+- You can prevent RTL patching by defining "FastcodeNoRtlPatch"
+- Fixed again Delphi 6 & 7 compilation problems
+- Updated AnsiStringReplace to the latest version
+
+0.6.1:
+- Fixed wrong stub for AnsiStringReplace in fastcode.pas
+- Fixed Delphi 6 compilation problems
+- Updated Lowercase, Uppercase, AnsiStringReplace, StrToInt to the latest versions
+
+0.6.0:
+- Added GCD, MaxInt
+- Added StrIComp Unit and for RTL patching
+- Added StrToInt32 Unit and for RTL patching
+- Updated AnsiStringReplace, Pos, PosEx, StrCopy to the latest versions
+- Corrected version numbering
+
+0.5.2:
+- Added CharPos
+- Fixed "fastcode" lettercase
+- Removed _a _b _c _d suffix
+- Fixed uninitialized values warning
+- Added Reset protection on fastcodePatch routine
+- Fixed wrong stub in StrLen *critical*
+- Added SizePenalty and Pascal Targets
+- Updated fastcodeCPUID and fastcode.inc
+- Reorder the functions according to Fastcode spreadsheet
+- Added from which BV versions are the functions from
+- Updated Contributors name in MPL License
+- Appended the "Unit" suffix into Units/Filenames.
+- Updated a few routines to the lateset versions
+
+0.5.1:
+- Updated the library to the latest fastcode.
+- Added AnsiStringReplace
+- Added PosEx
+- Added StrLen
+
+0.3.0:
+- Enabled direct calling of any function irrespective of compiler 
+  options and removed unnecessary compiler options	
+- Inserted missing compiler options to prevent Overflow and Range 
+  Check errors when compiling Pascal versions
+- Modified fastcode.inc to ensure valid fastcode compiler options
+- Renamed some shared functions to remove one indirect function call
+
+0.2.0:
+- Implement "John O'Harrow" optimization calling common 
+  functions/procedures
+- Fixed Pos Stub on Delphi 2005
+- Fixed fastcodePatch unit for DEP enabled machines 
+  using the suggestions from "Hallvard Vassbotn"
+- Added Defines for choosing the target. (See fastcode.inc)
+  From the default is the RTL Suggestion Target!
+- Added Version History file
+- Added support for: CompareMem, CompareStr and FillChar
+
+0.1.2:
+- Included forgotten fastcodePatch Unit
+- Fixed License information in the units
+
+
+0.1.0:
+First release ...

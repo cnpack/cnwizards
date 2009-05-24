@@ -1,0 +1,36 @@
+#------------------------------------------------------------------------------
+VERSION = BWS.01
+#------------------------------------------------------------------------------
+!ifndef ROOT
+ROOT = $(MAKEDIR)\..
+!endif
+#------------------------------------------------------------------------------
+MAKE = $(ROOT)\bin\make.exe -$(MAKEFLAGS) -f$**
+DCC = $(ROOT)\bin\dcc32.exe $**
+BRCC = $(ROOT)\bin\brcc32.exe $**
+#------------------------------------------------------------------------------
+PROJECTS = CnDfm6To5.exe CnConfigIO.exe Setup.exe CnDebugViewer.exe \
+  AsciiChart.exe CnIdeBRTool.exe
+#------------------------------------------------------------------------------
+default: $(PROJECTS)
+#------------------------------------------------------------------------------
+
+CnDfm6To5.exe: CnDfm6To5\CnDfm6To5.dpr
+  $(DCC)
+
+CnConfigIO.exe: CnConfigIO\CnConfigIO.dpr
+  $(DCC)
+
+Setup.exe: CnWizSetup\Setup.dpr
+  $(DCC)
+
+CnDebugViewer.exe: CnDebugViewer\CnDebugViewer.dpr
+  $(DCC)
+
+AsciiChart.exe: CnAsciiChart\AsciiChart.dpr
+  $(DCC)
+
+CnIdeBRTool.exe: CnIdeBRTool\CnIdeBRTool.dpr
+  $(DCC)
+
+

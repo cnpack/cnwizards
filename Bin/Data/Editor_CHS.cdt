@@ -1,0 +1,96 @@
+<TCnEditorCollection PropFormat="node">
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>0</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOF</InsertPos>
+    <Caption>普通单元头</Caption>
+    <Content>{*******************************************************}
+{                                                       }
+{       %软件名%%ColPos57%}
+{                                                       }
+{       版权所有 (C) %Year% %公司名%%ColPos57%}
+{                                                       }
+{*******************************************************}
+
+</Content>
+    <Hint>普通单元头</Hint>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>0</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipProcHead</InsertPos>
+    <Caption>标准过程头</Caption>
+    <Content>{-------------------------------------------------------------------------------
+  过程名:    %ProcName%
+  作者:      %User%
+  日期:      %Year%.%Month%.%Day%
+  参数:      %Arguments%
+  返回值:    %Result%
+-------------------------------------------------------------------------------}
+</Content>
+    <Hint>插入在过程头部的注释块</Hint>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>24764</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOL</InsertPos>
+    <Caption>粗框注释分隔条</Caption>
+    <Content>//==============================================================================
+// %注释%
+//==============================================================================
+
+</Content>
+    <Hint>粗边框的注释块</Hint>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>24766</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOL</InsertPos>
+    <Caption>细框注释分隔条</Caption>
+    <Content>//------------------------------------------------------------------------------
+// %注释%
+//------------------------------------------------------------------------------
+
+</Content>
+    <Hint>细框注释分隔条</Hint>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>0</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOL</InsertPos>
+    <Caption>类定义</Caption>
+    <Content>{ %类名% }
+
+  %类名% = class(TObject)
+  private
+
+  protected
+
+  public
+    constructor Create;
+    destructor Destroy; override;
+  published
+
+  end;
+</Content>
+    <Hint>新的类定义</Hint>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>0</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOL</InsertPos>
+    <Caption>单元初始化节</Caption>
+    <Content>initialization
+
+finalization
+
+</Content>
+    <Hint>单元初始化节声明</Hint>
+  </o>
+</TCnEditorCollection>

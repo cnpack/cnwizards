@@ -1,0 +1,12 @@
+!LanguageID=2052
+!LanguageName=简体中文
+!TranslationAuthor=刘啸
+!TranslationAuthorEmail=liuxiao@cnpack.org
+csHintStr=提示
+csInstallSucc=CnPack 专家包已安装在以下环境中:<BR>
+csInstallSuccEnd=再次运行安装程序将卸载专家包！
+csUnInstallSucc=CnPack 专家包已从以下环境中反安装:<BR>
+csUnInstallSuccEnd=再次运行安装程序将重新安装专家包！
+csInstallFail=没有找到可以安装 CnPack 专家包的编译器！
+csUnInstallFail=CnPack 专家包已经禁用！
+csSetupCmdHelp=本工具支持命令行参数的运行方式.<BR><BR>命令行参数说明：<BR><BR>         -i 或 /i 或 -install 或 /install 安装至 IDE 中<BR>         -u 或 /u 或 -uninstall 或 /uninstall 从 IDE 中卸载<BR>         -n 或 /n 或 -NoMsg 或 /NoMsg 运行后不显示成功提示信息<BR>         -? 或 /? 或 -h 或 /h 命令行参数帮助

@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Property Corrector</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">Property Corrector</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">Property Corrector</p>
+<p class="text" align="left"> This wizard is used to modify components' properties by some customized rules. Destination can be all components in current form or all forms in current project/projectgroup.</p>
+<p class="text" align="left"> The main dialog of Property Corrector is as below:</p>
+  
+<p align="center"> <img src="corpropmain.png"></p>
+<ul>
+  <li> 
+    <p class="text"><b>Current Form</b>: Correct all components in current form, including form itself and all sub-components.</p>
+  </li>
+  <li> 
+    <p class="text"><b>All Opened Forms</b>: Correct all components in all opened  forms, including forms themselves and all sub-components.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Forms in Current Project</b>: Correct all forms and all components in current project, including all sub-components.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Forms in Current ProjectGroup</b>: Correct all forms and all components in current projectgroup, including all sub-components.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Search</b>: Search or correct properties according to the rules.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Confirm All</b>: Confirm all modifications in searching results.</p>
+  </li>
+  <li>
+    <p class="text"><b>Undo</b>: Undo the modification for selected item.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Options</b>: Set correction rules here.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Close</b>: Close this dialog.</p>
+  </li>
+</ul>
+  
+<p class="text" align="left">Property Corrector will search all components' properties to find those targets by the rules. If the Action in the rule is 'Auto Correct', this property will be modified automatically and displayed in listbox. If it's 'Prompt', this property need to be confirmed in the listbox by right clicking and selecting 'Confirm Modify' in popup menu. 'Locate the Component' can let you select the component in the form designer. 'Undo' to undo the modification.</p>
+<p class="title" align="left">&nbsp;</p>
+<p class="title" align="left">Rules Settings</p>
+<p class="text" align="left">If 'Options' button was clicked, the rules settings dialog will appear as below:</p>
+<p class="text" align="center">
+<img src="corpropcfg.png"></p>
+  <p class="text" align="left"> </p>
+  
+<ul>
+  <li> 
+    <p class="text"><b>Add</b>: Add a rule.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Edit</b>: Edit the selected rule.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Delete</b>: Delete the selected rule.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Import</b>: Import rules from file. Imported rules will overwrite those existing rules.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Export</b>: Export all rules to a file.</p>
+  </li>
+</ul>
+<p class="text">The checkbox shows whether this rule is enabled.</p>
+<p class="title">&nbsp;</p>
+<p class="title">Rule Editor</p>
+  
+<p class="text">Rule Editor dialog will appear when clicking 'Add' or 'Edit' button, as below:</p>
+  <p align="center">
+    <img src="corproprules.png"></p>
+  
+<p class="text" align="left">A property correcting rule can be explained as a modification to a property when the property is satisfied to a comparing condition. Certainly the modification can be set to need confirming mode or auto correcting mode.</p>
+<ul>
+  <li> 
+    <p class="text"><b>Class</b>: Classname in the rule, which can be selected from dropdown list. It can not be empty.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Property</b>: Property name in the rule. It can not be empty.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Condition</b>: Condition operator in the rule.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Value</b>: Value to compare in the rule.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Action</b>: If the condtion was satisfied, what to do can be specified here, including 'Auto Correct' or 'Confirm'.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Modify to</b>: Destination value in the rule.</p>
+  </li>
+  <li>
+    <p class="text"><b>Enable this Rule</b>: Enable/Disable this rule in searching.</p>
+  </li>
+</ul>
+
+<p class="title" align="left">&nbsp;
+<p class="title">Links</p>
+<p class="text" align="left">
+<a href="wizards.htm">Basic Operation</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">CnWizards Settings</a><p class="text" align="left">
+<a href="../cnpack/index.htm">About CnWizards</a>
+<p class="text" align="left">&nbsp; 
+<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">Copyrights 2001-2009 CnPack Team</a></p>
+</body>
+</html>

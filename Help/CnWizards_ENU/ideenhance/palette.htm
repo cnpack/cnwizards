@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>IDE Main Form Enhancements Wizard</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">IDE Main Form Enhancements Wizard</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">IDE Main Form Enhancements Wizard</p>
+<p class="text">This wizard provides some enhancements for the IDE Main Form and Component Palette. It includes setting Component Palette to Multi-Line, Searching component function, Adding a Tabs menu item to the context menu of Palette for switching page directly in Delphi 5 and C++Builder 5, and etc.</p>
+<p class="text">The Multi-Line Component Palette shows as below:</p>
+<p class="text" align="center">
+<img src="multilinepal.png">
+</p>
+<p class="text">When enable the adding 'Tabs' menu feature, right click the Component Palette, the context menu shows as below:</p>
+<div align="center">
+  <img src="tabsmenu.png">
+</div>
+<ul>
+  <li>
+    <p class="text">Click a sub menu will change current page to it related as well as Delphi 6 / C++Builder 6 and above.</p>
+  </li>
+  <li>
+    <p class="text">Click the 'Multi-Line' menu can switch the display mode of Component Palette.</p>
+  </li>
+</ul>
+<p class="text">This wizard can be configured from the main settings dialog of CnWizards. The settings dialog shows as below:</p>
+<p align="center" class="text"><img src="palenhconf.png"></p>
+<ul>
+  <p class="text">&nbsp;</p>
+  <li>
+    <p class="text"><b>Add "Tabs" to Popup Menu</b>: Switch whether add the 'Tabs' menu to context menu. Only available in Delphi 5 and C++Builder 5.</p>
+  </li>
+  <li>
+    <p class="text"><b>Set Component Palette to Multi-Line</b>: Set Component Palette to Multi-Line. Code Editor Window can auto resize when this switch changed.</li>
+  <li>
+    <p class="text"><b>Set Component Palette's Style to Flat Button.</b>: Set the page appearence style of Component Palette's to Flat Button.</li>
+  <li>
+    <p class="text"><b>Wrap Tabs Menu when too Long</b>: Set Tabs Menu to Multi-Column when it's too long. Only available in Delphi 7 and below version.</li>
+  <li>
+    <p class="text"><b>Add "Search Component" Button in Pallete</b>: Show an arrow button at the bottom-right corner of Palette to drop a window to search component quickly. It's available in Delphi 7 and below only, Unavailable in BDS. Please see the details below.</p>
+  </li>
+  <li>
+    <p class="text"><b>Lock IDE Toolbar to Disable Drag</b>: Disable the drag operation of toolbars and pallete in the Controlbar of IDE main form. It can prevent misoperation of toolbar's dragging when clicking them.</p>
+  </li>
+  <li>
+    <p class="text"><b>Auto Display Shortcuts of IDE Main Menu</b>: In Delphi 7 and above version, IDE uses TActionMainMenuBar control as main menu, which maybe has a problem in displaying shortcuts. This switch can force the main menu to display shortcuts always. Available in Delphi 7 only.</p>
+  </li>
+  <li>
+    <p class="text"><b>Move Following Menu Items into Sub Menu</b>: This tool
+	can put the third-party menu item in main menu bar into specified sub menu
+	to shorten the menu width of IDE main window.</p>
+  </li>
+  <li>
+    <p class="text"><b>OK</b>: Close the dialog and save settings.</p>
+  </li>
+  <li><p class="text"><b>Cancel</b>: Cancel the settings.</li>
+  <li>
+    <p class="text"><b>Help</b>: Show this help information.</p>
+  </li>
+</ul>
+<p class="text">&nbsp;</p>
+<p class="title" align="left">Search Component
+<p class="text" align="left">When you click the arrow button at the bottom-right corner of Palette, a dropped window appears to let you search component or tab quickly. This window can be dragged out to a float window. ESC to close.</p><p class="text">
+You can enter text to search needed component or tab in the edit control in toolbar. Right-clicking the component list to popup a menu and you can change some settings in it. If a component selected, a hint window will popup to show its detailed information. The snapshot is as below:</p>
+<p class="text" align="center">
+<img src="searchcomp.png">
+</p>
+
+<ul>
+  <p class="text">&nbsp;</p>
+  <li>
+    <p class="text"><b>Match Component/Tab Name Start</b>: If checked, it will match the component or tab name head when searching. Only component or tab names that starts with it can be displayed.</p>
+  </li>
+  <li>
+    <p class="text"><b>Match Any Parts of Component/Tab Name</b>: If checked, it will match the component or tab name in any position when searching.</li>
+  <li>
+    <p class="text"><b>Create Component</b>: If you click this button, selected component will be created and placed to current form editor. Pressing enter or double-clicking selected component can do the same action.</li>
+  <li>
+    <p class="text"><b>Help</b>: Show this Help.</p>
+  </li>
+  <li>
+    <p class="text"><b>Show Prefix T</b>: It's in "Display Settings" menu. It controls whether to show the first letter T of component class names.</p>
+  </li>
+  <li>
+    <p class="text"><b>Show Details Hint</b>: It's in "Display Settings" menu. It controls whether to show a details hint window when a component is selected. The details include component name, unit name, tab name and class inheritance list.</p>
+  </li>
+  <li>
+    <p class="text"><b>Auto Select in Palette</b>: It's in "Display Settings" menu. It controls whether to switch to selected tab and select component in palette automatically when a component in list is selected.</p>
+  </li>
+  <li>
+    <p class="text"><b>Show All Tabs</b>: It's in "Tabs" menu, defaultly checked to show components in all tabs. If you selected another menu item with specified tab name below, only components in this tab will be searched and displayed.</p>
+  </li>
+</ul>
+<p class="text">&nbsp;</p>
+<p class="title" align="left">Links<p class="text" align="left">
+<p class="text" align="left"> <a href="formdesigner.htm">Form Designer Enhancements</a>
+<p class="text" align="left"> <a href="cpuwin.htm">CPU Window Enhancements</a>
+<p class="text" align="left"> <a href="objinspector.htm">Object Inspector Enhancements</a><p class="text" align="left">
+<p class="text" align="left"> <a href="wintoproller.htm">Caption Button Enhancements</a><p class="text" align="left">
+<p class="text" align="left"> <a href="inputhelper.htm">Code Input Helper</a><p class="text" align="left">
+<a href="../cnpack/index.htm">About CnWizards</a><p class="text" align="left"><hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">Copyrights 2001-2009 CnPack Team</a></p>
+</body>
+</html>

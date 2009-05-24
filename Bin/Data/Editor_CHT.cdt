@@ -1,0 +1,96 @@
+<TCnEditorCollection PropFormat="node">
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>0</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOF</InsertPos>
+    <Caption>Unit Header</Caption>
+    <Content>{*******************************************************}
+{                                                       }
+{       %SoftName%%ColPos57%}
+{                                                       }
+{       Copyright (C) %Year% %Company%%ColPos57%}
+{                                                       }
+{*******************************************************}
+
+</Content>
+    <Hint>Unit Header</Hint>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>0</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipProcHead</InsertPos>
+    <Caption>Procedure Header</Caption>
+    <Content>{-------------------------------------------------------------------------------
+  Procedure: %ProcName%
+  Author:    %User%
+  DateTime:  %Year%.%Month%.%Day%
+  Arguments: %Arguments%
+  Result:    %Result%
+-------------------------------------------------------------------------------}
+</Content>
+    <Hint>Comment for procedure</Hint>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>24764</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOL</InsertPos>
+    <Caption>Comment block</Caption>
+    <Content>//==============================================================================
+// %Comment%
+//==============================================================================
+
+</Content>
+    <Hint>Comment block</Hint>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>24766</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOL</InsertPos>
+    <Caption>Comment block 2</Caption>
+    <Content>//------------------------------------------------------------------------------
+// %Comment%
+//------------------------------------------------------------------------------
+
+</Content>
+    <Hint>Comment block 2</Hint>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>0</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOL</InsertPos>
+    <Caption>Class define</Caption>
+    <Content>{ %ClassName% }
+
+  %ClassName% = class(TObject)
+  private
+
+  protected
+
+  public
+    constructor Create;
+    destructor Destroy; override;
+  published
+
+  end;
+</Content>
+    <Hint>New class define</Hint>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>0</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOL</InsertPos>
+    <Caption>initialization</Caption>
+    <Content>initialization
+
+finalization
+
+</Content>
+    <Hint>initialization</Hint>
+  </o>
+</TCnEditorCollection>

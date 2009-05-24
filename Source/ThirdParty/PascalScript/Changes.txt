@@ -1,0 +1,187 @@
+==========
+ 3.0.3.57
+==========
+
+- NEW Support for Borland Developer Studio 2006
+
+==========
+ 3.0.3.53
+==========
+- Updated RemObjects SDk integration for Indy 10 / RO .349
+
+==========
+ 3.0.3.51
+==========
+- Support for Delphi 2005
+- Allow overriding internal procs.
+- Add importdecl to old style AddFunction ImportDecl.
+- New compiletime support functions
+- getconst/getconstcount
+- allow interface to be registered more than once and in any order 
+- widestring published properties support.
+- Fix. Var parameter types weren't always checked.
+- fixes for CHAR consts.
+- Eliminate "Comparing signed and unsigned types" warnings (on D5) (jr)
+
+
+==========
+ 3.0.3.39
+==========
+- strtoint now throws an exception for invalid numbers.
+- Compiler fix: Check var parameters.
+- Docs update
+- Fixes in the import tool
+- Added a few new functions to make it earlier to add variable pointers to the script.
+- Added a few new samples
+- New Help system
+
+==========
+ 3.0.3.37
+==========
+
+- Classes and units renamed 
+- product integrated into RemObjects Software product line
+
+==========
+ 3.0.1.33 (17 January 2004)
+==========
+- IDispatch Support now uses Variant for dynamic invocation
+- Smaller tweaks related to IDispatch
+
+==========
+ 3.0.1.32 (16 January 2004)
+==========
+- IDispatch type support
+- Dynamic Invoke using IDispatch
+- Removed Export mode, no need to set it anymore
+- RunProcP, RunProcPN functions, invoke IFPS3 functions with with 1 command
+- TIFPS3CompExec.ExecuteFunction wrapper for RunProcPN
+- Small Fix
+- Included missing .dpk
+
+==========
+ 3.0.1.31 (16 December 2003)
+==========
+- Fixes release
+
+==========
+ 3.0.1.30 (25 November 2003)
+==========
+- Better Interface support
+- Lot's of fixes and improvements
+- Records and other complex types passing to events
+- Adding regular variables to the script
+- PreProcessing
+
+==========
+ 3.0.1.21 (28 August 2003)
+==========
+- Speed Improvements
+- Default array properties
+- A few D5/BCC5 compatiblity changes
+- Help files update
+- SET properties
+- A few other fixes
+- Static arrays
+- With
+- Sets
+- Calling Interfaces (IUnknown etc)
+- AS/IS support (classes)
+- fixes
+- Speed Improvements
+- A small fix.
+
+==========
+ 3.0.1.20 beta 5 (31 July 2003)
+==========
+- Fix in codegen with some expressions
+- All Get* and Add* Method of the exec are now uppercasing their params
+- Removed AddExportVariable, now all variables are "exported"
+- Added an VGetAsString function that returns the string value of any variant.
+- Default array properties.
+
+==========
+ 3.0.1.20 beta 4 (26 July 2003)
+==========
+This release doesn't contain any new features, only fixes.
+
+==========
+ 3.0.1.20 beta 3 (05 May 2003)
+==========
+Changes since last beta:
+- A few D5/BCC5 compatiblity changes
+- Help files update
+- SET properties
+- A few other fixes
+
+==========
+ 3.0.1.20 beta 2 (02 April 2003)
+==========
+What's new: - Static arrays
+- With
+- Sets
+- Calling Interfaces (IUnknown etc)
+- AS/IS support (classes)
+- Assigned fixed
+- IFPS3 raises an exception when one of the Add* functions fail or when a scripted Event fails
+- A lot of fixes
+
+==========
+ 3.0.1.04 stable (09 March 2003)
+==========
+- A few fixes
+
+==========
+ 3.0.1.03 stable (14 January 2003)
+==========
+- New datetime library
+- Besides Open Array now also Dynamic Array (D4+) support
+- A few fixes
+
+==========
+ 3.0.1.02.1 stable (07 November 2002)
+==========
+- WideString/WideChar support
+- Some small fixes
+
+==========
+ 3.0.1.02 stable (26 August 2002)
+==========
+- Compiler speed improvements.
+- Couple of small changes.
+
+==========
+ 3.0.1.01.1 (08 July 2002)
+==========
+- Additions/Changes: Variant and Int64 support in calling library
+- Forward procedures
+- Automaticly adding published properties
+- Try/Finally/Except/End support
+- Open Array parameters in calling library
+- Component Wrapper
+
+==========
+ 3.0.1.01 (20 June 2002)
+==========
+- Added a lot of new imported classes
+- Added support for casting
+- Some fixes and changes
+
+==========
+ 3.0.1.00.3 stable (07 June 2002)
+==========
+- Kylix Demo
+- Dll Library updated for Kylix
+- Variant type
+- array constants
+- Procedural Variables
+- Nil
+- Events
+- Some fixes
+
+==========
+ 3.0.1.00.2 (15 May 2002)
+==========
+- Record support for class calling library.
+- Couple of new support functions.
+- Couple of fixes. 

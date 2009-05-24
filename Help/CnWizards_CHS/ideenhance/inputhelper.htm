@@ -1,0 +1,256 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>代码输入助手</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">代码输入助手</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">代码输入助手</p>
+<p class="text">代码输入助手提供当用户在代码编辑器中键入代码时自动弹出匹配的标识符列表窗口的功能，目前只完整支持 Delphi。对于 C++Builder，目前代码输入助手对其的支持不完整，仅能弹出 IDE 自带的自动完成窗口。</p>
+<p class="text">输入助手列表框及右键菜单如下图所示：</p>  
+<p class="text" align="center">
+<img src="inputhelper.png"> 
+</p>
+<p class="text">此时，如果继续输入字符，将自动过滤掉不匹配的内容。在列表中用上、下、PageUp、PageDown、Shift+Home、Shift+End 
+键以及鼠标左键可以选择当前项，左、右光标键可以选择匹配的位置，退格和删除键也会更新列表。使用回车、空格、Tab、鼠标双击或输入在设置中指定的按键时自动将当前选择项发送到代码编辑器中。按 Esc、Ctrl 以及其它功能键可以关闭列表。</p>
+<p class="text">除了普通的标识符，输入助手还支持其它一些特殊内容的自动输入：</p>
+<ul>
+  <li>
+    <p class="text">如果在 uses 区使用输入助手，会列出所有可用的单元名称。</p>
+  </li>
+  <li>
+	<p class="text">编译指示字自动输入。输入 {$ 会列出所有的编译指示字及说明。</p></li>
+	<li>
+	<p class="text">XML 风格的注释。输入 
+	/// 会列出相关列表及说明。</p></li>
+	<li>
+	<p class="text">JavaDoc 风格的注释。输入 
+	{* 会列出相关列表及说明。</p></li>
+	<li>
+	<p class="text">IDE 中设置的代码模板，如 
+	trycf、forb 等。</p></li>
+	<li>
+	<p class="text">用户自已定义的符号、编译指示字、注释模板、代码模板等。</p></li>
+	<li>
+	<p class="text">在代码模板中还可以使用宏定义等功能。</p></li>
+</ul>
+<p class="text"><b>小技巧</b>：如果您觉得输入助手比 IDE 自带的 Code Completion 好用，可以将 IDE 的 Code 
+Completion 关闭，这样在输入 '.' 号后就会弹出输入助手了，在 Delphi 5 中特别有用。</p>
+<p class="text">　</p>  
+<p class="text"><b>右键菜单</b></p> 
+<div align="center">
+</div>
+<ul>
+  <li>
+    <p class="text"><b>允许自动弹出</b>：是否允许用户在键入代码时自动弹出输入助手。</p>
+  </li>
+	<li>
+    <p class="text"><b>显示快速按钮</b>：是否在列表窗口右边显示一列功能按钮。</p>
+  </li>
+  <li> 
+    <p class="text"><b>排序方式</b>：自动排序根据标识符的匹配优先级自动排序，按文本、长度、类型排序分别以相关内容按升序进行排序。</p>
+  </li>
+  <li>
+    <p class="text"><b>图例</b>：显示列表中图标的含义，并可选择哪些类型出现在列表中。</p>
+  </li>
+	<li>
+    <p class="text"><b>添加自定义符号</b>：将当前标识符添加到用户符号列表中。</p>
+  </li>
+  <li>
+    <p class="text"><b>设置</b>：弹出输入助手设置对话框。</p>
+  </li>
+</ul>
+<p class="text">列表右边的快速按钮功能分别为：添加自定义符号、设置、输入助手帮助。</p>
+<p class="text">　</p>
+<p class="text"><b>设置选项</b></p>
+<p class="text">该功能可以在专家包“设置”菜单中的“专家设置”中，或通过列表右键菜单进行设置，设置对话框如下图所示：</p>
+<p align="center" class="text"><img src="inputhelperconf.png"></p>
+<ul>
+	<p class="text">　</p>
+	<li>
+	<p class="text"><b>自动选项</b></p></li>
+	<ul>
+	<li>
+	<p class="text"><b>自动弹出输入助手</b>：是否允许用户在键入代码时自动弹出输入助手。</p></li>
+	<li>
+	<p class="text"><b>连续输入的有效字符数</b>：只有连续输入指定的字符后，才弹出输入助手。有效的字符包含所有字母、数字、下划线以及在标识符内部的退格和删除键。</li>
+	<li>
+	<p class="text"><b>自动弹出延时</b>：在弹出助手前等待的时间，如果延时期又有按键输入，则重新开始延时。</p></li>
+	<li>
+	<p class="text"><b>智能判断是否需要弹出助手</b>：如果选择智能判断，在当前标识符已经完全匹配侯选列表中某一项时，则不弹出输入助手。</li>
+	<li>
+	<p class="text"><b>如果禁用 IDE 的代码完成，则自动取代</b>：如果希望输入助手取代 IDE 
+	自己的代码完成，可以选择该项，并关闭 IDE 的自动完成功能。</li>
+	<li>
+	<p class="text"><b>用来切换自动显示的快捷键</b>：指定一个快捷键用于切换自动弹出状态。</p></li>
+	<li>
+	<p class="text"><b>用来手工弹出显示的快捷键</b>：指定一个快捷键，可以在有效位置手工弹出输入助手。</p></li>
+	<li>
+	<p class="text"><b>输入法开启时不弹出输入助手</b>：当输入法打开时，是否不自动弹出输入助手。</p></li>
+	</ul>
+</ul>
+<ul>
+<li><p class="text"><b>输出设置</b></p></li>
+<ul>
+	<li>
+	<p class="text"><b>可用于选择当前项的字符列表</b>：
+	在输入助手显示时，如果键入字符列表中的字符，自动将列表中当前选择的标识符发送到代码区。</p></li>
+	<li>
+	<p class="text"><b>禁止自动弹出列表的符号(逗号分隔)</b>：
+	如果希望在输入某些字符时禁止自动弹出输入助手，可以将其加到这个列表中，多项内容用逗号分隔。</p></li>
+  <li> 
+    <p class="text"><b>标识符输出方式</b>：
+	当光标在标识符中间位置时，输出标识符使用的方式。“自动识别”方式根据匹配度自动选择替换光标左边的部分或整个标识符。“回车时替换整个标识符”方式则只有使用回车键时才替换整个标识符，其它按键输出时只替换光标左边的部分。</p>
+  </li>
+	<li> 
+    <p class="text"><b>允许使用空格键来选择当前项</b>：在输入助手显示时，输入空格键是否自动将列表中当前选择的标识符发送到代码区。</p>
+  </li>
+  <li> 
+    <p class="text"><b>使用空格键选择当前项后忽略空格本身。</b>：在输入空格键将列表中当前选择的标识符发送到代码区后，是否忽略这个空格键本身。如选择不忽略，则当前标识符后将出现一个空格。</p>
+  </li>
+	<li> 
+    <p class="text"><b>只使用回车键来选择中间匹配的标识符</b>：如果当前选择的标识符只是中间匹配输入的内容，是否只有回车键才可将其发送到代码区。</p>
+  </li>
+	<li>
+	<p class="text"><b>对关键字回车自动换行</b>：在输入完整的关键字后再输入回车，是否在输出关键字后同时进行换行。</p></li>
+	<li>
+	<p class="text"><b>对带参数的函数自动完成括号</b>：如果当前输入项为带参数的函数或过程，是否在完成输出时自动插入括号并调用参数提示功能。</p></li>
+</ul>
+</ul>
+
+</ul>
+<p align="center">
+<img src="inputhelperconf1.png"> </p>
+<ul>
+	<li>
+	<p class="text"><b>列表显示</b></p></li>
+	<ul>
+	<li>
+	<p class="text"><b>列表排序方式</b>： 
+	标识符列表的排序方式。自动排序根据标识符的匹配优先级自动排序，按文本、长度、类型排序分别以相关内容按升序进行排序。</p></li>
+  <li> 
+    <p class="text"><b>列表字体</b>：指定在标识符列表中使用的字体名称和大小。</p>
+  </li>
+  <li> 
+    <p class="text"><b>标识符的最小长度</b>：只有大于该长度的标识符才会显示在列表中。</p>
+  </li>
+	<li> 
+    <p class="text"><b>保留字</b>：设置列表中保留字类型标识符的大小写转换方式。</p>
+  </li>
+  <li> 
+    <p class="text"><b>显示中间匹配的标识符</b>： 
+	当用户输入字符时，是否保留只在中间匹配输入内容的标识符。如果选择，匹配内容会自动高亮，如果不选，只有从头匹配的标识符才会保留。</p>
+  </li>
+	<li>
+    <p class="text"><b>根据使用频率自动调整列表项显示优先级</b>：是否自动记忆用户输入过的标识符，并在显示时自动将常用的标识符调整到列表的前面。</p>
+  </li>
+	<li>
+    <p class="text"><b>过滤重复的列表项</b>：相同的列表项，是否只保留一份而过滤掉其它。开启该选项会少量降低输入助手的性能。</p>
+  </li>
+  <li> 
+    <p class="text"><b>使用兼容方式取得当前标识符列表（较慢）</b>： 在某些 IDE 中，如果输入助手导致编译问题或 IDE 不稳定，可以尝试打开该选项。开启后输入助手弹出速度会有所下降。</p>
+  </li>
+</ul>
+</ul>
+<ul>
+  <li> 
+    <p class="text"><b>内容设置</b></p>
+  </li>
+  <ul>
+  
+  <li><b>符号提供者列表</b>：选择在列表中要显示哪些符号提供者提供的标识符。</li>
+	<li><b>符号类型设置</b>：选择需要在列表中显示的符号类型。</li>
+  
+  </ul>
+  </ul>
+  <p class="text" align="center">
+	<img src="inputhelperconf2.png"></p>
+<ul>
+  <li> 
+    <p class="text"><b>符号列表</b>：显示自定义符号列表。</p>
+  </li>
+  <ul>
+  
+  <li><b>列表下拉框</b>：选择需要修改的列表。</li>
+  
+  <li><b>增加</b>：新增一项自定义符号，可以是普通的标识符、编译指示字、注释或模板等。</li>
+	<li><b>副本</b>：根据当前选择的符号生成一份复本。</li>
+	<li><b>删除</b>：删除当前选择的符号。</li>
+	<li><b>编辑</b>：修改当前选择的符号，如下图所示。</li>
+	<li><b>默认</b>：恢复当前列表内容为默认值。</li>
+	<li><b>导入</b>：从符号定义文件中导入符号到当前列表，可以选择替换或追加模式。</li>
+	<li><b>导出</b>：将当前符号列表导出到符号定义文件中。</li>
+  
+  </ul>
+  </ul>
+  <ul>
+  <li>
+    <p class="text"><b>代码模板</b>：编辑当前符号使用的代码模板，只有当符号类型为 
+	&quot;Comment&quot; 或 &quot;Template&quot; 时才有效。</p>
+  </li>
+  <ul>
+  
+  <li><b>插入宏</b>：在当前位置插入一个预定义宏，点击后弹出宏列表菜单项。</li>
+	<li><b>用户宏</b>：在当前位置插入一个用户定义宏，包括用户宏的模板在输出时会弹出对话框，由用户输入宏的值。</li>
+	<li><b>光标</b>：在当前位置插件光标标志，即 &quot;|&quot; 
+	字符，如果有多个光标，只有第一个有效。</li>
+	<li><b>清空</b>：清空模板内容。</li>
+  
+  </ul>
+  </ul>
+<ul>
+  <li>
+	<p class="text"><b>确定</b>：保存当前设置。</p></li>
+	<li>
+	<p class="text"><b>取消</b>：放弃当前设置。</p></li>
+  </ul>
+<ul>
+  <li> 
+    <p class="text"><b>帮助</b>：显示帮助信息。</p>
+  </li>
+</ul>
+<p class="text" align="left">　</p>
+<p class="text" align="left"><b>编辑自定义符号</b></p>
+<p class="text" align="left">在增加或编辑符号时，显示对话框如下图所示：</p>
+<p class="text" align="center">
+<img src="inputhelperedit.png"></p>
+<ul>
+	<li>
+	<p class="text" align="left"><b>名称</b>：符号的名称，用于输入符号的字符串。可以是普通的标识符，也可以用 
+	//xxx 或 {$xx 等表示注释或编译指示字的特殊符号。</p></li>
+	<li>
+	<p class="text" align="left"><b>类型</b>：自定义符号的类型。</p></li>
+	<li>
+	<p class="text" align="left"><b>描述</b>：符号的说明，显示在自动输入列表中。</p></li>
+	<li>
+	<p class="text" align="left"><b>优先级</b>：在自动输入列表中符号的位置，值越小，显示的位置越靠上。</p></li>
+	<li>
+	<p class="text" align="left"><b>多行文本模板在输出时自动缩进</b>：如果选择，表示在输出模板时，多行文本的每一行都按当前位置自动缩进。</p>
+	</li>
+	<li>
+	<p class="text" align="left"><b>即使当前输入完成匹配也显示列表</b>：对该符号忽略“<b>智能判断是否需要弹出助手</b>”的设置。</p>
+	</li>
+</ul>
+<p class="title" align="left">　<p class="title" align="left">相关主题
+<p class="text" align="left"> <a href="formdesigner.htm">窗体设计器扩展专家</a>
+<p class="text" align="left"> <a href="palette.htm">IDE 主窗体扩展专家</a>
+<p class="text" align="left"> <a href="cpuwin.htm">CPU 窗口扩展专家</a>
+<p class="text" align="left"> <a href="objinspector.htm">对象查看器扩展专家</a><p class="text" align="left">
+<p class="text" align="left"> <a href="wintoproller.htm">窗口置顶与折叠扩展专家</a><p class="text" align="left">
+<a href="../cnpack/index.htm">关于 IDE 专家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版权所有 2001-2009 CnPack 开发组</a></p>
+</body>
+</html>

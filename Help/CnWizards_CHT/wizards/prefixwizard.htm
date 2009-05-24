@@ -1,0 +1,260 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>元件首碼專家</title>
+<meta http-equiv="Content-Type" content="text/html; charset=big5">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">組件前綴專家</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">組件前綴專家</p>
+<p class="text" align="left">
+該專家可以根據標準的組件前綴對窗體上的組件進行更名，支持 Delphi/C++Builder。</p>
+<p class="text" align="left">
+組件更名支持自動更名、提示更名、手動更名三種方式，用戶可根據需要調整使用。</p>
+<p class="text" align="left">
+　</p>
+<p class="title">組件更名提示</p>
+<p class="text" align="left">
+在默認的設置下，當用戶在窗體上放置一個新的組件或者為已有組件重命名時，組件前綴專家會自動檢查標準的組件前綴與當前組件名，對不符合規範的組件，將彈出對話框請求用戶重命名。</p>
+<p class="text" align="left">
+如果用戶在窗體上放置了一個未定義前綴的組件，將彈出以下對話框，如下圖所示：</p>
+<p class="text" align="center">
+<img src="prefixdefine.png"></p>
+<p class="text" align="left">
+此時用戶可輸入該組件的前綴名。</p>
+<ul>
+  <li>
+<p class="text" align="left">
+<b>忽略該類型的組件</b>：如果選中該項，點擊「<b>確定</b>」或「<b>取消</b>」後，所有該類型的組件以後都將被忽略掉，不再受前綴命名的約束。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>以後不再詢問</b>：如果選中該項，以後發現未定義前綴的組件時，不再彈出對話框要求用戶修改，直接忽略。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>確定</b>：確定對組件前綴的定義或修改。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>取消</b>：取消對組件前綴的定義或修改。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>幫助</b>：顯示幫助信息。</p>
+  </li>
+</ul>
+<p class="text">
+當組件前綴被正確地定義時，專家如果發現新創建的組件或更名後的組件，其前綴不符合組件前綴標準，將彈出更名對話框，如下圖所示：</p>
+<p class="text" align="center">
+<img src="prefixedit.png"></p>
+<p class="text" align="left">
+此時用戶可輸入新的組件名。</p>
+<ul>
+  <li>
+<p class="text" align="left">
+<b>忽略該類型的組件</b>：如果選中該項，點擊「<b>確定</b>」或「<b>取消</b>」後，所有該類型的組件以後都將被忽略掉，不再受前綴命名的約束。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>對所有組件不再詢問</b>：如果選中該項，以後所有的組件更名都自動在後台進行，不再彈出對話框要求用戶修改。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>修改前綴</b>：點擊該按鈕，彈出「修改組件前綴」對話框，對當前組件的前綴進行修改。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>組件類按鈕</b>：設置組件名類去掉 T 前綴為控件名稱。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>確定</b>：確定對組件名稱的修改。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>取消</b>：取消對組件名稱的修改。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>幫助</b>：顯示幫助信息。</p>
+  </li>
+</ul>
+<p class="title">　</p>
+<p class="title">手動更名操作</p>
+<p class="text" align="left">
+用戶在 IDE 主菜單中，點擊 CnPack 菜單下的「組件前綴專家」，將彈出選擇對話框，如下圖所示：</p>
+<p class="text" align="center">
+<img src="prefixexe.png"></p>
+<ul>
+  <li>
+<p class="text" align="left">
+<b>需要進行前綴處理的內容</b></p>
+  </li>
+  <ul>
+	<li>
+<p class="text" align="left">
+<b>當前選擇的組件</b>：如果當前選擇的組件列表不為空，該選項有效。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>當前窗體上的所有組件</b>：如果當前編輯的對象為窗體，該選項有效。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>當前打開的所有窗體上的組件</b>：設定要處理的範圍為當前 IDE 中所有打開的窗體上的所有組件。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>當前工程所有窗體上的組件</b>：設定要處理的範圍為當前工程中所有窗體上的所有組件。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>當前工程組所有工程所有窗體上的組件</b>：設定要處理的範圍為當前工程組中所有窗體上的組件。</p>
+  </li>
+  </ul>
+  <li>
+<p class="text" align="left">
+<span lang="zh-cn"><b>組件列表內容</b></span></p>
+  </li>
+  <ul>
+	<li>
+<p class="text" align="left">
+<b>前綴不正確的組件</b>：只查找並顯示處理內容中前綴不正確的組件。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>前綴不正確的組件及前綴加數字形式的組件</b>：查找並顯示處理內容中前綴不正確的組件，以及自動生成的帶數字的無意義名稱組件，常用於批量命名組件。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>所有組件</b>：查找並顯示處理內容中所有組件，包括被忽略的組件，可用於瀏覽及批量命名組件。</p>
+  </li>
+  </ul>
+  <li>
+<p class="text" align="left">
+<b>處理</b>：分析所選擇的內容，如果存在需要更名的組件，顯示組件批量更名窗口。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>設置</b>：顯示設置窗口。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>關閉</b>：關閉對話框。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>幫助</b>：顯示幫助信息。</p>
+  </li>
+</ul>
+<p class="text" align="left">
+用戶點擊「<b>確定</b>」後，如果存在需要更名的組件，將彈出以下對話框：</p>
+<p class="text" align="center">
+<img src="prefixcomp.png"></p>
+<p class="text" align="left">
+該對話框中顯示了所有需要更名的組件，用戶可以選擇一項，並在上方輸入新的組件名，使用回車鍵或「修改」按鈕來更新。修改完成後，列表框自動跳轉到下一條記錄。</p>
+<p class="text" align="left">
+提示：在編輯框中可以使用 Up、Down、Home<span lang="zh-cn">、</span>PgUp<span lang="zh-cn">、</span>PgDown<span lang="zh-cn">、</span>End<span lang="zh-cn"> 
+等光標鍵來移動當前項。</span></p>
+<ul>
+  <li>
+<p class="text" align="left">
+<b>修改</b>：修改當前選擇的組件的新組件名。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>確定</b>：執行組件更名操作。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>取消</b>：取消當前操作。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>幫助</b>：顯示幫助信息。</p>
+  </li>
+</ul>
+<p class="text" align="left">
+如果不想修改當前的組件名，可以將組件前面的選擇框取消選擇，或者將新組件名設為空。</p>
+<p class="text" align="left">
+點擊列表上方的欄頭，可以按該欄進行排序。</p>
+<p class="text" align="left">
+　</p>
+<p class="title">
+設置界面</p>
+<p class="text" align="left">
+該專家的設置界面如下圖所示：</p>
+<p class="text" align="center"> <img src="prefixconfig.png"></p>
+<ul>
+  <li> 
+    <p class="text"><b>顯示設置</b></p>
+    <ul>
+      <li> 
+        <p class="text"><b>允許自動修改組件前綴</b>：是否允許專家在新增組件或組件更名時自動修改組件前綴。如果不選擇，以下功能都將關閉。</p>
+      </li>
+      <li> 
+        <p class="text"><b>新增組件或修改組件名稱時彈出對話框</b>： 是否允許組件更名時彈出對話框，由用戶輸入新的組件名。如果不選擇，專家將使用默認的方式為組件命名。</p>
+      </li>
+      <li> 
+        <p class="text"><b>提示輸入未定義前綴的組件前綴名</b>：當專家發現未定義前綴的組件時，是否彈出對話框要求用戶定義組件前綴。</p>
+      </li>
+      <li> 
+        <p class="text"><b>忽略使用組件類名命名的組件</b>：有時候用戶可能會使用組件類名（去掉字母 T）來為組件命名，如 MainMenu，該選項允許專家忽略這樣的組件。</p>
+      </li>
+      <li> 
+        <p class="text"><b>自動更名時替換原組件前綴</b>：在根據組件前綴計算新組件名時，是否去掉原組件名中前面的幾個小寫字母前綴。</p>
+      </li>
+      <li class="text"> 
+        <p><b>初次更名時在組件名稱前綴後添加下劃線</b>：在改名時，是否在前綴後加下劃線，如btn_1。</p>
+      </li>
+      <li><p><b>前綴區分大小寫</b>：判斷控件名是否有規定的前綴時，是否大小寫敏感。</p></li>
+      <li><p><b>重命名組件時允許參照關聯的 Action 的名稱</b>：在自動對組件重命名時，如果該組件有關聯的 Action 並且 Action 的組件名有意義，則使用組件前綴和 Action 名稱去掉前綴後的名稱作為該組件的名稱。</p></li>
+      <li><p><b>當組件關聯 Action 時自動重命名</b>：如果組件前綴不正確或者組件名稱為前綴加數字的形式，當組件的 Action 屬性改變時，自動根據 Action 的名稱來重命名組件。</p></li>
+      <li><p><b>重命名組件時允許參照 DataField 屬性的內容</b>：在自動對組件重命名時，如果該組件有 DataField 屬性並且屬性值有意義，則使用組件前綴和 DataField 屬性值作為該組件的名稱。</p></li>
+      <li><p><b>當組件的 DataField 屬性變更時自動重命名</b>：如果組件前綴不正確或者組件名稱為前綴加數字的形式，當組件的 DataField 屬性值改變的時候，自動根據 DataField 屬性值來重命名組件。</p></li>
+    </ul>
+  </li>
+  <li> 
+    <p class="text"> <b>組件前綴設置</b></p>
+    <ul>
+      <li>
+        <p class="text"><b>修改</b>：修改當前選擇的組件的前綴。</p>
+      </li>
+      <li>
+        <p class="text"><b>導入</b>：從數據文件中導入組件前綴定義。</p>
+      </li>
+      <li>
+        <p class="text"><b>導出</b>：將當前的組件前綴定義導出到指定的數據文件中。</p>
+      </li>
+    </ul>
+  </li>
+  <li> 
+    <p class="text"> <b>確定</b>：保存當前的組件前綴列表及設置。</p>
+  </li>
+  <li> 
+    <p class="text"> <b>取消</b>：取消當前操作。</p>
+  </li>
+  <li> 
+    <p class="text"> <b>幫助</b>：顯示幫助信息。</p>
+  </li>
+</ul>
+<p class="text" align="left">註：如果組件前面的檢測框未被選擇，專家在處理前綴命名時會忽略掉該類型的組件。<p class="title" align="left">　<p class="title" align="left">相關主題<p class="text" align="left">
+<a href="wizards.htm">IDE 專家基本操作</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">IDE 專家設置</a><p class="text" align="left">
+<a href="../cnpack/index.htm">關於 IDE 專家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版權所有 2001-2009 CnPack 開發組</a></p>
+</body>
+</html>

@@ -1,0 +1,16 @@
+Windows
+Messages
+SysUtils
+Variants
+Classes
+Graphics
+Controls
+Forms
+Dialogs
+Types
+QTypes
+QGraphics
+QControls
+QForms
+QDialogs
+QStdCtrls

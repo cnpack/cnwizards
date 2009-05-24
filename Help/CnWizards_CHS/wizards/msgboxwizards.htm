@@ -1,0 +1,98 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>MessageBox 设计器</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">MessageBox 设计器</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">MessageBox 设计器</p>
+<p class="text">该设计器用于可视化产生 MessageBox 调用代码，支持 Delphi/C++Builder。当 IDE 
+当前编辑对象为代码编辑器时，该工具可用。</p>
+<p class="text">使用前请先将光标移动到需要插入代码的正确位置，执行专家后显示如图：</p>
+<p class="text" align="center">
+<img src="msgboxwizard.png"></p>
+<ul>
+  <li>
+  <p class="text" align="left"><b>显示图标</b>：在消息对话框中需要显示的图标。</li>
+  <li>
+  <p class="text" align="left"><b>对话框标题</b>：显示对话框的标题，如果选择了“标题为变量名”，输入框的内容将作为变量使用。下拉列表可选择常用的变量名和标题。</li>
+  <li>
+  <p class="text" align="left"><b>文本信息</b>：对话框显示的文本内容，支持多行文本，如果选择了“文本信息为变量名”，文本框的内容将作为变量使用。</li>
+  <li>
+  <p class="text" align="left"><b>默认按钮</b>：对话框显示时默认获得焦点的按钮序号。</li>
+  <li>
+  <p class="text" align="left"><b>扩展风格</b>：设置窗口是否最上层显示。</li>
+  <li>
+  <p class="text" align="left"><b>对话框按钮</b>：在对话框中显示的按钮组合。</li>
+  <li>
+  <p class="text" align="left"><b>函数返回值</b>：需要处理的对话框返回值，根据选择的返回值数据，设计器会自动生成 
+  if、if...else...、case 等代码。</li>
+  <li>
+  <p class="text" align="left"><b>调用方式</b>：设置对话框函数的类型。本专家同时支持 MessageBox 与MessageDlg 两类函数。</li>
+  <li>
+  <p class="text" align="left"><b>使用 Handle 为父句柄</b>：如果选择，将使用 Handle 为 MessageBox API 的第一个参数，反之为 0。</li>
+  <li>
+  <p class="text" align="left"><b>预览</b>：根据用户设置的内容预览对话框。</li>
+  <li>
+  <p class="text" align="left"><b>用户模板</b>：用户可以将当前输入的内容保存为用户模板，以后可以重新调用。“自动保存模板”为最后一次成功执行时的内容。</li>
+</ul>
+<p class="text" align="left">用户确认后设计器会在当前源代码的光标处插入 MessageBox 
+函数代码，支持自动换行、缩进、自动生成辅助代码，同时光标定位在代码输入位置。</p>
+<p class="text" align="left">　</p>
+<p class="title">参数设置</p>
+<p class="text">MessageBox 设计器的设置界面如图：</p>
+<p class="text" align="center">
+<img src="msgboxwizardconfig.png"></p>
+<ul>
+  <li>
+<p class="text" align="left">
+<b>换行符</b>：设置生成代码中 Delphi 和 C++Builder 代码的换行符。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>Delphi 代码设置</b>：设置 Delphi 生成代码的缩进、自动换行，以及字符串是否使用 PChar 类型转换<span lang="zh-cn">，是否为 
+Format 字符串生成 Format 代码</span>。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>C++Builder 代码设置</b>：设置 C++Builder 生成代码的缩进、自动换行，以及 &quot;{&quot; 符是否放在行末。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>代码自动换行方式</b>：如果设置为根据换行宽度进行换行处理，设计器会将文本内容重新组合，否则按原文本内容进行换行。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<span lang="zh-cn"><b>自动装载最后一次的对话框设置内容</b>：每次打开对话框时自动装载最后一次保存的模板内容。</span></p>
+  </li>
+  <li>
+<p class="text" align="left">
+<span lang="zh-cn"><b>导出模板</b>：将当前的用户模板导出为数据文件。</span></p>
+  </li>
+  <li>
+<p class="text" align="left">
+<span lang="zh-cn"><b>导入模板</b>：从数据文件中导入用户模板。</span></p>
+  </li>
+</ul>
+<p class="text" align="left">
+　</p>
+<p class="title" align="left">相关主题<p class="text" align="left">
+<a href="wizards.htm">IDE 专家基本操作</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">IDE 专家设置</a><p class="text" align="left">
+<a href="../cnpack/index.htm">关于 IDE 专家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版权所有 2001-2009 CnPack 开发组</a></p>
+</body>
+</html>

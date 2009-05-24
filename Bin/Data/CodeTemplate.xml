@@ -1,0 +1,286 @@
+<Symbols PropFormat="node">
+  <Item>
+    <Name>//a</Name>
+    <Kind>skComment</Kind>
+    <Description>// Added by</Description>
+    <Text>// Added by %User% %DateTime%</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>//d</Name>
+    <Kind>skComment</Kind>
+    <Description>// DateTime</Description>
+    <Text>// %DateTime%</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>//l</Name>
+    <Kind>skComment</Kind>
+    <Description>// Deleted by</Description>
+    <Text>// Deleted by %User% %DateTime%</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>//m</Name>
+    <Kind>skComment</Kind>
+    <Description>// Modified by</Description>
+    <Text>// Modified by %User% %DateTime%</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>//t</Name>
+    <Kind>skComment</Kind>
+    <Description>{ TODO }</Description>
+    <Text>{ TODO -o%User% -c : | %DateTime% }</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>be</Name>
+    <Kind>skTemplate</Kind>
+    <Description>begin..end;</Description>
+    <Text>begin
+  |
+end;</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>bee</Name>
+    <Kind>skTemplate</Kind>
+    <Description>begin..end else;</Description>
+    <Text>begin
+  |
+end
+else</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>beebe</Name>
+    <Kind>skTemplate</Kind>
+    <Description>begin..end else begin..end;</Description>
+    <Text>begin
+  |
+end
+else
+begin
+
+end;</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>co</Name>
+    <Kind>skTemplate</Kind>
+    <Description>constructor Create();</Description>
+    <Text>constructor Create(|);</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>cob</Name>
+    <Kind>skTemplate</Kind>
+    <Description>constructor Create(); begin..end;</Description>
+    <Text>constructor Create(|);
+begin
+  
+end;</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>coc</Name>
+    <Kind>skTemplate</Kind>
+    <Description>constructor Create(AOwner); override;</Description>
+    <Text>constructor Create(AOwner: TComponent); override;</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>cocb</Name>
+    <Kind>skTemplate</Kind>
+    <Description>constructor Create(AOwner); begin..end;</Description>
+    <Text>constructor Create(AOwner: TComponent);
+begin
+  |
+end;</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>de</Name>
+    <Kind>skTemplate</Kind>
+    <Description>destructor Destroy; override;</Description>
+    <Text>destructor Destroy; override;</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>deb</Name>
+    <Kind>skTemplate</Kind>
+    <Description>destructor Destroy; begin..end;</Description>
+    <Text>destructor Destroy;
+begin
+  |
+end;</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>fu</Name>
+    <Kind>skTemplate</Kind>
+    <Description>function (): ;</Description>
+    <Text>function |(): ;</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>fub</Name>
+    <Kind>skTemplate</Kind>
+    <Description>function begin..end;</Description>
+    <Text>function |(): ;
+begin
+  
+end;</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>fubm</Name>
+    <Kind>skTemplate</Kind>
+    <Description>function %%(%%): %%; begin..end;</Description>
+    <Text>function %Name%(%Params%): %ResType%;
+begin
+  |
+end;</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>fum</Name>
+    <Kind>skTemplate</Kind>
+    <Description>function %%(%%): %%;</Description>
+    <Text>function %Name%(%Params%): %ResType%;</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>pr</Name>
+    <Kind>skTemplate</Kind>
+    <Description>procedure ();</Description>
+    <Text>procedure |();</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>prb</Name>
+    <Kind>skTemplate</Kind>
+    <Description>procedure (); begin..end;</Description>
+    <Text>procedure |();
+begin
+  
+end;</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>prbm</Name>
+    <Kind>skTemplate</Kind>
+    <Description>procedure %%(%%); begin..end;</Description>
+    <Text>procedure %Name%(%Params%);
+begin
+  |
+end;</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>prm</Name>
+    <Kind>skTemplate</Kind>
+    <Description>procedure %%(%%);</Description>
+    <Text>procedure %Name%(%Params%);</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>pro</Name>
+    <Kind>skTemplate</Kind>
+    <Description>property : read F write Set;</Description>
+    <Text>property |:  read F write Set;</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>prof</Name>
+    <Kind>skTemplate</Kind>
+    <Description>property : read F write F;</Description>
+    <Text>property |:  read F write F;</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>profm</Name>
+    <Kind>skTemplate</Kind>
+    <Description>property %%: %% read F%% write F%%;</Description>
+    <Text>property %Name%: %Type% read F%Name% write F%Name%;</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>prom</Name>
+    <Kind>skTemplate</Kind>
+    <Description>property %%: %% read F%% write Set%%;</Description>
+    <Text>property %Name%: %Type% read F%Name% write Set%Name%;</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>prr</Name>
+    <Kind>skTemplate</Kind>
+    <Description>property : read F;</Description>
+    <Text>property |:  read F;</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>prrm</Name>
+    <Kind>skTemplate</Kind>
+    <Description>property %%: %% read F%%;</Description>
+    <Text>property %Name%: %Type% read F%Name%;</Text>
+    <ScopeRate>0</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+</Symbols>

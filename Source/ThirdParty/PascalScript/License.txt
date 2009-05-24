@@ -1,0 +1,26 @@
+============================================
+ RemObjects Pascal Script License Agreement
+============================================
+
+This is the license agreement for Pascal Script ("Software"). 
+
+BY INSTALLING, COPYING, OR OTHERWISE USING THE SOFTWARE, YOU AGREE TO BE BOUND BY ALL OF THE TERMS AND CONDITIONS OF THE LICENSE AGREEMENT. 
+
+This Software is owned by RemObjects Software, Inc. and is protected by copyright law and international copyright treaty; therefore, you must treat it as copyrighted material. You have the right to use the Software as set forth in this License Agreement.
+
+You are not obtaining title or copyright on the Software, you are obtaining the permission to use, alter and redistribute it, subject to the following restrictions:
+
+1. The origin of this Software must not be misrepresented; you must not claim that you wrote the original Software.
+
+2. Altered source versions must be clearly marked as such, and must not assert to be the original Software.
+
+3. You must have a visible line in your program aboutbox or documentation stating that it was developed using RemObjects Pascal Script. You also must mention that RemObjects Pascal Script can be downloaded for free at "http://www.remobjects.com?ps".
+
+4. This Agreement may not be removed or altered from any source distribution.
+
+
+Disclaimer
+
+THIS SOFTWARE IS PROVIDED TO YOU "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED INCLUDING BUT NOT LIMITED TO THE APPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE. YOU ASSUME THE ENTIRE RISK AS TO THE ACCURACY AND THE USE OF THE SOFTWARE AND ALL OTHER RISK ARISING OUT OF THE USE OR PERFORMANCE OF THIS SOFTWARE AND DOCUMENTATION. 
+
+RemObjects Software, Inc. SHALL NOT BE LIABLE FOR ANY DAMAGES WHATSOEVER ARISING OUT OF THE USE OF OR INABILITY TO USE THIS SOFTWARE, EVEN IF RemObjects Software, Inc. HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL RemObjects Software, Inc. BE LIABLE FOR ANY CONSEQUENTIAL, INCIDENTAL, DIRECT, INDIRECT, SPECIAL, PUNITIVE, OR OTHER DAMAGES WHATSOEVER, INCLUDING BUT NOT LIMITED TO DAMAGES OR LOSS OF BUSINESS PROFITS, BUSINESS INTERRUPTION, LOSS OF BUSINESS INFORMATION, OR OTHER PECUNIARY LOSS, EVEN IF RemObjects Software, Inc. HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. BECAUSE SOME STATES/JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF LIABILITY FOR CONSEQUENTIAL OR INCIDENTAL DAMAGES, THE ABOVE LIMITATION MAY NOT APPLY.

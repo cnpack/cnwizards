@@ -1,0 +1,121 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>属性修改器</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">属性修改器</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">属性修改器</p>
+<p class="text" align="left"> 该专家用于在窗体上通过一定的自定义规则来批量修改一些控件的属性，支持一些简单的条件判断规则，并支持子控件属性修改。修改对象可以是当前窗体上的所有控件（包括窗体本身），也可以是当前工程或工程组中的所有窗体。</p>
+<p class="text" align="left"> 属性修改器主界面如图所示：</p>
+  
+<p align="center"> <img src="corpropmain.png"></p>
+<ul>
+  <li> 
+    <p class="text"><b>当前窗体：</b>对当前窗体本身、当前窗体上所有的控件及子控件进行处理。</p>
+  </li>
+  <li> 
+    <p class="text"><b>所有打开的窗体：</b>对所有打开的窗体本身以及其上的所有控件及子控件进行处理。</p>
+  </li>
+  <li> 
+    <p class="text"><b>当前工程所有窗体：</b>对当前工程中所有窗体以及其上所有的控件及子控件进行处理。</p>
+  </li>
+  <li> 
+    <p class="text"><b>当前工程组所有窗体：</b>对当前工程组中所有窗体上所有的控件及子控件进行处理。</p>
+  </li>
+  <li> 
+    <p class="text"><b>查找修正：</b>按照现存规则对待处理对象进行查找修改处理。</p>
+  </li>
+  <li> 
+    <p class="text"><b>全部确认：</b>全部确认修改结果中的“需要确认”项。</p>
+  </li>
+  <li>
+    <p class="text"><b>撤销修改：</b>撤销已经进行的选中条目的修改。</p>
+  </li>
+  <li> 
+    <p class="text"><b>设置：</b>可以自定义简单的组件属性修改的规则。</p>
+  </li>
+  <li> 
+    <p class="text"><b>关闭：</b>关闭属性修改器主窗体。</p>
+  </li>
+</ul>
+  
+<p class="text" align="left">当点击查找按钮后，属性修改器专家会搜寻所有待搜寻的组件，如果遇见符合规则的组件属性并且规则中的处理动作是“自动修改”，则会自动修改该属性并显示在下面的列表框中，当规则中的处理动作是“提示”时，用户需要右键点击列表框中选中的条目，在弹出的菜单中选择“确认修改”才会修改该属性。右键菜单中的“定位该控件”可以在窗体上选中该组件。“撤销修改”菜单则用来撤销已经进行的改动。</p>
+<p class="title" align="left">参数设置</p>
+<p class="text" align="left">当点击设置按钮时，系统会弹出如下图的规则设置对话框：</p>
+<p class="text" align="center">
+<img src="corpropcfg.png"></p>
+  <p class="text" align="left"> </p>
+  
+<ul>
+  <li> 
+    <p class="text"><b>添加：</b>添加新的属性修改规则。</p>
+  </li>
+  <li> 
+    <p class="text"><b>编辑：</b>编辑规则列表框中选中的某条规则。</p>
+  </li>
+  <li> 
+    <p class="text"><b>删除：</b>删除规则列表框中选中的某条规则。</p>
+  </li>
+  <li> 
+    <p class="text"><b>导入：</b>从外部文件中导入规则，导入的规则会覆盖现存的规则。</p>
+  </li>
+  <li> 
+    <p class="text"><b>导出：</b>将列表框中的所有规则导出保存成外部文件。</p>
+  </li>
+</ul>
+<p class="text">　其中，规则列表中左边的复选框表示该条规则在处理中是否有效。</p>
+<p class="title">具体规则设置</p>
+  
+<p class="text">当点击添加或编辑按钮时，系统会弹出规则编辑界面，如下图所示：</p>
+  <p align="center">
+    <img src="corproprules.png"></p>
+  
+<p class="text" align="left">一条属性修改规则可以这样直观地理解：当某个组件类的属性的属性值满足条件时，则可以修改为自定义的新属性值，当然根据动作的不同可以自动修改或者等待用户确认后修改。</p>
+<ul>
+  <p>&nbsp;</p>
+  <li> 
+    <p class="text"><b>组件类：</b>需要指定的组件类名，可以从包含了所有组件类名的下拉列表中选择，不能为空。</p>
+  </li>
+  <li> 
+    <p class="text"><b>属性：</b>需要指定的该组件类的属性名，不能为空。</p>
+  </li>
+  <li> 
+    <p class="text"><b>条件：</b>属性名和属性值需要满足的条件的运算符。</p>
+  </li>
+  <li> 
+    <p class="text"><b>属性值：</b>用来和属性名比较的值。</p>
+  </li>
+  <li> 
+    <p class="text"><b>动作：</b>当满足条件时，应该如何处理，可以选择“自动更正”或“提示”。</p>
+  </li>
+  <li> 
+    <p class="text"><b>修改为：</b>满足条件时修改而成的目的值。</p>
+  </li>
+  <li>
+    <p class="text"><b>规则有效：</b>选中时表示改规则在查找修改过程中有效，否则不起作用。</p>
+  </li>
+</ul>
+
+<p class="title" align="left">　<p class="title" align="left">相关主题 
+  <p class="text" align="left"> <a href="wizards.htm">IDE 专家基本操作</a> 
+  <p class="text" align="left"> <a href="../options/wizconfig.htm">IDE 专家设置</a> 
+  <p class="text" align="left"> <a href="../cnpack/index.htm">关于 IDE 专家包</a> 
+  <p class="text" align="left">　 
+  <hr>
+  <p class="text" align="center"><a href="http://www.cnpack.org">(C)版权所有 2001-2009 CnPack 开发组</a></p>
+</body>
+</html>

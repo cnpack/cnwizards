@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>CnDebug 使用說明</title>
+<meta http-equiv="Content-Type" content="text/html; charset=big5">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">CnDebug 使用說明</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="text">歡迎您使用 CnPack 開發組開發的 CnDebug/CnDebugViewer 日誌記錄型調試信息輸出查看工具。CnDebug 是 Windows  x86 平台下以源碼方式提供給開發者使用的調試信息輸出接口單元，目前只有 Object Pascal 形式的實現（CnDebug.pas），可在 Delphi 和 C++Builder 下使用。</p>
+<p class="text">　</p>
+<p class="title" align="left">CnDebug 的適用場合</p>
+<p class="text">在某些源碼級斷點單步調試不適用的情況下，日誌記錄型調試便有其用武之地了。很多朋友經常在代碼中的一定位置上使用 MessageBox 等函數來顯示運行期的某些值，這就是一種基本的日誌型調試手段，只不過使用彈出框顯示信息在某些場合下有局限性，比如在涉及到窗體重畫或比較複雜的用戶界面消息處理的代碼時，多餘的提示框反倒會產生多餘的消息，給程序流程帶來影響。這種情況下，後台日誌記錄型調試就顯得更適合了。</p>
+<p class="text">日誌記錄型調試會在被調試程序中使用特定的代碼來輸出標誌流程或調試值的信息，然後通過另外的工具來接受信息並統統記錄在案，以備分析程序的運行期信息。Win32 平台本身便提供了類似的 API 函數 OutputDebugString，此函數可以在程序中輸出一個字符串到 Windows 的專用調試字串的存放緩衝區，如果程序在 IDE 的調試器下運行，那麼該字符串會被 Event log 窗口捕獲並顯示；單獨運行時則會被存在著的日誌記錄調試器（如 DebugView）所捕獲；如果什麼調試器都沒有，則石沉大海無消息。
+</p>
+<p class="text">OutputDebugString 固然方便，但也存在著一些缺點，如信息輸出單一，配套的記錄工具顯示的內容無層次區分、不易過濾分類查找等。CnDebug.pas 便是為了增強此項功能而開發的、功能更加強大的輸出信息接口單元。</p>
+
+<p class="text">　</p>
+<p class="title" align="left">CnDebugger 功能簡介</p>
+
+<p class="text" align="left">CnDebug.pas 提供了一全局對像 CnDebugger 用來控制並且輸出調試信息。CnDebugger 的各個方法提供了靈活的記錄方式，不僅僅能輸出簡要的字符串，還能自動轉換整數、浮點數、顏色值，並且能用 RTTI 來處理對象與組件以生成輸出的屬性總結、攔截 Exception 發生時的現場信息記錄等。</p>
+<p class="text" align="left">CnDebugger 正常情況下在 CnDebug.pas 單元 initialization 時創建，在finalization 時釋放。</p>
+<p class="text">　</p>
+<p class="title" align="left">CnDebugger 輸出信息內容</p>
+
+<p class="text" align="left">由於 CnDebugger 的輸出信息要在接收端進行分類過濾，因此每條輸出信息中並不只是簡單地包含一字符串，而是包括了以下多種內容：</p>
+<blockquote><ul>
+<li>
+<p class="text"><b>文字</b>：Msg，字符串格式，最大長度有限制。
+<li>
+</li>    
+<p class="text"><b>層次</b>：Level，一整數，作為過濾條件之用。用戶可自定義某條輸出信息的 Level。Level 按層次包容，譬如如果指定了內部過濾條件中的 Level 為 2，那麼小於等於 2 的 Level 的信息都能被輸出，大於 2 的則被屏蔽了。目前 Level 定為 0 到 3。默認是 3 也就是全部輸出。所以 Level 可以用來控制輸出信息的詳細程度。
+<li>
+</li>
+<p class="text"><b>類型</b>：MsgType，標識該信息的類型，是普通信息還是警告還是錯誤等。
+<li>
+</li>
+<p class="text"><b>標籤</b>：Tag，固定長度的字符串格式（目前最長 8 字節），用於單項過濾之用。輸出時如不指定，默認是空。
+</li>
+</ul>
+</blockquote>
+<p class="text" align="left">以上是對用戶開放的信息，有多種方法可用來指定上述內容。</p>
+<p class="text" align="left">此外，還有部分信息屬於 CnDebugger 內部生成的，不對用戶開放自定義的接口。它們包括：</p>
+<blockquote><ul>
+  <li>
+<p class="text"><b>縮進</b>：Indent，一整數，供接收端折疊優化顯示之用，主要用於 Enter 和 Leave 等系列方法。注意此信息和當前線程有關。</li>
+<p class="text">
+  <li><b>進程</b> <b>ID</b>：ProcessID，當前進程 ID。</li>
+<p class="text"><li><b>線程</b> <b>ID</b>：ThreadID，當前線程 ID。</li>
+</ul>
+</blockquote>
+<p class="text" align="left">用戶可不關心這幾項內容。</p>
+<p class="text">　</p>
+<p class="title" align="left">CnDebugger 輸出接口編譯期的使能與編譯條件的關係</p>
+
+<p class="text" align="left">CnDebugger 提供兩類輸出接口：Log 系列和 Trace 系列。兩類輸出接口基本上具有相同的參數和功能。所不同的在於，Log 系列功能只在 DEBUG 編譯條件被定義的時候有效，而 Trace 系列在普通情況下也有效。不過在 NDEBUG 定義的情況下兩者都無效。</p>
+<p class="text" align="left">以上寫成表達式就是：</p>
+<ul><blockquote>
+  <li>
+Log 有效 := IF<font color="#ff0000">N</font>DEF NDEBUG and IFDEF DEBUG
+  </li>
+  <li>
+Trace 有效 := IF<font color="#ff0000">N</font>DEF NDEBUG
+  </li>
+  </blockquote>
+</ul>
+
+<p class="text" align="left">Log 系列輸出接口僅在調試時 DEBUG 被定義的情況下參與編譯，適合用於產生比較詳細的記錄的場合；而 Trace 系列輸出接口在正式版發佈時默認也會被編譯入產品中，用於產生關鍵的調試記錄。同時，這兩類功能可在 NDEBUG 情況下方便地被全部禁用。</p>
+<p class="text">DEBUG 等編譯條件可在 Project Options 中設置。</p>
+
+<p class="text">　</p>
+<p class="title" align="left">CnDebugger 異常攔截機制</p>
+
+<p class="text">CnDebugger 可自動替應用程序安裝一異常攔截功能，當發生未捕捉的異常時，可捕捉下來並且記錄當時程序的運行期信息，如堆棧內容、帶調試信息編譯時的出錯代碼行數等。這裡，CnDebugger 採用的是 JCL 庫的運行期攔截機制，添加了 CnDebugger 自身的異常通知處理過程來記錄當時信息。打開此選項的編譯條件名為 USE_JCL。
+<p class="text">注意，打開 USE_JCL 編譯條件後，CnDebug.pas 需要 JCL 庫才能順利編譯，如果未安裝 JCL 庫，則需要從 JCL 庫中複製 CnDebug.pas 頭部註釋中列出的一批 JCL 單元後才能編譯。編譯時打開編譯選項 Include TD32 debug Info 或生成 MapFile 可在異常截獲時獲得更多信息。
+
+<p class="text">　</p>
+<p class="title" align="left">CnDebugger 的計時功能</p>
+<p class="text">CnDebugger 提供了 StartTimeMark 和 StopTimeMark 方法供用戶測量一段時間之用。其內部使用了 x86 CPU 提供的取 CPU 週期指令來進行比較精確的計時。用戶可以如此使用：
+</p>
+<pre class="text">
+   // 開始計時，1 表示新啟動的計時器號
+   StartTimeMark(1);  
+   // 做其他耗時操作
+ 
+   // 停止計時
+   StopTimeMark(1);
+</pre>
+<p class="text">這樣，在停止計時的時候，CnDebugger 會自動記錄並計算出期間的 CPU 週期數，把結果作為一條計時消息發送出去。CnDebugger 可同時啟動多個計時器實例，每個實例以不同的計時器號標識它。
+<p class="text">　</p>
+<p class="title" align="left">CnDebugger 其他功能與常見問題</p>
+<p class="text">CnDebugger 對像提供了 EvaluateObject 方法來在運行期彈出 Inspector 式樣的窗體來顯示一對象的RTTI信息，此功能需要定義編譯條件 SUPPORT_EVALUATE。</p>
+<p class="text">如果您的 IDE 不支持雙字節字符，那麼可能在編譯 CnDebug.pas 時會出現 IDE 將註釋中的中文字符判斷為非法字符從而無法編譯的現象，此時您可以使用專家包的刪除註釋功能，刪除全部註釋，或刪除擴展 ASCII 字符即可。</p>
+<p class="text">CnDebugger 的接口詳細說明文檔可參見我們網站的文檔中心的<a href="http://www.cnpack.org/showdetail.php?id=453">CnDebugger接口幫助文檔</a>。</p>
+<p class="text">　</p><p class="text" align="left">您在使用中如果有任何的問題或建議，請與我們聯繫：<a href="mailto:master@cnpack.org?subject=關於 CnPack IDE 專家包">master@cnpack.org</a>，開發組將盡力為您提供幫助！<p class="text" align="left">　<p class="title" align="left">相關主題<p class="text" align="left">
+<a href="cndebugviewer.htm">CnDebugViewer 使用說明</a><p class="text" align="left">
+<a href="../licenses/license.htm">CnPack 許可協議</a><p class="text" align="left">
+<a href="../cnpack/about.htm">關於 CnPack</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版權所有 2001-2009 CnPack 開發組</a></p>
+</body>
+</html>

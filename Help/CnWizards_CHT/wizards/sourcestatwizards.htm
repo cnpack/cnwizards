@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>源代碼統計專家</title>
+<meta http-equiv="Content-Type" content="text/html; charset=big5">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4" id="table1">
+  <tr>
+    <td class="head" height="16">源代碼統計專家</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">源代碼統計專家</p>
+<p class="text" align="left">
+源代碼統計專家能對 Delphi 以及 C++Builder 環境下的 Pascal 代碼或 C++ 代碼進行統計並輸出統計結果。它提供了以下幾種統計方式：</p>
+
+<ul>
+  <li>
+<p class="text" align="left">
+直接統計打開的當前原始檔案。</p>
+
+  </li>
+  <li>
+<p class="text" align="left">
+統計當前工程組中包含的所有原始檔案。</p>
+
+  </li>
+  <li>
+<p class="text" align="left">
+統計當前工程中包含的所有原始檔案。</p>
+
+  </li>
+  <li>
+<p class="text" align="left">
+當前在IDE中打開的所有原始檔案。</p>
+
+  </li>
+  <li>
+<p class="text" align="left">
+按指定目錄和指定檔副檔名搜索所有檔並進行統計。</p>
+
+  </li>
+</ul>
+<p class="text" align="left">
+當單擊“CnPack”功能表中的“源代碼統計...”功能表項時，會彈出下圖所示的視窗詢問進行統計的方式：</p>
+
+<p class="text" align="center">
+<img src="SourceStat.png"></p>
+
+<p class="text" align="left">選擇統計方式後，源代碼統計專家能夠對被統計檔進行搜索，並統計出以下結果：</p>
+<ul>
+  <li>對於單個源代碼檔，可以統計其位元組數、行數、注釋行數、代碼行數、有效行數、空行數、代碼位元組數、注釋位元組數、注釋塊數等。</li>
+  <li> 對於工程組與工程，源代碼統計專家能統計出該工程組或工程的所有檔的以上統計結果。</li>
+  <li> Delphi 的工程組檔以及 C++Builder 的工程檔、工程組檔因為不是有效的源代碼檔，因此不參與統計。</li>
+</ul>
+<p class="text" align="left">　</p>
+<p class="text" align="left">源代碼統計專家介面如下圖所示：</p>
+<p class="text" align="center">
+<img src="SourceStatResult.png"></p>
+
+<p class="text" align="left">狀態欄中顯示的是當前參與統計的所有檔的數目、位元組總數和有效行總數等。其中，有效行數指源代碼檔中去除空行之外所餘下的包含有效代碼或者注釋的行數，如果某一行既有代碼又有注釋，則同時計入代碼行和注釋行。</p>
+
+<p class="text" align="left">另外，Pascal 代碼中的編譯指令 {$...} 被計入注釋，C++代碼中的編譯指令 #...
+被計入代碼。</p>
+
+<p class="title" align="left">　</p>
+
+<p class="title" align="left">功能介紹</p>
+
+<p class="text" align="left">源代碼統計專家視窗中提供了一系列功能用來進行統計與處理統計結果，可以彈出詢問視窗進行再一次統計，也可以直接對當前打開的原始檔案、當前工程組中包含的所有原始檔案、當前工程中包含的所有原始檔案，或當前在IDE中打開的所有原始檔案進行新的統計。</p>
+
+<p class="text" align="left">被統計檔可以通過雙擊的方式在 IDE 中打開。單個統計結果或所有統計可以保存成檔，包括 TXT 文本格式，逗號分割的 CSV 文本格式，Tab 分割的 TSV
+文本格式等。</p>
+
+<p class="text" align="left">當被統計檔過多時，還可以利用檔案名查找的方式來迅速定位需要尋找的被統計檔。</p>
+<p class="title">　</p>
+<p class="title">相關主題</p>
+<p class="text" align="left">
+<a href="wizards.htm">IDE 專家基本操作</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">IDE 專家設置</a><p class="text" align="left">
+<a href="../cnpack/index.htm">關於 IDE 專家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版權所有 2001-2009 CnPack 開發組</a></p>
+</body>
+</html>

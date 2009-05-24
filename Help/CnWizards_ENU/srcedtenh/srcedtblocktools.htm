@@ -1,0 +1,296 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Selection Button</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">Selection Button</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">Selection Button</p>
+<p class="text">This tool provides a group of features related to the selection text.
+When user select a text block in editor, selection button will appear in left side of editor automatically. Clicking this button will drop a context menu.</p>
+<p class="text">Selection Button and its context menu is as below:</p>
+<p class="text" align="center">
+<img src="srcedtblocktools.png"></p>
+<p class="text"><b>Edit Menu</b></p>
+<ul>
+	<li>
+	<p class="text"><b>Copy</b>: Copy selected text to clipboard.</p></li>
+	<li>
+	<p class="text"><b>Copy & Append</b>: Copy and append selected text to clipboard.</p></li>
+	<li>
+	<p class="text"><b>Cut</b>: Cut selected text to clipboard.</p></li>
+	<li>
+	<p class="text"><b>Cut & Append</b>: Cut and append selected text to clipboard.</p></li>
+	<li>
+	<p class="text"><b>Duplicate</b>: Duplicate selected text in current position and keep selection.</p></li>
+	<li>
+	<p class="text"><b>Delete</b>: Delete selected text.</p></li>
+	<li>
+	<p class="text"><b>Copy as HTML Format</b>: Copy selected text to clipboard with syntax highlighting. See  
+	<a href="../wizards/pas2htmlwizards.htm">Source Format Convert Wizard</a>.</p></li>
+	<li>
+	<p class="text"><b>Save to File...</b>: Save selected text to a file.</p></li>
+</ul>
+<p class="text" align="center">
+<img src="srcedtblockedit.png">&nbsp;&nbsp;&nbsp;
+<img src="srcedtblockcase.png"></p>
+<p class="text"><b>Convert Case Menu</b></p>
+<ul>
+	<li>
+	<p class="text"><b>To Lower Case</b>: Convert selected text to lower case.</p></li>
+	<li>
+	<p class="text"><b>To Upper Case</b>: Convert selected text to upper case.</p></li>
+	<li>
+	<p class="text"><b>Invert Case</b>: Invert case of selected text.</p></li>
+</ul>
+<p class="text"><b><br>
+Format Menu</b></p>
+<ul>
+	<li>
+	<p class="text"><b>Indent</b>: Indent selected block with default levels, may use Tab key to fast do this.</p></li>
+	<li>
+	<p class="text"><b>Indent Columns</b>: Indent selected block with levels user input.</p></li>
+	<li>
+	<p class="text"><b>Unindent</b>: Unindent selected block with default levels, may use Shift+Tab key to fast do this.</p>
+	</li>
+	<li>
+	<p class="text"><b>Unindent Columns</b>: Unindent selected block with levels user input.</p></li>
+</ul>
+<p class="text" align="center">
+<img src="srcedtblockformat.png">&nbsp;&nbsp;&nbsp;
+<img src="srcedtblockcomment.png"></p>
+<p class="text"><b>Comment Menu</b></p>
+<ul>
+	<li>
+	<p class="text"><b>Comment Code</b>: Add '//' to each line of selected code block to make it to comment. See
+	<a href="../wizards/editors/editorcodecomment.htm">Comment Code Tool</a>.</p></li>
+	<li>
+	<p class="text"><b>Uncomment Code</b>: Search selected code block and remove '//' at linehead to remove the comment. See 
+	<a href="../wizards/editors/editorcodeuncomment.htm">Uncomment Code Tool</a>.</p></li>
+	<li>
+	<p class="text"><b>Toggle Comment</b>: Search and analyse selected code block. If it's not commented by '//', then add '//' to each line head. Otherwise remove '//' of each line head. See 
+	<a href="../wizards/editors/editorcodetogglecomment.htm">Toggle Comment Tool</a>.</p>
+	</li>
+</ul>
+<p align="center">
+<img src="srcedtblockwrap.png"></p>
+<p class="text" align="left">
+<b>Surround With Menu</b></p>
+<ul>
+	<li>
+	<p class="text"><b>Surround With</b>: Indent selected text if needed and surround it in special code.</p>
+	</li>
+	<li>
+	<p class="text"><b>Options</b>: Show settings dialog as below:</li>
+</ul>
+<p class="text" align="center">
+<img src="srcedtblockwrapconf.png"></p>
+<ul>
+	<li>
+	<p class="text"><b>List</b></li>
+	<ul>
+	<li>
+	<p class="text"><b>Add</b>: Add a new item.</li>
+	<li>
+	<p class="text"><b>Remove</b>: Delete selected item.</li>
+	<li>
+	<p class="text"><b>Up, Down</b>: Up or down selected item.</li>
+	<li>
+	<p class="text"><b>Import</b>: Import items from data file, can select replace or append mode.</li>
+	<li>
+	<p class="text"><b>Export</b>: Export items to data file.</li>
+	</ul>
+</ul>
+<ul>
+	<li>
+	<p class="text"><b>Surround Item</b><ul>
+	<li>
+	<p class="text"><b>Caption</b>: The caption shown in menu.</li>
+	<li>
+	<p class="text"><b>Shortcut</b>: Define the shortcut.</li>
+	<li>
+	<p class="text"><b>Block</b>: 
+	If the switch "Line Block Mode" is on, then the head and tail of selection will expand to whole line when executing. In this mode, user can set code indent level.</li>
+	<li>
+	<p class="text"><b>Head</b>: Text to insert to the head of selection. If is line block mode, user can set indent level. Use '|' to set cursor position.</li>
+	<li>
+	<p class="text"><b>Tail</b>: Text to insert to the tail of selection. If is line block mode, user can set indent level. Use '|' to set cursor position.</li>
+	</ul>
+</ul>
+<ul>
+	<li>
+	<p class="text"><b>OK, Cancel</b>: Save or cancel settings and close dialog.</li>
+	<li>
+	<p class="text"><b>Help</b>: Show this help.</li>
+</ul>
+<p align="center">
+<img src="srcedtblockreplace.png"></p>
+<p class="text" align="left">
+<b>Group Replace Menu</b></p>
+<ul>
+	<li>
+	<p class="text"><b>Group Replace</b>: Group replace selected text with special context.</p>
+	</li>
+	<li>
+	<p class="text"><b>Options</b>: Show settings dialog as below.</li>
+</ul>
+<p class="text" align="center">
+<img src="srcedtblockreplaceconf.png"></p>
+<ul>
+	<li>
+	<p class="text"><b>List</b></li>
+	<ul>
+	<li>
+	<p class="text"><b>Add</b>: Add a new item.</li>
+	<li>
+	<p class="text"><b>Remove</b>: Delete selected item.</li>
+	<li>
+	<p class="text"><b>Up, Down</b>: Up or down selected item.</li>
+	<li>
+	<p class="text"><b>Import</b>: Import items from data file, can select replace or append mode.</li>
+	<li>
+	<p class="text"><b>Export</b>: Export items to data file.</li>
+	</ul>
+</ul>
+<ul>
+	<li>
+	<p class="text"><b>Group Replace Items</b><ul>
+	<li>
+	<p class="text"><b>Caption</b>: The caption shown in menu.</li>
+	<li>
+	<p class="text"><b>Shortcut</b>: Define the shortcut.</li>
+	<li>
+	<p class="text"><b>Items</b>: List of replace context.</li>
+	<li>
+	<p class="text"><b>Add</b>: Add a new item.</li>
+	<li>
+	<p class="text"><b>Remove</b>: Delete selected item.</li>
+	<li>
+	<p class="text"><b>Up, Down</b>: Up or down selected item.</li>
+	<li>
+	<p class="text"><b>From</b>: The search string.</li>
+	<li>
+	<p class="text"><b>To</b>: The replacement string.</li>
+	<li>
+	<p class="text"><b>Ignore Case</b>: Ignore case when performing a replace.</li>
+	<li>
+	<p class="text"><b>Match Whole Word</b>: Searches for words only.</li>
+	</ul>
+</ul>
+<ul>
+	<li>
+	<p class="text"><b>OK, Cancel</b>: Save or cancel settings and close dialog.</li>
+	<li>
+	<p class="text"><b>Help</b>: Show this help.</li>
+</ul>
+<p align="center">
+&nbsp;</p>
+<p align="center">
+<img src="srcedtblocksearch.png"></p>
+<p class="text" align="left">
+<b>Web Search Menu</b></p>
+<ul>
+	<li>
+	<p class="text"><b>Web Search</b>: Open special URL or run program to search 
+	selected text.</p>
+	</li>
+	<li>
+	<p class="text"><b>Options</b>: Show settings dialog as below.</li>
+</ul>
+<p class="text" align="center">
+<img src="srcedtblocksearchconf.png"></p>
+<ul>
+	<li>
+	<p class="text"><b>List</b></li>
+	<ul>
+	<li>
+	<p class="text"><b>Add</b>: Add a new item.</li>
+	<li>
+	<p class="text"><b>Remove</b>: Delete selected item.</li>
+	<li>
+	<p class="text"><b>Up, Down</b>: Up or down selected item.</li>
+	<li>
+	<p class="text"><b>Import</b>: Import items from data file, can select replace or append mode.</li>
+	<li>
+	<p class="text"><b>Export</b>: Export items to data file.</li>
+	</ul>
+</ul>
+<ul>
+	<li>
+	<p class="text"><b>Web Search Item</b><ul>
+	<li>
+	<p class="text"><b>Caption</b>: The caption shown in menu.</li>
+	<li>
+	<p class="text"><b>Shortcut</b>: Define the shortcut.</li>
+	<li>
+	<p class="text"><b>Search URL</b>: Filename or http link. %s mean selected 
+	text.</li>
+	</ul>
+</ul>
+<ul>
+	<li>
+	<p class="text"><b>OK, Cancel</b>: Save or cancel settings and close dialog.</li>
+	<li>
+	<p class="text"><b>Help</b>: Show this help.</li>
+</ul>
+<p class="text" align="center">
+&nbsp;</p>
+<p class="text"><b>Others Menu</b></p>
+<ul>
+	<li>
+	<p class="text"><b>Eval Swap</b>: Swap each evaluate expressions. i.e. change all A := B to B := A. See
+	<a href="../wizards/editors/editorcodeswap.htm">Eval Swap Tool</a>.</p></li>
+	<li>
+	<p class="text"><b>Convert to String</b>: Convert selected source block to a multi-line string, avoiding input of line-breaks and semicolons. See 
+	<a href="../wizards/editors/editorcodetostring.htm">Convert to String Tool</a>.</p></li>
+</ul>
+<ul>
+	<li>
+	<p class="text"><b>Insert Color</b>: Open a color dialog and use selected 
+	color to replace current selected text. See
+	<a href="../wizards/editors/editorinsertcolor.htm">Insert Color Tool</a>.</p></li>
+	<li>
+	<p class="text"><b>Insert Date Time</b>: Open a dialog and use formatted 
+        date time string to replace current selected text.  
+	<a href="../wizards/editors/editorinserttime.htm">Insert Date Time Tool</a>.</p></li>
+	<li>
+	<p class="text"><b>Sort Selected Lines</b>: Sort the lines in a selected 
+	block of code . See <a href="../wizards/editors/editorsortlines.htm">Sort 
+	Selected Lines</a>.</p></li>
+</ul>
+<p class="text" align="center">
+<img src="srcedtblockmisc.png"></p>
+<p class="text">&nbsp;</p>
+<p class="text"><b>Tool Settings</b></p>
+<p class="text">Settings dialog shows as below:</p>
+<p class="text" align="center">
+<img src="srcedtehnconf3.png"></p>
+<ul>
+  <li>
+    <p class="text"><b>Show Section Button when A Block Selected</b>: Enable or disable selection button.</p>
+  </li>
+  <li>
+    <p class="text"><b>Show Selection Button Menu Items in Editor Context Menu</b>: Enable or disable inserting a menu into editor context menu. This menu contains the popup menu items in selection button.</p>
+  </li>
+</ul>
+<p class="text">&nbsp;</p>
+<p class="title" align="left">Links<p class="text" align="left">
+<a href="srcedtenh.htm">Editor Enhancements Wizard</a><p class="text" align="left"> 
+<a href="srcedttab.htm">Tabset Enhancement</a><p class="text" align="left">
+<a href="../cnpack/index.htm">About CnWizards</a><p class="text" align="left"><hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">Copyrights 2001-2009 CnPack Team</a></p>
+</body>
+</html>

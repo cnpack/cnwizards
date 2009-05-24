@@ -1,0 +1,64 @@
+<Symbols PropFormat="node">
+  <Item>
+    <Name>///test</Name>
+    <Kind>skComment</Kind>
+    <Text>///%ArgList:$k (Kind) $n (Name) $t (Type) $d (Default)
+%
+///%RetType:$t (Type)%</Text>
+    <ScopeRate>15</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>//modified</Name>
+    <Kind>skComment</Kind>
+    <Description>Modified comment</Description>
+    <Text>// Modified by %User% %DateTime%</Text>
+    <ScopeRate>15</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>beg</Name>
+    <Kind>skTemplate</Kind>
+    <Description>begin..end;</Description>
+    <Text>begin
+  |
+end;</Text>
+    <ScopeRate>15</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>trycfo</Name>
+    <Kind>skTemplate</Kind>
+    <Description>try..finally..end with create</Description>
+    <Text>%Object% := %ClassName%.Create;
+try
+  |
+finally
+  %Object%.Free;
+end;  // try</Text>
+    <ScopeRate>15</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>UserName</Name>
+    <Kind>skVariable</Kind>
+    <Description>A user variable</Description>
+    <Text>UserName</Text>
+    <ScopeRate>15</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+  <Item>
+    <Name>{$IFDEF DEBUG}</Name>
+    <Kind>skCompDirect</Kind>
+    <Description>Compiler directive</Description>
+    <Text>{$IFDEF DEBUG}</Text>
+    <ScopeRate>15</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+  </Item>
+</Symbols>

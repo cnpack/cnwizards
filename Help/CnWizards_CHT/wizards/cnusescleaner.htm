@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>引用單元清理專家</title>
+<meta http-equiv="Content-Type" content="text/html; charset=big5">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4" id="table1">
+  <tr>
+    <td class="head" height="16">引用單元清理專家</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">引用單元清理專家</p>
+<p class="text" align="left"> 該專家用於清理單元中不需要的 uses 引用單元，目前只支援 Delphi。</p>
+<p class="text" align="left"> 當表單上加入控制項時，單元中的 uses 部分會自動加入此控制項所在的單元名，但控制項如果被刪除，其被引用的單元名卻不會自動刪除。本專家能按一定規則搜索當前單元或當前工程、工程組中可能不需要的單元引用，並列出以供清理。</p>
+<p class="text" align="left"> 本專家執行後介面如圖：</p>
+<p class="text" align="center">
+  <img src="usescleaner.png"> </p>
+<p class="text" align="left"> 引用單元清理的設置如下：</p>
+<ul>
+  <li>
+<p class="text" align="left"><b>當前編輯的單元</b>：搜索範圍為當前單元。</p>
+  </li>
+	<li>
+<p class="text" align="left"><b>當前工程組中打開的單元</b>：搜索範圍為當前工程組中所有打開的單元。</p>
+  </li>
+	<li>
+<p class="text" align="left"><b>當前工程中的所有單元</b>：搜索範圍為當前工程中的所有單元。</p>
+  </li>
+	<li>
+<p class="text" align="left"><b>當前工程組中的所有單元</b>：搜索範圍為當前工程組中的所有單元。</p>
+  </li>
+	<li>
+<p class="text" align="left"><b>忽略包含初始化節的引用單元</b>：是否忽略包含 initialization 部分的引用單元，此類單元包含初始化操作，刪除其引用可能會導致問題。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>忽略包含 Register 過程的引用單元</b>：是否忽略包含 Register 過程的引用單元，該類單元常包含元件註冊內容。</p>
+  </li>
+	<li>
+<p class="text" align="left"><b>忽略表單元件間接引用的單元</b>：是否忽略由元件間接引用到的單元。有些單元定義了元件的父類，如果刪除
+IDE 仍會自動添加上去。另外還可能包含工程中其他的表單單元，這些表單上的部分元件被當前表單的元件在屬性中引用。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>忽略無源碼的引用單元</b>：是否忽略無源碼的被引用單元。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>強行清理以下單元</b>：強行將以下單元置於結果中可被清理的位置。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>強行忽略以下引用單元</b>：搜索時忽略以下單元的引用，常用於一些系統單元。</p>
+  </li>
+  <li>
+<p class="text"><b>處理</b>：按照設置的規則進行編譯並搜索，完畢後彈出搜索結果表單供清理。</p></li>
+  <li>
+<p class="text"><b>取消</b>：關閉此視窗，不進行任何清理。</p></li>
+  <li>
+<p class="text"><b>說明</b>：顯示此說明資訊。</p></li>
+</ul>
+<p class="text" align="left"></p>
+<p class="title">　</p>
+<p class="title">清理分析結果</p>
+<p class="text" align="left">點擊“處理”按鈕後，該專家會自動編譯並分析需要處理的內容，並將搜索所得的結果列出如下圖。其中，勾上的單元表示搜索分析後認為可刪除引用的單元，用戶可以進一步確定其是否可被刪除。未勾上的單元表示此單元引用有效，或已按某種規則忽略。</p>
+<p class="text" align="center">　<img src="usescleanerres.png"></p>
+<p class="text" align="left">
+<ul>
+  <li>
+<p class="text"><b>清理</b>：刪除列表中勾上的單元引用。</p></li>
+	<li>
+<p class="text"><b>取消</b>：關閉此視窗，不進行任何清理。</p></li>
+  <li>
+<p class="text"><b>說明</b>：顯示此說明資訊。</p></li>
+</ul>
+<p class="title" align="left">　<p class="title" align="left">相關主題<p class="text" align="left">
+<a href="wizards.htm">IDE 專家基本操作</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">IDE 專家設置</a><p class="text" align="left">
+<a href="../cnpack/index.htm">關於 IDE 專家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版權所有 2001-2009 CnPack 開發組</a></p>
+</body>
+</html>

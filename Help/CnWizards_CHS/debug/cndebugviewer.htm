@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>CnDebugViewer 使用说明</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">CnDebugViewer 使用说明</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="text">欢迎您使用 CnPack 开发组开发的 CnDebug/CnDebugViewer 日志记录型调试信息输出查看工具。CnDebugViewer 是 Windows  x86 平台下以独立可执行文件方式提供给开发者使用的调试信息输出接收查看工具，它用来接收并显示 CnDebug.pas 输出的内容，同时也有接收 OutputDebugString 输出内容的功能。</p>
+
+<p class="text">　</p>
+<p class="title" align="left">CnDebugViewer 功能简介</p>
+
+<p class="text" align="left">CnDebugViewer 主要用来接收 CnDebug.pas 输出的调试信息和计时信息。调试信息在主窗口中以树状显示，可方便地根据各种条件过滤显示，也可保存成 XML 文件并再次载入。CnDebugViewer 的主界面如图所示：</p>
+<p class="text" align="center"><img src="cndebugviewer.png"></p>
+<p class="text" align="left">&nbsp;</p>
+<p class="text" align="left">CnDebugViewer 启动时会初始化一片共享内存区域并设置好队列读写标记。然后 CnDebugViewer 启动一读取线程，专门负责读取从 CnDebug 的输出，并根据发送端的进程 ID 开启不同的子窗口显示。最下面状态栏之上是进程标签切换页，页标题显示了输出进程的文件名和进程 ID。点击不同的标签可切换到不同的进程输出窗口。</p>
+<p class="text" align="left">中部的树状显示区是用来显示输出信息条目，右边的是计时结果显示区，下方是详细信息显示区，用来显示选中的调试信息的详细内容。主窗口上部的工具栏是菜单项的快捷按钮，在此不重复说明。</p>
+<p class="text" align="left">&nbsp;</p>
+<p class="title" align="left">文件菜单</p>
+<ul>
+  <li><p class="text"><b>新建窗口</b>：新建一空白窗口。如有新进程在通过 CnDebug 输出调试信息并且 CnDebugViewer 读取线程在运行，则此窗口将捕获此进程的输出信息。</li>
+  <li><p class="text"><b>打开</b>：打开一 CnDebugViewer 保存成的 XML 记录文件或 CnDebug 的输出文件（扩展名 *.cdd），注意此时 CnDebugViewer 的读取线程必须未运行。</li>
+  <li><p class="text"><b>关闭当前窗口</b>：关闭当前子窗口，子窗口的记录不会提示保存。</li>
+  <li><p class="text"><b>保存记录</b>：将当前子窗口中的调试信息保存成 XML 文件。注意此处只保存调试信息和书签信息，并未保存计时结果。</li>
+  <li><p class="text"><b>输出</b>：将当前子窗口中的调试信息输出成其他格式的文件，包括 TXT/CSV/HTM 等。</li>
+  <li><p class="text"><b>退出</b>：退出 CnDebugViewer。</li>
+</ul>
+<p class="text" align="left">&nbsp;</p>
+<p class="title" align="left">编辑菜单</p>
+<ul>
+  <li><p class="text"><b>清空信息内容</b>：清空输出信息显示区的所有信息。</li>
+  <li><p class="text"><b>清空计时内容</b>：清空计时结果显示区的所有信息。</li>
+  <li><p class="text"><b>复制</b>：复制当前选中的输出信息条目的详细内容。</li>
+  <li><p class="text"><b>切换书签</b>：切换当前选中的输出信息条目的书签状态，如果不是书签则切换成书签，否则取消书签。</li>
+  <li><p class="text"><b>跳至书签</b>：当书签存在时，此菜单项会显示以书签条目为内容的子菜单，点击子菜单可跳至相应的书签。</li>
+  <li><p class="text"><b>上一书签</b>：点击此菜单项时，会跳至当前选中条目的上一个书签处，如上面没有书签则不移动当前焦点。</li>
+  <li><p class="text"><b>下一书签</b>：点击此菜单项时，会跳至当前选中条目的下一个书签处，如下面没有书签则不移动当前焦点。</li>
+  <li><p class="text"><b>清除全部书签</b>：删除当前显示窗口中的全部书签。</li>
+  <li><p class="text"><b>全部展开</b>：当树状条目折叠时，点击此菜单项可将其全部展开。</li>
+  <li><p class="text"><b>查找</b>：点击此菜单项会弹出查找对话框，供用户在输出内容中查找相应信息。</li>
+  <li><p class="text"><b>查找下一个</b>：查找下一个待查的条目。</li>
+</ul>
+<p class="text" align="left">&nbsp;</p>
+<p class="title" align="left">查看菜单</p>
+<ul>
+  <li><p class="text"><b>计时显示</b>：选择此菜单项可确定是否显示计时结果区。</li>
+  <li><p class="text"><b>详细信息显示</b>：选择此菜单项可确定是否显示详细信息显示区。</li>
+  <li><p class="text"><b>到首条</b>：当前焦点跳到输出信息显示区的第一条记录。</li>
+  <li><p class="text"><b>上一条</b>：当前焦点跳到输出信息显示区的当前选择条目的上一条记录。</li>
+  <li><p class="text"><b>下一条</b>：当前焦点跳到输出信息显示区的当前选择条目的下一条记录。</li>
+  <li><p class="text"><b>到末尾</b>：当前焦点跳到输出信息显示区的最后一条记录。</li>
+  <li><p class="text"><b>前一分隔线</b>：当前焦点跳到输出信息显示区的上一条分隔线，如果没有则不动。</li>
+  <li><p class="text"><b>后一分隔线</b>：当前焦点跳到输出信息显示区的下一条分隔线，如果没有则不动。</li>
+  <li><p class="text"><b>自动滚动</b>：显示输出的信息时是否自动滚动到最后一条。</li>
+</ul>
+<p class="text">（说明：分隔线是 CnDebug 单元中输出的一条特殊信息，用来表示信息间的分隔，可用 LogSeparator 或 TraceSeparator 方法输出。）</p>
+<p class="text">&nbsp;</p>
+<p class="title">控制菜单</p>
+<ul>
+  <li><p class="text"><b>开始</b>：开始读取线程，默认时 CnDebugViewer 的读取线程是自动启动的。</li>
+  <li><p class="text"><b>暂停</b>：暂停当前读取线程的读取，此时 CnDebug 的输出内容会积累在共享内存队列中。</li>
+  <li><p class="text"><b>停止</b>：停止当前读取线程的读取，此时 CnDebug 的输出内容页也会积累在共享内存队列中。</li>
+</ul>
+<p class="text">&nbsp;</p>
+<p class="title">选项菜单</p>
+<ul>
+  <li><p class="text"><b>常规设置</b>：显示常规设置对话框。该对话框界面如图：</li>
+</ul>
+<p align="center" class="text"><img src="settings.png"></p>
+<ul>
+  <blockquote>
+    <li><p class="text"><b>主窗体显示热键</b>：设置显示主窗体的全局热键，默认为 Ctrl+Alt+V。</li>
+    <li><p class="text"><b>启动时最小化</b>：设置是否启动时最小化，默认为否。</li>
+    <li><p class="text"><b>显示系统托盘图标</b>：是否在系统托盘区显示 CnDebugViewer 的图标。</li>
+    <li><p class="text"><b>最小化到系统托盘</b>：在显示系统托盘图标的前提下，设置最小化 CnDebugViewer 时是否到系统托盘，而不在任务栏上显示按钮。</li>
+    <li><p class="text"><b>关闭时最小化到系统托盘</b>：在显示系统托盘图标的前提下，勾选此选项时，点击关闭按钮关闭 CnDebugViewer 时可最小化到系统托盘而不在任务栏上显示按钮，否则正常退出。</li>
+    <li><p class="text"><b>保存窗口状态及位置</b>：退出时是否保存主窗口的状态和位置，以备下次运行时恢复。</li>
+    <li><p class="text"><b>捕获 OutputDebugString 的输出</b>：是否同时捕捉系统调试 API OutputDebugString 的输出，默认不捕捉。此选项的改动要生效需要重新启动 CnDebugViewer。</li>
+    <li><p class="text"><b>确定</b>：确认常规选项的修改并关闭此对话框。</li>
+    <li><p class="text"><b>取消</b>：关闭此对话框，不做任何修改。</li>
+  </blockquote>
+</ul>
+<ul>
+  <li><p class="text"><b>过滤设置</b>：显示发送端过滤设置对话框，允许用户启用发送端过滤器。发送端过滤器不同于 CnDebugViewer 的显示过滤功能。它作用于 CnDebug 端，能阻止不符合需要的输出信息被输入至共享内存队列中。该对话框界面如图：</li>
+</ul>
+<p align="center" class="text"><img src="senderfilter.png"></p>
+<ul>
+  <blockquote>
+    <li><p class="text"><b>启用发送端过滤机制</b>：勾选此按钮后可启用发送端过滤机制，下部的条件设置使能。</li>
+    <li><p class="text"><b>Level</b>：用户可在此指定允许输出的信息的 Level 范围。</li>
+    <li><p class="text"><b>Tag</b>：用户可在此设定允许输出的信息的 Tag，空表示允许所有 Tag，不支持通配符。</li>
+    <li><p class="text"><b>允许输出的信息类型</b>：用户可在此处勾选允许输出的信息类型。</li>
+    <li><p class="text"><b>确定</b>：确认过滤器修改并关闭此对话框，过滤内容将作用于 CnDebug 端。</li>
+    <li><p class="text"><b>取消</b>：关闭此对话框，不做任何修改。</li>
+  </blockquote>
+  <li><p class="text"><b>Language</b>：CnDebugViewer 的界面被设计为支持多种语言，目前支持简体中文、繁体中文和英文，可在此菜单项下选择界面语言。</li>
+</ul>
+<p class="text">&nbsp;</p>
+<p class="title">帮助菜单</p>
+<ul>
+  <li><p class="text"><b>帮助</b>：显示此帮助信息。</li>
+  <li><p class="text"><b>关于</b>：显示作者和版权信息。</li>
+</ul>
+<p class="text">&nbsp;</p>
+<p class="title">显示过滤</p>
+<p class="text">子窗口上部是显示信息查找和过滤区，它能根据用户选择的过滤条件调整显示输出。注意这里的过滤和发送端过滤机制不同。</p>
+<ul>
+  <li><p class="text"><b>快捷查找框</b>：此处可输入字符串并点击右边的按钮（或按回车）进行快捷查找，查找历史记录保留在下拉框中。</li>
+  <li><p class="text"><b>根据类型过滤</b>：选择需要显示的信息的类型，目前只支持单选。</li>
+  <li><p class="text"><b>根据 Level 过滤</b>：选择需要显示的信息的 Level 范围。</li>
+  <li><p class="text"><b>根据线程 ID 过滤</b>：选择需要显示输出信息的线程 ID，或选择 * 表示显示所有线程。已经输出过信息的线程 ID 会显示在下拉框中。注意如果不同的线程中交错调用了 Enter 和 Leave 系列函数，则可能在显示全部线程时造成缩进错乱的情况，此时选择某一独立线程即可恢复此线程的原始缩进显示。</li>
+  <li><p class="text"><b>根据 Tag 过滤</b>：选择需要显示的输出信息的 Tag 值，或选择 * 表示显示所有的 Tag。已经输出的 Tag 值会显示在下拉框中。</li>
+</ul>
+<p class="text">　</p>
+<p class="text" align="left">您在使用中如果有任何的问题或建议，请与我们联系：<a href="mailto:master@cnpack.org?subject=关于 CnPack IDE 专家包">master@cnpack.org</a>，开发组将尽力为您提供帮助！<p class="text" align="left">　<p class="title" align="left">相关主题<p class="text" align="left">
+<a href="cndebug.htm">CnDebug 使用说明</a><p class="text" align="left">
+<a href="../licenses/license.htm">CnPack 许可协议</a><p class="text" align="left">
+<a href="../cnpack/about.htm">关于 CnPack</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版权所有 2001-2009 CnPack 开发组</a></p>
+</body>
+</html>

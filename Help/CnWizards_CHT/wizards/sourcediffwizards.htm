@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>源代碼比較專家</title>
+<meta http-equiv="Content-Type" content="text/html; charset=big5">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4" id="table1">
+  <tr>
+    <td class="head" height="16">源代碼比較專家</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">源代碼比較專家</p>
+<p class="text" align="left">
+該專家用於比較兩個源代碼檔或同一源代碼檔在編輯器中和存檔、備份檔案之間的差異，支持 Delphi/C++Builder。</p>
+<p class="text" align="left">
+下圖顯示了同一個單元在編輯器記憶體中的代碼及存檔檔之間的差異：</p>
+<p class="text" align="left">
+主區域顯示了兩份源代碼及其差異，右邊的豎條顯示了整個源代碼的差異分佈，單擊可快速定位於相應的位置。</p>
+<p class="text" align="center">
+<img src="sourcediff1.png"></p>
+<p class="title">
+　</p>
+<p class="title">
+主功能表操作</p>
+<ul>
+  <li>
+<p class="text"><b>檔菜單</b></p>
+<ul>
+<li><p class="text"><b>打開文件1</b>：在左視窗中打開檔。</p></li>
+<li><p class="text"><b>打開文件2</b>：在右視窗中打開檔。</p></li>
+<li><p class="text"><b>保存拼合後的檔</b>：將當前編輯的拼合文本保存到檔中，僅在拼合模式下有效。</p></li>
+<li><p class="text"><b>關閉</b>：關閉專家窗口。</p></li>
+</ul>
+  </li>
+  <li>
+<p class="text">
+<b>設置菜單</b></p>
+<ul>
+<li><p class="text"><b>忽略空白字元</b>：比較文本時忽略空白字元。</p></li>
+<li><p class="text"><b>忽略大小寫</b>：比較文本時忽略大小寫。</p></li>
+<li><p class="text"><b>只顯示不同之處</b>：在視窗中只顯示檔之間不同之處，在該模式下不支援拼合功能。</p></li>
+<li><p class="text"><b>水準/垂直分割</b>：設置兩個主視窗的分割方式。</p></li>
+<li><p class="text"><b>高亮顯示顏色</b>：設置「新增」、「修改」、「刪除」三種狀態下文本行的顏色，也可通過點擊左下角的小色框來設置。</p></li>
+<li><p class="text"><b>字體</b>：設置文本顯示的字體。</p></li>
+</ul></li>
+  <li>
+<p class="text">
+<b>操作功能表</b></p>
+  <ul>
+<li><p class="text"><b>源代碼比較</b>：對當前選擇的源代碼執行比較操作。</p></li>
+<li><p class="text"><b>刷新文件並重新比較</b>：重新裝載當前選擇的源代碼並執行比較操作。</p></li>
+<li><p class="text"><b>中斷比較</b>：在源代碼比較時中斷處理。</p></li>
+<li><p class="text"><b>上一處不同</b>：在源代碼中定位上一處不相同的地方。</p></li>
+<li><p class="text"><b>下一處不同</b>：在源代碼中定位下一處不相同的地方。</p></li>
+<li><p class="text"><b>轉到源代碼編輯器中</b>：在源代碼編輯器中打開當前獲得焦點的源代碼文件並定位到當前行處。在非拼合模式下，雙擊上方視窗源代碼執行該功能。</p></li>
+<li><p class="text"><b>拼合文件</b>：對當前選擇的源代碼執行拼合操作，可以選擇以左/右檔或兩個檔的交集為主。</p></li>
+<li><p class="text"><b>拼合當前文本</b>：當焦點位於上方源代碼視窗中時，用於將當前視窗中選擇的文本複製到拼合視窗相同位置處。
+在拼合模式下，雙擊上方視窗源代碼執行該功能。</p></li>
+<li><p class="text"><b>編輯當前文本</b>：
+當焦點位於下方拼合視窗時，編輯當前選擇的源代碼。在拼合模式下，雙擊下方拼合視窗源代碼執行該功能。</p></li>
+</ul></li>
+  <li>
+<p class="text">
+<b>幫助功能表</b></p>
+  <ul>
+<li><p class="text"><b>顯示幫助</b>：打開本說明文件。</p></li>
+</ul></li>
+</ul>
+<p class="text">
+　</p>
+<p class="title">
+工具欄按鈕</p>
+<p class="text">
+工具欄按鈕功能同相應的功能表項。</p>
+<p class="text">
+　</p>
+<p class="title">
+源代碼視窗上方的按鈕</p>
+<ul>
+  <li>
+<p class="text">
+<b>左按鈕</b>：打開源代碼文件。</p>
+  </li>
+  <li>
+<p class="text">
+<b>記憶體/檔/備份</b>：選擇當前源代碼檔的類型，可以是正在編輯器緩衝區中的代碼、已保存的檔或備份檔案(*.~pas 等)。</p>
+  </li>
+  <li>
+<p class="text">
+<b>右按鈕</b>：下拉菜單，包含刷新當前檔、打開檔、列出當前 IDE 中打開的檔以及歷史檔等菜單項。</p>
+  </li>
+</ul>
+<p class="text" align="left">
+　</p>
+<p class="title">
+代碼拼合功能</p>
+<p class="text" align="left">
+除了支援文本比較，該專家還支持代碼拼合功能，下圖顯示了一個正在拼合的代碼：</p>
+<p class="text" align="center">
+<img src="sourcediff2.png"></p>
+<p class="text" align="left">
+拼合時可用的操作見“主功能表操作”。</p>
+<p class="text" align="left">
+下圖為編輯拼合文本視窗：</p>
+<p class="text" align="center">
+<img src="sourcediff3.png"></p>
+<p class="text" align="left">
+編輯時請注意，編輯後的文本行數必須與原文本保持一致，超過原文本行數的內容將自動截去，不足的自動以空行補足。</p>
+<p class="text" align="left">
+　</p>
+<p class="title" align="left">相關主題<p class="text" align="left">
+<a href="wizards.htm">IDE 專家基本操作</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">IDE 專家設置</a><p class="text" align="left">
+<a href="../cnpack/index.htm">關於 IDE 專家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版權所有 2001-2009 CnPack 開發組</a></p>
+</body>
+</html>

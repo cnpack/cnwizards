@@ -1,0 +1,260 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>组件前缀专家</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">组件前缀专家</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">组件前缀专家</p>
+<p class="text" align="left">
+该专家可以根据标准的组件前缀对窗体上的组件进行更名，支持 Delphi/C++Builder。</p>
+<p class="text" align="left">
+组件更名支持自动更名、提示更名、手动更名三种方式，用户可根据需要调整使用。</p>
+<p class="text" align="left">
+　</p>
+<p class="title">组件更名提示</p>
+<p class="text" align="left">
+在默认的设置下，当用户在窗体上放置一个新的组件或者为已有组件重命名时，组件前缀专家会自动检查标准的组件前缀与当前组件名，对不符合规范的组件，将弹出对话框请求用户重命名。</p>
+<p class="text" align="left">
+如果用户在窗体上放置了一个未定义前缀的组件，将弹出以下对话框，如下图所示：</p>
+<p class="text" align="center">
+<img src="prefixdefine.png"></p>
+<p class="text" align="left">
+此时用户可输入该组件的前缀名。</p>
+<ul>
+  <li>
+<p class="text" align="left">
+<b>忽略该类型的组件</b>：如果选中该项，点击“<b>确定</b>”或“<b>取消</b>”后，所有该类型的组件以后都将被忽略掉，不再受前缀命名的约束。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>以后不再询问</b>：如果选中该项，以后发现未定义前缀的组件时，不再弹出对话框要求用户修改，直接忽略。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>确定</b>：确定对组件前缀的定义或修改。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>取消</b>：取消对组件前缀的定义或修改。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>帮助</b>：显示帮助信息。</p>
+  </li>
+</ul>
+<p class="text">
+当组件前缀被正确地定义时，专家如果发现新创建的组件或更名后的组件，其前缀不符合组件前缀标准，将弹出更名对话框，如下图所示：</p>
+<p class="text" align="center">
+<img src="prefixedit.png"></p>
+<p class="text" align="left">
+此时用户可输入新的组件名。</p>
+<ul>
+  <li>
+<p class="text" align="left">
+<b>忽略该类型的组件</b>：如果选中该项，点击“<b>确定</b>”或“<b>取消</b>”后，所有该类型的组件以后都将被忽略掉，不再受前缀命名的约束。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>对所有组件不再询问</b>：如果选中该项，以后所有的组件更名都自动在后台进行，不再弹出对话框要求用户修改。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>修改前缀</b>：点击该按钮，弹出“修改组件前缀”对话框，对当前组件的前缀进行修改。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>组件类按钮</b>：设置组件名类去掉 T 前缀为控件名称。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>确定</b>：确定对组件名称的修改。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>取消</b>：取消对组件名称的修改。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>帮助</b>：显示帮助信息。</p>
+  </li>
+</ul>
+<p class="title">　</p>
+<p class="title">手动更名操作</p>
+<p class="text" align="left">
+用户在 IDE 主菜单中，点击 CnPack 菜单下的“组件前缀专家”，将弹出选择对话框，如下图所示：</p>
+<p class="text" align="center">
+<img src="prefixexe.png"></p>
+<ul>
+  <li>
+<p class="text" align="left">
+<b>需要进行前缀处理的内容</b></p>
+  </li>
+  <ul>
+	<li>
+<p class="text" align="left">
+<b>当前选择的组件</b>：如果当前选择的组件列表不为空，该选项有效。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>当前窗体上的所有组件</b>：如果当前编辑的对象为窗体，该选项有效。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>当前打开的所有窗体上的组件</b>：设定要处理的范围为当前 IDE 中所有打开的窗体上的所有组件。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>当前工程所有窗体上的组件</b>：设定要处理的范围为当前工程中所有窗体上的所有组件。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>当前工程组所有工程所有窗体上的组件</b>：设定要处理的范围为当前工程组中所有窗体上的组件。</p>
+  </li>
+  </ul>
+  <li>
+<p class="text" align="left">
+<span lang="zh-cn"><b>组件列表内容</b></span></p>
+  </li>
+  <ul>
+	<li>
+<p class="text" align="left">
+<b>前缀不正确的组件</b>：只查找并显示处理内容中前缀不正确的组件。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>前缀不正确的组件及前缀加数字形式的组件</b>：查找并显示处理内容中前缀不正确的组件，以及自动生成的带数字的无意义名称组件，常用于批量命名组件。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>所有组件</b>：查找并显示处理内容中所有组件，包括被忽略的组件，可用于浏览及批量命名组件。</p>
+  </li>
+  </ul>
+  <li>
+<p class="text" align="left">
+<b>处理</b>：分析所选择的内容，如果存在需要更名的组件，显示组件批量更名窗口。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>设置</b>：显示设置窗口。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>关闭</b>：关闭对话框。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>帮助</b>：显示帮助信息。</p>
+  </li>
+</ul>
+<p class="text" align="left">
+用户点击“<b>确定</b>”后，如果存在需要更名的组件，将弹出以下对话框：</p>
+<p class="text" align="center">
+<img src="prefixcomp.png"></p>
+<p class="text" align="left">
+该对话框中显示了所有需要更名的组件，用户可以选择一项，并在上方输入新的组件名，使用回车键或“修改”按钮来更新。修改完成后，列表框自动跳转到下一条记录。</p>
+<p class="text" align="left">
+提示：在编辑框中可以使用 Up、Down、Home<span lang="zh-cn">、</span>PgUp<span lang="zh-cn">、</span>PgDown<span lang="zh-cn">、</span>End<span lang="zh-cn"> 
+等光标键来移动当前项。</span></p>
+<ul>
+  <li>
+<p class="text" align="left">
+<b>修改</b>：修改当前选择的组件的新组件名。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>确定</b>：执行组件更名操作。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>取消</b>：取消当前操作。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>帮助</b>：显示帮助信息。</p>
+  </li>
+</ul>
+<p class="text" align="left">
+如果不想修改当前的组件名，可以将组件前面的选择框取消选择，或者将新组件名设为空。</p>
+<p class="text" align="left">
+点击列表上方的栏头，可以按该栏进行排序。</p>
+<p class="text" align="left">
+　</p>
+<p class="title">
+设置界面</p>
+<p class="text" align="left">
+该专家的设置界面如下图所示：</p>
+<p class="text" align="center"> <img src="prefixconfig.png"></p>
+<ul>
+  <li> 
+    <p class="text"><b>显示设置</b></p>
+    <ul>
+      <li> 
+        <p class="text"><b>允许自动修改组件前缀</b>：是否允许专家在新增组件或组件更名时自动修改组件前缀。如果不选择，以下功能都将关闭。</p>
+      </li>
+      <li> 
+        <p class="text"><b>新增组件或修改组件名称时弹出对话框</b>： 是否允许组件更名时弹出对话框，由用户输入新的组件名。如果不选择，专家将使用默认的方式为组件命名。</p>
+      </li>
+      <li> 
+        <p class="text"><b>提示输入未定义前缀的组件前缀名</b>：当专家发现未定义前缀的组件时，是否弹出对话框要求用户定义组件前缀。</p>
+      </li>
+      <li> 
+        <p class="text"><b>忽略使用组件类名命名的组件</b>：有时候用户可能会使用组件类名（去掉字母 T）来为组件命名，如 MainMenu，该选项允许专家忽略这样的组件。</p>
+      </li>
+      <li> 
+        <p class="text"><b>自动更名时替换原组件前缀</b>：在根据组件前缀计算新组件名时，是否去掉原组件名中前面的几个小写字母前缀。</p>
+      </li>
+      <li class="text"> 
+        <p><b>初次更名时在组件名称前缀后添加下划线</b>：在改名时，是否在前缀后加下划线，如btn_1。</p>
+      </li>
+      <li><p><b>前缀区分大小写</b>：判断控件名是否有规定的前缀时，是否大小写敏感。</p></li>
+      <li><p><b>重命名组件时允许参照关联的 Action 的名称</b>：在自动对组件重命名时，如果该组件有关联的 Action 并且 Action 的组件名有意义，则使用组件前缀和 Action 名称去掉前缀后的名称作为该组件的名称。</p></li>
+      <li><p><b>当组件关联 Action 时自动重命名</b>：如果组件前缀不正确或者组件名称为前缀加数字的形式，当组件的 Action 属性改变时，自动根据 Action 的名称来重命名组件。</p></li>
+      <li><p><b>重命名组件时允许参照 DataField 属性的内容</b>：在自动对组件重命名时，如果该组件有 DataField 属性并且属性值有意义，则使用组件前缀和 DataField 属性值作为该组件的名称。</p></li>
+      <li><p><b>当组件的 DataField 属性变更时自动重命名</b>：如果组件前缀不正确或者组件名称为前缀加数字的形式，当组件的 DataField 属性值改变的时候，自动根据 DataField 属性值来重命名组件。</p></li>
+    </ul>
+  </li>
+  <li> 
+    <p class="text"> <b>组件前缀设置</b></p>
+    <ul>
+      <li>
+        <p class="text"><b>修改</b>：修改当前选择的组件的前缀。</p>
+      </li>
+      <li>
+        <p class="text"><b>导入</b>：从数据文件中导入组件前缀定义。</p>
+      </li>
+      <li>
+        <p class="text"><b>导出</b>：将当前的组件前缀定义导出到指定的数据文件中。</p>
+      </li>
+    </ul>
+  </li>
+  <li> 
+    <p class="text"> <b>确定</b>：保存当前的组件前缀列表及设置。</p>
+  </li>
+  <li> 
+    <p class="text"> <b>取消</b>：取消当前操作。</p>
+  </li>
+  <li> 
+    <p class="text"> <b>帮助</b>：显示帮助信息。</p>
+  </li>
+</ul>
+<p class="text" align="left">注：如果组件前面的检测框未被选择，专家在处理前缀命名时会忽略掉该类型的组件。<p class="title" align="left">　<p class="title" align="left">相关主题<p class="text" align="left">
+<a href="wizards.htm">IDE 专家基本操作</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">IDE 专家设置</a><p class="text" align="left">
+<a href="../cnpack/index.htm">关于 IDE 专家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版权所有 2001-2009 CnPack 开发组</a></p>
+</body>
+</html>

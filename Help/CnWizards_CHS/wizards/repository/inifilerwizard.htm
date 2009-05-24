@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>INI 读写单元生成向导</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link rel="stylesheet" href="../../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">INI 读写单元生成向导</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">INI 读写单元生成向导</p>
+<p class="text" align="left"> 该向导可以根据一现成的 INI 文件生成一读写此 INI 文件的单元，目前支持 Pascal 和 C++。执行此向导后，显示的窗体如图所示：</p>
+<p align="center"> <img src="inifilerform.png"></p>
+<ul>
+  <li> 
+    <p class="text"><b>INI 文件：</b>打开一个现成的 INI 文件，此项必须选择一个存在的文件。</p>
+  </li>
+  <li> 
+    <p class="text"><b>常量前缀：</b>INI 读写单元中会生成一系列常量字符串来表示该 INI 文件中的 Section 和 
+      Names 等。Section 常量的命名采用“常量前缀 + Section 名称”的方式，各个 Section 中的 Name 的命名采用“常量前缀 
+      + Name 所在的 Section 名称 + Name 名称”的方式，本项即用来设置此常量前缀，默认为“csIni”。</p>
+  </li>
+  <li> 
+    <p class="text"><b>类名：</b>INI 读写单元中会生成一个类和此类的实例作为读写 INI 文件的对象，此项即用来设置此类的类名，无需输入类名前缀的 
+      T，默认值是“IniOptions”。</p>
+  </li>
+  <li>
+    <p class="text"><b>自动判断类型：</b>如果勾上此选项，专家将自动判断 INI 文件中各项的类型，否则一律以字符串来对待。目前能自动判断的类型包括String, Integer, Float, DateTime, Boolean等几种。</p>
+  </li>
+  <li>
+    <p class="text"><b>将 0 和 1 作为布尔类型来处理：</b>如果勾上此选项，专家将自动将 INI 文件中值为 0 或 1 的项作为布尔值，否则以整数来对待。</p>
+  </li>
+</ul>
+  
+<p class="text" align="left">该专家在 Delphi 和 C++Builder 下都有效。在 BDS 2006 中，该向导能自动判断需要生成的语言类型，如无法获得当前语言类型，则提示用户选择。在 BDS 2005/2006 中，生成单元前需要预先选择保存的单元名。</p>
+<p class="title" align="left">　<p class="title" align="left">相关主题 
+  <p class="text" align="left"> <a href="../wizards.htm">IDE 专家基本操作</a> 
+  <p class="text" align="left"> <a href="../../options/wizconfig.htm">IDE 专家设置</a> 
+  
+<p class="text" align="left"> <a href="../../cnpack/index.htm">关于 IDE 专家包</a> 
+<p class="text" align="left"><a href="../repository.htm">Repository 菜单</a>
+<p class="text" align="left">　 
+  <hr>
+  <p class="text" align="center"><a href="http://www.cnpack.org">(C)版权所有 2001-2009 CnPack 开发组</a></p>
+</body>
+</html>

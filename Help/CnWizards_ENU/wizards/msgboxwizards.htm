@@ -1,0 +1,97 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>MessageBox Visual Designer</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">MessageBox Visual Designer</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">MessageBox Visual Designer</p>
+<p class="text">This wizard can generated messagebox calling code through visual designing. Both Delphi/C++Builder are supported. It's enabled when current window is source editor.</p>
+<p class="text">Please move cursor to required position before use this wizard. The dialog of this wizard is as below:</p>
+<p class="text" align="center">
+<img src="msgboxwizard.png"></p>
+<ul>
+  <li>
+  <p class="text" align="left"><b>Show Icon</b>: You can choose which icon to display in the message dialog.</li>
+  <li>
+  <p class="text" align="left"><b>Dialog Title</b>: Title of message dialog. If 'Title as Variable' was selected, entered title text will be treated as a variable, otherwise as string. You can select some useful titles in dropdown list.</li>
+  <li>
+  <p class="text" align="left"><b>Text Information</b>: The text displayed on message dialog. Multi-line text is supported. If 'Text as Variable' was selected, entered text will be treated as a variable.</li>
+  <li>
+  <p class="text" align="left"><b>Default Button</b>: You can specify which button is default when the message dialog displayed.</li>
+  <li>
+  <p class="text" align="left"><b>Extended Style</b>: Whether show at topmost.</li>
+  <li>
+  <p class="text" align="left"><b>Dialog Button</b>: You can specify the buttons needed in the message dialog.</li>
+  <li>
+  <p class="text" align="left"><b>Return Value</b>: If the message dialog need return values, the codes will be generated to process the values. such as if, if...else..., case.</li>
+  <li>
+  <p class="text" align="left"><b>Procedure to Use</b>: Which procedure will be used for implemetation. Both MessageBox and MessageDlg supported.</li>
+  <li>
+  <p class="text" align="left"><b>Uses Handle as Parent</b>: If this was selected,  Handle will be the first parameter in MessageBox API, otherwise 0 will be used.</li>
+  <li>
+  <p class="text" align="left"><b>Preview</b>: Preview the designed message dialog.</li>
+  <li>
+  <p class="text" align="left"><b>User Templates</b>: You can save the message dialog contents to templates for loading. The last contents will be saved to 'Auto Saved' template automatically.</li>
+</ul>
+<p class="text" align="left">MessageBox code will be generated and inserted into current cursor's position after OK is clicked. Line-wrap, auto indent are supported. Cursor will be put to right position after inserting.</p>
+<p class="text" align="left">&nbsp;</p>
+<p class="title">Settings</p>
+<p class="text">The setting dialog of MessageBox Visual Designer is as below:</p>
+<p class="text" align="center">
+<img src="msgboxwizardconfig.png"></p>
+<ul>
+  <li>
+<p class="text" align="left">
+<b>Carriage Return</b>: You can set the Carriage Return character for Delphi/C++Builder here.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>Delphi Code Settings</b>: You can set indent count, auto wrap width and whether use PChar to convert strings, whether use Format to generate string, in Delphi.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>C++Builder Code Settings</b>: You can set indent count, auto wrap width in C++Builder, and whether put { at the end of a line.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>Wordwrap Mode</b>: If 'Wordwrap by Line Width' was selected, text will be arranged by the width, otherwise uses entered format.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>Automatically Load Settings of Last Time</b>: When this was selected, the last template will be auto loaded when this wizard executing.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>Export</b>£ºExport user template to file.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>Import</b>: Import template from file.</p>
+  </li>
+</ul>
+
+<p class="title" align="left">&nbsp;
+<p class="title">Links</p>
+<p class="text" align="left">
+<a href="wizards.htm">Basic Operation</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">CnWizards Settings</a><p class="text" align="left">
+<a href="../cnpack/index.htm">About CnWizards</a>
+<p class="text" align="left">&nbsp; 
+<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">Copyrights 2001-2009 CnPack Team</a></p>
+</body>
+</html>

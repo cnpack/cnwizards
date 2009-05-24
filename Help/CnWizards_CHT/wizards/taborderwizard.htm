@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Tab Order 專家</title>
+<meta http-equiv="Content-Type" content="text/html; charset=big5">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4" id="table1">
+  <tr>
+    <td class="head" height="16">Tab Order 專家</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">Tab Order 專家</p>
+<p class="text" align="left"> 該設計器用於在表單上通過標籤來直觀的顯示控制項的 TabOrder 屬性的值，支援
+Delphi/C++Builder。當 IDE 當前編輯物件為表單編輯器時，該工具可用。繪製時會根據控制項的嵌套層數不同而採用不同的標籤顏色。當控制項的 TabStop 值為 False 的時候，使用虛線繪製標籤邊框，以表示 Tab 鍵不停留。</p>
+<p class="text" align="left"> 專家菜單如圖所示：</p>
+  <p align="center">
+  <img src="TabOrder.png"> </p>
+<ul>
+<li><p class="text"><b>已選擇的控制項：</b>對當前選擇的控制項進行處理
+，如果當前選擇的控制項為容器控制項，則處理容器控制項的所有子控制項，否則處理選擇控制項同級的所有控制項。</p></li>
+<li><p class="text"><b>當前表單所有控制項：</b>對表單上所有的控制項及子控制項進行處理。</p></li>
+<li><p class="text"><b>所有打開的表單：</b>對當前打開的所有表單上所有的控制項及子控制項進行處理。</p></li>
+<li><p class="text"><b>當前工程所有表單：</b>對當前工程中所有表單上所有的控制項及子控制項進行處理。</p></li>
+<li><p class="text"><b>當前工程組所有表單：</b>對當前工程組中所有表單上所有的控制項及子控制項進行處理。</p></li>
+<li><p class="text"><b>移動控制項自動設置：</b>當控制項在表單上發生移動時，專家將根據設定方式自動改變控制項的 TabOrder 屬性的值。</p></li>
+<li><p class="text"><b>顯示控制項Tab Order：</b>打開/關閉控制項的 Tab Order 標籤的顯示。</p></li>
+</ul>
+  <p class="text" align="left">下圖顯示了一個正在設計期並使用 Tab Order 專家設置後的表單：</p>
+<p class="text" align="center">
+<img src="TabOrderDemo.png"></p>
+  <p class="text" align="left"> </p>
+  <p class="title">　</p>
+  <p class="title">參數設置</p>
+  <p class="text">Tab Order 專家的設置介面如下圖所示：</p>
+  <p align="center">
+    <img src="TabOrderSetup.png"></p>
+  <p class="text" align="left"></p>
+<ul>
+<li><p class="text"><b>排序方式</b></p>
+<ul>
+<li><p class="text"><b>先水平再垂直</b>：設置 Tab Order 
+時以垂直方向從上到下（正向）排列，如果在同一水平方向上有多個控件，再按照水平方向排列。也就是先水平排列，再垂直排列。</p></li>
+<li><p class="text"><b>先垂直再水平</b>：設置 Tab Order 
+時以水平方向從左到右（正向）排列，如果在同一垂直方向上有多個控件，再按照垂直方向排列。也就是先垂直排列，再水平排列。</p></li>
+</ul></li>
+<li><p class="text"><b>附加處理</b></p>
+<ul>
+<li><p class="text"><b>反向排序</b>：設置 Tab Order
+時使用反方向排列，即從下到上（垂直方向為主）或從右到左（水準方向為主）。</p></li>
+<li><p class="text"><b>組件分組處理</b>：如果選擇分組處理，專家在排序控制項時會將高、寬相同且位置鄰近的控制項作為一組來處理，保證其
+Tab Order 連續。</p></li>
+</ul></li>
+<li><p class="text"><b>Tab Order標籤</b>：設置 Tab Order 標籤的顯示位置、字體及顏色。</p></li>
+<li><p class="text"><b>其他設置</b></p>
+<ul>
+<li><p class="text"><b>移動控制項時自動更新 Tab Order</b>：當控制項在表單上發生移動時，專家將根據設定方式自動改變控制項的 TabOrder 屬性的值。</p></li>
+<li><p class="text"><b>處理控制項時包含所有子控制項</b>：當處理容器類控制項時，同時處理其所有子控制項。</p></li>
+<li><p class="text"><b>計算位置時根據控制項中心來判斷</b>：
+根據控制項中心點位置來對控制項進行排序。如果不選擇，默認使用其排序方向的邊緣位置，如從上到下時以控制項 Top 屬性來排序。</p></li>
+<li><p class="text"><b>設置快捷鍵</b>：設置子功能表項的快捷鍵。</p></li>
+</ul></li>
+</ul>
+
+<p class="title" align="left">　<p class="title" align="left">相關主題
+  <p class="text" align="left"> <a href="wizards.htm">IDE 專家基本操作</a>
+  <p class="text" align="left"> <a href="../options/wizconfig.htm">IDE 專家設置</a>
+  <p class="text" align="left"> <a href="../cnpack/index.htm">關於 IDE 專家包</a>
+  <p class="text" align="left">　
+  <hr>
+  <p class="text" align="center"><a href="http://www.cnpack.org">(C)版權所有 2001-2009 CnPack 開發組</a></p>
+</body>
+</html>

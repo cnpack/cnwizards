@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Jumping Enhancement</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">Jumping Enhancement</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">Jumping Enhancement</p>
+<p class="text">IDE's jumping only available for identifier declaration, but this enhancement provides more effective jumping through tracking changing of current line number.
+When user moves cursor above special lines (default is five), the tool can remember the position before moving, and user can use the "Go Back" button to return last positions.</p>
+<p class="text">For example: if user need to add a new unit name in uses section, move the cursor to uses section using scrollbar directly.
+After modified, click "Go Back" button to return the original position.</p>
+<p class="text">This tool replaces the IDE's jumping buttons. The context menu of back button is as below:</p>
+<p class="text" align="center">
+<img src="srcedtnav.png"></p>
+<ul>
+  <li>
+    <p class="text"><b>IDE's Go Back</b>: Call IDE's Go Back feature. Press Shift or Alt or Ctrl key when click the button, can call IDE's Go Back also.</p>
+  </li>
+  <li>
+    <p class="text"><b>IDE's Go Back List</b>: IDE's Go Back history list.</p>
+  </li>
+  <li>
+    <p class="text"><b>Go Back List</b>: The list in go back history stack, the caption is filename and line number. Click an item to jump to related position.</p>
+  </li>
+  <li>
+    <p class="text"><b>Use IDE's Jumping Temporarily</b>: Whether use IDE's jumping temporarily when click buttons.
+This switch never saved, if you want to disable Jumping Enhancement, configure it in settings dialog.</p>
+  </li>
+	<li> 
+    <p class="text"><b>Editor Tools Settings</b>: Show <a href="srcedtenh.htm">Editor Enhancements Settings</a> 
+	dialog.</p>
+  </li>
+</ul>
+<p class="text">&nbsp;</p>
+<p class="text">The settings dialog shows as below:</p>
+<p class="text" align="center">
+<img src="srcedtehnconf2.png"></p>
+<ul>
+  <li>
+    <p class="text"><b>Improve the Jumping Features in IDE Editor</b>: Enable or disable Jumping Enhancement.</p>
+  </li>
+  <li>
+    <p class="text"><b>Lines to make a new Record</b>: When cursor moves special lines once, make a new go back record.</p>
+  </li>
+  <li>
+    <p class="text"><b>Maximum Count</b>: The maximum count to keep in history list.</p>
+  </li>
+</ul>
+<p class="text">&nbsp;</p>
+<p class="title" align="left">Links<p class="text" align="left">
+<a href="srcedtenh.htm">Editor Enhancements Wizard</a><p class="text" align="left"> 
+<a href="srcedttoolbar.htm">Editor Toolbar</a>
+<p class="text" align="left"> <a href="srcedtgutter.htm">Line Number Gutter</a><p class="text" align="left">
+<a href="../cnpack/index.htm">About CnWizards</a><p class="text" align="left"><hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">Copyrights 2001-2009 CnPack Team</a></p>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Batch File Replace</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">Batch File Replace</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">Batch File Replace</p>
+<p class="text" align="left">This wizard implements "Replace in Files" function in IDE. If a file was open in IDE, manual saving needed after replacing because modificaitions only affects editor buffer.</p>
+<p class="text" align="left">Note: Opened DFM files in IDE replacing is NOT supported! If you need to do so, please use 'In directories' mode.</p>
+<p class="text" align="left"> 
+There's NO confirming dialog when replacing, so there may be dangerous in replacing. It's recommended that search and confirm what to replace before actual replaceing.</p>
+<p class="text" align="center"> 
+  <img src="Replacewizards.png">
+<ul>
+<li><p class="text"><b>Text</b>: Here to specify what to search and replace. Only single-line text is supported.</p></li>
+<li><p class="text"><b>Options</b>: Here to set searching and matching mode.</p>
+<ul>
+  <li><p class="text"><b>Case Sensitive</b>: Match case or not when searching.</p></li>
+  <li><p class="text"><b>Whole Word Only</b>: Match whole word only or not when searching.</p></li>
+  <li><p class="text"><b>Regular Expression</b>: Regular expression used or not when searching. See below.</p></li>
+  <li><p class="text"><b>Ansi Compatible</b>: Use ansi compatible mode or not when searching. It may be required when searching in some certain char-set text.
+</p></li>
+</ul>
+</li>
+<li><p class="text"><b>Range</b>: You can specify the searching range, which can be current file, files in current project/projectgroup, all opened files and files in directory.</p></li>
+<li><p class="text"><b>Search Directory</b>: Here to set searching directory and file name filters when searching mode is set to "In Directory".</p></li>
+</ul>
+<p class="title">&nbsp;</p>
+<p class="title">Regular Expression</p>
+<p class="text" align="left"> Regular expression is technically a defined grammar for use in complex pattern searching. For example, if you want to search <b>unit</b> and <b>init</b>, you can use <b>[ui]nit</b> in searching text.</p>
+<p class="text" align="left">Note: This wizard does NOT support wildchar * and ? . Those are supported as below:</p>
+<ul>
+  <li>
+<p class="text" align="left"> \ : Backslash is an Escaped character.A number of characters have special meanings to regular expressions. A symbol with a special meaning can be matched, but to do so you must prefix it with the backslash character (this includes the backslash character itself: to match one backslash in the target, your regular expression should include "\\").
+</p>
+  </li>
+  <li>
+<p class="text" align="left"> ^ : Match the beginning of a line.</p>
+  </li>
+  <li>
+<p class="text" align="left"> $ : Match the end of a line.</p>
+  </li>
+  <li>
+<p class="text" align="left"> . : A period can stand for any character.  For example, 'f.r' can match 'for' or 'far'.</p>
+  </li>
+  <li>
+<p class="text" align="left"> : Colons means matching a set of characters. e.g. ':a' means all alphabets, ':d' means a digital. ':n' 
+ means an alphabets or a ditigal. ': ' means a space or tab or other control or sign characters(ASCII 0x01-0x40).</p>
+  </li>
+  <li>
+<p class="text" align="left"> [...] : Rather than name only a single character, you can include a pattern in a regular expression that matches any of a set of characters. A set of characters can be given as a simple list inside square brackets.
+e.g. [xyz] will match a single character x or y or z. [^xyz] will match  a single character which is not x or y or z.
+And if a caret symbol was used at the beginning of a character class, it reverses the meaning of the character class. Everything NOT included in the listed character set is matched. If only a caret in square brackets, it means match any character except new line characters 0x0D and 0x0A.
+For letter or number ranges you may also use only the first and last letter of a range, with a dash in the middle, e.g. [a-z] means matching all lowercase, but [z-a] matches nothing.
+</p>
+  </li>
+</ul>
+<p class="title" align="left">&nbsp;
+<p class="title">Links</p>
+<p class="text" align="left">
+<a href="wizards.htm">Basic Operation</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">CnWizards Settings</a><p class="text" align="left">
+<a href="../cnpack/index.htm">About CnWizards</a>
+<p class="text" align="left">&nbsp; 
+<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">Copyrights 2001-2009 CnPack Team</a></p>
+</body>
+</html>

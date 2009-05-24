@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Uses Units Cleaner</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">Uses Units Cleaner</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">Uses Units Cleaner</p>
+<p class="text" align="left"> This wizard is used to remove the unused reference units in 'uses' part. Only Delphi is supported now.</p>
+<p class="text" align="left"> When a component is put into form in design time, the units which contains the component will be added into uses part automatically. But NO removing when component is removing. This wizard can search the uses part and analyze them to list the possible unused reference units to clean.</p>
+<p class="text" align="left"> The dialog is shown as below:</p>
+<p class="text" align="center"> 
+  <img src="usescleaner.png"> </p>
+<p class="text" align="left"> Content and Clean Settings:</p>
+<ul>
+  <li>
+<p class="text" align="left"><b>Current Unit</b>: Search current unit.</p>
+  </li>
+	<li>
+<p class="text" align="left"><b>Opened Units in Current ProjectGroup</b>: Search opened units in current ProjectGroup.</p>
+  </li>
+	<li>
+<p class="text" align="left"><b>All Units in Current Project</b>: Search all units in current project.</p>
+  </li>
+	<li>
+<p class="text" align="left"><b>All Units in Current ProjectGroup</b>: Search all units in current ProjectGroup.</p>
+  </li>
+	<li>
+<p class="text" align="left"><b>Skip Used Units including Initialization Part</b>: Whether skip those units which contain initialization part in searching. The part may contains some initialization operations and removing the reference may cause problems.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Skip Used Units including Register Procedure.</b>: Whether skip those units which contain Register procedure in searching. This procedure may contain component register content. </p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Skip Used Units Refered by Component Indirectly.</b>: Whether skip those units which refered by component indirectly, such as ancestor definitions or components in other forms. </p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Skip Used Units without Source</b>: Whether skip those units without source code in searching.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Clean Units Directly</b>: Clean the units below directly.</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>Skip Units Directly</b>: Skip the units below directly. They're almost system units.</p>
+  </li>
+  <li>
+<p class="text"><b>Process</b>: Search unused reference units according to the settings.</p></li>
+  <li>
+<p class="text"><b>Cancel</b>: Close this window and DO NOT clean.</p></li>
+  <li>
+<p class="text"><b>Help</b>: Show this help.</p></li>
+</ul>
+<p class="text" align="left"></p>
+<p class="title">&nbsp;</p>
+<p class="title">Uses Units Cleaner Scan Result</p>
+<p class="text" align="left">After you click the 'Process' button. This wizard will compile current content and search and list the result in a treeview as below. The checked units are those can be cleaned. You can confirm or discard them. The unchecked units are already skipped by some settings.</p>
+<p class="text" align="center">&nbsp;<img src="usescleanerres.png"></p>
+<p class="text" align="left"> 
+<ul>
+  <li>
+<p class="text"><b>Clean</b>: Remove the checked reference units.</p></li>
+	<li>
+<p class="text"><b>Cancel</b>: Close this window and DO NOT clean.</p></li>
+  <li>
+<p class="text"><b>Help</b>: Show this help.</p></li>
+</ul>
+<p class="title" align="left">&nbsp;
+<p class="title">Links</p>
+<p class="text" align="left">
+<a href="wizards.htm">Basic Operation</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">CnWizards Settings</a><p class="text" align="left">
+<a href="../cnpack/index.htm">About CnWizards</a>
+<p class="text" align="left">&nbsp; 
+<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">Copyrights 2001-2009 CnPack Team</a></p>
+</body>
+</html>

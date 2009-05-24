@@ -1,0 +1,79 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Tab Order Wizard</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">Tab Order Wizard</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">Tab Order Wizard</p>
+<p class="text" align="left">This wizard can display the taborder value on components  and auto set taborder values in form designer. Both Delphi and C++Builder are supported. It's enabled when current form is form designer. Different color will be used to draw the taborder label according to component's nested level. When a control's TabStop is False, the label is dashline. </p>
+<p class="text" align="left">This wizard's menu is as below:</p>
+  <p align="center">
+  <img src="TabOrder.png"></p>
+<ul>
+<li><p class="text"><b>Components Selected</b>: Sort the taborders of current selected components. If selected component is a container, its all subcomponents will be processed. Otherwise those at the same level will be processed.
+</p></li>
+<li><p class="text"><b>All Components of Current Form</b>: Sort the taborders of all components and their subcomponents in current form designer.</p></li>
+<li><p class="text"><b>All Opened Forms</b>: Sort all components' taborders in all opened forms.</p></li>
+<li><p class="text"><b>All Forms in Current Project</b>: Sort all components' taborders in all forms of current project.</p></li>
+<li><p class="text"><b>All Forms in Current ProjectGroup</b>: Sort all components' taborders in all forms of current projectgroup.</p></li>
+<li><p class="text"><b>Auto Update Tab Orders</b>: If this was selected, taborders will be udpated automaticly when components were moved.</p></li>
+<li><p class="text"><b>Display Tab Orders</b>: Show/Hide Tab Order label on components.</p></li>
+</ul>
+  <p class="text" align="left">Below is a form in design time using Tab Order Wizard.</p>
+<p class="text" align="center">
+<img src="TabOrderDemo.png"></p>
+  <p class="text" align="left"> </p>
+  <p class="title">&nbsp;</p>
+  <p class="title">Settings</p>
+  <p class="text">Settings dialog of Tab Order Wizard is as below:</p>
+  <p align="center">
+    <img src="TabOrderSetup.png"></p>
+  <p class="text" align="left"></p>
+<ul>  
+<li><p class="text"><b>Sort Mode</b></p>
+<ul>
+<li><p class="text"><b>Vertical First</b>: Use top to bottom sorting mode to sort taborders holistically. If there were more than one components in a horizontal line, they will be sorted from left to right.
+</p></li>
+<li><p class="text"><b>Horizontal First</b>: Use left to right sorting mode to sort taborders holistically. If there were more than one components in a vertical line, they will be sorted from top to bottom.</p></li>
+</ul></li>
+<li><p class="text"><b>Add-on Process</b></p>
+<ul>
+<li><p class="text"><b>Inverse Sort</b>: If this was selected, Tab Order's sorting will use inverse mode: from bottom to top when vertical first or from right to left when hrizontal first.</p></li>
+<li><p class="text"><b>By Groups</b>: If this was selected, those components which have the same width and height nearby will be treated as a group to keep the continuum of taborders.</p></li>
+</ul></li>
+<li><p class="text"><b>Tab Order Label</b>: Set the position, color and font of Tab Order label.</p></li>
+<li><p class="text"><b>Other Settings</b></p>
+<ul>
+<li><p class="text"><b>Auto Update Tab Orders when Moved</b>If this was selected, taborders will be udpated automaticly when components were moved.</p></li>
+<li><p class="text"><b>Process All Sub-components</b>: Whether to process container's subcomponents when sorting.</p></li>
+<li><p class="text"><b>Calculate Using Component's Center</b>: 
+If this was selected, center point of component will be used to calculate and sort. Otherwise sorting edge will be used. e.g. Top will be used when sort from top to bottom.</p></li>
+<li><p class="text"><b>Hotkey</b>: Set shortcuts for the meun items.</p></li>
+</ul></li>
+</ul>
+
+<p class="title" align="left">&nbsp;
+<p class="title">Links</p>
+<p class="text" align="left">
+<a href="wizards.htm">Basic Operation</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">CnWizards Settings</a><p class="text" align="left">
+<a href="../cnpack/index.htm">About CnWizards</a>
+<p class="text" align="left">&nbsp; 
+<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">Copyrights 2001-2009 CnPack Team</a></p>
+</body>
+</html>

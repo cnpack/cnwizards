@@ -1,0 +1,203 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Caption Button Enhancements Wizard</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">Caption Button Enhancements Wizard</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">Caption Button Enhancements Wizard</p>
+<p class="text">Caption Button Enhancements Wizard adds some buttons to the caption bar of modeless windows in IDE. 
+It includes an option button which can drop down a menu, a roller button which can roll the window to free more work space, and a button to set the window stay on top.</p>
+<p class="text">The Object Inspector added caption buttons shows as below:</p>  
+<p class="text" align="center"> <img src="capbuttons.png"></p>
+<ul>
+  <li> 
+    <p class="text"><b>Option Button</b>: Click this button to drop down a menu about caption buttons.</p>
+  </li>
+  <li>
+    <p class="text"><b>Roller Button</b>: After chick this button, the window will roll to a bar. Click twice to restore. Some window can not roll since their set AutoSize or Constraints property.</li>
+  <li> 
+    <p class="text"><b>Stay on Top Button</b>: After click this button, the window will stay on top. Click twice to restore.</p>
+  </li>
+  <li><p class="text"><b>Add to Filters</b>: This tool allows user to filter some window which do not display caption buttons according to window class name. This menu can add current window to the filter list.</li>
+  <li> 
+    <p class="text"><b>Options</b>: Click this menu to show settings dialog.</p>
+  </li>
+</ul>
+<p class="text">The settings dialog shows as below:</p> 
+<div align="center"> <img src="wintoproller.png"></div>
+<p class="text">&nbsp;</p>
+<ul>
+  <li> 
+    <p class="text"><b>Buttons</b>: Controls the visibility of buttons. Includes Stay on Top, Roll and Options Buttons.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Ignore Caption Text Width</b>: If uncheck, buttons will displayed after caption text. So if the caption text is too long, some buttons will hide. If check this, the buttons will always display.</li>
+  <li> 
+    <p class="text"><b>Animated Rolling</b>: Controls whether display animate in rolling progress.</p>
+  </li>
+  <li><b>Enable Window ClassName Filters to Disable Caption Buttons</b>: Some modeless windows need not caption buttons, such as IDE Main Form. Perhaps user would disable them in some windows also.
+So wizard provides a filter list for this. All checked item in filter list will affected. The window which class name same as the filter item will not display caption buttons.
+The two ComboBox have some pre-defined class name and comment. See the following list:</li>
+</ul>
+<table width="75%" border="1" align="center" cellpadding="3" cellspacing="0" bordercolor="#666666">
+  <tr bgcolor="#FFFF00"> 
+    <td width="46%"><b>Window ClassName</b></td>
+    <td width="54%"><b>Comment</b></td>
+  </tr>
+  <tr> 
+    <td>TAppBuilder</td>
+    <td>IDE Main Window</td>
+  </tr>
+  <tr> 
+    <td>TObjectTreeView</td>
+    <td>Object TreeView</td>
+  </tr>
+  <tr> 
+    <td>TPropertyInspector</td>
+    <td>Object Inspector</td>
+  </tr>
+  <tr> 
+    <td>TEditWindow</td>
+    <td>Source Editor</td>
+  </tr>
+  <tr> 
+    <td>TPasModExpForm</td>
+    <td>Code Explorer</td>
+  </tr>
+  <tr> 
+    <td>TProjectManagerForm</td>
+    <td>Project Manager</td>
+  </tr>
+  <tr> 
+    <td>TToDoListWindow</td>
+    <td>ToDo List</td>
+  </tr>
+  <tr> 
+    <td>TAlignPalette</td>
+    <td>Align Palette</td>
+  </tr>
+  <tr> 
+    <td>TSynbolExplorer</td>
+    <td>Browse Synbol</td>
+  </tr>
+  <tr> 
+    <td>TCompListForm</td>
+    <td>Component List</td>
+  </tr>
+  <tr> 
+    <td>TMessageHintFrm</td>
+    <td>Message Hint</td>
+  </tr>
+  <tr> 
+    <td>TBPWindow</td>
+    <td>Break Points</td>
+  </tr>
+  <tr> 
+    <td>TCallStackWindow</td>
+    <td>Call Stack</td>
+  </tr>
+  <tr> 
+    <td>TWatchWindow</td>
+    <td>Watches</td>
+  </tr>
+  <tr> 
+    <td>TLocalVarsWindow</td>
+    <td>Local Variables</td>
+  </tr>
+  <tr> 
+    <td>TThreadStatus</td>
+    <td>Threads</td>
+  </tr>
+  <tr> 
+    <td>TModulesView</td>
+    <td>Modules</td>
+  </tr>
+  <tr> 
+    <td>TDebugLogView</td>
+    <td>Event Log</td>
+  </tr>
+  <tr> 
+    <td>TDisassemblyView</td>
+    <td>CPU Window</td>
+  </tr>
+  <tr> 
+    <td> TFPUWindow</td>
+    <td>FPU Window</td>
+  </tr>
+  <tr> 
+    <td>TCustomizeDlg</td>
+    <td>Toolbar Customize</td>
+  </tr>
+  <tr> 
+    <td>TEvalDialog</td>
+    <td>Evaluate/Modify</td>
+  </tr>
+  <tr> 
+    <td>TDbExplorerForm</td>
+    <td>DataBase Explorer</td>
+  </tr>
+  <tr> 
+    <td>TMenuBuilder</td>
+    <td>Menu Designer</td>
+  </tr>
+  <tr> 
+    <td>TActionListDesigner</td>
+    <td>ActionList Designer</td>
+  </tr>
+  <tr> 
+    <td>TFieldsEditor</td>
+    <td>Fields Editor</td>
+  </tr>
+  <tr>
+    <td>TCollectionEditor</td>
+    <td>Collection Editor</td>
+  </tr>
+  <tr> 
+    <td>TCustomizeActnEditDesigner</td>
+    <td>ActionManager Editor</td>
+  </tr>
+</table>
+<p>&nbsp;</p>
+<ul>
+  <li> 
+    <p class="text"><b>Replace</b>: Replace the class name and comment of selected item from the two ComboBox.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Add</b>: Add a new item using the class name and comment from the two ComboBox.</li>
+  <li> 
+    <p class="text"><b>Delete</b>: Delete selected item.</p>
+  </li>
+  <li> 
+    <p class="text"><b>OK</b>: Close the dialog and save settings.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Cancel</b>: Cancel the dialog.</li>
+  <li> 
+    <p class="text"><b>Help</b>: Show this help information.</p>
+  </li>
+</ul>
+<p class="text">&nbsp;</p>
+<p class="title" align="left">Links<p class="text" align="left">
+<p class="text" align="left"> <a href="formdesigner.htm">Form Designer Enhancements</a>
+<p class="text" align="left"> <a href="palette.htm">IDE Main Form Enhancements</a>
+<p class="text" align="left"> <a href="cpuwin.htm">CPU Window Enhancements</a>
+<p class="text" align="left"> <a href="objinspector.htm">Object Inspector Enhancements</a><p class="text" align="left">
+<p class="text" align="left"> <a href="inputhelper.htm">Code Input Helper</a><p class="text" align="left">
+<a href="../cnpack/index.htm">About CnWizards</a><p class="text" align="left"><hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">Copyrights 2001-2009 CnPack Team</a></p>
+</body>
+</html>

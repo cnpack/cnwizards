@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Source Statistics Wizard</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">Source Statistics Wizard</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">Source Statistics Wizard</p>
+<p class="text" align="left">
+This wizard can Calculate the lines of Pascal/C++ codes in Delphi and C++Builder IDE. It can do the statistics works from several methods as below:</p>
+
+<ul>
+  <li>
+<p class="text" align="left">
+Calculate current unit.</p>
+
+  </li>
+  <li>
+<p class="text" align="left">
+Calculate all files in current project.</p>
+
+  </li>
+  <li>
+<p class="text" align="left">
+Calculate all files in current projectgroup.</p>
+
+  </li>
+  <li>
+<p class="text" align="left">
+Calculate all opened files in IDE.</p>
+
+  </li>
+  <li>
+<p class="text" align="left">
+Calculate files in a directory with extensoin filtering.</p>
+
+  </li>
+</ul>
+<p class="text" align="left">
+When user click 'Source Statistics...' in 'CnPack' menu, a statistics dialog appears as below to let user choose count mode:</p>
+
+<p class="text" align="center">
+<img src="SourceStat.png"></p>
+
+<p class="text" align="left">After user click 'Calculate' button, this wizard can analysis selected files and give the results in the statistics result window. </p>
+<ul>
+  <li>To single file, the results include bytes, lines, lines of comments, lines of codes, effective lines, blank lines, bytes of codes, bytes of comments and blocks of comments.</li>
+  <li>To project or projectgroup, this wizards can give all the above results to all files.</li>
+  <li>Delphi's projectgroup source file and C++Builder's project or projectgroup source file are not valid source codes, so they're not calculated into results.</li>
+</ul>
+<p class="text" align="left">&nbsp;</p>
+<p class="text" align="left">The result window of this wizard is as below:</p>
+<p class="text" align="center">
+<img src="SourceStatResult.png"></p>
+
+<p class="text" align="left">The statusbar displays file counts, summary bytes and effective lines of all calculated files. Here 'effective lines' means none-blank lines. If one lines contains both code and comment, it will be counted both into lines of codes and lines of comments.</p>
+
+<p class="text" align="left">Note: {$...} in Pascal codes will be treated as comments, while #... in C++ as codes.</p>
+
+<p class="title" align="left">&nbsp;</p>
+
+<p class="title" align="left">Other Introduction</p>
+
+<p class="text" align="left">The result window provides some functions to process the statistics results. Also, statistics dialog can be shown again to select what to calcuate and re-calclate them.</p>
+
+<p class="text" align="left">You can double click a file in tree list to open it in IDE. Statistic results can be save to TXT file or CSV file seperated by comma or Tab.</p>
+
+<p class="text" align="left">If there were many files in statistices, you can use 'Search File...' to search the file and locate it.</p>
+<p class="title" align="left">&nbsp;
+<p class="title">Links</p>
+<p class="text" align="left">
+<a href="wizards.htm">Basic Operation</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">CnWizards Settings</a><p class="text" align="left">
+<a href="../cnpack/index.htm">About CnWizards</a>
+<p class="text" align="left">&nbsp; 
+<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">Copyrights 2001-2009 CnPack Team</a></p>
+</body>
+</html>

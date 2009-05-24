@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>带格式代码输出工具</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">带格式代码输出工具</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">带格式代码输出工具</p>
+<p class="text" align="left"> 该专家用于将部分或全部 Pascal/C/C++ 代码按照语法高亮显示的格式输出成 HTML 或 RTF 格式。当 IDE 当前编辑对象为代码编辑器时，该工具可用。</p>
+<p class="text" align="left"> 使用该专家，可以将 IDE 中已选择代码直接转换为 HTML 格式放入剪贴板，可以在 Word 等支持 HTML 
+格式的字处理软件中直接粘贴，也可以粘贴成纯文本，特别适合于编写文档时插入代码。</p>
+<p class="text" align="left"> 
+另外，该专家还支持输出当前编辑文件、输出当前所有打开的文件、输出当前工程中包含的所有文件以及输出当前工程组中包含的所有文件等批量转换输出功能。转换文件时会弹出对话框询问选择 HTML 格式还是 RTF 格式、HTML 格式的输出编码，以及选择是否转换完毕后打开目标文件或目录等。需要说明的是，HTML 格式编码的选择只影响输出的 HTML 文件头的编码部分，不影响文件本身的编码。</p>
+<p class="text" align="left"> 专家菜单如下图所示：</p>
+<p class="text" align="center"> 
+<img src="Pas2htmlMenu.png"></p>
+<p class="text" align="left"> 点击对应的子菜单项可以进行转换输出。</p>
+<p class="title" align="left"> 　</p>
+<p class="title" align="left"> 参数设置</p>
+<p class="text" align="left"> 专家的设置界面包括两页，第一页的常规设置如下图，可以设置各个输出命令的快捷键，并可以设置进行批量文件输出的时候是否显示进度条。</p>
+<p class="text" align="center"> <img src="pas2htmlop1.png"></p>
+<p class="text" align="left"> 　</p>
+<p class="text" align="left"> 第二页是字体设置，如下图所示。用户可以自定义 Pascal/C/C++ 代码中各个语法部分的字体，默认采用 Delphi 编辑器的默认高亮显示字体。这里，关键字、注释等的字体都由一个基准字体变化而来（如关键字加粗、注释变斜并且颜色变为深蓝等），这个字体的基准被称为基础字体，修改基础字体会影响到其他所有类别的输出字体。</p>
+<p align="center" class="text"><img src="pas2htmlop2.png"></p>
+<ul>
+  <li> 
+    <p class="text" align="left"><b>修改</b>：修改当前选择的字体，当修改基准字体时，会影响到其他字体。另外，双击显示区和点击本按钮的功能一样，都是修改当前代码类别的对应字体。</li>
+  <li> 
+    <p class="text" align="left"><b>重置</b>：恢复字体的初始设置，基准字体采用Courier New，10。</li>
+  <li> 
+    <p class="text" align="left"><b>载入</b>：尝试从注册表中根据已保存的高亮字体参数来设置各种字体，有可能注册表中不存在字体信息而导致载入不成功。</li>
+</ul>
+<p align="left" class="text">　</p>
+<p class="title" align="left">相关主题<p class="text" align="left">
+<a href="wizards.htm">IDE 专家基本操作</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">IDE 专家设置</a><p class="text" align="left">
+<a href="../cnpack/index.htm">关于 IDE 专家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版权所有 2001-2009 CnPack 开发组</a></p>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<TCnEditorCollection PropFormat="node">
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>0</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOF</InsertPos>
+    <Caption>炊硄虫じ繷</Caption>
+    <Content>//*****************************************************//
+//                                                     //
+//      %硁ン%%ColPos56%//
+//                                                     //
+//      舦┮Τ (C) %Year% %そ%%ColPos56%//
+//                                                     //
+//*****************************************************//
+
+</Content>
+    <Hint>炊硄虫じ繷</Hint>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>24764</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOL</InsertPos>
+    <Caption>彩爹睦だ筳兵</Caption>
+    <Content>//==============================================================================
+// %爹睦%
+//==============================================================================
+
+</Content>
+    <Hint>彩娩爹睦遏</Hint>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>24766</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOL</InsertPos>
+    <Caption>灿爹睦だ筳兵</Caption>
+    <Content>//------------------------------------------------------------------------------
+// %爹睦%
+//------------------------------------------------------------------------------
+
+</Content>
+    <Hint>灿爹睦だ筳兵</Hint>
+  </o>
+</TCnEditorCollection>

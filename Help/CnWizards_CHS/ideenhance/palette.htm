@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>IDE 主窗体扩展专家</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">IDE 主窗体扩展专家</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">IDE 主窗体扩展专家</p>
+<p class="text">该专家为 IDE 的主窗口以及组件面板提供了一些增强功能，包括可以使组件面板多行显示、快捷查找组件功能和使 Delphi 5 或 C++Builder 5 的组件板的右键菜单中添加 Tabs 项以供直接选择面板等，组件面板多行显示如下图所示：</p>
+<p class="text" align="center">
+<img src="multilinepal.png">
+</p>
+<p class="text">当增加 Tabs 菜单功能启用的时候，右键点击组件面板，弹出的菜单如下：</p>
+<div align="center">
+  <img src="tabsmenu.png">
+</div>
+<ul>
+  <li>
+    <p class="text">可以通过点击 Tabs 的子菜单直接选择某组件页（类似于 Delphi 6 / C++Builder 6 及以上版本）</p>
+  </li>
+  <li>
+    <p class="text">可以通过点击“多行方式”的菜单项直接切换组件面板的多行显示方式。</p>
+  </li>
+</ul>
+<p class="text">该功能可以在专家包“设置”菜单中的“专家设置”中设置，下图是选中该专家后点击设置按钮弹出的关于组件面板扩展专家的设置对话框：</p>
+<p align="center" class="text"><img src="palenhconf.png"></p>
+<ul>
+  <p class="text">　</p>
+  <li>
+    <p class="text"><b>在组件面板的弹出菜单上添加 Tabs 项</b>：是否在当前设计的窗体上的弹出菜单上添加类似于 Delphi
+      6 以及以上版本的 Tabs 项，该功能仅仅只在 Delphi 5 以及 C++Builder 5 中有效。</p>
+  </li>
+  <li>
+    <p class="text"><b>设置组件面板页为多行方式</b>：设置组件面板页面为多行，避免了点击鼠标来回滚动的麻烦。</li>
+  <li>
+    <p class="text"><b>设置组件面板页面为平面按钮风格</b>：设置组件面板切换页面的风格为平面按钮（Flat Button）方式。</li>
+  <li>
+    <p class="text"><b>屏幕空间不足时折叠 Tabs 子菜单</b>：当右键弹出菜单的 Tabs 内容太长时，选择是否多列显示 Tabs 菜单，此项只在 Delphi 7 及以下版本有效。</li>
+  <li>
+    <p class="text"><b>在组件面板上添加“查找组件”按钮</b>：该功能可在组件面板的右下角显示一下拉按钮，点击它可弹出一下拉窗体，供用户快速查找定位组件，类似于 BDS 中的组件过滤功能。该功能仅在 Delphi 7 及以下版本的 IDE 中有效，不适用于 BDS。详见下文的“查找组件”部分。</p>
+  </li>
+  <li>
+    <p class="text"><b>锁定 IDE 主窗口的工具栏以禁止拖动</b>：该功能可禁用 IDE 主窗口的 ControlBar 中的工具栏与组件面板的拖动操作，防止点击工具按钮时误拖动而改变其位置。</p>
+  </li>
+  <li>
+    <p class="text"><b>自动显示 IDE 主菜单的快捷键下划线</b>：Delphi 7 以及以上版本的 IDE 中使用了 TActionMainMenuBar 控件来做主菜单，该菜单在显示菜单快捷键时可能有些问题。本选项勾上能强制 IDE 主菜单显示快捷键的下划线。该功能仅在 Delphi 7 中有效。</p>
+  </li>
+  <li>
+    <p class="text"><b>移动主菜单上的菜单项到二级菜单下</b>：该功能可以将第三方工具在 IDE
+	主菜单上创建的一级菜单项放到指定的二级菜单下，以缩短主菜单宽度。</p>
+  </li>
+  <li>
+    <p class="text"><b>确定</b>：关闭此窗口，保存选项设置内容并更新生效。</p>
+  </li>
+  <li><p class="text"><b>取消：</b>关闭此窗口，忽略修改的选项内容。</li>
+  <li>
+    <p class="text"><b>帮助</b>：显示帮助信息。</p>
+  </li>
+</ul>
+<p class="text">　</p>
+<p class="title" align="left">查找组件
+<p class="text" align="left">点击组件面板右下角的下拉箭头按钮，可弹出一下拉窗口供快速查找定位组件或标签页之用，下拉窗口可通过拖动左边的竖条拖动成独立状态，ESC 键可关闭此窗口。</p>
+<p class="text">
+查找组件的窗口上部是工具栏和查找输入栏，中部是组件列表和标签页列表，右键点击组件列表可在弹出菜单中选择部分设置内容。下部可切换显示组件列表或标签页列表。组件列表中当前选中组件时，该组件的详细内容会显示在一提示框中。如下图所示：</p>
+<p class="text" align="center"><img src="searchcomp.png"> </p>
+<ul>
+  <p class="text">　</p>
+  <li>
+    <p class="text"><b>匹配组件名/标签名开头</b>：此按钮如按下，则查找的时候，输入的字符从组件名或标签名的头部开始匹配，组件名或标签名的头部含有输入字符的才能显示。</p>
+  </li>
+  <li>
+    <p class="text"><b>匹配组件名/标签名所有位置</b>：此按钮如按下，则查找的时候，输入的字符可匹配组件名或标签名的任何地方，包含输入字符的组件名或标签名才能显示。</li>
+  <li>
+    <p class="text"><b>创建组件</b>：点击此按钮将在当前窗体编辑器上创建选中的组件。在查找输入框按回车或在组件列表双击选中的组件也会实现同样的功能。</li>
+  <li>
+    <p class="text"><b>帮助</b>：显示此帮助信息。</p>
+  </li>
+  <li>
+    <p class="text"><b>显示组件名的首字母 T</b>：该功能处于“显示设置”菜单下，控制组件列表中是否显示组件类名的首字母 T。</p>
+  </li>
+  <li>
+    <p class="text"><b>显示组件详细提示</b>：该功能处于“显示设置”菜单下，控制组件列表中选中一组件时，是否弹出提示窗口显示其详细内容，包括组件名、所在单元名、所在标签页名以及祖先类继承图等。</p>
+  </li>
+  <li>
+    <p class="text"><b>自动选择组件面板的对应组件</b>：该功能处于“显示设置”菜单下，控制是否在组件列表中选中某组件时，自动切换到组件板的对应标签并选中组件板上对应的组件按钮。</p>
+  </li>
+  <li>
+    <p class="text"><b>显示所有标签页的组件</b>：该功能处于“标签页过滤”菜单下，默认选中，表示组件的查找范围是所有组件。如果勾选了下面的标签页的菜单项，则只搜索此标签页内的组件。</p>
+  </li>
+</ul>
+<p class="text">　</p>
+<p class="title" align="left">相关主题
+<p class="text" align="left"> <a href="formdesigner.htm">窗体设计器扩展专家</a>
+<p class="text" align="left"> <a href="cpuwin.htm">CPU 窗口扩展专家</a>
+<p class="text" align="left"> <a href="objinspector.htm">对象查看器扩展专家</a><p class="text" align="left">
+<p class="text" align="left"> <a href="wintoproller.htm">窗口置顶与折叠扩展专家</a><p class="text" align="left">
+<p class="text" align="left"> <a href="inputhelper.htm">代码输入助手</a><p class="text" align="left">
+<a href="../cnpack/index.htm">关于 IDE 专家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版权所有 2001-2009 CnPack 开发组</a></p>
+</body>
+</html>

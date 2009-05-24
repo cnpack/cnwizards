@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<PersonalityInfo>
+		<Option>
+			<Option Name="Personality">Default.Personality</Option>
+			<Option Name="ProjectType"></Option>
+			<Option Name="Version">1.0</Option>
+			<Option Name="GUID">{1AAFA68F-D7AE-44BA-927F-310105A7A640}</Option>
+		</Option>
+	</PersonalityInfo>
+	<Default.Personality>  
+    
+    
+    
+    <Projects>
+      <Projects Name="PascalScript_Core_D10.bpl">PascalScript_Core_D10.bdsproj</Projects>
+      <Projects Name="PascalScript_RO_D10.bpl">PascalScript_RO_D10.bdsproj</Projects>
+      <Projects Name="Targets">PascalScript_Core_D10.bpl PascalScript_RO_D10.bpl</Projects>
+    </Projects>
+    <Dependencies/>
+  </Default.Personality>  <StarTeamAssociation></StarTeamAssociation>
+  <StarTeamNonRelativeFiles></StarTeamNonRelativeFiles>
+</BorlandProject>

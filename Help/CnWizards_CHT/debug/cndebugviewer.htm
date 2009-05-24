@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>CnDebugViewer 使用說明</title>
+<meta http-equiv="Content-Type" content="text/html; charset=big5">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">CnDebugViewer 使用說明</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="text">歡迎您使用 CnPack 開發組開發的 CnDebug/CnDebugViewer 日誌記錄型調試信息輸出查看工具。CnDebugViewer 是 Windows  x86 平台下以獨立可執行文件方式提供給開發者使用的調試信息輸出接收查看工具，它用來接收並顯示 CnDebug.pas 輸出的內容，同時也有接收 OutputDebugString 輸出內容的功能。</p>
+
+<p class="text">　</p>
+<p class="title" align="left">CnDebugViewer 功能簡介</p>
+
+<p class="text" align="left">CnDebugViewer 主要用來接收 CnDebug.pas 輸出的調試信息和計時信息。調試信息在主窗口中以樹狀顯示，可方便地根據各種條件過濾顯示，也可保存成 XML 文件並再次載入。CnDebugViewer 的主界面如圖所示：</p>
+<p class="text" align="center"><img src="cndebugviewer.png"></p>
+<p class="text" align="left">&nbsp;</p>
+<p class="text" align="left">CnDebugViewer 啟動時會初始化一片共享內存區域並設置好隊列讀寫標記。然後 CnDebugViewer 啟動一讀取線程，專門負責讀取從 CnDebug 的輸出，並根據發送端的進程 ID 開啟不同的子窗口顯示。最下面狀態欄之上是進程標籤切換頁，頁標題顯示了輸出進程的文件名和進程 ID。點擊不同的標籤可切換到不同的進程輸出窗口。</p>
+<p class="text" align="left">中部的樹狀顯示區是用來顯示輸出信息條目，右邊的是計時結果顯示區，下方是詳細信息顯示區，用來顯示選中的調試信息的詳細內容。主窗口上部的工具欄是菜單項的快捷按鈕，在此不重複說明。</p>
+<p class="text" align="left">&nbsp;</p>
+<p class="title" align="left">文件菜單</p>
+<ul>
+  <li><p class="text"><b>新建窗口</b>：新建一空白窗口。如有新進程在通過 CnDebug 輸出調試信息並且 CnDebugViewer 讀取線程在運行，則此窗口將捕獲此進程的輸出信息。</li>
+  <li><p class="text"><b>打開</b>：打開一 CnDebugViewer 保存成的 XML 記錄文件或 CnDebug 的輸出文件（擴展名 *.cdd），注意此時 CnDebugViewer 的讀取線程必須未運行。</li>
+  <li><p class="text"><b>關閉當前窗口</b>：關閉當前子窗口，子窗口的記錄不會提示保存。</li>
+  <li><p class="text"><b>保存記錄</b>：將當前子窗口中的調試信息保存成 XML 文件。注意此處只保存調試信息和書籤信息，並未保存計時結果。</li>
+  <li><p class="text"><b>輸出</b>：將當前子窗口中的調試信息輸出成其他格式的文件，包括 TXT/CSV/HTM  等。</li>
+  <li><p class="text"><b>退出</b>：退出 CnDebugViewer。</li>
+</ul>
+<p class="text" align="left">&nbsp;</p>
+<p class="title" align="left">編輯菜單</p>
+<ul>
+  <li><p class="text"><b>清空信息內容</b>：清空輸出信息顯示區的所有信息。</li>
+  <li><p class="text"><b>清空計時內容</b>：清空計時結果顯示區的所有信息。</li>
+  <li><p class="text"><b>複製</b>：複製當前選中的輸出信息條目的詳細內容。</li>
+  <li><p class="text"><b>切換書籤</b>：切換當前選中的輸出信息條目的書籤狀態，如果不是書籤則切換成書籤，否則取消書籤。</li>
+  <li><p class="text"><b>跳至書籤</b>：當書籤存在時，此菜單項會顯示以書籤條目為內容的子菜單，點擊子菜單可跳至相應的書籤。</li>
+  <li><p class="text"><b>上一書籤</b>：點擊此菜單項時，會跳至當前選中條目的上一個書籤處，如上面沒有書籤則不移動當前焦點。</li>
+  <li><p class="text"><b>下一書籤</b>：點擊此菜單項時，會跳至當前選中條目的下一個書籤處，如下面沒有書籤則不移動當前焦點。</li>
+  <li><p class="text"><b>清除全部書籤</b>：刪除當前顯示窗口中的全部書籤。</li>
+  <li><p class="text"><b>全部展開</b>：當樹狀條目折疊時，點擊此菜單項可將其全部展開。</li>
+  <li><p class="text"><b>查找</b>：點擊此菜單項會彈出查找對話框，供用戶在輸出內容中查找相應信息。</li>
+  <li><p class="text"><b>查找下一個</b>：查找下一個待查的條目。</li>
+</ul>
+<p class="text" align="left">&nbsp;</p>
+<p class="title" align="left">查看菜單</p>
+<ul>
+  <li><p class="text"><b>計時顯示</b>：選擇此菜單項可確定是否顯示計時結果區。</li>
+  <li><p class="text"><b>詳細信息顯示</b>：選擇此菜單項可確定是否顯示詳細信息顯示區。</li>
+  <li><p class="text"><b>到首條</b>：當前焦點跳到輸出信息顯示區的第一條記錄。</li>
+  <li><p class="text"><b>上一條</b>：當前焦點跳到輸出信息顯示區的當前選擇條目的上一條記錄。</li>
+  <li><p class="text"><b>下一條</b>：當前焦點跳到輸出信息顯示區的當前選擇條目的下一條記錄。</li>
+  <li><p class="text"><b>到末尾</b>：當前焦點跳到輸出信息顯示區的最後一條記錄。</li>
+  <li><p class="text"><b>前一分隔線</b>：當前焦點跳到輸出信息顯示區的上一條分隔線，如果沒有則不動。</li>
+  <li><p class="text"><b>後一分隔線</b>：當前焦點跳到輸出信息顯示區的下一條分隔線，如果沒有則不動。</li>
+  <li><p class="text"><b>自動滾動</b>：顯示輸出的信息時是否自動滾動到最後一條。</li>
+</ul>
+<p class="text">（說明：分隔線是 CnDebug 單元中輸出的一條特殊信息，用來表示信息間的分隔，可用 LogSeparator 或 TraceSeparator 方法輸出。）</p>
+<p class="text">&nbsp;</p>
+<p class="title">控制菜單</p>
+<ul>
+  <li><p class="text"><b>開始</b>：開始讀取線程，默認時 CnDebugViewer 的讀取線程是自動啟動的。</li>
+  <li><p class="text"><b>暫停</b>：暫停當前讀取線程的讀取，此時 CnDebug 的輸出內容會積累在共享內存隊列中。</li>
+  <li><p class="text"><b>停止</b>：停止當前讀取線程的讀取，此時 CnDebug 的輸出內容頁也會積累在共享內存隊列中。</li>
+</ul>
+<p class="text">&nbsp;</p>
+<p class="title">選項菜單</p>
+<ul>
+  <li><p class="text"><b>常規設置</b>：顯示常規設置對話框。該對話框界面如圖：</li>
+</ul>
+<p align="center" class="text"><img src="settings.png"></p>
+<ul>
+  <blockquote>
+    <li><p class="text"><b>主窗體顯示熱鍵</b>：設置顯示主窗體的全局熱鍵，默認為 Ctrl+Alt+V。</li>
+    <li><p class="text"><b>啟動時最小化</b>：設置是否啟動時最小化，默認為否。</li>
+    <li><p class="text"><b>顯示系統托盤圖標</b>：是否在系統托盤區顯示 CnDebugViewer 的圖標。</li>
+    <li><p class="text"><b>最小化到系統托盤</b>：在顯示系統托盤圖標的前提下，設置最小化 CnDebugViewer 時是否到系統托盤，而不在任務欄上顯示按鈕。</li>
+    <li><p class="text"><b>關閉時最小化到系統托盤</b>：在顯示系統托盤圖標的前提下，勾選此選項時，點擊關閉按鈕關閉 CnDebugViewer 時可最小化到系統托盤而不在任務欄上顯示按鈕，否則正常退出。</li>
+    <li><p class="text"><b>保存窗口狀態及位置</b>：退出時是否保存主窗口的狀態和位置，以備下次運行時恢復。</li>
+    <li><p class="text"><b>捕獲 OutputDebugString 的輸出</b>：是否同時捕捉系統調試 API OutputDebugString 的輸出，默認不捕捉。此選項的改動要生效需要重新啟動 CnDebugViewer。</li>
+    <li><p class="text"><b>確定</b>：確認常規選項的修改並關閉此對話框。</li>
+    <li><p class="text"><b>取消</b>：關閉此對話框，不做任何修改。</li>
+  </blockquote>
+</ul>
+<ul>
+  <li><p class="text"><b>過濾設置</b>：顯示發送端過濾設置對話框，允許用戶啟用發送端過濾器。發送端過濾器不同於 CnDebugViewer 的顯示過濾功能。它作用於 CnDebug 端，能阻止不符合需要的輸出信息被輸入至共享內存隊列中。該對話框界面如圖：</li>
+</ul>
+<p align="center" class="text"><img src="senderfilter.png"></p>
+<ul>
+  <blockquote>
+    <li><p class="text"><b>啟用發送端過濾機制</b>：勾選此按鈕後可啟用發送端過濾機制，下部的條件設置使能。</li>
+    <li><p class="text"><b>Level</b>：用戶可在此指定允許輸出的信息的 Level 範圍。</li>
+    <li><p class="text"><b>Tag</b>：用戶可在此設定允許輸出的信息的 Tag，空表示允許所有 Tag，不支持通配符。</li>
+    <li><p class="text"><b>允許輸出的信息類型</b>：用戶可在此處勾選允許輸出的信息類型。</li>
+    <li><p class="text"><b>確定</b>：確認過濾器修改並關閉此對話框，過濾內容將作用於 CnDebug 端。</li>
+    <li><p class="text"><b>取消</b>：關閉此對話框，不做任何修改。</li>
+  </blockquote>
+  <li><p class="text"><b>Language</b>：CnDebugViewer 的界面被設計為支持多種語言，目前支持簡體中文、繁體中文和英文，可在此菜單項下選擇界面語言。</li>
+</ul>
+<p class="text">&nbsp;</p>
+<p class="title">幫助菜單</p>
+<ul>
+  <li><p class="text"><b>幫助</b>：顯示此幫助信息。</li>
+  <li><p class="text"><b>關於</b>：顯示作者和版權信息。</li>
+</ul>
+<p class="text">&nbsp;</p>
+<p class="title">顯示過濾</p>
+<p class="text">子窗口上部是顯示信息查找和過濾區，它能根據用戶選擇的過濾條件調整顯示輸出。注意這裡的過濾和發送端過濾機制不同。</p>
+<ul>
+  <li><p class="text"><b>快捷查找框</b>：此處可輸入字符串並點擊右邊的按鈕（或按回車）進行快捷查找，查找歷史記錄保留在下拉框中。</li>
+  <li><p class="text"><b>根據類型過濾</b>：選擇需要顯示的信息的類型，目前只支持單選。</li>
+  <li><p class="text"><b>根據 Level 過濾</b>：選擇需要顯示的信息的 Level 範圍。</li>
+  <li><p class="text"><b>根據線程 ID 過濾</b>：選擇需要顯示輸出信息的線程 ID，或選擇 * 表示顯示所有線程。已經輸出過信息的線程 ID 會顯示在下拉框中。注意如果不同的線程中交錯調用了 Enter 和 Leave 系列函數，則可能在顯示全部線程時造成縮進錯亂的情況，此時選擇某一獨立線程即可恢復此線程的原始縮進顯示。</li>
+  <li><p class="text"><b>根據 Tag 過濾</b>：選擇需要顯示的輸出信息的 Tag 值，或選擇 * 表示顯示所有的 Tag。已經輸出的 Tag 值會顯示在下拉框中。</li>
+</ul>
+<p class="text">　</p>
+<p class="text" align="left">您在使用中如果有任何的問題或建議，請與我們聯繫：<a href="mailto:master@cnpack.org?subject=關於 CnPack IDE 專家包">master@cnpack.org</a>，開發組將盡力為您提供幫助！<p class="text" align="left">　<p class="title" align="left">相關主題<p class="text" align="left">
+<a href="cndebug.htm">CnDebug 使用說明</a><p class="text" align="left">
+<a href="../licenses/license.htm">CnPack 許可協議</a><p class="text" align="left">
+<a href="../cnpack/about.htm">關於 CnPack</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版權所有 2001-2009 CnPack 開發組</a></p>
+</body>
+</html>

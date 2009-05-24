@@ -1,0 +1,113 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>源碼範本專家</title>
+<meta http-equiv="Content-Type" content="text/html; charset=big5">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4" id="table1">
+  <tr>
+    <td class="head" height="16">源碼範本專家</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">源碼範本專家</p>
+<p class="text">源碼範本專家，包含一組可自定義的源代碼和注釋範本，支援
+Delphi/C++Builder。</p>
+<p class="text">用戶定義編輯器範本後，可以在源代碼中插入指定的範本，範本裏可以使用預定的或自定義的巨集，插入時巨集會使用相應的文本替換。</p>
+<p class="text" align="left"> 　</p>
+<p class="title">源碼範本設置</p>
+<p class="text" align="left">該視窗中列出了所有的源代碼編輯器範本，如下圖所示：</p>
+<p class="text" align="center">
+<img border="0" src="srctemplates.png"></p>
+<p class="title" align="left"> 　</p>
+<ul>
+  <li>
+<p class="text" align="left"><b>增加</b>：增加一個新的編輯器範本。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>刪除</b>：刪除當前選擇的範本。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>清空</b>：刪除所有的範本。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>編輯</b>：編輯當前的範本。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>上移</b>：調整當前選擇的範本位置向上移動。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>下移</b>：調整當前選擇的範本位置向下移動。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>導入</b>：從編輯器範本檔中導入所有的範本，如果選擇追加方式，會將檔中的範本追加到當前範本之後。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>導出</b>：將當前使用的範本導出到範本檔中。</p>
+  </li>
+</ul>
+<p class="title" align="left"> 　</p>
+<p class="title">源碼範本編輯</p>
+<p class="text" align="left">當新增或編輯一個編輯器範本時，顯示如下圖所示編輯介面：</p>
+<p align="center" class="text"><img border="0" src="srctempeditfrm.png"></p>
+<ul>
+  <li>
+<p class="text" align="left">
+<b>標題</b>：顯示在編輯器範本功能表中的標題。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>圖示</b>：顯示在編輯器範本功能表中的圖示。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>快捷鍵</b>：調用該範本的快捷鍵。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>描述</b>：該範本的描述資訊，顯示為工具欄按鈕的 Hint。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>位置</b>：該範本插入在源代碼中的位置。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>禁用該編輯器範本</b>：禁用使其不出現在編輯器範本功能表中。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>插入後回到原來位置</b>：對插入位置在單元頭或其他位置的範本，完成插入後將游標移回到當前插入前的位置。該選項會覆蓋 %Cursor% 宏指定的游標位置。</p>
+  </li>
+</ul>
+<p class="text" align="left">
+　</p>
+<p class="text" align="left">
+在範本中可以使用預定義的宏和用戶自定義的宏。</p>
+<p class="text" align="left">
+選擇一個宏，並點擊“插入”按鈕，可在當前編輯位置插入一個預定義的宏。</p>
+<p class="text" align="left">
+用戶自定義宏使用兩個“%”引起來，巨集名可使用任何字元，包括中文。</p>
+<p class="text" align="left">
+當範本執行時，預定義宏會自動替換，而用戶巨集會彈出一個視窗，要求用戶輸入相應的文本，如下圖所示：</p>
+<p class="text" align="center">
+<img src="srctempmacroform.png"></p>
+<p class="text" align="left">
+其中巨集名即用戶自定義的巨集名稱，值為需要用戶輸入的替換文本。</p>
+<p class="text" align="left">
+輸入時回車鍵可切換到下一個宏，確定後在源代碼中插入相應的文本。</p>
+<p class="title" align="left">　<p class="title" align="left">相關主題<p class="text" align="left">
+<a href="wizards.htm">IDE 專家基本操作</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">IDE 專家設置</a><p class="text" align="left">
+<a href="../cnpack/index.htm">關於 IDE 專家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版權所有 2001-2009 CnPack 開發組</a></p>
+</body>
+</html>

@@ -1,0 +1,13 @@
+!LanguageID=1033
+!LanguageName=English
+!TranslationAuthor=Liu Xiao
+!TranslationAuthorEmail=liuxiao@cnpack.org
+!TranslationDefaultFont=Tahoma,8,,,,
+csHintStr=Hint
+csInstallSucc=CnPack IDE Wizards have been Installed in:<BR>
+csInstallSuccEnd=Run Setup again to Uninstall.
+csUnInstallSucc=CnPack IDE Wizards have been Uninstalled From:<BR>
+csUnInstallSuccEnd=Run Setup again to Install.
+csInstallFail=Can't Find Delphi or C++Builder to Install CnPack IDE Wizards.
+csUnInstallFail=CnPack IDE Wizards have already Disabled.
+csSetupCmdHelp=This Tool Supports Command Line Mode without Showing the Main Form.<BR><BR>Command Line Switch Help:<BR><BR>         -i or /i or -install or /install Install to IDE<BR>         -u or /u or -uninstall or /uninstall UnInstall from IDE<BR>         -n or /n or -NoMsg or /NoMsg Do NOT Show the Success Message after Setup run.<BR>         -? or /? or -h or /h Show the Command Line Help.

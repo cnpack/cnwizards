@@ -1,0 +1,294 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>选择块浮动按钮</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">选择块浮动按钮</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">选择块浮动按钮</p>
+<p class="text">该工具提供了一组与选择文本相关功能的快捷操作方式。当用户在代码编辑器中选择了一段文本时，会自动在编辑器左边显示一个浮动按钮，点击该按键下拉出相关的操作菜单。</p>
+<p class="text">使用界面如下图所示：</p>
+<p class="text" align="center">
+<img src="srcedtblocktools.png"></p>
+<p class="text"><b>编辑菜单</b></p>
+<ul>
+	<li>
+	<p class="text"><b>复制到剪帖板</b>：复制当前选择块。</p></li>
+	<li>
+	<p class="text"><b>追加复制到剪贴板</b>：复制当前选择块并追加到剪贴板。</p></li>
+	<li>
+	<p class="text"><b>剪切到剪贴板</b>：剪切当前选择块。</p></li>
+	<li>
+	<p class="text"><b>追加剪切到剪贴板</b>：剪切当前选择块并追加到剪贴板。</p></li>
+	<li>
+	<p class="text"><b>在当前位置重复</b>：将当前选择块原样复制一份在当前位置并保持块选择。</p></li>
+	<li>
+	<p class="text"><b>删除</b>：删除选择块。</p></li>
+	<li>
+	<p class="text"><b>复制 HTML 到剪帖板</b>：将当前选择块内容以语法高亮的 HTML 格式复制到剪贴板，见 
+	<a href="../wizards/pas2htmlwizards.htm">带格式代码输出工具</a>。</p></li>
+	<li>
+	<p class="text"><b>保存到文件</b>：将当前选择块内容保存到文件中。</p></li>
+</ul>
+<p class="text" align="center">
+<img src="srcedtblockedit.png">&nbsp;&nbsp;&nbsp;
+<img src="srcedtblockcase.png"></p>
+<p class="text"><b>大小写转换菜单</b></p>
+<ul>
+	<li>
+	<p class="text"><b>转换为小写</b>：将当前选择文本全部转换成小写。</p></li>
+	<li>
+	<p class="text"><b>转换为大写</b>：将当前选择文本全部转换成大写。</p></li>
+	<li>
+	<p class="text"><b>大小写互换</b>：将当前选择文本大小写互换。</p></li>
+</ul>
+<p class="text"><b><br>
+格式处理菜单</b></p>
+<ul>
+	<li>
+	<p class="text"><b>代码缩进</b>：使用 IDE 中设置的缩进量缩进当前选择块，可使用 Tab 键快速缩进。</p></li>
+	<li>
+	<p class="text"><b>代码缩进指定列</b>：使用指定的缩进量缩进当前选择块。</p></li>
+</ul>
+<ul>
+	<li>
+	<p class="text"><b>代码反缩进</b>：使用 IDE 中设置的缩进量反缩进当前选择块，可使用 Shift+Tab 键快速反缩进。</p>
+	</li>
+	<li>
+	<p class="text"><b>代码反缩进指定列</b>：使用指定的缩进量反缩进当前选择块。</p></li>
+</ul>
+<p class="text" align="center">
+<img src="srcedtblockformat.png">&nbsp;&nbsp;&nbsp;
+<img src="srcedtblockcomment.png"></p>
+<p class="text"><b>代码注释菜单</b></p>
+<ul>
+	<li>
+	<p class="text"><b>注释代码块</b>：使用 // 注释当前选择块。见 
+	<a href="../wizards/editors/editorcodecomment.htm">代码注释工具</a>。</p></li>
+	<li>
+	<p class="text"><b>取消代码块注释</b>：取消使用 // 的注释块。见 
+	<a href="../wizards/editors/editorcodeuncomment.htm">取消代码注释工具</a>。</p></li>
+	<li>
+	<p class="text"><b>反转代码块注释</b>：反转选择块的代码注释。见 
+	<a href="../wizards/editors/editorcodetogglecomment.htm">反转代码注释工具</a>。</p>
+	</li>
+</ul>
+<p align="center">
+<img src="srcedtblockwrap.png"></p>
+<p class="text" align="left">
+<b>代码嵌入菜单</b></p>
+<ul>
+	<li>
+	<p class="text"><b>嵌入到代码中</b>：根据需要将当前选择的代码块缩进并嵌入到指定的语句中。</p>
+	</li>
+	<li>
+	<p class="text"><b>设置</b>：显示代码嵌入设置对话框如下图所示</span>。</li>
+</ul>
+<p class="text" align="center">
+<img src="srcedtblockwrapconf.png"></p>
+<ul>
+	<li>
+	<p class="text"><b>项目列表</b></li>
+	<ul>
+	<li>
+	<p class="text"><b>增加</b>：增加一项新的内容。</li>
+	<li>
+	<p class="text"><b>删除</b>：删除当前选择的项目。</li>
+	<li>
+	<p class="text"><b>上、下</b>：向上或向下移动当前选择的项目。</li>
+	<li>
+	<p class="text"><b>导入</b>：从文件中导入项目到当前列表，可以选择替换或追加方式。</li>
+	<li>
+	<p class="text"><b>导出</b>：将当前列表中的项目导出到数据文件。</li>
+	</ul>
+</ul>
+<ul>
+	<li>
+	<p class="text"><b>代码嵌入项</b><ul>
+	<li>
+	<p class="text"><b>标题</b>：显示在菜单中的标题。</li>
+	<li>
+	<p class="text"><b>快捷键</b>：定义当前项目的快捷键。</li>
+	<li>
+	<p class="text"><b>代码块</b>：
+	如果选择了“行块处理模式”，则在执行代码嵌入时将选择区域首尾扩展到整行进行处理。在行块模式下，可以设置块缩进级数来对代码块进行缩进。</li>
+	<li>
+	<p class="text"><b>头部</b>：插入到选择块前面的代码。如果是行块模块，可以选择自动缩进和缩进级数。使用<span lang="en-us"> 
+	&quot;|&quot; </span>可以定位光标。</li>
+	<li>
+	<p class="text"><b>尾部</b>：插入到选择块后面的代码。如果是行块模块，可以选择自动缩进和缩进级数。使用<span lang="en-us"> 
+	&quot;|&quot; </span>可以定位光标。</li>
+	</ul>
+</ul>
+<ul>
+	<li>
+	<p class="text"><b>确定、取消</b>：保存或取消当前的设置。</li>
+	<li>
+	<p class="text"><b>帮助</b>：显示帮助页面。</li>
+</ul>
+<p align="center">
+<img src="srcedtblockreplace.png"></p>
+<p class="text" align="left">
+<b>组替换菜单</b></p>
+<ul>
+	<li>
+	<p class="text"><b>组替换功能</b>：根据设置对当前选择块中的内容执行批量替换。</p>
+	</li>
+	<li>
+	<p class="text"><b>设置</b>：显示组替换设置对话框如下图所示</span>。</li>
+</ul>
+<p class="text" align="center">
+<img src="srcedtblockreplaceconf.png"></p>
+<ul>
+	<li>
+	<p class="text"><b>项目列表</b></li>
+	<ul>
+	<li>
+	<p class="text"><b>增加</b>：增加一项新的内容。</li>
+	<li>
+	<p class="text"><b>删除</b>：删除当前选择的项目。</li>
+	<li>
+	<p class="text"><b>上、下</b>：向上或向下移动当前选择的项目。</li>
+	<li>
+	<p class="text"><b>导入</b>：从文件中导入项目到当前列表，可以选择替换或追加方式。</li>
+	<li>
+	<p class="text"><b>导出</b>：将当前列表中的项目导出到数据文件。</li>
+	</ul>
+</ul>
+<ul>
+	<li>
+	<p class="text"><b>组替换项</b><ul>
+	<li>
+	<p class="text"><b>标题</b>：显示在菜单中的标题。</li>
+	<li>
+	<p class="text"><b>快捷键</b>：定义当前项目的快捷键。</li>
+	<li>
+	<p class="text"><b>替换项</b>：列出需要执行替换的内容。</li>
+	<li>
+	<p class="text"><b>增加</b>：增加一项新的内容。</li>
+	<li>
+	<p class="text"><b>删除</b>：删除当前选择的项目。</li>
+	<li>
+	<p class="text"><b>上、下</b>：向上或向下移动当前选择的项目。</li>
+	<li>
+	<p class="text"><b>源文本</b>：需要进行替换的源字符串。</li>
+	<li>
+	<p class="text"><b>替换为</b>：替换后的目标字符串。</li>
+	<li>
+	<p class="text"><b>忽略大小写：</b>替换当前项时是否忽略大小写。</li>
+	<li>
+	<p class="text"><b>整词匹配：</b>替换时是否要求匹配的文本为独立的单词。</li>
+	</ul>
+</ul>
+<ul>
+	<li>
+	<p class="text"><b>确定、取消</b>：保存或取消当前的设置。</li>
+	<li>
+	<p class="text"><b>帮助</b>：显示帮助页面。</li>
+</ul>
+<p align="center">
+<img src="srcedtblocksearch.png"></p>
+<p class="text" align="left">
+<b>Web 搜索菜单</b></p>
+<ul>
+	<li>
+	<p class="text"><b>Web 搜索功能</b>：打开搜索链接页面，查找当前选择的内容。</p>
+	</li>
+	<li>
+	<p class="text"><b>设置</b>：显示 Web 搜索设置对话框如下图所示</span>。</li>
+</ul>
+<p class="text" align="center">
+<img src="srcedtblocksearchconf.png"></p>
+<ul>
+	<li>
+	<p class="text"><b>项目列表</b></li>
+	<ul>
+	<li>
+	<p class="text"><b>增加</b>：增加一项新的内容。</li>
+	<li>
+	<p class="text"><b>删除</b>：删除当前选择的项目。</li>
+	<li>
+	<p class="text"><b>上、下</b>：向上或向下移动当前选择的项目。</li>
+	<li>
+	<p class="text"><b>导入</b>：从文件中导入项目到当前列表，可以选择替换或追加方式。</li>
+	<li>
+	<p class="text"><b>导出</b>：将当前列表中的项目导出到数据文件。</li>
+	</ul>
+</ul>
+<ul>
+	<li>
+	<p class="text"><b>Web 搜索项</b><ul>
+	<li>
+	<p class="text"><b>标题</b>：显示在菜单中的标题。</li>
+	<li>
+	<p class="text"><b>快捷键</b>：定义当前项目的快捷键。</li>
+	<li>
+	<p class="text"><b>搜索链接</b>：指定进行搜索的可执行文件或网页链接，%s 表示当前选择内容。</li>
+	</ul>
+</ul>
+<ul>
+	<li>
+	<p class="text"><b>确定、取消</b>：保存或取消当前的设置。</li>
+	<li>
+	<p class="text"><b>帮助</b>：显示帮助页面。</li>
+</ul>
+<p class="text" align="center">
+　</p>
+<p class="text"><b>其它菜单</b></p>
+<ul>
+	<li>
+	<p class="text"><b>赋值交换</b>：将当前选择的源代码中的赋值代码左右交换，即将 A := B 的代码变换为 B := A。见 
+	<a href="../wizards/editors/editorcodeswap.htm">赋值交换工具</a>。</p></li>
+	<li>
+	<p class="text"><b>转换为字符串</b>：将当前选择的源代码转换成多行字符串常量，这样可以省去输入引号和换行字符的麻烦。见 
+	<a href="../wizards/editors/editorcodetostring.htm">转换为字符串工具</a>。</p></li>
+</ul>
+<ul>
+	<li>
+	<p class="text"><b>插入颜色</b>：打开颜色对话框并用选择的颜色值替换当前选择的文本。见 
+	<a href="../wizards/editors/editorinsertcolor.htm">插入颜色工具</a>。</p></li>
+	<li>
+	<p class="text"><b>插入日期时间</b>：打开插入日期对话框并用日期时间值替换当前选择的文本。见 
+	<a href="../wizards/editors/editorinserttime.htm">插入日期时间工具</a>。</p></li>
+	<li>
+	<p class="text"><b>转换为字符串</b>：将当前选择的代码行按字母排序。见 
+	 
+	<a href="../wizards/editors/editorsortlines.htm">选择行排序工具</a>。</p></li>
+</ul>
+<p class="text" align="center">
+<img src="srcedtblockmisc.png"></p>
+<p class="text">　</p>
+<p class="text"><b>工具设置</b></p>
+<p class="text">其设置界面如下图所示：</p>
+<p class="text" align="center">
+<img src="srcedtehnconf3.png"></p>
+<ul>
+  <li>
+    <p class="text"><b>块选择时显示浮动工具按钮</b>：是否启动选择块浮动工具按钮功能。</p>
+  </li>
+  <li>
+    <p class="text"><b>在编辑器右键菜单中显示浮动工具按钮下拉菜单</b>：是否在编辑器右键菜单中插入一项子菜单，其内容是浮动工具按钮下拉菜单中的菜单项，供右键菜单调用。</p>
+  </li>
+</ul>
+<p class="text">　</p>
+<p class="title" align="left">相关主题 
+<p class="text" align="left">
+<a href="srcedtenh.htm">代码编辑器扩展</a><p class="text" align="left"> 
+<a href="srcedttab.htm">源代码标签扩展</a><p class="text" align="left">
+<a href="../cnpack/index.htm">关于 IDE 专家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版权所有 2001-2009 CnPack 开发组</a></p>
+</body>
+</html>

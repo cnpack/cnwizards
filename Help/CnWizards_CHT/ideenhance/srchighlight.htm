@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>源代碼高亮擴展專家</title>
+<meta http-equiv="Content-Type" content="text/html; charset=big5">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">源代碼高亮擴展專家</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">源代碼高亮擴展專家</p>
+<p class="text">源代碼高亮擴展用於在源代碼編輯器中增加括號匹配高亮和代碼結構匹配高亮的功能。其中括號匹配支持 ( )、[ ]、{ } 匹配括號的高亮顯示，{ } 只在C/C++ 源文件中有效。代碼結構匹配高亮能以不同的顏色顯示代碼編輯器中不同層次的關鍵字以增加代碼可讀性，也能通過畫線匹配的方式顯示代碼層次，畫線匹配時還允許以背景色高亮的方式突出顯示光標下的關鍵字以及其配對字符。�</p>
+<p class="text">括號匹配高亮顯示後的代碼如下圖所示：</p>
+<p align="center" class="text">
+<img src="srchighlight.png"></p>
+<p class="text">代碼結構匹配關鍵字高亮顯示後的代碼如下圖所示：</p>
+<p align="center" class="text">
+<img src="srchighlight1.png"></p>
+<ul>
+  <p class="text">　</p>
+</ul>
+    <p class="text">其設置對話框如下圖所示：</p>
+<p class="text" align="center">
+<img src="srchighlightconf.png"></p>
+<p class="text">　</p>
+<ul>
+  <li>
+<p class="text"><b>括號匹配高亮</b></p>
+  <ul>
+  <li>
+<p class="text"><b>允許括號匹配高亮顯示</b>：是否對當前光標處匹配的括號高亮顯示。</p>
+  </li>
+  <li>
+<p class="text"><b>顏色設置</b>：設置高亮顯示的前景色、背景色和邊框色。</p>
+  </li>
+  <li>
+<p class="text"><b>括號加粗顯示</b>：括號是否加粗顯示。</p>
+  </li>
+  <li>
+<p class="text"><b>光標在括號中間的文本時也高亮顯示</b>：如果光標不在括號上而是位於匹配括號的中間，是否也高亮顯示。</p>
+  </li>
+  </ul>
+  <li>
+<p class="text"><b>代碼結構匹配高亮</b></p>
+  <ul>
+  <li>
+<p class="text"><b>允許光標處匹配關鍵字高亮背景顯示</b>：允許光標處匹配關鍵字高亮背景顯示。如果此功能使能，則當光標在 begin 處時，此 begin 與其配對的 end 都會以背景色高亮的方式突出顯示，默認是黃色背景。</p>
+  </li>
+  <li>
+<p class="text"><b>允許光標處匹配當前標識符高亮背景顯示</b>：允許光標處的標識符高亮背景顯示。如果此功能使能，則當光標在某個標識符處時，當前範圍內所有此標識符所在處都會以背景色高亮的方式突出顯示，默認是黃色背景。</p>
+  </li>
+  <li>
+<p class="text"><b>背景色</b>：光標處匹配關鍵字以及當前標識符高亮背景顯示的背景色，默認是黃色。</p>
+  </li>
+  <li>
+<p class="text"><b>允許高亮當前行背景</b>：允許光標所在的行背景高亮顯示，類似於 BDS 下的高亮當前行背景的功能。此功能只需在 Delphi 7 或以下版本中實現，BDS 中無需此功能。背景顏色可根據 IDE 編輯器配色方案自動配置，也可自定義。</p>
+  </li>
+  <li>
+<p class="text"><b>允許代碼結構匹配關鍵字高亮顯示</b>：是否允許代碼結構匹配關鍵字高亮顯示。此功能和下面的畫線高亮都只支持 Delphi 的 Pascal 源碼。</p>
+  </li>
+  <li>
+<p class="text"><b>允許代碼結構匹配連線顯示</b>：是否允許代碼結構匹配層次畫線高亮顯示。</p>
+  </li>
+  <li>
+<p class="text"><b>畫線設置</b>：畫線的設置，點擊打開對話框如下圖：</p>
+<p align="center" class="text"><img src="srchighlightlineconf.png"></p>
+  </li>
+  <ul>
+  <li>
+<p class="text"><b>線型</b>：畫線的線型，默認為實線。</p>
+  </li>
+  <li>
+<p class="text"><b>線寬</b>：畫線的線寬，默認 1 像素。</p>
+  </li>
+  <li>
+<p class="text"><b>在關鍵字配對端繪製「[」型端點</b>：是否在配對的關鍵字的左端各繪製「[」型端點，以明確指明關鍵字位置所在。</p>
+  </li>
+  <li>
+<p class="text"><b>關鍵字列未對齊時繪製橫線</b>：是否在配對的關鍵字左端不在同一列時繪製橫線，以指明關鍵字位置所在。</p>
+  </li>
+  <li>
+<p class="text"><b>橫線使用細虛線繪製</b>：是否使用細虛線繪製橫線以與豎線有所區別，如不選，橫線則採用上面的線型繪製。</p>
+  </li>
+  <li>
+<p class="text"><b>高亮連線時忽略 class/interface/record 等聲明內容</b>：高亮連線時是否忽略 class/interface/dispinterface/record 等聲明，此選項也會影響到後面的光標處匹配關鍵字的選項。</p>
+  </li>
+</ul>
+  <li>
+<p class="text"><b>高亮顯示範圍</b>：設置本單元中的高亮顯示範圍，有四個選項：整個單元、當前過程/函數、當前最外層塊、當前最內層塊。</p>
+  <ul>
+  <li>
+<p class="text"><b>整個單元</b>：高亮範圍為整個單元的實現部分。注意如文件尺寸過大，可能影響部分性能。</p>
+  </li>
+  <li>
+<p class="text"><b>當前過程/函數</b>：高亮範圍為當前光標所在的過程/函數，包括嵌套定義的過程/函數。</p>
+  </li>
+  <li>
+<p class="text"><b>當前最外層塊</b>：高亮範圍為當前光標所在的塊的最外層塊，比如所在過程/函數體，但不包括嵌套定義的過程/函數。</p>
+  </li>
+  <li>
+<p class="text"><b>當前最內層塊</b>：高亮範圍為當前光標附近最近一層次的代碼塊。</p>
+  </li>
+  </ui>
+  </li>
+  <li>
+<p class="text"><b>高亮層次顯示顏色</b>：設置不同層次的代碼塊所需要顯示的顏色，「恢復」按鈕可重置到默認顏色。</p>
+  </li>
+  <li>
+<p class="text"><b>高亮顯示延時</b>：代碼編輯器變動後需要重新解析並高亮關鍵字。本選項用來設置代碼編輯器變動後高亮刷新的延時。</p>
+  </li>
+  <ul>
+  <li>
+<p class="text"><b>即時顯示</b>：在代碼編輯器變動後的很短時間內立刻重新刷新高亮顯示。注意如文件尺寸過大並且改動頻繁，可能影響部分性能。</p>
+  </li>
+  <li>
+<p class="text"><b>顯示前延時</b>：代碼編輯器最近一次變動後延時一定時間再刷新高亮顯示，默認延時六百毫秒。</p>
+  </li>
+  <li>
+<p class="text"><b>熱鍵按下時顯示</b>：平時不高亮顯示關鍵字與畫線，僅僅當該熱鍵按下時才刷新顯示。此熱鍵也可用於屏幕顯示未更新時強制刷新當前編輯器高亮顯示。</p>
+  </li>
+  </ul>
+  <li>
+<p class="text"><b>不高亮匹配行數超過此數量的單元</b>：當編輯大文件時，頻繁的高亮更新可能影響性能。此選項可設置在文件尺寸超過一定行數時關閉高亮顯示。</p>
+  </li>
+  </ul>
+  <li>
+<p class="text"><b>確定</b>：保存當前參數設置。</p>
+  </li>
+  <li>
+<p class="text"><b>取消</b>：放棄當前操作。</p>
+  </li>
+</ul>
+<p class="text">　</p>
+<p class="title" align="left">相關主題 
+<p class="text" align="left"> <a href="formdesigner.htm">窗體設計器擴展專家</a>
+<p class="text" align="left"> <a href="palette.htm">IDE 主窗體擴展專家</a>
+<p class="text" align="left"> <a href="cpuwin.htm">CPU 窗口擴展專家</a>
+<p class="text" align="left"> <a href="objinspector.htm">對像查看器擴展專家</a><p class="text" align="left">
+<p class="text" align="left"> <a href="wintoproller.htm">窗口置頂與折疊擴展專家</a><p class="text" align="left">
+<p class="text" align="left"> <a href="inputhelper.htm">代碼輸入助手</a><p class="text" align="left">
+<a href="../cnpack/index.htm">關於 IDE 專家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版權所有 2001-2009 CnPack 開發組</a></p>
+</body>
+</html>

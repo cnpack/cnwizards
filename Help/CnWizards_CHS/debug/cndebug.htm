@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>CnDebug 使用说明</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">CnDebug 使用说明</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="text">欢迎您使用 CnPack 开发组开发的 CnDebug/CnDebugViewer 日志记录型调试信息输出查看工具。CnDebug 是 Windows  x86 平台下以源码方式提供给开发者使用的调试信息输出接口单元，目前只有 Object Pascal 形式的实现（CnDebug.pas），可在 Delphi 和 C++Builder 下使用。</p>
+<p class="text">　</p>
+<p class="title" align="left">CnDebug 的适用场合</p>
+<p class="text">在某些源码级断点单步调试不适用的情况下，日志记录型调试便有其用武之地了。很多朋友经常在代码中的一定位置上使用 MessageBox 等函数来显示运行期的某些值，这就是一种基本的日志型调试手段，只不过使用弹出框显示信息在某些场合下有局限性，比如在涉及到窗体重画或比较复杂的用户界面消息处理的代码时，多余的提示框反倒会产生多余的消息，给程序流程带来影响。这种情况下，后台日志记录型调试就显得更适合了。</p>
+<p class="text">日志记录型调试会在被调试程序中使用特定的代码来输出标志流程或调试值的信息，然后通过另外的工具来接受信息并统统记录在案，以备分析程序的运行期信息。Win32 平台本身便提供了类似的 API 函数 OutputDebugString，此函数可以在程序中输出一个字符串到 Windows 的专用调试字串的存放缓冲区，如果程序在 IDE 的调试器下运行，那么该字符串会被 Event log 窗口捕获并显示；单独运行时则会被存在着的日志记录调试器（如 DebugView）所捕获；如果什么调试器都没有，则石沉大海无消息。
+</p>
+<p class="text">OutputDebugString 固然方便，但也存在着一些缺点，如信息输出单一，配套的记录工具显示的内容无层次区分、不易过滤分类查找等。CnDebug.pas 便是为了增强此项功能而开发的、功能更加强大的输出信息接口单元。</p>
+
+<p class="text">　</p>
+<p class="title" align="left">CnDebugger 功能简介</p>
+
+<p class="text" align="left">CnDebug.pas 提供了一全局对象 CnDebugger 用来控制并且输出调试信息。CnDebugger 的各个方法提供了灵活的记录方式，不仅仅能输出简要的字符串，还能自动转换整数、浮点数、颜色值，并且能用 RTTI 来处理对象与组件以生成输出的属性总结、拦截 Exception 发生时的现场信息记录等。</p>
+<p class="text" align="left">CnDebugger 正常情况下在 CnDebug.pas 单元 initialization 时创建，在finalization 时释放。</p>
+<p class="text">　</p>
+<p class="title" align="left">CnDebugger 输出信息内容</p>
+
+<p class="text" align="left">由于 CnDebugger 的输出信息要在接收端进行分类过滤，因此每条输出信息中并不只是简单地包含一字符串，而是包括了以下多种内容：</p>
+<blockquote><ul>
+<li>
+<p class="text"><b>文字</b>：Msg，字符串格式，最大长度有限制。
+<li>
+</li>    
+<p class="text"><b>层次</b>：Level，一整数，作为过滤条件之用。用户可自定义某条输出信息的 Level。Level 按层次包容，譬如如果指定了内部过滤条件中的 Level 为 2，那么小于等于 2 的 Level 的信息都能被输出，大于 2 的则被屏蔽了。目前 Level 定为 0 到 3。默认是 3 也就是全部输出。所以 Level 可以用来控制输出信息的详细程度。
+<li>
+</li>
+<p class="text"><b>类型</b>：MsgType，标识该信息的类型，是普通信息还是警告还是错误等。
+<li>
+</li>
+<p class="text"><b>标签</b>：Tag，固定长度的字符串格式（目前最长 8 字节），用于单项过滤之用。输出时如不指定，默认是空。
+</li>
+</ul>
+</blockquote>
+<p class="text" align="left">以上是对用户开放的信息，有多种方法可用来指定上述内容。</p>
+<p class="text" align="left">此外，还有部分信息属于 CnDebugger 内部生成的，不对用户开放自定义的接口。它们包括：</p>
+<blockquote><ul>
+  <li>
+<p class="text"><b>缩进</b>：Indent，一整数，供接收端折叠优化显示之用，主要用于 Enter 和 Leave 等系列方法。注意此信息和当前线程有关。</li>
+<p class="text">
+  <li><b>进程</b> <b>ID</b>：ProcessID，当前进程 ID。</li>
+<p class="text"><li><b>线程</b> <b>ID</b>：ThreadID，当前线程 ID。</li>
+</ul>
+</blockquote>
+<p class="text" align="left">用户可不关心这几项内容。</p>
+<p class="text">　</p>
+<p class="title" align="left">CnDebugger 输出接口编译期的使能与编译条件的关系</p>
+
+<p class="text" align="left">CnDebugger 提供两类输出接口：Log 系列和 Trace 系列。两类输出接口基本上具有相同的参数和功能。所不同的在于，Log 系列功能只在 DEBUG 编译条件被定义的时候有效，而 Trace 系列在普通情况下也有效。不过在 NDEBUG 定义的情况下两者都无效。</p>
+<p class="text" align="left">以上写成表达式就是：</p>
+<ul><blockquote>
+  <li>
+Log 有效 := IF<font color="#ff0000">N</font>DEF NDEBUG and IFDEF DEBUG
+  </li>
+  <li>
+Trace 有效 := IF<font color="#ff0000">N</font>DEF NDEBUG
+  </li>
+  </blockquote>
+</ul>
+
+<p class="text" align="left">Log 系列输出接口仅在调试时 DEBUG 被定义的情况下参与编译，适合用于产生比较详细的记录的场合；而 Trace 系列输出接口在正式版发布时默认也会被编译入产品中，用于产生关键的调试记录。同时，这两类功能可在 NDEBUG 情况下方便地被全部禁用。</p>
+<p class="text">DEBUG 等编译条件可在 Project Options 中设置。</p>
+
+<p class="text">　</p>
+<p class="title" align="left">CnDebugger 异常拦截机制</p>
+
+<p class="text">CnDebugger 可自动替应用程序安装一异常拦截功能，当发生未捕捉的异常时，可捕捉下来并且记录当时程序的运行期信息，如堆栈内容、带调试信息编译时的出错代码行数等。这里，CnDebugger 采用的是 JCL 库的运行期拦截机制，添加了 CnDebugger 自身的异常通知处理过程来记录当时信息。打开此选项的编译条件名为 USE_JCL。
+<p class="text">注意，打开 USE_JCL 编译条件后，CnDebug.pas 需要 JCL 库才能顺利编译，如果未安装 JCL 库，则需要从 JCL 库中复制 CnDebug.pas 头部注释中列出的一批 JCL 单元后才能编译。编译时打开编译选项 Include TD32 debug Info 或生成 MapFile 可在异常截获时获得更多信息。
+
+<p class="text">　</p>
+<p class="title" align="left">CnDebugger 的计时功能</p>
+<p class="text">CnDebugger 提供了 StartTimeMark 和 StopTimeMark 方法供用户测量一段时间之用。其内部使用了 x86 CPU 提供的取 CPU 周期指令来进行比较精确的计时。用户可以如此使用：
+</p>
+<pre class="text">
+   // 开始计时，1 表示新启动的计时器号
+   StartTimeMark(1);  
+   // 做其他耗时操作
+ 
+   // 停止计时
+   StopTimeMark(1);
+</pre>
+<p class="text">这样，在停止计时的时候，CnDebugger 会自动记录并计算出期间的 CPU 周期数，把结果作为一条计时消息发送出去。CnDebugger 可同时启动多个计时器实例，每个实例以不同的计时器号标识它。
+<p class="text">　</p>
+<p class="title" align="left">CnDebugger 性能说明</p>
+<p class="text">CnDebug.pas 单元内部可使用多种形式的 Channel 来进行信息输出，目前默认的 Channel 是共享内存队列方式，该共享内存队列由 CnDebugViewer 创建维护。CnDebugger 的默认 Channel 在输出时如果未检测到共享内存队列存在，则所有的输出内容都会被忽略。因此，CnDebugger 的信息输出过程在 CnDebugViewer 未启动的情况下，对应用程序的性能影响是很小的。</p>
+<p class="text">CnDebugViewer 启动后，共享内存队列被创建，CnDebugger 的输出内容被逐个复制到了队列中，这种输出，不可避免地给应用程序带来了一些性能影响，但比起同类的产品 uDbg/Overseer 使用的 SendMessage 和 WM_COPYDATA 来说，性能提高了许多。而且在我们的测试使用过程中，此种影响远未达到不能接受的地步。目前 CnPack 开发组的产品 CnPack IDE 专家包便使用了 CnDebug.pas 来进行调试输出，对专家包本身与 IDE 并未造成太大的影响。与输出信息带来的方便相比，些许性能的牺牲，尤其是调试期间，还是值得的。</p>
+<p class="text">　</p>
+<p class="title" align="left">CnDebugger 其他功能与常见问题</p>
+<p class="text">CnDebugger 对象提供了 EvaluateObject 方法来在运行期弹出 Inspector 式样的窗体来显示一对象的RTTI信息，此功能需要定义编译条件 SUPPORT_EVALUATE。</p>
+<p class="text">如果您的 IDE 不支持双字节字符，那么可能在编译 CnDebug.pas 时会出现 IDE 将注释中的中文字符判断为非法字符从而无法编译的现象，此时您可以使用专家包的删除注释功能，删除全部注释，或删除扩展 ASCII 字符即可。</p>
+<p class="text">CnDebugger 的接口详细说明文档可参见我们网站的文档中心的<a href="http://www.cnpack.org/showdetail.php?id=453">CnDebugger接口帮助文档</a>。</p>
+<p class="text">　</p><p class="text" align="left">您在使用中如果有任何的问题或建议，请与我们联系：<a href="mailto:master@cnpack.org?subject=关于 CnPack IDE 专家包">master@cnpack.org</a>，开发组将尽力为您提供帮助！<p class="text" align="left">　<p class="title" align="left">相关主题<p class="text" align="left">
+<a href="cndebugviewer.htm">CnDebugViewer 使用说明</a><p class="text" align="left">
+<a href="../licenses/license.htm">CnPack 许可协议</a><p class="text" align="left">
+<a href="../cnpack/about.htm">关于 CnPack</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版权所有 2001-2009 CnPack 开发组</a></p>
+</body>
+</html>

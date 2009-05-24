@@ -1,0 +1,60 @@
+<TCnWebSearchCollection PropFormat="node">
+  <o>
+    <Caption>Google Search</Caption>
+    <ShortCut>0</ShortCut>
+    <Url>http://www.google.com/search?hl=en&amp;q=%s</Url>
+  </o>
+  <o>
+    <Caption>Google Newsgroups</Caption>
+    <ShortCut>0</ShortCut>
+    <Url>http://groups.google.com/groups?as_q=%s&amp;num=10&amp;scoring=r&amp;hl=en&amp;as_epq=&amp;as_oq=&amp;as_eq=&amp;as_ugroup=&amp;as_usubject=&amp;as_uauthors=&amp;lr=&amp;as_drrb=q&amp;as_qdr=&amp;as_mind=1&amp;as_minm=1&amp;as_miny=1981&amp;as_maxd=8&amp;as_maxm=9&amp;as_maxy=2005&amp;safe=off</Url>
+  </o>
+  <o>
+    <Caption>Google CodeSearch</Caption>
+    <ShortCut>0</ShortCut>
+    <Url>http://www.google.com/codesearch?hl=en&amp;lr=&amp;q=%s</Url>
+  </o>
+  <o>
+    <Caption>Yahoo! Search</Caption>
+    <ShortCut>0</ShortCut>
+    <Url>http://search.yahoo.com/search?ei=UTF-8&amp;fr=sfp&amp;p=%s</Url>
+  </o>
+  <o>
+    <Caption>MSN Search</Caption>
+    <ShortCut>0</ShortCut>
+    <Url>http://search.msn.com/results.aspx?FORM=MSNH&amp;srch_type=0&amp;q=%s</Url>
+  </o>
+  <o>
+    <Caption>-</Caption>
+    <ShortCut>0</ShortCut>
+  </o>
+  <o>
+    <Caption>MSDN Online Search</Caption>
+    <ShortCut>0</ShortCut>
+    <Url>http://search.microsoft.com/default.asp?so=RECCNT&amp;siteid=us/dev&amp;p=1&amp;nq=NEW&amp;qu=%s&amp;boolean=PHRASE&amp;ig=01&amp;i=99</Url>
+  </o>
+  <o>
+    <Caption>Borland Knowledge Base Search </Caption>
+    <ShortCut>0</ShortCut>
+    <Url>http://support.borland.com/kbsearch.jspa?advanced=false&amp;searchQuery=%s&amp;keywordList=&amp;includeComments=true&amp;parentCatID=1&amp;childCatID=-1&amp;dateRange=0&amp;entryTypeID=-1&amp;resultRange=15</Url>
+  </o>
+  <o>
+    <Caption>-</Caption>
+    <ShortCut>0</ShortCut>
+  </o>
+  <o>
+    <Caption>Torry's Delphi Pages</Caption>
+    <ShortCut>0</ShortCut>
+    <Url>http://www.torry.net/quicksearchd.php?String=%s&amp;Title=Yes</Url>
+  </o>
+  <o>
+    <Caption>Delphi Super Pages</Caption>
+    <ShortCut>0</ShortCut>
+    <Url>http://dsp.href.com/</Url>
+  </o>
+  <o>
+    <Caption>SourceForge.net</Caption>
+    <ShortCut>0</ShortCut>
+    <Url>http://sourceforge.net/search/?type_of_search=soft&amp;forum_id=0&amp;group_id=0&amp;atid=0&amp;words=%s&amp;Search=Search</Url>
+  </o>
+</TCnWebSearchCollection>

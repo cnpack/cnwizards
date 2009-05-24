@@ -1,0 +1,74 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>前進後退擴展</title>
+<meta http-equiv="Content-Type" content="text/html; charset=big5">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4" id="table1">
+  <tr>
+    <td class="head" height="16">前進後退擴展</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">前進後退擴展</p>
+<p class="text">IDE
+本身提供的前進、後退功能只對識別字聲明跳轉有效，該擴展通過跟蹤當前行號的改變來提供更方便的前進、後退功能。當編輯器游標移動超過指定行（默認是
+5行）時，工具會自動記住移動前的位置，並允許使用“後退”功能退回。</p>
+<p class="text">比如在編寫代碼時，需要到 uses 區添加一個新的引用單元，可以直接用捲軸找到 uses
+位置並定位游標，輸入完單元名稱後再用“後退”功能，即可回到原來編輯的位置。</p>
+<p class="text">該擴展取代了 IDE 原來的按鈕，後退功能的下拉功能表如下：</p>
+<p class="text" align="center">
+<img src="srcedtnav.png"></p>
+<ul>
+  <li>
+    <p class="text"><strong>IDE 後退</strong>：調用 IDE
+	自己的後退功能。在點擊後退按鈕時按住“Shift”、“Alt”或“Ctrl”中任意一鍵，都會直接調用 IDE 的後退。</p>
+  </li>
+  <li>
+    <p class="text"><strong>IDE 後退列表</strong>：顯示 IDE 自己的後退歷史列表。</p>
+  </li>
+  <li>
+    <p class="text"><strong>後退列表項</strong>：後退歷史堆疊中的列表，標題為檔案名和行號，點擊可直接跳轉到該位置。</p>
+  </li>
+  <li>
+    <p class="text"><strong>暫用 IDE 跳轉功能</strong>：在點擊按鈕時暫時使用 IDE
+	自己的跳轉功能。該狀態退出後不保存，如果需要關閉前進後退擴展，請在設置中禁用。</p>
+  </li>
+	<li>
+    <p class="text"><b>編輯器擴展配置</b>：打開 <a href="srcedtenh.htm">代碼編輯器擴展設置</a>
+	視窗，設置內容見後。</p>
+  </li>
+</ul>
+<p class="text">　</p>
+<p class="text">該擴展功能的設置介面如下圖所示：</p>
+<p class="text" align="center">
+<img src="srcedtehnconf2.png"></p>
+<ul>
+  <li>
+    <p class="text"><strong>擴展代碼編輯器的前進、後退按鈕功能</strong>：是否啟動前進後退擴展。</p>
+  </li>
+  <li>
+    <p class="text"><strong>新記錄的最小行間隔</strong>：當游標移動到與上一處位置間隔指定的行數時，產生新的後退記錄。</p>
+  </li>
+  <li>
+    <p class="text"><strong>最大列表項數</strong>：列表中保存的歷史記錄最大值。</p>
+  </li>
+</ul>
+<p class="text">　</p>
+<p class="title" align="left">相關主題
+<p class="text" align="left">
+<a href="srcedtenh.htm">代碼編輯器擴展</a><p class="text" align="left">
+<a href="srcedttoolbar.htm">編輯器工具欄</a>
+<p class="text" align="left"> <a href="srcedtgutter.htm">行號面板顯示</a><p class="text" align="left">
+<a href="../cnpack/index.htm">關於 IDE 專家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版權所有 2001-2009 CnPack 開發組</a></p>
+</body>
+</html>

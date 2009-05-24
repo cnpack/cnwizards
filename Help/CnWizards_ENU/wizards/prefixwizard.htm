@@ -1,0 +1,265 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Prefix Wizard</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">Prefix Wizard</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">Prefix Wizard</p>
+<p class="text" align="left">
+This wizard can rename components to correct prefix by some rules. Both Delphi/C++Builder are supported.</p>
+<p class="text" align="left">
+There are three rename mode in this wizard, including Auto, Prompt and Manual.</p>
+<p class="text" align="left">
+&nbsp;</p>
+<p class="title">Rename Prompt</p>
+<p class="text" align="left">
+In default options, if you put a new component or modify name of a component, this wizard will check whether the new name accords with its rule. If not, a rename dialog will popup to let you rename the component.</p>
+<p class="text" align="left">
+If the rule of this component type was not defined, a prefix type dialog will popup as below:</p>
+<p class="text" align="center">
+<img src="prefixdefine.png"></p>
+<p class="text" align="left">
+You can enter the prefix of this type of component.</p>
+<ul>
+  <li>
+<p class="text" align="left">
+<b>Ignore This Type of Component</b>: If this was selected, all this type of component will be ignored and never prompt again after clicking "<b>OK</b>" or "<b>Cancel</b>" Button.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>Never Ask Again</b>: If this was selected, all components without a prefix rule will be ignored.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>OK</b>: Confirm this prefix for this type of component.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>Cancel</b>: Cancel the modification.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>Help</b>: Show this help.</p>
+  </li>
+</ul>
+<p class="text">
+If a prefix rule for a type of component was defined, and a new or name-modified component's prefix does NOT accord with this rule, a rename dialog will popup to rename this component as below:</p>
+<p class="text" align="center">
+<img src="prefixedit.png"></p>
+<p class="text" align="left">
+You can enter new component name here.</p>
+<ul>
+  <li>
+<p class="text" align="left">
+<b>Ignore This Type of Component</b>: If this was selected, all this type of component will be ignored and never prompt again after clicking "<b>OK</b>" or "<b>Cancel</b>" Button.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>Never Ask Again</b>: If this was selected, all rename operations will be executed automatically without showing this dialog.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>Modify Prefix</b>: Click this button to modify prefix in the rule for this type of component.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>Classname Button</b>: Set classname without T to component name.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>OK</b>: Confirm modification.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>Cancel</b>: Cancel this modification.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>Help</b>: Show this help.</p>
+  </li>
+</ul>
+<p class="title">&nbsp;</p>
+<p class="title">Rename Manually</p>
+<p class="text" align="left">
+If you click the 'Prefix Wizard...' menu item in 'CnPack' menu in IDE, a dialog will show as below:</p>
+<p class="text" align="center">
+<img src="prefixexe.png"></p>
+<ul>
+  <li>
+<p class="text" align="left">
+<b>Please Select Which to be Processed</b></p>
+  </li>
+  <ul>
+  <li>
+<p class="text" align="left">
+<b>Selected Components</b>: The range is selected components in current form. It's enabled when selected count &gt; 0.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>All Components in Current Form</b>: The range is all components in current form. It's enabled when current form is form designer.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>All Components in All Opened Forms</b>: The range is all components in all opened forms in IDE.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>All Components in All Forms of Project</b>: The range is all components in all forms of current project in IDE.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>All Components in All Forms of ProjectGroup</b>: The range is all components in all forms of current projectgroup in IDE.</p>
+  </li>
+  </ul>
+  <li>
+<p class="text" align="left">
+<span lang="zh-cn"><b>Process Those in the List</b></span></p>
+  </li>
+  <ul>
+  <li>
+<p class="text" align="left">
+<b>Components with Unproper Prefix</b>: Only process those components without a correct prefix in range.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>Components with Unproper Prefix or Name + Digital</b>: Only process those components without a correct prefix or auto generated name with digital subfix in range.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>All Components including Those Ignored</b> Process all component in range, including those ignored components. It's used to browse and rename batch components.</p>
+  </li>
+  </ul>
+  <li>
+<p class="text" align="left">
+<b>Process</b>: Process components. If components requiring renaming exist, a prompt dialog will show.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>Settings</b>: Display settings dialog.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>Close</b>: Close this dialog.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>Help</b>: Show this help.</p>
+  </li>
+</ul>
+<p class="text" align="left">
+If components requiring renaming exist after clicking '<b>OK</b>', a prompt dialog will show as below.</p>
+<p class="text" align="center">
+<img src="prefixcomp.png"></p>
+<p class="text" align="left">
+This dialog shows the components that need renaming. You can choose one item and enter new name in top edit and press enter to confirm this modification.</p>
+<p class="text" align="left">
+Hint: You can use Up, Down, Home, PgUp, PgDown, End to move cursor.
+</p>
+<ul>
+  <li>
+<p class="text" align="left">
+<b>Modify</b>: Modify selected component and confirm the new name. It's equal to press enter in edit.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>OK</b>: Confirm all rename operations.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>Cancel</b>: Cancel this operation and close dialog.</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>Help</b>: Show this help.</p>
+  </li>
+</ul>
+<p class="text" align="left">
+If you do NOT want to modify a name of a component, you can uncheck its checkbox or modify new name to empty.</p>
+<p class="text" align="left">
+Sorting is supported by clicking column header.</p>
+<p class="text" align="left">
+&nbsp;</p>
+<p class="title">
+Settings Dialog</p>
+<p class="text" align="left">
+Settings dialog of this wizard is as below:</p>
+<p class="text" align="center"> <img src="prefixconfig.png"></p>
+<ul>
+  <li> 
+    <p class="text"><b>Display Settings</b></p>
+    <ul>
+      <li> 
+        <p class="text"><b>Enable Modify Prefix Automatically</b>: Whether allow renaming component automatically, if NOT, all options below will be disabled.</p>
+      </li>
+      <li> 
+        <p class="text"><b>Show Dialog when Add New Component or Rename</b>: Whether show renaming dialog to let user enter new component name. If not, renaming will be performed automatically.</p>
+      </li>
+      <li> 
+        <p class="text"><b>Prompt for Undefined Prefix</b>: Whether show prefix definition dialog to let user enter the prefix when meeting components without a corresponding prefix rule.</p>
+      </li>
+      <li> 
+        <p class="text"><b>Ignore Component Naming after Class Name</b>: Whether ignore those components naming after classname without T, such as MainMenu.</p>
+      </li>
+      <li> 
+        <p class="text"><b>Replace the Prefix when Auto-rename</b>: Whether replace the old prefix when computing new names.</p>
+      </li>
+      <li class="text"> 
+        <p><b>Add Underscore after Prefix when Renaming</b>: Whether add an underscore after prefix, i.e. btn_1.</p>
+      </li>
+      <li><b>Prefix Case Sensitive</b>: Whether match case when judge whether a component has a valid prefix.</li>
+      <li><p><b>Use Action Name as New Name if Connected to an Action</b>: If checked and if the component has an Action property, use the prefix + action name (without the action prefix) as the new name of this component.</p></li>
+      <li><p><b>Auto Rename when Action Changed</b>: If checked and when the Action property of an unnamed component, or named but does not have a correct prefix, or has a prefix + digital, changed (except to nil), component name will be renamed to prefix + action name (without the action prefix).</p></li>
+      <li><p><b>Use DataField as New Name if this Property Exists</b>: If checked and if the component has an DataField property, use the prefix + DataField value as the new name of this component.</p></li>
+      <li><p><b>Auto Rename when DataField Changed</b>: If checked and when the DataField property of an unnamed component, or named but does not have a correct prefix, or has a prefix + digital, changed (except to ''), component name will be renamed to prefix + DataField value.</p></li>
+    </ul>
+  </li>
+  <li> 
+    <p class="text"> <b>Component Prefix Settings</b></p>
+    <ul>
+      <li>
+        <p class="text"><b>Modify</b>: Modify selected component type's prefix.</p>
+      </li>
+      <li>
+        <p class="text"><b>Import</b>: Import prefix rules from a file.</p>
+      </li>
+      <li>
+        <p class="text"><b>Export</b>: Export prefix rules to a file.</p>
+      </li>
+    </ul>
+  </li>
+  <li> 
+    <p class="text"> <b>OK</b>: Save settings and close this dialog.</p>
+  </li>
+  <li> 
+    <p class="text"> <b>Cancel</b>: Cancel settings modification and close this dialog.</p>
+  </li>
+  <li> 
+    <p class="text"> <b>Help</b>: Show this help.</p>
+  </li>
+</ul>
+<p class="text" align="left">Note: If the checkbox before a type was not selected, this type will be ignored when processing.
+<p class="title" align="left">&nbsp;
+<p class="title">Links</p>
+<p class="text" align="left">
+<a href="wizards.htm">Basic Operation</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">CnWizards Settings</a><p class="text" align="left">
+<a href="../cnpack/index.htm">About CnWizards</a>
+<p class="text" align="left">&nbsp; 
+<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">Copyrights 2001-2009 CnPack Team</a></p>
+</body>
+</html>

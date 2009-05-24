@@ -1,0 +1,867 @@
+<!--
+  WANT - A build management tool.
+  Copyright (c) 2001-2003 Juancarlo Anez, Caracas, Venezuela.
+  All rights reserved.
+
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later Ver.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+{ $Id: want.xml,v 1.41 2009/05/19 14:30:09 zjy Exp $ }
+
+This is the Want script for building CnWizards.
+See http://www.suigeneris.org/want/ for details.
+-->
+<project name="cnwizards"
+         basedir="../"
+         default="help" >
+
+  <!-- 从环境变量中取得管理员标志 -->
+  <property name="master.ini"   value="${basedir}/Make/master.ini" />
+  <property name="ismaster"     value="?{${master.ini}:Master:Master}" />
+
+  <!-- 从环境变量中取得系统参数 -->
+  <property name="ProgramFiles"   value="%{ProgramFiles}" />
+
+  <property name="env.D9"         value="%{DCC_DELPHI9}" />
+  <property name="exe.D9"         value="${env.D9}" if="env.D9" />
+  <property name="exe.D9"         value="${ProgramFiles}\Borland\BDS\3.0\Bin\DCC32.EXE" unless="env.D9" />
+  <property name="exe.D10"        value="${env.D10}" if="env.D10" />
+  <property name="exe.D10"        value="${ProgramFiles}\Borland\BDS\4.0\Bin\DCC32.EXE" unless="env.D10" />
+  <property name="exe.D11"        value="${env.D11}" if="env.D11" />
+  <property name="exe.D11"        value="${ProgramFiles}\CodeGear\RAD Studio\5.0\Bin\DCC32.EXE" unless="env.D11" />
+  <property name="exe.D12"        value="${env.D12}" if="env.D12" />
+  <property name="exe.D12"        value="${ProgramFiles}\CodeGear\RAD Studio\6.0\Bin\DCC32.EXE" unless="env.D12" />
+  <property name="exe.D14"        value="${env.D14}" if="env.D14" />
+  <property name="exe.D14"        value="${ProgramFiles}\CodeGear\RAD Studio\7.0\Bin\DCC32.EXE" unless="env.D14" />
+  <property name="exe.brcc32"     value="%{BRCC32}" />
+
+  <!-- 根据发布类型设置相关属性，发布类型由命令行传入，如 want -Dpreview=true -->
+  <property name="release.type"   value="_Unstable" if="unstable" />
+  <property name="release.type"   value="_Debug"    if="debug" />
+  <property name="release.type"   value="_Preview"  if="preview" />
+  <property name="release.type"   value="_RC1"      if="rc1" />
+  <property name="release.type"   value="_RC2"      if="rc2" />
+  <property name="release.type"   value="_RC3"      if="rc3" />
+  <property name="release.type"   value="_RC4"      if="rc4" />
+  <property name="release.type"   value="_RC5"      if="rc5" />
+  <property name="release.type"   value=""          if="release" />
+
+  <property name="ftpdir"  value="/download.cnpack.org/unstable"  if="unstable" />
+  <property name="ftpdir"  value="/download.cnpack.org/debug"     if="debug" />
+  <property name="ftpdir"  value="/download.cnpack.org/preview"   if="preview" />
+  <property name="ftpdir"  value="/download.cnpack.org/rc"        if="rc1" />
+  <property name="ftpdir"  value="/download.cnpack.org/rc"        if="rc2" />
+  <property name="ftpdir"  value="/download.cnpack.org/rc"        if="rc3" />
+  <property name="ftpdir"  value="/download.cnpack.org/rc"        if="rc4" />
+  <property name="ftpdir"  value="/download.cnpack.org/rc"        if="rc5" />
+  <property name="ftpdir"  value="/upgrade.cnpack.org/cnwizards"  if="release" />
+
+  <property name="dcc_arg" value="-vn" if="debug" />
+  <property name="dcc_arg" value=""    unless="debug" />
+
+  <!-- 定义编译时使用的条件编译宏 -->
+  <property name="define._debug"    value=";DEBUG;USE_JCL" if="debug" />
+  <property name="define._debug"    value=""               unless="debug" />
+  <property name="define._master"   value=";IS_MASTER"     if="ismaster" />
+  <property name="define._master"   value=""               unless="ismaster" />
+  <property name="define.add"       value="AUTO_BUILD${define._debug}${define._master}"/>
+
+  <!-- 定义是否需要包括帮助文件的条件 -->
+  <property name="install_arg"  value="/DNO_HELP" if="unstable"/>
+  <property name="install_arg"  value=""          unless="unstable"/>
+  <property name="install_arg"  value="/DNO_HELP" if="debug"/>
+  <property name="install_arg"  value=""          if="helpfile"/>
+
+  <property name="release.type" value="_Unstable" unless="ftpdir" />
+  <property name="ftpdir"       value="/download.cnpack.org/unstable" unless="ftpdir" />
+
+  <!-- 从 release.ini 中读取项目属性 -->
+  <property name="ini"                  value="${basedir}/Make/release.ini" />
+  <property name="Ver.Major"            value="?{${ini}:Version:Major}" />
+  <property name="Ver.Minor"            value="?{${ini}:Version:Minor}" />
+  <property name="Ver.Release"          value="?{${ini}:Version:Release}" />
+  <property name="Ver.Build.old"        value="?{${ini}:Version:Build}" />
+  <property name="Ver.CompanyName"      value="?{${ini}:Version:CompanyName}" />
+  <property name="Ver.ProductName"      value="?{${ini}:Version:ProductName}" />
+  <property name="Ver.ProductVersion"   value="?{${ini}:Version:ProductVersion}" />
+  <property name="Ver.LegalCopyright"   value="?{${ini}:Version:LegalCopyright}" />
+  <property name="Ver.LegalTrademarks"  value="?{${ini}:Version:LegalTrademarks}" />
+  <property name="Ver.Comments"         value="?{${ini}:Version:Comments}" />
+
+  <!-- 如果是管理员，将 build 号加一 -->
+  <property name="Ver.Build"            value="={1 + ${Ver.Build.old}}" if="ismaster" />
+  <property name="Ver.Build"            value="${Ver.Build.old}"    unless="ismaster" />
+
+  <!-- 设置版本字符串 -->
+  <property name="Ver.Str.Major"        value="${Ver.Major}" />
+  <property name="Ver.Str.Minor"        value="${Ver.Minor}.${Ver.Release}.${Ver.Build}${release.type}" />
+  <property name="Ver.Comma"            value="${Ver.Major},${Ver.Minor},${Ver.Release},${Ver.Build}" />
+  <property name="Ver.Dot"              value="${Ver.Major}.${Ver.Minor}.${Ver.Release}.${Ver.Build}" />
+
+  <!-- 设置安装程序文件名 -->
+  <property name="Installer.Name"       value="CnWizards_${Ver.Str.Major}.${Ver.Str.Minor}.exe" />
+  <property name="zipname"              value="CnWizards_Src_${Ver.Str.Major}.${Ver.Str.Minor}.zip" />
+  <property name="zipfile"              value="${root}/../${zipname}" />
+
+  <!-- 取得日期时间 -->
+  <tstamp>
+    <format property="date.curr"        pattern="yyyy-mm-dd" />
+    <format property="date.build"       pattern="yyyy.mm.dd" />
+  </tstamp>
+
+  <!-- 定义目录名变量 -->
+  <property name="root"           value="${basedir}" />
+  <property name="bin"            value="${basedir}/Bin" />
+  <property name="dcu"            value="${basedir}/Dcu" />
+  <property name="doc"            value="${basedir}/Doc" />
+  <property name="help"           value="${basedir}/Help" />
+  <property name="install"        value="${basedir}/Install" />
+  <property name="install.src"    value="${basedir}/Install/Src" />
+  <property name="install.output" value="${basedir}/Install/Output" />
+  <property name="make"           value="${basedir}/Make" />
+  <property name="src"            value="${basedir}/Source" />
+  <property name="tools"          value="${basedir}/Tools" />
+  <property name="cnpack"         value="${basedir}/../cnpack" />
+  <property name="cnpack.src"     value="${cnpack}/Source" />
+
+  <!-- 显示帮助信息 -->
+  <target name="help" description="Show help text." >
+    <echo message="CnWizards Build Tool - WANT
+Usage: want [target-name] [-Dname=value]
+  where target-name may:
+    help       - This help text.
+    cleanbin   - Clean output files.
+    cleanobj   - Clean temp files.
+    clean      - Clean output and temp files.
+    cvsupdate  - Update all files.
+    d5         - Compile CnWizards for Delphi 5.
+                 (d6, d7, d9, d10, d11, d12, d14, cb5, cb6 also)
+    cnwizards  - Compile all CnWizards DLLs (D5, D6, etc.).
+    resdll     - Compile CnWizards Resource DLL.
+    cnconfigio - Compile CnConfigIO.
+    cndebugviewer - Compile CnDebugViewer.
+    cndfm6to5  - Compile CnDfm6To5.
+    cnascii    - Compile CnAsciiChart.
+    cnidebr    - Compile CnIdeBRTool.
+    cnmanagewiz   - Compile CnManageWiz;
+    cnselectlang  - Compile CnSelectLang.
+    cnsmr         - Compile Relation Analyzer.
+    cnwizsetup - Compile CnWizards Setup.
+    tools      - Compile Tools (CnDfm6To5, CnWizSetup, etc.).
+    help_chs   - Compile Chinese chm help (GB2312).
+    help_cht   - Compile Chinese chm help (BIG5).
+    help_enu   - Compile English chm help.
+    makehelp   - Compile all chm help files.
+    makeinst   - Build CnWizards Installer.
+    all        - All above tasks except cvsupdate.
+    allcvs     - All above tasks.
+    upload     - Upload Installer to Server (Master only).
+    incbuild   - Increase build and commit (Master only).
+    publish    - Publish a new version (Master only).
+
+  where name=value may:
+    unstable=true - Make unstable version (default).
+    debug=true    - Make debug version.
+    preview=true  - Make preview version.
+    release=true  - Make release version.
+    
+    helpfile=true - Include help files (default when not unstable)." />
+  </target>
+
+  <!-- 准备构建 -->
+  <target name="-prepare" >
+    <echo  message="Run as master." if="ismaster" />
+    <echo  message="version=${Ver.Str.Major}.${Ver.Str.Minor}" />
+  </target>
+
+  <!-- 清理目录 -->
+  <target name="clean" depends="cleanbin,cleanobj" description="Clean output and temp files." >
+  </target>
+
+  <target name="cleanbin" description="Clean output files." >
+    <delete dir="${bin}" >
+       <include name="*.*" />
+       <include name="Help/*.chm" />
+    </delete>
+  </target>
+
+  <target name="cleanobj" description="Clean temp files." >
+    <delete dir="${dcu}" >
+       <include name="*.*" />
+       <exclude name="Readme.txt" />
+    </delete>
+    <delete dir="${src}" >
+       <include name="**/*.hpp" />
+       <include name="**/*.drc" />
+       <include name="**/*.rc" />
+       <include name="**/*.mak" />
+       <exclude name="**/*.template.*" />
+    </delete>
+    <delete dir="${tools}" >
+       <include name="**/*.hpp" />
+       <include name="**/*.drc" />
+       <include name="**/*.rc" />
+       <include name="**/*.mak" />
+       <exclude name="**/*.template.*" />
+    </delete>
+    <delete dir="${cnpack.src}" >
+       <include name="**/*.hpp" />
+       <include name="**/*.drc" />
+       <include name="**/*.rc" />
+       <include name="**/*.mak" />
+       <exclude name="**/*.template.*" />
+    </delete>
+    <delete dir="${help}" >
+       <include name="**/_errorlog.txt" />
+    </delete>
+  </target>
+
+  <!-- 更新 cvs 源码 -->
+  <target name="cvsupdate" ifndef="nocvs" description="Update all files." >
+    <cvs dest="${root}" command="-z9 -q update -C -d" if="ismaster" />
+    <cvs dest="${cnpack}" command="-z9 -q update -C -d" if="ismaster"/>
+    <cvs dest="${root}" command="-z9 -q update -d" unless="ismaster" />
+    <cvs dest="${cnpack}" command="-z9 -q update -d" unless="ismaster"/>
+    <delete dir="${root}" if="ismaster" >
+       <include name="**/.#*" />
+    </delete>
+  </target>
+
+  <!-- 编译 CnWizards DLLs -->
+  <target name="cnwizards" depends="-cw_prepare,-d5,-d6,-d7,-d9,-d10,-d11,-d12,-d14,-cb5,-cb6,-cw_final" description="Compile all CnWizards DLLs (D5, D6, etc.)." />
+
+  <target name="d5" depends="-d5,-cw_final" description="Compile CnWizards for Delphi 5." />
+  <target name="d6" depends="-d6,-cw_final" description="Compile CnWizards for Delphi 6." />
+  <target name="d7" depends="-d7,-cw_final" description="Compile CnWizards for Delphi 7." />
+  <target name="d9" depends="-d9,-cw_final" description="Compile CnWizards for Delphi 2005." />
+  <target name="d10" depends="-d10,-cw_final" description="Compile CnWizards for Delphi 2006." />
+  <target name="d11" depends="-d11,-cw_final" description="Compile CnWizards for RAD Studio 2007." />
+  <target name="d12" depends="-d12,-cw_final" description="Compile CnWizards for RAD Studio 2009." />
+  <target name="d14" depends="-d14,-cw_final" description="Compile CnWizards for RAD Studio 2010." />
+  <target name="cb5" depends="-cb5,-cw_final" description="Compile CnWizards for C++Builder 5." />
+  <target name="cb6" depends="-cb6,-cw_final" description="Compile CnWizards for C++Builder 6." />
+
+  <target name="-cw_prepare" depends="-prepare" >
+    <copy tofile="${src}/Version.inc.old" unless="ismaster" >
+       <include name="${src}/Version.inc" />
+    </copy>
+    <echo input="${src}/Version.template.inc" file="${src}/Version.inc" />
+  </target>
+
+  <target name="-cw_final" >
+    <delete dir="${dcu}" >
+       <include name="*.*" />
+       <exclude name="Readme.txt" />
+    </delete>
+    <delete dir="${cnpack.src}" >
+       <include name="**/*.hpp" />
+    </delete>
+    <delete dir="${src}">
+       <include name="**/*.hpp" />
+    </delete>
+
+    <delete dir="${src}" unless="ismaster" >
+       <include name="Version.inc" />
+    </delete>
+    <move tofile="${src}/Version.inc" unless="ismaster" >
+       <include name="${src}/Version.inc.old" />
+    </move>
+  </target>
+
+  <target name="-d5" depends="-cw_prepare" >
+    <property name="Ver.FileDescription"  value="CnWizards For Delphi 5" />
+    <property name="Ver.InternalName"     value="CnWizards_D5" />
+    <property name="Ver.OriginalFilename" value="CnWizards_D5.DLL" />
+    <copy tofile="${src}/CnWizards_D5.res.old" >
+       <include name="${src}/CnWizards_D5.res" />
+    </copy>
+    <echo input="${src}/CnWizards.template.rc" file="${src}/CnWizards_D5.rc" />
+    <brcc file="${src}/CnWizards_D5.rc" output="${src}/CnWizards_D5.res" />
+    <dcc basedir="${src}" source="CnWizards_D5.dpr" versions="5" usecfg="true" arguments="${dcc_arg}" >
+      <define name="${define.add}" />
+    </dcc>
+    <delete dir="${src}">
+       <include name="CnWizards_D5.res" />
+       <include name="CnWizards_D5.rc" />
+       <include name="CnWizards_D5.drc" />
+    </delete>
+    <move tofile="${src}/CnWizards_D5.res" >
+       <include name="${src}/CnWizards_D5.res.old" />
+    </move>
+  </target>
+
+  <target name="-d6" depends="-cw_prepare" >
+    <property name="Ver.FileDescription"  value="CnWizards For Delphi 6" />
+    <property name="Ver.InternalName"     value="CnWizards_D6" />
+    <property name="Ver.OriginalFilename" value="CnWizards_D6.DLL" />
+    <copy tofile="${src}/CnWizards_D6.res.old" >
+       <include name="${src}/CnWizards_D6.res" />
+    </copy>
+    <echo input="${src}/CnWizards.template.rc" file="${src}/CnWizards_D6.rc" />
+    <brcc file="${src}/CnWizards_D6.rc" output="${src}/CnWizards_D6.res" />
+    <dcc basedir="${src}" source="CnWizards_D6.dpr" versions="6" usecfg="true" arguments="${dcc_arg}" >
+      <define name="${define.add}" />
+    </dcc>
+    <delete dir="${src}">
+       <include name="CnWizards_D6.res" />
+       <include name="CnWizards_D6.rc" />
+       <include name="CnWizards_D6.drc" />
+    </delete>
+    <move tofile="${src}/CnWizards_D6.res" >
+       <include name="${src}/CnWizards_D6.res.old" />
+    </move>
+  </target>
+
+  <target name="-d7" depends="-cw_prepare" >
+    <property name="Ver.FileDescription"  value="CnWizards For Delphi 7" />
+    <property name="Ver.InternalName"     value="CnWizards_D7" />
+    <property name="Ver.OriginalFilename" value="CnWizards_D7.DLL" />
+    <copy tofile="${src}/CnWizards_D7.res.old" >
+       <include name="${src}/CnWizards_D7.res" />
+    </copy>
+    <echo input="${src}/CnWizards.template.rc" file="${src}/CnWizards_D7.rc" />
+    <brcc file="${src}/CnWizards_D7.rc" output="${src}/CnWizards_D7.res" />
+    <dcc basedir="${src}" source="CnWizards_D7.dpr" versions="7" usecfg="true" arguments="${dcc_arg}" >
+      <define name="${define.add}" />
+    </dcc>
+    <delete dir="${src}">
+       <include name="CnWizards_D7.res" />
+       <include name="CnWizards_D7.rc" />
+       <include name="CnWizards_D7.drc" />
+    </delete>
+    <move tofile="${src}/CnWizards_D7.res" >
+       <include name="${src}/CnWizards_D7.res.old" />
+    </move>
+  </target>
+
+  <target name="-d9" depends="-cw_prepare" >
+    <property name="Ver.FileDescription"  value="CnWizards For Delphi 2005" />
+    <property name="Ver.InternalName"     value="CnWizards_D9" />
+    <property name="Ver.OriginalFilename" value="CnWizards_D9.DLL" />
+    <copy tofile="${src}/CnWizards_D9.res.old" >
+       <include name="${src}/CnWizards_D9.res" />
+    </copy>
+    <echo input="${src}/CnWizards.template.rc" file="${src}/CnWizards_D9.rc" />
+    <brcc file="${src}/CnWizards_D9.rc" exename="${exe.brcc32}" output="${src}/CnWizards_D9.res" />
+    <dcc basedir="${src}" source="CnWizards_D9.dpr" exename="${exe.D9}" usecfg="true" arguments="${dcc_arg}" >
+      <define name="${define.add}" />
+    </dcc>
+    <delete dir="${src}">
+       <include name="CnWizards_D9.res" />
+       <include name="CnWizards_D9.rc" />
+       <include name="CnWizards_D9.drc" />
+    </delete>
+    <move tofile="${src}/CnWizards_D9.res" >
+       <include name="${src}/CnWizards_D9.res.old" />
+    </move>
+  </target>
+
+  <target name="-d10" depends="-cw_prepare" >
+    <property name="Ver.FileDescription"  value="CnWizards For Delphi 2006" />
+    <property name="Ver.InternalName"     value="CnWizards_D10" />
+    <property name="Ver.OriginalFilename" value="CnWizards_D10.DLL" />
+    <copy tofile="${src}/CnWizards_D10.res.old" >
+       <include name="${src}/CnWizards_D10.res" />
+    </copy>
+    <echo input="${src}/CnWizards.template.rc" file="${src}/CnWizards_D10.rc" />
+    <brcc file="${src}/CnWizards_D10.rc" exename="${exe.brcc32}" output="${src}/CnWizards_D10.res" />
+    <dcc basedir="${src}" source="CnWizards_D10.dpr" exename="${exe.D10}" usecfg="true" arguments="${dcc_arg}" >
+      <define name="${define.add}" />
+    </dcc>
+    <delete dir="${src}">
+       <include name="CnWizards_D10.res" />
+       <include name="CnWizards_D10.rc" />
+       <include name="CnWizards_D10.drc" />
+    </delete>
+    <move tofile="${src}/CnWizards_D10.res" >
+       <include name="${src}/CnWizards_D10.res.old" />
+    </move>
+  </target>
+
+  <target name="-d11" depends="-cw_prepare" >
+    <property name="Ver.FileDescription"  value="CnWizards For RAD Studio 2007" />
+    <property name="Ver.InternalName"     value="CnWizards_D11" />
+    <property name="Ver.OriginalFilename" value="CnWizards_D11.DLL" />
+    <copy tofile="${src}/CnWizards_D11.res.old" >
+       <include name="${src}/CnWizards_D11.res" />
+    </copy>
+    <echo input="${src}/CnWizards.template.rc" file="${src}/CnWizards_D11.rc" />
+    <brcc file="${src}/CnWizards_D11.rc" exename="${exe.brcc32}" output="${src}/CnWizards_D11.res" />
+    <dcc basedir="${src}" source="CnWizards_D11.dpr" exename="${exe.D11}" usecfg="true" arguments="${dcc_arg}" >
+      <define name="${define.add}" />
+    </dcc>
+    <delete dir="${src}">
+       <include name="CnWizards_D11.res" />
+       <include name="CnWizards_D11.rc" />
+       <include name="CnWizards_D11.drc" />
+    </delete>
+    <move tofile="${src}/CnWizards_D11.res" >
+       <include name="${src}/CnWizards_D11.res.old" />
+    </move>
+  </target>
+
+  <target name="-d12" depends="-cw_prepare" >
+    <property name="Ver.FileDescription"  value="CnWizards For RAD Studio 2009" />
+    <property name="Ver.InternalName"     value="CnWizards_D12" />
+    <property name="Ver.OriginalFilename" value="CnWizards_D12.DLL" />
+    <copy tofile="${src}/CnWizards_D12.res.old" >
+       <include name="${src}/CnWizards_D12.res" />
+    </copy>
+    <echo input="${src}/CnWizards.template.rc" file="${src}/CnWizards_D12.rc" />
+    <brcc file="${src}/CnWizards_D12.rc" exename="${exe.brcc32}" output="${src}/CnWizards_D12.res" />
+    <dcc basedir="${src}" source="CnWizards_D12.dpr" exename="${exe.D12}" usecfg="true" arguments="${dcc_arg}" >
+      <define name="${define.add}" />
+    </dcc>
+    <delete dir="${src}">
+       <include name="CnWizards_D12.res" />
+       <include name="CnWizards_D12.rc" />
+       <include name="CnWizards_D12.drc" />
+    </delete>
+    <move tofile="${src}/CnWizards_D12.res" >
+       <include name="${src}/CnWizards_D12.res.old" />
+    </move>
+  </target>
+
+  <target name="-d14" depends="-cw_prepare" >
+    <property name="Ver.FileDescription"  value="CnWizards For RAD Studio 2010" />
+    <property name="Ver.InternalName"     value="CnWizards_D14" />
+    <property name="Ver.OriginalFilename" value="CnWizards_D14.DLL" />
+    <copy tofile="${src}/CnWizards_D14.res.old" >
+       <include name="${src}/CnWizards_D14.res" />
+    </copy>
+    <echo input="${src}/CnWizards.template.rc" file="${src}/CnWizards_D14.rc" />
+    <brcc file="${src}/CnWizards_D14.rc" exename="${exe.brcc32}" output="${src}/CnWizards_D14.res" />
+    <dcc basedir="${src}" source="CnWizards_D14.dpr" exename="${exe.D14}" usecfg="true" arguments="${dcc_arg}" >
+      <define name="${define.add}" />
+    </dcc>
+    <delete dir="${src}">
+       <include name="CnWizards_D14.res" />
+       <include name="CnWizards_D14.rc" />
+       <include name="CnWizards_D14.drc" />
+    </delete>
+    <move tofile="${src}/CnWizards_D14.res" >
+       <include name="${src}/CnWizards_D14.res.old" />
+    </move>
+  </target>
+
+  <target name="-cb5" depends="-cw_prepare" >
+    <delete dir="${dcu}" >
+       <include name="*.*" />
+       <exclude name="Readme.txt" />
+    </delete>
+
+    <property name="Ver.FileDescription"  value="CnWizards For C++Builder 5" />
+    <property name="Ver.InternalName"     value="CnWizards_CB5" />
+    <property name="Ver.OriginalFilename" value="CnWizards_CB5.DLL" />
+    <copy tofile="${src}/CnWizards_CB5.res.old" >
+       <include name="${src}/CnWizards_CB5.res" />
+    </copy>
+    <echo input="${src}/CnWizards.template.rc" file="${src}/CnWizards_CB5.rc" />
+    <brcc file="${src}/CnWizards_CB5.rc" output="${src}/CnWizards_CB5.res" />
+
+    <exec basedir="${src}" defaultfilters="true"
+          executable="${ProgramFiles}\Borland\CBuilder5\Bin\bpr2mak.exe">
+      <arg value='-t"${ProgramFiles}\Borland\CBuilder5\Bin\DEFAULT.BMK"' />
+      <arg value="CnWizards_CB5.bpr" />
+      <arg value="-q" />
+    </exec>
+
+    <!-- 替换掉编译宏 -->
+    <echo input="${src}\CnWizards_CB5.mak" file="${src}\CnWizards_CB5.mak" />
+
+    <exec basedir="${src}" defaultfilters="true"
+          executable="${ProgramFiles}\Borland\CBuilder5\Bin\make.exe">
+      <arg value="-fCnWizards_CB5.mak" />
+    </exec>
+
+    <delete dir="${src}">
+       <include name="CnWizards_CB5.res" />
+       <include name="CnWizards_CB5.rc" />
+       <include name="CnWizards_CB5.mak" />
+    </delete>
+    <delete dir="${bin}">
+       <include name="CnWizards_CB5.drc" />
+       <include name="CnWizards_CB5.lib" />
+       <include name="CnWizards_CB5.tds" />
+    </delete>
+    <move tofile="${src}/CnWizards_CB5.res" >
+       <include name="${src}/CnWizards_CB5.res.old" />
+    </move>
+  </target>
+
+  <target name="-cb6" depends="-cw_prepare" >
+    <delete dir="${dcu}" >
+       <include name="*.*" />
+       <exclude name="Readme.txt" />
+    </delete>
+
+    <property name="Ver.FileDescription"  value="CnWizards For C++Builder 6" />
+    <property name="Ver.InternalName"     value="CnWizards_CB6" />
+    <property name="Ver.OriginalFilename" value="CnWizards_CB6.DLL" />
+    <copy tofile="${src}/CnWizards_CB6.res.old" >
+       <include name="${src}/CnWizards_CB6.res" />
+    </copy>
+    <echo input="${src}/CnWizards.template.rc" file="${src}/CnWizards_CB6.rc" />
+    <brcc file="${src}/CnWizards_CB6.rc" output="${src}/CnWizards_CB6.res" />
+
+    <exec basedir="${src}" defaultfilters="true"
+          executable="${ProgramFiles}\Borland\CBuilder6\Bin\bpr2mak.exe">
+      <arg value='-t"${ProgramFiles}\Borland\CBuilder6\Bin\DEFAULT.BMK"' />
+      <arg value="CnWizards_CB6.bpr" />
+      <arg value="-q" />
+    </exec>
+
+    <!-- 替换掉编译宏 -->
+    <echo input="${src}\CnWizards_CB6.mak" file="${src}\CnWizards_CB6.mak" />
+
+    <exec basedir="${src}" defaultfilters="true"
+          executable="${ProgramFiles}\Borland\CBuilder6\Bin\make.exe">
+      <arg value="-fCnWizards_CB6.mak" />
+    </exec>
+
+    <delete dir="${src}">
+       <include name="CnWizards_CB6.res" />
+       <include name="CnWizards_CB6.rc" />
+       <include name="CnWizards_CB6.mak" />
+    </delete>
+    <delete dir="${bin}">
+       <include name="CnWizards_CB6.drc" />
+       <include name="CnWizards_CB6.lib" />
+       <include name="CnWizards_CB6.tds" />
+    </delete>
+    <move tofile="${src}/CnWizards_CB6.res" >
+       <include name="${src}/CnWizards_CB6.res.old" />
+    </move>
+  </target>
+
+  <!-- 编译资源 DLL -->
+  <target name="resdll" depends="-prepare" description="Compile CnWizards Resource DLL." >
+    <dcc basedir="${tools}/CnWizRes" source="CnWizResGen.dpr" versions="5" usecfg="true" />
+
+    <exec basedir="${tools}/CnWizRes" defaultfilters="true"
+          executable="${tools}/CnWizRes/CnWizResGen.exe">
+      <arg value="..\..\Bin\Icons\" />
+      <arg value="CnWizIcons.rc" />
+    </exec>
+
+    <brcc file="${tools}/CnWizRes/CnWizIcons.rc" output="${tools}/CnWizRes/CnWizIcons.res" />
+
+    <property name="Ver.FileDescription"  value="CnWizards Resource DLL" />
+    <property name="Ver.InternalName"     value="CnWizRes" />
+    <property name="Ver.OriginalFilename" value="CnWizRes.DLL" />
+    <copy tofile="${tools}/CnWizRes/CnWizRes.res.old" >
+       <include name="${tools}/CnWizRes/CnWizRes.res" />
+    </copy>
+    <echo input="${tools}/CnDll.template.rc" file="${tools}/CnWizRes/CnWizRes.rc" />
+    <brcc file="${tools}/CnWizRes/CnWizRes.rc" output="${tools}/CnWizRes/CnWizRes.res" />
+
+    <dcc basedir="${tools}/CnWizRes" source="CnWizRes.dpr" versions="5" usecfg="true" />
+
+    <delete dir="${tools}/CnWizRes">
+       <include name="*.exe" />
+       <include name="*.res" />
+       <include name="*.rc" />
+       <include name="*.drc" />
+       <include name="*.map" />
+    </delete>
+    <move tofile="${tools}/CnWizRes/CnWizRes.res" >
+       <include name="${tools}/CnWizRes/CnWizRes.res.old" />
+    </move>
+  </target>
+
+  <!-- 编译附加工具 -->
+  <target name="tools" depends="-prepare,cnconfigio,cndebugviewer,cndfm6to5,cnascii,cnidebr,cnmanagewiz,cnselectlang,cnsmr,cnwizsetup" description="Compile Tools (CnDfm6To5, CnWizSetup, etc.)." >
+    <delete dir="${dcu}" >
+       <include name="*.*" />
+       <exclude name="Readme.txt" />
+    </delete>
+  </target>
+
+  <target name="cnconfigio" depends="-prepare" description="Compile CnConfigIO." >
+    <property name="Ver.FileDescription"  value="CnWizards Configuration Import/Export Tool" />
+    <property name="Ver.InternalName"     value="CnConfigIO" />
+    <property name="Ver.OriginalFilename" value="CnConfigIO.EXE" />
+    <copy tofile="${tools}/CnConfigIO/CnConfigIO.res.old" >
+       <include name="${tools}/CnConfigIO/CnConfigIO.res" />
+    </copy>
+    <echo input="${tools}/CnTools.template.rc" file="${tools}/CnConfigIO/CnConfigIO.rc" />
+    <brcc file="${tools}/CnConfigIO/CnConfigIO.rc" output="${tools}/CnConfigIO/CnConfigIO.res" />
+    <dcc basedir="${tools}/CnConfigIO" source="CnConfigIO.dpr" versions="5" usecfg="true" />
+    <delete dir="${tools}/CnConfigIO">
+       <include name="CnConfigIO.res" />
+       <include name="CnConfigIO.rc" />
+       <include name="CnConfigIO.drc" />
+    </delete>
+    <move tofile="${tools}/CnConfigIO/CnConfigIO.res" >
+       <include name="${tools}/CnConfigIO/CnConfigIO.res.old" />
+    </move>
+  </target>
+
+  <target name="cndebugviewer" depends="-prepare" description="Compile CnDebugViewer." >
+    <property name="Ver.FileDescription"  value="CnWizards Debug Viewer" />
+    <property name="Ver.InternalName"     value="CnDebugViewer" />
+    <property name="Ver.OriginalFilename" value="CnDebugViewer.EXE" />
+    <copy tofile="${tools}/CnDebugViewer/CnDebugViewer.res.old" >
+       <include name="${tools}/CnDebugViewer/CnDebugViewer.res" />
+    </copy>
+    <echo input="${tools}/CnTools.template.rc" file="${tools}/CnDebugViewer/CnDebugViewer.rc" />
+    <brcc file="${tools}/CnDebugViewer/CnDebugViewer.rc" output="${tools}/CnDebugViewer/CnDebugViewer.res" />
+    <dcc basedir="${tools}/CnDebugViewer" source="CnDebugViewer.dpr" versions="5" usecfg="true" />
+    <delete dir="${tools}/CnDebugViewer">
+       <include name="CnDebugViewer.res" />
+       <include name="CnDebugViewer.rc" />
+       <include name="CnDebugViewer.drc" />
+    </delete>
+    <move tofile="${tools}/CnDebugViewer/CnDebugViewer.res" >
+       <include name="${tools}/CnDebugViewer/CnDebugViewer.res.old" />
+    </move>
+  </target>
+
+  <target name="cndfm6to5" depends="-prepare" description="Compile CnDfm6To5." >
+    <property name="Ver.FileDescription"  value="Delphi DFM Convertor" />
+    <property name="Ver.InternalName"     value="CnDfm6To5" />
+    <property name="Ver.OriginalFilename" value="CnDfm6To5.EXE" />
+    <copy tofile="${tools}/CnDfm6To5/CnDfm6To5.res.old" >
+       <include name="${tools}/CnDfm6To5/CnDfm6To5.res" />
+    </copy>
+    <echo input="${tools}/CnTools.template.rc" file="${tools}/CnDfm6To5/CnDfm6To5.rc" />
+    <brcc file="${tools}/CnDfm6To5/CnDfm6To5.rc" output="${tools}/CnDfm6To5/CnDfm6To5.res" />
+    <dcc basedir="${tools}/CnDfm6To5" source="CnDfm6To5.dpr" versions="5" usecfg="true" />
+    <delete dir="${tools}/CnDfm6To5">
+       <include name="CnDfm6To5.res" />
+       <include name="CnDfm6To5.rc" />
+       <include name="CnDfm6To5.drc" />
+    </delete>
+    <move tofile="${tools}/CnDfm6To5/CnDfm6To5.res" >
+       <include name="${tools}/CnDfm6To5/CnDfm6To5.res.old" />
+    </move>
+  </target>
+
+  <target name="cnascii" depends="-prepare" description="Compile CnAsciiChart." >
+    <property name="Ver.FileDescription"  value="ASCII Chart" />
+    <property name="Ver.InternalName"     value="cnascii" />
+    <property name="Ver.OriginalFilename" value="AsciiChart.EXE" />
+    <copy tofile="${tools}/CnAsciiChart/AsciiChart.res.old" >
+       <include name="${tools}/CnAsciiChart/AsciiChart.res" />
+    </copy>
+    <echo input="${tools}/CnTools.template.rc" file="${tools}/CnAsciiChart/AsciiChart.rc" />
+    <brcc file="${tools}/CnAsciiChart/AsciiChart.rc" output="${tools}/CnAsciiChart/AsciiChart.res" />
+    <dcc basedir="${tools}/CnAsciiChart" source="AsciiChart.dpr" versions="5" usecfg="true" />
+    <delete dir="${tools}/CnAsciiChart">
+       <include name="AsciiChart.res" />
+       <include name="AsciiChart.rc" />
+       <include name="AsciiChart.drc" />
+    </delete>
+    <move tofile="${tools}/CnAsciiChart/AsciiChart.res" >
+       <include name="${tools}/CnAsciiChart/AsciiChart.res.old" />
+    </move>
+  </target>
+
+  <target name="cnidebr" depends="-prepare" description="Compile CnIdeBRTool." >
+    <property name="Ver.FileDescription"  value="IDE Backup/Restore Tool" />
+    <property name="Ver.InternalName"     value="cnidebr" />
+    <property name="Ver.OriginalFilename" value="CnIdeBRTool.EXE" />
+    <copy tofile="${tools}/CnIdeBRTool/CnIdeBRTool.res.old" >
+       <include name="${tools}/CnIdeBRTool/CnIdeBRTool.res" />
+    </copy>
+    <echo input="${tools}/CnTools.template.rc" file="${tools}/CnIdeBRTool/CnIdeBRTool.rc" />
+    <brcc file="${tools}/CnIdeBRTool/CnIdeBRTool.rc" output="${tools}/CnIdeBRTool/CnIdeBRTool.res" />
+    <dcc basedir="${tools}/CnIdeBRTool" source="CnIdeBRTool.dpr" versions="5" usecfg="true" />
+    <delete dir="${tools}/CnIdeBRTool">
+       <include name="CnIdeBRTool.res" />
+       <include name="CnIdeBRTool.rc" />
+       <include name="CnIdeBRTool.drc" />
+    </delete>
+    <move tofile="${tools}/CnIdeBRTool/CnIdeBRTool.res" >
+       <include name="${tools}/CnIdeBRTool/CnIdeBRTool.res.old" />
+    </move>
+  </target>
+  
+  <target name="cnmanagewiz" depends="-prepare" description="Compile CnManageWiz." >
+    <property name="Ver.FileDescription"  value="External Wizard Management" />
+    <property name="Ver.InternalName"     value="cnmanagewiz" />
+    <property name="Ver.OriginalFilename" value="CnManageWiz.EXE" />
+    <copy tofile="${tools}/CnManageWiz/CnManageWiz.res.old" >
+       <include name="${tools}/CnManageWiz/CnManageWiz.res" />
+    </copy>
+    <echo input="${tools}/CnTools.template.rc" file="${tools}/CnManageWiz/CnManageWiz.rc" />
+    <brcc file="${tools}/CnManageWiz/CnManageWiz.rc" output="${tools}/CnManageWiz/CnManageWiz.res" />
+    <dcc basedir="${tools}/CnManageWiz" source="CnManageWiz.dpr" versions="5" usecfg="true" />
+    <delete dir="${tools}/CnManageWiz">
+       <include name="CnManageWiz.res" />
+       <include name="CnManageWiz.rc" />
+       <include name="CnManageWiz.drc" />
+    </delete>
+    <move tofile="${tools}/CnManageWiz/CnManageWiz.res" >
+       <include name="${tools}/CnManageWiz/CnManageWiz.res.old" />
+    </move>
+  </target>
+  
+  <target name="cnselectlang" depends="-prepare" description="Compile CnSelectLang." >
+    <property name="Ver.FileDescription"  value="Select CnWizards Language" />
+    <property name="Ver.InternalName"     value="CnSelectLang" />
+    <property name="Ver.OriginalFilename" value="CnSelectLang.EXE" />
+    <copy tofile="${tools}/CnSelectLang/CnSelectLang.res.old" >
+       <include name="${tools}/CnSelectLang/CnSelectLang.res" />
+    </copy>
+    <echo input="${tools}/CnTools.template.rc" file="${tools}/CnSelectLang/CnSelectLang.rc" />
+    <brcc file="${tools}/CnSelectLang/CnSelectLang.rc" output="${tools}/CnSelectLang/CnSelectLang.res" />
+    <dcc basedir="${tools}/CnSelectLang" source="CnSelectLang.dpr" versions="5" usecfg="true" />
+    <delete dir="${tools}/CnSelectLang">
+       <include name="CnSelectLang.res" />
+       <include name="CnSelectLang.rc" />
+       <include name="CnSelectLang.drc" />
+    </delete>
+    <move tofile="${tools}/CnSelectLang/CnSelectLang.res" >
+       <include name="${tools}/CnSelectLang/CnSelectLang.res.old" />
+    </move>
+  </target>
+  
+  <target name="cnsmr" depends="-prepare" description="Compile Relation Analyzer." >
+    <property name="Ver.FileDescription"  value="Relation Analyzer" />
+    <property name="Ver.InternalName"     value="CnSMR" />
+    <property name="Ver.OriginalFilename" value="CnSMR.EXE" />
+    <copy tofile="${tools}/CnSMR/CnSMR.res.old" >
+       <include name="${tools}/CnSMR/CnSMR.res" />
+    </copy>
+    <echo input="${tools}/CnTools.template.rc" file="${tools}/CnSMR/CnSMR.rc" />
+    <brcc file="${tools}/CnSMR/CnSMR.rc" output="${tools}/CnSMR/CnSMR.res" />
+    <dcc basedir="${tools}/CnSMR" source="CnSMR.dpr" versions="5" usecfg="true" />
+    <delete dir="${tools}/CnSMR">
+       <include name="CnSMR.res" />
+       <include name="CnSMR.rc" />
+       <include name="CnSMR.drc" />
+    </delete>
+    <move tofile="${tools}/CnSMR/CnSMR.res" >
+       <include name="${tools}/CnSMR/CnSMR.res.old" />
+    </move>
+  </target>
+
+  <target name="cnwizsetup" depends="-prepare" description="Compile CnWizards Setup." >
+    <property name="Ver.FileDescription"  value="CnWizards Installer" />
+    <property name="Ver.InternalName"     value="Setup" />
+    <property name="Ver.OriginalFilename" value="Setup.EXE" />
+    <copy tofile="${tools}/CnWizSetup/Setup.res.old" >
+       <include name="${tools}/CnWizSetup/Setup.res" />
+    </copy>
+    <echo input="${tools}/CnTools.template.rc" file="${tools}/CnWizSetup/Setup.rc" />
+    <brcc file="${tools}/CnWizSetup/Setup.rc" output="${tools}/CnWizSetup/Setup.res" />
+    <dcc basedir="${tools}/CnWizSetup" source="Setup.dpr" versions="5" usecfg="true" />
+    <delete dir="${tools}/CnWizSetup">
+       <include name="Setup.res" />
+       <include name="Setup.rc" />
+       <include name="Setup.drc" />
+    </delete>
+    <move tofile="${tools}/CnWizSetup/Setup.res" >
+       <include name="${tools}/CnWizSetup/Setup.res.old" />
+    </move>
+  </target>
+
+  <!-- 编译帮助文件 -->
+  <target name="makehelp" depends="-prepare,help_chs,help_cht,help_enu" description="Compile all chm help files." >
+  </target>
+
+  <target name="help_chs" depends="-prepare" description="Compile Chinese chm help (GB2312)." >
+    <exec basedir="${help}/CnWizards_CHS" errorlevel="1" defaultfilters="true"
+          executable="${ProgramFiles}\HTML Help Workshop\hhc">
+      <arg value="CnWizards.hhp" />
+    </exec>
+    <delete dir="${help}/CnWizards_CHS">
+       <include name="_errorlog.txt" />
+    </delete>
+  </target>
+
+  <target name="help_cht" depends="-prepare" description="Compile Chinese chm help (BIG5)." >
+    <exec basedir="${help}/CnWizards_CHT" errorlevel="1" defaultfilters="true"
+          executable="${ProgramFiles}\HTML Help Workshop\hhc">
+      <arg value="CnWizards.hhp" />
+    </exec>
+    <delete dir="${help}/CnWizards_CHT">
+       <include name="_errorlog.txt" />
+    </delete>
+  </target>
+
+  <target name="help_enu" depends="-prepare" description="Compile English chm help." >
+    <exec basedir="${help}/CnWizards_ENU" errorlevel="1" defaultfilters="true"
+          executable="${ProgramFiles}\HTML Help Workshop\hhc">
+      <arg value="CnWizards.hhp" />
+    </exec>
+    <delete dir="${help}/CnWizards_ENU">
+       <include name="_errorlog.txt" />
+    </delete>
+  </target>
+
+  <!-- 制作安装程序 -->
+  <target name="makeinst" depends="-prepare" description="Build CnWizards Installer." >
+    <property name="define.debug" value="want define:
+!define DEBUG" if="debug" />
+    <copy tofile="${install.src}/release.inc.old" unless="ismaster" >
+       <include name="${install.src}/release.inc" />
+    </copy>
+    <echo input="${install.src}/release.template.inc" file="${install.src}/release.inc" />
+    <exec basedir="${install.src}" defaultfilters="true"
+          executable="${ProgramFiles}\NSIS\makensis" >
+      <arg value="${install_arg}" />
+      <arg value="CnWizards_Install.nsi" />
+    </exec>
+    <delete dir="${install.src}" unless="ismaster" >
+       <include name="${install.src}/release.inc" />
+    </delete>
+    <move tofile="${install.src}/release.inc" unless="ismaster" >
+       <include name="${install.src}/release.inc.old" />
+    </move>
+  </target>
+
+  <!--
+  <target name="zip" >
+    <delete file="${zipfile}" />
+    <zip zipfile="${zipfile}" >
+      <include name="${root}/**" />
+    </zip>
+  </target>
+  -->
+
+  <!-- 完整构建 -->
+  <target name="all" depends="-prepare,clean,cnwizards,resdll,tools,makehelp,makeinst" description="All above tasks except cvsupdate." >
+  </target>
+
+  <!-- 带 cvs 更新的完整构建 -->
+  <target name="allcvs" depends="-prepare,clean,cvsupdate,cnwizards,resdll,tools,makehelp,makeinst" description="All above tasks." >
+  </target>
+
+  <!-- FTP 上传服务器 -->
+  <target name="upload" depends="-prepare" if="ismaster" description="Upload Installer to Server (Master only)." >
+    <ftp server="www.cnpack.org" userid="?{${master.ini}:Master:ftpuser}" password="?{${master.ini}:Master:ftppass}" >
+      <cd dir="${ftpdir}" />
+      <put basedir="${install.output}" src="${Installer.Name}" />
+    </ftp>
+  </target>
+
+  <!-- 更新 build 号及提交文件 -->
+  <target name="incbuild" depends="-prepare" if="ismaster" description="Increase build and commit (Master only)." >
+    <ini file="${ini}" >
+      <write section="Version" key="Major" value="${Ver.Major}" />
+      <write section="Version" key="Minor" value="${Ver.Minor}" />
+      <write section="Version" key="Release" value="${Ver.Release}" />
+      <write section="Version" key="Build" value="${Ver.Build}" />
+      <write section="Version" key="LastDate" value="${date.curr}" />
+    </ini>
+    <cvs dest="${root}" command='commit -m "Commit version files: ${Ver.Str.Major}.${Ver.Str.Minor}" Make/release.ini Source/Version.inc Install/Src/release.inc' />
+  </target>
+
+  <!-- 完整构建并发布 -->
+  <target name="publish" depends="allcvs,incbuild,upload" description="Publish a new version (Master only)." >
+  </target>
+</project>

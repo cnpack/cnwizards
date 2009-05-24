@@ -1,0 +1,204 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>脚本扩展专家</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">脚本扩展专家</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">脚本扩展专家</p>
+<p class="text" align="left"> 该专家使用 RemObjects Pascal Script 提供了 IDE 中的动态 Pascal 脚本的解释执行的支持，包括脚本控制窗口和脚本扩展设置等，可从菜单项中调用，也可由特定的 IDE 事件触发。</p>
+<p class="title">脚本控制窗口</p>
+<p class="text" align="left"> 脚本控制窗口提供了对脚本文件的编译运行等控制功能，而脚本文件的编辑则由 IDE 的编辑器来处理。脚本窗口上部是工具栏，中间是信息输出栏，其完整界面如图：</p>
+<p class="text" align="center"> 
+  <img src="scriptwindow.png"> </p>
+<ul>
+  <li>
+<p class="text" align="left"><b>新的脚本</b>：在 IDE 的编辑器窗口中新建一空白脚本框架。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>从文件中装入</b>：弹出一打开文件对话框，在 IDE 的编辑器窗口中打开一 Pascal 文件。
+通过下拉菜单可以直接打开脚本列表中的脚本文件以及 PSDemo 目录中的脚本例子。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>增加到脚本列表</b>：将当前 IDE 编辑器中的脚本文件增加到脚本设置窗口中的列表中。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>设置</b>：弹出脚本设置窗口供设置和管理各个脚本。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>编译脚本</b>：编译 IDE 中当前编辑窗口的脚本源文件内容，编译信息在信息栏中输出。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>运行脚本</b>：运行 IDE 中当前编辑窗口的脚本源文件内容。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>帮助</b>：显示此帮助信息。下拉菜单中的项还可显示 PSDecl 和 PSDemo 目录中的内容供参考。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>关闭</b>：关闭当前窗口。</p>
+  </li>
+</ul>
+<p class="text" align="left"></p>
+<p class="title">　</p>
+<p class="title">脚本扩展设置</p>
+<p class="text" align="left">脚本扩展设置窗口允许用户管理脚本文件库，各项脚本会显示在脚本扩展专家的子菜单中。脚本扩展设置窗口上部是工具栏，左边是脚本列表，右边是脚本设置区。如图所示：</p>
+<p class="text" align="center">　<img src="scriptlib.png"></p>
+<p class="text" align="left"> 
+<ul>
+  <li>
+<p class="text" align="left"><b>增加</b>：在列表中增加一新脚本供编辑。</p></li>
+	<li>
+<p class="text" align="left"><b>删除</b>：删除脚本列表中选中的脚本项。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>清空</b>：清空列表，删除全部脚本项。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>从文件中导入</b>：从外部 XML 文件中导入脚本列表。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>导出到文件</b>：将所有脚本项导出成 XML 文件。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>上移</b>：将选中的脚本项上移一行。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>下移</b>：将选中的脚本项下移一行。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>帮助</b>：显示此帮助信息。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>关闭</b>：关闭当前窗口。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>名称</b>：设定被编辑脚本项在脚本列表中的显示名称。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>描述</b>：该脚本的描述文字。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>文件</b>：该脚本所在的源文件的全路径名。</p>
+  </li>  
+  <li>
+<p class="text" align="left"><b>图标</b>：该脚本显示在菜单项中的图标，如不指定图标则无图标显示。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>热键</b>：执行此脚本的快捷键，默认无。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>该脚本有效</b>：勾选表示此脚本有效，可被编译执行，也能在所设置的事件触发时被执行。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>手动执行脚本时需要确认</b>：勾选表示手动执行此脚本时会弹出一对话框，需要用户确认是否执行。由事件触发执行的脚本不受此选项的影响。</p>
+  </li>
+  <li>
+<p class="text" align="left"><b>脚本通知选项</b>：脚本运行有两种方式，一是手动调用，二是事件触发运行。该树形复选框可设置当前脚本在 IDE 触发哪些事件时被调用运行。</p>
+<ul>
+  <li><p class="text" align="left"><b>smManual</b>：被手工调用。</p>
+  </li>
+  <li><p class="text" align="left"><b>smIDELoaded</b>：当 IDE 启动完成时调用。</p>
+  </li>
+  <li><p class="text" align="left"><b>smBeforeCompile</b>：编译前调用。</p>
+  </li>
+  <li><p class="text" align="left"><b>smAfterCompile</b>：编译后调用。</p>
+  </li>
+  <li><p class="text" align="left"><b>smFileNotify</b>：文件事件触发时调用，包括以下事件：</p>
+  </li>
+  <ul>
+  	<li><p class="text" align="left"><b>ofnFileOpening</b>：某文件即将打开时触发的事件。</p></li>
+  	<li><p class="text" align="left"><b>ofnFileOpened</b>：某文件打开后触发的事件。</p></li>
+  	<li><p class="text" align="left"><b>ofnFileClosing</b>：某文件即将关闭时触发的事件。</p></li>
+  	<li><p class="text" align="left"><b>ofnDefaultDesktopLoad</b>：默认的桌面设置加载时触发的事件。</p></li>
+  	<li><p class="text" align="left"><b>ofnDefaultDesktopSave</b>：默认的桌面设置保存时触发的事件。</p></li>
+  	<li><p class="text" align="left"><b>ofnProjectDesktopLoad</b>：当前工程的桌面设置加载时触发的事件。</p></li>
+  	<li><p class="text" align="left"><b>ofnProjectDesktopSave</b>：当前工程的桌面设置保存时触发的事件。</p></li>
+  	<li><p class="text" align="left"><b>ofnPackageInstalled</b>：包文件加载后触发的事件。</p></li>
+  	<li><p class="text" align="left"><b>ofnPackageUninstalled</b>：包文件卸载后触发的事件。</p></li>
+  </ul>	
+  <li><p class="text" align="left"><b>smSourceEditorNotify</b>：源码编辑器事件触发时调用，包括以下事件：</p>
+  <ul>
+  	<li><p class="text" align="left"><b>setOpened</b>：源码编辑器打开一文件时触发的事件。</p></li>
+  	<li><p class="text" align="left"><b>setClosing</b>：源码编辑器关闭一文件时触发的事件。</p></li>
+  	<li><p class="text" align="left"><b>setModified</b>：源码编辑器改动后触发的事件。</p></li>
+  	<li><p class="text" align="left"><b>setEditViewInsert</b>：源码编辑器新增一 EditView 时触发的事件。</p></li>
+  	<li><p class="text" align="left"><b>setEditViewRemove</b>：源码编辑器关闭一 EditView 时触发的事件。</p></li>
+  	<li><p class="text" align="left"><b>setEditViewActivated</b>：源码编辑器的某 EditView 变为活动时触发的事件。</p></li>
+  </ul>
+  </li>
+  <li><p class="text" align="left"><b>smFormEditorNotify</b>：窗体编辑器事件触发时调用，包括以下事件：</p>
+  <ul>
+  <li><p class="text" align="left"><b>fetOpened</b>：打开一窗体编辑器后触发的事件。</p></li>
+  <li><p class="text" align="left"><b>fetClosing</b>：关闭一窗体编辑器前触发的事件。</p></li>
+  <li><p class="text" align="left"><b>fetModified</b>：窗体编辑器改动后触发的事件。</p></li>
+  <li><p class="text" align="left"><b>fetActivated</b>：某窗体编辑器变为活动时触发的事件。</p></li>
+  <li><p class="text" align="left"><b>fetSaving</b>：窗体编辑器保存时触发的事件。</p></li>
+  <li><p class="text" align="left"><b>fetComponentCreating</b>：窗体编辑器上新建组件前触发的事件。</p></li>
+  <li><p class="text" align="left"><b>fetComponentCreated</b>：窗体编辑器上新建组件后触发的事件。</p></li>
+  <li><p class="text" align="left"><b>fetComponentDestorying</b>：窗体编辑器上删除组件前触发的事件。</p></li>
+  <li><p class="text" align="left"><b>fetComponentRenamed</b>：窗体编辑器上组件改名时触发的事件。</p></li>
+  </ul>
+  </li>
+</ul>
+  </li>
+  <li>
+<p class="text" align="left"><b>脚本搜索路径</b>：全局选项，设置脚本运行时的库文件搜索路径，每行一个路径。</p>
+  </li>
+</ul>
+<p class="text" align="left"></p>
+<p class="title">　</p>
+<p class="title">脚本语法与函数库简介</p>
+<p class="text" align="left">PascalScript 脚本的语法和 Object Pascal 大体相同，但有以下几点是需要说明的：</p>
+<ul>
+  <li>
+<p class="text" align="left">PascalScript 脚本语法不支持整型到对象类型间的强制类型转换，也即不支持 TObject(0) 这样的语法。欲实现这这种转换，可以利用辅助函数 function CnIntToObject(AInt: Integer): TObject; 来完成。</p>
+  </li>
+  <li>
+<p class="text" align="left">PascalScript 脚本语法不支持函数调用中的默认参数，也不支持 overload。</p>
+  </li>
+  <li>
+<p class="text" align="left">PascalScript 脚本语法不支持接口中的属性，可用属性对应的读写方法来替代。</p>
+  </li>
+  <li>
+<p class="text" align="left">PascalScript 支持在脚本中声明外部 DLL 函数并调用。</p>
+  </li>
+  <li>
+<p class="text" align="left">Readln 函数经过了重新实现，以弹出输入框的方式接受用户输入；Writeln 则重定向到了脚本窗口的输出。</p>
+  </li>
+</ul>
+<p class="text" align="left">PascalScript 脚本中可以使用的库函数均需要 CnWizards 在编译期写明并在运行期预先注册。CnWizards 目前预注册了一批系统函数和 IDE 的 Open Tools API 接口，其具体列表在安装目录的 PSDecl 目录下。需要说明的是，PSDecl 目录内的文件并不被运行期的 CnWizards 使用，而仅仅只供用户参考，它们基本来源于 VCL 中的同名文件但只包含声明不包括实现部分，并且为了适应 PascalScript  语法，可能有细微修改。凡是在 PSDecl 目录中各文件内列出的函数均可在 CnWizards 提供的 PascalScript 环境中调用，而函数使用方面的详细帮助则可查阅 Delphi 的帮助，这里不再重复。</p>
+<p class="text" align="left">安装目录的 PSDeclEx 目录下的文件，是由 CnWizards 额外注册的单元，主要包括对 
+Open Tools API 和 IDE 功能的访问封装。这些文件也不参与编译，不过它们都带有空实现体，以支持在 IDE 编辑器中的自动完成功能。</p>
+<p class="text" align="left">CnWizards 的安装目录的 PSDemo 目录下自带了部分 PascalScript 的 Demo，用户可参考其代码。</p>
+<p class="text" align="left">以上两目录的内容均在不断完善中，也欢迎用户自行编写脚本来扩充 CnWizards 的功能。</p>
+<p class="text" align="left">　</p>
+<p class="title">怎样编辑脚本？</p>
+<p class="text" align="left">脚本专家本身并不提供脚本编辑器，您可以使用任何一个文本编辑器来编辑脚本文件，IDE 
+本身的编辑器就是最好的工具。您只需要在 IDE 编辑器中象编写普通的代码一样编写脚本，就可以利用 IDE 的代码完成和 CnWizards 
+的代码输入助手来提高效率。需要注意的是：如果您在脚本中 uses 了 ToolsAPI，您需要在 IDE 的搜索路径中加入 ToolsAPI 
+单元所在的目录；如果您 uses 了 CnWizUtils 等在 PSDeclEx 目录下声明的文件，同样也需要在 IDE 的搜索路径中加入 PSDeclEx 
+目录。</p>
+<p class="text" align="left">　</p>
+<p class="title">怎样处理脚本事件与参数？</p>
+<p class="text" align="left">一个脚本可被手工调用，也可设置为在触发某事件时调用。脚本文件内部可以使用预设置的全局对象 Event 来获得此脚本被调用时的事件类型和参数。Event 是一 TCnScriptEvent 类型的对象，其属性 Mode 值是 TCnScriptMode，对应于上文的 smManual, smIDELoaded, smBeforeCompile, smAfterCompile, smFileNotify, smSourceEditorNotify, smFormEditorNotify，因此在脚本开头检查 Event 对象的 Mode 值便可确定此脚本是被何种事件触发的。对于某些类型的事件，它们被触发时脚本可能需要更多的信息，比如编译成功与否、当前文件名、当前编辑器等，对于此等事件，Event 对象在脚本运行前被初始化成了 TCnScriptEvent 类的子类如 TCnScriptSourceEditorNotify 等，用户在脚本中可通过类型强制转换将 Event 转换成需要的子类来获取参数。</p>
+<p class="text" align="left">更详细的说明，请参考 PSDeclEx 目录下的 ScriptEvent 文件以及例子中的 FormEventDemo.pas 等文件。</p>
+<p class="title" align="left">　<p class="title" align="left">相关主题<p class="text" align="left">
+<a href="wizards.htm">IDE 专家基本操作</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">IDE 专家设置</a><p class="text" align="left">
+<a href="../cnpack/index.htm">关于 IDE 专家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版权所有 2001-2009 CnPack 开发组</a></p>
+</body>
+</html>

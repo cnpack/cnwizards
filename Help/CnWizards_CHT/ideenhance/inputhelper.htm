@@ -1,0 +1,256 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>代碼輸入助手</title>
+<meta http-equiv="Content-Type" content="text/html; charset=big5">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4" id="table1">
+  <tr>
+    <td class="head" height="16">代碼輸入助手</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">代碼輸入助手</p>
+<p class="text">代碼輸入助手提供當用戶在代碼編輯器中鍵入代碼時自動彈出匹配的標識符列表窗口的功能，目前只完整支持 Delphi。對於 C++Builder，目前代碼輸入助手對其的支持不完整，僅能彈出 IDE 自帶的自動完成窗口。</p>
+<p class="text">輸入助手列表框及右鍵功能表如下圖所示：</p>
+<p class="text" align="center">
+<img src="inputhelper.png">
+</p>
+<p class="text">此時，如果繼續輸入字元，將自動過濾掉不匹配的內容。在列表中用上、下、PageUp、PageDown、Shift+Home、Shift+End
+鍵以及滑鼠左鍵可以選擇當前項，左、右游標鍵可以選擇匹配的位置，退格和刪除鍵也會更新列表。使用回車、空格、Tab、滑鼠雙擊或輸入在設置中指定的按鍵時自動將當前選擇項發送到代碼編輯器中。按 Esc、Ctrl 以及其他功能鍵可以關閉列表。</p>
+<p class="text">除了普通的識別字，輸入助手還支援其他一些特殊內容的自動輸入：</p>
+<ul>
+  <li>
+    <p class="text">如果在 uses 區使用輸入助手，會列出所有可用的單元名稱。</p>
+  </li>
+  <li>
+	<p class="text">編譯指示字自動輸入。輸入 {$ 會列出所有的編譯指示字及說明。</p></li>
+	<li>
+	<p class="text">XML 風格的注釋。輸入
+	/// 會列出相關列表及說明。</p></li>
+	<li>
+	<p class="text">JavaDoc 風格的注釋。輸入
+	{* 會列出相關列表及說明。</p></li>
+	<li>
+	<p class="text">IDE 中設置的代碼範本，如
+	trycf、forb 等。</p></li>
+	<li>
+	<p class="text">用戶自已定義的符號、編譯指示字、注釋範本、代碼範本等。</p></li>
+	<li>
+	<p class="text">在代碼範本中還可以使用巨集定義等功能。</p></li>
+</ul>
+<p class="text"><b>小技巧</b>：如果您覺得輸入助手比 IDE 自帶的 Code Completion 好用，可以將 IDE 的 Code
+Completion 關閉，這樣在輸入 '.' 號後就會彈出輸入助手了，在 Delphi 5 中特別有用。</p>
+<p class="text">　</p>
+<p class="text"><b>右鍵菜單</b></p>
+<div align="center">
+</div>
+<ul>
+  <li>
+    <p class="text"><b>允許自動彈出</b>：是否允許用戶在鍵入代碼時自動彈出輸入助手。</p>
+  </li>
+	<li>
+    <p class="text"><b>顯示快速按鈕</b>：是否在列表視窗右邊顯示一列功能按鈕。</p>
+  </li>
+  <li>
+    <p class="text"><b>排序方式</b>：自動排序根據識別字的匹配優先順序自動排序，按文本、長度、類型排序分別以相關內容按昇冪進行排序。</p>
+  </li>
+  <li>
+    <p class="text"><b>圖例</b>：顯示列表中圖示的含義，並可選擇哪些類型出現在列表中。</p>
+  </li>
+	<li>
+    <p class="text"><b>添加自定義符號</b>：將當前識別字添加到用戶符號列表中。</p>
+  </li>
+  <li>
+    <p class="text"><b>設置</b>：彈出輸入助手設置對話方塊。</p>
+  </li>
+</ul>
+<p class="text">列表右邊的快速按鈕功能分別為：添加自定義符號、設置、輸入助手幫助。</p>
+<p class="text">　</p>
+<p class="text"><b>設置選項</b></p>
+<p class="text">該功能可以在專家包“設置”功能表中的“專家設置”中，或通過列表右鍵功能表進行設置，設置對話方塊如下圖所示：</p>
+<p align="center" class="text"><img src="inputhelperconf.png"></p>
+<ul>
+	<p class="text">　</p>
+	<li>
+	<p class="text"><b>自動選項</b></p></li>
+	<ul>
+	<li>
+	<p class="text"><b>自動彈出輸入助手</b>：是否允許用戶在鍵入代碼時自動彈出輸入助手。</p></li>
+	<li>
+	<p class="text"><b>連續輸入的有效字元數</b>：只有連續輸入指定的字元後，才彈出輸入助手。有效的字元包含所有字母、數位、下劃線以及在識別字內部的退格和刪除鍵。</li>
+	<li>
+	<p class="text"><b>自動彈出延時</b>：在彈出助手前等待的時間，如果延時期又有按鍵輸入，則重新開始延時。</p></li>
+	<li>
+	<p class="text"><b>智慧判斷是否需要彈出助手</b>：如果選擇智慧判斷，在當前識別字已經完全匹配侯選列表中某一項時，則不彈出輸入助手。</li>
+	<li>
+	<p class="text"><b>如果禁用 IDE 的代碼完成，則自動取代</b>：如果希望輸入助手取代 IDE
+	自己的代碼完成，可以選擇該項，並關閉 IDE 的自動完成功能。</li>
+	<li>
+	<p class="text"><b>用來切換自動顯示的快捷鍵</b>：指定一個快捷鍵用於切換自動彈出狀態。</p></li>
+	<li>
+	<p class="text"><b>用來手工彈出顯示的快捷鍵</b>：指定一個快捷鍵，可以在有效位置手工彈出輸入助手。</p></li>
+	<li>
+	<p class="text"><b>輸入法開啟時不彈出輸入助手</b>：當輸入法打開時，是否不自動彈出輸入助手。</p></li>
+	</ul>
+</ul>
+<ul>
+<li><p class="text"><b>輸出設置</b></p></li>
+<ul>
+	<li>
+	<p class="text"><b>可用于選擇當前項的字元列表</b>：
+	在輸入助手顯示時，如果鍵入字元列表中的字元，自動將列表中當前選擇的識別字發送到代碼區。</p></li>
+	<li>
+	<p class="text"><b>禁止自動彈出列表的符號(逗號分隔)</b>：
+	如果希望在輸入某些字元時禁止自動彈出輸入助手，可以將其加到這個列表中，多項內容用逗號分隔。</p></li>
+  <li>
+    <p class="text"><b>識別字輸出方式</b>：
+	當游標在識別字中間位置時，輸出識別字使用的方式。“自動識別”方式根據匹配度自動選擇替換游標左邊的部分或整個識別字。“回車時替換整個識別字”方式則只有使用回車鍵時才替換整個識別字，其他按鍵輸出時只替換游標左邊的部分。</p>
+  </li>
+	<li>
+    <p class="text"><b>允許使用空白鍵來選擇當前項</b>：在輸入助手顯示時，輸入空白鍵是否自動將列表中當前選擇的識別字發送到代碼區。</p>
+  </li>
+  <li> 
+    <p class="text"><b>使用空格鍵選擇當前項後忽略空格本身。</b>：在輸入空格鍵將列表中當前選擇的標識符發送到代碼區後，是否忽略這個空格鍵本身。如選擇不忽略，則當前標識符後將出現一個空格。</p>
+  </li>
+	<li>
+    <p class="text"><b>只使用回車鍵來選擇中間匹配的識別字</b>：如果當前選擇的識別字只是中間匹配輸入的內容，是否只有回車鍵才可將其發送到代碼區。</p>
+  </li>
+	<li>
+	<p class="text"><b>對關鍵字回車自動換行</b>：在輸入完整的關鍵字後再輸入回車，是否在輸出關鍵字後同時進行換行。</p></li>
+	<li>
+	<p class="text"><b>對帶參數的函數自動完成括弧</b>：如果當前輸入項為帶參數的函數或過程，是否在完成輸出時自動插入括弧並調用參數提示功能。</p></li>
+</ul>
+</ul>
+
+</ul>
+<p align="center">
+<img src="inputhelperconf1.png"> </p>
+<ul>
+	<li>
+	<p class="text"><b>列表顯示</b></p></li>
+	<ul>
+	<li>
+	<p class="text"><b>列表排序方式</b>：
+	識別字列表的排序方式。自動排序根據識別字的匹配優先順序自動排序，按文本、長度、類型排序分別以相關內容按昇冪進行排序。</p></li>
+  <li>
+    <p class="text"><b>列表字體</b>：指定在識別字列表中使用的字體名稱和大小。</p>
+  </li>
+  <li>
+    <p class="text"><b>識別字的最小長度</b>：只有大於該長度的識別字才會顯示在列表中。</p>
+  </li>
+	<li>
+    <p class="text"><b>保留字</b>：設置列表中保留字類型識別字的大小寫轉換方式。</p>
+  </li>
+  <li>
+    <p class="text"><b>顯示中間匹配的識別字</b>：
+	當用戶輸入字元時，是否保留只在中間匹配輸入內容的識別字。如果選擇，匹配內容會自動高亮，如果不選，只有從頭匹配的識別字才會保留。</p>
+  </li>
+	<li>
+    <p class="text"><b>根據使用頻率自動調整列表項顯示優先順序</b>：是否自動記憶用戶輸入過的識別字，並在顯示時自動將常用的識別字調整到列表的前面。</p>
+  </li>
+	<li>
+    <p class="text"><b>過濾重複的列表項</b>：相同的列表項，是否只保留一份而過濾掉其他。開啟該選項會少量降低輸入助手的性能。</p>
+  </li>
+  <li>
+    <p class="text"><b>使用相容方式取得當前識別字列表（較慢）</b>： 在某些 IDE 中，如果輸入助手導致編譯問題或 IDE 不穩定，可以嘗試打開該選項。開啟後輸入助手彈出速度會有所下降。</p>
+  </li>
+</ul>
+</ul>
+<ul>
+  <li>
+    <p class="text"><b>內容設置</b></p>
+  </li>
+  <ul>
+
+  <li><b>符號提供者列表</b>：選擇在列表中要顯示哪些符號提供者提供的識別字。</li>
+	<li><b>符號類型設置</b>：選擇需要在列表中顯示的符號類型。</li>
+
+  </ul>
+  </ul>
+  <p class="text" align="center">
+	<img src="inputhelperconf2.png"></p>
+<ul>
+  <li>
+    <p class="text"><b>符號列表</b>：顯示自定義符號列表。</p>
+  </li>
+  <ul>
+
+  <li><b>列表下拉清單</b>：選擇需要修改的列表。</li>
+
+  <li><b>增加</b>：新增一項自定義符號，可以是普通的識別字、編譯指示字、注釋或範本等。</li>
+	<li><b>副本</b>：根據當前選擇的符號生成一份複本。</li>
+	<li><b>刪除</b>：刪除當前選擇的符號。</li>
+	<li><b>編輯</b>：修改當前選擇的符號，如下圖所示。</li>
+	<li><b>默認</b>：恢復當前列表內容為預設值。</li>
+	<li><b>導入</b>：從符號定義檔中導入符號到當前列表，可以選擇替換或追加模式。</li>
+	<li><b>導出</b>：將當前符號列表導出到符號定義檔中。</li>
+
+  </ul>
+  </ul>
+  <ul>
+  <li>
+    <p class="text"><b>代碼範本</b>：編輯當前符號使用的代碼範本，只有當符號類型為
+	&quot;Comment&quot; 或 &quot;Template&quot; 時才有效。</p>
+  </li>
+  <ul>
+
+  <li><b>插入宏</b>：在當前位置插入一個預定義宏，點擊後彈出巨集列表功能表項。</li>
+	<li><b>用戶宏</b>：在當前位置插入一個用戶定義巨集，包括用戶巨集的範本在輸出時會彈出對話方塊，由用戶輸入宏的值。</li>
+	<li><b>游標</b>：在當前位置插件游標標誌，即 &quot;|&quot; 
+	字元，如果有多個游標，只有第一個有效。</li>
+	<li><b>清空</b>：清空範本內容。</li>
+
+  </ul>
+  </ul>
+<ul>
+  <li>
+	<p class="text"><b>確定</b>：保存當前設置。</p></li>
+	<li>
+	<p class="text"><b>取消</b>：放棄當前設置。</p></li>
+  </ul>
+<ul>
+  <li>
+    <p class="text"><b>&#35500;明</b>：顯示幫助資訊。</p>
+  </li>
+</ul>
+<p class="text" align="left">　</p>
+<p class="text" align="left"><b>編輯自定義符號</b></p>
+<p class="text" align="left">在增加或編輯符號時，顯示對話方塊如下圖所示：</p>
+<p class="text" align="center">
+<img src="inputhelperedit.png"></p>
+<ul>
+	<li>
+	<p class="text" align="left"><b>名稱</b>：符號的名稱，用於輸入符號的字串。可以是普通的識別字，也可以用
+	//xxx 或 {$xx 等表示注釋或編譯指示字的特殊符號。</p></li>
+	<li>
+	<p class="text" align="left"><b>類型</b>：自定義符號的類型。</p></li>
+	<li>
+	<p class="text" align="left"><b>描述</b>：符號的說明，顯示在自動輸入列表中。</p></li>
+	<li>
+	<p class="text" align="left"><b>優先順序</b>：在自動輸入列表中符號的位置，值越小，顯示的位置越靠上。</p></li>
+	<li>
+	<p class="text" align="left"><b>多行文本範本在輸出時自動縮進</b>：如果選擇，表示在輸出範本時，多行文本的每一行都按當前位置自動縮進。</p>
+	</li>
+	<li>
+	<p class="text" align="left"><b>即使當前輸入完成匹配也顯示列表</b>：對該符號忽略“<b>智慧判斷是否需要彈出助手</b>”的設置。</p>
+	</li>
+</ul>
+<p class="title" align="left">　<p class="title" align="left">相關主題
+<p class="text" align="left"> <a href="formdesigner.htm">表單設計器擴展專家</a>
+<p class="text" align="left"> <a href="palette.htm">IDE 主表單擴展專家</a>
+<p class="text" align="left"> <a href="cpuwin.htm">CPU 窗口擴展專家</a>
+<p class="text" align="left"> <a href="objinspector.htm">物件查看器擴展專家</a><p class="text" align="left">
+<p class="text" align="left"> <a href="wintoproller.htm">窗口置頂與折疊擴展專家</a><p class="text" align="left">
+<a href="../cnpack/index.htm">關於 IDE 專家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版權所有 2001-2009 CnPack 開發組</a></p>
+</body>
+</html>

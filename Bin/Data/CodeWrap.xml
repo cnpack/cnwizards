@@ -1,0 +1,248 @@
+<TCnCodeWrapCollection PropFormat="node">
+  <o>
+    <Caption>(..)</Caption>
+    <ShortCut>0</ShortCut>
+    <LineBlockMode>0</LineBlockMode>
+    <IndentLevel>0</IndentLevel>
+    <HeadText>(</HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>0</HeadIndentLevel>
+    <TailText>)</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>0</TailIndentLevel>
+  </o>
+  <o>
+    <Caption>[..]</Caption>
+    <ShortCut>0</ShortCut>
+    <LineBlockMode>0</LineBlockMode>
+    <IndentLevel>0</IndentLevel>
+    <HeadText>[</HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>0</HeadIndentLevel>
+    <TailText>]</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>0</TailIndentLevel>
+  </o>
+  <o>
+    <Caption>{..}</Caption>
+    <ShortCut>0</ShortCut>
+    <LineBlockMode>0</LineBlockMode>
+    <IndentLevel>0</IndentLevel>
+    <HeadText>{</HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>0</HeadIndentLevel>
+    <TailText>}</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>0</TailIndentLevel>
+  </o>
+  <o>
+    <Caption>Typecast...</Caption>
+    <ShortCut>0</ShortCut>
+    <LineBlockMode>0</LineBlockMode>
+    <IndentLevel>0</IndentLevel>
+    <HeadText>%Typecast%(</HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>0</HeadIndentLevel>
+    <TailText>)</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>0</TailIndentLevel>
+  </o>
+  <o>
+    <Caption>-</Caption>
+    <ShortCut>0</ShortCut>
+    <LineBlockMode>0</LineBlockMode>
+    <IndentLevel>0</IndentLevel>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>0</HeadIndentLevel>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>0</TailIndentLevel>
+  </o>
+  <o>
+    <Caption>begin..end</Caption>
+    <ShortCut>41026</ShortCut>
+    <LineBlockMode>1</LineBlockMode>
+    <IndentLevel>1</IndentLevel>
+    <HeadText>begin</HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>0</HeadIndentLevel>
+    <TailText>end;</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>0</TailIndentLevel>
+  </o>
+  <o>
+    <Caption>if begin..end</Caption>
+    <ShortCut>41033</ShortCut>
+    <LineBlockMode>1</LineBlockMode>
+    <IndentLevel>1</IndentLevel>
+    <HeadText>if | then
+begin</HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>0</HeadIndentLevel>
+    <TailText>end;</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>0</TailIndentLevel>
+  </o>
+  <o>
+    <Caption>if begin..end else begin..end</Caption>
+    <ShortCut>0</ShortCut>
+    <LineBlockMode>1</LineBlockMode>
+    <IndentLevel>1</IndentLevel>
+    <HeadText>if | then
+begin</HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>0</HeadIndentLevel>
+    <TailText>end
+else
+begin
+
+end;</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>0</TailIndentLevel>
+  </o>
+  <o>
+    <Caption>-</Caption>
+    <ShortCut>0</ShortCut>
+    <LineBlockMode>0</LineBlockMode>
+    <IndentLevel>0</IndentLevel>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>0</HeadIndentLevel>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>0</TailIndentLevel>
+  </o>
+  <o>
+    <Caption>with begin..end</Caption>
+    <ShortCut>41047</ShortCut>
+    <LineBlockMode>1</LineBlockMode>
+    <IndentLevel>1</IndentLevel>
+    <HeadText>with | do
+begin</HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>0</HeadIndentLevel>
+    <TailText>end;</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>0</TailIndentLevel>
+  </o>
+  <o>
+    <Caption>while begin..end</Caption>
+    <ShortCut>0</ShortCut>
+    <LineBlockMode>1</LineBlockMode>
+    <IndentLevel>1</IndentLevel>
+    <HeadText>while | do
+begin</HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>0</HeadIndentLevel>
+    <TailText>end;</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>0</TailIndentLevel>
+  </o>
+  <o>
+    <Caption>repeat..until</Caption>
+    <ShortCut>0</ShortCut>
+    <LineBlockMode>1</LineBlockMode>
+    <IndentLevel>1</IndentLevel>
+    <HeadText>repeat</HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>0</HeadIndentLevel>
+    <TailText>until |;</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>0</TailIndentLevel>
+  </o>
+  <o>
+    <Caption>-</Caption>
+    <ShortCut>0</ShortCut>
+    <LineBlockMode>0</LineBlockMode>
+    <IndentLevel>0</IndentLevel>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>0</HeadIndentLevel>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>0</TailIndentLevel>
+  </o>
+  <o>
+    <Caption>try..finally..end</Caption>
+    <ShortCut>41044</ShortCut>
+    <LineBlockMode>1</LineBlockMode>
+    <IndentLevel>1</IndentLevel>
+    <HeadText>try</HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>0</HeadIndentLevel>
+    <TailText>finally
+  |
+end;</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>0</TailIndentLevel>
+  </o>
+  <o>
+    <Caption>try..except..end</Caption>
+    <ShortCut>41029</ShortCut>
+    <LineBlockMode>1</LineBlockMode>
+    <IndentLevel>1</IndentLevel>
+    <HeadText>try</HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>0</HeadIndentLevel>
+    <TailText>except
+  |
+end;</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>0</TailIndentLevel>
+  </o>
+  <o>
+    <Caption>-</Caption>
+    <ShortCut>0</ShortCut>
+    <LineBlockMode>0</LineBlockMode>
+    <IndentLevel>0</IndentLevel>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>0</HeadIndentLevel>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>0</TailIndentLevel>
+  </o>
+  <o>
+    <Caption>{$IFDEF}..{$ENDIF}</Caption>
+    <ShortCut>0</ShortCut>
+    <LineBlockMode>1</LineBlockMode>
+    <IndentLevel>0</IndentLevel>
+    <HeadText>{$IFDEF |}</HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>-1</HeadIndentLevel>
+    <TailText>{$ENDIF}</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>-1</TailIndentLevel>
+  </o>
+  <o>
+    <Caption>{$IFDEF}..{$ELSE}..{$ENDIF}</Caption>
+    <ShortCut>0</ShortCut>
+    <LineBlockMode>1</LineBlockMode>
+    <IndentLevel>0</IndentLevel>
+    <HeadText>{$IFDEF |}</HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>-1</HeadIndentLevel>
+    <TailText>{$ELSE}
+
+{$ENDIF}</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>-1</TailIndentLevel>
+  </o>
+  <o>
+    <Caption>{$IFDEF DEBUG}..{$ENDIF}</Caption>
+    <ShortCut>0</ShortCut>
+    <LineBlockMode>1</LineBlockMode>
+    <IndentLevel>0</IndentLevel>
+    <HeadText>{$IFDEF DEBUG}</HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>-1</HeadIndentLevel>
+    <TailText>{$ENDIF}</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>-1</TailIndentLevel>
+  </o>
+  <o>
+    <Caption>{$REGION}..{$ENDREGION}</Caption>
+    <ShortCut>0</ShortCut>
+    <LineBlockMode>1</LineBlockMode>
+    <IndentLevel>0</IndentLevel>
+    <HeadText>{$REGION '|'}</HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>-1</HeadIndentLevel>
+    <TailText>{$ENDREGION}</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>-1</TailIndentLevel>
+  </o>
+</TCnCodeWrapCollection>

@@ -1,0 +1,54 @@
+**********************************************************************
+                     CnPack For Delphi/C++Builder
+                     中国人自己的免费第三方开发包
+                 (C)Copyright 2001-2009 CnPack 开发组
+**********************************************************************
+
+                    CnPack IDE专家包IDE升级改动备忘录
+                           Revision 1.0.0.0
+                       =========================
+                         作者：刘啸 2008.06.07
+
+
+
+每次 Borland/CodeGear 推出新版的 Delphi 系列 IDE 后，CnPack IDE 专家包都要为了支持新版而做大量工作。在这儿将需要做的基本工作列出来，以免日后在改动中遗漏。
+
+代码方面：
+
+  一、cnpack\Source\Common 与 cnwizards\Source 两个模块下的两个文件
+      CnPack.inc，加入新的编译指令。
+
+  二、cnwizards\Source\Framework\CnWizCompilerConst.pas，加入新的枚举常量定义以及库文件名称定义。
+      cnwizards\Source\Utils\CnWizIdeUtils.pas 的 GetBDSUserDataDir 中，加入新的定义。
+      cnwizards\Misc\CnIDEVersion.pas 加入新的版本判断。
+      cnwizards\ThirdParty\GetIdeVersion.pas 加入新的版本判断。
+
+  三、cnwizards\Source\ScriptWizard\CnScript_CnWizUtils.pas 以及 
+      cnwizards\Bin\PSDeclEx\CnWizUtils.pas中照着 CnCompilerConst.pas 进行同样的改动。
+
+  四、专家包安装工具。cnwizards\Tools\CnWizSetup\Setup.dpr 中加入新的 IDE 的定义。
+
+  五、专家包设置备份工具。cnwizards\Tools\CnIDEBRTool目录下，CnBHConst.pas 中加入新的定义，
+      CnBHMain.pas、CleanClass.pas 与 CnAppBuilderInfo.pas 中在各个 IDE 的常量使用处加入新的常量。
+
+  六、专家包外部专家管理工具。cnwizards\Tools\CnManageWiz\CnManWizForm.pas 中加入新的定义。
+
+  七、want脚本。cnwizards\Make\want.xml。加入新的 Target 定义。
+
+  八、安装脚本。cnwizards\Install\CnWizards_Install.nsi，加入新的 Section 等。
+
+  九、cnwizards\Source 下加新版的专家包工程文件。
+
+  十、CnInputSymbolList.pas中加入新的Section名称和读入时的编译条件定义。
+
+  十一、UsesCleaner中检查DCU32是否支持新版本的dcu格式，不支持的话需要调试支持。
+
+  十二、多语文件中更新所有对应的字符串常量，有多个工具的多语字符串需更新。
+
+  十三、其他兼容性测试！这是最重要的。
+
+文档方面：
+
+  一、cnwizards\Readme*.txt，关于所支持的 IDE 的列表，各种语言都得改。
+
+  二、cnwizards\Help\*\cnpack\index.htm，关于所支持的 IDE 的列表，各种语言都得加。

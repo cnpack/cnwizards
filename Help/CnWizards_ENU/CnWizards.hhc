@@ -1,0 +1,471 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
+<!-- Sitemap 1.0 -->
+</HEAD><BODY>
+<OBJECT type="text/site properties">
+	<param name="FrameName" value="right">
+	<param name="Window Styles" value="0x800025">
+</OBJECT>
+<UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="CnPack Introduction">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Welcome to CnPack IDE Wizards">
+			<param name="Local" value="cnpack/index.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="About CnPack">
+			<param name="Local" value="cnpack/about.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="License">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="CnPack IDE Wizards License">
+			<param name="Local" value="licenses/license.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Other Referenced License">
+			</OBJECT>
+		<UL>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="GExperts License">
+				<param name="Local" value="licenses\gelicense.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Mozilla Public License 1.1">
+				<param name="Local" value="licenses\MPL-1.1.txt">
+				</OBJECT>
+		</UL>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Wizards">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Basic Operation">
+			<param name="Local" value="wizards/wizards.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Form Design Wizard">
+			<param name="Local" value="wizards/alignsizewizards.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="MessageBox Visual Designer">
+			<param name="Local" value="wizards/msgboxwizards.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Component Selector">
+			<param name="Local" value="wizards/componentselector.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Tab Order Wizard">
+			<param name="Local" value="wizards/taborderwizard.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Bookmark Browser">
+			<param name="Local" value="wizards/bookmarkwizards.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Open High-Version Forms">
+			<param name="Local" value="wizards/dfm6to5wizards.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Source Templates Wizard">
+			<param name="Local" value="wizards\srctemplates.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="MSDN Help Wizard">
+			<param name="Local" value="wizards/msdnwizards.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Source Format Convert Wizard">
+			<param name="Local" value="wizards/pas2htmlwizards.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Batch File Replace">
+			<param name="Local" value="wizards/replacewizards.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Source Compare Wizard">
+			<param name="Local" value="wizards/sourcediffwizards.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Source Statistics Wizard">
+			<param name="Local" value="wizards/sourcestatwizards.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Prefix Wizard">
+			<param name="Local" value="wizards/prefixwizard.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Property Corrector">
+			<param name="Local" value="wizards/corprop.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Comment Cropper">
+			<param name="Local" value="wizards/commcropwizard.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Historical Files Snapshot">
+			<param name="Local" value="wizards\projext\filesnapshot.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Repository List">
+			<param name="Local" value="wizards\repository.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Explorer Wizard">
+			<param name="Local" value="wizards\explorer.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Procedure List Wizard">
+			<param name="Local" value="wizards\cnproclistwizard.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Uses Units Cleaner">
+			<param name="Local" value="wizards\cnusescleaner.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="IDE Config Backup Restore Tool">
+			<param name="Local" value="wizards\cnidebrtool.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Script Wizard">
+			<param name="Local" value="wizards\scriptwizard.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="IDE External Wizard Management">
+			<param name="Local" value="wizards\cnmanagewiz.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Project Extension Wizard">
+			</OBJECT>
+		<UL>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Project Extension">
+				<param name="Local" value="wizards\projext\projectexwizard.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Unit List">
+				<param name="Local" value="wizards\projext\unitslist.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Form List">
+				<param name="Local" value="wizards\projext\formslist.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Use Unit">
+				<param name="Local" value="wizards\projext\uselist.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Frame List">
+				<param name="Local" value="wizards\projext\frameslist.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="List Used Unit">
+				<param name="Local" value="wizards\projext\listused.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Project Backup">
+				<param name="Local" value="wizards\projext\projbackup.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Clean Temporary Files">
+				<param name="Local" value="wizards\projext\cleantmp.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Project Dir Builder">
+				<param name="Local" value="wizards\projext\dirbuilder.htm">
+				</OBJECT>
+		</UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Code Editor Wizard">
+			</OBJECT>
+		<UL>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Code Editor Wizard Settings">
+				<param name="Local" value="wizards/editors/wizeditors.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Evaluation Swap Tool">
+				<param name="Local" value="wizards/editors/editorcodeswap.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Open File Tool">
+				<param name="Local" value="wizards/editors/editoropenfile.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Editor Fullscreen Switch">
+				<param name="Local" value="wizards/editors/editorfullscreen.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Code to String Converting Tool">
+				<param name="Local" value="wizards/editors/editorcodetostring.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Delete Blank Lines Tool">
+				<param name="Local" value="wizards\editors\editorcodedelblank.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Comment Code Tool">
+				<param name="Local" value="wizards\editors\editorcodecomment.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Uncomment Code Tool">
+				<param name="Local" value="wizards\editors\editorcodeuncomment.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Toggle Comment Tool">
+				<param name="Local" value="wizards\editors\editorcodetogglecomment.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Indent Code Tool">
+				<param name="Local" value="wizards\editors\editorcodeindent.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Unindent Code Tool">
+				<param name="Local" value="wizards\editors\editorcodeunindent.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="ASCII Chart">
+				<param name="Local" value="wizards\editors\asciichart.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Insert Color Tool">
+				<param name="Local" value="wizards\editors\editorinsertcolor.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Insert Date Time Tool">
+				<param name="Local" value="wizards\editors\editorinserttime.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Collector">
+				<param name="Local" value="wizards\editors\editorcollector.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Sort Selected Lines Tool">
+				<param name="Local" value="wizards\editors\editorsortlines.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Toggle Uses/Include Tool">
+				<param name="Local" value="wizards\editors\editortoggleuses.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Toggle Var Field Tool">
+				<param name="Local" value="wizards\editors\editortogglevar.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Previous Message Line Tool">
+				<param name="Local" value="wizards\editors\editorprevmsg.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Next Message Line Tool">
+				<param name="Local" value="wizards\editors\editorjumpmsg.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Jump to Interface Tool">
+				<param name="Local" value="wizards\editors\editorjumpintf.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Jump to Implememtation Tool">
+				<param name="Local" value="wizards\editors\editorjumpimpl.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Jump to Matched Keyword Tool">
+				<param name="Local" value="wizards\editors\editorjumpkeyword.htm">
+				</OBJECT>
+		</UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Editor Enhancements Wizard">
+			</OBJECT>
+		<UL>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Editor Enhancements Wizard">
+				<param name="Local" value="srcedtenh\srcedtenh.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Context Menu Enhancement">
+				<param name="Local" value="srcedtenh\srcedtpopupmenu.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Code Read Only Protection">
+				<param name="Local" value="srcedtenh\srcedtautoro.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Editor Toolbar">
+				<param name="Local" value="srcedtenh\srcedttoolbar.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Line Number Gutter">
+				<param name="Local" value="srcedtenh\srcedtgutter.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Jumping Enhancement">
+				<param name="Local" value="srcedtenh\srcedtnav.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Tabset Enhancement">
+				<param name="Local" value="srcedtenh\srcedttab.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Selection Button">
+				<param name="Local" value="srcedtenh\srcedtblocktools.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Auto Save">
+				<param name="Local" value="srcedtenh\srcedtautosave.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Other Enhancements">
+				<param name="Local" value="srcedtenh\srcedtothers.htm">
+				</OBJECT>
+		</UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="IDE Enhancements">
+			</OBJECT>
+		<UL>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="FastCode IDE Optimizer">
+				<param name="Local" value="ideenhance\fastcodeopt.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Form Designer Enhancements Wizard">
+				<param name="Local" value="ideenhance/formdesigner.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="IDE Main Form Enhancements Wizard">
+				<param name="Local" value="ideenhance/palette.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="CPU Window Enhancements Wizard">
+				<param name="Local" value="ideenhance/cpuwin.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Object Inspector Enhancements Wizard">
+				<param name="Local" value="ideenhance\objinspector.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Caption Button Enhancements Wizard">
+				<param name="Local" value="ideenhance\wintoproller.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Code Input Helper">
+				<param name="Local" value="ideenhance\inputhelper.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Source Highlight Enhancements Wizard">
+				<param name="Local" value="ideenhance\srchighlight.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Version Enhancements Wizard">
+				<param name="Local" value="ideenhance\verenh.htm">
+				</OBJECT>
+		</UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Repository Wizards">
+			</OBJECT>
+		<UL>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="DUnit Test Case">
+				<param name="Local" value="wizards\repository\dunitwizard.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="INI Reader and Writer">
+				<param name="Local" value="wizards\repository\inifilerwizard.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="CnMemProf Project Wizard">
+				<param name="Local" value="wizards\repository\cnmemprof.htm">
+				</OBJECT>
+		</UL>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Property and Component Editors">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Property Editors">
+			<param name="Local" value="propeditor/propeditor.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Multi-line String Editor">
+			<param name="Local" value="propeditor/propstring.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Constraints Editor">
+			<param name="Local" value="propeditor/propsize.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="CnWizards Settings">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="IDE Wizards Settings">
+			<param name="Local" value="options/wizconfig.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Property and Component Editors Settings">
+			<param name="Local" value="options/propconfig.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Environment and Upgrade Settings">
+			<param name="Local" value="options/otherconfig.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="CnPack IDE Wizards Upgrade Prompt">
+			<param name="Local" value="options/upgrade.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Command Line Arguments">
+			<param name="Local" value="options/cmdline.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="CnDebugger Tool">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="CnDebug Help">
+			<param name="Local" value="debug\cndebug.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="CnDebugViewer Help">
+			<param name="Local" value="debug\cndebugviewer.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="CnWizards Tools">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Relation Analyzer">
+			<param name="Local" value="cnsmr\cnsmr.htm">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Appendix">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="History">
+			<param name="Local" value="other/history.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Credits">
+			<param name="Local" value="other/credits.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Contact Us">
+			<param name="Local" value="other/contact.htm">
+			</OBJECT>
+	</UL>
+</UL>
+</BODY></HTML>
