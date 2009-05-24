@@ -150,6 +150,7 @@ Usage: want [target-name] [-Dname=value]
                  (d6, d7, d9, d10, d11, d12, d14, cb5, cb6 also)
     cnwizards  - Compile all CnWizards DLLs (D5, D6, etc.).
     resdll     - Compile CnWizards Resource DLL.
+    cnzipdll   - Compile CnWizards Zip Wrapper DLL.
     cnconfigio - Compile CnConfigIO.
     cndebugviewer - Compile CnDebugViewer.
     cndfm6to5  - Compile CnDfm6To5.
@@ -580,6 +581,27 @@ Usage: want [target-name] [-Dname=value]
        <include name="${tools}/CnWizRes/CnWizRes.res.old" />
     </move>
   </target>
+  
+  <!-- 编译 ZIP DLL -->  
+  <target name="cnzipdll" depends="-prepare" description="Compile Zip Wrapper DLL." >
+    <property name="Ver.FileDescription"  value="CnWizards Zip Wrapper DLL" />
+    <property name="Ver.InternalName"     value="CnZipWrapper" />
+    <property name="Ver.OriginalFilename" value="CnZipWrapper.DLL" />
+    <copy tofile="${tools}/CnZipWrapper/CnZipWrapper.res.old" >
+       <include name="${tools}/CnZipWrapper/CnZipWrapper.res" />
+    </copy>
+    <echo input="${tools}/CnTools.template.rc" file="${tools}/CnZipWrapper/CnZipWrapper.rc" />
+    <brcc file="${tools}/CnZipWrapper/CnZipWrapper.rc" output="${tools}/CnZipWrapper/CnZipWrapper.res" />
+    <dcc basedir="${tools}/CnZipWrapper" source="CnZipWrapper.dpr" versions="5" usecfg="true" />
+    <delete dir="${tools}/CnZipWrapper">
+       <include name="CnZipWrapper.res" />
+       <include name="CnZipWrapper.rc" />
+       <include name="CnZipWrapper.drc" />
+    </delete>
+    <move tofile="${tools}/CnZipWrapper/CnZipWrapper.res" >
+       <include name="${tools}/CnZipWrapper/CnZipWrapper.res.old" />
+    </move>
+  </target>
 
   <!-- 编译附加工具 -->
   <target name="tools" depends="-prepare,cnconfigio,cndebugviewer,cndfm6to5,cnascii,cnidebr,cnmanagewiz,cnselectlang,cnsmr,cnwizsetup" description="Compile Tools (CnDfm6To5, CnWizSetup, etc.)." >
@@ -834,11 +856,11 @@ Usage: want [target-name] [-Dname=value]
   -->
 
   <!-- 完整构建 -->
-  <target name="all" depends="-prepare,clean,cnwizards,resdll,tools,makehelp,makeinst" description="All above tasks except cvsupdate." >
+  <target name="all" depends="-prepare,clean,cnwizards,resdll,cnzipdll,tools,makehelp,makeinst" description="All above tasks except cvsupdate." >
   </target>
 
   <!-- 带 cvs 更新的完整构建 -->
-  <target name="allcvs" depends="-prepare,clean,cvsupdate,cnwizards,resdll,tools,makehelp,makeinst" description="All above tasks." >
+  <target name="allcvs" depends="-prepare,clean,cvsupdate,cnwizards,resdll,cnzipdll,tools,makehelp,makeinst" description="All above tasks." >
   </target>
 
   <!-- FTP 上传服务器 -->
