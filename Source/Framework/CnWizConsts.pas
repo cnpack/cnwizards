@@ -233,6 +233,8 @@ resourcestring
   SCnProjExtFileReopen = 'CnProjExtFileReopen';
   SCnProjExtDirBuilder = 'CnProjExtDirBuilder';
 
+  SCnProjExtBackupDllName = 'CnZipWrapper.Dll';
+
   // CnFilesSnapshotWizard
   SCnProjExtFilesSnapshotAdd = 'CnProjExtFilesSnapshotAdd';
   SCnProjExtFilesSnapshotManage = 'CnProjExtFilesSnapshotManage';
@@ -1234,6 +1236,7 @@ var
   SCnProjExtBackupFileCount: string = '备份 %s 工程文件总数: %d';
   SCnProjExtBackupNoFile: string = '没有需要备份的文件。';
   SCnProjExtBackupMustZip: string = '目前只支持 ZIP 格式的压缩文件，目标文件扩展名将更改为 ZIP，是否继续？';
+  SCnProjExtBackupDllMissCorrupt: string = '找不到 ZIP 库或库已损坏，请重新安装。';
   SCnProjExtBackupErrorCompressor: string = '外部压缩程序不存在，请重新指定。';
   SCnProjExtBackupSuccFmt: string = '文件已成功备份至 %s';
 
