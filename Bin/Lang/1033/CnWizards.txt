@@ -3097,6 +3097,7 @@ SCnProjExtBackupHint=Compress and Backup Project Files
 SCnProjExtBackupFileCount=Backup %s Files: %d
 SCnProjExtBackupNoFile=No Files to Backup.
 SCnProjExtBackupMustZip=Only ZIP Format Supported. Change the File Extension to ZIP?
+SCnProjExtBackupDllMissCorrupt=ZIP Library Missing or Corrupted. Please ReInstall.
 SCnProjExtBackupErrorCompressor=External Compressor NOT Exists. Please Select One.
 SCnProjExtBackupSuccFmt=File Saved to %s
 SCnProjExtDelTempCaption=&Clean Temporary Files...

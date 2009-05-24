@@ -3097,6 +3097,7 @@ SCnProjExtBackupHint=压缩备份工程文件
 SCnProjExtBackupFileCount=备份 %s 工程文件总数: %d
 SCnProjExtBackupNoFile=没有需要备份的文件。
 SCnProjExtBackupMustZip=目前只支持 ZIP 格式的压缩文件，目标文件扩展名将更改为 ZIP，是否继续？
+SCnProjExtBackupDllMissCorrupt=找不到 ZIP 库或库已损坏，请重新安装。
 SCnProjExtBackupErrorCompressor=外部压缩程序不存在，请重新指定。
 SCnProjExtBackupSuccFmt=文件已成功备份至 %s
 SCnProjExtDelTempCaption=清除工程临时文件(&C)...
