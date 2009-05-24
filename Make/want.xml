@@ -900,7 +900,7 @@ Usage: want [target-name] [-Dname=value]
           executable="${exe.python}" >
       <arg value="Make/googlecode_upload.py" />
       <arg value="-s" />
-      <arg value="${Installer.Name}" />
+      <arg value='"${Installer.Name}"' />
       <arg value="-p" />
       <arg value="cnpack" />
       <arg value="-u" />
@@ -908,7 +908,7 @@ Usage: want [target-name] [-Dname=value]
       <arg value="-w" />
       <arg value="?{${master.ini}:GoogleCode:password}" />
       <arg value="-l" />
-      <arg value="${release.labels}" />
+      <arg value='"${release.labels}"' />
       <arg value="Install/Output/${Installer.Name}" />
     </exec>
   </target>
@@ -927,7 +927,7 @@ Usage: want [target-name] [-Dname=value]
     <exec basedir="${basedir}" errorlevel="1" defaultfilters="true"
           executable="${exe.svn}" >
       <arg value="-m" />
-      <arg value="Commit version files: ${Ver.Str.Major}.${Ver.Str.Minor}" />
+      <arg value='"Commit version files: ${Ver.Str.Major}.${Ver.Str.Minor}"' />
       <arg value="commit" />
       <arg value="Make/release.ini" />
       <arg value="Source/Version.inc" />
