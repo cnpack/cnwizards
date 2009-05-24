@@ -540,6 +540,7 @@ InitOk:
   SetOutPath $INSTDIR
   File "..\..\Bin\Setup.exe"
   File "..\..\Bin\CnWizRes.dll"
+  File "..\..\Bin\CnZipWrapper.dll"
   File "..\..\License.chs.txt"
   File "..\..\License.cht.txt"
   File "..\..\License.enu.txt"
