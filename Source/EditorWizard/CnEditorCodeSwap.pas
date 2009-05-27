@@ -99,10 +99,12 @@ begin
   if LowerCase(Copy(Trim(Str), 1, 3)) = ForStatement then
     Exit;
 
-  if CurrentIsCSource then
-    EquStr := '='
+  if IsDelphiSourceModule(CnOtaGetCurrentSourceFile) or
+    IsInc(CnOtaGetCurrentSourceFile) then
+    EquStr := ':='
   else
-    EquStr := ':=';
+    EquStr := '=';
+
   EquPos := AnsiPos(EquStr, Str);
   if EquPos > 1 then
   begin
