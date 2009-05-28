@@ -247,7 +247,7 @@ const
   csFixThreadLocale = 'FixThreadLocale';
 
   csDelphiExtDefault = '.pas;.dpr;.inc';
-  csCExtDefault = '.c;.cpp;.h;.hpp';
+  csCExtDefault = '.c;.cpp;.h;.hpp;.cc;.hh';
 
   csUpgradeURL = 'URL';
   csNightlyBuildURL = 'URL';
