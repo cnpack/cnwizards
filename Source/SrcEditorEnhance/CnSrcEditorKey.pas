@@ -86,6 +86,7 @@ type
     FCorIdeModule: HModule;
     FSearchWrap: Boolean;
 {$IFNDEF DELPHI10_UP}
+    FSaveLineNo: Integer;
     FNeedChangeInsert: Boolean;
     procedure IdleDoAutoInput(Sender: TObject);
     procedure IdleDoAutoIndent(Sender: TObject);
