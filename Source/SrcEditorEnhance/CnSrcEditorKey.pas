@@ -72,7 +72,6 @@ type
     FShiftEnter: Boolean;
     FAutoIndent: Boolean;
     FAutoIndentList: TStringList;
-    FSaveLineNo: Integer;
     FHomeExt: Boolean;
     FHomeFirstChar: Boolean;
     FF3Search: Boolean;
@@ -81,7 +80,7 @@ type
     FRenameShortCut: TShortCut;
     FRenameKey: Word;
     FRenameShift: TShiftState;
-    FSemicolonLastChar: Boolean;    
+    FSemicolonLastChar: Boolean;
     FAutoEnterEnd: Boolean;
     FKeepSearch: Boolean;
     FCorIdeModule: HModule;
