@@ -29,7 +29,9 @@ unit CnSrcEditorEnhance;
 * 兼容测试：暂无（PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6）
 * 本 地 化：该窗体中的字符串符合本地化处理方式
 * 单元标识：$Id: CnSrcEditorEnhance.pas,v 1.52 2009/05/19 11:53:05 liuxiao Exp $
-* 修改记录：2007.05.02 V1.2
+* 修改记录：2009.05.30 V1.3
+*               LiuXiao 修改通知器以修改工具栏的更新方式，降低 CPU 占有率
+*           2007.05.02 V1.2
 *               LiuXiao 加入编辑器右键菜单中插入浮动下拉按钮的功能
 *           2004.06.12 V1.1
 *               LiuXiao 加入打开文件时自动只读保护的功能
@@ -49,7 +51,7 @@ uses
   IniFiles, Menus, CnCommon, CnWizUtils, CnConsts, CnWizClasses, CnWizConsts,
   CnWizManager, ComCtrls, ActnList, CnSpin, StdCtrls, ExtCtrls, CnWizMultiLang,
   CnSrcEditorMisc, CnSrcEditorGutter, CnSrcEditorToolBar, CnSrcEditorNav,
-  CnSrcEditorBlockTools, CnSrcEditorKey;
+  CnSrcEditorBlockTools, CnSrcEditorKey, CnEditControlWrapper;
 
 type
 
@@ -186,8 +188,9 @@ type
     FEditorKey: TCnSrcEditorKey;
 
   {$IFDEF BDS}
-    FCheckTimer: TTimer;
-    procedure CheckToolBarEnable(Sender: TObject);
+    procedure CheckToolBarEnable;
+    procedure EditorChanged(Editor: TEditorObject;
+      ChangeType: TEditorChangeTypes);
   {$ENDIF}
   protected
     procedure SetActive(Value: Boolean); override;
@@ -412,16 +415,14 @@ begin
   FEditorKey := TCnSrcEditorKey.Create;
   FEditorKey.OnEnhConfig := OnEnhConfig;
 {$IFDEF BDS}
-  FCheckTimer := TTimer.Create(nil);
-  FCheckTimer.Interval := 200;
-  FCheckTimer.OnTimer := CheckToolBarEnable;
+  EditControlWrapper.AddEditorChangeNotifier(EditorChanged);
 {$ENDIF}
 end;
 
 destructor TCnSrcEditorEnhance.Destroy;
 begin
 {$IFDEF BDS}
-  FCheckTimer.Free;
+  EditControlWrapper.RemoveEditorChangeNotifier(EditorChanged);
 {$ENDIF}
   FEditorMisc.Free;
   FToolbarMgr.Free;
@@ -677,91 +678,89 @@ end;
 
 {$IFDEF BDS}
 
-procedure TCnSrcEditorEnhance.CheckToolBarEnable(Sender: TObject);
+procedure TCnSrcEditorEnhance.EditorChanged(Editor: TEditorObject;
+  ChangeType: TEditorChangeTypes);
+begin
+  if Active and FToolbarMgr.Active and
+    (ChangeType * [ctTabSetChanged, ctViewBarChanged] <> []) then
+    CheckToolBarEnable;
+end;
+
+procedure TCnSrcEditorEnhance.CheckToolBarEnable;
 var
   I, J, K: Integer;
   AControl: TControl;
   AVisible, EditVisible: Boolean;
-
 begin
-  if Active and FToolbarMgr.Active then
+  if FToolbarMgr.Count > 0 then
   begin
-    try
-      FCheckTimer.Enabled := False;
+    // 有编辑器工具栏，需要和外部工具栏夹杂处理
+    for I := 0 to FToolbarMgr.Count - 1 do
+    begin
+      if not FToolbarMgr.ToolBars[I].Enabled then
+        FToolbarMgr.ToolBars[I].Enabled := True;
+      if not FToolbarMgr.ToolBars[I].ShowHint then
+        FToolbarMgr.ToolBars[I].ShowHint := True;
 
-      if FToolbarMgr.Count > 0 then
-      begin
-        // 有编辑器工具栏，需要和外部工具栏夹杂处理
-        for I := 0 to FToolbarMgr.Count - 1 do
+      try
+        if FToolbarMgr.ToolBars[I].Parent <> nil then
         begin
-          if not FToolbarMgr.ToolBars[I].Enabled then
-            FToolbarMgr.ToolBars[I].Enabled := True;
-          if not FToolbarMgr.ToolBars[I].ShowHint then
-            FToolbarMgr.ToolBars[I].ShowHint := True;
+          if FToolbarMgr.ShowInDesign then // 允许其它工具栏也显示
+          begin
+            if not FToolbarMgr.ToolBars[I].Visible then
+              FToolbarMgr.ToolBars[I].Visible := True;
+            Continue;
+          end;
 
-          try
-            if FToolbarMgr.ToolBars[I].Parent <> nil then
+          // 从头搜索第一个 Align 是 Client 的东西，是编辑器则显示
+          for J := FToolbarMgr.ToolBars[I].Parent.ControlCount - 1 downto 0 do
+          begin
+            AControl := FToolbarMgr.ToolBars[I].Parent.Controls[J];
+            if AControl.Align = alClient then
             begin
-              if FToolbarMgr.ShowInDesign then // 允许其它工具栏也显示
-              begin
-                if not FToolbarMgr.ToolBars[I].Visible then
-                  FToolbarMgr.ToolBars[I].Visible := True;
-                Continue;
-              end;
+              EditVisible := AControl.ClassNameIs(EditControlClassName) and AControl.Visible;
+              AVisible := EditVisible or AControl.ClassNameIs('TDisassemblyView'); // CPU 也显示
 
-              // 从头搜索第一个 Align 是 Client 的东西，是编辑器则显示
-              for J := FToolbarMgr.ToolBars[I].Parent.ControlCount - 1 downto 0 do
+              if AVisible then
               begin
-                AControl := FToolbarMgr.ToolBars[I].Parent.Controls[J];
-                if AControl.Align = alClient then
+                if AVisible <> FToolbarMgr.ToolBars[I].Visible then
+                  FToolbarMgr.ToolBars[I].Visible := AVisible;
+
+                if CnEditorToolBarService <> nil then
+                  CnEditorToolBarService.SetVisible(-1, AControl, EditVisible, False);
+              end
+              else // 要按倒序来，否则工具栏之间上下会错位
+              begin
+                // 还需要找出 EditControl 来让这个 EditControl 对应的 ToolBar 失效
+                if CnEditorToolBarService <> nil then
                 begin
-                  EditVisible := AControl.ClassNameIs(EditControlClassName) and AControl.Visible;
-                  AVisible := EditVisible or AControl.ClassNameIs('TDisassemblyView'); // CPU 也显示
-
-                  if AVisible then
+                  for K := FToolbarMgr.ToolBars[I].Parent.ControlCount - 1 downto 0 do
                   begin
-                    if AVisible <> FToolbarMgr.ToolBars[I].Visible then
-                      FToolbarMgr.ToolBars[I].Visible := AVisible;
-
-                    if CnEditorToolBarService <> nil then
-                      CnEditorToolBarService.SetVisible(-1, AControl, EditVisible, False);
-                  end
-                  else // 要按倒序来，否则工具栏之间上下会错位
-                  begin
-                    // 还需要找出 EditControl 来让这个 EditControl 对应的 ToolBar 失效
-                    if CnEditorToolBarService <> nil then
+                    AControl := FToolbarMgr.ToolBars[I].Parent.Controls[K];
+                    if AControl.ClassNameIs(EditControlClassName) then
                     begin
-                      for K := FToolbarMgr.ToolBars[I].Parent.ControlCount - 1 downto 0 do
-                      begin
-                        AControl := FToolbarMgr.ToolBars[I].Parent.Controls[K];
-                        if AControl.ClassNameIs(EditControlClassName) then
-                        begin
-                          CnEditorToolBarService.SetVisible(-1, AControl, EditVisible, False);
-                          Break;
-                        end;
-                      end;
+                      CnEditorToolBarService.SetVisible(-1, AControl, EditVisible, False);
+                      Break;
                     end;
-
-                    if AVisible <> FToolbarMgr.ToolBars[I].Visible then
-                      FToolbarMgr.ToolBars[I].Visible := AVisible;
                   end;
-                  Break;
                 end;
+
+                if AVisible <> FToolbarMgr.ToolBars[I].Visible then
+                  FToolbarMgr.ToolBars[I].Visible := AVisible;
               end;
+              Break;
             end;
-          except
-            ;
           end;
         end;
-      end
-      else // 无编辑器工具栏的情况下，单独调用 CheckEditorToolbarEnable 让其自行检测
-      begin
-        if CnEditorToolBarService <> nil then
-          CnEditorToolBarService.CheckEditorToolbarEnable;
+      except
+        ;
       end;
-    finally
-      FCheckTimer.Enabled := True;
     end;
+  end
+  else // 无编辑器工具栏的情况下，单独调用 CheckEditorToolbarEnable 让其自行检测
+  begin
+    if CnEditorToolBarService <> nil then
+      CnEditorToolBarService.CheckEditorToolbarEnable;
   end;
 end;
 
