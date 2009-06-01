@@ -5,9 +5,10 @@
 **********************************************************************
 
                           定制编译CnWizards的方法
-                            Revision 1.0.0.0
+
+                            Revision 1.0.0.1
                        =========================
-                        作者：刘啸 2007.08.02
+                        作者：刘啸 2009.06.01
 
 
     随着开发步伐的前进与规模的发展，CnPack IDE 专家包（CnWizards）的功
@@ -27,19 +28,14 @@
 一、从 CnPack 开发网站上下载 CnWizards 最新安装包并进行安装，推荐下载最
     新的每日构建版。http://www.cnpack.org/downbuilds.php
 
-二、从 CnPack 开发网站的 CVS 上将 cnpack 与 cnwizards 两个模块的全部内
-    容下载到同一目录下。
-    
-    CVSROOT:
-    :pserver:anoncvs@www.cnpack.org:/var/cvshome/cnpack
-    密码：
-    anoncvs
-    模块名：
-    cnpack
-    cnwizards
-    
-    关于具体如何使用 CnPack 的 CVS，请参考 CnPack 开发网站上的
-    《CVS使用说明》http://www.cnpack.org/showdetail.php?id=155
+二、从 CnPack 开发网站的 SVN 上将代码下载至本地。
+
+    svn checkout http://cnpack.googlecode.com/svn/trunk/
+
+    关于具体如何使用 CnPack 的 SVN，请参考 CnPack 网站上的 SVN 使用说明
+    http://www.cnpack.org/showdetail.php?id=639&lang=zh-cn
+    或：
+    http://code.google.com/p/cnpack/source/checkout
 
 三、启动 Delphi，打开 cnwizards\Tools\CnCustBuild\CnCustBuild.dpr，编译
     运行。
@@ -84,15 +80,9 @@ the features you want, you can follow these steps:
 1. Download latest (nightly-build) installer of CnWizards and install it.
    http://www.cnpack.org/downbuilds.php
 
-2. Download latest source code from CnPack CVS to one directory.
+2. Download latest source code from CnPack SNV to local directory.
 
-   CVSROOT:
-     :pserver:anoncvs@www.cnpack.org:/var/cvshome/cnpack
-   Password:
-     anoncvs
-   Module Name:
-     cnpack
-     cnwizards
+   svn checkout http://cnpack.googlecode.com/svn/trunk/
 
 3. Start Delphi, Open cnwizards\Tools\CnCustBuild\CnCustBuild.dpr and Run.
 

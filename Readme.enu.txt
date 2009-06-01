@@ -5,9 +5,9 @@
 **********************************************************************
 
                          CnPack IDE Wizards
-                           Version 0.9.1
+                           Version 0.9.2
                        =======================
-                         CnPack Team 2009.04
+                         CnPack Team 2009.06
 
 
 =====================================================
@@ -76,11 +76,7 @@ file.
     CnWizards Installer: http://download.cnpack.org/CnWizards.exe
     CnWizards Source:   http://download.cnpack.org/CnWizards_Src.zip
 
-    CVS Repository:
-    CVSROOT:  :pserver:anoncvs@www.cnpack.org:/var/cvshome/cnpack
-    Password: anoncvs
-    Modules:  cnpack
-              cnwizards
+    SVN: http://cnpack.googlecode.com/svn/trunk/
 
 ======================================================================
 6. Compiling And Building

@@ -149,7 +149,7 @@
 			<VersionInfo Name="AutoIncBuild">False</VersionInfo>
 			<VersionInfo Name="MajorVer">0</VersionInfo>
 			<VersionInfo Name="MinorVer">9</VersionInfo>
-			<VersionInfo Name="Release">1</VersionInfo>
+			<VersionInfo Name="Release">2</VersionInfo>
 			<VersionInfo Name="Build">0</VersionInfo>
 			<VersionInfo Name="Debug">False</VersionInfo>
 			<VersionInfo Name="PreRelease">False</VersionInfo>
@@ -161,7 +161,7 @@
 		</VersionInfo>
 		<VersionInfoKeys>
 			<VersionInfoKeys Name="FileDescription">CnWizards For Delphi 10</VersionInfoKeys>
-			<VersionInfoKeys Name="FileVersion">0.9.1.0</VersionInfoKeys>
+			<VersionInfoKeys Name="FileVersion">0.9.2.0</VersionInfoKeys>
 			<VersionInfoKeys Name="InternalName">CnWizards_D10</VersionInfoKeys>
 			<VersionInfoKeys Name="OriginalFilename">CnWizards_D10.DLL</VersionInfoKeys>
 			<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
