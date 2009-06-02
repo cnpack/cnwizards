@@ -466,12 +466,61 @@ end;
 procedure TCnSrcEditorKey.IdleDoAutoInput(Sender: TObject);
 var
   View: IOTAEditView;
+  Stream: TMemoryStream;
+  CharPos: TOTACharPos;
+  EditPos: TOTAEditPos;
+  Parser: TCnPasStructureParser;
+  NeedInsert: Boolean;
 begin
   View := CnOtaGetTopMostEditView;
   if Assigned(View) then
   begin
     if View.CursorPos.Line = FSaveLineNo + 1 then
     begin
+      // DONE: 加入一些限制，避免每个都加 end
+      // 光标所在的内层块一个是begin一个是end，并且俩的Col不等时，才需要加end
+      // 光标所在无内层块时也加 end。其余情况则无需加。
+      Stream := TMemoryStream.Create;
+      Parser := TCnPasStructureParser.Create;
+      try
+        CnOtaSaveEditorToStream(View.Buffer, Stream);
+        Parser.ParseSource(PAnsiChar(Stream.Memory),
+          IsDpr(View.Buffer.FileName), True);
+
+        EditPos := View.CursorPos;
+        View.ConvertPos(True, EditPos, CharPos);
+        Parser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
+
+        NeedInsert := False;
+        if (Parser.InnerBlockStartToken <> nil) and (Parser.InnerBlockCloseToken <> nil) then
+        begin
+          if (Parser.InnerBlockStartToken.TokenID = tkBegin) and
+            (Parser.InnerBlockCloseToken.TokenID = tkEnd) then
+          begin
+            // 转换成 Col 与 Line
+            CharPos := OTACharPos(Parser.InnerBlockStartToken.CharIndex - 1,
+              Parser.InnerBlockStartToken.LineNumber);
+            View.ConvertPos(False, EditPos, CharPos);
+            Parser.InnerBlockStartToken.EditCol := EditPos.Col;
+
+            CharPos := OTACharPos(Parser.InnerBlockCloseToken.CharIndex - 1,
+              Parser.InnerBlockCloseToken.LineNumber);
+            View.ConvertPos(False, EditPos, CharPos);
+            Parser.InnerBlockCloseToken.EditCol := EditPos.Col;
+
+            // 光标内层块的 begin end 不配对时，才需要加，
+            NeedInsert := Parser.InnerBlockStartToken.EditCol <> Parser.InnerBlockCloseToken.EditCol;
+          end;
+        end
+        else // 无配对时，也加
+          NeedInsert := True;
+      finally
+        Stream.Free;
+        Parser.Free;
+      end;
+
+      if not NeedInsert then Exit;
+
       CnOtaInsertTextToCurSource(#13#10'end;');
       View.Buffer.EditPosition.MoveRelative(-1, CnOtaGetBlockIndent - 4 );
       // 插入状态下才插入，减4是减去end; 的长度
