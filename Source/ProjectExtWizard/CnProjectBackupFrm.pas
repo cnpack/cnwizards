@@ -981,11 +981,11 @@ begin
         Screen.Cursor := crHourGlass;
         try
           DeleteFile(SaveFileName);
-          CnStartZip(PAnsiChar(SaveFileName), PAnsiChar(Password), RemovePath);
+          CnStartZip(_CnPChar(SaveFileName), _CnPChar(Password), RemovePath);
 
           for I := 0 to Self.lvFileView.Items.Count - 1 do
             if Self.lvFileView.Items[I].Data <> nil then
-              CnZipAddFile(PAnsiChar(TCnBackupFileInfo(Self.lvFileView.Items[I].Data).FullFileName));
+              CnZipAddFile(_CnPChar(TCnBackupFileInfo(Self.lvFileView.Items[I].Data).FullFileName));
 
           if CnZipSaveAndClose then
             InfoDlg(Format(SCnProjExtBackupSuccFmt, [SaveFileName]));
