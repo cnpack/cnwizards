@@ -30,6 +30,8 @@ unit CnReplaceWizard;
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
 * 单元标识：$Id: CnReplaceWizard.pas,v 1.18 2009/02/18 10:24:38 liuxiao Exp $
 * 修改记录：2003.03.01 V1.0
+*               Liu Xiao 加入替换后恢复书签的机制
+*           2003.03.01 V1.0
 *               创建单元，实现功能
 ================================================================================
 |</PRE>}
@@ -41,10 +43,10 @@ interface
 {$IFDEF CNWIZARDS_CNREPLACEWIZARD}
 
 uses
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, Math,
-  StdCtrls, ExtCtrls, IniFiles, ToolsAPI, FileCtrl, CnConsts, CnCommon,
-  CnWizClasses, CnWizConsts, CnWizUtils, CnWizEditFiler, CnWizSearch, CnIni,
-  CnWizMultiLang;
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  StdCtrls, ExtCtrls, IniFiles, ToolsAPI, FileCtrl, Math, Contnrs,
+  CnConsts, CnCommon, CnWizClasses, CnWizConsts, CnWizUtils, CnWizEditFiler,
+  CnWizSearch, CnIni, CnWizMultiLang;
 
 type
 
@@ -493,6 +495,8 @@ var
   IModule: IOTAModule;
   ISourceEditor: IOTASourceEditor;
   IWriter: IOTAEditWriter;
+  BookMarkList: TObjectList;
+  EditView: IOTAEditView;
 {$IFDEF IDE_WIDECONTROL}
   Text: AnsiString;
 {$ENDIF}
@@ -516,6 +520,7 @@ begin
 
   FCurrCount := 0;
   DoReplace(ExtractFileName(FileName));
+  BookMarkList := nil;
 
   if FOutStream.Size > 0 then         // 执行过替换
   begin
@@ -530,21 +535,34 @@ begin
           begin
             IWriter := ISourceEditor.CreateWriter;
             if Assigned(IWriter) then
-            try
+            begin
+              BookMarkList := TObjectList.Create(True);
+              EditView := CnOtaGetTopMostEditView(ISourceEditor);
+              // 先保存原有的书签
+              if EditView <> nil then
+                SaveBookMarksToObjectList(EditView, BookMarkList);
+
+              try
 {$IFDEF IDE_WIDECONTROL}
-              Text := CnAnsiToUtf8(PAnsiChar(FOutStream.Memory));
-              FOutStream.Size := Length(Text) + 1;
-              FOutStream.Position := 0;
-              FOutStream.Write(PAnsiChar(Text)^, Length(Text) + 1);
+                Text := CnAnsiToUtf8(PAnsiChar(FOutStream.Memory));
+                FOutStream.Size := Length(Text) + 1;
+                FOutStream.Position := 0;
+                FOutStream.Write(PAnsiChar(Text)^, Length(Text) + 1);
 {$ENDIF}
-              IWriter.DeleteTo(MaxInt);
-              IWriter.Insert(FOutStream.Memory);
-              
-              Inc(FFileCount);
-              Inc(FFoundCount, FCurrCount);
-              Exit;
-            finally
-              IWriter := nil;
+                IWriter.DeleteTo(MaxInt);
+                IWriter.Insert(FOutStream.Memory);
+
+                Inc(FFileCount);
+                Inc(FFoundCount, FCurrCount);
+
+                // 替换完毕后还原书签
+                if EditView <> nil then
+                  LoadBookMarksFromObjectList(EditView, BookMarkList);
+                Exit;
+              finally
+                IWriter := nil;
+                FreeAndNil(BookMarkList);
+              end;
             end;
           end;
         end;
@@ -560,7 +578,7 @@ begin
         if PByte(Integer(FOutStream.Memory) + FOutStream.Size - 1)^ = 0 then
           FOutStream.Size := FOutStream.Size - 1;
         FOutStream.SaveToFile(FileName);
-        
+
         Inc(FFileCount);
         Inc(FFoundCount, FCurrCount);
       except
