@@ -4888,6 +4888,7 @@ begin
       EditPos.Line := BookMarkObj.Line;
       EditView.CursorPos := EditPos;
       EditView.BookmarkToggle(BookMarkObj.ID);
+      BookMarkObj.Free;
     end;
     EditView.CursorPos := SavePos;
   end;
