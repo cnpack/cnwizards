@@ -161,17 +161,6 @@ uses
 type
   TControlHack = class(TControl);
 
-  TCnBookmarkObj = class
-  private
-    FLine: Integer;
-    FCol: Integer;
-    FID: Integer;
-  public
-    property ID: Integer read FID write FID;
-    property Line: Integer read FLine write FLine;
-    property Col: Integer read FCol write FCol;
-  end;
-
 const
   csAutoIndentFile = 'AutoIndent.dat';
 
@@ -879,8 +868,8 @@ var
   EditView: IOTAEditView;
   Parser: TCnPasStructureParser;
   Stream: TMemoryStream;
-  CharPos, APos: TOTACharPos;
-  EditPos, SavePos: TOTAEditPos;
+  CharPos: TOTACharPos;
+  EditPos: TOTAEditPos;
   I, iMaxCursorOffset: Integer;
   Rit: TCnRenameIdentifierType;
   iStart, iOldTokenLen: Integer;
@@ -891,7 +880,6 @@ var
   LastTokenPos: Integer;
   FrmModalResult: Boolean;
   BookMarkList: TObjectList;
-  BookMarkObj: TCnBookmarkObj;
 begin
   Result := False;
   if (Key <> FRenameKey) or (Shift <> FRenameShift) then Exit;
@@ -1064,18 +1052,7 @@ begin
 
       // DONE: 记录此 View 的 Bookmarks
       BookMarkList := TObjectList.Create(True);
-      for I := 0 to 9 do
-      begin
-        APos := EditView.BookmarkPos[I];
-        if (APos.CharIndex <> 0) or (APos.Line <> 0) then
-        begin
-          BookMarkObj := TCnBookmarkObj.Create;
-          BookMarkObj.ID := I;
-          BookMarkObj.Line := APos.Line;
-          BookMarkObj.Col := APos.CharIndex;
-          BookMarkList.Add(BookMarkObj);
-        end;
-      end;  
+      SaveBookMarksToObjectList(EditView, BookMarkList);
 
       NewCode := '';
       LastToken := nil;
@@ -1151,31 +1128,7 @@ begin
       EditView.Paint;
 
       // DONE: 恢复此 View 的 Bookmarks
-      if BookMarkList.Count > 0 then
-      begin
-        SavePos := EditView.CursorPos;
-        for I := 0 to 9 do // 先清除以前的书签
-        begin
-          APos := EditView.BookmarkPos[I];
-          if (APos.Line <> 0) or (APos.CharIndex <> 0) then
-          begin
-            EditPos := EditView.CursorPos;
-            EditPos.Line := APos.Line;
-            EditView.CursorPos := EditPos;
-            EditView.BookmarkToggle(I);
-          end;
-        end;
-
-        for I := 0 to BookMarkList.Count - 1 do
-        begin
-          BookMarkObj := TCnBookmarkObj(BookMarkList[I]);
-          EditPos := EditView.CursorPos;
-          EditPos.Line := BookMarkObj.Line;
-          EditView.CursorPos := EditPos;
-          EditView.BookmarkToggle(BookMarkObj.ID);
-        end;
-        EditView.CursorPos := SavePos;
-      end;  
+      LoadBookMarksFromObjectList(EditView, BookMarkList);
     end;
   finally
     FreeAndNil(BlockMatchInfo);

@@ -62,8 +62,8 @@ uses
   {$ELSE}
   DsgnIntf, LibIntf,
   {$ENDIF}
-  Clipbrd, TypInfo, ComCtrls, StdCtrls, Imm, CnWizConsts, CnCommon, CnConsts,
-  CnWizClasses, CnWizIni;
+  Clipbrd, TypInfo, ComCtrls, StdCtrls, Imm, Contnrs,
+  CnWizConsts, CnCommon, CnConsts, CnWizClasses, CnWizIni;
 
 type
   ECnWizardException = class(Exception);
@@ -713,6 +713,12 @@ function HWndIsNonvisualComponent(hWnd: HWND): Boolean;
 function FileExists(const Filename: string): Boolean;
 {* Tests for file existance, a lot faster than the RTL implementation }
 
+procedure SaveBookMarksToObjectList(EditView: IOTAEditView; BookMarkList: TObjectList);
+{* 将一 EditView 中的书签信息保存至一 ObjectList 中}
+
+procedure LoadBookMarksFromObjectList(EditView: IOTAEditView; BookMarkList: TObjectList);
+{* 从 ObjectList 中恢复一 EditView 中的书签}
+
 implementation
 
 uses
@@ -724,6 +730,17 @@ uses
 
 type
   TControlAccess = class(TControl);
+
+  TCnBookmarkObj = class
+  private
+    FLine: Integer;
+    FCol: Integer;
+    FID: Integer;
+  public
+    property ID: Integer read FID write FID;
+    property Line: Integer read FLine write FLine;
+    property Col: Integer read FCol write FCol;
+  end;
 
 var
 {$IFDEF COMPILER7_UP}
@@ -4816,6 +4833,66 @@ begin
   end;
 end;
 
+// 将一 EditView 中的书签信息保存至一 ObjectList 中
+procedure SaveBookMarksToObjectList(EditView: IOTAEditView; BookMarkList: TObjectList);
+var
+  I: Integer;
+  APos: TOTACharPos;
+  BookMarkObj: TCnBookmarkObj;
+begin
+  if (EditView = nil) or (BookMarkList = nil) then Exit;
+
+  for I := 0 to 9 do
+  begin
+    APos := EditView.BookmarkPos[I];
+    if (APos.CharIndex <> 0) or (APos.Line <> 0) then
+    begin
+      BookMarkObj := TCnBookmarkObj.Create;
+      BookMarkObj.ID := I;
+      BookMarkObj.Line := APos.Line;
+      BookMarkObj.Col := APos.CharIndex;
+      BookMarkList.Add(BookMarkObj);
+    end;
+  end;
+end;
+
+// 从 ObjectList 中恢复一 EditView 中的书签
+procedure LoadBookMarksFromObjectList(EditView: IOTAEditView; BookMarkList: TObjectList);
+var
+  I: Integer;
+  APos: TOTACharPos;
+  EditPos, SavePos: TOTAEditPos;
+  BookMarkObj: TCnBookmarkObj;
+begin
+  if (EditView = nil) or (BookMarkList = nil) then Exit;
+
+  if BookMarkList.Count > 0 then
+  begin
+    SavePos := EditView.CursorPos;
+    for I := 0 to 9 do // 先清除以前的书签
+    begin
+      APos := EditView.BookmarkPos[I];
+      if (APos.Line <> 0) or (APos.CharIndex <> 0) then
+      begin
+        EditPos := EditView.CursorPos;
+        EditPos.Line := APos.Line;
+        EditView.CursorPos := EditPos;
+        EditView.BookmarkToggle(I);
+      end;
+    end;
+
+    for I := 0 to BookMarkList.Count - 1 do
+    begin
+      BookMarkObj := TCnBookmarkObj(BookMarkList.Extract(BookMarkList.First));
+      EditPos := EditView.CursorPos;
+      EditPos.Line := BookMarkObj.Line;
+      EditView.CursorPos := EditPos;
+      EditView.BookmarkToggle(BookMarkObj.ID);
+    end;
+    EditView.CursorPos := SavePos;
+  end;
+end;
+
 initialization
   CnNoIconList := TStringList.Create;
   AddNoIconToList('TMenuItem'); // TMenuItem 等在专家加载之前已注册
@@ -4838,5 +4915,4 @@ finalization
 {$ENDIF Debug}
 
 end.
-
 

@@ -838,7 +838,7 @@ begin
         Tokens[I].EditLine := EditPos.Line;
       end;
 
-      // TODO: 记录大括号的层次
+      // 记录大括号的层次
       UpdateCurTokenList;
       UpdateLineList;
       if LineInfo <> nil then
