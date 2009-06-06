@@ -471,6 +471,29 @@ var
   EditPos: TOTAEditPos;
   Parser: TCnPasStructureParser;
   NeedInsert: Boolean;
+
+  function IsDotAfterTokenEnd(AToken: TCnPasToken): Boolean;
+  var
+    SavePos, APos: TOTAEditPos;
+    Text: string;
+    Line, Col: Integer;
+  begin
+    Result := False;
+    if AToken = nil then Exit;
+
+    SavePos := View.CursorPos;
+    APos := SavePos;
+    APos.Line := AToken.LineNumber + 1; // 必须加一
+    View.CursorPos := APos;
+    CnNtaGetCurrLineText(Text, Line, Col);
+
+    Col := AToken.EditCol + Length(AToken.Token) + 1;
+    if Length(Text) >= Col then
+      Result := (Text[Col] = '.');
+
+    View.CursorPos := SavePos;
+  end;
+
 begin
   View := CnOtaGetTopMostEditView;
   if Assigned(View) then
@@ -480,6 +503,7 @@ begin
       // DONE: 加入一些限制，避免每个都加 end
       // 光标所在的内层块一个是begin一个是end，并且俩的Col不等时，才需要加end
       // 光标所在无内层块时也加 end。其余情况则无需加。
+      // 另外，如果已经配对了，则这个 end 不能是 end. 这样的单元结尾符
       Stream := TMemoryStream.Create;
       Parser := TCnPasStructureParser.Create;
       try
@@ -510,6 +534,11 @@ begin
 
             // 光标内层块的 begin end 不配对时，才需要加，
             NeedInsert := Parser.InnerBlockStartToken.EditCol <> Parser.InnerBlockCloseToken.EditCol;
+
+            // 如果不要加也就是配对了，还得判断这个 end 不能是 end. 点则还是要加
+            if not NeedInsert then
+              if IsDotAfterTokenEnd(Parser.InnerBlockCloseToken) then
+                NeedInsert := True;
           end;
         end
         else // 无配对时，也加
