@@ -532,13 +532,29 @@ begin
             View.ConvertPos(False, EditPos, CharPos);
             Parser.InnerBlockCloseToken.EditCol := EditPos.Col;
 
-            // 光标内层块的 begin end 不配对时，才需要加，
+            // 光标内层块的 begin end 列位置不配对时，需要加
             NeedInsert := Parser.InnerBlockStartToken.EditCol <> Parser.InnerBlockCloseToken.EditCol;
 
             // 如果不要加也就是配对了，还得判断这个 end 不能是 end. 点则还是要加
             if not NeedInsert then
               if IsDotAfterTokenEnd(Parser.InnerBlockCloseToken) then
                 NeedInsert := True;
+
+            // 如果仍然不要加，则还得判断一下最外层块的层次是否配对正确，不配对还是要加
+            if not NeedInsert then
+            begin
+              if (Parser.BlockStartToken <> nil) and (Parser.BlockCloseToken <> nil) then
+              begin
+                if Parser.BlockStartToken.ItemLayer < Parser.BlockCloseToken.ItemLayer then
+                  NeedInsert := True
+                else if Parser.BlockStartToken.ItemLayer = Parser.BlockCloseToken.ItemLayer then
+                begin
+                  // 最外层如果配对的话，还得判断一下最后是不是 end. 是点则还是要加
+                  if IsDotAfterTokenEnd(Parser.BlockCloseToken) then
+                    NeedInsert := True;
+                end;
+              end;
+            end;
           end;
         end
         else // 无配对时，也加
