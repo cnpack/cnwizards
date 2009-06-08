@@ -24,7 +24,9 @@ unit CnTestParseTimeWizard;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：解析耗时测试专家演示单元
 * 单元作者：CnPack 开发组
-* 备    注：该单元是编辑器外部工具栏的测试单元
+* 备    注：该单元是解析耗时测试专家的测试单元，测试表明，TObject.Create 在
+*           D2010 测试版下的耗时十倍于 D5/D7 等以前版本，估计是有内存管理器跟踪
+*           的因素在内，但只限于 IDE 内部，独立的 exe 照旧。
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式
@@ -41,9 +43,85 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ToolsAPI, IniFiles, StdCtrls, CnPasCodeParser, mPasLex, Contnrs,
-  CnWizClasses, CnWizUtils, CnWizConsts, CnEditControlWrapper;
+  CnWizClasses, CnWizUtils, CnWizConsts, CnEditControlWrapper, mwBCBTokenList;
 
 type
+
+  TCnTestToken = class(TPersistent)
+  {* 描述一 Token 的结构高亮信息}
+  private
+
+  protected
+    FCppTokenKind: TCTokenKind;
+    FCharIndex: Integer;
+    FEditCol: Integer;
+    FEditLine: Integer;
+    FItemIndex: Integer;
+    FItemLayer: Integer;
+    FLineNumber: Integer;
+    FMethodLayer: Integer;
+    // FToken: AnsiString;
+    FTokenID: TTokenKind;
+    FTokenPos: Integer;
+    FIsMethodStart: Boolean;
+    FIsMethodClose: Boolean;
+    FIsBlockStart: Boolean;
+    FIsBlockClose: Boolean;
+    FUseAsC: Boolean;
+  published
+    property UseAsC: Boolean read FUseAsC;
+    {* 是否是 C 方式的解析，默认不是}
+    property CharIndex: Integer read FCharIndex; // Start 0
+    {* 从本行开始数的字符位置，从零开始 }
+    property EditCol: Integer read FEditCol write FEditCol;
+    {* 所在列，从一开始 }
+    property EditLine: Integer read FEditLine write FEditLine;
+    {* 所在行，从一开始 }
+    property ItemIndex: Integer read FItemIndex;
+    {* 在整个 Parser 中的序号 }
+    property ItemLayer: Integer read FItemLayer;
+    {* 所在高亮的层次 }
+    property LineNumber: Integer read FLineNumber; // Start 0
+    {* 所在行号，从零开始 }
+    property MethodLayer: Integer read FMethodLayer;
+    {* 所在函数的嵌套层次，最外层为一 }
+    // property Token: AnsiString read FToken;
+    {* 该 Token 的字符串内容 }
+    property TokenID: TTokenKind read FTokenID;
+    {* Token 的语法类型 }
+    property CppTokenKind: TCTokenKind read FCppTokenKind;
+    {* 作为 C 的 Token 使用时的 CToken 类型}
+    property TokenPos: Integer read FTokenPos;
+    {* Token 在整个文件中的线性位置 }
+    property IsBlockStart: Boolean read FIsBlockStart;
+    {* 是否是一块可匹配代码区域的开始 }
+    property IsBlockClose: Boolean read FIsBlockClose;
+    {* 是否是一块可匹配代码区域的结束 }
+    property IsMethodStart: Boolean read FIsMethodStart;
+    {* 是否是函数过程的开始 }
+    property IsMethodClose: Boolean read FIsMethodClose;
+    {* 是否是函数过程的结束 }
+  end;
+
+  PCnTestRecord = ^TCnTestRecord;
+  TCnTestRecord = packed record
+    FCppTokenKind: TCTokenKind;
+    FCharIndex: Integer;
+    FEditCol: Integer;
+    FEditLine: Integer;
+    FItemIndex: Integer;
+    FItemLayer: Integer;
+    FLineNumber: Integer;
+    FMethodLayer: Integer;
+    FToken: AnsiString;
+    FTokenID: TTokenKind;
+    FTokenPos: Integer;
+    FIsMethodStart: Boolean;
+    FIsMethodClose: Boolean;
+    FIsBlockStart: Boolean;
+    FIsBlockClose: Boolean;
+    FUseAsC: Boolean;
+  end;
 
 //==============================================================================
 // 解析耗时测试用菜单专家
@@ -86,7 +164,7 @@ end;
 
 destructor TCnTestParseTimeWizard.Destroy;
 begin
-  
+
   inherited;
 end;
 
@@ -99,8 +177,9 @@ var
   EditPos: TOTAEditPos;
   Parser: TCnPasStructureParser;
   I: Integer;
-  List: TObjectList;
+  List: TList;
   Token: TCnPasToken;
+  P: PCnTestRecord;
 begin
   Stream := TMemoryStream.Create;
   Parser := TCnPasStructureParser.Create;
@@ -122,13 +201,43 @@ begin
   List := TObjectList.Create(True);
   Tick := GetTickCount;
   for I := 0 to 100000 - 1 do
+    List.Add(TCnPasToken.Create);
+
+  Tick := GetTickCount - Tick;
+
+  ShowMessage('Create TCnPasToken 100000 Time: ' + IntToStr(Tick));
+  List.Free;
+
+  List := TObjectList.Create(True);
+  Tick := GetTickCount;
+  for I := 0 to 100000 - 1 do
+    List.Add(TCnTestToken.Create);
+  Tick := GetTickCount - Tick;
+
+  ShowMessage('Create TCnTestToken 100000 Time: ' + IntToStr(Tick));
+  List.Free;
+
+  List := TObjectList.Create(True);
+  Tick := GetTickCount;
+  for I := 0 to 100000 - 1 do
+    List.Add(TObject.Create);
+  Tick := GetTickCount - Tick;
+
+  ShowMessage('Create TObject 100000 Time: ' + IntToStr(Tick));
+  List.Free;
+
+  List := TList.Create;
+  Tick := GetTickCount;
+  for I := 0 to 100000 - 1 do
   begin
-    Token := TCnPasToken.Create;
-    List.Add(Token);
+    New(P);
+    List.Add(P);
   end;
   Tick := GetTickCount - Tick;
 
-  ShowMessage('Create 100000 Time: ' + IntToStr(Tick));
+  ShowMessage('New PCnTestRecord 100000 Time: ' + IntToStr(Tick));
+  for I := 0 to 100000 - 1 do
+    Dispose(List[I]);
   List.Free;
 end;
 
