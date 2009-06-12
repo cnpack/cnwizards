@@ -559,6 +559,11 @@ begin
   begin
     strExecute := AnsiString(Format(ExploreCmdLine, [CnOtaGetCurrentSourceFile]));
     WinExec(PAnsiChar(strExecute), SW_SHOWNORMAL);
+  end
+  else if DirectoryExists(ExtractFileDir(CnOtaGetCurrentSourceFile)) then
+  begin
+    strExecute := AnsiString(Format(ExploreCmdLine, [ExtractFileDir(CnOtaGetCurrentSourceFile)]));
+    WinExec(PAnsiChar(strExecute), SW_SHOWNORMAL);
   end;
 end;
 
