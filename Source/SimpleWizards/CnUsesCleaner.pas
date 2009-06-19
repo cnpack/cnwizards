@@ -499,7 +499,7 @@ begin
       Token := Lex.TokenID;
       while not (Lex.TokenID in [tkImplementation, tkNull]) do
       begin
-        if (Lex.TokenID = tkRegister) and (Token = tkProcedure) then
+        if (Lex.TokenID = tkRegister) and (Token = {$IFDEF DELPHI2010_UP}TTokenKind.{$ENDIF}tkProcedure) then
           RegDecl := True;
         Token := Lex.TokenID;
         Lex.NextNoJunk;
@@ -508,7 +508,7 @@ begin
       Token := Lex.TokenID;
       while Lex.TokenID <> tkNull do
       begin
-        if RegDecl and (Lex.TokenID = tkRegister) and (Token = tkProcedure) then
+        if RegDecl and (Lex.TokenID = tkRegister) and (Token = {$IFDEF DELPHI2010_UP}TTokenKind.{$ENDIF}tkProcedure) then
           Include(Kinds, ukHasRegProc);
 
         if (Lex.TokenID = tkIdentifier) and (Token = tkInitialization) then
