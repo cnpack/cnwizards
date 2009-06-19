@@ -214,15 +214,15 @@ begin
     if AFlag <> PRec.Flags then
       Continue;
     Lines := TStringList.Create;
-    AList.AddObject(PRec^.Name^, Lines);
+    AList.AddObject({$IFDEF DELPHI2009_UP}string{$ENDIF}(PRec^.Name^), Lines);
 
     Decl := PRec^.Decls;
     while Decl <> nil do
     begin
       if Decl is TImpDef then
-        Lines.Add(TImpDef(Decl).ik + ':' + Decl.Name^)
+        Lines.Add(TImpDef(Decl).ik + ':' + {$IFDEF DELPHI2009_UP}string{$ENDIF}(Decl.Name^))
       else
-        Lines.Add(Decl.Name^);
+        Lines.Add({$IFDEF DELPHI2009_UP}string{$ENDIF}(Decl.Name^));
       Decl := Decl.Next as TBaseDef;
     end;
   end;

@@ -1054,7 +1054,9 @@ begin
       begin
         for I := 0 to Parser.Count - 1 do
           if (Parser.Tokens[I].TokenID = tkIdentifier) and
-            InternalTokenMatch(Parser.Tokens[I].Token, FCurrentTokenName) then
+            InternalTokenMatch(
+              {$IFDEF DELPHI2009_UP}string{$ENDIF}(Parser.Tokens[I].Token),
+              {$IFDEF DELPHI2009_UP}string{$ENDIF}(FCurrentTokenName)) then
           begin
             FCurTokenList.Add(Parser.Tokens[I]);
             FCurTokenListEditLine.Add(Pointer(Parser.Tokens[I].EditLine));
@@ -1065,7 +1067,9 @@ begin
         for I := FCurMethodStartToken.ItemIndex to
           FCurMethodCloseToken.ItemIndex do
           if (Parser.Tokens[I].TokenID = tkIdentifier) and
-            InternalTokenMatch(Parser.Tokens[I].Token, FCurrentTokenName) then
+            InternalTokenMatch(
+              {$IFDEF DELPHI2009_UP}string{$ENDIF}(Parser.Tokens[I].Token),
+              {$IFDEF DELPHI2009_UP}string{$ENDIF}(FCurrentTokenName)) then
           begin
             FCurTokenList.Add(Parser.Tokens[I]);
             FCurTokenListEditLine.Add(Pointer(Parser.Tokens[I].EditLine));
@@ -1109,7 +1113,9 @@ begin
       for I := CppParser.BlockStartToken.ItemIndex to CppParser.BlockCloseToken.ItemIndex do
       begin
         if (CppParser.Tokens[I].CppTokenKind = ctkIdentifier) and
-          InternalTokenMatch(CppParser.Tokens[I].Token, FCurrentTokenName) then
+          InternalTokenMatch(
+            {$IFDEF DELPHI2009_UP}string{$ENDIF}(CppParser.Tokens[I].Token),
+            {$IFDEF DELPHI2009_UP}string{$ENDIF}(FCurrentTokenName)) then
         begin
           FCurTokenList.Add(CppParser.Tokens[I]);
           FCurTokenListEditLine.Add(Pointer(CppParser.Tokens[I].EditLine));
@@ -1122,7 +1128,9 @@ begin
       for I := CppParser.InnerBlockStartToken.ItemIndex to CppParser.InnerBlockCloseToken.ItemIndex do
       begin
         if (CppParser.Tokens[I].CppTokenKind = ctkIdentifier) and
-          InternalTokenMatch(CppParser.Tokens[I].Token, FCurrentTokenName) then
+          InternalTokenMatch(
+            {$IFDEF DELPHI2009_UP}string{$ENDIF}(CppParser.Tokens[I].Token),
+            {$IFDEF DELPHI2009_UP}string{$ENDIF}(FCurrentTokenName)) then
         begin
           FCurTokenList.Add(CppParser.Tokens[I]);
           FCurTokenListEditLine.Add(Pointer(CppParser.Tokens[I].EditLine));
@@ -1134,7 +1142,9 @@ begin
       for I := 0 to CppParser.Count - 1 do
       begin
         if (CppParser.Tokens[I].CppTokenKind = ctkIdentifier) and
-          InternalTokenMatch(CppParser.Tokens[I].Token, FCurrentTokenName) then
+          InternalTokenMatch(
+            {$IFDEF DELPHI2009_UP}string{$ENDIF}(CppParser.Tokens[I].Token),
+            {$IFDEF DELPHI2009_UP}string{$ENDIF}(FCurrentTokenName)) then
         begin
           FCurTokenList.Add(CppParser.Tokens[I]);
           FCurTokenListEditLine.Add(Pointer(CppParser.Tokens[I].EditLine));

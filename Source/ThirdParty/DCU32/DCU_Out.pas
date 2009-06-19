@@ -1,5 +1,8 @@
 unit DCU_Out;
 
+{$WARNINGS OFF}
+{$HINTS OFF}
+
 interface
 (*
 The output module of the DCU32INT utility by Alexei Hmelnov.

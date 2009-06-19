@@ -540,8 +540,8 @@ var
     if (ACls <> nil) and (ACls.ClassInfo <> nil) then
     begin
       TypeData := GetTypeData(PTypeInfo(ACls.ClassInfo));
-      if (TypeData <> nil) and (Units.IndexOf(TypeData^.UnitName) < 0) then
-        Units.Add(TypeData^.UnitName);
+      if (TypeData <> nil) and (Units.IndexOf({$IFDEF DELPHI2009_UP}string{$ENDIF}(TypeData^.UnitName)) < 0) then
+        Units.Add({$IFDEF DELPHI2009_UP}string{$ENDIF}(TypeData^.UnitName));
       DoAddCompRef(ACls.ClassParent);
     end;
   end;
@@ -882,7 +882,7 @@ begin
         Writer.DeleteTo(Lex.TokenPos);
         if Source <> '' then
         begin
-          Writer.Insert(PAnsiChar(ConvertTextToEditorText(Source)));
+          Writer.Insert(PAnsiChar(ConvertTextToEditorText({$IFDEF DELPHI2009_UP}AnsiString{$ENDIF}(Source))));
         end;
       end;
       
@@ -902,7 +902,7 @@ begin
           Writer.DeleteTo(Lex.TokenPos);
           if Source <> '' then
           begin
-            Writer.Insert(PAnsiChar(ConvertTextToEditorText(Source)));
+            Writer.Insert(PAnsiChar(ConvertTextToEditorText({$IFDEF DELPHI2009_UP}AnsiString{$ENDIF}(Source))));
           end;
         end;
       end;

@@ -715,7 +715,7 @@ var
   begin
 {$IFDEF DELPHI2009_UP}
     // GetAttributeAtPos 需要的是 UTF8 的Pos，因此 D2009 下进行 Col 的 UTF8 转换
-    EditPos.Col := Length(CnAnsiToUtf8(Text));
+    EditPos.Col := Length(CnAnsiToUtf8({$IFDEF DELPHI2009_UP}AnsiString{$ENDIF}(Text)));
 {$ELSE}
     EditPos.Col := Length(Text);
 {$ENDIF}
@@ -739,7 +739,7 @@ var
         // 找到了最后一个不是注释的地方
 {$IFDEF DELPHI2009_UP}
         // 从 UTF8 的 Pos，转换回 Ansi 的
-        EditPos.Col := Length(CnUtf8ToAnsi(Copy(Text, 1, EditPos.Col)));
+        EditPos.Col := Length(CnUtf8ToAnsi({$IFDEF DELPHI2009_UP}AnsiString{$ENDIF}(Copy(Text, 1, EditPos.Col))));
 {$ENDIF}
         View.Buffer.EditPosition.Move(EditPos.Line, EditPos.Col);
         View.Paint;
@@ -767,7 +767,7 @@ begin
     EditPos := View.CursorPos;
 {$IFDEF DELPHI2009_UP}
     // GetAttributeAtPos 需要的是 UTF8 的Pos，因此 D2009 下进行 Col 的 UTF8 转换
-    EditPos.Col := Length(CnAnsiToUtf8(Copy(Text, 1, EditPos.Col)));
+    EditPos.Col := Length(CnAnsiToUtf8({$IFDEF DELPHI2009_UP}AnsiString{$ENDIF}(Copy(Text, 1, EditPos.Col))));
 {$ENDIF}
 
     EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False, Element, LineFlag);
@@ -1127,7 +1127,8 @@ begin
           begin
             // 从上一 Token 的尾巴，到现任 Token 的头，再加替换后的文字
             LastTokenPos := LastToken.TokenPos + Length(LastToken.Token);
-            NewCode := NewCode + Copy(Parser.Source, LastTokenPos + 1,
+            NewCode := NewCode + Copy(
+              {$IFDEF DELPHI2009_UP}string{$ENDIF}(Parser.Source), LastTokenPos + 1,
               BlockMatchInfo.CurTokens[I].TokenPos - LastTokenPos) + NewName;
           end;
 
@@ -1145,7 +1146,8 @@ begin
       begin
 {$IFDEF BDS}
         // BDS 下要处理的是 UTF8 的长度，而 Paser 算出的 TokenPos 是 Ansi 因此需要转换
-        EditWriter.CopyTo(Length(AnsiToUtf8(Copy(Parser.Source, 1, StartCurToken.TokenPos))));
+        EditWriter.CopyTo(Length(AnsiToUtf8(Copy(
+          {$IFDEF DELPHI2009_UP}string{$ENDIF}(Parser.Source), 1, StartCurToken.TokenPos))));
 {$ELSE}
         EditWriter.CopyTo(StartCurToken.TokenPos);
 {$ENDIF}
@@ -1155,7 +1157,8 @@ begin
       begin
 {$IFDEF BDS}
         // BDS 下要处理的是 UTF8 的长度，而 Paser 算出的 TokenPos 是 Ansi 因此需要转换
-        EditWriter.DeleteTo(Length(AnsiToUtf8(Copy(Parser.Source, 1,
+        EditWriter.DeleteTo(Length(AnsiToUtf8(Copy(
+          {$IFDEF DELPHI2009_UP}string{$ENDIF}(Parser.Source), 1,
           EndCurToken.TokenPos + Length(EndCurToken.Token)))));
 {$ELSE}
         EditWriter.DeleteTo(EndCurToken.TokenPos + Length(EndCurToken.Token));
