@@ -60,7 +60,7 @@ uses
   ComCtrls, ToolWin, StdCtrls, ExtCtrls, IniFiles, ToolsAPI, Math, Menus, ActnList,
   CnProjectViewBaseFrm, CnWizClasses, CnWizManager, CnIni, CnWizEditFiler, mPasLex,
   mwBCBTokenList, Contnrs, Clipbrd, CnEditControlWrapper, CnPasCodeParser,
-  CnPopupMenu, CnWizIdeUtils, CnCppCodeParser;
+  CnPopupMenu, CnWizIdeUtils, CnCppCodeParser, CnEdit;
 
 type
   TCnSourceLanguageType = (ltUnknown, ltPas, ltCpp);
@@ -228,27 +228,29 @@ type
 // 工具栏中的下拉框组件
 //==============================================================================
 
-  TCnProcListComboBox = class(TCnToolBarComboBox)
+  TCnProcListComboBox = class(TCnEdit)
   private
     FChangeDown: Boolean; // 是否由于文字改变导致的下拉
+    FDisableChange: Boolean;
     FOnKillFocus: TNotifyEvent;
     FDropDownList: TCnProcDropDownBox;
     procedure RefreshDropBox(Sender: TObject);
     procedure DropDownListDblClick(Sender: TObject);
     procedure DropDownListClick(Sender: TObject);
     procedure UpdateDropPosition;
+    procedure CNKeyDown(var Message: TWMKeyDown); message CN_KEYDOWN;
     procedure ApplicationMessage(var Msg: TMsg; var Handled: Boolean);
   protected
     procedure KeyPress(var Key: Char); override;
     procedure KeyDown(var Key: Word; Shift: TShiftState); override;
-    procedure ComboWndProc(var Message: TMessage; ComboWnd: HWnd;
-      ComboProc: Pointer); override;
+    procedure WndProc(var Message: TMessage); override;
     procedure Change; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure SetBounds(ALeft, ATop, AWidth, AHeight: Integer); override;
     procedure ShowDropBox;
+    procedure SetTextWithoutChange(const AText: string);
 
     property DropDownList: TCnProcDropDownBox read FDropDownList;
     property OnKillFocus: TNotifyEvent read FOnKillFocus write FOnKillFocus;
@@ -546,7 +548,6 @@ var
 begin
   CheckReparse;
   ClassCombo := Sender as TCnProcListComboBox;
-  ClassCombo.Items.Clear;
   ClassCombo.DropDownList.InfoItems.Clear;
 
   Obj := GetToolBarObjFromEditControl(CnOtaGetCurrentEditControl);
@@ -561,26 +562,13 @@ begin
 
   if not ClassCombo.ChangeDown then
   begin
-    ClassCombo.Text := '';
+    ClassCombo.SetTextWithoutChange('');
     ClassCombo.DropDownList.MatchStr := '';
     ClassCombo.DropDownList.MatchStart := Obj.ToolBtnMatchStart.Down;
     ClassCombo.DropDownList.UpdateDisplay;
     if ClassCombo.DropDownList.DisplayItems.Count > 0 then  
       ClassCombo.ShowDropBox;
   end;
-
-
-{$IFNDEF COMPILER7_UP} // D5 6以下需要如此
-  SetCapture(ClassCombo.Handle);
-{$ELSE}
-  {$IFDEF COMPILER9}   // D9 10 需要如此
-    SetCapture(ClassCombo.Handle);
-  {$ELSE}
-    {$IFDEF COMPILER10}
-      SetCapture(ClassCombo.Handle);
-    {$ENDIF}
-  {$ENDIF}
-{$ENDIF}
 
   CnWizNotifierServices.ExecuteOnApplicationIdle(ClassCombo.RefreshDropBox);
 end;
@@ -704,19 +692,16 @@ begin
     Obj.ClassCombo := TCnProcListComboBox.Create(ToolBar);
     with Obj.ClassCombo do
     begin
-      Name := 'ClassCombo';
       Parent := ToolBar;
       Left := 108;
       Top := 0;
       Width := 150;
       Height := 21;
-      ItemHeight := 13;
-      DropDownCount := 16;
-      Text := '';
-    {$IFDEF COMPILER6_UP}
-      AutoComplete := False;
-    {$ENDIF}
-      OnDropDown := ClassComboDropDown;
+      FDisableChange := True;
+      Name := 'ClassCombo';
+      SetTextWithoutChange('');
+      FDisableChange := False;
+      OnButtonClick := ClassComboDropDown;
     end;
 
     Obj.FSplitter1 := TSplitter.Create(ToolBar);
@@ -732,19 +717,16 @@ begin
     Obj.ProcCombo := TCnProcListComboBox.Create(ToolBar);
     with Obj.ProcCombo do
     begin
-      Name := 'ProcCombo';
       Parent := ToolBar;
       Left := 265;
       Top := 0;
       Width := 244;
       Height := 21;
-      ItemHeight := 13;
-      DropDownCount := 16;
-      Text := '';
-    {$IFDEF COMPILER6_UP}
-      AutoComplete := False;
-    {$ENDIF}
-      OnDropDown := ProcComboDropDown;
+      FDisableChange := True;
+      Name := 'ProcCombo';
+      SetTextWithoutChange('');
+      FDisableChange := False;
+      OnButtonClick := ProcComboDropDown;
     end;
 
     Obj.FSplitter2 := TSplitter.Create(ToolBar);
@@ -1176,25 +1158,25 @@ begin
     EditView.ConvertPos(True, EditPos, CharPos);
 
     if not Obj.ClassCombo.Focused then
-      Obj.ClassCombo.Text:= string(FCurrPasParser.FindCurrentDeclaration(CharPos.Line, CharPos.CharIndex));
+      Obj.ClassCombo.SetTextWithoutChange(string(FCurrPasParser.FindCurrentDeclaration(CharPos.Line, CharPos.CharIndex)));
 
     if not Obj.ProcCombo.Focused then
     begin
       if FCurrPasParser.CurrentChildMethod <> '' then
-        Obj.ProcCombo.Text := string(FCurrPasParser.CurrentChildMethod)
+        Obj.ProcCombo.SetTextWithoutChange(string(FCurrPasParser.CurrentChildMethod))
       else if FCurrPasParser.CurrentMethod <> '' then
-        Obj.ProcCombo.Text := string(FCurrPasParser.CurrentMethod)
+        Obj.ProcCombo.SetTextWithoutChange(string(FCurrPasParser.CurrentMethod))
       else
-        Obj.ProcCombo.Text := SCnProcListNoContent;
+        Obj.ProcCombo.SetTextWithoutChange(SCnProcListNoContent);
     end;
 
     if not Obj.ClassCombo.Focused and (Obj.ClassCombo.Text = '') then
     begin
       DotPos := Pos('.', Obj.ProcCombo.Text);
       if DotPos > 1 then
-        Obj.ClassCombo.Text := Copy(Obj.ProcCombo.Text, 1, DotPos - 1)
+        Obj.ClassCombo.SetTextWithoutChange(Copy(Obj.ProcCombo.Text, 1, DotPos - 1))
       else
-        Obj.ClassCombo.Text := SCnProcListNoContent;
+        Obj.ClassCombo.SetTextWithoutChange(SCnProcListNoContent);
     end;
   end
   else if FLanguage = ltCpp then
@@ -1212,17 +1194,17 @@ begin
     if not Obj.ClassCombo.Focused then
     begin
       if FCurrCppParser.CurrentClass <> '' then
-        Obj.ClassCombo.Text := string(FCurrCppParser.CurrentClass)
+        Obj.ClassCombo.SetTextWithoutChange(string(FCurrCppParser.CurrentClass))
       else
-        Obj.ClassCombo.Text := SCnProcListNoContent;
+        Obj.ClassCombo.SetTextWithoutChange(SCnProcListNoContent);
     end;
 
     if not Obj.ProcCombo.Focused then
     begin
       if FCurrCppParser.CurrentMethod <> '' then
-        Obj.ProcCombo.Text := string(FCurrCppParser.CurrentMethod)
+        Obj.ProcCombo.SetTextWithoutChange(string(FCurrCppParser.CurrentMethod))
       else
-        Obj.ProcCombo.Text := SCnProcListNoContent;
+        Obj.ProcCombo.SetTextWithoutChange(SCnProcListNoContent);
     end;
   end;
 end;
@@ -1236,7 +1218,6 @@ var
 begin
   CheckReparse;
   ProcCombo := Sender as TCnProcListComboBox;
-  ProcCombo.Items.Clear;
   ProcCombo.DropDownList.InfoItems.Clear;
 
   Obj := GetToolBarObjFromEditControl(CnOtaGetCurrentEditControl);
@@ -1252,25 +1233,13 @@ begin
 
   if not ProcCombo.ChangeDown then
   begin
-    ProcCombo.Text := '';
+    ProcCombo.SetTextWithoutChange('');
     ProcCombo.DropDownList.MatchStr := '';
     ProcCombo.DropDownList.MatchStart := Obj.ToolBtnMatchStart.Down;
     ProcCombo.DropDownList.UpdateDisplay;
     if ProcCombo.DropDownList.DisplayItems.Count > 0 then
       ProcCombo.ShowDropBox;
   end;
-
-{$IFNDEF COMPILER7_UP} // D5 6以下需要如此
-  SetCapture(ProcCombo.Handle);
-{$ELSE}
-  {$IFDEF COMPILER9}   // D9 10 需要如此
-    SetCapture(ProcCombo.Handle);
-  {$ELSE}
-    {$IFDEF COMPILER10}
-      SetCapture(ProcCombo.Handle);
-    {$ENDIF}
-  {$ENDIF}
-{$ENDIF}
 
   CnWizNotifierServices.ExecuteOnApplicationIdle(ProcCombo.RefreshDropBox);
 end;
@@ -1434,7 +1403,6 @@ var
     else
     begin
       case ProcType of
-        // Do not localize.
         tkFunction, tkProcedure: Result := etSingleFunction;
         tkConstructor: Result := etConstructor;
         tkDestructor: Result := etDestructor;
@@ -3792,21 +3760,22 @@ var
   OldSel, OldSelLength: Integer;
 begin
   inherited;
+  if FDisableChange then Exit;
+
   OldSel := SelStart;
   OldSelLength := SelLength;
 
   if Text = '' then
   begin
     FDropDownList.Hide;
-    DroppedDown := False;
     Exit;
   end;
 
   if not FDropDownList.Visible then
   begin
     FChangeDown := True;
-    DroppedDown := True;
-    // OnDropDown(Self);  // 去手工触发 OnDropDown 事件
+    if Assigned(OnButtonClick) then // 手工下拉前，触发下拉事件
+      OnButtonClick(Self);
     FChangeDown := False;
   end;
 
@@ -3820,13 +3789,24 @@ begin
   FDropDownList.UpdateDisplay;
   if not FDropDownList.Visible then
     ShowDropBox;
-    
+
   SelStart := OldSel;
   SelLength := OldSelLength;
 end;
 
-procedure TCnProcListComboBox.ComboWndProc(var Message: TMessage;
-  ComboWnd: HWnd; ComboProc: Pointer);
+procedure TCnProcListComboBox.CNKeyDown(var Message: TWMKeyDown);
+var
+  AShortCut: TShortCut;
+  ShiftState: TShiftState;
+begin
+  ShiftState := KeyDataToShiftState(Message.KeyData);
+  AShortCut := ShortCut(Message.CharCode, ShiftState);
+  Message.Result := 1;
+  if not HandleEditShortCut(Self, AShortCut) then
+    inherited;
+end;
+
+procedure TCnProcListComboBox.WndProc(var Message: TMessage);
 begin
   inherited;
   if Message.Msg = WM_KILLFOCUS then
@@ -3839,6 +3819,7 @@ end;
 constructor TCnProcListComboBox.Create(AOwner: TComponent);
 begin
   inherited;
+  LinkStyle := lsDropDown;
   FDropDownList := TCnProcDropDownBox.Create(Self);
   FDropDownList.Name := 'DropDownList';
   FDropDownList.Parent := Application.MainForm;
@@ -3856,13 +3837,6 @@ end;
 
 procedure TCnProcListComboBox.RefreshDropBox(Sender: TObject);
 begin
-{$IFDEF COMPILER7_UP}  // D 5 6 不要
-  {$IFNDEF COMPILER9}
-    {$IFNDEF COMPILER10} // D9 D10 不要
-  DroppedDown := False;
-    {$ENDIF}
-  {$ENDIF}
-{$ENDIF}
   FDropDownList.Invalidate;
 end;
 
@@ -3901,7 +3875,6 @@ begin
     end
     else
     begin
-      DroppedDown := True;
       CnWizNotifierServices.ExecuteOnApplicationIdle(RefreshDropBox);
     end;
     Key := 0;
@@ -3962,7 +3935,6 @@ begin
     FDisableClickFlag := True;
     PostMessage(Handle, WM_KEYDOWN, VK_DOWN, 0); // 选中首条
   end;
-//    Selected[0] := True;
 end;
 
 procedure TCnProcDropDownBox.SetMatchStart(const Value: Boolean);
@@ -4010,6 +3982,13 @@ begin
       if (Msg.hwnd <> FDropDownList.Handle) and FDropDownList.Visible then
         FDropDownList.CloseUp;
   end;
+end;
+
+procedure TCnProcListComboBox.SetTextWithoutChange(const AText: string);
+begin
+  FDisableChange := True;
+  Text := AText;
+  FDisableChange := False;
 end;
 
 initialization
