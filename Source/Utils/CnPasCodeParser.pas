@@ -101,7 +101,7 @@ type
     property IsBlockClose: Boolean read FIsBlockClose;
     {* 是否是一块可匹配代码区域的结束 }
     property IsMethodStart: Boolean read FIsMethodStart;
-    {* 是否是函数过程的开始 }
+    {* 是否是函数过程的开始，包括 function 和 begin/asm 的情况 }
     property IsMethodClose: Boolean read FIsMethodClose;
     {* 是否是函数过程的结束 }
   end;
@@ -655,7 +655,7 @@ var
   var
     Level: Integer;
     i, NestedProcs: Integer;
-    StartInner: Boolean;
+    StartInner, InNestedPlace: Boolean;
   begin
     Level := 0;
     StartInner := True;
@@ -681,16 +681,23 @@ var
         Inc(Level);
       end;
 
-      if Token.IsMethodStart and (Token.TokenID in [tkProcedure, tkFunction,
-        tkConstructor, tkDestructor]) then
+      if Token.IsMethodStart then
       begin
-        Dec(NestedProcs);
-        if (NestedProcs = 0) and (FChildMethodStartToken = nil) then
-          FChildMethodStartToken := Token;
-        if Token.MethodLayer = 1 then
+        if Token.TokenID in [tkProcedure, tkFunction, tkConstructor, tkDestructor] then
         begin
-          FMethodStartToken := Token;
-          Exit;
+          // 由于 procedure 与其对应的 begin 都可能是 MethodStart，因此需要这样处理
+          Dec(NestedProcs);
+          if (NestedProcs = 0) and (FChildMethodStartToken = nil) then
+            FChildMethodStartToken := Token;
+          if Token.MethodLayer = 1 then
+          begin
+            FMethodStartToken := Token;
+            Exit;
+          end;
+        end
+        else if Token.TokenID in [tkBegin, tkAsm] then
+        begin
+          // 在可嵌套声明函数过程的地区，暂时无需其他处理
         end;
       end
       else if Token.IsMethodClose then
@@ -706,11 +713,12 @@ var
   procedure _ForwardFindDeclarePos;
   var
     Level: Integer;
-    i: Integer;
+    i, NestedProcs: Integer;
     EndInner: Boolean;
   begin
     Level := 0;
     EndInner := True;
+    NestedProcs := 1;
     for i := CurrIndex to Count - 1 do
     begin
       Token := Tokens[i];
@@ -734,13 +742,19 @@ var
 
       if Token.IsMethodClose then
       begin
-        if Token.MethodLayer = 1 then
+        Dec(NestedProcs);
+        if (NestedProcs = 0) and (Token.MethodLayer = 1) then
         begin
           FMethodCloseToken := Token;
           Exit;
         end
         else if FChildMethodCloseToken = nil then
           FChildMethodCloseToken := Token;
+      end
+      else if Token.IsMethodStart and (Token.TokenID in [tkProcedure, tkFunction,
+        tkConstructor, tkDestructor]) then
+      begin
+        Inc(NestedProcs);
       end;
 
       if Token.TokenID in [tkInitialization, tkFinalization] then
