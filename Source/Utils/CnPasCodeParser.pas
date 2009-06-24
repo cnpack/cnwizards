@@ -655,7 +655,7 @@ var
   var
     Level: Integer;
     i, NestedProcs: Integer;
-    StartInner, InNestedPlace: Boolean;
+    StartInner: Boolean;
   begin
     Level := 0;
     StartInner := True;
