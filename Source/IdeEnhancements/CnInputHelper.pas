@@ -1170,7 +1170,7 @@ function TCnInputHelper.AcceptDisplay: Boolean;
 begin
   Result := Active and IsEditControl(Screen.ActiveControl) and
     (not CheckImmRun or not IMMIsActive) and
-    CurrentIsSource and  // todo: 当前只支持 Delphi 代码
+    {$IFDEF BDS} CurrentIsDelphiSource {$ELSE} CurrentIsSource {$ENDIF} and  // TODO: 目前 BDS 以上只支持 Delphi 代码
     not IsAutoCompleteActive and not IsReadOnly and not CnOtaIsDebugging and
     not IsInIncreSearch and not IsInMacroOp;
 end;
