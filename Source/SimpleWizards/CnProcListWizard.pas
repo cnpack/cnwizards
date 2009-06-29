@@ -3826,12 +3826,12 @@ begin
   FDropDownList.OnDblClick := DropDownListDblClick;
   FDropDownList.OnClick := DropDownListClick;
 
-  //CnWizNotifierServices.AddApplicationMessageNotifier(ApplicationMessage);
+  CnWizNotifierServices.AddApplicationMessageNotifier(ApplicationMessage);
 end;
 
 destructor TCnProcListComboBox.Destroy;
 begin
-  //CnWizNotifierServices.RemoveApplicationMessageNotifier(ApplicationMessage);
+  CnWizNotifierServices.RemoveApplicationMessageNotifier(ApplicationMessage);
   inherited;
 end;
 
@@ -3975,12 +3975,23 @@ procedure TCnProcListComboBox.ApplicationMessage(var Msg: TMsg;
   var Handled: Boolean);
 begin
   case Msg.message of
+    WM_MOUSEWHEEL:  // 处理鼠标滚轮事件
+      if FDropDownList.Visible then
+      begin
+        SendMessage(FDropDownList.Handle, WM_MOUSEWHEEL, Msg.wParam, Msg.lParam);
+        Handled := True;
+        Msg.message := 0;
+        Msg.wParam := 0;
+        Msg.lParam := 0;
+      end;
+    { 暂时先不处理其他消息导致List关闭的情况
     WM_SYSKEYDOWN, WM_SETFOCUS:
       if FDropDownList.Visible then
         FDropDownList.CloseUp;
     WM_LBUTTONDOWN, WM_RBUTTONDOWN, WM_NCLBUTTONDOWN, WM_NCRBUTTONDOWN:
       if (Msg.hwnd <> FDropDownList.Handle) and FDropDownList.Visible then
         FDropDownList.CloseUp;
+    }
   end;
 end;
 
