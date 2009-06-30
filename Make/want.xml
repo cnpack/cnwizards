@@ -236,7 +236,6 @@ Usage: want [target-name] [-Dname=value]
     <delete dir="${cnvcl.src}" >
        <include name="**/*.hpp" />
        <include name="**/*.drc" />
-       <include name="**/*.rc" />
        <include name="**/*.mak" />
        <exclude name="**/*.template.*" />
     </delete>
@@ -286,7 +285,7 @@ Usage: want [target-name] [-Dname=value]
        <include name="*.*" />
        <exclude name="Readme.txt" />
     </delete>
-    <delete dir="${cnpack.src}" >
+    <delete dir="${cnvcl.src}" >
        <include name="**/*.hpp" />
     </delete>
     <delete dir="${src}">
