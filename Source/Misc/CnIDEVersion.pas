@@ -203,8 +203,8 @@ end;
 
 function IsDelphi14IdeVersionLatest: Boolean;
 const
-  CoreIdeLatest: TVersionNumber = // Beta 2
-    (Major: 14; Minor: 0; Release: 3449; Build: 21988);
+  CoreIdeLatest: TVersionNumber = // Beta 3
+    (Major: 14; Minor: 0; Release: 3462; Build: 22361);
 var
   ReadFileVersion: TVersionNumber;
 begin
