@@ -1016,14 +1016,14 @@ var
               #13:
                 begin
                   if FOrigin[Run + 1] = #10 then
-                  begin
-                    Inc(Run); Inc(ColNum);
-                    Inc(LineNum);
-                    ColNum := 0; // 让后文的 Inc 将其变成 1
-                  end;
+                    Inc(Run);
+                  Inc(LineNum);
+                  ColNum := 0; // 让后文的 Inc 将其变成 1
                 end;
               #10:
                 begin
+                  if FOrigin[Run + 1] = #13 then // #10#13 IDE 也会认为是一个换行符
+                    Inc(Run);
                   Inc(LineNum);
                   ColNum := 0; // 让后文的 Inc 将其变成 1
                 end;
@@ -1038,11 +1038,20 @@ var
           begin
             Inc(Run); Inc(ColNum);
             case FOrigin[Run] of
-              #0, #10:
+              #0, #10, #13:
                 begin
                   //if FOrigin[Run +1] = #10 then Inc(Run); //do not Inc(Run),it causes skipping the tkcCrlf token at the end of comment line
                   if FOrigin[Run] = #10 then
                   begin
+                    ColNum := 0; // 让后文变成 1
+                    Inc(LineNum);
+                    if FOrigin[Run + 1] = #13 then
+                      Inc(Run);
+                  end
+                  else if FOrigin[Run] = #13 then   // #13, #10, #13#10, #10#13都会被认为是一个回车
+                  begin
+                    if FOrigin[Run + 1] = #10 then
+                      Inc(Run);
                     ColNum := 0; // 让后文变成 1
                     Inc(LineNum);
                   end;
@@ -1065,7 +1074,7 @@ begin
     case FOrigin[Run] of
       #10:
         begin
-          Inc(Run);
+          if FOrigin[Run + 1] = #13 then Inc(Run, 2) else Inc(Run);
           FTokenPositionsList.Add(Run);
           Inc(LineNum);
           FTokenLineNumberList.Add(LineNum);
