@@ -314,9 +314,13 @@ const
     ('MB_OK', 'MB_OKCANCEL', 'MB_YESNO', 'MB_YESNOCANCEL', 'MB_RETRYCANCEL',
      'MB_ABORTRETRYIGNORE');
 
-  MsgDlgButtonKindStrs: array[TCnMsgBoxButtonKind] of string =
+  MsgDlgButtonKindDelphiStrs: array[TCnMsgBoxButtonKind] of string =
     ('[mbOK]', 'mbOKCancel', '[mbYes, mbNo]', 'mbYesNoCancel', '[mbRetry, mbCancel]',
      'mbAbortRetryIgnore');
+
+  MsgDlgButtonKindBCBStrs: array[TCnMsgBoxButtonKind] of string =
+    ('<< mbOK', '<< mbOK << mbCancel', '<< mbYes << mbNo', '<< mbYes << mbNo << mbCancel',
+     '<< mbRetry << mbCancel', '<< mbAbort << mbRetry << mbIgnore');
 
   MsgBoxIconKindStrs: array[TCnMsgBoxIconKind] of string =
     ('', 'MB_ICONINFORMATION', 'MB_ICONQUESTION', 'MB_ICONWARNING', 'MB_ICONSTOP');
@@ -1268,7 +1272,14 @@ begin
           if MsgBoxCodeKind = ckMsgDlg then
           begin
             Code := Format('%s %s', [Code, s]);
-            Code := Format('%s, %s, 0)', [Code, MsgDlgButtonKindStrs[MsgBoxButton]]);
+            if IsDelphi then
+            begin
+              Code := Format('%s, %s, 0)', [Code, MsgDlgButtonKindDelphiStrs[MsgBoxButton]]);
+            end
+            else
+            begin
+              Code := Format('%s, TMsgDlgButtons() %s, 0)', [Code, MsgDlgButtonKindBCBStrs[MsgBoxButton]]);
+            end;
           end
           else
             Code := Format('%s + %s', [Code, s]);
@@ -1334,7 +1345,7 @@ begin
             CnOtaSetCurSourceCol(Col);
             CnOtaInsertTextToCurSource('begin' + CRLF + CRLF + 'end;' + CRLF, ipCur);
           end
-          else
+          else // C++Builder
           begin
             if LineEndBrace then       // { 放在行末
             begin
@@ -1380,7 +1391,7 @@ begin
             CnOtaInsertTextToCurSource('begin' + CRLF + CRLF + 'end' + CRLF + 'else' +
               CRLF + 'begin' + CRLF + CRLF + 'end;' + CRLF, ipCur);
           end
-          else
+          else // C++Builder
           begin
             if LineEndBrace then       // { 放在行末
             begin
@@ -1437,7 +1448,7 @@ begin
                 CnOtaSetCurSourceCol(Col + Indent * 2);
                 CnOtaInsertTextToCurSource('begin' + CRLF + CRLF + 'end;' + CRLF, ipCur);
               end
-              else
+              else // C++Builder
               begin
                 if LineEndBrace then
                 begin
