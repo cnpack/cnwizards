@@ -226,7 +226,7 @@ var
     // 所以必须加上这样的判断，也牺牲了打开Project Source与BCB 5/6 CPP打开时的通知
     if IsDpr(FilePath) or IsPackage(FilePath) or IsBdsProject(FilePath) or
       IsDProject(FilePath) or IsBpr(FilePath) or IsCbProject(FilePath) or IsBpg(FilePath)
-      {$IFNDEF BDS}or IsCppSourceModule(FilePath){$ENDIF}} then
+      {$IFNDEF BDS} or IsCppSourceModule(FilePath) {$ENDIF} then
     begin
       CnOtaMakeSourceVisible(FilePath);
     end
