@@ -44,8 +44,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  CnWizMultiLang, StdCtrls, ExtCtrls, Buttons, ComCtrls,
-  CnSourceHighlight, CnWizOptions, CnSpin, CnLangMgr;
+  CnWizMultiLang, StdCtrls, ExtCtrls, Buttons, ComCtrls, Menus, IniFiles,
+  CnWizShareImages, CnSourceHighlight, CnWizOptions, CnSpin, CnLangMgr, CnIni;
 
 type
   TCnSourceHighlightForm = class(TCnTranslateForm)
@@ -91,6 +91,12 @@ type
     chkCurrentToken: TCheckBox;
     chkHighlightCurLine: TCheckBox;
     shpCurLine: TShape;
+    pmColor: TPopupMenu;
+    mniReset: TMenuItem;
+    mniExport: TMenuItem;
+    mniImport: TMenuItem;
+    dlgOpenColor: TOpenDialog;
+    dlgSaveColor: TSaveDialog;
     procedure UpdateControls(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure shpBracketMouseDown(Sender: TObject; Button: TMouseButton;
@@ -98,9 +104,13 @@ type
     procedure btnResetClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnLineSettingClick(Sender: TObject);
+    procedure mniResetClick(Sender: TObject);
+    procedure mniExportClick(Sender: TObject);
+    procedure mniImportClick(Sender: TObject);
   private
     { Private declarations }
     AWizard: TCnSourceHighlight;
+    procedure ResetToDefaultColor;
   protected
     function GetHelpTopic: string; override;
     procedure DoLanguageChanged(Sender: TObject); override;
@@ -247,14 +257,13 @@ begin
 end;
 
 procedure TCnSourceHighlightForm.btnResetClick(Sender: TObject);
+var
+  P: TPoint;
 begin
-  shpneg1.Brush.Color := HighLightDefColors[-1];
-  shp0.Brush.Color := HighLightDefColors[0];
-  shp1.Brush.Color := HighLightDefColors[1];
-  shp2.Brush.Color := HighLightDefColors[2];
-  shp3.Brush.Color := HighLightDefColors[3];
-  shp4.Brush.Color := HighLightDefColors[4];
-  shp5.Brush.Color := HighLightDefColors[5];
+  P.x := btnReset.Left;
+  P.y := btnReset.Top + btnReset.Height + 1;
+  P := btnReset.Parent.ClientToScreen(P);
+  pmColor.Popup(P.x, P.y);
 end;
 
 procedure TCnSourceHighlightForm.btnHelpClick(Sender: TObject);
@@ -302,6 +311,93 @@ begin
       AWizard.RepaintEditors;
     end;
     Free;
+  end;
+end;
+
+procedure TCnSourceHighlightForm.ResetToDefaultColor;
+begin
+  shpBracket.Brush.Color := clBlack;
+  shpBracketBk.Brush.Color := clAqua;
+  shpBracketBd.Brush.Color := $CCCCD6;
+  shpBk.Brush.Color := clYellow;
+  shpCurLine.Brush.Color := LoadIDEDefaultCurrentColor;
+
+  shpneg1.Brush.Color := HighLightDefColors[-1];
+  shp0.Brush.Color := HighLightDefColors[0];
+  shp1.Brush.Color := HighLightDefColors[1];
+  shp2.Brush.Color := HighLightDefColors[2];
+  shp3.Brush.Color := HighLightDefColors[3];
+  shp4.Brush.Color := HighLightDefColors[4];
+  shp5.Brush.Color := HighLightDefColors[5];
+end;
+
+procedure TCnSourceHighlightForm.mniResetClick(Sender: TObject);
+begin
+  ResetToDefaultColor;
+end;
+
+const
+  csHighlightColorsSection = 'HighlightColors';
+
+  csBracketColor = 'BracketColor';
+  csBracketColorBk = 'BracketColorBk';
+  csBracketColorBd = 'BracketColorBd';
+  csBlockMatchBackground = 'BlockMatchBackground';
+  csCurrentTokenHighlight = 'CurrentTokenHighlight';
+  csBlockMatchHighlightColor = 'BlockMatchHighlightColor';
+  csHighLightLineColor = 'HighLightLineColor';
+
+procedure TCnSourceHighlightForm.mniExportClick(Sender: TObject);
+var
+  Ini: TCnIniFile;
+begin
+  if dlgSaveColor.Execute then
+  begin
+    Ini := TCnIniFile.Create(ChangeFileExt(dlgSaveColor.FileName, '.ini'));
+    try
+      Ini.WriteColor(csHighlightColorsSection, csBracketColor, shpBracket.Brush.Color);
+      Ini.WriteColor(csHighlightColorsSection, csBracketColorBk, shpBracketBk.Brush.Color);
+      Ini.WriteColor(csHighlightColorsSection, csBracketColorBd, shpBracketBd.Brush.Color);
+      Ini.WriteColor(csHighlightColorsSection, csBlockMatchBackground, shpBk.Brush.Color);
+      Ini.WriteColor(csHighlightColorsSection, csHighLightLineColor, shpCurLine.Brush.Color);
+      Ini.WriteColor(csHighlightColorsSection, csBlockMatchHighlightColor + '-1', shpneg1.Brush.Color);
+      Ini.WriteColor(csHighlightColorsSection, csBlockMatchHighlightColor + '0', shp0.Brush.Color);
+      Ini.WriteColor(csHighlightColorsSection, csBlockMatchHighlightColor + '1', shp1.Brush.Color);
+      Ini.WriteColor(csHighlightColorsSection, csBlockMatchHighlightColor + '2', shp2.Brush.Color);
+      Ini.WriteColor(csHighlightColorsSection, csBlockMatchHighlightColor + '3', shp3.Brush.Color);
+      Ini.WriteColor(csHighlightColorsSection, csBlockMatchHighlightColor + '4', shp4.Brush.Color);
+      Ini.WriteColor(csHighlightColorsSection, csBlockMatchHighlightColor + '5', shp5.Brush.Color);
+
+      Ini.UpdateFile;
+    finally
+      Ini.Free;
+    end;
+  end;
+end;
+
+procedure TCnSourceHighlightForm.mniImportClick(Sender: TObject);
+var
+  Ini: TCnIniFile;
+begin
+  if dlgOpenColor.Execute then
+  begin
+    Ini := TCnIniFile.Create(dlgOpenColor.FileName);
+    try
+      shpBracket.Brush.Color := Ini.ReadColor(csHighlightColorsSection, csBracketColor, shpBracket.Brush.Color);
+      shpBracketBk.Brush.Color := Ini.ReadColor(csHighlightColorsSection, csBracketColorBk, shpBracketBk.Brush.Color);
+      shpBracketBd.Brush.Color := Ini.ReadColor(csHighlightColorsSection, csBracketColorBd, shpBracketBd.Brush.Color);
+      shpBk.Brush.Color := Ini.ReadColor(csHighlightColorsSection, csBlockMatchBackground, shpBk.Brush.Color);
+      shpCurLine.Brush.Color := Ini.ReadColor(csHighlightColorsSection, csHighLightLineColor, shpCurLine.Brush.Color);
+      shpneg1.Brush.Color := Ini.ReadColor(csHighlightColorsSection, csBlockMatchHighlightColor + '-1', shpneg1.Brush.Color);
+      shp0.Brush.Color := Ini.ReadColor(csHighlightColorsSection, csBlockMatchHighlightColor + '0', shp0.Brush.Color);
+      shp1.Brush.Color := Ini.ReadColor(csHighlightColorsSection, csBlockMatchHighlightColor + '1', shp1.Brush.Color);
+      shp2.Brush.Color := Ini.ReadColor(csHighlightColorsSection, csBlockMatchHighlightColor + '2', shp2.Brush.Color);
+      shp3.Brush.Color := Ini.ReadColor(csHighlightColorsSection, csBlockMatchHighlightColor + '3', shp3.Brush.Color);
+      shp4.Brush.Color := Ini.ReadColor(csHighlightColorsSection, csBlockMatchHighlightColor + '4', shp4.Brush.Color);
+      shp5.Brush.Color := Ini.ReadColor(csHighlightColorsSection, csBlockMatchHighlightColor + '5', shp5.Brush.Color);
+    finally
+      Ini.Free;
+    end;
   end;
 end;
 

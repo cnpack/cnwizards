@@ -389,7 +389,6 @@ type
     procedure SetBlockMatchLineClass(const Value: Boolean);
     procedure ReloadIDEFonts;
 {$IFNDEF BDS}
-    function LoadIDEDefaultCurrentColor: TColor;
     procedure BeforePaintLine(Editor: TEditorObject; LineNum, LogicLineNum: Integer);
     procedure SetHighLightCurrentLine(const Value: Boolean);
     procedure SetHighLightLineColor(const Value: TColor);
@@ -462,6 +461,9 @@ type
     property BlockMatchMaxLines: Integer read FBlockMatchMaxLines write FBlockMatchMaxLines;
     property OnEnhConfig: TNotifyEvent read FOnEnhConfig write FOnEnhConfig;
   end;
+
+function LoadIDEDefaultCurrentColor: TColor;
+{* 根据 IDE 配色方案自动调整的初始化高亮背景色}
 
 procedure HighlightCanvasLine(ACanvas: TCanvas; X1, Y1, X2, Y2: Integer;
   AStyle: TCnLineStyle);
@@ -3442,7 +3444,9 @@ begin
   Result := -1;
 end;
 
-function TCnSourceHighlight.LoadIDEDefaultCurrentColor: TColor;
+{$ENDIF}
+
+function LoadIDEDefaultCurrentColor: TColor;
 var
   AHighlight: THighlightItem;
 begin
@@ -3460,7 +3464,7 @@ begin
   end;
 end;
 
-{$ENDIF}
+
 
 { TBlockLinePair }
 
