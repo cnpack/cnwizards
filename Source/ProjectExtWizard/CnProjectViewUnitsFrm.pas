@@ -221,9 +221,12 @@ var
   begin
     // CnOtaMakeSourceVisible(FilePath);  // 这样打开可能会导致无 ctView 通知
     // CnOtaOpenFile(FilePath); // 但这样打开Project文件时会导致重新打开所有文件
-    // 所以必须加上这样的判断，也牺牲了打开Project Source时的通知
+                                // 并且 BCB 下会只打开窗体而不打开 CPP 文件
+
+    // 所以必须加上这样的判断，也牺牲了打开Project Source与CPP打开时的通知
     if IsDpr(FilePath) or IsPackage(FilePath) or IsBdsProject(FilePath) or
-      IsDProject(FilePath) or IsCbProject(FilePath) or IsBpg(FilePath) then
+      IsDProject(FilePath) or IsBpr(FilePath) or IsCbProject(FilePath) or IsBpg(FilePath)
+      or IsCppSourceModule(FilePath) then
       CnOtaMakeSourceVisible(FilePath)
     else
       CnOtaOpenFile(FilePath);
