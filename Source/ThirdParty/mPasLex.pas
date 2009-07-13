@@ -1123,7 +1123,11 @@ begin
     csAnsi: fTokenID:=tkCRLFCo;
   else fTokenID:=tkCRLF;
   end;
-  inc(Run);
+
+  Case FOrigin[Run+1]of
+    #13: inc(Run, 2);
+  else inc(Run);
+  end;
   inc(fLineNumber);
   fLinePos:=Run;
 end;
