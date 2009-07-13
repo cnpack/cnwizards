@@ -743,13 +743,14 @@ var
       if Token.IsMethodClose then
       begin
         Dec(NestedProcs);
-        if (NestedProcs = 0) and (Token.MethodLayer = 1) then
+        if Token.MethodLayer = 1 then // 碰到的最近的 Layer 为 1 的，必然是最外层
         begin
           FMethodCloseToken := Token;
           Exit;
         end
-        else if FChildMethodCloseToken = nil then
+        else if (NestedProcs = 0) and (FChildMethodCloseToken = nil) then
           FChildMethodCloseToken := Token;
+          // 最近的同层次的，才是 ChildMethodClose  
       end
       else if Token.IsMethodStart and (Token.TokenID in [tkProcedure, tkFunction,
         tkConstructor, tkDestructor]) then
