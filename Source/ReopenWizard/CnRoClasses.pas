@@ -34,7 +34,7 @@ unit CnRoClasses;
 * 开发平台：PWin2000Pro + Delphi 5.02
 * 兼容测试：PWin2000 + Delphi 5/6/7
 * 本 地 化：该窗体中的字符串支持本地化处理方式
-* 单元标识：$Id: CnRoClasses.pas,v 1.17 2009/01/02 08:36:29 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2004-12-12 V1.1
 *               去除TMyStringList，改用TList来管理。
 *               添加节点管理器，以及提取接口的Map

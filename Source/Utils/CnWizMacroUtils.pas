@@ -38,7 +38,7 @@ unit CnWizMacroUtils;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnWizMacroUtils.pas,v 1.15 2009/01/02 08:36:29 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2003.09.26 V1.1 何清(QSoft)
 *               修正代码编辑器专家中的加入过程头时，对Class methods处理错误的BUG 
 *           2002.12.04 V1.0

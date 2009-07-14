@@ -28,7 +28,7 @@ unit CnPropSheetFrm;
 * 开发平台：PWinXP + Delphi 5
 * 兼容测试：未测试
 * 本 地 化：该窗体中的字符串暂不符合本地化处理方式
-* 单元标识：$Id: CnPropSheetFrm.pas,v 1.11 2009/01/02 08:36:27 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2006.11.23
 *               加入对象类继承关系的显示
 *           2006.11.07

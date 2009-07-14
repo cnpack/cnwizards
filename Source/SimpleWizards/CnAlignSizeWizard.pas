@@ -31,7 +31,7 @@ unit CnAlignSizeWizard;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin2000 + Delphi 5
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnAlignSizeWizard.pas,v 1.38 2009/01/02 08:36:29 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2004.12.04 by 周劲羽
 *               大量修改和重构，支持更多的功能
 *           2003.11.20 by 周劲羽

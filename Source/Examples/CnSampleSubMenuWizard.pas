@@ -28,7 +28,7 @@ unit CnSampleSubMenuWizard;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式
-* 单元标识：$Id: CnSampleSubMenuWizard.pas,v 1.10 2009/01/02 08:36:28 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2003.09.10 V1.0 何清(Qsoft) hq.com@263.net
 *             重载CreateSubActions方法用于创建了菜单专家
 *           2003.05.25 V1.0

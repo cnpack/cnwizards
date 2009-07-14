@@ -28,7 +28,7 @@ unit CnRoWizard;
 * 开发平台：PWin2000Pro + Delphi 5.02
 * 兼容测试：PWin2000 + Delphi 5/6/7
 * 本 地 化：该窗体中的字符串支持本地化处理方式
-* 单元标识：$Id: CnRoWizard.pas,v 1.12 2009/01/02 08:36:29 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2004-12-12 V1.2
 *               修改为IReopener处理
 *           2004.07.22 V1.1

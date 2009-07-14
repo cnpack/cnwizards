@@ -28,7 +28,7 @@ unit CnCodeFormater;
 * 开发平台：Win2003 + Delphi 5.0
 * 兼容测试：not test yet
 * 本 地 化：not test hell
-* 单元标识：$Id: CnCodeFormater.pas,v 1.41 2009/01/02 08:36:28 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2003.12.16 V0.4
 *               最初级的实现，巨大的工作量，使用递归下降分析法基本完整的实现了
 *               Delphi 5 的 Object Pascal 语法解析。代码格式上包括代码缩进、关

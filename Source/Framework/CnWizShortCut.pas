@@ -37,7 +37,7 @@ unit CnWizShortCut;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnWizShortCut.pas,v 1.18 2009/05/19 08:16:38 zjy Exp $
+* 单元标识：$Id$
 * 修改记录：2007.05.21 V1.4
 *               去掉 PushKeyboard 调用，改为修改 AddKeyBinding 参数，解决某些快
 *               捷键无效的问题。

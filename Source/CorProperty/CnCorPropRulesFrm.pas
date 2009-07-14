@@ -29,7 +29,7 @@ unit CnCorPropRulesFrm;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin2000 + Delphi 5
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnCorPropRulesFrm.pas,v 1.12 2009/01/02 08:36:28 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2004.05.15 V1.1 by LiuXiao
 *               修改 PropDef 引用的重复释放导致出错的问题
 *           2003.05.17 V1.0 by LiuXiao

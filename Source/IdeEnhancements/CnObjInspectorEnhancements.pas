@@ -28,7 +28,7 @@ unit CnObjInspectorEnhancements;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 单元标识：$Id: CnObjInspectorEnhancements.pas,v 1.15 2009/01/02 08:36:28 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2004.5.15 chinbo(shenloqi)
 *               支持setelement的粗体显示
 *           2003.10.31

@@ -28,7 +28,7 @@ unit CnCodeFormatRules;
 * 开发平台：Win2003 + Delphi 5.0
 * 兼容测试：not test yet
 * 本 地 化：not test hell
-* 单元标识：$Id: CnCodeFormatRules.pas,v 1.11 2009/01/02 08:36:28 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2003.12.16 V0.1
 *               建立。目前包括 缩进空格数、操作符前后空格数、关键字大小写 的设置。
                 代码风格未实现。

@@ -28,7 +28,7 @@ unit CnProjectViewBaseFrm;
 * 开发平台：PWin2000Pro + Delphi 5.5
 * 兼容测试：PWin2000 + Delphi 5/6/7
 * 本 地 化：该窗体中的字符串支持本地化处理方式
-* 单元标识：$Id: CnProjectViewBaseFrm.pas,v 1.29 2009/01/02 08:36:29 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2004.02.22 V1.1
 *               重写所有代码
 *           2004.02.08 V1.0

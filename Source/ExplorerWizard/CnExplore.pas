@@ -28,7 +28,7 @@ unit CnExplore;
 * 开发平台：PWin2000Pro + Delphi 7
 * 兼容测试：未测试
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnExplore.pas,v 1.19 2009/05/19 08:14:56 zjy Exp $
+* 单元标识：$Id$
 * 修改记录：
 *           2003.12.03 by QSoft
 *               移植到 D5

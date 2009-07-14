@@ -28,7 +28,7 @@ unit CnTabOrderWizard;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnTabOrderWizard.pas,v 1.16 2009/05/01 01:06:31 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2003.05.06 V1.3
 *               部分修改以适应改进过的 CnWizControlHook
 *               新增多窗体处理功能，改用专家基类提供的快捷键设置窗口

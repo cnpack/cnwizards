@@ -28,7 +28,7 @@ unit CnHintEditorFrm;
 * 开发平台：PWin98SE + Delphi 5.0
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6
 * 本 地 化：该单元和窗体中的字符串已经符合本地化处理方式
-* 单元标识：$Id: CnHintEditorFrm.pas,v 1.9 2009/02/10 10:16:19 shenloqi Exp $
+* 单元标识：$Id$
 * 修改记录：
 *           2003.09.17 V1.4
 *               修改了全部替换死循环的BUG

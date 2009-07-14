@@ -29,7 +29,7 @@ unit CnSourceDiffFrm;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnSourceDiffFrm.pas,v 1.18 2009/01/02 08:36:29 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2003.03.21 V1.1
 *               修正右边差异图底色可能不正确的 Bug
 *               修正点击按钮定义到源码可能会出错的 Bug

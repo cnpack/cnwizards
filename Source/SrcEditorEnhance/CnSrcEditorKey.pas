@@ -28,7 +28,7 @@ unit CnSrcEditorKey;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 单元标识：$Id: CnSrcEditorKey.pas,v 1.64 2009/05/19 12:56:23 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2008.12.25
 *             加入 F2 修改当前变量名的功能
 *           2005.08.30

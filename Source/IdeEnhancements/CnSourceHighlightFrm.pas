@@ -28,7 +28,7 @@ unit CnSourceHighlightFrm;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 单元标识：$Id: CnSourceHighlightFrm.pas,v 1.29 2009/01/06 15:48:13 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2008.06.17
 *               增加对 BDS 的支持
 *           2005.09.05

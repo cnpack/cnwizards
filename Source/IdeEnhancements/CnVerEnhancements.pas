@@ -28,7 +28,7 @@ unit CnVerEnhancements;
 * 开发平台：JWinXPPro + Delphi 7.01
 * 兼容测试：JWinXPPro ＋Delphi7.０１
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 单元标识：$Id: CnVerEnhancements.pas,v 1.26 2009/01/02 08:36:28 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2007.01.22 V1.0 by liuxiao
 *               使能此单元并加以适应性修改
 *           2005.05.05 V1.0 by hubdog

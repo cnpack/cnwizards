@@ -44,7 +44,7 @@ unit CnMemProf;
 * 开发平台：PWin98SE + Delphi 5.0
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6
 * 本 地 化：该单元中的字符串符合本地化处理方式
-* 单元标识：$Id: CnMemProf.pas,v 1.4 2009/01/02 08:36:27 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2006.08.20 V1.3
 *               将字符串定义从 CnConsts 中移动至此以便单独使用
 *           2004.09.18 V1.3

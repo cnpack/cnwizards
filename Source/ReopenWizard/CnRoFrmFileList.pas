@@ -28,7 +28,7 @@ unit CnRoFrmFileList;
 * 开发平台：PWin2000Pro + Delphi 5.02
 * 兼容测试：PWin2000 + Delphi 5/6/7
 * 本 地 化：该窗体中的字符串支持本地化处理方式
-* 单元标识：$Id: CnRoFrmFileList.pas,v 1.17 2009/01/02 08:36:29 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：
 *           2005-05-04 V1.2 by hubdog
 *               修改ExploreDir的使用为采用ExploreFile

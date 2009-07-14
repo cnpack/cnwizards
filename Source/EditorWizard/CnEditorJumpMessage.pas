@@ -28,7 +28,7 @@ unit CnEditorJumpMessage;
 * 开发平台：PWinXP SP2 + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnEditorJumpMessage.pas,v 1.23 2009/04/16 10:04:29 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2009.04.15
 *               加入对 C/C++ 大括号的支持
 *           2008.11.22

@@ -28,7 +28,7 @@ unit CnSourceCropper;
 * 开发平台：Windows 2000 + Delphi 5
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 单元标识：$Id: CnSourceCropper.pas,v 1.11 2009/01/02 08:36:29 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2003.07.29 V1.1
 *               增加保留自定义格式注释的功能
 *           2003.06.15 V1.0

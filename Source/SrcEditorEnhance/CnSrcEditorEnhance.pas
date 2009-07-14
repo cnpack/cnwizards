@@ -28,7 +28,7 @@ unit CnSrcEditorEnhance;
 * 开发平台：PWin98SE + Delphi 6
 * 兼容测试：暂无（PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6）
 * 本 地 化：该窗体中的字符串符合本地化处理方式
-* 单元标识：$Id: CnSrcEditorEnhance.pas,v 1.52 2009/05/19 11:53:05 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2009.05.30 V1.3
 *               LiuXiao 修改通知器以修改工具栏的更新方式，降低 CPU 占有率
 *           2007.05.02 V1.2

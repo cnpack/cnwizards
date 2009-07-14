@@ -28,7 +28,7 @@ unit CnPascalGrammar;
 * 开发平台：Win2003 + Delphi 5.0
 * 兼容测试：not test yet
 * 本 地 化：not test hell
-* 单元标识：$Id: CnPascalGrammar.pas,v 1.17 2009/01/02 08:36:28 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2003-12-16 V0.3
 *               建立，来自Delphi Help - Object Pascal Gramer，
 *               原始文件有一些错误，一直在陆续修改中。

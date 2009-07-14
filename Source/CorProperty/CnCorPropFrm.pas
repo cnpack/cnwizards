@@ -29,7 +29,7 @@ unit CnCorPropFrm;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin2000 + Delphi 5
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnCorPropFrm.pas,v 1.18 2009/01/02 08:36:28 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2004.09.08 V1.3 by LiuXiao
 *               增加处理所有打开 Form 的选项
 *           2003.09.28 V1.2 by 何清

@@ -28,7 +28,7 @@ unit CnProjectViewUnitsFrm;
 * 开发平台：PWinXPPro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnProjectViewUnitsFrm.pas,v 1.34 2009/05/20 12:57:46 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2004.2.22 V2.1
 *               重写所有代码
 *           2004.2.18 V2.0 by Leeon

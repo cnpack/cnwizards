@@ -29,7 +29,7 @@ unit CnWizManager;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnWizManager.pas,v 1.27 2009/04/22 13:19:22 zjy Exp $
+* 单元标识：$Id$
 * 修改记录：2003.10.03 V1.2 by 何清(QSoft)
 *               增加专家引导工具
 *           2003.08.02 V1.1

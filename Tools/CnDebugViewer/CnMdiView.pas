@@ -28,7 +28,7 @@ unit CnMdiView;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 单元标识：$Id: CnMdiView.pas,v 1.31 2009/01/02 08:36:30 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2008.01.18
 *               Sesame 增加分秒方式显示时间
 *           2005.01.01

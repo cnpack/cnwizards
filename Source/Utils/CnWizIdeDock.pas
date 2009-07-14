@@ -38,7 +38,7 @@ unit CnWizIdeDock;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnWizIdeDock.pas,v 1.16 2009/01/07 11:14:45 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2009.01.07
 *               加入位置保存功能，采用了一些和 CnTranslateForm 中不同的机制
 *           2004.11.19 V1.1

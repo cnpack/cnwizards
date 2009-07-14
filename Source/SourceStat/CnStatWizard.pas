@@ -28,7 +28,7 @@ unit CnStatWizard;
 * 开发平台：Windows 98 + Delphi 6
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 单元标识：$Id: CnStatWizard.pas,v 1.29 2009/01/02 08:36:29 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2003.03.31 V1.2
 *               在目录中搜索文件的时候加入了进度提示
 *               树节点加入有效行数

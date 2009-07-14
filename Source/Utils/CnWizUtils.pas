@@ -39,7 +39,7 @@ unit CnWizUtils;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnWizUtils.pas,v 1.106 2009/05/19 08:16:38 zjy Exp $
+* 单元标识：$Id$
 * 修改记录：
 *           2005.05.06 by hubdog
 *               追加设置项目属性值的函数，修改CnOtaGetActiveProjectOptions

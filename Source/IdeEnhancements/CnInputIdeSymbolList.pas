@@ -29,7 +29,7 @@ unit CnInputIdeSymbolList;
 * 开发平台：PWinXP SP2 + Delphi 5.01
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnInputIdeSymbolList.pas,v 1.25 2009/05/02 13:13:57 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2005.06.03
 *               从 CnInputHelper 中分离出来
 ================================================================================

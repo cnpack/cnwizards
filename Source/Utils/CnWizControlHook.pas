@@ -28,7 +28,7 @@ unit CnWizControlHook;
 * 开发平台：PWin2000Pro + Delphi 5.0
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnWizControlHook.pas,v 1.11 2009/01/02 08:36:29 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2003.05.04 V1.2
 *               使用 CnWizNotifier 用正规的方法来挂接控件，去掉了 Listener 接口，
 *               改用 Message Notifier 以简化编程。

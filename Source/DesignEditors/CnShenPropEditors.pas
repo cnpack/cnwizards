@@ -28,7 +28,7 @@ unit CnShenPropEditors;
 * 开发平台：PWin98SE + Delphi 5.0
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6
 * 本 地 化：该单元和窗体中的字符串已经本地化处理方式
-* 单元标识：$Id: CnShenPropEditors.pas,v 1.15 2009/04/03 13:04:55 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2003.04.28 V1.3 by 周劲羽
 *               使用编辑器映射的方法，现在可以动态卸载属性编辑器了
 *           2003.03.14 V1.2 by chinbo

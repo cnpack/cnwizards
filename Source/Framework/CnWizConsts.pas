@@ -28,7 +28,7 @@ unit CnWizConsts;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnWizConsts.pas,v 1.129 2009/05/15 23:00:02 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2005.05.05 V1.2
 *               hubdog: 增加新的版本信息扩展专家
 *           2003.08.20 V1.1

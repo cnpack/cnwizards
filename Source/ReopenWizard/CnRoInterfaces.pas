@@ -34,7 +34,7 @@ unit CnRoInterfaces;
 * 开发平台：PWin2000Pro + Delphi 5.02
 * 兼容测试：PWin2000 + Delphi 5/6/7
 * 本 地 化：该窗体中的字符串支持本地化处理方式
-* 单元标识：$Id: CnRoInterfaces.pas,v 1.9 2009/01/02 08:36:29 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：- 2004-12-11 V1.1
 *                 删除原有接口。修正为IReopener，IRoOptions。
 *           - 2004-03-02 V1.0

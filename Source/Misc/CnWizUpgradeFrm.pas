@@ -28,7 +28,7 @@ unit CnWizUpgradeFrm;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnWizUpgradeFrm.pas,v 1.13 2009/01/02 08:36:28 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2003.08.10 V1.1
 *               只有点击“关闭”按钮时，才处理“以后不再提示”检查框
 *           2003.04.28 V1.1

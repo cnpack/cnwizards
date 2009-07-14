@@ -29,7 +29,7 @@ unit CnMultiLineEdtUserFmtFrm;
 * 开发平台：WinXP + Delphi 5.0
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6
 * 本 地 化：该单元和窗体中的字符串已经本地化处理方式
-* 单元标识：$Id: CnMultiLineEdtUserFmtFrm.pas,v 1.8 2009/01/02 08:36:28 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：
 *           2003.10.18
 *               创建单元

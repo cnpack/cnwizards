@@ -39,7 +39,7 @@ unit CnProcListWizard;
 * 开发平台：PWin2000 + Delphi 5
 * 兼容测试：暂无（PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6）
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnProcListWizard.pas,v 1.105 2009/05/09 02:05:04 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2009.04.16 V1.2
 *               增加工具栏的下拉查找功能
 *           2005.10.29 V1.1

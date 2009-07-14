@@ -28,7 +28,7 @@ unit CnFilesSnapshotManageFrm;
 * 开发平台：PWin2000Pro + Delphi 7
 * 兼容测试：P2000Pro + Delphi 6/7
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnFilesSnapshotManageFrm.pas,v 1.13 2009/01/02 08:36:29 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2007.08.02 V1.2
 *               beta 文件列表改为非 virtual 方式以提供对 D5 的兼容
 *           2007.08.01 V1.1

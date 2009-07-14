@@ -29,7 +29,7 @@ unit CnMessageBoxWizard;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnMessageBoxWizard.pas,v 1.18 2009/01/02 08:36:29 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2003.04.29 V1.3
 *               新增 Format 字符串支持，新增模板导入导出功能
 *           2003.03.10 V1.2

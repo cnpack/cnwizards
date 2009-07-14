@@ -28,7 +28,7 @@ unit CnMultiLineEditorFrm;
 * 开发平台：WinXP + Delphi 5.0
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6
 * 本 地 化：该单元和窗体中的字符串已经本地化处理方式
-* 单元标识：$Id: CnMultiLineEditorFrm.pas,v 1.14 2009/01/02 08:36:28 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：
 *           2005.08.01
 *               修正SetFont时每次都创建一个新的TFontDialog的BUG

@@ -28,7 +28,7 @@ unit CnAlignPropEditor;
 * 开发平台：Windows2000Pro + Delphi 6.1
 * 兼容测试：PWin2000Pro + Delphi 6
 * 本 地 化：
-* 单元标识：$Id: CnAlignPropEditor.pas,v 1.7 2009/01/02 08:36:28 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：
 *           2004-11-16 V1.0 by Leeon
 *               创建单元

@@ -28,7 +28,7 @@ unit CnFilesSnapshot;
 * 开发平台：PWin2000Pro + Delphi 7
 * 兼容测试：PWin2000Pro + Delphi 6/7
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnFilesSnapshot.pas,v 1.19 2009/01/02 08:36:29 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2007.08.01 V1.3
 *               beta 默认优先打开工程组文件及工程文件
 *               管理快照允许撤消操作

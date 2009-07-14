@@ -28,7 +28,7 @@ unit CnDesignEditor;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 单元标识：$Id: CnDesignEditor.pas,v 1.15 2009/01/19 13:54:57 zjy Exp $
+* 单元标识：$Id$
 * 修改记录：2003.04.28 V1.1
 *               修改属性编辑器框架，使用PropertyMapper来动态管理属性编辑器，
 *               现在支持动态卸载了同时集合编辑器支持所有集合属性，且专家包的

@@ -28,7 +28,7 @@ unit CnAsciiChart;
 * 开发平台：PWin2000Pro + Delphi 5
 * 兼容测试：未测试
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnAsciiChart.pas,v 1.24 2009/01/02 08:36:28 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2004-01-29
 *               状态栏上增加显示非可视 ASCII 字符的描述
 *           2004-01-13

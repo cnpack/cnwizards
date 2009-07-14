@@ -28,7 +28,7 @@ unit CnEditorCodeSwap;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnEditorCodeSwap.pas,v 1.14 2009/04/30 23:51:23 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2005.05.18 V1.2 熊恒(beta)
 *               支持 if X then A := B 和 case, goto 语句中 entry: A := B 的情况
 *               修正 S2 首尾均可能被截掉部分字符的问题

@@ -28,7 +28,7 @@ unit CnEditorCodeTool;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 单元标识：$Id: CnEditorCodeTool.pas,v 1.26 2009/01/02 08:36:28 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2005.01.25 V1.2
 *               弥补 GetText 不能读取大长度代码的缺陷
 *           2004.08.22 V1.1

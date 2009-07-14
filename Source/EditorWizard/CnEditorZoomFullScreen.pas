@@ -28,7 +28,7 @@ unit CnEditorZoomFullScreen;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnEditorZoomFullScreen.pas,v 1.24 2009/02/25 12:54:46 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2008.05.08 V1.3
 *               增加对 BDS 的支持
 *           2005.02.22 V1.2

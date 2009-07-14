@@ -29,7 +29,7 @@ unit CnCommentCropper;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnCommentCropper.pas,v 1.23 2009/02/08 12:54:47 liuxiao Exp $
+* 单元标识：$Id$
 * 修改记录：2009.01.26 V1.2
 *               增加目录搜索的功能，增加一合并空行的选项
 *           2003.07.29 V1.1
