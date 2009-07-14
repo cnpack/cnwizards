@@ -74,11 +74,8 @@
     CnWizards 安裝程序: http://download.cnpack.org/CnWizards.exe
     CnWizards 源代碼:   http://download.cnpack.org/CnWizards_Src.zip
 
-    CVS 源代碼檢出：
-    CVSROOT:   :pserver:anoncvs@www.cnpack.org:/var/cvshome/cnpack
-    Password:  anoncvs
-    Modules:   cnpack 
-               cnwizards
+    SVN 源代碼檢出：
+    http://code.google.com/p/cnpack/source/checkout
 
 ======================================================================
 6. 編譯及自動構建

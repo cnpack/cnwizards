@@ -76,7 +76,7 @@ file.
     CnWizards Installer: http://download.cnpack.org/CnWizards.exe
     CnWizards Source:   http://download.cnpack.org/CnWizards_Src.zip
 
-    SVN: http://cnpack.googlecode.com/svn/trunk/
+    SVN: http://code.google.com/p/cnpack/source/checkout
 
 ======================================================================
 6. Compiling And Building
