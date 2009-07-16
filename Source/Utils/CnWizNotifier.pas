@@ -855,10 +855,11 @@ begin
   GetMsgHook := 0;
 
   IServices := BorlandIDEServices as IOTAServices;
+  if Assigned(IServices) then
+    IServices.RemoveNotifier(FIdeNotifierIndex);
   IDebuggerService := BorlandIDEServices as IOTADebuggerServices;
-  Assert(Assigned(IServices) and Assigned(IDebuggerService));
-  IServices.RemoveNotifier(FIdeNotifierIndex);
-  IDebuggerService.RemoveNotifier(FDebuggerNotifierIndex);
+  if Assigned(IDebuggerService) then
+    IDebuggerService.RemoveNotifier(FDebuggerNotifierIndex);
 
   FreeAndNil(FCompNotifyList);
   FreeAndNil(FEvents);
