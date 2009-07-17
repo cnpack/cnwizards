@@ -335,13 +335,8 @@ const
   CnWideControlCanvasOffset = $230;
   // BDS 2005 下 EditControl 的 Canvas 属性的偏移量
 {$ELSE}
-  {$IFDEF BDS2010}
-  // BDS 2010 Beta 的偏移量
-  CnWideControlCanvasOffset = $268;
-  {$ELSE}
-  // BDS 2006/2007/2009 下 EditControl 的 Canvas 属性的偏移量
+  // BDS 2006/2007 下 EditControl 的 Canvas 属性的偏移量
   CnWideControlCanvasOffset = $260;
-  {$ENDIF}
 {$ENDIF}
 {$ENDIF}
 
@@ -1177,8 +1172,13 @@ begin
   Result := nil;
   if EditControl = nil then Exit;
 {$IFDEF BDS}
-  // BDS 下的 EditControl 不再继承自 TCustomControl，因此得用硬办法来获得画布
-  Result := TCanvas((PInteger(Integer(EditControl) + CnWideControlCanvasOffset))^);
+  {$IFDEF BDS2009_UP}
+    // BDS 2009 的 TControl 已经 Unicode 化了，直接用
+    Result := TCustomControlHack(EditControl).Canvas;
+  {$ELSE}
+    // BDS 2009 以下的 EditControl 不再继承自 TCustomControl，因此得用硬办法来获得画布
+    Result := TCanvas((PInteger(Integer(EditControl) + CnWideControlCanvasOffset))^);
+  {$ENDIF}
 {$ELSE}
   Result := TCustomControlHack(EditControl).Canvas;
 {$ENDIF}
