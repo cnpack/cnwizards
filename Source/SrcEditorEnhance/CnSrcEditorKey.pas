@@ -90,6 +90,7 @@ type
     FNeedChangeInsert: Boolean;
     procedure IdleDoAutoInput(Sender: TObject);
     procedure IdleDoAutoIndent(Sender: TObject);
+    procedure IdleDoCBracketIndent(Sender: TObject);
 {$ENDIF}
     procedure SetKeepSearch(const Value: Boolean);
     procedure SetRenameShortCut(const Value: TShortCut);
@@ -463,6 +464,23 @@ begin
   end;
 end;
 
+procedure TCnSrcEditorKey.IdleDoCBracketIndent(Sender: TObject);
+var
+  View: IOTAEditView;
+begin
+  View := CnOtaGetTopMostEditView;
+  if Assigned(View) then
+  begin
+    if View.CursorPos.Line = FSaveLineNo + 1 then
+    begin
+      CnOtaInsertTextToCurSource(#13#10);
+      CnOtaMovePosInCurSource(ipCur, -1, 0);
+      View.Buffer.EditPosition.MoveRelative(0, CnOtaGetBlockIndent);
+      View.Paint;
+    end;
+  end;
+end;
+
 procedure TCnSrcEditorKey.IdleDoAutoInput(Sender: TObject);
 var
   View: IOTAEditView;
@@ -596,7 +614,7 @@ begin
   begin
     if CnNtaGetCurrLineText(Text, LineNo, CharIdx) then
     begin
-      if CharIdx >= Length(Text) - 1 then
+      if CharIdx >= Length(Text) then  // 在行末尾
       begin
         Text := Trim(Text);
         if Text <> '' then
@@ -631,16 +649,27 @@ begin
               CnWizNotifierServices.ExecuteOnApplicationIdle(IdleDoAutoInput);
             end;
           end
-          else if CurrentIsCSource then
+          else if IsCppSourceModule(CnOtaGetCurrentSourceFile) then
           begin
             if Text[Length(Text)] = '{' then
-              NeedIndent := True;
+              NeedIndent := True
           end;
 
           if NeedIndent then
           begin
             FSaveLineNo := LineNo;
             CnWizNotifierServices.ExecuteOnApplicationIdle(IdleDoAutoIndent);
+          end;
+        end;
+      end
+      else // 不在行末尾
+      begin
+        if (CharIdx = Length(Text) - 1) and IsCppSourceModule(CnOtaGetCurrentSourceFile) then
+        begin
+          if (Text[CharIdx] = '{') and (Text[CharIdx + 1] = '}') then
+          begin
+            FSaveLineNo := LineNo;
+            CnWizNotifierServices.ExecuteOnApplicationIdle(IdleDoCBracketIndent);
           end;
         end;
       end;
