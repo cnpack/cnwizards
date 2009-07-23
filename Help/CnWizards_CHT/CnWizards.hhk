@@ -434,6 +434,11 @@
 		<param name="Local" value="srcedtenh\srcedtblocktools.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="隱私保護">
+		<param name="Name" value="隱私保護">
+		<param name="Local" value="other\privacy.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="引用單元列表">
 		<param name="Name" value="引用單元列表">
 		<param name="Local" value="wizards\projext\uselist.htm">

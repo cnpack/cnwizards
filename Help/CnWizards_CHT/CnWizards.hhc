@@ -463,6 +463,10 @@
 			<param name="Local" value="other/credits.htm">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="隱私保護">
+			<param name="Local" value="other/privacy.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="與我們聯繫">
 			<param name="Local" value="other/contact.htm">
 			</OBJECT>

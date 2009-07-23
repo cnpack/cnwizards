@@ -347,7 +347,12 @@
 		<param name="Name" value="Previous Message Line Tool">
 		<param name="Name" value="Previous Message Line Tool">
 		<param name="Local" value="wizards\editor\editorprevmsg.htm">
-		</OBJECT>	
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Privacy Policy">
+		<param name="Name" value="Privacy Policy">
+		<param name="Local" value="other\privacy.htm">
+		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Procedure List Wizard">
 		<param name="Name" value="Procedure List Wizard">
