@@ -45,7 +45,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   WinInet, IniFiles, CnWizConsts, CnWizOptions, CnCommon, StdCtrls, ExtCtrls,
-  CnWizUtils, CnInetUtils, CnWizMultiLang;
+  CnWizUtils, CnInetUtils, CnWizMultiLang, CnWizCompilerConst;
 
 type
 
@@ -258,8 +258,11 @@ const
   csMaxLinks = 3;
 
 procedure TCnWizUpgradeThread.Execute;
+var
+  S: string;
 begin
-  // 取升级记录
+  // 取升级记录，发送IDE大版本号与专家包版本号作为参数
+  S := Format('%s?ide=%s&ver=%s', [WizOptions.UpgradeURL, CompilerShortName, SCnWizardVersion]);
   if not GetUpgrade(WizOptions.UpgradeURL, 1) then
   begin
     if not FHTTP.Aborted and FUserCheck then
