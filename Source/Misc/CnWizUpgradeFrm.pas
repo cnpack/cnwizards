@@ -263,7 +263,7 @@ var
 begin
   // 取升级记录，发送IDE大版本号与专家包版本号作为参数
   S := Format('%s?ide=%s&ver=%s', [WizOptions.UpgradeURL, CompilerShortName, SCnWizardVersion]);
-  if not GetUpgrade(WizOptions.UpgradeURL, 1) then
+  if not GetUpgrade(S, 1) then
   begin
     if not FHTTP.Aborted and FUserCheck then
       ErrorDlg(SCnWizUpgradeFail);
