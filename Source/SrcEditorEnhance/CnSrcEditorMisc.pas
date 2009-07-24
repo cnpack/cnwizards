@@ -273,6 +273,9 @@ var
   TabControl: TControl;
   TabCtrlPanelComp: TComponent;
   TabCtrlPanel: TPanel;
+{$IFDEF COMPILER6}
+  CodePanel: TPanel;
+{$ENDIF}
 begin
   // 挂接编辑器右键菜单
   PopupMenu := TControlHack(EditControl).PopupMenu;
@@ -299,6 +302,17 @@ begin
         if TabCtrlPanel.Align <> alTop then
           TabCtrlPanel.Align := alTop;
       end;
+
+{$IFDEF COMPILER6}
+      // D6/BCB6 下，这个下方的Panel的Align不是alClient，只Anchors是四方，
+      // 会导致TabControl为MultiLine时容器高度不会改变，从而下面的显示效果被挡住
+      CodePanel := TPanel(EditWindow.FindComponent('CodePanel'));
+      if CodePanel <> nil then
+      begin
+        if CodePanel.Align <> alClient then
+          CodePanel.Align := alClient;
+      end;
+{$ENDIF}
     end;
 
     if TabControl is TTabControl then
