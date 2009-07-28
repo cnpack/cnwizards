@@ -125,6 +125,7 @@ var
   HasError: Boolean;
   AForm: TCnProjectViewBaseForm;
 begin
+  Result := False;
   AListBox := nil;
   if ASelf <> nil then
   begin
