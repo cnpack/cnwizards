@@ -289,8 +289,10 @@ begin
         btnOK.SetFocus;
     Key := #0;
   end
-  else if not CharInSet(Key, Chars + EditChars) then 
+{$IFNDEF UNICODE_STRING}
+  else if not CharInSet(Key, Chars + EditChars) then
     Key := #0;
+{$ENDIF}
 end;
 
 procedure TCnPrefixCompForm.btnOKClick(Sender: TObject);
