@@ -152,6 +152,14 @@ begin
 {$ENDIF}
 
   IsUseUnit := ASelf.HelpContext = UseUnitHelpContext;
+  if not IsUseUnit and (ASelf.HelpContext <> SelectFrameHelpContext) then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('ProjectExt: ViewDialog HelpContext Both Error. Exit.');
+{$ENDIF}
+    Exit;
+  end;
+
   ErrList := nil; HasError := False;
   Ini := TCnBaseWizard.CreateIniFile;
 

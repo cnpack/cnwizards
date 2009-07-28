@@ -203,8 +203,11 @@ begin
   FUseUnitAction := FindIDEAction(SCnUseUnitActionName);
 
   // 保存原 Action
-  FOldUnitNotifyEvent := FUnitsListAction.OnExecute;
-  FOldFormNotifyEvent := FFormsListAction.OnExecute;
+  if FUnitsListAction <> nil then
+    FOldUnitNotifyEvent := FUnitsListAction.OnExecute;
+  if FFormsListAction <> nil then
+    FOldFormNotifyEvent := FFormsListAction.OnExecute;
+
   // 更新对应 IDE 的 Action
   if Active then
   begin
@@ -610,13 +613,25 @@ begin
   // 实际上强行进行挂接，
   // 在挂接后的内容中才处理是否挂接的参数而决定调用新的还是旧的
   if FUnitsListAction = nil then
-    Exit;
+  begin
+    FUnitsListAction := FindIDEAction('ViewUnitCommand');
+    if FUnitsListAction <> nil then
+      FOldUnitNotifyEvent := FUnitsListAction.OnExecute
+    else
+      Exit;
+  end;
 
   FUnitsListAction.OnExecute := UnitsListActionOnExecute;
   UnitsListHookBtnChecked := HookUnitsList;
 
   if FFormsListAction = nil then
-    Exit;
+  begin
+    FFormsListAction := FindIDEAction('ViewFormCommand');
+    if FFormsListAction <> nil then
+      FOldFormNotifyEvent := FFormsListAction.OnExecute
+    else
+      Exit;
+  end;
 
   // 挂接
   FFormsListAction.OnExecute := FormsListActionOnExecute;
