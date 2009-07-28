@@ -306,8 +306,8 @@ var
   MacroText: TCnWizMacroText;
   Lines, Macros: TStringList;
   HeadText, TailText, BlockText: string;
-  Relocate: Boolean;
-  CurPos, BlockIndent, CurrIndent: Integer;
+  Relocate, NeedAlignStart: Boolean;
+  CurPos, BlockIndent, CurrIndent, PrevIndent: Integer;
   CurX, CurY: Integer;
   StartPos: Integer;
 
@@ -349,7 +349,7 @@ var
     CharPos: TOTACharPos;
     EditPos: TOTAEditPos;
   begin
-    // 向下查找第一个非空行
+    // 向下查找选区中的第一个非空行
     CharPos.Line := AEditView.Block.StartingRow - 1;
     repeat
       Inc(CharPos.Line);
@@ -364,6 +364,40 @@ var
         Dec(CharPos.Line);
         Text := CnOtaGetLineText(CharPos.Line, AEditView.Buffer);
       until (Trim(Text) <> '') or (CharPos.Line <= 1);
+    end;
+
+    // 计算字符缩进量
+    CharPos.CharIndex := 0;
+    while (CharPos.CharIndex < Length(Text)) and
+      CharInSet(Text[CharPos.CharIndex + 1], [' ', #9]) do
+      Inc(CharPos.CharIndex);
+
+    // 转换为栏位置
+    AEditView.ConvertPos(False, EditPos, CharPos);
+    Result := EditPos.Col - 1;
+  end;
+
+  function GetPreviousIndentPos(AEditView: IOTAEditView): Integer;
+  var
+    Text: string;
+    CharPos: TOTACharPos;
+    EditPos: TOTAEditPos;
+  begin
+    // 向上查找选区外的第一个非空行
+    CharPos.Line := AEditView.Block.StartingRow;
+    repeat
+      Dec(CharPos.Line);
+      Text := CnOtaGetLineText(CharPos.Line, AEditView.Buffer);
+    until (Trim(Text) <> '') or (CharPos.Line <= 1);
+
+    // 向下查找非空行
+    if Trim(Text) = '' then
+    begin
+      CharPos.Line := AEditView.Block.StartingRow - 1;
+      repeat
+        Inc(CharPos.Line);
+        Text := CnOtaGetLineText(CharPos.Line, AEditView.Buffer);
+      until (Trim(Text) <> '') or (CharPos.Line >= AEditView.Block.EndingRow);
     end;
 
     // 计算字符缩进量
@@ -436,18 +470,29 @@ begin
     end
     else
     begin
-      // 计算缩进量
-      CurrIndent := GetIndentPos(EditView);
+      NeedAlignStart := Item.HeadAutoIndent and Item.TailAutoIndent and
+        ((IsDprOrPas(EditView.Buffer.FileName) or IsInc(EditView.Buffer.FileName)) and ((LowerCase(Item.HeadText) = 'begin') or (LowerCase(Item.HeadText) = 'try'))
+         or (IsCppSourceModule(EditView.Buffer.FileName) and (LowerCase(Item.HeadText) = '{')));
+      // begin 和 try 开头的块，以及 C 中的大括号，需要和上一行开头对齐
 
-      // 计算块首尾行
+     // 计算块首尾行
       StartLine := EditView.Block.StartingRow;
       EndLine := EditView.Block.EndingRow;
       if EditView.Block.EndingColumn > 1 then
         Inc(EndLine);
 
+      // 计算缩进量
+      CurrIndent := GetIndentPos(EditView);
       BlockIndent := CnOtaGetBlockIndent;
-      // 缩进当前块
-      if Item.IndentLevel <> 0 then
+
+      // 先把块和上一行先对齐
+      if NeedAlignStart then
+      begin
+        PrevIndent := GetPreviousIndentPos(EditView);
+        EditView.Block.Indent(PrevIndent - CurrIndent + BlockIndent * Item.IndentLevel);
+        CurrIndent := PrevIndent;
+      end
+      else if Item.IndentLevel <> 0 then // 缩进当前块
         EditView.Block.Indent(BlockIndent * Item.IndentLevel);
 
       Relocate := False;
@@ -464,7 +509,7 @@ begin
             OutputLines(StartLine, 0);
           Inc(EndLine, Lines.Count);
         end;
-        
+
         if TailText <> '' then
         begin
           Lines.Text := TailText;
