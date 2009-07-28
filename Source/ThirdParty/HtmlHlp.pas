@@ -881,7 +881,5 @@ initialization
 finalization
 {$IFDEF HTMLHELP_DYNAMIC_LINK}
   UnLoadHtmlHelp;
-{$ELSE}
-  HtmlHelp(0, nil, HH_CLOSE_ALL, 0);   
 {$ENDIF}
 end.

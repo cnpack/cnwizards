@@ -146,6 +146,8 @@ type
     m_URL: string;
     FMsdnDotNetDefCaption: string;
 
+    FHtmlHelpInited: Boolean;
+
     procedure GetMsdnList;
     procedure GetMsdnDotNetList;
 
@@ -167,6 +169,11 @@ type
 
     procedure actViewMSDNWizardExecute(Sender: TObject);
     procedure actViewMSDNWizardUpdate(Sender: TObject);
+
+    procedure DoInitHtmlHelp;
+    procedure DoUninitHtmlHelp;
+    function DoHtmlHelp(hwndCaller: HWND; pszFile: PAnsiChar; uCommand: UINT;
+      dwData: DWORD): HWND;
 
   {$IFDEF RUN_ON_SAME_THREAD}
     procedure OnMessage(var Msg: TMsg; var Handled: Boolean);
@@ -320,19 +327,11 @@ begin
   GetMsdnList;
   GetMsdnDotNetList;
   InitBar;
-
-{$IFDEF RUN_ON_SAME_THREAD}
-  CnWizNotifierServices.AddApplicationMessageNotifier(OnMessage);
-  HtmlHelp(0, nil, HH_INITIALIZE, DWORD(@g_dwCookie));
-{$ENDIF}
 end;
 
 destructor TCnMsdnWizard.Destroy;
 begin
-{$IFDEF RUN_ON_SAME_THREAD}
-  HtmlHelp(0, nil, HH_UNINITIALIZE, g_dwCookie);
-  CnWizNotifierServices.RemoveApplicationMessageNotifier(OnMessage);
-{$ENDIF}
+  DoUninitHtmlHelp;
   Disconnect;
   FreeBar;
   FMsdnList.Free;
@@ -456,10 +455,42 @@ begin
   end;
 end;
 
+function TCnMsdnWizard.DoHtmlHelp(hwndCaller: HWND; pszFile: PAnsiChar;
+  uCommand: UINT; dwData: DWORD): HWND;
+begin
+  DoInitHtmlHelp;
+  Result := HtmlHelp(hwndCaller, pszFile, uCommand, dwData);
+end;
+
+procedure TCnMsdnWizard.DoInitHtmlHelp;
+begin
+  if not FHtmlHelpInited then
+  begin
+    FHtmlHelpInited := True;
+  {$IFDEF RUN_ON_SAME_THREAD}
+    HtmlHelp(0, nil, HH_INITIALIZE, DWORD(@g_dwCookie));
+    CnWizNotifierServices.AddApplicationMessageNotifier(OnMessage);
+  {$ENDIF}
+  end;
+end;
+
+procedure TCnMsdnWizard.DoUninitHtmlHelp;
+begin
+  if FHtmlHelpInited then
+  begin
+    HtmlHelp(0, nil, HH_CLOSE_ALL, 0);
+  {$IFDEF RUN_ON_SAME_THREAD}
+    CnWizNotifierServices.RemoveApplicationMessageNotifier(OnMessage);
+    HtmlHelp(0, nil, HH_UNINITIALIZE, g_dwCookie);
+  {$ENDIF}
+    FHtmlHelpInited := False;
+  end;
+end;
+
 {$IFDEF RUN_ON_SAME_THREAD}
 procedure TCnMsdnWizard.OnMessage(var Msg: TMsg; var Handled: Boolean);
 begin
-  HtmlHelp(0, nil, HH_PRETRANSLATEMESSAGE, DWORD(@Msg));
+  Handled := LongBool(HtmlHelp(0, nil, HH_PRETRANSLATEMESSAGE, DWORD(@Msg)));
 end;
 {$ENDIF}
 
@@ -579,7 +610,7 @@ procedure TCnMsdnWizard.RunMsdnSearch;
     try
       if MsdnInstalled then
       begin
-        ShowWindow(HtmlHelp(0, PAnsiChar(AnsiString(m_MsdnCollections)), HH_DISPLAY_SEARCH,
+        ShowWindow(DoHtmlHelp(0, PAnsiChar(AnsiString(m_MsdnCollections)), HH_DISPLAY_SEARCH,
           0), SW_SHOWMAXIMIZED);
         Result := True;
       end;
@@ -660,11 +691,11 @@ begin
     Link.pszMsgTitle := nil;
     Link.pszWindow := nil;
     Link.fIndexOnFail := True;
-    ShowWindow(HtmlHelp(0, PAnsiChar(AnsiString(m_MsdnCollections)), HH_KEYWORD_LOOKUP,
+    ShowWindow(DoHtmlHelp(0, PAnsiChar(AnsiString(m_MsdnCollections)), HH_KEYWORD_LOOKUP,
       DWORD(@Link)), SW_SHOWMAXIMIZED);
   end
   else
-    ShowWindow(HtmlHelp(0, PAnsiChar(AnsiString(m_MsdnCollections)), HH_DISPLAY_INDEX,
+    ShowWindow(DoHtmlHelp(0, PAnsiChar(AnsiString(m_MsdnCollections)), HH_DISPLAY_INDEX,
       0), SW_SHOWMAXIMIZED);
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('TCnMsdnWizard.RunMsdn');
@@ -1302,15 +1333,9 @@ begin
 end;
 
 initialization
-  {$IFDEF RUN_ON_SAME_THREAD}
-  HtmlHelp(0, nil, HH_INITIALIZE, DWORD(@g_dwCookie));
-  {$ENDIF}
   RegisterCnWizard(TCnMsdnWizard);
 
 finalization
-  {$IFDEF RUN_ON_SAME_THREAD}
-    HtmlHelp(0, nil, HH_UNINITIALIZE, g_dwCookie);
-  {$ENDIF}
 
 {$ENDIF CNWIZARDS_CNMSDNWIZARD}
 end.
