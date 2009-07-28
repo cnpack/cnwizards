@@ -52,7 +52,7 @@ uses
   {$ELSE}
   DsgnIntf,
   {$ENDIF}
-  ActnList, CnConsts, CnWizClasses, CnWizConsts, CnWizUtils, CnCommon,
+  ActnList, TypInfo, CnConsts, CnWizClasses, CnWizConsts, CnWizUtils, CnCommon,
   CnSpin, CnWizOptions, CnWizMultiLang;
 
 type
@@ -117,6 +117,8 @@ type
     actMoveDown: TAction;
     seTagStart: TCnSpinEdit;
     seTagEnd: TCnSpinEdit;
+    chkByEvent: TCheckBox;
+    cbbByEvent: TComboBox;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure DoUpdateSourceOrder(Sender: TObject);
@@ -142,6 +144,7 @@ type
     FSourceList, FDestList: IDesignerSelections;
     FContainerWindow: TWinControl;
     FCurrList: TStrings;
+    procedure GetEventList(AObj: TObject; AList: TStringList);
     procedure BeginUpdateList;
     procedure EndUpdateList;
     procedure InitControls;
@@ -261,6 +264,40 @@ end;
 // 控件设置方法
 //------------------------------------------------------------------------------
 
+procedure TCnComponentSelectorForm.GetEventList(AObj: TObject;
+  AList: TStringList);
+var
+  PropList: PPropList;
+  Value: TMethod;
+  Count, I: Integer;
+  MName: string;
+begin
+  if (AObj = nil) or not (AObj is TComponent) or (TComponent(AObj).Owner = nil) then
+    Exit;
+  try
+    Count := GetPropList(AObj.ClassInfo, [tkMethod], nil);
+  except
+    Exit;
+  end;
+
+  GetMem(PropList, Count * SizeOf(PPropInfo));
+  try
+    GetPropList(AObj.ClassInfo, [tkMethod], PropList);
+    for i := 0 to Count - 1 do
+    begin
+      Value := GetMethodProp(AObj, PropList[I]);
+      if Value.Code <> nil then
+      begin
+        MName := TComponent(AObj).Owner.MethodName(Value.Code);
+        if (MName <> '') and (AList.IndexOf(MName) < 0) then
+          AList.Add(MName);
+      end;
+    end;
+  finally
+    FreeMem(PropList);
+  end;
+end;
+
 // 初始化控件
 procedure TCnComponentSelectorForm.InitControls;
 var
@@ -268,6 +305,7 @@ var
   WinControl: TWinControl;
   SelIsEmpty: Boolean;
   Component: TComponent;
+  List: TStringList;
 begin
   // 检查当前选择的组件列表是否包含子控件
   SelIsEmpty := True;
@@ -308,6 +346,16 @@ begin
     with ContainerWindow.Components[i] do
       if cbbByClass.Items.IndexOf(ClassName) < 0 then
         cbbByClass.Items.AddObject(ClassName, Pointer(ClassType));
+  cbbByEvent.Items.Clear;
+  List := TStringList.Create;
+  try
+    List.Sorted := True;
+    for i := 0 to ContainerWindow.ComponentCount - 1 do
+      GetEventList(ContainerWindow.Components[i], List);
+    cbbByEvent.Items.Assign(List);
+  finally
+    List.Free;
+  end;          
 end;
 
 // 更新当前过滤列表
@@ -332,6 +380,24 @@ var
       AObject.ClassNameIs(cbbByClass.Text) or
       (cbSubClass.Checked and AObject.InheritsFrom(
       TClass(cbbByClass.Items.Objects[cbbByClass.ItemIndex])));
+  end;
+
+  // 事件是否匹配
+  function MatchEvent(AObject: TObject): Boolean;
+  var
+    List: TStringList;
+  begin
+    Result := True;
+    if not chkByEvent.Checked or (cbbByEvent.Text = '') then
+      Exit;
+
+    List := TStringList.Create;
+    try
+      GetEventList(AObject, List);
+      Result := List.IndexOf(cbbByEvent.Text) >= 0;
+    finally
+      List.Free;
+    end;   
   end;
 
   // Tag 是否匹配
@@ -364,7 +430,8 @@ var
   begin
     // 判断是否匹配
     if (AComponent.Name <> '') and MatchName(AComponent.Name) and MatchClass(AComponent)
-      and MatchTag(AComponent.Tag) and (CurrList.IndexOfObject(AComponent) < 0) then
+      and MatchEvent(AComponent) and MatchTag(AComponent.Tag)
+      and (CurrList.IndexOfObject(AComponent) < 0) then
     begin
       s := AComponent.Name + ': ' + AComponent.ClassName;
       CurrList.AddObject(s, AComponent);  // 增加到当前过滤列表
@@ -431,18 +498,25 @@ end;
 
 // 更新控件状态
 procedure TCnComponentSelectorForm.UpdateControls;
+  procedure InitComboBox(Combo: TComboBox);
+  begin
+    if (Combo.Items.Count > 0) and (Combo.ItemIndex < 0) then
+      Combo.ItemIndex := 0;
+  end;  
 begin
-  if cbbFilterControl.ItemIndex < 0 then cbbFilterControl.ItemIndex := 0;
-  if cbbByClass.ItemIndex < 0 then cbbByClass.ItemIndex := 0;
-  if cbbByTag.ItemIndex < 0 then cbbByTag.ItemIndex := 0;
-  if cbbSourceOrderStyle.ItemIndex < 0 then cbbSourceOrderStyle.ItemIndex := 0;
-  if cbbSourceOrderDir.ItemIndex < 0 then cbbSourceOrderDir.ItemIndex := 0;
+  InitComboBox(cbbFilterControl);
+  InitComboBox(cbbByClass);
+  InitComboBox(cbbByTag);
+  InitComboBox(cbbByEvent);
+  InitComboBox(cbbSourceOrderStyle);
+  InitComboBox(cbbSourceOrderDir);
   cbbFilterControl.Enabled := rbSpecControl.Checked;
   cbIncludeChildren.Enabled := not rbCurrForm.Checked;
   edtByName.Enabled := cbByName.Checked;
   cbSubClass.Enabled := cbByClass.Checked;
   cbbByClass.Enabled := cbByClass.Checked;
   cbbByTag.Enabled := cbByTag.Checked;
+  cbbByEvent.Enabled := chkByEvent.Checked;
   seTagStart.Enabled := cbByTag.Checked;
   seTagEnd.Enabled := cbByTag.Checked;
   seTagEnd.Visible := cbbByTag.ItemIndex = 3;
@@ -535,6 +609,8 @@ const
   csByClass = 'ByClass';
   csByClassText = 'ByClassText';
   csSubClass = 'SubClass';
+  csByEvent = 'ByEvent';
+  csByEventIndex = 'ByEventIndex';
   csByTag = 'ByTag';
   csByTagIndex = 'ByTagIndex';
   csTagStart = 'TagStart';
@@ -563,6 +639,8 @@ begin
   cbbByClass.ItemIndex := cbbByClass.Items.IndexOf(
     Ini.ReadString(Section, csByClassText, ''));
   cbSubClass.Checked := Ini.ReadBool(Section, csSubClass, True);
+  chkByEvent.Checked := Ini.ReadBool(Section, csByEvent, False);
+  cbbByEvent.ItemIndex := Ini.ReadInteger(Section, csByEvent, 0);
   cbByTag.Checked := Ini.ReadBool(Section, csByTag, False);
   cbbByTag.ItemIndex := Ini.ReadInteger(Section, csByTagIndex, 0);
   seTagStart.Text := IntToStr(Ini.ReadInteger(Section, csTagStart, 0));
@@ -589,6 +667,8 @@ begin
   Ini.WriteBool(Section, csByClass, cbByClass.Checked);
   Ini.WriteString(Section, csByClassText, cbbByClass.Text);
   Ini.WriteBool(Section, csSubClass, cbSubClass.Checked);
+  Ini.WriteBool(Section, csByEvent, chkByEvent.Checked);
+  Ini.WriteInteger(Section, csByEvent, cbbByEvent.ItemIndex);
   Ini.WriteBool(Section, csByTag, cbByTag.Checked);
   Ini.WriteInteger(Section, csByTagIndex, cbbByTag.ItemIndex);
   Ini.WriteInteger(Section, csTagStart, StrToIntDef(seTagStart.Text, 0));

@@ -206,7 +206,8 @@ TCnComponentSelectorForm.btnMoveDown.Caption=Move Down
 TCnComponentSelectorForm.btnHelp.Caption=&Help
 TCnComponentSelectorForm.btnOK.Caption=&OK
 TCnComponentSelectorForm.btnCancel.Caption=&Cancel
-TCnComponentSelectorForm.gbTag.Caption=&Tag Filter
+TCnComponentSelectorForm.gbTag.Caption=Event and &Tag Filter
+TCnComponentSelectorForm.chkByEvent.Caption=Enable Event Filter
 TCnComponentSelectorForm.lblTag.Caption=-
 TCnComponentSelectorForm.cbByTag.Caption=Enable Tag Filter
 TCnComponentSelectorForm.cbbByTag.Items.Text=Tag =<BR>Tag <<BR>Tag ><BR>Tag Betweens<BR>
