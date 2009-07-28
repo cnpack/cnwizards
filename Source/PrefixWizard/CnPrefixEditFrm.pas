@@ -196,8 +196,10 @@ procedure TCnPrefixEditForm.edtNameKeyPress(Sender: TObject;
 const
   Chars = ['A'..'Z', 'a'..'z', '_', '0'..'9', #03, #08, #22, #24, #26]; // Ctrl+C/V/X/Z
 begin
+{$IFNDEF UNICODE_STRING}
   if not CharInSet(Key, Chars) then
     Key := #0;
+{$ENDIF}
 end;
 
 procedure TCnPrefixEditForm.btnClassNameClick(Sender: TObject);
