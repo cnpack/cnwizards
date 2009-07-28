@@ -467,6 +467,7 @@ begin
   if not FHtmlHelpInited then
   begin
     FHtmlHelpInited := True;
+    LoadHtmlHelp;
   {$IFDEF RUN_ON_SAME_THREAD}
     HtmlHelp(0, nil, HH_INITIALIZE, DWORD(@g_dwCookie));
     CnWizNotifierServices.AddApplicationMessageNotifier(OnMessage);
@@ -483,6 +484,7 @@ begin
     CnWizNotifierServices.RemoveApplicationMessageNotifier(OnMessage);
     HtmlHelp(0, nil, HH_UNINITIALIZE, g_dwCookie);
   {$ENDIF}
+    UnLoadHtmlHelp;
     FHtmlHelpInited := False;
   end;
 end;
