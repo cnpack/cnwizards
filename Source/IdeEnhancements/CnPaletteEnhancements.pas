@@ -220,6 +220,7 @@ const
   csTabsMenuActive = 'TabsMenuActive';
   csPalMultiLine = 'PaletteMultiLine';
   csPalButtonStyle = 'PaletteButtonStyle';
+  csTabsItemMenuName = 'TabsItem';
   csIDEMenuLine = 'IDEMenuLine';
   csEnableWizMenu = 'EnableWizMenu';
   csWizMenuNames = 'WizMenuNames';
@@ -421,19 +422,24 @@ begin
   FSepMenuItem := TCnSepMenuItemDef.Create(ipFirst, '');
   FMenuHook.AddMenuItemDef(FSepMenuItem);
 
+{$IFDEF COMPILER5}
   FMultiLineMenuItem := TCnMenuItemDef.Create(SCnPaletteMutiLineMenuName,
     SCnPaletteMultiLineMenuCaption, OnMultiLineItemClick, ipFirst, '');
+{$ELSE}
+  FMultiLineMenuItem := TCnMenuItemDef.Create(SCnPaletteMutiLineMenuName,
+    SCnPaletteMultiLineMenuCaption, OnMultiLineItemClick, ipAfter, csTabsItemMenuName);
+{$ENDIF COMPILER5}
   FMultiLineMenuItem.OnCreated := OnMultiLineMenuCreated;
   FMenuHook.AddMenuItemDef(FMultiLineMenuItem);
 
-  {$IFDEF COMPILER5}
+{$IFDEF COMPILER5}
   FTabMenuItem := TCnMenuItemDef.Create(SCnPaletteTabsMenuName,
     SCnPaletteTabsMenuCaption, nil, ipFirst, '');
   FTabMenuItem.OnCreated := OnTabMenuCreated;
   FMenuHook.AddMenuItemDef(FTabMenuItem);
-  {$ELSE}
+{$ELSE}
   FMenuHook.OnAfterPopup := OnMenuAfterPopup;
-  {$ENDIF COMPILER5}
+{$ENDIF COMPILER5}
 end;
 
 {$IFDEF COMPILER5}
