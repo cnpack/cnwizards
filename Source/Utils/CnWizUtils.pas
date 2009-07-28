@@ -492,6 +492,8 @@ function CnOtaIsDebugging: Boolean;
 {* 当前是否在调试状态}
 function CnOtaGetBaseModuleFileName(const FileName: string): string;
 {* 取模块的单元文件名}
+function CnOtaIsPersistentBlocks: Boolean;
+{* 当前 PersistentBlocks 是否为 True}
 
 //==============================================================================
 // 源代码操作相关函数
@@ -3705,6 +3707,21 @@ begin
     Assert(Assigned(Editor));
     if IsForm(Editor.GetFileName) then
       Result := True;
+  end;
+end;
+
+// 当前 PersistentBlocks 是否为 True
+function CnOtaIsPersistentBlocks: Boolean;
+var
+  EnvOptions: IOTAEnvironmentOptions;
+begin
+  Result := False;
+  try
+    EnvOptions := CnOtaGetEnvironmentOptions;
+    if Assigned(EnvOptions) then
+      Result := EnvOptions.Values['PersistentBlocks'];
+  except
+    ;
   end;
 end;
 

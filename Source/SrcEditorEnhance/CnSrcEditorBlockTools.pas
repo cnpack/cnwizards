@@ -350,24 +350,9 @@ procedure TCnSrcEditorBlockTools.EditControlKeyDown(Key, ScanCode: Word;
   Shift: TShiftState; var Handled: Boolean);
 var
   EditView: IOTAEditView;
-
-  function IsPersistentBlocks: Boolean;
-  var
-    EnvOptions: IOTAEnvironmentOptions;
-  begin
-    Result := False;
-    try
-      EnvOptions := CnOtaGetEnvironmentOptions;
-      if Assigned(EnvOptions) then
-        Result := EnvOptions.Values['PersistentBlocks'];
-    except
-      ;
-    end;
-  end;
-
 begin
   if FTabIndent and (Key = VK_TAB) and (Shift - [ssShift] = [])
-    and not IsPersistentBlocks then
+    and not CnOtaIsPersistentBlocks then
   begin
     EditView := CnOtaGetTopMostEditView;
     if Assigned(EditView) and EditView.Block.IsValid then

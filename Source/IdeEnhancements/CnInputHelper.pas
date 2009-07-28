@@ -1268,7 +1268,7 @@ end;
 
 function TCnInputHelper.CurrBlockIsEmpty: Boolean;
 begin
-  Result := CnOtaGetCurrentSelection = '';
+  Result := CnOtaIsPersistentBlocks or (CnOtaGetCurrentSelection = '');
 end;
 
 function TCnInputHelper.IsValidDelelteKey(Key: Word): Boolean;
