@@ -89,7 +89,7 @@ SetDateSave on
   !define IDE_VERSION_D10 "1"
   !define IDE_VERSION_D11 "1"
   !define IDE_VERSION_D12 "1"
-  !define IDE_VERSION_D14 "1"
+;  !define IDE_VERSION_D14 "1"
   !define IDE_VERSION_CB5 "1"
   !define IDE_VERSION_CB6 "1"
 
