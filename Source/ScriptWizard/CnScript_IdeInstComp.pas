@@ -45,10 +45,9 @@ uses
 type
 
   TPSImport_IdeInstComp = class(TCnPSPlugin)
-  protected
+  public
     procedure CompileImport1(CompExec: TPSScript); override;
     procedure ExecImport1(CompExec: TPSScript; const ri: TPSRuntimeClassImporter); override;
-  public
     procedure CompOnUses1(CompExec: TPSScript); override;
   end;
 
