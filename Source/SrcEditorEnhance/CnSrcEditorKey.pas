@@ -489,6 +489,8 @@ var
   EditPos: TOTAEditPos;
   Parser: TCnPasStructureParser;
   NeedInsert: Boolean;
+  Text: string;
+  ACol: Integer;
 
   function IsDotAfterTokenEnd(AToken: TCnPasToken): Boolean;
   var
@@ -544,14 +546,24 @@ begin
               Parser.InnerBlockStartToken.LineNumber);
             View.ConvertPos(False, EditPos, CharPos);
             Parser.InnerBlockStartToken.EditCol := EditPos.Col;
+            Parser.InnerBlockStartToken.EditLine := EditPos.Line;
 
             CharPos := OTACharPos(Parser.InnerBlockCloseToken.CharIndex - 1,
               Parser.InnerBlockCloseToken.LineNumber);
             View.ConvertPos(False, EditPos, CharPos);
             Parser.InnerBlockCloseToken.EditCol := EditPos.Col;
+            Parser.InnerBlockCloseToken.EditLine := EditPos.Line;
 
             // 光标内层块的 begin end 列位置不配对时，需要加
-            NeedInsert := Parser.InnerBlockStartToken.EditCol <> Parser.InnerBlockCloseToken.EditCol;
+            // NeedInsert := Parser.InnerBlockStartToken.EditCol <> Parser.InnerBlockCloseToken.EditCol;
+
+            // 上面 if then begin \n end时会增加不必要的 end
+            // 改为判断 end 列位置与 begin 所在的行的第一个非空字符是否对的上号
+            Text := CnOtaGetLineText(Parser.InnerBlockStartToken.EditLine + 1, View.Buffer);
+            ACol := 0;
+            while (ACol < Length(Text)) and CharInSet(Text[ACol + 1], [' ', #9]) do
+              Inc(ACol);
+            NeedInsert := ACol <> Parser.InnerBlockCloseToken.EditCol;
 
             // 如果不要加也就是配对了，还得判断这个 end 不能是 end. 点则还是要加
             if not NeedInsert then
