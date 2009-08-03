@@ -417,9 +417,8 @@ begin
     (GetBuildNo(FUpgradeCollection[0].Version) > GetBuildNo(SCnWizardVersion)) then
   begin
     // É¾³ý¾É°æ±¾¼ÇÂ¼
-    for i := FUpgradeCollection.Count - 1 downto 0 do
-      if (FUpgradeCollection[i].Date < WizOptions.BuildDate) or
-        (GetBuildNo(FUpgradeCollection[0].Version) <= GetBuildNo(SCnWizardVersion)) then
+    for i := FUpgradeCollection.Count - 1 downto 1 do
+      if GetBuildNo(FUpgradeCollection[0].Version) <= GetBuildNo(SCnWizardVersion) then
         FUpgradeCollection.Delete(i);
 
     if not FUserCheck then
