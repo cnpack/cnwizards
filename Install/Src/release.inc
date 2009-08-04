@@ -1,6 +1,5 @@
-;want define:
-!define DEBUG
+;${define.debug}
 
 !define VER_MAJOR "0"
 
-!define VER_MINOR "9.3.535_Debug"
+!define VER_MINOR "9.3.536_Unstable"
