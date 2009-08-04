@@ -541,39 +541,27 @@ begin
           if (Parser.InnerBlockStartToken.TokenID = tkBegin) and
             (Parser.InnerBlockCloseToken.TokenID = tkEnd) then
           begin
-            // 转换成 Col 与 Line
-            CharPos := OTACharPos(Parser.InnerBlockStartToken.CharIndex - 1,
+            // 转换成 Col 与 Line，把 0 开始的 CharIndex，转换为 1 开始的 Col
+            CharPos := OTACharPos(Parser.InnerBlockStartToken.CharIndex,
               Parser.InnerBlockStartToken.LineNumber);
             View.ConvertPos(False, EditPos, CharPos);
             Parser.InnerBlockStartToken.EditCol := EditPos.Col;
             Parser.InnerBlockStartToken.EditLine := EditPos.Line;
 
-            CharPos := OTACharPos(Parser.InnerBlockCloseToken.CharIndex - 1,
+            CharPos := OTACharPos(Parser.InnerBlockCloseToken.CharIndex,
               Parser.InnerBlockCloseToken.LineNumber);
             View.ConvertPos(False, EditPos, CharPos);
             Parser.InnerBlockCloseToken.EditCol := EditPos.Col;
             Parser.InnerBlockCloseToken.EditLine := EditPos.Line;
 
-{$IFDEF COMPILER6_UP}
-  {$IFNDEF COMPILER8_UP}
-            // D6/CB6/D7 下，行首的 EditCol 值是 1，其余是 0，得改成 0 才能统一比较
-            if Parser.InnerBlockStartToken.EditCol = 1 then
-              Parser.InnerBlockStartToken.EditCol := Parser.InnerBlockStartToken.EditCol - 1;
-            if Parser.InnerBlockCloseToken.EditCol = 1 then
-              Parser.InnerBlockCloseToken.EditCol := Parser.InnerBlockCloseToken.EditCol - 1;
-  {$ENDIF}
-{$ENDIF}
-
-            // 光标内层块的 begin end 列位置不配对时，需要加
-            // NeedInsert := Parser.InnerBlockStartToken.EditCol <> Parser.InnerBlockCloseToken.EditCol;
-
-            // 上面 if then begin \n end时会增加不必要的 end
-            // 改为判断 end 列位置与 begin 所在的行的第一个非空字符是否对的上号
+            // 如只判断 begin/end 列是否匹配，则在 if then begin \n end 时会增加不必要的 end
+            // 应改为判断 end 列位置与 begin 所在的行的第一个非空字符是否对的上号
             Text := CnOtaGetLineText(Parser.InnerBlockStartToken.EditLine + 1, View.Buffer);
             ACol := 0;
             while (ACol < Length(Text)) and CharInSet(Text[ACol + 1], [' ', #9]) do
               Inc(ACol);
-            NeedInsert := ACol <> Parser.InnerBlockCloseToken.EditCol;
+            NeedInsert := ACol + 1 <> Parser.InnerBlockCloseToken.EditCol;
+            // 一个 0 开始，一个 1 开始，因此需要加一比较
 
             // 如果不要加也就是配对了，还得判断这个 end 不能是 end. 点则还是要加
             if not NeedInsert then
