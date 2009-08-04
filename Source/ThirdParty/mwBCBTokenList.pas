@@ -1156,7 +1156,27 @@ begin
                   else
                     BackSlashCount := 0;
                   case FOrigin[Run] of
-                    #0: break;
+                    #13:
+                      begin
+                        Inc(Run);
+                        if FOrigin[Run] = #10 then
+                        begin
+                          Inc(Run);
+                          Inc(LineNum);
+                          ColNum := -1; // 让下文加 1 来抵消
+                        end;
+                      end;
+                    #10:
+                      begin
+                        Inc(Run);
+                        if FOrigin[Run] = #13 then
+                        begin
+                          Inc(Run);
+                          Inc(LineNum);
+                          ColNum := -1; // 让下文加 1 来抵消
+                        end;
+                      end;
+                    #0: Break;
                   end;
                   Inc(Run);
                   Inc(ColNum);
@@ -1189,7 +1209,7 @@ begin
                           ColNum := -1; // 让后文加一来抵消
                         end;
                         Inc(Run);
-                        Inc(ColNum, 1);
+                        Inc(ColNum);
                       end;
                     until (FOrigin[Run + 1] in [#10, #13, #0]);
 

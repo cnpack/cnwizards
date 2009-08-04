@@ -40,7 +40,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, Contnrs, CnPasCodeParser,
-  mwBCBTokenList,CnCommon, CnFastList;
+  mwBCBTokenList, CnCommon, CnFastList;
   
 type
 
