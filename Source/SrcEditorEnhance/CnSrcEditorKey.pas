@@ -554,6 +554,16 @@ begin
             Parser.InnerBlockCloseToken.EditCol := EditPos.Col;
             Parser.InnerBlockCloseToken.EditLine := EditPos.Line;
 
+{$IFDEF COMPILER6_UP}
+  {$IFNDEF COMPILER8_UP}
+            // D6/CB6/D7 下，行首的 EditCol 值是 1，其余是 0，得改成 0 才能统一比较
+            if Parser.InnerBlockStartToken.EditCol = 1 then
+              Parser.InnerBlockStartToken.EditCol := Parser.InnerBlockStartToken.EditCol - 1;
+            if Parser.InnerBlockCloseToken.EditCol = 1 then
+              Parser.InnerBlockCloseToken.EditCol := Parser.InnerBlockCloseToken.EditCol - 1;
+  {$ENDIF}
+{$ENDIF}
+
             // 光标内层块的 begin end 列位置不配对时，需要加
             // NeedInsert := Parser.InnerBlockStartToken.EditCol <> Parser.InnerBlockCloseToken.EditCol;
 
