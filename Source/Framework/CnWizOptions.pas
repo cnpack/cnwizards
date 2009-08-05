@@ -94,6 +94,8 @@ type
     function GetUseToolsMenu: Boolean;
     procedure SetUseToolsMenu(const Value: Boolean);
     procedure SetFixThreadLocale(const Value: Boolean);
+    function GetUpgradeCheckMonth: TDateTime;
+    procedure SetUpgradeCheckMonth(const Value: TDateTime);
   public
     constructor Create;
     destructor Destroy; override;
@@ -211,6 +213,7 @@ type
     property UpgradeLastDate: TDateTime read FUpgradeLastDate write FUpgradeLastDate;
     {* 最后一次检测的升级日期}
     property UpgradeCheckDate: TDateTime read GetUpgradeCheckDate write SetUpgradeCheckDate;
+    property UpgradeCheckMonth: TDateTime read GetUpgradeCheckMonth write SetUpgradeCheckMonth;
     property UseToolsMenu: Boolean read GetUseToolsMenu write SetUseToolsMenu;
     {* 主菜单是否集成到 Tools 菜单下 }
     property FixThreadLocale: Boolean read FFixThreadLocale write SetFixThreadLocale;
@@ -257,6 +260,7 @@ const
   csBigBugFixed = 'BigBugFixed';
   csUpgradeLastDate = 'LastDate';
   csUpgradeCheckDate = 'CheckDate';
+  csUpgradeCheckMonth = 'CheckMonth';
 
 constructor TCnWizOptions.Create;
 begin
@@ -399,6 +403,26 @@ begin
   with CreateRegIniFile do
   try
     WriteDate(SCnUpgradeSection, csUpgradeCheckDate, Value);
+  finally
+    Free;
+  end;
+end;
+
+function TCnWizOptions.GetUpgradeCheckMonth: TDateTime;
+begin
+  with CreateRegIniFile do
+  try
+    Result := ReadDate(SCnUpgradeSection, csUpgradeCheckMonth, 0);
+  finally
+    Free;
+  end;
+end;
+
+procedure TCnWizOptions.SetUpgradeCheckMonth(const Value: TDateTime);
+begin
+  with CreateRegIniFile do
+  try
+    WriteDate(SCnUpgradeSection, csUpgradeCheckMonth, Value);
   finally
     Free;
   end;

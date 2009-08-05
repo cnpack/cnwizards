@@ -260,15 +260,32 @@ const
 procedure TCnWizUpgradeThread.Execute;
 var
   S: string;
+  Y1, M1, D1, Y2, M2, D2: Word;
 begin
   // 取升级记录，发送IDE大版本号与专家包版本号作为参数
   S := Format('%s?ide=%s&ver=%s', [WizOptions.UpgradeURL, CompilerShortName, SCnWizardVersion]);
+
+  // 手动调用
+  if FUserCheck then
+    S := S + '&manual=1';
+
+  // 每个月调用一次
+  DecodeDate(WizOptions.UpgradeCheckMonth, Y1, M1, D1);
+  DecodeDate(Date, Y2, M2, D2);
+  if (Y1 <> Y2) or (M1 <> M2) then
+  begin
+    S := S + '&month=1';
+    WizOptions.UpgradeCheckMonth := Date;
+  end;
+
+  // 取得更新信息
   if not GetUpgrade(S, 1) then
   begin
     if not FHTTP.Aborted and FUserCheck then
       ErrorDlg(SCnWizUpgradeFail);
   end;
 
+  // 检查新版本
   if not FHTTP.Aborted and not Terminated then
     Synchronize(CheckUpgrade);
 end;
