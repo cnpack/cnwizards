@@ -43,7 +43,7 @@ See http://www.suigeneris.org/want/ for details.
   <property name="exe.D12"        value="%{env.D12}" if="env.D12" />
   <property name="exe.D12"        value="${ProgramFiles}\CodeGear\RAD Studio\6.0\Bin\DCC32.EXE" unless="env.D12" />
   <property name="exe.D14"        value="%{env.D14}" if="env.D14" />
-  <property name="exe.D14"        value="${ProgramFiles}\CodeGear\RAD Studio\7.0\Bin\DCC32.EXE" unless="env.D14" />
+  <property name="exe.D14"        value="${ProgramFiles}\Embarcadero\RAD Studio\7.0\Bin\DCC32.EXE" unless="env.D14" />
   <property name="exe.brcc32"     value="%{BRCC32}" />
   <property name="exe.svn"        value="%{env.svn}" if="env.svn" />
   <property name="exe.svn"        value="${ProgramFiles}\Subversion\bin\svn.exe" unless="env.svn" />
