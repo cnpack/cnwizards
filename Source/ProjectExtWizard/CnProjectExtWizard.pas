@@ -203,9 +203,9 @@ begin
   FUseUnitAction := FindIDEAction(SCnUseUnitActionName);
 
   // 保存原 Action
-  if FUnitsListAction <> nil then
+  if (FUnitsListAction <> nil) and not Assigned(FOldUnitNotifyEvent) then
     FOldUnitNotifyEvent := FUnitsListAction.OnExecute;
-  if FFormsListAction <> nil then
+  if (FFormsListAction <> nil) and not Assigned(FOldFormNotifyEvent) then
     FOldFormNotifyEvent := FFormsListAction.OnExecute;
 
   // 更新对应 IDE 的 Action
@@ -615,28 +615,25 @@ begin
   if FUnitsListAction = nil then
   begin
     FUnitsListAction := FindIDEAction('ViewUnitCommand');
-    if FUnitsListAction <> nil then
-      FOldUnitNotifyEvent := FUnitsListAction.OnExecute
-    else
-      Exit;
+    if (FUnitsListAction <> nil) and not Assigned(FOldUnitNotifyEvent) then
+    begin
+      FOldUnitNotifyEvent := FUnitsListAction.OnExecute;
+      FUnitsListAction.OnExecute := UnitsListActionOnExecute;
+      UnitsListHookBtnChecked := HookUnitsList;
+    end;
   end;
-
-  FUnitsListAction.OnExecute := UnitsListActionOnExecute;
-  UnitsListHookBtnChecked := HookUnitsList;
 
   if FFormsListAction = nil then
   begin
     FFormsListAction := FindIDEAction('ViewFormCommand');
-    if FFormsListAction <> nil then
-      FOldFormNotifyEvent := FFormsListAction.OnExecute
-    else
-      Exit;
+    if (FFormsListAction <> nil) and not Assigned(FOldFormNotifyEvent) then
+    begin
+      FOldFormNotifyEvent := FFormsListAction.OnExecute;
+      FFormsListAction.OnExecute := FormsListActionOnExecute;
+      FormsListHookBtnChecked := HookFormsList;
+    end;
   end;
-
-  // 挂接
-  FFormsListAction.OnExecute := FormsListActionOnExecute;
-  FormsListHookBtnChecked := HookFormsList;
-
+    
   // 恢复时不直接恢复OnExecute，而是在挂接后的内容中做必要处理再跳回来
   // FUnitsListAction.OnExecute := FOldUnitNotifyEvent;
   // FFormsListAction.OnExecute := FOldFormNotifyEvent;
