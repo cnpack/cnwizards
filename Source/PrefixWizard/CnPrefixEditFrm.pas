@@ -196,7 +196,7 @@ procedure TCnPrefixEditForm.edtNameKeyPress(Sender: TObject;
 const
   Chars = ['A'..'Z', 'a'..'z', '_', '0'..'9', #03, #08, #22, #24, #26]; // Ctrl+C/V/X/Z
 begin
-  if not (Key in Chars) and not IsValidIdent('A' + Key) then
+  if not CharInSet(Key, Chars) and not IsValidIdent('A' + Key) then
     Key := #0;
 end;
 
