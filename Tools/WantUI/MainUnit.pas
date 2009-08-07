@@ -301,7 +301,7 @@ end;
 
 procedure TMainForm.btnAboutClick(Sender: TObject);
 begin
-  ShowMsg('Copyright 2003-2008 AegeanSoftware Corp., 2008 CnPack Team.');
+  ShowMsg('Copyright 2003-2008 AegeanSoftware Corp., 2008-2009 CnPack Team.');
 end;
 
 procedure TMainForm.lvProjectsResize(Sender: TObject);

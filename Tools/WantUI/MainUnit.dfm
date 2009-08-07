@@ -188,7 +188,8 @@ object MainForm: TMainForm
       'unstable=true'
       'debug=true'
       'preview=true'
-      'release=true')
+      'release=true'
+      'HELP_FILE=true')
   end
   object tmrBuild: TTimer
     OnTimer = tmrBuildTimer
