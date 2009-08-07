@@ -2302,16 +2302,23 @@ begin
       Info.FChanged := True;
       Info.FModified := ChangeType * [ctView, ctModified] <> [];
 
-      if (EditView <> nil) and (not FBlockMatchLineLimit or
-        (EditView.Buffer.GetLinesInBuffer <= FBlockMatchMaxLines)) then
+      if (EditView <> nil) then
       begin
-        // 正常情况下，延时一段时间再解析以避免重复
-        case BlockHighlightStyle of
-          bsNow: FTimer.Interval := csShortDelay;
-          bsDelay: FTimer.Interval := BlockMatchDelay;
-          bsHotkey: Exit;
+        if not FBlockMatchLineLimit or
+          (EditView.Buffer.GetLinesInBuffer <= FBlockMatchMaxLines) then
+        begin
+          // 正常情况下，延时一段时间再解析以避免重复
+          case BlockHighlightStyle of
+            bsNow: FTimer.Interval := csShortDelay;
+            bsDelay: FTimer.Interval := BlockMatchDelay;
+            bsHotkey: Exit;
+          end;
+          FTimer.Enabled := True;
+        end
+        else // 大小超过了限制
+        begin
+          FTimer.Enabled := False;
         end;
-        FTimer.Enabled := True;
       end;
     end
     else if not FTimer.Enabled then // 如果定时器已经开启，则不再处理
