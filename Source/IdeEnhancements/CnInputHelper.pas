@@ -65,12 +65,17 @@ const
 type
   TCnInputHelper = class;
 
-{ TCnInputBtnForm }
+{ TCnInputExtraForm }
 
-  TCnInputBtnForm = class(TWinControl)
+  TCnInputExtraForm = class(TCustomControl)
+  private
+    FOnPaint: TNotifyEvent;
   protected
     procedure CreateParams(var Params: TCreateParams); override;
     procedure CreateWnd; override;
+    procedure Paint; override;
+  public
+    property OnPaint: TNotifyEvent read FOnPaint write FOnPaint;
   end;
 
 { TCnInputListBox }
@@ -87,7 +92,10 @@ type
     FLastItem: Integer;
     FOnItemHint: TCnItemHintEvent;
     FOnButtonClick: TBtnClickEvent;
-    FBtnForm: TCnInputBtnForm;
+    FBtnForm: TCnInputExtraForm;
+    FHintForm: TCnInputExtraForm;
+    FHintCnt: Integer;
+    FHintTimer: TTimer;
     FDispButtons: Boolean;
     procedure CNDrawItem(var Message: TWMDrawItem); message CN_DRAWITEM;
     procedure CNMeasureItem(var Message: TWMMeasureItem); message CN_MEASUREITEM;
@@ -96,10 +104,12 @@ type
     procedure WMSize(var Message: TMessage); message WM_SIZE;
     procedure WMMove(var Message: TMessage); message WM_MOVE;
     function AdjustHeight(AHeight: Integer): Integer;
-    procedure CreateBtnForm;
-    procedure UpdateBtnForm;
-    procedure UpdateBtnFormLang;
+    procedure CreateExtraForm;
+    procedure UpdateExtraForm;
+    procedure UpdateExtraFormLang;
     procedure OnBtnClick(Sender: TObject);
+    procedure OnHintPaint(Sender: TObject);
+    procedure OnHintTimer(Sender: TObject);
   protected
     procedure CreateParams(var Params: TCreateParams); override;
     procedure CreateWnd; override;
@@ -113,7 +123,8 @@ type
     procedure CloseUp;
     procedure Popup;
     property DispButtons: Boolean read FDispButtons write FDispButtons;
-    property BtnForm: TCnInputBtnForm read FBtnForm;
+    property BtnForm: TCnInputExtraForm read FBtnForm;
+    property HintForm: TCnInputExtraForm read FHintForm;
     property OnItemHint: TCnItemHintEvent read FOnItemHint write FOnItemHint;
     property OnButtonClick: TBtnClickEvent read FOnButtonClick write FOnButtonClick;
   end;
@@ -416,6 +427,7 @@ const
   csCheckImmRun = 'CheckImmRun';
   csDispOnIDECompDisabled = 'DispOnIDECompDisabled';
   csUseCodeInsightMgr = 'UseCodeInsightMgr';
+  csUseKibitzCompileThread = 'UseKibitzCompileThread';
   csAutoAdjustScope = 'AutoAdjustScope';
   csRemoveSame = 'RemoveSame';
   csListActive = 'ListActive';
@@ -472,6 +484,7 @@ const
 
   csBtnWidth = 16;
   csBtnHeight = 16;
+  csHintHeight = 16;
 
   CS_DROPSHADOW = $20000;
 
@@ -492,9 +505,9 @@ end;
 // 输入列表框按钮窗体
 //==============================================================================
 
-{ TCnInputBtnForm }
+{ TCnInputExtraForm }
 
-procedure TCnInputBtnForm.CreateParams(var Params: TCreateParams);
+procedure TCnInputExtraForm.CreateParams(var Params: TCreateParams);
 begin
   inherited;
   Params.Style := Params.Style or WS_CHILDWINDOW or WS_MAXIMIZEBOX;
@@ -505,11 +518,17 @@ begin
     Params.WindowClass.style := CS_DBLCLKS;
 end;
 
-procedure TCnInputBtnForm.CreateWnd;
+procedure TCnInputExtraForm.CreateWnd;
 begin
   inherited;
   Windows.SetParent(Handle, 0);
   CallWindowProc(DefWndProc, Handle, WM_SETFOCUS, 0, 0);
+end;
+
+procedure TCnInputExtraForm.Paint;
+begin
+  if Assigned(FOnPaint) then
+    FOnPaint(Self);
 end;
 
 //==============================================================================
@@ -536,7 +555,7 @@ end;
 procedure TCnInputListBox.CloseUp;
 begin
   Visible := False;
-  UpdateBtnForm;
+  UpdateExtraForm;
 end;
 
 procedure TCnInputListBox.CMHintShow(var Message: TMessage);
@@ -615,15 +634,15 @@ begin
   Font.Name := 'Tahoma';
   Font.Size := 8;
   FLastItem := -1;
-  CreateBtnForm;
+  CreateExtraForm;
 end;
 
-procedure TCnInputListBox.CreateBtnForm;
+procedure TCnInputListBox.CreateExtraForm;
 var
   Btn: TCnInputButton;
   SpeedBtn: TSpeedButton;
 begin
-  FBtnForm := TCnInputBtnForm.Create(Self);
+  FBtnForm := TCnInputExtraForm.Create(Self);
   BtnForm.Parent := Application.MainForm;
   BtnForm.Visible := False;
   BtnForm.Width := csBtnWidth;
@@ -639,6 +658,18 @@ begin
     SpeedBtn.OnClick := OnBtnClick;
     dmCnSharedImages.ilInputHelper.GetBitmap(Ord(Btn), SpeedBtn.Glyph);
   end;
+
+  FHintForm := TCnInputExtraForm.Create(Self);
+  HintForm.Parent := Application.MainForm;
+  HintForm.Visible := False;
+  HintForm.Width := Width;
+  HintForm.Height := csHintHeight;
+  HintForm.OnPaint := OnHintPaint;
+  
+  FHintTimer := TTimer.Create(Self);
+  FHintTimer.Enabled := False;
+  FHintTimer.Interval := 600;
+  FHintTimer.OnTimer := OnHintTimer;
 end;
 
 procedure TCnInputListBox.CreateParams(var Params: TCreateParams);
@@ -692,11 +723,34 @@ begin
   end;
 end;
 
+procedure TCnInputListBox.OnHintPaint(Sender: TObject);
+var
+  i: Integer;
+  S: string;
+begin
+  with HintForm do
+  begin
+    Canvas.Brush.Style := bsClear;
+    Canvas.Font := Self.Font;
+    Canvas.Font.Color := clInfoText;
+    S := '';
+    for i := 0 to FHintCnt do
+      S := S + '.';
+    Canvas.TextOut(2, 2, SCnInputHelperKibitzCompileRunning + S);
+  end;
+end;
+
+procedure TCnInputListBox.OnHintTimer(Sender: TObject);
+begin
+  FHintCnt := (FHintCnt + 1) mod 5;
+  HintForm.Invalidate;
+end;
+
 procedure TCnInputListBox.Popup;
 begin
   Visible := True;
-  UpdateBtnFormLang;
-  UpdateBtnForm;
+  UpdateExtraFormLang;
+  UpdateExtraForm;
 end;
 
 procedure TCnInputListBox.SetCount(const Value: Integer);
@@ -720,10 +774,10 @@ end;
 procedure TCnInputListBox.SetPos(X, Y: Integer);
 begin
   SetWindowPos(Handle, HWND_TOPMOST, X, Y, 0, 0, SWP_NOACTIVATE or SWP_NOSIZE);
-  UpdateBtnForm;
+  UpdateExtraForm;
 end;
 
-procedure TCnInputListBox.UpdateBtnForm;
+procedure TCnInputListBox.UpdateExtraForm;
 begin
   if DispButtons then
   begin
@@ -734,9 +788,20 @@ begin
   end
   else
     BtnForm.Visible := False;
+    
+  if KibitzCompileThreadRunning then
+  begin
+    HintForm.Visible := Visible;
+    if Visible then
+      SetWindowPos(HintForm.Handle, HWND_TOPMOST, Left, Top + Height,
+        Width, csHintHeight, SWP_NOACTIVATE);
+  end
+  else
+    HintForm.Visible := False;
+  FHintTimer.Enabled := HintForm.Visible;
 end;
 
-procedure TCnInputListBox.UpdateBtnFormLang;
+procedure TCnInputListBox.UpdateExtraFormLang;
 var
   i: Integer;
 begin
@@ -749,12 +814,12 @@ end;
 
 procedure TCnInputListBox.WMMove(var Message: TMessage);
 begin
-  UpdateBtnForm;
+  UpdateExtraForm;
 end;
 
 procedure TCnInputListBox.WMSize(var Message: TMessage);
 begin
-  UpdateBtnForm;
+  UpdateExtraForm;
 end;
 
 //==============================================================================
@@ -2351,7 +2416,7 @@ end;
 procedure TCnInputHelper.OnDispBtnMenu(Sender: TObject);
 begin
   List.DispButtons := not List.DispButtons;
-  List.UpdateBtnForm;
+  List.UpdateExtraForm;
 end;
 
 procedure TCnInputHelper.OnConfigMenu(Sender: TObject);
@@ -2536,13 +2601,15 @@ begin
     Free;
   end;
 
-  if SupportMultiIDESymbolList then
-    with CreateIniFile(True) do
-    try
+  with CreateIniFile(True) do
+  try
+    if SupportMultiIDESymbolList then
       UseCodeInsightMgr := ReadBool('', csUseCodeInsightMgr, False);
-    finally
-      Free;
-    end;
+    if SupportKibitzCompile then
+      UseKibitzCompileThread := ReadBool('', csUseKibitzCompileThread, True);
+  finally
+    Free;
+  end;
 end;
 
 procedure TCnInputHelper.SaveSettings(Ini: TCustomIniFile);
@@ -2593,13 +2660,15 @@ begin
     Free;
   end;
   
-  if SupportMultiIDESymbolList then
-    with CreateIniFile(True) do
-    try
+  with CreateIniFile(True) do
+  try
+    if SupportMultiIDESymbolList then
       WriteBool('', csUseCodeInsightMgr, UseCodeInsightMgr);
-    finally
-      Free;
-    end;
+    if SupportKibitzCompile then
+      WriteBool('', csUseKibitzCompileThread, UseKibitzCompileThread);
+  finally
+    Free;
+  end;
 end;
 
 procedure TCnInputHelper.SetActive(Value: Boolean);

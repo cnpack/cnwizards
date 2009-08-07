@@ -359,10 +359,10 @@ type
     // ICnWizNotifierServices
     procedure AddFileNotifier(Notifier: TCnWizFileNotifier);
     procedure RemoveFileNotifier(Notifier: TCnWizFileNotifier);
-    procedure AddBeforeCompileNotifier(Notifier:TCnWizBeforeCompileNotifier);
-    procedure RemoveBeforeCompileNotifier(Notifier:TCnWizBeforeCompileNotifier);
-    procedure AddAfterCompileNotifier(Notifier:TCnWizAfterCompileNotifier);
-    procedure RemoveAfterCompileNotifier(Notifier:TCnWizAfterCompileNotifier);
+    procedure AddBeforeCompileNotifier(Notifier: TCnWizBeforeCompileNotifier);
+    procedure RemoveBeforeCompileNotifier(Notifier: TCnWizBeforeCompileNotifier);
+    procedure AddAfterCompileNotifier(Notifier: TCnWizAfterCompileNotifier);
+    procedure RemoveAfterCompileNotifier(Notifier: TCnWizAfterCompileNotifier);
     procedure AddSourceEditorNotifier(Notifier: TCnWizSourceEditorNotifier);
     procedure RemoveSourceEditorNotifier(Notifier: TCnWizSourceEditorNotifier);
     procedure AddFormEditorNotifier(Notifier: TCnWizFormEditorNotifier);
@@ -1080,6 +1080,8 @@ begin
   CnDebugger.LogFmt('AfterCompile: Succedded: %d IsCodeInsight: %d',
     [Integer(Succeeded), Integer(IsCodeInsight)]);
 {$ENDIF}
+  if GetCurrentThreadId <> MainThreadID then
+    Exit;
   if FAfterCompileNotifiers <> nil then
   begin
     for i := FAfterCompileNotifiers.Count - 1 downto 0 do
@@ -1105,6 +1107,8 @@ begin
     CnDebugger.LogFmt('BeforeCompile: %s IsCodeInsight: %d',
       [Project.FileName, Integer(IsCodeInsight)]);
 {$ENDIF}
+  if GetCurrentThreadId <> MainThreadID then
+    Exit;
   if FBeforeCompileNotifiers <> nil then
   begin
     for i := FBeforeCompileNotifiers.Count - 1 downto 0 do

@@ -43,8 +43,8 @@ interface
 
 uses
   Windows, SysUtils, Classes, Controls, ToolsApi, Math, Dialogs, Contnrs, TypInfo,
-  CnCommon, CnWizConsts, CnWizCompilerConst, CnWizUtils, CnWizMethodHook,
-  CnPasCodeParser, CnInputSymbolList, CnEditControlWrapper;
+  Forms, CnCommon, CnWizConsts, CnWizCompilerConst, CnWizUtils, CnWizMethodHook,
+  CnPasCodeParser, CnInputSymbolList, CnEditControlWrapper, CnWizNotifier;
 
 {$IFDEF DELPHI}
   {$DEFINE SUPPORT_IDESymbolList}
@@ -85,6 +85,8 @@ type
       const InputText: string; PosInfo: TCodePosInfo): Boolean;
   {$ENDIF SUPPORT_IOTACodeInsightManager}
   {$IFDEF SUPPORT_KibitzCompile}
+    procedure OnFileNotify(NotifyCode: TOTAFileNotification; const FileName: string);
+    procedure OnIdleExecute(Sender: TObject);
     function Reload_KibitzCompile(Editor: IOTAEditBuffer;
       const InputText: string; PosInfo: TCodePosInfo): Boolean;
   {$ENDIF SUPPORT_KibitzCompile}
@@ -103,20 +105,31 @@ const
   SupportMultiIDESymbolList = False;
 {$ENDIF}
 
+{$IFDEF SUPPORT_KibitzCompile}
+  SupportKibitzCompile = True;
+{$ELSE}
+  SupportKibitzCompile = False;
+{$ENDIF}
+
 var
   UseCodeInsightMgr: Boolean = False;
   {* 在 D7 中是否使用兼容性较好的方式取得符号列表，较慢}
-  
+  UseKibitzCompileThread: Boolean = True;
+  {* 是否使用后台线程预处理符号 }
+
+function KibitzCompileThreadRunning: Boolean;
+
 {$ENDIF CNWIZARDS_CNINPUTHELPER}
 
 implementation
 
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
 
-{$IFDEF Debug}
 uses
-  CnDebug;
+{$IFDEF Debug}
+  CnDebug,
 {$ENDIF Debug}
+  CnWizEditFiler, mPasLex;
 
 const
   csCIMgrNames = ';pascal;';
@@ -365,11 +378,28 @@ type
   TCompGetSymbolTextProc = procedure(Symbol: Integer {Comtypes::TSymbol*};
     var S: string; Unknown: Word); stdcall;
 
+  TKibitzThread = class(TThread)
+  private
+    FFileName: AnsiString;
+    FX, FY: Integer;
+  protected
+    procedure Execute; override;
+  public
+    constructor Create(const FileName: AnsiString; X, Y: Integer);
+    destructor Destroy; override;
+  end;
+
 var
   DoKibitzCompile: TDoKibitzCompileProc;
   KibitzGetValidSymbols: TKibitzGetValidSymbolsProc;
   CompGetSymbolText: TCompGetSymbolTextProc;
   KibitzEnabled: Boolean;
+
+  KibitzThread: TKibitzThread;
+  HookCS: TRTLCriticalSection;
+  KibitzFinished: Boolean = False;
+  Hook1: TCnMethodHook;
+  Hook2: TCnMethodHook;
 
   CorIdeModule: HModule;
   DphIdeModule: HModule;
@@ -425,6 +455,184 @@ begin
   begin
     FreeLibrary(DphIdeModule);
     DphIdeModule := 0;
+  end;
+end;
+
+procedure FakeDoKibitzCompile(FileName: AnsiString; XPos, YPos: Integer;
+  var KibitzResult: TKibitzResult); register;
+begin
+{$IFDEF Debug}
+  CnDebugger.LogMsg('FakeDoKibitzCompile');
+{$ENDIF}
+  FillChar(KibitzResult.KibitzDataArray, SizeOf(KibitzResult.KibitzDataArray), 0);
+end;
+
+function FakeKibitzGetValidSymbols(var KibitzResult: TKibitzResult;
+  Symbols: PSymbols; Unknowns: PUnknowns; SymbolCount: Integer): Integer; stdcall;
+begin
+{$IFDEF Debug}
+  CnDebugger.LogMsg('FakeKibitzGetValidSymbols');
+{$ENDIF}
+  Result := 0;
+end;
+
+{ TKibitzThread }
+
+constructor TKibitzThread.Create(const FileName: AnsiString; X, Y: Integer);
+begin
+{$IFDEF Debug}
+  CnDebugger.LogMsg('TKibitzThread.Create');
+{$ENDIF}
+  inherited Create(False);
+  FFileName := FileName;
+  FX := X;
+  FY := Y;
+  FreeOnTerminate := True;
+end;
+
+destructor TKibitzThread.Destroy;
+begin
+{$IFDEF Debug}
+  CnDebugger.LogMsg('TKibitzThread.Destroy');
+{$ENDIF}
+  KibitzThread := nil;
+  inherited;
+end;
+
+procedure TKibitzThread.Execute;
+var
+  KibitzResult: TKibitzResult;
+begin
+{$IFDEF Debug}
+  CnDebugger.LogMsg('TKibitzThread.Execute');
+{$ENDIF}
+  try
+    FillChar(KibitzResult, SizeOf(KibitzResult), 0);
+    DoKibitzCompile(FFileName, FX, FY, KibitzResult);
+  finally
+    EnterCriticalSection(HookCS);
+    try
+      KibitzFinished := True;
+      // 调用完成后恢复被 Hook 的函数
+      FreeAndNil(Hook1);
+      FreeAndNil(Hook2);
+    finally
+      LeaveCriticalSection(HookCS);
+    end;
+  end;
+end;
+
+function ParseProjectBegin(var FileName: AnsiString; var X, Y: Integer): Boolean;
+var
+  Stream: TMemoryStream;
+  Source: AnsiString;
+  Lex: TmwPasLex;
+begin
+{$IFDEF Debug}
+  CnDebugger.LogMsg('ParseProjectBegin');
+{$ENDIF}
+
+  Result := False;
+  FileName := CnOtaGetCurrentProjectFileName;
+  Stream := TMemoryStream.Create;
+  try
+    EditFilerSaveFileToStream(FileName, Stream, False);
+    Source := PAnsiChar(Stream.Memory);
+  finally
+    Stream.Free;
+  end;
+
+{$IFDEF Debug}
+  CnDebugger.LogMsg(FileName + #13#10 + Source);
+{$ENDIF}
+  Lex := TmwPasLex.Create;
+  try
+    Lex.Origin := PAnsiChar(Source);
+    while Lex.TokenID <> tkNull do
+    begin
+      if Lex.TokenID = tkBegin then
+      begin
+        Lex.Next;
+        X := 0;
+        Y := Lex.LineNumber + 1;
+        Result := True;
+        Break;
+      end;
+      Lex.Next;
+    end;
+  finally
+    Lex.Free;
+  end;
+end;
+
+procedure InvokeKibitzCompileInThread;
+var
+  Save: TCursor;
+  FileName: AnsiString;
+  X, Y: Integer;
+begin
+{$IFDEF Debug}
+  CnDebugger.LogMsg('CreateKibitzThread');
+{$ENDIF}
+  if not UseKibitzCompileThread or KibitzCompileThreadRunning then
+    Exit;
+
+  if ParseProjectBegin(FileName, X, Y) then
+  begin
+  {$IFDEF Debug}
+    CnDebugger.LogFmt('FileName: %s X: %d Y: %d', [FileName, X, Y]);
+  {$ENDIF}
+  
+    Save := Screen.Cursor;
+    KibitzFinished := False;
+    KibitzThread := TKibitzThread.Create(FileName, X, Y);
+    Sleep(50);  // 等待线程运行一会后再 Hook Kibitz 函数
+    Screen.Cursor := Save; // 恢复原来的光标
+
+    EnterCriticalSection(HookCS);
+    try
+      // 确保线程还没有结束前 Hook
+      if not KibitzFinished then
+      begin
+        Hook1 := TCnMethodHook.Create(@DoKibitzCompile, @FakeDoKibitzCompile);
+        Hook2 := TCnMethodHook.Create(@KibitzGetValidSymbols, @FakeKibitzGetValidSymbols);
+      end;
+    finally
+      LeaveCriticalSection(HookCS);
+    end;
+  end;
+end;
+
+procedure TIDESymbolList.OnIdleExecute(Sender: TObject);
+var
+  Tick: Cardinal;
+begin
+  if not UseKibitzCompileThread then
+    Exit;
+
+  // 工程切换时等待线程结束
+  Tick := GetTickCount;
+  while KibitzCompileThreadRunning do
+  begin
+    if GetTickCount - Tick > 500 then
+      Break;
+    Sleep(100);
+  end;
+  InvokeKibitzCompileInThread;
+end;
+
+procedure TIDESymbolList.OnFileNotify(NotifyCode: TOTAFileNotification;
+  const FileName: string);
+begin
+  if not UseKibitzCompileThread then
+    Exit;
+    
+  if (NotifyCode = ofnFileOpened) and IsDpr(FileName) then
+  begin
+  {$IFDEF Debug}
+    CnDebugger.LogFmt('TIDESymbolList.OnFileNotify: %s', [FileName]);
+  {$ENDIF}
+    CnWizNotifierServices.ExecuteOnApplicationIdle(OnIdleExecute);
   end;
 end;
 
@@ -512,7 +720,8 @@ var
   end;
 begin
   Result := False;
-  if not KibitzEnabled or (PosInfo.PosKind in csNonCodePosKinds) then
+  if not KibitzEnabled or (PosInfo.PosKind in csNonCodePosKinds)
+    or KibitzCompileThreadRunning then
     Exit;
 
   Clear;
@@ -569,17 +778,30 @@ end;
 
 {$ENDIF SUPPORT_KibitzCompile}
 
+function KibitzCompileThreadRunning: Boolean;
+begin
+{$IFDEF SUPPORT_KibitzCompile}
+  Result := KibitzThread <> nil;
+{$ELSE}
+  Result := False;
+{$ENDIF SUPPORT_KibitzCompile}
+end;
+
 constructor TIDESymbolList.Create;
 begin
   inherited;
 {$IFDEF SUPPORT_KibitzCompile}
   KibitzEnabled := KibitzInitialize;
+  InitializeCriticalSection(HookCS);
+  InvokeKibitzCompileInThread;
+  CnWizNotifierServices.AddFileNotifier(OnFileNotify);
 {$ENDIF SUPPORT_KibitzCompile}
 end;
 
 destructor TIDESymbolList.Destroy;
 begin
 {$IFDEF SUPPORT_KibitzCompile}
+  CnWizNotifierServices.RemoveFileNotifier(OnFileNotify);
   KibitzFinalize;
 {$ENDIF SUPPORT_KibitzCompile}
   inherited;

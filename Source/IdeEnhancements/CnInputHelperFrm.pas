@@ -124,6 +124,7 @@ type
     lbl16: TLabel;
     edtFilterSymbols: TEdit;
     chkIgnoreSpace: TCheckBox;
+    chkUseKibitzCompileThread: TCheckBox;
     procedure FormShow(Sender: TObject);
     procedure PaintBoxPaint(Sender: TObject);
     procedure btnFontClick(Sender: TObject);
@@ -265,15 +266,12 @@ begin
 
   with InputHelper do
   begin
+    chkUseCodeInsightMgr.Enabled := SupportMultiIDESymbolList;
     if SupportMultiIDESymbolList then
-    begin
       chkUseCodeInsightMgr.Checked := UseCodeInsightMgr;
-      chkUseCodeInsightMgr.Enabled := True;
-    end
-    else
-    begin
-      chkUseCodeInsightMgr.Enabled := False;
-    end;
+    chkUseKibitzCompileThread.Enabled := SupportKibitzCompile;
+    if SupportKibitzCompile then
+      chkUseKibitzCompileThread.Checked := UseKibitzCompileThread;
     chkAutoPopup.Checked := AutoPopup;
     seDispOnlyAtLeastKey.Value := DispOnlyAtLeastKey;
     tbDispDelay.Position := DispDelay;
@@ -383,6 +381,8 @@ begin
   begin
     if SupportMultiIDESymbolList then
       UseCodeInsightMgr := chkUseCodeInsightMgr.Checked;
+    if SupportKibitzCompile then
+      UseKibitzCompileThread := chkUseKibitzCompileThread.Checked;
     AutoPopup := chkAutoPopup.Checked;
     DispOnlyAtLeastKey := seDispOnlyAtLeastKey.Value;
     DispDelay := tbDispDelay.Position;

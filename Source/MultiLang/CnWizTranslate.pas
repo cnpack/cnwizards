@@ -1149,6 +1149,7 @@ begin
   TranslateStr(SCnInputHelperSortByKind, 'SCnInputHelperSortByKind');
   TranslateStr(SCnInputHelperAddSymbol, 'SCnInputHelperAddSymbol');
   TranslateStr(SCnInputHelperHelp, 'SCnInputHelperHelp');
+  TranslateStr(SCnInputHelperKibitzCompileRunning, 'SCnInputHelperKibitzCompileRunning');
   TranslateStr(SCnInputHelperPreDefSymbolList, 'SCnInputHelperPreDefSymbolList');
   TranslateStr(SCnInputHelperUserTemplateList, 'SCnInputHelperUserTemplateList');
   TranslateStr(SCnInputHelperCompDirectSymbolList, 'SCnInputHelperCompDirectSymbolList');

@@ -294,7 +294,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
         Left = 8
         Top = 8
         Width = 553
-        Height = 177
+        Height = 193
         Caption = '列表显示(&N)'
         TabOrder = 0
         object lbl7: TLabel
@@ -394,12 +394,20 @@ inherited CnInputHelperForm: TCnInputHelperForm
           ItemHeight = 13
           TabOrder = 3
         end
+        object chkUseKibitzCompileThread: TCheckBox
+          Left = 8
+          Top = 170
+          Width = 505
+          Height = 17
+          Caption = '打开工程时后台预获取标识符列表。'
+          TabOrder = 8
+        end
       end
       object grp4: TGroupBox
         Left = 8
-        Top = 192
+        Top = 210
         Width = 553
-        Height = 219
+        Height = 201
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = '内容设置(&S)'
         TabOrder = 1
@@ -421,7 +429,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Left = 8
           Top = 40
           Width = 369
-          Height = 170
+          Height = 153
           ItemHeight = 13
           TabOrder = 0
         end
@@ -429,7 +437,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Left = 384
           Top = 40
           Width = 161
-          Height = 170
+          Height = 153
           ItemHeight = 13
           TabOrder = 1
         end

@@ -1424,6 +1424,7 @@ var
   SCnInputHelperSortByKind: string = '按类型排序(&4)';
   SCnInputHelperAddSymbol: string = '添加自定义符号(&S)...';
   SCnInputHelperHelp: string = '输入助手帮助(&H)';
+  SCnInputHelperKibitzCompileRunning: string = '正在后台获取标识符列表';
 
   SCnInputHelperPreDefSymbolList: string = '预定义的常用标识符列表';
   SCnInputHelperUserTemplateList: string = '常用代码模板列表';
