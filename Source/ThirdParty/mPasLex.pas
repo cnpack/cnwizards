@@ -246,6 +246,8 @@ type
     procedure UnknownProc;
     function GetToken: string;
     function InSymbols(aChar: AnsiChar): Boolean;
+    function GetTokenAddr: PAnsiChar;
+    function GetTokenLength: Integer;
   protected
   public
     constructor Create;
@@ -266,6 +268,10 @@ type
     property RunPos: Integer read Run write SetRunPos;
     property TokenPos: Integer read fTokenPos;
     property Token: string read GetToken;
+    {* 此俩属性为 PAnsiChar 方式使用，以避免 D2010 下性能问题}
+    property TokenAddr: PAnsiChar read GetTokenAddr;
+    property TokenLength: Integer read GetTokenLength;
+
     property TokenID: TTokenKind read FTokenID;
   end;
 
@@ -1444,6 +1450,16 @@ begin
     else Next;
     end;
   until(fTokenID=tkClass)and(IsClass);
+end;
+
+function TmwPasLex.GetTokenAddr: PAnsiChar;
+begin
+  Result := FOrigin + fTokenPos;
+end;
+
+function TmwPasLex.GetTokenLength: Integer;
+begin
+  Result := Run - fTokenPos;
 end;
 
 initialization

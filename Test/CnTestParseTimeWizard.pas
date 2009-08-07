@@ -42,7 +42,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ToolsAPI, IniFiles, StdCtrls, CnPasCodeParser, mPasLex, Contnrs,
+  ToolsAPI, IniFiles, StdCtrls, CnPasCodeParser, mPasLex, Contnrs, TypInfo,
   CnWizClasses, CnWizUtils, CnWizConsts, CnEditControlWrapper, mwBCBTokenList;
 
 type
@@ -173,13 +173,13 @@ var
   Tick: Cardinal;
   EditView: IOTAEditView;
   Stream: TMemoryStream;
-  CharPos: TOTACharPos;
-  EditPos: TOTAEditPos;
   Parser: TCnPasStructureParser;
   I: Integer;
   List: TList;
-  Token: TCnPasToken;
   P: PCnTestRecord;
+  AControl: TControl;
+  Str: AnsiString;
+  WStr: string;
 begin
   Stream := TMemoryStream.Create;
   Parser := TCnPasStructureParser.Create;
@@ -239,6 +239,36 @@ begin
   for I := 0 to 100000 - 1 do
     Dispose(List[I]);
   List.Free;
+
+  Tick := GetTickCount;
+  for I := 0 to 10000 - 1 do
+  begin
+    AControl := CnOtaGetCurrentEditControl;
+    if AControl <> nil then
+    begin
+      Str := AnsiString(GetStrProp(AControl, 'LineText'));
+      if Str = '' then
+        Exit;
+    end;
+  end;
+  Tick := GetTickCount - Tick;
+  ShowMessage('AnsiString(GetStrProp(AControl, LineText)) 100000 Time: ' + IntToStr(Tick));
+
+ {$IFDEF UNICODE}
+  Tick := GetTickCount;
+  for I := 0 to 10000 - 1 do
+  begin
+    AControl := CnOtaGetCurrentEditControl;
+    if AControl <> nil then
+    begin
+      WStr := GetStrProp(AControl, 'LineText');
+      if WStr = '' then
+        Exit;
+    end;
+  end;
+  Tick := GetTickCount - Tick;
+  ShowMessage('Unicode GetStrProp(AControl, LineText) 100000 Time: ' + IntToStr(Tick));
+ {$ENDIF}
 end;
 
 function TCnTestParseTimeWizard.GetCaption: string;

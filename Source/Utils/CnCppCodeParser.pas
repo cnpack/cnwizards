@@ -69,7 +69,7 @@ type
     FChildStartToken: TCnCppToken;
     FCurrentChildMethod: AnsiString;
     FCurrentMethod: AnsiString;
-    FList: TCnObjectList;
+    FList: TCnList;
     FMethodCloseToken: TCnCppToken;
     FMethodStartToken: TCnCppToken;
     FInnerBlockCloseToken: TCnCppToken;
@@ -111,6 +111,38 @@ function ParseCppCodePosInfo(const Source: AnsiString; CurrPos: Integer;
 
 implementation
 
+var
+  TokenPool: TCnList;
+
+// 用池方式来管理 PasTokens 以提高性能
+function CreateCppToken: TCnCppToken;
+begin
+  if TokenPool.Count > 0 then
+  begin
+    Result := TCnCppToken(TokenPool.Last);
+    TokenPool.Delete(TokenPool.Count - 1);
+  end
+  else
+    Result := TCnCppToken.Create;
+end;
+
+procedure FreeCppToken(Token: TCnCppToken);
+begin
+  if Token <> nil then
+  begin
+    Token.Clear;
+    TokenPool.Add(Token);
+  end;
+end;
+
+procedure ClearTokenPool;
+var
+  I: Integer;
+begin
+  for I := 0 to TokenPool.Count - 1 do
+    TObject(TokenPool[I]).Free;
+end;
+
 //==============================================================================
 // C/C++ 解析器封装类
 //==============================================================================
@@ -120,7 +152,7 @@ implementation
 constructor TCnCppStructureParser.Create;
 begin
   inherited;
-  FList := TCnObjectList.Create;
+  FList := TCnList.Create;
 end;
 
 destructor TCnCppStructureParser.Destroy;
@@ -130,7 +162,11 @@ begin
 end;
 
 procedure TCnCppStructureParser.Clear;
+var
+  I: Integer;
 begin
+  for I := 0 to FList.Count - 1 do
+    FreeCppToken(TCnCppToken(FList[I]));
   FList.Clear;
   FMethodStartToken := nil;
   FMethodCloseToken := nil;
@@ -169,10 +205,20 @@ var
   PrevIsOperator: Boolean;
 
   procedure NewToken;
+  var
+    Len: Integer;
   begin
-    Token := TCnCppToken.Create;
+    Token := CreateCppToken;
     Token.FTokenPos := CParser.RunPosition;
-    Token.FToken := AnsiString(CParser.RunToken);
+
+    Len := CParser.TokenLength;
+    if Len > CN_TOKEN_MAX_SIZE then
+      Len := CN_TOKEN_MAX_SIZE;
+    FillChar(Token.FToken[0], SizeOf(Token.FToken), 0);
+    CopyMemory(@Token.FToken[0], CParser.TokenAddr, Len);
+
+    // Token.FToken := AnsiString(CParser.RunToken);
+
     Token.FLineNumber := CParser.RunLineNumber;
     Token.FCharIndex := CParser.RunColNumber;
     Token.FCppTokenKind := CParser.RunID;
@@ -669,5 +715,12 @@ begin
     ProcStack.Free;
   end;
 end;
+
+initialization
+  TokenPool := TCnList.Create;
+
+finalization
+  ClearTokenPool;
+  FreeAndNil(TokenPool);
 
 end.

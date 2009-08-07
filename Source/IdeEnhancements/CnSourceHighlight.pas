@@ -671,9 +671,16 @@ begin
     Exit;
   end;
   View := IOTAEditView(AView);
-
   LineNo := View.CursorPos.Line;
   Col := View.CursorPos.Col;
+  
+  if Token.EditLine <> LineNo then // 行号不等时直接退出
+  begin
+    Result := False;
+    Exit;
+  end;
+
+  // 行相等才需要读出行内容进行比较
 {$IFDEF BDS}
   Text := AnsiString(GetStrProp(AControl, 'LineText'));
   if Text <> '' then
@@ -686,8 +693,7 @@ begin
     {$ENDIF}
   end;
 {$ENDIF}
-  Result := (Token.EditLine = LineNo) and (Col >= Token.EditCol)
-    and (Col <= Token.EditCol + Length(Token.Token));
+  Result := (Col >= Token.EditCol) and (Col <= Token.EditCol + Length(Token.Token));
 end;
 
 function TokenIsMethodOrClassName(const Token, Name: string): Boolean;
@@ -954,12 +960,19 @@ var
   EditPos: TOTAEditPos;
   I: Integer;
 
-  function InternalTokenMatch(const T1: string; const T2: string): Boolean;
+  function InternalTokenMatch(const T1: AnsiString; const T2: AnsiString): Boolean;
   begin
     if CaseSensitive then
       Result := T1 = T2
     else
+    begin
+    {$IFDEF UNICODE}
+      // Unicode 时直接调用 API 比较以避免生成临时字符串而影响性能
+      Result := lstrcmpiA(@T1[1], @T2[1]) = 0;
+    {$ELSE}
       Result := UpperCase(T1) = UpperCase(T2);
+    {$ENDIF}
+    end;
   end;  
 begin
   FCurrentTokenName := '';
@@ -1056,9 +1069,7 @@ begin
       begin
         for I := 0 to Parser.Count - 1 do
           if (Parser.Tokens[I].TokenID = tkIdentifier) and
-            InternalTokenMatch(
-              {$IFDEF DELPHI2009_UP}string{$ENDIF}(Parser.Tokens[I].Token),
-              {$IFDEF DELPHI2009_UP}string{$ENDIF}(FCurrentTokenName)) then
+            InternalTokenMatch(Parser.Tokens[I].Token, FCurrentTokenName) then
           begin
             FCurTokenList.Add(Parser.Tokens[I]);
             FCurTokenListEditLine.Add(Pointer(Parser.Tokens[I].EditLine));
@@ -1069,9 +1080,7 @@ begin
         for I := FCurMethodStartToken.ItemIndex to
           FCurMethodCloseToken.ItemIndex do
           if (Parser.Tokens[I].TokenID = tkIdentifier) and
-            InternalTokenMatch(
-              {$IFDEF DELPHI2009_UP}string{$ENDIF}(Parser.Tokens[I].Token),
-              {$IFDEF DELPHI2009_UP}string{$ENDIF}(FCurrentTokenName)) then
+            InternalTokenMatch(Parser.Tokens[I].Token, FCurrentTokenName) then
           begin
             FCurTokenList.Add(Parser.Tokens[I]);
             FCurTokenListEditLine.Add(Pointer(Parser.Tokens[I].EditLine));
@@ -1115,9 +1124,7 @@ begin
       for I := CppParser.BlockStartToken.ItemIndex to CppParser.BlockCloseToken.ItemIndex do
       begin
         if (CppParser.Tokens[I].CppTokenKind = ctkIdentifier) and
-          InternalTokenMatch(
-            {$IFDEF DELPHI2009_UP}string{$ENDIF}(CppParser.Tokens[I].Token),
-            {$IFDEF DELPHI2009_UP}string{$ENDIF}(FCurrentTokenName)) then
+          InternalTokenMatch(CppParser.Tokens[I].Token, FCurrentTokenName) then
         begin
           FCurTokenList.Add(CppParser.Tokens[I]);
           FCurTokenListEditLine.Add(Pointer(CppParser.Tokens[I].EditLine));
@@ -1130,9 +1137,7 @@ begin
       for I := CppParser.InnerBlockStartToken.ItemIndex to CppParser.InnerBlockCloseToken.ItemIndex do
       begin
         if (CppParser.Tokens[I].CppTokenKind = ctkIdentifier) and
-          InternalTokenMatch(
-            {$IFDEF DELPHI2009_UP}string{$ENDIF}(CppParser.Tokens[I].Token),
-            {$IFDEF DELPHI2009_UP}string{$ENDIF}(FCurrentTokenName)) then
+          InternalTokenMatch(CppParser.Tokens[I].Token, FCurrentTokenName) then
         begin
           FCurTokenList.Add(CppParser.Tokens[I]);
           FCurTokenListEditLine.Add(Pointer(CppParser.Tokens[I].EditLine));
@@ -1144,9 +1149,7 @@ begin
       for I := 0 to CppParser.Count - 1 do
       begin
         if (CppParser.Tokens[I].CppTokenKind = ctkIdentifier) and
-          InternalTokenMatch(
-            {$IFDEF DELPHI2009_UP}string{$ENDIF}(CppParser.Tokens[I].Token),
-            {$IFDEF DELPHI2009_UP}string{$ENDIF}(FCurrentTokenName)) then
+          InternalTokenMatch(CppParser.Tokens[I].Token, FCurrentTokenName) then
         begin
           FCurTokenList.Add(CppParser.Tokens[I]);
           FCurTokenListEditLine.Add(Pointer(CppParser.Tokens[I].EditLine));
@@ -1554,7 +1557,7 @@ begin
   FKeywordHighlight.Bold := True;
 
   FBlockMatchLineLimit := True;
-  FBlockMatchMaxLines := 25000; // 大于此行数的 unit，不解析
+  FBlockMatchMaxLines := 40000; // 大于此行数的 unit，不解析
   FBlockMatchList := TObjectList.Create;
   FBlockLineList := TObjectList.Create;
   FLineMapList := TObjectList.Create;
@@ -2546,7 +2549,7 @@ begin
             for J := 0 to Length(Token.Token) - 1 do
             begin
               EditPos := OTAEditPos(Token.EditCol + J, LineNum);
-              if not EditorGetTextRect(Editor, EditPos, Token.Token[1], R) then
+              if not EditorGetTextRect(Editor, EditPos, Token.Token[0], R) then
                 Continue;
 
               EditPos.Col := EditPosColBase + J;
@@ -2567,7 +2570,8 @@ begin
                   end;
 
                   Brush.Style := bsClear;
-                  TextOut(R.Left, R.Top, string(Token.Token[J + 1]));
+                  TextOut(R.Left, R.Top, string(Token.Token[J]));
+                  // 注意下标，Token 是 string 和 PAnsiChar 时起点不同
                 end;
               end;
             end;

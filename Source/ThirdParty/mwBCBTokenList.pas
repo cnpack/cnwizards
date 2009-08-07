@@ -180,6 +180,8 @@ type
     function GetRunLineNumber: LongInt;
     function GetRunColNumber: LongInt;
     function GetRunToken: string;
+    function GetTokenAddr: PAnsiChar;
+    function GetTokenLength: Integer;
   protected
     function GetToken(Index: Integer): AnsiString;
     procedure SetCapacity(NewCapacity: Integer);
@@ -238,6 +240,9 @@ type
     property RunLineNumber: Integer read GetRunLineNumber;
     property RunColNumber: Integer read GetRunColNumber;    
     property RunToken: string read GetRunToken;
+    {* 此俩属性为 PAnsiChar 方式使用，以避免 D2010 下性能问题}
+    property TokenAddr: PAnsiChar read GetTokenAddr;
+    property TokenLength: Integer read GetTokenLength;
   end; { TBCBTokenList }
 
 const
@@ -1871,6 +1876,16 @@ begin
     Result := I;
   end;
 end; { PositionToIndex }
+
+function TBCBTokenList.GetTokenAddr: PAnsiChar;
+begin
+  Result := FOrigin + FTokenPositionsList[Run];
+end;
+
+function TBCBTokenList.GetTokenLength: Integer;
+begin
+  Result := FTokenPositionsList[Run + 1] - FTokenPositionsList[Run];
+end;
 
 end.
 

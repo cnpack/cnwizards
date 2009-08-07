@@ -41,7 +41,10 @@ interface
 uses
   Windows, SysUtils, Classes, mPasLex, mwBCBTokenList,
   Contnrs, CnCommon, CnFastList;
-  
+
+const
+  CN_TOKEN_MAX_SIZE = 32;
+
 type
 
 //==============================================================================
@@ -53,6 +56,7 @@ type
   TCnPasToken = class(TPersistent)
   {* 描述一 Token 的结构高亮信息}
   private
+    function GetToken: PAnsiChar;
   
   protected
     FCppTokenKind: TCTokenKind;
@@ -63,7 +67,7 @@ type
     FItemLayer: Integer;
     FLineNumber: Integer;
     FMethodLayer: Integer;
-    FToken: AnsiString;
+    FToken: array[0..CN_TOKEN_MAX_SIZE] of AnsiChar;
     FTokenID: TTokenKind;
     FTokenPos: Integer;
     FIsMethodStart: Boolean;
@@ -71,7 +75,9 @@ type
     FIsBlockStart: Boolean;
     FIsBlockClose: Boolean;
     FUseAsC: Boolean;
-  published
+  public
+    procedure Clear;
+
     property UseAsC: Boolean read FUseAsC;
     {* 是否是 C 方式的解析，默认不是}
     property CharIndex: Integer read FCharIndex; // Start 0
@@ -88,7 +94,7 @@ type
     {* 所在行号，从零开始 }
     property MethodLayer: Integer read FMethodLayer;
     {* 所在函数的嵌套层次，最外层为一 }
-    property Token: AnsiString read FToken;
+    property Token: PAnsiChar read GetToken;
     {* 该 Token 的字符串内容 }
     property TokenID: TTokenKind read FTokenID;
     {* Token 的语法类型 }
@@ -116,7 +122,7 @@ type
     FCurrentChildMethod: AnsiString;
     FCurrentMethod: AnsiString;
     FKeyOnly: Boolean;
-    FList: TCnObjectList;
+    FList: TCnList;
     FMethodCloseToken: TCnPasToken;
     FMethodStartToken: TCnPasToken;
     FSource: AnsiString;
@@ -242,6 +248,38 @@ procedure ParseUnitUses(const Source: AnsiString; UsesList: TStrings);
 
 implementation
 
+var
+  TokenPool: TCnList;
+
+// 用池方式来管理 PasTokens 以提高性能
+function CreatePasToken: TCnPasToken;
+begin
+  if TokenPool.Count > 0 then
+  begin
+    Result := TCnPasToken(TokenPool.Last);
+    TokenPool.Delete(TokenPool.Count - 1);
+  end
+  else
+    Result := TCnPasToken.Create;
+end;
+
+procedure FreePasToken(Token: TCnPasToken);
+begin
+  if Token <> nil then
+  begin
+    Token.Clear;
+    TokenPool.Add(Token);
+  end;
+end;
+
+procedure ClearTokenPool;
+var
+  I: Integer;
+begin
+  for I := 0 to TokenPool.Count - 1 do
+    TObject(TokenPool[I]).Free;
+end;
+
 // NextNoJunk仅仅只跳过注释，而没跳过编译指令的情况。加此函数可过编译指令
 procedure LexNextNoJunkWithoutCompDirect(Lex: TmwPasLex);
 begin
@@ -259,7 +297,7 @@ end;
 
 constructor TCnPasStructureParser.Create;
 begin
-  FList := TCnObjectList.Create;
+  FList := TCnList.Create;
 end;
 
 destructor TCnPasStructureParser.Destroy;
@@ -270,8 +308,13 @@ begin
 end;
 
 procedure TCnPasStructureParser.Clear;
+var
+  I: Integer;
 begin
+  for I := 0 to FList.Count - 1 do
+    FreePasToken(TCnPasToken(FList[I]));
   FList.Clear;
+
   FMethodStartToken := nil;
   FMethodCloseToken := nil;
   FChildMethodStartToken := nil;
@@ -305,10 +348,20 @@ var
   PrevTokenID: TTokenKind;
 
   procedure NewToken;
+  var
+    Len: Integer;
   begin
-    Token := TCnPasToken.Create;
+    Token := CreatePasToken;
     Token.FTokenPos := Lex.TokenPos;
-    Token.FToken := AnsiString(Lex.Token);
+    
+    Len := Lex.TokenLength;
+    if Len > CN_TOKEN_MAX_SIZE then
+      Len := CN_TOKEN_MAX_SIZE;
+    FillChar(Token.FToken[0], SizeOf(Token.FToken), 0);
+    CopyMemory(@Token.FToken[0], Lex.TokenAddr, Len);
+
+    // Token.FToken := AnsiString(Lex.Token);
+    
     Token.FLineNumber := Lex.LineNumber;
     Token.FCharIndex := Lex.TokenPos - Lex.LinePos;
     Token.FTokenID := Lex.TokenID;
@@ -323,7 +376,10 @@ var
   procedure DiscardToken(Forced: Boolean = False);
   begin
     if AKeyOnly or Forced then
+    begin
+      FreePasToken(FList[FList.Count - 1]);
       FList.Delete(FList.Count - 1);
+    end;
   end;
 begin
   Clear;
@@ -623,7 +679,10 @@ begin
         begin
           CurrMethod.FIsMethodStart := False;
           if AKeyOnly and (CurrMethod.FItemIndex = FList.Count - 1) then
+          begin
+            FreePasToken(FList[FList.Count - 1]);
             FList.Delete(FList.Count - 1);
+          end;
           if MethodStack.Count > 0 then
             CurrMethod := TCnPasToken(MethodStack.Pop)
           else
@@ -1218,5 +1277,38 @@ begin
     Lex.Free;
   end;
 end;
+
+{ TCnPasToken }
+
+procedure TCnPasToken.Clear;
+begin
+  FCppTokenKind := TCTokenKind(0);
+  FCharIndex := 0;
+  FEditCol := 0;
+  FEditLine := 0;
+  FItemIndex := 0;
+  FItemLayer := 0;
+  FLineNumber := 0;
+  FMethodLayer := 0;
+  FillChar(FToken[0], SizeOf(FToken), 0);
+  FTokenID := TTokenKind(0);
+  FTokenPos := 0;
+  FIsMethodStart := False;
+  FIsMethodClose := False;
+  FIsBlockStart := False;
+  FIsBlockClose := False;
+end;
+
+function TCnPasToken.GetToken: PAnsiChar;
+begin
+  Result := @FToken[0];
+end;
+
+initialization
+  TokenPool := TCnList.Create;
+
+finalization
+  ClearTokenPool;
+  FreeAndNil(TokenPool);
 
 end.
