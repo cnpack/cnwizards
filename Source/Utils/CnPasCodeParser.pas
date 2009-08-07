@@ -43,7 +43,7 @@ uses
   Contnrs, CnCommon, CnFastList;
 
 const
-  CN_TOKEN_MAX_SIZE = 32;
+  CN_TOKEN_MAX_SIZE = 63;
 
 type
 
