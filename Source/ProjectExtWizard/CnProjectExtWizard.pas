@@ -613,25 +613,25 @@ begin
   // 实际上强行进行挂接，
   // 在挂接后的内容中才处理是否挂接的参数而决定调用新的还是旧的
   if FUnitsListAction = nil then
-  begin
     FUnitsListAction := FindIDEAction('ViewUnitCommand');
-    if (FUnitsListAction <> nil) and not Assigned(FOldUnitNotifyEvent) then
-    begin
+
+  if FUnitsListAction <> nil then
+  begin
+    if not Assigned(FOldUnitNotifyEvent) then
       FOldUnitNotifyEvent := FUnitsListAction.OnExecute;
-      FUnitsListAction.OnExecute := UnitsListActionOnExecute;
-      UnitsListHookBtnChecked := HookUnitsList;
-    end;
+    FUnitsListAction.OnExecute := UnitsListActionOnExecute;
+    UnitsListHookBtnChecked := HookUnitsList;
   end;
 
   if FFormsListAction = nil then
-  begin
     FFormsListAction := FindIDEAction('ViewFormCommand');
-    if (FFormsListAction <> nil) and not Assigned(FOldFormNotifyEvent) then
-    begin
+
+  if FFormsListAction <> nil then
+  begin
+    if not Assigned(FOldFormNotifyEvent) then
       FOldFormNotifyEvent := FFormsListAction.OnExecute;
-      FFormsListAction.OnExecute := FormsListActionOnExecute;
-      FormsListHookBtnChecked := HookFormsList;
-    end;
+    FFormsListAction.OnExecute := FormsListActionOnExecute;
+    FormsListHookBtnChecked := HookFormsList;
   end;
     
   // 恢复时不直接恢复OnExecute，而是在挂接后的内容中做必要处理再跳回来
