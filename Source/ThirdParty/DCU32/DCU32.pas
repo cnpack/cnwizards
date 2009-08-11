@@ -48,6 +48,7 @@ const {My own (AX) codes for Delphi/Kylix versions}
   verD9=9; //2005
   verD10=10; //2006
   verD12=12; // Added by Liu Xiao. Delphi 2009.
+  verD14=14; // Added by Liu Xiao. Delphi 2010.
   verK1=100; //Kylix 1.0
   verK2=101; //Kylix 2.0
   verK3=103; //Kylix 2.0
@@ -72,7 +73,7 @@ const
   drObj=$71{'q'};
   drRes=$72{'r'};
   drAsm=$73{'s'}; //Found in D5 Debug versions
-  drStop2=$9F{'џ'}; //!!!
+  drStop2=$9F{'?}; //!!!
   drConst=$25{'%'};
   drResStr=$32{'2'};
   drType=$2A{'*'};
@@ -1974,7 +1975,7 @@ begin
             break;
           {TStrConstTypeDef.Create;}
           Decl := TStrConstDecl.Create;
-         {//м.б. надо регистрировать в таблице адресов
+         {//?? надо регистрировать ?таблиц?адресо?
           ReadStr;
           ReadUIndex;
           ReadUIndex;
@@ -2866,6 +2867,7 @@ begin
       $1100000D,$11800009: FVer := verD9;
       $12000023: FVer := verD10; //Delphi 2006, testing is very incomplete
       $14000039: FVer := verD12; // Added by Liu Xiao for Delphi 2009.
+      $15800045: FVer := verD14; // Added by Liu Xiao for Delphi 2010.
       ulong($F21F148C): FVer := verK1; //Kylix 1.0
       $0E1011DD,$0E0001DD: FVer := verK2; //Kylix 2.0
       $0F1001DD,$0F0001DD: FVer := verK3; //Kylix 3.0
