@@ -845,7 +845,15 @@ begin
     if not Editors[i].EditControl.Visible or (Editors[i].EditView = nil) then
       Continue;
 
-    Context := GetEditorContext(Editors[i]);
+    try
+      Context := GetEditorContext(Editors[i]);
+    except
+{$IFDEF BDS}
+      Editors[i].FEditView := nil;
+      // BDS 下，时常出现 EditView 已经被释放而导致出错的情况，此处将其置 nil
+      Continue;
+{$ENDIF}
+    end;
     OldContext := Editors[i].Context;
 
     ChangeType := [];
@@ -1402,7 +1410,8 @@ begin
     else
       Editor := nil;
 
-    DoEditorChange(Editor, FTabsChangeTypes);
+    if Editor <> nil then
+      DoEditorChange(Editor, FTabsChangeTypes);
     FTabsChangeTypes := [];
   end;
 end;
