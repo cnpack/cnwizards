@@ -211,6 +211,9 @@ var
   i: Integer;
 begin
   Result := False;
+  if not FileExists(FileName) then
+    Exit;
+
   try
     if not Append then
       Clear;
