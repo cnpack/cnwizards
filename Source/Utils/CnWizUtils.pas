@@ -728,7 +728,7 @@ uses
   CnDebug,
 {$ENDIF Debug}
   Math, CnWizOptions, CnWizMultiLang, CnGraphUtils, CnWizIdeUtils,
-  CnPasCodeParser;
+  CnPasCodeParser, CnCppCodeParser;
 
 type
   TControlAccess = class(TControl);
@@ -3134,31 +3134,56 @@ var
   Stream: TMemoryStream;
   CharPos: TOTACharPos;
   EditPos: TOTAEditPos;
-  Parser: TCnPasStructureParser;
+  PasParser: TCnPasStructureParser;
+  CParser: TCnCppStructureParser;
+  S: string;
 begin
   Result := '';
   EditView := CnOtaGetTopMostEditView;
   if EditView = nil then
     Exit;
 
-  Parser := TCnPasStructureParser.Create;
+  S := EditView.Buffer.FileName;
   Stream := TMemoryStream.Create;
+  CnOtaSaveEditorToStream(EditView.Buffer, Stream);
   try
-    CnOtaSaveEditorToStream(EditView.Buffer, Stream);
-    Parser.ParseSource(PAnsiChar(Stream.Memory),
-      IsDpr(EditView.Buffer.FileName), False);
+    if IsDprOrPas(S) or IsInc(S) then
+    begin
+      PasParser := TCnPasStructureParser.Create;
+      try
+        PasParser.ParseSource(PAnsiChar(Stream.Memory),
+          IsDpr(EditView.Buffer.FileName), False);
+
+        EditPos := EditView.CursorPos;
+        EditView.ConvertPos(True, EditPos, CharPos);
+        PasParser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
+        if PasParser.CurrentChildMethod <> '' then
+          Result := string(PasParser.CurrentChildMethod)
+        else if PasParser.CurrentMethod <> '' then
+          Result := string(PasParser.CurrentMethod);
+      finally
+        PasParser.Free;
+      end;
+    end
+    else if IsCppSourceModule(S) then
+    begin
+      CParser := TCnCppStructureParser.Create;
+
+      try
+        EditPos := EditView.CursorPos;
+        EditView.ConvertPos(True, EditPos, CharPos);
+        // 是否需要转换？
+        CParser.ParseSource(PAnsiChar(Stream.Memory), Stream.Size,
+          CharPos.Line, CharPos.CharIndex, True);
+
+        Result := string(CParser.CurrentMethod);
+      finally
+        CParser.Free;
+      end;
+    end;
   finally
     Stream.Free;
   end;
-
-  EditPos := EditView.CursorPos;
-  EditView.ConvertPos(True, EditPos, CharPos);
-  Parser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
-  if Parser.CurrentChildMethod <> '' then
-    Result := string(Parser.CurrentChildMethod)
-  else if Parser.CurrentMethod <> '' then
-    Result := string(Parser.CurrentMethod);
-  Parser.Free;
 end;
 
 // 获取当前光标所在的类名或声明

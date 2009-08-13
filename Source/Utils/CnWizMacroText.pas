@@ -40,7 +40,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, TypInfo, ToolsAPI, CnWizConsts, CnCommon,
-  CnPasCodeParser;
+  CnPasCodeParser, CnCppCodeParser;
 
 type
 
@@ -321,8 +321,10 @@ var
   Stream: TMemoryStream;
   CharPos: TOTACharPos;
   EditPos: TOTAEditPos;
-  Parser: TCnPasStructureParser;
+  PasParser: TCnPasStructureParser;
+  CParser: TCnCppStructureParser;
   S: string;
+  IsPasFile, IsCFile: Boolean;
 begin
   Result := AMacro;
   if IsInternalMacro(AMacro, Macro) then
@@ -353,6 +355,8 @@ begin
       cwmCurrMethodName:
         begin
           Result := EdtGetCurrProcName;
+          if Pos('::', Result) > 0 then
+            Result := Copy(Result, Pos('::', Result) + 1, MaxInt); // 处理 C++ 类名后的函数名
           if LastDelimiter('.', Result) > 0 then
             Result := Copy(Result, LastDelimiter('.', Result) + 1, MaxInt);
         end;
@@ -363,30 +367,57 @@ begin
           if EditView = nil then
             Exit;
 
-          Parser := TCnPasStructureParser.Create;
+          S := EditView.Buffer.FileName;
+          IsPasFile := IsPas(S) or IsDpr(S) or IsInc(S);
+          IsCFile := IsCppSourceModule(S);
+
           Stream := TMemoryStream.Create;
-          try
-            CnOtaSaveEditorToStream(EditView.Buffer, Stream);
-            Parser.ParseSource(PAnsiChar(Stream.Memory),
-              IsDpr(EditView.Buffer.FileName), False);
-          finally
-            Stream.Free;
-          end;
+          CnOtaSaveEditorToStream(EditView.Buffer, Stream);
 
-          EditPos := EditView.CursorPos;
-          EditView.ConvertPos(True, EditPos, CharPos);
-          Result := string(Parser.FindCurrentDeclaration(CharPos.Line, CharPos.CharIndex));
-          if Result = '' then
+          if IsPasFile then
           begin
-            if Parser.CurrentChildMethod <> '' then
-              S := string(Parser.CurrentChildMethod)
-            else if Parser.CurrentMethod <> '' then
-              S := string(Parser.CurrentMethod);
+            PasParser := TCnPasStructureParser.Create;
+            try
+              PasParser.ParseSource(PAnsiChar(Stream.Memory),
+                IsDpr(EditView.Buffer.FileName), False);
 
-            if Pos('.', S) > 0 then
-              Result := Copy(S, 1, Pos('.', S) - 1);
+              EditPos := EditView.CursorPos;
+              EditView.ConvertPos(True, EditPos, CharPos);
+              Result := string(PasParser.FindCurrentDeclaration(CharPos.Line, CharPos.CharIndex));
+              if Result = '' then
+              begin
+                if PasParser.CurrentChildMethod <> '' then
+                  S := string(PasParser.CurrentChildMethod)
+                else if PasParser.CurrentMethod <> '' then
+                  S := string(PasParser.CurrentMethod);
+
+                if Pos('.', S) > 0 then
+                  Result := Copy(S, 1, Pos('.', S) - 1);
+              end;
+            finally
+              PasParser.Free;
+            end;
+          end
+          else if IsCFile then
+          begin
+            CParser := TCnCppStructureParser.Create;
+
+            try
+              EditPos := EditView.CursorPos;
+              EditView.ConvertPos(True, EditPos, CharPos);
+              // 是否需要转换？
+              CParser.ParseSource(PAnsiChar(Stream.Memory), Stream.Size,
+                CharPos.Line, CharPos.CharIndex, True);
+
+              Result := CParser.CurrentClass;
+              if Pos('::', S) > 0 then
+                Result := Copy(S, 1, Pos('::', S) - 1);
+            finally
+              CParser.Free;
+            end;
           end;
-          Parser.Free;
+
+          Stream.Free;
         end;
       cwmUser:
         Result := EdtGetUser;
