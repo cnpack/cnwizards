@@ -427,7 +427,7 @@ const
   csCheckImmRun = 'CheckImmRun';
   csDispOnIDECompDisabled = 'DispOnIDECompDisabled';
   csUseCodeInsightMgr = 'UseCodeInsightMgr';
-  csUseKibitzCompileThread = 'UseKibitzCompileThread';
+  csUseKibitzCompileThread = 'UseKibitzThread';
   csAutoAdjustScope = 'AutoAdjustScope';
   csRemoveSame = 'RemoveSame';
   csListActive = 'ListActive';
@@ -2606,7 +2606,7 @@ begin
     if SupportMultiIDESymbolList then
       UseCodeInsightMgr := ReadBool('', csUseCodeInsightMgr, False);
     if SupportKibitzCompile then
-      UseKibitzCompileThread := ReadBool('', csUseKibitzCompileThread, True);
+      UseKibitzCompileThread := ReadBool('', csUseKibitzCompileThread, False);
   finally
     Free;
   end;
