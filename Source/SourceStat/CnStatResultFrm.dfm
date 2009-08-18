@@ -316,7 +316,6 @@ object CnStatResultForm: TCnStatResultForm
     Top = 80
     object N1: TMenuItem
       Caption = 'нд╪Ч(&F)'
-      OnClick = CloseActionExecute
       object T1: TMenuItem
         Action = StatAction
       end
