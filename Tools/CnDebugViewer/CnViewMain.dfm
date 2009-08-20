@@ -13,6 +13,7 @@ object CnMainViewer: TCnMainViewer
   FormStyle = fsMDIForm
   Menu = mmMain
   OldCreateOrder = False
+  OnClose = FormClose
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy

@@ -102,7 +102,8 @@ end;
 procedure TGetDebugThread.CreateANewMdiForm;
 begin
   if Application.MainForm <> nil then
-    TCnMsgChild.Create(Application).Show;
+    if not (csDestroying in Application.MainForm.ComponentState) then
+      TCnMsgChild.Create(Application).Show;
 end;
 
 procedure TGetDebugThread.Execute;
@@ -146,6 +147,12 @@ begin
     Tail := PHeader^.QueueTail;
     if Front = Tail then
     begin
+      if Terminated then
+      begin
+        CloseHandle(HMutex);
+        HMutex := 0;
+        Exit;
+      end;
       ReleaseMutex(HMutex);
       Continue;
     end;
@@ -160,6 +167,12 @@ begin
       begin
         PHeader^.QueueFront := 0;
         PHeader^.QueueTail := 0;
+        if Terminated then
+        begin
+          CloseHandle(HMutex);
+          HMutex := 0;
+          Exit;
+        end;
         ReleaseMutex(HMutex);
         Continue;
       end;
@@ -185,6 +198,12 @@ begin
     if PHeader^.QueueFront >= QueueSize then
       PHeader^.QueueFront := PHeader^.QueueFront mod QueueSize;
 
+    if Terminated then
+    begin
+      CloseHandle(HMutex);
+      HMutex := 0;
+      Exit;
+    end;
     ReleaseMutex(HMutex);
     if HFlush = 0 then
       HFlush := OpenEvent(EVENT_MODIFY_STATE, False, SCnDebugFlushEventName);

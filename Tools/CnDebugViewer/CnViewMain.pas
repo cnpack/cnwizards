@@ -231,6 +231,7 @@ type
     procedure actOptionsExecute(Sender: TObject);
     procedure tsSwitchDblClick(Sender: TObject);
     procedure actAutoScrollExecute(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     FUpdatingSwitch: Boolean;
     FClickingSwitch: Boolean;
@@ -437,8 +438,6 @@ begin
     end;
   end;
 
-  actStop.Execute;
-  DestroyThread;
   SaveOptions(ExtractFilePath(Application.ExeName) + SCnOptionFileName);
   CnLangManager.RemoveChangeNotifier(LanguageChanged);
 
@@ -529,10 +528,19 @@ begin
 end;
 
 procedure TCnMainViewer.ThreadOnTerminate(Sender: TObject);
+var
+  Res: Cardinal;
+  Count: Integer;
 begin
   if HMutex <> 0 then
   begin
-    WaitForSingleObject(HMutex, CnWaitMutexTime);
+    Count := 0;
+    repeat
+      Res := WaitForSingleObject(HMutex, CnWaitMutexTime);
+      Sleep(0);
+      Inc(Count);
+    until (Res = WAIT_OBJECT_0) or (Count = 10);
+
     CloseHandle(HMutex);
     HMutex := 0;
   end;
@@ -1212,6 +1220,13 @@ procedure TCnMainViewer.actAutoScrollExecute(Sender: TObject);
 begin
   actAutoScroll.Checked := not actAutoScroll.Checked;
   CnViewerOptions.AutoScroll := actAutoScroll.Checked;
+end;
+
+procedure TCnMainViewer.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+  actStop.Execute;
+  DestroyThread;
 end;
 
 end.
