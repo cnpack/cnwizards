@@ -416,11 +416,7 @@ begin
   TranslateStr(SCnSrcTemplateWizardDelete, 'SCnSrcTemplateWizardDelete');
   TranslateStr(SCnSrcTemplateWizardClear, 'SCnSrcTemplateWizardClear');
 
-{$IFDEF DELPHI}
   TranslateStr(SCnSrcTemplateDataDefName, 'SCnSrcTemplateDataDefName');
-{$ELSE}
-  TranslateStr(SCnSrcTemplateDataDefName, 'SCnSrcTemplateDataDefName_CB');
-{$ENDIF DELPHI}
 
   TranslateStr(SCnEIPCurrPos, 'SCnEIPCurrPos');
   TranslateStr(SCnEIPBOL, 'SCnEIPBOL');

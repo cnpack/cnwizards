@@ -70,6 +70,8 @@ type
     mmoContent: TMemo;
     cbbMacro: TComboBox;
     btnInsert: TButton;
+    chkForDelphi: TCheckBox;
+    chkForBcb: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure btnInsertClick(Sender: TObject);
     procedure btnOKClick(Sender: TObject);
@@ -88,7 +90,8 @@ function ShowEditorEditForm(EditorItem: TCnEditorItem): Boolean; overload;
 
 function ShowEditorEditForm(var ACaption, AHint, AIconName: string;
   var AShortCut: TShortCut; var AInsertPos: TEditorInsertPos;
-  var AEnabled, ASavePos: Boolean; var AContent: string): Boolean; overload;
+  var AEnabled, ASavePos: Boolean; var AContent: string; var AForDelphi,
+  AForBcb: Boolean): Boolean; overload;
 {* 显示编辑器专家编辑窗体，用于新增界面}
 
 {$ENDIF CNWIZARDS_CNSRCTEMPLATE}
@@ -113,6 +116,8 @@ begin
     chkDisabled.Checked := not EditorItem.Enabled;
     chkSavePos.Checked := EditorItem.SavePos;
     mmoContent.Lines.Text := EditorItem.Content;
+    chkForDelphi.Checked := EditorItem.ForDelphi;
+    chkForBcb.Checked := EditorItem.ForBcb;
     Result := ShowModal = mrOk;
     if Result then
     begin
@@ -124,6 +129,8 @@ begin
       EditorItem.Enabled := not chkDisabled.Checked;
       EditorItem.SavePos := chkSavePos.Checked;
       EditorItem.Content := mmoContent.Lines.Text;
+      EditorItem.ForDelphi := chkForDelphi.Checked;
+      EditorItem.ForBcb := chkForBcb.Checked;
     end;
   finally
     Free;
@@ -132,7 +139,8 @@ end;
 
 function ShowEditorEditForm(var ACaption, AHint, AIconName: string;
   var AShortCut: TShortCut; var AInsertPos: TEditorInsertPos;
-  var AEnabled, ASavePos: Boolean; var AContent: string): Boolean; overload;
+  var AEnabled, ASavePos: Boolean; var AContent: string; var AForDelphi,
+  AForBcb: Boolean): Boolean; overload;
 begin
   with TCnSrcTemplateEditForm.Create(nil) do
   try
@@ -145,6 +153,8 @@ begin
     chkDisabled.Checked := not AEnabled;
     chkSavePos.Checked := ASavePos;
     mmoContent.Lines.Text := AContent;
+    chkForDelphi.Checked := AForDelphi;
+    chkForBcb.Checked := AForBcb;
     Result := ShowModal = mrOk;
     if Result then
     begin
@@ -156,6 +166,8 @@ begin
       AEnabled := not chkDisabled.Checked;
       ASavePos := chkSavePos.Checked;
       AContent := mmoContent.Lines.Text;
+      AForDelphi := chkForDelphi.Checked;
+      AForBcb := chkForBcb.Checked;
     end;
   finally
     Free;

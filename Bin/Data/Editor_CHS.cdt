@@ -4,7 +4,7 @@
     <ShortCut>0</ShortCut>
     <SavePos>0</SavePos>
     <InsertPos>ipBOF</InsertPos>
-    <Caption>普通单元头</Caption>
+    <Caption>Pascal 普通单元头</Caption>
     <Content>{*******************************************************}
 {                                                       }
 {       %软件名%%ColPos57%}
@@ -14,14 +14,35 @@
 {*******************************************************}
 
 </Content>
-    <Hint>普通单元头</Hint>
+    <Hint>Pascal 普通单元头</Hint>
+    <ForDelphi>1</ForDelphi>
+    <ForBcb>0</ForBcb>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>0</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOF</InsertPos>
+    <Caption>C/C++ 普通单元头</Caption>
+    <Content>//*****************************************************//
+//                                                     //
+//      %软件名%%ColPos56%//
+//                                                     //
+//      版权所有 (C) %Year% %公司名%%ColPos56%//
+//                                                     //
+//*****************************************************//
+
+</Content>
+    <Hint>C/C++ 普通单元头</Hint>
+    <ForDelphi>0</ForDelphi>
+    <ForBcb>1</ForBcb>
   </o>
   <o>
     <Enabled>1</Enabled>
     <ShortCut>0</ShortCut>
     <SavePos>0</SavePos>
     <InsertPos>ipProcHead</InsertPos>
-    <Caption>标准过程头</Caption>
+    <Caption>Pascal 标准过程头</Caption>
     <Content>{-------------------------------------------------------------------------------
   过程名:    %ProcName%
   作者:      %User%
@@ -30,7 +51,9 @@
   返回值:    %Result%
 -------------------------------------------------------------------------------}
 </Content>
-    <Hint>插入在过程头部的注释块</Hint>
+    <Hint>插入在 Pascal 过程头部的注释块</Hint>
+    <ForDelphi>1</ForDelphi>
+    <ForBcb>0</ForBcb>
   </o>
   <o>
     <Enabled>1</Enabled>
@@ -44,6 +67,8 @@
 
 </Content>
     <Hint>粗边框的注释块</Hint>
+    <ForDelphi>1</ForDelphi>
+    <ForBcb>1</ForBcb>
   </o>
   <o>
     <Enabled>1</Enabled>
@@ -57,13 +82,15 @@
 
 </Content>
     <Hint>细框注释分隔条</Hint>
+    <ForDelphi>1</ForDelphi>
+    <ForBcb>1</ForBcb>
   </o>
   <o>
     <Enabled>1</Enabled>
     <ShortCut>0</ShortCut>
     <SavePos>0</SavePos>
     <InsertPos>ipBOL</InsertPos>
-    <Caption>类定义</Caption>
+    <Caption>Pascal 类定义</Caption>
     <Content>{ %类名% }
 
   %类名% = class(TObject)
@@ -78,19 +105,23 @@
 
   end;
 </Content>
-    <Hint>新的类定义</Hint>
+    <Hint>新的 Pascal 类定义</Hint>
+    <ForDelphi>1</ForDelphi>
+    <ForBcb>0</ForBcb>
   </o>
   <o>
     <Enabled>1</Enabled>
     <ShortCut>0</ShortCut>
     <SavePos>0</SavePos>
     <InsertPos>ipBOL</InsertPos>
-    <Caption>单元初始化节</Caption>
+    <Caption>Pascal 单元初始化节</Caption>
     <Content>initialization
 
 finalization
 
 </Content>
     <Hint>单元初始化节声明</Hint>
+    <ForDelphi>1</ForDelphi>
+    <ForBcb>0</ForBcb>
   </o>
 </TCnEditorCollection>

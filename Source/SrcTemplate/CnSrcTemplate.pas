@@ -65,6 +65,8 @@ type
     FActionIndex: Integer;
     FSavePos: Boolean;
     FCollection: TCnEditorCollection;
+    FForDelphi: Boolean;
+    FForBcb: Boolean;
   public
     constructor Create(Collection: TCollection); override;
     procedure Assign(Source: TPersistent); override;
@@ -78,6 +80,9 @@ type
     property Content: string read FContent write FContent;
     property Hint: string read FHint write FHint;
     property IconName: string read FIconName write FIconName;
+
+    property ForDelphi: Boolean read FForDelphi write FForDelphi default {$IFDEF BDS} True {$ELSE} {$IFDEF DELPHI} True {$ELSE} False {$ENDIF} {$ENDIF};
+    property ForBcb: Boolean read FForBcb write FForBcb default {$IFDEF BDS} True {$ELSE} {$IFDEF DELPHI} False {$ELSE} True {$ENDIF} {$ENDIF};
   end;
 
 { TCnEditorCollection }
@@ -221,6 +226,21 @@ begin
   FSavePos := False;
   FActionIndex := -1;
   FIconName := SCnSrcTemplateIconName;
+
+{$IFDEF BDS}
+  FForDelphi := True;
+  FForBcb := True;
+{$ELSE}
+  {$IFDEF DELPHI}
+  FForDelphi := True;
+  {$ELSE}
+  FForBcb := True;
+  {$ENDIF}
+{$ENDIF}
+
+{$IFDEF DEBUG}
+  CnDebugger.TraceObject(Self);
+{$ENDIF}
 end;
 
 { TCnEditorCollection }
@@ -404,6 +424,9 @@ procedure TCnSrcTemplate.LoadSettings(Ini: TCustomIniFile);
 begin
   inherited;
   LoadCollection;
+{$IFDEF DEBUG}
+  CnDebugger.TraceCollection(FCollection);
+{$ENDIF}
 end;
 
 procedure TCnSrcTemplate.SaveCollection;
@@ -462,21 +485,45 @@ end;
 procedure TCnSrcTemplate.UpdateActions;
 var
   i: Integer;
+
+  function ItemCanShow(Item: TCnEditorItem): Boolean;
+  begin
+    Result := False;
+    if Item = nil then Exit;
+    if not Item.Enabled then Exit;
+
+{$IFDEF BDS}
+   Result := Item.ForDelphi or Item.ForBcb;
+{$ELSE}
+  {$IFDEF DELPHI}
+  Result := Item.ForDelphi;
+  {$ELSE}
+  Result := Item.ForBcb;
+  {$ENDIF}
+{$ENDIF}
+  end;
 begin
   WizShortCutMgr.BeginUpdate;
   try
     while SubActionCount > FConfigIndex + 1 do
       DeleteSubAction(FConfigIndex + 1);
     for i := 0 to FCollection.Count - 1 do
-      with FCollection[i] do
-        if FEnabled then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.TraceObject(FCollection[i]);
+{$ENDIF}
+      if ItemCanShow(FCollection[i]) then
+      begin
+        with FCollection[i] do
         begin
           FActionIndex := RegisterASubAction(SCnSrcTemplateItem + IntToStr(i),
             FCaption, FShortCut, FHint, FIconName);
           SubActions[FActionIndex].ShortCut := FShortCut;
-        end
-        else
-          FActionIndex := -1;
+        end;
+      end
+      else
+        FCollection[i].FActionIndex := -1;
+    end;
   finally
     WizShortCutMgr.EndUpdate;
   end;
@@ -548,6 +595,8 @@ var
   AEnabled: Boolean;
   ASavePos: Boolean;
   AContent: string;
+  AForDelphi: Boolean;
+  AForBcb: Boolean;
 begin
   ACaption := '';
   AHint := '';
@@ -557,8 +606,21 @@ begin
   AEnabled := True;
   ASavePos := False;
   AContent := '';
+
+{$IFDEF BDS}
+  AForDelphi := True;
+  AForBcb := True;
+{$ELSE}
+  {$IFDEF DELPHI}
+  AForDelphi := True;
+  AForBcb := False;
+  {$ELSE}
+  AForDelphi := False;
+  AForBcb := True;
+  {$ENDIF}
+{$ENDIF}
   if ShowEditorEditForm(ACaption, AHint, AIconName, AShortCut, AInsertPos,
-    AEnabled, ASavePos, AContent) then
+    AEnabled, ASavePos, AContent, AForDelphi, AForBcb) then
     with FWizard.FCollection.Add do
     begin
       FCaption := ACaption;
@@ -569,6 +631,8 @@ begin
       FEnabled := AEnabled;
       FSavePos := ASavePos;
       FContent := AContent;
+      FForDelphi := AForDelphi;
+      FForBcb := AForBcb;
       ListView.Items.Add;
       UpdateListViewItem(ListView.Items.Count - 1);
       ListView.Selected := ListView.Items[ListView.Items.Count - 1];

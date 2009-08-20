@@ -4,7 +4,7 @@
     <ShortCut>0</ShortCut>
     <SavePos>0</SavePos>
     <InsertPos>ipBOF</InsertPos>
-    <Caption>Unit Header</Caption>
+    <Caption>Pascal Unit Header</Caption>
     <Content>{*******************************************************}
 {                                                       }
 {       %SoftName%%ColPos57%}
@@ -14,14 +14,35 @@
 {*******************************************************}
 
 </Content>
-    <Hint>Unit Header</Hint>
+    <Hint>Pascal Unit Header</Hint>
+    <ForDelphi>1</ForDelphi>
+    <ForBcb>0</ForBcb>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>0</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOF</InsertPos>
+    <Caption>C/C++ Unit Header</Caption>
+    <Content>//*****************************************************//
+//                                                     //
+//      %SoftName%%ColPos56%//
+//                                                     //
+//      Copyright (C) %Year% %Company%%ColPos56%//
+//                                                     //
+//*****************************************************//
+
+</Content>
+    <Hint>C/C++ Unit Header</Hint>
+    <ForDelphi>0</ForDelphi>
+    <ForBcb>1</ForBcb>
   </o>
   <o>
     <Enabled>1</Enabled>
     <ShortCut>0</ShortCut>
     <SavePos>0</SavePos>
     <InsertPos>ipProcHead</InsertPos>
-    <Caption>Procedure Header</Caption>
+    <Caption>Pascal Procedure Header</Caption>
     <Content>{-------------------------------------------------------------------------------
   Procedure: %ProcName%
   Author:    %User%
@@ -30,7 +51,9 @@
   Result:    %Result%
 -------------------------------------------------------------------------------}
 </Content>
-    <Hint>Comment for procedure</Hint>
+    <Hint>Comment for Pascal procedure</Hint>
+    <ForDelphi>1</ForDelphi>
+    <ForBcb>0</ForBcb>
   </o>
   <o>
     <Enabled>1</Enabled>
@@ -44,6 +67,8 @@
 
 </Content>
     <Hint>Comment block</Hint>
+    <ForDelphi>1</ForDelphi>
+    <ForBcb>1</ForBcb>
   </o>
   <o>
     <Enabled>1</Enabled>
@@ -57,13 +82,15 @@
 
 </Content>
     <Hint>Comment block 2</Hint>
+    <ForDelphi>1</ForDelphi>
+    <ForBcb>1</ForBcb>
   </o>
   <o>
     <Enabled>1</Enabled>
     <ShortCut>0</ShortCut>
     <SavePos>0</SavePos>
     <InsertPos>ipBOL</InsertPos>
-    <Caption>Class Definition</Caption>
+    <Caption>Pascal Class Definition</Caption>
     <Content>{ %ClassName% }
 
   %ClassName% = class(TObject)
@@ -78,19 +105,23 @@
 
   end;
 </Content>
-    <Hint>New Class Definition</Hint>
+    <Hint>New Pascal Class Definition</Hint>
+    <ForDelphi>1</ForDelphi>
+    <ForBcb>0</ForBcb>
   </o>
   <o>
     <Enabled>1</Enabled>
     <ShortCut>0</ShortCut>
     <SavePos>0</SavePos>
     <InsertPos>ipBOL</InsertPos>
-    <Caption>initialization</Caption>
+    <Caption>Unit initialization</Caption>
     <Content>initialization
 
 finalization
 
 </Content>
     <Hint>initialization</Hint>
+    <ForDelphi>1</ForDelphi>
+    <ForBcb>0</ForBcb>
   </o>
 </TCnEditorCollection>

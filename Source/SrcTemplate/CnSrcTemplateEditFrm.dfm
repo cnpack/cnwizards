@@ -1,6 +1,6 @@
 object CnSrcTemplateEditForm: TCnSrcTemplateEditForm
-  Left = 226
-  Top = 120
+  Left = 363
+  Top = 135
   BorderStyle = bsDialog
   Caption = '源码模板编辑'
   ClientHeight = 445
@@ -50,7 +50,7 @@ object CnSrcTemplateEditForm: TCnSrcTemplateEditForm
     Left = 8
     Top = 8
     Width = 601
-    Height = 97
+    Height = 121
     Caption = '设置(&O)'
     TabOrder = 3
     object lbl2: TLabel
@@ -160,12 +160,28 @@ object CnSrcTemplateEditForm: TCnSrcTemplateEditForm
       Caption = '插入完成后光标回到原来位置。'
       TabOrder = 6
     end
+    object chkForDelphi: TCheckBox
+      Left = 40
+      Top = 96
+      Width = 153
+      Height = 17
+      Caption = '本模板可用于Pascal文件。'
+      TabOrder = 7
+    end
+    object chkForBcb: TCheckBox
+      Left = 200
+      Top = 96
+      Width = 153
+      Height = 17
+      Caption = '本模板可用于C/C++文件。'
+      TabOrder = 8
+    end
   end
   object grp2: TGroupBox
     Left = 8
-    Top = 112
+    Top = 136
     Width = 601
-    Height = 297
+    Height = 273
     Caption = '内容(&M)'
     TabOrder = 4
     object lbl6: TLabel
@@ -179,7 +195,8 @@ object CnSrcTemplateEditForm: TCnSrcTemplateEditForm
       Left = 8
       Top = 44
       Width = 585
-      Height = 241
+      Height = 217
+      Anchors = [akLeft, akTop, akBottom]
       Font.Charset = ANSI_CHARSET
       Font.Color = clWindowText
       Font.Height = -12

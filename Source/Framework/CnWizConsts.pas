@@ -166,11 +166,7 @@ resourcestring
   SCnMsgBoxProjectLastName = 'Auto Saved';
 
   // CnSrcTemplate
-{$IFDEF DELPHI}
   SCnSrcTemplateDataName = 'Editor.cdt';
-{$ELSE}
-  SCnSrcTemplateDataName = 'Editor_CB.cdt';
-{$ENDIF DELPHI}
 
   // CnInputHelper
   SCnPreDefSymbolsFile = 'PreDefSymbols.xml';
@@ -715,11 +711,7 @@ var
   SCnSrcTemplateWizardDelete: string = '您确认要删除该编辑器模板吗？';
   SCnSrcTemplateWizardClear: string = '您确认要删除所有的编辑器模板吗？';
 
-{$IFDEF DELPHI}
   SCnSrcTemplateDataDefName: string = 'Editor_CHS.cdt';
-{$ELSE}
-  SCnSrcTemplateDataDefName: string = 'Editor_CB_CHS.cdt';
-{$ENDIF DELPHI}
 
   SCnEIPCurrPos: string = '当前光标处';
   SCnEIPBOL: string = '当前行行首';
