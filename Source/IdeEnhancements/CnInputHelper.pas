@@ -1796,6 +1796,7 @@ end;
 procedure TCnInputHelper.HideList;
 begin
   FKeyCount := 0;
+  FLastStr := '';
   if IsShowing then
     List.CloseUp;
 end;
