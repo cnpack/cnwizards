@@ -40,14 +40,14 @@ object CnWizAboutForm: TCnWizAboutForm
   end
   object Label4: TLabel
     Left = 96
-    Top = 72
+    Top = 68
     Width = 184
     Height = 13
     Caption = '版权所有: 2001-2009 CnPack 开发组'
   end
   object lblWeb: TLabel
     Left = 96
-    Top = 184
+    Top = 168
     Width = 144
     Height = 13
     Cursor = crHandPoint
@@ -85,7 +85,7 @@ object CnWizAboutForm: TCnWizAboutForm
   end
   object lblBbs: TLabel
     Left = 96
-    Top = 200
+    Top = 184
     Width = 137
     Height = 13
     Cursor = crHandPoint
@@ -107,7 +107,7 @@ object CnWizAboutForm: TCnWizAboutForm
   end
   object Label3: TLabel
     Left = 96
-    Top = 96
+    Top = 88
     Width = 276
     Height = 65
     Caption = 
@@ -116,7 +116,7 @@ object CnWizAboutForm: TCnWizAboutForm
       '网站上获得。'#13#10#13#10'更多信息请查看“授权协议”文件。'
   end
   object imgDonation: TImage
-    Left = 312
+    Left = 328
     Top = 184
     Width = 48
     Height = 48
@@ -346,6 +346,21 @@ object CnWizAboutForm: TCnWizAboutForm
     ShowHint = True
     OnClick = imgDonationClick
   end
+  object lblSource: TLabel
+    Left = 96
+    Top = 200
+    Width = 178
+    Height = 13
+    Cursor = crHandPoint
+    Caption = '源码: http://cnpack.googlecode.com'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clBlue
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    OnClick = lblSourceClick
+  end
   object btnOK: TButton
     Left = 303
     Top = 248
@@ -382,6 +397,7 @@ object CnWizAboutForm: TCnWizAboutForm
       Height = 220
       AutoSize = True
       ClickBlob = 150
+      Radius = 0
       Picture.Data = {
         07544269746D617016420000424D164200000000000036040000280000004600
         0000DC0000000100080000000000E03D0000C40E0000C40E0000000100000000

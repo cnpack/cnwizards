@@ -64,14 +64,15 @@ type
     CnWaterImage1: TCnWaterImage;
     imgDonation: TImage;
     edtVer: TEdit;
+    lblSource: TLabel;
     procedure lblWebClick(Sender: TObject);
     procedure lblEmailClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure lblBbsClick(Sender: TObject);
     procedure btnReportClick(Sender: TObject);
-    procedure lblNewsClick(Sender: TObject);
     procedure btnLicenseClick(Sender: TObject);
     procedure imgDonationClick(Sender: TObject);
+    procedure lblSourceClick(Sender: TObject);
   private
     { Private declarations }
   protected
@@ -125,9 +126,14 @@ begin
   OpenUrl(SCnPackBbsUrl);
 end;
 
-procedure TCnWizAboutForm.lblNewsClick(Sender: TObject);
+procedure TCnWizAboutForm.lblSourceClick(Sender: TObject);
 begin
-  OpenUrl(SCnPackNewsUrl);
+  OpenUrl(SCnPackSourceUrl);
+end;
+
+procedure TCnWizAboutForm.imgDonationClick(Sender: TObject);
+begin
+  OpenUrl(SCnPackDonationUrl);
 end;
 
 procedure TCnWizAboutForm.btnReportClick(Sender: TObject);
@@ -144,11 +150,6 @@ end;
 function TCnWizAboutForm.GetHelpTopic: string;
 begin
   Result := 'License';
-end;
-
-procedure TCnWizAboutForm.imgDonationClick(Sender: TObject);
-begin
-  OpenUrl(SCnPackDonationUrl);
 end;
 
 end.
