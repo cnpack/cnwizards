@@ -19,7 +19,7 @@
 C++Builder/BDS to improve development efficiency.
 
     CnWizards is designed to aide programmers who use Delphi 5 6 7,
-C++Builder 5 6 and BDS 2005 2006, RAD Studio 2007 2009.
+C++Builder 5 6 and BDS 2005 2006, RAD Studio 2007 2009 2010.
 
     The offical version of CnWizards includes three languages: 
 Simplified Chinese, Traditional Chinese and English.
