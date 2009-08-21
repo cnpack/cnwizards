@@ -409,7 +409,7 @@ begin
               CParser.ParseSource(PAnsiChar(Stream.Memory), Stream.Size,
                 CharPos.Line, CharPos.CharIndex, True);
 
-              Result := CParser.CurrentClass;
+              Result := string(CParser.CurrentClass);
               if Pos('::', S) > 0 then
                 Result := Copy(S, 1, Pos('::', S) - 1);
             finally
