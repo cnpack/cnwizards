@@ -2894,6 +2894,7 @@ SCnToolBarCloseHint=You Choose to Close Editor ToolBar.<BR><BR>If You Want to Sh
 SCnLineNumberGotoLine=&Goto Line...
 SCnLineNumberGotoBookMark=&Jump to Bookmark
 SCnLineNumberClearBookMarks=Clear &All Bookmarks
+SCnLineNumberShowIDELineNum=Show IDE's &Line Number
 SCnLineNumberClose=&Hide Line Number
 SCnSrcEditorNavIDEBack=IDE's Go Back (Shift+Click)
 SCnSrcEditorNavIDEForward=IDE's Go Forward (Shift+Click)

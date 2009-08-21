@@ -982,6 +982,7 @@ var
   SCnLineNumberGotoLine: string = '跳至行号(&G)...';
   SCnLineNumberGotoBookMark: string = '跳至书签(&J)';
   SCnLineNumberClearBookMarks: string = '清除所有书签(&R)';
+  SCnLineNumberShowIDELineNum: string = '显示 IDE 行号(&I)';
   SCnLineNumberClose: string = '关闭行号显示(&X)';
   SCnLineNumberGotoCaption: string = '跳至行号';
   SCnLineNumberGotoPrompt: string = '行号：';

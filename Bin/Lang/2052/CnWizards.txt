@@ -2894,6 +2894,7 @@ SCnToolBarCloseHint=您已经选择了关闭编辑器工具栏。<BR><BR>如果您以后需要重新显示
 SCnLineNumberGotoLine=跳至行号(&G)...
 SCnLineNumberGotoBookMark=跳至书签(&J)
 SCnLineNumberClearBookMarks=清除所有书签(&R)
+SCnLineNumberShowIDELineNum=显示 IDE 行号(&I)
 SCnLineNumberClose=关闭行号显示(&X)
 SCnSrcEditorNavIDEBack=IDE 后退 (Shift+Click)
 SCnSrcEditorNavIDEForward=IDE 前进 (Shift+Click)

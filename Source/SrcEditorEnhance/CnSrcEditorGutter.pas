@@ -57,6 +57,9 @@ type
     FEditControl: TControl;
     FEditWindow: TCustomForm;
     FMenu: TPopupMenu;
+{$IFDEF BDS}
+    FIDELineNumMenu: TMenuItem;
+{$ENDIF}
     FOldLineWidth: Integer;
     FPosInfo: TEditControlInfo;
     function GetTextHeight: Integer;
@@ -66,6 +69,9 @@ type
     procedure OnEnhConfig(Sender: TObject);
     procedure OnGotoLine(Sender: TObject);
     procedure OnLineClose(Sender: TObject);
+{$IFDEF BDS}
+    procedure OnShowIDELineNum(Sender: TObject);
+{$ENDIF}
     procedure SubItemClick(Sender: TObject);
     function GetLineCountRect: TRect;
   protected
@@ -79,6 +85,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure UpdateStatus;
+    procedure UpdateStatusOnIdle(Sender: TObject);
     procedure LanguageChanged(Sender: TObject);
     property EditControl: TControl read FEditControl write FEditControl;
     property EditWindow: TCustomForm read FEditWindow write FEditWindow;
@@ -151,6 +158,7 @@ uses
 
 const
   SCnSrcEditorGutter = 'CnSrcEditorGutter';
+  csIDEShowLineNumbers = 'ShowLineNumbers';
 
   csBevelWidth = 4;
   csGutter = 'Gutter';
@@ -215,7 +223,7 @@ begin
   if FGutterMgr.CanShowGutter and (Editor.EditControl = EditControl) then
   begin
     if ChangeType * [ctView] <> [] then
-      UpdateStatus
+      CnWizNotifierServices.ExecuteOnApplicationIdle(UpdateStatusOnIdle)
     else if ChangeType * [ctWindow, ctCurrLine, ctFont, ctVScroll,
       ctElided, ctUnElided] <> [] then
       Repaint;
@@ -263,6 +271,11 @@ begin
   // 当前行字体可能更宽，免得绘制不足，取宽者
   Width := MaxRowWidth + csBevelWidth + 1; // 多空一点点
   Invalidate;
+end;
+
+procedure TCnSrcEditorGutter.UpdateStatusOnIdle(Sender: TObject);
+begin
+  UpdateStatus;
 end;
 
 function TCnSrcEditorGutter.GetLineCountRect: TRect;
@@ -446,6 +459,9 @@ begin
   AddSepMenuItem(Menu.Items);
   AddMenuItem(Menu.Items, SCnEditorEnhanceConfig, OnEnhConfig);
   AddSepMenuItem(Menu.Items);
+{$IFDEF BDS}
+  FIDELineNumMenu := AddMenuItem(Menu.Items, SCnLineNumberShowIDELineNum, OnShowIDELineNum);
+{$ENDIF}
   AddMenuItem(Menu.Items, SCnLineNumberClose, OnLineClose);
 end;
 
@@ -454,6 +470,9 @@ var
   EditView: IOTAEditView;
   Item, SubItem: TMenuItem;
   I: Integer;
+{$IFDEF BDS}
+  Options: IOTAEnvironmentOptions;
+{$ENDIF}
 begin
   EditView := EditControlWrapper.GetEditView(EditControl);
   if Assigned(EditView) then
@@ -479,6 +498,17 @@ begin
       SubItem.Enabled := EditView.BookmarkPos[I].Line > 0
     end;
   end;
+
+{$IFDEF BDS}
+  Options := CnOtaGetEnvironmentOptions;
+  if Options <> nil then
+  begin
+    FIDELineNumMenu.Checked := Options.GetOptionValue(csIDEShowLineNumbers);
+    FIDELineNumMenu.Visible := True;
+  end
+  else
+    FIDELineNumMenu.Visible := False;
+{$ENDIF}
 end;
 
 procedure TCnSrcEditorGutter.OnClearBookMarks(Sender: TObject);
@@ -522,6 +552,21 @@ begin
     EditView.Paint;
   end;
 end;
+
+{$IFDEF BDS}
+procedure TCnSrcEditorGutter.OnShowIDELineNum(Sender: TObject);
+var
+  AShow: Boolean;
+  Options: IOTAEnvironmentOptions;
+begin
+  Options := CnOtaGetEnvironmentOptions;
+  if Options <> nil then
+  begin
+    AShow := Options.GetOptionValue(csIDEShowLineNumbers);
+    Options.SetOptionValue(csIDEShowLineNumbers, not AShow);
+  end;
+end;
+{$ENDIF}
 
 procedure TCnSrcEditorGutter.OnLineClose(Sender: TObject);
 begin
