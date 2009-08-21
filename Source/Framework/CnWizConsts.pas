@@ -156,6 +156,8 @@ resourcestring
 {$ENDIF}
 {$ENDIF}
 
+  SCnWizOnlineHelpUrl = 'http://help.cnpack.org/cnwizards/';
+
   // CnWizUpgrade
   SCnWizDefUpgradeURL = 'http://upgrade.cnpack.org/cnwizards/';
   SCnWizDefNightlyBuildUrl = 'http://upgrade.cnpack.org/cnwizards/latest/';

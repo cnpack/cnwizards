@@ -1135,6 +1135,21 @@ begin
   end;
 end;
 
+// 取帮助主题是否存在
+function TopicHelpFileExists(Url: string): Boolean;
+var
+  i: Integer;
+begin
+  i := AnsiPos('::/', Url);
+  if i > 0 then
+  begin
+    Delete(Url, i, MaxInt);
+    Result := FileExists(WizOptions.HelpPath + Url);
+  end
+  else
+    Result := True;  
+end;  
+
 // 显示指定主题的帮助内容
 procedure ShowHelp(const Topic: string);
 var
@@ -1145,14 +1160,19 @@ begin
   Url := GetTopicHelpUrl(Topic);
   if Url <> '' then
   begin
-    Url := 'mk:@MSITStore:' + WizOptions.HelpPath + Url;
-    ZeroMemory(@si, SizeOf(si));
-    si.cb := SizeOf(si);
-    ZeroMemory(@pi, SizeOf(pi));
-    CreateProcess(nil, PChar('hh ' + Url),
-      nil, nil, False, 0, nil, nil, si, pi);
-    if pi.hProcess <> 0 then CloseHandle(pi.hProcess);
-    if pi.hThread <> 0 then CloseHandle(pi.hThread);
+    if TopicHelpFileExists(Url) then
+    begin
+      Url := 'mk:@MSITStore:' + WizOptions.HelpPath + Url;
+      ZeroMemory(@si, SizeOf(si));
+      si.cb := SizeOf(si);
+      ZeroMemory(@pi, SizeOf(pi));
+      CreateProcess(nil, PChar('hh ' + Url),
+        nil, nil, False, 0, nil, nil, si, pi);
+      if pi.hProcess <> 0 then CloseHandle(pi.hProcess);
+      if pi.hThread <> 0 then CloseHandle(pi.hThread);
+    end
+    else
+      OpenUrl(SCnWizOnlineHelpUrl + Url);      
   end
   else
     ErrorDlg(SCnNoHelpofThisLang);
