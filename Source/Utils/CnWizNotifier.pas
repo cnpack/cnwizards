@@ -1676,8 +1676,9 @@ var
   I: Integer;
 begin
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('AppEventNotify: %s',
-    [GetEnumName(TypeInfo(TCnWizAppEventType), Ord(EventType))]);
+  if EventType <> aeHint then
+    CnDebugger.LogFmt('AppEventNotify: %s',
+      [GetEnumName(TypeInfo(TCnWizAppEventType), Ord(EventType))]);
 {$ENDIF}
   if not IdeClosing and (FAppEventNotifiers <> nil) then
   begin

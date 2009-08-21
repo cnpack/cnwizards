@@ -673,7 +673,7 @@ procedure TCnSrcEditorEnhance.EditorChanged(Editor: TEditorObject;
   ChangeType: TEditorChangeTypes);
 begin
   if Active and FToolbarMgr.Active and
-    (ChangeType * [ctTabSetChanged, ctViewBarChanged] <> []) then
+    (ChangeType * [ctTopEditorChanged] <> []) then
     CheckToolBarEnable;
 end;
 

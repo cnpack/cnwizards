@@ -571,12 +571,15 @@ procedure TCnSrcEditorGutter.OnShowIDELineNum(Sender: TObject);
 var
   AShow: Boolean;
   Options: IOTAEnvironmentOptions;
+  i: Integer;
 begin
   Options := CnOtaGetEnvironmentOptions;
   if Options <> nil then
   begin
     AShow := Options.GetOptionValue(csIDEShowLineNumbers);
     Options.SetOptionValue(csIDEShowLineNumbers, not AShow);
+    for i := 0 to EditControlWrapper.EditorCount - 1 do
+      EditControlWrapper.Editors[i].IDEShowLineNumberChanged;
   end;
 end;
 {$ENDIF}

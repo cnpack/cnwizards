@@ -82,11 +82,8 @@ type
     ctBlock,                  // 块变更
     ctModified,               // 编辑内容修改
     ctTopEditorChanged,       // 当前显示的上层编辑器变更
-{$IFDEF BDS}    
+{$IFDEF BDS}
     ctLineDigit,              // 编辑器总行数位数变化，如99到100
-    ctViewBarChanged,         // BDS 下底部的 TabSet 改变通知
-    ctTabSetChanged,          // BDS 下的 TIDEGradientTabSet 改变通知，
-                              // 因包含设计器，所以以上两者不等同于 ctView
 {$ENDIF}
     ctElided,                 // 编辑器行折叠，有限支持
     ctUnElided                // 编辑器行展开，有限支持
@@ -132,6 +129,7 @@ type
     constructor Create(AEditControl: TControl; AEditView: IOTAEditView);
     destructor Destroy; override;
     function EditorIsOnTop: Boolean;
+    procedure IDEShowLineNumberChanged;
     property Context: TEditorContext read FContext;
     property EditControl: TControl read FEditControl;
     property EditWindow: TCustomForm read FEditWindow;
@@ -192,10 +190,6 @@ type
     FPaintNotifyAvailable: Boolean;
     FPaintLineHook: TCnMethodHook;
     FSetEditViewHook: TCnMethodHook;
-{$IFDEF BDS}
-    FTabsChangeTypes: TEditorChangeTypes;
-    FTabsChangedHook, FViewBarChangedHook: TCnMethodHook;
-{$ENDIF}
     FEditorList: TObjectList;
     FEditControlList: TList;
     FOptionChanged: Boolean;
@@ -234,9 +228,6 @@ type
     procedure DoAfterUnElide(EditControl: TControl); // 暂不支持
     procedure DoEditControlNotify(EditControl: TControl; Operation: TOperation);
     procedure DoEditorChange(Editor: TEditorObject; ChangeType: TEditorChangeTypes);
-{$IFDEF BDS}
-    procedure DoTabSetIdleChange(Sender: TObject); // 在 IDLE 时被调用
-{$ENDIF}
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
     procedure CheckNewEditor(EditControl: TControl; View: IOTAEditView);
@@ -372,15 +363,10 @@ begin
   Result := FEditControlWrapper;
 end;
 
-{$IFDEF BDS}
-
-// 获得一数字有几位
 function GetLineDigit(LineCount: Integer): Integer;
 begin
   Result := Length(IntToStr(LineCount));
 end;
-
-{$ENDIF}
 
 { TEditorObject }
 
@@ -462,6 +448,11 @@ begin
   end;  
 end;
 
+procedure TEditorObject.IDEShowLineNumberChanged;
+begin
+  FGutterChanged := True;
+end;
+
 function TEditorObject.EditorIsOnTop: Boolean;
 begin
   Result := (EditControl <> nil) and (GetTopEditor = EditControl);
@@ -518,9 +509,6 @@ type
 {$IFDEF BDS}
   TPointFromEdPosProc = function(Self: TObject; const EdPos: TOTAEditPos;
     B1, B2: Boolean): TPoint;
-  TTabsChangedProc = procedure(Self: TObject; Sender: TObject);
-  TViewBarChangedProc = procedure(Self: TObject; Sender: TObject;
-    NewTab: Integer; var AllowChange: Boolean);
 {$ENDIF}
 
 {$IFDEF COMPILER7_UP}
@@ -542,8 +530,6 @@ var
   LineIsElided: TLineIsElidedProc = nil;
 {$IFDEF BDS}
   PointFromEdPos: TPointFromEdPosProc = nil;
-  TabsChanged: TTabsChangedProc = nil;
-  ViewBarChanged: TViewBarChangedProc = nil;
 {$ENDIF}
 
   PaintLineLock: TRTLCriticalSection;
@@ -561,57 +547,6 @@ begin
         Result := Result + ', ' + GetEnumName(TypeInfo(TEditorChangeType), Ord(AType));
   Result := '[' + Result + ']';
 end;
-
-{$IFDEF BDS}
-
-// 替换掉的 TabsChanged 函数，是 TIDEGradientTabSet 的 OnChange 处理事件
-procedure MyTabsChanged(Self: TObject; Sender: TObject);
-begin
-  FEditControlWrapper.FTabsChangedHook.UnhookMethod;
-  try
-    try
-      TabsChanged(Self, Sender);
-    except
-      on E: Exception do
-        DoHandleException(E.Message);
-    end;
-  finally
-    FEditControlWrapper.FTabsChangedHook.HookMethod;
-  end;
-
-{$IFDEF DEBUG}
-  CnDebugger.LogMsg('MyTabsChanged');
-{$ENDIF}
-  // OnChanged 事件调用完后，编辑器还没刷新，所以延迟到 Idle 时才通知
-  FEditControlWrapper.FTabsChangeTypes := [ctTabSetChanged];
-  CnWizNotifierServices.ExecuteOnApplicationIdle(FEditControlWrapper.DoTabSetIdleChange);
-end;
-
-// 替换掉的 TabsChanged 函数，是 TIDEGradientTabSet 的 OnChange 处理事件
-procedure MyViewBarChanged(Self: TObject; Sender: TObject;
-  NewTab: Integer; var AllowChange: Boolean);
-begin
-  FEditControlWrapper.FViewBarChangedHook.UnhookMethod;
-  try
-    try
-      ViewBarChanged(Self, Sender, NewTab, AllowChange);
-    except
-      on E: Exception do
-        DoHandleException(E.Message);
-    end;
-  finally
-    FEditControlWrapper.FViewBarChangedHook.HookMethod;
-  end;
-
-{$IFDEF DEBUG}
-  CnDebugger.LogMsg('MyViewBarChanged');
-{$ENDIF}
-  // OnChanged 事件调用完后，编辑器还没刷新，所以延迟到 Idle 时才通知
-  FEditControlWrapper.FTabsChangeTypes := [ctViewBarChanged];
-  CnWizNotifierServices.ExecuteOnApplicationIdle(FEditControlWrapper.DoTabSetIdleChange);
-end;
-
-{$ENDIF}
 
 // 替换掉的 TCustomEditControl.PaintLine 函数
 function MyPaintLine(Self: TObject; Ek: Pointer; LineNum, LogicLineNum, V2: Integer): Integer;
@@ -724,12 +659,6 @@ begin
     FPaintLineHook.Free;
   if FSetEditViewHook <> nil then
     FSetEditViewHook.Free;
-{$IFDEF BDS}
-  if FTabsChangedHook <> nil then
-    FTabsChangedHook.Free;
-  if FViewBarChangedHook <> nil then
-    FViewBarChangedHook.Free;
-{$ENDIF}
   FEditControlList.Free;
   FEditorList.Free;
 
@@ -776,16 +705,6 @@ begin
 
     PointFromEdPos := GetBplMethodAddress(GetProcAddress(CorIdeModule, SPointFromEdPosName));
     Assert(Assigned(PointFromEdPos), 'Failed to load PointFromEdPos from CorIdeModule');
-
-    TabsChanged := GetBplMethodAddress(GetProcAddress(CorIdeModule, STabsChangedName));
-    Assert(Assigned(TabsChanged), 'Failed to load TabsChanged from CorIdeModule');
-
-    FTabsChangedHook := TCnMethodHook.Create(@TabsChanged, @MyTabsChanged);
-
-    ViewBarChanged := GetBplMethodAddress(GetProcAddress(CorIdeModule, SViewBarChangedName));
-    Assert(Assigned(ViewBarChanged), 'Failed to load ViewBarChanged from CorIdeModule');
-
-    FViewBarChangedHook := TCnMethodHook.Create(@ViewBarChanged, @MyViewBarChanged);
   {$ENDIF}
 
     SetEditView := GetBplMethodAddress(GetProcAddress(CorIdeModule, SSetEditViewName));
@@ -1028,11 +947,6 @@ begin
 {$IFDEF BDS}
   if Context.LineDigit <> OldContext.LineDigit then
     Include(Result, ctLineDigit);
-  if FTabsChangeTypes * [ctTabSetChanged] <> [] then
-  begin
-    Include(Result, ctTabSetChanged);
-    FTabsChangeTypes := [];
-  end;
 {$ENDIF}
 
   // 有时候 EditBuffer 修改后时间未变化
@@ -1559,33 +1473,11 @@ begin
 end;
 
 {$IFDEF BDS}
-
 function TCnEditControlWrapper.GetPointFromEdPos(EditControl: TControl;
   APos: TOTAEditPos): TPoint;
 begin
   if Assigned(PointFromEdPos) then
     Result := PointFromEdPos(EditControl, APos, True, True);
-end;
-
-procedure TCnEditControlWrapper.DoTabSetIdleChange(Sender: TObject); // 在 IDLE 时被调用
-var
-  Idx: Integer;
-  Editor: TEditorObject;
-  EditControl: TControl;
-begin
-  if FTabsChangeTypes <> [] then
-  begin
-    EditControl := GetTopMostEditControl;
-    Idx := IndexOfEditor(EditControl);
-    if Idx >= 0 then
-      Editor := Editors[Idx]
-    else
-      Editor := nil;
-
-    if Editor <> nil then
-      DoEditorChange(Editor, FTabsChangeTypes);
-    FTabsChangeTypes := [];
-  end;
 end;
 {$ENDIF}
 
