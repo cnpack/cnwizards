@@ -174,7 +174,7 @@ const
 
   SACnRegIDEEntries: array[TCnIDEs] of string =
     ('Delphi\5.0', 'Delphi\6.0', 'Delphi\7.0', 'BDS\2.0', 'BDS\3.0', 'BDS\4.0',
-    'BDS\5.0', 'BDS\6.0', 'C++Builder\5.0', 'C++Builder\6.0');
+    'BDS\5.0', 'BDS\6.0', 'BDS\7.0', 'C++Builder\5.0', 'C++Builder\6.0');
   SCnRegHisProject = '\Closed Projects';
   SCnRegHisFiles = '\Closed Files';
 
@@ -277,7 +277,7 @@ begin
       lbxBackupOptions.Checked[I] := True;
 
     if lbxSelectApp.ItemIndex in [Ord(atBDS2005), Ord(atBDS2006), Ord(atDelphi2007),
-      Ord(atDelphi2009)] then // BDS 2005, 2006, 2007, 2009  的菜单模板和对象库不分开了。
+      Ord(atDelphi2009), Ord(atDelphi2010)] then // BDS 2005, 2006, 2007, 2009  的菜单模板和对象库不分开了。
     begin
       lbxBackupOptions.Checked[0] := True;
       lbxBackupOptions.ItemEnabled[0] := False;
@@ -627,7 +627,7 @@ begin
       Canvas.Font.Color := clGray;
       
     // 图像
-    il16.Draw(Canvas, Rect.Left + 3, Rect.Top + 2, Index + 10); // 前面 9 个 IDE 图标
+    il16.Draw(Canvas, Rect.Left + 3, Rect.Top + 2, Index + Integer(High(TAbiType)) + 1); // 前面 10 个 IDE 图标
     // 绘制出文字
     SetBkMode(Canvas.Handle, TRANSPARENT);
     Canvas.TextOut(Rect.Left + 22, Rect.Top + (Rect.Bottom
@@ -845,6 +845,9 @@ begin
         IDEHistories[IDE].Projects.Clear;
         for I := 0 to Strs.Count - 1 do
         begin
+          if Strs[I] = 'Max Closed Files' then //D2010后加了此项控制最大数
+            Continue;
+
           with IDEHistories[IDE].Projects.Add do
           begin
             EntryName := Strs[I];
@@ -864,6 +867,9 @@ begin
         IDEHistories[IDE].Files.Clear;
         for I := 0 to Strs.Count - 1 do
         begin
+          if Strs[I] = 'Max Closed Files' then //D2010后加了此项控制最大数
+            Continue;
+            
           with IDEHistories[IDE].Files.Add do
           begin
             EntryName := Strs[I];
@@ -1231,7 +1237,7 @@ end;
 
 function TCnIdeBRMainForm.GetRegIDEBase(IDE: TCnIDEs): string;
 begin
-  if IDE = ciDelphi12 then
+  if Integer(IDE) >= Integer(ciDelphi12) then
     Result := SCnRegIDEBase12
   else
     Result := SCnRegIDEBase;

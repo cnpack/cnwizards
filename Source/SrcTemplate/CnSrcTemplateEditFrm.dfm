@@ -153,7 +153,7 @@ object CnSrcTemplateEditForm: TCnSrcTemplateEditForm
       TabOrder = 0
     end
     object chkSavePos: TCheckBox
-      Left = 200
+      Left = 216
       Top = 72
       Width = 313
       Height = 17
@@ -163,13 +163,13 @@ object CnSrcTemplateEditForm: TCnSrcTemplateEditForm
     object chkForDelphi: TCheckBox
       Left = 40
       Top = 96
-      Width = 153
+      Width = 169
       Height = 17
       Caption = '本模板可用于Pascal文件。'
       TabOrder = 7
     end
     object chkForBcb: TCheckBox
-      Left = 200
+      Left = 216
       Top = 96
       Width = 153
       Height = 17

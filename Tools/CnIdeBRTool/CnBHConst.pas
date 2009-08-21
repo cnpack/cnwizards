@@ -36,29 +36,33 @@ unit CnBHConst;
 
 interface
 
-//---------------------------------------------------------------------------
 var
-  g_strAppName: array [0..9] of string =
+  g_strAppName: array [0..10] of string =
   (
       'C++Builder 5.0 ', 'C++Builder 6.0 ', 'Delphi 5.0 ', 'Delphi 6.0 ',
       'Delphi 7.0 ', 'Delphi 8.0 ', 'BDS 2005 ', 'BDS 2006 ', 'RAD Studio 2007',
-      'RAD Studio 2009'
+      'RAD Studio 2009', 'RAD Studio 2010'
   );
-  g_strAppAbName: array[0..9] of string =
+
+  g_strAppAbName: array[0..10] of string =
   (
       'BCB5', 'BCB6', 'Delphi5', 'Delphi6', 'Delphi7',
       'Delphi8', 'BDS2005', 'BDS2006', 'RADStudio2007',
-      'RADStudio2009'
+      'RADStudio2009', 'RADStudio2010'
   );
-  g_strRegPath: array[0..9] of string =
+
+  g_strRegPath: array[0..10] of string =
   (
       'C++Builder\5.0', 'C++Builder\6.0', 'Delphi\5.0', 'Delphi\6.0',
-      'Delphi\7.0', 'BDS\2.0', 'BDS\3.0', 'BDS\4.0', 'BDS\5.0', 'BDS\6.0'
+      'Delphi\7.0', 'BDS\2.0', 'BDS\3.0', 'BDS\4.0', 'BDS\5.0', 'BDS\6.0',
+      'BDS\7.0'
   );
+
   g_strOpResult: array[0..1] of string =
   (
       '失败！！！', '成功。'
   );
+
   g_strAbiOptions: array[0..3] of string =
   (
       '代码模板 (Code Templates)',
@@ -66,6 +70,7 @@ var
       'IDE 配置信息 (IDE Configuration)',
       '菜单模板 (Menu Templates)'
   );
+  
   g_strObjReps: array[0..9] of string =
   (
       'Type', 'Name', 'Page', 'Icon', 'Description', 'Author',

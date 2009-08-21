@@ -230,8 +230,6 @@ end ;
 function ChkNoFixupIn(CodePtr:PChar; Size: Cardinal): boolean;
 {Result: false - something wrong, true - Ok}
 var
-  Fx: PFixupRec;
-  F: Byte;
   Ofs: Cardinal;
 begin
   Result := false;
