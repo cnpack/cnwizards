@@ -262,7 +262,7 @@ var
 
   SCnDebugViewerAboutCaption: string = '关于';
   SCnDebugViewerAbout: string =
-    'CnDebugViewer 调试信息查看工具 1.3' + #13#10 +
+    'CnDebugViewer 调试信息查看工具 1.4' + #13#10 +
     '' + #13#10 +
     '该工具用来查看 CnDebug 单元输出的调试信息。' + #13#10 +
     '' + #13#10 +
