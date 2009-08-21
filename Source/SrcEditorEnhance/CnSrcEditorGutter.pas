@@ -39,8 +39,6 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFNDEF BDS}
-
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms, ToolsAPI,
   IniFiles, CnEditControlWrapper, CnWizNotifier, CnIni, CnPopupMenu;
@@ -71,6 +69,9 @@ type
     procedure SubItemClick(Sender: TObject);
     function GetLineCountRect: TRect;
   protected
+{$IFDEF BDS}
+    procedure SetEnabled(Value: Boolean); override;
+{$ENDIF}
     procedure Click; override;
     procedure InitPopupMenu;
     procedure Paint; override;
@@ -153,7 +154,13 @@ const
 
   csBevelWidth = 4;
   csGutter = 'Gutter';
+{$IFDEF BDS}
+  csShowLineNumber = 'ShowLineNumberBDS';
+  csShowLineNumberDef = True;
+{$ELSE}
   csShowLineNumber = 'ShowLineNumber';
+  csShowLineNumberDef = True;
+{$ENDIF}
   csFont = 'Font';
   csCurrFont = 'CurrFont';
   csShowLineCount = 'ShowLineCount';
@@ -190,6 +197,13 @@ end;
 // 状态更新
 //------------------------------------------------------------------------------
 
+{$IFDEF BDS}
+procedure TCnSrcEditorGutter.SetEnabled(Value: Boolean);
+begin
+// 什么也不做，以阻挡 BDS 下切换页面时 Disable 工具栏的操作
+end;
+{$ENDIF}
+
 function TCnSrcEditorGutter.GetTextHeight: Integer;
 begin
   Result := EditControlWrapper.GetCharHeight;
@@ -202,13 +216,15 @@ begin
   begin
     if ChangeType * [ctView] <> [] then
       UpdateStatus
-    else if ChangeType * [ctWindow, ctCurrLine, ctFont, ctVScroll] <> [] then
-      Invalidate;
+    else if ChangeType * [ctWindow, ctCurrLine, ctFont, ctVScroll,
+      ctElided, ctUnElided] <> [] then
+      Repaint;
   end;
 end;
 
 procedure TCnSrcEditorGutter.UpdateStatus;
 var
+  EditorObj: TEditorObject;
   MaxRowWidth, MaxCurRowWidth: Integer;
   EndLine: Integer;
 
@@ -221,11 +237,13 @@ begin
 
   if FGutterMgr.AutoWidth then
   begin
+    EditorObj := EditControlWrapper.GetEditorObject(EditControl);
+    Assert(Assigned(EditorObj));
     FPosInfo := EditControlWrapper.GetEditControlInfo(EditControl);
     if FGutterMgr.ShowLineCount then
       EndLine := FPosInfo.LineCount
     else
-      EndLine := Min(FPosInfo.TopLine + FPosInfo.LinesInWindow, FPosInfo.LineCount);
+      EndLine := EditorObj.ViewBottomLine;
     MaxRowWidth := Max(GetNumWidth(Length(IntToStr(EndLine))),
       GetNumWidth(FGutterMgr.MinWidth));
 
@@ -258,7 +276,8 @@ procedure TCnSrcEditorGutter.Paint;
 var
   R: TRect;
   StrNum: string;
-  I, TextHeight, EndRow, MaxRow: Integer;
+  I, Idx, TextHeight, MaxRow: Integer;
+  EditorObj: TEditorObject;
 begin
   if FPainting or not Visible or (EditControl = nil) or (Parent = nil) then
     Exit;
@@ -268,17 +287,16 @@ begin
     TextHeight := EditControlWrapper.GetCharHeight;
     if TextHeight > 0 then
     begin
+      EditorObj := EditControlWrapper.GetEditorObject(EditControl);
+      Assert(Assigned(EditorObj));
       FPosInfo := EditControlWrapper.GetEditControlInfo(EditControl);
-
-      with FPosInfo do
-        EndRow := Min(TopLine + LinesInWindow, LineCount);
 
       if FGutterMgr.AutoWidth then
       begin
         if FGutterMgr.ShowLineCount then
           MaxRow := FPosInfo.LineCount
         else
-          MaxRow := EndRow;
+          MaxRow := EditorObj.ViewBottomLine;
         if (OldLineWidth <> Length(IntToStr(MaxRow))) then
         begin
           OldLineWidth := Length(IntToStr(MaxRow));
@@ -288,16 +306,16 @@ begin
       end;
 
       Canvas.Brush.Style := bsClear;
-      for I := FPosInfo.TopLine to EndRow do
+      for I := 0 to EditorObj.ViewLineCount - 1 do
       begin
-        if I <> FPosInfo.CaretY then
+        Idx := EditorObj.ViewLineNumber[I];
+        if Idx <> FPosInfo.CaretY then
           Canvas.Font := FGutterMgr.Font
         else
           Canvas.Font := FGutterMgr.CurrFont;
 
-        StrNum := IntToStr(I);
-        R := Rect(1, (I - FPosInfo.TopLine) * TextHeight, Width - csBevelWidth,
-          (I - FPosInfo.TopLine + 1) * TextHeight);
+        StrNum := IntToStr(Idx);
+        R := Rect(1, I * TextHeight, Width - csBevelWidth, (I + 1) * TextHeight);
 
         DrawText(Canvas.Handle, PChar(StrNum), Length(StrNum), R, DT_VCENTER or
           DT_RIGHT);
@@ -339,6 +357,7 @@ var
   ID: Integer;
   EditPos, SavePos: TOTAEditPos;
   Pt: TPoint;
+  EditorObj: TEditorObject;
 
   function GetBlankBookmarkID: Integer;
   var
@@ -379,7 +398,12 @@ begin
     end
     else
     begin
-      Row := EditView.TopRow + Pt.y div GetTextHeight;
+      Row := Pt.y div GetTextHeight;
+      EditorObj := EditControlWrapper.GetEditorObject(EditControl);
+      if (EditorObj <> nil) and (Row < EditorObj.ViewLineCount) then
+        Row := EditorObj.ViewLineNumber[Row]
+      else
+        Row := EditView.TopRow + Row;
       SavePos := EditView.CursorPos;
       EditPos := EditView.CursorPos;
       EditPos.Line := Row;
@@ -646,7 +670,7 @@ procedure TCnSrcEditorGutterMgr.LoadSettings(Ini: TCustomIniFile);
 begin
   with TCnIniFile.Create(Ini) do
   try
-    FShowLineNumber := ReadBool(csGutter, csShowLineNumber, True);
+    FShowLineNumber := ReadBool(csGutter, csShowLineNumber, csShowLineNumberDef);
     FShowLineCount := ReadBool(csGutter, csShowLineCount, True);
     FFont := ReadFont(csGutter, csFont, FFont);
     FCurrFont := ReadFont(csGutter, csCurrFont, FCurrFont);
@@ -728,11 +752,5 @@ procedure TCnSrcEditorGutterMgr.SetMinWidth(const Value: TCnGutterWidth);
 begin
   FMinWidth := TrimInt(Value, Low(TCnGutterWidth), High(TCnGutterWidth));
 end;
-
-{$ELSE}
-
-implementation
-
-{$ENDIF}
 
 end.

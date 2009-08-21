@@ -179,8 +179,8 @@ type
     FEditorMisc: TCnSrcEditorMisc;
     FToolbarMgr: TCnSrcEditorToolBarMgr;
 
-  {$IFNDEF BDS}
     FGutterMgr: TCnSrcEditorGutterMgr;
+  {$IFNDEF BDS}
     FNavMgr: TCnSrcEditorNavMgr;
   {$ENDIF}
 
@@ -205,8 +205,8 @@ type
     procedure Config; override;
     procedure LanguageChanged(Sender: TObject); override;
 
-  {$IFNDEF BDS}
     property GutterMgr: TCnSrcEditorGutterMgr read FGutterMgr;
+  {$IFNDEF BDS}
     property NavMgr: TCnSrcEditorNavMgr read FNavMgr;
   {$ENDIF}
   
@@ -404,9 +404,9 @@ begin
     CreateEditorToolBarServiceProc();
 
   FToolbarMgr.OnEnhConfig := OnEnhConfig;
-{$IFNDEF BDS}
   FGutterMgr := TCnSrcEditorGutterMgr.Create;
   FGutterMgr.OnEnhConfig := OnEnhConfig;
+{$IFNDEF BDS}
   FNavMgr := TCnSrcEditorNavMgr.Create;
   FNavMgr.OnEnhConfig := OnEnhConfig;
 {$ENDIF}
@@ -428,8 +428,8 @@ begin
   FToolbarMgr.Free;
   
   CnEditorToolBarService := nil;
-{$IFNDEF BDS}
   FGutterMgr.Free;
+{$IFNDEF BDS}
   FNavMgr.Free;
 {$ENDIF}
   FBlockTools.Free;
@@ -444,8 +444,8 @@ begin
   FToolbarMgr.LanguageChanged(Sender);
   if CnEditorToolBarService <> nil then
     CnEditorToolBarService.LanguageChanged;
-{$IFNDEF BDS}
   FGutterMgr.LanguageChanged(Sender);
+{$IFNDEF BDS}
   FNavMgr.LanguageChanged(Sender);
 {$ENDIF}
   FBlockTools.LanguageChanged(Sender);
@@ -460,8 +460,8 @@ procedure TCnSrcEditorEnhance.LoadSettings(Ini: TCustomIniFile);
 begin
   FEditorMisc.LoadSettings(Ini);
   FToolbarMgr.LoadSettings(Ini);
-{$IFNDEF BDS}
   FGutterMgr.LoadSettings(Ini);
+{$IFNDEF BDS}
   FNavMgr.LoadSettings(Ini);
 {$ENDIF}
   FBlockTools.LoadSettings(Ini);
@@ -472,8 +472,8 @@ procedure TCnSrcEditorEnhance.SaveSettings(Ini: TCustomIniFile);
 begin
   FEditorMisc.SaveSettings(Ini);
   FToolbarMgr.SaveSettings(Ini);
-{$IFNDEF BDS}
   FGutterMgr.SaveSettings(Ini);
+{$IFNDEF BDS}
   FNavMgr.SaveSettings(Ini);
 {$ENDIF}
   FBlockTools.SaveSettings(Ini);
@@ -485,8 +485,8 @@ begin
   inherited;
   FEditorMisc.Active := Value;
   FToolbarMgr.Active := Value;
-{$IFNDEF BDS}
   FGutterMgr.Active := Value;
+{$IFNDEF BDS}
   FNavMgr.Active := Value;
 {$ENDIF}
   FBlockTools.Active := Value;
@@ -528,7 +528,6 @@ begin
     chkShowToolBar.Checked := FToolbarMgr.ShowToolBar;
     chkToolBarWrap.Checked := FToolbarMgr.Wrapable;
 
-  {$IFNDEF BDS}
     chkShowLineNumber.Checked := FGutterMgr.ShowLineNumber;
     chkShowLineCount.Checked := FGutterMgr.ShowLineCount;
     rbLinePanelAutoWidth.Checked := FGutterMgr.AutoWidth;
@@ -537,14 +536,6 @@ begin
     dlgFontCurrLine.Font := FGutterMgr.CurrFont;
     seLinePanelMinWidth.Value := FGutterMgr.MinWidth;
     seLinePanelFixWidth.Value := FGutterMgr.FixedWidth;
-  {$ELSE}
-    chkShowLineNumber.Enabled := False;
-    chkShowLineCount.Enabled := False;
-    rbLinePanelAutoWidth.Enabled := False;
-    rbLinePanelFixedWidth.Enabled := False;
-    seLinePanelMinWidth.Enabled := False;
-    seLinePanelFixWidth.Enabled := False;
-  {$ENDIF}
 
     chkEditorMultiLine.Checked := FEditorMisc.EditorTabMultiLine;
     chkEditorFlatButtons.Checked := FEditorMisc.EditorTabFlatButton;  
@@ -631,7 +622,6 @@ begin
       FToolbarMgr.ShowToolBar := chkShowToolBar.Checked;
       FToolbarMgr.Wrapable := chkToolBarWrap.Checked;
 
-    {$IFNDEF BDS}
       FGutterMgr.ShowLineNumber := chkShowLineNumber.Checked;
       FGutterMgr.ShowLineCount := chkShowLineCount.Checked;
       FGutterMgr.AutoWidth := rbLinePanelAutoWidth.Checked;
@@ -642,6 +632,7 @@ begin
       FGutterMgr.FixedWidth := seLinePanelFixWidth.Value;
       FGutterMgr.UpdateGutters;
 
+    {$IFNDEF BDS}
       FNavMgr.MinLineDiff := seNavMinLineDiff.Value;
       FNavMgr.MaxItems := seNavMaxItems.Value;
       FNavMgr.ExtendForwardBack := chkExtendForwardBack.Checked;

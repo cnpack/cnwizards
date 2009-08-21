@@ -87,8 +87,8 @@ type
     ctTabSetChanged,          // BDS 下的 TIDEGradientTabSet 改变通知，
                               // 因包含设计器，所以以上两者不等同于 ctView
 {$ENDIF}
-    ctElided,                 // 编辑器行折叠，暂不支持
-    ctUnElided                // 编辑器行展开，暂不支持
+    ctElided,                 // 编辑器行折叠，有限支持
+    ctUnElided                // 编辑器行展开，有限支持
     );
     
   TEditorChangeTypes = set of TEditorChangeType;
@@ -110,6 +110,10 @@ type
 
   TEditorObject = class
   private
+    FLines: TList;
+    FLastTop: Integer;
+    FLastBottomElided: Boolean;
+    FLinesChanged: Boolean;
     FContext: TEditorContext;
     FEditControl: TControl;
     FEditWindow: TCustomForm;
@@ -118,6 +122,9 @@ type
     FGutterChanged: Boolean;
     procedure SetEditView(AEditView: IOTAEditView);
     function GetGutterWidth: Integer;
+    function GetViewLineNumber(Index: Integer): Integer;
+    function GetViewLineCount: Integer;
+    function GetViewBottomLine: Integer;
   public
     constructor Create(AEditControl: TControl; AEditView: IOTAEditView);
     destructor Destroy; override;
@@ -126,6 +133,12 @@ type
     property EditWindow: TCustomForm read FEditWindow;
     property EditView: IOTAEditView read FEditView;
     property GutterWidth: Integer read GetGutterWidth;
+    // 视图中有效行数
+    property ViewLineCount: Integer read GetViewLineCount;
+    // 视图中显示的真实行号，Index 从 0 开始
+    property ViewLineNumber[Index: Integer]: Integer read GetViewLineNumber;
+    // 视图中显示的最大真实行号
+    property ViewBottomLine: Integer read GetViewBottomLine;
   end;
 
   THighlightItem = class
@@ -194,6 +207,8 @@ type
     procedure UpdateEditControlList;
     procedure CheckOptionDlg;
     function GetEditorContext(Editor: TEditorObject): TEditorContext;
+    function CheckViewLines(Editor: TEditorObject; Context: TEditorContext): Boolean;
+    function CheckEditorChanges(Editor: TEditorObject): TEditorChangeTypes;
     procedure OnActiveFormChange(Sender: TObject);
     procedure OnSourceEditorNotify(SourceEditor: IOTASourceEditor;
       NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
@@ -226,6 +241,7 @@ type
     destructor Destroy; override;
 
     function IndexOfEditor(EditControl: TControl): Integer;
+    function GetEditorObject(EditControl: TControl): TEditorObject;
     property Editors[Index: Integer]: TEditorObject read GetEditors;
     property EditorCount: Integer read GetEditorCount;
 
@@ -352,20 +368,10 @@ end;
 
 {$IFDEF BDS}
 
-// 获得一数字有几位，Digit是进制数
-function GetLineDigit(LineCount, Digit: Integer): Integer;
+// 获得一数字有几位
+function GetLineDigit(LineCount: Integer): Integer;
 begin
-  Result := 0;
-  if Digit <= 0 then Exit;
-  if LineCount < 0 then
-    LineCount := -LineCount;
-
-  Inc(Result);
-  while LineCount >= Digit do
-  begin
-    Inc(Result);
-    LineCount := LineCount div Digit;
-  end;
+  Result := Length(IntToStr(LineCount));
 end;
 
 {$ENDIF}
@@ -376,6 +382,7 @@ constructor TEditorObject.Create(AEditControl: TControl;
   AEditView: IOTAEditView);
 begin
   inherited Create;
+  FLines := TList.Create;
   FEditControl := AEditControl;
   FEditWindow := TCustomForm(AEditControl.Owner);
   SetEditView(AEditView);
@@ -384,6 +391,7 @@ end;
 destructor TEditorObject.Destroy;
 begin
   SetEditView(nil);
+  FLines.Free;
   inherited;
 end;
 
@@ -403,6 +411,24 @@ begin
     FGutterChanged := False;
   end;
   Result := FGutterWidth;  
+end;
+
+function TEditorObject.GetViewBottomLine: Integer;
+begin
+  if ViewLineCount > 0 then
+    Result := ViewLineNumber[ViewLineCount - 1]
+  else
+    Result := 0;
+end;
+
+function TEditorObject.GetViewLineNumber(Index: Integer): Integer;
+begin
+  Result := Integer(FLines[Index]);
+end;
+
+function TEditorObject.GetViewLineCount: Integer;
+begin
+  Result := FLines.Count;
 end;
 
 procedure TEditorObject.SetEditView(AEditView: IOTAEditView);
@@ -803,7 +829,7 @@ begin
     Result.EditView := Pointer(Editor.EditView);
     Result.LineText := GetStrProp(Editor.EditControl, 'LineText');
 {$IFDEF BDS}
-    Result.LineDigit := GetLineDigit(Result.LineCount, 10);
+    Result.LineDigit := GetLineDigit(Result.LineCount);
 {$ENDIF}
   end;
 end;
@@ -816,6 +842,18 @@ end;
 function TCnEditControlWrapper.GetEditors(Index: Integer): TEditorObject;
 begin
   Result := TEditorObject(FEditorList[Index]);
+end;
+
+function TCnEditControlWrapper.GetEditorObject(
+  EditControl: TControl): TEditorObject;
+var
+  Idx: Integer;
+begin
+  Idx := IndexOfEditor(EditControl);
+  if Idx >= 0 then
+    Result := Editors[Idx]
+  else
+    Result := nil;
 end;
 
 function TCnEditControlWrapper.IndexOfEditor(
@@ -834,75 +872,152 @@ begin
   Result := -1;
 end;
 
+function TCnEditControlWrapper.CheckViewLines(Editor: TEditorObject;
+  Context: TEditorContext): Boolean;
+var
+  I, Idx, LineCount: Integer;
+  Lines: TList;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnEditControlWrapper.CheckViewLines');
+{$ENDIF}
+  Result := False;
+  Lines := TList.Create;
+  try
+    LineCount := Context.LineCount;
+    Idx := Context.TopRow;
+    Editor.FLastTop := Idx;
+    Editor.FLastBottomElided := GetLineIsElided(Editor.EditControl, LineCount);
+    for I := Context.TopRow to Context.BottomRow do
+    begin
+      Lines.Add(Pointer(Idx));
+      repeat
+        Inc(Idx);
+        if Idx > LineCount then
+          Break;
+      until not GetLineIsElided(Editor.EditControl, Idx);
+
+      if Idx > LineCount then
+        Break;
+    end;
+
+    if Lines.Count <> Editor.FLines.Count then
+      Result := True
+    else
+    begin
+      for i := 0 to Lines.Count - 1 do
+        if Lines[i] <> Editor.FLines[i] then
+        begin
+          Result := True;
+          Break;
+        end;
+    end;
+
+    if Result then
+    begin
+      Editor.FLines.Count := Lines.Count;
+      for i := 0 to Lines.Count - 1 do
+        Editor.FLines[i] := Lines[i];
+    {$IFDEF DEBUG}
+      CnDebugger.LogMsg('Lines Changed');
+    {$ENDIF}
+    end;
+
+    Editor.FLinesChanged := False;
+  finally
+    Lines.Free;
+  end;          
+end;
+
+function TCnEditControlWrapper.CheckEditorChanges(Editor: TEditorObject):
+  TEditorChangeTypes;
+var
+  Context, OldContext: TEditorContext;
+begin
+  Result := [];
+  if not Editor.EditControl.Visible or (Editor.EditView = nil) then
+    Exit;
+
+  try
+    Context := GetEditorContext(Editor);
+  except
+  {$IFDEF BDS}
+    Editor.FEditView := nil;
+    // BDS 下，时常出现 EditView 已经被释放而导致出错的情况，此处将其置 nil
+    Exit;
+  {$ENDIF}
+  end;
+  OldContext := Editor.Context;
+
+  if (Context.TopRow <> OldContext.TopRow) or
+    (Context.BottomRow <> OldContext.BottomRow) then
+    Include(Result, ctWindow);
+  if (Context.LeftColumn <> OldContext.LeftColumn) then
+    Include(Result, ctHScroll);
+  if Context.CurPos.Line <> OldContext.CurPos.Line then
+    Include(Result, ctCurrLine);
+  if Context.CurPos.Col <> OldContext.CurPos.Col then
+    Include(Result, ctCurrCol);
+  if Context.BlockValid <> OldContext.BlockValid then
+    Include(Result, ctBlock);
+  if Context.EditView <> OldContext.EditView then
+    Include(Result, ctView);
+
+  if Editor.FLinesChanged or (Result * [ctWindow, ctView] <> []) or
+    (Editor.FLastBottomElided <> GetLineIsElided(Editor.EditControl,
+    Context.LineCount)) then
+  begin
+    if CheckViewLines(Editor, Context) then
+      if Result * [ctWindow, ctView] = [] then
+        Result := Result + [ctElided, ctUnElided];
+  end;
+
+{$IFDEF BDS}
+  if Context.LineDigit <> OldContext.LineDigit then
+    Include(Result, ctLineDigit);
+  if FTabsChangeTypes * [ctTabSetChanged] <> [] then
+  begin
+    Include(Result, ctTabSetChanged);
+    FTabsChangeTypes := [];
+  end;
+{$ENDIF}
+
+  // 有时候 EditBuffer 修改后时间未变化
+  if (Context.LineCount <> OldContext.LineCount) or
+    (Context.ModTime <> OldContext.ModTime) then
+  begin
+    Include(Result, ctModified);
+  end
+  else if Context.CurPos.Line = OldContext.CurPos.Line then
+  begin
+    if not AnsiSameStr(Context.LineText, OldContext.LineText) then
+      Include(Result, ctModified);
+  end;
+
+  Editor.FContext := Context;
+end;
+
 procedure TCnEditControlWrapper.OnIdle(Sender: TObject);
 var
   i: Integer;
-  Context, OldContext: TEditorContext;
+  OptionType: TEditorChangeTypes;
   ChangeType: TEditorChangeTypes;
 begin
+  OptionType := [];
+  if FOptionChanged then
+  begin
+    if UpdateCharSize then
+    begin
+      Include(OptionType, ctFont);
+      FOptionChanged := False;
+    end;      
+  end;
+
   for i := 0 to EditorCount - 1 do
   begin
-    if not Editors[i].EditControl.Visible or (Editors[i].EditView = nil) then
-      Continue;
-
-    try
-      Context := GetEditorContext(Editors[i]);
-    except
-{$IFDEF BDS}
-      Editors[i].FEditView := nil;
-      // BDS 下，时常出现 EditView 已经被释放而导致出错的情况，此处将其置 nil
-      Continue;
-{$ENDIF}
-    end;
-    OldContext := Editors[i].Context;
-
-    ChangeType := [];
-    if (Context.TopRow <> OldContext.TopRow) or
-      (Context.BottomRow <> OldContext.BottomRow) then
-      Include(ChangeType, ctWindow);
-    if (Context.LeftColumn <> OldContext.LeftColumn) then
-      Include(ChangeType, ctHScroll);
-    if Context.CurPos.Line <> OldContext.CurPos.Line then
-      Include(ChangeType, ctCurrLine);
-    if Context.CurPos.Col <> OldContext.CurPos.Col then
-      Include(ChangeType, ctCurrCol);
-    if Context.BlockValid <> OldContext.BlockValid then
-      Include(ChangeType, ctBlock);
-    if Context.EditView <> OldContext.EditView then
-      Include(ChangeType, ctView);
-
-{$IFDEF BDS}
-    if Context.LineDigit <> OldContext.LineDigit then
-      Include(ChangeType, ctLineDigit);
-    if FTabsChangeTypes * [ctTabSetChanged] <> [] then
-    begin
-      Include(ChangeType, ctTabSetChanged);
-      FTabsChangeTypes := [];
-    end;
-{$ENDIF}
-
-    // 有时候 EditBuffer 修改后时间未变化
-    if (Context.LineCount <> OldContext.LineCount) or
-      (Context.ModTime <> OldContext.ModTime) then
-    begin
-      Include(ChangeType, ctModified);
-    end
-    else if Context.CurPos.Line = OldContext.CurPos.Line then
-    begin
-      if not AnsiSameStr(Context.LineText, OldContext.LineText) then
-        Include(ChangeType, ctModified);
-    end;
-
-    if FOptionChanged then
-    begin
-      UpdateCharSize;
-      Include(ChangeType, ctFont);
-      FOptionChanged := False;
-    end;
-
+    ChangeType := CheckEditorChanges(Editors[i]) + OptionType;
     if ChangeType <> [] then
     begin
-      Editors[i].FContext := Context;
       DoEditorChange(Editors[i], ChangeType);
     end;
   end;
@@ -1129,7 +1244,7 @@ begin
         CalcFont('Italic', AFont);
       end;
       
-      Result := True;
+      Result := (FCharSize.cx > 0) and (FCharSize.cy > 0);
     finally
       SaveFont := SelectObject(DC, SaveFont);
       if SaveFont <> 0 then
@@ -1166,7 +1281,7 @@ begin
     Result.CaretY := GetOrdProp(EditControl, 'CaretY');
     Result.CharXIndex := GetOrdProp(EditControl, 'CharXIndex');
 {$IFDEF BDS}
-    Result.LineDigit := GetLineDigit(Result.LineCount, 10);
+    Result.LineDigit := GetLineDigit(Result.LineCount);
 {$ENDIF}
   except
     on E: Exception do
@@ -1544,6 +1659,18 @@ procedure TCnEditControlWrapper.DoAfterPaintLine(Editor: TEditorObject;
 var
   I: Integer;
 begin
+  if not Editor.FLinesChanged then
+  begin
+    if (LineNum < Editor.FLastTop) or (LineNum - Editor.FLastTop >= Editor.FLines.Count) or
+      (Editor.ViewLineNumber[LineNum - Editor.FLastTop] <> LogicLineNum) then
+    begin
+    {$IFDEF DEBUG}
+      CnDebugger.LogMsg('DoAfterPaintLine: Editor.FLinesChanged := True');
+    {$ENDIF}
+      Editor.FLinesChanged := True;
+    end;
+  end;    
+
   for I := 0 to FAfterPaintLineNotifiers.Count - 1 do
   try
     with PCnWizNotifierRecord(FAfterPaintLineNotifiers[I])^ do
@@ -1688,16 +1815,20 @@ procedure TCnEditControlWrapper.OnCallWndProcRet(Handle: HWND;
   Control: TWinControl; Msg: TMessage);
 var
   I: Integer;
+  ChangeType: TEditorChangeTypes;
 begin
   if ((Msg.Msg = WM_VSCROLL) or (Msg.Msg = WM_HSCROLL))
     and IsEditControl(Control) then
   begin
     if Msg.Msg = WM_VSCROLL then
-      for I := 0 to EditorCount - 1 do
-        DoEditorChange(Editors[I], [ctVScroll])
+      ChangeType := [ctVScroll]
     else
-      for I := 0 to EditorCount - 1 do
-        DoEditorChange(Editors[I], [ctHScroll])
+      ChangeType := [ctHScroll];
+
+    for I := 0 to EditorCount - 1 do
+    begin
+      DoEditorChange(Editors[I], ChangeType + CheckEditorChanges(Editors[i]));
+    end;
   end;
 end;
 
