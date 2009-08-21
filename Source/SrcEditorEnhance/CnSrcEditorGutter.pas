@@ -52,6 +52,7 @@ type
 
   TCnSrcEditorGutter = class(TCustomControl)
   private
+    FActive: Boolean;
     FPainting: Boolean;
     FGutterMgr: TCnSrcEditorGutterMgr;
     FEditControl: TControl;
@@ -222,7 +223,7 @@ procedure TCnSrcEditorGutter.EditorChanged(Editor: TEditorObject;
 begin
   if FGutterMgr.CanShowGutter and (Editor.EditControl = EditControl) then
   begin
-    if ChangeType * [ctView] <> [] then
+    if ChangeType * [ctView, ctTopEditorChanged] <> [] then
       CnWizNotifierServices.ExecuteOnApplicationIdle(UpdateStatusOnIdle)
     else if ChangeType * [ctWindow, ctCurrLine, ctFont, ctVScroll,
       ctElided, ctUnElided] <> [] then
@@ -241,12 +242,24 @@ var
     Result := Canvas.TextWidth(IntToStrEx(0, Len));
   end;
 begin
+  if not FActive then
+  begin
+    Visible := False;
+    Exit;
+  end;
+  
+  EditorObj := EditControlWrapper.GetEditorObject(EditControl);
+  if (EditorObj = nil) or not EditorObj.EditorIsOnTop then
+  begin
+    Visible := False;
+    Exit;
+  end;
+
+  Visible := True;
   Canvas.Font := Font;
 
   if FGutterMgr.AutoWidth then
   begin
-    EditorObj := EditControlWrapper.GetEditorObject(EditControl);
-    Assert(Assigned(EditorObj));
     FPosInfo := EditControlWrapper.GetEditControlInfo(EditControl);
     if FGutterMgr.ShowLineCount then
       EndLine := FPosInfo.LineCount
@@ -301,7 +314,7 @@ begin
     if TextHeight > 0 then
     begin
       EditorObj := EditControlWrapper.GetEditorObject(EditControl);
-      Assert(Assigned(EditorObj));
+      if EditorObj = nil then Exit;
       FPosInfo := EditControlWrapper.GetEditControlInfo(EditControl);
 
       if FGutterMgr.AutoWidth then
@@ -677,11 +690,12 @@ begin
       end;
 
       Gutter.Font := Font;
-      Gutter.Visible := True;
+      Gutter.FActive := True;
       Gutter.UpdateStatus;
     end
     else if Gutter <> nil then
     begin
+      Gutter.FActive := False;
       Gutter.Visible := False;
     end;
   end;

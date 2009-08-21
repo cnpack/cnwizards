@@ -81,6 +81,7 @@ type
     ctHScroll,                // 编辑器横向滚动
     ctBlock,                  // 块变更
     ctModified,               // 编辑内容修改
+    ctTopEditorChanged,       // 当前显示的上层编辑器变更
 {$IFDEF BDS}    
     ctLineDigit,              // 编辑器总行数位数变化，如99到100
     ctViewBarChanged,         // BDS 下底部的 TabSet 改变通知
@@ -114,6 +115,7 @@ type
     FLastTop: Integer;
     FLastBottomElided: Boolean;
     FLinesChanged: Boolean;
+    FTopControl: TControl;
     FContext: TEditorContext;
     FEditControl: TControl;
     FEditWindow: TCustomForm;
@@ -125,14 +127,18 @@ type
     function GetViewLineNumber(Index: Integer): Integer;
     function GetViewLineCount: Integer;
     function GetViewBottomLine: Integer;
+    function GetTopEditor: TControl;
   public
     constructor Create(AEditControl: TControl; AEditView: IOTAEditView);
     destructor Destroy; override;
+    function EditorIsOnTop: Boolean;
     property Context: TEditorContext read FContext;
     property EditControl: TControl read FEditControl;
     property EditWindow: TCustomForm read FEditWindow;
     property EditView: IOTAEditView read FEditView;
     property GutterWidth: Integer read GetGutterWidth;
+    // 当前显示在最前面的编辑控件
+    property TopControl: TControl read FTopControl;
     // 视图中有效行数
     property ViewLineCount: Integer read GetViewLineCount;
     // 视图中显示的真实行号，Index 从 0 开始
@@ -436,6 +442,31 @@ begin
   NoRef(FEditView) := NoRef(AEditView);
 end;
 
+function TEditorObject.GetTopEditor: TControl;
+var
+  i: Integer;
+  ACtrl: TControl;
+begin
+  Result := nil;
+  if (EditControl <> nil) and (EditControl.Parent <> nil) then
+  begin
+    for i := EditControl.Parent.ControlCount - 1 downto 0 do
+    begin
+      ACtrl := EditControl.Parent.Controls[i];
+      if (ACtrl.Align = alClient) and ACtrl.Visible then
+      begin
+        Result := ACtrl;
+        Exit;
+      end;  
+    end;  
+  end;  
+end;
+
+function TEditorObject.EditorIsOnTop: Boolean;
+begin
+  Result := (EditControl <> nil) and (GetTopEditor = EditControl);
+end;
+
 //==============================================================================
 // 代码编辑器控件封装类
 //==============================================================================
@@ -456,6 +487,7 @@ const
   SLineIsElidedName = '@Editorcontrol@TCustomEditControl@LineIsElided$qqri';
   SPointFromEdPosName = '@Editorcontrol@TCustomEditControl@PointFromEdPos$qqrrx9Ek@TEdPosoo';
   STabsChangedName = '@Editorform@TEditWindow@TabsChanged$qqrp14System@TObject';
+
   SViewBarChangedName = '@Editorform@TEditWindow@ViewBarChange$qqrp14System@TObjectiro';
 {$ELSE}
   SPaintLineName = '@Editors@TCustomEditControl@PaintLine$qqrr16Ek@TPaintContextisi';
@@ -547,6 +579,9 @@ begin
     FEditControlWrapper.FTabsChangedHook.HookMethod;
   end;
 
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('MyTabsChanged');
+{$ENDIF}
   // OnChanged 事件调用完后，编辑器还没刷新，所以延迟到 Idle 时才通知
   FEditControlWrapper.FTabsChangeTypes := [ctTabSetChanged];
   CnWizNotifierServices.ExecuteOnApplicationIdle(FEditControlWrapper.DoTabSetIdleChange);
@@ -568,6 +603,9 @@ begin
     FEditControlWrapper.FViewBarChangedHook.HookMethod;
   end;
 
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('MyViewBarChanged');
+{$ENDIF}
   // OnChanged 事件调用完后，编辑器还没刷新，所以延迟到 Idle 时才通知
   FEditControlWrapper.FTabsChangeTypes := [ctViewBarChanged];
   CnWizNotifierServices.ExecuteOnApplicationIdle(FEditControlWrapper.DoTabSetIdleChange);
@@ -933,14 +971,29 @@ function TCnEditControlWrapper.CheckEditorChanges(Editor: TEditorObject):
   TEditorChangeTypes;
 var
   Context, OldContext: TEditorContext;
+  ACtrl: TControl;
 begin
   Result := [];
   if not Editor.EditControl.Visible or (Editor.EditView = nil) then
     Exit;
 
+  ACtrl := Editor.GetTopEditor;
+  if Editor.FTopControl <> ACtrl then
+  begin
+    Include(Result, ctTopEditorChanged);
+    Editor.FTopControl := ACtrl;
+  end;
+
+  // 编辑器不在最前端时不进行后继判断
+  if ACtrl <> Editor.EditControl then
+    Exit;
+    
   try
     Context := GetEditorContext(Editor);
   except
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('GetEditorContext Error');
+  {$ENDIF}
   {$IFDEF BDS}
     Editor.FEditView := nil;
     // BDS 下，时常出现 EditView 已经被释放而导致出错的情况，此处将其置 nil
@@ -1497,8 +1550,12 @@ function TCnEditControlWrapper.GetLineIsElided(EditControl: TControl;
   LineNum: Integer): Boolean;
 begin
   Result := False;
-  if Assigned(LineIsElided) then
-    Result := LineIsElided(EditControl, LineNum);
+  try
+    if Assigned(LineIsElided) then
+      Result := LineIsElided(EditControl, LineNum);
+  except
+    ;
+  end;            
 end;
 
 {$IFDEF BDS}
