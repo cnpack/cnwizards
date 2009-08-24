@@ -61,6 +61,7 @@ const
   csDefDispDelay = 250;
   csDefCompleteChars = '%&,;()[]<>=';
   csDefFilterSymbols = '//,{';
+  csDefAutoSymbols = '" := "," <> "," = "," > "," >= "," < "," <= "';
 
 type
   TCnInputHelper = class;
@@ -201,6 +202,7 @@ type
     FSymbols: TStringList;
     FItems: TStringList;
     FKeyCount: Integer;
+    FKeyQueue: string;
     FCurrLine: Integer;
     FCurrIndex: Integer;
     FCurrLineLen: Integer;
@@ -219,6 +221,7 @@ type
     FMatchAnyWhere: Boolean;
     FCompleteChars: string;
     FFilterSymbols: TStrings;
+    FAutoSymbols: TStrings;
     FAutoInsertEnter: Boolean;
     FAutoCompParam: Boolean;
     FSmartDisplay: Boolean;
@@ -275,6 +278,7 @@ type
     function IsValidCharKey(VKey: Word; ScanCode: Word): Boolean;
     function IsValidDelelteKey(Key: Word): Boolean;
     function IsValidDotKey(Key: Word): Boolean;
+    function IsValidKeyQueue: Boolean;
     procedure AutoCompFunc(Sender: TObject);
     function GetListFont: TFont;
     procedure ConfigChanged;
@@ -336,6 +340,8 @@ type
     {* 可用来完成当前项选择的字符列表}
     property FilterSymbols: TStrings read FFilterSymbols;
     {* 禁止自动弹出列表的符号}
+    property AutoSymbols: TStrings read FAutoSymbols;
+    {* 自动弹出列表的符号 }
     property SpcComplete: Boolean read FSpcComplete write FSpcComplete default True;
     {* 空格是否可用来完成选择 }
     property IgnoreSpc: Boolean read FIgnoreSpc write FIgnoreSpc default False;
@@ -403,6 +409,8 @@ const
   csHashListCount = 32768;
   csHashListInc = 4;
 
+  csKeyQueueLen = 8;
+
   csWidth = 'Width';
   csHeight = 'Height';
   csFont = 'Font';
@@ -416,6 +424,7 @@ const
   csMatchAnyWhere = 'MatchAnyWhere';
   csCompleteChars = 'CompleteCharSet';
   csFilterSymbols = 'FilterSymbols';
+  csAutoSymbols = 'AutoSymbols';
   csSpcComplete = 'SpcComplete';
   csIgnoreSpc = 'IgnoreSpc';
   csAutoInsertEnter = 'AutoInsertEnter';
@@ -1118,6 +1127,7 @@ begin
   Timer.OnTimer := OnTimer;
   Timer.Enabled := False;
   FFilterSymbols := TStringList.Create;
+  FAutoSymbols := TStringList.Create;
   AppEvents := TApplicationEvents.Create(nil);
   AppEvents.OnDeactivate := OnAppDeactivate;
   FHitCountMgr := TCnSymbolHitCountMgr.Create;
@@ -1162,6 +1172,7 @@ begin
   HitCountMgr.Free;
   AppEvents.Free;
   FFilterSymbols.Free;
+  FAutoSymbols.Free;
   Timer.Free;
   Menu.Free;
   List.Free;
@@ -1368,11 +1379,27 @@ begin
   end;
 end;
 
+function TCnInputHelper.IsValidKeyQueue: Boolean;
+var
+  i: Integer;
+begin
+  Result := False;
+  for i := 0 to FAutoSymbols.Count - 1 do
+  begin
+    if SameText(FAutoSymbols[i], StrRight(FKeyQueue, Length(FAutoSymbols[i]))) then
+    begin
+      Result := True;
+      Exit;
+    end;
+  end;
+end;
+
 function TCnInputHelper.HandleKeyDown(var Msg: TMsg): Boolean;
 var
   Shift: TShiftState;
   ScanCode: Word;
   Key: Word;
+  KeyDownChar: AnsiChar;
 begin
   Result := False;
 
@@ -1398,7 +1425,13 @@ begin
   // Shift 键不需要处理
   if Key = VK_SHIFT then
     Exit;
-  
+
+  // 保存按键序列
+  KeyDownChar := VK_ScanCodeToAscii(Key, ScanCode);
+  FKeyQueue := FKeyQueue + KeyDownChar;
+  if Length(FKeyQueue) > csKeyQueueLen then
+    FKeyQueue := StrRight(FKeyQueue, csKeyQueueLen);
+
   if IsShowing then
   begin
     case Key of
@@ -1443,7 +1476,7 @@ begin
 
     if not Result then
     begin
-      Result := HandleKeyPress(VK_ScanCodeToAscii(Key, ScanCode));
+      Result := HandleKeyPress(KeyDownChar);
     end;
   end
   else
@@ -1516,14 +1549,15 @@ begin
   CnDebugger.LogInteger(Msg.wParam, 'TCnInputHelper.HandleKeyUp');
 {$ENDIF}
 
-  if FKeyDownValid and not IsShowing then
+  if (FKeyDownValid or IsValidKeyQueue) and not IsShowing then
   begin
     CnOtaGetCurrLineInfo(Line, Index, Len);
     // 如果此次按键对当前行作了修改才认为是有效按键，以处理增量查找等问题
     if (Line = FCurrLine) and (Len <> FCurrLineLen) then
     begin
       Inc(FKeyCount);
-      if IsValidDotKey(Key) or (FKeyCount >= DispOnlyAtLeastKey) then
+      if IsValidDotKey(Key) or (FKeyCount >= DispOnlyAtLeastKey) or
+        IsValidKeyQueue then
       begin
         if FDispDelay > GetTickCount - FKeyDownTick then
           Timer.Interval := Max(csMinDispDelay, FDispDelay - (GetTickCount -
@@ -1664,7 +1698,7 @@ begin
   FKeyCount := 0;
   if AcceptDisplay and ParsePosInfo then
   begin
-    ShowList(False);
+    ShowList(IsValidKeyQueue);
   end
   else
     HideAndClearList;
@@ -2586,6 +2620,10 @@ begin
     FDispDelay := ReadInteger('', csDispDelay, csDefDispDelay);
     FCompleteChars := ReadString('', csCompleteChars, csDefCompleteChars);
     FFilterSymbols.CommaText := ReadString('', csFilterSymbols, csDefFilterSymbols);
+    FAutoSymbols.CommaText := ReadString('', csAutoSymbols, csDefAutoSymbols);
+  {$IFDEF DEBUG}
+    CnDebugger.LogStrings(FAutoSymbols, 'FAutoSymbols');
+  {$ENDIF}
     FSpcComplete := ReadBool('', csSpcComplete, True);
     FIgnoreSpc := ReadBool('', csIgnoreSpc, False);
     FAutoInsertEnter := ReadBool('', csAutoInsertEnter, True);
@@ -2642,6 +2680,10 @@ begin
       DeleteKey('', csFilterSymbols)
     else
       WriteString('', csFilterSymbols, FFilterSymbols.CommaText);
+    if FAutoSymbols.CommaText = csDefAutoSymbols then
+      DeleteKey('', csAutoSymbols)
+    else
+      WriteString('', csAutoSymbols, FAutoSymbols.CommaText);
     WriteBool('', csSpcComplete, FSpcComplete);
     WriteBool('', csIgnoreSpc, FIgnoreSpc);
     WriteBool('', csAutoInsertEnter, FAutoInsertEnter);
