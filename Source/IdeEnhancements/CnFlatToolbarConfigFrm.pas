@@ -150,6 +150,9 @@ implementation
 
 {$R *.dfm}
 
+const
+  csSeparatorCaption = '-';
+
 resourcestring
   SNoButtonCategory = '(None)';
   SAllButtonsCategory = '(All)';
@@ -160,7 +163,7 @@ var
   NewIndex: Integer;
 begin
   if Action = nil then
-    NewIndex := Listbox.Items.Add('-')
+    NewIndex := Listbox.Items.Add(csSeparatorCaption)
   else if (Action is TCustomAction) and (TCustomAction(Action).Caption <> '') then
     NewIndex := Listbox.Items.AddObject(StripHotkey(TCustomAction(Action).Caption), Action)
   else
@@ -214,7 +217,7 @@ begin
   for i := 0 to FToolbarActionNames.Count - 1 do
   begin
     Action := FindIDEAction(FToolbarActionNames[i]);
-    if (FToolbarActionNames[i] = '-') or Assigned(Action) then
+    if (FToolbarActionNames[i] = csSeparatorCaption) or Assigned(Action) then
       AddActionToListbox(Action, lbToolbar, False);
   end;
 end;
@@ -458,7 +461,7 @@ begin
 
   if not lbAvailable.Enabled then
     LbCanvas.Font.Color := clGrayText;
-  if ListBox.Items[Index] = '-' then
+  if ListBox.Items[Index] = csSeparatorCaption then
     LbCanvas.TextOut(Rect.Left + 22, Rect.Top + FTextOffSet, SSeparator)
   else
     LbCanvas.TextOut(Rect.Left + 22, Rect.Top + FTextOffSet, Listbox.Items[Index]);
@@ -588,7 +591,7 @@ begin
     for i := 0 to FToolbarActionNames.Count - 1 do
     begin
       Action := FindIDEAction(FToolbarActionNames[i]);
-      if Assigned(Action) then
+      if (FToolbarActionNames[i] = csSeparatorCaption) or Assigned(Action) then
         AddActionToListbox(Action, lbToolbar, False);
     end;
   end;
