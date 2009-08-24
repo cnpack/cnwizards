@@ -432,8 +432,8 @@ var
     for i := 0 to AProject.InfoList.Count - 1 do
     begin
       UnitInfo := TCnUnitInfo(AProject.InfoList[i]);
-      if (MatchSearchText = '') or (AnsiStartsText(MatchSearchText, UnitInfo.Name)) or
-        (IsMatchAny and AnsiContainsText(UnitInfo.Name, MatchSearchText)) then
+      if (MatchSearchText = '') or RegExpContainsText(FRegExpr, UnitInfo.Name,
+        MatchSearchText, not IsMatchAny) then
       begin
         if UnitInfo.UnitType <> utUnknown then
         begin

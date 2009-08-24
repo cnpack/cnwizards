@@ -62,7 +62,7 @@ uses
   {$ELSE}
   DsgnIntf, LibIntf,
   {$ENDIF}
-  Clipbrd, TypInfo, ComCtrls, StdCtrls, Imm, Contnrs,
+  Clipbrd, TypInfo, ComCtrls, StdCtrls, Imm, Contnrs, RegExpr,
   CnWizConsts, CnCommon, CnConsts, CnWizClasses, CnWizIni;
 
 type
@@ -720,6 +720,10 @@ procedure SaveBookMarksToObjectList(EditView: IOTAEditView; BookMarkList: TObjec
 
 procedure LoadBookMarksFromObjectList(EditView: IOTAEditView; BookMarkList: TObjectList);
 {* 从 ObjectList 中恢复一 EditView 中的书签}
+
+function RegExpContainsText(ARegExpr: TRegExpr; const AText: string;
+  APattern: string; IsMatchStart: Boolean = False): Boolean;
+{* 判断正则表达式匹配}
 
 implementation
 
@@ -4953,6 +4957,24 @@ begin
       BookMarkObj.Free;
     end;
     EditView.CursorPos := SavePos;
+  end;
+end;
+
+// 判断正则表达式匹配
+function RegExpContainsText(ARegExpr: TRegExpr; const AText: string;
+  APattern: string; IsMatchStart: Boolean = False): Boolean;
+begin
+  Result := True;
+  if (APattern = '') or (ARegExpr = nil) then Exit;
+
+  if IsMatchStart and (APattern[1] <> '^') then // 额外的从头匹配
+    APattern := '^' + APattern;
+
+  ARegExpr.Expression := APattern;
+  try
+    Result := ARegExpr.Exec(AText);
+  except
+    Result := False;
   end;
 end;
 

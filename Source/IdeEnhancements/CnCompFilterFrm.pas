@@ -50,7 +50,7 @@ uses
   LibIntf,
   {$ENDIF}
   CnWizUtils, CnWizMultiLang, CnWizShareImages, CnWizConsts, CnWizIdeUtils,
-  CnWizNotifier, CnCommon, CnPopupMenu;
+  CnWizNotifier, CnCommon, CnPopupMenu, RegExpr;
 
 type
   TCnFilterFormStyle = (fsHidden, fsDropped, fsFloat);
@@ -189,6 +189,7 @@ type
     FDetailsList: TStringList;
     FDetailHint: THintWindow;
     FPackageChanged: Boolean;
+    FRegExpr: TRegExpr;
 
     procedure SetFilterFormStyle(const Value: TCnFilterFormStyle);
     procedure FileNotify(NotifyCode: TOTAFileNotification; const FileName: string);
@@ -219,6 +220,7 @@ type
     procedure ClearCompList;
     procedure ClearTabList;
     procedure UpdateToDisplayList;
+    function RegExpContainsText(AText, APattern: string; IsMatchStart: Boolean = False): Boolean;
     function CanDisplayAComp(AComp: TCnIdeCompInfo): Boolean;
     function CanDisplayATab(ATab: string): Boolean;
     procedure AdjustLayout;
@@ -576,6 +578,10 @@ begin
   FClassNameList := TStringList.Create;
   FDetailsList := TStringList.Create;
   FNeedRefresh := True;
+  
+  FRegExpr := TRegExpr.Create;
+  FRegExpr.ModifierI := True;
+
   CnWizNotifierServices.AddFileNotifier(FileNotify);
   CnWizNotifierServices.AddFormEditorNotifier(FormEditorNotify);
 end;
@@ -584,7 +590,8 @@ procedure TCnCompFilterForm.FormDestroy(Sender: TObject);
 begin
   DeactivateDetailHint;
   CnWizNotifierServices.RemoveFormEditorNotifier(FormEditorNotify);
-  CnWizNotifierServices.RemoveFileNotifier(FileNotify);  
+  CnWizNotifierServices.RemoveFileNotifier(FileNotify);
+  FRegExpr.Free;
   FCompList.Free;
   FDetailsList.Free;
   FClassNameList.Free;
@@ -674,17 +681,7 @@ begin
   Result := AComp <> nil;
   if Result then
   begin
-    Result := edtSearch.Text = '';
-    if btnMatchAny.Down then
-    begin
-      if not Result then
-        Result := Pos(UpperCase(Trim(edtSearch.Text)), UpperCase(AComp.CompName)) > 0;
-    end
-    else
-    begin
-      if not Result then
-        Result := Pos(UpperCase(Trim(edtSearch.Text)), UpperCase(AComp.CompName)) = 1;
-    end;
+    Result := RegExpContainsText(AComp.CompName, Trim(edtSearch.Text), btnMatchStart.Down);
 
     if Result and (FFilterTab <> '') then
       Result := AComp.TabName = FFilterTab;
@@ -1550,6 +1547,23 @@ begin
     PostMessage(edtSearch.Handle, WM_KEYDOWN, Key, 0);
     edtSearch.SetFocus;
   end
+end;
+
+function TCnCompFilterForm.RegExpContainsText(AText, APattern: string;
+  IsMatchStart: Boolean): Boolean;
+begin
+  Result := True;
+  if APattern = '' then Exit;
+
+  if IsMatchStart and (APattern[1] <> '^') then // 额外的从头匹配
+    APattern := '^' + APattern;
+
+  FRegExpr.Expression := APattern;
+  try
+    Result := FRegExpr.Exec(AText);
+  except
+    Result := False;
+  end;
 end;
 
 initialization

@@ -48,7 +48,7 @@ uses
 {$ENDIF COMPILER6_UP}
   ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles, ToolsAPI,
   CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnWizUtils, CnIni, CnWizIdeUtils,
-  CnWizMultiLang, CnWizShareImages, CnWizNotifier, CnIniStrUtils;
+  CnWizMultiLang, CnWizShareImages, CnWizNotifier, CnIniStrUtils, RegExpr;
 
 type
 
@@ -159,6 +159,7 @@ type
 
     procedure FirstUpdate(Sender: TObject);
   protected
+    FRegExpr: TRegExpr;
     NeedInitProjectControls: Boolean;
     ProjectList: TObjectList;
     CurrList: TList;
@@ -227,6 +228,9 @@ procedure TCnProjectViewBaseForm.FormCreate(Sender: TObject);
 begin
   Screen.Cursor := crHourGlass;
   try
+    FRegExpr := TRegExpr.Create;
+    FRegExpr.ModifierI := True;
+
     lvList.DoubleBuffered := True;
     ProjectList := TObjectList.Create;
     CurrList := TList.Create;
@@ -253,6 +257,7 @@ begin
   CnWizNotifierServices.StopExecuteOnApplicationIdle(DoSelectItemChanged);
   ProjectList.Free;
   CurrList.Free;
+  FRegExpr.Free;
 end;
 
 procedure TCnProjectViewBaseForm.FormKeyPress(Sender: TObject; var Key: Char);

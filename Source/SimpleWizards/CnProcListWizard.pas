@@ -60,7 +60,7 @@ uses
   ComCtrls, ToolWin, StdCtrls, ExtCtrls, IniFiles, ToolsAPI, Math, Menus, ActnList,
   CnProjectViewBaseFrm, CnWizClasses, CnWizManager, CnIni, CnWizEditFiler, mPasLex,
   mwBCBTokenList, Contnrs, Clipbrd, CnEditControlWrapper, CnPasCodeParser,
-  CnPopupMenu, CnWizIdeUtils, CnCppCodeParser, CnEdit;
+  CnPopupMenu, CnWizIdeUtils, CnCppCodeParser, CnEdit, RegExpr;
 
 type
   TCnSourceLanguageType = (ltUnknown, ltPas, ltCpp);
@@ -187,6 +187,7 @@ type
   // 工具栏中的下拉列表框的下拉列表
   TCnProcDropDownBox = class(TCustomListBox)
   private
+    FRegExpr: TRegExpr;
     FLastItem: Integer;
     FOnItemHint: TCnItemHintEvent;
     FDisplayItems: TStrings;
@@ -2589,7 +2590,7 @@ end;
 
 procedure TCnProcListForm.DoUpdateListView;
 var
-  I, Idx: Integer;
+  I: Integer;
   ProcName: string;
   ObjName: string;
   MatchStr: string;
@@ -2660,12 +2661,11 @@ begin
             FDisplayList.AddObject(FElementList[I], FElementList.Objects[I])
           else
           begin
-            Idx := Pos(MatchStr, UpperCase(ProcName));
-            if (Idx = 1) or (IsMatchAny and (Idx > 1)) then
+            if RegExpContainsText(FRegExpr, ProcName, MatchStr, not IsMatchAny) then
             begin
               FDisplayList.AddObject(FElementList[I], FElementList.Objects[I]);
               // 全匹配时，提高首匹配的优先级，记下第一个该首匹配的项以备选中
-              if IsMatchAny and (Idx = 1) then
+              if IsMatchAny and (Pos(MatchStr, ProcName) = 1) then
                 ToSelInfos.Add(FElementList.Objects[I]);
             end;
           end;
@@ -3663,6 +3663,9 @@ begin
   FDisplayItems := TStringList.Create;
   FInfoItems := TStringList.Create;
   OnDrawItem := ListDrawItem;
+
+  FRegExpr := TRegExpr.Create;
+  FRegExpr.ModifierI := True;
 end;
 
 procedure TCnProcDropDownBox.CreateParams(var Params: TCreateParams);
@@ -3689,6 +3692,7 @@ end;
 
 destructor TCnProcDropDownBox.Destroy;
 begin
+  FRegExpr.Free;
   FDisplayItems.Free;
   FInfoItems.Free;
   inherited;
@@ -3900,26 +3904,9 @@ var
   I, HeightCount: Integer;
 begin
   FDisplayItems.Clear;
-  if FMatchStr = '' then
-  begin
-    for I := 0 to FInfoItems.Count - 1 do
+  for I := 0 to FInfoItems.Count - 1 do
+    if RegExpContainsText(FRegExpr, FInfoItems[I], FMatchStr, FMatchStart) then
       FDisplayItems.AddObject(FInfoItems[I], FInfoItems.Objects[I]);
-  end
-  else
-  begin
-    if FMatchStart then
-    begin
-      for I := 0 to FInfoItems.Count - 1 do
-        if Pos(FMatchStr, UpperCase(FInfoItems[I])) = 1 then
-          FDisplayItems.AddObject(FInfoItems[I], FInfoItems.Objects[I]);
-    end
-    else // 匹配中间
-    begin
-      for I := 0 to FInfoItems.Count - 1 do
-        if Pos(FMatchStr, UpperCase(FInfoItems[I])) > 0 then
-          FDisplayItems.AddObject(FInfoItems[I], FInfoItems.Objects[I]);
-    end;
-  end;
 
   SetCount(FDisplayItems.Count);
   if FDisplayItems.Count > 12 then

@@ -516,10 +516,8 @@ var
     begin
       FormInfo := TCnFormInfo(ProjectInfo.InfoList[i]);
       if (MatchSearchText = '') or
-        AnsiStartsText(MatchSearchText, FormInfo.Name) or
-        AnsiStartsText(MatchSearchText, FormInfo.Caption) or
-        IsMatchAny and (AnsiContainsText(FormInfo.Name, MatchSearchText) or
-        AnsiContainsText(FormInfo.Caption, MatchSearchText)) then
+        RegExpContainsText(FRegExpr, FormInfo.Name, MatchSearchText, not IsMatchAny) or
+        RegExpContainsText(FRegExpr, FormInfo.Caption, MatchSearchText, not IsMatchAny) then
       begin
         CurrList.Add(FormInfo);
         // 全匹配时，提高首匹配的优先级，记下第一个该首匹配的项以备选中

@@ -261,8 +261,8 @@ begin
   try
     for I := 0 to FUsedList.Count - 1 do
     begin
-      if (MatchSearchText = '') or (AnsiStartsText(MatchSearchText, FUsedList[I])) or
-        (IsMatchAny and AnsiContainsText(FUsedList[I], MatchSearchText)) then
+      if (MatchSearchText = '') or
+        RegExpContainsText(FRegExpr, FUsedList[I], MatchSearchText, not IsMatchAny) then
       begin
         FDisplayList.AddObject(FUsedList[I], FUsedList.Objects[I]);
         // 全匹配时，提高首匹配的优先级，记下第一个该首匹配的项以备选中

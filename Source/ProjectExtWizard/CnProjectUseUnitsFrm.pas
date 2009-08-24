@@ -449,8 +449,8 @@ var
     for I := 0 to AProject.InfoList.Count - 1 do
     begin
       UnitInfo := TCnUnitInfo(AProject.InfoList[I]);
-      if (MatchSearchText = '') or (AnsiStartsText(MatchSearchText, UnitInfo.Name)) or
-        (IsMatchAny and AnsiContainsText(UnitInfo.Name, MatchSearchText)) then
+      if (MatchSearchText = '') or
+        RegExpContainsText(FRegExpr, UnitInfo.Name, MatchSearchText, not IsMatchAny) then
       begin
         if IsCurrent and (OriginalList.IndexOf(ChangeFileExt(UnitInfo.Name, '')) < 0) then // 当前工程，不在列表内，不加
           Continue;
