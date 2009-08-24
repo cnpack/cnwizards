@@ -1,9 +1,9 @@
 inherited CnInputHelperForm: TCnInputHelperForm
   Left = 233
-  Top = 128
+  Top = 101
   BorderStyle = bsDialog
   Caption = '输入助手设置'
-  ClientHeight = 495
+  ClientHeight = 522
   ClientWidth = 592
   KeyPreview = True
   OldCreateOrder = True
@@ -15,7 +15,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
   TextHeight = 13
   object btnHelp: TButton
     Left = 510
-    Top = 466
+    Top = 493
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -25,7 +25,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
   end
   object btnOK: TButton
     Left = 351
-    Top = 466
+    Top = 493
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -36,7 +36,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
   end
   object btnCancel: TButton
     Left = 431
-    Top = 466
+    Top = 493
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -49,7 +49,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
     Left = 8
     Top = 8
     Width = 577
-    Height = 451
+    Height = 478
     ActivePage = ts1
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
@@ -59,7 +59,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
         Left = 8
         Top = 8
         Width = 553
-        Height = 201
+        Height = 225
         Caption = '自动选项(&B)'
         TabOrder = 0
         object lbl1: TLabel
@@ -96,17 +96,24 @@ inherited CnInputHelperForm: TCnInputHelperForm
         end
         object lbl5: TLabel
           Left = 8
-          Top = 128
+          Top = 151
           Width = 148
           Height = 13
           Caption = '用来切换自动显示的快捷键:'
         end
         object lbl6: TLabel
           Left = 8
-          Top = 152
+          Top = 175
           Width = 148
           Height = 13
           Caption = '用来手工弹出显示的快捷键:'
+        end
+        object Label1: TLabel
+          Left = 24
+          Top = 125
+          Width = 192
+          Height = 13
+          Caption = '自动弹出列表的按键序列(逗号分隔):'
         end
         object chkAutoPopup: TCheckBox
           Left = 8
@@ -153,17 +160,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
         end
         object hkEnabled: THotKey
           Left = 232
-          Top = 125
-          Width = 305
-          Height = 19
-          HotKey = 32833
-          InvalidKeys = [hcNone, hcShift]
-          Modifiers = [hkAlt]
-          TabOrder = 5
-        end
-        object hkPopup: THotKey
-          Left = 232
-          Top = 149
+          Top = 148
           Width = 305
           Height = 19
           HotKey = 32833
@@ -171,13 +168,23 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Modifiers = [hkAlt]
           TabOrder = 6
         end
+        object hkPopup: THotKey
+          Left = 232
+          Top = 172
+          Width = 305
+          Height = 19
+          HotKey = 32833
+          InvalidKeys = [hcNone, hcShift]
+          Modifiers = [hkAlt]
+          TabOrder = 7
+        end
         object chkCheckImmRun: TCheckBox
           Left = 8
-          Top = 175
+          Top = 199
           Width = 401
           Height = 17
           Caption = '输入法开启时不弹出输入助手。'
-          TabOrder = 7
+          TabOrder = 8
         end
         object chkDispOnIDECompDisabled: TCheckBox
           Left = 24
@@ -187,12 +194,19 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Caption = '如果禁用 IDE 的代码完成，则自动取代。'
           TabOrder = 4
         end
+        object edtAutoSymbols: TEdit
+          Left = 232
+          Top = 121
+          Width = 305
+          Height = 21
+          TabOrder = 5
+        end
       end
       object grp3: TGroupBox
         Left = 8
-        Top = 216
+        Top = 240
         Width = 553
-        Height = 195
+        Height = 198
         Caption = '输出设置(&W)'
         TabOrder = 1
         object lbl9: TLabel
@@ -407,7 +421,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
         Left = 8
         Top = 210
         Width = 553
-        Height = 201
+        Height = 228
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = '内容设置(&S)'
         TabOrder = 1
@@ -429,7 +443,8 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Left = 8
           Top = 40
           Width = 369
-          Height = 153
+          Height = 177
+          Anchors = [akLeft, akTop, akBottom]
           ItemHeight = 13
           TabOrder = 0
         end
@@ -437,7 +452,8 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Left = 384
           Top = 40
           Width = 161
-          Height = 153
+          Height = 177
+          Anchors = [akLeft, akTop, akBottom]
           ItemHeight = 13
           TabOrder = 1
         end
@@ -450,7 +466,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
         Left = 8
         Top = 8
         Width = 553
-        Height = 403
+        Height = 430
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = '自定义符号(&T)'
         TabOrder = 0
@@ -515,7 +531,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Left = 8
           Top = 240
           Width = 465
-          Height = 155
+          Height = 182
           Anchors = [akLeft, akTop, akRight, akBottom]
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText

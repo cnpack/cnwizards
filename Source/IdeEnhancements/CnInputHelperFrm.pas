@@ -125,6 +125,8 @@ type
     edtFilterSymbols: TEdit;
     chkIgnoreSpace: TCheckBox;
     chkUseKibitzCompileThread: TCheckBox;
+    Label1: TLabel;
+    edtAutoSymbols: TEdit;
     procedure FormShow(Sender: TObject);
     procedure PaintBoxPaint(Sender: TObject);
     procedure btnFontClick(Sender: TObject);
@@ -291,6 +293,7 @@ begin
     chkCheckImmRun.Checked := CheckImmRun;
     edtCompleteChars.Text := CompleteChars;
     edtFilterSymbols.Text := FilterSymbols.CommaText;
+    edtAutoSymbols.Text := AutoSymbols.CommaText;
     chkSpcComplete.Checked := SpcComplete;
     chkIgnoreSpace.Checked:= IgnoreSpc;
     chkIgnoreSpace.Enabled := chkSpcComplete.Checked;
@@ -398,6 +401,7 @@ begin
     CheckImmRun := chkCheckImmRun.Checked;
     CompleteChars := edtCompleteChars.Text;
     FilterSymbols.CommaText := edtFilterSymbols.Text;
+    AutoSymbols.CommaText := edtAutoSymbols.Text;
     SpcComplete := chkSpcComplete.Checked;
     IgnoreSpc := chkIgnoreSpace.Checked;
     OutputStyle := TCnOutputStyle(cbbOutputStyle.ItemIndex);
@@ -470,6 +474,7 @@ begin
   tbDispDelay.Enabled := chkAutoPopup.Checked;
   chkSmartDisp.Enabled := chkAutoPopup.Checked;
   chkDispOnIDECompDisabled.Enabled := chkAutoPopup.Checked;
+  edtAutoSymbols.Enabled := chkAutoPopup.Checked;
 end;
 
 procedure TCnInputHelperForm.UpdateListItem(Item: TListItem);
