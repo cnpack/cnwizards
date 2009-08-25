@@ -2054,6 +2054,7 @@ TCnInputHelperForm.lbl6.Caption=Shortcut to Popup List Manually:
 TCnInputHelperForm.lbl7.Caption=Min Length of Symbol:
 TCnInputHelperForm.lbl8.Caption=List Sorted by:
 TCnInputHelperForm.lbl9.Caption=Input Current Item when Pressing:
+TCnInputHelperForm.lblKeySeq.Caption=Auto Popup after Key Sequences:
 TCnInputHelperForm.lvList.Columns.Item0.Caption=Name
 TCnInputHelperForm.lvList.Columns.Item1.Caption=Type
 TCnInputHelperForm.lvList.Columns.Item2.Caption=Scope

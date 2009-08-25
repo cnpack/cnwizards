@@ -2054,6 +2054,7 @@ TCnInputHelperForm.lbl6.Caption=用来手工弹出显示的快捷键:
 TCnInputHelperForm.lbl7.Caption=标识符的最小长度:
 TCnInputHelperForm.lbl8.Caption=列表排序方式:
 TCnInputHelperForm.lbl9.Caption=可用于选择当前项的字符列表:
+TCnInputHelperForm.lblKeySeq.Caption=自动弹出列表的按键序列(逗号分隔):
 TCnInputHelperForm.lvList.Columns.Item0.Caption=名称
 TCnInputHelperForm.lvList.Columns.Item1.Caption=类型
 TCnInputHelperForm.lvList.Columns.Item2.Caption=优先级
