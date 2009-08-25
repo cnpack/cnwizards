@@ -125,7 +125,7 @@ type
     edtFilterSymbols: TEdit;
     chkIgnoreSpace: TCheckBox;
     chkUseKibitzCompileThread: TCheckBox;
-    Label1: TLabel;
+    lblKeySeq: TLabel;
     edtAutoSymbols: TEdit;
     procedure FormShow(Sender: TObject);
     procedure PaintBoxPaint(Sender: TObject);

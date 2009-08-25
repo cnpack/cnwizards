@@ -108,7 +108,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Height = 13
           Caption = '用来手工弹出显示的快捷键:'
         end
-        object Label1: TLabel
+        object lblKeySeq: TLabel
           Left = 24
           Top = 125
           Width = 192
@@ -363,7 +363,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 249
           Height = 21
           Style = csDropDownList
-          ItemHeight = 13
+          ItemHeight = 0
           TabOrder = 0
         end
         object btnFont: TButton
@@ -405,7 +405,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 249
           Height = 21
           Style = csDropDownList
-          ItemHeight = 13
+          ItemHeight = 0
           TabOrder = 3
         end
         object chkUseKibitzCompileThread: TCheckBox
@@ -639,7 +639,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 401
           Height = 21
           Style = csDropDownList
-          ItemHeight = 13
+          ItemHeight = 0
           TabOrder = 0
           OnChange = cbbListChange
         end
