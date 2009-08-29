@@ -259,7 +259,7 @@ Usage: want [target-name] [-Dname=value]
   </target>
 
   <!-- 编译 CnWizards DLLs -->
-  <target name="cnwizards" depends="-cw_prepare,-d5,-d6,-d7,-d9,-d10,-d11,-d12,-cb5,-cb6,-cw_final" description="Compile all CnWizards DLLs (D5, D6, etc.)." />
+  <target name="cnwizards" depends="-cw_prepare,-d5,-d6,-d7,-d9,-d10,-d11,-d12,-d14,-cb5,-cb6,-cw_final" description="Compile all CnWizards DLLs (D5, D6, etc.)." />
 
   <target name="d5" depends="-d5,-cw_final" description="Compile CnWizards for Delphi 5." />
   <target name="d6" depends="-d6,-cw_final" description="Compile CnWizards for Delphi 6." />
