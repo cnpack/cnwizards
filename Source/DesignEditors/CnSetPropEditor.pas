@@ -122,6 +122,8 @@ type
   {$ENDIF}
   end;
 
+{$IFDEF DELPHI2010_UP}
+
   TCnBooleanPropEditor = class(TEnumProperty
     {$IFDEF COMPILER6_UP}, ICustomPropertyDrawing {$ENDIF})
   public
@@ -137,6 +139,8 @@ type
     class procedure GetInfo(var Name, Author, Email, Comment: string);
     class procedure Register;
   end;
+  
+{$ENDIF}
 
 implementation
 
@@ -433,8 +437,11 @@ initialization
   CnDesignEditorMgr.RegisterPropEditor(TCnSetPropEditor,
     TCnSetPropEditor.GetInfo, TCnSetPropEditor.Register,
     TCnSetPropEditor.CustomRegister);
+
+{$IFDEF DELPHI2010_UP}
   CnDesignEditorMgr.RegisterPropEditor(TCnBooleanPropEditor,
     TCnBooleanPropEditor.GetInfo, TCnBooleanPropEditor.Register);
+{$ENDIF}
 
 end.
 
