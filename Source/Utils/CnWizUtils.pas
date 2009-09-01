@@ -4838,14 +4838,14 @@ var
   Personality: string;
 {$ENDIF}
 begin
-{$IFNDEF COMPILER9_UP} // 不是 BDS 2005/2006，则以编译期为准
+{$IFNDEF COMPILER9_UP} // 不是 BDS 2005/2006 或以上，则以编译期为准
   {$IFDEF DELPHI}
   Result := True;
   {$ELSE}
   Result := False;
   {$ENDIF}
   Exit;
-{$ELSE} // 是 BDS 2005/2006 则需要动态判断
+{$ELSE} // 是 BDS 2005/2006 或以上则需要动态判断
   Result := CurrentIsDelphiSource;
   Project := CnOtaGetCurrentProject;
   if Project <> nil then

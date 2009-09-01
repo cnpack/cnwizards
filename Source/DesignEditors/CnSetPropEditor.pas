@@ -122,6 +122,8 @@ type
   {$ENDIF}
   end;
 
+{$IFNDEF DELPHI2010_UP}
+
   TCnBooleanPropEditor = class(TEnumProperty
     {$IFDEF COMPILER6_UP}, ICustomPropertyDrawing {$ENDIF})
   public
@@ -156,10 +158,12 @@ end;
 procedure TCnSetElementPropEditor.PropDrawValue(ACanvas: TCanvas; const ARect: TRect;
   ASelected: Boolean);
 begin
+  {$IFNDEF DELPHI2010_UP}
   // 如果不启用 Boolean 编辑器，此处也不绘制检查框
   if CnDesignEditorMgr.PropEditorActive[TCnBooleanPropEditor] then
     DrawBoolCheckBox(ACanvas, ARect, Value = BooleanIdents[True])
   else
+  {$ENDIF}
     DefaultPropertyDrawValue(Self, ACanvas, ARect);
 {$ELSE}
 
@@ -168,9 +172,11 @@ procedure TCnSetElementPropEditor.PropDrawValue(Canvas: TCanvas;
 begin
   // 如果不启用 Boolean 编辑器，此处也不绘制检查框
   inherited;
+  {$IFNDEF DELPHI2010_UP}
   // 2004-05-15 shenloqi: inherited to get canvas' setting;
   if CnDesignEditorMgr.PropEditorActive[TCnBooleanPropEditor] then
     DrawBoolCheckBox(Canvas, Rect, Value = BooleanIdents[True]);
+  {$ENDIF}    
 {$ENDIF}
 end;
 
@@ -381,6 +387,8 @@ end;
 
 { TCnBooleanPropEditor }
 
+{$IFNDEF DELPHI2010_UP}
+
 {$IFDEF COMPILER6_UP}
 
 procedure TCnBooleanPropEditor.PropDrawName(ACanvas: TCanvas; const ARect: TRect;
@@ -413,6 +421,7 @@ begin
 end;
 
 class procedure TCnBooleanPropEditor.Register;
+
   procedure DoRegister(AClass: TClass);
   begin
     RegisterPropertyEditor(TypeInfo(Boolean), AClass, '', TCnBooleanPropEditor);
@@ -420,6 +429,7 @@ class procedure TCnBooleanPropEditor.Register;
     RegisterPropertyEditor(TypeInfo(WordBool), AClass, '', TCnBoolPropEditor);
     RegisterPropertyEditor(TypeInfo(LongBool), AClass, '', TCnBoolPropEditor);
   end;
+
 begin
   DoRegister(TWinControl);
   DoRegister(TGraphicControl);
@@ -428,6 +438,8 @@ begin
   DoRegister(TPersistent);
   DoRegister(TObject);
 end;
+
+{$ENDIF}
 
 initialization
   CnDesignEditorMgr.RegisterPropEditor(TCnSetPropEditor,

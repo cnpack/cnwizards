@@ -69,10 +69,10 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, Dialogs, ActnList,
-  ToolsAPI, IniFiles, ShellAPI, Menus, FileCtrl, CnCommon, CnWizClasses,
-  CnWizUtils, CnConsts, CnWizConsts, CnProjectViewUnitsFrm, CnProjectViewFormsFrm,
-  CnProjectListUsedFrm, CnProjectDelTempFrm, CnIni, CnWizCompilerConst,
-  CnProjectBackupFrm, CnProjectDirBuilderFrm, CnWizMethodHook;
+  ToolsAPI, IniFiles, ShellAPI, Menus, FileCtrl, {$IFDEF BDS} Variants, {$ENDIF}
+  CnCommon, CnWizClasses, CnWizUtils, CnConsts, CnWizConsts, CnProjectViewUnitsFrm,
+  CnProjectViewFormsFrm, CnProjectListUsedFrm, CnProjectDelTempFrm, CnIni,
+  CnWizCompilerConst, CnProjectBackupFrm, CnProjectDirBuilderFrm, CnWizMethodHook;
                                            
 type
 
@@ -238,7 +238,7 @@ end;
 procedure TCnProjectExtWizard.ExploreExe;
 var
   Project: IOTAProject;
-  Dir, ProjectFileName, OutExt, OutName: string;
+  Dir, ProjectFileName, OutExt, OutName, IntermediaDir: string;
   Val: Variant;
 begin
   Project := CnOtaGetCurrentProject;
@@ -260,7 +260,16 @@ begin
         OutExt := '.dll'
       else
         OutExt := '.exe';
-      OutName := MakePath(Dir) + ChangeFileExt(ExtractFileName(ProjectFileName), OutExt);
+
+{$IFDEF BDS}
+      if not IsDelphiRuntime then
+      begin
+        if CnOtaGetActiveProjectOption('UnitOutputDir', Val) then
+          IntermediaDir := MakePath(VarToStr(Val));
+      end;
+{$ENDIF}
+
+      OutName := MakePath(Dir) + IntermediaDir + ChangeFileExt(ExtractFileName(ProjectFileName), OutExt);
       if FileExists(OutName) then
         ExploreFile(OutName)
       else if DirectoryExists(Dir) then
