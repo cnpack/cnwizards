@@ -140,6 +140,8 @@ type
     class procedure Register;
   end;
 
+{$ENDIF}
+
 implementation
 
 uses
