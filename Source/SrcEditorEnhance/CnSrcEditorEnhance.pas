@@ -695,7 +695,7 @@ end;
 
 procedure TCnSrcEditorEnhance.CheckToolBarEnable;
 var
-  I, J, K: Integer;
+  I, J: Integer;
   AControl: TControl;
   AVisible, EditVisible: Boolean;
 begin
@@ -720,6 +720,8 @@ begin
           end;
 
           // 从头搜索第一个 Align 是 Client 的东西，是编辑器则显示
+          EditVisible := False;
+          AVisible := False;
           for J := FToolbarMgr.ToolBars[I].Parent.ControlCount - 1 downto 0 do
           begin
             AControl := FToolbarMgr.ToolBars[I].Parent.Controls[J];
@@ -727,36 +729,25 @@ begin
             begin
               EditVisible := AControl.ClassNameIs(EditControlClassName) and AControl.Visible;
               AVisible := EditVisible or AControl.ClassNameIs('TDisassemblyView'); // CPU 也显示
-
-              if AVisible then
-              begin
-                if AVisible <> FToolbarMgr.ToolBars[I].Visible then
-                  FToolbarMgr.ToolBars[I].Visible := AVisible;
-
-                if CnEditorToolBarService <> nil then
-                  CnEditorToolBarService.SetVisible(-1, AControl, EditVisible, False);
-              end
-              else // 要按倒序来，否则工具栏之间上下会错位
-              begin
-                // 还需要找出 EditControl 来让这个 EditControl 对应的 ToolBar 失效
-                if CnEditorToolBarService <> nil then
-                begin
-                  for K := FToolbarMgr.ToolBars[I].Parent.ControlCount - 1 downto 0 do
-                  begin
-                    AControl := FToolbarMgr.ToolBars[I].Parent.Controls[K];
-                    if AControl.ClassNameIs(EditControlClassName) then
-                    begin
-                      CnEditorToolBarService.SetVisible(-1, AControl, EditVisible, False);
               Break;
             end;
           end;
-                end;
 
-          if AVisible <> FToolbarMgr.ToolBars[I].Visible then
-            FToolbarMgr.ToolBars[I].Visible := AVisible;
-              end;
-              Break;
-            end;
+          if AVisible then
+          begin
+            if AVisible <> FToolbarMgr.ToolBars[I].Visible then
+              FToolbarMgr.ToolBars[I].Visible := AVisible;
+
+            if CnEditorToolBarService <> nil then
+              CnEditorToolBarService.SetVisible(-1, AControl, EditVisible, False);
+          end
+          else // 要按倒序来，否则工具栏之间上下会错位
+          begin
+            if CnEditorToolBarService <> nil then
+              CnEditorToolBarService.SetVisible(-1, AControl, EditVisible, False);
+
+            if AVisible <> FToolbarMgr.ToolBars[I].Visible then
+              FToolbarMgr.ToolBars[I].Visible := AVisible;
           end;
         end;
       except
