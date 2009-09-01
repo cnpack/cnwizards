@@ -50,8 +50,8 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Dialogs, ToolsAPI,
   IniFiles, Menus, CnCommon, CnWizUtils, CnConsts, CnWizClasses, CnWizConsts,
   CnWizManager, ComCtrls, ActnList, CnSpin, StdCtrls, ExtCtrls, CnWizMultiLang,
-  CnSrcEditorMisc, CnSrcEditorGutter, CnSrcEditorToolBar, CnSrcEditorNav,
-  CnSrcEditorBlockTools, CnSrcEditorKey, CnEditControlWrapper;
+  Forms, CnSrcEditorMisc, CnSrcEditorGutter, CnSrcEditorToolBar, CnSrcEditorNav,
+  CnSrcEditorBlockTools, CnSrcEditorKey, CnEditControlWrapper, CnWizNotifier;
 
 type
 
@@ -191,6 +191,9 @@ type
     procedure CheckToolBarEnable;
     procedure EditorChanged(Editor: TEditorObject;
       ChangeType: TEditorChangeTypes);
+    procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm; 
+      Operation: TOperation);
+    procedure CheckToolBarEnableOnIdle(Sender: TObject);
   {$ENDIF}
   protected
     procedure SetActive(Value: Boolean); override;
@@ -416,6 +419,7 @@ begin
   FEditorKey.OnEnhConfig := OnEnhConfig;
 {$IFDEF BDS}
   EditControlWrapper.AddEditorChangeNotifier(EditorChanged);
+  EditControlWrapper.AddEditControlNotifier(EditControlNotify);
 {$ENDIF}
 end;
 
@@ -423,6 +427,7 @@ destructor TCnSrcEditorEnhance.Destroy;
 begin
 {$IFDEF BDS}
   EditControlWrapper.RemoveEditorChangeNotifier(EditorChanged);
+  EditControlWrapper.RemoveEditControlNotifier(EditControlNotify);
 {$ENDIF}
   FEditorMisc.Free;
   FToolbarMgr.Free;
@@ -677,6 +682,17 @@ begin
     CheckToolBarEnable;
 end;
 
+procedure TCnSrcEditorEnhance.CheckToolBarEnableOnIdle(Sender: TObject);
+begin
+  CheckToolBarEnable;
+end;
+
+procedure TCnSrcEditorEnhance.EditControlNotify(EditControl: TControl;
+  EditWindow: TCustomForm; Operation: TOperation);
+begin
+  CnWizNotifierServices.ExecuteOnApplicationIdle(CheckToolBarEnableOnIdle)
+end;
+
 procedure TCnSrcEditorEnhance.CheckToolBarEnable;
 var
   I, J, K: Integer;
@@ -731,13 +747,13 @@ begin
                     if AControl.ClassNameIs(EditControlClassName) then
                     begin
                       CnEditorToolBarService.SetVisible(-1, AControl, EditVisible, False);
-                      Break;
-                    end;
-                  end;
+              Break;
+            end;
+          end;
                 end;
 
-                if AVisible <> FToolbarMgr.ToolBars[I].Visible then
-                  FToolbarMgr.ToolBars[I].Visible := AVisible;
+          if AVisible <> FToolbarMgr.ToolBars[I].Visible then
+            FToolbarMgr.ToolBars[I].Visible := AVisible;
               end;
               Break;
             end;

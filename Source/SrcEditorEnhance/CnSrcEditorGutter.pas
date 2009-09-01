@@ -707,13 +707,16 @@ end;
 procedure TCnSrcEditorGutterMgr.EditControlNotify(EditControl: TControl;
   EditWindow: TCustomForm; Operation: TOperation);
 begin
-  if Operation = opInsert then
-    UpdateGutters;
+  UpdateGutters;
 end;
 
 procedure TCnSrcEditorGutterMgr.UpdateGutters;
+var
+  i: Integer;
 begin
   EnumEditControl(DoUpdateGutters, nil);
+  for i := 0 to Count - 1 do
+    Gutters[i].UpdateStatus;
 end;
 
 //------------------------------------------------------------------------------

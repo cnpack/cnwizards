@@ -764,6 +764,7 @@ begin
   if Idx >= 0 then
   begin
     FEditorList.Delete(Idx);
+    DoEditControlNotify(EditControl, opRemove);
   {$IFDEF DEBUG}
     CnDebugger.LogMsg('TCnEditControlWrapper: EditControl Removed.');
   {$ENDIF}
@@ -1319,7 +1320,6 @@ begin
   {$ENDIF}
     FEditControlList.Remove(AComponent);
     DeleteEditor(TControl(AComponent));
-    DoEditControlNotify(TControl(AComponent), opRemove);
   end;
 end;
 
