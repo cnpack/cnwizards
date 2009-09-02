@@ -739,12 +739,12 @@ begin
               FToolbarMgr.ToolBars[I].Visible := AVisible;
 
             if CnEditorToolBarService <> nil then
-              CnEditorToolBarService.SetVisible(-1, AControl, EditVisible, False);
+              CnEditorToolBarService.SetVisible(-1, FToolbarMgr.ToolBars[I].Parent, EditVisible, False);
           end
           else // 要按倒序来，否则工具栏之间上下会错位
           begin
             if CnEditorToolBarService <> nil then
-              CnEditorToolBarService.SetVisible(-1, AControl, EditVisible, False);
+              CnEditorToolBarService.SetVisible(-1, FToolbarMgr.ToolBars[I].Parent, EditVisible, False);
 
             if AVisible <> FToolbarMgr.ToolBars[I].Visible then
               FToolbarMgr.ToolBars[I].Visible := AVisible;

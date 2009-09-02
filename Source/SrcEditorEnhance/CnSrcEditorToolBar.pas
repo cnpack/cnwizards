@@ -173,9 +173,9 @@ type
     {* 允许外部模块注册一工具栏类型并提供回调函数供创建、初始化与删除，
        返回此类工具栏的索引号}
     procedure SetVisible(ToolBarTypeIndex: TCnEditorToolBarTypeIndex;
-      EditControl: TControl; Visible: Boolean; Forced: Boolean);
+      AParent: TControl; Visible: Boolean; Forced: Boolean);
     {* 设置某类工具栏是否全部可见或全部不可见，如果 ToolBarTypeIndex 是 -1，
-       则表示所有类都设置，如 EditControl 不为空，表示设置与该 EditControl 相关的
+       则表示所有类都设置，如 AParent 不为空，表示设置与该 AParent 相关的
        ToolBar, Forced 用于 BDS 表示强制设置，不管 EditControl 等的相关条件}
     function GetVisible(ToolBarTypeIndex: TCnEditorToolBarTypeIndex): Boolean;
     {* 获得某类工具栏是否可见}
@@ -259,7 +259,7 @@ type
       InitEvent: TCnEditorToolBarInitEvent;
       RemoveEvent: TCnEditorToolBarRemoveEvent): TCnEditorToolBarTypeIndex;
     procedure SetVisible(ToolBarTypeIndex: TCnEditorToolBarTypeIndex;
-      EditControl: TControl; Visible: Boolean; Forced: Boolean);
+      AParent: TControl; Visible: Boolean; Forced: Boolean);
     function GetVisible(ToolBarTypeIndex: TCnEditorToolBarTypeIndex): Boolean;
     procedure CheckEditorToolbarEnable;
     procedure LanguageChanged;
@@ -780,14 +780,9 @@ begin
       begin
         if Obj.EditControls[J] = EditControl then
         begin
-          if (Obj.ToolBars[J] <> nil) and Assigned(Obj.RemoveEvent) then
-            Obj.RemoveEvent(EditControl, Obj.ToolBars[J]);
-          // 一般 ToolBar 可能先于 EditControl 被删除，那么 RemoveEvent
-          // 便不该在此调用，而在 ToolBar 的 Notification 里头调用
-
-          Obj.RemoveEditControlFromIndex(J);
-          // 只简单删除引用，ToolBar 本身由其 Owner 释放，
-          // ToolBar 上在 CreateEvent 中生成的其它组件在 RemoveEvent 中释放
+          // 为了避免出现 EditControl 释放而 ToolBar 没有释放的情况，此处手工释放掉。
+          // 由 ToolBar 释放的 Notification 通知来处理剩下的事情。
+          Obj.ToolBars[J].Free;
         end;
       end;
     end;
@@ -888,7 +883,7 @@ begin
 end;
 
 procedure TCnExternalEditorToolBarMgr.SetVisible(
-  ToolBarTypeIndex: TCnEditorToolBarTypeIndex; EditControl: TControl;
+  ToolBarTypeIndex: TCnEditorToolBarTypeIndex; AParent: TControl;
   Visible: Boolean; Forced: Boolean);
 var
   Obj: TCnEditorToolBarObj;
@@ -916,7 +911,7 @@ begin
 
     for I := 0 to Obj.ToolBarCount - 1 do
       if Obj.ToolBars[I] <> nil then
-        if (EditControl = nil) or (Obj.EditControls[I] = EditControl) then
+        if (AParent = nil) or (Obj.ToolBars[I].Parent = AParent) then
           Obj.ToolBars[I].Visible := ActualVisible;
   end
   else
@@ -933,7 +928,7 @@ begin
 
         for I := 0 to Obj.ToolBarCount - 1 do
           if Obj.ToolBars[I] <> nil then
-            if (EditControl = nil) or (Obj.EditControls[I] = EditControl) then
+            if (AParent = nil) or (Obj.ToolBars[I].Parent = AParent) then
               Obj.ToolBars[I].Visible := ActualVisible;
       end;
     end
@@ -949,7 +944,7 @@ begin
 
         for I := 0 to Obj.ToolBarCount - 1 do
           if Obj.ToolBars[I] <> nil then
-            if (EditControl = nil) or (Obj.EditControls[I] = EditControl) then
+            if (AParent = nil) or (Obj.ToolBars[I].Parent = AParent) then
               Obj.ToolBars[I].Visible := ActualVisible;
       end;
     end;
@@ -1006,7 +1001,7 @@ var
 begin
   inherited;
   if Operation = opRemove then
-    for I := 0 to ToolBarCount - 1 do
+    for I := ToolBarCount - 1 downto 0 do
       if AComponent = FToolBars[I] then
       begin
         // 删除 ToolBar 时，调用 RemoveEvent 通知释放其它东西
@@ -1014,7 +1009,9 @@ begin
           and (AComponent.Tag <> 0) and (TObject(AComponent.Tag) is TControl) then
           FRemoveEvent(TObject(AComponent.Tag) as TControl, AComponent);
 
-        FToolBars[I] := nil;
+        // 从列表中直接删除
+        FToolBars.Delete(I);
+        FEditControls.Delete(I);
 {$IFDEF DEBUG}
         CnDebugger.LogFmt('TCnEditorToolBarObj Notification: ToolBar %d %8.8x Removed.',
           [I, Integer(AComponent)]);

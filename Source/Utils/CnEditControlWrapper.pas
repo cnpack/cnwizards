@@ -119,6 +119,7 @@ type
     FEditView: IOTAEditView;
     FGutterWidth: Integer;
     FGutterChanged: Boolean;
+    FLastValid: Boolean;
     procedure SetEditView(AEditView: IOTAEditView);
     function GetGutterWidth: Integer;
     function GetViewLineNumber(Index: Integer): Integer;
@@ -894,14 +895,24 @@ var
   ACtrl: TControl;
 begin
   Result := [];
-  if not Editor.EditControl.Visible or (Editor.EditView = nil) then
-    Exit;
 
+  // 始终判断编辑器是否在最顶端
   ACtrl := Editor.GetTopEditor;
   if Editor.FTopControl <> ACtrl then
   begin
     Include(Result, ctTopEditorChanged);
     Editor.FTopControl := ACtrl;
+  end;
+
+  if not Editor.EditControl.Visible or (Editor.EditView = nil) then
+  begin
+    if Editor.FLastValid then
+    begin
+      // 可能执行 Close All 导致 EditView 释放了
+      Include(Result, ctView);
+      Editor.FLastValid := False;
+    end;  
+    Exit;
   end;
 
   // 编辑器不在最前端时不进行后继判断
@@ -910,13 +921,15 @@ begin
     
   try
     Context := GetEditorContext(Editor);
+    Editor.FLastValid := True;
   except
   {$IFDEF DEBUG}
     CnDebugger.LogMsg('GetEditorContext Error');
   {$ENDIF}
   {$IFDEF BDS}
-    Editor.FEditView := nil;
     // BDS 下，时常出现 EditView 已经被释放而导致出错的情况，此处将其置 nil
+    Editor.FEditView := nil;
+    Include(Result, ctView);
     Exit;
   {$ENDIF}
   end;
@@ -1360,7 +1373,7 @@ begin
     for I := 0 to EditorCount - 1 do
       if Editors[I].EditView = EditView then
       begin
-        DeleteEditor(Editors[I].EditControl);
+        NoRef(Editors[I].FEditView) := nil;
         Break;
       end;
   end;  
