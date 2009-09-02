@@ -51,6 +51,18 @@ type
 // 代码编辑器工具栏
 //==============================================================================
 
+{ TCnBaseSrcEditorToolBar }
+
+  TCnBaseSrcEditorToolBar = class(TToolBar)
+  protected
+{$IFDEF BDS}
+    procedure SetEnabled(Value: Boolean); override;
+{$ENDIF}
+  public
+    constructor Create(AOwner: TComponent); override;
+    procedure InitControls; virtual;
+  end;
+
 { TCnSrcEditorToolButton }
 
   TCnSrcEditorToolButton = class(TToolButton)
@@ -66,34 +78,26 @@ type
 
   TCnSrcEditorToolBarMgr = class;
 
-  TCnSrcEditorToolBar = class(TToolBar)
+  TCnSrcEditorToolBar = class(TCnBaseSrcEditorToolBar)
   private
     FMenu: TPopupMenu;
     FToolBarMgr: TCnSrcEditorToolBarMgr;
     procedure OnConfig(Sender: TObject);
     procedure OnClose(Sender: TObject);
     procedure OnEnhConfig(Sender: TObject);
-  protected
-{$IFDEF BDS}
-    procedure SetEnabled(Value: Boolean); override;
-{$ENDIF}
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    procedure InitControls;
+    procedure InitControls; override;
     procedure RecreateButtons;
     procedure InitPopupMenu;
     procedure LanguageChanged(Sender: TObject);
     property Menu: TPopupMenu read FMenu;
   end;
 
-  TCnExternalSrcEditorToolBar = class(TToolBar)
-  private
-    procedure InitControls;
-  protected
-{$IFDEF BDS}
-    procedure SetEnabled(Value: Boolean); override;
-{$ENDIF}
+  TCnExternalSrcEditorToolBar = class(TCnBaseSrcEditorToolBar)
+  public
+    procedure InitControls; override;
   end;
 
 //==============================================================================
@@ -269,6 +273,45 @@ type
 // 代码编辑器工具栏
 //==============================================================================
 
+{ TCnBaseSrcEditorToolBar }
+
+constructor TCnBaseSrcEditorToolBar.Create(AOwner: TComponent);
+{$IFDEF BDS2006_UP}
+var
+  barStdTool: TToolBar;
+{$ENDIF}
+begin
+  inherited;
+  Caption := '';
+  DockSite := False;
+  ShowHint := True;
+  EdgeBorders := [ebBottom];
+  Flat := True;
+{$IFDEF BDS2006_UP}
+  barStdTool := (BorlandIDEServices as INTAServices).ToolBar[sStandardToolBar];
+  if Assigned(barStdTool) then
+  begin
+    DrawingStyle := barStdTool.DrawingStyle;
+    GradientDirection := barStdTool.GradientDirection;
+    GradientDrawingOptions := barStdTool.GradientDrawingOptions;
+    GradientStartColor := barStdTool.GradientStartColor;
+    GradientEndColor := barStdTool.GradientEndColor;
+  end;
+{$ENDIF}
+end;
+
+{$IFDEF BDS}
+procedure TCnBaseSrcEditorToolBar.SetEnabled(Value: Boolean);
+begin
+// 什么也不做，以阻挡 BDS 下切换页面时 Disable 工具栏的操作
+end;
+{$ENDIF}
+
+procedure TCnBaseSrcEditorToolBar.InitControls;
+begin
+
+end;
+
 { TCnSrcEditorToolButton }
 
 procedure TCnSrcEditorToolButton.Click;
@@ -320,25 +363,14 @@ end;
 // 工具栏初始化及更新
 //------------------------------------------------------------------------------
 
-{$IFDEF BDS}
-procedure TCnSrcEditorToolBar.SetEnabled(Value: Boolean);
-begin
-// 什么也不做，以阻挡 BDS 下切换页面时 Disable 工具栏的操作
-end;
-{$ENDIF}
-
 procedure TCnSrcEditorToolBar.InitControls;
 begin
-  InitPopupMenu;
-  Caption := '';
+  inherited;
   AutoSize := True;
   Align := alTop;
-  EdgeBorders := [ebBottom];
-  Flat := True;
-  DockSite := False;
-  Wrapable := FToolBarMgr.Wrapable;
   Images := GetIDEImageList;
-  ShowHint := True;
+  InitPopupMenu;
+  Wrapable := FToolBarMgr.Wrapable;
   PopupMenu := FMenu;
   RecreateButtons;
 end;
@@ -1029,23 +1061,11 @@ end;
 
 procedure TCnExternalSrcEditorToolBar.InitControls;
 begin
-  Caption := '';
+  inherited;
   AutoSize := True;
   Align := alTop;
-  EdgeBorders := [ebBottom];
-  Flat := True;
-  DockSite := False;
-  ShowHint := True;
+  Images := GetIDEImageList;
 end;
-
-{$IFDEF BDS}
-
-procedure TCnExternalSrcEditorToolBar.SetEnabled(Value: Boolean);
-begin
-// 啥都不做，以避免 BDS 下被误设置为禁用
-end;
-
-{$ENDIF}
 
 initialization
   CreateEditorToolBarServiceProc := CreateEditorToolBarService;
