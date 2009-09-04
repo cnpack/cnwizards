@@ -341,19 +341,29 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         end
         object chkToolBarWrap: TCheckBox
           Left = 24
-          Top = 38
+          Top = 66
           Width = 201
           Height = 17
           Caption = '按钮自动换行。'
-          TabOrder = 2
+          TabOrder = 4
         end
         object chkShowInDesign: TCheckBox
-          Left = 24
-          Top = 62
-          Width = 329
+          Left = 8
+          Top = 42
+          Width = 209
           Height = 17
-          Caption = '在嵌入式窗体设计界面显示工具栏（仅适用于BDS）。'
+          Caption = '在 BDS 窗体设计界面显示工具栏。'
+          TabOrder = 2
+          OnClick = UpdateContent
+        end
+        object btnDesignToolBar: TButton
+          Left = 224
+          Top = 42
+          Width = 129
+          Height = 21
+          Caption = '定制按钮(&F)...'
           TabOrder = 3
+          OnClick = btnDesignToolBarClick
         end
       end
       object grpEditorNav: TGroupBox
@@ -624,7 +634,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Width = 350
           Height = 17
           Caption = '使用此热键输入并替换光标下的标识符：'
-          TabOrder = 2
+          TabOrder = 3
           OnClick = UpdateContent
         end
         object hkRename: THotKey
@@ -635,7 +645,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           HotKey = 32833
           InvalidKeys = [hcNone, hcShift]
           Modifiers = [hkAlt]
-          TabOrder = 3
+          TabOrder = 2
         end
         object chkSemicolon: TCheckBox
           Left = 8

@@ -146,6 +146,7 @@ type
     hkRename: THotKey;
     chkSemicolon: TCheckBox;
     chkAutoEnterEnd: TCheckBox;
+    btnDesignToolBar: TButton;
     procedure btnHelpClick(Sender: TObject);
     procedure UpdateContent(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word;
@@ -160,6 +161,7 @@ type
     procedure btnToolBarClick(Sender: TObject);
     procedure btnLineFontClick(Sender: TObject);
     procedure btnCurrLineFontClick(Sender: TObject);
+    procedure btnDesignToolBarClick(Sender: TObject);
   private
     { Private declarations }
   protected
@@ -188,7 +190,6 @@ type
     FEditorKey: TCnSrcEditorKey;
 
   {$IFDEF BDS}
-    procedure CheckToolBarEnable;
     procedure EditorChanged(Editor: TEditorObject;
       ChangeType: TEditorChangeTypes);
     procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm; 
@@ -198,7 +199,10 @@ type
   protected
     procedure SetActive(Value: Boolean); override;
     function GetHasConfig: Boolean; override;
-    procedure OnEnhConfig(Sender: TObject);
+    procedure OnEnhConfig_0(Sender: TObject);
+    procedure OnEnhConfig_1(Sender: TObject);
+    procedure OnEnhConfig_2(Sender: TObject);
+    procedure OnEnhConfig_3(Sender: TObject);
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -206,6 +210,7 @@ type
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
     procedure Config; override;
+    procedure ConfigEx(APageIndex: Integer);
     procedure LanguageChanged(Sender: TObject); override;
 
     property GutterMgr: TCnSrcEditorGutterMgr read FGutterMgr;
@@ -254,15 +259,16 @@ begin
   edtDir.Enabled := chkAutoReadOnly.Checked;
   btnSelectDir.Enabled := chkAutoReadOnly.Checked;
 
-  chkToolBarWrap.Enabled := chkShowToolBar.Checked;
   btnToolBar.Enabled := chkShowToolBar.Checked;
+  btnDesignToolBar.Enabled := chkShowInDesign.Checked;
 {$IFDEF BDS}
-  chkShowInDesign.Enabled := chkShowToolBar.Checked;
   chkEditorMultiLine.Enabled := False;
   chkEditorFlatButtons.Enabled := False;  
 {$ELSE}
   chkShowInDesign.Enabled := False;
 {$ENDIF}
+  chkToolBarWrap.Enabled := chkShowToolBar.Checked or
+    chkShowInDesign.Enabled and chkShowInDesign.Checked;
 
   chkShowLineCount.Enabled := chkShowLineNumber.Checked;
   rbLinePanelAutoWidth.Enabled := chkShowLineNumber.Checked;
@@ -342,7 +348,16 @@ var
 begin
   Wizard := CnWizardMgr.WizardByClass(TCnSrcEditorEnhance) as TCnSrcEditorEnhance;
   if Wizard <> nil then
-    Wizard.ToolBarMgr.ConfigToolBar;
+    Wizard.ToolBarMgr.ConfigToolBar(tbtCode);
+end;
+
+procedure TCnSrcEditorEnhanceForm.btnDesignToolBarClick(Sender: TObject);
+var
+  Wizard: TCnSrcEditorEnhance;
+begin
+  Wizard := CnWizardMgr.WizardByClass(TCnSrcEditorEnhance) as TCnSrcEditorEnhance;
+  if Wizard <> nil then
+    Wizard.ToolBarMgr.ConfigToolBar(tbtDesign);
 end;
 
 procedure TCnSrcEditorEnhanceForm.actDeleteExecute(Sender: TObject);
@@ -406,17 +421,17 @@ begin
   if Assigned(CreateEditorToolBarServiceProc) then
     CreateEditorToolBarServiceProc();
 
-  FToolbarMgr.OnEnhConfig := OnEnhConfig;
+  FToolbarMgr.OnEnhConfig := OnEnhConfig_1;
   FGutterMgr := TCnSrcEditorGutterMgr.Create;
-  FGutterMgr.OnEnhConfig := OnEnhConfig;
+  FGutterMgr.OnEnhConfig := OnEnhConfig_1;
 {$IFNDEF BDS}
   FNavMgr := TCnSrcEditorNavMgr.Create;
-  FNavMgr.OnEnhConfig := OnEnhConfig;
+  FNavMgr.OnEnhConfig := OnEnhConfig_1;
 {$ENDIF}
   FBlockTools := TCnSrcEditorBlockTools.Create;
-  FBlockTools.OnEnhConfig := OnEnhConfig;
+  FBlockTools.OnEnhConfig := OnEnhConfig_2;
   FEditorKey := TCnSrcEditorKey.Create;
-  FEditorKey.OnEnhConfig := OnEnhConfig;
+  FEditorKey.OnEnhConfig := OnEnhConfig_3;
 {$IFDEF BDS}
   EditControlWrapper.AddEditorChangeNotifier(EditorChanged);
   EditControlWrapper.AddEditControlNotifier(EditControlNotify);
@@ -505,8 +520,14 @@ end;
 
 procedure TCnSrcEditorEnhance.Config;
 begin
+  ConfigEx(0);
+end;
+
+procedure TCnSrcEditorEnhance.ConfigEx(APageIndex: Integer);
+begin
   with TCnSrcEditorEnhanceForm.Create(nil) do
   try
+    pgc1.ActivePageIndex := APageIndex;
     chkAddMenuCloseOtherPages.Checked := FEditorMisc.AddMenuCloseOtherPages;
     chkAddMenuSelAll.Checked := FEditorMisc.AddMenuSelAll;
     chkAddMenuExplore.Checked := FEditorMisc.AddMenuExplore;
@@ -522,7 +543,7 @@ begin
     chkDispModifiedInTab.Checked := FEditorMisc.DispModifiedInTab;
   {$IFDEF BDS}
     chkDispModifiedInTab.Enabled := False;
-    chkShowInDesign.Checked := FToolbarMgr.ShowInDesign;
+    chkShowInDesign.Checked := FToolbarMgr.ShowDesignToolBar;
   {$ELSE}
     chkShowInDesign.Enabled := False;
   {$ENDIF}
@@ -643,7 +664,7 @@ begin
       FNavMgr.ExtendForwardBack := chkExtendForwardBack.Checked;
       FNavMgr.UpdateInstall;
     {$ELSE}
-      FToolbarMgr.ShowInDesign := chkShowInDesign.Checked;
+      FToolbarMgr.ShowDesignToolBar := chkShowInDesign.Checked;
     {$ENDIF}
 
       FBlockTools.ShowBlockTools := chkShowFlatButton.Checked;
@@ -677,14 +698,13 @@ end;
 procedure TCnSrcEditorEnhance.EditorChanged(Editor: TEditorObject;
   ChangeType: TEditorChangeTypes);
 begin
-  if Active and FToolbarMgr.Active and
-    (ChangeType * [ctTopEditorChanged] <> []) then
-    CheckToolBarEnable;
+  if Active and (ChangeType * [ctTopEditorChanged] <> []) then
+    FToolbarMgr.CheckToolBarEnable;
 end;
 
 procedure TCnSrcEditorEnhance.CheckToolBarEnableOnIdle(Sender: TObject);
 begin
-  CheckToolBarEnable;
+  FToolbarMgr.CheckToolBarEnable;
 end;
 
 procedure TCnSrcEditorEnhance.EditControlNotify(EditControl: TControl;
@@ -693,80 +713,26 @@ begin
   CnWizNotifierServices.ExecuteOnApplicationIdle(CheckToolBarEnableOnIdle)
 end;
 
-procedure TCnSrcEditorEnhance.CheckToolBarEnable;
-var
-  I, J: Integer;
-  AControl: TControl;
-  AVisible, EditVisible: Boolean;
-begin
-  if FToolbarMgr.Count > 0 then
-  begin
-    // 有编辑器工具栏，需要和外部工具栏夹杂处理
-    for I := 0 to FToolbarMgr.Count - 1 do
-    begin
-      if not FToolbarMgr.ToolBars[I].Enabled then
-        FToolbarMgr.ToolBars[I].Enabled := True;
-      if not FToolbarMgr.ToolBars[I].ShowHint then
-        FToolbarMgr.ToolBars[I].ShowHint := True;
-
-      try
-        if FToolbarMgr.ToolBars[I].Parent <> nil then
-        begin
-          if FToolbarMgr.ShowInDesign then // 允许其它工具栏也显示
-          begin
-            if not FToolbarMgr.ToolBars[I].Visible then
-              FToolbarMgr.ToolBars[I].Visible := True;
-            Continue;
-          end;
-
-          // 从头搜索第一个 Align 是 Client 的东西，是编辑器则显示
-          EditVisible := False;
-          AVisible := False;
-          for J := FToolbarMgr.ToolBars[I].Parent.ControlCount - 1 downto 0 do
-          begin
-            AControl := FToolbarMgr.ToolBars[I].Parent.Controls[J];
-            if AControl.Align = alClient then
-            begin
-              EditVisible := AControl.ClassNameIs(EditControlClassName) and AControl.Visible;
-              AVisible := EditVisible or AControl.ClassNameIs('TDisassemblyView'); // CPU 也显示
-              Break;
-            end;
-          end;
-
-          if AVisible then
-          begin
-            if AVisible <> FToolbarMgr.ToolBars[I].Visible then
-              FToolbarMgr.ToolBars[I].Visible := AVisible;
-
-            if CnEditorToolBarService <> nil then
-              CnEditorToolBarService.SetVisible(-1, FToolbarMgr.ToolBars[I].Parent, EditVisible, False);
-          end
-          else // 要按倒序来，否则工具栏之间上下会错位
-          begin
-            if CnEditorToolBarService <> nil then
-              CnEditorToolBarService.SetVisible(-1, FToolbarMgr.ToolBars[I].Parent, EditVisible, False);
-
-            if AVisible <> FToolbarMgr.ToolBars[I].Visible then
-              FToolbarMgr.ToolBars[I].Visible := AVisible;
-          end;
-        end;
-      except
-        ;
-      end;
-    end;
-  end
-  else // 无编辑器工具栏的情况下，单独调用 CheckEditorToolbarEnable 让其自行检测
-  begin
-    if CnEditorToolBarService <> nil then
-      CnEditorToolBarService.CheckEditorToolbarEnable;
-  end;
-end;
-
 {$ENDIF}
 
-procedure TCnSrcEditorEnhance.OnEnhConfig(Sender: TObject);
+procedure TCnSrcEditorEnhance.OnEnhConfig_0(Sender: TObject);
 begin
-  Config;
+  ConfigEx(0);
+end;
+
+procedure TCnSrcEditorEnhance.OnEnhConfig_1(Sender: TObject);
+begin
+  ConfigEx(1);
+end;
+
+procedure TCnSrcEditorEnhance.OnEnhConfig_2(Sender: TObject);
+begin
+  ConfigEx(2);
+end;
+
+procedure TCnSrcEditorEnhance.OnEnhConfig_3(Sender: TObject);
+begin
+  ConfigEx(3);
 end;
 
 class procedure TCnSrcEditorEnhance.GetWizardInfo(var Name, Author,

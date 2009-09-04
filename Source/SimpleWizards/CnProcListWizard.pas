@@ -301,8 +301,8 @@ type
 
   TCnProcListWizard = class(TCnMenuWizard)
   private
+    FEditorToolBarType: string;
     FUseEditorToolBar: Boolean;
-    FEditorToolBarIndex: Integer;
     FToolBarTimer: TTimer;
     FNeedReParse: Boolean;
     FCurrPasParser: TCnPasStructureParser;
@@ -314,9 +314,10 @@ type
     FHistoryCount: Integer;
     function GetToolBarObjFromEditControl(EditControl: TControl): TCnProcToolBarObj;
     procedure RemoveToolBarObjFromEditControl(EditControl: TControl);
-    procedure CreateProcToolBar(EditControl: TControl; Sender: TObject);
-    procedure InitProcToolBar(EditControl: TControl; Sender: TObject);
-    procedure RemoveProcToolBar(EditControl: TControl; Sender: TObject);
+    procedure ToolBarCanShow(Sender: TObject; APage: TCnSrcEditorPage; var ACanShow: Boolean);
+    procedure CreateProcToolBar(ToolBarType: string; EditControl: TControl; ToolBar: TToolBar);
+    procedure InitProcToolBar(ToolBarType: string; EditControl: TControl; ToolBar: TToolBar);
+    procedure RemoveProcToolBar(ToolBarType: string; EditControl: TControl; ToolBar: TToolBar);
     procedure EditorChange(Editor: TEditorObject; ChangeType:
       TEditorChangeTypes);
     procedure OnToolBarTimer(Sender: TObject);
@@ -598,7 +599,6 @@ end;
 constructor TCnProcListWizard.Create;
 begin
   inherited;
-  FEditorToolBarIndex := -1;
   FProcToolBarObjects := TList.Create;
 
   FElementList := TStringList.Create;
@@ -611,256 +611,260 @@ begin
   FWizard := Self;
 end;
 
-procedure TCnProcListWizard.CreateProcToolBar(EditControl: TControl; Sender: TObject);
+procedure TCnProcListWizard.ToolBarCanShow(Sender: TObject;
+  APage: TCnSrcEditorPage; var ACanShow: Boolean);
+begin
+  ACanShow := APage in [epCode];
+end;
+  
+procedure TCnProcListWizard.CreateProcToolBar(ToolBarType: string;
+  EditControl: TControl; ToolBar: TToolBar);
 var
-  ToolBar: TCnExternalSrcEditorToolBar;
   Obj: TCnProcToolBarObj;
   Item, SubItem: TMenuItem;
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('ProcList: Create Proc ToolBar from EditControl %8.8x', [Integer(EditControl)]);
 {$ENDIF}
-  if Sender is TCnExternalSrcEditorToolBar then
+  ToolBar.Top := 40; // 让其处于标准编辑器工具栏之下
+  ToolBar.Images := dmCnSharedImages.ilProcToolBar;
+  ToolBar.Wrapable := False;
+  if ToolBar is TCnExternalSrcEditorToolBar then
+    TCnExternalSrcEditorToolBar(ToolBar).OnCanShow := ToolBarCanShow;
+
+  Obj := TCnProcToolBarObj.Create;
+  Obj.EditControl := EditControl;
+  Obj.EditorToolBar := ToolBar;
+
+  // 手工创建弹出菜单
+  Obj.PopupMenu := TPopupMenu.Create(ToolBar);
+
+  // 排序
+  Item := TMenuItem.Create(Obj.PopupMenu);
+  Item.Caption := SCnProcListSortMenuCaption;
+  Obj.PopupMenu.Items.Add(Item);
+
+  // 子菜单缩进，按名称排序
+  SubItem := TMenuItem.Create(Obj.PopupMenu);
+  SubItem.Caption := SCnProcListSortSubMenuByName;
+  SubItem.Tag := 0;
+  SubItem.GroupIndex := 1;
+  SubItem.RadioItem := True;
+  SubItem.Checked := True;
+  SubItem.OnClick := PopupSubItemSortByClick;
+  Item.Add(SubItem);
+
+  // 按位置排序
+  SubItem := TMenuItem.Create(Obj.PopupMenu);
+  SubItem.Caption := SCnProcListSortSubMenuByLocation;
+  SubItem.Tag := 1;
+  SubItem.GroupIndex := 1;
+  SubItem.RadioItem := True;
+  SubItem.OnClick := PopupSubItemSortByClick;
+  Item.Add(SubItem);
+
+  SubItem := TMenuItem.Create(Obj.PopupMenu);
+  SubItem.Caption := '-';
+  Item.Add(SubItem);
+
+  SubItem := TMenuItem.Create(Obj.PopupMenu);
+  SubItem.Caption := SCnProcListSortSubMenuReverse;
+  SubItem.OnClick := PopupSubItemReverseClick;
+  Item.Add(SubItem);
+
+  // 导出
+  Item := TMenuItem.Create(Obj.PopupMenu);
+  Item.Caption := SCnProcListExportMenuCaption;
+  Item.OnClick := PopupExportItemClick;
+  Obj.PopupMenu.Items.Add(Item);
+
+  // 分割线
+  Item := TMenuItem.Create(Obj.PopupMenu);
+  Item.Caption := '-';
+  Obj.PopupMenu.Items.Add(Item);
+
+  // 关闭
+  Item := TMenuItem.Create(Obj.PopupMenu);
+  Item.Caption := SCnProcListCloseMenuCaption;
+  Item.OnClick := PopupCloseItemClick;
+  Obj.PopupMenu.Items.Add(Item);
+
+  ToolBar.PopupMenu := Obj.PopupMenu;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('ProcList: Proc ToolBar Obj Created: %8.8x', [Integer(Obj)]);
+{$ENDIF}
+
+  Obj.ClassCombo := TCnProcListComboBox.Create(ToolBar);
+  with Obj.ClassCombo do
   begin
-    ToolBar := Sender as TCnExternalSrcEditorToolBar;
-    ToolBar.Top := 40; // 让其处于标准编辑器工具栏之下
-    ToolBar.Images := dmCnSharedImages.ilProcToolBar;
-    ToolBar.Wrapable := False;
-
-    Obj := TCnProcToolBarObj.Create;
-    Obj.EditControl := EditControl;
-    Obj.EditorToolBar := ToolBar;
-
-    // 手工创建弹出菜单
-    Obj.PopupMenu := TPopupMenu.Create(ToolBar);
-
-    // 排序
-    Item := TMenuItem.Create(Obj.PopupMenu);
-    Item.Caption := SCnProcListSortMenuCaption;
-    Obj.PopupMenu.Items.Add(Item);
-
-      // 子菜单缩进，按名称排序
-      SubItem := TMenuItem.Create(Obj.PopupMenu);
-      SubItem.Caption := SCnProcListSortSubMenuByName;
-      SubItem.Tag := 0;
-      SubItem.GroupIndex := 1;
-      SubItem.RadioItem := True;
-      SubItem.Checked := True;
-      SubItem.OnClick := PopupSubItemSortByClick;
-      Item.Add(SubItem);
-
-      // 按位置排序
-      SubItem := TMenuItem.Create(Obj.PopupMenu);
-      SubItem.Caption := SCnProcListSortSubMenuByLocation;
-      SubItem.Tag := 1;
-      SubItem.GroupIndex := 1;
-      SubItem.RadioItem := True;
-      SubItem.OnClick := PopupSubItemSortByClick;
-      Item.Add(SubItem);
-
-      SubItem := TMenuItem.Create(Obj.PopupMenu);
-      SubItem.Caption := '-';
-      Item.Add(SubItem);
-
-      SubItem := TMenuItem.Create(Obj.PopupMenu);
-      SubItem.Caption := SCnProcListSortSubMenuReverse;
-      SubItem.OnClick := PopupSubItemReverseClick;
-      Item.Add(SubItem);
-
-    // 导出
-    Item := TMenuItem.Create(Obj.PopupMenu);
-    Item.Caption := SCnProcListExportMenuCaption;
-    Item.OnClick := PopupExportItemClick;
-    Obj.PopupMenu.Items.Add(Item);
-
-    // 分割线
-    Item := TMenuItem.Create(Obj.PopupMenu);
-    Item.Caption := '-';
-    Obj.PopupMenu.Items.Add(Item);
-
-    // 关闭
-    Item := TMenuItem.Create(Obj.PopupMenu);
-    Item.Caption := SCnProcListCloseMenuCaption;
-    Item.OnClick := PopupCloseItemClick;
-    Obj.PopupMenu.Items.Add(Item);
-
-    ToolBar.PopupMenu := Obj.PopupMenu;
-
-{$IFDEF DEBUG}
-    CnDebugger.LogFmt('ProcList: Proc ToolBar Obj Created: %8.8x', [Integer(Obj)]);
-{$ENDIF}
-
-    Obj.ClassCombo := TCnProcListComboBox.Create(ToolBar);
-    with Obj.ClassCombo do
-    begin
-      Parent := ToolBar;
-      Left := 108;
-      Top := 0;
-      Width := 150;
-      Height := 21;
-      FDisableChange := True;
-      Name := 'ClassCombo';
-      SetTextWithoutChange('');
-      FDisableChange := False;
-      OnButtonClick := ClassComboDropDown;
-    end;
-
-    Obj.FSplitter1 := TSplitter.Create(ToolBar);
-    with Obj.FSplitter1 do
-    begin
-      Align := alLeft;
-      Width := 2;
-      MinSize := 40;
-      Parent := ToolBar;
-      Left := Obj.ClassCombo.Width - 1;
-    end;
-
-    Obj.ProcCombo := TCnProcListComboBox.Create(ToolBar);
-    with Obj.ProcCombo do
-    begin
-      Parent := ToolBar;
-      Left := 265;
-      Top := 0;
-      Width := 244;
-      Height := 21;
-      FDisableChange := True;
-      Name := 'ProcCombo';
-      SetTextWithoutChange('');
-      FDisableChange := False;
-      OnButtonClick := ProcComboDropDown;
-    end;
-
-    Obj.FSplitter2 := TSplitter.Create(ToolBar);
-    with Obj.FSplitter2 do
-    begin
-      Align := alLeft;
-      Width := 3;
-      MinSize := 40;
-      Parent := ToolBar;
-      Left := Obj.ClassCombo.Width + 2;
-    end;
-
-    Obj.InternalToolBar2 := TCnExternalSrcEditorToolBar.Create(ToolBar);
-    with Obj.InternalToolBar2 do
-    begin
-      Parent := ToolBar;
-      Left := 40;
-      Top := 0;
-      Caption := '';
-      AutoSize := True;
-      Align := alLeft;
-      EdgeBorders := [];
-      Flat := True;
-      DockSite := False;
-      ShowHint := True;
-      Transparent := False;
-      Images := dmCnSharedImages.ilProcToolBar;
-      PopupMenu := Obj.PopupMenu;
-    end;
-
-    Obj.ToolBtnJumpIntf := TCnProcToolButton.Create(ToolBar);
-    with Obj.ToolBtnJumpIntf do
-    begin
-      Left := 54;
-      Top := 0;
-      Caption := '';
-      ImageIndex := 0;
-      SetToolBar(Obj.InternalToolBar2);
-      OnClick := JumpIntfOnClick;
-    end;
-
-    Obj.ToolBtnJumpImpl := TCnProcToolButton.Create(ToolBar);
-    with Obj.ToolBtnJumpImpl do
-    begin
-      Left := 77;
-      Top := 0;
-      Caption := '';
-      ImageIndex := 1;
-      SetToolBar(Obj.InternalToolBar2);
-      OnClick := JumpImplOnClick;
-    end;
-
-    Obj.InternalToolBar1 := TCnExternalSrcEditorToolBar.Create(ToolBar);
-    with Obj.InternalToolBar1 do
-    begin
-      Parent := ToolBar;
-      Left := 0;
-      Top := 0;
-      Caption := '';
-      AutoSize := True;
-      Align := alLeft;
-      EdgeBorders := [];
-      Flat := True;
-      DockSite := False;
-      ShowHint := True;
-      Transparent := False;
-      Images := GetIDEImageList;
-      PopupMenu := Obj.PopupMenu;
-    end;
-
-    Obj.ToolBtnProcList := TCnProcToolButton.Create(ToolBar);
-    with Obj.ToolBtnProcList do
-    begin
-      Left := 0;
-      Top := 0;
-      Caption := '';
-      ImageIndex := -1;
-      SetToolBar(Obj.InternalToolBar1);
-    end;
-
-    Obj.ToolBtnListUsed := TCnProcToolButton.Create(ToolBar);
-    with Obj.ToolBtnListUsed do
-    begin
-      Left := 23;
-      Top := 0;
-      Caption := '';
-      ImageIndex := -1;
-      SetToolBar(Obj.InternalToolBar1);
-    end;
-
-    Obj.ToolBtnSep1 := TCnProcToolButton.Create(ToolBar);
-    with Obj.ToolBtnSep1 do
-    begin
-      Left := 46;
-      Top := 0;
-      Width := 4;
-      Caption := '';
-      ImageIndex := -1;
-      Style := tbsSeparator;
-      SetToolBar(Obj.InternalToolBar1);
-    end;
-    Obj.InternalToolBar1.Visible := Obj.ToolBtnSep1.Visible;
-
-    Obj.ToolBtnMatchStart := TCnProcToolButton.Create(ToolBar);
-    with Obj.ToolBtnMatchStart do
-    begin
-      Left := 505;
-      Top := 0;
-      Caption := '';
-      ImageIndex := 2;
-      Grouped := True;
-      Style := tbsCheck;
-      SetToolBar(ToolBar);
-    end;
-
-    Obj.ToolBtnMatchAny := TCnProcToolButton.Create(ToolBar);
-    with Obj.ToolBtnMatchAny do
-    begin
-      Left := 528;
-      Top := 0;
-      Caption := '';
-      ImageIndex := 3;
-      Grouped := True;
-      Style := tbsCheck;
-      Down := True;
-      SetToolBar(ToolBar);
-    end;
-
-    FProcToolBarObjects.Add(Obj);
-{$IFDEF DEBUG}
-    CnDebugger.LogMsg('ProcList: Proc ToolBar Obj Added.');
-{$ENDIF}
+    Parent := ToolBar;
+    Left := 108;
+    Top := 0;
+    Width := 150;
+    Height := 21;
+    FDisableChange := True;
+    Name := 'ClassCombo';
+    SetTextWithoutChange('');
+    FDisableChange := False;
+    OnButtonClick := ClassComboDropDown;
   end;
+
+  Obj.FSplitter1 := TSplitter.Create(ToolBar);
+  with Obj.FSplitter1 do
+  begin
+    Align := alLeft;
+    Width := 2;
+    MinSize := 40;
+    Parent := ToolBar;
+    Left := Obj.ClassCombo.Width - 1;
+  end;
+
+  Obj.ProcCombo := TCnProcListComboBox.Create(ToolBar);
+  with Obj.ProcCombo do
+  begin
+    Parent := ToolBar;
+    Left := 265;
+    Top := 0;
+    Width := 244;
+    Height := 21;
+    FDisableChange := True;
+    Name := 'ProcCombo';
+    SetTextWithoutChange('');
+    FDisableChange := False;
+    OnButtonClick := ProcComboDropDown;
+  end;
+
+  Obj.FSplitter2 := TSplitter.Create(ToolBar);
+  with Obj.FSplitter2 do
+  begin
+    Align := alLeft;
+    Width := 3;
+    MinSize := 40;
+    Parent := ToolBar;
+    Left := Obj.ClassCombo.Width + 2;
+  end;
+
+  Obj.InternalToolBar2 := TCnExternalSrcEditorToolBar.Create(ToolBar);
+  with Obj.InternalToolBar2 do
+  begin
+    Parent := ToolBar;
+    Left := 40;
+    Top := 0;
+    Caption := '';
+    AutoSize := True;
+    Align := alLeft;
+    EdgeBorders := [];
+    Flat := True;
+    DockSite := False;
+    ShowHint := True;
+    Transparent := False;
+    Images := dmCnSharedImages.ilProcToolBar;
+    PopupMenu := Obj.PopupMenu;
+  end;
+
+  Obj.ToolBtnJumpIntf := TCnProcToolButton.Create(ToolBar);
+  with Obj.ToolBtnJumpIntf do
+  begin
+    Left := 54;
+    Top := 0;
+    Caption := '';
+    ImageIndex := 0;
+    SetToolBar(Obj.InternalToolBar2);
+    OnClick := JumpIntfOnClick;
+  end;
+
+  Obj.ToolBtnJumpImpl := TCnProcToolButton.Create(ToolBar);
+  with Obj.ToolBtnJumpImpl do
+  begin
+    Left := 77;
+    Top := 0;
+    Caption := '';
+    ImageIndex := 1;
+    SetToolBar(Obj.InternalToolBar2);
+    OnClick := JumpImplOnClick;
+  end;
+
+  Obj.InternalToolBar1 := TCnExternalSrcEditorToolBar.Create(ToolBar);
+  with Obj.InternalToolBar1 do
+  begin
+    Parent := ToolBar;
+    Left := 0;
+    Top := 0;
+    Caption := '';
+    AutoSize := True;
+    Align := alLeft;
+    EdgeBorders := [];
+    Flat := True;
+    DockSite := False;
+    ShowHint := True;
+    Transparent := False;
+    Images := GetIDEImageList;
+    PopupMenu := Obj.PopupMenu;
+  end;
+
+  Obj.ToolBtnProcList := TCnProcToolButton.Create(ToolBar);
+  with Obj.ToolBtnProcList do
+  begin
+    Left := 0;
+    Top := 0;
+    Caption := '';
+    ImageIndex := -1;
+    SetToolBar(Obj.InternalToolBar1);
+  end;
+
+  Obj.ToolBtnListUsed := TCnProcToolButton.Create(ToolBar);
+  with Obj.ToolBtnListUsed do
+  begin
+    Left := 23;
+    Top := 0;
+    Caption := '';
+    ImageIndex := -1;
+    SetToolBar(Obj.InternalToolBar1);
+  end;
+
+  Obj.ToolBtnSep1 := TCnProcToolButton.Create(ToolBar);
+  with Obj.ToolBtnSep1 do
+  begin
+    Left := 46;
+    Top := 0;
+    Width := 4;
+    Caption := '';
+    ImageIndex := -1;
+    Style := tbsSeparator;
+    SetToolBar(Obj.InternalToolBar1);
+  end;
+  Obj.InternalToolBar1.Visible := Obj.ToolBtnSep1.Visible;
+
+  Obj.ToolBtnMatchStart := TCnProcToolButton.Create(ToolBar);
+  with Obj.ToolBtnMatchStart do
+  begin
+    Left := 505;
+    Top := 0;
+    Caption := '';
+    ImageIndex := 2;
+    Grouped := True;
+    Style := tbsCheck;
+    SetToolBar(ToolBar);
+  end;
+
+  Obj.ToolBtnMatchAny := TCnProcToolButton.Create(ToolBar);
+  with Obj.ToolBtnMatchAny do
+  begin
+    Left := 528;
+    Top := 0;
+    Caption := '';
+    ImageIndex := 3;
+    Grouped := True;
+    Style := tbsCheck;
+    Down := True;
+    SetToolBar(ToolBar);
+  end;
+
+  FProcToolBarObjects.Add(Obj);
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('ProcList: Proc ToolBar Obj Added.');
+{$ENDIF}
 end;
 
 destructor TCnProcListWizard.Destroy;
@@ -1032,7 +1036,8 @@ begin
   Comment := SCnProcListWizardComment;
 end;
 
-procedure TCnProcListWizard.InitProcToolBar(EditControl: TControl; Sender: TObject);
+procedure TCnProcListWizard.InitProcToolBar(ToolBarType: string;
+  EditControl: TControl; ToolBar: TToolBar);
 var
   Obj: TCnProcToolBarObj;
 begin
@@ -1245,8 +1250,8 @@ begin
   CnWizNotifierServices.ExecuteOnApplicationIdle(ProcCombo.RefreshDropBox);
 end;
 
-procedure TCnProcListWizard.RemoveProcToolBar(EditControl: TControl;
-  Sender: TObject);
+procedure TCnProcListWizard.RemoveProcToolBar(ToolBarType: string;
+  EditControl: TControl; ToolBar: TToolBar);
 begin
   RemoveToolBarObjFromEditControl(EditControl);
 end;
@@ -3416,11 +3421,12 @@ begin
   begin
     if Value then
     begin
-      if FEditorToolBarIndex >= 0 then
-        CnEditorToolBarService.SetVisible(FEditorToolBarIndex, nil, True, True)
+      if FEditorToolBarType <> '' then
+        CnEditorToolBarService.SetVisible(FEditorToolBarType, True)
       else
       begin
-        FEditorToolBarIndex := CnEditorToolBarService.RegisterToolBarType(ClassName,
+        FEditorToolBarType := ClassName;
+        CnEditorToolBarService.RegisterToolBarType(FEditorToolBarType,
           CreateProcToolBar, InitProcToolBar, RemoveProcToolBar);
         if FToolBarTimer = nil then
         begin
@@ -3433,8 +3439,8 @@ begin
     end
     else
     begin
-      if FEditorToolBarIndex >= 0 then
-        CnEditorToolBarService.SetVisible(FEditorToolBarIndex, nil, False, True);
+      if FEditorToolBarType <> '' then
+        CnEditorToolBarService.SetVisible(FEditorToolBarType, False);
     end;
   end
   else

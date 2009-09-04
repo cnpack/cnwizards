@@ -83,6 +83,9 @@ const
   EditorFormClassName = 'TEditWindow';
   EditControlName = 'Editor';
   EditControlClassName = 'TEditControl';
+  DesignControlClassName = 'TEditorFormDesigner';
+  WelcomePageClassName = 'TWelcomePageFrame';
+  DisassemblyViewClassName = 'TDisassemblyView';
 {$IFDEF BDS}
   {$IFDEF BDS4_UP} // BDS 2006 RAD Studio 2007 的标签页类名
   XTabControlClassName = 'TIDEGradientTabSet';
@@ -319,6 +322,12 @@ function GetStatusBarFromEditor(EditControl: TControl): TStatusBar;
 function EnumEditControl(Proc: TEnumEditControlProc; Context: Pointer;
   EditorMustExists: Boolean = True): Integer;
 {* 枚举 IDE 中的代码编辑器窗口和 EditControl 控件，调用回调函数，返回总数 }
+
+type
+  TCnSrcEditorPage = (epCode, epDesign, epCPU, epWelcome, epOthers);
+
+function GetCurrentTopEditorPage(AControl: TWinControl): TCnSrcEditorPage;
+{* 取当前编辑窗口顶层页面类型，传入编辑器父控件 }
 
 //==============================================================================
 // 扩展控件
@@ -1504,6 +1513,32 @@ begin
           Proc(EditWindow, EditControl, Context);
       end;
     end;
+end;
+
+// 取当前编辑窗口顶层页面类型，传入编辑器父控件
+function GetCurrentTopEditorPage(AControl: TWinControl): TCnSrcEditorPage;
+var
+  I: Integer;
+  Ctrl: TControl;
+begin
+  // 从头搜索第一个 Align 是 Client 的东西，是编辑器则显示
+  Result := epOthers;
+  for I := AControl.ControlCount - 1 downto 0 do
+  begin
+    Ctrl := AControl.Controls[I];
+    if Ctrl.Visible and (Ctrl.Align = alClient) then
+    begin
+      if Ctrl.ClassNameIs(EditControlClassName) then
+        Result := epCode
+      else if Ctrl.ClassNameIs(DisassemblyViewClassName) then
+        Result := epCPU
+      else if Ctrl.ClassNameIs(DesignControlClassName) then
+        Result := epDesign
+      else if Ctrl.ClassNameIs(WelcomePageClassName) then
+        Result := epWelcome;
+      Break;
+    end;
+  end;
 end;
 
 //==============================================================================

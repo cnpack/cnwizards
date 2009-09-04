@@ -258,6 +258,7 @@ resourcestring
   SCnMenuExploreName = 'CnExplore';
   SCnCopyFileNameMenuName = 'CnCopyFileName';
   SCnEditorToolBarDataName = 'EditorToolBar.ini';
+  SCnEditorDesignToolBarDataName = 'DesignToolBar.ini';
 {$IFDEF DELPHI}
   SCnCodeWrapFile = 'CodeWrap.xml';
 {$ELSE}

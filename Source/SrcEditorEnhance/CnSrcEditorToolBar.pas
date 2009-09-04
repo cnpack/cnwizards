@@ -43,7 +43,7 @@ interface
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms, CnIni,
   ComCtrls, ToolWin, ToolsAPI, IniFiles, CnEditControlWrapper, CnWizNotifier,
-  CnWizIni;
+  CnWizIni, CnWizIdeUtils, CnPopupMenu;
 
 type
 
@@ -61,6 +61,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     procedure InitControls; virtual;
+    function CanShow(APage: TCnSrcEditorPage): Boolean; virtual;
   end;
 
 { TCnSrcEditorToolButton }
@@ -78,10 +79,13 @@ type
 
   TCnSrcEditorToolBarMgr = class;
 
+  TCnSrcEditorToolBarType = (tbtCode, tbtDesign);
+
   TCnSrcEditorToolBar = class(TCnBaseSrcEditorToolBar)
   private
     FMenu: TPopupMenu;
     FToolBarMgr: TCnSrcEditorToolBarMgr;
+    FToolBarType: TCnSrcEditorToolBarType;
     procedure OnConfig(Sender: TObject);
     procedure OnClose(Sender: TObject);
     procedure OnEnhConfig(Sender: TObject);
@@ -89,15 +93,24 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure InitControls; override;
+    function CanShow(APage: TCnSrcEditorPage): Boolean; override;
     procedure RecreateButtons;
     procedure InitPopupMenu;
     procedure LanguageChanged(Sender: TObject);
     property Menu: TPopupMenu read FMenu;
+    property ToolBarType: TCnSrcEditorToolBarType read FToolBarType write FToolBarType;
   end;
 
+  TCnSrcEditorCanShowEvent = procedure (Sender: TObject; APage: TCnSrcEditorPage;
+    var ACanShow: Boolean) of object;
+
   TCnExternalSrcEditorToolBar = class(TCnBaseSrcEditorToolBar)
+  private
+    FOnCanShow: TCnSrcEditorCanShowEvent;
   public
     procedure InitControls; override;
+    function CanShow(APage: TCnSrcEditorPage): Boolean; override;
+    property OnCanShow: TCnSrcEditorCanShowEvent read FOnCanShow write FOnCanShow;
   end;
 
 //==============================================================================
@@ -110,19 +123,20 @@ type
   private
     FShowToolBar: Boolean;
     FToolBarActions: TStringList;
+    FShowDesignToolBar: Boolean;
+    FDesignToolBarActions: TStringList;
     FActive: Boolean;
     FList: TList;
     FOnEnhConfig: TNotifyEvent;
     FWrapable: Boolean;
-{$IFDEF BDS}
-    FShowInDesign: Boolean;
-    procedure SetShowInDesign(const Value: Boolean);
-{$ENDIF}
-    procedure LoadToolBarActions(const FileName: string);
-    procedure SaveToolBarActions(const FileName: string);
+    procedure LoadToolBarActions(Actions: TStrings; const FileName: string);
+    procedure SaveToolBarActions(Actions: TStrings; const FileName: string);
     procedure SetShowToolBar(const Value: Boolean);
+    procedure SetShowDesignToolBar(const Value: Boolean);
     procedure SetActive(const Value: Boolean);
     procedure DoInstallToolBars(EditWindow: TCustomForm; EditControl: TControl;
+      Context: Pointer);
+    procedure DoGetEditList(EditWindow: TCustomForm; EditControl: TControl;
       Context: Pointer);
     function GetCount: Integer;
     function GetToolBar(Index: Integer): TCnSrcEditorToolBar;
@@ -132,13 +146,15 @@ type
   protected
     procedure DoEnhConfig;
     function CanShowToolBar: Boolean;
+    function CanShowDesignToolBar: Boolean;
   public
     constructor Create;
     destructor Destroy; override;
 
     procedure InstallToolBars;
     procedure UpdateToolBars;
-    procedure ConfigToolBar;
+    procedure ConfigToolBar(AType: TCnSrcEditorToolBarType);
+    procedure CheckToolBarEnable;
     procedure LanguageChanged(Sender: TObject);
     procedure LoadSettings(Ini: TCustomIniFile);
     procedure SaveSettings(Ini: TCustomIniFile);
@@ -147,9 +163,7 @@ type
     property ToolBars[Index: Integer]: TCnSrcEditorToolBar read GetToolBar;
 
     property ShowToolBar: Boolean read FShowToolBar write SetShowToolBar;
-{$IFDEF BDS}
-    property ShowInDesign: Boolean read FShowInDesign write SetShowInDesign;
-{$ENDIF}
+    property ShowDesignToolBar: Boolean read FShowDesignToolBar write SetShowDesignToolBar;
     property Wrapable: Boolean read FWrapable write SetWrapable;
     property Active: Boolean read FActive write SetActive;
     property OnEnhConfig: TNotifyEvent read FOnEnhConfig write FOnEnhConfig;
@@ -158,33 +172,28 @@ type
 {$ELSE}
 
 uses
-  SysUtils, Classes, Controls;
+  SysUtils, Classes, ComCtrls, Controls;
 
 {$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}
 
 type
-  TCnEditorToolBarTypeIndex = Integer;
-  TCnEditorToolBarCreateEvent = procedure (EditControl: TControl; Sender: TObject) of object;
-  TCnEditorToolBarInitEvent = procedure (EditControl: TControl; Sender: TObject) of object;
-  TCnEditorToolBarRemoveEvent = procedure (EditControl: TControl; Sender: TObject) of object;
+  TCnEditorToolBarEvent = procedure (ToolBarType: string;
+     EditControl: TControl; ToolBar: TToolBar) of object;
 
   ICnEditorToolBarService = interface
   ['{BF6B4399-270A-4E24-8137-587162D12497}']
-    function RegisterToolBarType(const ToolBarType: string;
-      CreateEvent: TCnEditorToolBarCreateEvent;
-      InitEvent: TCnEditorToolBarInitEvent;
-      RemoveEvent: TCnEditorToolBarRemoveEvent): TCnEditorToolBarTypeIndex;
-    {* 允许外部模块注册一工具栏类型并提供回调函数供创建、初始化与删除，
-       返回此类工具栏的索引号}
-    procedure SetVisible(ToolBarTypeIndex: TCnEditorToolBarTypeIndex;
-      AParent: TControl; Visible: Boolean; Forced: Boolean);
-    {* 设置某类工具栏是否全部可见或全部不可见，如果 ToolBarTypeIndex 是 -1，
-       则表示所有类都设置，如 AParent 不为空，表示设置与该 AParent 相关的
-       ToolBar, Forced 用于 BDS 表示强制设置，不管 EditControl 等的相关条件}
-    function GetVisible(ToolBarTypeIndex: TCnEditorToolBarTypeIndex): Boolean;
+    procedure RegisterToolBarType(const ToolBarType: string;
+      CreateEvent: TCnEditorToolBarEvent;
+      InitEvent: TCnEditorToolBarEvent;
+      RemoveEvent: TCnEditorToolBarEvent);
+    {* 允许外部模块注册一工具栏类型并提供回调函数供创建、初始化与删除}
+    procedure RemoveToolBarType(const ToolBarType: string);
+    {* 移除工具栏类型注册}
+    procedure SetVisible(const ToolBarType: string; Visible: Boolean);
+    {* 设置某类工具栏是否全部可见或全部不可见，如果 ToolBarType 是空，
+       则表示所有类都设置}
+    function GetVisible(const ToolBarType: string): Boolean;
     {* 获得某类工具栏是否可见}
-    procedure CheckEditorToolbarEnable;
-    {* 由外部 Timer 定时调用，检查 BDS 下的工具栏是否应该在界面切换时切换 Visible}
     procedure LanguageChanged;
     {* 供外部调用的语言改变通知}
   end;
@@ -203,27 +212,29 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  Math, TypInfo, CnCommon, CnWizUtils, CnWizConsts, CnWizIdeUtils,
+  Math, TypInfo, CnCommon, CnWizUtils, CnWizConsts,
   CnWizShareImages, CnFlatToolbarConfigFrm, CnWizOptions;
 
 const
   SCnSrcEditorToolBar = 'CnSrcEditorToolBar';
+  SCnSrcEditorDesignToolBar = 'CnSrcEditorDesignToolBar';
 
   csToolBar = 'ToolBar';
   csShowToolBar = 'ShowToolBar';
-  csShowInDesign = 'ShowInDesign';
+  csShowDesignToolBar = 'ShowDesignToolBar';
   csWrapable = 'Wrapable';
 
 type
   TCnEditorToolBarObj = class(TComponent)
   {* 用以描述一类工具栏与其所有实例，包含回调函数与对 EditControl 的引用}
   private
-    FCreateEvent: TCnEditorToolBarCreateEvent;
     FToolBars: TList;
     FEditControls: TList;
-    FInitEvent: TCnEditorToolBarInitEvent;
-    FRemoveEvent: TCnEditorToolBarRemoveEvent;
+    FToolBarType: string;
     FToolBarVisible: Boolean;
+    FCreateEvent: TCnEditorToolBarEvent;
+    FInitEvent: TCnEditorToolBarEvent;
+    FRemoveEvent: TCnEditorToolBarEvent;
     function GetToolBars(Index: Integer): TControl;
     function GetToolBarCount: Integer;
     function GetEditControls(Index: Integer): TControl;
@@ -236,13 +247,14 @@ type
     procedure AddToolBar(AToolBar: TControl; EditControl: TControl);
     procedure RemoveEditControlFromIndex(Index: Integer);
 
-    property CreateEvent: TCnEditorToolBarCreateEvent read FCreateEvent write FCreateEvent;
-    property InitEvent: TCnEditorToolBarInitEvent read FInitEvent write FInitEvent;
-    property RemoveEvent: TCnEditorToolBarRemoveEvent read FRemoveEvent write FRemoveEvent;
+    property CreateEvent: TCnEditorToolBarEvent read FCreateEvent write FCreateEvent;
+    property InitEvent: TCnEditorToolBarEvent read FInitEvent write FInitEvent;
+    property RemoveEvent: TCnEditorToolBarEvent read FRemoveEvent write FRemoveEvent;
     property EditControls[Index: Integer]: TControl read GetEditControls;
     property ToolBars[Index: Integer]: TControl read GetToolBars;
     property ToolBarCount: Integer read GetToolBarCount;
     property ToolBarVisible: Boolean read FToolBarVisible write FToolBarVisible;
+    property ToolBarType: string read FToolBarType write FToolBarType;
   end;
 
   TCnExternalEditorToolBarMgr = class(TInterfacedObject, ICnEditorToolBarService)
@@ -250,6 +262,7 @@ type
     FToolBarTypes: TStrings;
     procedure DoInstallToolBars(EditWindow: TCustomForm; EditControl: TControl;
       Context: Pointer);
+    function GetToolBarObj(ToolBarType: string): TCnEditorToolBarObj;
   protected
     procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm;
       Operation: TOperation);
@@ -258,16 +271,20 @@ type
     destructor Destroy; override;
 
     procedure InstallToolBars;
-    function RegisterToolBarType(const ToolBarType: string;
-      CreateEvent: TCnEditorToolBarCreateEvent;
-      InitEvent: TCnEditorToolBarInitEvent;
-      RemoveEvent: TCnEditorToolBarRemoveEvent): TCnEditorToolBarTypeIndex;
-    procedure SetVisible(ToolBarTypeIndex: TCnEditorToolBarTypeIndex;
-      AParent: TControl; Visible: Boolean; Forced: Boolean);
-    function GetVisible(ToolBarTypeIndex: TCnEditorToolBarTypeIndex): Boolean;
-    procedure CheckEditorToolbarEnable;
+    procedure RegisterToolBarType(const ToolBarType: string;
+      CreateEvent: TCnEditorToolBarEvent;
+      InitEvent: TCnEditorToolBarEvent;
+      RemoveEvent: TCnEditorToolBarEvent);
+    procedure RemoveToolBarType(const ToolBarType: string);
+    procedure SetVisible(const ToolBarType: string; Visible: Boolean);
+    function GetVisible(const ToolBarType: string): Boolean;
     procedure LanguageChanged;
+    property ToolBarObj[ToolBarType: string]: TCnEditorToolBarObj read GetToolBarObj;
   end;
+
+var
+  ExternalEditorToolBarMgr: TCnExternalEditorToolBarMgr;
+  CnSrcEditorToolBarMgr: TCnSrcEditorToolBarMgr;
 
 //==============================================================================
 // 代码编辑器工具栏
@@ -310,6 +327,11 @@ end;
 procedure TCnBaseSrcEditorToolBar.InitControls;
 begin
 
+end;
+
+function TCnBaseSrcEditorToolBar.CanShow(APage: TCnSrcEditorPage): Boolean;
+begin
+  Result := False;
 end;
 
 { TCnSrcEditorToolButton }
@@ -367,12 +389,14 @@ procedure TCnSrcEditorToolBar.InitControls;
 begin
   inherited;
   AutoSize := True;
+  Top := -1;
   Align := alTop;
   Images := GetIDEImageList;
   InitPopupMenu;
   Wrapable := FToolBarMgr.Wrapable;
   PopupMenu := FMenu;
   RecreateButtons;
+  Visible := CanShow(GetCurrentTopEditorPage(Parent));
 end;
 
 procedure TCnSrcEditorToolBar.InitPopupMenu;
@@ -384,6 +408,16 @@ begin
   AddMenuItem(FMenu.Items, SCnToolBarClose, OnClose);
 end;
 
+function TCnSrcEditorToolBar.CanShow(APage: TCnSrcEditorPage): Boolean;
+begin
+  if APage in [epCode, epCPU] then
+    Result := FToolBarType = tbtCode
+  else if APage in [epDesign] then
+    Result := FToolBarType = tbtDesign
+  else
+    Result := False;
+end;
+  
 procedure TCnSrcEditorToolBar.RecreateButtons;
 var
   i: Integer;
@@ -418,7 +452,10 @@ begin
   for i := ButtonCount - 1 downto 0 do
     Buttons[i].Free;
 
-  Actions := FToolBarMgr.FToolBarActions;
+  if FToolBarType = tbtCode then
+    Actions := FToolBarMgr.FToolBarActions
+  else
+    Actions := FToolBarMgr.FDesignToolBarActions;
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   if Svcs40.ToolBar[sStandardToolBar] <> nil then
     IDEToolBarParent := Svcs40.ToolBar[sStandardToolBar].Parent;
@@ -477,13 +514,16 @@ end;
 
 procedure TCnSrcEditorToolBar.OnConfig(Sender: TObject);
 begin
-  FToolBarMgr.ConfigToolBar;
+  FToolBarMgr.ConfigToolBar(FToolBarType);
 end;
 
 procedure TCnSrcEditorToolBar.OnClose(Sender: TObject);
 begin
   InfoDlg(SCnToolBarCloseHint);
-  FToolBarMgr.ShowToolBar := False;
+  if FToolBarType = tbtCode then
+    FToolBarMgr.ShowToolBar := False
+  else
+    FToolBarMgr.ShowDesignToolBar := False;
 end;
 
 procedure TCnSrcEditorToolBar.OnEnhConfig(Sender: TObject);
@@ -505,11 +545,14 @@ end;
 constructor TCnSrcEditorToolBarMgr.Create;
 begin
   inherited;
+  CnSrcEditorToolBarMgr := Self;
   FWrapable := True;
   FShowToolBar := True;
+  FShowDesignToolBar := True;
   FActive := True;
 
   FToolBarActions := TStringList.Create;
+  FDesignToolBarActions := TStringList.Create;
   FList := TList.Create;
   
   EditControlWrapper.AddEditControlNotifier(EditControlNotify);
@@ -520,11 +563,13 @@ destructor TCnSrcEditorToolBarMgr.Destroy;
 var
   i: Integer;
 begin
+  CnSrcEditorToolBarMgr := nil;
   EditControlWrapper.RemoveEditControlNotifier(EditControlNotify);
   for i := FList.Count - 1 downto 0 do
     TCnSrcEditorToolBar(FList[i]).Free;
   FList.Free;
   FToolBarActions.Free;
+  FDesignToolBarActions.Free;
   inherited;
 end;
 
@@ -535,6 +580,11 @@ end;
 function TCnSrcEditorToolBarMgr.CanShowToolBar: Boolean;
 begin
   Result := Active and ShowToolBar;
+end;
+
+function TCnSrcEditorToolBarMgr.CanShowDesignToolBar: Boolean;
+begin
+  Result := Active and ShowDesignToolBar and IdeGetIsEmbeddedDesigner;
 end;
 
 procedure TCnSrcEditorToolBarMgr.DoInstallToolBars(EditWindow: TCustomForm;
@@ -548,6 +598,7 @@ begin
     if ToolBar = nil then
     begin
       ToolBar := TCnSrcEditorToolBar.Create(EditWindow);
+      ToolBar.FToolBarType := tbtCode;
       ToolBar.FToolBarMgr := Self;
       ToolBar.Name := SCnSrcEditorToolBar;
       ToolBar.Parent := EditControl.Parent;
@@ -559,6 +610,33 @@ begin
   begin
     ToolBar.Free;
   end;
+{$IFDEF BDS}
+  ToolBar := TCnSrcEditorToolBar(EditWindow.FindComponent(SCnSrcEditorDesignToolBar));
+  if CanShowDesignToolBar then
+  begin
+    if ToolBar = nil then
+    begin
+      ToolBar := TCnSrcEditorToolBar.Create(EditWindow);
+      ToolBar.FToolBarType := tbtDesign;
+      ToolBar.FToolBarMgr := Self;
+      ToolBar.Name := SCnSrcEditorDesignToolBar;
+      ToolBar.Parent := EditControl.Parent;
+      ToolBar.InitControls;
+      FList.Add(ToolBar);
+    end;
+  end
+  else if ToolBar <> nil then
+  begin
+    ToolBar.Free;
+  end;
+{$ENDIF}
+end;
+
+procedure TCnSrcEditorToolBarMgr.DoGetEditList(EditWindow: TCustomForm; EditControl: TControl;
+  Context: Pointer);
+begin
+  if (EditControl <> nil) and (TList(Context).IndexOf(EditControl.Parent) <= 0) then
+    TList(Context).Add(EditControl.Parent);
 end;
 
 procedure TCnSrcEditorToolBarMgr.InstallToolBars;
@@ -588,12 +666,13 @@ end;
 // 工具条配置相关
 //------------------------------------------------------------------------------
 
-procedure TCnSrcEditorToolBarMgr.LoadToolBarActions(const FileName: string);
+procedure TCnSrcEditorToolBarMgr.LoadToolBarActions(Actions: TStrings;
+  const FileName: string);
 var
   Value: string;
   i: Integer;
 begin
-  FToolBarActions.Clear;
+  Actions.Clear;
   with TMemIniFile.Create(FileName) do
   try
     i := 0;
@@ -601,7 +680,7 @@ begin
     begin
       Value := Trim(ReadString(csToolBar, csButton + IntToStr(i), ''));
       if Value <> '' then
-        FToolBarActions.Add(Value);
+        Actions.Add(Value);
       Inc(i);
     end;
   finally
@@ -609,37 +688,125 @@ begin
   end;
 end;
 
-procedure TCnSrcEditorToolBarMgr.SaveToolBarActions(const FileName: string);
+procedure TCnSrcEditorToolBarMgr.SaveToolBarActions(Actions: TStrings;
+  const FileName: string);
 var
   i: Integer;
 begin
   with TMemIniFile.Create(FileName) do
   try
     EraseSection(csToolBar);
-    for i := 0 to FToolBarActions.Count - 1 do
-      WriteString(csToolBar, csButton + IntToStr(i), FToolBarActions[i]);
+    for i := 0 to Actions.Count - 1 do
+      WriteString(csToolBar, csButton + IntToStr(i), Actions[i]);
   finally
     UpdateFile;
     Free;
   end;
 end;
 
-procedure TCnSrcEditorToolBarMgr.ConfigToolBar;
+procedure TCnSrcEditorToolBarMgr.ConfigToolBar(AType: TCnSrcEditorToolBarType);
+var
+  List: TStringList;
+  FileName: string;
 begin
   with TCnFlatToolbarConfigForm.Create(nil) do
   try
-    SetStyle(tbsEditor, SCnEditorToolBarDataName, 'CnSrcEditorToolbarConfigForm');
-    ToolbarActions := FToolBarActions;
+    if AType = tbtCode then
+    begin
+      List := FToolBarActions;
+      FileName := SCnEditorToolBarDataName;
+    end
+    else
+    begin
+      List := FDesignToolBarActions;
+      FileName := SCnEditorDesignToolBarDataName;
+    end;
+    SetStyle(tbsEditor, FileName, 'CnSrcEditorToolbarConfigForm');
+    ToolbarActions := List;
     if ShowModal = mrOk then
     begin
-      FToolBarActions.Assign(ToolbarActions);
+      List.Assign(ToolbarActions);
 
-      SaveToolBarActions(WizOptions.GetUserFileName(SCnEditorToolBarDataName, False));
-      WizOptions.CheckUserFile(SCnEditorToolBarDataName);
+      SaveToolBarActions(List, WizOptions.GetUserFileName(FileName, False));
+      WizOptions.CheckUserFile(FileName);
       UpdateToolBars;
     end;
   finally
     Free;
+  end;
+end;
+
+procedure TCnSrcEditorToolBarMgr.CheckToolBarEnable;
+var
+  I, J, K: Integer;
+  APage: TCnSrcEditorPage;
+  ATop: Integer;
+  AControl: TWinControl;
+  EditorList: TList;
+  VisibleList, InvisibleList: TList;
+  TBObj: TCnEditorToolBarObj;
+  ExToolBar: TCnExternalSrcEditorToolBar;
+begin
+  EditorList := TList.Create;
+  VisibleList := TList.Create;
+  InvisibleList := TList.Create;
+  try
+    // Build EditorControl.Parent List
+    EnumEditControl(DoGetEditList, EditorList);
+    for I := 0 to EditorList.Count - 1 do
+    begin
+      AControl := TWinControl(EditorList[I]);
+      APage := GetCurrentTopEditorPage(AControl);
+      VisibleList.Clear;
+      InvisibleList.Clear;
+
+      // Build Visible and Invisible ToolBar List
+      for J := 0 to Count - 1 do
+      begin
+        if ToolBars[J].Parent = AControl then
+          if ToolBars[J].CanShow(APage) then
+            VisibleList.Add(ToolBars[J])
+          else
+            InvisibleList.Add(ToolBars[J]);
+      end;
+
+      if ExternalEditorToolBarMgr <> nil then
+      begin
+        with ExternalEditorToolBarMgr do
+        begin
+          for J := 0 to FToolBarTypes.Count - 1 do
+          begin
+            TBObj := TCnEditorToolBarObj(FToolBarTypes.Objects[J]);
+            for K := 0 to TBObj.FToolBars.Count - 1 do
+            begin
+              ExToolBar := TCnExternalSrcEditorToolBar(TBObj.FToolBars[K]);
+              if ExToolBar.Parent = AControl then
+                if TBObj.ToolBarVisible and ExToolBar.CanShow(APage) then
+                  VisibleList.Add(ExToolBar)
+                else
+                  InvisibleList.Add(ExToolBar);
+            end;
+          end;
+        end;
+      end;
+
+      // Hide Invisible ToolBars
+      for J := InvisibleList.Count - 1 downto 0 do
+        TToolBar(InvisibleList[J]).Visible := False;
+
+      // Show Visible ToolBars
+      ATop := -1;
+      for J := 0 to VisibleList.Count - 1 do
+      begin
+        TToolBar(VisibleList[J]).Visible := True;
+        TToolBar(VisibleList[J]).Top := ATop;
+        ATop := ATop + TToolBar(VisibleList[J]).Height;
+      end;  
+    end;
+  finally
+    EditorList.Free;
+    VisibleList.Free;
+    InvisibleList.Free;
   end;
 end;
 
@@ -658,22 +825,20 @@ end;
 procedure TCnSrcEditorToolBarMgr.LoadSettings(Ini: TCustomIniFile);
 begin
   ShowToolBar := Ini.ReadBool(csToolBar, csShowToolBar, FShowToolBar);
-{$IFDEF BDS}
-  ShowInDesign := Ini.ReadBool(csToolBar, csShowInDesign, False);
-{$ENDIF}
+  ShowDesignToolBar := Ini.ReadBool(csToolBar, csShowDesignToolBar, FShowDesignToolBar);
   Wrapable := Ini.ReadBool(csToolBar, csWrapable, FWrapable);
-  LoadToolBarActions(WizOptions.GetUserFileName(SCnEditorToolBarDataName, True));
+  LoadToolBarActions(FToolBarActions, WizOptions.GetUserFileName(SCnEditorToolBarDataName, True));
+  LoadToolBarActions(FDesignToolBarActions, WizOptions.GetUserFileName(SCnEditorDesignToolBarDataName, True));
 end;
 
 procedure TCnSrcEditorToolBarMgr.SaveSettings(Ini: TCustomIniFile);
 begin
   Ini.WriteBool(csToolBar, csShowToolBar, FShowToolBar);
-{$IFDEF BDS}
-  Ini.WriteBool(csToolBar, csShowInDesign, FShowInDesign);
-{$ENDIF}
   Ini.WriteBool(csToolBar, csWrapable, FWrapable);
-  SaveToolBarActions(WizOptions.GetUserFileName(SCnEditorToolBarDataName, False));
+  SaveToolBarActions(FToolBarActions, WizOptions.GetUserFileName(SCnEditorToolBarDataName, False));
   WizOptions.CheckUserFile(SCnEditorToolBarDataName);
+  SaveToolBarActions(FDesignToolBarActions, WizOptions.GetUserFileName(SCnEditorDesignToolBarDataName, False));
+  WizOptions.CheckUserFile(SCnEditorDesignToolBarDataName);
 end;
 
 procedure TCnSrcEditorToolBarMgr.DoEnhConfig;
@@ -714,6 +879,15 @@ begin
   end;
 end;
 
+procedure TCnSrcEditorToolBarMgr.SetShowDesignToolBar(const Value: Boolean);
+begin
+  if FShowDesignToolBar <> Value then
+  begin
+    FShowDesignToolBar := Value;
+    InstallToolBars;
+  end;
+end;
+
 procedure TCnSrcEditorToolBarMgr.SetWrapable(Value: Boolean);
 var
   I: Integer;
@@ -726,20 +900,12 @@ begin
   end;
 end;
 
-{$IFDEF BDS}
-
-procedure TCnSrcEditorToolBarMgr.SetShowInDesign(const Value: Boolean);
-begin
-  FShowInDesign := Value;
-end;
-
-{$ENDIF}
-
 { TCnExternalEditorToolBarMgr }
 
 constructor TCnExternalEditorToolBarMgr.Create;
 begin
   inherited;
+  ExternalEditorToolBarMgr := Self;
   FToolBarTypes := TStringList.Create;
 
   EditControlWrapper.AddEditControlNotifier(EditControlNotify);
@@ -750,6 +916,7 @@ destructor TCnExternalEditorToolBarMgr.Destroy;
 var
   I: Integer;
 begin
+  ExternalEditorToolBarMgr := nil;
   EditControlWrapper.RemoveEditControlNotifier(EditControlNotify);
   
   for I := FToolBarTypes.Count - 1 downto 0 do
@@ -779,9 +946,9 @@ begin
       (ToolBar as TCnExternalSrcEditorToolBar).InitControls;
 
       if Assigned(Obj.CreateEvent) then
-        Obj.CreateEvent(EditControl, ToolBar);
+        Obj.CreateEvent(Obj.ToolBarType, EditControl, ToolBar);
       if Assigned(Obj.InitEvent) then
-        Obj.InitEvent(EditControl, ToolBar);
+        Obj.InitEvent(Obj.ToolBarType, EditControl, ToolBar);
 
       ToolBar.Visible := Obj.ToolBarVisible;
       if Obj.ToolBarVisible then
@@ -789,6 +956,17 @@ begin
       Obj.AddToolBar(ToolBar, EditControl);
     end;
   end;
+end;
+
+function TCnExternalEditorToolBarMgr.GetToolBarObj(ToolBarType: string): TCnEditorToolBarObj;
+var
+  Idx: Integer;
+begin
+  Idx := FToolBarTypes.IndexOf(ToolBarType);
+  if Idx >= 0 then
+    Result := TCnEditorToolBarObj(FToolBarTypes.Objects[Idx])
+  else
+    Result := nil;
 end;
 
 procedure TCnExternalEditorToolBarMgr.EditControlNotify(
@@ -821,15 +999,14 @@ begin
   end;
 end;
 
-function TCnExternalEditorToolBarMgr.GetVisible(
-  ToolBarTypeIndex: TCnEditorToolBarTypeIndex): Boolean;
+function TCnExternalEditorToolBarMgr.GetVisible(const ToolBarType: string): Boolean;
 var
   Obj: TCnEditorToolBarObj;
 begin
   Result := False;
-  if (ToolBarTypeIndex >= 0) and (ToolBarTypeIndex < FToolBarTypes.Count) then
+  Obj := ToolBarObj[ToolBarType];
+  if Obj <> nil then
   begin
-    Obj := TCnEditorToolBarObj(FToolBarTypes.Objects[ToolBarTypeIndex]);
     Result := Obj.ToolBarVisible;
   end;
 end;
@@ -851,136 +1028,65 @@ begin
       if Obj.ToolBars[J] <> nil then
         if Assigned(Obj.InitEvent) then
         begin
-          Obj.InitEvent(Obj.EditControls[J], Obj.ToolBars[J]);
+          Obj.InitEvent(Obj.ToolBarType, Obj.EditControls[J], TToolBar(Obj.ToolBars[J]));
           Obj.ToolBars[J].Update;
         end;
   end;
 end;
 
-function TCnExternalEditorToolBarMgr.RegisterToolBarType(const ToolBarType:
-  string; CreateEvent: TCnEditorToolBarCreateEvent; InitEvent:
-  TCnEditorToolBarInitEvent; RemoveEvent: TCnEditorToolBarRemoveEvent):
-  TCnEditorToolBarTypeIndex;
+procedure TCnExternalEditorToolBarMgr.RegisterToolBarType(const ToolBarType:
+  string; CreateEvent, InitEvent, RemoveEvent: TCnEditorToolBarEvent);
 var
   Obj: TCnEditorToolBarObj;
 begin
-  Result := FToolBarTypes.IndexOf(ToolBarType);
-  if (ToolBarType <> '') and (Result = -1) then
+  if ToolBarType <> '' then
   begin
-    Obj := TCnEditorToolBarObj.Create(nil);
+    Obj := ToolBarObj[ToolBarType];
+    if Obj = nil then
+    begin
+      Obj := TCnEditorToolBarObj.Create(nil);
+      FToolBarTypes.AddObject(ToolBarType, Obj);
+    end;
     Obj.ToolBarVisible := True;
+    Obj.ToolBarType := ToolBarType;
     Obj.CreateEvent := CreateEvent;
     Obj.InitEvent := InitEvent;
     Obj.RemoveEvent := RemoveEvent;
-    Result := FToolBarTypes.AddObject(ToolBarType, Obj);
-
     InstallToolBars;
   end;
 end;
 
-procedure TCnExternalEditorToolBarMgr.CheckEditorToolbarEnable;
-{$IFDEF BDS}
+procedure TCnExternalEditorToolBarMgr.RemoveToolBarType(const ToolBarType: string);
 var
-  I, J, K: Integer;
-  AControl: TControl;
   Obj: TCnEditorToolBarObj;
-{$ENDIF}
+  I: Integer;
 begin
-{$IFDEF BDS}
-  for I := 0 to FToolBarTypes.Count - 1 do
+  Obj := ToolBarObj[ToolBarType];
+  if Obj <> nil then
   begin
-    Obj := TCnEditorToolBarObj(FToolBarTypes.Objects[I]);
-    if not Obj.ToolBarVisible then
-      Continue;
-
-    // 检查所有可见的工具栏
-    for J := 0 to Obj.ToolBarCount - 1 do
-    begin
-      if (Obj.ToolBars[J] <> nil) and (Obj.ToolBars[J].Parent <> nil) then
-      begin
-        for K := Obj.ToolBars[J].Parent.ControlCount - 1 downto 0 do
-        begin
-          AControl := Obj.ToolBars[J].Parent.Controls[K];
-          if AControl.Align = alClient then // 找到第一个 alcient 的 Control
-          begin
-            // 如果是 EditControl 就可见
-            Obj.ToolBars[J].Visible := AControl.ClassNameIs(EditControlClassName);
-            Break;
-          end;
-        end;
-      end;
-    end;
+    for I := Obj.ToolBarCount - 1 downto 0 do
+      Obj.ToolBars[I].Free;
+    Obj.Free;
   end;
-{$ENDIF}
+  FToolBarTypes.Delete(FToolBarTypes.IndexOf(ToolBarType));  
 end;
 
-procedure TCnExternalEditorToolBarMgr.SetVisible(
-  ToolBarTypeIndex: TCnEditorToolBarTypeIndex; AParent: TControl;
-  Visible: Boolean; Forced: Boolean);
+procedure TCnExternalEditorToolBarMgr.SetVisible(const ToolBarType: string;
+  Visible: Boolean);
 var
-  Obj: TCnEditorToolBarObj;
-  I, J: Integer;
-  ActualVisible: Boolean;
+  I: Integer;
+  TBObj: TCnEditorToolBarObj;
 begin
-  // 如果 Forced 为 True，则强行设置，ActualVisible := Visible
-  // 如果 Forced 为 False，则要看 ToolBar 本身的 ToolBarVisible，按下表：
-  // ToolBarVisible Vislble   -> ActualVisible
-  // True，         True         True
-  // True，         False        False
-  // False，        True         False
-  // False，        False        False
-  // 因此不 Forced 时 ActualVisible := Visible and Obj.ToolBarVisible
-
-  ActualVisible := Visible;
-
-  if ToolBarTypeIndex <> -1 then
+  for I := 0 to FToolBarTypes.Count - 1 do
   begin
-    Obj := TCnEditorToolBarObj(FToolBarTypes.Objects[ToolBarTypeIndex]);
-    if not Forced then
-      ActualVisible := Visible and Obj.ToolBarVisible
-    else
-      Obj.ToolBarVisible := Visible;
-
-    for I := 0 to Obj.ToolBarCount - 1 do
-      if Obj.ToolBars[I] <> nil then
-        if (AParent = nil) or (Obj.ToolBars[I].Parent = AParent) then
-          Obj.ToolBars[I].Visible := ActualVisible;
-  end
-  else
-  begin
-    if Visible then
+    TBObj := TCnEditorToolBarObj(FToolBarTypes.Objects[I]);
+    if (ToolBarType = '') or SameText(TBObj.ToolBarType, ToolBarType) then
     begin
-      for J := 0 to FToolBarTypes.Count - 1 do
-      begin
-        Obj := TCnEditorToolBarObj(FToolBarTypes.Objects[J]);
-        if not Forced then
-          ActualVisible := Visible and Obj.ToolBarVisible
-        else
-          Obj.ToolBarVisible := Visible;
-
-        for I := 0 to Obj.ToolBarCount - 1 do
-          if Obj.ToolBars[I] <> nil then
-            if (AParent = nil) or (Obj.ToolBars[I].Parent = AParent) then
-              Obj.ToolBars[I].Visible := ActualVisible;
-      end;
-    end
-    else // 设置可见与不可见时按倒序来，否则工具栏之间可能错位
-    begin
-      for J := FToolBarTypes.Count - 1 downto 0 do
-      begin
-        Obj := TCnEditorToolBarObj(FToolBarTypes.Objects[J]);
-        if not Forced then
-          ActualVisible := Visible and Obj.ToolBarVisible
-        else
-          Obj.ToolBarVisible := Visible;
-
-        for I := 0 to Obj.ToolBarCount - 1 do
-          if Obj.ToolBars[I] <> nil then
-            if (AParent = nil) or (Obj.ToolBars[I].Parent = AParent) then
-              Obj.ToolBars[I].Visible := ActualVisible;
-      end;
+      TBObj.ToolBarVisible := Visible;
     end;
   end;
+  if CnSrcEditorToolBarMgr <> nil then
+    CnSrcEditorToolBarMgr.CheckToolBarEnable;
 end;
 
 { TCnEditorToolBarObj }
@@ -1039,7 +1145,8 @@ begin
         // 删除 ToolBar 时，调用 RemoveEvent 通知释放其它东西
         if Assigned(FRemoveEvent)
           and (AComponent.Tag <> 0) and (TObject(AComponent.Tag) is TControl) then
-          FRemoveEvent(TObject(AComponent.Tag) as TControl, AComponent);
+          FRemoveEvent(ToolBarType, TObject(AComponent.Tag) as TControl,
+            AComponent as TToolBar);
 
         // 从列表中直接删除
         FToolBars.Delete(I);
@@ -1065,6 +1172,13 @@ begin
   AutoSize := True;
   Align := alTop;
   Images := GetIDEImageList;
+end;
+
+function TCnExternalSrcEditorToolBar.CanShow(APage: TCnSrcEditorPage): Boolean; 
+begin
+  Result := inherited CanShow(APage);
+  if Assigned(FOnCanShow) then
+    FOnCanShow(Self, APage, Result);
 end;
 
 initialization
