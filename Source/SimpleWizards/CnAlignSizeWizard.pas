@@ -93,7 +93,7 @@ type
     asParentHCenter, asParentVCenter, asBringToFront, asSendToBack,
     asSnapToGrid, {$IFDEF DELPHI10_UP} asUseGuidelines, {$ENDIF} asAlignToGrid,
     asSizeToGrid, asLockControls, asSelectRoot, asCopyCompName, asHideComponent,
-    asNonArrange, asListComp, asCompToCode, asShowFlatForm);
+    asNonArrange, asListComp, asCompToCode, asCompRename, asShowFlatForm);
 
   TNonArrangeStyle = (asRow, asCol);
   TNonMoveStyle = (msLeftTop, msRightTop, msLeftBottom, msRightBottom, msCenter);
@@ -204,7 +204,8 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  TypInfo, CnFormEnhancements, CnListCompFrm, CnCompToCodeFrm;
+  TypInfo, CnFormEnhancements, CnListCompFrm, CnCompToCodeFrm,
+  CnDesignEditorConsts, CnPrefixExecuteFrm;
 
 {$R *.dfm}
 
@@ -236,7 +237,7 @@ const
   // Action 生效需要选择的最小控件数
   csAlignNeedControls: array[TAlignSizeStyle] of Integer = (2, 2, 2, 2, 2, 2,
     3, 2, 2, 2, 2, 3, 2, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 0,
-    {$IFDEF DELPHI10_UP} 0, {$ENDIF} 1, 1, -1, -1, -1, 0, 0, 0, 0, -1);
+    {$IFDEF DELPHI10_UP} 0, {$ENDIF} 1, 1, -1, -1, -1, 0, 0, 0, 0, 1, -1);
 
   csAlignNeedSepMenu: set of TAlignSizeStyle =
     [asAlignVCenter, asSpaceRemoveV, asMakeSameSize, asParentVCenter,
@@ -253,7 +254,7 @@ const
     {$IFDEF DELPHI10_UP} 'CnUseGuidelines', {$ENDIF}
     'CnAlignToGrid', 'CnSizeToGrid', 'CnLockControls', 'CnSelectRoot',
     'CnCopyCompName', 'CnHideComponent', 'CnNonArrange', 'CnListComp',
-    'CnCompToCode', 'CnShowFlatForm');
+    'CnCompToCode', 'CnCompRename', 'CnShowFlatForm');
 
   csAlignSizeCaptions: array[TAlignSizeStyle] of PString = (
     @SCnAlignLeftCaption, @SCnAlignRightCaption, @SCnAlignTopCaption,
@@ -268,7 +269,8 @@ const
     {$IFDEF DELPHI10_UP} @SCnUseGuidelinesCaption, {$ENDIF}
     @SCnAlignToGridCaption, @SCnSizeToGridCaption, @SCnLockControlsCaption,
     @SCnSelectRootCaption, @SCnCopyCompNameCaption, @SCnHideComponentCaption,
-    @SCnNonArrangeCaption, @SCnListCompCaption, @SCnCompToCodeCaption, @SCnShowFlatFormCaption);
+    @SCnNonArrangeCaption, @SCnListCompCaption, @SCnCompToCodeCaption,
+    @SCnFloatPropBarRenameCaption, @SCnShowFlatFormCaption);
 
   csAlignSizeHints: array[TAlignSizeStyle] of PString = (
     @SCnAlignLeftHint, @SCnAlignRightHint, @SCnAlignTopHint,
@@ -283,7 +285,8 @@ const
     {$IFDEF DELPHI10_UP} @SCnUseGuidelinesHint, {$ENDIF}
     @SCnAlignToGridHint, @SCnSizeToGridHint, @SCnLockControlsHint,
     @SCnSelectRootHint, @SCnCopyCompNameHint, @SCnHideComponentHint,
-    @SCnNonArrangeHint, @SCnListCompHint, @SCnCompToCodeHint, @SCnShowFlatFormHint);
+    @SCnNonArrangeHint, @SCnListCompHint, @SCnCompToCodeHint,
+    @SCnFloatPropBarRenameCaption, @SCnShowFlatFormHint);
 
 //==============================================================================
 // Align Size 设置工具
@@ -697,6 +700,17 @@ begin
       asCompToCode:
         begin
           ShowCompToCodeForm.RefreshCode;
+        end;
+      asCompRename:
+        begin
+          if (ControlList.Count > 0) and (TObject(ControlList[0]) is TComponent) and
+            (Trim(TComponent(ControlList[0]).Name) <> '') then
+          begin
+            if Assigned(RenameProc) then
+              RenameProc(TComponent(ControlList[0]))
+            else
+              ErrorDlg(SCnPrefixWizardNotExist);
+          end;
         end;
       asShowFlatForm:
         begin
