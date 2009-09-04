@@ -222,6 +222,7 @@ type
     FCompleteChars: string;
     FFilterSymbols: TStrings;
     FAutoSymbols: TStrings;
+    FEnableAutoSymbols: Boolean;
     FAutoInsertEnter: Boolean;
     FAutoCompParam: Boolean;
     FSmartDisplay: Boolean;
@@ -340,6 +341,7 @@ type
     {* 可用来完成当前项选择的字符列表}
     property FilterSymbols: TStrings read FFilterSymbols;
     {* 禁止自动弹出列表的符号}
+    property EnableAutoSymbols: Boolean read FEnableAutoSymbols write FEnableAutoSymbols default False;
     property AutoSymbols: TStrings read FAutoSymbols;
     {* 自动弹出列表的符号 }
     property SpcComplete: Boolean read FSpcComplete write FSpcComplete default True;
@@ -424,6 +426,7 @@ const
   csMatchAnyWhere = 'MatchAnyWhere';
   csCompleteChars = 'CompleteCharSet';
   csFilterSymbols = 'FilterSymbols';
+  csEnableAutoSymbols = 'EnableAutoSymbols';
   csAutoSymbols = 'AutoSymbols';
   csSpcComplete = 'SpcComplete';
   csIgnoreSpc = 'IgnoreSpc';
@@ -1384,14 +1387,17 @@ var
   i: Integer;
 begin
   Result := False;
-  for i := 0 to FAutoSymbols.Count - 1 do
+  if FEnableAutoSymbols then
   begin
-    if SameText(FAutoSymbols[i], StrRight(FKeyQueue, Length(FAutoSymbols[i]))) then
+    for i := 0 to FAutoSymbols.Count - 1 do
     begin
-      Result := True;
-      Exit;
+      if SameText(FAutoSymbols[i], StrRight(FKeyQueue, Length(FAutoSymbols[i]))) then
+      begin
+        Result := True;
+        Exit;
+      end;
     end;
-  end;
+  end;    
 end;
 
 function TCnInputHelper.HandleKeyDown(var Msg: TMsg): Boolean;
@@ -2620,6 +2626,7 @@ begin
     FDispDelay := ReadInteger('', csDispDelay, csDefDispDelay);
     FCompleteChars := ReadString('', csCompleteChars, csDefCompleteChars);
     FFilterSymbols.CommaText := ReadString('', csFilterSymbols, csDefFilterSymbols);
+    FEnableAutoSymbols := ReadBool('', csEnableAutoSymbols, False);
     FAutoSymbols.CommaText := ReadString('', csAutoSymbols, csDefAutoSymbols);
   {$IFDEF DEBUG}
     CnDebugger.LogStrings(FAutoSymbols, 'FAutoSymbols');
@@ -2680,6 +2687,7 @@ begin
       DeleteKey('', csFilterSymbols)
     else
       WriteString('', csFilterSymbols, FFilterSymbols.CommaText);
+    WriteBool('', csEnableAutoSymbols, FEnableAutoSymbols);
     if FAutoSymbols.CommaText = csDefAutoSymbols then
       DeleteKey('', csAutoSymbols)
     else

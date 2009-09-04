@@ -125,8 +125,8 @@ type
     edtFilterSymbols: TEdit;
     chkIgnoreSpace: TCheckBox;
     chkUseKibitzCompileThread: TCheckBox;
-    lblKeySeq: TLabel;
     edtAutoSymbols: TEdit;
+    chkKeySeq: TCheckBox;
     procedure FormShow(Sender: TObject);
     procedure PaintBoxPaint(Sender: TObject);
     procedure btnFontClick(Sender: TObject);
@@ -302,6 +302,7 @@ begin
     chkAutoInsertEnter.Checked := AutoInsertEnter;
     chkAutoCompParam.Checked := AutoCompParam;
     chkDispOnIDECompDisabled.Checked := DispOnIDECompDisabled;
+    chkKeySeq.Checked := EnableAutoSymbols;
     FontDialog.Font.Assign(ListFont);
 
     for i := 0 to SymbolListMgr.Count - 1 do
@@ -409,6 +410,7 @@ begin
     AutoInsertEnter := chkAutoInsertEnter.Checked;
     AutoCompParam := chkAutoCompParam.Checked;
     DispOnIDECompDisabled := chkDispOnIDECompDisabled.Checked;
+    EnableAutoSymbols := chkKeySeq.Checked;
     ListFont.Assign(FontDialog.Font);
 
     for i := 0 to SymbolListMgr.Count - 1 do
@@ -470,11 +472,12 @@ end;
 
 procedure TCnInputHelperForm.UpdateControls(Sender: TObject);
 begin
-  seDispOnlyAtLeastKey.Enabled := chkAutoPopup.Checked;
   tbDispDelay.Enabled := chkAutoPopup.Checked;
+  seDispOnlyAtLeastKey.Enabled := chkAutoPopup.Checked;
   chkSmartDisp.Enabled := chkAutoPopup.Checked;
   chkDispOnIDECompDisabled.Enabled := chkAutoPopup.Checked;
-  edtAutoSymbols.Enabled := chkAutoPopup.Checked;
+  chkKeySeq.Enabled := chkAutoPopup.Checked;
+  edtAutoSymbols.Enabled := chkAutoPopup.Checked and chkKeySeq.Checked;
 end;
 
 procedure TCnInputHelperForm.UpdateListItem(Item: TListItem);

@@ -70,14 +70,14 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Caption = '连续输入的有效字符数:'
         end
         object lbl2: TLabel
-          Left = 242
+          Left = 250
           Top = 16
           Width = 76
           Height = 13
           Caption = '自动弹出延时:'
         end
         object lbl3: TLabel
-          Left = 216
+          Left = 232
           Top = 66
           Width = 40
           Height = 12
@@ -108,13 +108,6 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Height = 13
           Caption = '用来手工弹出显示的快捷键:'
         end
-        object lblKeySeq: TLabel
-          Left = 24
-          Top = 125
-          Width = 192
-          Height = 13
-          Caption = '自动弹出列表的按键序列(逗号分隔):'
-        end
         object chkAutoPopup: TCheckBox
           Left = 8
           Top = 16
@@ -122,6 +115,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Height = 17
           Caption = '自动弹出输入助手。'
           TabOrder = 0
+          OnClick = UpdateControls
         end
         object seDispOnlyAtLeastKey: TCnSpinEdit
           Left = 24
@@ -134,9 +128,9 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Value = 1
         end
         object tbDispDelay: TTrackBar
-          Left = 224
+          Left = 240
           Top = 32
-          Width = 321
+          Width = 305
           Height = 33
           Max = 2000
           Min = 100
@@ -159,9 +153,9 @@ inherited CnInputHelperForm: TCnInputHelperForm
           TabOrder = 3
         end
         object hkEnabled: THotKey
-          Left = 232
+          Left = 248
           Top = 148
-          Width = 305
+          Width = 289
           Height = 19
           HotKey = 32833
           InvalidKeys = [hcNone, hcShift]
@@ -169,9 +163,9 @@ inherited CnInputHelperForm: TCnInputHelperForm
           TabOrder = 6
         end
         object hkPopup: THotKey
-          Left = 232
+          Left = 248
           Top = 172
-          Width = 305
+          Width = 289
           Height = 19
           HotKey = 32833
           InvalidKeys = [hcNone, hcShift]
@@ -195,11 +189,20 @@ inherited CnInputHelperForm: TCnInputHelperForm
           TabOrder = 4
         end
         object edtAutoSymbols: TEdit
-          Left = 232
+          Left = 248
           Top = 121
-          Width = 305
+          Width = 289
           Height = 21
           TabOrder = 5
+        end
+        object chkKeySeq: TCheckBox
+          Left = 24
+          Top = 125
+          Width = 209
+          Height = 13
+          Caption = '自动弹出列表的按键序列(逗号分隔):'
+          TabOrder = 9
+          OnClick = UpdateControls
         end
       end
       object grp3: TGroupBox
@@ -231,16 +234,16 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Caption = '禁止自动弹出列表的符号(逗号分隔):'
         end
         object edtCompleteChars: TEdit
-          Left = 232
+          Left = 248
           Top = 16
-          Width = 305
+          Width = 289
           Height = 21
           TabOrder = 0
         end
         object cbbOutputStyle: TComboBox
-          Left = 232
+          Left = 248
           Top = 70
-          Width = 305
+          Width = 289
           Height = 21
           Style = csDropDownList
           ItemHeight = 13
@@ -285,9 +288,9 @@ inherited CnInputHelperForm: TCnInputHelperForm
           TabOrder = 7
         end
         object edtFilterSymbols: TEdit
-          Left = 232
+          Left = 248
           Top = 43
-          Width = 305
+          Width = 289
           Height = 21
           TabOrder = 1
         end
@@ -363,7 +366,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 249
           Height = 21
           Style = csDropDownList
-          ItemHeight = 0
+          ItemHeight = 13
           TabOrder = 0
         end
         object btnFont: TButton
@@ -405,7 +408,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 249
           Height = 21
           Style = csDropDownList
-          ItemHeight = 0
+          ItemHeight = 13
           TabOrder = 3
         end
         object chkUseKibitzCompileThread: TCheckBox
@@ -639,7 +642,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 401
           Height = 21
           Style = csDropDownList
-          ItemHeight = 0
+          ItemHeight = 13
           TabOrder = 0
           OnChange = cbbListChange
         end
