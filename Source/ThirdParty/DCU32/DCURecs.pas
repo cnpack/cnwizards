@@ -907,7 +907,7 @@ begin
   {if F and $1<>0 then
     raise Exception.CreateFmt('Flag 1 found: 0x%x',[F]);}
   if not NoInf and(F and $40<>0) then
-    Inf := ReadULong;
+    Inf := Integer(ReadULong);
   if (CurUnit.Ver>=verD8)and(CurUnit.Ver<verK1) then begin
     if F1 and $80<>0 then begin//Could be valid for MSIL only
       B2 := ReadUIndex;

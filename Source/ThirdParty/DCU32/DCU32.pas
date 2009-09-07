@@ -73,6 +73,7 @@ const
   drObj=$71{'q'};
   drRes=$72{'r'};
   drAsm=$73{'s'}; //Found in D5 Debug versions
+  drSrcGeneric=$76{'v'}; // Generic import (D2009)
   drStop2=$9F{'?}; //!!!
   drConst=$25{'%'};
   drResStr=$32{'2'};
@@ -482,7 +483,7 @@ begin
   FSrcFiles := Nil;
   SFRMain := Nil;
   SFRP := @FSrcFiles;
-  while (Tag=drSrc)or(Tag=drRes)or(Tag=drObj)or(Tag=drAsm) do begin
+  while (Tag=drSrc)or(Tag=drRes)or(Tag=drObj)or(Tag=drAsm)or(Tag=drSrcGeneric) do begin
     New(SFR);
     SFR^.Next := Nil;
     SFRP^ := SFR;
@@ -687,7 +688,7 @@ begin
             RTTISz := ReadUIndex;
             {ImpN := Format('%s[%d]',[ImpN,B]);}
           end ;
-          L := ReadULong;
+          L := LongInt(ReadULong);
           if Tag=drImpTypeDef then
             TR := TImpTypeDefRec.Create(ImpN,L,RTTISz{B},Nil{DefStart},hUnit)
           else
@@ -703,7 +704,7 @@ begin
         drImpVal: begin
           Ch := 'A';
           ImpN := ReadName;
-          L := ReadULong;
+          L := LongInt(ReadULong);
           if TagRq<>drDLL then
             AR := TImpDef.Create('A',ImpN,L,Nil{DefStart},hUnit)
           else
@@ -718,7 +719,7 @@ begin
          //Imports drConstAddInfo may be for the prev. drImpVal always
           L := -1;
           if (Ver>=verD8)and(Ver<verK1) then
-            L := ReadULong; //==IP for the imported drConstAddInfo
+            L := LongInt(ReadULong); //==IP for the imported drConstAddInfo
           Continue;
         end ;
         drConstAddInfo: begin
@@ -2911,7 +2912,7 @@ begin
       Tag := ReadTag;
      end
     else begin
-      FStamp := ReadULong;
+      FStamp := Integer(ReadULong);
       B := ReadByte;
       if (Ver>=verD7)and(Ver<verK1) then begin
         B := ReadByte; //It has another header byte (or index)
