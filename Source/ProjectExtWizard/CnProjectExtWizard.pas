@@ -252,24 +252,55 @@ begin
     if Dir <> '' then
     begin
       { TODO : 自定义的输出扩展名暂不支持 }
-      if CnOtaGetActiveProjectOption('GenPackage', Val) and Val then
-        OutExt := '.bpl'
-      else if CnOtaGetActiveProjectOption('GenStaticLibrary', Val) and Val then
-        OutExt := '.lib'
-      else if CnOtaGetActiveProjectOption('GenDll', Val) and Val then
-        OutExt := '.dll'
-      else
+      try
+        if CnOtaGetActiveProjectOption('GenPackage', Val) and Val then
+          OutExt := '.bpl';
+      except
+        ;
+      end;
+
+      try
+        if (OutExt = '') and CnOtaGetActiveProjectOption('GenStaticLibrary', Val) and Val then
+          OutExt := '.lib';
+      except
+        ;
+      end;
+
+      try
+        if (OutExt = '') and CnOtaGetActiveProjectOption('GenDll', Val) and Val then
+          OutExt := '.dll';
+      except
+        ;
+      end;
+
+      if OutExt = '' then
         OutExt := '.exe';
 
-{$IFDEF BDS}
+{$IFDEF IDE_CONF_MANAGER}
       if not IsDelphiRuntime then
       begin
-        if CnOtaGetActiveProjectOption('UnitOutputDir', Val) then
-          IntermediaDir := MakePath(VarToStr(Val));
+{$IFDEF BDS2009_UP}
+        if CnOtaGetActiveProjectOptionsConfigurations <> nil then
+        begin
+          if CnOtaGetActiveProjectOptionsConfigurations.GetActiveConfiguration <> nil then
+          begin
+            IntermediaDir := MakePath(CnOtaGetActiveProjectOptionsConfigurations.GetActiveConfiguration.GetName);
+          end;
+        end;
+{$ELSE}
+        // TODO: BCB2007 下无 OTA 接口得到 Configuration，得想别的法子
+        try
+          if CnOtaGetActiveProjectOption('UnitOutputDir', Val) then
+            IntermediaDir := MakePath(VarToStr(Val));
+        except
+          ;
+        end;
+{$ENDIF}
       end;
 {$ENDIF}
 
       OutName := MakePath(Dir) + IntermediaDir + ChangeFileExt(ExtractFileName(ProjectFileName), OutExt);
+      ShowMessage(OutName);
       if FileExists(OutName) then
         ExploreFile(OutName)
       else if DirectoryExists(Dir) then
