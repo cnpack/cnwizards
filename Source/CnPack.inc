@@ -888,8 +888,12 @@
   {$DEFINE SUPPORTS_INLINE}
 {$ENDIF}
 
-{$IFDEF DELPHI2009_UP}
+{$IFDEF BDS2009_UP}
   {$DEFINE UNICODE_STRING}
+{$ENDIF}
+
+{$IFDEF BDS2007_UP}
+  {$DEFINE IDE_CONF_MANAGER}
 {$ENDIF}
 
 //==============================================================================
