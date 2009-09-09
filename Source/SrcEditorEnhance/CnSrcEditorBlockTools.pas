@@ -506,7 +506,15 @@ begin
       Button.Image := FIcon;
       Button.DropdownMenu := FPopupMenu;
       Button.Hint := SCnSrcBlockToolsHint;
+      // BDS 下 Parent 在 EditControl.Parent 上可能导致 ModelMaker Explorer
+      // 工具栏自动隐藏判断错误
+      // D5 下 Parent 在 EditControl 上可能导致按钮刷新不正确
+      // 所以两边分开处理
+    {$IFDEF BDS}
+      Button.Parent := TWinControl(EditControl);
+    {$ELSE}
       Button.Parent := EditControl.Parent;
+    {$ENDIF}
     end;
 
     // 只查找本屏幕内选中的块的行
@@ -537,14 +545,21 @@ begin
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('EditorBlock Tool Remove Elided: Start %d, End %d.', [StartingRow, EndingRow]);
 {$ENDIF}
-
 {$ENDIF}
+
+    // Parent 不同需要分开计算
+{$IFDEF BDS}
+    Y := ((StartingRow + EndingRow) div 2 -
+      EditView.TopRow) * EditControlWrapper.GetCharHeight;
+    Y := TrimInt(Y, 0, EditControl.ClientHeight - Button.Height);
+    X := csLeftKeep;
+{$ELSE}
     Y := ((StartingRow + EndingRow) div 2 -
       EditView.TopRow) * EditControlWrapper.GetCharHeight + EditControl.Top;
     Y := TrimInt(Y, EditControl.Top, EditControl.Top +
       EditControl.ClientHeight - Button.Height);
     X := EditControl.Left + csLeftKeep;
-
+{$ENDIF}
     if Y <> Button.Top then
       Button.Top := Y;
     if X <> Button.Left then
