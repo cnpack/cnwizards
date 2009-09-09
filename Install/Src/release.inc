@@ -2,4 +2,4 @@
 
 !define VER_MAJOR "0"
 
-!define VER_MINOR "9.4.544_Unstable"
+!define VER_MINOR "9.4.545_Preview"
