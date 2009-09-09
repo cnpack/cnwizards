@@ -905,12 +905,16 @@ procedure TUnit.RefAddrDef(V: integer);
 {This procedure is used for addrs, which may be forward references to the objects,
 which don't yet exist. To fill the empty slot the drProcAddInfo tag is used after
 creation of the object. }
+var
+  MissingRefs : integer;
 begin
   if V>FAddrs.Count then begin
-    if V<>FAddrs.Count+1 then
-      DCUErrorFmt('Unexpected forward hDecl=0x%x<>0x%x',[V,FAddrs.Count+1]);
-    FAddrs.Add(Nil); //This way it won't interfere with FhNextAddr
-    {AddAddrDef(Nil);} //Reserve addr index, which will be claimed by drProcAddInfo
+    MissingRefs := V - FAddrs.Count;
+    while MissingRefs > 0 do begin
+      Dec(MissingRefs);
+      FAddrs.Add(Nil); //This way it won't interfere with FhNextAddr
+      {AddAddrDef(Nil);} //Reserve addr index, which will be claimed by drProcAddInfo
+    end;
   end ;
 end ;
 
@@ -1441,6 +1445,8 @@ begin
   if FLineRangeTbl<>Nil then
     DCUError('2nd Line Ranges table');
   FLineRangeCnt := ReadUIndex;
+  if FLineRangeCnt > (HIGH(Cardinal) div 256) then
+    Exit;  // FLineRangeCnt way to high and probably incorrect, better to Exit right now...
   FLineRangeTbl := AllocMem(FLineRangeCnt*SizeOf(TLineRangeRec));
   LR := Pointer(FLineRangeTbl);
   Num := 0;
