@@ -112,6 +112,7 @@ TCnWizConfigForm.btnExportActionList.Caption=導出 IDE Action 名稱(&A)
 TCnWizConfigForm.btnExportComponents.Caption=導出已安裝控制項列表(&L)
 TCnWizConfigForm.grpOthers.Caption=其他(&R)
 TCnWizConfigForm.chkUseToolsMenu.Caption=將 CnPack 專家功能表置於 Tools 功能表下。
+TCnWizConfigForm.chkUserDir.Caption=指定用戶數據目錄位置（需要重啟 IDE）:
 TCnWizConfigForm.btnHelp.Caption=說明(&H)
 TCnWizConfigForm.btnOK.Caption=確定(&O)
 TCnWizConfigForm.btnCancel.Caption=取消(&C)

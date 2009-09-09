@@ -226,7 +226,7 @@ begin
   with TMemIniFile.Create(GetFileFromLang(SCnWizCommentIniFile)) do
   try
     Result := ReadString(csComment, Command, '');
-    if Result = '' then
+    if not CheckWinVista and (Result = '') then
     begin
       WriteString(csComment, Command, '');  // 创建该项内容供编辑
       Exit;
@@ -236,7 +236,8 @@ begin
     Result := Spc(Indent) + StringReplace(Result, CRLF, #13#10 +
       Spc(Indent), [rfReplaceAll]);
   finally
-    UpdateFile;
+    if not CheckWinVista then
+      UpdateFile;
     Free;
   end;
 end;

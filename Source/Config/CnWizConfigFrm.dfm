@@ -400,9 +400,9 @@ object CnWizConfigForm: TCnWizConfigForm
       ImageIndex = 1
       object grpOthers: TGroupBox
         Left = 8
-        Top = 296
+        Top = 282
         Width = 481
-        Height = 47
+        Height = 89
         Caption = '其他(&R)'
         TabOrder = 3
         object Label2: TLabel
@@ -411,6 +411,49 @@ object CnWizConfigForm: TCnWizConfigForm
           Width = 3
           Height = 13
         end
+        object btnUserDir: TSpeedButton
+          Left = 450
+          Top = 57
+          Width = 23
+          Height = 22
+          Flat = True
+          Glyph.Data = {
+            36040000424D3604000000000000360000002800000010000000100000000100
+            2000000000000004000000000000000000000000000000000000FF00FF00FF00
+            FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00
+            FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00
+            FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00
+            FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00
+            FF00187B9C00187B9C00187B9C00187B9C00187B9C00187B9C00187B9C00187B
+            9C00187B9C00187B9C00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF001894
+            C6001894C6001894C6001894C6001894C6001894C6001894C6001894C6001894
+            C6001894C6001894C600187B9C00FF00FF00FF00FF00FF00FF00189CC600189C
+            C6009CFFFF006BD6FF006BD6FF006BD6FF006BD6FF006BD6FF006BD6FF006BD6
+            FF006BD6FF006BD6FF00299CBD000873A500FF00FF00FF00FF00189CC600189C
+            C6007BE7F7009CFFFF007BE7FF007BE7FF007BE7FF007BE7FF007BE7FF007BE7
+            FF007BE7FF007BDEFF0042B5DE000873A500FF00FF00FF00FF00189CC60021A5
+            CE0039BDD6009CFFFF0084EFFF0084EFFF0084EFFF0084EFFF0084EFFF0084EF
+            FF0084EFFF0084E7FF0042BDEF000873A500FF00FF00FF00FF00189CC60042B5
+            E70021A5CE00A5FFFF0094F7FF0094F7FF0094F7FF0094F7FF0094F7FF0094F7
+            FF0094F7FF0094F7FF0052BDE7005ABDCE000873A500FF00FF00189CC6006BD6
+            FF00189CC6008CF7F7009CFFFF009CFFFF009CFFFF009CFFFF009CFFFF009CFF
+            FF009CFFFF009CFFFF005AC6FF0094FFFF000873A500FF00FF00189CC60084D6
+            FF00189CC6006BBDDE00FFFFFF00FFFFFF00F7FFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF0084E7FF00FFFFFF000873A500FF00FF00189CC60084EF
+            FF004AC6E700189CC600189CC600189CC600189CC600189CC600189CC600189C
+            C600189CC600189CC600189CC600189CC6000873A500FF00FF00189CC6009CF7
+            FF008CF7FF008CF7FF008CF7FF008CF7FF008CF7FF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00189CC600187B9C00FF00FF00FF00FF00189CC600FFFF
+            FF009CFFFF009CFFFF009CFFFF009CFFFF00FFFFFF00189CC600189CC600189C
+            C600189CC600189CC600189CC600FF00FF00FF00FF00FF00FF00FF00FF0021A5
+            CE00FFFFFF00FFFFFF00FFFFFF00FFFFFF00189CC600FF00FF00FF00FF00FF00
+            FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00
+            FF0021A5CE0021A5CE0021A5CE0021A5CE00FF00FF00FF00FF00FF00FF00FF00
+            FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00
+            FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00
+            FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00}
+          OnClick = btnUserDirClick
+        end
         object chkUseToolsMenu: TCheckBox
           Left = 8
           Top = 16
@@ -418,6 +461,22 @@ object CnWizConfigForm: TCnWizConfigForm
           Height = 17
           Caption = '将 CnPack 专家菜单置于 Tools 菜单下。'
           TabOrder = 0
+        end
+        object chkUserDir: TCheckBox
+          Left = 8
+          Top = 35
+          Width = 273
+          Height = 17
+          Caption = '指定用户数据目录位置（需要重启 IDE）:'
+          TabOrder = 1
+          OnClick = UpdateControls
+        end
+        object edtUserDir: TEdit
+          Left = 24
+          Top = 58
+          Width = 422
+          Height = 21
+          TabOrder = 2
         end
       end
       object gbHintWnd: TGroupBox
@@ -459,7 +518,7 @@ object CnWizConfigForm: TCnWizConfigForm
         Left = 8
         Top = 80
         Width = 481
-        Height = 153
+        Height = 141
         Caption = '升级设置(&G)'
         TabOrder = 1
         object rbUpgradeDisabled: TRadioButton
@@ -473,8 +532,8 @@ object CnWizConfigForm: TCnWizConfigForm
         end
         object rbUpgradeAll: TRadioButton
           Left = 8
-          Top = 38
-          Width = 290
+          Top = 36
+          Width = 280
           Height = 17
           Caption = '在有新版本可用时显示提示。'
           Checked = True
@@ -484,8 +543,8 @@ object CnWizConfigForm: TCnWizConfigForm
         end
         object rbUpgradeUserDefine: TRadioButton
           Left = 8
-          Top = 61
-          Width = 361
+          Top = 55
+          Width = 280
           Height = 17
           Caption = '仅在检测到以下新版本时才显示提示。'
           TabOrder = 3
@@ -493,8 +552,8 @@ object CnWizConfigForm: TCnWizConfigForm
         end
         object cbNewFeature: TCheckBox
           Left = 24
-          Top = 83
-          Width = 145
+          Top = 75
+          Width = 264
           Height = 17
           Caption = '增加新的专家。'
           Checked = True
@@ -503,8 +562,8 @@ object CnWizConfigForm: TCnWizConfigForm
         end
         object cbBigBugFixed: TCheckBox
           Left = 24
-          Top = 106
-          Width = 185
+          Top = 94
+          Width = 264
           Height = 17
           Caption = '重要的错误修正或功能改进。'
           Checked = True
@@ -513,8 +572,8 @@ object CnWizConfigForm: TCnWizConfigForm
         end
         object cbUpgradeReleaseOnly: TCheckBox
           Left = 8
-          Top = 128
-          Width = 177
+          Top = 114
+          Width = 280
           Height = 17
           Caption = '检测时忽略测试版的程序。'
           TabOrder = 6
@@ -532,7 +591,7 @@ object CnWizConfigForm: TCnWizConfigForm
       end
       object grpTools: TGroupBox
         Left = 8
-        Top = 240
+        Top = 227
         Width = 481
         Height = 49
         Caption = '辅助工具(&T)'
@@ -548,7 +607,7 @@ object CnWizConfigForm: TCnWizConfigForm
           OnClick = btnExportImagelistClick
         end
         object btnExportActionList: TButton
-          Left = 152
+          Left = 156
           Top = 16
           Width = 153
           Height = 21
@@ -558,7 +617,7 @@ object CnWizConfigForm: TCnWizConfigForm
           OnClick = btnExportActionListClick
         end
         object btnExportComponents: TButton
-          Left = 312
+          Left = 320
           Top = 16
           Width = 153
           Height = 21

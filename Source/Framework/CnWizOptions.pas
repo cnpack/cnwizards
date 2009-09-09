@@ -40,7 +40,7 @@ interface
 
 uses
   Windows, Messages, Classes, Graphics, Controls, SysUtils, ToolsAPI, IniFiles,
-  Forms;
+  FileCtrl, Forms{$IFDEF COMPILER6_UP}, SHFolder{$ENDIF};
 
 type
 
@@ -88,6 +88,8 @@ type
     FShowTipOfDay: Boolean;
     FUseToolsMenu: Boolean;
     FFixThreadLocale: Boolean;
+    FCustomUserDir: string;
+    FUseCustomUserDir: Boolean;
     procedure SetCurrentLangID(const Value: Cardinal);
     function GetUpgradeCheckDate: TDateTime;
     procedure SetUpgradeCheckDate(const Value: TDateTime);
@@ -96,6 +98,8 @@ type
     procedure SetFixThreadLocale(const Value: Boolean);
     function GetUpgradeCheckMonth: TDateTime;
     procedure SetUpgradeCheckMonth(const Value: TDateTime);
+    procedure SetCustomUserDir(const Value: string);
+    procedure SetUseCustomUserDir(const Value: Boolean);
   public
     constructor Create;
     destructor Destroy; override;
@@ -218,6 +222,10 @@ type
     {* 主菜单是否集成到 Tools 菜单下 }
     property FixThreadLocale: Boolean read FFixThreadLocale write SetFixThreadLocale;
     {* 使用 SetThreadLocale 修正 Vista / Win7 下中文乱码问题}
+
+    property UseCustomUserDir: Boolean read FUseCustomUserDir write SetUseCustomUserDir;
+    property CustomUserDir: string read FCustomUserDir write SetCustomUserDir;
+    {* Vista / Win7 下使用指定的 User 目录来避免权限问题 }
   end;
 
 var
@@ -262,6 +270,21 @@ const
   csUpgradeCheckDate = 'CheckDate';
   csUpgradeCheckMonth = 'CheckMonth';
 
+  csUseCustomUserDir = 'UseCustomUserDir';
+  csCustomUserDir = 'CustomUserDir';
+
+{$IFNDEF COMPILER6_UP}
+const
+  SHFolderDll = 'SHFolder.dll';
+
+  CSIDL_PERSONAL = $0005; { My Documents }
+  CSIDL_FLAG_CREATE = $8000; { new for Win2K, or this in to force creation of folder }
+
+function SHGetFolderPath(hwnd: HWND; csidl: Integer; hToken: THandle;
+  dwFlags: DWord; pszPath: PAnsiChar): HRESULT; stdcall;
+  external SHFolderDll name 'SHGetFolderPathA';
+{$ENDIF}
+
 constructor TCnWizOptions.Create;
 begin
   inherited;
@@ -278,7 +301,8 @@ procedure TCnWizOptions.LoadSettings;
 const
   SCnSoftwareRegPath = '\Software\';
 var
-  ModuleName: array[0..MAX_Path - 1] of Char;
+  ModuleName, SHUserDir: array[0..MAX_Path - 1] of Char;
+  DefDir: string;
   Svcs: IOTAServices;
   i: Integer;
   s: string;
@@ -297,8 +321,6 @@ begin
   FTemplatePath := MakePath(FDllPath + SCnWizTemplatePath);
   FIconPath := MakePath(FDllPath + SCnWizIconPath);
   FHelpPath := MakePath(FDllPath + SCnWizHelpPath);
-  FUserPath := MakePath(FDllPath + SCnWizUserPath);
-  CreateDirectory(PChar(FUserPath), nil);
 
   FRegBase := SCnPackRegPath;
   for i := 1 to ParamCount do
@@ -343,6 +365,18 @@ begin
     FUseToolsMenu := ReadBool(SCnOptionSection, csUseToolsMenu, False);
     FixThreadLocale := ReadBool(SCnOptionSection, csFixThreadLocale, True);
 
+    FUseCustomUserDir := ReadBool(SCnOptionSection, csUseCustomUserDir, CheckWinVista);
+    SHGetFolderPath(0, CSIDL_PERSONAL or CSIDL_FLAG_CREATE, 0, 0, SHUserDir);
+    DefDir := MakePath(SHUserDir) + SCnWizCustomUserPath;
+    FCustomUserDir := ReadString(SCnOptionSection, csCustomUserDir, DefDir);
+    if FUseCustomUserDir then // 使用指定用户目录时需要保证该目录有效
+    begin
+      if (FCustomUserDir <> '') and not DirectoryExists(FCustomUserDir) then
+        CreateDirectory(PChar(FCustomUserDir), nil);
+      if (FCustomUserDir = '') or not DirectoryExists(FCustomUserDir) then
+        FCustomUserDir := DefDir;
+    end;
+
     FUpgradeReleaseOnly := ReadBool(SCnUpgradeSection, csUpgradeReleaseOnly, True);
     FUpgradeContent := [];
     if ReadBool(SCnUpgradeSection, csNewFeature, True) then
@@ -355,6 +389,15 @@ begin
   finally
     Free;
   end;
+
+  if FUseCustomUserDir then
+    FUserPath := MakePath(FCustomUserDir)
+  else
+    FUserPath := MakePath(FDllPath + SCnWizUserPath);
+  CreateDirectory(PChar(FUserPath), nil);
+{$IFDEF Debug}
+  CnDebugger.LogMsg('User Path: ' + FUserPath);
+{$ENDIF Debug}
 
   with TMemIniFile.Create(FDataPath + SCnWizUpgradeIniFile) do
   try
@@ -377,6 +420,8 @@ begin
     WriteString(SCnOptionSection, csCExt, FCExt);
     WriteBool(SCnOptionSection, csUseToolsMenu, FUseToolsMenu);
     WriteBool(SCnOptionSection, csFixThreadLocale, FFixThreadLocale);
+    WriteBool(SCnOptionSection, csUseCustomUserDir, FUseCustomUserDir);
+    WriteString(SCnOptionSection, csCustomUserDir, FCustomUserDir);
 
     WriteBool(SCnUpgradeSection, csUpgradeReleaseOnly, FUpgradeReleaseOnly);
     WriteBool(SCnUpgradeSection, csNewFeature, ucNewFeature in FUpgradeContent);
@@ -443,6 +488,16 @@ procedure TCnWizOptions.SetCurrentLangID(const Value: Cardinal);
 begin
   FCurrentLangID := Value;
   WriteInteger(SCnOptionSection, csLangID, FCurrentLangID);
+end;
+
+procedure TCnWizOptions.SetUseCustomUserDir(const Value: Boolean);
+begin
+  FUseCustomUserDir := Value;
+end;
+
+procedure TCnWizOptions.SetCustomUserDir(const Value: string);
+begin
+  FCustomUserDir := Value;
 end;
 
 //------------------------------------------------------------------------------

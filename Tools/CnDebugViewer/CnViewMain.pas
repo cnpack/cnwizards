@@ -41,7 +41,8 @@ uses
   ExtCtrls, Menus, ComCtrls, ActnList, ImgList, ToolWin, StdCtrls, IniFiles,
   Clipbrd, Registry, Tabs,
   VirtualTrees, CnMdiView, CnLangTranslator, CnLangMgr, CnWizLangID, CnTabSet,
-  CnLangStorage, CnHashLangStorage, CnClasses, CnMsgClasses, CnTrayIcon;
+  CnLangStorage, CnHashLangStorage, CnClasses, CnMsgClasses, CnTrayIcon,
+  CnWizCfgUtils;
 
 type
   TCnFormSwitch = (fsAdd, fsUpdate, fsDelete, fsActiveChange);
@@ -355,7 +356,10 @@ end;
 procedure TCnMainViewer.FormCreate(Sender: TObject);
 begin
   InitializeCore;
-  LoadOptions(ExtractFilePath(Application.ExeName) + SCnOptionFileName);
+  if GetCWUseCustomUserDir then
+    LoadOptions(GetCWUserPath + SCnOptionFileName)
+  else
+    LoadOptions(ExtractFilePath(Application.ExeName) + SCnOptionFileName);
   UpdateFilterToMap;
   InitializeLang;
 
@@ -438,7 +442,10 @@ begin
     end;
   end;
 
-  SaveOptions(ExtractFilePath(Application.ExeName) + SCnOptionFileName);
+  if GetCWUseCustomUserDir then
+    SaveOptions(GetCWUserPath + SCnOptionFileName)
+  else
+    SaveOptions(ExtractFilePath(Application.ExeName) + SCnOptionFileName);
   CnLangManager.RemoveChangeNotifier(LanguageChanged);
 
   // ×¢ÏúÈÈ¼ü

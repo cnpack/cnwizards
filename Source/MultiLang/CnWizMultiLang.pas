@@ -175,10 +175,11 @@ begin
   with TMemIniFile.Create(FileName) do
   try
     Result := ReadString(csSection, Topic, '');
-    if Result = '' then
+    if not CheckWinVista and (Result = '') then
       WriteString(csSection, Topic, '');   // 创建该项内容供编辑
   finally
-    UpdateFile;
+    if not CheckWinVista then
+      UpdateFile;
     Free;
   end;
 end;

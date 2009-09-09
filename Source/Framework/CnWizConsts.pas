@@ -128,6 +128,7 @@ resourcestring
   SCnWizIconPath = 'Icons';
   SCnWizHelpPath = 'Help';
   SCnWizUserPath = 'User';
+  SCnWizCustomUserPath = 'CnWizards';
   SCnWizCommentPath = 'Comment';
   SCnWizLangFile = 'CnWizards.txt';
   SCnWizHelpIniFile = 'Help.ini';

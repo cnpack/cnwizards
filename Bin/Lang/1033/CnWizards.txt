@@ -112,6 +112,7 @@ TCnWizConfigForm.btnExportActionList.Caption=Export IDE &Action Names
 TCnWizConfigForm.btnExportComponents.Caption=Export Controls &List
 TCnWizConfigForm.grpOthers.Caption=Othe&rs
 TCnWizConfigForm.chkUseToolsMenu.Caption=Integrate CnPack Menu into Tools Menu.
+TCnWizConfigForm.chkUserDir.Caption=Customize User Data Folder(Need Restart):
 TCnWizConfigForm.btnHelp.Caption=&Help
 TCnWizConfigForm.btnOK.Caption=&OK
 TCnWizConfigForm.btnCancel.Caption=&Cancel

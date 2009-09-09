@@ -50,7 +50,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   Menus, ExtCtrls, ComCtrls, ToolWin, StdCtrls, CnDesignEditor, CnWizMultiLang,
-  CnDesignEditorConsts, ImgList;
+  CnDesignEditorConsts, ImgList, Buttons;
 
 type
 
@@ -122,6 +122,9 @@ type
     chkUseToolsMenu: TCheckBox;
     btnDesignEditorCustomize: TButton;
     ilEnable: TImageList;
+    chkUserDir: TCheckBox;
+    edtUserDir: TEdit;
+    btnUserDir: TSpeedButton;
     procedure lbWizardsDrawItem(Control: TWinControl; Index: Integer;
       Rect: TRect; State: TOwnerDrawState);
     procedure FormCreate(Sender: TObject);
@@ -148,6 +151,7 @@ type
     procedure btnExportComponentsClick(Sender: TObject);
     procedure btnSortClick(Sender: TObject);
     procedure btnDesignEditorCustomizeClick(Sender: TObject);
+    procedure btnUserDirClick(Sender: TObject);
   private
     { Private declarations }
     FShortCuts: array of TShortCut;
@@ -261,6 +265,9 @@ begin
   cbBigBugFixed.Checked := ucBigBugFixed in WizOptions.UpgradeContent;
   cbUpgradeReleaseOnly.Checked := WizOptions.UpgradeReleaseOnly;
 
+  chkUserDir.Checked := WizOptions.UseCustomUserDir;
+  edtUserDir.Text := WizOptions.CustomUserDir;
+
   UpdateControls(nil);
 
   PageControl.ActivePageIndex := 0;
@@ -317,6 +324,9 @@ begin
     else
       WizOptions.UpgradeStyle := usAllUpgrade;
     WizOptions.UpgradeReleaseOnly := cbUpgradeReleaseOnly.Checked;
+
+    WizOptions.UseCustomUserDir := chkUserDir.Checked;
+    WizOptions.CustomUserDir := edtUserDir.Text;
 
     WizOptions.SaveSettings;
     CnWizardMgr.SaveSettings;
@@ -677,6 +687,8 @@ procedure TCnWizConfigForm.UpdateControls(Sender: TObject);
 begin
   cbNewFeature.Enabled := rbUpgradeUserDefine.Checked;
   cbBigBugFixed.Enabled := rbUpgradeUserDefine.Checked;
+  edtUserDir.Enabled := chkUserDir.Checked;
+  btnUserDir.Enabled := chkUserDir.Checked;
 end;
 
 procedure TCnWizConfigForm.btnExportImagelistClick(Sender: TObject);
@@ -732,6 +744,15 @@ begin
     end;
     Free;
   end;
+end;
+
+procedure TCnWizConfigForm.btnUserDirClick(Sender: TObject);
+var
+  ADir: string;
+begin
+  ADir := edtUserDir.Text;
+  if GetDirectory('', ADir) then
+    edtUserDir.Text := ADir;
 end;
 
 end.

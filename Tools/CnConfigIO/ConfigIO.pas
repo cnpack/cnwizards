@@ -41,11 +41,11 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   Registry, ExtCtrls, StdCtrls, FileCtrl, CnCommon, CnConsts, CnWizLangID,
-  CnLangTranslator, CnLangStorage, CnHashLangStorage, CnLangMgr, CnClasses;
+  CnLangTranslator, CnLangStorage, CnHashLangStorage, CnLangMgr, CnClasses,
+  CnWizCfgUtils;
 
 const
   SCnWizardsReg = 'CnWizards.reg';
-  SCnWizUserPath = 'User';
 
 var
   SCnQuitAsk: string = '是否要退出 CnPack IDE 专家包设置导入导出工具？';
@@ -150,7 +150,6 @@ begin
   Application.Title := Caption;
   FRegPath := MakePath(SCnPackRegPath);
   FRegFile := MakePath(ExtractFilePath(Application.ExeName)) + SCnWizardsReg;
-  FUserPath := MakePath(ExtractFilePath(Application.ExeName) + SCnWizUserPath);
   FFileList := TStringList.Create;
   FParmNoMsg := (FindCmdLineSwitch('n', ['-', '/'], True) or
     FindCmdLineSwitch('NoMsg', ['-', '/'], True));
@@ -160,6 +159,8 @@ begin
   FParmHelp := FindCmdLineSwitch('?', ['-', '/'], True)
     or FindCmdLineSwitch('h', ['-', '/'], True)
     or FindCmdLineSwitch('help', ['-', '/'], True);
+
+  FUserPath := GetCWUserPath;
 
   FVaildParams := FParmImport or FParmExport or FParmReDef;
 
@@ -335,6 +336,8 @@ var
   AStream: TMemoryStream;
   TmpFile: string;
 begin
+  // todo: 原来备份的用户路径可能与当前读到的不一致，更安全的办法应该是先恢复注册表，
+  // 再从注册表中更新用户路径进行恢复，此处暂未修改。
   if DirectoryExists(FUserPath) then
     FindFile(FUserPath, '*.*', OnFindFileToDel, nil, True, False)
   else

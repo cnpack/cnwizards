@@ -1131,10 +1131,11 @@ begin
   with TMemIniFile.Create(FileName) do
   try
     Result := ReadString(csSection, Topic, '');
-    if Result = '' then
+    if not CheckWinVista and (Result = '') then
       WriteString(csSection, Topic, '');   // 创建该项内容供编辑
   finally
-    UpdateFile;
+    if not CheckWinVista then
+      UpdateFile;
     Free;
   end;
 end;
@@ -1708,7 +1709,7 @@ begin
 end;
 
 //==============================================================================
-// 控件处理函数 
+// 控件处理函数
 //==============================================================================
 
 // 返回组件的标题
