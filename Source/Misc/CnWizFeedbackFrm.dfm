@@ -529,7 +529,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
             Top = 35
             Width = 240
             Height = 17
-            Caption = 'Borland IDE °æ±¾ºÅ¡£'
+            Caption = 'IDE °æ±¾ºÅ¡£'
             Checked = True
             Enabled = False
             State = cbChecked
