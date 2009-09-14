@@ -139,7 +139,7 @@ begin
     if FileExists(FileName) then
       with TMemIniFile.Create(FileName) do
       try
-        if not ValueExists(csComment, Command) then
+        if not CheckWinVista and not ValueExists(csComment, Command) then
         begin
           WriteString(csComment, Command, '');  // 创建该项内容供编辑
           Exit;
@@ -172,7 +172,8 @@ begin
           end;
         end;
       finally
-        UpdateFile;
+        if not CheckWinVista then
+          UpdateFile;
         Free;
       end;
   end;
