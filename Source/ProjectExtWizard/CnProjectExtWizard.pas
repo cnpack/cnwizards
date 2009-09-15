@@ -300,7 +300,6 @@ begin
 {$ENDIF}
 
       OutName := MakePath(Dir) + IntermediaDir + ChangeFileExt(ExtractFileName(ProjectFileName), OutExt);
-      ShowMessage(OutName);
       if FileExists(OutName) then
         ExploreFile(OutName)
       else if DirectoryExists(Dir) then
