@@ -329,6 +329,12 @@ type
 function GetCurrentTopEditorPage(AControl: TWinControl): TCnSrcEditorPage;
 {* 取当前编辑窗口顶层页面类型，传入编辑器父控件 }
 
+procedure BeginBatchOpenClose;
+{* 开始批量打开或关闭文件 }
+
+procedure EndBatchOpenClose;
+{* 结束批量打开或关闭文件 }
+
 //==============================================================================
 // 扩展控件
 //==============================================================================
@@ -470,6 +476,16 @@ uses
   CnDebug,
 {$ENDIF}
   Registry;
+
+{$IFDEF BDS4_UP}
+const
+  SBeginBatchOpenCloseName = '@Editorform@BeginBatchOpenClose$qqrv';
+  SEndBatchOpenCloseName = '@Editorform@EndBatchOpenClose$qqrv';
+
+var
+  BeginBatchOpenCloseProc: TProcedure = nil;
+  EndBatchOpenCloseProc: TProcedure = nil;
+{$ENDIF}
 
 type
   TCustomControlHack = class(TCustomControl);
@@ -1541,6 +1557,47 @@ begin
   end;
 end;
 
+var
+  CorIdeModule: HMODULE;
+
+procedure InitIdeAPIs;
+begin
+  CorIdeModule := LoadLibrary(CorIdeLibName);
+  Assert(CorIdeModule <> 0, 'Failed to load CorIdeModule');
+
+{$IFDEF BDS4_UP}
+  BeginBatchOpenCloseProc := GetProcAddress(CorIdeModule, SBeginBatchOpenCloseName);
+  Assert(Assigned(BeginBatchOpenCloseProc), 'Failed to load BeginBatchOpenCloseProc from CorIdeModule');
+
+  EndBatchOpenCloseProc := GetProcAddress(CorIdeModule, SEndBatchOpenCloseName);
+  Assert(Assigned(EndBatchOpenCloseProc), 'Failed to load EndBatchOpenCloseProc from CorIdeModule');
+{$ENDIF}
+end;
+
+procedure FinalIdeAPIs;
+begin
+  if CorIdeModule <> 0 then
+    FreeLibrary(CorIdeModule);
+end;  
+
+// 开始批量打开或关闭文件
+procedure BeginBatchOpenClose;
+begin
+{$IFDEF BDS4_UP}
+  if Assigned(BeginBatchOpenCloseProc) then
+    BeginBatchOpenCloseProc;
+{$ENDIF}
+end;
+
+// 结束批量打开或关闭文件
+procedure EndBatchOpenClose;
+begin
+{$IFDEF BDS4_UP}
+  if Assigned(EndBatchOpenCloseProc) then
+    EndBatchOpenCloseProc;
+{$ENDIF}
+end;
+
 //==============================================================================
 // 扩展控件
 //==============================================================================
@@ -1936,8 +1993,10 @@ begin
 end;
 
 initialization
-  IdeIsEmbeddedDesigner := IdeGetIsEmbeddedDesigner;
   // 使用此全局变量可以避免频繁调用 IdeGetIsEmbeddedDesigner 函数
+  IdeIsEmbeddedDesigner := IdeGetIsEmbeddedDesigner;
+  
+  InitIdeAPIs;
 
 finalization
 {$IFDEF DEBUG}
@@ -1949,6 +2008,8 @@ finalization
 
   if FCnMessageViewWrapper <> nil then
     FreeAndNil(FCnMessageViewWrapper);
+
+  FinalIdeAPIs;
 
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('CnWizIdeUtils finalization.');

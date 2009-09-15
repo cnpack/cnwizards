@@ -51,7 +51,8 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, Dialogs, ActnList,
   ToolsAPI, IniFiles, ShellAPI, Menus, CnCommon, CnWizClasses, CnWizUtils,
-  CnConsts, CnWizConsts, CnFilesSnapshotManageFrm, CnWizOptions, CnRoWizard;
+  CnConsts, CnWizConsts, CnFilesSnapshotManageFrm, CnWizOptions, CnWizIdeUtils,
+  CnRoWizard;
 
 type
 
@@ -404,9 +405,14 @@ procedure TCnFilesSnapshotWizard.FilesRestore(Index: Integer);
     i: Integer;
   begin
     Result := False;
-    for i := 0 to Files.Count - 1 do
-      if FileExists(Files[i]) then
-        Result := CnOtaOpenFile(Files[i]) or Result;
+    BeginBatchOpenClose;
+    try
+      for i := 0 to Files.Count - 1 do
+        if FileExists(Files[i]) then
+          Result := CnOtaOpenFile(Files[i]) or Result;
+    finally
+      EndBatchOpenClose;
+    end;
   end;
 
 begin

@@ -240,9 +240,14 @@ var
   var
     i: Integer;
   begin
-    for i := 0 to Pred(lvList.Items.Count) do
-      if lvList.Items.Item[i].Selected then
-        OpenItem(TCnUnitInfo(lvList.Items.Item[i].Data).FileName);
+    BeginBatchOpenClose;
+    try
+      for i := 0 to Pred(lvList.Items.Count) do
+        if lvList.Items.Item[i].Selected then
+          OpenItem(TCnUnitInfo(lvList.Items.Item[i].Data).FileName);
+    finally
+      EndBatchOpenClose;
+    end;
   end;
 
 begin

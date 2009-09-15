@@ -67,7 +67,8 @@ uses
 {$ENDIF}
   ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles, ToolsAPI,
   Graphics, CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnWizUtils, CnIni,
-  CnWizMultiLang, CnProjectViewBaseFrm, CnWizDfmParser, ImgList, ActnList;
+  CnWizMultiLang, CnProjectViewBaseFrm, CnWizDfmParser, ImgList, ActnList,
+  CnWizIdeUtils;
 
 type
   TCnFormInfo = class(TDfmInfo)
@@ -446,15 +447,20 @@ var
     i: Integer;
     FormInfo: TCnFormInfo;
   begin
-    for i := 0 to lvList.Items.Count - 1 do
-      if lvList.Items.Item[i].Selected then
-      begin
-        FormInfo := TCnFormInfo(lvList.Items.Item[i].Data);
-        if FormInfo.Format = dfUnknown then
-          OpenItem(FormInfo.FileName, FormInfo.Name)
-        else
-          OpenItem(FormInfo.FileName);
-      end;
+    BeginBatchOpenClose;
+    try
+      for i := 0 to lvList.Items.Count - 1 do
+        if lvList.Items.Item[i].Selected then
+        begin
+          FormInfo := TCnFormInfo(lvList.Items.Item[i].Data);
+          if FormInfo.Format = dfUnknown then
+            OpenItem(FormInfo.FileName, FormInfo.Name)
+          else
+            OpenItem(FormInfo.FileName);
+        end;
+    finally
+      EndBatchOpenClose;
+    end;
   end;
 
 begin

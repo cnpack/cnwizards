@@ -502,6 +502,7 @@ begin
 
   List := nil;
   ProjectList := nil;
+  BeginBatchOpenClose;
   try
     List := TList.Create;
     ProjectList := TList.Create;
@@ -534,6 +535,7 @@ begin
     for i := 0 to ProjectList.Count - 1 do
       CnOtaCloseEditView(IOTAModule(ProjectList[i]));
   finally
+    EndBatchOpenClose;
     if Assigned(List) then List.Free;
     if Assigned(ProjectList) then ProjectList.Free;
   end;
