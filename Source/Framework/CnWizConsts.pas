@@ -988,8 +988,6 @@ var
   SCnLineNumberClearBookMarks: string = '清除所有书签(&R)';
   SCnLineNumberShowIDELineNum: string = '显示 IDE 行号(&I)';
   SCnLineNumberClose: string = '关闭行号显示(&X)';
-  SCnLineNumberGotoCaption: string = '跳至行号';
-  SCnLineNumberGotoPrompt: string = '行号：';
 
   SCnSrcEditorNavIDEBack: string = 'IDE 后退 (Shift+Click)';
   SCnSrcEditorNavIDEForward: string = 'IDE 前进 (Shift+Click)';

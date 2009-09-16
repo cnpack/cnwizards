@@ -673,6 +673,7 @@ begin
   TranslateStr(SCnLineNumberGotoLine, 'SCnLineNumberGotoLine');
   TranslateStr(SCnLineNumberGotoBookMark, 'SCnLineNumberGotoBookMark');
   TranslateStr(SCnLineNumberClearBookMarks, 'SCnLineNumberClearBookMarks');
+  TranslateStr(SCnLineNumberShowIDELineNum, 'SCnLineNumberShowIDELineNum');
   TranslateStr(SCnLineNumberClose, 'SCnLineNumberClose');
 
   TranslateStr(SCnSrcEditorNavIDEBack, 'SCnSrcEditorNavIDEBack');
