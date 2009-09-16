@@ -834,6 +834,7 @@ end;
 procedure TCnSrcEditorToolBarMgr.SaveSettings(Ini: TCustomIniFile);
 begin
   Ini.WriteBool(csToolBar, csShowToolBar, FShowToolBar);
+  Ini.WriteBool(csToolBar, csShowDesignToolBar, FShowDesignToolBar);
   Ini.WriteBool(csToolBar, csWrapable, FWrapable);
   SaveToolBarActions(FToolBarActions, WizOptions.GetUserFileName(SCnEditorToolBarDataName, False));
   WizOptions.CheckUserFile(SCnEditorToolBarDataName);
