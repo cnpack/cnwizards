@@ -47,6 +47,10 @@ interface
   {$DEFINE SUPPORT_IDESymbolList}
 {$ENDIF}
 
+{$IFDEF BDS}
+  {$DEFINE ADJUST_CodeParamWindow}
+{$ENDIF}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ComCtrls, ExtCtrls, ImgList, Menus, ToolsApi, IniFiles, Math,
@@ -240,6 +244,9 @@ type
     // 如果不支持 IDE 符号列表，需要挂掉 Cppcodcmplt::TCppKibitzManager::CCError
     FCCErrorHook: TCnMethodHook;
 {$ENDIF}
+{$IFDEF ADJUST_CodeParamWindow}
+    FCodeWndProc: TWndMethod;
+{$ENDIF}
     function AcceptDisplay: Boolean;
     procedure ApplicationMessage(var Msg: TMsg; var Handled: Boolean);
     procedure ActiveControlChanged(Sender: TObject);
@@ -251,6 +258,11 @@ type
     procedure HideList;
     procedure ClearList;
     procedure HideAndClearList;
+{$IFDEF ADJUST_CodeParamWindow}
+    procedure CodeParamWndProc(var Message: TMessage);
+    procedure HookCodeParamWindow(Wnd: TWinControl);
+    procedure AdjustCodeParamWindowPos;
+{$ENDIF}
     function HandleKeyDown(var Msg: TMsg): Boolean;
     function HandleKeyUp(var Msg: TMsg): Boolean;
     function HandleKeyPress(Key: AnsiChar): Boolean;
@@ -1803,6 +1815,9 @@ begin
           Top := Max(Pt.y - List.Height - csLineHeight div 2, WorkRect.Top);
         List.SetPos(Left, Top);
         List.Popup;
+      {$IFDEF ADJUST_CodeParamWindow}
+        AdjustCodeParamWindowPos;
+      {$ENDIF}
       end
       else if not (FPosInfo.PosKind in [pkUnknown, pkFlat, pkComment, pkIntfUses,
         pkImplUses, pkResourceString, pkCompDirect, pkString]) then // 这个判断，Pascal 和 C++ 通用
@@ -1852,6 +1867,84 @@ function TCnInputHelper.GetIsShowing: Boolean;
 begin
   Result := List.Visible;
 end;
+
+{$IFDEF ADJUST_CodeParamWindow}
+procedure TCnInputHelper.CodeParamWndProc(var Message: TMessage);
+var
+  Msg: TWMWindowPosChanging;
+  ParaComp: TComponent;
+  ParaWnd: TWinControl;
+  R1, R2, R3: TRect;
+begin
+  if (Message.Msg = WM_WINDOWPOSCHANGING) and IsShowing then
+  begin
+    // 助手显示时，阻止参数提示窗口恢复到重叠位置
+    Msg := TWMWindowPosChanging(Message);
+    if Msg.WindowPos.flags and SWP_NOMOVE = 0 then
+    begin
+      ParaComp := Application.FindComponent('CodeParamWindow');
+      if (ParaComp <> nil) and ParaComp.ClassNameIs('TTokenWindow') and
+        (ParaComp is TWinControl) then
+      begin
+        ParaWnd := TWinControl(ParaComp);
+        GetWindowRect(ParaWnd.Handle, R1);
+        with Msg.WindowPos^ do
+          R1 := Bounds(x, y, RectWidth(R1), RectHeight(R1) + EditControlWrapper.GetCharHeight);
+        GetWindowRect(List.Handle, R2);
+        if IntersectRect(R3, R1, R2) and not IsRectEmpty(R3) then
+        begin
+          Msg.WindowPos.flags := Msg.WindowPos.flags + SWP_NOMOVE;
+        end;
+      end;
+    end;
+  end;
+  
+  if Assigned(FCodeWndProc) then
+    FCodeWndProc(Message);
+end;
+
+procedure TCnInputHelper.HookCodeParamWindow(Wnd: TWinControl);
+var
+  Med: TWndMethod;
+begin
+  Med := CodeParamWndProc;
+  if not SameMethod(TMethod(Wnd.WindowProc), TMethod(Med)) then
+  begin
+    FCodeWndProc := Wnd.WindowProc;
+    Wnd.WindowProc := CodeParamWndProc;
+  end;  
+end;
+
+procedure TCnInputHelper.AdjustCodeParamWindowPos;
+var
+  ParaComp: TComponent;
+  ParaWnd: TWinControl;
+  R1, R2, R3: TRect;
+begin
+  // BDS 下函数参数提示窗口在当前行的下方，挡住了助手窗口，需要移到当前行上方去
+  if IsShowing then
+  begin
+    ParaComp := Application.FindComponent('CodeParamWindow');
+    if (ParaComp <> nil) and ParaComp.ClassNameIs('TTokenWindow') and
+      (ParaComp is TWinControl) then
+    begin
+      ParaWnd := TWinControl(ParaComp);
+      // Hook参数窗口，阻止其自动恢复位置
+      HookCodeParamWindow(ParaWnd);
+      // 判断并调整参数窗口的位置
+      GetWindowRect(ParaWnd.Handle, R1);
+      GetWindowRect(List.Handle, R2);
+      if IntersectRect(R3, R1, R2) and not IsRectEmpty(R3) then
+      begin
+        ParaWnd.Top := List.Top - ParaWnd.Height - EditControlWrapper.GetCharHeight;
+        OffsetRect(R1, 0, - EditControlWrapper.GetCharHeight * 2);
+        SetWindowPos(ParaWnd.Handle, 0, R1.Left, R1.Top, 0, 0,
+          SWP_NOSIZE or SWP_NOZORDER or SWP_NOACTIVATE);
+      end;
+    end;
+  end;
+end;
+{$ENDIF}
 
 //------------------------------------------------------------------------------
 // 数据更新及处理
@@ -2043,6 +2136,10 @@ var
   i, Idx: Integer;
   Symbol: string;
 begin
+{$IFDEF ADJUST_CodeParamWindow}
+  AdjustCodeParamWindowPos;
+{$ENDIF}
+
   List.Items.BeginUpdate;
   try
     Symbol := UpperCase(FMatchStr);
