@@ -92,9 +92,6 @@ type
     gbUpdate: TGroupBox;
     rbUpgradeDisabled: TRadioButton;
     rbUpgradeAll: TRadioButton;
-    rbUpgradeUserDefine: TRadioButton;
-    cbNewFeature: TCheckBox;
-    cbBigBugFixed: TCheckBox;
     cbUpgradeReleaseOnly: TCheckBox;
     btnCheckUpgrade: TButton;
     tsPropEditor: TTabSheet;
@@ -125,6 +122,8 @@ type
     chkUserDir: TCheckBox;
     edtUserDir: TEdit;
     btnUserDir: TSpeedButton;
+    chkFixThreadLocale: TCheckBox;
+    chkUseOneCPUCore: TCheckBox;
     procedure lbWizardsDrawItem(Control: TWinControl; Index: Integer;
       Rect: TRect; State: TOwnerDrawState);
     procedure FormCreate(Sender: TObject);
@@ -243,14 +242,15 @@ begin
   chkUseToolsMenu.Checked := WizOptions.UseToolsMenu;
   cbShowHint.Checked := WizOptions.ShowHint;
   cbShowWizComment.Checked := WizOptions.ShowWizComment;
+  chkUseOneCPUCore.Checked := WizOptions.UseOneCPUCore;
+  chkFixThreadLocale.Checked := WizOptions.FixThreadLocale;
 
   // 升级设置
-  case WizOptions.UpgradeStyle of
-    usDisabled: rbUpgradeDisabled.Checked := True;
-    usUserDefine: rbUpgradeUserDefine.Checked := True;
+  if WizOptions.UpgradeStyle = usDisabled then
+    rbUpgradeDisabled.Checked := True
   else
     rbUpgradeAll.Checked := True;
-  end;
+  cbUpgradeReleaseOnly.Checked := WizOptions.UpgradeReleaseOnly;
 
   //自画高度调整
   FDrawTextHeight := 12;
@@ -260,10 +260,6 @@ begin
     lbWizards.ItemHeight := FScaler.MultiPPI(lbWizards.ItemHeight, Self);
     lbDesignEditors.ItemHeight := FScaler.MultiPPI(lbDesignEditors.ItemHeight, Self);
   end;
-
-  cbNewFeature.Checked := ucNewFeature in WizOptions.UpgradeContent;
-  cbBigBugFixed.Checked := ucBigBugFixed in WizOptions.UpgradeContent;
-  cbUpgradeReleaseOnly.Checked := WizOptions.UpgradeReleaseOnly;
 
   chkUserDir.Checked := WizOptions.UseCustomUserDir;
   edtUserDir.Text := WizOptions.CustomUserDir;
@@ -308,19 +304,12 @@ begin
     WizOptions.UseToolsMenu := chkUseToolsMenu.Checked;
     WizOptions.ShowHint := cbShowHint.Checked;
     WizOptions.ShowWizComment := cbShowWizComment.Checked;
+    WizOptions.UseOneCPUCore := chkUseOneCPUCore.Checked;
+    WizOptions.FixThreadLocale := chkFixThreadLocale.Checked;
 
     // 升级设置
     if rbUpgradeDisabled.Checked then
       WizOptions.UpgradeStyle := usDisabled
-    else if rbUpgradeUserDefine.Checked then
-    begin
-      WizOptions.UpgradeStyle := usUserDefine;
-      WizOptions.UpgradeContent := [];
-      if cbNewFeature.Checked then
-        WizOptions.UpgradeContent := WizOptions.UpgradeContent + [ucNewFeature];
-      if cbBigBugFixed.Checked then
-        WizOptions.UpgradeContent := WizOptions.UpgradeContent + [ucBigBugFixed];
-    end
     else
       WizOptions.UpgradeStyle := usAllUpgrade;
     WizOptions.UpgradeReleaseOnly := cbUpgradeReleaseOnly.Checked;
@@ -685,8 +674,7 @@ end;
 
 procedure TCnWizConfigForm.UpdateControls(Sender: TObject);
 begin
-  cbNewFeature.Enabled := rbUpgradeUserDefine.Checked;
-  cbBigBugFixed.Enabled := rbUpgradeUserDefine.Checked;
+  cbUpgradeReleaseOnly.Enabled := rbUpgradeAll.Checked;
   edtUserDir.Enabled := chkUserDir.Checked;
   btnUserDir.Enabled := chkUserDir.Checked;
 end;

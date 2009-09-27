@@ -7,7 +7,7 @@
 </head>
 
 <body>
-<table width="100%" border="0" cellpadding="4" id="table1">
+<table width="100%" border="0" cellpadding="4">
   <tr>
     <td class="head" height="16">環境及升級設置</td>
   </tr>
@@ -27,7 +27,7 @@
 <ul>
   <li>
 <p class="text"><b>允許專家第一次執行時顯示功能提示視窗</b>：
-是否允許專家工具在第一次執行時顯示提示資訊，如果關閉則所有提示視窗都將不顯示。見 <a href="../wizards/wizards.htm">IDE
+是否允許專家工具在第一次執行時顯示提示資訊，如果關閉則所有提示視窗都將不顯示。見 <a href="../wizards/wizards.htm">IDE 
 專家基本操作</a>。</p>
   </li>
   <li>
@@ -48,9 +48,6 @@
   <li>
 <p class="text"><b>在有新版本可用時顯示提示</b>：允許專家包在檢測到新的升級程式時進行提示。</p>
   </li>
-  <li>
-<p class="text"><b>僅在檢測到以下新版本時才顯示提示</b>：只有在檢測到有新功能增加或重大錯誤修正時才顯示升級提示。</p>
-  </li>
 </ul>
 <ul>
   <li>
@@ -67,25 +64,31 @@
 <p class="title">輔助工具</p>
 <ul>
   <li>
-<p class="text"><b>導出 IDE 圖像列表點陣圖</b>：將 IDE 主圖像列表保存到指定目錄下，主要供開發人員使用。</p>
+<p class="text"><b>匯出 IDE 圖像清單點陣圖</b>：將 IDE 主圖像清單保存到指定目錄下，主要供開發人員使用。</p>
   </li>
   <li>
-<p class="text"><b>導出 IDE ActionList 名稱</b>：保存 IDE 主 ActionList
+<p class="text"><b>匯出 IDE ActionList 名稱</b>：保存 IDE 主 ActionList 
 內容到指定檔中，主要供開發人員使用。</p>
   </li>
   <li>
-<p class="text"><b>導出已安裝控制項列表</b>：將 IDE 中已安裝的包和控制項列表分別保存到 Packages.txt 和
-Components.txt 檔中，主要供開發人員使用。控制項列表中可能因為 VCL 和 CLX 包的並存而存在重複的控制項名。</p>
+<p class="text"><b>匯出已安裝控制項清單</b>：將 IDE 中已安裝的包和控制項清單分別保存到 Packages.txt 和 
+Components.txt 檔中，主要供開發人員使用。控制項清單中可能因為 VCL 和 CLX 包的並存而存在重複的控制項名。</p>
   </li>
 </ul>
 <p class="text">　</p>
 <p class="title">其他</p>
 <ul>
   <li>
-<p class="text"><b>將 CnPack 專家菜單置於 Tools 菜單下</b>：設置將「CnPack」菜單項放在主菜單項中還是置於「Tools」菜單下。</p>
+<p class="text"><b>將 CnPack 專家功能表置於 Tools 功能表下</b>：設置將“CnPack”功能表項目放在主功能表項目中還是置於“Tools”菜單下。</p>
   </li>
   <li>
-<p class="text"><b>指定用戶數據目錄位置</b>: 該選項允許將用戶數據放置到用戶文檔目錄下，可解決 Vista/Windows 7 下運行需要管理權限的問題。</p>
+<p class="text"><b>設置 IDE 只在 CPU 0 單核中運行</b>：用於解決某些多核環境下可能導致 IDE 不穩定的問題。</p>
+  </li>
+  <li>
+<p class="text"><b>使用 SetThreadLocale 修正 Vista / Win7 下亂碼問題</b>：修正某些 IDE 在 Vista / Win7 下中文顯示為亂碼的問題。</p>
+  </li>
+  <li>
+<p class="text"><b>指定使用者資料目錄位置</b>: 該選項允許將使用者資料放置到使用者文檔目錄下，可解決 Vista/Windows 7 下運行需要管理許可權的問題。</p>
   </li>
 </ul>
 <p class="text">　</p>

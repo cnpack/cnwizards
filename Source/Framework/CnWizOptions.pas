@@ -90,6 +90,7 @@ type
     FFixThreadLocale: Boolean;
     FCustomUserDir: string;
     FUseCustomUserDir: Boolean;
+    FUseOneCPUCore: Boolean;
     procedure SetCurrentLangID(const Value: Cardinal);
     function GetUpgradeCheckDate: TDateTime;
     procedure SetUpgradeCheckDate(const Value: TDateTime);
@@ -100,6 +101,7 @@ type
     procedure SetUpgradeCheckMonth(const Value: TDateTime);
     procedure SetCustomUserDir(const Value: string);
     procedure SetUseCustomUserDir(const Value: Boolean);
+    procedure SetUseOneCPUCore(const Value: Boolean);
   public
     constructor Create;
     destructor Destroy; override;
@@ -222,6 +224,8 @@ type
     {* 主菜单是否集成到 Tools 菜单下 }
     property FixThreadLocale: Boolean read FFixThreadLocale write SetFixThreadLocale;
     {* 使用 SetThreadLocale 修正 Vista / Win7 下中文乱码问题}
+    property UseOneCPUCore: Boolean read FUseOneCPUCore write SetUseOneCPUCore;
+    {* 在多CPU中只使用一个CPU内核，以解决兼容性问题}
 
     property UseCustomUserDir: Boolean read FUseCustomUserDir write SetUseCustomUserDir;
     property CustomUserDir: string read FCustomUserDir write SetCustomUserDir;
@@ -256,6 +260,12 @@ const
   csCExt = 'CExt';
   csUseToolsMenu = 'UseToolsMenu';
   csFixThreadLocale = 'FixThreadLocale';
+  csUseOneCPUCore = 'UseOneCPUCore';
+{$IFDEF BDS}
+  csUseOneCPUDefault = True;
+{$ELSE}
+  csUseOneCPUDefault = False;
+{$ENDIF}
 
   csDelphiExtDefault = '.pas;.dpr;.inc';
   csCExtDefault = '.c;.cpp;.h;.hpp;.cc;.hh';
@@ -390,6 +400,13 @@ begin
     Free;
   end;
 
+  with CreateRegIniFile(FRegPath, True) do
+  try
+    UseOneCPUCore := ReadBool(SCnOptionSection, csUseOneCPUCore, csUseOneCPUDefault);
+  finally
+    Free;
+  end;
+
   if FUseCustomUserDir then
     FUserPath := MakePath(FCustomUserDir)
   else
@@ -428,6 +445,16 @@ begin
     WriteBool(SCnUpgradeSection, csBigBugFixed, ucBigBugFixed in FUpgradeContent);
     WriteInteger(SCnUpgradeSection, csUpgradeStyle, Ord(FUpgradeStyle));
     WriteDate(SCnUpgradeSection, csUpgradeLastDate, FUpgradeLastDate);
+  finally
+    Free;
+  end;
+
+  with CreateRegIniFile(FRegPath, True) do
+  try
+    if UseOneCPUCore = csUseOneCPUDefault then
+      DeleteKey(SCnOptionSection, csUseOneCPUCore)
+    else
+      WriteBool(SCnOptionSection, csUseOneCPUCore, UseOneCPUCore);
   finally
     Free;
   end;
@@ -493,6 +520,20 @@ end;
 procedure TCnWizOptions.SetUseCustomUserDir(const Value: Boolean);
 begin
   FUseCustomUserDir := Value;
+end;
+
+procedure TCnWizOptions.SetUseOneCPUCore(const Value: Boolean);
+var
+  AMask, SysMask: Cardinal;
+begin
+  FUseOneCPUCore := Value;
+  if GetProcessAffinityMask(GetCurrentProcess, AMask, SysMask) then
+  begin
+    if FUseOneCPUCore then
+      SetProcessAffinityMask(GetCurrentProcess, $0001)
+    else
+      SetProcessAffinityMask(GetCurrentProcess, SysMask);
+  end;
 end;
 
 procedure TCnWizOptions.SetCustomUserDir(const Value: string);

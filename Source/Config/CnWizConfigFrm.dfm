@@ -400,9 +400,9 @@ object CnWizConfigForm: TCnWizConfigForm
       ImageIndex = 1
       object grpOthers: TGroupBox
         Left = 8
-        Top = 282
+        Top = 230
         Width = 481
-        Height = 89
+        Height = 139
         Caption = '其他(&R)'
         TabOrder = 3
         object Label2: TLabel
@@ -413,7 +413,7 @@ object CnWizConfigForm: TCnWizConfigForm
         end
         object btnUserDir: TSpeedButton
           Left = 450
-          Top = 57
+          Top = 101
           Width = 23
           Height = 22
           Flat = True
@@ -464,19 +464,35 @@ object CnWizConfigForm: TCnWizConfigForm
         end
         object chkUserDir: TCheckBox
           Left = 8
-          Top = 35
+          Top = 79
           Width = 273
           Height = 17
           Caption = '指定用户数据目录位置（需要重启 IDE）:'
-          TabOrder = 1
+          TabOrder = 3
           OnClick = UpdateControls
         end
         object edtUserDir: TEdit
           Left = 24
-          Top = 58
+          Top = 102
           Width = 422
           Height = 21
+          TabOrder = 4
+        end
+        object chkFixThreadLocale: TCheckBox
+          Left = 8
+          Top = 58
+          Width = 457
+          Height = 17
+          Caption = '使用 SetThreadLocale 修正 Vista / Win7 下乱码问题。'
           TabOrder = 2
+        end
+        object chkUseOneCPUCore: TCheckBox
+          Left = 8
+          Top = 37
+          Width = 273
+          Height = 17
+          Caption = '设置 IDE 只在 CPU 0 单核中运行。'
+          TabOrder = 1
         end
       end
       object gbHintWnd: TGroupBox
@@ -506,7 +522,7 @@ object CnWizConfigForm: TCnWizConfigForm
         end
         object cbShowHint: TCheckBox
           Left = 8
-          Top = 42
+          Top = 40
           Width = 281
           Height = 17
           Caption = '允许显示工具提示信息。'
@@ -516,9 +532,9 @@ object CnWizConfigForm: TCnWizConfigForm
       end
       object gbUpdate: TGroupBox
         Left = 8
-        Top = 80
+        Top = 79
         Width = 481
-        Height = 141
+        Height = 90
         Caption = '升级设置(&G)'
         TabOrder = 1
         object rbUpgradeDisabled: TRadioButton
@@ -532,7 +548,7 @@ object CnWizConfigForm: TCnWizConfigForm
         end
         object rbUpgradeAll: TRadioButton
           Left = 8
-          Top = 36
+          Top = 38
           Width = 280
           Height = 17
           Caption = '在有新版本可用时显示提示。'
@@ -541,42 +557,13 @@ object CnWizConfigForm: TCnWizConfigForm
           TabStop = True
           OnClick = UpdateControls
         end
-        object rbUpgradeUserDefine: TRadioButton
-          Left = 8
-          Top = 55
-          Width = 280
-          Height = 17
-          Caption = '仅在检测到以下新版本时才显示提示。'
-          TabOrder = 3
-          OnClick = UpdateControls
-        end
-        object cbNewFeature: TCheckBox
-          Left = 24
-          Top = 75
-          Width = 264
-          Height = 17
-          Caption = '增加新的专家。'
-          Checked = True
-          State = cbChecked
-          TabOrder = 4
-        end
-        object cbBigBugFixed: TCheckBox
-          Left = 24
-          Top = 94
-          Width = 264
-          Height = 17
-          Caption = '重要的错误修正或功能改进。'
-          Checked = True
-          State = cbChecked
-          TabOrder = 5
-        end
         object cbUpgradeReleaseOnly: TCheckBox
-          Left = 8
-          Top = 114
+          Left = 24
+          Top = 61
           Width = 280
           Height = 17
           Caption = '检测时忽略测试版的程序。'
-          TabOrder = 6
+          TabOrder = 3
         end
         object btnCheckUpgrade: TButton
           Left = 296
@@ -591,7 +578,7 @@ object CnWizConfigForm: TCnWizConfigForm
       end
       object grpTools: TGroupBox
         Left = 8
-        Top = 227
+        Top = 175
         Width = 481
         Height = 49
         Caption = '辅助工具(&T)'
@@ -677,8 +664,8 @@ object CnWizConfigForm: TCnWizConfigForm
     Top = 403
   end
   object ilEnable: TImageList
-    Left = 272
-    Top = 351
+    Left = 456
+    Top = 367
     Bitmap = {
       494C010102000400040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
