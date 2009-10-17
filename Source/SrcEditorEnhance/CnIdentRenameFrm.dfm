@@ -28,7 +28,7 @@ object CnIdentRenameForm: TCnIdentRenameForm
     Width = 225
     Height = 97
     Caption = 'Ìæ»»·¶Î§(&R)'
-    TabOrder = 0
+    TabOrder = 1
     object rbCurrentProc: TRadioButton
       Left = 8
       Top = 20
@@ -59,7 +59,7 @@ object CnIdentRenameForm: TCnIdentRenameForm
     Top = 40
     Width = 225
     Height = 20
-    TabOrder = 1
+    TabOrder = 0
     OnKeyDown = edtRenameKeyDown
   end
   object btnOK: TButton
