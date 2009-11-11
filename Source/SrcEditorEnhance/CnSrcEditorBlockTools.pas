@@ -200,12 +200,10 @@ begin
       EditView.Block.StartingRow), EditView);
     EndPos := CnOtaEditPosToLinePos(OTAEditPos(EditView.Block.EndingColumn,
       EditView.Block.EndingRow), EditView);
-    TextLen := Length(EditView.Block.Text);
+    TextLen := EditView.Block.Size;
 
   {$IFDEF DELPHI2009_UP}
-    // 此处 Text 是 Unicode 形式的 UTF8，需要转成正常来处理
-    // TODO: 但选择区碰到跨双字节字符时仍然有问题
-    CnOtaInsertTextIntoEditorAtPos(CnUtf8ToAnsi2(EditView.Block.Text), StartPos, EditView.Buffer);
+    CnOtaInsertTextIntoEditorAtPos(EditView.Block.Text, StartPos, EditView.Buffer);
   {$ELSE}
     CnOtaInsertTextIntoEditorAtPos(ConvertEditorTextToText(EditView.Block.Text), StartPos, EditView.Buffer);
   {$ENDIF}
