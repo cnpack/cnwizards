@@ -2876,7 +2876,7 @@ begin
       $1100000D,$11800009: FVer := verD9;
       $12000023: FVer := verD10; //Delphi 2006, testing is very incomplete
       $14000039: FVer := verD12; // Added by Liu Xiao for Delphi 2009.
-      $15800045: FVer := verD14; // Added by Liu Xiao for Delphi 2010.
+      $15800045,$15000045: FVer := verD14; // Added by Liu Xiao for Delphi 2010.
       ulong($F21F148C): FVer := verK1; //Kylix 1.0
       $0E1011DD,$0E0001DD: FVer := verK2; //Kylix 2.0
       $0F1001DD,$0F0001DD: FVer := verK3; //Kylix 3.0
