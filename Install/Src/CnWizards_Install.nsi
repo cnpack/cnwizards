@@ -147,12 +147,14 @@ SetDateSave on
   !endif
 !endif
 
+!ifndef FULL_VERSION
+  !define VERSION_STRING "${VER_MAJOR}.${VER_MINOR}_${IDE_SHORT_NAME}"
+!else
+  !define VERSION_STRING "${VER_MAJOR}.${VER_MINOR}"
+!endif
+
 !ifndef INSTALLER_NAME
-  !ifndef FULL_VERSION
-    !define INSTALLER_NAME "CnWizards_${VER_MAJOR}.${VER_MINOR}_${IDE_SHORT_NAME}.exe"
-  !else
-    !define INSTALLER_NAME "CnWizards_${VER_MAJOR}.${VER_MINOR}.exe"
-  !endif
+  !define INSTALLER_NAME "CnWizards_${VERSION_STRING}.exe"
 !endif
 
 ;------------------------------------------------------------------------------
@@ -567,7 +569,13 @@ InitOk:
   RMDir /r $INSTDIR\Icons
 
   ; 为 Windows 卸载程序写入键值
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CnWizards" "DisplayIcon" '"$INSTDIR\uninst.exe"'
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CnWizards" "DisplayName" "$(APPNAMEDIR)"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CnWizards" "DisplayVersion" "${VERSION_STRING}"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CnWizards" "HelpLink" "http://www.cnpack.org"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CnWizards" "Publisher" "CnPack Team"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CnWizards" "URLInfoAbout" "http://bbs.cnpack.org"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CnWizards" "URLUpdateInfo" "http://www.cnpack.org"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CnWizards" "UninstallString" '"$INSTDIR\uninst.exe"'
 
   ; 删除以前的开始菜单项
