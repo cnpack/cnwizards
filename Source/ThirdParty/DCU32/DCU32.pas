@@ -338,7 +338,8 @@ public { Exported for DCURecs: }
   procedure FillProcLocVarTbls;
   procedure DoShowLocVarTbl;
 public
-  function Load(FName: String; VerRq: integer; MSILRq: boolean; AMem: Pointer): boolean; //Load instead of Create
+  function Load(FName: String; VerRq: integer; MSILRq: boolean; AMem: Pointer; 
+    UsesOnly: Boolean = False): boolean; //Load instead of Create
     //to prevent from Destroy after Exception in constructor
   destructor Destroy; override;
   procedure Show;
@@ -2813,7 +2814,8 @@ begin
   end ;
 end ;
 
-function TUnit.Load(FName: String; VerRq: integer; MSILRq: boolean; AMem: Pointer): boolean;
+function TUnit.Load(FName: String; VerRq: integer; MSILRq: boolean; AMem: Pointer;
+  UsesOnly: Boolean): boolean;
 var
   F: File;
   Magic: ulong;
@@ -2996,6 +2998,10 @@ begin
     NLOfs := 0;
     NL;}
     ReadUses(drDLL);
+
+    if UsesOnly then
+      Exit;
+
     try
       ReadDeclList(dlMain,FDecls);
       if (FDataBlPtr=Nil)or(FFixupTbl=Nil) then

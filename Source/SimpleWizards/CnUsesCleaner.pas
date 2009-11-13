@@ -366,7 +366,7 @@ var
   {$IFDEF DEBUG}
     CnDebugger.LogMsg('UsesCleaner ProcessAUnit: ' + ADcuName);
   {$ENDIF}
-    if FileExists(ADcuName) then
+    if IsDprOrPas(AModule.FileName) and FileExists(ADcuName) then
     begin
       Editor := CnOtaGetSourceEditorFromModule(AModule);
       Assert(Assigned(Editor));
@@ -401,10 +401,13 @@ var
           Continue;
 
         Module := ModuleInfo.OpenModule;
-        if not Assigned(Module) then
+        if not Assigned(Module) or not IsDprOrPas(Module.FileName) then
           Continue;
 
         DcuName := GetDcuName(DcuPath, Module);
+        if not FileExists(DcuName) then
+          Continue;
+          
         if ProcessAUnit(DcuName, Module, Project, UsesInfo) then
         begin
           if (UsesInfo.IntfCount > 0) or (UsesInfo.ImplCount > 0) then

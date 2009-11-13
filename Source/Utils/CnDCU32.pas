@@ -148,7 +148,7 @@ begin
   FImplUses := TStringList.Create;
   inherited Create;
   try
-    Load(DcuName, 0, False, nil);
+    Load(DcuName, 0, False, nil, True);
   except
     {$IFNDEF DELPHI2009_UP}
     raise;
