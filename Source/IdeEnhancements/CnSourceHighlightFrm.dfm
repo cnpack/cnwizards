@@ -3,8 +3,8 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
   Top = 119
   BorderStyle = bsDialog
   Caption = '源代码高亮设置'
-  ClientHeight = 519
-  ClientWidth = 377
+  ClientHeight = 537
+  ClientWidth = 380
   OldCreateOrder = True
   OnCreate = FormCreate
   PixelsPerInch = 96
@@ -86,7 +86,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
   end
   object btnOK: TButton
     Left = 134
-    Top = 490
+    Top = 506
     Width = 75
     Height = 21
     Caption = '确定(&O)'
@@ -96,7 +96,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
   end
   object btnCancel: TButton
     Left = 214
-    Top = 490
+    Top = 506
     Width = 75
     Height = 21
     Cancel = True
@@ -106,7 +106,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
   end
   object btnHelp: TButton
     Left = 294
-    Top = 490
+    Top = 506
     Width = 75
     Height = 21
     Caption = '帮助(&H)'
@@ -117,19 +117,61 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     Left = 8
     Top = 120
     Width = 361
-    Height = 362
+    Height = 377
     Caption = '代码结构匹配高亮(&S)'
     TabOrder = 1
     object shpBk: TShape
       Left = 325
-      Top = 19
+      Top = 15
       Width = 20
-      Height = 32
+      Height = 20
       OnMouseDown = shpBracketMouseDown
     end
     object shpCurLine: TShape
       Left = 325
-      Top = 57
+      Top = 84
+      Width = 20
+      Height = 20
+      OnMouseDown = shpBracketMouseDown
+    end
+    object lblCurTokenFg: TLabel
+      Left = 26
+      Top = 61
+      Width = 40
+      Height = 13
+      Caption = '前景色:'
+    end
+    object shpCurTokenFg: TShape
+      Left = 88
+      Top = 58
+      Width = 20
+      Height = 20
+      OnMouseDown = shpBracketMouseDown
+    end
+    object lblCurTokenBg: TLabel
+      Left = 130
+      Top = 61
+      Width = 40
+      Height = 13
+      Caption = '背景色:'
+    end
+    object shpCurTokenBg: TShape
+      Left = 192
+      Top = 58
+      Width = 20
+      Height = 20
+      OnMouseDown = shpBracketMouseDown
+    end
+    object lblCurTokenBd: TLabel
+      Left = 234
+      Top = 61
+      Width = 40
+      Height = 13
+      Caption = '边框色:'
+    end
+    object shpCurTokenBd: TShape
+      Left = 296
+      Top = 58
       Width = 20
       Height = 20
       OnMouseDown = shpBracketMouseDown
@@ -145,7 +187,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object chkHighlight: TCheckBox
       Left = 8
-      Top = 82
+      Top = 106
       Width = 337
       Height = 17
       Caption = '允许代码结构匹配关键字高亮显示。'
@@ -154,9 +196,9 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object rgMatchRange: TRadioGroup
       Left = 16
-      Top = 126
+      Top = 150
       Width = 137
-      Height = 97
+      Height = 91
       Caption = '高亮显示范围(&R)'
       Items.Strings = (
         '整个单元'
@@ -167,9 +209,9 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object grpHighlightColor: TGroupBox
       Left = 168
-      Top = 126
+      Top = 150
       Width = 177
-      Height = 97
+      Height = 91
       Caption = '高亮层次显示颜色(&L)'
       TabOrder = 8
       object shpneg1: TShape
@@ -251,7 +293,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object rgMatchDelay: TRadioGroup
       Left = 16
-      Top = 230
+      Top = 246
       Width = 329
       Height = 89
       Caption = '高亮显示延时(&D)'
@@ -264,7 +306,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object hkMatchHotkey: THotKey
       Left = 160
-      Top = 292
+      Top = 308
       Width = 129
       Height = 19
       HotKey = 32833
@@ -274,7 +316,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object chkMaxSize: TCheckBox
       Left = 24
-      Top = 330
+      Top = 346
       Width = 217
       Height = 17
       Caption = '不高亮匹配行数超过此数量的单元：'
@@ -283,7 +325,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object seDelay: TCnSpinEdit
       Left = 160
-      Top = 265
+      Top = 281
       Width = 73
       Height = 22
       Increment = 50
@@ -294,7 +336,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object pnl1: TPanel
       Left = 240
-      Top = 263
+      Top = 279
       Width = 73
       Height = 25
       BevelOuter = bvNone
@@ -303,7 +345,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object seMaxLines: TCnSpinEdit
       Left = 248
-      Top = 328
+      Top = 344
       Width = 97
       Height = 22
       Increment = 500
@@ -314,7 +356,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object chkDrawLine: TCheckBox
       Left = 8
-      Top = 104
+      Top = 126
       Width = 249
       Height = 17
       Caption = '允许代码结构匹配连线显示。'
@@ -323,7 +365,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object btnLineSetting: TButton
       Left = 270
-      Top = 102
+      Top = 124
       Width = 75
       Height = 21
       Caption = '画线设置(&X)'
@@ -332,7 +374,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object chkCurrentToken: TCheckBox
       Left = 8
-      Top = 38
+      Top = 36
       Width = 297
       Height = 17
       Caption = '允许光标处匹配标识符高亮背景显示。'
@@ -347,17 +389,10 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       AutoSize = True
       BevelOuter = bvNone
       TabOrder = 1
-      object lblBk: TLabel
-        Left = 0
-        Top = 0
-        Width = 36
-        Height = 13
-        Caption = '背景色'
-      end
     end
     object chkHighlightCurLine: TCheckBox
       Left = 8
-      Top = 60
+      Top = 86
       Width = 313
       Height = 17
       Caption = '允许高亮当前行背景（仅适用于Delphi 7或以下版本）。'

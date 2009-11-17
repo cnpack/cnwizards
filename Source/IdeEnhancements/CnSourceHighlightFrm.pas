@@ -87,7 +87,6 @@ type
     shpBk: TShape;
     btnLineSetting: TButton;
     pnl2: TPanel;
-    lblBk: TLabel;
     chkCurrentToken: TCheckBox;
     chkHighlightCurLine: TCheckBox;
     shpCurLine: TShape;
@@ -97,6 +96,12 @@ type
     mniImport: TMenuItem;
     dlgOpenColor: TOpenDialog;
     dlgSaveColor: TSaveDialog;
+    lblCurTokenFg: TLabel;
+    shpCurTokenFg: TShape;
+    lblCurTokenBg: TLabel;
+    shpCurTokenBg: TShape;
+    lblCurTokenBd: TLabel;
+    shpCurTokenBd: TShape;
     procedure UpdateControls(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure shpBracketMouseDown(Sender: TObject; Button: TMouseButton;
@@ -149,6 +154,9 @@ begin
     chkBkHighlight.Checked := Wizard.BlockMatchHighlight;
     chkCurrentToken.Checked := Wizard.CurrentTokenHighlight;
     shpBk.Brush.Color := Wizard.BlockMatchBackground;
+    shpCurTokenFg.Brush.Color := Wizard.CurrentTokenForeground;
+    shpCurTokenBg.Brush.Color := Wizard.CurrentTokenBackground;
+    shpCurTokenBd.Brush.Color := Wizard.CurrentTokenBorderColor;
 {$IFDEF BDS}
     chkHighlightCurLine.Enabled := False;
     shpCurLine.Enabled := False;
@@ -187,7 +195,9 @@ begin
       Wizard.BlockMatchHighlight := chkBkHighlight.Checked;
       Wizard.CurrentTokenHighlight := chkCurrentToken.Checked;
       Wizard.BlockMatchBackground := shpBk.Brush.Color;
-      Wizard.CurrentTokenBackground := shpBk.Brush.Color;
+      Wizard.CurrentTokenForeground := shpCurTokenFg.Brush.Color;
+      Wizard.CurrentTokenBackground := shpCurTokenBg.Brush.Color;
+      Wizard.CurrentTokenBorderColor := shpCurTokenBd.Brush.Color;
 
 {$IFNDEF BDS}
       Wizard.HighLightCurrentLine := chkHighlightCurLine.Checked;
@@ -235,9 +245,13 @@ begin
   rgMatchRange.Enabled := chkHighlight.Checked or chkDrawLine.Checked;
   grpHighlightColor.Enabled := chkHighlight.Checked or chkDrawLine.Checked;
 
-//  chkCurrentToken.Enabled := chkBkHighlight.Checked;
-  lblBk.Enabled := chkBkHighlight.Checked or chkCurrentToken.Checked;
-  shpBk.Enabled := chkBkHighlight.Checked or chkCurrentToken.Checked;
+  shpBk.Enabled := chkBkHighlight.Checked;
+  lblCurTokenFg.Enabled := chkCurrentToken.Checked;
+  shpCurTokenFg.Enabled := chkCurrentToken.Checked;
+  lblCurTokenBg.Enabled := chkCurrentToken.Checked;
+  shpCurTokenBg.Enabled := chkCurrentToken.Checked;
+  lblCurTokenBd.Enabled := chkCurrentToken.Checked;
+  shpCurTokenBd.Enabled := chkCurrentToken.Checked;
 
   chkMaxSize.Enabled := chkHighlight.Checked or chkDrawLine.Checked;
   seDelay.Enabled := (chkHighlight.Checked or chkDrawLine.Checked) and (rgMatchDelay.ItemIndex = 1);
@@ -281,9 +295,9 @@ begin
   if (CnLanguageManager.LanguageStorage <> nil) and
     (CnLanguageManager.LanguageStorage.CurrentLanguage <> nil) then
   begin
-    lblBk.Visible := (CnLanguageManager.LanguageStorage.CurrentLanguage.LanguageID = 2052) or
-      (CnLanguageManager.LanguageStorage.CurrentLanguage.LanguageID = 1028);
-    // 非中文界面下，这个 label 没地方显示，因此隐藏
+    lblCurTokenFg.Caption := lbl3.Caption;
+    lblCurTokenBg.Caption := lbl4.Caption;
+    lblCurTokenBd.Caption := lbl5.Caption;
   end;
 end;
 
@@ -320,6 +334,9 @@ begin
   shpBracketBk.Brush.Color := clAqua;
   shpBracketBd.Brush.Color := $CCCCD6;
   shpBk.Brush.Color := clYellow;
+  shpCurTokenFg.Brush.Color := clBlack;
+  shpCurTokenBg.Brush.Color := clYellow;
+  shpCurTokenBd.Brush.Color := clYellow;
   shpCurLine.Brush.Color := LoadIDEDefaultCurrentColor;
 
   shpneg1.Brush.Color := HighLightDefColors[-1];
@@ -344,6 +361,9 @@ const
   csBracketColorBd = 'BracketColorBd';
   csBlockMatchBackground = 'BlockMatchBackground';
   csCurrentTokenHighlight = 'CurrentTokenHighlight';
+  csCurrentTokenColor = 'CurrentTokenColor';
+  csCurrentTokenColorBk = 'CurrentTokenColorBk';
+  csCurrentTokenColorBd = 'CurrentTokenColorBd';
   csBlockMatchHighlightColor = 'BlockMatchHighlightColor';
   csHighLightLineColor = 'HighLightLineColor';
 
@@ -359,6 +379,9 @@ begin
       Ini.WriteColor(csHighlightColorsSection, csBracketColorBk, shpBracketBk.Brush.Color);
       Ini.WriteColor(csHighlightColorsSection, csBracketColorBd, shpBracketBd.Brush.Color);
       Ini.WriteColor(csHighlightColorsSection, csBlockMatchBackground, shpBk.Brush.Color);
+      Ini.WriteColor(csHighlightColorsSection, csCurrentTokenColor, shpCurTokenFg.Brush.Color);
+      Ini.WriteColor(csHighlightColorsSection, csCurrentTokenColorBk, shpCurTokenBg.Brush.Color);
+      Ini.WriteColor(csHighlightColorsSection, csCurrentTokenColorBd, shpCurTokenBd.Brush.Color);
       Ini.WriteColor(csHighlightColorsSection, csHighLightLineColor, shpCurLine.Brush.Color);
       Ini.WriteColor(csHighlightColorsSection, csBlockMatchHighlightColor + '-1', shpneg1.Brush.Color);
       Ini.WriteColor(csHighlightColorsSection, csBlockMatchHighlightColor + '0', shp0.Brush.Color);
@@ -387,6 +410,9 @@ begin
       shpBracketBk.Brush.Color := Ini.ReadColor(csHighlightColorsSection, csBracketColorBk, shpBracketBk.Brush.Color);
       shpBracketBd.Brush.Color := Ini.ReadColor(csHighlightColorsSection, csBracketColorBd, shpBracketBd.Brush.Color);
       shpBk.Brush.Color := Ini.ReadColor(csHighlightColorsSection, csBlockMatchBackground, shpBk.Brush.Color);
+      shpCurTokenFg.Brush.Color := Ini.ReadColor(csHighlightColorsSection, csCurrentTokenColor, shpCurTokenFg.Brush.Color);
+      shpCurTokenBg.Brush.Color := Ini.ReadColor(csHighlightColorsSection, csCurrentTokenColorBk, shpCurTokenBg.Brush.Color);
+      shpCurTokenBd.Brush.Color := Ini.ReadColor(csHighlightColorsSection, csCurrentTokenColorBd, shpCurTokenBd.Brush.Color);
       shpCurLine.Brush.Color := Ini.ReadColor(csHighlightColorsSection, csHighLightLineColor, shpCurLine.Brush.Color);
       shpneg1.Brush.Color := Ini.ReadColor(csHighlightColorsSection, csBlockMatchHighlightColor + '-1', shpneg1.Brush.Color);
       shp0.Brush.Color := Ini.ReadColor(csHighlightColorsSection, csBlockMatchHighlightColor + '0', shp0.Brush.Color);

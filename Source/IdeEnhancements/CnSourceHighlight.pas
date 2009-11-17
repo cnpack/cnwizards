@@ -347,6 +347,8 @@ type
     FHighLightCurrentLine: Boolean;
     FHighLightLineColor: TColor;
     FDefaultHighLightLineColor: TColor;
+    FCurrentTokenForeground: TColor;
+    FCurrentTokenBorderColor: TColor;
 {$ENDIF}
     function GetColorFg(ALayer: Integer): TColor;
     function EditorGetTextRect(Editor: TEditorObject; APos: TOTAEditPos;
@@ -426,7 +428,9 @@ type
     {* 光标下关键字配对高亮的背景色}
     property CurrentTokenHighlight: Boolean read FCurrentTokenHighlight write FCurrentTokenHighlight;
     {* 是否光标下当前标识符背景色高亮}
+    property CurrentTokenForeground: TColor read FCurrentTokenForeground write FCurrentTokenForeground;
     property CurrentTokenBackground: TColor read FCurrentTokenBackground write FCurrentTokenBackground;
+    property CurrentTokenBorderColor: TColor read FCurrentTokenBorderColor write FCurrentTokenBorderColor;
     {* 光标下当前标识符高亮的背景色}
     property BlockHighlightRange: TBlockHighlightRange read FBlockHighlightRange write FBlockHighlightRange;
     {* 高亮范围，默认改成了 brAll}
@@ -547,6 +551,9 @@ const
   csBlockMatchHighlight = 'BlockMatchHighlight';
   csBlockMatchBackground = 'BlockMatchBackground';
   csCurrentTokenHighlight = 'CurrentTokenHighlight';
+  csCurrentTokenColor = 'CurrentTokenColor';
+  csCurrentTokenColorBk = 'CurrentTokenColorBk';
+  csCurrentTokenColorBd = 'CurrentTokenColorBd';
   csBlockMatchHighlightColor = 'BlockMatchHighlightColor';
   csHighlightCurrentLine = 'HighLightCurrentLine';
   csHighLightLineColor = 'HighLightLineColor';
@@ -1541,6 +1548,8 @@ begin
 {$ENDIF}
   FCurrentTokenHighlight := False;    // 默认改为 False
   FCurrentTokenBackground := FBlockMatchBackground; // 使用相同的高亮背景色
+  FCurrentTokenForeground := clBlack;
+  FCurrentTokenBorderColor := FCurrentTokenBackground;
 
   FBlockHighlightRange := brAll;
   FBlockMatchDelay := 600;  // 默认延时 600 毫秒
@@ -1696,7 +1705,7 @@ begin
       Font.Style := Font.Style + [fsBold];
     if AItalic then
       Font.Style := Font.Style + [fsItalic];
-    if AItalic then
+    if AUnderline then
       Font.Style := Font.Style + [fsUnderline];
     Brush.Style := bsClear;
     TextOut(ARect.Left, ARect.Top, string(AText));
@@ -2639,12 +2648,22 @@ begin
               // 在位置上画背景高亮的标识符
               with EditCanvas do
               begin
-                Brush.Color := FCurrentTokenBackground;
-                Brush.Style := bsSolid;
-                FillRect(R);
+                if FCurrentTokenBackground <> clNone then
+                begin
+                  Brush.Color := FCurrentTokenBackground;
+                  Brush.Style := bsSolid;
+                  FillRect(R);
+                end;                  
 
                 Brush.Style := bsClear;
-                Font.Color := clBlack; // 黄色背景暂时用黑色前景
+                if (FCurrentTokenBorderColor <> clNone) and
+                  (FCurrentTokenBorderColor <> FCurrentTokenBackground) then
+                begin
+                  Pen.Color := FCurrentTokenBorderColor;
+                  Rectangle(R);
+                end;
+                
+                Font.Color := FCurrentTokenForeground;
                 TextOut(R.Left, R.Top, string(Token.Token));
               end;
             end;
@@ -3092,8 +3111,9 @@ begin
     FBlockMatchHighlight := ReadBool('', csBlockMatchHighlight, FBlockMatchHighlight);
     FBlockMatchBackground := ReadColor('', csBlockMatchBackground, FBlockMatchBackground);
     FCurrentTokenHighlight := ReadBool('', csCurrentTokenHighlight, FCurrentTokenHighlight);
-    // FCurrentTokenBackground := ReadColor('', csCurrentTokenBackground, FCurrentTokenBackground);
-    FCurrentTokenBackground := FBlockMatchBackground;
+    FCurrentTokenForeground := ReadColor('', csCurrentTokenColor, FCurrentTokenForeground);
+    FCurrentTokenBackground := ReadColor('', csCurrentTokenColorBk, FCurrentTokenBackground);
+    FCurrentTokenBorderColor := ReadColor('', csCurrentTokenColorBd, FCurrentTokenBorderColor);
 {$IFNDEF BDS}
     FHighLightLineColor := ReadColor('', csHighLightLineColor, FHighLightLineColor);
     FHighLightCurrentLine := ReadBool('', csHighLightCurrentLine, FHighLightCurrentLine);
@@ -3139,6 +3159,9 @@ begin
     WriteBool('', csBlockMatchHighlight, FBlockMatchHighlight);
     WriteColor('', csBlockMatchBackground, FBlockMatchBackground);
     WriteBool('', csCurrentTokenHighlight, FCurrentTokenHighlight);
+    WriteColor('', csCurrentTokenColor, FCurrentTokenForeground);
+    WriteColor('', csCurrentTokenColorBk, FCurrentTokenBackground);
+    WriteColor('', csCurrentTokenColorBd, FCurrentTokenBorderColor);
 {$IFNDEF BDS}
     WriteBool('', csHighLightCurrentLine, FHighLightCurrentLine);
     if FDefaultHighLightLineColor <> FHighLightLineColor then
