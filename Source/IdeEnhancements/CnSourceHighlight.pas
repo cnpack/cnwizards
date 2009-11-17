@@ -332,6 +332,8 @@ type
     FBlockMatchBackground: TColor;
     FCurrentTokenHighlight: Boolean;
     FCurrentTokenBackground: TColor;
+    FCurrentTokenForeground: TColor;
+    FCurrentTokenBorderColor: TColor;
     FBlockMatchLineEnd: Boolean;
     FBlockMatchLineHori: Boolean;
     FBlockMatchLineHoriDot: Boolean;
@@ -347,8 +349,6 @@ type
     FHighLightCurrentLine: Boolean;
     FHighLightLineColor: TColor;
     FDefaultHighLightLineColor: TColor;
-    FCurrentTokenForeground: TColor;
-    FCurrentTokenBorderColor: TColor;
 {$ENDIF}
     function GetColorFg(ALayer: Integer): TColor;
     function EditorGetTextRect(Editor: TEditorObject; APos: TOTAEditPos;
@@ -429,9 +429,11 @@ type
     property CurrentTokenHighlight: Boolean read FCurrentTokenHighlight write FCurrentTokenHighlight;
     {* 是否光标下当前标识符背景色高亮}
     property CurrentTokenForeground: TColor read FCurrentTokenForeground write FCurrentTokenForeground;
+    {* 光标下当前标识符高亮的前景色}
     property CurrentTokenBackground: TColor read FCurrentTokenBackground write FCurrentTokenBackground;
-    property CurrentTokenBorderColor: TColor read FCurrentTokenBorderColor write FCurrentTokenBorderColor;
     {* 光标下当前标识符高亮的背景色}
+    property CurrentTokenBorderColor: TColor read FCurrentTokenBorderColor write FCurrentTokenBorderColor;
+    {* 光标下当前标识符高亮的边框色}
     property BlockHighlightRange: TBlockHighlightRange read FBlockHighlightRange write FBlockHighlightRange;
     {* 高亮范围，默认改成了 brAll}
     property BlockHighlightStyle: TBlockHighlightStyle read FBlockHighlightStyle write FBlockHighlightStyle;
