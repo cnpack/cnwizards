@@ -80,6 +80,10 @@ uses
 const
   HighLightDefColors: array[-1..5] of TColor = ($00000099, $000000FF, $000099FF,
     $0033CC00, $0099CC00, $00FF6600, $00CC00CC);
+  csDefCurTokenColorBg = $0080DDFF;
+  csDefCurTokenColorFg = clBlack;
+  csDefCurTokenColorBd = $00226DA8;
+
 
   CN_LINE_STYLE_SMALL_DOT_STEP = 2;
 
@@ -1549,9 +1553,9 @@ begin
   FDefaultHighLightLineColor := FHighLightLineColor; // 用来判断与保存
 {$ENDIF}
   FCurrentTokenHighlight := False;    // 默认改为 False
-  FCurrentTokenBackground := FBlockMatchBackground; // 使用相同的高亮背景色
-  FCurrentTokenForeground := clBlack;
-  FCurrentTokenBorderColor := FCurrentTokenBackground;
+  FCurrentTokenBackground := csDefCurTokenColorBg;
+  FCurrentTokenForeground := csDEfCurTokenColorFg;
+  FCurrentTokenBorderColor := csDefCurTokenColorBd;
 
   FBlockHighlightRange := brAll;
   FBlockMatchDelay := 600;  // 默认延时 600 毫秒
@@ -2662,7 +2666,7 @@ begin
                   (FCurrentTokenBorderColor <> FCurrentTokenBackground) then
                 begin
                   Pen.Color := FCurrentTokenBorderColor;
-                  Rectangle(R);
+                  Rectangle(R.Left - 1, R.Top, R.Right + 1, R.Bottom);
                 end;
                 
                 Font.Color := FCurrentTokenForeground;

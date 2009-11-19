@@ -334,9 +334,9 @@ begin
   shpBracketBk.Brush.Color := clAqua;
   shpBracketBd.Brush.Color := $CCCCD6;
   shpBk.Brush.Color := clYellow;
-  shpCurTokenFg.Brush.Color := clBlack;
-  shpCurTokenBg.Brush.Color := clYellow;
-  shpCurTokenBd.Brush.Color := clYellow;
+  shpCurTokenFg.Brush.Color := csDefCurTokenColorFg;
+  shpCurTokenBg.Brush.Color := csDefCurTokenColorBg;
+  shpCurTokenBd.Brush.Color := csDefCurTokenColorBd;
   shpCurLine.Brush.Color := LoadIDEDefaultCurrentColor;
 
   shpneg1.Brush.Color := HighLightDefColors[-1];
