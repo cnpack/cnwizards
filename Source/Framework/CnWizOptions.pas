@@ -262,7 +262,7 @@ const
   csFixThreadLocale = 'FixThreadLocale';
   csUseOneCPUCore = 'UseOneCPUCore';
 {$IFDEF BDS}
-  csUseOneCPUDefault = True;
+  csUseOneCPUDefault = False;
 {$ELSE}
   csUseOneCPUDefault = False;
 {$ENDIF}
