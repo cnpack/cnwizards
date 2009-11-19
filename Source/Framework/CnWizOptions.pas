@@ -373,7 +373,7 @@ begin
     FCExt := ReadString(SCnOptionSection, csCExt, csCExtDefault);
     if FCExt = '' then FCExt := csCExtDefault;
     FUseToolsMenu := ReadBool(SCnOptionSection, csUseToolsMenu, False);
-    FixThreadLocale := ReadBool(SCnOptionSection, csFixThreadLocale, True);
+    FixThreadLocale := ReadBool(SCnOptionSection, csFixThreadLocale, False);
 
     FUseCustomUserDir := ReadBool(SCnOptionSection, csUseCustomUserDir, CheckWinVista);
     SHGetFolderPath(0, CSIDL_PERSONAL or CSIDL_FLAG_CREATE, 0, 0, SHUserDir);
