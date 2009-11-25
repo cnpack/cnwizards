@@ -2465,7 +2465,7 @@ end;
 procedure TCnSourceHighlight.PaintBlockMatchKeyword(Editor: TEditorObject;
   LineNum, LogicLineNum: Integer; AElided: Boolean);
 var
-  R: TRect;
+  R, R1: TRect;
   I, J, Layer: Integer;
   Info: TBlockMatchInfo;
   LineInfo: TBlockLineInfo;
@@ -2654,11 +2654,12 @@ begin
               // 在位置上画背景高亮的标识符
               with EditCanvas do
               begin
+                R1 := Rect(R.Left - 1, R.Top, R.Right + 1, R.Bottom - 1);
                 if FCurrentTokenBackground <> clNone then
                 begin
                   Brush.Color := FCurrentTokenBackground;
                   Brush.Style := bsSolid;
-                  FillRect(R);
+                  FillRect(R1);
                 end;                  
 
                 Brush.Style := bsClear;
@@ -2666,7 +2667,7 @@ begin
                   (FCurrentTokenBorderColor <> FCurrentTokenBackground) then
                 begin
                   Pen.Color := FCurrentTokenBorderColor;
-                  Rectangle(R.Left - 1, R.Top, R.Right + 1, R.Bottom);
+                  Rectangle(R1);
                 end;
                 
                 Font.Color := FCurrentTokenForeground;
