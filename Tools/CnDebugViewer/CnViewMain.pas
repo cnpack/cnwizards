@@ -252,6 +252,7 @@ type
     procedure LanguageChanged(Sender: TObject);
     procedure ActiveFormChanged(Sender: TObject);
     procedure OnUpdateStore(var Msg: TMessage); message WM_USER_UPDATE_STORE;
+    procedure OnNewChildForm(var Msg: TMessage); message WM_USER_NEW_FORM;
     procedure OnHotKey(var Message: TMessage); message WM_HOTKEY;
   protected
     procedure DoCreate; override;
@@ -1029,6 +1030,16 @@ begin
   for I := 0 to CnMsgManager.Count - 1 do
     if CnMsgManager.Store[I].Updating then
       CnMsgManager.Store[I].EndUpdate;
+end;
+
+procedure TCnMainViewer.OnNewChildForm(var Msg: TMessage);
+begin
+  if not (csDestroying in ComponentState) then
+    with TCnMsgChild.Create(Application) do
+    begin
+      Show;
+      Store := TCnMsgStore(Msg.WParam);
+    end;
 end;
 
 procedure TCnMainViewer.actExportExecute(Sender: TObject);

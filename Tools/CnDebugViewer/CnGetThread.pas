@@ -48,10 +48,8 @@ type
   private
     FPaused: Boolean;
   protected
-    procedure CreateANewMdiForm;
     procedure AddADescToStore(var ADesc: TCnMsgDesc);
     procedure Execute; override;
-
   public
     property Paused: Boolean read FPaused write FPaused;
   end;
@@ -79,8 +77,12 @@ begin
     AStore := CnMsgManager.IndexOf(0);
     if AStore = nil then
     begin
-      Synchronize(CreateANewMdiForm);
-      AStore := CnMsgManager.IndexOf(0);
+      if Application.MainForm <> nil then
+        if not (csDestroying in Application.MainForm.ComponentState) then
+        begin
+          AStore := CnMsgManager.AddStore(0, SCnNoneProcName);
+          PostMessage(Application.MainForm.Handle, WM_USER_NEW_FORM, Integer(AStore), 0);
+        end;
     end;
 
     if AStore <> nil then
@@ -97,13 +99,6 @@ begin
     AStore.BeginUpdate;
     AStore.AddMsgDesc(@ADesc);
   end;
-end;
-
-procedure TGetDebugThread.CreateANewMdiForm;
-begin
-  if Application.MainForm <> nil then
-    if not (csDestroying in Application.MainForm.ComponentState) then
-      TCnMsgChild.Create(Application).Show;
 end;
 
 procedure TGetDebugThread.Execute;
@@ -131,7 +126,8 @@ begin
     if PHeader^.QueueFront = PHeader^.QueueTail then
     begin
       // 队列空，可开始更新界面
-      PostMessage(Application.MainForm.Handle, WM_USER_UPDATE_STORE, 0, 0);
+      if (Application.MainForm <> nil) and not (csDestroying in Application.MainForm.ComponentState) then
+        PostMessage(Application.MainForm.Handle, WM_USER_UPDATE_STORE, 0, 0);
       Sleep(0);
       Continue;
     end;
@@ -278,8 +274,10 @@ begin
     finally
       LeaveCriticalSection(CSMsgStore);
     end;
+
     // 更新界面
-    PostMessage(Application.MainForm.Handle, WM_USER_UPDATE_STORE, 0, 0);
+    if (Application.MainForm <> nil) and not (csDestroying in Application.MainForm.ComponentState) then
+      PostMessage(Application.MainForm.Handle, WM_USER_UPDATE_STORE, 0, 0);
   end;
 end;
 

@@ -146,6 +146,7 @@ type
     procedure ClearBookMarks;
     procedure BookmarkMenuClick(Sender: TObject);
     procedure pnlTreeOnResize(Sender: TObject);
+    procedure SetStore(const Value: TCnMsgStore);
   protected
     procedure DoCreate; override;
     procedure LanguageChanged(Sender: TObject);
@@ -168,7 +169,7 @@ type
     function DescriptionOfMsg(Index: Integer; AMsgItem: TCnMsgItem): string;
     function DescriptionOfTime(Index: Integer ): string;
 
-    property Store: TCnMsgStore read FStore;
+    property Store: TCnMsgStore read FStore write SetStore;
     property Filter: TCnDisplayFilter read FFilter;
     property ProcessID: DWORD read FProcessID write FProcessID;
     property ProcName: string read FProcName write FProcName;
@@ -250,6 +251,22 @@ begin
   end;
 end;
 
+procedure TCnMsgChild.SetStore(const Value: TCnMsgStore);
+begin
+  if FStore <> Value then
+  begin
+    if FStore <> nil then
+      CnMsgManager.RemoveStore(FStore);
+    FStore := Value;
+    if FStore <> nil then
+    begin
+      FStore.OnChange := OnStoreChange;
+      FProcessID := FStore.ProcessID;
+      FProcName := FStore.ProcName;
+    end;
+  end;
+end;
+
 procedure TCnMsgChild.FormActivate(Sender: TObject);
 begin
   if not CnMainViewer.UpdatingSwitch and not CnMainViewer.ClickingSwitch then
@@ -260,7 +277,7 @@ procedure TCnMsgChild.lvTimeData(Sender: TObject; Item: TListItem);
 var
   ATimeItem: TCnTimeItem;
 begin
-  if (Item.Index > FStore.TimeCount) then Exit;
+  if (FStore = nil) or (Item.Index > FStore.TimeCount) then Exit;
   ATimeItem := FStore.Times[Item.Index];
   if ATimeItem = nil then Exit;
   
@@ -276,6 +293,8 @@ procedure TCnMsgChild.TreeGetText(Sender: TBaseVirtualTree;
 var
   Index: Integer;
 begin
+  if FStore = nil then Exit;
+  
   Index := Node^.AbsoluteIndex - 1; //.AbsoluteIndex(Node);
   // 原始的VirtualTree中，获得该 Index 严重影响显示速度，
   // 后经修改VirtualTree源码解决，但只支持顺序增加的节点
@@ -559,7 +578,7 @@ procedure TCnMsgChild.TreeChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
 var
   Index: Integer;
 begin
-  if Node <> nil then
+  if (FStore <> nil) and (Node <> nil) then
   begin
     Index := Node^.AbsoluteIndex - 1;
     FSelectedIndex := Index;
@@ -582,6 +601,8 @@ var
   AText: string;
   ATree: TVirtualStringTree;
 begin
+  if FStore = nil then Exit;
+  
   Index := Node^.AbsoluteIndex - 1;
   // 原始的 VirtualTree 获得该 Index 严重影响显示速度，目前优化后无此问题了。
   if FFilter.Filtered then
@@ -632,7 +653,8 @@ procedure TCnMsgChild.ClearStores;
 begin
   FMsgTree.Clear;
   FViewStore.ClearMsgs;
-  FStore.ClearMsgs;
+  if FStore <> nil then
+    FStore.ClearMsgs;
   if FMemContent = mcMsg then
     mmoDetail.Clear;
 end;
@@ -677,6 +699,7 @@ var
   dTime: Double;
 begin
   Result := '';
+  if FStore = nil then Exit;
   //Add Sesame 2008-1-22 增加时分秒方式显示时间
   dTime := FStore.Times[Index].CPUPeriod / CPUClock;
   if (Index >= 0) and (Index < FStore.TimeCount) then
@@ -687,7 +710,8 @@ end;
 
 procedure TCnMsgChild.ClearTimes;
 begin
-  FStore.ClearTimes;
+  if FStore <> nil then
+    FStore.ClearTimes;
   lvTime.Items.Clear;
   if FMemContent = mcTime then
     mmoDetail.Clear;
@@ -850,7 +874,7 @@ var
   AStore: TCnMsgStore;
   FoundNode: PVirtualNode;
 begin
-  if AText = '' then Exit;
+  if (AText = '') or (FStore <> nil) then Exit;
 
   if FMsgTree.FocusedNode <> nil then
     OldPos := FMsgTree.FocusedNode.AbsoluteIndex // 从 1 开始的
@@ -987,7 +1011,8 @@ end;
 
 procedure TCnMsgChild.ReleaseAnBookmarkSlot(Slot: Integer);
 begin
-  if (Slot >= Low(FBookmarks)) and (Slot <= High(FBookmarks)) and (FBookmarks[Slot] <> CnInvalidSlot) then
+  if (FStore <> nil) and (Slot >= Low(FBookmarks)) and (Slot <= High(FBookmarks))
+    and (FBookmarks[Slot] <> CnInvalidSlot) then
   begin
     if FFilter.Filtered then
     begin
@@ -1021,7 +1046,7 @@ end;
 
 procedure TCnMsgChild.SetSlotToBookmark(Slot, Line: Integer);
 begin
-  if (Slot >= Low(FBookmarks)) and (Slot <= High(FBookmarks)) then
+  if (FStore <> nil) and (Slot >= Low(FBookmarks)) and (Slot <= High(FBookmarks)) then
   begin
     if FFilter.Filtered then
       FViewStore.Msgs[Line].Bookmarked := True
@@ -1057,6 +1082,7 @@ var
   Index: Integer;
   AMsgItem: TCnMsgItem;
 begin
+  if FStore = nil then Exit;
   Index := Node^.AbsoluteIndex - 1;
 
   if FFilter.Filtered then
@@ -1105,7 +1131,7 @@ var
   Index: Integer;
   BookmarkVisible: Boolean;
 begin
-  if Sender <> nil then
+  if (Sender <> nil) and (FStore <> nil) then
   begin
     Index := (Sender as TComponent).Tag;
     if (Index >= Low(FBookmarks)) and (Index <= High(FBookmarks)) then
@@ -1166,7 +1192,7 @@ procedure TCnMsgChild.GotoNextBookmark;
 var
   I, Index: Integer;
 begin
-  if (FMsgTree.TotalCount = 0) or (FMsgTree.FocusedNode = nil) then
+  if (FStore = nil) or (FMsgTree.TotalCount = 0) or (FMsgTree.FocusedNode = nil) then
     Exit;
 
   Index := FMsgTree.FocusedNode.AbsoluteIndex - 1;
@@ -1198,7 +1224,7 @@ procedure TCnMsgChild.GotoPrevBookmark;
 var
   I, Index: Integer;
 begin
-  if (FMsgTree.TotalCount = 0) or (FMsgTree.FocusedNode = nil) then
+  if (FStore = nil) or (FMsgTree.TotalCount = 0) or (FMsgTree.FocusedNode = nil) then
     Exit;
 
   Index := FMsgTree.FocusedNode.AbsoluteIndex - 1;
