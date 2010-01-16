@@ -116,7 +116,7 @@ object CnEditorToolsForm: TCnEditorToolsForm
       Left = 312
       Top = 80
       Width = 129
-      Height = 33
+      Height = 49
       AutoSize = False
       Caption = 'lblToolAuthor'
       WordWrap = True
