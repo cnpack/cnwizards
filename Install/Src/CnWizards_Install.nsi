@@ -557,6 +557,8 @@ InitOk:
   File "..\..\Bin\Lang\1028\*.*"
   SetOutPath $INSTDIR\Lang\1033
   File "..\..\Bin\Lang\1033\*.*"
+  SetOutPath $INSTDIR\Lang\1049
+  File "..\..\Bin\Lang\1049\*.*"
   SetOutPath $INSTDIR\PSDecl
   File "..\..\Bin\PSDecl\*.*"
   SetOutPath $INSTDIR\PSDeclEx
