@@ -1,0 +1,13 @@
+!LanguageID=1049
+!LanguageName=Russian
+!TranslationAuthor=Yuri Petrov
+!TranslationAuthorEmail=keeper89@inbox.ru
+!TranslationDefaultFont=Tahoma,8,,,,
+csHintStr=Подсказка
+csInstallSucc=CnPack IDE-Мастер установлен в:<BR>
+csInstallSuccEnd=Для удаления еще раз запустите Setup.
+csUnInstallSucc=CnPack IDE-Мастер был удален из:<BR>
+csUnInstallSuccEnd=Для установки запустите Setup снова.
+csInstallFail=Не удается найти Delphi or C++Builder для установки CnPack IDE-Мастера.
+csUnInstallFail=CnPack IDE-Мастер уже был отключен.
+csSetupCmdHelp=Данная утилита поддерживает режим командной строки без показа главной формы.<BR><BR>Ключи командной строки:<BR><BR>         -i или /i или -install или /install Установить в IDE<BR>         -u или /u или -uninstall или /uninstall Удалить из IDE<BR>         -n или /n или -NoMsg или /NoMsg НЕ Показывать сообщение об успешном запуске программы установки.<BR>         -? или /? или -h или /h Показать справку по командной строке.

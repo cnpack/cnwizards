@@ -1,0 +1,45 @@
+<TCnEditorCollection PropFormat="node">
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>0</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOF</InsertPos>
+    <Caption>Заголовок модуля</Caption>
+    <Content>//*****************************************************//
+//                                                     //
+//      %SoftName%%ColPos56%//
+//                                                     //
+//      Copyright (C) %Year% %Company%%ColPos56%//
+//                                                     //
+//*****************************************************//
+
+</Content>
+    <Hint>Заголовок модуля</Hint>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>24764</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOL</InsertPos>
+    <Caption>Блок комментариев</Caption>
+    <Content>//==============================================================================
+// %Comment%
+//==============================================================================
+
+</Content>
+    <Hint>Блок комментариев</Hint>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>24766</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOL</InsertPos>
+    <Caption>Блок комментариев 2</Caption>
+    <Content>//------------------------------------------------------------------------------
+// %Comment%
+//------------------------------------------------------------------------------
+
+</Content>
+    <Hint>Блок комментариев 2</Hint>
+  </o>
+</TCnEditorCollection>

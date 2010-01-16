@@ -1,0 +1,55 @@
+<TCnWebSearchCollection PropFormat="node">
+  <o>
+    <Caption>Искать в Google</Caption>
+    <ShortCut>0</ShortCut>
+    <Url>http://www.google.ru/search?q=%s</Url>
+  </o>
+  <o>
+    <Caption>-</Caption>
+    <ShortCut>0</ShortCut>
+  </o>
+  <o>
+    <Caption>Искать в MSDN Online</Caption>
+    <ShortCut>0</ShortCut>
+    <Url>http://social.msdn.microsoft.com/Search/ru-RU?query=%s</Url>
+  </o>
+  <o>
+    <Caption>Borland Knowledge Base Search</Caption>
+    <ShortCut>0</ShortCut>
+    <Url>http://support.borland.com/kbsearch.jspa?advanced=false&amp;searchQuery=%s&amp;keywordList=&amp;includeComments=true&amp;parentCatID=1&amp;childCatID=-1&amp;dateRange=0&amp;entryTypeID=-1&amp;resultRange=15</Url>
+  </o>
+  <o>
+    <Caption>-</Caption>
+    <ShortCut>0</ShortCut>
+  </o>
+  <o>
+    <Caption>Винград.ру</Caption>
+    <ShortCut>0</ShortCut>
+    <Url>http://forum.vingrad.ru/act-Search.html</Url>
+  </o>
+  <o>
+    <Caption>Исходники.ру</Caption>
+    <ShortCut>0</ShortCut>
+    <Url>http://forum.sources.ru/index.php?act=Search&amp;f=</Url>
+  </o>
+  <o>
+    <Caption>DRKB-online</Caption>
+    <ShortCut>0</ShortCut>
+    <Url>http://antonn.ru/index.php?drkb&amp;drkb_search=%s&amp;f_d</Url>
+  </o>
+  <o>
+    <Caption>Torry's Delphi Pages</Caption>
+    <ShortCut>0</ShortCut>
+    <Url>http://www.torry.net/quicksearchd.php?String=%s&amp;Title=Yes</Url>
+  </o>
+  <o>
+    <Caption>SourceForge.net</Caption>
+    <ShortCut>0</ShortCut>
+    <Url>http://sourceforge.net/search/?type_of_search=soft&amp;forum_id=0&amp;group_id=0&amp;atid=0&amp;words=%s&amp;Search=Search</Url>
+  </o>
+  <o>
+    <Caption>Delphi Super Pages</Caption>
+    <ShortCut>0</ShortCut>
+    <Url>http://dsp.href.com/</Url>
+  </o>
+</TCnWebSearchCollection>

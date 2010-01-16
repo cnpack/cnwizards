@@ -1,0 +1,134 @@
+<TCnEditorCollection PropFormat="node">
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>0</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOF</InsertPos>
+    <Caption>Заголовок Delphi-модуля</Caption>
+    <Content>{*******************************************************}
+{                                                       }
+{       %SoftName%%ColPos57%}
+{                                                       }
+{       Copyright (C) %Year% %Company%%ColPos57%}
+{                                                       }
+{*******************************************************}
+
+</Content>
+    <Hint>Заголовок Delphi-модуля</Hint>
+    <ForBcb>0</ForBcb>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>0</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOF</InsertPos>
+    <Caption>Заголовок C/C++ модуля</Caption>
+    <Content>//*****************************************************//
+//                                                     //
+//      %SoftName%%ColPos56%//
+//                                                     //
+//      Copyright (C) %Year% %Company%%ColPos56%//
+//                                                     //
+//*****************************************************//
+
+</Content>
+    <Hint>Заголовок C/C++ модуля</Hint>
+    <ForDelphi>0</ForDelphi>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>0</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipProcHead</InsertPos>
+    <Caption>Описание Delphi-процедуры</Caption>
+    <Content>{-------------------------------------------------------------------------------
+  Процедура: %ProcName%
+  Автор:    %User%
+  Дата:  %Year%.%Month%.%Day%
+  Входные параметры: %Arguments%
+  Результат:    %Result%
+-------------------------------------------------------------------------------}
+</Content>
+    <Hint>Описание Delphi-процедуры</Hint>
+    <ForBcb>0</ForBcb>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>0</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipCurrPos</InsertPos>
+    <Caption>Описание Delphi-функции</Caption>
+    <Content>{-------------------------------------------------------------------------------
+  Функция: %ProcName%
+  Автор:    %User%
+  Дата:  %Year%.%Month%.%Day%
+  Входные параметры: %Arguments%
+  Результат:    %Result%
+-------------------------------------------------------------------------------}</Content>
+    <Hint>Описание Delphi-функции</Hint>
+    <ForBcb>0</ForBcb>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>24764</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOL</InsertPos>
+    <Caption>Блок комментариев</Caption>
+    <Content>//==============================================================================
+// %Comment%
+//==============================================================================
+
+</Content>
+    <Hint>Блок комментариев</Hint>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>24766</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOL</InsertPos>
+    <Caption>Блок комментариев 2</Caption>
+    <Content>//------------------------------------------------------------------------------
+// %Comment%
+//------------------------------------------------------------------------------
+
+</Content>
+    <Hint>Блок комментариев 2</Hint>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>0</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOL</InsertPos>
+    <Caption>Структура Delphi-класса</Caption>
+    <Content>{ %ClassName% }
+
+  %ClassName% = class(TObject)
+  private
+
+  protected
+
+  public
+    constructor Create;
+    destructor Destroy; override;
+  published
+
+  end;
+</Content>
+    <Hint>Структура Delphi-класса</Hint>
+    <ForBcb>0</ForBcb>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>0</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOL</InsertPos>
+    <Caption>Раздел initialization модуля</Caption>
+    <Content>initialization
+
+finalization
+
+</Content>
+    <Hint>initialization</Hint>
+    <ForBcb>0</ForBcb>
+  </o>
+</TCnEditorCollection>
