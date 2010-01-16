@@ -1,4 +1,4 @@
-!LanguageID=1033
+﻿!LanguageID=1033
 !LanguageName=English
 !TranslationAuthor=LiuXiao
 !TranslationAuthorEmail=liuxiao@cnpack.org
