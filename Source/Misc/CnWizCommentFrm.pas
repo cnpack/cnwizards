@@ -41,7 +41,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, Registry, Menus, CnWizClasses, CnLangMgr, CnWizMultiLang,
-  CnWizIni;
+  CnWizIni, CnWideStrings;
 
 type
 //==============================================================================
@@ -137,7 +137,7 @@ begin
   begin
     FileName := GetFileFromLang(SCnWizCommentIniFile);
     if FileExists(FileName) then
-      with TMemIniFile.Create(FileName) do
+      with TCnWideMemIniFile.Create(FileName) do
       try
         if not CheckWinVista and not ValueExists(csComment, Command) then
         begin
@@ -224,7 +224,7 @@ var
   Indent: Integer;
 begin
   Result := '';
-  with TMemIniFile.Create(GetFileFromLang(SCnWizCommentIniFile)) do
+  with TCnWideMemIniFile.Create(GetFileFromLang(SCnWizCommentIniFile)) do
   try
     Result := ReadString(csComment, Command, '');
     if not CheckWinVista and (Result = '') then
@@ -251,7 +251,7 @@ var
 begin
   Values := TStringList.Create;
   try
-    with TMemIniFile.Create(GetFileFromLang(SCnWizCommentIniFile)) do
+    with TCnWideMemIniFile.Create(GetFileFromLang(SCnWizCommentIniFile)) do
     try
       ReadSectionValues(csComment, Values);
     finally
@@ -261,7 +261,10 @@ begin
     with WizOptions.CreateRegIniFile do
     try
       for i := 0 to Values.Count - 1 do
-        WriteBool(SCnCommentSection, Values.Names[i], Show);
+        if Show then
+          DeleteKey(SCnCommentSection, Values.Names[i])
+        else
+          WriteBool(SCnCommentSection, Values.Names[i], Show);
     finally
       Free;
     end;

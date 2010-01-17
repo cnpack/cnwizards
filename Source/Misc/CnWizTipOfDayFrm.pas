@@ -39,7 +39,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls, IniFiles, CnWizClasses, CnWizMultiLang, CnLangMgr, CnWizIni;
+  StdCtrls, ExtCtrls, IniFiles, CnWizClasses, CnWizMultiLang, CnLangMgr, CnWizIni,
+  CnWideStrings;
 
 type
 
@@ -68,7 +69,7 @@ type
     procedure btnNextClick(Sender: TObject);
     procedure ShowTip;
   private
-    FIni: TMemIniFile;
+    FIni: TCnWideMemIniFile;
     FCurIndex: Integer;
     FTips: TStrings;
   public
@@ -119,7 +120,7 @@ begin
   FileName := GetFileFromLang(SCnWizTipOfDayIniFile);
   if not FileExists(FileName) then Exit;
 
-  FIni := TMemIniFile.Create(FileName);
+  FIni := TCnWideMemIniFile.Create(FileName);
   FTips := TStringList.Create;
   FIni.ReadSectionValues(csTipItem, FTips);
   FCurIndex := Random(FTips.Count);

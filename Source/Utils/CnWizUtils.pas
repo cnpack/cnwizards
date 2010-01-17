@@ -63,7 +63,7 @@ uses
   DsgnIntf, LibIntf,
   {$ENDIF}
   Clipbrd, TypInfo, ComCtrls, StdCtrls, Imm, Contnrs, RegExpr,
-  CnWizConsts, CnCommon, CnConsts, CnWizClasses, CnWizIni;
+  CnWizConsts, CnCommon, CnConsts, CnWideStrings, CnWizClasses, CnWizIni;
 
 type
   ECnWizardException = class(Exception);
@@ -1128,7 +1128,7 @@ begin
 
   if not FileExists(FileName) then
     Exit;
-  with TMemIniFile.Create(FileName) do
+  with TCnWideMemIniFile.Create(FileName) do
   try
     Result := ReadString(csSection, Topic, '');
     if not CheckWinVista and (Result = '') then

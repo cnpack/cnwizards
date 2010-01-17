@@ -65,7 +65,7 @@ uses
   CnConsts, CnWizClasses, CnWizManager, CnWizUtils, CnWizOptions, CnDesignEditor,
   CnWizTranslate, CnLangUtils,
 {$ELSE}
-  CnWizLangID,
+  CnWizLangID, CnWideStrings,
 {$ENDIF}
   CnWizConsts, CnCommon, CnLangMgr, CnHashLangStorage, CnLangStorage,
   CnFormScaler, CnWizIni;
@@ -172,7 +172,7 @@ begin
   if not FileExists(FileName) then
     Exit;
 
-  with TMemIniFile.Create(FileName) do
+  with TCnWideMemIniFile.Create(FileName) do
   try
     Result := ReadString(csSection, Topic, '');
     if not CheckWinVista and (Result = '') then
