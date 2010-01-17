@@ -2,7 +2,7 @@
 !LanguageName=简体中文
 !TranslationAuthor=LiuXiao
 !TranslationAuthorEmail=liuxiao@cnpack.org
-!TranslationDefaultFont=宋体,9,,0,clWindowText,GB2312_CHARSET
+!TranslationDefaultFont=Tahoma,8,,,,
 SCnPack_Zjy=周劲羽
 SCnPack_Shenloqi=沈龙强(Chinbo)
 SCnPack_xiaolv=吕宏庆

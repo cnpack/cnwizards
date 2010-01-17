@@ -2,7 +2,7 @@
 !LanguageName=繁體中文
 !TranslationAuthor=LiuXiao
 !TranslationAuthorEmail=liuxiao@cnpack.org
-!TranslationDefaultFont=細明體,9,,0,clWindowText,CHINESEBIG5_CHARSET
+!TranslationDefaultFont=Tahoma,8,,,,
 TCnAboutForm.Caption=簡介(&I)
 TCnAboutForm.Label2.Caption=歡迎使用 CnPack IDE 專家包源碼模塊關係分析工具。<BR><BR>本工具主要用來分析 Delphi 編譯生成的可執行文件內的單元與包信息，同時也可分析包之間的關聯關係以及包與其使用的單元之間的關聯關係。<BR><BR>分析的結果可以保存成 ARF 文件，同時也可編輯生成關聯信息記錄 SMR 文件，以達到在後續開發過程中方便地查詢源代碼和受影響的模塊之間關係的目的。<BR><BR>對於普通的分析，可在「分析可執行文件」頁中打開一個或多個可執行文件進行分析，分析結果可保存成 ARF 文件並在「查看分析結果」頁中重新加載查看。<BR><BR>ARF 是自動分析出來的結果，只包含 Pas 文件名和可執行文件之間的關聯，不包括其他文件以及具體的路徑信息。對於高級應用，可在「編輯源碼模塊關係」頁中，將 ARF 通過手工編輯的方式生成包含完整的文件名與可執行文件之間關聯關係的 SMR 文件。這樣在後續的開發過程中，便可使用「查看源碼模塊關係」頁來進行重新查看了。
 TCnAboutForm.lbl1.Caption=CnPack Relation Analyzer
