@@ -1,10 +1,10 @@
-<TCnEditorCollection PropFormat="node">
+п»ї<TCnEditorCollection PropFormat="node">
   <o>
     <Enabled>1</Enabled>
     <ShortCut>0</ShortCut>
     <SavePos>0</SavePos>
     <InsertPos>ipBOF</InsertPos>
-    <Caption>Заголовок модуля</Caption>
+    <Caption>Р—Р°РіРѕР»РѕРІРѕРє РјРѕРґСѓР»СЏ</Caption>
     <Content>//*****************************************************//
 //                                                     //
 //      %SoftName%%ColPos56%//
@@ -14,32 +14,32 @@
 //*****************************************************//
 
 </Content>
-    <Hint>Заголовок модуля</Hint>
+    <Hint>Р—Р°РіРѕР»РѕРІРѕРє РјРѕРґСѓР»СЏ</Hint>
   </o>
   <o>
     <Enabled>1</Enabled>
     <ShortCut>24764</ShortCut>
     <SavePos>0</SavePos>
     <InsertPos>ipBOL</InsertPos>
-    <Caption>Блок комментариев</Caption>
+    <Caption>Р‘Р»РѕРє РєРѕРјРјРµРЅС‚Р°СЂРёРµРІ</Caption>
     <Content>//==============================================================================
 // %Comment%
 //==============================================================================
 
 </Content>
-    <Hint>Блок комментариев</Hint>
+    <Hint>Р‘Р»РѕРє РєРѕРјРјРµРЅС‚Р°СЂРёРµРІ</Hint>
   </o>
   <o>
     <Enabled>1</Enabled>
     <ShortCut>24766</ShortCut>
     <SavePos>0</SavePos>
     <InsertPos>ipBOL</InsertPos>
-    <Caption>Блок комментариев 2</Caption>
+    <Caption>Р‘Р»РѕРє РєРѕРјРјРµРЅС‚Р°СЂРёРµРІ 2</Caption>
     <Content>//------------------------------------------------------------------------------
 // %Comment%
 //------------------------------------------------------------------------------
 
 </Content>
-    <Hint>Блок комментариев 2</Hint>
+    <Hint>Р‘Р»РѕРє РєРѕРјРјРµРЅС‚Р°СЂРёРµРІ 2</Hint>
   </o>
 </TCnEditorCollection>

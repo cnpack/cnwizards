@@ -1,6 +1,6 @@
-<TCnWebSearchCollection PropFormat="node">
+п»ї<TCnWebSearchCollection PropFormat="node">
   <o>
-    <Caption>Искать в Google</Caption>
+    <Caption>РСЃРєР°С‚СЊ РІ Google</Caption>
     <ShortCut>0</ShortCut>
     <Url>http://www.google.ru/search?q=%s</Url>
   </o>
@@ -9,26 +9,26 @@
     <ShortCut>0</ShortCut>
   </o>
   <o>
-    <Caption>Искать в MSDN Online</Caption>
+    <Caption>РСЃРєР°С‚СЊ РІ MSDN Online</Caption>
     <ShortCut>0</ShortCut>
     <Url>http://social.msdn.microsoft.com/Search/ru-RU?query=%s</Url>
   </o>
   <o>
-    <Caption>Borland Knowledge Base Search</Caption>
+    <Caption>Embarcadero Knowledge Base Search</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://support.borland.com/kbsearch.jspa?advanced=false&amp;searchQuery=%s&amp;keywordList=&amp;includeComments=true&amp;parentCatID=1&amp;childCatID=-1&amp;dateRange=0&amp;entryTypeID=-1&amp;resultRange=15</Url>
+    <Url>http://edn.embarcadero.com/search?q=%s&amp;allsites=y&amp;allwords=y&amp;x=18&amp;y=9</Url>
   </o>
   <o>
     <Caption>-</Caption>
     <ShortCut>0</ShortCut>
   </o>
   <o>
-    <Caption>Винград.ру</Caption>
+    <Caption>Р’РёРЅРіСЂР°Рґ.СЂСѓ</Caption>
     <ShortCut>0</ShortCut>
     <Url>http://forum.vingrad.ru/act-Search.html</Url>
   </o>
   <o>
-    <Caption>Исходники.ру</Caption>
+    <Caption>РСЃС…РѕРґРЅРёРєРё.СЂСѓ</Caption>
     <ShortCut>0</ShortCut>
     <Url>http://forum.sources.ru/index.php?act=Search&amp;f=</Url>
   </o>

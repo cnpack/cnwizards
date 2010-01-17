@@ -1,10 +1,10 @@
-<TCnEditorCollection PropFormat="node">
+п»ї<TCnEditorCollection PropFormat="node">
   <o>
     <Enabled>1</Enabled>
     <ShortCut>0</ShortCut>
     <SavePos>0</SavePos>
     <InsertPos>ipBOF</InsertPos>
-    <Caption>Заголовок Delphi-модуля</Caption>
+    <Caption>Р—Р°РіРѕР»РѕРІРѕРє Delphi-РјРѕРґСѓР»СЏ</Caption>
     <Content>{*******************************************************}
 {                                                       }
 {       %SoftName%%ColPos57%}
@@ -14,7 +14,7 @@
 {*******************************************************}
 
 </Content>
-    <Hint>Заголовок Delphi-модуля</Hint>
+    <Hint>Р—Р°РіРѕР»РѕРІРѕРє Delphi-РјРѕРґСѓР»СЏ</Hint>
     <ForBcb>0</ForBcb>
   </o>
   <o>
@@ -22,7 +22,7 @@
     <ShortCut>0</ShortCut>
     <SavePos>0</SavePos>
     <InsertPos>ipBOF</InsertPos>
-    <Caption>Заголовок C/C++ модуля</Caption>
+    <Caption>Р—Р°РіРѕР»РѕРІРѕРє C/C++ РјРѕРґСѓР»СЏ</Caption>
     <Content>//*****************************************************//
 //                                                     //
 //      %SoftName%%ColPos56%//
@@ -32,7 +32,7 @@
 //*****************************************************//
 
 </Content>
-    <Hint>Заголовок C/C++ модуля</Hint>
+    <Hint>Р—Р°РіРѕР»РѕРІРѕРє C/C++ РјРѕРґСѓР»СЏ</Hint>
     <ForDelphi>0</ForDelphi>
   </o>
   <o>
@@ -40,16 +40,16 @@
     <ShortCut>0</ShortCut>
     <SavePos>0</SavePos>
     <InsertPos>ipProcHead</InsertPos>
-    <Caption>Описание Delphi-процедуры</Caption>
+    <Caption>РћРїРёСЃР°РЅРёРµ Delphi-РїСЂРѕС†РµРґСѓСЂС‹</Caption>
     <Content>{-------------------------------------------------------------------------------
-  Процедура: %ProcName%
-  Автор:    %User%
-  Дата:  %Year%.%Month%.%Day%
-  Входные параметры: %Arguments%
-  Результат:    %Result%
+  РџСЂРѕС†РµРґСѓСЂР°: %ProcName%
+  РђРІС‚РѕСЂ:    %User%
+  Р”Р°С‚Р°:  %Year%.%Month%.%Day%
+  Р’С…РѕРґРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹: %Arguments%
+  Р РµР·СѓР»СЊС‚Р°С‚:    %Result%
 -------------------------------------------------------------------------------}
 </Content>
-    <Hint>Описание Delphi-процедуры</Hint>
+    <Hint>РћРїРёСЃР°РЅРёРµ Delphi-РїСЂРѕС†РµРґСѓСЂС‹</Hint>
     <ForBcb>0</ForBcb>
   </o>
   <o>
@@ -57,15 +57,15 @@
     <ShortCut>0</ShortCut>
     <SavePos>0</SavePos>
     <InsertPos>ipCurrPos</InsertPos>
-    <Caption>Описание Delphi-функции</Caption>
+    <Caption>РћРїРёСЃР°РЅРёРµ Delphi-С„СѓРЅРєС†РёРё</Caption>
     <Content>{-------------------------------------------------------------------------------
-  Функция: %ProcName%
-  Автор:    %User%
-  Дата:  %Year%.%Month%.%Day%
-  Входные параметры: %Arguments%
-  Результат:    %Result%
+  Р¤СѓРЅРєС†РёСЏ: %ProcName%
+  РђРІС‚РѕСЂ:    %User%
+  Р”Р°С‚Р°:  %Year%.%Month%.%Day%
+  Р’С…РѕРґРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹: %Arguments%
+  Р РµР·СѓР»СЊС‚Р°С‚:    %Result%
 -------------------------------------------------------------------------------}</Content>
-    <Hint>Описание Delphi-функции</Hint>
+    <Hint>РћРїРёСЃР°РЅРёРµ Delphi-С„СѓРЅРєС†РёРё</Hint>
     <ForBcb>0</ForBcb>
   </o>
   <o>
@@ -73,33 +73,33 @@
     <ShortCut>24764</ShortCut>
     <SavePos>0</SavePos>
     <InsertPos>ipBOL</InsertPos>
-    <Caption>Блок комментариев</Caption>
+    <Caption>Р‘Р»РѕРє РєРѕРјРјРµРЅС‚Р°СЂРёРµРІ</Caption>
     <Content>//==============================================================================
 // %Comment%
 //==============================================================================
 
 </Content>
-    <Hint>Блок комментариев</Hint>
+    <Hint>Р‘Р»РѕРє РєРѕРјРјРµРЅС‚Р°СЂРёРµРІ</Hint>
   </o>
   <o>
     <Enabled>1</Enabled>
     <ShortCut>24766</ShortCut>
     <SavePos>0</SavePos>
     <InsertPos>ipBOL</InsertPos>
-    <Caption>Блок комментариев 2</Caption>
+    <Caption>Р‘Р»РѕРє РєРѕРјРјРµРЅС‚Р°СЂРёРµРІ 2</Caption>
     <Content>//------------------------------------------------------------------------------
 // %Comment%
 //------------------------------------------------------------------------------
 
 </Content>
-    <Hint>Блок комментариев 2</Hint>
+    <Hint>Р‘Р»РѕРє РєРѕРјРјРµРЅС‚Р°СЂРёРµРІ 2</Hint>
   </o>
   <o>
     <Enabled>1</Enabled>
     <ShortCut>0</ShortCut>
     <SavePos>0</SavePos>
     <InsertPos>ipBOL</InsertPos>
-    <Caption>Структура Delphi-класса</Caption>
+    <Caption>РЎС‚СЂСѓРєС‚СѓСЂР° Delphi-РєР»Р°СЃСЃР°</Caption>
     <Content>{ %ClassName% }
 
   %ClassName% = class(TObject)
@@ -114,7 +114,7 @@
 
   end;
 </Content>
-    <Hint>Структура Delphi-класса</Hint>
+    <Hint>РЎС‚СЂСѓРєС‚СѓСЂР° Delphi-РєР»Р°СЃСЃР°</Hint>
     <ForBcb>0</ForBcb>
   </o>
   <o>
@@ -122,7 +122,7 @@
     <ShortCut>0</ShortCut>
     <SavePos>0</SavePos>
     <InsertPos>ipBOL</InsertPos>
-    <Caption>Раздел initialization модуля</Caption>
+    <Caption>Р Р°Р·РґРµР» initialization РјРѕРґСѓР»СЏ</Caption>
     <Content>initialization
 
 finalization
