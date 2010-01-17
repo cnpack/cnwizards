@@ -546,6 +546,7 @@ InitOk:
   File "..\..\License.chs.txt"
   File "..\..\License.cht.txt"
   File "..\..\License.enu.txt"
+  File "..\..\License.ru.txt"
 
   SetOutPath $INSTDIR\Data
   File "..\..\Bin\Data\*.*"
