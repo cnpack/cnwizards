@@ -1,91 +1,91 @@
-**********************************************************************
+﻿**********************************************************************
                      CnPack For Delphi/C++Builder
-                   ����H�ۤv���}�񷽽X�ĤT��}�o�]
-                 (C)Copyright 2001-2009 CnPack �}�o��
+                   中國人自己的開放源碼第三方開發包
+                 (C)Copyright 2001-2009 CnPack 開發組
 **********************************************************************
 
-                           CnPack IDE �M�a�]
+                           CnPack IDE 專家包
                              Version 0.9.5
                          =======================
-                          CnPack �}�o�� 2010.01
+                          CnPack 開發組 2010.01
 
 
 ======================================================================
-1. CnPack IDE �M�a�]²��
+1. CnPack IDE 專家包簡介
 ======================================================================
 
-    CnWizards �O CnPack ���زժ��D�O���~���@�A������٬O CnPack IDE �M
-�a�]�A�^����٬O CnPack IDE Wizards�A²�� CnWizards�CCnWizards �O�@��
-�����b Delphi/C++Builder/BDS �� IDE ���A�Ω�W�j IDE �\��B���� IDE ��
-�i�Ωʤζ}�o�Ĳv���K�O�B�}�񷽽X�u��C
+    CnWizards 是 CnPack 項目組的主力產品之一，中文全稱是 CnPack IDE 專
+家包，英文全稱是 CnPack IDE Wizards，簡稱 CnWizards。CnWizards 是一組
+集成在 Delphi/C++Builder/BDS 的 IDE 中，用於增強 IDE 功能、提高 IDE 的
+可用性及開發效率的免費、開放源碼工具。
 
-    CnWizards ���~�D�n����ϥ� Delphi 5 6 7�BC++Builder 5 6 �H�� BDS
-2005 2006�BRAD Studio 2007 2009 2010 �i��}�o���{�ǭ��CCnWizards �ثe�]
-�A²�餤��B�c�餤��B�^�y�T�ػy�����o�G�����C
+    CnWizards 產品主要面對使用 Delphi 5 6 7、C++Builder 5 6 以及 BDS
+2005 2006、RAD Studio 2007 2009 2010 進行開發的程序員。CnWizards 目前包
+括簡體中文、繁體中文、英語三種語言的發佈版本。
 
 ======================================================================
-2. �\�i��ĳ
+2. 許可協議
 ======================================================================
 
-    CnPack �M�a�]�H�}�񷽽X (Open Source) ���Φ��o�G�A���u CnPack ���\
-�i��ĳ�A�� CnPack �\�i��ĳ���O�@�C
+    CnPack 專家包以開放源碼 (Open Source) 的形式發佈，遵守 CnPack 的許
+可協議，受 CnPack 許可協議的保護。
 
-    License ��󤤦��Ө�ĳ���ԲӴy�z�A���餺�e�i�ѦҨ�ĳ���C
+    License 文件中有該協議的詳細描述，具體內容可參考協議文件。
 
-    �гX�� CnPack �}�o�����A�H��o�̷s����s�����G
+    請訪問 CnPack 開發網站，以獲得最新的更新消息：
 
     http://www.cnpack.org
 
 ======================================================================
-3. �w�˨ϥ�
+3. 安裝使用
 ======================================================================
 
-    �U�� CnWizards �᪽���B��w�ˤ��A�Y�i���Ӵ��ܶi��M�a�]���w�ˡC
-���U���e�i�Ѧ� CnWizards �۱a�����U���C
+    下載 CnWizards 後直接運行安裝文件，即可按照提示進行專家包的安裝。
+幫助內容可參考 CnWizards 自帶的幫助文件。
 
-    �p�G�z�b�ϥαM�a�]���L�{���o�{������D�A�лP CnPack �}�o���pô�G
+    如果您在使用專家包的過程中發現任何問題，請與 CnPack 開發組聯繫：
 
     http://www.cnpack.org
     mailto:master@cnpack.org
 
 ======================================================================
-4. �ؿ����e
+4. 目錄內容
 ======================================================================
 
-    CnWizards ���N�X�]���]�t�H�U�X�ӥؿ��G
+    CnWizards 的代碼包中包含以下幾個目錄：
 
-    1�BBin �G�i�����X�ؿ��P�B����ƾڦs�x�ؿ��A�]�A�h�y��󵥡C
-    2�BDcu �ѽsĶ���s���{�ɥؿ��C
-    3�BDoc �M�a�]�}�o���ɥؿ��A�̭��]�t�F�Ҧ� CnWizards �]�p�}�o���ɥH
-�ΦU�ض}�o�W�d���ɡC
-    4�BHelp �M�a�]���U�����ؿ��C
-    5�BInstall �M�a�]�w�ˤ��s�@�ؿ��C
-    6�BMake �M�a�]�c�إؿ��C
-    7�BSource �M�a�]���N�X�ؿ��A�Ҧ��� CnWizards ���X���ӥؿ��U�C
-    8�BTools �s��M�a�]���a���u�㪺���X�C
+    1、Bin 二進制文件輸出目錄與運行期數據存儲目錄，包括多語文件等。
+    2、Dcu 供編譯文件存放的臨時目錄。
+    3、Doc 專家包開發文檔目錄，裡面包含了所有 CnWizards 設計開發文檔以
+及各種開發規範文檔。
+    4、Help 專家包幫助源文件目錄。
+    5、Install 專家包安裝文件製作目錄。
+    6、Make 專家包構建目錄。
+    7、Source 專家包源代碼目錄，所有的 CnWizards 源碼放於該目錄下。
+    8、Tools 存放專家包附帶的工具的源碼。
 
 ======================================================================
-5. �{�Ǥη��X�U��
+5. 程序及源碼下載
 ======================================================================
 
-    �̷s�� CnWizards ���X�i�H�q cnpack �}�o�����U���A�Ϊ̨ϥΥH�U�a�}�G
+    最新的 CnWizards 源碼可以從 cnpack 開發網站下載，或者使用以下地址：
 
-    cnpack �ե�]���X:  http://download.cnpack.org/CnPack.zip
-    CnWizards �w�˵{��: http://download.cnpack.org/CnWizards.exe
-    CnWizards ���N�X:   http://download.cnpack.org/CnWizards_Src.zip
+    cnpack 組件包源碼:  http://download.cnpack.org/CnPack.zip
+    CnWizards 安裝程序: http://download.cnpack.org/CnWizards.exe
+    CnWizards 源代碼:   http://download.cnpack.org/CnWizards_Src.zip
 
-    SVN ���N�X�˥X�G
+    SVN 源代碼檢出：
     http://code.google.com/p/cnpack/source/checkout
 
 ======================================================================
-6. �sĶ�Φ۰ʺc��
+6. 編譯及自動構建
 ======================================================================
 
-    �sĶ CnWizards ���X�ݭn�q cnpack ������ SVN �����o cnpack �ե�]��
-���N�X�A��b cnwizards ���X���P�ťؿ��U�C���} Source �ؿ��U�������u�{��
-��i��sĶ�Y�i�CTools �ؿ��U�����[�u�㷽�X�C
+    編譯 CnWizards 源碼需要從 cnpack 網站或 SVN 中取得 cnpack 組件包的
+源代碼，放在 cnwizards 源碼的同級目錄下。打開 Source 目錄下的相應工程文
+件進行編譯即可。Tools 目錄下為附加工具源碼。
 
-    �۰ʺc�ؤu��b Make �ؿ��U�A�b�R�O��覡�U�B�� want �i�ݨ�������ܡC
+    自動構建工具在 Make 目錄下，在命令行方式下運行 want 可看到相關提示。
 
 
-�y���z
+『完』
