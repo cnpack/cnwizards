@@ -1,4 +1,4 @@
-﻿!LanguageID=1033
+﻿!LanguageID=1049
 !LanguageName=Russian
 !TranslationAuthor=Yuri Petrov
 !TranslationAuthorEmail=keeper89@inbox.ru
