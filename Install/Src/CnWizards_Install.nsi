@@ -27,6 +27,7 @@
 !include "Sections.nsh"
 !include "MUI.nsh"
 !include "LogicLib.nsh"
+!include "WordFunc.nsh"
 
 !include "release.inc"
 
@@ -61,8 +62,12 @@ SetDateSave on
 
 ; 软件子版本号
 !ifndef VER_MINOR
-  !define VER_MINOR "8.9.0"
+  !define VER_MINOR "9.5.0"
 !endif
+
+; 专家安装目录名称（不多语）
+!define APPNAMEDIR "CnPack IDE Wizards"
+!define SSELECTLANG "Select CnWizards Language"
 
 ;------------------------------------------------------------------------------
 ; IDE 版本打包的支持
@@ -158,176 +163,6 @@ SetDateSave on
 !endif
 
 ;------------------------------------------------------------------------------
-; 需要多语言处理的字符串
-;------------------------------------------------------------------------------
-
-; 专家名称
-LangString APPNAME 1033 "CnPack IDE Wizards"
-LangString APPNAME 1028 "CnPack IDE 盡產"
-LangString APPNAME 2052 "CnPack IDE 专家包"
-
-; 专家安装目录名称（不多语）
-LangString APPNAMEDIR 1033 "CnPack IDE Wizards"
-LangString APPNAMEDIR 1028 "CnPack IDE Wizards"
-LangString APPNAMEDIR 2052 "CnPack IDE Wizards"
-
-; 安装类型
-LangString TYPICALINST 1033 "Typical"
-LangString TYPICALINST 1028 "ㄥ杆"
-LangString TYPICALINST 2052 "典型安装"
-
-LangString MINIINST 1033 "Minimized"
-LangString MINIINST 1028 "程杆"
-LangString MINIINST 2052 "最小安装"
-
-LangString CUSTINST 1033 "Custom"
-LangString CUSTINST 1028 "﹚竡"
-LangString CUSTINST 2052 "自定义"
-
-; Section 名
-LangString PROGRAMDATA 1033 "Data files"
-LangString PROGRAMDATA 1028 "祘计沮ゅン"
-LangString PROGRAMDATA 2052 "程序数据文件"
-
-LangString HELPFILE 1033 "Help Files"
-LangString HELPFILE 1028 "腊ゅン"
-LangString HELPFILE 2052 "帮助文件"
-
-LangString OTHERTOOLS 1033 "Tools"
-LangString OTHERTOOLS 1028 "徊ㄣ"
-LangString OTHERTOOLS 2052 "辅助工具"
-
-; 快捷方式名
-LangString SHELP 1033 "CnWizards Help"
-LangString SHELP 1028 "盡產腊"
-LangString SHELP 2052 "专家包帮助"
-
-LangString SHELPCHM 1033 "CnWizards_ENU.chm"
-LangString SHELPCHM 1028 "CnWizards_CHT.chm"
-LangString SHELPCHM 2052 "CnWizards_CHS.chm"
-
-LangString SENABLE 1033 "Enable CnWizards"
-LangString SENABLE 1028 "币ノ盡產"
-LangString SENABLE 2052 "启用专家包"
-
-LangString SDISABLE 1033 "Disable CnWizards"
-LangString SDISABLE 1028 "窽ノ盡產"
-LangString SDISABLE 2052 "禁用专家包"
-
-LangString SCONFIGIO 1033 "CnWizards Config Import & Export"
-LangString SCONFIGIO 1028 "盡產砞竚旧旧ㄣ"
-LangString SCONFIGIO 2052 "专家包设置导入导出工具"
-
-LangString SCLEANIDEHIS 1033 "IDE History Cleaner"
-LangString SCLEANIDEHIS 1028 "睲埃 IDE ゴ秨ゅン菌"
-LangString SCLEANIDEHIS 2052 "清除 IDE 打开文件历史"
-
-LangString SASCIICHART 1033 "ASCII Chart"
-LangString SASCIICHART 1028 "ASCII 才"
-LangString SASCIICHART 2052 "ASCII 字符表"
-
-LangString SUNINSTALL 1033 "Uninstall"
-LangString SUNINSTALL 1028 "更"
-LangString SUNINSTALL 2052 "卸载"
-
-LangString SDFMCONVERTOR 1033 "DFM Convertor"
-LangString SDFMCONVERTOR 1028 "DFM 怠砰锣传ㄣ"
-LangString SDFMCONVERTOR 2052 "DFM 窗体转换工具"
-
-LangString SDEBUGVIEWER 1033 "Debug Viewer"
-LangString SDEBUGVIEWER 1028 "秸刚獺琩竟"
-LangString SDEBUGVIEWER 2052 "调试信息查看器"
-
-LangString SIDEBRTOOL 1033 "IDE Config Backup & Restore"
-LangString SIDEBRTOOL 1028 "IDE 砞竚称確ㄣ"
-LangString SIDEBRTOOL 2052 "IDE 设置备份恢复工具"
-
-LangString SMANAGEWIZ 1033 "IDE External Wizard Management"
-LangString SMANAGEWIZ 1028 "IDE 盡產恨瞶ㄣ"
-LangString SMANAGEWIZ 2052 "IDE 专家管理工具"
-
-LangString SRELATIONANALYZER 1033 "Relation Analyzer"
-LangString SRELATIONANALYZER 1028 "方絏家遏闽玒だ猂"
-LangString SRELATIONANALYZER 2052 "源码模块关系分析"
-
-LangString SSELECTLANG 1033 "Select CnWizards Language"
-LangString SSELECTLANG 1028 "Select CnWizards Language"
-LangString SSELECTLANG 2052 "Select CnWizards Language"
-
-; 对话框提示消息
-LangString SQUERYIDE 1033 "Setup has detected some wizard dlls are in using.$\n\
-                           Please close Delphi or C++Builder first.$\n$\n\
-                           Click [OK] to retry and continue.$\n\
-                           Click [Cancel] to exit Setup."
-LangString SQUERYIDE 1028 "杆祘浪代惠璶杆琘ㄇ盡產畐ゅンタ砆ㄏノ$\n\
-                           叫闽超眤 Delphi ㎝ C++Builder 祘$\n$\n\
-                           翴阑 [絋﹚] 盢穝浪代膥尿杆$\n\
-                           翴阑 [] 盢闽超杆祘"
-LangString SQUERYIDE 2052 "安装程序检测到需要安装的某些专家包库文件正在被使用，$\n\
-                           请关闭您的 Delphi 和 C++Builder 程序。$\n$\n\
-                           点击 [确定] 将重新检测并继续安装。$\n\
-                           点击 [取消] 将关闭安装程序。"
-
-LangString SQUERYDELETE 1033 "Delete user data files and wizards settings?$\n(If you want to keep them, please click [No].)"
-LangString SQUERYDELETE 1028 "琌埃ノめ计沮ゅン㎝盡產砞竚獺$\n(璝眤璶玂痙硂ㄇゅン叫翴阑 [] 秙)"
-LangString SQUERYDELETE 2052 "是否删除用户数据文件和专家包设置信息？$\n(若您要保留这些文件，请点击下面的 [否] 按钮)"
-
-; Section 描述信息
-LangString DESCDATA 1033 "The core programs and data files required to use wizards."
-LangString DESCDATA 1028 "杆 CnPack IDE 盡產ゲ斗计沮ゅン"
-LangString DESCDATA 2052 "安装 CnPack IDE 专家包必须的数据文件。"
-
-LangString DESCHELP 1033 "Help file for wizards."
-LangString DESCHELP 1028 "杆 CnPack IDE 盡產腊ゅン"
-LangString DESCHELP 2052 "安装 CnPack IDE 专家包帮助文件。"
-
-LangString DESCD5 1033 "Install wizard dll file for Delphi 5."
-LangString DESCD5 1028 "匡拒杆 Delphi 5  CnPack IDE 盡產ゅン"
-LangString DESCD5 2052 "选择安装 Delphi 5 下的 CnPack IDE 专家文件。"
-
-LangString DESCD6 1033 "Install wizard dll file for Delphi 6."
-LangString DESCD6 1028 "匡拒杆 Delphi 6  CnPack IDE 盡產ゅン"
-LangString DESCD6 2052 "选择安装 Delphi 6 下的 CnPack IDE 专家文件。"
-
-LangString DESCD7 1033 "Install wizard dll file for Delphi 7."
-LangString DESCD7 1028 "匡拒杆 Delphi 7  CnPack IDE 盡產ゅン"
-LangString DESCD7 2052 "选择安装 Delphi 7 下的 CnPack IDE 专家文件。"
-
-!ifdef SUPPORTS_BDS
-LangString DESCD9 1033 "Install wizard dll file for BDS 2005."
-LangString DESCD9 1028 "匡拒杆 BDS 2005  CnPack IDE 盡產ゅン"
-LangString DESCD9 2052 "选择安装 BDS 2005 下的 CnPack IDE 专家文件。"
-
-LangString DESCD10 1033 "Install wizard dll file for BDS 2006."
-LangString DESCD10 1028 "匡拒杆 BDS 2006  CnPack IDE 盡產ゅン"
-LangString DESCD10 2052 "选择安装 BDS 2006 下的 CnPack IDE 专家文件。"
-
-LangString DESCD11 1033 "Install wizard dll file for RAD Studio 2007."
-LangString DESCD11 1028 "匡拒杆 RAD Studio 2007  CnPack IDE 盡產ゅン"
-LangString DESCD11 2052 "选择安装 RAD Studio 2007 下的 CnPack IDE 专家文件。"
-
-LangString DESCD12 1033 "Install wizard dll file for RAD Studio 2009."
-LangString DESCD12 1028 "匡拒杆 RAD Studio 2009  CnPack IDE 盡產ゅン"
-LangString DESCD12 2052 "选择安装 RAD Studio 2009 下的 CnPack IDE 专家文件。"
-
-LangString DESCD14 1033 "Install wizard dll file for RAD Studio 2010."
-LangString DESCD14 1028 "匡拒杆 RAD Studio 2010  CnPack IDE 盡產ゅン"
-LangString DESCD14 2052 "选择安装 RAD Studio 2010 下的 CnPack IDE 专家文件。"
-!endif
-
-LangString DESCCB5 1033 "Install wizard dll file for C++Builder 5."
-LangString DESCCB5 1028 "匡拒杆 C++Builder 5  CnPack IDE 盡產ゅン"
-LangString DESCCB5 2052 "选择安装 C++Builder 5 下的 CnPack IDE 专家文件。"
-
-LangString DESCCB6 1033 "Install wizard dll file for C++Builder 6."
-LangString DESCCB6 1028 "匡拒杆 C++Builder 6  CnPack IDE 盡產ゅン"
-LangString DESCCB6 2052 "选择安装 C++Builder 6 下的 CnPack IDE 专家文件。"
-
-LangString DESCOTHERS 1033 "Other tools, include DFM Convertor etc."
-LangString DESCOTHERS 1028 "杆盡產徊ㄣ珹怠砰锣传ㄣ单"
-LangString DESCOTHERS 2052 "安装专家包辅助工具包，包括窗体转换工具等。"
-
-;------------------------------------------------------------------------------
 ; 软件主信息
 ;------------------------------------------------------------------------------
 
@@ -370,10 +205,6 @@ OutFile "..\Output\${INSTALLER_NAME}"
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_BITMAP "cnpack.bmp"
 
-LicenseLangString SLICENSEFILE 1033 "..\..\License.enu.txt"
-LicenseLangString SLICENSEFILE 1028 "..\..\License.cht.txt"
-LicenseLangString SLICENSEFILE 2052 "..\..\License.chs.txt"
-
 ; 安装程序页面
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_LICENSE $(SLICENSEFILE)
@@ -398,9 +229,15 @@ LicenseLangString SLICENSEFILE 2052 "..\..\License.chs.txt"
 !define MUI_LANGDLL_REGISTRY_ROOT "HKCU"
 !define MUI_LANGDLL_REGISTRY_KEY "Software\CnPack"
 !define MUI_LANGDLL_REGISTRY_VALUENAME "Installer Language"
-!insertmacro MUI_LANGUAGE "English"
-!insertmacro MUI_LANGUAGE "SimpChinese"
-!insertmacro MUI_LANGUAGE "TradChinese"
+
+;------------------------------------------------------------------------------
+; 包含多语言文件
+;------------------------------------------------------------------------------
+
+!include "Lang\CnWizInst_enu.nsh"
+!include "Lang\CnWizInst_chs.nsh"
+!include "Lang\CnWizInst_cht.nsh"
+!include "Lang\CnWizInst_ru.nsh"
 
 !verbose 4
 
@@ -543,10 +380,10 @@ InitOk:
   File "..\..\Bin\Setup.exe"
   File "..\..\Bin\CnWizRes.dll"
   File "..\..\Bin\CnZipWrapper.dll"
-  File "..\..\License.chs.txt"
-  File "..\..\License.cht.txt"
-  File "..\..\License.enu.txt"
-  File "..\..\License.ru.txt"
+  File "..\..\License.*.txt"
+  ;File "..\..\License.cht.txt"
+  ;File "..\..\License.enu.txt"
+  ;File "..\..\License.ru.txt"
 
   SetOutPath $INSTDIR\Data
   File "..\..\Bin\Data\*.*"
@@ -573,7 +410,7 @@ InitOk:
 
   ; 为 Windows 卸载程序写入键值
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CnWizards" "DisplayIcon" '"$INSTDIR\uninst.exe"'
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CnWizards" "DisplayName" "$(APPNAMEDIR)"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CnWizards" "DisplayName" "${APPNAMEDIR}"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CnWizards" "DisplayVersion" "${VERSION_STRING}"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CnWizards" "HelpLink" "http://bbs.cnpack.org"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CnWizards" "Publisher" "CnPack Team"
@@ -582,15 +419,15 @@ InitOk:
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CnWizards" "UninstallString" '"$INSTDIR\uninst.exe"'
 
   ; 删除以前的开始菜单项
-  RMDir /r "$SMPROGRAMS\$(APPNAMEDIR)"
+  RMDir /r "$SMPROGRAMS\${APPNAMEDIR}"
   RMDir /r "$SMPROGRAMS\CnPack IDE 专家包"
   RMDir /r "$SMPROGRAMS\CnPack IDE 盡產"
 
   ;  创建开始菜单项
-  CreateDirectory "$SMPROGRAMS\$(APPNAMEDIR)"
-  CreateShortCut "$SMPROGRAMS\$(APPNAMEDIR)\$(SENABLE).lnk" "$INSTDIR\Setup.exe" "-i" "$INSTDIR\Setup.exe" 1
-  CreateShortCut "$SMPROGRAMS\$(APPNAMEDIR)\$(SDISABLE).lnk" "$INSTDIR\Setup.exe" "-u" "$INSTDIR\Setup.exe" 2
-  CreateShortCut "$SMPROGRAMS\$(APPNAMEDIR)\$(SUNINSTALL) $(APPNAME).lnk" "$INSTDIR\uninst.exe"
+  CreateDirectory "$SMPROGRAMS\${APPNAMEDIR}"
+  CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SENABLE).lnk" "$INSTDIR\Setup.exe" "-i" "$INSTDIR\Setup.exe" 1
+  CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SDISABLE).lnk" "$INSTDIR\Setup.exe" "-u" "$INSTDIR\Setup.exe" 2
+  CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SUNINSTALL) $(APPNAME).lnk" "$INSTDIR\uninst.exe"
 
   ; 写入生成卸载程序
   WriteUninstaller "$INSTDIR\uninst.exe"
@@ -711,7 +548,7 @@ Section "$(HELPFILE)" SecHelp
   SectionIn 1
   SetOutPath $INSTDIR\Help
   File "..\..\Bin\Help\CnWizards_*.chm"
-  CreateShortCut "$SMPROGRAMS\$(APPNAMEDIR)\$(SHELP).lnk" "$INSTDIR\Help\$(SHELPCHM)"
+  CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SHELP).lnk" "$INSTDIR\Help\$(SHELPCHM)"
 SectionEnd
 !endif
 
@@ -727,14 +564,14 @@ Section "$(OTHERTOOLS)" SecTools
   File "..\..\Bin\CnSelectLang.exe"
   File "..\..\Bin\CnSMR.exe"
 
-  CreateShortCut "$SMPROGRAMS\$(APPNAMEDIR)\$(SCONFIGIO).lnk" "$INSTDIR\CnConfigIO.exe"
-  CreateShortCut "$SMPROGRAMS\$(APPNAMEDIR)\$(SASCIICHART).lnk" "$INSTDIR\AsciiChart.exe"
-  CreateShortCut "$SMPROGRAMS\$(APPNAMEDIR)\$(SDFMCONVERTOR).lnk" "$INSTDIR\CnDfm6To5.exe"
-  CreateShortCut "$SMPROGRAMS\$(APPNAMEDIR)\$(SDEBUGVIEWER).lnk" "$INSTDIR\CnDebugViewer.exe"
-  CreateShortCut "$SMPROGRAMS\$(APPNAMEDIR)\$(SIDEBRTOOL).lnk" "$INSTDIR\CnIdeBRTool.exe"
-  CreateShortCut "$SMPROGRAMS\$(APPNAMEDIR)\$(SMANAGEWIZ).lnk" "$INSTDIR\CnManageWiz.exe"
-  CreateShortCut "$SMPROGRAMS\$(APPNAMEDIR)\$(SSELECTLANG).lnk" "$INSTDIR\CnSelectLang.exe"
-  CreateShortCut "$SMPROGRAMS\$(APPNAMEDIR)\$(SRELATIONANALYZER).lnk" "$INSTDIR\CnSMR.exe"
+  CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SCONFIGIO).lnk" "$INSTDIR\CnConfigIO.exe"
+  CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SASCIICHART).lnk" "$INSTDIR\AsciiChart.exe"
+  CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SDFMCONVERTOR).lnk" "$INSTDIR\CnDfm6To5.exe"
+  CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SDEBUGVIEWER).lnk" "$INSTDIR\CnDebugViewer.exe"
+  CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SIDEBRTOOL).lnk" "$INSTDIR\CnIdeBRTool.exe"
+  CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SMANAGEWIZ).lnk" "$INSTDIR\CnManageWiz.exe"
+  CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\${SSELECTLANG}.lnk" "$INSTDIR\CnSelectLang.exe"
+  CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SRELATIONANALYZER).lnk" "$INSTDIR\CnSMR.exe"
 
   ; 写入CnDebugViewer路径键值
   WriteRegStr HKCU "Software\CnPack\CnDebug" "CnDebugViewer" "$INSTDIR\CnDebugViewer.exe"
@@ -770,36 +607,46 @@ Function .onMouseOverSection
     !insertmacro MUI_DESCRIPTION_TEXT ${SecHelp} "$(DESCHELP)"
 !endif
   !ifdef IDE_VERSION_D5
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecD5} "$(DESCD5)"
+    ${WordReplace} "$(DESDLL)" "#DLL#" "Delphi 5" "+" $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecD5} $R0
   !endif
   !ifdef IDE_VERSION_D6
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecD6} "$(DESCD6)"
+    ${WordReplace} "$(DESDLL)" "#DLL#" "Delphi 6" "+" $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecD6} $R0
   !endif
   !ifdef IDE_VERSION_D7
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecD7} "$(DESCD7)"
+    ${WordReplace} "$(DESDLL)" "#DLL#" "Delphi 7" "+" $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecD7} $R0
   !endif
 !ifdef SUPPORTS_BDS
   !ifdef IDE_VERSION_D9
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecD9} "$(DESCD9)"
+    ${WordReplace} "$(DESDLL)" "#DLL#" "BDS 2005" "+" $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecD9} $R0
   !endif
   !ifdef IDE_VERSION_D10
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecD10} "$(DESCD10)"
+    ${WordReplace} "$(DESDLL)" "#DLL#" "BDS 2006" "+" $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecD10} $R0
   !endif
   !ifdef IDE_VERSION_D11
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecD11} "$(DESCD11)"
+    ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio 2007" "+" $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecD11} $R0
   !endif
   !ifdef IDE_VERSION_D12
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecD12} "$(DESCD12)"
+    ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio 2009" "+" $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecD12} $R0
   !endif
   !ifdef IDE_VERSION_D14
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecD14} "$(DESCD14)"
+    ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio 2010" "+" $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecD14} $R0
   !endif
 !endif
   !ifdef IDE_VERSION_CB5
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecCB5} "$(DESCCB5)"
+    ${WordReplace} "$(DESDLL)" "#DLL#" "C++Builder 5" "+" $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecCB5} $R0
   !endif
   !ifdef IDE_VERSION_CB6
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecCB6} "$(DESCCB6)"
+    ${WordReplace} "$(DESDLL)" "#DLL#" "C++Builder 6" "+" $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecCB6} $R0
   !endif
     !insertmacro MUI_DESCRIPTION_TEXT ${SecTools} "$(DESCOTHERS)"
   !insertmacro MUI_DESCRIPTION_END
@@ -884,7 +731,7 @@ Section "Uninstall"
   RMDir /r $INSTDIR\Lang
   Delete "$INSTDIR\Source\*.*"
   RMDir /r $INSTDIR\Source
-  RMDir /r "$SMPROGRAMS\$(APPNAMEDIR)"
+  RMDir /r "$SMPROGRAMS\${APPNAMEDIR}"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CnWizards"
 
 !ifdef IDE_VERSION_D5
