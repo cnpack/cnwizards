@@ -381,9 +381,6 @@ InitOk:
   File "..\..\Bin\CnWizRes.dll"
   File "..\..\Bin\CnZipWrapper.dll"
   File "..\..\License.*.txt"
-  ;File "..\..\License.cht.txt"
-  ;File "..\..\License.enu.txt"
-  ;File "..\..\License.ru.txt"
 
   SetOutPath $INSTDIR\Data
   File "..\..\Bin\Data\*.*"
