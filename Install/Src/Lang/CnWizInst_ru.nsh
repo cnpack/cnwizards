@@ -10,45 +10,45 @@
 !insertmacro MUI_LANGUAGE "Russian"
 
 ; CnWizards Name
-LangString APPNAME        1049 "CnPack IDE Wizards"
+LangString APPNAME        1049 "CnPack IDE-Мастер"
 
 ; Install Type
-LangString TYPICALINST    1049 "Typical"
-LangString MINIINST       1049 "Minimized"
-LangString CUSTINST       1049 "Custom"
+LangString TYPICALINST    1049 "Полная"
+LangString MINIINST       1049 "Минимальная"
+LangString CUSTINST       1049 "Выборочная"
 
 ; Section Name
-LangString PROGRAMDATA    1049 "Data files"
-LangString HELPFILE       1049 "Help Files"
-LangString OTHERTOOLS     1049 "Tools"
+LangString PROGRAMDATA    1049 "CnPack IDE-Мастер"
+LangString HELPFILE       1049 "Справка"
+LangString OTHERTOOLS     1049 "Утилиты"
 
 ; Shortcut Name
-LangString SHELP          1049 "CnWizards Help"
+LangString SHELP          1049 "Справка"
 LangString SHELPCHM       1049 "CnWizards_ENU.chm"
-LangString SENABLE        1049 "Enable CnWizards"
-LangString SDISABLE       1049 "Disable CnWizards"
-LangString SCONFIGIO      1049 "CnWizards Config Import & Export"
-LangString SCLEANIDEHIS   1049 "IDE History Cleaner"
-LangString SASCIICHART    1049 "ASCII Chart"
-LangString SUNINSTALL     1049 "Uninstall"
-LangString SDFMCONVERTOR  1049 "DFM Convertor"
-LangString SDEBUGVIEWER   1049 "Debug Viewer"
-LangString SIDEBRTOOL     1049 "IDE Config Backup & Restore"
-LangString SMANAGEWIZ     1049 "IDE External Wizard Management"
-LangString SRELATIONANALYZER 1049 "Relation Analyzer"
+LangString SENABLE        1049 "Включить CnPack IDE-Мастер"
+LangString SDISABLE       1049 "Отключить CnPack IDE-Мастер"
+LangString SCONFIGIO      1049 "Сохр./восст. настроек CnPack IDE-Мастера"
+LangString SCLEANIDEHIS   1049 "Очистка истории IDE"
+LangString SASCIICHART    1049 "ASCII-таблица"
+LangString SUNINSTALL     1049 "Удаление"
+LangString SDFMCONVERTOR  1049 "DFM-конвертер"
+LangString SDEBUGVIEWER   1049 "Отладчик"
+LangString SIDEBRTOOL     1049 "Сохр./восст. настроек IDE"
+LangString SMANAGEWIZ     1049 "Внешнее управление мастерами IDE"
+LangString SRELATIONANALYZER 1049 "Тестер зависимостей"
 
 ; Dialog Message
-LangString SQUERYIDE      1049 "Setup has detected some wizard dlls are in using.$\n\
-                                Please close Delphi or C++Builder first.$\n$\n\
-                                Click [OK] to retry and continue.$\n\
-                                Click [Cancel] to exit Setup."
-LangString SQUERYDELETE   1049 "Delete user data files and wizards settings?$\n(If you want to keep them, please click [No].)"
+LangString SQUERYIDE      1049 "Программа установки обнаружила, что некоторые Мастеры сейчас используются.$\n\
+                                Пожалуйста, сперва закройте Delphi или C++Builder.$\n$\n\
+                                Нажмите [OK] для продолжения.$\n\
+                                Нажмите [Отмена] для выхода."
+LangString SQUERYDELETE   1049 "Удалить пользовательские файлы и настройки мастеров?$\n(Если Вы хотите сохранить их, нажмите [Нет].)"
 
 ; Section Description
-LangString DESCDATA       1049 "The core programs and data files required to use wizards."
-LangString DESCHELP       1049 "Help file for wizards."
-LangString DESDLL         1049 "Install wizard dll file for #DLL#."
-LangString DESCOTHERS     1049 "Other tools, include DFM Convertor etc."
+LangString DESCDATA       1049 "Основные программы и файлы, необходимые для работы CnPack IDE-Мастера."
+LangString DESCHELP       1049 "Справка по использованию CnPack IDE-Мастера."
+LangString DESDLL         1049 "Установка мастера для #DLL#."
+LangString DESCOTHERS     1049 "Утилиты, такие как DFM-конвертер и т.д."
 
 ; License File
 LicenseLangString SLICENSEFILE 1049 "..\..\License.ru.txt"
