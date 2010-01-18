@@ -1,13 +1,13 @@
 object CnWizFeedbackForm: TCnWizFeedbackForm
   Left = 349
   Top = 248
-  Width = 544
-  Height = 370
+  Width = 590
+  Height = 398
   BorderIcons = [biSystemMenu]
   Caption = 'CnPack IDE 专家包反馈向导'
   Color = clBtnFace
-  Constraints.MinHeight = 370
-  Constraints.MinWidth = 544
+  Constraints.MinHeight = 398
+  Constraints.MinWidth = 590
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -125,8 +125,8 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
   TextHeight = 13
   object Bevel1: TBevel
     Left = 0
-    Top = 309
-    Width = 536
+    Top = 337
+    Width = 582
     Height = 2
     Align = alBottom
     Shape = bsBottomLine
@@ -134,7 +134,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
   object Bevel2: TBevel
     Left = 0
     Top = 45
-    Width = 536
+    Width = 582
     Height = 2
     Align = alTop
     Shape = bsTopLine
@@ -142,7 +142,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
   object Panel1: TPanel
     Left = 0
     Top = 0
-    Width = 536
+    Width = 582
     Height = 45
     Align = alTop
     BevelOuter = bvNone
@@ -175,7 +175,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
       ParentFont = False
     end
     object Image1: TImage
-      Left = 496
+      Left = 542
       Top = 8
       Width = 32
       Height = 32
@@ -256,14 +256,14 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
   end
   object Panel2: TPanel
     Left = 0
-    Top = 311
-    Width = 536
+    Top = 339
+    Width = 582
     Height = 32
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 2
     object btnPrev: TButton
-      Left = 287
+      Left = 333
       Top = 6
       Width = 75
       Height = 21
@@ -272,7 +272,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
       TabOrder = 0
     end
     object btnNext: TButton
-      Left = 367
+      Left = 413
       Top = 6
       Width = 75
       Height = 21
@@ -281,7 +281,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
       TabOrder = 1
     end
     object btnCancel: TButton
-      Left = 455
+      Left = 501
       Top = 6
       Width = 75
       Height = 21
@@ -295,8 +295,8 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
   object Panel3: TPanel
     Left = 0
     Top = 47
-    Width = 536
-    Height = 262
+    Width = 582
+    Height = 290
     Align = alClient
     BevelOuter = bvNone
     BorderWidth = 4
@@ -304,8 +304,8 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
     object Panel4: TPanel
       Left = 4
       Top = 4
-      Width = 117
-      Height = 254
+      Width = 149
+      Height = 282
       Align = alLeft
       BevelInner = bvRaised
       BevelOuter = bvLowered
@@ -314,8 +314,8 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
       object CnWizardImage: TCnWizardImage
         Left = 2
         Top = 2
-        Width = 113
-        Height = 250
+        Width = 145
+        Height = 278
         Align = alClient
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWhite
@@ -371,10 +371,10 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
       end
     end
     object Notebook: TNotebook
-      Left = 125
+      Left = 157
       Top = 4
-      Width = 269
-      Height = 254
+      Width = 283
+      Height = 282
       Align = alClient
       TabOrder = 2
       OnPageChanged = NotebookPageChanged
@@ -385,7 +385,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
         object rgFeedbackType: TRadioGroup
           Left = 0
           Top = 8
-          Width = 265
+          Width = 281
           Height = 81
           Caption = '请选择您要反馈的类型(&T)'
           ItemIndex = 0
@@ -403,8 +403,8 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
         object memDesc: TMemo
           Left = 0
           Top = 0
-          Width = 269
-          Height = 254
+          Width = 283
+          Height = 282
           Align = alClient
           ScrollBars = ssVertical
           TabOrder = 0
@@ -417,7 +417,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
         object gbxBugDetails: TGroupBox
           Left = 0
           Top = 8
-          Width = 265
+          Width = 281
           Height = 121
           Caption = '错误重现率(&R)'
           TabOrder = 0
@@ -431,7 +431,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
           object cbProjectSpecific: TCheckBox
             Left = 8
             Top = 88
-            Width = 240
+            Width = 264
             Height = 17
             Caption = '该错误仅与特定的工程相关。'
             TabOrder = 3
@@ -439,7 +439,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
           object cbMultipleMachines: TCheckBox
             Left = 8
             Top = 64
-            Width = 240
+            Width = 264
             Height = 17
             Caption = '该错误在多台计算机上可重现。'
             TabOrder = 2
@@ -457,7 +457,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
           object cbReproducible: TCheckBox
             Left = 8
             Top = 16
-            Width = 240
+            Width = 264
             Height = 17
             Caption = '该错误可以重现。'
             Checked = True
@@ -474,8 +474,8 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
         object memBugSteps: TMemo
           Left = 0
           Top = 0
-          Width = 269
-          Height = 254
+          Width = 283
+          Height = 282
           Align = alClient
           ScrollBars = ssVertical
           TabOrder = 0
@@ -488,14 +488,14 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
         object gbConfigurationData: TGroupBox
           Left = 0
           Top = 8
-          Width = 265
+          Width = 281
           Height = 177
           Caption = '需要反馈的其它数据(&D)'
           TabOrder = 0
           object cbCnPackVer: TCheckBox
             Left = 8
             Top = 16
-            Width = 240
+            Width = 264
             Height = 17
             Caption = 'CnPack IDE 专家包版本号。'
             Checked = True
@@ -506,7 +506,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
           object cbOS: TCheckBox
             Left = 8
             Top = 55
-            Width = 240
+            Width = 264
             Height = 17
             Caption = '操作系统。'
             Checked = True
@@ -517,7 +517,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
           object cbExperts: TCheckBox
             Left = 8
             Top = 94
-            Width = 240
+            Width = 264
             Height = 17
             Caption = '已安装的专家。'
             Checked = True
@@ -527,7 +527,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
           object cbIdeVer: TCheckBox
             Left = 8
             Top = 35
-            Width = 240
+            Width = 264
             Height = 17
             Caption = 'IDE 版本号。'
             Checked = True
@@ -538,7 +538,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
           object cbPackages: TCheckBox
             Left = 8
             Top = 113
-            Width = 240
+            Width = 264
             Height = 17
             Caption = '已安装的包。'
             Checked = True
@@ -548,7 +548,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
           object cbLocaleKeyboard: TCheckBox
             Left = 8
             Top = 133
-            Width = 240
+            Width = 264
             Height = 17
             Caption = '本地化/键盘信息。'
             Checked = True
@@ -558,7 +558,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
           object cbCpu: TCheckBox
             Left = 8
             Top = 152
-            Width = 240
+            Width = 264
             Height = 17
             Caption = 'CPU 信息。'
             Checked = True
@@ -568,7 +568,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
           object cbCnPackSettings: TCheckBox
             Left = 8
             Top = 74
-            Width = 240
+            Width = 264
             Height = 17
             Caption = 'CnPack IDE 专家包设置。'
             Checked = True
@@ -583,14 +583,14 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
         Caption = 'Finished'
         object pnlReportButtons: TPanel
           Left = 0
-          Top = 218
-          Width = 269
+          Top = 246
+          Width = 283
           Height = 36
           Align = alBottom
           BevelOuter = bvNone
           TabOrder = 1
           object btnSave: TButton
-            Left = 101
+            Left = 125
             Top = 8
             Width = 77
             Height = 21
@@ -600,7 +600,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
             OnClick = btnSaveClick
           end
           object btnCopy: TButton
-            Left = 21
+            Left = 45
             Top = 8
             Width = 77
             Height = 21
@@ -610,7 +610,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
             OnClick = btnCopyClick
           end
           object btnEmail: TButton
-            Left = 181
+            Left = 205
             Top = 8
             Width = 77
             Height = 21
@@ -623,8 +623,8 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
         object memReport: TMemo
           Left = 0
           Top = 0
-          Width = 269
-          Height = 218
+          Width = 283
+          Height = 246
           Align = alClient
           ScrollBars = ssBoth
           TabOrder = 0
@@ -633,10 +633,10 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
       end
     end
     object PageControl: TPageControl
-      Left = 394
+      Left = 440
       Top = 4
       Width = 138
-      Height = 254
+      Height = 282
       ActivePage = tsHelp
       Align = alRight
       Style = tsFlatButtons
@@ -648,7 +648,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
           Left = 0
           Top = 0
           Width = 130
-          Height = 223
+          Height = 251
           Align = alClient
           Color = clInfoBk
           ReadOnly = True
@@ -672,10 +672,10 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
       end
     end
     object Panel5: TPanel
-      Left = 121
+      Left = 153
       Top = 4
       Width = 4
-      Height = 254
+      Height = 282
       Align = alLeft
       BevelOuter = bvNone
       TabOrder = 1

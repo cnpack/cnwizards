@@ -4,7 +4,7 @@ object CnEditorToolsForm: TCnEditorToolsForm
   BorderStyle = bsDialog
   Caption = '编辑器工具设置'
   ClientHeight = 413
-  ClientWidth = 464
+  ClientWidth = 506
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,7 +18,7 @@ object CnEditorToolsForm: TCnEditorToolsForm
   PixelsPerInch = 96
   TextHeight = 13
   object btnHelp: TButton
-    Left = 382
+    Left = 422
     Top = 384
     Width = 75
     Height = 21
@@ -27,7 +27,7 @@ object CnEditorToolsForm: TCnEditorToolsForm
     OnClick = btnHelpClick
   end
   object btnOK: TButton
-    Left = 302
+    Left = 342
     Top = 384
     Width = 75
     Height = 21
@@ -40,7 +40,7 @@ object CnEditorToolsForm: TCnEditorToolsForm
   object grp1: TGroupBox
     Left = 8
     Top = 8
-    Width = 449
+    Width = 489
     Height = 369
     Caption = '编辑器工具(&T)'
     TabOrder = 0
@@ -73,7 +73,7 @@ object CnEditorToolsForm: TCnEditorToolsForm
     object lblToolName: TLabel
       Left = 352
       Top = 14
-      Width = 89
+      Width = 129
       Height = 40
       AutoSize = False
       Caption = 'lblToolName'
@@ -95,7 +95,7 @@ object CnEditorToolsForm: TCnEditorToolsForm
     object bvlWizard: TBevel
       Left = 312
       Top = 48
-      Width = 129
+      Width = 169
       Height = 10
       Shape = bsBottomLine
     end
@@ -115,7 +115,7 @@ object CnEditorToolsForm: TCnEditorToolsForm
     object lblToolAuthor: TLabel
       Left = 312
       Top = 80
-      Width = 129
+      Width = 169
       Height = 49
       AutoSize = False
       Caption = 'lblToolAuthor'
@@ -150,7 +150,7 @@ object CnEditorToolsForm: TCnEditorToolsForm
     object mmoComment: TMemo
       Left = 8
       Top = 256
-      Width = 433
+      Width = 473
       Height = 97
       Color = 14745599
       ReadOnly = True
@@ -168,7 +168,7 @@ object CnEditorToolsForm: TCnEditorToolsForm
     object HotKey: THotKey
       Left = 312
       Top = 148
-      Width = 129
+      Width = 169
       Height = 19
       HotKey = 0
       InvalidKeys = [hcNone, hcShift]
@@ -177,7 +177,7 @@ object CnEditorToolsForm: TCnEditorToolsForm
       OnExit = HotKeyExit
     end
     object btnConfig: TButton
-      Left = 342
+      Left = 334
       Top = 225
       Width = 75
       Height = 21
