@@ -153,6 +153,7 @@ type
     rbMsgDlg: TRadioButton;
     cbResultYesToAll: TCheckBox;
     cbResultNoToAll: TCheckBox;
+    chkWideVer: TCheckBox;
     procedure btnPreviewClick(Sender: TObject);
     procedure rgButtonClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -215,6 +216,8 @@ type
     procedure SetUseHandle(Value: Boolean);
     procedure UpdatePrjList;
     procedure UpdateResultCheckBoxCaption(IsMsgDlg: Boolean);
+    function GetWideVer: Boolean;
+    procedure SetWideVer(const Value: Boolean);
   protected
     function GetHelpTopic: string; override;
     property Ini: TCustomIniFile read FIni;
@@ -252,6 +255,7 @@ type
     property LineEndBrace: Boolean read GetLineEndBrace write SetLineEndBrace;
     property LoadLast: Boolean read GetLoadLast write SetLoadLast;
     property UseHandle: Boolean read GetUseHandle write SetUseHandle;
+    property WideVer: Boolean read GetWideVer write SetWideVer;
   end;
 
 //==============================================================================
@@ -367,6 +371,7 @@ const
   csLineEndBrace = 'LineEndBrace';
   csLoadLast = 'LoadLast';
   csUseHandle = 'UseHandle';
+  csWideVer = 'WideVer';
 
 //==============================================================================
 // 私有过程
@@ -546,6 +551,7 @@ begin
   cbResultNo.Checked := cbResultNo.Enabled and cbResultNo.Checked;
 
   chkUseHandle.Enabled := rbCodeAPI.Checked;
+  chkWideVer.Enabled := rbCodeAPI.Checked;
 
   OldEnabled := not gbCaption.Enabled; // 得到变化以前 rbMsgDlg.Checked 的值
   gbCaption.Enabled := not rbMsgDlg.Checked;
@@ -667,6 +673,7 @@ begin
   LineEndBrace := Ini.ReadBool(Section, csLineEndBrace, True);
   LoadLast := Ini.ReadBool(Section, csLoadLast, True);
   UseHandle := Ini.ReadBool(Section, csUseHandle, True);
+  WideVer := Ini.ReadBool(Section, csWideVer, False);
 end;
 
 // 保存参数
@@ -685,6 +692,7 @@ begin
   Ini.WriteBool(Section, csLineEndBrace, LineEndBrace);
   Ini.WriteBool(Section, csLoadLast, LoadLast);
   Ini.WriteBool(Section, csUseHandle, UseHandle);
+  Ini.WriteBool(Section, csWideVer, WideVer);
 end;
 
 // 装载模板
@@ -876,17 +884,23 @@ begin
   Result := cbLineEndBrace.Checked;
 end;
 
+// UseHandle 属性读方法
+function TCnMessageBoxForm.GetUseHandle: Boolean;
+begin
+  Result := chkUseHandle.Checked;
+end;
+
+// WideVer 属性读方法
+function TCnMessageBoxForm.GetWideVer: Boolean;
+begin
+  Result := chkWideVer.Checked;
+end;
+
 // MsgBoxButton 属性写方法
 procedure TCnMessageBoxForm.SetMsgBoxButton(
   const Value: TCnMsgBoxButtonKind);
 begin
   rgButton.ItemIndex := Ord(Value);
-end;
-
-// UseHandle 属性读方法
-function TCnMessageBoxForm.GetUseHandle: Boolean;
-begin
-  Result := chkUseHandle.Checked;
 end;
 
 // MsgBoxCaption 属性写方法
@@ -912,6 +926,7 @@ begin
   else
     rbCodeApp.Checked := True;
   chkUseHandle.Enabled := rbCodeAPI.Checked;
+  chkWideVer.Enabled := rbCodeAPI.Checked;
 end;
 
 // MsgBoxDefaultButton 属性写方法
@@ -1041,6 +1056,12 @@ begin
   chkUseHandle.Checked := Value;
 end;
 
+// WideVer 属性写方法
+procedure TCnMessageBoxForm.SetWideVer(const Value: Boolean);
+begin
+  chkWideVer.Checked := Value;
+end;
+
 //==============================================================================
 // MessageBox 专家类
 //==============================================================================
@@ -1060,8 +1081,8 @@ end;
 procedure TCnMessageBoxWizard.Execute;
 var
   Ini: TCustomIniFile;
-  IsDelphi: Boolean;
-  s, Code, RetStr: string;
+  IsDelphi, IsWideVer: Boolean;
+  s, Code, RetStr, sPChar, sMsgBox: string;
   Value: TCnMsgBoxResultKind;
   Kind: TCnMsgBoxResultKind;
   SetCount: Integer;
@@ -1186,13 +1207,24 @@ begin
           RetStr := CRLF;
 
         { TODO -o周劲羽 -c优化 : 当前代码使用硬编码来生成代码，以后考虑用统一的方式来封装实现 }
+
         // 函数名
+        sPChar := 'PChar';
+        IsWideVer := False;
         if MsgBoxCodeKind = ckAPI then
         begin
-          if UseHandle then
-            Code := 'MessageBox(Handle, ' + RetStr
+          if WideVer then
+          begin
+            sMsgBox := 'MessageBoxW';
+            sPChar := 'PWideChar';
+            IsWideVer := True;
+          end
           else
-            Code := 'MessageBox(0, ' + RetStr;
+            sMsgBox := 'MessageBox';
+          if UseHandle then
+            Code := sMsgBox + '(Handle, ' + RetStr
+          else
+            Code := sMsgBox + '(0, ' + RetStr;
         end
         else if MsgBoxCodeKind = ckMsgDlg then
         begin
@@ -1210,17 +1242,20 @@ begin
         if MsgBoxTextIsVar and TextIsExp(MsgBoxText) then
         begin
           if IsDelphi then
-            Code := Format('%sPChar(%s), ' + RetStr, [Code, MsgBoxText])
+            Code := Format('%s' + sPChar + '(%s), ' + RetStr, [Code, MsgBoxText])
           else
             Code := Format('%s%s, ' + RetStr, [Code, MsgBoxText])
         end
         else
         begin
           if IsDelphi and CheckFormat and IsFormatStr(MsgBoxText, FmtStr) then
-            Code := Format('%sPChar(Format(%s, %s)), ' + RetStr, [Code,
+            Code := Format('%s' + sPChar + '(Format(%s, %s)), ' + RetStr, [Code,
               StrToSourceCode(MsgBoxText, DelphiReturn, CReturn, not AutoWrap), FmtStr])
           else if IsDelphi and UsePChar then
-            Code := Format('%sPChar(%s), ' + RetStr, [Code,
+            Code := Format('%s' + sPChar + '(%s), ' + RetStr, [Code,
+              StrToSourceCode(MsgBoxText, DelphiReturn, CReturn, not AutoWrap)])
+          else if not IsDelphi and IsWideVer then
+            Code := Format('%sL%s, ' + RetStr, [Code,
               StrToSourceCode(MsgBoxText, DelphiReturn, CReturn, not AutoWrap)])
           else
             Code := Format('%s%s, ' + RetStr, [Code,
@@ -1233,7 +1268,7 @@ begin
           if MsgBoxCaptionIsVar and TextIsExp(MsgBoxCaption) then
           begin
             if IsDelphi then
-              Code := Format('%sPChar(%s), ' + RetStr, [Code, MsgBoxCaption])
+              Code := Format('%s' + sPChar + '(%s), ' + RetStr, [Code, MsgBoxCaption])
             else
               Code := Format('%s%s, ' + RetStr, [Code, MsgBoxCaption])
           end
@@ -1247,14 +1282,19 @@ begin
             if IsDelphi then
             begin
               if CheckFormat and IsFormatStr(MsgBoxCaption, FmtStr) then
-                Code := Format('%sPChar(Format(''%s'', %s)), ' + RetStr, [Code, s, FmtStr])
+                Code := Format('%s' + sPChar + '(Format(''%s'', %s)), ' + RetStr, [Code, s, FmtStr])
               else if UsePChar then
-                Code := Format('%sPChar(''%s''), ' + RetStr, [Code, s])
+                Code := Format('%s' + sPChar + '(''%s''), ' + RetStr, [Code, s])
               else
                 Code := Format('%s''%s'', ' + RetStr, [Code, s]);
             end
             else
-              Code := Format('%s"%s", ' + RetStr, [Code, s]);
+            begin
+              if IsWideVer then
+                Code := Format('%sL"%s", ' + RetStr, [Code, s])
+              else
+                Code := Format('%s"%s", ' + RetStr, [Code, s]);
+            end;
           end;
         end;
 

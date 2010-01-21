@@ -147,6 +147,7 @@ TCnMessageBoxForm.cbResultYes.Caption=IDYES
 TCnMessageBoxForm.cbResultNo.Caption=IDNO
 TCnMessageBoxForm.grpCall.Caption=Procedure to &Use
 TCnMessageBoxForm.chkUseHandle.Caption=Use "Handle" as Parent
+TCnMessageBoxForm.chkWideVer.Caption=Use MessageBoxW
 TCnMessageBoxForm.gbProject.Caption=User Tem&plates
 TCnMessageBoxForm.btnDeleteProject.Caption=De&lete
 TCnMessageBoxForm.btnAddProject.Caption=Add

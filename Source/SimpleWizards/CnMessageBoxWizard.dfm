@@ -3,7 +3,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
   Top = 125
   BorderStyle = bsDialog
   Caption = 'MessageBox 设计器'
-  ClientHeight = 488
+  ClientHeight = 510
   ClientWidth = 472
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -22,7 +22,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
     Left = 8
     Top = 8
     Width = 457
-    Height = 440
+    Height = 465
     ActivePage = tsDesigner
     TabOrder = 0
     object tsDesigner: TTabSheet
@@ -31,12 +31,12 @@ object CnMessageBoxForm: TCnMessageBoxForm
         Left = 8
         Top = 8
         Width = 121
-        Height = 169
+        Height = 193
         Caption = '显示图标(&I)'
         TabOrder = 0
         object Image1: TImage
           Left = 8
-          Top = 28
+          Top = 44
           Width = 32
           Height = 32
           AutoSize = True
@@ -112,7 +112,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
         end
         object Image2: TImage
           Left = 8
-          Top = 61
+          Top = 77
           Width = 32
           Height = 32
           AutoSize = True
@@ -188,7 +188,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
         end
         object Image3: TImage
           Left = 8
-          Top = 95
+          Top = 111
           Width = 32
           Height = 32
           AutoSize = True
@@ -264,7 +264,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
         end
         object Image4: TImage
           Left = 8
-          Top = 128
+          Top = 144
           Width = 32
           Height = 32
           AutoSize = True
@@ -340,7 +340,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
         end
         object rbIconNone: TRadioButton
           Left = 48
-          Top = 16
+          Top = 24
           Width = 68
           Height = 17
           Caption = '无'
@@ -348,7 +348,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
         end
         object rbIconInformation: TRadioButton
           Left = 48
-          Top = 36
+          Top = 52
           Width = 68
           Height = 17
           Caption = '提示'
@@ -358,7 +358,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
         end
         object rbIconQuestion: TRadioButton
           Left = 48
-          Top = 69
+          Top = 85
           Width = 68
           Height = 17
           Caption = '询问'
@@ -366,7 +366,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
         end
         object rbIconWarning: TRadioButton
           Left = 48
-          Top = 103
+          Top = 119
           Width = 68
           Height = 17
           Caption = '警告'
@@ -374,7 +374,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
         end
         object rbIconStop: TRadioButton
           Left = 48
-          Top = 136
+          Top = 152
           Width = 68
           Height = 17
           Caption = '错误'
@@ -453,12 +453,12 @@ object CnMessageBoxForm: TCnMessageBoxForm
           '是/否/取消'
           '重试/取消'
           '终止/重试/忽略')
-        TabOrder = 4
+        TabOrder = 3
         OnClick = rgButtonClick
       end
       object rgDefaultButton: TRadioGroup
         Left = 8
-        Top = 184
+        Top = 208
         Width = 121
         Height = 89
         Caption = '默认按钮(&D)'
@@ -467,7 +467,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
           '第一个'
           '第二个'
           '第三个')
-        TabOrder = 3
+        TabOrder = 5
       end
       object gbResult: TGroupBox
         Left = 320
@@ -475,7 +475,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
         Width = 121
         Height = 157
         Caption = '函数返回值(&R)'
-        TabOrder = 5
+        TabOrder = 4
         object cbResultOK: TCheckBox
           Left = 8
           Top = 16
@@ -553,11 +553,11 @@ object CnMessageBoxForm: TCnMessageBoxForm
       end
       object gbProject: TGroupBox
         Left = 8
-        Top = 328
+        Top = 352
         Width = 121
         Height = 73
         Caption = '用户模板(&P)'
-        TabOrder = 7
+        TabOrder = 8
         object btnDeleteProject: TButton
           Left = 64
           Top = 41
@@ -589,7 +589,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
       end
       object btnPreview: TButton
         Left = 366
-        Top = 379
+        Top = 403
         Width = 75
         Height = 21
         Caption = '预览(&V)'
@@ -598,7 +598,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
       end
       object GroupBox1: TGroupBox
         Left = 8
-        Top = 280
+        Top = 304
         Width = 121
         Height = 41
         Caption = '扩展风格(&X)'
@@ -616,9 +616,9 @@ object CnMessageBoxForm: TCnMessageBoxForm
         Left = 136
         Top = 312
         Width = 177
-        Height = 89
+        Height = 113
         Caption = '调用方式(&S)'
-        TabOrder = 8
+        TabOrder = 7
         object rbCodeAPI: TRadioButton
           Left = 8
           Top = 32
@@ -641,20 +641,28 @@ object CnMessageBoxForm: TCnMessageBoxForm
         end
         object chkUseHandle: TCheckBox
           Left = 24
-          Top = 48
+          Top = 70
           Width = 145
           Height = 17
           Caption = '使用 Handle 作父句柄'
-          TabOrder = 2
+          TabOrder = 3
         end
         object rbMsgDlg: TRadioButton
           Left = 8
-          Top = 64
+          Top = 88
           Width = 161
           Height = 17
           Caption = 'MessageDlg'
-          TabOrder = 3
+          TabOrder = 4
           OnClick = rgButtonClick
+        end
+        object chkWideVer: TCheckBox
+          Left = 24
+          Top = 50
+          Width = 145
+          Height = 17
+          Caption = '使用 MessageBoxW'
+          TabOrder = 2
         end
       end
     end
@@ -861,7 +869,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
   end
   object btnHelp: TButton
     Left = 390
-    Top = 457
+    Top = 481
     Width = 75
     Height = 21
     Caption = '帮助(&H)'
@@ -870,7 +878,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
   end
   object btnOK: TButton
     Left = 230
-    Top = 457
+    Top = 481
     Width = 75
     Height = 21
     Caption = '确定(&O)'
@@ -880,7 +888,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
   end
   object btnCancel: TButton
     Left = 310
-    Top = 457
+    Top = 481
     Width = 75
     Height = 21
     Cancel = True
@@ -893,13 +901,13 @@ object CnMessageBoxForm: TCnMessageBoxForm
     Filter = '对话框模板文件(*.ini)|*.ini'
     Options = [ofHideReadOnly, ofFileMustExist, ofEnableSizing]
     Left = 8
-    Top = 456
+    Top = 480
   end
   object SaveDialog: TSaveDialog
     DefaultExt = 'ini'
     Filter = '对话框模板文件(*.ini)|*.ini'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
     Left = 40
-    Top = 456
+    Top = 480
   end
 end

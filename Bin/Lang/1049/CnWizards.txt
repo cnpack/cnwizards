@@ -147,6 +147,7 @@ TCnMessageBoxForm.cbResultYes.Caption=IDYES
 TCnMessageBoxForm.cbResultNo.Caption=IDNO
 TCnMessageBoxForm.grpCall.Caption=Используемая процедура
 TCnMessageBoxForm.chkUseHandle.Caption=Исп. "Handle" родителя
+TCnMessageBoxForm.chkWideVer.Caption=Use MessageBoxW
 TCnMessageBoxForm.gbProject.Caption=Шаблоны
 TCnMessageBoxForm.btnDeleteProject.Caption=Удал.
 TCnMessageBoxForm.btnAddProject.Caption=Добав.

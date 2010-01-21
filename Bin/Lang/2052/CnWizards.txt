@@ -147,6 +147,7 @@ TCnMessageBoxForm.cbResultYes.Caption=IDYES
 TCnMessageBoxForm.cbResultNo.Caption=IDNO
 TCnMessageBoxForm.grpCall.Caption=调用方式(&S)
 TCnMessageBoxForm.chkUseHandle.Caption=使用 Handle 作父句柄
+TCnMessageBoxForm.chkWideVer.Caption=使用 MessageBoxW
 TCnMessageBoxForm.gbProject.Caption=用户模板(&P)
 TCnMessageBoxForm.btnDeleteProject.Caption=删除(&L)
 TCnMessageBoxForm.btnAddProject.Caption=增加(&E)
