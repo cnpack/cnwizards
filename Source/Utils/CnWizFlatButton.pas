@@ -101,46 +101,6 @@ const
     ($006A240A, $006A240A, $006A240A, $666666);
   csArrowColor = clBlack;
 
-var
-  PopupMenuHook: HHOOK;
-  ButtonList: TList;
-
-procedure ReleasePopupMenuHooks;
-begin
-  if PopupMenuHook <> 0 then
-  begin
-    UnhookWindowsHookEx(PopupMenuHook);
-    PopupMenuHook := 0;
-  end;
-end;
-
-function PopupMenuGetMsgHook(Code: Integer; WParam: Longint; var Msg: TMsg): Longint; stdcall;
-var
-  i: Integer;
-begin
-  Result := CallNextHookEx(PopupMenuHook, Code, WParam, Longint(@Msg));
-  if Result <> 0 then Exit;
-  if (Code = MSGF_MENU) and (Msg.Message = WM_MENUSELECT) and
-    (HiWord(Msg.WParam) = $FFFF) and (Msg.LParam = 0) then
-  begin
-    for i := 0 to ButtonList.Count - 1 do
-    begin
-      TCnWizFlatButton(ButtonList[i]).IsDropdown := False;
-      TCnWizFlatButton(ButtonList[i]).UpdateSize;
-    end;
-    ReleasePopupMenuHooks;
-  end
-end;
-
-procedure InitPopupMenuHooks;
-begin
-  if PopupMenuHook = 0 then
-  begin
-    PopupMenuHook := SetWindowsHookEx(WH_MSGFILTER, @PopupMenuGetMsgHook, 0,
-      GetCurrentThreadID);
-  end;
-end;
-
 { TCnWizFlatButton }
 
 constructor TCnWizFlatButton.Create(AOwner: TComponent);
@@ -153,12 +113,10 @@ begin
   FTimer.Interval := 500;
   FTimer.OnTimer := OnTimer;
   UpdateSize;
-  ButtonList.Add(Self);
 end;
 
 destructor TCnWizFlatButton.Destroy;
 begin
-  ButtonList.Remove(Self);
   inherited;
 end;
 
@@ -248,8 +206,8 @@ begin
   begin
     P := ClientToScreen(Point(0, Height));
     IsDropdown := True;
-    InitPopupMenuHooks;
     FDropdownMenu.Popup(P.x, P.y);
+    IsDropdown := False;
   end;
 end;
 
@@ -319,11 +277,5 @@ begin
     FTimer.Enabled := IsMouseEnter;
   end;
 end;
-
-initialization
-  ButtonList := TList.Create;
-
-finalization
-  FreeAndNil(ButtonList);
 
 end.
