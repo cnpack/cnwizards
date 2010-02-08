@@ -1,0 +1,13 @@
+﻿!LanguageID=1031
+!LanguageName=German
+!TranslationAuthor=Ralf Schroedter
+!TranslationAuthorEmail=ralf@schroedter-online.de
+!TranslationDefaultFont=Tahoma,8,,,,
+csHintStr=Hint
+csInstallSucc=CnPack IDE Wizards wurden installiert in:<BR>
+csInstallSuccEnd=Starten Sie Setup erneu zum deinstallieren.
+csUnInstallSucc=CnPack IDE Wizards wurden deinstalliert von:<BR>
+csUnInstallSuccEnd=Starten Sie Setup erneut zum installieren.
+csInstallFail=Kann kein Delphi oder C++Builder finden, um CnPack IDE Wizards zu installieren.
+csUnInstallFail=CnPack IDE Wizards wurden bereits deaktiviert.
+csSetupCmdHelp=Dieses Werkzeug unterstüzt die Kommandozeile ohne das Hauptformular anzuzeigen.<BR><BR>Kommando Zeilen Parameter:<BR><BR>         -i oder /i oder -install oder /install installiert in die Programmierumgebung<BR>         -u oder /u oder -uninstall oder /uninstall Deinstalliert CNPack aus der Programmierumgebung.<BR>         -n oder /n oder -NoMsg oder /NoMsg zeige NICHT die Erfolgsmeldung nach dem Installationsvorgang.<BR>         -? oder /? oder -h oder /h Zeigt die Kommandozeilen Hilfe an.

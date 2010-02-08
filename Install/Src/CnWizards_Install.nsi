@@ -238,6 +238,7 @@ OutFile "..\Output\${INSTALLER_NAME}"
 !include "Lang\CnWizInst_chs.nsh"
 !include "Lang\CnWizInst_cht.nsh"
 !include "Lang\CnWizInst_ru.nsh"
+!include "Lang\CnWizInst_de.nsh"
 
 !verbose 4
 
@@ -394,6 +395,8 @@ InitOk:
   File "..\..\Bin\Lang\1033\*.*"
   SetOutPath $INSTDIR\Lang\1049
   File "..\..\Bin\Lang\1049\*.*"
+  SetOutPath $INSTDIR\Lang\1031
+  File "..\..\Bin\Lang\1031\*.*"
   SetOutPath $INSTDIR\PSDecl
   File "..\..\Bin\PSDecl\*.*"
   SetOutPath $INSTDIR\PSDeclEx
