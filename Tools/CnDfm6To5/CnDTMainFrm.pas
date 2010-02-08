@@ -1,7 +1,7 @@
 {******************************************************************************}
 {                       CnPack For Delphi/C++Builder                           }
 {                     中国人自己的开放源码第三方开发包                         }
-{                   (C)Copyright 2001-2009 CnPack 开发组                       }
+{                   (C)Copyright 2001-2010 CnPack 开发组                       }
 {                   ------------------------------------                       }
 {                                                                              }
 {            本开发包是开源的自由软件，您可以遵照 CnPack 的发布协议来修        }
@@ -121,7 +121,7 @@ var
     '支持文本格式和二进制格式的窗体。' + #13#10 +
     '' + #13#10 +
     '软件作者 周劲羽 (zjy@cnpack.org)' + #13#10 +
-    '版权所有 (C)2001-2009 CnPack 开发组';
+    '版权所有 (C)2001-2010 CnPack 开发组';
 
   csResults: array[TDFMConvertResult] of string =
     ('SSucc', 'SOpenFail', 'SSaveFail', 'SInvalidFormat');

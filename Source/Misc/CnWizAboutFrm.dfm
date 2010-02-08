@@ -43,7 +43,7 @@ object CnWizAboutForm: TCnWizAboutForm
     Top = 68
     Width = 184
     Height = 13
-    Caption = '版权所有: 2001-2009 CnPack 开发组'
+    Caption = '版权所有: 2001-2010 CnPack 开发组'
   end
   object lblWeb: TLabel
     Left = 96

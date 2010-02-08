@@ -1,6 +1,6 @@
 ﻿CnPack IDE 專家包發佈協議
 
-CnPack IDE Wizards（以下簡稱 CnWizards）的版權（2001-2009）屬於 CnPack 開發組以及其他提供代碼的作者所有。本協議覆蓋範圍為 CnPack 開發組所書寫的代碼、文檔以及其他工作內容。非 CnPack 開發組部分的版權事宜，需與各自的作者聯繫。
+CnPack IDE Wizards（以下簡稱 CnWizards）的版權（2001-2010）屬於 CnPack 開發組以及其他提供代碼的作者所有。本協議覆蓋範圍為 CnPack 開發組所書寫的代碼、文檔以及其他工作內容。非 CnPack 開發組部分的版權事宜，需與各自的作者聯繫。
 
 本產品及源碼發佈所根據的協議來源於 http://www.opensource.org 的官方開源協議，具體表述如下：
 
