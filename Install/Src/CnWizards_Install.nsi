@@ -419,8 +419,11 @@ InitOk:
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CnWizards" "UninstallString" '"$INSTDIR\uninst.exe"'
 
   ; 删除以前的开始菜单项
+  Delete "$SMPROGRAMS\${APPNAMEDIR}\*.*"
   RMDir /r "$SMPROGRAMS\${APPNAMEDIR}"
+  Delete "$SMPROGRAMS\CnPack IDE 专家包\*.*"
   RMDir /r "$SMPROGRAMS\CnPack IDE 专家包"
+  Delete "$SMPROGRAMS\CnPack IDE 盡產\*.*"
   RMDir /r "$SMPROGRAMS\CnPack IDE 盡產"
 
   ;  创建开始菜单项
@@ -731,6 +734,7 @@ Section "Uninstall"
   RMDir /r $INSTDIR\Lang
   Delete "$INSTDIR\Source\*.*"
   RMDir /r $INSTDIR\Source
+  Delete "$SMPROGRAMS\${APPNAMEDIR}\*.*"
   RMDir /r "$SMPROGRAMS\${APPNAMEDIR}"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CnWizards"
 
