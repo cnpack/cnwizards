@@ -20,6 +20,7 @@ type
      ideD1100, ideD1101, ideD1103,
      ideD1200,
      ideD1400,
+     ideD1500,
      ideCSB100,
      ideBCB300, ideBCB301,
      ideBCB400, ideBCB401, ideBCB402,
@@ -809,6 +810,14 @@ begin
   Result := ideD1400;
 end;
 
+function GetDelphi15Version: TBorlandIdeVersion;
+const
+  CoreIde1400: TVersionNumber =
+    (Major: 15; Minor: 0; Release: 0; Build: 0);
+begin
+  Result := ideD1500;
+end;
+
 function GetBorlandIdeVersion: TBorlandIdeVersion;
 begin
   // We only actually detect the version once per session.
@@ -905,6 +914,11 @@ begin
     Result := GetDelphi14Version;
     Assert(Result in [ideD1400]);
   {$ENDIF VER210}
+
+  {$IFDEF VER220}
+    Result := GetDelphi15Version;
+    Assert(Result in [ideD1500]);
+  {$ENDIF}
 
   if Result = ideUnknown then
     MessageDlg('Unknown IDE major version detected.  Please update This File.', mtError, [mbOK], 0);

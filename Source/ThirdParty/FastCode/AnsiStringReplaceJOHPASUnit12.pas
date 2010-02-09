@@ -2,6 +2,8 @@ unit AnsiStringReplaceJOHPASUnit12;
 
 interface
 
+{$I CnPack.inc}
+
 {$R-,Q-}
 
 uses
@@ -145,7 +147,7 @@ begin
             InitialiseAnsiUpcase; {CodePage Changed - Update Lookup Table}
         end
       else
-        PosExFunction := PosEx;
+        PosExFunction := {$IFDEF DELPHI15}@{$ENDIF}PosEx;
       if rfReplaceAll in Flags then
         begin
           if (OldLen = 1) and (NewLen = 1) then
@@ -160,15 +162,15 @@ begin
                   repeat
                     Dec(Remainder);
                     if AnsiUpcase[P[Remainder]] = Ch then
-                      P[Remainder] := NewPattern[1];
+                      P[Remainder] := {$IFDEF DELPHI15}Char{$ENDIF}(NewPattern[1]);
                   until Remainder = 0;
                 end
               else
                 begin
                   repeat
                     Dec(Remainder);
-                    if P[Remainder] = OldPattern[1] then
-                      P[Remainder] := NewPattern[1];
+                    if P[Remainder] = {$IFDEF DELPHI15}Char{$ENDIF}(OldPattern[1]) then
+                      P[Remainder] := {$IFDEF DELPHI15}Char{$ENDIF}(NewPattern[1]);
                   until Remainder = 0;
                 end;
               Exit;

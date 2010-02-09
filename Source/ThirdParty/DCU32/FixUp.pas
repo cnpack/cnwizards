@@ -193,7 +193,7 @@ procedure SkipFixups(Ofs: Cardinal);
 {Move CodeFixups to the next fixup with Offset>=Ofs}
 begin
   while CodeFixupCnt>0 do begin
-    if (CodeFixups^.OfsF and FixOfsMask)>=Ofs then
+    if (CodeFixups^.OfsF and FixOfsMask)>= Integer(Ofs) then
       Break;
     SetFixEnd;
     Inc(CodeFixups);
@@ -204,7 +204,7 @@ end ;
 function CurFixup(Ofs: Cardinal): PFixupRec;
 {If CodeFixups^ has the Offset=Ofs return it, else - Nil}
 begin
-  if (CodeFixupCnt>0)and((CodeFixups^.OfsF and FixOfsMask)=Ofs) then
+  if (CodeFixupCnt>0)and((CodeFixups^.OfsF and FixOfsMask)= Integer(Ofs)) then
     Result := CodeFixups
   else
     Result := Nil;
@@ -222,7 +222,7 @@ begin
   Dec(CodeFixupCnt);
   if CodeFixupCnt<=0 then
     Exit;
-  if (CodeFixups^.OfsF and FixOfsMask)>Ofs then
+  if (CodeFixups^.OfsF and FixOfsMask)> Integer(Ofs) then
     Exit;
   Result := true;
 end ;

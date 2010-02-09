@@ -1066,7 +1066,11 @@ begin
 {$IFDEF DELPHI14}
   Result := Result + 'CodeGear\RAD Studio\7.0';
 {$ELSE}
+{$IFDEF DELPHI15}
+  Result := Result + 'Embarcadero\BDS\8.0';
+{$ELSE}
   Error: Unknown Compiler
+{$ENDIF}
 {$ENDIF}
 {$ENDIF}
 {$ENDIF}

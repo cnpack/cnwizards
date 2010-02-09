@@ -941,6 +941,7 @@ begin
   end;
 end;
 
+{$HINTS OFF}
 function TCnSrcEditorKey.DoRename(View: IOTAEditView; Key, ScanCode: Word;
   Shift: TShiftState; var Handled: Boolean): Boolean;
 var
@@ -1226,6 +1227,7 @@ begin
 
   Handled := True;
 end;
+{$HINTS ON}
 
 function TCnSrcEditorKey.DoSearchAgain(View: IOTAEditView; Key, ScanCode: Word;
   Shift: TShiftState; var Handled: Boolean): Boolean;

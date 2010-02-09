@@ -1446,7 +1446,7 @@ begin
 
   // ±£´æ°´¼üÐòÁÐ
   KeyDownChar := VK_ScanCodeToAscii(Key, ScanCode);
-  FKeyQueue := FKeyQueue + KeyDownChar;
+  FKeyQueue := FKeyQueue + string(KeyDownChar);
   if Length(FKeyQueue) > csKeyQueueLen then
     FKeyQueue := StrRight(FKeyQueue, csKeyQueueLen);
 

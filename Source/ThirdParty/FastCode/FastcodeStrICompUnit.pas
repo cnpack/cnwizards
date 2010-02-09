@@ -30,6 +30,7 @@ unit FastcodeStrICompUnit;
 interface
 
 {$I Fastcode.inc}
+{$I CnPack.inc}
 
 type
   FastcodeStrICompFunction = function(const Str1, Str2: PChar): Integer;

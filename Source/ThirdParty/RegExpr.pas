@@ -39,6 +39,8 @@ unit RegExpr;
 
 interface
 
+{$I CnPack.inc}
+
 // ======== Determine compiler
 {$IFDEF VER80} Sorry, TRegExpr is for 32-bits Delphi only. Delphi 1 is not supported (and whos really care today?!). {$ENDIF}
 {$IFDEF VER90} {$DEFINE D2} {$ENDIF} // D2
@@ -68,7 +70,7 @@ interface
 {$ENDIF}
 
 // ======== Define options for TRegExpr engine
-{.$DEFINE UniCode} // Unicode support
+{$DEFINE UniCode} // Unicode support
 {$DEFINE RegExpPCodeDump} // p-code dumping (see Dump method)
 {$IFNDEF FPC} // the option is not supported in FreePascal
  {$DEFINE reRealExceptionAddr} // exceptions will point to appropriate source line, not to Error procedure
@@ -139,10 +141,12 @@ const
     '0123456789' //###0.940
   + 'abcdefghijklmnopqrstuvwxyz'
   + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ_';
+  {$WARNINGS OFF}
   RegExprLineSeparators : RegExprString =// default value for LineSeparators
    #$d#$a{$IFDEF UniCode}+#$b#$c#$2028#$2029#$85{$ENDIF}; //###0.947
   RegExprLinePairedSeparator : RegExprString =// default value for LinePairedSeparator
    #$d#$a;
+  {$WARNINGS ON}
   { if You need Unix-styled line separators (only \n), then use:
   RegExprLineSeparators = #$a;
   RegExprLinePairedSeparator = '';
@@ -392,8 +396,8 @@ type
     property ModifierR : boolean index 2 read GetModifier write SetModifier;
     // Modifier /r - use r.e.syntax extended for russian,
     // (was property ExtSyntaxEnabled in previous versions)
-    // If true, then а-€  additional include russian letter 'Є',
-    // ј-я  additional include '®', and а-я include all russian symbols.
+    // If true, then ?€  additional include russian letter '?,
+    // ?? additional include '?, and ??include all russian symbols.
     // You have to turn it off if it may interfere with you national alphabet.
     // , initialized from RegExprModifierR
 
@@ -1449,7 +1453,7 @@ procedure TRegExpr.Tail (p : PRegExprChar; val : PRegExprChar);
    // shr after subtraction to calculate widechar distance %-( )
    // so, if difference is negative we have .. the "feature" :(
    // I could wrap it in $IFDEF UniCode, but I didn't because
-   // "P Ц Q computes the difference between the address given
+   // "P ?Q computes the difference between the address given
    // by P (the higher address) and the address given by Q (the
    // lower address)" - Delphi help quotation.
    else PRENextOff (scan + REOpSz)^ := val - scan; //###0.933
@@ -1560,17 +1564,17 @@ const
    #$418,#$419,#$41A,#$41B,#$41C,#$41D,#$41E,#$41F,
    #$420,#$421,#$422,#$423,#$424,#$425,#$426,#$427,
    #$428,#$429,#$42A,#$42B,#$42C,#$42D,#$42E,#$42F,#0);
- RusRangeLoLow = #$430{'а'};
+ RusRangeLoLow = #$430{'?};
  RusRangeLoHigh = #$44F{'€'};
- RusRangeHiLow = #$410{'ј'};
- RusRangeHiHigh = #$42F{'я'};
+ RusRangeHiLow = #$410{'?};
+ RusRangeHiHigh = #$42F{'?};
 {$ELSE}
  RusRangeLo = 'абвгдеЄжзийклмнопрстуфхцчшщъыьэю€';
- RusRangeHi = 'јЅ¬√ƒ≈®∆«»… ЋћЌќѕ–—“”‘’÷„ЎўЏџ№Ёёя';
- RusRangeLoLow = 'а';
+ RusRangeHi = 'јЅ¬√ƒ≈®∆«»… ЋћЌќѕ–—“”‘’÷„ЎўЏџ№Ёё?;
+ RusRangeLoLow = '?;
  RusRangeLoHigh = '€';
- RusRangeHiLow = 'ј';
- RusRangeHiHigh = 'я';
+ RusRangeHiLow = '?;
+ RusRangeHiHigh = '?;
 {$ENDIF}
 
 function TRegExpr.CompileRegExpr (exp : PRegExprChar) : boolean;
@@ -2295,8 +2299,12 @@ function TRegExpr.ParseAtom (var flagp : integer) : PRegExprChar;
              if RangeEnd = EscChar then begin
                {$IFDEF UniCode} //###0.935
                if (ord ((regparse + 1)^) < 256)
-                  and (char ((regparse + 1)^)
-                        in ['d', 'D', 's', 'S', 'w', 'W']) then begin
+                  and (
+                  {$IFDEF DELPHI2009_UP}
+                  CharInSet(char ((regparse + 1)^), ['d', 'D', 's', 'S', 'w', 'W'])
+                  {$ELSE}
+                  char ((regparse + 1)^) in ['d', 'D', 's', 'S', 'w', 'W']
+                  {$ENDIF}) then begin
                {$ELSE}
                if (regparse + 1)^ in ['d', 'D', 's', 'S', 'w', 'W'] then begin
                {$ENDIF}
@@ -3590,7 +3598,7 @@ procedure TRegExpr.SetInputString (const AInputString : RegExprString);
   fInputStart := PChar (fInputString);
   Len := length (fInputString);
   fInputEnd := PRegExprChar (integer (fInputStart) + Len); ??
-  !! startp/endp все равно будет опасно использовать ?
+  !! startp/endp вс?равн?буде?опасно использовать ?
   }
  end; { of procedure TRegExpr.SetInputString
 --------------------------------------------------------------}
@@ -3678,7 +3686,13 @@ function TRegExpr.Substitute (const ATemplate : RegExprString) : RegExprString;
     else
      while (p < TemplateEnd) and
       {$IFDEF UniCode} //###0.935
-      (ord (p^) < 256) and (char (p^) in Digits)
+      (ord (p^) < 256) and (
+      {$IFDEF DELPHI2009_UP}
+      CharInSet(p^, Digits)
+      {$ELSE}
+      char (p^) in Digits
+      {$ENDIF}
+      )
       {$ELSE}
       (p^ in Digits)
       {$ENDIF}

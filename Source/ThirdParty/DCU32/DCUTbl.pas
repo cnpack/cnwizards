@@ -28,6 +28,8 @@ freely, subject to the following restrictions:
 *)
 interface
 
+{$I CnPack.inc}
+
 uses
   SysUtils,Classes,DCU32,DCP;
 
@@ -87,7 +89,13 @@ begin
     if SurePkg then
       Exit;
   end ;
-  if not (AnsiLastChar(S)^ in [{$IFNDEF Linux}':',{$ENDIF} DirSep]) then
+  if not (
+  {$IFDEF DELPHI2009_UP}
+  CharInSet(AnsiLastChar(S)^, [{$IFNDEF Linux}':',{$ENDIF} DirSep])
+  {$ELSE}
+  AnsiLastChar(S)^ in [{$IFNDEF Linux}':',{$ENDIF} DirSep]
+  {$ENDIF}
+  ) then
     S := S + DirSep;
   Result := PathList.Add(S);
 end ;
@@ -106,7 +114,13 @@ begin
       Break;
     I := P;
     while (P <= L) and (DirList[P] <> PathSep) do begin
-      if DirList[P] in LeadBytes then
+      if
+      {$IFDEF DELPHI2009_UP}
+      CharInSet(DirList[P], LeadBytes)
+      {$ELSE}
+      DirList[P] in LeadBytes
+      {$ENDIF}
+      then
         Inc(P);
       Inc(P);
     end;

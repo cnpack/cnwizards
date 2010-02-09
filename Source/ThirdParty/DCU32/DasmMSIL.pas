@@ -628,19 +628,19 @@ begin
      atJmpofs1: begin
        if Res<0 then
          Res := crJCond;
-       RegRef(CmdOfs+ShortInt(DP^),Res,IPRegRef);
+       RegRef(LongInt(CmdOfs)+ShortInt(DP^),Res,IPRegRef);
       end ;
      atJmpofs4: begin
        if Res<0 then
          Res := crJCond;
-       RegRef(CmdOfs+LongInt(DP^),Res,IPRegRef);
+       RegRef(LongInt(CmdOfs)+LongInt(DP^),Res,IPRegRef);
       end ;
      atJmpofs4tbl: begin
        Res := crJCond;
        Cnt := integer(DP^);
        while Cnt>0 do begin
          Inc(PChar(DP),SizeOf(integer));
-         RegRef(CmdOfs+LongInt(DP^),Res,IPRegRef);
+         RegRef(LongInt(CmdOfs)+LongInt(DP^),Res,IPRegRef);
          Dec(Cnt);
        end ;
       end ;

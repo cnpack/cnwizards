@@ -31,6 +31,7 @@ unit FastcodeUpperCaseUnit;
 interface
 
 {$I Fastcode.inc}
+{$I CnPack.inc}
 
 uses
   SysUtils;
@@ -519,14 +520,21 @@ procedure InitializeLookUpTable;
 var
  I : Byte;
  S1, S2 : AnsiString;
-
+ {$IFDEF DELPHI15}
+ S3: string;
+ {$ENDIF}
 begin
  SetLength(LookUpTable, 256);
  for I := 0 to 255 do
   begin
    S1 := Char(I);
-   S2 := UpperCase(S1);
+   S2 := {$IFDEF DELPHI15}AnsiString{$ENDIF}(UpperCase(S1));
+   {$IFDEF DELPHI15}
+   S3 := string(S2);
+   LookUpTable[I] := S3[1];
+   {$ELSE}
    LookUpTable[I] := S2[1];
+   {$ENDIF}
   end;
 end;
 
