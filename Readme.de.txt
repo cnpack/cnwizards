@@ -10,85 +10,95 @@
                          CnPack Team 2010.01
 
 
-=====================================================
-1. CnWizards Introduction
-=====================================================
+======================================================================
+1. CnWizards Einleitung
+======================================================================
 
-    CnWizards is CnPack's main product. The full name in English is 
-'CnPack IDE Wizards'. It's a free plug-in tool set used in Delphi/
-C++Builder/BDS to improve development efficiency.
+    CnWizards ist das Hauptprodukt von CnPack. Der vollständige 
+Name im Englischen heißt 'CnPack IDE Wizards'. Es handelt sich 
+um eine freie Plug-In Werkzeug-Sammlung, die in Delphi/C++Builder 
+eingebunden werden kann, damit die Effizienz bei der Entwicklung 
+gesteigert werden kann.
 
-    CnWizards is designed to aide programmers who use Delphi 5 6 7,
-C++Builder 5 6 and BDS 2005 2006, RAD Studio 2007 2009 2010.
+    CnWizards wurde entworfen, um Programmierern die mit Delphi 5 6 7,
+C++Builder 5 6 oder BDS 2005 2006 oder RAD Studio 2007 2009 2010 
+arbeiten, die Arbeit zu erleichtern.
 
-    The offical version of CnWizards includes follow languages: 
-Simplified Chinese, Traditional Chinese, English, Russian and German.
+    Die offizielle Version der CnWizards beinhalt folgende Sprachen: 
+Simplified Chinese, Traditional Chinese, Englisch, Russisch und Deutsch.
 
-=====================================================
-2. Software Copyright Statement
-=====================================================
+======================================================================
+2. Software Copyright 
+======================================================================
 
-    CnPack products is published in Open Source mode under CnPack 
-License, and also, is protected by it.
-
-    The License file describes it. Please see license file for details.
-
-    Welcome to CnPack website to get latest information.
-
+    Die Produkte von CnPack werden unter der CnPack Lizenz 
+veröffentlicht und sind von dieser auch urheberrechtlich geschützt.
+	
+    Die Lizenz-Datei beschreibt den Schutz, bitte lesen Sie die 
+Datei, um weitere Einzelheiten zu erfahren.
+	
+    Auf der CnPack Internetseite können Sie die neuesten 
+Informationen erfahren.
+	
     http://www.cnpack.org
 
 ======================================================================
 3. Installation
 ======================================================================
 
-    After downloading the setup file from our website, you can run it
-directly to install CnWizards. For more information, please see the help
-file.
+    Nach dem Herunterladen des Installations-Programms von unserer 
+Internet-Seite können Sie das Programm starten, um die cnWizards zu 
+installieren. Für weitere Informationen lesen Sie bitte die Hilfe-Datei.
 
-    If you meet any problem during using CnWizards, please contact us:
+    Wenn Sie irgendwelche Probleme während der Arbeit mit cnWizards haben,
+kontaktieren Sie uns bitte unter:
 
     http://www.cnpack.org
     mailto:master@cnpack.org
 
 ======================================================================
-4. Structure
+4. Struktur
 ======================================================================
 
-    There are several directories in CnWizards source codes:
-
-    1. Bin. It contains binaries output and other run time files, 
-            including language files.
-    2. Dcu. Temporary directory for compiling.
-    3. Doc. It contains all documents of CnWizards.
-    4. Help. It contains html source files of CnWizards' help file.
-    5. Install. It contains installation scripts.
-    6. Make. It contains auto-build scripts.
-    7. Source. It contains all source codes of CnWizards.
-    8. Tools. It contains the source codes of other tools of CnWizards.
-
+    Es befinden sich mehrere Unter-Verzeichnisse in dem Quelltext 
+der cnWizards:
+	
+    1. Bin:     beinhaltet die Binär-Dateien und weitere Dateien, die
+                für die Laufzeit benötigt werden, inklusive der Dateien
+                für die Spachen Einstellung.
+    2. Dcu:     Temporäres Verzeichnis für das kompilieren.
+    3. Doc:     beinhaltet die Dokumentation der CnWizards.
+    4. Help:    beinhaltet html Quelltext der CnWizards Hilfe Datei.
+    5. Install: beinhaltet die Installations Skripte.
+    6. Make:    beinhaltet Skripte für das automatische Herstellen.
+    7. Source:  beinhaltet den ganzen Quelltext der CnWizards.
+    8. Tools:   beinhaltet den Quelltext der anderen Tools der cnWizards.
+	
 ======================================================================
-5. Downloading
+5. Herunterladen
 ======================================================================
 
-    You can download the latest version from cnpack website, or:
+Sie können die neueste Version von der cnPack Internet-Seite 
+	herunterladen oder:
 
-    CnPack Component Package:  http://download.cnpack.org/CnPack.zip
-    CnWizards Installer: http://download.cnpack.org/CnWizards.exe
-    CnWizards Source:   http://download.cnpack.org/CnWizards_Src.zip
+    CnPack Komponenten Paket: http://download.cnpack.org/CnVcl.zip
+    CnWizards Installer:      http://download.cnpack.org/CnWizards.exe
+    CnWizards Quelltext:      http://download.cnpack.org/CnWizards_Src.zip
 
     SVN: http://code.google.com/p/cnpack/source/checkout
 
 ======================================================================
-6. Compiling And Building
+6. Kompilierung und Herstellung
 ======================================================================
 
-    First you need to download cnpack source code and decompress it into
-the same directory where cnwizards source lays in. Then open the project
-file in "Source" directory to compile. The "Tools" directory contains the 
-source codes of other tools of CnWizards.
+    Als erstes müssen Sie den cnpack Quelltext herunterladen und in das 
+entsprechende Quelltext Verzeichnis dekomprimieren. Dann öffnen sie die 
+Projekt-Datei in dem "Source"-Verzeichnis zum compilieren. Das "Tools" 
+Verzeichnis beinhaltet weitere Quelltexte der anderen Werkzeuge der 
+CnWizards.
 
-    The Auto-Build tool is in "Make" directory. You can run "want.exe" 
-under the command window to get more details.
-
+    Das Werkzeug zum automatischen Herstellen befindet sich in dem "Make" 
+Unter-Verzeichnis. Um weitere Informationen zu erlangen starten Sie
+"want.exe" auf der Kommandozeile.
 
 [EOF]

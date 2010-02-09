@@ -71,8 +71,8 @@ Delphi 5 6 7, C++Builder 5 6 и BDS 2005 2006, RAD Studio 2007 2009 2010.
 
     Вы можете загрузить последнюю версию с нашего сайта или:
 
-    Компоненты CnPack: http://download.cnpack.org/CnPack.zip
-    Дистрибутив CnPack IDE-Мастера: http://download.cnpack.org/CnWizards.exe
+    Компоненты CnPack:               http://download.cnpack.org/CnVcl.zip
+    Дистрибутив CnPack IDE-Мастера:  http://download.cnpack.org/CnWizards.exe
     Исходный код CnPack IDE-Мастера: http://download.cnpack.org/CnWizards_Src.zip
 
     SVN: http://code.google.com/p/cnpack/source/checkout

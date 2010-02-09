@@ -1,19 +1,19 @@
-﻿CnWizards License Agreement
+﻿CnWizards Lizenz Vereinbarung
 
-CnPack IDE Wizards (CnWizards) is Copyright 2001-2010 by CnPack Team and several other authors who have submitted their code for inclusion. This license agreement only covers code written by CnPack Team. You should contact the other authors concerning their respective copyrights and conditions. 
+Das Urheberrecht 2001-2010 der CnPack IDE Wizards (CnWizards) liegt bei dem CnPack Team und weiteren Autoren, die Ihren Quelltext zur Einbeziehung überlassen haben. Diese Lizenz Vereinbarung bezieht sich nur auf den Quelltext, der von dem CnPack Team entwickelt wurde. Sie sollten die anderen Autoren hinsichtlich ihrer jeweiligen Urheberrechts- Bedingungen kontaktieren.
 
-The rules governing the use of CnWizards and the CnWizards source code are derived from the official Open Source Definition, available at http://www.opensource.org. The conditions and limitations are as follows: 
+Die Richtlinien, die den Gebrauch von CnWizards und dem CnWizards Quellencode regeln, werden von der offiziellen Open Source Definition abgeleitet, die bei http://www.opensource.org einsehbar ist. Die Bedingungen und die Beschränkungen sind, wie folgt:
 
-1. Usage of CnWizards binary distributions is permitted for all developers. 
+1. Der Gebrauch der CnWizards Binär-Distribution ist für alle Entwickler erlaubt.
 
-2. You may not use the CnWizards source code to create and distribute custom versions of CnWizards under the "CnPack" or "CnWizards" name. If you do modify and distribute custom versions of CnWizards, the binary distribution must be named differently and clearly marked so users can tell they are not using the official CnWizards distribution. A visible and unmodified version of this license must appear in any modified distribution of CnWizards. 
+2. Sie dürfen den CnWizards Quellencode nicht verwenden, um kundenspezifische Versionen der CnWizards unter dem Namen "CnPack" oder " CnWizards" zu erstellen oder zu verteilen. Wenn Sie kundenspezifische Versionen von CnWizards verteilen, so muss die binäre Verteilung anders genannt werden und es muss klar ersichtlich sein, dass die Benutzer nicht die cnWizards Distribution benutzen. Eine unveränderte Version dieser Lizenz muss in jeder veränderten Distribution von CnWizards enthalten sein.
 
-3. Custom distributions of CnWizards must include all of the custom changes as a patch file that can be applied to the original source code. This restriction is in place to protect the integrity of the original author's source code. No support for modified versions of CnWizards will be provided by the original authors or on the CnWizards website, bbs or mailing lists.
+3. Kundenspezifische Verteilungen von CnWizards müssen alle Änderungen als Patch Datei umfassen, die am ursprünglichen Quellencode angewendet werden kann. Diese Beschränkung ist eingefügt, um die Integrität des ursprünglichen Quellencode des Autors zu schützen. Von den ursprünglichen Autoren oder von der CnWizards Web Seite wird keinerlei Unterstützung für geänderte Versionen der CnWizards gewährt.
 
-4. CnWizards source code can be used in Open Source projects without informing CnPack Team. All Open Source works derived from CnWizards must be distributed under a license compatible with this license and the official Open Source Definition, which can be obtained from http://www.opensource.org/. 
+4. CnWizards Quelltext darf ohne das CnPack Team zu informieren in anderen Open Source Projekten verwendet werden. Jede Open Source Arbeit, die von den CnWizards abgeleitet wird, muss unter einer zu dieser Lizenz kompatiblen Lizenz, sowie der offiziellen Open Source Definition stehen. Die offizielle Open Source Definition kann unter http://www.opensource.org/ beschafft werden.
 
-5. You may not use the CnWizards source code to develop proprietary or commercial products including plugins or libraries for those products without CnPack Team's formal authorization. If you need the authorization, please contact CnPack Team.
+5. Ohne die formelle Autorisierung des CnPack Teams dürfen Sie den Quelltext der CnWizards nicht benutzen, um kommerzielle oder proprietäre Produkte oder Plug-Ins zu erstellen oder zu vertreiben. Wenn Sie die Erlaubnis benötigen, nehmen Sie bitte Kontakt mit dem CnPack Team auf.
 
-Please note that CnPack Team and the other contributing authors hereby state that this package is provided "as is" and without any express or implied warranties, including, but not without limitation, the implied warranties of merchantability and fitness for a particular purpose. In other words, we accept no liability for any damage that may result from using CnWizards or programs that use the CnWizards source code. 
+Bitte beachten Sie, dass das CnPack Team und die anderen beteiligten Autoren herausstellen, dass dieses Paket als "so wie es ist" bereitgestellt wird; ausdrücklich ohne irgendwelche Garantien einzuschließen; jedoch nicht ohne Beschränkung der implizierten Garantie der Marktgängigkeit und Eignung zu einem bestimmten Zweck. Mit anderen Worten wir übernehmen keinerlei Haftung für irgendwelchen Schaden, der durch den Einsatz der cnWizards oder durch Programme resultiert, die Teile der cnWizards Quelltexte beinhalten.
 
-If you have questions about this license, please contact CnPack Team.
+Wenn Sie Fragen zu dieser Lizenz haben, kontaktieren Sie bitte das CnPack Team.

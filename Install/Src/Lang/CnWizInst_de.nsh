@@ -4,7 +4,7 @@
 ;                     (C)Copyright 2001-2010 CnPack Team
 ;******************************************************************************
 
-; English Language File for CnWizards Install Script
+; German Language File for CnWizards Install Script
 ; Please Use ANSI Format to Save Language File.
 
 !insertmacro MUI_LANGUAGE "German"
@@ -13,42 +13,42 @@
 LangString APPNAME        1031 "CnPack IDE Wizards"
 
 ; Install Type
-LangString TYPICALINST    1031 "Typical"
-LangString MINIINST       1031 "Minimized"
-LangString CUSTINST       1031 "Custom"
+LangString TYPICALINST    1031 "Typisch"
+LangString MINIINST       1031 "Minimal"
+LangString CUSTINST       1031 "Benutzerdefiniert"
 
 ; Section Name
-LangString PROGRAMDATA    1031 "Data files"
-LangString HELPFILE       1031 "Help Files"
-LangString OTHERTOOLS     1031 "Tools"
+LangString PROGRAMDATA    1031 "Daten-Dateien"
+LangString HELPFILE       1031 "Hilfe-Dateien"
+LangString OTHERTOOLS     1031 "Werkzeuge"
 
 ; Shortcut Name
-LangString SHELP          1031 "CnWizards Help"
+LangString SHELP          1031 "CnWizards Hilfe"
 LangString SHELPCHM       1031 "CnWizards_ENU.chm"
-LangString SENABLE        1031 "Enable CnWizards"
-LangString SDISABLE       1031 "Disable CnWizards"
-LangString SCONFIGIO      1031 "CnWizards Config Import & Export"
-LangString SCLEANIDEHIS   1031 "IDE History Cleaner"
+LangString SENABLE        1031 "aktiviere CnWizards"
+LangString SDISABLE       1031 "deaktiviere CnWizards"
+LangString SCONFIGIO      1031 "CnWizards Koniguration Import & Export Werkzeug"
+LangString SCLEANIDEHIS   1031 "IDE Backup/Restore Konfigurations Werkzeug"
 LangString SASCIICHART    1031 "ASCII Chart"
-LangString SUNINSTALL     1031 "Uninstall"
-LangString SDFMCONVERTOR  1031 "DFM Convertor"
-LangString SDEBUGVIEWER   1031 "Debug Viewer"
-LangString SIDEBRTOOL     1031 "IDE Config Backup & Restore"
+LangString SUNINSTALL     1031 "Deinstallieren"
+LangString SDFMCONVERTOR  1031 "DFM Konvertierungswerkzeug"
+LangString SDEBUGVIEWER   1031 "CnDebug Viewer"
+LangString SIDEBRTOOL     1031 "IDE Backup/Restore Konfigurations-Werkzeug"
 LangString SMANAGEWIZ     1031 "IDE External Wizard Management"
 LangString SRELATIONANALYZER 1031 "Relation Analyzer"
 
 ; Dialog Message
-LangString SQUERYIDE      1031 "Setup has detected some wizard dlls are in using.$\n\
-                                Please close Delphi or C++Builder first.$\n$\n\
-                                Click [OK] to retry and continue.$\n\
-                                Click [Cancel] to exit Setup."
-LangString SQUERYDELETE   1031 "Delete user data files and wizards settings?$\n(If you want to keep them, please click [No].)"
+LangString SQUERYIDE      1031 "Setup hat festgestellt, dass einige DLLs in Gebrauch sind.$\n\
+                                Bitte schliessen Sie Delphi oder C++Builder zuerst.$\n$\n\
+                                Klick [OK] um erneut zu versuchen und fortzufahren.$\n\
+                                Klick [Abbruch] um das Setup zu beenden."
+LangString SQUERYDELETE   1031 "Sollen die Benutzer-Dateien und Werkzeug Einstellungen gelöscht werden?$\n(Wenn Sie sie behalten wollen so klicken Sie bitte auf [NEIN].)"
 
 ; Section Description
-LangString DESCDATA       1031 "The core programs and data files required to use wizards."
-LangString DESCHELP       1031 "Help file for wizards."
-LangString DESDLL         1031 "Install wizard dll file for #DLL#."
-LangString DESCOTHERS     1031 "Other tools, include DFM Convertor etc."
+LangString DESCDATA       1031 "Die Kernprogramme und Daten-Dateien die für den Gebrauch der Wizards benötigt werden."
+LangString DESCHELP       1031 "Hilfe datei für die Wizards."
+LangString DESDLL         1031 "Installiere Wizard DLL für #DLL#."
+LangString DESCOTHERS     1031 "Wertere Werkzeuge, inklusive DFM Konvertor etc."
 
 ; License File
 LicenseLangString SLICENSEFILE 1031 "..\..\License.de.txt"

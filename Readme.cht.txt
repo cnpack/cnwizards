@@ -72,7 +72,7 @@
 
     最新的 CnWizards 源碼可以從 cnpack 開發網站下載，或者使用以下地址：
 
-    cnpack 組件包源碼:  http://download.cnpack.org/CnPack.zip
+    cnpack 組件包源碼:  http://download.cnpack.org/CnVcl.zip
     CnWizards 安裝程序: http://download.cnpack.org/CnWizards.exe
     CnWizards 源代碼:   http://download.cnpack.org/CnWizards_Src.zip
 

@@ -72,9 +72,9 @@ file.
 
     You can download the latest version from cnpack website, or:
 
-    CnPack Component Package:  http://download.cnpack.org/CnPack.zip
-    CnWizards Installer: http://download.cnpack.org/CnWizards.exe
-    CnWizards Source:   http://download.cnpack.org/CnWizards_Src.zip
+    CnPack Component Package:  http://download.cnpack.org/CnVcl.zip
+    CnWizards Installer:       http://download.cnpack.org/CnWizards.exe
+    CnWizards Source:          http://download.cnpack.org/CnWizards_Src.zip
 
     SVN: http://code.google.com/p/cnpack/source/checkout
 
