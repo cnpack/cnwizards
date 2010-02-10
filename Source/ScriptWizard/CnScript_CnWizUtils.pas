@@ -387,6 +387,7 @@ begin
   CL.AddDelphiFunction('Function SameEditPos( Pos1, Pos2 : TOTAEditPos) : Boolean');
   CL.AddDelphiFunction('Function SameCharPos( Pos1, Pos2 : TOTACharPos) : Boolean');
   CL.AddDelphiFunction('Function HWndIsNonvisualComponent( hWnd : HWND) : Boolean');
+  CL.AddDelphiFunction('Procedure TranslateFormFromLangFile( AForm: TCustomForm; const ALangDir, ALangFile: string; LangID: Cardinal)');
 end;
 
 (* === run-time registration functions === *)
@@ -610,6 +611,7 @@ begin
   S.RegisterDelphiFunction(@SameEditPos, 'SameEditPos', cdRegister);
   S.RegisterDelphiFunction(@SameCharPos, 'SameCharPos', cdRegister);
   S.RegisterDelphiFunction(@HWndIsNonvisualComponent, 'HWndIsNonvisualComponent', cdRegister);
+  S.RegisterDelphiFunction(@TranslateFormFromLangFile, 'TranslateFormFromLangFile', cdRegister);
 end;
 
 { TPSImport_CnWizUtils }

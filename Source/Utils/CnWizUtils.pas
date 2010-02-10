@@ -725,14 +725,18 @@ function RegExpContainsText(ARegExpr: TRegExpr; const AText: string;
   APattern: string; IsMatchStart: Boolean = False): Boolean;
 {* 判断正则表达式匹配}
 
+procedure TranslateFormFromLangFile(AForm: TCustomForm; const ALangDir, ALangFile: string;
+  LangID: Cardinal);
+{* 加载指定的语言文件翻译窗体}
+
 implementation
 
 uses
 {$IFDEF Debug}
   CnDebug,
 {$ENDIF Debug}
-  Math, CnWizOptions, CnWizMultiLang, CnGraphUtils, CnWizIdeUtils,
-  CnPasCodeParser, CnCppCodeParser;
+  Math, CnWizOptions, CnWizMultiLang, CnLangMgr, CnGraphUtils, CnWizIdeUtils,
+  CnPasCodeParser, CnCppCodeParser, CnLangStorage, CnHashLangStorage;
 
 type
   TControlAccess = class(TControl);
@@ -4979,6 +4983,36 @@ begin
   end;
 end;
 
+// 加载指定的语言文件翻译窗体
+procedure TranslateFormFromLangFile(AForm: TCustomForm; const ALangDir, ALangFile: string;
+  LangID: Cardinal);
+var
+  LangMgr: TCnLangManager;
+  Storage: TCnHashLangFileStorage;
+begin
+  LangMgr := nil;
+  Storage := nil;
+  try
+    LangMgr := TCnLangManager.Create(nil);
+    LangMgr.AutoTranslate := False;
+    LangMgr.TranslateTreeNode := True;
+    LangMgr.UseDefaultFont := True;
+    Storage := TCnHashLangFileStorage.Create(nil);
+    Storage.StorageMode := smByDirectory;
+    Storage.FileName := ALangFile;
+    Storage.LanguagePath := ALangDir;
+    LangMgr.LanguageStorage := Storage;
+    if Storage.Languages.Find(LangID) >= 0 then
+    begin
+      LangMgr.CurrentLanguageIndex := Storage.Languages.Find(LangID);
+      LangMgr.TranslateForm(AForm);
+    end;
+  finally
+    LangMgr.Free;
+    Storage.Free;
+  end;
+end;
+  
 initialization
   CnNoIconList := TStringList.Create;
   AddNoIconToList('TMenuItem'); // TMenuItem 等在专家加载之前已注册
