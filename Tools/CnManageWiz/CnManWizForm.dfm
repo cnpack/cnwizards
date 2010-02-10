@@ -1,23 +1,20 @@
 object CnManageWizardForm: TCnManageWizardForm
   Left = 191
   Top = 117
-  Caption = 'CnPack IDE '#19987#23478#31649#29702#24037#20855
-  ClientHeight = 454
-  ClientWidth = 652
+  Width = 660
+  Height = 481
+  Caption = 'CnPack IDE 专家管理工具'
   Color = clBtnFace
   Font.Charset = GB2312_CHARSET
   Font.Color = clWindowText
   Font.Height = -12
-  Font.Name = #23435#20307
+  Font.Name = '宋体'
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  DesignSize = (
-    652
-    454)
   PixelsPerInch = 96
   TextHeight = 12
   object bvl1: TBevel
@@ -45,16 +42,13 @@ object CnManageWizardForm: TCnManageWizardForm
     BevelOuter = bvNone
     Color = clWhite
     TabOrder = 0
-    DesignSize = (
-      652
-      73)
     object lbl2: TLabel
       Left = 52
       Top = 36
       Width = 354
       Height = 12
       Alignment = taCenter
-      Caption = 'CnPack IDE '#19987#23478#21253' - '#36890#36807#27880#20876#34920#23545' IDE '#22806#37096#19987#23478#36827#34892#31649#29702#30340#24037#20855
+      Caption = 'CnPack IDE 专家包 - 通过注册表对 IDE 外部专家进行管理的工具'
       Layout = tlCenter
     end
     object lbl1: TLabel
@@ -63,7 +57,7 @@ object CnManageWizardForm: TCnManageWizardForm
       Width = 138
       Height = 12
       Alignment = taCenter
-      Caption = 'CnPack IDE '#19987#23478#31649#29702#24037#20855
+      Caption = 'CnPack IDE 专家管理工具'
       Layout = tlCenter
     end
     object img1: TImage
@@ -180,7 +174,7 @@ object CnManageWizardForm: TCnManageWizardForm
     Width = 75
     Height = 21
     Anchors = [akLeft, akBottom]
-    Caption = #20851#20110'(&A)'
+    Caption = '关于(&A)'
     TabOrder = 2
     OnClick = btnAboutClick
   end
@@ -200,7 +194,7 @@ object CnManageWizardForm: TCnManageWizardForm
     Height = 21
     Anchors = [akRight, akBottom]
     Cancel = True
-    Caption = #20851#38381'(&C)'
+    Caption = '关闭(&C)'
     ModalResult = 1
     TabOrder = 4
     OnClick = btnCloseClick
@@ -216,7 +210,9 @@ object CnManageWizardForm: TCnManageWizardForm
     object spl1: TSplitter
       Left = 161
       Top = 0
+      Width = 3
       Height = 331
+      Cursor = crHSplit
       AutoSnap = False
       MinSize = 70
     end
@@ -228,17 +224,14 @@ object CnManageWizardForm: TCnManageWizardForm
       Align = alLeft
       BevelOuter = bvNone
       TabOrder = 0
-      DesignSize = (
-        161
-        331)
       object lstIDEs: TListBox
         Left = 16
         Top = 16
         Width = 145
         Height = 302
-        Style = lbOwnerDrawFixed
         Anchors = [akLeft, akTop, akRight, akBottom]
         ItemHeight = 24
+        Style = lbOwnerDrawFixed
         TabOrder = 0
         OnClick = lstIDEsClick
         OnDrawItem = lstIDEsDrawItem
@@ -252,9 +245,6 @@ object CnManageWizardForm: TCnManageWizardForm
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 1
-      DesignSize = (
-        488
-        331)
       object tlb1: TToolBar
         Left = 16
         Top = 14
@@ -263,6 +253,8 @@ object CnManageWizardForm: TCnManageWizardForm
         Align = alNone
         Anchors = [akLeft, akTop, akRight]
         Caption = 'tlb1'
+        EdgeBorders = []
+        Flat = True
         Images = ilToolbar
         ParentShowHint = False
         ShowHint = True
@@ -364,11 +356,11 @@ object CnManageWizardForm: TCnManageWizardForm
         Checkboxes = True
         Columns = <
           item
-            Caption = #19987#23478#21517
+            Caption = '专家名'
             Width = 116
           end
           item
-            Caption = #36335#24452#21450#25991#20214#21517
+            Caption = '路径及文件名'
             Width = 318
           end>
         ColumnClick = False
@@ -388,83 +380,83 @@ object CnManageWizardForm: TCnManageWizardForm
     Left = 580
     Top = 88
     object actRefresh: TAction
-      Caption = #37325#26032#36733#20837'(&R)'
-      Hint = #37325#26032#36733#20837#24403#21069' IDE '#30340#19987#23478#35774#32622
+      Caption = '重新载入(&R)'
+      Hint = '重新载入当前 IDE 的专家设置'
       ImageIndex = 0
       OnExecute = actRefreshExecute
     end
     object actSave: TAction
-      Caption = #20840#37096#20445#23384'(&S)'
-      Hint = #20445#23384#20840#37096' IDE '#20013#25152#20316#30340#20462#25913
+      Caption = '全部保存(&S)'
+      Hint = '保存全部 IDE 中所作的修改'
       ImageIndex = 1
       OnExecute = actSaveExecute
     end
     object actAdd: TAction
-      Caption = #26032#22686#19987#23478'(&W)...'
-      Hint = #25163#24037#28155#21152#19968#26032#19987#23478
+      Caption = '新增专家(&W)...'
+      Hint = '手工添加一新专家'
       ImageIndex = 2
       OnExecute = actAddExecute
     end
     object actRemove: TAction
-      Caption = #21024#38500#19987#23478'(&U)'
-      Hint = #21024#38500#36873#20013#30340#19987#23478
+      Caption = '删除专家(&U)'
+      Hint = '删除选中的专家'
       ImageIndex = 3
       OnExecute = actRemoveExecute
     end
     object actSelectAll: TAction
-      Caption = #20840#36873'(&A)'
-      Hint = #20840#37096#20351#33021
+      Caption = '全选(&A)'
+      Hint = '全部使能'
       ImageIndex = 4
       OnExecute = actSelectAllExecute
     end
     object actSelectNone: TAction
-      Caption = #20840#19981#36873'(&N)'
-      Hint = #20840#37096#31105#29992
+      Caption = '全不选(&N)'
+      Hint = '全部禁用'
       ImageIndex = 5
       OnExecute = actSelectNoneExecute
     end
     object actSelectInverse: TAction
-      Caption = #21453#21521#36873#25321'(&I)'
-      Hint = #21453#21521#36873#25321
+      Caption = '反向选择(&I)'
+      Hint = '反向选择'
       ImageIndex = 6
       OnExecute = actSelectInverseExecute
     end
     object actHelp: TAction
-      Caption = #24110#21161'(&H)'
-      Hint = #26174#31034#24110#21161#20869#23481
+      Caption = '帮助(&H)'
+      Hint = '显示帮助内容'
       ImageIndex = 7
       ShortCut = 112
       OnExecute = actHelpExecute
     end
     object actShowProp: TAction
-      Caption = #26174#31034#19987#23478#25991#20214#23646#24615'(&D)'
-      Hint = #26174#31034#19987#23478#25991#20214#23646#24615
+      Caption = '显示专家文件属性(&D)'
+      Hint = '显示专家文件属性'
       ImageIndex = 8
       OnExecute = actShowPropExecute
     end
     object actExplore: TAction
-      Caption = #25171#24320#25152#22312#30446#24405'(&E)'
-      Hint = #25171#24320#19987#23478#25991#20214#25152#22312#30446#24405
+      Caption = '打开所在目录(&E)'
+      Hint = '打开专家文件所在目录'
       ImageIndex = 11
       OnExecute = actExploreExecute
     end
     object actMoveUp: TAction
-      Caption = #19978#31227
-      Hint = #19978#31227
+      Caption = '上移'
+      Hint = '上移'
       ImageIndex = 9
       Visible = False
       OnExecute = actMoveUpExecute
     end
     object actMoveDown: TAction
-      Caption = #19979#31227
-      Hint = #19979#31227
+      Caption = '下移'
+      Hint = '下移'
       ImageIndex = 10
       Visible = False
       OnExecute = actMoveDownExecute
     end
     object actShellMenu: TAction
-      Caption = #22806#22771#20851#32852#33756#21333'(&L)'
-      Hint = #26174#31034#36164#28304#31649#29702#22120#20013#30340#22806#22771#20851#32852#33756#21333
+      Caption = '外壳关联菜单(&L)'
+      Hint = '显示资源管理器中的外壳关联菜单'
       ImageIndex = 12
       OnExecute = actShellMenuExecute
     end
@@ -473,7 +465,7 @@ object CnManageWizardForm: TCnManageWizardForm
     Left = 32
     Top = 112
     Bitmap = {
-      494C01010C000E00040010001000FFFFFFFFFF00FFFFFFFFFFFFFFFF424D3600
+      494C01010C000E00040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000004000000001002000000000000040
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -1005,7 +997,8 @@ object CnManageWizardForm: TCnManageWizardForm
       FC7FC3FFE07F8000603FC00FE0478000A00FC007F0010000C007C003F0010000
       C007C003F80000008003C001F800C0008003C001F800C0008003C001FC00E000
       8003C003FC0160008003C003FE037000C003C007FE1FB801C009C31FC01FBC01
-      E01EC3FFC01FCF83F83F81FFC01FF38F}
+      E01EC3FFC01FCF83F83F81FFC01FF38F00000000000000000000000000000000
+      000000000000}
   end
   object ilToolbar: TImageList
     Left = 552
@@ -1547,7 +1540,7 @@ object CnManageWizardForm: TCnManageWizardForm
       000000000000}
   end
   object dlgOpenWizard: TOpenDialog
-    Filter = #19987#23478#25991#20214'(*.DLL)|*.dll|'#25152#26377#25991#20214'(*.*)|*.*'
+    Filter = '专家文件(*.DLL)|*.dll|所有文件(*.*)|*.*'
     Left = 608
     Top = 88
   end
