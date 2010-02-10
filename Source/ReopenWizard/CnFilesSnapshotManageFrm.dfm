@@ -1,18 +1,12 @@
-object CnProjectFilesSnapshotManageForm: TCnProjectFilesSnapshotManageForm
+inherited CnProjectFilesSnapshotManageForm: TCnProjectFilesSnapshotManageForm
   Left = 317
   Top = 198
   Width = 408
   Height = 334
   BorderIcons = [biSystemMenu]
-  Caption = '整理文件列表快照'
-  Color = clBtnFace
+  Caption = 'Manage File List Snapshots'
   Constraints.MinHeight = 334
   Constraints.MinWidth = 408
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
   Icon.Data = {
     0000010001002020000001001800A80C00001600000028000000200000004000
     00000100180000000000800C0000000000000000000000000000000000000000
@@ -117,24 +111,22 @@ object CnProjectFilesSnapshotManageForm: TCnProjectFilesSnapshotManageForm
     003F8000003F800001FF800001FF800001FF800001FF800001FF800001FF8000
     03FF800007FF80000FFFFE001FFFFE003FFFFE007FFFFE00FFFFFFFFFFFF}
   KeyPreview = True
-  OldCreateOrder = False
-  Position = poScreenCenter
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object lblSnapshots: TLabel
     Left = 8
     Top = 8
-    Width = 160
+    Width = 90
     Height = 13
-    Caption = '请选择要处理的文件列表快照:'
+    Caption = 'Select a Snapshot:'
   end
   object lblFiles: TLabel
     Left = 8
     Top = 56
-    Width = 76
+    Width = 116
     Height = 13
-    Caption = '快照文件列表:'
+    Caption = 'File list of this snapshot:'
   end
   object cbbSnapshots: TComboBox
     Left = 8
@@ -164,7 +156,7 @@ object CnProjectFilesSnapshotManageForm: TCnProjectFilesSnapshotManageForm
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 10
     OnClick = btnHelpClick
   end
@@ -211,7 +203,7 @@ object CnProjectFilesSnapshotManageForm: TCnProjectFilesSnapshotManageForm
     Height = 21
     Anchors = [akRight, akBottom]
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 9
   end
@@ -805,39 +797,39 @@ object CnProjectFilesSnapshotManageForm: TCnProjectFilesSnapshotManageForm
     Left = 168
     Top = 48
     object actSnapshotDelete: TAction
-      Caption = '删除(&D)'
-      Hint = '删除此文件列表快照'
+      Caption = '&Delete'
+      Hint = 'Delete this snapshot'
       OnExecute = actSnapshotDeleteExecute
     end
     object actFileMoveUp: TAction
-      Caption = '上移(&U)'
-      Hint = '向上移动选中文件'
+      Caption = '&Up'
+      Hint = 'Move selected files up'
       ShortCut = 16422
       OnExecute = actFileMoveUpExecute
     end
     object actFileMoveDown: TAction
-      Caption = '下移(&W)'
-      Hint = '向下移动选中文件'
+      Caption = 'Do&wn'
+      Hint = 'Move selected files down'
       ShortCut = 16424
       OnExecute = actFileMoveDownExecute
     end
     object actFileRemove: TAction
-      Caption = '移除(&R)'
-      Hint = '从列表中移除选中文件'
+      Caption = '&Remove'
+      Hint = 'Remove selected files from this snapshot'
       OnExecute = actFileRemoveExecute
     end
     object actFileAdd: TAction
-      Caption = '添加(&A)'
-      Hint = '添加文件到列表'
+      Caption = '&Add'
+      Hint = 'Add files to this snapshot'
       OnExecute = actFileAddExecute
     end
     object actFileEdit: TAction
-      Caption = '编辑(&E)'
-      Hint = '编辑选中的文件名'
+      Caption = '&Edit'
+      Hint = 'Edit selected file name'
       OnExecute = actFileEditExecute
     end
     object actFormOk: TAction
-      Caption = '确定(&O)'
+      Caption = '&Ok'
       OnExecute = actFormOkExecute
     end
   end

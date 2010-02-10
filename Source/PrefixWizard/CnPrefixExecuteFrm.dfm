@@ -1,19 +1,10 @@
-object CnPrefixExecuteForm: TCnPrefixExecuteForm
+inherited CnPrefixExecuteForm: TCnPrefixExecuteForm
   Left = 331
   Top = 202
   BorderStyle = bsDialog
-  Caption = '组件前缀专家'
+  Caption = 'Component Prefix Wizard'
   ClientHeight = 260
   ClientWidth = 369
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
@@ -22,7 +13,7 @@ object CnPrefixExecuteForm: TCnPrefixExecuteForm
     Top = 232
     Width = 73
     Height = 21
-    Caption = '处理(&O)'
+    Caption = '&Process'
     Default = True
     ModalResult = 1
     TabOrder = 2
@@ -33,7 +24,7 @@ object CnPrefixExecuteForm: TCnPrefixExecuteForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '关闭(&C)'
+    Caption = '&Close'
     ModalResult = 2
     TabOrder = 4
   end
@@ -42,7 +33,7 @@ object CnPrefixExecuteForm: TCnPrefixExecuteForm
     Top = 232
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 5
     OnClick = btnHelpClick
   end
@@ -52,7 +43,7 @@ object CnPrefixExecuteForm: TCnPrefixExecuteForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '设置(&S)'
+    Caption = '&Settings'
     TabOrder = 3
   end
   object gbKind: TGroupBox
@@ -60,14 +51,14 @@ object CnPrefixExecuteForm: TCnPrefixExecuteForm
     Top = 8
     Width = 353
     Height = 129
-    Caption = '请选择需要进行前缀处理的内容(&N)'
+    Caption = 'Please &Select which to be Processed'
     TabOrder = 0
     object rbSelComp: TRadioButton
       Left = 8
       Top = 16
       Width = 310
       Height = 17
-      Caption = '当前选择的组件。'
+      Caption = 'Selected Components.'
       Checked = True
       TabOrder = 0
       TabStop = True
@@ -77,7 +68,7 @@ object CnPrefixExecuteForm: TCnPrefixExecuteForm
       Top = 38
       Width = 310
       Height = 17
-      Caption = '当前窗体上的所有组件。'
+      Caption = 'All Components in Current Form.'
       TabOrder = 1
     end
     object rbOpenedForm: TRadioButton
@@ -85,7 +76,7 @@ object CnPrefixExecuteForm: TCnPrefixExecuteForm
       Top = 60
       Width = 310
       Height = 17
-      Caption = '当前打开的所有窗体上的组件。'
+      Caption = 'All Components in All Opened Forms.'
       TabOrder = 2
     end
     object rbCurrProject: TRadioButton
@@ -93,7 +84,7 @@ object CnPrefixExecuteForm: TCnPrefixExecuteForm
       Top = 82
       Width = 310
       Height = 17
-      Caption = '当前工程所有窗体上的组件。'
+      Caption = 'All Components in All Forms of Project.'
       TabOrder = 3
     end
     object rbProjectGroup: TRadioButton
@@ -101,7 +92,7 @@ object CnPrefixExecuteForm: TCnPrefixExecuteForm
       Top = 104
       Width = 310
       Height = 17
-      Caption = '当前工程组所有工程所有窗体上的组件。'
+      Caption = 'All Components in All Forms of ProjectGroup.'
       TabOrder = 4
     end
   end
@@ -110,12 +101,12 @@ object CnPrefixExecuteForm: TCnPrefixExecuteForm
     Top = 144
     Width = 353
     Height = 81
-    Caption = '组件列表内容(&L)'
+    Caption = 'Process Those in the &List'
     ItemIndex = 0
     Items.Strings = (
-      '前缀不正确的组件。'
-      '前缀不正确的组件及前缀加数字形式的组件。'
-      '所有组件（包括被忽略的组件）。')
+      'Components with Unproper Prefix'
+      'Components with Unproper Prefix or Name + Digital'
+      'All Components including Those Ignored.')
     TabOrder = 1
   end
 end

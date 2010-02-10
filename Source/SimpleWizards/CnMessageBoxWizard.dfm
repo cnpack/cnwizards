@@ -1,19 +1,10 @@
-object CnMessageBoxForm: TCnMessageBoxForm
+inherited CnMessageBoxForm: TCnMessageBoxForm
   Left = 253
   Top = 125
   BorderStyle = bsDialog
-  Caption = 'MessageBox 设计器'
+  Caption = 'MessageBox Designer'
   ClientHeight = 510
   ClientWidth = 472
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   PixelsPerInch = 96
@@ -26,13 +17,13 @@ object CnMessageBoxForm: TCnMessageBoxForm
     ActivePage = tsDesigner
     TabOrder = 0
     object tsDesigner: TTabSheet
-      Caption = '(&M)essageBox'
+      Caption = '&MessageBox'
       object gbIcon: TGroupBox
         Left = 8
         Top = 8
         Width = 121
         Height = 193
-        Caption = '显示图标(&I)'
+        Caption = 'Show &Icon'
         TabOrder = 0
         object Image1: TImage
           Left = 8
@@ -343,7 +334,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
           Top = 24
           Width = 68
           Height = 17
-          Caption = '无'
+          Caption = 'None'
           TabOrder = 0
         end
         object rbIconInformation: TRadioButton
@@ -351,7 +342,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
           Top = 52
           Width = 68
           Height = 17
-          Caption = '提示'
+          Caption = 'Info'
           Checked = True
           TabOrder = 1
           TabStop = True
@@ -361,7 +352,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
           Top = 85
           Width = 68
           Height = 17
-          Caption = '询问'
+          Caption = 'Query'
           TabOrder = 2
         end
         object rbIconWarning: TRadioButton
@@ -369,7 +360,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
           Top = 119
           Width = 68
           Height = 17
-          Caption = '警告'
+          Caption = 'Warning'
           TabOrder = 3
         end
         object rbIconStop: TRadioButton
@@ -377,7 +368,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
           Top = 152
           Width = 68
           Height = 17
-          Caption = '错误'
+          Caption = 'Error'
           TabOrder = 4
         end
       end
@@ -386,14 +377,14 @@ object CnMessageBoxForm: TCnMessageBoxForm
         Top = 8
         Width = 305
         Height = 61
-        Caption = '对话框标题(&T)'
+        Caption = 'Dialog &Title'
         TabOrder = 1
         object cbCaptionIsVar: TCheckBox
           Left = 8
           Top = 38
           Width = 185
           Height = 17
-          Caption = '标题为变量名'
+          Caption = 'Title as Variable'
           TabOrder = 1
         end
         object cbbCaption: TComboBox
@@ -408,10 +399,10 @@ object CnMessageBoxForm: TCnMessageBoxForm
             'Application->Title.c_str()'
             'Caption'
             'Caption.c_str()'
-            '错误'
-            '警告'
-            '提示'
-            '关于')
+            'Error'
+            'Warning'
+            'Hint'
+            'About')
         end
       end
       object gbText: TGroupBox
@@ -419,7 +410,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
         Top = 76
         Width = 305
         Height = 101
-        Caption = '文本信息(&F)'
+        Caption = 'Text Information'
         TabOrder = 2
         object memText: TMemo
           Left = 8
@@ -435,7 +426,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
           Top = 80
           Width = 177
           Height = 17
-          Caption = '文本信息为变量名'
+          Caption = 'Text as Variable'
           TabOrder = 1
         end
       end
@@ -444,15 +435,15 @@ object CnMessageBoxForm: TCnMessageBoxForm
         Top = 184
         Width = 177
         Height = 121
-        Caption = '对话框按钮(&B)'
+        Caption = 'Dialog &Button'
         ItemIndex = 0
         Items.Strings = (
-          '确定'
-          '确定/取消'
-          '是/否'
-          '是/否/取消'
-          '重试/取消'
-          '终止/重试/忽略')
+          'OK'
+          'OK/Cancel'
+          'Yes/No'
+          'Yes/No/Cancel'
+          'Retry/Cancel'
+          'Abort/Retry/Ignore')
         TabOrder = 3
         OnClick = rgButtonClick
       end
@@ -461,12 +452,12 @@ object CnMessageBoxForm: TCnMessageBoxForm
         Top = 208
         Width = 121
         Height = 89
-        Caption = '默认按钮(&D)'
+        Caption = '&Default Button'
         ItemIndex = 0
         Items.Strings = (
-          '第一个'
-          '第二个'
-          '第三个')
+          'The First'
+          'The Second'
+          'The Third')
         TabOrder = 5
       end
       object gbResult: TGroupBox
@@ -474,7 +465,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
         Top = 184
         Width = 121
         Height = 157
-        Caption = '函数返回值(&R)'
+        Caption = '&Return Value'
         TabOrder = 4
         object cbResultOK: TCheckBox
           Left = 8
@@ -556,14 +547,14 @@ object CnMessageBoxForm: TCnMessageBoxForm
         Top = 352
         Width = 121
         Height = 73
-        Caption = '用户模板(&P)'
+        Caption = 'User Tem&plates'
         TabOrder = 8
         object btnDeleteProject: TButton
           Left = 64
           Top = 41
           Width = 50
           Height = 21
-          Caption = '删除(&L)'
+          Caption = 'De&lete'
           TabOrder = 2
           OnClick = btnDeleteProjectClick
         end
@@ -572,7 +563,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
           Top = 41
           Width = 50
           Height = 21
-          Caption = '增加(&E)'
+          Caption = 'Add'
           TabOrder = 1
           OnClick = btnAddProjectClick
         end
@@ -592,7 +583,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
         Top = 403
         Width = 75
         Height = 21
-        Caption = '预览(&V)'
+        Caption = 'Pre&view'
         TabOrder = 9
         OnClick = btnPreviewClick
       end
@@ -601,14 +592,14 @@ object CnMessageBoxForm: TCnMessageBoxForm
         Top = 304
         Width = 121
         Height = 41
-        Caption = '扩展风格(&X)'
+        Caption = 'E&xtended Style'
         TabOrder = 6
         object cbTopMost: TCheckBox
           Left = 8
           Top = 16
           Width = 105
           Height = 17
-          Caption = '窗口最上层显示'
+          Caption = 'Show Topmost'
           TabOrder = 0
         end
       end
@@ -617,7 +608,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
         Top = 312
         Width = 177
         Height = 113
-        Caption = '调用方式(&S)'
+        Caption = 'Procedure to &Use'
         TabOrder = 7
         object rbCodeAPI: TRadioButton
           Left = 8
@@ -644,7 +635,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
           Top = 70
           Width = 145
           Height = 17
-          Caption = '使用 Handle 作父句柄'
+          Caption = 'Use "Handle" as Parent'
           TabOrder = 3
         end
         object rbMsgDlg: TRadioButton
@@ -661,41 +652,41 @@ object CnMessageBoxForm: TCnMessageBoxForm
           Top = 50
           Width = 145
           Height = 17
-          Caption = '使用 MessageBoxW'
+          Caption = 'Use MessageBoxW'
           TabOrder = 2
         end
       end
     end
     object tsConfig: TTabSheet
-      Caption = '参数设置(&N)'
+      Caption = '&Settings'
       ImageIndex = 1
       object gbDelphiConfig: TGroupBox
         Left = 8
         Top = 88
         Width = 433
         Height = 73
-        Caption = '&Delphi 代码设置(&K)'
+        Caption = '&Delphi Code Settings'
         TabOrder = 1
         object Label1: TLabel
           Left = 8
           Top = 24
-          Width = 76
+          Width = 67
           Height = 13
-          Caption = '代码缩进宽度:'
+          Caption = 'Indent Width:'
         end
         object Label2: TLabel
           Left = 224
           Top = 24
-          Width = 76
+          Width = 85
           Height = 13
-          Caption = '自动换行宽度:'
+          Caption = 'Wordwrap Width:'
         end
         object cbUsePChar: TCheckBox
           Left = 8
           Top = 48
           Width = 185
           Height = 17
-          Caption = '字符串使用 PChar 类型转换。'
+          Caption = 'Cast strings to PChar.'
           TabOrder = 2
         end
         object seDelphiIndent: TCnSpinEdit
@@ -725,7 +716,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
           Top = 48
           Width = 209
           Height = 17
-          Caption = '处理 Format 字符串。'
+          Caption = 'Process Format string.'
           TabOrder = 3
         end
       end
@@ -734,21 +725,21 @@ object CnMessageBoxForm: TCnMessageBoxForm
         Top = 8
         Width = 433
         Height = 73
-        Caption = '换行符(&R)'
+        Caption = 'Carriage &Return'
         TabOrder = 0
         object Label6: TLabel
           Left = 8
           Top = 19
-          Width = 60
+          Width = 52
           Height = 13
-          Caption = 'Delphi 文件:'
+          Caption = 'Delphi File:'
         end
         object Label7: TLabel
           Left = 8
           Top = 45
-          Width = 80
+          Width = 78
           Height = 13
-          Caption = 'C++Builer 文件:'
+          Caption = 'C++Builder File:'
         end
         object edtDelphiReturn: TEdit
           Left = 104
@@ -772,11 +763,11 @@ object CnMessageBoxForm: TCnMessageBoxForm
         Top = 248
         Width = 433
         Height = 73
-        Caption = '代码自动换行方式(&W)'
+        Caption = '&Wordwrap Mode'
         ItemIndex = 0
         Items.Strings = (
-          '根据换行宽度进行换行处理。'
-          '根据文本内容进行换行处理。')
+          'Wordwrap by Line Width.'
+          'Wordwrap by Content.')
         TabOrder = 3
       end
       object gbCConfig: TGroupBox
@@ -784,28 +775,28 @@ object CnMessageBoxForm: TCnMessageBoxForm
         Top = 168
         Width = 433
         Height = 73
-        Caption = 'C++Builder 代码设置(&G)'
+        Caption = 'C++&Builder Code &Settings'
         TabOrder = 2
         object Label8: TLabel
           Left = 8
           Top = 24
-          Width = 76
+          Width = 67
           Height = 13
-          Caption = '代码缩进宽度:'
+          Caption = 'Indent Width:'
         end
         object Label9: TLabel
           Left = 224
           Top = 24
-          Width = 76
+          Width = 85
           Height = 13
-          Caption = '自动换行宽度:'
+          Caption = 'Wordwrap Width:'
         end
         object cbLineEndBrace: TCheckBox
           Left = 8
           Top = 48
           Width = 185
           Height = 17
-          Caption = '"{" 放在代码行末。'
+          Caption = 'Place "{" at the End of Line.'
           TabOrder = 2
         end
         object seCIndent: TCnSpinEdit
@@ -836,14 +827,14 @@ object CnMessageBoxForm: TCnMessageBoxForm
         Top = 328
         Width = 433
         Height = 49
-        Caption = '其它设置(&T)'
+        Caption = 'O&ther Settings'
         TabOrder = 4
         object cbLoadLast: TCheckBox
           Left = 8
           Top = 16
           Width = 249
           Height = 17
-          Caption = '自动装载最后一次的对话框设置内容。'
+          Caption = 'Automatically Load Settings of Last Time.'
           TabOrder = 0
         end
         object btnExport: TButton
@@ -851,7 +842,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
           Top = 16
           Width = 75
           Height = 21
-          Caption = '导出模板(&E)'
+          Caption = '&Export'
           TabOrder = 1
           OnClick = btnExportClick
         end
@@ -860,7 +851,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
           Top = 16
           Width = 75
           Height = 21
-          Caption = '导入模板(&I)'
+          Caption = '&Import'
           TabOrder = 2
           OnClick = btnImportClick
         end
@@ -872,7 +863,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
     Top = 481
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
   end
@@ -881,7 +872,7 @@ object CnMessageBoxForm: TCnMessageBoxForm
     Top = 481
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 1
@@ -892,20 +883,20 @@ object CnMessageBoxForm: TCnMessageBoxForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 2
   end
   object OpenDialog: TOpenDialog
     DefaultExt = 'ini'
-    Filter = '对话框模板文件(*.ini)|*.ini'
+    Filter = 'Dialog Templates Files(*.ini)|*.ini'
     Options = [ofHideReadOnly, ofFileMustExist, ofEnableSizing]
     Left = 8
     Top = 480
   end
   object SaveDialog: TSaveDialog
     DefaultExt = 'ini'
-    Filter = '对话框模板文件(*.ini)|*.ini'
+    Filter = 'Dialog Templates Files(*.ini)|*.ini'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
     Left = 40
     Top = 480

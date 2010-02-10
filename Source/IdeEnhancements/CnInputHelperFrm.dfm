@@ -2,7 +2,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
   Left = 233
   Top = 101
   BorderStyle = bsDialog
-  Caption = '输入助手设置'
+  Caption = 'Input Helper Settings'
   ClientHeight = 522
   ClientWidth = 592
   KeyPreview = True
@@ -19,7 +19,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
   end
@@ -29,7 +29,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     TabOrder = 1
     OnClick = btnOKClick
@@ -41,7 +41,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
     Height = 21
     Anchors = [akRight, akBottom]
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 2
   end
@@ -54,27 +54,27 @@ inherited CnInputHelperForm: TCnInputHelperForm
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
     object ts1: TTabSheet
-      Caption = '助手设置(&P)'
+      Caption = 'In&put Helper'
       object grp1: TGroupBox
         Left = 8
         Top = 8
         Width = 553
         Height = 225
-        Caption = '自动选项(&B)'
+        Caption = '&Auto-Settings'
         TabOrder = 0
         object lbl1: TLabel
           Left = 26
           Top = 35
-          Width = 124
+          Width = 199
           Height = 13
-          Caption = '连续输入的有效字符数:'
+          Caption = 'Popup after How Many Characters Input:'
         end
         object lbl2: TLabel
           Left = 250
           Top = 16
-          Width = 76
+          Width = 99
           Height = 13
-          Caption = '自动弹出延时:'
+          Caption = 'Delay before Popup:'
         end
         object lbl3: TLabel
           Left = 232
@@ -83,7 +83,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Height = 12
           Alignment = taCenter
           AutoSize = False
-          Caption = '0.1秒'
+          Caption = '0.1 Sec'
         end
         object lbl4: TLabel
           Left = 504
@@ -92,28 +92,28 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Height = 12
           Alignment = taCenter
           AutoSize = False
-          Caption = '2秒'
+          Caption = '2 Sec'
         end
         object lbl5: TLabel
           Left = 8
           Top = 151
-          Width = 148
+          Width = 153
           Height = 13
-          Caption = '用来切换自动显示的快捷键:'
+          Caption = 'Shortcut to Toggle Auto-Popup:'
         end
         object lbl6: TLabel
           Left = 8
           Top = 175
-          Width = 148
+          Width = 155
           Height = 13
-          Caption = '用来手工弹出显示的快捷键:'
+          Caption = 'Shortcut to Popup List Manually:'
         end
         object chkAutoPopup: TCheckBox
           Left = 8
           Top = 16
           Width = 169
           Height = 17
-          Caption = '自动弹出输入助手。'
+          Caption = 'Auto Popup Input Helper.'
           TabOrder = 0
           OnClick = UpdateControls
         end
@@ -149,7 +149,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 78
           Width = 409
           Height = 17
-          Caption = '智能判断是否需要弹出助手。'
+          Caption = 'Intelligent Popup.'
           TabOrder = 3
         end
         object hkEnabled: THotKey
@@ -177,7 +177,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 199
           Width = 401
           Height = 17
-          Caption = '输入法开启时不弹出输入助手。'
+          Caption = 'Disable Input Helper when IME Opened.'
           TabOrder = 8
         end
         object chkDispOnIDECompDisabled: TCheckBox
@@ -185,7 +185,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 99
           Width = 409
           Height = 17
-          Caption = '如果禁用 IDE 的代码完成，则自动取代。'
+          Caption = 'Replace Code Insight when Later is Disabled.'
           TabOrder = 4
         end
         object edtAutoSymbols: TEdit
@@ -200,7 +200,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 125
           Width = 209
           Height = 13
-          Caption = '自动弹出列表的按键序列(逗号分隔):'
+          Caption = 'Auto Popup after Key Sequences:'
           TabOrder = 9
           OnClick = UpdateControls
         end
@@ -210,28 +210,28 @@ inherited CnInputHelperForm: TCnInputHelperForm
         Top = 240
         Width = 553
         Height = 198
-        Caption = '输出设置(&W)'
+        Caption = 'O&utput Settings'
         TabOrder = 1
         object lbl9: TLabel
           Left = 8
           Top = 20
-          Width = 160
+          Width = 167
           Height = 13
-          Caption = '可用于选择当前项的字符列表:'
+          Caption = 'Input Current Item when Pressing:'
         end
         object lbl10: TLabel
           Left = 8
           Top = 74
-          Width = 88
+          Width = 102
           Height = 13
-          Caption = '标识符输出方式:'
+          Caption = 'Symbol Output Style:'
         end
         object lbl16: TLabel
           Left = 8
           Top = 47
-          Width = 192
+          Width = 189
           Height = 13
-          Caption = '禁止自动弹出列表的符号(逗号分隔):'
+          Caption = 'DO NOT Popup after these Characters:'
         end
         object edtCompleteChars: TEdit
           Left = 248
@@ -249,17 +249,17 @@ inherited CnInputHelperForm: TCnInputHelperForm
           ItemHeight = 13
           TabOrder = 2
           Items.Strings = (
-            '自动识别'
-            '替换标识符左边部分'
-            '替换整个标识符'
-            '回车时替换整个标识符')
+            'Automatic'
+            'Replace Left Side of Symbol'
+            'Replace the Whole Symbol'
+            'Replace the Whole Symbol Only when Pressing Enter')
         end
         object chkSelMidMatchByEnterOnly: TCheckBox
           Left = 8
           Top = 132
           Width = 529
           Height = 17
-          Caption = '只使用回车键来选择中间匹配的标识符。'
+          Caption = 'Select and Input Middle-Matched Symbol Only when Pressing Enter.'
           TabOrder = 5
         end
         object chkAutoInsertEnter: TCheckBox
@@ -267,7 +267,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 150
           Width = 529
           Height = 17
-          Caption = '对关键字回车自动换行。'
+          Caption = 'Auto Line Feed after Keyword when Pressing Enter.'
           TabOrder = 6
         end
         object chkSpcComplete: TCheckBox
@@ -275,7 +275,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 96
           Width = 529
           Height = 17
-          Caption = '允许使用空格键来选择当前项。'
+          Caption = 'Allow Inputting Current Item by Pressing Space.'
           TabOrder = 3
           OnClick = chkSpcCompleteClick
         end
@@ -284,7 +284,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 168
           Width = 529
           Height = 17
-          Caption = '对带参数的函数自动完成括号。'
+          Caption = 'Auto Insert Brackets for Function Having Parameters.'
           TabOrder = 7
         end
         object edtFilterSymbols: TEdit
@@ -299,34 +299,34 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 114
           Width = 521
           Height = 17
-          Caption = '使用空格键选择当前项后忽略空格本身。'
+          Caption = 'Ignore Space Char after Inputting Current Item.'
           TabOrder = 4
         end
       end
     end
     object ts2: TTabSheet
-      Caption = '列表设置(&J)'
+      Caption = '&List Settings'
       ImageIndex = 1
       object grp2: TGroupBox
         Left = 8
         Top = 8
         Width = 553
         Height = 193
-        Caption = '列表显示(&N)'
+        Caption = '&Display Settings'
         TabOrder = 0
         object lbl7: TLabel
           Left = 8
           Top = 47
-          Width = 100
+          Width = 106
           Height = 13
-          Caption = '标识符的最小长度:'
+          Caption = 'Min Length of Symbol:'
         end
         object lbl8: TLabel
           Left = 8
           Top = 20
-          Width = 76
+          Width = 70
           Height = 13
-          Caption = '列表排序方式:'
+          Caption = 'List Sorted by:'
         end
         object PaintBox: TPaintBox
           Left = 432
@@ -338,9 +338,9 @@ inherited CnInputHelperForm: TCnInputHelperForm
         object lbl15: TLabel
           Left = 8
           Top = 76
-          Width = 40
+          Width = 84
           Height = 13
-          Caption = '保留字:'
+          Caption = 'Reserved Words:'
         end
         object seListOnlyAtLeastLetter: TCnSpinEdit
           Left = 120
@@ -357,7 +357,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 98
           Width = 505
           Height = 17
-          Caption = '显示中间匹配的标识符。'
+          Caption = 'Display Middle-Matched Symbols.'
           TabOrder = 4
         end
         object cbbSortKind: TComboBox
@@ -366,7 +366,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 249
           Height = 21
           Style = csDropDownList
-          ItemHeight = 13
+          ItemHeight = 0
           TabOrder = 0
         end
         object btnFont: TButton
@@ -374,7 +374,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 16
           Width = 113
           Height = 21
-          Caption = '列表字体...'
+          Caption = 'List Font...'
           TabOrder = 1
           OnClick = btnFontClick
         end
@@ -383,7 +383,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 116
           Width = 505
           Height = 17
-          Caption = '根据使用频率自动调整列表项显示优先级。'
+          Caption = 'Adjust Priority Automatically according to the Frequency.'
           TabOrder = 5
         end
         object chkUseCodeInsightMgr: TCheckBox
@@ -391,7 +391,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 152
           Width = 505
           Height = 17
-          Caption = '使用兼容方式取得当前标识符列表（较慢）。'
+          Caption = 'Use the Compatible Way to Obtain Symbols.(slower)'
           TabOrder = 7
         end
         object chkRemoveSame: TCheckBox
@@ -399,7 +399,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 134
           Width = 505
           Height = 17
-          Caption = '过滤重复的列表项。'
+          Caption = 'Remove Duplicate Symbols.'
           TabOrder = 6
         end
         object cbbKeyword: TComboBox
@@ -408,7 +408,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 249
           Height = 21
           Style = csDropDownList
-          ItemHeight = 13
+          ItemHeight = 0
           TabOrder = 3
         end
         object chkUseKibitzCompileThread: TCheckBox
@@ -416,7 +416,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 170
           Width = 505
           Height = 17
-          Caption = '打开工程时后台预获取标识符列表。'
+          Caption = 'Prefetch Symbols List when Opening Project.'
           TabOrder = 8
         end
       end
@@ -426,21 +426,21 @@ inherited CnInputHelperForm: TCnInputHelperForm
         Width = 553
         Height = 228
         Anchors = [akLeft, akTop, akRight, akBottom]
-        Caption = '内容设置(&S)'
+        Caption = 'Conten&t Settings'
         TabOrder = 1
         object lbl11: TLabel
           Left = 8
           Top = 20
-          Width = 88
+          Width = 100
           Height = 13
-          Caption = '符号提供者列表:'
+          Caption = 'Symbol Provider List:'
         end
         object lbl14: TLabel
           Left = 384
           Top = 20
-          Width = 76
+          Width = 70
           Height = 13
-          Caption = '符号类型设置:'
+          Caption = 'Symbol Types:'
         end
         object chklstSymbol: TCheckListBox
           Left = 8
@@ -463,7 +463,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
       end
     end
     object ts3: TTabSheet
-      Caption = '自定义符号(&F)'
+      Caption = 'Customize &Symbols'
       ImageIndex = 2
       object grp5: TGroupBox
         Left = 8
@@ -471,21 +471,21 @@ inherited CnInputHelperForm: TCnInputHelperForm
         Width = 553
         Height = 430
         Anchors = [akLeft, akTop, akRight, akBottom]
-        Caption = '自定义符号(&T)'
+        Caption = 'Cus&tomize Symbols'
         TabOrder = 0
         object lbl12: TLabel
           Left = 8
           Top = 20
-          Width = 52
+          Width = 57
           Height = 13
-          Caption = '符号列表:'
+          Caption = 'Symbol List:'
         end
         object lbl13: TLabel
           Left = 8
           Top = 224
-          Width = 285
+          Width = 306
           Height = 13
-          Caption = '代码模板:(仅用于 "Template" 和 "Comment" 类型的符号)'
+          Caption = 'Code Template: (Only Used in "Template" and "Comment" Type)'
         end
         object lvList: TListView
           Left = 8
@@ -494,19 +494,19 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Height = 169
           Columns = <
             item
-              Caption = '名称'
+              Caption = 'Name'
               Width = 100
             end
             item
-              Caption = '类型'
+              Caption = 'Type'
               Width = 70
             end
             item
-              Caption = '优先级'
+              Caption = 'Scope'
               Width = 48
             end
             item
-              Caption = '描述'
+              Caption = 'Description'
               Width = 225
             end>
           HideSelection = False
@@ -526,7 +526,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 48
           Width = 65
           Height = 21
-          Caption = '增加(&A)'
+          Caption = '&Add'
           TabOrder = 2
           OnClick = btnAddClick
         end
@@ -551,7 +551,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 97
           Width = 65
           Height = 21
-          Caption = '删除(&D)'
+          Caption = '&Delete'
           TabOrder = 4
           OnClick = btnDeleteClick
         end
@@ -560,7 +560,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 122
           Width = 65
           Height = 21
-          Caption = '编辑(&E)'
+          Caption = '&Edit'
           TabOrder = 5
           OnClick = btnEditClick
         end
@@ -569,7 +569,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 171
           Width = 65
           Height = 21
-          Caption = '导入(&I)'
+          Caption = '&Import'
           TabOrder = 7
           OnClick = btnImportClick
         end
@@ -578,7 +578,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 196
           Width = 65
           Height = 21
-          Caption = '导出(&X)'
+          Caption = 'E&xport'
           TabOrder = 8
           OnClick = btnExportClick
         end
@@ -587,7 +587,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 241
           Width = 65
           Height = 21
-          Caption = '插入宏(&M)'
+          Caption = 'Insert &Macro'
           TabOrder = 10
           OnClick = btnInsertMacroClick
         end
@@ -596,7 +596,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 296
           Width = 65
           Height = 21
-          Caption = '光标(&R)'
+          Caption = 'Curso&r'
           TabOrder = 12
           OnClick = btnCursorClick
         end
@@ -605,7 +605,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 324
           Width = 65
           Height = 21
-          Caption = '清空(&L)'
+          Caption = 'C&lear'
           TabOrder = 13
           OnClick = btnClearClick
         end
@@ -614,7 +614,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 73
           Width = 65
           Height = 21
-          Caption = '副本(&U)'
+          Caption = 'D&uplicate'
           TabOrder = 3
           OnClick = btnDupClick
         end
@@ -623,7 +623,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 268
           Width = 65
           Height = 21
-          Caption = '用户宏(&V)'
+          Caption = 'U&ser Macro'
           TabOrder = 11
           OnClick = btnUserMacroClick
         end
@@ -632,7 +632,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 147
           Width = 65
           Height = 21
-          Caption = '默认(&K)'
+          Caption = 'Defaul&t'
           TabOrder = 6
           OnClick = btnDefaultClick
         end
@@ -642,7 +642,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 401
           Height = 21
           Style = csDropDownList
-          ItemHeight = 13
+          ItemHeight = 0
           TabOrder = 0
           OnChange = cbbListChange
         end
@@ -667,14 +667,14 @@ inherited CnInputHelperForm: TCnInputHelperForm
   end
   object dlgOpen: TOpenDialog
     DefaultExt = 'xml'
-    Filter = '自定义符号文件(*.xml)|*.xml'
+    Filter = 'Symbol List File(*.xml)|*.xml'
     Options = [ofFileMustExist, ofEnableSizing]
     Left = 47
     Top = 456
   end
   object dlgSave: TSaveDialog
     DefaultExt = 'xml'
-    Filter = '自定义符号文件(*.xml)|*.xml'
+    Filter = 'Symbol List File(*.xml)|*.xml'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
     Left = 111
     Top = 456

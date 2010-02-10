@@ -1,19 +1,10 @@
-object CnPrefixConfigForm: TCnPrefixConfigForm
+inherited CnPrefixConfigForm: TCnPrefixConfigForm
   Left = 303
   Top = 149
   BorderStyle = bsDialog
-  Caption = '组件前缀专家设置'
+  Caption = 'Component Prefix Wizard Settings'
   ClientHeight = 485
   ClientWidth = 416
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
@@ -22,14 +13,14 @@ object CnPrefixConfigForm: TCnPrefixConfigForm
     Top = 8
     Width = 401
     Height = 217
-    Caption = '显示设置(&D)'
+    Caption = '&Display Settings'
     TabOrder = 0
     object cbAutoPopSuggestDlg: TCheckBox
       Left = 24
       Top = 34
       Width = 370
       Height = 17
-      Caption = '新增组件或修改组件名称时弹出对话框。'
+      Caption = 'Show Dialog when Add New Component or Rename.'
       TabOrder = 1
     end
     object cbPopPrefixDefine: TCheckBox
@@ -37,7 +28,7 @@ object CnPrefixConfigForm: TCnPrefixConfigForm
       Top = 51
       Width = 370
       Height = 17
-      Caption = '提示输入未定义前缀的组件前缀名。'
+      Caption = 'Prompt for Undefined Prefix'
       TabOrder = 2
     end
     object cbAllowClassName: TCheckBox
@@ -45,7 +36,7 @@ object CnPrefixConfigForm: TCnPrefixConfigForm
       Top = 68
       Width = 370
       Height = 17
-      Caption = '忽略使用组件类名命名的组件。'
+      Caption = 'Ignore Component Naming after Class Name'
       TabOrder = 3
     end
     object cbAutoPrefix: TCheckBox
@@ -53,7 +44,7 @@ object CnPrefixConfigForm: TCnPrefixConfigForm
       Top = 16
       Width = 385
       Height = 17
-      Caption = '允许自动修改组件前缀'
+      Caption = 'Enable Modify Prefix Automatically'
       TabOrder = 0
       OnClick = cbAutoPrefixClick
     end
@@ -62,7 +53,7 @@ object CnPrefixConfigForm: TCnPrefixConfigForm
       Top = 86
       Width = 370
       Height = 17
-      Caption = '自动更名时替换原组件前缀。'
+      Caption = 'Replace the Prefix when Auto-rename.'
       TabOrder = 4
     end
     object cbUseUnderLine: TCheckBox
@@ -70,7 +61,7 @@ object CnPrefixConfigForm: TCnPrefixConfigForm
       Top = 104
       Width = 370
       Height = 17
-      Caption = '初次更名时在组件名称前缀后添加下划线。'
+      Caption = 'Add Underscore after Prefix when Renaming.'
       TabOrder = 5
     end
     object cbPrefixCaseSens: TCheckBox
@@ -78,7 +69,7 @@ object CnPrefixConfigForm: TCnPrefixConfigForm
       Top = 121
       Width = 370
       Height = 17
-      Caption = '前缀区分大小写。'
+      Caption = 'Prefix Case Sensitive.'
       TabOrder = 6
     end
     object chkUseActionName: TCheckBox
@@ -86,7 +77,7 @@ object CnPrefixConfigForm: TCnPrefixConfigForm
       Top = 138
       Width = 370
       Height = 17
-      Caption = '重命名组件时允许参照关联的 Action 的名称。'
+      Caption = 'Use Action Name as New Name if Connected to an Action.'
       TabOrder = 7
       OnClick = cbAutoPrefixClick
     end
@@ -95,7 +86,7 @@ object CnPrefixConfigForm: TCnPrefixConfigForm
       Top = 156
       Width = 353
       Height = 17
-      Caption = '当组件关联 Action 时自动重命名。'
+      Caption = 'Auto Rename when Action Changed.'
       TabOrder = 8
     end
     object chkUseFieldName: TCheckBox
@@ -103,7 +94,7 @@ object CnPrefixConfigForm: TCnPrefixConfigForm
       Top = 174
       Width = 370
       Height = 17
-      Caption = '重命名组件时允许参照 DataField 属性的内容。'
+      Caption = 'Use DataField as New Name if this Property Exists.'
       TabOrder = 9
       OnClick = cbAutoPrefixClick
     end
@@ -112,7 +103,7 @@ object CnPrefixConfigForm: TCnPrefixConfigForm
       Top = 191
       Width = 353
       Height = 17
-      Caption = '当组件的 DataField 属性变更时自动重命名。'
+      Caption = 'Auto Rename when DataField Changed.'
       TabOrder = 10
     end
   end
@@ -121,21 +112,21 @@ object CnPrefixConfigForm: TCnPrefixConfigForm
     Top = 232
     Width = 401
     Height = 217
-    Caption = '组件前缀设置(&P)'
+    Caption = 'Component &Prefix Settings'
     TabOrder = 1
     object lbl1: TLabel
       Left = 8
       Top = 24
-      Width = 28
+      Width = 32
       Height = 13
-      Caption = '前缀:'
+      Caption = 'Prefix:'
     end
     object lbl2: TLabel
       Left = 8
       Top = 198
-      Width = 184
+      Width = 224
       Height = 13
-      Caption = '注:未选中检查框的组件将被忽略。'
+      Caption = 'Notice: Unchecked Component will be Ignored.'
     end
     object ListView: TListView
       Left = 8
@@ -145,11 +136,11 @@ object CnPrefixConfigForm: TCnPrefixConfigForm
       Checkboxes = True
       Columns = <
         item
-          Caption = '组件类名'
+          Caption = 'Component Class Name'
           Width = 240
         end
         item
-          Caption = '组件前缀'
+          Caption = 'Component Prefix'
           Width = 120
         end>
       HideSelection = False
@@ -175,7 +166,7 @@ object CnPrefixConfigForm: TCnPrefixConfigForm
       Top = 20
       Width = 49
       Height = 21
-      Caption = '修改(&M)'
+      Caption = '&Modify'
       TabOrder = 1
       OnClick = btnModifyClick
     end
@@ -184,7 +175,7 @@ object CnPrefixConfigForm: TCnPrefixConfigForm
       Top = 20
       Width = 75
       Height = 21
-      Caption = '导入(&C)'
+      Caption = '&Import'
       TabOrder = 2
       OnClick = btnImportClick
     end
@@ -193,7 +184,7 @@ object CnPrefixConfigForm: TCnPrefixConfigForm
       Top = 20
       Width = 75
       Height = 21
-      Caption = '导出(&H)'
+      Caption = '&Export'
       TabOrder = 3
       OnClick = btnExportClick
     end
@@ -203,7 +194,7 @@ object CnPrefixConfigForm: TCnPrefixConfigForm
     Top = 456
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     TabOrder = 2
     OnClick = btnOKClick
   end
@@ -213,7 +204,7 @@ object CnPrefixConfigForm: TCnPrefixConfigForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 3
   end
@@ -222,20 +213,20 @@ object CnPrefixConfigForm: TCnPrefixConfigForm
     Top = 456
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 4
     OnClick = btnHelpClick
   end
   object OpenDialog: TOpenDialog
     DefaultExt = 'ini'
-    Filter = '组件前缀数据文件(*.ini)|*.ini'
+    Filter = 'Component Prefix Data Files(*.ini)|*.ini'
     Options = [ofHideReadOnly, ofFileMustExist, ofEnableSizing]
     Left = 336
     Top = 24
   end
   object SaveDialog: TSaveDialog
     DefaultExt = 'ini'
-    Filter = '组件前缀数据文件(*.ini)|*.ini'
+    Filter = 'Component Prefix Data Files(*.ini)|*.ini'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
     Left = 368
     Top = 24

@@ -1,20 +1,11 @@
-object CnPrefixNewForm: TCnPrefixNewForm
+inherited CnPrefixNewForm: TCnPrefixNewForm
   Left = 351
   Top = 291
   ActiveControl = edtPrefix
   BorderStyle = bsDialog
-  Caption = '输入组件前缀'
+  Caption = 'Enter Component Prefix'
   ClientHeight = 179
   ClientWidth = 280
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   PixelsPerInch = 96
   TextHeight = 13
   object gbNew: TGroupBox
@@ -22,28 +13,28 @@ object CnPrefixNewForm: TCnPrefixNewForm
     Top = 8
     Width = 265
     Height = 137
-    Caption = '输入新的组件前缀(&N)'
+    Caption = 'Enter &New Prefix'
     TabOrder = 0
     object lbl1: TLabel
       Left = 8
       Top = 24
-      Width = 160
+      Width = 195
       Height = 13
-      Caption = '请为当前组件输入新的前缀名:'
+      Caption = 'Enter new Prefix for Current Component'
     end
     object lbl3: TLabel
       Left = 8
       Top = 72
-      Width = 52
+      Width = 28
       Height = 13
-      Caption = '组件前缀:'
+      Caption = 'Prefix'
     end
     object Label1: TLabel
       Left = 8
       Top = 48
-      Width = 52
+      Width = 55
       Height = 13
-      Caption = '组件类名:'
+      Caption = 'Class Name'
     end
     object edtPrefix: TEdit
       Left = 72
@@ -58,7 +49,7 @@ object CnPrefixNewForm: TCnPrefixNewForm
       Top = 112
       Width = 240
       Height = 17
-      Caption = '以后不再询问。'
+      Caption = 'Never Ask Again.'
       TabOrder = 3
     end
     object edtComponent: TEdit
@@ -75,7 +66,7 @@ object CnPrefixNewForm: TCnPrefixNewForm
       Top = 93
       Width = 240
       Height = 17
-      Caption = '忽略该类型的组件。'
+      Caption = 'Ignore This Type of Component.'
       TabOrder = 2
     end
   end
@@ -84,7 +75,7 @@ object CnPrefixNewForm: TCnPrefixNewForm
     Top = 152
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     TabOrder = 1
     OnClick = btnOKClick
@@ -95,7 +86,7 @@ object CnPrefixNewForm: TCnPrefixNewForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 2
   end
@@ -104,7 +95,7 @@ object CnPrefixNewForm: TCnPrefixNewForm
     Top = 152
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
   end

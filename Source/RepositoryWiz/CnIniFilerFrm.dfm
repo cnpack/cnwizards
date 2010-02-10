@@ -1,19 +1,10 @@
-object CnIniFilerForm: TCnIniFilerForm
+inherited CnIniFilerForm: TCnIniFilerForm
   Left = 309
   Top = 173
   BorderStyle = bsDialog
-  Caption = 'INI 读写单元生成设置'
+  Caption = 'INI Reader and Writer Settings'
   ClientHeight = 223
   ClientWidth = 269
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnCloseQuery = FormCloseQuery
   PixelsPerInch = 96
   TextHeight = 13
@@ -22,7 +13,7 @@ object CnIniFilerForm: TCnIniFilerForm
     Top = 189
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 1
@@ -33,7 +24,7 @@ object CnIniFilerForm: TCnIniFilerForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 2
   end
@@ -42,7 +33,7 @@ object CnIniFilerForm: TCnIniFilerForm
     Top = 189
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
   end
@@ -51,28 +42,28 @@ object CnIniFilerForm: TCnIniFilerForm
     Top = 8
     Width = 245
     Height = 169
-    Caption = '读写单元生成设置'
+    Caption = 'INI Reader and Writer Settings'
     TabOrder = 0
     object lblIni: TLabel
       Left = 16
       Top = 24
-      Width = 54
+      Width = 38
       Height = 13
-      Caption = 'INI 文件：'
+      Caption = 'INI File:'
     end
     object lblConstPrefix: TLabel
       Left = 16
       Top = 56
-      Width = 60
+      Width = 63
       Height = 13
-      Caption = '常量前缀：'
+      Caption = 'Const Prefix:'
     end
     object lblIniClassName: TLabel
       Left = 16
       Top = 88
-      Width = 36
+      Width = 56
       Height = 13
-      Caption = '类名：'
+      Caption = 'ClassName:'
     end
     object lblT: TLabel
       Left = 80
@@ -126,7 +117,7 @@ object CnIniFilerForm: TCnIniFilerForm
       Top = 114
       Width = 225
       Height = 17
-      Caption = '自动判断 INI 文件中各项的类型'
+      Caption = 'Auto Detect the Type of Items in INI File.'
       Checked = True
       State = cbChecked
       TabOrder = 3
@@ -137,14 +128,14 @@ object CnIniFilerForm: TCnIniFilerForm
       Top = 138
       Width = 205
       Height = 17
-      Caption = '将 0 和 1 作为布尔类型处理'
+      Caption = 'Treat 0 and 1 as Boolean Type.'
       Checked = True
       State = cbChecked
       TabOrder = 4
     end
   end
   object dlgOpen: TOpenDialog
-    Filter = 'INI 文件(*.ini)|*.ini'
+    Filter = 'INI Files(*.ini)|*.ini'
     Left = 224
     Top = 96
   end

@@ -1,19 +1,10 @@
-object CnMsdnConfigForm: TCnMsdnConfigForm
+inherited CnMsdnConfigForm: TCnMsdnConfigForm
   Left = 330
   Top = 250
   BorderStyle = bsDialog
-  Caption = 'MSDN 专家设置'
+  Caption = 'MSDN Wizard Settings'
   ClientHeight = 329
   ClientWidth = 401
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
@@ -22,7 +13,7 @@ object CnMsdnConfigForm: TCnMsdnConfigForm
     Top = 300
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 2
@@ -33,7 +24,7 @@ object CnMsdnConfigForm: TCnMsdnConfigForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 3
   end
@@ -42,28 +33,28 @@ object CnMsdnConfigForm: TCnMsdnConfigForm
     Top = 8
     Width = 385
     Height = 65
-    Caption = '工具栏(&T)'
+    Caption = '&Toolbar'
     TabOrder = 0
     object lblMaxHistory: TLabel
       Left = 8
       Top = 40
-      Width = 136
+      Width = 115
       Height = 13
-      Caption = '工具栏下拉框最大历史数:'
+      Caption = 'Maximum History Items:'
     end
     object lblHistoryUnit: TLabel
       Left = 240
       Top = 40
-      Width = 12
+      Width = 27
       Height = 13
-      Caption = '条'
+      Caption = 'Items'
     end
     object cbShowToolbar: TCheckBox
       Left = 8
       Top = 16
       Width = 145
       Height = 17
-      Caption = '显示 MSDN 工具栏。'
+      Caption = 'Show MSDN toolbar.'
       TabOrder = 0
     end
     object seMaxHistory: TCnSpinEdit
@@ -83,7 +74,7 @@ object CnMsdnConfigForm: TCnMsdnConfigForm
       Top = 36
       Width = 85
       Height = 21
-      Caption = '设置快捷键(&K)'
+      Caption = 'Hot&key'
       TabOrder = 2
       OnClick = btnSetShortCutClick
     end
@@ -93,14 +84,14 @@ object CnMsdnConfigForm: TCnMsdnConfigForm
     Top = 80
     Width = 385
     Height = 212
-    Caption = '设置 MSDN(&S)'
+    Caption = '&Set MSDN'
     TabOrder = 1
     object rbDefault: TRadioButton
       Left = 8
       Top = 16
       Width = 220
       Height = 17
-      Caption = '使用默认 MSDN。'
+      Caption = '&Default'
       TabOrder = 0
     end
     object rbFollow: TRadioButton
@@ -108,7 +99,7 @@ object CnMsdnConfigForm: TCnMsdnConfigForm
       Top = 40
       Width = 220
       Height = 17
-      Caption = '使用下面的一个 MSDN。'
+      Caption = '&Use the following MSDN.'
       TabOrder = 1
       OnClick = rbFollowClick
     end
@@ -126,7 +117,7 @@ object CnMsdnConfigForm: TCnMsdnConfigForm
       Top = 160
       Width = 273
       Height = 17
-      Caption = '使用在线 MSDN(%s 为搜索关键字)。'
+      Caption = 'U&se MSDN online (%s represents the Keyword).'
       TabOrder = 4
     end
     object edtWeb: TEdit
@@ -142,7 +133,7 @@ object CnMsdnConfigForm: TCnMsdnConfigForm
       Top = 156
       Width = 85
       Height = 21
-      Caption = '默认 URL(&D)'
+      Caption = '&Default URL'
       TabOrder = 3
       OnClick = btnDefaultURLClick
     end
@@ -152,7 +143,7 @@ object CnMsdnConfigForm: TCnMsdnConfigForm
     Top = 300
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 4
     OnClick = btnHelpClick
   end

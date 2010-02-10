@@ -1,7 +1,7 @@
 inherited CnListCompForm: TCnListCompForm
   Left = 349
   Top = 253
-  Caption = '设计器组件列表'
+  Caption = 'Locate Components in Designer'
   ClientHeight = 377
   ClientWidth = 542
   Icon.Data = {
@@ -112,6 +112,10 @@ inherited CnListCompForm: TCnListCompForm
   TextHeight = 13
   inherited pnlHeader: TPanel
     Width = 542
+    inherited lblSearch: TLabel
+      Width = 24
+      Caption = '&Find:'
+    end
     inherited lblProject: TLabel
       Caption = '路径(&P):'
       Visible = False
@@ -129,11 +133,11 @@ inherited CnListCompForm: TCnListCompForm
     Height = 292
     Columns = <
       item
-        Caption = '组件名称'
+        Caption = 'Component Name'
         Width = 170
       end
       item
-        Caption = '组件类名'
+        Caption = 'Component Classname'
         Width = 180
       end
       item
@@ -153,15 +157,15 @@ inherited CnListCompForm: TCnListCompForm
         Width = 310
       end
       item
-        Text = '组件总数: 1'
+        Text = 'Components Count: 0'
         Width = 110
       end>
   end
   inherited ToolBar: TToolBar
     Width = 542
     inherited btnOpen: TToolButton
-      Hint = '在设计器中定位所选组件'
-      Caption = '选择(&O)'
+      Hint = 'Locate and Select Components'
+      Caption = '&Select'
     end
     inherited btnSep1: TToolButton
       Visible = False
@@ -173,62 +177,42 @@ inherited CnListCompForm: TCnListCompForm
       Visible = False
     end
     inherited btnCopy: TToolButton
-      Hint = '复制所选组件名称到剪贴板'
+      Hint = 'Copy Selected Component Name to Clipboard'
     end
     inherited btnSelectAll: TToolButton
-      Hint = '选择所有组件'
+      Hint = 'Select All Components'
     end
     inherited btnSelectNone: TToolButton
-      Hint = '取消选择组件'
+      Hint = 'Cancel Selection'
     end
     inherited btnSelectInvert: TToolButton
-      Hint = '反向选择组件'
+      Hint = 'Inverse Selection'
     end
     inherited btnMatchStart: TToolButton
-      Hint = '匹配字符串开头'
+      Hint = 'Match Start'
     end
     inherited btnMatchAny: TToolButton
-      Hint = '匹配字符串所有位置'
+      Hint = 'Match All Parts'
     end
     inherited btnHookIDE: TToolButton
-      Hint = '运行组件选取工具以进行更灵活的选择'
+      Hint = 'Run Component Selector'
     end
     inherited btnQuery: TToolButton
       Visible = False
     end
   end
   inherited ActionList: TActionList
-    inherited actOpen: TAction
-      Hint = '搜索并打开所选的单元'
+    inherited actFont: TAction
+      Caption = '&Font'
+      Hint = 'Change List Font'
     end
-    inherited actAttribute: TAction
-      Hint = '显示所选 Frame 的文件属性'
+    inherited actHelp: TAction
+      Caption = '&Help'
+      Hint = 'Display Help'
     end
-    inherited actCopy: TAction
-      Hint = '复制所选单元名称到剪贴板'
-    end
-    inherited actSelectAll: TAction
-      Hint = '选择所有单元'
-    end
-    inherited actSelectNone: TAction
-      Hint = '取消选择单元'
-    end
-    inherited actSelectInvert: TAction
-      Hint = '反向选择单元'
-    end
-    inherited actMatchStart: TAction
-      Hint = '匹配单元名开头'
-    end
-    inherited actMatchAny: TAction
-      Hint = '匹配单元名所有位置'
-    end
-    inherited actHookIDE: TAction
-      Caption = ''
-      Hint = ''
-    end
-    inherited actQuery: TAction
-      Caption = ''
-      Hint = '打开多个单元时提示'
+    inherited actClose: TAction
+      Caption = '&Exit'
+      Hint = 'Close Window'
     end
   end
 end

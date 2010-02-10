@@ -1,20 +1,11 @@
-object CnPrefixEditForm: TCnPrefixEditForm
+inherited CnPrefixEditForm: TCnPrefixEditForm
   Left = 351
   Top = 231
   ActiveControl = edtName
   BorderStyle = bsDialog
-  Caption = '修改组件名称'
+  Caption = 'Edit Component'#39's Name'
   ClientHeight = 228
   ClientWidth = 336
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
@@ -23,7 +14,7 @@ object CnPrefixEditForm: TCnPrefixEditForm
     Top = 8
     Width = 321
     Height = 185
-    Caption = '修改组件名称(&E)'
+    Caption = '&Edit Component Name'
     TabOrder = 0
     object lblFormName: TLabel
       Left = 72
@@ -42,23 +33,23 @@ object CnPrefixEditForm: TCnPrefixEditForm
     object lbl1: TLabel
       Left = 8
       Top = 80
-      Width = 48
+      Width = 66
       Height = 13
-      Caption = '原组件名'
+      Caption = 'Original Name'
     end
     object lbl2: TLabel
       Left = 8
       Top = 20
-      Width = 40
+      Width = 58
       Height = 13
-      Caption = '窗体名:'
+      Caption = 'Form Name:'
     end
     object lbl3: TLabel
       Left = 176
       Top = 80
-      Width = 48
+      Width = 51
       Height = 13
-      Caption = '新组件名'
+      Caption = 'New Name'
     end
     object img1: TImage
       Left = 152
@@ -81,9 +72,9 @@ object CnPrefixEditForm: TCnPrefixEditForm
     object lbl4: TLabel
       Left = 8
       Top = 40
-      Width = 40
+      Width = 59
       Height = 13
-      Caption = '组件类:'
+      Caption = 'Class Name:'
     end
     object lblClassName: TLabel
       Left = 72
@@ -96,9 +87,9 @@ object CnPrefixEditForm: TCnPrefixEditForm
     object lbl5: TLabel
       Left = 8
       Top = 59
-      Width = 28
+      Width = 41
       Height = 13
-      Caption = '标题:'
+      Caption = 'Caption:'
     end
     object lblText: TLabel
       Left = 72
@@ -143,7 +134,7 @@ object CnPrefixEditForm: TCnPrefixEditForm
       Top = 160
       Width = 217
       Height = 17
-      Caption = '对所有组件不再询问。'
+      Caption = 'Never Ask Again.'
       TabOrder = 4
     end
     object cbIgnoreComp: TCheckBox
@@ -151,7 +142,7 @@ object CnPrefixEditForm: TCnPrefixEditForm
       Top = 140
       Width = 217
       Height = 17
-      Caption = '忽略该类型的组件。'
+      Caption = 'Ignore This Type of Component.'
       TabOrder = 3
     end
     object btnPrefix: TButton
@@ -159,7 +150,7 @@ object CnPrefixEditForm: TCnPrefixEditForm
       Top = 137
       Width = 89
       Height = 21
-      Caption = '修改前缀(&P)'
+      Caption = 'Modify &Prefix'
       TabOrder = 2
       OnClick = btnPrefixClick
     end
@@ -179,7 +170,7 @@ object CnPrefixEditForm: TCnPrefixEditForm
     Top = 200
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     TabOrder = 1
     OnClick = btnOKClick
@@ -190,7 +181,7 @@ object CnPrefixEditForm: TCnPrefixEditForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 2
   end
@@ -199,7 +190,7 @@ object CnPrefixEditForm: TCnPrefixEditForm
     Top = 200
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
   end

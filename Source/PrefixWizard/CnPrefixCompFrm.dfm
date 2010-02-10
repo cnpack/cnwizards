@@ -1,16 +1,10 @@
-object CnPrefixCompForm: TCnPrefixCompForm
+inherited CnPrefixCompForm: TCnPrefixCompForm
   Left = 251
   Top = 162
   Width = 632
   Height = 476
   BorderIcons = [biSystemMenu]
-  Caption = '组件更名列表'
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
+  Caption = 'Component Renaming List'
   Icon.Data = {
     0000010001002020000001001800A80C00001600000028000000200000004000
     00000100180000000000800C0000000000000000000000000000000000000000
@@ -114,9 +108,6 @@ object CnPrefixCompForm: TCnPrefixCompForm
     01FFFF8000FFFB00006FF0000007E0000003C000000180000000C0000001E000
     0003F0000007FB00000FFF80009FFFC0011FFDE0030FF9F00603F9F80E01F1F8
     1C01F0F80401E0300003E000019FC0000FFFC0067FFF801FFFFF99FFFFFF}
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnCloseQuery = FormCloseQuery
   OnShow = FormShow
   PixelsPerInch = 96
@@ -127,14 +118,14 @@ object CnPrefixCompForm: TCnPrefixCompForm
     Width = 609
     Height = 405
     Anchors = [akLeft, akTop, akRight, akBottom]
-    Caption = '组件更名列表(&N)'
+    Caption = 'Component Re&naming List'
     TabOrder = 0
     object lbl1: TLabel
       Left = 8
       Top = 24
-      Width = 52
+      Width = 55
       Height = 13
-      Caption = '新组件名:'
+      Caption = 'New Name:'
     end
     object ListView: TListView
       Left = 8
@@ -145,31 +136,31 @@ object CnPrefixCompForm: TCnPrefixCompForm
       Checkboxes = True
       Columns = <
         item
-          Caption = '工程名'
+          Caption = 'Project Name'
           Width = 100
         end
         item
-          Caption = '窗体单元'
+          Caption = 'Form Unit'
           Width = 80
         end
         item
-          Caption = '原组件名'
+          Caption = 'Original Name'
           Width = 80
         end
         item
-          Caption = '组件类名'
+          Caption = 'Class Name'
           Width = 80
         end
         item
-          Caption = '组件标题'
+          Caption = 'Caption'
           Width = 90
         end
         item
-          Caption = '前缀'
+          Caption = 'Prefix'
           Width = 60
         end
         item
-          Caption = '新组件名'
+          Caption = 'New Name'
           Width = 80
         end>
       HideSelection = False
@@ -196,7 +187,7 @@ object CnPrefixCompForm: TCnPrefixCompForm
       Top = 20
       Width = 49
       Height = 21
-      Caption = '修改(&M)'
+      Caption = '&Modify'
       TabOrder = 1
       OnClick = btnModifyClick
     end
@@ -207,7 +198,7 @@ object CnPrefixCompForm: TCnPrefixCompForm
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
-    Caption = '确定(&O)'
+    Caption = '&OK'
     TabOrder = 1
     OnClick = btnOKClick
   end
@@ -218,7 +209,7 @@ object CnPrefixCompForm: TCnPrefixCompForm
     Height = 21
     Anchors = [akRight, akBottom]
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 2
   end
@@ -228,7 +219,7 @@ object CnPrefixCompForm: TCnPrefixCompForm
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
   end

@@ -1,47 +1,39 @@
-object CnHighlightLineForm: TCnHighlightLineForm
+inherited CnHighlightLineForm: TCnHighlightLineForm
   Left = 289
   Top = 249
   BorderStyle = bsDialog
-  Caption = '高亮画线设置'
+  Caption = 'Line Settings'
   ClientHeight = 200
   ClientWidth = 363
-  Color = clBtnFace
-  Font.Charset = GB2312_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -12
-  Font.Name = '宋体'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
   OnCreate = FormCreate
   PixelsPerInch = 96
-  TextHeight = 12
+  TextHeight = 13
   object GroupBox1: TGroupBox
     Left = 8
     Top = 8
     Width = 345
     Height = 152
-    Caption = '高亮画线设置(&L)'
+    Caption = 'Highlight &Line Settings'
     TabOrder = 0
     object lblLineWidth: TLabel
       Left = 240
       Top = 28
-      Width = 36
-      Height = 12
-      Caption = '线宽：'
+      Width = 32
+      Height = 13
+      Caption = 'Width:'
     end
     object lblLineType: TLabel
       Left = 16
       Top = 28
-      Width = 36
-      Height = 12
-      Caption = '线型：'
+      Width = 50
+      Height = 13
+      Caption = 'Line Type:'
     end
     object seLineWidth: TCnSpinEdit
       Left = 288
       Top = 24
       Width = 41
-      Height = 21
+      Height = 22
       MaxValue = 5
       MinValue = 1
       TabOrder = 1
@@ -67,7 +59,7 @@ object CnHighlightLineForm: TCnHighlightLineForm
       Top = 56
       Width = 313
       Height = 17
-      Caption = '在关键字配对端绘制“[”型端点'
+      Caption = 'Draw "[" at Line Ends'
       TabOrder = 2
     end
     object chkLineClass: TCheckBox
@@ -75,7 +67,7 @@ object CnHighlightLineForm: TCnHighlightLineForm
       Top = 116
       Width = 321
       Height = 17
-      Caption = '高亮连线时忽略 class/interface/record 等声明结构'
+      Caption = 'Ignore class/interface/record Declaration in Lines'
       TabOrder = 5
     end
     object chkLineHori: TCheckBox
@@ -83,7 +75,7 @@ object CnHighlightLineForm: TCnHighlightLineForm
       Top = 76
       Width = 313
       Height = 17
-      Caption = '关键字列未对齐时绘制横线'
+      Caption = 'Draw Horizontal Line when in Different Columns'
       TabOrder = 3
       OnClick = chkLineHoriClick
     end
@@ -92,7 +84,7 @@ object CnHighlightLineForm: TCnHighlightLineForm
       Top = 96
       Width = 305
       Height = 17
-      Caption = '横线使用细虚线绘制'
+      Caption = 'Use Tiny Dot to Draw the Horizontal Lines'
       TabOrder = 4
     end
   end
@@ -101,7 +93,7 @@ object CnHighlightLineForm: TCnHighlightLineForm
     Top = 168
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 1
@@ -112,7 +104,7 @@ object CnHighlightLineForm: TCnHighlightLineForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 2
   end
@@ -121,7 +113,7 @@ object CnHighlightLineForm: TCnHighlightLineForm
     Top = 168
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
   end

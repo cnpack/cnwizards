@@ -1,19 +1,10 @@
-object CnPalEnhanceForm: TCnPalEnhanceForm
+inherited CnPalEnhanceForm: TCnPalEnhanceForm
   Left = 340
   Top = 195
   BorderStyle = bsDialog
-  Caption = 'IDE 主窗体扩展专家设置'
+  Caption = 'IDE Main Form Enhancements Wizard Settings'
   ClientHeight = 435
   ClientWidth = 448
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnCreate = FormCreate
   OnShow = FormShow
   PixelsPerInch = 96
@@ -23,16 +14,14 @@ object CnPalEnhanceForm: TCnPalEnhanceForm
     Top = 8
     Width = 433
     Height = 145
-    Caption = '组件面板扩展设置(&P)'
+    Caption = 'Component &Palette Extension Settings'
     TabOrder = 0
     object chkAddTabs: TCheckBox
       Left = 8
       Top = 16
       Width = 409
       Height = 17
-      Caption = 
-        '在组件面板的弹出菜单上添加 Tabs 项（仅适用于 Delphi 5 与 BCB 5）' +
-        '。'
+      Caption = 'Add "Tabs" to Popup Menu(Delphi 5/BCB 5 only).'
       Checked = True
       State = cbChecked
       TabOrder = 0
@@ -42,7 +31,7 @@ object CnPalEnhanceForm: TCnPalEnhanceForm
       Top = 36
       Width = 337
       Height = 17
-      Caption = '设置组件面板页面为多行方式。'
+      Caption = 'Set Component Palette to Multi-line.'
       TabOrder = 1
     end
     object chkDivTabMenu: TCheckBox
@@ -50,7 +39,7 @@ object CnPalEnhanceForm: TCnPalEnhanceForm
       Top = 76
       Width = 409
       Height = 17
-      Caption = '屏幕空间不足时折叠 Tabs 子菜单（仅适用于 Delphi 7 及以下版本）。'
+      Caption = 'Wrap Tabs Menu when too Long(Delphi 7 Below Only).'
       TabOrder = 3
     end
     object chkCompFilter: TCheckBox
@@ -58,7 +47,7 @@ object CnPalEnhanceForm: TCnPalEnhanceForm
       Top = 96
       Width = 409
       Height = 17
-      Caption = '在组件面板上添加"组件查找"按钮（仅适用于 Delphi 7 及以下版本）。'
+      Caption = 'Add "Search Component" Button in Pallete(Delphi 7 Below Only).'
       TabOrder = 4
     end
     object chkButtonStyle: TCheckBox
@@ -66,7 +55,7 @@ object CnPalEnhanceForm: TCnPalEnhanceForm
       Top = 56
       Width = 337
       Height = 17
-      Caption = '设置组件面板页面为平面按钮风格。'
+      Caption = 'Set Component Palette'#39's Style to Flat Button.'
       TabOrder = 2
     end
     object chkLockToolbar: TCheckBox
@@ -74,7 +63,7 @@ object CnPalEnhanceForm: TCnPalEnhanceForm
       Top = 116
       Width = 409
       Height = 17
-      Caption = '锁定 IDE 主窗口的工具栏以禁止拖动。'
+      Caption = 'Lock IDE Toolbar to Disable Drag.'
       TabOrder = 5
     end
   end
@@ -83,7 +72,7 @@ object CnPalEnhanceForm: TCnPalEnhanceForm
     Top = 404
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 5
     OnClick = btnHelpClick
   end
@@ -92,7 +81,7 @@ object CnPalEnhanceForm: TCnPalEnhanceForm
     Top = 404
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 3
@@ -103,7 +92,7 @@ object CnPalEnhanceForm: TCnPalEnhanceForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 4
   end
@@ -112,14 +101,14 @@ object CnPalEnhanceForm: TCnPalEnhanceForm
     Top = 156
     Width = 433
     Height = 41
-    Caption = '其他扩展设置(&T)'
+    Caption = 'O&ther Settings'
     TabOrder = 1
     object chkMenuLine: TCheckBox
       Left = 8
       Top = 16
       Width = 409
       Height = 17
-      Caption = '自动显示 IDE 主菜单的快捷键下划线（仅适用于 Delphi 7）。'
+      Caption = 'Auto Display Shortcut of IDE Main Menu.(Delphi 7 only).'
       Checked = True
       Enabled = False
       State = cbChecked
@@ -131,35 +120,35 @@ object CnPalEnhanceForm: TCnPalEnhanceForm
     Top = 204
     Width = 433
     Height = 193
-    Caption = '主菜单设置(&W)'
+    Caption = 'M&ain Form Settings'
     TabOrder = 2
     object lbl1: TLabel
       Left = 24
       Top = 72
-      Width = 64
+      Width = 77
       Height = 13
-      Caption = '可用菜单项:'
+      Caption = 'Available Items:'
     end
     object lbl2: TLabel
       Left = 24
       Top = 44
-      Width = 52
+      Width = 41
       Height = 13
-      Caption = '菜单标题:'
+      Caption = 'Caption:'
     end
     object lbl3: TLabel
       Left = 240
       Top = 72
-      Width = 88
+      Width = 75
       Height = 13
-      Caption = '要移动的菜单项:'
+      Caption = 'Selected Items:'
     end
     object chkMoveWizMenus: TCheckBox
       Left = 8
       Top = 16
       Width = 401
       Height = 17
-      Caption = '移动主菜单上的菜单项到二级菜单下。'
+      Caption = 'Move Following Menu Items into Sub Menu.'
       TabOrder = 0
       OnClick = UpdateControls
     end

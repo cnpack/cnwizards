@@ -1,19 +1,10 @@
-object CnFormEnhanceConfigForm: TCnFormEnhanceConfigForm
+inherited CnFormEnhanceConfigForm: TCnFormEnhanceConfigForm
   Left = 304
   Top = 124
   BorderStyle = bsDialog
-  Caption = '窗体设计器扩展专家设置'
+  Caption = 'Form Designer Enhancements Settings'
   ClientHeight = 381
   ClientWidth = 489
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
@@ -22,40 +13,40 @@ object CnFormEnhanceConfigForm: TCnFormEnhanceConfigForm
     Top = 8
     Width = 233
     Height = 337
-    Caption = '浮动工具面板(&P)'
+    Caption = 'F&loat Toolbar Settings'
     TabOrder = 0
     object Label1: TLabel
       Left = 24
       Top = 254
-      Width = 52
+      Width = 86
       Height = 13
-      Caption = '水平偏移:'
+      Caption = 'Horizontal Offset:'
     end
     object Label2: TLabel
       Left = 24
       Top = 279
-      Width = 52
+      Width = 73
       Height = 13
-      Caption = '垂直偏移:'
+      Caption = 'Vertical Offset:'
     end
     object Label3: TLabel
       Left = 24
       Top = 229
-      Width = 52
+      Width = 41
       Height = 13
-      Caption = '停靠位置:'
+      Caption = 'Position:'
     end
     object Label4: TLabel
       Left = 8
       Top = 163
-      Width = 76
+      Width = 70
       Height = 13
-      Caption = '工具面板名称:'
+      Caption = 'Toolbar Name:'
     end
     object cbbSnapPos: TComboBox
-      Left = 104
+      Left = 112
       Top = 225
-      Width = 121
+      Width = 113
       Height = 21
       Style = csDropDownList
       ItemHeight = 13
@@ -67,7 +58,7 @@ object CnFormEnhanceConfigForm: TCnFormEnhanceConfigForm
       Top = 304
       Width = 89
       Height = 21
-      Caption = '定制面板(&T)'
+      Caption = 'Cus&tomize...'
       TabOrder = 11
       OnClick = btnCustomizeClick
     end
@@ -76,7 +67,7 @@ object CnFormEnhanceConfigForm: TCnFormEnhanceConfigForm
       Top = 304
       Width = 57
       Height = 21
-      Caption = '导出(&X)'
+      Caption = 'E&xport'
       TabOrder = 12
       OnClick = btnExportClick
     end
@@ -85,7 +76,7 @@ object CnFormEnhanceConfigForm: TCnFormEnhanceConfigForm
       Top = 304
       Width = 55
       Height = 21
-      Caption = '导入(&M)'
+      Caption = 'I&mport'
       TabOrder = 13
       OnClick = btnImportClick
     end
@@ -96,15 +87,15 @@ object CnFormEnhanceConfigForm: TCnFormEnhanceConfigForm
       Height = 89
       Columns = <
         item
-          Caption = '序号'
+          Caption = 'ID'
           Width = 38
         end
         item
-          Caption = '工具栏名称'
+          Caption = 'Toolbar Name'
           Width = 95
         end
         item
-          Caption = '停靠位置'
+          Caption = 'Position'
           Width = 60
         end>
       ColumnClick = False
@@ -121,7 +112,7 @@ object CnFormEnhanceConfigForm: TCnFormEnhanceConfigForm
       Top = 112
       Width = 65
       Height = 21
-      Caption = '添加(&A)'
+      Caption = '&Add'
       TabOrder = 1
       OnClick = btnAddClick
     end
@@ -130,7 +121,7 @@ object CnFormEnhanceConfigForm: TCnFormEnhanceConfigForm
       Top = 112
       Width = 65
       Height = 21
-      Caption = '删除(&D)'
+      Caption = '&Delete'
       TabOrder = 2
       OnClick = btnDeleteClick
     end
@@ -139,7 +130,7 @@ object CnFormEnhanceConfigForm: TCnFormEnhanceConfigForm
       Top = 112
       Width = 65
       Height = 21
-      Caption = '默认(&F)'
+      Caption = 'De&fault'
       TabOrder = 3
       OnClick = btnDefaultClick
     end
@@ -148,7 +139,7 @@ object CnFormEnhanceConfigForm: TCnFormEnhanceConfigForm
       Top = 184
       Width = 217
       Height = 17
-      Caption = '允许拖动此浮动工具面板。'
+      Caption = 'Allow Dragging'
       TabOrder = 6
       OnClick = UpdateControls
     end
@@ -157,16 +148,16 @@ object CnFormEnhanceConfigForm: TCnFormEnhanceConfigForm
       Top = 205
       Width = 217
       Height = 17
-      Caption = '自动停靠到设计窗体附近。'
+      Caption = 'Auto Snap To Form'
       Checked = True
       TabOrder = 7
       TabStop = True
       OnClick = UpdateControls
     end
     object seOffsetX: TCnSpinEdit
-      Left = 104
+      Left = 112
       Top = 249
-      Width = 121
+      Width = 113
       Height = 22
       MaxValue = 0
       MinValue = 0
@@ -175,9 +166,9 @@ object CnFormEnhanceConfigForm: TCnFormEnhanceConfigForm
       OnChange = UpdateControls
     end
     object seOffsetY: TCnSpinEdit
-      Left = 104
+      Left = 112
       Top = 274
-      Width = 121
+      Width = 113
       Height = 22
       MaxValue = 0
       MinValue = 0
@@ -186,9 +177,9 @@ object CnFormEnhanceConfigForm: TCnFormEnhanceConfigForm
       OnChange = UpdateControls
     end
     object edtName: TEdit
-      Left = 104
+      Left = 112
       Top = 160
-      Width = 121
+      Width = 113
       Height = 21
       TabOrder = 5
       OnChange = UpdateControls
@@ -198,7 +189,7 @@ object CnFormEnhanceConfigForm: TCnFormEnhanceConfigForm
       Top = 136
       Width = 217
       Height = 17
-      Caption = '显示此浮动工具面板。'
+      Caption = 'Show this Float Toolbar.'
       TabOrder = 4
       OnClick = UpdateControls
     end
@@ -209,7 +200,7 @@ object CnFormEnhanceConfigForm: TCnFormEnhanceConfigForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '关闭(&O)'
+    Caption = 'Cl&ose'
     Default = True
     ModalResult = 1
     TabOrder = 2
@@ -219,7 +210,7 @@ object CnFormEnhanceConfigForm: TCnFormEnhanceConfigForm
     Top = 352
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
   end
@@ -228,54 +219,54 @@ object CnFormEnhanceConfigForm: TCnFormEnhanceConfigForm
     Top = 8
     Width = 233
     Height = 337
-    Caption = '浮动属性编辑条(&P)'
+    Caption = 'Float &Property Bar'
     TabOrder = 1
     object lbl3: TLabel
       Left = 24
       Top = 158
-      Width = 52
+      Width = 86
       Height = 13
-      Caption = '水平偏移:'
+      Caption = 'Horizontal Offset:'
     end
     object lbl4: TLabel
       Left = 24
       Top = 183
-      Width = 52
+      Width = 73
       Height = 13
-      Caption = '垂直偏移:'
+      Caption = 'Vertical Offset:'
     end
     object lbl5: TLabel
       Left = 24
       Top = 133
-      Width = 52
+      Width = 41
       Height = 13
-      Caption = '停靠位置:'
+      Caption = 'Position:'
     end
     object lbl6: TLabel
       Left = 8
       Top = 208
-      Width = 156
+      Width = 195
       Height = 13
-      Caption = '常用属性列表(按优先级排列):'
+      Caption = 'Frequent Properties Ordered by priority:'
     end
     object lbl1: TLabel
       Left = 24
       Top = 41
-      Width = 64
+      Width = 62
       Height = 13
-      Caption = '属性名宽度:'
+      Caption = 'Name Width:'
     end
     object lbl2: TLabel
       Left = 24
       Top = 66
-      Width = 64
+      Width = 61
       Height = 13
-      Caption = '属性值宽度:'
+      Caption = 'Value Width:'
     end
     object cbbSnapPosPropBar: TComboBox
-      Left = 104
+      Left = 112
       Top = 129
-      Width = 121
+      Width = 113
       Height = 21
       Style = csDropDownList
       ItemHeight = 13
@@ -287,7 +278,7 @@ object CnFormEnhanceConfigForm: TCnFormEnhanceConfigForm
       Top = 88
       Width = 217
       Height = 17
-      Caption = '允许拖动浮动属性编辑条。'
+      Caption = 'Allow Dragging'
       TabOrder = 3
       OnClick = UpdateControls
     end
@@ -296,16 +287,16 @@ object CnFormEnhanceConfigForm: TCnFormEnhanceConfigForm
       Top = 109
       Width = 217
       Height = 17
-      Caption = '自动停靠到设计窗体附近。'
+      Caption = 'Auto Snap To Form'
       Checked = True
       TabOrder = 4
       TabStop = True
       OnClick = UpdateControls
     end
     object sePropBarX: TCnSpinEdit
-      Left = 104
+      Left = 112
       Top = 153
-      Width = 121
+      Width = 113
       Height = 22
       MaxValue = 0
       MinValue = 0
@@ -314,9 +305,9 @@ object CnFormEnhanceConfigForm: TCnFormEnhanceConfigForm
       OnChange = UpdateControls
     end
     object sePropBarY: TCnSpinEdit
-      Left = 104
+      Left = 112
       Top = 178
-      Width = 121
+      Width = 113
       Height = 22
       MaxValue = 0
       MinValue = 0
@@ -329,7 +320,7 @@ object CnFormEnhanceConfigForm: TCnFormEnhanceConfigForm
       Top = 16
       Width = 217
       Height = 17
-      Caption = '显示浮动属性编辑条。'
+      Caption = 'Show Float Property Bar.'
       TabOrder = 0
       OnClick = UpdateControls
     end
@@ -343,9 +334,9 @@ object CnFormEnhanceConfigForm: TCnFormEnhanceConfigForm
       OnExit = UpdateControls
     end
     object seNameWidth: TCnSpinEdit
-      Left = 104
+      Left = 112
       Top = 36
-      Width = 121
+      Width = 113
       Height = 22
       MaxValue = 300
       MinValue = 20
@@ -354,9 +345,9 @@ object CnFormEnhanceConfigForm: TCnFormEnhanceConfigForm
       OnChange = UpdateControls
     end
     object seValueWidth: TCnSpinEdit
-      Left = 104
+      Left = 112
       Top = 61
-      Width = 121
+      Width = 113
       Height = 22
       MaxValue = 300
       MinValue = 20

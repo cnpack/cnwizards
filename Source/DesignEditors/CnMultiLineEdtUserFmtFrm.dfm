@@ -2,7 +2,7 @@ inherited CnMultiLineEditorUserFmtForm: TCnMultiLineEditorUserFmtForm
   Left = 366
   Top = 237
   BorderStyle = bsDialog
-  Caption = '自定义格式化字符串'
+  Caption = 'Customize String Format:'
   ClientHeight = 159
   ClientWidth = 318
   OldCreateOrder = True
@@ -13,16 +13,16 @@ inherited CnMultiLineEditorUserFmtForm: TCnMultiLineEditorUserFmtForm
   object lbl1: TLabel
     Left = 16
     Top = 12
-    Width = 36
+    Width = 32
     Height = 13
-    Caption = '前缀：'
+    Caption = 'Prefix:'
   end
   object lbl2: TLabel
     Left = 16
     Top = 40
-    Width = 36
+    Width = 34
     Height = 13
-    Caption = '后缀：'
+    Caption = 'Subfix:'
   end
   object btnOK: TButton
     Left = 147
@@ -30,7 +30,7 @@ inherited CnMultiLineEditorUserFmtForm: TCnMultiLineEditorUserFmtForm
     Width = 75
     Height = 21
     Anchors = [akTop, akRight]
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 4
@@ -42,7 +42,7 @@ inherited CnMultiLineEditorUserFmtForm: TCnMultiLineEditorUserFmtForm
     Height = 21
     Anchors = [akTop, akRight]
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 5
   end
@@ -65,7 +65,7 @@ inherited CnMultiLineEditorUserFmtForm: TCnMultiLineEditorUserFmtForm
     Top = 68
     Width = 261
     Height = 17
-    Caption = '仅仅处理被选中的字符串'
+    Caption = 'Only Process Selected String.'
     Checked = True
     State = cbChecked
     TabOrder = 2
@@ -75,7 +75,7 @@ inherited CnMultiLineEditorUserFmtForm: TCnMultiLineEditorUserFmtForm
     Top = 96
     Width = 261
     Height = 17
-    Caption = '按行分别处理'
+    Caption = 'Process Partly by Row.'
     Checked = True
     State = cbChecked
     TabOrder = 3

@@ -2,11 +2,10 @@ inherited CnMultiLineEditorToolsOptionForm: TCnMultiLineEditorToolsOptionForm
   Left = 364
   Top = 337
   BorderStyle = bsDialog
-  Caption = '字符串编辑器辅助工具设置'
+  Caption = 'String Editor Tools Option'
   ClientHeight = 218
   ClientWidth = 354
   OldCreateOrder = True
-  Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnShow = FormShow
@@ -21,27 +20,27 @@ inherited CnMultiLineEditorToolsOptionForm: TCnMultiLineEditorToolsOptionForm
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
     object tsQuoted: TTabSheet
-      Caption = '引用转换'
+      Caption = 'Quoted Convert'
       object lbl1: TLabel
         Left = 16
         Top = 16
-        Width = 132
+        Width = 187
         Height = 13
-        Caption = '添加或删除引用的字符：'
+        Caption = 'Quoted Char for Add or Remove Block:'
       end
       object lbl2: TLabel
         Left = 16
         Top = 72
-        Width = 144
+        Width = 179
         Height = 13
-        Caption = '多行到单行的分隔字符串：'
+        Caption = 'Separator for MultiLine to Single Line:'
       end
       object lbl9: TLabel
         Left = 16
         Top = 44
-        Width = 144
+        Width = 168
         Height = 13
-        Caption = '去除引用间的分隔字符串：'
+        Caption = 'Separator of Extract Quoted Char:'
       end
       object edtQuotedChar: TEdit
         Left = 204
@@ -70,28 +69,28 @@ inherited CnMultiLineEditorToolsOptionForm: TCnMultiLineEditorToolsOptionForm
       end
     end
     object tsLineMove: TTabSheet
-      Caption = '块移动'
+      Caption = 'Block Move'
       ImageIndex = 3
       object lbl3: TLabel
         Left = 16
         Top = 16
-        Width = 168
+        Width = 213
         Height = 13
-        Caption = '移动块添加或删除的空格数目：'
+        Caption = 'Spaces to Add or Remove when Move Block:'
       end
       object lbl4: TLabel
         Left = 34
         Top = 64
-        Width = 144
+        Width = 63
         Height = 13
-        Caption = '制表符替换为空格的数目：'
+        Caption = 'Tab to Space'
       end
       object chkMoveReplaceTab: TCheckBox
         Left = 16
         Top = 40
         Width = 297
         Height = 17
-        Caption = '移动前替换制表符为空格'
+        Caption = 'Replace Tab to Space before Move.'
         TabOrder = 1
         OnClick = chkMoveReplaceTabClick
       end
@@ -119,14 +118,14 @@ inherited CnMultiLineEditorToolsOptionForm: TCnMultiLineEditorToolsOptionForm
       end
     end
     object tsSQLFormatter: TTabSheet
-      Caption = 'SQL语句格式化'
+      Caption = 'SQL Formatter'
       ImageIndex = 2
       object grpSQLIndent: TGroupBox
         Left = 8
         Top = 68
         Width = 313
         Height = 73
-        Caption = ' 缩进与换行 '
+        Caption = 'Indent and Line Break'
         TabOrder = 1
       end
       object grpSQLCase: TGroupBox
@@ -134,35 +133,35 @@ inherited CnMultiLineEditorToolsOptionForm: TCnMultiLineEditorToolsOptionForm
         Top = 4
         Width = 313
         Height = 61
-        Caption = ' 大小写 '
+        Caption = ' Case'
         TabOrder = 0
         object lbl5: TLabel
           Left = 16
           Top = 16
-          Width = 48
+          Width = 46
           Height = 13
-          Caption = '关键字：'
+          Caption = 'Keyword:'
         end
         object lbl6: TLabel
           Left = 164
           Top = 16
-          Width = 36
+          Width = 45
           Height = 13
-          Caption = '函数：'
+          Caption = 'Function:'
         end
         object lbl7: TLabel
           Left = 16
           Top = 40
-          Width = 36
+          Width = 60
           Height = 13
-          Caption = '表名：'
+          Caption = 'Table Name:'
         end
         object lbl8: TLabel
           Left = 164
           Top = 40
-          Width = 36
+          Width = 69
           Height = 13
-          Caption = '列名：'
+          Caption = 'Column Name:'
         end
         object cbb1: TComboBox
           Left = 68
@@ -173,10 +172,10 @@ inherited CnMultiLineEditorToolsOptionForm: TCnMultiLineEditorToolsOptionForm
           ItemHeight = 13
           TabOrder = 0
           Items.Strings = (
-            '大写'
-            '小写'
-            '首字母大写'
-            '不处理')
+            'Upper'
+            'Lower'
+            'First Upper'
+            'Do Nothing')
         end
         object cbb2: TComboBox
           Left = 216
@@ -187,10 +186,10 @@ inherited CnMultiLineEditorToolsOptionForm: TCnMultiLineEditorToolsOptionForm
           ItemHeight = 13
           TabOrder = 1
           Items.Strings = (
-            '大写'
-            '小写'
-            '首字母大写'
-            '不处理')
+            'Upper'
+            'Lower'
+            'First Upper'
+            'Do Nothing')
         end
         object cbb3: TComboBox
           Left = 68
@@ -201,10 +200,10 @@ inherited CnMultiLineEditorToolsOptionForm: TCnMultiLineEditorToolsOptionForm
           ItemHeight = 13
           TabOrder = 2
           Items.Strings = (
-            '大写'
-            '小写'
-            '首字母大写'
-            '不处理')
+            'Upper'
+            'Lower'
+            'First Upper'
+            'Do Nothing')
         end
         object cbb4: TComboBox
           Left = 216
@@ -215,10 +214,10 @@ inherited CnMultiLineEditorToolsOptionForm: TCnMultiLineEditorToolsOptionForm
           ItemHeight = 13
           TabOrder = 3
           Items.Strings = (
-            '大写'
-            '小写'
-            '首字母大写'
-            '不处理')
+            'Upper'
+            'Lower'
+            'First Upper'
+            'Do Nothing')
         end
       end
     end
@@ -229,7 +228,7 @@ inherited CnMultiLineEditorToolsOptionForm: TCnMultiLineEditorToolsOptionForm
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 1
@@ -241,7 +240,7 @@ inherited CnMultiLineEditorToolsOptionForm: TCnMultiLineEditorToolsOptionForm
     Height = 21
     Anchors = [akRight, akBottom]
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 2
   end

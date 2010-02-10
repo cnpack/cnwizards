@@ -2,7 +2,7 @@ inherited CnInputHelperEditForm: TCnInputHelperEditForm
   Left = 406
   Top = 248
   BorderStyle = bsDialog
-  Caption = '自定义符号'
+  Caption = 'Customize Symbol'
   ClientHeight = 220
   ClientWidth = 335
   OldCreateOrder = True
@@ -14,42 +14,42 @@ inherited CnInputHelperEditForm: TCnInputHelperEditForm
     Top = 8
     Width = 321
     Height = 177
-    Caption = '符号项(&S)'
+    Caption = '&Symbol'
     TabOrder = 0
     object lbl1: TLabel
       Left = 8
       Top = 24
-      Width = 28
+      Width = 31
       Height = 13
-      Caption = '名称:'
+      Caption = 'Name:'
     end
     object lbl2: TLabel
       Left = 8
       Top = 78
-      Width = 28
+      Width = 57
       Height = 13
-      Caption = '描述:'
+      Caption = 'Description:'
     end
     object lbl3: TLabel
       Left = 8
       Top = 51
       Width = 28
       Height = 13
-      Caption = '类型:'
+      Caption = 'Type:'
     end
     object lbl4: TLabel
       Left = 8
       Top = 105
-      Width = 40
+      Width = 33
       Height = 13
-      Caption = '优先级:'
+      Caption = 'Scope:'
     end
     object lbl5: TLabel
       Left = 144
       Top = 105
-      Width = 98
+      Width = 122
       Height = 13
-      Caption = '0..100，0为最高。'
+      Caption = '0..100, 0 Means Highest.'
     end
     object edtName: TEdit
       Left = 64
@@ -81,7 +81,7 @@ inherited CnInputHelperEditForm: TCnInputHelperEditForm
       Top = 128
       Width = 249
       Height = 17
-      Caption = '多行文本模板在输出时自动缩进。'
+      Caption = 'Auto Indent when Multi-Line.'
       TabOrder = 4
     end
     object seScope: TCnSpinEdit
@@ -99,7 +99,7 @@ inherited CnInputHelperEditForm: TCnInputHelperEditForm
       Top = 150
       Width = 249
       Height = 17
-      Caption = '即使当前输入完全匹配也显示列表。'
+      Caption = 'Always Popup Even Inputting Text is Full Match.'
       TabOrder = 5
     end
   end
@@ -108,7 +108,7 @@ inherited CnInputHelperEditForm: TCnInputHelperEditForm
     Top = 192
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
   end
@@ -117,7 +117,7 @@ inherited CnInputHelperEditForm: TCnInputHelperEditForm
     Top = 192
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     TabOrder = 1
     OnClick = btnOKClick
@@ -128,7 +128,7 @@ inherited CnInputHelperEditForm: TCnInputHelperEditForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 2
   end

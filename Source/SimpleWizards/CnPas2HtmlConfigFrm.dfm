@@ -1,19 +1,10 @@
-object CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
+inherited CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
   Left = 262
   Top = 138
   BorderStyle = bsDialog
-  Caption = 'HTML 格式代码输出专家设置'
+  Caption = 'Source Code to HTML/RTF Wizard Settings'
   ClientHeight = 293
   ClientWidth = 330
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
@@ -24,7 +15,7 @@ object CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
     Top = 264
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 1
@@ -35,7 +26,7 @@ object CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 2
   end
@@ -44,7 +35,7 @@ object CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
     Top = 264
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
   end
@@ -56,55 +47,55 @@ object CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
     ActivePage = TabSheet2
     TabOrder = 0
     object TabSheet1: TTabSheet
-      Caption = '常规设置(&N)'
+      Caption = 'Normal &Options'
       object gbShortCut: TGroupBox
         Left = 8
         Top = 8
         Width = 289
         Height = 177
-        Caption = '快捷键设置(&K)'
+        Caption = 'Sho&rtcut Settings'
         TabOrder = 0
         object Label1: TLabel
           Left = 8
           Top = 19
-          Width = 76
+          Width = 58
           Height = 13
-          Caption = '复制到剪贴板:'
+          Caption = 'Copy HTML:'
         end
         object Label2: TLabel
           Left = 8
           Top = 43
-          Width = 76
+          Width = 58
           Height = 13
-          Caption = '输出当前文件:'
+          Caption = 'Export Unit:'
         end
         object Label3: TLabel
           Left = 8
           Top = 115
-          Width = 88
+          Width = 102
           Height = 13
-          Caption = '输出当前工程组:'
+          Caption = 'Export ProjectGroup:'
         end
         object Label4: TLabel
           Left = 8
           Top = 139
-          Width = 52
+          Width = 82
           Height = 13
-          Caption = '配置窗口:'
+          Caption = 'Options Window:'
         end
         object Label6: TLabel
           Left = 8
           Top = 91
-          Width = 76
+          Width = 73
           Height = 13
-          Caption = '输出当前工程:'
+          Caption = 'Export Project:'
         end
         object Label8: TLabel
           Left = 8
           Top = 67
-          Width = 76
+          Width = 77
           Height = 13
-          Caption = '输出打开文件:'
+          Caption = 'Export Opened:'
         end
         object hkCopySelected: THotKey
           Left = 104
@@ -172,28 +163,28 @@ object CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
         Top = 192
         Width = 249
         Height = 17
-        Caption = '批量转换文件时显示进度窗口'
+        Caption = 'Show Progressbar when Batch Converting'
         Checked = True
         State = cbChecked
         TabOrder = 1
       end
     end
     object TabSheet2: TTabSheet
-      Caption = '输出字体(&F)'
+      Caption = 'Export &Font'
       ImageIndex = 1
       object GroupBox1: TGroupBox
         Left = 8
         Top = 8
         Width = 289
         Height = 201
-        Caption = '字体设置(&D)'
+        Caption = 'Fo&nt Settings'
         TabOrder = 0
         object Label5: TLabel
           Left = 16
           Top = 28
-          Width = 60
+          Width = 56
           Height = 13
-          Caption = '代码元素：'
+          Caption = 'Code Type:'
         end
         object LabelFontDisp: TLabel
           Left = 56
@@ -207,9 +198,9 @@ object CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
         object Label7: TLabel
           Left = 16
           Top = 102
-          Width = 36
+          Width = 26
           Height = 13
-          Caption = '字体：'
+          Caption = 'Font:'
         end
         object ComboBoxFont: TComboBox
           Left = 80
@@ -221,16 +212,16 @@ object CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
           TabOrder = 0
           OnChange = ComboBoxFontChange
           Items.Strings = (
-            '基础字体'
-            'Assembler (汇编语句)'
-            'Comment (注释)'
-            'Directive (编译指令)'
-            'Identifier (标识符)'
-            'Reserved word (保留字)'
-            'Number (数字)'
-            'Whitespace (空格)'
-            'String (字符串)'
-            'Symbol (标点符号)')
+            'Basic Font'
+            'Assembler'
+            'Comment'
+            'Directive'
+            'Identifier'
+            'Reserved Word'
+            'Number'
+            'Whitepace'
+            'String'
+            'Symbol')
         end
         object BtnModifyFont: TButton
           Left = 16
@@ -292,18 +283,18 @@ object CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
     Left = 160
     Top = 184
     object ChangeFontAction: TAction
-      Caption = '修改(&M)'
-      Hint = '修改当前字体'
+      Caption = '&Modify'
+      Hint = 'Modify Current Font'
       OnExecute = ChangeFontActionExecute
     end
     object ResetFontAction: TAction
-      Caption = '重置(&R)'
-      Hint = '重置所有字体'
+      Caption = '&Reset'
+      Hint = 'Reset All Fonts'
       OnExecute = ResetFontActionExecute
     end
     object actLoad: TAction
-      Caption = '载入(&L)'
-      Hint = '从 IDE 中载入字体'
+      Caption = '&Load'
+      Hint = 'Load Fonts From IDE Registry'
       OnExecute = actLoadExecute
     end
   end

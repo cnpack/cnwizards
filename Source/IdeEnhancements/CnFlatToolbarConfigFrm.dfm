@@ -1,18 +1,12 @@
-object CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
+inherited CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
   Left = 223
   Top = 171
   Width = 541
   Height = 370
   BorderIcons = [biSystemMenu]
-  Caption = '工具面板设置'
-  Color = clBtnFace
+  Caption = 'Toolbar Settings'
   Constraints.MinHeight = 340
   Constraints.MinWidth = 450
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
   Icon.Data = {
     0000010001002020000000000000A80800001600000028000000200000004000
     0000010008000000000080040000000000000000000000010000000000000000
@@ -84,9 +78,6 @@ object CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
     0007F8000003E0000001E0000003E00000078000000100000001000000010000
     00010000000100000001000000010000000F0000000F0000000F0000000F0000
     000FE000007FE000007FE000207FE040307FF0C039FFF9C03FFFFFC03FFF}
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   PixelsPerInch = 96
   TextHeight = 13
   object pnlButtons: TPanel
@@ -104,7 +95,7 @@ object CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
       Width = 75
       Height = 21
       Anchors = [akRight, akBottom]
-      Caption = '帮助(&H)'
+      Caption = '&Help'
       TabOrder = 2
       OnClick = btnHelpClick
     end
@@ -114,7 +105,7 @@ object CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
       Width = 75
       Height = 21
       Anchors = [akRight, akBottom]
-      Caption = '确定(&O)'
+      Caption = '&OK'
       Default = True
       ModalResult = 1
       TabOrder = 0
@@ -127,7 +118,7 @@ object CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
       Height = 21
       Anchors = [akRight, akBottom]
       Cancel = True
-      Caption = '取消(&C)'
+      Caption = '&Cancel'
       ModalResult = 2
       TabOrder = 1
     end
@@ -144,26 +135,26 @@ object CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
     object lblAvailable: TLabel
       Left = 120
       Top = 8
-      Width = 64
+      Width = 87
       Height = 13
-      Caption = '可用的按钮:'
+      Caption = 'Available Buttons:'
       FocusControl = lbAvailable
     end
     object lblCategories: TLabel
       Left = 9
       Top = 8
-      Width = 28
+      Width = 49
       Height = 13
-      Caption = '类别:'
+      Caption = 'Category:'
       FocusControl = lbCategories
     end
     object lblToolbar: TLabel
       Left = 336
       Top = 8
-      Width = 76
+      Width = 80
       Height = 13
       Anchors = [akTop, akRight]
-      Caption = '工具面板按钮:'
+      Caption = 'Toolbar Buttons:'
       FocusControl = lbToolbar
     end
     object pnlEditor: TPanel
@@ -179,7 +170,7 @@ object CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
         Top = 8
         Width = 153
         Height = 22
-        Caption = '增加分隔条(&A)'
+        Caption = '&Add Separator'
         TabOrder = 0
         OnClick = btnAddSepClick
       end
@@ -341,9 +332,9 @@ object CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
       object lbl1: TLabel
         Left = 1
         Top = 5
-        Width = 76
+        Width = 65
         Height = 13
-        Caption = '工具面板行数:'
+        Caption = 'Button Rows:'
       end
       object seLineCount: TCnSpinEdit
         Left = 87
@@ -359,9 +350,9 @@ object CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
       object chkVertOrder: TCheckBox
         Left = 0
         Top = 26
-        Width = 185
+        Width = 193
         Height = 17
-        Caption = '按钮先上下后左右排列'
+        Caption = 'Arrange Button by Top-Bottom First'
         TabOrder = 1
       end
     end
@@ -371,23 +362,23 @@ object CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
     Left = 40
     Top = 32
     object actAddButton: TAction
-      Hint = '增加按钮到浮动工具面板'
+      Hint = 'Add Button to Toolbar'
       OnExecute = actAddButtonExecute
     end
     object actRemoveButton: TAction
-      Hint = '从浮动工具面板中删除按钮'
+      Hint = 'Delete Current Button'
       OnExecute = actRemoveButtonExecute
     end
     object actMoveDown: TAction
-      Hint = '当前按钮向下移动'
+      Hint = 'Move Down Current Button'
       OnExecute = actMoveDownExecute
     end
     object actMoveUp: TAction
-      Hint = '当前按钮向上移动'
+      Hint = 'Move Up Current Button'
       OnExecute = actMoveUpExecute
     end
     object actReset: TAction
-      Hint = '恢复工具栏的默认设置'
+      Hint = 'Restore Default Toolbar Settings'
       OnExecute = actResetExecute
     end
   end

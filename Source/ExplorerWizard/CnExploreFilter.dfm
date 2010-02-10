@@ -1,19 +1,11 @@
-object CnExploreFilterForm: TCnExploreFilterForm
+inherited CnExploreFilterForm: TCnExploreFilterForm
   Left = 229
   Top = 202
   BorderStyle = bsDialog
-  Caption = '文件过滤'
+  Caption = 'Filters Setting'
   ClientHeight = 361
   ClientWidth = 435
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
   OldCreateOrder = True
-  Position = poScreenCenter
-  Scaled = False
   OnClose = FormClose
   OnCreate = FormCreate
   PixelsPerInch = 96
@@ -36,9 +28,9 @@ object CnExploreFilterForm: TCnExploreFilterForm
     object btnNew: TToolButton
       Left = 0
       Top = 0
-      Hint = '新建'
+      Hint = 'New'
       AutoSize = True
-      Caption = '新建'
+      Caption = 'New'
       ImageIndex = 12
       ParentShowHint = False
       ShowHint = True
@@ -47,9 +39,9 @@ object CnExploreFilterForm: TCnExploreFilterForm
     object btnDelete: TToolButton
       Left = 23
       Top = 0
-      Hint = '删除'
+      Hint = 'Delete'
       AutoSize = True
-      Caption = '删除'
+      Caption = 'Delete'
       ImageIndex = 13
       ParentShowHint = False
       ShowHint = True
@@ -58,9 +50,9 @@ object CnExploreFilterForm: TCnExploreFilterForm
     object btnDefault: TToolButton
       Left = 46
       Top = 0
-      Hint = '默认文件过滤设置'
+      Hint = 'Default Filter'
       AutoSize = True
-      Caption = '默认设置'
+      Caption = 'Default'
       ImageIndex = 19
       OnClick = btnDefaultClick
     end
@@ -75,9 +67,9 @@ object CnExploreFilterForm: TCnExploreFilterForm
     object btnClear: TToolButton
       Left = 77
       Top = 0
-      Hint = '过滤'
+      Hint = 'Filtrate Files or Folders'
       AutoSize = True
-      Caption = '过滤'
+      Caption = 'Filtrate'
       ImageIndex = 31
       OnClick = btnClearClick
     end
@@ -92,9 +84,9 @@ object CnExploreFilterForm: TCnExploreFilterForm
     object btnFilter: TToolButton
       Left = 108
       Top = 0
-      Hint = '退出'
+      Hint = 'Close'
       AutoSize = True
-      Caption = '退出'
+      Caption = 'Close'
       ImageIndex = 0
       OnClick = btnFilterClick
     end
@@ -113,14 +105,14 @@ object CnExploreFilterForm: TCnExploreFilterForm
       Top = 8
       Width = 417
       Height = 49
-      Caption = '对象类型'
+      Caption = 'Type'
       TabOrder = 0
       object chkFolder: TCheckBox
         Left = 12
         Top = 22
         Width = 97
         Height = 17
-        Caption = '文件夹'
+        Caption = 'Folders'
         Checked = True
         State = cbChecked
         TabOrder = 0
@@ -130,7 +122,7 @@ object CnExploreFilterForm: TCnExploreFilterForm
         Top = 22
         Width = 97
         Height = 17
-        Caption = '文件'
+        Caption = 'Files'
         Checked = True
         State = cbChecked
         TabOrder = 1
@@ -140,7 +132,7 @@ object CnExploreFilterForm: TCnExploreFilterForm
         Top = 22
         Width = 171
         Height = 17
-        Caption = '隐藏的文件(夹)'
+        Caption = 'Hidden Files or Folders'
         Checked = True
         State = cbChecked
         TabOrder = 2
@@ -154,6 +146,7 @@ object CnExploreFilterForm: TCnExploreFilterForm
     Height = 19
     Panels = <
       item
+        Text = 'Current Filter:'
         Width = 300
       end>
     ParentFont = True
@@ -168,12 +161,12 @@ object CnExploreFilterForm: TCnExploreFilterForm
     Align = alClient
     Columns = <
       item
-        Caption = '类型'
+        Caption = 'Type'
         Width = 100
       end
       item
         AutoSize = True
-        Caption = '扩展名'
+        Caption = 'Ext.'
         MinWidth = 100
       end>
     HideSelection = False
