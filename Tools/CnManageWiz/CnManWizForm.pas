@@ -36,6 +36,8 @@ unit CnManWizForm;
 
 interface
 
+{$I CnPack.inc}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ExtCtrls, StdCtrls, Buttons, ComCtrls, ToolWin, ActnList, ImgList, Registry,
@@ -82,7 +84,7 @@ const
     '\Software\Borland\BDS\5.0',
     '\Software\CodeGear\BDS\6.0',
     '\Software\CodeGear\BDS\7.0',
-    '\Software\CodeGear\BDS\8.0',
+    '\Software\Embarcadero\BDS\8.0',
     '\Software\Borland\C++Builder\5.0',
     '\Software\Borland\C++Builder\6.0');
 
@@ -581,7 +583,7 @@ begin
   // 画文字
   Margin := (ListBox.ItemHeight - TextH) div 2;
   ListBox.Canvas.TextOut(Rect.Left + ListBox.ItemHeight + 2, Rect.Top + Margin,
-    csIDENames[TCnCompiler(ImgIdx)]);
+    csIDENames[TCnCompiler(Index {ImgIdx} )]);    // use Index instead of ImgIdx
 
   // 根据是否 Enable 画图标
   Margin := (ListBox.ItemHeight - ilIDEs.Height) div 2;
@@ -790,8 +792,10 @@ end;
 procedure TCnManageWizardForm.actExploreExecute(Sender: TObject);
 begin
   if lvWizards.Selected <> nil then
-    WinExec(PChar(Format('EXPLORER.EXE /e,/select,%s',
-     [lvWizards.Selected.SubItems[0]])), SW_SHOWNORMAL);
+    WinExec({$IFDEF DELPHI2009_UP}PAnsiChar{$ELSE}PChar{$ENDIF}(
+    {$IFDEF DELPHI2009_UP}AnsiString{$ENDIF}(Format('EXPLORER.EXE /e,/select,%s',
+     [lvWizards.Selected.SubItems[0]]))
+     ), SW_SHOWNORMAL);
 end;
 
 procedure TCnManageWizardForm.actMoveUpExecute(Sender: TObject);
