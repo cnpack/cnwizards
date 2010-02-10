@@ -1,19 +1,10 @@
-object CnEditorToolsForm: TCnEditorToolsForm
+inherited CnEditorToolsForm: TCnEditorToolsForm
   Left = 359
   Top = 144
   BorderStyle = bsDialog
-  Caption = '编辑器工具设置'
+  Caption = 'Code Editor Wizard Settings'
   ClientHeight = 413
   ClientWidth = 506
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
@@ -22,7 +13,7 @@ object CnEditorToolsForm: TCnEditorToolsForm
     Top = 384
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 2
     OnClick = btnHelpClick
   end
@@ -32,7 +23,7 @@ object CnEditorToolsForm: TCnEditorToolsForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '关闭(&O)'
+    Caption = 'Cl&ose'
     Default = True
     ModalResult = 1
     TabOrder = 1
@@ -42,14 +33,14 @@ object CnEditorToolsForm: TCnEditorToolsForm
     Top = 8
     Width = 489
     Height = 369
-    Caption = '编辑器工具(&T)'
+    Caption = 'Editor &Tools'
     TabOrder = 0
     object lbl1: TLabel
       Left = 312
       Top = 132
-      Width = 42
+      Width = 53
       Height = 13
-      Caption = '快捷键:'
+      Caption = 'ShortCut:'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -60,9 +51,9 @@ object CnEditorToolsForm: TCnEditorToolsForm
     object lbl2: TLabel
       Left = 312
       Top = 187
-      Width = 29
+      Width = 50
       Height = 13
-      Caption = '设置:'
+      Caption = 'Settings:'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -102,9 +93,9 @@ object CnEditorToolsForm: TCnEditorToolsForm
     object lbl3: TLabel
       Left = 312
       Top = 64
-      Width = 29
+      Width = 42
       Height = 13
-      Caption = '作者:'
+      Caption = 'Author:'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -128,14 +119,14 @@ object CnEditorToolsForm: TCnEditorToolsForm
       Height = 233
       Columns = <
         item
-          Caption = '工具名称'
+          Caption = 'Tool Name'
           Width = 127
         end
         item
-          Caption = '状态'
+          Caption = 'Status'
         end
         item
-          Caption = '快捷键'
+          Caption = 'Shortcut'
           Width = 100
         end>
       ColumnClick = False
@@ -161,7 +152,7 @@ object CnEditorToolsForm: TCnEditorToolsForm
       Top = 203
       Width = 129
       Height = 17
-      Caption = '允许该工具启用'
+      Caption = 'Enable this Tool'
       TabOrder = 2
       OnClick = chkEnabledClick
     end
@@ -181,7 +172,7 @@ object CnEditorToolsForm: TCnEditorToolsForm
       Top = 225
       Width = 75
       Height = 21
-      Caption = '设置(&S)'
+      Caption = '&Settings'
       TabOrder = 3
       OnClick = btnConfigClick
     end

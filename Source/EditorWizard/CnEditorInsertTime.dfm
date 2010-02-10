@@ -1,40 +1,32 @@
-object CnEditorInsertTimeForm: TCnEditorInsertTimeForm
+inherited CnEditorInsertTimeForm: TCnEditorInsertTimeForm
   Left = 509
   Top = 415
   BorderStyle = bsDialog
-  Caption = '插入日期时间'
+  Caption = 'Insert Date Time'
   ClientHeight = 117
   ClientWidth = 284
-  Color = clBtnFace
-  Font.Charset = GB2312_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -12
-  Font.Name = '宋体'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
   PixelsPerInch = 96
-  TextHeight = 12
+  TextHeight = 13
   object lblFmt: TLabel
     Left = 16
     Top = 18
-    Width = 36
-    Height = 12
-    Caption = '格式：'
+    Width = 34
+    Height = 13
+    Caption = 'Format'
   end
   object lblPreview: TLabel
     Left = 16
     Top = 50
-    Width = 36
-    Height = 12
-    Caption = '预览：'
+    Width = 42
+    Height = 13
+    Caption = 'Preview:'
   end
   object cbbDateTimeFmt: TComboBox
     Left = 72
     Top = 16
     Width = 193
-    Height = 20
-    ItemHeight = 12
+    Height = 21
+    ItemHeight = 13
     TabOrder = 0
     OnChange = cbbDateTimeFmtChange
     Items.Strings = (
@@ -47,7 +39,7 @@ object CnEditorInsertTimeForm: TCnEditorInsertTimeForm
     Left = 72
     Top = 48
     Width = 193
-    Height = 20
+    Height = 21
     TabOrder = 1
   end
   object btnOK: TButton
@@ -55,7 +47,7 @@ object CnEditorInsertTimeForm: TCnEditorInsertTimeForm
     Top = 82
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 2
@@ -66,7 +58,7 @@ object CnEditorInsertTimeForm: TCnEditorInsertTimeForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 3
   end

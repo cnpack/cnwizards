@@ -1,4 +1,4 @@
-object CnCompFilterForm: TCnCompFilterForm
+inherited CnCompFilterForm: TCnCompFilterForm
   Left = 525
   Top = 206
   Width = 218
@@ -6,14 +6,7 @@ object CnCompFilterForm: TCnCompFilterForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSizeToolWin
   BorderWidth = 1
-  Color = clBtnFace
-  Font.Charset = GB2312_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -12
-  Font.Name = '宋体'
-  Font.Style = []
   KeyPreview = True
-  OldCreateOrder = False
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnDeactivate = FormDeactivate
@@ -21,7 +14,7 @@ object CnCompFilterForm: TCnCompFilterForm
   OnKeyDown = FormKeyDown
   OnResize = FormResize
   PixelsPerInch = 96
-  TextHeight = 12
+  TextHeight = 13
   object Panel1: TPanel
     Left = 0
     Top = 0
@@ -86,7 +79,7 @@ object CnCompFilterForm: TCnCompFilterForm
         object btnMatchStart: TToolButton
           Left = 0
           Top = 0
-          Hint = '匹配组件名开头'
+          Hint = 'Match Component/Tab Name Start'
           Grouped = True
           ImageIndex = 27
           Style = tbsCheck
@@ -95,7 +88,7 @@ object CnCompFilterForm: TCnCompFilterForm
         object btnMatchAny: TToolButton
           Left = 23
           Top = 0
-          Hint = '匹配组件名所有位置'
+          Hint = 'Match All Parts of Component/Tab Name'
           Down = True
           Grouped = True
           ImageIndex = 28
@@ -107,7 +100,7 @@ object CnCompFilterForm: TCnCompFilterForm
         Left = 58
         Top = 1
         Width = 100
-        Height = 20
+        Height = 21
         TabOrder = 1
         OnChange = edtSearchChange
         OnKeyDown = edtSearchKeyDown
@@ -133,7 +126,7 @@ object CnCompFilterForm: TCnCompFilterForm
         object btnHelp: TToolButton
           Left = 23
           Top = 0
-          Hint = '帮助'
+          Hint = 'Help'
           Caption = 'btnHelp'
           ImageIndex = 1
           OnClick = btnHelpClick
@@ -152,7 +145,7 @@ object CnCompFilterForm: TCnCompFilterForm
         Top = 0
         Width = 185
         Height = 97
-        Hint = '组件列表区域，右键菜单可进行更多控制'
+        Hint = 'Component List. Right-Click to Get Settings Menu.'
         Align = alClient
         Columns = <
           item
@@ -195,7 +188,7 @@ object CnCompFilterForm: TCnCompFilterForm
         Top = 0
         Width = 185
         Height = 169
-        Hint = '标签页列表区域'
+        Hint = 'Tab List'
         Align = alClient
         Columns = <
           item
@@ -238,17 +231,16 @@ object CnCompFilterForm: TCnCompFilterForm
     Font.Name = 'MS Sans Serif'
     Font.Style = []
     Tabs.Strings = (
-      '组件'
-      '标签')
-    TabIndex = 0
+      'Components'
+      'Tabs')
     OnChange = tbst1Change
   end
   object actlstFilter: TActionList
     Left = 168
     Top = 88
     object actCreateComp: TAction
-      Caption = '创建组件(&C)'
-      Hint = '创建选中的组件'
+      Caption = '&Create Component'
+      Hint = 'Create Selected Component in Current Form'
       ImageIndex = 34
       OnExecute = actCreateCompExecute
       OnUpdate = actCreateCompUpdate
@@ -278,24 +270,24 @@ object CnCompFilterForm: TCnCompFilterForm
       Caption = '-'
     end
     object mniDisplay: TMenuItem
-      Caption = '显示设置(&D)'
+      Caption = '&Display Settings'
       object mniShowPrefix: TMenuItem
-        Caption = '显示组件名的首字母 &T'
+        Caption = 'Show Prefix &T'
         OnClick = mniShowPrefixClick
       end
       object mniShowDetailHint: TMenuItem
-        Caption = '显示组件详细提示(&H)'
+        Caption = 'Show Details &Hint'
         OnClick = mniShowDetailHintClick
       end
       object mniAutoSelect: TMenuItem
-        Caption = '自动选择组件面板的对应组件(&S)'
+        Caption = 'Auto &Select in Palette'
         OnClick = mniAutoSelectClick
       end
     end
     object mniTabs: TMenuItem
-      Caption = '标签页过滤(&T)'
+      Caption = '&Tabs'
       object mniShowAllTabs: TMenuItem
-        Caption = '显示所有标签页的组件(&A)'
+        Caption = 'Show &All Tabs'
         OnClick = mniShowAllTabsClick
       end
       object mniN1: TMenuItem

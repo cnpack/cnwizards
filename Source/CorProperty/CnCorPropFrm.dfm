@@ -1,19 +1,10 @@
-object CnCorPropForm: TCnCorPropForm
+inherited CnCorPropForm: TCnCorPropForm
   Left = 371
   Top = 151
   BorderStyle = bsDialog
-  Caption = '批量属性修改器'
+  Caption = 'Property Corrector'
   ClientHeight = 461
   ClientWidth = 546
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnActivate = FormActivate
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -24,14 +15,14 @@ object CnCorPropForm: TCnCorPropForm
     Top = 5
     Width = 528
     Height = 68
-    Caption = '查找范围(&R)'
+    Caption = 'Search &Range'
     TabOrder = 0
     object rbProject: TRadioButton
       Left = 8
       Top = 40
       Width = 160
       Height = 17
-      Caption = '当前工程中的所有窗体(&3)'
+      Caption = 'Forms in Current Project(&3)'
       TabOrder = 2
     end
     object rbForm: TRadioButton
@@ -39,7 +30,7 @@ object CnCorPropForm: TCnCorPropForm
       Top = 18
       Width = 105
       Height = 17
-      Caption = '当前窗体(&1)'
+      Caption = 'Current Form(&1)'
       Checked = True
       TabOrder = 0
       TabStop = True
@@ -49,7 +40,7 @@ object CnCorPropForm: TCnCorPropForm
       Top = 40
       Width = 184
       Height = 17
-      Caption = '当前工程组中的所有窗体(&4)'
+      Caption = 'Forms in Current ProjectGroup(&4)'
       TabOrder = 3
     end
     object rbOpened: TRadioButton
@@ -57,7 +48,7 @@ object CnCorPropForm: TCnCorPropForm
       Top = 18
       Width = 129
       Height = 17
-      Caption = '所有打开的窗体(&2)'
+      Caption = 'All Opened Forms(&2)'
       TabOrder = 1
     end
   end
@@ -67,7 +58,7 @@ object CnCorPropForm: TCnCorPropForm
     Width = 75
     Height = 21
     Action = actCorrect
-    Caption = '查找修正(&F)'
+    Caption = '&Search'
     TabOrder = 1
   end
   object btnClose: TButton
@@ -76,7 +67,7 @@ object CnCorPropForm: TCnCorPropForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '关闭(&C)'
+    Caption = '&Close'
     ModalResult = 2
     TabOrder = 6
     OnClick = btnCloseClick
@@ -86,7 +77,7 @@ object CnCorPropForm: TCnCorPropForm
     Top = 84
     Width = 75
     Height = 21
-    Caption = '设置(&O)'
+    Caption = '&Options'
     TabOrder = 4
     OnClick = btnConfigClick
   end
@@ -95,7 +86,7 @@ object CnCorPropForm: TCnCorPropForm
     Top = 84
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 5
     OnClick = btnHelpClick
   end
@@ -104,7 +95,7 @@ object CnCorPropForm: TCnCorPropForm
     Top = 84
     Width = 75
     Height = 21
-    Caption = '全部确认(&A)'
+    Caption = 'Confirm &All'
     TabOrder = 2
     OnClick = btnAllClick
   end
@@ -121,7 +112,7 @@ object CnCorPropForm: TCnCorPropForm
     Top = 112
     Width = 529
     Height = 339
-    Caption = '查找修改结果：'
+    Caption = 'Search Result'
     TabOrder = 7
     object lvResult: TListView
       Left = 9
@@ -130,23 +121,23 @@ object CnCorPropForm: TCnCorPropForm
       Height = 313
       Columns = <
         item
-          Caption = '状态'
+          Caption = 'Status'
           Width = 70
         end
         item
-          Caption = '所在文件'
+          Caption = 'Current File'
           Width = 108
         end
         item
-          Caption = '组件名'
+          Caption = 'Name'
           Width = 98
         end
         item
-          Caption = '原属性值'
+          Caption = 'Value'
           Width = 108
         end
         item
-          Caption = '修改为...'
+          Caption = 'Modify to'
           Width = 108
         end>
       HideSelection = False
@@ -164,27 +155,27 @@ object CnCorPropForm: TCnCorPropForm
     Left = 30
     Top = 154
     object actCorrect: TAction
-      Caption = '查找(&F)'
+      Caption = '&Find'
       OnExecute = actCorrectExecute
       Left = 10
       Top = 10
     end
     object actLocateComp: TAction
-      Caption = '定位该控件(&L)'
+      Caption = '&Locate the Component'
       OnExecute = actLocateCompExecute
       OnUpdate = actLocateCompUpdate
       Left = 38
       Top = 10
     end
     object actCorrectComp: TAction
-      Caption = '确认修改(&M)'
+      Caption = 'Confirm &Modify'
       OnExecute = actCorrectCompExecute
       OnUpdate = actCorrectCompUpdate
       Left = 66
       Top = 10
     end
     object actUndoCorrect: TAction
-      Caption = '撤销修改(&U)'
+      Caption = '&Undo'
       OnExecute = actUndoCorrectExecute
       OnUpdate = actUndoCorrectUpdate
     end

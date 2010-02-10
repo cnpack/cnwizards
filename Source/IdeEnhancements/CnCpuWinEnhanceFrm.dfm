@@ -1,28 +1,19 @@
-object CnCpuWinEnhanceForm: TCnCpuWinEnhanceForm
+inherited CnCpuWinEnhanceForm: TCnCpuWinEnhanceForm
   Left = 347
   Top = 219
   BorderStyle = bsDialog
-  Caption = 'CPU 窗口扩展设置'
+  Caption = 'CPU Window Enhancements Settings'
   ClientHeight = 204
   ClientWidth = 249
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
   FormStyle = fsStayOnTop
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   PixelsPerInch = 96
   TextHeight = 13
   object CopyParam: TGroupBox
     Left = 8
     Top = 8
     Width = 233
-    Height = 72
-    Caption = '参数设置'
+    Height = 73
+    Caption = 'Settings'
     TabOrder = 0
     object Label1: TLabel
       Left = 8
@@ -30,14 +21,14 @@ object CnCpuWinEnhanceForm: TCnCpuWinEnhanceForm
       Width = 72
       Height = 12
       AutoSize = False
-      Caption = '复制行数:'
+      Caption = 'Copy Lines:'
     end
     object rbTopAddr: TRadioButton
       Left = 8
       Top = 48
       Width = 105
       Height = 17
-      Caption = '从第一行'
+      Caption = 'From Beginning'
       Checked = True
       TabOrder = 1
       TabStop = True
@@ -47,7 +38,7 @@ object CnCpuWinEnhanceForm: TCnCpuWinEnhanceForm
       Top = 48
       Width = 113
       Height = 17
-      Caption = '从选择行'
+      Caption = 'From Selected Line'
       TabOrder = 2
     end
     object seCopyLineCount: TCnSpinEdit
@@ -67,7 +58,7 @@ object CnCpuWinEnhanceForm: TCnCpuWinEnhanceForm
     Top = 152
     Width = 153
     Height = 17
-    Caption = '应用设置为默认操作。'
+    Caption = 'Set As Default.'
     TabOrder = 2
   end
   object rgCopyToMode: TRadioGroup
@@ -75,10 +66,10 @@ object CnCpuWinEnhanceForm: TCnCpuWinEnhanceForm
     Top = 88
     Width = 233
     Height = 57
-    Caption = '复制结果'
+    Caption = 'Copy Result'
     Items.Strings = (
-      '复制到剪贴板'
-      '复制到文件')
+      'Copy To Clipboard'
+      'Copy To File')
     TabOrder = 1
   end
   object btnOK: TButton
@@ -86,7 +77,7 @@ object CnCpuWinEnhanceForm: TCnCpuWinEnhanceForm
     Top = 176
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 3
@@ -97,7 +88,7 @@ object CnCpuWinEnhanceForm: TCnCpuWinEnhanceForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 4
   end
@@ -106,7 +97,7 @@ object CnCpuWinEnhanceForm: TCnCpuWinEnhanceForm
     Top = 176
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 5
     OnClick = btnHelpClick
   end

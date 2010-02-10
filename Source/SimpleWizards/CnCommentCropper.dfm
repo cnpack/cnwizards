@@ -1,19 +1,10 @@
-object CommentCropForm: TCommentCropForm
+inherited CommentCropForm: TCommentCropForm
   Left = 235
   Top = 155
   BorderStyle = bsDialog
-  Caption = '删除注释'
+  Caption = 'Delete Comments'
   ClientHeight = 354
   ClientWidth = 545
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnClose = FormClose
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
@@ -24,14 +15,14 @@ object CommentCropForm: TCommentCropForm
     Top = 8
     Width = 217
     Height = 209
-    Caption = '请选择处理内容(&N)'
+    Caption = '&Select Content to Crop'
     TabOrder = 1
     object rbSelEdit: TRadioButton
       Left = 8
       Top = 24
       Width = 200
       Height = 17
-      Caption = '当前编辑的选择区(&1)。'
+      Caption = 'Current Selection(&1).'
       TabOrder = 0
       TabStop = True
       OnClick = UpdateClick
@@ -41,7 +32,7 @@ object CommentCropForm: TCommentCropForm
       Top = 54
       Width = 200
       Height = 17
-      Caption = '当前编辑的单元(&2)。'
+      Caption = 'Current Unit(&2).'
       Checked = True
       TabOrder = 1
       TabStop = True
@@ -52,7 +43,7 @@ object CommentCropForm: TCommentCropForm
       Top = 85
       Width = 200
       Height = 17
-      Caption = '当前所有打开的单元(&3)。'
+      Caption = 'All Opened Units(&3).'
       TabOrder = 2
       TabStop = True
       OnClick = UpdateClick
@@ -62,7 +53,7 @@ object CommentCropForm: TCommentCropForm
       Top = 115
       Width = 200
       Height = 17
-      Caption = '当前工程中的所有单元(&4)。'
+      Caption = 'All Units in Current Project(&4).'
       TabOrder = 3
       TabStop = True
       OnClick = UpdateClick
@@ -72,7 +63,7 @@ object CommentCropForm: TCommentCropForm
       Top = 146
       Width = 200
       Height = 17
-      Caption = '当前工程组中的所有单元(&5)。'
+      Caption = 'All Units in Current ProjectGroup(&5).'
       TabOrder = 4
       TabStop = True
       OnClick = UpdateClick
@@ -82,7 +73,7 @@ object CommentCropForm: TCommentCropForm
       Top = 176
       Width = 200
       Height = 17
-      Caption = '指定目录(&6)。'
+      Caption = 'In Directories(&6).'
       TabOrder = 5
       TabStop = True
       OnClick = UpdateClick
@@ -91,23 +82,23 @@ object CommentCropForm: TCommentCropForm
   object GroupBox1: TGroupBox
     Left = 8
     Top = 8
-    Width = 300
+    Width = 305
     Height = 209
-    Caption = '处理选项(&P)'
+    Caption = '&Crop Settings'
     TabOrder = 0
     object Label1: TLabel
       Left = 24
       Top = 136
-      Width = 156
+      Width = 154
       Height = 13
-      Caption = '（字串之间以半角逗号分隔）'
+      Caption = '(Separate Strings using Comma)'
     end
     object rbCropComment: TRadioButton
       Left = 8
       Top = 18
-      Width = 281
+      Width = 293
       Height = 17
-      Caption = '删除注释块的所有内容。'
+      Caption = 'Delete All Comment Block.'
       Checked = True
       TabOrder = 0
       TabStop = True
@@ -115,50 +106,50 @@ object CommentCropForm: TCommentCropForm
     object rbExAscii: TRadioButton
       Left = 8
       Top = 38
-      Width = 281
+      Width = 293
       Height = 17
-      Caption = '只删除注释中的扩展 ASCII 字符。'
+      Caption = 'Only Delete Extended ASCII Chars.'
       TabOrder = 1
     end
     object chkCropDirective: TCheckBox
       Left = 8
       Top = 58
-      Width = 281
+      Width = 293
       Height = 17
-      Caption = '处理 Delphi 编译指令（不推荐）。'
+      Caption = 'Crop Delphi Compiler Directive(Not Recommended).'
       Enabled = False
       TabOrder = 2
     end
     object chkCropTodo: TCheckBox
       Left = 8
       Top = 78
-      Width = 281
+      Width = 293
       Height = 17
-      Caption = '处理 Todo List。'
+      Caption = 'Crop Todo List Items.'
       TabOrder = 3
     end
     object chkReserve: TCheckBox
       Left = 8
       Top = 118
-      Width = 286
+      Width = 293
       Height = 17
-      Caption = '保留内容中以以下字串开头的块注释'
+      Caption = 'Reserve Block Comment {...} and /*...*/ Beginning with:'
       TabOrder = 5
       OnClick = chkReserveClick
     end
     object edReserveStr: TEdit
       Left = 24
       Top = 154
-      Width = 260
+      Width = 273
       Height = 21
       TabOrder = 6
     end
     object chkCropProjectSrc: TCheckBox
       Left = 8
       Top = 98
-      Width = 281
+      Width = 293
       Height = 17
-      Caption = '处理项目源文件。'
+      Caption = 'Crop Project Source.'
       TabOrder = 4
     end
     object chkMergeBlank: TCheckBox
@@ -166,7 +157,7 @@ object CommentCropForm: TCommentCropForm
       Top = 181
       Width = 286
       Height = 17
-      Caption = '处理完毕后合并相邻空行。'
+      Caption = 'Merge Continuous Blank Lines to One.'
       Checked = True
       State = cbChecked
       TabOrder = 7
@@ -178,7 +169,7 @@ object CommentCropForm: TCommentCropForm
     Top = 323
     Width = 75
     Height = 21
-    Caption = '处理(&O)'
+    Caption = 'Pr&ocess'
     Default = True
     ModalResult = 1
     TabOrder = 3
@@ -189,7 +180,7 @@ object CommentCropForm: TCommentCropForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 4
   end
@@ -198,7 +189,7 @@ object CommentCropForm: TCommentCropForm
     Top = 323
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 5
     OnClick = btnHelpClick
   end
@@ -207,22 +198,22 @@ object CommentCropForm: TCommentCropForm
     Top = 224
     Width = 529
     Height = 89
-    Caption = '指定目录(&L)'
+    Caption = 'Search Directory'
     TabOrder = 2
     object lbl1: TLabel
       Left = 8
       Top = 19
-      Width = 55
+      Width = 48
       Height = 13
-      Caption = '目录名(&D):'
+      Caption = '&Directory:'
       FocusControl = cbbDir
     end
     object lbl2: TLabel
       Left = 8
       Top = 43
-      Width = 66
+      Width = 47
       Height = 13
-      Caption = '文件掩码(&E):'
+      Caption = 'Fil&e Mask:'
       FocusControl = cbbMask
     end
     object btnSelectDir: TButton
@@ -259,7 +250,7 @@ object CommentCropForm: TCommentCropForm
       Top = 64
       Width = 105
       Height = 17
-      Caption = '查找子目录(&S)'
+      Caption = '&Search Sub-folders'
       Checked = True
       State = cbChecked
       TabOrder = 3

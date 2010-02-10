@@ -1,19 +1,11 @@
-object CnExploreDirctoryForm: TCnExploreDirctoryForm
+inherited CnExploreDirctoryForm: TCnExploreDirctoryForm
   Left = 307
   Top = 211
   BorderStyle = bsDialog
-  Caption = '收藏文件夹'
+  Caption = 'Favorites'
   ClientHeight = 372
   ClientWidth = 464
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
   OldCreateOrder = True
-  Position = poScreenCenter
-  Scaled = False
   PixelsPerInch = 96
   TextHeight = 13
   object tlb: TToolBar
@@ -34,8 +26,8 @@ object CnExploreDirctoryForm: TCnExploreDirctoryForm
     object btnNew: TToolButton
       Left = 0
       Top = 0
-      Hint = '新建'
-      Caption = '新建'
+      Hint = 'New'
+      Caption = 'New'
       ImageIndex = 12
       ParentShowHint = False
       ShowHint = True
@@ -44,8 +36,8 @@ object CnExploreDirctoryForm: TCnExploreDirctoryForm
     object btnDelete: TToolButton
       Left = 23
       Top = 0
-      Hint = '删除'
-      Caption = '删除'
+      Hint = 'Delete'
+      Caption = 'Delete'
       ImageIndex = 13
       ParentShowHint = False
       ShowHint = True
@@ -62,8 +54,8 @@ object CnExploreDirctoryForm: TCnExploreDirctoryForm
     object btnClear: TToolButton
       Left = 54
       Top = 0
-      Hint = '定位选中的目录'
-      Caption = '选择'
+      Hint = 'Open Selected Folder'
+      Caption = 'Select'
       ImageIndex = 39
       OnClick = btnClearClick
     end
@@ -78,8 +70,8 @@ object CnExploreDirctoryForm: TCnExploreDirctoryForm
     object btnExit: TToolButton
       Left = 85
       Top = 0
-      Hint = '退出'
-      Caption = '退出'
+      Hint = 'Exit'
+      Caption = 'Exit'
       ImageIndex = 0
       OnClick = btnExitClick
     end
@@ -101,7 +93,7 @@ object CnExploreDirctoryForm: TCnExploreDirctoryForm
     Height = 19
     Panels = <
       item
-        Text = '当前活动文件夹:'
+        Text = 'Current Folder:'
         Width = 300
       end>
     ParentFont = True

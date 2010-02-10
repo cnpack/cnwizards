@@ -1,19 +1,10 @@
-object CnCorPropCfgForm: TCnCorPropCfgForm
+inherited CnCorPropCfgForm: TCnCorPropCfgForm
   Left = 228
   Top = 128
   BorderStyle = bsDialog
-  Caption = '属性修改器规则设置'
-  ClientHeight = 380
+  Caption = 'Property Corrector Rules Settings'
+  ClientHeight = 393
   ClientWidth = 535
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnDestroy = FormDestroy
   OnShow = FormShow
   PixelsPerInch = 96
@@ -26,59 +17,59 @@ object CnCorPropCfgForm: TCnCorPropCfgForm
   end
   object btnOK: TButton
     Left = 283
-    Top = 351
+    Top = 363
     Width = 75
     Height = 21
     Action = ActionConfirm
     Default = True
-    TabOrder = 4
+    TabOrder = 1
   end
   object btnCancel: TButton
     Left = 369
-    Top = 351
+    Top = 363
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
-    TabOrder = 5
+    TabOrder = 2
   end
   object GroupBox1: TGroupBox
     Left = 8
     Top = 8
     Width = 521
-    Height = 329
-    Caption = '属性修改规则(&R)'
+    Height = 345
+    Caption = 'Property Corrector &Rules'
     TabOrder = 0
     object ListView: TListView
       Left = 8
       Top = 56
       Width = 505
-      Height = 265
+      Height = 241
       Checkboxes = True
       Columns = <
         item
-          Caption = '组件类'
+          Caption = 'Class'
           Width = 100
         end
         item
-          Caption = '属性'
+          Caption = 'Property'
           Width = 100
         end
         item
-          Caption = '条件'
-          Width = 36
+          Caption = 'Condition'
+          Width = 38
         end
         item
-          Caption = '属性值'
+          Caption = 'Value'
           Width = 100
         end
         item
-          Caption = '动作'
+          Caption = 'Action'
           Width = 60
         end
         item
-          Caption = '修改为'
+          Caption = 'Modify To'
           Width = 100
         end>
       HideSelection = False
@@ -134,41 +125,41 @@ object CnCorPropCfgForm: TCnCorPropCfgForm
       Action = ActionEdit
       TabOrder = 1
     end
-  end
-  object ckbOpenFile: TCheckBox
-    Left = 8
-    Top = 344
-    Width = 113
-    Height = 17
-    Caption = '打开文件时检查'
-    TabOrder = 1
-    Visible = False
-  end
-  object ckbCloseFile: TCheckBox
-    Left = 120
-    Top = 344
-    Width = 121
-    Height = 17
-    Caption = '关闭文件时检查'
-    TabOrder = 2
-    Visible = False
-  end
-  object ckbNewComp: TCheckBox
-    Left = 8
-    Top = 360
-    Width = 109
-    Height = 17
-    Caption = '添加控件时检查'
-    TabOrder = 3
-    Visible = False
+    object ckbOpenFile: TCheckBox
+      Left = 8
+      Top = 304
+      Width = 233
+      Height = 17
+      Caption = 'Check When Open File'
+      TabOrder = 6
+      Visible = False
+    end
+    object ckbCloseFile: TCheckBox
+      Left = 256
+      Top = 304
+      Width = 257
+      Height = 17
+      Caption = 'Check When Close File'
+      TabOrder = 7
+      Visible = False
+    end
+    object ckbNewComp: TCheckBox
+      Left = 8
+      Top = 322
+      Width = 233
+      Height = 17
+      Caption = 'Check When Add Component'
+      TabOrder = 8
+      Visible = False
+    end
   end
   object btnHelp: TButton
     Left = 454
-    Top = 351
+    Top = 363
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
-    TabOrder = 6
+    Caption = '&Help'
+    TabOrder = 3
     OnClick = btnHelpClick
   end
   object ActionList: TActionList
@@ -176,39 +167,39 @@ object CnCorPropCfgForm: TCnCorPropCfgForm
     Left = 429
     Top = 4
     object ActionConfirm: TAction
-      Caption = '确定(&O)'
+      Caption = '&OK'
       OnExecute = ActionConfirmExecute
     end
     object ActionLoad: TAction
-      Caption = '导入(&L)'
+      Caption = '&Load'
       OnExecute = ActionLoadExecute
     end
     object ActionSave: TAction
-      Caption = '导出(&S)'
+      Caption = '&Save'
       OnExecute = ActionSaveExecute
     end
     object ActionAdd: TAction
-      Caption = '添加(&A)'
+      Caption = '&Add'
       OnExecute = ActionAddExecute
     end
     object ActionDel: TAction
-      Caption = '删除(&D)'
+      Caption = '&Delete'
       OnExecute = ActionDelExecute
     end
     object ActionEdit: TAction
-      Caption = '编辑(&E)'
+      Caption = '&Edit'
       OnExecute = ActionEditExecute
     end
   end
   object OpenDialog: TOpenDialog
     DefaultExt = 'rul'
-    Filter = '属性修正规则文件(*.rul)|*.rul'
+    Filter = 'Property Modify Rules File (*.rul)|*.rul'
     Left = 389
     Top = 4
   end
   object SaveDialog: TSaveDialog
     DefaultExt = 'rul'
-    Filter = '属性修正规则文件(*.rul)|*.rul'
+    Filter = 'Property Modify Rules File (*.rul)|*.rul'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
     Left = 349
     Top = 4

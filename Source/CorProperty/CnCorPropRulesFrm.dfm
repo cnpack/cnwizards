@@ -1,19 +1,10 @@
-object CorPropRuleForm: TCorPropRuleForm
+inherited CorPropRuleForm: TCorPropRuleForm
   Left = 203
   Top = 252
   BorderStyle = bsDialog
-  Caption = '属性修改规则'
+  Caption = 'Property Modify Rules'
   ClientHeight = 85
   ClientWidth = 658
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -23,44 +14,44 @@ object CorPropRuleForm: TCorPropRuleForm
   object Label1: TLabel
     Left = 8
     Top = 8
-    Width = 48
+    Width = 29
     Height = 13
-    Caption = '组件类：'
+    Caption = 'Class:'
   end
   object Label2: TLabel
     Left = 144
     Top = 8
-    Width = 36
+    Width = 46
     Height = 13
-    Caption = '属性：'
+    Caption = 'Property:'
   end
   object Label3: TLabel
     Left = 328
     Top = 8
-    Width = 48
+    Width = 30
     Height = 13
-    Caption = '属性值：'
+    Caption = 'Value:'
   end
   object Label4: TLabel
     Left = 256
     Top = 8
-    Width = 36
+    Width = 49
     Height = 13
-    Caption = '条件：'
+    Caption = 'Condition:'
   end
   object Label5: TLabel
     Left = 448
     Top = 8
-    Width = 36
+    Width = 34
     Height = 13
-    Caption = '动作：'
+    Caption = 'Action:'
   end
   object Label6: TLabel
     Left = 528
     Top = 8
-    Width = 48
+    Width = 51
     Height = 13
-    Caption = '修改为：'
+    Caption = 'Modify To:'
   end
   object btnOK: TButton
     Left = 416
@@ -68,7 +59,7 @@ object CorPropRuleForm: TCorPropRuleForm
     Width = 75
     Height = 21
     Anchors = [akTop, akRight]
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 7
@@ -80,7 +71,7 @@ object CorPropRuleForm: TCorPropRuleForm
     Height = 21
     Anchors = [akTop, akRight]
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 8
   end
@@ -90,7 +81,7 @@ object CorPropRuleForm: TCorPropRuleForm
     Width = 75
     Height = 21
     Anchors = [akTop, akRight]
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 9
     OnClick = btnHelpClick
   end
@@ -151,7 +142,7 @@ object CorPropRuleForm: TCorPropRuleForm
     Top = 56
     Width = 169
     Height = 17
-    Caption = '规则有效'
+    Caption = 'Enable this Rule'
     Checked = True
     State = cbChecked
     TabOrder = 6

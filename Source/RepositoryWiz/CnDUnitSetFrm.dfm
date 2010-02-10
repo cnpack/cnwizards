@@ -1,34 +1,25 @@
-object CnDUnitSetForm: TCnDUnitSetForm
+inherited CnDUnitSetForm: TCnDUnitSetForm
   Left = 349
   Top = 263
   BorderStyle = bsDialog
-  Caption = 'DUnit 专家'
-  ClientHeight = 170
+  Caption = 'DUnit Wizard'
+  ClientHeight = 168
   ClientWidth = 268
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   PixelsPerInch = 96
   TextHeight = 13
   object gbxSetup: TGroupBox
     Left = 12
     Top = 12
     Width = 246
-    Height = 113
-    Caption = '选项'
+    Height = 117
+    Caption = 'Options'
     TabOrder = 0
     object chbxUnitHead: TCheckBox
       Left = 16
       Top = 81
       Width = 161
       Height = 17
-      Caption = '加入单元头注释'
+      Caption = 'Add Comment Head'
       Checked = True
       State = cbChecked
       TabOrder = 3
@@ -38,7 +29,7 @@ object CnDUnitSetForm: TCnDUnitSetForm
       Top = 60
       Width = 161
       Height = 17
-      Caption = '初始化测试类'
+      Caption = 'Initialize Test Class'
       Checked = True
       State = cbChecked
       TabOrder = 2
@@ -48,7 +39,7 @@ object CnDUnitSetForm: TCnDUnitSetForm
       Top = 16
       Width = 169
       Height = 17
-      Caption = '新建 DUnit 测试工程'
+      Caption = 'New DUnit Test Application'
       Checked = True
       TabOrder = 0
       TabStop = True
@@ -58,36 +49,36 @@ object CnDUnitSetForm: TCnDUnitSetForm
       Top = 38
       Width = 169
       Height = 17
-      Caption = '新建 DUnit 测试单元'
+      Caption = 'New DUnit Test Unit'
       TabOrder = 1
     end
   end
   object btnOK: TButton
     Left = 11
-    Top = 137
+    Top = 138
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 1
   end
   object btnCancel: TButton
     Left = 97
-    Top = 137
+    Top = 138
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 2
   end
   object btnHelp: TButton
     Left = 182
-    Top = 137
+    Top = 138
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
   end

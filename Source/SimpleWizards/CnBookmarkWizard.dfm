@@ -1,19 +1,12 @@
-object CnBookmarkForm: TCnBookmarkForm
+inherited CnBookmarkForm: TCnBookmarkForm
   Left = 328
   Top = 164
   Width = 515
   Height = 423
-  Caption = '书签浏览'
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
+  Caption = 'Browse Bookmarks'
   KeyPreview = True
   OldCreateOrder = False
   Position = poScreenCenter
-  Scaled = False
   OnHide = FormHide
   OnKeyPress = FormKeyPress
   OnShow = FormShow
@@ -37,7 +30,7 @@ object CnBookmarkForm: TCnBookmarkForm
     object tbGoto: TToolButton
       Left = 0
       Top = 0
-      Hint = '在代码编辑器中定位到该书签位置'
+      Hint = 'Locate the Bookmark in Source Code'
       ImageIndex = 34
       OnClick = ListViewDblClick
     end
@@ -51,14 +44,14 @@ object CnBookmarkForm: TCnBookmarkForm
     object btnRefresh: TToolButton
       Left = 31
       Top = 0
-      Hint = '刷新显示'
+      Hint = 'Refresh Bookmark List'
       ImageIndex = 35
       OnClick = UpdateAll
     end
     object btnDelete: TToolButton
       Left = 54
       Top = 0
-      Hint = '删除书签'
+      Hint = 'Delete Bookmarks'
       ImageIndex = 13
       OnClick = btnDeleteClick
     end
@@ -72,7 +65,7 @@ object CnBookmarkForm: TCnBookmarkForm
     object tbConfig: TToolButton
       Left = 85
       Top = 0
-      Hint = '工具设置'
+      Hint = 'Tools Settings'
       ImageIndex = 2
       OnClick = tbConfigClick
     end
@@ -86,14 +79,14 @@ object CnBookmarkForm: TCnBookmarkForm
     object tbHelp: TToolButton
       Left = 116
       Top = 0
-      Hint = '帮助说明'
+      Hint = 'Help'
       ImageIndex = 1
       OnClick = tbHelpClick
     end
     object tbClose: TToolButton
       Left = 139
       Top = 0
-      Hint = '关闭'
+      Hint = 'Close Window'
       ImageIndex = 0
       OnClick = tbCloseClick
     end
@@ -151,19 +144,20 @@ object CnBookmarkForm: TCnBookmarkForm
       Align = alClient
       Columns = <
         item
-          Caption = '单元名'
+          Caption = 'Unit Name'
           Width = 100
         end
         item
-          Caption = '书签'
-          Width = 38
+          Caption = 'Bookmark'
+          Width = 60
         end
         item
-          Caption = '行号'
+          Caption = 'Line No.'
+          Width = 60
         end
         item
-          Caption = '源代码'
-          Width = 300
+          Caption = 'Source Code'
+          Width = 270
         end>
       ColumnClick = False
       HideSelection = False

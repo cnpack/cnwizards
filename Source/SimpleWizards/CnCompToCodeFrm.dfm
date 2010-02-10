@@ -1,15 +1,9 @@
-object CnCompToCodeForm: TCnCompToCodeForm
+inherited CnCompToCodeForm: TCnCompToCodeForm
   Left = 439
   Top = 170
   Width = 623
   Height = 553
-  Caption = '将所选择组件转换成代码'
-  Color = clBtnFace
-  Font.Charset = GB2312_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -12
-  Font.Name = '宋体'
-  Font.Style = []
+  Caption = 'Convert Selected Components to Code'
   Icon.Data = {
     0000010001002020000001001800A80C00001600000028000000200000004000
     00000100180000000000800C0000000000000000000000000000000000000000
@@ -114,12 +108,10 @@ object CnCompToCodeForm: TCnCompToCodeForm
     0000F0000000C0000000C0000000C0000003C0000003C000000FC000000FC000
     FFFFC000FFFFF003FFFFF003FFFFFC0FFFFFFC0FFFFFFF3FFFFFFF3FFFFF}
   KeyPreview = True
-  OldCreateOrder = False
-  Position = poScreenCenter
   OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
   PixelsPerInch = 96
-  TextHeight = 12
+  TextHeight = 13
   object spl1: TSplitter
     Left = 0
     Top = 189
@@ -212,9 +204,9 @@ object CnCompToCodeForm: TCnCompToCodeForm
     object lblVar: TLabel
       Left = 16
       Top = 8
-      Width = 66
-      Height = 12
-      Caption = 'var 区声明:'
+      Width = 105
+      Height = 13
+      Caption = 'var Declaration Code:'
     end
     object mmoVar: TMemo
       Left = 0
@@ -248,9 +240,9 @@ object CnCompToCodeForm: TCnCompToCodeForm
     object lblImpl: TLabel
       Left = 16
       Top = 7
-      Width = 114
-      Height = 12
-      Caption = '创建及属性赋值代码:'
+      Width = 89
+      Height = 13
+      Caption = 'Initialization Code:'
     end
     object mmoImpl: TMemo
       Left = 0
@@ -284,39 +276,39 @@ object CnCompToCodeForm: TCnCompToCodeForm
     Left = 316
     Top = 4
     object actRefrseh: TAction
-      Hint = '将选中的组件转换成代码'
+      Hint = 'Convert Selected Components to Code'
       ImageIndex = 35
       OnExecute = actRefrsehExecute
     end
     object actHelp: TAction
       Caption = 'actHelp'
-      Hint = '显示帮助'
+      Hint = 'Display Help'
       ImageIndex = 1
       OnExecute = actHelpExecute
     end
     object actClear: TAction
-      Hint = '清空代码区域'
+      Hint = 'Clear Code'
       ImageIndex = 13
       OnExecute = actClearExecute
     end
     object actCopyVar: TAction
-      Hint = '复制变量声明代码到剪贴板'
+      Hint = 'Copy Variable Declaration Code to Clipboard'
       ImageIndex = 20
       OnExecute = actCopyVarExecute
     end
     object actCopyImpl: TAction
       Caption = 'actCopyImpl'
-      Hint = '复制创建及赋值代码到剪贴板'
+      Hint = 'Copy Implementation Code to Clipboard'
       ImageIndex = 21
       OnExecute = actCopyImplExecute
     end
     object actCopyProc: TAction
-      Hint = '复制整个创建过程'
+      Hint = 'Copy the Whole Procedure Code'
       OnExecute = actCopyProcExecute
     end
     object actExit: TAction
       Caption = 'actExit'
-      Hint = '关闭窗口'
+      Hint = 'Close this Window'
       ImageIndex = 0
       OnExecute = actExitExecute
     end

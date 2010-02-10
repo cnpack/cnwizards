@@ -3,7 +3,7 @@ inherited CnEditorCollectorForm: TCnEditorCollectorForm
   Top = 229
   Width = 419
   Height = 292
-  Caption = '收集面板'
+  Caption = 'Collector'
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnDeactivate = FormDeactivate
@@ -111,7 +111,7 @@ inherited CnEditorCollectorForm: TCnEditorCollectorForm
     object btnAutoPaste: TToolButton
       Left = 247
       Top = 0
-      Hint = '自动粘贴'
+      Hint = 'Auto Paste'
       Caption = 'btnAutoPaste'
       ImageIndex = 47
       Style = tbsCheck
@@ -128,7 +128,7 @@ inherited CnEditorCollectorForm: TCnEditorCollectorForm
     object btnImport: TToolButton
       Left = 278
       Top = 0
-      Hint = '从 IDE 中复制'
+      Hint = 'Copy from IDE'
       Caption = 'btnImport'
       ImageIndex = 64
       OnClick = btnImportClick
@@ -136,7 +136,7 @@ inherited CnEditorCollectorForm: TCnEditorCollectorForm
     object btnExport: TToolButton
       Left = 301
       Top = 0
-      Hint = '将选中文字输出到 IDE'
+      Hint = 'Export Selection to IDE'
       Caption = 'btnExport'
       ImageIndex = 46
       OnClick = btnExportClick
@@ -152,7 +152,7 @@ inherited CnEditorCollectorForm: TCnEditorCollectorForm
     object btnSetFont: TToolButton
       Left = 332
       Top = 0
-      Hint = '选择字体'
+      Hint = 'Select Font'
       ImageIndex = 29
       OnClick = btnSetFontClick
     end
@@ -172,7 +172,7 @@ inherited CnEditorCollectorForm: TCnEditorCollectorForm
     object btnAbout: TToolButton
       Left = 386
       Top = 0
-      Hint = '帮助'
+      Hint = 'Help'
       ImageIndex = 1
       OnClick = btnAboutClick
     end
@@ -214,85 +214,85 @@ inherited CnEditorCollectorForm: TCnEditorCollectorForm
     Top = 194
     object actEditSave: TAction
       Category = 'Edit'
-      Hint = '保存当前文本'
+      Hint = 'Save To File'
       ImageIndex = 6
       ShortCut = 16467
       OnExecute = actEditSaveExecute
     end
     object actEditLoad: TAction
       Category = 'Edit'
-      Hint = '从文本文件中导入'
+      Hint = 'Load From File'
       ImageIndex = 3
       ShortCut = 16460
       OnExecute = actEditLoadExecute
     end
     object actEditFind: TAction
       Category = 'Edit'
-      Hint = '查找文字'
+      Hint = 'Find...'
       ImageIndex = 16
       ShortCut = 16454
       OnExecute = actEditFindExecute
     end
     object actEditFindNext: TAction
       Category = 'Edit'
-      Hint = '查找下一个'
+      Hint = 'Find Next'
       ImageIndex = 17
       ShortCut = 114
       OnExecute = actEditFindNextExecute
     end
     object actEditReplace: TAction
       Category = 'Edit'
-      Hint = '替换文字'
+      Hint = 'Replace...'
       ImageIndex = 33
       ShortCut = 16466
       OnExecute = actEditReplaceExecute
     end
     object actEditWordWrap: TAction
       Category = 'Edit'
-      Hint = '自动折行'
+      Hint = 'Word Wrap'
       ImageIndex = 21
       OnExecute = actEditWordWrapExecute
     end
     object actPageNew: TAction
       Category = 'Page'
-      Hint = '新建标签页'
+      Hint = 'New Page'
       ImageIndex = 12
       ShortCut = 16462
       OnExecute = actPageNewExecute
     end
     object actPageDelete: TAction
       Category = 'Page'
-      Hint = '删除标签页'
+      Hint = 'Delete Page'
       ImageIndex = 31
       ShortCut = 16430
       OnExecute = actPageDeleteExecute
     end
     object actPageRename: TAction
       Category = 'Page'
-      Hint = '重命名标签页'
+      Hint = 'Rename Page'
       ImageIndex = 86
       ShortCut = 113
       OnExecute = actPageRenameExecute
     end
     object actEditClear: TAction
       Category = 'Edit'
-      Hint = '清空'
+      Hint = 'Clear'
       ImageIndex = 13
       OnExecute = actEditClearExecute
     end
   end
   object dlgOpen: TOpenDialog
     DefaultExt = 'txt'
-    Filter = '文本文件(*.txt)|*.txt|所有文件(*.*)|*.*'
-    Title = '打开文本文件'
+    Filter = 'Text Files(*.txt)|*.txt|All Files(*.*)|*.*'
+    Title = 'Open Text File'
     Left = 79
     Top = 194
   end
   object dlgSave: TSaveDialog
     DefaultExt = 'txt'
-    Filter = '文本文件(*.txt)|*.txt|所有文件(*.*)|*.*'
+    Filter = 'Text Files(*.txt)|*.txt|All Files(*.*)|*.*'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
-    Title = '保存文本文件'
+    Title = 'Save Text File'
     Left = 143
     Top = 194
   end

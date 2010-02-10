@@ -1,19 +1,10 @@
-object CnBookmarkConfigForm: TCnBookmarkConfigForm
+inherited CnBookmarkConfigForm: TCnBookmarkConfigForm
   Left = 405
   Top = 296
   BorderStyle = bsDialog
-  Caption = '书签管理器设置'
+  Caption = 'Bookmark Manager Settings'
   ClientHeight = 221
   ClientWidth = 264
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   PixelsPerInch = 96
   TextHeight = 13
   object btnOK: TButton
@@ -21,7 +12,7 @@ object CnBookmarkConfigForm: TCnBookmarkConfigForm
     Top = 192
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 2
@@ -32,7 +23,7 @@ object CnBookmarkConfigForm: TCnBookmarkConfigForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 3
   end
@@ -41,28 +32,28 @@ object CnBookmarkConfigForm: TCnBookmarkConfigForm
     Top = 8
     Width = 249
     Height = 129
-    Caption = '浏览设置(&B)'
+    Caption = '&Browsing Settings'
     TabOrder = 0
     object Label1: TLabel
       Left = 8
       Top = 24
-      Width = 100
+      Width = 67
       Height = 13
-      Caption = '源代码显示前后各:'
+      Caption = 'Show nearby:'
     end
     object Label2: TLabel
       Left = 200
       Top = 24
-      Width = 24
+      Width = 25
       Height = 13
-      Caption = '行。'
+      Caption = 'lines.'
     end
     object lbl1: TLabel
       Left = 26
       Top = 72
-      Width = 52
+      Width = 83
       Height = 13
-      Caption = '刷新间隔:'
+      Caption = 'Refresh Interval:'
     end
     object lbl2: TLabel
       Left = 200
@@ -76,7 +67,7 @@ object CnBookmarkConfigForm: TCnBookmarkConfigForm
       Top = 96
       Width = 113
       Height = 21
-      Caption = '源代码显示字体(&F)'
+      Caption = 'Source Code &Font'
       TabOrder = 3
       OnClick = btnSourceFontClick
     end
@@ -85,7 +76,7 @@ object CnBookmarkConfigForm: TCnBookmarkConfigForm
       Top = 96
       Width = 105
       Height = 21
-      Caption = '高亮显示字体(&L)'
+      Caption = 'High&light Font'
       TabOrder = 4
       OnClick = btnHighlightFontClick
     end
@@ -94,7 +85,7 @@ object CnBookmarkConfigForm: TCnBookmarkConfigForm
       Top = 48
       Width = 237
       Height = 17
-      Caption = '自动刷新书签列表。'
+      Caption = 'Auto Refresh Bookmark List.'
       TabOrder = 1
     end
     object seDispLines: TCnSpinEdit
@@ -125,14 +116,14 @@ object CnBookmarkConfigForm: TCnBookmarkConfigForm
     Top = 144
     Width = 249
     Height = 41
-    Caption = '书签设置(&A)'
+    Caption = 'Bookm&ark Settings'
     TabOrder = 1
     object cbSaveBookmark: TCheckBox
       Left = 8
       Top = 16
       Width = 201
       Height = 17
-      Caption = '自动保存和装载书签。'
+      Caption = 'Auto Save/Load Bookmarks.'
       TabOrder = 0
     end
   end

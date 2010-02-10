@@ -1,20 +1,11 @@
-object CnComponentSelectorForm: TCnComponentSelectorForm
+inherited CnComponentSelectorForm: TCnComponentSelectorForm
   Left = 235
   Top = 111
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
-  Caption = '组件选择工具'
+  Caption = 'Component Selection Tools'
   ClientHeight = 489
-  ClientWidth = 598
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
+  ClientWidth = 655
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   PixelsPerInch = 96
@@ -22,16 +13,16 @@ object CnComponentSelectorForm: TCnComponentSelectorForm
   object gbFilter: TGroupBox
     Left = 8
     Top = 8
-    Width = 177
+    Width = 209
     Height = 137
-    Caption = '组件容器过滤(&F)'
+    Caption = 'Container &Filter'
     TabOrder = 0
     object rbCurrForm: TRadioButton
       Left = 8
       Top = 16
       Width = 160
       Height = 17
-      Caption = '窗体上所有组件'
+      Caption = 'All Components in Form'
       Checked = True
       TabOrder = 0
       TabStop = True
@@ -42,7 +33,7 @@ object CnComponentSelectorForm: TCnComponentSelectorForm
       Top = 38
       Width = 160
       Height = 17
-      Caption = '当前所选控件的子控件'
+      Caption = 'All Subs of Selected'
       TabOrder = 1
       OnClick = DoUpdateListControls
     end
@@ -51,14 +42,14 @@ object CnComponentSelectorForm: TCnComponentSelectorForm
       Top = 60
       Width = 160
       Height = 17
-      Caption = '指定控件的子控件'
+      Caption = 'All Subs of Specified'
       TabOrder = 2
       OnClick = DoUpdateListControls
     end
     object cbbFilterControl: TComboBox
       Left = 24
       Top = 84
-      Width = 145
+      Width = 177
       Height = 21
       Style = csDropDownList
       ItemHeight = 13
@@ -69,24 +60,24 @@ object CnComponentSelectorForm: TCnComponentSelectorForm
     object cbIncludeChildren: TCheckBox
       Left = 8
       Top = 112
-      Width = 161
+      Width = 199
       Height = 17
-      Caption = '包含多级子控件'
+      Caption = 'Contains Multi-level Sub-components'
       TabOrder = 4
       OnClick = DoUpdateList
     end
   end
   object gbByName: TGroupBox
-    Left = 192
+    Left = 224
     Top = 8
-    Width = 193
+    Width = 217
     Height = 137
-    Caption = '组件名称类型过滤(&N)'
+    Caption = 'Component &Name Filter'
     TabOrder = 1
     object edtByName: TEdit
       Left = 24
       Top = 40
-      Width = 161
+      Width = 185
       Height = 21
       TabOrder = 1
       OnChange = DoUpdateList
@@ -96,7 +87,7 @@ object CnComponentSelectorForm: TCnComponentSelectorForm
       Top = 16
       Width = 177
       Height = 17
-      Caption = '允许组件名称过滤'
+      Caption = 'Enable Component Name Filter'
       TabOrder = 0
       OnClick = DoUpdateListControls
     end
@@ -105,14 +96,14 @@ object CnComponentSelectorForm: TCnComponentSelectorForm
       Top = 64
       Width = 177
       Height = 17
-      Caption = '允许组件类型过滤'
+      Caption = 'Enable Component Type Filter'
       TabOrder = 2
       OnClick = DoUpdateListControls
     end
     object cbbByClass: TComboBox
       Left = 24
       Top = 84
-      Width = 161
+      Width = 185
       Height = 21
       Style = csDropDownList
       ItemHeight = 13
@@ -123,9 +114,9 @@ object CnComponentSelectorForm: TCnComponentSelectorForm
     object cbSubClass: TCheckBox
       Left = 24
       Top = 112
-      Width = 161
+      Width = 185
       Height = 17
-      Caption = '包含子类'
+      Caption = 'Contains Descendent Class'
       TabOrder = 4
       OnClick = DoUpdateList
     end
@@ -133,35 +124,35 @@ object CnComponentSelectorForm: TCnComponentSelectorForm
   object gbComponentList: TGroupBox
     Left = 8
     Top = 152
-    Width = 585
+    Width = 641
     Height = 301
-    Caption = '组件列表(&M)'
+    Caption = 'Co&mponents'#39' List'
     TabOrder = 3
     object Label1: TLabel
       Left = 8
       Top = 16
-      Width = 88
+      Width = 110
       Height = 13
-      Caption = '可供选择的组件:'
+      Caption = 'Available Components:'
     end
     object Label2: TLabel
       Left = 328
       Top = 16
-      Width = 76
+      Width = 108
       Height = 13
-      Caption = '已选择的组件:'
+      Caption = 'Selected Components:'
     end
     object Label4: TLabel
       Left = 8
       Top = 273
-      Width = 52
+      Width = 53
       Height = 13
-      Caption = '排序方式:'
+      Caption = 'Sort Mode:'
     end
     object lbSource: TListBox
       Left = 8
       Top = 32
-      Width = 249
+      Width = 273
       Height = 233
       ItemHeight = 13
       MultiSelect = True
@@ -169,65 +160,65 @@ object CnComponentSelectorForm: TCnComponentSelectorForm
       OnDblClick = actAddExecute
     end
     object btnAdd: TButton
-      Left = 264
+      Left = 288
       Top = 40
-      Width = 57
+      Width = 65
       Height = 21
       Action = actAdd
       TabOrder = 2
     end
     object btnAddAll: TButton
-      Left = 264
+      Left = 288
       Top = 64
-      Width = 57
+      Width = 65
       Height = 21
       Action = actAddAll
       TabOrder = 3
     end
     object btnDelete: TButton
-      Left = 264
+      Left = 288
       Top = 88
-      Width = 57
+      Width = 65
       Height = 21
       Action = actDelete
       TabOrder = 4
     end
     object btnDeleteAll: TButton
-      Left = 264
+      Left = 288
       Top = 112
-      Width = 57
+      Width = 65
       Height = 21
       Action = actDeleteAll
       TabOrder = 5
     end
     object btnSelAll: TButton
-      Left = 264
+      Left = 288
       Top = 192
-      Width = 57
+      Width = 65
       Height = 21
       Action = actSelAll
       TabOrder = 6
     end
     object btnSelNone: TButton
-      Left = 264
+      Left = 288
       Top = 216
-      Width = 57
+      Width = 65
       Height = 21
       Action = actSelNone
       TabOrder = 7
     end
     object btnSelInvert: TButton
-      Left = 264
+      Left = 288
       Top = 240
-      Width = 57
+      Width = 65
       Height = 21
       Action = actSelInvert
       TabOrder = 8
     end
     object lbDest: TListBox
-      Left = 328
+      Left = 360
       Top = 32
-      Width = 249
+      Width = 273
       Height = 233
       ItemHeight = 13
       MultiSelect = True
@@ -244,9 +235,9 @@ object CnComponentSelectorForm: TCnComponentSelectorForm
       TabOrder = 9
       OnChange = DoUpdateSourceOrder
       Items.Strings = (
-        '默认顺序'
-        '按组件名称排序'
-        '按组件类型排序')
+        'Default Order'
+        'Sort By Name'
+        'Sort By Type')
     end
     object cbbSourceOrderDir: TComboBox
       Left = 184
@@ -258,27 +249,27 @@ object CnComponentSelectorForm: TCnComponentSelectorForm
       TabOrder = 10
       OnChange = DoUpdateSourceOrder
       Items.Strings = (
-        '升序'
-        '降序')
+        'Ascending'
+        'Descending')
     end
     object btnMoveToTop: TButton
-      Left = 312
+      Left = 336
       Top = 270
-      Width = 63
+      Width = 79
       Height = 21
       Action = actMoveToTop
       TabOrder = 11
     end
     object btnMoveToBottom: TButton
-      Left = 379
+      Left = 419
       Top = 270
-      Width = 63
+      Width = 79
       Height = 21
       Action = actMoveToBottom
       TabOrder = 12
     end
     object btnMoveUp: TButton
-      Left = 447
+      Left = 503
       Top = 270
       Width = 63
       Height = 21
@@ -286,7 +277,7 @@ object CnComponentSelectorForm: TCnComponentSelectorForm
       TabOrder = 13
     end
     object btnMoveDown: TButton
-      Left = 514
+      Left = 570
       Top = 270
       Width = 63
       Height = 21
@@ -299,7 +290,7 @@ object CnComponentSelectorForm: TCnComponentSelectorForm
     Top = 462
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 6
     OnClick = btnHelpClick
   end
@@ -308,7 +299,7 @@ object CnComponentSelectorForm: TCnComponentSelectorForm
     Top = 462
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     TabOrder = 4
     OnClick = btnOKClick
@@ -319,19 +310,19 @@ object CnComponentSelectorForm: TCnComponentSelectorForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 5
   end
   object gbTag: TGroupBox
-    Left = 392
+    Left = 448
     Top = 8
     Width = 201
     Height = 137
-    Caption = '事件及 Tag 过滤(&T)'
+    Caption = 'Event and &Tag Filter'
     TabOrder = 2
     object lblTag: TLabel
-      Left = 107
+      Left = 106
       Top = 110
       Width = 4
       Height = 13
@@ -342,7 +333,7 @@ object CnComponentSelectorForm: TCnComponentSelectorForm
       Top = 60
       Width = 185
       Height = 17
-      Caption = '允许组件 Tag 过滤'
+      Caption = 'Enable Tag Filter'
       TabOrder = 2
       OnClick = DoUpdateListControls
     end
@@ -356,10 +347,10 @@ object CnComponentSelectorForm: TCnComponentSelectorForm
       TabOrder = 3
       OnChange = DoUpdateListControls
       Items.Strings = (
-        '组件 Tag 等于'
-        '组件 Tag 小于'
-        '组件 Tag 大于'
-        '组件 Tag 介于')
+        'Tag ='
+        'Tag <'
+        'Tag >'
+        'Tag Betweens')
     end
     object seTagStart: TCnSpinEdit
       Left = 24
@@ -388,7 +379,7 @@ object CnComponentSelectorForm: TCnComponentSelectorForm
       Top = 16
       Width = 185
       Height = 17
-      Caption = '允许组件事件过滤'
+      Caption = 'Enable Event Filter'
       TabOrder = 0
       OnClick = DoUpdateListControls
     end
@@ -409,7 +400,7 @@ object CnComponentSelectorForm: TCnComponentSelectorForm
     Top = 461
     Width = 225
     Height = 17
-    Caption = '选择为空时默认为全部选择。'
+    Caption = 'Select All when Nothing Selected.'
     Checked = True
     State = cbChecked
     TabOrder = 7
@@ -439,38 +430,38 @@ object CnComponentSelectorForm: TCnComponentSelectorForm
     end
     object actSelAll: TAction
       Category = 'Selection'
-      Caption = '全选(&A)'
+      Caption = 'Select &All'
       OnExecute = actSelAllExecute
     end
     object actSelNone: TAction
       Category = 'Selection'
-      Caption = '不选(&D)'
+      Caption = '&Deselect All'
       OnExecute = actSelNoneExecute
     end
     object actSelInvert: TAction
       Category = 'Selection'
-      Caption = '反向(&I)'
+      Caption = '&Inverse'
       OnExecute = actSelInvertExecute
       OnUpdate = DoActionListUpdate
     end
     object actMoveToTop: TAction
       Category = 'Move'
-      Caption = '移到顶部'
+      Caption = 'Move to Top'
       OnExecute = actMoveToTopExecute
     end
     object actMoveToBottom: TAction
       Category = 'Move'
-      Caption = '移到底部'
+      Caption = 'Move to Bottom'
       OnExecute = actMoveToBottomExecute
     end
     object actMoveUp: TAction
       Category = 'Move'
-      Caption = '上移一格'
+      Caption = 'Move Up'
       OnExecute = actMoveUpExecute
     end
     object actMoveDown: TAction
       Category = 'Move'
-      Caption = '下移一格'
+      Caption = 'Move Down'
       OnExecute = actMoveDownExecute
     end
   end

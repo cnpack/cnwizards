@@ -1,16 +1,10 @@
-object CnAsciiForm: TCnAsciiForm
+inherited CnAsciiForm: TCnAsciiForm
   Left = 293
   Top = 145
   Width = 220
   Height = 417
   ActiveControl = Grid
-  Caption = 'ASCII 字符表'
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
+  Caption = 'ASCII Chart'
   Icon.Data = {
     0000010001002020000001001800A80C00001600000028000000200000004000
     00000100180000000000800C0000000000000000000000000000000000000000
@@ -115,7 +109,6 @@ object CnAsciiForm: TCnAsciiForm
     000FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF000
     000FF000000FF000000FF000000FFC00000FFC00000FFFFFFFFFFFFFFFFF}
   OldCreateOrder = False
-  Scaled = False
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
@@ -134,7 +127,7 @@ object CnAsciiForm: TCnAsciiForm
       Top = 7
       Width = 21
       Height = 21
-      Hint = '切换十进制和十六进制显示'
+      Hint = 'Switch between Dec and Hex Mode'
       AllowAllUp = True
       GroupIndex = 2
       Caption = '$'
@@ -165,7 +158,7 @@ object CnAsciiForm: TCnAsciiForm
       Top = 7
       Width = 16
       Height = 21
-      Hint = '总在最前面'
+      Hint = 'Always on Top'
       AllowAllUp = True
       GroupIndex = 1
       Caption = '^'
@@ -271,7 +264,6 @@ object CnAsciiForm: TCnAsciiForm
       Top = 2
       Width = 20
       Height = 20
-      Hint = '转换字符串'
       Action = ToHexAction
       Anchors = [akTop, akRight]
       Flat = True
@@ -325,11 +317,11 @@ object CnAsciiForm: TCnAsciiForm
     Top = 56
     object PageAction: TAction
       Caption = '>'
-      Hint = '切换 ASCII 码页面'
+      Hint = 'Switch Ascii Page'
       OnExecute = PageActionExecute
     end
     object ToHexAction: TAction
-      Hint = '将输入的字符串转换成 # 加数字的形式'
+      Hint = 'Convert String'
       OnExecute = ToHexActionExecute
     end
   end

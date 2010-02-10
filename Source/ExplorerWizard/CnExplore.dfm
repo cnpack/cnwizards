@@ -3,7 +3,7 @@ inherited CnExploreForm: TCnExploreForm
   Top = 271
   Width = 263
   Height = 495
-  Caption = '文件管理器'
+  Caption = 'Explorer'
   OnDestroy = FormDestroy
   OnEndDock = FormEndDock
   PixelsPerInch = 96
@@ -48,7 +48,8 @@ inherited CnExploreForm: TCnExploreForm
       object btnUp: TToolButton
         Left = 0
         Top = 0
-        Hint = '上级目录'
+        Hint = 'Go to Up Folder'
+        Caption = 'btnUp'
         ImageIndex = 0
         OnClick = btnUpClick
       end
@@ -56,7 +57,8 @@ inherited CnExploreForm: TCnExploreForm
         Tag = 3
         Left = 23
         Top = 0
-        Hint = '排列图标'
+        Hint = 'Arrange Icons'
+        Caption = 'Arrange Icons'
         ImageIndex = 1
         ParentShowHint = False
         PopupMenu = pmViewStyle
@@ -66,14 +68,16 @@ inherited CnExploreForm: TCnExploreForm
       object btnFilter: TToolButton
         Left = 46
         Top = 0
-        Hint = '文件过滤'
+        Hint = 'Filter'
+        Caption = 'Filter'
         ImageIndex = 2
         OnClick = btnFilterClick
       end
       object btnCurrProj: TToolButton
         Left = 69
         Top = 0
-        Hint = '当前工程'
+        Hint = 'Current Project'
+        Caption = 'Current Project'
         ImageIndex = 3
         OnClick = btnCurrProjClick
       end
@@ -563,25 +567,25 @@ inherited CnExploreForm: TCnExploreForm
     Left = 132
     Top = 134
     object mnuitmVSIcon: TMenuItem
-      Caption = '大图标(&G)'
+      Caption = '&Icon'
       RadioItem = True
       OnClick = actVSIconExecute
     end
     object mnuitmVSSmallIcon: TMenuItem
       Tag = 1
-      Caption = '小图标(&M)'
+      Caption = '&Small Icon'
       RadioItem = True
       OnClick = actVSIconExecute
     end
     object mnuitmVSList: TMenuItem
       Tag = 2
-      Caption = '列表(&L)'
+      Caption = '&List'
       RadioItem = True
       OnClick = actVSIconExecute
     end
     object mnuitmVSDetail: TMenuItem
       Tag = 3
-      Caption = '详细资料(&D)'
+      Caption = '&Details'
       Checked = True
       RadioItem = True
       OnClick = actVSIconExecute
@@ -625,7 +629,7 @@ inherited CnExploreForm: TCnExploreForm
       Caption = '-'
     end
     object mnuitmFFMore: TMenuItem
-      Caption = '自定义过滤方案...(&M)'
+      Caption = 'Custo&mize Filter...'
       OnClick = mnuitmFFMoreClick
     end
   end
@@ -633,30 +637,30 @@ inherited CnExploreForm: TCnExploreForm
     Left = 128
     Top = 234
     object mnuitmFCurProj: TMenuItem
-      Caption = '当前工程(&C)'
+      Caption = '&Current Project'
       OnClick = mnuitmFCurProjClick
     end
     object mnuitmFCurFile: TMenuItem
-      Caption = '当前文件(&F)'
+      Caption = 'C&urrent File'
       OnClick = mnuitmFCurFileClick
     end
     object N1: TMenuItem
       Caption = '-'
     end
     object mnuitmFsys: TMenuItem
-      Caption = '浏览 Sys 目录'
+      Caption = 'Goto '#39'Sys'#39
       OnClick = mnuitmFsysClick
     end
     object mnuitmFcommon: TMenuItem
-      Caption = '浏览 Common 目录'
+      Caption = 'Goto '#39'Common'#39
       OnClick = mnuitmFcommonClick
     end
     object mnuitmFwin: TMenuItem
-      Caption = '浏览 Win 目录'
+      Caption = 'Goto '#39'Win'#39
       OnClick = mnuitmFwinClick
     end
     object mnuitmFtoolsapi: TMenuItem
-      Caption = '浏览 ToolsApi 目录'
+      Caption = 'Goto '#39'ToolsApi'#39
       OnClick = mnuitmFtoolsapiClick
     end
     object N2: TMenuItem
@@ -685,14 +689,14 @@ inherited CnExploreForm: TCnExploreForm
       Caption = '-'
     end
     object mnuitmFMore: TMenuItem
-      Caption = '打开收藏窗口...(&M)'
+      Caption = 'Open Fa&vorites...'
       OnClick = mnuitmFMoreClick
     end
     object N5: TMenuItem
       Caption = '-'
     end
     object mnuitmFAdd: TMenuItem
-      Caption = '收藏当前文件夹(&C)'
+      Caption = 'Add to Fa&vorites'
       OnClick = mnuitmFAddClick
     end
   end
@@ -769,25 +773,25 @@ inherited CnExploreForm: TCnExploreForm
     end
     object actFFFolder: TAction
       Category = 'File'
-      Caption = '文件夹(&o)'
+      Caption = 'F&olders'
       Checked = True
       OnExecute = actFFFolderExecute
     end
     object actFFFiles: TAction
       Category = 'File'
-      Caption = '文件(&F)'
+      Caption = '&Files'
       Checked = True
       OnExecute = actFFFolderExecute
     end
     object actFFHide: TAction
       Category = 'File'
-      Caption = '隐藏的文件/夹(&H)'
+      Caption = '&Hidden Files or Folders'
       Checked = True
       OnExecute = actFFFolderExecute
     end
     object actCreateDir: TAction
-      Caption = '新建文件夹'
-      Hint = '新建文件夹'
+      Caption = 'New Folder'
+      Hint = 'New Folder'
       ImageIndex = 4
       OnExecute = actCreateDirExecute
     end

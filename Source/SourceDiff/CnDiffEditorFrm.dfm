@@ -1,18 +1,10 @@
-object CnDiffEditorForm: TCnDiffEditorForm
+inherited CnDiffEditorForm: TCnDiffEditorForm
   Left = 251
   Top = 196
   Width = 678
   Height = 202
-  Caption = '拼合文本编辑'
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
+  Caption = 'Combine Text'
   OldCreateOrder = True
-  Position = poScreenCenter
-  Scaled = False
   PixelsPerInch = 96
   TextHeight = 13
   object Panel1: TPanel
@@ -26,18 +18,18 @@ object CnDiffEditorForm: TCnDiffEditorForm
     object Label1: TLabel
       Left = 176
       Top = 11
-      Width = 368
+      Width = 385
       Height = 13
       Caption = 
-        '提示: Ctrl+Enter 保存，Esc 取消。超过原文本行数的内容将自动截去' +
-        '。'
+        'Hint: Ctrl+Enter Save, Esc Cancel. Auto cut lines that exceed or' +
+        'iginal line count.'
     end
     object bSave: TButton
       Left = 8
       Top = 6
       Width = 75
       Height = 21
-      Caption = '保存(&S)'
+      Caption = '&Save'
       ModalResult = 1
       TabOrder = 0
     end
@@ -47,7 +39,7 @@ object CnDiffEditorForm: TCnDiffEditorForm
       Width = 75
       Height = 21
       Cancel = True
-      Caption = '取消(&C)'
+      Caption = '&Cancel'
       ModalResult = 2
       TabOrder = 1
     end
