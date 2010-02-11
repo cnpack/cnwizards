@@ -1,19 +1,11 @@
-object CnSrcTemplateEditForm: TCnSrcTemplateEditForm
+inherited CnSrcTemplateEditForm: TCnSrcTemplateEditForm
   Left = 363
   Top = 135
   BorderStyle = bsDialog
-  Caption = '源码模板编辑'
+  Caption = 'Source Template Editor'
   ClientHeight = 445
   ClientWidth = 616
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
+  OldCreateOrder = True
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
@@ -22,7 +14,7 @@ object CnSrcTemplateEditForm: TCnSrcTemplateEditForm
     Top = 416
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 2
     OnClick = btnHelpClick
   end
@@ -31,7 +23,7 @@ object CnSrcTemplateEditForm: TCnSrcTemplateEditForm
     Top = 416
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     TabOrder = 0
     OnClick = btnOKClick
@@ -42,7 +34,7 @@ object CnSrcTemplateEditForm: TCnSrcTemplateEditForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 1
   end
@@ -51,42 +43,42 @@ object CnSrcTemplateEditForm: TCnSrcTemplateEditForm
     Top = 8
     Width = 601
     Height = 121
-    Caption = '设置(&O)'
+    Caption = '&Options'
     TabOrder = 3
     object lbl2: TLabel
       Left = 8
       Top = 47
-      Width = 28
+      Width = 27
       Height = 13
-      Caption = '描述:'
+      Caption = 'Desc:'
     end
     object lbl3: TLabel
       Left = 384
       Top = 19
-      Width = 40
+      Width = 47
       Height = 13
-      Caption = '快捷键:'
+      Caption = 'ShortCut:'
     end
     object lbl4: TLabel
       Left = 384
       Top = 47
-      Width = 28
+      Width = 44
       Height = 13
-      Caption = '位置:'
+      Caption = 'Location:'
     end
     object lbl5: TLabel
       Left = 176
       Top = 19
-      Width = 28
+      Width = 25
       Height = 13
-      Caption = '图标:'
+      Caption = 'Icon:'
     end
     object lbl7: TLabel
       Left = 8
       Top = 19
-      Width = 28
+      Width = 24
       Height = 13
-      Caption = '标题:'
+      Caption = 'Title:'
     end
     object btnOpen: TSpeedButton
       Left = 348
@@ -142,7 +134,7 @@ object CnSrcTemplateEditForm: TCnSrcTemplateEditForm
       Top = 72
       Width = 153
       Height = 17
-      Caption = '禁用该编辑器模板。'
+      Caption = 'Disable this Template'
       TabOrder = 5
     end
     object edtCaption: TEdit
@@ -157,7 +149,7 @@ object CnSrcTemplateEditForm: TCnSrcTemplateEditForm
       Top = 72
       Width = 313
       Height = 17
-      Caption = '插入完成后光标回到原来位置。'
+      Caption = 'Restore Cursor Position after Insert'
       TabOrder = 6
     end
     object chkForDelphi: TCheckBox
@@ -165,7 +157,7 @@ object CnSrcTemplateEditForm: TCnSrcTemplateEditForm
       Top = 96
       Width = 169
       Height = 17
-      Caption = '本模板可用于Pascal文件。'
+      Caption = 'For Pascal File'
       TabOrder = 7
     end
     object chkForBcb: TCheckBox
@@ -173,7 +165,7 @@ object CnSrcTemplateEditForm: TCnSrcTemplateEditForm
       Top = 96
       Width = 153
       Height = 17
-      Caption = '本模板可用于C/C++文件。'
+      Caption = 'For C/C++ File'
       TabOrder = 8
     end
   end
@@ -182,14 +174,14 @@ object CnSrcTemplateEditForm: TCnSrcTemplateEditForm
     Top = 136
     Width = 601
     Height = 273
-    Caption = '内容(&M)'
+    Caption = 'Conte&nt'
     TabOrder = 4
     object lbl6: TLabel
       Left = 8
       Top = 18
-      Width = 40
+      Width = 65
       Height = 13
-      Caption = '插入宏:'
+      Caption = 'Insert Macro:'
     end
     object mmoContent: TMemo
       Left = 8
@@ -197,7 +189,7 @@ object CnSrcTemplateEditForm: TCnSrcTemplateEditForm
       Width = 585
       Height = 217
       Anchors = [akLeft, akTop, akBottom]
-      Font.Charset = ANSI_CHARSET
+      Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -12
       Font.Name = 'Courier New'
@@ -222,14 +214,14 @@ object CnSrcTemplateEditForm: TCnSrcTemplateEditForm
       Top = 15
       Width = 75
       Height = 21
-      Caption = '插入(&I)'
+      Caption = '&Insert'
       TabOrder = 1
       OnClick = btnInsertClick
     end
   end
   object OpenDialog: TOpenDialog
     DefaultExt = 'ico'
-    Filter = '图标文件(*.ico)|*.ico'
+    Filter = 'Icon Files(*.ico)|*.ico'
     Left = 8
     Top = 416
   end

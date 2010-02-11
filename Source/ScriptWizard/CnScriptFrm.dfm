@@ -3,7 +3,7 @@ inherited CnScriptForm: TCnScriptForm
   Top = 169
   Width = 574
   Height = 447
-  Caption = '脚本窗口'
+  Caption = 'Script Window'
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   PixelsPerInch = 96
@@ -23,14 +23,14 @@ inherited CnScriptForm: TCnScriptForm
     object btnNew: TToolButton
       Left = 0
       Top = 0
-      Hint = '新的脚本'
+      Hint = 'New a Script'
       ImageIndex = 12
       OnClick = btnNewClick
     end
     object btnLoad: TToolButton
       Left = 23
       Top = 0
-      Hint = '从文件中装入'
+      Hint = 'Load from File'
       DropdownMenu = pmOpen
       ImageIndex = 3
       Style = tbsDropDown
@@ -47,14 +47,14 @@ inherited CnScriptForm: TCnScriptForm
     object btnAddToList: TToolButton
       Left = 67
       Top = 0
-      Hint = '增加到脚本列表'
+      Hint = 'Add to Script Library'
       ImageIndex = 37
       OnClick = btnAddToListClick
     end
     object btnOption: TToolButton
       Left = 90
       Top = 0
-      Hint = '设置...'
+      Hint = 'Show Script Library'
       ImageIndex = 2
       OnClick = btnOptionClick
     end
@@ -68,14 +68,14 @@ inherited CnScriptForm: TCnScriptForm
     object btnCompile: TToolButton
       Left = 121
       Top = 0
-      Hint = '编译脚本'
+      Hint = 'Compile Script'
       ImageIndex = 34
       OnClick = btnCompileClick
     end
     object btnRun: TToolButton
       Left = 144
       Top = 0
-      Hint = '运行脚本'
+      Hint = 'Run Script'
       DropdownMenu = pmRun
       ImageIndex = 39
       Style = tbsDropDown
@@ -84,7 +84,7 @@ inherited CnScriptForm: TCnScriptForm
     object btnClear: TToolButton
       Left = 180
       Top = 0
-      Hint = '清空消息'
+      Hint = 'Clear Messages'
       ImageIndex = 13
       OnClick = btnClearClick
     end
@@ -98,7 +98,7 @@ inherited CnScriptForm: TCnScriptForm
     object btnHelp: TToolButton
       Left = 211
       Top = 0
-      Hint = '帮助'
+      Hint = 'Help'
       DropdownMenu = pmHelp
       ImageIndex = 1
       Style = tbsDropDown
@@ -107,7 +107,7 @@ inherited CnScriptForm: TCnScriptForm
     object btnClose: TToolButton
       Left = 247
       Top = 0
-      Hint = '关闭'
+      Hint = 'Close'
       ImageIndex = 0
       OnClick = btnCloseClick
     end
@@ -126,18 +126,18 @@ inherited CnScriptForm: TCnScriptForm
     Left = 79
     Top = 377
     object mniHelp: TMenuItem
-      Caption = '帮助(&H)'
+      Caption = '&Help'
       OnClick = mniHelpClick
     end
     object mniN1: TMenuItem
       Caption = '-'
     end
     object mniDeclDir: TMenuItem
-      Caption = '脚本接口文件目录(&D)'
+      Caption = '&Script Declaration Directory'
       OnClick = mniDeclDirClick
     end
     object mniDemoDir: TMenuItem
-      Caption = '例子脚本目录(&S)'
+      Caption = '&Demo Scripts Directory'
       OnClick = mniDemoDirClick
     end
   end
@@ -146,7 +146,7 @@ inherited CnScriptForm: TCnScriptForm
     Left = 111
     Top = 377
     object mniRun: TMenuItem
-      Caption = '执行当前脚本(&R)'
+      Caption = 'Run &Script'
       OnClick = btnRunClick
     end
     object mniN2: TMenuItem
@@ -160,7 +160,7 @@ inherited CnScriptForm: TCnScriptForm
   end
   object dlgOpenFile: TOpenDialog
     DefaultExt = 'pas'
-    Filter = 'Pascal 脚本文件(*.pas)|*.pas|所有文件(*.*)|*.*'
+    Filter = 'Pascal Script(*.pas)|*.pas|All Files(*.*)|*.*'
     Left = 15
     Top = 377
   end

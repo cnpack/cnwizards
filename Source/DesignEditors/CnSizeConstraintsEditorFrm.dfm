@@ -1,77 +1,68 @@
-object CnSizeConstraintsEditorForm: TCnSizeConstraintsEditorForm
+inherited CnSizeConstraintsEditorForm: TCnSizeConstraintsEditorForm
   Left = 362
   Top = 257
   BorderStyle = bsDialog
-  Caption = 'SizeConstraints编辑器'
+  Caption = 'SizeConstraints Editor'
   ClientHeight = 195
   ClientWidth = 336
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnKeyDown = FormKeyDown
   PixelsPerInch = 96
   TextHeight = 13
   object lblMXH: TLabel
-    Left = 62
+    Left = 7
     Top = 31
-    Width = 24
+    Width = 79
     Height = 13
     Alignment = taRightJustify
-    Caption = '%4D'
+    Caption = 'MaxHeight:%4D'
   end
   object lblMXW: TLabel
-    Left = 62
+    Left = 10
     Top = 65
-    Width = 24
+    Width = 76
     Height = 13
     Alignment = taRightJustify
-    Caption = '%4D'
+    Caption = 'MaxWidth:%4D'
   end
   object lblMNH: TLabel
-    Left = 62
+    Left = 11
     Top = 100
-    Width = 24
+    Width = 75
     Height = 13
     Alignment = taRightJustify
-    Caption = '%4D'
+    Caption = 'MinHeight:%4D'
   end
   object lblMNW: TLabel
-    Left = 62
+    Left = 14
     Top = 134
-    Width = 24
+    Width = 72
     Height = 13
     Alignment = taRightJustify
-    Caption = '%4D'
+    Caption = 'MinWidth:%4D'
   end
   object lblNowHeight: TLabel
-    Left = 252
+    Left = 217
     Top = 23
-    Width = 24
+    Width = 59
     Height = 13
     Alignment = taRightJustify
-    Caption = '%4D'
+    Caption = 'Height:%4D'
   end
   object lblNowWidth: TLabel
-    Left = 252
+    Left = 220
     Top = 38
-    Width = 24
+    Width = 56
     Height = 13
     Alignment = taRightJustify
-    Caption = '%4D'
+    Caption = 'Width:%4D'
   end
   object lblOld: TLabel
-    Left = 64
+    Left = 23
     Top = 8
-    Width = 24
+    Width = 65
     Height = 13
     Alignment = taRightJustify
-    Caption = '原值'
+    Caption = 'Original Value'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clGreen
     Font.Height = -11
@@ -82,9 +73,9 @@ object CnSizeConstraintsEditorForm: TCnSizeConstraintsEditorForm
   object lblNew: TLabel
     Left = 128
     Top = 8
-    Width = 24
+    Width = 50
     Height = 13
-    Caption = '新值'
+    Caption = 'New Value'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clRed
     Font.Height = -11
@@ -95,10 +86,10 @@ object CnSizeConstraintsEditorForm: TCnSizeConstraintsEditorForm
   object lblNow: TLabel
     Left = 212
     Top = 8
-    Width = 72
+    Width = 66
     Height = 13
     Alignment = taCenter
-    Caption = '现有的属性值'
+    Caption = 'Current Value'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clNavy
     Font.Height = -11
@@ -148,7 +139,7 @@ object CnSizeConstraintsEditorForm: TCnSizeConstraintsEditorForm
     Width = 160
     Height = 21
     Anchors = [akLeft, akTop, akRight]
-    Caption = '当前值作为最大值'
+    Caption = 'Current Value as Max Value'
     OnClick = CopyValue
   end
   object btnasMin: TSpeedButton
@@ -158,7 +149,7 @@ object CnSizeConstraintsEditorForm: TCnSizeConstraintsEditorForm
     Width = 160
     Height = 21
     Anchors = [akLeft, akTop, akRight]
-    Caption = '当前值作为最小值'
+    Caption = 'Current Value as Min Value'
     OnClick = CopyValue
   end
   object btnClear: TSpeedButton
@@ -167,7 +158,7 @@ object CnSizeConstraintsEditorForm: TCnSizeConstraintsEditorForm
     Top = 58
     Width = 76
     Height = 21
-    Caption = '全部清零'
+    Caption = 'Reset'
     OnClick = CopyValue
   end
   object btnFixed: TSpeedButton
@@ -176,7 +167,7 @@ object CnSizeConstraintsEditorForm: TCnSizeConstraintsEditorForm
     Top = 58
     Width = 76
     Height = 21
-    Caption = '固定大小'
+    Caption = 'Fixed Size'
     OnClick = CopyValue
   end
   object SpeedButton1: TSpeedButton
@@ -185,7 +176,7 @@ object CnSizeConstraintsEditorForm: TCnSizeConstraintsEditorForm
     Top = 82
     Width = 76
     Height = 21
-    Caption = '固定宽度'
+    Caption = 'Fixed Width'
     OnClick = CopyValue
   end
   object SpeedButton2: TSpeedButton
@@ -194,7 +185,7 @@ object CnSizeConstraintsEditorForm: TCnSizeConstraintsEditorForm
     Top = 82
     Width = 76
     Height = 21
-    Caption = '固定高度'
+    Caption = 'Fixed Height'
     OnClick = CopyValue
   end
   object lbl1: TLabel
@@ -252,7 +243,7 @@ object CnSizeConstraintsEditorForm: TCnSizeConstraintsEditorForm
     Height = 21
     Anchors = [akRight, akBottom]
     Cancel = True
-    Caption = '确定(&O)'
+    Caption = '&OK'
     TabOrder = 6
     OnClick = btnOKClick
   end
@@ -263,7 +254,7 @@ object CnSizeConstraintsEditorForm: TCnSizeConstraintsEditorForm
     Height = 21
     Anchors = [akRight, akBottom]
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     TabOrder = 7
     OnClick = btnCancelClick
   end

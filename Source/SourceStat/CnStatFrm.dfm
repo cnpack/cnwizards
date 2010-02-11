@@ -1,19 +1,10 @@
-object CnStatForm: TCnStatForm
+inherited CnStatForm: TCnStatForm
   Left = 233
   Top = 180
   BorderStyle = bsDialog
-  Caption = '请选择统计目标'
+  Caption = 'Select Target for Statistic'
   ClientHeight = 221
   ClientWidth = 376
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnClose = FormClose
   OnCreate = FormCreate
   PixelsPerInch = 96
@@ -23,15 +14,15 @@ object CnStatForm: TCnStatForm
     Top = 8
     Width = 361
     Height = 73
-    Caption = '统计目标(&A)'
+    Caption = 'T&arget'
     Columns = 2
     ItemIndex = 2
     Items.Strings = (
-      '当前单元(&1)'
-      '当前工程组所有文件(&2)'
-      '当前工程所有文件(&3)'
-      '当前打开的所有文件(&4)'
-      '指定目录(&5)')
+      'Current Unit(&1)'
+      'Files in ProjectGroup(&2)'
+      'Files in Project(&3)'
+      'All Opened Files(&4)'
+      'Specified Folder(&5)')
     TabOrder = 0
     OnClick = rgStatStyleClick
   end
@@ -40,22 +31,22 @@ object CnStatForm: TCnStatForm
     Top = 88
     Width = 361
     Height = 97
-    Caption = '指定目录(&L)'
+    Caption = 'Specify Fo&lder'
     TabOrder = 1
     object Label3: TLabel
       Left = 8
       Top = 19
-      Width = 61
+      Width = 64
       Height = 13
-      Caption = '目 录 名(&D):'
+      Caption = 'Fol&der Name:'
       FocusControl = cbbDir
     end
     object Label4: TLabel
       Left = 8
       Top = 47
-      Width = 66
+      Width = 47
       Height = 13
-      Caption = '文件掩码(&E):'
+      Caption = 'Fil&e Mask:'
       FocusControl = cbbMask
     end
     object btnSelectDir: TButton
@@ -92,7 +83,7 @@ object CnStatForm: TCnStatForm
       Top = 70
       Width = 153
       Height = 17
-      Caption = '包括子目录(&S)'
+      Caption = 'Include &Sub-folders'
       TabOrder = 2
     end
   end
@@ -101,7 +92,7 @@ object CnStatForm: TCnStatForm
     Top = 192
     Width = 75
     Height = 21
-    Caption = '统计(&R)'
+    Caption = 'Ca&lculate'
     Default = True
     ModalResult = 1
     TabOrder = 2
@@ -112,7 +103,7 @@ object CnStatForm: TCnStatForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 3
   end
@@ -121,7 +112,7 @@ object CnStatForm: TCnStatForm
     Top = 192
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 4
     OnClick = btnHelpClick
   end

@@ -2,7 +2,7 @@ inherited CnSrcTemplateForm: TCnSrcTemplateForm
   Left = 364
   Top = 135
   BorderStyle = bsDialog
-  Caption = '源码模板'
+  Caption = 'Source Templates'
   ClientHeight = 428
   ClientWidth = 472
   OldCreateOrder = True
@@ -14,7 +14,7 @@ inherited CnSrcTemplateForm: TCnSrcTemplateForm
     Top = 8
     Width = 457
     Height = 385
-    Caption = '源码模板(&T)'
+    Caption = '&Template'
     TabOrder = 0
     object ListView: TListView
       Left = 8
@@ -23,15 +23,15 @@ inherited CnSrcTemplateForm: TCnSrcTemplateForm
       Height = 355
       Columns = <
         item
-          Caption = '菜单标题'
+          Caption = 'Menu Title'
           Width = 140
         end
         item
-          Caption = '状态'
+          Caption = 'Status'
           Width = 60
         end
         item
-          Caption = '快捷键'
+          Caption = 'Shortcut'
           Width = 120
         end>
       ColumnClick = False
@@ -48,7 +48,7 @@ inherited CnSrcTemplateForm: TCnSrcTemplateForm
       Top = 24
       Width = 75
       Height = 21
-      Caption = '增加(&A)'
+      Caption = '&Add'
       TabOrder = 1
       OnClick = btnAddClick
     end
@@ -57,7 +57,7 @@ inherited CnSrcTemplateForm: TCnSrcTemplateForm
       Top = 52
       Width = 75
       Height = 21
-      Caption = '删除(&D)'
+      Caption = '&Delete'
       TabOrder = 2
       OnClick = btnDeleteClick
     end
@@ -66,7 +66,7 @@ inherited CnSrcTemplateForm: TCnSrcTemplateForm
       Top = 80
       Width = 75
       Height = 21
-      Caption = '清空(&L)'
+      Caption = 'C&lear'
       TabOrder = 3
       OnClick = btnClearClick
     end
@@ -75,7 +75,7 @@ inherited CnSrcTemplateForm: TCnSrcTemplateForm
       Top = 108
       Width = 75
       Height = 21
-      Caption = '编辑(&E)'
+      Caption = '&Edit'
       TabOrder = 4
       OnClick = btnEditClick
     end
@@ -84,7 +84,7 @@ inherited CnSrcTemplateForm: TCnSrcTemplateForm
       Top = 136
       Width = 75
       Height = 21
-      Caption = '上移(&U)'
+      Caption = 'Move &Up'
       TabOrder = 5
       OnClick = btnUpClick
     end
@@ -93,7 +93,7 @@ inherited CnSrcTemplateForm: TCnSrcTemplateForm
       Top = 164
       Width = 75
       Height = 21
-      Caption = '下移(&W)'
+      Caption = 'Move Do&wn'
       TabOrder = 6
       OnClick = btnDownClick
     end
@@ -102,7 +102,7 @@ inherited CnSrcTemplateForm: TCnSrcTemplateForm
       Top = 192
       Width = 75
       Height = 21
-      Caption = '导入(&I)'
+      Caption = '&Import'
       TabOrder = 7
       OnClick = btnImportClick
     end
@@ -111,7 +111,7 @@ inherited CnSrcTemplateForm: TCnSrcTemplateForm
       Top = 220
       Width = 75
       Height = 21
-      Caption = '导出(&P)'
+      Caption = 'Ex&port'
       TabOrder = 8
       OnClick = btnExportClick
     end
@@ -121,7 +121,7 @@ inherited CnSrcTemplateForm: TCnSrcTemplateForm
     Top = 400
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 2
     OnClick = btnHelpClick
   end
@@ -131,23 +131,23 @@ inherited CnSrcTemplateForm: TCnSrcTemplateForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '关闭(&O)'
+    Caption = 'Cl&ose'
     Default = True
     ModalResult = 1
     TabOrder = 1
   end
   object OpenDialog: TOpenDialog
     DefaultExt = 'cdt'
-    Filter = '编辑器模板文件(*.cdt)|*.cdt'
+    Filter = 'Editor Templates Files(*.cdt)|*.cdt'
     Options = [ofHideReadOnly, ofFileMustExist, ofEnableSizing]
-    Title = '导入编辑器模板文件'
+    Title = 'Import Editor Templates'
     Left = 8
     Top = 392
   end
   object SaveDialog: TSaveDialog
     DefaultExt = 'cdt'
-    Filter = '编辑器模板文件(*.cdt)|*.cdt'
-    Title = '导出编辑器模板文件'
+    Filter = 'Editor Templates Files(*.cdt)|*.cdt'
+    Title = 'Export Editor Templates'
     Left = 40
     Top = 392
   end

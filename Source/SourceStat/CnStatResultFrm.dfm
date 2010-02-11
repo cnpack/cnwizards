@@ -1,21 +1,11 @@
-object CnStatResultForm: TCnStatResultForm
-  Left = 192
+inherited CnStatResultForm: TCnStatResultForm
   Top = 85
   Width = 791
   Height = 513
-  Caption = '源代码统计专家'
-  Color = clBtnFace
+  Caption = 'Source Code Statistic Wizard'
   Constraints.MinHeight = 450
   Constraints.MinWidth = 600
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
   Menu = MainMenu
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -175,21 +165,21 @@ object CnStatResultForm: TCnStatResultForm
       Width = 506
       Height = 185
       Anchors = [akLeft, akTop, akRight]
-      Caption = '单个文件统计信息'
+      Caption = 'Single File Statistic'
       TabOrder = 0
       object Label1: TLabel
         Left = 16
         Top = 22
-        Width = 48
+        Width = 20
         Height = 13
-        Caption = '文件名：'
+        Caption = 'File:'
       end
       object Label2: TLabel
         Left = 16
         Top = 42
-        Width = 60
+        Width = 48
         Height = 13
-        Caption = '所在目录：'
+        Caption = 'Directory:'
       end
       object LabelFileName: TLabel
         Left = 72
@@ -227,7 +217,7 @@ object CnStatResultForm: TCnStatResultForm
       Width = 161
       Height = 180
       Anchors = [akLeft, akBottom]
-      Caption = '工程统计信息或文件汇总信息'
+      Caption = 'Files or Project Statistic Result'
       TabOrder = 1
       object LabelProjectName: TLabel
         Left = 16
@@ -265,7 +255,7 @@ object CnStatResultForm: TCnStatResultForm
       Top = 216
       Width = 173
       Height = 179
-      Caption = '工程组统计信息'
+      Caption = 'Project Group Statistic Result'
       TabOrder = 2
       object LabelProjectGroupName: TLabel
         Left = 16
@@ -315,7 +305,7 @@ object CnStatResultForm: TCnStatResultForm
     Left = 56
     Top = 80
     object N1: TMenuItem
-      Caption = '文件(&F)'
+      Caption = '&File'
       object T1: TMenuItem
         Action = StatAction
       end
@@ -342,7 +332,7 @@ object CnStatResultForm: TCnStatResultForm
       end
     end
     object N2: TMenuItem
-      Caption = ' 操作(&P)'
+      Caption = ' O&peration'
       object N11: TMenuItem
         Action = OpenSelFileAction
       end
@@ -369,7 +359,7 @@ object CnStatResultForm: TCnStatResultForm
       end
     end
     object H1: TMenuItem
-      Caption = '帮助(&H)'
+      Caption = '&Help'
       object N3: TMenuItem
         Action = HelpAction
       end
@@ -524,81 +514,81 @@ object CnStatResultForm: TCnStatResultForm
     Left = 368
     Top = 56
     object StatAction: TAction
-      Caption = '源代码统计(&J)...'
-      Hint = '进行源码统计'
+      Caption = 'Source Code Calculation...'
+      Hint = 'Calculate the Source Code'
       ImageIndex = 49
       OnExecute = StatActionExecute
     end
     object StatUnitAction: TAction
-      Caption = '统计当前单元(&U)'
-      Hint = '统计当前单元'
+      Caption = 'Calculate Current &Unit'
+      Hint = 'Calculate Current Unit'
       ImageIndex = 59
       OnExecute = StatUnitActionExecute
     end
     object StatProjectGroupAction: TAction
-      Caption = '统计当前工程组所有文件(&G)'
-      Hint = '统计当前工程组所有文件'
+      Caption = 'Calculate All Files in Current Project &Group'
+      Hint = 'Calculate All Files in Current Project Group'
       ImageIndex = 57
       OnExecute = StatProjectGroupActionExecute
     end
     object StatProjectAction: TAction
-      Caption = '统计当前工程所有文件(&P)'
-      Hint = '统计当前工程所有文件'
+      Caption = 'Calculate All Files in Current &Project'
+      Hint = 'Calculate All Files in Current Project'
       ImageIndex = 58
       OnExecute = StatProjectActionExecute
     end
     object StatOpenUnitsAction: TAction
-      Caption = '统计当前打开的所有文件(&O)'
-      Hint = '统计当前打开的所有文件'
+      Caption = 'Calculate All &Opened Files'
+      Hint = 'Calculate All Opened Files'
       ImageIndex = 60
       OnExecute = StatOpenUnitsActionExecute
     end
     object SaveCurResultAction: TAction
-      Caption = '保存当前统计结果(&S)'
-      Hint = '保存当前文件的统计结果'
+      Caption = '&Save Result'
+      Hint = 'Save Result of Current File'
       ImageIndex = 6
       OnExecute = SaveCurResultActionExecute
     end
     object SaveAllResultAction: TAction
-      Caption = '保存所有统计结果(&A)'
-      Hint = '保存所有统计结果'
+      Caption = 'Save &All Results'
+      Hint = 'Save All Results'
       ImageIndex = 48
       OnExecute = SaveAllResultActionExecute
     end
     object OpenSelFileAction: TAction
-      Caption = '打开选中的文件(&O)'
-      Hint = '在IDE编辑器中打开选中的文件'
+      Caption = '&Open Selected File'
+      Hint = 'Open Selected File in IDE'
       ImageIndex = 34
       OnExecute = OpenSelFileActionExecute
     end
     object ClearResultAction: TAction
-      Caption = '清空统计结果(&X)'
-      Hint = '清空所有统计结果'
+      Caption = 'Clea&r Results'
+      Hint = 'Clear All Results'
       ImageIndex = 13
       OnExecute = ClearResultActionExecute
     end
     object HelpAction: TAction
-      Caption = '使用帮助...'
-      Hint = '显示帮助信息'
+      Caption = 'Using Help...'
+      Hint = 'Display Help'
       ImageIndex = 1
       ShortCut = 112
       OnExecute = HelpActionExecute
     end
     object CloseAction: TAction
-      Caption = '退出(&X)'
-      Hint = '退出源代码统计专家'
+      Caption = 'E&xit'
+      Hint = 'Exit Source Code Statistic Wizard'
       ImageIndex = 0
       OnExecute = CloseActionExecute
     end
     object CopyResultAction: TAction
-      Caption = '复制当前统计结果(&C)'
-      Hint = '复制当前选中文件的统计结果'
+      Caption = '&Copy Current Result'
+      Hint = 'Copy Result of Selected Files'
       ImageIndex = 10
       OnExecute = CopyResultActionExecute
     end
     object SearchFileAction: TAction
-      Caption = '查找文件(&F)...'
-      Hint = '在文件列表中查找文件'
+      Caption = 'Search &File...'
+      Hint = 'Search File in File List'
       ImageIndex = 16
       OnExecute = SearchFileActionExecute
     end
@@ -635,10 +625,10 @@ object CnStatResultForm: TCnStatResultForm
   end
   object SaveDialog: TSaveDialog
     Filter = 
-      '文本文件(*.txt)|*.txt|逗号分隔值文件(*.csv)|*.csv|制表符分隔值文' +
-      '件(*.tsv)|*.tsv'
+      'Text Files(*.txt)|*.txt|Comma Separated Files(*.csv)|*.csv|TAB S' +
+      'eparated Files(*.tsv)|*.tsv'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
-    Title = '保存统计结果'
+    Title = 'Save Result'
     Left = 408
     Top = 56
   end

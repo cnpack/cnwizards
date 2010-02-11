@@ -1,4 +1,4 @@
-object CnProjectViewBaseForm: TCnProjectViewBaseForm
+inherited CnProjectViewBaseForm: TCnProjectViewBaseForm
   Left = 300
   Top = 150
   AutoScroll = False
@@ -6,12 +6,6 @@ object CnProjectViewBaseForm: TCnProjectViewBaseForm
   Caption = 'BaseForm'
   ClientHeight = 433
   ClientWidth = 622
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
   Icon.Data = {
     0000010001001010100000000000280100001600000028000000100000002000
     00000100040000000000C0000000000000000000000000000000000000000000
@@ -24,9 +18,6 @@ object CnProjectViewBaseForm: TCnProjectViewBaseForm
     0000FFFF0000E0070000E0070000E0070000E0070000E0070000E0070000E007
     0000E0070000E0070000E0070000E0070000E0070000FFFF0000FFFF0000}
   KeyPreview = True
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
@@ -45,17 +36,17 @@ object CnProjectViewBaseForm: TCnProjectViewBaseForm
     object lblSearch: TLabel
       Left = 15
       Top = 12
-      Width = 42
+      Width = 24
       Height = 13
-      Caption = '查找(&F):'
+      Caption = '&Find:'
       FocusControl = edtMatchSearch
     end
     object lblProject: TLabel
       Left = 327
       Top = 12
-      Width = 42
+      Width = 38
       Height = 13
-      Caption = '工程(&P):'
+      Caption = '&Project:'
       FocusControl = cbbProjectList
     end
     object edtMatchSearch: TEdit
@@ -87,24 +78,24 @@ object CnProjectViewBaseForm: TCnProjectViewBaseForm
     AllocBy = 500
     Columns = <
       item
-        Caption = '窗体'
+        Caption = 'Form'
         Width = 210
       end
       item
-        Caption = '类型'
+        Caption = 'Caption'
         Width = 100
       end
       item
-        Caption = '工程'
+        Caption = 'Type'
         Width = 140
       end
       item
         Alignment = taRightJustify
-        Caption = '大小(Byte)'
+        Caption = 'Project'
         Width = 80
       end
       item
-        Caption = '文件类型'
+        Caption = 'Size(Byte)'
         Width = 72
       end>
     HideSelection = False
@@ -134,11 +125,11 @@ object CnProjectViewBaseForm: TCnProjectViewBaseForm
         Width = 340
       end
       item
-        Text = '工程总数: 1'
+        Text = 'Project Count: 1'
         Width = 110
       end
       item
-        Text = '窗体总数: 1'
+        Text = 'Form Count: 1'
         Width = 110
       end>
     ParentFont = True
@@ -287,80 +278,80 @@ object CnProjectViewBaseForm: TCnProjectViewBaseForm
     Left = 15
     Top = 390
     object actOpen: TAction
-      Caption = '打开(&O)'
-      Hint = '打开所选窗体'
+      Caption = '&Open'
+      Hint = 'Open Selected Form'
       ImageIndex = 34
       OnExecute = actOpenExecute
     end
     object actAttribute: TAction
-      Caption = '属性(&R)'
-      Hint = '显示所选窗体文件属性'
+      Caption = 'P&roperty'
+      Hint = 'Show Property of Selected Form File'
       ImageIndex = 19
       OnExecute = actAttributeExecute
     end
     object actCopy: TAction
-      Caption = '复制(&C)'
-      Hint = '复制所选窗体名到剪贴板'
+      Caption = '&Copy'
+      Hint = 'Copy Selected Form Name to Clipboard'
       ImageIndex = 10
       OnExecute = actCopyExecute
     end
     object actSelectAll: TAction
-      Caption = '全部选择(&W)'
-      Hint = '选择所有窗体'
+      Caption = 'Select A&ll Forms'
+      Hint = 'Select All Forms'
       ImageIndex = 61
       OnExecute = actSelectAllExecute
     end
     object actSelectNone: TAction
-      Caption = '取消选择(&N)'
-      Hint = '取消选择窗体'
+      Caption = 'Ca&ncel Selection'
+      Hint = 'Cancel Selection'
       ImageIndex = 62
       OnExecute = actSelectNoneExecute
     end
     object actSelectInvert: TAction
-      Caption = '反向选择(&V)'
-      Hint = '反向选择窗体'
+      Caption = 'In&verse Selection'
+      Hint = 'Inverse Selection'
       ImageIndex = 63
       OnExecute = actSelectInvertExecute
     end
     object actMatchStart: TAction
-      Caption = '匹配开头(&S)'
-      Hint = '匹配窗体名开头'
+      Caption = 'Match Form Name &Start'
+      Hint = 'Match Form Name Start'
       ImageIndex = 27
       OnExecute = actMatchStartExecute
     end
     object actMatchAny: TAction
-      Caption = '匹配所有(&A)'
-      Hint = '匹配窗体名所有位置'
+      Caption = 'Match &All Parts of Form Name'
+      Hint = 'Match All Parts of Form Name'
       ImageIndex = 28
       OnExecute = actMatchAnyExecute
     end
     object actHookIDE: TAction
-      Caption = '挂接 IDE(&I)'
-      Hint = '挂接工程窗体列表到 IDE'
+      Caption = 'Hook &IDE'
+      Hint = 'Hook Project Form List to IDE'
       ImageIndex = 2
       OnExecute = actHookIDEExecute
     end
     object actQuery: TAction
-      Caption = '打开多个窗体提示(&P)'
-      Hint = '打开多个窗体时提示'
+      Caption = '&Prompt when Open More than ONE Form'
+      Hint = 'Prompt when Open More than ONE Form'
       ImageIndex = 18
       OnExecute = actQueryExecute
     end
     object actFont: TAction
-      Caption = '字体(&F)'
-      Hint = '设置字体'
+      Caption = '&Font'
+      Hint = 'Change List Font'
       ImageIndex = 29
       OnExecute = actFontExecute
     end
     object actHelp: TAction
-      Caption = '帮助(&H)'
-      Hint = '显示帮助'
+      Caption = '&Help'
+      Hint = 'Display Help'
       ImageIndex = 1
       OnExecute = actHelpExecute
     end
     object actClose: TAction
-      Caption = '关闭(&E)'
-      Hint = '关闭窗口'
+      Caption = 'E&xit'
+      Hint = 'Close Window'
       ImageIndex = 0
       OnExecute = actCloseExecute
     end
@@ -369,7 +360,7 @@ object CnProjectViewBaseForm: TCnProjectViewBaseForm
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
-    Font.Name = 'MS Sans Serif'
+    Font.Name = 'Tahoma'
     Font.Style = []
     MinFontSize = 0
     MaxFontSize = 0

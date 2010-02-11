@@ -1,22 +1,13 @@
-object CnWizConfigForm: TCnWizConfigForm
+inherited CnWizConfigForm: TCnWizConfigForm
   Left = 237
   Top = 119
   Width = 528
   Height = 475
   BorderIcons = [biSystemMenu]
   BorderWidth = 6
-  Caption = 'CnPack IDE 专家包设置'
-  Color = clBtnFace
+  Caption = 'CnPack IDE Wizards Settings'
   Constraints.MinHeight = 471
   Constraints.MinWidth = 528
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnResize = FormResize
@@ -32,7 +23,7 @@ object CnWizConfigForm: TCnWizConfigForm
     TabOrder = 0
     object tsWizards: TTabSheet
       BorderWidth = 1
-      Caption = '专家设置(&W)'
+      Caption = '&Wizard Settings'
       object lbWizards: TListBox
         Left = 0
         Top = 0
@@ -61,7 +52,7 @@ object CnWizConfigForm: TCnWizConfigForm
           Height = 36
           AutoSize = False
           Font.Charset = DEFAULT_CHARSET
-          Font.Color = clBlack
+          Font.Color = clWindowText
           Font.Height = -11
           Font.Name = 'Tahoma'
           Font.Style = [fsBold]
@@ -79,9 +70,9 @@ object CnWizConfigForm: TCnWizConfigForm
         object Label1: TLabel
           Left = 8
           Top = 56
-          Width = 29
+          Width = 42
           Height = 13
-          Caption = '作者:'
+          Caption = 'Author:'
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -108,9 +99,9 @@ object CnWizConfigForm: TCnWizConfigForm
         object Label3: TLabel
           Left = 8
           Top = 168
-          Width = 29
+          Width = 64
           Height = 13
-          Caption = '说明:'
+          Caption = 'Comments:'
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -121,9 +112,9 @@ object CnWizConfigForm: TCnWizConfigForm
         object Label4: TLabel
           Left = 8
           Top = 256
-          Width = 42
+          Width = 53
           Height = 13
-          Caption = '快捷键:'
+          Caption = 'ShortCut:'
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -134,9 +125,9 @@ object CnWizConfigForm: TCnWizConfigForm
         object Label5: TLabel
           Left = 8
           Top = 304
-          Width = 29
+          Width = 50
           Height = 13
-          Caption = '设置:'
+          Caption = 'Settings:'
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -153,9 +144,9 @@ object CnWizConfigForm: TCnWizConfigForm
         object Label7: TLabel
           Left = 8
           Top = 128
-          Width = 29
+          Width = 31
           Height = 13
-          Caption = '类型:'
+          Caption = 'Type:'
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -185,7 +176,7 @@ object CnWizConfigForm: TCnWizConfigForm
           Top = 320
           Width = 169
           Height = 17
-          Caption = '允许该专家为活动状态。'
+          Caption = 'Enabled'
           TabOrder = 1
           OnClick = cbWizardActiveClick
         end
@@ -194,7 +185,7 @@ object CnWizConfigForm: TCnWizConfigForm
           Top = 348
           Width = 75
           Height = 21
-          Caption = '设置(&S)'
+          Caption = '&Settings'
           TabOrder = 2
           OnClick = btnConfigClick
         end
@@ -203,7 +194,7 @@ object CnWizConfigForm: TCnWizConfigForm
           Top = 348
           Width = 75
           Height = 21
-          Caption = '高级(&A)'
+          Caption = '&Advanced'
           TabOrder = 3
           OnClick = btnSortClick
         end
@@ -211,7 +202,7 @@ object CnWizConfigForm: TCnWizConfigForm
     end
     object tsPropEditor: TTabSheet
       BorderWidth = 1
-      Caption = '属性编辑器(&D)'
+      Caption = 'Property E&ditor'
       ImageIndex = 2
       object Panel1: TPanel
         Left = 317
@@ -229,7 +220,7 @@ object CnWizConfigForm: TCnWizConfigForm
           AutoSize = False
           Caption = 'lblDesignEditorName'
           Font.Charset = DEFAULT_CHARSET
-          Font.Color = clBlack
+          Font.Color = clWindowText
           Font.Height = -11
           Font.Name = 'Tahoma'
           Font.Style = [fsBold]
@@ -247,9 +238,9 @@ object CnWizConfigForm: TCnWizConfigForm
         object Label11: TLabel
           Left = 8
           Top = 56
-          Width = 29
+          Width = 42
           Height = 13
-          Caption = '作者:'
+          Caption = 'Author:'
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -278,9 +269,9 @@ object CnWizConfigForm: TCnWizConfigForm
         object Label14: TLabel
           Left = 8
           Top = 168
-          Width = 29
+          Width = 64
           Height = 13
-          Caption = '说明:'
+          Caption = 'Comments:'
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -291,9 +282,9 @@ object CnWizConfigForm: TCnWizConfigForm
         object Label16: TLabel
           Left = 8
           Top = 304
-          Width = 29
+          Width = 50
           Height = 13
-          Caption = '设置:'
+          Caption = 'Settings:'
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -311,9 +302,9 @@ object CnWizConfigForm: TCnWizConfigForm
         object Label18: TLabel
           Left = 8
           Top = 128
-          Width = 29
+          Width = 31
           Height = 13
-          Caption = '类型:'
+          Caption = 'Type:'
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -358,7 +349,7 @@ object CnWizConfigForm: TCnWizConfigForm
           Top = 320
           Width = 169
           Height = 17
-          Caption = '允许该编辑器启用。'
+          Caption = 'Enabled'
           TabOrder = 0
           OnClick = cbDesignEditorActiveClick
         end
@@ -367,7 +358,7 @@ object CnWizConfigForm: TCnWizConfigForm
           Top = 348
           Width = 75
           Height = 21
-          Caption = '设置(&S)'
+          Caption = '&Settings'
           TabOrder = 1
           OnClick = btnDesignEditorConfigClick
         end
@@ -376,7 +367,7 @@ object CnWizConfigForm: TCnWizConfigForm
           Top = 348
           Width = 75
           Height = 21
-          Caption = '定制(&M)'
+          Caption = 'Custo&mize'
           TabOrder = 2
           OnClick = btnDesignEditorCustomizeClick
         end
@@ -396,14 +387,14 @@ object CnWizConfigForm: TCnWizConfigForm
       end
     end
     object tsEnvOption: TTabSheet
-      Caption = '环境设置(&E)'
+      Caption = '&Environment Settings'
       ImageIndex = 1
       object grpOthers: TGroupBox
         Left = 8
         Top = 230
         Width = 481
         Height = 139
-        Caption = '其他(&R)'
+        Caption = 'Othe&rs'
         TabOrder = 3
         object Label2: TLabel
           Left = 8
@@ -459,7 +450,7 @@ object CnWizConfigForm: TCnWizConfigForm
           Top = 16
           Width = 273
           Height = 17
-          Caption = '将 CnPack 专家菜单置于 Tools 菜单下。'
+          Caption = 'Integrate CnPack Menu into Tools Menu.'
           TabOrder = 0
         end
         object chkUserDir: TCheckBox
@@ -467,7 +458,7 @@ object CnWizConfigForm: TCnWizConfigForm
           Top = 79
           Width = 273
           Height = 17
-          Caption = '指定用户数据目录位置（需要重启 IDE）:'
+          Caption = 'Customize User Data Folder(Need Restart):'
           TabOrder = 3
           OnClick = UpdateControls
         end
@@ -483,7 +474,7 @@ object CnWizConfigForm: TCnWizConfigForm
           Top = 58
           Width = 457
           Height = 17
-          Caption = '使用 SetThreadLocale 修正 Vista / Win7 下乱码问题。'
+          Caption = 'Use SetThreadLocale to fix encode problem under Vista / Win7.'
           TabOrder = 2
         end
         object chkUseOneCPUCore: TCheckBox
@@ -491,7 +482,7 @@ object CnWizConfigForm: TCnWizConfigForm
           Top = 37
           Width = 273
           Height = 17
-          Caption = '设置 IDE 只在 CPU 0 单核中运行。'
+          Caption = 'Set IDE to run in CPU 0 single core.'
           TabOrder = 1
         end
       end
@@ -500,14 +491,14 @@ object CnWizConfigForm: TCnWizConfigForm
         Top = 8
         Width = 481
         Height = 65
-        Caption = '提示信息(&N)'
+        Caption = 'Hi&nt'
         TabOrder = 0
         object cbShowWizComment: TCheckBox
           Left = 8
           Top = 18
           Width = 281
           Height = 17
-          Caption = '允许专家第一次执行时显示功能提示窗口。'
+          Caption = 'Show Hint Form for the First Time'
           TabOrder = 0
         end
         object btnResetWizComment: TButton
@@ -516,7 +507,7 @@ object CnWizConfigForm: TCnWizConfigForm
           Width = 177
           Height = 21
           Anchors = [akTop, akRight]
-          Caption = '重新开启所有提示窗口(&P)'
+          Caption = 'Reo&pen All Hint Forms'
           TabOrder = 1
           OnClick = btnResetWizCommentClick
         end
@@ -525,7 +516,7 @@ object CnWizConfigForm: TCnWizConfigForm
           Top = 40
           Width = 281
           Height = 17
-          Caption = '允许显示工具提示信息。'
+          Caption = 'Show ToolTips'
           TabOrder = 2
           OnClick = cbShowHintClick
         end
@@ -535,14 +526,14 @@ object CnWizConfigForm: TCnWizConfigForm
         Top = 79
         Width = 481
         Height = 90
-        Caption = '升级设置(&G)'
+        Caption = 'Up&grade Settings'
         TabOrder = 1
         object rbUpgradeDisabled: TRadioButton
           Left = 8
           Top = 16
           Width = 280
           Height = 17
-          Caption = '关闭升级提示功能。'
+          Caption = 'Disable Upgrade Prompt'
           TabOrder = 0
           OnClick = UpdateControls
         end
@@ -551,7 +542,7 @@ object CnWizConfigForm: TCnWizConfigForm
           Top = 38
           Width = 280
           Height = 17
-          Caption = '在有新版本可用时显示提示。'
+          Caption = 'Prompt when New Version Available'
           Checked = True
           TabOrder = 2
           TabStop = True
@@ -562,7 +553,7 @@ object CnWizConfigForm: TCnWizConfigForm
           Top = 61
           Width = 280
           Height = 17
-          Caption = '检测时忽略测试版的程序。'
+          Caption = 'Ignore Beta Version'
           TabOrder = 3
         end
         object btnCheckUpgrade: TButton
@@ -571,7 +562,7 @@ object CnWizConfigForm: TCnWizConfigForm
           Width = 177
           Height = 21
           Anchors = [akTop, akRight]
-          Caption = '立即检测最新的版本(&U)'
+          Caption = 'Check for New &Upgrade Now'
           TabOrder = 1
           OnClick = btnCheckUpgradeClick
         end
@@ -581,7 +572,7 @@ object CnWizConfigForm: TCnWizConfigForm
         Top = 175
         Width = 481
         Height = 49
-        Caption = '辅助工具(&T)'
+        Caption = 'Auxiliary &Tools'
         TabOrder = 2
         object btnExportImagelist: TButton
           Left = 8
@@ -589,7 +580,7 @@ object CnWizConfigForm: TCnWizConfigForm
           Width = 137
           Height = 21
           Anchors = [akTop, akRight]
-          Caption = '导出 IDE 图像列表(&M)'
+          Caption = 'Export IDE I&mage List'
           TabOrder = 0
           OnClick = btnExportImagelistClick
         end
@@ -599,7 +590,7 @@ object CnWizConfigForm: TCnWizConfigForm
           Width = 153
           Height = 21
           Anchors = [akTop, akRight]
-          Caption = '导出 IDE Action 名称(&A)'
+          Caption = 'Export IDE &Action Names'
           TabOrder = 1
           OnClick = btnExportActionListClick
         end
@@ -609,7 +600,7 @@ object CnWizConfigForm: TCnWizConfigForm
           Width = 153
           Height = 21
           Anchors = [akTop, akRight]
-          Caption = '导出已安装控件列表(&L)'
+          Caption = 'Export Controls &List'
           TabOrder = 2
           OnClick = btnExportComponentsClick
         end
@@ -630,7 +621,7 @@ object CnWizConfigForm: TCnWizConfigForm
       Width = 75
       Height = 21
       Anchors = [akTop, akRight]
-      Caption = '帮助(&H)'
+      Caption = '&Help'
       TabOrder = 2
       OnClick = btnHelpClick
     end
@@ -640,7 +631,7 @@ object CnWizConfigForm: TCnWizConfigForm
       Width = 75
       Height = 21
       Anchors = [akTop, akRight]
-      Caption = '确定(&O)'
+      Caption = '&OK'
       Default = True
       ModalResult = 1
       TabOrder = 0
@@ -652,14 +643,14 @@ object CnWizConfigForm: TCnWizConfigForm
       Height = 21
       Anchors = [akTop, akRight]
       Cancel = True
-      Caption = '取消(&C)'
+      Caption = '&Cancel'
       ModalResult = 2
       TabOrder = 1
     end
   end
   object dlgSaveActionList: TSaveDialog
     DefaultExt = 'txt'
-    Filter = '文本文件(*.txt)|*.txt|所有文件(*.*)|*.*'
+    Filter = 'Text Files(*.txt)|*.txt|Any File(*.*)|*.*'
     Left = 8
     Top = 403
   end

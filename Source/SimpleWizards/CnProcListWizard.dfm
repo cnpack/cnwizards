@@ -1,10 +1,9 @@
 inherited CnProcListForm: TCnProcListForm
   Left = 211
   Top = 120
-  Caption = '函数过程列表'
+  Caption = 'Procedure List'
   ClientHeight = 501
   ClientWidth = 681
-  OldCreateOrder = True
   PixelsPerInch = 96
   TextHeight = 13
   object Splitter: TSplitter [0]
@@ -25,15 +24,15 @@ inherited CnProcListForm: TCnProcListForm
     end
     inherited lblProject: TLabel
       Left = 243
-      Width = 43
-      Caption = '分类(&C):'
+      Width = 40
+      Caption = '&Classes:'
     end
     object lblFiles: TLabel [2]
       Left = 471
       Top = 12
-      Width = 43
+      Width = 23
       Height = 13
-      Caption = '单元(&U):'
+      Caption = '&Unit:'
       FocusControl = cbbFiles
     end
     inherited edtMatchSearch: TEdit
@@ -75,19 +74,19 @@ inherited CnProcListForm: TCnProcListForm
     Height = 334
     Columns = <
       item
-        Caption = '名称'
+        Caption = 'Name'
         Width = 318
       end
       item
-        Caption = '类型'
+        Caption = 'Type'
         Width = 152
       end
       item
-        Caption = '行号'
+        Caption = 'Line'
         Width = 60
       end
       item
-        Caption = '所在单元'
+        Caption = 'Unit'
         Width = 130
       end>
     MultiSelect = False
@@ -127,7 +126,7 @@ inherited CnProcListForm: TCnProcListForm
     object btnShowPreview: TToolButton
       Left = 363
       Top = 0
-      Hint = '切换预览窗口的显示'
+      Hint = 'Show / Hide Preview'
       ImageIndex = 30
       Style = tbsCheck
       OnClick = btnShowPreviewClick
@@ -138,7 +137,7 @@ inherited CnProcListForm: TCnProcListForm
     Top = 403
     Width = 681
     Height = 79
-    Hint = '函数过程内容预览'
+    Hint = 'Content Preview'
     Align = alBottom
     Constraints.MinHeight = 30
     Font.Charset = ANSI_CHARSET
@@ -157,13 +156,14 @@ inherited CnProcListForm: TCnProcListForm
   end
   inherited ActionList: TActionList
     inherited actOpen: TAction
-      Hint = '跳转至选定的过程'
+      Caption = '&Goto Implementation'
+      Hint = 'Goto Implementation of Selected Procedure'
     end
     inherited actAttribute: TAction
       Visible = False
     end
     inherited actCopy: TAction
-      Hint = '复制所选函数或过程名到剪贴板'
+      Hint = 'Copy Selected Procedure Name to Clipboard'
     end
     inherited actSelectAll: TAction
       Visible = False
@@ -175,14 +175,16 @@ inherited CnProcListForm: TCnProcListForm
       Visible = False
     end
     inherited actMatchStart: TAction
-      Hint = '匹配函数过程名开头'
+      Caption = 'Match &Start'
+      Hint = 'Match Procedure Name Start'
     end
     inherited actMatchAny: TAction
-      Hint = '匹配函数过程名所有位置'
+      Caption = 'Match &All Parts of Procedure Name'
+      Hint = 'Match All Parts of Procedure Name'
     end
     inherited actHookIDE: TAction
-      Caption = '显示工具栏(&I)'
-      Hint = '在编辑器窗口内显示函数过程列表工具栏'
+      Caption = 'Show &ToolBar'
+      Hint = 'Show Procedure List ToolBar in Editor'
     end
     inherited actQuery: TAction
       Visible = False

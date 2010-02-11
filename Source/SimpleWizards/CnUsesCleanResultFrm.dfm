@@ -4,7 +4,7 @@ inherited CnUsesCleanResultForm: TCnUsesCleanResultForm
   Width = 514
   Height = 424
   BorderIcons = [biSystemMenu]
-  Caption = '引用单元清理分析结果'
+  Caption = 'Uses Units Cleaner Scan Result'
   Constraints.MinHeight = 350
   Constraints.MinWidth = 450
   Icon.Data = {
@@ -116,9 +116,9 @@ inherited CnUsesCleanResultForm: TCnUsesCleanResultForm
   object lbl1: TLabel
     Left = 8
     Top = 8
-    Width = 52
+    Width = 60
     Height = 13
-    Caption = '分析结果:'
+    Caption = 'Scan Result:'
   end
   object chktvResult: TCnCheckTreeView
     Left = 8
@@ -141,7 +141,7 @@ inherited CnUsesCleanResultForm: TCnUsesCleanResultForm
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
-    Caption = '清理(&O)'
+    Caption = 'Clea&n'
     Default = True
     TabOrder = 1
     OnClick = btnCleanClick
@@ -153,7 +153,7 @@ inherited CnUsesCleanResultForm: TCnUsesCleanResultForm
     Height = 21
     Anchors = [akRight, akBottom]
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 2
   end
@@ -163,7 +163,7 @@ inherited CnUsesCleanResultForm: TCnUsesCleanResultForm
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
   end
@@ -172,40 +172,40 @@ inherited CnUsesCleanResultForm: TCnUsesCleanResultForm
     Left = 120
     Top = 256
     object mniSelAll: TMenuItem
-      Caption = '全部选择(&A)'
+      Caption = 'Select &All'
       OnClick = mniSelAllClick
     end
     object mniSelNone: TMenuItem
-      Caption = '取消选择(&N)'
+      Caption = 'Deselect A&ll'
       OnClick = mniSelNoneClick
     end
     object mniSelInvert: TMenuItem
-      Caption = '反转选择(&I)'
+      Caption = '&Inverse Selection'
       OnClick = mniSelInvertClick
     end
     object N4: TMenuItem
       Caption = '-'
     end
     object mniSameSel: TMenuItem
-      Caption = '选择相同项(&S)'
+      Caption = 'Select &Same Units'
       OnClick = mniSameSelClick
     end
     object mniSameNone: TMenuItem
-      Caption = '取消相同项(&O)'
+      Caption = 'Deselect S&ame Units'
       OnClick = mniSameNoneClick
     end
     object N2: TMenuItem
       Caption = '-'
     end
     object mniCopyName: TMenuItem
-      Caption = '复制名称(&C)'
+      Caption = '&Copy Name'
       OnClick = mniCopyNameClick
     end
     object N3: TMenuItem
       Caption = '-'
     end
     object mniDefault: TMenuItem
-      Caption = '恢复默认选择(&D)'
+      Caption = 'Restore to &Default'
       OnClick = mniDefaultClick
     end
   end

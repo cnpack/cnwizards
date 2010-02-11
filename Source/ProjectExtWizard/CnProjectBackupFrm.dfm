@@ -1,15 +1,9 @@
-object CnProjectBackupForm: TCnProjectBackupForm
+inherited CnProjectBackupForm: TCnProjectBackupForm
   Left = 329
   Top = 252
   Width = 669
   Height = 483
-  Caption = '工程备份'
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
+  Caption = 'Project Backup'
   Icon.Data = {
     0000010001002020000001000800A80800001600000028000000200000004000
     0000010008000000000000040000000000000000000000010000000100000000
@@ -82,7 +76,6 @@ object CnProjectBackupForm: TCnProjectBackupForm
     0003000000030000000F0000000F0000000F0000000FF000000FF000000FF000
     000FF000000FF000000FF000000FF000000FF000000FFFFFFFFFFFFFFFFF}
   KeyPreview = True
-  OldCreateOrder = False
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
@@ -114,20 +107,20 @@ object CnProjectBackupForm: TCnProjectBackupForm
     Align = alClient
     Columns = <
       item
-        Caption = '文件名'
+        Caption = 'Filename'
         Width = 150
       end
       item
-        Caption = '工程'
+        Caption = 'Project'
         Width = 100
       end
       item
-        Caption = '路径'
+        Caption = 'Path'
         Width = 300
       end
       item
         Alignment = taRightJustify
-        Caption = '大小(byte)'
+        Caption = 'Size(byte)'
         Width = 80
       end>
     MultiSelect = True
@@ -204,9 +197,9 @@ object CnProjectBackupForm: TCnProjectBackupForm
     object lblProjects: TLabel
       Left = 8
       Top = 7
-      Width = 42
+      Width = 38
       Height = 13
-      Caption = '工程(&P):'
+      Caption = '&Project:'
     end
     object cbbProjectList: TComboBox
       Left = 82
@@ -224,32 +217,32 @@ object CnProjectBackupForm: TCnProjectBackupForm
     Left = 24
     Top = 88
     object actAddFile: TAction
-      Caption = '添加文件'
-      Hint = '添加文件到工程备份列表'
+      Caption = 'Add Files'
+      Hint = 'Add Files to List'
       ImageIndex = 14
       OnExecute = actAddFileExecute
     end
     object actRemoveFile: TAction
-      Caption = '删除选中的文件'
-      Hint = '从工程备份列表中移除文件'
+      Caption = 'Remove Selected Files'
+      Hint = 'Remove Selected Files from List'
       ImageIndex = 15
       OnExecute = actRemoveFileExecute
     end
     object actZip: TAction
-      Caption = '压缩并保存'
-      Hint = '压缩并保存工程备份包'
+      Caption = 'Compress and Save'
+      Hint = 'Compress and Save the Backup File'
       ImageIndex = 6
       OnExecute = actZipExecute
     end
     object actHelp: TAction
-      Caption = '帮助'
-      Hint = '帮助'
+      Caption = 'Help'
+      Hint = 'Show Help Information'
       ImageIndex = 1
       OnExecute = actHelpExecute
     end
     object actClose: TAction
-      Caption = '关闭'
-      Hint = '关闭工程备份窗口'
+      Caption = 'Exit'
+      Hint = 'Close this Window and Exit'
       ImageIndex = 0
       OnExecute = actCloseExecute
     end

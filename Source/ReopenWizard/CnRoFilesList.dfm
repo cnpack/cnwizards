@@ -1,16 +1,9 @@
-object CnFilesListForm: TCnFilesListForm
-  Left = 192
+inherited CnFilesListForm: TCnFilesListForm
   Top = 131
   Width = 786
   Height = 568
   Anchors = [akLeft, akTop, akRight, akBottom]
-  Caption = '打开历史文件'
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
+  Caption = 'Open Historical Files'
   Icon.Data = {
     0000010001002020100000000000E80200001600000028000000200000004000
     0000010004000000000080020000000000000000000000000000000000000000
@@ -37,8 +30,6 @@ object CnFilesListForm: TCnFilesListForm
     0303000003030000FFC30000FFC300003F3300003F330000C0FF0000C0FF0000
     FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0003FFFF0003FFFF}
   KeyPreview = True
-  OldCreateOrder = False
-  Position = poScreenCenter
   OnClose = FormClose
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
@@ -69,15 +60,15 @@ object CnFilesListForm: TCnFilesListForm
     OnDragDrop = tvMenuDragDrop
     OnDragOver = tvMenuDragOver
     Items.Data = {
-      01000000270000000200000002000000FFFFFFFFFFFFFFFF0000000006000000
-      0ED7EEBDFCB4F2BFAAB5C4CEC4BCFE1F000000000000000300000000000000FF
-      FFFFFF000000000000000006B9A4B3CCD7E92100000001000000030000000000
-      0000FFFFFFFF000000000000000008B9A4B3CCCEC4BCFE230000000600000003
-      00000000000000FFFFFFFF00000000000000000A44656C706869CEC4BCFE1F00
-      0000080000000300000000000000FFFFFFFF000000000000000006B0FCCEC4BC
-      FE21000000090000000300000000000000FFFFFFFF000000000000000008C6E4
-      CBFBCEC4BCFE1F0000000B0000000300000000000000FFFFFFFF000000000000
-      000006CAD5B2D8BCD0}
+      01000000250000000200000002000000FFFFFFFFFFFFFFFF0000000006000000
+      0C526563656E742046696C657325000000000000000300000000000000FFFFFF
+      FF00000000000000000C50726F6A65637447726F757020000000010000000300
+      000000000000FFFFFFFF00000000000000000750726F6A656374240000000600
+      00000300000000000000FFFFFFFF00000000000000000B536F75726365204669
+      6C6520000000080000000300000000000000FFFFFFFF00000000000000000750
+      61636B6167651F000000090000000300000000000000FFFFFFFF000000000000
+      0000064F7468657273220000000B0000000300000000000000FFFFFFFF000000
+      0000000000094661766F7269746573}
   end
   object clbr1: TCoolBar
     Left = 0
@@ -101,7 +92,7 @@ object CnFilesListForm: TCnFilesListForm
       Height = 26
       AutoSize = True
       BorderWidth = 1
-      ButtonWidth = 51
+      ButtonWidth = 72
       Caption = 'tlb1'
       DisabledImages = dmCnSharedImages.DisabledImages
       EdgeBorders = []
@@ -119,27 +110,27 @@ object CnFilesListForm: TCnFilesListForm
         Action = actOpen
       end
       object btnDelete: TToolButton
-        Left = 51
+        Left = 72
         Top = 0
         Action = actDelete
       end
       object btnOptions: TToolButton
-        Left = 102
+        Left = 144
         Top = 0
         Action = actOptions
       end
       object btnFavorite: TToolButton
-        Left = 153
+        Left = 216
         Top = 0
         Action = actFav
       end
       object btnHelp: TToolButton
-        Left = 204
+        Left = 288
         Top = 0
         Action = actHelp
       end
       object btnExit: TToolButton
-        Left = 255
+        Left = 360
         Top = 0
         Action = actExit
       end
@@ -903,38 +894,38 @@ object CnFilesListForm: TCnFilesListForm
     Left = 12
     Top = 162
     object actOpen: TAction
-      Caption = '打开'
-      Hint = '在 IDE 中打开选定的文件'
+      Caption = 'Open'
+      Hint = 'Open Selected File in IDE'
       ImageIndex = 3
       OnExecute = actOpenExecute
     end
     object actDelete: TAction
-      Caption = '删除'
-      Hint = '从列表中移除选定的文件'
+      Caption = 'Remove'
+      Hint = 'Remove Selected File from List'
       ImageIndex = 13
       OnExecute = actDeleteExecute
     end
     object actOptions: TAction
-      Caption = '选项'
-      Hint = '显示选项设置信息'
+      Caption = 'Options'
+      Hint = 'Display Options'
       ImageIndex = 2
       OnExecute = actOptionsExecute
     end
     object actFav: TAction
-      Caption = '收藏'
-      Hint = '将选中的文件添加到收藏夹'
+      Caption = 'Favorites'
+      Hint = 'Add to Favorites'
       ImageIndex = 5
       OnExecute = actFavExecute
     end
     object actExit: TAction
-      Caption = '退出'
-      Hint = '退出打开历史文件窗口'
+      Caption = 'Exit'
+      Hint = 'Close this Window'
       ImageIndex = 0
       OnExecute = actExitExecute
     end
     object actHelp: TAction
-      Caption = '帮助'
-      Hint = '显示帮助信息'
+      Caption = 'Help'
+      Hint = 'Display Help'
       ImageIndex = 1
       OnExecute = actHelpExecute
     end

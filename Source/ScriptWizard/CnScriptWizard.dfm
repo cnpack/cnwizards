@@ -3,7 +3,7 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
   Top = 161
   BorderIcons = [biSystemMenu, biMaximize]
   BorderStyle = bsDialog
-  Caption = '脚本扩展专家'
+  Caption = 'Script Library'
   ClientHeight = 443
   ClientWidth = 678
   Icon.Data = {
@@ -204,11 +204,11 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
     Height = 405
     Columns = <
       item
-        Caption = '名称'
+        Caption = 'Script Name'
         Width = 120
       end
       item
-        Caption = '启用'
+        Caption = 'Enabled'
         Width = 60
       end>
     HideSelection = False
@@ -225,28 +225,28 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
     Top = 24
     Width = 465
     Height = 233
-    Caption = '脚本项(&S)'
+    Caption = '&Script Item'
     TabOrder = 1
     object lbl2: TLabel
       Left = 8
       Top = 20
-      Width = 28
+      Width = 31
       Height = 13
-      Caption = '名称:'
+      Caption = 'Name:'
     end
     object lbl3: TLabel
       Left = 8
       Top = 118
-      Width = 28
+      Width = 25
       Height = 13
-      Caption = '图标:'
+      Caption = 'Icon:'
     end
     object lbl1: TLabel
       Left = 8
       Top = 52
-      Width = 28
+      Width = 27
       Height = 13
-      Caption = '描述:'
+      Caption = 'Desc:'
     end
     object btnOpen: TSpeedButton
       Left = 212
@@ -267,16 +267,16 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
     object lbl4: TLabel
       Left = 8
       Top = 150
-      Width = 28
+      Width = 45
       Height = 13
-      Caption = '热键:'
+      Caption = 'Shortcut:'
     end
     object lbl5: TLabel
       Left = 8
       Top = 85
-      Width = 28
+      Width = 46
       Height = 13
-      Caption = '文件:'
+      Caption = 'Filename:'
     end
     object btnFileName: TSpeedButton
       Left = 212
@@ -315,7 +315,7 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
       Top = 177
       Width = 161
       Height = 17
-      Caption = '该脚本有效。'
+      Caption = 'Script Enabled'
       TabOrder = 6
       OnClick = OnControlChanged
     end
@@ -343,7 +343,7 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
       Top = 206
       Width = 161
       Height = 17
-      Caption = '手动执行脚本时需要确认。'
+      Caption = 'Confirm when Manual Run'
       TabOrder = 7
       OnClick = OnControlChanged
     end
@@ -363,6 +363,7 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
       Indent = 19
       ReadOnly = True
       TabOrder = 1
+      CanDisableNode = False
       OnStateChange = chktvModeStateChange
     end
   end
@@ -371,14 +372,14 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
     Top = 264
     Width = 465
     Height = 169
-    Caption = '全局设置(&G)'
+    Caption = '&Global Settings'
     TabOrder = 3
     object lbl6: TLabel
       Left = 8
       Top = 16
-      Width = 76
+      Width = 92
       Height = 13
-      Caption = '脚本搜索路径:'
+      Caption = 'Script Search Path:'
     end
     object mmoSearchPath: TMemo
       Left = 8
@@ -396,74 +397,74 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
     Left = 15
     Top = 343
     object actAdd: TAction
-      Hint = '增加'
+      Hint = 'Add'
       ImageIndex = 14
       OnExecute = actAddExecute
     end
     object actDelete: TAction
-      Hint = '删除'
+      Hint = 'Delete'
       ImageIndex = 15
       OnExecute = actDeleteExecute
     end
     object actClear: TAction
-      Hint = '清空'
+      Hint = 'Clear'
       ImageIndex = 31
       OnExecute = actClearExecute
     end
     object actMoveUp: TAction
-      Hint = '上移'
+      Hint = 'Move Up'
       ImageIndex = 44
       OnExecute = actMoveUpExecute
     end
     object actMoveDown: TAction
-      Hint = '下移'
+      Hint = 'Move Down'
       ImageIndex = 45
       OnExecute = actMoveDownExecute
     end
     object actExport: TAction
-      Hint = '导出到文件'
+      Hint = 'Export to File'
       ImageIndex = 46
       OnExecute = actExportExecute
     end
     object actImport: TAction
-      Hint = '从文件中导入'
+      Hint = 'Import from File'
       ImageIndex = 64
       OnExecute = actImportExecute
     end
     object actHelp: TAction
-      Hint = '帮助'
+      Hint = 'Help'
       ImageIndex = 1
       OnExecute = actHelpExecute
     end
     object actClose: TAction
-      Hint = '关闭'
+      Hint = 'Close'
       ImageIndex = 0
       OnExecute = actCloseExecute
     end
   end
   object dlgOpen: TOpenDialog
     DefaultExt = 'xml'
-    Filter = '脚本设置文件(*.xml)|*.xml'
+    Filter = 'Script Setting File(*.xml)|*.xml'
     Options = [ofFileMustExist, ofEnableSizing]
     Left = 111
     Top = 343
   end
   object dlgSave: TSaveDialog
     DefaultExt = 'xml'
-    Filter = '脚本设置文件(*.xml)|*.xml'
+    Filter = 'Script Setting File(*.xml)|*.xml'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
     Left = 143
     Top = 343
   end
   object dlgOpenIcon: TOpenDialog
     DefaultExt = 'ico'
-    Filter = '图标文件(*.ico)|*.ico'
+    Filter = 'Icon File(*.ico)|*.ico'
     Left = 47
     Top = 343
   end
   object dlgOpenFile: TOpenDialog
     DefaultExt = 'pas'
-    Filter = 'Pascal 脚本文件(*.pas)|*.pas|所有文件(*.*)|*.*'
+    Filter = 'Pascal Script(*.pas)|*.pas|All Files(*.*)|*.*'
     Left = 79
     Top = 343
   end

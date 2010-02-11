@@ -1,19 +1,10 @@
-object CnWizSubActionShortCutForm: TCnWizSubActionShortCutForm
+inherited CnWizSubActionShortCutForm: TCnWizSubActionShortCutForm
   Left = 349
   Top = 221
   BorderStyle = bsDialog
-  Caption = '子菜单快捷键设置'
+  Caption = 'Sub-menu Shortcut Settings'
   ClientHeight = 331
   ClientWidth = 351
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
@@ -24,14 +15,14 @@ object CnWizSubActionShortCutForm: TCnWizSubActionShortCutForm
     Top = 8
     Width = 337
     Height = 289
-    Caption = '快捷键设置'
+    Caption = 'Shortcut Settings'
     TabOrder = 0
     object lbl2: TLabel
       Left = 8
       Top = 260
-      Width = 40
+      Width = 47
       Height = 13
-      Caption = '快捷键:'
+      Caption = 'ShortCut:'
     end
     object ListView: TListView
       Left = 8
@@ -40,11 +31,11 @@ object CnWizSubActionShortCutForm: TCnWizSubActionShortCutForm
       Height = 233
       Columns = <
         item
-          Caption = '子菜单项'
+          Caption = 'Sub-menu Item'
           Width = 160
         end
         item
-          Caption = '快捷键'
+          Caption = 'Shortcut'
           Width = 130
         end>
       HideSelection = False
@@ -71,7 +62,7 @@ object CnWizSubActionShortCutForm: TCnWizSubActionShortCutForm
     Top = 304
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
   end
@@ -80,7 +71,7 @@ object CnWizSubActionShortCutForm: TCnWizSubActionShortCutForm
     Top = 304
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     TabOrder = 1
     OnClick = btnOKClick
   end
@@ -90,7 +81,7 @@ object CnWizSubActionShortCutForm: TCnWizSubActionShortCutForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 2
   end

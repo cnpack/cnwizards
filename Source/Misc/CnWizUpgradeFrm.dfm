@@ -1,18 +1,12 @@
-object CnWizUpgradeForm: TCnWizUpgradeForm
+inherited CnWizUpgradeForm: TCnWizUpgradeForm
   Left = 277
   Top = 182
   Width = 457
   Height = 365
   BorderIcons = [biSystemMenu, biMaximize]
-  Caption = 'CnPack IDE 专家包更新提示'
-  Color = clBtnFace
+  Caption = 'CnPack IDE Wizards Upgrade Prompt'
   Constraints.MinHeight = 350
   Constraints.MinWidth = 400
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
   Icon.Data = {
     0000010001002020000001000800A80800001600000028000000200000004000
     000001000800000000000004000000000000000000000001000000010000FFFD
@@ -84,9 +78,6 @@ object CnWizUpgradeForm: TCnWizUpgradeForm
     000FE000000FE0000007E0000007E0000007E0000007E0000007E0000007E000
     0007F000000FF000000FF000001FF800001FF800003FFC00003FFC00003FFC00
     003FFC00007FFFE007FFFFE007FFFFE007FFFFE007FFFFE00FFFFFFFFFFF}
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -116,9 +107,9 @@ object CnWizUpgradeForm: TCnWizUpgradeForm
     object Label1: TLabel
       Left = 8
       Top = 5
-      Width = 55
+      Width = 77
       Height = 13
-      Caption = '更新提示:'
+      Caption = 'Upgrade Info:'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -159,9 +150,9 @@ object CnWizUpgradeForm: TCnWizUpgradeForm
       Anchors = [akLeft, akTop, akRight]
       AutoSize = False
       Caption = 
-        '提示：CnPack IDE 专家包的安装程序是设计为可重复安装的。您在安装' +
-        '新版本时，如果安装程序没有特别指明，则不需要先删除旧的版本，直接' +
-        '升级即可，所有设置都会保留。'
+        'Hint: CnPack IDE Wizards can be Reinstall. You can Install New V' +
+        'ersions Directly without Remove the Old Version. All User Data a' +
+        'nd Configuration will be Kept.'
       WordWrap = True
     end
     object cbNoHint: TCheckBox
@@ -169,7 +160,7 @@ object CnWizUpgradeForm: TCnWizUpgradeForm
       Top = 47
       Width = 209
       Height = 17
-      Caption = '对该版本以后不再提示。'
+      Caption = 'Never Prompt Me for This Version.'
       TabOrder = 0
       OnClick = cbNoHintClick
     end
@@ -179,7 +170,7 @@ object CnWizUpgradeForm: TCnWizUpgradeForm
       Width = 75
       Height = 21
       Anchors = [akTop, akRight]
-      Caption = '立即下载(&D)'
+      Caption = '&Download'
       Default = True
       TabOrder = 1
       OnClick = btnDownloadClick
@@ -191,7 +182,7 @@ object CnWizUpgradeForm: TCnWizUpgradeForm
       Height = 21
       Anchors = [akTop, akRight]
       Cancel = True
-      Caption = '关闭(&C)'
+      Caption = '&Close'
       TabOrder = 2
       OnClick = btnCloseClick
     end
@@ -201,7 +192,7 @@ object CnWizUpgradeForm: TCnWizUpgradeForm
       Width = 75
       Height = 21
       Anchors = [akTop, akRight]
-      Caption = '帮助(&H)'
+      Caption = '&Help'
       TabOrder = 3
       OnClick = btnHelpClick
     end

@@ -1,18 +1,12 @@
-object CnProjectDelTempForm: TCnProjectDelTempForm
+inherited CnProjectDelTempForm: TCnProjectDelTempForm
   Left = 289
   Top = 169
   Width = 469
   Height = 409
   BorderIcons = [biSystemMenu]
-  Caption = '清除工程临时文件'
-  Color = clBtnFace
+  Caption = 'Clean Project Temporary Files'
   Constraints.MinHeight = 376
   Constraints.MinWidth = 469
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
   Icon.Data = {
     0000010001002020000001000800A80800001600000028000000200000004000
     0000010008000000000000040000000000000000000000010000000100000000
@@ -84,9 +78,6 @@ object CnProjectDelTempForm: TCnProjectDelTempForm
     003FFE00003FFC00000FFC00000FFC000003FC000003FC000000F8000000F800
     0000F0000000E0000000C0000000800000008040000081C0000083C0000087C0
     0000FFC00000FFC0003FFFC0003FFFC0003FFFC0003FFFFFFFFFFFFFFFFF}
-  OldCreateOrder = True
-  Position = poScreenCenter
-  Scaled = False
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
@@ -115,21 +106,21 @@ object CnProjectDelTempForm: TCnProjectDelTempForm
           Width = 445
           Height = 161
           Align = alTop
-          Caption = '路径(&Y)'
+          Caption = '&Path'
           TabOrder = 0
           object Label1: TLabel
             Left = 8
             Top = 142
-            Width = 360
+            Width = 260
             Height = 13
-            Caption = '选中文件夹前面的复选框，则搜索时包含该文件夹下面的子文件夹。'
+            Caption = 'Checking the Checkbox before Path means Recursive.'
           end
           object lblpe: TLabel
             Left = 8
             Top = 20
-            Width = 36
+            Width = 24
             Height = 13
-            Caption = '类型：'
+            Caption = 'Kind:'
           end
           object chklstDirs: TCheckListBox
             Left = 8
@@ -149,7 +140,7 @@ object CnProjectDelTempForm: TCnProjectDelTempForm
             Width = 75
             Height = 21
             Anchors = [akTop, akRight]
-            Caption = '添加(&A)'
+            Caption = '&Add'
             TabOrder = 1
             OnClick = btnAddClick
           end
@@ -159,7 +150,7 @@ object CnProjectDelTempForm: TCnProjectDelTempForm
             Width = 75
             Height = 21
             Anchors = [akTop, akRight]
-            Caption = '删除(&R)'
+            Caption = '&Remove'
             Enabled = False
             TabOrder = 3
             OnClick = btnRemoveClick
@@ -175,10 +166,10 @@ object CnProjectDelTempForm: TCnProjectDelTempForm
             TabOrder = 0
             OnChange = cbbSelectTypeChange
             Items.Strings = (
-              '仅当前工程'
-              '当前工程(包含二进制目录)'
-              '工程组中所有工程'
-              '工程组中所有工程(包含二进制目录)')
+              'Current Project'
+              'Current Project, including Binary Directory'
+              'Current ProjectGroup'
+              'Current ProjectGroup, including Binary Directory')
           end
         end
         object grpFileType: TGroupBox
@@ -188,7 +179,7 @@ object CnProjectDelTempForm: TCnProjectDelTempForm
           Height = 166
           Align = alBottom
           Anchors = [akLeft, akTop, akRight, akBottom]
-          Caption = '文件类型(&T)'
+          Caption = 'File &Type'
           TabOrder = 1
           object chklstExtensions: TCheckListBox
             Left = 8
@@ -210,7 +201,7 @@ object CnProjectDelTempForm: TCnProjectDelTempForm
             Width = 75
             Height = 21
             Anchors = [akTop, akRight]
-            Caption = '添加(&D)'
+            Caption = 'A&dd'
             TabOrder = 1
             OnClick = btnAddExtClick
           end
@@ -220,7 +211,7 @@ object CnProjectDelTempForm: TCnProjectDelTempForm
             Width = 75
             Height = 21
             Anchors = [akTop, akRight]
-            Caption = '删除(&M)'
+            Caption = 'Re&move'
             Enabled = False
             TabOrder = 2
             OnClick = btnRemoveExtClick
@@ -231,7 +222,7 @@ object CnProjectDelTempForm: TCnProjectDelTempForm
             Width = 75
             Height = 21
             Anchors = [akRight, akBottom]
-            Caption = '默认(&E)'
+            Caption = 'Defau&lt'
             TabOrder = 3
             OnClick = btnDefaultClick
           end
@@ -240,7 +231,7 @@ object CnProjectDelTempForm: TCnProjectDelTempForm
             Top = 142
             Width = 345
             Height = 17
-            Caption = '无同名源文件时保留相应的编译目标文件'
+            Caption = 'Keep Obj/Dcu Files when NO Same Source Files Exist.'
             TabOrder = 4
           end
         end
@@ -264,7 +255,7 @@ object CnProjectDelTempForm: TCnProjectDelTempForm
           Width = 445
           Height = 334
           Align = alClient
-          Caption = '文件列表'
+          Caption = 'File List'
           TabOrder = 0
           object chklstFileList: TCheckListBox
             Left = 8
@@ -285,7 +276,7 @@ object CnProjectDelTempForm: TCnProjectDelTempForm
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
-    Caption = '完成(&F)'
+    Caption = '&Finish'
     ModalResult = 1
     TabOrder = 5
     OnClick = btnFinishClick
@@ -296,7 +287,7 @@ object CnProjectDelTempForm: TCnProjectDelTempForm
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
-    Caption = '下一步(&N)'
+    Caption = '&Next'
     TabOrder = 4
     OnClick = btnNextClick
   end
@@ -306,7 +297,7 @@ object CnProjectDelTempForm: TCnProjectDelTempForm
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
-    Caption = '上一步(&P)'
+    Caption = '&Previous'
     TabOrder = 3
     OnClick = btnPrioClick
   end
@@ -317,7 +308,7 @@ object CnProjectDelTempForm: TCnProjectDelTempForm
     Height = 21
     Anchors = [akLeft, akBottom]
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     TabOrder = 1
     OnClick = btnCancelClick
   end
@@ -328,7 +319,7 @@ object CnProjectDelTempForm: TCnProjectDelTempForm
     Height = 21
     Anchors = [akLeft, akBottom]
     Cancel = True
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 2
     OnClick = btnHelpClick
   end
@@ -336,27 +327,27 @@ object CnProjectDelTempForm: TCnProjectDelTempForm
     Left = 135
     Top = 346
     object actDirsCheckAll: TAction
-      Caption = '全部选中(&C)'
+      Caption = '&Select All'
       OnExecute = CheckActionExecute
     end
     object actDirsUncheckAll: TAction
-      Caption = '全部不选中(&U)'
+      Caption = '&Unselect All'
       OnExecute = CheckActionExecute
     end
     object actDirsInvert: TAction
-      Caption = '反向选择(&I)'
+      Caption = '&Inverse'
       OnExecute = CheckActionExecute
     end
     object actExtsCheckAll: TAction
-      Caption = '全部选中(&C)'
+      Caption = 'S&elect All'
       OnExecute = CheckActionExecute
     end
     object actExtsUncheckAll: TAction
-      Caption = '全部不选中(&U)'
+      Caption = 'U&nselect All'
       OnExecute = CheckActionExecute
     end
     object actExtsInvert: TAction
-      Caption = '反向选择(&I)'
+      Caption = 'In&verse'
       OnExecute = CheckActionExecute
     end
   end

@@ -1,20 +1,11 @@
-object CnPropEditorCustomizeForm: TCnPropEditorCustomizeForm
+inherited CnPropEditorCustomizeForm: TCnPropEditorCustomizeForm
   Left = 384
   Top = 202
   BorderStyle = bsDialog
-  Caption = '自定义属性编辑器'
+  Caption = 'Customize Property Editor'
   ClientHeight = 269
   ClientWidth = 361
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
   KeyPreview = True
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnKeyDown = FormKeyDown
   PixelsPerInch = 96
   TextHeight = 13
@@ -23,14 +14,14 @@ object CnPropEditorCustomizeForm: TCnPropEditorCustomizeForm
     Top = 8
     Width = 345
     Height = 225
-    Caption = '自定义属性(&P)'
+    Caption = 'Customize &Property'
     TabOrder = 0
     object lbl1: TLabel
       Left = 8
       Top = 16
-      Width = 276
+      Width = 282
       Height = 13
-      Caption = '需要注册的属性列表，格式为 ClassName.PropName。'
+      Caption = 'Property List to Register, (Format "ClassName.PropName")'
     end
     object mmoProp: TMemo
       Left = 8
@@ -45,7 +36,7 @@ object CnPropEditorCustomizeForm: TCnPropEditorCustomizeForm
     Top = 240
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 1
@@ -56,7 +47,7 @@ object CnPropEditorCustomizeForm: TCnPropEditorCustomizeForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 2
   end
@@ -65,7 +56,7 @@ object CnPropEditorCustomizeForm: TCnPropEditorCustomizeForm
     Top = 240
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
   end

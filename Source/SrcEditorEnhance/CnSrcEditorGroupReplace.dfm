@@ -2,11 +2,10 @@ inherited CnSrcEditorGroupReplaceForm: TCnSrcEditorGroupReplaceForm
   Left = 218
   Top = 62
   BorderStyle = bsDialog
-  Caption = '组替换设置'
+  Caption = 'Group Replace Setting'
   ClientHeight = 460
   ClientWidth = 473
   OldCreateOrder = True
-  Position = poScreenCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
@@ -17,7 +16,7 @@ inherited CnSrcEditorGroupReplaceForm: TCnSrcEditorGroupReplaceForm
     Top = 8
     Width = 457
     Height = 145
-    Caption = '列表(&L)'
+    Caption = '&List'
     TabOrder = 0
     object ListView: TListView
       Left = 8
@@ -26,15 +25,15 @@ inherited CnSrcEditorGroupReplaceForm: TCnSrcEditorGroupReplaceForm
       Height = 121
       Columns = <
         item
-          Caption = '标题'
+          Caption = 'Caption'
           Width = 150
         end
         item
-          Caption = '快捷键'
+          Caption = 'Shortcut'
           Width = 130
         end
         item
-          Caption = '替换项'
+          Caption = 'Items'
           Width = 60
         end>
       HideSelection = False
@@ -54,7 +53,7 @@ inherited CnSrcEditorGroupReplaceForm: TCnSrcEditorGroupReplaceForm
       Top = 16
       Width = 73
       Height = 21
-      Caption = '增加(&A)'
+      Caption = '&Add'
       TabOrder = 1
       OnClick = btnAddClick
     end
@@ -63,7 +62,7 @@ inherited CnSrcEditorGroupReplaceForm: TCnSrcEditorGroupReplaceForm
       Top = 42
       Width = 73
       Height = 21
-      Caption = '删除(&R)'
+      Caption = '&Remove'
       TabOrder = 2
       OnClick = btnDeleteClick
     end
@@ -72,7 +71,7 @@ inherited CnSrcEditorGroupReplaceForm: TCnSrcEditorGroupReplaceForm
       Top = 91
       Width = 73
       Height = 21
-      Caption = '导入(&I)'
+      Caption = '&Import'
       TabOrder = 5
       OnClick = btnImportClick
     end
@@ -81,7 +80,7 @@ inherited CnSrcEditorGroupReplaceForm: TCnSrcEditorGroupReplaceForm
       Top = 116
       Width = 73
       Height = 21
-      Caption = '导出(&X)'
+      Caption = 'E&xport'
       TabOrder = 6
       OnClick = btnExportClick
     end
@@ -90,7 +89,7 @@ inherited CnSrcEditorGroupReplaceForm: TCnSrcEditorGroupReplaceForm
       Top = 66
       Width = 34
       Height = 21
-      Caption = '上(&U)'
+      Caption = '&Up'
       TabOrder = 3
       OnClick = btnUpClick
     end
@@ -99,7 +98,7 @@ inherited CnSrcEditorGroupReplaceForm: TCnSrcEditorGroupReplaceForm
       Top = 66
       Width = 34
       Height = 21
-      Caption = '下(&D)'
+      Caption = '&Down'
       TabOrder = 4
       OnClick = btnDownClick
     end
@@ -109,42 +108,42 @@ inherited CnSrcEditorGroupReplaceForm: TCnSrcEditorGroupReplaceForm
     Top = 160
     Width = 457
     Height = 265
-    Caption = '组替换项(&E)'
+    Caption = 'Group R&eplace Item'
     TabOrder = 1
     object lbl1: TLabel
       Left = 8
       Top = 20
-      Width = 28
+      Width = 41
       Height = 13
-      Caption = '标题:'
+      Caption = 'Caption:'
     end
     object lbl4: TLabel
       Left = 8
       Top = 44
-      Width = 40
+      Width = 45
       Height = 13
-      Caption = '快捷键:'
+      Caption = 'Shortcut:'
     end
     object lbl2: TLabel
       Left = 8
       Top = 188
-      Width = 40
+      Width = 28
       Height = 13
-      Caption = '源文本:'
+      Caption = 'From:'
     end
     object lbl3: TLabel
       Left = 8
       Top = 214
-      Width = 40
+      Width = 16
       Height = 13
-      Caption = '替换为:'
+      Caption = 'To:'
     end
     object lbl5: TLabel
       Left = 8
       Top = 69
-      Width = 40
+      Width = 31
       Height = 13
-      Caption = '替换项:'
+      Caption = 'Items:'
     end
     object edtCaption: TEdit
       Left = 56
@@ -172,18 +171,18 @@ inherited CnSrcEditorGroupReplaceForm: TCnSrcEditorGroupReplaceForm
       Height = 113
       Columns = <
         item
-          Caption = '源文本'
+          Caption = 'From'
           Width = 95
         end
         item
-          Caption = '替换为'
+          Caption = 'To'
           Width = 95
         end
         item
-          Caption = '忽略大小写'
+          Caption = 'Ignore Case'
         end
         item
-          Caption = '整词匹配'
+          Caption = 'Match Whole Word'
         end>
       HideSelection = False
       MultiSelect = True
@@ -202,7 +201,7 @@ inherited CnSrcEditorGroupReplaceForm: TCnSrcEditorGroupReplaceForm
       Top = 65
       Width = 73
       Height = 21
-      Caption = '增加(&A)'
+      Caption = '&Add'
       TabOrder = 3
       OnClick = btnItemAddClick
     end
@@ -211,7 +210,7 @@ inherited CnSrcEditorGroupReplaceForm: TCnSrcEditorGroupReplaceForm
       Top = 91
       Width = 73
       Height = 21
-      Caption = '删除(&R)'
+      Caption = '&Remove'
       TabOrder = 4
       OnClick = btnItemDeleteClick
     end
@@ -220,7 +219,7 @@ inherited CnSrcEditorGroupReplaceForm: TCnSrcEditorGroupReplaceForm
       Top = 115
       Width = 34
       Height = 21
-      Caption = '上(&U)'
+      Caption = '&Up'
       TabOrder = 5
       OnClick = btnItemUpClick
     end
@@ -229,7 +228,7 @@ inherited CnSrcEditorGroupReplaceForm: TCnSrcEditorGroupReplaceForm
       Top = 115
       Width = 34
       Height = 21
-      Caption = '下(&D)'
+      Caption = '&Down'
       TabOrder = 6
       OnClick = btnItemDownClick
     end
@@ -254,7 +253,7 @@ inherited CnSrcEditorGroupReplaceForm: TCnSrcEditorGroupReplaceForm
       Top = 237
       Width = 161
       Height = 17
-      Caption = '忽略大小写。'
+      Caption = 'Ignore Case'
       TabOrder = 9
       OnClick = ItemControlChanged
     end
@@ -263,7 +262,7 @@ inherited CnSrcEditorGroupReplaceForm: TCnSrcEditorGroupReplaceForm
       Top = 237
       Width = 161
       Height = 17
-      Caption = '整词匹配。'
+      Caption = 'Match Whole Word'
       TabOrder = 10
       OnClick = ItemControlChanged
     end
@@ -273,7 +272,7 @@ inherited CnSrcEditorGroupReplaceForm: TCnSrcEditorGroupReplaceForm
     Top = 432
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 4
     OnClick = btnHelpClick
   end
@@ -282,7 +281,7 @@ inherited CnSrcEditorGroupReplaceForm: TCnSrcEditorGroupReplaceForm
     Top = 432
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 2
@@ -293,20 +292,20 @@ inherited CnSrcEditorGroupReplaceForm: TCnSrcEditorGroupReplaceForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 3
   end
   object dlgOpen: TOpenDialog
     DefaultExt = 'xml'
-    Filter = '组替换设置文件(*.xml)|*.xml'
+    Filter = 'Group Replace Setting File(*.xml)|*.xml'
     Options = [ofFileMustExist, ofEnableSizing]
     Left = 8
     Top = 424
   end
   object dlgSave: TSaveDialog
     DefaultExt = 'xml'
-    Filter = '组替换设置文件(*.xml)|*.xml'
+    Filter = 'Group Replace Setting File(*.xml)|*.xml'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
     Left = 40
     Top = 424

@@ -1,20 +1,10 @@
-object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
+inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
   Left = 300
   Top = 126
   BorderStyle = bsDialog
-  Caption = '代码编辑器扩展专家设置'
-  ClientHeight = 453
+  Caption = 'Editor Enhancements Wizard Settings'
   ClientWidth = 401
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
   KeyPreview = True
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
   PixelsPerInch = 96
@@ -24,7 +14,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
     Top = 422
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 1
@@ -35,7 +25,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 2
   end
@@ -44,7 +34,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
     Top = 422
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
   end
@@ -56,27 +46,27 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
     ActivePage = ts1
     TabOrder = 0
     object ts1: TTabSheet
-      Caption = '编辑器增强(&E)'
+      Caption = 'Code &Editor'
       object grpEditorEnh: TGroupBox
         Left = 8
         Top = 8
         Width = 361
         Height = 169
-        Caption = '代码编辑器菜单扩展(&F)'
+        Caption = 'General and &Menu Enhancements'
         TabOrder = 0
         object lbl4: TLabel
           Left = 26
           Top = 60
-          Width = 64
+          Width = 73
           Height = 13
-          Caption = '执行命令行:'
+          Caption = 'Command Line:'
         end
         object chkAddMenuCloseOtherPages: TCheckBox
           Left = 8
           Top = 16
           Width = 350
           Height = 17
-          Caption = '在编辑器右键菜单中增加“关闭其它页面”菜单项。'
+          Caption = 'Add "Close Other Pages" in Editor'#39's Popupmenu.'
           TabOrder = 0
         end
         object chkAddMenuSelAll: TCheckBox
@@ -84,7 +74,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 100
           Width = 350
           Height = 17
-          Caption = '在编辑器右键菜单中增加“选择全部”菜单项。'
+          Caption = 'Add "Select All" in Editor'#39's Popupmenu.'
           TabOrder = 4
         end
         object chkAddMenuExplore: TCheckBox
@@ -92,7 +82,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 36
           Width = 350
           Height = 17
-          Caption = '在编辑器右键菜单中增加“在资源管理器中打开”菜单项。'
+          Caption = 'Add "Open in Explorer" in Editor'#39's Popupmenu.'
           TabOrder = 1
           OnClick = UpdateContent
         end
@@ -101,7 +91,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 140
           Width = 193
           Height = 17
-          Caption = '增加代码自动完成的热键：'
+          Caption = 'Add a CodeCompletion HotKey:'
           TabOrder = 6
           OnClick = UpdateContent
         end
@@ -120,7 +110,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 120
           Width = 350
           Height = 17
-          Caption = '在编辑器右键菜单中增加“外壳关联菜单”菜单项。'
+          Caption = 'Add "Shell Context Menu" in Editor'#39's Popupmenu.'
           TabOrder = 5
         end
         object chkAddMenuCopyFileName: TCheckBox
@@ -128,7 +118,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 80
           Width = 350
           Height = 17
-          Caption = '在编辑器右键菜单中增加“复制完整的路径名/文件名”菜单项'
+          Caption = 'Add "Copy Full Path/FileName" in Editor'#39's Popupmenu.'
           TabOrder = 3
         end
         object edtExploreCmdLine: TEdit
@@ -144,21 +134,21 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         Top = 180
         Width = 361
         Height = 189
-        Caption = '源代码只读保护(&R)'
+        Caption = '&Read Only Protection'
         TabOrder = 1
         object lblDir: TLabel
           Left = 8
           Top = 137
-          Width = 36
+          Width = 17
           Height = 13
-          Caption = '目录：'
+          Caption = 'Dir:'
         end
         object chkAutoReadOnly: TCheckBox
           Left = 8
           Top = 17
           Width = 345
           Height = 17
-          Caption = '打开下列目录中的源文件时自动只读保护：'
+          Caption = 'Auto Set Editor to ReadOnly when Opening Files in Directories:'
           TabOrder = 0
           OnClick = UpdateContent
         end
@@ -215,35 +205,35 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
       end
     end
     object ts2: TTabSheet
-      Caption = '行号及工具栏(&V)'
+      Caption = 'Line &Number / Toolbar'
       ImageIndex = 1
       object grpLineNumber: TGroupBox
         Left = 8
         Top = 110
         Width = 361
         Height = 145
-        Caption = '行号显示(&L)'
+        Caption = '&Line Number'
         TabOrder = 1
         object lbl1: TLabel
           Left = 42
           Top = 120
-          Width = 84
+          Width = 59
           Height = 13
-          Caption = '固定显示位数：'
+          Caption = 'Show Fixed:'
         end
         object lbl2: TLabel
           Left = 42
           Top = 80
-          Width = 84
+          Width = 72
           Height = 13
-          Caption = '最少显示位数：'
+          Caption = 'Show at Least:'
         end
         object chkShowLineNumber: TCheckBox
           Left = 8
           Top = 14
           Width = 350
           Height = 17
-          Caption = '在编辑器中增加显示行号的功能。'
+          Caption = 'Show Line Number in Editor.'
           TabOrder = 0
           OnClick = UpdateContent
         end
@@ -252,7 +242,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 53
           Width = 321
           Height = 17
-          Caption = '行号面板宽度自动调整。'
+          Caption = 'Auto Adjust Width of Line Number'
           Checked = True
           TabOrder = 4
           TabStop = True
@@ -263,7 +253,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 99
           Width = 321
           Height = 17
-          Caption = '行号面板固定宽度。'
+          Caption = 'Fixed Width of Line Number'
           TabOrder = 6
           OnClick = UpdateContent
         end
@@ -282,7 +272,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 32
           Width = 321
           Height = 17
-          Caption = '显示文件总行数。'
+          Caption = 'Show Total Line Count.'
           TabOrder = 2
         end
         object seLinePanelMinWidth: TCnSpinEdit
@@ -300,7 +290,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 16
           Width = 129
           Height = 21
-          Caption = '行号字体(&F)...'
+          Caption = 'Line Number &Font...'
           TabOrder = 1
           OnClick = btnLineFontClick
         end
@@ -309,7 +299,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 48
           Width = 129
           Height = 21
-          Caption = '当前行行号字体(&U)...'
+          Caption = 'C&ur. Line Number Font...'
           TabOrder = 3
           OnClick = btnCurrLineFontClick
         end
@@ -319,14 +309,14 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         Top = 8
         Width = 361
         Height = 94
-        Caption = '编辑器工具栏(&T)'
+        Caption = 'Editor &Toolbar'
         TabOrder = 0
         object chkShowToolBar: TCheckBox
           Left = 8
           Top = 16
           Width = 225
           Height = 17
-          Caption = '在编辑器中增加工具栏。'
+          Caption = 'Show Toolbar in Editor.'
           TabOrder = 0
           OnClick = UpdateContent
         end
@@ -335,7 +325,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 16
           Width = 129
           Height = 21
-          Caption = '定制按钮(&B)...'
+          Caption = 'Customize &Buttons...'
           TabOrder = 1
           OnClick = btnToolBarClick
         end
@@ -344,7 +334,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 66
           Width = 201
           Height = 17
-          Caption = '按钮自动换行。'
+          Caption = 'Wrap Buttons'
           TabOrder = 4
         end
         object chkShowInDesign: TCheckBox
@@ -352,7 +342,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 42
           Width = 209
           Height = 17
-          Caption = '在 BDS 窗体设计界面显示工具栏。'
+          Caption = 'Show Toolbar in BDS Embedded Designer.'
           TabOrder = 2
           OnClick = UpdateContent
         end
@@ -361,7 +351,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 42
           Width = 129
           Height = 21
-          Caption = '定制按钮(&F)...'
+          Caption = 'Customize B&uttons...'
           TabOrder = 3
           OnClick = btnDesignToolBarClick
         end
@@ -371,28 +361,28 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         Top = 262
         Width = 361
         Height = 106
-        Caption = '前进后退扩展(&J)'
+        Caption = '&Jumping Enhancement'
         TabOrder = 2
         object Label1: TLabel
           Left = 26
           Top = 44
-          Width = 120
+          Width = 139
           Height = 13
-          Caption = '新记录的最小行间隔：'
+          Caption = 'Lines to Make a New Record:'
         end
         object Label2: TLabel
           Left = 26
           Top = 72
-          Width = 84
+          Width = 80
           Height = 13
-          Caption = '最大列表项数：'
+          Caption = 'Maximum Count:'
         end
         object chkExtendForwardBack: TCheckBox
           Left = 8
           Top = 16
           Width = 345
           Height = 17
-          Caption = '扩展代码编辑器的前进、后退按钮功能。'
+          Caption = 'Improve the Jumping Features in IDE Editor.'
           TabOrder = 0
           OnClick = UpdateContent
         end
@@ -420,21 +410,21 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
       end
     end
     object ts3: TTabSheet
-      Caption = '标签及浮动按钮(&T)'
+      Caption = '&Tabset / Button'
       ImageIndex = 2
       object gbTab: TGroupBox
         Left = 8
         Top = 8
         Width = 361
         Height = 123
-        Caption = '源码标签扩展(&B)'
+        Caption = 'Ta&bset Enhancement'
         TabOrder = 0
         object chkDispModifiedInTab: TCheckBox
           Left = 8
           Top = 16
           Width = 350
           Height = 17
-          Caption = '在源代码标签中为已修改的文件添加 * 号。'
+          Caption = 'Add "*" to Modified File'#39's Name in Tabset.'
           TabOrder = 0
         end
         object chkDblClkClosePage: TCheckBox
@@ -442,7 +432,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 36
           Width = 350
           Height = 17
-          Caption = '通过双击编辑器标签关闭指定页面。'
+          Caption = 'Close Page by Double-click.'
           TabOrder = 1
         end
         object chkRClickShellMenu: TCheckBox
@@ -450,7 +440,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 56
           Width = 350
           Height = 17
-          Caption = '使用 Shift 或 Ctrl 加鼠标右键点击标签显示外壳菜单。'
+          Caption = 'Show Shell Menu by Right-click Tabset with Shift or Ctrl.'
           TabOrder = 2
         end
         object chkEditorMultiLine: TCheckBox
@@ -458,7 +448,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 76
           Width = 350
           Height = 17
-          Caption = '设置代码编辑器标签为多行方式（不适用于BDS）。'
+          Caption = 'Set Editor Tab to Multi-line(N.A. for BDS).'
           TabOrder = 3
         end
         object chkEditorFlatButtons: TCheckBox
@@ -466,7 +456,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 96
           Width = 350
           Height = 17
-          Caption = '设置代码编辑器标签为平面按钮风格（不适用于BDS）。'
+          Caption = 'Set Editor Tab'#39's Style to Flat Button(N.A. for BDS).'
           TabOrder = 4
         end
       end
@@ -475,14 +465,14 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         Top = 139
         Width = 361
         Height = 64
-        Caption = '选择块浮动按钮(&F)'
+        Caption = '&Selection Button'
         TabOrder = 1
         object chkShowFlatButton: TCheckBox
           Left = 8
           Top = 16
           Width = 350
           Height = 17
-          Caption = '块选择时显示浮动工具按钮。'
+          Caption = 'Show Selection Button when A Block Selected.'
           TabOrder = 0
         end
         object chkAddMenuBlockTools: TCheckBox
@@ -490,7 +480,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 38
           Width = 326
           Height = 17
-          Caption = '在编辑器右键菜单中显示浮动工具按钮下拉菜单。'
+          Caption = 'Show Selection Button Menu Items in Editor Context Menu.'
           TabOrder = 1
         end
       end
@@ -499,28 +489,28 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         Top = 281
         Width = 361
         Height = 87
-        Caption = '自动保存(&S)'
+        Caption = 'Auto &Save'
         TabOrder = 3
         object lblSaveInterval: TLabel
           Left = 26
           Top = 40
-          Width = 36
+          Width = 69
           Height = 13
-          Caption = '每隔：'
+          Caption = 'Save All Every'
         end
         object lblMinutes: TLabel
           Left = 200
           Top = 40
-          Width = 108
+          Width = 41
           Height = 13
-          Caption = '分钟全部保存一次。'
+          Caption = 'Minutes.'
         end
         object chkAutoSave: TCheckBox
           Left = 8
           Top = 16
           Width = 350
           Height = 17
-          Caption = '启用自动保存功能。'
+          Caption = 'Auto Save All'
           TabOrder = 0
           OnClick = UpdateContent
         end
@@ -540,14 +530,14 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         Top = 211
         Width = 361
         Height = 62
-        Caption = '剪贴板操作(&P)'
+        Caption = 'Cli&pboard Operations'
         TabOrder = 2
         object chkSmartCopy: TCheckBox
           Left = 8
           Top = 16
           Width = 350
           Height = 17
-          Caption = '未选择时剪切复制当前光标下的标识符。'
+          Caption = 'Cut / Copy Token under Cursor when NO Selection.'
           TabOrder = 0
         end
         object chkSmartPaste: TCheckBox
@@ -555,27 +545,27 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 36
           Width = 350
           Height = 17
-          Caption = '粘贴时自动替换当前光标下的标识符。'
+          Caption = 'Replace Token under Cursor when Pasting.'
           TabOrder = 1
         end
       end
     end
     object ts4: TTabSheet
-      Caption = '其它(&R)'
+      Caption = 'Oth&ers'
       ImageIndex = 3
       object grpKeyExtend: TGroupBox
         Left = 8
         Top = 8
         Width = 361
         Height = 224
-        Caption = '功能键扩展(&K)'
+        Caption = '&Keyboard Extend'
         TabOrder = 0
         object chkShiftEnter: TCheckBox
           Left = 8
           Top = 40
           Width = 350
           Height = 17
-          Caption = 'Shift+Enter 键移到行尾再换行。'
+          Caption = 'Use Shift+Enter to Move to Line End and Enter.'
           TabOrder = 1
         end
         object chkHomeExtend: TCheckBox
@@ -583,7 +573,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 140
           Width = 350
           Height = 17
-          Caption = '使用 Home 键移动到行首或第一个非空字符。'
+          Caption = 'Extend Home to Move Between Line Head and First No-Whitespace.'
           TabOrder = 7
           OnClick = UpdateContent
         end
@@ -592,7 +582,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 160
           Width = 329
           Height = 17
-          Caption = '不在行首时按 Home 键首先移到第一个非空字符。'
+          Caption = 'Move to First No-Whitespace if not in Line Head.'
           TabOrder = 8
         end
         object chkSearchAgain: TCheckBox
@@ -600,7 +590,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 80
           Width = 350
           Height = 17
-          Caption = 'F3/Shift+F3 查找选中的文字。'
+          Caption = 'F3/Shift+F3 to Search Selected Text.'
           TabOrder = 4
           OnClick = UpdateContent
         end
@@ -609,7 +599,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 20
           Width = 350
           Height = 17
-          Caption = 'Tab/Shift+Tab 缩进/反缩进选中代码块。'
+          Caption = 'Tab/Shift+Tab to Indent/Unindent Selected Block.'
           TabOrder = 0
         end
         object chkAutoBracket: TCheckBox
@@ -617,7 +607,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 120
           Width = 350
           Height = 17
-          Caption = '自动括号匹配输入 (), [], {} 。'
+          Caption = 'Auto Input Matched Bracket (), [], {}.'
           TabOrder = 6
         end
         object chkKeepSearch: TCheckBox
@@ -625,7 +615,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 100
           Width = 330
           Height = 17
-          Caption = 'F3/Shift+F3 查找时记忆查找的内容。'
+          Caption = 'Let IDE Remember F3/Shift+F3 Search Text. '
           TabOrder = 5
         end
         object chkF2Rename: TCheckBox
@@ -633,7 +623,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 60
           Width = 350
           Height = 17
-          Caption = '使用此热键输入并替换光标下的标识符：'
+          Caption = 'Rename and Replace Identifier under Cursor with:'
           TabOrder = 3
           OnClick = UpdateContent
         end
@@ -652,7 +642,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 180
           Width = 350
           Height = 17
-          Caption = '有效代码语句中输入分号时自动移动到行尾。'
+          Caption = 'Put to Line End when Enter ";" in Source Code.'
           TabOrder = 9
           OnClick = UpdateContent
         end
@@ -661,7 +651,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 200
           Width = 350
           Height = 17
-          Caption = 'begin 后按回车时自动输入匹配的 end 并缩进。'
+          Caption = 'Auto Add "end" when Pressing Enter after "begin".'
           TabOrder = 10
           OnClick = UpdateContent
         end
@@ -671,21 +661,21 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         Top = 237
         Width = 361
         Height = 132
-        Caption = '自动缩进(&I)'
+        Caption = 'Auto &Indent'
         TabOrder = 1
         object lbl3: TLabel
           Left = 24
           Top = 37
-          Width = 159
+          Width = 175
           Height = 13
-          Caption = '需要缩进的 Delphi 关键字列表:'
+          Caption = 'Delphi Keyword List for Auto Indent:'
         end
         object chkAutoIndent: TCheckBox
           Left = 8
           Top = 16
           Width = 345
           Height = 17
-          Caption = '在 Delphi 的指定关键字或 C 的 '#39'{'#39' 后回车时自动缩进。'
+          Caption = 'Auto &Indent for Special Keywords in Delphi or '#39'{'#39' in C File.'
           TabOrder = 0
           OnClick = UpdateContent
         end
@@ -706,15 +696,15 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
     Left = 8
     Top = 416
     object actReplace: TAction
-      Caption = '替换(&R)'
+      Caption = '&Replace'
       OnExecute = actReplaceExecute
     end
     object actAdd: TAction
-      Caption = '添加(&A)'
+      Caption = '&Add'
       OnExecute = actAddExecute
     end
     object actDelete: TAction
-      Caption = '删除(&D)'
+      Caption = '&Delete'
       OnExecute = actDeleteExecute
     end
   end
@@ -722,7 +712,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
-    Font.Name = 'MS Sans Serif'
+    Font.Name = 'Tahoma'
     Font.Style = []
     MinFontSize = 0
     MaxFontSize = 0
@@ -733,7 +723,7 @@ object CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
-    Font.Name = 'MS Sans Serif'
+    Font.Name = 'Tahoma'
     Font.Style = []
     MinFontSize = 0
     MaxFontSize = 0

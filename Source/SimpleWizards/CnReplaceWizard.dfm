@@ -1,19 +1,10 @@
-object CnReplaceWizardForm: TCnReplaceWizardForm
+inherited CnReplaceWizardForm: TCnReplaceWizardForm
   Left = 306
   Top = 155
   BorderStyle = bsDialog
-  Caption = '批量文件替换工具'
+  Caption = 'File Batch Replace Tools'
   ClientHeight = 331
   ClientWidth = 400
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   PixelsPerInch = 96
@@ -23,14 +14,14 @@ object CnReplaceWizardForm: TCnReplaceWizardForm
     Top = 88
     Width = 193
     Height = 113
-    Caption = '选项(&O)'
+    Caption = '&Options'
     TabOrder = 1
     object cbCaseSensitive: TCheckBox
       Left = 8
       Top = 16
       Width = 105
       Height = 17
-      Caption = '区分大小写(&I)'
+      Caption = 'Case Sens&itive'
       TabOrder = 0
     end
     object cbWholeWord: TCheckBox
@@ -38,7 +29,7 @@ object CnReplaceWizardForm: TCnReplaceWizardForm
       Top = 39
       Width = 129
       Height = 17
-      Caption = '只匹配整个单词(&W)'
+      Caption = '&Whole Word Only'
       TabOrder = 1
     end
     object cbRegEx: TCheckBox
@@ -46,7 +37,7 @@ object CnReplaceWizardForm: TCnReplaceWizardForm
       Top = 63
       Width = 169
       Height = 17
-      Caption = '查找内容支持正则表达式(&U)'
+      Caption = 'Reg&ular Expression'
       TabOrder = 2
     end
     object cbANSICompatible: TCheckBox
@@ -54,7 +45,7 @@ object CnReplaceWizardForm: TCnReplaceWizardForm
       Top = 86
       Width = 169
       Height = 17
-      Caption = 'Ansi兼容方式查找(慢速)(&N)'
+      Caption = 'A&NSI Compatible (Slow)'
       TabOrder = 3
     end
   end
@@ -63,21 +54,21 @@ object CnReplaceWizardForm: TCnReplaceWizardForm
     Top = 8
     Width = 385
     Height = 73
-    Caption = '文本(&T)'
+    Caption = '&Text'
     TabOrder = 0
     object Label1: TLabel
       Left = 8
       Top = 20
-      Width = 66
+      Width = 56
       Height = 13
-      Caption = '查找文本(&F):'
+      Caption = 'Search &For:'
     end
     object Label2: TLabel
       Left = 8
       Top = 44
-      Width = 54
+      Width = 67
       Height = 13
-      Caption = '替换为(&P):'
+      Caption = 'Re&place With:'
     end
     object cbbSrc: TComboBox
       Left = 88
@@ -101,14 +92,14 @@ object CnReplaceWizardForm: TCnReplaceWizardForm
     Top = 88
     Width = 185
     Height = 113
-    Caption = '范围(&A)'
+    Caption = 'R&ange'
     ItemIndex = 0
     Items.Strings = (
-      '当前单元(&1)'
-      '当前工程组所有文件(&2)'
-      '当前工程所有文件(&3)'
-      '当前打开的所有文件(&4)'
-      '指定目录(&5)')
+      'Current Unit(&1)'
+      'Files in Project Group(&2)'
+      'Files in Project(&3)'
+      'All Opened Files(&4)'
+      'In Directories(&5)')
     TabOrder = 2
     OnClick = rgReplaceStyleClick
   end
@@ -117,22 +108,22 @@ object CnReplaceWizardForm: TCnReplaceWizardForm
     Top = 208
     Width = 385
     Height = 89
-    Caption = '指定目录(&L)'
+    Caption = 'Search Directory'
     TabOrder = 3
     object Label3: TLabel
       Left = 8
       Top = 19
-      Width = 55
+      Width = 48
       Height = 13
-      Caption = '目录名(&D):'
+      Caption = '&Directory:'
       FocusControl = cbbDir
     end
     object Label4: TLabel
       Left = 8
       Top = 43
-      Width = 66
+      Width = 47
       Height = 13
-      Caption = '文件掩码(&E):'
+      Caption = 'Fil&e Mask:'
       FocusControl = cbbMask
     end
     object btnSelectDir: TButton
@@ -170,7 +161,7 @@ object CnReplaceWizardForm: TCnReplaceWizardForm
       Top = 64
       Width = 105
       Height = 17
-      Caption = '查找子目录(&S)'
+      Caption = '&Search Sub-folders'
       TabOrder = 3
     end
   end
@@ -179,7 +170,7 @@ object CnReplaceWizardForm: TCnReplaceWizardForm
     Top = 304
     Width = 75
     Height = 21
-    Caption = '开始替换(&R)'
+    Caption = '&Replace'
     TabOrder = 4
     OnClick = btnReplaceClick
   end
@@ -189,7 +180,7 @@ object CnReplaceWizardForm: TCnReplaceWizardForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '关闭(&C)'
+    Caption = '&Close'
     ModalResult = 2
     TabOrder = 5
   end
@@ -198,7 +189,7 @@ object CnReplaceWizardForm: TCnReplaceWizardForm
     Top = 304
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 6
     OnClick = btnHelpClick
   end

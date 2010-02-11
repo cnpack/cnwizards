@@ -1,35 +1,26 @@
-object CnWizMacroForm: TCnWizMacroForm
+inherited CnWizMacroForm: TCnWizMacroForm
   Left = 331
   Top = 266
   ActiveControl = cbbValue0
   BorderStyle = bsDialog
-  Caption = '文本宏值替换'
+  Caption = 'Macro Replacement'
   ClientHeight = 127
   ClientWidth = 391
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   PixelsPerInch = 96
   TextHeight = 13
   object lblMacro0: TLabel
     Left = 48
     Top = 27
-    Width = 40
+    Width = 33
     Height = 13
-    Caption = '宏名称:'
+    Caption = 'Macro:'
   end
   object lblValue0: TLabel
     Left = 192
     Top = 27
-    Width = 40
+    Width = 30
     Height = 13
-    Caption = '输入值:'
+    Caption = 'Value:'
   end
   object imgIcon: TImage
     Left = 8
@@ -66,9 +57,9 @@ object CnWizMacroForm: TCnWizMacroForm
   object Label3: TLabel
     Left = 8
     Top = 7
-    Width = 55
+    Width = 48
     Height = 13
-    Caption = '宏值替换:'
+    Caption = 'Replace:'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
@@ -86,16 +77,16 @@ object CnWizMacroForm: TCnWizMacroForm
   object lblMacro1: TLabel
     Left = 48
     Top = 52
-    Width = 40
+    Width = 33
     Height = 13
-    Caption = '宏名称:'
+    Caption = 'Macro:'
   end
   object lblValue1: TLabel
     Left = 192
     Top = 52
-    Width = 40
+    Width = 30
     Height = 13
-    Caption = '输入值:'
+    Caption = 'Value:'
   end
   object edtMacro0: TEdit
     Left = 88
@@ -127,7 +118,7 @@ object CnWizMacroForm: TCnWizMacroForm
       Top = 16
       Width = 75
       Height = 21
-      Caption = '帮助(&H)'
+      Caption = '&Help'
       TabOrder = 2
       OnClick = btnHelpClick
     end
@@ -136,7 +127,7 @@ object CnWizMacroForm: TCnWizMacroForm
       Top = 16
       Width = 75
       Height = 21
-      Caption = '确定(&O)'
+      Caption = '&OK'
       ModalResult = 1
       TabOrder = 0
     end
@@ -146,7 +137,7 @@ object CnWizMacroForm: TCnWizMacroForm
       Width = 75
       Height = 21
       Cancel = True
-      Caption = '取消(&C)'
+      Caption = '&Cancel'
       ModalResult = 2
       TabOrder = 1
     end

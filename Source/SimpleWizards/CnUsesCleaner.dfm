@@ -2,7 +2,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
   Left = 335
   Top = 163
   BorderStyle = bsDialog
-  Caption = '引用单元清理'
+  Caption = 'Uses Units Cleaner'
   ClientHeight = 365
   ClientWidth = 392
   OldCreateOrder = True
@@ -13,14 +13,14 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
     Top = 8
     Width = 377
     Height = 97
-    Caption = '请选择处理内容(&N)'
+    Caption = '&Select Content to Process'
     TabOrder = 0
     object rbCurrUnit: TRadioButton
       Left = 8
       Top = 18
       Width = 281
       Height = 17
-      Caption = '当前编辑的单元(&1)。'
+      Caption = 'Current Unit(&1).'
       Checked = True
       TabOrder = 0
       TabStop = True
@@ -30,7 +30,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
       Top = 54
       Width = 281
       Height = 17
-      Caption = '当前工程中的所有单元(&3)。'
+      Caption = 'All Units in Current Project(&3).'
       TabOrder = 2
       TabStop = True
     end
@@ -39,7 +39,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
       Top = 72
       Width = 281
       Height = 17
-      Caption = '当前工程组中的所有单元(&4)。'
+      Caption = 'All Units in Current ProjectGroup(&4).'
       TabOrder = 3
       TabStop = True
     end
@@ -48,7 +48,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
       Top = 36
       Width = 281
       Height = 17
-      Caption = '当前工程组中打开的单元(&2)。'
+      Caption = 'Opened Units in Current ProjectGroup(&2).'
       TabOrder = 1
       TabStop = True
     end
@@ -58,7 +58,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
     Top = 336
     Width = 75
     Height = 21
-    Caption = '处理(&O)'
+    Caption = '&Process'
     Default = True
     ModalResult = 1
     TabOrder = 2
@@ -69,7 +69,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 3
   end
@@ -78,7 +78,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
     Top = 336
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 4
     OnClick = btnHelpClick
   end
@@ -87,28 +87,28 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
     Top = 112
     Width = 377
     Height = 217
-    Caption = '清理设置(&S)'
+    Caption = 'Clean &Settings'
     TabOrder = 1
     object lblIgnore: TLabel
       Left = 8
       Top = 104
-      Width = 124
+      Width = 97
       Height = 13
-      Caption = '强行清理以下引用单元:'
+      Caption = 'Clean Units Directly:'
     end
     object lbl1: TLabel
       Left = 192
       Top = 104
-      Width = 124
+      Width = 89
       Height = 13
-      Caption = '强行忽略以下引用单元:'
+      Caption = 'Skip Units Directly:'
     end
     object chkIgnoreInit: TCheckBox
       Left = 8
       Top = 16
       Width = 361
       Height = 17
-      Caption = '忽略包含初始化节的引用单元。'
+      Caption = 'Skip Used Units including Initialization Part.'
       TabOrder = 0
     end
     object chkIgnoreReg: TCheckBox
@@ -116,7 +116,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
       Top = 38
       Width = 361
       Height = 17
-      Caption = '忽略包含 Register 过程的引用单元。'
+      Caption = 'Skip Used Units including Register Procedure.'
       TabOrder = 1
     end
     object mmoClean: TMemo
@@ -140,7 +140,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
       Top = 82
       Width = 361
       Height = 17
-      Caption = '忽略无源码的引用单元。'
+      Caption = 'Skip Used Units without Source.'
       TabOrder = 3
     end
     object chkIgnoreCompRef: TCheckBox
@@ -148,7 +148,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
       Top = 60
       Width = 361
       Height = 17
-      Caption = '忽略窗体组件间接引用的单元。'
+      Caption = 'Skip Used Units Referred by Component Indirectly.'
       TabOrder = 2
     end
   end

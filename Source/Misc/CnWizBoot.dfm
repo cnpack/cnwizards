@@ -1,19 +1,10 @@
-object CnWizBootForm: TCnWizBootForm
+inherited CnWizBootForm: TCnWizBootForm
   Left = 215
   Top = 134
   Width = 549
   Height = 392
   BorderIcons = [biSystemMenu]
-  Caption = 'CnPack IDE 专家引导工具'
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
+  Caption = 'CnWizards Loader'
   OnKeyPress = FormKeyPress
   OnShow = FormShow
   PixelsPerInch = 96
@@ -27,19 +18,19 @@ object CnWizBootForm: TCnWizBootForm
     Checkboxes = True
     Columns = <
       item
-        Caption = '序号'
+        Caption = 'Index'
         Width = 40
       end
       item
-        Caption = '专家名称'
+        Caption = 'Wizard Name'
         Width = 180
       end
       item
-        Caption = '专家ID'
+        Caption = 'Wizard ID'
         Width = 150
       end
       item
-        Caption = '专家类型'
+        Caption = 'Wizard Type'
         Width = 150
       end>
     ReadOnly = True
@@ -64,8 +55,8 @@ object CnWizBootForm: TCnWizBootForm
     object tbnSelectAll: TToolButton
       Left = 0
       Top = 0
-      Hint = '选择所有专家'
-      Caption = '全部选择(&W)'
+      Hint = 'Select All Wizards'
+      Caption = 'Select &All'
       ImageIndex = 61
       ParentShowHint = False
       ShowHint = True
@@ -74,8 +65,8 @@ object CnWizBootForm: TCnWizBootForm
     object tbnUnSelect: TToolButton
       Left = 23
       Top = 0
-      Hint = '取消选择专家'
-      Caption = '取消选择(&N)'
+      Hint = 'Unselect'
+      Caption = '&Unselect All'
       ImageIndex = 62
       ParentShowHint = False
       ShowHint = True
@@ -84,8 +75,8 @@ object CnWizBootForm: TCnWizBootForm
     object tbnReverseSelect: TToolButton
       Left = 46
       Top = 0
-      Hint = '反向选择专家'
-      Caption = '反向选择(&V)'
+      Hint = 'Inverse Selection'
+      Caption = 'Inverse Selection'
       ImageIndex = 63
       ParentShowHint = False
       ShowHint = True
@@ -102,8 +93,8 @@ object CnWizBootForm: TCnWizBootForm
     object tbtnOK: TToolButton
       Left = 77
       Top = 0
-      Hint = '加载选择的专家项'
-      Caption = '加载选择(&L)'
+      Hint = 'Press OK to Run Selected Wizards.'
+      Caption = '&Load Selected Wizards'
       ImageIndex = 39
       ParentShowHint = False
       ShowHint = True
@@ -112,8 +103,8 @@ object CnWizBootForm: TCnWizBootForm
     object tbtnCancel: TToolButton
       Left = 100
       Top = 0
-      Hint = '取消当前选择'
-      Caption = '取消当前选择(&C)'
+      Hint = 'Cancel Selection'
+      Caption = '&Cancel Selection'
       ImageIndex = 13
       ParentShowHint = False
       ShowHint = True
@@ -132,11 +123,11 @@ object CnWizBootForm: TCnWizBootForm
         Width = 160
       end
       item
-        Text = '当前专家：'
+        Text = 'Current Wizards:'
         Width = 120
       end
       item
-        Text = '启动专家：'
+        Text = 'Enabled Wizards:'
         Width = 120
       end
       item

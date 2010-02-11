@@ -1,18 +1,11 @@
-object CnProjectDirBuilderForm: TCnProjectDirBuilderForm
+inherited CnProjectDirBuilderForm: TCnProjectDirBuilderForm
   Left = 225
   Top = 173
   Width = 675
-  Height = 480
   BorderIcons = [biSystemMenu, biMaximize]
-  Caption = '工程目录创建器'
-  Color = clBtnFace
+  Caption = 'Project Dir Builder'
   Constraints.MinHeight = 300
   Constraints.MinWidth = 450
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
   Icon.Data = {
     0000010001002020000001001800A80C00001600000028000000200000004000
     00000100180000000000800C0000000000000000000000000000000000000000
@@ -116,8 +109,6 @@ object CnProjectDirBuilderForm: TCnProjectDirBuilderForm
     003F0000003F0000000000000000000000000000000000000000000000000000
     0000000000000000000000000000C0000000C0000000F0000000F0000000FC00
     0000FC000000FC000003FC000003FF0003FFFF0003FFFFC00FFFFFC00FFF}
-  OldCreateOrder = False
-  Position = poScreenCenter
   OnClose = FormClose
   OnCreate = FormCreate
   OnShow = FormShow
@@ -158,7 +149,8 @@ object CnProjectDirBuilderForm: TCnProjectDirBuilderForm
       object btnBuildDir: TToolButton
         Left = 0
         Top = 0
-        Caption = '生成目录(&B)'
+        Hint = 'Build Dir'
+        Caption = '&Build Dir'
         ImageIndex = 5
         OnClick = btnBuildDirClick
       end
@@ -173,28 +165,32 @@ object CnProjectDirBuilderForm: TCnProjectDirBuilderForm
       object btnNew: TToolButton
         Left = 31
         Top = 0
-        Caption = '新建模板(&N)'
+        Hint = 'New Template'
+        Caption = '&New Template'
         ImageIndex = 26
         OnClick = btnNewClick
       end
       object btnImport: TToolButton
         Left = 54
         Top = 0
-        Caption = '导入(&I)'
+        Hint = 'Import Directory Structure'
+        Caption = '&Import Directories'
         ImageIndex = 46
         OnClick = btnImportClick
       end
       object btnDelete: TToolButton
         Left = 77
         Top = 0
-        Caption = '删除模板(&D)'
+        Hint = 'Delete Template'
+        Caption = '&Delete Template'
         ImageIndex = 38
         OnClick = btnDeleteClick
       end
       object btnSave: TToolButton
         Left = 100
         Top = 0
-        Caption = '保存模板(&S)'
+        Hint = 'Save Template'
+        Caption = '&Save Template'
         ImageIndex = 6
         OnClick = btnSaveClick
       end
@@ -209,7 +205,8 @@ object CnProjectDirBuilderForm: TCnProjectDirBuilderForm
       object btnFont: TToolButton
         Left = 131
         Top = 0
-        Caption = '编辑器字体(&F)'
+        Hint = 'Editor Font'
+        Caption = '&Editor Font'
         ImageIndex = 29
         OnClick = btnFontClick
       end
@@ -224,7 +221,8 @@ object CnProjectDirBuilderForm: TCnProjectDirBuilderForm
       object btnHelp: TToolButton
         Left = 162
         Top = 0
-        Caption = '帮助(&H)'
+        Hint = 'Show Help'
+        Caption = '&Help'
         ImageIndex = 1
         OnClick = btnHelpClick
       end
@@ -239,7 +237,8 @@ object CnProjectDirBuilderForm: TCnProjectDirBuilderForm
       object btnClose: TToolButton
         Left = 193
         Top = 0
-        Caption = '关闭(&C)'
+        Hint = 'Close Window'
+        Caption = '&Close'
         ImageIndex = 0
         OnClick = btnCloseClick
       end
@@ -256,6 +255,7 @@ object CnProjectDirBuilderForm: TCnProjectDirBuilderForm
         Top = 0
         Width = 145
         Height = 21
+        Hint = 'Template List'
         Style = csDropDownList
         ItemHeight = 13
         TabOrder = 0
@@ -322,7 +322,7 @@ object CnProjectDirBuilderForm: TCnProjectDirBuilderForm
         Top = 0
         Width = 137
         Height = 17
-        Caption = '生成目录描述文件(&U)'
+        Caption = 'B&uild Dir Description File'
         TabOrder = 0
         OnClick = CheckBoxClick
       end
@@ -351,45 +351,45 @@ object CnProjectDirBuilderForm: TCnProjectDirBuilderForm
     OnPopup = PopupMenuPopup
     Left = 560
     object mnuAdd: TMenuItem
-      Caption = '添加目录(&R)'
+      Caption = 'Add Di&r'
       OnClick = mnuAddClick
     end
     object mnuAddSub: TMenuItem
-      Caption = '添加子目录(&S)'
+      Caption = 'Add &Sub Dir'
       OnClick = mnuAddSubClick
     end
     object mnuRename: TMenuItem
-      Caption = '重命名(&M)'
+      Caption = 'Rena&me'
       OnClick = mnuRenameClick
     end
     object mnuDelete: TMenuItem
-      Caption = '删除(&D)'
+      Caption = '&Delete'
       OnClick = mnuDeleteClick
     end
     object mnuLine1: TMenuItem
       Caption = '-'
     end
     object mnuExpand: TMenuItem
-      Caption = '全部展开(&E)'
+      Caption = '&Expand All'
       OnClick = mnuExpandClick
     end
     object mnuCollapse: TMenuItem
-      Caption = '全部折叠(&O)'
+      Caption = 'C&ollapse All'
       OnClick = mnuCollapseClick
     end
     object mnuLine2: TMenuItem
       Caption = '-'
     end
     object mnuSelectAll: TMenuItem
-      Caption = '全部选中(&A)'
+      Caption = 'Select &All'
       OnClick = mnuSelectAllClick
     end
     object mnuReverseSelect: TMenuItem
-      Caption = '反向选择(&V)'
+      Caption = 'Re&verse Select'
       OnClick = mnuReverseSelectClick
     end
     object mnuUnselect: TMenuItem
-      Caption = '全部不选中(&C)'
+      Caption = 'Unsele&ct'
       OnClick = mnuUnselectClick
     end
   end

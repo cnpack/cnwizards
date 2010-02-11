@@ -2,7 +2,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
   Left = 349
   Top = 119
   BorderStyle = bsDialog
-  Caption = '源代码高亮设置'
+  Caption = 'Source Highlight Settings'
   ClientHeight = 537
   ClientWidth = 380
   OldCreateOrder = True
@@ -14,14 +14,14 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     Top = 8
     Width = 361
     Height = 105
-    Caption = '括号匹配高亮(&B)'
+    Caption = 'Bracket High&Light'
     TabOrder = 0
     object lbl3: TLabel
       Left = 26
       Top = 40
-      Width = 40
+      Width = 60
       Height = 13
-      Caption = '前景色:'
+      Caption = 'Foreground:'
     end
     object shpBracket: TShape
       Left = 88
@@ -33,9 +33,9 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     object lbl4: TLabel
       Left = 130
       Top = 40
-      Width = 40
+      Width = 60
       Height = 13
-      Caption = '背景色:'
+      Caption = 'Background:'
     end
     object shpBracketBk: TShape
       Left = 192
@@ -47,9 +47,9 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     object lbl5: TLabel
       Left = 234
       Top = 40
-      Width = 40
+      Width = 34
       Height = 13
-      Caption = '边框色:'
+      Caption = 'Frame:'
     end
     object shpBracketBd: TShape
       Left = 296
@@ -63,7 +63,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 16
       Width = 350
       Height = 17
-      Caption = '允许括号匹配高亮显示。'
+      Caption = 'Enable Highlight Matched Brackets.'
       TabOrder = 0
       OnClick = UpdateControls
     end
@@ -72,7 +72,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 59
       Width = 329
       Height = 17
-      Caption = '加粗显示。'
+      Caption = 'Bracket Bold.'
       TabOrder = 1
     end
     object chkBracketMiddle: TCheckBox
@@ -80,7 +80,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 79
       Width = 329
       Height = 17
-      Caption = '光标在括号中间的文本时也高亮显示。'
+      Caption = 'Highlight when Cursor is between Brackets.'
       TabOrder = 2
     end
   end
@@ -89,7 +89,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     Top = 506
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 2
@@ -100,7 +100,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 3
   end
@@ -109,7 +109,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     Top = 506
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 4
     OnClick = btnHelpClick
   end
@@ -118,17 +118,17 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     Top = 120
     Width = 361
     Height = 377
-    Caption = '代码结构匹配高亮(&S)'
+    Caption = 'Code &Structure Highlight'
     TabOrder = 1
     object shpBk: TShape
-      Left = 325
+      Left = 329
       Top = 15
       Width = 20
       Height = 20
       OnMouseDown = shpBracketMouseDown
     end
     object shpCurLine: TShape
-      Left = 325
+      Left = 329
       Top = 84
       Width = 20
       Height = 20
@@ -139,7 +139,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 61
       Width = 40
       Height = 13
-      Caption = '前景色:'
+      Caption = 'Foreground:'
     end
     object shpCurTokenFg: TShape
       Left = 88
@@ -153,7 +153,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 61
       Width = 40
       Height = 13
-      Caption = '背景色:'
+      Caption = 'Background:'
     end
     object shpCurTokenBg: TShape
       Left = 192
@@ -167,7 +167,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 61
       Width = 40
       Height = 13
-      Caption = '边框色:'
+      Caption = 'Frame:'
     end
     object shpCurTokenBd: TShape
       Left = 296
@@ -181,7 +181,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 16
       Width = 305
       Height = 17
-      Caption = '允许光标处匹配关键字高亮背景显示。'
+      Caption = 'Enable Background Highlight Keyword Structure at Cursor.'
       TabOrder = 0
       OnClick = UpdateControls
     end
@@ -190,7 +190,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 106
       Width = 337
       Height = 17
-      Caption = '允许代码结构匹配关键字高亮显示。'
+      Caption = 'Enable Highlight Keyword Structure.'
       TabOrder = 4
       OnClick = UpdateControls
     end
@@ -199,20 +199,20 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 150
       Width = 137
       Height = 91
-      Caption = '高亮显示范围(&R)'
+      Caption = 'Highlight &Range'
       Items.Strings = (
-        '整个单元'
-        '当前过程/函数'
-        '当前最外层块'
-        '当前最内层块')
+        'Unit'
+        'Procedure/Function'
+        'Whole Block'
+        'Current Block')
       TabOrder = 7
     end
     object grpHighlightColor: TGroupBox
       Left = 168
       Top = 150
-      Width = 177
+      Width = 181
       Height = 91
-      Caption = '高亮层次显示颜色(&L)'
+      Caption = 'Colors by &Level'
       TabOrder = 8
       object shpneg1: TShape
         Left = 16
@@ -275,7 +275,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
           Top = 4
           Width = 20
           Height = 22
-          Hint = '配色相关功能'
+          Hint = 'Color Setting Functions'
           Flat = True
           Glyph.Data = {
             D6000000424DD60000000000000076000000280000000C0000000C0000000100
@@ -294,13 +294,13 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     object rgMatchDelay: TRadioGroup
       Left = 16
       Top = 246
-      Width = 329
+      Width = 333
       Height = 89
-      Caption = '高亮显示延时(&D)'
+      Caption = 'Highlight &Delay'
       Items.Strings = (
-        '即时显示'
-        '显示前延时'
-        '热键按下时显示')
+        'Immediately'
+        'Delay for'
+        'Only Show when Hotkey:')
       TabOrder = 9
       OnClick = UpdateControls
     end
@@ -319,7 +319,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 346
       Width = 217
       Height = 17
-      Caption = '不高亮匹配行数超过此数量的单元：'
+      Caption = 'Disable Highlight when Unit Lines Exceeds:'
       TabOrder = 14
       OnClick = UpdateControls
     end
@@ -340,13 +340,13 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Width = 73
       Height = 25
       BevelOuter = bvNone
-      Caption = '毫秒'
+      Caption = 'mSec'
       TabOrder = 10
     end
     object seMaxLines: TCnSpinEdit
       Left = 248
       Top = 344
-      Width = 97
+      Width = 101
       Height = 22
       Increment = 500
       MaxValue = 100000
@@ -359,16 +359,16 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 126
       Width = 249
       Height = 17
-      Caption = '允许代码结构匹配连线显示。'
+      Caption = 'Enable Lines.'
       TabOrder = 6
       OnClick = UpdateControls
     end
     object btnLineSetting: TButton
       Left = 270
       Top = 124
-      Width = 75
+      Width = 79
       Height = 21
-      Caption = '画线设置(&X)'
+      Caption = 'Line Se&ttings'
       TabOrder = 5
       OnClick = btnLineSettingClick
     end
@@ -377,7 +377,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 36
       Width = 297
       Height = 17
-      Caption = '允许光标处匹配标识符高亮背景显示。'
+      Caption = 'Enable Background Highlight Current Identifier at Cursor.'
       TabOrder = 2
       OnClick = UpdateControls
     end
@@ -393,9 +393,9 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     object chkHighlightCurLine: TCheckBox
       Left = 8
       Top = 86
-      Width = 313
+      Width = 317
       Height = 17
-      Caption = '允许高亮当前行背景（仅适用于Delphi 7或以下版本）。'
+      Caption = 'Enable Background Highlight Current Line (Delphi 7 below only).'
       TabOrder = 3
       OnClick = UpdateControls
     end
@@ -411,17 +411,17 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     Left = 288
     Top = 352
     object mniReset: TMenuItem
-      Caption = '重置为默认颜色(&R)'
+      Caption = '&Reset to Default Color'
       ImageIndex = 52
       OnClick = mniResetClick
     end
     object mniExport: TMenuItem
-      Caption = '导出配色方案(&E)...'
+      Caption = '&Export Color Settings...'
       ImageIndex = 6
       OnClick = mniExportClick
     end
     object mniImport: TMenuItem
-      Caption = '导入配色方案(&I)...'
+      Caption = '&Import Color Settings...'
       ImageIndex = 3
       OnClick = mniImportClick
     end

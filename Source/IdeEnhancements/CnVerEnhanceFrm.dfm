@@ -2,7 +2,7 @@ inherited CnVerEnhanceForm: TCnVerEnhanceForm
   Left = 427
   Top = 392
   BorderStyle = bsDialog
-  Caption = '版本信息扩展专家设置'
+  Caption = 'Version Enhancements Settings'
   ClientHeight = 125
   ClientWidth = 403
   OldCreateOrder = True
@@ -14,21 +14,21 @@ inherited CnVerEnhanceForm: TCnVerEnhanceForm
     Top = 8
     Width = 387
     Height = 81
-    Caption = '版本信息扩展专家设置(&V)'
+    Caption = '&Version Enhancements Settings'
     TabOrder = 0
     object lblNote: TLabel
       Left = 24
       Top = 56
-      Width = 312
+      Width = 306
       Height = 13
-      Caption = '（注：以上两选项只在工程选项中包含版本信息时有效。）'
+      Caption = '(Note: Both Only Enabled when Include Version Info in Project.)'
     end
     object chkLastCompiled: TCheckBox
       Left = 8
       Top = 16
       Width = 377
       Height = 17
-      Caption = '版本信息中插入编译时刻 （仅适用于 Delphi 6 及以上版本）。'
+      Caption = 'Insert Compiling Time into Version Info(Delphi 6 Above Only).'
       Checked = True
       State = cbChecked
       TabOrder = 0
@@ -38,7 +38,7 @@ inherited CnVerEnhanceForm: TCnVerEnhanceForm
       Top = 36
       Width = 377
       Height = 17
-      Caption = '编译时自动增加 Build 号 （仅适用于 Delphi 6 及以上版本）。'
+      Caption = 'Auto-increment Build Number when Compiling(Delphi 6 Above Only).'
       TabOrder = 1
     end
   end
@@ -48,7 +48,7 @@ inherited CnVerEnhanceForm: TCnVerEnhanceForm
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 1
@@ -60,7 +60,7 @@ inherited CnVerEnhanceForm: TCnVerEnhanceForm
     Height = 21
     Anchors = [akRight, akBottom]
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 2
   end
@@ -70,7 +70,7 @@ inherited CnVerEnhanceForm: TCnVerEnhanceForm
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
   end

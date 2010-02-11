@@ -1,18 +1,11 @@
-object CnRoOptionsDlg: TCnRoOptionsDlg
+inherited CnRoOptionsDlg: TCnRoOptionsDlg
   Left = 354
   Top = 181
   BorderStyle = bsDialog
-  Caption = '打开历史文件选项'
+  Caption = 'Historical Files Settings'
   ClientHeight = 261
   ClientWidth = 248
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
   OldCreateOrder = True
-  Position = poScreenCenter
   OnCreate = FormCreate
   OnShow = FormShow
   PixelsPerInch = 96
@@ -25,21 +18,21 @@ object CnRoOptionsDlg: TCnRoOptionsDlg
     ActivePage = tsSample
     TabOrder = 0
     object tsSample: TTabSheet
-      Caption = '普通选项(&N)'
+      Caption = '&General'
       ImageIndex = 1
       object Label6: TLabel
         Left = 8
         Top = 8
-        Width = 72
+        Width = 66
         Height = 13
-        Caption = '默认打开页：'
+        Caption = 'Default Page:'
       end
       object chkIgnoreDefault: TCheckBox
         Left = 8
         Top = 64
         Width = 156
         Height = 17
-        Caption = '忽略 Unit1, Project1。'
+        Caption = 'Ignore Unit1 and Project1'
         TabOrder = 1
       end
       object cbDefaultPage: TComboBox
@@ -51,19 +44,19 @@ object CnRoOptionsDlg: TCnRoOptionsDlg
         ItemHeight = 13
         TabOrder = 0
         Items.Strings = (
-          '工程组文件'
-          '工程文件'
-          '源码文件'
-          '包文件'
-          '其他文件'
-          '收藏夹')
+          'ProjectGroup'
+          'Project'
+          'Source File'
+          'Package'
+          'Others'
+          'Favorites')
       end
       object chkSortPersistance: TCheckBox
         Left = 8
         Top = 88
         Width = 138
         Height = 17
-        Caption = '保留标题排序方法。'
+        Caption = 'Keep Sort'
         TabOrder = 2
       end
       object chkLocalDate: TCheckBox
@@ -71,53 +64,53 @@ object CnRoOptionsDlg: TCnRoOptionsDlg
         Top = 112
         Width = 138
         Height = 17
-        Caption = '本地日期格式。'
+        Caption = 'Local Time Format'
         TabOrder = 3
       end
     end
     object tsCapacity: TTabSheet
-      Caption = '设置保存文件数(&M)'
+      Caption = 'Files &Limit'
       object lblPjg: TLabel
         Left = 13
         Top = 15
-        Width = 98
+        Width = 101
         Height = 13
-        Caption = '工程组文件(*.%s):'
+        Caption = 'ProjectGroup(*.%s):'
       end
       object lblPj: TLabel
         Left = 13
         Top = 44
-        Width = 86
+        Width = 72
         Height = 13
-        Caption = '工程文件(*.%s):'
+        Caption = 'Project(*.%s):'
       end
       object lblUnt: TLabel
         Left = 13
         Top = 73
-        Width = 86
+        Width = 90
         Height = 13
-        Caption = '源码文件(*.%s):'
+        Caption = 'Source File(*.%s):'
       end
       object lblPkg: TLabel
         Left = 13
         Top = 102
-        Width = 74
+        Width = 78
         Height = 13
-        Caption = '包文件(*.%s):'
+        Caption = 'Package(*.%s):'
       end
       object lblOth: TLabel
         Left = 13
         Top = 131
-        Width = 88
+        Width = 73
         Height = 13
-        Caption = '其他文件(Other):'
+        Caption = 'Others(Other):'
       end
       object lblFav: TLabel
         Left = 15
         Top = 160
-        Width = 40
+        Width = 49
         Height = 13
-        Caption = '收藏夹:'
+        Caption = 'Favorites:'
       end
       object SpinEditBPG: TCnSpinEdit
         Left = 148
@@ -192,7 +185,7 @@ object CnRoOptionsDlg: TCnRoOptionsDlg
     Top = 234
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 1
@@ -203,7 +196,7 @@ object CnRoOptionsDlg: TCnRoOptionsDlg
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 2
   end

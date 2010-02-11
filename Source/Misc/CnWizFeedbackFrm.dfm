@@ -1,18 +1,12 @@
-object CnWizFeedbackForm: TCnWizFeedbackForm
+inherited CnWizFeedbackForm: TCnWizFeedbackForm
   Left = 349
   Top = 248
   Width = 590
   Height = 398
   BorderIcons = [biSystemMenu]
-  Caption = 'CnPack IDE 专家包反馈向导'
-  Color = clBtnFace
+  Caption = 'CnPack IDE Wizards Feedback Wizard'
   Constraints.MinHeight = 398
   Constraints.MinWidth = 590
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
   Icon.Data = {
     0000010001002020000001001800A80C00001600000028000000200000004000
     00000100180000000000000C0000000000000000000000000000000000000000
@@ -116,9 +110,6 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
     9FFF3F8027FF3F0033FF1E001DFF8C000EFF8400077F800003BFC00001DFC000
     00EFC0000077800000370000003B0000001B0000001D0000001D0000001B0000
     00130000000F0004003F800E007FC01F00FFF0FFC1FFFFFFFFFFFFFFFFFF}
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnClose = FormClose
   OnCreate = FormCreate
   PixelsPerInch = 96
@@ -151,9 +142,9 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
     object Label1: TLabel
       Left = 8
       Top = 8
-      Width = 108
+      Width = 114
       Height = 13
-      Caption = 'CnPack IDE 专家包:'
+      Caption = 'CnPack IDE Wizards:'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -164,9 +155,9 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
     object lblTitle: TLabel
       Left = 24
       Top = 24
-      Width = 156
+      Width = 195
       Height = 13
-      Caption = '错误报告及用户建议向导。'
+      Caption = 'Bug Report and Suggestion Wizard'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -287,7 +278,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
       Height = 21
       Anchors = [akTop, akRight]
       Cancel = True
-      Caption = '取消(&C)'
+      Caption = '&Cancel'
       TabOrder = 2
       OnClick = btnCancelClick
     end
@@ -324,36 +315,35 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
         Font.Style = []
         Items = <
           item
-            Caption = '类型'
+            Caption = 'Type'
             Comment.Strings = (
-              '感谢您对 CnPack 的支持！'
-              ''
-              '请选择反馈类型。')
+              'Thank You for Your Support! '
+              'Please Choose Feedback Type.')
           end
           item
-            Caption = '反馈内容'
+            Caption = 'Feedback'
             Comment.Strings = (
-              '请输入需要反馈的内容！')
+              'Feedback Content.')
           end
           item
-            Caption = '错误细节'
+            Caption = 'Bug Details'
             Comment.Strings = (
-              '请输入错误重复出现的概率！')
+              'Recurrence Probability.')
           end
           item
-            Caption = '重现步骤'
+            Caption = 'Recurrence Step'
             Comment.Strings = (
-              '请描述使错误重复出现的步骤！')
+              'Recurrence Step')
           end
           item
-            Caption = '反馈设置'
+            Caption = 'Feedback Settings'
             Comment.Strings = (
-              '请选择需要报告的其它设置！')
+              'Choose Other Content.')
           end
           item
-            Caption = '完成'
+            Caption = 'Finish'
             Comment.Strings = (
-              '感谢您的反馈！')
+              'Thank you.')
           end>
         ItemIndex = 0
         SelectedFont.Charset = DEFAULT_CHARSET
@@ -387,11 +377,11 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
           Top = 8
           Width = 281
           Height = 81
-          Caption = '请选择您要反馈的类型(&T)'
+          Caption = 'Please Select Feedback &Type:'
           ItemIndex = 0
           Items.Strings = (
-            '我有一个错误要报告。'
-            '对 CnPack IDE 专家包，我有一些建议。')
+            'I have a Bug to Report.'
+            'I have a Suggestion to CnPack IDE Wizards.')
           TabOrder = 0
           OnClick = rgpFeedbackTypeClick
         end
@@ -419,21 +409,21 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
           Top = 8
           Width = 281
           Height = 121
-          Caption = '错误重现率(&R)'
+          Caption = 'Bug Reproducible Rate'
           TabOrder = 0
           object lblPercent: TLabel
             Left = 69
             Top = 44
-            Width = 74
+            Width = 111
             Height = 13
-            Caption = '% 可以重现。'
+            Caption = '% can be Reproduced.'
           end
           object cbProjectSpecific: TCheckBox
             Left = 8
             Top = 88
             Width = 264
             Height = 17
-            Caption = '该错误仅与特定的工程相关。'
+            Caption = 'The Bug Associates with a Specific Project.'
             TabOrder = 3
           end
           object cbMultipleMachines: TCheckBox
@@ -441,7 +431,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
             Top = 64
             Width = 264
             Height = 17
-            Caption = '该错误在多台计算机上可重现。'
+            Caption = 'The Bug can be Reproduced on Different Machines.'
             TabOrder = 2
           end
           object edtPercent: TEdit
@@ -459,7 +449,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
             Top = 16
             Width = 264
             Height = 17
-            Caption = '该错误可以重现。'
+            Caption = 'The Bug can be Reproduced.'
             Checked = True
             State = cbChecked
             TabOrder = 0
@@ -490,14 +480,14 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
           Top = 8
           Width = 281
           Height = 177
-          Caption = '需要反馈的其它数据(&D)'
+          Caption = 'Other Feedback &Data'
           TabOrder = 0
           object cbCnPackVer: TCheckBox
             Left = 8
             Top = 16
             Width = 264
             Height = 17
-            Caption = 'CnPack IDE 专家包版本号。'
+            Caption = 'CnPack IDE Wizards Version.'
             Checked = True
             Enabled = False
             State = cbChecked
@@ -508,7 +498,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
             Top = 55
             Width = 264
             Height = 17
-            Caption = '操作系统。'
+            Caption = 'OS.'
             Checked = True
             Enabled = False
             State = cbChecked
@@ -519,7 +509,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
             Top = 94
             Width = 264
             Height = 17
-            Caption = '已安装的专家。'
+            Caption = 'Installed Wizards.'
             Checked = True
             State = cbChecked
             TabOrder = 4
@@ -529,7 +519,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
             Top = 35
             Width = 264
             Height = 17
-            Caption = 'IDE 版本号。'
+            Caption = 'IDE version.'
             Checked = True
             Enabled = False
             State = cbChecked
@@ -540,7 +530,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
             Top = 113
             Width = 264
             Height = 17
-            Caption = '已安装的包。'
+            Caption = 'Installed Packages.'
             Checked = True
             State = cbChecked
             TabOrder = 5
@@ -550,7 +540,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
             Top = 133
             Width = 264
             Height = 17
-            Caption = '本地化/键盘信息。'
+            Caption = 'Localization/Keyboard Information.'
             Checked = True
             State = cbChecked
             TabOrder = 6
@@ -560,7 +550,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
             Top = 152
             Width = 264
             Height = 17
-            Caption = 'CPU 信息。'
+            Caption = 'CPU Information.'
             Checked = True
             State = cbChecked
             TabOrder = 7
@@ -570,7 +560,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
             Top = 74
             Width = 264
             Height = 17
-            Caption = 'CnPack IDE 专家包设置。'
+            Caption = 'CnPack IDE Wizards Settings.'
             Checked = True
             State = cbChecked
             TabOrder = 3
@@ -595,7 +585,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
             Width = 77
             Height = 21
             Anchors = [akTop, akRight]
-            Caption = '保存(&S)...'
+            Caption = '&Save...'
             TabOrder = 1
             OnClick = btnSaveClick
           end
@@ -605,7 +595,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
             Width = 77
             Height = 21
             Anchors = [akTop, akRight]
-            Caption = '复制(&O)'
+            Caption = 'C&opy'
             TabOrder = 0
             OnClick = btnCopyClick
           end
@@ -615,7 +605,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
             Width = 77
             Height = 21
             Anchors = [akTop, akRight]
-            Caption = '邮件(&M)'
+            Caption = 'E-&mail'
             TabOrder = 2
             OnClick = btnEmailClick
           end
@@ -642,7 +632,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
       Style = tsFlatButtons
       TabOrder = 3
       object tsHelp: TTabSheet
-        Caption = '帮助(&H)'
+        Caption = '&Help'
         ImageIndex = 1
         object memHelp: TMemo
           Left = 0
@@ -657,7 +647,7 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
         end
       end
       object tsExample: TTabSheet
-        Caption = '示范(&S)'
+        Caption = '&Sample'
         object memExample: TMemo
           Left = 0
           Top = 0
@@ -685,19 +675,19 @@ object CnWizFeedbackForm: TCnWizFeedbackForm
     Left = 184
     Top = 8
     object actPrev: TAction
-      Caption = '< 上一步(&P)'
+      Caption = '< &Previous'
       OnExecute = actPrevExecute
       OnUpdate = actPrevUpdate
     end
     object actNext: TAction
-      Caption = '下一步(&N) >'
+      Caption = '&Next >'
       OnExecute = actNextExecute
       OnUpdate = actNextUpdate
     end
   end
   object dlgSaveReport: TSaveDialog
     DefaultExt = 'txt'
-    Filter = '文本文件 (*.txt)|*.txt|所有文件 (*.*)|*.*'
+    Filter = 'Text Files (*.txt)|*.txt|Any Files (*.*)|*.*'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofPathMustExist, ofEnableSizing]
     Left = 216
     Top = 8

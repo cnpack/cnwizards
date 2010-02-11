@@ -1,19 +1,10 @@
-object CnMenuSortForm: TCnMenuSortForm
+inherited CnMenuSortForm: TCnMenuSortForm
   Left = 230
   Top = 136
   BorderStyle = bsDialog
-  Caption = '高级设置'
+  Caption = 'Advanced Settings'
   ClientHeight = 435
   ClientWidth = 571
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   PixelsPerInch = 96
@@ -23,7 +14,7 @@ object CnMenuSortForm: TCnMenuSortForm
     Top = 405
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 1
@@ -34,7 +25,7 @@ object CnMenuSortForm: TCnMenuSortForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 2
   end
@@ -43,7 +34,7 @@ object CnMenuSortForm: TCnMenuSortForm
     Top = 405
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
   end
@@ -56,13 +47,13 @@ object CnMenuSortForm: TCnMenuSortForm
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 0
     object TabSheet1: TTabSheet
-      Caption = '排序(&S)'
+      Caption = '&Sort Menus'
       object Label1: TLabel
         Left = 8
         Top = 8
-        Width = 108
+        Width = 139
         Height = 13
-        Caption = '专家菜单顺序设置：'
+        Caption = 'Wizard Menu Order Settings:'
       end
       object lvMenuWizards: TListView
         Left = 0
@@ -72,19 +63,19 @@ object CnMenuSortForm: TCnMenuSortForm
         Align = alBottom
         Columns = <
           item
-            Caption = '菜单项标题'
+            Caption = 'Title of the Menu Item'
             Width = 140
           end
           item
-            Caption = '专家名称'
+            Caption = 'Wizard Name'
             Width = 139
           end
           item
-            Caption = '专家 ID'
+            Caption = 'Wizard ID'
             Width = 144
           end
           item
-            Caption = '专家类型'
+            Caption = 'Wizard Type'
             Width = 102
           end>
         DragMode = dmAutomatic
@@ -159,14 +150,14 @@ object CnMenuSortForm: TCnMenuSortForm
       end
     end
     object TabSheet2: TTabSheet
-      Caption = '高级(&A)'
+      Caption = '&Advanced'
       ImageIndex = 1
       object Label2: TLabel
         Left = 8
         Top = 8
-        Width = 216
+        Width = 240
         Height = 13
-        Caption = '专家实例创建设置（下一次启动有效）：'
+        Caption = 'Wizard Instance Creation Settings(Need Restart):'
       end
       object lvWizardCreate: TListView
         Left = 0
@@ -177,15 +168,15 @@ object CnMenuSortForm: TCnMenuSortForm
         Checkboxes = True
         Columns = <
           item
-            Caption = '专家名称'
+            Caption = 'Wizard Name'
             Width = 210
           end
           item
-            Caption = '专家 ID'
+            Caption = 'Wizard ID'
             Width = 175
           end
           item
-            Caption = '专家类型'
+            Caption = 'Wizard Type'
             Width = 140
           end>
         HideSelection = False
@@ -336,27 +327,27 @@ object CnMenuSortForm: TCnMenuSortForm
     Left = 400
     Top = 8
     object UpAction: TAction
-      Hint = '选中的菜单专家上移'
+      Hint = 'Move Up Selection'
       OnExecute = UpActionExecute
     end
     object DownAction: TAction
-      Hint = '选中的菜单专家下移'
+      Hint = 'Move Down Selection'
       OnExecute = DownActionExecute
     end
     object ResetAction: TAction
-      Hint = '重置菜单专家顺序'
+      Hint = 'Reset Menu Order'
       OnExecute = ResetActionExecute
     end
     object actSelAll: TAction
-      Hint = '勾选所有专家'
+      Hint = 'Select All Wizards'
       OnExecute = actSelAllExecute
     end
     object actSelNone: TAction
-      Hint = '不勾选所有专家'
+      Hint = 'Deselect All Wizards'
       OnExecute = actSelNoneExecute
     end
     object actSelReverse: TAction
-      Hint = '反向勾选专家'
+      Hint = 'Inverse Selection'
       OnExecute = actSelReverseExecute
     end
   end

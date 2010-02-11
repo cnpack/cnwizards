@@ -13,19 +13,19 @@ object RecentFilesFrame: TRecentFilesFrame
     Columns = <
       item
         AutoSize = True
-        Caption = '文件名称'
+        Caption = 'FileName'
       end
       item
-        Caption = '路径'
+        Caption = 'Path'
         Width = 200
       end
       item
         AutoSize = True
-        Caption = '最后一次打开'
+        Caption = 'Last Open'
       end
       item
         AutoSize = True
-        Caption = '最后一次关闭'
+        Caption = 'Last Close'
       end>
     DragMode = dmAutomatic
     HideSelection = False
@@ -216,22 +216,22 @@ object RecentFilesFrame: TRecentFilesFrame
     Left = 136
     Top = 80
     object actCopyName: TAction
-      Caption = '复制文件名到剪贴板'
+      Caption = 'Copy FileName To Clipboard'
       ImageIndex = 10
       OnExecute = actCopyNameExecute
     end
     object actCopyFolder: TAction
-      Caption = '复制文件路径到剪贴板'
+      Caption = 'Copy Path To Clipboard'
       ImageIndex = 20
       OnExecute = actCopyFolderExecute
     end
     object actOpenFolder: TAction
-      Caption = '打开所在的文件夹'
+      Caption = 'Open Folder'
       ImageIndex = 4
       OnExecute = actOpenFolderExecute
     end
     object actOpenFile: TAction
-      Caption = '打开文件'
+      Caption = 'Open'
       ImageIndex = 3
       OnExecute = actOpenFileExecute
     end

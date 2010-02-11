@@ -1,19 +1,11 @@
-object CnWizTipOfDayForm: TCnWizTipOfDayForm
+inherited CnWizTipOfDayForm: TCnWizTipOfDayForm
   Left = 404
   Top = 256
   BorderIcons = []
   BorderStyle = bsDialog
-  Caption = 'CnPack IDE 专家包每日一帖'
+  Caption = 'CnPack IDE Wizards'#39' Tip of Day'
   ClientHeight = 220
   ClientWidth = 360
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   PixelsPerInch = 96
@@ -501,9 +493,9 @@ object CnWizTipOfDayForm: TCnWizTipOfDayForm
   object Label1: TLabel
     Left = 8
     Top = 7
-    Width = 29
+    Width = 26
     Height = 13
-    Caption = '提示:'
+    Caption = 'Hint:'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
@@ -530,7 +522,7 @@ object CnWizTipOfDayForm: TCnWizTipOfDayForm
     Top = 192
     Width = 75
     Height = 21
-    Caption = '下一条(&N)'
+    Caption = '&Next'
     Default = True
     TabOrder = 0
     OnClick = btnNextClick
@@ -541,7 +533,7 @@ object CnWizTipOfDayForm: TCnWizTipOfDayForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '关闭(&C)'
+    Caption = '&Close'
     ModalResult = 2
     TabOrder = 1
   end
@@ -584,12 +576,12 @@ object CnWizTipOfDayForm: TCnWizTipOfDayForm
           Width = 293
           Height = 29
           AutoSize = False
-          Caption = '你知道吗?'
+          Caption = 'Did You Know...?'
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
-          Font.Height = -27
-          Font.Name = 'Tahoma'
-          Font.Style = []
+          Font.Height = -29
+          Font.Name = 'Times New Roman'
+          Font.Style = [fsBold]
           ParentFont = False
         end
       end
@@ -610,7 +602,7 @@ object CnWizTipOfDayForm: TCnWizTipOfDayForm
     Top = 192
     Width = 145
     Height = 17
-    Caption = '总是在启动时显示本页'
+    Caption = 'Show Tips when Starting'
     TabOrder = 3
   end
 end

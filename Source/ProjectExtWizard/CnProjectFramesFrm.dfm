@@ -1,5 +1,5 @@
 inherited CnProjectFramesForm: TCnProjectFramesForm
-  Caption = 'Frames 列表'
+  Caption = 'Select Frame to Insert'
   ClientWidth = 606
   Icon.Data = {
     0000010001001010100000000000280100001600000028000000100000002000
@@ -21,24 +21,24 @@ inherited CnProjectFramesForm: TCnProjectFramesForm
     Width = 606
     Columns = <
       item
-        Caption = 'Frame 名称'
+        Caption = 'Frame Name'
         Width = 210
       end
       item
-        Caption = '类型'
+        Caption = 'Type'
         Width = 90
       end
       item
-        Caption = '工程'
+        Caption = 'Project'
         Width = 130
       end
       item
         Alignment = taRightJustify
-        Caption = '大小(Byte)'
+        Caption = 'Size(Byte)'
         Width = 100
       end
       item
-        Caption = '格式'
+        Caption = 'Format'
         Width = 72
       end>
     MultiSelect = False
@@ -60,12 +60,6 @@ inherited CnProjectFramesForm: TCnProjectFramesForm
     inherited btnSep5: TToolButton
       Visible = False
     end
-    inherited btnMatchStart: TToolButton
-      Hint = '匹配 Frame 名开头'
-    end
-    inherited btnMatchAny: TToolButton
-      Hint = '匹配 Frame 名所有位置'
-    end
     inherited btnHookIDE: TToolButton
       Visible = False
     end
@@ -84,33 +78,27 @@ inherited CnProjectFramesForm: TCnProjectFramesForm
   end
   inherited ActionList: TActionList
     inherited actOpen: TAction
-      Hint = '将所选 Frame 加入窗体'
+      Hint = 'Add Selected Frame to Form'
     end
     inherited actAttribute: TAction
-      Hint = '显示所选 Frame 的文件属性'
+      Hint = 'Show Property of Selected Frame File'
     end
     inherited actCopy: TAction
-      Hint = '复制所选 Frame 名称到剪贴板'
+      Hint = 'Copy Selected Frame Name to Clipboard'
     end
     inherited actSelectAll: TAction
       Caption = ''
-      Hint = ''
+      Hint = 'Select All Units'
     end
-    inherited actSelectNone: TAction
-      Caption = ''
-      Hint = ''
+    inherited actMatchStart: TAction
+      Caption = 'Match Frame Name &Start'
+      Hint = 'Match Frame Name &Start'
     end
-    inherited actSelectInvert: TAction
-      Caption = ''
-      Hint = ''
+    inherited actMatchAny: TAction
+      Hint = 'Match All Parts of Frame Name'
     end
-    inherited actHookIDE: TAction
-      Caption = ''
-      Hint = ''
-    end
-    inherited actQuery: TAction
-      Caption = ''
-      Hint = ''
+    inherited actClose: TAction
+      Caption = '&Exit'
     end
   end
 end

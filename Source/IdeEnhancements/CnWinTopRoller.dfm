@@ -1,18 +1,9 @@
-object CnTopRollerForm: TCnTopRollerForm
+inherited CnTopRollerForm: TCnTopRollerForm
   Left = 231
   Top = 73
   BorderStyle = bsDialog
-  Caption = '窗体置顶与折叠设置'
-  ClientHeight = 453
+  Caption = 'Caption Button Enhancements Settings'
   ClientWidth = 344
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
   PixelsPerInch = 96
   TextHeight = 13
   object grpMain: TGroupBox
@@ -20,21 +11,21 @@ object CnTopRollerForm: TCnTopRollerForm
     Top = 8
     Width = 329
     Height = 99
-    Caption = '按钮扩展设置(&B)'
+    Caption = '&Buttons Settings'
     TabOrder = 0
     object lblButtons: TLabel
       Left = 8
       Top = 16
-      Width = 204
+      Width = 203
       Height = 13
-      Caption = '在非模态窗口的标题栏上增加以下按钮'
+      Caption = 'Add Those Buttons to Non-Modal Window:'
     end
     object chkCaptionPacked: TCheckBox
       Left = 8
       Top = 54
       Width = 313
       Height = 17
-      Caption = '忽略标题栏文字宽度'
+      Caption = 'Ignore Caption Text Width (Always Show Buttons)'
       TabOrder = 3
     end
     object chkAnimate: TCheckBox
@@ -42,7 +33,7 @@ object CnTopRollerForm: TCnTopRollerForm
       Top = 74
       Width = 313
       Height = 17
-      Caption = '窗口折叠使用动画效果'
+      Caption = 'Animated Rolling'
       TabOrder = 4
     end
     object chkShowTop: TCheckBox
@@ -50,7 +41,7 @@ object CnTopRollerForm: TCnTopRollerForm
       Top = 34
       Width = 89
       Height = 17
-      Caption = '置顶'
+      Caption = 'Stay On Top'
       TabOrder = 0
     end
     object chkShowRoller: TCheckBox
@@ -58,7 +49,7 @@ object CnTopRollerForm: TCnTopRollerForm
       Top = 34
       Width = 89
       Height = 17
-      Caption = '折叠'
+      Caption = 'Roll'
       TabOrder = 1
     end
     object chkShowOptions: TCheckBox
@@ -66,7 +57,7 @@ object CnTopRollerForm: TCnTopRollerForm
       Top = 34
       Width = 105
       Height = 17
-      Caption = '设置'
+      Caption = 'Options'
       TabOrder = 2
     end
   end
@@ -75,14 +66,14 @@ object CnTopRollerForm: TCnTopRollerForm
     Top = 112
     Width = 329
     Height = 307
-    Caption = '窗体过滤设置(&F)'
+    Caption = '&Filters Settings'
     TabOrder = 1
     object chkFilter: TCheckBox
       Left = 8
       Top = 16
       Width = 313
       Height = 17
-      Caption = '启用自定义窗体类名过滤以阻止部分窗口显示扩展按钮'
+      Caption = 'Enable Window ClassName Filters to Disable Caption Buttons'
       TabOrder = 0
     end
     object ListView: TListView
@@ -93,11 +84,11 @@ object CnTopRollerForm: TCnTopRollerForm
       Checkboxes = True
       Columns = <
         item
-          Caption = '窗体类名'
+          Caption = 'Window ClassName'
           Width = 140
         end
         item
-          Caption = '说明'
+          Caption = 'Comment'
           Width = 152
         end>
       HideSelection = False
@@ -216,7 +207,7 @@ object CnTopRollerForm: TCnTopRollerForm
     Top = 425
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 2
@@ -227,7 +218,7 @@ object CnTopRollerForm: TCnTopRollerForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 3
   end
@@ -236,7 +227,7 @@ object CnTopRollerForm: TCnTopRollerForm
     Top = 425
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 4
     OnClick = btnHelpClick
   end
@@ -245,15 +236,15 @@ object CnTopRollerForm: TCnTopRollerForm
     Left = 264
     Top = 376
     object actReplace: TAction
-      Caption = '替换(&R)'
+      Caption = '&Replace'
       OnExecute = actReplaceExecute
     end
     object actAdd: TAction
-      Caption = '添加(&A)'
+      Caption = '&Add'
       OnExecute = actAddExecute
     end
     object actDelete: TAction
-      Caption = '删除(&D)'
+      Caption = '&Delete'
       OnExecute = actDeleteExecute
     end
   end

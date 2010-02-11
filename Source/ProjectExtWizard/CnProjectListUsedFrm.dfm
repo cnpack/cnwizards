@@ -1,7 +1,7 @@
 inherited CnProjectListUsedForm: TCnProjectListUsedForm
   Left = 289
   Top = 188
-  Caption = '被引用单元列表'
+  Caption = 'Used Unit List'
   ClientHeight = 349
   ClientWidth = 424
   Icon.Data = {
@@ -15,13 +15,12 @@ inherited CnProjectListUsedForm: TCnProjectListUsedForm
     FFFFF0B00000007FFFFFF000000000777777700000000000000000000000C001
     0000C0010000C0010000C0010000C0010000C0010000C0010000C0010000C001
     0000C0010000C0030000C0070000C00F0000C01F0000C03F0000FFFF0000}
-  OldCreateOrder = True
   PixelsPerInch = 96
   TextHeight = 13
   inherited pnlHeader: TPanel
     Width = 424
     inherited lblProject: TLabel
-      Caption = '路径(&P):'
+      Width = 42
       Visible = False
     end
     inherited edtMatchSearch: TEdit
@@ -37,11 +36,11 @@ inherited CnProjectListUsedForm: TCnProjectListUsedForm
     Height = 264
     Columns = <
       item
-        Caption = '单元名称'
+        Caption = 'Unit Name'
         Width = 250
       end
       item
-        Caption = '引用类型'
+        Caption = 'Uses Type'
         Width = 150
       end>
     OwnerData = True
@@ -57,7 +56,7 @@ inherited CnProjectListUsedForm: TCnProjectListUsedForm
         Width = 310
       end
       item
-        Text = '单元总数: 1'
+        Text = 'Unit: 1'
         Width = 110
       end>
   end
@@ -78,28 +77,22 @@ inherited CnProjectListUsedForm: TCnProjectListUsedForm
   end
   inherited ActionList: TActionList
     inherited actOpen: TAction
-      Hint = '搜索并打开所选的单元'
-    end
-    inherited actAttribute: TAction
-      Hint = '显示所选 Frame 的文件属性'
+      Hint = 'Search and Open Selected Unit'
     end
     inherited actCopy: TAction
-      Hint = '复制所选单元名称到剪贴板'
+      Hint = 'Copy Selected Unit Name to Clipboard'
     end
     inherited actSelectAll: TAction
-      Hint = '选择所有单元'
-    end
-    inherited actSelectNone: TAction
-      Hint = '取消选择单元'
-    end
-    inherited actSelectInvert: TAction
-      Hint = '反向选择单元'
+      Caption = 'Select A&ll Units'
+      Hint = 'Select All Units'
     end
     inherited actMatchStart: TAction
-      Hint = '匹配单元名开头'
+      Caption = 'Match Unit Name &Start'
+      Hint = 'Match Frame Name &Start'
     end
     inherited actMatchAny: TAction
-      Hint = '匹配单元名所有位置'
+      Caption = 'Match &All Parts of Unit Name'
+      Hint = 'Match &All Parts of Unit Name'
     end
     inherited actHookIDE: TAction
       Caption = ''
@@ -107,7 +100,10 @@ inherited CnProjectListUsedForm: TCnProjectListUsedForm
     end
     inherited actQuery: TAction
       Caption = ''
-      Hint = '打开多个单元时提示'
+      Hint = 'Prompt when Open More than ONE Unit.'
+    end
+    inherited actClose: TAction
+      Caption = '&Exit'
     end
   end
 end

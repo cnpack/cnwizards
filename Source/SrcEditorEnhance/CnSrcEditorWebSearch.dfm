@@ -2,7 +2,7 @@ inherited CnSrcEditorWebSearchForm: TCnSrcEditorWebSearchForm
   Left = 256
   Top = 156
   BorderStyle = bsDialog
-  Caption = '搜索设置'
+  Caption = 'Web Search Settings'
   ClientHeight = 301
   ClientWidth = 457
   OldCreateOrder = True
@@ -16,28 +16,28 @@ inherited CnSrcEditorWebSearchForm: TCnSrcEditorWebSearchForm
     Top = 8
     Width = 441
     Height = 257
-    Caption = '列表(&L)'
+    Caption = '&List'
     TabOrder = 0
     object lbl1: TLabel
       Left = 8
       Top = 176
-      Width = 28
+      Width = 37
       Height = 13
-      Caption = '标题:'
+      Caption = 'Caption'
     end
     object lbl2: TLabel
       Left = 192
       Top = 176
-      Width = 40
+      Width = 43
       Height = 13
-      Caption = '快捷键:'
+      Caption = 'ShortCut'
     end
     object lbl3: TLabel
       Left = 8
       Top = 203
-      Width = 309
+      Width = 281
       Height = 13
-      Caption = '搜索链接(可执行文件或 http 链接，%s 表示当前选择内容):'
+      Caption = 'Search URL(Filename or http link. %s mean selected text):'
     end
     object ListView: TListView
       Left = 8
@@ -46,15 +46,15 @@ inherited CnSrcEditorWebSearchForm: TCnSrcEditorWebSearchForm
       Height = 145
       Columns = <
         item
-          Caption = '标题'
+          Caption = 'Caption'
           Width = 80
         end
         item
-          Caption = '快捷键'
+          Caption = 'ShortCut'
           Width = 80
         end
         item
-          Caption = '搜索链接'
+          Caption = 'URL'
           Width = 180
         end>
       HideSelection = False
@@ -74,7 +74,7 @@ inherited CnSrcEditorWebSearchForm: TCnSrcEditorWebSearchForm
       Top = 16
       Width = 57
       Height = 21
-      Caption = '增加(&A)'
+      Caption = '&Add'
       TabOrder = 1
       OnClick = btnAddClick
     end
@@ -83,7 +83,7 @@ inherited CnSrcEditorWebSearchForm: TCnSrcEditorWebSearchForm
       Top = 41
       Width = 57
       Height = 21
-      Caption = '删除(&R)'
+      Caption = '&De&lete'
       TabOrder = 2
       OnClick = btnDeleteClick
     end
@@ -92,7 +92,7 @@ inherited CnSrcEditorWebSearchForm: TCnSrcEditorWebSearchForm
       Top = 66
       Width = 57
       Height = 21
-      Caption = '上移(&U)'
+      Caption = '&Up'
       TabOrder = 3
       OnClick = btnUpClick
     end
@@ -101,7 +101,7 @@ inherited CnSrcEditorWebSearchForm: TCnSrcEditorWebSearchForm
       Top = 90
       Width = 57
       Height = 21
-      Caption = '下移(&D)'
+      Caption = '&Down'
       TabOrder = 4
       OnClick = btnDownClick
     end
@@ -137,7 +137,7 @@ inherited CnSrcEditorWebSearchForm: TCnSrcEditorWebSearchForm
       Top = 115
       Width = 57
       Height = 21
-      Caption = '导入(&I)'
+      Caption = '&Import...'
       TabOrder = 5
       OnClick = btnImportClick
     end
@@ -146,7 +146,7 @@ inherited CnSrcEditorWebSearchForm: TCnSrcEditorWebSearchForm
       Top = 140
       Width = 57
       Height = 21
-      Caption = '导出(&X)'
+      Caption = 'E&xport...'
       TabOrder = 6
       OnClick = btnExportClick
     end
@@ -156,7 +156,7 @@ inherited CnSrcEditorWebSearchForm: TCnSrcEditorWebSearchForm
     Top = 273
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 1
@@ -167,7 +167,7 @@ inherited CnSrcEditorWebSearchForm: TCnSrcEditorWebSearchForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 2
   end
@@ -176,20 +176,20 @@ inherited CnSrcEditorWebSearchForm: TCnSrcEditorWebSearchForm
     Top = 273
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
   end
   object dlgOpen: TOpenDialog
     DefaultExt = 'xml'
-    Filter = 'Web 搜索设置文件(*.xml)|*.xml'
+    Filter = 'Web Search Settings File(*.xml)|*.xml'
     Options = [ofFileMustExist, ofEnableSizing]
     Left = 8
     Top = 272
   end
   object dlgSave: TSaveDialog
     DefaultExt = 'xml'
-    Filter = 'Web 搜索设置文件(*.xml)|*.xml'
+    Filter = 'Web Search Settings File(*.xml)|*.xml'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
     Left = 40
     Top = 272

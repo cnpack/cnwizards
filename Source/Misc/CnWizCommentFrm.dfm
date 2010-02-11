@@ -1,20 +1,11 @@
-object CnWizCommentForm: TCnWizCommentForm
+inherited CnWizCommentForm: TCnWizCommentForm
   Left = 273
   Top = 212
   ActiveControl = btnContinue
   BorderStyle = bsDialog
-  Caption = 'CnPack IDE 专家提示'
+  Caption = 'CnPack IDE Wizards Hint'
   ClientHeight = 219
   ClientWidth = 360
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   PixelsPerInch = 96
   TextHeight = 13
   object imgIcon: TImage
@@ -293,9 +284,9 @@ object CnWizCommentForm: TCnWizCommentForm
   object Label1: TLabel
     Left = 8
     Top = 7
-    Width = 29
+    Width = 26
     Height = 13
-    Caption = '提示:'
+    Caption = 'Hint:'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
@@ -331,7 +322,7 @@ object CnWizCommentForm: TCnWizCommentForm
     Top = 195
     Width = 97
     Height = 17
-    Caption = '不再显示本页'
+    Caption = 'Don'#39't Show'
     TabOrder = 1
   end
   object btnCancel: TButton
@@ -340,7 +331,7 @@ object CnWizCommentForm: TCnWizCommentForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 4
   end
@@ -349,7 +340,7 @@ object CnWizCommentForm: TCnWizCommentForm
     Top = 195
     Width = 97
     Height = 17
-    Caption = '关闭所有提示'
+    Caption = 'Disable All'
     TabOrder = 2
   end
   object btnContinue: TButton
@@ -357,7 +348,7 @@ object CnWizCommentForm: TCnWizCommentForm
     Top = 192
     Width = 75
     Height = 21
-    Caption = '继续(&O)'
+    Caption = 'C&ontinue'
     Default = True
     ModalResult = 1
     TabOrder = 3

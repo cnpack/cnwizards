@@ -2,7 +2,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
   Left = 218
   Top = 62
   BorderStyle = bsDialog
-  Caption = '代码嵌入设置'
+  Caption = 'Code Surround Setting'
   ClientHeight = 455
   ClientWidth = 440
   OldCreateOrder = True
@@ -16,7 +16,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
     Top = 8
     Width = 425
     Height = 145
-    Caption = '列表(&L)'
+    Caption = '&List'
     TabOrder = 0
     object ListView: TListView
       Left = 8
@@ -25,15 +25,15 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
       Height = 121
       Columns = <
         item
-          Caption = '标题'
+          Caption = 'Caption'
           Width = 125
         end
         item
-          Caption = '快捷键'
+          Caption = 'Shortcut'
           Width = 120
         end
         item
-          Caption = '缩进'
+          Caption = 'Indent'
           Width = 60
         end>
       HideSelection = False
@@ -53,7 +53,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
       Top = 16
       Width = 73
       Height = 21
-      Caption = '增加(&A)'
+      Caption = '&Add'
       TabOrder = 1
       OnClick = btnAddClick
     end
@@ -62,7 +62,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
       Top = 42
       Width = 73
       Height = 21
-      Caption = '删除(&R)'
+      Caption = '&Remove'
       TabOrder = 2
       OnClick = btnDeleteClick
     end
@@ -71,7 +71,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
       Top = 91
       Width = 73
       Height = 21
-      Caption = '导入(&I)'
+      Caption = '&Import'
       TabOrder = 5
       OnClick = btnImportClick
     end
@@ -80,7 +80,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
       Top = 116
       Width = 73
       Height = 21
-      Caption = '导出(&X)'
+      Caption = 'E&xport'
       TabOrder = 6
       OnClick = btnExportClick
     end
@@ -89,7 +89,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
       Top = 66
       Width = 34
       Height = 21
-      Caption = '上(&U)'
+      Caption = '&Up'
       TabOrder = 3
       OnClick = btnUpClick
     end
@@ -98,7 +98,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
       Top = 66
       Width = 34
       Height = 21
-      Caption = '下(&D)'
+      Caption = '&Down'
       TabOrder = 4
       OnClick = btnDownClick
     end
@@ -108,42 +108,42 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
     Top = 160
     Width = 425
     Height = 257
-    Caption = '代码嵌入项(&E)'
+    Caption = '&Surround Item'
     TabOrder = 1
     object lbl1: TLabel
       Left = 8
       Top = 20
-      Width = 28
+      Width = 41
       Height = 13
-      Caption = '标题:'
+      Caption = 'Caption:'
     end
     object lbl4: TLabel
       Left = 8
       Top = 44
-      Width = 40
+      Width = 45
       Height = 13
-      Caption = '快捷键:'
+      Caption = 'Shortcut:'
     end
     object lbl2: TLabel
       Left = 8
       Top = 93
-      Width = 28
+      Width = 29
       Height = 13
-      Caption = '头部:'
+      Caption = 'Head:'
     end
     object lbl5: TLabel
       Left = 8
       Top = 174
-      Width = 28
+      Width = 20
       Height = 13
-      Caption = '尾部:'
+      Caption = 'Tail:'
     end
     object lbl6: TLabel
       Left = 8
       Top = 70
-      Width = 40
+      Width = 28
       Height = 13
-      Caption = '代码块:'
+      Caption = 'Block:'
     end
     object lbl7: TLabel
       Left = 216
@@ -152,7 +152,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
       Height = 13
       Alignment = taRightJustify
       AutoSize = False
-      Caption = '块缩进级数:'
+      Caption = 'Indent Count:'
     end
     object lbl8: TLabel
       Left = 216
@@ -161,7 +161,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
       Height = 13
       Alignment = taRightJustify
       AutoSize = False
-      Caption = '相对缩进级数:'
+      Caption = 'Relative Indent:'
     end
     object lbl9: TLabel
       Left = 216
@@ -170,7 +170,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
       Height = 13
       Alignment = taRightJustify
       AutoSize = False
-      Caption = '相对缩进级数:'
+      Caption = 'Relative Indent:'
     end
     object edtCaption: TEdit
       Left = 56
@@ -196,7 +196,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
       Top = 66
       Width = 153
       Height = 22
-      Caption = '行块处理模式。'
+      Caption = 'Line Block Mode'
       TabOrder = 2
       OnClick = ControlChanged
     end
@@ -246,7 +246,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
       Top = 146
       Width = 153
       Height = 22
-      Caption = '自动缩进。'
+      Caption = 'Auto Indent'
       TabOrder = 5
       OnClick = ControlChanged
     end
@@ -266,7 +266,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
       Top = 227
       Width = 153
       Height = 22
-      Caption = '自动缩进。'
+      Caption = 'Auto Indent'
       TabOrder = 8
       OnClick = ControlChanged
     end
@@ -287,7 +287,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
     Top = 426
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 4
     OnClick = btnHelpClick
   end
@@ -296,7 +296,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
     Top = 426
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 2
@@ -307,20 +307,20 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 3
   end
   object dlgOpen: TOpenDialog
     DefaultExt = 'xml'
-    Filter = '代码嵌入设置文件(*.xml)|*.xml'
+    Filter = 'Code Surround Setting File(*.xml)|*.xml'
     Options = [ofFileMustExist, ofEnableSizing]
     Left = 8
     Top = 408
   end
   object dlgSave: TSaveDialog
     DefaultExt = 'xml'
-    Filter = '代码嵌入设置文件(*.xml)|*.xml'
+    Filter = 'Code Surround Setting File(*.xml)|*.xml'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
     Left = 40
     Top = 408

@@ -1,19 +1,11 @@
-object CnSourceDiffForm: TCnSourceDiffForm
+inherited CnSourceDiffForm: TCnSourceDiffForm
   Left = 272
   Top = 153
   Width = 661
   Height = 485
-  Caption = '源代码比较器'
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
+  Caption = 'Source Code Compare'
   Menu = MainMenu
   OldCreateOrder = True
-  Position = poScreenCenter
-  Scaled = False
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -109,9 +101,9 @@ object CnSourceDiffForm: TCnSourceDiffForm
             Top = 1
             Width = 42
             Height = 18
-            Hint = '设置文件1内容'
+            Hint = 'Set File 1 Content'
             Anchors = [akTop, akRight]
-            Caption = '文件'
+            Caption = 'File'
             TabOrder = 1
             OnClick = btnFileKind1Click
             Glyph.Data = {
@@ -135,7 +127,7 @@ object CnSourceDiffForm: TCnSourceDiffForm
             Top = 1
             Width = 14
             Height = 18
-            Hint = '打开文件历史记录'
+            Hint = 'Opened File History'
             Anchors = [akTop, akRight]
             TabOrder = 2
             OnClick = btnHistory1Click
@@ -195,9 +187,9 @@ object CnSourceDiffForm: TCnSourceDiffForm
             Top = 1
             Width = 42
             Height = 18
-            Hint = '设置文件2内容'
+            Hint = 'Set File 2 Content'
             Anchors = [akTop, akRight]
-            Caption = '文件'
+            Caption = 'File'
             TabOrder = 1
             OnClick = btnFileKind2Click
             Glyph.Data = {
@@ -221,7 +213,7 @@ object CnSourceDiffForm: TCnSourceDiffForm
             Top = 1
             Width = 14
             Height = 18
-            Hint = '打开文件历史记录'
+            Hint = 'Opened File History'
             Anchors = [akTop, akRight]
             TabOrder = 2
             OnClick = btnHistory2Click
@@ -387,7 +379,7 @@ object CnSourceDiffForm: TCnSourceDiffForm
       Left = 187
       Top = 0
       AutoSize = True
-      Caption = '拼合文件(&M)'
+      Caption = '&Merge File'
       Enabled = False
       ImageIndex = 47
       MenuItem = mnuMergeOptions
@@ -460,7 +452,7 @@ object CnSourceDiffForm: TCnSourceDiffForm
     Left = 48
     Top = 64
     object File1: TMenuItem
-      Caption = '文件(&F)'
+      Caption = '&File'
       object mnuOpen1: TMenuItem
         Action = actOpen1
       end
@@ -481,7 +473,7 @@ object CnSourceDiffForm: TCnSourceDiffForm
       end
     end
     object Options1: TMenuItem
-      Caption = '设置(&O)'
+      Caption = '&Options'
       object mnuIgnoreBlanks: TMenuItem
         Action = actIgnoreBlanks
       end
@@ -501,7 +493,7 @@ object CnSourceDiffForm: TCnSourceDiffForm
         Caption = '-'
       end
       object mnuHighlightColors: TMenuItem
-        Caption = '高亮显示颜色(&C)'
+        Caption = 'Highlight &Color'
         object Added1: TMenuItem
           Action = actAddColor
         end
@@ -520,7 +512,7 @@ object CnSourceDiffForm: TCnSourceDiffForm
       end
     end
     object mnuActions: TMenuItem
-      Caption = '操作(&P)'
+      Caption = 'O&peration'
       object mnuCompare: TMenuItem
         Action = actCompare
       end
@@ -546,7 +538,7 @@ object CnSourceDiffForm: TCnSourceDiffForm
         Caption = '-'
       end
       object mnuMergeOptions: TMenuItem
-        Caption = '拼合文件(&M)'
+        Caption = '&Merge File'
         Enabled = False
         ImageIndex = 47
         object mnuMergeFromFile1: TMenuItem
@@ -567,7 +559,7 @@ object CnSourceDiffForm: TCnSourceDiffForm
       end
     end
     object Help1: TMenuItem
-      Caption = '帮助(&H)'
+      Caption = '&Help'
       object Contents1: TMenuItem
         Action = actHelp
       end
@@ -575,9 +567,9 @@ object CnSourceDiffForm: TCnSourceDiffForm
   end
   object OpenDialog1: TOpenDialog
     Filter = 
-      'Delphi源文件(*.pas;*.dpr)|*.pas;*.dpr|C++Builder源文件(*.c;*.cpp' +
-      ';*.h;*.hpp)|*.c;*.cpp;*.h;*.hpp|窗体文件(*.dfm;*.xfm)|*.dfm;*.xf' +
-      'm|所有文件(*.*)|*.*'
+      'Delphi Source Files(*.pas;*.dpr)|*.pas;*.dpr|C++Builder Source F' +
+      'iles(*.c;*.cpp;*.h;*.hpp)|*.c;*.cpp;*.h;*.hpp|Form Files(*.dfm;*' +
+      '.xfm)|*.dfm;*.xfm|Any File(*.*)|*.*'
     Options = [ofReadOnly, ofHideReadOnly, ofNoChangeDir, ofPathMustExist, ofFileMustExist]
     Left = 88
     Top = 64
@@ -601,9 +593,9 @@ object CnSourceDiffForm: TCnSourceDiffForm
   end
   object SaveDialog: TSaveDialog
     Filter = 
-      'Delphi源文件(*.pas;*.dpr)|*.pas;*.dpr|C++Builder源文件(*.c;*.cpp' +
-      ';*.h;*.hpp)|*.c;*.cpp;*.h;*.hpp|窗体文件(*.dfm;*.xfm)|*.dfm;*.xf' +
-      'm|所有文件(*.*)|*.*'
+      'Delphi Source Files(*.pas;*.dpr)|*.pas;*.dpr|C++Builder Source F' +
+      'iles(*.c;*.cpp;*.h;*.hpp)|*.c;*.cpp;*.h;*.hpp|Form Files(*.dfm;*' +
+      '.xfm)|*.dfm;*.xfm|Any File(*.*)|*.*'
     Options = [ofOverwritePrompt, ofHideReadOnly]
     Left = 168
     Top = 64
@@ -615,176 +607,176 @@ object CnSourceDiffForm: TCnSourceDiffForm
     Top = 64
     object actOpen1: TAction
       Category = 'File'
-      Caption = '打开文件(&1)...'
-      Hint = '打开文件1'
+      Caption = 'Open F&ile...'
+      Hint = 'Open File 1'
       ShortCut = 16433
       OnExecute = actOpen1Execute
     end
     object actOpen2: TAction
       Category = 'File'
-      Caption = '打开文件(&2)...'
-      Hint = '打开文件2'
+      Caption = 'Open Fi&le...'
+      Hint = 'Open File 2'
       ShortCut = 16434
       OnExecute = actOpen2Execute
     end
     object actCompareEx: TAction
       Category = 'Actions'
-      Caption = '刷新文件并重新比较(&R)'
-      Hint = '刷新文件并重新比较'
+      Caption = '&Refresh and Re-compare'
+      Hint = 'Refresh and Re-compare'
       ImageIndex = 51
       ShortCut = 16504
       OnExecute = actCompareExExecute
     end
     object actGoto: TAction
       Category = 'Actions'
-      Caption = '转到源代码编辑器中(&J)'
-      Hint = '转到源代码编辑器中'
+      Caption = 'Return &to Source Code Editor'
+      Hint = 'Return to Source Code Editor'
       ImageIndex = 34
       ShortCut = 16458
       OnExecute = actGotoExecute
     end
     object actSaveMerged: TAction
       Category = 'File'
-      Caption = '保存拼合后的文件(&S)...'
-      Hint = '保存拼合后的文件'
+      Caption = '&Save Merged File...'
+      Hint = 'Save Merged File'
       ImageIndex = 6
       ShortCut = 16467
       OnExecute = actSaveMergedExecute
     end
     object actClose: TAction
       Category = 'File'
-      Caption = '关闭(&X)'
-      Hint = '关闭'
+      Caption = 'E&xit'
+      Hint = 'Exit'
       ImageIndex = 0
       ShortCut = 16499
       OnExecute = actCloseExecute
     end
     object actIgnoreBlanks: TAction
       Category = 'Options'
-      Caption = '忽略空白字符(&B)'
-      Hint = '忽略空白字符'
+      Caption = 'Ignore &Blank Space'
+      Hint = 'Ignore Blank Space'
       ShortCut = 16450
       OnExecute = actIgnoreBlanksExecute
     end
     object actIgnoreCase: TAction
       Category = 'Options'
-      Caption = '忽略大小写(&I)'
-      Hint = '忽略大小写'
+      Caption = '&Ignore Case'
+      Hint = 'Ignore Case'
       ShortCut = 16457
       OnExecute = actIgnoreCaseExecute
     end
     object actShowDiffOnly: TAction
       Category = 'Options'
-      Caption = '只显示不同之处(&D)'
-      Hint = '只显示不同之处'
+      Caption = 'Only &Difference'
+      Hint = 'Only Difference'
       ShortCut = 16452
       OnExecute = actShowDiffOnlyExecute
     end
     object actSplitHorizontally: TAction
       Category = 'Options'
-      Caption = '水平分割(&H)'
-      Hint = '水平分割'
+      Caption = '&Horizontal Split'
+      Hint = 'Horizontal Split'
       ImageIndex = 30
       ShortCut = 16456
       OnExecute = actSplitHorizontallyExecute
     end
     object actAddColor: TAction
       Category = 'Options'
-      Caption = '新增的行(&A)...'
-      Hint = '设置新增的行颜色'
+      Caption = '&Added Line'
+      Hint = 'Set Color of Added Line'
       OnExecute = actAddColorExecute
     end
     object actModColor: TAction
       Category = 'Options'
-      Caption = '修改的行(&M)...'
-      Hint = '设置修改的行颜色'
+      Caption = '&Modified Line'
+      Hint = 'Set Color of Modified Line'
       OnExecute = actModColorExecute
     end
     object actDelColor: TAction
       Category = 'Options'
-      Caption = '删除的行(&D)...'
-      Hint = '设置删除的行颜色'
+      Caption = 'Deleted Line'
+      Hint = 'Set Color of Deleted Line'
       OnExecute = actDelColorExecute
     end
     object actFont: TAction
       Category = 'Options'
-      Caption = '字体(&F)...'
-      Hint = '设置字体'
+      Caption = '&Font...'
+      Hint = 'Set Font'
       ImageIndex = 29
       ShortCut = 16454
       OnExecute = actFontExecute
     end
     object actCompare: TAction
       Category = 'Actions'
-      Caption = '源代码比较(&C)'
-      Hint = '源代码比较'
+      Caption = 'Source Code &Compare'
+      Hint = 'Source Code Compare'
       ImageIndex = 39
       ShortCut = 120
       OnExecute = actCompareExecute
     end
     object actCancel: TAction
       Category = 'Actions'
-      Caption = '中断比较(&N)'
+      Caption = 'Abort Compariso&n'
       Enabled = False
-      Hint = '中断比较'
+      Hint = 'Abort Comparison'
       ImageIndex = 50
       ShortCut = 16497
       OnExecute = actCancelExecute
     end
     object actMergeFromFile1: TAction
       Category = 'Actions'
-      Caption = '以左/上文件为主(&L)'
-      Hint = '以左/上文件为主进行拼合'
+      Caption = 'Top/&Left File is Primary'
+      Hint = 'Merge primarily for top/left file'
       OnExecute = actMergeFromExecute
     end
     object actMergeFromFile2: TAction
       Category = 'Actions'
-      Caption = '以右/下文件为主(&R)'
-      Hint = '以右/下文件为主进行拼合'
+      Caption = 'Bottom/&Right File is Primary'
+      Hint = 'Merge primarily for bottom/right file'
       OnExecute = actMergeFromExecute
     end
     object actMergeFromNeither: TAction
       Category = 'Actions'
-      Caption = '两个文件的交集(&R)'
-      Hint = '两个文件的交集'
+      Caption = 'Inte&rsection of the Two Files'
+      Hint = 'Intersection of the Two Files'
       OnExecute = actMergeFromExecute
     end
     object actMergeFocusedText: TAction
       Category = 'Actions'
-      Caption = '拼合当前文本(&M)'
-      Hint = '拼合当前文本'
+      Caption = '&Merge Current Text'
+      Hint = 'Merge Current Text'
       ImageIndex = 46
       ShortCut = 16461
       OnExecute = actMergeFocusedTextExecute
     end
     object actEditFocusedText: TAction
       Category = 'Actions'
-      Caption = '编辑当前文本(&E)'
-      Hint = '编辑当前文本'
+      Caption = '&Edit Current Text'
+      Hint = 'Edit Current Text'
       ImageIndex = 12
       ShortCut = 16453
       OnExecute = actEditFocusedTextExecute
     end
     object actHelp: TAction
       Category = 'Help'
-      Caption = '显示帮助(&H)'
-      Hint = '显示帮助'
+      Caption = 'Display &Help'
+      Hint = 'Display Help'
       ImageIndex = 1
       ShortCut = 112
       OnExecute = actHelpExecute
     end
     object actNextDiff: TAction
       Category = 'Actions'
-      Caption = '下一处不同(&N)'
-      Hint = '下一处不同'
+      Caption = '&Next Difference'
+      Hint = 'Next Difference'
       ImageIndex = 45
       ShortCut = 16424
       OnExecute = actNextDiffExecute
     end
     object actPrioDiff: TAction
       Category = 'Actions'
-      Caption = '上一处不同(&P)'
-      Hint = '上一处不同'
+      Caption = '&Previous Difference'
+      Hint = 'Previous Difference'
       ImageIndex = 44
       ShortCut = 16422
       OnExecute = actPrioDiffExecute
@@ -796,20 +788,20 @@ object CnSourceDiffForm: TCnSourceDiffForm
     Left = 8
     Top = 112
     object pmiDiskFile1: TMenuItem
-      Caption = '存盘文件(&S)'
+      Caption = '&Save File'
       Checked = True
       RadioItem = True
       OnClick = pmiDiskFile1Click
     end
     object pmiEditorBuff1: TMenuItem
       Tag = 1
-      Caption = '编辑器内存缓冲区(&E)'
+      Caption = '&Editor Buffer'
       RadioItem = True
       OnClick = pmiDiskFile1Click
     end
     object pmiBakFile1: TMenuItem
       Tag = 2
-      Caption = '备份文件(&B)'
+      Caption = '&Backup File'
       RadioItem = True
       OnClick = pmiDiskFile1Click
     end
@@ -832,29 +824,29 @@ object CnSourceDiffForm: TCnSourceDiffForm
     Left = 88
     Top = 112
     object pmiDiskFile2: TMenuItem
-      Caption = '存盘文件(&S)'
+      Caption = '&Save File'
       Checked = True
       RadioItem = True
       OnClick = pmiDiskFile2Click
     end
     object pmiEditorBuff2: TMenuItem
       Tag = 1
-      Caption = '编辑器内存缓冲区(&E)'
+      Caption = '&Editor Buffer'
       RadioItem = True
       OnClick = pmiDiskFile2Click
     end
     object pmiBakFile2: TMenuItem
       Tag = 2
-      Caption = '备份文件(&B)'
+      Caption = '&Backup File'
       RadioItem = True
       OnClick = pmiDiskFile2Click
     end
   end
   object OpenDialog2: TOpenDialog
     Filter = 
-      'Delphi源文件(*.pas;*.dpr)|*.pas;*.dpr|C++Builder源文件(*.c;*.cpp' +
-      ';*.h;*.hpp)|*.c;*.cpp;*.h;*.hpp|窗体文件(*.dfm;*.xfm)|*.dfm;*.xf' +
-      'm|所有文件(*.*)|*.*'
+      'Delphi Source Files(*.pas;*.dpr)|*.pas;*.dpr|C++Builder Source F' +
+      'iles(*.c;*.cpp;*.h;*.hpp)|*.c;*.cpp;*.h;*.hpp|Form Files(*.dfm;*' +
+      '.xfm)|*.dfm;*.xfm|Any File(*.*)|*.*'
     Options = [ofReadOnly, ofHideReadOnly, ofNoChangeDir, ofPathMustExist, ofFileMustExist]
     Left = 536
     Top = 72

@@ -107,17 +107,11 @@ inherited CnListCompForm: TCnListCompForm
     000FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF000
     000FF000000FFFFFFFFFFFFFFFFFFF3FFCFFFF3FFCFFFC0FF03FFC0FF03FF003
     C00FF003C00FFC00F003FC00F003FF03FC0FFF03FC0FFFCFFF3FFFCFFF3F}
-  OldCreateOrder = True
   PixelsPerInch = 96
   TextHeight = 13
   inherited pnlHeader: TPanel
     Width = 542
-    inherited lblSearch: TLabel
-      Width = 24
-      Caption = '&Find:'
-    end
     inherited lblProject: TLabel
-      Caption = 'Â·¾¶(&P):'
       Visible = False
     end
     inherited edtMatchSearch: TEdit
@@ -182,12 +176,6 @@ inherited CnListCompForm: TCnListCompForm
     inherited btnSelectAll: TToolButton
       Hint = 'Select All Components'
     end
-    inherited btnSelectNone: TToolButton
-      Hint = 'Cancel Selection'
-    end
-    inherited btnSelectInvert: TToolButton
-      Hint = 'Inverse Selection'
-    end
     inherited btnMatchStart: TToolButton
       Hint = 'Match Start'
     end
@@ -202,17 +190,8 @@ inherited CnListCompForm: TCnListCompForm
     end
   end
   inherited ActionList: TActionList
-    inherited actFont: TAction
-      Caption = '&Font'
-      Hint = 'Change List Font'
-    end
-    inherited actHelp: TAction
-      Caption = '&Help'
-      Hint = 'Display Help'
-    end
     inherited actClose: TAction
       Caption = '&Exit'
-      Hint = 'Close Window'
     end
   end
 end

@@ -1,27 +1,19 @@
-object CnImportDirForm: TCnImportDirForm
+inherited CnImportDirForm: TCnImportDirForm
   Left = 246
   Top = 187
   BorderStyle = bsDialog
-  Caption = '导入目录结构'
+  Caption = 'Import Directories'
   ClientHeight = 171
   ClientWidth = 371
-  Color = clBtnFace
-  Font.Charset = GB2312_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -12
-  Font.Name = '宋体'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
   PixelsPerInch = 96
-  TextHeight = 12
+  TextHeight = 13
   object btnHelp: TButton
     Left = 286
     Top = 140
     Width = 75
     Height = 21
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 2
     OnClick = btnHelpClick
   end
@@ -30,7 +22,7 @@ object CnImportDirForm: TCnImportDirForm
     Top = 140
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 0
@@ -41,7 +33,7 @@ object CnImportDirForm: TCnImportDirForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 1
   end
@@ -50,20 +42,20 @@ object CnImportDirForm: TCnImportDirForm
     Top = 8
     Width = 353
     Height = 121
-    Caption = '导入目录结构'
+    Caption = 'Import Directories'
     TabOrder = 3
     object lblDir: TLabel
       Left = 16
       Top = 23
-      Width = 36
-      Height = 12
-      Caption = '目录：'
+      Width = 17
+      Height = 13
+      Caption = 'Dir:'
     end
     object edtDir: TEdit
       Left = 56
       Top = 19
       Width = 249
-      Height = 20
+      Height = 21
       TabOrder = 0
     end
     object btnSelectDir: TButton
@@ -80,7 +72,7 @@ object CnImportDirForm: TCnImportDirForm
       Top = 54
       Width = 97
       Height = 17
-      Caption = '忽略子目录名：'
+      Caption = 'Ignore this Dir:'
       TabOrder = 2
       OnClick = chkIngoreDirClick
     end
@@ -88,8 +80,8 @@ object CnImportDirForm: TCnImportDirForm
       Left = 120
       Top = 52
       Width = 217
-      Height = 20
-      ItemHeight = 12
+      Height = 21
+      ItemHeight = 13
       TabOrder = 3
       Items.Strings = (
         'CVS')
@@ -99,7 +91,7 @@ object CnImportDirForm: TCnImportDirForm
       Top = 86
       Width = 289
       Height = 17
-      Caption = '根据子目录名自动生成描述文件'
+      Caption = 'Auto Generate Readme File by Directory Name'
       TabOrder = 4
       OnClick = chkIngoreDirClick
     end

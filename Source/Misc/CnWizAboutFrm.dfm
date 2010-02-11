@@ -1,20 +1,11 @@
-object CnWizAboutForm: TCnWizAboutForm
+inherited CnWizAboutForm: TCnWizAboutForm
   Left = 235
   Top = 126
   ActiveControl = btnOK
   BorderStyle = bsDialog
-  Caption = '关于 CnPack 专家包'
+  Caption = 'About CnPack IDE Wizards'
   ClientHeight = 276
   ClientWidth = 384
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
-  OldCreateOrder = False
-  Position = poScreenCenter
-  Scaled = False
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
@@ -28,11 +19,11 @@ object CnWizAboutForm: TCnWizAboutForm
   object Label2: TLabel
     Left = 96
     Top = 8
-    Width = 150
+    Width = 164
     Height = 19
-    Caption = 'CnPack IDE 专家包'
+    Caption = 'CnPack IDE Wizards'
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clBlack
+    Font.Color = clWindowText
     Font.Height = -16
     Font.Name = 'Tahoma'
     Font.Style = [fsBold]
@@ -41,17 +32,17 @@ object CnWizAboutForm: TCnWizAboutForm
   object Label4: TLabel
     Left = 96
     Top = 68
-    Width = 184
+    Width = 173
     Height = 13
-    Caption = '版权所有: 2001-2010 CnPack 开发组'
+    Caption = 'Copyright: 2001-2010 CnPack Team'
   end
   object lblWeb: TLabel
     Left = 96
     Top = 168
-    Width = 144
+    Width = 160
     Height = 13
     Cursor = crHandPoint
-    Caption = '主页: http://www.cnpack.org'
+    Caption = 'WebSite: http://www.cnpack.org'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlue
     Font.Height = -11
@@ -66,7 +57,7 @@ object CnWizAboutForm: TCnWizAboutForm
     Width = 127
     Height = 13
     Cursor = crHandPoint
-    Caption = '邮件: master@cnpack.org'
+    Caption = 'Email: master@cnpack.org'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlue
     Font.Height = -11
@@ -78,18 +69,18 @@ object CnWizAboutForm: TCnWizAboutForm
   object lblVersion: TLabel
     Left = 96
     Top = 42
-    Width = 23
+    Width = 20
     Height = 13
-    Caption = 'Ver: '
+    Caption = 'Ver:'
     Visible = False
   end
   object lblBbs: TLabel
     Left = 96
     Top = 184
-    Width = 137
+    Width = 143
     Height = 13
     Cursor = crHandPoint
-    Caption = '论坛: http://bbs.cnpack.org'
+    Caption = 'Forum: http://bbs.cnpack.org'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlue
     Font.Height = -11
@@ -108,12 +99,13 @@ object CnWizAboutForm: TCnWizAboutForm
   object Label3: TLabel
     Left = 96
     Top = 88
-    Width = 276
+    Width = 211
     Height = 65
     Caption = 
-      '这一软件是自由软件，您可以自由地使用它而无须'#13#10'支付任何费用，您也' +
-      '可以以任何形式对它进行拷贝、'#13#10'传播，但不得对其收费。源代码可以从' +
-      '网站上获得。'#13#10#13#10'更多信息请查看“授权协议”文件。'
+      'This is a freeware, you can use it freely '#13#10'without any fee. You' +
+      ' can copy or distribute '#13#10'it in any form, without any fee. The s' +
+      'ource '#13#10'code can be obtained from Internet. For '#13#10'more informati' +
+      'on please see the license file.'
   end
   object imgDonation: TImage
     Left = 328
@@ -121,7 +113,7 @@ object CnWizAboutForm: TCnWizAboutForm
     Width = 48
     Height = 48
     Cursor = crHandPoint
-    Hint = '向 CnPack 公益基金提供网上捐助'
+    Hint = 'Donate to CnPack Foundation'
     ParentShowHint = False
     Picture.Data = {
       07544269746D6170361B0000424D361B00000000000036000000280000003000
@@ -349,10 +341,10 @@ object CnWizAboutForm: TCnWizAboutForm
   object lblSource: TLabel
     Left = 96
     Top = 200
-    Width = 178
+    Width = 215
     Height = 13
     Cursor = crHandPoint
-    Caption = '源码: http://cnpack.googlecode.com'
+    Caption = 'Source Code: http://cnpack.googlecode.com'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlue
     Font.Height = -11
@@ -367,7 +359,7 @@ object CnWizAboutForm: TCnWizAboutForm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '关闭(&C)'
+    Caption = '&Close'
     Default = True
     ModalResult = 1
     TabOrder = 3
@@ -377,7 +369,7 @@ object CnWizAboutForm: TCnWizAboutForm
     Top = 248
     Width = 163
     Height = 21
-    Caption = '错误报告及建议(&R)'
+    Caption = 'Bug &Report and Suggestion'
     TabOrder = 2
     OnClick = btnReportClick
   end
@@ -938,7 +930,7 @@ object CnWizAboutForm: TCnWizAboutForm
     Top = 248
     Width = 75
     Height = 21
-    Caption = '协议(&L)'
+    Caption = '&License'
     TabOrder = 1
     OnClick = btnLicenseClick
   end
