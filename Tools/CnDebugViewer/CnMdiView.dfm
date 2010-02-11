@@ -6,10 +6,10 @@ object CnMsgChild: TCnMsgChild
   ActiveControl = cbbSearch
   BorderIcons = [biSystemMenu, biMaximize]
   Color = clBtnFace
-  Font.Charset = GB2312_CHARSET
+  Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -12
-  Font.Name = '宋体'
+  Font.Height = -11
+  Font.Name = 'Tahoma'
   Font.Style = []
   FormStyle = fsMDIChild
   OldCreateOrder = False
@@ -21,7 +21,7 @@ object CnMsgChild: TCnMsgChild
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   PixelsPerInch = 96
-  TextHeight = 12
+  TextHeight = 13
   object splDetail: TSplitter
     Left = 0
     Top = 306
@@ -43,7 +43,7 @@ object CnMsgChild: TCnMsgChild
     Top = 0
     Width = 175
     Height = 306
-    Hint = '计时信息显示区'
+    Hint = 'Timing Display'
     Align = alRight
     Columns = <
       item
@@ -51,11 +51,11 @@ object CnMsgChild: TCnMsgChild
         Width = 20
       end
       item
-        Caption = '次数'
+        Caption = 'Cnt'
         Width = 37
       end
       item
-        Caption = '耗时us'
+        Caption = 'Time(us)'
         Width = 64
       end
       item
@@ -125,10 +125,10 @@ object CnMsgChild: TCnMsgChild
           Left = 0
           Top = 0
           Width = 49
-          Height = 20
-          Hint = '根据信息层次过滤'
+          Height = 21
+          Hint = 'Filter by Level'
           Style = csDropDownList
-          ItemHeight = 12
+          ItemHeight = 13
           ParentShowHint = False
           ShowHint = True
           TabOrder = 0
@@ -148,10 +148,10 @@ object CnMsgChild: TCnMsgChild
           Left = 0
           Top = 0
           Width = 81
-          Height = 20
-          Hint = '根据线程过滤'
+          Height = 21
+          Hint = 'Filter by Thread'
           Style = csDropDownList
-          ItemHeight = 12
+          ItemHeight = 13
           ParentShowHint = False
           ShowHint = True
           TabOrder = 0
@@ -171,7 +171,7 @@ object CnMsgChild: TCnMsgChild
           Top = 0
           Width = 23
           Height = 22
-          Hint = '查找信息内容'
+          Hint = 'Search Text'
           Anchors = [akTop, akRight]
           Flat = True
           Glyph.Data = {
@@ -217,10 +217,10 @@ object CnMsgChild: TCnMsgChild
           Left = 8
           Top = 0
           Width = 169
-          Height = 20
-          Hint = '输入待查找内容再回车可在信息中进行查找'
+          Height = 21
+          Hint = 'Enter Words and Press Enter to Search'
           Anchors = [akLeft, akTop, akRight]
-          ItemHeight = 12
+          ItemHeight = 13
           ParentShowHint = False
           ShowHint = True
           TabOrder = 0
@@ -240,10 +240,10 @@ object CnMsgChild: TCnMsgChild
           Left = 0
           Top = 0
           Width = 73
-          Height = 20
-          Hint = '根据信息类型过滤'
+          Height = 21
+          Hint = 'Filter by Type'
           Style = csDropDownList
-          ItemHeight = 12
+          ItemHeight = 13
           ParentShowHint = False
           ShowHint = True
           TabOrder = 0
@@ -261,9 +261,9 @@ object CnMsgChild: TCnMsgChild
         object Label1: TLabel
           Left = 6
           Top = 3
-          Width = 24
-          Height = 12
-          Caption = '查找'
+          Width = 20
+          Height = 13
+          Caption = 'Find'
         end
       end
       object pnlTag: TPanel
@@ -279,9 +279,9 @@ object CnMsgChild: TCnMsgChild
           Left = 0
           Top = 0
           Width = 81
-          Height = 20
-          Hint = '根据 Tag 过滤'
-          ItemHeight = 12
+          Height = 21
+          Hint = 'Filter by Tag'
+          ItemHeight = 13
           ParentShowHint = False
           ShowHint = True
           TabOrder = 0
@@ -324,7 +324,7 @@ object CnMsgChild: TCnMsgChild
       Top = 0
       Width = 789
       Height = 84
-      Hint = '详细信息显示区'
+      Hint = 'Detailed Display'
       Align = alClient
       ParentShowHint = False
       ReadOnly = True
@@ -349,11 +349,6 @@ object CnMsgChild: TCnMsgChild
     end
     object D1: TMenuItem
       Action = CnMainViewer.actClear
-    end
-    object A2: TMenuItem
-      Caption = '-'
-      Hint = '显示关于信息'
-      ImageIndex = 18
     end
     object B1: TMenuItem
       Action = CnMainViewer.actBookmark

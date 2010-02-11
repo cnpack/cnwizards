@@ -84,7 +84,6 @@ type
     X1: TMenuItem;
     F1: TMenuItem;
     B1: TMenuItem;
-    A2: TMenuItem;
     N1: TMenuItem;
     N2: TMenuItem;
     MenuDropBookmark: TMenuItem;

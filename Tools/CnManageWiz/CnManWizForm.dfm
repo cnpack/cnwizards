@@ -3,12 +3,12 @@ object CnManageWizardForm: TCnManageWizardForm
   Top = 117
   Width = 660
   Height = 481
-  Caption = 'CnPack IDE 专家管理工具'
+  Caption = 'CnPack IDE External Wizard Management'
   Color = clBtnFace
-  Font.Charset = GB2312_CHARSET
+  Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -12
-  Font.Name = '宋体'
+  Font.Height = -11
+  Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
@@ -16,7 +16,7 @@ object CnManageWizardForm: TCnManageWizardForm
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   PixelsPerInch = 96
-  TextHeight = 12
+  TextHeight = 13
   object bvl1: TBevel
     Left = 0
     Top = 73
@@ -45,19 +45,21 @@ object CnManageWizardForm: TCnManageWizardForm
     object lbl2: TLabel
       Left = 52
       Top = 36
-      Width = 354
-      Height = 12
+      Width = 351
+      Height = 13
       Alignment = taCenter
-      Caption = 'CnPack IDE 专家包 - 通过注册表对 IDE 外部专家进行管理的工具'
+      Caption = 
+        'CnPack IDE Wizards - IDE External Wizard Registration Management' +
+        ' Tool'
       Layout = tlCenter
     end
     object lbl1: TLabel
       Left = 16
       Top = 16
-      Width = 138
-      Height = 12
+      Width = 199
+      Height = 13
       Alignment = taCenter
-      Caption = 'CnPack IDE 专家管理工具'
+      Caption = 'CnPack IDE External Wizard Management'
       Layout = tlCenter
     end
     object img1: TImage
@@ -174,7 +176,7 @@ object CnManageWizardForm: TCnManageWizardForm
     Width = 75
     Height = 21
     Anchors = [akLeft, akBottom]
-    Caption = '关于(&A)'
+    Caption = '&About'
     TabOrder = 2
     OnClick = btnAboutClick
   end
@@ -194,7 +196,7 @@ object CnManageWizardForm: TCnManageWizardForm
     Height = 21
     Anchors = [akRight, akBottom]
     Cancel = True
-    Caption = '关闭(&C)'
+    Caption = '&Close'
     ModalResult = 1
     TabOrder = 4
     OnClick = btnCloseClick
@@ -356,11 +358,11 @@ object CnManageWizardForm: TCnManageWizardForm
         Checkboxes = True
         Columns = <
           item
-            Caption = '专家名'
+            Caption = 'Wizard Name'
             Width = 116
           end
           item
-            Caption = '路径及文件名'
+            Caption = 'Wizard File'
             Width = 318
           end>
         ColumnClick = False
@@ -380,83 +382,83 @@ object CnManageWizardForm: TCnManageWizardForm
     Left = 580
     Top = 88
     object actRefresh: TAction
-      Caption = '重新载入(&R)'
-      Hint = '重新载入当前 IDE 的专家设置'
+      Caption = '&Reload'
+      Hint = 'Reload Registration Information of Current IDE'
       ImageIndex = 0
       OnExecute = actRefreshExecute
     end
     object actSave: TAction
-      Caption = '全部保存(&S)'
-      Hint = '保存全部 IDE 中所作的修改'
+      Caption = '&Save'
+      Hint = 'Save All Registration Information'
       ImageIndex = 1
       OnExecute = actSaveExecute
     end
     object actAdd: TAction
-      Caption = '新增专家(&W)...'
-      Hint = '手工添加一新专家'
+      Caption = 'Add &Wizard...'
+      Hint = 'Add a New Wizard'
       ImageIndex = 2
       OnExecute = actAddExecute
     end
     object actRemove: TAction
-      Caption = '删除专家(&U)'
-      Hint = '删除选中的专家'
+      Caption = '&UnRegister Wizard'
+      Hint = 'UnRegister Wizard'
       ImageIndex = 3
       OnExecute = actRemoveExecute
     end
     object actSelectAll: TAction
-      Caption = '全选(&A)'
-      Hint = '全部使能'
+      Caption = 'Select &All'
+      Hint = 'Enable All'
       ImageIndex = 4
       OnExecute = actSelectAllExecute
     end
     object actSelectNone: TAction
-      Caption = '全不选(&N)'
-      Hint = '全部禁用'
+      Caption = 'Select &None'
+      Hint = 'Disable All'
       ImageIndex = 5
       OnExecute = actSelectNoneExecute
     end
     object actSelectInverse: TAction
-      Caption = '反向选择(&I)'
-      Hint = '反向选择'
+      Caption = 'Select &Inverse'
+      Hint = 'Select Inverse'
       ImageIndex = 6
       OnExecute = actSelectInverseExecute
     end
     object actHelp: TAction
-      Caption = '帮助(&H)'
-      Hint = '显示帮助内容'
+      Caption = '&Help'
+      Hint = 'Show Help'
       ImageIndex = 7
       ShortCut = 112
       OnExecute = actHelpExecute
     end
     object actShowProp: TAction
-      Caption = '显示专家文件属性(&D)'
-      Hint = '显示专家文件属性'
+      Caption = '&Display File Properties'
+      Hint = 'Display File Properties'
       ImageIndex = 8
       OnExecute = actShowPropExecute
     end
     object actExplore: TAction
-      Caption = '打开所在目录(&E)'
-      Hint = '打开专家文件所在目录'
+      Caption = 'Open Dir&ectory'
+      Hint = 'Open Directory'
       ImageIndex = 11
       OnExecute = actExploreExecute
     end
     object actMoveUp: TAction
-      Caption = '上移'
-      Hint = '上移'
+      Caption = 'Move Up'
+      Hint = 'Move Up'
       ImageIndex = 9
       Visible = False
       OnExecute = actMoveUpExecute
     end
     object actMoveDown: TAction
-      Caption = '下移'
-      Hint = '下移'
+      Caption = 'Move Down'
+      Hint = 'Move Down'
       ImageIndex = 10
       Visible = False
       OnExecute = actMoveDownExecute
     end
     object actShellMenu: TAction
-      Caption = '外壳关联菜单(&L)'
-      Hint = '显示资源管理器中的外壳关联菜单'
+      Caption = 'She&ll Menu'
+      Hint = 'Popup Shell Menu of Explorer'
       ImageIndex = 12
       OnExecute = actShellMenuExecute
     end
@@ -1540,7 +1542,7 @@ object CnManageWizardForm: TCnManageWizardForm
       000000000000}
   end
   object dlgOpenWizard: TOpenDialog
-    Filter = '专家文件(*.DLL)|*.dll|所有文件(*.*)|*.*'
+    Filter = 'Wizard Files(*.DLL)|*.dll|All Files(*.*)|*.*'
     Left = 608
     Top = 88
   end

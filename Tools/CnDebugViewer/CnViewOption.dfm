@@ -2,25 +2,25 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
   Left = 370
   Top = 239
   BorderStyle = bsDialog
-  Caption = '常规选项设置'
+  Caption = 'General Settings'
   ClientHeight = 295
   ClientWidth = 249
   Color = clBtnFace
-  Font.Charset = GB2312_CHARSET
+  Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -12
-  Font.Name = '宋体'
+  Font.Height = -11
+  Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
   Position = poMainFormCenter
   PixelsPerInch = 96
-  TextHeight = 12
+  TextHeight = 13
   object btnOK: TButton
     Left = 85
     Top = 263
     Width = 75
     Height = 21
-    Caption = '确定(&O)'
+    Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 2
@@ -31,7 +31,7 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
     Width = 75
     Height = 21
     Cancel = True
-    Caption = '取消(&C)'
+    Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 3
   end
@@ -40,14 +40,14 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
     Top = 8
     Width = 233
     Height = 160
-    Caption = '界面设置(&U)'
+    Caption = '&User Interface Settings'
     TabOrder = 0
     object lblHotKey: TLabel
       Left = 16
       Top = 26
-      Width = 114
-      Height = 12
-      Caption = '主窗口显示热键(&H)：'
+      Width = 81
+      Height = 13
+      Caption = '&HotKey to Show:'
       FocusControl = hkShowFormHotKey
     end
     object chkCloseToTrayIcon: TCheckBox
@@ -55,7 +55,7 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
       Top = 108
       Width = 177
       Height = 17
-      Caption = '关闭时最小化到系统托盘(&L)'
+      Caption = 'C&lose to Tray Icon'
       TabOrder = 4
     end
     object chkMinToTrayIcon: TCheckBox
@@ -63,7 +63,7 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
       Top = 88
       Width = 137
       Height = 17
-      Caption = '最小化到系统托盘(&M)'
+      Caption = '&Minimize to Tray Icon'
       TabOrder = 3
     end
     object hkShowFormHotKey: THotKey
@@ -81,7 +81,7 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
       Top = 68
       Width = 155
       Height = 13
-      Caption = '显示系统托盘图标(&T)'
+      Caption = 'Show &Tray Icon'
       TabOrder = 2
       OnClick = chkShowTrayIconClick
     end
@@ -90,7 +90,7 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
       Top = 48
       Width = 155
       Height = 13
-      Caption = '启动时最小化(&I)'
+      Caption = 'M&inimize when Startup.'
       TabOrder = 1
       OnClick = chkShowTrayIconClick
     end
@@ -99,7 +99,7 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
       Top = 132
       Width = 155
       Height = 13
-      Caption = '保存窗口状态及位置(&S)'
+      Caption = '&Save Window State/Position'
       TabOrder = 5
       OnClick = chkShowTrayIconClick
     end
@@ -109,21 +109,21 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
     Top = 181
     Width = 233
     Height = 73
-    Caption = '捕获设置(&P)'
+    Caption = 'Ca&pture Settings'
     TabOrder = 1
     object lblCapOD: TLabel
       Left = 32
       Top = 40
-      Width = 180
-      Height = 12
-      Caption = '（需要重新启动 CnDebugViewer）'
+      Width = 156
+      Height = 13
+      Caption = 'Need to Restart CnDebugViewer'
     end
     object chkCapDebug: TCheckBox
       Left = 14
       Top = 23
       Width = 211
       Height = 13
-      Caption = '捕获 OutputDebugString 的输出(&D)'
+      Caption = 'Capture "Output&DebugString" API'
       TabOrder = 0
       OnClick = chkShowTrayIconClick
     end

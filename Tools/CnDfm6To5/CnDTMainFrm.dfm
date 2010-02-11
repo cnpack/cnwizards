@@ -3,7 +3,7 @@ object CnDTMainForm: TCnDTMainForm
   Top = 92
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
-  Caption = 'DFM 窗体转换工具'
+  Caption = 'DFM Convert Tool'
   ClientHeight = 412
   ClientWidth = 531
   Color = clBtnFace
@@ -22,9 +22,9 @@ object CnDTMainForm: TCnDTMainForm
   object Label1: TLabel
     Left = 8
     Top = 383
-    Width = 142
+    Width = 124
     Height = 13
-    Caption = 'CnPack IDE 专家包辅助工具'
+    Caption = 'CnPack IDE Wizards Tools'
   end
   object lblURL: TLabel
     Left = 168
@@ -46,7 +46,7 @@ object CnDTMainForm: TCnDTMainForm
     Top = 8
     Width = 513
     Height = 153
-    Caption = '转换内容(&M)'
+    Caption = '&To Convert'
     TabOrder = 0
     object sbFile: TSpeedButton
       Left = 482
@@ -69,7 +69,7 @@ object CnDTMainForm: TCnDTMainForm
       Top = 18
       Width = 145
       Height = 17
-      Caption = '转换指定文件(&I)'
+      Caption = 'Convert a &File'
       Checked = True
       TabOrder = 0
       TabStop = True
@@ -87,7 +87,7 @@ object CnDTMainForm: TCnDTMainForm
       Top = 58
       Width = 153
       Height = 17
-      Caption = '转换指定目录(&D)'
+      Caption = 'Convert in &Dir'
       TabOrder = 3
       OnClick = rbFileClick
     end
@@ -103,7 +103,7 @@ object CnDTMainForm: TCnDTMainForm
       Top = 100
       Width = 169
       Height = 17
-      Caption = '包含子目录(&U)'
+      Caption = '&Include Sub-folders'
       TabOrder = 4
     end
     object cbReadOnly: TCheckBox
@@ -111,7 +111,7 @@ object CnDTMainForm: TCnDTMainForm
       Top = 122
       Width = 225
       Height = 17
-      Caption = '处理只读文件(&O)'
+      Caption = 'Process &Read-only Files'
       TabOrder = 5
     end
   end
@@ -120,7 +120,7 @@ object CnDTMainForm: TCnDTMainForm
     Top = 168
     Width = 513
     Height = 201
-    Caption = '转换结果(&R)'
+    Caption = 'Convert R&esult'
     TabOrder = 1
     object ListView: TListView
       Left = 10
@@ -129,11 +129,11 @@ object CnDTMainForm: TCnDTMainForm
       Height = 169
       Columns = <
         item
-          Caption = '文件名'
+          Caption = 'FileName'
           Width = 400
         end
         item
-          Caption = '转换结果'
+          Caption = 'Result'
           Width = 70
         end>
       ReadOnly = True
@@ -147,7 +147,7 @@ object CnDTMainForm: TCnDTMainForm
     Top = 380
     Width = 75
     Height = 22
-    Caption = '开始转换(&S)'
+    Caption = 'Con&vert'
     TabOrder = 2
     OnClick = btnStartClick
   end
@@ -156,7 +156,7 @@ object CnDTMainForm: TCnDTMainForm
     Top = 380
     Width = 75
     Height = 22
-    Caption = '关闭(&C)'
+    Caption = '&Close'
     TabOrder = 4
     OnClick = btnCloseClick
   end
@@ -165,13 +165,13 @@ object CnDTMainForm: TCnDTMainForm
     Top = 380
     Width = 75
     Height = 22
-    Caption = '关于(&A)'
+    Caption = '&About'
     TabOrder = 3
     OnClick = btnAboutClick
   end
   object OpenDialog: TOpenDialog
     DefaultExt = '*.DFM'
-    Filter = 'Delphi/C++Builder 窗体文件(*.DFM)|*.DFM'
+    Filter = 'Delphi/C++Builder Forms (*.DFM)|*.DFM'
     Left = 144
     Top = 112
   end

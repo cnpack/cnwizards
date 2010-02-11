@@ -2,7 +2,7 @@ object FrmConfigIO: TFrmConfigIO
   Left = 262
   Top = 191
   BorderStyle = bsDialog
-  Caption = 'CnPack IDE 专家包设置导入导出工具'
+  Caption = 'CnPack IDE Wizards Config Import & Export Tool'
   ClientHeight = 243
   ClientWidth = 392
   Color = clBtnFace
@@ -25,9 +25,10 @@ object FrmConfigIO: TFrmConfigIO
     Height = 65
     AutoSize = False
     Caption = 
-      '本工具提供 CnPack IDE 专家包设置的导入导出功能，'#13#10'用于保留设置备' +
-      '份，或者将设置迁移到其他环境中。'#13#10#13#10'需要注意的是：导入的设置将覆' +
-      '盖 CnPack IDE 专家包'#13#10'当前的自定义设置。'
+      'This tool can be used to Import and Export CnPack IDE Wizards Co' +
+      'nfig Information for configuration '#13#10'backup or migration.'#13#10#13#10'Not' +
+      'ice: Imported Config Info will overwrite existing Config Informa' +
+      'tion.'
     WordWrap = True
   end
   object Bevel1: TBevel
@@ -435,16 +436,16 @@ object FrmConfigIO: TFrmConfigIO
   object Label2: TLabel
     Left = 64
     Top = 104
-    Width = 54
+    Width = 52
     Height = 13
-    Caption = '您需要……'
+    Caption = 'You Can...'
   end
   object RadioButtonOut: TRadioButton
     Left = 88
     Top = 128
     Width = 289
     Height = 17
-    Caption = '导出 CnPack IDE 专家包的设置。'
+    Caption = 'Export CnPack IDE Wizards Config Info.'
     Checked = True
     TabOrder = 0
     TabStop = True
@@ -454,7 +455,7 @@ object FrmConfigIO: TFrmConfigIO
     Top = 152
     Width = 297
     Height = 17
-    Caption = '从外部文件中导入 CnPack IDE 专家包的设置。'
+    Caption = 'Import CnPack IDE Wizards Config Info From File.'
     TabOrder = 1
   end
   object btnClose: TButton
@@ -464,7 +465,7 @@ object FrmConfigIO: TFrmConfigIO
     Height = 21
     Anchors = [akTop, akRight]
     Cancel = True
-    Caption = '关闭(&C)'
+    Caption = '&Close'
     TabOrder = 4
     OnClick = btnCloseClick
   end
@@ -474,7 +475,7 @@ object FrmConfigIO: TFrmConfigIO
     Width = 75
     Height = 21
     Anchors = [akTop, akRight]
-    Caption = '关于(&A)'
+    Caption = '&About'
     TabOrder = 5
     OnClick = btnHelpClick
   end
@@ -484,7 +485,7 @@ object FrmConfigIO: TFrmConfigIO
     Width = 75
     Height = 21
     Anchors = [akTop, akRight]
-    Caption = '下一步(&N)'
+    Caption = '&Next'
     Default = True
     ModalResult = 1
     TabOrder = 3
@@ -495,16 +496,16 @@ object FrmConfigIO: TFrmConfigIO
     Top = 176
     Width = 297
     Height = 17
-    Caption = '恢复 CnPack IDE 专家包的默认设置。'
+    Caption = 'Restore Default CnPack IDE Wizards Config Info.'
     TabOrder = 2
   end
   object OpenDialog: TOpenDialog
-    Filter = 'CnPack IDE 专家设置文件(*.cnw)|*.cnw|所有文件(*.*)|*.*'
+    Filter = 'CnPack IDE Wizards Config(*.cnw)|*.cnw|All Files(*.*)|*.*'
     Left = 8
     Top = 200
   end
   object SaveDialog: TSaveDialog
-    Filter = 'CnPack IDE 专家设置文件(*.cnw)|*.cnw|所有文件(*.*)|*.*'
+    Filter = 'CnPack IDE Wizards Config(*.cnw)|*.cnw|All Files(*.*)|*.*'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
     Left = 40
     Top = 200

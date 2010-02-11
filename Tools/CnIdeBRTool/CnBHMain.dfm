@@ -7,17 +7,17 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
   ClientHeight = 472
   ClientWidth = 579
   Color = clBtnFace
-  Font.Charset = GB2312_CHARSET
+  Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -12
-  Font.Name = '宋体'
+  Font.Height = -11
+  Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
   OnClose = FormClose
   OnCreate = FormCreate
   PixelsPerInch = 96
-  TextHeight = 12
+  TextHeight = 13
   object bvlLine: TBevel
     Left = 0
     Top = 412
@@ -32,7 +32,7 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
-    Caption = '下一步(&N)'
+    Caption = '&Next'
     Default = True
     TabOrder = 5
     OnClick = btnNextClick
@@ -43,7 +43,7 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
     Width = 75
     Height = 21
     Anchors = [akLeft, akBottom]
-    Caption = '关于(&A)'
+    Caption = '&About'
     TabOrder = 2
     OnClick = btnAboutClick
     NumGlyphs = 2
@@ -55,7 +55,7 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
     Height = 21
     Anchors = [akRight, akBottom]
     Cancel = True
-    Caption = '关闭(&C)'
+    Caption = '&Close'
     ModalResult = 1
     TabOrder = 6
     OnClick = btnCloseClick
@@ -67,7 +67,7 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
-    Caption = '上一步(&P)'
+    Caption = '&Previous'
     TabOrder = 4
     Visible = False
     OnClick = btnPrevClick
@@ -87,47 +87,48 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
       object lbl1: TLabel
         Left = 40
         Top = 40
-        Width = 336
-        Height = 12
-        Caption = '欢迎使用 CnPack IDE 专家包附带的 IDE 配置备份/恢复工具。'
+        Width = 270
+        Height = 13
+        Caption = 'Welcome to CnWizards IDE Config Backup/Restore Tool.'
         WordWrap = True
       end
       object lbl11: TLabel
         Left = 40
         Top = 166
-        Width = 180
-        Height = 12
-        Caption = '请选择需要的功能后点击下一步：'
+        Width = 161
+        Height = 13
+        Caption = 'Please Select One and Click Next:'
       end
       object Label1: TLabel
         Left = 40
         Top = 64
-        Width = 480
-        Height = 48
+        Width = 449
+        Height = 52
         Caption = 
-          '对于经常使用 Delphi  或 C++Builder 的朋友来说，每次安装完 Delphi' +
-          ' 或 C++Builder 后配置 IDE 是个比较麻烦的过程，而且积累下来的很多' +
-          '东西容易丢失。本程序可以备份/恢复 Delphi 和 C++Builder 的配置，' +
-          '包括代码模板，对象库，菜单模板，IDE 编辑选项配置，IDE 窗口信息等' +
-          '。'
+          'It'#39's Inconvenient for Our Delphi/C++Builder Users to Re-config I' +
+          'DE Settings Manually after Re-install IDE. And What a Pity if Ou' +
+          'r Valuable Settings Lost! This Tool can Help us to Backup Delphi' +
+          '/C++Builder IDE Settings Information, including Code Templates, ' +
+          'Menu Templates, IDE Environment and Editor Configuration and IDE' +
+          ' Desktop Settings.'
         WordWrap = True
       end
       object Label2: TLabel
         Left = 40
         Top = 128
-        Width = 504
-        Height = 24
+        Width = 472
+        Height = 26
         Caption = 
-          '目前版本支持 Delphi 5/6/7/8、C++Builder 5/6 和 BDS 2005/2006、RA' +
-          'D Studio 2007/2009。'#13#10'此外，本工具还整合了清除 IDE 打开文件历史' +
-          '记录的功能。'
+          'Now Delphi 5/6/7/8, C++Builder 5/6 and BDS 2005/2006, RAD Studio' +
+          ' 2007/2009/2010 Supported.'#13#10'And, IDE History Cleaner also Includ' +
+          'ed Here.'
       end
       object rbBackup: TRadioButton
         Left = 40
         Top = 197
         Width = 177
         Height = 17
-        Caption = '备份 IDE 配置(&B)'
+        Caption = '&Backup IDE Settings'
         Checked = True
         TabOrder = 0
         TabStop = True
@@ -137,7 +138,7 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
         Top = 225
         Width = 177
         Height = 17
-        Caption = '恢复 IDE 配置(&R)'
+        Caption = '&Restore IDE Settings'
         TabOrder = 1
       end
       object rbOther: TRadioButton
@@ -145,7 +146,7 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
         Top = 253
         Width = 185
         Height = 17
-        Caption = '清除 IDE 打开文件历史记录(&T)'
+        Caption = 'C&lean IDE History'
         TabOrder = 2
       end
     end
@@ -155,9 +156,9 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
       object lbl7: TLabel
         Left = 8
         Top = 40
-        Width = 108
-        Height = 12
-        Caption = '选择要处理的 &IDE：'
+        Width = 53
+        Height = 13
+        Caption = 'Select &IDE:'
         FocusControl = lbxSelectApp
       end
       object lbxSelectApp: TListBox
@@ -181,24 +182,24 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
       object lbl2: TLabel
         Left = 8
         Top = 40
-        Width = 126
-        Height = 12
-        Caption = '选择要备份的项目(&I)：'
+        Width = 121
+        Height = 13
+        Caption = 'Select &Item(s) to Backup:'
         FocusControl = lbxBackupOptions
       end
       object lbl3: TLabel
         Left = 8
         Top = 199
-        Width = 126
-        Height = 12
-        Caption = '将备份文件保存到(&F)：'
+        Width = 99
+        Height = 13
+        Caption = 'Save Backup &File To:'
         FocusControl = edtBackupFile
       end
       object edtBackupFile: TEdit
         Left = 32
         Top = 223
         Width = 481
-        Height = 20
+        Height = 21
         TabOrder = 1
       end
       object btnBrowBackupFile: TBitBtn
@@ -217,10 +218,10 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
         Height = 97
         BorderStyle = bsNone
         Flat = False
-        Font.Charset = GB2312_CHARSET
+        Font.Charset = DEFAULT_CHARSET
         Font.Color = clNavy
-        Font.Height = -12
-        Font.Name = '宋体'
+        Font.Height = -11
+        Font.Name = 'Tahoma'
         Font.Style = []
         ItemHeight = 24
         ParentColor = True
@@ -235,7 +236,7 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
         Top = 255
         Width = 369
         Height = 17
-        Caption = '将对象库全部备份到缺省目录(推荐选中)'
+        Caption = 'Store All Objects to Default Directory. (Recommended)'
         Checked = True
         State = cbChecked
         TabOrder = 3
@@ -248,24 +249,24 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
       object lbl5: TLabel
         Left = 8
         Top = 40
-        Width = 126
-        Height = 12
-        Caption = '选择要恢复的文件(&R)：'
+        Width = 125
+        Height = 13
+        Caption = 'Select the File to &Restore:'
         FocusControl = edtRestoreFile
       end
       object lbl8: TLabel
         Left = 8
         Top = 92
-        Width = 126
-        Height = 12
-        Caption = '备份文件相关信息(&F)：'
+        Width = 116
+        Height = 13
+        Caption = 'Backup &File Information:'
         FocusControl = mmoBakFileInfo
       end
       object edtRestoreFile: TEdit
         Left = 32
         Top = 64
         Width = 489
-        Height = 20
+        Height = 21
         ReadOnly = True
         TabOrder = 1
       end
@@ -297,17 +298,17 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
       object lbl4: TLabel
         Left = 8
         Top = 40
-        Width = 138
-        Height = 12
-        Caption = '请选择要恢复的项目(&R)：'
+        Width = 125
+        Height = 13
+        Caption = 'Select Item(s) to &Restore:'
         FocusControl = lbxRestoreOptions
       end
       object lbl9: TLabel
         Left = 8
         Top = 192
-        Width = 126
-        Height = 12
-        Caption = '目前安装的 &IDE 目录：'
+        Width = 119
+        Height = 13
+        Caption = 'Installed &IDE Directories:'
         FocusControl = edtRestoreRootPath
       end
       object lbxRestoreOptions: TCheckListBox
@@ -319,10 +320,10 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
         BorderStyle = bsNone
         Enabled = False
         Flat = False
-        Font.Charset = GB2312_CHARSET
+        Font.Charset = DEFAULT_CHARSET
         Font.Color = clNavy
-        Font.Height = -12
-        Font.Name = '宋体'
+        Font.Height = -11
+        Font.Name = 'Tahoma'
         Font.Style = []
         ItemHeight = 20
         ParentColor = True
@@ -335,7 +336,7 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
         Left = 32
         Top = 216
         Width = 361
-        Height = 20
+        Height = 21
         Color = clBtnFace
         ReadOnly = True
         TabOrder = 1
@@ -347,42 +348,42 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
       object lbl10: TLabel
         Left = 8
         Top = 32
-        Width = 516
-        Height = 36
+        Width = 463
+        Height = 39
         Caption = 
-          '本工具用于清除 IDE 中的曾打开的工程文件与普通文件的历史记录。'#13#10'' +
-          '支持 Delphi 5/6/7/8/2007、C++Builder 5/6 以及 BDS 2005/2006、Del' +
-          'phi 2007。'#13#10'注意：由于 IDE 退出时会重写历史记录，因此进行历史记' +
-          '录清除时，请确保 IDE 未在运行状态。'
+          'This Tool can be Used to Clean IDE Opened Projects and Files His' +
+          'tory.'#13#10'Delphi 5/6/7/8, C++Builder 5/6 and BDS 2005/2006 RAD Stud' +
+          'io 2007/2009/2010 are Supported.'#13#10'Notice: Please make sure that ' +
+          'IDE are NOT running when executing this Tool.'
         WordWrap = True
       end
       object lblProjects: TLabel
         Left = 136
         Top = 80
-        Width = 84
-        Height = 12
-        Caption = '历史工程文件：'
+        Width = 89
+        Height = 13
+        Caption = 'Historical Projects:'
       end
       object lblFiles: TLabel
         Left = 136
         Top = 196
-        Width = 84
-        Height = 12
-        Caption = '历史普通文件：'
+        Width = 71
+        Height = 13
+        Caption = 'Historical Files:'
       end
       object lblIDEs: TLabel
         Left = 8
         Top = 80
-        Width = 60
-        Height = 12
-        Caption = 'IDE 名称：'
+        Width = 21
+        Height = 13
+        Caption = 'IDE:'
       end
       object btnSelAllIDE: TSpeedButton
         Left = 104
         Top = 72
         Width = 23
         Height = 22
-        Hint = '全选'
+        Hint = 'Select All'
         Flat = True
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
@@ -420,7 +421,7 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
         Top = 72
         Width = 23
         Height = 22
-        Hint = '全选'
+        Hint = 'Select All'
         Flat = True
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
@@ -458,7 +459,7 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
         Top = 188
         Width = 23
         Height = 22
-        Hint = '全选'
+        Hint = 'Select All'
         Flat = True
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
@@ -526,9 +527,9 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
       object lbl6: TLabel
         Left = 8
         Top = 40
-        Width = 54
-        Height = 12
-        Caption = '操作完成!'
+        Width = 100
+        Height = 13
+        Caption = 'Operation Complete!'
       end
       object mmoLog: TMemo
         Left = 8
@@ -668,22 +669,22 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
     object lblFun: TLabel
       Left = 16
       Top = 16
-      Width = 139
-      Height = 12
-      Caption = 'IDE 配置备份/恢复工具'
-      Font.Charset = GB2312_CHARSET
+      Width = 179
+      Height = 13
+      Caption = 'IDE Config Backup/Restore Tool'
+      Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -12
-      Font.Name = '宋体'
+      Font.Height = -11
+      Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentFont = False
     end
     object lblDesc: TLabel
       Left = 48
       Top = 35
-      Width = 234
-      Height = 12
-      Caption = 'CnPack IDE 专家包 IDE 配置备份/恢复工具'
+      Width = 259
+      Height = 13
+      Caption = 'CnPack IDE Wizards - IDE Config Backup/Restore Tool'
     end
   end
   object btnHelp: TBitBtn
@@ -692,7 +693,7 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
     Width = 75
     Height = 21
     Anchors = [akLeft, akBottom]
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
     NumGlyphs = 2
@@ -714,7 +715,7 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
     Left = 280
     Top = 16
     Bitmap = {
-      494C01010F001300040010001000FFFFFFFFFF00FFFFFFFFFFFFFFFF424D3600
+      494C01010F001300040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000005000000001002000000000000050
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -1378,7 +1379,8 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
       00000031FC7FC3FF00000000603FC00F00000800A00FC00700000800C007C003
       00000000C007C003000000008003C001000100008003C001000100008003C001
       000000008003C003000000008003C00300000000C003C00789830070C009C31F
-      C983F07FE01EC3FFFDC3F07FF83F81FF}
+      C983F07FE01EC3FFFDC3F07FF83F81FF00000000000000000000000000000000
+      000000000000}
   end
   object CnHashLangFileStorage: TCnHashLangFileStorage
     StorageMode = smByDirectory

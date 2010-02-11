@@ -3,14 +3,14 @@ object CnCustBuildForm: TCnCustBuildForm
   Top = 209
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
-  Caption = 'CnPack IDE 专家包自定义构建工具'
+  Caption = 'CnPack IDE Wizards Custom Build Tool'
   ClientHeight = 420
   ClientWidth = 584
   Color = clBtnFace
-  Font.Charset = GB2312_CHARSET
+  Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -12
-  Font.Name = '宋体'
+  Font.Height = -11
+  Font.Name = 'Tahoma'
   Font.Style = []
   Icon.Data = {
     0000010001002020000001001800A80C00001600000028000000200000004000
@@ -120,17 +120,17 @@ object CnCustBuildForm: TCnCustBuildForm
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   PixelsPerInch = 96
-  TextHeight = 12
+  TextHeight = 13
   object lblList: TLabel
     Left = 16
     Top = 88
-    Width = 85
-    Height = 12
-    Caption = '可用专家列表:'
-    Font.Charset = GB2312_CHARSET
+    Width = 71
+    Height = 13
+    Caption = 'Wizards List:'
+    Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -12
-    Font.Name = '宋体'
+    Font.Height = -11
+    Font.Name = 'Tahoma'
     Font.Style = [fsBold]
     ParentFont = False
   end
@@ -173,13 +173,13 @@ object CnCustBuildForm: TCnCustBuildForm
   object lblComments: TLabel
     Left = 408
     Top = 182
-    Width = 33
-    Height = 12
-    Caption = '说明:'
-    Font.Charset = GB2312_CHARSET
+    Width = 64
+    Height = 13
+    Caption = 'Comments:'
+    Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -12
-    Font.Name = '宋体'
+    Font.Height = -11
+    Font.Name = 'Tahoma'
     Font.Style = [fsBold]
     ParentFont = False
   end
@@ -201,13 +201,13 @@ object CnCustBuildForm: TCnCustBuildForm
   object lblState: TLabel
     Left = 408
     Top = 268
-    Width = 33
-    Height = 12
-    Caption = '状态:'
-    Font.Charset = GB2312_CHARSET
+    Width = 40
+    Height = 13
+    Caption = 'Status:'
+    Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -12
-    Font.Name = '宋体'
+    Font.Height = -11
+    Font.Name = 'Tahoma'
     Font.Style = [fsBold]
     ParentFont = False
   end
@@ -223,7 +223,7 @@ object CnCustBuildForm: TCnCustBuildForm
     Top = 84
     Width = 23
     Height = 22
-    Hint = '全选'
+    Hint = 'Select All'
     Flat = True
     Glyph.Data = {
       36040000424D3604000000000000360000002800000010000000100000000100
@@ -269,7 +269,7 @@ object CnCustBuildForm: TCnCustBuildForm
     Top = 84
     Width = 23
     Height = 22
-    Hint = '全不选'
+    Hint = 'Deselect All'
     Flat = True
     Glyph.Data = {
       36040000424D3604000000000000360000002800000010000000100000000100
@@ -315,7 +315,7 @@ object CnCustBuildForm: TCnCustBuildForm
     Top = 84
     Width = 23
     Height = 22
-    Hint = '反选'
+    Hint = 'Inverse Selection'
     Flat = True
     Glyph.Data = {
       36040000424D3604000000000000360000002800000010000000100000000100
@@ -482,24 +482,24 @@ object CnCustBuildForm: TCnCustBuildForm
     object lblFun: TLabel
       Left = 16
       Top = 16
-      Width = 207
-      Height = 12
-      Caption = 'CnPack IDE 专家包自定义构建工具'
-      Font.Charset = GB2312_CHARSET
+      Width = 214
+      Height = 13
+      Caption = 'CnPack IDE Wizards Custom Build Tool'
+      Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -12
-      Font.Name = '宋体'
+      Font.Height = -11
+      Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentFont = False
     end
     object lblDesc: TLabel
       Left = 48
       Top = 35
-      Width = 456
-      Height = 12
+      Width = 442
+      Height = 13
       Caption = 
-        'CnPack IDE 专家包自定义构建工具，用于生成自定义的 CnWizards.inc ' +
-        '文件供编译。'
+        'CnPack IDE Wizards Custom Build Tool to Generate Customized CnWi' +
+        'zards.inc for Compiling.'
     end
   end
   object chklstWizards: TCheckListBox
@@ -508,7 +508,7 @@ object CnCustBuildForm: TCnCustBuildForm
     Width = 377
     Height = 233
     OnClickCheck = chklstWizardsClickCheck
-    ItemHeight = 12
+    ItemHeight = 13
     TabOrder = 1
     OnClick = chklstWizardsClick
   end
@@ -519,7 +519,7 @@ object CnCustBuildForm: TCnCustBuildForm
     Height = 21
     Anchors = [akRight, akBottom]
     Cancel = True
-    Caption = '关闭(&C)'
+    Caption = '&Close'
     ModalResult = 1
     TabOrder = 2
     OnClick = btnCloseClick
@@ -531,7 +531,7 @@ object CnCustBuildForm: TCnCustBuildForm
     Width = 75
     Height = 21
     Anchors = [akLeft, akBottom]
-    Caption = '关于(&A)'
+    Caption = '&About'
     TabOrder = 3
     OnClick = btnAboutClick
     NumGlyphs = 2
@@ -542,7 +542,7 @@ object CnCustBuildForm: TCnCustBuildForm
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
-    Caption = '写入(&W)'
+    Caption = '&Write'
     Default = True
     TabOrder = 4
     OnClick = btnNextClick
@@ -553,7 +553,7 @@ object CnCustBuildForm: TCnCustBuildForm
     Width = 75
     Height = 21
     Anchors = [akLeft, akBottom]
-    Caption = '帮助(&H)'
+    Caption = '&Help'
     TabOrder = 5
     OnClick = btnHelpClick
     NumGlyphs = 2

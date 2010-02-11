@@ -10,7 +10,8 @@ DCC = $(ROOT)\bin\dcc32.exe $**
 BRCC = $(ROOT)\bin\brcc32.exe $**
 #------------------------------------------------------------------------------
 PROJECTS = CnDfm6To5.exe CnConfigIO.exe Setup.exe CnDebugViewer.exe \
-  AsciiChart.exe CnIdeBRTool.exe
+  AsciiChart.exe CnIdeBRTool.exe CnManageWiz.exe CnSelectLang.exe CnSMR.exe \
+  CnZipWrapper.dll
 #------------------------------------------------------------------------------
 default: $(PROJECTS)
 #------------------------------------------------------------------------------
@@ -31,6 +32,18 @@ AsciiChart.exe: CnAsciiChart\AsciiChart.dpr
   $(DCC)
 
 CnIdeBRTool.exe: CnIdeBRTool\CnIdeBRTool.dpr
+  $(DCC)
+
+CnManageWiz.exe: CnManageWiz\CnManageWiz.dpr
+  $(DCC)
+
+CnSelectLang.exe: CnSelectLang\CnSelectLang.dpr
+  $(DCC)
+
+CnSMR.exe: CnSMR\CnSMR.dpr
+  $(DCC)
+
+CnZipWrapper.dll: CnZipWrapper\CnZipWrapper.dpr
   $(DCC)
 
 

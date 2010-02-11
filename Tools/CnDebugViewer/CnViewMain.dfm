@@ -3,12 +3,12 @@ object CnMainViewer: TCnMainViewer
   Top = 141
   Width = 651
   Height = 469
-  Caption = 'CnDebugViewer 调试信息查看器'
+  Caption = 'CnDebugViewer'
   Color = clAppWorkSpace
-  Font.Charset = GB2312_CHARSET
+  Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -12
-  Font.Name = '宋体'
+  Font.Height = -11
+  Font.Name = 'Tahoma'
   Font.Style = []
   FormStyle = fsMDIForm
   Menu = mmMain
@@ -18,7 +18,7 @@ object CnMainViewer: TCnMainViewer
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   PixelsPerInch = 96
-  TextHeight = 12
+  TextHeight = 13
   object statMain: TStatusBar
     Left = 0
     Top = 404
@@ -252,7 +252,7 @@ object CnMainViewer: TCnMainViewer
     Left = 360
     Top = 40
     object F1: TMenuItem
-      Caption = '&F. 文件'
+      Caption = '&File'
       object N4: TMenuItem
         Action = actNew
       end
@@ -276,7 +276,7 @@ object CnMainViewer: TCnMainViewer
       end
     end
     object N1: TMenuItem
-      Caption = '&E. 编辑'
+      Caption = '&Edit'
       object D2: TMenuItem
         Action = actClear
       end
@@ -296,7 +296,7 @@ object CnMainViewer: TCnMainViewer
         Action = actBookmark
       end
       object MenuJump: TMenuItem
-        Caption = '&J. 跳至书签...'
+        Caption = '&Jump to Bookmark'
       end
       object X2: TMenuItem
         Action = actPrevBookmark
@@ -321,7 +321,7 @@ object CnMainViewer: TCnMainViewer
       end
     end
     object N7: TMenuItem
-      Caption = '&V. 查看'
+      Caption = '&View'
       object T2: TMenuItem
         Action = actViewTime
       end
@@ -351,7 +351,7 @@ object CnMainViewer: TCnMainViewer
       end
     end
     object O1: TMenuItem
-      Caption = '&C. 控制'
+      Caption = '&Control'
       object S2: TMenuItem
         Action = actStart
       end
@@ -363,7 +363,7 @@ object CnMainViewer: TCnMainViewer
       end
     end
     object N2: TMenuItem
-      Caption = '&O. 选项'
+      Caption = '&Option'
       object S3: TMenuItem
         Action = actOptions
       end
@@ -378,7 +378,7 @@ object CnMainViewer: TCnMainViewer
       end
     end
     object N3: TMenuItem
-      Caption = '&H. 帮助'
+      Caption = '&Help'
       object H1: TMenuItem
         Action = actHelp
       end
@@ -394,255 +394,257 @@ object CnMainViewer: TCnMainViewer
     Top = 40
     object actNew: TAction
       Category = 'File'
-      Caption = '&N. 新建窗口'
-      Hint = '新建一显示窗口'
+      Caption = '&New Window'
+      Hint = 'Create a New Window'
       ImageIndex = 12
       ShortCut = 16462
       OnExecute = actNewExecute
     end
     object actClose: TAction
       Category = 'File'
-      Caption = '&D. 关闭当前窗口'
-      Hint = '关闭当前窗口'
+      Caption = 'Close Win&dow'
+      Hint = 'Close Current Window'
       ImageIndex = 13
       ShortCut = 16452
       OnExecute = actCloseExecute
     end
     object actOpen: TAction
       Category = 'File'
-      Caption = '&O. 打开...'
-      Hint = '打开记录文件'
+      Caption = '&Open...'
+      Hint = 'Open a Recording File'
       ImageIndex = 3
       ShortCut = 16463
       OnExecute = actOpenExecute
     end
     object actSave: TAction
       Category = 'File'
-      Caption = '&S. 保存记录...'
-      Hint = '保存为记录文件'
+      Caption = '&Save...'
+      Hint = 'Save to File'
       ImageIndex = 6
       ShortCut = 16467
       OnExecute = actSaveExecute
     end
     object actFindNext: TAction
       Category = 'Edit'
-      Caption = '&N. 查找下一个'
-      Hint = '查找下一个'
+      Caption = 'Find &Next'
+      Hint = 'Find Next'
       ImageIndex = 17
       ShortCut = 114
       OnExecute = actFindNextExecute
     end
     object actExit: TAction
       Category = 'File'
-      Caption = '&X. 退出'
-      Hint = '退出本程序'
+      Caption = 'E&xit'
+      Hint = 'Exit'
       ImageIndex = 0
       ShortCut = 16472
       OnExecute = actExitExecute
     end
     object actClear: TAction
       Category = 'Edit'
-      Caption = '&D. 清空信息内容'
-      Hint = '清空信息显示内容'
+      Caption = 'Clear &Display'
+      Hint = 'Clear Display'
       OnExecute = actClearExecute
     end
     object actSelAll: TAction
       Category = 'Edit'
-      Caption = '&A. 全选'
-      Hint = '全部选择'
+      Caption = 'Select &All'
+      Hint = 'Select All'
       Visible = False
     end
     object actCopy: TAction
       Category = 'Edit'
-      Caption = '&C. 复制'
-      Hint = '复制选中内容到剪贴板'
+      Caption = '&Copy'
+      Hint = 'Copy to Clipboard'
       ImageIndex = 10
       OnExecute = actCopyExecute
     end
     object actViewTime: TAction
       Category = 'View'
-      Caption = '&T. 计时显示'
-      Hint = '显示/隐藏计时面板'
+      Caption = '&Time'
+      Hint = 'Show/Hide Timing'
       OnExecute = actViewTimeExecute
     end
     object actViewDetail: TAction
       Category = 'View'
-      Caption = '&D. 详细信息显示'
-      Hint = '显示/隐藏条目详细内容'
+      Caption = '&Details'
+      Hint = 'Show/Hide Details'
       OnExecute = actViewDetailExecute
     end
     object actFind: TAction
       Category = 'Edit'
-      Caption = '&F. 查找...'
-      Hint = '查找信息内容'
+      Caption = '&Find...'
+      Hint = 'Find'
       ImageIndex = 16
       OnExecute = actFindExecute
     end
     object actExpandAll: TAction
       Category = 'Edit'
-      Caption = '&E. 全部展开'
-      Hint = '全部展开树中的信息'
+      Caption = '&Expand All'
+      Hint = 'Expand All Information'
       OnExecute = actExpandAllExecute
     end
     object actStart: TAction
       Category = 'Control'
-      Caption = '&S. 开始'
-      Hint = '开始读取信息'
+      Caption = '&Start'
+      Hint = 'Start Reading'
       ImageIndex = 39
       OnExecute = actStartExecute
     end
     object actPause: TAction
       Category = 'Control'
-      Caption = '&P. 暂停'
-      Hint = '暂停读取信息'
+      Caption = '&Pause'
+      Hint = 'Pause Reading'
       ImageIndex = 41
       OnExecute = actPauseExecute
     end
     object actStop: TAction
       Category = 'Control'
-      Caption = '&T. 停止'
-      Hint = '停止读取信息'
+      Caption = 'S&top'
+      Hint = 'Stop Reading'
       ImageIndex = 40
       OnExecute = actStopExecute
     end
     object actSwtClose: TAction
       Category = 'Switch'
-      Caption = '&C. 关闭当前窗口'
-      Hint = '关闭当前窗口'
+      Caption = '&Close Window'
+      Hint = 'Close Current Window'
       OnExecute = actSwtCloseExecute
     end
     object actSwtCloseAll: TAction
       Category = 'Switch'
-      Caption = '&A. 关闭所有窗口'
-      Hint = '关闭所有窗口'
+      Caption = 'Close &All'
+      Hint = 'Close All Windows'
       OnExecute = actSwtCloseAllExecute
     end
     object actSwtCloseOther: TAction
       Category = 'Switch'
-      Caption = '&O. 关闭其他窗口'
-      Hint = '关闭其他窗口'
+      Caption = 'Close &Other Windows'
+      Hint = 'Close Other Windows'
       OnExecute = actSwtCloseOtherExecute
     end
     object actHelp: TAction
       Category = 'Help'
-      Caption = '&C. 内容...'
-      Hint = '显示帮助信息'
+      Caption = '&Content...'
+      Hint = 'Help Content'
       ImageIndex = 1
       ShortCut = 112
       OnExecute = actHelpExecute
     end
     object actAbout: TAction
       Category = 'Help'
-      Caption = '&A. 关于...'
-      Hint = '显示关于信息'
+      Caption = '&About...'
+      Hint = 'About'
       ImageIndex = 18
       OnExecute = actAboutExecute
     end
     object actGotoFirst: TAction
       Category = 'Goto'
-      Caption = '&F. 到首条'
-      Hint = '到第一条信息'
+      Caption = '&First'
+      Hint = 'Goto First'
       ImageIndex = 84
       OnExecute = actGotoFirstExecute
     end
     object actGotoPrev: TAction
       Category = 'Goto'
-      Caption = '&P. 上一条'
-      Hint = '到上一条信息'
+      Caption = '&Previous'
+      Hint = 'Goto Previous'
       ImageIndex = 86
       OnExecute = actGotoPrevExecute
     end
     object actGotoNext: TAction
       Category = 'Goto'
-      Caption = '&N. 下一条'
-      Hint = '到后一条信息'
+      Caption = '&Next'
+      Hint = 'Goto Next'
       ImageIndex = 87
       OnExecute = actGotoNextExecute
     end
     object actGotoLast: TAction
       Category = 'Goto'
-      Caption = '&L. 到末尾'
-      Hint = '到最后一条信息'
+      Caption = '&Last'
+      Hint = 'Goto Last'
       ImageIndex = 85
       OnExecute = actGotoLastExecute
     end
     object actGotoPrevLine: TAction
       Category = 'Goto'
-      Caption = '&A. 前一分隔线'
-      Hint = '到上一条分隔线'
+      Caption = 'Previ&ous Separator'
+      Hint = 'Goto Previous Separator'
       ImageIndex = 88
       OnExecute = actGotoPrevLineExecute
     end
     object actGotoNextLine: TAction
       Category = 'Goto'
-      Caption = '&Z. 后一分隔线'
-      Hint = '到下一条分隔线'
+      Caption = 'Next &Separator'
+      Hint = 'Goto Next Separator'
       ImageIndex = 89
       OnExecute = actGotoNextLineExecute
     end
     object actOptions: TAction
-      Caption = '&S. 常规设置...'
-      Hint = '普通选项设置'
+      Caption = 'General Option&s...'
+      Hint = 'General Options'
       ImageIndex = 30
       OnExecute = actOptionsExecute
     end
     object actFilter: TAction
-      Caption = '&F. 过滤设置...'
-      Hint = '设置发送端的过滤机制'
+      Caption = '&Filter Options...'
+      Hint = 'Sender Filter Settings'
       ImageIndex = 22
       OnExecute = actFilterExecute
     end
     object actClearTime: TAction
       Category = 'Edit'
-      Caption = '&T. 清空计时内容'
-      Hint = '清空计时内容'
+      Caption = 'Clear &Time'
+      Hint = 'Clear Time Content'
       OnExecute = actClearTimeExecute
     end
     object actBookmark: TAction
       Category = 'Edit'
-      Caption = '&B. 切换书签'
-      Hint = '切换当前行的书签标志'
+      Caption = 'Toggle &Bookmark'
+      Hint = 'Toggle Bookmark of Current Line'
       ImageIndex = 32
       ShortCut = 16497
       OnExecute = actBookmarkExecute
     end
     object actPrevBookmark: TAction
       Category = 'Edit'
-      Caption = '&S. 上一书签'
+      Caption = 'Previou&s Bookmark'
+      Hint = 'Jump to Previous Bookmark'
       ImageIndex = 45
       ShortCut = 8305
       OnExecute = actPrevBookmarkExecute
     end
     object actNextBookmark: TAction
       Category = 'Edit'
-      Caption = '&X. 下一书签'
+      Caption = 'Ne&xt Bookmark'
+      Hint = 'Jump to Next Bookmark'
       ImageIndex = 46
       ShortCut = 113
       OnExecute = actNextBookmarkExecute
     end
     object actClearBookmarks: TAction
       Category = 'Edit'
-      Caption = '&M. 清除全部书签'
-      Hint = '清除全部书签'
+      Caption = 'Clear Book&marks'
+      Hint = 'Clear All Bookmarks'
       OnExecute = actClearBookmarksExecute
     end
     object actExport: TAction
       Category = 'File'
-      Caption = '&E. 输出...'
-      Hint = '输出成其他格式的文件'
+      Caption = '&Export...'
+      Hint = 'Export to File'
       ShortCut = 16453
       OnExecute = actExportExecute
     end
     object actShowMainForm: TAction
-      Caption = '&H. 显示主窗口'
-      Hint = '显示主窗口'
+      Caption = 'Show CnDebug&Viewer'
+      Hint = 'Show CnDebugViewer'
       ImageIndex = 43
       OnExecute = actShowMainFormExecute
     end
     object actAutoScroll: TAction
       Category = 'Goto'
-      Caption = '自动滚动'
-      Hint = '显示信息时自动滚动至最后一条'
+      Caption = 'Auto Scroll'
+      Hint = 'Auto Scroll to Last Message'
       ImageIndex = 90
       OnExecute = actAutoScrollExecute
     end
@@ -3848,13 +3850,13 @@ object CnMainViewer: TCnMainViewer
   end
   object dlgOpen: TOpenDialog
     Filter = 
-      'XML 文件(*.xml)|*.xml|CnDebug Dump 文件(*.cdd)|*.cdd|所有文件(*.' +
-      '*)|*.*'
+      'XML File (*.xml)|*.xml|CnDebug Dump File(*.cdd)|*.cdd|All Files ' +
+      '(*.*)|*.*'
     Left = 504
     Top = 40
   end
   object dlgSave: TSaveDialog
-    Filter = 'XML 文件(*.xml)|*.xml|所有文件(*.*)|*.*'
+    Filter = 'XML File (*.xml)|*.xml|All Files (*.*)|*.*'
     Left = 544
     Top = 40
   end
@@ -3883,8 +3885,8 @@ object CnMainViewer: TCnMainViewer
   end
   object dlgSaveExport: TSaveDialog
     Filter = 
-      '文本文件(*.txt)|*.txt|CSV 文件(*.csv)|*.csv|RTF文件(*.rtf)|*.rtf' +
-      '|HTML文件(*.htm)|*.htm'
+      'Text File(*.txt)|*.txt|Comma Seperated File(*.csv)|*.csv|HTML Fi' +
+      'le(*.htm)|*.htm'
     Left = 544
     Top = 80
   end
