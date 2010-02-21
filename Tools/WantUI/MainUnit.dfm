@@ -184,12 +184,6 @@ object MainForm: TMainForm
     Height = 23
     ItemHeight = 15
     TabOrder = 4
-    Items.Strings = (
-      'unstable=true'
-      'debug=true'
-      'preview=true'
-      'release=true'
-      'HELP_FILE=true')
   end
   object tmrBuild: TTimer
     OnTimer = tmrBuildTimer

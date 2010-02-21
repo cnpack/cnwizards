@@ -1,0 +1,6 @@
+unstable=true
+debug=true
+preview=true
+release=true
+lite=true
+HELP_FILE=true

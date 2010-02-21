@@ -131,6 +131,8 @@ begin
   AppPath := ExtractFilePath(ParamStr(0));
   WantFile := AppPath + DefWantFile;
   edtFileName.Text := AppPath + DefXMLFile;
+  if FileExists(ChangeFileExt(Application.ExeName, '.dat')) then
+    cbbProperties.Items.LoadFromFile(ChangeFileExt(Application.ExeName, '.dat'));
 end;
 
 procedure TMainForm.FormClose(Sender: TObject; var Action: TCloseAction);
