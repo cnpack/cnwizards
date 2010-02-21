@@ -44,55 +44,55 @@ uses
 {$I CnWizards.inc}
 
 //==============================================================================
-// 需要本地化的字符串
+// Need to Localize
 //==============================================================================
 
 var
-  SCnPropertyEditor: string = '属性编辑器';
-  SCnComponentEditor: string = '组件编辑器';
-  SCnDesignEditorNameStr: string = '名称: ';
-  SCnDesignEditorStateStr: string = '状态: ';
-  SCnPropEditorConfigFormCaption: string = '%s - 属性过滤';
+  SCnPropertyEditor: string = 'Property Editor';
+  SCnComponentEditor: string = 'Component Editor';
+  SCnDesignEditorNameStr: string = 'Name:';
+  SCnDesignEditorStateStr: string = 'State:';
+  SCnPropEditorConfigFormCaption: string = '%s - Property Filter';
 
-  // 编辑器名称
-  SCnStringPropEditorName: string = '字符串、标题属性编辑器';
-  sCnHintPropEditorName: string = 'Hint 属性编辑器';
-  SCnStringsPropEditorName: string = '字符串列表属性编辑器';
-  SCnFileNamePropEditorName: string = '文件名属性编辑器';
-  SCnSizeConstraintsPropEditorName: string = 'Constraints 属性编辑器';
-  SCnFontPropEditorName: string = '字体属性编辑器';
-  SCnControlScrollBarPropEditorName: string = '控件滚动条属性编辑器';
-  SCnBooleanPropEditorName: string = '布尔属性编辑器';
-  SCnAlignPropEditorName: string = 'Align属性编辑器';
-  SCnSetPropEditorName: string = '集合属性编辑器';
-  SCnNamePropEditorName: string = '组件名属性编辑器';
+  // Editor Names
+  SCnStringPropEditorName: string = 'String Caption Editor';
+  sCnHintPropEditorName: string = 'Hint Editor';
+  SCnStringsPropEditorName: string = 'String List Editor';
+  SCnFileNamePropEditorName: string = 'FileName Editor';
+  SCnSizeConstraintsPropEditorName: string = 'Constraints Editor';
+  SCnFontPropEditorName: string = 'Font Editor';
+  SCnControlScrollBarPropEditorName: string = 'Scrollbar Editor';
+  SCnBooleanPropEditorName: string = 'Bool Editor';
+  SCnSetPropEditorName: string = 'Set Editor';
+  SCnAlignPropEditorName: string = 'Align Editor';
+  SCnNamePropEditorName: string = 'Component Name Editor';
 
-  // 编辑器说明
-  SCnStringPropEditorComment: string = '允许编辑多行文本的字符串和标题属性。';
-  sCnHintPropEditorComment: string = '允许编辑多行文本的 Hint 属性，支持长格式和短格式。';
-  SCnStringsPropEditorComment: string = '提供更多功能的字符串列表属性编辑器。';
-  SCnFileNamePropEditorComment: string = '可以使用打开文件对话框来选择文件名。';
-  SCnSizeConstraintsPropEditorComment: string = '可以方便地设置控件或窗体的最大、最小尺寸。';
-  SCnFontPropEditorComment: string = '增强的字体属性编辑器，可以显示更多的字体信息。';
-  SCnControlScrollBarPropEditorComment: string = '增强的控件滚动条属性编辑器，可以显示更多的信息。';
-  SCnBooleanPropEditorComment: string = '可以为布尔属性显示一个检查框。';
-  SCnAlignPropEditorComment: string = '可以为Align属性增加图标';
-  SCnSetPropEditorComment: string = '为集合属性增加下拉列表设置及直接输入集合值的功能。';
-  SCnNamePropEditorComment: string = '使用组件前缀标准来规范组件名称。';
+  // Editor Comments
+  SCnStringPropEditorComment: string = 'Editor for Multi-line String and Caption.';
+  sCnHintPropEditorComment: string = 'Editor for Multi-line Hint, Short and Long Style Supported.';
+  SCnStringsPropEditorComment: string = 'Editor for String List.';
+  SCnFileNamePropEditorComment: string = 'Use OpenFile Dialog to Select FileName.';
+  SCnSizeConstraintsPropEditorComment: string = 'Editor for Constraints.';
+  SCnFontPropEditorComment: string = 'Editor for Font with more Information.';
+  SCnControlScrollBarPropEditorComment: string = 'Editor for Scrollbar with more Information.';
+  SCnBooleanPropEditorComment: string = 'Editor for Bool Property with a Checkbox.';
+  SCnSetPropEditorComment: string = 'Editor for Set Property with Checkboxs in Dropdown List, Direct Input Supported.';
+  SCnAlignPropEditorComment: string = 'Editor for Align Property with a bitmap.';
+  SCnNamePropEditorComment: string = 'Editor for Component Name Property used Component Prefix Rules.';
 
   // TCnMultiLineEditorForm
-  SCnPropEditorNoMatch: string = '没有发现匹配的字符串！';
-  SCnPropEditorReplaceOK: string = '替换完成，一共进行了%D处替换。';
-  SCnPropEditorCursorPos: string = '光标：[%D:%D]';
-  SCnPropEditorSaveText: string = '当前文本未保存，要保存吗？';
+  SCnPropEditorNoMatch: string = 'No Matched Text!';
+  SCnPropEditorReplaceOK: string = 'Replace OK, %D actions total.';
+  SCnPropEditorCursorPos: string = 'Caret [%D:%D]';
+  SCnPropEditorSaveText: string = 'Text Changed. Save it Now?';
 
 
   // TCnSizeConstraintsEditorForm
-  SCnSizeConsInputError: string = '您必须输入有效的整数！';
-  SCnSizeConsInputNeg: string = '您不能输入负数！';
+  SCnSizeConsInputError: string = 'Please Enter Integer Values.';
+  SCnSizeConsInputNeg: string = 'Negative is Invalid.';
 
   // TCnNamePropEditor
-  SCnPrefixWizardNotExist: string = '组件前缀专家没有找到，请开启该专家！';
+  SCnPrefixWizardNotExist: string = 'Component Prefix Wizard NOT Exists, Please Enable It.';
 
 implementation
 
