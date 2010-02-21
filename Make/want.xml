@@ -98,6 +98,9 @@ See http://www.suigeneris.org/want/ for details.
   <property name="install_arg"  value="/DNO_HELP" if="debug"/>
   <property name="install_arg"  value=""          if="helpfile"/>
 
+  <property name="install_dbg"  value="/DDEBUG"   if="debug"/>
+  <property name="install_dbg"  value=""          unless="debug"/>
+
   <property name="release.type" value="_Unstable" unless="ftpdir" />
   <property name="ftpdir"       value="/download.cnpack.org/unstable" unless="ftpdir" />
 
@@ -849,23 +852,14 @@ Usage: want [target-name] [-Dname=value]
 
   <!-- 制作安装程序 -->
   <target name="makeinst" depends="-prepare" description="Build CnWizards Installer." >
-    <property name="define.debug" value="want define:
-!define DEBUG" if="debug" />
-    <copy tofile="${install.src}/release.inc.old" unless="ismaster" >
-       <include name="${install.src}/release.inc" />
-    </copy>
-    <echo input="${install.src}/release.template.inc" file="${install.src}/release.inc" />
     <exec basedir="${install.src}" defaultfilters="true"
           executable="${ProgramFiles}\NSIS\makensis" >
+      <arg value="/DVER_MAJOR=${Ver.Str.Major}" />
+      <arg value="/DVER_MINOR=${Ver.Str.Minor}" />
       <arg value="${install_arg}" />
+      <arg value="${install_dbg}" />
       <arg value="CnWizards_Install.nsi" />
     </exec>
-    <delete dir="${install.src}" unless="ismaster" >
-       <include name="${install.src}/release.inc" />
-    </delete>
-    <move tofile="${install.src}/release.inc" unless="ismaster" >
-       <include name="${install.src}/release.inc.old" />
-    </move>
   </target>
 
   <!--
@@ -930,7 +924,6 @@ Usage: want [target-name] [-Dname=value]
       <arg value="commit" />
       <arg value="Make/release.ini" />
       <arg value="Source/Version.inc" />
-      <arg value="Install/Src/release.inc" />
     </exec>
   </target>
 
