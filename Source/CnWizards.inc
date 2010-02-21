@@ -20,6 +20,12 @@
 
 {$I CnPack.inc}
 
+{$IFDEF CNWIZARDS_LITE}
+
+{$I CnWizards_Lite.inc}
+
+{$ELSE}
+
 // Wizard: CnFastCodeWizard
 {$DEFINE CNWIZARDS_CNFASTCODEWIZARD}
 
@@ -134,5 +140,6 @@
 // Wizard: CnScriptWizard
 {$DEFINE CNWIZARDS_CNSCRIPTWIZARD}
 
-{$I CnWizards_Def.inc}
+{$ENDIF}
 
+{$I CnWizards_Def.inc}

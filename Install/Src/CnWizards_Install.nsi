@@ -83,8 +83,20 @@ SetDateSave on
 !ifndef IDE_VERSION_CB5
 !ifndef IDE_VERSION_CB6
 
-  !define FULL_VERSION    "1"
+!ifdef  LITE
+  !define LITE_VERSION    "1"
 
+  !define IDE_VERSION_D6  "1"
+  !define IDE_VERSION_D7  "1"
+  !define IDE_VERSION_D10 "1"
+  !define IDE_VERSION_D11 "1"
+  !define IDE_VERSION_CB6 "1"
+  
+  !define NO_HELP         "1"
+  !define NO_LANG_FILE    "1"
+!else
+  !define FULL_VERSION    "1"
+  
   !define IDE_VERSION_D5  "1"
   !define IDE_VERSION_D6  "1"
   !define IDE_VERSION_D7  "1"
@@ -95,6 +107,7 @@ SetDateSave on
   !define IDE_VERSION_D14 "1"
   !define IDE_VERSION_CB5 "1"
   !define IDE_VERSION_CB6 "1"
+!endif
 
 !endif
 !endif
@@ -108,6 +121,9 @@ SetDateSave on
 !endif
 
 !ifndef FULL_VERSION
+!ifndef LITE_VERSION
+  !define IDE_VERSION
+
   !ifdef IDE_VERSION_D5
     !define IDE_SHORT_NAME "D5"
     !define IDE_LONG_NAME "Delphi 5"
@@ -149,8 +165,9 @@ SetDateSave on
     !define IDE_LONG_NAME "C++Builder 5"
   !endif
 !endif
+!endif
 
-!ifndef FULL_VERSION
+!ifdef IDE_VERSION
   !define VERSION_STRING "${VER_MAJOR}.${VER_MINOR}_${IDE_SHORT_NAME}"
 !else
   !define VERSION_STRING "${VER_MAJOR}.${VER_MINOR}"
@@ -165,14 +182,14 @@ SetDateSave on
 ;------------------------------------------------------------------------------
 
 ; 软件名称
-!ifndef FULL_VERSION
+!ifdef IDE_VERSION
   Name "$(APPNAME) ${VER_MAJOR}.${VER_MINOR} For ${IDE_LONG_NAME}"
 !else
   Name "$(APPNAME) ${VER_MAJOR}.${VER_MINOR}"
 !endif
 
 ; 标题名称
-!ifndef FULL_VERSION
+!ifdef IDE_VERSION
 Caption "$(APPNAME) ${VER_MAJOR}.${VER_MINOR} For ${IDE_LONG_NAME}"
 !else
 Caption "$(APPNAME) ${VER_MAJOR}.${VER_MINOR}"
@@ -378,13 +395,18 @@ InitOk:
   SetOutPath $INSTDIR
   File "..\..\Bin\Setup.exe"
   File "..\..\Bin\CnWizRes.dll"
+!ifndef LITE_VERSION
   File "..\..\Bin\CnZipWrapper.dll"
+!endif
   File "..\..\License.*.txt"
 
   SetOutPath $INSTDIR\Data
   File "..\..\Bin\Data\*.*"
-  SetOutPath $INSTDIR\Data\Templates
-  File "..\..\Bin\Data\Templates\*.*"
+
+!ifdef NO_LANG_FILE
+  SetOutPath $INSTDIR\Lang\1033
+  File "..\..\Bin\Lang\1033\Help.ini"
+!else
   SetOutPath $INSTDIR\Lang\2052
   File "..\..\Bin\Lang\2052\*.*"
   SetOutPath $INSTDIR\Lang\1028
@@ -395,12 +417,21 @@ InitOk:
   File "..\..\Bin\Lang\1049\*.*"
   SetOutPath $INSTDIR\Lang\1031
   File "..\..\Bin\Lang\1031\*.*"
+!endif
+
+!ifndef LITE_VERSION
+  SetOutPath $INSTDIR\Data\Templates
+  File "..\..\Bin\Data\Templates\*.*"
+!endif
+
+!ifndef LITE_VERSION
   SetOutPath $INSTDIR\PSDecl
   File "..\..\Bin\PSDecl\*.*"
   SetOutPath $INSTDIR\PSDeclEx
   File "..\..\Bin\PSDeclEx\*.*"
   SetOutPath $INSTDIR\PSDemo
   File "..\..\Bin\PSDemo\*.*"
+!endif
 
   ; 删除 0.8.0 以前版本安装的图标文件，将于后续版本内去掉
   Delete "$INSTDIR\Icons\*.*"
@@ -556,23 +587,27 @@ SectionEnd
 Section "$(OTHERTOOLS)" SecTools
   SectionIn 1
   SetOutPath $INSTDIR
+!ifndef LITE_VERSION
   File "..\..\Bin\CnDfm6To5.exe"
-  File "..\..\Bin\CnConfigIO.exe"
   File "..\..\Bin\AsciiChart.exe"
-  File "..\..\Bin\CnDebugViewer.exe"
   File "..\..\Bin\CnIdeBRTool.exe"
   File "..\..\Bin\CnManageWiz.exe"
   File "..\..\Bin\CnSelectLang.exe"
   File "..\..\Bin\CnSMR.exe"
+!endif
+  File "..\..\Bin\CnConfigIO.exe"
+  File "..\..\Bin\CnDebugViewer.exe"
 
-  CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SCONFIGIO).lnk" "$INSTDIR\CnConfigIO.exe"
+!ifndef LITE_VERSION
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SASCIICHART).lnk" "$INSTDIR\AsciiChart.exe"
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SDFMCONVERTOR).lnk" "$INSTDIR\CnDfm6To5.exe"
-  CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SDEBUGVIEWER).lnk" "$INSTDIR\CnDebugViewer.exe"
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SIDEBRTOOL).lnk" "$INSTDIR\CnIdeBRTool.exe"
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SMANAGEWIZ).lnk" "$INSTDIR\CnManageWiz.exe"
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\${SSELECTLANG}.lnk" "$INSTDIR\CnSelectLang.exe"
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SRELATIONANALYZER).lnk" "$INSTDIR\CnSMR.exe"
+!endif
+  CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SCONFIGIO).lnk" "$INSTDIR\CnConfigIO.exe"
+  CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SDEBUGVIEWER).lnk" "$INSTDIR\CnDebugViewer.exe"
 
   ; 写入CnDebugViewer路径键值
   WriteRegStr HKCU "Software\CnPack\CnDebug" "CnDebugViewer" "$INSTDIR\CnDebugViewer.exe"
