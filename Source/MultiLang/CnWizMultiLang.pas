@@ -65,9 +65,9 @@ uses
   CnConsts, CnWizClasses, CnWizManager, CnWizUtils, CnWizOptions, CnDesignEditor,
   CnWizTranslate, CnLangUtils,
 {$ELSE}
-  CnWizLangID, CnWizHelp,
+  CnWizLangID,
 {$ENDIF}
-  CnWizConsts, CnCommon, CnLangMgr, CnHashLangStorage, CnLangStorage,
+  CnWizConsts, CnCommon, CnLangMgr, CnHashLangStorage, CnLangStorage, CnWizHelp,
   CnFormScaler, CnWizIni;
 
 type
@@ -477,10 +477,10 @@ begin
   if Topic <> '' then
   begin
 {$IFDEF STAND_ALONE}
-    if not ShowHelp(Topic) then
+    if not CnWizHelp.ShowHelp(Topic) then
       DoHelpError;
 {$ELSE}
-    ShowHelp(Topic);
+    CnWizUtils.ShowHelp(Topic);
 {$ENDIF}
   end;
 end;
