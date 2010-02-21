@@ -110,24 +110,21 @@ const
   csLangFile = 'Setup.txt';
 
 var
-  csHintStr: string = '提示';
-  csInstallSucc: string = 'CnPack 专家包已安装在以下环境中:' + #13#10;
-  csInstallSuccEnd: string = '再次运行安装程序将卸载专家包！';
-  csUnInstallSucc: string = 'CnPack 专家包已从以下环境中反安装:' + #13#10;
-  csUnInstallSuccEnd: string = '再次运行安装程序将重新安装专家包！';
-  csInstallFail: string = '没有找到可以安装 CnPack 专家包的编译器！';
-  csUnInstallFail: string = 'CnPack 专家包已经禁用！';
+  csHintStr: string = 'Hint';
+  csInstallSucc: string = 'CnPack IDE Wizards have been Installed in:' + #13#10 + '';
+  csInstallSuccEnd: string = 'Run Setup again to Uninstall.';
+  csUnInstallSucc: string = 'CnPack IDE Wizards have been Uninstalled From:' + #13#10 + '';
+  csUnInstallSuccEnd: string = 'Run Setup again to Install.';
+  csInstallFail: string = 'Can''t Find Delphi or C++Builder to Install CnPack IDE Wizards.';
+  csUnInstallFail: string = 'CnPack IDE Wizards have already Disabled.';
 
   csSetupCmdHelp: string =
-  '本工具支持命令行参数的运行方式.' + #13#10 +
-    '' + #13#10 +
-    '命令行参数说明：' + #13#10 +
-    '' + #13#10 +
-    '         -i 或 /i 或 -install 或 /install 安装至 IDE 中' + #13#10 +
-    '         -u 或 /u 或 -uninstall 或 /uninstall 从 IDE 中卸载' + #13#10 +
-    '         -n 或 /n 或 -NoMsg 或 /NoMsg 运行后不显示成功提示信息' + #13#10 +
-    '         -? 或 /? 或 -h 或 /h 命令行参数帮助' + #13#10 
-  ;
+    'This Tool Supports Command Line Mode without Showing the Main Form.' + #13#10#13#10 +
+    'Command Line Switch Help:' + #13#10#13#10 +
+    '         -i or /i or -install or /install Install to IDE' + #13#10 +
+    '         -u or /u or -uninstall or /uninstall UnInstall from IDE' + #13#10 +
+    '         -n or /n or -NoMsg or /NoMsg Do NOT Show the Success Message after Setup run.' + #13#10 +
+    '         -? or /? or -h or /h Show the Command Line Help.';
 
 //==============================================================================
 // 注册表访问

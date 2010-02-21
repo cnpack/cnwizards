@@ -159,65 +159,81 @@ var
 
 // ==== Start of 'Constant' String for Translation
 
-  SCnNoneProcName: string = '[未知程序]';
-  SCnHintMsgTree: string = '调试信息显示区';
+  SCnNoneProcName: string = '[Unknown]';
+  SCnHintMsgTree: string = 'Debugging Information Display';
 
-  SCnCPUSpeedFmt: string = 'CPU 估算频率：%f MHz';
+  SCnCPUSpeedFmt: string = 'CPU Speed: %f MHz';
   SCnTreeColumn0: string = '#';
-  SCnTreeColumn1: string = '输出信息';
-  SCnTreeColumn2: string = '类型';
+  SCnTreeColumn1: string = 'Information';
+  SCnTreeColumn2: string = 'Type';
   SCnTreeColumn3: string = 'Level';
   SCnTreeColumn4: string = 'Thread';
   SCnTreeColumn5: string = 'Tag';
-  SCnTreeColumn6: string = '时刻';
+  SCnTreeColumn6: string = 'TimeStamp';
 
   SCnMsgTypeNone:          string = '*';
-  SCnMsgTypeInformation:   string = '信息';
-  SCnMsgTypeWarning:       string = '警告';
-  SCnMsgTypeError:         string = '错误';
-  SCnMsgTypeSeparator:     string = '分隔';
-  SCnMsgTypeEnterProc:     string = '进入';
-  SCnMsgTypeLeaveProc:     string = '退出';
-  SCnMsgTypeTimeMarkStart: string = '计时';
-  SCnMsgTypeTimeMarkStop:  string = '计时';
-  SCnMsgTypeMemoryDump:    string = '内存';
-  SCnMsgTypeException:     string = '异常';
-  SCnMsgTypeObject:        string = '对象';
-  SCnMsgTypeComponent:     string = '组件';
-  SCnMsgTypeCustom:        string = '自定义';
-  SCnMsgTypeSystem:        string = '系统';
+  SCnMsgTypeInformation:   string = 'Information';
+  SCnMsgTypeWarning:       string = 'Warning';
+  SCnMsgTypeError:         string = 'Error';
+  SCnMsgTypeSeparator:     string = 'Separator';
+  SCnMsgTypeEnterProc:     string = 'Enter';
+  SCnMsgTypeLeaveProc:     string = 'Leave';
+  SCnMsgTypeTimeMarkStart: string = 'Timing';
+  SCnMsgTypeTimeMarkStop:  string = 'Timing';
+  SCnMsgTypeMemoryDump:    string = 'MemDump';
+  SCnMsgTypeException:     string = 'Exception';
+  SCnMsgTypeObject:        string = 'Object';
+  SCnMsgTypeComponent:     string = 'Component';
+  SCnMsgTypeCustom:        string = 'Custom';
+  SCnMsgTypeSystem:        string = 'System';
 
   SCnMsgDescriptionFmt: string =
-    '序号: %-5d    Level: %-1d    ThreadID: $%-8x    ProcessID: $%-8x   Tag: %-8s   时间戳: %s' +
+    'No: %-5d    Level: %-1d    ThreadID: $%-8x    ProcessID: $%-8x   Tag: %-8s   TimeStamp: %s' +
     #13#10 + '%s';
   SCnTimeDescriptionFmt: string =
-    '序号: %-5d    累计次数: %8d    Tag: %-8s    总耗时: %f 微秒 (%s)';
+    'No: %-5d    Count: %8d    Tag: %-8s    Summary: %f us';
 
-  SCnThreadRunning: string = '正在运行...';
-  SCnThreadPaused: string = '已暂停';
-  SCnThreadStopped: string = '已停止';
+  SCnThreadRunning: string = 'Running...';
+  SCnThreadPaused: string = 'Paused';
+  SCnThreadStopped: string = 'Stopped';
 
-  SCnErrorCaption: string = '出错信息';
-  SCnInfoCaption: string = '提示';
-  SCnNotFound: string = '未找到字符串';
-  SCnStopFirst: string = '读取信息期间不支持文件的载入，是否先停止信息的读取？';
-  SCnDebuggerExists: string = '提示: 系统中已存在另一调试器。';
-  SCnBookmarkFull: string = '已达到书签最大数目，无法再定义书签';
-  SCnBookmarkNOTExist: string = '此书签不可见，可能已被过滤掉';
-  SCnRegisterHotKeyError: string = '注册全局热键错误。';
+  SCnErrorCaption: string = 'Error';
+  SCnInfoCaption: string = 'Hint';
+  SCnNotFound: string = 'Searching Content NOT Found.';
+  SCnStopFirst: string = 'Loading NOT Supported while Reading Debugging Information. Stop it First?';
+  SCnDebuggerExists: string = 'Warning: Another Debugger Exists.';
+  SCnBookmarkFull: string = 'Maximized Bookmark Count Reached! Can NOT Continue.';
+  SCnBookmarkNOTExist: string = ' Bookmark NOT found, maybe Filtered.';
+  SCnRegisterHotKeyError: string = 'Register HotKey Error. HotKey Disabled.';
 
-  SCnBookmark: string = '书签 &%d，第 %d 行';
+  SCnBookmark: string = 'Bookmark &%d, Line %d';
   SCnNoHelpofThisLang: string = 'Sorry. No HELP in this Language.';
 
-  SCnCSVFormatHeader: string = '序号,Level,类型,ThreadID,ProcessID,Tag,时间戳,内容';
+  SCnCSVFormatHeader: string = 'Index,Level,Type,ThreadID,ProcessID,Tag,TimeStamp,Message';
+  SCnHTMFormatCharset: string = 'iso-8859-1';
 
   SCnHTMFormatStyle: string =
-    '.tabletext   { font-family: 宋体; font-size: 9pt; text-align: left; line-height: 13pt;' + #13#10 +
-                   'color: #000000; background-color: #FFFFF8 }' + #13#10 +
-    '.tablehead   { font-family: 宋体; font-size: 9pt; text-align: center; line-height: 13pt;' + #13#10 +
-                   'color: #0000FF; background-color: #DDEEFF }' + #13#10;
-
-  SCnHTMFormatCharset: string = 'gb2312';
+    '.tabletext   { font-family: Tahoma; font-size: 8pt; text-align: left; line-height: 13pt;' + #13#10 +
+    '               color: #000000; background-color: #FFFFF8 }' + #13#10 +
+    '.tablehead   { font-family: Tahoma; font-size: 8pt; text-align: center; line-height: 13pt;' + #13#10 +
+    '               color: #0000FF; background-color: #DDEEFF }' + #13#10;
+  SCnHTMFormatTableHead: string =
+    '<tr>' + #13#10 +
+      '<td width="24pt" class="tablehead" valign="top">Index</td>' + #13#10 +
+      '<td width="9pt" class="tablehead" valign="top">Level</td>' + #13#10 +
+      '<td width="28pt" class="tablehead" valign="top">Type</td>' + #13#10 +
+      '<td width="32pt" class="tablehead" valign="top">ThreadID</td>' + #13#10 +
+      '<td width="32pt" class="tablehead" valign="top">ProcessID</td>' + #13#10 +
+      '<td width="28pt" class="tablehead" valign="top">Tag</td>' + #13#10 +
+      '<td width="60pt" class="tablehead" valign="top">TimeStamp</td>' + #13#10 +
+      '<td class="tablehead">Message</td>' + #13#10 +
+    '</tr>';
+  SCnDebugViewerAboutCaption: string = 'About';
+  SCnDebugViewerAbout: string =
+    'CnDebugViewer 1.4' + #13#10#13#10 +
+    'This Tool is Used to Show the Debugging Output Information from CnDebug.' + #13#10#13#10 +
+    'Author: Liu Xiao (liuxiao@cnpack.org)' + #13#10 +
+    'Copyright (C) 2001-2010 CnPack Team';
 
   SCnHTMFormatHeader: string =
     '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">' + #13#10 +
@@ -234,18 +250,6 @@ var
     '<table width="100%%" cellspacing="1" cellpadding="2" bgcolor="#CCCCFF"' + #13#10 +
     'bordercolor="#CCCCFF" bordercolorlight="#FFFFFF" bordercolordark="#6666FF" valign="top">';
 
-  SCnHTMFormatTableHead: string =
-    '<tr>' + #13#10 +
-      '<td width="24pt" class="tablehead" valign="top">序号</td>' + #13#10 +
-      '<td width="9pt" class="tablehead" valign="top">Level</td>' + #13#10 +
-      '<td width="28pt" class="tablehead" valign="top">类型</td>' + #13#10 +
-      '<td width="32pt" class="tablehead" valign="top">线程</td>' + #13#10 +
-      '<td width="32pt" class="tablehead" valign="top">进程</td>' + #13#10 +
-      '<td width="28pt" class="tablehead" valign="top">Tag</td>' + #13#10 +
-      '<td width="60pt" class="tablehead" valign="top">时间戳</td>' + #13#10 +
-      '<td class="tablehead">内容</td>' + #13#10 +
-    '</tr>';
-
   SCnHTMFormatLine: string = 
     '<tr>' + #13#10 +
       '<td width="24pt" class="tabletext" valign="top">%d</td>' + #13#10 +
@@ -259,15 +263,6 @@ var
     '</tr>';
 
   SCnHTMFormatEnd: string = '</table></body></html>';
-
-  SCnDebugViewerAboutCaption: string = '关于';
-  SCnDebugViewerAbout: string =
-    'CnDebugViewer 调试信息查看工具 1.4' + #13#10 +
-    '' + #13#10 +
-    '该工具用来查看 CnDebug 单元输出的调试信息。' + #13#10 +
-    '' + #13#10 +
-    '软件作者 刘啸 (LiuXiao) liuxiao@cnpack.org' + #13#10 +
-    '版权所有 (C) 2001-2010 CnPack 开发组';
 
 // ==== End of 'Constant' String for Translation
 

@@ -99,12 +99,12 @@ var
   CnSMRMainForm: TCnSMRMainForm;
 
   // 需要本地化的字符串
-  SCnAboutCaption: string = '关于';
-  SCnIDEAbout: string = 'CnPack Relation Analyzer - 源码模块关系分析工具' + #13#10 +
-  '' + #13#10 +
-  '软件作者 Chinbo (Shenloqi)  chinbo@eyou.com' + #13#10 +
-  '　　移植 刘啸 (LiuXiao)  liuxiao@cnpack.org' + #13#10 +
-  '版权所有 (C) 2001-2010 CnPack 开发组';
+  SCnAboutCaption: string = 'About';
+  SCnIDEAbout: string = 'CnPack IDE Wizards - Source file / affected Modules Relation Analyzer' + #13#10#13#10 +
+    'Author:' + #13#10 +
+    'Chinbo (Shenloqi)  chinbo@eyou.com' + #13#10 +
+    'LiuXiao (LiuXiao)  liuxiao@cnpack.org' + #13#10#13#10 +
+    'Copyright (C) 2001-2010 CnPack Team';
 
   SCnAnalyzedResultsSaved: string = 'Analyzed Results Saved Successed to File %s.';
   SCnDuplicatedNameFound: string = 'Can NOT Save analyzed result: Duplicated File Names Found:'#13#10#13#10'%s';
@@ -172,9 +172,9 @@ begin
   end
   else
   begin
-    // 如语言初始化失败，则返回中文的内容，因为默认的界面是中文的
+    // 如语言初始化失败，则返回英文的内容，因为默认的界面是英文的
     Result := IncludeTrailingBackslash(ExtractFilePath(ParamStr(0))) + csLangDir
-      + '2052\' + FileName;
+      + '1033\' + FileName;
   end;
 end;
 

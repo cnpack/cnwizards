@@ -247,17 +247,15 @@ implementation
 var
   CmdSelected: TCnCompiler = cnDelphi5;
 
-  SCnAboutCaption: string = '关于';
-  SCnMessageHint: string = '提示';
-  SCnConfirmDeleteFmt: string = '确定删除专家 %s 在 %s 下的注册信息？';
-  SCnChangedRefreshFmt: string = '%s 下的专家注册信息已经改变，是否放弃改变，重新载入？';
-  SCnWizardChangedFmt: string = '下列 IDE 的专家注册信息已经改变，退出前是否保存？' + #13#10#13#10;
-  SCnConfirmExit: string = '确实要退出 CnPack IDE 专家管理工具？';
-
-  SCnManageWizAbout: string = 'CnPack IDE 专家管理工具' + #13#10 +
-    '' + #13#10 +
-    '软件作者 刘啸 (LiuXiao)  liuxiao@cnpack.org' + #13#10 +
-    '版权所有 (C) 2001-2010 CnPack 开发组';
+  SCnAboutCaption: string = 'About';
+  SCnMessageHint: string = 'Hint';
+  SCnConfirmDeleteFmt: string = 'Sure to UnRegister %s in %s ?';
+  SCnChangedRefreshFmt: string = '%s Wizard Registration Information Changed, Discard and Reload?';
+  SCnWizardChangedFmt: string = 'Below IDE(s) Wizard Registration Information Changed. Save?' + #13#10#13#10;
+  SCnConfirmExit: string = 'Sure to Exit?';
+  SCnManageWizAbout: string = 'CnPack IDE External Wizard Management' + #13#10#13#10 +
+    'Author LiuXiao liuxiao@cnpack.org' + #13#10 +
+    'Copyright (C) 2001-2010 CnPack Team';
 
 const
   csLangDir = 'Lang\';
@@ -276,9 +274,9 @@ begin
   end
   else
   begin
-    // 如语言初始化失败，则返回中文的内容，因为默认的界面是中文的
+    // 如语言初始化失败，则返回英文的内容，因为默认的界面是英文的
     Result := IncludeTrailingBackslash(ExtractFilePath(ParamStr(0))) + csLangDir
-      + '2052\' + FileName;
+      + '1033\' + FileName;
   end;
 end;
 

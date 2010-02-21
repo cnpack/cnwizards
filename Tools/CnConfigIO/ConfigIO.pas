@@ -48,39 +48,36 @@ const
   SCnWizardsReg = 'CnWizards.reg';
 
 var
-  SCnQuitAsk: string = '是否要退出 CnPack IDE 专家包设置导入导出工具？';
-  SCnQuitAskCaption: string = '提示';
-  SCnRestoreDef: string = '恢复默认设置将清除所有的用户自定义设置，是否继续？';
-  SCnBackupSucc: string = ' CnPack IDE 专家包设置信息已经成功导出！';
-  SCnRestoreSucc: string = ' CnPack IDE 专家包设置信息已经成功导入！';
-  SCnRestoreDefSucc: string = 'CnPack IDE 专家包已经恢复默认设置！';
-  SCnIdeRunning: string = '在执行导入操作前，请先关闭您的 Delphi / C++Builder 程序！';
-  SCnIdeRunning1: string = '在执行恢复默认操作前，请先关闭您的 Delphi / C++Builder 程序！';
-  SCnRestoreError: string = '无法导入指定的注册表文件！';
+  SCnQuitAsk: string = 'Sure to Exit?';
+  SCnQuitAskCaption: string = 'Information';
+  SCnRestoreDef: string = 'The Restoring Action will Overwrite Existing Config Info, Continue?';
+  SCnBackupSucc: string = 'CnPack IDE Wizards Config Info Exported Successfully.';
+  SCnRestoreSucc: string = 'CnPack IDE Wizards Config Info Imported Successfully.';
+  SCnRestoreDefSucc: string = 'CnPack IDE Wizards Config Info Restored Successfully.';
+  SCnIdeRunning: string = 'Please Close Delphi / C++Builder before Importing or Exporting.';
+  SCnIdeRunning1: string = 'Please Close Delphi / C++Builder before Restoring.';
+  SCnRestoreError: string = 'Can not Import Registry Files.';
 
   SCnConfigIOCmdHelp: string =
-    '本工具支持命令行参数的不显示主窗口的导入导出方式' + #13#10 +
-    '' + #13#10 +
-    '命令行参数说明：' + #13#10 + #13#10 +
-    '         命令行参数中第一个不以 / 或 - 开头的是文件名参数' + #13#10 +
-    '         -i 或 /i     导入设置' + #13#10 +
-    '         -o 或 /o     导出设置' + #13#10 +
-    '         -r 或 /r     恢复默认设置' + #13#10 +
-    '         -n 或 /n 或 -NoMsg 或 /NoMsg 不弹出成功的提示信息' + #13#10 +
-    '         -? 或 /? 或 -h 或 /h  命令行参数帮助' + #13#10 +
-    '' + #13#10 +
-    '如：' + #13#10 +
+    'This Tool Supports Command Line Mode without Showing the Main Form.' + #13#10#13#10 +
+    'Command Line Switch Help:' + #13#10#13#10 +
+    '         The First Parameter without / or - Represents the File name.' + #13#10 +
+    '         -i or /i     Import CnWizards Settings' + #13#10 +
+    '         -o or /o     Export CnWizards Settings' + #13#10 +
+    '         -r or /r     Restore to CnWizards Default Settings' + #13#10 +
+    '         -n or /n or -NoMsg or /NoMsg Do NOT Show the Success Message after Import/Export/Restore Operation.' + #13#10 +
+    '         -? or /? or -h 或 /h  Show the Command Line Help' + #13#10#13#10 +
+    'Examples:' + #13#10 +
     '         CnConfigIO -i C:\a.cnw -n' + #13#10 +
     '         CnConfigIO -o C:\a.cnw -n' + #13#10 +
     '         CnConfigIO -r';
 
-  SCnConfigIOAboutCaption: string = '关于';
-  SCnConfigIOAbout: string = 'CnPack IDE 专家包设置导入导出工具' + #13#10#13#10 +
-    '该工具提供 CnPack IDE 专家包设置的导入导出功能，' + #13#10 +
-    '用于保留设置备份，或者将设置迁移到其他环境中。' + #13#10 +
-    '' + #13#10 +
-    '软件作者 刘啸 (LiuXiao)  liuxiao@cnpack.org' + #13#10 +
-    '版权所有 (C) 2001-2010 CnPack 开发组';
+  SCnConfigIOAboutCaption: string = 'About';
+  SCnConfigIOAbout: string = 'CnPack IDE Wizards Config Import & Export Tool' + #13#10#13#10 +
+    'This tool can be used to Import and Export CnPack IDE Wizards Config Information ' + #13#10 +
+    'for Config backup or migration.' + #13#10#13#10 +
+    'Author: Liu Xiao (liuxiao@cnpack.org)' + #13#10 +
+    'Copyright (C) 2001-2010 CnPack Team';
 
 type
   TFrmConfigIO = class(TForm)
