@@ -65,7 +65,7 @@ uses
   CnConsts, CnWizClasses, CnWizManager, CnWizUtils, CnWizOptions, CnDesignEditor,
   CnWizTranslate, CnLangUtils,
 {$ELSE}
-  CnWizLangID, CnWideStrings,
+  CnWizLangID, CnWizHelp,
 {$ENDIF}
   CnWizConsts, CnCommon, CnLangMgr, CnHashLangStorage, CnLangStorage,
   CnFormScaler, CnWizIni;
@@ -156,60 +156,6 @@ const
 var
   FStorage: TCnHashLangFileStorage;
 
-{$IFDEF STAND_ALONE}
-// 独立状态下，copy 此俩函数过来
-
-// 取帮助主题链接
-function GetTopicHelpUrl(const Topic: string): string;
-const
-  csSection = 'CnWizards';
-var
-  FileName: string;
-begin
-  Result := '';
-  FileName := GetFileFromLang(SCnWizHelpIniFile);
-
-  if not FileExists(FileName) then
-    Exit;
-
-  with TCnWideMemIniFile.Create(FileName) do
-  try
-    Result := ReadString(csSection, Topic, '');
-    if not CheckWinVista and (Result = '') then
-      WriteString(csSection, Topic, '');   // 创建该项内容供编辑
-  finally
-    if not CheckWinVista then
-      UpdateFile;
-    Free;
-  end;
-end;
-
-// 显示指定主题的帮助内容
-function ShowHelp(const Topic: string): Boolean;
-var
-  Url: string;
-  si: TStartupInfo;
-  pi: TProcessInformation;
-begin
-  Url := GetTopicHelpUrl(Topic);
-  if Url <> '' then
-  begin
-    Url := 'mk:@MSITStore:' + ExtractFilePath(ParamStr(0)) + csHelpDir + Url;
-    ZeroMemory(@si, SizeOf(si));
-    si.cb := SizeOf(si);
-    ZeroMemory(@pi, SizeOf(pi));
-    CreateProcess(nil, PChar('hh ' + Url),
-      nil, nil, False, 0, nil, nil, si, pi);
-    if pi.hProcess <> 0 then CloseHandle(pi.hProcess);
-    if pi.hThread <> 0 then CloseHandle(pi.hThread);
-    Result := True;
-  end
-  else
-    Result := False;
-end;
-
-{$ENDIF}
-
 procedure InitLangManager;
 var
   LangID: Cardinal;
@@ -266,28 +212,7 @@ end;
 
 function GetFileFromLang(const FileName: string): string;
 begin
-  if (CnLanguageManager.LanguageStorage <> nil) and
-    (CnLanguageManager.LanguageStorage.CurrentLanguage <> nil) then
-  begin
-{$IFNDEF STAND_ALONE}
-    Result := MakePath(WizOptions.LangPath +
-      CnLanguageManager.LanguageStorage.CurrentLanguage.LanguageDirName)
-      + FileName;
-{$ELSE}
-    Result := MakePath(ExtractFilePath(ParamStr(0)) + csLangDir +
-      CnLanguageManager.LanguageStorage.CurrentLanguage.LanguageDirName)
-      + FileName;
-{$ENDIF}
-  end
-  else
-  begin
-    // 如语言初始化失败，则返回中文的内容，因为默认的界面是中文的
-{$IFNDEF STAND_ALONE}
-    Result := MakePath(WizOptions.LangPath) + '2052\' + FileName;
-{$ELSE}
-    Result := MakePath(ExtractFilePath(ParamStr(0))) + '2052\' + FileName;
-{$ENDIF}
-  end;
+  Result := CnWizHelp.GetFileFromLang(FileName);
 end;
 
 {$IFNDEF STAND_ALONE}

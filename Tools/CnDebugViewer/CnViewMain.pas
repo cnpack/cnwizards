@@ -38,9 +38,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ExtCtrls, Menus, ComCtrls, ActnList, ImgList, ToolWin, StdCtrls, IniFiles,
-  Clipbrd, Registry, Tabs,
-  VirtualTrees, CnMdiView, CnLangTranslator, CnLangMgr, CnWizLangID, CnTabSet,
+  ExtCtrls, Menus, ComCtrls, ActnList, ImgList, ToolWin, Clipbrd, Registry, 
+  Tabs, VirtualTrees, CnMdiView, CnLangMgr, CnWizLangID, CnTabSet,
   CnLangStorage, CnHashLangStorage, CnClasses, CnMsgClasses, CnTrayIcon,
   CnWizCfgUtils;
 
@@ -274,7 +273,7 @@ var
 implementation
 
 uses
-  CnViewCore, CnGetThread, CnFilterFrm, CnViewOption;
+  CnViewCore, CnGetThread, CnFilterFrm, CnViewOption, CnWizHelp;
 
 {$R *.DFM}
 
@@ -985,41 +984,8 @@ begin
 end;
 
 procedure TCnMainViewer.actHelpExecute(Sender: TObject);
-var
-  Url, HelpPath, FileName: string;
-  si: TStartupInfo;
-  pi: TProcessInformation;
 begin
-  HelpPath := ExtractFilePath(ParamStr(0)) + csHelpDir;
-  FileName := IncludeTrailingBackslash(ExtractFilePath(ParamStr(0)) + csLangDir
-    + CnLanguageManager.LanguageStorage.CurrentLanguage.LanguageDirName) + SCnDbgHelpIniFile;
-
-  if not FileExists(FileName) then
-  begin
-    HelpPath := ExtractFilePath(ParamStr(0));
-    FileName := HelpPath + SCnDbgHelpIniFile;
-    if not FileExists(FileName) then
-      Exit;
-  end;
-
-  with TIniFile.Create(FileName) do
-  try
-    Url := ReadString(SCnDbgHelpIniSecion, SCnDbgHelpIniTopic, '');
-  finally
-    Free;
-  end;
-
-  if Url <> '' then
-  begin
-    Url := 'mk:@MSITStore:' + IncludeTrailingBackslash(HelpPath) + Url;
-    ZeroMemory(@si, SizeOf(si));
-    si.cb := SizeOf(si);
-    ZeroMemory(@pi, SizeOf(pi));
-    CreateProcess(nil, PChar('hh ' + Url), nil, nil, False, 0, nil, nil, si, pi);
-    if pi.hProcess <> 0 then CloseHandle(pi.hProcess);
-    if pi.hThread <> 0 then CloseHandle(pi.hThread);
-  end
-  else
+  if not ShowHelp(SCnDbgHelpIniTopic, SCnDbgHelpIniSecion) then
     ErrorDlg(SCnNoHelpofThisLang);
 end;
 

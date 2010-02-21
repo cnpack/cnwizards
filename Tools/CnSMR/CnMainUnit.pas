@@ -141,89 +141,12 @@ procedure SyncMemoWithStrings(ss: TStrings; mmo: TMemo);
 procedure UpdateChildrenAlign(ctrl: TControl);
 procedure WrapButtonsCaption(ParentControl: TWinControl);
 
-// 显示指定主题的帮助内容
-function ShowHelp(const Topic: string): Boolean;
-// 取帮助主题链接
-function GetTopicHelpUrl(const Topic: string): string;
-// 根据语言取文件名
-function GetFileFromLang(const FileName: string): string;
-
 implementation
 
 uses
-  CnBaseUtils;// , CnWizConsts;
+  CnBaseUtils, CnWizHelp;
 
 {$R *.dfm}
-
-const
-  csLangDir = 'Lang\';
-  csHelpDir = 'Help\';
-  csWizHelpIniFile = 'Help.ini';
-
-// 根据语言取文件名
-function GetFileFromLang(const FileName: string): string;
-begin
-  if (CnLanguageManager.LanguageStorage <> nil) and
-    (CnLanguageManager.LanguageStorage.CurrentLanguage <> nil) then
-  begin
-    Result := IncludeTrailingBackslash(ExtractFilePath(ParamStr(0)) + csLangDir +
-      CnLanguageManager.LanguageStorage.CurrentLanguage.LanguageDirName)
-      + FileName;
-  end
-  else
-  begin
-    // 如语言初始化失败，则返回英文的内容，因为默认的界面是英文的
-    Result := IncludeTrailingBackslash(ExtractFilePath(ParamStr(0))) + csLangDir
-      + '1033\' + FileName;
-  end;
-end;
-
-// 取帮助主题链接
-function GetTopicHelpUrl(const Topic: string): string;
-const
-  csSection = 'CnSMR';
-var
-  FileName: string;
-begin
-  Result := '';
-  FileName := GetFileFromLang(csWizHelpIniFile);
-
-  if not FileExists(FileName) then
-    Exit;
-
-  with TIniFile.Create(FileName) do
-  try
-    Result := ReadString(csSection, Topic, '');
-    if Result = '' then
-      WriteString(csSection, Topic, '');   // 创建该项内容供编辑
-  finally
-    Free;
-  end;
-end;
-
-// 显示指定主题的帮助内容
-function ShowHelp(const Topic: string): Boolean;
-var
-  Url: string;
-  si: TStartupInfo;
-  pi: TProcessInformation;
-begin
-  Url := GetTopicHelpUrl(Topic);
-  if Url <> '' then
-  begin
-    Url := 'mk:@MSITStore:' + ExtractFilePath(ParamStr(0)) + csHelpDir + Url;
-    ZeroMemory(@si, SizeOf(si));
-    si.cb := SizeOf(si);
-    ZeroMemory(@pi, SizeOf(pi));
-    CreateProcess(nil, PChar('hh ' + Url),
-      nil, nil, False, 0, nil, nil, si, pi);
-    if pi.hProcess <> 0 then CloseHandle(pi.hProcess);
-    if pi.hThread <> 0 then CloseHandle(pi.hThread);
-    Result := True;
-  end
-  else
-    Result := False;
-end;
 
 function AppPath: string;
 begin
@@ -232,7 +155,7 @@ end;
 
 var
   FormClassList: TList;
-  
+
 procedure RegisterFormClass(FormClass: TFormClass; idx: Integer = -1);
 begin
   if not Assigned(FormClass) then
@@ -791,7 +714,7 @@ end;
 
 procedure TCnSMRMainForm.actHelpExecute(Sender: TObject);
 begin
-  ShowHelp('CnSMR');
+  ShowHelp('CnSMR', 'CnSMR');
 end;
 
 initialization
