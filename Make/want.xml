@@ -662,7 +662,7 @@ Usage: want [target-name] [-Dname=value]
     </copy>
     <echo input="${tools}/CnTools.template.rc" file="${tools}/CnDebugViewer/CnDebugViewer.rc" />
     <brcc file="${tools}/CnDebugViewer/CnDebugViewer.rc" output="${tools}/CnDebugViewer/CnDebugViewer.res" />
-    <dcc basedir="${tools}/CnDebugViewer" source="CnDebugViewer.dpr" versions="5" usecfg="true" />
+    <dcc basedir="${tools}/CnDebugViewer" source="CnDebugViewer.dpr" versions="7" usecfg="true" />
     <delete dir="${tools}/CnDebugViewer">
        <include name="CnDebugViewer.res" />
        <include name="CnDebugViewer.rc" />
