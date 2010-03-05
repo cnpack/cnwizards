@@ -51,6 +51,7 @@ See http://www.suigeneris.org/want/ for details.
   <property name="exe.python"     value="C:\Python26\python.exe" unless="env.python" />
 
   <!-- 版本类型属性，由命令行传入，如 want -Dlite=true -->
+  <property name="release.pro"    value="" />
   <property name="release.pro"    value=""          if="full" />
   <property name="release.pro"    value="_Lite"     if="lite" />
 
