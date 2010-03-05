@@ -1,0 +1,24 @@
+**********************************************************************
+                     CnPack For Delphi/C++Builder
+                A Free, Open Source Project from China
+                 (C)Copyright 2001-2010 CnPack Team
+**********************************************************************
+
+Follow features depend third part components:
+
+Script Wizard
+=============
+
+Depend on: RemObjects Pascal Script
+Revision : 213
+
+You'll need to obtain the exact revision from the ROPS Subversion repository:
+
+> cd CnPack\cnwizards\Source\ThirdParty
+> svn checkout -r 213 http://code.remobjects.com/svn/pascalscript/Source PascalScript
+
+Also, you'll need to open file CnPack\cnwizards\Source\CnWizards_Def.inc and
+remove or comment this line:
+  {$UNDEF SUPPORT_PASCAL_SCRIPT}
+
+[EOF]
