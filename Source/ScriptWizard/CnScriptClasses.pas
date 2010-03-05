@@ -58,6 +58,8 @@ type
   protected
     function DoOnUnknowUses(Sender: TPSPascalCompiler; const Name: AnsiString):
       Boolean; override;
+  public
+    destructor Destroy; override;
   end;
 
   TCnExecResult = (erSucc, erCompileError, erExecError);
@@ -162,6 +164,16 @@ begin
     end;
   end;
   Result := False;
+end;
+
+destructor TCnPSScript.Destroy;
+var
+  i: Integer;
+begin
+  // 提前释放插件，以避免后面释放时出错
+  for i := Plugins.Count - 1 downto 0 do
+    TPSPluginItem(Plugins.Items[i]).Plugin.Free;
+  inherited Destroy;
 end;
 
 { TCnScriptExec }
