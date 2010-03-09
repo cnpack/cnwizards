@@ -5,7 +5,7 @@
 			<Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
 			<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
-			<DCC_DependencyCheckOutputName>..\Bin\CnWizards_D11.dll</DCC_DependencyCheckOutputName>
+			<DCC_DependencyCheckOutputName>..\Bin\CnWizards_D14.dll</DCC_DependencyCheckOutputName>
 			<ProjectVersion>12.0</ProjectVersion>
 			<Config Condition="'$(Config)'==''">Release</Config>
 		</PropertyGroup>
@@ -42,10 +42,10 @@
 			<DCC_DcuOutput>..\Dcu</DCC_DcuOutput>
 			<DCC_ObjOutput>..\Dcu</DCC_ObjOutput>
 			<DCC_HppOutput>..\Dcu</DCC_HppOutput>
-			<DCC_UnitSearchPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript;ThirdParty\FastCode;Utils;ScriptWizard;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
-			<DCC_ResourcePath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript;ThirdParty\FastCode;Utils;ScriptWizard;$(DCC_ResourcePath)</DCC_ResourcePath>
-			<DCC_ObjPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript;ThirdParty\FastCode;Utils;ScriptWizard;$(DCC_ObjPath)</DCC_ObjPath>
-			<DCC_IncludePath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript;ThirdParty\FastCode;Utils;ScriptWizard;$(DCC_IncludePath)</DCC_IncludePath>
+			<DCC_UnitSearchPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript_2009;ThirdParty\FastCode;Utils;ScriptWizard;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+			<DCC_ResourcePath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript_2009;ThirdParty\FastCode;Utils;ScriptWizard;$(DCC_ResourcePath)</DCC_ResourcePath>
+			<DCC_ObjPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript_2009;ThirdParty\FastCode;Utils;ScriptWizard;$(DCC_ObjPath)</DCC_ObjPath>
+			<DCC_IncludePath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript_2009;ThirdParty\FastCode;Utils;ScriptWizard;$(DCC_IncludePath)</DCC_IncludePath>
 			<DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
 			<DCC_SYMBOL_DEPRECATED>False</DCC_SYMBOL_DEPRECATED>
 			<DCC_SYMBOL_LIBRARY>False</DCC_SYMBOL_LIBRARY>
@@ -67,10 +67,10 @@
 			<DCC_DcuOutput>..\Dcu</DCC_DcuOutput>
 			<DCC_ObjOutput>..\Dcu</DCC_ObjOutput>
 			<DCC_HppOutput>..\Dcu</DCC_HppOutput>
-			<DCC_UnitSearchPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript;ThirdParty\FastCode;Utils;ScriptWizard;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
-			<DCC_ResourcePath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript;ThirdParty\FastCode;Utils;ScriptWizard;$(DCC_ResourcePath)</DCC_ResourcePath>
-			<DCC_ObjPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript;ThirdParty\FastCode;Utils;ScriptWizard;$(DCC_ObjPath)</DCC_ObjPath>
-			<DCC_IncludePath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript;ThirdParty\FastCode;Utils;ScriptWizard;$(DCC_IncludePath)</DCC_IncludePath>
+			<DCC_UnitSearchPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript_2009;ThirdParty\FastCode;Utils;ScriptWizard;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+			<DCC_ResourcePath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript_2009;ThirdParty\FastCode;Utils;ScriptWizard;$(DCC_ResourcePath)</DCC_ResourcePath>
+			<DCC_ObjPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript_2009;ThirdParty\FastCode;Utils;ScriptWizard;$(DCC_ObjPath)</DCC_ObjPath>
+			<DCC_IncludePath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript_2009;ThirdParty\FastCode;Utils;ScriptWizard;$(DCC_IncludePath)</DCC_IncludePath>
 			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
 			<DCC_SYMBOL_DEPRECATED>False</DCC_SYMBOL_DEPRECATED>
 			<DCC_SYMBOL_LIBRARY>False</DCC_SYMBOL_LIBRARY>
