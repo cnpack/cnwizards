@@ -361,7 +361,7 @@ begin
   for I := 0 to Grid.RowCount - 1 do
     Grid.Cells[0, I] := GetOrd(8 * (I - 1) + FPage * 128, FHex);
   for I := 0 to Grid.ColCount - 1 do
-    Grid.Cells[I, 0] := GetOrd(I - 1  + FPage * 128, FHex);
+    Grid.Cells[I, 0] := GetOrd(I - 1, FHex);
   Grid.Cells[0, 0] := '';
 
   for I := 1 to Grid.RowCount - 1 do
