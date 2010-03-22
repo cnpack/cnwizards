@@ -901,12 +901,8 @@ begin
         
       FSavePath := ExtractFilePath(SaveFileName);
       FTimeFormatIndex := cbbTimeFormat.ItemIndex;
-      
-      if FSavePath = '' then
-      begin
-        FSavePath := MakePath(ExtractFilePath(FCurrentName));
-        SaveFileName := FSavePath + SaveFileName;
-      end;
+
+      SaveFileName := LinkPath(ExtractFilePath(FCurrentName), SaveFileName);
 
       if FileExists(SaveFileName) and not Confirmed then
         if not QueryDlg(SCnOverwriteQuery) then
