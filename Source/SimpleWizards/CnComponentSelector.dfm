@@ -20,7 +20,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
     object rbCurrForm: TRadioButton
       Left = 8
       Top = 16
-      Width = 160
+      Width = 223
       Height = 17
       Caption = 'All Components in Form'
       Checked = True
@@ -31,7 +31,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
     object rbCurrControl: TRadioButton
       Left = 8
       Top = 38
-      Width = 160
+      Width = 223
       Height = 17
       Caption = 'All Subs of Selected'
       TabOrder = 1
@@ -40,7 +40,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
     object rbSpecControl: TRadioButton
       Left = 8
       Top = 60
-      Width = 160
+      Width = 223
       Height = 17
       Caption = 'All Subs of Specified'
       TabOrder = 2
@@ -60,7 +60,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
     object cbIncludeChildren: TCheckBox
       Left = 8
       Top = 112
-      Width = 199
+      Width = 223
       Height = 17
       Caption = 'Contains Multi-level Sub-components'
       TabOrder = 4
@@ -85,7 +85,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
     object cbByName: TCheckBox
       Left = 8
       Top = 16
-      Width = 177
+      Width = 217
       Height = 17
       Caption = 'Enable Component Name Filter'
       TabOrder = 0
@@ -94,7 +94,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
     object cbByClass: TCheckBox
       Left = 8
       Top = 64
-      Width = 177
+      Width = 217
       Height = 17
       Caption = 'Enable Component Type Filter'
       TabOrder = 2
@@ -114,7 +114,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
     object cbSubClass: TCheckBox
       Left = 24
       Top = 112
-      Width = 185
+      Width = 201
       Height = 17
       Caption = 'Contains Descendent Class'
       TabOrder = 4
@@ -398,7 +398,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
   object cbDefaultSelAll: TCheckBox
     Left = 8
     Top = 461
-    Width = 225
+    Width = 305
     Height = 17
     Caption = 'Select All when Nothing Selected.'
     Checked = True
