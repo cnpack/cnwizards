@@ -894,7 +894,7 @@ Usage: want [target-name] [-Dname=value]
   </target>
 
   <!-- 带 svn 更新的完整构建 -->
-  <target name="allsvn" depends="-prepare,clean,svnupdate,cnwizards,resdll,cnzipdll,tools,makehelp,makeinst" description="All above tasks." >
+  <target name="allsvn" depends="-prepare,clean,svnupdate,${all_list}" description="All above tasks." >
   </target>
 
   <!-- FTP 上传服务器 -->
