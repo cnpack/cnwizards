@@ -5,7 +5,7 @@
 !TranslationDefaultFont=Tahoma,8,,,,
 csHintStr=Hint
 csInstallSucc=CnPack IDE Wizards wurden installiert in:<BR>
-csInstallSuccEnd=Starten Sie Setup erneu zum deinstallieren.
+csInstallSuccEnd=Starten Sie Setup erneut, um zum deinstallieren.
 csUnInstallSucc=CnPack IDE Wizards wurden deinstalliert von:<BR>
 csUnInstallSuccEnd=Starten Sie Setup erneut zum installieren.
 csInstallFail=Kann kein Delphi oder C++Builder finden, um CnPack IDE Wizards zu installieren.
