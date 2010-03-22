@@ -108,6 +108,7 @@ type
     procedure Loaded; override;
     procedure DoCreate; override;
     procedure DoDestroy; override;
+    procedure ReadState(Reader: TReader); override;
     procedure DoHelpError; virtual;
 
 {$IFDEF CREATE_PARAMS_BUG}
@@ -435,6 +436,12 @@ begin
     end;
   end;
 {$ENDIF}
+end;
+
+procedure TCnTranslateForm.ReadState(Reader: TReader);
+begin
+  inherited;
+  OldCreateOrder := False;
 end;
 
 {$IFDEF CREATE_PARAMS_BUG}

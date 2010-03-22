@@ -5,7 +5,6 @@ inherited CnExploreFilterForm: TCnExploreFilterForm
   Caption = 'Filters Setting'
   ClientHeight = 361
   ClientWidth = 435
-  OldCreateOrder = True
   OnClose = FormClose
   OnCreate = FormCreate
   PixelsPerInch = 96

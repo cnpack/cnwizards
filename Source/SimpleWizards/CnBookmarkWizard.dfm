@@ -5,7 +5,6 @@ inherited CnBookmarkForm: TCnBookmarkForm
   Height = 423
   Caption = 'Browse Bookmarks'
   KeyPreview = True
-  OldCreateOrder = False
   Position = poScreenCenter
   OnHide = FormHide
   OnKeyPress = FormKeyPress

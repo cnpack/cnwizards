@@ -5,7 +5,6 @@ inherited CnSrcTemplateEditForm: TCnSrcTemplateEditForm
   Caption = 'Source Template Editor'
   ClientHeight = 445
   ClientWidth = 616
-  OldCreateOrder = True
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13

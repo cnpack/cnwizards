@@ -5,7 +5,6 @@ inherited CnRoOptionsDlg: TCnRoOptionsDlg
   Caption = 'Historical Files Settings'
   ClientHeight = 261
   ClientWidth = 248
-  OldCreateOrder = True
   OnCreate = FormCreate
   OnShow = FormShow
   PixelsPerInch = 96

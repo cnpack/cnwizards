@@ -9,7 +9,6 @@ object CnIdeDockForm: TCnIdeDockForm
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = True
   Scaled = False
   PixelsPerInch = 96
   TextHeight = 13

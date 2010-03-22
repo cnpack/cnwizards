@@ -5,7 +5,6 @@ inherited CnSrcEditorWebSearchForm: TCnSrcEditorWebSearchForm
   Caption = 'Web Search Settings'
   ClientHeight = 301
   ClientWidth = 457
-  OldCreateOrder = True
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow

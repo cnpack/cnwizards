@@ -284,6 +284,7 @@ inherited CnProjectDirBuilderForm: TCnProjectDirBuilderForm
     OnKeyDown = TreeViewKeyDown
     OnMouseDown = TreeViewMouseDown
     OnStartDrag = TreeViewStartDrag
+    CanDisableNode = False
   end
   object StatusBar: TStatusBar
     Left = 0

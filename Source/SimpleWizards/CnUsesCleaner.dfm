@@ -5,7 +5,6 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
   Caption = 'Uses Units Cleaner'
   ClientHeight = 365
   ClientWidth = 392
-  OldCreateOrder = True
   PixelsPerInch = 96
   TextHeight = 13
   object grpKind: TGroupBox

@@ -5,7 +5,6 @@ inherited CnExploreFilterEditorForm: TCnExploreFilterEditorForm
   Caption = 'Add a Filter'
   ClientHeight = 96
   ClientWidth = 299
-  OldCreateOrder = True
   PixelsPerInch = 96
   TextHeight = 13
   object lbl1: TLabel

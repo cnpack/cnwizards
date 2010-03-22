@@ -5,7 +5,6 @@ inherited CnInputHelperEditForm: TCnInputHelperEditForm
   Caption = 'Customize Symbol'
   ClientHeight = 220
   ClientWidth = 335
-  OldCreateOrder = True
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13

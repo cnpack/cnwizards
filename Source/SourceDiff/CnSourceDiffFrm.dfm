@@ -5,7 +5,6 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
   Height = 485
   Caption = 'Source Code Compare'
   Menu = MainMenu
-  OldCreateOrder = True
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy

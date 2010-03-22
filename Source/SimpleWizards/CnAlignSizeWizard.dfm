@@ -5,7 +5,6 @@ inherited CnNonArrangeForm: TCnNonArrangeForm
   Caption = 'Arrange Non-visual Components'
   ClientHeight = 301
   ClientWidth = 409
-  OldCreateOrder = True
   OnCloseQuery = FormCloseQuery
   OnShow = UpdateControls
   PixelsPerInch = 96

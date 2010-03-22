@@ -5,7 +5,6 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
   Caption = 'Source Highlight Settings'
   ClientHeight = 537
   ClientWidth = 380
-  OldCreateOrder = True
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13

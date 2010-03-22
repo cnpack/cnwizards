@@ -5,7 +5,6 @@ inherited CnSrcEditorGroupReplaceForm: TCnSrcEditorGroupReplaceForm
   Caption = 'Group Replace Setting'
   ClientHeight = 460
   ClientWidth = 473
-  OldCreateOrder = True
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow

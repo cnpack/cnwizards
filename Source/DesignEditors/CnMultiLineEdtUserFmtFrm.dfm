@@ -5,7 +5,6 @@ inherited CnMultiLineEditorUserFmtForm: TCnMultiLineEditorUserFmtForm
   Caption = 'Customize String Format:'
   ClientHeight = 159
   ClientWidth = 318
-  OldCreateOrder = True
   OnCloseQuery = FormCloseQuery
   OnShow = FormShow
   PixelsPerInch = 96

@@ -5,7 +5,6 @@ inherited CnSrcTemplateForm: TCnSrcTemplateForm
   Caption = 'Source Templates'
   ClientHeight = 428
   ClientWidth = 472
-  OldCreateOrder = True
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13

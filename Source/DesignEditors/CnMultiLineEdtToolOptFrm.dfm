@@ -5,7 +5,6 @@ inherited CnMultiLineEditorToolsOptionForm: TCnMultiLineEditorToolsOptionForm
   Caption = 'String Editor Tools Option'
   ClientHeight = 218
   ClientWidth = 354
-  OldCreateOrder = True
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnShow = FormShow

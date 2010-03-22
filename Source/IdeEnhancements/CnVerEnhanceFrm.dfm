@@ -5,7 +5,6 @@ inherited CnVerEnhanceForm: TCnVerEnhanceForm
   Caption = 'Version Enhancements Settings'
   ClientHeight = 125
   ClientWidth = 403
-  OldCreateOrder = True
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13

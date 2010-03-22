@@ -4,7 +4,6 @@ inherited CnDiffEditorForm: TCnDiffEditorForm
   Width = 678
   Height = 202
   Caption = 'Combine Text'
-  OldCreateOrder = True
   PixelsPerInch = 96
   TextHeight = 13
   object Panel1: TPanel

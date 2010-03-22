@@ -6,7 +6,6 @@ inherited CnInputHelperForm: TCnInputHelperForm
   ClientHeight = 522
   ClientWidth = 592
   KeyPreview = True
-  OldCreateOrder = True
   OnActivate = FormActivate
   OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown

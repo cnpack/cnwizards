@@ -5,7 +5,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
   BorderStyle = bsDialog
   Caption = 'Component Selection Tools'
   ClientHeight = 489
-  ClientWidth = 655
+  ClientWidth = 704
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   PixelsPerInch = 96
@@ -13,7 +13,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
   object gbFilter: TGroupBox
     Left = 8
     Top = 8
-    Width = 209
+    Width = 241
     Height = 137
     Caption = 'Container &Filter'
     TabOrder = 0
@@ -49,7 +49,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
     object cbbFilterControl: TComboBox
       Left = 24
       Top = 84
-      Width = 177
+      Width = 209
       Height = 21
       Style = csDropDownList
       ItemHeight = 13
@@ -68,16 +68,16 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
     end
   end
   object gbByName: TGroupBox
-    Left = 224
+    Left = 256
     Top = 8
-    Width = 217
+    Width = 233
     Height = 137
     Caption = 'Component &Name Filter'
     TabOrder = 1
     object edtByName: TEdit
       Left = 24
       Top = 40
-      Width = 185
+      Width = 201
       Height = 21
       TabOrder = 1
       OnChange = DoUpdateList
@@ -103,7 +103,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
     object cbbByClass: TComboBox
       Left = 24
       Top = 84
-      Width = 185
+      Width = 201
       Height = 21
       Style = csDropDownList
       ItemHeight = 13
@@ -124,7 +124,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
   object gbComponentList: TGroupBox
     Left = 8
     Top = 152
-    Width = 641
+    Width = 689
     Height = 301
     Caption = 'Co&mponents'#39' List'
     TabOrder = 3
@@ -136,7 +136,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
       Caption = 'Available Components:'
     end
     object Label2: TLabel
-      Left = 328
+      Left = 384
       Top = 16
       Width = 108
       Height = 13
@@ -152,7 +152,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
     object lbSource: TListBox
       Left = 8
       Top = 32
-      Width = 273
+      Width = 297
       Height = 233
       ItemHeight = 13
       MultiSelect = True
@@ -160,7 +160,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
       OnDblClick = actAddExecute
     end
     object btnAdd: TButton
-      Left = 288
+      Left = 312
       Top = 40
       Width = 65
       Height = 21
@@ -168,7 +168,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
       TabOrder = 2
     end
     object btnAddAll: TButton
-      Left = 288
+      Left = 312
       Top = 64
       Width = 65
       Height = 21
@@ -176,7 +176,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
       TabOrder = 3
     end
     object btnDelete: TButton
-      Left = 288
+      Left = 312
       Top = 88
       Width = 65
       Height = 21
@@ -184,7 +184,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
       TabOrder = 4
     end
     object btnDeleteAll: TButton
-      Left = 288
+      Left = 312
       Top = 112
       Width = 65
       Height = 21
@@ -192,7 +192,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
       TabOrder = 5
     end
     object btnSelAll: TButton
-      Left = 288
+      Left = 312
       Top = 192
       Width = 65
       Height = 21
@@ -200,7 +200,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
       TabOrder = 6
     end
     object btnSelNone: TButton
-      Left = 288
+      Left = 312
       Top = 216
       Width = 65
       Height = 21
@@ -208,7 +208,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
       TabOrder = 7
     end
     object btnSelInvert: TButton
-      Left = 288
+      Left = 312
       Top = 240
       Width = 65
       Height = 21
@@ -216,9 +216,9 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
       TabOrder = 8
     end
     object lbDest: TListBox
-      Left = 360
+      Left = 384
       Top = 32
-      Width = 273
+      Width = 297
       Height = 233
       ItemHeight = 13
       MultiSelect = True
@@ -228,7 +228,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
     object cbbSourceOrderStyle: TComboBox
       Left = 64
       Top = 270
-      Width = 113
+      Width = 137
       Height = 21
       Style = csDropDownList
       ItemHeight = 13
@@ -240,9 +240,9 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
         'Sort By Type')
     end
     object cbbSourceOrderDir: TComboBox
-      Left = 184
+      Left = 208
       Top = 270
-      Width = 81
+      Width = 97
       Height = 21
       Style = csDropDownList
       ItemHeight = 13
@@ -253,7 +253,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
         'Descending')
     end
     object btnMoveToTop: TButton
-      Left = 336
+      Left = 384
       Top = 270
       Width = 79
       Height = 21
@@ -261,7 +261,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
       TabOrder = 11
     end
     object btnMoveToBottom: TButton
-      Left = 419
+      Left = 467
       Top = 270
       Width = 79
       Height = 21
@@ -269,7 +269,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
       TabOrder = 12
     end
     object btnMoveUp: TButton
-      Left = 503
+      Left = 551
       Top = 270
       Width = 63
       Height = 21
@@ -277,7 +277,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
       TabOrder = 13
     end
     object btnMoveDown: TButton
-      Left = 570
+      Left = 618
       Top = 270
       Width = 63
       Height = 21
@@ -286,7 +286,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
     end
   end
   object btnHelp: TButton
-    Left = 518
+    Left = 622
     Top = 462
     Width = 75
     Height = 21
@@ -295,7 +295,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
     OnClick = btnHelpClick
   end
   object btnOK: TButton
-    Left = 358
+    Left = 462
     Top = 462
     Width = 75
     Height = 21
@@ -305,7 +305,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
     OnClick = btnOKClick
   end
   object btnCancel: TButton
-    Left = 438
+    Left = 542
     Top = 462
     Width = 75
     Height = 21
@@ -315,7 +315,7 @@ inherited CnComponentSelectorForm: TCnComponentSelectorForm
     TabOrder = 5
   end
   object gbTag: TGroupBox
-    Left = 448
+    Left = 496
     Top = 8
     Width = 201
     Height = 137

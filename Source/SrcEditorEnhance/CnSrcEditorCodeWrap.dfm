@@ -5,7 +5,6 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
   Caption = 'Code Surround Setting'
   ClientHeight = 455
   ClientWidth = 440
-  OldCreateOrder = True
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow

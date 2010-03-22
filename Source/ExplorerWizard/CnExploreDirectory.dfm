@@ -5,7 +5,6 @@ inherited CnExploreDirctoryForm: TCnExploreDirctoryForm
   Caption = 'Favorites'
   ClientHeight = 372
   ClientWidth = 464
-  OldCreateOrder = True
   PixelsPerInch = 96
   TextHeight = 13
   object tlb: TToolBar
