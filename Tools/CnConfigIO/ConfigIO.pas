@@ -414,6 +414,10 @@ var
   Path: string;
 begin
   Result := False;
+
+  if FindWindow('TAppBuilder', nil) = 0 then
+    Exit;
+    
   Path := ExtractFilePath(Application.ExeName);
   FR := FindFirst(Path + 'CnWizard*.dll', faAnyFile - faVolumeID, Info);
   try
