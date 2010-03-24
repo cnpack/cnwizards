@@ -177,6 +177,8 @@ const
   csNormalColor = $FFF4F4;
   csShadowColor = $444444;
 
+  csLastSelectedItem = 'LastSelectedItem';
+
 {$R *.DFM}
 
 // œ‘ æ≈‰÷√¥∞ø⁄
@@ -216,8 +218,9 @@ begin
       FShortCuts[i] := 0;
     lbWizards.Items.AddObject(CnWizardMgr[i].WizardName, CnWizardMgr[i]);
   end;
-  lbWizards.ItemIndex := 0;
+  lbWizards.ItemIndex := WizOptions.ReadInteger(SCnOptionSection, csLastSelectedItem, 0);
   lbWizardsClick(lbWizards);
+  ActiveControl := lbWizards;
 
   //  Ù–‘±‡º≠∆˜“≥√Ê
   SetLength(FEditorActives, CnDesignEditorMgr.PropEditorCount +
@@ -316,6 +319,8 @@ begin
 
     WizOptions.UseCustomUserDir := chkUserDir.Checked;
     WizOptions.CustomUserDir := edtUserDir.Text;
+    
+    WizOptions.WriteInteger(SCnOptionSection, csLastSelectedItem, lbWizards.ItemIndex);
 
     WizOptions.SaveSettings;
     CnWizardMgr.SaveSettings;
