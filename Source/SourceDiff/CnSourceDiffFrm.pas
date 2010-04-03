@@ -361,7 +361,6 @@ constructor TCnSourceDiffForm.CreateEx(AOwner: TComponent;
 begin
   Create(AOwner);
   Ini := AIni;
-  LoadOptions;
 end;
 //---------------------------------------------------------------------
 
@@ -419,6 +418,8 @@ begin
 
   btnFileKind1.Caption := csFileKinds[Low(TFileKind)];
   btnFileKind2.Caption := csFileKinds[Low(TFileKind)];
+  
+  LoadOptions;
 end;
 //---------------------------------------------------------------------
 
