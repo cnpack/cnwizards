@@ -184,6 +184,9 @@
     <DCCReference Include="IdeEnhancements\CnFormEnhancements.pas">
       <Form>CnFormEnhanceConfigForm</Form>
     </DCCReference>
+    <DCCReference Include="IdeEnhancements\CnHighlightLineFrm.pas">
+      <Form>CnHighlightLineForm</Form>
+    </DCCReference>
     <DCCReference Include="IdeEnhancements\CnIdeEnhanceMenu.pas" />
     <DCCReference Include="IdeEnhancements\CnInputHelper.pas" />
     <DCCReference Include="IdeEnhancements\CnInputHelperEditFrm.pas">
@@ -201,9 +204,6 @@
     <DCCReference Include="IdeEnhancements\CnSourceHighlight.pas" />
     <DCCReference Include="IdeEnhancements\CnSourceHighlightFrm.pas">
       <Form>CnSourceHighlightForm</Form>
-    </DCCReference>
-    <DCCReference Include="IdeEnhancements\CnHighlightLineFrm.pas">
-      <Form>CnHighlightLineForm</Form>
     </DCCReference>
     <DCCReference Include="IdeEnhancements\CnVerEnhanceFrm.pas">
       <Form>CnVerEnhanceForm</Form>
@@ -228,6 +228,7 @@
     </DCCReference>
     <DCCReference Include="Misc\CnWizShareImages.pas">
       <Form>dmCnSharedImages</Form>
+      <DesignClass>TDataModule</DesignClass>
     </DCCReference>
     <DCCReference Include="Misc\CnWizTipOfDayFrm.pas">
       <Form>CnWizTipOfDayForm</Form>
@@ -301,6 +302,7 @@
     </DCCReference>
     <DCCReference Include="ReopenWizard\CnRoFrmFileList.pas">
       <Form>RecentFilesFrame</Form>
+      <DesignClass>TFrame</DesignClass>
     </DCCReference>
     <DCCReference Include="ReopenWizard\CnRoInterfaces.pas" />
     <DCCReference Include="ReopenWizard\CnRoOptions.pas">
@@ -346,9 +348,13 @@
     <DCCReference Include="SimpleWizards\CnCompToCodeFrm.pas">
       <Form>CnCompToCodeForm</Form>
     </DCCReference>
+    <DCCReference Include="SimpleWizards\CnFeedWizard.pas" />
+    <DCCReference Include="SimpleWizards\CnFeedWizardFrm.pas">
+      <Form>CnFeedWizardForm</Form>
+    </DCCReference>
     <DCCReference Include="SimpleWizards\CnIdeBRWizard.pas" />
     <DCCReference Include="SimpleWizards\CnListCompFrm.pas">
-      <Form>CnListCompFrm</Form>
+      <Form>CnListCompForm</Form>
     </DCCReference>
     <DCCReference Include="SimpleWizards\CnMessageBoxWizard.pas">
       <Form>CnMessageBoxForm</Form>
@@ -394,6 +400,9 @@
       <Form>CnStatResultForm</Form>
     </DCCReference>
     <DCCReference Include="SourceStat\CnStatWizard.pas" />
+    <DCCReference Include="SrcEditorEnhance\CnIdentRenameFrm.pas">
+      <Form>CnIdentRenameForm</Form>
+    </DCCReference>
     <DCCReference Include="SrcEditorEnhance\CnSrcEditorBlockTools.pas" />
     <DCCReference Include="SrcEditorEnhance\CnSrcEditorCodeWrap.pas">
       <Form>CnSrcEditorCodeWrapForm</Form>
@@ -406,9 +415,6 @@
     </DCCReference>
     <DCCReference Include="SrcEditorEnhance\CnSrcEditorGutter.pas" />
     <DCCReference Include="SrcEditorEnhance\CnSrcEditorKey.pas" />
-    <DCCReference Include="SrcEditorEnhance\CnIdentRenameFrm.pas">
-      <Form>CnIdentRenameForm</Form>
-    </DCCReference>
     <DCCReference Include="SrcEditorEnhance\CnSrcEditorMisc.pas" />
     <DCCReference Include="SrcEditorEnhance\CnSrcEditorNav.pas" />
     <DCCReference Include="SrcEditorEnhance\CnSrcEditorToolBar.pas" />
@@ -421,12 +427,13 @@
     <DCCReference Include="SrcTemplate\CnSrcTemplateEditFrm.pas">
       <Form>CnSrcTemplateEditForm</Form>
     </DCCReference>
+    <DCCReference Include="Utils\CnCppCodeParser.pas" />
     <DCCReference Include="Utils\CnDCU32.pas" />
     <DCCReference Include="Utils\CnEditControlWrapper.pas" />
+    <DCCReference Include="Utils\CnFeedParser.pas" />
     <DCCReference Include="Utils\CnGroupReplace.pas" />
     <DCCReference Include="Utils\CnLineParser.pas" />
     <DCCReference Include="Utils\CnPasCodeParser.pas" />
-    <DCCReference Include="Utils\CnCppCodeParser.pas" />
     <DCCReference Include="Utils\CnPasConvert.pas" />
     <DCCReference Include="Utils\CnSourceCropper.pas" />
     <DCCReference Include="Utils\CnWizControlHook.pas" />

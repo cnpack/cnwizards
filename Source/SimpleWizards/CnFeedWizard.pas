@@ -38,6 +38,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_CNFEEDWIZARD}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, IniFiles, Forms,
   Menus, CommCtrl, ComCtrls, CnWizClasses, CnWizNotifier, CnWizUtils, CnCommon,
@@ -144,13 +146,17 @@ type
     property ExludeCategories: string read FExludeCategories write FExludeCategories;
   end;
 
+{$ENDIF CNWIZARDS_CNCOMPONENTSELECTOR}
+
 implementation
+
+{$IFDEF CNWIZARDS_CNCOMPONENTSELECTOR}
 
 uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnEditControlWrapper, CnWizIdeUtils, CnInetUtils;
+  CnEditControlWrapper, CnWizIdeUtils, CnInetUtils, CnFeedWizardFrm;
 
 const
   SCnFeedStatusPanel = 'CnFeedStatusPanel';
@@ -163,10 +169,14 @@ const
   SCnOfficalFeedPeriod = 24 * 60;
   SCnOfficalFeedRecent = 10;
 
+{$IFDEF BCB6}
+  csBarKeepWidth = 200;
+{$ELSE}
 {$IFDEF COMPILER6_UP}
   csBarKeepWidth = 140;
 {$ELSE}
   csBarKeepWidth = 80;
+{$ENDIF}
 {$ENDIF}
 
 function DoSortFeed(Item1, Item2: Pointer): Integer;
@@ -184,9 +194,14 @@ end;
 procedure TCnStatusPanel.CalcTextRect(AText: string; var ARect: TRect);
 begin
   Canvas.Font := Font;
-  ARect := ClientRect;
-  DrawText(Canvas.Handle, PChar(AText), Length(AText), ARect,
-    DT_CALCRECT or DT_SINGLELINE or DT_VCENTER or DT_NOPREFIX or DT_END_ELLIPSIS);
+  if AText <> '' then
+  begin
+    ARect := ClientRect;
+    DrawText(Canvas.Handle, PChar(AText), Length(AText), ARect,
+      DT_CALCRECT or DT_SINGLELINE or DT_VCENTER or DT_NOPREFIX or DT_END_ELLIPSIS);
+  end
+  else
+    ARect := Bounds(0, 0, 0, 0);
 end;
 
 procedure TCnStatusPanel.Click;
@@ -312,8 +327,8 @@ end;
 
 procedure TCnFeedWizard.Config;
 begin
-  inherited;
-
+  if ShowCnFeedWizardForm(Self) then
+    DoSaveSettings;
 end;
 
 constructor TCnFeedWizard.Create;
@@ -424,7 +439,7 @@ end;
 
 function TCnFeedWizard.GetHasConfig: Boolean;
 begin
-  Result := False;
+  Result := True;
 end;
 
 function TCnFeedWizard.GetPanels(Index: Integer): TCnStatusPanel;
@@ -520,7 +535,13 @@ var
 begin
   EnumEditControl(DoUpdateStatusPanel, nil);
   for i := 0 to PanelCount - 1 do
+  begin
+    if FCurFeed <> nil then
+      Panels[i].Text := FCurFeed.Title
+    else
+      Panels[i].Text := '';
     Panels[i].UpdateStatus;
+  end;
 end;
 
 procedure TCnFeedWizard.NextFeed;
@@ -583,7 +604,7 @@ begin
 
   FileName := FFeedPath + Def.IDStr + '.xml';
   TmpName := ChangeFileExt(FileName, '.tmp');
-  if ForceUpdate or (Abs(FIni.ReadDateTime('LastCheck', Def.IDStr, 0) - Now) > Def.CheckPeriod / 24 / 60) then
+  if ForceUpdate or (Abs(Now - FIni.ReadDateTime('LastCheck', Def.IDStr, 0)) > Def.CheckPeriod / 24 / 60) then
   begin
     FIni.WriteDateTime('LastCheck', Def.IDStr, Now);
     with TCnHTTP.Create do
@@ -669,5 +690,7 @@ end;
 
 initialization
   RegisterCnWizard(TCnFeedWizard);
+
+{$ENDIF CNWIZARDS_CNCOMPONENTSELECTOR}
 
 end.

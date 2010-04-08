@@ -425,7 +425,7 @@
 			<DCCReference Include="SrcEditorEnhance\CnSrcEditorKey.pas"/>
 			<DCCReference Include="SrcEditorEnhance\CnIdentRenameFrm.pas">
 				<Form>CnIdentRenameForm</Form>
-				</DCCReference>
+			</DCCReference>
 			<DCCReference Include="Utils\CnWizFlatButton.pas"/>
 			<DCCReference Include="IdeEnhancements\CnSourceHighlight.pas"/>
 			<DCCReference Include="IdeEnhancements\CnSourceHighlightFrm.pas">
@@ -464,6 +464,11 @@
 			</DCCReference>
 			<DCCReference Include="ScriptWizard\CnScriptClasses.pas"/>
 			<DCCReference Include="ScriptWizard\CnScriptRegister.pas"/>
+			<DCCReference Include="SimpleWizards\CnFeedWizard.pas"/>
+			<DCCReference Include="Utils\CnFeedParser.pas"/>
+			<DCCReference Include="SimpleWizards\CnFeedWizardFrm.pas">
+				<Form>CnFeedWizardForm</Form>
+			</DCCReference>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>

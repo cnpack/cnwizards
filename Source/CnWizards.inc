@@ -140,6 +140,9 @@
 // Wizard: CnScriptWizard
 {$DEFINE CNWIZARDS_CNSCRIPTWIZARD}
 
+// Wizard: CnFeedWizard
+{$DEFINE CNWIZARDS_CNFEEDWIZARD}
+
 {$ENDIF}
 
 {$I CnWizards_Def.inc}

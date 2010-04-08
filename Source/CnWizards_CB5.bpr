@@ -6,16 +6,14 @@
     <PROJECT value="..\Bin\CnWizards_CB5.dll"/>
     <OBJFILES value="..\Dcu\CnWizDllEntry.obj ..\Dcu\CnWizClasses.obj 
       ..\Dcu\CnWizCompilerConst.obj ..\Dcu\CnWizManager.obj 
-      ..\Dcu\CnWizConsts.obj ..\Dcu\CnWizMenuAction.obj 
-      ..\Dcu\CnWizShortCut.obj ..\Dcu\CnWizOptions.obj 
-      ..\Dcu\CnWizSplash.obj ..\Dcu\CnWizAboutFrm.obj 
+      ..\Dcu\CnWizConsts.obj ..\Dcu\CnWizMenuAction.obj ..\Dcu\CnWizOptions.obj 
+      ..\Dcu\CnWizShortCut.obj ..\Dcu\CnWizSplash.obj ..\Dcu\CnWizAboutFrm.obj 
       ..\Dcu\CnWizCommentFrm.obj ..\Dcu\CnWizUpgradeFrm.obj 
       ..\Dcu\CnWizFeedbackFrm.obj ..\Dcu\CnWizShareImages.obj 
-      ..\Dcu\CnWizAbout.obj ..\Dcu\CnIDEVersion.obj 
-      ..\Dcu\CnWizMultiLang.obj ..\Dcu\CnWizConfigFrm.obj 
-      ..\Dcu\CnWizSubActionShortCutFrm.obj ..\Dcu\CnWizMenuSortFrm.obj 
-      ..\Dcu\CnWizUtils.obj ..\Dcu\CnAlignSizeWizard.obj
-      ..\Dcu\CnListCompFrm.obj 
+      ..\Dcu\CnWizAbout.obj ..\Dcu\CnIDEVersion.obj ..\Dcu\CnWizMultiLang.obj 
+      ..\Dcu\CnWizConfigFrm.obj ..\Dcu\CnWizSubActionShortCutFrm.obj 
+      ..\Dcu\CnWizMenuSortFrm.obj ..\Dcu\CnWizUtils.obj 
+      ..\Dcu\CnAlignSizeWizard.obj ..\Dcu\CnListCompFrm.obj 
       ..\Dcu\CnCompToCodeFrm.obj ..\Dcu\CnMessageBoxWizard.obj 
       ..\Dcu\CnComponentSelector.obj ..\Dcu\CnTabOrderWizard.obj 
       ..\Dcu\CnWizDfm6To5.obj ..\Dcu\CnDfm6To5Wizard.obj 
@@ -26,29 +24,31 @@
       ..\Dcu\CnEditorOpenFile.obj ..\Dcu\CnEditorCodeSwap.obj 
       ..\Dcu\CnWizEditFiler.obj ..\Dcu\CnMsdnWizard.obj 
       ..\Dcu\CnPas2HtmlWizard.obj ..\Dcu\CnPasConvertTypeFrm.obj 
-      ..\Dcu\CnPas2HtmlConfigFrm.obj 
-      ..\Dcu\CnEditorZoomFullScreen.obj ..\Dcu\CnWizSearch.obj 
-      ..\Dcu\CnReplaceWizard.obj ..\Dcu\CnDiffEditorFrm.obj 
-      ..\Dcu\CnSourceDiffFrm.obj ..\Dcu\CnSourceDiffWizard.obj 
-      ..\Dcu\CnDesignEditor.obj ..\Dcu\CnDesignEditorConsts.obj 
-      ..\Dcu\CnDesignEditorUtils.obj ..\Dcu\CnHintEditorFrm.obj 
-      ..\Dcu\CnMultiLineEditorFrm.obj ..\Dcu\CnSetPropEditor.obj 
-      ..\Dcu\CnShenPropEditors.obj ..\Dcu\CnSizeConstraintsEditorFrm.obj 
-      ..\Dcu\CnEditorCodeToString.obj ..\Dcu\CnEditorCodeDelBlank.obj 
-      ..\Dcu\CnEditorCodeTool.obj ..\Dcu\CnLineParser.obj 
-      ..\Dcu\CnEditorCodeComment.obj ..\Dcu\CnEditorCodeIndent.obj 
-      ..\Dcu\CnAsciiChart.obj ..\Dcu\CnStatFrm.obj ..\Dcu\CnStatResultFrm.obj 
-      ..\Dcu\CnStatWizard.obj ..\Dcu\CnPrefixCompFrm.obj 
-      ..\Dcu\CnPrefixConfigFrm.obj ..\Dcu\CnPrefixEditFrm.obj 
-      ..\Dcu\CnPrefixExecuteFrm.obj ..\Dcu\CnPrefixList.obj 
-      ..\Dcu\CnPrefixNewFrm.obj ..\Dcu\CnPrefixWizard.obj 
-      ..\Dcu\CnFlatToolbarConfigFrm.obj ..\Dcu\CnFormEnhancements.obj 
-      ..\Dcu\CnPaletteEnhancements.obj ..\Dcu\CnPaletteEnhanceFrm.obj 
-      ..\Dcu\CnCompFilterFrm.obj ..\Dcu\CnCorPropCfgFrm.obj 
-      ..\Dcu\CnCorPropFrm.obj ..\Dcu\CnCorPropRulesFrm.obj 
-      ..\Dcu\CnCorPropWizard.obj ..\Dcu\CnProjectExtWizard.obj 
-      ..\Dcu\CnProjectViewFormsFrm.obj ..\Dcu\CnProjectViewUnitsFrm.obj 
-      ..\Dcu\CnProjectUseUnitsFrm.obj ..\Dcu\CnProjectFramesFrm.obj ..\Dcu\CnProjectListUsedFrm.obj 
+      ..\Dcu\CnPas2HtmlConfigFrm.obj ..\Dcu\CnEditorZoomFullScreen.obj 
+      ..\Dcu\CnWizSearch.obj ..\Dcu\CnReplaceWizard.obj 
+      ..\Dcu\CnDiffEditorFrm.obj ..\Dcu\CnSourceDiffFrm.obj 
+      ..\Dcu\CnSourceDiffWizard.obj ..\Dcu\CnDesignEditor.obj 
+      ..\Dcu\CnDesignEditorConsts.obj ..\Dcu\CnDesignEditorUtils.obj 
+      ..\Dcu\CnHintEditorFrm.obj ..\Dcu\CnMultiLineEditorFrm.obj 
+      ..\Dcu\CnSetPropEditor.obj ..\Dcu\CnShenPropEditors.obj 
+      ..\Dcu\CnSizeConstraintsEditorFrm.obj ..\Dcu\CnEditorCodeToString.obj 
+      ..\Dcu\CnEditorCodeDelBlank.obj ..\Dcu\CnEditorCodeTool.obj 
+      ..\Dcu\CnLineParser.obj ..\Dcu\CnEditorCodeComment.obj 
+      ..\Dcu\CnEditorCodeIndent.obj ..\Dcu\CnAsciiChart.obj ..\Dcu\CnStatFrm.obj 
+      ..\Dcu\CnStatResultFrm.obj ..\Dcu\CnStatWizard.obj 
+      ..\Dcu\CnPrefixCompFrm.obj ..\Dcu\CnPrefixConfigFrm.obj 
+      ..\Dcu\CnPrefixEditFrm.obj ..\Dcu\CnPrefixExecuteFrm.obj 
+      ..\Dcu\CnPrefixList.obj ..\Dcu\CnPrefixNewFrm.obj 
+      ..\Dcu\CnPrefixWizard.obj ..\Dcu\CnFlatToolbarConfigFrm.obj 
+      ..\Dcu\CnFormEnhancements.obj ..\Dcu\CnPaletteEnhancements.obj 
+      ..\Dcu\CnPaletteEnhanceFrm.obj ..\Dcu\CnScriptClasses.obj 
+      ..\Dcu\CnScriptRegister.obj ..\Dcu\CnScriptFrm.obj 
+      ..\Dcu\CnScriptWizard.obj ..\Dcu\CnCompFilterFrm.obj 
+      ..\Dcu\CnCorPropCfgFrm.obj ..\Dcu\CnCorPropFrm.obj 
+      ..\Dcu\CnCorPropRulesFrm.obj ..\Dcu\CnCorPropWizard.obj 
+      ..\Dcu\CnProjectExtWizard.obj ..\Dcu\CnProjectViewFormsFrm.obj 
+      ..\Dcu\CnProjectViewUnitsFrm.obj ..\Dcu\CnProjectUseUnitsFrm.obj 
+      ..\Dcu\CnProjectFramesFrm.obj ..\Dcu\CnProjectListUsedFrm.obj 
       ..\Dcu\CnCommentCropper.obj ..\Dcu\CnSourceCropper.obj 
       ..\Dcu\CnCpuWinEnhancements.obj ..\Dcu\CnCpuWinEnhanceFrm.obj 
       ..\Dcu\CnMultiLineEdtToolOptFrm.obj ..\Dcu\CnMultiLineEdtUserFmtFrm.obj 
@@ -59,37 +59,34 @@
       ..\Dcu\CnExplore.obj ..\Dcu\CnExploreDirectory.obj 
       ..\Dcu\CnExploreFilter.obj ..\Dcu\CnExploreFilterEditor.obj 
       ..\Dcu\CnProjectViewBaseFrm.obj ..\Dcu\CnFilesSnapshot.obj 
-      ..\Dcu\CnFilesSnapshotManageFrm.obj 
-      ..\Dcu\CnRoClasses.obj ..\Dcu\CnRoConst.obj ..\Dcu\CnRoFilesList.obj 
-      ..\Dcu\CnRoFrmFileList.obj ..\Dcu\CnRoInterfaces.obj 
-      ..\Dcu\CnRoOptions.obj ..\Dcu\CnRoWizard.obj ..\Dcu\CnWinTopRoller.obj 
-      ..\Dcu\CnAlignPropEditor.obj ..\Dcu\CnWizIdeHooks.obj 
-      ..\Dcu\Utils\CnPasCodeParser.obj ..\Dcu\Utils\CnCppCodeParser.obj 
-      ..\Dcu\CnEditControlWrapper.obj ..\Dcu\CnSrcEditorToolBar.obj 
-      ..\Dcu\CnSrcEditorGutter.obj ..\Dcu\CnSrcEditorEnhance.obj 
-      ..\Dcu\CnProjectBackupFrm.obj ..\Dcu\CnProjectBackupSaveFrm.obj 
-      ..\Dcu\CnSrcEditorNav.obj ..\Dcu\CnSrcEditorMisc.obj 
-      ..\Dcu\CnWizFlatButton.obj ..\Dcu\CnSrcEditorBlockTools.obj 
-      ..\Dcu\CnProcListWizard.obj ..\Dcu\CnWizDfmParser.obj 
-      ..\Dcu\CnNamePropEditor.obj ..\Dcu\CnVerEnhanceFrm.obj 
-      ..\Dcu\CnVerEnhancements.obj ..\Dcu\CnProjectDirBuilderFrm.obj 
-      ..\Dcu\CnProjectDirImportFrm.obj ..\Dcu\CnWizMacroFrm.obj 
-      ..\Dcu\CnWizMacroText.obj ..\Dcu\CnWizMacroUtils.obj 
-      ..\Dcu\CnSrcEditorCodeWrap.obj ..\Dcu\CnSrcEditorGroupReplace.obj 
-      ..\Dcu\CnEditorInsertColor.obj ..\Dcu\CnEditorInsertTime.obj 
-      ..\Dcu\CnEditorCollector.obj ..\Dcu\CnGroupReplace.obj 
-      ..\Dcu\CnEditorSortLines.obj ..\Dcu\CnEditorToggleUses.obj 
-      ..\Dcu\CnEditorJumpMessage.obj ..\Dcu\CnSrcEditorKey.obj 
-      ..\Dcu\CnIdentRenameFrm.obj 
+      ..\Dcu\CnFilesSnapshotManageFrm.obj ..\Dcu\CnRoClasses.obj 
+      ..\Dcu\CnRoConst.obj ..\Dcu\CnRoFilesList.obj ..\Dcu\CnRoFrmFileList.obj 
+      ..\Dcu\CnRoInterfaces.obj ..\Dcu\CnRoOptions.obj ..\Dcu\CnRoWizard.obj 
+      ..\Dcu\CnWinTopRoller.obj ..\Dcu\CnAlignPropEditor.obj 
+      ..\Dcu\CnPasCodeParser.obj ..\Dcu\CnCppCodeParser.obj 
+      ..\Dcu\CnWizIdeHooks.obj ..\Dcu\CnEditControlWrapper.obj 
+      ..\Dcu\CnSrcEditorToolBar.obj ..\Dcu\CnSrcEditorGutter.obj 
+      ..\Dcu\CnSrcEditorEnhance.obj ..\Dcu\CnProjectBackupFrm.obj 
+      ..\Dcu\CnProjectBackupSaveFrm.obj ..\Dcu\CnSrcEditorNav.obj 
+      ..\Dcu\CnSrcEditorMisc.obj ..\Dcu\CnWizFlatButton.obj 
+      ..\Dcu\CnSrcEditorBlockTools.obj ..\Dcu\CnProcListWizard.obj 
+      ..\Dcu\CnWizDfmParser.obj ..\Dcu\CnNamePropEditor.obj 
+      ..\Dcu\CnVerEnhanceFrm.obj ..\Dcu\CnVerEnhancements.obj 
+      ..\Dcu\CnProjectDirBuilderFrm.obj ..\Dcu\CnProjectDirImportFrm.obj 
+      ..\Dcu\CnWizMacroFrm.obj ..\Dcu\CnWizMacroText.obj 
+      ..\Dcu\CnWizMacroUtils.obj ..\Dcu\CnSrcEditorCodeWrap.obj 
+      ..\Dcu\CnSrcEditorGroupReplace.obj ..\Dcu\CnEditorInsertColor.obj 
+      ..\Dcu\CnEditorInsertTime.obj ..\Dcu\CnEditorCollector.obj 
+      ..\Dcu\CnGroupReplace.obj ..\Dcu\CnEditorSortLines.obj 
+      ..\Dcu\CnEditorToggleUses.obj ..\Dcu\CnEditorJumpMessage.obj 
+      ..\Dcu\CnSrcEditorKey.obj ..\Dcu\CnIdentRenameFrm.obj 
       ..\Dcu\CnIdeEnhanceMenu.obj ..\Dcu\CnIdeBRWizard.obj 
-      ..\Dcu\CnSourceHighlightFrm.obj ..\Dcu\CnSourceHighlight.obj 
-      ..\Dcu\CnHighlightLineFrm.obj 
-      ..\Dcu\CnSrcEditorWebSearch.obj ..\Dcu\CnPropEditorCustomizeFrm.obj 
-      ..\Dcu\CnScriptClasses.obj ..\Dcu\CnScriptRegister.obj 
-      ..\Dcu\CnScriptFrm.obj ..\Dcu\CnScriptWizard.obj 
-      ..\Dcu\CnInputSymbolList.obj 
+      ..\Dcu\CnSourceHighlightFrm.obj ..\Dcu\CnHighlightLineFrm.obj 
+      ..\Dcu\CnSourceHighlight.obj ..\Dcu\CnSrcEditorWebSearch.obj 
+      ..\Dcu\CnPropEditorCustomizeFrm.obj ..\Dcu\CnInputSymbolList.obj 
       ..\Dcu\CnInputHelper.obj ..\Dcu\CnInputHelperEditFrm.obj 
       ..\Dcu\CnInputHelperFrm.obj ..\Dcu\CnInputIdeSymbolList.obj 
+      ..\Dcu\CnFeedWizardFrm.obj ..\Dcu\CnFeedWizard.obj ..\Dcu\CnFeedParser.obj 
       ..\Dcu\CnWizards_CB5.obj"/>
     <RESFILES value="CnWizards_CB5.res"/>
     <IDLFILES value=""/>
@@ -99,31 +96,34 @@
       Misc\CnWizUpgradeFrm.dfm Misc\CnWizShareImages.dfm 
       MultiLang\CnWizMultiLang.dfm Config\CnWizConfigFrm.dfm 
       Config\CnWizSubActionShortCutFrm.dfm Config\CnWizMenuSortFrm.dfm 
-      SimpleWizards\CnMessageBoxWizard.dfm SimpleWizards\CnComponentSelector.dfm 
-      SimpleWizards\CnTabOrderWizard.dfm SimpleWizards\CnBookmarkWizard.dfm 
-      SimpleWizards\CnBookmarkConfigFrm.dfm SrcTemplate\CnSrcTemplate.dfm 
-      SrcTemplate\CnSrcTemplateEditFrm.dfm EditorWizard\CnEditorWizard.dfm 
-      SimpleWizards\CnMsdnWizard.dfm SimpleWizards\CnPas2HtmlWizard.dfm 
-      SimpleWizards\CnPasConvertTypeFrm.dfm SimpleWizards\CnPas2HtmlConfigFrm.dfm 
-      EditorWizard\CnEditorZoomFullScreen.dfm 
-      SimpleWizards\CnReplaceWizard.dfm SourceDiff\CnDiffEditorFrm.dfm 
-      SourceDiff\CnSourceDiffFrm.dfm DesignEditors\CnHintEditorFrm.dfm 
-      DesignEditors\CnMultiLineEditorFrm.dfm 
+      SimpleWizards\CnAlignSizeWizard.dfm SimpleWizards\CnListCompFrm.dfm 
+      SimpleWizards\CnCompToCodeFrm.dfm SimpleWizards\CnMessageBoxWizard.dfm 
+      SimpleWizards\CnComponentSelector.dfm SimpleWizards\CnTabOrderWizard.dfm 
+      SimpleWizards\CnBookmarkWizard.dfm SimpleWizards\CnBookmarkConfigFrm.dfm 
+      SrcTemplate\CnSrcTemplate.dfm SrcTemplate\CnSrcTemplateEditFrm.dfm 
+      EditorWizard\CnEditorWizard.dfm SimpleWizards\CnMsdnWizard.dfm 
+      SimpleWizards\CnPas2HtmlWizard.dfm SimpleWizards\CnPasConvertTypeFrm.dfm 
+      SimpleWizards\CnPas2HtmlConfigFrm.dfm 
+      EditorWizard\CnEditorZoomFullScreen.dfm SimpleWizards\CnReplaceWizard.dfm 
+      SourceDiff\CnDiffEditorFrm.dfm SourceDiff\CnSourceDiffFrm.dfm 
+      DesignEditors\CnHintEditorFrm.dfm DesignEditors\CnMultiLineEditorFrm.dfm 
       DesignEditors\CnSizeConstraintsEditorFrm.dfm 
-      EditorWizard\CnEditorCodeToString.dfm EditorWizard\CnEditorCodeComment.dfm
-      EditorWizard\CnEditorCodeDelBlank.dfm EditorWizard\CnAsciiChart.dfm 
-      SourceStat\CnStatFrm.dfm SourceStat\CnStatResultFrm.dfm 
-      PrefixWizard\CnPrefixCompFrm.dfm PrefixWizard\CnPrefixConfigFrm.dfm 
-      PrefixWizard\CnPrefixEditFrm.dfm PrefixWizard\CnPrefixExecuteFrm.dfm 
-      PrefixWizard\CnPrefixNewFrm.dfm IdeEnhancements\CnFormEnhancements.dfm 
-      IdeEnhancements\CnPaletteEnhanceFrm.dfm IdeEnhancements\CnCompFilterFrm.dfm 
-      CorProperty\CnCorPropCfgFrm.dfm 
-      CorProperty\CnCorPropFrm.dfm CorProperty\CnCorPropRulesFrm.dfm 
+      EditorWizard\CnEditorCodeToString.dfm 
+      EditorWizard\CnEditorCodeDelBlank.dfm EditorWizard\CnEditorCodeComment.dfm 
+      EditorWizard\CnAsciiChart.dfm SourceStat\CnStatFrm.dfm 
+      SourceStat\CnStatResultFrm.dfm PrefixWizard\CnPrefixCompFrm.dfm 
+      PrefixWizard\CnPrefixConfigFrm.dfm PrefixWizard\CnPrefixEditFrm.dfm 
+      PrefixWizard\CnPrefixExecuteFrm.dfm PrefixWizard\CnPrefixNewFrm.dfm 
+      IdeEnhancements\CnFormEnhancements.dfm 
+      IdeEnhancements\CnPaletteEnhanceFrm.dfm ScriptWizard\CnScriptFrm.dfm 
+      ScriptWizard\CnScriptWizard.dfm IdeEnhancements\CnCompFilterFrm.dfm 
+      CorProperty\CnCorPropCfgFrm.dfm CorProperty\CnCorPropFrm.dfm 
+      CorProperty\CnCorPropRulesFrm.dfm 
       ProjectExtWizard\CnProjectViewFormsFrm.dfm 
       ProjectExtWizard\CnProjectViewUnitsFrm.dfm 
       ProjectExtWizard\CnProjectUseUnitsFrm.dfm 
       ProjectExtWizard\CnProjectFramesFrm.dfm 
-      ProjectExtWizard\CnProjectListUsedFrm.dfm
+      ProjectExtWizard\CnProjectListUsedFrm.dfm 
       SimpleWizards\CnCommentCropper.dfm 
       DesignEditors\CnMultiLineEdtToolOptFrm.dfm 
       DesignEditors\CnMultiLineEdtUserFmtFrm.dfm RepositoryWiz\CnDUnitSetFrm.dfm 
@@ -132,8 +132,7 @@
       ExplorerWizard\CnExploreDirectory.dfm ExplorerWizard\CnExploreFilter.dfm 
       ExplorerWizard\CnExploreFilterEditor.dfm 
       ProjectExtWizard\CnProjectViewBaseFrm.dfm 
-      ReopenWizard\CnFilesSnapshotManageFrm.dfm 
-      ReopenWizard\CnRoFrmFileList.dfm 
+      ReopenWizard\CnFilesSnapshotManageFrm.dfm ReopenWizard\CnRoFrmFileList.dfm 
       IdeEnhancements\CnWinTopRoller.dfm SrcEditorEnhance\CnSrcEditorEnhance.dfm 
       ProjectExtWizard\CnProjectBackupFrm.dfm 
       ProjectExtWizard\CnProjectBackupSaveFrm.dfm 
@@ -141,14 +140,13 @@
       ProjectExtWizard\CnProjectDirImportFrm.dfm Utils\CnWizMacroFrm.dfm 
       SrcEditorEnhance\CnSrcEditorGroupReplace.dfm 
       EditorWizard\CnEditorInsertTime.dfm EditorWizard\CnEditorCollector.dfm 
+      SrcEditorEnhance\CnIdentRenameFrm.dfm 
       IdeEnhancements\CnSourceHighlightFrm.dfm 
       IdeEnhancements\CnHighlightLineFrm.dfm 
-      IdeEnhancements\CnInputHelperEditFrm.dfm 
-      IdeEnhancements\CnInputHelperFrm.dfm 
-      ScriptWizard\CnScriptFrm.dfm ScriptWizard\CnScriptWizard.dfm 
       SrcEditorEnhance\CnSrcEditorWebSearch.dfm 
-      SrcEditorEnhance\CnIdentRenameFrm.dfm 
-      DesignEditors\CnPropEditorCustomizeFrm.dfm"/>
+      DesignEditors\CnPropEditorCustomizeFrm.dfm 
+      IdeEnhancements\CnInputHelperEditFrm.dfm 
+      IdeEnhancements\CnInputHelperFrm.dfm SimpleWizards\CnFeedWizardFrm.dfm"/>
     <LIBFILES value=""/>
     <LIBRARIES value="Inet50.lib vclie50.lib wininet.lib"/>
     <SPARELIBS value="vcl50.lib vclx50.lib wininet.lib dsnide50.lib vclie50.lib Inet50.lib"/>

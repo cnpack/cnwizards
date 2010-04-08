@@ -171,6 +171,9 @@ USEUNIT("IdeEnhancements\CnInputHelper.pas");
 USEFORMNS("IdeEnhancements\CnInputHelperEditFrm.pas", Cninputhelpereditfrm, CnInputHelperEditForm);
 USEFORMNS("IdeEnhancements\CnInputHelperFrm.pas", Cninputhelperfrm, CnInputHelperForm);
 USEUNIT("IdeEnhancements\CnInputIdeSymbolList.pas");
+USEFORMNS("SimpleWizards\CnFeedWizardFrm.pas", Cnfeedwizardfrm, CnFeedWizardForm);
+USEUNIT("SimpleWizards\CnFeedWizard.pas");
+USEUNIT("Utils\CnFeedParser.pas");
 //---------------------------------------------------------------------------
 This file is used by the project manager only and should be treated like the project file
 

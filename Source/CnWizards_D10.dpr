@@ -200,7 +200,10 @@ uses
   CnScriptWizard in 'ScriptWizard\CnScriptWizard.pas' {CnScriptWizardForm},
   CnScriptFrm in 'ScriptWizard\CnScriptFrm.pas' {CnScriptForm},
   CnScriptClasses in 'ScriptWizard\CnScriptClasses.pas',
-  CnScriptRegister in 'ScriptWizard\CnScriptRegister.pas';
+  CnScriptRegister in 'ScriptWizard\CnScriptRegister.pas',
+  CnFeedWizard in 'SimpleWizards\CnFeedWizard.pas',
+  CnFeedParser in 'Utils\CnFeedParser.pas',
+  CnFeedWizardFrm in 'SimpleWizards\CnFeedWizardFrm.pas' {CnFeedWizardForm};
 
 {$R *.RES}
 
