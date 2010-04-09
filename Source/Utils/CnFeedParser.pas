@@ -39,11 +39,11 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, SysUtils, Classes;
+  Windows, SysUtils, Classes, CnClasses;
 
 type
 
-  TCnFeedItem = class(TCollectionItem)
+  TCnFeedItem = class(TCnAssignableCollectionItem)
   private
     FPubDate: TDateTime;
     FDescription: WideString;
@@ -60,7 +60,7 @@ type
     property Author: WideString read FAuthor write FAuthor;
   end;
 
-  TCnFeedChannel = class(TCollection)
+  TCnFeedChannel = class(TCnAssignableCollection)
   private
     FLastBuildDate: TDateTime;
     FPubDate: TDateTime;

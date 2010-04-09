@@ -42,9 +42,10 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, IniFiles, Forms,
-  Menus, CommCtrl, ComCtrls, CnWizClasses, CnWizNotifier, CnWizUtils, CnCommon,
-  CnFeedParser, Contnrs, ExtCtrls, Math, CnWizOptions, CnConsts, CnWizConsts,
-  CnWizMultiLang;
+  Buttons, Menus, CommCtrl, ComCtrls, Contnrs, ExtCtrls, Math,
+  OmniXML, OmniXMLPersistent, CnConsts, CnCommon, CnClasses,
+  CnWizClasses, CnWizNotifier, CnWizUtils, CnFeedParser, CnWizOptions,
+  CnWizConsts, CnWizMultiLang;
 
 type
 
@@ -58,6 +59,9 @@ type
     FActive: Boolean;
     FIsHot: Boolean;
     FText: string;
+    FBtnPrevFeed: TSpeedButton;
+    FBtnNextFeed: TSpeedButton;
+    FBtnConfig: TSpeedButton;
     procedure MenuPopup(Sender: TObject);
     procedure OnStatusBarResize(Sender: TObject);
     procedure CalcTextRect(AText: string; var ARect: TRect);
@@ -67,6 +71,7 @@ type
     procedure InitPopupMenu;
     procedure Paint; override;
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
+    procedure CMMouseEnter(var Message: TMessage); message CM_MOUSEENTER;
     procedure CMMouseLeave(var Message: TMessage); message CM_MOUSELEAVE;
     procedure Click; override;
     property IsHot: Boolean read FIsHot write SetIsHot;
@@ -84,24 +89,78 @@ type
     property Active: Boolean read FActive write FActive;
   end;
 
-  TCnFeedDefine = record
-    IDStr: string;
-    Url: string;
-    CheckPeriod: Integer;
-    Recent: Integer;
+{ TCnFeedCfgItem }
+
+  TCnFeedCfgItem = class(TCnAssignableCollectionItem)
+  private
+    FRecent: Integer;
+    FCheckPeriod: Integer;
+    FIDStr: string;
+    FUrl: string;
+  public
+    property IDStr: string read FIDStr write FIDStr;
+    property Url: string read FUrl write FUrl;
+    property CheckPeriod: Integer read FCheckPeriod write FCheckPeriod;
+    property Recent: Integer read FRecent write FRecent;
   end;
+
+{ TCnFeedCfg }
+
+  TCnFeedCfg = class(TCnAssignableCollection)
+  private
+    function GetItems(Index: Integer): TCnFeedCfgItem;
+    procedure SetItems(Index: Integer; const Value: TCnFeedCfgItem);
+  public
+    constructor Create;
+    function Add: TCnFeedCfgItem;
+    property Items[Index: Integer]: TCnFeedCfgItem read GetItems write SetItems; default;
+  end;
+
+{ TCnFeedThread }
+
+  TCnFeedThread = class(TThread)
+  private
+    FActive: Boolean;
+    FIni: TCustomIniFile;
+    FFeedPath: string;
+    FTick: Cardinal;
+    FLock: TCnLockObject;
+    FForceUpdate: Boolean;
+    FFeeds: TObjectList;
+    FFeedCfg: TCnFeedCfg;
+    FOnFeedUpdate: TNotifyEvent;
+    procedure DoFeedUpdate;
+    function UpdateFeeds(ForceUpdate: Boolean): Boolean;
+    function DoUpdateFeed(Def: TCnFeedCfgItem; ForceUpdate: Boolean): Boolean;
+    function GetFeedCount: Integer;
+    function GetFeeds(Index: Integer): TCnFeedChannel;
+  protected
+    procedure Execute; override;
+  public
+    constructor Create(AIni: TCustomIniFile; AFeedPath: string);
+    destructor Destroy; override;
+    procedure DoForceUpdate;
+    procedure SetFeedCfg(ACfg: TCnFeedCfg);
+    
+    property OnFeedUpdate: TNotifyEvent read FOnFeedUpdate write FOnFeedUpdate;
+    property FeedCount: Integer read GetFeedCount;
+    property Feeds[Index: Integer]: TCnFeedChannel read GetFeeds;
+  end;
+
+{ TCnFeedWizard }
 
   TCnFeedWizard = class(TCnIDEEnhanceWizard)
   private
+    FThread: TCnFeedThread;
     FIni: TCustomIniFile;
     FFeedPath: string;
-    FFeedDef: array of TCnFeedDefine;
+    FFeedCfg: TCnFeedCfg;
     FLastUpdateTick: Cardinal;
-    FLastCheckTick: Cardinal;
     FTimer: TTimer;
     FPanels: TList;
     FFeeds: TObjectList;
     FSortedFeeds: TList;
+    FRandomFeeds: TList;
     FCurFeed: TCnFeedItem;
     FUpdatePeriod: Integer;
     FExludeCategories: string;
@@ -115,7 +174,11 @@ type
     function GetFeedCount: Integer;
     function GetFeeds(Index: Integer): TCnFeedChannel;
     procedure OnTimer(Sender: TObject);
-    function DoUpdateFeed(Def: TCnFeedDefine; ForceUpdate: Boolean): Boolean;
+    procedure RandomFeed;
+    procedure OnFeedUpdate(Sender: TObject);
+    procedure OnPrevFeed(Sender: TObject);
+    procedure OnNextFeed(Sender: TObject);
+    procedure OnConfig(Sender: TObject);
   protected
     procedure SetActive(Value: Boolean); override;
     function GetHasConfig: Boolean; override;
@@ -133,8 +196,7 @@ type
 
     procedure UpdateStatusPanels;
 
-    procedure NextFeed;
-    function UpdateFeeds(ForceUpdate: Boolean = False): Boolean;
+    procedure FeedStep(Step: Integer);
 
     property PanelCount: Integer read GetPanelCount;
     property Panels[Index: Integer]: TCnStatusPanel read GetPanels;
@@ -159,10 +221,14 @@ uses
   CnEditControlWrapper, CnWizIdeUtils, CnInetUtils, CnFeedWizardFrm;
 
 const
+  SCnFeedWizardName: string = 'Feed Wizard';
+  SCnFeedWizardComment: string = 'Display Feed Context in Status Bar';
+
   SCnFeedStatusPanel = 'CnFeedStatusPanel';
   SCnEdtStatusBar = 'StatusBar';
   SCnFeedCache = 'FeedCache\';
   SCnUpdateFeedMutex = 'CnUpdateFeedMutex';
+  SCnFeedCfgFile = 'FeedCfg.xml';
 
   SCnOfficalFeedIDStr = 'CnPackOfficalFeed';
   SCnOfficalFeedUrl = 'http://www.cnpack.org/rssbuild.php?lang=en';
@@ -178,6 +244,7 @@ const
   csBarKeepWidth = 80;
 {$ENDIF}
 {$ENDIF}
+  csPnlBtnWidth = 18; 
 
 function DoSortFeed(Item1, Item2: Pointer): Integer;
 begin
@@ -210,8 +277,18 @@ begin
     inherited;
 end;
 
+procedure TCnStatusPanel.CMMouseEnter(var Message: TMessage);
+begin
+  FBtnPrevFeed.Visible := True;
+  FBtnNextFeed.Visible := True;
+  FBtnConfig.Visible := True;
+end;
+
 procedure TCnStatusPanel.CMMouseLeave(var Message: TMessage);
 begin
+  FBtnPrevFeed.Visible := False;
+  FBtnNextFeed.Visible := False;
+  FBtnConfig.Visible := False;
   IsHot := False;
 end;
 
@@ -219,6 +296,15 @@ constructor TCnStatusPanel.Create(AOwner: TComponent);
 begin
   inherited;
   InitPopupMenu;
+  FBtnPrevFeed := TSpeedButton.Create(Self);
+  FBtnPrevFeed.Caption := '<<';
+  FBtnPrevFeed.Flat := True;
+  FBtnNextFeed := TSpeedButton.Create(Self);
+  FBtnNextFeed.Caption := '>>';
+  FBtnNextFeed.Flat := True;
+  FBtnConfig := TSpeedButton.Create(Self);
+  FBtnConfig.Caption := '...';
+  FBtnConfig.Flat := True;
 end;
 
 destructor TCnStatusPanel.Destroy;
@@ -262,6 +348,12 @@ begin
   StatusBar.Perform(SB_GETRECT, StatusBar.Panels.Count - 1, Integer(@R));
   Inc(R.Left, csBarKeepWidth);
   SetBounds(R.Left + 1, R.Top + 1, R.Right - R.Left - 2, R.Bottom - R.Top - 2);
+  FBtnPrevFeed.Parent := Self;
+  FBtnNextFeed.Parent := Self;
+  FBtnConfig.Parent := Self;
+  FBtnNextFeed.SetBounds(ClientWidth - csPnlBtnWidth - 1, 0, csPnlBtnWidth, ClientHeight);
+  FBtnConfig.SetBounds(ClientWidth - 2 * csPnlBtnWidth - 1, 0, csPnlBtnWidth, ClientHeight);
+  FBtnPrevFeed.SetBounds(ClientWidth - 3 * csPnlBtnWidth - 1, 0, csPnlBtnWidth, ClientHeight);
   Invalidate;
 end;
 
@@ -318,6 +410,226 @@ begin
   OnStatusBarResize(StatusBar);
 end;
 
+{ TCnFeedCfg }
+
+function TCnFeedCfg.Add: TCnFeedCfgItem;
+begin
+  Result := TCnFeedCfgItem(inherited Add);
+end;
+
+constructor TCnFeedCfg.Create;
+begin
+  inherited Create(TCnFeedCfgItem);
+end;
+
+function TCnFeedCfg.GetItems(Index: Integer): TCnFeedCfgItem;
+begin
+  Result := TCnFeedCfgItem(inherited Items[Index]);
+end;
+
+procedure TCnFeedCfg.SetItems(Index: Integer; const Value: TCnFeedCfgItem);
+begin
+  inherited Items[Index] := Value;
+end;
+
+{ TCnFeedThread }
+
+constructor TCnFeedThread.Create(AIni: TCustomIniFile; AFeedPath: string);
+begin
+  inherited Create(False);
+  FreeOnTerminate := True;
+  FIni := AIni;
+  FFeedPath := AFeedPath;
+  FLock := TCnLockObject.Create;
+  FFeeds := TObjectList.Create;
+  FFeedCfg := TCnFeedCfg.Create;
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnFeedThread.Create');
+{$ENDIF}
+end;
+
+destructor TCnFeedThread.Destroy;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnFeedThread.Destroy');
+{$ENDIF}
+  FLock.Free;
+  FFeeds.Free;
+  FFeedCfg.Free;
+  inherited;
+end;
+
+procedure TCnFeedThread.DoFeedUpdate;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnFeedThread.DoFeedUpdate');
+{$ENDIF}
+  if Assigned(FOnFeedUpdate) then
+    FOnFeedUpdate(Self);
+end;
+
+procedure TCnFeedThread.DoForceUpdate;
+begin
+  FForceUpdate := True;
+end;
+
+function TCnFeedThread.DoUpdateFeed(Def: TCnFeedCfgItem; ForceUpdate: Boolean): Boolean;
+var
+  FileName, TmpName: string;
+  Feed: TCnFeedChannel;
+  i: Integer;
+  List: TList;
+begin
+  Result := False;
+  
+  Feed := nil;
+  for i := 0 to FeedCount - 1 do
+    if SameText(Feeds[i].IDStr, Def.IDStr) then
+    begin
+      Feed := Feeds[i];
+      Break;
+    end;
+  if Feed = nil then
+  begin
+    Feed := TCnFeedChannel.Create;
+    Feed.IDStr := Def.IDStr;
+    FFeeds.Add(Feed);
+    Result := True;
+  end;
+
+  FileName := FFeedPath + Def.IDStr + '.xml';
+  TmpName := ChangeFileExt(FileName, '.tmp');
+  if ForceUpdate or (Abs(Now - FIni.ReadDateTime('LastCheck', Def.IDStr, 0)) > Def.CheckPeriod / 24 / 60) then
+  begin
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('Update Feed: ' + Def.IDStr + ' -> ' + Def.Url);
+  {$ENDIF}
+    FIni.WriteDateTime('LastCheck', Def.IDStr, Now);
+    with TCnHTTP.Create do
+    try
+      if GetFile(Def.Url, TmpName) and (GetFileSize(TmpName) > 0) then
+      begin
+        DeleteFile(FileName);
+        CopyFile(PChar(TmpName), PChar(FileName), False);
+        DeleteFile(TmpName);
+      end;
+    finally
+      Free;
+    end;
+    Result := True;
+  end;
+
+  if Result then
+  begin
+    Feed.LoadFromFile(FileName);
+
+    if (Def.Recent > 0) and (Feed.Count > Def.Recent) then
+    begin
+      List := TList.Create;
+      try
+        for i := 0 to Feed.Count - 1 do
+          List.Add(Feed[i]);
+        List.Sort(DoSortFeed);
+        for i := Def.Recent to List.Count - 1 do
+          TCnFeedItem(List[i]).Free;
+      finally
+        List.Free;
+      end;   
+    end;  
+  end;
+end;
+
+function TCnFeedThread.UpdateFeeds(ForceUpdate: Boolean): Boolean;
+var
+  i: Integer;
+  hMutex: THandle;
+  ACfg: TCnFeedCfg;
+begin
+  Result := False;
+  hMutex := CreateMutex(nil, False, SCnUpdateFeedMutex);
+  if GetLastError = ERROR_ALREADY_EXISTS then
+    Exit;
+
+  try
+    if ForceUpdate then
+    begin
+      FFeeds.Clear;
+    end;
+
+    ACfg := TCnFeedCfg.Create;
+    try
+      FLock.Lock;
+      try
+        ACfg.Assign(FFeedCfg);
+      finally
+        FLock.Unlock;
+      end;
+
+      with ACfg.Add do
+      begin
+        IDStr := SCnOfficalFeedIDStr;
+        Url := SCnOfficalFeedUrl;
+        CheckPeriod := SCnOfficalFeedPeriod;
+        Recent := SCnOfficalFeedRecent;
+      end;
+
+      for i := 0 to ACfg.Count - 1 do
+      begin
+        if Terminated then Exit;
+        if DoUpdateFeed(ACfg[i], ForceUpdate) then
+          Result := True;
+      end;
+    finally
+      ACfg.Free;
+    end;
+  finally
+    if hMutex <> 0 then
+    begin
+      ReleaseMutex(hMutex);
+      CloseHandle(hMutex);
+    end;
+  end;
+end;
+
+procedure TCnFeedThread.Execute;
+var
+  IsForce: Boolean;
+begin
+  while not Terminated do
+  begin
+    if FActive and (Abs(GetTickCount - FTick) > 60 * 1000) then
+    begin
+      FTick := GetTickCount;
+      IsForce := FForceUpdate;
+      FForceUpdate := False;
+      if UpdateFeeds(IsForce) then
+        Synchronize(DoFeedUpdate);
+    end
+    else
+      Sleep(100);  
+  end;  
+end;
+
+function TCnFeedThread.GetFeedCount: Integer;
+begin
+  Result := FFeeds.Count;
+end;
+
+function TCnFeedThread.GetFeeds(Index: Integer): TCnFeedChannel;
+begin
+  Result := TCnFeedChannel(FFeeds[Index]);
+end;
+
+procedure TCnFeedThread.SetFeedCfg(ACfg: TCnFeedCfg);
+begin
+  FLock.Lock;
+  try
+    FFeedCfg.Assign(ACfg);
+  finally
+    FLock.Unlock;
+  end;   
+end;
+
 { TCnFeedWizard }
 
 function TCnFeedWizard.CanShowPanels: Boolean;
@@ -328,17 +640,25 @@ end;
 procedure TCnFeedWizard.Config;
 begin
   if ShowCnFeedWizardForm(Self) then
+  begin
+    if FThread <> nil then
+    begin
+      FThread.SetFeedCfg(FFeedCfg);
+      FThread.DoForceUpdate;
+    end;
     DoSaveSettings;
+  end;
 end;
 
 constructor TCnFeedWizard.Create;
 begin
   inherited;
   FLastUpdateTick := GetTickCount;
-  FLastCheckTick := GetTickCount;
   FPanels := TList.Create;
   FFeeds := TObjectList.Create;
   FSortedFeeds := TList.Create;
+  FRandomFeeds := TList.Create;
+  FFeedCfg := TCnFeedCfg.Create;
   FTimer := TTimer.Create(nil);
   FTimer.OnTimer := OnTimer;
   FTimer.Interval := 1000;
@@ -362,8 +682,16 @@ begin
   FPanels.Free;
   FFeeds.Free;
   FSortedFeeds.Free;
+  FRandomFeeds.Free;
+  FFeedCfg.Free;
   FTimer.Free;
   FIni.Free;
+  if FThread <> nil then
+  begin
+    FThread.Terminate;
+    TerminateThread(FThread.Handle, 0);
+    FThread := nil;
+  end;
   inherited;
 end;
 
@@ -389,10 +717,13 @@ begin
           Panel.EditWindow := EditWindow;
           Panel.StatusBar := StatusBar;
           Panel.OnClick := PanelClick;
+          Panel.FBtnPrevFeed.OnClick := OnPrevFeed;
+          Panel.FBtnNextFeed.OnClick := OnNextFeed;
+          Panel.FBtnConfig.OnClick := OnConfig;
           Panel.UpdateStatus;
           FPanels.Add(Panel);
         {$IFDEF DEBUG}
-          CnDebugger.LogMsgWarning('CnStatusPanel installed');
+          CnDebugger.LogMsg('CnStatusPanel installed');
         {$ENDIF}
         end
         else
@@ -450,10 +781,10 @@ end;
 class procedure TCnFeedWizard.GetWizardInfo(var Name, Author, Email,
   Comment: string);
 begin
-  Name := 'Feed Wizard';
+  Name := SCnFeedWizardName;
   Author := SCnPack_Zjy;
   Email := SCnPack_ZjyEmail;
-  Comment := 'Feed Wizard';
+  Comment := SCnFeedWizardComment;
 end;
 
 procedure TCnFeedWizard.LanguageChanged(Sender: TObject);
@@ -468,53 +799,29 @@ end;
 procedure TCnFeedWizard.Loaded;
 begin
   inherited;
-  UpdateFeeds;
+  FThread := TCnFeedThread.Create(FIni, FFeedPath);
+  FThread.OnFeedUpdate := OnFeedUpdate;
+  FThread.SetFeedCfg(FFeedCfg);
+  FThread.FActive := Active;
 end;
 
 procedure TCnFeedWizard.LoadSettings(Ini: TCustomIniFile);
-var
-  AName, AIDStr: string;
-  Cnt, i: Integer;
 begin
   inherited;
-  FFeedDef := nil;
-  Cnt := Ini.ReadInteger('', 'DefCount', 0);
-  for i := 0 to Cnt - 1 do
-  begin
-    AName := 'Item' + IntToStr(i);
-    AIDStr := Ini.ReadString(AName, 'IDStr', '');
-    if AIDStr <> '' then
-    begin
-      SetLength(FFeedDef, Length(FFeedDef) + 1);
-      with FFeedDef[High(FFeedDef)] do
-      begin
-        IDStr := AIDStr;
-        Url := Ini.ReadString(AName, 'Url', '');
-        CheckPeriod := Ini.ReadInteger(AName, 'CheckPeriod', 24 * 60);
-        Recent := Ini.ReadInteger(AName, 'Recent', 0);
-      end;
-    end;
+  try
+    FFeedCfg.Clear;
+    TOmniXMLReader.LoadFromFile(FFeedCfg, WizOptions.UserPath + SCnFeedCfgFile);
+  except
+    ;
   end;
+  if FThread <> nil then
+    FThread.SetFeedCfg(FFeedCfg);
 end;
 
 procedure TCnFeedWizard.SaveSettings(Ini: TCustomIniFile);
-var
-  AName: string;
-  i: Integer;
 begin
   inherited;
-  Ini.WriteInteger('', 'DefCount', High(FFeedDef) + 1);
-  for i := 0 to High(FFeedDef) do
-  begin
-    AName := 'Item' + IntToStr(i);
-    with FFeedDef[High(i)] do
-    begin
-      Ini.WriteString(AName, 'IDStr', IDStr);
-      Ini.WriteString(AName, 'Url', Url);
-      Ini.WriteInteger(AName, 'CheckPeriod', CheckPeriod);
-      Ini.WriteInteger(AName, 'Recent', Recent);
-    end;
-  end;
+  TOmniXMLWriter.SaveToFile(FFeedCfg, WizOptions.UserPath + SCnFeedCfgFile, pfAuto, ofIndent);
 end;
 
 procedure TCnFeedWizard.PanelClick(Sender: TObject);
@@ -527,6 +834,8 @@ procedure TCnFeedWizard.SetActive(Value: Boolean);
 begin
   inherited;
   UpdateStatusPanels;
+  if FThread <> nil then
+    FThread.FActive := Value;
 end;
 
 procedure TCnFeedWizard.UpdateStatusPanels;
@@ -544,21 +853,41 @@ begin
   end;
 end;
 
-procedure TCnFeedWizard.NextFeed;
+procedure TCnFeedWizard.FeedStep(Step: Integer);
 var
-  Rnd: Double;
-  i: Integer;
+  i, Idx: Integer;
 begin
+  if FCurFeed <> nil then
+    Idx := FRandomFeeds.IndexOf(FCurFeed)
+  else
+    Idx := 0;
+    
   FCurFeed := nil;
-  if FSortedFeeds.Count > 0 then
+  if FRandomFeeds.Count > 0 then
   begin
-    Rnd := Power(Random, 2.5);
-    FCurFeed := TCnFeedItem(FSortedFeeds[TrimInt(Round(Rnd * FSortedFeeds.Count),
-      0, FSortedFeeds.Count - 1)]);
+    Idx := (Idx + Step) mod FRandomFeeds.Count;
+    if Idx < 0 then
+      Idx := Idx + FRandomFeeds.Count;
+    FCurFeed := TCnFeedItem(FRandomFeeds[TrimInt(Idx, 0, FRandomFeeds.Count - 1)]);
     for i := 0 to PanelCount - 1 do
       Panels[i].Text := FCurFeed.Title;
   end;
   FLastUpdateTick := GetTickCount;
+end;
+
+procedure TCnFeedWizard.OnConfig(Sender: TObject);
+begin
+  Config;
+end;
+
+procedure TCnFeedWizard.OnNextFeed(Sender: TObject);
+begin
+  FeedStep(1);
+end;
+
+procedure TCnFeedWizard.OnPrevFeed(Sender: TObject);
+begin
+  FeedStep(-1);
 end;
 
 procedure TCnFeedWizard.OnTimer(Sender: TObject);
@@ -568,124 +897,63 @@ begin
 
   if Abs(GetTickCount - FLastUpdateTick) >= FUpdatePeriod * 1000 then
   begin
-    NextFeed;
-  end;
-
-  if Abs(GetTickCount - FLastCheckTick) >= 60 * 1000 then
-  begin
-    if UpdateFeeds then
-      NextFeed;
+    FeedStep(1);
+    FLastUpdateTick := GetTickCount;
   end;
 end;
 
-function TCnFeedWizard.DoUpdateFeed(Def: TCnFeedDefine; ForceUpdate: Boolean): Boolean;
+procedure TCnFeedWizard.RandomFeed;
 var
-  FileName, TmpName: string;
-  Feed: TCnFeedChannel;
-  i: Integer;
+  i, Idx: Integer;
   List: TList;
 begin
-  Result := False;
-  
-  Feed := nil;
-  for i := 0 to FeedCount - 1 do
-    if SameText(Feeds[i].IDStr, Def.IDStr) then
+  FRandomFeeds.Clear;
+
+  List := TList.Create;
+  try
+    List.Capacity := FSortedFeeds.Capacity;
+    for i := 0 to FSortedFeeds.Count - 1 do
+      List.Add(FSortedFeeds[i]);
+
+    FRandomFeeds.Clear;
+    FRandomFeeds.Capacity := List.Capacity;
+    while List.Count > 0 do
     begin
-      Feed := Feeds[i];
-      Break;
+      Idx := TrimInt(Round(Power(Random, 5) * List.Count), 0, List.Count - 1);
+      FRandomFeeds.Add(List[Idx]);
+      List.Delete(Idx);
     end;
-  if Feed = nil then
-  begin
-    Feed := TCnFeedChannel.Create;
-    Feed.IDStr := Def.IDStr;
-    FFeeds.Add(Feed);
-    Result := True;
-  end;
-
-  FileName := FFeedPath + Def.IDStr + '.xml';
-  TmpName := ChangeFileExt(FileName, '.tmp');
-  if ForceUpdate or (Abs(Now - FIni.ReadDateTime('LastCheck', Def.IDStr, 0)) > Def.CheckPeriod / 24 / 60) then
-  begin
-    FIni.WriteDateTime('LastCheck', Def.IDStr, Now);
-    with TCnHTTP.Create do
-    try
-      if GetFile(Def.Url, TmpName) and (GetFileSize(TmpName) > 0) then
-      begin
-        DeleteFile(FileName);
-        CopyFile(PChar(TmpName), PChar(FileName), False);
-        DeleteFile(TmpName);
-      end;
-    finally
-      Free;
-    end;
-    Result := True;
-  end;
-
-  if Result then
-  begin
-    Feed.LoadFromFile(FileName);
-
-    if (Def.Recent > 0) and (Feed.Count > Def.Recent) then
-    begin
-      List := TList.Create;
-      try
-        for i := 0 to Feed.Count - 1 do
-          List.Add(Feed[i]);
-        List.Sort(DoSortFeed);
-        for i := Def.Recent to List.Count - 1 do
-          TCnFeedItem(List[i]).Free;
-      finally
-        List.Free;
-      end;   
-    end;  
+  finally
+    List.Free;
   end;
 end;
 
-function TCnFeedWizard.UpdateFeeds(ForceUpdate: Boolean): Boolean;
+procedure TCnFeedWizard.OnFeedUpdate(Sender: TObject);
 var
   i, j: Integer;
-  Offcial: TCnFeedDefine;
-  hMutex: THandle;
+  Channel: TCnFeedChannel;
 begin
-  Result := False;
+  FFeeds.Clear;
+  FSortedFeeds.Clear;
+  FRandomFeeds.Clear;
+  FCurFeed := nil;
 
-  hMutex := CreateMutex(nil, False, SCnUpdateFeedMutex);
-  if GetLastError = ERROR_ALREADY_EXISTS then
-    Exit;
-    
-  try
-    if ForceUpdate then
-    begin
-      FFeeds.Clear;
-    end;  
-
-    Offcial.IDStr := SCnOfficalFeedIDStr;
-    Offcial.Url := SCnOfficalFeedUrl;
-    Offcial.CheckPeriod := SCnOfficalFeedPeriod;
-    Offcial.Recent := SCnOfficalFeedRecent;
-    if DoUpdateFeed(Offcial, ForceUpdate) then
-      Result := True;
-
-    for i := Low(FFeedDef) to High(FFeedDef) do
-      if DoUpdateFeed(FFeedDef[i], ForceUpdate) then
-        Result := True;
-
-    if Result then
-    begin
-      FCurFeed := nil;
-      FSortedFeeds.Clear;
-      for i := 0 to FeedCount - 1 do
-        for j := 0 to Feeds[i].Count - 1 do
-          FSortedFeeds.Add(Feeds[i][j]);
-      FSortedFeeds.Sort(DoSortFeed);
-    end;
-  finally
-    if hMutex <> 0 then
-    begin
-      ReleaseMutex(hMutex);
-      CloseHandle(hMutex);
-    end;
+  for i := 0 to FThread.FeedCount - 1 do
+  begin
+    Channel := TCnFeedChannel.Create;
+    Channel.Assign(TCnFeedChannel(FThread.Feeds[i]));
+    FFeeds.Add(Channel);
   end;
+
+  FSortedFeeds.Clear;
+  for i := 0 to FeedCount - 1 do
+    for j := 0 to Feeds[i].Count - 1 do
+      FSortedFeeds.Add(Feeds[i][j]);
+  FSortedFeeds.Sort(DoSortFeed);
+
+  RandomFeed;
+
+  FeedStep(0);
 end;
 
 initialization
