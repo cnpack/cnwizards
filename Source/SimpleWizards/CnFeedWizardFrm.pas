@@ -126,7 +126,7 @@ begin
   FFeedCfg.Assign(FWizard.FeedCfg);
   lvList.Items.Count := FFeedCfg.Count;
   if FFeedCfg.Count > 0 then
-    lvList.ItemIndex := 0;
+    lvList.Selected := lvList.Items[0];
   SetToControl;
 end;
 
@@ -159,18 +159,21 @@ begin
 end;
 
 procedure TCnFeedWizardForm.GetFromControl;
+var
+  Idx: Integer;
 begin
   if FUpdating then Exit;
 
   FUpdating := True;
   try
-    if lvList.ItemIndex >= 0 then
+    if lvList.Selected <> nil then
     begin
-      FFeedCfg[lvList.ItemIndex].Caption := Trim(edtCaption.Text);
-      FFeedCfg[lvList.ItemIndex].Url := Trim(edtUrl.Text);
-      FFeedCfg[lvList.ItemIndex].CheckPeriod := sePeriod.Value;
-      FFeedCfg[lvList.ItemIndex].Limit := seLimit.Value;
-      lvList.UpdateItems(lvList.ItemIndex, lvList.ItemIndex);
+      Idx := lvList.Selected.Index;
+      FFeedCfg[Idx].Caption := Trim(edtCaption.Text);
+      FFeedCfg[Idx].Url := Trim(edtUrl.Text);
+      FFeedCfg[Idx].CheckPeriod := sePeriod.Value;
+      FFeedCfg[Idx].Limit := seLimit.Value;
+      lvList.UpdateItems(Idx, Idx);
     end;
   finally
     FUpdating := False;
@@ -178,17 +181,20 @@ begin
 end;
 
 procedure TCnFeedWizardForm.SetToControl;
+var
+  Idx: Integer;
 begin
   if FUpdating then Exit;
 
   FUpdating := True;
   try
-    if lvList.ItemIndex >= 0 then
+    if lvList.Selected <> nil then
     begin
-      edtCaption.Text := FFeedCfg[lvList.ItemIndex].Caption;
-      edtUrl.Text := FFeedCfg[lvList.ItemIndex].Url;
-      sePeriod.Value := FFeedCfg[lvList.ItemIndex].CheckPeriod;
-      seLimit.Value := FFeedCfg[lvList.ItemIndex].Limit;
+      Idx := lvList.Selected.Index;
+      edtCaption.Text := FFeedCfg[Idx].Caption;
+      edtUrl.Text := FFeedCfg[Idx].Url;
+      sePeriod.Value := FFeedCfg[Idx].CheckPeriod;
+      seLimit.Value := FFeedCfg[Idx].Limit;
     end
     else
     begin
@@ -197,10 +203,10 @@ begin
       sePeriod.Value := 1;
       seLimit.Value := 0;
     end;
-    edtCaption.Enabled := lvList.ItemIndex >= 0;
-    edtUrl.Enabled := lvList.ItemIndex >= 0;
-    sePeriod.Enabled := lvList.ItemIndex >= 0;
-    seLimit.Enabled := lvList.ItemIndex >= 0;
+    edtCaption.Enabled := lvList.Selected <> nil;
+    edtUrl.Enabled := lvList.Selected <> nil;
+    sePeriod.Enabled := lvList.Selected <> nil;
+    seLimit.Enabled := lvList.Selected <> nil;
   finally
     FUpdating := False;
   end;
@@ -212,30 +218,27 @@ begin
 end;
 
 procedure TCnFeedWizardForm.btnAddClick(Sender: TObject);
-var
-  GUID: TGUID;
 begin
   with FFeedCfg.Add do
   begin
     Caption := SCnFeedNewItem;
-    CreateGUID(GUID);
-    IDStr := GUIDToString(GUID);
+    IDStr := CreateGuidString;
     CheckPeriod := 60;
     Limit := 20;
   end;
   lvList.Items.Count := FFeedCfg.Count;
-  lvList.ItemIndex := FFeedCfg.Count - 1;
+  lvList.Selected := lvList.Items[FFeedCfg.Count - 1];
   SetToControl;
 end;
 
 procedure TCnFeedWizardForm.btnDeleteClick(Sender: TObject);
 begin
-  if (lvList.ItemIndex >= 0) and QueryDlg(SCnDeleteConfirm) then
+  if (lvList.Selected <> nil) and QueryDlg(SCnDeleteConfirm) then
   begin
-    FFeedCfg.Delete(lvList.ItemIndex);
+    FFeedCfg.Delete(lvList.Selected.Index);
     lvList.Items.Count := FFeedCfg.Count;
     if FFeedCfg.Count > 0 then
-      lvList.ItemIndex := 0;
+      lvList.Selected := lvList.Items[0];
     SetToControl;
   end;
 end;

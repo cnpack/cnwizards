@@ -145,7 +145,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
       MaxValue = 99999
       MinValue = 1
       TabOrder = 5
-      Value = 0
+      Value = 1
       OnExit = edtCaptionChange
     end
     object seLimit: TCnSpinEdit

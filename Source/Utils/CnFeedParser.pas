@@ -125,8 +125,7 @@ var
   
   function FeedStrToDateTime(S: WideString): TDateTime;
   begin
-    if not XMLStrToDateTime(S, Result) then
-      Result := Now; // todo: FeedStrToDateTime
+    Result := Now; // todo: FeedStrToDateTime
   end;  
 begin
   try

@@ -1,0 +1,9 @@
+<TCnFeedCfg PropFormat="node">
+  <o>
+    <Caption>CnPack RSS</Caption>
+    <IDStr>CnPackRSS</IDStr>
+    <Url>http://www.cnpack.org/rss/?lang=$landid$</Url>
+    <CheckPeriod>1440</CheckPeriod>
+    <Limit>0</Limit>
+  </o>
+</TCnFeedCfg>

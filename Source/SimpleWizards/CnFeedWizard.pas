@@ -181,6 +181,7 @@ type
     function GetFeeds(Index: Integer): TCnFeedChannel;
     procedure OnTimer(Sender: TObject);
     procedure RandomFeed;
+    procedure SetFeedCfgToThread;
     procedure OnFeedUpdate(Sender: TObject);
     procedure OnPrevFeed(Sender: TObject);
     procedure OnNextFeed(Sender: TObject);
@@ -236,11 +237,7 @@ const
   SCnFeedCache = 'FeedCache\';
   SCnUpdateFeedMutex = 'CnUpdateFeedMutex';
   SCnFeedCfgFile = 'FeedCfg.xml';
-
-  SCnOfficalFeedIDStr = 'CnPackOfficalFeed';
-  SCnOfficalFeedUrl = 'http://www.cnpack.org/rssbuild.php?lang=en';
-  SCnOfficalFeedPeriod = 24 * 60;
-  SCnOfficalFeedLimit = 20;
+  SCnFeedLangID = '$landid$';
 
 {$IFDEF BCB6}
   csBarKeepWidth = 200;
@@ -451,7 +448,7 @@ end;
 
 constructor TCnFeedThread.Create(AIni: TCustomIniFile; AFeedPath: string);
 begin
-  inherited Create(False);
+  inherited Create(True);
   FreeOnTerminate := True;
   FIni := AIni;
   FFeedPath := AFeedPath;
@@ -490,12 +487,14 @@ end;
 
 function TCnFeedThread.DoUpdateFeed(Def: TCnFeedCfgItem; ForceUpdate: Boolean): Boolean;
 var
-  FileName, TmpName: string;
+  FileName, TmpName, Url: string;
   Feed: TCnFeedChannel;
   i: Integer;
   List: TList;
 begin
   Result := False;
+  if (Def.IDStr = '') or (Trim(Def.Url) = '') then
+    Exit;
   
   Feed := nil;
   for i := 0 to FeedCount - 1 do
@@ -522,7 +521,9 @@ begin
     FIni.WriteDateTime('LastCheck', Def.IDStr, Now);
     with TCnHTTP.Create do
     try
-      if GetFile(Def.Url, TmpName) and (GetFileSize(TmpName) > 0) then
+      Url := StringReplace(Trim(Def.Url), SCnFeedLangID, IntToStr(WizOptions.CurrentLangID),
+        [rfReplaceAll, rfIgnoreCase]);
+      if GetFile(Url, TmpName) and (GetFileSize(TmpName) > 0) then
       begin
         DeleteFile(FileName);
         CopyFile(PChar(TmpName), PChar(FileName), False);
@@ -551,6 +552,10 @@ begin
         List.Free;
       end;   
     end;  
+
+  {$IFDEF DEBUG}
+    CnDebugger.LogCollection(Feed);
+  {$ENDIF}
   end;
 end;
 
@@ -580,14 +585,6 @@ begin
         FLock.Unlock;
       end;
 
-      with ACfg.Add do
-      begin
-        IDStr := SCnOfficalFeedIDStr;
-        Url := SCnOfficalFeedUrl;
-        CheckPeriod := SCnOfficalFeedPeriod;
-        Limit := SCnOfficalFeedLimit;
-      end;
-
       for i := 0 to ACfg.Count - 1 do
       begin
         if Terminated then Exit;
@@ -612,7 +609,7 @@ var
 begin
   while not Terminated do
   begin
-    if FActive and (Abs(GetTickCount - FTick) > 60 * 1000) then
+    if FActive and ((Abs(GetTickCount - FTick) > 60 * 1000) or FForceUpdate) then
     begin
       FTick := GetTickCount;
       IsForce := FForceUpdate;
@@ -658,7 +655,7 @@ begin
   begin
     if FThread <> nil then
     begin
-      FThread.SetFeedCfg(FFeedCfg);
+      SetFeedCfgToThread;
       FThread.DoForceUpdate;
     end;
     DoSaveSettings;
@@ -817,8 +814,9 @@ begin
   inherited;
   FThread := TCnFeedThread.Create(FIni, FFeedPath);
   FThread.OnFeedUpdate := OnFeedUpdate;
-  FThread.SetFeedCfg(FFeedCfg);
   FThread.FActive := Active;
+  SetFeedCfgToThread;
+  FThread.Resume;
 end;
 
 procedure TCnFeedWizard.LoadSettings(Ini: TCustomIniFile);
@@ -830,8 +828,7 @@ begin
   except
     ;
   end;
-  if FThread <> nil then
-    FThread.SetFeedCfg(FFeedCfg);
+  SetFeedCfgToThread;
 end;
 
 procedure TCnFeedWizard.SaveSettings(Ini: TCustomIniFile);
@@ -866,6 +863,32 @@ begin
     else
       Panels[i].Text := '';
     Panels[i].UpdateStatus;
+  end;
+end;
+
+procedure TCnFeedWizard.SetFeedCfgToThread;
+var
+  i: Integer;
+  Cfg: TCnFeedCfg;
+begin
+  if FThread <> nil then
+  begin
+    Cfg := TCnFeedCfg.Create;
+    try
+      try
+        TOmniXMLReader.LoadFromFile(Cfg, WizOptions.DataPath + SCnFeedCfgFile);
+      except
+        ;
+      end;
+      for i := 0 to FFeedCfg.Count - 1 do
+        Cfg.Add.Assign(FFeedCfg[i]);
+    {$IFDEF DEBUG}
+      CnDebugger.LogCollection(Cfg);
+    {$ENDIF}
+      FThread.SetFeedCfg(Cfg);
+    finally
+      Cfg.Free;
+    end;
   end;
 end;
 
