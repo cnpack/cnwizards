@@ -72,6 +72,7 @@ type
     procedure SetText(const Value: string);
   protected
     procedure InitPopupMenu;
+    procedure CreateButtons;
     procedure Paint; override;
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
     procedure CMMouseEnter(var Message: TMessage); message CM_MOUSEENTER;
@@ -96,15 +97,17 @@ type
 
   TCnFeedCfgItem = class(TCnAssignableCollectionItem)
   private
-    FRecent: Integer;
+    FLimit: Integer;
     FCheckPeriod: Integer;
     FIDStr: string;
     FUrl: string;
-  public
+    FCaption: string;
+  published
+    property Caption: string read FCaption write FCaption;
     property IDStr: string read FIDStr write FIDStr;
     property Url: string read FUrl write FUrl;
     property CheckPeriod: Integer read FCheckPeriod write FCheckPeriod;
-    property Recent: Integer read FRecent write FRecent;
+    property Limit: Integer read FLimit write FLimit;
   end;
 
 { TCnFeedCfg }
@@ -206,6 +209,7 @@ type
     property FeedCount: Integer read GetFeedCount;
     property Feeds[Index: Integer]: TCnFeedChannel read GetFeeds;
     property CurFeed: TCnFeedItem read FCurFeed;
+    property FeedCfg: TCnFeedCfg read FFeedCfg;
   published
     property UpdatePeriod: Integer read FUpdatePeriod write FUpdatePeriod default 30;
     property ExludeCategories: string read FExludeCategories write FExludeCategories;
@@ -236,7 +240,7 @@ const
   SCnOfficalFeedIDStr = 'CnPackOfficalFeed';
   SCnOfficalFeedUrl = 'http://www.cnpack.org/rssbuild.php?lang=en';
   SCnOfficalFeedPeriod = 24 * 60;
-  SCnOfficalFeedRecent = 10;
+  SCnOfficalFeedLimit = 20;
 
 {$IFDEF BCB6}
   csBarKeepWidth = 200;
@@ -247,7 +251,7 @@ const
   csBarKeepWidth = 80;
 {$ENDIF}
 {$ENDIF}
-  csPnlBtnWidth = 18; 
+  csPnlBtnWidth = 16; 
 
 function DoSortFeed(Item1, Item2: Pointer): Integer;
 begin
@@ -299,15 +303,22 @@ constructor TCnStatusPanel.Create(AOwner: TComponent);
 begin
   inherited;
   InitPopupMenu;
-  FBtnPrevFeed := TSpeedButton.Create(Self);
-  FBtnPrevFeed.Caption := '<<';
-  FBtnPrevFeed.Flat := True;
-  FBtnNextFeed := TSpeedButton.Create(Self);
-  FBtnNextFeed.Caption := '>>';
-  FBtnNextFeed.Flat := True;
-  FBtnConfig := TSpeedButton.Create(Self);
-  FBtnConfig.Caption := '...';
-  FBtnConfig.Flat := True;
+  CreateButtons;
+end;
+
+procedure TCnStatusPanel.CreateButtons;
+
+  function CreateButton(ACaption: string): TSpeedButton;
+  begin
+    Result := TSpeedButton.Create(Self);
+    Result.Caption := ACaption;
+    Result.Flat := True;
+    Result.Visible := False;
+  end;
+begin
+  FBtnPrevFeed := CreateButton('<<');
+  FBtnNextFeed := CreateButton('>>');
+  FBtnConfig := CreateButton('...');
 end;
 
 destructor TCnStatusPanel.Destroy;
@@ -527,14 +538,14 @@ begin
   begin
     Feed.LoadFromFile(FileName);
 
-    if (Def.Recent > 0) and (Feed.Count > Def.Recent) then
+    if (Def.Limit > 0) and (Feed.Count > Def.Limit) then
     begin
       List := TList.Create;
       try
         for i := 0 to Feed.Count - 1 do
           List.Add(Feed[i]);
         List.Sort(DoSortFeed);
-        for i := Def.Recent to List.Count - 1 do
+        for i := Def.Limit to List.Count - 1 do
           TCnFeedItem(List[i]).Free;
       finally
         List.Free;
@@ -574,7 +585,7 @@ begin
         IDStr := SCnOfficalFeedIDStr;
         Url := SCnOfficalFeedUrl;
         CheckPeriod := SCnOfficalFeedPeriod;
-        Recent := SCnOfficalFeedRecent;
+        Limit := SCnOfficalFeedLimit;
       end;
 
       for i := 0 to ACfg.Count - 1 do
