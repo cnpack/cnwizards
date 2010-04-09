@@ -51,8 +51,11 @@ type
 
 { TCnStatusPanel }
 
+  TCnFeedWizard = class;
+
   TCnStatusPanel = class(TCustomControl)
   private
+    FWizard: TCnFeedWizard;
     FStatusBar: TStatusBar;
     FEditWindow: TCustomForm;
     FMenu: TPopupMenu;
@@ -312,6 +315,7 @@ begin
   if StatusBar <> nil then
     StatusBar.OnResize := nil;
   FMenu.Free;
+  FWizard.FPanels.Remove(Self);
   inherited;
 end;
 
@@ -714,6 +718,7 @@ begin
         begin
           Panel := TCnStatusPanel.Create(EditWindow);
           Panel.Name := SCnFeedStatusPanel;
+          Panel.FWizard := Self;
           Panel.EditWindow := EditWindow;
           Panel.StatusBar := StatusBar;
           Panel.OnClick := PanelClick;
