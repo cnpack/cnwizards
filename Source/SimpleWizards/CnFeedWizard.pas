@@ -42,7 +42,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, IniFiles, Forms,
-  Buttons, Menus, CommCtrl, ComCtrls, Contnrs, ExtCtrls, Math,
+  Buttons, Menus, CommCtrl, ComCtrls, Contnrs, ExtCtrls, Math, Tabs,
   OmniXML, OmniXMLPersistent, CnConsts, CnCommon, CnClasses,
   CnWizClasses, CnWizNotifier, CnWizUtils, CnFeedParser, CnWizOptions,
   CnWizConsts, CnWizMultiLang;
@@ -57,6 +57,7 @@ type
   private
     FWizard: TCnFeedWizard;
     FStatusBar: TStatusBar;
+    FTabSet: TTabSet;
     FEditWindow: TCustomForm;
     FMenu: TPopupMenu;
     FActive: Boolean;
@@ -67,6 +68,7 @@ type
     FBtnConfig: TSpeedButton;
     procedure MenuPopup(Sender: TObject);
     procedure OnStatusBarResize(Sender: TObject);
+    procedure OnTabSetChange(Sender: TObject);
     procedure CalcTextRect(AText: string; var ARect: TRect);
     procedure SetIsHot(const Value: Boolean);
     procedure SetText(const Value: string);
@@ -86,6 +88,7 @@ type
     procedure UpdateStatus;
     
     property StatusBar: TStatusBar read FStatusBar write FStatusBar;
+    property TabSet: TTabSet read FTabSet write FTabSet;
     property EditWindow: TCustomForm read FEditWindow write FEditWindow;
     property Menu: TPopupMenu read FMenu;
 
@@ -234,6 +237,7 @@ const
 
   SCnFeedStatusPanel = 'CnFeedStatusPanel';
   SCnEdtStatusBar = 'StatusBar';
+  SCnEdtTabSet = 'ViewBar';
   SCnFeedCache = 'FeedCache\';
   SCnUpdateFeedMutex = 'CnUpdateFeedMutex';
   SCnFeedCfgFile = 'FeedCfg.xml';
@@ -248,7 +252,7 @@ const
   csBarKeepWidth = 80;
 {$ENDIF}
 {$ENDIF}
-  csPnlBtnWidth = 16; 
+  csPnlBtnWidth = 18; 
 
 function DoSortFeed(Item1, Item2: Pointer): Integer;
 begin
@@ -268,6 +272,13 @@ begin
   if AText <> '' then
   begin
     ARect := ClientRect;
+    if FBtnPrevFeed.Visible then
+      ARect.Right := FBtnPrevFeed.Left - 2;
+    if ARect.Right < ARect.Left then
+    begin
+      ARect := Bounds(0, 0, 0, 0);
+      Exit;
+    end;
     DrawText(Canvas.Handle, PChar(AText), Length(AText), ARect,
       DT_CALCRECT or DT_SINGLELINE or DT_VCENTER or DT_NOPREFIX or DT_END_ELLIPSIS);
   end
@@ -286,6 +297,7 @@ begin
   FBtnPrevFeed.Visible := True;
   FBtnNextFeed.Visible := True;
   FBtnConfig.Visible := True;
+  Invalidate;
 end;
 
 procedure TCnStatusPanel.CMMouseLeave(var Message: TMessage);
@@ -294,6 +306,7 @@ begin
   FBtnNextFeed.Visible := False;
   FBtnConfig.Visible := False;
   IsHot := False;
+  Invalidate;
 end;
 
 constructor TCnStatusPanel.Create(AOwner: TComponent);
@@ -311,6 +324,7 @@ procedure TCnStatusPanel.CreateButtons;
     Result.Caption := ACaption;
     Result.Flat := True;
     Result.Visible := False;
+    Result.Parent := Self;
   end;
 begin
   FBtnPrevFeed := CreateButton('<<');
@@ -322,6 +336,8 @@ destructor TCnStatusPanel.Destroy;
 begin
   if StatusBar <> nil then
     StatusBar.OnResize := nil;
+  if TabSet <> nil then
+    TTabList(TabSet.Tabs).OnChange := nil;
   FMenu.Free;
   FWizard.FPanels.Remove(Self);
   inherited;
@@ -356,17 +372,35 @@ end;
 procedure TCnStatusPanel.OnStatusBarResize(Sender: TObject);
 var
   R: TRect;
+  W: Integer;
 begin
   StatusBar.Perform(SB_GETRECT, StatusBar.Panels.Count - 1, Integer(@R));
-  Inc(R.Left, csBarKeepWidth);
+  W := 0;
+  if TabSet <> nil then
+  begin
+    TabSet.Repaint;
+    if TabSet.VisibleTabs < TabSet.Tabs.Count then
+    begin
+      SetBounds(0, 0, 0, 0);
+      Exit;
+    end;  
+    W := TabSet.ItemRect(TabSet.VisibleTabs - 1).Right;
+  end;
+
+  if W > 0 then
+    Inc(R.Left, W + 20)
+  else
+    Inc(R.Left, csBarKeepWidth);
   SetBounds(R.Left + 1, R.Top + 1, R.Right - R.Left - 2, R.Bottom - R.Top - 2);
-  FBtnPrevFeed.Parent := Self;
-  FBtnNextFeed.Parent := Self;
-  FBtnConfig.Parent := Self;
   FBtnNextFeed.SetBounds(ClientWidth - csPnlBtnWidth - 1, 0, csPnlBtnWidth, ClientHeight);
   FBtnConfig.SetBounds(ClientWidth - 2 * csPnlBtnWidth - 1, 0, csPnlBtnWidth, ClientHeight);
   FBtnPrevFeed.SetBounds(ClientWidth - 3 * csPnlBtnWidth - 1, 0, csPnlBtnWidth, ClientHeight);
   Invalidate;
+end;
+
+procedure TCnStatusPanel.OnTabSetChange(Sender: TObject);
+begin
+  CnWizNotifierServices.ExecuteOnApplicationIdle(OnStatusBarResize);
 end;
 
 procedure TCnStatusPanel.Paint;
@@ -418,8 +452,10 @@ begin
   begin
     Parent := StatusBar;
     StatusBar.OnResize := OnStatusBarResize;
+    if TabSet <> nil then
+      TTabList(TabSet.Tabs).OnChange := OnTabSetChange;
   end;
-  OnStatusBarResize(StatusBar);
+  OnTabSetChange(TabSet);
 end;
 
 { TCnFeedCfg }
@@ -729,6 +765,8 @@ begin
           Panel.FWizard := Self;
           Panel.EditWindow := EditWindow;
           Panel.StatusBar := StatusBar;
+          Panel.TabSet := TTabSet(FindComponentByClass(EditWindow,
+            TTabSet, SCnEdtTabSet));
           Panel.OnClick := PanelClick;
           Panel.FBtnPrevFeed.OnClick := OnPrevFeed;
           Panel.FBtnNextFeed.OnClick := OnNextFeed;
