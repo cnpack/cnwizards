@@ -92,7 +92,143 @@ implementation
 uses
   OmniXML, OmniXMLUtils;
 
-{ TCnFeedChannel }                                 
+const
+  csShortMonthNames: array[1..12] of string = ('Jan', 'Feb', 'Mar',
+    'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
+
+// From: IdGlobal.pas
+// www.indyproject.org
+function GmtOffsetStrToDateTime(S: string): TDateTime;
+begin
+  Result := 0.0;
+  S := Copy(Trim(s), 1, 5);
+  if Length(S) > 0 then
+  begin
+    if s[1] in ['-', '+'] then
+    begin
+      try
+        Result := EncodeTime(StrToInt(Copy(s, 2, 2)), StrToInt(Copy(s, 4, 2)), 0, 0);
+        if s[1] = '-' then
+        begin
+          Result := -Result;
+        end;
+      except
+        Result := 0.0;
+      end;
+    end;
+  end;
+end;
+
+// From: IdGlobal.pas
+// www.indyproject.org
+function OffsetFromUTC: TDateTime;
+var
+  iBias: Integer;
+  tmez: TTimeZoneInformation;
+begin
+  Result := 0;
+  Case GetTimeZoneInformation(tmez) of
+    TIME_ZONE_ID_UNKNOWN  :
+      iBias := tmez.Bias;
+    TIME_ZONE_ID_DAYLIGHT :
+      iBias := tmez.Bias + tmez.DaylightBias;
+    TIME_ZONE_ID_STANDARD :
+      iBias := tmez.Bias + tmez.StandardBias;
+    else
+      Exit;
+  end;
+  {We use ABS because EncodeTime will only accept positve values}
+  Result := EncodeTime(Abs(iBias) div 60, Abs(iBias) mod 60, 0, 0);
+  {The GetTimeZone function returns values oriented towards convertin
+   a GMT time into a local time.  We wish to do the do the opposit by returning
+   the difference between the local time and GMT.  So I just make a positive
+   value negative and leave a negative value as positive}
+  if iBias > 0 then begin
+    Result := 0 - Result;
+  end;
+end;
+
+function FeedStrToDateTime1(S: WideString; var Time: TDateTime): Boolean;
+var
+  i: Integer;
+  T: WideString;
+  List: TStringList;
+  Y, M, D: Word;
+begin
+  Result := False;
+  try
+    // Wed, 09 Sep 2009 12:42:19 GMT
+    T := Trim(S);
+    if Pos(',', T) = 4 then
+    begin
+      Delete(T, 1, 4);
+      T := Trim(T);
+      List := TStringList.Create;
+      try
+        List.Text := StringReplace(T, ' ', #13#10, [rfReplaceAll]);
+        for i := List.Count - 1 downto 0 do
+          if Trim(List[i]) = '' then
+            List.Delete(i);
+        if List.Count > 4 then
+        begin
+          D := StrToInt(List[0]);
+          M := 0;
+          for i := Low(csShortMonthNames) to High(csShortMonthNames) do
+            if SameText(csShortMonthNames[i], List[1]) then
+            begin
+              M := i;
+              Break;
+            end;
+          Y := StrToInt(List[2]);
+          if Y < 100 then
+            Y := 1900 + Y;
+          Time := EncodeDate(Y, M, D) + StrToTime(List[3]);
+          if List.Count > 4 then
+            Time := Time - GmtOffsetStrToDateTime(List[4]);
+          Time := Time + OffsetFromUTC;
+          Result := True;
+        end;
+      finally
+        List.Free;
+      end;
+    end;
+  except
+    ;
+  end;
+end;
+
+function FeedStrToDateTime2(S: WideString; var Time: TDateTime): Boolean;
+var
+  T: WideString;
+  Y, M, D: Word;
+begin
+  Result := False;
+  try
+    T := Trim(S);
+    if Length(T) < 19 then Exit;
+    // 2010-04-09T14:55:18Z
+    if T[11] = 'T' then
+    begin
+      Y := StrToInt(Copy(T, 1, 4));
+      M := StrToInt(Copy(T, 6, 2));
+      D := StrToInt(Copy(T, 9, 2));
+      Time := EncodeDate(Y, M, D) + StrToTime(Copy(T, 12, 8));
+      if (Length(T) > 19) and (T[20] = 'Z') then
+        Time := Time + OffsetFromUTC;
+      Result := True;
+    end;
+  except
+    ;
+  end;
+end;  
+
+function FeedStrToDateTime(S: WideString): TDateTime;
+begin
+  if not FeedStrToDateTime1(S, Result) and not FeedStrToDateTime2(S, Result) then
+    Result := Now;
+end;
+
+{ TCnFeedChannel }
 
 constructor TCnFeedChannel.Create;
 begin
@@ -122,11 +258,6 @@ var
   XML: IXMLDocument;
   Node, Item: IXMLNode;
   i: Integer;
-  
-  function FeedStrToDateTime(S: WideString): TDateTime;
-  begin
-    Result := Now; // todo: FeedStrToDateTime
-  end;  
 begin
   try
     Clear;
