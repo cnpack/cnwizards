@@ -46,6 +46,8 @@ interface
 uses Windows, ActiveX;
 {$HPPEMIT '#include <msxml.h>"}
 
+{$WARNINGS OFF}
+
 // *********************************************************************//
 // GUIDS declared in the TypeLibrary. Following prefixes are used:
 //   Type Libraries     : LIBID_xxxx

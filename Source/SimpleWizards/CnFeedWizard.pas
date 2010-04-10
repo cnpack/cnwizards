@@ -223,7 +223,7 @@ type
   published
     property SubCnPackChannels: Boolean read FSubCnPackChannels write FSubCnPackChannels default True;
     property RandomDisplay: Boolean read FRandomDisplay write FRandomDisplay default True;
-    property ChangePeriod: Integer read FChangePeriod write FChangePeriod default 30;
+    property ChangePeriod: Integer read FChangePeriod write FChangePeriod default 20;
   end;
 
 {$ENDIF CNWIZARDS_CNFEEDREADERWIZARD}
@@ -662,7 +662,7 @@ var
   IsForce: Boolean;
   InitSucc: Boolean;
 begin
-  InitSucc := Succeeded(CoInitializeEx(nil, COINIT_MULTITHREADED));
+  InitSucc := Succeeded(CoInitializeEx(nil, COINIT_APARTMENTTHREADED));
   while not Terminated do
   begin
     if FActive and ((Abs(GetTickCount - FTick) > 60 * 1000) or FForceUpdate) then
@@ -730,7 +730,7 @@ begin
   FTimer.OnTimer := OnTimer;
   FTimer.Interval := 1000;
   FTimer.Enabled := True;
-  FChangePeriod := 30;
+  FChangePeriod := 20;
   FSubCnPackChannels := True;
   FRandomDisplay := True;
   FIni := CreateIniFile;
