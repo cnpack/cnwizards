@@ -64,6 +64,10 @@ type
     lbl6: TLabel;
     btnAdd: TButton;
     btnDelete: TButton;
+    grp1: TGroupBox;
+    lbl7: TLabel;
+    seChangePeriod: TCnSpinEdit;
+    lbl8: TLabel;
     procedure btnHelpClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -96,7 +100,7 @@ implementation
 {$IFDEF CNWIZARDS_CNFEEDWIZARD}
 
 const
-  SCnFeedNewItem = 'New Item';
+  SCnFeedNewItem = 'New Feed';
 
 {$R *.dfm}
 
@@ -123,6 +127,7 @@ end;
 
 procedure TCnFeedWizardForm.FormShow(Sender: TObject);
 begin
+  seChangePeriod.Value := FWizard.ChangePeriod;
   FFeedCfg.Assign(FWizard.FeedCfg);
   lvList.Items.Count := FFeedCfg.Count;
   if FFeedCfg.Count > 0 then
@@ -245,6 +250,8 @@ end;
 
 procedure TCnFeedWizardForm.btnOKClick(Sender: TObject);
 begin
+  FWizard.ChangePeriod := seChangePeriod.Value;
+  GetFromControl;
   FWizard.FeedCfg.Assign(FFeedCfg);
   ModalResult := mrOk;
 end;

@@ -45,7 +45,7 @@ uses
   Buttons, Menus, CommCtrl, ComCtrls, Contnrs, ExtCtrls, Math, Tabs,
   OmniXML, OmniXMLPersistent, CnConsts, CnCommon, CnClasses,
   CnWizClasses, CnWizNotifier, CnWizUtils, CnFeedParser, CnWizOptions,
-  CnWizConsts, CnWizMultiLang;
+  CnWizConsts, CnWizMultiLang, CnPopupMenu;
 
 type
 
@@ -59,6 +59,7 @@ type
     FStatusBar: TStatusBar;
     FTabSet: TTabSet;
     FEditWindow: TCustomForm;
+    FMenuItems: array[0..4] of TMenuItem;
     FMenu: TPopupMenu;
     FActive: Boolean;
     FIsHot: Boolean;
@@ -66,7 +67,6 @@ type
     FBtnPrevFeed: TSpeedButton;
     FBtnNextFeed: TSpeedButton;
     FBtnConfig: TSpeedButton;
-    procedure MenuPopup(Sender: TObject);
     procedure OnStatusBarResize(Sender: TObject);
     procedure OnTabSetChange(Sender: TObject);
     procedure CalcTextRect(AText: string; var ARect: TRect);
@@ -85,6 +85,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure LanguageChanged(Sender: TObject);
+    procedure InitControls;
     procedure UpdateStatus;
     
     property StatusBar: TStatusBar read FStatusBar write FStatusBar;
@@ -171,24 +172,25 @@ type
     FSortedFeeds: TList;
     FRandomFeeds: TList;
     FCurFeed: TCnFeedItem;
-    FUpdatePeriod: Integer;
-    FExludeCategories: string;
+    FChangePeriod: Integer;
     procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm;
       Operation: TOperation);
     procedure DoUpdateStatusPanel(EditWindow: TCustomForm; EditControl: TControl;
       Context: Pointer);
     function GetPanelCount: Integer;
     function GetPanels(Index: Integer): TCnStatusPanel;
-    procedure PanelClick(Sender: TObject);
+    procedure OnPanelClick(Sender: TObject);
     function GetFeedCount: Integer;
     function GetFeeds(Index: Integer): TCnFeedChannel;
     procedure OnTimer(Sender: TObject);
     procedure RandomFeed;
     procedure SetFeedCfgToThread;
     procedure OnFeedUpdate(Sender: TObject);
+    procedure OnForceUpdateFeed(Sender: TObject);
     procedure OnPrevFeed(Sender: TObject);
     procedure OnNextFeed(Sender: TObject);
     procedure OnConfig(Sender: TObject);
+    procedure OnCloseFeed(Sender: TObject);
   protected
     procedure SetActive(Value: Boolean); override;
     function GetHasConfig: Boolean; override;
@@ -215,8 +217,7 @@ type
     property CurFeed: TCnFeedItem read FCurFeed;
     property FeedCfg: TCnFeedCfg read FFeedCfg;
   published
-    property UpdatePeriod: Integer read FUpdatePeriod write FUpdatePeriod default 30;
-    property ExludeCategories: string read FExludeCategories write FExludeCategories;
+    property ChangePeriod: Integer read FChangePeriod write FChangePeriod default 30;
   end;
 
 {$ENDIF CNWIZARDS_CNCOMPONENTSELECTOR}
@@ -234,6 +235,12 @@ uses
 const
   SCnFeedWizardName: string = 'Feed Wizard';
   SCnFeedWizardComment: string = 'Display Feed Context in Status Bar';
+  SCnFeedPrevFeedCaption: string = 'Previous Item';
+  SCnFeedNextFeedCaption: string = 'Next Item';
+  SCnFeedForceUpdateCaption: string = 'Update All';
+  SCnFeedConfigCaption: string = 'Settings...';
+  SCnFeedCloseCaption: string = 'Close';
+  SCnFeedCloseQuery: string = 'Are you sure to close feed wizard?';
 
   SCnFeedStatusPanel = 'CnFeedStatusPanel';
   SCnEdtStatusBar = 'StatusBar';
@@ -312,8 +319,6 @@ end;
 constructor TCnStatusPanel.Create(AOwner: TComponent);
 begin
   inherited;
-  InitPopupMenu;
-  CreateButtons;
 end;
 
 procedure TCnStatusPanel.CreateButtons;
@@ -330,6 +335,9 @@ begin
   FBtnPrevFeed := CreateButton('<<');
   FBtnNextFeed := CreateButton('>>');
   FBtnConfig := CreateButton('...');
+  FBtnPrevFeed.OnClick := FWizard.OnPrevFeed;
+  FBtnNextFeed.OnClick := FWizard.OnNextFeed;
+  FBtnConfig.OnClick := FWizard.OnConfig;
 end;
 
 destructor TCnStatusPanel.Destroy;
@@ -346,18 +354,31 @@ end;
 procedure TCnStatusPanel.InitPopupMenu;
 begin
   FMenu := TPopupMenu.Create(Self);
-  FMenu.OnPopup := MenuPopup;
   PopupMenu := FMenu;
+  FMenuItems[0] := AddMenuItem(FMenu.Items, SCnFeedPrevFeedCaption, FWizard.OnPrevFeed);
+  FMenuItems[1] := AddMenuItem(FMenu.Items, SCnFeedNextFeedCaption, FWizard.OnNextFeed);
+  AddMenuItem(FMenu.Items, '-');
+  FMenuItems[2] := AddMenuItem(FMenu.Items, SCnFeedForceUpdateCaption, FWizard.OnForceUpdateFeed);
+  FMenuItems[3] := AddMenuItem(FMenu.Items, SCnFeedCloseCaption, FWizard.OnCloseFeed);
+  AddMenuItem(FMenu.Items, '-');
+  FMenuItems[4] := AddMenuItem(FMenu.Items, SCnFeedConfigCaption, FWizard.OnConfig);
+end;
+
+procedure TCnStatusPanel.InitControls;
+begin
+  OnClick := FWizard.OnPanelClick;
+  InitPopupMenu;
+  CreateButtons;
+  UpdateStatus;
 end;
 
 procedure TCnStatusPanel.LanguageChanged(Sender: TObject);
 begin
-
-end;
-
-procedure TCnStatusPanel.MenuPopup(Sender: TObject);
-begin
-
+  FMenuItems[0].Caption := SCnFeedPrevFeedCaption;
+  FMenuItems[0].Caption := SCnFeedNextFeedCaption;
+  FMenuItems[0].Caption := SCnFeedForceUpdateCaption;
+  FMenuItems[0].Caption := SCnFeedCloseCaption;
+  FMenuItems[0].Caption := SCnFeedConfigCaption;
 end;
 
 procedure TCnStatusPanel.MouseMove(Shift: TShiftState; X, Y: Integer);
@@ -689,11 +710,8 @@ procedure TCnFeedWizard.Config;
 begin
   if ShowCnFeedWizardForm(Self) then
   begin
-    if FThread <> nil then
-    begin
-      SetFeedCfgToThread;
-      FThread.DoForceUpdate;
-    end;
+    SetFeedCfgToThread;
+    OnForceUpdateFeed(Self);
     DoSaveSettings;
   end;
 end;
@@ -711,7 +729,7 @@ begin
   FTimer.OnTimer := OnTimer;
   FTimer.Interval := 1000;
   FTimer.Enabled := True;
-  FUpdatePeriod := 30;
+  FChangePeriod := 30;
   FIni := CreateIniFile;
   FFeedPath := WizOptions.UserPath + SCnFeedCache;
   ForceDirectories(FFeedPath);
@@ -767,10 +785,7 @@ begin
           Panel.StatusBar := StatusBar;
           Panel.TabSet := TTabSet(FindComponentByClass(EditWindow,
             TTabSet, SCnEdtTabSet));
-          Panel.OnClick := PanelClick;
-          Panel.FBtnPrevFeed.OnClick := OnPrevFeed;
-          Panel.FBtnNextFeed.OnClick := OnNextFeed;
-          Panel.FBtnConfig.OnClick := OnConfig;
+          Panel.InitControls;
           Panel.UpdateStatus;
           FPanels.Add(Panel);
         {$IFDEF DEBUG}
@@ -875,7 +890,7 @@ begin
   TOmniXMLWriter.SaveToFile(FFeedCfg, WizOptions.UserPath + SCnFeedCfgFile, pfAuto, ofIndent);
 end;
 
-procedure TCnFeedWizard.PanelClick(Sender: TObject);
+procedure TCnFeedWizard.OnPanelClick(Sender: TObject);
 begin
   if (FCurFeed <> nil) and (FCurFeed.Link <> '') then
     OpenUrl(FCurFeed.Link);
@@ -967,12 +982,24 @@ begin
   FeedStep(-1);
 end;
 
+procedure TCnFeedWizard.OnCloseFeed(Sender: TObject);
+begin
+  if QueryDlg(SCnFeedCloseQuery) then
+    Active := False;
+end;
+
+procedure TCnFeedWizard.OnForceUpdateFeed(Sender: TObject);
+begin
+  if FThread <> nil then
+    FThread.DoForceUpdate;
+end;
+
 procedure TCnFeedWizard.OnTimer(Sender: TObject);
 begin
   if not Active then
     Exit;
 
-  if Abs(GetTickCount - FLastUpdateTick) >= FUpdatePeriod * 1000 then
+  if Abs(GetTickCount - FLastUpdateTick) >= FChangePeriod * 1000 then
   begin
     FeedStep(1);
     FLastUpdateTick := GetTickCount;

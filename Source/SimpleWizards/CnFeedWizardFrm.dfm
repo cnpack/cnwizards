@@ -1,10 +1,10 @@
 inherited CnFeedWizardForm: TCnFeedWizardForm
-  Left = 424
-  Top = 278
+  Left = 434
+  Top = 191
   BorderStyle = bsDialog
   Caption = 'Feed Wizard Settings'
-  ClientHeight = 358
-  ClientWidth = 481
+  ClientHeight = 390
+  ClientWidth = 480
   OldCreateOrder = True
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -13,78 +13,78 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
   TextHeight = 13
   object btnOK: TButton
     Left = 238
-    Top = 328
+    Top = 360
     Width = 75
     Height = 21
     Caption = '&OK'
     Default = True
-    TabOrder = 1
+    TabOrder = 2
     OnClick = btnOKClick
   end
   object btnCancel: TButton
     Left = 318
-    Top = 328
+    Top = 360
     Width = 75
     Height = 21
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
-    TabOrder = 2
+    TabOrder = 3
   end
   object btnHelp: TButton
     Left = 398
-    Top = 328
+    Top = 360
     Width = 75
     Height = 21
     Caption = '&Help'
-    TabOrder = 3
+    TabOrder = 4
     OnClick = btnHelpClick
   end
   object grpFeeds: TGroupBox
     Left = 8
-    Top = 8
+    Top = 72
     Width = 465
-    Height = 313
+    Height = 281
     Caption = 'Feed &List'
-    TabOrder = 0
+    TabOrder = 1
     object lbl1: TLabel
       Left = 8
-      Top = 188
+      Top = 164
       Width = 41
       Height = 13
       Caption = 'Caption:'
     end
     object lbl2: TLabel
       Left = 8
-      Top = 220
+      Top = 194
       Width = 17
       Height = 13
       Caption = 'Url:'
     end
     object lbl3: TLabel
       Left = 8
-      Top = 252
+      Top = 223
       Width = 34
       Height = 13
       Caption = 'Period:'
     end
     object lbl4: TLabel
       Left = 144
-      Top = 252
+      Top = 223
       Width = 41
       Height = 13
       Caption = 'minutes.'
     end
     object lbl5: TLabel
       Left = 8
-      Top = 285
+      Top = 253
       Width = 25
       Height = 13
       Caption = 'Limit:'
     end
     object lbl6: TLabel
       Left = 144
-      Top = 284
+      Top = 253
       Width = 98
       Height = 13
       Caption = 'items.(0 is unlimited)'
@@ -93,7 +93,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
       Left = 8
       Top = 16
       Width = 441
-      Height = 129
+      Height = 105
       Columns = <
         item
           Caption = 'Caption'
@@ -123,7 +123,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
     end
     object edtCaption: TEdit
       Left = 56
-      Top = 184
+      Top = 160
       Width = 393
       Height = 21
       TabOrder = 3
@@ -131,7 +131,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
     end
     object edtUrl: TEdit
       Left = 56
-      Top = 216
+      Top = 189
       Width = 393
       Height = 21
       TabOrder = 4
@@ -139,7 +139,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
     end
     object sePeriod: TCnSpinEdit
       Left = 56
-      Top = 248
+      Top = 218
       Width = 81
       Height = 22
       MaxValue = 99999
@@ -150,7 +150,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
     end
     object seLimit: TCnSpinEdit
       Left = 56
-      Top = 280
+      Top = 248
       Width = 81
       Height = 22
       MaxLength = 999
@@ -162,7 +162,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
     end
     object btnAdd: TButton
       Left = 56
-      Top = 152
+      Top = 128
       Width = 75
       Height = 21
       Caption = '&Add'
@@ -171,12 +171,45 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
     end
     object btnDelete: TButton
       Left = 136
-      Top = 152
+      Top = 128
       Width = 75
       Height = 21
       Caption = '&Delete'
       TabOrder = 2
       OnClick = btnDeleteClick
+    end
+  end
+  object grp1: TGroupBox
+    Left = 8
+    Top = 8
+    Width = 465
+    Height = 57
+    Caption = '&Feed Settings'
+    TabOrder = 0
+    object lbl7: TLabel
+      Left = 8
+      Top = 24
+      Width = 74
+      Height = 13
+      Caption = 'Change Period:'
+    end
+    object lbl8: TLabel
+      Left = 176
+      Top = 24
+      Width = 43
+      Height = 13
+      Caption = 'seconds.'
+    end
+    object seChangePeriod: TCnSpinEdit
+      Left = 88
+      Top = 19
+      Width = 81
+      Height = 22
+      MaxValue = 99999
+      MinValue = 1
+      TabOrder = 0
+      Value = 1
+      OnExit = edtCaptionChange
     end
   end
 end
