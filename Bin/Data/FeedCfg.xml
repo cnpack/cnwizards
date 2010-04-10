@@ -4,7 +4,7 @@
     <IDStr>CnPackRSS</IDStr>
     <Url>http://www.cnpack.org/rss/?lang=$landid$</Url>
     <CheckPeriod>1440</CheckPeriod>
-    <Limit>0</Limit>
+    <Limit>10</Limit>
   </o>
   <o>
     <Caption>CnPack Download</Caption>

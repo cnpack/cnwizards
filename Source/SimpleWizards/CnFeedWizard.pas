@@ -43,7 +43,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, IniFiles, Forms,
   Buttons, Menus, CommCtrl, ComCtrls, Contnrs, ExtCtrls, Math, Tabs,
-  OmniXML, OmniXMLPersistent, CnConsts, CnCommon, CnClasses,
+  ActiveX, OmniXML, OmniXMLPersistent, CnConsts, CnCommon, CnClasses,
   CnWizClasses, CnWizNotifier, CnWizUtils, CnFeedParser, CnWizOptions,
   CnWizConsts, CnWizMultiLang, CnPopupMenu;
 
@@ -656,7 +656,9 @@ end;
 procedure TCnFeedThread.Execute;
 var
   IsForce: Boolean;
+  InitSucc: Boolean;
 begin
+  InitSucc := Succeeded(CoInitializeEx(nil, COINIT_MULTITHREADED));
   while not Terminated do
   begin
     if FActive and ((Abs(GetTickCount - FTick) > 60 * 1000) or FForceUpdate) then
@@ -669,7 +671,9 @@ begin
     end
     else
       Sleep(100);  
-  end;  
+  end;
+  if InitSucc then
+    CoUninitialize;
 end;
 
 function TCnFeedThread.GetFeedCount: Integer;

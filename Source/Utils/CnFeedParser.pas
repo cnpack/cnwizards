@@ -38,6 +38,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$DEFINE USE_MSXML}
+
 uses
   Windows, SysUtils, Classes, CnClasses;
 
@@ -73,7 +75,6 @@ type
     procedure SetItems(Index: Integer; const Value: TCnFeedItem);
   public
     constructor Create;
-    procedure LoadFromStream(Stream: TStream);
     procedure LoadFromFile(const FileName: string);
 
     property Items[Index: Integer]: TCnFeedItem read GetItems write SetItems; default;
@@ -90,7 +91,17 @@ type
 implementation
 
 uses
+{$IFDEF USE_MSXML}
+  ActiveX, ComObj, msxml;
+{$ELSE}
   OmniXML, OmniXMLUtils;
+{$ENDIF}
+
+{$IFDEF USE_MSXML}
+type
+  IXMLNode = IXMLDOMNode;
+  IXMLDocument = IXMLDOMDocument;
+{$ENDIF}
 
 const
   csShortMonthNames: array[1..12] of string = ('Jan', 'Feb', 'Mar',
@@ -228,6 +239,89 @@ begin
     Result := Now;
 end;
 
+{$IFDEF USE_MSXML}
+function GetNodeAttr(parentNode: IXMLNode; attrName: string;
+  var value: WideString): boolean;
+var
+  attrNode: IXMLNode;
+begin
+  attrNode := parentNode.Attributes.GetNamedItem(attrName);
+  if not assigned(attrNode) then
+    Result := false
+  else begin
+    value := attrNode.NodeValue;
+    Result := true;
+  end;
+end;
+
+function GetNodeAttrStr(parentNode: IXMLNode; attrName: string;
+  defaultValue: WideString): WideString;
+begin
+  if not GetNodeAttr(parentNode,attrName,Result) then
+    Result := defaultValue
+  else
+    Result := Trim(Result);
+end;
+
+function GetTextChild(node: IXMLNode): IXMLNode;
+var
+  iText: integer;
+begin
+  Result := nil;
+  for iText := 0 to node.ChildNodes.Length-1 do
+    if node.ChildNodes.Item[iText].NodeType = NODE_TEXT then begin
+      Result := node.ChildNodes.Item[iText];
+      break; //for
+    end;
+end;
+
+function GetNodeText(parentNode: IXMLNode; nodeTag: string;
+  var nodeText: WideString): boolean;
+var
+  myNode: IXMLNode;
+begin
+  nodeText := '';
+  Result := false;
+  myNode := parentNode.SelectSingleNode(nodeTag);
+  if assigned(myNode) then
+  begin
+    nodeText := myNode.text;
+    Result := true;
+  end;
+end;
+
+function GetNodeTextStr(parentNode: IXMLNode; nodeTag: string;
+  defaultValue: WideString): WideString;
+begin
+  if not GetNodeText(parentNode,nodeTag,Result) then
+    Result := defaultValue
+  else
+    Result := Trim(Result);
+end;
+
+function FindNode(parentNode: IXMLNode; matchesName: string): IXMLNode;
+var
+  i: Integer;
+begin
+  for i := 0 to parentNode.childNodes.length - 1 do
+    if SameText(parentNode.childNodes.item[i].nodeName, matchesName) then
+    begin
+      Result := parentNode.childNodes.item[i];
+      Exit;
+    end;
+  Result := nil;
+end;
+
+function CreateXMLDoc: IXMLDOMDocument;
+begin
+  try
+    Result := CreateOleObject('Microsoft.XMLDOM') as IXMLDomDocument;
+  except
+    ;
+  end;
+end;
+{$ENDIF}
+
 { TCnFeedChannel }
 
 constructor TCnFeedChannel.Create;
@@ -241,19 +335,6 @@ begin
 end;
 
 procedure TCnFeedChannel.LoadFromFile(const FileName: string);
-var
-  Stream: TMemoryStream;
-begin
-  Stream := TMemoryStream.Create;
-  try
-    Stream.LoadFromFile(FileName);
-    LoadFromStream(Stream);
-  finally
-    Stream.Free;
-  end;
-end;
-
-procedure TCnFeedChannel.LoadFromStream(Stream: TStream);
 var
   XML: IXMLDocument;
   Node, Item, Tmp: IXMLNode;
@@ -279,7 +360,7 @@ begin
   try
     Clear;
     XML := CreateXMLDoc;
-    if XML.LoadFromStream(Stream) then
+    if (XML <> nil) and XML.load(FileName) then
     begin
       // RSS 2.0
       Node := FindNode(XML, 'rss');
