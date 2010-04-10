@@ -863,6 +863,8 @@ begin
   inherited;
   for i := 0 to PanelCount - 1 do
     Panels[i].LanguageChanged(Sender);
+  if FSubCnPackChannels then
+    OnForceUpdateFeed(nil);
 end;
 
 procedure TCnFeedReaderWizard.Loaded;
@@ -946,6 +948,8 @@ end;
 function TCnFeedReaderWizard.FeedHTMLToTxt(const Text: WideString): WideString;
 var
   Exp: TRegExpr;
+  Lines: TStringList;
+  I: Integer;
 begin
   Result := Text;
   Exp := TRegExpr.Create;
@@ -953,6 +957,12 @@ begin
     // Delete HTML tags
     Exp.Expression := '<[^>]*>';
     Result := Exp.Replace(Result, '', False);
+    Lines := TStringList.Create;
+    Lines.Text := Result;
+    for I := Lines.Count - 1 downto 0 do
+      if Trim(Lines[I]) = '' then
+        Lines.Delete(I);
+    Result := Trim(Lines.Text);
   finally
     Exp.Free;
   end;
