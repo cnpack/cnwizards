@@ -942,7 +942,7 @@ begin
   try
     // Delete HTML tags
     Exp.Expression := '<[^>]*>';
-    Result := Exp.Replace(Result, '');
+    Result := Exp.Replace(Result, '', False);
   finally
     Exp.Free;
   end;
