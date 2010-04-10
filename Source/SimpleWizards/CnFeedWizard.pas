@@ -173,6 +173,8 @@ type
     FRandomFeeds: TList;
     FCurFeed: TCnFeedItem;
     FChangePeriod: Integer;
+    FRandomDisplay: Boolean;
+    FSubCnPackChannels: Boolean;
     procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm;
       Operation: TOperation);
     procedure DoUpdateStatusPanel(EditWindow: TCustomForm; EditControl: TControl;
@@ -219,6 +221,8 @@ type
     property CurFeed: TCnFeedItem read FCurFeed;
     property FeedCfg: TCnFeedCfg read FFeedCfg;
   published
+    property SubCnPackChannels: Boolean read FSubCnPackChannels write FSubCnPackChannels default True;
+    property RandomDisplay: Boolean read FRandomDisplay write FRandomDisplay default True;
     property ChangePeriod: Integer read FChangePeriod write FChangePeriod default 30;
   end;
 
@@ -727,6 +731,8 @@ begin
   FTimer.Interval := 1000;
   FTimer.Enabled := True;
   FChangePeriod := 30;
+  FSubCnPackChannels := True;
+  FRandomDisplay := True;
   FIni := CreateIniFile;
   FFeedPath := WizOptions.UserPath + SCnFeedCache;
   ForceDirectories(FFeedPath);
@@ -916,11 +922,15 @@ begin
   begin
     Cfg := TCnFeedCfg.Create;
     try
-      try
-        TOmniXMLReader.LoadFromFile(Cfg, WizOptions.DataPath + SCnFeedCfgFile);
-      except
-        ;
+      if FSubCnPackChannels then
+      begin
+        try
+          TOmniXMLReader.LoadFromFile(Cfg, WizOptions.DataPath + SCnFeedCfgFile);
+        except
+          ;
+        end;
       end;
+         
       for i := 0 to FFeedCfg.Count - 1 do
         Cfg.Add.Assign(FFeedCfg[i]);
     {$IFDEF DEBUG}
@@ -982,19 +992,24 @@ end;
 procedure TCnFeedReaderWizard.FeedStep(Step: Integer);
 var
   Idx: Integer;
+  List: TList;
 begin
+  if FRandomDisplay then
+    List := FRandomFeeds
+  else
+    List := FSortedFeeds;
   if FCurFeed <> nil then
-    Idx := FRandomFeeds.IndexOf(FCurFeed)
+    Idx := List.IndexOf(FCurFeed)
   else
     Idx := 0;
     
   FCurFeed := nil;
-  if FRandomFeeds.Count > 0 then
+  if List.Count > 0 then
   begin
-    Idx := (Idx + Step) mod FRandomFeeds.Count;
+    Idx := (Idx + Step) mod List.Count;
     if Idx < 0 then
-      Idx := Idx + FRandomFeeds.Count;
-    FCurFeed := TCnFeedItem(FRandomFeeds[TrimInt(Idx, 0, FRandomFeeds.Count - 1)]);
+      Idx := Idx + List.Count;
+    FCurFeed := TCnFeedItem(List[TrimInt(Idx, 0, List.Count - 1)]);
     SetFeedToPanels;
   end;
   FLastUpdateTick := GetTickCount;

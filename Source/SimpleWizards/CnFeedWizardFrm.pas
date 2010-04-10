@@ -68,6 +68,8 @@ type
     lbl7: TLabel;
     seChangePeriod: TCnSpinEdit;
     lbl8: TLabel;
+    chkSubCnPackChannels: TCheckBox;
+    chkRandomDisplay: TCheckBox;
     procedure btnHelpClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -127,6 +129,8 @@ end;
 procedure TCnFeedWizardForm.FormShow(Sender: TObject);
 begin
   seChangePeriod.Value := FWizard.ChangePeriod;
+  chkSubCnPackChannels.Checked := FWizard.SubCnPackChannels;
+  chkRandomDisplay.Checked := FWizard.RandomDisplay;
   FFeedCfg.Assign(FWizard.FeedCfg);
   lvList.Items.Count := FFeedCfg.Count;
   if FFeedCfg.Count > 0 then
@@ -255,6 +259,8 @@ end;
 procedure TCnFeedWizardForm.btnOKClick(Sender: TObject);
 begin
   FWizard.ChangePeriod := seChangePeriod.Value;
+  FWizard.SubCnPackChannels := chkSubCnPackChannels.Checked;
+  FWizard.RandomDisplay := chkRandomDisplay.Checked;
   GetFromControl;
   FWizard.FeedCfg.Assign(FFeedCfg);
   ModalResult := mrOk;

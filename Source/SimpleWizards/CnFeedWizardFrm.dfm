@@ -3,7 +3,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
   Top = 191
   BorderStyle = bsDialog
   Caption = 'FeedReader Wizard Settings'
-  ClientHeight = 390
+  ClientHeight = 412
   ClientWidth = 480
   OldCreateOrder = True
   OnCreate = FormCreate
@@ -13,7 +13,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
   TextHeight = 13
   object btnOK: TButton
     Left = 238
-    Top = 360
+    Top = 384
     Width = 75
     Height = 21
     Caption = '&OK'
@@ -23,7 +23,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
   end
   object btnCancel: TButton
     Left = 318
-    Top = 360
+    Top = 384
     Width = 75
     Height = 21
     Cancel = True
@@ -33,7 +33,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
   end
   object btnHelp: TButton
     Left = 398
-    Top = 360
+    Top = 384
     Width = 75
     Height = 21
     Caption = '&Help'
@@ -42,49 +42,49 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
   end
   object grpFeeds: TGroupBox
     Left = 8
-    Top = 72
+    Top = 104
     Width = 465
-    Height = 281
+    Height = 273
     Caption = 'Feed &List'
     TabOrder = 1
     object lbl1: TLabel
       Left = 8
-      Top = 164
+      Top = 152
       Width = 41
       Height = 13
       Caption = 'Caption:'
     end
     object lbl2: TLabel
       Left = 8
-      Top = 194
+      Top = 182
       Width = 17
       Height = 13
       Caption = 'Url:'
     end
     object lbl3: TLabel
       Left = 8
-      Top = 223
+      Top = 211
       Width = 34
       Height = 13
       Caption = 'Period:'
     end
     object lbl4: TLabel
       Left = 152
-      Top = 223
+      Top = 211
       Width = 41
       Height = 13
       Caption = 'minutes.'
     end
     object lbl5: TLabel
       Left = 8
-      Top = 253
+      Top = 241
       Width = 25
       Height = 13
       Caption = 'Limit:'
     end
     object lbl6: TLabel
       Left = 152
-      Top = 253
+      Top = 241
       Width = 98
       Height = 13
       Caption = 'items.(0 is unlimited)'
@@ -93,7 +93,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
       Left = 8
       Top = 16
       Width = 441
-      Height = 105
+      Height = 97
       Columns = <
         item
           Caption = 'Caption'
@@ -123,7 +123,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
     end
     object edtCaption: TEdit
       Left = 64
-      Top = 160
+      Top = 148
       Width = 385
       Height = 21
       TabOrder = 3
@@ -131,7 +131,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
     end
     object edtUrl: TEdit
       Left = 64
-      Top = 189
+      Top = 177
       Width = 385
       Height = 21
       TabOrder = 4
@@ -139,7 +139,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
     end
     object sePeriod: TCnSpinEdit
       Left = 64
-      Top = 218
+      Top = 206
       Width = 81
       Height = 22
       MaxValue = 99999
@@ -150,7 +150,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
     end
     object seLimit: TCnSpinEdit
       Left = 64
-      Top = 248
+      Top = 236
       Width = 81
       Height = 22
       MaxLength = 999
@@ -162,7 +162,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
     end
     object btnAdd: TButton
       Left = 64
-      Top = 128
+      Top = 120
       Width = 75
       Height = 21
       Caption = '&Add'
@@ -171,7 +171,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
     end
     object btnDelete: TButton
       Left = 144
-      Top = 128
+      Top = 120
       Width = 75
       Height = 21
       Caption = '&Delete'
@@ -183,33 +183,49 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
     Left = 8
     Top = 8
     Width = 465
-    Height = 57
+    Height = 89
     Caption = '&Feed Settings'
     TabOrder = 0
     object lbl7: TLabel
       Left = 8
-      Top = 24
+      Top = 64
       Width = 74
       Height = 13
       Caption = 'Change Period:'
     end
     object lbl8: TLabel
       Left = 176
-      Top = 24
+      Top = 64
       Width = 43
       Height = 13
       Caption = 'seconds.'
     end
     object seChangePeriod: TCnSpinEdit
       Left = 88
-      Top = 19
+      Top = 59
       Width = 81
       Height = 22
       MaxValue = 99999
       MinValue = 1
-      TabOrder = 0
+      TabOrder = 2
       Value = 1
       OnExit = edtCaptionChange
+    end
+    object chkSubCnPackChannels: TCheckBox
+      Left = 8
+      Top = 16
+      Width = 449
+      Height = 17
+      Caption = '&Subscribe CnPack channels.'
+      TabOrder = 0
+    end
+    object chkRandomDisplay: TCheckBox
+      Left = 8
+      Top = 36
+      Width = 449
+      Height = 17
+      Caption = '&Random display.'
+      TabOrder = 1
     end
   end
 end
