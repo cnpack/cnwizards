@@ -2,7 +2,7 @@
   <o>
     <Caption>CnPack RSS</Caption>
     <IDStr>CnPackRSS</IDStr>
-    <Url>http://www.cnpack.org/rss/?lang=$landid$</Url>
+    <Url>http://www.cnpack.org/rss/?lang=$langid$</Url>
     <CheckPeriod>1440</CheckPeriod>
     <Limit>10</Limit>
   </o>

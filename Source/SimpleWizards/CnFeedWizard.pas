@@ -245,7 +245,7 @@ const
   SCnFeedCache = 'FeedCache\';
   SCnUpdateFeedMutex = 'CnUpdateFeedMutex';
   SCnFeedCfgFile = 'FeedCfg.xml';
-  SCnFeedLangID = '$landid$';
+  SCnFeedLangID = '$langid$';
 
 {$IFDEF BCB6}
   csBarKeepWidth = 200;
