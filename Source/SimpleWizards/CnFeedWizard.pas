@@ -184,6 +184,7 @@ type
     function GetFeeds(Index: Integer): TCnFeedChannel;
     procedure OnTimer(Sender: TObject);
     procedure RandomFeed;
+    function FeedHTMLToTxt(const Text: WideString): WideString;
     procedure SetFeedCfgToThread;
     procedure SetFeedToPanels;
     procedure OnFeedUpdate(Sender: TObject);
@@ -251,7 +252,8 @@ const
   csBarKeepWidth = 80;
 {$ENDIF}
 {$ENDIF}
-  csPnlBtnWidth = 18; 
+  csPnlBtnWidth = 18;
+  csMaxHintLength = 250;
 
 function DoSortFeed(Item1, Item2: Pointer): Integer;
 begin
@@ -927,16 +929,33 @@ begin
   end;
 end;
 
+function TCnFeedReaderWizard.FeedHTMLToTxt(const Text: WideString): WideString;
+begin
+  Result := Text;
+  // todo: FeedHTMLToTxt
+end;
+
 procedure TCnFeedReaderWizard.SetFeedToPanels;
 var
   i: Integer;
+  Title, Desc, Hint: WideString;
 begin
   for i := 0 to PanelCount - 1 do
   begin
     if FCurFeed <> nil then
     begin
-      Panels[i].Text := FCurFeed.Title;
-      Panels[i].Hint := FCurFeed.Title;
+      Title := FeedHTMLToTxt(FCurFeed.Title);
+      Desc := FeedHTMLToTxt(FCurFeed.Description);
+      
+      Panels[i].Text := Title;
+      if Pos(Title, Desc) > 0 then
+        Hint := Desc
+      else
+        Hint := Title + #13#10 + Desc;
+      if Length(Hint) > csMaxHintLength then
+        Panels[i].Hint := Copy(Hint, 1, csMaxHintLength) + '...'
+      else
+        Panels[i].Hint := Hint;
     end
     else
     begin

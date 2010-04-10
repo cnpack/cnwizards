@@ -87,6 +87,8 @@ type
     FFeedCfg: TCnFeedCfg;
     procedure SetToControl;
     procedure GetFromControl;
+  protected
+    function GetHelpTopic: string; override;
   public
     { Public declarations }
   end;
@@ -130,6 +132,11 @@ begin
   if FFeedCfg.Count > 0 then
     lvList.Selected := lvList.Items[0];
   SetToControl;
+end;
+
+function TCnFeedWizardForm.GetHelpTopic: string;
+begin
+  Result := 'CnFeedReaderWizard';
 end;
 
 procedure TCnFeedWizardForm.btnHelpClick(Sender: TObject);

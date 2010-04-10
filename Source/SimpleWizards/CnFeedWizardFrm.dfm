@@ -2,7 +2,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
   Left = 434
   Top = 191
   BorderStyle = bsDialog
-  Caption = 'Feed Wizard Settings'
+  Caption = 'FeedReader Wizard Settings'
   ClientHeight = 390
   ClientWidth = 480
   OldCreateOrder = True
@@ -69,7 +69,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
       Caption = 'Period:'
     end
     object lbl4: TLabel
-      Left = 144
+      Left = 152
       Top = 223
       Width = 41
       Height = 13
@@ -83,7 +83,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
       Caption = 'Limit:'
     end
     object lbl6: TLabel
-      Left = 144
+      Left = 152
       Top = 253
       Width = 98
       Height = 13
@@ -122,23 +122,23 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
       OnData = lvListData
     end
     object edtCaption: TEdit
-      Left = 56
+      Left = 64
       Top = 160
-      Width = 393
+      Width = 385
       Height = 21
       TabOrder = 3
       OnChange = edtCaptionChange
     end
     object edtUrl: TEdit
-      Left = 56
+      Left = 64
       Top = 189
-      Width = 393
+      Width = 385
       Height = 21
       TabOrder = 4
       OnChange = edtCaptionChange
     end
     object sePeriod: TCnSpinEdit
-      Left = 56
+      Left = 64
       Top = 218
       Width = 81
       Height = 22
@@ -149,7 +149,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
       OnExit = edtCaptionChange
     end
     object seLimit: TCnSpinEdit
-      Left = 56
+      Left = 64
       Top = 248
       Width = 81
       Height = 22
@@ -161,7 +161,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
       OnExit = edtCaptionChange
     end
     object btnAdd: TButton
-      Left = 56
+      Left = 64
       Top = 128
       Width = 75
       Height = 21
@@ -170,7 +170,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
       OnClick = btnAddClick
     end
     object btnDelete: TButton
-      Left = 136
+      Left = 144
       Top = 128
       Width = 75
       Height = 21
