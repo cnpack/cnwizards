@@ -934,9 +934,18 @@ begin
 end;
 
 function TCnFeedReaderWizard.FeedHTMLToTxt(const Text: WideString): WideString;
+var
+  Exp: TRegExpr;
 begin
   Result := Text;
-  // todo: FeedHTMLToTxt
+  Exp := TRegExpr.Create;
+  try
+    // Delete HTML tags
+    Exp.Expression := '<[^>]*>';
+    Result := Exp.Replace(Result, '');
+  finally
+    Exp.Free;
+  end;
 end;
 
 procedure TCnFeedReaderWizard.SetFeedToPanels;
