@@ -38,7 +38,7 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNFEEDWIZARD}
+{$IFDEF CNWIZARDS_CNFEEDREADERWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, ActiveX,
@@ -83,7 +83,7 @@ type
   private
     { Private declarations }
     FUpdating: Boolean;
-    FWizard: TCnFeedWizard;
+    FWizard: TCnFeedReaderWizard;
     FFeedCfg: TCnFeedCfg;
     procedure SetToControl;
     procedure GetFromControl;
@@ -91,20 +91,17 @@ type
     { Public declarations }
   end;
 
-function ShowCnFeedWizardForm(Wizard: TCnFeedWizard): Boolean;
+function ShowCnFeedWizardForm(Wizard: TCnFeedReaderWizard): Boolean;
 
-{$ENDIF CNWIZARDS_CNCOMPONENTSELECTOR}
+{$ENDIF CNWIZARDS_CNFEEDREADERWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNFEEDWIZARD}
-
-const
-  SCnFeedNewItem = 'New Feed';
+{$IFDEF CNWIZARDS_CNFEEDREADERWIZARD}
 
 {$R *.dfm}
 
-function ShowCnFeedWizardForm(Wizard: TCnFeedWizard): Boolean;
+function ShowCnFeedWizardForm(Wizard: TCnFeedReaderWizard): Boolean;
 begin
   with TCnFeedWizardForm.Create(nil) do
   try
@@ -256,6 +253,6 @@ begin
   ModalResult := mrOk;
 end;
 
-{$ENDIF CNWIZARDS_CNCOMPONENTSELECTOR}
+{$ENDIF CNWIZARDS_CNFEEDREADERWIZARD}
 
 end.

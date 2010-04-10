@@ -256,8 +256,25 @@ end;
 procedure TCnFeedChannel.LoadFromStream(Stream: TStream);
 var
   XML: IXMLDocument;
-  Node, Item: IXMLNode;
+  Node, Item, Tmp: IXMLNode;
   i: Integer;
+
+  function GetATOMLinkProp(ANode: IXMLNode): WideString;
+  var
+    i: Integer;
+    N: IXMLNode;
+  begin
+    Result := '';
+    for i := 0 to ANode.ChildNodes.Length - 1 do
+    begin
+      N := ANode.ChildNodes.Item[i];
+      if SameText('link', N.NodeName) then
+      begin
+        if (Result = '') or SameText(GetNodeAttrStr(N, 'rel', ''), 'alternate') then
+          Result := GetNodeAttrStr(N, 'href', '');
+      end;
+    end;
+  end;
 begin
   try
     Clear;
@@ -302,8 +319,33 @@ begin
       Node := FindNode(XML, 'feed');
       if Node <> nil then
       begin
-        // todo: Support ATOM format
-      end;  
+        Title := GetNodeTextStr(Node, 'title', '');
+        Link := GetATOMLinkProp(Node);
+        Description := GetNodeTextStr(Node, 'description', '');
+        Language := GetNodeTextStr(Node, 'language', '');
+        PubDate := FeedStrToDateTime(GetNodeTextStr(Node, 'updated', ''));
+        LastBuildDate := FeedStrToDateTime(GetNodeTextStr(Node, 'lastBuildDate', ''));
+
+        for i := 0 to Node.ChildNodes.Length - 1 do
+        begin
+          if SameText(Node.ChildNodes.Item[i].NodeName, 'entry') then
+          begin
+            Item := Node.ChildNodes.Item[i];
+            with TCnFeedItem(Add) do
+            begin
+              Title := GetNodeTextStr(Item, 'title', '');
+              Link := GetATOMLinkProp(Item);
+              Description := GetNodeTextStr(Item, 'content', '');
+              Category := GetNodeTextStr(Item, 'category', '');
+              Tmp := FindNode(Item, 'author');
+              if Tmp <> nil then
+                Author := GetNodeTextStr(Tmp, 'name', '');
+              PubDate := FeedStrToDateTime(GetNodeTextStr(Item, 'updated', ''));
+            end;
+          end;
+        end;
+        Exit;
+      end;
     end;
   except
     ;

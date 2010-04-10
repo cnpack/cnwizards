@@ -1468,6 +1468,17 @@ var
   SCnScriptMenuDemoCaption: string = '&Demos';
   SCnScriptMenuDemoHint: string = 'Script Demos';
 
+  // CnFeedWizard
+  SCnFeedWizardName: string = 'FeedReader Wizard';
+  SCnFeedWizardComment: string = 'Display Feed Content in Status Bar';
+  SCnFeedPrevFeedCaption: string = '&Previous Item';
+  SCnFeedNextFeedCaption: string = '&Next Item';
+  SCnFeedForceUpdateCaption: string = '&Update All';
+  SCnFeedConfigCaption: string = '&Settings...';
+  SCnFeedCloseCaption: string = '&Close';
+  SCnFeedCloseQuery: string = 'Sure to Close FeedReader Wizard?';
+  SCnFeedNewItem: string = 'New Feed';
+
 implementation
 
 end.

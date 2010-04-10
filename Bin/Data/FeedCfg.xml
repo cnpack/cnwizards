@@ -6,4 +6,11 @@
     <CheckPeriod>1440</CheckPeriod>
     <Limit>0</Limit>
   </o>
+  <o>
+    <Caption>CnPack Download</Caption>
+    <IDStr>CnPackDownload</IDStr>
+    <Url>http://code.google.com/feeds/p/cnpack/downloads/basic</Url>
+    <CheckPeriod>60</CheckPeriod>
+    <Limit>5</Limit>
+  </o>
 </TCnFeedCfg>

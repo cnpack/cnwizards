@@ -38,7 +38,7 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNFEEDWIZARD}
+{$IFDEF CNWIZARDS_CNFEEDREADERWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, IniFiles, Forms,
@@ -51,11 +51,11 @@ type
 
 { TCnStatusPanel }
 
-  TCnFeedWizard = class;
+  TCnFeedReaderWizard = class;
 
   TCnStatusPanel = class(TCustomControl)
   private
-    FWizard: TCnFeedWizard;
+    FWizard: TCnFeedReaderWizard;
     FStatusBar: TStatusBar;
     FTabSet: TTabSet;
     FEditWindow: TCustomForm;
@@ -157,9 +157,9 @@ type
     property Feeds[Index: Integer]: TCnFeedChannel read GetFeeds;
   end;
 
-{ TCnFeedWizard }
+{ TCnFeedReaderWizard }
 
-  TCnFeedWizard = class(TCnIDEEnhanceWizard)
+  TCnFeedReaderWizard = class(TCnIDEEnhanceWizard)
   private
     FThread: TCnFeedThread;
     FIni: TCustomIniFile;
@@ -185,6 +185,7 @@ type
     procedure OnTimer(Sender: TObject);
     procedure RandomFeed;
     procedure SetFeedCfgToThread;
+    procedure SetFeedToPanels;
     procedure OnFeedUpdate(Sender: TObject);
     procedure OnForceUpdateFeed(Sender: TObject);
     procedure OnPrevFeed(Sender: TObject);
@@ -220,28 +221,19 @@ type
     property ChangePeriod: Integer read FChangePeriod write FChangePeriod default 30;
   end;
 
-{$ENDIF CNWIZARDS_CNCOMPONENTSELECTOR}
+{$ENDIF CNWIZARDS_CNFEEDREADERWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNCOMPONENTSELECTOR}
+{$IFDEF CNWIZARDS_CNFEEDREADERWIZARD}
 
 uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnEditControlWrapper, CnWizIdeUtils, CnInetUtils, CnFeedWizardFrm;
+  RegExpr, CnEditControlWrapper, CnWizIdeUtils, CnInetUtils, CnFeedWizardFrm;
 
 const
-  SCnFeedWizardName: string = 'Feed Wizard';
-  SCnFeedWizardComment: string = 'Display Feed Context in Status Bar';
-  SCnFeedPrevFeedCaption: string = 'Previous Item';
-  SCnFeedNextFeedCaption: string = 'Next Item';
-  SCnFeedForceUpdateCaption: string = 'Update All';
-  SCnFeedConfigCaption: string = 'Settings...';
-  SCnFeedCloseCaption: string = 'Close';
-  SCnFeedCloseQuery: string = 'Are you sure to close feed wizard?';
-
   SCnFeedStatusPanel = 'CnFeedStatusPanel';
   SCnEdtStatusBar = 'StatusBar';
   SCnEdtTabSet = 'ViewBar';
@@ -375,10 +367,10 @@ end;
 procedure TCnStatusPanel.LanguageChanged(Sender: TObject);
 begin
   FMenuItems[0].Caption := SCnFeedPrevFeedCaption;
-  FMenuItems[0].Caption := SCnFeedNextFeedCaption;
-  FMenuItems[0].Caption := SCnFeedForceUpdateCaption;
-  FMenuItems[0].Caption := SCnFeedCloseCaption;
-  FMenuItems[0].Caption := SCnFeedConfigCaption;
+  FMenuItems[1].Caption := SCnFeedNextFeedCaption;
+  FMenuItems[2].Caption := SCnFeedForceUpdateCaption;
+  FMenuItems[3].Caption := SCnFeedCloseCaption;
+  FMenuItems[4].Caption := SCnFeedConfigCaption;
 end;
 
 procedure TCnStatusPanel.MouseMove(Shift: TShiftState; X, Y: Integer);
@@ -463,7 +455,6 @@ end;
 procedure TCnStatusPanel.SetText(const Value: string);
 begin
   FText := Value;
-  Hint := Value;
   Invalidate;
 end;
 
@@ -699,14 +690,14 @@ begin
   end;   
 end;
 
-{ TCnFeedWizard }
+{ TCnFeedReaderWizard }
 
-function TCnFeedWizard.CanShowPanels: Boolean;
+function TCnFeedReaderWizard.CanShowPanels: Boolean;
 begin
   Result := Active;
 end;
 
-procedure TCnFeedWizard.Config;
+procedure TCnFeedReaderWizard.Config;
 begin
   if ShowCnFeedWizardForm(Self) then
   begin
@@ -716,7 +707,7 @@ begin
   end;
 end;
 
-constructor TCnFeedWizard.Create;
+constructor TCnFeedReaderWizard.Create;
 begin
   inherited;
   FLastUpdateTick := GetTickCount;
@@ -738,7 +729,7 @@ begin
   UpdateStatusPanels;
 end;
 
-destructor TCnFeedWizard.Destroy;
+destructor TCnFeedReaderWizard.Destroy;
 var
   i: Integer;
 begin
@@ -761,7 +752,7 @@ begin
   inherited;
 end;
 
-procedure TCnFeedWizard.DoUpdateStatusPanel(EditWindow: TCustomForm;
+procedure TCnFeedReaderWizard.DoUpdateStatusPanel(EditWindow: TCustomForm;
   EditControl: TControl; Context: Pointer);
 var
   Panel: TCnStatusPanel;
@@ -813,38 +804,38 @@ begin
   end;
 end;
 
-procedure TCnFeedWizard.EditControlNotify(EditControl: TControl;
+procedure TCnFeedReaderWizard.EditControlNotify(EditControl: TControl;
   EditWindow: TCustomForm; Operation: TOperation);
 begin
   UpdateStatusPanels;
 end;
 
-function TCnFeedWizard.GetPanelCount: Integer;
+function TCnFeedReaderWizard.GetPanelCount: Integer;
 begin
   Result := FPanels.Count;
 end;
 
-function TCnFeedWizard.GetFeedCount: Integer;
+function TCnFeedReaderWizard.GetFeedCount: Integer;
 begin
   Result := FFeeds.Count;
 end;
 
-function TCnFeedWizard.GetFeeds(Index: Integer): TCnFeedChannel;
+function TCnFeedReaderWizard.GetFeeds(Index: Integer): TCnFeedChannel;
 begin
   Result := TCnFeedChannel(FFeeds[Index]);
 end;
 
-function TCnFeedWizard.GetHasConfig: Boolean;
+function TCnFeedReaderWizard.GetHasConfig: Boolean;
 begin
   Result := True;
 end;
 
-function TCnFeedWizard.GetPanels(Index: Integer): TCnStatusPanel;
+function TCnFeedReaderWizard.GetPanels(Index: Integer): TCnStatusPanel;
 begin
   Result := TCnStatusPanel(FPanels[Index]);
 end;
 
-class procedure TCnFeedWizard.GetWizardInfo(var Name, Author, Email,
+class procedure TCnFeedReaderWizard.GetWizardInfo(var Name, Author, Email,
   Comment: string);
 begin
   Name := SCnFeedWizardName;
@@ -853,7 +844,7 @@ begin
   Comment := SCnFeedWizardComment;
 end;
 
-procedure TCnFeedWizard.LanguageChanged(Sender: TObject);
+procedure TCnFeedReaderWizard.LanguageChanged(Sender: TObject);
 var
   i: Integer;
 begin
@@ -862,7 +853,7 @@ begin
     Panels[i].LanguageChanged(Sender);
 end;
 
-procedure TCnFeedWizard.Loaded;
+procedure TCnFeedReaderWizard.Loaded;
 begin
   inherited;
   FThread := TCnFeedThread.Create(FIni, FFeedPath);
@@ -872,7 +863,7 @@ begin
   FThread.Resume;
 end;
 
-procedure TCnFeedWizard.LoadSettings(Ini: TCustomIniFile);
+procedure TCnFeedReaderWizard.LoadSettings(Ini: TCustomIniFile);
 begin
   inherited;
   try
@@ -884,19 +875,19 @@ begin
   SetFeedCfgToThread;
 end;
 
-procedure TCnFeedWizard.SaveSettings(Ini: TCustomIniFile);
+procedure TCnFeedReaderWizard.SaveSettings(Ini: TCustomIniFile);
 begin
   inherited;
   TOmniXMLWriter.SaveToFile(FFeedCfg, WizOptions.UserPath + SCnFeedCfgFile, pfAuto, ofIndent);
 end;
 
-procedure TCnFeedWizard.OnPanelClick(Sender: TObject);
+procedure TCnFeedReaderWizard.OnPanelClick(Sender: TObject);
 begin
   if (FCurFeed <> nil) and (FCurFeed.Link <> '') then
     OpenUrl(FCurFeed.Link);
 end;
 
-procedure TCnFeedWizard.SetActive(Value: Boolean);
+procedure TCnFeedReaderWizard.SetActive(Value: Boolean);
 begin
   inherited;
   UpdateStatusPanels;
@@ -904,22 +895,13 @@ begin
     FThread.FActive := Value;
 end;
 
-procedure TCnFeedWizard.UpdateStatusPanels;
-var
-  i: Integer;
+procedure TCnFeedReaderWizard.UpdateStatusPanels;
 begin
   EnumEditControl(DoUpdateStatusPanel, nil);
-  for i := 0 to PanelCount - 1 do
-  begin
-    if FCurFeed <> nil then
-      Panels[i].Text := FCurFeed.Title
-    else
-      Panels[i].Text := '';
-    Panels[i].UpdateStatus;
-  end;
+  SetFeedToPanels;
 end;
 
-procedure TCnFeedWizard.SetFeedCfgToThread;
+procedure TCnFeedReaderWizard.SetFeedCfgToThread;
 var
   i: Integer;
   Cfg: TCnFeedCfg;
@@ -945,9 +927,29 @@ begin
   end;
 end;
 
-procedure TCnFeedWizard.FeedStep(Step: Integer);
+procedure TCnFeedReaderWizard.SetFeedToPanels;
 var
-  i, Idx: Integer;
+  i: Integer;
+begin
+  for i := 0 to PanelCount - 1 do
+  begin
+    if FCurFeed <> nil then
+    begin
+      Panels[i].Text := FCurFeed.Title;
+      Panels[i].Hint := FCurFeed.Title;
+    end
+    else
+    begin
+      Panels[i].Text := '';
+      Panels[i].Hint := '';
+    end;
+    Panels[i].UpdateStatus;
+  end;
+end;
+
+procedure TCnFeedReaderWizard.FeedStep(Step: Integer);
+var
+  Idx: Integer;
 begin
   if FCurFeed <> nil then
     Idx := FRandomFeeds.IndexOf(FCurFeed)
@@ -961,40 +963,39 @@ begin
     if Idx < 0 then
       Idx := Idx + FRandomFeeds.Count;
     FCurFeed := TCnFeedItem(FRandomFeeds[TrimInt(Idx, 0, FRandomFeeds.Count - 1)]);
-    for i := 0 to PanelCount - 1 do
-      Panels[i].Text := FCurFeed.Title;
+    SetFeedToPanels;
   end;
   FLastUpdateTick := GetTickCount;
 end;
 
-procedure TCnFeedWizard.OnConfig(Sender: TObject);
+procedure TCnFeedReaderWizard.OnConfig(Sender: TObject);
 begin
   Config;
 end;
 
-procedure TCnFeedWizard.OnNextFeed(Sender: TObject);
+procedure TCnFeedReaderWizard.OnNextFeed(Sender: TObject);
 begin
   FeedStep(1);
 end;
 
-procedure TCnFeedWizard.OnPrevFeed(Sender: TObject);
+procedure TCnFeedReaderWizard.OnPrevFeed(Sender: TObject);
 begin
   FeedStep(-1);
 end;
 
-procedure TCnFeedWizard.OnCloseFeed(Sender: TObject);
+procedure TCnFeedReaderWizard.OnCloseFeed(Sender: TObject);
 begin
   if QueryDlg(SCnFeedCloseQuery) then
     Active := False;
 end;
 
-procedure TCnFeedWizard.OnForceUpdateFeed(Sender: TObject);
+procedure TCnFeedReaderWizard.OnForceUpdateFeed(Sender: TObject);
 begin
   if FThread <> nil then
     FThread.DoForceUpdate;
 end;
 
-procedure TCnFeedWizard.OnTimer(Sender: TObject);
+procedure TCnFeedReaderWizard.OnTimer(Sender: TObject);
 begin
   if not Active then
     Exit;
@@ -1006,7 +1007,7 @@ begin
   end;
 end;
 
-procedure TCnFeedWizard.RandomFeed;
+procedure TCnFeedReaderWizard.RandomFeed;
 var
   i, Idx: Integer;
   List: TList;
@@ -1032,7 +1033,7 @@ begin
   end;
 end;
 
-procedure TCnFeedWizard.OnFeedUpdate(Sender: TObject);
+procedure TCnFeedReaderWizard.OnFeedUpdate(Sender: TObject);
 var
   i, j: Integer;
   Channel: TCnFeedChannel;
@@ -1061,8 +1062,8 @@ begin
 end;
 
 initialization
-  RegisterCnWizard(TCnFeedWizard);
+  RegisterCnWizard(TCnFeedReaderWizard);
 
-{$ENDIF CNWIZARDS_CNCOMPONENTSELECTOR}
+{$ENDIF CNWIZARDS_CNFEEDREADERWIZARD}
 
 end.

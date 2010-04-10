@@ -1263,6 +1263,16 @@ begin
   TranslateStr(SCnScriptMenuDemoCaption, 'SCnScriptMenuDemoCaption');
   TranslateStr(SCnScriptMenuDemoHint, 'SCnScriptMenuDemoHint');
 
+  // CnFeedWizard
+  TranslateStr(SCnFeedWizardName, 'SCnFeedWizardName');
+  TranslateStr(SCnFeedWizardComment, 'SCnFeedWizardComment');
+  TranslateStr(SCnFeedPrevFeedCaption, 'SCnFeedPrevFeedCaption');
+  TranslateStr(SCnFeedNextFeedCaption, 'SCnFeedNextFeedCaption');
+  TranslateStr(SCnFeedForceUpdateCaption, 'SCnFeedForceUpdateCaption');
+  TranslateStr(SCnFeedConfigCaption, 'SCnFeedConfigCaption');
+  TranslateStr(SCnFeedCloseCaption, 'SCnFeedCloseCaption');
+  TranslateStr(SCnFeedCloseQuery, 'SCnFeedCloseQuery');
+  TranslateStr(SCnFeedNewItem, 'SCnFeedNewItem');
 end;
 
 end.
