@@ -194,6 +194,11 @@
 		<param name="Local" value="ideenhance\fastcodeopt.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Feed Reader Wizard">
+		<param name="Name" value="Feed Reader Wizard">
+		<param name="Local" value="wizards\feedreader.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Form Designer Enhancements Wizard">
 		<param name="Name" value="Form Designer Enhancements Wizard">
 		<param name="Local" value="ideenhance\formdesigner.htm">

@@ -499,6 +499,11 @@
 		<param name="Local" value="cnsmr\cnsmr.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="源阅读专家">
+		<param name="Name" value="源阅读专家">
+		<param name="Local" value="wizards\feedreader.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="组件前缀专家">
 		<param name="Name" value="组件前缀专家">
 		<param name="Local" value="wizards\prefixwizard.htm">
