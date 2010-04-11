@@ -236,7 +236,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  RegExpr, CnEditControlWrapper, CnWizIdeUtils, CnInetUtils, CnFeedWizardFrm;
+  RegExpr, CnCRC32, CnEditControlWrapper, CnWizIdeUtils, CnInetUtils, CnFeedWizardFrm;
 
 const
   SCnFeedStatusPanel = 'CnFeedStatusPanel';
@@ -544,7 +544,7 @@ var
   FileName, TmpName, Url: string;
   Feed: TCnFeedChannel;
   i: Integer;
-  List: TList;
+  List, Save: TList;
 begin
   Result := False;
   if (Def.IDStr = '') or (Trim(Def.Url) = '') then
@@ -591,21 +591,35 @@ begin
 
   if Result then
   begin
-    Feed.LoadFromFile(FileName);
+    Save := TList.Create;
+    try
+      for i := 0 to Feed.Count - 1 do
+        Save.Add(Pointer(StrCRC32A(0, Feed[i].Title + Feed[i].Description)));
 
-    if (Def.Limit > 0) and (Feed.Count > Def.Limit) then
-    begin
-      List := TList.Create;
-      try
-        for i := 0 to Feed.Count - 1 do
-          List.Add(Feed[i]);
-        List.Sort(DoSortFeed);
-        for i := Def.Limit to List.Count - 1 do
-          TCnFeedItem(List[i]).Free;
-      finally
-        List.Free;
-      end;   
-    end;  
+      Feed.LoadFromFile(FileName);
+      if (Def.Limit > 0) and (Feed.Count > Def.Limit) then
+      begin
+        List := TList.Create;
+        try
+          for i := 0 to Feed.Count - 1 do
+            List.Add(Feed[i]);
+          List.Sort(DoSortFeed);
+          for i := Def.Limit to List.Count - 1 do
+            TCnFeedItem(List[i]).Free;
+        finally
+          List.Free;
+        end;
+      end;
+
+      for i := 0 to Feed.Count - 1 do
+      begin
+        if (Save.Count = 0) or (Save.IndexOf(Pointer(StrCRC32A(0,
+          Feed[i].Title + Feed[i].Description))) < 0) then
+          Feed[i].IsNew := True;
+      end;
+    finally
+      Save.Free;
+    end;
 
   {$IFDEF DEBUG}
     CnDebugger.LogCollection(Feed);
@@ -615,9 +629,10 @@ end;
 
 function TCnFeedThread.UpdateFeeds(ForceUpdate: Boolean): Boolean;
 var
-  i: Integer;
+  i, j: Integer;
   hMutex: THandle;
   ACfg: TCnFeedCfg;
+  Found: Boolean;
 begin
   Result := False;
   hMutex := CreateMutex(nil, False, SCnUpdateFeedMutex);
@@ -625,11 +640,6 @@ begin
     Exit;
 
   try
-    if ForceUpdate then
-    begin
-      FFeeds.Clear;
-    end;
-
     ACfg := TCnFeedCfg.Create;
     try
       FLock.Lock;
@@ -637,6 +647,22 @@ begin
         ACfg.Assign(FFeedCfg);
       finally
         FLock.Unlock;
+      end;
+
+      if ForceUpdate then
+      begin
+        for i := FeedCount - 1 downto 0 do
+        begin
+          Found := False;
+          for j := 0 to ACfg.Count - 1 do
+            if SameText(Feeds[i].IDStr, ACfg[j].IDStr) then
+            begin
+              Found := True;
+              Break;
+            end;
+          if not Found then
+            FFeeds.Delete(i);
+        end;
       end;
 
       for i := 0 to ACfg.Count - 1 do
@@ -981,8 +1007,12 @@ begin
       Desc := FeedHTMLToTxt(FCurFeed.Description);
       
       Panels[i].Text := Title;
-      if Pos(Title, Desc) > 0 then
+      if Trim(Desc) = '' then
+        Hint := Title
+      else if Pos(Title, Desc) > 0 then
         Hint := Desc
+      else if Pos(Desc, Title) > 0 then
+        Hint := Title
       else
         Hint := Title + #13#10 + Desc;
       if Length(Hint) > csMaxHintLength then
@@ -1067,26 +1097,49 @@ end;
 procedure TCnFeedReaderWizard.RandomFeed;
 var
   i, Idx: Integer;
-  List: TList;
+  List, NewList: TList;
+
+  procedure DoAddRandomFeed(AList: TList);
+  begin
+    while AList.Count > 0 do
+    begin
+      Idx := TrimInt(Round(Power(Random, 5) * AList.Count), 0, AList.Count - 1);
+      FRandomFeeds.Add(AList[Idx]);
+      AList.Delete(Idx);
+    end;
+  end;
 begin
   FRandomFeeds.Clear;
 
-  List := TList.Create;
+  List := nil;
+  NewList := nil;
   try
+    List := TList.Create;
+    NewList := TList.Create;
     List.Capacity := FSortedFeeds.Capacity;
+    NewList.Capacity := FSortedFeeds.Capacity;
     for i := 0 to FSortedFeeds.Count - 1 do
-      List.Add(FSortedFeeds[i]);
+      if TCnFeedItem(FSortedFeeds[i]).IsNew then
+      begin
+        NewList.Add(FSortedFeeds[i]);
+        TCnFeedItem(FSortedFeeds[i]).IsNew := False;
+      end
+      else
+        List.Add(FSortedFeeds[i]);
+        
+  {$IFDEF DEBUG}
+    CnDebugger.LogInteger(NewList.Count, 'New Feed Items Count');
+    CnDebugger.LogInteger(List.Count, 'Old Feed Items Count');
+  {$ENDIF}
 
     FRandomFeeds.Clear;
     FRandomFeeds.Capacity := List.Capacity;
-    while List.Count > 0 do
-    begin
-      Idx := TrimInt(Round(Power(Random, 5) * List.Count), 0, List.Count - 1);
-      FRandomFeeds.Add(List[Idx]);
-      List.Delete(Idx);
-    end;
+
+    DoAddRandomFeed(NewList);
+    DoAddRandomFeed(List);
   finally
     List.Free;
+    NewList.Free;
   end;
 end;
 

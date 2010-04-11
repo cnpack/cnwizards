@@ -47,6 +47,7 @@ type
 
   TCnFeedItem = class(TCnAssignableCollectionItem)
   private
+    FIsNew: Boolean;
     FPubDate: TDateTime;
     FDescription: WideString;
     FCategory: WideString;
@@ -60,6 +61,7 @@ type
     property Category: WideString read FCategory write FCategory;
     property PubDate: TDateTime read FPubDate write FPubDate;
     property Author: WideString read FAuthor write FAuthor;
+    property IsNew: Boolean read FIsNew write FIsNew;
   end;
 
   TCnFeedChannel = class(TCnAssignableCollection)

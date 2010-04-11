@@ -30,7 +30,9 @@ unit CnDebug;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2008.07.16
+* 修改记录：2009.12.31
+*               不输出至CnDebugViewer时也可输出至文件
+*           2008.07.16
 *               增加部分声明以区分对宽字符的支持。
 *           2008.05.01
 *               增加部分记录入文件的属性。
@@ -755,6 +757,7 @@ begin
 
   AList.Add('Collection: $' + IntToHex(Integer(Collection), 2) + ' ' + Collection.ClassName);
   AList.Add('  Count = ' + IntToStr(Collection.Count));
+  AddObjectToStringList(Collection, AList, 0);
   for I := 0 to Collection.Count - 1 do
   begin
     AList.Add('');
@@ -1022,21 +1025,10 @@ procedure TCnDebugger.InternalOutputMsg(const AMsg: AnsiString; Size: Integer;
 var
   TagLen, MsgLen: Integer;
   MsgDesc: TCnMsgDesc;
-begin
-  if FAutoStart and not FIgnoreViewer and not FViewerAutoStartCalled then
-  begin
-    StartDebugViewer;
-    FViewerAutoStartCalled := True;
-  end;
-
-  Inc(FMessageCount);
-  if not CheckEnabled or not FChannel.CheckReady then Exit;
-  if FChannel.CheckFilterChanged then
-    FChannel.RefreshFilter(FFilter);
-
-  if not CheckFiltered(string(ATag), ALevel, AType) then
-    Exit;
+  ChkReady: Boolean;
   
+  procedure GenerateMsgDesc;
+begin
   // 进行具体的组装工作
   MsgLen := Size;
   if MsgLen > CnMaxMsgLength then
@@ -1069,7 +1061,32 @@ begin
 
   MsgLen := MsgLen + SizeOf(MsgDesc.Annex) + SizeOf(DWORD);
   MsgDesc.Length := MsgLen;
+  end;
+
+begin
+  if FAutoStart and not FIgnoreViewer and not FViewerAutoStartCalled then
+  begin
+    StartDebugViewer;
+    FViewerAutoStartCalled := True;
+  end;
+
+  Inc(FMessageCount);
+  if not CheckEnabled then 
+    Exit;
+  ChkReady := FChannel.CheckReady;
+  if not ChkReady and not FDumpToFile then
+    Exit;
+
+  GenerateMsgDesc;
+
+  if ChkReady then
+  begin
+    if FChannel.CheckFilterChanged then
+      FChannel.RefreshFilter(FFilter);
+
+    if CheckFiltered(string(ATag), ALevel, AType) then
   InternalOutput(MsgDesc, MsgLen);
+  end;
 
   // 同时 DumpToFile
   if FDumpToFile and not FIgnoreViewer and (FDumpFile <> nil) then
