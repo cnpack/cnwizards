@@ -70,6 +70,8 @@ type
     lbl8: TLabel;
     chkSubCnPackChannels: TCheckBox;
     chkRandomDisplay: TCheckBox;
+    lbl9: TLabel;
+    mmoFilter: TMemo;
     procedure btnHelpClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -128,6 +130,7 @@ end;
 
 procedure TCnFeedWizardForm.FormShow(Sender: TObject);
 begin
+  mmoFilter.Lines.CommaText := FWizard.Filter;
   seChangePeriod.Value := FWizard.ChangePeriod;
   chkSubCnPackChannels.Checked := FWizard.SubCnPackChannels;
   chkRandomDisplay.Checked := FWizard.RandomDisplay;
@@ -261,6 +264,7 @@ begin
   FWizard.ChangePeriod := seChangePeriod.Value;
   FWizard.SubCnPackChannels := chkSubCnPackChannels.Checked;
   FWizard.RandomDisplay := chkRandomDisplay.Checked;
+  FWizard.Filter := Trim(mmoFilter.Lines.CommaText);
   GetFromControl;
   FWizard.FeedCfg.Assign(FFeedCfg);
   ModalResult := mrOk;

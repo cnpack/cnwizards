@@ -200,6 +200,13 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
       Height = 13
       Caption = 'seconds.'
     end
+    object lbl9: TLabel
+      Left = 256
+      Top = 16
+      Width = 94
+      Height = 13
+      Caption = 'Spam Keyword List:'
+    end
     object seChangePeriod: TCnSpinEdit
       Left = 88
       Top = 59
@@ -207,14 +214,14 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
       Height = 22
       MaxValue = 99999
       MinValue = 1
-      TabOrder = 2
+      TabOrder = 3
       Value = 1
       OnExit = edtCaptionChange
     end
     object chkSubCnPackChannels: TCheckBox
       Left = 8
       Top = 16
-      Width = 449
+      Width = 241
       Height = 17
       Caption = '&Subscribe CnPack channels.'
       TabOrder = 0
@@ -222,9 +229,16 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
     object chkRandomDisplay: TCheckBox
       Left = 8
       Top = 36
-      Width = 449
+      Width = 241
       Height = 17
       Caption = '&Random display.'
+      TabOrder = 2
+    end
+    object mmoFilter: TMemo
+      Left = 256
+      Top = 32
+      Width = 193
+      Height = 49
       TabOrder = 1
     end
   end

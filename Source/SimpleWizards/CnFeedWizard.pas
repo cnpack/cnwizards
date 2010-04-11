@@ -137,11 +137,13 @@ type
     FLock: TCnLockObject;
     FForceUpdate: Boolean;
     FFeeds: TObjectList;
+    FFilter: WideString;
     FFeedCfg: TCnFeedCfg;
     FOnFeedUpdate: TNotifyEvent;
     procedure DoFeedUpdate;
     function UpdateFeeds(ForceUpdate: Boolean): Boolean;
-    function DoUpdateFeed(Def: TCnFeedCfgItem; ForceUpdate: Boolean): Boolean;
+    function DoUpdateFeed(Def: TCnFeedCfgItem; AFilter: TStringList;
+      ForceUpdate: Boolean): Boolean;
     function GetFeedCount: Integer;
     function GetFeeds(Index: Integer): TCnFeedChannel;
   protected
@@ -150,7 +152,7 @@ type
     constructor Create(AIni: TCustomIniFile; AFeedPath: string);
     destructor Destroy; override;
     procedure DoForceUpdate;
-    procedure SetFeedCfg(ACfg: TCnFeedCfg);
+    procedure SetFeedCfg(ACfg: TCnFeedCfg; AFilter: WideString);
     
     property OnFeedUpdate: TNotifyEvent read FOnFeedUpdate write FOnFeedUpdate;
     property FeedCount: Integer read GetFeedCount;
@@ -175,6 +177,7 @@ type
     FChangePeriod: Integer;
     FRandomDisplay: Boolean;
     FSubCnPackChannels: Boolean;
+    FFilter: WideString;
     procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm;
       Operation: TOperation);
     procedure DoUpdateStatusPanel(EditWindow: TCustomForm; EditControl: TControl;
@@ -223,6 +226,7 @@ type
   published
     property SubCnPackChannels: Boolean read FSubCnPackChannels write FSubCnPackChannels default True;
     property RandomDisplay: Boolean read FRandomDisplay write FRandomDisplay default True;
+    property Filter: WideString read FFilter write FFilter;
     property ChangePeriod: Integer read FChangePeriod write FChangePeriod default 20;
   end;
 
@@ -539,11 +543,13 @@ begin
   FForceUpdate := True;
 end;
 
-function TCnFeedThread.DoUpdateFeed(Def: TCnFeedCfgItem; ForceUpdate: Boolean): Boolean;
+function TCnFeedThread.DoUpdateFeed(Def: TCnFeedCfgItem; AFilter: TStringList;
+  ForceUpdate: Boolean): Boolean;
 var
   FileName, TmpName, Url: string;
   Feed: TCnFeedChannel;
-  i: Integer;
+  hMutex: THandle;
+  i, j: Integer;
   List, Save: TList;
 begin
   Result := False;
@@ -573,18 +579,37 @@ begin
     CnDebugger.LogMsg('Update Feed: ' + Def.IDStr + ' -> ' + Def.Url);
   {$ENDIF}
     FIni.WriteDateTime('LastCheck', Def.IDStr, Now);
-    with TCnHTTP.Create do
-    try
-      Url := StringReplace(Trim(Def.Url), SCnFeedLangID, IntToStr(WizOptions.CurrentLangID),
-        [rfReplaceAll, rfIgnoreCase]);
-      if GetFile(Url, TmpName) and (GetFileSize(TmpName) > 0) then
-      begin
-        DeleteFile(FileName);
-        CopyFile(PChar(TmpName), PChar(FileName), False);
-        DeleteFile(TmpName);
+
+    hMutex := CreateMutex(nil, False, PChar(SCnUpdateFeedMutex + Def.IDStr));
+    if GetLastError <> ERROR_ALREADY_EXISTS then
+    begin
+      try
+        with TCnHTTP.Create do
+        try
+          Url := StringReplace(Trim(Def.Url), SCnFeedLangID, IntToStr(WizOptions.CurrentLangID),
+            [rfReplaceAll, rfIgnoreCase]);
+          if GetFile(Url, TmpName) and (GetFileSize(TmpName) > 0) then
+          begin
+            DeleteFile(FileName);
+            CopyFile(PChar(TmpName), PChar(FileName), False);
+            DeleteFile(TmpName);
+          end;
+        finally
+          Free;
+        end;
+      finally
+        if hMutex <> 0 then
+        begin
+          ReleaseMutex(hMutex);
+          CloseHandle(hMutex);
+        end;
       end;
-    finally
-      Free;
+    end
+    else
+    begin
+    {$IFDEF DEBUG}
+      CnDebugger.LogMsg('Update Feed Conflict: ' + Def.IDStr);
+    {$ENDIF}
     end;
     Result := True;
   end;
@@ -594,9 +619,19 @@ begin
     Save := TList.Create;
     try
       for i := 0 to Feed.Count - 1 do
-        Save.Add(Pointer(StrCRC32A(0, Feed[i].Title + Feed[i].Description)));
+        Save.Add(Pointer(StrCRC32A(0, AnsiString(Feed[i].Title + Feed[i].Description))));
 
       Feed.LoadFromFile(FileName);
+
+      if AFilter.Count > 0 then
+        for i := Feed.Count - 1 downto 0 do
+          for j := 0 to AFilter.Count - 1 do
+            if Pos(UpperCase(AFilter[j]), UpperCase(Feed[i].Title)) > 0 then
+            begin
+              Feed.Delete(i);
+              Break;
+            end;  
+
       if (Def.Limit > 0) and (Feed.Count > Def.Limit) then
       begin
         List := TList.Create;
@@ -614,7 +649,7 @@ begin
       for i := 0 to Feed.Count - 1 do
       begin
         if (Save.Count = 0) or (Save.IndexOf(Pointer(StrCRC32A(0,
-          Feed[i].Title + Feed[i].Description))) < 0) then
+          AnsiString(Feed[i].Title + Feed[i].Description)))) < 0) then
           Feed[i].IsNew := True;
       end;
     finally
@@ -630,56 +665,54 @@ end;
 function TCnFeedThread.UpdateFeeds(ForceUpdate: Boolean): Boolean;
 var
   i, j: Integer;
-  hMutex: THandle;
   ACfg: TCnFeedCfg;
   Found: Boolean;
+  AFilter: TStringList;
 begin
   Result := False;
-  hMutex := CreateMutex(nil, False, SCnUpdateFeedMutex);
-  if GetLastError = ERROR_ALREADY_EXISTS then
-    Exit;
 
+  ACfg := nil;
+  AFilter := nil;
   try
     ACfg := TCnFeedCfg.Create;
+    AFilter := TStringList.Create;
+    FLock.Lock;
     try
-      FLock.Lock;
-      try
-        ACfg.Assign(FFeedCfg);
-      finally
-        FLock.Unlock;
-      end;
-
-      if ForceUpdate then
-      begin
-        for i := FeedCount - 1 downto 0 do
-        begin
-          Found := False;
-          for j := 0 to ACfg.Count - 1 do
-            if SameText(Feeds[i].IDStr, ACfg[j].IDStr) then
-            begin
-              Found := True;
-              Break;
-            end;
-          if not Found then
-            FFeeds.Delete(i);
-        end;
-      end;
-
-      for i := 0 to ACfg.Count - 1 do
-      begin
-        if Terminated then Exit;
-        if DoUpdateFeed(ACfg[i], ForceUpdate) then
-          Result := True;
-      end;
+      ACfg.Assign(FFeedCfg);
+      AFilter.CommaText := FFilter;
     finally
-      ACfg.Free;
+      FLock.Unlock;
+    end;
+
+    for i := AFilter.Count - 1 downto 0 do
+      if Trim(AFilter[i]) = '' then
+        AFilter.Delete(i);
+
+    if ForceUpdate then
+    begin
+      for i := FeedCount - 1 downto 0 do
+      begin
+        Found := False;
+        for j := 0 to ACfg.Count - 1 do
+          if SameText(Feeds[i].IDStr, ACfg[j].IDStr) then
+          begin
+            Found := True;
+            Break;
+          end;
+        if not Found then
+          FFeeds.Delete(i);
+      end;
+    end;
+
+    for i := 0 to ACfg.Count - 1 do
+    begin
+      if Terminated then Exit;
+      if DoUpdateFeed(ACfg[i], AFilter, ForceUpdate) then
+        Result := True;
     end;
   finally
-    if hMutex <> 0 then
-    begin
-      ReleaseMutex(hMutex);
-      CloseHandle(hMutex);
-    end;
+    ACfg.Free;
+    AFilter.Free;
   end;
 end;
 
@@ -716,11 +749,12 @@ begin
   Result := TCnFeedChannel(FFeeds[Index]);
 end;
 
-procedure TCnFeedThread.SetFeedCfg(ACfg: TCnFeedCfg);
+procedure TCnFeedThread.SetFeedCfg(ACfg: TCnFeedCfg; AFilter: WideString);
 begin
   FLock.Lock;
   try
     FFeedCfg.Assign(ACfg);
+    FFilter := AFilter;
   finally
     FLock.Unlock;
   end;   
@@ -964,7 +998,7 @@ begin
     {$IFDEF DEBUG}
       CnDebugger.LogCollection(Cfg);
     {$ENDIF}
-      FThread.SetFeedCfg(Cfg);
+      FThread.SetFeedCfg(Cfg, Filter);
     finally
       Cfg.Free;
     end;

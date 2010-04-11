@@ -111,13 +111,13 @@ const
 
 // From: IdGlobal.pas
 // www.indyproject.org
-function GmtOffsetStrToDateTime(S: string): TDateTime;
+function GmtOffsetStrToDateTime(S: WideString): TDateTime;
 begin
   Result := 0.0;
   S := Copy(Trim(s), 1, 5);
   if Length(S) > 0 then
   begin
-    if s[1] in ['-', '+'] then
+    if (s[1] = '-') or (s[1] = '+') then
     begin
       try
         Result := EncodeTime(StrToInt(Copy(s, 2, 2)), StrToInt(Copy(s, 4, 2)), 0, 0);

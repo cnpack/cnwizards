@@ -2494,6 +2494,7 @@ TCnFeedWizardForm.lbl5.Caption=限制:
 TCnFeedWizardForm.lbl6.Caption=條。(0 表示不限制)
 TCnFeedWizardForm.lbl7.Caption=切換週期:
 TCnFeedWizardForm.lbl8.Caption=秒。
+TCnFeedWizardForm.lbl9.Caption=垃圾關鍵字列表:
 TCnFeedWizardForm.lvList.Columns.Item0.Caption=標題
 TCnFeedWizardForm.lvList.Columns.Item1.Caption=連結
 TCnFeedWizardForm.lvList.Columns.Item2.Caption=週期(分)
