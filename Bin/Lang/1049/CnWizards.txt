@@ -2483,6 +2483,7 @@ TCnFeedWizardForm.btnOK.Caption=&OK
 TCnFeedWizardForm.Caption=Настройки Мастера подписки
 TCnFeedWizardForm.chkRandomDisplay.Caption=В случайном порядке
 TCnFeedWizardForm.chkSubCnPackChannels.Caption=Подписаться на канал CnPack
+TCnFeedWizardForm.chkSubPartnerChannels.Caption=Подписаться на каналы партнеров CnPack
 TCnFeedWizardForm.grp1.Caption=Настройки подписки
 TCnFeedWizardForm.grpFeeds.Caption=Ваши подписки
 TCnFeedWizardForm.lbl1.Caption=Название:
