@@ -1190,7 +1190,7 @@ var
   begin
     while AList.Count > 0 do
     begin
-      Idx := TrimInt(Round(Power(Random, 5) * AList.Count), 0, AList.Count - 1);
+      Idx := TrimInt(Round(Power(Random, 3) * AList.Count), 0, AList.Count - 1);
       FRandomFeeds.Add(AList[Idx]);
       AList.Delete(Idx);
     end;

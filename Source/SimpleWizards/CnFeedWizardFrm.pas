@@ -256,7 +256,9 @@ begin
     FFeedCfg.Delete(lvList.Selected.Index);
     lvList.Items.Count := FFeedCfg.Count;
     if FFeedCfg.Count > 0 then
-      lvList.Selected := lvList.Items[0];
+      lvList.Selected := lvList.Items[0]
+    else
+      lvList.Invalidate;
     SetToControl;
   end;
 end;
