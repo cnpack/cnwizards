@@ -42,49 +42,49 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
   end
   object grpFeeds: TGroupBox
     Left = 8
-    Top = 104
+    Top = 120
     Width = 465
-    Height = 273
+    Height = 257
     Caption = 'Feed &List'
     TabOrder = 1
     object lbl1: TLabel
       Left = 8
-      Top = 152
+      Top = 136
       Width = 41
       Height = 13
       Caption = 'Caption:'
     end
     object lbl2: TLabel
       Left = 8
-      Top = 182
+      Top = 166
       Width = 17
       Height = 13
       Caption = 'Url:'
     end
     object lbl3: TLabel
       Left = 8
-      Top = 211
+      Top = 195
       Width = 34
       Height = 13
       Caption = 'Period:'
     end
     object lbl4: TLabel
       Left = 152
-      Top = 211
+      Top = 195
       Width = 41
       Height = 13
       Caption = 'minutes.'
     end
     object lbl5: TLabel
       Left = 8
-      Top = 241
+      Top = 225
       Width = 25
       Height = 13
       Caption = 'Limit:'
     end
     object lbl6: TLabel
       Left = 152
-      Top = 241
+      Top = 225
       Width = 98
       Height = 13
       Caption = 'items.(0 is unlimited)'
@@ -93,7 +93,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
       Left = 8
       Top = 16
       Width = 441
-      Height = 97
+      Height = 81
       Columns = <
         item
           Caption = 'Caption'
@@ -123,7 +123,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
     end
     object edtCaption: TEdit
       Left = 64
-      Top = 148
+      Top = 132
       Width = 385
       Height = 21
       TabOrder = 3
@@ -131,7 +131,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
     end
     object edtUrl: TEdit
       Left = 64
-      Top = 177
+      Top = 161
       Width = 385
       Height = 21
       TabOrder = 4
@@ -139,7 +139,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
     end
     object sePeriod: TCnSpinEdit
       Left = 64
-      Top = 206
+      Top = 190
       Width = 81
       Height = 22
       MaxValue = 99999
@@ -150,7 +150,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
     end
     object seLimit: TCnSpinEdit
       Left = 64
-      Top = 236
+      Top = 220
       Width = 81
       Height = 22
       MaxLength = 999
@@ -162,7 +162,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
     end
     object btnAdd: TButton
       Left = 64
-      Top = 120
+      Top = 104
       Width = 75
       Height = 21
       Caption = '&Add'
@@ -171,7 +171,7 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
     end
     object btnDelete: TButton
       Left = 144
-      Top = 120
+      Top = 104
       Width = 75
       Height = 21
       Caption = '&Delete'
@@ -183,19 +183,19 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
     Left = 8
     Top = 8
     Width = 465
-    Height = 89
+    Height = 105
     Caption = '&Feed Settings'
     TabOrder = 0
     object lbl7: TLabel
       Left = 8
-      Top = 64
+      Top = 80
       Width = 74
       Height = 13
       Caption = 'Change Period:'
     end
     object lbl8: TLabel
       Left = 176
-      Top = 64
+      Top = 80
       Width = 43
       Height = 13
       Caption = 'seconds.'
@@ -209,12 +209,12 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
     end
     object seChangePeriod: TCnSpinEdit
       Left = 88
-      Top = 59
+      Top = 75
       Width = 81
       Height = 22
       MaxValue = 99999
       MinValue = 1
-      TabOrder = 3
+      TabOrder = 4
       Value = 1
       OnExit = edtCaptionChange
     end
@@ -228,18 +228,27 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
     end
     object chkRandomDisplay: TCheckBox
       Left = 8
-      Top = 36
+      Top = 52
       Width = 241
       Height = 17
       Caption = '&Random display.'
-      TabOrder = 2
+      TabOrder = 3
     end
     object mmoFilter: TMemo
       Left = 256
       Top = 32
       Width = 193
-      Height = 49
+      Height = 65
+      ScrollBars = ssVertical
       TabOrder = 1
+    end
+    object chkSubPartnerChannels: TCheckBox
+      Left = 8
+      Top = 34
+      Width = 241
+      Height = 17
+      Caption = 'Subscribe CnPack &Partner channels.'
+      TabOrder = 2
     end
   end
 end

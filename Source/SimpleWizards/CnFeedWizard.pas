@@ -99,6 +99,8 @@ type
 
 { TCnFeedCfgItem }
 
+  TCnFeedType = (ftUser, ftCnPack, ftPartner);
+
   TCnFeedCfgItem = class(TCnAssignableCollectionItem)
   private
     FLimit: Integer;
@@ -106,10 +108,12 @@ type
     FIDStr: string;
     FUrl: string;
     FCaption: string;
+    FFeedType: TCnFeedType;
   published
     property Caption: string read FCaption write FCaption;
     property IDStr: string read FIDStr write FIDStr;
     property Url: string read FUrl write FUrl;
+    property FeedType: TCnFeedType read FFeedType write FFeedType;
     property CheckPeriod: Integer read FCheckPeriod write FCheckPeriod;
     property Limit: Integer read FLimit write FLimit;
   end;
@@ -178,6 +182,7 @@ type
     FRandomDisplay: Boolean;
     FSubCnPackChannels: Boolean;
     FFilter: WideString;
+    FSubPartnerChannels: Boolean;
     procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm;
       Operation: TOperation);
     procedure DoUpdateStatusPanel(EditWindow: TCustomForm; EditControl: TControl;
@@ -225,6 +230,7 @@ type
     property FeedCfg: TCnFeedCfg read FFeedCfg;
   published
     property SubCnPackChannels: Boolean read FSubCnPackChannels write FSubCnPackChannels default True;
+    property SubPartnerChannels: Boolean read FSubPartnerChannels write FSubPartnerChannels default True;
     property RandomDisplay: Boolean read FRandomDisplay write FRandomDisplay default True;
     property Filter: WideString read FFilter write FFilter;
     property ChangePeriod: Integer read FChangePeriod write FChangePeriod default 20;
@@ -573,6 +579,11 @@ begin
 
   FileName := FFeedPath + Def.IDStr + '.xml';
   TmpName := ChangeFileExt(FileName, '.tmp');
+
+  // 先加载一次当前的数据，这样如果下载到新文件，后面可以比较出新项目
+  if Feed.Count = 0 then
+    Feed.LoadFromFile(FileName);
+    
   if ForceUpdate or (Abs(Now - FIni.ReadDateTime('LastCheck', Def.IDStr, 0)) > Def.CheckPeriod / 24 / 60) then
   begin
   {$IFDEF DEBUG}
@@ -792,6 +803,7 @@ begin
   FTimer.Enabled := True;
   FChangePeriod := 20;
   FSubCnPackChannels := True;
+  FSubPartnerChannels := True;
   FRandomDisplay := True;
   FIni := CreateIniFile;
   FFeedPath := WizOptions.UserPath + SCnFeedCache;
@@ -923,7 +935,7 @@ begin
   inherited;
   for i := 0 to PanelCount - 1 do
     Panels[i].LanguageChanged(Sender);
-  if FSubCnPackChannels then
+  if FSubCnPackChannels or FSubPartnerChannels then
     OnForceUpdateFeed(nil);
 end;
 
@@ -984,10 +996,15 @@ begin
   begin
     Cfg := TCnFeedCfg.Create;
     try
-      if FSubCnPackChannels then
+      if FSubCnPackChannels or FSubPartnerChannels then
       begin
         try
           TOmniXMLReader.LoadFromFile(Cfg, WizOptions.DataPath + SCnFeedCfgFile);
+          for i := Cfg.Count - 1 downto 0 do
+            if not FSubCnPackChannels and (Cfg[i].FeedType = ftCnPack) then
+              Cfg.Delete(i)
+            else if not FSubPartnerChannels and (Cfg[i].FeedType = ftPartner) then
+              Cfg.Delete(i);
         except
           ;
         end;

@@ -2484,6 +2484,7 @@ TCnFeedWizardForm.btnOK.Caption=&OK
 TCnFeedWizardForm.Caption=FeedReader Wizard Settings
 TCnFeedWizardForm.chkRandomDisplay.Caption=&Random display.
 TCnFeedWizardForm.chkSubCnPackChannels.Caption=&Subscribe CnPack channels.
+TCnFeedWizardForm.chkSubPartnerChannels.Caption=Subscribe CnPack &Partner channels.
 TCnFeedWizardForm.grp1.Caption=&Feed Settings
 TCnFeedWizardForm.grpFeeds.Caption=Feed &List
 TCnFeedWizardForm.lbl1.Caption=Caption:
