@@ -603,8 +603,8 @@ begin
           begin
             DeleteFile(FileName);
             CopyFile(PChar(TmpName), PChar(FileName), False);
-            DeleteFile(TmpName);
           end;
+          DeleteFile(TmpName);
         finally
           Free;
         end;
