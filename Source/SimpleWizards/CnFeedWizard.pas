@@ -712,7 +712,10 @@ begin
             Break;
           end;
         if not Found then
+        begin
+          DeleteFile(FFeedPath + Feeds[i].IDStr + '.xml');
           FFeeds.Delete(i);
+        end;
       end;
     end;
 
