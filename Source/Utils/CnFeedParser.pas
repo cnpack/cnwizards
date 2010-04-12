@@ -73,6 +73,7 @@ type
     FLanguage: WideString;
     FLink: WideString;
     FIDStr: WideString;
+    FUserData: Integer;
     function GetItems(Index: Integer): TCnFeedItem;
     procedure SetItems(Index: Integer; const Value: TCnFeedItem);
   public
@@ -88,6 +89,7 @@ type
     property Language: WideString read FLanguage write FLanguage;
     property PubDate: TDateTime read FPubDate write FPubDate;
     property LastBuildDate: TDateTime read FLastBuildDate write FLastBuildDate;
+    property UserData: Integer read FUserData write FUserData;
   end;
 
 implementation

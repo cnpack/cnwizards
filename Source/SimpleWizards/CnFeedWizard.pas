@@ -573,6 +573,7 @@ begin
   begin
     Feed := TCnFeedChannel.Create;
     Feed.IDStr := Def.IDStr;
+    Feed.UserData := Integer(Def.FeedType);
     FFeeds.Add(Feed);
     Result := True;
   end;
@@ -1048,7 +1049,24 @@ end;
 procedure TCnFeedReaderWizard.SetFeedToPanels;
 var
   i: Integer;
-  Title, Desc, Hint: WideString;
+  Channel: TCnFeedChannel;
+  Title, ChlTitle, Desc, Hint: WideString;
+
+  function GetShortTitle(ATitle: WideString): WideString;
+  var
+    i: Integer;
+  begin
+    Result := ATitle;
+    if Length(Result) > 20 then
+    begin
+      for i := 17 to Length(Result) do
+        if (Ord(Result[i]) <= Ord(' ')) or (Result[i] = '_') then
+        begin
+          Result := Trim(Copy(Result, 1, i - 1)) + '...';
+          Exit;
+        end;
+    end;
+  end;
 begin
   for i := 0 to PanelCount - 1 do
   begin
@@ -1056,8 +1074,23 @@ begin
     begin
       Title := FeedHTMLToTxt(FCurFeed.Title);
       Desc := FeedHTMLToTxt(FCurFeed.Description);
-      
-      Panels[i].Text := Title;
+      if Trim(Title) = '' then
+        Title := Desc;
+
+      Channel := TCnFeedChannel(FCurFeed.Collection);
+      if TCnFeedType(Channel.UserData) = ftCnPack then
+      begin
+        Panels[i].Text := Title;
+      end
+      else
+      begin
+        ChlTitle := Trim(Channel.Title);
+        if ChlTitle <> '' then
+          Panels[i].Text := Format('[%s] %s', [GetShortTitle(ChlTitle), Title])
+        else
+          Panels[i].Text := Title;
+      end;
+
       if Trim(Desc) = '' then
         Hint := Title
       else if Pos(Title, Desc) > 0 then
