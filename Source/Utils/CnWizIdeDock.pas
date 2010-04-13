@@ -100,6 +100,7 @@ type
     // 以下复制自 TCnTranslateForm 以实现多语
     procedure DoCreate; override;
     procedure DoDestroy; override;
+    procedure ReadState(Reader: TReader); override;
 
 {$IFDEF CREATE_PARAMS_BUG}
     procedure CreateParams(var Params: TCreateParams); override;
@@ -313,6 +314,12 @@ begin
   if CnLanguageManager <> nil then
     CnLanguageManager.RemoveChangeNotifier(OnLanguageChanged);
   inherited;
+end;
+
+procedure TCnIdeDockForm.ReadState(Reader: TReader);
+begin
+  inherited;
+  OldCreateOrder := False;
 end;
 
 {$IFDEF CREATE_PARAMS_BUG}
