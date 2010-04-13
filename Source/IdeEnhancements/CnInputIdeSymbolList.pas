@@ -64,6 +64,10 @@ uses
 {$ENDIF} {$ENDIF}
 {$ENDIF SUPPORT_IDESymbolList}
 
+{$IFDEF IDE_WIDECONTROL} {$IFNDEF UNICODE_STRING}
+  {$DEFINE UTF8_SYMBOL}
+{$ENDIF} {$ENDIF}
+
 {$IFDEF BDS4_UP}
   // BDS 2006 在执行 IOTACodeInsightServices.SetQueryContext(nil, nil)
   // 后再调用自动完成会导致 IDE 异常
@@ -241,7 +245,7 @@ var
             for i := 0 to SymbolList.Count - 1 do
             begin
               // follow code maybe raise exception, but disabled.
-            {$IFDEF IDE_WIDECONTROL}
+            {$IFDEF UTF8_SYMBOL}
               Name := string(FastUtf8ToAnsi(AnsiString(SymbolList.SymbolText[i])));
             {$ELSE}
               Name := SymbolList.SymbolText[i];
@@ -250,7 +254,7 @@ var
               Kind := SymbolFlagsToKind(SymbolList.SymbolFlags[i], Desc);
               // Description is Utf-8 format under BDS.
               Add(Name, Kind, Round(MaxInt / SymbolList.Count * i), Desc, '', True,
-                False, False, {$IFDEF IDE_WIDECONTROL}True{$ELSE}False{$ENDIF});
+                False, False, {$IFDEF UTF8_SYMBOL}True{$ELSE}False{$ENDIF});
             end;
           except
             ;
