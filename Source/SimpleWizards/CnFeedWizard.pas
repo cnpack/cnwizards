@@ -744,8 +744,12 @@ begin
       FTick := GetTickCount;
       IsForce := FForceUpdate;
       FForceUpdate := False;
-      if UpdateFeeds(IsForce) then
-        Synchronize(DoFeedUpdate);
+      try
+        if UpdateFeeds(IsForce) then
+          Synchronize(DoFeedUpdate);
+      except
+        ;
+      end;
     end
     else
       Sleep(100);  
@@ -795,6 +799,7 @@ end;
 constructor TCnFeedReaderWizard.Create;
 begin
   inherited;
+  Randomize;
   FLastUpdateTick := GetTickCount;
   FPanels := TList.Create;
   FFeeds := TObjectList.Create;
