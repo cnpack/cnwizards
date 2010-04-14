@@ -262,8 +262,9 @@ var
   S: string;
   Y1, M1, D1, Y2, M2, D2: Word;
 begin
-  // 取升级记录，发送IDE大版本号与专家包版本号作为参数
-  S := Format('%s?ide=%s&ver=%s', [WizOptions.UpgradeURL, CompilerShortName, SCnWizardVersion]);
+  // 取升级记录，发送IDE大版本号与专家包版本号以及语言ID作为参数
+  S := Format('%s?ide=%s&ver=%s&langid=%d', [WizOptions.UpgradeURL, CompilerShortName,
+    SCnWizardVersion, WizOptions.CurrentLangID]);
 
   // 手动调用
   if FUserCheck then
