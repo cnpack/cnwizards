@@ -2,7 +2,7 @@
 !LanguageName=繁體中文
 !TranslationAuthor=LiuXiao
 !TranslationAuthorEmail=liuxiao@cnpack.org
-!TranslationDefaultFont=Tahoma,8,,,,
+!TranslationDefaultFont=細明體,9,,,,
 TCnDTMainForm.btnAbout.Caption=關於(&A)
 TCnDTMainForm.btnClose.Caption=關閉(&C)
 TCnDTMainForm.btnStart.Caption=開始轉換(&S)

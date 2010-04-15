@@ -2,7 +2,7 @@
 !LanguageName=繁體中文
 !TranslationAuthor=LiuXiao
 !TranslationAuthorEmail=liuxiao@cnpack.org
-!TranslationDefaultFont=Tahoma,8,,,,
+!TranslationDefaultFont=細明體,9,,,,
 TFrmConfigIO.btnClose.Caption=關閉(&C)
 TFrmConfigIO.btnHelp.Caption=關於(&A)
 TFrmConfigIO.btnOK.Caption=下一步(&N)
