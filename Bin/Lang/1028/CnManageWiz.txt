@@ -2,7 +2,7 @@
 !LanguageName=繁體中文
 !TranslationAuthor=LiuXiao
 !TranslationAuthorEmail=liuxiao@cnpack.org
-!TranslationDefaultFont=細明體,9,,,,
+!TranslationDefaultFont=Tahoma,8,,,,
 TCnManageWizardForm.actAdd.Caption=新增專家(&W)...
 TCnManageWizardForm.actAdd.Hint=手工添加一新專家
 TCnManageWizardForm.actExplore.Caption=打開所在目錄(&E)

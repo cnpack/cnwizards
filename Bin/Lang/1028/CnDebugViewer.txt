@@ -2,7 +2,7 @@
 !LanguageName=繁體中文
 !TranslationAuthor=LiuXiao
 !TranslationAuthorEmail=liuxiao@cnpack.org
-!TranslationDefaultFont=細明體,9,,,,
+!TranslationDefaultFont=Tahoma,8,,,,
 TCnMainViewer.actAbout.Caption=&A. 關於...
 TCnMainViewer.actAbout.Hint=顯示關於資訊
 TCnMainViewer.actAutoScroll.Caption=自動滾動

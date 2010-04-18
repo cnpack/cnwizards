@@ -2,7 +2,7 @@
 !LanguageName=繁體中文
 !TranslationAuthor=LiuXiao
 !TranslationAuthorEmail=liuxiao@cnpack.org
-!TranslationDefaultFont=細明體,9,,,,
+!TranslationDefaultFont=Tahoma,8,,,,
 csHintStr=提示
 csInstallSucc=CnPack 專家包已安裝在以下環境中:<BR>
 csInstallSuccEnd=再次運行安裝程式將卸載專家包！
