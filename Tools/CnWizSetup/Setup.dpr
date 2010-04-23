@@ -230,7 +230,7 @@ begin
 end;
 
 // 判断是否安装
-function IsInstall: Boolean;
+function IsInstalled: Boolean;
 var
   Compiler: TCompilerName;
 begin
@@ -257,20 +257,17 @@ begin
     if Compiler = cvD8 then // 不安装 D8 的
       Continue;
 
-    if WizardExists(Compiler) then
+    if WizardExists(Compiler) and RegKeyExists(csRegPaths[Compiler]) then
     begin
-      if RegKeyExists(csRegPaths[Compiler]) then
+      if not RegKeyExists(csRegPaths[Compiler] + csExperts) then
       begin
-        if not RegKeyExists(csRegPaths[Compiler] + csExperts) then
-        begin
-          RegCreateKey(HKEY_CURRENT_USER, PChar(csRegPaths[Compiler] + csExperts), Key);
-          RegCloseKey(Key);
-        end;
-
-        if RegWriteStr(csRegPaths[Compiler] + csExperts, GetDllValue(Compiler),
-          GetDllName(Compiler)) then
-          S := S + #13#10 + ' - ' + csCompilerNames[Compiler];
+        RegCreateKey(HKEY_CURRENT_USER, PChar(csRegPaths[Compiler] + csExperts), Key);
+        RegCloseKey(Key);
       end;
+
+      if RegWriteStr(csRegPaths[Compiler] + csExperts, GetDllValue(Compiler),
+        GetDllName(Compiler)) then
+        S := S + #13#10 + ' - ' + csCompilerNames[Compiler];
     end;
   end;
 
@@ -371,7 +368,7 @@ begin
 
   if ParamCmdHelp then
     InfoDlg(csSetupCmdHelp)
-  else if IsInstall and not ParamInstall or ParamUnInstall then
+  else if IsInstalled and not ParamInstall or ParamUnInstall then
     UnInstallWizards
   else
     InstallWizards;
