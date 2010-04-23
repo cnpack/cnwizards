@@ -236,7 +236,7 @@ var
 begin
   Result := True;
   for Compiler := Low(Compiler) to High(Compiler) do
-    if WizardExists(Compiler) and RegKeyExists(csRegPaths[Compiler] + csExperts) and
+    if WizardExists(Compiler) and RegKeyExists(csRegPaths[Compiler]) and
       not RegValueExists(csRegPaths[Compiler] + csExperts, GetDllValue(Compiler)) then
     begin
       Result := False;
