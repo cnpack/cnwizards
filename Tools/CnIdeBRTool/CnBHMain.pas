@@ -1237,7 +1237,7 @@ end;
 
 function TCnIdeBRMainForm.GetRegIDEBase(IDE: TCnIDEs): string;
 begin
-  if Integer(IDE) >= Integer(ciDelphi12) then
+  if (Integer(IDE) >= Integer(ciDelphi12)) and not (IDE in [ciBCB5, ciBCB6]) then
     Result := SCnRegIDEBase12
   else
     Result := SCnRegIDEBase;
