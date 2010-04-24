@@ -87,8 +87,9 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
       object lbl1: TLabel
         Left = 40
         Top = 40
-        Width = 270
+        Width = 505
         Height = 13
+        AutoSize = False
         Caption = 'Welcome to CnWizards IDE Config Backup/Restore Tool.'
         WordWrap = True
       end
@@ -348,8 +349,9 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
       object lbl10: TLabel
         Left = 8
         Top = 32
-        Width = 463
+        Width = 545
         Height = 39
+        AutoSize = False
         Caption = 
           'This Tool can be Used to Clean IDE Opened Projects and Files His' +
           'tory.'#13#10'Delphi 5/6/7/8, C++Builder 5/6 and BDS 2005/2006 RAD Stud' +
