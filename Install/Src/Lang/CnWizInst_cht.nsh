@@ -24,7 +24,7 @@ LangString OTHERTOOLS     1028 "輔助工具"
 
 ; 快捷方式名
 LangString SHELP          1028 "專家包幫助"
-LangString SHELPCHM       1028 "CnWizards_CHS.chm"
+LangString SHELPCHM       1028 "CnWizards_CHT.chm"
 LangString SENABLE        1028 "啟用專家包"
 LangString SDISABLE       1028 "禁用專家包"
 LangString SCONFIGIO      1028 "專家包設置導入導出工具"
