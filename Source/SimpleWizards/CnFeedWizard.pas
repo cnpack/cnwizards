@@ -104,6 +104,7 @@ type
     FBtnPrevFeed: TSpeedButton;
     FBtnNextFeed: TSpeedButton;
     FBtnConfig: TSpeedButton;
+    procedure OnMenuPopup(Sender: TObject);
     procedure OnStatusBarResize(Sender: TObject);
     procedure OnTabSetChange(Sender: TObject);
     procedure OnHintTimer(Sender: TObject);
@@ -183,9 +184,9 @@ type
     FFeedCfg: TCnFeedCfg;
     FOnFeedUpdate: TNotifyEvent;
     procedure DoFeedUpdate;
-    function UpdateFeeds(ForceUpdate: Boolean): Boolean;
+    function UpdateFeeds(AForceUpdate: Boolean): Boolean;
     function DoUpdateFeed(Def: TCnFeedCfgItem; AFilter: TStringList;
-      ForceUpdate: Boolean): Boolean;
+      AForceUpdate: Boolean): Boolean;
     function GetFeedCount: Integer;
     function GetFeeds(Index: Integer): TCnFeedChannel;
   protected
@@ -665,6 +666,7 @@ begin
   FMenuItems[3] := AddMenuItem(FMenu.Items, SCnFeedCloseCaption, FWizard.OnCloseFeed);
   AddMenuItem(FMenu.Items, '-');
   FMenuItems[4] := AddMenuItem(FMenu.Items, SCnFeedConfigCaption, FWizard.OnConfig);
+  FMenu.OnPopup := OnMenuPopup;
 end;
 
 procedure TCnStatusPanel.InitControls;
@@ -694,6 +696,11 @@ begin
   IsHot := PtInRect(ARect, Point(X, Y));
   if IsHot then
     FHintTimer.Enabled := True;
+end;
+
+procedure TCnStatusPanel.OnMenuPopup(Sender: TObject);
+begin
+  FHintTimer.Enabled := False;
 end;
 
 procedure TCnStatusPanel.OnStatusBarResize(Sender: TObject);
@@ -853,7 +860,7 @@ begin
 end;
 
 function TCnFeedThread.DoUpdateFeed(Def: TCnFeedCfgItem; AFilter: TStringList;
-  ForceUpdate: Boolean): Boolean;
+  AForceUpdate: Boolean): Boolean;
 var
   FileName, TmpName, Url: string;
   Feed: TCnFeedChannel;
@@ -888,7 +895,8 @@ begin
   if Feed.Count = 0 then
     Feed.LoadFromFile(FileName);
     
-  if ForceUpdate or (Abs(Now - FIni.ReadDateTime('LastCheck', Def.IDStr, 0)) > Def.CheckPeriod / 24 / 60) then
+  if AForceUpdate or not FileExists(FileName) or
+    (Abs(Now - FIni.ReadDateTime('LastCheck', Def.IDStr, 0)) > Def.CheckPeriod / 24 / 60) then
   begin
   {$IFDEF DEBUG}
     CnDebugger.LogMsg('Update Feed: ' + Def.IDStr + ' -> ' + Def.Url);
@@ -903,7 +911,7 @@ begin
         try
           Url := StringReplace(Trim(Def.Url), SCnFeedLangID, IntToStr(WizOptions.CurrentLangID),
             [rfReplaceAll, rfIgnoreCase]);
-          if GetFile(Url, TmpName) and (GetFileSize(TmpName) > 0) then
+          if GetFile(Url, TmpName) and ((GetFileSize(TmpName) > 0) or not FileExists(FileName)) then
           begin
             DeleteFile(FileName);
             CopyFile(PChar(TmpName), PChar(FileName), False);
@@ -977,13 +985,16 @@ begin
   end;
 end;
 
-function TCnFeedThread.UpdateFeeds(ForceUpdate: Boolean): Boolean;
+function TCnFeedThread.UpdateFeeds(AForceUpdate: Boolean): Boolean;
 var
   i, j: Integer;
   ACfg: TCnFeedCfg;
   Found: Boolean;
   AFilter: TStringList;
 begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnFeedThread.UpdateFeeds: ForceUpdate = ' + BoolToStr(AForceUpdate, True));
+{$ENDIF}
   Result := False;
 
   ACfg := nil;
@@ -1003,7 +1014,7 @@ begin
       if Trim(AFilter[i]) = '' then
         AFilter.Delete(i);
 
-    if ForceUpdate then
+    if AForceUpdate then
     begin
       for i := FeedCount - 1 downto 0 do
       begin
@@ -1024,9 +1035,15 @@ begin
 
     for i := 0 to ACfg.Count - 1 do
     begin
-      if Terminated then Exit;
-      if DoUpdateFeed(ACfg[i], AFilter, ForceUpdate) then
-        Result := True;
+      if Terminated or FForceUpdate then
+        Exit;
+        
+      try
+        if DoUpdateFeed(ACfg[i], AFilter, AForceUpdate) then
+          Result := True;
+      except
+        ;
+      end;
     end;
   finally
     ACfg.Free;
