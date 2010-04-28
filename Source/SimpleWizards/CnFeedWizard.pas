@@ -49,12 +49,49 @@ uses
 
 type
 
-{ TCnStatusPanel }
-
   TCnFeedReaderWizard = class;
+
+{ TCnFeedHintForm }
+
+  TCnFadeMode = (fmNone, fmFadeIn, fmFadeOut);
+  TCnHintHitTest = (htNone, htTitle, htText);
+
+  TCnFeedHintForm = class(TCustomForm)
+  private
+    FHitTest: TCnHintHitTest;
+    FText: WideString;
+    FTimer: TTimer;
+    FBtnPrevFeed: TSpeedButton;
+    FBtnNextFeed: TSpeedButton;
+    FFadeAlpha: Byte;
+    FFadeMode: TCnFadeMode;
+    FTitleRect, FTextRect: TRect;
+    FWizard: TCnFeedReaderWizard;
+    FLastTick: Cardinal;
+    procedure CalcRects;
+    procedure OnFadeTimer(Sender: TObject);
+    procedure SetFadeAlpha(const Value: Byte);
+  protected
+    procedure Paint; override;
+    procedure Click; override;
+    procedure CreateParams(var Params: TCreateParams); override;
+    procedure CreateButtons;
+    procedure InitControls;
+    function CalcHitTest: TCnHintHitTest;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+    procedure UpdateContent(AText: WideString);
+    procedure FadeShow;
+    procedure FadeHide;
+    property FadeAlpha: Byte read FFadeAlpha write SetFadeAlpha;
+  end;
+
+{ TCnStatusPanel }
 
   TCnStatusPanel = class(TCustomControl)
   private
+    FHintTimer: TTimer;
     FWizard: TCnFeedReaderWizard;
     FStatusBar: TStatusBar;
     FTabSet: TTabSet;
@@ -69,6 +106,7 @@ type
     FBtnConfig: TSpeedButton;
     procedure OnStatusBarResize(Sender: TObject);
     procedure OnTabSetChange(Sender: TObject);
+    procedure OnHintTimer(Sender: TObject);
     procedure CalcTextRect(AText: string; var ARect: TRect);
     procedure SetIsHot(const Value: Boolean);
     procedure SetText(const Value: string);
@@ -173,6 +211,7 @@ type
     FFeedCfg: TCnFeedCfg;
     FLastUpdateTick: Cardinal;
     FTimer: TTimer;
+    FHintForm: TCnFeedHintForm;
     FPanels: TList;
     FFeeds: TObjectList;
     FSortedFeeds: TList;
@@ -219,6 +258,7 @@ type
     procedure SaveSettings(Ini: TCustomIniFile); override;
 
     procedure UpdateStatusPanels;
+    procedure ShowHintForm;
 
     procedure FeedStep(Step: Integer);
 
@@ -267,7 +307,13 @@ const
 {$ENDIF}
 {$ENDIF}
   csPnlBtnWidth = 18;
-  csMaxHintLength = 250;
+  csPnlBtnHeight = 16;
+  csHintBorder = 6;
+
+  csHintKeepTime = 2000;
+  csHintDelay = 1000;
+
+  crHandPoint = TCursor(5010);
 
 function DoSortFeed(Item1, Item2: Pointer): Integer;
 begin
@@ -277,6 +323,252 @@ begin
     Result := 1
   else
     Result := 0;
+end;
+
+{ TCnFeedHintForm }
+
+constructor TCnFeedHintForm.Create(AOwner: TComponent);
+begin
+  inherited CreateNew(AOwner);
+  FormStyle := fsStayOnTop;
+  BorderStyle := bsNone;
+  Width := 230;
+  Height := 158;
+  Visible := False;
+  DoubleBuffered := True;
+  FTimer := TTimer.Create(Self);
+  FTimer.Interval := 100;
+  FTimer.Enabled := True;
+  FTimer.OnTimer := OnFadeTimer;
+end;
+
+destructor TCnFeedHintForm.Destroy;
+begin
+  inherited;
+end;
+
+procedure TCnFeedHintForm.CreateButtons;
+
+  function CreateButton(ACaption: string): TSpeedButton;
+  begin
+    Result := TSpeedButton.Create(Self);
+    Result.Caption := ACaption;
+    Result.Flat := True;
+    Result.Visible := True;
+    Result.Parent := Self;
+  end;
+begin
+  FBtnPrevFeed := CreateButton('<<');
+  FBtnNextFeed := CreateButton('>>');
+  FBtnPrevFeed.OnClick := FWizard.OnPrevFeed;
+  FBtnNextFeed.OnClick := FWizard.OnNextFeed;
+  FBtnNextFeed.SetBounds(ClientWidth - csPnlBtnWidth - csHintBorder, csHintBorder,
+    csPnlBtnWidth, csPnlBtnHeight);
+  FBtnPrevFeed.SetBounds(ClientWidth - 2 * csPnlBtnWidth - csHintBorder, csHintBorder,
+    csPnlBtnWidth, csPnlBtnHeight);
+end;
+
+procedure TCnFeedHintForm.InitControls;
+begin
+  CreateButtons;
+  CalcRects;
+end;
+
+procedure TCnFeedHintForm.CalcRects;
+var
+  S: string;
+  H, TH: Integer;
+begin
+  FTitleRect := Rect(csHintBorder, csHintBorder, FBtnPrevFeed.Left - csHintBorder,
+    FBtnPrevFeed.Top + FBtnPrevFeed.Height);
+  FTextRect := Rect(csHintBorder, FTitleRect.Bottom + csHintBorder,
+    ClientWidth - csHintBorder, ClientHeight - csHintBorder);
+  if FWizard.CurFeed <> nil then
+  begin
+    Canvas.Font.Style := [fsBold];
+    S := FWizard.CurFeed.Channel.Title;
+    DrawText(Canvas.Handle, PChar(S), Length(S), FTitleRect, DT_NOPREFIX or
+      DT_SINGLELINE or DT_END_ELLIPSIS or DT_CALCRECT);
+
+    Canvas.Font.Style := [fsBold];
+    S := FText;
+    DrawText(Canvas.Handle, PChar(S), Length(S), FTextRect, DT_NOPREFIX or
+      DT_END_ELLIPSIS or DT_WORDBREAK or DT_CALCRECT);
+    if FTextRect.Bottom > ClientHeight - csHintBorder then
+    begin
+      TH := Canvas.TextHeight('fy');
+      H := (ClientHeight - csHintBorder) - (FTitleRect.Bottom + csHintBorder);
+      FTextRect.Bottom := FTitleRect.Bottom + csHintBorder + H div TH * TH + 3;
+    end;
+  end
+  else
+  begin
+    FTitleRect := Rect(-1, -1, -1, -1);
+    FTextRect := Rect(-1, -1, -1, -1);
+  end;
+end;
+
+function TCnFeedHintForm.CalcHitTest: TCnHintHitTest;
+var
+  PT: TPoint;
+begin
+  PT := ScreenToClient(Mouse.CursorPos);
+  if PtInRect(FTitleRect, PT) then
+    Result := htTitle
+  else if PtInRect(FTextRect, PT) then
+    Result := htText
+  else
+    Result := htNone;
+end;
+
+procedure TCnFeedHintForm.CreateParams(var Params: TCreateParams);
+const
+  CS_DROPSHADOW = $20000;
+begin
+  inherited;
+  Params.ExStyle := WS_EX_TOOLWINDOW or WS_EX_WINDOWEDGE;
+  if CheckWinXP then
+    Params.WindowClass.style := CS_DROPSHADOW
+  else
+    Params.WindowClass.style := 0;
+end;
+
+procedure TCnFeedHintForm.Paint;
+var
+  R: TRect;
+  S: string;
+begin
+  R := ClientRect;
+  Canvas.Brush.Style := bsSolid;
+  Canvas.Brush.Color := clInfoBk;
+  Canvas.FrameRect(R);
+  InflateRect(R, -1, -1);
+  Canvas.FrameRect(R);
+
+  if FWizard.CurFeed <> nil then
+  begin
+    // Draw Title
+    Canvas.Brush.Style := bsClear;
+    if FHitTest = htTitle then
+    begin
+      Canvas.Font.Style := [fsUnderline, fsBold];
+      Canvas.Font.Color := clBlue;
+    end
+    else
+    begin
+      Canvas.Font.Style := [fsBold];
+      Canvas.Font.Color := clBlack;
+    end;
+    S := FWizard.CurFeed.Channel.Title;
+    DrawText(Canvas.Handle, PChar(S), Length(S), FTitleRect, DT_NOPREFIX or DT_SINGLELINE or DT_END_ELLIPSIS);
+
+    // Draw Text
+    if FHitTest = htText then
+    begin
+      Canvas.Font.Style := [fsUnderline];
+      Canvas.Font.Color := clBlue;
+    end
+    else
+    begin
+      Canvas.Font.Style := [];
+      Canvas.Font.Color := clInfoText;
+    end;
+
+    S := FText;
+    DrawText(Canvas.Handle, PChar(S), Length(S), FTextRect, DT_NOPREFIX or DT_END_ELLIPSIS or DT_WORDBREAK);
+  end;
+end;
+
+procedure TCnFeedHintForm.UpdateContent(AText: WideString);
+begin
+  FText := AText;
+  CalcRects;
+  Invalidate;
+end;
+
+procedure TCnFeedHintForm.SetFadeAlpha(const Value: Byte);
+begin
+  FFadeAlpha := Value;
+  CnSetWindowAlphaBlend(Handle, FFadeAlpha);
+end;
+
+procedure TCnFeedHintForm.OnFadeTimer(Sender: TObject);
+var
+  MouseInForm: Boolean;
+  Test: TCnHintHitTest;
+begin
+  if not Visible then
+    Exit;
+
+  MouseInForm := PtInRect(Bounds(Left, Top, Width, Height), Mouse.CursorPos);
+  if FFadeMode = fmFadeIn then
+  begin
+    FadeAlpha := TrimInt(FadeAlpha + 20, 0, 255);
+    if FadeAlpha = 255 then
+    begin
+      FLastTick := GetTickCount;
+      FFadeMode := fmNone;
+    end;
+  end
+  else if FFadeMode = fmFadeOut then
+  begin
+    if MouseInForm then
+      FFadeMode := fmFadeIn;
+    FadeAlpha := TrimInt(FadeAlpha - 20, 0, 255);
+    if FadeAlpha = 0 then
+    begin
+      FFadeMode := fmNone;
+      Hide;
+    end;
+  end
+  else if Abs(GetTickCount - FLastTick) > csHintKeepTime then
+  begin
+    if not MouseInForm then
+      FFadeMode := fmFadeOut;
+  end;
+
+  Test := CalcHitTest;
+  if Test <> FHitTest then
+  begin
+    FHitTest := Test;
+    if FHitTest in [htTitle, htText] then
+      Cursor := crHandPoint
+    else
+      Cursor := crDefault;
+    Invalidate;
+  end;  
+end;
+
+procedure TCnFeedHintForm.FadeShow;
+begin
+  if not Visible then
+  begin
+    FadeAlpha := 0;
+    // 不抢焦点显示窗口
+    SetWindowPos(Handle, 0, 0, 0, 0, 0, SWP_NOACTIVATE or SWP_NOREPOSITION or
+      SWP_NOMOVE or SWP_NOSIZE or SWP_NOZORDER or SWP_SHOWWINDOW);
+    Visible := True;
+  end;
+  FFadeMode := fmFadeIn;
+end;
+
+procedure TCnFeedHintForm.FadeHide;
+begin
+  if Visible then
+  begin
+    FFadeMode := fmFadeOut;
+  end;  
+end;
+
+procedure TCnFeedHintForm.Click;
+begin
+  if FWizard.FCurFeed <> nil then
+  begin
+    if (FHitTest = htTitle) and (FWizard.FCurFeed.Channel.Link <> '') then
+      OpenUrl(FWizard.FCurFeed.Channel.Link)
+    else if (FHitTest = htText) and (FWizard.FCurFeed.Link <> '') then
+      OpenUrl(FWizard.FCurFeed.Link);
+  end;    
 end;
 
 { TCnStatusPanel }
@@ -327,6 +619,10 @@ end;
 constructor TCnStatusPanel.Create(AOwner: TComponent);
 begin
   inherited;
+  FHintTimer := TTimer.Create(Self);
+  FHintTimer.Enabled := False;
+  FHintTimer.Interval := csHintDelay;
+  FHintTimer.OnTimer := OnHintTimer;
 end;
 
 procedure TCnStatusPanel.CreateButtons;
@@ -394,8 +690,11 @@ var
   ARect: TRect;
 begin
   inherited;
+  FHintTimer.Enabled := False;
   CalcTextRect(Text, ARect);
-  IsHot := PtInRect(ARect, Point(X, Y))
+  IsHot := PtInRect(ARect, Point(X, Y));
+  if IsHot then
+    FHintTimer.Enabled := True;
 end;
 
 procedure TCnStatusPanel.OnStatusBarResize(Sender: TObject);
@@ -432,6 +731,12 @@ begin
   CnWizNotifierServices.ExecuteOnApplicationIdle(OnStatusBarResize);
 end;
 
+procedure TCnStatusPanel.OnHintTimer(Sender: TObject);
+begin
+  FHintTimer.Enabled := False;
+  FWizard.ShowHintForm;
+end;
+
 procedure TCnStatusPanel.Paint;
 var
   ARect: TRect;
@@ -457,12 +762,11 @@ begin
     if FIsHot then
     begin
       Cursor := crHandPoint;
-      ShowHint := True;
     end
     else
     begin
       Cursor := crDefault;
-      ShowHint := False;
+      FHintTimer.Enabled := False;
     end;
     Invalidate;
   end;
@@ -810,6 +1114,9 @@ begin
   FTimer.OnTimer := OnTimer;
   FTimer.Interval := 1000;
   FTimer.Enabled := True;
+  FHintForm := TCnFeedHintForm.Create(nil);
+  FHintForm.FWizard := Self;
+  FHintForm.InitControls;
   FChangePeriod := 20;
   FSubCnPackChannels := True;
   FSubPartnerChannels := True;
@@ -817,6 +1124,8 @@ begin
   FIni := CreateIniFile;
   FFeedPath := WizOptions.UserPath + SCnFeedCache;
   ForceDirectories(FFeedPath);
+
+  Screen.Cursors[crHandPoint] := LoadCursor(0, IDC_HAND);
   
   EditControlWrapper.AddEditControlNotifier(EditControlNotify);
   UpdateStatusPanels;
@@ -835,6 +1144,7 @@ begin
   FRandomFeeds.Free;
   FFeedCfg.Free;
   FTimer.Free;
+  FHintForm.Free;
   FIni.Free;
   if FThread <> nil then
   begin
@@ -942,10 +1252,10 @@ var
   i: Integer;
 begin
   inherited;
-  for i := 0 to PanelCount - 1 do
-    Panels[i].LanguageChanged(Sender);
   if FSubCnPackChannels or FSubPartnerChannels then
     OnForceUpdateFeed(nil);
+  for i := 0 to PanelCount - 1 do
+    Panels[i].LanguageChanged(Sender);
 end;
 
 procedure TCnFeedReaderWizard.Loaded;
@@ -1057,7 +1367,6 @@ end;
 procedure TCnFeedReaderWizard.SetFeedToPanels;
 var
   i: Integer;
-  Channel: TCnFeedChannel;
   Title, ChlTitle, Desc, Hint: WideString;
 
   function GetShortTitle(ATitle: WideString): WideString;
@@ -1076,49 +1385,39 @@ var
     end;
   end;
 begin
+  Title := '';
+  Hint := '';
+  if FCurFeed <> nil then
+  begin
+    Title := FeedHTMLToTxt(FCurFeed.Title);
+    Desc := FeedHTMLToTxt(FCurFeed.Description);
+    if Trim(Title) = '' then
+      Title := Desc;
+
+    if Trim(Desc) = '' then
+      Hint := Title
+    else if Pos(Title, Desc) > 0 then
+      Hint := Desc
+    else if Pos(Desc, Title) > 0 then
+      Hint := Title
+    else
+      Hint := Title + #13#10#13#10 + Desc;
+
+    if TCnFeedType(FCurFeed.Channel.UserData) <> ftCnPack then
+    begin
+      ChlTitle := Trim(FCurFeed.Channel.Title);
+      if ChlTitle <> '' then
+        Title := Format('[%s] %s', [GetShortTitle(ChlTitle), Title])
+    end;
+  end;
+
   for i := 0 to PanelCount - 1 do
   begin
-    if FCurFeed <> nil then
-    begin
-      Title := FeedHTMLToTxt(FCurFeed.Title);
-      Desc := FeedHTMLToTxt(FCurFeed.Description);
-      if Trim(Title) = '' then
-        Title := Desc;
-
-      Channel := TCnFeedChannel(FCurFeed.Collection);
-      if TCnFeedType(Channel.UserData) = ftCnPack then
-      begin
-        Panels[i].Text := Title;
-      end
-      else
-      begin
-        ChlTitle := Trim(Channel.Title);
-        if ChlTitle <> '' then
-          Panels[i].Text := Format('[%s] %s', [GetShortTitle(ChlTitle), Title])
-        else
-          Panels[i].Text := Title;
-      end;
-
-      if Trim(Desc) = '' then
-        Hint := Title
-      else if Pos(Title, Desc) > 0 then
-        Hint := Desc
-      else if Pos(Desc, Title) > 0 then
-        Hint := Title
-      else
-        Hint := Title + #13#10 + Desc;
-      if Length(Hint) > csMaxHintLength then
-        Panels[i].Hint := Copy(Hint, 1, csMaxHintLength) + '...'
-      else
-        Panels[i].Hint := Hint;
-    end
-    else
-    begin
-      Panels[i].Text := '';
-      Panels[i].Hint := '';
-    end;
+    Panels[i].Text := Title;
     Panels[i].UpdateStatus;
   end;
+
+  FHintForm.UpdateContent(Hint);
 end;
 
 procedure TCnFeedReaderWizard.FeedStep(Step: Integer);
@@ -1175,13 +1474,28 @@ begin
 end;
 
 procedure TCnFeedReaderWizard.OnTimer(Sender: TObject);
+
+  function StatusBarIsHot: Boolean;
+  var
+    i: Integer;
+  begin
+    Result := False;
+    for i := 0 to PanelCount - 1 do
+      if Panels[i].IsHot then
+      begin
+        Result := True;
+        Exit;
+      end;  
+  end;  
 begin
   if not Active then
     Exit;
 
   if Abs(GetTickCount - FLastUpdateTick) >= FChangePeriod * 1000 then
   begin
-    FeedStep(1);
+    // 高亮时不自动切换
+    if not FHintForm.Visible and not StatusBarIsHot then
+      FeedStep(1);
     FLastUpdateTick := GetTickCount;
   end;
 end;
@@ -1261,6 +1575,16 @@ begin
   RandomFeed;
 
   FeedStep(0);
+end;
+
+procedure TCnFeedReaderWizard.ShowHintForm;
+begin
+  if not FHintForm.Visible then
+  begin
+    FHintForm.Top := Mouse.CursorPos.Y - FHintForm.Height - 10;
+    FHintForm.Left := Mouse.CursorPos.X;
+    FHintForm.FadeShow;
+  end;    
 end;
 
 initialization

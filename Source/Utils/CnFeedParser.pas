@@ -45,6 +45,8 @@ uses
 
 type
 
+  TCnFeedChannel = class;
+  
   TCnFeedItem = class(TCnAssignableCollectionItem)
   private
     FIsNew: Boolean;
@@ -54,6 +56,8 @@ type
     FTitle: WideString;
     FAuthor: WideString;
     FLink: WideString;
+  public
+    function Channel: TCnFeedChannel;
   published
     property Title: WideString read FTitle write FTitle;
     property Link: WideString read FLink write FLink;
@@ -325,6 +329,13 @@ begin
   end;
 end;
 {$ENDIF}
+
+{ TCnFeedItem }
+
+function TCnFeedItem.Channel: TCnFeedChannel;
+begin
+  Result := TCnFeedChannel(Collection);
+end;
 
 { TCnFeedChannel }
 
