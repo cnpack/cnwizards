@@ -426,7 +426,7 @@ const
   CS_DROPSHADOW = $20000;
 begin
   inherited;
-  Params.ExStyle := WS_EX_TOOLWINDOW or WS_EX_WINDOWEDGE;
+  Params.ExStyle := WS_EX_TOOLWINDOW;
   if CheckWinXP then
     Params.WindowClass.style := CS_DROPSHADOW
   else
@@ -441,9 +441,8 @@ begin
   R := ClientRect;
   Canvas.Brush.Style := bsSolid;
   Canvas.Brush.Color := clInfoBk;
-  Canvas.FrameRect(R);
-  InflateRect(R, -1, -1);
-  Canvas.FrameRect(R);
+  Canvas.FillRect(R);
+  Windows.DrawEdge(Canvas.Handle, R, BDR_RAISEDOUTER, BF_RECT);
 
   if FWizard.CurFeed <> nil then
   begin
@@ -545,8 +544,8 @@ begin
   begin
     FadeAlpha := 0;
     // 不抢焦点显示窗口
-    SetWindowPos(Handle, 0, 0, 0, 0, 0, SWP_NOACTIVATE or SWP_NOREPOSITION or
-      SWP_NOMOVE or SWP_NOSIZE or SWP_NOZORDER or SWP_SHOWWINDOW);
+    SetWindowPos(Handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOACTIVATE or
+      SWP_NOMOVE or SWP_NOSIZE or SWP_SHOWWINDOW);
     Visible := True;
   end;
   FFadeMode := fmFadeIn;
