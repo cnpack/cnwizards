@@ -45,6 +45,9 @@ SetDatablockOptimize on
 ; 设置在数据中写入文件时间
 SetDateSave on
 
+; Vista / Win7
+RequestExecutionLevel user
+
 ;------------------------------------------------------------------------------
 ; 软件版本号，根据实际版本号进行更新
 ;------------------------------------------------------------------------------
@@ -60,7 +63,7 @@ SetDateSave on
 
 ; 软件子版本号
 !ifndef VER_MINOR
-  !define VER_MINOR "9.5.0"
+  !define VER_MINOR "9.6.0"
 !endif
 
 ; 专家安装目录名称（不多语）
