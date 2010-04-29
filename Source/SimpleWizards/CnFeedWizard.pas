@@ -104,11 +104,11 @@ type
     FBtnPrevFeed: TSpeedButton;
     FBtnNextFeed: TSpeedButton;
     FBtnConfig: TSpeedButton;
-    procedure OnMenuPopup(Sender: TObject);
     procedure OnStatusBarResize(Sender: TObject);
     procedure OnTabSetChange(Sender: TObject);
     procedure OnHintTimer(Sender: TObject);
     procedure CalcTextRect(AText: string; var ARect: TRect);
+    procedure CheckIsHot;
     procedure SetIsHot(const Value: Boolean);
     procedure SetText(const Value: string);
   protected
@@ -619,6 +619,7 @@ end;
 constructor TCnStatusPanel.Create(AOwner: TComponent);
 begin
   inherited;
+  DoubleBuffered := True;
   FHintTimer := TTimer.Create(Self);
   FHintTimer.Enabled := False;
   FHintTimer.Interval := csHintDelay;
@@ -666,7 +667,6 @@ begin
   FMenuItems[3] := AddMenuItem(FMenu.Items, SCnFeedCloseCaption, FWizard.OnCloseFeed);
   AddMenuItem(FMenu.Items, '-');
   FMenuItems[4] := AddMenuItem(FMenu.Items, SCnFeedConfigCaption, FWizard.OnConfig);
-  FMenu.OnPopup := OnMenuPopup;
 end;
 
 procedure TCnStatusPanel.InitControls;
@@ -686,21 +686,23 @@ begin
   FMenuItems[4].Caption := SCnFeedConfigCaption;
 end;
 
-procedure TCnStatusPanel.MouseMove(Shift: TShiftState; X, Y: Integer);
+procedure TCnStatusPanel.CheckIsHot;
 var
+  P: TPoint;
   ARect: TRect;
+begin
+  P := ScreenToClient(Mouse.CursorPos);
+  CalcTextRect(Text, ARect);
+  IsHot := PtInRect(ARect, Point(P.X, P.Y));
+end;
+
+procedure TCnStatusPanel.MouseMove(Shift: TShiftState; X, Y: Integer);
 begin
   inherited;
   FHintTimer.Enabled := False;
-  CalcTextRect(Text, ARect);
-  IsHot := PtInRect(ARect, Point(X, Y));
+  CheckIsHot;
   if IsHot then
     FHintTimer.Enabled := True;
-end;
-
-procedure TCnStatusPanel.OnMenuPopup(Sender: TObject);
-begin
-  FHintTimer.Enabled := False;
 end;
 
 procedure TCnStatusPanel.OnStatusBarResize(Sender: TObject);
@@ -740,7 +742,10 @@ end;
 procedure TCnStatusPanel.OnHintTimer(Sender: TObject);
 begin
   FHintTimer.Enabled := False;
-  FWizard.ShowHintForm;
+
+  CheckIsHot;
+  if IsHot then
+    FWizard.ShowHintForm;
 end;
 
 procedure TCnStatusPanel.Paint;
