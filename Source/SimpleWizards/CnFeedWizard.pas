@@ -912,19 +912,17 @@ begin
     if GetLastError <> ERROR_ALREADY_EXISTS then
     begin
       try
-        with TCnHTTP.Create do
-        try
-          Url := StringReplace(Trim(Def.Url), SCnFeedLangID, IntToStr(WizOptions.CurrentLangID),
-            [rfReplaceAll, rfIgnoreCase]);
-          if GetFile(Url, TmpName) and ((GetFileSize(TmpName) > 0) or not FileExists(FileName)) then
+        Url := StringReplace(Trim(Def.Url), SCnFeedLangID, IntToStr(WizOptions.CurrentLangID),
+          [rfReplaceAll, rfIgnoreCase]);
+        if CnInet_GetFile(Url, TmpName) then
+        begin
+          if (GetFileSize(TmpName) > 0) or not FileExists(FileName) then
           begin
             DeleteFile(FileName);
             CopyFile(PChar(TmpName), PChar(FileName), False);
-          end;
-          DeleteFile(TmpName);
-        finally
-          Free;
+          end;            
         end;
+        DeleteFile(TmpName);
       finally
         if hMutex <> 0 then
         begin
