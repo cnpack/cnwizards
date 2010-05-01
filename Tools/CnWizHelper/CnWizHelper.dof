@@ -43,8 +43,8 @@ OutputDir=..\..\Bin
 UnitOutputDir=..\..\Dcu
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=..\..\Source\ThirdParty\TPAbbrevia
-Packages=Vcl50;Vclx50;VclSmp50;Vcldb50;vclado50;Vclbde50;vcldbx50;Qrpt50;TeeUI50;TeeDB50;Tee50;Dss50;TeeQR50;VCLIB50;Vclmid50;vclie50;Inetdb50;Inet50;NMFast50;webmid50;dclocx50;dclaxserver50
+SearchPath=..\..\Source;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\MultiLang;..\..\..\cnvcl\Source\Nonvisual;..\..\..\cnvcl\Source\NetComm;..\..\Source\Framework;..\..\Source\MultiLang;..\..\Source\ThirdParty;..\..\Source\ThirdParty\TPAbbrevia;..\..\Source\Utils
+Packages=Vcl50;Vclx50;VclSmp50;Vcldb50;vclado50;Vclbde50;vcldbx50;Qrpt50;TeeUI50;TeeDB50;Tee50;Dss50;TeeQR50;VCLIB50;Vclmid50;vclie50;Inetdb50;Inet50;NMFast50;webmid50;dclocx50;dclaxserver50;CnPack_D5
 Conditionals=
 DebugSourceDirs=
 UsePackages=0
@@ -67,8 +67,8 @@ PreRelease=0
 Special=0
 Private=0
 DLL=0
-Locale=1033
-CodePage=1252
+Locale=2052
+CodePage=936
 [Version Info Keys]
 CompanyName=
 FileDescription=
@@ -88,14 +88,15 @@ Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlSearchPath]
 Count=4
-Item0=..\..\Source\ThirdParty\TPAbbrevia
-Item1=..\..\ThirdParty\TPAbbrevia
+Item0=..\..\Source;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\MultiLang;..\..\..\cnvcl\Source\Nonvisual;..\..\..\cnvcl\Source\NetComm;..\..\Source\Framework;..\..\Source\MultiLang;..\..\Source\ThirdParty;..\..\Source\ThirdParty\TPAbbrevia;..\..\Source\Utils
+Item1=..\..\Source;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\MultiLang;..\..\..\cnvcl\Source\Nonvisual;..\..\..\cnvcl\Source\NetComm;..\..\Source\Framework;..\..\Source\MultiLang;..\..\Source\ThirdParty;..\..\Source\Utils
 Item2=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript;Utils;ScriptWizard
 Item3=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript;Utils
 [HistoryLists\hlUnitOutputDirectory]
-Count=2
+Count=3
 Item0=..\..\Dcu
-Item1=..\Dcu
+Item1=..\..\Bin
+Item2=..\Dcu
 [HistoryLists\hlOutputDirectorry]
 Count=2
 Item0=..\..\Bin

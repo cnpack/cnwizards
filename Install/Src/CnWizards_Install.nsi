@@ -399,7 +399,7 @@ InitOk:
   File "..\..\Bin\Setup.exe"
   File "..\..\Bin\CnWizRes.dll"
 !ifndef LITE_VERSION
-  File "..\..\Bin\CnZipWrapper.dll"
+  File "..\..\Bin\CnWizHelper.dll"
 !endif
   File "..\..\License.*.txt"
 

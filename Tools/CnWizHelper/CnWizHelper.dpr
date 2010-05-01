@@ -1,4 +1,4 @@
-library CnZipWrapper;
+library CnWizHelper;
 
 { Important note about DLL memory management: ShareMem must be the
   first unit in your library's USES clause AND your project's (select
@@ -11,16 +11,10 @@ library CnZipWrapper;
   using PChar or ShortString parameters. }
 
 uses
-  SysUtils,
-  Classes,
+  CnWizInetUtils in 'CnWizInetUtils.pas',
   CnAbrZip in 'CnAbrZip.pas';
 
 {$R *.RES}
 
-exports
-  CnStartZip,
-  CnZipAddFile,
-  CnZipSaveAndClose;
-  
 begin
 end.

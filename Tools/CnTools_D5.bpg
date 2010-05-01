@@ -11,7 +11,7 @@ BRCC = $(ROOT)\bin\brcc32.exe $**
 #------------------------------------------------------------------------------
 PROJECTS = CnDfm6To5.exe CnConfigIO.exe Setup.exe CnDebugViewer.exe \
   AsciiChart.exe CnIdeBRTool.exe CnManageWiz.exe CnSelectLang.exe CnSMR.exe \
-  CnZipWrapper.dll
+  CnWizHelper.dll
 #------------------------------------------------------------------------------
 default: $(PROJECTS)
 #------------------------------------------------------------------------------
@@ -43,7 +43,7 @@ CnSelectLang.exe: CnSelectLang\CnSelectLang.dpr
 CnSMR.exe: CnSMR\CnSMR.dpr
   $(DCC)
 
-CnZipWrapper.dll: CnZipWrapper\CnZipWrapper.dpr
+CnWizHelper.dll: CnWizHelper\CnWizHelper.dpr
   $(DCC)
 
 

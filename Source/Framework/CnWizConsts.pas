@@ -232,8 +232,6 @@ resourcestring
   SCnProjExtFileReopen = 'CnProjExtFileReopen';
   SCnProjExtDirBuilder = 'CnProjExtDirBuilder';
 
-  SCnProjExtBackupDllName = 'CnZipWrapper.Dll';
-
   // CnFilesSnapshotWizard
   SCnProjExtFilesSnapshotAdd = 'CnProjExtFilesSnapshotAdd';
   SCnProjExtFilesSnapshotManage = 'CnProjExtFilesSnapshotManage';

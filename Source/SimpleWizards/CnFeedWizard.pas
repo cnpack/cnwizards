@@ -45,7 +45,7 @@ uses
   Buttons, Menus, CommCtrl, ComCtrls, Contnrs, ExtCtrls, Math, Tabs,
   ActiveX, OmniXML, OmniXMLPersistent, CnConsts, CnCommon, CnClasses,
   CnWizClasses, CnWizNotifier, CnWizUtils, CnFeedParser, CnWizOptions,
-  CnWizConsts, CnWizMultiLang, CnPopupMenu;
+  CnWizConsts, CnWizMultiLang, CnPopupMenu, CnWizHelperIntf;
 
 type
 
@@ -872,6 +872,7 @@ var
   hMutex: THandle;
   i, j: Integer;
   List, Save: TList;
+  Succ: Boolean;
 begin
   Result := False;
   if (Def.IDStr = '') or (Trim(Def.Url) = '') then
@@ -914,7 +915,15 @@ begin
       try
         Url := StringReplace(Trim(Def.Url), SCnFeedLangID, IntToStr(WizOptions.CurrentLangID),
           [rfReplaceAll, rfIgnoreCase]);
-        if CnInet_GetFile(Url, TmpName) then
+
+        // D5,D6 下在这里直接调用 CnInet_GetFile 可能会导致 Borlndmm.dll 异常，
+        // 故优先调用 CnWizHelper.dll 中的实现
+        if CnWizHelperInetValid then
+          Succ := CnWiz_Inet_GetFile(PAnsiChar(Url), PAnsiChar(TmpName))
+        else
+          Succ := CnInet_GetFile(Url, TmpName);
+
+        if Succ then
         begin
           if (GetFileSize(TmpName) > 0) or not FileExists(FileName) then
           begin

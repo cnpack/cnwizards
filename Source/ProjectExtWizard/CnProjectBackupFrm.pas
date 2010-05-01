@@ -217,7 +217,7 @@ implementation
 uses
 {$IFDEF DEBUG} CnDebug, {$ENDIF}
 {$IFDEF COMPILER6_UP}Variants, {$ENDIF}
-  CnWizOptions, CnWizUtils,
+  CnWizOptions, CnWizUtils, CnWizHelperIntf,
   CnWizShareImages, CnProjectBackupSaveFrm, CnWizNotifier;
 
 const
@@ -243,24 +243,6 @@ const
   csCmdListFile = '<ListFile>';
   csCmdPassword = '<Password>';
   csAfterCmd = '<externfile.exe>';
-
-type
-  {* DLL 接口}
-
-  TProcCnStartZip = procedure (const SaveFileName: PAnsiChar; const Password: PAnsiChar;
-    RemovePath: Boolean); stdcall;
-  {* 开始一个 Zip，创建内部对象，指明文件名、密码等}
-
-  TProcCnZipAddFile = procedure (FileName: PAnsiChar); stdcall;
-  {* 添加文件到 Zip}
-
-  TFuncCnZipSaveAndClose = function : Boolean; stdcall;
-  {* 压缩保存 Zip 文件并释放内部对象}
-
-const
-  SCnStartZip = 'CnStartZip';
-  SCnZipAddFile = 'CnZipAddFile';
-  SCnZipSaveAndClose = 'CnZipSaveAndClose';
 
 function ShowProjectBackupForm(Ini: TCustomIniFile): Boolean;
 begin
@@ -839,10 +821,6 @@ var
   CompressorCommand, ListFileName, ExecCommand, VerStr: string;
   List: TStrings;
   Options: IOTAProjectOptions;
-  ZipDll: THandle;
-  CnStartZip: TProcCnStartZip;
-  CnZipAddFile: TProcCnZipAddFile;
-  CnZipSaveAndClose: TFuncCnZipSaveAndClose;
 begin
   if lvFileView.Items.Count = 0 then
   begin
@@ -956,20 +934,8 @@ begin
       else
       begin
         // 调用外部 DLL 来实现压缩
-        ZipDll := LoadLibrary(PChar(MakePath(WizOptions.DllPath) + SCnProjExtBackupDllName));
-        if ZipDll = 0 then
+        if not CnWizHelperZipValid then
         begin
-          ErrorDlg(SCnProjExtBackupDllMissCorrupt);
-          Exit;
-        end;
-
-        CnStartZip := TProcCnStartZip(GetProcAddress(ZipDll, SCnStartZip));
-        CnZipAddFile := TProcCnZipAddFile(GetProcAddress(ZipDll, SCnZipAddFile));
-        CnZipSaveAndClose := TFuncCnZipSaveAndClose(GetProcAddress(ZipDll, SCnZipSaveAndClose));
-
-        if not Assigned(CnStartZip) or not Assigned(CnZipAddFile) or not Assigned(CnZipSaveAndClose) then
-        begin
-          FreeLibrary(ZipDll);
           ErrorDlg(SCnProjExtBackupDllMissCorrupt);
           Exit;
         end;
@@ -977,17 +943,16 @@ begin
         Screen.Cursor := crHourGlass;
         try
           DeleteFile(SaveFileName);
-          CnStartZip(_CnPChar(SaveFileName), _CnPChar(Password), RemovePath);
+          CnWiz_StartZip(_CnPChar(SaveFileName), _CnPChar(Password), RemovePath);
 
           for I := 0 to Self.lvFileView.Items.Count - 1 do
             if Self.lvFileView.Items[I].Data <> nil then
-              CnZipAddFile(_CnPChar(TCnBackupFileInfo(Self.lvFileView.Items[I].Data).FullFileName));
+              CnWiz_ZipAddFile(_CnPChar(TCnBackupFileInfo(Self.lvFileView.Items[I].Data).FullFileName));
 
-          if CnZipSaveAndClose then
+          if CnWiz_ZipSaveAndClose then
             InfoDlg(Format(SCnProjExtBackupSuccFmt, [SaveFileName]));
         finally
           Screen.Cursor := crDefault;
-          FreeLibrary(ZipDll);
         end;
       end;
 

@@ -22,13 +22,13 @@ unit CnAbrZip;
 { |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包
-* 单元名称：项目备份功能对 TPAbbriva Zip 功能的封装 DLL
+* 单元名称：项目备份功能对 TPAbbriva Zip 功能的封装
 * 单元作者：刘啸 (liuxiao@cnpack.org)
 * 备    注：
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 单元标识：$Id$
+* 单元标识：$Id: CnAbrZip.pas 418 2010-02-08 04:53:54Z zhoujingyu $
 * 修改记录：2009.05.23 V1.0 by liuxiao
 *               创建单元
 ================================================================================
@@ -40,22 +40,27 @@ uses
   SysUtils, Classes,
   AbBase, AbBrowse, AbZBrows, AbZipper, AbArcTyp;
 
-procedure CnStartZip(const SaveFileName: PAnsiChar; const Password: PAnsiChar;
+procedure CnWiz_StartZip(const SaveFileName: PAnsiChar; const Password: PAnsiChar;
   RemovePath: Boolean); stdcall;
 {* 开始一个 Zip，创建内部对象，指明文件名、密码等}
 
-procedure CnZipAddFile(FileName: PAnsiChar); stdcall;
+procedure CnWiz_ZipAddFile(FileName: PAnsiChar); stdcall;
 {* 添加文件到 Zip}
 
-function CnZipSaveAndClose: Boolean; stdcall;
+function CnWiz_ZipSaveAndClose: Boolean; stdcall;
 {* 压缩保存 Zip 文件并释放内部对象}
+
+exports
+  CnWiz_StartZip,
+  CnWiz_ZipAddFile,
+  CnWiz_ZipSaveAndClose;
 
 implementation
 
 var
   Zip: TAbZipper = nil;
 
-procedure CnStartZip(const SaveFileName: PAnsiChar; const Password: PAnsiChar;
+procedure CnWiz_StartZip(const SaveFileName: PAnsiChar; const Password: PAnsiChar;
   RemovePath: Boolean); stdcall;
 begin
   FreeAndNil(Zip);
@@ -72,13 +77,13 @@ begin
     Zip.Password := Password;
 end;
 
-procedure CnZipAddFile(FileName: PAnsiChar); stdcall;
+procedure CnWiz_ZipAddFile(FileName: PAnsiChar); stdcall;
 begin
   if Zip = nil then Exit;
   Zip.AddFiles(FileName, 0);
 end;
 
-function CnZipSaveAndClose: Boolean; stdcall;
+function CnWiz_ZipSaveAndClose: Boolean; stdcall;
 begin
   Result := False;
   if Zip = nil then Exit;
