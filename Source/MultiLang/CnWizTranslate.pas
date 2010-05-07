@@ -917,6 +917,7 @@ begin
   TranslateStr(SCnProjExtBackupDllMissCorrupt, 'SCnProjExtBackupDllMissCorrupt');
   TranslateStr(SCnProjExtBackupErrorCompressor, 'SCnProjExtBackupErrorCompressor');
   TranslateStr(SCnProjExtBackupSuccFmt, 'SCnProjExtBackupSuccFmt');
+  TranslateStr(SCnProjExtBackupFail, 'SCnProjExtBackupFail');
 
   TranslateStr(SCnProjExtDelTempCaption, 'SCnProjExtDelTempCaption');
   TranslateStr(SCnProjExtDelTempHint, 'SCnProjExtDelTempHint');

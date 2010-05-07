@@ -3140,6 +3140,7 @@ SCnProjExtBackupMustZip=目前只支持 ZIP 格式的压缩文件，目标文件
 SCnProjExtBackupDllMissCorrupt=找不到 ZIP 库或库已损坏，请重新安装。
 SCnProjExtBackupErrorCompressor=外部压缩程序不存在，请重新指定。
 SCnProjExtBackupSuccFmt=文件已成功备份至 %s
+SCnProjExtBackupFail=备份文件失败！
 SCnProjExtDelTempCaption=清除工程临时文件(&C)...
 SCnProjExtDelTempHint清除工程目录下的临时文件。
 SCnProjExtProjectAll=<全部>

@@ -749,7 +749,7 @@ begin
 
       AddBackupFile(ProjectList.Name, ProjectList);
       for I := 0 to ProjectList.Count - 1 do
-        AddBackupFiles( ProjectList.Items[I] );
+        AddBackupFiles(ProjectList.Items[I]);
     end
     else
     begin
@@ -760,14 +760,14 @@ begin
           Exit;
 
         ProjectName := ExtractFileName(IProject.FileName);
-        FCurrentName := ProjectName;
+        FCurrentName := IProject.FileName;
       end;
 
       for I := 0 to ProjectList.Count - 1 do
       begin
         if (CompareText(ProjectList.Items[i].Name, ProjectName) = 0) then
         begin
-          FCurrentName := ProjectName;
+          FCurrentName := ProjectList.Items[i].GetFullFileName;
           AddBackupFiles(ProjectList.Items[I]);
         end;
       end;
@@ -829,7 +829,7 @@ begin
   end;
 
   with TCnProjectBackupSaveForm.Create(nil) do
-  begin
+  try
     RemovePath := FRemovePath;
     RememberPass := FRememberPass;
     UsePassword := FUsePassword;
@@ -943,14 +943,18 @@ begin
         Screen.Cursor := crHourGlass;
         try
           DeleteFile(SaveFileName);
-          CnWiz_StartZip(_CnPChar(SaveFileName), _CnPChar(Password), RemovePath);
+          try
+            CnWiz_StartZip(_CnPChar(SaveFileName), _CnPChar(Password), RemovePath);
 
-          for I := 0 to Self.lvFileView.Items.Count - 1 do
-            if Self.lvFileView.Items[I].Data <> nil then
-              CnWiz_ZipAddFile(_CnPChar(TCnBackupFileInfo(Self.lvFileView.Items[I].Data).FullFileName));
+            for I := 0 to Self.lvFileView.Items.Count - 1 do
+              if Self.lvFileView.Items[I].Data <> nil then
+                CnWiz_ZipAddFile(_CnPChar(TCnBackupFileInfo(Self.lvFileView.Items[I].Data).FullFileName));
 
-          if CnWiz_ZipSaveAndClose then
-            InfoDlg(Format(SCnProjExtBackupSuccFmt, [SaveFileName]));
+            if CnWiz_ZipSaveAndClose then
+              InfoDlg(Format(SCnProjExtBackupSuccFmt, [SaveFileName]));
+          except
+            ErrorDlg(SCnProjExtBackupFail);
+          end;
         finally
           Screen.Cursor := crDefault;
         end;
@@ -972,6 +976,7 @@ begin
         end;
       end;  
     end;
+  finally
     Free;
   end;
 end;

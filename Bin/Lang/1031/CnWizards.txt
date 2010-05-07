@@ -3140,6 +3140,7 @@ SCnProjExtBackupMustZip=nur ZIP Format unterstützt. Soll die Datei Erweiterung 
 SCnProjExtBackupDllMissCorrupt=ZIP DLL fehlt oder ist beschädigt. Bitte neu installieren.
 SCnProjExtBackupErrorCompressor=Externer Packer existiert nicht. Bitte wählen Sie einen aus.
 SCnProjExtBackupSuccFmt=Datei gespeichert in %s
+SCnProjExtBackupFail=Backup Files Failed!
 SCnProjExtDelTempCaption=&Temporäre Dateien löschen...
 SCnProjExtDelTempHint=Temporäre Dateien des Projektes löschen
 SCnProjExtProjectAll=<All>

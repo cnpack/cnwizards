@@ -3140,6 +3140,7 @@ SCnProjExtBackupMustZip=目前只支援 ZIP 格式的壓縮檔，目標檔副檔
 SCnProjExtBackupDllMissCorrupt=找不到 ZIP 庫或庫已損壞，請重新安裝。
 SCnProjExtBackupErrorCompressor=外部壓縮程序不存在，請重新指定。
 SCnProjExtBackupSuccFmt=檔已成功備份至 %s
+SCnProjExtBackupFail=備份檔失敗！
 SCnProjExtDelTempCaption=清除工程暫存檔案(&C)...
 SCnProjExtDelTempHint清除工程目錄下的暫存檔案。
 SCnProjExtProjectAll=<全部>
