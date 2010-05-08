@@ -1,0 +1,47 @@
+**********************************************************************
+                     CnPack For Delphi/C++Builder
+                A Free, Open Source Project from China
+                 (C)Copyright 2001-2010 CnPack Team
+**********************************************************************
+
+How to add a translation for CnWizards?
+---------------------------------------
+CnWizards supports multi-language UI. If you want to add a new translation
+for CnWizards, please do follow steps:
+
+1. You can get all language files from our SVN or download page.
+* How to access our SVN: 
+http://code.google.com/p/cnpack/source/checkout
+* Or you can download CnWizards source code from: 
+http://code.google.com/p/cnpack/downloads/list
+
+2. Our language files are in cnwizards\Bin\Lang, 1033 is English.
+Also the Lang directory is in our installation destination, such as 
+C:\Program Files\CnPack\CnWizards\Lang
+
+3. For a new language, such as Spanish, you can copy 1033 directory to 1034 
+and translate all the txt files in it into Spanish.
+
+4. For example, if there's a line in CnWizards.txt
+TCnWizAboutForm.Caption=About CnPack IDE Wizards
+You can translate it as:
+TCnWizAboutForm.Caption=(Translated text)
+
+5. You can edit follow basic information in every language file. Such as:
+!LanguageID=1034
+!LanguageName=Spanish
+!TranslationAuthor=Your Name
+!TranslationAuthorEmail=Your email
+
+6. You can copy new language directory to Lang directory in CnWizards 
+installation destination. So you can see and select the new language in IDE.
+
+7. You also need to translate follow files to new language for installer:
+cnwizards\License.enu.txt
+cnwizards\Readme.enu.txt
+cnwizards\Install\Src\Lang\CnWizInst_enu.nsh
+
+8. You need to translate about 4,000 lines text. When you finish, please 
+mail them to master@cnpack.org. You'll see the new language in next build.
+
+[EOF]
