@@ -919,7 +919,7 @@ begin
         // D5,D6 下在这里直接调用 CnInet_GetFile 可能会导致 Borlndmm.dll 异常，
         // 故优先调用 CnWizHelper.dll 中的实现
         if CnWizHelperInetValid then
-          Succ := CnWiz_Inet_GetFile(PAnsiChar(Url), PAnsiChar(TmpName))
+          Succ := CnWiz_Inet_GetFile(PAnsiChar(AnsiString(Url)), PAnsiChar(AnsiString(TmpName)))
         else
           Succ := CnInet_GetFile(Url, TmpName);
 
