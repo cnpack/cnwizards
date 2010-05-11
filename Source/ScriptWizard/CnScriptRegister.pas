@@ -59,7 +59,8 @@ uses
   CnScript_ToolsAPI_D5,
 {$ENDIF}
   CnScript_IdeInstComp, CnScript_CnCommon, CnScript_CnDebug, CnScript_CnWizUtils,
-  CnScript_CnWizIdeUtils, CnScript_CnWizOptions, CnScript_ScriptEvent;
+  CnScript_CnWizIdeUtils, CnScript_CnWizOptions, CnScript_ScriptEvent,
+  CnScript_RegExpr;
 
 initialization
   RegisterCnScriptPlugin(TPSDllPlugin);
@@ -98,6 +99,7 @@ initialization
   RegisterCnScriptPlugin(TPSImport_CnWizIdeUtils);
   RegisterCnScriptPlugin(TPSImport_CnWizOptions);
   RegisterCnScriptPlugin(TPSImport_ScriptEvent);
+  RegisterCnScriptPlugin(TPSImport_RegExpr);
 
 {$ENDIF}
 
