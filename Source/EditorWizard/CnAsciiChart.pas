@@ -76,10 +76,12 @@ type
 {$ENDIF}
 
 {$IFNDEF STAND_ALONE}
-  TCnAsciiForm = class(TCnIdeDockForm)
+  TCnAsciiBaseForm = TCnIdeDockForm;
 {$ELSE}
-  TCnAsciiForm = class(TCnTranslateForm)
+  TCnAsciiBaseForm = TCnTranslateForm;
 {$ENDIF}
+
+  TCnAsciiForm = class(TCnAsciiBaseForm)
     Panel1: TPanel;
     Grid: TStringGrid;
     cbFont: TComboBox;
@@ -93,7 +95,6 @@ type
     pnlCanvas: TPanel;
     edtOut: TEdit;
     Image: TImage;
-    imVirtual: TImage;
     edtSource: TEdit;
     ToHexAction: TAction;
     sbToHex: TSpeedButton;
@@ -318,9 +319,8 @@ begin
       Canvas.Brush.Color := $00B5EBFF;
 
     Canvas.FillRect(Rect);
-    Canvas.TextOut(Rect.Left + ((Rect.Right - Rect.Left -
-      Canvas.TextWidth(OutStr)) shr 1), Rect.Top + ((Rect.Bottom - Rect.top
-      - Canvas.TextHeight(OutStr)) shr 1), OutStr);
+    DrawText(Canvas.Handle, PChar(OutStr), Length(OutStr), Rect,
+      DT_CENTER or DT_VCENTER or DT_SINGLELINE or DT_NOPREFIX);
   end;
 end;
 
@@ -341,7 +341,6 @@ procedure TCnAsciiForm.cbFontChange(Sender: TObject);
 begin
   Grid.Font.Name := cbFont.Text;
   StatusBar.Font.Name := cbFont.Text;
-  imVirtual.Canvas.Font.Name := cbFont.Text;
 end;
 
 procedure TCnAsciiForm.GridClick(Sender: TObject);
@@ -385,7 +384,6 @@ end;
 procedure TCnAsciiForm.seFontSizeChange(Sender: TObject);
 begin
   Grid.Font.Size := seFontSize.Value;
-  imVirtual.Canvas.Font.Size := seFontSize.Value;
 end;
 
 procedure TCnAsciiForm.sbHexClick(Sender: TObject);
@@ -468,11 +466,19 @@ end;
 procedure TCnAsciiForm.DrawStretchedAscii;
 var
   ARect: TRect;
+  S: string;
 begin
-  ARect := Rect(0, 0, 16, 16);
-  imVirtual.Canvas.FillRect(ARect);
-  imVirtual.Canvas.TextOut(4, 1, GetChr((Grid.Row - 1) * 8 + Grid.Col - 1 + FPage * 128));
-  Image.Canvas.StretchDraw(Image.Canvas.ClipRect, imVirtual.Picture.Bitmap);
+  ARect := Image.ClientRect;
+  S := GetChr((Grid.Row - 1) * 8 + Grid.Col - 1 + FPage * 128);
+  Image.Picture.Bitmap.Width := Image.Width;
+  Image.Picture.Bitmap.Height := Image.Height;
+  Image.Picture.Bitmap.Canvas.Brush.Color := clWhite;
+  Image.Picture.Bitmap.Canvas.FillRect(ARect);
+  Image.Picture.Bitmap.Canvas.Font := Grid.Font;
+  Image.Picture.Bitmap.Canvas.Font.Size := Image.Height * Grid.Font.Size div 18;
+  DrawText(Image.Picture.Bitmap.Canvas.Handle, PChar(S), Length(S), ARect,
+    DT_CENTER or DT_VCENTER or DT_SINGLELINE or DT_NOPREFIX);
+  Image.Invalidate;
 end;
 
 function TCnAsciiForm.GetChrSharp(I: Integer): string;
