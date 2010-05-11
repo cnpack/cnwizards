@@ -124,6 +124,7 @@ type
     FOldCol: Integer;
     FOldRow: Integer;
     FIsClick: Boolean;
+    FCells: array of array of string;
 
     function GetChr(I: Integer): string;
     function GetChrSharp(I: Integer): string;
@@ -310,15 +311,18 @@ var
 begin
   with Sender as TStringGrid do
   begin
-    OutStr := Cells[ACol, ARow];
     if (gdSelected in State) and not (gdFixed in State) then
       Canvas.Brush.Color := $00D2BDB6
     else if (FPage = 0) and (ARow in [1..4]) and (ACol > 0) then
       Canvas.Brush.Color := $00B5EBFF;
     Canvas.FillRect(Rect);
-    Canvas.Font := Grid.Font;
-    DrawText(Canvas.Handle, PChar(OutStr), Length(OutStr), Rect,
-      DT_CENTER or DT_VCENTER or DT_SINGLELINE or DT_NOPREFIX);
+    if FCells <> nil then
+    begin
+      OutStr := FCells[ACol, ARow];
+      Canvas.Font := Grid.Font;
+      DrawText(Canvas.Handle, PChar(OutStr), Length(OutStr), Rect,
+        DT_CENTER or DT_VCENTER or DT_SINGLELINE or DT_NOPREFIX);
+    end;
   end;
 end;
 
@@ -355,19 +359,24 @@ procedure TCnAsciiForm.UpdateChart;
 var
   I, J: Integer;
 begin
-  for I := 0 to Grid.RowCount - 1 do
-    Grid.Cells[0, I] := GetOrd(8 * (I - 1) + FPage * 128, FHex);
+  FCells := nil;
+  SetLength(FCells, Grid.ColCount);
   for I := 0 to Grid.ColCount - 1 do
-    Grid.Cells[I, 0] := GetOrd(I - 1, FHex);
-  Grid.Cells[0, 0] := '';
+    SetLength(FCells[I], Grid.RowCount);
+  for I := 0 to Grid.RowCount - 1 do
+    FCells[0, I] := GetOrd(8 * (I - 1) + FPage * 128, FHex);
+  for I := 0 to Grid.ColCount - 1 do
+    FCells[I, 0] := GetOrd(I - 1, FHex);
+  FCells[0, 0] := '';
 
   for I := 1 to Grid.RowCount - 1 do
   begin
     for J := 1 to Grid.ColCount - 1 do
     begin
-      Grid.Cells[J, I] := GetChr((I - 1) * 8 + J - 1 + FPage * 128);
+      FCells[J, I] := GetChr((I - 1) * 8 + J - 1 + FPage * 128);
     end;
   end;
+  Grid.Invalidate;
 end;
 
 procedure TCnAsciiForm.UpdateStatusBar;
