@@ -315,8 +315,8 @@ begin
       Canvas.Brush.Color := $00D2BDB6
     else if (FPage = 0) and (ARow in [1..4]) and (ACol > 0) then
       Canvas.Brush.Color := $00B5EBFF;
-
     Canvas.FillRect(Rect);
+    Canvas.Font := Grid.Font;
     DrawText(Canvas.Handle, PChar(OutStr), Length(OutStr), Rect,
       DT_CENTER or DT_VCENTER or DT_SINGLELINE or DT_NOPREFIX);
   end;

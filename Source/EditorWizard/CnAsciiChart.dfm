@@ -251,13 +251,6 @@ inherited CnAsciiForm: TCnAsciiForm
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 3
-    object imVirtual: TImage
-      Left = 56
-      Top = 24
-      Width = 16
-      Height = 16
-      Visible = False
-    end
     object sbToHex: TSpeedButton
       Left = 188
       Top = 2
