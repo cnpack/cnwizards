@@ -76,12 +76,10 @@ type
 {$ENDIF}
 
 {$IFNDEF STAND_ALONE}
-  TCnAsciiBaseForm = TCnIdeDockForm;
+  TCnAsciiForm = class(TCnIdeDockForm)
 {$ELSE}
-  TCnAsciiBaseForm = TCnTranslateForm;
+  TCnAsciiForm = class(TCnTranslateForm)
 {$ENDIF}
-
-  TCnAsciiForm = class(TCnAsciiBaseForm)
     Panel1: TPanel;
     Grid: TStringGrid;
     cbFont: TComboBox;
