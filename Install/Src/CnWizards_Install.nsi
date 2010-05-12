@@ -618,9 +618,11 @@ Section "$(OTHERTOOLS)" SecTools
   WriteRegStr HKCU "Software\CnPack\CnDebug" "CnDebugViewer" "$INSTDIR\CnDebugViewer.exe"
 
   SetOutPath $INSTDIR\Source
-  File "..\..\Bin\Source\*.pas"
-  File "..\..\Bin\Source\*.dfm"
-  File "..\..\Source\CnPack.inc"
+  File "..\..\..\cnvcl\Source\Common\CnPack.inc"
+  File "..\..\..\cnvcl\Source\Common\CnDebug.pas"
+  File "..\..\..\cnvcl\Source\Common\CnPropSheetFrm.pas"
+  File "..\..\..\cnvcl\Source\Common\CnPropSheetFrm.dfm"
+  File "..\..\..\cnvcl\Source\Common\CnMemProf.pas"
 SectionEnd
 
 ;------------------------------------------------------------------------------
