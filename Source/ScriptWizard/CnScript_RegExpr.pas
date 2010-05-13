@@ -38,6 +38,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$DEFINE UniCode}
+
 uses
   Windows, SysUtils, Classes, RegExpr, uPSComponent, uPSRuntime, uPSCompiler;
 
