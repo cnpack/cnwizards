@@ -507,7 +507,7 @@ var
     View.CursorPos := APos;
     CnNtaGetCurrLineText(Text, Line, Col);
 
-    Col := AToken.EditCol + Length(AToken.Token) + 1;
+    Col := AToken.EditCol + Length(AToken.Token);
     if Length(Text) >= Col then
       Result := (Text[Col] = '.');
 
