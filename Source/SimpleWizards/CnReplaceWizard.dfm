@@ -3,8 +3,8 @@ inherited CnReplaceWizardForm: TCnReplaceWizardForm
   Top = 155
   BorderStyle = bsDialog
   Caption = 'File Batch Replace Tools'
-  ClientHeight = 331
-  ClientWidth = 400
+  ClientHeight = 366
+  ClientWidth = 410
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   PixelsPerInch = 96
@@ -12,47 +12,73 @@ inherited CnReplaceWizardForm: TCnReplaceWizardForm
   object tbOptions: TGroupBox
     Left = 8
     Top = 88
-    Width = 193
-    Height = 113
+    Width = 201
+    Height = 145
     Caption = '&Options'
     TabOrder = 1
     object cbCaseSensitive: TCheckBox
-      Left = 8
-      Top = 16
-      Width = 105
+      Left = 24
+      Top = 32
+      Width = 169
       Height = 17
       Caption = 'Case Sens&itive'
-      TabOrder = 0
-    end
-    object cbWholeWord: TCheckBox
-      Left = 8
-      Top = 39
-      Width = 129
-      Height = 17
-      Caption = '&Whole Word Only'
       TabOrder = 1
     end
+    object cbWholeWord: TCheckBox
+      Left = 24
+      Top = 50
+      Width = 169
+      Height = 17
+      Caption = '&Whole Word Only'
+      TabOrder = 2
+    end
     object cbRegEx: TCheckBox
-      Left = 8
-      Top = 63
+      Left = 24
+      Top = 68
       Width = 169
       Height = 17
       Caption = 'Reg&ular Expression'
-      TabOrder = 2
+      TabOrder = 3
     end
     object cbANSICompatible: TCheckBox
-      Left = 8
+      Left = 24
       Top = 86
       Width = 169
       Height = 17
       Caption = 'A&NSI Compatible (Slow)'
-      TabOrder = 3
+      TabOrder = 4
+    end
+    object rbNormal: TRadioButton
+      Left = 8
+      Top = 16
+      Width = 185
+      Height = 17
+      Caption = 'Nor&mal Mode'
+      TabOrder = 0
+      OnClick = rbNormalClick
+    end
+    object rbRegExpr: TRadioButton
+      Left = 8
+      Top = 104
+      Width = 185
+      Height = 17
+      Caption = 'Use TRegExpr to Replace'
+      TabOrder = 5
+      OnClick = rbNormalClick
+    end
+    object chkUseSub: TCheckBox
+      Left = 24
+      Top = 120
+      Width = 169
+      Height = 17
+      Caption = 'Use &Substitution'
+      TabOrder = 6
     end
   end
   object gbText: TGroupBox
     Left = 8
     Top = 8
-    Width = 385
+    Width = 393
     Height = 73
     Caption = '&Text'
     TabOrder = 0
@@ -73,7 +99,7 @@ inherited CnReplaceWizardForm: TCnReplaceWizardForm
     object cbbSrc: TComboBox
       Left = 88
       Top = 16
-      Width = 289
+      Width = 297
       Height = 21
       ItemHeight = 13
       TabOrder = 0
@@ -81,17 +107,17 @@ inherited CnReplaceWizardForm: TCnReplaceWizardForm
     object cbbDst: TComboBox
       Left = 88
       Top = 40
-      Width = 289
+      Width = 297
       Height = 21
       ItemHeight = 13
       TabOrder = 1
     end
   end
   object rgReplaceStyle: TRadioGroup
-    Left = 208
+    Left = 216
     Top = 88
     Width = 185
-    Height = 113
+    Height = 145
     Caption = 'R&ange'
     ItemIndex = 0
     Items.Strings = (
@@ -105,8 +131,8 @@ inherited CnReplaceWizardForm: TCnReplaceWizardForm
   end
   object gbDir: TGroupBox
     Left = 8
-    Top = 208
-    Width = 385
+    Top = 240
+    Width = 393
     Height = 89
     Caption = 'Search Directory'
     TabOrder = 3
@@ -127,18 +153,18 @@ inherited CnReplaceWizardForm: TCnReplaceWizardForm
       FocusControl = cbbMask
     end
     object btnSelectDir: TButton
-      Left = 352
+      Left = 360
       Top = 16
       Width = 21
       Height = 21
       Caption = '...'
-      TabOrder = 2
+      TabOrder = 1
       OnClick = btnSelectDirClick
     end
     object cbbDir: TComboBox
       Left = 88
       Top = 16
-      Width = 257
+      Width = 265
       Height = 21
       ItemHeight = 13
       TabOrder = 0
@@ -147,10 +173,10 @@ inherited CnReplaceWizardForm: TCnReplaceWizardForm
     object cbbMask: TComboBox
       Left = 88
       Top = 40
-      Width = 257
+      Width = 265
       Height = 21
       ItemHeight = 13
-      TabOrder = 1
+      TabOrder = 2
       Items.Strings = (
         '.pas;.dpr'
         '.cpp;.c;.hpp;.h;.cxx;.cc;.hxx;.hh;.asm'
@@ -159,15 +185,15 @@ inherited CnReplaceWizardForm: TCnReplaceWizardForm
     object cbSubDirs: TCheckBox
       Left = 88
       Top = 64
-      Width = 105
+      Width = 265
       Height = 17
       Caption = '&Search Sub-folders'
       TabOrder = 3
     end
   end
   object btnReplace: TButton
-    Left = 158
-    Top = 304
+    Left = 166
+    Top = 336
     Width = 75
     Height = 21
     Caption = '&Replace'
@@ -175,8 +201,8 @@ inherited CnReplaceWizardForm: TCnReplaceWizardForm
     OnClick = btnReplaceClick
   end
   object btnClose: TButton
-    Left = 238
-    Top = 304
+    Left = 246
+    Top = 336
     Width = 75
     Height = 21
     Cancel = True
@@ -185,8 +211,8 @@ inherited CnReplaceWizardForm: TCnReplaceWizardForm
     TabOrder = 5
   end
   object btnHelp: TButton
-    Left = 318
-    Top = 304
+    Left = 326
+    Top = 336
     Width = 75
     Height = 21
     Caption = '&Help'

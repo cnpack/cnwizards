@@ -44,7 +44,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls, IniFiles, ToolsAPI, FileCtrl, Math, Contnrs,
+  StdCtrls, ExtCtrls, IniFiles, ToolsAPI, FileCtrl, Math, Contnrs, RegExpr,
   CnConsts, CnCommon, CnWizClasses, CnWizConsts, CnWizUtils, CnWizEditFiler,
   CnWizSearch, CnIni, CnWizMultiLang;
 
@@ -76,6 +76,9 @@ type
     cbSubDirs: TCheckBox;
     cbRegEx: TCheckBox;
     cbANSICompatible: TCheckBox;
+    rbNormal: TRadioButton;
+    rbRegExpr: TRadioButton;
+    chkUseSub: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnReplaceClick(Sender: TObject);
@@ -83,6 +86,7 @@ type
     procedure rgReplaceStyleClick(Sender: TObject);
     procedure cbbDirDropDown(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
+    procedure rbNormalClick(Sender: TObject);
   private
     { Private declarations }
     FIni: TCustomIniFile;
@@ -123,7 +127,10 @@ type
 
   TCnReplaceWizard = class(TCnMenuWizard)
   private
+    FUseRegExpr: Boolean;
+    FUseSub: Boolean;
     FSearcher: TCnSearcher;
+    FRegExpr: TRegExpr;
     FInStream: TMemoryStream;
     FOutStream: TMemoryStream;
     FLastInStreamPos: Integer;
@@ -136,10 +143,12 @@ type
     FOpenInIDE: Boolean;
     procedure OnFound(Sender: TObject; LineNo: Integer; LineOffset: Integer;
       const Line: string; SPos, EPos: Integer);
+    function OnRegExprReplace(ARegExpr : TRegExpr): string;
     procedure OnFindFile(const FileName: string; const Info: TSearchRec;
       var Abort: Boolean);
     procedure QueryContinue(const Msg: string);
-    procedure DoReplace(const FileName: string);
+    procedure DoNormalReplace(const FileName: string);
+    procedure DoRegExprReplace(const FileName: string);
     procedure ReplaceFile(const FileName: string);
     procedure ReplaceProject(Project: IOTAProject);
     procedure ReplaceProjectGroup(ProjectGroup: IOTAProjectGroup);
@@ -216,6 +225,7 @@ begin
   try
     FSearcher.SearchOptions := SearchOption;
     FSearcher.SetPattern(cbbSrc.Text);
+    FSearcher.ANSICompatible := ANSICompatible;
   except
     on E: EPatternError do
     begin
@@ -239,8 +249,6 @@ begin
     end;
   end;
 
-  FSearcher.ANSICompatible := ANSICompatible;
-
   ModalResult := mrOk;
 end;
 
@@ -249,11 +257,13 @@ const
   csSourceTexts = 'SourceTexts';
   csDestText = 'DestText';
   csDestTexts = 'DestTexts';
+  csUseRegExpr = 'UseRegExpr';
   csCaseSensitive = 'CaseSensitive';
   csWholeWord = 'WholeWord';
   csRegEx = 'RegEx';
   csIncludeForm = 'IncludeForm';
   csReplaceStyle = 'ReplaceStyle';
+  csUseSub = 'UseSub';
   csDir = 'Dir';
   csDirs = 'Dirs';
   csMask = 'Mask';
@@ -269,18 +279,22 @@ begin
     ReadStrings(csSourceTexts, cbbSrc.Items);
     cbbDst.Text := ReadString('', csDestText, '');
     ReadStrings(csDestTexts, cbbDst.Items);
+    rbNormal.Checked := not ReadBool('', csUseRegExpr, False);
+    rbRegExpr.Checked := not rbNormal.Checked;
     cbCaseSensitive.Checked := ReadBool('', csCaseSensitive, False);
     cbWholeWord.Checked := ReadBool('', csWholeWord, False);
     cbRegEx.Checked := ReadBool('', csRegEx, False);
+    cbANSICompatible.Checked := ReadBool('', csANSICompatible, False);
+    chkUseSub.Checked := ReadBool('', csUseSub, False);
     rgReplaceStyle.ItemIndex := ReadInteger('', csReplaceStyle, 0);
     cbbDir.Text := ReadString('', csDir, '');
     ReadStrings(csDirs, cbbDir.Items);
     cbbMask.Text := ReadString('', csMask, '');
     ReadStrings(csMasks, cbbMask.Items);
     cbSubDirs.Checked := ReadBool('', csSubDirs, True);
-    cbANSICompatible.Checked := ReadBool('', csANSICompatible, False);
 
     rgReplaceStyleClick(nil);
+    rbNormalClick(nil);
   finally
     Free;
   end;
@@ -303,13 +317,15 @@ begin
     WriteBool('', csCaseSensitive, cbCaseSensitive.Checked);
     WriteBool('', csWholeWord, cbWholeWord.Checked);
     WriteBool('', csRegEx, cbRegEx.Checked);
+    WriteBool('', csANSICompatible, cbANSICompatible.Checked);
+    WriteBool('', csUseRegExpr, rbRegExpr.Checked);
+    WriteBool('', csUseSub, chkUseSub.Checked);
     WriteInteger('', csReplaceStyle, rgReplaceStyle.ItemIndex);
     WriteString('', csDir, cbbDir.Text);
     WriteStrings(csDirs, cbbDir.Items);
     WriteString('', csMask, cbbMask.Text);
     WriteStrings(csMasks, cbbMask.Items);
     WriteBool('', csSubDirs, cbSubDirs.Checked);
-    WriteBool('', csANSICompatible, cbANSICompatible.Checked);
   finally
     Free;
   end;
@@ -340,6 +356,15 @@ var
 begin
   for i := 0 to gbDir.ControlCount - 1 do
     gbDir.Controls[i].Enabled := ReplaceStyle = rsDir;
+end;
+
+procedure TCnReplaceWizardForm.rbNormalClick(Sender: TObject);
+begin
+  cbCaseSensitive.Enabled := rbNormal.Checked;
+  cbWholeWord.Enabled := rbNormal.Checked;
+  cbRegEx.Enabled := rbNormal.Checked;
+  cbANSICompatible.Enabled := rbNormal.Checked;
+  chkUseSub.Enabled := rbRegExpr.Checked;
 end;
 
 procedure TCnReplaceWizardForm.cbbDirDropDown(Sender: TObject);
@@ -433,13 +458,20 @@ procedure TCnReplaceWizard.Execute;
 var
   FileName: string;
 begin
-  FSearcher := TCnSearcher.Create;
+  FSearcher := nil;
+  FRegExpr := nil;
   try
+    FSearcher := TCnSearcher.Create;
+    FRegExpr := TRegExpr.Create;
     FSearcher.OnFound := OnFound;
     with TCnReplaceWizardForm.CreateEx(nil, CreateIniFile, FSearcher) do
     try
       if ShowModal = mrOk then
       begin
+        FUseRegExpr := rbRegExpr.Checked;
+        FUseSub := chkUseSub.Checked;
+        if FUseRegExpr then
+          FRegExpr.Expression := SourceText;
         FDestText := DestText;
         FFoundCount := 0;
         FCurrCount := 0;
@@ -479,6 +511,7 @@ begin
     end;
   finally
     FreeAndNil(FSearcher);
+    FreeAndNil(FRegExpr);
   end;
 end;
 
@@ -519,7 +552,10 @@ begin
   end;
 
   FCurrCount := 0;
-  DoReplace(ExtractFileName(FileName));
+  if FUseRegExpr then
+    DoRegExprReplace(ExtractFileName(FileName))
+  else
+    DoNormalReplace(ExtractFileName(FileName));
   BookMarkList := nil;
 
   if FOutStream.Size > 0 then         // Ö´ÐÐ¹ýÌæ»»
@@ -660,7 +696,7 @@ begin
   FindFile(Dir, '*.*', OnFindFile, nil, IncludeSubDirs);
 end;
 
-procedure TCnReplaceWizard.DoReplace(const FileName: string);
+procedure TCnReplaceWizard.DoNormalReplace(const FileName: string);
 begin
   FInStream.Position := 0;
   FOutStream.Size := 0;
@@ -699,6 +735,35 @@ begin
 {$ENDIF}
   FLastInStreamPos := LineOffset + EPos;
 
+  Inc(FCurrCount);
+end;
+
+procedure TCnReplaceWizard.DoRegExprReplace(const FileName: string);
+var
+  InStr, OutStr: RegExprString;
+  MemStr: AnsiString;
+begin
+  FInStream.Position := 0;
+  FOutStream.Size := 0;
+  FLastInStreamPos := 0;
+
+  InStr := RegExprString(PAnsiChar(FInStream.Memory));
+  OutStr := FRegExpr.ReplaceEx(InStr, OnRegExprReplace);
+
+  if FLastInStreamPos > 0 then
+  begin
+    MemStr := AnsiString(OutStr);
+    FOutStream.Write(PAnsiChar(MemStr)^, Length(MemStr) + 1);
+  end;
+end;
+
+function TCnReplaceWizard.OnRegExprReplace(ARegExpr: TRegExpr): string;
+begin
+  if FUseSub then
+    Result := ARegExpr.Substitute(FDestText)
+  else
+    Result := FDestText;
+  FLastInStreamPos := ARegExpr.MatchPos[0] + ARegExpr.MatchLen[0];
   Inc(FCurrCount);
 end;
 
