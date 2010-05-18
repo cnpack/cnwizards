@@ -2173,7 +2173,8 @@ begin
     UpdateFlatPanelsPosition;
   end
   else if ((Msg.Msg = WM_WINDOWPOSCHANGED) or (Msg.Msg = WM_SHOWWINDOW)) and
-    (Control <> nil) and (Control = CnOtaGetCurrentDesignContainer) then
+    (Control <> nil) and (csDesigning in Control.ComponentState) and
+    (Control.Parent = nil) and (Control = CnOtaGetCurrentDesignContainer) then
   begin
     if Msg.Msg = WM_WINDOWPOSCHANGED then
       UpdateFlatPanelsPosition
