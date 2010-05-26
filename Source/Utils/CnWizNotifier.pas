@@ -148,17 +148,17 @@ type
     procedure RemoveAppEventNotifier(Notifier: TCnWizAppEventNotifier);
     {* 删除一个应用程序事件通知事件}
 
-    procedure AddCallWndProcNotifier(Notifier: TCnWizMsgHookNotifier);
+    procedure AddCallWndProcNotifier(Notifier: TCnWizMsgHookNotifier; MsgIDs: array of Cardinal);
     {* 增加一个 CallWndProc HOOK 通知事件}
     procedure RemoveCallWndProcNotifier(Notifier: TCnWizMsgHookNotifier);
     {* 删除一个 CallWndProc HOOK 通知事件}
 
-    procedure AddCallWndProcRetNotifier(Notifier: TCnWizMsgHookNotifier);
+    procedure AddCallWndProcRetNotifier(Notifier: TCnWizMsgHookNotifier; MsgIDs: array of Cardinal);
     {* 增加一个 CallWndProcRet HOOK 通知事件}
     procedure RemoveCallWndProcRetNotifier(Notifier: TCnWizMsgHookNotifier);
     {* 删除一个 CallWndProcRet HOOK 通知事件}
 
-    procedure AddGetMsgNotifier(Notifier: TCnWizMsgHookNotifier);
+    procedure AddGetMsgNotifier(Notifier: TCnWizMsgHookNotifier; MsgIDs: array of Cardinal);
     {* 增加一个 GetMessage HOOK 通知事件}
     procedure RemoveGetMsgNotifier(Notifier: TCnWizMsgHookNotifier);
     {* 删除一个 GetMessage HOOK 通知事件}
@@ -336,8 +336,11 @@ type
     FApplicationMessageNotifiers: TList;
     FAppEventNotifiers: TList;
     FCallWndProcNotifiers: TList;
+    FCallWndProcMsgList: TList;
     FCallWndProcRetNotifiers: TList;
+    FCallWndProcRetMsgList: TList;
     FGetMsgNotifiers: TList;
+    FGetMsgMsgList: TList;
     FIdleMethods: TList;
     FEvents: TApplicationEvents;
     FIdeNotifierIndex: Integer;
@@ -352,6 +355,7 @@ type
     procedure ClearAndFreeList(var List: TList);
     function IndexOf(List: TList; Notifier: TMethod): Integer;
     procedure AddNotifier(List: TList; Notifier: TMethod);
+    procedure AddNotifierEx(List, MsgList: TList; Notifier: TMethod; MsgIDs: array of Cardinal);
     procedure RemoveNotifier(List: TList; Notifier: TMethod);
     procedure CheckActiveControl;
     procedure OnIdleTimer(Sender: TObject);
@@ -377,11 +381,11 @@ type
     procedure RemoveApplicationMessageNotifier(Notifier: TMessageEvent);
     procedure AddAppEventNotifier(Notifier: TCnWizAppEventNotifier);
     procedure RemoveAppEventNotifier(Notifier: TCnWizAppEventNotifier);
-    procedure AddCallWndProcNotifier(Notifier: TCnWizMsgHookNotifier);
+    procedure AddCallWndProcNotifier(Notifier: TCnWizMsgHookNotifier; MsgIDs: array of Cardinal);
     procedure RemoveCallWndProcNotifier(Notifier: TCnWizMsgHookNotifier);
-    procedure AddCallWndProcRetNotifier(Notifier: TCnWizMsgHookNotifier);
+    procedure AddCallWndProcRetNotifier(Notifier: TCnWizMsgHookNotifier; MsgIDs: array of Cardinal);
     procedure RemoveCallWndProcRetNotifier(Notifier: TCnWizMsgHookNotifier);
-    procedure AddGetMsgNotifier(Notifier: TCnWizMsgHookNotifier);
+    procedure AddGetMsgNotifier(Notifier: TCnWizMsgHookNotifier; MsgIDs: array of Cardinal);
     procedure RemoveGetMsgNotifier(Notifier: TCnWizMsgHookNotifier);
     procedure AddProcessCreatedNotifier(Notifier: TCnWizProcessNotifier);
     procedure RemoveProcessCreatedNotifier(Notifier: TCnWizProcessNotifier);
@@ -425,7 +429,7 @@ type
 
     procedure DoApplicationIdle(Sender: TObject; var Done: Boolean);
     procedure DoApplicationMessage(var Msg: TMsg; var Handled: Boolean);
-    procedure DoMsgHook(AList: TList; hwnd: HWND; Msg: TMessage);
+    procedure DoMsgHook(AList, MsgList: TList; hwnd: HWND; Msg: TMessage);
     procedure DoCallWndProc(hwnd: HWND; Msg: TMessage);
     procedure DoCallWndProcRet(hwnd: HWND; Msg: TMessage);
     procedure DoGetMsg(hwnd: HWND; Msg: TMessage);
@@ -816,8 +820,11 @@ begin
   FApplicationMessageNotifiers := TList.Create;
   FAppEventNotifiers := TList.Create;
   FCallWndProcNotifiers := TList.Create;
+  FCallWndProcMsgList := TList.Create;
   FCallWndProcRetNotifiers := TList.Create;
+  FCallWndProcRetMsgList := TList.Create;
   FGetMsgNotifiers := TList.Create;
+  FGetMsgMsgList := TList.Create;
   FIdleMethods := TList.Create;
   FCompNotifyList := TComponentList.Create(True);
   FCnWizIdeNotifier := TCnWizIdeNotifier.Create(Self);
@@ -880,8 +887,11 @@ begin
   ClearAndFreeList(FApplicationMessageNotifiers);
   ClearAndFreeList(FAppEventNotifiers);
   ClearAndFreeList(FCallWndProcNotifiers);
+  ClearAndFreeList(FCallWndProcMsgList);
   ClearAndFreeList(FCallWndProcRetNotifiers);
+  ClearAndFreeList(FCallWndProcRetMsgList);
   ClearAndFreeList(FGetMsgNotifiers);
+  ClearAndFreeList(FGetMsgMsgList);
   ClearAndFreeList(FIdleMethods);
 
 {$IFDEF Debug}
@@ -941,6 +951,17 @@ begin
     Rec^.Notifier := TMethod(Notifier);
     List.Add(Rec);
   end;
+end;
+
+procedure TCnWizNotifierServices.AddNotifierEx(List, MsgList: TList;
+  Notifier: TMethod; MsgIDs: array of Cardinal);
+var
+  I: Integer;
+begin
+  AddNotifier(List, Notifier);
+  for I := Low(MsgIDs) to High(MsgIDs) do
+    if MsgList.IndexOf(Pointer(MsgIDs[I])) < 0 then
+      MsgList.Add(Pointer(MsgIDs[I]));
 end;
 
 procedure TCnWizNotifierServices.RemoveNotifier(List: TList;
@@ -1754,13 +1775,26 @@ end;
 // HOOK 通知
 //------------------------------------------------------------------------------
 
-procedure TCnWizNotifierServices.DoMsgHook(AList: TList; hwnd: HWND;
+procedure TCnWizNotifierServices.DoMsgHook(AList, MsgList: TList; hwnd: HWND;
   Msg: TMessage);
 var
   I: Integer;
   Control: TWinControl;
+
+  function IsMsgRegistered: Boolean;
+  var
+    I: Integer;
+  begin
+    Result := False;
+    for I := 0 to MsgList.Count - 1 do
+      if Msg.Msg = Cardinal(MsgList[I]) then
+      begin
+        Result := True;
+        Exit;
+      end;
+  end;
 begin
-  if not IdeClosing and (AList <> nil) then
+  if not IdeClosing and (AList <> nil) and IsMsgRegistered then
   begin
     Control := FindControl(hwnd);
     for I := AList.Count - 1 downto 0 do
@@ -1774,9 +1808,9 @@ begin
 end;
 
 procedure TCnWizNotifierServices.AddCallWndProcNotifier(
-  Notifier: TCnWizMsgHookNotifier);
+  Notifier: TCnWizMsgHookNotifier; MsgIDs: array of Cardinal);
 begin
-  AddNotifier(FCallWndProcNotifiers, TMethod(Notifier));
+  AddNotifierEx(FCallWndProcNotifiers, FCallWndProcMsgList, TMethod(Notifier), MsgIDs);
 end;
 
 procedure TCnWizNotifierServices.RemoveCallWndProcNotifier(
@@ -1787,13 +1821,13 @@ end;
 
 procedure TCnWizNotifierServices.DoCallWndProc(hwnd: HWND; Msg: TMessage);
 begin
-  DoMsgHook(FCallWndProcNotifiers, hwnd, Msg);
+  DoMsgHook(FCallWndProcNotifiers, FCallWndProcMsgList, hwnd, Msg);
 end;
 
 procedure TCnWizNotifierServices.AddCallWndProcRetNotifier(
-  Notifier: TCnWizMsgHookNotifier);
+  Notifier: TCnWizMsgHookNotifier; MsgIDs: array of Cardinal);
 begin
-  AddNotifier(FCallWndProcRetNotifiers, TMethod(Notifier));
+  AddNotifierEx(FCallWndProcRetNotifiers, FCallWndProcRetMsgList, TMethod(Notifier), MsgIDs);
 end;
 
 procedure TCnWizNotifierServices.RemoveCallWndProcRetNotifier(
@@ -1805,13 +1839,13 @@ end;
 procedure TCnWizNotifierServices.DoCallWndProcRet(hwnd: HWND;
   Msg: TMessage);
 begin
-  DoMsgHook(FCallWndProcRetNotifiers, hwnd, Msg);
+  DoMsgHook(FCallWndProcRetNotifiers, FCallWndProcRetMsgList, hwnd, Msg);
 end;
 
 procedure TCnWizNotifierServices.AddGetMsgNotifier(
-  Notifier: TCnWizMsgHookNotifier);
+  Notifier: TCnWizMsgHookNotifier; MsgIDs: array of Cardinal);
 begin
-  AddNotifier(FGetMsgNotifiers, TMethod(Notifier));
+  AddNotifierEx(FGetMsgNotifiers, FGetMsgMsgList, TMethod(Notifier), MsgIDs);
 end;
 
 procedure TCnWizNotifierServices.RemoveGetMsgNotifier(
@@ -1822,7 +1856,7 @@ end;
 
 procedure TCnWizNotifierServices.DoGetMsg(hwnd: HWND; Msg: TMessage);
 begin
-  DoMsgHook(FGetMsgNotifiers, hwnd, Msg);
+  DoMsgHook(FGetMsgNotifiers, FGetMsgMsgList, hwnd, Msg);
 end;
 
 procedure TCnWizNotifierServices.BreakpointAdded(

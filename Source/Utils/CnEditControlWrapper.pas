@@ -638,7 +638,8 @@ begin
 
   CnWizNotifierServices.AddSourceEditorNotifier(OnSourceEditorNotify);
   CnWizNotifierServices.AddActiveFormNotifier(OnActiveFormChange);
-  CnWizNotifierServices.AddCallWndProcRetNotifier(OnCallWndProcRet);
+  CnWizNotifierServices.AddCallWndProcRetNotifier(OnCallWndProcRet,
+    [WM_VSCROLL, WM_HSCROLL]);
   CnWizNotifierServices.AddApplicationMessageNotifier(ApplicationMessage);
   CnWizNotifierServices.AddApplicationIdleNotifier(OnIdle);
 

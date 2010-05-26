@@ -2080,7 +2080,8 @@ begin
     Inc(FDefCount);
 
   CnWizNotifierServices.AddApplicationMessageNotifier(OnAppMessage);
-  CnWizNotifierServices.AddCallWndProcRetNotifier(OnCallWndProcRet);
+  CnWizNotifierServices.AddCallWndProcRetNotifier(OnCallWndProcRet,
+    [WM_ACTIVATE, WM_NCACTIVATE, WM_WINDOWPOSCHANGED, WM_SHOWWINDOW]);
   CnWizNotifierServices.AddFormEditorNotifier(FormEditorNotify);
   CnWizNotifierServices.AddApplicationIdleNotifier(ApplicationIdle);
   CnWizNotifierServices.AddActiveFormNotifier(ActiveFormChanged);

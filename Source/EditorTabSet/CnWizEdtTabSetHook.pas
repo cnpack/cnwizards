@@ -174,7 +174,8 @@ begin
   StatusBar.OnResize := OnStatusBarResize;
   OnStatusBarResize(StatusBar);
 
-  CnWizNotifierServices.AddCallWndProcRetNotifier(OnCallWndProcRet);
+  CnWizNotifierServices.AddCallWndProcRetNotifier(OnCallWndProcRet,
+    [TCM_INSERTITEM, TCM_DELETEITEM, TCM_DELETEALLITEMS, CN_NOTIFY]);
 end;
 
 destructor TCnWizEdtTabSetHookComp.Destroy;

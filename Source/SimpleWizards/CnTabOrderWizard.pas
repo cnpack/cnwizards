@@ -419,8 +419,9 @@ begin
   FCanvas.Pen.Color := clBlack;
   FBkColor := HSLToRGB(0, 0.7, 0.7);
 
-  CnWizNotifierServices.AddCallWndProcRetNotifier(OnCallWndProcRet);
-  CnWizNotifierServices.AddGetMsgNotifier(OnGetMsg);
+  CnWizNotifierServices.AddCallWndProcRetNotifier(OnCallWndProcRet,
+    [WM_PAINT, WM_WINDOWPOSCHANGED]);
+  CnWizNotifierServices.AddGetMsgNotifier(OnGetMsg, [WM_PAINT]);
   CnWizNotifierServices.AddFormEditorNotifier(FormNotify);
 
   FTimer := TTimer.Create(nil);
