@@ -320,8 +320,9 @@ begin
     begin
       OutStr := FCells[ACol, ARow];
       Canvas.Font := Grid.Font;
-      DrawText(Canvas.Handle, PChar(OutStr), Length(OutStr), Rect,
-        DT_CENTER or DT_VCENTER or DT_SINGLELINE or DT_NOPREFIX);
+      Canvas.TextRect(Rect, Rect.Left + ((Rect.Right - Rect.Left -
+        Canvas.TextWidth(OutStr)) shr 1), Rect.Top + ((Rect.Bottom - Rect.top
+        - Canvas.TextHeight(OutStr)) shr 1), OutStr);
     end;
   end;
 end;
@@ -477,14 +478,18 @@ var
 begin
   ARect := Image.ClientRect;
   S := GetChr((Grid.Row - 1) * 8 + Grid.Col - 1 + FPage * 128);
-  Image.Picture.Bitmap.Width := Image.Width;
-  Image.Picture.Bitmap.Height := Image.Height;
-  Image.Picture.Bitmap.Canvas.Brush.Color := clWhite;
-  Image.Picture.Bitmap.Canvas.FillRect(ARect);
-  Image.Picture.Bitmap.Canvas.Font := Grid.Font;
-  Image.Picture.Bitmap.Canvas.Font.Size := Image.Height * Grid.Font.Size div 18;
-  DrawText(Image.Picture.Bitmap.Canvas.Handle, PChar(S), Length(S), ARect,
-    DT_CENTER or DT_VCENTER or DT_SINGLELINE or DT_NOPREFIX);
+  with Image.Picture.Bitmap do
+  begin
+    Width := Image.Width;
+    Height := Image.Height;
+    Canvas.Brush.Color := clWhite;
+    Canvas.FillRect(ARect);
+    Canvas.Font := Grid.Font;
+    Canvas.Font.Size := Image.Height * Grid.Font.Size div 18;
+    Canvas.TextRect(ARect, ARect.Left + ((ARect.Right - ARect.Left -
+      Canvas.TextWidth(S)) shr 1), ARect.Top + ((ARect.Bottom - ARect.top
+      - Canvas.TextHeight(S)) shr 1), S);
+  end;
   Image.Invalidate;
 end;
 

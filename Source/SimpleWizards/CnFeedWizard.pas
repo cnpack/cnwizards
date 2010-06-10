@@ -475,7 +475,7 @@ begin
     end;
 
     S := FText;
-    DrawText(Canvas.Handle, PChar(S), Length(S), FTextRect, DT_NOPREFIX or DT_END_ELLIPSIS or DT_WORDBREAK);
+    DrawText(Canvas.Handle, PChar(S), Length(S), FTextRect, DT_NOPREFIX or DT_END_ELLIPSIS or DT_EDITCONTROL or DT_WORDBREAK);
   end;
 end;
 
