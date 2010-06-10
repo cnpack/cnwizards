@@ -115,10 +115,16 @@ const
   SupportKibitzCompile = False;
 {$ENDIF}
 
+{$IFDEF DELPHI5}
+  SupportKibitzCompileThread = True;
+{$ELSE}
+  SupportKibitzCompileThread = False;
+{$ENDIF}
+
 var
   UseCodeInsightMgr: Boolean = False;
   {* 在 D7 中是否使用兼容性较好的方式取得符号列表，较慢}
-  UseKibitzCompileThread: Boolean = True;
+  UseKibitzCompileThread: Boolean = False;
   {* 是否使用后台线程预处理符号 }
 
 function KibitzCompileThreadRunning: Boolean;
@@ -578,7 +584,7 @@ begin
 {$IFDEF Debug}
   CnDebugger.LogMsg('CreateKibitzThread');
 {$ENDIF}
-  if not UseKibitzCompileThread or KibitzCompileThreadRunning then
+  if not SupportKibitzCompileThread or not UseKibitzCompileThread or KibitzCompileThreadRunning then
     Exit;
 
   if ParseProjectBegin(FileName, X, Y) then
@@ -611,7 +617,7 @@ procedure TIDESymbolList.OnIdleExecute(Sender: TObject);
 var
   Tick: Cardinal;
 begin
-  if not UseKibitzCompileThread then
+  if not SupportKibitzCompileThread or not UseKibitzCompileThread then
     Exit;
 
   // 工程切换时等待线程结束
@@ -628,7 +634,7 @@ end;
 procedure TIDESymbolList.OnFileNotify(NotifyCode: TOTAFileNotification;
   const FileName: string);
 begin
-  if not UseKibitzCompileThread then
+  if not SupportKibitzCompileThread or not UseKibitzCompileThread then
     Exit;
     
   if (NotifyCode = ofnFileOpened) and IsDpr(FileName) then

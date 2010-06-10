@@ -2748,7 +2748,7 @@ begin
   try
     if SupportMultiIDESymbolList then
       UseCodeInsightMgr := ReadBool('', csUseCodeInsightMgr, False);
-    if SupportKibitzCompile then
+    if SupportKibitzCompileThread then
       UseKibitzCompileThread := ReadBool('', csUseKibitzCompileThread, False);
   finally
     Free;
@@ -2812,7 +2812,7 @@ begin
   try
     if SupportMultiIDESymbolList then
       WriteBool('', csUseCodeInsightMgr, UseCodeInsightMgr);
-    if SupportKibitzCompile then
+    if SupportKibitzCompileThread then
       WriteBool('', csUseKibitzCompileThread, UseKibitzCompileThread);
   finally
     Free;

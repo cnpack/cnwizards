@@ -271,8 +271,8 @@ begin
     chkUseCodeInsightMgr.Enabled := SupportMultiIDESymbolList;
     if SupportMultiIDESymbolList then
       chkUseCodeInsightMgr.Checked := UseCodeInsightMgr;
-    chkUseKibitzCompileThread.Enabled := SupportKibitzCompile;
-    if SupportKibitzCompile then
+    chkUseKibitzCompileThread.Enabled := SupportKibitzCompileThread;
+    if SupportKibitzCompileThread then
       chkUseKibitzCompileThread.Checked := UseKibitzCompileThread;
     chkAutoPopup.Checked := AutoPopup;
     seDispOnlyAtLeastKey.Value := DispOnlyAtLeastKey;
@@ -385,7 +385,7 @@ begin
   begin
     if SupportMultiIDESymbolList then
       UseCodeInsightMgr := chkUseCodeInsightMgr.Checked;
-    if SupportKibitzCompile then
+    if SupportKibitzCompileThread then
       UseKibitzCompileThread := chkUseKibitzCompileThread.Checked;
     AutoPopup := chkAutoPopup.Checked;
     DispOnlyAtLeastKey := seDispOnlyAtLeastKey.Value;
