@@ -1148,29 +1148,36 @@ end;
 procedure TCnSubMenuWizard.OnPopup(Sender: TObject);
 var
   Point: TPoint;
-  MenuItem, SubItem: TMenuItem;
-  I, J: Integer;
+
+  procedure AddMenuSubItems(SrcItem, DstItem: TMenuItem);
+  var
+    MenuItem, SubItem: TMenuItem;
+    I, J: Integer;
+  begin
+    for I := 0 to SrcItem.Count - 1 do
+    begin
+      MenuItem := TMenuItem.Create(FPopupMenu);
+      MenuItem.Action := SrcItem.Items[I].Action;
+      if not Assigned(MenuItem.Action) then
+        MenuItem.Caption := SrcItem.Items[I].Caption
+      else if MenuItem.Action is TCnWizMenuAction then
+      begin  // 添加二级子菜单
+        for J := 0 to TCnWizMenuAction(MenuItem.Action).Menu.Count - 1 do
+        begin
+          SubItem := TMenuItem.Create(FPopupMenu);
+          SubItem.Action := TCnWizMenuAction(MenuItem.Action).Menu.Items[J].Action;
+          if not Assigned(SubItem.Action) then
+            SubItem.Caption := TCnWizMenuAction(MenuItem.Action).Menu.Items[J].Caption;
+          MenuItem.Add(SubItem);
+        end;
+      end;
+      AddMenuSubItems(SrcItem.Items[I], MenuItem);
+      DstItem.Add(MenuItem);
+    end;
+  end;
 begin
   FPopupMenu.Items.Clear;
-  for I := 0 to Menu.Count - 1 do
-  begin
-    MenuItem := TMenuItem.Create(FPopupMenu);
-    MenuItem.Action := Menu.Items[I].Action;
-    if not Assigned(MenuItem.Action) then
-      MenuItem.Caption := Menu.Items[I].Caption
-    else if MenuItem.Action is TCnWizMenuAction then
-    begin  // 添加二级子菜单
-      for J := 0 to TCnWizMenuAction(MenuItem.Action).Menu.Count - 1 do
-      begin
-        SubItem := TMenuItem.Create(FPopupMenu);
-        SubItem.Action := TCnWizMenuAction(MenuItem.Action).Menu.Items[J].Action;
-        if not Assigned(SubItem.Action) then
-          SubItem.Caption := TCnWizMenuAction(MenuItem.Action).Menu.Items[J].Caption;
-        MenuItem.Add(SubItem);
-      end;
-    end;
-    FPopupMenu.Items.Add(MenuItem);
-  end;
+  AddMenuSubItems(Menu, FPopupMenu.Items);
   GetCursorPos(Point);
   FPopupMenu.Popup(Point.x, Point.y);
 end;
