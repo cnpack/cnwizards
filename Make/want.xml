@@ -98,7 +98,8 @@ See http://www.suigeneris.org/want/ for details.
   <property name="ftpdir"  value="/upgrade.cnpack.org/cnwizards"  if="release" />
 
   <property name="dcc_arg" value="-vn" if="debug" />
-  <property name="dcc_arg" value=""    unless="debug" />
+  <property name="dcc_arg" value="-vn" if="td32" />
+  <property name="dcc_arg" value=""    unless="dcc_arg" />
 
   <!-- 定义编译时使用的条件编译宏 -->
   <property name="define._debug"    value=";DEBUG;USE_JCL" if="debug" />
