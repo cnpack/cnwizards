@@ -195,6 +195,8 @@ type
     FEditControlList: TList;
     FOptionChanged: Boolean;
     FOptionDlgVisible: Boolean;
+    FSaveFontName: string;
+    FSaveFontSize: Integer;
     procedure AddNotifier(List: TList; Notifier: TMethod);
     function CalcCharSize: Boolean;
     procedure GetHighlightFromReg;
@@ -984,15 +986,26 @@ var
   i: Integer;
   OptionType: TEditorChangeTypes;
   ChangeType: TEditorChangeTypes;
+  Option: IOTAEditOptions;
 begin
   OptionType := [];
+  
+  Option := CnOtaGetEditOptions;
+  if Option <> nil then
+  begin
+    if not SameText(Option.FontName, FSaveFontName) or (Option.FontSize <> FSaveFontSize) then
+    begin
+      FOptionChanged := True;
+    end;
+  end;
+
   if FOptionChanged then
   begin
     if UpdateCharSize then
     begin
       Include(OptionType, ctFont);
       FOptionChanged := False;
-    end;      
+    end;
   end;
 
   for i := 0 to EditorCount - 1 do
@@ -1179,6 +1192,9 @@ begin
       [LogFont.lfFaceName, LogFont.lfHeight, LogFont.lfWidth]);
   {$ENDIF}
 
+    FSaveFontName := Option.FontName;
+    FSaveFontSize := Option.FontSize;
+    
     FontName := Option.FontName;
     FontHeight := -MulDiv(Option.FontSize, Screen.PixelsPerInch, 72);
     if not SameText(FontName, LogFont.lfFaceName) or (FontHeight <> LogFont.lfHeight) then

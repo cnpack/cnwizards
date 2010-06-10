@@ -681,6 +681,16 @@ var
   SCnEditorJumpMatchedKeywordMenuHint: string = 'Jump to Matched Keyword under Cursor';
   SCnEditorJumpMatchedKeywordName: string = 'Jump to Matched Keyword Tool';
 
+  // CnEditorFontInc
+  SCnEditorFontIncMenuCaption: string = 'Zoom &Larger Font';
+  SCnEditorFontIncMenuHint: string = 'Zoom Larger Editor Font';
+  SCnEditorFontIncName: string = 'Zoom Larger Editor Font Tool';
+
+  // CnEditorFontDec
+  SCnEditorFontDecMenuCaption: string = 'Zoom &Smaller Font';
+  SCnEditorFontDecMenuHint: string = 'Zoom Smaller Editor Font';
+  SCnEditorFontDecName: string = 'Zoom Smaller Editor Font Tool';
+
   // CnSrcTemplate
   SCnSrcTemplateMenuCaption: string = 'Source Te&mplates';
   SCnSrcTemplateMenuHint: string = 'Source and Comment Templates';

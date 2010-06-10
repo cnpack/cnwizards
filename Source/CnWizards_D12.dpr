@@ -90,6 +90,7 @@ uses
   CnEditorToggleUses in 'EditorWizard\CnEditorToggleUses.pas',
   CnEditorToggleVar in 'EditorWizard\CnEditorToggleVar.pas',
   CnEditorJumpMessage in 'EditorWizard\CnEditorJumpMessage.pas',
+  CnEditorFontZoom in 'EditorWizard\CnEditorFontZoom.pas',
   CnMsdnWizard in 'SimpleWizards\CnMsdnWizard.pas' {CnMsdnConfigForm},
   CnPas2HtmlWizard in 'SimpleWizards\CnPas2HtmlWizard.pas' {CnPas2HtmlForm},
   CnPasConvertTypeFrm in 'SimpleWizards\CnPasConvertTypeFrm.pas' {CnPasConvertTypeForm},
