@@ -887,11 +887,11 @@ begin
   ClearAndFreeList(FApplicationMessageNotifiers);
   ClearAndFreeList(FAppEventNotifiers);
   ClearAndFreeList(FCallWndProcNotifiers);
-  ClearAndFreeList(FCallWndProcMsgList);
+  FreeAndNil(FCallWndProcMsgList);
   ClearAndFreeList(FCallWndProcRetNotifiers);
-  ClearAndFreeList(FCallWndProcRetMsgList);
+  FreeAndNil(FCallWndProcRetMsgList);
   ClearAndFreeList(FGetMsgNotifiers);
-  ClearAndFreeList(FGetMsgMsgList);
+  FreeAndNil(FGetMsgMsgList);
   ClearAndFreeList(FIdleMethods);
 
 {$IFDEF Debug}
