@@ -4,44 +4,44 @@
                  (C)Copyright 2001-2010 CnPack Team
 **********************************************************************
 
-How to add a translation for CnWizards?
----------------------------------------
-CnWizards supports multi-language UI. If you want to add a new translation
+How to add translation for CnWizards?
+-------------------------------------
+CnWizards supports multi-language UI. If you want to add new translation
 for CnWizards, please do follow steps:
 
-1. You can get all language files from our SVN or download page.
+1.You can get all language files from our SVN or download page.
 * How to access our SVN: 
 http://code.google.com/p/cnpack/source/checkout
-* Or you can download CnWizards source code from: 
+* Or you can download CnWizards source code from here(Maybe not latest): 
 http://code.google.com/p/cnpack/downloads/list
 
-2. Our language files are in cnwizards\Bin\Lang, 1033 is English.
+2.Our language files are in cnwizards\Bin\Lang, 1033 is English.
 Also the Lang directory is in our installation destination, such as 
 C:\Program Files\CnPack\CnWizards\Lang
 
-3. For a new language, such as Spanish, you can copy 1033 directory to 1034 
-and translate all the txt files in it into Spanish.
+3.For a new language, such as French, you can copy 1033(English) directory
+to 1036(French) and translate all the txt files in it into French.
 
-4. For example, if there's a line in CnWizards.txt
+4.For example, if there's a line in CnWizards.txt
 TCnWizAboutForm.Caption=About CnPack IDE Wizards
 You can translate it as:
-TCnWizAboutForm.Caption=(Translated text)
+TCnWizAboutForm.Caption=(French string)
 
-5. You can edit follow basic information in every language file. Such as:
-!LanguageID=1034
-!LanguageName=Spanish
+5.You can edit follow basic information in every new language file. Such as:
+!LanguageID=1036
+!LanguageName=French
 !TranslationAuthor=Your Name
 !TranslationAuthorEmail=Your email
 
-6. You can copy new language directory to Lang directory in CnWizards 
+6.You can copy new language directory to Lang directory in CnWizards 
 installation destination. So you can see and select the new language in IDE.
 
-7. You also need to translate follow files to new language for installer:
+7.You need to translate follow files to new language for CnWizards installer:
 cnwizards\License.enu.txt
 cnwizards\Readme.enu.txt
 cnwizards\Install\Src\Lang\CnWizInst_enu.nsh
 
-8. You need to translate about 4,000 lines text. When you finish, please 
-mail them to master@cnpack.org. You'll see the new language in next build.
+8.When you finished, please mail them to master@cnpack.org. You'll see the
+new language in CnWizards and your name in our credits in next build .
 
 [EOF]
