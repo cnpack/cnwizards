@@ -3413,7 +3413,7 @@ SCnProcListSortSubMenuReverse=反序(&R)
 SCnProcListExportMenuCaption=输出列表到文件(&E)...
 SCnProcListCloseMenuCaption=关闭函数列表工具栏(&H)
 SCnProcListNoContent=<无>
-SCnProcListCloseToolBarHint'您已经选择了关闭函数列表工具栏。<BR><BR>如果您以后需要重新显示此工具栏，可在函数过程列表窗口中点击<BR>“显示函数过程列表工具栏”按钮来实现。
+SCnProcListCloseToolBarHint=您已经选择了关闭函数列表工具栏。<BR><BR>如果您以后需要重新显示此工具栏，可在函数过程列表窗口中点击<BR>“显示函数过程列表工具栏”按钮来实现。
 SCnProcListErrorNoIntf=未找到 interface 部分
 SCnProcListErrorNoImpl=未找到 implementation 部分
 SCnUsesCleanerMenuCaption=清理引用单元(&U)...

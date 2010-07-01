@@ -3413,7 +3413,7 @@ SCnProcListSortSubMenuReverse=反序(&R)
 SCnProcListExportMenuCaption=輸出列表到文件(&E)...
 SCnProcListCloseMenuCaption=關閉函數列表工具欄(&H)
 SCnProcListNoContent=<無>
-SCnProcListCloseToolBarHint'您已經選擇了關閉函數列表工具欄。<BR><BR>如果您以後需要重新顯示此工具欄，可在函數過程列表窗口中點擊<BR>「顯示函數過程列表工具欄」按鈕來實現。
+SCnProcListCloseToolBarHint=您已經選擇了關閉函數列表工具欄。<BR><BR>如果您以後需要重新顯示此工具欄，可在函數過程列表窗口中點擊<BR>「顯示函數過程列表工具欄」按鈕來實現。
 SCnProcListErrorNoIntf=未找到 interface 部分
 SCnProcListErrorNoImpl=未找到 implementation 部分
 SCnUsesCleanerMenuCaption=清理引用單元(&U)...
