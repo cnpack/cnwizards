@@ -69,9 +69,11 @@ type
   TCnSrcEditorToolButton = class(TToolButton)
   private
     FMenu: TPopupMenu;
+    FLastTick: Cardinal;
     procedure OnPopup(Sender: TObject);
     procedure DoClick(Sender: TObject);
   public
+    procedure InitiateAction; override;
     procedure Click; override;
   end;
 
@@ -224,6 +226,8 @@ const
   csShowDesignToolBar = 'ShowDesignToolBar';
   csWrapable = 'Wrapable';
 
+  csUpdateMinInterval = 500;
+
 type
   TCnEditorToolBarObj = class(TComponent)
   {* 用以描述一类工具栏与其所有实例，包含回调函数与对 EditControl 的引用}
@@ -347,6 +351,16 @@ end;
 procedure TCnSrcEditorToolButton.DoClick(Sender: TObject);
 begin
   inherited Click;
+end;
+
+procedure TCnSrcEditorToolButton.InitiateAction;
+begin
+  // 减少调用次数，降低CPU占用率
+  if Abs(GetTickCount - FLastTick) > csUpdateMinInterval then
+  begin
+    inherited InitiateAction;
+    FLastTick := GetTickCount;
+  end;
 end;
 
 procedure TCnSrcEditorToolButton.OnPopup(Sender: TObject);

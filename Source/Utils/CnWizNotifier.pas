@@ -198,7 +198,7 @@ uses
 {$ENDIF Debug}
 
 const
-  csIdleTimerInterval = 20;
+  csIdleMinInterval = 200;
 
 type
 
@@ -350,15 +350,15 @@ type
     FLastControl: TWinControl;
     FLastForm: TForm;
     FCompNotifyList: TComponentList;
+    FLastIdleTick: Cardinal;
     FIdleExecuting: Boolean;
-    FIdleTimer: TTimer;
     procedure ClearAndFreeList(var List: TList);
     function IndexOf(List: TList; Notifier: TMethod): Integer;
     procedure AddNotifier(List: TList; Notifier: TMethod);
     procedure AddNotifierEx(List, MsgList: TList; Notifier: TMethod; MsgIDs: array of Cardinal);
     procedure RemoveNotifier(List: TList; Notifier: TMethod);
     procedure CheckActiveControl;
-    procedure OnIdleTimer(Sender: TObject);
+    procedure DoIdleNotifiers;
   protected
     // ICnWizNotifierServices
     procedure AddFileNotifier(Notifier: TCnWizFileNotifier);
@@ -828,10 +828,6 @@ begin
   FIdleMethods := TList.Create;
   FCompNotifyList := TComponentList.Create(True);
   FCnWizIdeNotifier := TCnWizIdeNotifier.Create(Self);
-  FIdleTimer := TTimer.Create(nil);
-  FIdleTimer.OnTimer := OnIdleTimer;
-  FIdleTimer.Enabled := False;
-  FIdleTimer.Interval := csIdleTimerInterval;
   FIdeNotifierIndex := IServices.AddNotifier(FCnWizIdeNotifier as IOTAIDENotifier);
   FCnWizDebuggerNotifier := TCnWizDebuggerNotifier.Create(Self);
   FDebuggerNotifierIndex := IDebuggerService.AddNotifier(FCnWizDebuggerNotifier as IOTADebuggerNotifier);
@@ -870,7 +866,6 @@ begin
 
   FreeAndNil(FCompNotifyList);
   FreeAndNil(FEvents);
-  FIdleTimer.Free;
 
   ClearAndFreeList(FBeforeCompileNotifiers);
   ClearAndFreeList(FAfterCompileNotifiers);
@@ -1627,7 +1622,7 @@ begin
   RemoveNotifier(FAppEventNotifiers, TMethod(Notifier));
 end;
 
-procedure TCnWizNotifierServices.OnIdleTimer(Sender: TObject);
+procedure TCnWizNotifierServices.DoIdleNotifiers;
 var
   I: Integer;
 begin
@@ -1639,12 +1634,11 @@ begin
       for I := FApplicationIdleNotifiers.Count - 1 downto 0 do
       try
         with PCnWizNotifierRecord(FApplicationIdleNotifiers[I])^ do
-          TNotifyEvent(Notifier)(Sender);
+          TNotifyEvent(Notifier)(Self);
       except
         DoHandleException('TCnWizNotifierServices.DoApplicationIdle[' + IntToStr(I) + ']');
       end;
     end;
-    FIdleTimer.Enabled := False;
   finally
     FIdleExecuting := False;
   end;
@@ -1657,8 +1651,11 @@ begin
   
   DoIdleExecute;
 
-  if not FIdleTimer.Enabled then
-    FIdleTimer.Enabled := True; 
+  if Abs(GetTickCount - FLastIdleTick) > csIdleMinInterval then
+  begin
+    FLastIdleTick := GetTickCount;
+    DoIdleNotifiers;
+  end;
 end;
 
 procedure TCnWizNotifierServices.DoApplicationMessage(var Msg: TMsg;
