@@ -723,7 +723,7 @@ Usage: want [target-name] [-Dname=value]
     </copy>
     <echo input="${tools}/CnTools.template.rc" file="${tools}/CnAsciiChart/AsciiChart.rc" />
     <brcc file="${tools}/CnAsciiChart/AsciiChart.rc" output="${tools}/CnAsciiChart/AsciiChart.res" />
-    <dcc basedir="${tools}/CnAsciiChart" source="AsciiChart.dpr" versions="5" usecfg="true" />
+    <dcc basedir="${tools}/CnAsciiChart" source="AsciiChart.dpr" versions="7" usecfg="true" />
     <delete dir="${tools}/CnAsciiChart">
        <include name="AsciiChart.res" />
        <include name="AsciiChart.rc" />
@@ -823,7 +823,7 @@ Usage: want [target-name] [-Dname=value]
     </copy>
     <echo input="${tools}/CnTools.template.rc" file="${tools}/CnWizSetup/Setup.rc" />
     <brcc file="${tools}/CnWizSetup/Setup.rc" output="${tools}/CnWizSetup/Setup.res" />
-    <dcc basedir="${tools}/CnWizSetup" source="Setup.dpr" versions="5" usecfg="true" />
+    <dcc basedir="${tools}/CnWizSetup" source="Setup.dpr" versions="7" usecfg="true" />
     <delete dir="${tools}/CnWizSetup">
        <include name="Setup.res" />
        <include name="Setup.rc" />
