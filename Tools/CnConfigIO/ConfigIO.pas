@@ -139,6 +139,10 @@ implementation
 
 {$R *.DFM}
 
+{$IFDEF COMPILER7_UP}
+{$R WindowsXP.res}
+{$ENDIF}
+
 procedure TFrmConfigIO.FormCreate(Sender: TObject);
 var
   AFileName: string;

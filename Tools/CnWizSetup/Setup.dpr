@@ -58,6 +58,10 @@ uses
 {$R *.RES}
 {$R SetupRes.RES}
 
+{$IFDEF COMPILER7_UP}
+{$R WindowsXP.res}
+{$ENDIF}
+
 type
   TCompilerName = (cvD5, cvD6, cvD7, cvD8, cbD9, cbD10, cbD2007, cbD2009,
     cbD2010, cbD2011, cvCB5, cvCB6);

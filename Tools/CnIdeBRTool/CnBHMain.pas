@@ -168,6 +168,10 @@ implementation
 
 {$R *.dfm}
 
+{$IFDEF COMPILER7_UP}
+{$R WindowsXP.res}
+{$ENDIF}
+
 const
   SCnRegIDEBase = '\Software\Borland\';
   SCnRegIDEBase12 = '\Software\CodeGear\';

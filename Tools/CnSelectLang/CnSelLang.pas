@@ -85,6 +85,10 @@ uses
 
 {$R *.DFM}
 
+{$IFDEF COMPILER7_UP}
+{$R WindowsXP.res}
+{$ENDIF}
+
 procedure CnSetWizardsLanguageID(LangID: DWORD; ShowMsg: Boolean; LangName: string);
 begin
   if LangID <> 0 then

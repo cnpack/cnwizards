@@ -156,6 +156,10 @@ uses
 
 {$R *.DFM}
 
+{$IFDEF COMPILER7_UP}
+{$R WindowsXP.res}
+{$ENDIF}
+
 const
   SCnNonVisualAscii: array[0..32] of string = (
     'NUL', 'SOH', 'STX', 'ETX', 'EOT', 'ENQ', 'ACK', 'BEL',

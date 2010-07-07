@@ -96,6 +96,10 @@ uses
 
 {$R *.DFM}
 
+{$IFDEF COMPILER7_UP}
+{$R WindowsXP.res}
+{$ENDIF}
+
 const
   csSection = 'CnDfm6To5';
   csSelectFile = 'SelectFile';
