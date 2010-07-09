@@ -156,8 +156,10 @@ uses
 
 {$R *.DFM}
 
+{$IFDEF STAND_ALONE}
 {$IFDEF COMPILER7_UP}
 {$R WindowsXP.res}
+{$ENDIF}
 {$ENDIF}
 
 const
