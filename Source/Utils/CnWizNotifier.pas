@@ -198,7 +198,7 @@ uses
 {$ENDIF Debug}
 
 const
-  csIdleMinInterval = 200;
+  csIdleMinInterval = 50;
 
 type
 
