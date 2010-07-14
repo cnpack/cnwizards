@@ -1081,7 +1081,7 @@ end;
 procedure TCnMessageBoxWizard.Execute;
 var
   Ini: TCustomIniFile;
-  IsDelphi, IsWideVer: Boolean;
+  IsDelphi, IsWideVer, IsBds: Boolean;
   s, Code, RetStr, sPChar, sMsgBox: string;
   Value: TCnMsgBoxResultKind;
   Kind: TCnMsgBoxResultKind;
@@ -1182,6 +1182,11 @@ var
   end;
 
 begin
+{$IFDEF BDS}
+  IsBds := True;
+{$ELSE}
+  IsBds := False;
+{$ENDIF}
   Ini := CreateIniFile;
   try
     with TCnMessageBoxForm.CreateEx(nil, Ini, False) do
@@ -1249,8 +1254,14 @@ begin
         else
         begin
           if IsDelphi and CheckFormat and IsFormatStr(MsgBoxText, FmtStr) then
-            Code := Format('%s' + sPChar + '(Format(%s, %s)), ' + RetStr, [Code,
-              StrToSourceCode(MsgBoxText, DelphiReturn, CReturn, not AutoWrap), FmtStr])
+          begin
+            if IsBds and IsWideVer then
+              Code := Format('%s' + sPChar + '(WideFormat(%s, %s)), ' + RetStr, [Code,
+                StrToSourceCode(MsgBoxText, DelphiReturn, CReturn, not AutoWrap), FmtStr])
+            else
+              Code := Format('%s' + sPChar + '(Format(%s, %s)), ' + RetStr, [Code,
+                StrToSourceCode(MsgBoxText, DelphiReturn, CReturn, not AutoWrap), FmtStr])
+          end
           else if IsDelphi and UsePChar then
             Code := Format('%s' + sPChar + '(%s), ' + RetStr, [Code,
               StrToSourceCode(MsgBoxText, DelphiReturn, CReturn, not AutoWrap)])
@@ -1282,7 +1293,12 @@ begin
             if IsDelphi then
             begin
               if CheckFormat and IsFormatStr(MsgBoxCaption, FmtStr) then
-                Code := Format('%s' + sPChar + '(Format(''%s'', %s)), ' + RetStr, [Code, s, FmtStr])
+              begin
+                if IsBds and IsWideVer then
+                  Code := Format('%s' + sPChar + '(WideFormat(''%s'', %s)), ' + RetStr, [Code, s, FmtStr])
+                else
+                  Code := Format('%s' + sPChar + '(Format(''%s'', %s)), ' + RetStr, [Code, s, FmtStr])
+              end
               else if UsePChar then
                 Code := Format('%s' + sPChar + '(''%s''), ' + RetStr, [Code, s])
               else
