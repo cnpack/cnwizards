@@ -50,7 +50,7 @@ uses
   CnWizCompilerConst, Contnrs;
 
 type
-  TCnBracketType = (btNone, btBracket, btSquare, btCurly); // () [] {}
+  TCnAutoMatchType = (btNone, btBracket, btSquare, btCurly, btQuote, btDitto); // () [] {} '' ""
   TCnRenameIdentifierType = (ritInvalid, ritUnit, ritCurrentProc, ritInnerProc);
 
 //==============================================================================
@@ -63,8 +63,8 @@ type
   private
     FActive: Boolean;
     FOnEnhConfig: TNotifyEvent;
-    FBracketEntered: Boolean;
-    FBracketType: TCnBracketType;
+    FAutoMatchEntered: Boolean;
+    FAutoMatchType: TCnAutoMatchType;
     FRepaintView: Cardinal; // 供传递重画参数用
 
     FSmartCopy: Boolean;
@@ -97,7 +97,7 @@ type
   protected
     procedure SetActive(Value: Boolean);
     procedure DoEnhConfig;
-    function DoAutoBracket(View: IOTAEditView; Key, ScanCode: Word; Shift: TShiftState;
+    function DoAutoMatchEnter(View: IOTAEditView; Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean): Boolean;
     function DoSmartCopy(View: IOTAEditView; Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean): Boolean;
@@ -317,19 +317,19 @@ end;
 // 扩展功能方法
 //------------------------------------------------------------------------------
 
-function TCnSrcEditorKey.DoAutoBracket(View: IOTAEditView; Key, ScanCode: Word;
+function TCnSrcEditorKey.DoAutoMatchEnter(View: IOTAEditView; Key, ScanCode: Word;
   Shift: TShiftState; var Handled: Boolean): Boolean;
 var
   AChar: Char;
   Line: string;
   LineNo, CharIndex: Integer;
-  NeedBracket: Boolean;
+  NeedAutoMatch: Boolean;
 begin
   if CnNtaGetCurrLineText(Line, LineNo, CharIndex) then
   begin
     AChar := Char(VK_ScanCodeToAscii(Key, ScanCode));
 
-    if CharInSet(AChar, ['(', '[', '{']) then
+    if CharInSet(AChar, ['(', '[', '{', '''', '"']) then
     begin
       if CanIgnoreFromIME then
       begin
@@ -337,33 +337,35 @@ begin
         Exit;
       end;
 
-      NeedBracket := False;
+      NeedAutoMatch := False;
       if Length(Line) > CharIndex then
       begin
-        // 当前位置后是标识符以及左括号时不自动输入括号
-        NeedBracket := not CharInSet(Line[CharIndex + 1], ['_', 'A'..'Z',
+        // 当前位置后是标识符以及左括号引号时不自动输入括号
+        NeedAutoMatch := not CharInSet(Line[CharIndex + 1], ['_', 'A'..'Z',
           'a'..'z', '0'..'9', '(', '''', '[']);
       end
       else if Length(Line) = CharIndex then
-        NeedBracket := True; // 行尾
+        NeedAutoMatch := True; // 行尾
 
       // 自动输入括号配对
-      if NeedBracket then
+      if NeedAutoMatch then
       begin
         case AChar of
-          '(': FBracketType := btBracket;
-          '[': FBracketType := btSquare;
-          '{': FBracketType := btCurly;
+          '(': FAutoMatchType := btBracket;
+          '[': FAutoMatchType := btSquare;
+          '{': FAutoMatchType := btCurly;
+          '''':FAutoMatchType := btQuote;
+          '"': FAutoMatchType := btDitto;
         else
-          FBracketType := btNone;
+          FAutoMatchType := btNone;
         end;
 
-        FBracketEntered := True;
+        FAutoMatchEntered := True;
         FRepaintView := Cardinal(View);
         CnWizNotifierServices.ExecuteOnApplicationIdle(ExecuteInsertCharOnIdle);
       end;
     end
-    else if FBracketEntered and CharInSet(AChar, [')', ']', '}', #9]) then
+    else if FAutoMatchEntered and CharInSet(AChar, [')', ']', '}', '''', '"', #9]) then
     begin
       if CanIgnoreFromIME then
       begin
@@ -372,27 +374,31 @@ begin
       end;
 
       // 刚输入了左括号，此右括号可能要省掉 ，或者按 Tab 时跳到右括号后
-      if ((FBracketType = btBracket) and (AChar = ')')) or
-        ((FBracketType = btSquare) and (AChar = ']')) or
-        ((FBracketType = btCurly) and (AChar = '}')) or (AChar = #9) then
+      if ((FAutoMatchType = btBracket) and (AChar = ')')) or
+        ((FAutoMatchType = btSquare) and (AChar = ']')) or
+        ((FAutoMatchType = btCurly) and (AChar = '}')) or
+        ((FAutoMatchType = btQuote) and (AChar = '''')) or
+        ((FAutoMatchType = btDitto) and (AChar = '"')) or (AChar = #9) then
       begin
         // 判断当前光标右边是否是相应的右括号
-        NeedBracket := False;
+        NeedAutoMatch := False;
         if Length(Line) > CharIndex then
         begin
           AChar := Line[CharIndex + 1]; // 重新使用 AChar
-          case FBracketType of
-            btBracket: NeedBracket := AChar = ')';
-            btSquare:  NeedBracket := AChar = ']';
-            btCurly:   NeedBracket := AChar = '}';
+          case FAutoMatchType of
+            btBracket: NeedAutoMatch := AChar = ')';
+            btSquare:  NeedAutoMatch := AChar = ']';
+            btCurly:   NeedAutoMatch := AChar = '}';
+            btQuote:   NeedAutoMatch := AChar = '''';
+            btDitto:   NeedAutoMatch := AChar = '"';
           end;
         end;
 
-        if NeedBracket then // 有匹配的东西
+        if NeedAutoMatch then // 有匹配的东西
         begin
           CnOtaMovePosInCurSource(ipCur, 0, 1);
           View.Paint;
-          FBracketEntered := False;
+          FAutoMatchEntered := False;
           Handled := True;
         end;
       end;
@@ -1399,7 +1405,7 @@ begin
     if not Assigned(View) then
       Exit;
 
-    if FAutoBracket and DoAutoBracket(View, Key, ScanCode, Shift, Handled) then
+    if FAutoBracket and DoAutoMatchEnter(View, Key, ScanCode, Shift, Handled) then
       Exit;
 
     if FSmartCopy or FSmartPaste then
@@ -1440,13 +1446,15 @@ end;
 
 procedure TCnSrcEditorKey.ExecuteInsertCharOnIdle(Sender: TObject);
 begin
-  if (FBracketType = btNone) or (FRepaintView = 0) then
+  if (FAutoMatchType = btNone) or (FRepaintView = 0) then
     Exit;
 
-  case FBracketType of
+  case FAutoMatchType of
     btBracket: CnOtaInsertTextToCurSource(')');
     btSquare:  CnOtaInsertTextToCurSource(']');
     btCurly:   CnOtaInsertTextToCurSource('}');
+    btQuote:   CnOtaInsertTextToCurSource('''');
+    btDitto:   CnOtaInsertTextToCurSource('"');
   end;
   
   CnOtaMovePosInCurSource(ipCur, 0, -1);

@@ -607,7 +607,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 120
           Width = 350
           Height = 17
-          Caption = 'Auto Input Matched Bracket (), [], {}.'
+          Caption = 'Auto Input Matched Bracket and Quote (), [], {} '''', "".'
           TabOrder = 6
         end
         object chkKeepSearch: TCheckBox
