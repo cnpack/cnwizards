@@ -290,9 +290,12 @@ begin
       '_', '0'..'9', 'a'..'z', 'A'..'Z': Identifiers[I]:=True;
     else Identifiers[I]:=False;
     end;
-    J:=AnsiChar(UpperCase(string(I))[1]);
     Case I of
-      'a'..'z', 'A'..'Z', '_': mHashTable[I]:=Ord(J)-64;
+      'a'..'z', 'A'..'Z', '_':
+      begin
+        J:=AnsiChar(UpperCase(string(I))[1]);
+        mHashTable[I]:=Ord(J)-64;
+      end;
     else mHashTable[AnsiChar(I)]:=0;
     end;
   end;
