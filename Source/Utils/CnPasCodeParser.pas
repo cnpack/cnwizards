@@ -427,9 +427,10 @@ begin
               // 不处理 procedure/function 类型定义，前面是 = 号
               // 也不处理 procedure/function 变量声明，前面是 : 号
               // 也不处理匿名方法声明，前面是 to
-              // 也不处理匿名方法实现，前面是 :=
+              // 也不处理匿名方法实现，前面是 := 赋值或 ( , 做参数，但可能不完全
               if IsImpl and ((not (Lex.TokenID in [tkProcedure, tkFunction]))
-                or (not (PrevTokenID in [tkEqual, tkColon, tkTo, tkAssign]))) and (DeclareWithEndLevel <= 0) then
+                or (not (PrevTokenID in [tkEqual, tkColon, tkTo, tkAssign, tkRoundOpen, tkComma])))
+                and (DeclareWithEndLevel <= 0) then
               begin
                 // DeclareWithEndLevel <= 0 表示只处理 class/record 外的声明，内部不管
                 while BlockStack.Count > 0 do
