@@ -572,7 +572,7 @@ Section "RAD Studio 2011" SecD15
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_D15.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\CodeGear\BDS\8.0\Experts" "CnWizards_D15" "$INSTDIR\CnWizards_D15.dll"
+  WriteRegStr HKCU "Software\Embarcadero\BDS\8.0\Experts" "CnWizards_D15" "$INSTDIR\CnWizards_D15.dll"
 SectionEnd
 !endif
 
@@ -779,7 +779,7 @@ Function SetCheckBoxes
   !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\CodeGear\BDS\7.0" "App" ${SecD14}
 !endif
 !ifdef IDE_VERSION_D15
-  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\CodeGear\BDS\8.0" "App" ${SecD15}
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\8.0" "App" ${SecD15}
 !endif
 !endif
 !ifdef IDE_VERSION_CB5
@@ -838,7 +838,7 @@ Section "Uninstall"
   DeleteRegValue HKCU "Software\CodeGear\BDS\7.0\Experts" "CnWizards_D14"
 !endif
 !ifdef IDE_VERSION_D15
-  DeleteRegValue HKCU "Software\CodeGear\BDS\8.0\Experts" "CnWizards_D15"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\8.0\Experts" "CnWizards_D15"
 !endif
 !ifdef IDE_VERSION_CB5
   DeleteRegValue HKCU "Software\Borland\C++Builder\5.0\Experts" "CnWizards_CB5"
