@@ -5,9 +5,9 @@
 **********************************************************************
 
                          CnPack IDE Wizards
-                           Version 0.9.6
+                           Version 0.9.7
                        =======================
-                         CnPack Team 2010.05
+                         CnPack Team 2010.08
 
 
 ======================================================================
@@ -21,7 +21,7 @@ eingebunden werden kann, damit die Effizienz bei der Entwicklung
 gesteigert werden kann.
 
     CnWizards wurde entworfen, um Programmierern die mit Delphi 5 6 7,
-C++Builder 5 6 oder BDS 2005 2006 oder RAD Studio 2007 2009 2010 
+C++Builder 5 6 oder BDS 2005 2006 oder RAD Studio 2007 2009 2010 2011 
 arbeiten, die Arbeit zu erleichtern.
 
     Die offizielle Version der CnWizards beinhalt folgende Sprachen: 
