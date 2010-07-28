@@ -19,6 +19,7 @@
 ;    IDE_VERSION_D11
 ;    IDE_VERSION_D12
 ;    IDE_VERSION_D14
+;    IDE_VERSION_D15
 ;    IDE_VERSION_CB5
 ;    IDE_VERSION_CB6
 ;    NO_HELP
@@ -83,6 +84,7 @@ RequestExecutionLevel admin
 !ifndef IDE_VERSION_D11
 !ifndef IDE_VERSION_D12
 !ifndef IDE_VERSION_D14
+!ifndef IDE_VERSION_D15
 !ifndef IDE_VERSION_CB5
 !ifndef IDE_VERSION_CB6
 
@@ -108,10 +110,12 @@ RequestExecutionLevel admin
   !define IDE_VERSION_D11 "1"
   !define IDE_VERSION_D12 "1"
   !define IDE_VERSION_D14 "1"
+  !define IDE_VERSION_D15 "1"
   !define IDE_VERSION_CB5 "1"
   !define IDE_VERSION_CB6 "1"
 !endif
 
+!endif
 !endif
 !endif
 !endif
@@ -158,6 +162,10 @@ RequestExecutionLevel admin
   !ifdef IDE_VERSION_D14
     !define IDE_SHORT_NAME "D2010"
     !define IDE_LONG_NAME "RAD Studio 2010"
+  !endif
+  !ifdef IDE_VERSION_D15
+    !define IDE_SHORT_NAME "D2011"
+    !define IDE_LONG_NAME "RAD Studio 2011"
   !endif
   !ifdef IDE_VERSION_CB5
     !define IDE_SHORT_NAME "CB5"
@@ -368,6 +376,13 @@ FileLoop:
   FileClose $0
 !endif
 
+!ifdef IDE_VERSION_D15
+  IfFileExists "$INSTDIR\CnWizards_D15.dll" 0 +4
+  FileOpen $0 "$INSTDIR\CnWizards_D15.dll" a
+  IfErrors FileInUse
+  FileClose $0
+!endif
+
 !endif
 
 !ifdef IDE_VERSION_CB5
@@ -551,6 +566,16 @@ Section "RAD Studio 2010" SecD14
 SectionEnd
 !endif
 
+!ifdef IDE_VERSION_D15
+Section "RAD Studio 2011" SecD15
+  SectionIn 1 2
+  SetOutPath $INSTDIR
+  File "..\..\Bin\CnWizards_D15.dll"
+  ; 写入专家注册键值
+  WriteRegStr HKCU "Software\CodeGear\BDS\8.0\Experts" "CnWizards_D15" "$INSTDIR\CnWizards_D15.dll"
+SectionEnd
+!endif
+
 !endif
 
 !ifdef IDE_VERSION_CB5
@@ -682,6 +707,10 @@ Function .onMouseOverSection
     ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio 2010" "+" $R0
     !insertmacro MUI_DESCRIPTION_TEXT ${SecD14} $R0
   !endif
+  !ifdef IDE_VERSION_D15
+    ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio 2011" "+" $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecD15} $R0
+  !endif
 !endif
   !ifdef IDE_VERSION_CB5
     ${WordReplace} "$(DESDLL)" "#DLL#" "C++Builder 5" "+" $R0
@@ -749,6 +778,9 @@ Function SetCheckBoxes
 !ifdef IDE_VERSION_D14
   !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\CodeGear\BDS\7.0" "App" ${SecD14}
 !endif
+!ifdef IDE_VERSION_D15
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\CodeGear\BDS\8.0" "App" ${SecD15}
+!endif
 !endif
 !ifdef IDE_VERSION_CB5
   !insertmacro SET_COMPILER_CHECKBOX HKLM "Software\Borland\C++Builder\5.0" "App" ${SecCB5}
@@ -804,6 +836,9 @@ Section "Uninstall"
 !endif
 !ifdef IDE_VERSION_D14
   DeleteRegValue HKCU "Software\CodeGear\BDS\7.0\Experts" "CnWizards_D14"
+!endif
+!ifdef IDE_VERSION_D15
+  DeleteRegValue HKCU "Software\CodeGear\BDS\8.0\Experts" "CnWizards_D15"
 !endif
 !ifdef IDE_VERSION_CB5
   DeleteRegValue HKCU "Software\Borland\C++Builder\5.0\Experts" "CnWizards_CB5"
