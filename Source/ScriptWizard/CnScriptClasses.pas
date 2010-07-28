@@ -67,6 +67,11 @@ type
   TCnReadlnEvent = procedure (const Prompt: string; var Text: string) of object;
   TCnWritelnEvent = procedure (const Text: string) of object;
 
+{$IFDEF DELPHI2009_UP}
+  TPSOnCompImport = TPSOnCompImportEvent;
+  TPSOnExecImport = TPSOnExecImportEvent;
+{$ENDIF}
+
   TCnScriptExec = class
   private
     PSScript: TPSScript;

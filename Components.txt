@@ -11,13 +11,13 @@ Script Wizard
 
 Depend on: RemObjects Pascal Script
 Revision : 157 (For D5-D2007) 
-           215 (For D2009 and above)
+           231 (For D2009 and above)
 
 You'll need to obtain the exact revision from the ROPS Subversion repository:
 
 > cd CnPack\cnwizards\Source\ThirdParty
 > svn checkout -r 157 http://code.remobjects.com/svn/pascalscript/Source PascalScript
-> svn checkout -r 215 http://code.remobjects.com/svn/pascalscript/Source PascalScript_2009
+> svn checkout -r 231 http://code.remobjects.com/svn/pascalscript/Source PascalScript_2009
 
 Also, you'll need to open file CnPack\cnwizards\Source\CnWizards_Def.inc and
 remove or comment this line:
