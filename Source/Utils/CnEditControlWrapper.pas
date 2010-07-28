@@ -100,6 +100,11 @@ type
     LineText: string;
     ModTime: TDateTime;
     BlockValid: Boolean;
+    BlockSize: Integer;
+    BlockStartingColumn: Integer;
+    BlockStartingRow: Integer;
+    BlockEndingColumn: Integer;
+    BlockEndingRow: Integer;
     EditView: Pointer;
 {$IFDEF BDS}
     LineDigit: Integer;       // 编辑器总行数的位数，如100行为3, 计算而来
@@ -788,6 +793,11 @@ begin
     Result.ModTime := Editor.EditView.Buffer.GetCurrentDate;
     Result.LineCount := Editor.EditView.Buffer.GetLinesInBuffer;
     Result.BlockValid := Editor.EditView.Block.IsValid;
+    Result.BlockSize := Editor.EditView.Block.Size;
+    Result.BlockStartingColumn := Editor.EditView.Block.StartingColumn;
+    Result.BlockStartingRow := Editor.EditView.Block.StartingRow;
+    Result.BlockEndingColumn := Editor.EditView.Block.EndingColumn;
+    Result.BlockEndingRow := Editor.EditView.Block.EndingRow;
     Result.EditView := Pointer(Editor.EditView);
     Result.LineText := GetStrProp(Editor.EditControl, 'LineText');
 {$IFDEF BDS}
@@ -947,7 +957,12 @@ begin
     Include(Result, ctCurrLine);
   if Context.CurPos.Col <> OldContext.CurPos.Col then
     Include(Result, ctCurrCol);
-  if Context.BlockValid <> OldContext.BlockValid then
+  if (Context.BlockValid <> OldContext.BlockValid) or
+    (Context.BlockSize <> OldContext.BlockSize) or
+    (Context.BlockStartingColumn <> OldContext.BlockStartingColumn) or
+    (Context.BlockStartingRow <> OldContext.BlockStartingRow) or
+    (Context.BlockEndingColumn <> OldContext.BlockEndingColumn) or
+    (Context.BlockEndingRow <> OldContext.BlockEndingRow) then
     Include(Result, ctBlock);
   if Context.EditView <> OldContext.EditView then
     Include(Result, ctView);
@@ -972,10 +987,19 @@ begin
   begin
     Include(Result, ctModified);
   end
-  else if Context.CurPos.Line = OldContext.CurPos.Line then
+  else if (Context.CurPos.Line = OldContext.CurPos.Line) and
+    not AnsiSameStr(Context.LineText, OldContext.LineText) then
   begin
-    if not AnsiSameStr(Context.LineText, OldContext.LineText) then
-      Include(Result, ctModified);
+    Include(Result, ctModified);
+  end
+  else if (Context.BlockSize <> OldContext.BlockSize) and
+    (Context.BlockStartingRow = OldContext.BlockStartingRow) and
+    (Context.BlockEndingColumn = OldContext.BlockEndingColumn) and
+    (Context.BlockEndingRow = OldContext.BlockEndingRow) and
+    (Context.BlockEndingRow = Context.CurPos.Line) then
+  begin
+    // 块缩进、反缩进时块位置不变而大小变化
+    Include(Result, ctModified);
   end;
 
   Editor.FContext := Context;
