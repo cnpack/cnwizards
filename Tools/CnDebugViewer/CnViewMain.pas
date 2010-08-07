@@ -1003,13 +1003,16 @@ begin
 end;
 
 procedure TCnMainViewer.OnNewChildForm(var Msg: TMessage);
+var
+  AChild: TCnMsgChild;
 begin
   if not (csDestroying in ComponentState) then
-    with TCnMsgChild.Create(Application) do
-    begin
-      Show;
-      Store := TCnMsgStore(Msg.WParam);
-    end;
+  begin
+    AChild := TCnMsgChild.Create(Application);
+    AChild.Show;
+    AChild.Store := TCnMsgStore(Msg.WParam);
+    UpdateFormInSwitch(AChild, fsUpdate);
+  end;
 end;
 
 procedure TCnMainViewer.actExportExecute(Sender: TObject);

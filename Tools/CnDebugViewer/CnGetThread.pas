@@ -70,8 +70,10 @@ uses
 procedure TGetDebugThread.AddADescToStore(var ADesc: TCnMsgDesc);
 var
   AStore: TCnMsgStore;
+  StoreInited: Boolean;
 begin
   AStore := CnMsgManager.IndexOf(ADesc.Annex.ProcessId);
+  StoreInited := False;
   if AStore = nil then
   begin
     AStore := CnMsgManager.IndexOf(0);
@@ -81,11 +83,13 @@ begin
         if not (csDestroying in Application.MainForm.ComponentState) then
         begin
           AStore := CnMsgManager.AddStore(0, SCnNoneProcName);
+          AStore.ProcessID := ADesc.Annex.ProcessId;
+          AStore.ProcName := GetProcNameFromProcessID(AStore.ProcessID);
           PostMessage(Application.MainForm.Handle, WM_USER_NEW_FORM, Integer(AStore), 0);
         end;
     end;
 
-    if AStore <> nil then
+    if not StoreInited and (AStore <> nil) then
     begin
       AStore.ProcessID := ADesc.Annex.ProcessId;
       AStore.ProcName := GetProcNameFromProcessID(AStore.ProcessID);
