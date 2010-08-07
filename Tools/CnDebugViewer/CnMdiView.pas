@@ -873,7 +873,7 @@ var
   AStore: TCnMsgStore;
   FoundNode: PVirtualNode;
 begin
-  if (AText = '') or (FStore <> nil) then Exit;
+  if (AText = '') or (FStore = nil) then Exit;
 
   if FMsgTree.FocusedNode <> nil then
     OldPos := FMsgTree.FocusedNode.AbsoluteIndex // 从 1 开始的
