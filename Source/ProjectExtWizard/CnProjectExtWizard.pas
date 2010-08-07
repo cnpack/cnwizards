@@ -67,6 +67,10 @@ interface
 
 {$IFDEF CNWIZARDS_CNPROJECTEXTWIZARD}
 
+{$IFNDEF BDS2010_UP}
+  {$DEFINE SUPPORT_USE_UNIT}
+{$ENDIF}
+
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, Dialogs, ActnList,
   ToolsAPI, IniFiles, ShellAPI, Menus, FileCtrl, {$IFDEF BDS} Variants, {$ENDIF}
@@ -92,7 +96,9 @@ type
     IdExploreExe: Integer;
     IdViewUnits: Integer;
     IdViewForms: Integer;
+  {$IFDEF SUPPORT_USE_UNIT}
     IdUseUnits: Integer;
+  {$ENDIF}
     IdListUsed: Integer;
   {$IFDEF SUPPORT_PRJ_BACKUP}
     IdProjBackup: Integer;
@@ -434,9 +440,11 @@ begin
     SCnProjExtViewFormsCaption, 0,
     SCnProjExtViewFormsHint, SCnProjExtViewForms);
 
+ {$IFDEF SUPPORT_USE_UNIT}
   IdUseUnits := RegisterASubAction(SCnProjExtUseUnits,
     SCnProjExtUseUnitsCaption, 0,
     SCnProjExtUseUnitsHint, SCnProjExtUseUnits);
+{$ENDIF}
 
   IdListUsed := RegisterASubAction(SCnProjExtListUsed,
     SCnProjExtListUsedCaption, 0,
@@ -497,6 +505,7 @@ begin
       Ini.Free;
     end;
   end
+{$IFDEF SUPPORT_USE_UNIT}
   else if Index = IdUseUnits then
   begin
     CnProjectUseUnitsFrm.Ini := CreateIniFile;
@@ -514,6 +523,7 @@ begin
       CnProjectUseUnitsFrm.Ini := nil;
     end;
   end
+{$ENDIF}
   else if Index = IdListUsed then
   begin
     Ini := CreateIniFile;
@@ -588,6 +598,7 @@ begin
   SetEnabled([IdProjBackup], AEnabled);
 {$ENDIF}
 
+{$IFDEF SUPPORT_USE_UNIT}
   if FUseUnitAction <> nil then
   begin
     SetEnabled([IdUseUnits], (FUseUnitAction as TCustomAction).Enabled);
@@ -595,6 +606,7 @@ begin
   end
   else
     SetVisible([IdUseUnits], False);
+{$ENDIF}
 
   if FUnitsListAction is TCustomAction then
   begin
