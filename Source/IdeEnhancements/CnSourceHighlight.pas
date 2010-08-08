@@ -1048,6 +1048,9 @@ begin
         begin
           CharPos := OTACharPos(Parser.Tokens[I].CharIndex, Parser.Tokens[I].LineNumber + 1);
           EditView.ConvertPos(False, EditPos, CharPos);
+{$IFDEF BDS2009_UP}
+          EditPos.Col := Parser.Tokens[I].CharIndex + 1;
+{$ENDIF}
           Parser.Tokens[I].EditCol := EditPos.Col;
           Parser.Tokens[I].EditLine := EditPos.Line;
 
@@ -1069,6 +1072,9 @@ begin
         begin
           CharPos := OTACharPos(Parser.Tokens[I].CharIndex, Parser.Tokens[I].LineNumber + 1);
           EditView.ConvertPos(False, EditPos, CharPos);
+{$IFDEF BDS2009_UP}
+          EditPos.Col := Parser.Tokens[I].CharIndex + 1;
+{$ENDIF}
           Parser.Tokens[I].EditCol := EditPos.Col;
           Parser.Tokens[I].EditLine := EditPos.Line;
 
