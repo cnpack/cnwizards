@@ -857,6 +857,9 @@ begin
         CharPos := OTACharPos(Tokens[I].CharIndex - 1, Tokens[I].LineNumber);
         EditView.ConvertPos(False, EditPos, CharPos);
         // TODO: 以上这句在 D2009 中的结果可能会有偏差，暂无办法
+{$IFDEF BDS2009_UP}
+        EditPos.Col := Tokens[I].CharIndex + 1;
+{$ENDIF}        
         Tokens[I].EditCol := EditPos.Col;
         Tokens[I].EditLine := EditPos.Line;
       end;
@@ -2576,7 +2579,7 @@ begin
             for J := 0 to Length(Token.Token) - 1 do
             begin
               EditPos := OTAEditPos(Token.EditCol + J, LineNum);
-              if not EditorGetTextRect(Editor, EditPos, Token.Token[0], R) then
+              if not EditorGetTextRect(Editor, EditPos, Token.Token[J], R) then
                 Continue;
 
               EditPos.Col := EditPosColBase + J;
