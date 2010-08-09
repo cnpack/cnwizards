@@ -3649,7 +3649,7 @@ begin
   if Text <> '' then
   begin
     {$IFDEF DELPHI2009_UP}
-    Col := Length(CnUtf8ToAnsi(Copy(CnAnsiToUtf8(Text), 1, Col)));
+    //Col := Length(CnUtf8ToAnsi(Copy(CnAnsiToUtf8(Text), 1, Col)));
     {$ELSE}
     Col := Length(CnUtf8ToAnsi(Copy(Text, 1, Col)));
     Text := CnUtf8ToAnsi(Text);
