@@ -356,7 +356,7 @@ type
 {$ENDIF}
     function GetColorFg(ALayer: Integer): TColor;
     function EditorGetTextRect(Editor: TEditorObject; APos: TOTAEditPos;
-      AText: AnsiString; var ARect: TRect): Boolean;
+      const LineText, AText: AnsiString; var ARect: TRect): Boolean;
     procedure EditorPaintText(EditControl: TControl; ARect: TRect; AText: AnsiString;
       AColor, AColorBk, AColorBd: TColor; ABold, AItalic, AUnderline: Boolean);
     function IndexOfBracket(EditControl: TControl): Integer;
@@ -1661,16 +1661,52 @@ begin
 end;
 
 function TCnSourceHighlight.EditorGetTextRect(Editor: TEditorObject;
-  APos: TOTAEditPos; AText: AnsiString; var ARect: TRect): Boolean;
+  APos: TOTAEditPos; const LineText, AText: AnsiString; var ARect: TRect): Boolean;
+//{$IFDEF BDS}
+//var
+//  I, TotalWidth, CharWidth: Integer;
+//  S: AnsiString;
+//{$IFDEF UNICODE}
+//  U: string;
+//{$ELSE}
+//  U: WideString;
+//{$ENDIF}
+//  EditCanvas: TCanvas;
+//{$ENDIF}
 begin
   with Editor do
   begin
     if InBound(APos.Line, EditView.TopRow, EditView.BottomRow) and
       InBound(APos.Col, EditView.LeftColumn, EditView.RightColumn) then
     begin
+//{$IFDEF BDS}
+//      EditCanvas := EditControlWrapper.GetEditControlCanvas(Editor.EditControl);
+//      TotalWidth := 0;
+//      S := '';
+//      if APos.Col - EditView.LeftColumn >= 0 then
+//        S := Copy(LineText, EditView.LeftColumn, APos.Col - EditView.LeftColumn);
+//{$IFDEF UNICODE}
+//      U := string(S);
+//{$ELSE}
+//      U := WideString(S);
+//{$ENDIF}
+//      if U <> '' then
+//      begin
+//        for I := 1 to Length(U) do
+//        begin
+//          CharWidth := EditCanvas.TextWidth(U[I]);
+//          CharWidth := Round(CharWidth / CharSize.cx) * CharSize.cx;
+//          Inc(TotalWidth, CharWidth);
+//        end;
+//      end;
+//      ARect := Bounds(GutterWidth + TotalWidth,
+//        (APos.Line - EditView.TopRow) * CharSize.cy, EditCanvas.TextWidth(string(AText)),
+//        CharSize.cy);
+//{$ELSE}
       ARect := Bounds(GutterWidth + (APos.Col - EditView.LeftColumn) * CharSize.cx,
         (APos.Line - EditView.TopRow) * CharSize.cy, CharSize.cx * Length(AText),
         CharSize.cy);
+//{$ENDIF}
       Result := True;
     end
     else
@@ -2174,12 +2210,12 @@ begin
       if Info.IsMatch then
       begin
         if (LogicLineNum = Info.TokenPos.Line) and EditorGetTextRect(Editor,
-          OTAEditPos(Info.TokenPos.Col, LineNum), Info.TokenStr, R) then
+          OTAEditPos(Info.TokenPos.Col, LineNum), FLineText, Info.TokenStr, R) then
           EditorPaintText(EditControl, R, Info.TokenStr, BracketColor,
             BracketColorBk, BracketColorBd, BracketBold, False, False);
 
         if (LogicLineNum = Info.TokenMatchPos.Line) and EditorGetTextRect(Editor,
-          OTAEditPos(Info.TokenMatchPos.Col, LineNum), Info.TokenMatchStr, R) then
+          OTAEditPos(Info.TokenMatchPos.Col, LineNum), FLineText, Info.TokenMatchStr, R) then
           EditorPaintText(EditControl, R, Info.TokenMatchStr, BracketColor,
             BracketColorBk, BracketColorBd, BracketBold, False, False);
       end;
@@ -2494,6 +2530,7 @@ var
   EditCanvas: TCanvas;
   TokenLen: Integer;
   CanDrawToken: Boolean;
+  RectGot: Boolean;
 begin
   with Editor do
   begin
@@ -2582,11 +2619,22 @@ begin
             {$ENDIF}
 
             // 挨个字符重画以免影响选择效果，如果是高亮，ColorBk已设置好
+            RectGot := False;
             for J := 0 to Length(Token.Token) - 1 do
             begin
               EditPos := OTAEditPos(Token.EditCol + J, LineNum);
-              if not EditorGetTextRect(Editor, EditPos, Token.Token[J], R) then
-                Continue;
+              if not RectGot then
+              begin
+                if EditorGetTextRect(Editor, EditPos, FLineText, Token.Token[J], R) then
+                  RectGot := True
+                else
+                  Continue;
+              end
+              else
+              begin
+                Inc(R.Left, CharSize.cx);
+                Inc(R.Right, CharSize.cx);
+              end;
 
               EditPos.Col := EditPosColBase + J;
               EditPos.Line := Token.EditLine;
@@ -2636,7 +2684,7 @@ begin
             TokenLen := Length(Token.Token);
 
             EditPos := OTAEditPos(Token.EditCol, LineNum);
-            if not EditorGetTextRect(Editor, EditPos, Token.Token, R) then
+            if not EditorGetTextRect(Editor, EditPos, FLineText, Token.Token, R) then
               Continue;
 
             EditPos.Col := Token.EditCol;
