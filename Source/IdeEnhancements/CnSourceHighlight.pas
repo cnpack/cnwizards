@@ -700,7 +700,7 @@ begin
   begin
     {$IFDEF DELPHI2009_UP}
     // Delphi 2009 下，LineText 不是 UTF8 需要转换为 UTF8 计算
-    Col := Length(CnUtf8ToAnsi(Copy(CnAnsiToUtf8(Text), 1, Col)));
+    // Col := Length(CnUtf8ToAnsi(Copy(CnAnsiToUtf8(Text), 1, Col)));
     {$ELSE}
     Col := Length(CnUtf8ToAnsi(Copy(Text, 1, Col)));
     {$ENDIF}
