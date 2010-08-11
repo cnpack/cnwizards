@@ -356,7 +356,7 @@ type
 {$ENDIF}
     function GetColorFg(ALayer: Integer): TColor;
     function EditorGetTextRect(Editor: TEditorObject; APos: TOTAEditPos;
-      const LineText, AText: AnsiString; var ARect: TRect): Boolean;
+      const {$IFDEF BDS}LineText, {$ENDIF} AText: AnsiString; var ARect: TRect): Boolean;
     procedure EditorPaintText(EditControl: TControl; ARect: TRect; AText: AnsiString;
       AColor, AColorBk, AColorBd: TColor; ABold, AItalic, AUnderline: Boolean);
     function IndexOfBracket(EditControl: TControl): Integer;
@@ -1661,7 +1661,7 @@ begin
 end;
 
 function TCnSourceHighlight.EditorGetTextRect(Editor: TEditorObject;
-  APos: TOTAEditPos; const LineText, AText: AnsiString; var ARect: TRect): Boolean;
+  APos: TOTAEditPos; const {$IFDEF BDS}LineText, {$ENDIF} AText: AnsiString; var ARect: TRect): Boolean;
 //{$IFDEF BDS}
 //var
 //  I, TotalWidth, CharWidth: Integer;
@@ -2210,12 +2210,12 @@ begin
       if Info.IsMatch then
       begin
         if (LogicLineNum = Info.TokenPos.Line) and EditorGetTextRect(Editor,
-          OTAEditPos(Info.TokenPos.Col, LineNum), FLineText, Info.TokenStr, R) then
+          OTAEditPos(Info.TokenPos.Col, LineNum), {$IFDEF BDS}FLineText, {$ENDIF} Info.TokenStr, R) then
           EditorPaintText(EditControl, R, Info.TokenStr, BracketColor,
             BracketColorBk, BracketColorBd, BracketBold, False, False);
 
         if (LogicLineNum = Info.TokenMatchPos.Line) and EditorGetTextRect(Editor,
-          OTAEditPos(Info.TokenMatchPos.Col, LineNum), FLineText, Info.TokenMatchStr, R) then
+          OTAEditPos(Info.TokenMatchPos.Col, LineNum), {$IFDEF BDS}FLineText, {$ENDIF} Info.TokenMatchStr, R) then
           EditorPaintText(EditControl, R, Info.TokenMatchStr, BracketColor,
             BracketColorBk, BracketColorBd, BracketBold, False, False);
       end;
@@ -2625,7 +2625,7 @@ begin
               EditPos := OTAEditPos(Token.EditCol + J, LineNum);
               if not RectGot then
               begin
-                if EditorGetTextRect(Editor, EditPos, FLineText, Token.Token[J], R) then
+                if EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FLineText, {$ENDIF} Token.Token[J], R) then
                   RectGot := True
                 else
                   Continue;
@@ -2684,7 +2684,7 @@ begin
             TokenLen := Length(Token.Token);
 
             EditPos := OTAEditPos(Token.EditCol, LineNum);
-            if not EditorGetTextRect(Editor, EditPos, FLineText, Token.Token, R) then
+            if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FLineText, {$ENDIF} Token.Token, R) then
               Continue;
 
             EditPos.Col := Token.EditCol;
