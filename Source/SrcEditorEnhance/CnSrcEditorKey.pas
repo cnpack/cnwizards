@@ -1173,11 +1173,10 @@ begin
             NewCode := NewName
           else
           begin
-            // 从上一 Token 的尾巴，到现任 Token 的头，再加替换后的文字
+            // 从上一 Token 的尾巴，到现任 Token 的头，再加替换后的文字，都用 AnsiString 来计算
             LastTokenPos := LastToken.TokenPos + Length(LastToken.Token);
-            NewCode := NewCode + Copy(
-              {$IFDEF DELPHI2009_UP}string{$ENDIF}(Parser.Source), LastTokenPos + 1,
-              BlockMatchInfo.CurTokens[I].TokenPos - LastTokenPos) + NewName;
+            NewCode := NewCode + string(Copy(AnsiString(Parser.Source), LastTokenPos + 1,
+              BlockMatchInfo.CurTokens[I].TokenPos - LastTokenPos)) + NewName;
           end;
 
           // 同一行前面的会影响光标位置
@@ -1194,8 +1193,12 @@ begin
       begin
 {$IFDEF BDS}
         // BDS 下要处理的是 UTF8 的长度，而 Paser 算出的 TokenPos 是 Ansi 因此需要转换
-        EditWriter.CopyTo(Length(AnsiToUtf8(Copy(
-          {$IFDEF DELPHI2009_UP}string{$ENDIF}(Parser.Source), 1, StartCurToken.TokenPos))));
+  {$IFDEF UNICODE}
+        // 用 AnsiString
+        EditWriter.CopyTo(Length(CnAnsiToUtf8(Copy(Parser.Source, 1, StartCurToken.TokenPos))));
+  {$ELSE}
+        EditWriter.CopyTo(Length(AnsiToUtf8(Copy(Parser.Source, 1, StartCurToken.TokenPos))));
+  {$ENDIF}
 {$ELSE}
         EditWriter.CopyTo(StartCurToken.TokenPos);
 {$ENDIF}
@@ -1205,9 +1208,14 @@ begin
       begin
 {$IFDEF BDS}
         // BDS 下要处理的是 UTF8 的长度，而 Paser 算出的 TokenPos 是 Ansi 因此需要转换
-        EditWriter.DeleteTo(Length(AnsiToUtf8(Copy(
-          {$IFDEF DELPHI2009_UP}string{$ENDIF}(Parser.Source), 1,
+  {$IFDEF UNICODE}
+        // 用 AnsiString
+        EditWriter.DeleteTo(Length(CnAnsiToUtf8(Copy(Parser.Source, 1,
           EndCurToken.TokenPos + Length(EndCurToken.Token)))));
+  {$ELSE}
+        EditWriter.DeleteTo(Length(AnsiToUtf8(Copy(Parser.Source, 1,
+          EndCurToken.TokenPos + Length(EndCurToken.Token)))));
+  {$ENDIF}
 {$ELSE}
         EditWriter.DeleteTo(EndCurToken.TokenPos + Length(EndCurToken.Token));
 {$ENDIF}
