@@ -698,6 +698,9 @@ begin
   Text := AnsiString(GetStrProp(AControl, 'LineText'));
   if Text <> '' then
   begin
+    // TODO: 用 TextWidth 获得光标位置精确对应的源码字符位置，但实现较难。
+    // 当存在占据单字符位置的双字节字符时，以下算法会有偏差。
+
     {$IFDEF DELPHI2009_UP}
     // Delphi 2009 下，LineText 不是 UTF8 需要转换为 UTF8 计算
     // Col := Length(CnUtf8ToAnsi(Copy(CnAnsiToUtf8(Text), 1, Col)));
@@ -1662,51 +1665,68 @@ end;
 
 function TCnSourceHighlight.EditorGetTextRect(Editor: TEditorObject;
   APos: TOTAEditPos; const {$IFDEF BDS}LineText, {$ENDIF} AText: AnsiString; var ARect: TRect): Boolean;
-//{$IFDEF BDS}
-//var
-//  I, TotalWidth, CharWidth: Integer;
-//  S: AnsiString;
-//{$IFDEF UNICODE}
-//  U: string;
-//{$ELSE}
-//  U: WideString;
-//{$ENDIF}
-//  EditCanvas: TCanvas;
-//{$ENDIF}
+{$IFDEF BDS}
+var
+  I, TotalWidth: Integer;
+  S: AnsiString;
+{$IFDEF UNICODE}
+  U: string;
+{$ELSE}
+  U: WideString;
+{$ENDIF}
+  EditCanvas: TCanvas;
+
+  function GetWideCharWidth(AChar: WideChar): Integer;
+  begin
+    if Integer(AChar) < $80  then
+      Result := CharSize.cx
+    else
+      Result := Round(EditCanvas.TextWidth(AChar) / CharSize.cx) * CharSize.cx;
+  end;
+{$ENDIF}
 begin
   with Editor do
   begin
     if InBound(APos.Line, EditView.TopRow, EditView.BottomRow) and
       InBound(APos.Col, EditView.LeftColumn, EditView.RightColumn) then
     begin
-//{$IFDEF BDS}
-//      EditCanvas := EditControlWrapper.GetEditControlCanvas(Editor.EditControl);
-//      TotalWidth := 0;
-//      S := '';
-//      if APos.Col - EditView.LeftColumn >= 0 then
-//        S := Copy(LineText, EditView.LeftColumn, APos.Col - EditView.LeftColumn);
-//{$IFDEF UNICODE}
-//      U := string(S);
-//{$ELSE}
-//      U := WideString(S);
-//{$ENDIF}
-//      if U <> '' then
-//      begin
-//        for I := 1 to Length(U) do
-//        begin
-//          CharWidth := EditCanvas.TextWidth(U[I]);
-//          CharWidth := Round(CharWidth / CharSize.cx) * CharSize.cx;
-//          Inc(TotalWidth, CharWidth);
-//        end;
-//      end;
-//      ARect := Bounds(GutterWidth + TotalWidth,
-//        (APos.Line - EditView.TopRow) * CharSize.cy, EditCanvas.TextWidth(string(AText)),
-//        CharSize.cy);
-//{$ELSE}
+{$IFDEF BDS}
+      EditCanvas := EditControlWrapper.GetEditControlCanvas(Editor.EditControl);
+      TotalWidth := 0;
+      if APos.Col > 1 then
+        S := Copy(LineText, 1, APos.Col - 1)
+      else
+        S := '';
+{$IFDEF UNICODE}
+      U := string(S);
+{$ELSE}
+      U := WideString(S);
+{$ENDIF}
+      if U <> '' then
+      begin
+        // 挨个记录每个字符（双字节）的宽度并累加
+        for I := 1 to Length(U) do
+          Inc(TotalWidth, GetWideCharWidth(U[I]));
+
+        // 然后减去横向滚动时左边隐藏的宽度
+        if EditView.LeftColumn > 1 then
+        begin
+          TotalWidth := TotalWidth - (EditView.LeftColumn - 1) * CharSize.cx;
+          if TotalWidth < 0 then // 如果左边隐藏太多，则不显示
+          begin
+            Result := False;
+            Exit;
+          end;
+        end;
+      end;
+      ARect := Bounds(GutterWidth + TotalWidth,
+        (APos.Line - EditView.TopRow) * CharSize.cy, EditCanvas.TextWidth(string(AText)),
+        CharSize.cy);
+{$ELSE}
       ARect := Bounds(GutterWidth + (APos.Col - EditView.LeftColumn) * CharSize.cx,
         (APos.Line - EditView.TopRow) * CharSize.cy, CharSize.cx * Length(AText),
         CharSize.cy);
-//{$ENDIF}
+{$ENDIF}
       Result := True;
     end
     else
@@ -3693,6 +3713,9 @@ begin
   Text := AnsiString(GetStrProp(FControl, 'LineText'));
   Col := View.CursorPos.Col;
 {$IFDEF BDS}
+  // TODO: 用 TextWidth 获得光标位置精确对应的源码字符位置，但实现较难。
+  // 当存在占据单字符位置的双字节字符时，以下算法会有偏差。
+
   // 获得的是 UTF8 字符串与 Pos，需要转换成 Ansi 的，但 D2009 无需转换
   if Text <> '' then
   begin
@@ -3791,26 +3814,26 @@ end;
 
 procedure TBlockLineInfo.UpdateLineList;
 var
-  i, j: Integer;
+  I, J: Integer;
   Pair: TBlockLinePair;
   MaxLine: Integer;
 begin
   MaxLine := 0;
-  for i := 0 to FPairList.Count - 1 do
+  for I := 0 to FPairList.Count - 1 do
   begin
-    if Pairs[i].FBottom > MaxLine then
-      MaxLine := Pairs[i].FBottom;
+    if Pairs[I].FBottom > MaxLine then
+      MaxLine := Pairs[I].FBottom;
   end;
   FLineList.Count := MaxLine + 1;
-  
-  for i := 0 to FPairList.Count - 1 do
+
+  for I := 0 to FPairList.Count - 1 do
   begin
-    Pair := Pairs[i];
-    for j := Pair.FTop to Pair.FBottom do
+    Pair := Pairs[I];
+    for J := Pair.FTop to Pair.FBottom do
     begin
-      if FLineList[j] = nil then
-        FLineList[j] := TCnList.Create;
-      TCnList(FLineList[j]).Add(Pair);
+      if FLineList[J] = nil then
+        FLineList[J] := TCnList.Create;
+      TCnList(FLineList[J]).Add(Pair);
     end;
   end;
 end;
