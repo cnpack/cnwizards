@@ -293,6 +293,8 @@ type
     {* 取指定行的文本。注意该函数取到的文本是将 Tab 扩展成空格的，如果使用
        ConvertPos 来转换成 EditPos 可能会有问题。直接将 CharIndex + 1 赋值
        给 EditPos.Col 即可。 }
+    function IndexPosToCurPos(EditControl: TControl; Col, Line: Integer): Integer;
+    {* 计算编辑器字符串索引到编辑器显示的实际位置 }
 
     procedure RepaintEditControls;
     {* 挨个强行让编辑器控件们重画}
@@ -488,6 +490,11 @@ const
   STabsChangedName = '@Editorform@TEditWindow@TabsChanged$qqrp14System@TObject';
 
   SViewBarChangedName = '@Editorform@TEditWindow@ViewBarChange$qqrp14System@TObjectiro';
+{$IFDEF COMPILER10_UP}
+  SIndexPosToCurPosName = '@Editorcontrol@TCustomEditControl@IndexPosToCurPos$qqrsi';
+{$ELSE}
+  SIndexPosToCurPosName = '@Editorcontrol@TCustomEditControl@IndexPosToCurPos$qqrss';
+{$ENDIF}
 {$ELSE}
   SPaintLineName = '@Editors@TCustomEditControl@PaintLine$qqrr16Ek@TPaintContextisi';
   SMarkLinesDirtyName = '@Editors@TCustomEditControl@MarkLinesDirty$qqriusi';
@@ -517,6 +524,7 @@ type
 {$IFDEF BDS}
   TPointFromEdPosProc = function(Self: TObject; const EdPos: TOTAEditPos;
     B1, B2: Boolean): TPoint;
+  TIndexPosToCurPosProc = function(Self: TObject; Col: ShortInt; Row: Integer): ShortInt;
 {$ENDIF}
 
 {$IFDEF COMPILER7_UP}
@@ -538,6 +546,7 @@ var
   LineIsElided: TLineIsElidedProc = nil;
 {$IFDEF BDS}
   PointFromEdPos: TPointFromEdPosProc = nil;
+  IndexPosToCurPosProc: TIndexPosToCurPosProc = nil;
 {$ENDIF}
 
   PaintLineLock: TRTLCriticalSection;
@@ -714,6 +723,9 @@ begin
 
     PointFromEdPos := GetBplMethodAddress(GetProcAddress(CorIdeModule, SPointFromEdPosName));
     Assert(Assigned(PointFromEdPos), 'Failed to load PointFromEdPos from CorIdeModule');
+
+    IndexPosToCurPosProc := GetBplMethodAddress(GetProcAddress(CorIdeModule, SIndexPosToCurPosName));
+    Assert(Assigned(IndexPosToCurPosProc), 'Failed to load IndexPosToCurPos from CorIdeModule');
   {$ENDIF}
 
     SetEditView := GetBplMethodAddress(GetProcAddress(CorIdeModule, SSetEditViewName));
@@ -1554,6 +1566,24 @@ function TCnEditControlWrapper.GetTextAtLine(EditControl: TControl;
 begin
   if Assigned(DoGetTextAtLine) then
     Result := DoGetTextAtLine(EditControl, LineNum);
+end;
+
+function TCnEditControlWrapper.IndexPosToCurPos(EditControl: TControl;
+  Col, Line: Integer): Integer;
+begin
+{$IFDEF BDS}
+  if Assigned(IndexPosToCurPosProc) then
+  begin
+    Result := IndexPosToCurPosProc(EditControl, Col, Line);
+  {$IFDEF DEBUG}
+    CnDebugger.LogFmt('IndexPosToCurPos: %d,%d => %d', [Col, Line, Result]);
+  {$ENDIF}
+  end
+  else
+{$ENDIF}
+  begin
+    Result := Col;
+  end;    
 end;
 
 procedure TCnEditControlWrapper.RepaintEditControls;
