@@ -1,11 +1,14 @@
 inherited CnPrefixEditForm: TCnPrefixEditForm
   Left = 351
   Top = 231
+  Width = 344
+  Height = 255
   ActiveControl = edtName
-  BorderStyle = bsDialog
+  BorderIcons = [biSystemMenu]
   Caption = 'Edit Component'#39's Name'
-  ClientHeight = 228
-  ClientWidth = 336
+  Constraints.MinHeight = 255
+  Constraints.MinWidth = 344
+  OldCreateOrder = True
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
@@ -14,6 +17,7 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
     Top = 8
     Width = 321
     Height = 185
+    Anchors = [akLeft, akTop, akRight, akBottom]
     Caption = '&Edit Component Name'
     TabOrder = 0
     object lblFormName: TLabel
@@ -28,6 +32,7 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
       Top = 96
       Width = 305
       Height = 2
+      Anchors = [akLeft, akTop, akRight]
       Shape = bsBottomLine
     end
     object lbl1: TLabel
@@ -104,6 +109,7 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
       Top = 36
       Width = 20
       Height = 20
+      Anchors = [akTop, akRight]
       Flat = True
       Glyph.Data = {
         76010000424D7601000000000000760000002800000020000000100000000100
@@ -126,6 +132,7 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
       Top = 108
       Width = 137
       Height = 21
+      Anchors = [akLeft, akTop, akRight]
       TabOrder = 1
       OnKeyPress = edtNameKeyPress
     end
@@ -134,6 +141,7 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
       Top = 160
       Width = 217
       Height = 17
+      Anchors = [akLeft, akBottom]
       Caption = 'Never Ask Again.'
       TabOrder = 4
     end
@@ -142,6 +150,7 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
       Top = 140
       Width = 217
       Height = 17
+      Anchors = [akLeft, akBottom]
       Caption = 'Ignore This Type of Component.'
       TabOrder = 3
     end
@@ -150,6 +159,7 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
       Top = 137
       Width = 89
       Height = 21
+      Anchors = [akRight, akBottom]
       Caption = 'Modify &Prefix'
       TabOrder = 2
       OnClick = btnPrefixClick
@@ -170,6 +180,7 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
     Top = 200
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&OK'
     Default = True
     TabOrder = 1
@@ -180,6 +191,7 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
     Top = 200
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
@@ -190,6 +202,7 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
     Top = 200
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
