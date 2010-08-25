@@ -3275,8 +3275,11 @@ end;
 
 procedure TCnProcListWizard.SetUseEditorToolBar(const Value: Boolean);
 begin
-  FUseEditorToolBar := Value;
-  EditorToolBarEnable(Active and FUseEditorToolBar);
+  if FUseEditorToolBar <> Value then
+  begin
+    FUseEditorToolBar := Value;
+    EditorToolBarEnable(Active and FUseEditorToolBar);
+  end;
 end;
 
 procedure TCnProcListWizard.DoIdleComboChange(Sender: TObject);
