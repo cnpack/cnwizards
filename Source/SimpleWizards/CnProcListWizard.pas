@@ -3328,7 +3328,11 @@ begin
 
     EditControl := GetCurrentEditControl;
     if (EditControl <> nil) and (EditControl is TWinControl) then
+    try
       (EditControl as TWinControl).SetFocus;
+    except
+      ;
+    end;
   end;
 end;
 
