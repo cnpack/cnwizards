@@ -217,6 +217,7 @@ type
     procedure SetPos(X, Y: Integer);
     procedure CloseUp;
     procedure Popup;
+    procedure SavePosition;
 
     property OnItemHint: TCnItemHintEvent read FOnItemHint write FOnItemHint;
     property DisplayItems: TStrings read FDisplayItems;
@@ -312,6 +313,10 @@ type
     FComboToSearch: TCnProcListComboBox;
     FPreviewLineCount: Integer;
     FHistoryCount: Integer;
+    FProcComboHeight: Integer;
+    FClassComboHeight: Integer;
+    FProcComboWidth: Integer;
+    FClassComboWidth: Integer;
     function GetToolBarObjFromEditControl(EditControl: TControl): TCnProcToolBarObj;
     procedure RemoveToolBarObjFromEditControl(EditControl: TControl);
     procedure ToolBarCanShow(Sender: TObject; APage: TCnSrcEditorPage; var ACanShow: Boolean);
@@ -369,6 +374,12 @@ type
     {* 预览窗口中的行数量}
     property HistoryCount: Integer read FHistoryCount write FHistoryCount;
     {* 历史记录的数量}
+
+    // 下拉框的尺寸
+    property ProcComboHeight: Integer read FProcComboHeight write FProcComboHeight;
+    property ProcComboWidth: Integer read FProcComboWidth write FProcComboWidth;
+    property ClassComboHeight: Integer read FClassComboHeight write FClassComboHeight;
+    property ClassComboWidth: Integer read FClassComboWidth write FClassComboWidth;
   end;
 
 {$ENDIF CNWIZARDS_CNPROCLISTWIZARD}
@@ -388,6 +399,13 @@ const
   csUseEditorToolbar = 'UseEditorToolBar';
   csPreviewLineCount = 'PreviewLineCount';
   csHistoryCount = 'HistoryCount';
+  csProcHeight = 'ProcHeight';
+  csProcWidth = 'ProcWidth';
+  csClassHeight = 'ClassHeight';
+  csClassWidth = 'ClassWidth';
+
+  csProcComboName = 'ProcCombo';
+  csClassComboName = 'ClassCombo';
 
 type
   TCnFileInfo = class(TObject)
@@ -704,7 +722,7 @@ begin
     Width := 150;
     Height := 21;
     FDisableChange := True;
-    Name := 'ClassCombo';
+    Name := csClassComboName;
     SetTextWithoutChange('');
     FDisableChange := False;
     OnButtonClick := ClassComboDropDown;
@@ -729,7 +747,7 @@ begin
     Width := 244;
     Height := 21;
     FDisableChange := True;
-    Name := 'ProcCombo';
+    Name := csProcComboName;
     SetTextWithoutChange('');
     FDisableChange := False;
     OnButtonClick := ProcComboDropDown;
@@ -1110,6 +1128,11 @@ begin
   UseEditorToolBar := Ini.ReadBool('', csUseEditorToolbar, True);
   PreviewLineCount := Ini.ReadInteger('', csPreviewLineCount, 4);
   HistoryCount := Ini.ReadInteger('', csHistoryCount, 8);
+
+  ProcComboHeight := Ini.ReadInteger('', csProcHeight, 0);
+  ProcComboWidth := Ini.ReadInteger('', csProcWidth, 0);
+  ClassComboHeight := Ini.ReadInteger('', csClassHeight, 0);
+  ClassComboWidth := Ini.ReadInteger('', csClassWidth, 0);
 end;
 
 procedure TCnProcListWizard.OnToolBarTimer(Sender: TObject);
@@ -1281,6 +1304,11 @@ begin
   Ini.WriteBool('', csUseEditorToolbar, UseEditorToolBar);
   Ini.WriteInteger('', csPreviewLineCount, PreviewLineCount);
   Ini.WriteInteger('', csHistoryCount, HistoryCount);
+
+  Ini.WriteInteger('', csProcHeight, ProcComboHeight);
+  Ini.WriteInteger('', csProcWidth, ProcComboWidth);
+  Ini.WriteInteger('', csClassHeight, ClassComboHeight);
+  Ini.WriteInteger('', csClassWidth, ClassComboWidth);
 end;
 
 { TCnProcListFrm }
@@ -3588,7 +3616,28 @@ end;
 
 procedure TCnProcDropDownBox.CloseUp;
 begin
-  Visible := False;
+  if Visible then
+  begin
+    Visible := False;
+    SavePosition;
+  end;
+end;
+
+procedure TCnProcDropDownBox.SavePosition;
+begin
+  if (FWizard <> nil) and (Owner <> nil) then
+  begin
+    if Owner.Name = csProcComboName then
+    begin
+      FWizard.ProcComboHeight := Height;
+      FWizard.ProcComboWidth := Width;
+    end
+    else if Owner.Name = csClassComboName then
+    begin
+      FWizard.ClassComboHeight := Height;
+      FWizard.ClassComboWidth := Width;
+    end;
+  end;
 end;
 
 procedure TCnProcDropDownBox.CMHintShow(var Message: TMessage);
@@ -3785,6 +3834,7 @@ begin
   if Text = '' then
   begin
     FDropDownList.Hide;
+    FDropDownList.SavePosition;
     Exit;
   end;
 
@@ -3828,7 +3878,11 @@ begin
   inherited;
   if Message.Msg = WM_KILLFOCUS then
   begin
-    FDropDownList.Hide;
+    if FDropDownList.Visible then
+    begin
+      FDropDownList.Hide;
+      FDropDownList.SavePosition;
+    end;
     Message.Result := 0;
   end;
 end;
@@ -3878,7 +3932,11 @@ procedure TCnProcListComboBox.KeyDown(var Key: Word; Shift: TShiftState);
 begin
   if (Key = VK_ESCAPE) and (Shift = []) then
   begin
-    FDropDownList.Hide;
+    if FDropDownList.Visible then
+    begin
+      FDropDownList.Hide;
+      FDropDownList.SavePosition;
+    end;
     Key := 0;
   end
   else if (Key = VK_RETURN) and (Shift = []) then
@@ -3889,6 +3947,7 @@ begin
       FWizard.FComboToSearch := Self;
       CnWizNotifierServices.ExecuteOnApplicationIdle(FWizard.DoIdleComboChange);
       FDropDownList.Hide;
+      FDropDownList.SavePosition;
     end
     else
     begin
@@ -3914,7 +3973,8 @@ end;
 
 procedure TCnProcDropDownBox.UpdateDisplay;
 var
-  I, HeightCount: Integer;
+  I, HeightCount, AHeight: Integer;
+  HeightSet: Boolean;
 begin
   FDisplayItems.Clear;
   for I := 0 to FInfoItems.Count - 1 do
@@ -3929,7 +3989,36 @@ begin
   else
     HeightCount := FDisplayItems.Count;
 
-  Height := ItemHeight * HeightCount + 8;
+  AHeight := ItemHeight * HeightCount + 8;
+  HeightSet := False;
+
+  if (FWizard <> nil) and (Owner <> nil) then
+  begin
+    if Owner.Name = csProcComboName then
+    begin
+      if FWizard.ProcComboWidth > 100 then
+        Width := FWizard.ProcComboWidth;
+      if FWizard.ProcComboHeight > AHeight then
+      begin
+        Height := FWizard.ProcComboHeight;
+        HeightSet := True;
+      end;
+    end
+    else if Owner.Name = csClassComboName then
+    begin
+      if FWizard.ClassComboWidth > 100 then
+        Width := FWizard.ClassComboWidth;
+      if FWizard.ClassComboHeight > AHeight then
+      begin
+        Height := FWizard.ClassComboHeight;
+        HeightSet := True;
+      end;
+    end;
+  end;
+
+  if not HeightSet then
+    Height := AHeight;
+
   if FDisplayItems.Count > 0 then
   begin
     FDisableClickFlag := True;
@@ -4007,6 +4096,4 @@ initialization
 
 {$ENDIF CNWIZARDS_CNPROCLISTWIZARD}
 end.
-
-
 
