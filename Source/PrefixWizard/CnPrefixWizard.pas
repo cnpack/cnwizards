@@ -706,7 +706,7 @@ begin
     ClassName := 'TForm'
   else if Component is TDataModule then
     ClassName := 'TDataModule'
-  else if (Component is TCustomFrame) and ((Component as TFrame).Parent = nil) then
+  else if (Component is TCustomFrame) and ((Component as TControl).Parent = nil) then
     ClassName := 'TFrame'; // 是一个在设计期的独立 Frame
 
   Prefix := PrefixList.Prefixs[ClassName];
