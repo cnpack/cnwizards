@@ -585,18 +585,21 @@ procedure TCnDesignEditorMgr.UnRegister;
 begin
   if FGroup >= 0 then
   begin
-  {$IFDEF Debug}
+{$IFDEF DEBUG}
     CnDebugger.LogInteger(FGroup, 'FreeEditorGroup');
-  {$ENDIF}
+{$ENDIF}
 
-  {$IFDEF BDS}
-    // D8/D2005 下在 DLL 释放时调用可能会出异常
-    if FNeedUnRegister then
+    try
+{$IFDEF BDS}
+      // D8/D2005 下在 DLL 释放时调用可能会出异常
+      if FNeedUnRegister then
+        FreeEditorGroup(FGroup);
+{$ELSE}
       FreeEditorGroup(FGroup);
-  {$ELSE}
-    FreeEditorGroup(FGroup);
-  {$ENDIF}
-  
+{$ENDIF}
+    except
+      ;
+    end;
     FGroup := -1;
   end;
 end;
