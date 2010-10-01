@@ -10,12 +10,14 @@ CnWizards 是 CnPack 项目组的主力产品之一，中文全称是 CnPack IDE 专家包，
 Delphi/C++Builder/BDS 的 IDE 中，用于增强 IDE 功能、提高 IDE 的可用性及
 开发效率的免费、开放源码工具。
 
+2010 年 9 月，CnWizards 已进入 Embarcadero Delphi XE Partner DVD。
+
 ==================================
 二、CnWizards 主要面对哪类用户群？
 ==================================
 
 CnWizards 产品主要面对使用 Delphi 5 6 7、C++Builder 5 6 与 BDS 2005 
-2006、RAD Studio 2007 2009 2010 的开发者。
+2006、RAD Studio 2007 2009 2010 2011 的开发者。
 
 CnWizards 目前包括以下几种语言的发布版本：简体中文、繁体中文、英语、
 俄语、德语。
@@ -86,12 +88,14 @@ CnWizards is CnPack's main products, with the English full name 'CnPack
  IDE Wizards'. It's a free plug-in tools set used in Delphi/C++Builder
 /BDS to improve our development efficiency.
 
+CnWizards enters Embarcadero Delphi XE Partner DVD in Sep. 2010.
+
 =========================
 2. Who can use CnWizards?
 =========================
 
 CnWizards is designed to face the programmers who use Delphi 5 6 7, 
-C++Builder 5 6 and BDS 2005 2006, RAD Studio 2007 2009 2010.
+C++Builder 5 6 and BDS 2005 2006, RAD Studio 2007 2009 2010 2011.
 
 The offical version of CnWizards includes follow languages: 
 Simplified Chinese, Traditional Chinese, English, Russian and German.
