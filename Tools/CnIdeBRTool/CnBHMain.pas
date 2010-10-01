@@ -175,10 +175,11 @@ implementation
 const
   SCnRegIDEBase = '\Software\Borland\';
   SCnRegIDEBase12 = '\Software\CodeGear\';
+  SCnRegIDEBase15 = '\Software\Embarcadero\';
 
   SACnRegIDEEntries: array[TCnIDEs] of string =
     ('Delphi\5.0', 'Delphi\6.0', 'Delphi\7.0', 'BDS\2.0', 'BDS\3.0', 'BDS\4.0',
-    'BDS\5.0', 'BDS\6.0', 'BDS\7.0', 'C++Builder\5.0', 'C++Builder\6.0');
+    'BDS\5.0', 'BDS\6.0', 'BDS\7.0', 'BDS\8.0', 'C++Builder\5.0', 'C++Builder\6.0');
   SCnRegHisProject = '\Closed Projects';
   SCnRegHisFiles = '\Closed Files';
 
@@ -281,7 +282,7 @@ begin
       lbxBackupOptions.Checked[I] := True;
 
     if lbxSelectApp.ItemIndex in [Ord(atBDS2005), Ord(atBDS2006), Ord(atDelphi2007),
-      Ord(atDelphi2009), Ord(atDelphi2010)] then // BDS 2005, 2006, 2007, 2009  的菜单模板和对象库不分开了。
+      Ord(atDelphi2009), Ord(atDelphi2010), Ord(atDelphi2011)] then // BDS 2005, 2006, 2007, 2009 以上的菜单模板和对象库不分开了。
     begin
       lbxBackupOptions.Checked[0] := True;
       lbxBackupOptions.ItemEnabled[0] := False;
@@ -631,7 +632,7 @@ begin
       Canvas.Font.Color := clGray;
       
     // 图像
-    il16.Draw(Canvas, Rect.Left + 3, Rect.Top + 2, Index + Integer(High(TAbiType)) + 1); // 前面 10 个 IDE 图标
+    il16.Draw(Canvas, Rect.Left + 3, Rect.Top + 2, Index + Integer(High(TAbiType)) + 1); // 前面 许多个是 IDE 图标
     // 绘制出文字
     SetBkMode(Canvas.Handle, TRANSPARENT);
     Canvas.TextOut(Rect.Left + 22, Rect.Top + (Rect.Bottom
@@ -1242,7 +1243,12 @@ end;
 function TCnIdeBRMainForm.GetRegIDEBase(IDE: TCnIDEs): string;
 begin
   if (Integer(IDE) >= Integer(ciDelphi12)) and not (IDE in [ciBCB5, ciBCB6]) then
-    Result := SCnRegIDEBase12
+  begin
+    if (Integer(IDE) >= Integer(ciDelphi15)) then
+      Result := SCnRegIDEBase15
+    else
+      Result := SCnRegIDEBase12;
+  end
   else
     Result := SCnRegIDEBase;
 end;

@@ -54,7 +54,7 @@ type
 
   // AppBuilder 类型
   TAbiType = (atBCB5, atBCB6, atDelphi5, atDelphi6, atDelphi7, atDelphi8,
-    atBDS2005, atBDS2006, atDelphi2007, atDelphi2009, atDelphi2010);
+    atBDS2005, atBDS2006, atDelphi2007, atDelphi2009, atDelphi2010, atDelphi2011);
   TAbiTypes = set of TAbiType; // at := [BCB5, BCB6];
 
   TAppBuilderInfo = class(TObject)
@@ -182,6 +182,8 @@ begin
   begin
     if m_AbiType in [atBDS2005, atBDS2006, atDelphi2007, atDelphi2009, atDelphi2010] then
       strFileName := m_strRootDir + 'Objrepos\' + GetAbiOptionFile(aoCodeTemp)
+    else if m_AbiType in [atDelphi2011] then
+      strFileName := m_strRootDir + 'Objrepos\en\' + GetAbiOptionFile(aoCodeTemp)
     else
       strFileName := m_strRootDir + 'bin\' + GetAbiOptionFile(aoCodeTemp);
 
@@ -199,6 +201,8 @@ begin
   begin
     if m_AbiType in [atBDS2005, atBDS2006, atDelphi2007, atDelphi2009, atDelphi2010] then
       strFileName := m_strRootDir + 'Objrepos\' + GetAbiOptionFile(aoObjRep)
+    else if m_AbiType in [atDelphi2011] then
+      strFileName := m_strRootDir + 'Objrepos\en\' + GetAbiOptionFile(aoObjRep)
     else
       strFileName := m_strRootDir + 'bin\' + GetAbiOptionFile(aoObjRep);
 
@@ -208,7 +212,7 @@ begin
           PChar(m_strTempPath + GetAbiOptionFile(aoObjRep)), False);
       OutputLog(m_strAppName + g_strObjRepConfig
           + g_strBackup + OpResult(bResult));
-      //
+
       SaveObjRep(m_strTempPath + GetAbiOptionFile(aoObjRep));
     end
     else
@@ -217,7 +221,10 @@ begin
   // 菜单模板文件：dmt
   if aoMenuTemp in m_AbiOption then
   begin
-    strFileName := m_strRootDir + 'bin\' + GetAbiOptionFile(aoMenuTemp);
+    if m_AbiType in [atDelphi2011] then
+      strFileName := m_strRootDir + 'Objrepos\en\' + GetAbiOptionFile(aoMenuTemp)
+    else
+      strFileName := m_strRootDir + 'bin\' + GetAbiOptionFile(aoMenuTemp);
     if FileExists(strFileName) then
     begin
       bResult := CopyFile(PChar(strFileName),
@@ -404,7 +411,7 @@ begin
   OutputLog(m_strAppName + g_strObjRepUnit + g_strBackup
       + OpResult(SHFileOperation(sfo) = 0), 1);
 
-  if m_AbiType in [atBDS2005, atBDS2006, atDelphi2007, atDelphi2009, atDelphi2010] then
+  if m_AbiType in [atBDS2005, atBDS2006, atDelphi2007, atDelphi2009, atDelphi2010, atDelphi2011] then
   begin
     // 以 XML 格式处理 BorlandStudioRepository.xml
     XMLDoc := CreateXMLDoc;
@@ -734,6 +741,9 @@ begin
       if m_AbiType in [atBDS2005, atBDS2006, atDelphi2007, atDelphi2009, atDelphi2010] then
         bResult := CopyFile(PChar(strFileName),
           PChar(m_strRootDir + 'Objrepos\' + GetAbiOptionFile(aoCodeTemp)), False)
+      else if m_AbiType in [atDelphi2011] then
+        bResult := CopyFile(PChar(strFileName),
+          PChar(m_strRootDir + 'Objrepos\en\' + GetAbiOptionFile(aoCodeTemp)), False)
       else
         bResult := CopyFile(PChar(strFileName),
           PChar(m_strRootDir + 'bin\' + GetAbiOptionFile(aoCodeTemp)), False);
@@ -758,6 +768,9 @@ begin
       if m_AbiType in [atBDS2005, atBDS2006, atDelphi2007, atDelphi2009, atDelphi2010] then
         bResult := CopyFile(PChar(strFileName),
           PChar(m_strRootDir + 'Objrepos\' + GetAbiOptionFile(aoObjRep)), False)
+      else if m_AbiType in [atDelphi2011] then
+        bResult := CopyFile(PChar(strFileName),
+          PChar(m_strRootDir + 'Objrepos\en' + GetAbiOptionFile(aoObjRep)), False)
       else
         bResult := CopyFile(PChar(strFileName),
           PChar(m_strRootDir + 'bin\' + GetAbiOptionFile(aoObjRep)), False);
@@ -772,7 +785,11 @@ begin
     strFileName := m_strTempPath + GetAbiOptionFile(aoMenuTemp);
     if FileExists(strFileName) then
     begin
-      bResult := CopyFile(PChar(strFileName),
+      if m_AbiType in [atDelphi2011] then
+        bResult := CopyFile(PChar(strFileName),
+          PChar(m_strRootDir + 'ObjRepos\en\' + GetAbiOptionFile(aoMenuTemp)), False)
+      else
+        bResult := CopyFile(PChar(strFileName),
           PChar(m_strRootDir + 'bin\' + GetAbiOptionFile(aoMenuTemp)), False);
       OutputLog(m_strAppName + g_strAbiOptions[Ord(aoMenuTemp)] + g_strRestore + OpResult(bResult));
     end
@@ -903,7 +920,7 @@ begin
         aoRegInfo: Result := '';        // 注册表信息
         aoMenuTemp: Result := 'bds.dmt'; // 菜单模板
       end;
-    atDelphi2010:
+    atDelphi2010, atDelphi2011:
       case ao of
         aoCodeTemp: Result := 'bds.dci'; // 代码模板
         aoObjRep: Result := 'RADStudioRepository.xml';   // 对象库
@@ -1042,9 +1059,9 @@ begin
         = UpperCase(ExtractFileName(pe32.szExeFile)) then
     begin
       hModuleSnap := CreateToolhelp32Snapshot(TH32CS_SNAPALL, pe32.th32ProcessID);
-		  if hModuleSnap = INVALID_HANDLE_VALUE then
+      if hModuleSnap = INVALID_HANDLE_VALUE then
         strTemp := string(pe32.szExeFile)
-			else
+      else
       begin
         ZeroMemory(@me32, sizeof(me32));
 		    me32.dwSize := sizeof(me32);
@@ -1081,7 +1098,9 @@ end;
 
 function GetRegIDEBaseFromAt(at: TAbiType): string;
 begin
-  if Integer(at) >= Integer(atDelphi2009) then
+  if Integer(at) >= Integer(atDelphi2011) then
+    Result := '\Software\Embarcadero\'
+  else if Integer(at) >= Integer(atDelphi2009) then
     Result := '\Software\CodeGear\'
   else
     Result := '\Software\Borland\';
