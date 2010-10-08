@@ -343,7 +343,7 @@ var
   MethodStack, BlockStack, MidBlockStack: TObjectStack;
   Token, CurrMethod, CurrBlock, CurrMidBlock: TCnPasToken;
   SavePos, SaveLineNumber: Integer;
-  IsClassOpen, IsClassDef, IsImpl, IsHelper: Boolean;
+  IsClassOpen, IsClassDef, IsImpl, IsHelper, IsSealed: Boolean;
   DeclareWithEndLevel: Integer;
   PrevTokenID: TTokenKind;
 
@@ -528,6 +528,7 @@ begin
           tkClass, tkInterface, tkDispInterface:
             begin
               IsHelper := False;
+              IsSealed := False;
               IsClassDef := ((Lex.TokenID = tkClass) and Lex.IsClass)
                 or ((Lex.TokenID = tkInterface) and Lex.IsInterface) or
                 (Lex.TokenID = tkDispInterface);
@@ -540,11 +541,18 @@ begin
 
                 LexNextNoJunkWithoutCompDirect(Lex);
                 if Lex.TokenID in [tkSymbol, tkIdentifier] then
-                  if Lowercase(Lex.Token) = 'helper' then
+                begin
+                  if LowerCase(Lex.Token) = 'helper' then
                   begin
                     IsClassDef := True;
                     IsHelper := True;
-                  end;
+                  end
+                  else if LowerCase(Lex.Token) = 'sealed' then
+                  begin
+                    IsClassDef := True;
+                    IsSealed := True;
+                  end;     
+                end;
                 Lex.LineNumber := SaveLineNumber;
                 Lex.RunPos := SavePos;
               end;
@@ -558,7 +566,7 @@ begin
                 LexNextNoJunkWithoutCompDirect(Lex);
                 if Lex.TokenID = tkSemiColon then // 是个 class; 不需要 end;
                   IsClassOpen := False
-                else if IsHelper then
+                else if IsHelper or IsSealed then
                   LexNextNoJunkWithoutCompDirect(Lex);
 
                 if Lex.TokenID = tkRoundOpen then // 有括号，看是不是();
