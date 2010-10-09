@@ -1692,6 +1692,7 @@ function TCnSourceHighlight.EditorGetTextRect(Editor: TEditorObject;
 var
   I, TotalWidth: Integer;
   S: AnsiString;
+  UseTab: Boolean;
 {$IFDEF UNICODE}
   U: string;
 {$ELSE}
@@ -1714,7 +1715,12 @@ begin
       InBound(APos.Col, EditView.LeftColumn, EditView.RightColumn) then
     begin
 {$IFDEF BDS}
-      if not FUseTabKey then
+  {$IFDEF BDS2009_UP}
+      UseTab := FUseTabKey;
+  {$ELSE}
+      UseTab := False;
+  {$ENDIF}
+      if not UseTab then
       begin
         EditCanvas := EditControlWrapper.GetEditControlCanvas(Editor.EditControl);
         TotalWidth := 0;
