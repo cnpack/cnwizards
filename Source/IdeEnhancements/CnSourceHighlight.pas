@@ -79,7 +79,8 @@ interface
 
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms,
-  ToolsAPI, IniFiles, Contnrs, ExtCtrls, TypInfo, Math, mPasLex, Variants,
+  ToolsAPI, IniFiles, Contnrs, ExtCtrls, TypInfo, Math, mPasLex, 
+  {$IFDEF COMPILER6_UP}Variants, {$ENDIF}
   CnWizClasses, CnEditControlWrapper, CnWizNotifier, CnIni, CnWizUtils, CnCommon,
   CnConsts, CnWizConsts, CnWizIdeUtils, CnWizShortCut, CnPasCodeParser,
   CnGraphUtils, CnFastList, CnCppCodeParser, mwBCBTokenList;
