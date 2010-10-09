@@ -692,47 +692,51 @@ begin
 
   NewList := TObjectList.Create;
   try
-    for i := 0 to ModuleSvcs.ModuleCount - 1 do
-    begin
-      Module := ModuleSvcs.Modules[i];
-      for j := 0 to Module.GetModuleFileCount - 1 do
+    try
+      for i := 0 to ModuleSvcs.ModuleCount - 1 do
       begin
-        if Supports(Module.GetModuleFileEditor(j), IOTAEditBuffer, Buffer) then
+        Module := ModuleSvcs.Modules[i];
+        for j := 0 to Module.GetModuleFileCount - 1 do
         begin
-          EditorObj := nil;
-          if Assigned(Buffer.TopView) then
+          if Supports(Module.GetModuleFileEditor(j), IOTAEditBuffer, Buffer) then
           begin
-            for k := 0 to 9 do
+            EditorObj := nil;
+            if Assigned(Buffer.TopView) then
             begin
-              Pos := Buffer.TopView.BookmarkPos[k];
-              if (Pos.CharIndex <> 0) or (Pos.Line <> 0) then
+              for k := 0 to 9 do
               begin
-                if EditorObj = nil then
+                Pos := Buffer.TopView.BookmarkPos[k];
+                if (Pos.CharIndex <> 0) or (Pos.Line <> 0) then
                 begin
-                  EditorObj := TCnEditorObj.Create;
-                  EditorObj.FileName := Buffer.FileName;
-                  NewList.Add(EditorObj);
+                  if EditorObj = nil then
+                  begin
+                    EditorObj := TCnEditorObj.Create;
+                    EditorObj.FileName := Buffer.FileName;
+                    NewList.Add(EditorObj);
+                  end;
+                  BkObj := TCnBookmarkObj.Create(EditorObj);
+                  BkObj.BookmarkID := k;
+                  BkObj.Pos := Pos;
+                  BkObj.Line := CnOtaGetLineText(Pos.Line, Buffer);
+                  EditorObj.List.Add(BkObj);
                 end;
-                BkObj := TCnBookmarkObj.Create(EditorObj);
-                BkObj.BookmarkID := k;
-                BkObj.Pos := Pos;
-                BkObj.Line := CnOtaGetLineText(Pos.Line, Buffer);
-                EditorObj.List.Add(BkObj);
               end;
             end;
           end;
         end;
       end;
-    end;
-    SortList(NewList);
+      SortList(NewList);
 
-    Result := not SameEditorList(List, NewList);
-    if Result then
-    begin
-      List.Clear;
-      while NewList.Count > 0 do
-        List.Add(NewList.Extract(NewList.First));
-    end;  
+      Result := not SameEditorList(List, NewList);
+      if Result then
+      begin
+        List.Clear;
+        while NewList.Count > 0 do
+          List.Add(NewList.Extract(NewList.First));
+      end;
+    except
+      ;
+    end;
   finally
     NewList.Free;
   end;
