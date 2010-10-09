@@ -86,7 +86,8 @@ type
     ctLineDigit,              // 编辑器总行数位数变化，如99到100
 {$ENDIF}
     ctElided,                 // 编辑器行折叠，有限支持
-    ctUnElided                // 编辑器行展开，有限支持
+    ctUnElided,               // 编辑器行展开，有限支持
+    ctOptionChanged           // 编辑器设置对话框曾经打开过
     );
     
   TEditorChangeTypes = set of TEditorChangeType;
@@ -1037,11 +1038,10 @@ begin
 
   if FOptionChanged then
   begin
+    Include(OptionType, ctOptionChanged);
     if UpdateCharSize then
-    begin
       Include(OptionType, ctFont);
-      FOptionChanged := False;
-    end;
+    FOptionChanged := False;
   end;
 
   for i := 0 to EditorCount - 1 do

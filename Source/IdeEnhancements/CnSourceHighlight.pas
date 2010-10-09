@@ -38,7 +38,14 @@ unit CnSourceHighlight;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2009.03.28
+* 修改记录：2010.10.04
+*               2009 以上 Unicode 环境下，各个 Token 的 Col 采用 ConvertPos 进行
+*               转换时，对汉字以及单位置双字节字符等的判断会有错误，因此采用
+*               CharIndex + 1 时，又不能处理好 Tab 键。
+*               速度快的 GetTextAtLine 取得的文本是将 Tab 扩展成空格的，导致无法
+*               区分是否存在 Tab 键，只能在 UseTabChar 选项为 True 时，使用传统的
+*               D2009 以上会错位的计算方法。
+*           2009.03.28
 *               加入控制大小写匹配的机制，对 Pascal 文件，不区分大小写
 *           2009.01.06
 *               加入高亮当前行背景的功能，尚未完善。
@@ -72,7 +79,7 @@ interface
 
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms,
-  ToolsAPI, IniFiles, Contnrs, ExtCtrls, TypInfo, Math, mPasLex,
+  ToolsAPI, IniFiles, Contnrs, ExtCtrls, TypInfo, Math, mPasLex, Variants,
   CnWizClasses, CnEditControlWrapper, CnWizNotifier, CnIni, CnWizUtils, CnCommon,
   CnConsts, CnWizConsts, CnWizIdeUtils, CnWizShortCut, CnPasCodeParser,
   CnGraphUtils, CnFastList, CnCppCodeParser, mwBCBTokenList;
@@ -349,6 +356,10 @@ type
     FViewFileNameIsPascalList: TList;
 {$IFDEF BDS}
     FLineText: AnsiString;
+  {$IFDEF BDS2009_UP}
+    FUseTabKey: Boolean;
+    FTabWidth: Integer;
+  {$ENDIF}
 {$ELSE}
     FHighLightCurrentLine: Boolean;
     FHighLightLineColor: TColor;
@@ -368,6 +379,9 @@ type
     function IndexOfBlockLine(EditControl: TControl): Integer;
 {$IFNDEF BDS}
     function IndexOfCurLine(EditControl: TControl): Integer;
+{$ENDIF}
+{$IFDEF BDS2009_UP}
+    procedure UpdateTabWidth;
 {$ENDIF}
     procedure OnHighlightTimer(Sender: TObject);
     procedure OnHighlightExec(Sender: TObject);
@@ -859,10 +873,12 @@ begin
         // 转换成 Col 与 Line
         CharPos := OTACharPos(Tokens[I].CharIndex - 1, Tokens[I].LineNumber);
         EditView.ConvertPos(False, EditPos, CharPos);
-        // TODO: 以上这句在 D2009 中的结果可能会有偏差，暂无办法
+        // 以上这句 ConvertPos 在 D2009 或以上中带汉字时的结果可能会有偏差，
+        // 因此直接采用 CharIndex + 1 的方式，但对 Tab 键似乎处理有问题
 {$IFDEF BDS2009_UP}
-        EditPos.Col := Tokens[I].CharIndex + 1;
-{$ENDIF}        
+        if not FHighlight.FUseTabKey then
+          EditPos.Col := Tokens[I].CharIndex + 1;
+{$ENDIF}
         Tokens[I].EditCol := EditPos.Col;
         Tokens[I].EditLine := EditPos.Line;
       end;
@@ -950,7 +966,8 @@ begin
         EditView.ConvertPos(False, EditPos, CharPos);
         // TODO: 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
 {$IFDEF BDS2009_UP}
-        EditPos.Col := Tokens[I].CharIndex + 1;
+        if not FHighlight.FUseTabKey then
+          EditPos.Col := Tokens[I].CharIndex + 1;
 {$ENDIF}
         Tokens[I].EditCol := EditPos.Col;
         Tokens[I].EditLine := EditPos.Line;
@@ -1051,8 +1068,10 @@ begin
         begin
           CharPos := OTACharPos(Parser.Tokens[I].CharIndex, Parser.Tokens[I].LineNumber + 1);
           EditView.ConvertPos(False, EditPos, CharPos);
+          // TODO: 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
 {$IFDEF BDS2009_UP}
-          EditPos.Col := Parser.Tokens[I].CharIndex + 1;
+          if not FHighlight.FUseTabKey then
+            EditPos.Col := Parser.Tokens[I].CharIndex + 1;
 {$ENDIF}
           Parser.Tokens[I].EditCol := EditPos.Col;
           Parser.Tokens[I].EditLine := EditPos.Line;
@@ -1069,7 +1088,7 @@ begin
           end;
         end;
       end
-      else if FHighlight.BlockHighlightRange = brAll then// 无当前过程并且高亮所有内容时搜索当前所有标识符，避免只高亮光标出于当前过程内的问题
+      else if FHighlight.BlockHighlightRange = brAll then // 无当前过程并且高亮所有内容时搜索当前所有标识符，避免只高亮光标出于当前过程内的问题
       begin
         for I := 0 to Parser.Count - 1 do
         begin
@@ -1598,6 +1617,9 @@ begin
 {$IFNDEF BDS}
   FCurLineList := TObjectList.Create;
 {$ENDIF}
+{$IFDEF BDS2009_UP}
+  UpdateTabWidth;
+{$ENDIF}
   FBlockShortCut := WizShortCutMgr.Add('', ShortCut(Ord('H'), [ssCtrl, ssShift]),
     OnHighlightExec);
   FTimer := TTimer.Create(nil);
@@ -1691,37 +1713,46 @@ begin
       InBound(APos.Col, EditView.LeftColumn, EditView.RightColumn) then
     begin
 {$IFDEF BDS}
-      EditCanvas := EditControlWrapper.GetEditControlCanvas(Editor.EditControl);
-      TotalWidth := 0;
-      if APos.Col > 1 then
-        S := Copy(LineText, 1, APos.Col - 1)
-      else
-        S := '';
-{$IFDEF UNICODE}
-      U := string(S);
-{$ELSE}
-      U := WideString(S);
-{$ENDIF}
-      if U <> '' then
+      if not FUseTabKey then
       begin
-        // 挨个记录每个字符（双字节）的宽度并累加
-        for I := 1 to Length(U) do
-          Inc(TotalWidth, GetWideCharWidth(U[I]));
-
-        // 然后减去横向滚动时左边隐藏的宽度
-        if EditView.LeftColumn > 1 then
+        EditCanvas := EditControlWrapper.GetEditControlCanvas(Editor.EditControl);
+        TotalWidth := 0;
+        if APos.Col > 1 then
+          S := Copy(LineText, 1, APos.Col - 1)
+        else
+          S := '';
+{$IFDEF UNICODE}
+        U := string(S);
+{$ELSE}
+        U := WideString(S);
+{$ENDIF}
+        if U <> '' then
         begin
-          TotalWidth := TotalWidth - (EditView.LeftColumn - 1) * CharSize.cx;
-          if TotalWidth < 0 then // 如果左边隐藏太多，则不显示
+          // 挨个记录每个字符（双字节）的宽度并累加
+          for I := 1 to Length(U) do
+            Inc(TotalWidth, GetWideCharWidth(U[I]));
+
+          // 然后减去横向滚动时左边隐藏的宽度
+          if EditView.LeftColumn > 1 then
           begin
-            Result := False;
-            Exit;
+            TotalWidth := TotalWidth - (EditView.LeftColumn - 1) * CharSize.cx;
+            if TotalWidth < 0 then // 如果左边隐藏太多，则不显示
+            begin
+              Result := False;
+              Exit;
+            end;
           end;
         end;
+        ARect := Bounds(GutterWidth + TotalWidth,
+          (APos.Line - EditView.TopRow) * CharSize.cy, EditCanvas.TextWidth(string(AText)),
+          CharSize.cy);
+      end
+      else
+      begin
+        ARect := Bounds(GutterWidth + (APos.Col - EditView.LeftColumn) * CharSize.cx,
+          (APos.Line - EditView.TopRow) * CharSize.cy, CharSize.cx * Length(AText),
+          CharSize.cy);
       end;
-      ARect := Bounds(GutterWidth + TotalWidth,
-        (APos.Line - EditView.TopRow) * CharSize.cy, EditCanvas.TextWidth(string(AText)),
-        CharSize.cy);
 {$ELSE}
       ARect := Bounds(GutterWidth + (APos.Col - EditView.LeftColumn) * CharSize.cx,
         (APos.Line - EditView.TopRow) * CharSize.cy, CharSize.cx * Length(AText),
@@ -3080,12 +3111,22 @@ begin
 
     CharSize := EditControlWrapper.GetCharSize;
 
-    if ctFont in ChangeType then
+    if (ctFont in ChangeType) or (ctOptionChanged in ChangeType) then
     begin
-      ReloadIDEFonts;
+      if ctFont in ChangeType then
+      begin
+        ReloadIDEFonts;
 {$IFNDEF BDS}
-      if FHighLightLineColor = FDefaultHighLightLineColor then
-        FHighLightLineColor := LoadIDEDefaultCurrentColor;
+        if FHighLightLineColor = FDefaultHighLightLineColor then
+          FHighLightLineColor := LoadIDEDefaultCurrentColor;
+{$ENDIF}
+      end;
+{$IFDEF BDS2009_UP}
+      if ctOptionChanged in ChangeType then
+      begin
+        // 记录当前是否使用 Tab 键以及 TabWidth
+        UpdateTabWidth;
+      end;
 {$ENDIF}
       RepaintEditors;
     end;
@@ -3565,6 +3606,35 @@ begin
       Exit;
     end;
   Result := -1;
+end;
+
+{$ENDIF}
+
+{$IFDEF BDS2009_UP}
+
+procedure TCnSourceHighlight.UpdateTabWidth;
+var
+  Options: IOTAEnvironmentOptions;
+begin
+  FUseTabKey := False;
+  FTabWidth := 2;
+  Options := CnOtaGetEnvironmentOptions;
+  if Options <> nil then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('SourceHighlight: Editor Option Changed. Get UseTabKey is '
+      + VarToStr(Options.GetOptionValue('UseTabCharacter')));
+{$ENDIF}
+    if VarToStr(Options.GetOptionValue('UseTabCharacter')) = 'True' then
+    begin
+      FUseTabKey := True;
+      try
+        FTabWidth := Options.GetOptionValue('TabStops');
+      except
+        ;
+      end;
+    end;
+  end;
 end;
 
 {$ENDIF}
