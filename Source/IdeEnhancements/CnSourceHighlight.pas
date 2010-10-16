@@ -873,7 +873,11 @@ begin
       begin
         // 转换成 Col 与 Line
         CharPos := OTACharPos(Tokens[I].CharIndex - 1, Tokens[I].LineNumber);
-        EditView.ConvertPos(False, EditPos, CharPos);
+        try
+          EditView.ConvertPos(False, EditPos, CharPos);
+        except
+          Continue; // D5/6下ConvertPos在只有一个大于号时会出错，只能屏蔽
+        end;
         // 以上这句 ConvertPos 在 D2009 或以上中带汉字时的结果可能会有偏差，
         // 因此直接采用 CharIndex + 1 的方式，但对 Tab 键似乎处理有问题
 {$IFDEF BDS2009_UP}
