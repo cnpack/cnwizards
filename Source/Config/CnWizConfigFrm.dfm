@@ -8,6 +8,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
   Caption = 'CnPack IDE Wizards Settings'
   Constraints.MinHeight = 471
   Constraints.MinWidth = 528
+  OldCreateOrder = True
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnResize = FormResize
@@ -182,7 +183,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         end
         object btnConfig: TButton
           Left = 7
-          Top = 348
+          Top = 344
           Width = 75
           Height = 21
           Caption = '&Settings'
@@ -191,7 +192,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         end
         object btnSort: TButton
           Left = 99
-          Top = 348
+          Top = 344
           Width = 75
           Height = 21
           Caption = '&Advanced'
@@ -355,7 +356,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         end
         object btnDesignEditorConfig: TButton
           Left = 7
-          Top = 348
+          Top = 344
           Width = 75
           Height = 21
           Caption = '&Settings'
@@ -364,7 +365,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         end
         object btnDesignEditorCustomize: TButton
           Left = 99
-          Top = 348
+          Top = 344
           Width = 75
           Height = 21
           Caption = 'Custo&mize'
