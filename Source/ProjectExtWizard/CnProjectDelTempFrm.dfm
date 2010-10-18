@@ -231,6 +231,7 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
             Top = 142
             Width = 345
             Height = 17
+            Anchors = [akLeft, akBottom]
             Caption = 'Keep Obj/Dcu Files when NO Same Source Files Exist.'
             TabOrder = 4
           end
