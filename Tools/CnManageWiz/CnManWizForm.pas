@@ -633,7 +633,8 @@ end;
 
 procedure TCnManageWizardForm.lstIDEsClick(Sender: TObject);
 begin
-  UpdateWizardstoListView(TCnCompiler(lstIDEs.ItemIndex));
+  if lstIDEs.ItemIndex >= 0 then
+    UpdateWizardstoListView(TCnCompiler(lstIDEs.ItemIndex));
   if lvWizards.Items.Count > 0 then
     lvWizards.Items[0].Selected := True;
 end;

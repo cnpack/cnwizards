@@ -2,7 +2,7 @@ object CnManageWizardForm: TCnManageWizardForm
   Left = 191
   Top = 117
   Width = 660
-  Height = 481
+  Height = 485
   Caption = 'CnPack IDE External Wizard Management'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
