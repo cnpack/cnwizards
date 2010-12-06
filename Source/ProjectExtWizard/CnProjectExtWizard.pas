@@ -244,8 +244,11 @@ end;
 procedure TCnProjectExtWizard.ExploreExe;
 var
   Project: IOTAProject;
-  Dir, ProjectFileName, OutExt, OutName, IntermediaDir: string;
+  Dir, ProjectFileName, OutName: string;
+{$IFNDEF DELPHI2011}
+  OutExt, IntermediaDir: string;
   Val: Variant;
+{$ENDIF}
 begin
   Project := CnOtaGetCurrentProject;
   if not Assigned(Project) then
@@ -257,6 +260,13 @@ begin
     Dir := GetOutputDir;
     if Dir <> '' then
     begin
+{$IFDEF DELPHI2011}
+      if CnOtaGetActiveProjectOptions <> nil then
+      begin
+        OutName := CnOtaGetActiveProjectOptions.TargetName;
+        Dir := ExtractFilePath(OutName);
+      end;
+{$ELSE}
       { TODO : 自定义的输出扩展名暂不支持 }
       try
         if CnOtaGetActiveProjectOption('GenPackage', Val) and Val then
@@ -306,6 +316,7 @@ begin
 {$ENDIF}
 
       OutName := MakePath(Dir) + IntermediaDir + ChangeFileExt(ExtractFileName(ProjectFileName), OutExt);
+{$ENDIF}
       if FileExists(OutName) then
         ExploreFile(OutName)
       else if DirectoryExists(Dir) then
