@@ -229,13 +229,32 @@ end;
 function TCnProjectExtWizard.GetOutputDir: string;
 var
   ProjectDir: string;
+{$IFNDEF DELPHI2011_UP}
   OutputDir: Variant;
+{$ENDIF}
 begin
   ProjectDir := ExtractFileDir(CnOtaGetCurrentProjectFileName);
-  if CnOtaGetActiveProjectOption('OutputDir', OutputDir) then
-    Result := LinkPath(ProjectDir, ReplaceToActualPath(OutputDir))
+{$IFDEF DELPHI2011_UP}
+  if CnOtaGetActiveProjectOptions <> nil then
+  begin
+    Result := ExtractFilePath(CnOtaGetActiveProjectOptions.TargetName);
+  end
   else
+  begin
     Result := ProjectDir;
+  end;
+{$ELSE}
+  if CnOtaGetActiveProjectOption('OutputDir', OutputDir) then
+  begin
+    // D2011 下 OutputDir 是 $(Config)/$(Platform) 的形式，Replace替换不到 Config，会出错
+    Result := LinkPath(ProjectDir, ReplaceToActualPath(OutputDir))
+  end
+  else
+  begin
+    Result := ProjectDir;
+  end;
+{$ENDIF}
+
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('OutputDir: ' + Result);
 {$ENDIF}
@@ -245,7 +264,7 @@ procedure TCnProjectExtWizard.ExploreExe;
 var
   Project: IOTAProject;
   Dir, ProjectFileName, OutName: string;
-{$IFNDEF DELPHI2011}
+{$IFNDEF DELPHI2011_UP}
   OutExt, IntermediaDir: string;
   Val: Variant;
 {$ENDIF}
@@ -260,12 +279,9 @@ begin
     Dir := GetOutputDir;
     if Dir <> '' then
     begin
-{$IFDEF DELPHI2011}
+{$IFDEF DELPHI2011_UP}
       if CnOtaGetActiveProjectOptions <> nil then
-      begin
         OutName := CnOtaGetActiveProjectOptions.TargetName;
-        Dir := ExtractFilePath(OutName);
-      end;
 {$ELSE}
       { TODO : 自定义的输出扩展名暂不支持 }
       try
@@ -314,7 +330,6 @@ begin
 {$ENDIF}
       end;
 {$ENDIF}
-
       OutName := MakePath(Dir) + IntermediaDir + ChangeFileExt(ExtractFileName(ProjectFileName), OutExt);
 {$ENDIF}
       if FileExists(OutName) then
