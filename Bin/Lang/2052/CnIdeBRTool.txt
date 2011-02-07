@@ -83,4 +83,4 @@ SCnErrorCaption=错误
 SCnCleaned=历史记录清除完毕！
 SCnHelpOpenError=帮助文件打开出错！
 SCnAboutCaption=关于
-SCnIDEAbout=IDE 配置备份/恢复工具<BR><BR>软件作者 ccrun (老妖)  info@ccrun.com<BR>　　移植 刘啸 liuxiao@cnpack.org<BR>版权所有 (C) 2001-2010 CnPack 开发组
+SCnIDEAbout=IDE 配置备份/恢复工具<BR><BR>软件作者 ccrun (老妖)  info@ccrun.com<BR>　　移植 刘啸 liuxiao@cnpack.org<BR>版权所有 (C) 2001-2011 CnPack 开发组
