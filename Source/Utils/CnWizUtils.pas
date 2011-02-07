@@ -1302,6 +1302,9 @@ function ReplaceToActualPath(const Path: string): string;
 var
   Vars: TStringList;
   i: Integer;
+{$IFDEF DELPHI2011_UP}
+  BC: IOTAProjectOptionsConfigurations;
+{$ENDIF}
 begin
   Result := Path;
   Vars := TStringList.Create;
@@ -1310,6 +1313,13 @@ begin
     for i := 0 to Vars.Count - 1 do
       Result := StringReplace(Result, '$(' + Vars.Names[i] + ')',
         Vars.Values[Vars.Names[i]], [rfReplaceAll, rfIgnoreCase]);
+    {$IFDEF DELPHI2011_UP}
+      BC := CnOtaGetActiveProjectOptionsConfigurations(nil);
+      if BC <> nil then
+        if BC.GetActiveConfiguration <> nil then
+          Result := StringReplace(Result, '$(Config)',
+            BC.GetActiveConfiguration.GetName, [rfReplaceAll, rfIgnoreCase]);
+    {$ENDIF}
   finally
     Vars.Free;
   end;   
