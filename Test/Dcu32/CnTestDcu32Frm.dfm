@@ -28,8 +28,8 @@ object Form1: TForm1
     Width = 451
     Height = 13
     Caption = 
-      'Note: This Test Should Run OK from Delphi 5 ~ 2009, and  Parse O' +
-      'K forr Delphi 5~ 2009 Units.'
+      'Note: This Test Should Run OK from Delphi 5 ~ 2011, and  Parse O' +
+      'K forr Delphi 5~ 2011 Units.'
   end
   object Edit1: TEdit
     Left = 80
