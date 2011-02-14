@@ -1206,7 +1206,7 @@ var
   S: string;
 begin
   S := ChangeFileExt(Info.Name, '');
-  if IsValidIdent(S) and (FCurrList.IndexOf(S) < 0) then
+  if IsValidIdent(StringReplace(S, '.', '', [rfReplaceAll])) and (FCurrList.IndexOf(S) < 0) then
     FCurrList.Add(S);
 end;
 
