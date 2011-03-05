@@ -303,7 +303,7 @@ begin
       if ReplaceText <> '' then
         Stream.Write(PChar(ReplaceText)^, Length(ReplaceText) * SizeOf(Char));
     end;
-    Stream.Write(P^, 1);
+    Stream.Write(P^, SizeOf(Char));
     Result := PChar(Stream.Memory);
   finally
     Stream.Free;
