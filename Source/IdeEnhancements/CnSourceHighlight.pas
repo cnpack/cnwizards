@@ -1625,7 +1625,7 @@ begin
 {$IFDEF BDS2009_UP}
   UpdateTabWidth;
 {$ENDIF}
-  FBlockShortCut := WizShortCutMgr.Add('', ShortCut(Ord('H'), [ssCtrl, ssShift]),
+  FBlockShortCut := WizShortCutMgr.Add(SCnSourceHighlightBlock, ShortCut(Ord('H'), [ssCtrl, ssShift]),
     OnHighlightExec);
   FTimer := TTimer.Create(nil);
   FTimer.Enabled := False;

@@ -314,6 +314,9 @@ resourcestring
   // CnExplore
   SCnExploreFilterDataName = 'ExploreFilter.cdt';
 
+  // CnSourceHighlight
+  SCnSourceHighlightBlock = 'CnSourceHighlightBlock';
+
   // CnInputHelper
   SCnInputHelperPopup = 'CnInputHelperPopup';
 
