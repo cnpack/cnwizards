@@ -300,10 +300,18 @@ begin
   if ActiveControl <> hkCodeCompletion then
     Exit;
 
-  if (Key = VK_SPACE) and (ssAlt in Shift) then
+  if Key = VK_SPACE then
   begin
-    hkCodeCompletion.HotKey := ShortCut(VK_SPACE, [ssAlt]);
-    Key := 0;
+    if ssAlt in Shift then
+    begin
+      hkCodeCompletion.HotKey := ShortCut(VK_SPACE, [ssAlt]);
+      Key := 0;
+    end
+    else if ssCtrl in Shift then
+    begin
+      hkCodeCompletion.HotKey := ShortCut(VK_SPACE, [ssCtrl]);
+      Key := 0;
+    end;
   end;
 end;
 

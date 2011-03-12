@@ -775,16 +775,27 @@ end;
 
 procedure TCnInputHelperForm.FormKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
+var
+  Hk: THotKey;
 begin
-  if ActiveControl <> hkPopup then
+  if (ActiveControl = nil) or not (ActiveControl is THotKey) then
     Exit;
 
-  if (Key = VK_SPACE) and (ssAlt in Shift) then
-  begin
-    hkPopup.HotKey := ShortCut(VK_SPACE, [ssAlt]);
-    Key := 0;
-  end;
+  Hk := ActiveControl as THotKey;
 
+  if Key = VK_SPACE then
+  begin
+    if ssAlt in Shift then
+    begin
+      Hk.HotKey := ShortCut(VK_SPACE, [ssAlt]);
+      Key := 0;
+    end
+    else if ssCtrl in Shift then
+    begin
+      Hk.HotKey := ShortCut(VK_SPACE, [ssCtrl]);
+      Key := 0;
+    end;
+  end;
 end;
 
 procedure TCnInputHelperForm.chkSpcCompleteClick(Sender: TObject);
