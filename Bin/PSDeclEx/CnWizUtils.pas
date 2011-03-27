@@ -446,6 +446,10 @@ function CnOtaGetCurrentProject: IOTAProject;
 {* 取当前工程}
 function CnOtaGetProject: IOTAProject;
 {* 取第一个工程}
+function CnOtaGetProjectCountFromGroup: Integer;
+{* 取当前工程组中工程数，无工程组返回 -1}
+function CnOtaGetProjectFromGroupByIndex(Index: Integer): IOTAProject;
+{* 取当前工程组中的第 Index 个工程，从 0 开始}
 procedure CnOtaGetOptionsNames(Options: IOTAOptions; List: TStrings;
   IncludeType: Boolean = True); overload;
 {* 取得 IDE 设置变量名列表}
@@ -1216,6 +1220,14 @@ begin
 end;
 
 function CnOtaGetProject: IOTAProject;
+begin
+end;
+
+function CnOtaGetProjectCountFromGroup: Integer;
+begin
+end;
+
+function CnOtaGetProjectFromGroupByIndex(Index: Integer): IOTAProject;
 begin
 end;
 
