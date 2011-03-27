@@ -292,6 +292,8 @@ begin
   CL.AddDelphiFunction('Function CnOtaGetProjectResource( Project : IOTAProject) : IOTAProjectResource');
   CL.AddDelphiFunction('Function CnOtaGetCurrentProject : IOTAProject');
   CL.AddDelphiFunction('Function CnOtaGetProject : IOTAProject');
+  CL.AddDelphiFunction('Function CnOtaGetProjectCountFromGroup : Integer');
+  CL.AddDelphiFunction('Function CnOtaGetProjectFromGroupByIndex( Index : Integer) : IOTAProject');
   CL.AddDelphiFunction('Procedure CnOtaGetOptionsNames( Options : IOTAOptions; List : TStrings; IncludeType : Boolean);');
   CL.AddDelphiFunction('Procedure CnOtaSetProjectOptionValue( Options : IOTAProjectOptions; const AOption, AValue : string)');
   CL.AddDelphiFunction('Procedure CnOtaGetProjectList( const List : TInterfaceList)');
@@ -518,6 +520,8 @@ begin
   S.RegisterDelphiFunction(@CnOtaGetProjectResource, 'CnOtaGetProjectResource', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetCurrentProject, 'CnOtaGetCurrentProject', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetProject, 'CnOtaGetProject', cdRegister);
+  S.RegisterDelphiFunction(@CnOtaGetProjectCountFromGroup, 'CnOtaGetProjectCountFromGroup', cdRegister);
+  S.RegisterDelphiFunction(@CnOtaGetProjectFromGroupByIndex, 'CnOtaGetProjectFromGroupByIndex', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetOptionsNames_P, 'CnOtaGetOptionsNames', cdRegister);
   S.RegisterDelphiFunction(@CnOtaSetProjectOptionValue, 'CnOtaSetProjectOptionValue', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetProjectList, 'CnOtaGetProjectList', cdRegister);
