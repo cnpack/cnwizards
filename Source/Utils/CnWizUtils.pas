@@ -361,6 +361,10 @@ function CnOtaGetComponentText(Component: IOTAComponent): string;
 {* 返回组件的标题}
 function CnOtaGetModule(const FileName: string): IOTAModule;
 {* 根据文件名返回模块接口}
+function CnOtaGetModuleCountFromProject(Project: IOTAProject): Integer;
+{* 取当前工程中模块数，无工程返回 -1}
+function CnOtaGetModuleFromProjectByIndex(Project: IOTAProject; Index: Integer): IOTAModuleInfo;
+{* 取当前工程中的第 Index 个模块信息，从 0 开始}
 function CnOtaGetEditor(const FileName: string): IOTAEditor;
 {* 根据文件名返回编辑器接口}
 function CnOtaGetRootComponentFromEditor(Editor: IOTAFormEditor): TComponent;
@@ -2488,6 +2492,23 @@ begin
   QuerySvcs(BorlandIDEServices, IOTAModuleServices, ModuleServices);
   if ModuleServices <> nil then
     Result := ModuleServices.FindModule(FileName);
+end;
+
+// 取当前工程中模块数，无工程返回 -1
+function CnOtaGetModuleCountFromProject(Project: IOTAProject): Integer;
+begin
+  Result := -1;
+  if Project <> nil then
+    Result := Project.GetModuleCount;
+end;
+
+// 取当前工程中的第 Index 个模块信息，从 0 开始
+function CnOtaGetModuleFromProjectByIndex(Project: IOTAProject; Index: Integer): IOTAModuleInfo;
+begin
+  if Project <> nil then
+    Result := Project.GetModule(Index)
+  else
+    Result := nil;
 end;
 
 // 根据文件名返回编辑器接口

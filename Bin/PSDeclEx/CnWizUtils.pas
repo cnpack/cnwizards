@@ -426,6 +426,10 @@ function CnOtaGetComponentText(Component: IOTAComponent): string;
 {* 返回组件的标题}
 function CnOtaGetModule(const FileName: string): IOTAModule;
 {* 根据文件名返回模块接口}
+function CnOtaGetModuleCountFromProject(Project: IOTAProject): Integer;
+{* 取当前工程中模块数，无工程返回 -1}
+function CnOtaGetModuleFromProjectByIndex(Project: IOTAProject; Index: Integer): IOTAModuleInfo;
+{* 取当前工程中的第 Index 个模块信息，从 0 开始}
 function CnOtaGetEditor(const FileName: string): IOTAEditor;
 {* 根据文件名返回编辑器接口}
 function CnOtaGetRootComponentFromEditor(Editor: IOTAFormEditor): TComponent;
@@ -1180,6 +1184,14 @@ begin
 end;
 
 function CnOtaGetModule(const FileName: string): IOTAModule;
+begin
+end;
+
+function CnOtaGetModuleCountFromProject(Project: IOTAProject): Integer;
+begin
+end;
+
+function CnOtaGetModuleFromProjectByIndex(Project: IOTAProject; Index: Integer): IOTAModuleInfo;
 begin
 end;
 

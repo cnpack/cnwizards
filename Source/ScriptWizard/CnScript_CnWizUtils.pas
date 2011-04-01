@@ -282,6 +282,8 @@ begin
   CL.AddDelphiFunction('Function CnOtaGetComponentName( Component : IOTAComponent; var Name : string) : Boolean');
   CL.AddDelphiFunction('Function CnOtaGetComponentText( Component : IOTAComponent) : string');
   CL.AddDelphiFunction('Function CnOtaGetModule( const FileName : string) : IOTAModule');
+  CL.AddDelphiFunction('Function CnOtaGetModuleCountFromProject( Project : IOTAProject): Integer');
+  CL.AddDelphiFunction('Function CnOtaGetModuleFromProjectByIndex( Project : IOTAProject; Index : Integer): IOTAModuleInfo');
   CL.AddDelphiFunction('Function CnOtaGetEditor( const FileName : string) : IOTAEditor');
   CL.AddDelphiFunction('Function CnOtaGetRootComponentFromEditor( Editor : IOTAFormEditor) : TComponent');
   CL.AddDelphiFunction('Function CnOtaGetCurrentEditWindow : TCustomForm');
