@@ -512,6 +512,8 @@ begin
   S.RegisterDelphiFunction(@CnOtaGetComponentName, 'CnOtaGetComponentName', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetComponentText, 'CnOtaGetComponentText', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetModule, 'CnOtaGetModule', cdRegister);
+  S.RegisterDelphiFunction(@CnOtaGetModuleCountFromProject, 'CnOtaGetModuleCountFromProject', cdRegister);
+  S.RegisterDelphiFunction(@CnOtaGetModuleFromProjectByIndex, 'CnOtaGetModuleFromProjectByIndex', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetEditor, 'CnOtaGetEditor', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetRootComponentFromEditor, 'CnOtaGetRootComponentFromEditor', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetCurrentEditWindow, 'CnOtaGetCurrentEditWindow', cdRegister);
