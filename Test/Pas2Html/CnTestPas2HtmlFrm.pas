@@ -35,14 +35,14 @@ uses CnPasConvert;
 
 procedure TForm1.Button1Click(Sender: TObject);
 var
-  Con: TCnPasConversion;
+  Con: TCnSourceConversion;
   InStream: TStream;
   OutStream: TMemoryStream;
 begin
   // ²âÊÔ×ª HTML
   if dlgOpen1.Execute then
   begin
-    Con := TCnPasToHtmlConversion.Create;
+    Con := TCnSourceToHtmlConversion.Create;
     InStream := TFileStream.Create(dlgOpen1.FileName, fmOpenRead);
     OutStream := TMemoryStream.Create;
 
@@ -61,14 +61,14 @@ end;
 
 procedure TForm1.Button2Click(Sender: TObject);
 var
-  Con: TCnPasConversion;
+  Con: TCnSourceConversion;
   InStream: TStream;
   OutStream: TMemoryStream;
 begin
   // ²âÊÔ×ª RTF
   if dlgOpen1.Execute then
   begin
-    Con := TCnPasToRTFConversion.Create;
+    Con := TCnSourceToRtfConversion.Create;
     InStream := TFileStream.Create(dlgOpen1.FileName, fmOpenRead);
     OutStream := TMemoryStream.Create;
 
@@ -87,7 +87,7 @@ end;
 
 procedure TForm1.Button3Click(Sender: TObject);
 var
-  Con: TCnPasConversion;
+  Con: TCnSourceConversion;
   InStream: TStream;
   OutStream1, OutStream2: TMemoryStream;
   Fmt: UINT;
@@ -97,7 +97,7 @@ begin
   // ²âÊÔ×ª HTML
   if dlgOpen1.Execute then
   begin
-    Con := TCnPasToHtmlConversion.Create;
+    Con := TCnSourceToHtmlConversion.Create;
     InStream := TFileStream.Create(dlgOpen1.FileName, fmOpenRead);
     OutStream1 := TMemoryStream.Create;
     OutStream2 := TMemoryStream.Create;
