@@ -287,9 +287,16 @@ var
     Result := Chr(AByte);
   end;
 
+{
+十六进制输出格式：
+00 11 22 33 44 55 66 77 88 99 AA BB CC DD EE FF ; 01234567890ABCDEF
+来Size个字节，行数为(Size div 16) + 1，一满行字符为3 * 16 + 2 + 16 + 2
+最后一行为Size mod 16，当其大于0时， 一满行字符为3 * 16 + 2 + (Size mod 16)
+如尾部用空格填充，则总字节数简化为 ((Size div 16) + 1 ) * ( 3 * 16 + 2 + 16 + 2 )
+}
   function HexDumpMemory(AMem: Pointer; Size: Integer): string;
   var
-    I, DestP: Integer;
+    I, J, DestP, PrevLineStart: Integer;
     AChar: Char;
   begin
     if (Size <= 0) or (AMem = nil) then
@@ -298,8 +305,10 @@ var
       Exit;
     end;
 
-    SetLength(Result, 3 * Size - 1 + Size div 16);
-    DestP := 0;
+    SetLength(Result, ((Size div 16) + 1 ) * ( 3 * 16 + 2 + 16 + 2 ));
+    FillChar(Result[1], Length(Result), 0);
+
+    DestP := 0; PrevLineStart := 0;
     for I := 0 to Size - 1 do
     begin
       AChar := (PChar(Integer(AMem) + I))^;
@@ -312,12 +321,54 @@ var
         Inc(DestP);
         if (I > 0) and ((I + 1) mod 16 = 0) then
         begin
+          // DONE: 加缩略字符再加回车
+          Result[DestP] := ' '; // 加空格分隔
+          Inc(DestP);
+          Result[DestP] := ';'; // 加分号分隔
+          Inc(DestP);
+          Result[DestP] := ' '; // 加空格分隔
+          Inc(DestP);
+
+          for J := PrevLineStart to I do
+          begin
+            AChar := (PChar(Integer(AMem) + J))^;
+            if AChar in [#32..#127] then
+              Result[DestP] := AChar
+            else
+              Result[DestP] := '.'; // 不可显示字符
+            Inc(DestP);
+          end;
+          PrevLineStart := I + 1;
+
           Result[DestP] := #$D;
           Inc(DestP);
           Result[DestP] := #$A; // 加回车分隔
         end
         else
+        begin
           Result[DestP] := ' '; // 加空格分隔
+        end;
+      end;
+    end;
+
+    if (Size mod 16) > 0 then
+    begin
+      // DONE: 处理末行未完的情形
+      Result[DestP] := ' '; // 加空格分隔
+      Inc(DestP);
+      Result[DestP] := ';'; // 加分号分隔
+      Inc(DestP);
+      Result[DestP] := ' '; // 加空格分隔
+      Inc(DestP);
+
+      for J := PrevLineStart to Size - 1 do
+      begin
+        AChar := (PChar(Integer(AMem) + J))^;
+        if AChar in [#32..#127] then
+          Result[DestP] := AChar
+        else
+          Result[DestP] := '.'; // 不可显示字符
+        Inc(DestP);
       end;
     end;
   end;
