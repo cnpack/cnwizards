@@ -358,7 +358,9 @@ begin
         try
           S := AnsiString(Block.Text);
 {$IFDEF IDE_WIDECONTROL}
+  {$IFNDEF BDS2010_UP} // Delphi 2010 以及以上版本，Block的Text已经不是UTF8而是Ansi了
           S := CnUtf8ToAnsi(S);
+  {$ENDIF}
 {$ENDIF}
           InMStream.Write(S[1], Length(S));
 
