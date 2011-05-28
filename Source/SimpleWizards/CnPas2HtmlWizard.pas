@@ -143,7 +143,6 @@ implementation
 uses
   CnPas2HtmlConfigFrm {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
-
 const
   csDispGauge = 'DispGauge';
   csAutoSave = 'SaveBeforeConvert';
@@ -667,6 +666,12 @@ begin
         try
           Move(HtmlStrBuf^, DataHPtr^, SizeH + 1);
           SetClipboardData(Fmt, DataH);
+          if not IsClipboardFormatAvailable(Fmt) then
+          begin
+{$IFDEF DEBUG}
+            CnDebugger.LogErrorFmt('HTML Format %d not Availiable after SetClipboardData.', [Fmt]);
+{$ENDIF}          
+          end;
         finally
           GlobalUnlock(DataH);
         end;
