@@ -268,7 +268,7 @@ end;
 class procedure TCnStringPropEditor.Register;
 begin
   RegisterPropertyEditor(TypeInfo(string), TPersistent, '', TCnStringPropEditor);
-
+  RegisterPropertyEditor(TypeInfo(WideString), TPersistent, '', TCnStringPropEditor);
   RegisterPropertyEditor(TypeInfo(TCaption), TLabel, 'Caption', TCnCaptionPropEditor);
   RegisterPropertyEditor(TypeInfo(TCaption), TCustomLabel, 'Caption', TCnCaptionPropEditor);
 end;
