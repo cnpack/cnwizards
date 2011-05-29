@@ -1645,9 +1645,11 @@ begin
         Inc(P);
       end;
 
+      // BDS 下但是取出的内容必须做 Utf8->Ansi转换以免注释解析出错等问题，
+      // 放 ParsePasCodePosInfo/ParseCppCodePosInfo 内部处理
       if IsPascalFile then
       begin
-        FPosInfo := ParsePasCodePosInfo(P, CurrPos - StartPos, False);
+        FPosInfo := ParsePasCodePosInfo(P, CurrPos - StartPos, False, True);
         EditControlWrapper.GetAttributeAtPos(CnOtaGetCurrentEditControl,
           View.CursorPos, False, Element, LineFlag);
         case Element of
@@ -1661,7 +1663,7 @@ begin
       else if IsCppFile then
       begin
         // 解析 C++ 文件，判断光标所属的位置类型
-        FPosInfo := ParseCppCodePosInfo(P, CurrPos - StartPos, False);
+        FPosInfo := ParseCppCodePosInfo(P, CurrPos - StartPos, False, True);
         EditControlWrapper.GetAttributeAtPos(CnOtaGetCurrentEditControl,
           View.CursorPos, False, Element, LineFlag);
         case Element of
@@ -1676,14 +1678,15 @@ begin
     else
     begin
       CnOtaSaveCurrentEditorToStream(Stream, False, False);
+      // BDS 下内容已经是 UTF8 了，必须做Ansi转换以避免注释判断错误
       if IsPascalFile then
       begin
-        FPosInfo := ParsePasCodePosInfo(PAnsiChar(Stream.Memory), CurrPos, True)
+        FPosInfo := ParsePasCodePosInfo(PAnsiChar(Stream.Memory), CurrPos, True, True)
       end
       else if IsCppFile then
       begin
         // 解析 C++ 文件，判断光标所属的位置类型
-        FPosInfo := ParseCppCodePosInfo(PAnsiChar(Stream.Memory), CurrPos, True);
+        FPosInfo := ParseCppCodePosInfo(PAnsiChar(Stream.Memory), CurrPos, True, True);
       end;
     end;
   finally

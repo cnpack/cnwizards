@@ -29,7 +29,9 @@ unit CnPasCodeParser;
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2004.11.07
+* 修改记录：2011.05.29
+*               修正BDS下对汉字UTF8未处理而导致解析出错的问题
+*           2004.11.07
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -39,8 +41,8 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, SysUtils, Classes, mPasLex, mwBCBTokenList,
-  Contnrs, CnCommon, CnFastList;
+  Windows, SysUtils, Classes, mPasLex, mwBCBTokenList, CnWizUtils,
+  Contnrs, CnCommon, CnFastList, CnDebug;
 
 const
   CN_TOKEN_MAX_SIZE = 63;
@@ -240,7 +242,7 @@ const
   csNormalPosKinds = csAllPosKinds - csNonCodePosKinds - csFieldPosKinds;
 
 function ParsePasCodePosInfo(const Source: AnsiString; CurrPos: Integer;
-  FullSource: Boolean = True): TCodePosInfo;
+  FullSource: Boolean = True; IsUtf8: Boolean = False): TCodePosInfo;
 {* 分析源代码中当前位置的信息}
 
 procedure ParseUnitUses(const Source: AnsiString; UsesList: TStrings);
@@ -967,7 +969,7 @@ end;
 //==============================================================================
 
 function ParsePasCodePosInfo(const Source: AnsiString; CurrPos: Integer;
-  FullSource: Boolean = True): TCodePosInfo;
+  FullSource: Boolean = True; IsUtf8: Boolean = False): TCodePosInfo;
 var
   IsProgram: Boolean;
   InClass: Boolean;
@@ -975,6 +977,7 @@ var
   ProcIndent: Integer;
   SavePos: TCodePosKind;
   Lex: TmwPasLex;
+  Text: AnsiString;
 
   procedure DoNext(NoJunk: Boolean = False);
   begin
@@ -1001,7 +1004,15 @@ begin
   try
     Lex := TmwPasLex.Create;
     ProcStack := TStack.Create;
-    Lex.Origin := PAnsiChar(Source);
+{$IFDEF BDS}
+    if IsUtf8 then
+      Text := CnUtf8ToAnsi(PAnsiChar(Source))
+    else
+      Text := Source;
+{$ELSE}
+    Text := Source;
+{$ENDIF}
+    Lex.Origin := PAnsiChar(Text);
 
     if FullSource then
     begin
@@ -1019,6 +1030,7 @@ begin
     ProcIndent := 0;
     while (Lex.TokenPos < CurrPos) and (Lex.TokenID <> tkNull) do
     begin
+      CnDebugger.LogFmt('ParsePasCodePosInfo %d, %s', [Integer(Lex.TokenID), Lex.Token]);
       case Lex.TokenID of
         tkUnit:
           begin

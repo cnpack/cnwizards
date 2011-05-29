@@ -29,7 +29,9 @@ unit CnCppCodeParser;
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2009.04.10
+* 修改记录：2011.05.29
+*               修正BDS下对汉字UTF8未处理而导致解析出错的问题
+*           2009.04.10
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -39,7 +41,7 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, SysUtils, Classes, Contnrs, CnPasCodeParser,
+  Windows, SysUtils, Classes, Contnrs, CnPasCodeParser, CnWizUtils,
   mwBCBTokenList, CnCommon, CnFastList;
   
 type
@@ -106,7 +108,7 @@ type
   end;
 
 function ParseCppCodePosInfo(const Source: AnsiString; CurrPos: Integer;
-  FullSource: Boolean = True): TCodePosInfo;
+  FullSource: Boolean = True; IsUtf8: Boolean = False): TCodePosInfo;
 {* 分析源代码中当前位置的信息}
 
 implementation
@@ -587,7 +589,7 @@ end;
 
 // 分析源代码中当前位置的信息
 function ParseCppCodePosInfo(const Source: AnsiString; CurrPos: Integer;
-  FullSource: Boolean = True): TCodePosInfo;
+  FullSource: Boolean = True; IsUtf8: Boolean = False): TCodePosInfo;
 var
   CanExit: Boolean;
   ProcStack: TStack;
@@ -595,6 +597,7 @@ var
   IsDeclareStart: Boolean;
   IsDeclareEnd: Boolean;
   IsIdentifier: Boolean;
+  Text: AnsiString;
 
   procedure DoNext(NoJunk: Boolean = False);
   var
@@ -626,7 +629,15 @@ begin
   try
     CParser := TBCBTokenList.Create;
     ProcStack := TStack.Create;
-    CParser.SetOrigin(PAnsiChar(Source), Length(Source));
+{$IFDEF BDS}
+    if IsUtf8 then
+      Text := CnUtf8ToAnsi(PAnsiChar(Source))
+    else
+      Text := Source;
+{$ELSE}
+    Text := Source;
+{$ENDIF}
+    CParser.SetOrigin(PAnsiChar(Text), Length(Text));
 
     if FullSource then
     begin
