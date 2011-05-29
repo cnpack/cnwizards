@@ -42,7 +42,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, mPasLex, mwBCBTokenList, CnWizUtils,
-  Contnrs, CnCommon, CnFastList, CnDebug;
+  Contnrs, CnCommon, CnFastList;
 
 const
   CN_TOKEN_MAX_SIZE = 63;
@@ -1030,7 +1030,6 @@ begin
     ProcIndent := 0;
     while (Lex.TokenPos < CurrPos) and (Lex.TokenID <> tkNull) do
     begin
-      CnDebugger.LogFmt('ParsePasCodePosInfo %d, %s', [Integer(Lex.TokenID), Lex.Token]);
       case Lex.TokenID of
         tkUnit:
           begin
