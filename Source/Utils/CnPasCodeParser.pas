@@ -1006,7 +1006,10 @@ begin
     ProcStack := TStack.Create;
 {$IFDEF BDS}
     if IsUtf8 then
-      Text := CnUtf8ToAnsi(PAnsiChar(Source))
+    begin
+      Text := CnUtf8ToAnsi(PAnsiChar(Source));
+      CurrPos := Length(CnUtf8ToAnsi(Copy(Source, 1, CurrPos)));
+    end
     else
       Text := Source;
 {$ELSE}
@@ -1030,6 +1033,7 @@ begin
     ProcIndent := 0;
     while (Lex.TokenPos < CurrPos) and (Lex.TokenID <> tkNull) do
     begin
+      // CnDebugger.LogFmt('Token ID %d, %s',[Integer(Lex.TokenID), Lex.Token]);
       case Lex.TokenID of
         tkUnit:
           begin
