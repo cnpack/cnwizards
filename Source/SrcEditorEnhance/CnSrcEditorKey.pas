@@ -29,7 +29,9 @@ unit CnSrcEditorKey;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2008.12.25
+* 修改记录：2011.06.14
+*             加入行首尾按左右键折行的功能
+*           2008.12.25
 *             加入 F2 修改当前变量名的功能
 *           2005.08.30
 *             创建单元
@@ -74,6 +76,7 @@ type
     FAutoIndentList: TStringList;
     FHomeExt: Boolean;
     FHomeFirstChar: Boolean;
+    FLeftRightLineWrap: Boolean;
     FF3Search: Boolean;
     FAutoBracket: Boolean;
     FF2Rename: Boolean;
@@ -109,6 +112,8 @@ type
 {$ENDIF}
     function DoHomeExtend(View: IOTAEditView; Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean): Boolean;
+    function DoLeftRightLineWrap(View: IOTAEditView; Key, ScanCode: Word; Shift: TShiftState;
+      var Handled: Boolean): Boolean;
     function DoSemicolonLastChar(View: IOTAEditView; Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean): Boolean;
     function DoSearchAgain(View: IOTAEditView; Key, ScanCode: Word; Shift: TShiftState;
@@ -141,6 +146,7 @@ type
     property AutoIndentList: TStringList read FAutoIndentList;
     property HomeExt: Boolean read FHomeExt write FHomeExt;
     property HomeFirstChar: Boolean read FHomeFirstChar write FHomeFirstChar;
+    property LeftRightLineWrap: Boolean read FLeftRightLineWrap write FLeftRightLineWrap;
     property AutoBracket: Boolean read FAutoBracket write FAutoBracket;
     property SemicolonLastChar: Boolean read FSemicolonLastChar write FSemicolonLastChar;
     property AutoEnterEnd: Boolean read FAutoEnterEnd write FAutoEnterEnd;
@@ -736,6 +742,49 @@ begin
         Result := True;
         View.Paint;
       end;
+    end;
+  end;
+end;
+
+function TCnSrcEditorKey.DoLeftRightLineWrap(View: IOTAEditView; Key,
+  ScanCode: Word; Shift: TShiftState; var Handled: Boolean): Boolean;
+var
+  Text: string;
+  LineNo: Integer;
+  CharIdx: Integer;
+  Len: Integer;
+begin
+  Result := False;
+  Handled := False;
+  if ((Key = VK_LEFT) or (Key = VK_RIGHT)) and not (ssCtrl in Shift)
+    and not View.Block.IsValid and CurrentIsSource then
+  begin
+    if CnNtaGetCurrLineText(Text, LineNo, CharIdx) then
+    begin
+      if (CharIdx = 0) and (Key = VK_LEFT) then // 行首左移至上一行尾
+      begin
+        Result := View.Buffer.EditPosition.MoveRelative(-1, 0)
+          and View.Buffer.EditPosition.MoveEOL;
+        Handled := Result;
+      end
+      else if Key = VK_RIGHT then  // 行尾右移至下一行头
+      begin
+{$IFDEF DELPHI2009_UP}
+        CharIdx := View.CursorPos.Col - 1;
+        Len := Length(AnsiString(Text));
+{$ELSE}
+        Len := Length(Text);
+{$ENDIF}
+        if CharIdx >= Len then
+        begin
+          View.Buffer.EditPosition.MoveRelative(1, 0);
+          View.Buffer.EditPosition.MoveBOL;
+          Result := True;
+          Handled := Result;
+        end;
+      end;
+      if Result then
+        View.Paint;
     end;
   end;
 end;
@@ -1438,6 +1487,9 @@ begin
     if FHomeExt and DoHomeExtend(View, Key, ScanCode, Shift, Handled) then
       Exit;
 
+    if FLeftRightLineWrap and DoLeftRightLineWrap(View, Key, ScanCode, Shift, Handled) then
+      Exit;
+
     if FSemicolonLastChar and DoSemicolonLastChar(View, Key, ScanCode, Shift, Handled) then
       Exit;
   end;
@@ -1486,6 +1538,7 @@ const
   csAutoIndent = 'AutoIndent';
   csHomeExt = 'HomeExt';
   csHomeFirstChar = 'HomeFirstChar';
+  csLeftRightLineWrap = 'LeftRightLineWrap';
   csAutoBracket = 'AutoBracket';
   csSemicolonLastChar = 'SemicolonLastChar';
   csAutoEnterEnd = 'AutoEnterEnd';
@@ -1503,6 +1556,7 @@ begin
   SearchWrap := Ini.ReadBool(csEditorKey, csSearchWrap, True);
   FHomeExt := Ini.ReadBool(csEditorKey, csHomeExt, True);
   FHomeFirstChar := Ini.ReadBool(csEditorKey, csHomeFirstChar, False);
+  FLeftRightLineWrap := Ini.ReadBool(csEditorKey, csLeftRightLineWrap, False);
   FAutoBracket := Ini.ReadBool(csEditorKey, csAutoBracket, False);
   FSemicolonLastChar := Ini.ReadBool(csEditorKey, csSemicolonLastChar, False);
   FAutoEnterEnd := Ini.ReadBool(csEditorKey, csAutoEnterEnd, True);
@@ -1522,6 +1576,7 @@ begin
   Ini.WriteBool(csEditorKey, csAutoIndent, FAutoIndent);
   Ini.WriteBool(csEditorKey, csHomeExt, FHomeExt);
   Ini.WriteBool(csEditorKey, csHomeFirstChar, FHomeFirstChar);
+  Ini.WriteBool(csEditorKey, csLeftRightLineWrap, FLeftRightLineWrap);
   Ini.WriteBool(csEditorKey, csAutoBracket, FAutoBracket);
   Ini.WriteBool(csEditorKey, csSemicolonLastChar, FSemicolonLastChar);
   Ini.WriteBool(csEditorKey, csAutoEnterEnd, FAutoEnterEnd);
@@ -1563,5 +1618,6 @@ begin
 end;
 
 {$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}
+
 end.
 
