@@ -1335,7 +1335,9 @@ begin
 
               if (Pair.StartToken.TokenID = tkIf) and (Pair.EndToken.TokenID = tkThen) then
                 FIfThenStack.Push(Pair);
-              // 记下if then 块，让后面的 else 来配。注意已无需处理 on Exception do 块
+              if (Pair.StartToken.TokenID = tkOn) and (Pair.EndToken.TokenID = tkDo) then
+                FIfThenStack.Push(Pair);
+              // 记下if then 块，让后面的 else 来配。注意同时也处理 on Exception do 块
             end;
           end
           else
