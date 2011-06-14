@@ -3,6 +3,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
   Top = 126
   BorderStyle = bsDialog
   Caption = 'Editor Enhancements Wizard Settings'
+  ClientHeight = 473
   ClientWidth = 401
   KeyPreview = True
   OnCreate = FormCreate
@@ -11,7 +12,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
   TextHeight = 13
   object btnOK: TButton
     Left = 158
-    Top = 422
+    Top = 442
     Width = 75
     Height = 21
     Caption = '&OK'
@@ -21,7 +22,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
   end
   object btnCancel: TButton
     Left = 238
-    Top = 422
+    Top = 442
     Width = 75
     Height = 21
     Cancel = True
@@ -31,7 +32,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
   end
   object btnHelp: TButton
     Left = 318
-    Top = 422
+    Top = 442
     Width = 75
     Height = 21
     Caption = '&Help'
@@ -42,7 +43,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
     Left = 8
     Top = 8
     Width = 385
-    Height = 406
+    Height = 426
     ActivePage = ts1
     TabOrder = 0
     object ts1: TTabSheet
@@ -133,12 +134,12 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         Left = 8
         Top = 180
         Width = 361
-        Height = 189
+        Height = 210
         Caption = '&Read Only Protection'
         TabOrder = 1
         object lblDir: TLabel
           Left = 8
-          Top = 137
+          Top = 157
           Width = 17
           Height = 13
           Caption = 'Dir:'
@@ -156,21 +157,21 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Left = 8
           Top = 40
           Width = 337
-          Height = 85
+          Height = 105
           ItemHeight = 13
           TabOrder = 1
           OnClick = lbReadOnlyDirsClick
         end
         object edtDir: TEdit
           Left = 48
-          Top = 133
+          Top = 153
           Width = 273
           Height = 21
           TabOrder = 2
         end
         object btnSelectDir: TButton
           Left = 325
-          Top = 133
+          Top = 153
           Width = 21
           Height = 21
           Caption = '...'
@@ -179,7 +180,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         end
         object btnReplace: TButton
           Left = 63
-          Top = 159
+          Top = 180
           Width = 75
           Height = 21
           Action = actReplace
@@ -187,7 +188,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         end
         object btnAdd: TButton
           Left = 143
-          Top = 159
+          Top = 180
           Width = 75
           Height = 21
           Action = actAdd
@@ -195,7 +196,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         end
         object btnDel: TButton
           Left = 223
-          Top = 159
+          Top = 180
           Width = 75
           Height = 21
           Action = actDelete
@@ -557,7 +558,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         Left = 8
         Top = 8
         Width = 361
-        Height = 224
+        Height = 244
         Caption = '&Keyboard Extend'
         TabOrder = 0
         object chkShiftEnter: TCheckBox
@@ -607,7 +608,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 120
           Width = 350
           Height = 17
-          Caption = 'Auto Input Matched Bracket and Quote (), [], {} '''', "".'
+          Caption = 'Auto Input Matched Bracket and Quote (), [], {} '#39#39', "".'
           TabOrder = 6
         end
         object chkKeepSearch: TCheckBox
@@ -639,28 +640,37 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         end
         object chkSemicolon: TCheckBox
           Left = 8
-          Top = 180
+          Top = 200
           Width = 350
           Height = 17
           Caption = 'Put to Line End when Enter ";" in Source Code.'
-          TabOrder = 9
+          TabOrder = 10
           OnClick = UpdateContent
         end
         object chkAutoEnterEnd: TCheckBox
           Left = 8
-          Top = 200
+          Top = 220
           Width = 350
           Height = 17
           Caption = 'Auto Add "end" when Pressing Enter after "begin".'
-          TabOrder = 10
+          TabOrder = 11
+          OnClick = UpdateContent
+        end
+        object chkLeftRightWrapLine: TCheckBox
+          Left = 8
+          Top = 180
+          Width = 350
+          Height = 17
+          Caption = 'Wrap Cursor when Press Left/Right at Line Head/End.'
+          TabOrder = 9
           OnClick = UpdateContent
         end
       end
       object grpAutoIndent: TGroupBox
         Left = 8
-        Top = 237
+        Top = 257
         Width = 361
-        Height = 132
+        Height = 133
         Caption = 'Auto &Indent'
         TabOrder = 1
         object lbl3: TLabel
