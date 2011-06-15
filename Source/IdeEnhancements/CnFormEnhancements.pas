@@ -1822,7 +1822,7 @@ begin
       V := '[' + V + ']';
 
     IsStr := (FTypeInfo^.Kind in [tkWChar, tkString, tkLString, tkWString
-      {$IFDEF UNICODE_STRING}, tkUString{$ENDIF}]) and (FTypeInfo^.Name <> 'Name');
+      {$IFDEF UNICODE_STRING}, tkUString{$ENDIF}]) and (PropName <> 'Name');
       
     if not TextOnly then
     begin
@@ -1877,7 +1877,7 @@ begin
         FStringButton.Show;
         AlignSubControls;
       end;
-      FStrCaption := Selections[0].GetNamePath + '.' + FTypeInfo^.Name;
+      FStrCaption := Selections[0].GetNamePath + '.' + PropName;
     end
     else
     begin
