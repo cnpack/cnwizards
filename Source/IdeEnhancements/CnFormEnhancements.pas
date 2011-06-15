@@ -246,12 +246,14 @@ type
     FSelection: TList;
     FNameCombo: TCnToolBarComboBox;
     FValueCombo: TCnValueComboBox;
+    FStringButton: TSpeedButton;
     FFreqButton: TSpeedButton;
     FRenameButton: TSpeedButton;
     FNameComboWidth: Integer;
     FValueComboWidth: Integer;
     FUseHistory: Boolean;
     FSaveValue: string;
+    FStrCaption: string;
     FIsSetProp: Boolean;
     FTypeInfo: PTypeInfo;
     FSetValue: TIntegerSet;
@@ -271,6 +273,7 @@ type
     procedure OnKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure OnKillFocus(Sender: TObject);
     procedure OnValueClick(Sender: TObject);
+    procedure OnButtonClick(Sender: TObject);
     function GetSelection(Index: Integer): TPersistent;
     function GetSelectionCount: Integer;
     procedure UpdateControls;
@@ -434,7 +437,8 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnWizShareImages, CnPrefixExecuteFrm, CnDesignEditorConsts;
+  CnWizShareImages, CnPrefixExecuteFrm, CnDesignEditorConsts,
+  CnMultiLineEditorFrm;
 
 const
   csButtonWidth = 20;
@@ -1435,6 +1439,11 @@ begin
   FValueCombo.OnMeasureItem := OnMeasureItem;
   FValueCombo.OnDrawItem := OnDrawItem;
   FValueCombo.OnDropDown := OnDropDown;
+
+  FStringButton := TSpeedButton.Create(Self);
+  FStringButton.Parent := Panel;
+  FStringButton.Caption := '...';
+  FStringButton.OnClick := OnButtonClick;
 {$IFDEF COMPILER6_UP}
   FValueCombo.AutoComplete := False;
 {$ENDIF}
@@ -1482,8 +1491,18 @@ begin
     FNameCombo.SetBounds(-1, -1, FNameComboWidth, csPropBarHeight);
     FValueCombo.SetBounds(FNameCombo.Left + FNameCombo.Width, -1,
       FValueComboWidth, csPropBarHeight);
-    FFreqButton.SetBounds(FValueCombo.Left + FValueCombo.Width, 0,
-      csPropBarHeight, csPropBarHeight);
+    if FStringButton.Visible then
+    begin
+      FStringButton.SetBounds(FValueCombo.Left + FValueCombo.Width, 0,
+        csPropBarHeight, csPropBarHeight);
+      FFreqButton.SetBounds(FStringButton.Left + FStringButton.Width, 0,
+        csPropBarHeight, csPropBarHeight);
+    end
+    else
+    begin
+      FFreqButton.SetBounds(FValueCombo.Left + FValueCombo.Width, 0,
+        csPropBarHeight, csPropBarHeight);
+    end;
     FRenameButton.SetBounds(FFreqButton.Left + FFreqButton.Width, 0,
       csPropBarHeight, csPropBarHeight);
     Panel.ClientHeight := csPropBarHeight;
@@ -1763,6 +1782,7 @@ var
   i: Integer;
   PropName: string;
   V: Variant;
+  IsStr: Boolean;
 
   procedure AddEnumList(AInfo: PTypeInfo);
   var
@@ -1801,6 +1821,9 @@ begin
     if (FTypeInfo^.Kind = tkSet) and (V <> '') then
       V := '[' + V + ']';
 
+    IsStr := (FTypeInfo^.Kind in [tkWChar, tkString, tkLString, tkWString
+      {$IFDEF UNICODE_STRING}, tkUString{$ENDIF}]) and (FTypeInfo^.Name <> 'Name');
+      
     if not TextOnly then
     begin
       FValueCombo.Items.Clear;
@@ -1842,8 +1865,30 @@ begin
         end;
         FUseHistory := True;
       end;
-    end;      
+    end;
     FValueCombo.Text := V;
+
+    if IsStr then
+    begin
+      if FValueCombo.Style <> csSimple then
+        FValueCombo.Style := csSimple;
+      if not FStringButton.Visible then
+      begin
+        FStringButton.Show;
+        AlignSubControls;
+      end;
+      FStrCaption := Selections[0].GetNamePath + '.' + FTypeInfo^.Name;
+    end
+    else
+    begin
+      if FValueCombo.Style <> csDropDown then
+        FValueCombo.Style := csDropDown;
+      if FStringButton.Visible then
+      begin
+        FStringButton.Hide;
+        AlignSubControls;
+      end;
+    end;
   end
   else
   begin
@@ -1950,6 +1995,24 @@ begin
   // 直接设置会导致 Text 变空
   PostMessage(Handle, WM_PROPBARMODIFIED, 0, 0);
 end;
+
+procedure TCnFormFloatPropBar.OnButtonClick(Sender: TObject);
+begin
+  // 弹出字符串属性编辑框
+  with TCnMultiLineEditorForm.Create(nil) do
+  try
+    Caption := FStrCaption;
+    memEdit.Text := FValueCombo.Text;
+    memEdit.Modified := False;
+    tbtSep9.Visible := False;
+    tbtCodeEditor.Visible := False;
+    case ShowModal of
+      mrOK: FValueCombo.Text := memEdit.Text;
+    end;
+  finally
+    Free;
+  end;
+end;  
 
 procedure TCnFormFloatPropBar.OnKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
