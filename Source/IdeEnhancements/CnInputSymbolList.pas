@@ -1286,7 +1286,7 @@ begin
   end;
 end;
 
-function GetModuleProc(HInstance: Integer; Data: Pointer): Boolean;
+function GetModuleProc(HInstance: THandle; Data: Pointer): Boolean;
 var
   Flags: Integer;
 begin
