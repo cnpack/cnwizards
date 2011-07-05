@@ -5,9 +5,9 @@
 **********************************************************************
 
                          CnPack IDE Wizards
-                           Version 0.9.7
+                           Version 0.9.8
                        =======================
-                         CnPack Team 2010.10
+                         CnPack Team 2011.06
 
 
 =====================================================
@@ -19,7 +19,7 @@
 C++Builder/BDS to improve development efficiency.
 
     CnWizards is designed to aide programmers who use Delphi 5 6 7,
-C++Builder 5 6 and BDS 2005 2006, RAD Studio 2007 2009 2010 2011.
+C++Builder 5 6 and BDS 2005 2006, RAD Studio 2007 2009 2010 2011 2012.
 
     The offical version of CnWizards includes follow languages: 
 Simplified Chinese, Traditional Chinese, English, Russian and German.
