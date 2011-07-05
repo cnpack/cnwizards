@@ -21,6 +21,7 @@ type
      ideD1200,
      ideD1400,
      ideD1500,
+     ideD1600,
      ideCSB100,
      ideBCB300, ideBCB301,
      ideBCB400, ideBCB401, ideBCB402,
@@ -812,10 +813,18 @@ end;
 
 function GetDelphi15Version: TBorlandIdeVersion;
 const
-  CoreIde1400: TVersionNumber =
+  CoreIde1500: TVersionNumber =
     (Major: 15; Minor: 0; Release: 0; Build: 0);
 begin
   Result := ideD1500;
+end;
+
+function GetDelphi16Version: TBorlandIdeVersion;
+const
+  CoreIde1600: TVersionNumber =
+    (Major: 16; Minor: 0; Release: 0; Build: 0);
+begin
+  Result := ideD1600;
 end;
 
 function GetBorlandIdeVersion: TBorlandIdeVersion;
@@ -915,9 +924,14 @@ begin
     Assert(Result in [ideD1400]);
   {$ENDIF VER210}
 
-  {$IFDEF VER220}
+  {$IFDEF VER220}  // Delphi 15 (2011)
     Result := GetDelphi15Version;
     Assert(Result in [ideD1500]);
+  {$ENDIF}
+
+  {$IFDEF VER230}  // Delphi 16 (2012)
+    Result := GetDelphi16Version;
+    Assert(Result in [ideD1600]);
   {$ENDIF}
 
   if Result = ideUnknown then
