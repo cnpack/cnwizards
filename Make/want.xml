@@ -46,6 +46,8 @@ See http://www.suigeneris.org/want/ for details.
   <property name="exe.D14"        value="${ProgramFiles}\Embarcadero\RAD Studio\7.0\Bin\DCC32.EXE" unless="env.D14" />
   <property name="exe.D15"        value="%{env.D15}" if="env.D15" />
   <property name="exe.D15"        value="${ProgramFiles}\Embarcadero\RAD Studio\8.0\Bin\DCC32.EXE" unless="env.D15" />
+  <property name="exe.D16"        value="%{env.D16}" if="env.D16" />
+  <property name="exe.D16"        value="${ProgramFiles}\Embarcadero\RAD Studio\9.0\Bin\DCC32.EXE" unless="env.D16" />  
   <property name="exe.brcc32"     value="%{BRCC32}" />
   <property name="exe.svn"        value="%{env.svn}" if="env.svn" />
   <property name="exe.svn"        value="${ProgramFiles}\Subversion\bin\svn.exe" unless="env.svn" />
@@ -57,7 +59,7 @@ See http://www.suigeneris.org/want/ for details.
   <property name="release.pro"    value=""          if="full" />
   <property name="release.pro"    value="_Lite"     if="lite" />
 
-  <property name="cnwizards_list" value="-d5,-d6,-d7,-d9,-d10,-d11,-d12,-d14,-d15,-cb5,-cb6" unless="lite" />
+  <property name="cnwizards_list" value="-d5,-d6,-d7,-d9,-d10,-d11,-d12,-d14,-d15,-d16,-cb5,-cb6" unless="lite" />
   <property name="cnwizards_list" value="-d6,-d7,-d10,-d11,-cb6" if="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cndfm6to5,cnascii,cnidebr,cnmanagewiz,cnselectlang,cnsmr,cnwizsetup" unless="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cnwizsetup" if="lite" />
@@ -184,7 +186,7 @@ Usage: want [target-name] [-Dname=value]
     clean      - Clean output and temp files.
     svnupdate  - Update all files.
     d5         - Compile CnWizards for Delphi 5.
-                 (d6, d7, d9, d10, d11, d12, d14, d15, cb5, cb6 also)
+                 (d6, d7, d9, d10, d11, d12, d14, d15, d16, cb5, cb6 also)
     cnwizards  - Compile all CnWizards DLLs (D5, D6, etc.).
     resdll     - Compile CnWizards Resource DLL.
     cnwizhelperdll - Compile CnWizards Helper DLL.
@@ -293,6 +295,7 @@ Usage: want [target-name] [-Dname=value]
   <target name="d12" depends="-d12,-cw_final" description="Compile CnWizards for RAD Studio 2009." />
   <target name="d14" depends="-d14,-cw_final" description="Compile CnWizards for RAD Studio 2010." />
   <target name="d15" depends="-d15,-cw_final" description="Compile CnWizards for RAD Studio 2011." />
+  <target name="d16" depends="-d16,-cw_final" description="Compile CnWizards for RAD Studio 2012." />
   <target name="cb5" depends="-cb5,-cw_final" description="Compile CnWizards for C++Builder 5." />
   <target name="cb6" depends="-cb6,-cw_final" description="Compile CnWizards for C++Builder 6." />
 
@@ -521,7 +524,29 @@ Usage: want [target-name] [-Dname=value]
        <include name="${src}/CnWizards_D15.res.old" />
     </move>
   </target>
-
+  
+  <target name="-d16" depends="-cw_prepare" >
+    <property name="Ver.FileDescription"  value="CnWizards For RAD Studio 2012" />
+    <property name="Ver.InternalName"     value="CnWizards_D16" />
+    <property name="Ver.OriginalFilename" value="CnWizards_D16.DLL" />
+    <copy tofile="${src}/CnWizards_D16.res.old" >
+       <include name="${src}/CnWizards_D16.res" />
+    </copy>
+    <echo input="${src}/CnWizards.template.rc" file="${src}/CnWizards_D16.rc" />
+    <brcc file="${src}/CnWizards_D16.rc" exename="${exe.brcc32}" output="${src}/CnWizards_D16.res" />
+    <dcc basedir="${src}" source="CnWizards_D16.dpr" exename="${exe.D16}" usecfg="true" arguments="${dcc_arg}" >
+      <define name="${define.add}" />
+    </dcc>
+    <delete dir="${src}">
+       <include name="CnWizards_D16.res" />
+       <include name="CnWizards_D16.rc" />
+       <include name="CnWizards_D16.drc" />
+    </delete>
+    <move tofile="${src}/CnWizards_D16.res" >
+       <include name="${src}/CnWizards_D16.res.old" />
+    </move>
+  </target>
+  
   <target name="-cb5" depends="-cw_prepare" >
     <delete dir="${dcu}" >
        <exclude name="?svn" />
