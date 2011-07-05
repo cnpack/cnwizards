@@ -20,6 +20,7 @@
 ;    IDE_VERSION_D12
 ;    IDE_VERSION_D14
 ;    IDE_VERSION_D15
+;    IDE_VERSION_D16
 ;    IDE_VERSION_CB5
 ;    IDE_VERSION_CB6
 ;    NO_HELP
@@ -64,7 +65,7 @@ RequestExecutionLevel admin
 
 ; 软件子版本号
 !ifndef VER_MINOR
-  !define VER_MINOR "9.6.569"
+  !define VER_MINOR "9.9.999"
 !endif
 
 ; 专家安装目录名称（不多语）
@@ -85,6 +86,7 @@ RequestExecutionLevel admin
 !ifndef IDE_VERSION_D12
 !ifndef IDE_VERSION_D14
 !ifndef IDE_VERSION_D15
+!ifndef IDE_VERSION_D16
 !ifndef IDE_VERSION_CB5
 !ifndef IDE_VERSION_CB6
 
@@ -111,6 +113,7 @@ RequestExecutionLevel admin
   !define IDE_VERSION_D12 "1"
   !define IDE_VERSION_D14 "1"
   !define IDE_VERSION_D15 "1"
+  !define IDE_VERSION_D16 "1"
   !define IDE_VERSION_CB5 "1"
   !define IDE_VERSION_CB6 "1"
 !endif
@@ -166,6 +169,10 @@ RequestExecutionLevel admin
   !ifdef IDE_VERSION_D15
     !define IDE_SHORT_NAME "D2011"
     !define IDE_LONG_NAME "RAD Studio 2011"
+  !endif
+  !ifdef IDE_VERSION_D16
+    !define IDE_SHORT_NAME "D2012"
+    !define IDE_LONG_NAME "RAD Studio 2012"
   !endif
   !ifdef IDE_VERSION_CB5
     !define IDE_SHORT_NAME "CB5"
@@ -383,6 +390,13 @@ FileLoop:
   FileClose $0
 !endif
 
+!ifdef IDE_VERSION_D16
+  IfFileExists "$INSTDIR\CnWizards_D16.dll" 0 +4
+  FileOpen $0 "$INSTDIR\CnWizards_D16.dll" a
+  IfErrors FileInUse
+  FileClose $0
+!endif
+
 !endif
 
 !ifdef IDE_VERSION_CB5
@@ -576,6 +590,16 @@ Section "RAD Studio 2011" SecD15
 SectionEnd
 !endif
 
+!ifdef IDE_VERSION_D16
+Section "RAD Studio 2012" SecD16
+  SectionIn 1 2
+  SetOutPath $INSTDIR
+  File "..\..\Bin\CnWizards_D16.dll"
+  ; 写入专家注册键值
+  WriteRegStr HKCU "Software\Embarcadero\BDS\9.0\Experts" "CnWizards_D16" "$INSTDIR\CnWizards_D16.dll"
+SectionEnd
+!endif
+
 !endif
 
 !ifdef IDE_VERSION_CB5
@@ -711,6 +735,10 @@ Function .onMouseOverSection
     ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio 2011" "+" $R0
     !insertmacro MUI_DESCRIPTION_TEXT ${SecD15} $R0
   !endif
+  !ifdef IDE_VERSION_D16
+    ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio 2012" "+" $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecD16} $R0
+  !endif
 !endif
   !ifdef IDE_VERSION_CB5
     ${WordReplace} "$(DESDLL)" "#DLL#" "C++Builder 5" "+" $R0
@@ -781,6 +809,9 @@ Function SetCheckBoxes
 !ifdef IDE_VERSION_D15
   !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\8.0" "App" ${SecD15}
 !endif
+!ifdef IDE_VERSION_D16
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\9.0" "App" ${SecD16}
+!endif
 !endif
 !ifdef IDE_VERSION_CB5
   !insertmacro SET_COMPILER_CHECKBOX HKLM "Software\Borland\C++Builder\5.0" "App" ${SecCB5}
@@ -839,6 +870,9 @@ Section "Uninstall"
 !endif
 !ifdef IDE_VERSION_D15
   DeleteRegValue HKCU "Software\Embarcadero\BDS\8.0\Experts" "CnWizards_D15"
+!endif
+!ifdef IDE_VERSION_D16
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\9.0\Experts" "CnWizards_D16"
 !endif
 !ifdef IDE_VERSION_CB5
   DeleteRegValue HKCU "Software\Borland\C++Builder\5.0\Experts" "CnWizards_CB5"
