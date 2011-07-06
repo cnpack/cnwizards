@@ -1,94 +1,97 @@
 inherited CnImageListEditorForm: TCnImageListEditorForm
   Left = 499
   Top = 240
-  Width = 788
-  Height = 432
+  AutoScroll = False
   BorderIcons = [biSystemMenu]
-  Caption = 'ImageList Editor Online'
+  Caption = 'CnWizards ImageList Editor'
+  ClientHeight = 398
+  ClientWidth = 803
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object spl1: TSplitter
-    Left = 433
+    Left = 457
     Top = 0
-    Width = 5
-    Height = 394
+    Width = 8
+    Height = 398
+    AutoSnap = False
+    Beveled = True
+    ResizeStyle = rsUpdate
   end
   object pnlLeft: TPanel
     Left = 0
     Top = 0
-    Width = 433
-    Height = 394
+    Width = 457
+    Height = 398
     Align = alLeft
     BevelOuter = bvNone
-    Constraints.MinHeight = 394
-    Constraints.MinWidth = 433
+    Constraints.MinHeight = 398
+    Constraints.MinWidth = 457
     TabOrder = 0
     DesignSize = (
-      433
-      394)
+      457
+      398)
     object grp1: TGroupBox
       Left = 8
       Top = 8
-      Width = 417
-      Height = 105
+      Width = 441
+      Height = 121
       Anchors = [akLeft, akTop, akRight]
       Caption = '&Selected Image'
       TabOrder = 0
       DesignSize = (
-        417
-        105)
+        441
+        121)
       object lbl2: TLabel
-        Left = 96
+        Left = 112
         Top = 16
         Width = 91
         Height = 13
         Caption = '&Transparent Color:'
       end
       object lbl3: TLabel
-        Left = 96
-        Top = 56
-        Width = 44
-        Height = 13
-        Caption = '&Fill Color:'
+        Left = 112
+        Top = 72
+        Width = 225
+        Height = 41
+        Anchors = [akLeft, akTop, akRight]
+        AutoSize = False
+        Caption = 
+          'Warning: If you use XP Style Image, your application must be bui' +
+          'lt with XPManifest and run under XP or higher OS.'
+        WordWrap = True
       end
       object pnl3: TPanel
         Left = 8
         Top = 16
-        Width = 81
-        Height = 81
+        Width = 97
+        Height = 97
         BevelOuter = bvLowered
         TabOrder = 0
         object imgSelected: TImage
           Left = 1
           Top = 1
-          Width = 79
-          Height = 79
+          Width = 95
+          Height = 95
           Align = alClient
         end
       end
       object cbbTransparentColor: TComboBox
-        Left = 96
+        Left = 112
         Top = 32
-        Width = 217
+        Width = 225
         Height = 21
         Anchors = [akLeft, akTop, akRight]
         ItemHeight = 13
         TabOrder = 2
       end
-      object cbbFillColor: TComboBox
-        Left = 96
-        Top = 72
-        Width = 217
-        Height = 21
-        Anchors = [akLeft, akTop, akRight]
-        ItemHeight = 13
-        TabOrder = 3
-      end
       object rgOptions: TRadioGroup
-        Left = 320
+        Left = 344
         Top = 16
         Width = 89
-        Height = 81
+        Height = 97
         Anchors = [akTop, akRight]
         Caption = 'Options'
         Items.Strings = (
@@ -97,163 +100,170 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
           'C&enter')
         TabOrder = 1
       end
+      object chk1: TCheckBox
+        Left = 112
+        Top = 56
+        Width = 225
+        Height = 17
+        Caption = 'Use XP Style Image with Alpha channel.'
+        TabOrder = 3
+      end
     end
     object grp2: TGroupBox
       Left = 8
-      Top = 120
-      Width = 417
-      Height = 238
+      Top = 134
+      Width = 441
+      Height = 229
       Anchors = [akLeft, akTop, akRight, akBottom]
       Caption = 'Images'
       TabOrder = 1
       DesignSize = (
-        417
-        238)
+        441
+        229)
       object btnAdd: TButton
         Left = 8
-        Top = 205
+        Top = 196
         Width = 57
         Height = 21
+        Action = actAdd
         Anchors = [akLeft, akBottom]
-        Caption = '&Add...'
         TabOrder = 1
       end
       object btnReplace: TButton
         Left = 72
-        Top = 205
+        Top = 196
         Width = 57
         Height = 21
+        Action = actReplace
         Anchors = [akLeft, akBottom]
-        Caption = '&Replace'
         TabOrder = 2
       end
       object btnDelete: TButton
         Left = 136
-        Top = 205
+        Top = 196
         Width = 57
         Height = 21
+        Action = actDelete
         Anchors = [akLeft, akBottom]
-        Caption = '&Delete'
         TabOrder = 3
       end
       object btnClear: TButton
         Left = 200
-        Top = 205
+        Top = 196
         Width = 57
         Height = 21
+        Action = actClear
         Anchors = [akLeft, akBottom]
-        Caption = '&Clear'
         TabOrder = 4
       end
       object btnExport: TButton
         Left = 264
-        Top = 205
+        Top = 196
         Width = 57
         Height = 21
+        Action = actExport
         Anchors = [akLeft, akBottom]
-        Caption = 'E&xport...'
         TabOrder = 5
       end
       object lvList: TListView
         Left = 8
         Top = 16
-        Width = 401
-        Height = 182
+        Width = 425
+        Height = 173
         Anchors = [akLeft, akTop, akRight, akBottom]
         Columns = <>
+        IconOptions.AutoArrange = True
+        LargeImages = ilList
+        MultiSelect = True
         TabOrder = 0
       end
       object cbbSize: TComboBox
-        Left = 328
-        Top = 205
-        Width = 81
+        Left = 344
+        Top = 196
+        Width = 89
         Height = 21
         Style = csDropDownList
         Anchors = [akRight, akBottom]
         ItemHeight = 13
         TabOrder = 6
+        OnChange = cbbSizeChange
         Items.Strings = (
-          '12x12'
-          '16x16'
-          '24x24'
-          '32x32'
-          '48x48'
-          '64x64'
-          '128x128')
+          '')
       end
     end
     object btnOK: TButton
-      Left = 88
-      Top = 365
+      Left = 160
+      Top = 369
       Width = 57
       Height = 21
-      Anchors = [akLeft, akBottom]
+      Anchors = [akRight, akBottom]
       Caption = '&OK'
       TabOrder = 2
     end
     object btnCancel: TButton
-      Left = 152
-      Top = 365
+      Left = 224
+      Top = 369
       Width = 57
       Height = 21
-      Anchors = [akLeft, akBottom]
+      Anchors = [akRight, akBottom]
       Cancel = True
       Caption = '&Cancel'
       ModalResult = 2
       TabOrder = 3
     end
     object btnApply: TButton
-      Left = 216
-      Top = 365
+      Left = 288
+      Top = 369
       Width = 57
       Height = 21
-      Anchors = [akLeft, akBottom]
-      Caption = '&Apply'
+      Action = actApply
+      Anchors = [akRight, akBottom]
       TabOrder = 4
     end
     object btnHelp: TButton
-      Left = 280
-      Top = 365
+      Left = 352
+      Top = 369
       Width = 57
       Height = 21
-      Anchors = [akLeft, akBottom]
+      Anchors = [akRight, akBottom]
       Caption = '&Help'
       TabOrder = 5
     end
     object btnShowSearch: TButton
-      Left = 344
-      Top = 365
-      Width = 81
+      Left = 416
+      Top = 369
+      Width = 33
       Height = 21
-      Anchors = [akLeft, akBottom]
-      Caption = 'Searc&h >>'
+      Anchors = [akRight, akBottom]
+      Caption = '<<'
       TabOrder = 6
+      OnClick = btnShowSearchClick
     end
   end
   object pnlSearch: TPanel
-    Left = 438
+    Left = 465
     Top = 0
-    Width = 334
-    Height = 394
+    Width = 338
+    Height = 398
     Align = alClient
     BevelOuter = bvNone
-    Constraints.MinHeight = 394
-    Constraints.MinWidth = 334
+    Constraints.MinHeight = 398
+    Constraints.MinWidth = 338
     TabOrder = 1
     DesignSize = (
-      334
-      394)
+      338
+      398)
     object grp3: TGroupBox
       Left = 8
       Top = 8
-      Width = 319
-      Height = 350
+      Width = 323
+      Height = 354
       Anchors = [akLeft, akTop, akRight, akBottom]
       Caption = 'Online Search'
       TabOrder = 0
       DesignSize = (
-        319
-        350)
+        323
+        354)
       object lbl1: TLabel
         Left = 8
         Top = 20
@@ -268,111 +278,204 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         Height = 13
         Caption = 'Provider:'
       end
+      object lblPage: TLabel
+        Left = 132
+        Top = 325
+        Width = 41
+        Height = 13
+        Alignment = taRightJustify
+        Anchors = [akRight, akBottom]
+        AutoSize = False
+        Caption = '0/0'
+      end
       object btnSearch: TButton
-        Left = 246
+        Left = 250
         Top = 16
         Width = 65
         Height = 21
         Anchors = [akTop, akRight]
         Caption = '&Search'
         TabOrder = 1
+        OnClick = btnSearchClick
       end
-      object lv2: TListView
+      object lvSearch: TListView
         Left = 8
-        Top = 80
-        Width = 303
-        Height = 230
+        Top = 94
+        Width = 307
+        Height = 221
         Anchors = [akLeft, akTop, akRight, akBottom]
         Columns = <>
-        TabOrder = 4
+        IconOptions.AutoArrange = True
+        LargeImages = ilSearch
+        MultiSelect = True
+        TabOrder = 5
       end
       object btnSearchAdd: TButton
         Left = 8
-        Top = 317
+        Top = 321
         Width = 57
         Height = 21
+        Action = actSearchAdd
         Anchors = [akLeft, akBottom]
-        Caption = 'Add'
-        TabOrder = 5
+        TabOrder = 6
       end
       object btnPrev: TButton
-        Left = 192
-        Top = 317
-        Width = 35
+        Left = 213
+        Top = 321
+        Width = 30
         Height = 21
+        Action = actPrev
         Anchors = [akRight, akBottom]
-        Caption = '<<'
-        TabOrder = 8
-      end
-      object btnNext: TButton
-        Left = 233
-        Top = 317
-        Width = 35
-        Height = 21
-        Anchors = [akRight, akBottom]
-        Caption = '>>'
         TabOrder = 9
       end
-      object btnFirst: TButton
-        Left = 150
-        Top = 317
-        Width = 35
+      object btnNext: TButton
+        Left = 249
+        Top = 321
+        Width = 30
         Height = 21
+        Action = actNext
         Anchors = [akRight, akBottom]
-        Caption = '|<'
-        TabOrder = 7
+        TabOrder = 10
+      end
+      object btnFirst: TButton
+        Left = 178
+        Top = 321
+        Width = 30
+        Height = 21
+        Action = actFirst
+        Anchors = [akRight, akBottom]
+        TabOrder = 8
       end
       object btnLast: TButton
-        Left = 275
-        Top = 317
-        Width = 35
+        Left = 284
+        Top = 321
+        Width = 30
         Height = 21
+        Action = actLast
         Anchors = [akRight, akBottom]
-        Caption = '>|'
-        TabOrder = 10
+        TabOrder = 11
       end
       object btnSearchReplace: TButton
         Left = 72
-        Top = 317
+        Top = 321
         Width = 57
         Height = 21
+        Action = actSearchReplace
         Anchors = [akLeft, akBottom]
-        Caption = 'Rep&lace'
-        TabOrder = 6
+        TabOrder = 7
       end
       object cbbKeyword: TComboBox
         Left = 64
         Top = 16
-        Width = 175
+        Width = 179
         Height = 21
         AutoComplete = False
         Anchors = [akLeft, akTop, akRight]
         ItemHeight = 13
         TabOrder = 0
+        OnKeyPress = cbbKeywordKeyPress
       end
-      object cbb1: TComboBox
+      object cbbProvider: TComboBox
         Left = 64
         Top = 48
-        Width = 175
+        Width = 179
         Height = 21
         AutoComplete = False
+        Style = csDropDownList
         Anchors = [akLeft, akTop, akRight]
         ItemHeight = 13
         TabOrder = 2
       end
       object btnGoto: TButton
-        Left = 246
+        Left = 250
         Top = 48
         Width = 65
         Height = 21
         Anchors = [akTop, akRight]
         Caption = '&Goto'
         TabOrder = 3
+        OnClick = btnGotoClick
+      end
+      object chkCommercialLicenses: TCheckBox
+        Left = 64
+        Top = 72
+        Width = 249
+        Height = 17
+        Caption = 'Include only icons with commercial licenses'
+        TabOrder = 4
       end
     end
+    object pbSearch: TProgressBar
+      Left = 8
+      Top = 372
+      Width = 322
+      Height = 17
+      Anchors = [akLeft, akRight, akBottom]
+      TabOrder = 1
+    end
   end
-  object il1: TImageList
+  object ilSearch: TImageList
     Left = 304
     Top = 232
+  end
+  object ilList: TImageList
+    Left = 336
+    Top = 232
+  end
+  object ActionList: TActionList
+    OnUpdate = ActionListUpdate
+    Left = 368
+    Top = 232
+    object actAdd: TAction
+      Category = 'List'
+      Caption = '&Add...'
+    end
+    object actReplace: TAction
+      Category = 'List'
+      Caption = '&Replace'
+    end
+    object actDelete: TAction
+      Category = 'List'
+      Caption = '&Delete'
+    end
+    object actClear: TAction
+      Category = 'List'
+      Caption = '&Clear'
+    end
+    object actExport: TAction
+      Category = 'List'
+      Caption = 'E&xport...'
+    end
+    object actSearchAdd: TAction
+      Category = 'Search'
+      Caption = 'Add'
+    end
+    object actSearchReplace: TAction
+      Category = 'Search'
+      Caption = 'Rep&lace'
+    end
+    object actFirst: TAction
+      Category = 'Search'
+      Caption = '|<'
+      OnExecute = actFirstExecute
+    end
+    object actPrev: TAction
+      Category = 'Search'
+      Caption = '<<'
+      OnExecute = actPrevExecute
+    end
+    object actNext: TAction
+      Category = 'Search'
+      Caption = '>>'
+      OnExecute = actNextExecute
+    end
+    object actLast: TAction
+      Category = 'Search'
+      Caption = '>|'
+      OnExecute = actLastExecute
+    end
+    object actApply: TAction
+      Caption = '&Apply'
+    end
   end
 end

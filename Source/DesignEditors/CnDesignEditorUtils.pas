@@ -97,7 +97,7 @@ function CreateEditorIniFile(CompEditor: TComponentEditorClass;
 var
   Path: string;
 begin
-  Path := MakePath(WizOptions.PropEditorRegPath) +
+  Path := MakePath(WizOptions.CompEditorRegPath) +
     RemoveClassPrefix(CompEditor.ClassName);
   Result := WizOptions.CreateRegIniFile(Path, CompilerSection);
 end;

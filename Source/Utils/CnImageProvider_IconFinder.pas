@@ -60,7 +60,7 @@ implementation
 constructor TCnImageProvider_IconFinder.Create;
 begin
   inherited;
-  FItemsPerPage := 10;
+  FItemsPerPage := 20;
 end;
 
 destructor TCnImageProvider_IconFinder.Destroy;
@@ -87,16 +87,18 @@ var
   TempFile, BmpName: string;
 begin
   Result := False;
+  DoProgress(0);
   FPageCount := 0;
   FTotalCount := 0;
   Items.Clear;
   if Req.CommercialLicenses then
     Lic := 1
   else
-    LIc := 0;
+    Lic := 0;
   Url := Format('http://www.iconfinder.com/xml/search/?q=%s&c=%d&p=%d&l=%d&min=%d&max=%d&api_key=7cb3bc9947285bc4b3a2f2d8bd20a3dd',
     [Req.Keyword, FItemsPerPage, Req.Page, Lic, Req.MinSize, Req.MaxSize]);
   Text := CnInet_GetString(Url);
+  DoProgress(5);
   xml := CreateXMLDoc;
   if xml.LoadXML(Text) then
   begin
@@ -107,7 +109,10 @@ begin
       begin
         node := root.ChildNodes.Item[i];
         if SameText(node.NodeName, 'opensearch:totalResults') then
-          FTotalCount := XMLStrToIntDef(node.Text, 0)
+        begin
+          FTotalCount := XMLStrToIntDef(node.Text, 0);
+          FPageCount := (FTotalCount + FItemsPerPage - 1) div FItemsPerPage;
+        end
         else if SameText(node.NodeName, 'iconmatches') then
         begin
           Result := True;
@@ -138,11 +143,16 @@ begin
                 DeleteFile(TempFile);
               end;
             end;
+            DoProgress(5 + j * 95 div node.ChildNodes.Length);
           end;
         end;
       end;
     end;
+    DoProgress(100);
   end;
 end;
+
+initialization
+  ImageProviderMgr.RegisterProvider(TCnImageProvider_IconFinder);
 
 end.

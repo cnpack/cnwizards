@@ -75,23 +75,30 @@ type
     property Items[Index: Integer]: TCnImageRespItem read GetItems write SetItems; default;
   end;
 
+  TCnProgressEvent = procedure (Sender: TObject; Progress: Integer) of object;
+
   TCnBaseImageProvider = class
   private
     FItems: TCnImageRespItems;
+    FOnProgress: TCnProgressEvent;
   protected
     FPageCount: Integer;
     FTotalCount: Integer;
     FItemsPerPage: Integer;
+    procedure DoProgress(Progress: Integer);
   public
     constructor Create; virtual;
     destructor Destroy; override;
     class procedure GetProviderInfo(var DispName, HomeUrl: string); virtual; abstract;
+    class function DispName: string;
+    class function HomeUrl: string;
 
     function SearchImage(Req: TCnImageReqInfo): Boolean; virtual; abstract;
     property Items: TCnImageRespItems read FItems;
     property PageCount: Integer read FPageCount;
     property ItemsPerPage: Integer read FItemsPerPage;
     property TotalCount: Integer read FTotalCount;
+    property OnProgress: TCnProgressEvent read FOnProgress write FOnProgress;
   end;
 
   TCnImageProviderClass = class of TCnBaseImageProvider;
@@ -171,6 +178,26 @@ destructor TCnBaseImageProvider.Destroy;
 begin
   FItems.Free;
   inherited;
+end;
+
+class function TCnBaseImageProvider.DispName: string;
+var
+  s: string;
+begin
+  GetProviderInfo(Result, s);
+end;
+
+procedure TCnBaseImageProvider.DoProgress(Progress: Integer);
+begin
+  if Assigned(FOnProgress) then
+    FOnProgress(Self, Progress);
+end;
+
+class function TCnBaseImageProvider.HomeUrl: string;
+var
+  s: string;
+begin
+  GetProviderInfo(s, Result);
 end;
 
 { TCnImageProviderMgr }

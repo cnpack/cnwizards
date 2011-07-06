@@ -45,8 +45,8 @@ uses
   {$ELSE}
   Dsgnintf,
   {$ENDIF}
-  SysUtils, Classes, ImgList, Controls, CnConsts, CnDesignEditor,
-  CnDesignEditorConsts, CnImageListEditorFrm;
+  SysUtils, Classes, ImgList, Controls, IniFiles, CnConsts, CnDesignEditor,
+  CnDesignEditorConsts, CnImageListEditorFrm, CnDesignEditorUtils;
 
 type
 
@@ -70,9 +70,18 @@ implementation
 { TCnImageListEditor }
 
 procedure TCnImageListEditor.Edit;
+var
+  Ini: TCustomIniFile;
 begin
   if Component is TCustomImageList then
-    ShowCnImageListEditorForm(TCustomImageList(Component));
+  begin
+    Ini := CreateEditorIniFile(TCnImageListEditor, False);
+    try
+      ShowCnImageListEditorForm(TCustomImageList(Component), Ini);
+    finally
+      Ini.Free;
+    end;
+  end;
 end;
 
 procedure TCnImageListEditor.ExecuteVerb(Index: Integer);

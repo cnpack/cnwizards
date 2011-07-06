@@ -58,9 +58,13 @@ interface
 {$DEFINE CREATE_PARAMS_BUG}
 {$ENDIF}
 
+{$IFDEF TEST_APP}
+{$DEFINE STAND_ALONE}
+{$ENDIF}
+
 uses
   Windows, Messages, SysUtils, Classes, Forms, ActnList, Controls, Menus,
-  IniFiles, StdCtrls,
+{$IFNDEF TEST_APP}
 {$IFNDEF STAND_ALONE}
   CnConsts, CnWizClasses, CnWizManager, CnWizUtils, CnWizOptions, CnDesignEditor,
   CnWizTranslate, CnLangUtils,
@@ -68,7 +72,9 @@ uses
   CnWizLangID,
 {$ENDIF}
   CnWizConsts, CnCommon, CnLangMgr, CnHashLangStorage, CnLangStorage, CnWizHelp,
-  CnFormScaler, CnWizIni;
+  CnFormScaler, CnWizIni,
+{$ENDIF}
+  StdCtrls, IniFiles;
 
 type
 
@@ -97,24 +103,28 @@ type
 {$ENDIF}
 
   TCnTranslateForm = class(TForm)
+{$IFNDEF TEST_APP}
   private
     FActionList: TActionList;
     FHelpAction: TAction;
     procedure OnLanguageChanged(Sender: TObject);
     procedure OnHelp(Sender: TObject);
+{$ENDIF TEST_APP}
   protected
+{$IFNDEF TEST_APP}
     FScaler: TCnFormScaler;
 
     procedure Loaded; override;
     procedure DoCreate; override;
     procedure DoDestroy; override;
     procedure ReadState(Reader: TReader); override;
-    procedure DoHelpError; virtual;
+{$ENDIF TEST_APP}
 
 {$IFDEF CREATE_PARAMS_BUG}
     procedure CreateParams(var Params: TCreateParams); override;
 {$ENDIF}
 
+    procedure DoHelpError; virtual;
     procedure InitFormControls; virtual;
     {* 初始化窗体子控件}
     procedure DoLanguageChanged(Sender: TObject); virtual;
@@ -129,12 +139,14 @@ type
     {* 进行全窗体翻译}
   end;
 
+{$IFNDEF TEST_APP}
 function CnLangMgr: TCnCustomLangManager;
 {* CnLanguageManager 的简略封装，保证返回的管理器能进行翻译 }
 
 procedure InitLangManager;
 
 function GetFileFromLang(const FileName: string): string;
+{$ENDIF}
 
 implementation
 
@@ -154,6 +166,7 @@ const
   csHelpDir = 'Help\';
 {$ENDIF}
 
+{$IFNDEF TEST_APP}
 var
   FStorage: TCnHashLangFileStorage;
 
@@ -215,6 +228,7 @@ function GetFileFromLang(const FileName: string): string;
 begin
   Result := CnWizHelp.GetFileFromLang(FileName);
 end;
+{$ENDIF}
 
 {$IFNDEF STAND_ALONE}
 
@@ -323,6 +337,8 @@ end;
 
 {$ENDIF}
 
+{$IFNDEF TEST_APP}
+
 { TCnTranslateForm }
 
 procedure TCnTranslateForm.DoCreate;
@@ -367,40 +383,12 @@ begin
   end;
 {$ENDIF}
 
-  FScaler.Free;
   FHelpAction.Free;
   FActionList.Free;
+  FScaler.Free;
   if CnLanguageManager <> nil then
     CnLanguageManager.RemoveChangeNotifier(OnLanguageChanged);
   inherited;
-end;
-
-procedure TCnTranslateForm.DoHelpError;
-begin
-  ErrorDlg(SCnNoHelpofThisLang);
-end;
-
-procedure TCnTranslateForm.DoLanguageChanged(Sender: TObject);
-begin
-  // 基类啥都不干
-end;
-
-function TCnTranslateForm.GetHelpTopic: string;
-begin
-  Result := '';
-end;
-
-procedure TCnTranslateForm.InitFormControls;
-{$IFDEF COMBOBOX_CHS_BUG}
-var
-  i: Integer;
-{$ENDIF}
-begin
-{$IFDEF COMBOBOX_CHS_BUG}
-  for i := 0 to ComponentCount - 1 do
-    if Components[i] is TCustomComboBox then
-      TComboBox(Components[i]).AutoComplete := False;
-{$ENDIF}
 end;
 
 procedure TCnTranslateForm.Loaded;
@@ -474,8 +462,7 @@ begin
     SetWindowLong(AHandle, GWL_EXSTYLE, OldLong);
 end;
 
-{$ENDIF}
-
+{$ENDIF CREATE_PARAMS_BUG}
 procedure TCnTranslateForm.OnHelp(Sender: TObject);
 var
   Topic: string;
@@ -505,13 +492,48 @@ begin
   DoLanguageChanged(Sender);
 end;
 
+{$ENDIF TEST_APP}
+
+procedure TCnTranslateForm.InitFormControls;
+{$IFDEF COMBOBOX_CHS_BUG}
+var
+  i: Integer;
+{$ENDIF}
+begin
+{$IFDEF COMBOBOX_CHS_BUG}
+  for i := 0 to ComponentCount - 1 do
+    if Components[i] is TCustomComboBox then
+      TComboBox(Components[i]).AutoComplete := False;
+{$ENDIF}
+end;
+
+procedure TCnTranslateForm.DoLanguageChanged(Sender: TObject);
+begin
+  // 基类啥都不干
+end;
+
+function TCnTranslateForm.GetHelpTopic: string;
+begin
+  Result := '';
+end;
+
+procedure TCnTranslateForm.DoHelpError;
+begin
+{$IFNDEF TEST_APP}
+  ErrorDlg(SCnNoHelpofThisLang);
+{$ENDIF TEST_APP}
+end;
+
 procedure TCnTranslateForm.ShowFormHelp;
 begin
+{$IFNDEF TEST_APP}
   FHelpAction.Execute;
+{$ENDIF TEST_APP}
 end;
 
 procedure TCnTranslateForm.Translate;
 begin
+{$IFNDEF TEST_APP}
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnTranslateForm.Translate');
 {$ENDIF DEBUG}
@@ -537,12 +559,15 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('TCnTranslateForm.Translate');
 {$ENDIF DEBUG}
+{$ENDIF TEST_APP}
 end;
 
 function TCnTranslateForm.GetNeedPersistentPosition: Boolean;
 begin
   Result := False;
 end;
+
+{$IFNDEF TEST_APP}
 
 initialization
 {$IFDEF STAND_ALONE}
@@ -561,6 +586,9 @@ finalization
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('CnWizMultiLang finalization.');
 {$ENDIF DEBUG}
+
+{$ENDIF TEST_APP}
+
 end.
 
 
