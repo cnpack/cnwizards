@@ -77,8 +77,8 @@ const
     'RAD Studio 2007',
     'RAD Studio 2009',
     'RAD Studio 2010',
-    'RAD Studio 2011',
-    'RAD Studio 2012',
+    'RAD Studio XE',
+    'RAD Studio XE 2',
     'C++Builder 5',
     'C++Builder 6');
 
