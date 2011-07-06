@@ -21,8 +21,8 @@ eingebunden werden kann, damit die Effizienz bei der Entwicklung
 gesteigert werden kann.
 
     CnWizards wurde entworfen, um Programmierern die mit Delphi 5 6 7,
-C++Builder 5 6 oder BDS 2005 2006 oder RAD Studio 2007 2009 2010 2011 
-2012 arbeiten, die Arbeit zu erleichtern.
+C++Builder 5 6 oder BDS 2005 2006 oder RAD Studio 2007 2009 2010, XE, 
+XE 2 arbeiten, die Arbeit zu erleichtern.
 
     Die offizielle Version der CnWizards beinhalt folgende Sprachen: 
 Simplified Chinese, Traditional Chinese, Englisch, Russisch und Deutsch.
