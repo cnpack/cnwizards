@@ -168,11 +168,11 @@ RequestExecutionLevel admin
   !endif
   !ifdef IDE_VERSION_D15
     !define IDE_SHORT_NAME "D2011"
-    !define IDE_LONG_NAME "RAD Studio 2011"
+    !define IDE_LONG_NAME "RAD Studio XE"
   !endif
   !ifdef IDE_VERSION_D16
     !define IDE_SHORT_NAME "D2012"
-    !define IDE_LONG_NAME "RAD Studio 2012"
+    !define IDE_LONG_NAME "RAD Studio XE 2"
   !endif
   !ifdef IDE_VERSION_CB5
     !define IDE_SHORT_NAME "CB5"
@@ -581,7 +581,7 @@ SectionEnd
 !endif
 
 !ifdef IDE_VERSION_D15
-Section "RAD Studio 2011" SecD15
+Section "RAD Studio XE" SecD15
   SectionIn 1 2
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_D15.dll"
@@ -591,7 +591,7 @@ SectionEnd
 !endif
 
 !ifdef IDE_VERSION_D16
-Section "RAD Studio 2012" SecD16
+Section "RAD Studio XE 2" SecD16
   SectionIn 1 2
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_D16.dll"
@@ -732,11 +732,11 @@ Function .onMouseOverSection
     !insertmacro MUI_DESCRIPTION_TEXT ${SecD14} $R0
   !endif
   !ifdef IDE_VERSION_D15
-    ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio 2011" "+" $R0
+    ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio XE" "+" $R0
     !insertmacro MUI_DESCRIPTION_TEXT ${SecD15} $R0
   !endif
   !ifdef IDE_VERSION_D16
-    ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio 2012" "+" $R0
+    ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio XE 2" "+" $R0
     !insertmacro MUI_DESCRIPTION_TEXT ${SecD16} $R0
   !endif
 !endif
