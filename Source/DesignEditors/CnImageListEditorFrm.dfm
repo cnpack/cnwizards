@@ -172,9 +172,11 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         Height = 173
         Anchors = [akLeft, akTop, akRight, akBottom]
         Columns = <>
+        HideSelection = False
         IconOptions.AutoArrange = True
         LargeImages = ilList
         MultiSelect = True
+        ReadOnly = True
         TabOrder = 0
       end
       object cbbSize: TComboBox
@@ -293,10 +295,9 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         Top = 16
         Width = 65
         Height = 21
+        Action = actSearch
         Anchors = [akTop, akRight]
-        Caption = '&Search'
         TabOrder = 1
-        OnClick = btnSearchClick
       end
       object lvSearch: TListView
         Left = 8
@@ -305,9 +306,11 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         Height = 221
         Anchors = [akLeft, akTop, akRight, akBottom]
         Columns = <>
+        HideSelection = False
         IconOptions.AutoArrange = True
         LargeImages = ilSearch
         MultiSelect = True
+        ReadOnly = True
         TabOrder = 5
       end
       object btnSearchAdd: TButton
@@ -476,6 +479,11 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
     end
     object actApply: TAction
       Caption = '&Apply'
+    end
+    object actSearch: TAction
+      Category = 'Search'
+      Caption = '&Search'
+      OnExecute = actSearchExecute
     end
   end
 end

@@ -231,6 +231,9 @@ begin
     for i := 0 to Items.Count - 1 do
     begin
       Items[i].FFileName := GetWindowsTempPath + MD5Print(MD5String(Items[i].Url));
+      DeleteFile(Items[i].FFileName);
+      if FileExists(Items[i].FFileName) then
+        Items[i].FFileName := Items[i].FFileName + '1';
       DownList.Add(DownMgr.NewDownload(Items[i].Url, Items[i].FFileName, Items[i]));
     end;
 

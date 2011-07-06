@@ -42,7 +42,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, CnWizMultiLang, ExtCtrls, StdCtrls, ImgList, ComCtrls, IniFiles,
-  CnImageProviderMgr, CnCommon, CommCtrl, ActnList, Math;
+  CnImageProviderMgr, CnCommon, CommCtrl, ActnList, Math, Contnrs;
 
 type
   TCnImageListEditorForm = class(TCnTranslateForm)
@@ -102,10 +102,10 @@ type
     actLast: TAction;
     actApply: TAction;
     pbSearch: TProgressBar;
+    actSearch: TAction;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure btnSearchClick(Sender: TObject);
     procedure btnGotoClick(Sender: TObject);
     procedure actFirstExecute(Sender: TObject);
     procedure actPrevExecute(Sender: TObject);
@@ -115,6 +115,7 @@ type
     procedure btnShowSearchClick(Sender: TObject);
     procedure cbbSizeChange(Sender: TObject);
     procedure ActionListUpdate(Action: TBasicAction; var Handled: Boolean);
+    procedure actSearchExecute(Sender: TObject);
   private
     { Private declarations }
     FComponent: TCustomImageList;
@@ -125,6 +126,7 @@ type
     FSupportXPStyle: Boolean;
     FShowSearch: Boolean;
     FChanging: Boolean;
+    FList: TObjectList;
     procedure AddSize(W, H: Integer);
     function CreateProvider: Boolean;
     function DoSearch(Page: Integer): Boolean;
@@ -150,6 +152,7 @@ const
   // todo: ¥˝∂‡”Ô—‘¥¶¿Ì
   SImageListChangeSize = 'Do you want to change the image dimensions?' + #13#10 +
     'This will remove all the existing images from the list.';
+  SImageListSearchFailed = 'Search image failed!';
 
 procedure ShowCnImageListEditorForm(AComponent: TCustomImageList; AIni: TCustomIniFile);
 begin
@@ -169,6 +172,7 @@ var
   B: Boolean;
 begin
   inherited;
+  FList := TObjectList.Create;
   if not CheckXPManifest(B, FSupportXPStyle) then
     FSupportXPStyle := False;
   for i := 0 to ImageProviderMgr.Count - 1 do
@@ -197,11 +201,13 @@ begin
   end;
   if FProvider <> nil then
     FProvider.Free;
+  FList.Free;
 end;
 
 procedure TCnImageListEditorForm.FormShow(Sender: TObject);
 var
   s: string;
+  i: Integer;
 begin
   inherited;
   Assert(FComponent <> nil);
@@ -237,6 +243,16 @@ begin
   ilList.Height := FComponent.Height;
   ilSearch.Width := FComponent.Width;
   ilSearch.Height := FComponent.Width;
+  ilList.Handle := ImageList_Duplicate(FComponent.Handle);
+  for i := 0 to ilList.Count - 1 do
+  begin
+    FList.Add(nil);
+    with lvList.Items.Add do
+    begin
+      Caption := IntToStr(i);
+      ImageIndex := i;
+    end;
+  end;
 end;
 
 procedure TCnImageListEditorForm.AddSize(W, H: Integer);
@@ -292,7 +308,7 @@ end;
 function TCnImageListEditorForm.DoSearch(Page: Integer): Boolean;
 var
   mask, bmp: TBitmap;
-  i, idx, x, y: Integer;
+  i, x, y: Integer;
   alpha, ext: Byte;
   p: PDWORD;
   p1: PByteArray;
@@ -366,45 +382,32 @@ begin
                   Inc(p);
                 end;
               end;
-              idx := ilSearch.AddMasked(bmp, clFuchsia);
+              ilSearch.AddMasked(bmp, clFuchsia);
             end
             else
             begin
-              idx := ilSearch.Add(FProvider.Items[i].Bitmap, mask);
+              ilSearch.Add(FProvider.Items[i].Bitmap, mask);
             end;
-
-            if idx >= 0 then
-              with lvSearch.Items.Add do
-              begin
-                ImageIndex := idx;
-                Caption := IntToStr(idx);
-              end;
           end;
         end;
+
+        for i := 0 to ilSearch.Count - 1 do
+          with lvSearch.Items.Add do
+          begin
+            ImageIndex := i;
+            Caption := IntToStr(i);
+          end;
         Result := True;
       finally
         lvSearch.Items.EndUpdate;
         mask.Free;
         bmp.Free;
       end;
-    end;
+    end
+    else
+      ErrorDlg(SImageListSearchFailed);
   finally
     FSearching := False;
-  end;
-end;
-
-procedure TCnImageListEditorForm.btnSearchClick(Sender: TObject);
-begin
-  if Trim(cbbKeyword.Text) <> '' then
-  begin
-    AddComboBoxTextToItems(cbbKeyword);
-    if not CreateProvider then
-      Exit;
-    FReq.Keyword := Trim(cbbKeyword.Text);
-    FReq.MinSize := ilList.Width;
-    FReq.MaxSize := ilList.Width;
-    FReq.CommercialLicenses := chkCommercialLicenses.Checked;
-    DoSearch(0);
   end;
 end;
 
@@ -489,12 +492,28 @@ end;
 procedure TCnImageListEditorForm.ActionListUpdate(Action: TBasicAction;
   var Handled: Boolean);
 begin
+  actSearch.Enabled := (cbbProvider.ItemIndex >= 0) and (Trim(cbbKeyword.Text) <> '');
   actFirst.Enabled := (FProvider <> nil) and (FProvider.PageCount > 0) and (FReq.Page > 0);
   actPrev.Enabled := (FProvider <> nil) and (FProvider.PageCount > 0) and (FReq.Page > 0);
   actNext.Enabled := (FProvider <> nil) and (FProvider.PageCount > 0) and
     (FReq.Page < FProvider.PageCount - 1);
   actLast.Enabled := (FProvider <> nil) and (FProvider.PageCount > 0) and
     (FReq.Page < FProvider.PageCount - 1);
+end;
+
+procedure TCnImageListEditorForm.actSearchExecute(Sender: TObject);
+begin
+  if Trim(cbbKeyword.Text) <> '' then
+  begin
+    AddComboBoxTextToItems(cbbKeyword);
+    if not CreateProvider then
+      Exit;
+    FReq.Keyword := Trim(cbbKeyword.Text);
+    FReq.MinSize := ilList.Width;
+    FReq.MaxSize := ilList.Width;
+    FReq.CommercialLicenses := chkCommercialLicenses.Checked;
+    DoSearch(0);
+  end;
 end;
 
 end.
