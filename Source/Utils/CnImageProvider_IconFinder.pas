@@ -41,16 +41,16 @@ interface
 
 uses
   Windows, SysUtils, Classes, Graphics, CnImageProviderMgr, CnInetUtils,
-  OmniXML, OmniXMLUtils, CnCommon, CnPngUtilsIntf;
+  OmniXML, OmniXMLUtils, CnCommon;
 
 type
   TCnImageProvider_IconFinder = class(TCnBaseImageProvider)
+  protected
+    function DoSearchImage(Req: TCnImageReqInfo): Boolean; override;
   public
     constructor Create; override;
     destructor Destroy; override;
     class procedure GetProviderInfo(var DispName, HomeUrl: string); override;
-
-    function SearchImage(Req: TCnImageReqInfo): Boolean; override;
   end;
   
 implementation
@@ -76,7 +76,7 @@ begin
   HomeUrl := 'http://www.iconfinder.com';
 end;
 
-function TCnImageProvider_IconFinder.SearchImage(Req: TCnImageReqInfo): Boolean;
+function TCnImageProvider_IconFinder.DoSearchImage(Req: TCnImageReqInfo): Boolean;
 var
   Url, Text: string;
   Lic: Integer;
@@ -84,13 +84,8 @@ var
   root, node, icon: IXMLNode;
   i, j, size: Integer;
   Item: TCnImageRespItem;
-  TempFile, BmpName: string;
 begin
   Result := False;
-  DoProgress(0);
-  FPageCount := 0;
-  FTotalCount := 0;
-  Items.Clear;
   if Req.CommercialLicenses then
     Lic := 1
   else
@@ -98,7 +93,6 @@ begin
   Url := Format('http://www.iconfinder.com/xml/search/?q=%s&c=%d&p=%d&l=%d&min=%d&max=%d&api_key=7cb3bc9947285bc4b3a2f2d8bd20a3dd',
     [Req.Keyword, FItemsPerPage, Req.Page, Lic, Req.MinSize, Req.MaxSize]);
   Text := CnInet_GetString(Url);
-  DoProgress(5);
   xml := CreateXMLDoc;
   if xml.LoadXML(Text) then
   begin
@@ -128,27 +122,13 @@ begin
                 Item.Size := size;
                 Item.Id := GetNodeTextStr(icon, 'id', '');
                 Item.Url := GetNodeTextStr(icon, 'image', '');
-                TempFile := CnGetTempFileName('.tmp');
-                if CnInet_GetFile(Item.Url, TempFile) then
-                begin
-                  if SameText(ExtractFileExt(Item.Url), '.png') then
-                  begin
-                    BmpName := TempFile + '.bmp';
-                    if CnConvertPngToBmp(PAnsiChar(AnsiString(TempFile)),
-                      PAnsiChar(AnsiString(BmpName))) then
-                      Item.Bitmap.LoadFromFile(BmpName);
-                    DeleteFile(BmpName);
-                  end;
-                end;
-                DeleteFile(TempFile);
+                Item.Ext := ExtractFileExt(Item.Url);
               end;
             end;
-            DoProgress(5 + j * 95 div node.ChildNodes.Length);
           end;
         end;
       end;
     end;
-    DoProgress(100);
   end;
 end;
 

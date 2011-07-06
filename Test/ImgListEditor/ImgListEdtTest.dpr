@@ -8,7 +8,8 @@ uses
   CnPngUtilsIntf in '..\..\Source\Utils\CnPngUtilsIntf.pas',
   CnWizMultiLang in '..\..\Source\MultiLang\CnWizMultiLang.pas' {CnTranslateForm},
   CnWizLangID in '..\..\Source\MultiLang\CnWizLangID.pas',
-  CnImageListEditorFrm in '..\..\Source\DesignEditors\CnImageListEditorFrm.pas' {CnImageListEditorForm};
+  CnImageListEditorFrm in '..\..\Source\DesignEditors\CnImageListEditorFrm.pas' {CnImageListEditorForm},
+  CnWizHttpDownMgr in '..\..\Source\Utils\CnWizHttpDownMgr.pas';
 
 {$R *.res}
 

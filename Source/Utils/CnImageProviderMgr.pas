@@ -40,7 +40,8 @@ unit CnImageProviderMgr;
 interface
 
 uses
-  Windows, SysUtils, Classes, Graphics;
+  Windows, SysUtils, Classes, Graphics, CnWizHttpDownMgr, Forms,
+  CnCommon, CnMD5, CnThreadTaskMgr, CnPngUtilsIntf;
 
 type
   TCnImageReqInfo = record
@@ -54,13 +55,16 @@ type
   private
     FId: string;
     FUrl: string;
+    FExt: string;
     FBitmap: TBitmap;
     FSize: Integer;
+    FFileName: string;
   public
     constructor Create(Collection: TCollection); override;
     destructor Destroy; override;
     property Id: string read FId write FId;
     property Url: string read FUrl write FUrl;
+    property Ext: string read FExt write FExt;
     property Size: Integer read FSize write FSize;
     property Bitmap: TBitmap read FBitmap;
   end;
@@ -86,6 +90,7 @@ type
     FTotalCount: Integer;
     FItemsPerPage: Integer;
     procedure DoProgress(Progress: Integer);
+    function DoSearchImage(Req: TCnImageReqInfo): Boolean; virtual; abstract;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -93,7 +98,7 @@ type
     class function DispName: string;
     class function HomeUrl: string;
 
-    function SearchImage(Req: TCnImageReqInfo): Boolean; virtual; abstract;
+    function SearchImage(Req: TCnImageReqInfo): Boolean;
     property Items: TCnImageRespItems read FItems;
     property PageCount: Integer read FPageCount;
     property ItemsPerPage: Integer read FItemsPerPage;
@@ -198,6 +203,89 @@ var
   s: string;
 begin
   GetProviderInfo(s, Result);
+end;
+
+function TCnBaseImageProvider.SearchImage(Req: TCnImageReqInfo): Boolean;
+var
+  i: Integer;
+  Prog: Integer;
+  Task: TCnDownTask;
+  Item: TCnImageRespItem;
+  BmpName, TmpName: string;
+  DownMgr: TCnDownMgr;
+  DownList: TList;
+begin
+  DownMgr := nil;
+  DownList := nil;
+  try
+    DownMgr := TCnDownMgr.Create;
+    DownList := TList.Create;
+    DoProgress(0);
+    FPageCount := 0;
+    FTotalCount := 0;
+    Items.Clear;
+    Result := DoSearchImage(Req);
+    if not Result then
+      Exit;
+
+    for i := 0 to Items.Count - 1 do
+    begin
+      Items[i].FFileName := GetWindowsTempPath + MD5Print(MD5String(Items[i].Url));
+      DownList.Add(DownMgr.NewDownload(Items[i].Url, Items[i].FFileName, Items[i]));
+    end;
+
+    Prog := 5;
+    DoProgress(5);
+    while DownMgr.FinishCount <> DownMgr.Count do
+    begin
+      for i := DownList.Count - 1 downto 0 do
+      begin
+        Task := TCnDownTask(DownList[i]);
+        Item := TCnImageRespItem(Task.Data);
+        if Task.Status in [tsFailure, tsFinished] then
+        begin
+          TmpName := Item.FFileName;
+          if Task.Status = tsFailure then
+          begin
+            Item.Free;
+          end
+          else if Task.Status = tsFinished then
+          begin
+            if SameText(Item.Ext, '.png') then
+            begin
+              BmpName := Item.FFileName + '.bmp';
+              if CnConvertPngToBmp(PAnsiChar(AnsiString(Item.FFileName)),
+                PAnsiChar(AnsiString(BmpName))) then
+                Item.Bitmap.LoadFromFile(BmpName);
+              DeleteFile(BmpName);
+            end
+            else if SameText(Item.Ext, '.bmp') then
+            begin
+              Item.Bitmap.LoadFromFile(Item.FFileName);
+            end
+            else
+            begin
+              // todo: 处理其它格式
+              Item.Free;
+            end;
+          end;
+          DeleteFile(TmpName);
+          DownList.Delete(i);
+        end;
+      end;
+
+      if DownMgr.FinishCount * 95 div DownMgr.Count + 5 <> Prog then
+      begin
+        Prog := DownMgr.FinishCount * 95 div DownMgr.Count + 5;
+        DoProgress(Prog);
+      end;
+      Application.ProcessMessages;
+    end;
+    DoProgress(100);
+  finally
+    FreeAndNil(DownMgr);
+    FreeAndNil(DownList);
+  end;
 end;
 
 { TCnImageProviderMgr }
