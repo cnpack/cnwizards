@@ -1,6 +1,6 @@
 inherited CnImageListEditorForm: TCnImageListEditorForm
-  Left = 499
-  Top = 240
+  Left = 374
+  Top = 193
   AutoScroll = False
   BorderIcons = [biSystemMenu]
   Caption = 'CnWizards ImageList Editor'
@@ -86,6 +86,8 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         Anchors = [akLeft, akTop, akRight]
         ItemHeight = 13
         TabOrder = 2
+        OnClick = rgOptionsClick
+        OnExit = rgOptionsClick
       end
       object rgOptions: TRadioGroup
         Left = 344
@@ -99,8 +101,9 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
           'St&retch'
           'C&enter')
         TabOrder = 1
+        OnClick = rgOptionsClick
       end
-      object chk1: TCheckBox
+      object chkXPStyle: TCheckBox
         Left = 112
         Top = 56
         Width = 225
@@ -178,6 +181,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         MultiSelect = True
         ReadOnly = True
         TabOrder = 0
+        OnSelectItem = lvListSelectItem
       end
       object cbbSize: TComboBox
         Left = 344
@@ -230,6 +234,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
       Anchors = [akRight, akBottom]
       Caption = '&Help'
       TabOrder = 5
+      OnClick = btnHelpClick
     end
     object btnShowSearch: TButton
       Left = 416
@@ -432,30 +437,37 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
     object actAdd: TAction
       Category = 'List'
       Caption = '&Add...'
+      OnExecute = actAddExecute
     end
     object actReplace: TAction
       Category = 'List'
       Caption = '&Replace'
+      OnExecute = actReplaceExecute
     end
     object actDelete: TAction
       Category = 'List'
       Caption = '&Delete'
+      OnExecute = actDeleteExecute
     end
     object actClear: TAction
       Category = 'List'
       Caption = '&Clear'
+      OnExecute = actClearExecute
     end
     object actExport: TAction
       Category = 'List'
       Caption = 'E&xport...'
+      OnExecute = actExportExecute
     end
     object actSearchAdd: TAction
       Category = 'Search'
       Caption = 'Add'
+      OnExecute = actSearchAddExecute
     end
     object actSearchReplace: TAction
       Category = 'Search'
       Caption = 'Rep&lace'
+      OnExecute = actSearchReplaceExecute
     end
     object actFirst: TAction
       Category = 'Search'
@@ -485,5 +497,13 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
       Caption = '&Search'
       OnExecute = actSearchExecute
     end
+  end
+  object dlgOpen: TOpenDialog
+    Filter = 
+      'All (*.bmp;*.ico;*.png)|*.bmp;*.ico;*.png|Bitmaps (*.bmp)|*.bmp|' +
+      'Icons (*.ico)|*.ico|Png files (*.png)|*.png'
+    Options = [ofAllowMultiSelect, ofFileMustExist, ofEnableSizing]
+    Left = 272
+    Top = 232
   end
 end

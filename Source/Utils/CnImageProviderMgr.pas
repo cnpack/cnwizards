@@ -207,7 +207,7 @@ end;
 
 function TCnBaseImageProvider.SearchImage(Req: TCnImageReqInfo): Boolean;
 var
-  i: Integer;
+  i, idx: Integer;
   Prog: Integer;
   Task: TCnDownTask;
   Item: TCnImageRespItem;
@@ -230,10 +230,11 @@ begin
 
     for i := 0 to Items.Count - 1 do
     begin
-      Items[i].FFileName := GetWindowsTempPath + MD5Print(MD5String(Items[i].Url));
-      DeleteFile(Items[i].FFileName);
-      if FileExists(Items[i].FFileName) then
-        Items[i].FFileName := Items[i].FFileName + '1';
+      idx := 0;
+      repeat
+        Items[i].FFileName := GetWindowsTempPath + MD5Print(MD5String(Items[i].Url)) + IntToStr(idx);
+        Inc(idx);
+      until not FileExists(Items[i].FFileName);
       DownList.Add(DownMgr.NewDownload(Items[i].Url, Items[i].FFileName, Items[i]));
     end;
 
