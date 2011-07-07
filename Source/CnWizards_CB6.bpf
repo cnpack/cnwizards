@@ -82,6 +82,7 @@ USEFORMNS("DesignEditors\CnPropEditorCustomizeFrm.pas", Cnpropeditorcustomizefrm
 USEFORMNS("ScriptWizard\CnScriptFrm.pas", Cnscriptfrm, CnScriptForm);
 USEFORMNS("ScriptWizard\CnScriptWizard.pas", Cnscriptwizard, CnScriptWizardForm);
 USEFORMNS("SimpleWizards\CnFeedWizardFrm.pas", Cnfeedwizardfrm, CnFeedWizardForm);
+USEFORMNS("DesignEditors\CnImageListEditorFrm.pas", Cnimagelisteditorfrm, CnImageListEditorForm);
 //---------------------------------------------------------------------------
 USEFORMNS("IdeEnhancements\CnCompFilterFrm.pas', Cncompfilterfrm, CnCompFilterForm);
 USEFORMNS("CorProperty\CnCorPropCfgFrm.pas", Cncorpropcfgfrm, CnCorPropCfgForm);

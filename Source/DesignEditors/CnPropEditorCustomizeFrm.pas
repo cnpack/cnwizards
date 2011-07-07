@@ -40,7 +40,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, CnWizMultiLang;
+  StdCtrls, CnDesignEditorConsts, CnWizMultiLang;
 
 type
   TCnPropEditorCustomizeForm = class(TCnTranslateForm)
@@ -61,16 +61,22 @@ type
     { Public declarations }
   end;
 
-function ShowPropEditorCustomizeForm(List: TStrings): Boolean;
+function ShowPropEditorCustomizeForm(List: TStrings; IsComp: Boolean): Boolean;
 
 implementation
 
 {$R *.DFM}
 
-function ShowPropEditorCustomizeForm(List: TStrings): Boolean;
+function ShowPropEditorCustomizeForm(List: TStrings; IsComp: Boolean): Boolean;
 begin
   with TCnPropEditorCustomizeForm.Create(nil) do
   try
+    if IsComp then
+    begin
+      Caption := SCnCompEditorCustomizeCaption;
+      grp1.Caption := SCnCompEditorCustomizeCaption1;
+      lbl1.Caption := SCnCompEditorCustomizeDesc;
+    end;
     mmoProp.Lines.Assign(List);
     Result := ShowModal = mrOk;
     if Result then

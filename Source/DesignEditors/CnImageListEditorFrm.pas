@@ -220,6 +220,7 @@ const
   SCnImageListSepBmp = 'Image dimensions for %s are greater than imagelist dimensions. Separate into %d separate bitmaps?';
   SCnImageListNoPngLib = 'CnPngLib.dll not found! Please reinstall CnWizards.'; 
   SCnImageListExportFailed = 'Export images failed!';
+  SCnImageListXPStyleNotSupport = 'The ImageList uses XP Style images, but your IDE doesn''t support XPManifest! Please upgrade your IDE.';
 
 procedure ShowCnImageListEditorForm(AComponent: TCustomImageList;
   AIni: TCustomIniFile; AOnApply: TNotifyEvent);
@@ -329,6 +330,9 @@ begin
   ilList.Width := FComponent.Width;
   ilList.Height := FComponent.Height;
   ilList.Masked := FComponent.Masked;
+{$IFDEF DELPHI2009_UP}
+  ilList.ColorDepth := FComponent.ColorDepth;
+{$ENDIF}
   ilSearch.Width := FComponent.Width;
   ilSearch.Height := FComponent.Width;
   ilList.Handle := ImageList_Duplicate(FComponent.Handle);
@@ -346,8 +350,9 @@ begin
   XpStyle := CheckXPStyle;
   FChanging := True;
   try
-    // todo: 检查不支持XPStyle时的提示和转换
     chkXPStyle.Checked := XpStyle;
+    if not FSupportXPStyle and XpStyle then
+      WarningDlg(SCnImageListXPStyleNotSupport);
   finally
     FChanging := False;
   end;
@@ -876,6 +881,9 @@ begin
   FComponent.Width := ilList.Width;
   FComponent.Height := ilList.Height;
   FComponent.Masked := ilList.Masked;
+{$IFDEF DELPHI2009_UP}
+  FComponent.ColorDepth := ilList.ColorDepth;
+{$ENDIF}
   FComponent.Handle := ImageList_Duplicate(ilList.Handle);
   if Assigned(FOnApply) then
     FOnApply(Self);
@@ -889,7 +897,11 @@ var
 begin
   bmp := TBitmap.Create;
   try
+  {$IFDEF DELPHI2009_UP}
+    Result := ilList.ColorDepth = cd32Bit;
+  {$ELSE}
     Result := False;
+  {$ENDIF}
     for i := 0 to ilList.Count - 1 do
     begin
       if ImageList_GetImageInfo(ilList.Handle, i, info) then
@@ -937,16 +949,24 @@ procedure TCnImageListEditorForm.RecreateImageList;
 const
   csMasks: array[Boolean] of Integer = (0, ILC_MASK);
 begin
+{$IFDEF DELPHI2009_UP}
+  if FSupportXPStyle and chkXPStyle.Checked then
+    ilList.ColorDepth := cd32Bit
+  else
+    ilList.ColorDepth := cdDeviceDependent;
+  TImageListAccess(ilList).HandleNeeded;
+{$ELSE}
   if FSupportXPStyle and chkXPStyle.Checked then
   begin
     ilList.Handle := ImageList_Create(ilList.Width, ilList.Height,
-      ILC_COLOR32, 4, 4);
+      ILC_COLOR32, ilList.AllocBy, ilList.AllocBy);
   end
   else
   begin
     ilList.Handle := ImageList_Create(ilList.Width, ilList.Height,
-      ILC_COLORDDB or csMasks[ilList.Masked], 4, 4);
+      ILC_COLORDDB or csMasks[ilList.Masked], ilList.AllocBy, ilList.AllocBy);
   end;
+{$ENDIF}
 end;
 
 procedure TCnImageListEditorForm.UpdateListView;

@@ -520,7 +520,9 @@ type
 procedure MyCCError(Rec: PResStringRec);
 begin
   // É¶´í¶¼²»³ö
+{$IFNDEF BCB}
   Rec := Rec;
+{$ENDIF}
 end;
 
 {$ENDIF}

@@ -88,7 +88,8 @@ end;
 
 procedure TCnImageListEditor.ExecuteVerb(Index: Integer);
 begin
-  // Do noting.
+  if Index = 0 then
+    Edit;
 end;
 
 class procedure TCnImageListEditor.GetInfo(var Name, Author, Email,

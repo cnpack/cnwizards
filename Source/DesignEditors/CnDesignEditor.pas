@@ -157,8 +157,23 @@ type
 { TCnCompEditorInfo }
 
   TCnCompEditorInfo = class(TCnDesignEditorInfo)
+  private
+    FEditorClass: TComponentEditorClass;
+    FCustomClasses: TStringList;
+    procedure CheckCustomClasses;
   protected
     function GetRegPath: string; override;
+    function GetHasCustomize: Boolean; override;
+  public
+    constructor Create; override;
+    destructor Destroy; override;
+    procedure LoadSettings(Ini: TCustomIniFile); override;
+    procedure SaveSettings(Ini: TCustomIniFile); override;
+    function GetEditorClass: TComponentEditorClass;
+    procedure Customize; override;
+
+    property CustomClasses: TStringList read FCustomClasses;
+    {* 用户自定义的类注册内容，每行格式为 ClassName }
   end;
 
 //==============================================================================
@@ -236,6 +251,7 @@ uses
 
 const
   csCustomProperties = 'CustomProperties';
+  csCustomClasses = 'CustomClasses';
 
 var
   FCnDesignEditorMgr: TCnDesignEditorMgr;
@@ -393,7 +409,7 @@ begin
   inherited;
   if Assigned(FCustomRegProc) then
   begin
-    if ShowPropEditorCustomizeForm(FCustomProperties) then
+    if ShowPropEditorCustomizeForm(FCustomProperties, False) then
     begin
       CheckCustomProperties;
       DoSaveSettings;
@@ -432,9 +448,65 @@ end;
 
 { TCnCompEditorInfo }
 
+procedure TCnCompEditorInfo.CheckCustomClasses;
+var
+  i: Integer;
+begin
+  for i := FCustomClasses.Count - 1 downto 0 do
+  begin
+    FCustomClasses[i] := Trim(FCustomClasses[i]);
+    if FCustomClasses[i] = '' then
+      FCustomClasses.Delete(i);
+  end;
+end;
+
+constructor TCnCompEditorInfo.Create;
+begin
+  inherited;
+  FCustomClasses := TStringList.Create;
+end;
+
+procedure TCnCompEditorInfo.Customize;
+begin
+  if ShowPropEditorCustomizeForm(FCustomClasses, True) then
+  begin
+    CheckCustomClasses;
+    DoSaveSettings;
+  end;
+end;
+
+destructor TCnCompEditorInfo.Destroy;
+begin
+  FCustomClasses.Free;
+  inherited;
+end;
+
+function TCnCompEditorInfo.GetEditorClass: TComponentEditorClass;
+begin
+  Result := FEditorClass;
+end;
+
+function TCnCompEditorInfo.GetHasCustomize: Boolean;
+begin
+  Result := True;
+end;
+
 function TCnCompEditorInfo.GetRegPath: string;
 begin
   Result := WizOptions.CompEditorRegPath;
+end;
+
+procedure TCnCompEditorInfo.LoadSettings(Ini: TCustomIniFile);
+begin
+  inherited;
+  FCustomClasses.CommaText := Ini.ReadString('', csCustomClasses, '');
+  CheckCustomClasses;
+end;
+
+procedure TCnCompEditorInfo.SaveSettings(Ini: TCustomIniFile);
+begin
+  inherited;
+  Ini.WriteString('', csCustomClasses, FCustomClasses.CommaText);
 end;
 
 { TCnDesignEditorMgr }
@@ -478,6 +550,7 @@ begin
   Info.FEditorInfoProc := AEditorInfoProc;
   Info.FRegEditorProc := ARegEditorProc;
   Info.FConfigProc := AConfigProc;
+  Info.FEditorClass := AEditor;
   if Assigned(AEditorInfoProc) then
     Info.LanguageChanged(nil);
   FCompEditorList.Add(Info);
@@ -573,6 +646,23 @@ begin
       CnDebugger.LogMsg('Register CompEditor: ' + CompEditors[i].IDStr);
     {$ENDIF}
       CompEditors[i].RegEditorProc;
+
+      for j := 0 to CompEditors[i].CustomClasses.Count - 1 do
+      begin
+        AName := Trim(CompEditors[i].CustomClasses[j]);
+        if AName <> '' then
+        begin
+          AClass := GetClass(AName);
+          if AClass <> nil then
+          begin
+            RegisterComponentEditor(TComponentClass(AClass), CompEditors[i].GetEditorClass);
+          {$IFDEF Debug}
+            CnDebugger.LogFmt('CustomRegister: %s Succ: %s',
+              [AName, BoolToStr(Success, True)]);
+          {$ENDIF}
+          end
+        end;
+      end;
     end;
 
   // 为了避免反注册时把其它模块中的编辑器也反注册掉（一个可能的情况是 CodeRush

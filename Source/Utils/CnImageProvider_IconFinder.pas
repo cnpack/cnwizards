@@ -92,7 +92,7 @@ begin
     Lic := 0;
   Url := Format('http://www.iconfinder.com/xml/search/?q=%s&c=%d&p=%d&l=%d&min=%d&max=%d&api_key=7cb3bc9947285bc4b3a2f2d8bd20a3dd',
     [Req.Keyword, FItemsPerPage, Req.Page, Lic, Req.MinSize, Req.MaxSize]);
-  Text := CnInet_GetString(Url);
+  Text := string(CnInet_GetString(Url));
   xml := CreateXMLDoc;
   if xml.LoadXML(Text) then
   begin

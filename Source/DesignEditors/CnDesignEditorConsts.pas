@@ -53,6 +53,9 @@ var
   SCnDesignEditorNameStr: string = 'Name:';
   SCnDesignEditorStateStr: string = 'State:';
   SCnPropEditorConfigFormCaption: string = '%s - Property Filter';
+  SCnCompEditorCustomizeCaption: string = 'Customize Component Editor';
+  SCnCompEditorCustomizeCaption1: string = 'Customize Component';
+  SCnCompEditorCustomizeDesc: string = 'Component List to Register, (Format "ClassName")';
 
   // Editor Names
   SCnStringPropEditorName: string = 'String Caption Editor';

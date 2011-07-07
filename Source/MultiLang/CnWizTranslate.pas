@@ -1013,6 +1013,9 @@ begin
   TranslateStr(SCnDesignEditorNameStr, 'SCnDesignEditorNameStr');
   TranslateStr(SCnDesignEditorStateStr, 'SCnDesignEditorStateStr');
   TranslateStr(SCnPropEditorConfigFormCaption, 'SCnPropEditorConfigFormCaption');
+  TranslateStr(SCnCompEditorCustomizeCaption, 'SCnCompEditorCustomizeCaption');
+  TranslateStr(SCnCompEditorCustomizeCaption1, 'SCnCompEditorCustomizeCaption1');
+  TranslateStr(SCnCompEditorCustomizeDesc, 'SCnCompEditorCustomizeDesc');
 
   // Editors Name
   TranslateStr(SCnStringPropEditorName, 'SCnStringPropEditorName');
