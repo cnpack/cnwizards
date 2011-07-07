@@ -6,6 +6,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
   Caption = 'CnWizards ImageList Editor'
   ClientHeight = 398
   ClientWidth = 807
+  OldCreateOrder = True
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
@@ -304,6 +305,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         LargeImages = ilSearch
         MultiSelect = True
         ReadOnly = True
+        PopupMenu = pmSearch
         TabOrder = 5
         OnDblClick = actSearchAddExecute
       end
@@ -512,5 +514,25 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
     Left = 400
     Top = 232
+  end
+  object pmSearch: TPopupMenu
+    OnPopup = pmSearchPopup
+    Left = 272
+    Top = 264
+    object mniRefresh: TMenuItem
+      Caption = 'Refresh'
+      OnClick = mniRefreshClick
+    end
+    object mniN1: TMenuItem
+      Caption = '-'
+    end
+    object mniOpen: TMenuItem
+      Caption = 'Open Image in Browser...'
+      OnClick = mniOpenClick
+    end
+    object mniSearchIconset: TMenuItem
+      Caption = 'Search Iconset'
+      OnClick = mniSearchIconsetClick
+    end
   end
 end

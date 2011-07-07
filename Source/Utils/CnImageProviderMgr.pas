@@ -49,6 +49,7 @@ type
     Page: Integer;
     MinSize, MaxSize: Integer;
     CommercialLicenses: Boolean;
+    Data: Pointer;
   end;
 
   TCnImageRespItem = class(TCollectionItem)
@@ -81,11 +82,15 @@ type
 
   TCnProgressEvent = procedure (Sender: TObject; Progress: Integer) of object;
 
+  TCnImageProviderFeature = (pfOpenInBrowser, pfSearchIconset);
+  TCnImageProviderFeatures = set of TCnImageProviderFeature;
+
   TCnBaseImageProvider = class
   private
     FItems: TCnImageRespItems;
     FOnProgress: TCnProgressEvent;
   protected
+    FFeatures: TCnImageProviderFeatures;
     FPageCount: Integer;
     FTotalCount: Integer;
     FItemsPerPage: Integer;
@@ -99,10 +104,13 @@ type
     class function HomeUrl: string;
 
     function SearchImage(Req: TCnImageReqInfo): Boolean;
+    procedure OpenInBrowser(Item: TCnImageRespItem); virtual;
+    procedure SearchIconset(Item: TCnImageRespItem; var Req: TCnImageReqInfo); virtual;
     property Items: TCnImageRespItems read FItems;
     property PageCount: Integer read FPageCount;
     property ItemsPerPage: Integer read FItemsPerPage;
     property TotalCount: Integer read FTotalCount;
+    property Features: TCnImageProviderFeatures read FFeatures;
     property OnProgress: TCnProgressEvent read FOnProgress write FOnProgress;
   end;
 
@@ -209,6 +217,17 @@ var
   s: string;
 begin
   GetProviderInfo(s, Result);
+end;
+
+procedure TCnBaseImageProvider.OpenInBrowser(Item: TCnImageRespItem);
+begin
+
+end;
+
+procedure TCnBaseImageProvider.SearchIconset(Item: TCnImageRespItem;
+  var Req: TCnImageReqInfo);
+begin
+
 end;
 
 function TCnBaseImageProvider.SearchImage(Req: TCnImageReqInfo): Boolean;

@@ -43,7 +43,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
   Dialogs, CnWizMultiLang, ExtCtrls, StdCtrls, ImgList, ComCtrls, IniFiles,
   CnImageProviderMgr, CnCommon, CommCtrl, ActnList, Math, Contnrs,
-  CnPngUtilsIntf, ExtDlgs;
+  CnPngUtilsIntf, ExtDlgs, Menus;
 
 type
   TCnImageOption = (ioCrop, ioStrech, ioCenter);
@@ -117,6 +117,11 @@ type
     dlgOpen: TOpenDialog;
     dlgSave: TSaveDialog;
     actSelectAll: TAction;
+    pmSearch: TPopupMenu;
+    mniOpen: TMenuItem;
+    mniRefresh: TMenuItem;
+    mniN1: TMenuItem;
+    mniSearchIconset: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -146,6 +151,10 @@ type
     procedure chkXPStyleClick(Sender: TObject);
     procedure ilListChange(Sender: TObject);
     procedure actSelectAllExecute(Sender: TObject);
+    procedure mniOpenClick(Sender: TObject);
+    procedure pmSearchPopup(Sender: TObject);
+    procedure mniRefreshClick(Sender: TObject);
+    procedure mniSearchIconsetClick(Sender: TObject);
   private
     { Private declarations }
     FComponent: TCustomImageList;
@@ -1425,6 +1434,36 @@ procedure TCnImageListEditorForm.btnOKClick(Sender: TObject);
 begin
   ApplyImageList;
   ModalResult := mrOk;
+end;
+
+procedure TCnImageListEditorForm.pmSearchPopup(Sender: TObject);
+begin
+  mniRefresh.Visible := (FProvider <> nil) and (FReq.Keyword <> '');
+  mniOpen.Visible := (FProvider <> nil) and (pfOpenInBrowser in FProvider.Features)
+    and (lvSearch.Selected <> nil);
+  mniSearchIconset.Visible := (FProvider <> nil) and (pfSearchIconset in FProvider.Features)
+    and (lvSearch.Selected <> nil);
+end;
+
+procedure TCnImageListEditorForm.mniRefreshClick(Sender: TObject);
+begin
+  DoSearch(FReq.Page);
+end;
+
+procedure TCnImageListEditorForm.mniOpenClick(Sender: TObject);
+begin
+  if (FProvider <> nil) and (lvSearch.Selected <> nil) then
+  begin
+    FProvider.OpenInBrowser(TCnImageRespItem(lvSearch.Selected.Data));
+  end;
+end;
+
+procedure TCnImageListEditorForm.mniSearchIconsetClick(Sender: TObject);
+begin
+  if (FProvider <> nil) and (lvSearch.Selected <> nil) then
+  begin
+    FProvider.SearchIconset(TCnImageRespItem(lvSearch.Selected.Data), FReq);
+  end;
 end;
 
 end.

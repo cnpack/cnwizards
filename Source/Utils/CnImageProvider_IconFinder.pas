@@ -51,6 +51,8 @@ type
     constructor Create; override;
     destructor Destroy; override;
     class procedure GetProviderInfo(var DispName, HomeUrl: string); override;
+    procedure OpenInBrowser(Item: TCnImageRespItem); override;
+    procedure SearchIconset(Item: TCnImageRespItem; var Req: TCnImageReqInfo); override;
   end;
   
 implementation
@@ -61,6 +63,7 @@ constructor TCnImageProvider_IconFinder.Create;
 begin
   inherited;
   FItemsPerPage := 20;
+  FFeatures := [pfOpenInBrowser];
 end;
 
 destructor TCnImageProvider_IconFinder.Destroy;
@@ -130,6 +133,17 @@ begin
       end;
     end;
   end;
+end;
+
+procedure TCnImageProvider_IconFinder.OpenInBrowser(Item: TCnImageRespItem);
+begin
+  OpenUrl(Format('http://www.iconfinder.com/icondetails/%s/%d/', [Item.Id, Item.Size]));
+end;
+
+procedure TCnImageProvider_IconFinder.SearchIconset(Item: TCnImageRespItem;
+  var Req: TCnImageReqInfo);
+begin
+
 end;
 
 initialization
