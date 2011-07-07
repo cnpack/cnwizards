@@ -427,6 +427,7 @@ InitOk:
   SetOutPath $INSTDIR
   File "..\..\Bin\Setup.exe"
   File "..\..\Bin\CnWizRes.dll"
+  File "..\..\Bin\CnPngLib.dll"
 !ifndef LITE_VERSION
   File "..\..\Bin\CnWizHelper.dll"
 !endif

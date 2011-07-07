@@ -16,6 +16,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
     Top = 0
     Width = 8
     Height = 398
+    Cursor = crHSplit
     AutoSnap = False
     Beveled = True
     ResizeStyle = rsUpdate
@@ -30,9 +31,6 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
     Constraints.MinHeight = 398
     Constraints.MinWidth = 457
     TabOrder = 0
-    DesignSize = (
-      457
-      398)
     object grp1: TGroupBox
       Left = 8
       Top = 8
@@ -41,9 +39,6 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
       Anchors = [akLeft, akTop, akRight]
       Caption = '&Selected Image'
       TabOrder = 0
-      DesignSize = (
-        441
-        121)
       object lbl2: TLabel
         Left = 112
         Top = 16
@@ -121,9 +116,6 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
       Anchors = [akLeft, akTop, akRight, akBottom]
       Caption = 'Images'
       TabOrder = 1
-      DesignSize = (
-        441
-        229)
       object btnAdd: TButton
         Left = 8
         Top = 196
@@ -259,9 +251,6 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
     Constraints.MinHeight = 398
     Constraints.MinWidth = 342
     TabOrder = 1
-    DesignSize = (
-      342
-      398)
     object grp3: TGroupBox
       Left = 8
       Top = 8
@@ -270,9 +259,6 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
       Anchors = [akLeft, akTop, akRight, akBottom]
       Caption = 'Online Search'
       TabOrder = 0
-      DesignSize = (
-        327
-        354)
       object lbl1: TLabel
         Left = 8
         Top = 20
@@ -380,7 +366,6 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         Top = 16
         Width = 183
         Height = 21
-        AutoComplete = False
         Anchors = [akLeft, akTop, akRight]
         ItemHeight = 13
         TabOrder = 0
@@ -391,7 +376,6 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         Top = 48
         Width = 183
         Height = 21
-        AutoComplete = False
         Style = csDropDownList
         Anchors = [akLeft, akTop, akRight]
         ItemHeight = 13
@@ -422,6 +406,8 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
       Width = 326
       Height = 17
       Anchors = [akLeft, akRight, akBottom]
+      Min = 0
+      Max = 100
       TabOrder = 1
     end
   end

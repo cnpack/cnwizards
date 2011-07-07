@@ -40,7 +40,7 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
   Dialogs, CnWizMultiLang, ExtCtrls, StdCtrls, ImgList, ComCtrls, IniFiles,
   CnImageProviderMgr, CnCommon, CommCtrl, ActnList, Math, Contnrs,
   CnPngUtilsIntf, ExtDlgs;

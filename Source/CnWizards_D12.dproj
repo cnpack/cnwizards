@@ -229,6 +229,7 @@
 			<DCCReference Include="EditorWizard\CnEditorToggleUses.pas"/>
 			<DCCReference Include="EditorWizard\CnEditorToggleVar.pas"/>
 			<DCCReference Include="EditorWizard\CnEditorJumpMessage.pas"/>
+			<DCCReference Include="EditorWizard\CnEditorFontZoom.pas"/>
 			<DCCReference Include="SimpleWizards\CnMsdnWizard.pas">
 				<Form>CnMsdnConfigForm</Form>
 			</DCCReference>
@@ -469,6 +470,12 @@
 			<DCCReference Include="SimpleWizards\CnFeedWizardFrm.pas">
 				<Form>CnFeedWizardForm</Form>
 			</DCCReference>
+			<DCCReference Include="DesignEditors\CnImageListEditorFrm.pas">
+				<Form>CnImageListEditorForm</Form>
+			</DCCReference>
+			<DCCReference Include="DesignEditors\CnImageListEditor.pas"/>
+			<DCCReference Include="Utils\CnImageProviderMgr.pas"/>
+			<DCCReference Include="Utils\CnImageProvider_IconFinder.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>

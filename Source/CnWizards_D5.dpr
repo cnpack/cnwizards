@@ -209,7 +209,11 @@ uses
   CnScriptRegister in 'ScriptWizard\CnScriptRegister.pas',
   CnFeedWizard in 'SimpleWizards\CnFeedWizard.pas',
   CnFeedParser in 'Utils\CnFeedParser.pas',
-  CnFeedWizardFrm in 'SimpleWizards\CnFeedWizardFrm.pas' {CnFeedWizardForm};
+  CnFeedWizardFrm in 'SimpleWizards\CnFeedWizardFrm.pas' {CnFeedWizardForm},
+  CnImageListEditorFrm in 'DesignEditors\CnImageListEditorFrm.pas' {CnImageListEditorForm},
+  CnImageListEditor in 'DesignEditors\CnImageListEditor.pas',
+  CnImageProviderMgr in 'Utils\CnImageProviderMgr.pas',
+  CnImageProvider_IconFinder in 'Utils\CnImageProvider_IconFinder.pas';
 
 {$R *.RES}
 

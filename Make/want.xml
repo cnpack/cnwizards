@@ -63,8 +63,8 @@ See http://www.suigeneris.org/want/ for details.
   <property name="cnwizards_list" value="-d6,-d7,-d10,-d11,-cb6" if="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cndfm6to5,cnascii,cnidebr,cnmanagewiz,cnselectlang,cnsmr,cnwizsetup" unless="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cnwizsetup" if="lite" />
-  <property name="all_list"       value="cnwizards,resdll,cnwizhelperdll,tools,makehelp,makeinst" unless="lite" />
-  <property name="all_list"       value="cnwizards,resdll,tools,makeinst" if="lite" />
+  <property name="all_list"       value="cnwizards,resdll,cnwizhelperdll,cnpnglib,tools,makehelp,makeinst" unless="lite" />
+  <property name="all_list"       value="cnwizards,resdll,cnpnglib,tools,makeinst" if="lite" />
 
   <property name="install_lite"   value=""          unless="lite"/>
   <property name="install_lite"   value="/DLITE"    if="lite"/>
@@ -190,6 +190,7 @@ Usage: want [target-name] [-Dname=value]
     cnwizards  - Compile all CnWizards DLLs (D5, D6, etc.).
     resdll     - Compile CnWizards Resource DLL.
     cnwizhelperdll - Compile CnWizards Helper DLL.
+    cnpnglib   - Compile CnPngLib DLL.
     cnconfigio - Compile CnConfigIO.
     cndebugviewer  - Compile CnDebugViewer.
     cndfm6to5  - Compile CnDfm6To5.
@@ -692,6 +693,27 @@ Usage: want [target-name] [-Dname=value]
     </delete>
     <move tofile="${tools}/CnWizHelper/CnWizHelper.res" >
        <include name="${tools}/CnWizHelper/CnWizHelper.res.old" />
+    </move>
+  </target>
+
+  <!-- 编译 CnPngLib DLL -->  
+  <target name="cnpnglib" depends="-prepare" description="Compile CnPngLib DLL." >
+    <property name="Ver.FileDescription"  value="CnPngLib DLL" />
+    <property name="Ver.InternalName"     value="CnPngLib" />
+    <property name="Ver.OriginalFilename" value="CnPngLib.DLL" />
+    <copy tofile="${tools}/CnPngLib/CnPngLib.res.old" >
+       <include name="${tools}/CnPngLib/CnPngLib.res" />
+    </copy>
+    <echo input="${tools}/CnDll.template.rc" file="${tools}/CnPngLib/CnPngLib.rc" />
+    <brcc file="${tools}/CnPngLib/CnPngLib.rc" output="${tools}/CnPngLib/CnPngLib.res" />
+    <dcc basedir="${tools}/CnPngLib" source="CnPngLib.dpr" exename="${exe.D14}" usecfg="true" />
+    <delete dir="${tools}/CnPngLib">
+       <include name="CnPngLib.res" />
+       <include name="CnPngLib.rc" />
+       <include name="CnPngLib.drc" />
+    </delete>
+    <move tofile="${tools}/CnPngLib/CnPngLib.res" >
+       <include name="${tools}/CnPngLib/CnPngLib.res.old" />
     </move>
   </target>
 
