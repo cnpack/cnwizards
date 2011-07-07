@@ -105,7 +105,7 @@ type
 
     function SearchImage(Req: TCnImageReqInfo): Boolean;
     procedure OpenInBrowser(Item: TCnImageRespItem); virtual;
-    procedure SearchIconset(Item: TCnImageRespItem; var Req: TCnImageReqInfo); virtual;
+    function SearchIconset(Item: TCnImageRespItem; var Req: TCnImageReqInfo): Boolean; virtual;
     property Items: TCnImageRespItems read FItems;
     property PageCount: Integer read FPageCount;
     property ItemsPerPage: Integer read FItemsPerPage;
@@ -224,10 +224,10 @@ begin
 
 end;
 
-procedure TCnBaseImageProvider.SearchIconset(Item: TCnImageRespItem;
-  var Req: TCnImageReqInfo);
+function TCnBaseImageProvider.SearchIconset(Item: TCnImageRespItem;
+  var Req: TCnImageReqInfo): Boolean;
 begin
-
+  Result := False;
 end;
 
 function TCnBaseImageProvider.SearchImage(Req: TCnImageReqInfo): Boolean;

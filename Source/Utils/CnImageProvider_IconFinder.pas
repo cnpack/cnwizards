@@ -52,7 +52,7 @@ type
     destructor Destroy; override;
     class procedure GetProviderInfo(var DispName, HomeUrl: string); override;
     procedure OpenInBrowser(Item: TCnImageRespItem); override;
-    procedure SearchIconset(Item: TCnImageRespItem; var Req: TCnImageReqInfo); override;
+    function SearchIconset(Item: TCnImageRespItem; var Req: TCnImageReqInfo): Boolean; override;
   end;
   
 implementation
@@ -63,7 +63,7 @@ constructor TCnImageProvider_IconFinder.Create;
 begin
   inherited;
   FItemsPerPage := 20;
-  FFeatures := [pfOpenInBrowser];
+  FFeatures := [pfOpenInBrowser, pfSearchIconset];
 end;
 
 destructor TCnImageProvider_IconFinder.Destroy;
@@ -140,10 +140,32 @@ begin
   OpenUrl(Format('http://www.iconfinder.com/icondetails/%s/%d/', [Item.Id, Item.Size]));
 end;
 
-procedure TCnImageProvider_IconFinder.SearchIconset(Item: TCnImageRespItem;
-  var Req: TCnImageReqInfo);
+function TCnImageProvider_IconFinder.SearchIconset(Item: TCnImageRespItem;
+  var Req: TCnImageReqInfo): Boolean;
+var
+  Url, Text: string;
+  xml: IXMLDocument;
+  root, node: IXMLNode;
 begin
-
+  Result := False;
+  Url := Format('http://www.iconfinder.com/xml/icondetails/?id=%s&size=%d&api_key=7cb3bc9947285bc4b3a2f2d8bd20a3dd',
+    [Item.Id, Item.Size]);
+  Text := string(CnInet_GetString(Url));
+  xml := CreateXMLDoc;
+  if xml.LoadXML(Text) then
+  begin
+    root := FindNode(xml, 'icon');
+    if root <> nil then
+    begin
+      node := FindNode(root, 'iconsetid');
+      if node <> nil then
+      begin
+        Req.Keyword := 'iconset:' + node.Text;
+        Req.Page := 0;
+        Result := True;
+      end;
+    end;
+  end;
 end;
 
 initialization

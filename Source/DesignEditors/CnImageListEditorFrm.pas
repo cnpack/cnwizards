@@ -230,6 +230,7 @@ const
   SCnImageListNoPngLib = 'CnPngLib.dll not found! Please reinstall CnWizards.'; 
   SCnImageListExportFailed = 'Export images failed!';
   SCnImageListXPStyleNotSupport = 'The ImageList uses XP Style images, but your IDE doesn''t support XPManifest! Please upgrade your IDE.';
+  SCnImageListSearchIconsetFailed = 'Search icon set failed!';
 
 procedure ShowCnImageListEditorForm(AComponent: TCustomImageList;
   AIni: TCustomIniFile; AOnApply: TNotifyEvent);
@@ -1462,7 +1463,14 @@ procedure TCnImageListEditorForm.mniSearchIconsetClick(Sender: TObject);
 begin
   if (FProvider <> nil) and (lvSearch.Selected <> nil) then
   begin
-    FProvider.SearchIconset(TCnImageRespItem(lvSearch.Selected.Data), FReq);
+    if not FProvider.SearchIconset(TCnImageRespItem(lvSearch.Selected.Data), FReq) then
+      ErrorDlg(SCnImageListSearchIconsetFailed)
+    else
+    begin
+      if FReq.Keyword <> Trim(cbbKeyword.Text) then
+        cbbKeyword.Text := FReq.Keyword;
+      DoSearch(0);
+    end;
   end;
 end;
 
