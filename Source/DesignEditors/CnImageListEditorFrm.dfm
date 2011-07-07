@@ -51,7 +51,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         Height = 13
         Caption = '&Transparent Color:'
       end
-      object lbl3: TLabel
+      object lblAlpha: TLabel
         Left = 112
         Top = 72
         Width = 225
@@ -110,6 +110,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         Height = 17
         Caption = 'Use XP Style Image with Alpha channel.'
         TabOrder = 3
+        OnClick = chkXPStyleClick
       end
     end
     object grp2: TGroupBox
@@ -205,6 +206,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
       Anchors = [akRight, akBottom]
       Caption = '&OK'
       TabOrder = 2
+      OnClick = btnOKClick
     end
     object btnCancel: TButton
       Left = 224
@@ -491,6 +493,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
     end
     object actApply: TAction
       Caption = '&Apply'
+      OnExecute = actApplyExecute
     end
     object actSearch: TAction
       Category = 'Search'

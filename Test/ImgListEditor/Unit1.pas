@@ -31,7 +31,7 @@ implementation
 
 procedure TImgListEdtTestForm.btnTestClick(Sender: TObject);
 begin
-  ShowCnImageListEditorForm(il1, FIni);
+  ShowCnImageListEditorForm(il1, FIni, nil);
 end;
 
 procedure TImgListEdtTestForm.FormCreate(Sender: TObject);

@@ -96,7 +96,7 @@ type
     ilSearch: TImageList;
     chkCommercialLicenses: TCheckBox;
     chkXPStyle: TCheckBox;
-    lbl3: TLabel;
+    lblAlpha: TLabel;
     lblPage: TLabel;
     ilList: TImageList;
     ActionList: TActionList;
@@ -139,42 +139,64 @@ type
     procedure lvListSelectItem(Sender: TObject; Item: TListItem;
       Selected: Boolean);
     procedure rgOptionsClick(Sender: TObject);
+    procedure actApplyExecute(Sender: TObject);
+    procedure btnOKClick(Sender: TObject);
+    procedure chkXPStyleClick(Sender: TObject);
   private
     { Private declarations }
     FComponent: TCustomImageList;
     FIni: TCustomIniFile;
+    FOnApply: TNotifyEvent; 
     FReq: TCnImageReqInfo;
     FSearching: Boolean;
     FProvider: TCnBaseImageProvider;
     FSupportXPStyle: Boolean;
     FShowSearch: Boolean;
     FChanging: Boolean;
+    FTempList: TImageList;
+    FTempInfo: TList;
     FList: TObjectList;
     procedure AddSize(W, H: Integer);
     procedure DoGetColor(const S: string);
     function CreateProvider: Boolean;
     function DoSearch(Page: Integer): Boolean;
     procedure ClearImageList;
+    procedure RecreateImageList;
+    procedure ClearBitmap(ABmp: TBitmap);
     procedure OnProgress(Sender: TObject; Progress: Integer);
     procedure ConvertBmp(UseAlpha: Boolean; Src, Dst: TBitmap; var Mask: TColor);
     function CreateDstBmp(ABmp: TBitmap; ARow, ACol: Integer; Option: TCnImageOption): TBitmap;
+    function CheckXPStyle: Boolean;
     procedure UpdateSelected;
+    procedure UpdatePreview(Idx: Integer);
+    procedure AddImages(Replace: Boolean);
+    procedure AddSearchImages(Replace: Boolean);
+    procedure DeleteSelectedImages;
     procedure DoAddBmp(ARow, ACol: Integer; ABmp: TBitmap; AMask: TColor;
       AOption: TCnImageOption; NewBmp: Boolean);
-    procedure AddBmp(FileName: string; Bmp: TBitmap);
+    procedure AlphaBlendDraw(Src, Dst: TBitmap);
+    procedure BeginReplace;
+    procedure EndReplace;
+    procedure UpdateListView;
+    procedure AddBmp(FileName: string; Bmp: TBitmap; IsSearch: Boolean);
     procedure AddIco(Ico: TIcon);
     procedure UpdateSearchPanel;
+    procedure ApplyImageList;
   protected
     function GetHelpTopic: string; override;
   public
     { Public declarations }
   end;
 
-procedure ShowCnImageListEditorForm(AComponent: TCustomImageList; AIni: TCustomIniFile);
+procedure ShowCnImageListEditorForm(AComponent: TCustomImageList;
+  AIni: TCustomIniFile; AOnApply: TNotifyEvent);
 
 implementation
 
 {$R *.dfm}
+
+type
+  TImageListAccess = class(TImageList);
 
 const
   csImageListEditor = 'CnImageListEditor';
@@ -186,17 +208,21 @@ const
   // todo: 待多语言处理
   SImageListChangeSize = 'Do you want to change the image dimensions?' + #13#10 +
     'This will remove all the existing images from the list.';
+  SImageListChangeXPStyle = 'Do you want to change the image style?' + #13#10 +
+    'This will remove all the existing images from the list.';
   SImageListSearchFailed = 'Search image failed!';
   SImageListInvalidFile = 'The file is not a valid image file: ';
   SImageListSepBmp = 'Image dimensions for %s are greater than imagelist dimensions. Separate into %d separate bitmaps?';
 
 
-procedure ShowCnImageListEditorForm(AComponent: TCustomImageList; AIni: TCustomIniFile);
+procedure ShowCnImageListEditorForm(AComponent: TCustomImageList;
+  AIni: TCustomIniFile; AOnApply: TNotifyEvent);
 begin
   with TCnImageListEditorForm.Create(nil) do
   try
     FComponent := AComponent;
     FIni := AIni;
+    FOnApply := AOnApply;
     ShowModal;
   finally
     Free;
@@ -219,12 +245,15 @@ var
   B: Boolean;
 begin
   inherited;
+  FShowSearch := True;
   FList := TObjectList.Create;
   if not CheckXPManifest(B, FSupportXPStyle) then
     FSupportXPStyle := False;
+  chkXPStyle.Enabled := FSupportXPStyle;
+  lblAlpha.Enabled := FSupportXPStyle;
+
   for i := 0 to ImageProviderMgr.Count - 1 do
     cbbProvider.Items.Add(ImageProviderMgr[i].DispName);
-  FShowSearch := True;
 
   cbbSize.Items.Clear;
   AddSize(12, 12);
@@ -257,6 +286,7 @@ procedure TCnImageListEditorForm.FormShow(Sender: TObject);
 var
   s: string;
   i: Integer;
+  XpStyle: Boolean;
 begin
   inherited;
   Assert(FComponent <> nil);
@@ -288,10 +318,9 @@ begin
     FChanging := False;
   end;
 
-  chkXPStyle.Enabled := FSupportXPStyle;
-
   ilList.Width := FComponent.Width;
   ilList.Height := FComponent.Height;
+  ilList.Masked := FComponent.Masked;
   ilSearch.Width := FComponent.Width;
   ilSearch.Height := FComponent.Width;
   ilList.Handle := ImageList_Duplicate(FComponent.Handle);
@@ -303,6 +332,15 @@ begin
       Caption := IntToStr(i);
       ImageIndex := i;
     end;
+  end;
+
+  XpStyle := CheckXPStyle;
+  FChanging := True;
+  try
+    // todo: 检查不支持XPStyle时的提示和转换
+    chkXPStyle.Checked := XpStyle;
+  finally
+    FChanging := False;
   end;
   
   UpdateSelected;
@@ -367,7 +405,7 @@ function TCnImageListEditorForm.DoSearch(Page: Integer): Boolean;
 var
   mask, bmp: TBitmap;
   mcolor: TColor;
-  i: Integer;
+  i, idx: Integer;
 begin
   Result := False;
   if FSearching then Exit;
@@ -387,7 +425,7 @@ begin
         ilSearch.Clear;
         lvSearch.Items.Clear;
         mask := TBitmap.Create;
-        mask.PixelFormat := pf1bit;
+        mask.Monochrome := True;
         mask.Width := ilList.Width;
         mask.Height := ilList.Height;
         bmp := TBitmap.Create;
@@ -412,16 +450,18 @@ begin
             (FProvider.Items[i].Bitmap.Height >= ilSearch.Height) then
           begin
             ConvertBmp(True, FProvider.Items[i].Bitmap, bmp, mcolor);
-            ilSearch.AddMasked(bmp, mcolor);
+            idx := ilSearch.AddMasked(bmp, mcolor);
+            if idx >= 0 then
+            begin
+              with lvSearch.Items.Add do
+              begin
+                ImageIndex := idx;
+                Caption := IntToStr(idx);
+                Data := FProvider.Items[i];
+              end;
+            end;
           end;
         end;
-
-        for i := 0 to ilSearch.Count - 1 do
-          with lvSearch.Items.Add do
-          begin
-            ImageIndex := i;
-            Caption := IntToStr(i);
-          end;
         Result := True;
       finally
         lvSearch.Items.EndUpdate;
@@ -436,42 +476,6 @@ begin
   end;
 end;
 
-procedure TCnImageListEditorForm.btnGotoClick(Sender: TObject);
-begin
-  if cbbProvider.ItemIndex >= 0 then
-    OpenUrl(ImageProviderMgr[cbbProvider.ItemIndex].HomeUrl);
-end;
-
-procedure TCnImageListEditorForm.actFirstExecute(Sender: TObject);
-begin
-  DoSearch(0);
-end;
-
-procedure TCnImageListEditorForm.actPrevExecute(Sender: TObject);
-begin
-  DoSearch(FReq.Page - 1);
-end;
-
-procedure TCnImageListEditorForm.actNextExecute(Sender: TObject);
-begin
-  DoSearch(FReq.Page + 1);
-end;
-
-procedure TCnImageListEditorForm.actLastExecute(Sender: TObject);
-begin
-  DoSearch(MaxInt);
-end;
-
-procedure TCnImageListEditorForm.cbbKeywordKeyPress(Sender: TObject;
-  var Key: Char);
-begin
-  if Key = #13 then
-  begin
-    Key := #0;
-    btnSearch.Click;
-  end;
-end;
-
 procedure TCnImageListEditorForm.OnProgress(Sender: TObject;
   Progress: Integer);
 begin
@@ -479,87 +483,9 @@ begin
   Application.ProcessMessages;
 end;
 
-procedure TCnImageListEditorForm.btnShowSearchClick(Sender: TObject);
-begin
-  FShowSearch := not FShowSearch;
-  UpdateSearchPanel;
-end;
-
-procedure TCnImageListEditorForm.cbbSizeChange(Sender: TObject);
-var
-  D: Integer;
-begin
-  if FChanging then Exit;
-  
-  if cbbSize.ItemIndex >= 0 then
-    if (ilList.Count = 0) or QueryDlg(SImageListChangeSize) then
-    begin
-      ClearImageList;
-      D := Integer(cbbSize.Items.Objects[cbbSize.ItemIndex]);
-      FreeAndNil(FProvider);
-      lvSearch.Items.Clear;
-      ilList.Width := D shr 16;
-      ilList.Height := D and $FFFF;
-      ilSearch.Width := ilList.Width;
-      ilSearch.Height := ilList.Height;
-    end
-    else
-    begin
-      FChanging := True;
-      try
-        cbbSize.ItemIndex := cbbSize.Items.IndexOf(Format('%dx%d', [ilList.Width, ilList.Height]));
-      finally
-        FChanging := False;
-      end;
-    end;
-end;
-
 function TCnImageListEditorForm.GetHelpTopic: string;
 begin
   Result := 'CnImageListEditor';
-end;
-
-procedure TCnImageListEditorForm.ActionListUpdate(Action: TBasicAction;
-  var Handled: Boolean);
-begin
-  actReplace.Enabled := lvList.SelCount = 1;
-  actDelete.Enabled := lvList.SelCount > 0;
-  actClear.Enabled := lvList.Items.Count > 0;
-  actExport.Enabled := lvList.Items.Count > 0;
-  actSearchAdd.Enabled := (lvSearch.Items.Count > 0) and (lvSearch.SelCount > 0);
-  actSearchReplace.Enabled := (lvList.SelCount = 1) and (lvSearch.SelCount = 1);
-  actSearch.Enabled := (cbbProvider.ItemIndex >= 0) and (Trim(cbbKeyword.Text) <> '');
-  actFirst.Enabled := (FProvider <> nil) and (FProvider.PageCount > 0) and (FReq.Page > 0);
-  actPrev.Enabled := (FProvider <> nil) and (FProvider.PageCount > 0) and (FReq.Page > 0);
-  actNext.Enabled := (FProvider <> nil) and (FProvider.PageCount > 0) and
-    (FReq.Page < FProvider.PageCount - 1);
-  actLast.Enabled := (FProvider <> nil) and (FProvider.PageCount > 0) and
-    (FReq.Page < FProvider.PageCount - 1);
-end;
-
-procedure TCnImageListEditorForm.actSearchExecute(Sender: TObject);
-begin
-  if Trim(cbbKeyword.Text) <> '' then
-  begin
-    AddComboBoxTextToItems(cbbKeyword);
-    if not CreateProvider then
-      Exit;
-    FReq.Keyword := Trim(cbbKeyword.Text);
-    FReq.MinSize := ilList.Width;
-    FReq.MaxSize := ilList.Width;
-    FReq.CommercialLicenses := chkCommercialLicenses.Checked;
-    DoSearch(0);
-  end;
-end;
-
-procedure TCnImageListEditorForm.actSearchAddExecute(Sender: TObject);
-begin
-  //
-end;
-
-procedure TCnImageListEditorForm.actSearchReplaceExecute(Sender: TObject);
-begin
-  //
 end;
 
 procedure TCnImageListEditorForm.ConvertBmp(UseAlpha: Boolean; Src, Dst: TBitmap;
@@ -575,9 +501,8 @@ begin
     Dst.Width := Src.Width;
     Dst.Height := Src.Height;
     Dst.PixelFormat := pf24bit;
-    Dst.Canvas.Brush.Color := clFuchsia;
-    Dst.Canvas.FillRect(Rect(0, 0, Dst.Width, Dst.Height));
-    Mask := clFuchsia;
+    ClearBitmap(Dst);
+    Mask := Dst.TransparentColor;
     for y := 0 to Dst.Height - 1 do
     begin
       p := Src.ScanLine[y];
@@ -611,6 +536,24 @@ begin
   end;
 end;
 
+procedure TCnImageListEditorForm.ClearBitmap(ABmp: TBitmap);
+var
+  i: Integer;
+begin
+  if ABmp.PixelFormat = pf32bit then
+  begin
+    for i := 0 to ABmp.Height - 1 do
+      ZeroMemory(ABmp.ScanLine[i], ABmp.Width * 4);
+  end
+  else
+  begin
+    ABmp.Canvas.Brush.Color := clFuchsia;
+    ABmp.Canvas.FillRect(Rect(0, 0, ABmp.Width, ABmp.Height));
+    ABmp.Transparent := True;
+    ABmp.TransparentColor := clFuchsia;
+  end;
+end;
+
 function TCnImageListEditorForm.CreateDstBmp(ABmp: TBitmap;
   ARow, ACol: Integer; Option: TCnImageOption): TBitmap;
 begin
@@ -618,8 +561,7 @@ begin
   Result.Width := ilList.Width;
   Result.Height := ilList.Height;
   Result.PixelFormat := ABmp.PixelFormat;
-  Result.Canvas.Brush.Color := clFuchsia;
-  Result.Canvas.FillRect(Rect(0, 0, Result.Width, Result.Height));
+  ClearBitmap(Result);
   if Option = ioCrop then
   begin
     BitBlt(Result.Canvas.Handle, 0, 0, Result.Width, Result.Height,
@@ -662,19 +604,19 @@ begin
   end;
 end;
 
-procedure TCnImageListEditorForm.AddBmp(FileName: string; Bmp: TBitmap);
+procedure TCnImageListEditorForm.AddBmp(FileName: string; Bmp: TBitmap; IsSearch: Boolean);
 var
   dst: TBitmap;
   mask: TColor;
   i, j, cols, rows: Integer;
-
 begin
   try
     dst := TBitmap.Create;
     try
       ConvertBmp(chkXPStyle.Checked, Bmp, dst, mask);
       Bmp.Assign(dst);
-      if (Bmp.Width >= ilList.Width * 2) or (Bmp.Height >= ilList.Height * 2) then
+      if not IsSearch and ((Bmp.Width >= ilList.Width * 2) or
+        (Bmp.Height >= ilList.Height * 2)) then
       begin
         cols := Max(1, Bmp.Width div ilList.Width);
         rows := Max(1, Bmp.Height div ilList.Height);
@@ -693,11 +635,11 @@ begin
       end
       else if (Bmp.Width > ilList.Width) or (Bmp.Height > ilList.Height) then
       begin
-        DoAddBmp(0, 0, Bmp, mask, ioStrech, False);
+        DoAddBmp(0, 0, Bmp, mask, ioStrech, IsSearch);
       end
       else
       begin
-        DoAddBmp(0, 0, Bmp, mask, ioCenter, False);
+        DoAddBmp(0, 0, Bmp, mask, ioCenter, IsSearch);
       end;
     finally
       dst.Free;
@@ -730,11 +672,11 @@ begin
   end;
 end;
 
-procedure TCnImageListEditorForm.UpdateSelected;
+procedure TCnImageListEditorForm.BeginReplace;
 var
   i, idx: Integer;
-  info: TCnImageInfo;
 begin
+  // 先找到第一个选中的项
   idx := -1;
   for i := 0 to lvList.Items.Count - 1 do
     if lvList.Items[i].Selected then
@@ -742,30 +684,61 @@ begin
       idx := i;
       Break;
     end;
-  if (idx >= 0) and (FList[idx] <> nil) then
+  if idx < 0 then
+    Exit;
+    
+  // 再删除所有选中的项
+  DeleteSelectedImages;
+
+  // 创建一个临时列表，把插入点后面的保存起来
+  FTempList := TImageList.Create(nil);
+  FTempList.Handle := ImageList_Duplicate(ilList.Handle);
+  FTempInfo := TList.Create;
+  for i := ilList.Count - 1 downto idx do
   begin
-    info := TCnImageInfo(FList[idx]);
-    if info.Image is TBitmap then
-    begin
-      cbbTransparentColor.Enabled := True;
-      cbbTransparentColor.Text := ColorToString(info.Mask);
-      rgOptions.Enabled := True;
-      rgOptions.ItemIndex := Ord(info.Option);
-      Exit;
-    end;
+    ilList.Delete(i);
+    FTempInfo.Insert(0, FList.Extract(FList[i]));
   end;
-  cbbTransparentColor.Enabled := False;
-  rgOptions.Enabled := False;
+  for i := idx - 1 downto 0 do
+    FTempList.Delete(i);
 end;
 
-procedure TCnImageListEditorForm.ClearImageList;
+procedure TCnImageListEditorForm.EndReplace;
+var
+  i: Integer;
+  bmp, mask: TBitmap;
 begin
-  ilList.Clear;
-  lvList.Items.Clear;
-  FList.Clear;
+  bmp := nil;
+  mask := nil;
+  try
+    bmp := TBitmap.Create;
+    if FSupportXPStyle and chkXPStyle.Checked then
+      bmp.PixelFormat := pf32bit
+    else
+      bmp.PixelFormat := pf24bit;
+    bmp.Width := ilList.Width;
+    bmp.Height := ilList.Height;
+    mask := TBitmap.Create;
+    mask.Monochrome := True;
+    mask.Width := ilList.Width;
+    mask.Height := ilList.Height;
+    for i := 0 to FTempList.Count - 1 do
+    begin
+      TImageListAccess(FTempList).GetImages(i, bmp, mask);
+      ilList.Add(bmp, mask);
+      FList.Add(FTempInfo[i]);
+    end;
+    FreeAndNil(FTempList);
+    FreeAndNil(FTempInfo);
+
+    UpdateListView;
+  finally
+    bmp.Free;
+    mask.Free;
+  end;   
 end;
 
-procedure TCnImageListEditorForm.actAddExecute(Sender: TObject);
+procedure TCnImageListEditorForm.AddImages(Replace: Boolean);
 var
   i: Integer;
   fn, tmp: string;
@@ -774,53 +747,18 @@ var
 begin
   if dlgOpen.Execute then
   begin
-    for i := 0 to dlgOpen.Files.Count - 1 do
-    begin
-      fn := dlgOpen.Files[i];
-      if SameText(ExtractFileExt(fn), '.bmp') then
+    lvList.Items.BeginUpdate;
+    if Replace then
+      BeginReplace;
+    try
+      for i := 0 to dlgOpen.Files.Count - 1 do
       begin
-        bmp := TBitmap.Create;
-        try
-          bmp.LoadFromFile(fn);
-        except
-          ;
-        end;
-        if bmp.Empty then
-        begin
-          ErrorDlg(SImageListInvalidFile + ExtractFileName(fn));
-          bmp.Free;
-        end
-        else
-        begin
-          AddBmp(fn, bmp);
-        end;
-      end
-      else if SameText(ExtractFileExt(fn), '.ico') then
-      begin
-        ico := TIcon.Create;
-        try
-          ico.LoadFromFile(fn);
-        except
-          ;
-        end;
-        if ico.Empty then
-        begin
-          ErrorDlg(SImageListInvalidFile + ExtractFileName(fn));
-          ico.Free;
-        end
-        else
-        begin
-          AddIco(ico);
-        end;
-      end
-      else if SameText(ExtractFileExt(fn), '.png') then
-      begin
-        tmp := CnGetTempFileName('.bmp');
-        if CnConvertPngToBmp(PAnsiChar(AnsiString(fn)), PAnsiChar(AnsiString(tmp))) then
+        fn := dlgOpen.Files[i];
+        if SameText(ExtractFileExt(fn), '.bmp') then
         begin
           bmp := TBitmap.Create;
           try
-            bmp.LoadFromFile(tmp);
+            bmp.LoadFromFile(fn);
           except
             ;
           end;
@@ -831,40 +769,387 @@ begin
           end
           else
           begin
-            AddBmp(fn, bmp);
+            AddBmp(fn, bmp, False);
           end;
-          DeleteFile(tmp);
         end
-        else
+        else if SameText(ExtractFileExt(fn), '.ico') then
         begin
-          ErrorDlg(SImageListInvalidFile + ExtractFileName(fn));
+          ico := TIcon.Create;
+          try
+            ico.LoadFromFile(fn);
+          except
+            ;
+          end;
+          if ico.Empty then
+          begin
+            ErrorDlg(SImageListInvalidFile + ExtractFileName(fn));
+            ico.Free;
+          end
+          else
+          begin
+            AddIco(ico);
+          end;
+        end
+        else if SameText(ExtractFileExt(fn), '.png') then
+        begin
+          tmp := CnGetTempFileName('.bmp');
+          if CnConvertPngToBmp(PAnsiChar(AnsiString(fn)), PAnsiChar(AnsiString(tmp))) then
+          begin
+            bmp := TBitmap.Create;
+            try
+              bmp.LoadFromFile(tmp);
+            except
+              ;
+            end;
+            if bmp.Empty then
+            begin
+              ErrorDlg(SImageListInvalidFile + ExtractFileName(fn));
+              bmp.Free;
+            end
+            else
+            begin
+              AddBmp(fn, bmp, False);
+            end;
+            DeleteFile(tmp);
+          end
+          else
+          begin
+            ErrorDlg(SImageListInvalidFile + ExtractFileName(fn));
+          end;
+        end;
+      end;
+    finally
+      if Replace then
+        EndReplace;
+      lvList.Items.EndUpdate;
+    end;
+  end;
+end;
+
+procedure TCnImageListEditorForm.AddSearchImages(Replace: Boolean);
+var
+  i: Integer;
+  item: TCnImageRespItem;
+begin
+  if lvSearch.SelCount = 0 then Exit;
+
+  lvList.Items.BeginUpdate;
+  if Replace then
+    BeginReplace;
+  try
+    for i := 0 to lvSearch.Items.Count - 1 do
+    begin
+      if lvSearch.Items[i].Selected then
+      begin
+        item := TCnImageRespItem(lvSearch.Items[i].Data);
+        AddBmp('', item.Bitmap, True);
+      end;
+    end;
+  finally
+    if Replace then
+      EndReplace;
+    lvList.Items.EndUpdate;
+  end;
+end;
+
+procedure TCnImageListEditorForm.ApplyImageList;
+begin
+  FComponent.Width := ilList.Width;
+  FComponent.Height := ilList.Height;
+  FComponent.Masked := ilList.Masked;
+  FComponent.Handle := ImageList_Duplicate(ilList.Handle);
+  if Assigned(FOnApply) then
+    FOnApply(Self);
+end;
+
+function TCnImageListEditorForm.CheckXPStyle: Boolean;
+var
+  bmp: TBitmap;
+  i: Integer;
+  info: TImageInfo;
+begin
+  bmp := TBitmap.Create;
+  try
+    Result := False;
+    for i := 0 to ilList.Count - 1 do
+    begin
+      if ImageList_GetImageInfo(ilList.Handle, i, info) then
+      begin
+        bmp.Handle := info.hbmImage;
+        if bmp.PixelFormat = pf32bit then
+        begin
+          Result := True;
+          Break;
         end;
       end;
     end;
+  finally
+    bmp.Free;
+  end;   
+end;
+
+procedure TCnImageListEditorForm.DeleteSelectedImages;
+var
+  i: Integer;
+begin
+  lvList.Items.BeginUpdate;
+  try
+    for i := lvList.Items.Count - 1 downto 0 do
+      if lvList.Items[i].Selected then
+      begin
+        ilList.Delete(i);
+        lvList.Items.Delete(i);
+        FList.Delete(i);
+      end;
+    UpdateListView;
+  finally
+    lvList.Items.EndUpdate;
   end;
+end;
+
+procedure TCnImageListEditorForm.ClearImageList;
+begin
+  ilList.Clear;
+  lvList.Items.Clear;
+  FList.Clear;
+end;
+
+procedure TCnImageListEditorForm.RecreateImageList;
+const
+  csMasks: array[Boolean] of Integer = (0, ILC_MASK);
+begin
+  if FSupportXPStyle and chkXPStyle.Checked then
+  begin
+    ilList.Handle := ImageList_Create(ilList.Width, ilList.Height,
+      ILC_COLOR32, 4, 4);
+  end
+  else
+  begin
+    ilList.Handle := ImageList_Create(ilList.Width, ilList.Height,
+      ILC_COLORDDB or csMasks[ilList.Masked], 4, 4);
+  end;
+end;
+
+procedure TCnImageListEditorForm.UpdateListView;
+var
+  i: Integer;
+begin
+  lvList.Items.BeginUpdate;
+  try
+    // 如果只在后面追加新节点，Replace 时会导致显示顺序不正确，故改成清空重建
+    //while lvList.Items.Count > ilList.Count do
+    //  lvList.Items.Delete(lvList.Items.Count - 1);
+    lvList.Items.Clear;
+    for i := lvList.Items.Count to ilList.Count - 1 do
+      lvList.Items.Add;
+    for i := 0 to lvList.Items.Count - 1 do
+    begin
+      lvList.Items[i].ImageIndex := i;
+      lvList.Items[i].Caption := IntToStr(i);
+    end;
+  finally
+    lvList.Items.EndUpdate;
+  end;
+end;
+
+procedure TCnImageListEditorForm.AlphaBlendDraw(Src, Dst: TBitmap);
+var
+  ps, pd: PByteArray;
+  a: Byte;
+  i, j: Integer;
+begin
+  if (Src.Width <> Dst.Width) or (Src.Height <> Dst.Height) or
+    (Src.PixelFormat <> pf32bit) or (Dst.PixelFormat <> pf32bit) then
+    Exit;
+  for i := 0 to Src.Height - 1 do
+  begin
+    ps := Src.ScanLine[i];
+    pd := Dst.ScanLine[i];
+    for j := 0 to Src.Width - 1 do
+    begin
+      a := ps[j * 4 + 3];
+      pd[j * 4] := (pd[j * 4] * ($100 - a) + ps[j * 4] * a) shr 8;
+      pd[j * 4 + 1] := (pd[j * 4 + 1] * ($100 - a) + ps[j * 4 + 1] * a) shr 8;
+      pd[j * 4 + 2] := (pd[j * 4 + 2] * ($100 - a) + ps[j * 4 + 2] * a) shr 8;
+    end;
+  end;
+end;
+
+procedure TCnImageListEditorForm.UpdatePreview(Idx: Integer);
+const
+  csGridSize = 8;
+var
+  bmp, bmp1, bmp2: TBitmap;
+  i, j: Integer;
+begin
+  bmp := TBitmap.Create;
+  try
+    bmp.Width := imgSelected.Width;
+    bmp.Height := imgSelected.Height;
+    if FSupportXPStyle and chkXPStyle.Checked then
+      bmp.PixelFormat := pf32bit
+    else
+      bmp.PixelFormat := pf24bit;
+    for i := 0 to (bmp.Height + csGridSize - 1) div csGridSize - 1 do
+      for j := 0 to (bmp.Width + csGridSize - 1) div csGridSize - 1 do
+      begin
+        if Odd(i + j) then
+          bmp.Canvas.Brush.Color := clSilver
+        else
+          bmp.Canvas.Brush.Color := clWhite;
+        bmp.Canvas.FillRect(Bounds(j * csGridSize, i * csGridSize, csGridSize, csGridSize));
+      end;
+
+    if Idx >= 0 then
+    begin
+      bmp1 := TBitmap.Create;
+      try
+        bmp1.Width := ilList.Width;
+        bmp1.Height := ilList.Height;
+        bmp1.PixelFormat := bmp.PixelFormat;
+        ClearBitmap(bmp1);
+        ilList.Draw(bmp1.Canvas, 0, 0, idx, True);
+        if bmp1.PixelFormat <> pf32bit then
+        begin
+          bmp.Canvas.StretchDraw(Rect(0, 0, bmp.Width, bmp.Height), bmp1);
+        end
+        else
+        begin
+          bmp2 := TBitmap.Create;
+          bmp2.Width := bmp.Width;
+          bmp2.Height := bmp.Height;
+          bmp2.PixelFormat := pf32bit;
+          bmp2.Canvas.StretchDraw(Rect(0, 0, bmp2.Width, bmp2.Height), bmp1);
+          AlphaBlendDraw(bmp2, bmp);
+        end;
+      finally
+        bmp1.Free;
+      end;
+    end;
+    
+    imgSelected.Picture.Bitmap := bmp;
+  finally
+    bmp.Free;
+  end;
+end;
+
+procedure TCnImageListEditorForm.UpdateSelected;
+var
+  i, idx: Integer;
+  info: TCnImageInfo;
+begin
+  if FChanging then Exit;
+  FChanging := True;
+  try
+    idx := -1;
+    for i := 0 to lvList.Items.Count - 1 do
+      if lvList.Items[i].Selected then
+      begin
+        idx := i;
+        Break;
+      end;
+    UpdatePreview(idx);
+    if (idx >= 0) and (FList[idx] <> nil) then
+    begin
+      info := TCnImageInfo(FList[idx]);
+      if info.Image is TBitmap then
+      begin
+        cbbTransparentColor.Enabled := TBitmap(info.Image).PixelFormat <> pf32bit;
+        cbbTransparentColor.Text := ColorToString(info.Mask);
+        rgOptions.Enabled := True;
+        rgOptions.ItemIndex := Ord(info.Option);
+        Exit;
+      end;
+    end;
+    cbbTransparentColor.Enabled := False;
+    rgOptions.Enabled := False;
+  finally
+    FChanging := False;
+  end;          
+end;
+
+procedure TCnImageListEditorForm.ActionListUpdate(Action: TBasicAction;
+  var Handled: Boolean);
+begin
+  actReplace.Enabled := lvList.SelCount > 0;
+  actDelete.Enabled := lvList.SelCount > 0;
+  actClear.Enabled := lvList.Items.Count > 0;
+  actExport.Enabled := lvList.Items.Count > 0;
+  actSearchAdd.Enabled := (lvSearch.Items.Count > 0) and (lvSearch.SelCount > 0);
+  actSearchReplace.Enabled := (lvList.SelCount > 0) and (lvSearch.SelCount > 0);
+  actSearch.Enabled := (cbbProvider.ItemIndex >= 0) and (Trim(cbbKeyword.Text) <> '');
+  actFirst.Enabled := (FProvider <> nil) and (FProvider.PageCount > 0) and (FReq.Page > 0);
+  actPrev.Enabled := (FProvider <> nil) and (FProvider.PageCount > 0) and (FReq.Page > 0);
+  actNext.Enabled := (FProvider <> nil) and (FProvider.PageCount > 0) and
+    (FReq.Page < FProvider.PageCount - 1);
+  actLast.Enabled := (FProvider <> nil) and (FProvider.PageCount > 0) and
+    (FReq.Page < FProvider.PageCount - 1);
+end;
+
+procedure TCnImageListEditorForm.actSearchExecute(Sender: TObject);
+begin
+  if Trim(cbbKeyword.Text) <> '' then
+  begin
+    AddComboBoxTextToItems(cbbKeyword);
+    if not CreateProvider then
+      Exit;
+    FReq.Keyword := Trim(cbbKeyword.Text);
+    FReq.MinSize := ilList.Width;
+    FReq.MaxSize := ilList.Width;
+    FReq.CommercialLicenses := chkCommercialLicenses.Checked;
+    DoSearch(0);
+  end;
+end;
+
+procedure TCnImageListEditorForm.actSearchAddExecute(Sender: TObject);
+begin
+  AddSearchImages(False);
+end;
+
+procedure TCnImageListEditorForm.actSearchReplaceExecute(Sender: TObject);
+begin
+  AddSearchImages(True);
+end;
+
+procedure TCnImageListEditorForm.btnGotoClick(Sender: TObject);
+begin
+  if cbbProvider.ItemIndex >= 0 then
+    OpenUrl(ImageProviderMgr[cbbProvider.ItemIndex].HomeUrl);
+end;
+
+procedure TCnImageListEditorForm.actFirstExecute(Sender: TObject);
+begin
+  DoSearch(0);
+end;
+
+procedure TCnImageListEditorForm.actPrevExecute(Sender: TObject);
+begin
+  DoSearch(FReq.Page - 1);
+end;
+
+procedure TCnImageListEditorForm.actNextExecute(Sender: TObject);
+begin
+  DoSearch(FReq.Page + 1);
+end;
+
+procedure TCnImageListEditorForm.actLastExecute(Sender: TObject);
+begin
+  DoSearch(MaxInt);
+end;
+
+procedure TCnImageListEditorForm.actAddExecute(Sender: TObject);
+begin
+  AddImages(False);
 end;
 
 procedure TCnImageListEditorForm.actReplaceExecute(Sender: TObject);
 begin
-  //
+  AddImages(True);
 end;
 
 procedure TCnImageListEditorForm.actDeleteExecute(Sender: TObject);
-var
-  i: Integer;
 begin
-  for i := lvList.Items.Count - 1 downto 0 do
-    if lvList.Items[i].Selected then
-    begin
-      ilList.Delete(i);
-      lvList.Items.Delete(i);
-      FList.Delete(i);
-    end;
-  for i := 0 to ilList.Count - 1 do
-  begin
-    lvList.Items[i].Caption := IntToStr(i);
-    lvList.Items[i].ImageIndex := i;
-  end;
+  DeleteSelectedImages;
 end;
 
 procedure TCnImageListEditorForm.actClearExecute(Sender: TObject);
@@ -877,10 +1162,73 @@ begin
   //
 end;
 
+procedure TCnImageListEditorForm.actApplyExecute(Sender: TObject);
+begin
+  ApplyImageList;
+end;
+
 procedure TCnImageListEditorForm.lvListSelectItem(Sender: TObject;
   Item: TListItem; Selected: Boolean);
 begin
   UpdateSelected;
+end;
+
+procedure TCnImageListEditorForm.cbbKeywordKeyPress(Sender: TObject;
+  var Key: Char);
+begin
+  if Key = #13 then
+  begin
+    Key := #0;
+    btnSearch.Click;
+  end;
+end;
+
+procedure TCnImageListEditorForm.btnShowSearchClick(Sender: TObject);
+begin
+  FShowSearch := not FShowSearch;
+  UpdateSearchPanel;
+end;
+
+procedure TCnImageListEditorForm.cbbSizeChange(Sender: TObject);
+var
+  D: Integer;
+begin
+  if FChanging then Exit;
+
+  if cbbSize.ItemIndex >= 0 then
+    if (ilList.Count = 0) or QueryDlg(SImageListChangeSize) then
+    begin
+      ClearImageList;
+      D := Integer(cbbSize.Items.Objects[cbbSize.ItemIndex]);
+      ilList.Width := D shr 16;
+      ilList.Height := D and $FFFF;
+      RecreateImageList;
+
+      FreeAndNil(FProvider);
+      lvSearch.Items.Clear;
+      ilSearch.Width := ilList.Width;
+      ilSearch.Height := ilList.Height;
+    end
+    else
+    begin
+      FChanging := True;
+      try
+        cbbSize.ItemIndex := cbbSize.Items.IndexOf(Format('%dx%d', [ilList.Width, ilList.Height]));
+      finally
+        FChanging := False;
+      end;
+    end;
+end;
+
+procedure TCnImageListEditorForm.chkXPStyleClick(Sender: TObject);
+begin
+  if FChanging then Exit;
+
+  if (ilList.Count = 0) or QueryDlg(SImageListChangeXPStyle) then
+  begin
+    ClearImageList;
+    RecreateImageList;
+  end;
 end;
 
 procedure TCnImageListEditorForm.rgOptionsClick(Sender: TObject);
@@ -889,34 +1237,56 @@ var
   info: TCnImageInfo;
   bmp: TBitmap;
 begin
-  for i := 0 to lvList.Items.Count - 1 do
-    if lvList.Items[i].Selected then
-    begin
-      if FList[i] <> nil then
+  if FChanging then Exit;
+  FChanging := True;
+  try
+    for i := 0 to lvList.Items.Count - 1 do
+      if lvList.Items[i].Selected then
       begin
-        info := TCnImageInfo(FList[i]);
-        if info.Image is TBitmap then
+        if FList[i] <> nil then
         begin
-          info.Option := TCnImageOption(rgOptions.ItemIndex);
-          try
-            info.Mask := StringToColor(cbbTransparentColor.Text);
-          except
-            ;
+          info := TCnImageInfo(FList[i]);
+          if info.Image is TBitmap then
+          begin
+            info.Option := TCnImageOption(rgOptions.ItemIndex);
+            try
+              info.Mask := StringToColor(cbbTransparentColor.Text);
+            except
+              ;
+            end;
+            bmp := CreateDstBmp(TBitmap(info.Image), 0, 0, info.Option);
+            try
+              if bmp.PixelFormat <> pf32bit then
+                ilList.ReplaceMasked(i, bmp, info.Mask)
+              else
+                ImageList_Replace(ilList.Handle, i, bmp.Handle, 0);
+            finally
+              bmp.Free;
+            end;
           end;
-          bmp := CreateDstBmp(TBitmap(info.Image), 0, 0, info.Option);
-          try
-            ilList.ReplaceMasked(i, bmp, info.Mask);
-          finally
-            bmp.Free;
-          end;   
         end;
       end;
-    end;
+
+    for i := 0 to lvList.Items.Count - 1 do
+      if lvList.Items[i].Selected then
+      begin
+        UpdatePreview(i);
+        Break;
+      end;
+  finally
+    FChanging := False;
+  end;            
 end;
 
 procedure TCnImageListEditorForm.btnHelpClick(Sender: TObject);
 begin
   ShowFormHelp;
+end;
+
+procedure TCnImageListEditorForm.btnOKClick(Sender: TObject);
+begin
+  ApplyImageList;
+  ModalResult := mrOk;
 end;
 
 end.
