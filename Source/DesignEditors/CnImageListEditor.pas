@@ -52,6 +52,8 @@ type
 
   TCnImageListEditor = class(TComponentEditor)
   {* 针对 ImageList 的组件编辑器}
+  private
+    procedure OnApply(Sender: TObject);
   public
     procedure Edit; override;
     {* 双击的过程 }
@@ -77,7 +79,7 @@ begin
   begin
     Ini := CreateEditorIniFile(TCnImageListEditor, False);
     try
-      ShowCnImageListEditorForm(TCustomImageList(Component), Ini);
+      ShowCnImageListEditorForm(TCustomImageList(Component), Ini, OnApply);
     finally
       Ini.Free;
     end;
@@ -106,6 +108,11 @@ end;
 function TCnImageListEditor.GetVerbCount: Integer;
 begin
   Result := 1;
+end;
+
+procedure TCnImageListEditor.OnApply(Sender: TObject);
+begin
+  Designer.Modified;
 end;
 
 class procedure TCnImageListEditor.Register;

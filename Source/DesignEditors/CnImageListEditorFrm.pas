@@ -142,6 +142,7 @@ type
     procedure actApplyExecute(Sender: TObject);
     procedure btnOKClick(Sender: TObject);
     procedure chkXPStyleClick(Sender: TObject);
+    procedure ilListChange(Sender: TObject);
   private
     { Private declarations }
     FComponent: TCustomImageList;
@@ -204,6 +205,7 @@ const
   csCommercialLicenses = 'CommercialLicenses';
   csKeyword = 'Keyword';
   csShowSearch = 'ShowSearch';
+  csTransColor = clFuchsia;
 
   // todo: 待多语言处理
   SImageListChangeSize = 'Do you want to change the image dimensions?' + #13#10 +
@@ -270,6 +272,7 @@ end;
 procedure TCnImageListEditorForm.FormDestroy(Sender: TObject);
 begin
   inherited;
+  ilList.OnChange := nil; // 不能再通知了
   if FIni <> nil then
   begin
     FIni.WriteString(csImageListEditor, csProvider, cbbProvider.Text);
@@ -333,6 +336,7 @@ begin
       ImageIndex := i;
     end;
   end;
+  actApply.Enabled := False;
 
   XpStyle := CheckXPStyle;
   FChanging := True;
@@ -502,7 +506,7 @@ begin
     Dst.Height := Src.Height;
     Dst.PixelFormat := pf24bit;
     ClearBitmap(Dst);
-    Mask := Dst.TransparentColor;
+    Mask := csTransColor;
     for y := 0 to Dst.Height - 1 do
     begin
       p := Src.ScanLine[y];
@@ -547,10 +551,10 @@ begin
   end
   else
   begin
-    ABmp.Canvas.Brush.Color := clFuchsia;
+    ABmp.Canvas.Brush.Color := csTransColor;
     ABmp.Canvas.FillRect(Rect(0, 0, ABmp.Width, ABmp.Height));
     ABmp.Transparent := True;
-    ABmp.TransparentColor := clFuchsia;
+    ABmp.TransparentColor := csTransColor;
   end;
 end;
 
@@ -854,6 +858,7 @@ end;
 
 procedure TCnImageListEditorForm.ApplyImageList;
 begin
+  actApply.Enabled := False;
   FComponent.Width := ilList.Width;
   FComponent.Height := ilList.Height;
   FComponent.Masked := ilList.Masked;
@@ -1162,6 +1167,11 @@ begin
   //
 end;
 
+procedure TCnImageListEditorForm.ilListChange(Sender: TObject);
+begin
+  actApply.Enabled := True;
+end;
+
 procedure TCnImageListEditorForm.actApplyExecute(Sender: TObject);
 begin
   ApplyImageList;
@@ -1285,7 +1295,8 @@ end;
 
 procedure TCnImageListEditorForm.btnOKClick(Sender: TObject);
 begin
-  ApplyImageList;
+  if actApply.Enabled then
+    ApplyImageList;
   ModalResult := mrOk;
 end;
 

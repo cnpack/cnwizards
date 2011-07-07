@@ -429,6 +429,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
     Top = 232
   end
   object ilList: TImageList
+    OnChange = ilListChange
     Left = 336
     Top = 232
   end

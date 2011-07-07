@@ -41,12 +41,95 @@ unit CnPngUtilsIntf;
 
 interface
 
+function CnPngLibLoaded: LongBool;
 function CnConvertPngToBmp(PngFile, BmpFile: PAnsiChar): LongBool; stdcall;
 function CnConvertBmpToPng(BmpFile, PngFile: PAnsiChar): LongBool; stdcall;
 
 implementation
 
+{$IFDEF CNPNGLIB_STATIC_LINK}
+
+function CnPngLibLoaded: LongBool;
+begin
+  Result := True;
+end;
+
 function CnConvertPngToBmp; external 'CnPngLib.dll';
 function CnConvertBmpToPng; external 'CnPngLib.dll';
+
+{$ELSE}
+
+uses
+  Windows, SysUtils;
+
+type
+  TCnConvertPngToBmpProc = function (PngFile, BmpFile: PAnsiChar): LongBool; stdcall;
+  TCnConvertBmpToPngProc = function (BmpFile, PngFile: PAnsiChar): LongBool; stdcall;
+
+var
+  _hMod: HMODULE;
+  _CnConvertPngToBmpProc: TCnConvertPngToBmpProc = nil;
+  _CnConvertBmpToPngProc: TCnConvertBmpToPngProc = nil;
+
+function ModulePath: string;
+var
+  ModName: array[0..MAX_PATH] of Char;
+begin
+  SetString(Result, ModName, GetModuleFileName(HInstance, ModName, SizeOf(ModName)));
+  Result := ExtractFilePath(Result);
+end;
+
+procedure LoadCnPngLib;
+var
+  DllName: string;
+begin
+  DllName := ModulePath + 'CnPngLib.dll';
+  _hMod := LoadLibrary(PChar(DllName));
+  if _hMod <> 0 then
+  begin
+    _CnConvertPngToBmpProc := TCnConvertPngToBmpProc(GetProcAddress(_hMod, 'CnConvertPngToBmp'));
+    _CnConvertBmpToPngProc := TCnConvertBmpToPngProc(GetProcAddress(_hMod, 'CnConvertBmpToPng'));
+  end;
+end;
+
+procedure FreeCnPngLib;
+begin
+  if _hMod <> 0 then
+  begin
+    FreeLibrary(_hMod);
+    _CnConvertPngToBmpProc := nil;
+    _CnConvertBmpToPngProc := nil;
+    _hMod := 0;
+  end;
+end;
+
+function CnPngLibLoaded: LongBool;
+begin
+  Result := Assigned(_CnConvertPngToBmpProc) and Assigned(_CnConvertBmpToPngProc);
+end;
+
+function CnConvertPngToBmp(PngFile, BmpFile: PAnsiChar): LongBool; stdcall;
+begin
+  if Assigned(_CnConvertPngToBmpProc) then
+    Result := _CnConvertPngToBmpProc(PngFile, BmpFile)
+  else
+    Result := False;
+end;
+
+function CnConvertBmpToPng(BmpFile, PngFile: PAnsiChar): LongBool; stdcall;
+begin
+  if Assigned(_CnConvertBmpToPngProc) then
+    Result := _CnConvertBmpToPngProc(BmpFile, PngFile)
+  else
+    Result := False;
+end;
+
+initialization
+  LoadCnPngLib;
+
+finalization
+  FreeCnPngLib;
+
+{$ENDIF}
 
 end.
