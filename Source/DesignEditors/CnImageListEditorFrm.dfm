@@ -5,7 +5,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
   BorderIcons = [biSystemMenu]
   Caption = 'CnWizards ImageList Editor'
   ClientHeight = 398
-  ClientWidth = 803
+  ClientWidth = 807
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
@@ -252,26 +252,26 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
   object pnlSearch: TPanel
     Left = 465
     Top = 0
-    Width = 338
+    Width = 342
     Height = 398
     Align = alClient
     BevelOuter = bvNone
     Constraints.MinHeight = 398
-    Constraints.MinWidth = 338
+    Constraints.MinWidth = 342
     TabOrder = 1
     DesignSize = (
-      338
+      342
       398)
     object grp3: TGroupBox
       Left = 8
       Top = 8
-      Width = 323
+      Width = 327
       Height = 354
       Anchors = [akLeft, akTop, akRight, akBottom]
       Caption = 'Online Search'
       TabOrder = 0
       DesignSize = (
-        323
+        327
         354)
       object lbl1: TLabel
         Left = 8
@@ -288,7 +288,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         Caption = 'Provider:'
       end
       object lblPage: TLabel
-        Left = 132
+        Left = 136
         Top = 325
         Width = 41
         Height = 13
@@ -298,7 +298,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         Caption = '0/0'
       end
       object btnSearch: TButton
-        Left = 250
+        Left = 254
         Top = 16
         Width = 65
         Height = 21
@@ -309,7 +309,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
       object lvSearch: TListView
         Left = 8
         Top = 94
-        Width = 307
+        Width = 311
         Height = 221
         Anchors = [akLeft, akTop, akRight, akBottom]
         Columns = <>
@@ -319,6 +319,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         MultiSelect = True
         ReadOnly = True
         TabOrder = 5
+        OnDblClick = actSearchAddExecute
       end
       object btnSearchAdd: TButton
         Left = 8
@@ -330,7 +331,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         TabOrder = 6
       end
       object btnPrev: TButton
-        Left = 213
+        Left = 217
         Top = 321
         Width = 30
         Height = 21
@@ -339,7 +340,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         TabOrder = 9
       end
       object btnNext: TButton
-        Left = 249
+        Left = 253
         Top = 321
         Width = 30
         Height = 21
@@ -348,7 +349,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         TabOrder = 10
       end
       object btnFirst: TButton
-        Left = 178
+        Left = 182
         Top = 321
         Width = 30
         Height = 21
@@ -357,7 +358,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         TabOrder = 8
       end
       object btnLast: TButton
-        Left = 284
+        Left = 288
         Top = 321
         Width = 30
         Height = 21
@@ -377,7 +378,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
       object cbbKeyword: TComboBox
         Left = 64
         Top = 16
-        Width = 179
+        Width = 183
         Height = 21
         AutoComplete = False
         Anchors = [akLeft, akTop, akRight]
@@ -388,7 +389,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
       object cbbProvider: TComboBox
         Left = 64
         Top = 48
-        Width = 179
+        Width = 183
         Height = 21
         AutoComplete = False
         Style = csDropDownList
@@ -397,7 +398,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         TabOrder = 2
       end
       object btnGoto: TButton
-        Left = 250
+        Left = 254
         Top = 48
         Width = 65
         Height = 21
@@ -418,7 +419,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
     object pbSearch: TProgressBar
       Left = 8
       Top = 372
-      Width = 322
+      Width = 326
       Height = 17
       Anchors = [akLeft, akRight, akBottom]
       TabOrder = 1
@@ -440,6 +441,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
     object actAdd: TAction
       Category = 'List'
       Caption = '&Add...'
+      ShortCut = 45
       OnExecute = actAddExecute
     end
     object actReplace: TAction
@@ -450,6 +452,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
     object actDelete: TAction
       Category = 'List'
       Caption = '&Delete'
+      ShortCut = 46
       OnExecute = actDeleteExecute
     end
     object actClear: TAction
@@ -501,13 +504,27 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
       Caption = '&Search'
       OnExecute = actSearchExecute
     end
+    object actSelectAll: TAction
+      Category = 'List'
+      ShortCut = 16449
+      OnExecute = actSelectAllExecute
+    end
   end
   object dlgOpen: TOpenDialog
     Filter = 
       'All (*.bmp;*.ico;*.png)|*.bmp;*.ico;*.png|Bitmaps (*.bmp)|*.bmp|' +
       'Icons (*.ico)|*.ico|Png files (*.png)|*.png'
-    Options = [ofAllowMultiSelect, ofFileMustExist, ofEnableSizing]
+    Options = [ofHideReadOnly, ofAllowMultiSelect, ofFileMustExist, ofEnableSizing]
     Left = 272
+    Top = 232
+  end
+  object dlgSave: TSaveDialog
+    DefaultExt = 'bmp'
+    Filter = 
+      'All (*.bmp;*.png)|*.bmp;*.png|Bitmaps (*.bmp)|*.bmp|Png files (*' +
+      '.png)|*.png'
+    Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
+    Left = 400
     Top = 232
   end
 end

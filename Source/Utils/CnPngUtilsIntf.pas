@@ -42,22 +42,10 @@ unit CnPngUtilsIntf;
 interface
 
 function CnPngLibLoaded: LongBool;
-function CnConvertPngToBmp(PngFile, BmpFile: PAnsiChar): LongBool; stdcall;
-function CnConvertBmpToPng(BmpFile, PngFile: PAnsiChar): LongBool; stdcall;
+function CnConvertPngToBmp(PngFile, BmpFile: string): LongBool; stdcall;
+function CnConvertBmpToPng(BmpFile, PngFile: string): LongBool; stdcall;
 
 implementation
-
-{$IFDEF CNPNGLIB_STATIC_LINK}
-
-function CnPngLibLoaded: LongBool;
-begin
-  Result := True;
-end;
-
-function CnConvertPngToBmp; external 'CnPngLib.dll';
-function CnConvertBmpToPng; external 'CnPngLib.dll';
-
-{$ELSE}
 
 uses
   Windows, SysUtils;
@@ -108,18 +96,26 @@ begin
   Result := Assigned(_CnConvertPngToBmpProc) and Assigned(_CnConvertBmpToPngProc);
 end;
 
-function CnConvertPngToBmp(PngFile, BmpFile: PAnsiChar): LongBool; stdcall;
+function CnConvertPngToBmp(PngFile, BmpFile: string): LongBool; stdcall;
+var
+  P, B: AnsiString;
 begin
+  P := AnsiString(PngFile);
+  B := AnsiString(BmpFile);
   if Assigned(_CnConvertPngToBmpProc) then
-    Result := _CnConvertPngToBmpProc(PngFile, BmpFile)
+    Result := _CnConvertPngToBmpProc(PAnsiChar(P), PAnsiChar(B))
   else
     Result := False;
 end;
 
-function CnConvertBmpToPng(BmpFile, PngFile: PAnsiChar): LongBool; stdcall;
+function CnConvertBmpToPng(BmpFile, PngFile: string): LongBool; stdcall;
+var
+  P, B: AnsiString;
 begin
+  P := AnsiString(PngFile);
+  B := AnsiString(BmpFile);
   if Assigned(_CnConvertBmpToPngProc) then
-    Result := _CnConvertBmpToPngProc(BmpFile, PngFile)
+    Result := _CnConvertBmpToPngProc(PAnsiChar(B), PAnsiChar(P))
   else
     Result := False;
 end;
@@ -129,7 +125,5 @@ initialization
 
 finalization
   FreeCnPngLib;
-
-{$ENDIF}
 
 end.

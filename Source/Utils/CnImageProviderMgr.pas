@@ -258,8 +258,7 @@ begin
             if SameText(Item.Ext, '.png') then
             begin
               BmpName := Item.FFileName + '.bmp';
-              if CnConvertPngToBmp(PAnsiChar(AnsiString(Item.FFileName)),
-                PAnsiChar(AnsiString(BmpName))) then
+              if CnConvertPngToBmp(Item.FFileName, BmpName) then
                 Item.Bitmap.LoadFromFile(BmpName);
               DeleteFile(BmpName);
             end

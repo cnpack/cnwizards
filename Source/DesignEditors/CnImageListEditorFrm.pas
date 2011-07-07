@@ -43,7 +43,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, CnWizMultiLang, ExtCtrls, StdCtrls, ImgList, ComCtrls, IniFiles,
   CnImageProviderMgr, CnCommon, CommCtrl, ActnList, Math, Contnrs,
-  CnPngUtilsIntf;
+  CnPngUtilsIntf, ExtDlgs;
 
 type
   TCnImageOption = (ioCrop, ioStrech, ioCenter);
@@ -115,6 +115,8 @@ type
     pbSearch: TProgressBar;
     actSearch: TAction;
     dlgOpen: TOpenDialog;
+    dlgSave: TSaveDialog;
+    actSelectAll: TAction;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -143,6 +145,7 @@ type
     procedure btnOKClick(Sender: TObject);
     procedure chkXPStyleClick(Sender: TObject);
     procedure ilListChange(Sender: TObject);
+    procedure actSelectAllExecute(Sender: TObject);
   private
     { Private declarations }
     FComponent: TCustomImageList;
@@ -208,14 +211,15 @@ const
   csTransColor = clFuchsia;
 
   // todo: 待多语言处理
-  SImageListChangeSize = 'Do you want to change the image dimensions?' + #13#10 +
+  SCnImageListChangeSize = 'Do you want to change the image dimensions?' + #13#10 +
     'This will remove all the existing images from the list.';
-  SImageListChangeXPStyle = 'Do you want to change the image style?' + #13#10 +
+  SCnImageListChangeXPStyle = 'Do you want to change the image style?' + #13#10 +
     'This will remove all the existing images from the list.';
-  SImageListSearchFailed = 'Search image failed!';
-  SImageListInvalidFile = 'The file is not a valid image file: ';
-  SImageListSepBmp = 'Image dimensions for %s are greater than imagelist dimensions. Separate into %d separate bitmaps?';
-
+  SCnImageListSearchFailed = 'Search image failed!';
+  SCnImageListInvalidFile = 'The file is not a valid image file: ';
+  SCnImageListSepBmp = 'Image dimensions for %s are greater than imagelist dimensions. Separate into %d separate bitmaps?';
+  SCnImageListNoPngLib = 'CnPngLib.dll not found! Please reinstall CnWizards.'; 
+  SCnImageListExportFailed = 'Export images failed!';
 
 procedure ShowCnImageListEditorForm(AComponent: TCustomImageList;
   AIni: TCustomIniFile; AOnApply: TNotifyEvent);
@@ -273,6 +277,7 @@ procedure TCnImageListEditorForm.FormDestroy(Sender: TObject);
 begin
   inherited;
   ilList.OnChange := nil; // 不能再通知了
+  lvList.OnSelectItem := nil;
   if FIni <> nil then
   begin
     FIni.WriteString(csImageListEditor, csProvider, cbbProvider.Text);
@@ -348,6 +353,9 @@ begin
   end;
   
   UpdateSelected;
+
+  if not CnPngLibLoaded then
+    WarningDlg(SCnImageListNoPngLib);
 end;
 
 procedure TCnImageListEditorForm.AddSize(W, H: Integer);
@@ -474,7 +482,7 @@ begin
       end;
     end
     else
-      ErrorDlg(SImageListSearchFailed);
+      ErrorDlg(SCnImageListSearchFailed);
   finally
     FSearching := False;
   end;
@@ -604,6 +612,7 @@ begin
     begin
       ImageIndex := ilList.Count - 1;
       Caption := IntToStr(ImageIndex);
+      Selected := True;
     end;
   end;
 end;
@@ -624,7 +633,7 @@ begin
       begin
         cols := Max(1, Bmp.Width div ilList.Width);
         rows := Max(1, Bmp.Height div ilList.Height);
-        if QueryDlg(Format(SImageListSepBmp, [ExtractFileName(FileName), cols * rows])) then
+        if QueryDlg(Format(SCnImageListSepBmp, [ExtractFileName(FileName), cols * rows])) then
         begin
           for i := 0 to rows - 1 do
             for j := 0 to cols - 1 do
@@ -669,6 +678,7 @@ begin
       begin
         ImageIndex := ilList.Count - 1;
         Caption := IntToStr(ImageIndex);
+        Selected := True;
       end;
     end;
   except
@@ -755,6 +765,8 @@ begin
     if Replace then
       BeginReplace;
     try
+      for i := 0 to lvList.Items.Count - 1 do
+        lvList.Items[i].Selected := False; 
       for i := 0 to dlgOpen.Files.Count - 1 do
       begin
         fn := dlgOpen.Files[i];
@@ -768,7 +780,7 @@ begin
           end;
           if bmp.Empty then
           begin
-            ErrorDlg(SImageListInvalidFile + ExtractFileName(fn));
+            ErrorDlg(SCnImageListInvalidFile + ExtractFileName(fn));
             bmp.Free;
           end
           else
@@ -786,7 +798,7 @@ begin
           end;
           if ico.Empty then
           begin
-            ErrorDlg(SImageListInvalidFile + ExtractFileName(fn));
+            ErrorDlg(SCnImageListInvalidFile + ExtractFileName(fn));
             ico.Free;
           end
           else
@@ -797,7 +809,7 @@ begin
         else if SameText(ExtractFileExt(fn), '.png') then
         begin
           tmp := CnGetTempFileName('.bmp');
-          if CnConvertPngToBmp(PAnsiChar(AnsiString(fn)), PAnsiChar(AnsiString(tmp))) then
+          if CnConvertPngToBmp(fn, tmp) then
           begin
             bmp := TBitmap.Create;
             try
@@ -807,7 +819,7 @@ begin
             end;
             if bmp.Empty then
             begin
-              ErrorDlg(SImageListInvalidFile + ExtractFileName(fn));
+              ErrorDlg(SCnImageListInvalidFile + ExtractFileName(fn));
               bmp.Free;
             end
             else
@@ -818,7 +830,7 @@ begin
           end
           else
           begin
-            ErrorDlg(SImageListInvalidFile + ExtractFileName(fn));
+            ErrorDlg(SCnImageListInvalidFile + ExtractFileName(fn));
           end;
         end;
       end;
@@ -841,6 +853,8 @@ begin
   if Replace then
     BeginReplace;
   try
+    for i := 0 to lvList.Items.Count - 1 do
+      lvList.Items[i].Selected := False;
     for i := 0 to lvSearch.Items.Count - 1 do
     begin
       if lvSearch.Items[i].Selected then
@@ -1005,7 +1019,7 @@ begin
         bmp.Canvas.FillRect(Bounds(j * csGridSize, i * csGridSize, csGridSize, csGridSize));
       end;
 
-    if Idx >= 0 then
+    if (Idx >= 0) and (Idx < ilList.Count) then
     begin
       bmp1 := TBitmap.Create;
       try
@@ -1153,8 +1167,25 @@ begin
 end;
 
 procedure TCnImageListEditorForm.actDeleteExecute(Sender: TObject);
+var
+  i, idx: Integer;
 begin
+  idx := -1;
+  for i := 0 to lvList.Items.Count - 1 do
+    if lvList.Items[i].Selected then
+    begin
+      idx := i;
+      Break;
+    end;
+
   DeleteSelectedImages;
+  
+  if idx >= 0 then
+  begin
+    idx := TrimInt(idx, -1, lvList.Items.Count - 1);
+    if idx >= 0 then
+      lvList.Selected := lvList.Items[idx];
+  end;
 end;
 
 procedure TCnImageListEditorForm.actClearExecute(Sender: TObject);
@@ -1163,8 +1194,69 @@ begin
 end;
 
 procedure TCnImageListEditorForm.actExportExecute(Sender: TObject);
+var
+  bmp: TBitmap;
+  tmp: string;
+  i, idx, cnt, row, col: Integer;
 begin
-  //
+  if ilList.Count > 0 then
+  begin
+    if dlgSave.Execute then
+    begin
+      bmp := TBitmap.Create;
+      try
+        // 尽量将图像拆成 MxN 的格式以便导出后查看
+        if lvList.SelCount > 0 then
+          cnt := lvList.SelCount
+        else
+          cnt := ilList.Count;
+        col := cnt;
+        row := 1;
+        for i := 2 to Floor(Sqrt(cnt)) do
+          if cnt mod i = 0 then
+          begin
+            row := i;
+            col := cnt div i;
+          end;
+
+        bmp.Width := ilList.Width * col;
+        bmp.Height := ilList.Height * row;
+        if FSupportXPStyle and chkXPStyle.Checked then
+          bmp.PixelFormat := pf32bit
+        else
+          bmp.PixelFormat := pf24bit;
+        ClearBitmap(bmp);
+        idx := 0;
+        for i := 0 to lvList.Items.Count - 1 do
+        begin
+          if (lvList.SelCount = 0) or (lvList.Items[i].Selected) then
+          begin
+            ilList.Draw(bmp.Canvas, (idx mod col) * ilList.Width,
+              (idx div col) * ilList.Height, i, True);
+            Inc(idx);
+          end;
+        end;
+
+        try
+          if SameText(ExtractFileExt(dlgSave.FileName), '.png') then
+          begin
+            tmp := CnGetTempFileName('.bmp');
+            bmp.SaveToFile(tmp);
+            if not CnConvertBmpToPng(tmp, dlgSave.FileName) then
+              ErrorDlg(SCnImageListExportFailed);
+          end
+          else
+          begin
+            bmp.SaveToFile(dlgSave.FileName);
+          end;
+        except
+          ErrorDlg(SCnImageListExportFailed);
+        end;
+      finally
+        bmp.Free;
+      end;                      
+    end;
+  end;
 end;
 
 procedure TCnImageListEditorForm.ilListChange(Sender: TObject);
@@ -1175,6 +1267,22 @@ end;
 procedure TCnImageListEditorForm.actApplyExecute(Sender: TObject);
 begin
   ApplyImageList;
+end;
+
+procedure TCnImageListEditorForm.actSelectAllExecute(Sender: TObject);
+
+  procedure DoSelectAll(List: TListView);
+  var
+    i: Integer;
+  begin
+    for i := 0 to List.Items.Count - 1 do
+      List.Items[i].Selected := True;
+  end;
+begin
+  if lvList.Focused then
+    DoSelectAll(lvList)
+  else if lvSearch.Focused then
+    DoSelectAll(lvSearch);
 end;
 
 procedure TCnImageListEditorForm.lvListSelectItem(Sender: TObject;
@@ -1206,7 +1314,7 @@ begin
   if FChanging then Exit;
 
   if cbbSize.ItemIndex >= 0 then
-    if (ilList.Count = 0) or QueryDlg(SImageListChangeSize) then
+    if (ilList.Count = 0) or QueryDlg(SCnImageListChangeSize) then
     begin
       ClearImageList;
       D := Integer(cbbSize.Items.Objects[cbbSize.ItemIndex]);
@@ -1234,7 +1342,7 @@ procedure TCnImageListEditorForm.chkXPStyleClick(Sender: TObject);
 begin
   if FChanging then Exit;
 
-  if (ilList.Count = 0) or QueryDlg(SImageListChangeXPStyle) then
+  if (ilList.Count = 0) or QueryDlg(SCnImageListChangeXPStyle) then
   begin
     ClearImageList;
     RecreateImageList;
@@ -1295,8 +1403,7 @@ end;
 
 procedure TCnImageListEditorForm.btnOKClick(Sender: TObject);
 begin
-  if actApply.Enabled then
-    ApplyImageList;
+  ApplyImageList;
   ModalResult := mrOk;
 end;
 
