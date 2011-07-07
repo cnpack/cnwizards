@@ -87,6 +87,8 @@
       ..\Dcu\CnInputHelper.obj ..\Dcu\CnInputHelperEditFrm.obj 
       ..\Dcu\CnInputHelperFrm.obj ..\Dcu\CnInputIdeSymbolList.obj 
       ..\Dcu\CnFeedWizardFrm.obj ..\Dcu\CnFeedWizard.obj ..\Dcu\CnFeedParser.obj 
+      ..\Dcu\CnImageListEditor.obj ..\Dcu\CnImageListEditorFrm.obj 
+      ..\Dcu\CnImageProvider_IconFinder.obj ..\Dcu\CnImageProviderMgr.obj 
       ..\Dcu\CnWizards_CB5.obj"/>
     <RESFILES value="CnWizards_CB5.res"/>
     <IDLFILES value=""/>
@@ -146,14 +148,15 @@
       SrcEditorEnhance\CnSrcEditorWebSearch.dfm 
       DesignEditors\CnPropEditorCustomizeFrm.dfm 
       IdeEnhancements\CnInputHelperEditFrm.dfm 
-      IdeEnhancements\CnInputHelperFrm.dfm SimpleWizards\CnFeedWizardFrm.dfm"/>
+      IdeEnhancements\CnInputHelperFrm.dfm SimpleWizards\CnFeedWizardFrm.dfm 
+      DesignEditors\CnImageListEditorFrm.dfm"/>
     <LIBFILES value=""/>
     <LIBRARIES value="Inet50.lib vclie50.lib wininet.lib"/>
     <SPARELIBS value="vcl50.lib vclx50.lib wininet.lib dsnide50.lib vclie50.lib Inet50.lib"/>
     <PACKAGES value="vcl50.bpi vclx50.bpi vcldb50.bpi vcldbx50.bpi vclbde50.bpi dsnide50.bpi 
       vclmid50.bpi"/>
     <PATHCPP value=".;"/>
-    <PATHPAS value=".;Framework;Misc;MultiLang;Config;Utils;SimpleWizards;SrcTemplate;EditorWizard;SourceDiff;DesignEditors;SourceStat;PrefixWizard;IdeEnhancements;CorProperty;ProjectExtWizard;RepositoryWiz;ExplorerWizard;ReopenWizard;SrcEditorEnhance;ScriptWizard"/>
+    <PATHPAS value=".;Framework;Misc;MultiLang;Config;Utils;SimpleWizards;SrcTemplate;EditorWizard;SourceDiff;DesignEditors;SourceStat;PrefixWizard;IdeEnhancements;ScriptWizard;CorProperty;ProjectExtWizard;RepositoryWiz;ExplorerWizard;ReopenWizard;SrcEditorEnhance"/>
     <PATHRC value=".;"/>
     <PATHASM value=".;"/>
     <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
@@ -173,11 +176,10 @@
       -IDesignEditors -ISourceDiff -IEditorWizard -IUtils -IFramework 
       -I$(BCB)\include -I$(BCB)\include\vcl -I$(BCB)\source\toolsapi 
       -Ithirdparty -Ithirdparty\tpabbrevia -Ithirdparty\jcl -I..\dcu 
-      -Ithirdparty\pascalscript 
-      -I..\..\cnvcl\source\common -I..\..\cnvcl\source\nonvisual 
-      -I..\..\cnvcl\source\graphics -I..\..\cnvcl\source\netcomm 
-      -I..\..\cnvcl\source\multilang -I..\..\cnvcl\source\objrep 
-      -src_suffix cpp -boa"/>
+      -Ithirdparty\pascalscript -I..\..\cnvcl\source\common 
+      -I..\..\cnvcl\source\nonvisual -I..\..\cnvcl\source\graphics 
+      -I..\..\cnvcl\source\netcomm -I..\..\cnvcl\source\multilang 
+      -I..\..\cnvcl\source\objrep -src_suffix cpp -boa"/>
     <CFLAG1 value="-WD -O2 -Vx -Ve -X- -a8 -b- -k- -vi -tWD -tWM -c"/>
     <PFLAGS value="-N2..\Dcu -N0..\Dcu -$Y- -$W -$O- -$L- -$D- -LUvcl50;dsnide50 -v -JPHNE -M"/>
     <RFLAGS value=""/>

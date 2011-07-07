@@ -94,7 +94,7 @@ type
   public
     constructor Create; virtual;
     destructor Destroy; override;
-    class procedure GetProviderInfo(var DispName, HomeUrl: string); virtual; abstract;
+    class procedure GetProviderInfo(var DispName, HomeUrl: string); virtual;
     class function DispName: string;
     class function HomeUrl: string;
 
@@ -196,6 +196,12 @@ procedure TCnBaseImageProvider.DoProgress(Progress: Integer);
 begin
   if Assigned(FOnProgress) then
     FOnProgress(Self, Progress);
+end;
+
+class procedure TCnBaseImageProvider.GetProviderInfo(var DispName,
+  HomeUrl: string);
+begin
+
 end;
 
 class function TCnBaseImageProvider.HomeUrl: string;
