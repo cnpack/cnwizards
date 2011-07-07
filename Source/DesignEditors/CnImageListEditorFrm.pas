@@ -122,6 +122,7 @@ type
     mniRefresh: TMenuItem;
     mniN1: TMenuItem;
     mniSearchIconset: TMenuItem;
+    mniGotoPage: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -155,6 +156,10 @@ type
     procedure pmSearchPopup(Sender: TObject);
     procedure mniRefreshClick(Sender: TObject);
     procedure mniSearchIconsetClick(Sender: TObject);
+    procedure lvListDragOver(Sender, Source: TObject; X, Y: Integer;
+      State: TDragState; var Accept: Boolean);
+    procedure lvListDragDrop(Sender, Source: TObject; X, Y: Integer);
+    procedure mniGotoPageClick(Sender: TObject);
   private
     { Private declarations }
     FComponent: TCustomImageList;
@@ -188,8 +193,11 @@ type
     procedure DoAddBmp(ARow, ACol: Integer; ABmp: TBitmap; AMask: TColor;
       AOption: TCnImageOption; NewBmp: Boolean);
     procedure AlphaBlendDraw(Src, Dst: TBitmap);
+    procedure MoveSelectedItemsTo(Idx: Integer);
     procedure BeginReplace;
+    procedure BeginInsert(Idx: Integer);
     procedure EndReplace;
+    procedure EndInsert;
     procedure UpdateListView;
     procedure AddBmp(FileName: string; Bmp: TBitmap; IsSearch: Boolean);
     procedure AddIco(Ico: TIcon);
@@ -231,6 +239,8 @@ const
   SCnImageListExportFailed = 'Export images failed!';
   SCnImageListXPStyleNotSupport = 'The ImageList uses XP Style images, but your IDE doesn''t support XPManifest! Please upgrade your IDE.';
   SCnImageListSearchIconsetFailed = 'Search icon set failed!';
+  SCnImageListGotoPage = 'Goto Page';
+  SCnImageListGotoPagePrompt = 'Enter new page number:';
 
 procedure ShowCnImageListEditorForm(AComponent: TCustomImageList;
   AIni: TCustomIniFile; AOnApply: TNotifyEvent);
@@ -701,24 +711,10 @@ begin
   end;
 end;
 
-procedure TCnImageListEditorForm.BeginReplace;
+procedure TCnImageListEditorForm.BeginInsert(Idx: Integer);
 var
-  i, idx: Integer;
+  i: Integer;
 begin
-  // 先找到第一个选中的项
-  idx := -1;
-  for i := 0 to lvList.Items.Count - 1 do
-    if lvList.Items[i].Selected then
-    begin
-      idx := i;
-      Break;
-    end;
-  if idx < 0 then
-    Exit;
-    
-  // 再删除所有选中的项
-  DeleteSelectedImages;
-
   // 创建一个临时列表，把插入点后面的保存起来
   FTempList := TImageList.Create(nil);
   FTempList.Handle := ImageList_Duplicate(ilList.Handle);
@@ -726,17 +722,26 @@ begin
   for i := ilList.Count - 1 downto idx do
   begin
     ilList.Delete(i);
-    FTempInfo.Insert(0, FList.Extract(FList[i]));
+    lvList.Items.Delete(i);
+    if FList[i] <> nil then
+      FTempInfo.Insert(0, FList.Extract(FList[i]))
+    else
+    begin
+      FList.Delete(i);
+      FTempInfo.Insert(0, nil);
+    end;
   end;
   for i := idx - 1 downto 0 do
     FTempList.Delete(i);
 end;
 
-procedure TCnImageListEditorForm.EndReplace;
+procedure TCnImageListEditorForm.EndInsert;
 var
   i: Integer;
   bmp, mask: TBitmap;
 begin
+  if FTempList = nil then Exit;
+  
   bmp := nil;
   mask := nil;
   try
@@ -764,7 +769,28 @@ begin
   finally
     bmp.Free;
     mask.Free;
-  end;   
+  end;
+end;
+
+procedure TCnImageListEditorForm.BeginReplace;
+var
+  idx: Integer;
+begin
+  idx := -1;
+  if lvList.Selected <> nil then
+    idx := lvList.Selected.Index;
+  if idx < 0 then
+    Exit;
+
+  // 再删除所有选中的项
+  DeleteSelectedImages;
+
+  BeginInsert(idx);
+end;
+
+procedure TCnImageListEditorForm.EndReplace;
+begin
+  EndInsert;
 end;
 
 procedure TCnImageListEditorForm.AddImages(Replace: Boolean);
@@ -777,6 +803,7 @@ begin
   if dlgOpen.Execute then
   begin
     lvList.Items.BeginUpdate;
+    FChanging := True;
     if Replace then
       BeginReplace;
     try
@@ -852,7 +879,9 @@ begin
     finally
       if Replace then
         EndReplace;
+      FChanging := False;
       lvList.Items.EndUpdate;
+      UpdateSelected;
     end;
   end;
 end;
@@ -865,6 +894,7 @@ begin
   if lvSearch.SelCount = 0 then Exit;
 
   lvList.Items.BeginUpdate;
+  FChanging := True;
   if Replace then
     BeginReplace;
   try
@@ -881,7 +911,9 @@ begin
   finally
     if Replace then
       EndReplace;
+    FChanging := False;
     lvList.Items.EndUpdate;
+    UpdateSelected;
   end;
 end;
 
@@ -982,22 +1014,28 @@ end;
 procedure TCnImageListEditorForm.UpdateListView;
 var
   i: Integer;
+  lst: TList;
 begin
+  lst := TList.Create;
   lvList.Items.BeginUpdate;
   try
     // 如果只在后面追加新节点，Replace 时会导致显示顺序不正确，故改成清空重建
-    //while lvList.Items.Count > ilList.Count do
-    //  lvList.Items.Delete(lvList.Items.Count - 1);
-    lvList.Items.Clear;
-    for i := lvList.Items.Count to ilList.Count - 1 do
-      lvList.Items.Add;
     for i := 0 to lvList.Items.Count - 1 do
+      if lvList.Items[i].Selected then
+        lst.Add(Pointer(i));
+    lvList.Items.Clear;
+    for i := 0 to ilList.Count - 1 do
     begin
-      lvList.Items[i].ImageIndex := i;
-      lvList.Items[i].Caption := IntToStr(i);
+      with lvList.Items.Add do
+      begin
+        ImageIndex := i;
+        Caption := IntToStr(i);
+        Selected := lst.IndexOf(Pointer(i)) >= 0;
+      end;
     end;
   finally
     lvList.Items.EndUpdate;
+    lst.Free;
   end;
 end;
 
@@ -1198,15 +1236,11 @@ end;
 
 procedure TCnImageListEditorForm.actDeleteExecute(Sender: TObject);
 var
-  i, idx: Integer;
+  idx: Integer;
 begin
   idx := -1;
-  for i := 0 to lvList.Items.Count - 1 do
-    if lvList.Items[i].Selected then
-    begin
-      idx := i;
-      Break;
-    end;
+  if lvList.Selected <> nil then
+    idx := lvList.Selected.Index;
 
   DeleteSelectedImages;
   
@@ -1471,6 +1505,118 @@ begin
         cbbKeyword.Text := FReq.Keyword;
       DoSearch(0);
     end;
+  end;
+end;
+
+procedure TCnImageListEditorForm.MoveSelectedItemsTo(Idx: Integer);
+var
+  i: Integer;
+  tmpList: TImageList;
+  tmpInfo: TList;
+  bmp, mask: TBitmap;
+begin
+  if lvList.Selected = nil then Exit;
+  
+  tmpList := nil;
+  tmpInfo := nil;
+  lvList.Items.BeginUpdate;
+  FChanging := True;
+  try
+    tmpList := TImageList.Create(nil);
+    tmpList.Handle := ImageList_Duplicate(ilList.Handle);
+    tmpInfo := TList.Create;
+    for i := lvList.Items.Count - 1 downto 0 do
+    begin
+      if lvList.Items[i].Selected then
+      begin
+        ilList.Delete(i);
+        if FList[i] <> nil then
+          tmpInfo.Insert(0, FList.Extract(FList[i]))
+        else
+        begin
+          FList.Delete(i);
+          tmpInfo.Insert(0, nil);
+        end;
+        if i < Idx then
+          Dec(Idx);
+      end
+      else
+        tmpList.Delete(i);
+      lvList.Items[i].Selected := False;
+    end;
+
+    if Idx >= 0 then
+      BeginInsert(Idx);
+      
+    bmp := nil;
+    mask := nil;
+    try
+      bmp := TBitmap.Create;
+      if FSupportXPStyle and chkXPStyle.Checked then
+        bmp.PixelFormat := pf32bit
+      else
+        bmp.PixelFormat := pf24bit;
+      bmp.Width := ilList.Width;
+      bmp.Height := ilList.Height;
+      mask := TBitmap.Create;
+      mask.Monochrome := True;
+      mask.Width := ilList.Width;
+      mask.Height := ilList.Height;
+      for i := 0 to tmpList.Count - 1 do
+      begin
+        TImageListAccess(tmpList).GetImages(i, bmp, mask);
+        ilList.Add(bmp, mask);
+        FList.Add(tmpInfo[i]);
+        lvList.Items[ilList.Count - 1].Selected := True;
+      end;
+    finally
+      bmp.Free;
+      mask.Free;
+    end;
+
+    if Idx >= 0 then
+      EndInsert;
+  finally
+    tmpList.Free;
+    tmpInfo.Free;
+    FChanging := False;
+    UpdateListView;
+    lvList.Items.EndUpdate;
+    UpdateSelected;
+  end;   
+end;
+
+procedure TCnImageListEditorForm.lvListDragOver(Sender, Source: TObject; X,
+  Y: Integer; State: TDragState; var Accept: Boolean);
+begin
+  if Source = lvList then
+    Accept := True;
+end;
+
+procedure TCnImageListEditorForm.lvListDragDrop(Sender, Source: TObject; X,
+  Y: Integer);
+var
+  item: TListItem;
+begin
+  if Source = lvList then
+  begin
+    item := lvList.GetItemAt(X, Y);
+    if item <> nil then
+      MoveSelectedItemsTo(item.Index)
+    else
+      MoveSelectedItemsTo(-1);
+  end;
+end;
+
+procedure TCnImageListEditorForm.mniGotoPageClick(Sender: TObject);
+var
+  s: string;
+begin
+  s := IntToStr(FReq.Page + 1);
+  if (FProvider <> nil) and CnInputQuery(SCnImageListGotoPage,
+    SCnImageListGotoPagePrompt, s) then
+  begin
+    DoSearch(StrToIntDef(s, FReq.Page + 1) - 1);
   end;
 end;
 

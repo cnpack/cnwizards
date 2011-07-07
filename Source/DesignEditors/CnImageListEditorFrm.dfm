@@ -169,12 +169,15 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         Height = 173
         Anchors = [akLeft, akTop, akRight, akBottom]
         Columns = <>
+        DragMode = dmAutomatic
         HideSelection = False
         IconOptions.AutoArrange = True
         LargeImages = ilList
         MultiSelect = True
         ReadOnly = True
         TabOrder = 0
+        OnDragDrop = lvListDragDrop
+        OnDragOver = lvListDragOver
         OnSelectItem = lvListSelectItem
       end
       object cbbSize: TComboBox
@@ -522,6 +525,10 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
     object mniRefresh: TMenuItem
       Caption = 'Refresh'
       OnClick = mniRefreshClick
+    end
+    object mniGotoPage: TMenuItem
+      Caption = 'Goto Page...'
+      OnClick = mniGotoPageClick
     end
     object mniN1: TMenuItem
       Caption = '-'
