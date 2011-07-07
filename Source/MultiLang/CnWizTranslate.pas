@@ -1029,6 +1029,7 @@ begin
   TranslateStr(SCnAlignPropEditorName, 'SCnAlignPropEditorName');
   TranslateStr(SCnSetPropEditorName, 'SCnSetPropEditorName');
   TranslateStr(SCnNamePropEditorName, 'SCnNamePropEditorName');
+  TranslateStr(SCnImageListCompEditorName, 'SCnImageListCompEditorName');
 
   // Editors Comment
   TranslateStr(SCnStringPropEditorComment, 'SCnStringPropEditorComment');
@@ -1042,6 +1043,7 @@ begin
   TranslateStr(SCnAlignPropEditorComment, 'SCnAlignPropEditorComment');
   TranslateStr(SCnSetPropEditorComment, 'SCnSetPropEditorComment');
   TranslateStr(SCnNamePropEditorComment, 'SCnNamePropEditorComment');
+  TranslateStr(SCnImageListCompEditorComment, 'SCnImageListCompEditorComment');
 
   // TCnMultiLineEditorForm
   TranslateStr(SCnPropEditorNoMatch, 'SCnPropEditorNoMatch');
@@ -1055,6 +1057,19 @@ begin
 
   // TCnNamePropEditor
   TranslateStr(SCnPrefixWizardNotExist, 'SCnPrefixWizardNotExist');
+
+  // TCnImageListEditor
+  TranslateStr(SCnImageListChangeSize, 'SCnImageListChangeSize');
+  TranslateStr(SCnImageListChangeXPStyle, 'SCnImageListChangeXPStyle');
+  TranslateStr(SCnImageListSearchFailed, 'SCnImageListSearchFailed');
+  TranslateStr(SCnImageListInvalidFile, 'SCnImageListInvalidFile');
+  TranslateStr(SCnImageListSepBmp, 'SCnImageListSepBmp');
+  TranslateStr(SCnImageListNoPngLib, 'SCnImageListNoPngLib');
+  TranslateStr(SCnImageListExportFailed, 'SCnImageListExportFailed');
+  TranslateStr(SCnImageListXPStyleNotSupport, 'SCnImageListXPStyleNotSupport');
+  TranslateStr(SCnImageListSearchIconsetFailed, 'SCnImageListSearchIconsetFailed');
+  TranslateStr(SCnImageListGotoPage, 'SCnImageListGotoPage');
+  TranslateStr(SCnImageListGotoPagePrompt, 'SCnImageListGotoPagePrompt');
 
   // CnResourceMgrWizard
   TranslateStr(SCnResMgrWizardMenuCaption, 'SCnResMgrWizardMenuCaption');

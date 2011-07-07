@@ -43,7 +43,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
   Dialogs, CnWizMultiLang, ExtCtrls, StdCtrls, ImgList, ComCtrls, IniFiles,
   CnImageProviderMgr, CnCommon, CommCtrl, ActnList, Math, Contnrs,
-  CnPngUtilsIntf, ExtDlgs, Menus;
+  CnDesignEditorConsts, CnPngUtilsIntf, ExtDlgs, Menus;
 
 type
   TCnImageOption = (ioCrop, ioStrech, ioCenter);
@@ -226,21 +226,6 @@ const
   csKeyword = 'Keyword';
   csShowSearch = 'ShowSearch';
   csTransColor = clFuchsia;
-
-  // todo: ¥˝∂‡”Ô—‘¥¶¿Ì
-  SCnImageListChangeSize = 'Do you want to change the image dimensions?' + #13#10 +
-    'This will remove all the existing images from the list.';
-  SCnImageListChangeXPStyle = 'Do you want to change the image style?' + #13#10 +
-    'This will remove all the existing images from the list.';
-  SCnImageListSearchFailed = 'Search image failed!';
-  SCnImageListInvalidFile = 'The file is not a valid image file: ';
-  SCnImageListSepBmp = 'Image dimensions for %s are greater than imagelist dimensions. Separate into %d separate bitmaps?';
-  SCnImageListNoPngLib = 'CnPngLib.dll not found! Please reinstall CnWizards.'; 
-  SCnImageListExportFailed = 'Export images failed!';
-  SCnImageListXPStyleNotSupport = 'The ImageList uses XP Style images, but your IDE doesn''t support XPManifest! Please upgrade your IDE.';
-  SCnImageListSearchIconsetFailed = 'Search icon set failed!';
-  SCnImageListGotoPage = 'Goto Page';
-  SCnImageListGotoPagePrompt = 'Enter new page number:';
 
 procedure ShowCnImageListEditorForm(AComponent: TCustomImageList;
   AIni: TCustomIniFile; AOnApply: TNotifyEvent);
@@ -1474,6 +1459,7 @@ end;
 procedure TCnImageListEditorForm.pmSearchPopup(Sender: TObject);
 begin
   mniRefresh.Visible := (FProvider <> nil) and (FReq.Keyword <> '');
+  mniGotoPage.Visible := (FProvider <> nil) and (FReq.Keyword <> '');
   mniOpen.Visible := (FProvider <> nil) and (pfOpenInBrowser in FProvider.Features)
     and (lvSearch.Selected <> nil);
   mniSearchIconset.Visible := (FProvider <> nil) and (pfSearchIconset in FProvider.Features)

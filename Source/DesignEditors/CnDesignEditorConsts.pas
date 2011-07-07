@@ -69,6 +69,7 @@ var
   SCnSetPropEditorName: string = 'Set Editor';
   SCnAlignPropEditorName: string = 'Align Editor';
   SCnNamePropEditorName: string = 'Component Name Editor';
+  SCnImageListCompEditorName: string = 'ImageList Editor';
 
   // Editor Comments
   SCnStringPropEditorComment: string = 'Editor for Multi-line String and Caption.';
@@ -82,6 +83,7 @@ var
   SCnSetPropEditorComment: string = 'Editor for Set Property with Checkboxs in Dropdown List, Direct Input Supported.';
   SCnAlignPropEditorComment: string = 'Editor for Align Property with a bitmap.';
   SCnNamePropEditorComment: string = 'Editor for Component Name Property used Component Prefix Rules.';
+  SCnImageListCompEditorComment: string = 'Editor for TImageList, XP Style Image and Online Search Supported.';
 
   // TCnMultiLineEditorForm
   SCnPropEditorNoMatch: string = 'No Matched Text!';
@@ -96,6 +98,21 @@ var
 
   // TCnNamePropEditor
   SCnPrefixWizardNotExist: string = 'Component Prefix Wizard NOT Exists, Please Enable It.';
+
+  // TCnImageListEditor
+  SCnImageListChangeSize: string = 'Do you want to change the image dimensions?' + #13#10 +
+    'This will remove all the existing images from the list.';
+  SCnImageListChangeXPStyle: string = 'Do you want to change the image style?' + #13#10 +
+    'This will remove all the existing images from the list.';
+  SCnImageListSearchFailed: string = 'Search image failed!';
+  SCnImageListInvalidFile: string = 'The file is not a valid image file: ';
+  SCnImageListSepBmp: string = 'Image dimensions for %s are greater than imagelist dimensions. Separate into %d separate bitmaps?';
+  SCnImageListNoPngLib: string = 'CnPngLib.dll not found! Please reinstall CnWizards.';
+  SCnImageListExportFailed: string = 'Export images failed!';
+  SCnImageListXPStyleNotSupport: string = 'The ImageList uses XP Style images, but your IDE doesn''t support XPManifest! Please upgrade your IDE.';
+  SCnImageListSearchIconsetFailed: string = 'Search icon set failed!';
+  SCnImageListGotoPage: string = 'Goto Page';
+  SCnImageListGotoPagePrompt: string = 'Enter new page number:';
 
 implementation
 

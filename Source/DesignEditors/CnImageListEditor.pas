@@ -95,10 +95,10 @@ end;
 class procedure TCnImageListEditor.GetInfo(var Name, Author, Email,
   Comment: string);
 begin
-  Name := 'ImageList Editor';
+  Name := SCnImageListCompEditorName;
   Author := SCnPack_Zjy;
   Email := SCnPack_ZjyEmail;
-  Comment := 'ImageList Editor';
+  Comment := SCnImageListCompEditorComment;
 end;
 
 function TCnImageListEditor.GetVerb(Index: Integer): string;
