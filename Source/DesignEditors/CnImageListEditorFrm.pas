@@ -1015,7 +1015,6 @@ end;
 function TCnImageListEditorForm.CheckXPStyle: Boolean;
 var
   bmp: TBitmap;
-  i: Integer;
   info: TImageInfo;
 begin
   bmp := TBitmap.Create;
@@ -1025,17 +1024,11 @@ begin
   {$ELSE}
     Result := False;
   {$ENDIF}
-    for i := 0 to ilList.Count - 1 do
+    if (ilList.Count > 0) and ImageList_GetImageInfo(ilList.Handle, 0, info) then
     begin
-      if ImageList_GetImageInfo(ilList.Handle, i, info) then
-      begin
-        bmp.Handle := info.hbmImage;
-        if bmp.PixelFormat = pf32bit then
-        begin
-          Result := True;
-          Break;
-        end;
-      end;
+      bmp.Handle := info.hbmImage;
+      if bmp.PixelFormat = pf32bit then
+        Result := True;
     end;
   finally
     bmp.Free;
@@ -1076,9 +1069,10 @@ var
   i: Integer;
   info: TCnImageInfo;
   bmp, dst: TBitmap;
-  img: TImageInfo;
+  XpStyle: Boolean;
 begin
   // 将原来的图片保存起来
+  XpStyle := CheckXPStyle;
   for i := 0 to ilList.Count - 1 do
   begin
     if FList[i] = nil then
@@ -1094,9 +1088,9 @@ begin
         info.Option := ioStrech
       else
         info.Option := ioCenter;
-      if ImageList_GetImageInfo(ilList.Handle, i, img) then
-        bmp.Handle := img.hbmImage;
-      if bmp.PixelFormat <> pf32bit then
+      if XpStyle then
+        bmp.PixelFormat := pf32bit
+      else
         bmp.PixelFormat := pf24bit;
       bmp.Width := ilList.Width;
       bmp.Height := ilList.Height;
