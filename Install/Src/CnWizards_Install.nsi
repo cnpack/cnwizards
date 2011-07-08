@@ -813,7 +813,6 @@ Function SetCheckBoxes
 !ifdef IDE_VERSION_D16
   !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\9.0" "App" ${SecD16}
 !endif
-!endif
 !ifdef IDE_VERSION_CB5
   !insertmacro SET_COMPILER_CHECKBOX HKLM "Software\Borland\C++Builder\5.0" "App" ${SecCB5}
 !endif
