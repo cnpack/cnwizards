@@ -41,8 +41,13 @@ interface
 uses
   Classes, {$IFDEF COMPILER6_UP}RTLConsts{$ELSE}Consts{$ENDIF}, SysUtils;
 
-type
 
+{$IFDEF BDS2012_UP}
+const
+  MaxListSize = Maxint div 16;
+{$ENDIF}
+
+type
   TCnBaseList = class(TObject)
   private
     FList: PPointerList;
