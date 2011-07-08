@@ -46,6 +46,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         Width = 91
         Height = 13
         Caption = '&Transparent Color:'
+        FocusControl = cbbTransparentColor
       end
       object lblAlpha: TLabel
         Left = 112
@@ -305,6 +306,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         Width = 46
         Height = 13
         Caption = 'Key&word:'
+        FocusControl = cbbKeyword
       end
       object lbl4: TLabel
         Left = 8
@@ -312,6 +314,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         Width = 44
         Height = 13
         Caption = 'Provider:'
+        FocusControl = cbbProvider
       end
       object lblPage: TLabel
         Left = 136
@@ -523,7 +526,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
       OnExecute = actLastExecute
     end
     object actApply: TAction
-      Caption = '&Apply'
+      Caption = 'A&pply'
       OnExecute = actApplyExecute
     end
     object actSearch: TAction

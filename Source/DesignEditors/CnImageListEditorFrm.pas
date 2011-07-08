@@ -1079,13 +1079,9 @@ begin
       else
         info.Option := ioCenter;
       if ImageList_GetImageInfo(ilList.Handle, i, img) then
-      begin
-        // 32位图像不做处理
         bmp.Handle := img.hbmImage;
-        if bmp.PixelFormat = pf32bit then
-          Continue;
-      end;
-      bmp.PixelFormat := pf24bit;
+      if bmp.PixelFormat <> pf32bit then
+        bmp.PixelFormat := pf24bit;
       bmp.Width := ilList.Width;
       bmp.Height := ilList.Height;
       ClearBitmap(bmp);
@@ -1316,7 +1312,7 @@ begin
   actLast.Enabled := (FProvider <> nil) and (FProvider.PageCount > 0) and
     (FReq.Page < FProvider.PageCount - 1);
   cbbSize.Enabled := not FSearching;
-  chkXPStyle.Enabled := FSupportXPStyle and not FSupportXPStyle;
+  chkXPStyle.Enabled := FSupportXPStyle and not FSearching;
 end;
 
 procedure TCnImageListEditorForm.actSearchExecute(Sender: TObject);
