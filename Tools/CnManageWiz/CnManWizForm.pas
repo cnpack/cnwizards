@@ -56,7 +56,8 @@ const
     'RAD Studio 2007',
     'RAD Studio 2009',
     'RAD Studio 2010',
-    'RAD Studio 2011',
+    'RAD Studio XE',
+    'RAD Studio XE 2',
     'C++Builder 5',
     'C++Builder 6');
 
@@ -70,7 +71,8 @@ const
     'RADStudio2007',
     'RADStudio2009',
     'RADStudio2010',
-    'RADStudio2011',
+    'RADStudioXE',
+    'RADStudioXE2',
     'BCB5',
     'BCB6');
 
@@ -85,6 +87,7 @@ const
     '\Software\CodeGear\BDS\6.0',
     '\Software\CodeGear\BDS\7.0',
     '\Software\Embarcadero\BDS\8.0',
+    '\Software\Embarcadero\BDS\9.0',
     '\Software\Borland\C++Builder\5.0',
     '\Software\Borland\C++Builder\6.0');
 
@@ -94,13 +97,13 @@ const
 
 var
   IDEInstalled: array[TCnCompiler] of Boolean =
-    (False, False, False, False, False, False, False, False, False, False, False, False);
+    (False, False, False, False, False, False, False, False, False, False, False, False, False);
 
   IDEWizardsList: array[TCnCompiler] of TObjectList =
-    (nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil);
+    (nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil);
 
   IDEWizardsChanged: array[TCnCompiler] of Boolean =
-    (False, False, False, False, False, False, False, False, False, False, False, False);
+    (False, False, False, False, False, False, False, False, False, False, False, False, False);
 
 type
 
