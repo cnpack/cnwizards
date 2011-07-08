@@ -9,7 +9,8 @@ uses
   CnWizMultiLang in '..\..\Source\MultiLang\CnWizMultiLang.pas' {CnTranslateForm},
   CnWizLangID in '..\..\Source\MultiLang\CnWizLangID.pas',
   CnImageListEditorFrm in '..\..\Source\DesignEditors\CnImageListEditorFrm.pas' {CnImageListEditorForm},
-  CnWizHttpDownMgr in '..\..\Source\Utils\CnWizHttpDownMgr.pas';
+  CnWizHttpDownMgr in '..\..\Source\Utils\CnWizHttpDownMgr.pas',
+  CnDesignEditorConsts in '..\..\Source\DesignEditors\CnDesignEditorConsts.pas';
 
 {$R *.res}
 

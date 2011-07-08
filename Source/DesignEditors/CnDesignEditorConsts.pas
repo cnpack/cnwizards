@@ -91,7 +91,6 @@ var
   SCnPropEditorCursorPos: string = 'Caret [%D:%D]';
   SCnPropEditorSaveText: string = 'Text Changed. Save it Now?';
 
-
   // TCnSizeConstraintsEditorForm
   SCnSizeConsInputError: string = 'Please Enter Integer Values.';
   SCnSizeConsInputNeg: string = 'Negative is Invalid.';
@@ -100,16 +99,14 @@ var
   SCnPrefixWizardNotExist: string = 'Component Prefix Wizard NOT Exists, Please Enable It.';
 
   // TCnImageListEditor
-  SCnImageListChangeSize: string = 'Do you want to change the image dimensions?' + #13#10 +
-    'This will remove all the existing images from the list.';
-  SCnImageListChangeXPStyle: string = 'Do you want to change the image style?' + #13#10 +
-    'This will remove all the existing images from the list.';
+  SCnImageListChangeSize: string = 'Do you want to change the image dimensions?';
+  SCnImageListChangeXPStyle: string = 'Do you want to change the image style?';
   SCnImageListSearchFailed: string = 'Search image failed!';
   SCnImageListInvalidFile: string = 'The file is not a valid image file: ';
   SCnImageListSepBmp: string = 'Image dimensions for %s are greater than imagelist dimensions. Separate into %d separate bitmaps?';
   SCnImageListNoPngLib: string = 'CnPngLib.dll not found! Please reinstall CnWizards.';
   SCnImageListExportFailed: string = 'Export images failed!';
-  SCnImageListXPStyleNotSupport: string = 'The ImageList uses XP Style images, but your IDE doesn''t support XPManifest! Please upgrade your IDE.';
+  SCnImageListXPStyleNotSupport: string = 'The ImageList uses XP Style images, but your IDE doesn''t support XPManifest! Do you want to convert images to normal style?';
   SCnImageListSearchIconsetFailed: string = 'Search icon set failed!';
   SCnImageListGotoPage: string = 'Goto Page';
   SCnImageListGotoPagePrompt: string = 'Enter new page number:';
