@@ -536,7 +536,11 @@ begin
       end;
     end
     else
+    begin
       ErrorDlg(SCnImageListSearchFailed);
+      ilSearch.Clear;
+      lvSearch.Items.Clear;
+    end;
   finally
     pbSearch.Visible := False;
     FSearching := False;
