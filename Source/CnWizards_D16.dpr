@@ -18,7 +18,7 @@
 {                                                                              }
 {******************************************************************************}
 
-library CnWizards_D15;
+library CnWizards_D16;
 
 uses
   CnWizDllEntry in 'Framework\CnWizDllEntry.pas',
