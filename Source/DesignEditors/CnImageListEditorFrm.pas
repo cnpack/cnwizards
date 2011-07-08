@@ -165,6 +165,8 @@ type
     procedure btnGetColorClick(Sender: TObject);
     procedure imgSelectedMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+    procedure lvSearchContextPopup(Sender: TObject; MousePos: TPoint;
+      var Handled: Boolean);
   private
     { Private declarations }
     FComponent: TCustomImageList;
@@ -245,6 +247,9 @@ const
   csCommercialLicenses = 'CommercialLicenses';
   csKeyword = 'Keyword';
   csShowSearch = 'ShowSearch';
+  csLeftWidth = 'LeftWidth';
+  csSearchWidth = 'SearchWidth';
+  csFormHeight = 'Height';
   csTransColor = clFuchsia;
 
 procedure ShowCnImageListEditorForm(AComponent: TCustomImageList;
@@ -315,6 +320,9 @@ begin
     FIni.WriteBool(csImageListEditor, csCommercialLicenses, chkCommercialLicenses.Checked);
     FIni.WriteString(csImageListEditor, csKeyword, cbbKeyword.Items.CommaText);
     FIni.WriteBool(csImageListEditor, csShowSearch, FShowSearch);
+    FIni.WriteInteger(csImageListEditor, csLeftWidth, pnlLeft.Width);
+    FIni.WriteInteger(csImageListEditor, csSearchWidth, pnlSearch.Width);
+    FIni.WriteInteger(csImageListEditor, csFormHeight, Height);
   end;
   if FProvider <> nil then
     FProvider.Free;
@@ -336,9 +344,13 @@ begin
         FIni.ReadString(csImageListEditor, csProvider, cbbProvider.Items[0]));
     chkCommercialLicenses.Checked := FIni.ReadBool(csImageListEditor, csCommercialLicenses, False);
     cbbKeyword.Items.CommaText := FIni.ReadString(csImageListEditor, csKeyword, '');
+    pnlLeft.Width := FIni.ReadInteger(csImageListEditor, csLeftWidth, pnlLeft.Width);
+    pnlSearch.Width := FIni.ReadInteger(csImageListEditor, csSearchWidth, pnlSearch.Width);
+    Height := FIni.ReadInteger(csImageListEditor, csFormHeight, Height);
     FShowSearch := FIni.ReadBool(csImageListEditor, csShowSearch, FShowSearch);
     UpdateSearchPanel;
     Left := (Screen.Width - Width) div 2;
+    Top := (Screen.Height - Height) div 2;
   end;
   if (cbbProvider.Items.Count > 0) and (cbbProvider.ItemIndex < 0) then
     cbbProvider.ItemIndex := 0;
@@ -456,6 +468,7 @@ var
   mask, bmp: TBitmap;
   mcolor: TColor;
   i, idx: Integer;
+  hdl: Boolean;
 begin
   Result := False;
   if FSearching then Exit;
@@ -463,7 +476,9 @@ begin
     Exit;
 
   FSearching := True;
+  pbSearch.Visible := True;
   try
+    ActionListUpdate(nil, hdl);
     FReq.Page := TrimInt(Page, 0, Max(0, FProvider.PageCount - 1));
     if FProvider.SearchImage(FReq) then
     begin
@@ -523,6 +538,7 @@ begin
     else
       ErrorDlg(SCnImageListSearchFailed);
   finally
+    pbSearch.Visible := False;
     FSearching := False;
   end;
 end;
@@ -956,7 +972,7 @@ var
   i: Integer;
   item: TCnImageRespItem;
 begin
-  if lvSearch.SelCount = 0 then Exit;
+  if FSearching or (lvSearch.SelCount = 0) then Exit;
 
   lvList.Items.BeginUpdate;
   FChanging := True;
@@ -1302,15 +1318,15 @@ begin
   actDelete.Enabled := lvList.SelCount > 0;
   actClear.Enabled := lvList.Items.Count > 0;
   actExport.Enabled := lvList.Items.Count > 0;
-  actSearchAdd.Enabled := (lvSearch.Items.Count > 0) and (lvSearch.SelCount > 0);
-  actSearchReplace.Enabled := (lvList.SelCount > 0) and (lvSearch.SelCount > 0);
-  actSearch.Enabled := (cbbProvider.ItemIndex >= 0) and (Trim(cbbKeyword.Text) <> '');
-  actFirst.Enabled := (FProvider <> nil) and (FProvider.PageCount > 0) and (FReq.Page > 0);
-  actPrev.Enabled := (FProvider <> nil) and (FProvider.PageCount > 0) and (FReq.Page > 0);
+  actSearchAdd.Enabled := (lvSearch.Items.Count > 0) and (lvSearch.SelCount > 0) and not FSearching;
+  actSearchReplace.Enabled := (lvList.SelCount > 0) and (lvSearch.SelCount > 0) and not FSearching;
+  actSearch.Enabled := (cbbProvider.ItemIndex >= 0) and (Trim(cbbKeyword.Text) <> '') and not FSearching;
+  actFirst.Enabled := (FProvider <> nil) and (FProvider.PageCount > 0) and (FReq.Page > 0) and not FSearching;
+  actPrev.Enabled := (FProvider <> nil) and (FProvider.PageCount > 0) and (FReq.Page > 0) and not FSearching;
   actNext.Enabled := (FProvider <> nil) and (FProvider.PageCount > 0) and
-    (FReq.Page < FProvider.PageCount - 1);
+    (FReq.Page < FProvider.PageCount - 1) and not FSearching;
   actLast.Enabled := (FProvider <> nil) and (FProvider.PageCount > 0) and
-    (FReq.Page < FProvider.PageCount - 1);
+    (FReq.Page < FProvider.PageCount - 1) and not FSearching;
   cbbSize.Enabled := not FSearching;
   chkXPStyle.Enabled := FSupportXPStyle and not FSearching;
 end;
@@ -1778,6 +1794,13 @@ begin
   end;
   FInGetColor := False;
   imgSelected.Cursor := crDefault;
+end;
+
+procedure TCnImageListEditorForm.lvSearchContextPopup(Sender: TObject;
+  MousePos: TPoint; var Handled: Boolean);
+begin
+  if FSearching then
+    Handled := True;
 end;
 
 end.

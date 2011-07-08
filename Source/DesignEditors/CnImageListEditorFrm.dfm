@@ -349,6 +349,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         ReadOnly = True
         PopupMenu = pmSearch
         TabOrder = 5
+        OnContextPopup = lvSearchContextPopup
         OnDblClick = actSearchAddExecute
       end
       object btnSearchAdd: TButton
@@ -453,6 +454,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
       Min = 0
       Max = 100
       TabOrder = 1
+      Visible = False
     end
   end
   object ilSearch: TImageList

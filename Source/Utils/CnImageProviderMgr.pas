@@ -135,12 +135,47 @@ implementation
 
 var
   FImageProviderMgr: TCnImageProviderMgr;
-  
+
 function ImageProviderMgr: TCnImageProviderMgr;
 begin
   if FImageProviderMgr = nil then
     FImageProviderMgr := TCnImageProviderMgr.Create;
   Result := FImageProviderMgr;
+end;
+
+type
+  TCnImageSearchThread = class(TThread)
+  private
+    FProvider: TCnBaseImageProvider;
+    FReq: TCnImageReqInfo;
+    FSucc: Boolean;
+    FFinished: Boolean;
+  public
+    constructor Create(AProvider: TCnBaseImageProvider; AReq: TCnImageReqInfo);
+    procedure Execute; override;
+  end;
+
+{ TCnImageSearchThread }
+
+constructor TCnImageSearchThread.Create(AProvider: TCnBaseImageProvider;
+  AReq: TCnImageReqInfo);
+begin
+  inherited Create(False);
+  FProvider := AProvider;
+  FReq := AReq;
+  FSucc := False;
+  FFinished := False;
+  FreeOnTerminate := False;
+end;
+
+procedure TCnImageSearchThread.Execute;
+begin
+  try
+    FSucc := FProvider.DoSearchImage(FReq);
+  except
+    FSucc := False;
+  end;
+  FFinished := True;
 end;
 
 { TCnImageRespItem }
@@ -249,7 +284,16 @@ begin
     FPageCount := 0;
     FTotalCount := 0;
     Items.Clear;
-    Result := DoSearchImage(Req);
+    
+    // 后台线程去搜索以避免程序无响应
+    with TCnImageSearchThread.Create(Self, Req) do
+    try
+      while not FFinished do
+        Application.ProcessMessages;
+      Result := FSucc;
+    finally
+      Free;
+    end;
     if not Result then
       Exit;
 
