@@ -41,7 +41,6 @@ interface
 uses
   Classes, {$IFDEF COMPILER6_UP}RTLConsts{$ELSE}Consts{$ENDIF}, SysUtils;
 
-
 {$IFDEF BDS2012_UP}
 const
   MaxListSize = Maxint div 16;

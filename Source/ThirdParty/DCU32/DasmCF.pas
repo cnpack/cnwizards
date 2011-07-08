@@ -27,6 +27,8 @@ freely, subject to the following restrictions:
 
 interface
 
+{$I CnPack.inc}
+
 uses
   Classes;
 
@@ -196,7 +198,12 @@ begin
     Result.Add(Items[j]);
   Result.FSize := AOfs-FStart;
   Count := Count-i;
+{$IFDEF LIST_NEW_POINTER}
+  System.move(List[i],List[0],Count*SizeOf(Pointer));
+{$ELSE}
   System.move(List^[i],List^,Count*SizeOf(Pointer));
+{$ENDIF}
+
   FStart := AOfs;
   Dec(FSize,Result.FSize);
   i := Count or $7;
