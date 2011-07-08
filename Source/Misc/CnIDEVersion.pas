@@ -226,7 +226,7 @@ end;
 function IsDelphi16IdeVersionLatest: Boolean;
 const
   CoreIdeLatest: TVersionNumber =
-    (Major: 16; Minor: 0; Release: 4182; Build: 40406);
+    (Major: 16; Minor: 0; Release: 4203; Build: 41037);
 var
   ReadFileVersion: TVersionNumber;
 begin
