@@ -1,0 +1,113 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>ImageList 組件編輯器</title>
+<meta http-equiv="Content-Type" content="text/html; charset=big5">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">ImageList 組件編輯器</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">ImageList 組件編輯器</p>
+<p class="text" align="left">
+該編輯器為 ImageList 提供了強大的設計支援，包括 XP 風格帶 Alpha 通道的圖像清單支援、png 檔支援（自動轉換為 Bitmap）和線上搜索圖示等功能。</p>
+<p class="text" align="left">
+下圖為 ImageList 元件編輯器介面：</p>
+<p class="text" align="center">
+<img src="compimglist.png"></p>
+<p class="title">選中的圖像</p>
+<ul>
+  <li>
+<p class="text"><b>圖像預覽</b>：預覽當前選中的圖像，背景棋盤格表示圖像的透明部分。</p>
+  </li>
+  <li>
+<p class="text"><b>透明色</b>：如果選中的圖像是通過檔或搜索添加的 png 和 bmp 檔，可以選擇其透明色。點擊下拉清單右邊的按鈕，可從圖像預覽區點取透明色。</p>
+  </li>
+  <li>
+<p class="text"><b>使用帶透明通道的 XP 風格圖示</b>：選中該選項後，圖像清單將使用 32 bit 的格式。該選項需要 IDE 本身支援 XPManifest 才會啟用。</p>
+  </li>
+  <li>
+<p class="text"><b>選項</b>：如果選中的圖像是通過檔或搜索添加的 png 和 bmp 檔，設定顯示的縮放方式。</p>
+  </li>
+</ul>
+<p class="title">圖像清單</p>
+<ul>
+  <li>
+<p class="text"><b>增加</b>：從檔案系統中選擇一個或多個影像檔，添加到列表中。支援 bmp、ico 和 png 三種格式。</p>
+  </li>
+  <li>
+<p class="text"><b>替換</b>：從檔案系統中選擇一個或多個影像檔，替換掉當前選中的圖像。</p>
+  </li>
+  <li>
+<p class="text"><b>刪除</b>：刪除當前選中的圖像。</p>
+  </li>
+  <li>
+<p class="text"><b>清空</b>：清空當前圖像清單。</p>
+  </li>
+  <li>
+<p class="text"><b>匯出</b>：匯出當前選中的圖像或全部圖像為影像檔，支援 bmp 和 png 格式匯出。</p>
+  </li>
+  <li>
+<p class="text"><b>拖動排序</b>：在圖像清單中，可通過選中圖示拖動來進行排序。</p>
+  </li>
+  <li>
+<p class="text"><b>圖像大小</b>：可以快速修改圖像清單的大小。如果當前圖像清單不為空，修改大小後會自動對圖像進行縮放。</p>
+  </li>
+</ul>
+<p class="title">線上搜索</p>
+<ul>
+  <li>
+<p class="text"><b>關鍵字</b>：輸入要搜索的關鍵字，多個關鍵字用空格隔開，目前只支持英文單詞。</p>
+  </li>
+  <li>
+<p class="text"><b>搜索</b>：開始搜索圖示。</p>
+  </li>
+  <li>
+<p class="text"><b>圖示來源</b>：選擇提供圖示搜索服務的網站。</p>
+  </li>
+  <li>
+<p class="text"><b>轉到</b>：在流覽器中打開當前選擇的圖示搜索服務網站。</p>
+  </li>
+  <li>
+<p class="text"><b>只包含允許商業授權的圖示</b>：搜索圖示時指定是否在結果中只包含允許在商務軟體中使用的圖示。</p>
+  </li>
+  <li>
+<p class="text"><b>增加</b>：將當前選中的圖像添加到左邊的圖像清單中。</p>
+  </li>
+  <li>
+<p class="text"><b>替換</b>：用當前選中的圖像替換左邊的圖像清單中選中的圖像。</p>
+  </li>
+  <li>
+<p class="text"><b>翻頁</b>：在搜索結果中翻頁。</p>
+  </li>
+  <li>
+<p class="text"><b>刷新菜單</b>：刷新當前頁面的顯示。</p>
+  </li>
+  <li>
+<p class="text"><b>轉到頁數</b>：跳轉到指定頁數顯示。</p>
+  </li>
+  <li>
+<p class="text"><b>在流覽器中打開圖像</b>：直接從網站上訪問當前選中圖像。</p>
+  </li>
+  <li>
+<p class="text"><b>搜索圖示集</b>：搜索當前選中圖像所從屬的圖示集，該功能只對部分圖示來源有效。</p>
+  </li>
+</ul>
+<p class="text">　</p>
+<p class="title" align="left">相關主題<p class="text" align="left">
+<a href="../options/propconfig.htm">屬性、元件編輯器設置</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">IDE 專家設置</a><p class="text" align="left">
+<a href="../cnpack/index.htm">關於 IDE 專家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版權所有 2001-2011 CnPack 開發組</a></p>
+</body>
+</html>

@@ -249,6 +249,11 @@
 		<param name="Local" value="options\wizconfig.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="ImageList Component Editor">
+		<param name="Name" value="ImageList Component Editor">
+		<param name="Local" value="propeditor\compimglist.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Indent Code Tool">
 		<param name="Name" value="Indent Code Tool">
 		<param name="Local" value="wizards\editors\editorcodeindent.htm">

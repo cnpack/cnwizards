@@ -94,6 +94,11 @@
 		<param name="Local" value="options\wizconfig.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="ImageList 组件编辑器">
+		<param name="Name" value="ImageList 组件编辑器">
+		<param name="Local" value="propeditor\compimglist.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="INI 读写单元生成向导">
 		<param name="Name" value="INI 读写单元生成向导">
 		<param name="Local" value="wizards\repository\inifilerwizard.htm">

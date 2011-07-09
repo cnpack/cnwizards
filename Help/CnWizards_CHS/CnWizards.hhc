@@ -406,6 +406,10 @@
 			<param name="Name" value="Constraints 编辑器">
 			<param name="Local" value="propeditor/propsize.htm">
 			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="ImageList 组件编辑器">
+			<param name="Local" value="propeditor/compimglist.htm">
+			</OBJECT>
 	</UL>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="专家包设置">

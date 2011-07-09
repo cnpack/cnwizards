@@ -1,0 +1,113 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>ImageList 组件编辑器</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">ImageList 组件编辑器</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">ImageList 组件编辑器</p>
+<p class="text" align="left">
+该编辑器为 ImageList 提供了强大的设计支持，包括 XP 风格带 Alpha 通道的图像列表支持、png 文件支持（自动转换为 Bitmap）和在线搜索图标等功能。</p>
+<p class="text" align="left">
+下图为 ImageList 组件编辑器界面：</p>
+<p class="text" align="center">
+<img src="compimglist.png"></p>
+<p class="title">选中的图像</p>
+<ul>
+  <li>
+<p class="text"><b>图像预览</b>：预览当前选中的图像，背景棋盘格表示图像的透明部分。</p>
+  </li>
+  <li>
+<p class="text"><b>透明色</b>：如果选中的图像是通过文件或搜索添加的 png 和 bmp 文件，可以选择其透明色。点击下拉框右边的按钮，可从图像预览区点取透明色。</p>
+  </li>
+  <li>
+<p class="text"><b>使用带透明通道的 XP 风格图标</b>：选中该选项后，图像列表将使用 32 bit 的格式。该选项需要 IDE 本身支持 XPManifest 才会启用。</p>
+  </li>
+  <li>
+<p class="text"><b>选项</b>：如果选中的图像是通过文件或搜索添加的 png 和 bmp 文件，设定显示的缩放方式。</p>
+  </li>
+</ul>
+<p class="title">图像列表</p>
+<ul>
+  <li>
+<p class="text"><b>增加</b>：从文件系统中选择一个或多个图像文件，添加到列表中。支持 bmp、ico 和 png 三种格式。</p>
+  </li>
+  <li>
+<p class="text"><b>替换</b>：从文件系统中选择一个或多个图像文件，替换掉当前选中的图像。</p>
+  </li>
+  <li>
+<p class="text"><b>删除</b>：删除当前选中的图像。</p>
+  </li>
+  <li>
+<p class="text"><b>清空</b>：清空当前图像列表。</p>
+  </li>
+  <li>
+<p class="text"><b>导出</b>：导出当前选中的图像或全部图像为图像文件，支持 bmp 和 png 格式导出。</p>
+  </li>
+  <li>
+<p class="text"><b>拖动排序</b>：在图像列表中，可通过选中图标拖动来进行排序。</p>
+  </li>
+  <li>
+<p class="text"><b>图像大小</b>：可以快速修改图像列表的大小。如果当前图像列表不为空，修改大小后会自动对图像进行缩放。</p>
+  </li>
+</ul>
+<p class="title">在线搜索</p>
+<ul>
+  <li>
+<p class="text"><b>关键字</b>：输入要搜索的关键字，多个关键字用空格隔开，目前只支持英文单词。</p>
+  </li>
+  <li>
+<p class="text"><b>搜索</b>：开始搜索图标。</p>
+  </li>
+  <li>
+<p class="text"><b>图标来源</b>：选择提供图标搜索服务的网站。</p>
+  </li>
+  <li>
+<p class="text"><b>转到</b>：在浏览器中打开当前选择的图标搜索服务网站。</p>
+  </li>
+  <li>
+<p class="text"><b>只包含允许商业授权的图标</b>：搜索图标时指定是否在结果中只包含允许在商业软件中使用的图标。</p>
+  </li>
+  <li>
+<p class="text"><b>增加</b>：将当前选中的图像添加到左边的图像列表中。</p>
+  </li>
+  <li>
+<p class="text"><b>替换</b>：用当前选中的图像替换左边的图像列表中选中的图像。</p>
+  </li>
+  <li>
+<p class="text"><b>翻页</b>：在搜索结果中翻页。</p>
+  </li>
+  <li>
+<p class="text"><b>刷新菜单</b>：刷新当前页面的显示。</p>
+  </li>
+  <li>
+<p class="text"><b>转到页数</b>：跳转到指定页数显示。</p>
+  </li>
+  <li>
+<p class="text"><b>在浏览器中打开图像</b>：直接从网站上访问当前选中图像。</p>
+  </li>
+  <li>
+<p class="text"><b>搜索图标集</b>：搜索当前选中图像所从属的图标集，该功能只对部分图标来源有效。</p>
+  </li>
+</ul>
+<p class="text">　</p>
+<p class="title" align="left">相关主题<p class="text" align="left">
+<a href="../options/propconfig.htm">属性、组件编辑器设置</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">IDE 专家设置</a><p class="text" align="left">
+<a href="../cnpack/index.htm">关于 IDE 专家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版权所有 2001-2011 CnPack 开发组</a></p>
+</body>
+</html>
