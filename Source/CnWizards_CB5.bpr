@@ -89,7 +89,7 @@
       ..\Dcu\CnFeedWizardFrm.obj ..\Dcu\CnFeedWizard.obj ..\Dcu\CnFeedParser.obj 
       ..\Dcu\CnImageListEditor.obj ..\Dcu\CnImageListEditorFrm.obj 
       ..\Dcu\CnImageProvider_IconFinder.obj ..\Dcu\CnImageProviderMgr.obj 
-      ..\Dcu\CnWizards_CB5.obj"/>
+      ..\Dcu\CnImageProvider_FindIcons.obj ..\Dcu\CnWizards_CB5.obj"/>
     <RESFILES value="CnWizards_CB5.res"/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>

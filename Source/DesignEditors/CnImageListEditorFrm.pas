@@ -192,6 +192,8 @@ type
     procedure OnProgress(Sender: TObject; Progress: Integer);
     procedure ConvertBmp(UseAlpha: Boolean; Src, Dst: TBitmap; var Mask: TColor);
     function CreateDstBmp(ABmp: TBitmap; ARow, ACol: Integer; Option: TCnImageOption): TBitmap;
+    function GetDefaultOption(ABmp: TBitmap): TCnImageOption; overload;
+    function GetDefaultOption(W, H: Integer): TCnImageOption; overload;
     function CheckXPStyle: Boolean;
     procedure UpdateSelected;
     procedure UpdatePreview(Idx: Integer);
@@ -316,7 +318,8 @@ begin
   lvList.OnSelectItem := nil;
   if FIni <> nil then
   begin
-    FIni.WriteString(csImageListEditor, csProvider, cbbProvider.Text);
+    if cbbProvider.ItemIndex >= 0 then
+      FIni.WriteString(csImageListEditor, csProvider, ImageProviderMgr.Items[cbbProvider.ItemIndex].ClassName);
     FIni.WriteBool(csImageListEditor, csCommercialLicenses, chkCommercialLicenses.Checked);
     FIni.WriteString(csImageListEditor, csKeyword, cbbKeyword.Items.CommaText);
     FIni.WriteBool(csImageListEditor, csShowSearch, FShowSearch);
@@ -340,8 +343,15 @@ begin
   if FIni <> nil then
   begin
     if cbbProvider.Items.Count > 0 then
-      cbbProvider.ItemIndex := cbbProvider.Items.IndexOf(
-        FIni.ReadString(csImageListEditor, csProvider, cbbProvider.Items[0]));
+    begin
+      s := FIni.ReadString(csImageListEditor, csProvider, ImageProviderMgr.Items[0].ClassName);
+      for i := 0 to ImageProviderMgr.Count - 1 do
+        if SameText(s, ImageProviderMgr.Items[i].ClassName) then
+        begin
+          cbbProvider.ItemIndex := i;
+          Break;
+        end;
+    end;
     chkCommercialLicenses.Checked := FIni.ReadBool(csImageListEditor, csCommercialLicenses, False);
     cbbKeyword.Items.CommaText := FIni.ReadString(csImageListEditor, csKeyword, '');
     pnlLeft.Width := FIni.ReadInteger(csImageListEditor, csLeftWidth, pnlLeft.Width);
@@ -433,6 +443,23 @@ begin
   Result := FProvider <> nil;
 end;
 
+function TCnImageListEditorForm.GetDefaultOption(W,
+  H: Integer): TCnImageOption;
+begin
+  if (ilList.Width = W) and (ilList.Height = H) then
+    Result := ioCrop
+  else if (ilList.Width < W) or (ilList.Height < H) then
+    Result := ioStrech
+  else
+    Result := ioCenter;
+end;
+
+function TCnImageListEditorForm.GetDefaultOption(
+  ABmp: TBitmap): TCnImageOption;
+begin
+  Result := GetDefaultOption(ABmp.Width, ABmp.Height);
+end;
+
 procedure TCnImageListEditorForm.UpdateSearchPanel;
 var
   save: Integer;
@@ -465,7 +492,7 @@ end;
 
 function TCnImageListEditorForm.DoSearch(Page: Integer): Boolean;
 var
-  mask, bmp: TBitmap;
+  mask, bmp, dst: TBitmap;
   mcolor: TColor;
   i, idx: Integer;
   hdl: Boolean;
@@ -510,21 +537,25 @@ begin
 
         for i := 0 to FProvider.Items.Count - 1 do
         begin
-          if not FProvider.Items[i].Bitmap.Empty and
-            (FProvider.Items[i].Bitmap.Width >= ilSearch.Width) and
-            (FProvider.Items[i].Bitmap.Height >= ilSearch.Height) then
+          if not FProvider.Items[i].Bitmap.Empty then
           begin
             mcolor := clNone;
-            ConvertBmp(True, FProvider.Items[i].Bitmap, bmp, mcolor);
-            idx := ilSearch.AddMasked(bmp, mcolor);
-            if idx >= 0 then
-            begin
-              with lvSearch.Items.Add do
+            dst := CreateDstBmp(FProvider.Items[i].Bitmap, 0, 0,
+              GetDefaultOption(FProvider.Items[i].Bitmap));
+            try
+              ConvertBmp(True, dst, bmp, mcolor);
+              idx := ilSearch.AddMasked(bmp, mcolor);
+              if idx >= 0 then
               begin
-                ImageIndex := idx;
-                Caption := IntToStr(idx);
-                Data := FProvider.Items[i];
+                with lvSearch.Items.Add do
+                begin
+                  ImageIndex := idx;
+                  Caption := IntToStr(idx);
+                  Data := FProvider.Items[i];
+                end;
               end;
+            finally
+              dst.Free;
             end;
           end;
         end;
@@ -759,13 +790,9 @@ begin
         DoAddBmp(0, 0, Bmp, ioStrech, False, mask);
       end;
     end
-    else if (Bmp.Width > ilList.Width) or (Bmp.Height > ilList.Height) then
-    begin
-      DoAddBmp(0, 0, Bmp, ioStrech, IsSearch, mask);
-    end
     else
     begin
-      DoAddBmp(0, 0, Bmp, ioCenter, IsSearch, mask);
+      DoAddBmp(0, 0, Bmp, GetDefaultOption(Bmp), IsSearch, mask);
     end;
   except
     ;

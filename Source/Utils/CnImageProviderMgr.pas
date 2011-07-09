@@ -60,11 +60,15 @@ type
     FBitmap: TBitmap;
     FSize: Integer;
     FFileName: string;
+    FUserAgent: string;
+    FReferer: string;
   public
     constructor Create(Collection: TCollection); override;
     destructor Destroy; override;
     property Id: string read FId write FId;
     property Url: string read FUrl write FUrl;
+    property UserAgent: string read FUserAgent write FUserAgent;
+    property Referer: string read FReferer write FReferer;
     property Ext: string read FExt write FExt;
     property Size: Integer read FSize write FSize;
     property Bitmap: TBitmap read FBitmap;
@@ -304,7 +308,8 @@ begin
         Items[i].FFileName := GetWindowsTempPath + MD5Print(MD5String(Items[i].Url)) + IntToStr(idx);
         Inc(idx);
       until not FileExists(Items[i].FFileName);
-      DownList.Add(DownMgr.NewDownload(Items[i].Url, Items[i].FFileName, Items[i]));
+      DownList.Add(DownMgr.NewDownload(Items[i].Url, Items[i].FFileName,
+        Items[i].FUserAgent, Items[i].FReferer, Items[i]));
     end;
 
     Prog := 5;

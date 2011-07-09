@@ -97,6 +97,10 @@
     <DCCReference Include="DesignEditors\CnHintEditorFrm.pas">
       <Form>CnHintEditorForm</Form>
     </DCCReference>
+    <DCCReference Include="DesignEditors\CnImageListEditor.pas" />
+    <DCCReference Include="DesignEditors\CnImageListEditorFrm.pas">
+      <Form>CnImageListEditorForm</Form>
+    </DCCReference>
     <DCCReference Include="DesignEditors\CnMultiLineEditorFrm.pas">
       <Form>CnMultiLineEditorForm</Form>
     </DCCReference>
@@ -138,6 +142,7 @@
     <DCCReference Include="EditorWizard\CnEditorCollector.pas">
       <Form>CnEditorCollectorForm</Form>
     </DCCReference>
+    <DCCReference Include="EditorWizard\CnEditorFontZoom.pas" />
     <DCCReference Include="EditorWizard\CnEditorInsertColor.pas" />
     <DCCReference Include="EditorWizard\CnEditorInsertTime.pas">
       <Form>CnEditorInsertTimeForm</Form>
@@ -432,6 +437,9 @@
     <DCCReference Include="Utils\CnEditControlWrapper.pas" />
     <DCCReference Include="Utils\CnFeedParser.pas" />
     <DCCReference Include="Utils\CnGroupReplace.pas" />
+    <DCCReference Include="Utils\CnImageProviderMgr.pas" />
+    <DCCReference Include="Utils\CnImageProvider_FindIcons.pas" />
+    <DCCReference Include="Utils\CnImageProvider_IconFinder.pas" />
     <DCCReference Include="Utils\CnLineParser.pas" />
     <DCCReference Include="Utils\CnPasCodeParser.pas" />
     <DCCReference Include="Utils\CnPasConvert.pas" />

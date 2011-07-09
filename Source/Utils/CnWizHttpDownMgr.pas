@@ -50,8 +50,12 @@ type
   private
     FUrl: string;
     FFileName: string;
+    FUserAgent: string;
+    FReferer: string;
   public
     property Url: string read FUrl;
+    property UserAgent: string read FUserAgent;
+    property Referer: string read FReferer;
     property FileName: string read FFileName;
   end;
 
@@ -71,7 +75,7 @@ type
     constructor Create;
     destructor Destroy; override;
     // 增加一个下载
-    function NewDownload(AUrl, AFileName: string; Data: Pointer): TCnDownTask;
+    function NewDownload(AUrl, AFileName, AUserAgent, AReferer: string; Data: Pointer): TCnDownTask;
   end;
   
 implementation
@@ -93,13 +97,16 @@ begin
   Result := TCnDownThread;
 end;
 
-function TCnDownMgr.NewDownload(AUrl, AFileName: string; Data: Pointer): TCnDownTask;
+function TCnDownMgr.NewDownload(AUrl, AFileName, AUserAgent, AReferer: string;
+  Data: Pointer): TCnDownTask;
 begin
   if AUrl <> '' then
   begin
     Result := TCnDownTask.Create;
     Result.FUrl := AUrl;
     Result.FFileName := AFileName;
+    Result.FUserAgent := AUserAgent;
+    Result.FReferer := AReferer;
     Result.FData := Data;
     Result.TimeOut := 30 * 1000;
     AddTask(AUrl, Result);
@@ -127,6 +134,10 @@ begin
   try
     for i := 0 to csRetryCount - 1 do
     begin
+      if ATask.UserAgent <> '' then
+        FHttp.UserAgent := ATask.UserAgent;
+      if ATask.Referer <> '' then
+        FHttp.HttpRequestHeaders.Add('Referer: ' + ATask.Referer);
       FHttp.GetFile(ATask.Url, ATask.FileName);
       if GetFileSize(ATask.FileName) > 0 then
       begin

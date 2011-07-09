@@ -519,6 +519,7 @@
 			<DCCReference Include="DesignEditors\CnImageListEditor.pas"/>
 			<DCCReference Include="Utils\CnImageProviderMgr.pas"/>
 			<DCCReference Include="Utils\CnImageProvider_IconFinder.pas"/>
+			<DCCReference Include="Utils\CnImageProvider_FindIcons.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>

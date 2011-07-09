@@ -210,7 +210,8 @@ uses
   CnImageListEditorFrm in 'DesignEditors\CnImageListEditorFrm.pas' {CnImageListEditorForm},
   CnImageListEditor in 'DesignEditors\CnImageListEditor.pas',
   CnImageProviderMgr in 'Utils\CnImageProviderMgr.pas',
-  CnImageProvider_IconFinder in 'Utils\CnImageProvider_IconFinder.pas';
+  CnImageProvider_IconFinder in 'Utils\CnImageProvider_IconFinder.pas',
+  CnImageProvider_FindIcons in 'Utils\CnImageProvider_FindIcons.pas';
 
 {$R *.RES}
 

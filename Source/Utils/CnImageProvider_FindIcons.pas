@@ -24,7 +24,8 @@ unit CnImageProvider_FindIcons;
 * 软件名称：开发包属性、组件编辑器库
 * 单元名称：www.FindIcons.com 服务支持单元
 * 单元作者：周劲羽 zjy@cnpack.org
-* 备    注：
+* 备    注：该网站没有提供API接口，通过网页分析可以拿到图标。但由于网站做了流量
+*           限制，查询时可能不稳定。
 * 开发平台：Win7 + Delphi 7
 * 兼容测试：
 * 本 地 化：该单元和窗体中的字符串已经本地化处理方式
@@ -41,7 +42,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, Graphics, CnImageProviderMgr, CnInetUtils,
-  OmniXML, OmniXMLUtils, CnCommon;
+  OmniXML, OmniXMLUtils, CnCommon, RegExpr;
 
 type
   TCnImageProvider_FindIcons = class(TCnBaseImageProvider)
@@ -55,7 +56,6 @@ type
     function SearchIconset(Item: TCnImageRespItem; var Req: TCnImageReqInfo): Boolean; override;
   end;
 
-
 implementation
 
 { TCnImageProvider_FindIcons }
@@ -63,8 +63,8 @@ implementation
 constructor TCnImageProvider_FindIcons.Create;
 begin
   inherited;
-  FItemsPerPage := 20;
-  FFeatures := [pfOpenInBrowser, pfSearchIconset];
+  FItemsPerPage := 24;
+  FFeatures := [pfOpenInBrowser];
 end;
 
 destructor TCnImageProvider_FindIcons.Destroy;
@@ -76,7 +76,7 @@ end;
 class procedure TCnImageProvider_FindIcons.GetProviderInfo(var DispName,
   HomeUrl: string);
 begin
-  DispName := 'FindIcons.com';
+  DispName := 'FindIcons.com (Beta)';
   HomeUrl := 'http://www.findicons.com';
 end;
 
@@ -84,42 +84,84 @@ function TCnImageProvider_FindIcons.DoSearchImage(
   Req: TCnImageReqInfo): Boolean;
 var
   Url, Text, KeyStr, PageStr, LicStr: string;
-  i, j, size: Integer;
   Item: TCnImageRespItem;
+  RegExpr: TRegExpr;
 begin
-  Result := False;
-  KeyStr := Req.Keyword;
-  if Req.Page = 0 then
-    PageStr := ''
-  else
-    PageStr := '/' + IntToStr(Req.Page + 1);
-  if Req.CommercialLicenses then
-    LicStr := 'cf'
-  else
-    LicStr := 'all';
-  Url := Format('http://findicons.com/search/%s%s?icons=%d&width_from=%d&width_to=%d&color=all&style=all&order=default&license=%s&icon_box=small&icon=&png_file=&output_format=jpg',
-    [Req.Keyword, PageStr, FItemsPerPage, Req.MinSize, Req.MaxSize, LicStr]);
-  with TCnHTTP.Create do
+  RegExpr := TRegExpr.Create;
   try
-    HttpRequestHeaders.Add('x-requested-with: XMLHttpRequest');
-    NoCookie := True;
-    Text := GetString(Url);
+    Result := False;
+    RegExpr.Expression := '\w+';
+    if RegExpr.Exec(Req.Keyword) then
+    begin
+      KeyStr := RegExpr.Match[0];
+      while RegExpr.ExecNext do
+        KeyStr := KeyStr + '-' + RegExpr.Match[0];
+    end;
+    if KeyStr = '' then
+      Exit;
+
+    if Req.Page = 0 then
+      PageStr := ''
+    else
+      PageStr := '/' + IntToStr(Req.Page + 1);
+    if Req.CommercialLicenses then
+      LicStr := 'cf'
+    else
+      LicStr := 'all';
+    Url := Format('http://findicons.com/search/%s%s?icons=%d&width_from=%d&width_to=%d&color=all&style=all&order=default&license=%s&icon_box=small&icon=&png_file=&output_format=jpg',
+      [KeyStr, PageStr, FItemsPerPage, Req.MinSize, Req.MaxSize, LicStr]);
+    with TCnHTTP.Create do
+    try
+      UserAgent := 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)';
+      HttpRequestHeaders.Add('x-requested-with: XMLHttpRequest');
+      NoCookie := True;
+      Text := GetString(Url);
+    finally
+      Free;
+    end;
+
+    if Text = '' then
+      Exit;
+
+    RegExpr.Expression := 'of (\d+) icons for';
+    if RegExpr.Exec(Text) then
+    begin
+      FTotalCount := StrToIntDef(RegExpr.Match[1], 0);
+      FPageCount := (FTotalCount + FItemsPerPage - 1) div FItemsPerPage;
+    end;
+    if FTotalCount <= 0 then
+      Exit;
+
+    RegExpr.Expression := '<a class="header_download_link" href="#" rel="/icon/download/(\d+)/([^\/]+)/(\d+)/png\?id=(\d+)" title="PNG">PNG</a>';
+    if RegExpr.Exec(Text) then
+    begin
+      repeat
+        Item := Items.Add;
+        Item.Url := Format('http://findicons.com/icon/download/%s/%s/%s/png?id=%s',
+          [RegExpr.Match[1], RegExpr.Match[2], RegExpr.Match[3], RegExpr.Match[4]]);
+        Item.Ext := '.png';
+        Item.Size := StrToIntDef(RegExpr.Match[3], Req.MinSize);
+        Item.Id := Format('%s/%s?id=%s', [RegExpr.Match[1], RegExpr.Match[2], RegExpr.Match[4]]);
+        Item.UserAgent := 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)';
+        Item.Referer := 'http://findicons.com/icon/' + Item.Id;
+      until not RegExpr.ExecNext;
+      Result := True;
+    end;
   finally
-    Free;
-  end;
-  // todo:
+    RegExpr.Free;
+  end;   
 end;
 
 procedure TCnImageProvider_FindIcons.OpenInBrowser(Item: TCnImageRespItem);
 begin
-  inherited;
-
+  OpenUrl('http://findicons.com/icon/' + Item.Id);
 end;
 
 function TCnImageProvider_FindIcons.SearchIconset(Item: TCnImageRespItem;
   var Req: TCnImageReqInfo): Boolean;
 begin
-
+  // todo: 支持图标集
+  Result := False;
 end;
 
 initialization

@@ -178,6 +178,7 @@ USEUNIT("DesignEditors\CnImageListEditor.pas");
 USEFORMNS("DesignEditors\CnImageListEditorFrm.pas", Cnimagelisteditorfrm, CnImageListEditorForm);
 USEUNIT("Utils\CnImageProvider_IconFinder.pas");
 USEUNIT("Utils\CnImageProviderMgr.pas");
+USEUNIT("Utils\CnImageProvider_FindIcons.pas");
 //---------------------------------------------------------------------------
 This file is used by the project manager only and should be treated like the project file
 

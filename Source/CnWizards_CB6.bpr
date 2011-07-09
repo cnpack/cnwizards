@@ -87,7 +87,8 @@
       ..\Dcu\CnScriptFrm.obj ..\Dcu\CnScriptWizard.obj 
       ..\Dcu\CnFeedWizardFrm.obj ..\Dcu\CnFeedWizard.obj ..\Dcu\CnFeedParser.obj 
       ..\Dcu\CnImageListEditor.obj ..\Dcu\CnImageListEditorFrm.obj 
-      ..\Dcu\CnImageProvider_IconFinder.obj ..\Dcu\CnImageProviderMgr.obj"/>
+      ..\Dcu\CnImageProvider_IconFinder.obj ..\Dcu\CnImageProviderMgr.obj 
+      ..\Dcu\CnImageProvider_FindIcons.obj"/>
     <RESFILES value="CnWizards_CB6.res"/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
@@ -381,6 +382,7 @@
       <FILE FILENAME="DesignEditors\CnImageListEditorFrm.pas" FORMNAME="CnImageListEditorForm" UNITNAME="CnImageListEditorFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnImageProvider_IconFinder.pas" FORMNAME="" UNITNAME="CnImageProvider_IconFinder.pas" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnImageProviderMgr.pas" FORMNAME="" UNITNAME="CnImageProviderMgr.pas" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="Utils\CnImageProvider_FindIcons.pas" FORMNAME="" UNITNAME="CnImageProvider_FindIcons" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
   </FILELIST>
   <BUILDTOOLS>
   </BUILDTOOLS>
