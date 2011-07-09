@@ -44,12 +44,19 @@ uses
 {$IFDEF BDS2012_UP}
 const
   MaxListSize = Maxint div 16;
+
+type
+  PCnPointerList = ^TCnPointerList;
+  TCnPointerList = array[0..MaxListSize - 1] of Pointer;
+{$ELSE}
+type
+  PCnPointerList = PPointerList;
 {$ENDIF}
 
 type
   TCnBaseList = class(TObject)
   private
-    FList: PPointerList;
+    FList: PCnPointerList;
     FObjectList: Boolean;
     FCount: Integer;
     FCapacity: Integer;
@@ -72,7 +79,7 @@ type
     property Capacity: Integer read FCapacity write SetCapacity;
     property Count: Integer read FCount write SetCount;
     property Items[Index: Integer]: Pointer read Get write Put; default;
-    property List: PPointerList read FList;
+    property List: PCnPointerList read FList;
   end;
 
   TCnList = class(TCnBaseList)
