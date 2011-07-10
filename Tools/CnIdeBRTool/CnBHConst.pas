@@ -41,7 +41,7 @@ var
   (
       'C++Builder 5.0 ', 'C++Builder 6.0 ', 'Delphi 5.0 ', 'Delphi 6.0 ',
       'Delphi 7.0 ', 'Delphi 8.0 ', 'BDS 2005 ', 'BDS 2006 ', 'RAD Studio 2007',
-      'RAD Studio 2009', 'RAD Studio 2010', 'RAD Studio 2011'
+      'RAD Studio 2009', 'RAD Studio 2010', 'RAD Studio XE'
   );
 
   g_strAppAbName: array[0..11] of string =
