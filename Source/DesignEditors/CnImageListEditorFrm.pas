@@ -447,7 +447,7 @@ function TCnImageListEditorForm.GetDefaultOption(W,
   H: Integer): TCnImageOption;
 begin
   if (ilList.Width = W) and (ilList.Height = H) then
-    Result := ioCrop
+    Result := ioCenter
   else if (ilList.Width < W) or (ilList.Height < H) then
     Result := ioStrech
   else
@@ -1323,7 +1323,8 @@ begin
         cbbTransparentColor.Enabled := TBitmap(info.Image).PixelFormat <> pf32bit;
         cbbTransparentColor.Text := ColorToString(info.Mask);
         btnGetColor.Enabled := cbbTransparentColor.Enabled;
-        rgOptions.Enabled := True;
+        rgOptions.Enabled := (TBitmap(info.Image).Width <> ilList.Width) or
+          (TBitmap(info.Image).Height <> ilList.Height);
         rgOptions.ItemIndex := Ord(info.Option);
         Exit;
       end;
