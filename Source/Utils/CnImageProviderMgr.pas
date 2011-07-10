@@ -40,8 +40,9 @@ unit CnImageProviderMgr;
 interface
 
 uses
-  Windows, SysUtils, Classes, Graphics, CnWizHttpDownMgr, Forms,
-  CnCommon, CnMD5, CnThreadTaskMgr, CnPngUtilsIntf;
+  Windows, SysUtils, Classes, Graphics, CnWizHttpDownMgr, Forms, CnCommon,
+  {$IFNDEF TEST_APP}CnWizOptions,{$ENDIF} RegExpr,
+  CnMD5, CnThreadTaskMgr, CnPngUtilsIntf, CnDesignEditorConsts;
 
 type
   TCnImageReqInfo = record
@@ -60,6 +61,7 @@ type
     FBitmap: TBitmap;
     FSize: Integer;
     FFileName: string;
+    FCacheName: string;
     FUserAgent: string;
     FReferer: string;
   public
@@ -100,12 +102,15 @@ type
     FItemsPerPage: Integer;
     procedure DoProgress(Progress: Integer);
     function DoSearchImage(Req: TCnImageReqInfo): Boolean; virtual; abstract;
+    function FindCache(Url, Keywords, Ext: string; ASize: Integer): string;
   public
     constructor Create; virtual;
     destructor Destroy; override;
     class procedure GetProviderInfo(var DispName, HomeUrl: string); virtual;
     class function DispName: string;
     class function HomeUrl: string;
+    class function CachePath: string;
+    class function IsLocalImage: Boolean; virtual;
 
     function SearchImage(Req: TCnImageReqInfo): Boolean;
     procedure OpenInBrowser(Item: TCnImageRespItem); virtual;
@@ -221,6 +226,15 @@ end;
 
 { TCnBaseImageProvider }
 
+class function TCnBaseImageProvider.CachePath: string;
+begin
+{$IFDEF TEST_APP}
+  Result := MakePath(ExtractFilePath(ParamStr(0)) + csImageCacheDir);
+{$ELSE}
+  Result := MakePath(WizOptions.UserPath + csImageCacheDir);
+{$ENDIF}
+end;
+
 constructor TCnBaseImageProvider.Create;
 begin
   FItems := TCnImageRespItems.Create;
@@ -245,6 +259,65 @@ begin
     FOnProgress(Self, Progress);
 end;
 
+function TCnBaseImageProvider.FindCache(Url, Keywords, Ext: string;
+  ASize: Integer): string;
+var
+  Size: Integer;
+  md5: string;
+  Info: TSearchRec;
+  Succ: Integer;
+  RegExpr: TRegExpr;
+  List: TStringList;
+
+  procedure AddKeywords;
+  var
+    KeyStr: string;
+  begin
+    RegExpr.Expression := '\w+';
+    if RegExpr.Exec(Keywords) then
+    repeat
+      KeyStr := RegExpr.Match[0];
+      if List.IndexOf(KeyStr) < 0 then
+        List.Add(KeyStr);
+    until not RegExpr.ExecNext;
+  end;
+begin
+  RegExpr := TRegExpr.Create;
+  List := TStringList.Create;
+  md5 := MD5Print(MD5String(Url));
+  Succ := FindFirst(CachePath + md5 + '_*.*', faAnyFile - faDirectory - faVolumeID, Info);
+  try
+    while Succ = 0 do
+    begin
+      RegExpr.Expression := md5 + '_\[([^\]]+)\]_\((\d+)\)';
+      if RegExpr.Exec(Info.Name) then
+      begin
+        Size := StrToIntDef(RegExpr.Match[2], 0);
+        if (Size = ASize) and SameText(ExtractFileExt(Info.Name), Ext) then
+        begin
+          // 在文件名中使用新的关键字，并更名文件
+          AddKeywords;
+          Result := CachePath + md5 + Format('_[%s]_(%d)%s',
+            [List.CommaText, ASize, Ext]);
+          if not RenameFile(CachePath + Info.Name, Result) then
+            Result := CachePath + Info.Name;
+          Exit;
+        end;
+      end;
+      Succ := FindNext(Info);
+    end;
+
+    List.Clear;
+    AddKeywords;
+    Result := CachePath + md5 + Format('_[%s]_(%d)%s', [List.CommaText,
+      ASize, Ext]);
+  finally
+    FindClose(Info);
+    List.Free;
+    RegExpr.Free;
+  end;
+end;
+
 class procedure TCnBaseImageProvider.GetProviderInfo(var DispName,
   HomeUrl: string);
 begin
@@ -256,6 +329,11 @@ var
   s: string;
 begin
   GetProviderInfo(s, Result);
+end;
+
+class function TCnBaseImageProvider.IsLocalImage: Boolean;
+begin
+  Result := False;
 end;
 
 procedure TCnBaseImageProvider.OpenInBrowser(Item: TCnImageRespItem);
@@ -278,6 +356,26 @@ var
   BmpName, TmpName: string;
   DownMgr: TCnDownMgr;
   DownList: TList;
+
+  procedure LoadCache(AItem: TCnImageRespItem);
+  begin
+    if SameText(AItem.Ext, '.png') then
+    begin
+      BmpName := AItem.FCacheName + '.bmp';
+      if CnConvertPngToBmp(AItem.FCacheName, BmpName) then
+        AItem.Bitmap.LoadFromFile(BmpName);
+      DeleteFile(BmpName);
+    end
+    else if SameText(AItem.Ext, '.bmp') then
+    begin
+      AItem.Bitmap.LoadFromFile(AItem.FCacheName);
+    end
+    else
+    begin
+      // todo: 处理其它格式
+      AItem.Free;
+    end;
+  end;
 begin
   DownMgr := nil;
   DownList := nil;
@@ -288,6 +386,7 @@ begin
     FPageCount := 0;
     FTotalCount := 0;
     Items.Clear;
+    ForceDirectories(MakeDir(CachePath));
     
     // 后台线程去搜索以避免程序无响应
     with TCnImageSearchThread.Create(Self, Req) do
@@ -301,62 +400,84 @@ begin
     if not Result then
       Exit;
 
-    for i := 0 to Items.Count - 1 do
+    if IsLocalImage then
     begin
-      idx := 0;
-      repeat
-        Items[i].FFileName := GetWindowsTempPath + MD5Print(MD5String(Items[i].Url)) + IntToStr(idx);
-        Inc(idx);
-      until not FileExists(Items[i].FFileName);
-      DownList.Add(DownMgr.NewDownload(Items[i].Url, Items[i].FFileName,
-        Items[i].FUserAgent, Items[i].FReferer, Items[i]));
-    end;
-
-    Prog := 5;
-    DoProgress(5);
-    while DownMgr.FinishCount <> DownMgr.Count do
-    begin
-      for i := DownList.Count - 1 downto 0 do
+      DoProgress(5);
+      for i := 0 to Items.Count - 1 do
       begin
-        Task := TCnDownTask(DownList[i]);
-        Item := TCnImageRespItem(Task.Data);
-        if Task.Status in [tsFailure, tsFinished] then
-        begin
-          TmpName := Item.FFileName;
-          if Task.Status = tsFailure then
-          begin
-            Item.Free;
-          end
-          else if Task.Status = tsFinished then
-          begin
-            if SameText(Item.Ext, '.png') then
-            begin
-              BmpName := Item.FFileName + '.bmp';
-              if CnConvertPngToBmp(Item.FFileName, BmpName) then
-                Item.Bitmap.LoadFromFile(BmpName);
-              DeleteFile(BmpName);
-            end
-            else if SameText(Item.Ext, '.bmp') then
-            begin
-              Item.Bitmap.LoadFromFile(Item.FFileName);
-            end
-            else
-            begin
-              // todo: 处理其它格式
-              Item.Free;
-            end;
-          end;
-          DeleteFile(TmpName);
-          DownList.Delete(i);
-        end;
-      end;
-
-      if DownMgr.FinishCount * 95 div DownMgr.Count + 5 <> Prog then
-      begin
-        Prog := DownMgr.FinishCount * 95 div DownMgr.Count + 5;
+        Items[i].FCacheName := Items[i].Url;
+        LoadCache(Items[i]);
+        Prog := i * 95 div Items.Count + 5;
         DoProgress(Prog);
       end;
-      Application.ProcessMessages;
+    end
+    else
+    begin
+      for i := 0 to Items.Count - 1 do
+      begin
+        idx := 0;
+        repeat
+          Items[i].FFileName := GetWindowsTempPath + MD5Print(MD5String(Items[i].Url)) + IntToStr(idx);
+          Inc(idx);
+        until not FileExists(Items[i].FFileName);
+        Items[i].FCacheName := FindCache(Items[i].Url, Req.Keyword, Items[i].Ext, Items[i].Size);
+        if FileExists(Items[i].FCacheName) then
+          LoadCache(Items[i])
+        else
+          DownList.Add(DownMgr.NewDownload(Items[i].Url, Items[i].FFileName,
+            Items[i].FUserAgent, Items[i].FReferer, Items[i]));
+      end;
+
+      Prog := 5;
+      DoProgress(5);
+      while DownMgr.FinishCount <> DownMgr.Count do
+      begin
+        for i := DownList.Count - 1 downto 0 do
+        begin
+          Task := TCnDownTask(DownList[i]);
+          Item := TCnImageRespItem(Task.Data);
+          if Task.Status in [tsFailure, tsFinished] then
+          begin
+            TmpName := Item.FFileName;
+            if Task.Status = tsFailure then
+            begin
+              Item.Free;
+            end
+            else if Task.Status = tsFinished then
+            begin
+              if SameText(Item.Ext, '.png') then
+              begin
+                BmpName := Item.FFileName + '.bmp';
+                if CnConvertPngToBmp(Item.FFileName, BmpName) then
+                begin
+                  Item.Bitmap.LoadFromFile(BmpName);
+                  CopyFile(PChar(Item.FFileName), PChar(Item.FCacheName), False);
+                end;
+                DeleteFile(BmpName);
+              end
+              else if SameText(Item.Ext, '.bmp') then
+              begin
+                CopyFile(PChar(Item.FFileName), PChar(Item.FCacheName), False);
+                Item.Bitmap.LoadFromFile(Item.FFileName);
+              end
+              else
+              begin
+                // todo: 处理其它格式
+                Item.Free;
+              end;
+            end;
+            DeleteFile(TmpName);
+            DownList.Delete(i);
+          end;
+        end;
+
+        if DownMgr.FinishCount * 95 div DownMgr.Count + 5 <> Prog then
+        begin
+          Prog := DownMgr.FinishCount * 95 div DownMgr.Count + 5;
+          DoProgress(Prog);
+        end;
+        Application.ProcessMessages;
+      end;
     end;
     DoProgress(100);
   finally

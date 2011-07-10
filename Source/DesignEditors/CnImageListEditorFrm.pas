@@ -1384,7 +1384,10 @@ end;
 procedure TCnImageListEditorForm.btnGotoClick(Sender: TObject);
 begin
   if cbbProvider.ItemIndex >= 0 then
-    OpenUrl(ImageProviderMgr[cbbProvider.ItemIndex].HomeUrl);
+    if ImageProviderMgr[cbbProvider.ItemIndex].IsLocalImage then
+      ExploreDir(ImageProviderMgr[cbbProvider.ItemIndex].HomeUrl)
+    else
+      OpenUrl(ImageProviderMgr[cbbProvider.ItemIndex].HomeUrl);
 end;
 
 procedure TCnImageListEditorForm.actFirstExecute(Sender: TObject);

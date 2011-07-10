@@ -11,7 +11,8 @@ uses
   CnImageListEditorFrm in '..\..\Source\DesignEditors\CnImageListEditorFrm.pas' {CnImageListEditorForm},
   CnWizHttpDownMgr in '..\..\Source\Utils\CnWizHttpDownMgr.pas',
   CnDesignEditorConsts in '..\..\Source\DesignEditors\CnDesignEditorConsts.pas',
-  CnImageProvider_FindIcons in '..\..\Source\Utils\CnImageProvider_FindIcons.pas';
+  CnImageProvider_FindIcons in '..\..\Source\Utils\CnImageProvider_FindIcons.pas',
+  CnImageProvider_LocalCache in '..\..\Source\Utils\CnImageProvider_LocalCache.pas';
 
 {$R *.res}
 
