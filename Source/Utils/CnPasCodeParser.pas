@@ -408,8 +408,6 @@ begin
 
     Lex := TmwPasLex.Create;
     Lex.Origin := PAnsiChar(ASource);
-    Lex.UseTabKey := FUseTabKey;
-    Lex.TabWidth := FTabWidth;
 
     DeclareWithEndLevel := 0; // 嵌套的需要end的定义层数
     Token := nil;
