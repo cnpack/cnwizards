@@ -887,10 +887,10 @@ begin
           Continue; // D5/6下ConvertPos在只有一个大于号时会出错，只能屏蔽
         end;
         // 以上这句 ConvertPos 在 D2009 或以上中带汉字时的结果可能会有偏差，
-        // 因此直接采用 CharIndex + 1 的方式，但对 Tab 键似乎处理有问题
+        // 因此直接采用下面 CharIndex + 1 的方式，但对 Tab 键展开缺乏处理。
 {$IFDEF BDS2009_UP}
-        if not FHighlight.FUseTabKey then
-          EditPos.Col := Tokens[I].CharIndex + 1;
+        // if not FHighlight.FUseTabKey then
+        EditPos.Col := Tokens[I].CharIndex + 1;
 {$ENDIF}
         Tokens[I].EditCol := EditPos.Col;
         Tokens[I].EditLine := EditPos.Line;
@@ -916,6 +916,9 @@ begin
   {$ENDIF}
         CnOtaSaveEditorToStream(EditView.Buffer, Stream);
         // 解析当前显示的源文件，需要高亮当前标识符时不设置KeyOnly
+{$IFDEF BDS2009_UP}
+        Parser.TabWidth := FHighlight.FTabWidth;
+{$ENDIF}
         Parser.ParseSource(PAnsiChar(Stream.Memory),
           IsDpr(EditView.Buffer.FileName), not FHighlight.CurrentTokenHighlight);
       finally
@@ -979,10 +982,11 @@ begin
         // 转换成 Col 与 Line
         CharPos := OTACharPos(Tokens[I].CharIndex, Tokens[I].LineNumber + 1);
         EditView.ConvertPos(False, EditPos, CharPos);
-        // TODO: 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
+        // TODO: 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，
+        // 因此直接采用下面 CharIndex + 1 的方式，Parser 本身已对 Tab 键展开。
 {$IFDEF BDS2009_UP}
-        if not FHighlight.FUseTabKey then
-          EditPos.Col := Tokens[I].CharIndex + 1;
+        // if not FHighlight.FUseTabKey then
+        EditPos.Col := Tokens[I].CharIndex + 1;
 {$ENDIF}
         Tokens[I].EditCol := EditPos.Col;
         Tokens[I].EditLine := EditPos.Line;
@@ -1123,8 +1127,8 @@ begin
           EditView.ConvertPos(False, EditPos, CharPos);
           // TODO: 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
 {$IFDEF BDS2009_UP}
-          if not FHighlight.FUseTabKey then
-            EditPos.Col := Parser.Tokens[I].CharIndex + 1;
+          // if not FHighlight.FUseTabKey then
+          EditPos.Col := Parser.Tokens[I].CharIndex + 1;
 {$ENDIF}
           Parser.Tokens[I].EditCol := EditPos.Col;
           Parser.Tokens[I].EditLine := EditPos.Line;
@@ -1485,6 +1489,7 @@ begin
   inherited Create;
   FControl := AControl;
   FParser := TCnPasStructureParser.Create;
+  FParser.UseTabKey := True;
   FCppParser := TCnCppStructureParser.Create;
   FKeyList := TCnList.Create;
   FCurTokenList := TCnList.Create;
