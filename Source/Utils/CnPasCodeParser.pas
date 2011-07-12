@@ -356,6 +356,33 @@ var
   DeclareWithEndLevel: Integer;
   PrevTokenID: TTokenKind;
 
+  function CalcCharIndex(): Integer;
+{$IFDEF BDS2009_UP}
+  var
+    I, Len: Integer;
+{$ENDIF}
+  begin
+{$IFDEF BDS2009_UP}
+    if FUseTabKey and (FTabWidth >= 2) then
+    begin
+      // 遍历当前行内容进行 Tab 键展开
+      I := Lex.LinePos;
+      Len := 0;
+      while ( I < Lex.TokenPos ) do
+      begin
+        if (ASource[I] = #09) then
+          Len := ((Len div FTabWidth) + 1) * FTabWidth
+        else
+          Inc(Len);
+        Inc(I);
+      end;
+      Result := Len;
+    end
+    else
+{$ENDIF}
+      Result := Lex.TokenPos - Lex.LinePos;
+  end;
+
   procedure NewToken;
   var
     Len: Integer;
@@ -372,7 +399,7 @@ var
     // Token.FToken := AnsiString(Lex.Token);
     
     Token.FLineNumber := Lex.LineNumber;
-    Token.FCharIndex := Lex.TokenPos - Lex.LinePos;
+    Token.FCharIndex := CalcCharIndex();
     Token.FTokenID := Lex.TokenID;
     Token.FItemIndex := FList.Count;
     if CurrBlock <> nil then
