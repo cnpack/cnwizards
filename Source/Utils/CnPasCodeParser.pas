@@ -48,13 +48,6 @@ const
   CN_TOKEN_MAX_SIZE = 63;
 
 type
-
-//==============================================================================
-// Pascal 文件结构高亮解析器
-//==============================================================================
-
-{ TCnPasStructureParser }
-
   TCnPasToken = class(TPersistent)
   {* 描述一 Token 的结构高亮信息}
   private
@@ -113,6 +106,12 @@ type
     property IsMethodClose: Boolean read FIsMethodClose;
     {* 是否是函数过程的结束 }
   end;
+
+//==============================================================================
+// Pascal 文件结构高亮解析器
+//==============================================================================
+
+  { TCnPasStructureParser }
 
   TCnPasStructureParser = class(TObject)
   {* 利用 Lex 进行语法解析得到各个 Token 和位置信息}
