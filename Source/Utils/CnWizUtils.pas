@@ -1325,8 +1325,14 @@ begin
       BC := CnOtaGetActiveProjectOptionsConfigurations(nil);
       if BC <> nil then
         if BC.GetActiveConfiguration <> nil then
+        begin
           Result := StringReplace(Result, '$(Config)',
             BC.GetActiveConfiguration.GetName, [rfReplaceAll, rfIgnoreCase]);
+    {$IFDEF DELPHI2012_UP}
+          Result := StringReplace(Result, '$(Platform)',
+            BC.GetActiveConfiguration.GetPlatform, [rfReplaceAll, rfIgnoreCase]);
+    {$ENDIF}
+        end;
     {$ENDIF}
   finally
     Vars.Free;
