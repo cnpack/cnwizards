@@ -130,6 +130,8 @@ type
     FSource: AnsiString;
     FInnerBlockCloseToken: TCnPasToken;
     FInnerBlockStartToken: TCnPasToken;
+    FUseTabKey: Boolean;
+    FTabWidth: Integer;
     function GetCount: Integer;
     function GetToken(Index: Integer): TCnPasToken;
   public
@@ -165,6 +167,11 @@ type
     property Source: AnsiString read FSource;
     property KeyOnly: Boolean read FKeyOnly;
     {* 是否只处理出关键字}
+
+    property UseTabKey: Boolean read FUseTabKey write FUseTabKey;
+    {* 是否排版处理 Tab 键的宽度，如不处理，则将 Tab 键当作宽为 1 处理}
+    property TabWidth: Integer read FTabWidth write FTabWidth;
+    {* Tab 键的宽度}
   end;
 
 //==============================================================================
@@ -300,6 +307,7 @@ end;
 constructor TCnPasStructureParser.Create;
 begin
   FList := TCnList.Create;
+  FTabWidth := 2;
 end;
 
 destructor TCnPasStructureParser.Destroy;
@@ -401,6 +409,8 @@ begin
 
     Lex := TmwPasLex.Create;
     Lex.Origin := PAnsiChar(ASource);
+    Lex.UseTabKey := FUseTabKey;
+    Lex.TabWidth := FTabWidth;
 
     DeclareWithEndLevel := 0; // 嵌套的需要end的定义层数
     Token := nil;
