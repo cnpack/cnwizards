@@ -135,6 +135,8 @@ type
     fLinePos: Integer;
     fIsInterface: Boolean;
     fIsClass: Boolean;
+    FUseTabKey: Boolean;
+    FTabWidth: Integer;
     function KeyHash(ToHash: PAnsiChar): Integer;
     function KeyComp(const aKey: AnsiString): Boolean;
     function Func15: TTokenKind;
@@ -263,16 +265,24 @@ type
     property LastNoSpace: TTokenKind read fLastNoSpace;
     property LastNoSpacePos: Integer read fLastNoSpacePos;
     property LineNumber: Integer read fLineNumber write fLineNumber;
+    {* 当前行号，从 0 开始}
     property LinePos: Integer read fLinePos;
+    {* 当前行行首所在的线性位置}
     property Origin: PAnsiChar read fOrigin write SetOrigin;
     property RunPos: Integer read Run write SetRunPos;
     property TokenPos: Integer read fTokenPos;
+    {* 当前 Token 所在的线性位置，减去 LinePos 即是当前列位置}
     property Token: string read GetToken;
     {* 此俩属性为 PAnsiChar 方式使用，以避免 D2010 下性能问题}
     property TokenAddr: PAnsiChar read GetTokenAddr;
     property TokenLength: Integer read GetTokenLength;
 
     property TokenID: TTokenKind read FTokenID;
+
+    property UseTabKey: Boolean read FUseTabKey write FUseTabKey;
+    {* 是否排版处理 Tab 键的宽度，如不处理，则将 Tab 键当作宽为 1 处理}
+    property TabWidth: Integer read FTabWidth write FTabWidth;
+    {* Tab 键的宽度}
   end;
 
 var
@@ -915,6 +925,7 @@ end;
 constructor TmwPasLex.Create;
 begin
   inherited Create;
+  FTabWidth := 2;
   InitIdent;
   MakeMethodTables;
 end; { Create }
@@ -1342,7 +1353,16 @@ procedure TmwPasLex.SpaceProc;
 begin
   inc(Run);
   fTokenID:=tkSpace;
-  while FOrigin[Run]in [#1..#9, #11, #12, #14..#32]do inc(Run);
+  while FOrigin[Run]in [#1..#9, #11, #12, #14..#32]do
+  begin
+    if FUseTabKey and (FOrigin[Run] = #9) and (FTabWidth >= 2) then
+    begin
+      // 被 Tab 排版排好的 Run
+      Run := ((Run div FTabWidth) + 1) * FTabWidth;
+    end
+    else
+      inc(Run);
+  end;
 end;
 
 procedure TmwPasLex.SquareCloseProc;
