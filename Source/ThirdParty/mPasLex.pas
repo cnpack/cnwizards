@@ -135,8 +135,6 @@ type
     fLinePos: Integer;
     fIsInterface: Boolean;
     fIsClass: Boolean;
-    FUseTabKey: Boolean;
-    FTabWidth: Integer;
     function KeyHash(ToHash: PAnsiChar): Integer;
     function KeyComp(const aKey: AnsiString): Boolean;
     function Func15: TTokenKind;
@@ -278,11 +276,6 @@ type
     property TokenLength: Integer read GetTokenLength;
 
     property TokenID: TTokenKind read FTokenID;
-
-    property UseTabKey: Boolean read FUseTabKey write FUseTabKey;
-    {* 是否排版处理 Tab 键的宽度，如不处理，则将 Tab 键当作宽为 1 处理}
-    property TabWidth: Integer read FTabWidth write FTabWidth;
-    {* Tab 键的宽度}
   end;
 
 var
@@ -925,7 +918,6 @@ end;
 constructor TmwPasLex.Create;
 begin
   inherited Create;
-  FTabWidth := 2;
   InitIdent;
   MakeMethodTables;
 end; { Create }
@@ -1353,16 +1345,7 @@ procedure TmwPasLex.SpaceProc;
 begin
   inc(Run);
   fTokenID:=tkSpace;
-  while FOrigin[Run]in [#1..#9, #11, #12, #14..#32]do
-  begin
-    if FUseTabKey and (FOrigin[Run] = #9) and (FTabWidth >= 2) then
-    begin
-      // 被 Tab 排版排好的 Run
-      Run := ((Run div FTabWidth) + 1) * FTabWidth;
-    end
-    else
-      inc(Run);
-  end;
+  while FOrigin[Run]in [#1..#9, #11, #12, #14..#32]do inc(Run);
 end;
 
 procedure TmwPasLex.SquareCloseProc;
