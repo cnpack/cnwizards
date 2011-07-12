@@ -48,6 +48,19 @@ const
   CN_TOKEN_MAX_SIZE = 63;
 
 type
+  TCnUseToken = class(TObject)
+  private
+    FIsImpl: Boolean;
+    FTokenPos: Integer;
+    FToken: string;
+    FTokenID: TTokenKind;
+  public
+    property Token: string read FToken write FToken;
+    property IsImpl: Boolean read FIsImpl write FIsImpl;
+    property TokenPos: Integer read FTokenPos write FTokenPos;
+    property TokenID: TTokenKind read FTokenID write FTokenID;
+  end;
+
   TCnPasToken = class(TPersistent)
   {* 描述一 Token 的结构高亮信息}
   private
@@ -1306,11 +1319,18 @@ end;
 procedure ParseUnitUses(const Source: AnsiString; UsesList: TStrings);
 var
   Lex: TmwPasLex;
-  I: Integer;
+  I, Flag: Integer;
+{$IFDEF BDS2012_UP}
+  TempList: TObjectList;
+  AUseObj, NextUseObj, Next2UseObj: TCnUseToken;
+{$ENDIF}
 begin
   UsesList.Clear;
   Lex := TmwPasLex.Create;
-  I := 0;
+{$IFDEF BDS2012_UP}
+  TempList := TObjectList.Create(True);
+{$ENDIF}
+  Flag := 0;
   try
     Lex.Origin := PAnsiChar(Source);
     while Lex.TokenID <> tkNull do
@@ -1320,18 +1340,75 @@ begin
         while not (Lex.TokenID in [tkNull, tkSemiColon]) do
         begin
           Lex.Next;
+{$IFDEF BDS2012_UP}
+          if (Lex.TokenID = tkIdentifier) or (Lex.TokenID = tkPoint) then
+          begin
+            AUseObj := TCnUseToken.Create;
+            AUseObj.Token := string(Lex.Token);
+            AUseObj.IsImpl := Flag = 1;
+            AUseObj.TokenPos := Lex.TokenPos;
+            AUseObj.TokenID := Lex.TokenID;
+            TempList.Add(AUseObj);
+          end;
+{$ELSE}
           if Lex.TokenID = tkIdentifier then
-            UsesList.AddObject(string(Lex.Token), TObject(I));
+          begin
+            UsesList.AddObject(string(Lex.Token), TObject(Flag));
+          end;
+{$ENDIF}
         end;
       end
       else if Lex.TokenID = tkImplementation then
       begin
-        I := 1;
-        // 用 I 来表示 interface 还是 implementation
+        Flag := 1;
+        // 用 Flag 来表示 interface 还是 implementation
       end;
       Lex.Next;
     end;
+{$IFDEF BDS2012_UP}
+    // XE2 下允许 Vcl.Forms 这样的 uses，因此需要合并
+    I := 0;
+    while I < TempList.Count do
+    begin
+      AUseObj := TCnUseToken(TempList.Items[I]);
+      if AUseObj.IsImpl then
+        Flag := 1
+      else
+        Flag := 0;
+
+      if (I = TempList.Count - 1) or (I = TempList.Count - 2) then
+      begin
+        if AUseObj.TokenID = tkIdentifier then
+          UsesList.AddObject(AUseObj.Token, TObject(Flag));
+      end
+      else if (I >= 0) and (I < TempList.Count - 2) then
+      begin
+        NextUseObj := TCnUseToken(TempList.Items[I + 1]);
+        if (NextUseObj.TokenID = tkPoint)
+          and (NextUseObj.TokenPos = AUseObj.TokenPos + Length(AUseObj.Token)) then
+        begin
+          // 这个和后面的点紧挨着
+          Next2UseObj := TCnUseToken(TempList.Items[I + 2]);
+          if (Next2UseObj.TokenID = tkIdentifier)
+            and (Next2UseObj.TokenPos = NextUseObj.TokenPos + Length(NextUseObj.Token)) then
+          begin
+            // 点和后面的紧挨着，拼成一个
+            UsesList.AddObject(AUseObj.Token + '.' + Next2UseObj.Token, TObject(Flag));
+            Inc(I, 3);
+            Continue;
+          end;
+        end;
+
+        if AUseObj.TokenID = tkIdentifier then
+          UsesList.AddObject(AUseObj.Token, TObject(Flag));
+      end;
+      Inc(I);
+    end;
+{$ENDIF}
   finally
+{$IFDEF BDS2012_UP}
+    TempList.Free;
+{$ENDIF}
     Lex.Free;
   end;
 end;
