@@ -3017,8 +3017,8 @@ type
 
 function ReBaseImage(CurrentImageName: PAnsiChar; SymbolPath: PAnsiChar; fReBase: BOOL;
   fRebaseSysfileOk: BOOL; fGoingDown: BOOL; CheckImageSize: ULONG;
-  var OldImageSize: ULONG; var OldImageBase: ULONG_PTR; var NewImageSize: ULONG;
-  var NewImageBase: ULONG_PTR; TimeStamp: ULONG): BOOL; stdcall;
+  var OldImageSize: ULONG; var OldImageBase: ULONG; var NewImageSize: ULONG;
+  var NewImageBase: ULONG; TimeStamp: ULONG): BOOL; stdcall;
 {$EXTERNALSYM ReBaseImage}
 
 function ReBaseImage64(CurrentImageName: PAnsiChar; SymbolPath: PAnsiChar; fReBase: BOOL;

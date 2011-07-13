@@ -5242,7 +5242,7 @@ end;
 function VersionResourceAvailable(const FileName: string): Boolean;
 var
   Size: DWORD;
-  Handle: THandle;
+  Handle: DWORD;
   Buffer: string;
 begin
   Result := False;
@@ -5302,7 +5302,7 @@ end;
 function VersionFixedFileInfo(const FileName: string; var FixedInfo: TVSFixedFileInfo): Boolean;
 var
   Size, FixInfoLen: DWORD;
-  Handle: THandle;
+  Handle: DWORD;
   Buffer: string;
   FixInfoBuf: PVSFixedFileInfo;
 begin
@@ -5342,7 +5342,7 @@ end;
 
 constructor TJclFileVersionInfo.Create(const FileName: string);
 var
-  Handle: THandle;
+  Handle: DWORD;
   Size: DWORD;
 begin
   Size := GetFileVersionInfoSize(PChar(FileName), Handle);

@@ -520,7 +520,7 @@ type
   private
     FStackInfo: TStackInfo;
     function GetCallerAdr: Pointer;
-    function GetLogicalAddress: DWORD_PTR;
+    function GetLogicalAddress: DWORD;
   public
     property CallerAdr: Pointer read GetCallerAdr;
     property LogicalAddress: DWORD read GetLogicalAddress;
@@ -547,8 +547,8 @@ type
     procedure TraceStackFrames;
     procedure TraceStackRaw;
     procedure DelayStoreStack;
-    function ValidCallSite(CodeAddr: DWORD_PTR; var CallInstructionSize: Cardinal): Boolean;
-    function ValidStackAddr(StackAddr: DWORD_PTR): Boolean;
+    function ValidCallSite(CodeAddr: DWORD; var CallInstructionSize: Cardinal): Boolean;
+    function ValidStackAddr(StackAddr: DWORD): Boolean;
     function GetCount: Integer;
     procedure CorrectOnAccess(ASkipFirstItem: Boolean);
   public
@@ -716,7 +716,7 @@ type
     function GetThreadNames(ThreadID: DWORD): string;
     procedure DoSyncThreadRegistered;
     procedure DoSyncThreadUnregistered;
-    function GetThreadHandle(Index: Integer): THandle;
+    function GetThreadHandle(Index: Integer): DWORD;
     function GetThreadID(Index: Integer): DWORD;
     function GetThreadIDCount: Integer;
     function GetThreadValues(ThreadID: DWORD; Index: Integer): string;
@@ -4070,9 +4070,9 @@ begin
   Result := Pointer(FStackInfo.CallerAdr);
 end;
 
-function TJclStackInfoItem.GetLogicalAddress: DWORD_PTR;
+function TJclStackInfoItem.GetLogicalAddress: DWORD;
 begin
-  Result := FStackInfo.CallerAdr - DWORD_PTR(ModuleFromAddr(CallerAdr));
+  Result := FStackInfo.CallerAdr - DWORD(ModuleFromAddr(CallerAdr));
 end;
 
 //=== { TJclStackInfoList } ==================================================

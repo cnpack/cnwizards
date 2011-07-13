@@ -1202,7 +1202,11 @@ begin
     while L <= H do
     begin
       I := (L + H) shr 1;
+{$IFDEF VER230}
+      C := SortFunc(List.List[I], Item);
+{$ELSE}
       C := SortFunc(List.List^[I], Item);
+{$ENDIF}
       if C < 0 then
         L := I + 1
       else
@@ -1995,7 +1999,7 @@ begin
   FSignChars[False] := '-';
   FSignChars[True] := '+';
   FPaddingChar := ' ';
-  FMultiplier := '×';
+  FMultiplier := #$D7;
   FFractionalPartSeparator := DecimalSeparator{$IFDEF CLR}[1]{$ENDIF};
   FDigitBlockSeparator := ThousandSeparator{$IFDEF CLR}[1]{$ENDIF};
 end;

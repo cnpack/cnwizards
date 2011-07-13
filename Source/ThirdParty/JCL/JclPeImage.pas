@@ -2303,8 +2303,11 @@ begin
 
         ExportItem := TJclPeExportFuncItem.Create(Self, UTF8ToString(PAnsiChar(RvaToVa(Names^))),
           ForwardedName, Address, I, NameOrdinals^ + FBase, icNotChecked);
-
+{$IFDEF VER230}
+        List[I] := ExportItem;
+{$ELSE}
         List^[I] := ExportItem;
+{$ENDIF}
         Inc(NameOrdinals);
         Inc(Names);
       end;
@@ -6198,7 +6201,7 @@ function InternalReadProcMem(ProcessHandle: THandle; Address: DWORD;
   Buffer: Pointer; Size: Integer): Boolean;
 // TODO 64 bit version
 var
-  BR: DWORD;
+  BR: THandle;
 begin
   Result := ReadProcessMemory(ProcessHandle, Pointer(Address), Buffer, Size, BR);
 end;
