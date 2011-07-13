@@ -2671,7 +2671,8 @@ begin
       SaveFontStyles := [];
       EditCanvas := EditControlWrapper.GetEditControlCanvas(EditControl);
 
-      if FHilightSeperateLine and (Integer(Info.FSeperateLineList[LogicLineNum]) = CN_LINE_SEPERATE_FLAG)
+      if FHilightSeperateLine and (LogicLineNum <= Info.FSeperateLineList.Count - 1)
+        and (Integer(Info.FSeperateLineList[LogicLineNum]) = CN_LINE_SEPERATE_FLAG)
         and (Trim(EditControlWrapper.GetTextAtLine(EditControl, LogicLineNum)) = '') then
       begin
         // ±£´æ EditCanvas µÄ¾ÉÄÚÈÝ
