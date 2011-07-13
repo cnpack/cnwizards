@@ -134,7 +134,16 @@ begin
   
   if FileName <> '' then
     if not SearchAndOpenFile(FileName) then
-      ErrorDlg(SCnEditorOpenFileNotFind);
+    begin
+      // For Vcl.Forms like
+      if IsDelphiRuntime then
+        FileName := FileName + '.pas'
+      else
+        FileName := FileName + '.cpp';
+
+      if not SearchAndOpenFile(FileName) then
+        ErrorDlg(SCnEditorOpenFileNotFind);
+    end;
 end;
 
 function TCnEditorOpenFile.GetCaption: string;
