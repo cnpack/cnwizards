@@ -1258,13 +1258,15 @@ function GetFileNameFromModuleName(AName: string; AProject: IOTAProject = nil): 
 var
   Paths: TStringList;
   i: Integer;
+  Ext: string;
 begin
   if AProject = nil then
     AProject := CnOtaGetCurrentProject;
-    
-  if ExtractFileExt(AName) = '' then
+
+  Ext := LowerCase(ExtractFileExt(AName));
+  if (Ext = '') or (Ext <> '.pas') then
     AName := AName + '.pas';
-    
+
   Result := '';
   // 在工程模块中查找
   if AProject <> nil then
