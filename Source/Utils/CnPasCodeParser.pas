@@ -1319,8 +1319,9 @@ end;
 procedure ParseUnitUses(const Source: AnsiString; UsesList: TStrings);
 var
   Lex: TmwPasLex;
-  I, Flag: Integer;
+  Flag: Integer;
 {$IFDEF BDS2012_UP}
+  I: Integer;
   TempList: TObjectList;
   AUseObj, NextUseObj, Next2UseObj: TCnUseToken;
 {$ENDIF}
