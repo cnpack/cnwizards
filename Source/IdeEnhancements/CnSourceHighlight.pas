@@ -3740,15 +3740,13 @@ begin
     CnDebugger.LogMsg('SourceHighlight: Editor Option Changed. Get UseTabKey is '
       + VarToStr(Options.GetOptionValue('UseTabCharacter')));
 {$ENDIF}
-    if VarToStr(Options.GetOptionValue('UseTabCharacter')) = 'True' then
-    begin
-      FUseTabKey := True;
-      try
-        FTabWidth := Options.GetOptionValue('TabStops');
-      except
-        ;
-      end;
+    try
+      FTabWidth := Options.GetOptionValue('TabStops');
+    except
+      ;
     end;
+    if VarToStr(Options.GetOptionValue('UseTabCharacter')) = 'True' then
+      FUseTabKey := True;
   end;
 end;
 
