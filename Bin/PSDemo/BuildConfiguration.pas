@@ -20,7 +20,7 @@ var
   I: Integer;
 begin
   if (CompilerKind = ckDelphi) and ((Compiler = cnDelphi12) or 
-    (Compiler = cnDelphi14) or (Compiler = cnDelphi15)) then
+    (Compiler = cnDelphi14) or (Compiler = cnDelphi15) or (Compiler = cnDelphi16)) then
   begin
     BC := CnOtaGetActiveProjectOptionsConfigurations(nil);
     if BC <> nil then
