@@ -158,7 +158,7 @@ end;
 procedure TCnCorPropWizard.Config;
 begin
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('Configure Correct Property Expert');
+  CnDebugger.LogMsg('Configure Correct Property Wizard');
 {$ENDIF}
   with TCnCorPropCfgForm.Create(Application) do
     try
