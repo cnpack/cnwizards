@@ -28,7 +28,7 @@ begin
   Writeln(Format('Environment Options Total %d', [Strs.Count]));
 
   for I := 0 to Strs.Count - 1 do
-    Writeln(Strs[I] + ': ' + Options.GetOptionValue(Strs[I]));
+    Writeln(Strs[I] + ': ' + string(Options.GetOptionValue(Strs[I])));
 
   Strs.Free;
 end.

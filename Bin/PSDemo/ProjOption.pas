@@ -28,7 +28,14 @@ begin
   Writeln(Format('Project Options Total %d', [Strs.Count]));
 
   for I := 0 to Strs.Count - 1 do
-    Writeln(Strs[I] + ': ' + Options.GetOptionValue(Strs[I]));
+  begin
+    try
+      Writeln(Strs[I] + ': ' + string(Options.GetOptionValue(Strs[I])));
+    except
+      Writeln(Strs[I] + ': <Can NOT get the value>');
+      Continue;
+    end;
+  end;
 
   Strs.Free;
 end.
