@@ -157,14 +157,14 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
       object btnAdd: TButton
         Left = 8
         Top = 196
-        Width = 57
+        Width = 69
         Height = 21
         Action = actAdd
         Anchors = [akLeft, akBottom]
         TabOrder = 1
       end
       object btnReplace: TButton
-        Left = 72
+        Left = 83
         Top = 196
         Width = 57
         Height = 21
@@ -173,7 +173,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         TabOrder = 2
       end
       object btnDelete: TButton
-        Left = 136
+        Left = 146
         Top = 196
         Width = 57
         Height = 21
@@ -182,7 +182,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         TabOrder = 3
       end
       object btnClear: TButton
-        Left = 200
+        Left = 209
         Top = 196
         Width = 57
         Height = 21
@@ -191,9 +191,9 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         TabOrder = 4
       end
       object btnExport: TButton
-        Left = 264
+        Left = 272
         Top = 196
-        Width = 57
+        Width = 65
         Height = 21
         Action = actExport
         Anchors = [akLeft, akBottom]
@@ -232,9 +232,9 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
       end
     end
     object btnOK: TButton
-      Left = 160
+      Left = 128
       Top = 369
-      Width = 57
+      Width = 65
       Height = 21
       Anchors = [akRight, akBottom]
       Caption = '&OK'
@@ -242,9 +242,9 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
       OnClick = btnOKClick
     end
     object btnCancel: TButton
-      Left = 224
+      Left = 197
       Top = 369
-      Width = 57
+      Width = 65
       Height = 21
       Anchors = [akRight, akBottom]
       Cancel = True
@@ -253,18 +253,18 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
       TabOrder = 3
     end
     object btnApply: TButton
-      Left = 288
+      Left = 272
       Top = 369
-      Width = 57
+      Width = 68
       Height = 21
       Action = actApply
       Anchors = [akRight, akBottom]
       TabOrder = 4
     end
     object btnHelp: TButton
-      Left = 352
+      Left = 344
       Top = 369
-      Width = 57
+      Width = 65
       Height = 21
       Anchors = [akRight, akBottom]
       Caption = '&Help'
@@ -317,7 +317,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         FocusControl = cbbProvider
       end
       object lblPage: TLabel
-        Left = 136
+        Left = 156
         Top = 325
         Width = 41
         Height = 13
@@ -355,52 +355,52 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
       object btnSearchAdd: TButton
         Left = 8
         Top = 321
-        Width = 57
+        Width = 69
         Height = 21
         Action = actSearchAdd
         Anchors = [akLeft, akBottom]
         TabOrder = 6
       end
       object btnPrev: TButton
-        Left = 217
+        Left = 231
         Top = 321
-        Width = 30
+        Width = 27
         Height = 21
         Action = actPrev
         Anchors = [akRight, akBottom]
         TabOrder = 9
       end
       object btnNext: TButton
-        Left = 253
+        Left = 261
         Top = 321
-        Width = 30
+        Width = 27
         Height = 21
         Action = actNext
         Anchors = [akRight, akBottom]
         TabOrder = 10
       end
       object btnFirst: TButton
-        Left = 182
+        Left = 201
         Top = 321
-        Width = 30
+        Width = 27
         Height = 21
         Action = actFirst
         Anchors = [akRight, akBottom]
         TabOrder = 8
       end
       object btnLast: TButton
-        Left = 288
+        Left = 291
         Top = 321
-        Width = 30
+        Width = 27
         Height = 21
         Action = actLast
         Anchors = [akRight, akBottom]
         TabOrder = 11
       end
       object btnSearchReplace: TButton
-        Left = 72
+        Left = 80
         Top = 321
-        Width = 57
+        Width = 69
         Height = 21
         Action = actSearchReplace
         Anchors = [akLeft, akBottom]
