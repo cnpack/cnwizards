@@ -746,7 +746,7 @@ type
     EndPos: Longint; // Position at the end of the unit name
     CommaBeforePos: Longint; // Position of ',' before unit name
     CommaAfterPos: Longint;  // Position of ',' after unit name
-		SpaceAfter: Boolean;
+    SpaceAfter: Boolean;
   end;
 
 function TCnUsesCleaner.DoCleanUnit(Buffer: IOTAEditBuffer; Intf, Impl:
