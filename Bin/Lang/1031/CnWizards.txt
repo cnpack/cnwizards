@@ -3275,6 +3275,7 @@ SCnBooleanPropEditorComment=Editor für Bool Property mit einer Checkbox.
 SCnSetPropEditorComment=Editor für Set Property mit Checkboxen in Dropdown Liste, Direkte Eingabe unterstützt.
 SCnAlignPropEditorComment=Editor für Ausrichtung Property mit einer Bitmap.
 SCnNamePropEditorComment=Editor für Komponenten Namen Property benutzt Komponenten Präfix Regeln.
+SCnImageListCompEditorComment=Editor für TImageList, XP Style Image und Online Suche unterstützt
 SCnPropEditorNoMatch=kein Matched Text!
 SCnPropEditorReplaceOK=Austausch OK, %D Aktionen total.
 SCnPropEditorNoMatch=keine Übereinstimmung!
