@@ -2,7 +2,7 @@
 		<PropertyGroup>
 			<ProjectGuid>{1C1531F7-1D1A-4F26-AF11-F48656B06770}</ProjectGuid>
 			<MainSource>CnWizards_D16.dpr</MainSource>
-			<Config Condition="'$(Config)'==''">Release</Config>
+			<Config Condition="'$(Config)'==''">Debug</Config>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
 			<ProjectVersion>13.4</ProjectVersion>
 			<FrameworkType>VCL</FrameworkType>
@@ -34,12 +34,18 @@
 			<CfgParent>Base</CfgParent>
 			<Base>true</Base>
 		</PropertyGroup>
+		<PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win32)'!=''">
+			<Cfg_2_Win32>true</Cfg_2_Win32>
+			<CfgParent>Cfg_2</CfgParent>
+			<Cfg_2>true</Cfg_2>
+			<Base>true</Base>
+		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
 			<VerInfo_MinorVer>9</VerInfo_MinorVer>
-			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=0.9.9.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<VerInfo_Locale>2052</VerInfo_Locale>
-			<VerInfo_Release>8</VerInfo_Release>
+			<VerInfo_Release>9</VerInfo_Release>
 			<VerInfo_MajorVer>0</VerInfo_MajorVer>
 			<DCC_UsePackage>rtl;vcl;vclx;designide</DCC_UsePackage>
 			<UsePackages>true</UsePackages>
@@ -81,6 +87,11 @@
 			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
 			<DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
 			<DCC_DependencyCheckOutputName>..\Bin\CnWizards_D16.dll</DCC_DependencyCheckOutputName>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
+			<DCC_Define>USE_JCL;$(DCC_Define)</DCC_Define>
+			<DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
+			<Manifest_File>None</Manifest_File>
 		</PropertyGroup>
 		<ItemGroup>
 			<DelphiCompile Include="CnWizards_D16.dpr">
@@ -476,6 +487,7 @@
 			<DCCReference Include="Utils\CnImageProviderMgr.pas"/>
 			<DCCReference Include="Utils\CnImageProvider_IconFinder.pas"/>
 			<DCCReference Include="Utils\CnImageProvider_FindIcons.pas"/>
+			<DCCReference Include="Utils\CnImageProvider_LocalCache.pas"/>
 			<BuildConfiguration Include="Debug">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

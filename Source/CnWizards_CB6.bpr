@@ -394,7 +394,7 @@ IncludeVerInfo=1
 AutoIncBuild=0
 MajorVer=0
 MinorVer=9
-Release=8
+Release=9
 Build=0
 Debug=0
 PreRelease=0
@@ -407,7 +407,7 @@ CodePage=1200
 [Version Info Keys]
 CompanyName=CnPack Team
 FileDescription=CnWizards For C++Builder 6
-FileVersion=0.9.3.0
+FileVersion=0.9.9.0
 InternalName=CnWizards_CB6
 LegalCopyright=(C)Copyright 2001-2011 CnPack Team
 LegalTrademarks=CnPack
