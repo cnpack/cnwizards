@@ -81,9 +81,9 @@ var
       begin
         Result := CL.AddClass(DoRegisterClass(AClass.ClassParent), AClass);
         Result.RegisterPublishedProperties;
-      end;  
-    end;  
-  end;  
+      end;
+    end;
+  end;
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('SIRegister_IdeInstComp');
@@ -95,7 +95,7 @@ begin
   {$ENDIF}
     GetInstalledComponents(nil, List);
   {$IFDEF DEBUG}
-    CnDebugger.LogInteger(List.Count);
+    CnDebugger.LogMsg(List.Text);
   {$ENDIF}
     for i := 0 to List.Count - 1 do
     begin
@@ -127,8 +127,8 @@ var
         DoRegisterClass(AClass.ClassParent);
         Result := CL.Add(AClass);
       end;
-    end;  
-  end;  
+    end;
+  end;
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('RIRegister_IdeInstComp');
@@ -140,7 +140,7 @@ begin
   {$ENDIF}
     GetInstalledComponents(nil, List);
   {$IFDEF DEBUG}
-    CnDebugger.LogInteger(List.Count);
+    CnDebugger.LogMsg(List.Text);
   {$ENDIF}
     for i := 0 to List.Count - 1 do
     begin

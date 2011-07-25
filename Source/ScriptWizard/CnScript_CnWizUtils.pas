@@ -326,6 +326,7 @@ begin
   CL.AddDelphiFunction('Function CnOtaGetEditOptions : IOTAEditOptions');
   CL.AddDelphiFunction('Function CnOtaGetActiveProjectOptions( Project : IOTAProject) : IOTAProjectOptions');
   CL.AddDelphiFunction('Function CnOtaGetActiveProjectOption( const Option : string; var Value : Variant) : Boolean');
+  CL.AddDelphiFunction('Function CnOtaGetPackageServices : IOTAPackageServices');
 {$IFDEF DELPHI2009_UP}
   CL.AddDelphiFunction('Function CnOtaGetActiveProjectOptionsConfigurations(Project: IOTAProject): IOTAProjectOptionsConfigurations');
 {$ENDIF}
@@ -556,6 +557,7 @@ begin
   S.RegisterDelphiFunction(@CnOtaGetEditOptions, 'CnOtaGetEditOptions', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetActiveProjectOptions, 'CnOtaGetActiveProjectOptions', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetActiveProjectOption, 'CnOtaGetActiveProjectOption', cdRegister);
+  S.RegisterDelphiFunction(@CnOtaGetPackageServices, 'CnOtaGetPackageServices', cdRegister);
 {$IFDEF DELPHI2009_UP}
   S.RegisterDelphiFunction(@CnOtaGetActiveProjectOptionsConfigurations, 'CnOtaGetActiveProjectOptionsConfigurations', cdRegister);
 {$ENDIF}

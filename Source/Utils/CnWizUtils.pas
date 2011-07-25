@@ -422,6 +422,8 @@ function CnOtaGetActiveProjectOptions(Project: IOTAProject = nil): IOTAProjectOp
 {* 取当前工程选项}
 function CnOtaGetActiveProjectOption(const Option: string; var Value: Variant): Boolean;
 {* 取当前工程指定选项}
+function CnOtaGetPackageServices: IOTAPackageServices;
+{* 取当前包与组件服务}
 
 {$IFDEF DELPHI2009_UP}
 function CnOtaGetActiveProjectOptionsConfigurations(Project: IOTAProject = nil): IOTAProjectOptionsConfigurations;
@@ -2978,6 +2980,13 @@ begin
     Value := ProjectOptions.Values[Option];
     Result := True;
   end;
+end;
+
+// 取当前包与组件服务
+function CnOtaGetPackageServices: IOTAPackageServices;
+begin
+  if not QuerySvcs(BorlandIDEServices, IOTAPackageServices, Result) then
+    Result := nil;
 end;
 
 {$IFDEF DELPHI2009_UP}
