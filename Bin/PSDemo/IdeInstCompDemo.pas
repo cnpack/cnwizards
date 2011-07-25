@@ -7,7 +7,7 @@
 {                                                       }
 {*******************************************************}
 
-program Test;
+program IdeInstCompDemo;
 
 // 当脚本在 uses 列表中指定了 IdeInstComp 时，脚本可以使用在 IDE 中安装的所有组件。
 // 对于没有在 PSDecl 目录下的声明文件中列出的组件，只能访问其 published 的属性。
@@ -16,15 +16,17 @@ program Test;
 // 不过如果 uses 他们，在 IDE 代码编辑器中编辑脚本时，可以使用 IDE 的代码自动完成。
 // 不将 IdeInstComp 直接导入，是因为当 IDE 安装了很多包时，导入的速度可能较慢
 
+// 编译本脚本时出现未声明的组件类名错误时，可能是 IDE 内未安装此组件或无法访问此组件。
+
 uses
   Windows, SysUtils, IdeInstComp; // uses IdeInstComp is needed.
 
 var
-  DB: TDataBase;    // TDataBase is not imported by script engine expressly.
+  DB: TDatabase;    // TDatabase is not imported by script engine expressly.
   Timer: TCnTimer;  // TCnTimer is a 3rd component (in CnPack) installed in IDE.
 
 begin
-  DB := TDataBase.Create(nil);
+  DB := TDatabase.Create(nil);
   try
     DB.AliasName := 'Test';  // You can access published properties only!!!
   finally

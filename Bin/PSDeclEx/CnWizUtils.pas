@@ -485,6 +485,8 @@ function CnOtaGetActiveProjectOptions(Project: IOTAProject = nil): IOTAProjectOp
 {* 取当前工程选项}
 function CnOtaGetActiveProjectOption(const Option: string; var Value: Variant): Boolean;
 {* 取当前工程指定选项}
+function CnOtaGetPackageServices: IOTAPackageServices;
+{* 取当前包与组件服务}
 function CnOtaGetActiveProjectOptionsConfigurations(Project: IOTAProject = nil): IOTAProjectOptionsConfigurations;
 {* 取当前工程配置选项，2009 后才有效}
 function CnOtaGetNewFormTypeOption: TFormType;
@@ -1299,6 +1301,10 @@ begin
 end;
 
 function CnOtaGetActiveProjectOption(const Option: string; var Value: Variant): Boolean;
+begin
+end;
+
+function CnOtaGetPackageServices: IOTAPackageServices;
 begin
 end;
 
