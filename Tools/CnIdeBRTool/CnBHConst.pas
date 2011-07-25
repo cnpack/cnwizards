@@ -88,8 +88,8 @@ var
   g_strRestoring: string = 'Processing Restore ';
   g_strCreating: string = 'Creating ';
   g_strNotFound: string = 'Can NOT Find ';
-  g_strObjRepConfig: string = ' Object Repository Config';
-  g_strObjRepUnit: string = ' Object Repository Units';
+  g_strObjRepConfig: string = 'Object Repository Config';
+  g_strObjRepUnit: string = 'Object Repository Units';
   g_strPleaseWait: string = ', Please Wait...';
   g_strUnkownName: string = 'Unknown Name!';
   g_strBakFile: string = 'Backup File';

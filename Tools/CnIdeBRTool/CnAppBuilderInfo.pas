@@ -191,10 +191,10 @@ begin
     begin
       bResult := CopyFile(PChar(strFileName),
           PChar(m_strTempPath + GetAbiOptionFile(aoCodeTemp)), False);
-      OutputLog(m_strAppName + g_strAbiOptions[Ord(aoCodeTemp)] + g_strBackup + OpResult(bResult));
+      OutputLog(m_strAppName + ' ' + g_strAbiOptions[Ord(aoCodeTemp)] + g_strBackup + OpResult(bResult));
     end
     else
-      OutputLog(g_strNotFound + m_strAppName + g_strAbiOptions[Ord(aoCodeTemp)]);
+      OutputLog(g_strNotFound + m_strAppName + ' ' + g_strAbiOptions[Ord(aoCodeTemp)]);
   end;
   // 对象库文件：dro
   if aoObjRep in m_AbiOption then
@@ -210,13 +210,13 @@ begin
     begin
       bResult := CopyFile(PChar(strFileName),
           PChar(m_strTempPath + GetAbiOptionFile(aoObjRep)), False);
-      OutputLog(m_strAppName + g_strObjRepConfig
+      OutputLog(m_strAppName + ' ' + g_strObjRepConfig
           + g_strBackup + OpResult(bResult));
 
       SaveObjRep(m_strTempPath + GetAbiOptionFile(aoObjRep));
     end
     else
-      OutputLog(g_strNotFound + m_strAppName + g_strObjRepConfig);
+      OutputLog(g_strNotFound + m_strAppName + ' ' + g_strObjRepConfig);
   end;
   // 菜单模板文件：dmt
   if aoMenuTemp in m_AbiOption then
@@ -229,16 +229,16 @@ begin
     begin
       bResult := CopyFile(PChar(strFileName),
           PChar(m_strTempPath + GetAbiOptionFile(aoMenuTemp)), False);
-      OutputLog(m_strAppName + g_strAbiOptions[Ord(aoMenuTemp)] + g_strBackup + OpResult(bResult));
+      OutputLog(m_strAppName + ' ' + g_strAbiOptions[Ord(aoMenuTemp)] + g_strBackup + OpResult(bResult));
     end
     else
-      OutputLog(g_strNotFound + m_strAppName + g_strAbiOptions[Ord(aoMenuTemp)]);
+      OutputLog(g_strNotFound + m_strAppName + ' ' + g_strAbiOptions[Ord(aoMenuTemp)]);
   end;
   // IDE 配置信息
   if aoRegInfo in m_AbiOption then
   begin
     strRegFile := SaveKey2File;
-    OutputLog(m_strAppName + g_strAbiOptions[Ord(aoRegInfo)]
+    OutputLog(m_strAppName + ' ' + g_strAbiOptions[Ord(aoRegInfo)]
         + g_strBackup + OpResult(strRegFile <> ''));
     // *.dsk/dst 桌面信息设置文件
     FindFile(m_strRootDir + 'bin\', '*.dsk', OnFindBackupDskFile, nil, False);
@@ -401,14 +401,14 @@ begin
     ForceDirectories(strRepsPath);
 
   // 将系统目录ObjRepos中所有文件拷贝到临时目录
-  OutputLog(g_strBackuping + m_strAppName + g_strObjRepUnit + g_strPleaseWait);
+  OutputLog(g_strBackuping + m_strAppName + ' ' + g_strObjRepUnit + g_strPleaseWait);
   ZeroMemory(@sfo, sizeof(sfo));
   sfo.wFunc := FO_COPY;
   sfo.pFrom := PChar(m_strRootDir + 'ObjRepos\*.*' + #0 + #0);
   sfo.pTo := PChar(strRepsPath + #0 + #0);
   sfo.fFlags := FOF_NOCONFIRMATION or FOF_SILENT or FOF_NOCONFIRMMKDIR;
 
-  OutputLog(m_strAppName + g_strObjRepUnit + g_strBackup
+  OutputLog(m_strAppName + ' ' + g_strObjRepUnit + g_strBackup
       + OpResult(SHFileOperation(sfo) = 0), 1);
 
   if m_AbiType in [atBDS2005, atBDS2006, atDelphi2007, atDelphi2009, atDelphi2010, atDelphi2011] then
@@ -644,7 +644,7 @@ begin
       '$(MYROOTDIR)\', [rfReplaceAll, rfIgnoreCase]);
   pSecList.SaveToFile(strDroFile);
   FreeAndNil(pSecList);
-  OutputLog(m_strAppName + g_strObjRepUnit + g_strBackupSuccess, 1);
+  OutputLog(m_strAppName + ' ' + g_strObjRepUnit + g_strBackupSuccess, 1);
 end;
 
 // 分析备份文件
@@ -725,9 +725,9 @@ begin
     end;
     // 再重新创建临时释放目录
     ForceDirectories(strTempPath);
-    OutputLog(g_strAnalyzing + m_strAppName + g_strBakFile + g_strPleaseWait);
+    OutputLog(g_strAnalyzing + m_strAppName + ' ' + g_strBakFile + g_strPleaseWait);
     dcmp.Extract(strTempPath);
-    OutputLog(m_strAppName + g_strBakFile + g_strAnalyseSuccess, 1);
+    OutputLog(m_strAppName + ' ' + g_strBakFile + g_strAnalyseSuccess, 1);
   finally
     FreeAndNil(dcmp);
     FreeAndNil(fs);
@@ -748,11 +748,11 @@ begin
         bResult := CopyFile(PChar(strFileName),
           PChar(m_strRootDir + 'bin\' + GetAbiOptionFile(aoCodeTemp)), False);
 
-      OutputLog(m_strAppName + g_strAbiOptions[Ord(aoCodeTemp)]
+      OutputLog(m_strAppName + ' ' + g_strAbiOptions[Ord(aoCodeTemp)]
           + g_strRestore + OpResult(bResult));
     end
     else
-      OutputLog(g_strNotFound + m_strAppName + g_strAbiOptions[Ord(aoCodeTemp)]);
+      OutputLog(g_strNotFound + m_strAppName + ' ' + g_strAbiOptions[Ord(aoCodeTemp)]);
   end;
   // 对象库文件：dro
   if aoObjRep in m_abiOption then
@@ -763,7 +763,7 @@ begin
       OutputLog(g_strRestoring + g_strObjRepUnit + g_strPleaseWait);
       //
       bResult := LoadRepObj(strFileName);
-      OutputLog(m_strAppName + g_strObjRepUnit + g_strRestore + OpResult(bResult), 1);
+      OutputLog(m_strAppName + ' ' + g_strObjRepUnit + g_strRestore + OpResult(bResult), 1);
 
       if m_AbiType in [atBDS2005, atBDS2006, atDelphi2007, atDelphi2009, atDelphi2010] then
         bResult := CopyFile(PChar(strFileName),
@@ -774,10 +774,10 @@ begin
       else
         bResult := CopyFile(PChar(strFileName),
           PChar(m_strRootDir + 'bin\' + GetAbiOptionFile(aoObjRep)), False);
-      OutputLog(m_strAppName + g_strObjRepConfig + g_strRestore + OpResult(bResult));
+      OutputLog(m_strAppName + ' ' + g_strObjRepConfig + g_strRestore + OpResult(bResult));
     end
     else
-      OutputLog(g_strNotFound + m_strAppName + g_strObjRepConfig);
+      OutputLog(g_strNotFound + m_strAppName + ' ' + g_strObjRepConfig);
   end;
   // 菜单模板文件：dmt
   if aoMenuTemp in m_abiOption then
@@ -791,10 +791,10 @@ begin
       else
         bResult := CopyFile(PChar(strFileName),
           PChar(m_strRootDir + 'bin\' + GetAbiOptionFile(aoMenuTemp)), False);
-      OutputLog(m_strAppName + g_strAbiOptions[Ord(aoMenuTemp)] + g_strRestore + OpResult(bResult));
+      OutputLog(m_strAppName + ' ' + g_strAbiOptions[Ord(aoMenuTemp)] + g_strRestore + OpResult(bResult));
     end
     else
-      OutputLog(g_strNotFound + m_strAppName + g_strAbiOptions[Ord(aoMenuTemp)]);
+      OutputLog(g_strNotFound + m_strAppName + ' ' + g_strAbiOptions[Ord(aoMenuTemp)]);
   end;
   // IDE 配置信息，以及桌面模板 dsk/dst
   if aoRegInfo in m_AbiOption then
@@ -845,10 +845,10 @@ begin
       //bResult := Integer(ShellExecute(0, 'open', , nil, SW_HIDE)) > 32;
       bResult := (0 = WinExecAndWait32(regExec, SW_HIDE, True));
 
-      OutputLog(m_strAppName + g_strAbiOptions[Ord(aoRegInfo)] + g_strRestore + OpResult(bResult), 1);
+      OutputLog(m_strAppName + ' ' + g_strAbiOptions[Ord(aoRegInfo)] + g_strRestore + OpResult(bResult), 1);
     end
     else
-      OutputLog(g_strNotFound + m_strAppName + g_strAbiOptions[Ord(aoRegInfo)]);
+      OutputLog(g_strNotFound + m_strAppName + ' ' + g_strAbiOptions[Ord(aoRegInfo)]);
 
     FindFile(m_strTempPath, '*.dsk', OnFindRestoreDskFile, nil, False);
     FindFile(m_strTempPath, '*.dst', OnFindRestoreDskFile, nil, False);
@@ -1113,7 +1113,7 @@ var
 begin
   bResult := CopyFile(PChar(FileName), PChar(MakePath(m_strTempPath) +
     ExtractFileName(FileName)), False);
-  OutputLog(m_strAppName + ExtractFileName(FileName) + g_strBackup + OpResult(bResult));
+  OutputLog(m_strAppName + ' ' + ExtractFileName(FileName) + g_strBackup + OpResult(bResult));
 end;
 
 procedure TAppBuilderInfo.OnFindRestoreDskFile(const FileName: string;
@@ -1123,7 +1123,7 @@ var
 begin
   bResult := CopyFile(PChar(FileName), PChar(m_strRootDir + 'bin\' +
     ExtractFileName(FileName)), False);
-  OutputLog(m_strAppName + ExtractFileName(FileName) + g_strRestore + OpResult(bResult));
+  OutputLog(m_strAppName + ' ' + ExtractFileName(FileName) + g_strRestore + OpResult(bResult));
 end;
 
 end.
