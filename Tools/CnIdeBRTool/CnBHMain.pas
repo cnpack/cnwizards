@@ -800,7 +800,7 @@ begin
     btnPrev.Enabled := True;
     btnNext.Visible := True;
     btnNext.Enabled := True;
-    edtBackupFile.Text := ExtractFilePath(Application.ExeName)
+    edtBackupFile.Text := GetMyDocumentsDir +
         + g_strAppAbName[lbxSelectApp.ItemIndex]
         + FormatDateTime('_yyyymmdd', Now()) + '.bic';
   end
