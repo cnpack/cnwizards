@@ -40,7 +40,7 @@ interface
 
 uses
   Windows, Messages, Classes, Graphics, Controls, SysUtils, ToolsAPI, IniFiles,
-  FileCtrl, Forms{$IFDEF COMPILER6_UP}, SHFolder{$ENDIF};
+  FileCtrl, Forms, Registry{$IFDEF COMPILER6_UP}, SHFolder{$ENDIF};
 
 type
 
@@ -243,7 +243,7 @@ uses
   CnDebug,
 {$ENDIF Debug}
   CnWizUtils, CnWizConsts, CnCommon, CnWizManager, CnConsts, CnWizCompilerConst,
-  Registry;
+  CnNativeDecl;
 
 //==============================================================================
 // 专家公共参数类
@@ -524,7 +524,7 @@ end;
 
 procedure TCnWizOptions.SetUseOneCPUCore(const Value: Boolean);
 var
-  AMask, SysMask: Cardinal;
+  AMask, SysMask: TCnNativeUInt;
 begin
   FUseOneCPUCore := Value;
   if GetProcessAffinityMask(GetCurrentProcess, AMask, SysMask) then
