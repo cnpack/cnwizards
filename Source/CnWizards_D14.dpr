@@ -20,6 +20,9 @@
 
 library CnWizards_D14;
 
+{$WEAKLINKRTTI ON}
+{$RTTI EXPLICIT METHODS([]) PROPERTIES([]) FIELDS([])}
+
 uses
   CnWizDllEntry in 'Framework\CnWizDllEntry.pas',
   CnWizConsts in 'Framework\CnWizConsts.pas',
