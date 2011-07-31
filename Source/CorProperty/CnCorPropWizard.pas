@@ -76,7 +76,7 @@ type
   TPropAction = (paWarn, paCorrect);
   //属性定义对象
 
-  TPropDef = class(TComponent)
+  TCnPropDef = class(TComponent)
   private
     FActive: Boolean;
     FToValue: string;
@@ -270,7 +270,7 @@ end;
 procedure TCnCorPropWizard.LoadPropertyRules(const FileName: string);
 var
   i: Integer;
-  APropDef: TPropDef;
+  APropDef: TCnPropDef;
   DefCount: Integer;
 begin
   with TMemIniFile.Create(FileName) do
@@ -279,7 +279,7 @@ begin
       DefCount := ReadInteger(sSection, sCount, 0);
       for i := 0 to DefCount - 1 do
       begin
-        APropDef := TPropDef.Create(nil);
+        APropDef := TCnPropDef.Create(nil);
         with APropDef do
         begin
           Action   := TPropAction (ReadInteger(sSection, Format(sActionFmt  , [I]), 0));
@@ -301,7 +301,7 @@ end;
 procedure TCnCorPropWizard.SavePropertyRules(const FileName: string);
 var
   i: Integer;
-  APropDef: TPropDef;
+  APropDef: TCnPropDef;
 begin
   with TMemIniFile.Create(FileName) do
   begin
@@ -310,7 +310,7 @@ begin
       WriteInteger(sSection, sCount, FPropDefList.Count);
       for i := 0 to FPropDefList.Count - 1 do
       begin
-        APropDef := TPropDef(FPropDefList.Items[I]);
+        APropDef := TCnPropDef(FPropDefList.Items[I]);
         with APropDef do
         begin
           WriteBool   (sSection, Format(sActiveFmt  , [I]), Active);
@@ -337,17 +337,17 @@ end;
 
 { TPropDef }
 
-procedure TPropDef.Assign(Source: TPersistent);
+procedure TCnPropDef.Assign(Source: TPersistent);
 begin
-  if Source is TPropDef then
+  if Source is TCnPropDef then
   begin
-    Action := (Source as TPropDef).Action;
-    Active := (Source as TPropDef).Active;
-    Compare := (Source as TPropDef).Compare;
-    CompName := (Source as TPropDef).CompName;
-    PropName := (Source as TPropDef).PropName;
-    ToValue := (Source as TPropDef).ToValue;
-    Value := (Source as TPropDef).Value;
+    Action := (Source as TCnPropDef).Action;
+    Active := (Source as TCnPropDef).Active;
+    Compare := (Source as TCnPropDef).Compare;
+    CompName := (Source as TCnPropDef).CompName;
+    PropName := (Source as TCnPropDef).PropName;
+    ToValue := (Source as TCnPropDef).ToValue;
+    Value := (Source as TCnPropDef).Value;
   end
   else
     inherited;

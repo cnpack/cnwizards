@@ -190,13 +190,13 @@ var
   FS: TFileStream;
   I: Integer;
   DefCount: Integer;
-  PropDef: TPropDef;
+  PropDef: TCnPropDef;
 begin
   //加载修正属性定义
   if not OpenDialog.Execute then
     Exit;
 {$IFDEF DEBUG}
-  CnDebugger.LogMsgWithTag(OpenDialog.FileName, 'OpenFile');
+  CnDebugger.LogFmt('OpenFile: ' + OpenDialog.FileName, );
 {$ENDIF}
   FS := TFileStream.Create(OpenDialog.FileName, fmOpenRead);
   AReader := TReader.Create(FS, 4096);
@@ -208,8 +208,8 @@ begin
     FPropDefList.Clear;
     for I := 0 to DefCount - 1 do
     begin
-      RegisterClass(TPropDef); //必须的
-      PropDef := TPropDef(AReader.ReadRootComponent(nil));
+      RegisterClass(TCnPropDef); //必须的
+      PropDef := TCnPropDef(AReader.ReadRootComponent(nil));
     {$IFDEF DEBUG}
       CnDebugger.LogComponent(PropDef);
     {$ENDIF}
@@ -238,7 +238,7 @@ begin
     UpdateDefines;
     AWriter.WriteInteger(FPropDefList.Count);
     for I := 0 to FPropDefList.Count - 1 do
-      AWriter.WriteRootComponent(TPropDef(FPropDefList.Items[I]));
+      AWriter.WriteRootComponent(TCnPropDef(FPropDefList.Items[I]));
     //不能使用Writer.WriteComponent
 //而只能使用WriteRootComponent，实际上TStream的WriteComponent就是调用的Writer.WriteRootComponent
 //同理，读取也应该用ReadRootComponent
@@ -250,7 +250,7 @@ end;
 
 procedure TCnCorPropCfgForm.UpdateDefines;
 var
-  APropDef: TPropDef;
+  APropDef: TCnPropDef;
   i: Integer;
 begin
   //保存属性修正定义
@@ -258,7 +258,7 @@ begin
   FPropDefList.Clear;
   for i := 0 to Self.ListView.Items.Count - 1 do
   begin
-    APropDef := TPropDef.Create(nil);
+    APropDef := TCnPropDef.Create(nil);
     APropDef.Active := ListView.Items.Item[i].Checked;
     APropDef.CompName := Trim(ListView.Items.Item[i].Caption);
     APropDef.PropName := Trim(ListView.Items.Item[i].SubItems[0]);
@@ -273,7 +273,7 @@ end;
 procedure TCnCorPropCfgForm.UpdateView;
 var
   I: Integer;
-  AProp: TPropDef;
+  AProp: TCnPropDef;
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('UpdateView');
@@ -286,7 +286,7 @@ begin
     Self.ListView.Items.Clear;
     for i := 0 to PropDefList.Count - 1 do
     begin
-      AProp := TPropDef(PropDefList.Items[i]);
+      AProp := TCnPropDef(PropDefList.Items[i]);
       with Self.ListView.Items.Add do
       begin
         Caption := AProp.CompName;
@@ -349,7 +349,7 @@ end;
 
 procedure TCnCorPropCfgForm.ActionEditExecute(Sender: TObject);
 var
-  APropDef: TPropDef;
+  APropDef: TCnPropDef;
 begin
   if Self.ListView.Selected <> nil then
   begin
@@ -357,10 +357,10 @@ begin
       CorPropRuleForm := TCorPropRuleForm.Create(nil);
     with CorPropRuleForm do
     begin
-      PropDef := TPropDef(Self.FPropDefList[Self.ListView.Selected.Index]);
+      PropDef := TCnPropDef(Self.FPropDefList[Self.ListView.Selected.Index]);
       if ShowModal = mrOK then
       begin
-        APropDef := TPropDef(Self.FPropDefList[Self.ListView.Selected.Index]);
+        APropDef := TCnPropDef(Self.FPropDefList[Self.ListView.Selected.Index]);
         APropDef.CompName := PropDef.CompName;
         APropDef.PropName := PropDef.PropName;
         APropDef.Compare := PropDef.Compare;
@@ -377,7 +377,7 @@ end;
 
 procedure TCnCorPropCfgForm.ActionAddExecute(Sender: TObject);
 var
-  APropDef: TPropDef;
+  APropDef: TCnPropDef;
 begin
   if not Assigned(CorPropRuleForm) then
     CorPropRuleForm := TCorPropRuleForm.Create(nil);
@@ -386,7 +386,7 @@ begin
     ClearAll;
     if ShowModal = mrOK then
     begin
-      APropDef := TPropDef.Create(nil);
+      APropDef := TCnPropDef.Create(nil);
       APropDef.CompName := PropDef.CompName;
       APropDef.PropName := PropDef.PropName;
       APropDef.Compare := PropDef.Compare;
@@ -416,7 +416,7 @@ begin
     if Item <> nil then
     begin
       if Self.FPropDefList.Count >= Item.Index then
-        TPropDef(Self.FPropDefList[Item.Index]).Active := Item.Checked;
+        TCnPropDef(Self.FPropDefList[Item.Index]).Active := Item.Checked;
     end;
   end
   else

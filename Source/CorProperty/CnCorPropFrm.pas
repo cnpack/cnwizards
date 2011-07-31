@@ -61,18 +61,18 @@ type
   private
     FCorrComp: TComponent;
     FFileName: string;
-    FPropDef: TPropDef;
+    FPropDef: TCnPropDef;
     FPropName: string;
     FOldValue: string;
     procedure SetCorrComp(const Value: TComponent);
     procedure SetFileName(const Value: string);
-    procedure SetPropDef(const Value: TPropDef);
+    procedure SetPropDef(const Value: TCnPropDef);
     procedure SetPropName(const Value: string);
     procedure SetOldValue(const Value: string);
   published
     property FileName: string read FFileName write SetFileName;
     property CorrComp: TComponent read FCorrComp write SetCorrComp;
-    property PropDef: TPropDef read FPropDef write SetPropDef;
+    property PropDef: TCnPropDef read FPropDef write SetPropDef;
     property PropName: string read FPropName write SetPropName;
     property OldValue: string read FOldValue write SetOldValue;
   end;
@@ -125,7 +125,7 @@ type
     procedure SetPropDefList(const Value: TObjectList);
     //将修正属性的结果添加到ListView中，返回是否修改
     function CorrectProp(FileName: string; AComp: IOTAComponent): Boolean;
-    function ValidateProp(APropDef: TPropDef; AValue: Variant;
+    function ValidateProp(APropDef: TCnPropDef; AValue: Variant;
       PropInfo: PPropInfo): Boolean;
     procedure AddCorrItem(AItem: TCorrectItem);
     procedure SetCorrectItemList(const Value: TObjectList); //添加修正项目
@@ -151,7 +151,7 @@ type
     //是修改全部，还是只是当前
   end;
 
-  TValueType = (vtInt, vtFloat, vtIdent, vtOther);
+  TValueType = (vtInt, vtFloat, vtIdent, vtObject, vtOther);
 
 {$ENDIF CNWIZARDS_CNCORPROPWIZARD}
 
@@ -220,7 +220,7 @@ var
   NTAComp: INTAComponent;
   ANTAComp: TComponent;
   L: Integer;
-  APropDef: TPropDef;
+  APropDef: TCnPropDef;
   PropName: string;
   V: Variant;
   AValue: Variant;
@@ -234,7 +234,7 @@ begin
 
   for L := 0 to PropDefList.Count - 1 do
   begin
-    APropDef := TPropDef(PropDefList.Items[L]);
+    APropDef := TCnPropDef(PropDefList.Items[L]);
     if not APropDef.Active then
       Continue;
 
@@ -256,8 +256,12 @@ begin
 
     // 检查该控件有无该属性名并且检查是否有Font.Color这样的级连属性。
     AValue := GetPropValueIncludeSub(ANTAComp, PropName);
+    // 对象是 Nil 值时 GetPropValueIncludeSub 返回 0，改作空值
+    if (PropInfo^.PropType^.Kind = tkClass) and (VarToStr(AValue) = '0') then
+      AValue := '';
+
   {$IFDEF DEBUG}
-    CnDebugger.LogMsgWithTag(AValue, 'AValue');
+    CnDebugger.LogMsg('AValue: ' + VarToStr(AValue));
   {$ENDIF}
 
     if not ValidateProp(APropDef, AValue, PropInfo) then
@@ -283,7 +287,7 @@ begin
 end;
 
 //检查属性是否满足条件
-function TCnCorPropForm.ValidateProp(APropDef: TPropDef;
+function TCnCorPropForm.ValidateProp(APropDef: TCnPropDef;
   AValue: Variant; PropInfo: PPropInfo): Boolean;
 var
   I1, I2: integer;
@@ -329,14 +333,22 @@ begin
     begin
       S1 := APropDef.Value;
       S2 := AValue;
-      ValueType := vtOther;
+      if PropInfo^.PropType^.Kind = tkClass then
+        ValueType := vtObject
+      else
+        ValueType := vtOther;
     end;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('PropName %s, TypeKind %d, S1 %s, S2 %s',
+      [APropDef.PropName, Integer(PropInfo^.PropType^.Kind), S1, S2]);
+{$ENDIF}
 
     case APropDef.Compare of
       coLarge, coLargeEqual, coLess, coLessEqual:
-        //字符串或没有大于等于等操作，只能是=或<>操作
+        // 字符串和对象等没有大于等于等操作，只能是 = 或 <> 操作
         begin
-          if ValueType = vtOther then
+          if (ValueType = vtOther) or (ValueType = vtObject) then
             Exit;
           case APropDef.Compare of
             coLarge:
@@ -376,18 +388,20 @@ begin
         end;
       coEqual:
         begin
-          if ((ValueType = vtInt) and (I2 = I1)) or ((ValueType = vtFloat)
-            and (FloatToStr(F2) = FloatToStr(F1))) or ((ValueType = vtOther) and
-            (S2 = S1)) then
+          if ((ValueType = vtInt) and (I2 = I1))
+            or ((ValueType = vtFloat) and (FloatToStr(F2) = FloatToStr(F1)))
+            or ((ValueType = vtObject) and (S2 = S1))
+            or ((ValueType = vtOther) and (S2 = S1)) then
             Result := True
           else
             Result := False;
         end;
       coNotEqual:
         begin
-          if ((ValueType = vtInt) and (I2 <> I1)) or ((ValueType = vtFloat)
-            and (FloatToStr(F2) <> FloatToStr(F1))) or ((ValueType = vtOther)
-            and (S2 <> S1)) then
+          if ((ValueType = vtInt) and (I2 <> I1))
+            or ((ValueType = vtFloat) and (FloatToStr(F2) <> FloatToStr(F1)))
+            or ((ValueType = vtObject) and (S2 <> S1))
+            or ((ValueType = vtOther) and (S2 <> S1)) then
             Result := True
           else
             Result := False;
@@ -633,7 +647,7 @@ begin
   FOldValue := Value;
 end;
 
-procedure TCorrectItem.SetPropDef(const Value: TPropDef);
+procedure TCorrectItem.SetPropDef(const Value: TCnPropDef);
 begin
   FPropDef := Value;
 end;

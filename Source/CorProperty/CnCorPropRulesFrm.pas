@@ -72,9 +72,9 @@ type
     procedure FormShow(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
   private
-    FPropDef: TPropDef;
-    procedure SetPropDef(const Value: TPropDef);
-    function GetPropDef: TPropDef;
+    FPropDef: TCnPropDef;
+    procedure SetPropDef(const Value: TCnPropDef);
+    function GetPropDef: TCnPropDef;
     { Private declarations }
   protected
     function GetHelpTopic: string; override;
@@ -82,7 +82,7 @@ type
     { Public declarations }
     procedure ClearAll;
     procedure AddUniqueToCombo(Combo: TComboBox);
-    property PropDef: TPropDef read GetPropDef write SetPropDef;
+    property PropDef: TCnPropDef read GetPropDef write SetPropDef;
     {外界引用，自己不管理}
   end;
 
@@ -104,7 +104,7 @@ procedure TCorPropRuleForm.FormCreate(Sender: TObject);
 var
   i: Integer;
 begin
-  FPropDef := TPropDef.Create(nil);
+  FPropDef := TCnPropDef.Create(nil);
   cbbCondition.Items.Clear;
   cbbAction.Items.Clear;
   for i := Ord(Low(CompareStr)) to Ord(High(CompareStr)) do
@@ -126,7 +126,7 @@ begin
   cbbAction.ItemIndex := 0;
 end;
 
-procedure TCorPropRuleForm.SetPropDef(const Value: TPropDef);
+procedure TCorPropRuleForm.SetPropDef(const Value: TCnPropDef);
 begin
   if not Assigned(Value) then Exit;
   with Value do
@@ -147,7 +147,7 @@ begin
   FreeAndNil(FPropDef);
 end;
 
-function TCorPropRuleForm.GetPropDef: TPropDef;
+function TCorPropRuleForm.GetPropDef: TCnPropDef;
 begin
   if FPropDef <> nil then with FPropDef do
   begin
