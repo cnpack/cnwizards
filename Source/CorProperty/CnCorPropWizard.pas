@@ -335,7 +335,7 @@ begin
   ActionStr[paCorrect] := SCnCorrectPropertyActionAutoCorrect;
 end;
 
-{ TPropDef }
+{ TCnPropDef }
 
 procedure TCnPropDef.Assign(Source: TPersistent);
 begin
@@ -358,12 +358,4 @@ initialization
 
 {$ENDIF CNWIZARDS_CNCORPROPWIZARD}
 end.
-
-
-
-
-
-
-
-
 
