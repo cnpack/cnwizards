@@ -115,7 +115,7 @@ begin
       UserAgent := 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)';
       HttpRequestHeaders.Add('x-requested-with: XMLHttpRequest');
       NoCookie := True;
-      Text := GetString(Url);
+      Text := string(GetString(Url));
     finally
       Free;
     end;
