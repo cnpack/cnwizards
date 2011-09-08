@@ -196,7 +196,7 @@ begin
   if not OpenDialog.Execute then
     Exit;
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('OpenFile: ' + OpenDialog.FileName);
+  CnDebugger.LogMsg('OpenFile: ' + OpenDialog.FileName);
 {$ENDIF}
   FS := TFileStream.Create(OpenDialog.FileName, fmOpenRead);
   AReader := TReader.Create(FS, 4096);
