@@ -38,7 +38,9 @@ unit CnSourceHighlight;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2010.10.04
+* 修改记录：2011.09.04
+*               加入 white_nigger 的修补以针对修复 CloseAll 时出错的问题，待测试
+*           2010.10.04
 *               2009 以上 Unicode 环境下，各个 Token 的 Col 采用 ConvertPos 进行
 *               转换时，对汉字以及单位置双字节字符等的判断会有错误，因此采用
 *               CharIndex + 1 时，又不能处理好 Tab 键。
@@ -400,6 +402,8 @@ type
     procedure AfterCompile(Succeeded: Boolean; IsCodeInsight: Boolean);
     procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm;
       Operation: TOperation);
+    procedure SourceEditorNotify(SourceEditor: IOTASourceEditor;
+      NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
     procedure EditorChanged(Editor: TEditorObject; ChangeType: TEditorChangeTypes);
     procedure ClearHighlight(Editor: TEditorObject);
     procedure PaintBracketMatch(Editor: TEditorObject;
@@ -1708,6 +1712,7 @@ begin
 {$ENDIF}
   CnWizNotifierServices.AddActiveFormNotifier(ActiveFormChanged);
   CnWizNotifierServices.AddAfterCompileNotifier(AfterCompile);
+  CnWizNotifierServices.AddSourceEditorNotifier(SourceEditorNotify);
 end;
 
 destructor TCnSourceHighlight.Destroy;
@@ -1730,6 +1735,7 @@ begin
 {$ENDIF}
 
   WizShortCutMgr.DeleteShortCut(FBlockShortCut);
+  CnWizNotifierServices.RemoveSourceEditorNotifier(SourceEditorNotify);
   CnWizNotifierServices.RemoveAfterCompileNotifier(AfterCompile);
   CnWizNotifierServices.RemoveActiveFormNotifier(ActiveFormChanged);
   EditControlWrapper.RemoveEditControlNotifier(EditControlNotify);
@@ -3181,6 +3187,17 @@ begin
 {$ENDIF}
     end;
   end;
+end;
+
+procedure TCnSourceHighlight.SourceEditorNotify(SourceEditor: IOTASourceEditor;
+  NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
+begin
+{$IFDEF DELPHI2009_UP}
+  if NotifyType = setClosing then
+    FTimer.OnTimer := nil
+  else if (NotifyType = setOpened) or (NotifyType = setEditViewActivated) then
+    FTimer.OnTimer := OnHighlightTimer;
+{$ENDIF}    
 end;
 
 procedure TCnSourceHighlight.ActiveFormChanged(Sender: TObject);
