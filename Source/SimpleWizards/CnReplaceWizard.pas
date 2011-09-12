@@ -546,7 +546,10 @@ begin
         Exit;
       end;
     end;
-    FOpenInIDE := Reader.Mode = mmModule;
+    // BCB5 中，h文件回写至ide时会写至cpp文件的编辑器中，因而此处强行改用文件模式。
+    FOpenInIDE := (Reader.Mode = mmModule) and {$IFDEF DELPHI} True {$ELSE}
+      (UpperCase(ExtractFileExt(FileName)) <> '.H') and
+      (UpperCase(ExtractFileExt(FileName)) <> '.HPP') {$ENDIF};
   finally
     Reader.Free;
   end;
@@ -562,6 +565,9 @@ begin
   begin
     if FOpenInIDE then
     begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('ReplaceFile is in IDE: ' + FileName);
+{$ENDIF}
       try
         IModule := CnOtaGetModule(FileName);
         if Assigned(IModule) then
@@ -641,6 +647,14 @@ begin
     FileName := Project.GetModule(i).FileName;
     if IsSourceModule(FileName) then
       ReplaceFile(FileName);
+{$IFDEF BCB}
+    if IsCpp(FileName) or IsC(FileName) then // BCB 下替换相关头文件
+    begin
+      FileName := ChangeFileExt(FileName, '.h');
+      if FileExists(FileName) then
+        ReplaceFile(FileName);
+    end;
+{$ENDIF}
     if FAbort then Exit;
   end;
 end;
