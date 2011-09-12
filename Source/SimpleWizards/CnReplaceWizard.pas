@@ -546,10 +546,7 @@ begin
         Exit;
       end;
     end;
-    // BCB5 中，h文件回写至ide时会写至cpp文件的编辑器中，因而此处强行改用文件模式。
-    FOpenInIDE := (Reader.Mode = mmModule) and {$IFDEF DELPHI} True {$ELSE}
-      (UpperCase(ExtractFileExt(FileName)) <> '.H') and
-      (UpperCase(ExtractFileExt(FileName)) <> '.HPP') {$ENDIF};
+    FOpenInIDE := Reader.Mode = mmModule;
   finally
     Reader.Free;
   end;
@@ -561,7 +558,7 @@ begin
     DoNormalReplace(ExtractFileName(FileName));
   BookMarkList := nil;
 
-  if FOutStream.Size > 0 then         // 执行过替换
+  if FOutStream.Size > 0 then  // 执行过替换
   begin
     if FOpenInIDE then
     begin
@@ -572,7 +569,7 @@ begin
         IModule := CnOtaGetModule(FileName);
         if Assigned(IModule) then
         begin
-          ISourceEditor := CnOtaGetSourceEditorFromModule(IModule);
+          ISourceEditor := CnOtaGetSourceEditorFromModule(IModule, FileName);
           if Assigned(ISourceEditor) then
           begin
             IWriter := ISourceEditor.CreateWriter;
