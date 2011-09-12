@@ -245,7 +245,9 @@ begin
   FModIntf := CnOtaGetModule(FFileName);
   if FModIntf = nil  then
   begin
-    {$IFDEF Debug} CnDebugger.LogMsg('EditReader: Module not open in the IDE - opening from disk'); {$ENDIF}
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('EditReader: Module not open in the IDE - opening from disk');
+{$ENDIF}
     AllocateFromDisk;
   end
   else if CnOtaGetSourceEditorFromModule(FModIntf, FileName) = nil then
@@ -256,12 +258,16 @@ begin
   else
   begin
     FMode := mmModule;
-    {$IFDEF Debug} CnDebugger.LogMsg('EditReader: Got module for ' + FFileName); {$ENDIF}
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('EditReader: Got module for ' + FFileName);
+{$ENDIF}
 
     // Allocate notifier for module
     Assert(FModuleNotifier = nil);
     FModuleNotifier := TModuleFreeNotifier.Create(Self);
-    {$IFDEF Debug} CnDebugger.LogMsg('EditReader: Got FModuleNotifier'); {$ENDIF}
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('EditReader: Got FModuleNotifier');
+{$ENDIF}
     if FModuleNotifier = nil then
     begin
       FModIntf := nil;
@@ -274,7 +280,9 @@ begin
     Assert(FEditIntf = nil);
 
     FEditIntf := CnOtaGetSourceEditorFromModule(FModIntf, FFileName);
-    {$IFDEF Debug} CnDebugger.LogMsg('EditReader: Got FEditIntf for module'); {$ENDIF}
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('EditReader: Got FEditIntf for module');
+{$ENDIF}
     if FEditIntf = nil then
     begin
       ReleaseModuleNotifier;
