@@ -28,6 +28,7 @@ unit CnBHMain;
 * 开发平台：PWinXP + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
+* 已知问题：XE以及以上版本的代码模板分目录存储了，备份会失败
 * 单元标识：$Id$
 * 修改记录：2006.08.23 V1.0
 *               LiuXiao 移植此单元
@@ -179,7 +180,8 @@ const
 
   SACnRegIDEEntries: array[TCnIDEs] of string =
     ('Delphi\5.0', 'Delphi\6.0', 'Delphi\7.0', 'BDS\2.0', 'BDS\3.0', 'BDS\4.0',
-    'BDS\5.0', 'BDS\6.0', 'BDS\7.0', 'BDS\8.0', 'C++Builder\5.0', 'C++Builder\6.0');
+    'BDS\5.0', 'BDS\6.0', 'BDS\7.0', 'BDS\8.0', 'BDS\9.0', 'C++Builder\5.0',
+    'C++Builder\6.0');
   SCnRegHisProject = '\Closed Projects';
   SCnRegHisFiles = '\Closed Files';
 
@@ -282,7 +284,7 @@ begin
       lbxBackupOptions.Checked[I] := True;
 
     if lbxSelectApp.ItemIndex in [Ord(atBDS2005), Ord(atBDS2006), Ord(atDelphi2007),
-      Ord(atDelphi2009), Ord(atDelphi2010), Ord(atDelphi2011)] then // BDS 2005, 2006, 2007, 2009 以上的菜单模板和对象库不分开了。
+      Ord(atDelphi2009), Ord(atDelphi2010), Ord(atDelphiXE), Ord(atDelphiXE2)] then // BDS 2005, 2006, 2007, 2009 以上的菜单模板和对象库不分开了。
     begin
       lbxBackupOptions.Checked[0] := True;
       lbxBackupOptions.ItemEnabled[0] := False;

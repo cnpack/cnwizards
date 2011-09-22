@@ -43,7 +43,7 @@ uses
 
 type
   TCnIDEs = (ciDelphi5, ciDelphi6, ciDelphi7, ciDelphi8, ciDelphi9, ciDelphi10,
-    ciDelphi11, ciDelphi12, ciDelphi14, ciDelphi15, ciBCB5, ciBCB6);
+    ciDelphi11, ciDelphi12, ciDelphi14, ciDelphi15, ciDelphi16, ciBCB5, ciBCB6);
 
   TCnHisEntry = class(TCollectionItem)
   {* 描述一待删除的文件对象}
@@ -97,8 +97,8 @@ implementation
 const
   SCnIDENames: array[TCnIDEs] of string =
     ('Delphi 5', 'Delphi 6', 'Delphi 7', 'Delphi 8', 'BDS 2005', 'BDS 2006',
-     'RAD Studio 2007', 'RAD Studio 2009', 'RAD Studio 2010', 'RAD Studio 2011',
-     'C++Builder 5', 'C++Builder 6');
+     'RAD Studio 2007', 'RAD Studio 2009', 'RAD Studio 2010', 'RAD Studio XE',
+     'RAD Studio XE 2', 'C++Builder 5', 'C++Builder 6');
 
 procedure CreateIDEHistories;
 var
