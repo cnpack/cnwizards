@@ -1,0 +1,560 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{1C1531F7-1D1A-4F26-AF11-F48656B06770}</ProjectGuid>
+			<MainSource>CnWizards_D16.dpr</MainSource>
+			<Config Condition="'$(Config)'==''">Release</Config>
+			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
+			<ProjectVersion>13.4</ProjectVersion>
+			<FrameworkType>VCL</FrameworkType>
+			<Base>True</Base>
+			<Platform Condition="'$(Platform)'==''">Win32</Platform>
+			<AppType>Library</AppType>
+			<TargetedPlatforms>1</TargetedPlatforms>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Base)'=='true') or '$(Base_Win64)'!=''">
+			<Base_Win64>true</Base_Win64>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Base)'=='true') or '$(Base_Win32)'!=''">
+			<Base_Win32>true</Base_Win32>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_1)'!=''">
+			<Cfg_1>true</Cfg_1>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Debug' or '$(Cfg_2)'!=''">
+			<Cfg_2>true</Cfg_2>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win32)'!=''">
+			<Cfg_2_Win32>true</Cfg_2_Win32>
+			<CfgParent>Cfg_2</CfgParent>
+			<Cfg_2>true</Cfg_2>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Base)'!=''">
+			<DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
+			<VerInfo_MinorVer>9</VerInfo_MinorVer>
+			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=0.9.9.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+			<VerInfo_Locale>2052</VerInfo_Locale>
+			<VerInfo_Release>9</VerInfo_Release>
+			<VerInfo_MajorVer>0</VerInfo_MajorVer>
+			<DCC_UsePackage>rtl;vcl;vclx;designide</DCC_UsePackage>
+			<UsePackages>true</UsePackages>
+			<DCC_DependencyCheckOutputName>Base\Win32\CnWizards_D16.dll</DCC_DependencyCheckOutputName>
+			<DCC_ImageBase>00400000</DCC_ImageBase>
+			<DCC_DcuOutput>.\$(Config)\$(Platform)</DCC_DcuOutput>
+			<DCC_Platform>x86</DCC_Platform>
+			<DCC_ExeOutput>.\$(Config)\$(Platform)</DCC_ExeOutput>
+			<DCC_N>false</DCC_N>
+			<DCC_S>false</DCC_S>
+			<GenDll>true</GenDll>
+			<DCC_E>false</DCC_E>
+			<DCC_F>false</DCC_F>
+			<DCC_K>false</DCC_K>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Base_Win64)'!=''">
+			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+			<VerInfo_Locale>1033</VerInfo_Locale>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Base_Win32)'!=''">
+			<DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_1)'!=''">
+			<DCC_ExeOutput>..\Bin</DCC_ExeOutput>
+			<DCC_UnitSearchPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript_2009;ThirdParty\FastCode;Utils;ScriptWizard;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+			<DCC_DcuOutput>..\Dcu</DCC_DcuOutput>
+			<DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
+			<DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
+			<DCC_DependencyCheckOutputName>..\Bin\CnWizards_D16.dll</DCC_DependencyCheckOutputName>
+			<DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
+			<DCC_DebugInformation>false</DCC_DebugInformation>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_2)'!=''">
+			<DCC_ExeOutput>..\Bin</DCC_ExeOutput>
+			<DCC_UnitSearchPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript_2009;ThirdParty\FastCode;Utils;ScriptWizard;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+			<DCC_DcuOutput>..\Dcu</DCC_DcuOutput>
+			<DCC_Optimize>false</DCC_Optimize>
+			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
+			<DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
+			<DCC_DependencyCheckOutputName>..\Bin\CnWizards_D16.dll</DCC_DependencyCheckOutputName>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
+			<DCC_Define>USE_JCL;$(DCC_Define)</DCC_Define>
+			<DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
+			<Manifest_File>None</Manifest_File>
+		</PropertyGroup>
+		<ItemGroup>
+			<DelphiCompile Include="$(MainSource)">
+				<MainSource>MainSource</MainSource>
+			</DelphiCompile>
+			<DCCReference Include="Framework\CnWizDllEntry.pas"/>
+			<DCCReference Include="Framework\CnWizConsts.pas"/>
+			<DCCReference Include="Framework\CnWizCompilerConst.pas"/>
+			<DCCReference Include="Framework\CnWizShortCut.pas"/>
+			<DCCReference Include="Framework\CnWizMenuAction.pas"/>
+			<DCCReference Include="Framework\CnWizClasses.pas"/>
+			<DCCReference Include="Framework\CnWizManager.pas"/>
+			<DCCReference Include="Framework\CnWizOptions.pas"/>
+			<DCCReference Include="Misc\CnWizTipOfDayFrm.pas">
+				<Form>CnWizTipOfDayForm</Form>
+			</DCCReference>
+			<DCCReference Include="Misc\CnWizAbout.pas"/>
+			<DCCReference Include="Misc\CnWizAboutFrm.pas">
+				<Form>CnWizAboutForm</Form>
+			</DCCReference>
+			<DCCReference Include="Misc\CnWizCommentFrm.pas">
+				<Form>CnWizCommentForm</Form>
+			</DCCReference>
+			<DCCReference Include="Misc\CnWizBoot.pas">
+				<Form>CnWizBootForm</Form>
+			</DCCReference>
+			<DCCReference Include="Misc\CnWizFeedbackFrm.pas">
+				<Form>CnWizFeedbackForm</Form>
+			</DCCReference>
+			<DCCReference Include="Misc\CnWizShareImages.pas">
+				<Form>dmCnSharedImages</Form>
+				<DesignClass>TDataModule</DesignClass>
+			</DCCReference>
+			<DCCReference Include="Misc\CnWizUpgradeFrm.pas">
+				<Form>CnWizUpgradeForm</Form>
+			</DCCReference>
+			<DCCReference Include="Misc\CnIDEVersion.pas"/>
+			<DCCReference Include="MultiLang\CnWizMultiLang.pas">
+				<Form>CnTranslateForm</Form>
+			</DCCReference>
+			<DCCReference Include="MultiLang\CnWizTranslate.pas"/>
+			<DCCReference Include="Utils\CnWizUtils.pas"/>
+			<DCCReference Include="Utils\CnWizNotifier.pas"/>
+			<DCCReference Include="Utils\CnWizIdeUtils.pas"/>
+			<DCCReference Include="Config\CnWizConfigFrm.pas">
+				<Form>CnWizConfigForm</Form>
+			</DCCReference>
+			<DCCReference Include="Config\CnWizMenuSortFrm.pas">
+				<Form>CnMenuSortForm</Form>
+			</DCCReference>
+			<DCCReference Include="Config\CnWizSubActionShortCutFrm.pas">
+				<Form>CnWizSubActionShortCutForm</Form>
+			</DCCReference>
+			<DCCReference Include="DesignEditors\CnDesignEditor.pas"/>
+			<DCCReference Include="DesignEditors\CnDesignEditorConsts.pas"/>
+			<DCCReference Include="DesignEditors\CnDesignEditorUtils.pas"/>
+			<DCCReference Include="DesignEditors\CnPropEditorCustomizeFrm.pas">
+				<Form>CnPropEditorCustomizeForm</Form>
+			</DCCReference>
+			<DCCReference Include="DesignEditors\CnHintEditorFrm.pas">
+				<Form>CnHintEditorForm</Form>
+			</DCCReference>
+			<DCCReference Include="DesignEditors\CnMultiLineEditorFrm.pas">
+				<Form>CnMultiLineEditorForm</Form>
+			</DCCReference>
+			<DCCReference Include="DesignEditors\CnSetPropEditor.pas"/>
+			<DCCReference Include="DesignEditors\CnShenPropEditors.pas"/>
+			<DCCReference Include="DesignEditors\CnShenStringModule.pas"/>
+			<DCCReference Include="DesignEditors\CnSizeConstraintsEditorFrm.pas">
+				<Form>CnSizeConstraintsEditorForm</Form>
+			</DCCReference>
+			<DCCReference Include="DesignEditors\CnMultiLineEdtUserFmtFrm.pas">
+				<Form>CnMultiLineEditorUserFmtForm</Form>
+			</DCCReference>
+			<DCCReference Include="DesignEditors\CnMultiLineEdtToolOptFrm.pas">
+				<Form>CnMultiLineEditorToolsOptionForm</Form>
+			</DCCReference>
+			<DCCReference Include="DesignEditors\CnAlignPropEditor.pas"/>
+			<DCCReference Include="IdeEnhancements\CnFastCodeWizard.pas"/>
+			<DCCReference Include="SimpleWizards\CnAlignSizeWizard.pas">
+				<Form>CnNonArrangeForm</Form>
+			</DCCReference>
+			<DCCReference Include="SimpleWizards\CnListCompFrm.pas">
+				<Form>CnListCompForm</Form>
+			</DCCReference>
+			<DCCReference Include="SimpleWizards\CnCompToCodeFrm.pas">
+				<Form>CnCompToCodeForm</Form>
+			</DCCReference>
+			<DCCReference Include="SimpleWizards\CnMessageBoxWizard.pas">
+				<Form>CnMessageBoxForm</Form>
+			</DCCReference>
+			<DCCReference Include="SimpleWizards\CnComponentSelector.pas">
+				<Form>CnComponentSelectorForm</Form>
+			</DCCReference>
+			<DCCReference Include="SimpleWizards\CnTabOrderWizard.pas">
+				<Form>CnTabOrderForm</Form>
+			</DCCReference>
+			<DCCReference Include="SimpleWizards\CnBookmarkWizard.pas">
+				<Form>CnBookmarkForm</Form>
+			</DCCReference>
+			<DCCReference Include="Utils\CnWizControlHook.pas"/>
+			<DCCReference Include="SimpleWizards\CnBookmarkConfigFrm.pas">
+				<Form>CnBookmarkConfigForm</Form>
+			</DCCReference>
+			<DCCReference Include="Utils\CnWizMacroFrm.pas">
+				<Form>CnWizMacroForm</Form>
+			</DCCReference>
+			<DCCReference Include="Utils\CnWizMacroUtils.pas"/>
+			<DCCReference Include="Utils\CnWizMacroText.pas"/>
+			<DCCReference Include="SrcTemplate\CnSrcTemplate.pas">
+				<Form>CnSrcTemplateForm</Form>
+			</DCCReference>
+			<DCCReference Include="SrcTemplate\CnSrcTemplateEditFrm.pas">
+				<Form>CnSrcTemplateEditForm</Form>
+			</DCCReference>
+			<DCCReference Include="EditorWizard\CnEditorWizard.pas">
+				<Form>CnEditorToolsForm</Form>
+			</DCCReference>
+			<DCCReference Include="EditorWizard\CnEditorOpenFile.pas"/>
+			<DCCReference Include="EditorWizard\CnEditorCodeSwap.pas"/>
+			<DCCReference Include="EditorWizard\CnEditorZoomFullScreen.pas">
+				<Form>CnEditorZoomFullScreenForm</Form>
+			</DCCReference>
+			<DCCReference Include="EditorWizard\CnEditorCodeTool.pas"/>
+			<DCCReference Include="EditorWizard\CnEditorCodeToString.pas">
+				<Form>CnEditorCodeToStringForm</Form>
+			</DCCReference>
+			<DCCReference Include="EditorWizard\CnEditorCodeDelBlank.pas">
+				<Form>CnDelBlankForm</Form>
+			</DCCReference>
+			<DCCReference Include="EditorWizard\CnEditorCodeComment.pas">
+				<Form>CnEditorCodeCommentForm</Form>
+			</DCCReference>
+			<DCCReference Include="EditorWizard\CnEditorCodeIndent.pas"/>
+			<DCCReference Include="EditorWizard\CnAsciiChart.pas">
+				<Form>CnAsciiForm</Form>
+			</DCCReference>
+			<DCCReference Include="EditorWizard\CnEditorInsertColor.pas"/>
+			<DCCReference Include="EditorWizard\CnEditorInsertTime.pas">
+				<Form>CnEditorInsertTimeForm</Form>
+			</DCCReference>
+			<DCCReference Include="EditorWizard\CnEditorCollector.pas">
+				<Form>CnEditorCollectorForm</Form>
+			</DCCReference>
+			<DCCReference Include="EditorWizard\CnEditorSortLines.pas"/>
+			<DCCReference Include="EditorWizard\CnEditorToggleUses.pas"/>
+			<DCCReference Include="EditorWizard\CnEditorToggleVar.pas"/>
+			<DCCReference Include="EditorWizard\CnEditorJumpMessage.pas"/>
+			<DCCReference Include="EditorWizard\CnEditorFontZoom.pas"/>
+			<DCCReference Include="SimpleWizards\CnMsdnWizard.pas">
+				<Form>CnMsdnConfigForm</Form>
+			</DCCReference>
+			<DCCReference Include="SimpleWizards\CnPas2HtmlWizard.pas">
+				<Form>CnPas2HtmlForm</Form>
+			</DCCReference>
+			<DCCReference Include="SimpleWizards\CnPasConvertTypeFrm.pas">
+				<Form>CnPasConvertTypeForm</Form>
+			</DCCReference>
+			<DCCReference Include="SimpleWizards\CnPas2HtmlConfigFrm.pas">
+				<Form>CnPas2HtmlConfigForm</Form>
+			</DCCReference>
+			<DCCReference Include="Utils\CnPasConvert.pas"/>
+			<DCCReference Include="Utils\CnWizEditFiler.pas"/>
+			<DCCReference Include="SimpleWizards\CnReplaceWizard.pas">
+				<Form>CnReplaceWizardForm</Form>
+			</DCCReference>
+			<DCCReference Include="Utils\CnWizSearch.pas"/>
+			<DCCReference Include="SourceDiff\CnDiffEditorFrm.pas">
+				<Form>CnDiffEditorForm</Form>
+			</DCCReference>
+			<DCCReference Include="SourceDiff\CnSourceDiffFrm.pas">
+				<Form>CnSourceDiffForm</Form>
+			</DCCReference>
+			<DCCReference Include="SourceDiff\CnSourceDiffWizard.pas"/>
+			<DCCReference Include="SourceStat\CnStatFrm.pas">
+				<Form>CnStatForm</Form>
+			</DCCReference>
+			<DCCReference Include="SourceStat\CnStatResultFrm.pas">
+				<Form>CnStatResultForm</Form>
+			</DCCReference>
+			<DCCReference Include="SourceStat\CnStatWizard.pas"/>
+			<DCCReference Include="Utils\CnLineParser.pas"/>
+			<DCCReference Include="PrefixWizard\CnPrefixExecuteFrm.pas">
+				<Form>CnPrefixExecuteForm</Form>
+			</DCCReference>
+			<DCCReference Include="PrefixWizard\CnPrefixNewFrm.pas">
+				<Form>CnPrefixNewForm</Form>
+			</DCCReference>
+			<DCCReference Include="PrefixWizard\CnPrefixEditFrm.pas">
+				<Form>CnPrefixEditForm</Form>
+			</DCCReference>
+			<DCCReference Include="PrefixWizard\CnPrefixConfigFrm.pas">
+				<Form>CnPrefixConfigForm</Form>
+			</DCCReference>
+			<DCCReference Include="PrefixWizard\CnPrefixWizard.pas"/>
+			<DCCReference Include="PrefixWizard\CnPrefixList.pas"/>
+			<DCCReference Include="PrefixWizard\CnPrefixCompFrm.pas">
+				<Form>CnPrefixCompForm</Form>
+			</DCCReference>
+			<DCCReference Include="DesignEditors\CnNamePropEditor.pas"/>
+			<DCCReference Include="SrcEditorEnhance\CnSrcEditorEnhance.pas">
+				<Form>CnSrcEditorEnhanceForm</Form>
+			</DCCReference>
+			<DCCReference Include="IdeEnhancements\CnFormEnhancements.pas">
+				<Form>CnFormEnhanceConfigForm</Form>
+			</DCCReference>
+			<DCCReference Include="IdeEnhancements\CnFlatToolbarConfigFrm.pas">
+				<Form>CnFlatToolbarConfigForm</Form>
+			</DCCReference>
+			<DCCReference Include="IdeEnhancements\CnPaletteEnhancements.pas"/>
+			<DCCReference Include="IdeEnhancements\CnPaletteEnhanceFrm.pas">
+				<Form>CnPalEnhanceForm</Form>
+			</DCCReference>
+			<DCCReference Include="CorProperty\CnCorPropWizard.pas"/>
+			<DCCReference Include="CorProperty\CnCorPropFrm.pas">
+				<Form>CnCorPropForm</Form>
+			</DCCReference>
+			<DCCReference Include="CorProperty\CnCorPropCfgFrm.pas">
+				<Form>CnCorPropCfgForm</Form>
+			</DCCReference>
+			<DCCReference Include="CorProperty\CnCorPropRulesFrm.pas">
+				<Form>CorPropRuleForm</Form>
+			</DCCReference>
+			<DCCReference Include="ProjectExtWizard\CnProjectExtWizard.pas"/>
+			<DCCReference Include="ProjectExtWizard\CnProjectViewBaseFrm.pas">
+				<Form>CnProjectViewBaseForm</Form>
+			</DCCReference>
+			<DCCReference Include="ProjectExtWizard\CnProjectViewUnitsFrm.pas">
+				<Form>CnProjectViewUnitsForm</Form>
+			</DCCReference>
+			<DCCReference Include="ProjectExtWizard\CnProjectViewFormsFrm.pas">
+				<Form>CnProjectViewFormsForm</Form>
+			</DCCReference>
+			<DCCReference Include="ProjectExtWizard\CnProjectUseUnitsFrm.pas">
+				<Form>CnProjectViewUnitsForm</Form>
+			</DCCReference>
+			<DCCReference Include="ProjectExtWizard\CnProjectFramesFrm.pas">
+				<Form>CnProjectFramesForm</Form>
+			</DCCReference>
+			<DCCReference Include="ProjectExtWizard\CnProjectListUsedFrm.pas">
+				<Form>CnProjectListUsedForm</Form>
+			</DCCReference>
+			<DCCReference Include="Utils\CnWizDfmParser.pas"/>
+			<DCCReference Include="SimpleWizards\CnCommentCropper.pas">
+				<Form>CommentCropForm</Form>
+			</DCCReference>
+			<DCCReference Include="Utils\CnSourceCropper.pas"/>
+			<DCCReference Include="IdeEnhancements\CnCpuWinEnhancements.pas"/>
+			<DCCReference Include="IdeEnhancements\CnCpuWinEnhanceFrm.pas">
+				<Form>CnCpuWinEnhanceForm</Form>
+			</DCCReference>
+			<DCCReference Include="RepositoryWiz\CnRepositoryMenu.pas"/>
+			<DCCReference Include="RepositoryWiz\CnDUnitWizard.pas"/>
+			<DCCReference Include="RepositoryWiz\CnDUnitSetFrm.pas">
+				<Form>CnDUnitSetForm</Form>
+			</DCCReference>
+			<DCCReference Include="RepositoryWiz\CnOTACreators.pas"/>
+			<DCCReference Include="RepositoryWiz\CnIniFilerWizard.pas"/>
+			<DCCReference Include="RepositoryWiz\CnIniFilerFrm.pas">
+				<Form>CnIniFilerForm</Form>
+			</DCCReference>
+			<DCCReference Include="RepositoryWiz\CnMemProfWizard.pas">
+				<Form>CnMemProfForm</Form>
+			</DCCReference>
+			<DCCReference Include="Utils\CnWizMethodHook.pas"/>
+			<DCCReference Include="Utils\CnWizIdeDock.pas">
+				<Form>CnIdeDockForm</Form>
+			</DCCReference>
+			<DCCReference Include="ExplorerWizard\CnExplore.pas">
+				<Form>CnExploreForm</Form>
+			</DCCReference>
+			<DCCReference Include="ExplorerWizard\CnExploreDirectory.pas">
+				<Form>CnExploreDirctoryForm</Form>
+			</DCCReference>
+			<DCCReference Include="ExplorerWizard\CnExploreFilter.pas">
+				<Form>CnExploreFilterForm</Form>
+			</DCCReference>
+			<DCCReference Include="ExplorerWizard\CnExploreFilterEditor.pas">
+				<Form>CnExploreFilterEditorForm</Form>
+			</DCCReference>
+			<DCCReference Include="ProjectExtWizard\CnProjectDelTempFrm.pas">
+				<Form>CnProjectDelTempForm</Form>
+			</DCCReference>
+			<DCCReference Include="ReopenWizard\CnRoClasses.pas"/>
+			<DCCReference Include="ReopenWizard\CnRoConst.pas"/>
+			<DCCReference Include="ReopenWizard\CnRoFrmFileList.pas">
+				<Form>RecentFilesFrame</Form>
+				<DesignClass>TFrame</DesignClass>
+			</DCCReference>
+			<DCCReference Include="ReopenWizard\CnRoInterfaces.pas"/>
+			<DCCReference Include="ReopenWizard\CnRoWizard.pas"/>
+			<DCCReference Include="ReopenWizard\CnRoFilesList.pas">
+				<Form>CnFilesListForm</Form>
+			</DCCReference>
+			<DCCReference Include="ReopenWizard\CnRoOptions.pas">
+				<Form>CnRoOptionsDlg</Form>
+			</DCCReference>
+			<DCCReference Include="ReopenWizard\CnFilesSnapshot.pas"/>
+			<DCCReference Include="ReopenWizard\CnFilesSnapshotManageFrm.pas">
+				<Form>CnProjectFilesSnapshotManageForm</Form>
+			</DCCReference>
+			<DCCReference Include="IdeEnhancements\CnWinTopRoller.pas">
+				<Form>CnTopRollerForm</Form>
+			</DCCReference>
+			<DCCReference Include="EditorTabSet\CnWizEdtTabSetHook.pas"/>
+			<DCCReference Include="EditorTabSet\CnWizEdtTabSetFrm.pas">
+				<Form>CnWizEdtTabSetForm</Form>
+			</DCCReference>
+			<DCCReference Include="IdeEnhancements\CnInputHelper.pas"/>
+			<DCCReference Include="IdeEnhancements\CnInputHelperFrm.pas">
+				<Form>CnInputHelperForm</Form>
+			</DCCReference>
+			<DCCReference Include="IdeEnhancements\CnInputHelperEditFrm.pas">
+				<Form>CnInputHelperEditForm</Form>
+			</DCCReference>
+			<DCCReference Include="IdeEnhancements\CnInputSymbolList.pas"/>
+			<DCCReference Include="IdeEnhancements\CnInputIdeSymbolList.pas"/>
+			<DCCReference Include="Utils\CnPasCodeParser.pas"/>
+			<DCCReference Include="Utils\CnWizIdeHooks.pas"/>
+			<DCCReference Include="Utils\CnEditControlWrapper.pas"/>
+			<DCCReference Include="SrcEditorEnhance\CnSrcEditorGutter.pas"/>
+			<DCCReference Include="SrcEditorEnhance\CnSrcEditorToolBar.pas"/>
+			<DCCReference Include="ProjectExtWizard\CnProjectBackupFrm.pas">
+				<Form>CnProjectBackupForm</Form>
+			</DCCReference>
+			<DCCReference Include="ProjectExtWizard\CnProjectBackupSaveFrm.pas">
+				<Form>CnProjectBackupSaveForm</Form>
+			</DCCReference>
+			<DCCReference Include="SrcEditorEnhance\CnSrcEditorMisc.pas"/>
+			<DCCReference Include="SrcEditorEnhance\CnSrcEditorNav.pas"/>
+			<DCCReference Include="SrcEditorEnhance\CnSrcEditorBlockTools.pas"/>
+			<DCCReference Include="SrcEditorEnhance\CnSrcEditorCodeWrap.pas">
+				<Form>CnSrcEditorCodeWrapForm</Form>
+			</DCCReference>
+			<DCCReference Include="Utils\CnGroupReplace.pas"/>
+			<DCCReference Include="SrcEditorEnhance\CnSrcEditorGroupReplace.pas">
+				<Form>CnSrcEditorGroupReplaceForm</Form>
+			</DCCReference>
+			<DCCReference Include="SrcEditorEnhance\CnSrcEditorWebSearch.pas">
+				<Form>CnSrcEditorWebSearchForm</Form>
+			</DCCReference>
+			<DCCReference Include="SrcEditorEnhance\CnSrcEditorKey.pas"/>
+			<DCCReference Include="SrcEditorEnhance\CnIdentRenameFrm.pas">
+				<Form>CnIdentRenameForm</Form>
+			</DCCReference>
+			<DCCReference Include="Utils\CnWizFlatButton.pas"/>
+			<DCCReference Include="IdeEnhancements\CnSourceHighlight.pas"/>
+			<DCCReference Include="IdeEnhancements\CnSourceHighlightFrm.pas">
+				<Form>CnSourceHighlightForm</Form>
+			</DCCReference>
+			<DCCReference Include="IdeEnhancements\CnHighlightLineFrm.pas">
+				<Form>CnHighlightLineForm</Form>
+			</DCCReference>
+			<DCCReference Include="SimpleWizards\CnProcListWizard.pas">
+				<Form>CnProcListForm</Form>
+			</DCCReference>
+			<DCCReference Include="IdeEnhancements\CnVerEnhancements.pas"/>
+			<DCCReference Include="IdeEnhancements\CnVerEnhanceFrm.pas">
+				<Form>CnVerEnhanceForm</Form>
+			</DCCReference>
+			<DCCReference Include="ProjectExtWizard\CnProjectDirBuilderFrm.pas">
+				<Form>CnProjectDirBuilderForm</Form>
+			</DCCReference>
+			<DCCReference Include="ProjectExtWizard\CnProjectDirImportFrm.pas">
+				<Form>CnImportDirForm</Form>
+			</DCCReference>
+			<DCCReference Include="Utils\CnDCU32.pas"/>
+			<DCCReference Include="SimpleWizards\CnUsesCleaner.pas">
+				<Form>CnUsesCleanerForm</Form>
+			</DCCReference>
+			<DCCReference Include="SimpleWizards\CnUsesCleanResultFrm.pas">
+				<Form>CnUsesCleanResultForm</Form>
+			</DCCReference>
+			<DCCReference Include="IdeEnhancements\CnIdeEnhanceMenu.pas"/>
+			<DCCReference Include="SimpleWizards\CnIdeBRWizard.pas"/>
+			<DCCReference Include="ScriptWizard\CnScriptWizard.pas">
+				<Form>CnScriptWizardForm</Form>
+			</DCCReference>
+			<DCCReference Include="ScriptWizard\CnScriptFrm.pas">
+				<Form>CnScriptForm</Form>
+			</DCCReference>
+			<DCCReference Include="ScriptWizard\CnScriptClasses.pas"/>
+			<DCCReference Include="ScriptWizard\CnScriptRegister.pas"/>
+			<DCCReference Include="SimpleWizards\CnFeedWizard.pas"/>
+			<DCCReference Include="Utils\CnFeedParser.pas"/>
+			<DCCReference Include="SimpleWizards\CnFeedWizardFrm.pas">
+				<Form>CnFeedWizardForm</Form>
+			</DCCReference>
+			<DCCReference Include="DesignEditors\CnImageListEditorFrm.pas">
+				<Form>CnImageListEditorForm</Form>
+			</DCCReference>
+			<DCCReference Include="DesignEditors\CnImageListEditor.pas"/>
+			<DCCReference Include="Utils\CnImageProviderMgr.pas"/>
+			<DCCReference Include="Utils\CnImageProvider_IconFinder.pas"/>
+			<DCCReference Include="Utils\CnImageProvider_FindIcons.pas"/>
+			<DCCReference Include="Utils\CnImageProvider_LocalCache.pas"/>
+			<BuildConfiguration Include="Debug">
+				<Key>Cfg_2</Key>
+				<CfgParent>Base</CfgParent>
+			</BuildConfiguration>
+			<BuildConfiguration Include="Base">
+				<Key>Base</Key>
+			</BuildConfiguration>
+			<BuildConfiguration Include="Release">
+				<Key>Cfg_1</Key>
+				<CfgParent>Base</CfgParent>
+			</BuildConfiguration>
+		</ItemGroup>
+		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')" Project="$(BDS)\Bin\CodeGear.Delphi.Targets"/>
+		<ProjectExtensions>
+			<Borland.Personality>Delphi.Personality.12</Borland.Personality>
+			<Borland.ProjectType>VCLApplication</Borland.ProjectType>
+			<BorlandProject>
+				<Delphi.Personality>
+					<Source>
+						<Source Name="MainSource">CnWizards_D16.dpr</Source>
+					</Source>
+					<Parameters>
+						<Parameters Name="UseLauncher">False</Parameters>
+						<Parameters Name="LoadAllSymbols">True</Parameters>
+						<Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
+					</Parameters>
+					<VersionInfo>
+						<VersionInfo Name="IncludeVerInfo">False</VersionInfo>
+						<VersionInfo Name="AutoIncBuild">False</VersionInfo>
+						<VersionInfo Name="MajorVer">0</VersionInfo>
+						<VersionInfo Name="MinorVer">9</VersionInfo>
+						<VersionInfo Name="Release">8</VersionInfo>
+						<VersionInfo Name="Build">0</VersionInfo>
+						<VersionInfo Name="Debug">False</VersionInfo>
+						<VersionInfo Name="PreRelease">False</VersionInfo>
+						<VersionInfo Name="Special">False</VersionInfo>
+						<VersionInfo Name="Private">False</VersionInfo>
+						<VersionInfo Name="DLL">False</VersionInfo>
+						<VersionInfo Name="Locale">2052</VersionInfo>
+						<VersionInfo Name="CodePage">936</VersionInfo>
+					</VersionInfo>
+					<VersionInfoKeys>
+						<VersionInfoKeys Name="CompanyName"/>
+						<VersionInfoKeys Name="FileDescription"/>
+						<VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="InternalName"/>
+						<VersionInfoKeys Name="LegalCopyright"/>
+						<VersionInfoKeys Name="LegalTrademarks"/>
+						<VersionInfoKeys Name="OriginalFilename"/>
+						<VersionInfoKeys Name="ProductName"/>
+						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="Comments"/>
+					</VersionInfoKeys>
+					<Excluded_Packages>
+						<Excluded_Packages Name="$(BDSBIN)\bcboffice2k160.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
+						<Excluded_Packages Name="$(BDSBIN)\bcbofficexp160.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
+						<Excluded_Packages Name="$(BDSBIN)\dcloffice2k160.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDSBIN)\dclofficexp160.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+					</Excluded_Packages>
+				</Delphi.Personality>
+				<Platforms>
+					<Platform value="Win64">False</Platform>
+					<Platform value="OSX32">False</Platform>
+					<Platform value="Win32">True</Platform>
+				</Platforms>
+			</BorlandProject>
+			<ProjectFileVersion>12</ProjectFileVersion>
+		</ProjectExtensions>
+		<Import Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')" Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj"/>
+	</Project>
