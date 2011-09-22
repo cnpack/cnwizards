@@ -1,0 +1,142 @@
+Index: F:/CnPack/cnwizards/Source/ThirdParty/JCL/JclDebug.pas
+===================================================================
+--- F:/CnPack/cnwizards/Source/ThirdParty/JCL/JclDebug.pas	(revision 924)
++++ F:/CnPack/cnwizards/Source/ThirdParty/JCL/JclDebug.pas	(revision 925)
+@@ -520,7 +520,7 @@
+   private
+     FStackInfo: TStackInfo;
+     function GetCallerAdr: Pointer;
+-    function GetLogicalAddress: DWORD_PTR;
++    function GetLogicalAddress: DWORD;
+   public
+     property CallerAdr: Pointer read GetCallerAdr;
+     property LogicalAddress: DWORD read GetLogicalAddress;
+@@ -547,8 +547,8 @@
+     procedure TraceStackFrames;
+     procedure TraceStackRaw;
+     procedure DelayStoreStack;
+-    function ValidCallSite(CodeAddr: DWORD_PTR; var CallInstructionSize: Cardinal): Boolean;
+-    function ValidStackAddr(StackAddr: DWORD_PTR): Boolean;
++    function ValidCallSite(CodeAddr: DWORD; var CallInstructionSize: Cardinal): Boolean;
++    function ValidStackAddr(StackAddr: DWORD): Boolean;
+     function GetCount: Integer;
+     procedure CorrectOnAccess(ASkipFirstItem: Boolean);
+   public
+@@ -716,7 +716,7 @@
+     function GetThreadNames(ThreadID: DWORD): string;
+     procedure DoSyncThreadRegistered;
+     procedure DoSyncThreadUnregistered;
+-    function GetThreadHandle(Index: Integer): THandle;
++    function GetThreadHandle(Index: Integer): DWORD;
+     function GetThreadID(Index: Integer): DWORD;
+     function GetThreadIDCount: Integer;
+     function GetThreadValues(ThreadID: DWORD; Index: Integer): string;
+@@ -4070,9 +4070,9 @@
+   Result := Pointer(FStackInfo.CallerAdr);
+ end;
+ 
+-function TJclStackInfoItem.GetLogicalAddress: DWORD_PTR;
++function TJclStackInfoItem.GetLogicalAddress: DWORD;
+ begin
+-  Result := FStackInfo.CallerAdr - DWORD_PTR(ModuleFromAddr(CallerAdr));
++  Result := FStackInfo.CallerAdr - DWORD(ModuleFromAddr(CallerAdr));
+ end;
+ 
+ //=== { TJclStackInfoList } ==================================================
+Index: F:/CnPack/cnwizards/Source/ThirdParty/JCL/JclSysUtils.pas
+===================================================================
+--- F:/CnPack/cnwizards/Source/ThirdParty/JCL/JclSysUtils.pas	(revision 924)
++++ F:/CnPack/cnwizards/Source/ThirdParty/JCL/JclSysUtils.pas	(revision 925)
+@@ -1202,7 +1202,11 @@
+     while L <= H do
+     begin
+       I := (L + H) shr 1;
++{$IFDEF VER230}
++      C := SortFunc(List.List[I], Item);
++{$ELSE}
+       C := SortFunc(List.List^[I], Item);
++{$ENDIF}
+       if C < 0 then
+         L := I + 1
+       else
+@@ -1995,7 +1999,7 @@
+   FSignChars[False] := '-';
+   FSignChars[True] := '+';
+   FPaddingChar := ' ';
+-  FMultiplier := '?;
++  FMultiplier := #$D7;
+   FFractionalPartSeparator := DecimalSeparator{$IFDEF CLR}[1]{$ENDIF};
+   FDigitBlockSeparator := ThousandSeparator{$IFDEF CLR}[1]{$ENDIF};
+ end;
+Index: F:/CnPack/cnwizards/Source/ThirdParty/JCL/JclPeImage.pas
+===================================================================
+--- F:/CnPack/cnwizards/Source/ThirdParty/JCL/JclPeImage.pas	(revision 924)
++++ F:/CnPack/cnwizards/Source/ThirdParty/JCL/JclPeImage.pas	(revision 925)
+@@ -2303,8 +2303,11 @@
+ 
+         ExportItem := TJclPeExportFuncItem.Create(Self, UTF8ToString(PAnsiChar(RvaToVa(Names^))),
+           ForwardedName, Address, I, NameOrdinals^ + FBase, icNotChecked);
+-
++{$IFDEF VER230}
++        List[I] := ExportItem;
++{$ELSE}
+         List^[I] := ExportItem;
++{$ENDIF}
+         Inc(NameOrdinals);
+         Inc(Names);
+       end;
+@@ -6198,7 +6201,7 @@
+   Buffer: Pointer; Size: Integer): Boolean;
+ // TODO 64 bit version
+ var
+-  BR: DWORD;
++  BR: THandle;
+ begin
+   Result := ReadProcessMemory(ProcessHandle, Pointer(Address), Buffer, Size, BR);
+ end;
+Index: F:/CnPack/cnwizards/Source/ThirdParty/JCL/JclFileUtils.pas
+===================================================================
+--- F:/CnPack/cnwizards/Source/ThirdParty/JCL/JclFileUtils.pas	(revision 924)
++++ F:/CnPack/cnwizards/Source/ThirdParty/JCL/JclFileUtils.pas	(revision 925)
+@@ -5242,7 +5242,7 @@
+ function VersionResourceAvailable(const FileName: string): Boolean;
+ var
+   Size: DWORD;
+-  Handle: THandle;
++  Handle: DWORD;
+   Buffer: string;
+ begin
+   Result := False;
+@@ -5302,7 +5302,7 @@
+ function VersionFixedFileInfo(const FileName: string; var FixedInfo: TVSFixedFileInfo): Boolean;
+ var
+   Size, FixInfoLen: DWORD;
+-  Handle: THandle;
++  Handle: DWORD;
+   Buffer: string;
+   FixInfoBuf: PVSFixedFileInfo;
+ begin
+@@ -5342,7 +5342,7 @@
+ 
+ constructor TJclFileVersionInfo.Create(const FileName: string);
+ var
+-  Handle: THandle;
++  Handle: DWORD;
+   Size: DWORD;
+ begin
+   Size := GetFileVersionInfoSize(PChar(FileName), Handle);
+Index: F:/CnPack/cnwizards/Source/ThirdParty/JCL/JclWin32.pas
+===================================================================
+--- F:/CnPack/cnwizards/Source/ThirdParty/JCL/JclWin32.pas	(revision 924)
++++ F:/CnPack/cnwizards/Source/ThirdParty/JCL/JclWin32.pas	(revision 925)
+@@ -3017,8 +3017,8 @@
+ 
+ function ReBaseImage(CurrentImageName: PAnsiChar; SymbolPath: PAnsiChar; fReBase: BOOL;
+   fRebaseSysfileOk: BOOL; fGoingDown: BOOL; CheckImageSize: ULONG;
+-  var OldImageSize: ULONG; var OldImageBase: ULONG_PTR; var NewImageSize: ULONG;
+-  var NewImageBase: ULONG_PTR; TimeStamp: ULONG): BOOL; stdcall;
++  var OldImageSize: ULONG; var OldImageBase: ULONG; var NewImageSize: ULONG;
++  var NewImageBase: ULONG; TimeStamp: ULONG): BOOL; stdcall;
+ {$EXTERNALSYM ReBaseImage}
+ 
+ function ReBaseImage64(CurrentImageName: PAnsiChar; SymbolPath: PAnsiChar; fReBase: BOOL;
