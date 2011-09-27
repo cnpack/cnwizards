@@ -2583,7 +2583,13 @@ begin
 
       // CheckBlockMatch  ±ª·…Ë÷√ FChanged
       if Info.FChanged then
-        Info.CheckBlockMatch(BlockHighlightRange);
+      begin
+        try
+          Info.CheckBlockMatch(BlockHighlightRange);
+        exception
+          ; // Hide an Unknown exception.
+        end;
+      end;
     end;
   finally
     FIsChecking := False;
