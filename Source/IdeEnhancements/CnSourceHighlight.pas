@@ -2586,7 +2586,7 @@ begin
       begin
         try
           Info.CheckBlockMatch(BlockHighlightRange);
-        exception
+        except
           ; // Hide an Unknown exception.
         end;
       end;
