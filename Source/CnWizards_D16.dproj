@@ -41,13 +41,14 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
+			<Manifest_File>None</Manifest_File>
 			<DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
 			<VerInfo_MinorVer>9</VerInfo_MinorVer>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=0.9.9.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<VerInfo_Locale>2052</VerInfo_Locale>
 			<VerInfo_Release>9</VerInfo_Release>
 			<VerInfo_MajorVer>0</VerInfo_MajorVer>
-			<DCC_UsePackage>rtl;vcl;vclx;designide</DCC_UsePackage>
+			<DCC_UsePackage>rtl;vcl;vclx;fmx;designide;$(DCC_UsePackage)</DCC_UsePackage>
 			<UsePackages>true</UsePackages>
 			<DCC_DependencyCheckOutputName>Base\Win32\CnWizards_D16.dll</DCC_DependencyCheckOutputName>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
@@ -67,6 +68,7 @@
 			<VerInfo_Locale>1033</VerInfo_Locale>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base_Win32)'!=''">
+			<Manifest_File>None</Manifest_File>
 			<DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1)'!=''">
