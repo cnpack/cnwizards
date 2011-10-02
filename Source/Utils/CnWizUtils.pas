@@ -292,6 +292,8 @@ function IsForm(const FileName: string): Boolean;
 {* 判断是否窗体文件}
 function IsXfm(const FileName: string): Boolean;
 {* 判断是否.Xfm文件}
+function IsFmx(const FileName: string): Boolean;
+{* 判断是否.fmx文件}
 function IsCppSourceModule(const FileName: string): Boolean;
 {* 判断是否所有类型的C++源文件}
 function IsHpp(const FileName: string): Boolean;
@@ -742,9 +744,12 @@ procedure TranslateFormFromLangFile(AForm: TCustomForm; const ALangDir, ALangFil
 implementation
 
 uses
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebug,
-{$ENDIF Debug}
+{$ENDIF}
+{$IFDEF SUPPORTS_FMX}
+  CnFmxUtils,
+{$ENDIF}
   Math, CnWizOptions, CnWizMultiLang, CnLangMgr, CnGraphUtils, CnWizIdeUtils,
   CnPasCodeParser, CnCppCodeParser, CnLangStorage, CnHashLangStorage, CnWizHelp;
 
@@ -2032,11 +2037,20 @@ var
 begin
   FileExt := ExtractUpperFileExt(FileName);
   Result := (FileExt = '.DFM') or (FileExt = '.XFM');
+{$IFDEF SUPPORTS_FMX}
+  if not Result then
+    Result := (FileExt = '.FMX');
+{$ENDIF}
 end;
 
 function IsXfm(const FileName: string): Boolean;
 begin
   Result := (ExtractUpperFileExt(FileName) = '.XFM');
+end;
+
+function IsFmx(const FileName: string): Boolean;
+begin
+  Result := (ExtractUpperFileExt(FileName) = '.FMX');
 end;
 
 function IsCppSourceModule(const FileName: string): Boolean;
@@ -2308,7 +2322,7 @@ begin
         end;
       end;
   end;
-  Result:=nil;
+  Result := nil;
 end;
 
 // 取当前窗体编辑器
@@ -2316,7 +2330,6 @@ function CnOtaGetCurrentFormEditor: IOTAFormEditor;
 var
   Module: IOTAModule;
 begin
-  
   Module := CnOtaGetCurrentModule;
   if Assigned(Module) then
   begin    
@@ -2374,9 +2387,18 @@ begin
       (TObject(IComponent.GetComponentHandle) is TComponent) then
     begin
       Component := TObject(IComponent.GetComponentHandle) as TComponent;
-      if Assigned(Component) and (Component is TControl) and
-        Assigned(TControl(Component).Parent) then
-        List.Add(Component);
+      if Assigned(Component) then
+      begin
+        if (Component is TControl) and Assigned(TControl(Component).Parent) then
+          List.Add(Component);
+{$IFDEF SUPPORTS_FMX}
+        if CnFmxIsInheritedFromControl(Component) then
+        begin
+          if Assigned(CnFmxGetControlParent(Component)) then
+            List.Add(Component);
+        end;
+{$ENDIF}
+      end;
     end;
   end;
 
