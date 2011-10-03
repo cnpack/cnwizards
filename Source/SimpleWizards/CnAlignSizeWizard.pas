@@ -32,7 +32,9 @@ unit CnAlignSizeWizard;
 * 兼容测试：PWin2000 + Delphi 5
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2004.12.04 by 周劲羽
+* 修改记录：2011.10.03 by LiuXiao
+*               使用一批封装 Control 操作的函数以支持 FMX 框架
+*           2004.12.04 by 周劲羽
 *               大量修改和重构，支持更多的功能
 *           2003.11.20 by 周劲羽
 *               换了一种方法检查是否不可视组件，修正有时候不能过滤 TField 等的问题。
@@ -355,7 +357,7 @@ end;
 
 procedure TCnAlignSizeWizard.DoAlignSize(AlignSizeStyle: TAlignSizeStyle);
 var
-  I: Integer;
+  I, AWidth, AHeight, ALeft, ATop: Integer;
   Count, Value: Integer;
   Curr: Double;
   ControlList: TList;
@@ -505,7 +507,7 @@ begin
             R1 := R2;
           end;
         end;
-      asIncWidth, asDecWidth, asIncHeight, asDecHeight,
+      asIncWidth, asDecWidth, asIncHeight, asDecHeight, // FMX support
       asAlignToGrid, asSizeToGrid:
        begin
           try
@@ -513,34 +515,40 @@ begin
             GridSizeX := EnvOptions.GetOptionValue(SOptionGridSizeX);
             GridSizeY := EnvOptions.GetOptionValue(SOptionGridSizeY);
             if (GridSizeX <> 0) and (GridSizeY <> 0) then
-              for i := 0 to ControlList.Count - 1 do
-                with TControl(ControlList[I]) do
+            begin
+              for I := 0 to ControlList.Count - 1 do
+              begin
+                ALeft := GetControlLeft(TControl(ControlList[I]));
+                ATop := GetControlTop(TControl(ControlList[I]));
+                AWidth := GetControlWidth(TControl(ControlList[I]));
+                AHeight := GetControlHeight(TControl(ControlList[I]));
+
+                if AlignSizeStyle = asIncWidth then
+                  SetControlWidth(TControl(ControlList[I]), AWidth + GridSizeX)
+                else if AlignSizeStyle = asDecWidth then
                 begin
-                  if AlignSizeStyle = asIncWidth then
-                    Width := Width + GridSizeX
-                  else if AlignSizeStyle = asDecWidth then
+                  if AWidth > GridSizeX then
+                    SetControlWidth(TControl(ControlList[I]), AWidth - GridSizeX);
+                end
+                else if AlignSizeStyle = asIncHeight then
+                  SetControlHeight(TControl(ControlList[I]), AHeight + GridSizeY)
+                else if AlignSizeStyle = asDecHeight then
+                begin
+                  if AHeight > GridSizeY then
+                    SetControlHeight(TControl(ControlList[I]), AHeight - GridSizeY);
+                end
+                else
+                begin
+                  SetControlLeft(TControl(ControlList[I]), ALeft - ALeft mod GridSizeX);
+                  SetControlTop(TControl(ControlList[I]), ATop - ATop mod GridSizeY);
+                  if AlignSizeStyle = asSizeToGrid then
                   begin
-                    if Width > GridSizeX then
-                      Width := Width - GridSizeX;
-                  end
-                  else if AlignSizeStyle = asIncHeight then
-                    Height := Height + GridSizeY
-                  else if AlignSizeStyle = asDecHeight then
-                  begin
-                    if Height > GridSizeY then
-                      Height := Height - GridSizeY;
-                  end
-                  else
-                  begin
-                    Left := Left - Left mod GridSizeX;
-                    Top := Top - Top mod GridSizeY;
-                    if AlignSizeStyle = asSizeToGrid then
-                    begin
-                      Width := Round(Width / GridSizeX) * GridSizeX;
-                      Height := Round(Height / GridSizeY) * GridSizeY;
-                    end;
+                    SetControlWidth(TControl(ControlList[I]), Round(AWidth / GridSizeX) * GridSizeX);
+                    SetControlHeight(TControl(ControlList[I]), Round(AHeight / GridSizeY) * GridSizeY);
                   end;
                 end;
+              end;
+            end;
           except
             DoHandleException('AlignToGrid Error.');
           end;
@@ -557,10 +565,10 @@ begin
           begin
             if AlignSizeStyle in [asMakeMinWidth, asMakeMaxWidth,
               asMakeSameWidth, asMakeSameSize] then
-              TControl(ControlList[I]).Width := TControl(ControlList[0]).Width;
+              SetControlWidth(ControlList[I], GetControlWidth(TControl(ControlList[0])));
             if AlignSizeStyle in [asMakeMinHeight, asMakeMaxHeight,
               asMakeSameHeight, asMakeSameSize] then
-              TControl(ControlList[I]).Height := TControl(ControlList[0]).Height;
+              SetControlHeight(ControlList[I], GetControlHeight(TControl(ControlList[0])));
           end;
         end;
       asParentHCenter, asParentVCenter:
@@ -617,9 +625,9 @@ begin
         begin
           for I := 0 to ControlList.Count - 1 do
             if AlignSizeStyle = asBringToFront then
-              TControl(ControlList[I]).BringToFront
+              ControlBringToFront(TControl(ControlList[I]))
             else
-              TControl(ControlList[I]).SendToBack;
+              ControlSendToBack(TControl(ControlList[I]));
         end;
       asSnapToGrid:
         begin
