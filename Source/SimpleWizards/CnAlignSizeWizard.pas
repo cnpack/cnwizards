@@ -358,6 +358,7 @@ end;
 procedure TCnAlignSizeWizard.DoAlignSize(AlignSizeStyle: TAlignSizeStyle);
 var
   I, AWidth, AHeight, ALeft, ATop: Integer;
+  AParent: TComponent;
   Count, Value: Integer;
   Curr: Double;
   ControlList: TList;
@@ -377,7 +378,7 @@ begin
   try
     if (csAlignNeedControls[AlignSizeStyle] > 0) and
       not CnOtaGetSelectedControlFromCurrentForm(ControlList) then Exit;
-
+}
     IsModified := True;
     case AlignSizeStyle of
       asAlignLeft, asAlignRight, asAlignTop, asAlignBottom,
@@ -387,6 +388,7 @@ begin
           for I := 1 to ControlList.Count - 1 do
           begin
             R2 := GetControlScreenRect(TControl(ControlList[I]));
+
             if AlignSizeStyle = asAlignLeft then
               OffsetRect(R2, R1.Left - R2.Left, 0)
             else if AlignSizeStyle = asAlignRight then
@@ -399,6 +401,7 @@ begin
               OffsetRect(R2, 0, (R1.Top + R1.Bottom - R2.Top - R2.Bottom) div 2)
             else // AlignSizeStyle = asAlignHCenter
               OffsetRect(R2, (R1.Left + R1.Right - R2.Left - R2.Right) div 2, 0);
+
             SetControlScreenRect(TControl(ControlList[I]), R2);
           end;
         end;
@@ -581,7 +584,7 @@ begin
               AList.Clear;
               AList.Add(ControlList.Extract(ControlList[0]));
               for i := ControlList.Count - 1 downto 0 do
-                if TControl(ControlList[I]).Parent = TControl(AList[0]).Parent then
+                if GetControlParent(ControlList[I]) = GetControlParent(TControl(AList[0])) then
                   AList.Add(ControlList.Extract(ControlList[I]));
 
               if AlignSizeStyle = asParentHCenter then
@@ -589,16 +592,25 @@ begin
                 // 计算控件组的外接宽度
                 R1.Left := MaxInt;
                 R1.Right := -MaxInt;
-                for i := 0 to AList.Count - 1 do
+                for I := 0 to AList.Count - 1 do
                 begin
-                  R1.Left := Min(TControl(AList[i]).Left, R1.Left);
-                  R1.Right := Max(TControl(AList[i]).Left + TControl(AList[I]).Width, R1.Right);
+                  R1.Left := Min(GetControlLeft(TControl(AList[I])), R1.Left);
+                  R1.Right := Max(GetControlLeft(TControl(AList[I])) + GetControlWidth(TControl(AList[I])), R1.Right);
                 end;
 
                 // 要移动的距离
-                Value := (TControl(AList[0]).Parent.ClientWidth - R1.Left - R1.Right) div 2;
-                for I := 0 to AList.Count - 1 do
-                  TControl(AList[I]).Left := TControl(AList[I]).Left + Value;
+                AParent := GetControlParent(TControl(AList[0]));
+                if AParent <> nil then
+                begin
+                  if AParent is TControl then
+                    AWidth := TControl(AParent).ClientWidth
+                  else // FMX
+                    AWidth := GetControlWidth(AParent);
+                  Value := (AWidth - R1.Left - R1.Right) div 2;
+
+                  for I := 0 to AList.Count - 1 do
+                    SetControlLeft(TControl(AList[I]), GetControlLeft(TControl(AList[I])) + Value);
+                end;
               end
               else
               begin
@@ -607,14 +619,23 @@ begin
                 R1.Bottom := -MaxInt;
                 for I := 0 to AList.Count - 1 do
                 begin
-                  R1.Top := Min(TControl(AList[I]).Top, R1.Top);
-                  R1.Bottom := Max(TControl(AList[I]).Top + TControl(AList[I]).Height, R1.Bottom);
+                  R1.Top := Min(GetControlTop(TControl(AList[I])), R1.Top);
+                  R1.Bottom := Max(GetControlTop(TControl(AList[I])) + GetControlHeight(TControl(AList[I])), R1.Bottom);
                 end;
 
                 // 要移动的距离
-                Value := (TControl(AList[0]).Parent.ClientHeight - R1.Top - R1.Bottom) div 2;
-                for i := 0 to AList.Count - 1 do
-                  TControl(AList[I]).Top := TControl(AList[I]).Top + Value;
+                AParent := GetControlParent(TControl(AList[0]));
+                if AParent <> nil then
+                begin
+                  if AParent is TControl then
+                    AHeight := TControl(AParent).ClientHeight
+                  else // FMX
+                    AHeight := GetControlHeight(AParent);
+                  Value := (AHeight - R1.Top - R1.Bottom) div 2;
+
+                  for I := 0 to AList.Count - 1 do
+                    SetControlTop(TControl(AList[I]), GetControlTop(TControl(AList[I])) + Value);
+                end;
               end;
             end;
           finally
