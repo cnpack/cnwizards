@@ -378,7 +378,7 @@ begin
   try
     if (csAlignNeedControls[AlignSizeStyle] > 0) and
       not CnOtaGetSelectedControlFromCurrentForm(ControlList) then Exit;
-}
+
     IsModified := True;
     case AlignSizeStyle of
       asAlignLeft, asAlignRight, asAlignTop, asAlignBottom,
