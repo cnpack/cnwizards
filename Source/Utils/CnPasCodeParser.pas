@@ -29,7 +29,9 @@ unit CnPasCodeParser;
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2011.05.29
+* 修改记录：2011.11.03
+*               优化对带点的引用单元名的支持
+*           2011.05.29
 *               修正BDS下对汉字UTF8未处理而导致解析出错的问题
 *           2004.11.07
 *               创建单元
@@ -1320,18 +1322,13 @@ procedure ParseUnitUses(const Source: AnsiString; UsesList: TStrings);
 var
   Lex: TmwPasLex;
   Flag: Integer;
-{$IFDEF BDS2012_UP}
-  I: Integer;
-  TempList: TObjectList;
-  AUseObj, NextUseObj, Next2UseObj: TCnUseToken;
-{$ENDIF}
+  S: string;
 begin
   UsesList.Clear;
   Lex := TmwPasLex.Create;
-{$IFDEF BDS2012_UP}
-  TempList := TObjectList.Create(True);
-{$ENDIF}
+
   Flag := 0;
+  S := '';
   try
     Lex.Origin := PAnsiChar(Source);
     while Lex.TokenID <> tkNull do
@@ -1341,22 +1338,19 @@ begin
         while not (Lex.TokenID in [tkNull, tkSemiColon]) do
         begin
           Lex.Next;
-{$IFDEF BDS2012_UP}
-          if (Lex.TokenID = tkIdentifier) or (Lex.TokenID = tkPoint) then
-          begin
-            AUseObj := TCnUseToken.Create;
-            AUseObj.Token := string(Lex.Token);
-            AUseObj.IsImpl := Flag = 1;
-            AUseObj.TokenPos := Lex.TokenPos;
-            AUseObj.TokenID := Lex.TokenID;
-            TempList.Add(AUseObj);
-          end;
-{$ELSE}
           if Lex.TokenID = tkIdentifier then
           begin
-            UsesList.AddObject(string(Lex.Token), TObject(Flag));
+            S := S + string(Lex.Token);
+          end
+          else if Lex.TokenID = tkPoint then
+          begin
+            S := S + '.';
+          end
+          else if Trim(S) <> '' then
+          begin
+            UsesList.AddObject(S, TObject(Flag));
+            S := '';
           end;
-{$ENDIF}
         end;
       end
       else if Lex.TokenID = tkImplementation then
@@ -1366,50 +1360,7 @@ begin
       end;
       Lex.Next;
     end;
-{$IFDEF BDS2012_UP}
-    // XE2 下允许 Vcl.Forms 这样的 uses，因此需要合并
-    I := 0;
-    while I < TempList.Count do
-    begin
-      AUseObj := TCnUseToken(TempList.Items[I]);
-      if AUseObj.IsImpl then
-        Flag := 1
-      else
-        Flag := 0;
-
-      if (I = TempList.Count - 1) or (I = TempList.Count - 2) then
-      begin
-        if AUseObj.TokenID = tkIdentifier then
-          UsesList.AddObject(AUseObj.Token, TObject(Flag));
-      end
-      else if (I >= 0) and (I < TempList.Count - 2) then
-      begin
-        NextUseObj := TCnUseToken(TempList.Items[I + 1]);
-        if (NextUseObj.TokenID = tkPoint)
-          and (NextUseObj.TokenPos = AUseObj.TokenPos + Length(AUseObj.Token)) then
-        begin
-          // 这个和后面的点紧挨着
-          Next2UseObj := TCnUseToken(TempList.Items[I + 2]);
-          if (Next2UseObj.TokenID = tkIdentifier)
-            and (Next2UseObj.TokenPos = NextUseObj.TokenPos + Length(NextUseObj.Token)) then
-          begin
-            // 点和后面的紧挨着，拼成一个
-            UsesList.AddObject(AUseObj.Token + '.' + Next2UseObj.Token, TObject(Flag));
-            Inc(I, 3);
-            Continue;
-          end;
-        end;
-
-        if AUseObj.TokenID = tkIdentifier then
-          UsesList.AddObject(AUseObj.Token, TObject(Flag));
-      end;
-      Inc(I);
-    end;
-{$ENDIF}
   finally
-{$IFDEF BDS2012_UP}
-    TempList.Free;
-{$ENDIF}
     Lex.Free;
   end;
 end;
