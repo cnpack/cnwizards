@@ -29,7 +29,9 @@ unit CnUsesCleaner;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2005.08.11 V1.0
+* 修改记录：2011.11.05 V1.1
+*               完善对XE2风格的带点的单元名的支持
+*           2005.08.11 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -757,14 +759,16 @@ var
   Lex: TmwPasLex;
   Source: string;
 
-  // 以下代码参考了 GExperts 的 GX_UsesManager 单元
+  // 以下代码部分参考了 GExperts 的 GX_UsesManager 单元
+  // liuxiao 加入对带点号文件名的支持
   function GetUsesSource(List: TStrings): AnsiString;
   var
     UsesList: TObjectList;
     Item: TPrvUsesItem;
     LastCommaPos: Integer;
     CPos, BegPos, EndPos: Integer;
-    i: Integer;
+    I, UnitStartPos, UnitEndPos: Integer;
+    S: string;
   begin
     Result := '';
     CPos := Lex.TokenPos;
@@ -772,18 +776,36 @@ var
     try
       Item := nil;
       LastCommaPos := 0;
+      UnitStartPos := 0;
+      UnitEndPos := 0;
       while not (Lex.TokenID in [tkNull, tkSemiColon]) do
       begin
         if Lex.TokenID = tkIdentifier then
         begin
+          if UnitStartPos = 0 then
+            UnitStartPos := Lex.TokenPos;
+          UnitEndPos := Lex.RunPos;
+          S := S + string(Lex.Token);
+        end
+        else if Lex.TokenID = tkPoint then
+        begin
+          S := S + '.';
+          UnitEndPos := Lex.RunPos;
+        end
+        else if Trim(S) <> '' then
+        begin
           Item := TPrvUsesItem.Create;
-          Item.Name := Lex.Token;
-          Item.BeginPos := Lex.TokenPos;
-          Item.EndPos := Lex.RunPos;
+          Item.Name := S;
+          Item.BeginPos := UnitStartPos;
+          Item.EndPos := UnitEndPos;
           if LastCommaPos <> 0 then
             Item.CommaBeforePos := LastCommaPos - 1;
           Item.CommaAfterPos := 0;
           UsesList.Add(Item);
+
+          S := '';
+          UnitStartPos := 0;
+          UnitEndPos := 0;
         end;
 
         if Lex.TokenID = tkComma then
@@ -805,12 +827,12 @@ var
       SetLength(Result, Lex.TokenPos - CPos);
       CopyMemory(Pointer(Result), Pointer(Integer(Lex.Origin) + CPos), Lex.TokenPos - CPos);
 
-      for i := UsesList.Count - 1 downto 0 do
+      for I := UsesList.Count - 1 downto 0 do
       begin
-        Item := TPrvUsesItem(UsesList[i]);
+        Item := TPrvUsesItem(UsesList[I]);
         if List.IndexOf(Item.Name) >= 0 then
         begin
-          if i = 0 then // First in the uses clause
+          if I = 0 then // First in the uses clause
           begin
             if Item.CommaAfterPos <> 0 then
               EndPos := Item.CommaAfterPos + 1
@@ -818,7 +840,7 @@ var
               EndPos := Item.EndPos;
             BegPos := Item.BeginPos;
           end
-          else if i = UsesList.Count - 1 then // Last in the uses clause
+          else if I = UsesList.Count - 1 then // Last in the uses clause
           begin
             EndPos := Item.EndPos;
             if Item.CommaBeforePos <> 0 then
@@ -849,7 +871,7 @@ var
           EndPos := Min(EndPos, CPos + Length(Result) - 1);
 
           Delete(Result, BegPos - CPos + 1, EndPos - BegPos);
-          UsesList.Delete(i);
+          UsesList.Delete(I);
         end;
       end;
       
