@@ -13,11 +13,15 @@ Winapi.Messages
 System.SysUtils
 System.Variants
 System.Classes
+System.Types
 Vcl.Graphics
 Vcl.Controls
 Vcl.Forms
 Vcl.Dialogs
-System.Types
+FMX.Types
+FMX.Controls
+FMX.Forms
+FMX.Dialogs
 QTypes
 QGraphics
 QControls
