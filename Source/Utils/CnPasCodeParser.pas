@@ -29,7 +29,9 @@ unit CnPasCodeParser;
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2011.11.03
+* 修改记录：2011.11.29
+*               XE/XE2 的位置解析无需UTF8的位置转换
+*           2011.11.03
 *               优化对带点的引用单元名的支持
 *           2011.05.29
 *               修正BDS下对汉字UTF8未处理而导致解析出错的问题
@@ -1057,7 +1059,10 @@ begin
     if IsUtf8 then
     begin
       Text := CnUtf8ToAnsi(PAnsiChar(Source));
+{$IFNDEF BDS2009_UP}
+      // XE/XE2 下的CurrPos 已经是 UTF8 的位置，无需再次转换，否则出错。2009 未知。
       CurrPos := Length(CnUtf8ToAnsi(Copy(Source, 1, CurrPos)));
+{$ENDIF}
     end
     else
       Text := Source;
@@ -1082,7 +1087,7 @@ begin
     ProcIndent := 0;
     while (Lex.TokenPos < CurrPos) and (Lex.TokenID <> tkNull) do
     begin
-      // CnDebugger.LogFmt('Token ID %d, %s',[Integer(Lex.TokenID), Lex.Token]);
+      // CnDebugger.LogFmt('Token ID %d, Pos %d, %s',[Integer(Lex.TokenID), Lex.TokenPos, Lex.Token]);
       case Lex.TokenID of
         tkUnit:
           begin
