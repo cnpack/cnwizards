@@ -1411,14 +1411,14 @@ end;
 procedure TCnEditControlWrapper.OnSourceEditorNotify(
   SourceEditor: IOTASourceEditor; NotifyType: TCnWizSourceEditorNotifyType;
   EditView: IOTAEditView);
-{$IFDEF DELPHI11}
+{$IFDEF DELPHI2007_UP}
 var
   I: Integer;
 {$ENDIF}
 begin
   if NotifyType = setEditViewActivated then
     UpdateEditControlList;
-{$IFDEF DELPHI11}
+{$IFDEF DELPHI2007_UP}
   if NotifyType = setEditViewRemove then
   begin
     // RAD Studio 2007 Update1 下，Close All 时 EditControl 似乎不会释放，
