@@ -29,7 +29,9 @@ unit CnCppCodeParser;
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2011.11.29
+* 修改记录：2012.02.07
+*               UTF8的位置转换去除后仍有问题，恢复之
+*           2011.11.29
 *               XE/XE2 的位置解析无需UTF8的位置转换
 *           2011.05.29
 *               修正BDS下对汉字UTF8未处理而导致解析出错的问题
@@ -635,10 +637,11 @@ begin
     if IsUtf8 then
     begin
       Text := CnUtf8ToAnsi(PAnsiChar(Source));
-{$IFNDEF BDS2009_UP}
+//{$IFNDEF BDS2009_UP}
       // XE/XE2 下的CurrPos 已经是 UTF8 的位置，无需再次转换，否则出错。2009 未知。
       CurrPos := Length(CnUtf8ToAnsi(Copy(Source, 1, CurrPos)));
-{$ENDIF}
+      // 不转换会导致其他问题如字符串里弹出代码助手，还是得转。
+//{$ENDIF}
     end
     else
       Text := Source;
