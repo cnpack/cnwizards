@@ -40,7 +40,9 @@ unit CnProcListWizard;
 * 兼容测试：暂无（PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6）
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2009.04.16 V1.2
+* 修改记录：2012.02.07 V1.3
+*               增加列表框的宽度保存机制
+*           2009.04.16 V1.2
 *               增加工具栏的下拉查找功能
 *           2005.10.29 V1.1
 *               增加多个单元的选择功能，目前排序还有点问题
@@ -317,9 +319,12 @@ type
     FClassComboHeight: Integer;
     FProcComboWidth: Integer;
     FClassComboWidth: Integer;
+    FToolbarClassComboWidth: Integer;
+    FToolbarProcComboWidth: Integer;
     function GetToolBarObjFromEditControl(EditControl: TControl): TCnProcToolBarObj;
     procedure RemoveToolBarObjFromEditControl(EditControl: TControl);
     procedure ToolBarCanShow(Sender: TObject; APage: TCnSrcEditorPage; var ACanShow: Boolean);
+    procedure SplitterMoved(Sender: TObject);
     procedure CreateProcToolBar(ToolBarType: string; EditControl: TControl; ToolBar: TToolBar);
     procedure InitProcToolBar(ToolBarType: string; EditControl: TControl; ToolBar: TToolBar);
     procedure RemoveProcToolBar(ToolBarType: string; EditControl: TControl; ToolBar: TToolBar);
@@ -380,6 +385,10 @@ type
     property ProcComboWidth: Integer read FProcComboWidth write FProcComboWidth;
     property ClassComboHeight: Integer read FClassComboHeight write FClassComboHeight;
     property ClassComboWidth: Integer read FClassComboWidth write FClassComboWidth;
+
+    // 工具栏列表框宽度
+    property ToolbarClassComboWidth: Integer read FToolbarClassComboWidth write FToolbarClassComboWidth;
+    property ToolbarProcComboWidth: Integer read FToolbarProcComboWidth write FToolbarProcComboWidth;
   end;
 
 {$ENDIF CNWIZARDS_CNPROCLISTWIZARD}
@@ -403,6 +412,8 @@ const
   csProcWidth = 'ProcWidth';
   csClassHeight = 'ClassHeight';
   csClassWidth = 'ClassWidth';
+  csToolbarClassComboWidth = 'ToolbarClassComboWidth';
+  csToolbarProcComboWidth = 'ToolbarProcComboWidth';
 
   csProcComboName = 'ProcCombo';
   csClassComboName = 'ClassCombo';
@@ -423,6 +434,8 @@ const
   csShowPreview = 'ShowPreview';
   csPreviewHeight = 'PreviewHeight';
   csDropDown = 'DropDown';
+  csClassComboWidth = 'ClassComboWidth';
+  csProcComboWidth = 'ProcComboWidth';
 
   csCRLF = #13#10;
   csSep = ';';
@@ -635,6 +648,34 @@ begin
   ACanShow := APage in [epCode];
 end;
   
+procedure TCnProcListWizard.SplitterMoved(Sender: TObject);
+var
+  AComp, AToolbar: TComponent;
+  AClassCombo, AProcCombo: TCnProcListComboBox;
+begin
+  if Sender is TSplitter then
+  begin
+    AToolbar := (Sender as TSplitter).Owner;
+    if (AToolbar <> nil) then
+    begin
+      AComp := AToolbar.FindComponent(csClassComboName);
+      if (AComp <> nil) and (AComp is TCnProcListComboBox) then
+      begin
+        AClassCombo := AComp as TCnProcListComboBox;
+        if AClassCombo.Parent <> nil then
+          FToolbarClassComboWidth := AClassCombo.Width;
+      end;
+      AComp := AToolbar.FindComponent(csProcComboName);
+      if (AComp <> nil) and (AComp is TCnProcListComboBox) then
+      begin
+        AProcCombo := AComp as TCnProcListComboBox;
+        if AProcCombo.Parent <> nil then
+          FToolbarProcComboWidth := AProcCombo.Width;
+      end;
+    end;
+  end;
+end;
+
 procedure TCnProcListWizard.CreateProcToolBar(ToolBarType: string;
   EditControl: TControl; ToolBar: TToolBar);
 var
@@ -719,7 +760,10 @@ begin
     Parent := ToolBar;
     Left := 108;
     Top := 0;
-    Width := 150;
+    if FToolbarClassComboWidth > 50 then
+      Width := FToolbarClassComboWidth
+    else
+      Width := 150;
     Height := 21;
     FDisableChange := True;
     Name := csClassComboName;
@@ -736,6 +780,7 @@ begin
     MinSize := 40;
     Parent := ToolBar;
     Left := Obj.ClassCombo.Width - 1;
+    OnMoved := SplitterMoved;
   end;
 
   Obj.ProcCombo := TCnProcListComboBox.Create(ToolBar);
@@ -744,7 +789,10 @@ begin
     Parent := ToolBar;
     Left := 265;
     Top := 0;
-    Width := 244;
+    if FToolbarProcComboWidth > 50 then
+      Width := FToolbarProcComboWidth
+    else
+      Width := 244;
     Height := 21;
     FDisableChange := True;
     Name := csProcComboName;
@@ -761,6 +809,7 @@ begin
     MinSize := 40;
     Parent := ToolBar;
     Left := Obj.ClassCombo.Width + 2;
+    onMoved := SplitterMoved;
   end;
 
   Obj.InternalToolBar2 := TCnExternalSrcEditorToolBar.Create(ToolBar);
@@ -1133,6 +1182,9 @@ begin
   ProcComboWidth := Ini.ReadInteger('', csProcWidth, 0);
   ClassComboHeight := Ini.ReadInteger('', csClassHeight, 0);
   ClassComboWidth := Ini.ReadInteger('', csClassWidth, 0);
+
+  ToolbarClassComboWidth := Ini.ReadInteger('', csToolbarClassComboWidth, 0);
+  ToolbarProcComboWidth := Ini.ReadInteger('', csToolbarProcComboWidth, 0);
 end;
 
 procedure TCnProcListWizard.OnToolBarTimer(Sender: TObject);
@@ -1309,6 +1361,9 @@ begin
   Ini.WriteInteger('', csProcWidth, ProcComboWidth);
   Ini.WriteInteger('', csClassHeight, ClassComboHeight);
   Ini.WriteInteger('', csClassWidth, ClassComboWidth);
+
+  Ini.WriteInteger('', csToolbarClassComboWidth, ToolbarClassComboWidth);
+  Ini.WriteInteger('', csToolbarProcComboWidth, ToolbarProcComboWidth);
 end;
 
 { TCnProcListFrm }
