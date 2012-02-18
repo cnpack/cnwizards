@@ -371,8 +371,8 @@ type
     FHighLightCurrentLine: Boolean;
     FHighLightLineColor: TColor;
     FDefaultHighLightLineColor: TColor;
-    FSeparateLineColor: TColor;
 {$ENDIF}
+    FSeparateLineColor: TColor;
     function GetColorFg(ALayer: Integer): TColor;
     function EditorGetTextRect(Editor: TEditorObject; APos: TOTAEditPos;
       const {$IFDEF BDS}LineText, {$ENDIF} AText: AnsiString; var ARect: TRect): Boolean;
