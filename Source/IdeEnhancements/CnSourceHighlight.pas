@@ -99,7 +99,7 @@ const
   CN_LINE_STYLE_TINY_DOT_STEP = 1;
   // 每几个像素空几个像素
 
-  CN_LINE_SEPERATE_FLAG = 1;
+  CN_LINE_SEPARATE_FLAG = 1;
 
   csKeyTokens: set of TTokenKind = [
     tkIf, tkThen, tkElse,
@@ -158,7 +158,7 @@ type
     FCurTokenListEditLine: TCnList; // 容纳解析出来的光标当前词相同的词的行数
     FLineList: TCnObjectList;
     FIdLineList: TCnObjectList;// LineList/IdLineList 容纳按行方式存储的快速访问的内容
-    FSeperateLineList: TCnList;// 容纳分界空行信息
+    FSeparateLineList: TCnList;// 容纳分界空行信息
     FLineInfo: TBlockLineInfo; // 容纳解析出来的 Tokens 配对信息
     FStack: TStack;
     FIfThenStack: TStack;
@@ -181,7 +181,7 @@ type
     constructor Create(AControl: TControl);
     destructor Destroy; override;
     function CheckBlockMatch(BlockHighlightRange: TBlockHighlightRange): Boolean;
-    procedure UpdateSeperateLineList;
+    procedure UpdateSeparateLineList;
     procedure UpdateCurTokenList;
     procedure CheckLineMatch(View: IOTAEditView; IgnoreClass: Boolean);
     procedure UpdateLineList;
@@ -348,7 +348,7 @@ type
     FBlockMatchHighlight: Boolean;
     FBlockMatchBackground: TColor;
     FCurrentTokenHighlight: Boolean;
-    FHilightSeperateLine: Boolean;
+    FHilightSeparateLine: Boolean;
     FCurrentTokenBackground: TColor;
     FCurrentTokenForeground: TColor;
     FCurrentTokenBorderColor: TColor;
@@ -371,6 +371,7 @@ type
     FHighLightCurrentLine: Boolean;
     FHighLightLineColor: TColor;
     FDefaultHighLightLineColor: TColor;
+    FSeparateLineColor: TColor;
 {$ENDIF}
     function GetColorFg(ALayer: Integer): TColor;
     function EditorGetTextRect(Editor: TEditorObject; APos: TOTAEditPos;
@@ -417,7 +418,7 @@ type
     procedure SetBlockMatchHotkey(const Value: TShortCut);
     procedure SetBlockMatchLineClass(const Value: Boolean);
     procedure ReloadIDEFonts;
-    procedure SetHilightSeperateLine(const Value: Boolean);    
+    procedure SetHilightSeparateLine(const Value: Boolean);    
 {$IFNDEF BDS}
     procedure BeforePaintLine(Editor: TEditorObject; LineNum, LogicLineNum: Integer);
     procedure SetHighLightCurrentLine(const Value: Boolean);
@@ -491,7 +492,10 @@ type
     property HighLightLineColor: TColor read FHighLightLineColor write SetHighLightLineColor;
     {* 高亮当前行的背景色}
 {$ENDIF}
-    property HilightSeperateLine: Boolean read FHilightSeperateLine write SetHilightSeperateLine;
+    property HilightSeparateLine: Boolean read FHilightSeparateLine write SetHilightSeparateLine;
+    {* 是否绘制空行分隔线}
+    property SeparateLineColor: TColor read FSeparateLineColor write FSeparateLineColor;
+    {* 空行分隔线的颜色}
     property BlockMatchLineLimit: Boolean read FBlockMatchLineLimit write FBlockMatchLineLimit;
     property BlockMatchMaxLines: Integer read FBlockMatchMaxLines write FBlockMatchMaxLines;
     property OnEnhConfig: TNotifyEvent read FOnEnhConfig write FOnEnhConfig;
@@ -585,7 +589,8 @@ const
   csCurrentTokenColor = 'CurrentTokenColor';
   csCurrentTokenColorBk = 'CurrentTokenColorBk';
   csCurrentTokenColorBd = 'CurrentTokenColorBd';
-  csHilightSeperateLine = 'HilightSeperateLine';
+  csHilightSeparateLine = 'HilightSeparateLine';
+  csSeparateLineColor = 'SeparateLineColor';
   csBlockMatchHighlightColor = 'BlockMatchHighlightColor';
   csHighlightCurrentLine = 'HighLightCurrentLine';
   csHighLightLineColor = 'HighLightLineColor';
@@ -797,7 +802,7 @@ begin
   FKeyList.Clear;
   FLineList.Clear;
   FIdLineList.Clear;
-  FSeperateLineList.Clear;
+  FSeparateLineList.Clear;
   if LineInfo <> nil then
     LineInfo.Clear;
 
@@ -998,11 +1003,11 @@ begin
       UpdateLineList;
     end;
 
-    if FHighlight.FHilightSeperateLine then
+    if FHighlight.FHilightSeparateLine then
     begin
-      UpdateSeperateLineList;
+      UpdateSeparateLineList;
 {$IFDEF DEBUG}
-      CnDebugger.LogInteger(FSeperateLineList.Count, 'FSeperateLineList.Count');
+      CnDebugger.LogInteger(FSeparateLineList.Count, 'FSeparateLineList.Count');
 {$ENDIF}
     end;
 
@@ -1025,9 +1030,10 @@ begin
   Modified := False;
 end;
 
-procedure TBlockMatchInfo.UpdateSeperateLineList;
+procedure TBlockMatchInfo.UpdateSeparateLineList;
 var
   MaxLine, I, J, LastSepLine: Integer;
+  Line: string;
 begin
   MaxLine := 0;
   for I := 0 to FKeyList.Count - 1 do
@@ -1035,17 +1041,26 @@ begin
     if Tokens[I].EditLine > MaxLine then
       MaxLine := Tokens[I].EditLine;
   end;
-  FSeperateLineList.Count := MaxLine + 1;
-  
+  FSeparateLineList.Count := MaxLine + 1;
+
   LastSepLine := 1;
   for I := 0 to FKeyList.Count - 1 do
   begin
     if Tokens[I].IsMethodStart then
     begin
-      // 从 LastSepLine 到此 Token 前一个，均标记
-      if LastSepLine > 1 then    
+      // 从 LastSepLine 到此 Token 前一个，找第一个空行标记
+      if LastSepLine > 1 then
+      begin
         for J := LastSepLine to Tokens[I].EditLine do
-          FSeperateLineList[J] := Pointer(CN_LINE_SEPERATE_FLAG);
+        begin
+          Line := Trim(EditControlWrapper.GetTextAtLine(Control, J));
+          if Line = '' then
+          begin
+            FSeparateLineList[J] := Pointer(CN_LINE_SEPARATE_FLAG);
+            Break;
+          end;
+        end;
+      end;
     end
     else if Tokens[I].IsMethodClose then
     begin
@@ -1473,7 +1488,7 @@ begin
   FCurTokenListEditLine.Clear;
   FLineList.Clear;
   FIdLineList.Clear;
-  FSeperateLineList.Clear;
+  FSeparateLineList.Clear;
   if LineInfo <> nil then
     LineInfo.Clear;
 end;
@@ -1500,7 +1515,7 @@ begin
   FCurTokenListEditLine := TCnList.Create;
   FLineList := TCnObjectList.Create;
   FIdLineList := TCnObjectList.Create;
-  FSeperateLineList := TCnList.Create;
+  FSeparateLineList := TCnList.Create;
   FStack := TStack.Create;
   FIfThenStack := TStack.Create;
   FModified := True;
@@ -1514,7 +1529,7 @@ begin
   FIfThenStack.Free;
   FLineList.Free;
   FIdLineList.Free;
-  FSeperateLineList.Free;
+  FSeparateLineList.Free;
   FCurTokenListEditLine.Free;
   FCurTokenList.Free;
   FKeyList.Free;
@@ -1673,6 +1688,7 @@ begin
   FKeywordHighlight := THighlightItem.Create;
   FIdentifierHighlight := THighlightItem.Create;
   FKeywordHighlight.Bold := True;
+  FSeparateLineColor := clGray;
 
   FBlockMatchLineLimit := True;
   FBlockMatchMaxLines := 40000; // 大于此行数的 unit，不解析
@@ -2387,7 +2403,7 @@ begin
       FKeyList.Clear;
       FLineList.Clear;
       FIdLineList.Clear;
-      FSeperateLineList.Clear;
+      FSeparateLineList.Clear;
       if LineInfo <> nil then
         LineInfo.Clear;
     end;
@@ -2482,7 +2498,7 @@ begin
       Info.FKeyList.Clear;
       Info.FLineList.Clear;
       Info.FIdLineList.Clear;
-      Info.FSeperateLineList.Clear;
+      Info.FSeparateLineList.Clear;
       if Info.LineInfo <> nil then
         Info.LineInfo.Clear;
       // 以上不能调用 Info.Clear 来简单清除所有内容，必须不清 FCurTokenList
@@ -2683,8 +2699,8 @@ begin
       SaveFontStyles := [];
       EditCanvas := EditControlWrapper.GetEditControlCanvas(EditControl);
 
-      if FHilightSeperateLine and (LogicLineNum <= Info.FSeperateLineList.Count - 1)
-        and (Integer(Info.FSeperateLineList[LogicLineNum]) = CN_LINE_SEPERATE_FLAG)
+      if FHilightSeparateLine and (LogicLineNum <= Info.FSeparateLineList.Count - 1)
+        and (Integer(Info.FSeparateLineList[LogicLineNum]) = CN_LINE_SEPARATE_FLAG)
         and (Trim(EditControlWrapper.GetTextAtLine(EditControl, LogicLineNum)) = '') then
       begin
         // 保存 EditCanvas 的旧内容
@@ -2703,7 +2719,7 @@ begin
         EditPos := OTAEditPos(Editor.EditView.LeftColumn, LogicLineNum);
         if EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FLineText, {$ENDIF} ' ', R) then
         begin
-          EditCanvas.Pen.Color := clRed;
+          EditCanvas.Pen.Color := FSeparateLineColor;
           HighlightCanvasLine(EditCanvas, R.Left, (R.Top + R.Bottom) div 2,
             R.Left + 1024, (R.Top + R.Bottom) div 2, lsSmallDot);
         end;
@@ -3327,7 +3343,7 @@ begin
     if FMatchedBracket then
       PaintBracketMatch(Editor, LineNum, LogicLineNum, AElided);
     if FStructureHighlight or FBlockMatchHighlight or FCurrentTokenHighlight
-      or FHilightSeperateLine then // 里头顺便做背景匹配高亮
+      or FHilightSeparateLine then // 里头顺便做背景匹配高亮
       PaintBlockMatchKeyword(Editor, LineNum, LogicLineNum, AElided);
     if FBlockMatchDrawLine then
       PaintBlockMatchLine(Editor, LineNum, LogicLineNum, AElided);
@@ -3379,7 +3395,8 @@ begin
     FCurrentTokenForeground := ReadColor('', csCurrentTokenColor, FCurrentTokenForeground);
     FCurrentTokenBackground := ReadColor('', csCurrentTokenColorBk, FCurrentTokenBackground);
     FCurrentTokenBorderColor := ReadColor('', csCurrentTokenColorBd, FCurrentTokenBorderColor);
-    FHilightSeperateLine := ReadBool('', csHilightSeperateLine, FHilightSeperateLine);
+    FHilightSeparateLine := ReadBool('', csHilightSeparateLine, FHilightSeparateLine);
+    FSeparateLineColor := ReadColor('', csSeparateLineColor, FSeparateLineColor);
 {$IFNDEF BDS}
     FHighLightLineColor := ReadColor('', csHighLightLineColor, FHighLightLineColor);
     FHighLightCurrentLine := ReadBool('', csHighLightCurrentLine, FHighLightCurrentLine);
@@ -3428,7 +3445,8 @@ begin
     WriteColor('', csCurrentTokenColor, FCurrentTokenForeground);
     WriteColor('', csCurrentTokenColorBk, FCurrentTokenBackground);
     WriteColor('', csCurrentTokenColorBd, FCurrentTokenBorderColor);
-    WriteBool('', csHilightSeperateLine, FHilightSeperateLine);
+    WriteBool('', csHilightSeparateLine, FHilightSeparateLine);
+    WriteColor('', csSeparateLineColor, FSeparateLineColor);
 {$IFNDEF BDS}
     WriteBool('', csHighLightCurrentLine, FHighLightCurrentLine);
     if FDefaultHighLightLineColor <> FHighLightLineColor then
@@ -3794,9 +3812,9 @@ begin
   end;
 end;
 
-procedure TCnSourceHighlight.SetHilightSeperateLine(const Value: Boolean);
+procedure TCnSourceHighlight.SetHilightSeparateLine(const Value: Boolean);
 begin
-  FHilightSeperateLine := Value;
+  FHilightSeparateLine := Value;
 end;
 
 { TBlockLinePair }

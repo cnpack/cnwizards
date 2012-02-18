@@ -29,7 +29,9 @@ unit CnSourceHighlightFrm;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2008.06.17
+* 修改记录：2012.02.17
+*               增加空行分隔线的选项
+*           2008.06.17
 *               增加对 BDS 的支持
 *           2005.09.05
 *               创建单元
@@ -102,6 +104,8 @@ type
     shpCurTokenBg: TShape;
     lblCurTokenBd: TLabel;
     shpCurTokenBd: TShape;
+    chkSeparateLine: TCheckBox;
+    shpSeparateLine: TShape;
     procedure UpdateControls(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure shpBracketMouseDown(Sender: TObject; Button: TMouseButton;
@@ -157,6 +161,8 @@ begin
     shpCurTokenFg.Brush.Color := Wizard.CurrentTokenForeground;
     shpCurTokenBg.Brush.Color := Wizard.CurrentTokenBackground;
     shpCurTokenBd.Brush.Color := Wizard.CurrentTokenBorderColor;
+    chkSeparateLine.Checked := Wizard.HilightSeparateLine;
+    shpSeparateLine.Brush.Color := Wizard.SeparateLineColor; 
 {$IFDEF BDS}
     chkHighlightCurLine.Enabled := False;
     shpCurLine.Enabled := False;
@@ -198,7 +204,8 @@ begin
       Wizard.CurrentTokenForeground := shpCurTokenFg.Brush.Color;
       Wizard.CurrentTokenBackground := shpCurTokenBg.Brush.Color;
       Wizard.CurrentTokenBorderColor := shpCurTokenBd.Brush.Color;
-
+      Wizard.HilightSeparateLine := chkSeparateLine.Checked;
+      Wizard.SeparateLineColor := shpSeparateLine.Brush.Color;
 {$IFNDEF BDS}
       Wizard.HighLightCurrentLine := chkHighlightCurLine.Checked;
       Wizard.HighLightLineColor := shpCurLine.Brush.Color;
@@ -218,7 +225,6 @@ begin
       Wizard.FHighLightColors[3] := shp3.Brush.Color;
       Wizard.FHighLightColors[4] := shp4.Brush.Color;
       Wizard.FHighLightColors[5] := shp5.Brush.Color;
-
 
       Wizard.DoSaveSettings;
       Wizard.RepaintEditors;

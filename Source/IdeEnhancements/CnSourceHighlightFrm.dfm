@@ -1,10 +1,11 @@
 inherited CnSourceHighlightForm: TCnSourceHighlightForm
-  Left = 349
-  Top = 119
+  Left = 315
+  Top = 34
   BorderStyle = bsDialog
   Caption = 'Source Highlight Settings'
-  ClientHeight = 537
+  ClientHeight = 557
   ClientWidth = 380
+  OldCreateOrder = True
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
@@ -85,7 +86,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
   end
   object btnOK: TButton
     Left = 134
-    Top = 506
+    Top = 526
     Width = 75
     Height = 21
     Caption = '&OK'
@@ -95,7 +96,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
   end
   object btnCancel: TButton
     Left = 214
-    Top = 506
+    Top = 526
     Width = 75
     Height = 21
     Cancel = True
@@ -105,7 +106,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
   end
   object btnHelp: TButton
     Left = 294
-    Top = 506
+    Top = 526
     Width = 75
     Height = 21
     Caption = '&Help'
@@ -116,7 +117,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     Left = 8
     Top = 120
     Width = 361
-    Height = 377
+    Height = 397
     Caption = 'Code &Structure Highlight'
     TabOrder = 1
     object shpBk: TShape
@@ -136,7 +137,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     object lblCurTokenFg: TLabel
       Left = 26
       Top = 61
-      Width = 40
+      Width = 60
       Height = 13
       Caption = 'Foreground:'
     end
@@ -150,7 +151,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     object lblCurTokenBg: TLabel
       Left = 130
       Top = 61
-      Width = 40
+      Width = 60
       Height = 13
       Caption = 'Background:'
     end
@@ -164,13 +165,20 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     object lblCurTokenBd: TLabel
       Left = 234
       Top = 61
-      Width = 40
+      Width = 34
       Height = 13
       Caption = 'Frame:'
     end
     object shpCurTokenBd: TShape
       Left = 296
       Top = 58
+      Width = 20
+      Height = 20
+      OnMouseDown = shpBracketMouseDown
+    end
+    object shpSeparateLine: TShape
+      Left = 329
+      Top = 148
       Width = 20
       Height = 20
       OnMouseDown = shpBracketMouseDown
@@ -195,7 +203,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object rgMatchRange: TRadioGroup
       Left = 16
-      Top = 150
+      Top = 170
       Width = 137
       Height = 91
       Caption = 'Highlight &Range'
@@ -204,15 +212,15 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
         'Procedure/Function'
         'Whole Block'
         'Current Block')
-      TabOrder = 7
+      TabOrder = 8
     end
     object grpHighlightColor: TGroupBox
       Left = 168
-      Top = 150
+      Top = 170
       Width = 181
       Height = 91
       Caption = 'Colors by &Level'
-      TabOrder = 8
+      TabOrder = 9
       object shpneg1: TShape
         Left = 16
         Top = 23
@@ -292,7 +300,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object rgMatchDelay: TRadioGroup
       Left = 16
-      Top = 246
+      Top = 266
       Width = 333
       Height = 89
       Caption = 'Highlight &Delay'
@@ -300,7 +308,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
         'Immediately'
         'Delay for'
         'Only Show when Hotkey:')
-      TabOrder = 9
+      TabOrder = 10
       OnClick = UpdateControls
     end
     object hkMatchHotkey: THotKey
@@ -311,15 +319,15 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       HotKey = 32833
       InvalidKeys = [hcNone, hcShift]
       Modifiers = [hkAlt]
-      TabOrder = 12
+      TabOrder = 13
     end
     object chkMaxSize: TCheckBox
       Left = 24
-      Top = 346
+      Top = 366
       Width = 217
       Height = 17
       Caption = 'Disable Highlight when Unit Lines Exceeds:'
-      TabOrder = 14
+      TabOrder = 15
       OnClick = UpdateControls
     end
     object seDelay: TCnSpinEdit
@@ -330,7 +338,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Increment = 50
       MaxValue = 5000
       MinValue = 500
-      TabOrder = 11
+      TabOrder = 12
       Value = 500
     end
     object pnl1: TPanel
@@ -340,17 +348,17 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Height = 25
       BevelOuter = bvNone
       Caption = 'mSec'
-      TabOrder = 10
+      TabOrder = 11
     end
     object seMaxLines: TCnSpinEdit
       Left = 248
-      Top = 344
+      Top = 364
       Width = 101
       Height = 22
       Increment = 500
       MaxValue = 100000
       MinValue = 1000
-      TabOrder = 13
+      TabOrder = 14
       Value = 25000
     end
     object chkDrawLine: TCheckBox
@@ -358,7 +366,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 126
       Width = 249
       Height = 17
-      Caption = 'Enable Lines.'
+      Caption = 'Enable Structure Lines.'
       TabOrder = 6
       OnClick = UpdateControls
     end
@@ -396,6 +404,15 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Height = 17
       Caption = 'Enable Background Highlight Current Line (Delphi 7 below only).'
       TabOrder = 3
+      OnClick = UpdateControls
+    end
+    object chkSeparateLine: TCheckBox
+      Left = 8
+      Top = 146
+      Width = 249
+      Height = 17
+      Caption = 'Enable Separate Lines between Functions.'
+      TabOrder = 7
       OnClick = UpdateControls
     end
   end
