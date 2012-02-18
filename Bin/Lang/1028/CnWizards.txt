@@ -2316,6 +2316,7 @@ TCnSourceHighlightForm.lbl5.Caption=邊框色:
 TCnSourceHighlightForm.btnReset.Hint=配色相關功能
 TCnSourceHighlightForm.chkHighlight.Caption=允許代碼結構匹配關鍵字高亮顯示。
 TCnSourceHighlightForm.chkDrawLine.Caption=允許代碼結構匹配連線顯示。
+TCnSourceHighlightForm.chkSeparateLine.Caption=允許函數間的空行顯示分隔線。
 TCnSourceHighlightForm.chkBkHighlight.Caption=允許光標處匹配關鍵字高亮背景顯示。
 TCnSourceHighlightForm.chkCurrentToken.Caption=允許光標處匹配當前標識符高亮背景顯示。
 TCnSourceHighlightForm.chkHighlightCurLine.Caption=允許高亮當前行背景（僅適用於Delphi 7或以下版本）。
