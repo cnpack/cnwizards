@@ -1769,7 +1769,7 @@ var
     CurIdent, CurClass, CurIntf: string;
     PrevIsOperator: Boolean;
     PrevElementForForward: TCnElementInfo;
-    IsClassForForward: Boolean;
+    IsClassForForward, IsInTemplate: Boolean;
   begin
     FElementList.BeginUpdate;
     try
@@ -1783,6 +1783,7 @@ var
             InIntfDeclaration := False;
             FoundNonEmptyType := False;
             IsClassForForward := False;
+            IsInTemplate := False;
             PrevElementForForward := nil;
             IntfName := '';
             CurIdent := '';
@@ -1793,10 +1794,31 @@ var
             while Parser.TokenID <> tkNull do
             begin
               // 记录下每个 Identifier
-              if Parser.TokenID = tkIdentifier then
-                CurIdent := Parser.Token
+              if Parser.TokenID = tkLower then
+              begin
+                IsInTemplate := True;
+                CurIdent := CurIdent + '<'
+              end
+              else if Parser.TokenID = tkGreater then
+              begin
+                IsInTemplate := False;
+                CurIdent := CurIdent + '>';
+              end
+              else if Parser.TokenID = tkIdentifier then
+              begin
+                if IsInTemplate then
+                  CurIdent := CurIdent + Parser.Token
+                else
+                  CurIdent := Parser.Token;
+              end
+              else if Parser.TokenID = tkComma then
+              begin
+                if IsInTemplate then
+                  CurIdent := CurIdent + Parser.Token;
+              end
               else if Parser.TokenID = tkSemicolon then
               begin
+                IsInTemplate := False;
                 if IsClassForForward and (PrevElementForForward <> nil) then
                   PrevElementForForward.IsForward := True;
               end;
