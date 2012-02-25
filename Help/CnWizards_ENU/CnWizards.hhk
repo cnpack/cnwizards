@@ -289,6 +289,16 @@
 		<param name="Local" value="wizards\editor\editorjumpkeyword.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Jump to Next Identifier Tool">
+		<param name="Name" value="Jump to Next Identifier Tool">
+		<param name="Local" value="wizards\editor\editorjumpnextident.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Jump to Previous Identifier Tool">
+		<param name="Name" value="Jump to Previous Identifier Tool">
+		<param name="Local" value="wizards\editor\editorjumpprevident.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Jumping Enhancement">
 		<param name="Name" value="Jumping Enhancement">
 		<param name="Local" value="srcedtenh\srcedtnav.htm">

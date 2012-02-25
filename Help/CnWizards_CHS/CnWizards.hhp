@@ -147,6 +147,8 @@ wizards\editors\editorjumpmsg.htm
 wizards\editors\editorjumpintf.htm
 wizards\editors\editorjumpimpl.htm
 wizards\editors\editorjumpkeyword.htm
+wizards\editors\editorjumpprevident.htm
+wizards\editors\editorjumpnextident.htm
 wizards\editors\wizeditorform.png
 wizards\editors\wizeditors.htm
 wizards\feedreader.htm

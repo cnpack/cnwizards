@@ -285,6 +285,14 @@
 				<param name="Name" value="Jump to Matched Keyword Tool">
 				<param name="Local" value="wizards\editors\editorjumpkeyword.htm">
 				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Jump to Previous Identifier Tool">
+				<param name="Local" value="wizards\editors\editorjumpprevident.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Jump to Next Identifier Tool">
+				<param name="Local" value="wizards\editors\editorjumpnextident.htm">
+				</OBJECT>
 		</UL>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Editor Enhancements Wizard">

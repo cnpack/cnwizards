@@ -399,9 +399,19 @@
 		<param name="Local" value="wizards\corprop.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="跳至後一標識符工具">
+		<param name="Name" value="跳至後一標識符工具">
+		<param name="Local" value="wizards\editor\editorjumpnextident.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="跳至匹配關鍵字工具">
 		<param name="Name" value="跳至匹配關鍵字工具">
 		<param name="Local" value="wizards\editor\editorjumpkeyword.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="跳至前一標識符工具">
+		<param name="Name" value="跳至前一標識符工具">
+		<param name="Local" value="wizards\editor\editorjumpprevident.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="跳至上一信息行工具">
