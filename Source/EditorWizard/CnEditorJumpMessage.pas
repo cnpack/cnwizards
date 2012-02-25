@@ -756,7 +756,7 @@ var
   EditPos: TOTAEditPos;
   I: Integer;
   CurrentToken: TCnPasToken;
-  CurrentTokenName: string;
+  CurrentTokenName: AnsiString;
   CurIsPas, CurIsCpp: Boolean;
   CurrentTokenIndex, StartIdx, EndIdx: Integer;
   
