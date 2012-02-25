@@ -685,14 +685,14 @@ var
   SCnEditorJumpMatchedKeywordName: string = 'Jump to Matched Keyword Tool';
 
   // CnEditorJumpPrevIdent
-  SCnEditorJumpPrevIndentMenuCaption: string = 'Jump to Previous Identifier';
-  SCnEditorJumpPrevIndentMenuHint: string = 'Jump to Previous Identifier under Cursor';
-  SCnEditorJumpPrevIndentName: string = 'Jump to Previous Identifier Tool';
+  SCnEditorJumpPrevIdentMenuCaption: string = 'Jump to Previous Identifier';
+  SCnEditorJumpPrevIdentMenuHint: string = 'Jump to Previous Identifier under Cursor';
+  SCnEditorJumpPrevIdentName: string = 'Jump to Previous Identifier Tool';
 
   // CnEditorJumpNextIdent
-  SCnEditorJumpNextIndentMenuCaption: string = 'Jump to Next Identifier';
-  SCnEditorJumpNextIndentMenuHint: string = 'Jump to Next Identifier under Cursor';
-  SCnEditorJumpNextIndentName: string = 'Jump to Next Identifier Tool';
+  SCnEditorJumpNextIdentMenuCaption: string = 'Jump to Next Identifier';
+  SCnEditorJumpNextIdentMenuHint: string = 'Jump to Next Identifier under Cursor';
+  SCnEditorJumpNextIdentName: string = 'Jump to Next Identifier Tool';
 
   // CnEditorFontInc
   SCnEditorFontIncMenuCaption: string = 'Zoom &Larger Font';

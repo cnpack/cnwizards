@@ -401,14 +401,14 @@ begin
   TranslateStr(SCnEditorJumpMatchedKeywordName, 'SCnEditorJumpMatchedKeywordName');
 
   // CnEditorJumpPrevIdent
-  TranslateStr(SCnEditorJumpPrevIndentMenuCaption, 'SCnEditorJumpPrevIndentMenuCaption');
-  TranslateStr(SCnEditorJumpPrevIndentMenuHint, 'SCnEditorJumpPrevIndentMenuHint');
-  TranslateStr(SCnEditorJumpPrevIndentName, 'SCnEditorJumpPrevIndentName');
+  TranslateStr(SCnEditorJumpPrevIdentMenuCaption, 'SCnEditorJumpPrevIdentMenuCaption');
+  TranslateStr(SCnEditorJumpPrevIdentMenuHint, 'SCnEditorJumpPrevIdentMenuHint');
+  TranslateStr(SCnEditorJumpPrevIdentName, 'SCnEditorJumpPrevIdentName');
 
   // CnEditorJumpNextIdent
-  TranslateStr(SCnEditorJumpNextIndentMenuCaption, 'SCnEditorJumpNextIndentMenuCaption');
-  TranslateStr(SCnEditorJumpNextIndentMenuHint, 'SCnEditorJumpNextIndentMenuHint');
-  TranslateStr(SCnEditorJumpNextIndentName, 'SCnEditorJumpNextIndentName');
+  TranslateStr(SCnEditorJumpNextIdentMenuCaption, 'SCnEditorJumpNextIdentMenuCaption');
+  TranslateStr(SCnEditorJumpNextIdentMenuHint, 'SCnEditorJumpNextIdentMenuHint');
+  TranslateStr(SCnEditorJumpNextIdentName, 'SCnEditorJumpNextIdentName');
 
   // CnEditorFontInc
   TranslateStr(SCnEditorFontIncMenuCaption, 'SCnEditorFontIncMenuCaption');

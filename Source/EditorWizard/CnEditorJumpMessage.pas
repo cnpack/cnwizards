@@ -949,7 +949,7 @@ end;
 
 function TCnEditorJumpPrevIdent.GetCaption: string;
 begin
-  Result := SCnEditorJumpPrevIndentMenuCaption;
+  Result := SCnEditorJumpPrevIdentMenuCaption;
 end;
 
 function TCnEditorJumpPrevIdent.GetDefShortCut: TShortCut;
@@ -960,14 +960,14 @@ end;
 procedure TCnEditorJumpPrevIdent.GetEditorInfo(var Name, Author,
   Email: string);
 begin
-  Name := SCnEditorJumpPrevIndentName;
+  Name := SCnEditorJumpPrevIdentName;
   Author := SCnPack_LiuXiao;
   Email := SCnPack_LiuXiaoEmail;
 end;
 
 function TCnEditorJumpPrevIdent.GetHint: string;
 begin
-  Result := SCnEditorJumpPrevIndentMenuHint;
+  Result := SCnEditorJumpPrevIdentMenuHint;
 end;
 
 function TCnEditorJumpPrevIdent.GetState: TWizardState;
@@ -1013,7 +1013,7 @@ end;
 
 function TCnEditorJumpNextIdent.GetCaption: string;
 begin
-  Result := SCnEditorJumpNextIndentMenuCaption;
+  Result := SCnEditorJumpNextIdentMenuCaption;
 end;
 
 function TCnEditorJumpNextIdent.GetDefShortCut: TShortCut;
@@ -1024,14 +1024,14 @@ end;
 procedure TCnEditorJumpNextIdent.GetEditorInfo(var Name, Author,
   Email: string);
 begin
-  Name := SCnEditorJumpNextIndentName;
+  Name := SCnEditorJumpNextIdentName;
   Author := SCnPack_LiuXiao;
   Email := SCnPack_LiuXiaoEmail;
 end;
 
 function TCnEditorJumpNextIdent.GetHint: string;
 begin
-  Result := SCnEditorJumpNextIndentMenuHint;
+  Result := SCnEditorJumpNextIdentMenuHint;
 end;
 
 function TCnEditorJumpNextIdent.GetState: TWizardState;
