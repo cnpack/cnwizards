@@ -684,6 +684,16 @@ var
   SCnEditorJumpMatchedKeywordMenuHint: string = 'Jump to Matched Keyword under Cursor';
   SCnEditorJumpMatchedKeywordName: string = 'Jump to Matched Keyword Tool';
 
+  // CnEditorJumpPrevIdent
+  SCnEditorJumpPrevIndentMenuCaption: string = 'Jump to Previous Identifier';
+  SCnEditorJumpPrevIndentMenuHint: string = 'Jump to Previous Identifier under Cursor';
+  SCnEditorJumpPrevIndentName: string = 'Jump to Previous Identifier Tool';
+
+  // CnEditorJumpNextIdent
+  SCnEditorJumpNextIndentMenuCaption: string = 'Jump to Next Identifier';
+  SCnEditorJumpNextIndentMenuHint: string = 'Jump to Next Identifier under Cursor';
+  SCnEditorJumpNextIndentName: string = 'Jump to Next Identifier Tool';
+
   // CnEditorFontInc
   SCnEditorFontIncMenuCaption: string = 'Zoom &Larger Font';
   SCnEditorFontIncMenuHint: string = 'Zoom Larger Editor Font';

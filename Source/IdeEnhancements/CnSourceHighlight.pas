@@ -511,8 +511,13 @@ procedure HighlightCanvasLine(ACanvas: TCanvas; X1, Y1, X2, Y2: Integer;
 function IsCurrentToken(AView: Pointer; AControl: TControl; Token: TCnPasToken): Boolean;
 {* 判断标识符是否在光标下，频繁调用，因此此处 View 用指针来避免引用计数从而优化速度 }
 
+function CheckTokenMatch(const T1: AnsiString; const T2: AnsiString;
+  CaseSensitive: Boolean): Boolean;
+{* 判断是否俩Identifer相等}
+
 {$IFNDEF BDS}
-procedure MyEditorsCustomEditControlSetForeAndBackColor(ASelf: TObject; Param1, Param2, Param3, Param4: Cardinal);
+procedure MyEditorsCustomEditControlSetForeAndBackColor(ASelf: TObject;
+  Param1, Param2, Param3, Param4: Cardinal);
 {$ENDIF}
 
 {$ENDIF CNWIZARDS_CNSOURCEHIGHLIGHT}
@@ -612,6 +617,22 @@ var
   // CurrentLineNum: Integer = -1;
   {$ENDIF}
 {$ENDIF}
+
+function CheckTokenMatch(const T1: AnsiString; const T2: AnsiString;
+  CaseSensitive: Boolean): Boolean;
+begin
+  if CaseSensitive then
+    Result := T1 = T2
+  else
+  begin
+  {$IFDEF UNICODE}
+    // Unicode 时直接调用 API 比较以避免生成临时字符串而影响性能
+    Result := lstrcmpiA(@T1[1], @T2[1]) = 0;
+  {$ELSE}
+    Result := UpperCase(T1) = UpperCase(T2);
+  {$ENDIF}
+  end;
+end;
 
 procedure HighlightCanvasLine(ACanvas: TCanvas; X1, Y1, X2, Y2: Integer;
   AStyle: TCnLineStyle);
@@ -1076,21 +1097,6 @@ var
   CharPos: TOTACharPos;
   EditPos: TOTAEditPos;
   I: Integer;
-
-  function InternalTokenMatch(const T1: AnsiString; const T2: AnsiString): Boolean;
-  begin
-    if CaseSensitive then
-      Result := T1 = T2
-    else
-    begin
-    {$IFDEF UNICODE}
-      // Unicode 时直接调用 API 比较以避免生成临时字符串而影响性能
-      Result := lstrcmpiA(@T1[1], @T2[1]) = 0;
-    {$ELSE}
-      Result := UpperCase(T1) = UpperCase(T2);
-    {$ENDIF}
-    end;
-  end;  
 begin
   FCurrentTokenName := '';
   FCurrentToken := nil;
@@ -1194,7 +1200,7 @@ begin
       begin
         for I := 0 to Parser.Count - 1 do
           if (Parser.Tokens[I].TokenID = tkIdentifier) and
-            InternalTokenMatch(Parser.Tokens[I].Token, FCurrentTokenName) then
+            CheckTokenMatch(Parser.Tokens[I].Token, FCurrentTokenName, CaseSensitive) then
           begin
             FCurTokenList.Add(Parser.Tokens[I]);
             FCurTokenListEditLine.Add(Pointer(Parser.Tokens[I].EditLine));
@@ -1205,7 +1211,7 @@ begin
         for I := FCurMethodStartToken.ItemIndex to
           FCurMethodCloseToken.ItemIndex do
           if (Parser.Tokens[I].TokenID = tkIdentifier) and
-            InternalTokenMatch(Parser.Tokens[I].Token, FCurrentTokenName) then
+            CheckTokenMatch(Parser.Tokens[I].Token, FCurrentTokenName, CaseSensitive) then
           begin
             FCurTokenList.Add(Parser.Tokens[I]);
             FCurTokenListEditLine.Add(Pointer(Parser.Tokens[I].EditLine));
@@ -1249,7 +1255,7 @@ begin
       for I := CppParser.BlockStartToken.ItemIndex to CppParser.BlockCloseToken.ItemIndex do
       begin
         if (CppParser.Tokens[I].CppTokenKind = ctkIdentifier) and
-          InternalTokenMatch(CppParser.Tokens[I].Token, FCurrentTokenName) then
+          CheckTokenMatch(CppParser.Tokens[I].Token, FCurrentTokenName, CaseSensitive) then
         begin
           FCurTokenList.Add(CppParser.Tokens[I]);
           FCurTokenListEditLine.Add(Pointer(CppParser.Tokens[I].EditLine));
@@ -1262,7 +1268,7 @@ begin
       for I := CppParser.InnerBlockStartToken.ItemIndex to CppParser.InnerBlockCloseToken.ItemIndex do
       begin
         if (CppParser.Tokens[I].CppTokenKind = ctkIdentifier) and
-          InternalTokenMatch(CppParser.Tokens[I].Token, FCurrentTokenName) then
+          CheckTokenMatch(CppParser.Tokens[I].Token, FCurrentTokenName, CaseSensitive) then
         begin
           FCurTokenList.Add(CppParser.Tokens[I]);
           FCurTokenListEditLine.Add(Pointer(CppParser.Tokens[I].EditLine));
@@ -1274,7 +1280,7 @@ begin
       for I := 0 to CppParser.Count - 1 do
       begin
         if (CppParser.Tokens[I].CppTokenKind = ctkIdentifier) and
-          InternalTokenMatch(CppParser.Tokens[I].Token, FCurrentTokenName) then
+          CheckTokenMatch(CppParser.Tokens[I].Token, FCurrentTokenName, CaseSensitive) then
         begin
           FCurTokenList.Add(CppParser.Tokens[I]);
           FCurTokenListEditLine.Add(Pointer(CppParser.Tokens[I].EditLine));

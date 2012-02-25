@@ -400,6 +400,16 @@ begin
   TranslateStr(SCnEditorJumpMatchedKeywordMenuHint, 'SCnEditorJumpMatchedKeywordMenuHint');
   TranslateStr(SCnEditorJumpMatchedKeywordName, 'SCnEditorJumpMatchedKeywordName');
 
+  // CnEditorJumpPrevIdent
+  TranslateStr(SCnEditorJumpPrevIndentMenuCaption, 'SCnEditorJumpPrevIndentMenuCaption');
+  TranslateStr(SCnEditorJumpPrevIndentMenuHint, 'SCnEditorJumpPrevIndentMenuHint');
+  TranslateStr(SCnEditorJumpPrevIndentName, 'SCnEditorJumpPrevIndentName');
+
+  // CnEditorJumpNextIdent
+  TranslateStr(SCnEditorJumpNextIndentMenuCaption, 'SCnEditorJumpNextIndentMenuCaption');
+  TranslateStr(SCnEditorJumpNextIndentMenuHint, 'SCnEditorJumpNextIndentMenuHint');
+  TranslateStr(SCnEditorJumpNextIndentName, 'SCnEditorJumpNextIndentName');
+
   // CnEditorFontInc
   TranslateStr(SCnEditorFontIncMenuCaption, 'SCnEditorFontIncMenuCaption');
   TranslateStr(SCnEditorFontIncMenuHint, 'SCnEditorFontIncMenuHint');

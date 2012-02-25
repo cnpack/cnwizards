@@ -29,7 +29,9 @@ unit CnEditorJumpMessage;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2009.04.15
+* 修改记录：2012.02.25
+*               加入跳至前一个/后一个相同标识符的功能
+*           2009.04.15
 *               加入对 C/C++ 大括号的支持
 *           2008.11.22
 *               加入跳至匹配关键字的功能
@@ -122,7 +124,11 @@ type
     function GetDefShortCut: TShortCut; override;
     procedure Execute; override;
   end;
-  
+
+{$IFDEF CNWIZARDS_CNSOURCEHIGHLIGHT}
+
+// 此仨功能依赖于高亮解析因此此处需要也这样 IFDEF
+
   TCnEditorJumpMatchedKeyword = class(TCnBaseEditorTool)
   private
 
@@ -138,6 +144,40 @@ type
     function GetDefShortCut: TShortCut; override;
     procedure Execute; override;
   end;
+
+  TCnEditorJumpPrevIdent = class(TCnBaseEditorTool)
+  private
+
+  public
+    constructor Create(AOwner: TCnEditorWizard); override;
+    destructor Destroy; override;
+    procedure LoadSettings(Ini: TCustomIniFile); override;
+    procedure SaveSettings(Ini: TCustomIniFile); override;
+    function GetCaption: string; override;
+    function GetHint: string; override;
+    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    function GetState: TWizardState; override;
+    function GetDefShortCut: TShortCut; override;
+    procedure Execute; override;
+  end;
+
+  TCnEditorJumpNextIdent = class(TCnBaseEditorTool)
+  private
+
+  public
+    constructor Create(AOwner: TCnEditorWizard); override;
+    destructor Destroy; override;
+    procedure LoadSettings(Ini: TCustomIniFile); override;
+    procedure SaveSettings(Ini: TCustomIniFile); override;
+    function GetCaption: string; override;
+    function GetHint: string; override;
+    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    function GetState: TWizardState; override;
+    function GetDefShortCut: TShortCut; override;
+    procedure Execute; override;
+  end;
+
+{$ENDIF CNWIZARDS_CNSOURCEHIGHLIGHT}
 
 {$ENDIF CNWIZARDS_CNEDITORWIZARD}
 
@@ -156,6 +196,32 @@ begin
   Result := [];
 end;
 {$ENDIF}
+
+procedure EditGoPosAndRepaint(EditView: IOTAEditView; Line: Integer; Col: Integer = -1);
+var
+  EditControl: TControl;
+begin
+  if EditView <> nil then
+  begin
+    if Line > 0 then
+    begin
+      EditView.Position.GotoLine(Line);
+      if Col >= 0 then
+      begin
+        EditView.Position.MoveBOL;
+        EditView.Position.MoveRelative(0, Col);
+      end
+      else
+        EditView.Center(Line, 1);
+      CnOtaMakeSourceVisible(EditView.Buffer.FileName);
+      EditView.Paint;
+
+      EditControl := GetCurrentEditControl;
+      if (EditControl <> nil) and (EditControl is TWinControl) then
+        (EditControl as TWinControl).SetFocus;
+    end;
+  end;
+end;
 
 { TCnEditorJumpMessage }
 
@@ -281,7 +347,6 @@ var
   View: IOTAEditView;
   Parser: TmwPasLex;
   MemStream: TMemoryStream;
-  EditControl: TControl;
   S: string;
 begin
   View := CnOtaGetTopMostEditView;
@@ -323,15 +388,7 @@ begin
     end;
 
     if LineNum > 0 then
-    begin
-      View.Position.GotoLine(LineNum);
-      View.Center(LineNum, 1);
-      View.Paint;
-
-      EditControl := GetCurrentEditControl;
-      if (EditControl <> nil) and (EditControl is TWinControl) then
-        (EditControl as TWinControl).SetFocus;
-    end
+      EditGoPosAndRepaint(View, LineNum)
     else
       ErrorDlg(ErrorMsg);
   finally
@@ -652,18 +709,7 @@ begin
     end;
 
     if DestToken <> nil then
-    begin
-      EditView.Position.GotoLine(DestToken.EditLine);
-      EditView.Position.MoveBOL;
-      EditView.Position.MoveRelative(0, DestToken.EditCol - 1);
-      CnOtaMakeSourceVisible(EditView.Buffer.FileName);
-      //EditView.Center(DestToken.EditLine, 1);
-      EditView.Paint;
-
-      EditControl := GetCurrentEditControl;
-      if (EditControl <> nil) and (EditControl is TWinControl) then
-        (EditControl as TWinControl).SetFocus;
-    end;
+      EditGoPosAndRepaint(EditView, DestToken.EditLine, DestToken.EditCol - 1);
   finally
     FreeAndNil(BlockMatchInfo);
     FreeAndNil(LineInfo);
@@ -699,6 +745,264 @@ begin
 
 end;
 
+procedure JumpIdentifierNearby(Prev: Boolean);
+var
+  EditControl: TControl;
+  EditView: IOTAEditView;
+  Parser: TCnPasStructureParser;
+  CppParser: TCnCppStructureParser;
+  Stream: TMemoryStream;
+  CharPos: TOTACharPos;
+  EditPos: TOTAEditPos;
+  I: Integer;
+  CurrentToken: TCnPasToken;
+  CurrentTokenName: string;
+  CurIsPas, CurIsCpp: Boolean;
+  CurrentTokenIndex, StartIdx, EndIdx: Integer;
+  
+  procedure SetParseRange(MaxCount: Integer);
+  begin
+    if Prev then
+    begin
+      StartIdx := CurrentTokenIndex - 1;
+      EndIdx := 0;
+    end
+    else
+    begin
+      StartIdx := CurrentTokenIndex + 1;
+      EndIdx := MaxCount;
+    end;
+  end;
+
+begin
+  EditControl := CnOtaGetCurrentEditControl;
+  if EditControl = nil then
+    Exit;
+  try
+    EditView := EditControlWrapper.GetEditView(EditControl);
+  except
+    Exit;
+  end;
+
+  if EditView = nil then
+    Exit;
+
+  CurIsPas := IsDprOrPas(EditView.Buffer.FileName) or IsInc(EditView.Buffer.FileName);
+  CurIsCpp := IsCppSourceModule(EditView.Buffer.FileName);
+  if (not CurIsCpp) and (not CurIsPas) then
+    Exit;
+
+  Parser := nil;
+  CppParser := nil;
+
+  if CurIsPas then
+    Parser := TCnPasStructureParser.Create;
+  if CurIsCpp then
+    CppParser := TCnCppStructureParser.Create;
+
+  Stream := TMemoryStream.Create;
+  try
+    CnOtaSaveEditorToStream(EditView.Buffer, Stream);
+    // 解析当前显示的源文件
+    if CurIsPas then
+    begin
+      Parser.ParseSource(PAnsiChar(Stream.Memory),
+        IsDpr(EditView.Buffer.FileName) or IsInc(EditView.Buffer.FileName), False);
+
+      CurrentToken := nil;
+      for I := 0 to Parser.Count - 1 do
+      begin
+        CharPos := OTACharPos(Parser.Tokens[I].CharIndex, Parser.Tokens[I].LineNumber + 1);
+        EditView.ConvertPos(False, EditPos, CharPos);
+{$IFDEF BDS2009_UP}
+        EditPos.Col := Parser.Tokens[I].CharIndex + 1;
+{$ENDIF}
+        Parser.Tokens[I].EditCol := EditPos.Col;
+        Parser.Tokens[I].EditLine := EditPos.Line;
+
+        if (Parser.Tokens[I].TokenID = tkIdentifier) and // 此处判断不支持双字节字符
+          IsCurrentToken(Pointer(EditView), EditControl, Parser.Tokens[I]) then
+        begin
+          if CurrentToken = nil then
+          begin
+            CurrentToken := Parser.Tokens[I];
+            CurrentTokenName := CurrentToken.Token;
+            CurrentTokenIndex := I;
+            // Can't Break for Parser Tokens Line/Col need to assigned.
+          end;
+        end;
+      end;
+
+      SetParseRange(Parser.Count);
+      if CurrentTokenName <> '' then
+      begin
+        if StartIdx > EndIdx then
+        begin
+          for I := StartIdx downto EndIdx do // Search for previous
+          begin
+            if (Parser.Tokens[I].TokenID = tkIdentifier) and
+              CheckTokenMatch(Parser.Tokens[I].Token, CurrentTokenName, False) then
+            begin
+              // Found. Jump here and Exit;
+              EditGoPosAndRepaint(EditView, Parser.Tokens[I].EditLine, Parser.Tokens[I].EditCol - 1);
+              Exit;
+            end;
+          end;
+        end
+        else
+        begin
+          for I := StartIdx to EndIdx do // Search for Next
+          begin
+            if (Parser.Tokens[I].TokenID = tkIdentifier) and
+              CheckTokenMatch(Parser.Tokens[I].Token, CurrentTokenName, False) then
+            begin
+              // Found. Jump here and Exit;
+              EditGoPosAndRepaint(EditView, Parser.Tokens[I].EditLine, Parser.Tokens[I].EditCol - 1);
+              Exit;
+            end;
+          end;
+        end;
+      end
+    end;
+
+    if CurIsCpp then
+    begin
+      CppParser.ParseSource(PAnsiChar(Stream.Memory), Stream.Size,
+        EditView.CursorPos.Line, EditView.CursorPos.Col);
+    end;
+  finally
+    Stream.Free;
+  end;
+end;
+
+{ TCnEditorJumpPrevIdent }
+
+constructor TCnEditorJumpPrevIdent.Create(AOwner: TCnEditorWizard);
+begin
+  inherited;
+
+end;
+
+destructor TCnEditorJumpPrevIdent.Destroy;
+begin
+
+  inherited;
+end;
+
+procedure TCnEditorJumpPrevIdent.Execute;
+begin
+  JumpIdentifierNearby(True);
+end;
+
+function TCnEditorJumpPrevIdent.GetCaption: string;
+begin
+  Result := SCnEditorJumpPrevIndentMenuCaption;
+end;
+
+function TCnEditorJumpPrevIdent.GetDefShortCut: TShortCut;
+begin
+  Result := ShortCut(VK_UP, [ssAlt, ssCtrl]);
+end;
+
+procedure TCnEditorJumpPrevIdent.GetEditorInfo(var Name, Author,
+  Email: string);
+begin
+  Name := SCnEditorJumpPrevIndentName;
+  Author := SCnPack_LiuXiao;
+  Email := SCnPack_LiuXiaoEmail;
+end;
+
+function TCnEditorJumpPrevIdent.GetHint: string;
+begin
+  Result := SCnEditorJumpPrevIndentMenuHint;
+end;
+
+function TCnEditorJumpPrevIdent.GetState: TWizardState;
+var
+  S: string;
+begin
+  Result := inherited GetState;
+  S := CnOtaGetCurrentSourceFileName;
+  if (wsEnabled in Result) and not (IsDprOrPas(S) or IsInc(S) or IsCppSourceModule(S)) then
+    Result := [];
+end;
+
+procedure TCnEditorJumpPrevIdent.LoadSettings(Ini: TCustomIniFile);
+begin
+  inherited;
+
+end;
+
+procedure TCnEditorJumpPrevIdent.SaveSettings(Ini: TCustomIniFile);
+begin
+  inherited;
+
+end;
+
+{ TCnEditorJumpNextIdent }
+
+constructor TCnEditorJumpNextIdent.Create(AOwner: TCnEditorWizard);
+begin
+  inherited;
+
+end;
+
+destructor TCnEditorJumpNextIdent.Destroy;
+begin
+
+  inherited;
+end;
+
+procedure TCnEditorJumpNextIdent.Execute;
+begin
+  JumpIdentifierNearby(False);
+end;
+
+function TCnEditorJumpNextIdent.GetCaption: string;
+begin
+  Result := SCnEditorJumpNextIndentMenuCaption;
+end;
+
+function TCnEditorJumpNextIdent.GetDefShortCut: TShortCut;
+begin
+  Result := ShortCut(VK_DOWN, [ssAlt, ssCtrl]);
+end;
+
+procedure TCnEditorJumpNextIdent.GetEditorInfo(var Name, Author,
+  Email: string);
+begin
+  Name := SCnEditorJumpNextIndentName;
+  Author := SCnPack_LiuXiao;
+  Email := SCnPack_LiuXiaoEmail;
+end;
+
+function TCnEditorJumpNextIdent.GetHint: string;
+begin
+  Result := SCnEditorJumpNextIndentMenuHint;
+end;
+
+function TCnEditorJumpNextIdent.GetState: TWizardState;
+var
+  S: string;
+begin
+  Result := inherited GetState;
+  S := CnOtaGetCurrentSourceFileName;
+  if (wsEnabled in Result) and not (IsDprOrPas(S) or IsInc(S) or IsCppSourceModule(S)) then
+    Result := [];
+end;
+
+procedure TCnEditorJumpNextIdent.LoadSettings(Ini: TCustomIniFile);
+begin
+  inherited;
+
+end;
+
+procedure TCnEditorJumpNextIdent.SaveSettings(Ini: TCustomIniFile);
+begin
+  inherited;
+
+end;
+
 {$ENDIF CNWIZARDS_CNSOURCEHIGHLIGHT}
 
 initialization
@@ -710,6 +1014,8 @@ initialization
 
 {$IFDEF CNWIZARDS_CNSOURCEHIGHLIGHT}
   RegisterCnEditor(TCnEditorJumpMatchedKeyword);
+  RegisterCnEditor(TCnEditorJumpPrevIdent);
+  RegisterCnEditor(TCnEditorJumpNextIdent);
 {$ENDIF CNWIZARDS_CNSOURCEHIGHLIGHT}
 
 {$ENDIF CNWIZARDS_CNEDITORWIZARD}
