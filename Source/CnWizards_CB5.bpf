@@ -21,6 +21,7 @@ USEFORMNS("Config\CnWizSubActionShortCutFrm.pas", Cnwizsubactionshortcutfrm, CnW
 USEFORMNS("Config\CnWizMenuSortFrm.pas", Cnwizmenusortfrm, CnMenuSortFrm);
 USEUNIT("Utils\CnWizUtils.pas");
 USEFORMNS("SimpleWizards\CnAlignSizeWizard.pas", Cnalignsizewizard, CnNonArrangeForm);
+USEFORMNS("EditorWizard\CnEditorWizard.pas", Cneditorwizard, CnEditorToolsForm);
 USEFORMNS("SimpleWizards\CnListCompFrm.pas", Cnlistcompfrm, CnListCompForm);
 USEFORMNS("SimpleWizards\CnCompToCodeFrm.pas", Cncomptocodefrm, CnCompToCodeForm);
 USEFORMNS("SimpleWizards\CnMessageBoxWizard.pas", Cnmessageboxwizard, CnMessageBoxForm);
@@ -35,7 +36,6 @@ USEFORMNS("SimpleWizards\CnBookmarkConfigFrm.pas", Cnbookmarkconfigfrm, CnBookma
 USEUNIT("Utils\CnWizIdeUtils.pas");
 USEFORMNS("SrcTemplate\CnSrcTemplate.pas", Cnsrctemplate, CnSrcTemplateForm);
 USEFORMNS("SrcTemplate\CnSrcTemplateEditFrm.pas", Cnsrctemplateeditfrm, CnSrcTemplateEditForm);
-USEFORMNS("EditorWizard\CnEditorWizard.pas", Cneditorwizard, CnEditorToolsForm);
 USEUNIT("EditorWizard\CnEditorOpenFile.pas");
 USEUNIT("EditorWizard\CnEditorCodeSwap.pas");
 USEUNIT("Utils\CnWizEditFiler.pas");

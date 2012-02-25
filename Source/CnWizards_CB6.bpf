@@ -6,6 +6,8 @@ USEFORMNS("MultiLang\CnWizMultiLang.pas", Cnwizmultilang, CnTranslateForm);
 USEFORMNS("Config\CnWizConfigFrm.pas", Cnwizconfigfrm, CnWizConfigForm);
 USEFORMNS("Config\CnWizSubActionShortCutFrm.pas", Cnwizsubactionshortcutfrm, CnWizSubActionShortCutForm);
 USEFORMNS("Config\CnWizMenuSortFrm.pas", Cnwizmenusortfrm, CnMenuSortFrm);
+USEFORMNS("SimpleWizards\CnAlignSizeWizard.pas", Cnalignsizewizard, CnNonArrangeForm);
+USEFORMNS("EditorWizard\CnEditorWizard.pas", CnEditorWizard, CnEditorToolsForm);
 USEFORMNS("SimpleWizards\CnMessageBoxWizard.pas", Cnmessageboxwizard, CnMessageBoxForm);
 USEFORMNS("SimpleWizards\CnComponentSelector.pas", Cncomponentselector, CnComponentSelectorForm);
 USEFORMNS("SimpleWizards\CnTabOrderWizard.pas", Cntaborderwizard, CnTabOrderForm);
