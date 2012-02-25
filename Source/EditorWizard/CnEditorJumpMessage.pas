@@ -800,6 +800,7 @@ begin
   if CurIsCpp then
     CppParser := TCnCppStructureParser.Create;
 
+  CurrentToken := nil;
   Stream := TMemoryStream.Create;
   try
     CnOtaSaveEditorToStream(EditView.Buffer, Stream);
@@ -809,7 +810,6 @@ begin
       Parser.ParseSource(PAnsiChar(Stream.Memory),
         IsDpr(EditView.Buffer.FileName) or IsInc(EditView.Buffer.FileName), False);
 
-      CurrentToken := nil;
       for I := 0 to Parser.Count - 1 do
       begin
         CharPos := OTACharPos(Parser.Tokens[I].CharIndex, Parser.Tokens[I].LineNumber + 1);
@@ -862,13 +862,66 @@ begin
             end;
           end;
         end;
-      end
+      end;
     end;
 
     if CurIsCpp then
     begin
       CppParser.ParseSource(PAnsiChar(Stream.Memory), Stream.Size,
         EditView.CursorPos.Line, EditView.CursorPos.Col);
+
+      for I := 0 to CppParser.Count - 1 do
+      begin
+        CharPos := OTACharPos(CppParser.Tokens[I].CharIndex - 1, CppParser.Tokens[I].LineNumber);
+        // 此处 LineNumber 无需加一了，因为 mwBCBTokenList 中的此属性是从 1 开始的
+        // 反倒 CharIndex 得减一
+        EditView.ConvertPos(False, EditPos, CharPos);
+        CppParser.Tokens[I].EditCol := EditPos.Col;
+        CppParser.Tokens[I].EditLine := EditPos.Line;
+
+        if (CppParser.Tokens[I].CppTokenKind = ctkidentifier) and
+          IsCurrentToken(Pointer(EditView), EditControl, CppParser.Tokens[I]) then
+        begin
+          if CurrentToken = nil then
+          begin
+            CurrentToken := CppParser.Tokens[I];
+            CurrentTokenName := CurrentToken.Token;
+            CurrentTokenIndex := I;
+            // Can't Break for Parser Tokens Line/Col need to assigned.
+          end;
+        end;
+      end;
+
+      SetParseRange(CppParser.Count);
+      if CurrentTokenName <> '' then
+      begin
+        if StartIdx > EndIdx then
+        begin
+          for I := StartIdx downto EndIdx do // Search for previous
+          begin
+            if (CppParser.Tokens[I].CppTokenKind = ctkidentifier) and
+              CheckTokenMatch(CppParser.Tokens[I].Token, CurrentTokenName, True) then
+            begin
+              // Found. Jump here and Exit;
+              EditGoPosAndRepaint(EditView, CppParser.Tokens[I].EditLine, CppParser.Tokens[I].EditCol - 1);
+              Exit;
+            end;
+          end;
+        end
+        else
+        begin
+          for I := StartIdx to EndIdx do // Search for Next
+          begin
+            if (CppParser.Tokens[I].CppTokenKind = ctkidentifier) and
+              CheckTokenMatch(CppParser.Tokens[I].Token, CurrentTokenName, True) then
+            begin
+              // Found. Jump here and Exit;
+              EditGoPosAndRepaint(EditView, CppParser.Tokens[I].EditLine, CppParser.Tokens[I].EditCol - 1);
+              Exit;
+            end;
+          end;
+        end;
+      end;
     end;
   finally
     Stream.Free;
