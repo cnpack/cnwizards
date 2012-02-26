@@ -144,6 +144,11 @@
 		<param name="Local" value="other\credits.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Decrease Font Size Tool">
+		<param name="Name" value="Decrease Font Size Tool">
+		<param name="Local" value="wizards\editors\editorfontdec.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Delete Blank Lines Tool">
 		<param name="Name" value="Delete Blank Lines Tool">
 		<param name="Local" value="wizards\editors\editorcodedelblank.htm">
@@ -252,6 +257,11 @@
 		<param name="Name" value="ImageList Component Editor">
 		<param name="Name" value="ImageList Component Editor">
 		<param name="Local" value="propeditor\compimglist.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Increase Font Size Tool">
+		<param name="Name" value="Increase Font Size Tool">
+		<param name="Local" value="wizards\editors\editorfontinc.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Indent Code Tool">

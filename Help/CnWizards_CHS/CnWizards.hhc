@@ -293,6 +293,14 @@
 				<param name="Name" value="跳至后一标识符工具">
 				<param name="Local" value="wizards\editors\editorjumpnextident.htm">
 				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="增大字体工具">
+				<param name="Local" value="wizards\editors\editorfontinc.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="缩小字体工具">
+				<param name="Local" value="wizards\editors\editorfontdec.htm">
+				</OBJECT>
 		</UL>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="代码编辑器扩展">

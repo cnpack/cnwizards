@@ -399,6 +399,11 @@
 		<param name="Local" value="wizards\corprop.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="縮小字體工具">
+		<param name="Name" value="縮小字體工具">
+		<param name="Local" value="wizards\editors\editorfontdec.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="跳至後一標識符工具">
 		<param name="Name" value="跳至後一標識符工具">
 		<param name="Local" value="wizards\editor\editorjumpnextident.htm">
@@ -517,6 +522,11 @@
 		<param name="Name" value="源碼模塊關係分析">
 		<param name="Name" value="源碼模塊關係分析工具使用說明">
 		<param name="Local" value="cnsmr\cnsmr.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="增大字體工具">
+		<param name="Name" value="增大字體工具">
+		<param name="Local" value="wizards\editors\editorfontinc.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="組件前綴專家">
