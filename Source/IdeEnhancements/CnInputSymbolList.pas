@@ -30,7 +30,9 @@ unit CnInputSymbolList;
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2004.11.05
+* 修改记录：2012.03.26
+*               增加对XE/XE2独有的XML格式的模板的支持，有部分内容兼容问题
+*           2004.11.05
 *               移植而来
 ================================================================================
 |</PRE>}
@@ -249,7 +251,7 @@ type
     class function GetListName: string; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
       TCodePosInfo): Boolean; override;
-    procedure GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet; 
+    procedure GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet;
       PosInfo: TCodePosInfo); override;
   end;
 
@@ -358,8 +360,24 @@ type
   protected
     function GetReadFileName: string; override;
   public
-    class function GetListName: string; override; 
+    class function GetListName: string; override;
   end;
+
+{$IFDEF DELPHIXE_UP}
+//==============================================================================
+// XE/XE2 IDE 自带的 XML 格式的代码模板列表
+//==============================================================================
+
+  TXECodeTemplateList = class(TCodeTemplateList)
+  private
+    function GetLanguageDirectoryName: string;
+  protected
+    function GetReadFileName: string; override;
+    function GetScanDirectory: string; virtual;
+  public
+    procedure Load; override;
+  end;
+{$ENDIF}
 
 //==============================================================================
 // 符号列表管理器
@@ -1401,7 +1419,7 @@ procedure TCodeTemplateList.Load;
 var
   Lines: TStringList;
   StrList: TStringList;
-  i: Integer;
+  I: Integer;
   FileName: string;
   Text: string;
   Line: string;
@@ -1428,10 +1446,10 @@ begin
       CnDebugger.LogStrings(Lines, 'Lines');
     {$ENDIF}
 
-      i := 0;
-      while i < Lines.Count - 1 do
+      I := 0;
+      while I < Lines.Count - 1 do
       begin
-        Line := Lines[i];
+        Line := Lines[I];
         if IsTempleteCaption(Line) then
         begin
           // 取出模板名称、描述及语言
@@ -1455,13 +1473,13 @@ begin
 
           // 取出模板内容
           Text := '';
-          Inc(i);
-          while (i < Lines.Count - 1) and not IsTempleteCaption(Lines[i]) do
+          Inc(I);
+          while (I < Lines.Count - 1) and not IsTempleteCaption(Lines[I]) do
           begin
             if Text <> '' then
               Text := Text + CRLF;
-            Text := Text + Lines[i];
-            Inc(i);
+            Text := Text + Lines[I];
+            Inc(I);
           end;
 
           if (Name <> '') and ((LangName = '') or SameText(LangName,
@@ -1469,7 +1487,7 @@ begin
             Add(Name, skTemplate, csTemplateScope, Desc, Text, True);
         end
         else
-          Inc(i);
+          Inc(I);
       end;
     finally
       Lines.Free;
@@ -1515,6 +1533,125 @@ begin
 {$ENDIF}
 {$ENDIF}
 end;
+
+{$IFDEF DELPHIXE_UP}
+function TXECodeTemplateList.GetReadFileName: string;
+begin
+  Result := ''; // NOT Used for directory mode.
+end;
+
+function TXECodeTemplateList.GetLanguageDirectoryName: string;
+begin
+  Result := 'en'; // Temporary only support English directory
+end;
+
+function TXECodeTemplateList.GetScanDirectory: string;
+begin
+  // Only Support Delphi Templates
+  Result := ExtractFilePath(ExtractFileDir(Application.ExeName))
+    + 'ObjRepos\' + GetLanguageDirectoryName() + '\Code_Templates\Delphi\';
+end;
+
+const
+  XeCodeTemplateTag_codetemplate = 'codetemplate';
+  XeCodeTemplateTag_template = 'template';
+  XeCodeTemplateAttrib_name = 'name';
+  XeCodeTemplateTag_description = 'description';
+  XeCodeTemplateTag_code = 'code';
+  XeCodeTemplateAttrib_language = 'language';
+  XeCodeTemplate_cdata = '<![CDATA[';
+  XeCodeTemplate_cdataend = ']]>';
+
+procedure TXECodeTemplateList.Load;
+var
+  Dir, FileName: string;
+  Sch: TSearchRec;
+  Doc: IXMLDocument;
+  Root, TemplateNode, CodeNode: IXmlElement;
+  I, C, CDataEndPos: Integer;
+  Text: string;
+  Name: string;
+  Desc: string;
+begin
+  // 扫描指定目录下的 XML 文件，每个文件是一项输入列表
+  Dir := GetScanDirectory();
+  C := 0;
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('XECodeTemplateList Scan directory: ' + Dir);
+{$ENDIF}
+  if FindFirst(Dir + '*.xml', faAnyfile, Sch) = 0 then
+  begin
+    repeat
+      if ((Sch.Name = '.') or (Sch.Name = '..')) then Continue;
+      if DirectoryExists(Dir + Sch.Name) then
+      begin
+        // XML Dir? do nothing.
+      end
+      else
+      begin
+        try
+          FileName := Dir + Sch.Name;
+          // Load this XML and read Name/Descripttion/Text
+          Doc := CreateXMLDoc();
+          Doc.Load(FileName);
+          Root := Doc.DocumentElement;
+          if not Assigned(Root) or not
+            SameText(Root.NodeName, XeCodeTemplateTag_codetemplate) then
+            Continue;
+
+          TemplateNode := nil;
+          for I := 0 to Root.ChildNodes.Length - 1 do
+          begin
+            if SameText(Root.ChildNodes.Item[I].NodeName, XeCodeTemplateTag_template) then
+            begin
+              TemplateNode := Root.ChildNodes.Item[I] as IXMLElement;
+              Break;
+            end;
+          end;
+
+          if TemplateNode <> nil then
+          begin
+            Name := Trim(TemplateNode.GetAttribute(XeCodeTemplateAttrib_name));
+            Desc := ''; Text := '';
+            for I := 0 to TemplateNode.ChildNodes.Length - 1 do
+            begin
+              if SameText(TemplateNode.ChildNodes.Item[I].NodeName, XeCodeTemplateTag_description) then
+              begin
+                // Read Description
+                Desc := Trim(TemplateNode.ChildNodes.Item[I].Text);
+              end
+              else if SameText(TemplateNode.ChildNodes.Item[I].NodeName, XeCodeTemplateTag_code) then
+              begin
+                // Language is Delphi? read the CDATA part
+                CodeNode := TemplateNode.ChildNodes.Item[I] as IXMLElement;
+                if CodeNode.GetAttribute(XeCodeTemplateAttrib_language) = 'Delphi' then
+                begin
+                  Text := Trim(CodeNode.Text);
+                  if Pos(XeCodeTemplate_cdata, Text) = 1 then
+                    Text := Copy(Text, Length(XeCodeTemplate_cdata), MaxInt);
+                  CDataEndPos := Length(Text) - Length(XeCodeTemplate_cdataend) + 1;
+                  if Pos(XeCodeTemplate_cdataend, Text) = CDataEndPos then
+                    Text := Copy(Text, 1, CDataEndPos - 1);
+                end;
+              end;
+            end;
+
+            Inc(C);
+            if (Name <> '') and (Text <> '') then
+              Add(Name, skTemplate, csTemplateScope, Desc, Text, True);
+          end;
+        except
+          ;
+        end;
+      end;
+    until FindNext(Sch) <> 0;
+    FindClose(Sch);
+  end;
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('XECodeTemplateList Load Tempates: ' + IntToStr(C));
+{$ENDIF}
+end;
+{$ENDIF}
 
 //==============================================================================
 // 符号列表管理器
@@ -1635,7 +1772,11 @@ initialization
   RegisterSymbolList(TJavaDocSymbolList);
   RegisterSymbolList(TUnitNameList);
   RegisterSymbolList(TUnitUsesList);
+{$IFDEF DELPHIXE_UP}
+  RegisterSymbolList(TXECodeTemplateList);
+{$ELSE}
   RegisterSymbolList(TIDECodeTemplateList);
+{$ENDIF}
   RegisterSymbolList(TUserSymbolList);
 
 finalization
