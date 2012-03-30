@@ -375,8 +375,12 @@ begin
     ini.EraseSection('HKEY_CURRENT_USER\Software\CodeGear\' + m_strRegPath + '\Closed Projects');
     ini.EraseSection('HKEY_CURRENT_USER\Software\CodeGear\' + m_strRegPath + '\Transfer');
 
-    FreeAndNil(ini);
+    ini.EraseSection('HKEY_CURRENT_USER\Software\Embarcadero\' + m_strRegPath);
+    ini.EraseSection('HKEY_CURRENT_USER\Software\Embarcadero\' + m_strRegPath + '\Closed Files');
+    ini.EraseSection('HKEY_CURRENT_USER\Software\Embarcadero\' + m_strRegPath + '\Closed Projects');
+    ini.EraseSection('HKEY_CURRENT_USER\Software\Embarcadero\' + m_strRegPath + '\Transfer');
 
+    FreeAndNil(ini);
     Result := m_strAppAbName + '.reg';
   end
   else
