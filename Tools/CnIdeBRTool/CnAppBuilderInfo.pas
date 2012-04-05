@@ -358,7 +358,7 @@ begin
     // 转换绝对安装目录的绝对路径为宏路径
     strOrgPath := Copy(m_strRootDir, 1, LastDelimiter('\', m_strRootDir) - 1);
     strOrgPath := StringReplace(strOrgPath, '\', '\\', [rfReplaceAll]);
-    pList.Text := StringReplace(pList.Text, strOrgPath,
+    pList.Text := StringReplaceNonAnsi(pList.Text, strOrgPath,
         '$(MYROOTDIR)', [rfReplaceAll, rfIgnoreCase]);
     pList.SaveToFile(m_strTempPath + m_strAppAbName + '.reg');
     FreeAndNil(pList);
@@ -540,7 +540,7 @@ begin
     pSecList := TStringList.Create;
     // 先将Dro文件中的[]替换掉，否则会影响TIniFile类
     pSecList.LoadFromFile(strDroFile);
-    pSecList.Text := StringReplace(pSecList.Text, '[]', '[$(MYBLANK)]', [rfReplaceAll]);
+    pSecList.Text := StringReplaceNonAnsi(pSecList.Text, '[]', '[$(MYBLANK)]', [rfReplaceAll]);
     pSecList.SaveToFile(strDroFile);
 
     // 替换完毕，以Ini格式处理
@@ -646,7 +646,7 @@ begin
   pSecList := TStringList.Create;
   // 将AppBuilder安装目录字符串用$(MYROOTDIR)代替
   pSecList.LoadFromFile(strDroFile);
-  pSecList.Text := StringReplace(pSecList.Text, m_strRootDir,
+  pSecList.Text := StringReplaceNonAnsi(pSecList.Text, m_strRootDir,
       '$(MYROOTDIR)\', [rfReplaceAll, rfIgnoreCase]);
   pSecList.SaveToFile(strDroFile);
   FreeAndNil(pSecList);
@@ -813,7 +813,7 @@ begin
       pList.LoadFromFile(strFileName);
       strOrgPath := Copy(m_strRootDir, 1, LastDelimiter('\', m_strRootDir) - 1);
       strOrgPath := StringReplace(strOrgPath, '\', '\\', [rfReplaceAll]);
-      pList.Text := StringReplace(pList.Text, '$(MYROOTDIR)', strOrgPath,
+      pList.Text := StringReplaceNonAnsi(pList.Text, '$(MYROOTDIR)', strOrgPath,
         [rfReplaceAll, rfIgnoreCase]);
       pList.SaveToFile(m_strTempPath + m_strAppAbName + '.reg');
       FreeAndNil(pList);
@@ -886,9 +886,9 @@ begin
   pSecList := TStringList.Create;
   pSecList.LoadFromFile(strDroFile);
   // 将[$(MYBLANK)]替换成原来的空格
-  pSecList.Text := StringReplace(pSecList.Text, '[$(MYBLANK)]', '[]', [rfReplaceAll]);
+  pSecList.Text := StringReplaceNonAnsi(pSecList.Text, '[$(MYBLANK)]', '[]', [rfReplaceAll]);
   // 将AppBuilder安装目录字符串用$(MYROOTDIR)代替
-  pSecList.Text := StringReplace(pSecList.Text, '$(MYROOTDIR)\', m_strRootDir,
+  pSecList.Text := StringReplaceNonAnsi(pSecList.Text, '$(MYROOTDIR)\', m_strRootDir,
       [rfReplaceAll, rfIgnoreCase]);
   pSecList.SaveToFile(strDroFile);
   FreeAndNil(pSecList);
