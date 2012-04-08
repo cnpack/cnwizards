@@ -1632,6 +1632,31 @@ begin
                   CDataEndPos := Length(Text) - Length(XeCodeTemplate_cdataend) + 1;
                   if Pos(XeCodeTemplate_cdataend, Text) = CDataEndPos then
                     Text := Copy(Text, 1, CDataEndPos - 1);
+
+                  // Just replace these fields to empty
+                  Text := StringReplace(Text, '|variable|', '', [rfReplaceAll]);
+                  Text := StringReplace(Text, '|classtype|', '', [rfReplaceAll]);
+                  Text := StringReplace(Text, '|selected|', '', [rfReplaceAll]);
+                  Text := StringReplace(Text, '|expr|', '', [rfReplaceAll]);
+                  Text := StringReplace(Text, '|createparms|', '', [rfReplaceAll]);
+                  Text := StringReplace(Text, '|enumname|', '', [rfReplaceAll]);
+                  Text := StringReplace(Text, '|name|', '', [rfReplaceAll]);
+                  Text := StringReplace(Text, '|ident|', '', [rfReplaceAll]);
+                  Text := StringReplace(Text, '|collection|', '', [rfReplaceAll]);
+                  Text := StringReplace(Text, '|ancestor|', '', [rfReplaceAll]);
+                  Text := StringReplace(Text, '|end|', '', [rfReplaceAll]);
+                  Text := StringReplace(Text, '|type|', '', [rfReplaceAll]);
+                  Text := StringReplace(Text, '|last|', '', [rfReplaceAll]);
+                  Text := StringReplace(Text, '|collection|', '', [rfReplaceAll]);
+                  Text := StringReplace(Text, '|low|', '', [rfReplaceAll]);
+                  Text := StringReplace(Text, '|high|', '', [rfReplaceAll]);
+                  Text := StringReplace(Text, '|var|', '', [rfReplaceAll]);
+                  Text := StringReplace(Text, '|init|', '', [rfReplaceAll]);
+                  Text := StringReplace(Text, '|expression|', '', [rfReplaceAll]);
+                  Text := StringReplace(Text, '|cases|', '', [rfReplaceAll]);
+                  Text := StringReplace(Text, '|errormessage|', '', [rfReplaceAll]);
+                  Text := StringReplace(Text, '|exception|', '', [rfReplaceAll]);
+                  Text := StringReplace(Text, '|*|', '', [rfReplaceAll]);
                 end;
               end;
             end;
