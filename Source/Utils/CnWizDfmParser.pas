@@ -469,6 +469,7 @@ const
 var
   Pos: Integer;
   Signature: Integer;
+  BOM: array[1..3] of AnsiChar;
 begin
   Pos := Stream.Position;
   Signature := 0;
@@ -481,20 +482,34 @@ begin
   end
   else
   begin
-    Stream.ReadResHeader;
     Pos := Stream.Position;
     Signature := 0;
-    Stream.Read(Signature, SizeOf(Signature));
+    Stream.Read(BOM, SizeOf(BOM));
     Stream.Position := Pos;
-    if Signature = Integer(FilerSignature) then
+
+    if ((BOM[1] = #$FF) and (BOM[2] = #$FE)) or // UTF8/UTF 16
+      ((BOM[1] = #$EF) and (BOM[2] = #$BB) and (BOM[3] = #$BF)) then
     begin
-      Info.Format := dfBinary;
-      Result := ParseBinaryDfmStream(Stream, Info);
+      Info.Format := dfText;
+      Result := ParseTextDfmStream(Stream, Info); // Only ANSI yet
     end
     else
     begin
-      Info.Format := dfUnknown;
-      Result := False;
+      Stream.ReadResHeader;
+      Pos := Stream.Position;
+      Signature := 0;
+      Stream.Read(Signature, SizeOf(Signature));
+      Stream.Position := Pos;
+      if Signature = Integer(FilerSignature) then
+      begin
+        Info.Format := dfBinary;
+        Result := ParseBinaryDfmStream(Stream, Info);
+      end
+      else
+      begin
+        Info.Format := dfUnknown;
+        Result := False;
+      end;
     end;
   end;
 end;
