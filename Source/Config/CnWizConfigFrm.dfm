@@ -25,19 +25,6 @@ inherited CnWizConfigForm: TCnWizConfigForm
     object tsWizards: TTabSheet
       BorderWidth = 1
       Caption = '&Wizard Settings'
-      object lbWizards: TListBox
-        Left = 0
-        Top = 0
-        Width = 317
-        Height = 377
-        Align = alClient
-        ItemHeight = 45
-        Style = lbOwnerDrawFixed
-        TabOrder = 0
-        OnClick = lbWizardsClick
-        OnDblClick = lbWizardsDblClick
-        OnDrawItem = lbWizardsDrawItem
-      end
       object pnlWizard: TPanel
         Left = 317
         Top = 0
@@ -45,7 +32,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         Height = 377
         Align = alRight
         BevelOuter = bvNone
-        TabOrder = 1
+        TabOrder = 0
         object lblWizardName: TLabel
           Left = 48
           Top = 8
@@ -200,6 +187,44 @@ inherited CnWizConfigForm: TCnWizConfigForm
           OnClick = btnSortClick
         end
       end
+      object pnlListBox: TPanel
+        Left = 0
+        Top = 0
+        Width = 317
+        Height = 377
+        Align = alClient
+        BevelOuter = bvNone
+        TabOrder = 1
+        object lblSearchWizard: TLabel
+          Left = 8
+          Top = 8
+          Width = 24
+          Height = 13
+          Caption = '&Find:'
+          FocusControl = edtSearchWizard
+        end
+        object lbWizards: TListBox
+          Left = 0
+          Top = 32
+          Width = 317
+          Height = 345
+          Align = alBottom
+          ItemHeight = 45
+          Style = lbOwnerDrawFixed
+          TabOrder = 1
+          OnClick = lbWizardsClick
+          OnDblClick = lbWizardsDblClick
+          OnDrawItem = lbWizardsDrawItem
+        end
+        object edtSearchWizard: TEdit
+          Left = 58
+          Top = 6
+          Width = 257
+          Height = 21
+          TabOrder = 0
+          OnChange = edtSearchWizardChange
+        end
+      end
     end
     object tsPropEditor: TTabSheet
       BorderWidth = 1
@@ -212,7 +237,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         Height = 377
         Align = alRight
         BevelOuter = bvNone
-        TabOrder = 1
+        TabOrder = 0
         object lblDesignEditorName: TLabel
           Left = 48
           Top = 8
@@ -373,18 +398,43 @@ inherited CnWizConfigForm: TCnWizConfigForm
           OnClick = btnDesignEditorCustomizeClick
         end
       end
-      object lbDesignEditors: TListBox
+      object pnlEditors: TPanel
         Left = 0
         Top = 0
         Width = 317
         Height = 377
         Align = alClient
-        ItemHeight = 32
-        Style = lbOwnerDrawFixed
-        TabOrder = 0
-        OnClick = lbDesignEditorsClick
-        OnDblClick = lbDesignEditorsDblClick
-        OnDrawItem = lbDesignEditorsDrawItem
+        BevelOuter = bvNone
+        TabOrder = 1
+        object lblSearchEditor: TLabel
+          Left = 8
+          Top = 8
+          Width = 24
+          Height = 13
+          Caption = '&Find:'
+          FocusControl = edtSearchEditor
+        end
+        object lbDesignEditors: TListBox
+          Left = 0
+          Top = 32
+          Width = 317
+          Height = 345
+          Align = alBottom
+          ItemHeight = 32
+          Style = lbOwnerDrawFixed
+          TabOrder = 1
+          OnClick = lbDesignEditorsClick
+          OnDblClick = lbDesignEditorsDblClick
+          OnDrawItem = lbDesignEditorsDrawItem
+        end
+        object edtSearchEditor: TEdit
+          Left = 58
+          Top = 6
+          Width = 257
+          Height = 21
+          TabOrder = 0
+          OnChange = edtSearchEditorChange
+        end
       end
     end
     object tsEnvOption: TTabSheet

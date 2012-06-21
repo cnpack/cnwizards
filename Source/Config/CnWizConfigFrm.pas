@@ -29,7 +29,8 @@ unit CnWizConfigFrm;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：
+* 修改记录：2012.06.21 V1.5
+*               加入搜索框，允许按首字母搜索专家与属性组件编辑器
 *           2004.11.18 V1.4
 *               修正listbox自画不适合120DPI的小问题 (shenloqi)
 *           2003.06.25 V1.3
@@ -50,7 +51,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   Menus, ExtCtrls, ComCtrls, ToolWin, StdCtrls, CnDesignEditor, CnWizMultiLang,
-  CnDesignEditorConsts, ImgList, Buttons;
+  CnWizClasses, CnDesignEditorConsts, ImgList, Buttons;
 
 type
 
@@ -67,7 +68,6 @@ type
     btnOK: TButton;
     btnCancel: TButton;
     tsWizards: TTabSheet;
-    lbWizards: TListBox;
     pnlWizard: TPanel;
     lblWizardName: TLabel;
     bvlWizard: TBevel;
@@ -107,7 +107,6 @@ type
     Label18: TLabel;
     cbDesignEditorActive: TCheckBox;
     btnDesignEditorConfig: TButton;
-    lbDesignEditors: TListBox;
     imgIcon: TImage;
     Image1: TImage;
     dlgSaveActionList: TSaveDialog;
@@ -124,6 +123,14 @@ type
     btnUserDir: TSpeedButton;
     chkFixThreadLocale: TCheckBox;
     chkUseOneCPUCore: TCheckBox;
+    pnlListBox: TPanel;
+    lbWizards: TListBox;
+    lblSearchWizard: TLabel;
+    edtSearchWizard: TEdit;
+    pnlEditors: TPanel;
+    lbDesignEditors: TListBox;
+    edtSearchEditor: TEdit;
+    lblSearchEditor: TLabel;
     procedure lbWizardsDrawItem(Control: TWinControl; Index: Integer;
       Rect: TRect; State: TOwnerDrawState);
     procedure FormCreate(Sender: TObject);
@@ -151,12 +158,16 @@ type
     procedure btnSortClick(Sender: TObject);
     procedure btnDesignEditorCustomizeClick(Sender: TObject);
     procedure btnUserDirClick(Sender: TObject);
+    procedure edtSearchWizardChange(Sender: TObject);
+    procedure edtSearchEditorChange(Sender: TObject);
   private
     { Private declarations }
     FShortCuts: array of TShortCut;
     FActives: array of Boolean;
     FEditorActives: array of Boolean;
     FDrawTextHeight: Integer;
+    function CalcSelectedWizardIndex(Wizard: TCnBaseWizard = nil): Integer;
+    function CalcSelectedEditorIndex(Editor: TCnDesignEditorInfo = nil): Integer;
   protected
     function GetHelpTopic: string; override;
   public
@@ -169,7 +180,8 @@ procedure ShowCnWizConfigForm(AIcon: TIcon = nil);
 implementation
 
 uses
-  CnWizManager, CnWizClasses, CnCommon, CnWizConsts, CnWizShortCut, CnWizOptions,
+  CnDebug,
+  CnWizManager, CnCommon, CnWizConsts, CnWizShortCut, CnWizOptions,
   CnWizCommentFrm, CnWizUtils, CnWizUpgradeFrm, CnWizIdeUtils, CnWizMenuSortFrm;
 
 const
@@ -350,13 +362,14 @@ var
   ARect: TRect;
   R: TRect;
   Wizard: TCnBaseWizard;
-  x, y: Integer;
+  Idx, x, y: Integer;
   Bmp: TBitmap;
   EnableIndex, EnableIconMargin: Integer;
 begin
   if not (Control is TListBox) then Exit;
   ListBox := TListBox(Control);
   Wizard := TCnBaseWizard(ListBox.Items.Objects[Index]);
+  Idx := CalcSelectedWizardIndex(Wizard);
 
   // 创建临时位图以消除闪烁
   Bmp := TBitmap.Create;
@@ -384,7 +397,7 @@ begin
       Canvas.Brush.Color := csSelectedColor;
       Canvas.Font.Color := clBlue;
     end
-    else if FActives[Index] then
+    else if FActives[Idx] then
     begin
       Canvas.Brush.Color := csNormalColor;
       Canvas.Font.Color := clBlack;
@@ -402,18 +415,18 @@ begin
     y := R.Top + 2;
     Canvas.TextOut(x, y, SCnWizardNameStr + Wizard.WizardName);
     Inc(y, FDrawTextHeight);
-    if FActives[Index] then
+    if FActives[Idx] then
       Canvas.TextOut(x, y, SCnWizardStateStr + SCnWizardActiveStr)
     else
       Canvas.TextOut(x, y, SCnWizardStateStr + SCnWizardDisActiveStr);
     Inc(y, FDrawTextHeight);
-    Canvas.TextOut(x, y, SCnWizardShortCutStr + ShortCutToText(FShortCuts[Index]));
+    Canvas.TextOut(x, y, SCnWizardShortCutStr + ShortCutToText(FShortCuts[Idx]));
 
     BitBlt(ListBox.Canvas.Handle, Rect.Left, Rect.Top, Bmp.Width, Bmp.Height,
       Canvas.Handle, 0, 0, SRCCOPY);
 
     // 画勾叉图标
-    if FActives[Index] then
+    if FActives[Idx] then
       EnableIndex := 0
     else
       EnableIndex := 1;
@@ -433,23 +446,32 @@ procedure TCnWizConfigForm.lbWizardsClick(Sender: TObject);
 var
   Wizard: TCnBaseWizard;
   AName, Author, Email, Comment: string;
+  Idx: Integer;
 begin
-  if lbWizards.ItemIndex < 0 then
+  if (lbWizards.Items.Count = 0) or (lbWizards.ItemIndex < 0) then
   begin
     btnConfig.Enabled := False;
+    imgIcon.Picture.Graphic := nil;
+    lblWizardName.Caption := '';
+    lblWizardAuthor.Caption := '';
+    lblWizardComment.Caption := '';
+    lblWizardKind.Caption := '';
+    HotKeyWizard.HotKey := 0;
+    
     Exit;
   end;
   Wizard := TCnBaseWizard(lbWizards.Items.Objects[lbWizards.ItemIndex]);
+  Idx := CalcSelectedWizardIndex(Wizard);
+
   imgIcon.Picture.Graphic := Wizard.Icon;
   Wizard.GetWizardInfo(AName, Author, Email, Comment);
   lblWizardName.Caption := AName;
   lblWizardAuthor.Caption := CnAuthorEmailToStr(Author, '');
   lblWizardComment.Caption := Comment;
-
   lblWizardKind.Caption := GetCnWizardTypeName(Wizard);
 
-  cbWizardActive.Checked := FActives[lbWizards.ItemIndex];
-  HotKeyWizard.HotKey := FShortCuts[lbWizards.ItemIndex];
+  cbWizardActive.Checked := FActives[Idx];
+  HotKeyWizard.HotKey := FShortCuts[Idx];
   HotKeyWizard.Visible := (Wizard is TCnActionWizard) and
     TCnActionWizard(Wizard).EnableShortCut;
   btnConfig.Enabled := Wizard.HasConfig and cbWizardActive.Checked;
@@ -464,21 +486,29 @@ end;
 
 // 处理热键
 procedure TCnWizConfigForm.HotKeyWizardExit(Sender: TObject);
+var
+  Idx: Integer;
 begin
-  if lbWizards.ItemIndex >= 0 then
-    FShortCuts[lbWizards.ItemIndex] := HotKeyWizard.HotKey;
+  Idx := CalcSelectedWizardIndex();
+  if Idx >= 0 then
+    FShortCuts[Idx] := HotKeyWizard.HotKey;
 end;
 
 // 设置专家活跃
 procedure TCnWizConfigForm.cbWizardActiveClick(Sender: TObject);
+var
+  Idx: Integer;
 begin
-  if lbWizards.ItemIndex >= 0 then
+  Idx := CalcSelectedWizardIndex();
+  if Idx >= 0 then
   begin
-    FActives[lbWizards.ItemIndex] := cbWizardActive.Checked;
+    FActives[Idx] := cbWizardActive.Checked;
     btnConfig.Enabled := cbWizardActive.Checked and
       TCnBaseWizard(lbWizards.Items.Objects[lbWizards.ItemIndex]).HasConfig;
     lbWizards.Refresh;
-  end;
+  end
+  else
+    btnConfig.Enabled := False;
 end;
 
 // 设置专家
@@ -504,13 +534,14 @@ var
   R: TRect;
   ARect: TRect;
   Info: TCnDesignEditorInfo;
-  x, y: Integer;
+  Idx, x, y: Integer;
   Bmp: TBitmap;
   EnableIndex, EnableIconMargin: Integer;
 begin
   if not (Control is TListBox) then Exit;
   ListBox := TListBox(Control);
   Info := TCnDesignEditorInfo(ListBox.Items.Objects[Index]);
+  Idx := CalcSelectedEditorIndex(Info);
 
   // 创建临时位图以消除闪烁
   Bmp := TBitmap.Create;
@@ -538,7 +569,7 @@ begin
       Canvas.Brush.Color := csSelectedColor;
       Canvas.Font.Color := clBlue;
     end
-    else if FEditorActives[Index] then
+    else if FEditorActives[Idx] then
     begin
       Canvas.Brush.Color := csNormalColor;
       Canvas.Font.Color := clBlack;
@@ -555,7 +586,7 @@ begin
     Canvas.TextOut(x, y, SCnDesignEditorNameStr + Info.Name);
     Inc(y, FDrawTextHeight);
 
-    if FEditorActives[Index] then
+    if FEditorActives[Idx] then
       Canvas.TextOut(x, y, SCnDesignEditorStateStr + SCnWizardActiveStr)
     else
       Canvas.TextOut(x, y, SCnDesignEditorStateStr + SCnWizardDisActiveStr);
@@ -564,7 +595,7 @@ begin
       Canvas.Handle, 0, 0, SRCCOPY);
 
     // 画勾叉图标
-    if FEditorActives[Index] then
+    if FEditorActives[Idx] then
       EnableIndex := 0
     else
       EnableIndex := 1;
@@ -582,10 +613,22 @@ end;
 procedure TCnWizConfigForm.lbDesignEditorsClick(Sender: TObject);
 var
   EditorInfo: TCnDesignEditorInfo;
+  Idx: Integer;
 begin
-  if lbDesignEditors.ItemIndex < 0 then Exit;
+  if (lbDesignEditors.Items.Count = 0) or (lbDesignEditors.ItemIndex < 0) then
+  begin
+    lblDesignEditorName.Caption := '';
+    lblDesignEditorAuthor.Caption := '';
+    lblDesignEditorComment.Caption := '';
+    lblDesignEditorKind.Caption := '';
+    btnDesignEditorConfig.Enabled := False;
+    btnDesignEditorCustomize.Enabled := False;
+    
+    Exit;
+  end;
 
   EditorInfo := TCnDesignEditorInfo(lbDesignEditors.Items.Objects[lbDesignEditors.ItemIndex]);
+  Idx := CalcSelectedEditorIndex(EditorInfo);
   with EditorInfo do
   begin
     lblDesignEditorName.Caption := Name;
@@ -597,7 +640,7 @@ begin
       lblDesignEditorKind.Caption := SCnComponentEditor
     else // 其它类型
       lblDesignEditorKind.Caption := '';
-    cbDesignEditorActive.Checked := FEditorActives[lbDesignEditors.ItemIndex];
+    cbDesignEditorActive.Checked := FEditorActives[Idx];
     btnDesignEditorConfig.Visible := HasConfig;
     btnDesignEditorConfig.Enabled := cbDesignEditorActive.Checked;
     btnDesignEditorCustomize.Visible := HasCustomize;
@@ -612,13 +655,18 @@ begin
 end;
 
 procedure TCnWizConfigForm.cbDesignEditorActiveClick(Sender: TObject);
+var
+  Idx: Integer;
 begin
-  if lbDesignEditors.ItemIndex >= 0 then
+  Idx := CalcSelectedEditorIndex();
+  if Idx >= 0 then
   begin
-    FEditorActives[lbDesignEditors.ItemIndex] := cbDesignEditorActive.Checked;
+    FEditorActives[Idx] := cbDesignEditorActive.Checked;
     btnDesignEditorConfig.Enabled := cbDesignEditorActive.Checked;
     lbDesignEditors.Refresh;
-  end;
+  end
+  else
+    btnDesignEditorConfig.Enabled := False;
 end;
 
 procedure TCnWizConfigForm.btnDesignEditorConfigClick(Sender: TObject);
@@ -746,6 +794,136 @@ begin
   ADir := edtUserDir.Text;
   if GetDirectory('', ADir) then
     edtUserDir.Text := ADir;
+end;
+
+procedure TCnWizConfigForm.edtSearchWizardChange(Sender: TObject);
+var
+  I: Integer;
+  Py: string;
+
+  function CanShowWizard(FilterText: string; Wizard: TCnBaseWizard): Boolean;
+  begin
+    if FilterText = '' then
+    begin
+      Result := True;
+      Exit;
+    end;
+    FilterText := LowerCase(FilterText);
+
+    if (Pos(FilterText, Wizard.WizardName) > 0)
+      or (Pos(FilterText, Wizard.GetIDStr) > 0)
+      or (Pos(FilterText, Wizard.GetAuthor) > 0) then
+      Result := True
+    else // 查找拼音首字母
+    begin
+      Py := LowerCase(GetHzPy(Wizard.WizardName));
+      Result := Pos(FilterText, Py) > 0;
+    end;
+  end;
+
+begin
+  lbWizards.Items.Clear;
+  for I := 0 to CnWizardMgr.WizardCount - 1 do
+  begin
+    if CanShowWizard(edtSearchWizard.Text, CnWizardMgr[I]) then
+      lbWizards.Items.AddObject(CnWizardMgr[I].WizardName, CnWizardMgr[I]);
+  end;
+  if lbWizards.Items.Count > 0 then
+    lbWizards.ItemIndex := 0;
+
+  lbWizardsClick(lbWizards);
+end;
+
+procedure TCnWizConfigForm.edtSearchEditorChange(Sender: TObject);
+var
+  I: Integer;
+  Py: string;
+
+  function CanShowEditor(FilterText: string; Editor: TCnPropEditorInfo): Boolean; overload;
+  begin
+    if FilterText = '' then
+    begin
+      Result := True;
+      Exit;
+    end;
+    FilterText := LowerCase(FilterText);
+
+    if (Pos(FilterText, Editor.Name) > 0)
+      or (Pos(FilterText, Editor.Author) > 0) then
+      Result := True
+    else // 查找拼音首字母
+    begin
+      Py := LowerCase(GetHzPy(Editor.Name));
+      Result := Pos(FilterText, Py) > 0;
+    end;
+  end;
+
+   function CanShowEditor(FilterText: string; Editor: TCnCompEditorInfo): Boolean; overload;
+  begin
+    if FilterText = '' then
+    begin
+      Result := True;
+      Exit;
+    end;
+    FilterText := LowerCase(FilterText);
+
+    if (Pos(FilterText, Editor.Name) > 0)
+      or (Pos(FilterText, Editor.Author) > 0) then
+      Result := True
+    else // 查找拼音首字母
+    begin
+      Py := LowerCase(GetHzPy(Editor.Name));
+      Result := Pos(FilterText, Py) > 0;
+    end;
+  end;
+
+begin
+  lbDesignEditors.Items.Clear;
+  for I := 0 to CnDesignEditorMgr.PropEditorCount - 1 do
+  begin
+    if CanShowEditor(edtSearchEditor.Text, CnDesignEditorMgr.PropEditors[I]) then
+      lbDesignEditors.Items.AddObject(CnDesignEditorMgr.PropEditors[I].Name,
+        CnDesignEditorMgr.PropEditors[I]);
+  end;
+
+  for I := 0 to CnDesignEditorMgr.CompEditorCount - 1 do
+  begin
+    if CanShowEditor(edtSearchEditor.Text, CnDesignEditorMgr.CompEditors[I]) then
+      lbDesignEditors.Items.AddObject(CnDesignEditorMgr.CompEditors[I].Name,
+        CnDesignEditorMgr.CompEditors[I]);
+  end;
+
+  if lbDesignEditors.Items.Count > 0 then
+    lbDesignEditors.ItemIndex := 0;
+  lbDesignEditorsClick(lbDesignEditors);
+end;
+
+function TCnWizConfigForm.CalcSelectedWizardIndex(Wizard: TCnBaseWizard): Integer;
+begin
+  Result := -1;
+  if Wizard = nil then
+    if lbWizards.ItemIndex >= 0 then
+      Wizard := TCnBaseWizard(lbWizards.Items.Objects[lbWizards.ItemIndex]);
+
+  if Wizard <> nil then
+    Result := CnWizardMgr.IndexOf(Wizard);
+end;
+
+function TCnWizConfigForm.CalcSelectedEditorIndex(Editor: TCnDesignEditorInfo): Integer;
+begin
+  Result := -1;
+  if Editor = nil then
+    if lbDesignEditors.ItemIndex >= 0 then
+      Editor := TCnDesignEditorInfo(lbDesignEditors.Items.Objects[lbDesignEditors.ItemIndex]);
+
+  if Editor <> nil then
+  begin
+    if Editor is TCnPropEditorInfo then
+      Result := CnDesignEditorMgr.IndexOfPropEditor(Editor as TCnPropEditorInfo)
+    else if Editor is TCnCompEditorInfo then
+      Result := CnDesignEditorMgr.PropEditorCount +
+        CnDesignEditorMgr.IndexOfCompEditor(Editor as TCnCompEditorInfo);
+  end;
 end;
 
 end.
