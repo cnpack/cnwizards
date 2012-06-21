@@ -180,7 +180,6 @@ procedure ShowCnWizConfigForm(AIcon: TIcon = nil);
 implementation
 
 uses
-  CnDebug,
   CnWizManager, CnCommon, CnWizConsts, CnWizShortCut, CnWizOptions,
   CnWizCommentFrm, CnWizUtils, CnWizUpgradeFrm, CnWizIdeUtils, CnWizMenuSortFrm;
 
