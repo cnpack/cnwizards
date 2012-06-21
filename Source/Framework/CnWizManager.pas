@@ -151,6 +151,8 @@ type
     {* 根据专家类名返回专家实例，如果找不到专家，返回为 nil}
     function WizardByClassName(AClassName: string): TCnBaseWizard;
     {* 根据专家类名字符串返回专家实例，如果找不到专家，返回为 nil}
+    function IndexOf(Wizard: TCnBaseWizard): Integer;
+    {* 根据专家实例查找其在专家列表中的索引号}
     property Menu: TMenuItem read FMenu;
     {* 插入到 IDE 主菜单中的菜单项}
     property WizardCount: Integer read GetWizardCount;
@@ -544,6 +546,20 @@ begin
       Exit;
     end;
   Result := nil;
+end;
+
+// 根据专家实例查找其在专家列表中的索引号
+function TCnWizardMgr.IndexOf(Wizard: TCnBaseWizard): Integer;
+var
+  I: Integer;
+begin
+  for I := 0 to WizardCount - 1 do
+    if Wizards[I] = Wizard then
+    begin
+      Result := I;
+      Exit;
+    end;
+  Result := -1;
 end;
 
 // 根据专家名称返回专家实例，如果找不到专家，返回为 nil
