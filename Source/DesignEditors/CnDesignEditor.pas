@@ -191,11 +191,12 @@ type
     function GetPropEditor(Index: Integer): TCnPropEditorInfo;
     function GetPropEditorByClass(AEditor: TPropertyEditorClass): TCnPropEditorInfo;
     function GetPropEditorActive(AEditor: TPropertyEditorClass): Boolean;
-    
+
     function GetCompEditorCount: Integer;
     function GetCompEditor(Index: Integer): TCnCompEditorInfo;
     function GetCompEditorByClass(AEditor: TComponentEditorClass): TCnCompEditorInfo;
     function GetCompEditorActive(AEditor: TComponentEditorClass): Boolean;
+
     procedure SetActive(const Value: Boolean);
   public
     constructor Create;
@@ -236,6 +237,11 @@ type
     {* 根据编辑器类取指定的属性编辑器信息 }
     property CompEditorActive[AEditor: TComponentEditorClass]: Boolean read GetCompEditorActive;
     {* 返回指定的编辑器是否有效 }
+
+    function IndexOfPropEditor(EditorInfo: TCnPropEditorInfo): Integer;
+    {* 根据属性编辑器Info查找其在属性列表中的索引号}
+    function IndexOfCompEditor(EditorInfo: TCnCompEditorInfo): Integer;
+    {* 根据属性编辑器Info查找其在属性列表中的索引号}
 
     property Active: Boolean read FActive write SetActive;
   end;
@@ -794,6 +800,34 @@ begin
     if FActive then
       Register;
   end;
+end;
+
+function TCnDesignEditorMgr.IndexOfCompEditor(
+  EditorInfo: TCnCompEditorInfo): Integer;
+var
+  I: Integer;
+begin
+  for I := 0 to CompEditorCount - 1 do
+    if FCompEditorList[I] = EditorInfo then
+    begin
+      Result := I;
+      Exit;
+    end;
+  Result := -1;
+end;
+
+function TCnDesignEditorMgr.IndexOfPropEditor(
+  EditorInfo: TCnPropEditorInfo): Integer;
+var
+  I: Integer;
+begin
+  for I := 0 to PropEditorCount - 1 do
+    if FPropEditorList[I] = EditorInfo then
+    begin
+      Result := I;
+      Exit;
+    end;
+  Result := -1;
 end;
 
 initialization
