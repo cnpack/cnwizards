@@ -29,7 +29,9 @@ unit CnEditorCollector;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2005.08.01 V1.0
+* 修改记录：2012.08.22 V1.1
+*               补上自动粘贴状态未保存的功能
+*           2005.08.01 V1.0
 *               创建单元，实现功能
 ================================================================================
 |</PRE>}
@@ -179,6 +181,7 @@ const
   csTabLabel = 'CurrPage';
   csFont = 'Font';
   csWordWrap = 'WordWrap';
+  csAutoPaste = 'AutoPaste';
 
 var
   FindStr, RepStr: string;
@@ -335,6 +338,10 @@ begin
       TabSet.TabIndex := 0;
     mmoEdit.Font := ReadFont('', csFont, mmoEdit.Font);
     mmoEdit.WordWrap := ReadBool('', csWordWrap, mmoEdit.WordWrap);
+    FAutoPaste := ReadBool('', csAutoPaste, False);
+    if FAutoPaste then
+      btnAutoPaste.Down := True;
+
     if mmoEdit.WordWrap then
       mmoEdit.ScrollBars := ssVertical
     else
@@ -359,6 +366,7 @@ begin
       WriteString('', csTabLabel, '');
     WriteFont('', csFont, mmoEdit.Font);
     WriteBool('', csWordWrap, mmoEdit.WordWrap);
+    WriteBool('', csAutoPaste, FAutoPaste);
   finally
     Free;
   end;
