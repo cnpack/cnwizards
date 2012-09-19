@@ -34,7 +34,9 @@ unit CnWizMenuAction;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2002.09.17 V1.0
+* 修改记录：2012.09.19 by shenloqi
+*               移植到Delphi XE3
+*           2002.09.17 V1.0
 *               创建单元，实现功能
 ================================================================================
 |</PRE>}
@@ -45,7 +47,7 @@ interface
 
 uses
   Windows, Messages, Classes, SysUtils, Graphics, Menus, Forms, ActnList, ToolsAPI, 
-  CnCommon, CnWizConsts, CnWizShortCut;
+  {$IFDEF DelphiXE3_UP}Actions,{$ENDIF} CnCommon, CnWizConsts, CnWizShortCut;
 
 type
 //==============================================================================
@@ -66,9 +68,10 @@ type
     FUpdating: Boolean;
     FLastUpdateTick: Cardinal;
     procedure SetInheritedShortCut;
-    procedure SetShortCut(const Value: TShortCut);
     function GetShortCut: TShortCut;
     procedure OnShortCut(Sender: TObject);
+{$IFDEF DelphiXE3_UP}protected{$ENDIF}
+    procedure SetShortCut({$IFNDEF DelphiXE3_UP}const{$ENDIF} Value: TShortCut); {$IFDEF DelphiXE3_UP}override;{$ENDIF}
   protected
     procedure Change; override;
     property WizShortCut: TCnWizShortCut read FWizShortCut;
@@ -307,9 +310,10 @@ begin
 end;
 
 // ShortCut 属性写方法
-procedure TCnWizAction.SetShortCut(const Value: TShortCut);
+procedure TCnWizAction.SetShortCut({$IFNDEF DelphiXE3_UP}const{$ENDIF} Value: TShortCut);
 begin
   Assert(Assigned(FWizShortCut));
+  {$IFDEF DelphiXE3_UP}inherited SetShortCut(Value);{$ENDIF}
   if FWizShortCut.ShortCut <> Value then
   begin
     FWizShortCut.ShortCut := Value;

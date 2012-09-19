@@ -29,7 +29,9 @@ unit CnScript_CnWizUtils;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7
 * 本 地 化：该窗体中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2006.12.31 V1.0
+* 修改记录：2012.09.19 by shenloqi
+*               移植到Delphi XE3
+*           2006.12.31 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -64,7 +66,8 @@ procedure SIRegister_CnWizUtils(CL: TPSPascalCompiler);
 begin
   CL.AddTypeS('TCnCompilerKind', '( ckDelphi, ckBCB )');
   CL.AddTypeS('TCnCompiler', '( cnDelphi5, cnDelphi6, cnDelphi7, cnDelphi8, cnDelphi9, '
-    + 'cnDelphi10, cnDelphi11, cnDelphi12, cnDelphi14, cnDelphi15, cnDelphi16, cnBCB5, cnBCB6 )');
+    + 'cnDelphi10, cnDelphi11, cnDelphi12, cnDelphi14, cnDelphi15, cnDelphi16, cnDelphi17, '
+    + 'cnBCB5, cnBCB6 )');
   CL.AddConstantN('Compiler', 'TCnCompiler').SetInt(Ord(Compiler));
   CL.AddConstantN('CompilerKind', 'TCnCompilerKind').SetInt(Ord(CompilerKind));
   CL.AddConstantN('CompilerName', 'String').SetString(CompilerName);
@@ -87,6 +90,7 @@ begin
   CL.AddConstantN('_DELPHI14', 'Boolean').SetUInt(Ord(_DELPHI14));
   CL.AddConstantN('_DELPHI15', 'Boolean').SetUInt(Ord(_DELPHI15));
   CL.AddConstantN('_DELPHI16', 'Boolean').SetUInt(Ord(_DELPHI16));
+  CL.AddConstantN('_DELPHI17', 'Boolean').SetUInt(Ord(_DELPHI17));
 
   CL.AddConstantN('_DELPHI1_UP', 'Boolean').SetUInt(Ord(_DELPHI1_UP));
   CL.AddConstantN('_DELPHI2_UP', 'Boolean').SetUInt(Ord(_DELPHI2_UP));
@@ -103,6 +107,7 @@ begin
   CL.AddConstantN('_DELPHI14_UP', 'Boolean').SetUInt(Ord(_DELPHI14_UP));
   CL.AddConstantN('_DELPHI15_UP', 'Boolean').SetUInt(Ord(_DELPHI15_UP));
   CL.AddConstantN('_DELPHI16_UP', 'Boolean').SetUInt(Ord(_DELPHI16_UP));
+  CL.AddConstantN('_DELPHI17_UP', 'Boolean').SetUInt(Ord(_DELPHI17_UP));
 
   CL.AddConstantN('_BCB1', 'Boolean').SetUInt(Ord(_BCB1));
   CL.AddConstantN('_BCB3', 'Boolean').SetUInt(Ord(_BCB3));
@@ -116,6 +121,7 @@ begin
   CL.AddConstantN('_BCB14', 'Boolean').SetUInt(Ord(_BCB14));
   CL.AddConstantN('_BCB15', 'Boolean').SetUInt(Ord(_BCB15));
   CL.AddConstantN('_BCB16', 'Boolean').SetUInt(Ord(_BCB16));
+  CL.AddConstantN('_BCB17', 'Boolean').SetUInt(Ord(_BCB17));
 
   CL.AddConstantN('_BCB1_UP', 'Boolean').SetUInt(Ord(_BCB1_UP));
   CL.AddConstantN('_BCB3_UP', 'Boolean').SetUInt(Ord(_BCB3_UP));
@@ -129,6 +135,7 @@ begin
   CL.AddConstantN('_BCB14_UP', 'Boolean').SetUInt(Ord(_BCB14_UP));
   CL.AddConstantN('_BCB15_UP', 'Boolean').SetUInt(Ord(_BCB15_UP));
   CL.AddConstantN('_BCB16_UP', 'Boolean').SetUInt(Ord(_BCB16_UP));
+  CL.AddConstantN('_BCB17_UP', 'Boolean').SetUInt(Ord(_BCB17_UP));
 
   CL.AddConstantN('_KYLIX1', 'Boolean').SetUInt(Ord(_KYLIX1));
   CL.AddConstantN('_KYLIX2', 'Boolean').SetUInt(Ord(_KYLIX2));
@@ -144,6 +151,7 @@ begin
   CL.AddConstantN('_BDS7', 'Boolean').SetUInt(Ord(_BDS7));
   CL.AddConstantN('_BDS8', 'Boolean').SetUInt(Ord(_BDS8));
   CL.AddConstantN('_BDS9', 'Boolean').SetUInt(Ord(_BDS9));
+  CL.AddConstantN('_BDS10', 'Boolean').SetUInt(Ord(_BDS10));
 
   CL.AddConstantN('_BDS2_UP', 'Boolean').SetUInt(Ord(_BDS2_UP));
   CL.AddConstantN('_BDS3_UP', 'Boolean').SetUInt(Ord(_BDS3_UP));
@@ -153,6 +161,7 @@ begin
   CL.AddConstantN('_BDS7_UP', 'Boolean').SetUInt(Ord(_BDS7_UP));
   CL.AddConstantN('_BDS8_UP', 'Boolean').SetUInt(Ord(_BDS8_UP));
   CL.AddConstantN('_BDS9_UP', 'Boolean').SetUInt(Ord(_BDS9_UP));
+  CL.AddConstantN('_BDS10_UP', 'Boolean').SetUInt(Ord(_BDS10_UP));
 
   CL.AddConstantN('_COMPILER1', 'Boolean').SetUInt(Ord(_COMPILER1));
   CL.AddConstantN('_COMPILER2', 'Boolean').SetUInt(Ord(_COMPILER2));
@@ -170,6 +179,7 @@ begin
   CL.AddConstantN('_COMPILER14', 'Boolean').SetUInt(Ord(_COMPILER14));
   CL.AddConstantN('_COMPILER15', 'Boolean').SetUInt(Ord(_COMPILER15));
   CL.AddConstantN('_COMPILER16', 'Boolean').SetUInt(Ord(_COMPILER16));
+  CL.AddConstantN('_COMPILER17', 'Boolean').SetUInt(Ord(_COMPILER17));
 
   CL.AddConstantN('_COMPILER1_UP', 'Boolean').SetUInt(Ord(_COMPILER1_UP));
   CL.AddConstantN('_COMPILER2_UP', 'Boolean').SetUInt(Ord(_COMPILER2_UP));
@@ -187,6 +197,7 @@ begin
   CL.AddConstantN('_COMPILER14_UP', 'Boolean').SetUInt(Ord(_COMPILER14_UP));
   CL.AddConstantN('_COMPILER15_UP', 'Boolean').SetUInt(Ord(_COMPILER15_UP));
   CL.AddConstantN('_COMPILER16_UP', 'Boolean').SetUInt(Ord(_COMPILER16_UP));
+  CL.AddConstantN('_COMPILER17_UP', 'Boolean').SetUInt(Ord(_COMPILER17_UP));
 
   CL.AddTypeS('TFormType', '( ftBinary, ftText, ftUnknown )');
   CL.AddTypeS('TCnCharSet', 'set of Char');

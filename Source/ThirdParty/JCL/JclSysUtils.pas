@@ -1205,7 +1205,11 @@ begin
 {$IFDEF VER230}
       C := SortFunc(List.List[I], Item);
 {$ELSE}
+  {$IFDEF VER240}
+      C := SortFunc(List.List[I], Item);
+  {$ELSE}
       C := SortFunc(List.List^[I], Item);
+  {$ENDIF}
 {$ENDIF}
       if C < 0 then
         L := I + 1

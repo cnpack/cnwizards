@@ -29,7 +29,9 @@ unit CnSrcEditorBlockTools;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2005.06.05
+* 修改记录：2012.09.19 by shenloqi
+*               移植到Delphi XE3
+*           2005.06.05
 *               LiuXiao 加入复制粘贴当前标识符的功能
 *           2004.12.25
 *               创建单元，从原 CnEditorEnhancements 移出
@@ -45,6 +47,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Dialogs, ToolsAPI,
   IniFiles, Forms, Menus, ActnList, Math,
+  {$IFDEF DelphiXE3_UP}Actions,{$ENDIF}
   CnCommon, CnWizUtils, CnWizIdeUtils, CnWizConsts, CnEditControlWrapper,
   CnWizFlatButton, CnConsts, CnWizNotifier, CnWizShortCut, CnPopupMenu,
   CnSrcEditorCodeWrap, CnSrcEditorGroupReplace, CnSrcEditorWebSearch;

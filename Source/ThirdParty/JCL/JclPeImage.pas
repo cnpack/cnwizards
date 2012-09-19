@@ -2310,7 +2310,11 @@ begin
 {$IFDEF VER230}
         List[I] := ExportItem;
 {$ELSE}
+  {$IFDEF VER240}
+        List[I] := ExportItem;
+  {$ELSE}
         List^[I] := ExportItem;
+  {$ENDIF}
 {$ENDIF}
         Inc(NameOrdinals);
         Inc(Names);

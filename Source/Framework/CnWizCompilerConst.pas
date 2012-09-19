@@ -29,7 +29,9 @@ unit CnWizCompilerConst;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2002.11.07 V1.0
+* 修改记录：2012.09.19 by shenloqi
+*               移植到 Delphi XE3
+*           2002.11.07 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -44,6 +46,7 @@ type
   TCnCompilerKind = (ckDelphi, ckBCB);
   TCnCompiler = (cnDelphi5, cnDelphi6, cnDelphi7, cnDelphi8, cnDelphi9,
     cnDelphi10, cnDelphi11, cnDelphi12, cnDelphi14, cnDelphi15, cnDelphi16,
+    cnDelphi17,
     cnBCB5, cnBCB6);
   TCnCompilers = set of TCnCompiler;
 
@@ -67,6 +70,7 @@ const
   _DELPHI14 = {$IFDEF DELPHI14}True{$ELSE}False{$ENDIF};
   _DELPHI15 = {$IFDEF DELPHI15}True{$ELSE}False{$ENDIF};
   _DELPHI16 = {$IFDEF DELPHI16}True{$ELSE}False{$ENDIF};
+  _DELPHI17 = {$IFDEF DELPHI17}True{$ELSE}False{$ENDIF};
 
   _DELPHI1_UP = {$IFDEF DELPHI1_UP}True{$ELSE}False{$ENDIF};
   _DELPHI2_UP = {$IFDEF DELPHI2_UP}True{$ELSE}False{$ENDIF};
@@ -83,6 +87,7 @@ const
   _DELPHI14_UP = {$IFDEF DELPHI14_UP}True{$ELSE}False{$ENDIF};
   _DELPHI15_UP = {$IFDEF DELPHI15_UP}True{$ELSE}False{$ENDIF};
   _DELPHI16_UP = {$IFDEF DELPHI16_UP}True{$ELSE}False{$ENDIF};
+  _DELPHI17_UP = {$IFDEF DELPHI17_UP}True{$ELSE}False{$ENDIF};
 
   _BCB1 = {$IFDEF BCB1}True{$ELSE}False{$ENDIF};
   _BCB3 = {$IFDEF BCB3}True{$ELSE}False{$ENDIF};
@@ -96,6 +101,7 @@ const
   _BCB14 = {$IFDEF BCB14}True{$ELSE}False{$ENDIF};
   _BCB15 = {$IFDEF BCB15}True{$ELSE}False{$ENDIF};
   _BCB16 = {$IFDEF BCB16}True{$ELSE}False{$ENDIF};
+  _BCB17 = {$IFDEF BCB17}True{$ELSE}False{$ENDIF};
 
   _BCB1_UP = {$IFDEF BCB1_UP}True{$ELSE}False{$ENDIF};
   _BCB3_UP = {$IFDEF BCB3_UP}True{$ELSE}False{$ENDIF};
@@ -109,6 +115,7 @@ const
   _BCB14_UP = {$IFDEF BCB14_UP}True{$ELSE}False{$ENDIF};
   _BCB15_UP = {$IFDEF BCB15_UP}True{$ELSE}False{$ENDIF};
   _BCB16_UP = {$IFDEF BCB16_UP}True{$ELSE}False{$ENDIF};
+  _BCB17_UP = {$IFDEF BCB17_UP}True{$ELSE}False{$ENDIF};
 
   _KYLIX1 = {$IFDEF KYLIX1}True{$ELSE}False{$ENDIF};
   _KYLIX2 = {$IFDEF KYLIX2}True{$ELSE}False{$ENDIF};
@@ -126,6 +133,7 @@ const
   _BDS7 = {$IFDEF BDS7}True{$ELSE}False{$ENDIF};
   _BDS8 = {$IFDEF BDS8}True{$ELSE}False{$ENDIF};
   _BDS9 = {$IFDEF BDS9}True{$ELSE}False{$ENDIF};
+  _BDS10 = {$IFDEF BDS10}True{$ELSE}False{$ENDIF};
 
   _BDS2_UP = {$IFDEF BDS2_UP}True{$ELSE}False{$ENDIF};
   _BDS3_UP = {$IFDEF BDS3_UP}True{$ELSE}False{$ENDIF};
@@ -135,6 +143,7 @@ const
   _BDS7_UP = {$IFDEF BDS7_UP}True{$ELSE}False{$ENDIF};
   _BDS8_UP = {$IFDEF BDS8_UP}True{$ELSE}False{$ENDIF};
   _BDS9_UP = {$IFDEF BDS9_UP}True{$ELSE}False{$ENDIF};
+  _BDS10_UP = {$IFDEF BDS10_UP}True{$ELSE}False{$ENDIF};
 
   _COMPILER1 = {$IFDEF COMPILER1}True{$ELSE}False{$ENDIF};
   _COMPILER2 = {$IFDEF COMPILER2}True{$ELSE}False{$ENDIF};
@@ -152,6 +161,7 @@ const
   _COMPILER14 = {$IFDEF COMPILER14}True{$ELSE}False{$ENDIF};
   _COMPILER15 = {$IFDEF COMPILER15}True{$ELSE}False{$ENDIF};
   _COMPILER16 = {$IFDEF COMPILER16}True{$ELSE}False{$ENDIF};
+  _COMPILER17 = {$IFDEF COMPILER17}True{$ELSE}False{$ENDIF};
 
   _COMPILER1_UP = {$IFDEF COMPILER1_UP}True{$ELSE}False{$ENDIF};
   _COMPILER2_UP = {$IFDEF COMPILER2_UP}True{$ELSE}False{$ENDIF};
@@ -169,6 +179,7 @@ const
   _COMPILER14_UP = {$IFDEF COMPILER14_UP}True{$ELSE}False{$ENDIF};
   _COMPILER15_UP = {$IFDEF COMPILER15_UP}True{$ELSE}False{$ENDIF};
   _COMPILER16_UP = {$IFDEF COMPILER16_UP}True{$ELSE}False{$ENDIF};
+  _COMPILER17_UP = {$IFDEF COMPILER17_UP}True{$ELSE}False{$ENDIF};
 
 {$IFDEF DELPHI5}
   Compiler: TCnCompiler = cnDelphi5;
@@ -231,24 +242,31 @@ const
                     CompilerShortName = 'D15';
                   {$ELSE}
                     {$IFDEF DELPHI16}
-                      Compiler: TCnCompiler = cnDelphi15;
+                      Compiler: TCnCompiler = cnDelphi16;
                       CompilerKind: TCnCompilerKind = ckDelphi;
                       CompilerName = 'RAD Studio 2012';
                       CompilerShortName = 'D16';
                     {$ELSE}
-                      {$IFDEF BCB5}
-                        Compiler: TCnCompiler = cnBCB5;
-                        CompilerKind: TCnCompilerKind = ckBCB;
-                        CompilerName = 'C++BUILDER 5';
-                        CompilerShortName = 'CB5';
+                      {$IFDEF DELPHI17}
+                        Compiler: TCnCompiler = cnDelphi17;
+                        CompilerKind: TCnCompilerKind = ckDelphi;
+                        CompilerName = 'RAD Studio 2013';
+                        CompilerShortName = 'D17';
                       {$ELSE}
-                        {$IFDEF BCB6}
-                          Compiler: TCnCompiler = cnBCB6;
+                        {$IFDEF BCB5}
+                          Compiler: TCnCompiler = cnBCB5;
                           CompilerKind: TCnCompilerKind = ckBCB;
-                          CompilerName = 'C++BUILDER 6';
-                          CompilerShortName = 'CB6';
+                          CompilerName = 'C++BUILDER 5';
+                          CompilerShortName = 'CB5';
                         {$ELSE}
-                          Unknow Compiler;
+                          {$IFDEF BCB6}
+                            Compiler: TCnCompiler = cnBCB6;
+                            CompilerKind: TCnCompilerKind = ckBCB;
+                            CompilerName = 'C++BUILDER 6';
+                            CompilerShortName = 'CB6';
+                          {$ELSE}
+                            Unknow Compiler;
+                          {$ENDIF}
                         {$ENDIF}
                       {$ENDIF}
                     {$ENDIF}
@@ -352,9 +370,16 @@ const
 {$IFDEF COMPILER16}
   CorIdeLibName = 'coreide160.bpl';
   DphIdeLibName = 'delphicoreide160.bpl';
-  dccLibName = 'dcc160.dll';
+  dccLibName = 'dcc32160.dll';
   {$DEFINE LibNamesDefined}
 {$ENDIF COMPILER16}
+
+{$IFDEF COMPILER17}
+  CorIdeLibName = 'coreide170.bpl';
+  DphIdeLibName = 'delphicoreide170.bpl';
+  dccLibName = 'dcc32170.dll';
+  {$DEFINE LibNamesDefined}
+{$ENDIF COMPILER17}
 
 implementation
 

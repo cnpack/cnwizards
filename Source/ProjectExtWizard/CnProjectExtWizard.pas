@@ -30,7 +30,9 @@ unit CnProjectExtWizard;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2005.05.10
+* 修改记录：2012.09.19 by shenloqi
+*               移植到Delphi XE3
+*           2005.05.10
 *               Alan 新增工程目录创建器
 *           2005.05.03
 *               hubdog 将大部分的ExploreDir调用改成ExploreFile调用
@@ -74,6 +76,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, Dialogs, ActnList,
   ToolsAPI, IniFiles, ShellAPI, Menus, FileCtrl, {$IFDEF BDS} Variants, {$ENDIF}
+  {$IFDEF DelphiXE3_UP}Actions,{$ENDIF}
   CnCommon, CnWizClasses, CnWizUtils, CnConsts, CnWizConsts, CnProjectViewUnitsFrm,
   CnProjectViewFormsFrm, CnProjectListUsedFrm, CnProjectDelTempFrm, CnIni,
   CnWizCompilerConst, CnProjectBackupFrm, CnProjectDirBuilderFrm, CnWizMethodHook;

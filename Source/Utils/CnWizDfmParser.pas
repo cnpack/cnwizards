@@ -29,7 +29,9 @@ unit CnWizDfmParser;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2005.03.23 V1.0
+* 修改记录：2012.09.19 by shenloqi
+*               移植到Delphi XE3
+*           2005.03.23 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -288,14 +290,14 @@ var
 begin
   try
     Parser := TParser.Create(Stream);
-    SaveSeparator := DecimalSeparator;
-    DecimalSeparator := '.';
+    SaveSeparator := {$IFDEF DelphiXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator;
+    {$IFDEF DelphiXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := '.';
     try
       PropCount := 0;
       ParseObject;
       Result := True;
     finally
-      DecimalSeparator := SaveSeparator;
+      {$IFDEF DelphiXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := SaveSeparator;
       Parser.Free;
     end;
   except
@@ -447,15 +449,15 @@ var
 begin
   try
     Reader := TReader.Create(Stream, 4096);
-    SaveSeparator := DecimalSeparator;
-    DecimalSeparator := '.';
+    SaveSeparator := {$IFDEF DelphiXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator;
+    {$IFDEF DelphiXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := '.';
     try
       PropCount := 0;
       Reader.ReadSignature;
       ParseObject;
       Result := True;
     finally
-      DecimalSeparator := SaveSeparator;
+      {$IFDEF DelphiXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := SaveSeparator;
       Reader.Free;
     end;
   except

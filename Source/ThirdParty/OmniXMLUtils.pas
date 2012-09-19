@@ -655,7 +655,7 @@ function XMLStrToReal(nodeValue: WideString; var value: real): boolean;
 begin
   try
     value := StrToFloat(StringReplace(nodeValue,DEFAULT_DECIMALSEPARATOR,
-      DecimalSeparator,[rfReplaceAll]));
+      {$IFDEF DelphiXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator,[rfReplaceAll]));
     Result := true;
   except
     on EConvertError do
@@ -1031,7 +1031,7 @@ end; { GetNodeAttrTime }
 function XMLRealToStr(value: real): WideString;
 begin
   Result := StringReplace(FloatToStr(value),
-    DecimalSeparator,DEFAULT_DECIMALSEPARATOR,[rfReplaceAll]);
+    {$IFDEF DelphiXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator,DEFAULT_DECIMALSEPARATOR,[rfReplaceAll]);
 end; { XMLRealToStr }
 
 function XMLIntToStr(value: integer): WideString;

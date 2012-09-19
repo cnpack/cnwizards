@@ -29,7 +29,9 @@ unit CnWizConfigFrm;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2012.06.21 V1.5
+* 修改记录：2012.09.19 by shenloqi
+*               移植到Delphi XE3
+*           2012.06.21 V1.5
 *               加入搜索框，允许按首字母搜索专家与属性组件编辑器
 *           2004.11.18 V1.4
 *               修正listbox自画不适合120DPI的小问题 (shenloqi)
@@ -815,7 +817,11 @@ var
       Result := True
     else // 查找拼音首字母
     begin
+{$IFDEF DelphiXE3_UP}
+      Py := LowerCase(String(GetHzPy(AnsiString(Wizard.WizardName))));
+{$ELSE}
       Py := LowerCase(GetHzPy(Wizard.WizardName));
+{$ENDIF DelphiXE3_UP}
       Result := Pos(FilterText, Py) > 0;
     end;
   end;
@@ -852,7 +858,11 @@ var
       Result := True
     else // 查找拼音首字母
     begin
+{$IFDEF DelphiXE3_UP}
+      Py := LowerCase(String(GetHzPy(AnsiString(Editor.Name))));
+{$ELSE}
       Py := LowerCase(GetHzPy(Editor.Name));
+{$ENDIF DelphiXE3_UP}
       Result := Pos(FilterText, Py) > 0;
     end;
   end;
@@ -871,7 +881,11 @@ var
       Result := True
     else // 查找拼音首字母
     begin
+{$IFDEF DelphiXE3_UP}
+      Py := LowerCase(String(GetHzPy(AnsiString(Editor.Name))));
+{$ELSE}
       Py := LowerCase(GetHzPy(Editor.Name));
+{$ENDIF DelphiXE3_UP}
       Result := Pos(FilterText, Py) > 0;
     end;
   end;

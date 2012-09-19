@@ -29,7 +29,9 @@ unit CnFormEnhancements;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2007.01.11 by 周劲羽
+* 修改记录：2012.09.19 by shenloqi
+*               移植到Delphi XE3
+*           2007.01.11 by 周劲羽
 *               不再使用 CnWizControlHook 单元，改用 CallWndProcRet Hook
 *               重新实现浮动面板的 Visible 属性，解决某些情况下错误显示的问题
 *           2004.12.03 by 周劲羽
@@ -66,7 +68,9 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, ToolsAPI, IniFiles,
   Forms, ExtCtrls, Menus, ComCtrls, StdCtrls, Contnrs, ActnList, Buttons, Math,
-  ImgList, Dialogs, CnCommon, CnWizUtils, CnWizNotifier, CnWizIdeUtils,
+  ImgList, Dialogs,
+  {$IFDEF DelphiXE3_UP}Actions,{$ENDIF}
+  CnCommon, CnWizUtils, CnWizNotifier, CnWizIdeUtils,
   CnWizConsts, CnConsts, CnWizClasses, CnWizOptions, CnFlatToolbarConfigFrm,
   CnWizManager, CnWizMultiLang, CnSpin, TypInfo, CnPopupMenu, CnDesignEditorUtils,
   CnWizIni;

@@ -39,7 +39,9 @@ unit CnFlatToolbarConfigFrm;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2003.05.02 V1.0
+* 修改记录：2012.09.19 by shenloqi
+*               移植到Delphi XE3
+*           2003.05.02 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -50,8 +52,9 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Menus,
-  StdCtrls, ExtCtrls, ComCtrls, ActnList, Buttons, CnSpin, CnWizUtils,
-  CnCommon, CnWizConsts, CnWizOptions, IniFiles, CnWizMultiLang;
+  StdCtrls, ExtCtrls, ComCtrls, ActnList, Buttons, IniFiles,
+  {$IFDEF DelphiXE3_UP}Actions,{$ENDIF}
+  CnSpin, CnWizUtils, CnCommon, CnWizConsts, CnWizOptions, CnWizMultiLang;
 
 const
   csOptions = 'Options';

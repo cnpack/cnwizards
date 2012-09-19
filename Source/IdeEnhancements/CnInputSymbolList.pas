@@ -30,7 +30,9 @@ unit CnInputSymbolList;
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2012.03.26
+* 修改记录：2012.09.19 by shenloqi
+*               移植到Delphi XE3
+*           2012.03.26
 *               增加对XE/XE2独有的XML格式的模板的支持，有部分内容兼容问题
 *           2004.11.05
 *               移植而来
@@ -1568,15 +1570,18 @@ var
   Sch: TSearchRec;
   Doc: IXMLDocument;
   Root, TemplateNode, CodeNode: IXmlElement;
-  I, C, CDataEndPos: Integer;
+  I, CDataEndPos: Integer;
   Text: string;
   Name: string;
   Desc: string;
+{$IFDEF DEBUG}
+  C: Integer;
+{$ENDIF}
 begin
   // 扫描指定目录下的 XML 文件，每个文件是一项输入列表
   Dir := GetScanDirectory();
-  C := 0;
 {$IFDEF DEBUG}
+  C := 0;
   CnDebugger.LogMsg('XECodeTemplateList Scan directory: ' + Dir);
 {$ENDIF}
   if FindFirst(Dir + '*.xml', faAnyfile, Sch) = 0 then
@@ -1661,7 +1666,9 @@ begin
               end;
             end;
 
+{$IFDEF DEBUG}
             Inc(C);
+{$ENDIF}
             if (Name <> '') and (Text <> '') then
               Add(Name, skTemplate, csTemplateScope, Desc, Text, True);
           end;
