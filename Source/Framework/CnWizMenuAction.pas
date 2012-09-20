@@ -69,9 +69,9 @@ type
     FLastUpdateTick: Cardinal;
     procedure SetInheritedShortCut;
     function GetShortCut: TShortCut;
+    procedure {$IFDEF DelphiXE3_UP}_CnSetShortCut{$ELSE}SetShortCut{$ENDIF}(const Value: TShortCut);
+    {* Delphi XE3引入了SetShortCut基方法，为避免同名带入的问题，故将此方法改名}
     procedure OnShortCut(Sender: TObject);
-{$IFDEF DelphiXE3_UP}protected{$ENDIF}
-    procedure SetShortCut({$IFNDEF DelphiXE3_UP}const{$ENDIF} Value: TShortCut); {$IFDEF DelphiXE3_UP}override;{$ENDIF}
   protected
     procedure Change; override;
     property WizShortCut: TCnWizShortCut read FWizShortCut;
@@ -88,7 +88,7 @@ type
     {* Action 命令字符串，用来唯一标识一个 Action，同时也是快捷键对象的名字}
     property Icon: TIcon read FIcon;
     {* Action 关联的图标，可在其它地方使用，但请不要更改图标内容}
-    property ShortCut: TShortCut read GetShortCut write SetShortCut;
+    property ShortCut: TShortCut read GetShortCut write {$IFDEF DelphiXE3_UP}_CnSetShortCut{$ELSE}SetShortCut{$ENDIF};
     {* Action 关联的快捷键}
   end;
 
@@ -310,10 +310,9 @@ begin
 end;
 
 // ShortCut 属性写方法
-procedure TCnWizAction.SetShortCut({$IFNDEF DelphiXE3_UP}const{$ENDIF} Value: TShortCut);
+procedure TCnWizAction.{$IFDEF DelphiXE3_UP}_CnSetShortCut{$ELSE}SetShortCut{$ENDIF}(const Value: TShortCut);
 begin
   Assert(Assigned(FWizShortCut));
-  {$IFDEF DelphiXE3_UP}inherited SetShortCut(Value);{$ENDIF}
   if FWizShortCut.ShortCut <> Value then
   begin
     FWizShortCut.ShortCut := Value;
