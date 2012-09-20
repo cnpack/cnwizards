@@ -39,7 +39,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Menus,
   Dialogs, StdCtrls, Buttons, ExtCtrls, ComCtrls,
-  CnCommon, CnMainUnit, CnSMRBplUtils, CnBaseUtils;
+  CnMainUnit, CnSMRBplUtils, CnBaseUtils;
 
 type
   TCnViewARFForm = class(TForm, IUIInitializable)
@@ -927,7 +927,7 @@ var
   idx: Integer;
   _s: string;
 begin
-  if _CnExtractFileExt(s) = '' then
+  if ExtractFileExt(s) = '' then
   begin
     _s := s + csDefaultPackageExt;
   end
