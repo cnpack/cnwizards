@@ -3760,7 +3760,7 @@ begin
   {$IFDEF CLR}
   Result := System.Char.IsDigit(C) or (C = '+') or (C = '-') or (C = DecimalSeparator);
   {$ELSE}
-  Result := ((StrCharTypes[C] and C1_DIGIT) <> 0) or (C = '+') or (C = '-') or (C = DecimalSeparator);
+  Result := ((StrCharTypes[C] and C1_DIGIT) <> 0) or (C = '+') or (C = '-') or (C = {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator);
   {$ENDIF CLR}
 end;
 
@@ -3769,7 +3769,7 @@ begin
   {$IFDEF CLR}
   Result := System.Char.IsDigit(C) or (C = DecimalSeparator);
   {$ELSE}
-  Result := ((StrCharTypes[C] and C1_DIGIT) <> 0) or (C = DecimalSeparator);
+  Result := ((StrCharTypes[C] and C1_DIGIT) <> 0) or (C = {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator);
   {$ENDIF CLR}
 end;
 
@@ -4618,8 +4618,8 @@ begin
   DecSep := Char(DecimalSeparator[1]);
   ThouSep := Char(ThousandSeparator[1]);
   {$ELSE}
-  DecSep := DecimalSeparator;
-  ThouSep := ThousandSeparator;
+  DecSep := {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator;
+  ThouSep := {$IFDEF VER240}FormatSettings.{$ENDIF}ThousandSeparator;
   {$ENDIF CLR}
   Temp := S;
   SwapSeparators := False;

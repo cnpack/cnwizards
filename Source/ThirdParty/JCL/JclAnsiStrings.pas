@@ -3147,12 +3147,12 @@ end;
 function CharIsNumberChar(const C: AnsiChar): Boolean;
 begin
   Result := ((AnsiCharTypes[C] and C1_DIGIT) <> 0) or
-    (C = AnsiSignMinus) or (C = AnsiSignPlus) or (Char(C) = DecimalSeparator);
+    (C = AnsiSignMinus) or (C = AnsiSignPlus) or (Char(C) = {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator);
 end;
 
 function CharIsNumber(const C: AnsiChar): Boolean;
 begin
-  Result := ((AnsiCharTypes[C] and C1_DIGIT) <> 0) or (Char(C) = DecimalSeparator);
+  Result := ((AnsiCharTypes[C] and C1_DIGIT) <> 0) or (Char(C) = {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator);
 end;
 
 function CharIsPrintable(const C: AnsiChar): Boolean;
@@ -3814,8 +3814,8 @@ var
   DecSep: AnsiChar;
   ThouSep: AnsiChar;
 begin
-  DecSep := AnsiChar(DecimalSeparator{$IFDEF CLR}[1]{$ENDIF CLR});
-  ThouSep := AnsiChar(ThousandSeparator{$IFDEF CLR}[1]{$ENDIF CLR});
+  DecSep := AnsiChar({$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator{$IFDEF CLR}[1]{$ENDIF CLR});
+  ThouSep := AnsiChar({$IFDEF VER240}FormatSettings.{$ENDIF}ThousandSeparator{$IFDEF CLR}[1]{$ENDIF CLR});
   Temp := S;
   SwapSeparators := False;
 

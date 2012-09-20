@@ -2004,8 +2004,8 @@ begin
   FSignChars[True] := '+';
   FPaddingChar := ' ';
   FMultiplier := #$D7;
-  FFractionalPartSeparator := DecimalSeparator{$IFDEF CLR}[1]{$ENDIF};
-  FDigitBlockSeparator := ThousandSeparator{$IFDEF CLR}[1]{$ENDIF};
+  FFractionalPartSeparator := {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator{$IFDEF CLR}[1]{$ENDIF};
+  FDigitBlockSeparator := {$IFDEF VER240}FormatSettings.{$ENDIF}ThousandSeparator{$IFDEF CLR}[1]{$ENDIF};
 end;
 
 procedure TJclNumericFormat.InvalidDigit(Digit: Char);

@@ -998,10 +998,10 @@ var
   OldSep: Char;
 begin
   RegGetDataType(RootKey, Key, Name, DataType);
-  OldSep := DecimalSeparator;
+  OldSep := {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator;
   if DataType in [REG_SZ, REG_EXPAND_SZ] then
     try
-      DecimalSeparator := '.';
+      {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator := '.';
       if RaiseException then
       begin
         RetValue := StrToFloat(RegReadString(RootKey, Key, Name));
@@ -1010,7 +1010,7 @@ begin
       else
         Result := TryStrToFloat(RegReadString(RootKey, Key, Name), RetValue);
     finally
-      DecimalSeparator := OldSep;
+      {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator := OldSep;
     end
   else
     Result := InternalGetData(RootKey, Key, Name, [REG_BINARY],
@@ -1039,10 +1039,10 @@ var
   OldSep: Char;
 begin
   RegGetDataType(RootKey, Key, Name, DataType);
-  OldSep := DecimalSeparator;
+  OldSep := {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator;
   if DataType in [REG_SZ, REG_EXPAND_SZ] then
     try
-      DecimalSeparator := '.';
+      {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator := '.';
       if RaiseException then
       begin
         RetValue := StrToFloat(RegReadString(RootKey, Key, Name));
@@ -1051,7 +1051,7 @@ begin
       else
         Result := TryStrToFloat(RegReadString(RootKey, Key, Name), RetValue);
     finally
-      DecimalSeparator := OldSep;
+      {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator := OldSep;
     end
   else
     Result := InternalGetData(RootKey, Key, Name, [REG_BINARY],
@@ -1080,10 +1080,10 @@ var
   OldSep: Char;
 begin
   RegGetDataType(RootKey, Key, Name, DataType);
-  OldSep := DecimalSeparator;
+  OldSep := {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator;
   if DataType in [REG_SZ, REG_EXPAND_SZ] then
     try
-      DecimalSeparator := '.';
+      {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator := '.';
       if RaiseException then
       begin
         RetValue := StrToFloat(RegReadString(RootKey, Key, Name));
@@ -1092,7 +1092,7 @@ begin
       else
         Result := TryStrToFloat(RegReadString(RootKey, Key, Name), RetValue);
     finally
-      DecimalSeparator := OldSep;
+      {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator := OldSep;
     end
   else
     Result := InternalGetData(RootKey, Key, Name, [REG_BINARY],
