@@ -1189,7 +1189,7 @@ begin
             Result.AreaKind := akEnd;
             Result.PosKind := pkUnknown;
           end
-          else if Lex.LastNoSpace in [tkIdentifier, tkPointerSymbol,
+          else if Lex.LastNoSpace in [tkIdentifier, tkPointerSymbol, {$IFDEF DelphiXE3_UP} tkString, {$ENDIF} // Delphi XE3 Supports function invoke on string
             tkSquareClose, tkRoundClose] then
           begin
             if not (Result.PosKind in [pkFieldDot, pkField]) then
