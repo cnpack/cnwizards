@@ -30,6 +30,8 @@ unit CnScript_ActnList;
 * 本 地 化：该窗体中的字符串支持本地化处理方式
 * 单元标识：$Id$
 * 修改记录：2006.12.29 V1.0
+*               XE3 下的 Action 换单元了，适应性更改。
+*           2006.12.29 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -40,6 +42,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, ActnList, ImgList,
+  {$IFDEF DELPHIXE3_UP} Actions, {$ENDIF}
   uPSComponent, uPSRuntime, uPSCompiler;
 
 type
@@ -290,7 +293,11 @@ end;
 
 procedure TContainedActionActionList_R(Self: TContainedAction; var T: TCustomActionList);
 begin
+{$IFDEF DELPHIXE3_UP}
+  T := Self.ActionList as TCustomActionList;
+{$ELSE}
   T := Self.ActionList;
+{$ENDIF}
 end;
 
 procedure RIRegister_TAction(CL: TPSRuntimeClassImporter);
