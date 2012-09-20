@@ -49,7 +49,7 @@ uses
   QDialogs,
   {$ENDIF}
   SysUtils, Classes,
-
+  CnCommon,
   AbConst, AbExcept, AbUtils, AbArcTyp, AbTarTyp, 
   AbDfBase, AbDfDec, AbDfEnc, AbVMStrm, AbBitBkt, AbSpanSt;
 
@@ -1125,7 +1125,7 @@ begin
   StoreOptions := StoreOptions + [soStripDrive, soStripPath];
   Result := '';
   if Value <> '' then
-    Result := ExtractFileName(Value);
+    Result := _CnExtractFileName(Value);
 end;
 
 function TAbGzipArchive.GetIsGzippedTar: Boolean;
@@ -1271,7 +1271,7 @@ begin
       OutGzHelp := TAbGzipStreamHelper.Create(NewStream);
 
       { create helper }
-      NewStream.SwapFileDirectory := ExtractFilePath(AbGetTempFile(FTempDir, False));
+      NewStream.SwapFileDirectory := _CnExtractFilePath(AbGetTempFile(FTempDir, False));
 
       {build new archive from existing archive}
       for i := 0 to pred(Count) do begin

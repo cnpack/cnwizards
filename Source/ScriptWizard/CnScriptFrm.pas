@@ -544,7 +544,7 @@ end;
 procedure TCnScriptForm.DemoFindCallBack(const FileName: string; const Info: TSearchRec;
   var Abort: Boolean);
 begin
-  FDemoFiles.Add(ExtractFileName(FileName));
+  FDemoFiles.Add(_CnExtractFileName(FileName));
 end;
 
 procedure TCnScriptForm.pmOpenPopup(Sender: TObject);

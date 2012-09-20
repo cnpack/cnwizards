@@ -44,7 +44,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  uPSComponent, uPSCompiler, uPSRuntime;
+  CnCommon, uPSComponent, uPSCompiler, uPSRuntime;
 
 type
 
@@ -262,7 +262,7 @@ function TCnScriptExec.FindFileInSearchPath(const OrgName, FileName: string;
     i := Pos('..\', ATail);
     while i > 0 do
     begin
-      AHead := ExtractFileDir(AHead);
+      AHead := _CnExtractFileDir(AHead);
       Delete(ATail, 1, 3);
       i := Pos('..\', ATail);
     end;
@@ -274,11 +274,11 @@ var
 begin
   Result := True;
 
-  OutName := LinkPath(ExtractFileDir(OrgName), FileName);
+  OutName := LinkPath(_CnExtractFileDir(OrgName), FileName);
   if FileExists(OutName) then
     Exit;
 
-  OutName := LinkPath(ExtractFileDir(ScripFile), FileName);
+  OutName := LinkPath(_CnExtractFileDir(ScripFile), FileName);
   if FileExists(OutName) then
     Exit;
 

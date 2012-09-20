@@ -95,7 +95,7 @@ var
 begin
   if FindFirst(FileName, faAnyFile, F) = 0 then
   begin
-    AName := ExtractFilePath(FileName) + (F.Name); // 取得真实的文件名
+    AName := _CnExtractFilePath(FileName) + (F.Name); // 取得真实的文件名
     FindClose(F);                                  // 因为用户输入的可能是全小写
     CnOtaOpenFile(AName);
     Result := True;
@@ -113,7 +113,7 @@ end;
 class procedure TCnEditorOpenFile.DoFindFile(const FileName: string;
   const Info: TSearchRec; var Abort: Boolean);
 begin
-  if SameFileName(ExtractFileName(FileName), SrcFile) then
+  if SameFileName(_CnExtractFileName(FileName), SrcFile) then
   begin
     DstFile := FileName;
     Found := True;

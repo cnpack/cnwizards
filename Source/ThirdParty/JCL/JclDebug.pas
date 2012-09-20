@@ -818,6 +818,7 @@ const
 implementation
 
 uses
+  CnCommon,
   {$IFDEF MSWINDOWS}
   JclRegistry,
   {$ENDIF MSWINDOWS}
@@ -1876,7 +1877,7 @@ var
   JDbgFileName: TFileName;
   Generator: TJclBinDebugGenerator;
 begin
-  JDbgFileName := ChangeFileExt(MapFileName, JclDbgFileExtension);
+  JDbgFileName := _CnChangeFileExt(MapFileName, JclDbgFileExtension);
   Generator := TJclBinDebugGenerator.Create(MapFileName, 0);
   try
     MapFileSize := Generator.Stream.Size;
@@ -2803,7 +2804,7 @@ function TJclDebugInfoMap.InitializeSource: Boolean;
 var
   MapFileName: TFileName;
 begin
-  MapFileName := ChangeFileExt(FileName, JclMapFileExtension);
+  MapFileName := _CnChangeFileExt(FileName, JclMapFileExtension);
   Result := FileExists(MapFileName);
   if Result then
     FScanner := TJclMapScanner.Create(MapFileName, Module);
@@ -2850,7 +2851,7 @@ begin
     FStream := TJclPeSectionStream.Create(Module, JclDbgDataResName)
   else
   begin
-    JdbgFileName := ChangeFileExt(FileName, JclDbgFileExtension);
+    JdbgFileName := _CnChangeFileExt(FileName, JclDbgFileExtension);
     Result := FileExists(JdbgFileName);
     if Result then
     begin
@@ -2966,7 +2967,7 @@ begin
           { Check if we have a valid address in an exported function. }
           if not IsAddressInThisExportedFunction(Addr, FModule + Items[I].Address) then
           begin
-            //Info.UnitName := '[' + AnsiLowerCase(ExtractFileName(GetModulePath(FModule))) + ']'
+            //Info.UnitName := '[' + AnsiLowerCase(_CnExtractFileName(GetModulePath(FModule))) + ']'
             Info.ProcedureName := Format(RsUnknownFunctionAt, [Info.ProcedureName]);
           end;
 
@@ -3490,7 +3491,7 @@ begin
       Result := OffsetStr + Result;
     end;
     if IncludeModuleName then
-      Insert(Format('{%-12s}', [ExtractFileName(GetModulePath(Module))]), Result, 11);
+      Insert(Format('{%-12s}', [_CnExtractFileName(GetModulePath(Module))]), Result, 11);
   end;
 end;
 

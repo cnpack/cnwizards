@@ -43,6 +43,7 @@ uses
   Windows,
 {$ENDIF MSWINDOWS }
   SysUtils, Classes,
+  CnCommon,
   AbUtils, AbVMStrm, AbSpanSt, AbExcept, AbArcTyp;
 
 const
@@ -1085,7 +1086,7 @@ begin
     System.Delete( Value, 1, 1 );
 
   if soStripPath in StoreOptions then
-    Value := ExtractFileName(Value);
+    Value := _CnExtractFileName(Value);
 
   if soRemoveDots in StoreOptions then
     AbStripDots(Value);
@@ -1133,7 +1134,7 @@ begin
     try {NewStream/OutTarHelp}
 
       { create helper }
-      NewStream.SwapFileDirectory := ExtractFilePath(AbGetTempFile(FTempDir, False));
+      NewStream.SwapFileDirectory := _CnExtractFilePath(AbGetTempFile(FTempDir, False));
 
       {build new archive from existing archive}
       for i := 0 to pred(Count) do begin

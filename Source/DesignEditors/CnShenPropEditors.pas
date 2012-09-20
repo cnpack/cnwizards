@@ -47,7 +47,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, ToolsAPI, StdCtrls, Graphics, Controls, Buttons,
-  Menus, Forms, Grids, Dialogs, TypInfo,
+  Menus, Forms, Grids, Dialogs, TypInfo, CnCommon,
   CnMultiLineEditorFrm, CnHintEditorFrm, CnSizeConstraintsEditorFrm,
 {$IFDEF COMPILER6_UP}
   DesignIntf, DesignEditors, VCLEditors,
@@ -515,7 +515,7 @@ begin
       Title := S;
     FileName := GetStrValue();
     if Trim(GetStrValue()) <> '' then
-      InitialDir := ExtractFilePath(GetStrValue());
+      InitialDir := _CnExtractFilePath(GetStrValue());
     if Execute then
       SetStrValue(FileName);
   finally

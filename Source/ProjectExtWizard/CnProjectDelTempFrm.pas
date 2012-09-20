@@ -258,7 +258,7 @@ var
         (VarType(DirectoryVariant) = varOleStr) then
       begin
         Directory := ReplaceToActualPath(DirectoryVariant);
-        ProjectDir := ExtractFileDir(Project.FileName);
+        ProjectDir := _CnExtractFileDir(Project.FileName);
         if Trim(Directory) <> '' then
         begin
           Directory := LinkPath(ProjectDir, Directory);
@@ -274,12 +274,12 @@ var
     ModuleInfo: IOTAModuleInfo;
     TempPathString: string;
   begin
-    AddPathToStrings(ExtractFileDir(Project.FileName));
+    AddPathToStrings(_CnExtractFileDir(Project.FileName));
     for I := 0 to Project.GetModuleCount - 1 do
     begin
       ModuleInfo := Project.GetModule(I);
       Assert(Assigned(ModuleInfo));
-      TempPathString := ExtractFileDir(ModuleInfo.FileName);
+      TempPathString := _CnExtractFileDir(ModuleInfo.FileName);
       AddPathToStrings(TempPathString);
     end;
     if NeedBin then
@@ -531,16 +531,16 @@ begin
     begin
       if chklstFileList.Items.IndexOf(FileName) < 0 then
       begin
-        Ext := UpperCase(ExtractFileExt(FileName));
+        Ext := UpperCase(_CnExtractFileExt(FileName));
         if FCheckSource and ((Ext = '.DCU') or (Ext = '.OBJ')) then
         begin
           ToDelete := False;
           // 如果待清理的目标文件无对应源文件，则不删除
-          if FileExists(ChangeFileExt(FileName, '.pas')) then
+          if FileExists(_CnChangeFileExt(FileName, '.pas')) then
             ToDelete := True
-          else if FileExists(ChangeFileExt(FileName, '.cpp')) then
+          else if FileExists(_CnChangeFileExt(FileName, '.cpp')) then
             ToDelete := True
-          else if FileExists(ChangeFileExt(FileName, '.c')) then
+          else if FileExists(_CnChangeFileExt(FileName, '.c')) then
             ToDelete := True;
         end;
 

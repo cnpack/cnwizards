@@ -150,7 +150,7 @@ var
 begin
   Application.Title := Caption;
   FRegPath := MakePath(SCnPackRegPath);
-  FRegFile := MakePath(ExtractFilePath(Application.ExeName)) + SCnWizardsReg;
+  FRegFile := MakePath(_CnExtractFilePath(Application.ExeName)) + SCnWizardsReg;
   FFileList := TStringList.Create;
   FParmNoMsg := (FindCmdLineSwitch('n', ['-', '/'], True) or
     FindCmdLineSwitch('NoMsg', ['-', '/'], True));
@@ -291,7 +291,7 @@ begin
   begin
     BackupStream := nil; Writer := nil; AStream := nil;
     try
-      F := ChangeFileExt(FileName, '.cnw');
+      F := _CnChangeFileExt(FileName, '.cnw');
       if not FileExists(f) then
         BackupStream := TFileStream.Create(F, fmCreate)
       else
@@ -303,7 +303,7 @@ begin
       AStream := TMemoryStream.Create;
       for i := 0 to Self.FFileList.Count - 1 do
       begin
-        Writer.WriteStr(ExtractFileName(FFileList.Strings[i]));
+        Writer.WriteStr(_CnExtractFileName(FFileList.Strings[i]));
         if FileExists(FFileList.Strings[i]) then
         begin
           AStream.LoadFromFile(FFileList.Strings[i]);
@@ -422,7 +422,7 @@ begin
   if FindWindow('TAppBuilder', nil) = 0 then
     Exit;
     
-  Path := ExtractFilePath(Application.ExeName);
+  Path := _CnExtractFilePath(Application.ExeName);
   FR := FindFirst(Path + 'CnWizard*.dll', faAnyFile - faVolumeID, Info);
   try
     while FR = 0 do
@@ -448,7 +448,7 @@ var
 begin
   if CnLanguageManager <> nil then
   begin
-    CnHashLangFileStorage.LanguagePath := ExtractFilePath(ParamStr(0)) + csLangDir;
+    CnHashLangFileStorage.LanguagePath := _CnExtractFilePath(ParamStr(0)) + csLangDir;
     LangID := GetWizardsLanguageID;
 
     for I := 0 to CnLanguageManager.LanguageStorage.LanguageCount - 1 do

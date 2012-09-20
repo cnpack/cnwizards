@@ -629,6 +629,7 @@ uses
   {$ENDIF}
   {$ENDIF}
   {$ENDIF}
+  CnCommon,
   AbConst,
   AbExcept,
   AbVMStrm,
@@ -1981,7 +1982,7 @@ begin
     System.Delete( Value, 1, 1 );
 
   if soStripPath in StoreOptions then begin
-    Value := ExtractFileName( Value );
+    Value := _CnExtractFileName( Value );
   end;
 
   if soRemoveDots in StoreOptions then
@@ -2409,7 +2410,7 @@ begin
   FStream.Position := 0;
 
   CompressedDataStream := TAbVirtualMemoryStream.Create;
-  CompressedDataStream.SwapFileDirectory := ExtractFilePath(AbGetTempFile(FTempDir, False));
+  CompressedDataStream.SwapFileDirectory := _CnExtractFilePath(AbGetTempFile(FTempDir, False));
 
 //  CDStream := TAbVirtualMemoryStream.Create;
 //  CDStream.SwapFileDirectory := CompressedDataStream.SwapFileDirectory;
@@ -2535,7 +2536,7 @@ begin
   {init new zip archive stream}
   NewStream := TAbVirtualMemoryStream.Create;
   try {NewStream}
-    NewStream.SwapFileDirectory := ExtractFilePath(AbGetTempFile(FTempDir, False));
+    NewStream.SwapFileDirectory := _CnExtractFilePath(AbGetTempFile(FTempDir, False));
 
     {copy the executable stub over to the output}
     if IsExecutable then

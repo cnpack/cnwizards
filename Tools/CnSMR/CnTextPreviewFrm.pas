@@ -78,7 +78,7 @@ function PreviewText(const ss: TStrings;
 implementation
 
 uses
-  CnLangMgr;
+  CnCommon, CnLangMgr;
 
 {$R *.dfm}
 
@@ -220,7 +220,7 @@ var
   ss: TStringList;
   i: Integer;
 begin
-  sd.InitialDir := ExtractFilePath(ParamStr(0));
+  sd.InitialDir := _CnExtractFilePath(ParamStr(0));
   if sd.Execute then
   begin
     ss := TStringList.Create;

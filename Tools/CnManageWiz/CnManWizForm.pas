@@ -42,7 +42,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ExtCtrls, StdCtrls, Buttons, ComCtrls, ToolWin, ActnList, ImgList, Registry,
   Contnrs, ShellAPI, Menus, IniFiles, ActiveX,
-  CnWizCompilerConst, CnShellUtils, CnLangStorage, CnHashLangStorage,
+  CnCommon, CnWizCompilerConst, CnShellUtils, CnLangStorage, CnHashLangStorage,
   CnClasses, CnLangMgr, CnWizLangID, CnWizHelp;
 
 const
@@ -374,7 +374,7 @@ begin
 
     WItem.Enabled := True;
     WItem.Removed := False;
-    WItem.WizardName := ChangeFileExt(ExtractFileName(dlgOpenWizard.FileName), '');
+    WItem.WizardName := _CnChangeFileExt(_CnExtractFileName(dlgOpenWizard.FileName), '');
     WItem.WizardPath := dlgOpenWizard.FileName;
 
     IDEWizardsList[TCnCompiler(lstIDEs.ItemIndex)].Add(WItem);
@@ -909,7 +909,7 @@ var
 begin
   if CnLanguageManager <> nil then
   begin
-    hfs1.LanguagePath := ExtractFilePath(ParamStr(0)) + csLangPath;
+    hfs1.LanguagePath := _CnExtractFilePath(ParamStr(0)) + csLangPath;
     CnLanguageManager.LanguageStorage := hfs1;
 
     LangID := GetWizardsLanguageID;

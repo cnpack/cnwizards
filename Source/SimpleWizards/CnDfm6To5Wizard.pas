@@ -108,9 +108,9 @@ begin
          case DFM6To5(OpenDialog.Files[i]) of
            crSucc:
              begin
-               Fn := ChangeFileExt(OpenDialog.Files[i], '.pas'); // 相关的 Pas 文件
+               Fn := _CnChangeFileExt(OpenDialog.Files[i], '.pas'); // 相关的 Pas 文件
                if not FileExists(Fn) then
-                 Fn := ChangeFileExt(OpenDialog.Files[i], '.cpp'); // 相关的 Cpp 文件
+                 Fn := _CnChangeFileExt(OpenDialog.Files[i], '.cpp'); // 相关的 Cpp 文件
                if not FileExists(Fn) then
                  Fn := OpenDialog.Files[i]; // 没有相关的单元文件，打开窗体本身
                ActionSvcs.CloseFile(Fn); // 先关闭相关单元

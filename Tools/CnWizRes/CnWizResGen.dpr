@@ -39,7 +39,8 @@ program CnWizResGen;
 uses
   Windows,
   Classes,
-  SysUtils;
+  SysUtils,
+  CnCommon;
 
 var
   IconPath: string;
@@ -51,7 +52,7 @@ var
 begin
   if ParamCount <> 2 then
   begin
-    Writeln('Usage: ' + ExtractFileName(ParamStr(0)) + ' IconPath RcFile');
+    Writeln('Usage: ' + _CnExtractFileName(ParamStr(0)) + ' IconPath RcFile');
     Exit;
   end;
 
@@ -63,15 +64,15 @@ begin
     try
       while Succ = 0 do
       begin
-        if SameText(ExtractFileExt(Info.Name), '.ico') then
+        if SameText(_CnExtractFileExt(Info.Name), '.ico') then
         begin
-          Lines.Add(Format('%s ICON "%s"', [UpperCase(ChangeFileExt(
-            ExtractFileName(Info.Name), '')), IconPath + Info.Name]));
+          Lines.Add(Format('%s ICON "%s"', [UpperCase(_CnChangeFileExt(
+            _CnExtractFileName(Info.Name), '')), IconPath + Info.Name]));
         end
-        else if SameText(ExtractFileExt(Info.Name), '.bmp') then
+        else if SameText(_CnExtractFileExt(Info.Name), '.bmp') then
         begin
-          Lines.Add(Format('%s BITMAP "%s"', [UpperCase(ChangeFileExt(
-            ExtractFileName(Info.Name), '')), IconPath + Info.Name]));
+          Lines.Add(Format('%s BITMAP "%s"', [UpperCase(_CnChangeFileExt(
+            _CnExtractFileName(Info.Name), '')), IconPath + Info.Name]));
         end;
         Succ := FindNext(Info);
       end;

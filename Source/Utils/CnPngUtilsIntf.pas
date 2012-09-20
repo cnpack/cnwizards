@@ -48,7 +48,7 @@ function CnConvertBmpToPng(BmpFile, PngFile: string): LongBool; stdcall;
 implementation
 
 uses
-  Windows, SysUtils;
+  Windows, SysUtils, CnCommon;
 
 type
   TCnConvertPngToBmpProc = function (PngFile, BmpFile: PAnsiChar): LongBool; stdcall;
@@ -64,7 +64,7 @@ var
   ModName: array[0..MAX_PATH] of Char;
 begin
   SetString(Result, ModName, GetModuleFileName(HInstance, ModName, SizeOf(ModName)));
-  Result := ExtractFilePath(Result);
+  Result := _CnExtractFilePath(Result);
 end;
 
 procedure LoadCnPngLib;

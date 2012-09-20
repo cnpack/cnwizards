@@ -401,7 +401,7 @@ var
   Root, Items: IXMLElement;
 begin
   // 存放对象库文件的临时目录
-  strRepsPath := ExtractFilePath(strDroFile) + 'Reps\';
+  strRepsPath := _CnExtractFilePath(strDroFile) + 'Reps\';
   if not DirectoryExists(strRepsPath) then
     ForceDirectories(strRepsPath);
 
@@ -873,7 +873,7 @@ var
   sfo: SHFILEOPSTRUCT;
 begin
   // 存放对象库文件的临时目录
-  strRepsPath := ExtractFilePath(strDroFile) + 'Reps\';
+  strRepsPath := _CnExtractFilePath(strDroFile) + 'Reps\';
   if not DirectoryExists(strRepsPath) then
   begin
     Result := False;
@@ -1061,8 +1061,8 @@ begin
   bFlag := Process32First(hSnapShot, pe32);
   while bFlag do
   begin
-    if UpperCase(ExtractFileName(strFileName))
-        = UpperCase(ExtractFileName(pe32.szExeFile)) then
+    if UpperCase(_CnExtractFileName(strFileName))
+        = UpperCase(_CnExtractFileName(pe32.szExeFile)) then
     begin
       hModuleSnap := CreateToolhelp32Snapshot(TH32CS_SNAPALL, pe32.th32ProcessID);
       if hModuleSnap = INVALID_HANDLE_VALUE then
@@ -1118,8 +1118,8 @@ var
   bResult: Boolean;
 begin
   bResult := CopyFile(PChar(FileName), PChar(MakePath(m_strTempPath) +
-    ExtractFileName(FileName)), False);
-  OutputLog(m_strAppName + ' ' + ExtractFileName(FileName) + g_strBackup + OpResult(bResult));
+    _CnExtractFileName(FileName)), False);
+  OutputLog(m_strAppName + ' ' + _CnExtractFileName(FileName) + g_strBackup + OpResult(bResult));
 end;
 
 procedure TAppBuilderInfo.OnFindRestoreDskFile(const FileName: string;
@@ -1128,8 +1128,8 @@ var
   bResult: Boolean;
 begin
   bResult := CopyFile(PChar(FileName), PChar(m_strRootDir + 'bin\' +
-    ExtractFileName(FileName)), False);
-  OutputLog(m_strAppName + ' ' + ExtractFileName(FileName) + g_strRestore + OpResult(bResult));
+    _CnExtractFileName(FileName)), False);
+  OutputLog(m_strAppName + ' ' + _CnExtractFileName(FileName) + g_strRestore + OpResult(bResult));
 end;
 
 end.

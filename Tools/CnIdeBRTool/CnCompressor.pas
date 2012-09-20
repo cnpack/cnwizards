@@ -37,7 +37,7 @@ unit CnCompressor;
 interface
 
 uses
-  Classes, Windows, SysUtils, FileCtrl, ZLib;
+  Classes, Windows, SysUtils, FileCtrl, ZLib, CnCommon;
 
 type
   THeaderStruct = packed record
@@ -400,7 +400,7 @@ begin
   begin
     Inc(Result);
     strFileName := strPath + StrPas(@pEntry.strFileName);
-    FilePath := ExtractFilePath(strFileName);
+    FilePath := _CnExtractFilePath(strFileName);
     if not DirectoryExists(FilePath) then
       CreateDirectory(FilePath, 0);
     fs := nil;

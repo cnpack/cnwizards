@@ -177,7 +177,7 @@ end;
 procedure TCnDTMainForm.FileCallBack(const FileName: string;
   const Info: TSearchRec; var Abort: Boolean);
 begin
-  if SameText(ExtractFileExt(FileName), '.DFM') then
+  if SameText(_CnExtractFileExt(FileName), '.DFM') then
     ConvertAFile(FileName);
 end;
 
@@ -251,7 +251,7 @@ var
 begin
   if CnLanguageManager <> nil then
   begin
-    CnHashLangFileStorage.LanguagePath := ExtractFilePath(ParamStr(0)) + csLangDir;
+    CnHashLangFileStorage.LanguagePath := _CnExtractFilePath(ParamStr(0)) + csLangDir;
     LangID := GetWizardsLanguageID;
     for I := 0 to CnLanguageManager.LanguageStorage.LanguageCount - 1 do
     begin

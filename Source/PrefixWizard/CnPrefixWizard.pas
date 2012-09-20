@@ -507,7 +507,7 @@ begin
       begin
         // 取工程名
         if Assigned(FormEditor.Module) and (FormEditor.Module.OwnerCount > 0) then
-          ProjectName := ExtractFileName(FormEditor.Module.Owners[0].FileName)
+          ProjectName := _CnExtractFileName(FormEditor.Module.Owners[0].FileName)
         else
           ProjectName := '';
 
@@ -818,7 +818,7 @@ begin
       begin
         DisableDesignerDrag; // 弥补设计期可能会吞吃WM_LBUTTONUP消息从而产生拖动状态的缺陷
 
-        Succ := GetNewComponentName(ExtractFileName(FormEditor.GetFileName),
+        Succ := GetNewComponentName(_CnExtractFileName(FormEditor.GetFileName),
           ClassName, CompText, OldName, Prefix, NewName, UserMode, Ignore,
           FAutoPopSuggestDlg, FUseUnderLine);
         PrefixList.Prefixs[ClassName] := Prefix;
@@ -948,7 +948,7 @@ begin
               ANewName := NewName;
 
               // 弹出对话框要求输入新组件名
-              if GetNewComponentName(ExtractFileName(FormEditor.GetFileName),
+              if GetNewComponentName(_CnExtractFileName(FormEditor.GetFileName),
                 Component.ClassName, CnGetComponentText(Component),
                 OldName, APrefix, ANewName, True, AIgnore, AAutoDlg,
                 FUseUnderLine) then
@@ -1120,7 +1120,7 @@ begin
   // 取工程名
   if (ProjectName = '') and Assigned(FormEditor.Module) and
     (FormEditor.Module.OwnerCount > 0) then
-    AProjectName := ExtractFileName(FormEditor.Module.Owners[0].FileName)
+    AProjectName := _CnExtractFileName(FormEditor.Module.Owners[0].FileName)
   else
     AProjectName := ProjectName;
 
@@ -1142,7 +1142,7 @@ var
 begin
   if not Assigned(Project) then Exit;
 
-  ProjectName := ExtractFileName(Project.FileName);
+  ProjectName := _CnExtractFileName(Project.FileName);
   for i := 0 to Project.GetModuleCount - 1 do
   begin
     ModuleInfo := Project.GetModule(i);
@@ -1220,7 +1220,7 @@ begin
   begin
     // 取工程名
     if Assigned(FormEditor.Module) and (FormEditor.Module.OwnerCount > 0) then
-      ProjectName := ExtractFileName(FormEditor.Module.Owners[0].FileName)
+      ProjectName := _CnExtractFileName(FormEditor.Module.Owners[0].FileName)
     else
       ProjectName := '';
 

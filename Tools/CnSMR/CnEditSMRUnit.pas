@@ -38,7 +38,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Grids, ADODB,
-  Dialogs, Menus, StdCtrls, Buttons, ExtCtrls, DB, DBCtrls, DBGrids, 
+  Dialogs, Menus, StdCtrls, Buttons, ExtCtrls, DB, DBCtrls, DBGrids, CnCommon,
   CnMainUnit, CnSMRBplUtils, CnBaseUtils, CnSMRUtils, ActnList, AppEvnts;
 
 type
@@ -562,9 +562,9 @@ end;
 function TCnEditSMRForm.GetSourceUnit(const s: string): string;
 begin
   Result := Trim(s);
-  if (Result <> '') and IsDelphiExt(UpperCase(ExtractFileExt(Result))) then
+  if (Result <> '') and IsDelphiExt(UpperCase(_CnExtractFileExt(Result))) then
   begin
-    Result := ChangeFileExt(ExtractFileName(Result), '');
+    Result := _CnChangeFileExt(_CnExtractFileName(Result), '');
   end;
 end;
 

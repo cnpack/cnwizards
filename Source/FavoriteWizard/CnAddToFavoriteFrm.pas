@@ -6,7 +6,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ComCtrls, StdCtrls, ExtCtrls, ToolsAPI, CnWizOptions, CnWizUtils, CnWizIdeUtils;
+  ComCtrls, StdCtrls, ExtCtrls, ToolsAPI,
+  CnCommon, CnWizOptions, CnWizUtils, CnWizIdeUtils;
 
 type
   TCnAddToFavoriteForm = class(TForm)
@@ -135,16 +136,16 @@ begin
   begin
     FormEditor := CnOtaGetCurrentFormEditor;
     chkCurrFile.Checked := True;
-    edtFileName.Text := ExtractFileName(FormEditor.FileName);
-    Path := ExtractFilePath(FormEditor.FileName);
+    edtFileName.Text := _CnExtractFileName(FormEditor.FileName);
+    Path := _CnExtractFilePath(FormEditor.FileName);
   end
   else
     SourceEditor := CnOtaGetCurrentSourceEditor;
     if IsPas(SourceEditor.FileName) or IsCppSourceModule(SourceEditor.FileName) then
     begin
       chkCurrFile.Checked := True;
-      edtFileName.Text := ExtractFileName(SourceEditor.FileName);
-      Path := ExtractFilePath(SourceEditor.FileName);
+      edtFileName.Text := _CnExtractFileName(SourceEditor.FileName);
+      Path := _CnExtractFilePath(SourceEditor.FileName);
     end
   else
   begin
@@ -156,8 +157,8 @@ begin
   // Current Project
   if Project <> nil then
   begin
-    edtProjectName.Text := ExtractFileName(Project.FileName);
-    Path := ExtractFilePath(Project.FileName);
+    edtProjectName.Text := _CnExtractFileName(Project.FileName);
+    Path := _CnExtractFilePath(Project.FileName);
   end
   else
   begin

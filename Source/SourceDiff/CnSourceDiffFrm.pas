@@ -684,9 +684,9 @@ begin
   end;
 
   if OpenFile1 then
-    OpenDialog1.InitialDir := ExtractFilePath(FileName)
+    OpenDialog1.InitialDir := _CnExtractFilePath(FileName)
   else
-    OpenDialog2.InitialDir := ExtractFilePath(FileName);
+    OpenDialog2.InitialDir := _CnExtractFilePath(FileName);
 
   DiffControl.MaxLineNum := 1;
   DiffControl.TopVisibleLine := 0;
@@ -697,7 +697,7 @@ end;
 procedure TCnSourceDiffForm.actOpen1Execute(Sender: TObject);
 begin
   if FileName1 <> '' then
-    OpenDialog1.InitialDir := ExtractFileDir(FileName1);
+    OpenDialog1.InitialDir := _CnExtractFileDir(FileName1);
 
   if OpenDialog1.Execute then
   begin
@@ -719,7 +719,7 @@ begin
   OpenDialog2.FilterIndex := OpenDialog2.FilterIndex;
 
   if FileName2 <> '' then
-    OpenDialog2.InitialDir := ExtractFileDir(FileName2);
+    OpenDialog2.InitialDir := _CnExtractFileDir(FileName2);
 
   if OpenDialog2.Execute then
   begin
@@ -1401,7 +1401,7 @@ end;
 
 function TCnSourceDiffForm.GetBakFileName(const FileName: string): string;
 begin
-  Result := ExtractFilePath(FileName) + StringReplace(ExtractFileName(FileName),
+  Result := _CnExtractFilePath(FileName) + StringReplace(_CnExtractFileName(FileName),
     '.', '.~', [rfReplaceAll]);
 end;
 

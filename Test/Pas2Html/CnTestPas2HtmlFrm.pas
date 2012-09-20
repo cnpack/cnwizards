@@ -29,7 +29,7 @@ var
 
 implementation
 
-uses CnPasConvert;
+uses CnCommon, CnPasConvert;
 
 {$R *.dfm}
 
@@ -51,7 +51,7 @@ begin
 
     Con.Convert;
 
-    OutStream.SaveToFile(ChangeFileExt(dlgOpen1.FileName, '.html'));
+    OutStream.SaveToFile(_CnChangeFileExt(dlgOpen1.FileName, '.html'));
 
     InStream.Free;
     OutStream.Free;
@@ -77,7 +77,7 @@ begin
 
     Con.Convert;
 
-    OutStream.SaveToFile(ChangeFileExt(dlgOpen1.FileName, '.rtf'));
+    OutStream.SaveToFile(_CnChangeFileExt(dlgOpen1.FileName, '.rtf'));
 
     InStream.Free;
     OutStream.Free;
@@ -107,7 +107,7 @@ begin
 
     Con.Convert;
     ConvertHTMLToClipBoardHtml(outStream1, OutStream2);
-    OutStream2.SaveToFile(ChangeFileExt(dlgOpen1.FileName, '.txt'));
+    OutStream2.SaveToFile(_CnChangeFileExt(dlgOpen1.FileName, '.txt'));
 
     Clipboard.Open;
     EmptyClipboard;

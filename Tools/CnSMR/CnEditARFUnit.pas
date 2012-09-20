@@ -116,7 +116,7 @@ type
 implementation
 
 uses
-  CnBaseUtils;
+  CnCommon, CnBaseUtils;
 
 {$R *.dfm}
 
@@ -125,7 +125,7 @@ const
 
 function StringProcessProc(const s: string): string;
 begin
-  Result := ExtractFileName(s);
+  Result := _CnExtractFileName(s);
 end;
 
 procedure TCnEditARFForm.AddFiles(ss: TStrings);

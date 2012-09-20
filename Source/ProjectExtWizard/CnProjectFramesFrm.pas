@@ -161,7 +161,7 @@ begin
 {$ENDIF}
 
         ProjectInfo := TCnProjectInfo.Create;
-        ProjectInfo.Name := ExtractFileName(IProject.FileName);
+        ProjectInfo.Name := _CnExtractFileName(IProject.FileName);
         ProjectInfo.FileName := IProject.FileName;
 
         // 添加窗体信息到 FormInfo
@@ -170,7 +170,7 @@ begin
           IModuleInfo := IProject.GetModule(j);
           if IModuleInfo.FormName = '' then
             Continue;
-          if UpperCase(ExtractFileExt(IModuleInfo.FormName)) = '.RES' then
+          if UpperCase(_CnExtractFileExt(IModuleInfo.FormName)) = '.RES' then
             Continue;
 {$IFDEF DEBUG}
           CnDebugger.LogFmt('Frames: IModuleInfo DesignClass is %s.', [IModuleInfo.DesignClass]);
@@ -188,15 +188,15 @@ begin
               Continue;
           end;
 
-          FormFileName := ChangeFileExt(IModuleInfo.FileName, '.dfm');
+          FormFileName := _CnChangeFileExt(IModuleInfo.FileName, '.dfm');
           Exists := FileExists(FormFileName);
           if not Exists then
           begin
-            FormFileName := ChangeFileExt(IModuleInfo.FileName, '.nfm'); // VCL.NET
+            FormFileName := _CnChangeFileExt(IModuleInfo.FileName, '.nfm'); // VCL.NET
             Exists := FileExists(FormFileName);
             if not Exists then
             begin
-              FormFileName := ChangeFileExt(IModuleInfo.FileName, '.xfm'); // CLX, Kylix
+              FormFileName := _CnChangeFileExt(IModuleInfo.FileName, '.xfm'); // CLX, Kylix
               Exists := FileExists(FormFileName);
             end;
           end;
@@ -204,7 +204,7 @@ begin
           if not Exists then
           begin
             // todo: Get default form name
-            FormFileName := ChangeFileExt(IModuleInfo.FileName, '.dfm');
+            FormFileName := _CnChangeFileExt(IModuleInfo.FileName, '.dfm');
           end;
 
           FormInfo := TCnFormInfo.Create;
@@ -212,7 +212,7 @@ begin
           begin
             Name := IModuleInfo.FormName;
             FileName := FormFileName;
-            Project := ExtractFileName(IProject.FileName);
+            Project := _CnExtractFileName(IProject.FileName);
             DesignClass := IModuleInfo.DesignClass;
             IsOpened := CnOtaIsFormOpen(Name);
             

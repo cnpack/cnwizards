@@ -38,7 +38,9 @@ unit AbCabTyp;
 interface
 
 uses
-  Windows, SysUtils, Classes, AbFciFdi, AbArcTyp,
+  Windows, SysUtils, Classes,
+  CnCommon,
+  AbFciFdi, AbArcTyp,
   AbUtils, AbConst, AbExcept;
 
 type
@@ -440,10 +442,10 @@ begin
         NewFilename := StrPas(pfdin^.psz1);
         if (NewFilename = Archive.FItemInProgress.FileName) then begin
           if not (eoRestorePath in Archive.ExtractOptions) then
-            NewFilename := ExtractFileName(NewFileName);
+            NewFilename := _CnExtractFileName(NewFileName);
           if (Archive.BaseDirectory <> '') then
             NewFilename := Archive.BaseDirectory + '\' + NewFilename;
-          NewFilePath := ExtractFilePath(NewFilename);
+          NewFilePath := _CnExtractFilePath(NewFilename);
           if (Length(NewFilePath) > 0 ) and
             (NewFilePath[Length(NewFilePath)] = '\') then
             System.Delete(NewFilePath, Length(NewFilePath), 1);
@@ -489,12 +491,12 @@ begin
   FMode := Mode and fmOpenWrite;
   FStatus := asInvalid;
   FArchiveName := FileName;
-  BaseDirectory := ExtractFilePath(ParamStr(0));
+  BaseDirectory := _CnExtractFilePath(ParamStr(0));
   FItemList := TAbArchiveList.Create;
   FPadLock := TAbPadLock.Create;
   FStatus := asIdle;
-  StrPCopy(FCabName, ExtractFileName(FileName));
-  StrPCopy(FCabPath, ExtractFilePath(FileName));
+  StrPCopy(FCabName, _CnExtractFileName(FileName));
+  StrPCopy(FCabPath, _CnExtractFilePath(FileName));
   SpanningThreshold := AbDefCabSpanningThreshold;
   FFolderThreshold := AbDefFolderThreshold;
   FItemInProgress := nil;
@@ -539,7 +541,7 @@ begin
     raise EAbFileNotFound.Create;
 
 
-  StrPCopy(FN, ExtractFilename(Item.Filename));                          {!!.02}
+  StrPCopy(FN, _CnExtractFilename(Item.Filename));                          {!!.02}
   if not FCIAddFile(FFCIContext, FP, FN, DoExecute, @FCI_GetNextCab,
     @FCI_Status, @FCI_GetOpenInfo, CompressionTypeMap[FCompressionType]) then
     raise EAbFCIAddFileError.Create;

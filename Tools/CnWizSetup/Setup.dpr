@@ -221,13 +221,13 @@ var
 // 取专家DLL文件名
 function GetDllName(Compiler: TCompilerName): string;
 begin
-  Result := ExtractFilePath(ParamStr(0)) + csDllNames[Compiler];
+  Result := _CnExtractFilePath(ParamStr(0)) + csDllNames[Compiler];
 end;
 
 // 取专家名
 function GetDllValue(Compiler: TCompilerName): string;
 begin
-  Result := ChangeFileExt(csDllNames[Compiler], '');
+  Result := _CnChangeFileExt(csDllNames[Compiler], '');
 end;
 
 // 判断专家DLL是否存在
@@ -343,7 +343,7 @@ begin
     begin
       StorageMode := smByDirectory;
       FileName := csLangFile;
-      LanguagePath := ExtractFilePath(ParamStr(0)) + csLangDir;
+      LanguagePath := _CnExtractFilePath(ParamStr(0)) + csLangDir;
     end;
   end;
 

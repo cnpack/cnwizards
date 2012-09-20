@@ -185,7 +185,7 @@ begin
 {$IFNDEF STAND_ALONE}
     FStorage.LanguagePath := WizOptions.LangPath;
 {$ELSE}
-    FStorage.LanguagePath := ExtractFilePath(ParamStr(0)) + csLangDir;
+    FStorage.LanguagePath := _CnExtractFilePath(ParamStr(0)) + csLangDir;
 {$ENDIF}
   except
     ; // 屏蔽自动检测语言文件时可能出的错

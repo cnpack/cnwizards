@@ -171,7 +171,7 @@ var
   CurrentModule: IOTAModule;
 begin
   CurrentModule := CnOtaGetCurrentModule;
-  Result := ChangeFileExt(ExtractFileName(CurrentModule.FileName), '');
+  Result := _CnChangeFileExt(_CnExtractFileName(CurrentModule.FileName), '');
 end;
 
 function TCnProjectViewUnitsForm.GetSelectedFileName: string;
@@ -320,16 +320,16 @@ begin
 {$ENDIF}
 
         ProjectInfo := TCnProjectInfo.Create;
-        ProjectInfo.Name := ExtractFileName(IProject.FileName);
+        ProjectInfo.Name := _CnExtractFileName(IProject.FileName);
         ProjectInfo.FileName := IProject.FileName;
 
         // 将 Project 信息添加到 UnitInfo
         UnitInfo := TCnUnitInfo.Create;
         with UnitInfo do
         begin
-          Name := ChangeFileExt(ExtractFileName(IProject.FileName), '');
+          Name := _CnChangeFileExt(_CnExtractFileName(IProject.FileName), '');
           FileName := IProject.FileName;
-          Project := ExtractFileName(IProject.FileName);;
+          Project := _CnExtractFileName(IProject.FileName);;
           
         {$IFDEF SUPPORT_MODULETYPE}
           // todo: Check ModuleInfo.ModuleType
@@ -355,15 +355,15 @@ begin
           if UnitFileName = '' then
             Continue;
 
-          if SameText(ExtractFileExt(UnitFileName), '.RES') then
+          if SameText(_CnExtractFileExt(UnitFileName), '.RES') then
             Continue;
 
           UnitInfo := TCnUnitInfo.Create;
           with UnitInfo do
           begin
-            Name := ChangeFileExt(ExtractFileName(UnitFileName), '');
+            Name := _CnChangeFileExt(_CnExtractFileName(UnitFileName), '');
             FileName := UnitFileName;
-            Project := ExtractFileName(IProject.FileName);
+            Project := _CnExtractFileName(IProject.FileName);
             
           {$IFDEF SUPPORT_MODULETYPE}
             // todo: Check ModuleInfo.ModuleType
@@ -415,7 +415,7 @@ begin
       for i := 0 to ProjectList.Count - 1 do
       begin
         ProjectInfo := TCnProjectInfo(ProjectList[i]);
-        Items.AddObject(ExtractFileName(ProjectInfo.Name), ProjectInfo);
+        Items.AddObject(_CnExtractFileName(ProjectInfo.Name), ProjectInfo);
       end;
     end;
   end;
@@ -477,7 +477,7 @@ begin
       for i := 0 to ProjectList.Count - 1 do
       begin
         ProjectInfo := TCnProjectInfo(ProjectList[i]);
-        if ChangeFileExt(ProjectInfo.FileName, '') = CnOtaGetCurrentProjectFileNameEx then
+        if _CnChangeFileExt(ProjectInfo.FileName, '') = CnOtaGetCurrentProjectFileNameEx then
           DoAddProject(ProjectInfo);
       end;
     end

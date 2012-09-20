@@ -371,6 +371,7 @@ function GetDCURecStr(D: TDCURec; hDef: integer; ShowNDX: boolean): String;
 implementation
 
 uses
+  CnCommon,
   DCUTbl, DCP, DasmX86, DasmMSIL, DasmCF, Op;
 
 type
@@ -2840,7 +2841,7 @@ begin
   FTypeDefCnt := 0;
 //  FDefs := Nil;
   FFName := FName;
-  FFExt := ExtractFileExt(FName);
+  FFExt := _CnExtractFileExt(FName);
   if AMem=Nil then begin
     AssignFile(F,FName);
     FileMode := 0; //Read only, helps with DCUs on CD

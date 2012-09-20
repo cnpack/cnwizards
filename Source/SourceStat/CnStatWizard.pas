@@ -302,8 +302,8 @@ begin
   begin
     New(PRec);
     FillChar(PRec^, SizeOf(TSourceStatRec), 0);
-    PRec^.FileName := ExtractFileName(FileName);
-    PRec^.FileDir := ExtractFileDir(FileName);
+    PRec^.FileName := _CnExtractFileName(FileName);
+    PRec^.FileDir := _CnExtractFileDir(FileName);
     PRec^.IsValidSource := False;
   end
   else if IsCppSourceModule(FileName) or IsDelphiSourceModule(FileName) or
@@ -323,8 +323,8 @@ begin
       New(PRec);
       FillChar(PRec^, SizeOf(TSourceStatRec), 0);
 
-      PRec^.FileName := ExtractFileName(FileName);
-      PRec^.FileDir := ExtractFileDir(FileName);
+      PRec^.FileName := _CnExtractFileName(FileName);
+      PRec^.FileDir := _CnExtractFileDir(FileName);
       PRec^.IsValidSource := True;
       Self.StatAStream(inStream, PRec, not (IsDelphiSourceModule(FileName) or IsDpk(FileName)));
 
@@ -342,7 +342,7 @@ begin
     DispCaption := Copy(FileName, DirLength, Length(FileName) - DirLength + 1);
   end
   else
-    DispCaption := ExtractFileName(FileName);
+    DispCaption := _CnExtractFileName(FileName);
 
   if ((CnStatResultForm.StatStyle <> ssProjectGroup) and (CnStatResultForm.StatStyle <> ssProject))
     or ((PRec^.Bytes > 0) and (not IsBpr(FileName) and not IsDpr(FileName))) then
@@ -499,7 +499,7 @@ begin
             if Supports(Editor, IOTASourceEditor, SourceEditor) then
             begin
               sName := SourceEditor.FileName;
-              if (sName = '') or (UpperCase(ExtractFileExt(sName)) = '.BPG') or
+              if (sName = '') or (UpperCase(_CnExtractFileExt(sName)) = '.BPG') or
                 ((not (IsDelphiSourceModule(sName) or IsDpk(sName)))
                 and (not (IsCppSourceModule(sName)) or IsBpk(sName))) then
                 Continue;
@@ -544,10 +544,10 @@ begin
       if IsBdsProject(Project.FileName) or IsDProject(Project.FileName)
         or IsCbProject(Project.FileName) then
       begin
-        if FileExists(ChangeFileExt(Project.FileName, '.dpr')) then
-          ProcessAFile(ChangeFileExt(Project.FileName, '.dpr'), 0)
-        else if FileExists(ChangeFileExt(Project.FileName, '.dpk')) then
-          ProcessAFile(ChangeFileExt(Project.FileName, '.dpk'), 0);
+        if FileExists(_CnChangeFileExt(Project.FileName, '.dpr')) then
+          ProcessAFile(_CnChangeFileExt(Project.FileName, '.dpr'), 0)
+        else if FileExists(_CnChangeFileExt(Project.FileName, '.dpk')) then
+          ProcessAFile(_CnChangeFileExt(Project.FileName, '.dpk'), 0);
       end;
 {$ELSE}
       Self.ProcessAFile(Project.FileName, 0);
@@ -642,10 +642,10 @@ begin
           if IsBdsProject(Project.FileName) or IsDProject(Project.FileName)
             or IsCbProject(Project.FileName) then
           begin
-            if FileExists(ChangeFileExt(Project.FileName, '.dpr')) then
-              ProcessAFile(ChangeFileExt(Project.FileName, '.dpr'), 1)
-            else if FileExists(ChangeFileExt(Project.FileName, '.dpk')) then
-              ProcessAFile(ChangeFileExt(Project.FileName, '.dpk'), 1);
+            if FileExists(_CnChangeFileExt(Project.FileName, '.dpr')) then
+              ProcessAFile(_CnChangeFileExt(Project.FileName, '.dpr'), 1)
+            else if FileExists(_CnChangeFileExt(Project.FileName, '.dpk')) then
+              ProcessAFile(_CnChangeFileExt(Project.FileName, '.dpk'), 1);
           end;
 {$ELSE}
           Self.ProcessAFile(Project.FileName, 1);

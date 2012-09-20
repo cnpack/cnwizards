@@ -236,11 +236,11 @@ var
   OutputDir: Variant;
 {$ENDIF}
 begin
-  ProjectDir := ExtractFileDir(CnOtaGetCurrentProjectFileName);
+  ProjectDir := _CnExtractFileDir(CnOtaGetCurrentProjectFileName);
 {$IFDEF DELPHI2011_UP}
   if CnOtaGetActiveProjectOptions <> nil then
   begin
-    Result := ExtractFilePath(CnOtaGetActiveProjectOptions.TargetName);
+    Result := _CnExtractFilePath(CnOtaGetActiveProjectOptions.TargetName);
   end
   else
   begin
@@ -333,7 +333,7 @@ begin
 {$ENDIF}
       end;
 {$ENDIF}
-      OutName := MakePath(Dir) + IntermediaDir + ChangeFileExt(ExtractFileName(ProjectFileName), OutExt);
+      OutName := MakePath(Dir) + IntermediaDir + _CnChangeFileExt(_CnExtractFileName(ProjectFileName), OutExt);
 {$ENDIF}
       if FileExists(OutName) then
         ExploreFile(OutName)
@@ -352,8 +352,8 @@ begin
   begin
     if FileExists(FileName) then
       ExploreFile(FileName)
-    else if DirectoryExists(ExtractFileDir(FileName)) then
-      ExploreDir(ExtractFileDir(FileName));
+    else if DirectoryExists(_CnExtractFileDir(FileName)) then
+      ExploreDir(_CnExtractFileDir(FileName));
   end;
 end;
 
@@ -371,8 +371,8 @@ begin
   begin
     if FileExists(ProjectFileName) then
       ExploreFile(ProjectFileName)
-    else if DirectoryExists(ExtractFileDir(ProjectFileName)) then
-      ExploreDir(ExtractFileDir(ProjectFileName));
+    else if DirectoryExists(_CnExtractFileDir(ProjectFileName)) then
+      ExploreDir(_CnExtractFileDir(ProjectFileName));
   end;
 end;
 
@@ -389,7 +389,7 @@ begin
     Exit;
 
   ProjectFileName := Project.GetFileName;
-  ProjectExt := ExtractFileExt(ProjectFileName);
+  ProjectExt := _CnExtractFileExt(ProjectFileName);
 
   if IndexStr(ProjectExt, ['.dpr', '.cpp', '.bpr', 'dpk', 'bpk']) < 0 then Exit;
 
@@ -419,7 +419,7 @@ begin
   if ExeName = '' then
   begin
     OutputDir := GetOutputDir;
-    ExeName := MakePath(OutputDir) + ChangeFileExt(ExtractFileName(ProjectFileName), '.exe');
+    ExeName := MakePath(OutputDir) + _CnChangeFileExt(_CnExtractFileName(ProjectFileName), '.exe');
   end;
 
 {$IFDEF DEBUG}
@@ -429,7 +429,7 @@ begin
   // Ö´ÐÐ³ÌÐò
   if FileExists(ExeName) then
     ShellExecute(0, 'open', PChar(ExeName), PChar(Params),
-      PChar(ExtractFileDir(ExeName)), SW_SHOWNORMAL);
+      PChar(_CnExtractFileDir(ExeName)), SW_SHOWNORMAL);
 end;
 {$ENDIF}
 

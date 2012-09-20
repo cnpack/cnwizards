@@ -292,7 +292,7 @@ begin
 {$ENDIF}
 
         ProjectInfo := TCnProjectInfo.Create;
-        ProjectInfo.Name := ExtractFileName(IProject.FileName);
+        ProjectInfo.Name := _CnExtractFileName(IProject.FileName);
         ProjectInfo.FileName := IProject.FileName;
 
         // 添加窗体信息到 FormInfo
@@ -301,18 +301,18 @@ begin
           IModuleInfo := IProject.GetModule(j);
           if IModuleInfo.FormName = '' then
             Continue;
-          if UpperCase(ExtractFileExt(IModuleInfo.FormName)) = '.RES' then
+          if UpperCase(_CnExtractFileExt(IModuleInfo.FormName)) = '.RES' then
             Continue;
 
-          FormFileName := ChangeFileExt(IModuleInfo.FileName, '.dfm');
+          FormFileName := _CnChangeFileExt(IModuleInfo.FileName, '.dfm');
           Exists := FileExists(FormFileName);
           if not Exists then
           begin
-            FormFileName := ChangeFileExt(IModuleInfo.FileName, '.nfm'); // VCL.NET
+            FormFileName := _CnChangeFileExt(IModuleInfo.FileName, '.nfm'); // VCL.NET
             Exists := FileExists(FormFileName);
             if not Exists then
             begin
-              FormFileName := ChangeFileExt(IModuleInfo.FileName, '.xfm'); // CLX, Kylix
+              FormFileName := _CnChangeFileExt(IModuleInfo.FileName, '.xfm'); // CLX, Kylix
               Exists := FileExists(FormFileName);
             end;
           end;
@@ -320,7 +320,7 @@ begin
           if not Exists then
           begin
             // todo: Get default form name
-            FormFileName := ChangeFileExt(IModuleInfo.FileName, '.dfm');
+            FormFileName := _CnChangeFileExt(IModuleInfo.FileName, '.dfm');
           end;
 
           FormInfo := TCnFormInfo.Create;
@@ -328,7 +328,7 @@ begin
           begin
             Name := IModuleInfo.FormName;
             FileName := FormFileName;
-            Project := ExtractFileName(IProject.FileName);
+            Project := _CnExtractFileName(IProject.FileName);
             DesignClass := IModuleInfo.DesignClass;
             IsOpened := CnOtaIsFormOpen(Name);
             
@@ -416,14 +416,14 @@ var
       Exit;
     end;
 
-    S := ChangeFileExt(FileName, '.pas');
+    S := _CnChangeFileExt(FileName, '.pas');
     if FileExists(S) then
     begin
       CnOtaOpenFile(S);
     end
     else
     begin
-      S := ChangeFileExt(FileName, '.cpp');
+      S := _CnChangeFileExt(FileName, '.cpp');
       if FileExists(S) then
       begin
         CnOtaOpenFile(S);
@@ -433,7 +433,7 @@ var
       end
       else
       begin
-        S := ChangeFileExt(FileName, '.cs');
+        S := _CnChangeFileExt(FileName, '.cs');
         if FileExists(S) then
           CnOtaOpenFile(S)
         else
@@ -500,7 +500,7 @@ begin
       for i := 0 to ProjectList.Count - 1 do
       begin
         ProjectInfo := TCnProjectInfo(ProjectList[i]);
-        Items.AddObject(ExtractFileName(ProjectInfo.Name), ProjectInfo);
+        Items.AddObject(_CnExtractFileName(ProjectInfo.Name), ProjectInfo);
       end;
   end;
 end;
@@ -560,7 +560,7 @@ begin
       for i := 0 to ProjectList.Count - 1 do
       begin
         ProjectInfo := TCnProjectInfo(ProjectList[i]);
-        if ChangeFileExt(ProjectInfo.FileName, '') = CnOtaGetCurrentProjectFileNameEx then
+        if _CnChangeFileExt(ProjectInfo.FileName, '') = CnOtaGetCurrentProjectFileNameEx then
           DoAddProject(ProjectInfo);
       end;
     end

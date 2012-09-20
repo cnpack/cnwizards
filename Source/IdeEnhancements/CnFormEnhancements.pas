@@ -1256,7 +1256,7 @@ begin
   finally
     Ini.Free;
   end;
-  if SameText(ExtractFileName(FileName), ActionFileName) then
+  if SameText(_CnExtractFileName(FileName), ActionFileName) then
     WizOptions.CheckUserFile(ActionFileName);
 end;
 

@@ -824,15 +824,15 @@ begin
   if FIsDelphi then
     Result := ''
   else
-    Result := ChangeFileExt(FFileName, '.h');
+    Result := _CnChangeFileExt(FFileName, '.h');
 end;
 
 function TCnIniFilerCreator.GetImplFileName: string;
 begin
   if FIsDelphi then
-    Result := ChangeFileExt(FFileName, '.pas')
+    Result := _CnChangeFileExt(FFileName, '.pas')
   else
-    Result := ChangeFileExt(FFileName, '.cpp');
+    Result := _CnChangeFileExt(FFileName, '.cpp');
 end;
 
 {$ENDIF}

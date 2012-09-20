@@ -405,7 +405,7 @@ begin
   // 请不要本地化
   Execute := Format('mailto:%s?Subject=%s&Body=%s', [Address, Subject, Body]);
   ShellExecute(Self.Handle, 'open', PChar(Execute), nil,
-    PChar(ExtractFilePath(Application.ExeName)), SW_SHOWNORMAL);
+    PChar(_CnExtractFilePath(Application.ExeName)), SW_SHOWNORMAL);
 end;
 
 procedure TCnWizFeedbackForm.btnCopyClick(Sender: TObject);
@@ -556,7 +556,7 @@ end;
 
 function GetCnPackVersionString: string;
 begin
-  Result := Format('%s Ver: %s.%s Build %s' + #13#10, [ExtractFileName(WizOptions.DllName),
+  Result := Format('%s Ver: %s.%s Build %s' + #13#10, [_CnExtractFileName(WizOptions.DllName),
     SCnWizardMajorVersion, SCnWizardMinorVersion, SCnWizardBuildDate]);
 end;
 

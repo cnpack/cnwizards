@@ -393,7 +393,7 @@ function TCnProjectFilesSnapshotManageForm.lstFilesItemFmt(
   const AFileName: string): string;
 begin
   Result :=
-    Format('%s (%s)', [ExtractFileName(AFileName), ExtractFileDir(AFileName)]);
+    Format('%s (%s)', [_CnExtractFileName(AFileName), _CnExtractFileDir(AFileName)]);
 end;
 
 procedure TCnProjectFilesSnapshotManageForm.lstFilesKeyDown(Sender: TObject;

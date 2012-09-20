@@ -37,7 +37,7 @@ interface
 |</PRE>}
 
 uses
-  Windows, SysUtils;
+  Windows, SysUtils, CnCommon;
 
 const
   SCnWizHelperDllName = 'CnWizHelper.Dll';
@@ -101,7 +101,7 @@ var
   ModuleName: array[0..MAX_Path - 1] of Char;
 begin
   GetModuleFileName(hInstance, ModuleName, MAX_PATH);
-  hHelperDll := LoadLibrary(PChar(ExtractFilePath(ModuleName) + SCnWizHelperDllName));
+  hHelperDll := LoadLibrary(PChar(_CnExtractFilePath(ModuleName) + SCnWizHelperDllName));
   
   if hHelperDll <> 0 then
   begin

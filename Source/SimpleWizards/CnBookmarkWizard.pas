@@ -756,7 +756,7 @@ begin
     for i := 0 to List.Count - 1 do
     begin
       Editor := TCnEditorObj(List[i]);
-      cbbUnit.Items.Add(ExtractFileName(Editor.FileName));
+      cbbUnit.Items.Add(_CnExtractFileName(Editor.FileName));
       if not SaveAllUnit and (CompareText(Editor.FileName, SaveFileName) = 0) then
         Idx := i + 1;
     end;
@@ -785,7 +785,7 @@ var
       Item := ListView.Items.Add;
       with Item do
       begin
-        Caption := ExtractFileName(AEditor.FileName);
+        Caption := _CnExtractFileName(AEditor.FileName);
         SubItems.Add(IntToStr(BkObj.BookmarkID));
         SubItems.Add(IntToStr(BkObj.Pos.Line));
         SubItems.Add(BkObj.Line);

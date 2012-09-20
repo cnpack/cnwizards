@@ -182,7 +182,7 @@ var
 
 implementation
 
-uses CnViewMain, CnViewCore, CnDebugIntf, CnMsgXMLFiler;
+uses CnCommon, CnViewMain, CnViewCore, CnDebugIntf, CnMsgXMLFiler;
 
 {$R *.DFM}
 
@@ -749,7 +749,7 @@ begin
       ClearTimes;
       ClearBookMarks;
 
-      Ext := LowerCase(ExtractFileExt(FileName));
+      Ext := LowerCase(_CnExtractFileExt(FileName));
       if Ext = '.xml' then // 是 CnDebugViewer 保存的 XML 文件
       begin
         Filer := TCnMsgXMLFiler.Create;

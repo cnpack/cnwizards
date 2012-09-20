@@ -220,6 +220,7 @@ uses
   ActiveX,
   CommCtrl,
   Messages, ShellApi,
+  CnCommon,
   JclFileUtils, JclStrings, JclSysInfo;
 
 type
@@ -840,11 +841,11 @@ var
 begin
   Result := nil;
   {$IFDEF SUPPORTS_UNICODE}
-  Path := PChar(ExtractFilePath(FileName));
+  Path := PChar(_CnExtractFilePath(FileName));
   ItemName := Path;
   {$ELSE ~SUPPORTS_UNICODE}
-  MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, PAnsiChar(ExtractFilePath(FileName)), -1, Path, MAX_PATH);
-  MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, PAnsiChar(ExtractFileName(FileName)), -1, ItemName, MAX_PATH);
+  MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, PAnsiChar(_CnExtractFilePath(FileName)), -1, Path, MAX_PATH);
+  MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, PAnsiChar(_CnExtractFileName(FileName)), -1, ItemName, MAX_PATH);
   {$ENDIF ~SUPPORTS_UNICODE}
   if Succeeded(SHGetDesktopFolder(DesktopFolder)) then
   begin
@@ -1182,7 +1183,7 @@ var
   Info: TSHFileInfo;
 begin
   Result := 0;
-  LocExt := LowerCase(ExtractFileExt(Link.IconLocation));
+  LocExt := LowerCase(_CnExtractFileExt(Link.IconLocation));
   // 1. See if IconLocation specifies a valid icon file
   if (LocExt = '.ico') and (FileExists(Link.IconLocation)) then
   begin
@@ -1452,8 +1453,8 @@ function ShellRunControlPanel(const NameOrFileName: string; AppletNumber: Intege
 var
   FileName: TFileName;
 begin
-  if ExtractFilePath(NameOrFileName) = '' then
-    FileName := ChangeFileExt(PathAddSeparator(GetWindowsSystemFolder) + NameOrFileName, '.cpl')
+  if _CnExtractFilePath(NameOrFileName) = '' then
+    FileName := _CnChangeFileExt(PathAddSeparator(GetWindowsSystemFolder) + NameOrFileName, '.cpl')
   else
     FileName := NameOrFileName;
   if FileExists(FileName) then

@@ -228,19 +228,19 @@ procedure TCnProjectBackupSaveForm.btnSelectClick(Sender: TObject);
 var
   FileName: string;
 begin
-  dlgSave.FileName := ExtractFileName(edtFile.Text);
+  dlgSave.FileName := _CnExtractFileName(edtFile.Text);
   if Self.dlgSave.Execute then
   begin
     case dlgSave.FilterIndex of
-      1: FileName := ChangeFileExt(Self.dlgSave.FileName, '.zip');
-      2: FileName := ChangeFileExt(Self.dlgSave.FileName, '.rar');
-      3: FileName := ChangeFileExt(Self.dlgSave.FileName, '.7z');
+      1: FileName := _CnChangeFileExt(Self.dlgSave.FileName, '.zip');
+      2: FileName := _CnChangeFileExt(Self.dlgSave.FileName, '.rar');
+      3: FileName := _CnChangeFileExt(Self.dlgSave.FileName, '.7z');
     end;
     
     if not FileExists(FileName) or QueryDlg(SCnOverwriteQuery) then
     begin
       edtFile.Text := FileName;
-      FSavePath := ExtractFilePath(Self.dlgSave.FileName);
+      FSavePath := _CnExtractFilePath(Self.dlgSave.FileName);
       FConfirmed := True;
     end;
   end;
@@ -275,7 +275,7 @@ begin
       Exit;
     end;
 
-    if not chkUseExternal.Checked and (UpperCase(ExtractFileExt(edtFile.Text)) <> '.ZIP') then
+    if not chkUseExternal.Checked and (UpperCase(_CnExtractFileExt(edtFile.Text)) <> '.ZIP') then
     begin
       CanClose := QueryDlg(SCnProjExtBackupMustZip);
       Exit;
@@ -392,7 +392,7 @@ begin
   
   if not chkUseExternal.Checked then Exit;
   FExt := GetExtFromCompressor(edtCompressor.Text);
-  edtFile.Text := ChangeFileExt(edtFile.Text, FExt);
+  edtFile.Text := _CnChangeFileExt(edtFile.Text, FExt);
 end;
 
 procedure TCnProjectBackupSaveForm.cbbPredefineChange(Sender: TObject);
@@ -405,7 +405,7 @@ begin
     mmoCmd.Lines.Text := SCnCompressCmdPredefined[TCnCompressPredefined(cbbPredefine.ItemIndex)];
     Ext := GetExtFromCompressor(edtCompressor.Text);
     if Ext <> '' then
-      edtFile.Text :=  ChangeFileExt(edtFile.Text, Ext);
+      edtFile.Text :=  _CnChangeFileExt(edtFile.Text, Ext);
   end;
 end;
 
@@ -429,7 +429,7 @@ var
   S: string;
 begin
   Result := '';
-  S := LowerCase(ExtractFileName(Compressor));
+  S := LowerCase(_CnExtractFileName(Compressor));
   if S = '' then Exit;
 
   if Pos('rar', S) > 0 then

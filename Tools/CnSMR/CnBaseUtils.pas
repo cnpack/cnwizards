@@ -735,7 +735,7 @@ begin
   try
     FileMasksToStrings(FileMasks, MaskList, CaseSensitive);
 
-    FFileName := _CaseSensitive(CaseSensitive, ExtractFileName(FileName));
+    FFileName := _CaseSensitive(CaseSensitive, _CnExtractFileName(FileName));
     Result := False;
     for i := 0 to MaskList.Count - 1 do
     begin
@@ -756,7 +756,7 @@ var
   FFileName: string;
   i: Integer;
 begin
-  FFileName := _CaseSensitive(CaseSensitive, ExtractFileName(FileName));
+  FFileName := _CaseSensitive(CaseSensitive, _CnExtractFileName(FileName));
 
   Result := False;
   for i := 0 to MaskList.Count - 1 do
@@ -822,7 +822,7 @@ begin
   Result := True;
   for i := 0 to ssFiles.Count - 1 do
   begin
-    s := ExtractFileName(ssFiles[i]);
+    s := _CnExtractFileName(ssFiles[i]);
     idx := ssNames.IndexOf(s);
     if idx >= 0 then
     begin
@@ -855,7 +855,7 @@ begin
   Result := True;
   for i := 0 to ssFiles.Count - 1 do
   begin
-    s := ExtractFileName(ssFiles[i]);
+    s := _CnExtractFileName(ssFiles[i]);
     idx := ssNames.IndexOf(s);
     if idx >= 0 then
     begin
@@ -1122,7 +1122,7 @@ begin
 
     if StrScan(PChar(ExtList[i]), '.') <> nil then
     begin
-      ExtList[i] := _CaseSensitive(CaseSensitive, ExtractFileExt(ExtList[i]));
+      ExtList[i] := _CaseSensitive(CaseSensitive, _CnExtractFileExt(ExtList[i]));
     end
     else
     begin
@@ -1176,7 +1176,7 @@ begin
   try
     FileExtsToStrings(FileExts, ExtList, CaseSensitive);
 
-    FExt := _CaseSensitive(CaseSensitive, ExtractFileExt(FileName));
+    FExt := _CaseSensitive(CaseSensitive, _CnExtractFileExt(FileName));
     Result := False;
     for i := 0 to ExtList.Count - 1 do
     begin
@@ -1197,7 +1197,7 @@ var
   FExt: string;
   i: Integer;
 begin
-  FExt := _CaseSensitive(CaseSensitive, ExtractFileExt(FileName));
+  FExt := _CaseSensitive(CaseSensitive, _CnExtractFileExt(FileName));
 
   Result := False;
   for i := 0 to ExtList.Count - 1 do

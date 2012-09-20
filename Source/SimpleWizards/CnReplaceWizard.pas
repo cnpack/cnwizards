@@ -553,9 +553,9 @@ begin
 
   FCurrCount := 0;
   if FUseRegExpr then
-    DoRegExprReplace(ExtractFileName(FileName))
+    DoRegExprReplace(_CnExtractFileName(FileName))
   else
-    DoNormalReplace(ExtractFileName(FileName));
+    DoNormalReplace(_CnExtractFileName(FileName));
   BookMarkList := nil;
 
   if FOutStream.Size > 0 then  // 执行过替换
@@ -647,7 +647,7 @@ begin
 {$IFDEF BCB}
     if IsCpp(FileName) or IsC(FileName) then // BCB 下替换相关头文件
     begin
-      FileName := ChangeFileExt(FileName, '.h');
+      FileName := _CnChangeFileExt(FileName, '.h');
       if FileExists(FileName) then
         ReplaceFile(FileName);
     end;

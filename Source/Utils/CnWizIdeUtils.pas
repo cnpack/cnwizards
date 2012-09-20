@@ -1040,7 +1040,7 @@ end;
 // 取编译器安装目录
 function GetInstallDir: string;
 begin
-  Result := ExtractFileDir(ExtractFileDir(Application.ExeName));
+  Result := _CnExtractFileDir(_CnExtractFileDir(Application.ExeName));
 end;
 
 {$IFDEF BDS}
@@ -1195,7 +1195,7 @@ begin
           end
           else                          // 相对路径
           begin
-            APath := LinkPath(ExtractFilePath(Project.FileName), APath);
+            APath := LinkPath(_CnExtractFilePath(Project.FileName), APath);
             if Paths.IndexOf(APath) < 0 then
               Paths.Add(APath);
           end;
@@ -1242,7 +1242,7 @@ begin
           // 增加工程中文件的路径
           for j := 0 to Project.GetModuleCount - 1 do
           begin
-            Path := ExtractFileDir(Project.GetModule(j).FileName);
+            Path := _CnExtractFileDir(Project.GetModule(j).FileName);
             if Paths.IndexOf(Path) < 0 then
               Paths.Add(Path);
           end;
@@ -1269,7 +1269,7 @@ begin
   if AProject = nil then
     AProject := CnOtaGetCurrentProject;
 
-  Ext := LowerCase(ExtractFileExt(AName));
+  Ext := LowerCase(_CnExtractFileExt(AName));
   if (Ext = '') or (Ext <> '.pas') then
     AName := AName + '.pas';
 
@@ -1278,7 +1278,7 @@ begin
   if AProject <> nil then
   begin
     for i := 0 to AProject.GetModuleCount - 1 do
-      if SameFileName(ExtractFileName(AProject.GetModule(i).FileName), AName) then
+      if SameFileName(_CnExtractFileName(AProject.GetModule(i).FileName), AName) then
       begin
         Result := AProject.GetModule(i).FileName;
         Exit;

@@ -144,7 +144,7 @@ procedure WrapButtonsCaption(ParentControl: TWinControl);
 implementation
 
 uses
-  CnBaseUtils, CnWizHelp;
+  CnCommon, CnBaseUtils, CnWizHelp;
 
 {$R *.dfm}
 
@@ -154,7 +154,7 @@ uses
 
 function AppPath: string;
 begin
-  Result := ExtractFilePath(ParamStr(0));
+  Result := _CnExtractFilePath(ParamStr(0));
 end;
 
 var
@@ -400,7 +400,7 @@ end;
 
 function DefaultMatchProc(const Mask, s: string): Boolean;
 begin
-  Result := MatchFileName(Mask, AnsiUpperCase(ExtractFileName(s)));
+  Result := MatchFileName(Mask, AnsiUpperCase(_CnExtractFileName(s)));
 end;
 
 function lsbFindKey(lsb: TListBox; s: string; SearchNext, SkipCurrent: Boolean; MatchProc: TStringMatchFunc): Boolean;
@@ -678,7 +678,7 @@ var
 begin
   if CnLanguageManager <> nil then
   begin
-    hfs1.LanguagePath := ExtractFilePath(ParamStr(0)) + csLangDir;
+    hfs1.LanguagePath := _CnExtractFilePath(ParamStr(0)) + csLangDir;
     LangID := GetWizardsLanguageID;
     for I := 0 to CnLanguageManager.LanguageStorage.LanguageCount - 1 do
     begin

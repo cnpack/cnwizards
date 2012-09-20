@@ -182,39 +182,39 @@ end;
 
 function EdtGetProjectDir: string;
 begin
-  Result := ExtractFilePath(CnOtaGetCurrentProjectFileName);
+  Result := _CnExtractFilePath(CnOtaGetCurrentProjectFileName);
   if Result = '' then
     Result := SCnUnknownNameResult;
 end;
 
 function EdtGetProjectName: string;
 begin
-  Result := ExtractFileName(CnOtaGetCurrentProjectFileName);
+  Result := _CnExtractFileName(CnOtaGetCurrentProjectFileName);
   if Result = '' then
     Result := SCnUnknownNameResult
   else
-    Result := ChangeFileExt(Result, '');
+    Result := _CnChangeFileExt(Result, '');
 end;
 
 function EdtGetProjectGroupDir: string;
 begin
-  Result := ExtractFilePath(CnOtaGetProjectGroupFileName);
+  Result := _CnExtractFilePath(CnOtaGetProjectGroupFileName);
   if Result = '' then
     Result := SCnUnknownNameResult;
 end;
 
 function EdtGetProjectGroupName: string;
 begin
-  Result := ExtractFileName(CnOtaGetProjectGroupFileName);
+  Result := _CnExtractFileName(CnOtaGetProjectGroupFileName);
   if Result = '' then
     Result := SCnUnknownNameResult
   else
-    Result := ChangeFileExt(Result, '');
+    Result := _CnChangeFileExt(Result, '');
 end;
 
 function EdtGetUnitName: string;
 begin
-  Result := ExtractFileName(CnOtaGetCurrentSourceFile);
+  Result := _CnExtractFileName(CnOtaGetCurrentSourceFile);
   if Result = '' then
     Result := SCnUnknownNameResult;
 end;

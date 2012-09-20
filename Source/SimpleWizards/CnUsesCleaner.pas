@@ -341,7 +341,7 @@ var
     begin
       Result := ReplaceToActualPath(AProject.ProjectOptions.Values['UnitOutputDir']);
       if Result <> '' then
-        Result := MakePath(LinkPath(ExtractFilePath(AProject.FileName), Result));
+        Result := MakePath(LinkPath(_CnExtractFilePath(AProject.FileName), Result));
     {$IFDEF DEBUG}
       CnDebugger.LogMsg('GetProjectDcuPath: ' + Result);
     {$ENDIF}
@@ -353,9 +353,9 @@ var
   function GetDcuName(const ADcuPath: string; AModule: IOTAModule): string;
   begin
     if ADcuPath = '' then
-      Result := ChangeFileExt(Module.FileName, csDcuExt)
+      Result := _CnChangeFileExt(Module.FileName, csDcuExt)
     else
-      Result := ChangeFileExt(ADcuPath + ExtractFileName(Module.FileName), csDcuExt);
+      Result := _CnChangeFileExt(ADcuPath + _CnExtractFileName(Module.FileName), csDcuExt);
   end;
 
   function ProcessAUnit(const ADcuName: string; AModule: IOTAModule;
@@ -418,7 +418,7 @@ var
             FreeAndNil(UsesInfo);
         end
         else if not QueryDlg(Format(SCnUsesCleanerProcessError,
-          [ExtractFileName(Module.FileName)])) then
+          [_CnExtractFileName(Module.FileName)])) then
         begin
           Exit;
         end;
@@ -459,7 +459,7 @@ begin
             end;
           end
           else
-            ErrorDlg(Format(SCnUsesCleanerUnitError, [ExtractFileName(Module.FileName)]))
+            ErrorDlg(Format(SCnUsesCleanerUnitError, [_CnExtractFileName(Module.FileName)]))
         end;
       ukCurrProject:
         begin
@@ -583,7 +583,7 @@ var
                 for j := 0 to AProject.GetModuleCount - 1 do
                   if SameText(AProject.GetModule(j).FormName, FormName) then
                   begin
-                    UnitName := ChangeFileExt(ExtractFileName(
+                    UnitName := _CnChangeFileExt(_CnExtractFileName(
                       AProject.GetModule(j).FileName), '');
                     if Units.IndexOf(UnitName) < 0 then
                       Units.Add(UnitName);
@@ -986,7 +986,7 @@ begin
                 Logs.Add('  Implementation Uses: ' + Impl.CommaText);
             end
             else if not QueryDlg(Format(SCnUsesCleanerProcessError,
-              [ExtractFileName(Buffer.FileName)])) then
+              [_CnExtractFileName(Buffer.FileName)])) then
               Exit;
           end;
         end;

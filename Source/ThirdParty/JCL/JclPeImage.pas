@@ -1096,6 +1096,7 @@ const
 implementation
 
 uses
+  CnCommon,
   JclLogic, JclResources, JclSysUtils, JclStrings, JclStringConversions;
 
 const
@@ -3235,7 +3236,7 @@ var
   FullName: array [0..MAX_PATH] of Char;
   FilePart: PChar;
 begin
-  Result := PathAddSeparator(ExtractFilePath(BasePath)) + ModuleName;
+  Result := PathAddSeparator(_CnExtractFilePath(BasePath)) + ModuleName;
   if FileExists(Result) then
     Exit;
   if SearchPath(nil, PChar(ModuleName), nil, Length(FullName), FullName, FilePart) = 0 then
@@ -3246,7 +3247,7 @@ end;
 
 function TJclPeImage.ExpandModuleName(const ModuleName: string): TFileName;
 begin
-  Result := ExpandBySearchPath(ModuleName, ExtractFilePath(FFileName));
+  Result := ExpandBySearchPath(ModuleName, _CnExtractFilePath(FFileName));
 end;
 
 function TJclPeImage.GetCertificateList: TJclPeCertificateList;
@@ -4522,7 +4523,7 @@ begin
     for I := 0 to ImportList.Count - 1 do
     begin
       Name := ImportList[I];
-      if StrSame(ExtractFileExt(Name), BinaryExtensionPackage) then
+      if StrSame(_CnExtractFileExt(Name), BinaryExtensionPackage) then
       begin
         if Descriptions then
           List.Add(Name + '=' + GetPackageDescription(PChar(Name)))
@@ -4592,7 +4593,7 @@ var
   begin
     Result := False;
     ImportName := AnsiUpperCase(ImportName);
-    if StrSame(ExtractFileExt(ImportName), BinaryExtensionPackage) then
+    if StrSame(_CnExtractFileExt(ImportName), BinaryExtensionPackage) then
     begin
       ImportName := PathExtractFileNameNoExt(ImportName);
       if (Length(ImportName) = 5) and
@@ -4617,7 +4618,7 @@ begin
       end;
     if FPackageCompilerVersion = 0 then
     begin
-      ImportName := ExtractFileName(FileName);
+      ImportName := _CnExtractFileName(FileName);
       CheckName;
     end;  
   end;
@@ -4691,7 +4692,7 @@ var
     try
       while not Terminated and (SearchResult = 0) do
       begin
-        F_FileName := PathAddSeparator(ExtractFilePath(DirName)) + Se.Name;
+        F_FileName := PathAddSeparator(_CnExtractFilePath(DirName)) + Se.Name;
         F_Process := True;
         FPeImage.FileName := F_FileName;
         if Assigned(FOnProcessFile) then
@@ -4958,7 +4959,7 @@ function PeRebaseImage32(const ImageName: TFileName; NewBase: TJclAddr32;
     FirstChar: Char;
     ModuleName: string;
   begin
-    ModuleName := ExtractFileName(ImageName);
+    ModuleName := _CnExtractFileName(ImageName);
     if Length(ModuleName) > 0 then
       FirstChar := UpCase(ModuleName[1])
     else
@@ -4988,7 +4989,7 @@ function PeRebaseImage64(const ImageName: TFileName; NewBase: TJclAddr64;
     FirstChar: Char;
     ModuleName: string;
   begin
-    ModuleName := ExtractFileName(ImageName);
+    ModuleName := _CnExtractFileName(ImageName);
     if Length(ModuleName) > 0 then
       FirstChar := UpCase(ModuleName[1])
     else

@@ -868,7 +868,7 @@ const
 implementation
 
 uses
-  JclResources, JclSysUtils, JclStringConversions;
+  CnCommon, JclResources, JclSysUtils, JclStringConversions;
 
 const
   TurboDebuggerSymbolExt = '.tds';
@@ -1674,7 +1674,7 @@ var
 begin
   Result := False;
   DataStream := nil;
-  TdsFileName := ChangeFileExt(FileName, TurboDebuggerSymbolExt);
+  TdsFileName := _CnChangeFileExt(FileName, TurboDebuggerSymbolExt);
   if FileExists(TdsFileName) then
   begin
     TempStream := TJclFileMappingStream.Create(TdsFileName, fmOpenRead or fmShareDenyNone);

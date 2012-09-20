@@ -453,7 +453,7 @@ begin
     ModuleIsOpen := CnOtaIsFileOpen(ModuleInfo.FileName);
     CorResultCount := FCorrectItemList.Count;
 
-    Ext := UpperCase(ExtractFileExt(ModuleInfo.FileName));
+    Ext := UpperCase(_CnExtractFileExt(ModuleInfo.FileName));
     if (Ext = '.DCR') then
       Continue;
 
@@ -578,7 +578,7 @@ begin
       AViewItem.ImageIndex := 1;
       AViewItem.Caption := SCnCorrectPropertyStateWarning;
     end;
-    AViewItem.SubItems.Add(ChangeFileExt(ExtractFileName(AItem.FileName), ''));
+    AViewItem.SubItems.Add(_CnChangeFileExt(_CnExtractFileName(AItem.FileName), ''));
     AViewItem.SubItems.Add(AItem.CorrComp.Name + '.' + AItem.PropDef.PropName);
     with AItem do
     begin
@@ -714,9 +714,9 @@ begin
     AItem := TCorrectItem(FCorrectItemList.Items[Index]);
 
   if IsDelphiRuntime then
-    Module := CnOtaGetModule(ChangeFileExt(AItem.FileName, '.pas'))
+    Module := CnOtaGetModule(_CnChangeFileExt(AItem.FileName, '.pas'))
   else
-    Module := CnOtaGetModule(ChangeFileExt(AItem.FileName, '.cpp'));
+    Module := CnOtaGetModule(_CnChangeFileExt(AItem.FileName, '.cpp'));
 
   if not Assigned(Module) then
   begin

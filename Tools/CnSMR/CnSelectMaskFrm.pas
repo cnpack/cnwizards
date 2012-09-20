@@ -207,7 +207,7 @@ var
 begin
   ss := TStringList.Create;
   try
-    sFile := MakePath(ExtractFileDir(ParamStr(0))) + 'Masks.txt';
+    sFile := MakePath(_CnExtractFileDir(ParamStr(0))) + 'Masks.txt';
     if FileExists(sFile) then
     begin
       StringsLoadFromFileWithSection(ss, sFile, 'DeleteMasks');

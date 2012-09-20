@@ -546,7 +546,7 @@ procedure TCnScriptWizardForm.AddNewScript(const Script: string);
 begin
   actAdd.Execute;
   OnControlChanged(nil);
-  edtName.Text := ChangeFileExt(ExtractFileName(Script), '');
+  edtName.Text := _CnChangeFileExt(_CnExtractFileName(Script), '');
   edtFileName.Text := Script;
   ActiveControl := edtName;
 end;
@@ -742,16 +742,16 @@ end;
 
 procedure TCnScriptWizardForm.btnFileNameClick(Sender: TObject);
 begin
-  dlgOpenFile.InitialDir := ExtractFilePath(edtFileName.Text);
-  dlgOpenFile.FileName := ExtractFileName(edtFileName.Text);
+  dlgOpenFile.InitialDir := _CnExtractFilePath(edtFileName.Text);
+  dlgOpenFile.FileName := _CnExtractFileName(edtFileName.Text);
   if dlgOpenFile.Execute then
     edtFileName.Text := dlgOpenFile.FileName;
 end;
 
 procedure TCnScriptWizardForm.btnOpenClick(Sender: TObject);
 begin
-  dlgOpenIcon.InitialDir := ExtractFilePath(edtIcon.Text);
-  dlgOpenIcon.FileName := ExtractFileName(edtIcon.Text);
+  dlgOpenIcon.InitialDir := _CnExtractFilePath(edtIcon.Text);
+  dlgOpenIcon.FileName := _CnExtractFileName(edtIcon.Text);
   if dlgOpenIcon.Execute then
     edtIcon.Text := dlgOpenIcon.FileName;
 end;

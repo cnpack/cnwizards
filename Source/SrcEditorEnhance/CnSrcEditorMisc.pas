@@ -576,9 +576,9 @@ begin
     strExecute := AnsiString(Format(ExploreCmdLine, [CnOtaGetCurrentSourceFile]));
     WinExec(PAnsiChar(strExecute), SW_SHOWNORMAL);
   end
-  else if DirectoryExists(ExtractFileDir(CnOtaGetCurrentSourceFile)) then
+  else if DirectoryExists(_CnExtractFileDir(CnOtaGetCurrentSourceFile)) then
   begin
-    strExecute := AnsiString(Format(ExploreCmdLine, [ExtractFileDir(CnOtaGetCurrentSourceFile)]));
+    strExecute := AnsiString(Format(ExploreCmdLine, [_CnExtractFileDir(CnOtaGetCurrentSourceFile)]));
     WinExec(PAnsiChar(strExecute), SW_SHOWNORMAL);
   end;
 end;
@@ -592,7 +592,7 @@ procedure TCnSrcEditorMisc.OnExploreMenuCreated(Sender: TObject;
   MenuItem: TMenuItem);
 begin
   MenuItem.Caption := Format(SCnMenuExploreCaption,
-    [ExtractFileName(CnOtaGetCurrentSourceFile)]);
+    [_CnExtractFileName(CnOtaGetCurrentSourceFile)]);
 end;
 
 procedure TCnSrcEditorMisc.OnBlockToolsMenuCreated(Sender: TObject; MenuItem: TMenuItem);

@@ -777,7 +777,7 @@ begin
     begin
       cols := Max(1, Bmp.Width div ilList.Width);
       rows := Max(1, Bmp.Height div ilList.Height);
-      if QueryDlg(Format(SCnImageListSepBmp, [ExtractFileName(FileName), cols * rows])) then
+      if QueryDlg(Format(SCnImageListSepBmp, [_CnExtractFileName(FileName), cols * rows])) then
       begin
         for i := 0 to rows - 1 do
           for j := 0 to cols - 1 do
@@ -924,7 +924,7 @@ begin
       for i := 0 to dlgOpen.Files.Count - 1 do
       begin
         fn := dlgOpen.Files[i];
-        if SameText(ExtractFileExt(fn), '.bmp') then
+        if SameText(_CnExtractFileExt(fn), '.bmp') then
         begin
           bmp := TBitmap.Create;
           try
@@ -934,7 +934,7 @@ begin
           end;
           if bmp.Empty then
           begin
-            ErrorDlg(SCnImageListInvalidFile + ExtractFileName(fn));
+            ErrorDlg(SCnImageListInvalidFile + _CnExtractFileName(fn));
             bmp.Free;
           end
           else
@@ -942,7 +942,7 @@ begin
             AddBmp(fn, bmp, False);
           end;
         end
-        else if SameText(ExtractFileExt(fn), '.ico') then
+        else if SameText(_CnExtractFileExt(fn), '.ico') then
         begin
           ico := TIcon.Create;
           try
@@ -952,7 +952,7 @@ begin
           end;
           if ico.Empty then
           begin
-            ErrorDlg(SCnImageListInvalidFile + ExtractFileName(fn));
+            ErrorDlg(SCnImageListInvalidFile + _CnExtractFileName(fn));
             ico.Free;
           end
           else
@@ -960,7 +960,7 @@ begin
             AddIco(ico);
           end;
         end
-        else if SameText(ExtractFileExt(fn), '.png') then
+        else if SameText(_CnExtractFileExt(fn), '.png') then
         begin
           tmp := CnGetTempFileName('.bmp');
           if CnConvertPngToBmp(fn, tmp) then
@@ -973,7 +973,7 @@ begin
             end;
             if bmp.Empty then
             begin
-              ErrorDlg(SCnImageListInvalidFile + ExtractFileName(fn));
+              ErrorDlg(SCnImageListInvalidFile + _CnExtractFileName(fn));
               bmp.Free;
             end
             else
@@ -984,7 +984,7 @@ begin
           end
           else
           begin
-            ErrorDlg(SCnImageListInvalidFile + ExtractFileName(fn));
+            ErrorDlg(SCnImageListInvalidFile + _CnExtractFileName(fn));
           end;
         end;
       end;
@@ -1489,7 +1489,7 @@ begin
         end;
 
         try
-          if SameText(ExtractFileExt(dlgSave.FileName), '.png') then
+          if SameText(_CnExtractFileExt(dlgSave.FileName), '.png') then
           begin
             tmp := CnGetTempFileName('.bmp');
             bmp.SaveToFile(tmp);

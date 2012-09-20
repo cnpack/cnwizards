@@ -39,7 +39,8 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, Messages, SysUtils, IniFiles, ShellAPI, CnLangMgr, CnWideStrings;
+  Windows, Messages, SysUtils, IniFiles, ShellAPI,
+  CnCommon, CnLangMgr, CnWideStrings;
 
 const
   csSection = 'CnWizards';
@@ -62,7 +63,7 @@ var
   ModName: array[0..MAX_PATH] of Char;
 begin
   SetString(Result, ModName, GetModuleFileName(HInstance, ModName, SizeOf(ModName)));
-  Result := ExtractFilePath(Result);
+  Result := _CnExtractFilePath(Result);
 end;
 
 // 根据语言取文件名

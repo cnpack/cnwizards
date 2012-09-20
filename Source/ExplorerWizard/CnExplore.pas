@@ -491,7 +491,7 @@ procedure TCnExploreForm.mnuitmFCurProjClick(Sender: TObject);
 var
   CurPath: string;
 begin
-  CurPath := ExtractFilePath(CnOtaGetCurrentProjectFileName);
+  CurPath := _CnExtractFilePath(CnOtaGetCurrentProjectFileName);
   if CurPath <> '' then
     shltv.Path := CurPath;
 end;
@@ -500,7 +500,7 @@ procedure TCnExploreForm.mnuitmFCurFileClick(Sender: TObject);
 var
   CurPath: string;
 begin
-  CurPath := ExtractFilePath(CnOtaGetFileNameOfCurrentModule);
+  CurPath := _CnExtractFilePath(CnOtaGetFileNameOfCurrentModule);
   if CurPath <> '' then
     shltv.Path := CurPath;
 end;
@@ -598,7 +598,7 @@ procedure TCnExploreForm.shlstAddFolder(Sender: TObject;
     if FFileFilterList.Count > 0 then
       for i := 0 to FFileFilterList.Count - 1 do
       begin
-        XExt := ExtractFileExt(aFile);
+        XExt := _CnExtractFileExt(aFile);
         if UpperCase('*' + XExt) = UpperCase(FFileFilterList.Strings[i]) then
         begin
           Result := True;
@@ -740,7 +740,7 @@ begin
   FDirectoryMenu := TStringList.Create;
 
   //设置路径为当前工程的路径
-  CurPath := ExtractFilePath(CnOtaGetCurrentProjectFileName);
+  CurPath := _CnExtractFilePath(CnOtaGetCurrentProjectFileName);
   if CurPath <> '' then
     shltv.Path := CurPath;
 end;

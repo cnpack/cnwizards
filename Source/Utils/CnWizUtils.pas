@@ -852,7 +852,7 @@ begin
   
   // 从文件中装载
   try
-    if SameFileName(ExtractFileName(ResName), ResName) then
+    if SameFileName(_CnExtractFileName(ResName), ResName) then
       FileName := WizOptions.IconPath + ResName + SCnIcoFileExt
     else
       FileName := ResName;
@@ -890,7 +890,7 @@ begin
   
   // 从文件中装载
   try
-    if SameFileName(ExtractFileName(ResName), ResName) then
+    if SameFileName(_CnExtractFileName(ResName), ResName) then
       FileName := WizOptions.IconPath + ResName + SCnBmpFileExt
     else
       FileName := ResName;
@@ -1310,7 +1310,7 @@ end;
 // 取得 IDE 根目录
 function GetIdeRootDirectory: string;
 begin
-  Result := ExtractFilePath(ExtractFileDir(Application.ExeName));
+  Result := _CnExtractFilePath(_CnExtractFileDir(Application.ExeName));
 end;
 
 // 将 $(DELPHI) 这样的符号替换为 Delphi 所在路径
@@ -1890,7 +1890,7 @@ end;
   
 function ExtractUpperFileExt(const FileName: string): string;
 begin
-  Result := UpperCase(ExtractFileExt(FileName));
+  Result := UpperCase(_CnExtractFileExt(FileName));
 end;
 
 procedure AssertIsDprOrPas(const FileName: string);
@@ -2628,7 +2628,7 @@ end;
 // 返回单元名称
 function CnOtaGetUnitName(Editor: IOTASourceEditor): string;
 begin
-  Result := ExtractFileName(Editor.FileName);
+  Result := _CnExtractFileName(Editor.FileName);
 end;
 
 // 取当前工程组
@@ -2826,8 +2826,8 @@ begin
   IProject := CnOtaGetCurrentProject;
   if Assigned(IProject) then
   begin
-    Result := ExtractFileName(IProject.FileName);
-    Result := ChangeFileExt(Result, '');
+    Result := _CnExtractFileName(IProject.FileName);
+    Result := _CnChangeFileExt(Result, '');
   end;
 end;
 
@@ -2847,12 +2847,12 @@ end;
 function CnOtaGetCurrentProjectFileNameEx: string;
 begin
   // 修改以符合返回全路径的规则
-  Result := ChangeFileExt((CnOtaGetCurrentProjectFileName), '');
+  Result := _CnChangeFileExt((CnOtaGetCurrentProjectFileName), '');
 
   if Result <> '' then
     Exit;
 
-  Result := ChangeFileExt((CnOtaGetProject.FileName), '');
+  Result := _CnChangeFileExt((CnOtaGetProject.FileName), '');
   if Result <> '' then
     Exit;
 
@@ -2908,7 +2908,7 @@ var
 begin
   CurrentModule := CnOtaGetCurrentModule;
   if Assigned(CurrentModule) then
-    Result := ChangeFileExt(CurrentModule.FileName, '.dfm')
+    Result := _CnChangeFileExt(CurrentModule.FileName, '.dfm')
   else
     Result := '';
 end;
@@ -3667,11 +3667,11 @@ begin
   if IsForm(FileName) then
   begin
     {$IFDEF BCB}
-    AltName := ChangeFileExt(FileName, '.cpp');
+    AltName := _CnChangeFileExt(FileName, '.cpp');
     if CnOtaIsFileOpen(AltName) or FileExists(AltName) then
       Result := AltName;
     {$ENDIF BCB}
-    AltName := ChangeFileExt(FileName, '.pas');
+    AltName := _CnChangeFileExt(FileName, '.pas');
     if CnOtaIsFileOpen(AltName) or FileExists(AltName) then
       Result := AltName;
   end;
@@ -4070,27 +4070,27 @@ begin
   Result := CnOtaGetCurrentSourceFile;
   if IsForm(Result) then
   begin
-    TmpName := ChangeFileExt(Result, '.pas');
+    TmpName := _CnChangeFileExt(Result, '.pas');
     if CnOtaIsFileOpen(TmpName) then
       Result := TmpName
     else
     begin
-      TmpName := ChangeFileExt(Result, '.cpp');
+      TmpName := _CnChangeFileExt(Result, '.cpp');
       if CnOtaIsFileOpen(TmpName) then
         Result := TmpName
       else
       begin
-        TmpName := ChangeFileExt(Result, '.h');
+        TmpName := _CnChangeFileExt(Result, '.h');
         if CnOtaIsFileOpen(TmpName) then
           Result := TmpName
         else
         begin
-          TmpName := ChangeFileExt(Result, '.cc');
+          TmpName := _CnChangeFileExt(Result, '.cc');
           if CnOtaIsFileOpen(TmpName) then
             Result := TmpName
           else
           begin
-            TmpName := ChangeFileExt(Result, '.hh');
+            TmpName := _CnChangeFileExt(Result, '.hh');
             if CnOtaIsFileOpen(TmpName) then
               Result := TmpName
           end;

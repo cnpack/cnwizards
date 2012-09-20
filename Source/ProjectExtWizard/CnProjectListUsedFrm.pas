@@ -147,12 +147,12 @@ begin
   begin
     if IsForm(FCurFile) then
     begin
-      TmpName := ChangeFileExt(FCurFile, '.pas');
+      TmpName := _CnChangeFileExt(FCurFile, '.pas');
       if CnOtaIsFileOpen(TmpName) then
         FCurFile := TmpName
       else
       begin
-        TmpName := ChangeFileExt(FCurFile, '.cpp');
+        TmpName := _CnChangeFileExt(FCurFile, '.cpp');
         if CnOtaIsFileOpen(TmpName) then
           FCurFile := TmpName;
       end;
@@ -318,7 +318,7 @@ var
   CurrentModule: IOTAModule;
 begin
   CurrentModule := CnOtaGetCurrentModule;
-  Result := ChangeFileExt(ExtractFileName(CurrentModule.FileName), '');
+  Result := _CnChangeFileExt(_CnExtractFileName(CurrentModule.FileName), '');
 end;
 
 function TCnProjectListUsedForm.GetSelectedFileName: string;

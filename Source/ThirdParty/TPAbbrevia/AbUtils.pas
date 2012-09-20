@@ -356,6 +356,7 @@ const
 implementation
 
 uses
+  CnCommon,
   AbConst,
   AbExcept;
 
@@ -570,7 +571,7 @@ begin
   Result := (DType = DRIVE_REMOVABLE);
 {$ENDIF}
 {$IFDEF LINUX}
-  Path2 := LowerCase(ExtractFilePath(Path));
+  Path2 := LowerCase(_CnExtractFilePath(Path));
   {LINUX -- Following may not cover all the bases}
   Result := Path2 = '/mnt/floppy';
 {$ENDIF}
@@ -613,7 +614,7 @@ var
   PathBuf : array[0..255] of char;
 begin
   Result := -1;
-  StrPCopy(PathBuf, AbAddBackSlash(ExtractFilePath(Path)));
+  StrPCopy(PathBuf, AbAddBackSlash(_CnExtractFilePath(Path)));
   Succeeded := GetDiskFreeSpaceEx(PathBuf, FreeAvailable, TotalSpace, @TotalFree);
   if Succeeded then
     Result := FreeAvailable;
@@ -648,7 +649,7 @@ var
   Rslt : Integer;
 begin
   Result := -1;
-  Rslt := statfs(PAnsiChar(ExtractFilePath(Path)), FStats);
+  Rslt := statfs(PAnsiChar(_CnExtractFilePath(Path)), FStats);
   if Rslt = 0 then
     Result := Int64(FStats.f_bAvail) * Int64(FStats.f_bsize);
 end;
@@ -659,7 +660,7 @@ var
   Rslt : Integer;
 begin
   Result := -1;
-  Rslt := statfs(PAnsiChar(ExtractFilePath(Path)), FStats);
+  Rslt := statfs(PAnsiChar(_CnExtractFilePath(Path)), FStats);
   if Rslt = 0 then
     Result := Int64(FStats.f_blocks) * Int64(FStats.f_bsize);
 end;
@@ -706,7 +707,7 @@ begin
       else begin { path is not UNC}
         { determine drive type }
         DrvTyp := GetDriveType(PChar(DrvStr));                       {!!.02}
-        {DrvTyp := GetDriveType(PAnsiChar(ExtractFilePath(ArchiveName))); }{!!.02}
+        {DrvTyp := GetDriveType(PAnsiChar(_CnExtractFilePath(ArchiveName))); }{!!.02}
         case DrvTyp of
           0 {type undeterminable} : Size := -1; { fail }
           1 {root non-existant}   : Size := -1; { fail }
@@ -774,14 +775,14 @@ var
 begin
   FileName := UpperCase( FileName );
   FileMask := UpperCase( FileMask );
-  MaskDir := ExtractFilePath( FileMask );
+  MaskDir := _CnExtractFilePath( FileMask );
   if MaskDir = '' then
     DirMatch := True
   else
-    DirMatch := AbPatternMatch( ExtractFilePath( FileName ), 1, MaskDir, 1 );
+    DirMatch := AbPatternMatch( _CnExtractFilePath( FileName ), 1, MaskDir, 1 );
 
-  Result := DirMatch and AbPatternMatch( ExtractFileName( FileName ), 1,
-                                       ExtractFileName( FileMask ), 1 );
+  Result := DirMatch and AbPatternMatch( _CnExtractFileName( FileName ), 1,
+                                       _CnExtractFileName( FileMask ), 1 );
 end;
 { -------------------------------------------------------------------------- }
 procedure AbFindFiles( const FileMask : string; SearchAttr : Integer;
@@ -795,9 +796,9 @@ begin
   Found := FindFirst( FileMask, SearchAttr, SR );
   if Found = 0 then begin
     try
-      NameMask := UpperCase(ExtractFileName(FileMask));
+      NameMask := UpperCase(_CnExtractFileName(FileMask));
       while Found = 0 do begin
-        NewFile := ExtractFilePath( FileMask ) + SR.Name;
+        NewFile := _CnExtractFilePath( FileMask ) + SR.Name;
         if AbPatternMatch(UpperCase(SR.Name), 1, NameMask, 1) then
         FileList.Add( NewFile );
         Found := FindNext( SR );
@@ -808,7 +809,7 @@ begin
   end;
   if not Recurse then
     Exit;
-  NewFile := ExtractFilePath( FileMask );
+  NewFile := _CnExtractFilePath( FileMask );
   if ( NewFile <> '' ) and ( NewFile[Length(NewFile)] <> AbPathDelim) then
     NewFile := NewFile + AbPathDelim;
   NewFile := NewFile + AbAnyFile;
@@ -820,8 +821,8 @@ begin
         if ( SR.Name <> AbThisDir ) and
            ( SR.Name <> AbParentDir ) and
            ((SR.Attr and faDirectory) > 0 ) then
-          AbFindFiles( ExtractFilePath( NewFile ) + SR.Name + AbPathDelim +
-                       ExtractFileName( FileMask ), SearchAttr,          {!!.04}
+          AbFindFiles( _CnExtractFilePath( NewFile ) + SR.Name + AbPathDelim +
+                       _CnExtractFileName( FileMask ), SearchAttr,          {!!.04}
                        FileList, True );
         Found := FindNext( SR );
       end;
@@ -955,12 +956,12 @@ var
   I : Word;
 begin
   I := Value mod 100;
-  Ext := ExtractFileExt(Filename);
+  Ext := _CnExtractFileExt(Filename);
   if (Length(Ext) < 2) then
     Ext := '.' + Format('%.2d', [I])
   else
     Ext := Ext[1] + Ext[2] + Format('%.2d', [I]);
-  Filename := ChangeFileExt(Filename, Ext);
+  Filename := _CnChangeFileExt(Filename, Ext);
 end;
 { -------------------------------------------------------------------------- }
 procedure AbParseFileName( FileSpec : string;
@@ -974,8 +975,8 @@ var
 begin
   if Pos( AB_ZIPPATHDELIM, FileSpec ) > 0 then
     AbUnfixName( FileSpec );
-  FileName := ExtractFileName( FileSpec );
-  Path := ExtractFilePath( FileSpec );
+  FileName := _CnExtractFileName( FileSpec );
+  Path := _CnExtractFilePath( FileSpec );
   {see how much of the path currently exists}
   iColon := Pos( ':', Path );
   if Pos( '\\', Path ) > 0 then begin

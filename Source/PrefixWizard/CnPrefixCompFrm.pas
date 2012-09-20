@@ -173,7 +173,7 @@ begin
       begin
         Checked := FList[i].Active;
         Caption := FList[i].ProjectName;
-        SubItems.Add(ExtractFileName(FList[i].FormEditor.FileName));
+        SubItems.Add(_CnExtractFileName(FList[i].FormEditor.FileName));
         SubItems.Add(FList[i].OldName);
         SubItems.Add(FList[i].Component.ClassName);
         SubItems.Add(CnGetComponentText(FList[i].Component));
@@ -335,7 +335,7 @@ begin
 
     // 取工程名
     if Assigned(FormEditor.Module) and (FormEditor.Module.OwnerCount > 0) then
-      ProjectName := ExtractFileName(FormEditor.Module.Owners[0].FileName)
+      ProjectName := _CnExtractFileName(FormEditor.Module.Owners[0].FileName)
     else
       ProjectName := '';
 

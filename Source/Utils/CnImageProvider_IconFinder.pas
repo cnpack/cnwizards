@@ -125,7 +125,7 @@ begin
                 Item.Size := size;
                 Item.Id := GetNodeTextStr(icon, 'id', '');
                 Item.Url := GetNodeTextStr(icon, 'image', '');
-                Item.Ext := ExtractFileExt(Item.Url);
+                Item.Ext := _CnExtractFileExt(Item.Url);
               end;
             end;
           end;

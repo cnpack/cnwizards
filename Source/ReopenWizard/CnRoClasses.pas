@@ -740,7 +740,7 @@ var
   var
     Index: Integer;
   begin
-    S := ExtractFileExt(S);
+    S := _CnExtractFileExt(S);
     Index := IndexStr(S, [
       '.BPG',
       '.DPR', '.BPR', '.BPF',

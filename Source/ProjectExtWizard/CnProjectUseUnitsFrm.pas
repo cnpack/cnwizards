@@ -208,11 +208,11 @@ begin
           if lvList.Items[I].Selected then
           begin
             if IsUseUnit then
-              AName := ChangeFileExt(TCnUnitInfo(lvList.Items[I].Data).FileName, '')
+              AName := _CnChangeFileExt(TCnUnitInfo(lvList.Items[I].Data).FileName, '')
             else
-              AName := ChangeFileExt(TCnFormInfo(lvList.Items[I].Data).Name, '');
+              AName := _CnChangeFileExt(TCnFormInfo(lvList.Items[I].Data).Name, '');
 
-            AName := ExtractFileName(AName);
+            AName := _CnExtractFileName(AName);
             Idx := OriginalList.IndexOf(AName);
             if Idx >= 0 then
             begin
@@ -256,7 +256,7 @@ var
   CurrentModule: IOTAModule;
 begin
   CurrentModule := CnOtaGetCurrentModule;
-  Result := ChangeFileExt(ExtractFileName(CurrentModule.FileName), '');
+  Result := _CnChangeFileExt(_CnExtractFileName(CurrentModule.FileName), '');
 end;
 
 function TCnProjectUseUnitsForm.GetSelectedFileName: string;
@@ -354,7 +354,7 @@ begin
 {$ENDIF}
 
         ProjectInfo := TCnProjectInfo.Create;
-        ProjectInfo.Name := ExtractFileName(IProject.FileName);
+        ProjectInfo.Name := _CnExtractFileName(IProject.FileName);
         ProjectInfo.FileName := IProject.FileName;
 
         // Project 源文件信息无需添加到 UnitInfo
@@ -367,15 +367,15 @@ begin
           if UnitFileName = '' then
             Continue;
 
-          if SameText(ExtractFileExt(UnitFileName), '.RES') then
+          if SameText(_CnExtractFileExt(UnitFileName), '.RES') then
             Continue;
 
           UnitInfo := TCnUnitInfo.Create;
           with UnitInfo do
           begin
-            Name := ChangeFileExt(ExtractFileName(UnitFileName), '');
+            Name := _CnChangeFileExt(_CnExtractFileName(UnitFileName), '');
             FileName := UnitFileName;
-            Project := ExtractFileName(IProject.FileName);
+            Project := _CnExtractFileName(IProject.FileName);
 
           {$IFDEF SUPPORT_MODULETYPE}
             // todo: Check ModuleInfo.ModuleType
@@ -427,7 +427,7 @@ begin
       for i := 0 to ProjectList.Count - 1 do
       begin
         ProjectInfo := TCnProjectInfo(ProjectList[i]);
-        Items.AddObject(ExtractFileName(ProjectInfo.Name), ProjectInfo);
+        Items.AddObject(_CnExtractFileName(ProjectInfo.Name), ProjectInfo);
       end;
     end;
   end;
@@ -452,7 +452,7 @@ var
       if (MatchSearchText = '') or
         RegExpContainsText(FRegExpr, UnitInfo.Name, MatchSearchText, not IsMatchAny) then
       begin
-        if IsCurrent and (OriginalList.IndexOf(ChangeFileExt(UnitInfo.Name, '')) < 0) then // 当前工程，不在列表内，不加
+        if IsCurrent and (OriginalList.IndexOf(_CnChangeFileExt(UnitInfo.Name, '')) < 0) then // 当前工程，不在列表内，不加
           Continue;
 
         if UnitInfo.UnitType <> utUnknown then
@@ -492,7 +492,7 @@ begin
       for i := 0 to ProjectList.Count - 1 do
       begin
         ProjectInfo := TCnProjectInfo(ProjectList[i]);
-        if ChangeFileExt(ProjectInfo.FileName, '') = CnOtaGetCurrentProjectFileNameEx then
+        if _CnChangeFileExt(ProjectInfo.FileName, '') = CnOtaGetCurrentProjectFileNameEx then
           DoAddProject(ProjectInfo, True);
       end;
     end
@@ -505,7 +505,7 @@ begin
           if TCnProjectInfo(cbbProjectList.Items.Objects[cbbProjectList.ItemIndex]).FileName
             = ProjectInfo.FileName then
           begin
-            DoAddProject(ProjectInfo, ChangeFileExt(ProjectInfo.FileName, '') = CnOtaGetCurrentProjectFileNameEx);
+            DoAddProject(ProjectInfo, _CnChangeFileExt(ProjectInfo.FileName, '') = CnOtaGetCurrentProjectFileNameEx);
           end;
       end;
     end;

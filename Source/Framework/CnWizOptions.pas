@@ -323,8 +323,8 @@ begin
   FCompilerRegPath := Svcs.GetBaseRegistryKey;
   GetModuleFileName(hInstance, ModuleName, MAX_PATH);
   FDllName := ModuleName;
-  FDllPath := ExtractFilePath(FDllName);
-  FCompilerPath := ExtractFilePath(ExtractFileDir(Application.ExeName));
+  FDllPath := _CnExtractFilePath(FDllName);
+  FCompilerPath := _CnExtractFilePath(_CnExtractFileDir(Application.ExeName));
 
   FLangPath := MakePath(FDllPath + SCnWizLangPath);
   FDataPath := MakePath(FDllPath + SCnWizDataPath);

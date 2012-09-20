@@ -39,7 +39,7 @@ interface
 {$I CnWizards.inc}
 
 uses
-  SysUtils, Windows, Classes, CnBaseUtils;
+  SysUtils, Windows, Classes, CnCommon, CnBaseUtils;
 
 const
   csDefaultPackageExt = '.bpl';
@@ -299,7 +299,7 @@ begin
         for j := 0 to P.RequiredPackages.Count - 1 do
         begin
           sRequiredPackage := P.RequiredPackages[j];
-          if ExtractFileExt(sRequiredPackage) = '' then
+          if _CnExtractFileExt(sRequiredPackage) = '' then
           begin
             sRequiredPackage := sRequiredPackage + csDefaultPackageExt;
           end;

@@ -534,7 +534,7 @@ begin
         if (IsDir and CachedDelDirs) or (CachedDelFiles and (not IsDir)) then
         begin
           WillDelete := FileMatchesMasks(
-            ExtractFileName(MakeDir(sri.Name)),
+            _CnExtractFileName(MakeDir(sri.Name)),
             ssMasks, CachedCaseSensitive);
           if WillDelete then
           begin
@@ -764,7 +764,7 @@ begin
   begin
     if chbGroup.Checked then
     begin
-      Result := ExtractFileName(s);
+      Result := _CnExtractFileName(s);
       Exit;
     end;
 
@@ -939,7 +939,7 @@ var
 begin
   ss := TStringList.Create;
   try
-    sFile := MakePath(ExtractFileDir(ParamStr(0))) + 'Masks.txt';
+    sFile := MakePath(_CnExtractFileDir(ParamStr(0))) + 'Masks.txt';
     if FileExists(sFile) then
     begin
       StringsLoadFromFileWithSection(ss, sFile, 'SearchMasks');

@@ -122,7 +122,7 @@ implementation
 {$R *.DFM}
 
 uses
-  ToolsAPI, CnRoWizard, CnLangMgr;
+  ToolsAPI, CnCommon, CnRoWizard, CnLangMgr;
 
 {***************************** TCnFilesListForm *******************************}
 
@@ -346,8 +346,8 @@ begin
       with Items.Add, PRoFileEntry(Files.Nodes[I])^ do
       begin
         ImageIndex := 2;
-        Caption := ExtractFileName(FileName);
-        SubItems.Add(ExtractFilePath(FileName));
+        Caption := _CnExtractFileName(FileName);
+        SubItems.Add(_CnExtractFilePath(FileName));
         if OpenedTime <> '' then
           SubItems.Add(OpenedTime)
         else

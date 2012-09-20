@@ -219,6 +219,7 @@ function AbDetermineArcType(const FN : string; AssertType : TAbArchiveType) : TA
 implementation
 
 uses
+  CnCommon,
   AbConst;
 
 { TAbBaseBrowser implementation ======================================= }
@@ -492,7 +493,7 @@ var
   Ext : string;
   FS : TFileStream;
 begin
-  Ext := UpperCase(ExtractFileExt(FN));
+  Ext := UpperCase(_CnExtractFileExt(FN));
   Result := atUnknown;
 
   if AssertType = atUnknown then begin { use file extension as first guess }
@@ -512,7 +513,7 @@ begin
     else begin  { file exists so guess that's what it is and double check }
       FS := TFileStream.Create(FN, fmOpenRead or fmShareDenyNone);
       try
-        Ext := UpperCase(ExtractFileExt(FN));
+        Ext := UpperCase(_CnExtractFileExt(FN));
 
         if Ext = '.EXE' then
           Result := VerifySelfExtracting(FS);

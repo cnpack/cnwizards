@@ -273,7 +273,7 @@ var
 implementation
 
 uses
-  CnViewCore, CnGetThread, CnFilterFrm, CnViewOption, CnWizHelp;
+  CnCommon, CnViewCore, CnGetThread, CnFilterFrm, CnViewOption, CnWizHelp;
 
 {$R *.DFM}
 
@@ -363,7 +363,7 @@ begin
   if GetCWUseCustomUserDir then
     LoadOptions(GetCWUserPath + SCnOptionFileName)
   else
-    LoadOptions(ExtractFilePath(Application.ExeName) + SCnOptionFileName);
+    LoadOptions(_CnExtractFilePath(Application.ExeName) + SCnOptionFileName);
   UpdateFilterToMap;
   InitializeLang;
 
@@ -449,7 +449,7 @@ begin
   if GetCWUseCustomUserDir then
     SaveOptions(GetCWUserPath + SCnOptionFileName)
   else
-    SaveOptions(ExtractFilePath(Application.ExeName) + SCnOptionFileName);
+    SaveOptions(_CnExtractFilePath(Application.ExeName) + SCnOptionFileName);
   CnLangManager.RemoveChangeNotifier(LanguageChanged);
 
   // ×¢ÏúÈÈ¼ü
@@ -773,7 +773,7 @@ begin
       CurrentChild.LoadFromFile(dlgOpen.FileName);
       CurrentChild.Store.ProcessID := CnInvalidFileProcId;
       CurrentChild.ProcessID := CnInvalidFileProcId;
-      CurrentChild.ProcName := ExtractFileName(dlgOpen.FileName);
+      CurrentChild.ProcName := _CnExtractFileName(dlgOpen.FileName);
 
       UpdateFormInSwitch(CurrentChild, fsUpdate);
     end;
@@ -789,8 +789,8 @@ begin
     if dlgSave.Execute then
     begin
       FileName := dlgSave.FileName;
-      if ExtractFileExt(FileName) = '' then
-        FileName := ChangeFileExt(FileName, '.xml');
+      if _CnExtractFileExt(FileName) = '' then
+        FileName := _CnChangeFileExt(FileName, '.xml');
       CurrentChild.SaveToFile(FileName);
     end;
   end;
@@ -863,7 +863,7 @@ var
 begin
   if CnLanguageManager <> nil then
   begin
-    CnHashLangFileStorage.LanguagePath := ExtractFilePath(ParamStr(0)) + csLangDir;
+    CnHashLangFileStorage.LanguagePath := _CnExtractFilePath(ParamStr(0)) + csLangDir;
     LangID := GetWizardsLanguageID;
 
     for I := 0 to CnLanguageManager.LanguageStorage.LanguageCount - 1 do
@@ -1091,22 +1091,22 @@ begin
       case dlgSaveExport.FilterIndex of
         1: // TXT
           begin
-            S := ChangeFileExt(S, '.txt');
+            S := _CnChangeFileExt(S, '.txt');
             ExportToTextFile(CurrentChild.Store, S);
           end;
         2: // CSV
           begin
-            S := ChangeFileExt(S, '.csv');
+            S := _CnChangeFileExt(S, '.csv');
             ExportToCSVFile(CurrentChild.Store, S);
           end;
         3: // HTML
           begin
-            S := ChangeFileExt(S, '.htm');
+            S := _CnChangeFileExt(S, '.htm');
             ExportToHTMFile(CurrentChild.Store, S);
           end;
         4: // RTF
           begin
-            S := ChangeFileExt(S, '.rtf');
+            S := _CnChangeFileExt(S, '.rtf');
             ErrorDlg('Sorry. NOT Implemented.');
           end;
       end;

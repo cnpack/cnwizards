@@ -87,7 +87,7 @@ var
 
 implementation
 
-uses OmniXML;
+uses OmniXML, CnCommon;
 
 const
   DefWantFile = 'want.exe';
@@ -128,11 +128,11 @@ begin
   DosProcess.OnTerminated := OnProcessTerminated;
   DosProcess.OnNewLine := OnProcessNewLine;
 
-  AppPath := ExtractFilePath(ParamStr(0));
+  AppPath := _CnExtractFilePath(ParamStr(0));
   WantFile := AppPath + DefWantFile;
   edtFileName.Text := AppPath + DefXMLFile;
-  if FileExists(ChangeFileExt(Application.ExeName, '.dat')) then
-    cbbProperties.Items.LoadFromFile(ChangeFileExt(Application.ExeName, '.dat'));
+  if FileExists(_CnChangeFileExt(Application.ExeName, '.dat')) then
+    cbbProperties.Items.LoadFromFile(_CnChangeFileExt(Application.ExeName, '.dat'));
 end;
 
 procedure TMainForm.FormClose(Sender: TObject; var Action: TCloseAction);

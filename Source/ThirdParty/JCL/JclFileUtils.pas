@@ -1074,6 +1074,7 @@ const
 implementation
 
 uses
+  CnCommon,
   {$IFDEF Win32API}
   ShellApi,
   {$IFDEF FPC}
@@ -2264,7 +2265,7 @@ begin
   // always returns it. Hence the need to use StrEnsurePrefix for the SameText
   // test to return an accurate value.
   if (Path <> '') and (Extension <> '') and
-    not SameText(ExtractFileExt(Path), StrEnsurePrefix('.', Extension)) then
+    not SameText(_CnExtractFileExt(Path), StrEnsurePrefix('.', Extension)) then
   begin
     if Path[Length(Path)] = '.' then
       Delete(Result, Length(Path), 1);
@@ -2439,7 +2440,7 @@ end;
 procedure PathExtractElements(const Source: string; var Drive, Path, FileName, Ext: string);
 begin
   Drive := ExtractFileDrive(Source);
-  Path := ExtractFilePath(Source);
+  Path := _CnExtractFilePath(Source);
   // Path includes drive so remove that
   if Drive <> '' then
     Delete(Path, 1, Length(Drive));
@@ -2450,17 +2451,17 @@ begin
     Delete(Path, 1, 1);
   // and extract the remaining elements
   FileName := PathExtractFileNameNoExt(Source);
-  Ext := ExtractFileExt(Source);
+  Ext := _CnExtractFileExt(Source);
 end;
 
 function PathExtractFileDirFixed(const S: string): string;
 begin
-  Result := PathAddSeparator(ExtractFileDir(S));
+  Result := PathAddSeparator(_CnExtractFileDir(S));
 end;
 
 function PathExtractFileNameNoExt(const Path: string): string;
 begin
-  Result := PathRemoveExtension(ExtractFileName(Path));
+  Result := PathRemoveExtension(_CnExtractFileName(Path));
 end;
 
 function PathExtractPathDepth(const Path: string; Depth: Integer): string;
@@ -2474,7 +2475,7 @@ begin
     if IsDirectory(Path) then
       LocalPath := Path
     else
-      LocalPath := ExtractFilePath(Path);
+      LocalPath := _CnExtractFilePath(Path);
     StrIToStrings(LocalPath, DirDelimiter, List, True);
     I := Depth + 1;
     if PathIsUNC(LocalPath) then
@@ -2501,7 +2502,7 @@ begin
     if IsDirectory(Path) then
       LocalPath := Path
     else
-      LocalPath := ExtractFilePath(Path);
+      LocalPath := _CnExtractFilePath(Path);
     StrIToStrings(LocalPath, DirDelimiter, List, False);
     if PathIsUNC(LocalPath) then
       Start := 1
@@ -3244,7 +3245,7 @@ begin
               ParseName := SHGetDisplayName(RootFolder, pidl[0], True);
               DisplayName := SHGetDisplayName(RootFolder, pidl[0], False);
               Malloc.Free(pidl[0]);
-              if (System.String.Compare(Name, ExtractFileName(ParseName), True) = 0) or
+              if (System.String.Compare(Name, _CnExtractFileName(ParseName), True) = 0) or
                  (System.String.Compare(Name, DisplayName, True) = 0) then
               begin
                 Name := DisplayName;
@@ -3423,7 +3424,7 @@ begin
         ParseName := SHGetDisplayName(RootFolder, pidl, True);
         DisplayName := SHGetDisplayName(RootFolder, pidl, False);
         Malloc.Free(pidl);
-        if (AnsiCompareText(Name, ExtractFileName(ParseName)) = 0) or
+        if (AnsiCompareText(Name, _CnExtractFileName(ParseName)) = 0) or
            (AnsiCompareText(Name, DisplayName) = 0) then
         begin
           Name := DisplayName;
@@ -3475,7 +3476,7 @@ begin
   MaskList := TStringList.Create;
   try
     {* extract the Directory *}
-    Directory := ExtractFileDir(Path);
+    Directory := _CnExtractFileDir(Path);
 
     {* files can be searched in the current directory *}
     if Directory <> '' then
@@ -3794,7 +3795,7 @@ var
   DestFileName: string;
 begin
   if IsDirectory(NewFileName) then
-    DestFileName := PathAddSeparator(NewFileName) + ExtractFileName(ExistingFileName)
+    DestFileName := PathAddSeparator(NewFileName) + _CnExtractFileName(ExistingFileName)
   else
     DestFileName := NewFileName;
   {$IFDEF CLR}
@@ -3941,7 +3942,7 @@ function GetBackupFileName(const FileName: string): string;
 var
   NewExt: string;
 begin
-  NewExt := ExtractFileExt(FileName);
+  NewExt := _CnExtractFileExt(FileName);
   if Length(NewExt) > 0 then
   begin
     NewExt[1] := '~';
@@ -3949,12 +3950,12 @@ begin
   end
   else
     NewExt := '.~';
-  Result := ChangeFileExt(FileName, NewExt);
+  Result := _CnChangeFileExt(FileName, NewExt);
 end;
 
 function IsBackupFileName(const FileName: string): Boolean;
 begin
-  Result := (pos('.~', ExtractFileExt(FileName)) = 1);
+  Result := (pos('.~', _CnExtractFileExt(FileName)) = 1);
 end;
 
 function FileGetDisplayName(const FileName: string): string;
@@ -4165,7 +4166,7 @@ begin
   if (RetVal = 0) or (Trim(Result) = '') then
   begin
     // Lookup failed so mimic explorer behaviour by returning "XYZ File"
-    Result := ExtractFileExt(FileName);
+    Result := _CnExtractFileExt(FileName);
     Delete(Result, 1, 1);
     Result := TrimLeft(UpperCase(Result) + RsDefaultFileTypeName);
   end;
@@ -4204,14 +4205,14 @@ begin
     {$ENDIF}
   Name := PathRemoveSeparator(Name);
   {$IFDEF MSWINDOWS}
-  ExtractPath := ExtractFilePath(Name);
+  ExtractPath := _CnExtractFilePath(Name);
   if ((Length(Name) = 2) and (Copy(Name, 2,1) = ':')) or DirectoryExists(Name) or (ExtractPath = Name) then
     Exit;
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
   if (Length(Name) = 0) or DirectoryExists(Name) then
     Exit;
-  ExtractPath := ExtractFilePath(Name);
+  ExtractPath := _CnExtractFilePath(Name);
   {$ENDIF UNIX}
   if ExtractPath = '' then
     Result := CreateDir(Name)
@@ -5908,8 +5909,8 @@ var
 
 begin
   Assert(Assigned(Files));
-  FileMask := ExtractFileName(Path);
-  RootDir := ExtractFilePath(Path);
+  FileMask := _CnExtractFileName(Path);
+  RootDir := _CnExtractFilePath(Path);
 
   Folders := TStringList.Create;
   Files.BeginUpdate;
@@ -6055,7 +6056,7 @@ begin
   Assert(VerifyFileAttributeMask(RejectedAttributes, RequiredAttributes),
     RsFileSearchAttrInconsistency);
 
-  Directory := ExtractFilePath(Path);
+  Directory := _CnExtractFilePath(Path);
 
   Attr := faAnyFile and not RejectedAttributes;
 

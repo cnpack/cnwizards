@@ -473,7 +473,7 @@ end;
 // 点击'浏览恢复文件'按钮
 procedure TCnIdeBRMainForm.btnBrowRestoreFileClick(Sender: TObject);
 begin
-  dlgOpen.InitialDir := ExtractFilePath(Application.ExeName);
+  dlgOpen.InitialDir := _CnExtractFilePath(Application.ExeName);
   if dlgOpen.Execute then
   begin
     ParseFileAndNotifyUI(dlgOpen.FileName);
@@ -483,7 +483,7 @@ end;
 // 点击'浏览备份文件'按钮
 procedure TCnIdeBRMainForm.btnBrowBackupFileClick(Sender: TObject);
 begin
-  dlgSave.FileName := ExtractFileName(edtBackupFile.Text);
+  dlgSave.FileName := _CnExtractFileName(edtBackupFile.Text);
   if dlgSave.Execute then
   begin
     edtBackupFile.Text := dlgSave.FileName;
@@ -675,7 +675,7 @@ begin
     SetLength(strFileName, MAX_PATH);
     nLength := DragQueryFile(HDROP(Msg.Drop), 0, PChar(strFileName), Length(strFileName));
     SetLength(strFileName, nLength);
-    if UpperCase(ExtractFileExt(strFileName)) = '.BIC' then
+    if UpperCase(_CnExtractFileExt(strFileName)) = '.BIC' then
     begin
       ParseFileAndNotifyUI(strFileName);
     end;
@@ -1166,7 +1166,7 @@ const
 begin
   if CnLanguageManager <> nil then
   begin
-    CnHashLangFileStorage.LanguagePath := ExtractFilePath(ParamStr(0)) + csLangDir;
+    CnHashLangFileStorage.LanguagePath := _CnExtractFilePath(ParamStr(0)) + csLangDir;
     CnLanguageManager.LanguageStorage := CnHashLangFileStorage;
   end;
 

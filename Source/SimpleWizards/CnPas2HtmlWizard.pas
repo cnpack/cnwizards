@@ -454,7 +454,7 @@ begin
           OutMStream.SaveToFile(CnPas2HtmlForm.SaveDialog.FileName);
           if FOpenAfterConvert then
             ShellExecute(0, 'open', PChar(CnPas2HtmlForm.SaveDialog.FileName), nil,
-              PChar(ExtractFileDir(CnPas2HtmlForm.SaveDialog.FileName)), SW_SHOWNORMAL);
+              PChar(_CnExtractFileDir(CnPas2HtmlForm.SaveDialog.FileName)), SW_SHOWNORMAL);
         end;
       finally
         CnPas2HtmlForm.Close;
@@ -484,14 +484,14 @@ begin
         for I := 0 to iModuleServices.GetModuleCount - 1 do
         begin
           sName := CnOtaGetFileNameOfModule(iModuleServices.GetModule(I));
-          if (UpperCase(ExtractFileExt(sName)) = '.BPG')
+          if (UpperCase(_CnExtractFileExt(sName)) = '.BPG')
 {$IFDEF BDS}
-           or (UpperCase(ExtractFileExt(sName)) = '.BDSPROJ')
-           or (UpperCase(ExtractFileExt(sName)) = '.DPROJ')
-           or (UpperCase(ExtractFileExt(sName)) = '.CBPROJ')
-           or (UpperCase(ExtractFileExt(sName)) = '.BDSGROUP')
-           or (UpperCase(ExtractFileExt(sName)) = '.GROUPPROJ')
-           or (UpperCase(ExtractFileExt(sName)) = '.HTM')
+           or (UpperCase(_CnExtractFileExt(sName)) = '.BDSPROJ')
+           or (UpperCase(_CnExtractFileExt(sName)) = '.DPROJ')
+           or (UpperCase(_CnExtractFileExt(sName)) = '.CBPROJ')
+           or (UpperCase(_CnExtractFileExt(sName)) = '.BDSGROUP')
+           or (UpperCase(_CnExtractFileExt(sName)) = '.GROUPPROJ')
+           or (UpperCase(_CnExtractFileExt(sName)) = '.HTM')
 {$ENDIF}
            then Continue;
           // 不处理 BPG/BDSPROJ/DPROJ/CBPROJ/BDSGROUP/GROUPPROJ文件。
@@ -555,7 +555,7 @@ begin
     if GetDirectory(SCnSelectDirCaption, FDir) then
     begin
       FDir := MakePath(FDir);
-      sName := ChangeFileExt(ExtractFileName(ProjectGroup.FileName), '');
+      sName := _CnChangeFileExt(_CnExtractFileName(ProjectGroup.FileName), '');
 
       case FConvertType of
         ctHTML: sGroupDir := FDir + sName + '_Html\';
@@ -833,7 +833,7 @@ begin
       ctHTML: FileExt := '.htm';
       ctRTF:  FileExt := '.rtf';
     end;
-    OutMStream.SaveToFile(OutputDir + ChangeFileExt(ExtractFileName(Filename), FileExt));
+    OutMStream.SaveToFile(OutputDir + _CnChangeFileExt(_CnExtractFileName(Filename), FileExt));
   finally
     InMStream.Free;
     OutMStream.Free;
@@ -859,7 +859,7 @@ begin
       end;
     end;
 
-    sPFileName := ChangeFileExt(ExtractFileName(Project.FileName), '');
+    sPFileName := _CnChangeFileExt(_CnExtractFileName(Project.FileName), '');
     case FConvertType of
       ctHTML: sOutPutDir := sDir + sPFileName + '_Html\';
       ctRTF:  sOutPutDir := sDir + sPFileName + '_RTF\';
@@ -872,14 +872,14 @@ begin
     // 以下开始创建 DPR 的转换 html 文件。
     sFileName := Project.FileName;
     if IsBdsProject(Project.FileName) or IsDProject(Project.FileName) then // 不是 BDS Project 才行
-      sFileName := ChangeFileExt(Project.FileName, '.dpr');
+      sFileName := _CnChangeFileExt(Project.FileName, '.dpr');
 
     if Assigned(CnPas2HtmlForm) then
       CnPas2HtmlForm.ConvertingFileName := sFileName;
 
     if not IsCbProject(sFileName) and not InternalProcessAFile(sFileName, sOutPutDir) then
     begin
-      sFileName := ChangeFileExt(sFileName, '.dpk');
+      sFileName := _CnChangeFileExt(sFileName, '.dpk');
       if not InternalProcessAFile(sFileName, sOutPutDir) then
         ErrorDlg(SCnPas2HtmlErrorConvertProject);
     end;
@@ -888,7 +888,7 @@ begin
     for I := 0 to Project.GetModuleCount - 1 do
     begin
       if Trim(Project.GetModule(I).FileName) = '' then Continue;
-      sFileName := ExtractFileName(Project.GetModule(I).FileName);
+      sFileName := _CnExtractFileName(Project.GetModule(I).FileName);
 
       if not IsDelphiSourceModule(Project.GetModule(I).FileName)
         and not IsCppSourceModule(Project.GetModule(I).FileName) then

@@ -229,7 +229,7 @@ end;
 class function TCnBaseImageProvider.CachePath: string;
 begin
 {$IFDEF TEST_APP}
-  Result := MakePath(ExtractFilePath(ParamStr(0)) + csImageCacheDir);
+  Result := MakePath(_CnExtractFilePath(ParamStr(0)) + csImageCacheDir);
 {$ELSE}
   Result := MakePath(WizOptions.UserPath + csImageCacheDir);
 {$ENDIF}
@@ -293,7 +293,7 @@ begin
       if RegExpr.Exec(Info.Name) then
       begin
         Size := StrToIntDef(RegExpr.Match[2], 0);
-        if (Size = ASize) and SameText(ExtractFileExt(Info.Name), Ext) then
+        if (Size = ASize) and SameText(_CnExtractFileExt(Info.Name), Ext) then
         begin
           // 在文件名中使用新的关键字，并更名文件
           AddKeywords;

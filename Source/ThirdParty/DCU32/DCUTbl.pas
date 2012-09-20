@@ -31,7 +31,7 @@ interface
 {$I CnPack.inc}
 
 uses
-  SysUtils,Classes,DCU32,DCP;
+  SysUtils,Classes,DCU32,DCP, CnCommon;
 
 const
   PathSep = {$IFNDEF LINUX}';'{$ELSE}':'{$ENDIF};
@@ -80,7 +80,7 @@ begin
   Result := PathList.IndexOf(S);
   if Result>=0 then
     Exit; {It may be wrong on Unix}
-  if SurePkg or (CompareText(ExtractFileExt(S),'.dcp')=0) then begin
+  if SurePkg or (CompareText(_CnExtractFileExt(S),'.dcp')=0) then begin
     if FileExists(S) then begin
       Result := PathList.AddObject(S,TDCPackage.Create);
       Exit;
@@ -179,7 +179,7 @@ begin
   FillChar(SR,SizeOf(TDCUSearchRec),0);
   SR.FN := FN;
   SR.hPath := -1;
-  Dir := ExtractFileDir(FN);
+  Dir := _CnExtractFileDir(FN);
   Result := Dir<>'';
   AddedUnitDir := AddedUnitDirToPath;
   if not AddedUnitDirToPath then begin
@@ -198,10 +198,10 @@ begin
     SR.hPath := AddToPathList(FN,true{SurePkg});
     if SR.hPath>=0 then
       SR.UnitName := StrPas(CP+1);
-    SR.UnitName := ChangeFileExt(SR.UnitName,'');
+    SR.UnitName := _CnChangeFileExt(SR.UnitName,'');
     Exit;
   end ;
-  {if ExtractFileExt(SR.FN)='' then
+  {if _CnExtractFileExt(SR.FN)='' then
     SR.FN := SR.FN+'.dcu';}
   SR.FN := SR.FN+FExt;
  (*
@@ -368,13 +368,13 @@ begin
     Result := '';
     Exit;
   end ;
-  S := ExtractFilePath(FName);
+  S := _CnExtractFilePath(FName);
   if S<>'' then begin
     if FileExists(FName) then begin
       Result := FName;
       Exit;
     end ;
-    FName := ExtractFileName(FName);
+    FName := _CnExtractFileName(FName);
   end ;
   Result := FileSearch(FName,PASPath);
 end ;

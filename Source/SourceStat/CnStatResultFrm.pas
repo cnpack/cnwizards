@@ -618,7 +618,7 @@ begin
   begin
     if TreeView.Selected.Data <> nil then
     begin
-      SaveDialog.FileName := ChangeFileExt(PSourceStatRec
+      SaveDialog.FileName := _CnChangeFileExt(PSourceStatRec
         (TreeView.Selected.Data)^.FileName, '');
     end
     else
@@ -628,9 +628,9 @@ begin
     begin
       FSaveMode := TCnStatSaveMode(SaveDialog.FilterIndex - 1);
       case FSaveMode of
-        smTXT: SaveDialog.FileName := ChangeFileExt(SaveDialog.FileName, '.txt');
-        smCSV: SaveDialog.FileName := ChangeFileExt(SaveDialog.FileName, '.csv');
-        smTSV: SaveDialog.FileName := ChangeFileExt(SaveDialog.FileName, '.tsv');
+        smTXT: SaveDialog.FileName := _CnChangeFileExt(SaveDialog.FileName, '.txt');
+        smCSV: SaveDialog.FileName := _CnChangeFileExt(SaveDialog.FileName, '.csv');
+        smTSV: SaveDialog.FileName := _CnChangeFileExt(SaveDialog.FileName, '.tsv');
       end;
 
       AList := nil;
@@ -972,7 +972,7 @@ begin
   begin
     if (TreeView.Items[0].Data <> nil) and ((StatStyle <> ssDir) and (StatStyle <> ssOpenUnits)) then
     begin
-      SaveDialog.FileName := ChangeFileExt(PSourceStatRec
+      SaveDialog.FileName := _CnChangeFileExt(PSourceStatRec
         (TreeView.Items[0].Data)^.FileName, '');
     end
     else
@@ -982,9 +982,9 @@ begin
     begin
       FSaveMode := TCnStatSaveMode(SaveDialog.FilterIndex - 1);
       case FSaveMode of
-        smTXT: SaveDialog.FileName := ChangeFileExt(SaveDialog.FileName, '.txt');
-        smCSV: SaveDialog.FileName := ChangeFileExt(SaveDialog.FileName, '.csv');
-        smTSV: SaveDialog.FileName := ChangeFileExt(SaveDialog.FileName, '.tsv');
+        smTXT: SaveDialog.FileName := _CnChangeFileExt(SaveDialog.FileName, '.txt');
+        smCSV: SaveDialog.FileName := _CnChangeFileExt(SaveDialog.FileName, '.csv');
+        smTSV: SaveDialog.FileName := _CnChangeFileExt(SaveDialog.FileName, '.tsv');
       end;
 
       AList := nil;

@@ -155,8 +155,8 @@ begin
   begin
     if FileExists(lvFile.Selected.SubItems[0]) then
       ExploreFile(lvFile.Selected.SubItems[0])
-    else if DirectoryExists(ExtractFileDir(lvFile.Selected.SubItems[0])) then
-      ExploreDir(ExtractFileDir(lvFile.Selected.SubItems[0]));
+    else if DirectoryExists(_CnExtractFileDir(lvFile.Selected.SubItems[0])) then
+      ExploreDir(_CnExtractFileDir(lvFile.Selected.SubItems[0]));
   end;
 end;
 

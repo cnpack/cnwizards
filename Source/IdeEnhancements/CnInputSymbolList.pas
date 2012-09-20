@@ -1213,7 +1213,7 @@ begin
         begin
           FileName := Project.GetModule(j).FileName;
           if IsPas(FileName) or IsDcu(FileName) then
-            AddUnit(ChangeFileExt(ExtractFileName(FileName), ''));
+            AddUnit(_CnChangeFileExt(_CnExtractFileName(FileName), ''));
         end;
       end;
     end;
@@ -1225,7 +1225,7 @@ procedure TUnitNameList.DoFindFile(const FileName: string; const Info:
 var
   S: string;
 begin
-  S := ChangeFileExt(Info.Name, '');
+  S := _CnChangeFileExt(Info.Name, '');
   if IsValidIdent(StringReplace(S, '.', '', [rfReplaceAll])) and (FCurrList.IndexOf(S) < 0) then
     FCurrList.Add(S);
 end;
@@ -1526,12 +1526,12 @@ begin
   Result := MakePath(GetBDSUserDataDir) + 'bds.dci';
   // c:\Program Files\CodeGear\RAD Studio\5.0\ObjRepos\bds.dci
   if not FileExists(Result) then
-    Result := ExtractFilePath(ExtractFileDir(Application.ExeName)) + 'ObjRepos\bds.dci';
+    Result := _CnExtractFilePath(_CnExtractFileDir(Application.ExeName)) + 'ObjRepos\bds.dci';
 {$ELSE}
 {$IFDEF BCB}
-  Result := ExtractFilePath(Application.ExeName) + 'bcb.dci';
+  Result := _CnExtractFilePath(Application.ExeName) + 'bcb.dci';
 {$ELSE}
-  Result := ExtractFilePath(Application.ExeName) + 'delphi32.dci';
+  Result := _CnExtractFilePath(Application.ExeName) + 'delphi32.dci';
 {$ENDIF}
 {$ENDIF}
 end;
@@ -1550,7 +1550,7 @@ end;
 function TXECodeTemplateList.GetScanDirectory: string;
 begin
   // Only Support Delphi Templates
-  Result := ExtractFilePath(ExtractFileDir(Application.ExeName))
+  Result := _CnExtractFilePath(_CnExtractFileDir(Application.ExeName))
     + 'ObjRepos\' + GetLanguageDirectoryName() + '\Code_Templates\Delphi\';
 end;
 

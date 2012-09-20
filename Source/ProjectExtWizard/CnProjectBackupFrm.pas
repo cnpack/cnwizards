@@ -296,8 +296,8 @@ end;
 procedure TCnBackupFileInfo.SetFileInfo(FileName: string; ACustomFile: Boolean = False);
 begin
   FCustomFile := ACustomFile;
-  FName := ExtractFileName(FileName);
-  FPath := ExtractFilePath(FileName);
+  FName := _CnExtractFileName(FileName);
+  FPath := _CnExtractFilePath(FileName);
   FSize := GetFileSize(FileName);
 end;
 
@@ -349,18 +349,18 @@ begin
   // 加入 cpp 文件对应的 h/hpp/bpr/bpk
   if TempFileName = '.CPP' then
   begin
-    AddFile(ChangeFileExt(FileName, '.h'));
-    AddFile(ChangeFileExt(FileName, '.hpp'));
-    AddFile(ChangeFileExt(FileName, '.bpr'));
-    AddFile(ChangeFileExt(FileName, '.bpk'));
+    AddFile(_CnChangeFileExt(FileName, '.h'));
+    AddFile(_CnChangeFileExt(FileName, '.hpp'));
+    AddFile(_CnChangeFileExt(FileName, '.bpr'));
+    AddFile(_CnChangeFileExt(FileName, '.bpk'));
   end;
 
   // 加入其他文件
-  AddFile(ChangeFileExt(FileName, '.dfm'));
-  AddFile(ChangeFileExt(FileName, '.xfm'));
-  AddFile(ChangeFileExt(FileName, '.nfm'));
-  AddFile(ChangeFileExt(FileName, '.todo'));
-  AddFile(ChangeFileExt(FileName, '.tlb'));
+  AddFile(_CnChangeFileExt(FileName, '.dfm'));
+  AddFile(_CnChangeFileExt(FileName, '.xfm'));
+  AddFile(_CnChangeFileExt(FileName, '.nfm'));
+  AddFile(_CnChangeFileExt(FileName, '.todo'));
+  AddFile(_CnChangeFileExt(FileName, '.tlb'));
 end;
 
 function TCnBackupProjectInfo.GetCount: Integer;
@@ -759,7 +759,7 @@ begin
         if (IProject = nil) then
           Exit;
 
-        ProjectName := ExtractFileName(IProject.FileName);
+        ProjectName := _CnExtractFileName(IProject.FileName);
         FCurrentName := IProject.FileName;
       end;
 
@@ -845,7 +845,7 @@ begin
       
     cbbTimeFormat.ItemIndex := FTimeFormatIndex;
     SavePath := MakePath(FSavePath);
-    CurrentName := ChangeFileExt(ExtractFileName(FCurrentName), '');
+    CurrentName := _CnChangeFileExt(_CnExtractFileName(FCurrentName), '');
 
     if not FUseExternal then
       SaveFileName := SavePath + CurrentName + FormatDateTime('_' + cbbTimeFormat.Items[FTimeFormatIndex], Date + Time) + '.zip'
@@ -877,10 +877,10 @@ begin
       else
         FPassword := '';
         
-      FSavePath := ExtractFilePath(SaveFileName);
+      FSavePath := _CnExtractFilePath(SaveFileName);
       FTimeFormatIndex := cbbTimeFormat.ItemIndex;
 
-      SaveFileName := LinkPath(ExtractFilePath(FCurrentName), SaveFileName);
+      SaveFileName := LinkPath(_CnExtractFilePath(FCurrentName), SaveFileName);
 
       if FileExists(SaveFileName) and not Confirmed then
         if not QueryDlg(SCnOverwriteQuery) then

@@ -895,7 +895,7 @@ begin
   end;
 
   FileName := FFeedPath + Def.IDStr + '.xml';
-  TmpName := ChangeFileExt(FileName, '.tmp');
+  TmpName := _CnChangeFileExt(FileName, '.tmp');
 
   // 先加载一次当前的数据，这样如果下载到新文件，后面可以比较出新项目
   if Feed.Count = 0 then

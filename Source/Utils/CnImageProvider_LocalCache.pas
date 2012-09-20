@@ -115,7 +115,7 @@ begin
       Item.Size := Integer(Files.Objects[i]);
       Item.Id := Files[i];
       Item.Url := CachePath + Files[i];
-      Item.Ext := ExtractFileExt(Files[i]);
+      Item.Ext := _CnExtractFileExt(Files[i]);
     end;
     Result := Items.Count > 0;
   finally

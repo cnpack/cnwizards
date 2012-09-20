@@ -1909,7 +1909,7 @@ var
                   end;
 
                   ElementInfo.LineNo := Line;
-                  ElementInfo.FileName := ExtractFileName(aFileName);
+                  ElementInfo.FileName := _CnExtractFileName(aFileName);
                   ElementInfo.AllName := aFileName;
                   AddProcedure(ElementInfo, InIntfDeclaration);
                 end;
@@ -1927,7 +1927,7 @@ var
                 // 记录类信息
                 ElementInfo := TCnElementInfo.Create;
                 ElementInfo.LineNo := Parser.LineNumber + 1;
-                ElementInfo.FileName := ExtractFileName(aFileName);
+                ElementInfo.FileName := _CnExtractFileName(aFileName);
                 ElementInfo.AllName := aFileName;
                 ElementInfo.ElementType := etClass;
                 ElementInfo.ElementTypeStr := 'class';
@@ -1948,7 +1948,7 @@ var
                 // 记录接口信息
                 ElementInfo := TCnElementInfo.Create;
                 ElementInfo.LineNo := Parser.LineNumber + 1;
-                ElementInfo.FileName := ExtractFileName(aFileName);
+                ElementInfo.FileName := _CnExtractFileName(aFileName);
                 ElementInfo.AllName := aFileName;
                 ElementInfo.ElementType := etInterface;
                 ElementInfo.ElementTypeStr := 'interface';
@@ -1965,7 +1965,7 @@ var
                 // 记录记录信息
                 ElementInfo := TCnElementInfo.Create;
                 ElementInfo.LineNo := Parser.LineNumber + 1;
-                ElementInfo.FileName := ExtractFileName(aFileName);
+                ElementInfo.FileName := _CnExtractFileName(aFileName);
                 ElementInfo.AllName := aFileName;
                 ElementInfo.ElementType := etRecord;
                 ElementInfo.ElementTypeStr := 'record';
@@ -1984,7 +1984,7 @@ var
                 begin
                   ElementInfo := TCnElementInfo.Create;
                   ElementInfo.LineNo := Parser.LineNumber + 1;
-                  ElementInfo.FileName := ExtractFileName(aFileName);
+                  ElementInfo.FileName := _CnExtractFileName(aFileName);
                   ElementInfo.AllName := aFileName;
 
                   while Parser.TokenID <> tkIdentifier do
@@ -2302,7 +2302,7 @@ var
                     ElementInfo.ProcReturnType := ProcReturnType;
                     ElementInfo.ElementType := ElementType;
                     ElementInfo.ProcName := ProcName;
-                    ElementInfo.FileName := ExtractFileName(aFileName);
+                    ElementInfo.FileName := _CnExtractFileName(aFileName);
                     ElementInfo.AllName := aFileName;
                     AddProcedure(ElementInfo, False); // TODO: BCB Interface
 
@@ -2338,7 +2338,7 @@ var
                       etRecord: ElementInfo.ElementTypeStr := 'struct';
                       etNamespace: ElementInfo.ElementTypeStr := 'namespace';
                     end;
-                    ElementInfo.FileName := ExtractFileName(aFileName);
+                    ElementInfo.FileName := _CnExtractFileName(aFileName);
                     ElementInfo.AllName := aFileName;
                     AddProcedure(ElementInfo, False);
                   end;
@@ -2387,7 +2387,7 @@ begin
       end;
 
       if ToClear and (ProcListForm <> nil) then
-        ProcListForm.Caption := FOldCaption + ' - ' + ExtractFileName(aFileName);
+        ProcListForm.Caption := FOldCaption + ' - ' + _CnExtractFileName(aFileName);
 
       Screen.Cursor := crHourGlass;
       try
@@ -3215,7 +3215,7 @@ var
     begin
       FileInfo := TCnFileInfo.Create;
       FileInfo.ProjectName := aProject;
-      FileInfo.FileName := ExtractFileName(aFile);
+      FileInfo.FileName := _CnExtractFileName(aFile);
       FileInfo.AllName := aFile;
 
       cbbFiles.Items.AddObject(FileInfo.FileName, FileInfo);

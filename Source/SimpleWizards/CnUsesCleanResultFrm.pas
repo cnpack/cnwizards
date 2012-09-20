@@ -42,7 +42,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ComCtrls, Contnrs, ToolsAPI, CnCheckTreeView, CnWizMultiLang,
+  StdCtrls, ComCtrls, Contnrs, ToolsAPI, CnCommon, CnCheckTreeView, CnWizMultiLang,
   CnDCU32, CnWizShareImages, CnWizConsts, Menus, Clipbrd, CnPopupMenu;
 
 type
@@ -177,14 +177,14 @@ begin
     begin
       ProjectInfo := TCnProjectUsesInfo(List[i]);
       ProjNode := chktvResult.Items.AddChildObject(nil,
-        ExtractFileName(ProjectInfo.Project.FileName), ProjectInfo);
+        _CnExtractFileName(ProjectInfo.Project.FileName), ProjectInfo);
       ProjNode.ImageIndex := IdxProject;
       ProjNode.SelectedIndex := IdxProject;
       for j := 0 to ProjectInfo.Units.Count - 1 do
         with TCnEmptyUsesInfo(ProjectInfo.Units[j]) do
         begin
           UnitNode := chktvResult.Items.AddChildObject(ProjNode,
-            ExtractFileName(Buffer.FileName), ProjectInfo.Units[j]);
+            _CnExtractFileName(Buffer.FileName), ProjectInfo.Units[j]);
           UnitNode.ImageIndex := IdxUnit;
           UnitNode.SelectedIndex := IdxUnit;
 
@@ -319,7 +319,7 @@ begin
     else if Obj is TCnUsesItem then
       Clipboard.AsText := TCnUsesItem(Obj).Name
     else if Obj is TCnEmptyUsesInfo then
-      Clipboard.AsText := ExtractFileName(TCnEmptyUsesInfo(Obj).Buffer.FileName)
+      Clipboard.AsText := _CnExtractFileName(TCnEmptyUsesInfo(Obj).Buffer.FileName)
     else
       Clipboard.AsText := FSelection.Text;
   end;

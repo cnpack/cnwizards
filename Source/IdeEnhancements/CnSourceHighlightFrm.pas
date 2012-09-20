@@ -46,7 +46,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  CnWizMultiLang, StdCtrls, ExtCtrls, Buttons, ComCtrls, Menus, IniFiles,
+  CnWizMultiLang, StdCtrls, ExtCtrls, Buttons, ComCtrls, Menus, IniFiles, CnCommon,
   CnWizShareImages, CnSourceHighlight, CnWizOptions, CnSpin, CnLangMgr, CnIni;
 
 type
@@ -379,7 +379,7 @@ var
 begin
   if dlgSaveColor.Execute then
   begin
-    Ini := TCnIniFile.Create(ChangeFileExt(dlgSaveColor.FileName, '.ini'));
+    Ini := TCnIniFile.Create(_CnChangeFileExt(dlgSaveColor.FileName, '.ini'));
     try
       Ini.WriteColor(csHighlightColorsSection, csBracketColor, shpBracket.Brush.Color);
       Ini.WriteColor(csHighlightColorsSection, csBracketColorBk, shpBracketBk.Brush.Color);

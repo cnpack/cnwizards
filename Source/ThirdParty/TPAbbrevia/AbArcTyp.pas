@@ -503,6 +503,7 @@ implementation
 {.$R ABRES.R32}
 
 uses
+  CnCommon,
   AbExcept,
   AbSpanSt,
   AbConst;
@@ -533,9 +534,9 @@ begin
   if (eoRestorePath in ExtractOptions) then
     FMessage := FMessage + TestPath
   else
-    FMessage := FMessage + ExtractFileName(TestPath);
+    FMessage := FMessage + _CnExtractFileName(TestPath);
 
-  TestPath := ExtractFilePath(FMessage);
+  TestPath := _CnExtractFilePath(FMessage);
   if (Length(TestPath) > 0) and (TestPath[Length(TestPath)] = AbPathDelim) then
       System.Delete(TestPath, Length(TestPath), 1);
   if (Length(TestPath) > 0) and (not AbDirectoryExists(TestPath)) then
@@ -582,7 +583,7 @@ end;
 { -------------------------------------------------------------------------- }
 function TAbArchiveItem.GetDiskPath : string;
 begin
-  Result := ExtractFilePath(DiskFileName);
+  Result := _CnExtractFilePath(DiskFileName);
 end;
 { -------------------------------------------------------------------------- }
 function TAbArchiveItem.GetExternalFileAttributes : LongInt;
@@ -612,7 +613,7 @@ end;
 { -------------------------------------------------------------------------- }
 function TAbArchiveItem.GetStoredPath : string;
 begin
-  Result := ExtractFilePath(DiskFileName);
+  Result := _CnExtractFilePath(DiskFileName);
 end;
 { -------------------------------------------------------------------------- }
 function TAbArchiveItem.GetUnCompressedSize : LongInt;
@@ -888,7 +889,7 @@ begin
   FOnProgress := DoProgress;
   FSpanned := False;
   FMode := Mode;
-  BaseDirectory := ExtractFilePath(ParamStr(0));
+  BaseDirectory := _CnExtractFilePath(ParamStr(0));
   Init;
 end;
 { -------------------------------------------------------------------------- }
@@ -1472,7 +1473,7 @@ begin
     System.Delete(Value, 1, 1);
 
   if soStripPath in StoreOptions then begin
-    Value := ExtractFileName(Value);
+    Value := _CnExtractFileName(Value);
   end;
 
   if soRemoveDots in StoreOptions then

@@ -129,7 +129,7 @@ function ExtractFileNameAnySep(FN: String): String;
 implementation
 
 uses
-  DCU32{CurUnit};
+  CnCommon, DCU32{CurUnit};
 
 procedure DCUError(Msg: String);
 var
@@ -140,7 +140,7 @@ begin
   if CurUnit<>MainUnit then begin
     US := CurUnit.UnitName;
     if US='' then
-      US := ChangeFileExt(ExtractFileName(CurUnit.FileName),'');
+      US := _CnChangeFileExt(_CnExtractFileName(CurUnit.FileName),'');
     US := Format(' in %s ',[US]);
   end ;
   TagC := Char(Tag);
@@ -167,7 +167,7 @@ begin
   if CurUnit<>MainUnit then begin
     US := CurUnit.UnitName;
     if US='' then
-      US := ChangeFileExt(ExtractFileName(CurUnit.FileName),'');
+      US := _CnChangeFileExt(_CnExtractFileName(CurUnit.FileName),'');
     US := Format(' in %s ',[US]);
   end ;
   if ScSt.EndPos<>Nil then
@@ -461,7 +461,7 @@ function ExtractFileNameAnySep(FN: String): String;
 var
   CP: PChar;
 begin
-  Result := ExtractFileName(FN);
+  Result := _CnExtractFileName(FN);
   CP := StrRScan(PChar(Result),AlterSep);
   if CP=Nil then
     Exit;

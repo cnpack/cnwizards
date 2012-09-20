@@ -391,7 +391,7 @@ var
   CurrentModule: IOTAModule;
 begin
   CurrentModule := CnOtaGetCurrentModule;
-  Result := ChangeFileExt(ExtractFileName(CurrentModule.FileName), '');
+  Result := _CnChangeFileExt(_CnExtractFileName(CurrentModule.FileName), '');
 end;
 
 function TCnListCompForm.GetSelectedFileName: string;
