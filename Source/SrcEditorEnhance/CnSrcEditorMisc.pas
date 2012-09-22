@@ -189,6 +189,9 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
+{$IFDEF DelphiXE2_UP}
+  Rtti,
+{$ENDIF}
   CnSrcEditorEnhance, CnWizOptions, CnWizShortCut;
 
 const
@@ -384,12 +387,15 @@ begin
   if RClickShellMenu and (Msg.message = WM_RBUTTONUP) and (IsShiftDown or
     IsCtrlDown) or DblClickClosePage and (Msg.message = WM_LBUTTONDBLCLK) then
   begin
+    XPos := Msg.lParam and $FFFF;
+    YPos := (Msg.lParam shr 16) and $FFFF;
     Control := FindControl(Msg.hwnd);
+    {$IFDEF DelphiXE2_UP}
+    Idx := TRttiContext.Create().GetType(Control.ClassType).GetMethod('ItemAtPos').Invoke(Control, [TValue.From(Point(XPos, YPos))]).AsInteger;
+    {$ENDIF}
     if (Control <> nil) and (Control is TXTabControl) then
     begin
       TabControl := Control as TXTabControl;
-      XPos := Msg.lParam and $FFFF;
-      YPos := (Msg.lParam shr 16) and $FFFF;
     {$IFDEF BDS}
       Idx := TabControl.ItemAtPos(Point(XPos, YPos));
     {$ELSE}
@@ -426,6 +432,9 @@ begin
       Control.ClassNameIs(XTabControlClassName) then
     begin
       PostMessage(Control.Handle, WM_MBUTTONUP, 16, Msg.lParam);
+      {$IFDEF DelphiXE2_UP}
+      if Idx >= 0 then Handled := True;
+      {$ENDIF}
     end;
   {$ENDIF}
   end;
