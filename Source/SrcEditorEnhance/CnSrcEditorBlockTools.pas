@@ -194,28 +194,39 @@ var
   TextLen: Integer;
   StartPos: Integer;
   EndPos: Integer;
+  LineNo: Integer;
+  CharIndex: Integer;
+  LineText: String;
 begin
   EditView := CnOtaGetTopMostEditView;
-  if IsEditControl(Screen.ActiveControl) and Assigned(EditView) and
-    EditView.Block.IsValid then
+  if IsEditControl(Screen.ActiveControl) and Assigned(EditView) then
   begin
-    StartPos := CnOtaEditPosToLinePos(OTAEditPos(EditView.Block.StartingColumn,
-      EditView.Block.StartingRow), EditView);
-    EndPos := CnOtaEditPosToLinePos(OTAEditPos(EditView.Block.EndingColumn,
-      EditView.Block.EndingRow), EditView);
-    TextLen := EditView.Block.Size;
+    if EditView.Block.IsValid then
+    begin
+      StartPos := CnOtaEditPosToLinePos(OTAEditPos(EditView.Block.StartingColumn,
+        EditView.Block.StartingRow), EditView);
+      EndPos := CnOtaEditPosToLinePos(OTAEditPos(EditView.Block.EndingColumn,
+        EditView.Block.EndingRow), EditView);
+      TextLen := EditView.Block.Size;
 
-  {$IFDEF DELPHI2009_UP}
-    CnOtaInsertTextIntoEditorAtPos(EditView.Block.Text, StartPos, EditView.Buffer);
-  {$ELSE}
-    CnOtaInsertTextIntoEditorAtPos(ConvertEditorTextToText(EditView.Block.Text), StartPos, EditView.Buffer);
-  {$ENDIF}
-    EditView.CursorPos := CnOtaLinePosToEditPos(StartPos + TextLen);
-    EditView.Block.BeginBlock;
-    EditView.CursorPos := CnOtaLinePosToEditPos(EndPos + TextLen);
-    EditView.Block.EndBlock;
+    {$IFDEF DELPHI2009_UP}
+      CnOtaInsertTextIntoEditorAtPos(EditView.Block.Text, StartPos, EditView.Buffer);
+    {$ELSE}
+      CnOtaInsertTextIntoEditorAtPos(ConvertEditorTextToText(EditView.Block.Text), StartPos, EditView.Buffer);
+    {$ENDIF}
+      EditView.CursorPos := CnOtaLinePosToEditPos(StartPos + TextLen);
+      EditView.Block.BeginBlock;
+      EditView.CursorPos := CnOtaLinePosToEditPos(EndPos + TextLen);
+      EditView.Block.EndBlock;
 
-    EditView.Paint;
+      EditView.Paint;
+    end
+    else
+    begin
+      CnOtaGetCurrLineText(LineText, LineNo, CharIndex);
+      Inc(LineNo);
+      CnOtaInsertSingleLine(LineNo, LineText);
+    end;
   end;
 end;
 
