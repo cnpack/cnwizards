@@ -225,7 +225,7 @@ begin
     begin
       CnOtaGetCurrLineText(LineText, LineNo, CharIndex);
       Inc(LineNo);
-      CnOtaInsertSingleLine(LineNo, LineText);
+      CnOtaInsertSingleLine(LineNo, TrimRight(LineText));
     end;
   end;
 end;
