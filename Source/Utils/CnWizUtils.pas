@@ -40,7 +40,9 @@ unit CnWizUtils;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2012.09.19 by shenloqi
+* 修改记录：2012.10.01 by shenloqi
+*               修复CnOtaGetCurrLineText不能获取最后一行和未TrimRight的BUG
+*           2012.09.19 by shenloqi
 *               移植到Delphi XE3
 *           2005.05.06 by hubdog
 *               追加设置项目属性值的函数，修改CnOtaGetActiveProjectOptions
@@ -551,6 +553,9 @@ function CnOtaGetCurrentSourceFile: string;
 
 function CnOtaGetCurrentSourceFileName: string;
 {* 取当前编辑的 Pascal 或 C 源文件，判断限制较多}
+
+// 在 EditPosition 中插入一段文本，支持 D2005 下使用 utf-8 格式
+procedure CnOtaPositionInsertText(EditPosition: IOTAEditPosition; const Text: string);
 
 type
   TInsertPos = (ipCur, ipFileHead, ipFileEnd, ipLineHead, ipLineEnd);
@@ -3344,15 +3349,18 @@ begin
 
   EditBuffer := View.Buffer;
   L1 := CnOtaEditPosToLinePos(OTAEditPos(1, LineNo), EditBuffer.TopView);
-  L2 := CnOtaEditPosToLinePos(OTAEditPos(1, LineNo + 1), EditBuffer.TopView);
-  SetLength(OutStr, L2 - L1 - 2);
+  if (LineNo >= View.Buffer.GetLinesInBuffer) then
+    L2 := CnOtaEditPosToLinePos(OTAEditPos(High(SmallInt), LineNo + 1), EditBuffer.TopView)
+  else
+    L2 := CnOtaEditPosToLinePos(OTAEditPos(1, LineNo + 1), EditBuffer.TopView) - 2;
+  SetLength(OutStr, L2 - L1);
   Reader := EditBuffer.CreateReader;
   try
-    Reader.GetText(L1, PAnsiChar(OutStr), L2 - L1 - 2);
+    Reader.GetText(L1, PAnsiChar(OutStr), L2 - L1);
   finally
     Reader := nil;
   end;          
-  Text := string(ConvertEditorTextToText(OutStr));
+  Text := TrimRight(string(ConvertEditorTextToText(OutStr)));
   Result := True;
 end;
 

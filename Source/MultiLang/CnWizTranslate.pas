@@ -736,6 +736,8 @@ begin
   TranslateStr(SCnSrcBlockSearch, 'SCnSrcBlockSearch');
   TranslateStr(SCnWebSearchFileDef, 'SCnWebSearchFileDef');
   TranslateStr(SCnSrcBlockMisc, 'SCnSrcBlockMisc');
+  TranslateStr(SCnSrcBlockMoveUp, 'SCnSrcBlockMoveUp');
+  TranslateStr(SCnSrcBlockMoveDown, 'SCnSrcBlockMoveDown');
 
   // CnSrcEditorKey
   TranslateStr(SCnRenameVarCaption, 'SCnRenameVarCaption');

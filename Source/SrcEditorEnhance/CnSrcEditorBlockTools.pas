@@ -29,7 +29,9 @@ unit CnSrcEditorBlockTools;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2012.09.19 by shenloqi
+* 修改记录：2012.10.01 by shenloqi
+*               增加了将当前代码/行上下移动的功能，完善了复制当前代码/行的功能
+*           2012.09.19 by shenloqi
 *               移植到Delphi XE3
 *           2005.06.05
 *               LiuXiao 加入复制粘贴当前标识符的功能
@@ -59,7 +61,7 @@ type
     btLowerCase, btUpperCase, btToggleCase,
     btIndent, btIndentEx, btUnindent, btUnindentEx,
     btCommentCode, btUnCommentCode, btToggleComment,
-    btCodeSwap, btCodeToString, btInsertColor, btInsertDateTime, btSortLines);
+    btCodeSwap, btCodeToString, btInsertColor, btInsertDateTime, btSortLines, btBlockMoveUp, btBlockMoveDown);
 
   TCnSrcEditorBlockTools = class(TObject)
   private
@@ -68,6 +70,8 @@ type
     FGroupReplace: TCnSrcEditorGroupReplaceTool;
     FWebSearch: TCnSrcEditorWebSearchTool;
     FDupShortCut: TCnWizShortCut;
+    FBlockMoveUpShortCut: TCnWizShortCut;
+    FBlockMoveDownShortCut: TCnWizShortCut;
     FActive: Boolean;
     FOnEnhConfig: TNotifyEvent;
     FShowBlockTools: Boolean;
@@ -86,6 +90,8 @@ type
     procedure OnPopup(Sender: TObject);
     procedure OnItemClick(Sender: TObject);
     procedure OnEditDuplicate(Sender: TObject);
+    procedure OnEditBlockMoveUp(Sender: TObject);
+    procedure OnEditBlockMoveDown(Sender: TObject);
     procedure DoBlockExecute(Kind: TBlockToolKind);
     procedure DoBlockEdit(Kind: TBlockToolKind);
     procedure DoBlockCase(Kind: TBlockToolKind);
@@ -148,6 +154,10 @@ begin
 
   FDupShortCut := WizShortCutMgr.Add('CnEditDuplicate',
     ShortCut(Word('D'), [ssCtrl, ssAlt]), OnEditDuplicate);
+  FBlockMoveUpShortCut := WizShortCutMgr.Add('CnEditBlockMoveUp',
+    ShortCut(Word('U'), [ssCtrl, ssAlt, ssShift]), OnEditBlockMoveUp);
+  FBlockMoveDownShortCut := WizShortCutMgr.Add('CnEditBlockMoveDown',
+    ShortCut(Word('D'), [ssCtrl, ssAlt, ssShift]), OnEditBlockMoveDown);
 
   FPopupMenu := TPopupMenu.Create(nil);
   FPopupMenu.AutoPopup := False;
@@ -171,7 +181,9 @@ begin
   FCodeWrap.Free;
   FGroupReplace.Free;
   FWebSearch.Free;
-  
+
+  WizShortCutMgr.DeleteShortCut(FBlockMoveUpShortCut);
+  WizShortCutMgr.DeleteShortCut(FBlockMoveDownShortCut);
   WizShortCutMgr.DeleteShortCut(FDupShortCut);
   FPopupMenu.Free;
   FIcon.Free;
@@ -186,6 +198,192 @@ procedure TCnSrcEditorBlockTools.OnItemClick(Sender: TObject);
 begin
   if Sender is TMenuItem then
     DoBlockExecute(TBlockToolKind(TMenuItem(Sender).Tag));
+end;
+
+procedure TCnSrcEditorBlockTools.OnEditBlockMoveDown(Sender: TObject);
+var
+  EditView: IOTAEditView;
+  StartRow: Integer;
+  EndRow: Integer;
+  StartCol: Integer;
+  EndCol: Integer;
+  TotalLine: Integer;
+  InsertingText: string;
+begin
+  EditView := CnOtaGetTopMostEditView;
+  if IsEditControl(Screen.ActiveControl) and Assigned(EditView) then
+  begin
+    TotalLine := EditView.Buffer.GetLinesInBuffer;
+    if EditView.Block.IsValid then
+    begin
+      EndRow := EditView.Block.EndingRow;
+      if EndRow >= TotalLine then Exit;
+
+      StartRow := EditView.Block.StartingRow;
+      StartCol := EditView.Block.StartingColumn;
+      EndCol := EditView.Block.EndingColumn;
+      if EndRow + 1 < TotalLine then
+      begin
+        EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
+            OTAEditPos(1, StartRow), EditView));
+        EditView.Block.BeginBlock;
+        EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
+            OTAEditPos(1, EndRow + 1), EditView));
+      end
+      else
+      begin
+        EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
+            OTAEditPos(1, StartRow - 1), EditView));
+        EditView.Position.MoveEOL;
+        EditView.Block.BeginBlock;
+        EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
+            OTAEditPos(1, EndRow), EditView));
+        EditView.Position.MoveEOL;
+      end;
+      EditView.Block.EndBlock;
+      InsertingText := EditView.Block.Text;
+      CnOtaDeleteCurrentSelection();
+      if EndRow + 1 < TotalLine then
+      begin
+        EditView.Position.Move(StartRow + 1, 1);
+      end
+      else
+      begin
+        EditView.Position.Move(StartRow, 1);
+        EditView.Position.MoveEOL;
+      end;
+      {$IFDEF DELPHI2009_UP}
+      CnOtaInsertTextIntoEditorAtPos(InsertingText,
+        CnOtaEditPosToLinePos(EditView.CursorPos, EditView) , EditView.Buffer);
+      {$ELSE}
+      CnOtaInsertTextIntoEditorAtPos(ConvertEditorTextToText(InsertingText),
+        CnOtaEditPosToLinePos(EditView.CursorPos, EditView) , EditView.Buffer);
+      {$ENDIF}
+      EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
+          OTAEditPos(StartCol, StartRow + 1), EditView));
+      EditView.Block.BeginBlock;
+      EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
+          OTAEditPos(EndCol, EndRow + 1), EditView));
+      EditView.Block.EndBlock;
+
+      //EditView.MoveViewToCursor();
+    end
+    else if CnOtaGetCurrLineText(InsertingText, StartRow, StartCol) then
+    begin
+      if StartRow >= TotalLine then Exit;
+
+      EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
+          OTAEditPos(1, StartRow), EditView));
+      EditView.Block.BeginBlock;
+      EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
+          OTAEditPos(1, StartRow + 1), EditView));
+      EditView.Block.EndBlock;
+      CnOtaDeleteCurrentSelection();
+      Inc(StartRow);
+      CnOtaInsertSingleLine(StartRow, InsertingText, EditView);
+    end;
+  end;
+end;
+
+procedure TCnSrcEditorBlockTools.OnEditBlockMoveUp(Sender: TObject);
+var
+  EditView: IOTAEditView;
+  StartRow: Integer;
+  EndRow: Integer;
+  StartCol: Integer;
+  EndCol: Integer;
+  TotalLine: Integer;
+  InsertingText: string;
+begin
+  EditView := CnOtaGetTopMostEditView;
+  if IsEditControl(Screen.ActiveControl) and Assigned(EditView) then
+  begin
+    TotalLine := EditView.Buffer.GetLinesInBuffer;
+    if EditView.Block.IsValid then
+    begin
+      StartRow := EditView.Block.StartingRow;
+      if StartRow <= 1 then Exit;
+
+      EndRow := EditView.Block.EndingRow;
+      StartCol := EditView.Block.StartingColumn;
+      EndCol := EditView.Block.EndingColumn;
+      if (EndRow >= TotalLine) then
+      begin
+        EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
+            OTAEditPos(1, StartRow - 1), EditView));
+        EditView.Position.MoveEOL;
+        EditView.Block.BeginBlock;
+        EditView.Position.MoveEOF;
+        EditView.Block.EndBlock;
+        InsertingText := Copy(EditView.Block.Text, 3,
+          Length(EditView.Block.Text)) + CRLF;
+      end
+      else
+      begin
+        EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
+            OTAEditPos(1, StartRow), EditView));
+        EditView.Block.BeginBlock;
+        EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
+          OTAEditPos(1, EndRow + 1), EditView));
+        EditView.Block.EndBlock;
+        InsertingText := EditView.Block.Text;
+      end;
+      CnOtaDeleteCurrentSelection();
+      {$IFDEF DELPHI2009_UP}
+      CnOtaInsertTextIntoEditorAtPos(InsertingText,
+        CnOtaEditPosToLinePos(OTAEditPos(1, StartRow - 1), EditView),
+        EditView.Buffer);
+      {$ELSE}
+      CnOtaInsertTextIntoEditorAtPos(ConvertEditorTextToText(InsertingText),
+        CnOtaEditPosToLinePos(OTAEditPos(1, StartRow - 1), EditView),
+        EditView.Buffer);
+      {$ENDIF}
+      EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
+          OTAEditPos(StartCol, StartRow - 1), EditView));
+      EditView.Block.BeginBlock;
+      EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
+          OTAEditPos(EndCol, EndRow - 1), EditView));
+      EditView.Block.EndBlock;
+
+      EditView.MoveViewToCursor();
+    end
+    else if CnOtaGetCurrLineText(InsertingText, StartRow, StartCol) then
+    begin
+      if StartRow <= 1 then Exit;
+
+      if (StartRow >= TotalLine) then
+      begin
+        EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
+            OTAEditPos(1, StartRow - 1), EditView));
+        EditView.Position.MoveEOL;
+        EditView.Block.BeginBlock;
+        EditView.Position.MoveEOF;
+      end
+      else
+      begin
+        EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
+            OTAEditPos(1, StartRow), EditView));
+        EditView.Block.BeginBlock;
+        EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
+          OTAEditPos(1, StartRow + 1), EditView));
+      end;
+      EditView.Block.EndBlock;
+      CnOtaDeleteCurrentSelection();
+      Dec(StartRow);
+      if StartRow <= 1 then
+      begin
+        EditView.Position.Move(StartRow, 1);
+        CnOtaPositionInsertText(EditView.Position, CRLF);
+        EditView.Position.Move(StartRow, 1);
+        CnOtaPositionInsertText(EditView.Position, InsertingText);
+        EditView.Paint;
+      end
+      else
+      begin
+        CnOtaInsertSingleLine(StartRow, InsertingText, EditView);
+      end;
+    end;
+  end;
 end;
 
 procedure TCnSrcEditorBlockTools.OnEditDuplicate(Sender: TObject);
@@ -225,7 +423,7 @@ begin
     begin
       CnOtaGetCurrLineText(LineText, LineNo, CharIndex);
       Inc(LineNo);
-      CnOtaInsertSingleLine(LineNo, TrimRight(LineText));
+      CnOtaInsertSingleLine(LineNo, LineText, EditView);
     end;
   end;
 end;
@@ -237,7 +435,7 @@ begin
     btLowerCase..btToggleCase: DoBlockCase(Kind);
     btIndent..btUnindentEx: DoBlockFormat(Kind);
     btCommentCode..btToggleComment: DoBlockComment(Kind);
-    btCodeSwap..btSortLines: DoBlockMisc(Kind);
+    btCodeSwap..btBlockMoveDown: DoBlockMisc(Kind);
   end;
 end;
 
@@ -350,8 +548,19 @@ begin
 end;
 
 procedure TCnSrcEditorBlockTools.DoBlockMisc(Kind: TBlockToolKind);
+var
+  EditView: IOTAEditView;
 begin
-  ExecuteMenu(FMiscMenu, Kind);
+  EditView := CnOtaGetTopMostEditView;
+  if Assigned(EditView) then
+  begin
+    case Kind of
+      btBlockMoveUp: OnEditBlockMoveUp(nil);
+      btBlockMoveDown: OnEditBlockMoveDown(nil);
+    else
+      ExecuteMenu(FMiscMenu, Kind);
+    end;
+  end;
 end;
 
 //------------------------------------------------------------------------------
@@ -479,6 +688,8 @@ begin
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorInsertColor', btInsertColor);
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorInsertTime', btInsertDateTime);
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorSortLines', btSortLines);
+  DoAddMenuItem(FMiscMenu, SCnSrcBlockMoveUp, btBlockMoveUp, FBlockMoveUpShortCut.ShortCut);
+  DoAddMenuItem(FMiscMenu, SCnSrcBlockMoveDown, btBlockMoveDown, FBlockMoveDownShortCut.ShortCut);
 
   // 设置菜单
   AddSepMenuItem(Items);

@@ -1003,6 +1003,8 @@ var
   SCnSrcBlockSearch: string = '&Web Search';
   SCnWebSearchFileDef: string = 'WebSearch_ENU.xml';
   SCnSrcBlockMisc: string = '&Others';
+  SCnSrcBlockMoveUp: string = 'Move &Up';
+  SCnSrcBlockMoveDown: string = 'Move &Down';
 
   // CnSrcEditorKey
   SCnRenameVarCaption: string = 'Rename Identifier';
