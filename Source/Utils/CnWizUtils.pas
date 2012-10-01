@@ -42,6 +42,7 @@ unit CnWizUtils;
 * 单元标识：$Id$
 * 修改记录：2012.10.01 by shenloqi
 *               修复CnOtaGetCurrLineText不能获取最后一行和未TrimRight的BUG
+*               修复CnOtaInsertSingleLine不能正确在第一行插入的BUG
 *           2012.09.19 by shenloqi
 *               移植到Delphi XE3
 *           2005.05.06 by hubdog
@@ -4490,9 +4491,16 @@ begin
     EditView := CnOtaGetTopMostEditView;
   if Assigned(EditView) then
   begin
-    // 先插入一个换行
-    EditView.Position.Move(Line - 1, 1);
-    EditView.Position.MoveEOL;
+    if Line > 1 then
+    begin
+      // 先插入一个换行
+      EditView.Position.Move(Line - 1, 1);
+      EditView.Position.MoveEOL;
+    end
+    else
+    begin
+      EditView.Position.Move(1, 1);
+    end;
     CnOtaPositionInsertText(EditView.Position, CRLF);
     // 再插入文本以避免下一行自动缩进
     EditView.Position.Move(Line, 1);

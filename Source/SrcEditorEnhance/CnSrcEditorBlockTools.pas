@@ -370,18 +370,7 @@ begin
       EditView.Block.EndBlock;
       CnOtaDeleteCurrentSelection();
       Dec(StartRow);
-      if StartRow <= 1 then
-      begin
-        EditView.Position.Move(StartRow, 1);
-        CnOtaPositionInsertText(EditView.Position, CRLF);
-        EditView.Position.Move(StartRow, 1);
-        CnOtaPositionInsertText(EditView.Position, InsertingText);
-        EditView.Paint;
-      end
-      else
-      begin
-        CnOtaInsertSingleLine(StartRow, InsertingText, EditView);
-      end;
+      CnOtaInsertSingleLine(StartRow, InsertingText, EditView);
     end;
   end;
 end;
