@@ -29,7 +29,9 @@ unit CnSrcEditorBlockTools;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2012.10.01 by shenloqi
+* 修改记录：2012.10.08 by shenloqi
+*               增加Ctrl+Shift+D删除当前行或选中行的功能
+*           2012.10.01 by shenloqi
 *               增加了将当前代码/行上下移动的功能，完善了复制当前代码/行的功能
 *           2012.09.19 by shenloqi
 *               移植到Delphi XE3
@@ -61,7 +63,7 @@ type
     btLowerCase, btUpperCase, btToggleCase,
     btIndent, btIndentEx, btUnindent, btUnindentEx,
     btCommentCode, btUnCommentCode, btToggleComment,
-    btCodeSwap, btCodeToString, btInsertColor, btInsertDateTime, btSortLines, btBlockMoveUp, btBlockMoveDown);
+    btCodeSwap, btCodeToString, btInsertColor, btInsertDateTime, btSortLines, btBlockMoveUp, btBlockMoveDown, btBlockDelLines);
 
   TCnSrcEditorBlockTools = class(TObject)
   private
@@ -72,6 +74,7 @@ type
     FDupShortCut: TCnWizShortCut;
     FBlockMoveUpShortCut: TCnWizShortCut;
     FBlockMoveDownShortCut: TCnWizShortCut;
+    FBlockDelLinesShortCut: TCnWizShortCut;
     FActive: Boolean;
     FOnEnhConfig: TNotifyEvent;
     FShowBlockTools: Boolean;
@@ -92,6 +95,7 @@ type
     procedure OnEditDuplicate(Sender: TObject);
     procedure OnEditBlockMoveUp(Sender: TObject);
     procedure OnEditBlockMoveDown(Sender: TObject);
+    procedure OnEditBlockDelLines(Sender: TObject);
     procedure DoBlockExecute(Kind: TBlockToolKind);
     procedure DoBlockEdit(Kind: TBlockToolKind);
     procedure DoBlockCase(Kind: TBlockToolKind);
@@ -158,6 +162,8 @@ begin
     ShortCut(Word('U'), [ssCtrl, ssAlt, ssShift]), OnEditBlockMoveUp);
   FBlockMoveDownShortCut := WizShortCutMgr.Add('CnEditBlockMoveDown',
     ShortCut(Word('D'), [ssCtrl, ssAlt, ssShift]), OnEditBlockMoveDown);
+  FBlockDelLinesShortCut := WizShortCutMgr.Add('CnEditBlockDeleteLines',
+    ShortCut(Word('D'), [ssCtrl, ssShift]), OnEditBlockDelLines);
 
   FPopupMenu := TPopupMenu.Create(nil);
   FPopupMenu.AutoPopup := False;
@@ -182,8 +188,9 @@ begin
   FGroupReplace.Free;
   FWebSearch.Free;
 
-  WizShortCutMgr.DeleteShortCut(FBlockMoveUpShortCut);
+  WizShortCutMgr.DeleteShortCut(FBlockDelLinesShortCut);
   WizShortCutMgr.DeleteShortCut(FBlockMoveDownShortCut);
+  WizShortCutMgr.DeleteShortCut(FBlockMoveUpShortCut);
   WizShortCutMgr.DeleteShortCut(FDupShortCut);
   FPopupMenu.Free;
   FIcon.Free;
@@ -198,6 +205,46 @@ procedure TCnSrcEditorBlockTools.OnItemClick(Sender: TObject);
 begin
   if Sender is TMenuItem then
     DoBlockExecute(TBlockToolKind(TMenuItem(Sender).Tag));
+end;
+
+procedure TCnSrcEditorBlockTools.OnEditBlockDelLines(Sender: TObject);
+var
+  EditView: IOTAEditView;
+  StartRow: Integer;
+  EndRow: Integer;
+  LineText: string;
+  CharIndex: Integer;
+begin
+  EditView := CnOtaGetTopMostEditView;
+  if IsEditControl(Screen.ActiveControl) and Assigned(EditView) then
+  begin
+    if EditView.Block.IsValid then
+    begin
+      StartRow := EditView.Block.StartingRow;
+      EndRow := EditView.Block.EndingRow;
+      EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
+          OTAEditPos(1, StartRow), EditView));
+      EditView.Block.BeginBlock;
+      EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
+          OTAEditPos(1, EndRow + 1), EditView));
+      EditView.Block.EndBlock;
+      CnOtaDeleteCurrentSelection();
+      EditView.Position.Move(StartRow, 1);
+      EditView.MoveViewToCursor();
+    end
+    else if CnOtaGetCurrLineText(LineText, StartRow, CharIndex) then
+    begin
+      EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
+          OTAEditPos(1, StartRow), EditView));
+      EditView.Block.BeginBlock;
+      EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
+          OTAEditPos(1, StartRow + 1), EditView));
+      EditView.Block.EndBlock;
+      CnOtaDeleteCurrentSelection();
+      EditView.Position.Move(StartRow, 1);
+      EditView.MoveViewToCursor();
+    end;
+  end;
 end;
 
 procedure TCnSrcEditorBlockTools.OnEditBlockMoveDown(Sender: TObject);
@@ -424,7 +471,7 @@ begin
     btLowerCase..btToggleCase: DoBlockCase(Kind);
     btIndent..btUnindentEx: DoBlockFormat(Kind);
     btCommentCode..btToggleComment: DoBlockComment(Kind);
-    btCodeSwap..btBlockMoveDown: DoBlockMisc(Kind);
+    btCodeSwap..btBlockDelLines: DoBlockMisc(Kind);
   end;
 end;
 
@@ -546,6 +593,7 @@ begin
     case Kind of
       btBlockMoveUp: OnEditBlockMoveUp(nil);
       btBlockMoveDown: OnEditBlockMoveDown(nil);
+      btBlockDelLines: OnEditBlockDelLines(nil);
     else
       ExecuteMenu(FMiscMenu, Kind);
     end;
@@ -679,6 +727,7 @@ begin
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorSortLines', btSortLines);
   DoAddMenuItem(FMiscMenu, SCnSrcBlockMoveUp, btBlockMoveUp, FBlockMoveUpShortCut.ShortCut);
   DoAddMenuItem(FMiscMenu, SCnSrcBlockMoveDown, btBlockMoveDown, FBlockMoveDownShortCut.ShortCut);
+  DoAddMenuItem(FMiscMenu, SCnSrcBlockDeleteLines, btBlockDelLines, FBlockDelLinesShortCut.ShortCut);
 
   // 设置菜单
   AddSepMenuItem(Items);

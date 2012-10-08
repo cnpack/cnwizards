@@ -1005,6 +1005,7 @@ var
   SCnSrcBlockMisc: string = '&Others';
   SCnSrcBlockMoveUp: string = 'Move &Up';
   SCnSrcBlockMoveDown: string = 'Move &Down';
+  SCnSrcBlockDeleteLines: string = 'Delete &Lines';
 
   // CnSrcEditorKey
   SCnRenameVarCaption: string = 'Rename Identifier';
