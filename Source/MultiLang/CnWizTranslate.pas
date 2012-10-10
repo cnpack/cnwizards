@@ -738,6 +738,7 @@ begin
   TranslateStr(SCnSrcBlockMisc, 'SCnSrcBlockMisc');
   TranslateStr(SCnSrcBlockMoveUp, 'SCnSrcBlockMoveUp');
   TranslateStr(SCnSrcBlockMoveDown, 'SCnSrcBlockMoveDown');
+  TranslateStr(SCnSrcBlockDeleteLines, 'SCnSrcBlockDeleteLines');
 
   // CnSrcEditorKey
   TranslateStr(SCnRenameVarCaption, 'SCnRenameVarCaption');
