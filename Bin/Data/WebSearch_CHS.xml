@@ -55,7 +55,7 @@
   <o>
     <Caption>MSDN 在线搜索</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://search.microsoft.com/default.asp?so=RECCNT&amp;siteid=us/dev&amp;p=1&amp;nq=NEW&amp;qu=%s&amp;boolean=PHRASE&amp;ig=01&amp;i=99</Url>
+    <Url>http://social.msdn.microsoft.com/Search/zh-CN?query=%s&amp;addenglish=1</Url>
   </o>
   <o>
     <Caption>Embarcadero 知识库</Caption>
