@@ -47,7 +47,7 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, SysUtils, Classes, mPasLex, mwBCBTokenList, CnWizUtils,
+  Windows, SysUtils, Classes, mPasLex, mwBCBTokenList,
   Contnrs, CnCommon, CnFastList;
 
 const

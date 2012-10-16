@@ -45,7 +45,7 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, SysUtils, Classes, Contnrs, CnPasCodeParser, CnWizUtils,
+  Windows, SysUtils, Classes, Contnrs, CnPasCodeParser, 
   mwBCBTokenList, CnCommon, CnFastList;
   
 type

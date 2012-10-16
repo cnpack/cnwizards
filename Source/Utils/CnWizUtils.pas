@@ -66,7 +66,7 @@ uses
   {$ELSE}
   DsgnIntf, LibIntf,
   {$ENDIF}
-  {$IFDEF DelphiXE3_UP}Actions,{$ENDIF}
+  {$IFDEF DELPHIXE3_UP}Actions,{$ENDIF}
   Clipbrd, TypInfo, ComCtrls, StdCtrls, Imm, Contnrs, RegExpr,
   CnWizConsts, CnCommon, CnConsts, CnWideStrings, CnWizClasses, CnWizIni;
 
@@ -3380,6 +3380,7 @@ begin
   if (EditControl <> nil) and (View <> nil) then
   begin
     Text := GetStrProp(EditControl, 'LineText');
+    //CnDebugger.TraceFmt('Col %d, Len %d, Text %s', [View.CursorPos.Col - 1, Length(Text), Text]);
     CharIndex := Min(View.CursorPos.Col - 1, Length(Text));
     LineNo := View.CursorPos.Line;
     Result := True;
@@ -3424,6 +3425,7 @@ begin
   if (EditView <> nil) and CnNtaGetCurrLineText(LineText, LineNo, CharIndex) and
     (LineText <> '') then
   begin
+    //CnDebugger.TraceFmt('CharIndex %d, LineText %s', [CharIndex, LineText]);
     if CheckCursorOutOfLineEnd and CnOtaIsEditPosOutOfLine(EditView.CursorPos) then
       Exit;
 
