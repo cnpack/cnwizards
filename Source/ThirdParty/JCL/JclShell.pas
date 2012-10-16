@@ -242,6 +242,44 @@ const
 const
   FOF_COMPLETELYSILENT = FOF_SILENT or FOF_NOCONFIRMATION or FOF_NOERRORUI or FOF_NOCONFIRMMKDIR;
 
+// 对ExtractFilePath的封装，防止Delphi XE3的
+// TStringHelper.LastDelimiter引入的不兼容，从CnCommon复制而来
+function _CnExtractFilePath(const FileName: string): string;
+{$IFNDEF VER130}
+{$IF RTLVersion > 23.00}
+var
+  I: Integer;
+{$IFEND}
+{$ENDIF}
+begin
+  Result := ExtractFilePath(FileName);
+{$IFNDEF VER130}
+{$IF RTLVersion > 23.00}
+  I := LastDelimiter(PathDelim + DriveDelim, FileName);
+  Result := Copy(FileName, 1, I);
+{$IFEND}
+{$ENDIF}
+end;
+
+// 对ExtractFileName的封装，防止Delphi XE3的
+// TStringHelper.LastDelimiter引入的不兼容
+function _CnExtractFileName(const FileName: string): string;
+{$IFNDEF VER130}
+{$IF RTLVersion > 23.00}
+var
+  I: Integer;
+{$IFEND}
+{$ENDIF}
+begin
+  Result := ExtractFileName(FileName);
+{$IFNDEF VER130}
+{$IF RTLVersion > 23.00}
+  I := LastDelimiter(PathDelim + DriveDelim, FileName);
+  Result := Copy(FileName, I + 1, MaxInt);
+{$IFEND}
+{$ENDIF}
+end;
+
 function DeleteOptionsToCardinal(Options: TSHDeleteOptions): Cardinal;
 begin
   Result := 0;
