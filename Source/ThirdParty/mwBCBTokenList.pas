@@ -14,8 +14,10 @@
 
  // Modifications/reformatting by Ales Kahanek and Erik Berry (July 2001)
 
- // Enhancements by Liu Xiao to Obtain Token Line/Col (2009.04.10)
- 
+ // Enhancements by Liu Xiao:
+ // 1. to Obtain Token Line/Col (2009.04.10)
+ // 2. Fix a crash problem when no crlf at file end in comment (2012.10.16)
+
 unit mwBCBTokenList;
 
 {$I CnWizards.inc}
@@ -1382,7 +1384,9 @@ begin
               end; // Continuation on the next line
 
           end;
-          Inc(Run); Inc(ColNum);
+
+          if FOrigin[Run] <> #0 then // Maybe reached end #0 when handlecomments or other
+            Inc(Run); Inc(ColNum);
           FTokenPositionsList.Add(Run);
           FTokenLineNumberList.Add(LineNum);
           FTokenColNumberList.Add(ColNum);
