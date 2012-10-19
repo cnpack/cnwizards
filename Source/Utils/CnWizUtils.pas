@@ -533,14 +533,6 @@ function CodeAutoWrap(Code: string; Width, Indent: Integer;
 {$IFDEF COMPILER6_UP}
 function FastUtf8ToAnsi(const Text: AnsiString): AnsiString;
 {* 快速转换Utf8到Ansi字符串，适用于长度短且主要是Ansi字符的字符串 }
-
-function CnUtf8ToAnsi(const Text: AnsiString): AnsiString;
-function CnUtf8ToAnsi2(const Text: string): string;
-{* Ansi 版的转换 Utf8 到 Ansi 字符串，以解决 D2009 下 Utf8ToAnsi 是 UString 的问题 }
-
-function CnAnsiToUtf8(const Text: AnsiString): AnsiString;
-function CnAnsiToUtf82(const Text: string): string;
-{* Ansi 版的转换 Ansi 到 Utf8 字符串，以解决 D2009 下 AnsiToUtf8 是 UString 的问题 }
 {$ENDIF}
 
 function ConvertTextToEditorText(const Text: AnsiString): AnsiString;
@@ -3984,42 +3976,6 @@ begin
     Result := '';
 end;
 
-// Ansi 版的转换 Utf8 到 Ansi 字符串，以解决 D2009 下 Utf8ToAnsi 是 UString 的问题
-function CnUtf8ToAnsi(const Text: AnsiString): AnsiString;
-begin
-{$IFDEF UNICODE_STRING}
-  Result := AnsiString(UTF8ToUnicodeString(PAnsiChar(Text)));
-{$ELSE}
-  Result := Utf8ToAnsi(Text);
-{$ENDIF}
-end;
-
-function CnUtf8ToAnsi2(const Text: string): string;
-begin
-{$IFDEF UNICODE_STRING}
-  Result := UTF8ToUnicodeString(PAnsiChar(AnsiString(Text)));
-{$ELSE}
-  Result := Utf8ToAnsi(Text);
-{$ENDIF}
-end;
-
-function CnAnsiToUtf8(const Text: AnsiString): AnsiString;
-begin
-{$IFDEF UNICODE_STRING}
-  Result := AnsiString(Utf8Encode(Text));
-{$ELSE}
-  Result := AnsiToUtf8(Text);
-{$ENDIF}
-end;
-
-function CnAnsiToUtf82(const Text: string): string;
-begin
-{$IFDEF UNICODE_STRING}
-  Result := string(Utf8Encode(Text));
-{$ELSE}
-  Result := AnsiToUtf8(Text);
-{$ENDIF}
-end;
 {$ENDIF}
 
 // 转换字符串为编辑器使用的字符串
