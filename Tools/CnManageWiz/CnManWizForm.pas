@@ -1,7 +1,7 @@
 {******************************************************************************}
 {                       CnPack For Delphi/C++Builder                           }
 {                     中国人自己的开放源码第三方开发包                         }
-{                   (C)Copyright 2001-2011 CnPack 开发组                       }
+{                   (C)Copyright 2001-2012 CnPack 开发组                       }
 {                   ------------------------------------                       }
 {                                                                              }
 {            本开发包是开源的自由软件，您可以遵照 CnPack 的发布协议来修        }
@@ -261,7 +261,7 @@ var
   SCnConfirmExit: string = 'Sure to Exit?';
   SCnManageWizAbout: string = 'CnPack IDE External Wizard Management' + #13#10#13#10 +
     'Author LiuXiao liuxiao@cnpack.org' + #13#10 +
-    'Copyright (C) 2001-2011 CnPack Team';
+    'Copyright (C) 2001-2012 CnPack Team';
 
 function GetAppRootDir(IDE: TCnCompiler): string;
 var

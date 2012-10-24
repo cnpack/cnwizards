@@ -1,7 +1,7 @@
 ;******************************************************************************
 ;                        CnPack For Delphi/C++Builder
 ;                   A Free, Open Source Project from China
-;                     (C)Copyright 2001-2011 CnPack Team
+;                     (C)Copyright 2001-2012 CnPack Team
 ;******************************************************************************
 
 ; Russian Language File for CnWizards Install Script
