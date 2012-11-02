@@ -29,7 +29,9 @@ unit CnSrcEditorBlockTools;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2012.10.08 by shenloqi
+* 修改记录：2012.11.02 by liuxiao
+*               因OTA的Bug，屏蔽D7下的三项新增功能
+*           2012.10.08 by shenloqi
 *               增加Ctrl+Shift+D删除当前行或选中行的功能
 *           2012.10.01 by shenloqi
 *               增加了将当前代码/行上下移动的功能，完善了复制当前代码/行的功能
@@ -63,7 +65,8 @@ type
     btLowerCase, btUpperCase, btToggleCase,
     btIndent, btIndentEx, btUnindent, btUnindentEx,
     btCommentCode, btUnCommentCode, btToggleComment,
-    btCodeSwap, btCodeToString, btInsertColor, btInsertDateTime, btSortLines, btBlockMoveUp, btBlockMoveDown, btBlockDelLines);
+    btCodeSwap, btCodeToString, btInsertColor, btInsertDateTime, btSortLines,
+    btBlockMoveUp, btBlockMoveDown, btBlockDelLines);
 
   TCnSrcEditorBlockTools = class(TObject)
   private
@@ -725,9 +728,12 @@ begin
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorInsertColor', btInsertColor);
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorInsertTime', btInsertDateTime);
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorSortLines', btSortLines);
+  
+{$IFDEF BDS} // Only for BDS because of bug. ;-(
   DoAddMenuItem(FMiscMenu, SCnSrcBlockMoveUp, btBlockMoveUp, FBlockMoveUpShortCut.ShortCut);
   DoAddMenuItem(FMiscMenu, SCnSrcBlockMoveDown, btBlockMoveDown, FBlockMoveDownShortCut.ShortCut);
   DoAddMenuItem(FMiscMenu, SCnSrcBlockDeleteLines, btBlockDelLines, FBlockDelLinesShortCut.ShortCut);
+{$ENDIF}
 
   // 设置菜单
   AddSepMenuItem(Items);
