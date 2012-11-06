@@ -180,7 +180,7 @@ const
 
   SACnRegIDEEntries: array[TCnIDEs] of string =
     ('Delphi\5.0', 'Delphi\6.0', 'Delphi\7.0', 'BDS\2.0', 'BDS\3.0', 'BDS\4.0',
-    'BDS\5.0', 'BDS\6.0', 'BDS\7.0', 'BDS\8.0', 'BDS\9.0', 'C++Builder\5.0',
+    'BDS\5.0', 'BDS\6.0', 'BDS\7.0', 'BDS\8.0', 'BDS\9.0', 'BDS\10.0', 'C++Builder\5.0',
     'C++Builder\6.0');
   SCnRegHisProject = '\Closed Projects';
   SCnRegHisFiles = '\Closed Files';
@@ -204,7 +204,6 @@ begin
   pgcMain.ActivePageIndex := 0;
 
   // 查看系统中已安装的 AppBuilder
-  // 支持 BCB5/BCB6/Delphi5/Delphi6/Delph7/Delphi8/BDS2005/BDS2006/Delphi2007/Delphi2009
   for I := Ord(Low(TAbiType)) to Ord(High(TAbiType)) do
   begin
     strRootDir := GetAppRootDir(TAbiType(I));
@@ -283,8 +282,9 @@ begin
     for I := 0 to lbxBackupOptions.Items.Count - 1 do
       lbxBackupOptions.Checked[I] := True;
 
+    // BDS 2005, 2006, 2007, 2009 以上的菜单模板和对象库不分开了。
     if lbxSelectApp.ItemIndex in [Ord(atBDS2005), Ord(atBDS2006), Ord(atDelphi2007),
-      Ord(atDelphi2009), Ord(atDelphi2010), Ord(atDelphiXE), Ord(atDelphiXE2)] then // BDS 2005, 2006, 2007, 2009 以上的菜单模板和对象库不分开了。
+      Ord(atDelphi2009), Ord(atDelphi2010), Ord(atDelphiXE), Ord(atDelphiXE2), Ord(atDelphiXE3)] then
     begin
       lbxBackupOptions.Checked[0] := True;
       lbxBackupOptions.ItemEnabled[0] := False;
