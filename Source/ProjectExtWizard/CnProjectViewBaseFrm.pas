@@ -489,7 +489,8 @@ procedure TCnProjectViewBaseForm.LoadProjectSettings(Ini: TCustomIniFile;
 begin
   with Ini do
   begin
-    if ReadBool(aSection, csCurrentPrj, False) then
+    FProjectListSelectedAllProject := not ReadBool(aSection, csCurrentPrj, False);
+    if not FProjectListSelectedAllProject then
     begin
       cbbProjectList.ItemIndex := cbbProjectList.Items.IndexOf(SCnProjExtCurrentProject);
       cbbProjectListChange(nil);
