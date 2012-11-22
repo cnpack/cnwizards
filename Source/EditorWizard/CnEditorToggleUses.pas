@@ -29,7 +29,9 @@ unit CnEditorToggleUses;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2007.12.02 V1.0
+* 修改记录：2012.11.22 V1.1
+*               加入一选项，跳过Implementation
+*           2007.12.02 V1.0
 *               创建单元，实现功能
 ================================================================================
 |</PRE>}
@@ -61,9 +63,9 @@ type
     FUsesPosition: TCnUsesPosition;
     FJumpTime: DWORD;
     FParser: TmwPasLex;
-
     FUsesAdded: Boolean;
     FColumn: Integer;
+    FSkipImplementUses: Boolean;
     procedure CursorReturnBack;
   protected
     procedure EditorKeyDown(Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
@@ -92,6 +94,8 @@ uses
 const
   CnToggleUsesBookmarkID = 20;
   CnToggleUsesTimeInterval = 2; // Seconds
+
+  csSkipImplementUses = 'SkipImplementUses';
 
 { TCnEditorToggleUses }
 
@@ -216,8 +220,8 @@ begin
           end;
         end;
 
-        // 跳到 interface 也就是 uses1 处即可
-        if (not CursorInImplement and (FUsesPosition = upNone))
+        // 跳到 interface 也就是第一处 uses 处即可
+        if ((not CursorInImplement or FSkipImplementUses) and (FUsesPosition = upNone))
           or ((FUsesPosition = upImplementation) and
           (GetTickCount - FJumpTime <= CnToggleUsesTimeInterval * 1000)) then
         begin
@@ -273,7 +277,7 @@ begin
       end
       else if IsCpp(S) or IsC(S) or IsH(S) or IsHpp(S) then // 解析 C
       begin
-        // TODO: 处理 C 的 Include 部分
+        // 处理 C 的 Include 部分
         CSources := TStringList.Create;
         try
           CSources.LoadFromStream(MemStream);
@@ -357,13 +361,13 @@ end;
 procedure TCnEditorToggleUses.LoadSettings(Ini: TCustomIniFile);
 begin
   inherited;
-
+  FSkipImplementUses := Ini.ReadBool('', csSkipImplementUses, False);
 end;
 
 procedure TCnEditorToggleUses.SaveSettings(Ini: TCustomIniFile);
 begin
   inherited;
-
+  Ini.WriteBool('', csSkipImplementUses, FSkipImplementUses);
 end;
 
 procedure TCnEditorToggleUses.EditorKeyDown(Key, ScanCode: Word; Shift: TShiftState;
