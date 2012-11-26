@@ -11,7 +11,7 @@ object CnTranslateForm: TCnTranslateForm
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
-  Scaled = False
+  Scaled = True
   PixelsPerInch = 96
   TextHeight = 13
 end
