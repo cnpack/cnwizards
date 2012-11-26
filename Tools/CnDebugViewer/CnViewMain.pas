@@ -1050,7 +1050,8 @@ var
       Msg := StringReplace(Msg, ',', ' ', [rfIgnoreCase, rfReplaceAll]);
 
       FileStrs.Add(Format('%d,%d,%s,$%x,$%x,%s,%s,%s', [I + 1, AMsgItem.Level,
-        SCnMsgTypeDescArray[AMsgItem.MsgType]^, AMsgItem.ThreadId, AMsgItem.ProcessId, AMsgItem.Tag, GetTimeDesc(AMsgItem), Msg]));
+        SCnMsgTypeDescArray[AMsgItem.MsgType]^, AMsgItem.ThreadId, AMsgItem.ProcessId,
+        AMsgItem.Tag, GetLongTimeDesc(AMsgItem), Msg]));
     end;
     FileStrs.SaveToFile(AFileName);
   end;
@@ -1074,7 +1075,8 @@ var
       Msg := StringReplace(AMsgItem.Msg, #13#10, '<BR>', [rfIgnoreCase, rfReplaceAll]);
 
       FileStrs.Add(Format(SCnHTMFormatLine, [I + 1, AMsgItem.Level,
-        SCnMsgTypeDescArray[AMsgItem.MsgType]^, AMsgItem.ThreadId, AMsgItem.ProcessId, AMsgItem.Tag, GetTimeDesc(AMsgItem), Msg]));
+        SCnMsgTypeDescArray[AMsgItem.MsgType]^, AMsgItem.ThreadId, AMsgItem.ProcessId, AMsgItem.Tag,
+        GetLongTimeDesc(AMsgItem), Msg]));
     end;
     FileStrs.Add(SCnHTMFormatEnd);
     FileStrs.SaveToFile(AFileName);

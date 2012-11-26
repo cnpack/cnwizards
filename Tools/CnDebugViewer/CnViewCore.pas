@@ -53,6 +53,7 @@ const
 
   SCnViewerMutexName = 'CnViewerMutexName';
   SCnDefDateTimeFmt = 'hh:nn:ss.zzz';
+  SCnDefLongDateTimeFmt = 'yyyy-mm-dd hh:nn:ss.zzz';
   SCnOptionFileName = 'CnDVOptions.xml';
 
   csLangDir = 'Lang\';
@@ -89,6 +90,7 @@ type
     FAutoScroll: Boolean;
     FSaveFormPosition: Boolean;
     FTop, FLeft, FHeight, FWidth, FWinState: Integer;
+    FLongDateTimeFormat: string;
     procedure SetTop(const Value: Integer);
     procedure SetLeft(const Value: Integer);
     procedure SetWidth(const Value: Integer);
@@ -105,6 +107,7 @@ type
 
     property SearchDownCount: Integer read FSearchDownCount write FSearchDownCount;
     property DateTimeFormat: string read FDateTimeFormat write FDateTimeFormat;
+    property LongDateTimeFormat: string read FLongDateTimeFormat write FLongDateTimeFormat;
     property MsgColumnWidth: Integer read FMsgColumnWidth write FMsgColumnWidth;
     
     property ShowTrayIcon: Boolean read FShowTrayIcon write FShowTrayIcon;
@@ -617,6 +620,7 @@ begin
   FFilterLevel := 3;
   FSearchDownCount := 7;
   FDateTimeFormat := SCnDefDateTimeFmt;
+  FLongDateTimeFormat := SCnDefLongDateTimeFmt;
   FIgnoreODString := True;
   FMainShortCut := 49238; //Ctrl + Alt + V
   FShowTrayIcon := True;

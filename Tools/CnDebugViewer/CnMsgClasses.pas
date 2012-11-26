@@ -242,6 +242,8 @@ procedure AssignMsgDescToMsgItem(ADesc: PCnMsgDesc; AItem: TCnMsgItem);
 
 function GetTimeDesc(AMsgItem: TCnMsgItem): string;
 
+function GetLongTimeDesc(AMsgItem: TCnMsgItem): string;
+
 implementation
 
 uses
@@ -421,6 +423,18 @@ function GetTimeDesc(AMsgItem: TCnMsgItem): string;
 begin
   case AMsgItem.TimeStampType of
     ttDateTime: Result := FormatDateTime(CnViewerOptions.DateTimeFormat,
+      AMsgItem.MsgDateTime);
+    ttTickCount: Result := IntToStr(AMsgItem.MsgTickCount);
+    ttCPUPeriod: Result := IntToStr(AMsgItem.MsgCPUPeriod);
+  else
+    Result := '';
+  end;
+end;
+
+function GetLongTimeDesc(AMsgItem: TCnMsgItem): string;
+begin
+  case AMsgItem.TimeStampType of
+    ttDateTime: Result := FormatDateTime(CnViewerOptions.LongDateTimeFormat,
       AMsgItem.MsgDateTime);
     ttTickCount: Result := IntToStr(AMsgItem.MsgTickCount);
     ttCPUPeriod: Result := IntToStr(AMsgItem.MsgCPUPeriod);
