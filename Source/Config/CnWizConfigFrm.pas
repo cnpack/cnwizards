@@ -29,7 +29,9 @@ unit CnWizConfigFrm;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2012.09.19 by shenloqi
+* 修改记录：2012.11.30 V1.7
+*               去除使用FormScaler重新调整文字的机制
+*           2012.09.19 by shenloqi
 *               移植到Delphi XE3
 *           2012.06.21 V1.5
 *               加入搜索框，允许按首字母搜索专家与属性组件编辑器
@@ -270,12 +272,12 @@ begin
 
   //自画高度调整
   FDrawTextHeight := 12;
-  if Scaled then
-  begin
-    FDrawTextHeight := FScaler.MultiPPI(FDrawTextHeight, Self);
-    lbWizards.ItemHeight := FScaler.MultiPPI(lbWizards.ItemHeight, Self);
-    lbDesignEditors.ItemHeight := FScaler.MultiPPI(lbDesignEditors.ItemHeight, Self);
-  end;
+//  if Scaled then
+//  begin
+//    FDrawTextHeight := FScaler.MultiPPI(FDrawTextHeight, Self);
+//    lbWizards.ItemHeight := FScaler.MultiPPI(lbWizards.ItemHeight, Self);
+//    lbDesignEditors.ItemHeight := FScaler.MultiPPI(lbDesignEditors.ItemHeight, Self);
+//  end;
 
   chkUserDir.Checked := WizOptions.UseCustomUserDir;
   edtUserDir.Text := WizOptions.CustomUserDir;

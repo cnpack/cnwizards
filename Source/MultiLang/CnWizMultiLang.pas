@@ -29,7 +29,9 @@ unit CnWizMultiLang;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2009.01.07
+* 修改记录：2012.11.30
+*               不使用CnFormScaler来处理字体，改用固定的96/72进行字体尺寸计算。
+*           2009.01.07
 *               加入位置保存功能
 *           2004.11.19 V1.4
 *               修正因多语切换引起的Scaled=False时字体还是会Scaled的BUG (shenloqi)
@@ -72,7 +74,7 @@ uses
   CnWizLangID,
 {$ENDIF}
   CnWizConsts, CnCommon, CnLangMgr, CnHashLangStorage, CnLangStorage, CnWizHelp,
-  CnFormScaler, CnWizIni,
+  CnFormScaler, CnWizIni, CnLangCollection,
 {$ENDIF}
   StdCtrls, IniFiles;
 
@@ -109,6 +111,7 @@ type
     FHelpAction: TAction;
     procedure OnLanguageChanged(Sender: TObject);
     procedure OnHelp(Sender: TObject);
+    procedure CheckDefaultFontSize();
 {$ENDIF TEST_APP}
   protected
 {$IFNDEF TEST_APP}
@@ -161,6 +164,9 @@ const
   csLanguage = 'Language';
   csEnglishID = 1033;
 
+  csFixPPI = 96;
+  csFixPerInch = 72;
+
 {$IFDEF STAND_ALONE}
   csLangDir = 'Lang\';
   csHelpDir = 'Help\';
@@ -169,6 +175,7 @@ const
 {$IFNDEF TEST_APP}
 var
   FStorage: TCnHashLangFileStorage;
+  FDefaultFontSize: Integer = 8;
 
 procedure InitLangManager;
 var
@@ -352,7 +359,10 @@ begin
   try
     Translate;
     if not Scaled then
-      Font.Height := MulDiv(Font.Height, FScaler.DesignPPI, PixelsPerInch);
+    begin
+      CheckDefaultFontSize;
+      Font.Height := -MulDiv(FDefaultFontSize, csFixPPI, csFixPerInch);
+    end;
   finally
     EnableAlign;
   end;
@@ -479,13 +489,38 @@ begin
   end;
 end;
 
+procedure TCnTranslateForm.CheckDefaultFontSize;
+var
+  Storage: TCnCustomLangStorage;
+  Language: TCnLanguageItem;
+begin
+  Storage := CnLanguageManager.LanguageStorage;
+  Language := nil;
+  if Storage <> nil then
+  begin
+    Language := Storage.CurrentLanguage;
+    if Storage.FontInited and (Storage.DefaultFont <> nil) then
+      FDefaultFontSize := Storage.DefaultFont.Size;
+  end;
+
+  if (Language <> nil) and (Language.DefaultFont <> nil) then
+    FDefaultFontSize := Language.DefaultFont.Size;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnTranslateForm.CheckDefaultFontSize. Get Default Font Size: ' + IntToStr(FDefaultFontSize));
+{$ENDIF}        
+end;
+
 procedure TCnTranslateForm.OnLanguageChanged(Sender: TObject);
 begin
   DisableAlign;
   try
     CnLanguageManager.TranslateForm(Self);
     if not Scaled then
-      Font.Height := MulDiv(Font.Height, FScaler.DesignPPI, PixelsPerInch);
+    begin
+      CheckDefaultFontSize;
+      Font.Height := -MulDiv(FDefaultFontSize, csFixPPI, csFixPerInch);
+    end;
   finally
     EnableAlign;
   end;
@@ -551,10 +586,10 @@ begin
   else
   begin
 {$IFDEF DEBUG}
-    CnDebugger.LogMsgError('MultiLang Initialization Error. Use Chinese Font as default.');
+    CnDebugger.LogMsgError('DockForm MultiLang Initialization Error. Use English Font as default.');
 {$ENDIF DEBUG}
-    // 因初始化失败而无语言条目，因原始窗体是中文，故设置为中文字体
-    Font.Charset := GB2312_CHARSET;
+    // 因初始化失败而无语言条目，因原始窗体是英文，故设置为英文字体
+    Font.Charset := DEFAULT_CHARSET;
   end;
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('TCnTranslateForm.Translate');
@@ -590,7 +625,3 @@ finalization
 {$ENDIF TEST_APP}
 
 end.
-
-
-
-

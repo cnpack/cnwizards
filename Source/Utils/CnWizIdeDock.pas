@@ -39,7 +39,9 @@ unit CnWizIdeDock;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2009.01.07
+* 修改记录：2012.11.30
+*               不使用CnFormScaler来处理字体，改用固定的96/72进行字体尺寸计算。
+*           2009.01.07
 *               加入位置保存功能，采用了一些和 CnTranslateForm 中不同的机制
 *           2004.11.19 V1.1
 *               修正因多语切换引起的Scaled=False时字体还是会Scaled的BUG (shenloqi)
@@ -60,6 +62,7 @@ interface
 uses
   Windows, SysUtils, Classes, IniFiles, Forms, Controls, Menus, Messages,
   MenuBar, ActnList, CnWizUtils, CnClasses, CnLangMgr, CnFormScaler,
+  CnLangCollection, CnLangStorage,
   // 该单元编译在 DsnIdeXX/DesignIde 包中，专家必须与它相连接
   DockForm;
 
@@ -93,6 +96,7 @@ type
     procedure OnHelp(Sender: TObject);
     function DoHandleShortCut(var Message: TWMKey): Boolean;
     procedure RestorePosition;
+    procedure CheckDefaultFontSize();
   protected
     procedure Loaded; override;
     procedure DoShow; override;
@@ -172,6 +176,13 @@ type
       var IdeDockFormVar; const IdeDockFormName: string);
     procedure ShowForm(Form: TForm);
   end;
+
+const
+  csFixPPI = 96;
+  csFixPerInch = 72;
+
+var
+  FDefaultFontSize: Integer = 8;
 
 { TIdeDockManager }
 
@@ -282,7 +293,10 @@ begin
   try
     Translate;
     if not Scaled then
-      Font.Height := MulDiv(Font.Height, FScaler.DesignPPI, PixelsPerInch);
+    begin
+      CheckDefaultFontSize;
+      Font.Height := -MulDiv(FDefaultFontSize, csFixPPI, csFixPerInch);
+    end;
   finally
     EnableAlign;
   end;
@@ -399,11 +413,33 @@ begin
   else
   begin
 {$IFDEF DEBUG}
-    CnDebugger.LogMsgError('MultiLang Initialization Error. Use Chinese Font as default.');
+    CnDebugger.LogMsgError('MultiLang Initialization Error. Use English Font as default.');
 {$ENDIF}
-    // 因初始化失败而无语言条目，因原始窗体是中文，故设置为中文字体
-    Font.Charset := GB2312_CHARSET;
+    // 因初始化失败而无语言条目，因原始窗体是英文，故设置为英文字体
+    Font.Charset := DEFAULT_CHARSET;
   end;
+end;
+
+procedure TCnIdeDockForm.CheckDefaultFontSize;
+var
+  Storage: TCnCustomLangStorage;
+  Language: TCnLanguageItem;
+begin
+  Storage := CnLanguageManager.LanguageStorage;
+  Language := nil;
+  if Storage <> nil then
+  begin
+    Language := Storage.CurrentLanguage;
+    if Storage.FontInited and (Storage.DefaultFont <> nil) then
+      FDefaultFontSize := Storage.DefaultFont.Size;
+  end;
+
+  if (Language <> nil) and (Language.DefaultFont <> nil) then
+    FDefaultFontSize := Language.DefaultFont.Size;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnIdeDockForm.CheckDefaultFontSize. Get Default Font Size: ' + IntToStr(FDefaultFontSize));
+{$ENDIF}        
 end;
 
 procedure TCnIdeDockForm.OnLanguageChanged(Sender: TObject);
@@ -412,7 +448,10 @@ begin
   try
     CnLanguageManager.TranslateForm(Self);
     if not Scaled then
-      Font.Height := MulDiv(Font.Height, FScaler.DesignPPI, PixelsPerInch);
+    begin
+      CheckDefaultFontSize;
+      Font.Height := -MulDiv(FDefaultFontSize, csFixPPI, csFixPerInch);
+    end;
   finally
     EnableAlign;
   end;
