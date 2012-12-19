@@ -42,14 +42,11 @@ procedure T<#IniClassName>.LoadFromFile(const FileName: string);
 var
   Ini: TIniFile;
 begin
-  if FileExists(FileName) then
-  begin
-    Ini := TIniFile.Create(FileName);
-    try
-      LoadSettings(Ini);
-    finally
-      Ini.Free;
-    end;
+  Ini := TIniFile.Create(FileName);
+  try
+    LoadSettings(Ini);
+  finally
+    Ini.Free;
   end;
 end;
 

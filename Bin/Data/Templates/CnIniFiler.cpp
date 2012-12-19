@@ -27,18 +27,15 @@ void T<#IniClassName>::SaveSettings(TIniFile *Ini)
 void T<#IniClassName>::LoadFromFile(const AnsiString FileName)
 {
   TIniFile *Ini;
-  if (FileExists(FileName))
-  {
-    Ini = new TIniFile(FileName);
+  Ini = new TIniFile(FileName);
     
-    __try
-    {
-      LoadSettings(Ini);
-    }
-    __finally
-    {
-      delete Ini;
-    }
+  __try
+  {
+    LoadSettings(Ini);
+  }
+  __finally
+  {
+    delete Ini;
   }
 }
 
