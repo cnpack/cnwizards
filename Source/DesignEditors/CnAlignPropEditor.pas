@@ -29,7 +29,8 @@ unit CnAlignPropEditor;
 * 兼容测试：PWin2000Pro + Delphi 6
 * 本 地 化：
 * 单元标识：$Id$
-* 修改记录：
+* 修改记录：2012-12-21 V1.1
+*               加入编辑状态的图标绘制
 *           2004-11-16 V1.0 by Leeon
 *               创建单元
 ================================================================================
@@ -51,12 +52,10 @@ uses
 
 type
 
-{$IFDEF COMPILER6_UP}
-  TCnAlignProperty = class(TEnumProperty,
-    ICustomPropertyDrawing, ICustomPropertyListDrawing)
-{$ELSE}
-  TCnAlignProperty = class(TEnumProperty)
-{$ENDIF}
+  TCnAlignProperty = class(TEnumProperty
+    {$IFDEF COMPILER6_UP}, ICustomPropertyDrawing, ICustomPropertyListDrawing
+      {$IFDEF COMPILER9_UP}, ICustomPropertyDrawing80{$ENDIF}
+    {$ENDIF})
   private
     procedure DrawAlignBitmap(const Value: string; ACanvas: TCanvas;
       var ARect: TRect; ASelected, AListDraw: Boolean);
@@ -72,6 +71,10 @@ type
       ASelected: Boolean);
     procedure PropDrawValue(ACanvas: TCanvas; const ARect: TRect;
       ASelected: Boolean);
+    {$IFDEF COMPILER9_UP}
+      function PropDrawNameRect(const ARect: TRect): TRect;
+      function PropDrawValueRect(const ARect: TRect): TRect;
+    {$ENDIF}
   {$ELSE}
     procedure ListMeasureHeight(const Value: string; ACanvas: TCanvas;
       var AHeight: Integer); override;
@@ -118,7 +121,12 @@ const
 
   csItemHeight = 24;
   csItemWidth = 24;
+{$IFDEF COMPILER9_UP}
+  csItemBorder = 3;
+{$ELSE}
   csItemBorder = 2;
+{$ENDIF}
+
 
 class procedure TCnAlignProperty.GetInfo(var Name, Author, Email,
   Comment: string);
@@ -194,6 +202,18 @@ begin
   inherited PropDrawValue(ACanvas, R, ASelected);
 {$ENDIF}
 end;
+
+{$IFDEF COMPILER9_UP}
+function TCnAlignProperty.PropDrawNameRect(const ARect: TRect): TRect;
+begin
+  Result := ARect;
+end;
+
+function TCnAlignProperty.PropDrawValueRect(const ARect: TRect): TRect;
+begin
+  Result := Rect(ARect.Left, ARect.Top, (ARect.Bottom - ARect.Top) + ARect.Left, ARect.Bottom);
+end;
+{$ENDIF}
 
 procedure TCnAlignProperty.ListDrawValue(const Value: string;
   ACanvas: TCanvas; const ARect: TRect; ASelected: Boolean);
