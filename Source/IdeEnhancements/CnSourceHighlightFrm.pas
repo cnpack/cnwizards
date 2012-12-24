@@ -258,6 +258,7 @@ begin
   shpCurTokenBg.Enabled := chkCurrentToken.Checked;
   lblCurTokenBd.Enabled := chkCurrentToken.Checked;
   shpCurTokenBd.Enabled := chkCurrentToken.Checked;
+  shpSeparateLine.Enabled := chkSeparateLine.Checked;
 
   chkMaxSize.Enabled := chkHighlight.Checked or chkDrawLine.Checked;
   seDelay.Enabled := (chkHighlight.Checked or chkDrawLine.Checked) and (rgMatchDelay.ItemIndex = 1);
