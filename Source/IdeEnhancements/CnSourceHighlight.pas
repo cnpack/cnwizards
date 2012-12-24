@@ -38,7 +38,9 @@ unit CnSourceHighlight;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2011.09.04
+* 修改记录：2012.12.24
+*               修复 jtdd 报告的绘制空行分隔线在折叠状态下可能出错的问题
+*           2011.09.04
 *               加入 white_nigger 的修补以针对修复 CloseAll 时出错的问题，待测试
 *           2010.10.04
 *               2009 以上 Unicode 环境下，各个 Token 的 Col 采用 ConvertPos 进行
@@ -2707,7 +2709,7 @@ begin
 
       if FHilightSeparateLine and (LogicLineNum <= Info.FSeparateLineList.Count - 1)
         and (Integer(Info.FSeparateLineList[LogicLineNum]) = CN_LINE_SEPARATE_FLAG)
-        and (Trim(EditControlWrapper.GetTextAtLine(EditControl, LogicLineNum)) = '') then
+        and (Trim(EditControlWrapper.GetTextAtLine(EditControl, LineNum)) = '') then
       begin
         // 保存 EditCanvas 的旧内容
         with EditCanvas do
