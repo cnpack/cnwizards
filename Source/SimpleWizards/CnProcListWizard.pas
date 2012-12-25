@@ -40,7 +40,9 @@ unit CnProcListWizard;
 * 兼容测试：暂无（PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6）
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2012.02.07 V1.3
+* 修改记录：2012.12.25 V1.4
+*               修正列表框的宽度恢复可能有误的问题
+*           2012.02.07 V1.3
 *               增加列表框的宽度保存机制
 *           2009.04.16 V1.2
 *               增加工具栏的下拉查找功能
@@ -418,6 +420,8 @@ const
   csProcComboName = 'ProcCombo';
   csClassComboName = 'ClassCombo';
 
+  CN_SPLITTER_WIDTH = 3;
+
 type
   TCnFileInfo = class(TObject)
   private
@@ -776,10 +780,10 @@ begin
   with Obj.FSplitter1 do
   begin
     Align := alLeft;
-    Width := 2;
+    Width := CN_SPLITTER_WIDTH;
     MinSize := 40;
     Parent := ToolBar;
-    Left := Obj.ClassCombo.Width - 1;
+    Left := Obj.ClassCombo.Left + Obj.ClassCombo.Width - 1;
     OnMoved := SplitterMoved;
   end;
 
@@ -787,7 +791,7 @@ begin
   with Obj.ProcCombo do
   begin
     Parent := ToolBar;
-    Left := 265;
+    Left := Obj.FSplitter1.Left + Obj.FSplitter1.Width + 1;
     Top := 0;
     if FToolbarProcComboWidth > 50 then
       Width := FToolbarProcComboWidth
@@ -805,10 +809,10 @@ begin
   with Obj.FSplitter2 do
   begin
     Align := alLeft;
-    Width := 3;
+    Width := CN_SPLITTER_WIDTH;
     MinSize := 40;
     Parent := ToolBar;
-    Left := Obj.ClassCombo.Width + 2;
+    Left := Obj.ProcCombo.Left + Obj.ProcCombo.Width + 2;
     onMoved := SplitterMoved;
   end;
 
@@ -906,7 +910,7 @@ begin
   Obj.ToolBtnMatchStart := TCnProcToolButton.Create(ToolBar);
   with Obj.ToolBtnMatchStart do
   begin
-    Left := 505;
+    Left := Obj.ProcCombo.Left + Obj.ProcCombo.Width + Obj.FSplitter1.Width + 2;
     Top := 0;
     Caption := '';
     ImageIndex := 2;
@@ -918,7 +922,7 @@ begin
   Obj.ToolBtnMatchAny := TCnProcToolButton.Create(ToolBar);
   with Obj.ToolBtnMatchAny do
   begin
-    Left := 528;
+    Left := Obj.ToolBtnMatchStart.Left + Obj.ToolBtnMatchStart.Width + 2;
     Top := 0;
     Caption := '';
     ImageIndex := 3;
