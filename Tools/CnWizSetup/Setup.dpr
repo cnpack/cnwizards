@@ -64,7 +64,7 @@ uses
 
 type
   TCompilerName = (cvD5, cvD6, cvD7, cvD8, cbD9, cbD10, cbD2007, cbD2009,
-    cbD2010, cbD2011, cbD2012, cvCB5, cvCB6);
+    cbD2010, cbD2011XE, cbD2012XE2, cbD2013XE3, cvCB5, cvCB6);
 
 const
   csCompilerNames: array[TCompilerName] of string = (
@@ -78,7 +78,8 @@ const
     'RAD Studio 2009',
     'RAD Studio 2010',
     'RAD Studio XE',
-    'RAD Studio XE 2',
+    'RAD Studio XE2',
+    'RAD Studio XE3',
     'C++Builder 5',
     'C++Builder 6');
 
@@ -94,6 +95,7 @@ const
     '\Software\CodeGear\BDS\7.0',
     '\Software\Embarcadero\BDS\8.0',
     '\Software\Embarcadero\BDS\9.0',
+    '\Software\Embarcadero\BDS\10.0',
     '\Software\Borland\C++Builder\5.0',
     '\Software\Borland\C++Builder\6.0');
 
@@ -109,6 +111,7 @@ const
     'CnWizards_D14.DLL',
     'CnWizards_D15.DLL',
     'CnWizards_D16.DLL',
+    'CnWizards_D17.DLL',
     'CnWizards_CB5.DLL',
     'CnWizards_CB6.DLL');
 
