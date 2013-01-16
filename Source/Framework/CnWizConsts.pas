@@ -740,6 +740,7 @@ var
   SCnEMVCurMethodName: string = 'Current Method Name (without Class Name)';
   SCnEMVCurClassName: string = 'Current Class Name';
   SCnEMVUser: string = 'Current Username';
+  SCnEMVCurIDEName: string = 'Current IDE Name and Version';
   SCnEMVDateTime: string = 'Date and Time';
   SCnEMVDate: string = 'Date';
   SCnEMVYear: string = 'Year';

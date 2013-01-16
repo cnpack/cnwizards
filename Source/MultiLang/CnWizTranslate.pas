@@ -459,6 +459,7 @@ begin
   TranslateStr(SCnEMVCurMethodName, 'SCnEMVCurMethodName');
   TranslateStr(SCnEMVCurClassName, 'SCnEMVCurClassName');
   TranslateStr(SCnEMVUser, 'SCnEMVUser');
+  TranslateStr(SCnEMVCurIDEName, 'SCnEMVCurIDEName');
   TranslateStr(SCnEMVDateTime, 'SCnEMVDateTime');
   TranslateStr(SCnEMVDate, 'SCnEMVDate');
   TranslateStr(SCnEMVYear, 'SCnEMVYear');

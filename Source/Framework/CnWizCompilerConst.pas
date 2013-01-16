@@ -238,19 +238,19 @@ const
                   {$IFDEF DELPHI15}
                     Compiler: TCnCompiler = cnDelphi15;
                     CompilerKind: TCnCompilerKind = ckDelphi;
-                    CompilerName = 'RAD Studio 2011';
+                    CompilerName = 'RAD Studio XE';
                     CompilerShortName = 'D15';
                   {$ELSE}
                     {$IFDEF DELPHI16}
                       Compiler: TCnCompiler = cnDelphi16;
                       CompilerKind: TCnCompilerKind = ckDelphi;
-                      CompilerName = 'RAD Studio 2012';
+                      CompilerName = 'RAD Studio XE2';
                       CompilerShortName = 'D16';
                     {$ELSE}
                       {$IFDEF DELPHI17}
                         Compiler: TCnCompiler = cnDelphi17;
                         CompilerKind: TCnCompilerKind = ckDelphi;
-                        CompilerName = 'RAD Studio 2013';
+                        CompilerName = 'RAD Studio XE3';
                         CompilerShortName = 'D17';
                       {$ELSE}
                         {$IFDEF BCB5}

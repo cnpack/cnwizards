@@ -40,7 +40,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, TypInfo, ToolsAPI, CnWizConsts, CnCommon,
-  CnPasCodeParser, CnCppCodeParser;
+  CnWizCompilerConst, CnPasCodeParser, CnCppCodeParser;
 
 type
 
@@ -49,7 +49,7 @@ type
   TCnWizMacro = (cwmProjectDir, cwmProjectName, cwmProjectGroupDir,
     cwmProjectGroupName, cwmUnit, cwmProcName,
     cwmResult, cwmArguments, cwmArgList, cwmRetType, cwmCurrProcName,
-    cwmCurrMethodName, cwmCurrClassName,
+    cwmCurrMethodName, cwmCurrClassName, cwmCurrIDEName,
     cwmUser, cwmDateTime, cwmDate, cwmYear, cwmMonth, cwmMonthShortName,
     cwmMonthLongName, cwmDay, cwmDayShortName, cwmDayLongName,
     cwmHour, cwmMinute, cwmSecond, cwmCodeLines, cwmColPos, cwmCursor);
@@ -84,8 +84,8 @@ const
     @SCnEMVProjectDir, @SCnEMVProjectName, @SCnEMVProjectGroupDir,
     @SCnEMVProjectGroupName, @SCnEMVUnit, @SCnEMVProceName, @SCnEMVResult,
     @SCnEMVArguments, @SCnEMVArgList, @SCnEMVRetType, @SCnEMVCurProceName,
-    @SCnEMVCurMethodName, @SCnEMVCurClassName, @SCnEMVUser, @SCnEMVDateTime,
-    @SCnEMVDate, @SCnEMVYear,
+    @SCnEMVCurMethodName, @SCnEMVCurClassName, @SCnEMVCurIDEName, @SCnEMVUser,
+    @SCnEMVDateTime, @SCnEMVDate, @SCnEMVYear,
     @SCnEMVMonth, @SCnEMVMonthShortName, @SCnEMVMonthLongName, @SCnEMVDay,
     @SCnEMVDayShortName, @SCnEMVDayLongName, @SCnEMVHour, @SCnEMVMinute,
     @SCnEMVSecond, @SCnEMVCodeLines, @SCnEMVColPos, @SCnEMVCursor);
@@ -419,6 +419,8 @@ begin
 
           Stream.Free;
         end;
+      cwmCurrIDEName:
+        Result := CompilerName;
       cwmUser:
         Result := EdtGetUser;
       cwmDateTime:
