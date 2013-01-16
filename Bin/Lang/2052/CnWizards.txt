@@ -2771,6 +2771,7 @@ SCnEMVCurProceName=当前光标所在的过程名称
 SCnEMVCurMethodName=当前光标所在的方法名称（无类名）
 SCnEMVCurClassName=当前光标所在的类名称
 SCnEMVUser=当前登录用户
+SCnEMVCurIDEName=当前 IDE 名称与版本号
 SCnEMVDateTime=当前日期时间
 SCnEMVDate=当前日期
 SCnEMVYear=年份

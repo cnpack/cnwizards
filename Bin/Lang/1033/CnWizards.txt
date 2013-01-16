@@ -2771,6 +2771,7 @@ SCnEMVCurProceName=Current Procedure Name
 SCnEMVCurMethodName=Current Method Name (without Class Name)
 SCnEMVCurClassName=Current Class Name
 SCnEMVUser=Current Username
+SCnEMVCurIDEName=Current IDE Name and Version
 SCnEMVDateTime=Date and Time
 SCnEMVDate=Date
 SCnEMVYear=Year

@@ -2770,6 +2770,7 @@ SCnEMVRetType=函數返回值類型塊
 SCnEMVCurProceName=當前光標所在的過程名稱
 SCnEMVCurMethodName=當前光標所在的方法名稱（無類名）
 SCnEMVCurClassName=當前光標所在的類名稱
+SCnEMVCurIDEName=當前 IDE 名稱與版本號
 SCnEMVUser=當前登錄用戶
 SCnEMVDateTime=當前日期時間
 SCnEMVDate=當前日期
