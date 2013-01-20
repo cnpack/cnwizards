@@ -163,6 +163,7 @@ USEUNIT("IdeEnhancements\CnIdeEnhanceMenu.pas");
 USEUNIT("SimpleWizards\CnIdeBRWizard.pas");
 USEFORMNS("IdeEnhancements\CnSourceHighlightFrm.pas", Cnsourcehighlightfrm, CnSourceHighlightForm);
 USEFORMNS("IdeEnhancements\CnHighlightLineFrm.pas", Cnhighlightlinefrm, CnHighlightLineForm);
+USEFORMNS("IdeEnhancements\CnHighlightSeparateLineFrm.pas", Cnhighlightseparatelinefrm, CnHighlightSeparateLineForm);
 USEUNIT("IdeEnhancements\CnSourceHighlight.pas");
 USEFORMNS("SrcEditorEnhance\CnSrcEditorWebSearch.pas", Cnsrceditorwebsearch, CnSrcEditorWebSearchForm);
 USEFORMNS("DesignEditors\CnPropEditorCustomizeFrm.pas", Cnpropeditorcustomizefrm, CnPropEditorCustomizeForm);

@@ -435,6 +435,9 @@
 			<DCCReference Include="IdeEnhancements\CnHighlightLineFrm.pas">
 				<Form>CnHighlightLineForm</Form>
 			</DCCReference>
+			<DCCReference Include="IdeEnhancements\CnHighlightSeparateLineFrm.pas">
+        <Form>CnHighlightSeparateLineForm</Form>
+      </DCCReference>
 			<DCCReference Include="SimpleWizards\CnProcListWizard.pas">
 				<Form>CnProcListForm</Form>
 			</DCCReference>

@@ -176,13 +176,6 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Height = 20
       OnMouseDown = shpBracketMouseDown
     end
-    object shpSeparateLine: TShape
-      Left = 329
-      Top = 148
-      Width = 20
-      Height = 20
-      OnMouseDown = shpBracketMouseDown
-    end
     object chkBkHighlight: TCheckBox
       Left = 8
       Top = 16
@@ -414,6 +407,15 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Caption = 'Enable Separate Lines between Functions.'
       TabOrder = 7
       OnClick = UpdateControls
+    end
+    object btnSeparateLineSettings: TButton
+      Left = 270
+      Top = 144
+      Width = 79
+      Height = 21
+      Caption = 'Line Sett&ings'
+      TabOrder = 16
+      OnClick = btnSeparateLineSettingsClick
     end
   end
   object dlgColor: TColorDialog

@@ -190,6 +190,7 @@ uses
   CnSourceHighlight in 'IdeEnhancements\CnSourceHighlight.pas',
   CnSourceHighlightFrm in 'IdeEnhancements\CnSourceHighlightFrm.pas' {CnSourceHighlightForm},
   CnHighlightLineFrm in 'IdeEnhancements\CnHighlightLineFrm.pas' {CnHighlightLineForm},
+  CnHighlightSeparateLineFrm in 'IdeEnhancements\CnHighlightSeparateLineFrm.pas' {CnHighlightSeparateLineForm},
   CnProcListWizard in 'SimpleWizards\CnProcListWizard.pas' {CnProcListForm},
   CnVerEnhancements in 'IdeEnhancements\CnVerEnhancements.pas',
   CnVerEnhanceFrm in 'IdeEnhancements\CnVerEnhanceFrm.pas' {CnVerEnhanceForm},

@@ -81,7 +81,7 @@
       ..\Dcu\CnEditorToggleUses.obj ..\Dcu\CnEditorJumpMessage.obj 
       ..\Dcu\CnSrcEditorKey.obj ..\Dcu\CnIdentRenameFrm.obj 
       ..\Dcu\CnIdeEnhanceMenu.obj ..\Dcu\CnIdeBRWizard.obj 
-      ..\Dcu\CnSourceHighlightFrm.obj ..\Dcu\CnHighlightLineFrm.obj 
+      ..\Dcu\CnSourceHighlightFrm.obj ..\Dcu\CnHighlightLineFrm.obj ..\Dcu\CnHighlightSeparateLineFrm.obj 
       ..\Dcu\CnSourceHighlight.obj ..\Dcu\CnSrcEditorWebSearch.obj 
       ..\Dcu\CnPropEditorCustomizeFrm.obj ..\Dcu\CnInputSymbolList.obj 
       ..\Dcu\CnInputHelper.obj ..\Dcu\CnInputHelperEditFrm.obj 

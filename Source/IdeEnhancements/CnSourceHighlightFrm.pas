@@ -105,7 +105,7 @@ type
     lblCurTokenBd: TLabel;
     shpCurTokenBd: TShape;
     chkSeparateLine: TCheckBox;
-    shpSeparateLine: TShape;
+    btnSeparateLineSettings: TButton;
     procedure UpdateControls(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure shpBracketMouseDown(Sender: TObject; Button: TMouseButton;
@@ -116,6 +116,7 @@ type
     procedure mniResetClick(Sender: TObject);
     procedure mniExportClick(Sender: TObject);
     procedure mniImportClick(Sender: TObject);
+    procedure btnSeparateLineSettingsClick(Sender: TObject);
   private
     { Private declarations }
     AWizard: TCnSourceHighlight;
@@ -134,7 +135,7 @@ function ShowSourceHighlightForm(Wizard: TCnSourceHighlight): Boolean;
 implementation
 
 uses
-  CnHighlightLineFrm;
+  CnHighlightLineFrm, CnHighlightSeparateLineFrm;
 
 {$IFDEF CNWIZARDS_CNSOURCEHIGHLIGHT}
 
@@ -162,7 +163,6 @@ begin
     shpCurTokenBg.Brush.Color := Wizard.CurrentTokenBackground;
     shpCurTokenBd.Brush.Color := Wizard.CurrentTokenBorderColor;
     chkSeparateLine.Checked := Wizard.HilightSeparateLine;
-    shpSeparateLine.Brush.Color := Wizard.SeparateLineColor; 
 {$IFDEF BDS}
     chkHighlightCurLine.Enabled := False;
     shpCurLine.Enabled := False;
@@ -205,7 +205,6 @@ begin
       Wizard.CurrentTokenBackground := shpCurTokenBg.Brush.Color;
       Wizard.CurrentTokenBorderColor := shpCurTokenBd.Brush.Color;
       Wizard.HilightSeparateLine := chkSeparateLine.Checked;
-      Wizard.SeparateLineColor := shpSeparateLine.Brush.Color;
 {$IFNDEF BDS}
       Wizard.HighLightCurrentLine := chkHighlightCurLine.Checked;
       Wizard.HighLightLineColor := shpCurLine.Brush.Color;
@@ -258,7 +257,9 @@ begin
   shpCurTokenBg.Enabled := chkCurrentToken.Checked;
   lblCurTokenBd.Enabled := chkCurrentToken.Checked;
   shpCurTokenBd.Enabled := chkCurrentToken.Checked;
-  shpSeparateLine.Enabled := chkSeparateLine.Checked;
+
+  btnLineSetting.Enabled := chkDrawLine.Checked;
+  btnSeparateLineSettings.Enabled := chkSeparateLine.Checked;
 
   chkMaxSize.Enabled := chkHighlight.Checked or chkDrawLine.Checked;
   seDelay.Enabled := (chkHighlight.Checked or chkDrawLine.Checked) and (rgMatchDelay.ItemIndex = 1);
@@ -327,6 +328,26 @@ begin
       AWizard.BlockMatchLineHori := chkLineHori.Checked;
       AWizard.BlockMatchLineHoriDot := chkLineHoriDot.Checked;
       AWizard.BlockMatchLineClass := not chkLineClass.Checked;
+
+      AWizard.DoSaveSettings;
+      AWizard.RepaintEditors;
+    end;
+    Free;
+  end;
+end;
+
+procedure TCnSourceHighlightForm.btnSeparateLineSettingsClick(
+  Sender: TObject);
+begin
+  with TCnHighlightSeparateLineForm.Create(Self) do
+  begin
+    cbbLineType.ItemIndex := Ord(AWizard.SeparateLineStyle);
+    shpSeparateLine.Brush.Color := AWizard.SeparateLineColor;
+
+    if ShowModal = mrOK then
+    begin
+      AWizard.SeparateLineStyle := TCnLineStyle(cbbLineType.ItemIndex);
+      AWizard.SeparateLineColor := shpSeparateLine.Brush.Color;
 
       AWizard.DoSaveSettings;
       AWizard.RepaintEditors;

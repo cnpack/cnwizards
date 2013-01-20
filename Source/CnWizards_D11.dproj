@@ -192,6 +192,9 @@
     <DCCReference Include="IdeEnhancements\CnHighlightLineFrm.pas">
       <Form>CnHighlightLineForm</Form>
     </DCCReference>
+    <DCCReference Include="IdeEnhancements\CnHighlightSeparateLineFrm.pas">
+      <Form>CnHighlightSeparateLineForm</Form>
+    </DCCReference>
     <DCCReference Include="IdeEnhancements\CnIdeEnhanceMenu.pas" />
     <DCCReference Include="IdeEnhancements\CnInputHelper.pas" />
     <DCCReference Include="IdeEnhancements\CnInputHelperEditFrm.pas">
