@@ -2307,6 +2307,7 @@ TCnSourceHighlightForm.btnCancel.Caption=Отмена
 TCnSourceHighlightForm.btnHelp.Caption=Справка
 TCnSourceHighlightForm.btnOK.Caption=&OK
 TCnSourceHighlightForm.btnLineSetting.Caption=Линии...
+TCnSourceHighlightForm.btnSeparateLineSetting.Caption=Линии...
 TCnSourceHighlightForm.Caption=Настройки Подсветки Синтаксиса
 TCnSourceHighlightForm.chkBracketBold.Caption=Жирные скобки
 TCnSourceHighlightForm.chkBracketMiddle.Caption=Подсвечивать, если курсор между скобок

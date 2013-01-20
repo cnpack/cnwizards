@@ -2307,6 +2307,7 @@ TCnSourceHighlightForm.btnCancel.Caption=&Abbruch
 TCnSourceHighlightForm.btnHelp.Caption=&Hilfe
 TCnSourceHighlightForm.btnOK.Caption=&OK
 TCnSourceHighlightForm.btnLineSetting.Caption=Linien Einst.
+TCnSourceHighlightForm.btnSeparateLineSetting.Caption=Linien Einst.
 TCnSourceHighlightForm.Caption=Quelltext Highlight Einstellungen
 TCnSourceHighlightForm.chkBracketBold.Caption=Klammern Fett.
 TCnSourceHighlightForm.chkBracketMiddle.Caption=Highlight wenn der Cursor innerhalb der Klammern ist.

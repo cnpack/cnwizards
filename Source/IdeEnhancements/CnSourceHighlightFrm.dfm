@@ -205,7 +205,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
         'Procedure/Function'
         'Whole Block'
         'Current Block')
-      TabOrder = 8
+      TabOrder = 9
     end
     object grpHighlightColor: TGroupBox
       Left = 168
@@ -213,7 +213,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Width = 181
       Height = 91
       Caption = 'Colors by &Level'
-      TabOrder = 9
+      TabOrder = 10
       object shpneg1: TShape
         Left = 16
         Top = 23
@@ -301,7 +301,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
         'Immediately'
         'Delay for'
         'Only Show when Hotkey:')
-      TabOrder = 10
+      TabOrder = 11
       OnClick = UpdateControls
     end
     object hkMatchHotkey: THotKey
@@ -312,7 +312,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       HotKey = 32833
       InvalidKeys = [hcNone, hcShift]
       Modifiers = [hkAlt]
-      TabOrder = 13
+      TabOrder = 14
     end
     object chkMaxSize: TCheckBox
       Left = 24
@@ -331,7 +331,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Increment = 50
       MaxValue = 5000
       MinValue = 500
-      TabOrder = 12
+      TabOrder = 13
       Value = 500
     end
     object pnl1: TPanel
@@ -341,7 +341,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Height = 25
       BevelOuter = bvNone
       Caption = 'mSec'
-      TabOrder = 11
+      TabOrder = 12
     end
     object seMaxLines: TCnSpinEdit
       Left = 248
@@ -351,7 +351,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Increment = 500
       MaxValue = 100000
       MinValue = 1000
-      TabOrder = 14
+      TabOrder = 16
       Value = 25000
     end
     object chkDrawLine: TCheckBox
@@ -360,7 +360,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Width = 249
       Height = 17
       Caption = 'Enable Structure Lines.'
-      TabOrder = 6
+      TabOrder = 5
       OnClick = UpdateControls
     end
     object btnLineSetting: TButton
@@ -369,7 +369,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Width = 79
       Height = 21
       Caption = 'Line Se&ttings'
-      TabOrder = 5
+      TabOrder = 6
       OnClick = btnLineSettingClick
     end
     object chkCurrentToken: TCheckBox
@@ -414,7 +414,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Width = 79
       Height = 21
       Caption = 'Line Sett&ings'
-      TabOrder = 16
+      TabOrder = 8
       OnClick = btnSeparateLineSettingsClick
     end
   end

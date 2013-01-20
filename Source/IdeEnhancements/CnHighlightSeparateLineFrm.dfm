@@ -13,7 +13,7 @@ inherited CnHighlightSeparateLineForm: TCnHighlightSeparateLineForm
     Top = 8
     Width = 235
     Height = 97
-    Caption = 'Highlight &Line Settings'
+    Caption = 'Highlight &Separate Line Settings'
     TabOrder = 0
     object lblLineColor: TLabel
       Left = 16
