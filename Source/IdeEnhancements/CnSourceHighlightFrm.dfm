@@ -408,14 +408,14 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       TabOrder = 7
       OnClick = UpdateControls
     end
-    object btnSeparateLineSettings: TButton
+    object btnSeparateLineSetting: TButton
       Left = 270
       Top = 144
       Width = 79
       Height = 21
       Caption = 'Line Sett&ings'
       TabOrder = 8
-      OnClick = btnSeparateLineSettingsClick
+      OnClick = btnSeparateLineSettingClick
     end
   end
   object dlgColor: TColorDialog

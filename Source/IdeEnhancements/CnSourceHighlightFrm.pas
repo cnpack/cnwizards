@@ -29,7 +29,9 @@ unit CnSourceHighlightFrm;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2012.02.17
+* 修改记录：2013.01.20
+*               增加空行分隔线的线型与色彩选项
+*           2012.02.17
 *               增加空行分隔线的选项
 *           2008.06.17
 *               增加对 BDS 的支持
@@ -105,7 +107,7 @@ type
     lblCurTokenBd: TLabel;
     shpCurTokenBd: TShape;
     chkSeparateLine: TCheckBox;
-    btnSeparateLineSettings: TButton;
+    btnSeparateLineSetting: TButton;
     procedure UpdateControls(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure shpBracketMouseDown(Sender: TObject; Button: TMouseButton;
@@ -116,7 +118,7 @@ type
     procedure mniResetClick(Sender: TObject);
     procedure mniExportClick(Sender: TObject);
     procedure mniImportClick(Sender: TObject);
-    procedure btnSeparateLineSettingsClick(Sender: TObject);
+    procedure btnSeparateLineSettingClick(Sender: TObject);
   private
     { Private declarations }
     AWizard: TCnSourceHighlight;
@@ -258,8 +260,9 @@ begin
   lblCurTokenBd.Enabled := chkCurrentToken.Checked;
   shpCurTokenBd.Enabled := chkCurrentToken.Checked;
 
+  shpCurLine.Enabled := chkHighlightCurLine.Checked;
   btnLineSetting.Enabled := chkDrawLine.Checked;
-  btnSeparateLineSettings.Enabled := chkSeparateLine.Checked;
+  btnSeparateLineSetting.Enabled := chkSeparateLine.Checked;
 
   chkMaxSize.Enabled := chkHighlight.Checked or chkDrawLine.Checked;
   seDelay.Enabled := (chkHighlight.Checked or chkDrawLine.Checked) and (rgMatchDelay.ItemIndex = 1);
@@ -336,7 +339,7 @@ begin
   end;
 end;
 
-procedure TCnSourceHighlightForm.btnSeparateLineSettingsClick(
+procedure TCnSourceHighlightForm.btnSeparateLineSettingClick(
   Sender: TObject);
 begin
   with TCnHighlightSeparateLineForm.Create(Self) do
