@@ -346,11 +346,13 @@ begin
   begin
     cbbLineType.ItemIndex := Ord(AWizard.SeparateLineStyle);
     shpSeparateLine.Brush.Color := AWizard.SeparateLineColor;
+    seLineWidth.Value := AWizard.SeparateLineWidth;
 
     if ShowModal = mrOK then
     begin
       AWizard.SeparateLineStyle := TCnLineStyle(cbbLineType.ItemIndex);
       AWizard.SeparateLineColor := shpSeparateLine.Brush.Color;
+      AWizard.SeparateLineWidth := seLineWidth.Value;
 
       AWizard.DoSaveSettings;
       AWizard.RepaintEditors;

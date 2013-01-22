@@ -55,6 +55,8 @@ type
     cbbLineType: TComboBox;
     shpSeparateLine: TShape;
     dlgColor: TColorDialog;
+    seLineWidth: TCnSpinEdit;
+    lblLineWidth: TLabel;
     procedure cbbLineTypeDrawItem(Control: TWinControl; Index: Integer;
       Rect: TRect; State: TOwnerDrawState);
     procedure btnHelpClick(Sender: TObject);

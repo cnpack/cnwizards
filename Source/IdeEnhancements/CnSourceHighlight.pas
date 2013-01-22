@@ -376,6 +376,7 @@ type
 {$ENDIF}
     FSeparateLineColor: TColor;
     FSeparateLineStyle: TCnLineStyle;
+    FSeparateLineWidth: Integer;
     function GetColorFg(ALayer: Integer): TColor;
     function EditorGetTextRect(Editor: TEditorObject; APos: TOTAEditPos;
       const {$IFDEF BDS}LineText, {$ENDIF} AText: AnsiString; var ARect: TRect): Boolean;
@@ -501,6 +502,8 @@ type
     {* 空行分隔线的颜色}
     property SeparateLineStyle: TCnLineStyle read FSeparateLineStyle write FSeparateLineStyle;
     {* 空行分隔线的线型}
+    property SeparateLineWidth: Integer read FSeparateLineWidth write FSeparateLineWidth;
+    {* 空行分隔线的线宽，默认为 1}
     property BlockMatchLineLimit: Boolean read FBlockMatchLineLimit write FBlockMatchLineLimit;
     property BlockMatchMaxLines: Integer read FBlockMatchMaxLines write FBlockMatchMaxLines;
     property OnEnhConfig: TNotifyEvent read FOnEnhConfig write FOnEnhConfig;
@@ -602,6 +605,7 @@ const
   csHilightSeparateLine = 'HilightSeparateLine';
   csSeparateLineColor = 'SeparateLineColor';
   csSeparateLineStyle = 'SeparateLineStyle';
+  csSeparateLineWidth = 'SeparateLineWidth';
   csBlockMatchHighlightColor = 'BlockMatchHighlightColor';
   csHighlightCurrentLine = 'HighLightCurrentLine';
   csHighLightLineColor = 'HighLightLineColor';
@@ -1702,6 +1706,7 @@ begin
   FKeywordHighlight.Bold := True;
   FSeparateLineColor := clGray;
   FSeparateLineStyle := lsSmallDot;
+  FSeparateLineWidth := 1;
 
   FBlockMatchLineLimit := True;
   FBlockMatchMaxLines := 40000; // 大于此行数的 unit，不解析
@@ -2733,6 +2738,7 @@ begin
         if EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FLineText, {$ENDIF} ' ', R) then
         begin
           EditCanvas.Pen.Color := FSeparateLineColor;
+          EditCanvas.Pen.Width := FSeparateLineWidth;
           HighlightCanvasLine(EditCanvas, R.Left, (R.Top + R.Bottom) div 2,
             R.Left + 2048, (R.Top + R.Bottom) div 2, FSeparateLineStyle);
         end;
@@ -3411,6 +3417,7 @@ begin
     FHilightSeparateLine := ReadBool('', csHilightSeparateLine, FHilightSeparateLine);
     FSeparateLineColor := ReadColor('', csSeparateLineColor, FSeparateLineColor);
     FSeparateLineStyle := TCnLineStyle(ReadInteger('', csSeparateLineStyle, Ord(FSeparateLineStyle)));
+    FSeparateLineWidth := ReadInteger('', csSeparateLineWidth, FSeparateLineWidth);
 {$IFNDEF BDS}
     FHighLightLineColor := ReadColor('', csHighLightLineColor, FHighLightLineColor);
     FHighLightCurrentLine := ReadBool('', csHighLightCurrentLine, FHighLightCurrentLine);
@@ -3462,6 +3469,7 @@ begin
     WriteBool('', csHilightSeparateLine, FHilightSeparateLine);
     WriteColor('', csSeparateLineColor, FSeparateLineColor);
     WriteInteger('', csSeparateLineStyle, Ord(FSeparateLineStyle));
+    WriteInteger('', csSeparateLineWidth, FSeparateLineWidth);
 {$IFNDEF BDS}
     WriteBool('', csHighLightCurrentLine, FHighLightCurrentLine);
     if FDefaultHighLightLineColor <> FHighLightLineColor then

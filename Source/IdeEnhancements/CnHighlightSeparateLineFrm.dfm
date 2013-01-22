@@ -4,14 +4,14 @@ inherited CnHighlightSeparateLineForm: TCnHighlightSeparateLineForm
   BorderStyle = bsDialog
   Caption = 'Separate Line Settings'
   ClientHeight = 151
-  ClientWidth = 253
+  ClientWidth = 362
   OldCreateOrder = True
   PixelsPerInch = 96
   TextHeight = 13
   object GroupBox1: TGroupBox
     Left = 8
     Top = 8
-    Width = 235
+    Width = 345
     Height = 97
     Caption = 'Highlight &Separate Line Settings'
     TabOrder = 0
@@ -36,6 +36,13 @@ inherited CnHighlightSeparateLineForm: TCnHighlightSeparateLineForm
       Height = 20
       OnMouseDown = shpSeparateLineMouseDown
     end
+    object lblLineWidth: TLabel
+      Left = 240
+      Top = 28
+      Width = 32
+      Height = 13
+      Caption = 'Width:'
+    end
     object cbbLineType: TComboBox
       Left = 80
       Top = 24
@@ -51,9 +58,19 @@ inherited CnHighlightSeparateLineForm: TCnHighlightSeparateLineForm
         '2'
         '3')
     end
+    object seLineWidth: TCnSpinEdit
+      Left = 288
+      Top = 24
+      Width = 41
+      Height = 22
+      MaxValue = 5
+      MinValue = 1
+      TabOrder = 1
+      Value = 1
+    end
   end
   object btnOK: TButton
-    Left = 8
+    Left = 118
     Top = 120
     Width = 75
     Height = 21
@@ -63,7 +80,7 @@ inherited CnHighlightSeparateLineForm: TCnHighlightSeparateLineForm
     TabOrder = 1
   end
   object btnCancel: TButton
-    Left = 88
+    Left = 198
     Top = 120
     Width = 75
     Height = 21
@@ -73,7 +90,7 @@ inherited CnHighlightSeparateLineForm: TCnHighlightSeparateLineForm
     TabOrder = 2
   end
   object btnHelp: TButton
-    Left = 168
+    Left = 278
     Top = 120
     Width = 75
     Height = 21
