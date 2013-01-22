@@ -239,7 +239,7 @@ end;
 function IsDelphi17IdeVersionLatest: Boolean;
 const
   CoreIdeLatest: TVersionNumber =
-    (Major: 17; Minor: 0; Release: 4625; Build: 53395);
+    (Major: 17; Minor: 0; Release: 4723; Build: 55752);
 var
   ReadFileVersion: TVersionNumber;
 begin
