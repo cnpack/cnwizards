@@ -2353,6 +2353,7 @@ TCnHighlightSeparateLineForm.btnOK.Caption=确定(&O)
 TCnHighlightSeparateLineForm.GroupBox1.Caption=高亮分隔线设置(&S)
 TCnHighlightSeparateLineForm.lblLineColor.Caption=颜色：
 TCnHighlightSeparateLineForm.lblLineType.Caption=线型：
+TCnHighlightSeparateLineForm.lblLineWidth.Caption=线宽：
 TCnSrcEditorWebSearchForm.btnAdd.Caption=增加(&A)
 TCnSrcEditorWebSearchForm.btnCancel.Caption=取消(&C)
 TCnSrcEditorWebSearchForm.btnDelete.Caption=删除(&R)

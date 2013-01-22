@@ -2353,6 +2353,7 @@ TCnHighlightSeparateLineForm.btnOK.Caption=&OK
 TCnHighlightSeparateLineForm.GroupBox1.Caption=Highlight & Seperator Linien Einstellungen
 TCnHighlightSeparateLineForm.lblLineColor.Caption=Farbe:
 TCnHighlightSeparateLineForm.lblLineType.Caption=Linien Typ:
+TCnHighlightSeparateLineForm.lblLineWidth.Caption=Breite:
 TCnSrcEditorWebSearchForm.btnAdd.Caption=&hinzufügen
 TCnSrcEditorWebSearchForm.btnCancel.Caption=&Abbruch
 TCnSrcEditorWebSearchForm.btnDelete.Caption=&löschen

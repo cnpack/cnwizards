@@ -2353,6 +2353,7 @@ TCnHighlightSeparateLineForm.btnOK.Caption=&OK
 TCnHighlightSeparateLineForm.GroupBox1.Caption=Настройка разделителя
 TCnHighlightSeparateLineForm.lblLineColor.Caption=Цвет:
 TCnHighlightSeparateLineForm.lblLineType.Caption=Тип линии:
+TCnHighlightSeparateLineForm.lblLineWidth.Caption=Толщина:
 TCnSrcEditorWebSearchForm.btnAdd.Caption=Добавить
 TCnSrcEditorWebSearchForm.btnCancel.Caption=Отмена
 TCnSrcEditorWebSearchForm.btnDelete.Caption=Удалить
