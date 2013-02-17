@@ -38,8 +38,6 @@ interface
 
 {$I CnWizards.inc}
 
-{$DEFINE USE_MSXML}
-
 uses
   Windows, SysUtils, Classes, CnClasses;
 
@@ -99,16 +97,11 @@ type
 implementation
 
 uses
-{$IFDEF USE_MSXML}
+  CnWizXmlUtils,
+{$IFDEF CN_USE_MSXML}
   ActiveX, ComObj, msxml;
 {$ELSE}
   OmniXML, OmniXMLUtils;
-{$ENDIF}
-
-{$IFDEF USE_MSXML}
-type
-  IXMLNode = IXMLDOMNode;
-  IXMLDocument = IXMLDOMDocument;
 {$ENDIF}
 
 const
@@ -246,89 +239,6 @@ begin
   if not FeedStrToDateTime1(S, Result) and not FeedStrToDateTime2(S, Result) then
     Result := Now;
 end;
-
-{$IFDEF USE_MSXML}
-function GetNodeAttr(parentNode: IXMLNode; attrName: string;
-  var value: WideString): boolean;
-var
-  attrNode: IXMLNode;
-begin
-  attrNode := parentNode.Attributes.GetNamedItem(attrName);
-  if not assigned(attrNode) then
-    Result := false
-  else begin
-    value := attrNode.NodeValue;
-    Result := true;
-  end;
-end;
-
-function GetNodeAttrStr(parentNode: IXMLNode; attrName: string;
-  defaultValue: WideString): WideString;
-begin
-  if not GetNodeAttr(parentNode,attrName,Result) then
-    Result := defaultValue
-  else
-    Result := Trim(Result);
-end;
-
-function GetTextChild(node: IXMLNode): IXMLNode;
-var
-  iText: integer;
-begin
-  Result := nil;
-  for iText := 0 to node.ChildNodes.Length-1 do
-    if node.ChildNodes.Item[iText].NodeType = NODE_TEXT then begin
-      Result := node.ChildNodes.Item[iText];
-      break; //for
-    end;
-end;
-
-function GetNodeText(parentNode: IXMLNode; nodeTag: string;
-  var nodeText: WideString): boolean;
-var
-  myNode: IXMLNode;
-begin
-  nodeText := '';
-  Result := false;
-  myNode := parentNode.SelectSingleNode(nodeTag);
-  if assigned(myNode) then
-  begin
-    nodeText := myNode.text;
-    Result := true;
-  end;
-end;
-
-function GetNodeTextStr(parentNode: IXMLNode; nodeTag: string;
-  defaultValue: WideString): WideString;
-begin
-  if not GetNodeText(parentNode,nodeTag,Result) then
-    Result := defaultValue
-  else
-    Result := Trim(Result);
-end;
-
-function FindNode(parentNode: IXMLNode; matchesName: string): IXMLNode;
-var
-  i: Integer;
-begin
-  for i := 0 to parentNode.childNodes.length - 1 do
-    if SameText(parentNode.childNodes.item[i].nodeName, matchesName) then
-    begin
-      Result := parentNode.childNodes.item[i];
-      Exit;
-    end;
-  Result := nil;
-end;
-
-function CreateXMLDoc: IXMLDOMDocument;
-begin
-  try
-    Result := CreateOleObject('Microsoft.XMLDOM') as IXMLDomDocument;
-  except
-    ;
-  end;
-end;
-{$ENDIF}
 
 { TCnFeedItem }
 

@@ -42,7 +42,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, Graphics, CnImageProviderMgr, CnInetUtils,
-  OmniXML, OmniXMLUtils, CnCommon, RegExpr;
+  CnCommon, RegExpr;
 
 type
   TCnImageProvider_FindIcons = class(TCnBaseImageProvider)

@@ -39,9 +39,16 @@ unit CnImageProvider_IconFinder;
 
 interface
 
+{$DEFINE USE_MSXML}
+
 uses
   Windows, SysUtils, Classes, Graphics, CnImageProviderMgr, CnInetUtils,
-  OmniXML, OmniXMLUtils, CnCommon;
+{$IFDEF CN_USE_MSXML}
+  ActiveX, ComObj, msxml,
+{$ELSE}
+  OmniXML, OmniXMLUtils,
+{$ENDIF}
+  CnCommon, CnWizXmlUtils;
 
 type
   TCnImageProvider_IconFinder = class(TCnBaseImageProvider)
