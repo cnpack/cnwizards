@@ -29,7 +29,9 @@ unit CnCompToCodeFrm;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2007.01.31
+* 修改记录：2013.02.17
+*               加入部分对 FMX 的支持
+*           2007.01.31
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -41,7 +43,11 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, ComCtrls, ToolWin, ActnList, Clipbrd, ToolsAPI, Contnrs,
-  TypInfo, CnWizConsts, CnWizMultiLang, CnCommon, CnWizUtils;
+  TypInfo, CnWizConsts, CnWizMultiLang, CnCommon,
+{$IFDEF SUPPORTS_FMX}
+  CnFmxUtils,
+{$ENDIF}
+  CnWizUtils;
 
 type
   TCnCompToCodeForm = class(TCnTranslateForm)
@@ -382,8 +388,20 @@ begin
       ConvertComponents(AComp.Components[I]);
   end
   else if AComp is TWinControl then // 转组件的 Children
+  begin
     for I := 0 to (AComp as TWinControl).ControlCount - 1 do
       ConvertComponents((AComp as TWinControl).Controls[I]);
+  end
+  else
+  begin
+{$IFDEF SUPPORTS_FMX}
+    if CnFmxIsInheritedFromControl(AComp) then
+    begin
+      for I := 0 to CnFmxGetControlsCount(AComp) - 1 do
+        ConvertComponents(CnFmxGetControlByIndex(AComp, I));
+    end;
+{$ENDIF}
+  end;
 end;
 
 procedure TCnCompToCodeForm.GetComponentStrings(AComp: TComponent;
@@ -440,6 +458,9 @@ var
   PName, PValue, PItemClass, PItemName, PItemValue: string;
   ColonPos, EquPos, DotPos, I: Integer;
   AChildComp: TComponent;
+{$IFDEF SUPPORTS_FMX}
+  TmpComp: TComponent;
+{$ENDIF}
   NeedRefreshPropNames: Boolean;
   IsLastLine: Boolean;
   ACollect: TObject;
@@ -458,7 +479,7 @@ begin
 
   GetPropNames(AComp, FPropNames);
 {$IFDEF DEBUG}
-  CnDebugger.LogStrings(FPropNames);
+//  CnDebugger.LogStrings(FPropNames);
 {$ENDIF}
 
   S := Copy(FCurLine, Length('object') + 2, Length(FCurLine) - Length('object') - 1);
@@ -557,6 +578,35 @@ begin
       end;
     end;
 
+{$IFDEF SUPPORTS_FMX}
+    AParent := '';
+    if CnFmxIsInheritedFromControl(AComp) then
+    begin
+      if (CnFmxGetObjectParent(AComp) <> nil) and CnFmxIsInheritedFromCommonCustomForm(CnFmxGetObjectParent(AComp)) then
+      begin
+        if FSelIsForm and not FCurIsForm then
+          AParent := FOwnFormName
+        else
+        begin
+          if FIsPas then
+            AParent := 'Self'
+          else
+            AParent := 'this';
+        end;
+      end
+      else if (CnFmxGetObjectParent(AComp) <> nil) and CnFmxIsInheritedFromControl(CnFmxGetObjectParent(AComp)) then
+        AParent := CnFmxGetControlParent(AComp).Name;
+
+      if AParent <> '' then
+      begin
+        if FIsPas then
+          mmoImpl.Lines.Add(Spc(FIndentWidth) + AName + '.Parent := ' + AParent + ';')
+        else
+          mmoImpl.Lines.Add(Spc(FIndentWidth) + AName + '->Parent = ' + AParent + ';');
+      end;
+    end;
+{$ENDIF}
+
     // 接着处理其他属性
     while not GetReadEof(CompStrs) do
     begin
@@ -613,6 +663,39 @@ begin
               FCurIsForm := False;
               ParseCompText(AChildComp, CompStrs);
             end;
+          end
+          else
+          begin
+{$IFDEF SUPPORTS_FMX}
+            // 处理FMX的子组件
+            if CnFmxIsInheritedFromControl(AComp) then
+            begin
+              AChildComp := nil;
+{$IFDEF DEBUG}
+              CnDebugger.LogInteger(CnFmxGetControlsCount(AComp), 'FMX Controls Count');
+{$ENDIF}
+              for I := 0 to CnFmxGetControlsCount(AComp) - 1 do
+              begin
+                TmpComp := CnFmxGetControlByIndex(AComp, I);
+                if (TmpComp <> nil) and (TmpComp.Name = AChild) then
+                begin
+                  AChildComp := TmpComp;
+{$IFDEF DEBUG}
+                  CnDebugger.LogInteger(I, 'FMX Control Index as AChild');
+{$ENDIF}
+                  Break;
+                end;
+              end;
+
+              if AChildComp <> nil then // 如果实际存在FMX的 Child 组件，则递归处理 Child 组件
+              begin
+                // 有子组件，FPropNames 会被更新成子组件的属性列表，因此设个标志
+                NeedRefreshPropNames := True;
+                FCurIsForm := False;
+                ParseCompText(AChildComp, CompStrs);
+               end;
+            end;
+{$ENDIF}
           end;
         end;
       end
@@ -638,8 +721,8 @@ begin
           // 注意需要通过 RTTI 判断属性存在才可赋值，避免 Top 和 Left 这种问题
           if (FHasProps and (FPropNames.IndexOfName(PName) < 0)) and
             (StrRight(PName, Length('.Strings')) <> '.Strings') and
-             (StrRight(PName, Length('.Items')) <> '.Items') and
-             (PName <> 'Parent') and (PName <> 'PageControl')
+            (StrRight(PName, Length('.Items')) <> '.Items') and
+            (PName <> 'Parent') and (PName <> 'PageControl')
             then
             Continue;
 
@@ -878,8 +961,19 @@ begin
                 PValue := FOwnFormName + '->' + PValue;
             end;
 
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('Generate a Line: %s.%s := %s', [AComp.Name, PName, PValue]);
+{$ENDIF}
             if FIsPas then
+            begin
+              // TODO: Set 属性赋值在DXE后语法规则变了，枚举常量必须加入类名了，
+              // 但它为了兼容又定义了许多和以前一样的const，导致无法判断[]中的
+              // 量究竟是枚举常量还是正常的const。不好办，只能先硬补几个。
+{$IFDEF SUPPORTS_FMX}
+              // 先只处理 FMX 中的一些特定名字。
+{$ENDIF}
               mmoImpl.Lines.Add(Spc(FIndentWidth) + AName + '.' + PName + ' := ' + PValue + ';')
+            end
             else
               mmoImpl.Lines.Add(Spc(FIndentWidth) + AName + '->' + StringReplace(PName, '.', '->', [rfReplaceAll]) + ' = ' + GetCppValue(FPropNames, PName, PValue) + ';')
           end;
