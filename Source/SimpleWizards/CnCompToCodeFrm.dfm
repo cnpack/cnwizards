@@ -108,6 +108,7 @@ inherited CnCompToCodeForm: TCnCompToCodeForm
     0000F0000000C0000000C0000000C0000003C0000003C000000FC000000FC000
     FFFFC000FFFFF003FFFFF003FFFFFC0FFFFFFC0FFFFFFF3FFFFFFF3FFFFF}
   KeyPreview = True
+  OldCreateOrder = True
   OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
   PixelsPerInch = 96
@@ -223,8 +224,9 @@ inherited CnCompToCodeForm: TCnCompToCodeForm
       HideSelection = False
       ParentFont = False
       ReadOnly = True
-      ScrollBars = ssVertical
+      ScrollBars = ssBoth
       TabOrder = 0
+      WordWrap = False
     end
   end
   object pnlImpl: TPanel
@@ -259,8 +261,9 @@ inherited CnCompToCodeForm: TCnCompToCodeForm
       HideSelection = False
       ParentFont = False
       ReadOnly = True
-      ScrollBars = ssVertical
+      ScrollBars = ssBoth
       TabOrder = 0
+      WordWrap = False
     end
     object StatusBar1: TStatusBar
       Left = 0

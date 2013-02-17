@@ -966,11 +966,12 @@ begin
 {$ENDIF}
             if FIsPas then
             begin
-              // TODO: Set 属性赋值在DXE后语法规则变了，枚举常量必须加入类名了，
+              // Set 属性赋值在DXE后语法规则变了，枚举常量必须加入类名了，
               // 但它为了兼容又定义了许多和以前一样的const，导致无法判断[]中的
               // 量究竟是枚举常量还是正常的const。不好办，只能先硬补几个。
 {$IFDEF SUPPORTS_FMX}
               // 先只处理 FMX 中的一些特定名字。
+              PValue := CnFmxFixSetValue(FPropNames.Values[PName], PValue);
 {$ENDIF}
               mmoImpl.Lines.Add(Spc(FIndentWidth) + AName + '.' + PName + ' := ' + PValue + ';')
             end
