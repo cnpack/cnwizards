@@ -97,12 +97,12 @@ type
 implementation
 
 uses
-  CnWizXmlUtils,
 {$IFDEF CN_USE_MSXML}
-  ActiveX, ComObj, msxml;
+  ActiveX, ComObj, msxml,
 {$ELSE}
-  OmniXML, OmniXMLUtils;
+  OmniXML, OmniXMLUtils,
 {$ENDIF}
+  CnWizXmlUtils;
 
 const
   csShortMonthNames: array[1..12] of string = ('Jan', 'Feb', 'Mar',
