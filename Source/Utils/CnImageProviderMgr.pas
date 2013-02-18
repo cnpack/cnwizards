@@ -28,9 +28,8 @@ unit CnImageProviderMgr;
 * 开发平台：Win7 + Delphi 7
 * 兼容测试：
 * 本 地 化：该单元和窗体中的字符串已经本地化处理方式
-* 单元标识：$Id: $
-* 修改记录：
-*           2011.07.04 V1.0
+* 单元标识：$Id: CnImageProviderMgr.pas 1146 2012-10-24 06:25:41Z liuxiaoshanzhashu@gmail.com $
+* 修改记录：2011.07.04 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -41,7 +40,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, Graphics, CnWizHttpDownMgr, Forms, CnCommon,
-  {$IFNDEF TEST_APP}CnWizOptions,{$ENDIF} RegExpr,
+  {$IFNDEF TEST_APP}CnWizOptions,{$ENDIF} RegExpr, ActiveX,
   CnMD5, CnThreadTaskMgr, CnPngUtilsIntf, CnDesignEditorConsts;
 
 type
@@ -179,10 +178,15 @@ end;
 
 procedure TCnImageSearchThread.Execute;
 begin
+  CoInitialize(nil);
   try
-    FSucc := FProvider.DoSearchImage(FReq);
-  except
-    FSucc := False;
+    try
+      FSucc := FProvider.DoSearchImage(FReq);
+    except
+      FSucc := False;
+    end;
+  finally
+    CoUninitialize;
   end;
   FFinished := True;
 end;

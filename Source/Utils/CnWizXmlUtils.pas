@@ -28,7 +28,7 @@ unit CnWizXmlUtils;
 * 开发平台：Win7 SP1 + Delphi 2010
 * 兼容测试：
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 单元标识：$Id: $
+* 单元标识：$Id: CnWizXmlUtils.pas 1146 2012-10-24 06:25:41Z liuxiaoshanzhashu@gmail.com $
 * 修改记录：2013.02.17
 *               创建单元
 ================================================================================
@@ -75,10 +75,10 @@ function XMLStrToInt(nodeValue: WideString; var value: integer): boolean;
 begin
   try
     value := StrToInt(nodeValue);
-    Result := true;
+    Result := True;
   except
     on EConvertError do
-      Result := false;
+      Result := False;
   end;
 end;
 
@@ -95,10 +95,10 @@ var
 begin
   attrNode := parentNode.Attributes.GetNamedItem(attrName);
   if not assigned(attrNode) then
-    Result := false
+    Result := False
   else begin
     value := attrNode.NodeValue;
-    Result := true;
+    Result := True;
   end;
 end;
 
@@ -119,7 +119,7 @@ begin
   for iText := 0 to node.ChildNodes.Length-1 do
     if node.ChildNodes.Item[iText].NodeType = NODE_TEXT then begin
       Result := node.ChildNodes.Item[iText];
-      break; //for
+      Break; //for
     end;
 end;
 
@@ -129,12 +129,12 @@ var
   myNode: IXMLNode;
 begin
   nodeText := '';
-  Result := false;
+  Result := False;
   myNode := parentNode.SelectSingleNode(nodeTag);
   if assigned(myNode) then
   begin
     nodeText := myNode.text;
-    Result := true;
+    Result := True;
   end;
 end;
 
@@ -179,6 +179,7 @@ begin
     ;
   end;
 end;
+
 {$ENDIF}
 
 end.
