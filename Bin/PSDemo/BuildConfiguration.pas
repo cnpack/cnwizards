@@ -16,27 +16,54 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs;
 
 var
-  BC: IOTAProjectOptionsConfigurations;
+  POCS: IOTAProjectOptionsConfigurations;
+  BC: IOTABuildConfiguration;
   I: Integer;
 begin
-  if (CompilerKind = ckDelphi) and ((Compiler = cnDelphi12) or 
-    (Compiler = cnDelphi14) or (Compiler = cnDelphi15) or (Compiler = cnDelphi16)) then
+  BC := nil;
+  if (_SUPPORT_OTA_PROJECT_CONFIGURATION = True) and (CompilerKind = ckDelphi) then
   begin
-    BC := CnOtaGetActiveProjectOptionsConfigurations(nil);
-    if BC <> nil then
+    POCS := CnOtaGetActiveProjectOptionsConfigurations(nil);
+    if POCS <> nil then
     begin
-      ShowMessage('Current Project''s Configuration Count: ' + IntToStr(BC.GetConfigurationCount));
-      for I := 0 to BC.GetConfigurationCount - 1 do
+      Writeln('Current Project''s Configuration Count: ' + IntToStr(POCS.GetConfigurationCount));
+      for I := 0 to POCS.GetConfigurationCount - 1 do
       begin
-        if BC.GetConfiguration(I).GetName = BC.GetActiveConfiguration.GetName then
-          ShowMessage(Format('Configuration %d (Active): ', [I]) + BC.GetConfiguration(I).GetName)
+        if POCS.GetConfiguration(I).GetName = POCS.GetActiveConfiguration.GetName then
+        begin
+          Writeln(Format('Configuration %d (Active): ', [I]) + POCS.GetConfiguration(I).GetName)
+          BC := POCS.GetConfiguration(I);
+        end
         else
-          ShowMessage(Format('Configuration %d: ', [I]) + BC.GetConfiguration(I).GetName);
+          Writeln(Format('Configuration %d: ', [I]) + POCS.GetConfiguration(I).GetName);
       end;
     end;
 
-    if QueryDlg('Test: Do you want to Set Active Configuration to Index 1?', True) then
-      BC.SetActiveConfiguration(BC.GetConfiguration(1));
+    if BC <> nil then
+    begin
+      Writeln('');
+      //Writeln(Format('Active Configuration Platform %s:', [BC.GetPlatform]));
+      Writeln(Format('Active Configuration has %d properties:', [BC.GetPropertyCount]));
+      for I := 0 to BC.GetPropertyCount - 1 do
+      begin
+        Writeln(BC.GetPropertyName(I));
+      end;
+
+      Writeln('');
+      Writeln('VerInfo_MajorVer: ' + BC.GetValue('VerInfo_MajorVer'));
+      Writeln('VerInfo_MinorVer: ' + BC.GetValue('VerInfo_MinorVer'));
+      Writeln('VerInfo_Release: ' + BC.GetValue('VerInfo_Release'));
+      Writeln('VerInfo_Build: ' + BC.GetValue('VerInfo_Build'));
+
+      //BC.SetValue('VerInfo_Build', '2');
+
+      Writeln('');
+      Writeln(Format('Active Configuration has %d Children:', [BC.GetChildCount]));
+    end;
+
+    if POCS <> nil then
+      if QueryDlg('Test: Do you want to Set Active Configuration to Index 1?', True) then
+        POCS.SetActiveConfiguration(POCS.GetConfiguration(1));
   end
   else
     ErrorDlg('Only Support Delphi 2009 and Later.');

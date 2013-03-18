@@ -199,6 +199,8 @@ begin
   CL.AddConstantN('_COMPILER16_UP', 'Boolean').SetUInt(Ord(_COMPILER16_UP));
   CL.AddConstantN('_COMPILER17_UP', 'Boolean').SetUInt(Ord(_COMPILER17_UP));
 
+  CL.AddConstantN('_SUPPORT_OTA_PROJECT_CONFIGURATION', 'Boolean').SetUInt(Ord(_SUPPORT_OTA_PROJECT_CONFIGURATION));
+
   CL.AddTypeS('TFormType', '( ftBinary, ftText, ftUnknown )');
   CL.AddTypeS('TCnCharSet', 'set of Char');
   CL.AddDelphiFunction('Function CnIntToObject(AInt: Integer): TObject');
