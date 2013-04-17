@@ -512,6 +512,12 @@ const
 
   CS_DROPSHADOW = $20000;
 
+{$IFDEF SUPPORT_UNITNAME_DOT}
+  csUnitDotPrefixes: array[0..6] of string = (
+    'Vcl', 'Xml', 'System', 'Winapi', 'Soap', 'FMX', 'Data'
+  );
+{$ENDIF}
+
 {$IFNDEF SUPPORT_IDESymbolList}
 
 type
@@ -1420,6 +1426,7 @@ var
   ScanCode: Word;
   Key: Word;
   KeyDownChar: AnsiChar;
+  IgnoreOfDot: Boolean;
 begin
   Result := False;
 
@@ -1462,11 +1469,25 @@ begin
         end;
       VK_TAB, VK_DECIMAL, 190: // '.'
         begin
-          SendSymbolToIDE(SelMidMatchByEnterOnly, False, False, #0, Result);
-          if IsValidDotKey(Key) then
+          IgnoreOfDot := False;
+{$IFDEF SUPPORT_UNITNAME_DOT}
+          if Key = 190 then
           begin
-            Timer.Interval := Max(csDefDispDelay, FDispDelay);
-            Timer.Enabled := True;
+            if IndexStr(FToken, csUnitDotPrefixes, CurrentIsDelphiSource) >= 0 then
+            begin
+              IgnoreOfDot := True;
+              CnDebugger.TraceMsg('Dot Got. Unit Prefix Detected. Ignore ' + FToken);
+            end;
+          end;
+{$ENDIF}
+          if not IgnoreOfDot then
+          begin
+            SendSymbolToIDE(SelMidMatchByEnterOnly, False, False, #0, Result);
+            if IsValidDotKey(Key) then
+            begin
+              Timer.Interval := Max(csDefDispDelay, FDispDelay);
+              Timer.Enabled := True;
+            end;
           end;
         end;
       VK_ESCAPE:
@@ -1776,6 +1797,7 @@ begin
     // 取得当前标识符及光标左边的部分
     CnOtaGetCurrPosToken(FToken, CurrPos, True, FirstSet, CharSet);
     FMatchStr := Copy(FToken, 1, CurrPos);
+    //CnDebugger.TraceFmt('Token %s, Match %s', [FToken, FMatchStr]);
     if ForcePopup or IsValidSymbol(FToken) or (FPosInfo.PosKind = pkFieldDot) then
     begin
       // 在过滤列表中时不自动弹出
