@@ -1476,7 +1476,9 @@ begin
             if IndexStr(FToken, csUnitDotPrefixes, CurrentIsDelphiSource) >= 0 then
             begin
               IgnoreOfDot := True;
-              CnDebugger.TraceMsg('Dot Got. Unit Prefix Detected. Ignore ' + FToken);
+{$IFDEF DEBUG}
+              CnDebugger.LogMsg('Dot Got. Unit Prefix Detected. Ignore ' + FToken);
+{$ENDIF}
             end;
           end;
 {$ENDIF}

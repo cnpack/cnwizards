@@ -44,7 +44,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, ToolsAPI, IniFiles,
-  Forms, ExtCtrls, Menus, ComCtrls, Contnrs, CnCommon, CnWizUtils, CnWizNotifier,
+  Forms, ExtCtrls, Menus, ComCtrls, Contnrs, Variants, CnCommon, CnWizUtils, CnWizNotifier,
   CnWizIdeUtils, CnWizConsts, CnMenuHook, CnConsts, CnWizClasses;
 
 type
@@ -185,7 +185,12 @@ begin
   Options := CnOtaGetActiveProjectOptions(Project);
   if not Assigned(Options) then Exit;
 
-  FIncludeVer := Options.GetOptionValue('IncludeVersionInfo') = '-1';
+  // -1 为包含，高版本 True 为包含
+  FIncludeVer := (Options.GetOptionValue('IncludeVersionInfo') = '-1')
+    or (Options.GetOptionValue('IncludeVersionInfo') = 'True');
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('VerEnhance BeforeCompile ' + VarToStr(Options.GetOptionValue('IncludeVersionInfo')));
+{$ENDIF}
   if not FIncludeVer then Exit;
 
   FBeforeBuildNo := Options.GetOptionValue('Build');
