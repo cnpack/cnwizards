@@ -404,6 +404,15 @@ function CnOtaGetOptionsNames(Options: IOTAOptions; IncludeType:
 procedure CnOtaSetProjectOptionValue(Options: IOTAProjectOptions; const AOption,
   AValue: string);
 {* 设置当前项目的属性值}
+
+{$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
+function CnOtaGetProjectCurrentBuildConfigurationValue(const APropName: string): string;
+{* 获得当前项目的当前BuildConfiguration中的属性值，返回字符串}
+procedure CnOtaSetProjectCurrentBuildConfigurationValue(const APropName,
+  AValue: string);
+{* 设置当前项目的当前BuildConfiguration中的属性值}
+{$ENDIF}
+
 procedure CnOtaGetProjectList(const List: TInterfaceList);
 {* 取得所有工程列表}
 function CnOtaGetCurrentProjectName: string;
@@ -2718,6 +2727,109 @@ begin
   Assert(Options <> nil, ' Options can not be null');
   Options.Values[AOption] := AValue;
 end;
+
+{$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
+// 获得当前项目的当前BuildConfiguration中的属性值，返回字符串
+function CnOtaGetProjectCurrentBuildConfigurationValue(const APropName: string): string;
+var
+  POCS: IOTAProjectOptionsConfigurations;
+  BC: IOTABuildConfiguration;
+  I: Integer;
+  PS, CurrPs: string;
+  PlatformConfig: IOTABuildConfiguration;
+  Proj: IOTAProject;
+begin
+  Result := '';
+  BC := nil;
+  POCS := CnOtaGetActiveProjectOptionsConfigurations(nil);
+  if POCS <> nil then
+  begin
+    for I := 0 to POCS.GetConfigurationCount - 1 do
+    begin
+      if POCS.GetConfiguration(I).GetName = POCS.GetActiveConfiguration.GetName then
+      begin
+        BC := POCS.GetConfiguration(I);
+        Break;
+      end;
+    end;
+
+    if BC <> nil then
+    begin
+      Result := BC.GetValue(APropName);
+
+      Proj := CnOtaGetCurrentProject;
+      CurrPs := '';
+      if Proj <> nil  then
+      begin
+        CurrPs := Proj.CurrentPlatform;
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('CnOtaGetProjectCurrentBuildConfigurationValue. Current Project Platform %s.', [CurrPs]);
+{$ENDIF}
+        for PS in BC.Platforms do
+        begin
+          PlatformConfig := BC.PlatformConfiguration[PS];
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('CnOtaGetProjectCurrentBuildConfigurationValue. Name %s, Platform %s, Value %s.',
+            [APropName, PS, PlatformConfig.Value[APropName]]);
+{$ENDIF}
+          if PS = CurrPs then
+            Result := PlatformConfig.Value[APropName];
+        end;
+      end;
+    end;
+  end;
+end;
+
+// 设置当前项目的当前BuildConfiguration中的属性值
+procedure CnOtaSetProjectCurrentBuildConfigurationValue(const APropName,
+  AValue: string);
+var
+  POCS: IOTAProjectOptionsConfigurations;
+  BC: IOTABuildConfiguration;
+  I: Integer;
+  PS, CurrPs: string;
+  PlatformConfig: IOTABuildConfiguration;
+  Proj: IOTAProject;
+begin
+  BC := nil;
+  POCS := CnOtaGetActiveProjectOptionsConfigurations(nil);
+  if POCS <> nil then
+  begin
+    for I := 0 to POCS.GetConfigurationCount - 1 do
+    begin
+      if POCS.GetConfiguration(I).GetName = POCS.GetActiveConfiguration.GetName then
+      begin
+        BC := POCS.GetConfiguration(I);
+        Break;
+      end;
+    end;
+
+    if BC <> nil then
+    begin
+      Proj := CnOtaGetCurrentProject;
+      CurrPs := '';
+      if Proj <> nil  then
+      begin
+        CurrPs := Proj.CurrentPlatform;
+        for PS in BC.Platforms do
+        begin
+          PlatformConfig := BC.PlatformConfiguration[PS];
+          if PS = CurrPs then
+          begin
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('CnOtaSetProjectCurrentBuildConfigurationValue. Name %s, Platform %s, Value %s.',
+            [APropName, PS, AValue]);
+{$ENDIF}
+            PlatformConfig.SetValue(APropName, AValue);
+            Exit;
+          end;
+        end;
+      end;
+      BC.SetValue(APropName, AValue);
+    end;
+  end;
+end;  
+{$ENDIF}
 
 // 取得 IDE 设置变量名列表
 procedure CnOtaGetOptionsNames(Options: IOTAOptions; List: TStrings;

@@ -31,7 +31,7 @@ begin
       begin
         if POCS.GetConfiguration(I).GetName = POCS.GetActiveConfiguration.GetName then
         begin
-          Writeln(Format('Configuration %d (Active): ', [I]) + POCS.GetConfiguration(I).GetName)
+          Writeln(Format('Configuration %d (Active): ', [I]) + POCS.GetConfiguration(I).GetName);
           BC := POCS.GetConfiguration(I);
         end
         else
@@ -50,6 +50,7 @@ begin
       end;
 
       Writeln('');
+      Writeln('VerInfo_IncludeVerInfo: ' + BC.GetValue('VerInfo_IncludeVerInfo'));
       Writeln('VerInfo_MajorVer: ' + BC.GetValue('VerInfo_MajorVer'));
       Writeln('VerInfo_MinorVer: ' + BC.GetValue('VerInfo_MinorVer'));
       Writeln('VerInfo_Release: ' + BC.GetValue('VerInfo_Release'));

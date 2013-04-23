@@ -147,6 +147,9 @@ begin
     // 编译失败，版本号改回去
 {$IFDEF COMPILER6_UP} // 只 D6 及以上改回版本号，D5 由于 Bug 而无效
     CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [FBeforeBuildNo]));
+  {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
+    CnOtaSetProjectCurrentBuildConfigurationValue('VerInfo_Build', IntToStr(FBeforeBuildNo));
+  {$ENDIF}
 {$ENDIF}
 {$IFDEF DEBUG}
     CnDebugger.LogMsg(Format('VerEnhance Compiling Fail. Set Back Build No %d.', [FBeforeBuildNo]));
@@ -192,9 +195,16 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('VerEnhance BeforeCompile ' + VarToStr(Options.GetOptionValue('IncludeVersionInfo')));
 {$ENDIF}
+{$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
+  if not FIncludeVer then
+    FIncludeVer := (CnOtaGetProjectCurrentBuildConfigurationValue('VerInfo_IncludeVerInfo') = 'true');
+{$ENDIF}
   if not FIncludeVer then Exit;
 
   FBeforeBuildNo := Options.GetOptionValue('Build');
+{$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
+  FBeforeBuildNo := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue('VerInfo_Build'), 0);
+{$ENDIF}
 
   //先增加文件版本信息, 修改OptionValue的值就可以了
   //Hubdog:SetProjectOptionValue在D5下无法修改Build, Release等版本信息
@@ -203,6 +213,9 @@ begin
   begin
 {$IFDEF COMPILER6_UP} // 只 D6 及以上增加版本号，D5 由于 Bug 而无效
     CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [FBeforeBuildNo + 1]));
+  {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
+    CnOtaSetProjectCurrentBuildConfigurationValue('VerInfo_Build', IntToStr(FBeforeBuildNo + 1));
+  {$ENDIF}
 {$ENDIF}
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('VerEnhance Set New Build No %d.', [FBeforeBuildNo + 1]);
