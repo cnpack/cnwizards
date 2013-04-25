@@ -2735,9 +2735,12 @@ var
   POCS: IOTAProjectOptionsConfigurations;
   BC: IOTABuildConfiguration;
   I: Integer;
-  PS, CurrPs: string;
+  PS: string;
   PlatformConfig: IOTABuildConfiguration;
+{$IFDEF SUPPORT_MULTI_PLATFORM}
   Proj: IOTAProject;
+  CurrPs: string;
+{$ENDIF}
 begin
   Result := '';
   BC := nil;
@@ -2755,8 +2758,7 @@ begin
 
     if BC <> nil then
     begin
-      Result := BC.GetValue(APropName);
-
+{$IFDEF SUPPORT_MULTI_PLATFORM}
       Proj := CnOtaGetCurrentProject;
       CurrPs := '';
       if Proj <> nil  then
@@ -2776,6 +2778,9 @@ begin
             Result := PlatformConfig.Value[APropName];
         end;
       end;
+{$ELSE}
+      Result := BC.GetValue(APropName);
+{$ENDIF}
     end;
   end;
 end;
@@ -2787,9 +2792,12 @@ var
   POCS: IOTAProjectOptionsConfigurations;
   BC: IOTABuildConfiguration;
   I: Integer;
-  PS, CurrPs: string;
+  PS: string;
   PlatformConfig: IOTABuildConfiguration;
+{$IFDEF SUPPORT_MULTI_PLATFORM}
   Proj: IOTAProject;
+  CurrPs: string;
+{$ENDIF}
 begin
   BC := nil;
   POCS := CnOtaGetActiveProjectOptionsConfigurations(nil);
@@ -2806,6 +2814,7 @@ begin
 
     if BC <> nil then
     begin
+{$IFDEF SUPPORT_MULTI_PLATFORM}
       Proj := CnOtaGetCurrentProject;
       CurrPs := '';
       if Proj <> nil  then
@@ -2825,7 +2834,9 @@ begin
           end;
         end;
       end;
+{$ELSE}
       BC.SetValue(APropName, AValue);
+{$ENDIF}
     end;
   end;
 end;  
