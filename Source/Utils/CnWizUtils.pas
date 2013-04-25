@@ -2739,7 +2739,7 @@ begin
     Project := CnOtaGetCurrentProject;
   if Project = nil then
     Exit;
-  Result := Proj.CurrentPlatform;
+  Result := Project.CurrentPlatform;
 {$ENDIF}
 end;
 
@@ -2752,7 +2752,7 @@ begin
     Project := CnOtaGetCurrentProject;
   if Project = nil then
     Exit;
-  Result := Project.CurrentFrameworkType;
+  Result := Project.FrameworkType;
 {$ENDIF}
 end;
 
