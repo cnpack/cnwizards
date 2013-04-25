@@ -29,7 +29,9 @@ unit CnWizCompilerConst;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2012.09.19 by shenloqi
+* 修改记录：2013.04.25 by liuxiao
+*               增加几个特性变量
+*           2012.09.19 by shenloqi
 *               移植到 Delphi XE3
 *           2002.11.07 V1.0
 *               创建单元
@@ -182,6 +184,10 @@ const
   _COMPILER17_UP = {$IFDEF COMPILER17_UP}True{$ELSE}False{$ENDIF};
 
   _SUPPORT_OTA_PROJECT_CONFIGURATION = {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}True{$ELSE}False{$ENDIF};
+  _SUPPORT_CROSS_PLATFORM = {$IFDEF SUPPORTS_CROSS_PLATFORM}True{$ELSE}False{$ENDIF};
+  _SUPPORT_FMX = {$IFDEF SUPPORTS_FMX}True{$ELSE}False{$ENDIF};
+  _SUPPORT_32_AND_64 = {$IFDEF SUPPORTS_32_AND_64}True{$ELSE}False{$ENDIF};
+  _UNICODE_STRING = {$IFDEF UNICODE_STRING}True{$ELSE}False{$ENDIF};
 
 {$IFDEF DELPHI5}
   Compiler: TCnCompiler = cnDelphi5;

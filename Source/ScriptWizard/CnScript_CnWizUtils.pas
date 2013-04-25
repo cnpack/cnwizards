@@ -200,6 +200,10 @@ begin
   CL.AddConstantN('_COMPILER17_UP', 'Boolean').SetUInt(Ord(_COMPILER17_UP));
 
   CL.AddConstantN('_SUPPORT_OTA_PROJECT_CONFIGURATION', 'Boolean').SetUInt(Ord(_SUPPORT_OTA_PROJECT_CONFIGURATION));
+  CL.AddConstantN('_SUPPORT_CROSS_PLATFORM', 'Boolean').SetUInt(Ord(_SUPPORT_CROSS_PLATFORM));
+  CL.AddConstantN('_SUPPORT_FMX', 'Boolean').SetUInt(Ord(_SUPPORT_FMX));
+  CL.AddConstantN('_SUPPORT_32_AND_64', 'Boolean').SetUInt(Ord(_SUPPORT_32_AND_64));
+  CL.AddConstantN('_UNICODE_STRING', 'Boolean').SetUInt(Ord(_UNICODE_STRING));
 
   CL.AddTypeS('TFormType', '( ftBinary, ftText, ftUnknown )');
   CL.AddTypeS('TCnCharSet', 'set of Char');
@@ -325,8 +329,16 @@ begin
   CL.AddDelphiFunction('Function CnOtaGetProject : IOTAProject');
   CL.AddDelphiFunction('Function CnOtaGetProjectCountFromGroup : Integer');
   CL.AddDelphiFunction('Function CnOtaGetProjectFromGroupByIndex( Index : Integer) : IOTAProject');
-  CL.AddDelphiFunction('Procedure CnOtaGetOptionsNames( Options : IOTAOptions; List : TStrings; IncludeType : Boolean);');
+  CL.AddDelphiFunction('Procedure CnOtaGetOptionsNames( Options : IOTAOptions; List : TStrings; IncludeType : Boolean)');
   CL.AddDelphiFunction('Procedure CnOtaSetProjectOptionValue( Options : IOTAProjectOptions; const AOption, AValue : string)');
+{$IFDEF SUPPORTS_CROSS_PLATFORM}
+  CL.AddDelphiFunction('Function CnOtaGetProjectPlatform( Project : IOTAProject) : string;');
+  CL.AddDelphiFunction('Function CnOtaGetProjectFrameworkType( Project : IOTAProject) : string;');
+{$ENDIF}
+{$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
+  CL.AddDelphiFunction('Function CnOtaGetProjectCurrentBuildConfigurationValue(const APropName : string) : string');
+  CL.AddDelphiFunction('Procedure CnOtaSetProjectCurrentBuildConfigurationValue(const APropName, AValue : string)');
+{$ENDIF}
   CL.AddDelphiFunction('Procedure CnOtaGetProjectList( const List : TInterfaceList)');
   CL.AddDelphiFunction('Function CnOtaGetCurrentProjectName : string');
   CL.AddDelphiFunction('Function CnOtaGetCurrentProjectFileName : string');
@@ -558,6 +570,14 @@ begin
   S.RegisterDelphiFunction(@CnOtaGetProjectFromGroupByIndex, 'CnOtaGetProjectFromGroupByIndex', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetOptionsNames_P, 'CnOtaGetOptionsNames', cdRegister);
   S.RegisterDelphiFunction(@CnOtaSetProjectOptionValue, 'CnOtaSetProjectOptionValue', cdRegister);
+{$IFDEF SUPPORTS_CROSS_PLATFORM}
+  S.RegisterDelphiFunction(@CnOtaGetProjectPlatform, 'CnOtaGetProjectPlatform', cdRegister);
+  S.RegisterDelphiFunction(@CnOtaGetProjectFrameworkType, 'CnOtaGetProjectFrameworkType', cdRegister);
+{$ENDIF}
+{$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
+  S.RegisterDelphiFunction(@CnOtaGetProjectCurrentBuildConfigurationValue, 'CnOtaGetProjectCurrentBuildConfigurationValue', cdRegister);
+  S.RegisterDelphiFunction(@CnOtaSetProjectCurrentBuildConfigurationValue, 'CnOtaSetProjectCurrentBuildConfigurationValue', cdRegister);
+{$ENDIF}
   S.RegisterDelphiFunction(@CnOtaGetProjectList, 'CnOtaGetProjectList', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetCurrentProjectName, 'CnOtaGetCurrentProjectName', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetCurrentProjectFileName, 'CnOtaGetCurrentProjectFileName', cdRegister);

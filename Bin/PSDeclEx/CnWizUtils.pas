@@ -56,7 +56,10 @@ uses
 type
   TCnCompilerKind = (ckDelphi, ckBCB);
   TCnCompiler = (cnDelphi5, cnDelphi6, cnDelphi7, cnDelphi8, cnDelphi9,
-    cnDelphi10, cnDelphi11, cnDelphi12, cnDelphi14, cnBCB5, cnBCB6);
+    cnDelphi10, cnDelphi11, cnDelphi12, cnDelphi14, cnDelphi15, cnDelphi16,
+    cnDelphi17,
+    cnBCB5, cnBCB6);
+  TCnCompilers = set of TCnCompiler;
 
 const
   // 以下常量的实际值取决于当前编译器
@@ -82,6 +85,9 @@ const
   _DELPHI11 = {$IFDEF DELPHI11}True{$ELSE}False{$ENDIF};
   _DELPHI12 = {$IFDEF DELPHI12}True{$ELSE}False{$ENDIF};
   _DELPHI14 = {$IFDEF DELPHI14}True{$ELSE}False{$ENDIF};
+  _DELPHI15 = {$IFDEF DELPHI15}True{$ELSE}False{$ENDIF};
+  _DELPHI16 = {$IFDEF DELPHI16}True{$ELSE}False{$ENDIF};
+  _DELPHI17 = {$IFDEF DELPHI17}True{$ELSE}False{$ENDIF};
 
   _DELPHI1_UP = {$IFDEF DELPHI1_UP}True{$ELSE}False{$ENDIF};
   _DELPHI2_UP = {$IFDEF DELPHI2_UP}True{$ELSE}False{$ENDIF};
@@ -96,6 +102,9 @@ const
   _DELPHI11_UP = {$IFDEF DELPHI11_UP}True{$ELSE}False{$ENDIF};
   _DELPHI12_UP = {$IFDEF DELPHI12_UP}True{$ELSE}False{$ENDIF};
   _DELPHI14_UP = {$IFDEF DELPHI14_UP}True{$ELSE}False{$ENDIF};
+  _DELPHI15_UP = {$IFDEF DELPHI15_UP}True{$ELSE}False{$ENDIF};
+  _DELPHI16_UP = {$IFDEF DELPHI16_UP}True{$ELSE}False{$ENDIF};
+  _DELPHI17_UP = {$IFDEF DELPHI17_UP}True{$ELSE}False{$ENDIF};
 
   _BCB1 = {$IFDEF BCB1}True{$ELSE}False{$ENDIF};
   _BCB3 = {$IFDEF BCB3}True{$ELSE}False{$ENDIF};
@@ -107,6 +116,9 @@ const
   _BCB11 = {$IFDEF BCB11}True{$ELSE}False{$ENDIF};
   _BCB12 = {$IFDEF BCB12}True{$ELSE}False{$ENDIF};
   _BCB14 = {$IFDEF BCB14}True{$ELSE}False{$ENDIF};
+  _BCB15 = {$IFDEF BCB15}True{$ELSE}False{$ENDIF};
+  _BCB16 = {$IFDEF BCB16}True{$ELSE}False{$ENDIF};
+  _BCB17 = {$IFDEF BCB17}True{$ELSE}False{$ENDIF};
 
   _BCB1_UP = {$IFDEF BCB1_UP}True{$ELSE}False{$ENDIF};
   _BCB3_UP = {$IFDEF BCB3_UP}True{$ELSE}False{$ENDIF};
@@ -118,6 +130,9 @@ const
   _BCB11_UP = {$IFDEF BCB11_UP}True{$ELSE}False{$ENDIF};
   _BCB12_UP = {$IFDEF BCB12_UP}True{$ELSE}False{$ENDIF};
   _BCB14_UP = {$IFDEF BCB14_UP}True{$ELSE}False{$ENDIF};
+  _BCB15_UP = {$IFDEF BCB15_UP}True{$ELSE}False{$ENDIF};
+  _BCB16_UP = {$IFDEF BCB16_UP}True{$ELSE}False{$ENDIF};
+  _BCB17_UP = {$IFDEF BCB17_UP}True{$ELSE}False{$ENDIF};
 
   _KYLIX1 = {$IFDEF KYLIX1}True{$ELSE}False{$ENDIF};
   _KYLIX2 = {$IFDEF KYLIX2}True{$ELSE}False{$ENDIF};
@@ -133,6 +148,9 @@ const
   _BDS5 = {$IFDEF BDS5}True{$ELSE}False{$ENDIF};
   _BDS6 = {$IFDEF BDS6}True{$ELSE}False{$ENDIF};
   _BDS7 = {$IFDEF BDS7}True{$ELSE}False{$ENDIF};
+  _BDS8 = {$IFDEF BDS8}True{$ELSE}False{$ENDIF};
+  _BDS9 = {$IFDEF BDS9}True{$ELSE}False{$ENDIF};
+  _BDS10 = {$IFDEF BDS10}True{$ELSE}False{$ENDIF};
 
   _BDS2_UP = {$IFDEF BDS2_UP}True{$ELSE}False{$ENDIF};
   _BDS3_UP = {$IFDEF BDS3_UP}True{$ELSE}False{$ENDIF};
@@ -140,6 +158,9 @@ const
   _BDS5_UP = {$IFDEF BDS5_UP}True{$ELSE}False{$ENDIF};
   _BDS6_UP = {$IFDEF BDS6_UP}True{$ELSE}False{$ENDIF};
   _BDS7_UP = {$IFDEF BDS7_UP}True{$ELSE}False{$ENDIF};
+  _BDS8_UP = {$IFDEF BDS8_UP}True{$ELSE}False{$ENDIF};
+  _BDS9_UP = {$IFDEF BDS9_UP}True{$ELSE}False{$ENDIF};
+  _BDS10_UP = {$IFDEF BDS10_UP}True{$ELSE}False{$ENDIF};
 
   _COMPILER1 = {$IFDEF COMPILER1}True{$ELSE}False{$ENDIF};
   _COMPILER2 = {$IFDEF COMPILER2}True{$ELSE}False{$ENDIF};
@@ -155,6 +176,9 @@ const
   _COMPILER11 = {$IFDEF COMPILER11}True{$ELSE}False{$ENDIF};
   _COMPILER12 = {$IFDEF COMPILER12}True{$ELSE}False{$ENDIF};
   _COMPILER14 = {$IFDEF COMPILER14}True{$ELSE}False{$ENDIF};
+  _COMPILER15 = {$IFDEF COMPILER15}True{$ELSE}False{$ENDIF};
+  _COMPILER16 = {$IFDEF COMPILER16}True{$ELSE}False{$ENDIF};
+  _COMPILER17 = {$IFDEF COMPILER17}True{$ELSE}False{$ENDIF};
 
   _COMPILER1_UP = {$IFDEF COMPILER1_UP}True{$ELSE}False{$ENDIF};
   _COMPILER2_UP = {$IFDEF COMPILER2_UP}True{$ELSE}False{$ENDIF};
@@ -170,6 +194,15 @@ const
   _COMPILER11_UP = {$IFDEF COMPILER11_UP}True{$ELSE}False{$ENDIF};
   _COMPILER12_UP = {$IFDEF COMPILER12_UP}True{$ELSE}False{$ENDIF};
   _COMPILER14_UP = {$IFDEF COMPILER14_UP}True{$ELSE}False{$ENDIF};
+  _COMPILER15_UP = {$IFDEF COMPILER15_UP}True{$ELSE}False{$ENDIF};
+  _COMPILER16_UP = {$IFDEF COMPILER16_UP}True{$ELSE}False{$ENDIF};
+  _COMPILER17_UP = {$IFDEF COMPILER17_UP}True{$ELSE}False{$ENDIF};
+
+  _SUPPORT_OTA_PROJECT_CONFIGURATION = {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}True{$ELSE}False{$ENDIF};
+  _SUPPORT_CROSS_PLATFORM = {$IFDEF SUPPORTS_CROSS_PLATFORM}True{$ELSE}False{$ENDIF};
+  _SUPPORT_FMX = {$IFDEF SUPPORTS_FMX}True{$ELSE}False{$ENDIF};
+  _SUPPORT_32_AND_64 = {$IFDEF SUPPORTS_32_AND_64}True{$ELSE}False{$ENDIF};
+  _UNICODE_STRING = {$IFDEF UNICODE_STRING}True{$ELSE}False{$ENDIF};
 
 type
   TFormType = (ftBinary, ftText, ftUnknown);
@@ -459,6 +492,15 @@ procedure CnOtaGetOptionsNames(Options: IOTAOptions; List: TStrings;
 {* 取得 IDE 设置变量名列表}
 procedure CnOtaSetProjectOptionValue(Options: IOTAProjectOptions; const AOption,
   AValue: string);
+function CnOtaGetProjectPlatform(Project: IOTAProject): string;
+{* 获得项目的当前Platform值，返回字符串，如不支持此特性则返回空字符串}
+function CnOtaGetProjectFrameworkType(Project: IOTAProject): string;
+{* 获得项目的当前FrameworkType值，返回字符串，如不支持此特性则返回空字符串}
+function CnOtaGetProjectCurrentBuildConfigurationValue(const APropName: string): string;
+{* 获得当前项目的当前BuildConfiguration中的属性值，返回字符串，如不支持此特性则返回空字符串}
+procedure CnOtaSetProjectCurrentBuildConfigurationValue(const APropName,
+  AValue: string);
+{* 设置当前项目的当前BuildConfiguration中的属性值，如不支持此特性则什么都不做}
 {* 设置当前项目的属性值}
 procedure CnOtaGetProjectList(const List: TInterfaceList);
 {* 取得所有工程列表}
@@ -1251,6 +1293,23 @@ begin
 end;
 
 procedure CnOtaSetProjectOptionValue(Options: IOTAProjectOptions; const AOption,
+  AValue: string);
+begin
+end;
+
+function CnOtaGetProjectPlatform(Project: IOTAProject): string;
+begin
+end;
+
+function CnOtaGetProjectFrameworkType(Project: IOTAProject): string;
+begin
+end;
+
+function CnOtaGetProjectCurrentBuildConfigurationValue(const APropName: string): string;
+begin
+end;
+
+procedure CnOtaSetProjectCurrentBuildConfigurationValue(const APropName,
   AValue: string);
 begin
 end;

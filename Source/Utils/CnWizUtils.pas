@@ -405,13 +405,15 @@ procedure CnOtaSetProjectOptionValue(Options: IOTAProjectOptions; const AOption,
   AValue: string);
 {* 设置当前项目的属性值}
 
-{$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
+function CnOtaGetProjectPlatform(Project: IOTAProject): string;
+{* 获得项目的当前Platform值，返回字符串，如不支持此特性则返回空字符串}
+function CnOtaGetProjectFrameworkType(Project: IOTAProject): string;
+{* 获得项目的当前FrameworkType值，返回字符串，如不支持此特性则返回空字符串}
 function CnOtaGetProjectCurrentBuildConfigurationValue(const APropName: string): string;
-{* 获得当前项目的当前BuildConfiguration中的属性值，返回字符串}
+{* 获得当前项目的当前BuildConfiguration中的属性值，返回字符串，如不支持此特性则返回空字符串}
 procedure CnOtaSetProjectCurrentBuildConfigurationValue(const APropName,
   AValue: string);
-{* 设置当前项目的当前BuildConfiguration中的属性值}
-{$ENDIF}
+{* 设置当前项目的当前BuildConfiguration中的属性值，如不支持此特性则什么都不做}
 
 procedure CnOtaGetProjectList(const List: TInterfaceList);
 {* 取得所有工程列表}
@@ -2728,21 +2730,50 @@ begin
   Options.Values[AOption] := AValue;
 end;
 
-{$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
-// 获得当前项目的当前BuildConfiguration中的属性值，返回字符串
+// 获得项目的当前Platform值，返回字符串，如不支持此特性则返回空字符串
+function CnOtaGetProjectPlatform(Project: IOTAProject): string;
+begin
+  Result := '';
+{$IFDEF SUPPORTS_CROSS_PLATFORM}
+  if Project = nil then
+    Project := CnOtaGetCurrentProject;
+  if Project = nil then
+    Exit;
+  Result := Proj.CurrentPlatform;
+{$ENDIF}
+end;
+
+// 获得项目的当前FrameworkType值，返回字符串，如不支持此特性则返回空字符串
+function CnOtaGetProjectFrameworkType(Project: IOTAProject): string;
+begin
+  Result := '';
+{$IFDEF SUPPORTS_CROSS_PLATFORM}
+  if Project = nil then
+    Project := CnOtaGetCurrentProject;
+  if Project = nil then
+    Exit;
+  Result := Project.CurrentFrameworkType;
+{$ENDIF}
+end;
+
+
+// 获得当前项目的当前BuildConfiguration中的属性值，返回字符串，如不支持此特性则返回空字符串
 function CnOtaGetProjectCurrentBuildConfigurationValue(const APropName: string): string;
+{$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
 var
   POCS: IOTAProjectOptionsConfigurations;
   BC: IOTABuildConfiguration;
   I: Integer;
   PS: string;
   PlatformConfig: IOTABuildConfiguration;
-{$IFDEF SUPPORT_MULTI_PLATFORM}
+{$IFDEF SUPPORTS_CROSS_PLATFORM}
   Proj: IOTAProject;
   CurrPs: string;
 {$ENDIF}
+{$ENDIF}
 begin
   Result := '';
+{$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
   BC := nil;
   POCS := CnOtaGetActiveProjectOptionsConfigurations(nil);
   if POCS <> nil then
@@ -2758,7 +2789,7 @@ begin
 
     if BC <> nil then
     begin
-{$IFDEF SUPPORT_MULTI_PLATFORM}
+{$IFDEF SUPPORTS_CROSS_PLATFORM}
       Proj := CnOtaGetCurrentProject;
       CurrPs := '';
       if Proj <> nil  then
@@ -2783,22 +2814,26 @@ begin
 {$ENDIF}
     end;
   end;
+{$ENDIF}
 end;
 
 // 设置当前项目的当前BuildConfiguration中的属性值
 procedure CnOtaSetProjectCurrentBuildConfigurationValue(const APropName,
   AValue: string);
+{$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
 var
   POCS: IOTAProjectOptionsConfigurations;
   BC: IOTABuildConfiguration;
   I: Integer;
   PS: string;
   PlatformConfig: IOTABuildConfiguration;
-{$IFDEF SUPPORT_MULTI_PLATFORM}
+{$IFDEF SUPPORTS_CROSS_PLATFORM}
   Proj: IOTAProject;
   CurrPs: string;
 {$ENDIF}
+{$ENDIF}
 begin
+{$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
   BC := nil;
   POCS := CnOtaGetActiveProjectOptionsConfigurations(nil);
   if POCS <> nil then
@@ -2814,7 +2849,7 @@ begin
 
     if BC <> nil then
     begin
-{$IFDEF SUPPORT_MULTI_PLATFORM}
+{$IFDEF SUPPORTS_CROSS_PLATFORM}
       Proj := CnOtaGetCurrentProject;
       CurrPs := '';
       if Proj <> nil  then
@@ -2839,8 +2874,8 @@ begin
 {$ENDIF}
     end;
   end;
-end;  
 {$ENDIF}
+end;  
 
 // 取得 IDE 设置变量名列表
 procedure CnOtaGetOptionsNames(Options: IOTAOptions; List: TStrings;
