@@ -29,7 +29,9 @@ unit CnVerEnhancements;
 * 兼容测试：JWinXPPro ＋Delphi7.０１
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2007.01.22 V1.0 by liuxiao
+* 修改记录：2013.04.28 V1.2 by liuxiao
+*               修正XE下版本增加后未能写入目标文件的问题
+*           2007.01.22 V1.1 by liuxiao
 *               使能此单元并加以适应性修改
 *           2005.05.05 V1.0 by hubdog
 *               创建单元
@@ -69,6 +71,9 @@ type
     function GetCompileNotifyEnabled: Boolean;
     procedure SetIncBuild(const Value: Boolean);
     procedure SetLastCompiled(const Value: Boolean);
+{$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
+    procedure UpdateConfigurationFileVersion;
+{$ENDIF}
   protected
     procedure BeforeCompile(const Project: IOTAProject; IsCodeInsight: Boolean;
       var Cancel: Boolean);
@@ -113,6 +118,44 @@ const
 
 { TCnVerEnhanceWizard }
 
+{$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
+ procedure TCnVerEnhanceWizard.UpdateConfigurationFileVersion;
+ var
+   S, St: string;
+   Sl: TStrings;
+   Major, Minor,Release, Build: Integer;
+ begin
+   S := CnOtaGetProjectCurrentBuildConfigurationValue('VerInfo_Keys');
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('VerEnhance Get VerInfo_Keys: ' + S);
+{$ENDIF}
+
+  Sl := TStringList.Create;
+  try
+    ExtractStrings([';'], [], PWideChar(S), Sl);
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('VerEnhance Get VerInfo_Keys Strings Line ' + IntToStr(Sl.Count));
+    CnDebugger.LogMsg('VerEnhance Get FileVersion ' + Sl.Values['FileVersion']);
+  {$ENDIF}
+
+    Major := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue('VerInfo_MajorVer'), 0);
+    Minor := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue('VerInfo_MinorVer'), 0);
+    Release := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue('VerInfo_Release'), 0);
+    Build := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue('VerInfo_Build'), 0);
+
+    St := Format('%d.%d.%d.%d', [Major, Minor,Release, Build]);
+    Sl.Values['FileVersion'] := St;
+    Sl.Delimiter := ';';
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('VerEnhance Set VerInfo_Keys: ' + Sl.DelimitedText);
+  {$ENDIF}
+    CnOtaSetProjectCurrentBuildConfigurationValue('VerInfo_Keys', Sl.DelimitedText);
+  finally
+    Sl.Free;
+  end;
+ end;
+{$ENDIF}
+
 procedure TCnVerEnhanceWizard.AfterCompile(Succeeded,
   IsCodeInsight: Boolean);
 var
@@ -127,7 +170,7 @@ begin
 
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('VerEnhance AfterCompile');
-{$ENDIF}                                      
+{$ENDIF}
   Options := CnOtaGetActiveProjectOptions;
   if not Assigned(Options) then Exit;
 
@@ -149,6 +192,7 @@ begin
     CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [FBeforeBuildNo]));
   {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
     CnOtaSetProjectCurrentBuildConfigurationValue('VerInfo_Build', IntToStr(FBeforeBuildNo));
+    UpdateConfigurationFileVersion;
   {$ENDIF}
 {$ENDIF}
 {$IFDEF DEBUG}
@@ -215,6 +259,7 @@ begin
     CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [FBeforeBuildNo + 1]));
   {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
     CnOtaSetProjectCurrentBuildConfigurationValue('VerInfo_Build', IntToStr(FBeforeBuildNo + 1));
+    UpdateConfigurationFileVersion;
   {$ENDIF}
 {$ENDIF}
 {$IFDEF DEBUG}
