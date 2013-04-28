@@ -30,7 +30,7 @@ unit CnVerEnhancements;
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
 * 修改记录：2013.04.28 V1.2 by liuxiao
-*               修正XE下版本增加后未能写入目标文件的问题
+*               修正XE下版本增加后未能写入目标文件的问题并修正插入编译时间的问题
 *           2007.01.22 V1.1 by liuxiao
 *               使能此单元并加以适应性修改
 *           2005.05.05 V1.0 by hubdog
@@ -72,7 +72,7 @@ type
     procedure SetIncBuild(const Value: Boolean);
     procedure SetLastCompiled(const Value: Boolean);
 {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
-    procedure UpdateConfigurationFileVersion;
+    procedure UpdateConfigurationFileVersionAndTime(IncB: Boolean; LastComp: Boolean);
 {$ENDIF}
   protected
     procedure BeforeCompile(const Project: IOTAProject; IsCodeInsight: Boolean;
@@ -112,6 +112,13 @@ uses
 
 const
   csDateKeyName = 'LastCompiledTime';
+  csVerInfoKeys = 'VerInfo_Keys';
+  csMajorVer = 'VerInfo_MajorVer';
+  csMinorVer = 'VerInfo_MinorVer';
+  csRelease = 'VerInfo_Release';
+  csBuild = 'VerInfo_Build';
+
+  csFileVersion = 'FileVersion';
 
   csLastCompiled = 'LastCompiled';
   csIncBuild = 'IncBuild';
@@ -119,13 +126,15 @@ const
 { TCnVerEnhanceWizard }
 
 {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
- procedure TCnVerEnhanceWizard.UpdateConfigurationFileVersion;
- var
-   S, St: string;
-   Sl: TStrings;
-   Major, Minor,Release, Build: Integer;
- begin
-   S := CnOtaGetProjectCurrentBuildConfigurationValue('VerInfo_Keys');
+procedure TCnVerEnhanceWizard.UpdateConfigurationFileVersionAndTime(IncB: Boolean;
+  LastComp: Boolean);
+var
+  S, St: string;
+  Sl: TStrings;
+  Idx: Integer;
+  Major, Minor,Release, Build: Integer;
+begin
+  S := CnOtaGetProjectCurrentBuildConfigurationValue(csVerInfoKeys);
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('VerEnhance Get VerInfo_Keys: ' + S);
 {$ENDIF}
@@ -138,18 +147,34 @@ const
     CnDebugger.LogMsg('VerEnhance Get FileVersion ' + Sl.Values['FileVersion']);
   {$ENDIF}
 
-    Major := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue('VerInfo_MajorVer'), 0);
-    Minor := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue('VerInfo_MinorVer'), 0);
-    Release := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue('VerInfo_Release'), 0);
-    Build := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue('VerInfo_Build'), 0);
+    if Active and IncB then
+    begin
+      Major := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue(csMajorVer), 0);
+      Minor := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue(csMinorVer), 0);
+      Release := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue(csRelease), 0);
+      Build := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue(csBuild), 0);
 
-    St := Format('%d.%d.%d.%d', [Major, Minor,Release, Build]);
-    Sl.Values['FileVersion'] := St;
+      St := Format('%d.%d.%d.%d', [Major, Minor,Release, Build]);
+      Sl.Values[csFileVersion] := St;
+    end;
+
+    if Active and FLastCompiled then
+    begin
+      Sl.Values[csDateKeyName] := DateTimeToStr(Now);
+    end
+    else
+    begin
+      Idx := Sl.IndexOfName(csDateKeyName);
+      if Idx >= 0 then
+        Sl.Delete(Idx);
+    end;
+
     Sl.Delimiter := ';';
+    Sl.StrictDelimiter := True;
   {$IFDEF DEBUG}
     CnDebugger.LogMsg('VerEnhance Set VerInfo_Keys: ' + Sl.DelimitedText);
   {$ENDIF}
-    CnOtaSetProjectCurrentBuildConfigurationValue('VerInfo_Keys', Sl.DelimitedText);
+    CnOtaSetProjectCurrentBuildConfigurationValue(csVerInfoKeys, Sl.DelimitedText);
   finally
     Sl.Free;
   end;
@@ -192,7 +217,7 @@ begin
     CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [FBeforeBuildNo]));
   {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
     CnOtaSetProjectCurrentBuildConfigurationValue('VerInfo_Build', IntToStr(FBeforeBuildNo));
-    UpdateConfigurationFileVersion;
+    UpdateConfigurationFileVersionAndTime(FIncBuild, False);
   {$ENDIF}
 {$ENDIF}
 {$IFDEF DEBUG}
@@ -205,6 +230,9 @@ begin
     // 不改版本号时如果需要插入时间，则需要这样重写一下让插入时间有效
 {$IFDEF COMPILER6_UP} // 只 D6 及以上增加版本号，D5 由于 Bug 而无效
     CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [FAfterBuildNo]));
+  {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
+    UpdateConfigurationFileVersionAndTime(FIncBuild, FLastCompiled);
+  {$ENDIF}
 {$ENDIF}
   end;
 end;
@@ -259,13 +287,16 @@ begin
     CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [FBeforeBuildNo + 1]));
   {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
     CnOtaSetProjectCurrentBuildConfigurationValue('VerInfo_Build', IntToStr(FBeforeBuildNo + 1));
-    UpdateConfigurationFileVersion;
   {$ENDIF}
 {$ENDIF}
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('VerEnhance Set New Build No %d.', [FBeforeBuildNo + 1]);
 {$ENDIF}
   end;
+
+{$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
+  UpdateConfigurationFileVersionAndTime(FIncBuild, Active and FLastCompiled);
+{$ENDIF}
 
 {$IFDEF COMPILER6_UP} // D6 及以上才处理编译时间
 
