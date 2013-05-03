@@ -1,7 +1,7 @@
 ;******************************************************************************
 ;                        CnPack For Delphi/C++Builder
 ;                      中国人自己的开放源码第三方开发包
-;                    (C)Copyright 2001-2011 CnPack 开发组
+;                    (C)Copyright 2001-2013 CnPack 开发组
 ;******************************************************************************
 
 ; 以下脚本用以生成 CnPack IDE 专家包安装程序
@@ -22,6 +22,7 @@
 ;    IDE_VERSION_D15
 ;    IDE_VERSION_D16
 ;    IDE_VERSION_D17
+;    IDE_VERSION_DXE4
 ;    IDE_VERSION_CB5
 ;    IDE_VERSION_CB6
 ;    NO_HELP
@@ -89,6 +90,7 @@ RequestExecutionLevel admin
 !ifndef IDE_VERSION_D15
 !ifndef IDE_VERSION_D16
 !ifndef IDE_VERSION_D17
+!ifndef IDE_VERSION_DXE4
 !ifndef IDE_VERSION_CB5
 !ifndef IDE_VERSION_CB6
 
@@ -117,10 +119,12 @@ RequestExecutionLevel admin
   !define IDE_VERSION_D15 "1"
   !define IDE_VERSION_D16 "1"
   !define IDE_VERSION_D17 "1"
+  !define IDE_VERSION_DXE4 "1"
   !define IDE_VERSION_CB5 "1"
   !define IDE_VERSION_CB6 "1"
 !endif
 
+!endif
 !endif
 !endif
 !endif
@@ -177,11 +181,15 @@ RequestExecutionLevel admin
   !endif
   !ifdef IDE_VERSION_D16
     !define IDE_SHORT_NAME "D2012"
-    !define IDE_LONG_NAME "RAD Studio XE 2"
+    !define IDE_LONG_NAME "RAD Studio XE2"
   !endif
   !ifdef IDE_VERSION_D17
     !define IDE_SHORT_NAME "D2013"
-    !define IDE_LONG_NAME "RAD Studio XE 3"
+    !define IDE_LONG_NAME "RAD Studio XE3"
+  !endif
+  !ifdef IDE_VERSION_DXE4
+    !define IDE_SHORT_NAME "DXE4"
+    !define IDE_LONG_NAME "RAD Studio XE4"
   !endif
   !ifdef IDE_VERSION_CB5
     !define IDE_SHORT_NAME "CB5"
@@ -413,6 +421,13 @@ FileLoop:
   FileClose $0
 !endif
 
+!ifdef IDE_VERSION_DXE4
+  IfFileExists "$INSTDIR\CnWizards_DXE4.dll" 0 +4
+  FileOpen $0 "$INSTDIR\CnWizards_DXE4.dll" a
+  IfErrors FileInUse
+  FileClose $0
+!endif
+
 !endif
 
 !ifdef IDE_VERSION_CB5
@@ -608,7 +623,7 @@ SectionEnd
 !endif
 
 !ifdef IDE_VERSION_D16
-Section "RAD Studio XE 2" SecD16
+Section "RAD Studio XE2" SecD16
   SectionIn 1 2
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_D16.dll"
@@ -618,12 +633,22 @@ SectionEnd
 !endif
 
 !ifdef IDE_VERSION_D17
-Section "RAD Studio XE 3" SecD17
+Section "RAD Studio XE3" SecD17
   SectionIn 1 2
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_D17.dll"
   ; 写入专家注册键值
   WriteRegStr HKCU "Software\Embarcadero\BDS\10.0\Experts" "CnWizards_D17" "$INSTDIR\CnWizards_D17.dll"
+SectionEnd
+!endif
+
+!ifdef IDE_VERSION_DXE4
+Section "RAD Studio XE4" SecDXE4
+  SectionIn 1 2
+  SetOutPath $INSTDIR
+  File "..\..\Bin\CnWizards_DXE4.dll"
+  ; 写入专家注册键值
+  WriteRegStr HKCU "Software\Embarcadero\BDS\11.0\Experts" "CnWizards_DXE4" "$INSTDIR\CnWizards_DXE4.dll"
 SectionEnd
 !endif
 
@@ -763,12 +788,16 @@ Function .onMouseOverSection
     !insertmacro MUI_DESCRIPTION_TEXT ${SecD15} $R0
   !endif
   !ifdef IDE_VERSION_D16
-    ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio XE 2" "+" $R0
+    ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio XE2" "+" $R0
     !insertmacro MUI_DESCRIPTION_TEXT ${SecD16} $R0
   !endif
   !ifdef IDE_VERSION_D17
-    ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio XE 3" "+" $R0
+    ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio XE3" "+" $R0
     !insertmacro MUI_DESCRIPTION_TEXT ${SecD17} $R0
+  !endif
+  !ifdef IDE_VERSION_DXE4
+    ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio XE4" "+" $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecDXE4} $R0
   !endif
 !endif
   !ifdef IDE_VERSION_CB5
@@ -846,6 +875,9 @@ Function SetCheckBoxes
 !ifdef IDE_VERSION_D17
   !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\10.0" "App" ${SecD17}
 !endif
+!ifdef IDE_VERSION_DXE4
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\11.0" "App" ${SecDXE4}
+!endif
 !endif
 !ifdef IDE_VERSION_CB5
   !insertmacro SET_COMPILER_CHECKBOX HKLM "Software\Borland\C++Builder\5.0" "App" ${SecCB5}
@@ -910,6 +942,9 @@ Section "Uninstall"
 !endif
 !ifdef IDE_VERSION_D17
   DeleteRegValue HKCU "Software\Embarcadero\BDS\10.0\Experts" "CnWizards_D17"
+!endif
+!ifdef IDE_VERSION_DXE4
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\11.0\Experts" "CnWizards_DXE4"
 !endif
 !ifdef IDE_VERSION_CB5
   DeleteRegValue HKCU "Software\Borland\C++Builder\5.0\Experts" "CnWizards_CB5"
