@@ -637,6 +637,7 @@ begin
     end;
     IDEWizardsChanged[IDE] := False;
     AReg.CloseKey;
+    List.Free;
   end;
 end;
 
