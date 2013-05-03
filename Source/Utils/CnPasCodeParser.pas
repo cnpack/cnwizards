@@ -371,7 +371,7 @@ var
   MethodStack, BlockStack, MidBlockStack: TObjectStack;
   Token, CurrMethod, CurrBlock, CurrMidBlock: TCnPasToken;
   SavePos, SaveLineNumber: Integer;
-  IsClassOpen, IsClassDef, IsImpl, IsHelper, IsSealed: Boolean;
+  IsClassOpen, IsClassDef, IsImpl, IsHelper, IsRecordHelper, IsSealed: Boolean;
   DeclareWithEndLevel: Integer;
   PrevTokenID: TTokenKind;
 
@@ -462,6 +462,7 @@ begin
     CurrMidBlock := nil;
     IsImpl := AIsDpr;
     IsHelper := False;
+    IsRecordHelper := False;
 
     while Lex.TokenID <> tkNull do
     begin
@@ -547,10 +548,29 @@ begin
           tkTry, tkRepeat, tkIf, tkFor, tkWith, tkOn, tkWhile,
           tkRecord, tkObject:
             begin
+              if Lex.TokenID = tkRecord then
+              begin
+                // 处理 record helper for 的情形，但在implementation部分其end会被
+                // record内部的function/procedure给干掉，暂无解决方案。
+                IsRecordHelper := False;
+                SavePos := Lex.RunPos;
+                SaveLineNumber := Lex.LineNumber;
+
+                LexNextNoJunkWithoutCompDirect(Lex);
+                if Lex.TokenID in [tkSymbol, tkIdentifier] then
+                begin
+                  if LowerCase(Lex.Token) = 'helper' then
+                    IsRecordHelper := True;
+                end;
+
+                Lex.LineNumber := SaveLineNumber;
+                Lex.RunPos := SavePos;
+              end;
+
               // 不处理 of object 的字样；不处理前面是 @@ 型的label的情形
               if ((Lex.TokenID <> tkObject) or (PrevTokenID <> tkOf))
                 and not (PrevTokenID in [tkAt, tkDoubleAddressOp])
-                and not ((Lex.TokenID = tkFor) and IsHelper) then
+                and not ((Lex.TokenID = tkFor) and (IsHelper or IsRecordHelper)) then
                 // 不处理 helper 中的 for
               begin
                 Token.FIsBlockStart := True;
@@ -577,8 +597,13 @@ begin
                 end;
               end;
               
-              if (Lex.TokenID = tkFor) and IsHelper then
-                IsHelper := False;
+              if Lex.TokenID = tkFor then
+              begin
+                if IsHelper then
+                  IsHelper := False;
+                if IsRecordHelper then
+                  IsRecordHelper := False;
+              end;
             end;
           tkClass, tkInterface, tkDispInterface:
             begin
@@ -606,7 +631,7 @@ begin
                   begin
                     IsClassDef := True;
                     IsSealed := True;
-                  end;     
+                  end;
                 end;
                 Lex.LineNumber := SaveLineNumber;
                 Lex.RunPos := SavePos;
