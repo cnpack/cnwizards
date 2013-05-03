@@ -302,8 +302,8 @@ function CharIsDigit(const C: AnsiChar): Boolean; {$IFDEF SUPPORTS_INLINE} inlin
 function CharIsFracDigit(const C: AnsiChar): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
 function CharIsHexDigit(const C: AnsiChar): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
 function CharIsLower(const C: AnsiChar): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
-function CharIsNumberChar(const C: AnsiChar): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
-function CharIsNumber(const C: AnsiChar): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+function CharIsNumberChar(const C: AnsiChar): Boolean; // {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+function CharIsNumber(const C: AnsiChar): Boolean; // {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
 function CharIsPrintable(const C: AnsiChar): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
 function CharIsPunctuation(const C: AnsiChar): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
 function CharIsReturn(const C: AnsiChar): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
@@ -430,6 +430,10 @@ const
   AnsiLnOffset    = 4;                       // offset to Length in StrRec
   AnsiStrRecSize  = SizeOf(TAnsiStrRec);     // size of the AnsiString header rec
 {$ENDIF ~CLR}
+
+var
+  InternalDecimalSeparator: Char;
+  InternalThousandSeparator: Char;
 
 procedure LoadCharTypes;
 var
@@ -3147,12 +3151,12 @@ end;
 function CharIsNumberChar(const C: AnsiChar): Boolean;
 begin
   Result := ((AnsiCharTypes[C] and C1_DIGIT) <> 0) or
-    (C = AnsiSignMinus) or (C = AnsiSignPlus) or (Char(C) = {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator);
+    (C = AnsiSignMinus) or (C = AnsiSignPlus) or (Char(C) = InternalDecimalSeparator);
 end;
 
 function CharIsNumber(const C: AnsiChar): Boolean;
 begin
-  Result := ((AnsiCharTypes[C] and C1_DIGIT) <> 0) or (Char(C) = {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator);
+  Result := ((AnsiCharTypes[C] and C1_DIGIT) <> 0) or (Char(C) = InternalDecimalSeparator);
 end;
 
 function CharIsPrintable(const C: AnsiChar): Boolean;
@@ -3814,8 +3818,8 @@ var
   DecSep: AnsiChar;
   ThouSep: AnsiChar;
 begin
-  DecSep := AnsiChar({$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator{$IFDEF CLR}[1]{$ENDIF CLR});
-  ThouSep := AnsiChar({$IFDEF VER240}FormatSettings.{$ENDIF}ThousandSeparator{$IFDEF CLR}[1]{$ENDIF CLR});
+  DecSep := AnsiChar(InternalDecimalSeparator{$IFDEF CLR}[1]{$ENDIF CLR});
+  ThouSep := AnsiChar(InternalThousandSeparator{$IFDEF CLR}[1]{$ENDIF CLR});
   Temp := S;
   SwapSeparators := False;
 
@@ -4037,6 +4041,19 @@ end;
 initialization
   LoadCharTypes;  // this table first
   LoadCaseMap;    // or this function does not work
+{$IFDEF VER240}
+  InternalDecimalSeparator := FormatSettings.DecimalSeparator;
+  InternalThousandSeparator := FormatSettings.ThousandSeparator;
+{$ELSE}
+  {$IFDEF VER250}
+    InternalDecimalSeparator := FormatSettings.DecimalSeparator;
+    InternalThousandSeparator := FormatSettings.ThousandSeparator;
+  {$ELSE}
+    InternalDecimalSeparator := DecimalSeparator;
+    InternalThousandSeparator := ThousandSeparator;
+  {$ENDIF}
+{$ENDIF}
+
 {$IFDEF UNITVERSIONING}
   RegisterUnitVersion(HInstance, UnitVersioning);
 

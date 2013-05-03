@@ -48,7 +48,7 @@ type
   TCnCompilerKind = (ckDelphi, ckBCB);
   TCnCompiler = (cnDelphi5, cnDelphi6, cnDelphi7, cnDelphi8, cnDelphi9,
     cnDelphi10, cnDelphi11, cnDelphi12, cnDelphi14, cnDelphi15, cnDelphi16,
-    cnDelphi17,
+    cnDelphi17, cnDelphiXE4,
     cnBCB5, cnBCB6);
   TCnCompilers = set of TCnCompiler;
 
@@ -261,19 +261,26 @@ const
                         CompilerName = 'RAD Studio XE3';
                         CompilerShortName = 'D17';
                       {$ELSE}
-                        {$IFDEF BCB5}
-                          Compiler: TCnCompiler = cnBCB5;
-                          CompilerKind: TCnCompilerKind = ckBCB;
-                          CompilerName = 'C++BUILDER 5';
-                          CompilerShortName = 'CB5';
+                        {$IFDEF DELPHIXE4}
+                          Compiler: TCnCompiler = cnDelphiXE4;
+                          CompilerKind: TCnCompilerKind = ckDelphi;
+                          CompilerName = 'RAD Studio XE4';
+                          CompilerShortName = 'DXE4';
                         {$ELSE}
-                          {$IFDEF BCB6}
-                            Compiler: TCnCompiler = cnBCB6;
+                          {$IFDEF BCB5}
+                            Compiler: TCnCompiler = cnBCB5;
                             CompilerKind: TCnCompilerKind = ckBCB;
-                            CompilerName = 'C++BUILDER 6';
-                            CompilerShortName = 'CB6';
+                            CompilerName = 'C++BUILDER 5';
+                            CompilerShortName = 'CB5';
                           {$ELSE}
-                            Unknow Compiler;
+                            {$IFDEF BCB6}
+                              Compiler: TCnCompiler = cnBCB6;
+                              CompilerKind: TCnCompilerKind = ckBCB;
+                              CompilerName = 'C++BUILDER 6';
+                              CompilerShortName = 'CB6';
+                            {$ELSE}
+                              Unknow Compiler;
+                            {$ENDIF}
                           {$ENDIF}
                         {$ENDIF}
                       {$ENDIF}
@@ -388,6 +395,13 @@ const
   dccLibName = 'dcc32170.dll';
   {$DEFINE LibNamesDefined}
 {$ENDIF COMPILER17}
+
+{$IFDEF COMPILER18}
+  CorIdeLibName = 'coreide180.bpl';
+  DphIdeLibName = 'delphicoreide180.bpl';
+  dccLibName = 'dcc32180.dll';
+  {$DEFINE LibNamesDefined}
+{$ENDIF COMPILER18}
 
 implementation
 

@@ -606,6 +606,10 @@ uses
   {$ENDIF COMPILER5}
   JclFileUtils, JclMath, JclResources, JclStrings, JclStringConversions, JclSysInfo;
 
+var
+  InternalDecimalSeparator: Char;
+  InternalThousandSeparator: Char;
+
 {$IFNDEF CLR}
 
 // Pointer manipulation
@@ -1208,7 +1212,11 @@ begin
   {$IFDEF VER240}
       C := SortFunc(List.List[I], Item);
   {$ELSE}
+    {$IFDEF VER250}
+      C := SortFunc(List.List[I], Item);
+    {$ELSE}
       C := SortFunc(List.List^[I], Item);
+    {$ENDIF}
   {$ENDIF}
 {$ENDIF}
       if C < 0 then
@@ -2004,8 +2012,8 @@ begin
   FSignChars[True] := '+';
   FPaddingChar := ' ';
   FMultiplier := #$D7;
-  FFractionalPartSeparator := {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator{$IFDEF CLR}[1]{$ENDIF};
-  FDigitBlockSeparator := {$IFDEF VER240}FormatSettings.{$ENDIF}ThousandSeparator{$IFDEF CLR}[1]{$ENDIF};
+  FFractionalPartSeparator := InternalDecimalSeparator{$IFDEF CLR}[1]{$ENDIF};
+  FDigitBlockSeparator := InternalThousandSeparator{$IFDEF CLR}[1]{$ENDIF};
 end;
 
 procedure TJclNumericFormat.InvalidDigit(Digit: Char);
@@ -3259,6 +3267,19 @@ end;
 {$ENDIF ~CLR}
 
 initialization
+{$IFDEF VER240}
+  InternalDecimalSeparator := FormatSettings.DecimalSeparator;
+  InternalThousandSeparator := FormatSettings.ThousandSeparator;
+{$ELSE}
+  {$IFDEF VER250}
+    InternalDecimalSeparator := FormatSettings.DecimalSeparator;
+    InternalThousandSeparator := FormatSettings.ThousandSeparator;
+  {$ELSE}
+    InternalDecimalSeparator := DecimalSeparator;
+    InternalThousandSeparator := ThousandSeparator;
+  {$ENDIF}
+{$ENDIF}
+
   {$IFNDEF CLR}
   SimpleLog := nil;
   {$IFDEF MSWINDOWS}

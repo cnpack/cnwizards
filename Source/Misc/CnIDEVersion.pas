@@ -247,6 +247,17 @@ begin
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
 end;
 
+function IsDelphiXE4IdeVersionLatest: Boolean;
+const
+  CoreIdeLatest: TVersionNumber =
+    (Major: 18; Minor: 0; Release: 4854; Build: 59655);
+var
+  ReadFileVersion: TVersionNumber;
+begin
+  ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide180.bpl');
+  Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+end;
+
 function IsIdeVersionLatest: Boolean;
 begin
   if CnIdeVersionDetected then
@@ -311,6 +322,10 @@ begin
 
 {$IFDEF DELPHI17}
   CnIdeVersionIsLatest := IsDelphi17IdeVersionLatest;
+{$ENDIF}
+
+{$IFDEF DELPHIXE4}
+  CnIdeVersionIsLatest := IsDelphiXE4IdeVersionLatest;
 {$ENDIF}
 
   Result := CnIdeVersionIsLatest;

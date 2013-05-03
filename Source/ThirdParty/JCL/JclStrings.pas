@@ -288,8 +288,8 @@ function CharIsDigit(const C: Char): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {
 function CharIsFracDigit(const C: Char): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
 function CharIsHexDigit(const C: Char): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
 function CharIsLower(const C: Char): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
-function CharIsNumberChar(const C: Char): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
-function CharIsNumber(const C: Char): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+function CharIsNumberChar(const C: Char): Boolean; // {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+function CharIsNumber(const C: Char): Boolean; // {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
 function CharIsPrintable(const C: Char): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
 function CharIsPunctuation(const C: Char): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
 function CharIsReturn(const C: Char): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
@@ -656,6 +656,10 @@ const
   StrRefCountOffset = 8;                         // offset to RefCount in StrRec
   StrLengthOffset   = 4;                         // offset to Length in StrRec
 {$ENDIF ~SUPPORTS_UNICODE}
+
+var
+  InternalDecimalSeparator: Char;
+  InternalThousandSeparator: Char;
 
 procedure LoadCharTypes;
 var
@@ -3760,7 +3764,7 @@ begin
   {$IFDEF CLR}
   Result := System.Char.IsDigit(C) or (C = '+') or (C = '-') or (C = DecimalSeparator);
   {$ELSE}
-  Result := ((StrCharTypes[C] and C1_DIGIT) <> 0) or (C = '+') or (C = '-') or (C = {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator);
+  Result := ((StrCharTypes[C] and C1_DIGIT) <> 0) or (C = '+') or (C = '-') or (C = InternalDecimalSeparator);
   {$ENDIF CLR}
 end;
 
@@ -3769,7 +3773,7 @@ begin
   {$IFDEF CLR}
   Result := System.Char.IsDigit(C) or (C = DecimalSeparator);
   {$ELSE}
-  Result := ((StrCharTypes[C] and C1_DIGIT) <> 0) or (C = {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator);
+  Result := ((StrCharTypes[C] and C1_DIGIT) <> 0) or (C = InternalDecimalSeparator);
   {$ENDIF CLR}
 end;
 
@@ -4618,8 +4622,8 @@ begin
   DecSep := Char(DecimalSeparator[1]);
   ThouSep := Char(ThousandSeparator[1]);
   {$ELSE}
-  DecSep := {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator;
-  ThouSep := {$IFDEF VER240}FormatSettings.{$ENDIF}ThousandSeparator;
+  DecSep := InternalDecimalSeparator;
+  ThouSep := InternalThousandSeparator;
   {$ENDIF CLR}
   Temp := S;
   SwapSeparators := False;
@@ -6285,6 +6289,20 @@ initialization
 initialization
   LoadCharTypes;  // this table first
   LoadCaseMap;    // or this function does not work
+
+ {$IFDEF VER240}
+  InternalDecimalSeparator := FormatSettings.DecimalSeparator;
+  InternalThousandSeparator := FormatSettings.ThousandSeparator;
+{$ELSE}
+  {$IFDEF VER250}
+    InternalDecimalSeparator := FormatSettings.DecimalSeparator;
+    InternalThousandSeparator := FormatSettings.ThousandSeparator;
+  {$ELSE}
+    InternalDecimalSeparator := DecimalSeparator;
+    InternalThousandSeparator := ThousandSeparator;
+  {$ENDIF}
+{$ENDIF}
+
   {$IFDEF UNITVERSIONING}
   RegisterUnitVersion(HInstance, UnitVersioning);
   {$ENDIF UNITVERSIONING}

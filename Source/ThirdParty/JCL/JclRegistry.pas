@@ -319,6 +319,10 @@ const
   cItems = 'Items';
   cRegBinKinds = [REG_SZ..REG_QWORD];  // all types
 
+var
+  InternalDecimalSeparator: Char;
+  InternalThousandSeparator: Char;
+
 //=== Internal helper routines ===============================================
 
 function RootKeyName(const RootKey: THandle): string;
@@ -998,10 +1002,10 @@ var
   OldSep: Char;
 begin
   RegGetDataType(RootKey, Key, Name, DataType);
-  OldSep := {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator;
+  OldSep := InternalDecimalSeparator;
   if DataType in [REG_SZ, REG_EXPAND_SZ] then
     try
-      {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator := '.';
+      InternalDecimalSeparator := '.';
       if RaiseException then
       begin
         RetValue := StrToFloat(RegReadString(RootKey, Key, Name));
@@ -1010,7 +1014,7 @@ begin
       else
         Result := TryStrToFloat(RegReadString(RootKey, Key, Name), RetValue);
     finally
-      {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator := OldSep;
+      InternalDecimalSeparator := OldSep;
     end
   else
     Result := InternalGetData(RootKey, Key, Name, [REG_BINARY],
@@ -1039,10 +1043,10 @@ var
   OldSep: Char;
 begin
   RegGetDataType(RootKey, Key, Name, DataType);
-  OldSep := {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator;
+  OldSep := InternalDecimalSeparator;
   if DataType in [REG_SZ, REG_EXPAND_SZ] then
     try
-      {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator := '.';
+      InternalDecimalSeparator := '.';
       if RaiseException then
       begin
         RetValue := StrToFloat(RegReadString(RootKey, Key, Name));
@@ -1051,7 +1055,7 @@ begin
       else
         Result := TryStrToFloat(RegReadString(RootKey, Key, Name), RetValue);
     finally
-      {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator := OldSep;
+      InternalDecimalSeparator := OldSep;
     end
   else
     Result := InternalGetData(RootKey, Key, Name, [REG_BINARY],
@@ -1080,10 +1084,10 @@ var
   OldSep: Char;
 begin
   RegGetDataType(RootKey, Key, Name, DataType);
-  OldSep := {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator;
+  OldSep := InternalDecimalSeparator;
   if DataType in [REG_SZ, REG_EXPAND_SZ] then
     try
-      {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator := '.';
+      InternalDecimalSeparator := '.';
       if RaiseException then
       begin
         RetValue := StrToFloat(RegReadString(RootKey, Key, Name));
@@ -1092,7 +1096,7 @@ begin
       else
         Result := TryStrToFloat(RegReadString(RootKey, Key, Name), RetValue);
     finally
-      {$IFDEF VER240}FormatSettings.{$ENDIF}DecimalSeparator := OldSep;
+      InternalDecimalSeparator := OldSep;
     end
   else
     Result := InternalGetData(RootKey, Key, Name, [REG_BINARY],
@@ -1940,10 +1944,26 @@ begin
   end;
 end;
 
-{$IFDEF UNITVERSIONING}
-initialization
-  RegisterUnitVersion(HInstance, UnitVersioning);
 
+initialization
+{$IFDEF UNITVERSIONING}
+  RegisterUnitVersion(HInstance, UnitVersioning);
+{$ENDIF UNITVERSIONING}
+
+  {$IFDEF VER240}
+  InternalDecimalSeparator := FormatSettings.DecimalSeparator;
+  InternalThousandSeparator := FormatSettings.ThousandSeparator;
+{$ELSE}
+  {$IFDEF VER250}
+    InternalDecimalSeparator := FormatSettings.DecimalSeparator;
+    InternalThousandSeparator := FormatSettings.ThousandSeparator;
+  {$ELSE}
+    InternalDecimalSeparator := DecimalSeparator;
+    InternalThousandSeparator := ThousandSeparator;
+  {$ENDIF}
+{$ENDIF}
+
+{$IFDEF UNITVERSIONING}
 finalization
   UnregisterUnitVersion(HInstance);
 {$ENDIF UNITVERSIONING}

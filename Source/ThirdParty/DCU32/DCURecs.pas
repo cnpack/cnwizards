@@ -2710,7 +2710,10 @@ begin
       end ;
     end ;
     SizeOf(Extended): E := Extended(DP^);
+{$IFNDEF VER250}
+    // Extended and Real size equals from XR4
     SizeOf(Real): E := Real(DP^);
+{$ENDIF}
   else
     Ok := false;
   end ;
