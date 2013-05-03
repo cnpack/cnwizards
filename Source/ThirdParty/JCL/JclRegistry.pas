@@ -321,7 +321,6 @@ const
 
 var
   InternalDecimalSeparator: Char;
-  InternalThousandSeparator: Char;
 
 //=== Internal helper routines ===============================================
 
@@ -1950,16 +1949,13 @@ initialization
   RegisterUnitVersion(HInstance, UnitVersioning);
 {$ENDIF UNITVERSIONING}
 
-  {$IFDEF VER240}
+{$IFDEF VER240}
   InternalDecimalSeparator := FormatSettings.DecimalSeparator;
-  InternalThousandSeparator := FormatSettings.ThousandSeparator;
 {$ELSE}
   {$IFDEF VER250}
     InternalDecimalSeparator := FormatSettings.DecimalSeparator;
-    InternalThousandSeparator := FormatSettings.ThousandSeparator;
   {$ELSE}
     InternalDecimalSeparator := DecimalSeparator;
-    InternalThousandSeparator := ThousandSeparator;
   {$ENDIF}
 {$ENDIF}
 
