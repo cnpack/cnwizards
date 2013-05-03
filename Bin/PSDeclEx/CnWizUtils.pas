@@ -57,7 +57,7 @@ type
   TCnCompilerKind = (ckDelphi, ckBCB);
   TCnCompiler = (cnDelphi5, cnDelphi6, cnDelphi7, cnDelphi8, cnDelphi9,
     cnDelphi10, cnDelphi11, cnDelphi12, cnDelphi14, cnDelphi15, cnDelphi16,
-    cnDelphi17,
+    cnDelphi17, cnDelphiXE4,
     cnBCB5, cnBCB6);
   TCnCompilers = set of TCnCompiler;
 
@@ -88,6 +88,7 @@ const
   _DELPHI15 = {$IFDEF DELPHI15}True{$ELSE}False{$ENDIF};
   _DELPHI16 = {$IFDEF DELPHI16}True{$ELSE}False{$ENDIF};
   _DELPHI17 = {$IFDEF DELPHI17}True{$ELSE}False{$ENDIF};
+  _DELPHIXE4 = {$IFDEF DELPHIXE4}True{$ELSE}False{$ENDIF};
 
   _DELPHI1_UP = {$IFDEF DELPHI1_UP}True{$ELSE}False{$ENDIF};
   _DELPHI2_UP = {$IFDEF DELPHI2_UP}True{$ELSE}False{$ENDIF};
@@ -105,6 +106,7 @@ const
   _DELPHI15_UP = {$IFDEF DELPHI15_UP}True{$ELSE}False{$ENDIF};
   _DELPHI16_UP = {$IFDEF DELPHI16_UP}True{$ELSE}False{$ENDIF};
   _DELPHI17_UP = {$IFDEF DELPHI17_UP}True{$ELSE}False{$ENDIF};
+  _DELPHIXE4_UP = {$IFDEF DELPHIXE4_UP}True{$ELSE}False{$ENDIF};
 
   _BCB1 = {$IFDEF BCB1}True{$ELSE}False{$ENDIF};
   _BCB3 = {$IFDEF BCB3}True{$ELSE}False{$ENDIF};
@@ -119,6 +121,7 @@ const
   _BCB15 = {$IFDEF BCB15}True{$ELSE}False{$ENDIF};
   _BCB16 = {$IFDEF BCB16}True{$ELSE}False{$ENDIF};
   _BCB17 = {$IFDEF BCB17}True{$ELSE}False{$ENDIF};
+  _BCBXE4 = {$IFDEF BCBXE4}True{$ELSE}False{$ENDIF};
 
   _BCB1_UP = {$IFDEF BCB1_UP}True{$ELSE}False{$ENDIF};
   _BCB3_UP = {$IFDEF BCB3_UP}True{$ELSE}False{$ENDIF};
@@ -133,6 +136,7 @@ const
   _BCB15_UP = {$IFDEF BCB15_UP}True{$ELSE}False{$ENDIF};
   _BCB16_UP = {$IFDEF BCB16_UP}True{$ELSE}False{$ENDIF};
   _BCB17_UP = {$IFDEF BCB17_UP}True{$ELSE}False{$ENDIF};
+  _BCBXE4_UP = {$IFDEF BCBXE4_UP}True{$ELSE}False{$ENDIF};
 
   _KYLIX1 = {$IFDEF KYLIX1}True{$ELSE}False{$ENDIF};
   _KYLIX2 = {$IFDEF KYLIX2}True{$ELSE}False{$ENDIF};
@@ -151,6 +155,7 @@ const
   _BDS8 = {$IFDEF BDS8}True{$ELSE}False{$ENDIF};
   _BDS9 = {$IFDEF BDS9}True{$ELSE}False{$ENDIF};
   _BDS10 = {$IFDEF BDS10}True{$ELSE}False{$ENDIF};
+  _BDS11 = {$IFDEF BDS11}True{$ELSE}False{$ENDIF};
 
   _BDS2_UP = {$IFDEF BDS2_UP}True{$ELSE}False{$ENDIF};
   _BDS3_UP = {$IFDEF BDS3_UP}True{$ELSE}False{$ENDIF};
@@ -161,6 +166,7 @@ const
   _BDS8_UP = {$IFDEF BDS8_UP}True{$ELSE}False{$ENDIF};
   _BDS9_UP = {$IFDEF BDS9_UP}True{$ELSE}False{$ENDIF};
   _BDS10_UP = {$IFDEF BDS10_UP}True{$ELSE}False{$ENDIF};
+  _BDS11_UP = {$IFDEF BDS11_UP}True{$ELSE}False{$ENDIF};
 
   _COMPILER1 = {$IFDEF COMPILER1}True{$ELSE}False{$ENDIF};
   _COMPILER2 = {$IFDEF COMPILER2}True{$ELSE}False{$ENDIF};
@@ -179,6 +185,7 @@ const
   _COMPILER15 = {$IFDEF COMPILER15}True{$ELSE}False{$ENDIF};
   _COMPILER16 = {$IFDEF COMPILER16}True{$ELSE}False{$ENDIF};
   _COMPILER17 = {$IFDEF COMPILER17}True{$ELSE}False{$ENDIF};
+  _COMPILER18 = {$IFDEF COMPILER18}True{$ELSE}False{$ENDIF};
 
   _COMPILER1_UP = {$IFDEF COMPILER1_UP}True{$ELSE}False{$ENDIF};
   _COMPILER2_UP = {$IFDEF COMPILER2_UP}True{$ELSE}False{$ENDIF};
@@ -197,6 +204,7 @@ const
   _COMPILER15_UP = {$IFDEF COMPILER15_UP}True{$ELSE}False{$ENDIF};
   _COMPILER16_UP = {$IFDEF COMPILER16_UP}True{$ELSE}False{$ENDIF};
   _COMPILER17_UP = {$IFDEF COMPILER17_UP}True{$ELSE}False{$ENDIF};
+  _COMPILER18_UP = {$IFDEF COMPILER18_UP}True{$ELSE}False{$ENDIF};
 
   _SUPPORT_OTA_PROJECT_CONFIGURATION = {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}True{$ELSE}False{$ENDIF};
   _SUPPORT_CROSS_PLATFORM = {$IFDEF SUPPORTS_CROSS_PLATFORM}True{$ELSE}False{$ENDIF};
