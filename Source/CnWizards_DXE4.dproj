@@ -3,7 +3,7 @@
         <ProjectGuid>{1C6A547D-B315-484B-B7DB-08723731B6D1}</ProjectGuid>
         <MainSource>CnWizards_DXE4.dpr</MainSource>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Debug</Config>
+        <Config Condition="'$(Config)'==''">Release</Config>
         <TargetedPlatforms>1</TargetedPlatforms>
         <AppType>Library</AppType>
         <FrameworkType>None</FrameworkType>
