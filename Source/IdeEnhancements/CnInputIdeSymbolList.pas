@@ -74,6 +74,10 @@ uses
   {$DEFINE IDE_SetQueryContext_Bug}
 {$ENDIF}
 
+{$IFDEF DELPHI2009_UP}
+  {$DEFINE SYMBOL_LOCKHOOK}
+{$ENDIF}
+
 type
 
 //==============================================================================
@@ -151,6 +155,11 @@ const
 { TIDESymbolList }
 
 {$IFDEF SUPPORT_IOTACodeInsightManager}
+
+const
+  ComtypesLockName = '@Comtypes@Lock$qqsv';
+  ComtypesUnLockName = '@Comtypes@UnLock$qqsv';
+
 function MyMessageDlgPosHelp(const Msg: string; DlgType: TMsgDlgType;
   Buttons: TMsgDlgButtons; HelpCtx: Longint; X, Y: Integer;
   const HelpFileName: string): Integer;
@@ -160,6 +169,26 @@ begin
 {$ENDIF Debug}
   Result := mrOk;
 end;
+
+{$IFDEF SYMBOL_LOCKHOOK}
+type
+  TComtypesLockProc = procedure; stdcall;
+
+var
+  DphIdeModule1: HMODULE;
+  LockHook: TCnMethodHook;
+  UnLockHook: TCnMethodHook;
+  ComtypesLock: TComtypesLockProc;
+  ComtypesUnLock: TComtypesLockProc;
+
+procedure MyComtypesUnLock; stdcall;
+begin
+end;
+
+procedure MyComtypesLock; stdcall;
+begin
+end;
+{$ENDIF SYMBOL_LOCKHOOK}
 
 // Invoke delphi code completion, load symbol list
 function TIDESymbolList.Reload_CodeInsightManager(Editor: IOTAEditBuffer;
@@ -229,6 +258,16 @@ var
     if not Manager.HandlesFile(Editor.FileName) then
       Exit;
 
+  {$IFDEF SYMBOL_LOCKHOOK}
+    if DphIdeModule1 = 0 then
+      DphIdeModule1 := LoadLibrary(DphIdeLibName);
+    ComtypesLock := TComtypesLockProc(GetProcAddress(DphIdeModule1, ComtypesLockName));
+    ComtypesUnLock := TComtypesLockProc(GetProcAddress(DphIdeModule1, ComtypesUnLockName));
+    ComtypesLock;
+    LockHook := TCnMethodHook.Create(@ComtypesLock, @MyComtypesLock);
+    UnLockHook := TCnMethodHook.Create(@ComtypesUnLock, @MyComtypesUnLock);
+  {$ENDIF SYMBOL_LOCKHOOK}
+
     CodeInsightServices.SetQueryContext(EditView, Manager);
     try
       // Allow: otherwise you will get an AV in 'InvokeCodeCompletion'
@@ -239,31 +278,45 @@ var
 
       // Not used, but the IDE calls it in this order, and the calling order might be important.
       ValidChars := Manager.EditorTokenValidChars(False);
-      
+
       if not MyInvokeCodeCompletion(Manager) then
         Exit;
       try
         SymbolList := nil;
+      {$IFDEF Debug}
+        CnDebugger.LogMsg('Before Manager.GetSymbolList');
+      {$ENDIF Debug}
         Manager.GetSymbolList(SymbolList);
         if Assigned(SymbolList) then
         begin
+        {$IFDEF Debug}
+          CnDebugger.LogInteger(SymbolList.Count, 'SymbolList.Count');
+        {$ENDIF Debug}
           try
-            for i := 0 to SymbolList.Count - 1 do
-            begin
-              // follow code maybe raise exception, but disabled.
-            {$IFDEF UTF8_SYMBOL}
-              Name := string(FastUtf8ToAnsi(AnsiString(SymbolList.SymbolText[i])));
-            {$ELSE}
-              Name := SymbolList.SymbolText[i];
-            {$ENDIF}
-              Desc := SymbolList.SymbolTypeText[i];
-              Kind := SymbolFlagsToKind(SymbolList.SymbolFlags[i], Desc);
-              // Description is Utf-8 format under BDS.
-              Add(Name, Kind, Round(MaxInt / SymbolList.Count * i), Desc, '', True,
-                False, False, {$IFDEF UTF8_SYMBOL}True{$ELSE}False{$ENDIF});
+            try
+              for i := 0 to SymbolList.Count - 1 do
+              begin
+                // follow code maybe raise exception, but disabled.
+              {$IFDEF UTF8_SYMBOL}
+                Name := string(FastUtf8ToAnsi(AnsiString(SymbolList.SymbolText[i])));
+              {$ELSE}
+                Name := SymbolList.SymbolText[i];
+              {$ENDIF}
+                Desc := SymbolList.SymbolTypeText[i];
+                Kind := SymbolFlagsToKind(SymbolList.SymbolFlags[i], Desc);
+                // Description is Utf-8 format under BDS.
+                Add(Name, Kind, Round(MaxInt / SymbolList.Count * i), Desc, '', True,
+                  False, False, {$IFDEF UTF8_SYMBOL}True{$ELSE}False{$ENDIF});
+              end;
+            except
+            {$IFDEF Debug}
+              on E: Exception do
+              begin
+                CnDebugger.LogMsg('Exception: ' + E.ClassName + ' ' + E.Message);
+              end;
+            {$ENDIF Debug}
             end;
-          except
-            ;
+          finally
           end;
         end;
       finally
@@ -271,7 +324,16 @@ var
         Manager.Done(False, DisplayParams);
       end;
     finally
+    {$IFDEF SYMBOL_LOCKHOOK}
+      LockHook.Free;
+      UnLockHook.Free;
+      ComtypesUnLock;
+    {$ENDIF SYMBOL_LOCKHOOK}
+
       CodeInsightServices.SetQueryContext(nil, nil);
+    {$IFDEF Debug}
+      CnDebugger.LogMsg('End AddToSymbolList');
+    {$ENDIF Debug}
     end;
   end;
 
