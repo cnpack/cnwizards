@@ -29,7 +29,9 @@ unit CnVerEnhancements;
 * 兼容测试：JWinXPPro ＋Delphi7.０１
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2013.04.28 V1.2 by liuxiao
+* 修改记录：2013.05.23 V1.3 by liuxiao
+*               Wiseinfo修正编译工程组时使用当前工程引发错误的问题
+*           2013.04.28 V1.2 by liuxiao
 *               修正XE下版本增加后未能写入目标文件的问题并修正插入编译时间的问题
 *           2007.01.22 V1.1 by liuxiao
 *               使能此单元并加以适应性修改
@@ -46,24 +48,24 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, ToolsAPI, IniFiles,
-  Forms, ExtCtrls, Menus, ComCtrls, Contnrs, {$IFDEF BDS} Variants, {$ENDIF}
+  Forms, ExtCtrls, Menus, ComCtrls, Contnrs, {$IFDEF BDS}Variants, {$ENDIF}
   CnCommon, CnWizUtils, CnWizNotifier, CnWizIdeUtils, CnWizConsts, CnMenuHook,
-  CnConsts, CnWizClasses;
+  CnConsts, CnWizClasses, Vcl.Dialogs,DateUtils;
 
 type
 
-//==============================================================================
-// 版本信息扩展专家
-// Todo: 增加自定义添加新的版本信息，和通用的模版，如网站名称，公司名称等等
-//==============================================================================
+  //==============================================================================
+  // 版本信息扩展专家
+  // Todo: 增加自定义添加新的版本信息，和通用的模版，如网站名称，公司名称等等
+  //==============================================================================
 
-{ TCnVerEnhanceWizard }
+  { TCnVerEnhanceWizard }
 
   TCnVerEnhanceWizard = class(TCnIDEEnhanceWizard)
   private
+    FCurrentProject:IOTAProject;
     FLastCompiled: Boolean;
     FIncBuild: Boolean;
-
     FBeforeBuildNo: Integer;
     FAfterBuildNo: Integer;
     FIncludeVer: Boolean;
@@ -80,7 +82,6 @@ type
     procedure AfterCompile(Succeeded: Boolean; IsCodeInsight: Boolean);
     procedure InsertTime;
     procedure DeleteTime;
-
     function GetHasConfig: Boolean; override;
     procedure UpdateCompileNotify;
     property CompileNotifyEnabled: Boolean read GetCompileNotifyEnabled;
@@ -123,18 +124,19 @@ const
   csLastCompiled = 'LastCompiled';
   csIncBuild = 'IncBuild';
 
-{ TCnVerEnhanceWizard }
+  { TCnVerEnhanceWizard }
 
 {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
+
 procedure TCnVerEnhanceWizard.UpdateConfigurationFileVersionAndTime(IncB: Boolean;
   LastComp: Boolean);
 var
   S, St: string;
   Sl: TStrings;
   Idx: Integer;
-  Major, Minor,Release, Build: Integer;
+  Major, Minor, Release, Build: Integer;
 begin
-  S := CnOtaGetProjectCurrentBuildConfigurationValue(csVerInfoKeys);
+  S := CnOtaGetProjectCurrentBuildConfigurationValue(FCurrentProject, csVerInfoKeys);
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('VerEnhance Get VerInfo_Keys: ' + S);
 {$ENDIF}
@@ -142,19 +144,19 @@ begin
   Sl := TStringList.Create;
   try
     ExtractStrings([';'], [], PWideChar(S), Sl);
-  {$IFDEF DEBUG}
+{$IFDEF DEBUG}
     CnDebugger.LogMsg('VerEnhance Get VerInfo_Keys Strings Line ' + IntToStr(Sl.Count));
     CnDebugger.LogMsg('VerEnhance Get FileVersion ' + Sl.Values['FileVersion']);
-  {$ENDIF}
+{$ENDIF}
 
     if Active and IncB then
     begin
-      Major := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue(csMajorVer), 0);
-      Minor := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue(csMinorVer), 0);
-      Release := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue(csRelease), 0);
-      Build := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue(csBuild), 0);
+      Major := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue(FCurrentProject, csMajorVer), 0);
+      Minor := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue(FCurrentProject, csMinorVer), 0);
+      Release := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue(FCurrentProject, csRelease), 0);
+      Build := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue(FCurrentProject, csBuild), 0);
 
-      St := Format('%d.%d.%d.%d', [Major, Minor,Release, Build]);
+      St := Format('%d.%d.%d.%d', [Major, Minor, Release, Build]);
       Sl.Values[csFileVersion] := St;
     end;
 
@@ -171,33 +173,36 @@ begin
 
     Sl.Delimiter := ';';
     Sl.StrictDelimiter := True;
-  {$IFDEF DEBUG}
+{$IFDEF DEBUG}
     CnDebugger.LogMsg('VerEnhance Set VerInfo_Keys: ' + Sl.DelimitedText);
-  {$ENDIF}
-    CnOtaSetProjectCurrentBuildConfigurationValue(csVerInfoKeys, Sl.DelimitedText);
+{$ENDIF}
+    CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csVerInfoKeys, Sl.DelimitedText);
   finally
     Sl.Free;
   end;
- end;
+end;
 {$ENDIF}
 
 procedure TCnVerEnhanceWizard.AfterCompile(Succeeded,
   IsCodeInsight: Boolean);
 var
   Options: IOTAProjectOptions;
-  Project: IOTAProject;
+  //Project: IOTAProject;
 begin
-  if IsCodeInsight or not Active then Exit;
+  if IsCodeInsight or not Active then
+    Exit;
 
   //注意build project是在编译后才增加buildno的
   //如果不将版本信息加入可执行文件，退出
-  if not FIncludeVer then Exit;
+  if not FIncludeVer then
+    Exit;
 
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('VerEnhance AfterCompile');
 {$ENDIF}
-  Options := CnOtaGetActiveProjectOptions;
-  if not Assigned(Options) then Exit;
+  Options := CnOtaGetActiveProjectOptions(FCurrentProject);
+  if not Assigned(Options) then
+    Exit;
 
   FAfterBuildNo := Options.GetOptionValue('Build');
 
@@ -206,8 +211,7 @@ begin
     [FAfterBuildNo, Integer(Succeeded)]));
 {$ENDIF}
 
-  Project := CnOtaGetCurrentProject;
-  if not Assigned(Project) then
+  if not Assigned(FCurrentProject) then
     Exit;
 
   if not Succeeded and FIncBuild and (FAfterBuildNo > FBeforeBuildNo) then
@@ -216,7 +220,7 @@ begin
 {$IFDEF COMPILER6_UP} // 只 D6 及以上改回版本号，D5 由于 Bug 而无效
     CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [FBeforeBuildNo]));
   {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
-    CnOtaSetProjectCurrentBuildConfigurationValue('VerInfo_Build', IntToStr(FBeforeBuildNo));
+    CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, 'VerInfo_Build', IntToStr(FBeforeBuildNo));
     UpdateConfigurationFileVersionAndTime(FIncBuild, False);
   {$ENDIF}
 {$ENDIF}
@@ -250,8 +254,8 @@ var
 {$ENDIF}
   Options: IOTAProjectOptions;
 begin
-  if IsCodeInsight then Exit;
-
+  if IsCodeInsight then
+    Exit;
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('VerEnhance BeforeCompile');
 {$ENDIF}
@@ -259,8 +263,9 @@ begin
   //Hubdog: 注意：通过检查dof文件来获得版本信息是没有用的，因为只有在save project后，才会将内存中的
   //Hubdog: 这些信息写进dof
   Options := CnOtaGetActiveProjectOptions(Project);
-  if not Assigned(Options) then Exit;
-
+  if not Assigned(Options) then
+    Exit;
+  FCurrentProject := Project;
   // -1 为包含，高版本 True 为包含
   FIncludeVer := (Options.GetOptionValue('IncludeVersionInfo') = '-1')
     or (Options.GetOptionValue('IncludeVersionInfo') = 'True');
@@ -269,13 +274,14 @@ begin
 {$ENDIF}
 {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
   if not FIncludeVer then
-    FIncludeVer := (CnOtaGetProjectCurrentBuildConfigurationValue('VerInfo_IncludeVerInfo') = 'true');
+    FIncludeVer := (CnOtaGetProjectCurrentBuildConfigurationValue(FCurrentProject, 'VerInfo_IncludeVerInfo') = 'true');
 {$ENDIF}
-  if not FIncludeVer then Exit;
+  if not FIncludeVer then
+    Exit;
 
   FBeforeBuildNo := Options.GetOptionValue('Build');
 {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
-  FBeforeBuildNo := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue('VerInfo_Build'), 0);
+  FBeforeBuildNo := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue(FCurrentProject,'VerInfo_Build'), 0);
 {$ENDIF}
 
   //先增加文件版本信息, 修改OptionValue的值就可以了
@@ -285,9 +291,9 @@ begin
   begin
 {$IFDEF COMPILER6_UP} // 只 D6 及以上增加版本号，D5 由于 Bug 而无效
     CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [FBeforeBuildNo + 1]));
-  {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
-    CnOtaSetProjectCurrentBuildConfigurationValue('VerInfo_Build', IntToStr(FBeforeBuildNo + 1));
-  {$ENDIF}
+{$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
+    CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject,'VerInfo_Build', IntToStr(FBeforeBuildNo + 1));
+{$ENDIF}
 {$ENDIF}
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('VerEnhance Set New Build No %d.', [FBeforeBuildNo + 1]);
@@ -303,9 +309,9 @@ begin
   //添加LastCompileTime信息
   if Active and FLastCompiled then
   begin
-  {$IFDEF DEBUG}
+{$IFDEF DEBUG}
     CnDebugger.LogMsg('VerEnhance. Set LastCompiledTime ');
-  {$ENDIF}
+{$ENDIF}
     InsertTime;
   end
   else
@@ -320,13 +326,12 @@ begin
   for I := 0 to Project.GetModuleFileCount - 1 do
   begin
     ModuleFileEditor := CnOtaGetFileEditorForModule(Project, I);
-
     if Supports(ModuleFileEditor, IOTAProjectResource, ProjectResource) then
     begin
 {$IFDEF DEBUG}
       CnDebugger.LogMsg('VerEnhance IOTAProjectResource Got.');
 {$ENDIF}
-    
+
       ResourceEntry := ProjectResource.FindEntry(RT_VERSION, PChar(1));
       if Assigned(ResourceEntry) then
       begin
@@ -353,18 +358,18 @@ procedure TCnVerEnhanceWizard.Config;
 begin
   // 进行配置。
   with TCnVerEnhanceForm.Create(nil) do
-  try
-    chkLastCompiled.Checked := FLastCompiled;
-    chkIncBuild.Checked := FIncBuild;
-    if ShowModal = mrOK then
-    begin
-      LastCompiled := chkLastCompiled.Checked;
-      IncBuild := chkIncBuild.Checked;
-      DoSaveSettings;
+    try
+      chkLastCompiled.Checked := FLastCompiled;
+      chkIncBuild.Checked := FIncBuild;
+      if ShowModal = mrOK then
+      begin
+        LastCompiled := chkLastCompiled.Checked;
+        IncBuild := chkIncBuild.Checked;
+        DoSaveSettings;
+      end;
+    finally
+      Free;
     end;
-  finally
-    Free;
-  end;
 end;
 
 constructor TCnVerEnhanceWizard.Create;
@@ -378,7 +383,7 @@ procedure TCnVerEnhanceWizard.InsertTime;
 var
   Keys: TStringList;
 begin
-  Keys := TStringList(CnOtaGetVersionInfoKeys);
+  Keys := TStringList(CnOtaGetVersionInfoKeys(FCurrentProject));
   try
     Keys.Values[csDateKeyName] := DateTimeToStr(Now);
   except
@@ -394,9 +399,9 @@ var
   Keys: TStringList;
   Index: Integer;
 begin
-  Keys := TStringList(CnOtaGetVersionInfoKeys);
+  Keys := TStringList(CnOtaGetVersionInfoKeys(FCurrentProject));
   Keys.Values[csDateKeyName] := '';
-  
+
   Index := Keys.IndexOfName(csDateKeyName);
   if Index > -1 then
   begin
@@ -431,7 +436,6 @@ begin
   Email := SCnPack_HubdogEmail + ';' + SCnPack_LiuXiaoEmail;
   Comment := SCnVerEnhanceWizardComment;
 end;
-
 
 procedure TCnVerEnhanceWizard.LoadSettings(Ini: TCustomIniFile);
 begin
@@ -497,4 +501,3 @@ initialization
 {$ENDIF CNWIZARDS_CNVERENHANCEWIZARD}
 end.
 
- 

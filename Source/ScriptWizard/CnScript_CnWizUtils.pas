@@ -344,8 +344,8 @@ begin
   CL.AddDelphiFunction('Function CnOtaGetProjectFrameworkType( Project : IOTAProject) : string;');
 {$ENDIF}
 {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
-  CL.AddDelphiFunction('Function CnOtaGetProjectCurrentBuildConfigurationValue(const APropName : string) : string');
-  CL.AddDelphiFunction('Procedure CnOtaSetProjectCurrentBuildConfigurationValue(const APropName, AValue : string)');
+  CL.AddDelphiFunction('Function CnOtaGetProjectCurrentBuildConfigurationValue(Project: IOTAProject; const APropName : string) : string');
+  CL.AddDelphiFunction('Procedure CnOtaSetProjectCurrentBuildConfigurationValue(Project: IOTAProject; const APropName, AValue : string)');
 {$ENDIF}
   CL.AddDelphiFunction('Procedure CnOtaGetProjectList( const List : TInterfaceList)');
   CL.AddDelphiFunction('Function CnOtaGetCurrentProjectName : string');
