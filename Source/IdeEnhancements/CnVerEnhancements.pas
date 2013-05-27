@@ -50,7 +50,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, ToolsAPI, IniFiles,
   Forms, ExtCtrls, Menus, ComCtrls, Contnrs, {$IFDEF BDS}Variants, {$ENDIF}
   CnCommon, CnWizUtils, CnWizNotifier, CnWizIdeUtils, CnWizConsts, CnMenuHook,
-  CnConsts, CnWizClasses, Vcl.Dialogs,DateUtils;
+  CnConsts, CnWizClasses;
 
 type
 
