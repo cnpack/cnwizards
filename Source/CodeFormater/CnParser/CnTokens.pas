@@ -56,6 +56,7 @@ type
     tokFloat,
     tokWString,
     tokComment,
+    tokCompDirective,
 
     // Const value
     tokTrue,
@@ -327,6 +328,7 @@ const
     (Value: Integer(tokFloat);          Name: ''),
     (Value: Integer(tokWString);        Name: ''),
     (Value: Integer(tokComment);        Name: ''),
+    (Value: Integer(tokCompDirective);  Name: ''),
 
     // Const Value
     (Value: Integer(tokTrue);           Name: ''),

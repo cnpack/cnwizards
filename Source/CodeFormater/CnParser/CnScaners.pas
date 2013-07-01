@@ -44,7 +44,10 @@ interface
 
 uses
   Classes, SysUtils, Contnrs,
-  CnParseConsts, CnTokens, CnCodeGenerators; 
+  CnParseConsts, CnTokens, CnCodeGenerators;
+
+type
+  TCompDirectiveMode = (cdmAsComment, cdmOnlyFirst);
 
 type
   TScannerBookmark = class(TObject)
@@ -86,6 +89,7 @@ type
     FASMMode: Boolean;
     FFirstCommentInBlock: Boolean;
     FPreviousIsComment: Boolean;
+    FInDirectiveNestSearch: Boolean;
 
     procedure ReadBuffer;
     procedure SetOrigin(AOrigin: Longint);
@@ -137,12 +141,15 @@ type
   private
     FStream: TStream;
     FCodeGen: TCnCodeGenerator;
+    FCompDirectiveMode: TCompDirectiveMode;
   public
     constructor Create(AStream: TStream); overload; override;
     constructor Create(AStream: TStream; ACodeGen: TCnCodeGenerator); reintroduce; overload; 
     destructor Destroy; override;
     function NextToken: TPascalToken; override;
     function ForwardToken(Count: Integer = 1): TPascalToken; override;
+
+    property CompDirectiveMode: TCompDirectiveMode read FCompDirectiveMode;
   end;
 
 implementation
@@ -568,6 +575,7 @@ begin
   FStream := AStream;
   FCodeGen := ACodeGen;
 
+  FCompDirectiveMode := cdmOnlyFirst; // Set CompDirective Process Mode
   inherited Create(AStream);
 end;
 
@@ -611,6 +619,8 @@ function TScaner.NextToken: TPascalToken;
 var
   IsWideStr: Boolean;
   P: PChar;
+  Directive: TPascalToken;
+  DirectiveNest: Integer;
 begin
   SkipBlanks;
   P := FSourcePtr;
@@ -689,11 +699,17 @@ begin
     '{':
       begin
         Inc(P);
-        { TODO: Check Directive sign $}
-
-        Result := tokComment;
+        { Check Directive sign $}
+        if P^ = '$' then
+          Result := tokCompDirective
+        else
+          Result := tokComment;
         while ((P^ <> #0) and (P^ <> '}')) do
+        begin
+          if P^ = #10 then
+            Inc(FSourceLine);
           Inc(P);
+        end;
 
         if P^ = '}' then
         begin
@@ -703,6 +719,7 @@ begin
             Inc(P);
           if P^ = #13 then
           begin
+            Inc(FSourceLine);
             if not FASMMode then // ASM 模式下，换行作为语句结束符，不在注释内处理
             begin
               Inc(P);
@@ -725,12 +742,13 @@ begin
         if P^ = '/' then
         begin
           Result := tokComment;
-          while (P^ <> #0) and (P^ <> #13)
-            do Inc(P); // 找行尾
+          while (P^ <> #0) and (P^ <> #13) do
+            Inc(P); // 找行尾
 
           FBlankLinesAfterComment := 0;
           if P^ = #13 then
           begin
+            Inc(FSourceLine);
             if not FASMMode then // ASM 模式下，换行作为语句结束符，不在注释内处理
             begin
               Inc(P);
@@ -772,6 +790,7 @@ begin
 
                 if P^ = #13 then
                 begin
+                  Inc(FSourceLine);
                   if not FASMMode then // ASM 模式下，换行作为语句结束符，不在注释内处理
                   begin
                     Inc(P);
@@ -787,7 +806,11 @@ begin
               end;
             end
             else
+            begin
+              if P^ = #10 then
+                Inc(FSourceLine);
               Inc(P);
+            end;
           end;
         end;
       end;
@@ -943,6 +966,7 @@ begin
     #10:  // 如果有回车则处理，以 #10 为准
       begin
         Result := tokCRLF;
+        Inc(FSourceLine);
         Inc(P);
       end;
   else
@@ -958,54 +982,179 @@ begin
   FSourcePtr := P;
   FToken := Result;
 
-  if Result = tokComment then // 当前是 Comment
+  if FCompDirectiveMode = cdmAsComment then
   begin
-    if Assigned(FCodeGen) then
+    if (Result = tokComment) or (Result = tokCompDirective) then // 当前是 Comment
     begin
-      FCodeGen.Write(BlankString);
-      FCodeGen.Write(TokenString);
-    end;
+      if Assigned(FCodeGen) then
+      begin
+        FCodeGen.Write(BlankString);
+        FCodeGen.Write(TokenString);
+      end;
 
-    if not FFirstCommentInBlock then // 第一次碰到 Comment 时设置这个
-    begin
-      FFirstCommentInBlock := True;
-      FBlankLinesBefore := FBlankLines;
-    end;
+      if not FFirstCommentInBlock then // 第一次碰到 Comment 时设置这个
+      begin
+        FFirstCommentInBlock := True;
+        FBlankLinesBefore := FBlankLines;
+      end;
 
-    FPreviousIsComment := True;
-    Result := NextToken;
-    // 进入递归寻找下一个 Token，
-    // 进入后 FFirstCommentInBlock 为 True，因此不会重新记录 FBlankLinesBefore
-    FPreviousIsComment := False;
-  end
-  else
-  begin
-    // 只要当前不是 Comment 就设置非第一个 Comment 的标记
-    FFirstCommentInBlock := False;
-
-    if FPreviousIsComment then // 上一个是 Comment，记录这个到 上一个Comment的空行数
-    begin
-      // 最后一块注释的在递归最外层赋值，因此FBlankLinesAfter会被层层覆盖，
-      // 代表最后一块注释后的空行数
-      FBlankLinesAfter := FBlankLines + FBlankLinesAfterComment;
+      FPreviousIsComment := True;
+      Result := NextToken;
+      // 进入递归寻找下一个 Token，
+      // 进入后 FFirstCommentInBlock 为 True，因此不会重新记录 FBlankLinesBefore
+      FPreviousIsComment := False;
     end
-    else // 上一个不是 Comment，当前也不是 Comment。全清0
+    else
     begin
-      FBlankLinesAfter := 0;
-      FBlankLinesBefore := 0;
-      FBlankLines := 0;
+      // 只要当前不是 Comment 就设置非第一个 Comment 的标记
+      FFirstCommentInBlock := False;
+
+      if FPreviousIsComment then // 上一个是 Comment，记录这个到 上一个Comment的空行数
+      begin
+        // 最后一块注释的在递归最外层赋值，因此FBlankLinesAfter会被层层覆盖，
+        // 代表最后一块注释后的空行数
+        FBlankLinesAfter := FBlankLines + FBlankLinesAfterComment;
+      end
+      else // 上一个不是 Comment，当前也不是 Comment。全清0
+      begin
+        FBlankLinesAfter := 0;
+        FBlankLinesBefore := 0;
+        FBlankLines := 0;
+      end;
+
+      if (FBackwardToken = tokComment) or (FBackwardToken = tokCompDirective) then // 当前不是 Comment，但前一个是 Comment
+        FCodeGen.Write(BlankString);
+
+      if (Result = tokString) and (Length(TokenString) = 1) then
+        Result := tokChar
+      else if Result = tokSymbol then
+        Result := StringToToken(TokenString);
+
+      FToken := Result;
+      FBackwardToken := FToken;
     end;
+  end
+  else if FCompDirectiveMode = cdmOnlyFirst then
+  begin
+    if (Result = tokComment) or ((Result = tokCompDirective) and (Pos('{$ELSE', UpperCase(TokenString)) = 0)) then
+    begin
+      if FInDirectiveNestSearch then // In a Nested search for Endif
+        Exit;
 
-    if FBackwardToken = tokComment then // 当前不是 Comment，但前一个是 Comment
-      FCodeGen.Write(BlankString);
+      // 当前是 Comment，或非ELSE编译指令，当普通注释处理
+      if Assigned(FCodeGen) then
+      begin
+        FCodeGen.Write(BlankString);
+        FCodeGen.Write(TokenString);
+      end;
 
-    if (Result = tokString) and (Length(TokenString) = 1) then
-      Result := tokChar
-    else if Result = tokSymbol then
-      Result := StringToToken(TokenString);
+      if not FFirstCommentInBlock then // 第一次碰到 Comment 时设置这个
+      begin
+        FFirstCommentInBlock := True;
+        FBlankLinesBefore := FBlankLines;
+      end;
 
-    FToken := Result;
-    FBackwardToken := FToken;
+      FPreviousIsComment := True;
+      Result := NextToken;
+      // 进入递归寻找下一个 Token，
+      // 进入后 FFirstCommentInBlock 为 True，因此不会重新记录 FBlankLinesBefore
+      FPreviousIsComment := False;
+    end
+    else if (Result = tokCompDirective) and (Pos('{$ELSE', UpperCase(TokenString)) = 1) then
+    begin
+      // 如果本处是IFDEF/IFNDEF/IFOPT/ENDIF，可以不管，
+      // 如果是ELSE，则找对应的ENDIF，并跳过两者之间的
+      // 但找的过程中要忽略中间其他配对的IFDEF/IFNDEF/IFOPT与ENDIF
+
+      if not FFirstCommentInBlock then // 第一次碰到 Comment 时设置这个
+      begin
+        FFirstCommentInBlock := True;
+        FBlankLinesBefore := FBlankLines;
+      end;
+
+      if Assigned(FCodeGen) then
+      begin
+        FCodeGen.Write(BlankString);
+        FCodeGen.Write(TokenString); // Write ELSE itself
+      end;
+
+      DirectiveNest := 1; // 1 means ELSE itself
+      FPreviousIsComment := True;
+      Directive := NextToken;
+      FPreviousIsComment := False;
+
+      FInDirectiveNestSearch := True;
+      try
+        while Directive <> tokEOF do
+        begin
+          if Assigned(FCodeGen) then
+          begin
+            FCodeGen.Write(BlankString);
+            FCodeGen.Write(TokenString);
+          end;
+
+          if Directive = tokCompDirective then
+          begin
+            if (Pos('{$IFDEF', UpperCase(TokenString)) = 1) or
+              (Pos('{$IFNDEF', UpperCase(TokenString)) = 1) or
+              (Pos('{$IFOPT', UpperCase(TokenString)) = 1) then
+            begin
+              Inc(DirectiveNest);
+            end
+            else if (Pos('{$ENDIF', UpperCase(TokenString)) = 1) then
+            begin
+              Dec(DirectiveNest);
+              if DirectiveNest = 0 then
+              begin
+                FInDirectiveNestSearch := False;
+                // 已经顺利找到了，再往后按原有的跳过注释的规矩找下一个Token
+                // 避免下一个又是IFDEF时出问题。
+                FPreviousIsComment := True;
+                Result := NextToken;
+                FPreviousIsComment := False;
+                Exit;
+              end;
+            end;
+          end;
+          FPreviousIsComment := True;
+          Directive := NextToken;
+          FPreviousIsComment := False;
+        end;
+        Result := tokEOF;
+        FToken := Result;
+      finally
+        FInDirectiveNestSearch := False;
+      end;
+    end
+    else
+    begin
+      // 只要当前不是 Comment 就设置非第一个 Comment 的标记
+      FFirstCommentInBlock := False;
+
+      if FPreviousIsComment then // 上一个是 Comment，记录这个到 上一个Comment的空行数
+      begin
+        // 最后一块注释的在递归最外层赋值，因此FBlankLinesAfter会被层层覆盖，
+        // 代表最后一块注释后的空行数
+        FBlankLinesAfter := FBlankLines + FBlankLinesAfterComment;
+      end
+      else // 上一个不是 Comment，当前也不是 Comment。全清0
+      begin
+        FBlankLinesAfter := 0;
+        FBlankLinesBefore := 0;
+        FBlankLines := 0;
+      end;
+
+      if FBackwardToken = tokComment then // 当前不是 Comment，但前一个是 Comment
+        FCodeGen.Write(BlankString);
+
+      if (Result = tokString) and (Length(TokenString) = 1) then
+        Result := tokChar
+      else if Result = tokSymbol then
+        Result := StringToToken(TokenString);
+
+      FToken := Result;
+      FBackwardToken := FToken;
+    end;
   end;
 end;
 

@@ -2035,7 +2035,7 @@ end;
 procedure TCnTypeSectionFormater.FormatDirective(PreSpaceCount: Byte;
   IgnoreFirst: Boolean);
 begin
-  if Scaner.Token in DirectiveTokens then
+  if Scaner.Token in DirectiveTokens + ComplexTokens then
   begin
     // deal with the Directive use like this
     // function MessageBox(...): Integer; stdcall; external 'user32.dll' name 'MessageBoxA';
@@ -3562,7 +3562,7 @@ begin
 
   IsExternal := False;
   IsForward := False;
-  while Scaner.Token in DirectiveTokens do
+  while Scaner.Token in DirectiveTokens + ComplexTokens do  // Use ComplexTokens for "local;"
   begin
     if Scaner.Token = tokDirectiveExternal then
       IsExternal := True;

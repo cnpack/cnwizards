@@ -63,10 +63,45 @@ object MainForm: TMainForm
           Font.Name = 'Courier New'
           Font.Style = []
           Lines.Strings = (
+            
+              '{***************************************************************' +
+              '***************}'
+            
+              '{                       CnPack For Delphi/C++Builder            ' +
+              '               }'
+            
+              '{                     中国人自己的开放源码第三方开发包          ' +
+              '               }'
+            
+              '{                   (C)Copyright 2001-2012 CnPack 开发组        ' +
+              '               }    '
+            
+              '{                   ------------------------------------        ' +
+              '               }'
+            
+              '{***************************************************************' +
+              '***************}'
             'unit CnCodeFormaterTest;'
+            '{* |<PRE>'
+            
+              '================================================================' +
+              '================'
+            '* 软件名称：CnPack 代码格式化专家'
+            '* 单元名称：格式化专家测试程序 CnCodeFormaterTest'
+            '* 单元作者：CnPack开发组'
+            
+              '================================================================' +
+              '================'
+            '|</PRE>}'
             ''
-            'interface'
-            ''
+            'interface// HERE is a comment'
+            '{I CnPack.inc}'
+            'uses'
+            
+              '  Classes, SysUtils{$IFDEF DEBUG},CnDebug{$ELSE},  NDebug{$ENDIF' +
+              '};'
+            'const'
+            '  PathDelim  = {$IFDEF MSWINDOWS} '#39'\'#39'; {$ELSE} '#39'/'#39'; {$ENDIF}'
             'implementation'
             ''
             'end.')
