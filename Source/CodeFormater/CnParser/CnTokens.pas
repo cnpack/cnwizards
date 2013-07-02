@@ -175,6 +175,7 @@ type
     tokDirectiveASSEMBLER,
     tokDirectiveAUTOMATED,
     tokDirectiveCDECL,
+    tokDirectiveDELAYED,
     tokDirectiveDEPRECATED,
     tokDirectiveDISPID,
     tokDirectiveDYNAMIC,
@@ -227,7 +228,7 @@ const
   DirectiveTokens = [tokDirective_BEGIN .. tokDirective_END, tokKeywordInline,
     tokKeywordLibrary, tokComplexDefault, tokComplexIndex, tokComplexName,
     tokComplexNoDefault, tokComplexRead, tokComplexReadOnly, tokComplexStored,
-    tokComplexWrite, tokComplexWriteOnly];
+    tokComplexWrite, tokComplexWriteOnly, tokKeywordStatic];
     
   ComplexTokens = [tokComplex_BEGIN .. tokComplex_END, tokDirectiveMessage,
     tokDirectiveRegister, tokDirectiveForward];
@@ -448,6 +449,7 @@ const
     (Value: Integer(tokDirectiveASSEMBLER);    Name: 'ASSEMBLER'),
     (Value: Integer(tokDirectiveAUTOMATED);    Name: 'AUTOMATED'),
     (Value: Integer(tokDirectiveCDECL);        Name: 'CDECL'),
+    (Value: Integer(tokDirectiveDELAYED);      Name: 'DELAYED'),
     (Value: Integer(tokDirectiveDEPRECATED);   Name: 'DEPRECATED'),
     (Value: Integer(tokDirectiveDISPID);       Name: 'DISPID'),
     (Value: Integer(tokDirectiveDYNAMIC);      Name: 'DYNAMIC'),

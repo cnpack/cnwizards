@@ -74,6 +74,8 @@ type
     {* 检查给定字符串是否是一个常用函数名，如果是则返回正确的格式 }
     function Tab(PreSpaceCount: Byte = 0; CareBeginBlock: Boolean = True): Byte;
     {* 根据代码格式风格设置返回缩进一次的前导空格数 }
+    function BackTab(PreSpaceCount: Byte = 0; CareBeginBlock: Boolean = True): Byte;
+    {* 根据代码格式风格设置返回上一次缩进的前导空格数 }
     function Space(Count: Word): string;
     {* 返回指定数目空格的字符串 }
     procedure Writeln;
@@ -575,6 +577,17 @@ begin
   if FCodeGen <> nil then
     for I := 1 to Scaner.BlankLinesAfter do
       FCodeGen.Writeln;
+end;
+
+function TCnAbstractCodeFormater.BackTab(PreSpaceCount: Byte;
+  CareBeginBlock: Boolean): Byte;
+begin
+  if CareBeginBlock then
+  begin
+    Result := PreSpaceCount - CnPascalCodeForRule.TabSpaceCount;
+    if Result < 0 then
+      Result := 0;
+  end;
 end;
 
 { TCnExpressionFormater }
@@ -2051,6 +2064,7 @@ begin
       tokDirectiveDispID,
       tokDirectiveExternal,
       tokDirectiveMESSAGE,
+      tokDirectiveDEPRECATED,
       tokComplexName,
       tokComplexImplements,
       tokComplexStored,
@@ -2133,27 +2147,44 @@ begin
   First := True;
   while not (Scaner.Token in [tokKeywordEnd, tokKeywordCase, tokRB]) do
   begin
-    if First and IgnoreFirst then
-      FormatFieldDecl
-    else
-      FormatFieldDecl(PreSpaceCount);
-    First := False;
-    
-    if Scaner.Token = tokSemicolon then
+    if Scaner.Token in ClassVisibilityTokens then
+      FormatClassVisibility(BackTab(PreSpaceCount));
+
+    if Scaner.Token in [tokKeywordProcedure, tokKeywordFunction,
+      tokKeywordConstructor, tokKeywordDestructor, tokKeywordClass] then
     begin
-      AfterIsRB := Scaner.ForwardToken in [tokRB];
-      if not AfterIsRB then // 后面还有才写分号和换行
-      begin
-        Match(Scaner.Token);
-        Writeln;
-      end
-      else
-        Scaner.NextToken;
-    end
-    else if Scaner.Token = tokKeywordEnd then // 最后一项无分号时也可以
-    begin
+      FormatClassMethod(PreSpaceCount);
       Writeln;
-      Break;
+    end
+    else if Scaner.Token = tokKeywordProperty then
+    begin
+      FormatClassProperty(PreSpaceCount);
+      Writeln;
+    end
+    else
+    begin
+      if First and IgnoreFirst then
+        FormatFieldDecl
+      else
+        FormatFieldDecl(PreSpaceCount);
+      First := False;
+
+      if Scaner.Token = tokSemicolon then
+      begin
+        AfterIsRB := Scaner.ForwardToken in [tokRB];
+        if not AfterIsRB then // 后面还有才写分号和换行
+        begin
+          Match(Scaner.Token);
+          Writeln;
+        end
+        else
+          Scaner.NextToken;
+      end
+      else if Scaner.Token = tokKeywordEnd then // 最后一项无分号时也可以
+      begin
+        Writeln;
+        Break;
+      end;
     end;
   end;
 
