@@ -621,6 +621,7 @@ var
   P: PChar;
   Directive: TPascalToken;
   DirectiveNest: Integer;
+  TmpToken: string;
 begin
   SkipBlanks;
   P := FSourcePtr;
@@ -1082,32 +1083,34 @@ begin
         FCodeGen.Write(TokenString); // Write ELSE/ELSEIF itself
       end;
 
+      FInDirectiveNestSearch := True;
+
       DirectiveNest := 1; // 1 means ELSE/ELSEIF itself
       FPreviousIsComment := True;
       Directive := NextToken;
       FPreviousIsComment := False;
+      TmpToken := TokenString;
 
-      FInDirectiveNestSearch := True;
       try
         while Directive <> tokEOF do
         begin
           if Assigned(FCodeGen) then
           begin
             FCodeGen.Write(BlankString);
-            FCodeGen.Write(TokenString);
+            FCodeGen.Write(TmpToken);
           end;
 
           if Directive = tokCompDirective then
           begin
-            if (Pos('{$IFDEF', UpperCase(TokenString)) = 1) or
-              (Pos('{$IFNDEF', UpperCase(TokenString)) = 1) or
-              (Pos('{$IF ', UpperCase(TokenString)) = 1) or
-              (Pos('{$IFOPT', UpperCase(TokenString)) = 1) then
+            if (Pos('{$IFDEF', UpperCase(TmpToken)) = 1) or
+              (Pos('{$IFNDEF', UpperCase(TmpToken)) = 1) or
+              (Pos('{$IF ', UpperCase(TmpToken)) = 1) or
+              (Pos('{$IFOPT', UpperCase(TmpToken)) = 1) then
             begin
               Inc(DirectiveNest);
             end
-            else if (Pos('{$ENDIF', UpperCase(TokenString)) = 1) or
-              (Pos('{$IFEND', UpperCase(TokenString)) = 1) then
+            else if (Pos('{$ENDIF', UpperCase(TmpToken)) = 1) or
+              (Pos('{$IFEND', UpperCase(TmpToken)) = 1) then
             begin
               Dec(DirectiveNest);
               if DirectiveNest = 0 then
@@ -1120,12 +1123,12 @@ begin
                 FPreviousIsComment := False;
                 Exit;
               end;
-
             end;
           end;
           FPreviousIsComment := True;
           Directive := NextToken;
           FPreviousIsComment := False;
+          TmpToken := TokenString;
         end;
         Result := tokEOF;
         FToken := Result;

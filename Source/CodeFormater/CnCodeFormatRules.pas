@@ -54,6 +54,7 @@ type
     SpaceBeforeASM: Byte;
     SpaceTabASMKeyword: Byte;
     WrapWidth: Integer;
+    UsesUnitSingleLine: Boolean;
   end;
 
 const
@@ -68,6 +69,7 @@ const
     SpaceBeforeASM: 8;
     SpaceTabASMKeyword: 8;
     WrapWidth: 80;
+    UsesUnitSingleLine: False;
   );
 
 var

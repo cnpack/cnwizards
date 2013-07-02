@@ -51,6 +51,7 @@ type
     FLock: Word;
     FColumnPos: Integer;
     FCodeWrapMode: TCnCodeWrapMode;
+    FPrevStr: string;
     function GetCurIndentSpace: Integer;
     function GetLockedCount: Word;
   public
@@ -177,8 +178,10 @@ begin
   end
   else if CodeWrapMode = cwmSimple then // 简单换行，判断是否超出宽度
   begin
-    if (FColumnPos <= CnPascalCodeForRule.WrapWidth) and
-      (FColumnPos + Len > CnPascalCodeForRule.WrapWidth) then
+    if (FPrevStr <> '.') and // Dot in unitname should not new line.
+     (((FColumnPos <= CnPascalCodeForRule.WrapWidth) and
+      (FColumnPos + Len > CnPascalCodeForRule.WrapWidth)) or
+      (FColumnPos > CnPascalCodeForRule.WrapWidth)) then
     begin
       Str := StringOfChar(' ', CurIndentSpace) + Str; // 加上原有的缩进
       Writeln;
@@ -193,6 +196,7 @@ begin
     Format('%s%s', [FCode[FCode.Count - 1], Str]);
 
   FColumnPos := Length(FCode[FCode.Count - 1]);
+  FPrevStr := S;
 end;
 
 procedure TCnCodeGenerator.Writeln;

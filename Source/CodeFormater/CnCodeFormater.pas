@@ -3850,7 +3850,7 @@ begin
   if Scaner.Token = tokKeywordUses then
   begin
     WriteLine;
-    FormatUsesClause(PreSpaceCount);
+    FormatUsesClause(PreSpaceCount, CnPascalCodeForRule.UsesUnitSingleLine);
   end;
 
   if Scaner.Token in DeclSectionTokens then
@@ -3897,7 +3897,7 @@ begin
     if MakeLine then WriteLine;
 
     case Scaner.Token of
-      tokKeywordUses: FormatUsesClause(PreSpaceCount); // 加入 uses 的处理以提高容错性
+      tokKeywordUses: FormatUsesClause(PreSpaceCount, CnPascalCodeForRule.UsesUnitSingleLine); // 加入 uses 的处理以提高容错性
       tokKeywordConst, tokKeywordResourcestring: FormatConstSection(PreSpaceCount);
       tokKeywordType: FormatTypeSection(PreSpaceCount);
       tokKeywordVar, tokKeywordThreadvar: FormatVarSection(PreSpaceCount);
@@ -3929,7 +3929,7 @@ begin
   if Scaner.Token = tokKeywordUses then
   begin
     WriteLine;
-    FormatUsesClause(PreSpaceCount);
+    FormatUsesClause(PreSpaceCount, CnPascalCodeForRule.UsesUnitSingleLine);
   end;
 
   if Scaner.Token in InterfaceDeclTokens then
