@@ -1036,9 +1036,10 @@ begin
   end
   else if FCompDirectiveMode = cdmOnlyFirst then
   begin
-    if (Result = tokComment) or ((Result = tokCompDirective) and (Pos('{$ELSE', UpperCase(TokenString)) = 0)) then
+    if (Result = tokComment) or ((Result = tokCompDirective) and
+      (Pos('{$ELSE', UpperCase(TokenString)) = 0) ) then // NOT $ELSE/$ELSEIF
     begin
-      if FInDirectiveNestSearch then // In a Nested search for Endif
+      if FInDirectiveNestSearch then // In a Nested search for ENDIF/IFEND
         Exit;
 
       // 当前是 Comment，或非ELSE编译指令，当普通注释处理
@@ -1060,11 +1061,14 @@ begin
       // 进入后 FFirstCommentInBlock 为 True，因此不会重新记录 FBlankLinesBefore
       FPreviousIsComment := False;
     end
-    else if (Result = tokCompDirective) and (Pos('{$ELSE', UpperCase(TokenString)) = 1) then
+    else if (Result = tokCompDirective) and (Pos('{$ELSE', UpperCase(TokenString)) = 1) then // include ELSEIF
     begin
-      // 如果本处是IFDEF/IFNDEF/IFOPT/ENDIF，可以不管，
-      // 如果是ELSE，则找对应的ENDIF，并跳过两者之间的
-      // 但找的过程中要忽略中间其他配对的IFDEF/IFNDEF/IFOPT与ENDIF
+      // 如果本处是IF/IFEND或其他，可以不管，
+      // 如果是ELSEIF，则找对应的IFEND，并跳过两者之间的
+      // 但找的过程中要忽略中间其他配对的IFDEF/IFNDEF/IFOPT与ENDIF以及同级的ELSE/ELSEIF
+
+      if FInDirectiveNestSearch then // In a Nested search for ENDIF/IFEND
+        Exit;
 
       if not FFirstCommentInBlock then // 第一次碰到 Comment 时设置这个
       begin
@@ -1075,10 +1079,10 @@ begin
       if Assigned(FCodeGen) then
       begin
         FCodeGen.Write(BlankString);
-        FCodeGen.Write(TokenString); // Write ELSE itself
+        FCodeGen.Write(TokenString); // Write ELSE/ELSEIF itself
       end;
 
-      DirectiveNest := 1; // 1 means ELSE itself
+      DirectiveNest := 1; // 1 means ELSE/ELSEIF itself
       FPreviousIsComment := True;
       Directive := NextToken;
       FPreviousIsComment := False;
@@ -1097,11 +1101,13 @@ begin
           begin
             if (Pos('{$IFDEF', UpperCase(TokenString)) = 1) or
               (Pos('{$IFNDEF', UpperCase(TokenString)) = 1) or
+              (Pos('{$IF ', UpperCase(TokenString)) = 1) or
               (Pos('{$IFOPT', UpperCase(TokenString)) = 1) then
             begin
               Inc(DirectiveNest);
             end
-            else if (Pos('{$ENDIF', UpperCase(TokenString)) = 1) then
+            else if (Pos('{$ENDIF', UpperCase(TokenString)) = 1) or
+              (Pos('{$IFEND', UpperCase(TokenString)) = 1) then
             begin
               Dec(DirectiveNest);
               if DirectiveNest = 0 then
@@ -1114,6 +1120,7 @@ begin
                 FPreviousIsComment := False;
                 Exit;
               end;
+
             end;
           end;
           FPreviousIsComment := True;

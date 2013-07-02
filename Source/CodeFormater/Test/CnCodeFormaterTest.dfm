@@ -1,8 +1,8 @@
 object MainForm: TMainForm
   Left = 80
   Top = 71
-  Width = 900
-  Height = 602
+  Width = 1087
+  Height = 729
   Caption = 'CnPack IDE 专家包 Object Pascal / Delphi 代码格式化测试程序'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -18,25 +18,25 @@ object MainForm: TMainForm
   object PageControl1: TPageControl
     Left = 0
     Top = 0
-    Width = 892
-    Height = 575
+    Width = 1079
+    Height = 702
     ActivePage = tsSingleTest
     Align = alClient
     TabOrder = 0
     object tsSingleTest: TTabSheet
       Caption = '代码格式化测试'
       object Splitter1: TSplitter
-        Left = 425
+        Left = 505
         Top = 29
         Width = 3
-        Height = 519
+        Height = 646
         Cursor = crHSplit
       end
       object Panel1: TPanel
         Left = 0
         Top = 29
-        Width = 425
-        Height = 519
+        Width = 505
+        Height = 646
         Align = alLeft
         BevelOuter = bvNone
         Caption = 'Panel1'
@@ -44,7 +44,7 @@ object MainForm: TMainForm
         object Label1: TLabel
           Left = 0
           Top = 0
-          Width = 425
+          Width = 505
           Height = 12
           Align = alTop
           Alignment = taCenter
@@ -54,8 +54,8 @@ object MainForm: TMainForm
         object SrcMemo: TMemo
           Left = 0
           Top = 12
-          Width = 425
-          Height = 507
+          Width = 505
+          Height = 634
           Align = alClient
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
@@ -112,10 +112,10 @@ object MainForm: TMainForm
         end
       end
       object Panel2: TPanel
-        Left = 428
+        Left = 508
         Top = 29
-        Width = 456
-        Height = 519
+        Width = 563
+        Height = 646
         Align = alClient
         BevelOuter = bvNone
         Caption = 'Panel1'
@@ -123,7 +123,7 @@ object MainForm: TMainForm
         object Label2: TLabel
           Left = 0
           Top = 0
-          Width = 456
+          Width = 563
           Height = 12
           Align = alTop
           Alignment = taCenter
@@ -133,8 +133,8 @@ object MainForm: TMainForm
         object DesMemo: TMemo
           Left = 0
           Top = 12
-          Width = 456
-          Height = 507
+          Width = 563
+          Height = 634
           Align = alClient
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
@@ -150,7 +150,7 @@ object MainForm: TMainForm
       object ToolBar1: TToolBar
         Left = 0
         Top = 0
-        Width = 884
+        Width = 1071
         Height = 29
         BorderWidth = 1
         ButtonHeight = 20
@@ -279,7 +279,7 @@ object MainForm: TMainForm
         Left = 0
         Top = 24
         Width = 181
-        Height = 520
+        Height = 647
         Anchors = [akLeft, akTop, akBottom]
         FileList = fllst1
         ItemHeight = 16
@@ -289,7 +289,7 @@ object MainForm: TMainForm
         Left = 184
         Top = 40
         Width = 177
-        Height = 520
+        Height = 647
         Anchors = [akLeft, akTop, akBottom]
         ItemHeight = 12
         Mask = '*.pas'
@@ -318,8 +318,8 @@ object MainForm: TMainForm
       object lvTestFiles: TListView
         Left = 400
         Top = 0
-        Width = 483
-        Height = 545
+        Width = 670
+        Height = 672
         Anchors = [akLeft, akTop, akRight, akBottom]
         Columns = <
           item
@@ -400,14 +400,14 @@ object MainForm: TMainForm
         Left = 393
         Top = 29
         Width = 3
-        Height = 464
+        Height = 646
         Cursor = crHSplit
       end
       object Panel4: TPanel
         Left = 0
         Top = 29
         Width = 393
-        Height = 464
+        Height = 646
         Align = alLeft
         BevelOuter = bvNone
         Caption = 'Panel1'
@@ -426,7 +426,7 @@ object MainForm: TMainForm
           Left = 0
           Top = 12
           Width = 393
-          Height = 452
+          Height = 634
           Align = alClient
           ScrollBars = ssBoth
           TabOrder = 0
@@ -437,8 +437,8 @@ object MainForm: TMainForm
       object Panel5: TPanel
         Left = 396
         Top = 29
-        Width = 374
-        Height = 464
+        Width = 675
+        Height = 646
         Align = alClient
         BevelOuter = bvNone
         Caption = 'Panel1'
@@ -456,8 +456,8 @@ object MainForm: TMainForm
         object Memo2: TMemo
           Left = 0
           Top = 12
-          Width = 374
-          Height = 452
+          Width = 675
+          Height = 634
           Align = alClient
           ScrollBars = ssBoth
           TabOrder = 0
@@ -468,7 +468,7 @@ object MainForm: TMainForm
       object ToolBar2: TToolBar
         Left = 0
         Top = 0
-        Width = 770
+        Width = 1071
         Height = 29
         BorderWidth = 1
         ButtonHeight = 20

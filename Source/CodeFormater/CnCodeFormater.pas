@@ -109,8 +109,8 @@ type
     procedure FormatDesignatorList(PreSpaceCount: Byte = 0);
     procedure FormatQualID(PreSpaceCount: Byte = 0);
     procedure FormatTypeID(PreSpaceCount: Byte = 0);
-    procedure FormatIdent(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = False);
-    procedure FormatIdentList(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = False);
+    procedure FormatIdent(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = True);
+    procedure FormatIdentList(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = True);
     procedure FormatConstExpr(PreSpaceCount: Byte = 0);
     procedure FormatConstExprInType(PreSpaceCount: Byte = 0);
     procedure FormatSetConstructor(PreSpaceCount: Byte = 0);
@@ -233,9 +233,9 @@ type
   protected
     procedure FormatProgramBlock(PreSpaceCount: Byte = 0);
     procedure FormatUsesClause(PreSpaceCount: Byte = 0; const NeedCRLF: Boolean = False);
-    procedure FormatUsesList(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = False;
+    procedure FormatUsesList(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = True;
       const NeedCRLF: Boolean = False);
-    procedure FormatUsesDecl(PreSpaceCount: Byte; const CanHaveUnitQual: Boolean = False);
+    procedure FormatUsesDecl(PreSpaceCount: Byte; const CanHaveUnitQual: Boolean = True);
     procedure FormatBlock(PreSpaceCount: Byte = 0; IsInternal: Boolean = False);
     procedure FormatDeclSection(PreSpaceCount: Byte; IndentProcs: Boolean = True;
       IsInternal: Boolean = False);
@@ -546,7 +546,7 @@ begin
     tokAssign:    CodeGen.Write(Scaner.TokenString, 1, 1);
   else
 
-    if (Token in KeywordTokens) then
+    if (Token in KeywordTokens + ComplexTokens + DirectiveTokens) then // 关键字范围扩大
     begin
       if (Token <> tokKeywordEnd) and (Token <> tokKeywordString) then
       begin
@@ -2787,14 +2787,16 @@ begin
       begin
         Match(Scaner.Token);
         ProcessBlank;
-        FormatIdent(0, True);
+        FormatDesignator(0);
+        //FormatIdent(0, True);
       end;
 
       tokComplexWrite:
       begin
         Match(Scaner.Token);
         ProcessBlank;
-        FormatIdent(0, True);
+        FormatDesignator(0);
+        //FormatIdent(0, True);
       end;
 
       tokComplexStored:
@@ -3199,7 +3201,7 @@ begin
   else // 不是括号开头，说明是简单的常量，直接处理
     if Scaner.Token in ConstTokens + [tokAtSign, tokPlus, tokMinus] then // 有可能初始化的值以这些开头
       FormatConstExpr(PreSpaceCount)
-    else
+    else if Scaner.Token <> tokRB then
       Error('TypeConstant is needed.');
   end;
 end;
@@ -3495,7 +3497,7 @@ begin
 
   IsExternal := False;
   IsForward := False;
-  while Scaner.Token in DirectiveTokens do
+  while Scaner.Token in DirectiveTokens + ComplexTokens do
   begin
     if Scaner.Token = tokDirectiveExternal then
       IsExternal := True;
