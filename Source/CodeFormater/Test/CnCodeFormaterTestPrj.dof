@@ -43,7 +43,7 @@ OutputDir=
 UnitOutputDir=..\DCU
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=$(DELPHI)\Lib\Debug;..\..
+SearchPath=$(DELPHI)\Lib;..\..;..\..\..\..\cnvcl\Source\Common
 Packages=Vcl50;Vclx50;VclSmp50;Vcldb50;vclado50;Vclbde50;vcldbx50;TeeDB50;Tee50;Vclmid50;vclie50;dclocx50;dxMasterViewD5;dxcomnD5;dxBarD5;dxBarDBNavD5;dxBarExtItemsD5;dxBarExtDBItemsD5;dxsbd5;EQTLD5;dxEdtrD5;ECQDBCD5;EQDBTLD5;EQGridD5;dxGrEdD5;dxExELD5;dxELibD5;dxPSCored5;dxPSPrVwAdvD5;dxPSLnksD5;dxPSTLLnkD5;dxPSdxDBTLLnkD5;dxPSdxDBCtrlLnkd5;dxPSdxDBGrLnkD5;dxPSTeeChartD5;dxPSDBTeeChartD5;dxPSdxMVLnkD5;dxDBEdD5;dxInsD5;dxExRwD5;dxObjInsD5;Rz30Ctls50;Rz30DBCtls50
 Conditionals=
 DebugSourceDirs=
@@ -80,24 +80,17 @@ OriginalFilename=
 ProductName=
 ProductVersion=1.0.0.0
 Comments=
-[Excluded Packages]
-C:\WINDOWS\system32\\ibevnt50.bpl=Borland Interbase Event Alerter Component
-C:\Program Files\Raize\RC4\Bin\RaizeComponentsVcl_Design50.bpl=Raize Components 4.1.1
-C:\Program Files\Raize\RC4\Bin\RaizeComponentsVclDB_Design50.bpl=Raize Components 4.1.1 (Data-Aware)
-$(DELPHI)\Projects\Bpl\dclusr50.bpl=Borland User Components
-$(DELPHI)\Projects\Bpl\AbkDBStdD5.bpl=Abakus VCL DB-Enabled components
-C:\PROGRA~1\Borland\Delphi5\Projects\Bpl\AbkStdD5.bpl=Abakus VCL 
-$(DELPHI)\Projects\Bpl\Ehlib.bpl=EhLib 2.1
-$(DELPHI)\Projects\Bpl\FR5.bpl=FastReport 2.4 Components
-$(DELPHI)\Projects\Bpl\Common_D5.bpl=常用控件包
-$(DELPHI)\Projects\Bpl\dclrx5.bpl=RX Library Controls and Tools
+[HistoryLists\hlConditionals]
+Count=1
+Item0=DEBUG
 [HistoryLists\hlUnitAliases]
 Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlSearchPath]
-Count=2
-Item0=$(DELPHI)\Lib\Debug;..\..
-Item1=..\..
+Count=4
+Item0=$(DELPHI)\Lib;..\..;..\..\..\..\cnvcl\Source\Common
+Item1=$(DELPHI)\Lib\Debug;..\..
+Item2=..\..
 [HistoryLists\hlUnitOutputDirectory]
 Count=1
 Item0=..\DCU

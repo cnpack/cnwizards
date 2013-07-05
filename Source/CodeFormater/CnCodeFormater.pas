@@ -74,7 +74,7 @@ type
     {* 检查给定字符串是否是一个常用函数名，如果是则返回正确的格式 }
     function Tab(PreSpaceCount: Byte = 0; CareBeginBlock: Boolean = True): Byte;
     {* 根据代码格式风格设置返回缩进一次的前导空格数 }
-    function BackTab(PreSpaceCount: Byte = 0; CareBeginBlock: Boolean = True): Byte;
+    function BackTab(PreSpaceCount: Byte = 0; CareBeginBlock: Boolean = True): Integer;
     {* 根据代码格式风格设置返回上一次缩进的前导空格数 }
     function Space(Count: Word): string;
     {* 返回指定数目空格的字符串 }
@@ -580,7 +580,7 @@ begin
 end;
 
 function TCnAbstractCodeFormater.BackTab(PreSpaceCount: Byte;
-  CareBeginBlock: Boolean): Byte;
+  CareBeginBlock: Boolean): Integer;
 begin
   if CareBeginBlock then
   begin
@@ -1688,6 +1688,7 @@ begin
         begin
           // Match(Scaner.Token);
           CodeGen.UnLockOutput;
+          Writeln;
           CodeGen.Write(ALabel); // 写入 label，再写剩下的关键字前的空格
           if CnPascalCodeForRule.SpaceBeforeASM - LabelLen <= 0 then // Label 太长就换行
           begin

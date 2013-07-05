@@ -56,11 +56,13 @@ type
     FTokenBookmark: TPascalToken;
     FTokenPtrBookmark: PChar;
     FSourcePtrBookmark: PChar;
+    FSourceLineBookmark: Integer;
   protected
     property OriginBookmark: Longint read FOriginBookmark write FOriginBookmark;
     property TokenBookmark: TPascalToken read FTokenBookmark write FTokenBookmark;
     property TokenPtrBookmark: PChar read FTokenPtrBookmark write FTokenPtrBookmark;
     property SourcePtrBookmark: PChar read FSourcePtrBookmark write FSourcePtrBookmark;
+    property SourceLineBookmark: Integer read FSourceLineBookmark write FSourceLineBookmark;
   end;
 
   TAbstractScaner = class(TObject)
@@ -155,6 +157,11 @@ type
 implementation
 
 { TAbstractScaner }
+
+{$IFDEF DEBUG}
+uses
+  CnDebug;
+{$ENDIF}
 
 const
   ScanBufferSize = 512 * 1024 {KB};
@@ -407,7 +414,7 @@ begin
           if FASMMode then // 需要检测回车的标志
           begin
             FBlankStringEnd := FSourcePtr;
-            Exit;
+            Exit; // Do not exit for Inc FSourcePtr?
           end;
         end;
       #33..#255:
@@ -508,6 +515,7 @@ begin
         FSourcePtr := SourcePtrBookmark;
         FTokenPtr := TokenPtrBookmark;
         FToken := TokenBookmark;
+        FSourceLine := SourceLineBookmark;
       end
       else
         Error(SInvalidBookmark);
@@ -529,6 +537,7 @@ begin
     SourcePtrBookmark := FSourcePtr;
     TokenBookmark := FToken;
     TokenPtrBookmark := FTokenPtr;
+    SourceLineBookmark := FSourceLine;
   end;
   FBookmarks.Add(Bookmark);
 end;
@@ -718,17 +727,17 @@ begin
           Inc(P);
           while P^ in [' ', #9] do
             Inc(P);
+
           if P^ = #13 then
+            Inc(P);
+          if P^ = #10 then
           begin
-            Inc(FSourceLine);
-            if not FASMMode then // ASM 模式下，换行作为语句结束符，不在注释内处理
+            // ASM 模式下，换行作为语句结束符，不在注释内处理，所以这也不加
+            if not FASMMode then
             begin
+              Inc(FSourceLine);
+              Inc(FBlankLinesAfterComment);
               Inc(P);
-              if P^ = #10 then
-              begin
-                Inc(FBlankLinesAfterComment);
-                Inc(P);
-              end;
             end;
           end;
         end
@@ -743,21 +752,21 @@ begin
         if P^ = '/' then
         begin
           Result := tokComment;
-          while (P^ <> #0) and (P^ <> #13) do
+          while (P^ <> #0) and (P^ <> #13) and (P^ <> #10) do
             Inc(P); // 找行尾
 
           FBlankLinesAfterComment := 0;
+
           if P^ = #13 then
+            Inc(P);
+          if P^ = #10 then
           begin
-            Inc(FSourceLine);
-            if not FASMMode then // ASM 模式下，换行作为语句结束符，不在注释内处理
+            // ASM 模式下，换行作为语句结束符，不在注释内处理，所以这也不加
+            if not FASMMode then
             begin
+              Inc(FSourceLine);
+              Inc(FBlankLinesAfterComment);
               Inc(P);
-              if P^ = #10 then
-              begin
-                Inc(FBlankLinesAfterComment);
-                Inc(P);
-              end;
             end;
           end
           else
@@ -790,16 +799,15 @@ begin
                   Inc(P);
 
                 if P^ = #13 then
+                  Inc(P);
+                if P^ = #10 then
                 begin
-                  Inc(FSourceLine);
-                  if not FASMMode then // ASM 模式下，换行作为语句结束符，不在注释内处理
+                  // ASM 模式下，换行作为语句结束符，不在注释内处理，所以这也不加
+                  if not FASMMode then
                   begin
+                    Inc(FSourceLine);
+                    Inc(FBlankLinesAfterComment);
                     Inc(P);
-                    if P^ = #10 then
-                    begin
-                      Inc(FBlankLinesAfterComment);
-                      Inc(P);
-                    end;
                   end;
                 end;
 
@@ -967,7 +975,8 @@ begin
     #10:  // 如果有回车则处理，以 #10 为准
       begin
         Result := tokCRLF;
-        Inc(FSourceLine);
+        if not FASMMode then // FSourceLine Inc-ed at another place
+          Inc(FSourceLine);
         Inc(P);
       end;
   else
@@ -982,6 +991,10 @@ begin
 
   FSourcePtr := P;
   FToken := Result;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('Line: %5.5d. Token: %s', [FSourceLine, TokenString]);
+{$ENDIF}
 
   if FCompDirectiveMode = cdmAsComment then
   begin
