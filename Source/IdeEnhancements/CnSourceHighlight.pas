@@ -38,7 +38,9 @@ unit CnSourceHighlight;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2012.12.24
+* 修改记录：2013.07.08
+*               加入绘制流程控制标识符背景的功能
+*           2012.12.24
 *               修复 jtdd 报告的绘制空行分隔线在折叠状态下可能出错的问题
 *           2011.09.04
 *               加入 white_nigger 的修补以针对修复 CloseAll 时出错的问题，待测试
@@ -112,6 +114,17 @@ const
     tkCase,
     tkRepeat, tkUntil];
 
+  csPasFlowTokenStr: array[0..3] of AnsiString =
+    ('exit', 'continue', 'break', 'abort');
+
+  csPasFlowTokenKinds: set of TTokenKind = [tkGoto, tkRaise];
+
+  csCppFlowTokenStr: array[0..1] of AnsiString =
+    ('abort', 'exit');
+
+  csCppFlowTokenKinds: TIdentDirect = [ctkgoto, ctkreturn, ctkcontinue, ctkbreak];
+  // If change here, CppCodeParser also need change. 
+
 type
   TCnLineStyle = (lsSolid, lsDot, lsSmallDot, lsTinyDot);
 
@@ -158,8 +171,11 @@ type
     FKeyList: TCnList;         // 容纳解析出来的 Tokens
     FCurTokenList: TCnList;    // 容纳解析出来的与光标当前词相同的 Tokens
     FCurTokenListEditLine: TCnList; // 容纳解析出来的光标当前词相同的词的行数
+    FFlowTokenList: TCnList;   // 容纳解析出来的流程控制标识符的Token
+    FFlowTokenListEditLine: TCnList;// 容纳解析出来的流程控制标识符所在的行数
     FLineList: TCnObjectList;
     FIdLineList: TCnObjectList;// LineList/IdLineList 容纳按行方式存储的快速访问的内容
+    FFlowLineList: TCnObjectList;
     FSeparateLineList: TCnList;// 容纳分界空行信息
     FLineInfo: TBlockLineInfo; // 容纳解析出来的 Tokens 配对信息
     FStack: TStack;
@@ -179,30 +195,44 @@ type
     function GetLines(LineNum: Integer): TCnList;
     function GetCurTokenCount: Integer;
     function GetIdLines(LineNum: Integer): TCnList;
+    function GetFlowTokenCount: Integer;
+    function GetFlowTokens(Index: Integer): TCnPasToken;
+    function GetFlowLineCount: Integer;
+    function GetFlowLines(LineNum: Integer): TCnList;
   public
     constructor Create(AControl: TControl);
     destructor Destroy; override;
     function CheckBlockMatch(BlockHighlightRange: TBlockHighlightRange): Boolean;
     procedure UpdateSeparateLineList;
+    procedure UpdateFlowTokenList;
     procedure UpdateCurTokenList;
     procedure CheckLineMatch(View: IOTAEditView; IgnoreClass: Boolean);
-    procedure UpdateLineList;
-    procedure UpdateIdLineList;
+    procedure ConvertLineList;    // 将解析出的关键字符号转换成按行方式快速访问的
+    procedure ConvertIdLineList;  // 将解析出的标识符转换成按行方式快速访问的
+    procedure ConvertFlowLineList;  // 将解析出的流程控制标识符转换成按行方式快速访问的
     procedure Clear;
     procedure AddToKeyList(AToken: TCnPasToken);
     procedure AddToCurrList(AToken: TCnPasToken);
+    procedure AddToFlowList(AToken: TCnPasToken);
     property Count: Integer read GetCount;
     property Tokens[Index: Integer]: TCnPasToken read GetTokens;
     property CurTokens[Index: Integer]: TCnPasToken read GetCurTokens;
     {* 和当前标识符相同的标识符列表}
     property CurTokenCount: Integer read GetCurTokenCount;
     {* 和当前标识符相同的标识符列表数目}
+    property FlowTokens[Index: Integer]: TCnPasToken read GetFlowTokens;
+    {* 流程控制的标识符列表}
+    property FlowTokenCount: Integer read GetFlowTokenCount;
+    {* 流程控制的标识符列表数目}
     property LineCount: Integer read GetLineCount;
     property IdLineCount: Integer read GetIdLineCount;
+    property FlowLineCount: Integer read GetFlowLineCount;
     property Lines[LineNum: Integer]: TCnList read GetLines;
     {* 每行一个CnList，后者容纳 Token}
     property IdLines[LineNum: Integer]: TCnList read GetIdLines;
     {* 也是按 Lines 的方式来，每行一个 CnList，后者容纳 CurToken}
+    property FlowLines[LineNum: Integer]: TCnList read GetFlowLines;
+    {* 也是按 Lines 的方式来，每行一个 CnList，后者容纳 FlowToken}
     property Control: TControl read FControl;
     property Modified: Boolean read FModified write FModified;
     property Changed: Boolean read FChanged write FChanged;
@@ -284,7 +314,7 @@ type
     function GetPairs(Index: Integer): TBlockLinePair;
     function GetLineCount: Integer;
     function GetLines(LineNum: Integer): TCnList;
-    procedure UpdateLineList;
+    procedure ConvertLineList;
   public
     constructor Create(AControl: TControl);
     destructor Destroy; override;
@@ -377,6 +407,9 @@ type
     FSeparateLineColor: TColor;
     FSeparateLineStyle: TCnLineStyle;
     FSeparateLineWidth: Integer;
+    FHighlightFlowStatement: Boolean;
+    FFlowStatementBackground: TColor;
+    FFlowStatementForeground: TColor;
     function GetColorFg(ALayer: Integer): TColor;
     function EditorGetTextRect(Editor: TEditorObject; APos: TOTAEditPos;
       const {$IFDEF BDS}LineText, {$ENDIF} AText: AnsiString; var ARect: TRect): Boolean;
@@ -428,6 +461,9 @@ type
     procedure SetHighLightCurrentLine(const Value: Boolean);
     procedure SetHighLightLineColor(const Value: TColor);
 {$ENDIF}
+    procedure SetFlowStatementBackground(const Value: TColor);
+    procedure SetHighlightFlowStatement(const Value: Boolean);
+    procedure SetFlowStatementForeground(const Value: TColor);
   protected
     procedure DoEnhConfig;
     procedure SetActive(Value: Boolean); override;
@@ -506,6 +542,12 @@ type
     {* 空行分隔线的线宽，默认为 1}
     property BlockMatchLineLimit: Boolean read FBlockMatchLineLimit write FBlockMatchLineLimit;
     property BlockMatchMaxLines: Integer read FBlockMatchMaxLines write FBlockMatchMaxLines;
+    property HighlightFlowStatement: Boolean read FHighlightFlowStatement write SetHighlightFlowStatement;
+    {* 是否高亮流程控制语句}
+    property FlowStatementBackground: TColor read FFlowStatementBackground write SetFlowStatementBackground;
+    {* 高亮流程控制语句的背景色}
+    property FlowStatementForeground: TColor read FFlowStatementForeground write SetFlowStatementForeground;
+    {* 高亮流程控制语句的前景色}
     property OnEnhConfig: TNotifyEvent read FOnEnhConfig write FOnEnhConfig;
   end;
 
@@ -609,6 +651,9 @@ const
   csBlockMatchHighlightColor = 'BlockMatchHighlightColor';
   csHighlightCurrentLine = 'HighLightCurrentLine';
   csHighLightLineColor = 'HighLightLineColor';
+  csHighlightFlowStatement = 'HighlightFlowStatement';
+  csFlowStatementBackground = 'FlowStatementBackground';
+  csFlowStatementForeground = 'FlowStatementForeground';
 
 var
   FHighlight: TCnSourceHighlight = nil;
@@ -627,6 +672,76 @@ var
   // CurrentLineNum: Integer = -1;
   {$ENDIF}
 {$ENDIF}
+
+function CheckIsFlowToken(AToken: TCnPasToken; IsCpp: Boolean): Boolean;
+var
+  I: Integer;
+  T: AnsiString;
+begin
+  Result := False;
+  if AToken = nil then
+    Exit;
+
+  if IsCpp then // 区分大小写
+  begin
+    if AToken.CppTokenKind in csCppFlowTokenKinds then // 先比关键字
+    begin
+      Result := True;
+{$IFDEF DEBUG}
+//    CnDebugger.LogFmt('Cpp TokenType %d, Token: %s', [Integer(AToken.CppTokenKind), AToken.Token]);
+{$ENDIF}
+      Exit;
+    end
+    else
+    begin
+      T := AToken.Token;
+      for I := Low(csCppFlowTokenStr) to High(csCppFlowTokenStr) do
+      begin
+        if T = csCppFlowTokenStr[I] then
+        begin
+{$IFDEF DEBUG}
+//        CnDebugger.LogFmt('Cpp is Flow. TokenType %d, Token: %s', [Integer(AToken.CppTokenKind), AToken.Token]);
+{$ENDIF}
+          Result := True;
+          Exit;
+        end;
+      end;
+    end;
+  end
+  else // 不区分大小写
+  begin
+    if AToken.TokenID in csPasFlowTokenKinds then // 也先比关键字
+    begin
+{$IFDEF DEBUG}
+//    CnDebugger.LogFmt('Pascal TokenType %d, Token: %s', [Integer(AToken.TokenID), AToken.Token]);
+{$ENDIF}
+      Result := True;
+      Exit;
+    end
+    else
+    begin
+      T := AToken.Token;
+      for I := Low(csPasFlowTokenStr) to High(csPasFlowTokenStr) do
+      begin
+        {$IFDEF UNICODE}
+        // Unicode 时直接调用 API 比较以避免生成临时字符串而影响性能
+        Result := lstrcmpiA(@T[1], @((csPasFlowTokenStr[I])[1])) = 0;
+        {$ELSE}
+        Result := LowerCase(T) = csPasFlowTokenStr[I];
+       {$ENDIF}
+
+        if Result then
+        begin
+{$IFDEF DEBUG}
+//        CnDebugger.LogFmt('Pascal is Flow. TokenType %d, Token: %s', [Integer(AToken.TokenID), AToken.Token]);
+{$ENDIF}
+          Exit;
+        end;
+      end;
+    end;
+  end;
+  Result := False;
+end;
 
 function CheckTokenMatch(const T1: AnsiString; const T2: AnsiString;
   CaseSensitive: Boolean): Boolean;
@@ -833,6 +948,7 @@ begin
   FKeyList.Clear;
   FLineList.Clear;
   FIdLineList.Clear;
+  FFlowLineList.Clear;
   FSeparateLineList.Clear;
   if LineInfo <> nil then
     LineInfo.Clear;
@@ -938,7 +1054,8 @@ begin
 
       // 记录大括号的层次
       UpdateCurTokenList;
-      UpdateLineList;
+      UpdateFlowTokenList;
+      ConvertLineList;
       if LineInfo <> nil then
         CheckLineMatch(EditView, GlobalIgnoreClass);
     end;
@@ -1008,6 +1125,7 @@ begin
     end;
 
     UpdateCurTokenList;
+    UpdateFlowTokenList;
     FCurrentBlockSearched := False;
 
   {$IFDEF DEBUG}
@@ -1031,7 +1149,7 @@ begin
         Tokens[I].EditCol := EditPos.Col;
         Tokens[I].EditLine := EditPos.Line;
       end;
-      UpdateLineList;
+      ConvertLineList;
     end;
 
     if FHighlight.FHilightSeparateLine then
@@ -1099,6 +1217,184 @@ begin
       LastSepLine := Tokens[I].EditLine + 1;
     end;
   end;
+end;
+
+procedure TBlockMatchInfo.UpdateFlowTokenList;
+var
+  EditView: IOTAEditView;
+  CharPos: TOTACharPos;
+  EditPos: TOTAEditPos;
+  I: Integer;
+begin
+  FCurMethodStartToken := nil;
+  FCurMethodCloseToken := nil;
+
+  if FControl = nil then Exit;
+
+  try
+    EditView := EditControlWrapper.GetEditView(FControl);
+  except
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('GetEditView error');
+  {$ENDIF}
+    Exit;
+  end;
+
+  if EditView = nil then
+    Exit;
+
+  for I := 0 to FFlowTokenList.Count - 1 do
+    FHighLight.EditorMarkLineDirty(Integer(FFlowTokenListEditLine[I]));
+
+  FFlowTokenList.Clear;
+  FFlowTokenListEditLine.Clear;
+  if not FIsCppSource then
+  begin
+    if Assigned(Parser) then
+    begin
+      if not FCurrentBlockSearched then   // 找当前块，供转换Token位置
+      begin
+        EditPos := EditView.CursorPos;
+        EditView.ConvertPos(True, EditPos, CharPos);
+        Parser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
+      end;
+
+    {$IFDEF DEBUG}
+      if Assigned(Parser.MethodStartToken) and
+        Assigned(Parser.MethodCloseToken) then
+        CnDebugger.LogFmt('CurrentMethod: %s, MethodStartToken: %d, MethodCloseToken: %d',
+          [Parser.CurrentMethod, Parser.MethodStartToken.ItemIndex, Parser.MethodCloseToken.ItemIndex]);
+    {$ENDIF}
+
+      if Assigned(Parser.MethodStartToken) and
+        Assigned(Parser.MethodCloseToken) then
+      begin
+        FCurMethodStartToken := Parser.MethodStartToken;
+        FCurMethodCloseToken := Parser.MethodCloseToken;
+
+        for I := FCurMethodStartToken.ItemIndex to
+          FCurMethodCloseToken.ItemIndex do
+        begin
+          CharPos := OTACharPos(Parser.Tokens[I].CharIndex, Parser.Tokens[I].LineNumber + 1);
+          EditView.ConvertPos(False, EditPos, CharPos);
+          // TODO: 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
+{$IFDEF BDS2009_UP}
+          // if not FHighlight.FUseTabKey then
+          EditPos.Col := Parser.Tokens[I].CharIndex + 1;
+{$ENDIF}
+          Parser.Tokens[I].EditCol := EditPos.Col;
+          Parser.Tokens[I].EditLine := EditPos.Line;
+        end;
+      end
+      else if FHighlight.BlockHighlightRange = brAll then // 无当前过程并且高亮所有内容时搜索当前所有标识符，避免只高亮光标出于当前过程内的问题
+      begin
+        for I := 0 to Parser.Count - 1 do
+        begin
+          CharPos := OTACharPos(Parser.Tokens[I].CharIndex, Parser.Tokens[I].LineNumber + 1);
+          EditView.ConvertPos(False, EditPos, CharPos);
+{$IFDEF BDS2009_UP}
+          EditPos.Col := Parser.Tokens[I].CharIndex + 1;
+{$ENDIF}
+          Parser.Tokens[I].EditCol := EditPos.Col;
+          Parser.Tokens[I].EditLine := EditPos.Line;
+        end;
+      end;
+
+      // 高亮整个单元时，或当前是过程名与类名时，高亮整个单元
+      if (FCurMethodStartToken = nil) or (FCurMethodCloseToken = nil) or
+        (FHighlight.BlockHighlightRange = brAll) then
+      begin
+        for I := 0 to Parser.Count - 1 do
+        begin
+          if CheckIsFlowToken(Parser.Tokens[I], FIsCppSource) then
+          begin
+            FFlowTokenList.Add(Parser.Tokens[I]);
+            FFlowTokenListEditLine.Add(Pointer(Parser.Tokens[I].EditLine));
+          end;
+        end;
+      end
+      else // 其它范围便默认改为高亮本过程的
+      begin
+        for I := FCurMethodStartToken.ItemIndex to FCurMethodCloseToken.ItemIndex do
+        begin
+          if CheckIsFlowToken(Parser.Tokens[I], FIsCppSource) then
+          begin
+            FFlowTokenList.Add(Parser.Tokens[I]);
+            FFlowTokenListEditLine.Add(Pointer(Parser.Tokens[I].EditLine));
+          end;
+        end;
+      end;
+    end;
+
+    FFlowLineList.Clear;
+    ConvertFlowLineList;
+  end
+  else // 做 C/C++ 中的当前解析，将控制流程的标识符解析出来
+  begin
+    // 为了减少代码重构的工作量，此处 C/C++ 中当前解析出的标识符，仍旧用
+    // TCnPasToken 来表示并加入 FFlowTokenList 中，但和 Pascal 语言相关的属性
+    // 均无效，只有 Token 名和位置等有效。因此 C/C++ 的高亮标识符不支持范围设置
+
+    // 将解析出的流程控制的Token 按范围规定加入 FFlowTokenList
+    for I := 0 to CppParser.Count - 1 do
+    begin
+      CharPos := OTACharPos(CppParser.Tokens[I].CharIndex - 1, CppParser.Tokens[I].LineNumber);
+      // 此处 LineNumber 无需加一了，因为 mwBCBTokenList 中的此属性是从 1 开始的
+      // 反倒 CharIndex 得减一
+      EditView.ConvertPos(False, EditPos, CharPos);
+      CppParser.Tokens[I].EditCol := EditPos.Col;
+      CppParser.Tokens[I].EditLine := EditPos.Line;
+    end;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('CppParser.Count: %d', [CppParser.Count]);
+{$ENDIF}
+    if (FHighlight.BlockHighlightRange in [brMethod, brWholeBlock])
+      and Assigned(CppParser.BlockStartToken) and Assigned(CppParser.BlockCloseToken) then
+    begin
+      for I := CppParser.BlockStartToken.ItemIndex to CppParser.BlockCloseToken.ItemIndex do
+      begin
+        if CheckIsFlowToken(CppParser.Tokens[I], FIsCppSource) then
+        begin
+          FFlowTokenList.Add(CppParser.Tokens[I]);
+          FFlowTokenListEditLine.Add(Pointer(CppParser.Tokens[I].EditLine));
+        end;
+      end;
+    end
+    else if (FHighlight.BlockHighlightRange in [brInnerBlock])
+      and Assigned(CppParser.InnerBlockStartToken) and Assigned(CppParser.InnerBlockCloseToken) then
+    begin
+      for I := CppParser.InnerBlockStartToken.ItemIndex to CppParser.InnerBlockCloseToken.ItemIndex do
+      begin
+        if CheckIsFlowToken(CppParser.Tokens[I], FIsCppSource) then
+        begin
+          FFlowTokenList.Add(CppParser.Tokens[I]);
+          FFlowTokenListEditLine.Add(Pointer(CppParser.Tokens[I].EditLine));
+        end;
+      end;
+    end
+    else // 整个范围
+    begin
+      for I := 0 to CppParser.Count - 1 do
+      begin
+        if CheckIsFlowToken(CppParser.Tokens[I], FIsCppSource) then
+        begin
+          FFlowTokenList.Add(CppParser.Tokens[I]);
+          FFlowTokenListEditLine.Add(Pointer(CppParser.Tokens[I].EditLine));
+        end;
+      end;
+    end;
+
+    FFlowLineList.Clear;
+    ConvertFlowLineList;
+  end;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('FFlowTokenList.Count: %d', [FFlowTokenList.Count]);
+{$ENDIF}
+
+  for I := 0 to FFlowTokenList.Count - 1 do
+    FHighLight.EditorMarkLineDirty(TCnPasToken(FFlowTokenList[I]).EditLine);
 end;
 
 procedure TBlockMatchInfo.UpdateCurTokenList;
@@ -1230,7 +1526,7 @@ begin
     end;
 
     FIdLineList.Clear;
-    UpdateIdLineList;
+    ConvertIdLineList;
   end
   else // 做 C/C++ 中的当前解析，将相同的标识符解析出来
   begin
@@ -1299,7 +1595,7 @@ begin
     end;
 
     FIdLineList.Clear;
-    UpdateIdLineList;
+    ConvertIdLineList;
   end;
 
 {$IFDEF DEBUG}
@@ -1356,7 +1652,7 @@ begin
             LineInfo.AddPair(Pair);
           end;
         end;
-        LineInfo.UpdateLineList;
+        LineInfo.ConvertLineList;
         LineInfo.FindCurrentPair(View, FIsCppSource);
       finally
         for I := 0 to FStack.Count - 1 do
@@ -1485,7 +1781,7 @@ begin
             end;
           end;
         end;
-        LineInfo.UpdateLineList;
+        LineInfo.ConvertLineList;
         LineInfo.FindCurrentPair(View, FIsCppSource);
       finally
         for I := 0 to FIfThenStack.Count - 1 do
@@ -1504,6 +1800,7 @@ begin
   FCurTokenListEditLine.Clear;
   FLineList.Clear;
   FIdLineList.Clear;
+  FFlowLineList.Clear;
   FSeparateLineList.Clear;
   if LineInfo <> nil then
     LineInfo.Clear;
@@ -1519,6 +1816,11 @@ begin
   FCurTokenList.Add(AToken);
 end;
 
+procedure TBlockMatchInfo.AddToFlowList(AToken: TCnPasToken);
+begin
+  FFlowTokenList.Add(AToken);
+end;
+
 constructor TBlockMatchInfo.Create(AControl: TControl);
 begin
   inherited Create;
@@ -1529,8 +1831,11 @@ begin
   FKeyList := TCnList.Create;
   FCurTokenList := TCnList.Create;
   FCurTokenListEditLine := TCnList.Create;
+  FFlowTokenList := TCnList.Create;
+  FFlowTokenListEditLine := TCnList.Create;
   FLineList := TCnObjectList.Create;
   FIdLineList := TCnObjectList.Create;
+  FFlowLineList := TCnObjectList.Create;
   FSeparateLineList := TCnList.Create;
   FStack := TStack.Create;
   FIfThenStack := TStack.Create;
@@ -1545,7 +1850,10 @@ begin
   FIfThenStack.Free;
   FLineList.Free;
   FIdLineList.Free;
+  FFlowLineList.Free;
   FSeparateLineList.Free;
+  FFlowTokenListEditLine.Free;
+  FFlowTokenList.Free;
   FCurTokenListEditLine.Free;
   FCurTokenList.Free;
   FKeyList.Free;
@@ -1574,6 +1882,16 @@ begin
   Result := FCurTokenList.Count;
 end;
 
+function TBlockMatchInfo.GetFlowTokenCount: Integer;
+begin
+  Result := FFlowTokenList.Count;
+end;
+
+function TBlockMatchInfo.GetFlowTokens(Index: Integer): TCnPasToken;
+begin
+  Result := TCnPasToken(FFlowTokenList[Index]);
+end;
+
 function TBlockMatchInfo.GetLineCount: Integer;
 begin
   Result := FLineList.Count;
@@ -1582,6 +1900,11 @@ end;
 function TBlockMatchInfo.GetIdLineCount: Integer;
 begin
   Result := FIdLineList.Count;
+end;
+
+function TBlockMatchInfo.GetFlowLineCount: Integer;
+begin
+  Result := FFlowLineList.Count;
 end;
 
 function TBlockMatchInfo.GetLines(LineNum: Integer): TCnList;
@@ -1594,7 +1917,12 @@ begin
   Result := TCnList(FIdLineList[LineNum]);
 end;
 
-procedure TBlockMatchInfo.UpdateLineList;
+function TBlockMatchInfo.GetFlowLines(LineNum: Integer): TCnList;
+begin
+  Result := TCnList(FFlowLineList[LineNum]);
+end;
+
+procedure TBlockMatchInfo.ConvertLineList;
 var
   i: Integer;
   Token: TCnPasToken;
@@ -1636,7 +1964,7 @@ begin
   end;
 end;
 
-procedure TBlockMatchInfo.UpdateIdLineList;
+procedure TBlockMatchInfo.ConvertIdLineList;
 var
   I: Integer;
   Token: TCnPasToken;
@@ -1656,6 +1984,30 @@ begin
       if FIdLineList[Token.EditLine] = nil then
         FIdLineList[Token.EditLine] := TCnList.Create;
       TCnList(FIdLineList[Token.EditLine]).Add(Token);
+    end;
+  end;
+end;
+
+procedure TBlockMatchInfo.ConvertFlowLineList;
+var
+  I: Integer;
+  Token: TCnPasToken;
+  MaxLine: Integer;
+begin
+  MaxLine := 0;
+  for I := 0 to FFlowTokenList.Count - 1 do
+    if FlowTokens[I].EditLine > MaxLine then
+      MaxLine := FlowTokens[I].EditLine;
+  FFlowLineList.Count := MaxLine + 1;
+
+  if FHighlight.HighlightFlowStatement then
+  begin
+    for I := 0 to FFLowTokenList.Count - 1 do
+    begin
+      Token := FlowTokens[I];
+      if FFlowLineList[Token.EditLine] = nil then
+        FFlowLineList[Token.EditLine] := TCnList.Create;
+      TCnList(FFlowLineList[Token.EditLine]).Add(Token);
     end;
   end;
 end;
@@ -1707,6 +2059,10 @@ begin
   FSeparateLineColor := clGray;
   FSeparateLineStyle := lsSmallDot;
   FSeparateLineWidth := 1;
+
+  FHighlightFlowStatement := True; // 默认画流程语句背景
+  FFlowStatementBackground := $CCFFCC;
+  FFlowStatementForeground := clBlack;
 
   FBlockMatchLineLimit := True;
   FBlockMatchMaxLines := 40000; // 大于此行数的 unit，不解析
@@ -2553,9 +2909,12 @@ begin
       CurTokenRefreshed := False;
       if ChangeType * [ctCurrLine, ctCurrCol] <> [] then
       begin
-        if FCurrentTokenHighlight and not CurTokenRefreshed then
+        if (FCurrentTokenHighlight or FHighlightFlowStatement) and not CurTokenRefreshed then
         begin
-          Info.UpdateCurTokenList;
+          if FCurrentTokenHighlight then
+            Info.UpdateCurTokenList;
+          if FHighlightFlowStatement then
+            Info.UpdateFlowTokenList;
           CurTokenRefreshed := True;
         end;
 
@@ -2585,11 +2944,14 @@ begin
         end;
       end;
 
-      if FCurrentTokenHighlight and not CurTokenRefreshed then
+      if (FCurrentTokenHighlight or FHighlightFlowStatement) and not CurTokenRefreshed then
       begin
         if ctHScroll in ChangeType then
         begin
-          Info.UpdateCurTokenList;
+          if FCurrentTokenHighlight then
+            Info.UpdateCurTokenList;
+          if FHighlightFlowStatement then
+            Info.UpdateFlowTokenList;
         end
         else if ctVScroll in ChangeType then
           RefreshCurrentTokens(Info);
@@ -2733,7 +3095,7 @@ begin
         end;
         CanvasSaved := True;
 
-        // 先画上再说
+        // 先画上分隔线再说
         EditPos := OTAEditPos(Editor.EditView.LeftColumn, LogicLineNum);
         if EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FLineText, {$ENDIF} ' ', R) then
         begin
@@ -2928,7 +3290,7 @@ begin
                   Brush.Color := FCurrentTokenBackground;
                   Brush.Style := bsSolid;
                   FillRect(R1);
-                end;                  
+                end;
 
                 Brush.Style := bsClear;
                 if (FCurrentTokenBorderColor <> clNone) and
@@ -2937,8 +3299,85 @@ begin
                   Pen.Color := FCurrentTokenBorderColor;
                   Rectangle(R1);
                 end;
-                
+
                 Font.Color := FCurrentTokenForeground;
+                TextOut(R.Left, R.Top, string(Token.Token));
+              end;
+            end;
+          end;
+        end;
+
+        // 如果有需要高亮绘制的流程控制标识符的内容
+        if FHighlightFlowStatement and (LogicLineNum < Info.FlowLineCount) and
+          (Info.FlowLines[LogicLineNum] <> nil) then
+        begin
+          for I := 0 to Info.FlowLines[LogicLineNum].Count - 1 do
+          begin
+            Token := TCnPasToken(Info.FlowLines[LogicLineNum][I]);
+            TokenLen := Length(Token.Token);
+
+            EditPos := OTAEditPos(Token.EditCol, LineNum);
+            if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FLineText, {$ENDIF} Token.Token, R) then
+              Continue;
+
+            EditPos.Col := Token.EditCol;
+            EditPos.Line := Token.EditLine;
+
+            // Token 前也就是初始 EditCol 需要 UTF8 转换
+{$IFDEF BDS}
+            if FLineText <> '' then
+              EditPos.Col := Length(CnAnsiToUtf8(Copy(FLineText, 1, Token.EditCol)));
+{$ENDIF}
+            CanDrawToken := True;
+            for J := 0 to TokenLen - 1 do
+            begin
+              // 此处循环内本来需要一个 UTF8 的位置转换，但目前解析出来的 Token 不包含
+              // 双字节字符，因此 Token 内暂不需要转换。
+              EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False,
+                Element, LineFlag);
+              CanDrawToken := (LineFlag = 0) and (Element in [atIdentifier, atReservedWord]);
+
+              if not CanDrawToken then // 如果中间有选择区，则不画
+                Break;
+              Inc(EditPos.Col);
+            end;
+
+            if CanDrawToken then
+            begin
+              // 在位置上画背景高亮的标识符
+              with EditCanvas do
+              begin
+                R1 := Rect(R.Left - 1, R.Top, R.Right + 1, R.Bottom - 1);
+                if FFlowStatementBackground <> clNone then
+                begin
+                  Brush.Color := FFlowStatementBackground;
+                  Brush.Style := bsSolid;
+                  FillRect(R1);
+                end;
+
+                if Element = atIdentifier then
+                begin
+                  Font.Style := [];
+                  Font.Color := FIdentifierHighlight.ColorFg;
+                  if FIdentifierHighlight.Bold then
+                    Font.Style := Font.Style + [fsBold];
+                  if FIdentifierHighlight.Italic then
+                    Font.Style := Font.Style + [fsItalic];
+                  if FIdentifierHighlight.Underline then
+                    Font.Style := Font.Style + [fsUnderline];
+                end
+                else if Element = atReservedWord then
+                begin
+                  Font.Style := [];
+                  Font.Color := FKeywordHighlight.ColorFg;
+                  if FKeywordHighlight.Bold then
+                    Font.Style := Font.Style + [fsBold];
+                  if FKeywordHighlight.Italic then
+                    Font.Style := Font.Style + [fsItalic];
+                  if FKeywordHighlight.Underline then
+                    Font.Style := Font.Style + [fsUnderline];
+                end;
+                Font.Color := FFlowStatementForeground;
                 TextOut(R.Left, R.Top, string(Token.Token));
               end;
             end;
@@ -3362,7 +3801,7 @@ begin
     if FMatchedBracket then
       PaintBracketMatch(Editor, LineNum, LogicLineNum, AElided);
     if FStructureHighlight or FBlockMatchHighlight or FCurrentTokenHighlight
-      or FHilightSeparateLine then // 里头顺便做背景匹配高亮
+      or FHilightSeparateLine or FHighlightFlowStatement then // 里头顺便做背景匹配高亮
       PaintBlockMatchKeyword(Editor, LineNum, LogicLineNum, AElided);
     if FBlockMatchDrawLine then
       PaintBlockMatchLine(Editor, LineNum, LogicLineNum, AElided);
@@ -3422,6 +3861,10 @@ begin
     FHighLightLineColor := ReadColor('', csHighLightLineColor, FHighLightLineColor);
     FHighLightCurrentLine := ReadBool('', csHighLightCurrentLine, FHighLightCurrentLine);
 {$ENDIF}
+    FHighlightFlowStatement := ReadBool('', csHighlightFlowStatement, FHighlightFlowStatement);
+    FFlowStatementBackground := ReadColor('', csFlowStatementBackground, FFlowStatementBackground);
+    FFlowStatementForeground := ReadColor('', csFlowStatementForeground, FFlowStatementForeground);
+    
     FBlockHighlightRange := TBlockHighlightRange(ReadInteger('', csBlockHighlightRange,
       Ord(FBlockHighlightRange)));
     FBlockMatchDelay := ReadInteger('', csBlockMatchDelay, FBlockMatchDelay);
@@ -3475,7 +3918,10 @@ begin
     if FDefaultHighLightLineColor <> FHighLightLineColor then
       WriteColor('', csHighLightLineColor, FHighLightLineColor);
 {$ENDIF}
-
+    WriteBool('', csHighlightFlowStatement, FHighlightFlowStatement);
+    WriteColor('', csFlowStatementBackground, FFlowStatementBackground);
+    WriteColor('', csFlowStatementForeground, FFlowStatementForeground);
+    
     WriteInteger('', csBlockHighlightRange, Ord(FBlockHighlightRange));
     WriteInteger('', csBlockMatchDelay, FBlockMatchDelay);
     WriteBool('', csBlockMatchLineLimit, FBlockMatchLineLimit);
@@ -3840,6 +4286,24 @@ begin
   FHilightSeparateLine := Value;
 end;
 
+procedure TCnSourceHighlight.SetFlowStatementBackground(
+  const Value: TColor);
+begin
+  FFlowStatementBackground := Value;
+end;
+
+procedure TCnSourceHighlight.SetHighlightFlowStatement(
+  const Value: Boolean);
+begin
+  FHighlightFlowStatement := Value;
+end;
+
+procedure TCnSourceHighlight.SetFlowStatementForeground(
+  const Value: TColor);
+begin
+  FFlowStatementForeground := Value;
+end;
+
 { TBlockLinePair }
 
 procedure TBlockLinePair.AddMidToken(const Token: TCnPasToken;
@@ -4063,7 +4527,7 @@ begin
   Result := TBlockLinePair(FPairList[Index]);
 end;
 
-procedure TBlockLineInfo.UpdateLineList;
+procedure TBlockLineInfo.ConvertLineList;
 var
   I, J: Integer;
   Pair: TBlockLinePair;

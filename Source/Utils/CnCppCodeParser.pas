@@ -395,7 +395,8 @@ begin
             end;
             Dec(Layer);
           end;
-        ctkidentifier:
+        ctkidentifier,        // Need this 4 for flow control in source highlight
+        ctkreturn, ctkgoto, ctkbreak, ctkcontinue:
           begin
             NewToken;
           end;

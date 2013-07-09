@@ -270,7 +270,7 @@ begin
   FIncludeVer := (Options.GetOptionValue('IncludeVersionInfo') = '-1')
     or (Options.GetOptionValue('IncludeVersionInfo') = 'True');
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('VerEnhance BeforeCompile ' + VarToStr(Options.GetOptionValue('IncludeVersionInfo')));
+//  CnDebugger.LogMsg('VerEnhance BeforeCompile ' + VarToStr(Options.GetOptionValue('IncludeVersionInfo')));
 {$ENDIF}
 {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
   if not FIncludeVer then

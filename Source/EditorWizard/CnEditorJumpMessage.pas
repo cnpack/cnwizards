@@ -676,7 +676,7 @@ begin
         BlockMatchInfo.Tokens[I].EditCol := EditPos.Col;
         BlockMatchInfo.Tokens[I].EditLine := EditPos.Line;
       end;
-      BlockMatchInfo.UpdateLineList;
+      BlockMatchInfo.ConvertLineList;
     end;
 
     BlockMatchInfo.IsCppSource := CurIsCpp;
