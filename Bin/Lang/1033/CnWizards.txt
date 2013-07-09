@@ -2318,6 +2318,7 @@ TCnSourceHighlightForm.lbl4.Caption=Background:
 TCnSourceHighlightForm.lbl5.Caption=Frame:
 TCnSourceHighlightForm.btnReset.Hint=Color Setting Functions
 TCnSourceHighlightForm.chkHighlight.Caption=Enable Highlight Keyword Structure.
+TCnSourceHighlightForm.chkFlowControl.Caption=Enable Highlight Flow Control Statement.
 TCnSourceHighlightForm.chkDrawLine.Caption=Enable Structure Lines.
 TCnSourceHighlightForm.chkSeparateLine.Caption=Enable Separate Lines between Functions.
 TCnSourceHighlightForm.chkBkHighlight.Caption=Enable Background Highlight Keyword Structure at Cursor.

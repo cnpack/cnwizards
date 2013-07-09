@@ -2318,6 +2318,7 @@ TCnSourceHighlightForm.lbl4.Caption=背景色:
 TCnSourceHighlightForm.lbl5.Caption=边框色:
 TCnSourceHighlightForm.btnReset.Hint=配色相关功能
 TCnSourceHighlightForm.chkHighlight.Caption=允许代码结构匹配关键字高亮显示。
+TCnSourceHighlightForm.chkFlowControl.Caption=允许流程控制语句高亮显示。
 TCnSourceHighlightForm.chkDrawLine.Caption=允许代码结构匹配连线显示。
 TCnSourceHighlightForm.chkSeparateLine.Caption=允许函数间的空行显示分隔线。
 TCnSourceHighlightForm.chkBkHighlight.Caption=允许光标处匹配关键字高亮背景显示。
