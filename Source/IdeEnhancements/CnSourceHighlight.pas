@@ -97,6 +97,7 @@ const
   csDefCurTokenColorBg = $0080DDFF;
   csDefCurTokenColorFg = clBlack;
   csDefCurTokenColorBd = $00226DA8;
+  csDefFlowControlBg = $FFCCCC;
 
   CN_LINE_STYLE_SMALL_DOT_STEP = 2;
 
@@ -2061,7 +2062,7 @@ begin
   FSeparateLineWidth := 1;
 
   FHighlightFlowStatement := True; // Ä¬ÈÏ»­Á÷³ÌÓï¾ä±³¾°
-  FFlowStatementBackground := $CCFFCC;
+  FFlowStatementBackground := csDefFlowControlBg;
   FFlowStatementForeground := clBlack;
 
   FBlockMatchLineLimit := True;

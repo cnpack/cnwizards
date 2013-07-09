@@ -29,7 +29,9 @@ unit CnSourceHighlightFrm;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2013.01.20
+* 修改记录：2013.07.09
+*               增加流程控制背景高亮
+*           2013.01.20
 *               增加空行分隔线的线型与色彩选项
 *           2012.02.17
 *               增加空行分隔线的选项
@@ -108,6 +110,8 @@ type
     shpCurTokenBd: TShape;
     chkSeparateLine: TCheckBox;
     btnSeparateLineSetting: TButton;
+    chkFlowControl: TCheckBox;
+    shpFlowControl: TShape;
     procedure UpdateControls(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure shpBracketMouseDown(Sender: TObject; Button: TMouseButton;
@@ -172,6 +176,8 @@ begin
     chkHighlightCurLine.Checked := Wizard.HighLightCurrentLine;
     shpCurLine.Brush.Color := Wizard.HighLightLineColor;
 {$ENDIF}
+    chkFlowControl.Checked := Wizard.HighlightFlowStatement;
+    shpFlowControl.Brush.Color := Wizard.FlowStatementBackground;
 
     rgMatchRange.ItemIndex := Integer(Wizard.BlockHighlightRange);
     rgMatchDelay.ItemIndex := Integer(Wizard.BlockHighlightStyle);
@@ -211,6 +217,8 @@ begin
       Wizard.HighLightCurrentLine := chkHighlightCurLine.Checked;
       Wizard.HighLightLineColor := shpCurLine.Brush.Color;
 {$ENDIF}
+      Wizard.HighlightFlowStatement := chkFlowControl.Checked;
+      Wizard.FlowStatementBackground := shpFlowControl.Brush.Color;
 
       Wizard.BlockHighlightRange := TBlockHighlightRange(rgMatchRange.ItemIndex);
       Wizard.BlockHighlightStyle := TBlockHighlightStyle(rgMatchDelay.ItemIndex);
@@ -261,6 +269,7 @@ begin
   shpCurTokenBd.Enabled := chkCurrentToken.Checked;
 
   shpCurLine.Enabled := chkHighlightCurLine.Checked;
+  shpFlowControl.Enabled := chkFlowControl.Checked;
   btnLineSetting.Enabled := chkDrawLine.Checked;
   btnSeparateLineSetting.Enabled := chkSeparateLine.Checked;
 
@@ -371,6 +380,7 @@ begin
   shpCurTokenBg.Brush.Color := csDefCurTokenColorBg;
   shpCurTokenBd.Brush.Color := csDefCurTokenColorBd;
   shpCurLine.Brush.Color := LoadIDEDefaultCurrentColor;
+  shpFlowControl.Brush.Color := csDefFlowControlBg;
 
   shpneg1.Brush.Color := HighLightDefColors[-1];
   shp0.Brush.Color := HighLightDefColors[0];
