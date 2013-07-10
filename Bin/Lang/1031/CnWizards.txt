@@ -2318,6 +2318,7 @@ TCnSourceHighlightForm.lbl4.Caption=Hintergrund:
 TCnSourceHighlightForm.lbl5.Caption=Frame:
 TCnSourceHighlightForm.btnReset.Hint=Farb-Einstellungen Funktionen
 TCnSourceHighlightForm.chkHighlight.Caption=aktiviere Highlight Schlüsselwort Struktur.
+TCnSourceHighlightForm.chkFlowControl.Caption=aktiviere Flow Control Markierung.
 TCnSourceHighlightForm.chkDrawLine.Caption=aktiviere Linien.
 TCnSourceHighlightForm.chkSeparateLine.Caption=aktiviere Trennlinien zwischen Funktionen.
 TCnSourceHighlightForm.chkBkHighlight.Caption=akt. Hintergr. Highl. Schlüsselwort Struktur am Cursor.
