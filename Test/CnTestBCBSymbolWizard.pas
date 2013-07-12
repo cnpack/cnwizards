@@ -109,8 +109,10 @@ type
   TKibitzGetValidSymbolsProc = function(AParam: Integer;
     Symbols: PSymbols; Unknowns: PUnknowns; SymbolCount: Integer): Integer; stdcall;
 
-  TCompGetSymbolTextProc = procedure(Symbol: Integer {Comtypes::TSymbol*};
-    Bif: PChar; Unknown: Word); stdcall;
+  TCppGetSymbolTextProc = procedure(Symbol: Integer {Comtypes::TSymbol*};
+    Bif: PChar; TextType: Word); stdcall;
+
+  TCppGetSymbolFlagsProc = function(Symbol: Integer): Integer; stdcall;
 
 const
   bccLibName = 'bccide.dll';
@@ -123,8 +125,8 @@ const
 
   KibitzGetValidSymbolsName = 'CppGetValidSymbols';
   // corideXX.bpl
-  // Comdebug.CompGetSymbolText(Symbol: PSymbols; var S: string; Unknown: Word); stdcall;
   CppGetSymbolTextName = 'CppGetSymbolText';
+  CppGetSymbolFlagsName = 'CppGetSymbolFlags';
 
   csMaxSymbolCount = 32768;
 
@@ -140,7 +142,8 @@ var
   GetKibitzInfo: TGetKibitzInfoProc;
   IDEEnableKibitzing: TIDEEnableKibitzingProc;
   KibitzGetValidSymbols: TKibitzGetValidSymbolsProc;
-  CppGetSymbolText: TCompGetSymbolTextProc;
+  CppGetSymbolText: TCppGetSymbolTextProc;
+  CppGetSymbolFlags: TCppGetSymbolFlagsProc;
 
   IDEEnableKibitzingHook: TCnMethodHook = nil;
   KibitzGetValidSymbolsHook: TCnMethodHook = nil;
@@ -179,6 +182,9 @@ begin
 
     CppGetSymbolText := GetProcAddress(bccModule, CppGetSymbolTextName);
     Assert(Assigned(CppGetSymbolText), 'Failed to load CppGetSymbolText');
+
+    CppGetSymbolFlags := GetProcAddress(bccModule, CppGetSymbolFlagsName);
+    Assert(Assigned(CppGetSymbolFlags), 'Failed to load CppGetSymbolFlags');
 
     Result := True;
   {$IFDEF Debug}
@@ -273,7 +279,9 @@ var
   I, SymbolCount: Integer;
   Unknowns: PUnknowns;
   Symbols: PSymbols;
-  Text: array[0..1023] of Char;
+  SymbolName: array[0..255] of Char;
+  SymbolType: array[0..1023] of Char;
+  SymbolFlag: Integer;
 begin
   if IDEEnableKibitzingRun then
   begin
@@ -301,8 +309,11 @@ begin
     // 获得符号项
     for I := 0 to SymbolCount - 1 do
     begin
-      CppGetSymbolText(Symbols^[I], @(Text[0]), 1);  // 0 代表名字，8代表类型，1代表俩都要。
-      CnDebugger.LogFmt('TCnTestBCBSymbolWizard, Get Symbol %d, %s', [I, Text]);
+      CppGetSymbolText(Symbols^[I], @(SymbolName[0]), 0);  // 0 代表名字，8代表类型，1代表俩都要。
+      CppGetSymbolText(Symbols^[I], @(SymbolType[0]), 8);
+      SymbolFlag := CppGetSymbolFlags(Symbols^[I]);
+      CnDebugger.LogFmt('TCnTestBCBSymbolWizard, Get Symbol %d, Name: %s, Flag %8.8x, Type %s',
+        [I, SymbolName, SymbolFlag, SymbolType]);
     end;
 
     // 然后Hook掉GetValidSymbol，防止弹出代码自动完成
