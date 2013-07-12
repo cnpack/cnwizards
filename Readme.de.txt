@@ -1,13 +1,13 @@
 ﻿**********************************************************************
                      CnPack For Delphi/C++Builder
                 A Free, Open Source Project from China
-                 (C)Copyright 2001-2012 CnPack Team
+                 (C)Copyright 2001-2013 CnPack Team
 **********************************************************************
 
                          CnPack IDE Wizards
-                           Version 1.0.0
+                           Version 1.0.1
                        =======================
-                         CnPack Team 2012.12
+                         CnPack Team 2013.07
 
 
 ======================================================================
