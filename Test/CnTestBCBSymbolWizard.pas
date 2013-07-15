@@ -31,12 +31,17 @@ unit CnTestBCBSymbolWizard;
 *           先 Hook 掉 bccide 的 IDEENABLEKIBITZING，在其中调用 GetValidSymbols
 *           与 CppGetSymbolText 来得到符号列表，再 Hook 掉 GetValidSymbols 让其
 *           返回 0 来屏蔽弹出的自动完成窗口。
+*           BCB6 的原理类似，但它没有可用的 GetKibitzInfo，只能跑到更上层调用
+*           coride60 中的 TCustomEditControl::CodeCompletion，后面的机制类似，但
+*           调它有个限制，不能从菜单中调，当前焦点与光标必须在当前编辑器里才行。
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式
 * 单元标识：$Id: CnTestBCBSymbolWizard.pas 1146 2012-10-24 06:25:41Z liuxiaoshanzhashu@gmail.com $
-* 修改记录：2013.07.10 V1.0
-*               创建单元
+* 修改记录：2013.07.15 V1.1
+*               实现 BCB6 下的符号获取
+*           2013.07.10 V1.0
+*               创建单元，实现 BCB5 下的符号获取
 ================================================================================
 |</PRE>}
 
@@ -101,8 +106,13 @@ type
     KibitzReserveArray: array[0..255] of Integer; // 再定义一个大数组备用
   end;
 
+{$IFDEF BCB5}
   TGetKibitzInfoProc = procedure(CCMgrSelf: Integer; XPos, YPos: Integer;
     var KibitzResult: TKibitzResult); register;
+{$ENDIF}
+{$IFDEF BCB6}
+  TCustomEditControlCodeCompletionProc = procedure(ASelf: TObject);
+{$ENDIF}
 
   TIDEEnableKibitzingProc = procedure(AParam: Integer); stdcall;
 
@@ -117,10 +127,15 @@ type
 const
   bccLibName = 'bccide.dll';
 
-  CodeCompletionManagerName = '@Cppcodcmplt@CodeCompletionManager'; // bcbide50.bpl 中全局的CodeCompletionManager实例的导出名称
-
+{$IFDEF BCB5}
+  // bcbide50.bpl 中全局的CodeCompletionManager实例的导出名称，非函数
+  CodeCompletionManagerName = '@Cppcodcmplt@CodeCompletionManager';
   GetKibitzInfoName = '@Cppcodcmplt@TCodeCompletionManager@GetKibitzInfo$qqriir22Comtypes@TKibitzResult';
-
+{$ENDIF}
+{$IFDEF BCB6}
+  // BCB6的触发代码分析的
+  CustomEditControlCodeCompletionName = '@Editors@TCustomEditControl@CodeCompletion$qqrc';
+{$ENDIF}
   IDEEnableKibitzingName = 'IDEENABLEKIBITZING';
 
   KibitzGetValidSymbolsName = 'CppGetValidSymbols';
@@ -139,7 +154,12 @@ var
 
   GlobalCodeCompletionManager: Integer = 0;
   KibitzEnabled: Boolean = False;
+{$IFDEF BCB5}
   GetKibitzInfo: TGetKibitzInfoProc;
+{$ENDIF}
+{$IFDEF BCB6}
+  CustomEditControlCodeCompletion: TCustomEditControlCodeCompletionProc;
+{$ENDIF}
   IDEEnableKibitzing: TIDEEnableKibitzingProc;
   KibitzGetValidSymbols: TKibitzGetValidSymbolsProc;
   CppGetSymbolText: TCppGetSymbolTextProc;
@@ -149,17 +169,21 @@ var
   KibitzGetValidSymbolsHook: TCnMethodHook = nil;
 
 function KibitzInitialize: Boolean;
+{$IFDEF BCB5}
 var
   P: PInteger;
+{$ENDIF}
 begin
   Result := False;
   try
     DphIdeModule := LoadLibrary(DphIdeLibName);
     Assert(DphIdeModule <> 0, 'Failed to load DphIdeModule');
-
+{$IFDEF BCB5}
     GetKibitzInfo := GetProcAddress(DphIdeModule, GetKibitzInfoName);
-    Assert(Assigned(GetKibitzInfo), 'Failed to load GetKibitzInfo from DphIdeModule');
+    if not Assigned(GetKibitzInfo) then
+      CnDebugger.LogMsg('Failed to load GetKibitzInfo from DphIdeModule');
 
+    // Only for BCB5
     P := GetProcAddress(DphIdeModule, CodeCompletionManagerName);
     if P <> nil then
     begin
@@ -167,29 +191,37 @@ begin
       CnDebugger.LogFmt('Get Global CodeCompletionManager Address %8.8x, Value %8.8x.',
         [Integer(P), GlobalCodeCompletionManager]);
     end;
-
+{$ENDIF}
     bccModule := LoadLibrary(bccLibName);
     Assert(bccModule <> 0, 'Failed to load dccModule');
 
     KibitzGetValidSymbols := GetProcAddress(bccModule, KibitzGetValidSymbolsName);
-    Assert(Assigned(KibitzGetValidSymbols), 'Failed to load KibitzGetValidSymbols from dccModule');
+    if not Assigned(KibitzGetValidSymbols) then
+      CnDebugger.LogMsg('Failed to load KibitzGetValidSymbols from dccModule');
 
     IDEEnableKibitzing := GetProcAddress(bccModule, IDEEnableKibitzingName);
-    Assert(Assigned(IDEEnableKibitzing), 'Failed to load IDEEnableKibitzing from dccModule');
+    if not Assigned(IDEEnableKibitzing) then
+      CnDebugger.LogMsg('Failed to load IDEEnableKibitzing from dccModule');
 
-//    CorIdeModule := LoadLibrary(CorIdeLibName);
-//    Assert(CorIdeModule <> 0, 'Failed to load CorIdeModule');
+{$IFDEF BCB6}
+    CorIdeModule := LoadLibrary(CorIdeLibName);
+    Assert(CorIdeModule <> 0, 'Failed to load CorIdeModule');
+
+    CustomEditControlCodeCompletion := GetProcAddress(CorIdeModule, CustomEditControlCodeCompletionName);
+    if not Assigned(CustomEditControlCodeCompletion) then
+      CnDebugger.LogMsg('Failed to load CustomEditControlCodeCompletion from CoreIdeModule');
+{$ENDIF}
 
     CppGetSymbolText := GetProcAddress(bccModule, CppGetSymbolTextName);
-    Assert(Assigned(CppGetSymbolText), 'Failed to load CppGetSymbolText');
+    if not Assigned(CppGetSymbolText) then
+      CnDebugger.LogMsg('Failed to load CppGetSymbolText');
 
     CppGetSymbolFlags := GetProcAddress(bccModule, CppGetSymbolFlagsName);
-    Assert(Assigned(CppGetSymbolFlags), 'Failed to load CppGetSymbolFlags');
+    if not Assigned(CppGetSymbolFlags) then
+      CnDebugger.LogMsg('Failed to load CppGetSymbolFlags');
 
     Result := True;
-  {$IFDEF Debug}
     CnDebugger.LogMsg('TCnTestBCBSymbolWizard KibitzInitialize succ');
-  {$ENDIF}
   except
     on E: Exception do
       DoHandleException(E.Message);
@@ -217,48 +249,16 @@ begin
   end;
 end;
 
-function ParseProjectBegin(var FileName: AnsiString; var X, Y: Integer): Boolean;
-var
-  Stream: TMemoryStream;
-  Source: AnsiString;
-  Lex: TmwPasLex;
+{$IFDEF BCB6}
+
+function MyMessageDlgPosHelp(const Msg: string; DlgType: TMsgDlgType;
+  Buttons: TMsgDlgButtons; HelpCtx: Longint; X, Y: Integer;
+  const HelpFileName: string): Integer;
 begin
-{$IFDEF Debug}
-  CnDebugger.LogMsg('ParseProjectBegin');
-{$ENDIF}
-
-  Result := False;
-  FileName := CnOtaGetCurrentProjectFileName;
-  Stream := TMemoryStream.Create;
-  try
-    EditFilerSaveFileToStream(FileName, Stream, False);
-    Source := PAnsiChar(Stream.Memory);
-  finally
-    Stream.Free;
-  end;
-
-{$IFDEF Debug}
-  CnDebugger.LogMsg(FileName + #13#10 + Source);
-{$ENDIF}
-  Lex := TmwPasLex.Create;
-  try
-    Lex.Origin := PAnsiChar(Source);
-    while Lex.TokenID <> tkNull do
-    begin
-      if Lex.TokenID = tkBegin then
-      begin
-        Lex.Next;
-        X := 0;
-        Y := Lex.LineNumber + 1;
-        Result := True;
-        Break;
-      end;
-      Lex.Next;
-    end;
-  finally
-    Lex.Free;
-  end;
+  Result := mrOk;
 end;
+
+{$ENDIF}
 
 procedure FakeDoKibitzCompile(FileName: AnsiString; XPos, YPos: Integer;
   var KibitzResult: TKibitzResult); register;
@@ -363,9 +363,13 @@ procedure TCnTestBCBSymbolWizard.Execute;
 var
   KibitzResult: TKibitzResult;
   CharPos: TOTACharPos;
-  Offset: Integer;
   EditControl: TControl;
+{$IFDEF BCB5}
   IsC: Integer;
+{$ENDIF}
+{$IFDEF BCB6}
+  HookMessageDlgPos: TCnMethodHook;
+{$ENDIF}
 begin
   if not KibitzEnabled then
   begin
@@ -373,12 +377,15 @@ begin
     Exit;
   end;
 
+  CnDebugger.LogMsg('TCnTestBCBSymbolWizard To prepare for compile.');
+
   FillChar(KibitzResult, SizeOf(KibitzResult), 0);
   CharPos := CnOtaGetCurrCharPos(nil);
-  Offset := 0;
-
-  // CodeCompletionManager 全局实例中可能没有当前EditControl的值，塞上
   EditControl := CnOtaGetCurrentEditControl;
+
+  // 准备触发 IDE 自身的代码分析。
+{$IFDEF BCB5}
+  // CodeCompletionManager 全局实例中可能没有当前EditControl的值，塞上
   (PInteger(GlobalCodeCompletionManager + SizeOf(Integer)))^ := Integer(EditControl);
 
   // CodeCompletionManager 全局实例中可能没有当前文件是Cpp的标记，也塞上
@@ -388,6 +395,19 @@ begin
     IsC := IsC or 1;
     (PInteger(GlobalCodeCompletionManager + $C8))^ := IsC;
   end;
+{$ENDIF}
+
+{$IFDEF BCB6} // BCB6没法子，选择直接触发IDE的自动完成
+  HookMessageDlgPos := nil;
+  if Assigned(EditControl) then
+  begin
+    // IDE 在无法进行 CodeInsight 时会弹出一个错误框（不是异常）
+    // 此处临时替换掉显示错误框的函数 MessageDlgPosHelp，使之不显示出来
+    // 待调用完成后再恢复。
+    HookMessageDlgPos := TCnMethodHook.Create(GetBplMethodAddress(@MessageDlgPosHelp),
+      @MyMessageDlgPosHelp);
+  end;
+{$ENDIF}
 
   IDEEnableKibitzingRun := False;
   if IDEEnableKibitzingHook = nil then
@@ -395,15 +415,24 @@ begin
   else
     IDEEnableKibitzingHook.HookMethod;
 
+  CnDebugger.LogMsg('TCnTestBCBSymbolWizard To call for compile and wait for hook.');
+{$IFDEF BCB5}
   // 执行符号信息编译，在被Hook的过程中拿到符号列表
-  GetKibitzInfo(GlobalCodeCompletionManager, CharPos.CharIndex + Offset,
-    CharPos.Line, KibitzResult);
+  GetKibitzInfo(GlobalCodeCompletionManager, CharPos.CharIndex, CharPos.Line, KibitzResult);
+{$ENDIF}
+
+{$IFDEF BCB6} // BCB6 通过触发 IDE 的自动完成的方式执行编译，同样在被Hook的过程中拿符号列表
+   CustomEditControlCodeCompletion(EditControl);
+   HookMessageDlgPos.Free;
+{$ENDIF}
+
   IDEEnableKibitzingHook.UnhookMethod;
   IDEEnableKibitzingRun := False;
 
   if KibitzGetValidSymbolsHook = nil then
     KibitzGetValidSymbolsHook := TCnMethodHook.Create(@KibitzGetValidSymbols, @FakeKibitzGetValidSymbols);
   KibitzGetValidSymbolsHook.UnhookMethod; // 让被屏蔽的恢复正常
+  CnDebugger.LogMsg('TCnTestBCBSymbolWizard End call.');  
 end;
 
 function TCnTestBCBSymbolWizard.GetCaption: string;
