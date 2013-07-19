@@ -50,6 +50,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_CNFORMENHANCEWIZARD}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Menus,
   StdCtrls, ExtCtrls, ComCtrls, ActnList, Buttons, IniFiles,
@@ -149,7 +151,11 @@ type
     property VertOrder: Boolean read GetVertOrder write SetVertOrder;
   end;
 
+{$ENDIF CNWIZARDS_CNFORMENHANCEWIZARD}
+
 implementation
+
+{$IFDEF CNWIZARDS_CNFORMENHANCEWIZARD}
 
 {$R *.dfm}
 
@@ -600,4 +606,5 @@ begin
   end;
 end;
 
+{$ENDIF CNWIZARDS_CNFORMENHANCEWIZARD}
 end.

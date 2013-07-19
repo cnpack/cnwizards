@@ -38,6 +38,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_CNDUNITWIZARD}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, Buttons, ExtCtrls, CnWizMultiLang, CnOTACreators;
@@ -70,7 +72,11 @@ type
     property CreatorType: TCnCreatorType read GetCreatorType write SetCreatorType;
   end;
 
+{$ENDIF CNWIZARDS_CNDUNITWIZARD}
+
 implementation
+
+{$IFDEF CNWIZARDS_CNDUNITWIZARD}
 
 {$R *.dfm}
 
@@ -122,4 +128,5 @@ begin
   Result := 'CnDUnitWizard';
 end;
 
+{$ENDIF CNWIZARDS_CNDUNITWIZARD}
 end.
