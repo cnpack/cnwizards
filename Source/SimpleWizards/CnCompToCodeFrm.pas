@@ -40,6 +40,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_CNALIGNSIZEWIZARD}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, ComCtrls, ToolWin, ActnList, Clipbrd, ToolsAPI, Contnrs,
@@ -130,7 +132,11 @@ var
 
 function ShowCompToCodeForm(): TCnCompToCodeForm;
 
+{$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}
+
 implementation
+
+{$IFDEF CNWIZARDS_CNALIGNSIZEWIZARD}
 
 {$R *.DFM}
 
@@ -1142,4 +1148,5 @@ finalization
   if CnCompToCodeForm <> nil then
     FreeAndNil(CnCompToCodeForm);
 
+{$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}
 end.

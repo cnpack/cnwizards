@@ -39,6 +39,10 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_CNCPUWINENHANCEWIZARD}
+
+{$IFNDEF BDS}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ComCtrls, ExtCtrls, CnSpin, CnWizUtils, CnWizMultiLang;
@@ -74,7 +78,15 @@ type
 function ShowCpuWinEnhanceForm(var CopyForm: TCopyFrom; var CopyTo: TCopyTo;
   var CopyLineCount: Integer; var SettingToAll: Boolean): Boolean;
 
+{$ENDIF}
+
+{$ENDIF CNWIZARDS_CNCPUWINENHANCEWIZARD}
+
 implementation
+
+{$IFDEF CNWIZARDS_CNCPUWINENHANCEWIZARD}
+
+{$IFNDEF BDS}
 
 {$R *.dfm}
 
@@ -130,5 +142,9 @@ begin
     Key := #0;
   end
 end;
+
+{$ENDIF}
+
+{$ENDIF CNWIZARDS_CNCPUWINENHANCEWIZARD}
 
 end.

@@ -38,6 +38,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_CNBOOKMARKWIZARD}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ComCtrls, CnSpin, CnWizOptions, CnWizMultiLang;
@@ -73,7 +75,11 @@ function ShowBookmarkConfigForm(var DispLines: Integer; var SaveBookmark,
   AutoRefresh: Boolean; var Interval: Integer; SourceFont, HighlightFont:
   TFont): Boolean;
 
+{$ENDIF CNWIZARDS_CNBOOKMARKWIZARD}
+
 implementation
+
+{$IFDEF CNWIZARDS_CNBOOKMARKWIZARD}
 
 {$R *.DFM}
 
@@ -131,4 +137,5 @@ begin
   end
 end;
 
+{$ENDIF CNWIZARDS_CNBOOKMARKWIZARD}
 end.
