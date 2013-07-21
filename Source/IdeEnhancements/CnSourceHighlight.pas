@@ -3626,8 +3626,9 @@ end;
 procedure TCnSourceHighlight.ActiveFormChanged(Sender: TObject);
 begin
   if Active and (FStructureHighlight or FBlockMatchDrawLine or FHilightSeparateLine
-    or FHighLightCurrentLine or FHighlightFlowStatement or FCurrentTokenHighlight)
-    and (BlockHighlightStyle <> bsHotkey) and IsIdeEditorForm(Screen.ActiveForm) then
+    {$IFNDEF BDS} or FHighLightCurrentLine {$ENDIF} or FHighlightFlowStatement
+    or FCurrentTokenHighlight) and (BlockHighlightStyle <> bsHotkey)
+    and IsIdeEditorForm(Screen.ActiveForm) then
     CnWizNotifierServices.ExecuteOnApplicationIdle(OnHighlightExec);
 end;
 
@@ -3635,9 +3636,9 @@ procedure TCnSourceHighlight.AfterCompile(Succeeded,
   IsCodeInsight: Boolean);
 begin
   if Active and (not IsCodeInsight) and (FStructureHighlight or FBlockMatchDrawLine
-    or FHilightSeparateLine or FHighLightCurrentLine or FHighlightFlowStatement
-    or FCurrentTokenHighlight) and (BlockHighlightStyle <> bsHotkey)
-    and IsIdeEditorForm(Screen.ActiveForm) then
+    or FHilightSeparateLine {$IFNDEF BDS} or FHighLightCurrentLine {$ENDIF}
+    or FHighlightFlowStatement or FCurrentTokenHighlight)
+    and (BlockHighlightStyle <> bsHotkey) and IsIdeEditorForm(Screen.ActiveForm) then
     CnWizNotifierServices.ExecuteOnApplicationIdle(OnHighlightExec);
 end;
 
