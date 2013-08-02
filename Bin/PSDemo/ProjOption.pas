@@ -17,8 +17,18 @@ var
   Options: IOTAProjectOptions;
   Strs: TStringList;
   I: Integer;
-
+  Proj: IOTAProject;
 begin
+  if _SUPPORT_OTA_PROJECT_CONFIGURATION = True then
+  begin
+    Proj := CnOtaGetCurrentProject();
+    if Proj <> nil then
+    begin
+      Writeln('FrameworkType: ' + Proj.GetFrameworkType());
+      Writeln('Platform: ' + Proj.GetPlatform());
+    end;
+  end;
+
   Options := CnOtaGetActiveProjectOptions(nil);
   if Options = nil then Exit;
   Strs := TStringList.Create;
