@@ -770,6 +770,9 @@ var
     I, UnitStartPos, UnitEndPos: Integer;
     S: string;
   begin
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('GetUsesSource List: %s.', [List.Text]);
+{$ENDIF}
     Result := '';
     CPos := Lex.TokenPos;
     UsesList := TObjectList.Create;
@@ -802,7 +805,9 @@ var
             Item.CommaBeforePos := LastCommaPos - 1;
           Item.CommaAfterPos := 0;
           UsesList.Add(Item);
-
+{$IFDEF DEBUG}
+//        CnDebugger.LogFmt('GetUsesSource UsesList Add: %s.', [Item.Name]);
+{$ENDIF}
           S := '';
           UnitStartPos := 0;
           UnitEndPos := 0;
@@ -821,17 +826,42 @@ var
         
         Lex.NextNoJunk;
       end;
+      if (Lex.TokenID = tkSemiColon) and (Trim(S) <> '') then
+      begin
+        // Add last unit before the semicolon
+        Item := TPrvUsesItem.Create;
+        Item.Name := S;
+        Item.BeginPos := UnitStartPos;
+        Item.EndPos := UnitEndPos;
+        if LastCommaPos <> 0 then
+          Item.CommaBeforePos := LastCommaPos - 1;
+        Item.CommaAfterPos := 0;
+        UsesList.Add(Item);
+{$IFDEF DEBUG}
+//      CnDebugger.LogFmt('GetUsesSource UsesList Add Last: %s.', [Item.Name]);
+{$ENDIF}
+      end;
 
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('GetUsesSource UsesList Count: %d. List Count %d.',
+        [UsesList.Count, List.Count]);
+{$ENDIF}
       if Lex.TokenID <> tkNull then
         Lex.Next;
       SetLength(Result, Lex.TokenPos - CPos);
       CopyMemory(Pointer(Result), Pointer(Integer(Lex.Origin) + CPos), Lex.TokenPos - CPos);
 
+{$IFDEF DEBUG}
+//    CnDebugger.LogFmt('GetUsesSource First Copy Result %s.', [Result]);
+{$ENDIF}
       for I := UsesList.Count - 1 downto 0 do
       begin
         Item := TPrvUsesItem(UsesList[I]);
         if List.IndexOf(Item.Name) >= 0 then
         begin
+{$IFDEF DEBUG}
+//        CnDebugger.LogFmt('GetUsesSource Has Name %s.', [Item.Name]);
+{$ENDIF}
           if I = 0 then // First in the uses clause
           begin
             if Item.CommaAfterPos <> 0 then
@@ -869,14 +899,23 @@ var
 
           // ·ÀÖ¹É¾³ý×îºóµÄ ; ºÅ
           EndPos := Min(EndPos, CPos + Length(Result) - 1);
-
+{$IFDEF DEBUG}
+//        CnDebugger.LogFmt('GetUsesSource Before a Delete BegPos %d, CPos %d, EndPos %d.',
+//          [BegPos, CPos, EndPos]);
+{$ENDIF}
           Delete(Result, BegPos - CPos + 1, EndPos - BegPos);
+{$IFDEF DEBUG}
+//        CnDebugger.LogFmt('GetUsesSource After a Delete Result %s.', [Result]);
+{$ENDIF}
           UsesList.Delete(I);
         end;
       end;
       
       if UsesList.Count = 0 then
         Result := '';
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('GetUsesSource Return: ' + Result);
+{$ENDIF}
     finally
       UsesList.Free;
     end;
