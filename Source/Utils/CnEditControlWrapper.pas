@@ -1477,9 +1477,9 @@ begin
     Result := Editors[Idx].EditView
   else
   begin
-  {$IFDEF DEBUG}
-    CnDebugger.LogMsgWarning('GetEditView: not found in list.');
-  {$ENDIF}
+{$IFDEF DEBUG}
+//  CnDebugger.LogMsgWarning('GetEditView: not found in list.');
+{$ENDIF}
     Result := CnOtaGetTopMostEditView;
   end;
 end;

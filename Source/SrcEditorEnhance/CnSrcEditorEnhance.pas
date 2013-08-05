@@ -183,22 +183,17 @@ type
   private
     FEditorMisc: TCnSrcEditorMisc;
     FToolbarMgr: TCnSrcEditorToolBarMgr;
-
     FGutterMgr: TCnSrcEditorGutterMgr;
-  {$IFNDEF BDS}
     FNavMgr: TCnSrcEditorNavMgr;
-  {$ENDIF}
-
     FBlockTools: TCnSrcEditorBlockTools;
     FEditorKey: TCnSrcEditorKey;
-
-  {$IFDEF BDS}
+{$IFDEF BDS}
     procedure EditorChanged(Editor: TEditorObject;
       ChangeType: TEditorChangeTypes);
-    procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm; 
+    procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm;
       Operation: TOperation);
     procedure CheckToolBarEnableOnIdle(Sender: TObject);
-  {$ENDIF}
+{$ENDIF}
   protected
     procedure SetActive(Value: Boolean); override;
     function GetHasConfig: Boolean; override;
@@ -217,9 +212,7 @@ type
     procedure LanguageChanged(Sender: TObject); override;
 
     property GutterMgr: TCnSrcEditorGutterMgr read FGutterMgr;
-  {$IFNDEF BDS}
     property NavMgr: TCnSrcEditorNavMgr read FNavMgr;
-  {$ENDIF}
   
     property ToolBarMgr: TCnSrcEditorToolBarMgr read FToolbarMgr;
     property EditorMisc: TCnSrcEditorMisc read FEditorMisc;
@@ -435,10 +428,10 @@ begin
   FToolbarMgr.OnEnhConfig := OnEnhConfig_1;
   FGutterMgr := TCnSrcEditorGutterMgr.Create;
   FGutterMgr.OnEnhConfig := OnEnhConfig_1;
-{$IFNDEF BDS}
+
   FNavMgr := TCnSrcEditorNavMgr.Create;
   FNavMgr.OnEnhConfig := OnEnhConfig_1;
-{$ENDIF}
+
   FBlockTools := TCnSrcEditorBlockTools.Create;
   FBlockTools.OnEnhConfig := OnEnhConfig_2;
   FEditorKey := TCnSrcEditorKey.Create;
@@ -460,9 +453,7 @@ begin
   
   CnEditorToolBarService := nil;
   FGutterMgr.Free;
-{$IFNDEF BDS}
   FNavMgr.Free;
-{$ENDIF}
   FBlockTools.Free;
   FEditorKey.Free;
   inherited;
@@ -476,9 +467,7 @@ begin
   if CnEditorToolBarService <> nil then
     CnEditorToolBarService.LanguageChanged;
   FGutterMgr.LanguageChanged(Sender);
-{$IFNDEF BDS}
   FNavMgr.LanguageChanged(Sender);
-{$ENDIF}
   FBlockTools.LanguageChanged(Sender);
   FEditorKey.LanguageChanged(Sender);
 end;
@@ -492,9 +481,7 @@ begin
   FEditorMisc.LoadSettings(Ini);
   FToolbarMgr.LoadSettings(Ini);
   FGutterMgr.LoadSettings(Ini);
-{$IFNDEF BDS}
   FNavMgr.LoadSettings(Ini);
-{$ENDIF}
   FBlockTools.LoadSettings(Ini);
   FEditorKey.LoadSettings(Ini);
 end;
@@ -504,9 +491,7 @@ begin
   FEditorMisc.SaveSettings(Ini);
   FToolbarMgr.SaveSettings(Ini);
   FGutterMgr.SaveSettings(Ini);
-{$IFNDEF BDS}
   FNavMgr.SaveSettings(Ini);
-{$ENDIF}
   FBlockTools.SaveSettings(Ini);
   FEditorKey.SaveSettings(Ini);
 end;
@@ -517,9 +502,7 @@ begin
   FEditorMisc.Active := Value;
   FToolbarMgr.Active := Value;
   FGutterMgr.Active := Value;
-{$IFNDEF BDS}
   FNavMgr.Active := Value;
-{$ENDIF}
   FBlockTools.Active := Value;
   FEditorKey.Active := Value;
 end;
@@ -576,17 +559,14 @@ begin
 
     chkEditorMultiLine.Checked := FEditorMisc.EditorTabMultiLine;
     chkEditorFlatButtons.Checked := FEditorMisc.EditorTabFlatButton;  
-  {$IFNDEF BDS}
+
     chkExtendForwardBack.Checked := FNavMgr.ExtendForwardBack;
     seNavMinLineDiff.Value := FNavMgr.MinLineDiff;
     seNavMaxItems.Value := FNavMgr.MaxItems;
-  {$ELSE}
-    chkExtendForwardBack.Enabled := False;
-    seNavMinLineDiff.Enabled := False;
-    seNavMaxItems.Enabled := False;
+{$IFDEF BDS}
     chkEditorMultiLine.Checked := False;
     chkEditorFlatButtons.Checked := False;
-  {$ENDIF}
+{$ENDIF}
 
     chkShowFlatButton.Checked := FBlockTools.ShowBlockTools;
     chkAddMenuBlockTools.Checked := FEditorMisc.AddMenuBlockTools;
@@ -670,14 +650,13 @@ begin
       FGutterMgr.FixedWidth := seLinePanelFixWidth.Value;
       FGutterMgr.UpdateGutters;
 
-    {$IFNDEF BDS}
       FNavMgr.MinLineDiff := seNavMinLineDiff.Value;
       FNavMgr.MaxItems := seNavMaxItems.Value;
       FNavMgr.ExtendForwardBack := chkExtendForwardBack.Checked;
       FNavMgr.UpdateInstall;
-    {$ELSE}
+{$IFDEF BDS}
       FToolbarMgr.ShowDesignToolBar := chkShowInDesign.Checked;
-    {$ENDIF}
+{$ENDIF}
 
       FBlockTools.ShowBlockTools := chkShowFlatButton.Checked;
       FEditorKey.SmartCopy := chkSmartCopy.Checked;

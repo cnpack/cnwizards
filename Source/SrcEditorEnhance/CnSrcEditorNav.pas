@@ -29,7 +29,9 @@ unit CnSrcEditorNav;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2005.01.03
+* 修改记录：2013.08.05
+*               加入对 BDS 的支持
+*           2005.01.03
 *               创建单元，从原 CnEditorEnhancements 移出
 ================================================================================
 |</PRE>}
@@ -38,11 +40,12 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFNDEF BDS}
-
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, ToolsAPI, IniFiles,
   Forms, ExtCtrls, Menus, ComCtrls, TypInfo, Math, CnCommon, ActnList, ImgList,
+  {$IFDEF BDS}
+  ActnMan,
+  {$ENDIF}
   CnWizUtils, CnConsts, CnWizIdeUtils, CnWizConsts, CnMenuHook, CnWizNotifier,
   CnEditControlWrapper, CnWizShareImages, CnPopupMenu;
 
@@ -68,6 +71,10 @@ type
     FOldForwardMenu: Menus.TPopupMenu;
     FOldBackAction: TBasicAction;
     FOldForwardAction: TBasicAction;
+{$IFDEF BDS}
+    FOldBackImageIndex: Integer;
+    FOldForwardImageIndex: Integer;
+{$ENDIF}
     FOldImageList: TCustomImageList;
     FLastUpdateTick: Cardinal;
     FBackMenu: TPopupMenu;
@@ -95,6 +102,9 @@ type
     procedure GotoSourceLine(Idx: Integer; SrcList, DstList: TStringList);
     procedure AppIdle(Sender: TObject);
     procedure AddItem(AList: TStringList; const AFileName: string; ALine: Integer);
+{$IFDEF BDS}
+    function FindActionByNameFromActionManager(ActionManager: TActionManager; AName: string): TBasicAction;
+{$ENDIF}
   protected
     procedure OnEnhConfig(Sender: TObject);
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
@@ -130,6 +140,9 @@ type
     destructor Destroy; override;
 
     procedure UpdateInstall;
+{$IFDEF BDS}
+    procedure DoUpdateInstallInAppBuilder(Sender: TObject);
+{$ENDIF}
     procedure UpdateControls;
 
     procedure LoadSettings(Ini: TCustomIniFile);
@@ -145,10 +158,23 @@ type
 
 implementation
 
+{$IFDEF DEBUG}
+uses
+  CnDebug;
+{$ENDIF}
+
 const
   SBackToolButtonName = 'BackToolButton';
   SForwardToolButtonName = 'ForwardToolButton';
   SCnSrcEditorNavName = 'CnSrcEditorNav';
+  SBrowserToolBarName = 'BrowserToolBar';
+  SBackCommandActionName = 'BackCommand';
+  SForwardCommandActionName = 'ForwardCommand';
+  SBrowserToolBarImageListName = 'ImageList1';
+  SIDEActionManagerName = 'ActionList1';
+
+  SCnBackActionName = 'CnBackAction';
+  SCnForwardActionName = 'CnForwardAction';
   csUpdateInterval = 100;
 
 { TCnSrcEditorNav }
@@ -166,9 +192,12 @@ begin
   FBackAction.OnExecute := BackActionExecute;
   FBackAction.OnUpdate := ActionUpdate;
   FBackAction.ImageIndex := 0;
+
+  FBackAction.Name := SCnBackActionName;
   FForwardAction.OnExecute := ForwardActionExecute;
   FForwardAction.OnUpdate := ActionUpdate;
   FForwardAction.ImageIndex := 1;
+  FForwardAction.Name := SCnForwardActionName;
   
   FBackList := TStringList.Create;
   FForwardList := TStringList.Create;
@@ -179,7 +208,7 @@ end;
 destructor TCnSrcEditorNav.Destroy;
 begin
   CnWizNotifierServices.RemoveApplicationIdleNotifier(AppIdle);
-  
+
   Uninstall;
   FBackList.Free;
   FForwardList.Free;
@@ -442,6 +471,9 @@ procedure TCnSrcEditorNav.Install;
 var
   BackButton: TToolButton;
   ForwardButton: TToolButton;
+{$IFDEF BDS}
+  BrowserToolbar: TToolBar;
+{$ENDIF}
 begin
   if Assigned(Owner) then
   begin
@@ -464,6 +496,46 @@ begin
       ForwardButton.Action := FForwardAction;
       ForwardButton.DropdownMenu := FForwardMenu;
     end;
+
+{$IFDEF BDS}
+    if (BackButton = nil) and (ForwardButton = nil) then
+    begin
+      // In AppBuilder, install it to Toolbar.
+      BrowserToolbar := TToolBar(Owner.FindComponent(SBrowserToolBarName));
+      if BrowserToolbar <> nil then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('TCnSrcEditorNav.Install. Got BrowserToolbar.');
+{$ENDIF}
+        BackButton := BrowserToolbar.Buttons[0];
+        ForwardButton := BrowserToolbar.Buttons[1];
+
+        if Assigned(BackButton) and (BackButton.Action <> FBackAction) then
+        begin
+          FOldImageList := TToolBar(BackButton.Parent).Images;
+          TToolBar(BackButton.Parent).Images := dmCnSharedImages.ilBackForward;
+
+//        FOldBackImageIndex := BackButton.ImageIndex;
+          FOldBackAction := BackButton.Action;
+          FOldBackMenu := BackButton.DropdownMenu;
+          BackButton.Action := FBackAction;
+          BackButton.DropdownMenu := FBackMenu;
+        end;
+
+        if Assigned(ForwardButton) and (ForwardButton.Action <> FForwardAction) then
+        begin
+//        FOldForwardImageIndex := ForwardButton.ImageIndex;
+          FOldForwardAction := ForwardButton.Action;
+          FOldForwardMenu := ForwardButton.DropdownMenu;
+          ForwardButton.Action := FForwardAction;
+          ForwardButton.DropdownMenu := FForwardMenu;
+        end;
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('TCnSrcEditorNav.Install. Buttons Hooked.');
+{$ENDIF}
+      end;
+    end;
+{$ENDIF}
   end;
 end;
 
@@ -471,6 +543,10 @@ procedure TCnSrcEditorNav.Uninstall;
 var
   BackButton: TToolButton;
   ForwardButton: TToolButton;
+{$IFDEF BDS}
+  BrowserToolbar: TToolBar;
+  ActionMgr: TActionManager;
+{$ENDIF}
 begin
   if Assigned(Owner) then
   begin
@@ -488,6 +564,42 @@ begin
       ForwardButton.Action := FOldForwardAction;
       ForwardButton.DropdownMenu := FOldForwardMenu;
     end;
+
+{$IFDEF BDS}
+    if (BackButton = nil) and (ForwardButton = nil) then
+    begin
+      // In AppBuilder, uninstall it from Toolbar.
+      BrowserToolbar := TToolBar(Owner.FindComponent(SBrowserToolBarName));
+      if BrowserToolbar <> nil then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('TCnSrcEditorNav.UnInstall. Got BrowserToolbar.');
+{$ENDIF}
+        BackButton := BrowserToolbar.Buttons[0];
+        ForwardButton := BrowserToolbar.Buttons[1];
+
+        ActionMgr := TActionManager(Owner.FindComponent(SIDEActionManagerName));
+        if ActionMgr <> nil then
+        begin
+          if Assigned(BackButton) and (BackButton.Action = FBackAction) then
+          begin
+            TToolBar(BackButton.Parent).Images := TImageList(Owner.FindComponent(SBrowserToolBarImageListName));
+
+            BackButton.Action := FindActionByNameFromActionManager(ActionMgr, SBackCommandActionName);
+            BackButton.DropdownMenu := FOldBackMenu;
+            //BackButton.ImageIndex := FOldBackImageIndex;
+          end;
+
+          if Assigned(ForwardButton) and (ForwardButton.Action = FForwardAction) then
+          begin
+            ForwardButton.Action := FindActionByNameFromActionManager(ActionMgr, SForwardCommandActionName);
+            ForwardButton.DropdownMenu := FOldForwardMenu;
+            //ForwardButton.ImageIndex := FOldForwardImageIndex;
+          end;
+        end;
+      end;
+    end;
+{$ENDIF}
   end;
 end;
 
@@ -520,6 +632,29 @@ begin
       FOldForwardAction := nil;
   end;
 end;
+
+{$IFDEF BDS}
+
+function TCnSrcEditorNav.FindActionByNameFromActionManager(
+  ActionManager: TActionManager; AName: string): TBasicAction;
+var
+  I: Integer;
+begin
+  Result := nil;
+  if ActionManager = nil then
+    Exit;
+
+  for I := 0 to ActionManager.ActionCount - 1 do
+  begin
+    if ActionManager.Actions[I].Name = AName then
+    begin
+      Result := ActionManager.Actions[I];
+      Exit;
+    end;
+  end;
+end;
+
+{$ENDIF}
 
 { TCnSrcEditorNavMgr }
 
@@ -572,9 +707,41 @@ begin
   end;
 end;
 
+{$IFDEF BDS}
+
+procedure TCnSrcEditorNavMgr.DoUpdateInstallInAppBuilder(Sender: TObject);
+var
+  EditorNav: TCnSrcEditorNav;
+begin
+  EditorNav := TCnSrcEditorNav(FindComponentByClass(GetIdeMainForm,
+    TCnSrcEditorNav, SCnSrcEditorNavName));
+  if Active and ExtendForwardBack then
+  begin
+    if not Assigned(EditorNav) then
+    begin
+      EditorNav := TCnSrcEditorNav.Create(GetIdeMainForm);
+      EditorNav.Name := SCnSrcEditorNavName;
+      EditorNav.FNavMgr := Self;
+      EditorNav.FEditControl := nil;
+      EditorNav.Install;
+      FList.Add(EditorNav);
+    end;
+  end
+  else if Assigned(EditorNav) then
+  begin
+    EditorNav.Free;
+  end;
+end;
+
+{$ENDIF}
+
 procedure TCnSrcEditorNavMgr.UpdateInstall;
 begin
   EnumEditControl(DoUpdateInstall, nil);
+{$IFDEF BDS}
+  // 必须放 Idle 里，因为第一次执行到此时，BDS 中的俩 Button 所在的工具栏还没创建
+  CnWizNotifierServices.ExecuteOnApplicationIdle(DoUpdateInstallInAppBuilder);
+{$ENDIF}
   UpdateControls;
 end;
 
@@ -649,11 +816,5 @@ begin
     UpdateInstall;
   end;
 end;
-
-{$ELSE}
-
-implementation
-
-{$ENDIF}
 
 end.
