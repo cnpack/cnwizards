@@ -71,10 +71,6 @@ type
     FOldForwardMenu: Menus.TPopupMenu;
     FOldBackAction: TBasicAction;
     FOldForwardAction: TBasicAction;
-{$IFDEF BDS}
-    FOldBackImageIndex: Integer;
-    FOldForwardImageIndex: Integer;
-{$ENDIF}
     FOldImageList: TCustomImageList;
     FLastUpdateTick: Cardinal;
     FBackMenu: TPopupMenu;
@@ -515,7 +511,6 @@ begin
           FOldImageList := TToolBar(BackButton.Parent).Images;
           TToolBar(BackButton.Parent).Images := dmCnSharedImages.ilBackForward;
 
-//        FOldBackImageIndex := BackButton.ImageIndex;
           FOldBackAction := BackButton.Action;
           FOldBackMenu := BackButton.DropdownMenu;
           BackButton.Action := FBackAction;
@@ -524,7 +519,6 @@ begin
 
         if Assigned(ForwardButton) and (ForwardButton.Action <> FForwardAction) then
         begin
-//        FOldForwardImageIndex := ForwardButton.ImageIndex;
           FOldForwardAction := ForwardButton.Action;
           FOldForwardMenu := ForwardButton.DropdownMenu;
           ForwardButton.Action := FForwardAction;
@@ -587,14 +581,12 @@ begin
 
             BackButton.Action := FindActionByNameFromActionManager(ActionMgr, SBackCommandActionName);
             BackButton.DropdownMenu := FOldBackMenu;
-            //BackButton.ImageIndex := FOldBackImageIndex;
           end;
 
           if Assigned(ForwardButton) and (ForwardButton.Action = FForwardAction) then
           begin
             ForwardButton.Action := FindActionByNameFromActionManager(ActionMgr, SForwardCommandActionName);
             ForwardButton.DropdownMenu := FOldForwardMenu;
-            //ForwardButton.ImageIndex := FOldForwardImageIndex;
           end;
         end;
       end;
