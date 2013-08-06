@@ -597,14 +597,10 @@ function ParseCppCodePosInfo(const Source: AnsiString; CurrPos: Integer;
   FullSource: Boolean = True; IsUtf8: Boolean = False): TCodePosInfo;
 var
   CanExit: Boolean;
-  ProcStack: TStack;
   CParser: TBCBTokenList;
-  IsDeclareStart: Boolean;
-  IsDeclareEnd: Boolean;
-  IsIdentifier: Boolean;
   Text: AnsiString;
 
-  procedure DoNext(NoJunk: Boolean = False);
+  procedure DoNext;
   var
     OldPosition: Integer;
   begin
@@ -615,10 +611,7 @@ var
     Result.CTokenID := CParser.RunID;
 
     OldPosition := CParser.RunPosition;
-    if NoJunk then
-      CParser.NextNonJunk
-    else
-      CParser.Next;
+    CParser.Next;
 
     CanExit := CParser.RunPosition = OldPosition;
     // 当 Next 再也前进不了的时候，就是该撤了
@@ -628,12 +621,11 @@ begin
   if CurrPos <= 0 then
     CurrPos := MaxInt;
   CParser := nil;
-  ProcStack := nil;
   Result.IsPascal := False;
 
   try
     CParser := TBCBTokenList.Create;
-    ProcStack := TStack.Create;
+    CParser.DirectivesAsComments := False;
 {$IFDEF BDS}
     if IsUtf8 then
     begin
@@ -653,21 +645,17 @@ begin
 
     if FullSource then
     begin
-      Result.AreaKind := akHead;
-      Result.PosKind := pkUnknown;
+      Result.AreaKind := akHead; // 未使用
+      Result.PosKind := pkField; // 常规空白区，以pkField
     end
     else
     begin
 
     end;
 
-    IsDeclareStart := True;
-    IsDeclareEnd := False;
-    IsIdentifier := False;
     while (CParser.RunPosition < CurrPos) and (CParser.RunID <> ctknull) do
     begin
       // 至少要区分出字符（串）、注释、->或.后、标识符、编译指令等
-
       case CParser.RunID of
         ctkansicomment, ctkslashescomment:
           begin
@@ -677,65 +665,55 @@ begin
           begin
             Result.PosKind := pkString;
           end;
-        ctksemicolon, ctkbraceopen, ctkbraceclose, ctkbracepair:
+        ctkcrlf:
           begin
-            IsDeclareStart := True; // 碰到分号或各种大括号时，先认为下一个是声明
-            IsDeclareEnd := False;
-            IsIdentifier := False;
-            Result.PosKind := pkField;
+            // 行注释与#编译指令，以回车结尾
+            if (Result.PosKind = pkCompDirect) or (Result.CTokenID = ctkslashescomment) then
+              Result.PosKind := pkField;
           end;
-        ctkint, ctkfloat, ctkdouble, ctkchar:
+//        ctksemicolon, ctkbraceopen, ctkbraceclose, ctkbracepair,
+//        ctkint, ctkfloat, ctkdouble, ctkchar,
+//        ctkidentifier, ctkcoloncolon,
+//        ctkroundopen, ctkroundpair, ctksquareopen, ctksquarepair,
+//        ctkcomma, ctkequal, ctknumber:
+//          begin
+//            Result.PosKind := pkField;
+//          end;
+        ctkselectelement:
           begin
-            if IsDeclareStart then
-              IsDeclareEnd := True;
+            Result.PosKind := pkFieldDot; // -> 视作 . 处理
           end;
-        ctkidentifier, ctkcoloncolon:
+        ctkpoint:
           begin
-            if IsDeclareStart then
-              IsIdentifier := True;  // 出现了标识符可能带::，可能是类型名
+            if Result.CTokenID = ctkidentifier then
+              Result.PosKind := pkFieldDot; // 上一个标识符后的点才算
           end;
-        ctkroundopen, ctkroundpair, ctksquareopen, ctksquarepair:
+        ctkdirdefine, ctkdirelif, ctkdirelse, ctkdirendif, ctkdirerror, ctkdirif,
+        ctkdirifdef, ctkdirifndef, ctkdirinclude, ctkdirline, ctkdirnull,
+        ctkdirpragma, ctkdirundef:
           begin
-            IsDeclareStart := False; // 小中括号后是函数调用和数组，不是声明了
-            IsIdentifier := False;
-            IsDeclareEnd := False;
+            Result.PosKind := pkCompDirect;
           end;
-        ctkspace:  // 碰到空白
+        ctkUnknown:
           begin
-            if IsDeclareEnd then // 如果是声明前半部分结束，说明现在是声明后，无需弹出
+            // #后的编译指令未完成时
+            if (Length(CParser.RunToken) >= 1 ) and (CParser.RunToken[1] = '#') then
             begin
-              Result.PosKind := pkDeclaration;
-              IsDeclareStart := False;
+              Result.PosKind := pkCompDirect;
             end
             else
-            begin
-              if IsIdentifier then // 如果前面是标识符，那么这个空白后面基本上是变量声明
-              begin
-                IsDeclareStart := False;
-                Result.PosKind := pkDeclaration;
-              end;
-            end;
-          end;
-        ctkcomma, ctkequal, ctknumber:
-          begin
-            if IsDeclareEnd then // 如果前面是声明前半部分结束，那么逗号是多个变量声明，继续
-            begin
-              IsDeclareStart := False;
-              Result.PosKind := pkDeclaration;
-            end;
+              Result.PosKind := pkField;
           end;
       else
         Result.PosKind := pkField;
       end;
 
       DoNext;
-
       if CanExit then
         Break;
     end;
   finally
     CParser.Free;
-    ProcStack.Free;
   end;
 end;
 

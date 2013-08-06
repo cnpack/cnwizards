@@ -214,9 +214,9 @@ type
 
   // 源代码位置类型，同时支持 Pascal 和 C/C++
   TCodePosKind = (
-    pkUnknown,         // 未知无效区
+    pkUnknown,         // 未知无效区，Pascal 和 C/C++ 都有效
     pkFlat,            // 单元空白区
-    pkComment,         // 注释块内部
+    pkComment,         // 注释块内部，Pascal 和 C/C++ 都有效
     pkIntfUses,        // Pascal interface 的 uses 内部
     pkImplUses,        // Pascal implementation 的 uses 内部
     pkClass,           // Pascal class 声明内部
@@ -225,16 +225,16 @@ type
     pkConst,           // Pascal const 定义区
     pkResourceString,  // Pascal resourcestring 定义区
     pkVar,             // Pascal var 定义区
-    pkCompDirect,      // 编译指令内部
-    pkString,          // 字符串内部
-    pkField,           // 标识符. 后面的域内部，属性、方法、事件、记录项等
+    pkCompDirect,      // 编译指令内部{$...}，C/C++ 则是指 #include 等内部
+    pkString,          // 字符串内部，Pascal 和 C/C++ 都有效
+    pkField,           // 标识符. 后面的域内部，属性、方法、事件、记录项等，Pascal 和 C/C++ 都有效
     pkProcedure,       // 过程内部
     pkFunction,        // 函数内部
     pkConstructor,     // 构造器内部
     pkDestructor,      // 析构器内部
-    pkFieldDot,        // 连接域的点
+    pkFieldDot,        // 连接域的点，包括C/C++的->
 
-    pkDeclaration);    // C中的变量声明区
+    pkDeclaration);    // C中的变量声明区，指类型之后的变量名部分，一般无需弹出
 
   TCodePosKinds = set of TCodePosKind;
 

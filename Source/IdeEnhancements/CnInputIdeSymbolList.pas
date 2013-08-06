@@ -22,7 +22,7 @@ unit CnInputIdeSymbolList;
 {* |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包
-* 单元名称：输入助手单词列表类定义单元
+* 单元名称：输入助手 IDE 符号列表类定义单元
 * 单元作者：Johnson Zhong zhongs@tom.com http://www.longator.com
 *           周劲羽 zjy@cnpack.org
 * 备    注：IDE 标识符列表类
@@ -244,7 +244,7 @@ var
   procedure AddToSymbolList(Manager: IOTACodeInsightManager);
   var
     DisplayParams: Boolean;
-    i: Integer;
+    i, Idx: Integer;
     SymbolList: IOTACodeInsightSymbolList;
     Desc: string;
     Kind: TSymbolKind;
@@ -305,8 +305,12 @@ var
                 Desc := SymbolList.SymbolTypeText[i];
                 Kind := SymbolFlagsToKind(SymbolList.SymbolFlags[i], Desc);
                 // Description is Utf-8 format under BDS.
-                Add(Name, Kind, Round(MaxInt / SymbolList.Count * i), Desc, '', True,
+                Idx := Add(Name, Kind, Round(MaxInt / SymbolList.Count * i), Desc, '', True,
                   False, False, {$IFDEF UTF8_SYMBOL}True{$ELSE}False{$ENDIF});
+
+                // 根据源文件的类型设置符号项的适用范围
+                Items[Idx].ForPascal := PosInfo.IsPascal;
+                Items[Idx].ForCpp := not PosInfo.IsPascal;
               end;
             except
             {$IFDEF Debug}
@@ -760,7 +764,7 @@ var
       else
         begin
         {$IFDEF Debug}
-          CnDebugger.LogMsg('Unknown declear: ' + AText);
+          CnDebugger.LogMsg('Unknown decl: ' + AText);
         {$ENDIF}
           AKind := skUnknown;
         end;
@@ -913,7 +917,11 @@ end;
 
 initialization
 {$IFDEF SUPPORT_IDESymbolList}
+{$IFNDEF BCB5}  // 支持BCB5/6的IDE符号列表差异较大，放另外一个单元。
+{$IFNDEF BCB6}
   RegisterSymbolList(TIDESymbolList);
+{$ENDIF}
+{$ENDIF}
 {$ENDIF}
 
 {$ENDIF CNWIZARDS_CNINPUTHELPER}

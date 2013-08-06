@@ -43,9 +43,9 @@ interface
 
 {$DEFINE SUPPORT_INPUTHELPER}
 
-{$IFDEF DELPHI}
+//{$IFDEF DELPHI}
   {$DEFINE SUPPORT_IDESymbolList}
-{$ENDIF}
+//{$ENDIF}
 
 {$IFDEF BDS}
   {$DEFINE ADJUST_CodeParamWindow}
@@ -207,7 +207,8 @@ type
     FItems: TStringList;
     FKeyCount: Integer;
     FKeyQueue: string;
-    FCurrLine: Integer;
+    FCurrLineText: string;
+    FCurrLineNo: Integer;
     FCurrIndex: Integer;
     FCurrLineLen: Integer;
     FKeyDownTick: Cardinal;
@@ -216,7 +217,7 @@ type
     FPosInfo: TCodePosInfo;
     FSavePos: TOTAEditPos;
     FBracketText: string;
-
+    FNoActualParaminCpp: Boolean;
     FPopupShortCut: TCnWizShortCut;
     FListOnlyAtLeastLetter: Integer;
     FDispOnlyAtLeastKey: Integer;
@@ -291,7 +292,9 @@ type
     function IsValidCharKey(VKey: Word; ScanCode: Word): Boolean;
     function IsValidDelelteKey(Key: Word): Boolean;
     function IsValidDotKey(Key: Word): Boolean;
+    function IsValidCppArrowKey(VKey: Word; Code: Word): Boolean;
     function IsValidKeyQueue: Boolean;
+    function CalcFirstSet(IsPascal: Boolean): TAnsiCharSet;
     procedure AutoCompFunc(Sender: TObject);
     function GetListFont: TFont;
     procedure ConfigChanged;
@@ -477,7 +480,10 @@ const
   csFieldSymbolKind = csAllSymbolKind - [skUnknown, skConstant, skType,
     skUnit, skLabel, skInterface, skKeyword, skClass, skUser];
 
-  csSymbolKindTable: array[TCodePosKind] of TSymbolKindSet = (
+  // BCB 中不易区分 Field，干脆就等同于Code。
+  csCppFieldSymbolKind = csAllSymbolKind;
+
+  csPascalSymbolKindTable: array[TCodePosKind] of TSymbolKindSet = (
     csNoneSymbolKind,          // 未知无效区
     csAllSymbolKind,           // 单元空白区
     csCommentSymbolKind,       // 注释块内部
@@ -491,12 +497,35 @@ const
     csDefineSymbolKind,        // var 定义区
     csCompDirectSymbolKind,    // 编译指令内部
     csNoneSymbolKind,          // 字符串内部
-    csFieldSymbolKind,         // 标识符. 后面的域内部，属性、方法、事件、记录项等
+    csFieldSymbolKind,         // 标识符. 后面的域内部，属性、方法、事件、记录项等，C/C++源文件大部分都在此
     csCodeSymbolKind,          // 过程内部
     csCodeSymbolKind,          // 函数内部
     csCodeSymbolKind,          // 构造器内部
     csCodeSymbolKind,          // 析构器内部
     csFieldSymbolKind,         // 连接域的点
+
+    csNoneSymbolKind);         // C 变量声明区
+
+  csCppSymbolKindTable: array[TCodePosKind] of TSymbolKindSet = (
+    csNoneSymbolKind,          // 未知无效区
+    csAllSymbolKind,           // 单元空白区
+    csCommentSymbolKind,       // 注释块内部
+    csUnitSymbolKind,          // interface 的 uses 内部
+    csUnitSymbolKind,          // implementation 的 uses 内部
+    csDeclearSymbolKind,       // class 声明内部
+    csDeclearSymbolKind,       // interface 声明内部
+    csDefineSymbolKind,        // type 定义区
+    csDefineSymbolKind,        // const 定义区
+    csDefineSymbolKind,        // resourcestring 定义区
+    csDefineSymbolKind,        // var 定义区
+    csCompDirectSymbolKind,    // 编译指令内部
+    csNoneSymbolKind,          // 字符串内部
+    csCppFieldSymbolKind,      // 标识符. 后面的域内部，属性、方法、事件、记录项等，C/C++源文件大部分都在此
+    csCodeSymbolKind,          // 过程内部
+    csCodeSymbolKind,          // 函数内部
+    csCodeSymbolKind,          // 构造器内部
+    csCodeSymbolKind,          // 析构器内部
+    csCppFieldSymbolKind,      // 连接域的点
 
     csNoneSymbolKind);         // C 变量声明区
 
@@ -527,9 +556,7 @@ type
 procedure MyCCError(Rec: PResStringRec);
 begin
   // 啥错都不出
-{$IFNDEF BCB}
   Rec := Rec;
-{$ENDIF}
 end;
 
 {$ENDIF}
@@ -1229,6 +1256,7 @@ end;
 //------------------------------------------------------------------------------
 
 function TCnInputHelper.AcceptDisplay: Boolean;
+
   function IsAutoCompleteActive: Boolean;
   var
     hWin: THandle;
@@ -1270,7 +1298,8 @@ function TCnInputHelper.AcceptDisplay: Boolean;
 begin
   Result := Active and IsEditControl(Screen.ActiveControl) and
     (not CheckImmRun or not IMMIsActive) and
-    {$IFDEF BDS} CurrentIsDelphiSource {$ELSE} CurrentIsSource {$ENDIF} and  // TODO: 目前 BDS 以上只支持 Delphi 代码
+    //{$IFDEF BDS} CurrentIsDelphiSource {$ELSE} CurrentIsSource {$ENDIF} and  // TODO: 目前 BDS 以上只支持 Delphi 代码
+    CurrentIsSource and
     not IsAutoCompleteActive and not IsReadOnly and not CnOtaIsDebugging and
     not IsInIncreSearch and not IsInMacroOp;
 end;
@@ -1335,8 +1364,8 @@ end;
 function TCnInputHelper.IsValidSymbolChar(C: Char;
   First: Boolean): Boolean;
 begin
-  if First then
-    Result := CharInSet(C, FirstSet)
+  if First then  // C/C++ 需要编译指令也算标识符
+    Result := CharInSet(C, CalcFirstSet(FPosInfo.IsPascal))
   else
     Result := CharInSet(C, CharSet);
 end;
@@ -1361,9 +1390,12 @@ var
 begin
   C := VK_ScanCodeToAscii(VKey, ScanCode);
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('VK_ScanCodeToAscii: %d %d => %d ("%s")', [VKey, ScanCode, Ord(C), C]);
+  CnDebugger.LogFmt('IsValidCharKey VK_ScanCodeToAscii: %d %d => %d ("%s")', [VKey, ScanCode, Ord(C), C]);
 {$ENDIF}
-  Result := C in (FirstSet + CharSet);
+  if FPosInfo.IsPascal then
+    Result := C in ( FirstSet + CharSet)
+  else // C/C++ 允许 -> 号
+    Result := C in ( FirstSet + ['>'] + CharSet);
 end;
 
 function TCnInputHelper.CurrBlockIsEmpty: Boolean;
@@ -1486,7 +1518,7 @@ begin
           if not IgnoreOfDot then
           begin
             SendSymbolToIDE(SelMidMatchByEnterOnly, False, False, #0, Result);
-            if IsValidDotKey(Key) then
+            if IsValidDotKey(Key) or IsValidCppArrowKey(Key, ScanCode) then
             begin
               Timer.Interval := Max(csDefDispDelay, FDispDelay);
               Timer.Enabled := True;
@@ -1528,10 +1560,15 @@ begin
     Timer.Enabled := False;
     FKeyDownValid := False;
     if AutoPopup and ((FKeyCount < DispOnlyAtLeastKey - 1) or CurrBlockIsEmpty) and
-      (IsValidCharKey(Key, ScanCode) or IsValidDelelteKey(Key) or IsValidDotKey(Key)) then
+      (IsValidCharKey(Key, ScanCode) or IsValidDelelteKey(Key) or IsValidDotKey(Key)
+       or IsValidCppArrowKey(Key, ScanCode)) then
     begin
-      // 为了解决增量查找及其它兼容问题，此处只保存当前行信息
-      CnOtaGetCurrLineInfo(FCurrLine, FCurrIndex, FCurrLineLen);
+      // 为了解决增量查找及其它兼容问题，此处保存当前行文本与信息
+      CnNtaGetCurrLineText(FCurrLineText, FCurrLineNo, FCurrIndex);
+      FCurrLineLen := Length(FCurrLineText);
+{$IFDEF DEBUG}
+//    CnDebugger.LogMsg('Handle Key Down. Got Line Len: ' + IntToStr(FCurrLineLen));
+{$ENDIF}
       FKeyDownTick := GetTickCount;
       FKeyDownValid := True;
     end
@@ -1546,7 +1583,6 @@ var
   Idx: Integer;
 begin
   Result := False;
-
 {$IFDEF DEBUG}
   CnDebugger.LogInteger(Ord(Key), 'TCnInputHelper.HandleKeyPress');
 {$ENDIF}
@@ -1582,25 +1618,35 @@ end;
 function TCnInputHelper.HandleKeyUp(var Msg: TMsg): Boolean;
 var
   Key: Word;
-  NewToken: string;
+  NewToken, LineText: string;
   CurrPos: Integer;
-  Line, Index, Len: Integer;
+  LineNo, Index, Len: Integer;
+  ScanCode: Word;
 begin
   Result := False;
   Key := Msg.wParam;
-
+  ScanCode := (Msg.lParam and $00FF0000) shr 16;
+  
 {$IFDEF DEBUG}
   CnDebugger.LogInteger(Msg.wParam, 'TCnInputHelper.HandleKeyUp');
 {$ENDIF}
 
   if (FKeyDownValid or IsValidKeyQueue) and not IsShowing then
   begin
-    CnOtaGetCurrLineInfo(Line, Index, Len);
+    CnNtaGetCurrLineText(LineText, LineNo, Index);
+    Len := Length(LineText);
+{$IFDEF DEBUG}
+//  CnDebugger.LogFmt('Input Helper. Line: %d, Len %d. CurLine %d, CurLen %d', [LineNo, Len, FCurrLineNo, FCurrLineLen]);
+{$ENDIF}
     // 如果此次按键对当前行作了修改才认为是有效按键，以处理增量查找等问题
-    if (Line = FCurrLine) and (Len <> FCurrLineLen) then
+    // XE4的BCB环境中，空行默认长度都是4，后以空格填充，因此不能简单比较长度，得比内容
+    if (LineNo = FCurrLineNo) and ((Len <> FCurrLineLen) or (LineText <> FCurrLineText)) then
     begin
       Inc(FKeyCount);
-      if IsValidDotKey(Key) or (FKeyCount >= DispOnlyAtLeastKey) or
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('Input Helper. Inc FKeyCount to ' + IntToStr(FKeyCount));
+{$ENDIF}
+      if IsValidDotKey(Key) or IsValidCppArrowKey(Key, ScanCode) or (FKeyCount >= DispOnlyAtLeastKey) or
         IsValidKeyQueue then
       begin
         if FDispDelay > GetTickCount - FKeyDownTick then
@@ -1609,6 +1655,9 @@ begin
         else
           Timer.Interval := csMinDispDelay;
         Timer.Enabled := True;
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('Input Helper. Key Count Reached or Popup Key Meet. Enable Timer.');
+{$ENDIF}
       end;
     end;
   end
@@ -1618,7 +1667,7 @@ begin
     FNeedUpdate := False;
     if (Key = VK_LEFT) or (Key = VK_RIGHT) then
     begin
-      CnOtaGetCurrPosToken(NewToken, CurrPos, True, FirstSet, CharSet);
+      CnOtaGetCurrPosToken(NewToken, CurrPos, True, CalcFirstSet(FPosInfo.IsPascal), CharSet);
       if not SameText(NewToken, FToken) then
       begin
         HideAndClearList;
@@ -1720,14 +1769,24 @@ begin
   end;
 {$IFDEF DEBUG}
   with FPosInfo do
-    CnDebugger.LogMsg(
-      'TokenID: ' + GetEnumName(TypeInfo(TTokenKind), Ord(TokenID)) + #13#10 +
-      'AreaKind: ' + GetEnumName(TypeInfo(TCodeAreaKind), Ord(AreaKind)) + #13#10 +
-      'PosKind: ' + GetEnumName(TypeInfo(TCodePosKind), Ord(PosKind)) + #13#10 +
-      'LineNumber: ' + IntToStr(LineNumber) + #13#10 +
-      'LinePos: ' + IntToStr(LinePos) + #13#10 +
-      'LastToken: ' + GetEnumName(TypeInfo(TTokenKind), Ord(LastNoSpace)) + #13#10 +
-      'Token: ' + string(Token));
+    if FPosInfo.IsPascal then
+      CnDebugger.LogMsg(
+        'TokenID: ' + GetEnumName(TypeInfo(TTokenKind), Ord(TokenID)) + #13#10 +
+        ' AreaKind: ' + GetEnumName(TypeInfo(TCodeAreaKind), Ord(AreaKind)) + #13#10 +
+        ' PosKind: ' + GetEnumName(TypeInfo(TCodePosKind), Ord(PosKind)) + #13#10 +
+        ' LineNumber: ' + IntToStr(LineNumber) + #13#10 +
+        ' LinePos: ' + IntToStr(LinePos) + #13#10 +
+        ' LastToken: ' + GetEnumName(TypeInfo(TTokenKind), Ord(LastNoSpace)) + #13#10 +
+        ' Token: ' + string(Token))
+    else
+      CnDebugger.LogMsg(
+        'CTokenID: ' + GetEnumName(TypeInfo(TCTokenKind), Ord(CTokenID)) + #13#10 +
+        ' AreaKind: ' + GetEnumName(TypeInfo(TCodeAreaKind), Ord(AreaKind)) + #13#10 +
+        ' PosKind: ' + GetEnumName(TypeInfo(TCodePosKind), Ord(PosKind)) + #13#10 +
+        ' LineNumber: ' + IntToStr(LineNumber) + #13#10 +
+        ' LinePos: ' + IntToStr(LinePos) + #13#10 +
+        ' LastToken: ' + GetEnumName(TypeInfo(TTokenKind), Ord(LastNoSpace)) + #13#10 +
+        ' Token: ' + string(Token));
 {$ENDIF}
   SymbolListMgr.GetValidCharSet(FirstSet, CharSet, FPosInfo);
   if IsPascalFile then
@@ -1735,7 +1794,7 @@ begin
       not (FPosInfo.PosKind in [pkUnknown, pkString]) and
       not (FPosInfo.TokenID in [tkFloat])
   else if IsCppFile then
-    Result := not (FPosInfo.PosKind in [pkUnknown, pkString, pkComment, pkDeclaration]) and
+    Result := not (FPosInfo.PosKind in [pkUnknown, pkString, pkDeclaration]) and
       not (FPosInfo.CTokenID in [ctknumber, ctkfloat]); // 这些情况下使能看看
 end;
 
@@ -1797,10 +1856,12 @@ var
 begin
   if AcceptDisplay and GetCaretPosition(Pt) then
   begin
-    // 取得当前标识符及光标左边的部分
-    CnOtaGetCurrPosToken(FToken, CurrPos, True, FirstSet, CharSet);
+    // 取得当前标识符及光标左边的部分，C/C++情况下，允许编译指令的#也作为标识符开头
+    CnOtaGetCurrPosToken(FToken, CurrPos, True, CalcFirstSet(FPosInfo.IsPascal), CharSet);
     FMatchStr := Copy(FToken, 1, CurrPos);
-    //CnDebugger.TraceFmt('Token %s, Match %s', [FToken, FMatchStr]);
+{$IFDEF DEBUG}
+    CnDebugger.TraceFmt('Token %s, Match %s', [FToken, FMatchStr]);
+{$ENDIF}
     if ForcePopup or IsValidSymbol(FToken) or (FPosInfo.PosKind = pkFieldDot) then
     begin
       // 在过滤列表中时不自动弹出
@@ -1861,7 +1922,7 @@ begin
             ShowIDECodeCompletion
           else
           begin
-            CnOtaGetCurrPosToken(AToken, CurrPos, True, FirstSet, CharSet);
+            CnOtaGetCurrPosToken(AToken, CurrPos, True, CalcFirstSet(FPosInfo.IsPascal), CharSet);
             if (AToken <> '') and (CurrPos > 0) and  not (AToken[CurrPos] in ['+', '-', '*', '/']) then
               ShowIDECodeCompletion;
           end;
@@ -2127,15 +2188,39 @@ begin
     for i := 0 to SymbolListMgr.Count - 1 do
     begin
       SymbolList := SymbolListMgr.List[i];
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('Input Helper To Reload %s. PosKind %s', [SymbolList.ClassName,
+        GetEnumName(TypeInfo(TCodePosKind), Ord(FPosInfo.PosKind))]);
+{$ENDIF}
       if SymbolList.Active and SymbolList.Reload(Editor, FMatchStr, FPosInfo) then
       begin
-        Kinds := csSymbolKindTable[FPosInfo.PosKind] * DispKindSet;
+{$IFDEF DEBUG}
+//      CnDebugger.LogFmt('Input Helper Reload %s Success: %d', [SymbolList.ClassName, SymbolList.Count]);
+{$ENDIF}
+        // 根据语言类型得到可用的 KindSet
+        if FPosInfo.IsPascal then
+          Kinds := csPascalSymbolKindTable[FPosInfo.PosKind] * DispKindSet
+        else
+          Kinds := csCppSymbolKindTable[FPosInfo.PosKind] * DispKindSet;
+
         for j := 0 to SymbolList.Count - 1 do
         begin
           Item := SymbolList.Items[j];
+          if FPosInfo.IsPascal and not Item.ForPascal then  // Pascal 中，跳过非 Pascal的
+            Continue;
+          if not FPosInfo.IsPascal and not Item.ForCpp then // C/C++ 中，跳过非 C/C++的
+            Continue;
+
           S := Item.Name;
+{$IFDEF DEBUG}
+//      CnDebugger.LogFmt('Input Helper Check Name %s, %s', [S, GetEnumName(TypeInfo(TSymbolKind), Ord(Item.Kind))]);
+{$ENDIF}
+
           if (Item.Kind in Kinds) and (Length(S) >= ListOnlyAtLeastLetter) then
           begin
+{$IFDEF DEBUG}
+//      CnDebugger.LogMsg('Input Helper is in Kinds. ' + IntToStr(ListOnlyAtLeastLetter));
+{$ENDIF}
             if (HashList = nil) or not HashList.CheckExist(Item) then
             begin
               if FAutoAdjustScope and (Item.HashCode <> 0) then
@@ -2149,6 +2234,9 @@ begin
                 Item.ScopeHit := 0;
                 Item.ScopeAdjust := Item.Scope;
               end;
+{$IFDEF DEBUG}
+//          CnDebugger.LogFmt('Input Helper Add %s with Kind %s', [S, GetEnumName(TypeInfo(TSymbolKind), Ord(Item.Kind))]);
+{$ENDIF}
               FSymbols.AddObject(S, Item);
             end;
           end;
@@ -2173,6 +2261,9 @@ begin
   List.Items.BeginUpdate;
   try
     Symbol := UpperCase(FMatchStr);
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('FMatchStr %s. Symbol %s. FLastStr %s.', [FMatchStr, Symbol, FLastStr]);
+{$ENDIF}
     if (Length(Symbol) > 1) and (Length(Symbol) - Length(FLastStr) = 1) and
       (Pos(UpperCase(FLastStr), Symbol) = 1) then
     begin
@@ -2204,7 +2295,6 @@ begin
     end;
     
     SortCurrSymbolList;
-
     List.SetCount(FItems.Count);
 
     Result := FItems.Count > 0;
@@ -2232,15 +2322,19 @@ var
   AToken: string;
 {$ENDIF}
 begin
-  if CnOtaGetCurrPosToken(FToken, CurrPos, True, FirstSet, CharSet) or ForcePopup
+  if CnOtaGetCurrPosToken(FToken, CurrPos, True, CalcFirstSet(FPosInfo.IsPascal), CharSet) or ForcePopup
     or ParsePosInfo and (FPosInfo.PosKind in [pkFieldDot, pkField]) then
   begin
   {$IFDEF DEBUG}
-    CnDebugger.LogFmt('CurrToken: %s, CurrPos: %d', [FToken, CurrPos]);
+    CnDebugger.LogFmt('InputHelper UpdateListBox. CurrToken: %s, CurrPos: %d', [FToken, CurrPos]);
   {$ENDIF}
     FMatchStr := Copy(FToken, 1, CurrPos);
     Result := UpdateCurrList(ForcePopup);
-    
+
+{$IFDEF DEBUG}
+//  CnDebugger.LogFmt('InputHelper UpdateCurrList Returns %d', [Integer(Result)]);
+{$ENDIF}
+
   {$IFNDEF SUPPORT_IDESymbolList}
     // 如果不支持 IDE 符号列表，只有从前面匹配的才有效
     if Result then
@@ -2268,7 +2362,7 @@ begin
           ShowIDECodeCompletion
         else
         begin
-          CnOtaGetCurrPosToken(AToken, CurrPos, True, FirstSet, CharSet);
+          CnOtaGetCurrPosToken(AToken, CurrPos, True, CalcFirstSet(FPosInfo.IsPascal), CharSet);
           if (AToken <> '') and (CurrPos > 0) and  not (AToken[CurrPos] in ['+', '-', '*', '/']) then
             ShowIDECodeCompletion;
         end;
@@ -2290,6 +2384,8 @@ var
   Item: TSymbolItem;
   DelLeft: Boolean;
   Buffer: IOTAEditBuffer;
+  C: Char;
+  EditPos: IOTAEditPosition;
 
   function ItemHasParam(AItem: TSymbolItem): Boolean;
   var
@@ -2300,9 +2396,18 @@ var
       and not AItem.AllowMultiLine then
     begin
       Desc := Trim(AItem.Description);
-      if (Length(Desc) > 2) and (Desc[1] = '(') and (AnsiPos(')', Desc) > 0) and
-        not SameText(Desc, '(...)') then
+      if FPosInfo.IsPascal then
+      begin
+        FNoActualParaminCpp := False;
+        if (Length(Desc) > 2) and (Desc[1] = '(') and (AnsiPos(')', Desc) > 0) and
+          not SameText(Desc, '(...)') then
         Result := True;
+      end
+      else // C/C++ 的函数必须要括号
+      begin
+        Result := True;
+        FNoActualParaminCpp := Pos('()', Desc) >= 1; // Desc 中有()便认为无参数
+      end;
     end;
   end;
 
@@ -2313,6 +2418,15 @@ var
   begin
     Result := CnNtaGetCurrLineText(Text, LineNo, CIndex) and (CIndex >= Length(Text));
   end;
+
+  function InternalCalcCharSet(IsCpp: Boolean): TAnsiCharSet;
+  begin
+    if IsCpp then
+      Result := CharSet
+    else
+      Result := CharSet + ['}']; // Pascal 的编译指令末尾的}也一并替换掉
+  end;
+
 begin
   HideList;
   if List.ItemIndex >= 0 then
@@ -2347,9 +2461,28 @@ begin
       end;
 
       if DelLeft then
-        CnOtaDeleteCurrTokenLeft(FirstSet, CharSet)
+        CnOtaDeleteCurrTokenLeft(CalcFirstSet(FPosInfo.IsPascal), CharSet)
       else
-        CnOtaDeleteCurrToken(FirstSet, CharSet);
+        CnOtaDeleteCurrToken(CalcFirstSet(FPosInfo.IsPascal), CharSet);
+
+      // DONE: 如果是Pascal编译指令并且光标后有个}则要把}删掉
+      // 不能简单地在上面的Charset中加}，因为还会有其他判断
+      if FPosInfo.IsPascal and (Item.Kind = skCompDirect) then
+      begin
+        C := CnOtaGetCurrChar();
+{$IFDEF DEBUG}
+        CnDebugger.LogChar(C, 'Input Helper Char Under Cursor');
+{$ENDIF}
+        if C = '}' then
+        begin
+          EditPos := CnOtaGetEditPosition;
+          if Assigned(EditPos) then
+          begin
+            EditPos.MoveRelative(0, 1);  // 退格删掉这个}
+            EditPos.BackspaceDelete(1);
+          end;
+        end;
+      end;
 
       // 输出文本
       Buffer := CnOtaGetEditBuffer;
@@ -2394,7 +2527,8 @@ begin
   begin
     Buffer.TopView.CursorPos := FSavePos;
     Buffer.EditPosition.InsertText(FBracketText);
-    Buffer.EditPosition.MoveRelative(0, -(Length(FBracketText) - 1));
+    if not FNoActualParaminCpp then // C/C++ 函数必须括号，但如无参数，光标便不用移动回来
+      Buffer.EditPosition.MoveRelative(0, -(Length(FBracketText) - 1));
     Buffer.TopView.Paint;
     (Buffer.TopView as IOTAEditActions).CodeCompletion(csParamList or csManual);
   end;
@@ -2861,6 +2995,46 @@ begin
       FCCErrorHook.UnHookMethod;
   end;
 {$ENDIF}
+end;
+
+function TCnInputHelper.CalcFirstSet(IsPascal: Boolean): TAnsiCharSet;
+begin
+  if IsPascal then
+    Result := FirstSet
+  else
+    Result := FirstSet + ['#']; // C/C++的标识符需要把#也算上
+end;
+
+function TCnInputHelper.IsValidCppArrowKey(VKey: Word; Code: Word): Boolean;
+var
+  C: AnsiChar;
+  AToken: string;
+  CurrPos: Integer;
+  Option: IOTAEnvironmentOptions;
+begin
+  Result := False;
+  if not FPosInfo.IsPascal and DispOnIDECompDisabled then
+  begin
+    C := VK_ScanCodeToAscii(VKey, Code);
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('IsValidCppArrowKey VK_ScanCodeToAscii: %d %d => %d ("%s")', [VKey, Code, Ord(C), C]);
+{$ENDIF}
+    if C = '>' then
+    begin
+      // 是>，if 光标下的前一个标识符的最后一位是-
+      CnOtaGetCurrPosToken(AToken, CurrPos, True, CalcFirstSet(FPosInfo.IsPascal), CharSet);
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('Is Valid Cpp Arrow Key: Token: ' + AToken);
+{$ENDIF}
+      if (Length(AToken) >= 1) and (AToken[Length(AToken)] = '-') then
+      begin
+        Option := CnOtaGetEnvironmentOptions;
+        if not Option.GetOptionValue(csKeyCodeCompletion) then
+          Result := True;
+      end;
+    end;
+  end;
+
 end;
 
 initialization

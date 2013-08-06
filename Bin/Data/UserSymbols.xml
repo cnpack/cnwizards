@@ -8,6 +8,8 @@
     <ScopeRate>15</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>//modified</Name>
@@ -17,6 +19,8 @@
     <ScopeRate>15</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>beg</Name>
@@ -28,6 +32,8 @@ end;</Text>
     <ScopeRate>15</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>trycfo</Name>
@@ -42,6 +48,8 @@ end;  // try</Text>
     <ScopeRate>15</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>UserName</Name>
@@ -51,6 +59,8 @@ end;  // try</Text>
     <ScopeRate>15</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>{$IFDEF DEBUG}</Name>
@@ -60,5 +70,7 @@ end;  // try</Text>
     <ScopeRate>15</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
 </Symbols>

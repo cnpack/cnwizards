@@ -86,6 +86,8 @@ type
     FMatchFirstOnly: Boolean;
     FAutoIndent: Boolean;
     FAlwaysDisp: Boolean;
+    FForPascal: Boolean;
+    FForCpp: Boolean;
     function GetScopeRate: Integer;
     function GetText: string;
     procedure SetScopeRate(const Value: Integer);
@@ -134,6 +136,10 @@ type
     {* 如果是多行文本时，是否自动缩进对齐 }
     property AlwaysDisp: Boolean read FAlwaysDisp write FAlwaysDisp;
     {* 允许文本全匹配时不弹出助手允许多行文本 }
+    property ForPascal: Boolean read FForPascal write FForPascal;
+    {* 是否在 Pascal 中有效}
+    property ForCpp: Boolean read FForCpp write FForCpp;
+    {* 是否在 C/C++ 中有效}
   end;
 
 //==============================================================================
@@ -345,6 +351,8 @@ type
   private
     FFileAge: Integer;
   protected
+    FForBcb: Boolean;
+    FForPascal: Boolean;
     function GetReadFileName: string; virtual; abstract;
   public
     procedure Load; override;
@@ -423,6 +431,8 @@ const
   csIdentCharSet: TAnsiCharSet = AlphaNumeric;
   csCompDirectFirstSet: TAnsiCharSet = ['{'];
   csCompDirectCharSet: TAnsiCharSet = ['$', '+', '-'] + AlphaNumeric;
+  csCppCompDirectFirstSet: TAnsiCharSet = ['#'];
+  csCppCompDirectCharSet: TAnsiCharSet = AlphaNumeric;
   csCommentFirstSet: TAnsiCharSet = ['/'];
   csCommentCharSet: TAnsiCharSet = ['/'] + AlphaNumeric;
   csJavaDocFirstSet: TAnsiCharSet = ['{'];
@@ -450,6 +460,7 @@ const
   csCompD10 = 'D10';
   csCompD11 = 'D11';
   csCompD12 = 'D12';
+  csCompBCB = 'BCB';
   csCompUser = 'User';
 
   csCompDirectScope = MaxInt div 100 * 35;
@@ -490,6 +501,7 @@ begin
   FScope := csDefScope;
   FAutoIndent := True;
   FAlwaysDisp := False;
+  FForPascal := True;
 end;
 
 procedure TSymbolItem.Assign(Source: TPersistent);
@@ -953,7 +965,10 @@ end;
 function TFileSymbolList.Reload(Editor: IOTAEditBuffer;
   const InputText: string; PosInfo: TCodePosInfo): Boolean;
 begin
-  Result := PosInfo.PosKind in (csNormalPosKinds + [pkCompDirect, pkComment]);
+  if PosInfo.IsPascal then
+    Result := PosInfo.PosKind in (csNormalPosKinds + [pkCompDirect, pkComment])
+  else
+    Result := PosInfo.PosKind in [pkField, pkComment];
 end;
 
 procedure TFileSymbolList.RestoreDefault;
@@ -1012,7 +1027,7 @@ end;
 procedure TCompDirectSymbolList.AddSection(Ini: TMemIniFile; const Section: string);
 var
   Names: TStringList;
-  i: Integer;
+  i, Idx: Integer;
   Desc: string;
 begin
   Names := TStringList.Create;
@@ -1021,7 +1036,12 @@ begin
     for i := 0 to Names.Count - 1 do
     begin
       Desc := Trim(Ini.ReadString(Section, Names[i], ''));
-      Add(Names[i], skCompDirect, csCompDirectScope, Desc, Names[i], True, True);
+      Idx := Add(Names[i], skCompDirect, csCompDirectScope, Desc, Names[i], True, True);
+      if Names[i][1] = '#' then // # 开头的是 C/C++ 的
+      begin
+        Items[Idx].ForPascal := False;
+        Items[Idx].ForCpp := True;
+      end;
     end;
   finally
     Names.Free;
@@ -1043,6 +1063,7 @@ begin
   {$IFDEF DELPHI10_UP} AddSection(Ini, csCompD10); {$ENDIF}
   {$IFDEF DELPHI11_UP} AddSection(Ini, csCompD11); {$ENDIF}
   {$IFDEF DELPHI12_UP} AddSection(Ini, csCompD12); {$ENDIF}
+   AddSection(Ini, csCompBCB); // 加进来并设为C/C++专用的再说
   finally
     Ini.Free;
   end;
@@ -1052,7 +1073,10 @@ end;
 function TCompDirectSymbolList.Reload(Editor: IOTAEditBuffer;
   const InputText: string; PosInfo: TCodePosInfo): Boolean;
 begin
-  Result := PosInfo.PosKind in (csNormalPosKinds + [pkCompDirect]);
+  if PosInfo.IsPascal then
+    Result := PosInfo.PosKind in (csNormalPosKinds + [pkCompDirect])
+  else
+    Result := PosInfo.PosKind in (csNormalPosKinds + [pkCompDirect, pkField]);
 end;
 
 procedure TCompDirectSymbolList.Save;
@@ -1150,7 +1174,7 @@ end;
 function TJavaDocSymbolList.Reload(Editor: IOTAEditBuffer;
   const InputText: string; PosInfo: TCodePosInfo): Boolean;
 begin
-  Result := PosInfo.PosKind in [pkComment];
+  Result := PosInfo.PosKind in [pkComment, pkField]; // Pascal/C/C++ 
 end;
 
 //==============================================================================
@@ -1346,7 +1370,7 @@ function TUnitNameList.Reload(Editor: IOTAEditBuffer; const InputText: string;
 begin
   Result := False;
   try
-    if PosInfo.PosKind in [pkIntfUses, pkImplUses] then
+    if PosInfo.IsPascal and (PosInfo.PosKind in [pkIntfUses, pkImplUses]) then
     begin
       FUnits.Clear;
       Clear;
@@ -1421,13 +1445,15 @@ procedure TCodeTemplateList.Load;
 var
   Lines: TStringList;
   StrList: TStringList;
-  I: Integer;
+  I, Idx: Integer;
   FileName: string;
   Text: string;
   Line: string;
   Name: string;
   Desc: string;
   LangName: string;
+  IsPascal: Boolean;
+  IsCpp: Boolean;
 
   function IsTempleteCaption(const AText: string): Boolean;
   begin
@@ -1484,9 +1510,35 @@ begin
             Inc(I);
           end;
 
-          if (Name <> '') and ((LangName = '') or SameText(LangName,
-            'Borland.EditOptions.Pascal')) then
-            Add(Name, skTemplate, csTemplateScope, Desc, Text, True);
+          IsPascal := False;
+          IsCpp := False;
+          if Name <> '' then
+          begin
+            Idx := Add(Name, skTemplate, csTemplateScope, Desc, Text, True);
+            if LangName = '' then
+            begin
+              // 自动判断类型
+{$IFNDEF DELPHI} // 说明是BCB5、6编译
+              IsPascal := False;
+              IsCpp := True;
+{$ELSE}
+              IsPascal := True;
+              IsCpp := False;
+{$ENDIF}
+            end
+            else if SameText(LangName, 'Borland.EditOptions.Pascal') then
+            begin
+              IsPascal := True;
+              IsCpp := False;
+            end
+            else if SameText(LangName, 'Borland.EditOptions.C') then
+            begin
+              IsPascal := False;
+              IsCpp := True;
+            end;
+            Items[Idx].ForPascal := IsPascal;
+            Items[Idx].ForCpp := IsCpp;
+          end;
         end
         else
           Inc(I);
@@ -1501,7 +1553,11 @@ end;
 function TCodeTemplateList.Reload(Editor: IOTAEditBuffer;
   const InputText: string; PosInfo: TCodePosInfo): Boolean;
 begin
-  Result := PosInfo.PosKind in csNormalPosKinds;
+  if PosInfo.IsPascal then
+    Result := PosInfo.PosKind in csNormalPosKinds
+  else
+    Result := PosInfo.PosKind in [pkField, pkComment];
+
   if Result then
   begin
     Load;
@@ -1527,11 +1583,15 @@ begin
   // c:\Program Files\CodeGear\RAD Studio\5.0\ObjRepos\bds.dci
   if not FileExists(Result) then
     Result := _CnExtractFilePath(_CnExtractFileDir(Application.ExeName)) + 'ObjRepos\bds.dci';
+  FForBcb := True;
+  FForPascal := True;
 {$ELSE}
 {$IFDEF BCB}
   Result := _CnExtractFilePath(Application.ExeName) + 'bcb.dci';
+  FForBcb := True;
 {$ELSE}
   Result := _CnExtractFilePath(Application.ExeName) + 'delphi32.dci';
+  FForPascal := True;
 {$ENDIF}
 {$ENDIF}
 end;
@@ -1549,9 +1609,9 @@ end;
 
 function TXECodeTemplateList.GetScanDirectory: string;
 begin
-  // Only Support Delphi Templates
+  // Support Delphi/C Templates, so returns the parent directory
   Result := _CnExtractFilePath(_CnExtractFileDir(Application.ExeName))
-    + 'ObjRepos\' + GetLanguageDirectoryName() + '\Code_Templates\Delphi\';
+    + 'ObjRepos\' + GetLanguageDirectoryName() + '\Code_Templates\';
 end;
 
 const
@@ -1570,115 +1630,156 @@ var
   Sch: TSearchRec;
   Doc: IXMLDocument;
   Root, TemplateNode, CodeNode: IXmlElement;
-  I, CDataEndPos: Integer;
+  CDataEndPos: Integer;
   Text: string;
   Name: string;
   Desc: string;
 {$IFDEF DEBUG}
   C: Integer;
 {$ENDIF}
+
+  procedure ScanAndParseDir(const ADir: string);
+  var
+    Lang: string;
+    I, Idx: Integer;
+  begin
+    if FindFirst(ADir + '*.xml', faAnyfile, Sch) = 0 then
+    begin
+      repeat
+        if ((Sch.Name = '.') or (Sch.Name = '..')) then Continue;
+        if DirectoryExists(ADir + Sch.Name) then
+        begin
+          // XML Dir? do nothing.
+        end
+        else
+        begin
+          try
+            FileName := ADir + Sch.Name;
+            // Load this XML and read Name/Descripttion/Text
+            Doc := CreateXMLDoc();
+            Doc.Load(FileName);
+            Root := Doc.DocumentElement;
+            if not Assigned(Root) or not
+              SameText(Root.NodeName, XeCodeTemplateTag_codetemplate) then
+              Continue;
+
+            TemplateNode := nil;
+            for I := 0 to Root.ChildNodes.Length - 1 do
+            begin
+              if SameText(Root.ChildNodes.Item[I].NodeName, XeCodeTemplateTag_template) then
+              begin
+                TemplateNode := Root.ChildNodes.Item[I] as IXMLElement;
+                Break;
+              end;
+            end;
+
+            if TemplateNode <> nil then
+            begin
+              Name := Trim(TemplateNode.GetAttribute(XeCodeTemplateAttrib_name));
+              Desc := ''; Text := ''; Lang := '';
+              for I := 0 to TemplateNode.ChildNodes.Length - 1 do
+              begin
+                if SameText(TemplateNode.ChildNodes.Item[I].NodeName, XeCodeTemplateTag_description) then
+                begin
+                  // Read Description
+                  Desc := Trim(TemplateNode.ChildNodes.Item[I].Text);
+                end
+                else if SameText(TemplateNode.ChildNodes.Item[I].NodeName, XeCodeTemplateTag_code) then
+                begin
+                  // Language is Delphi? read the CDATA part
+                  CodeNode := TemplateNode.ChildNodes.Item[I] as IXMLElement;
+                  Lang := CodeNode.GetAttribute(XeCodeTemplateAttrib_language);
+                  if (Lang = 'Delphi') or (Lang = 'C') then
+                  begin
+                    Text := Trim(CodeNode.Text);
+                    if Pos(XeCodeTemplate_cdata, Text) = 1 then
+                      Text := Copy(Text, Length(XeCodeTemplate_cdata), MaxInt);
+                    CDataEndPos := Length(Text) - Length(XeCodeTemplate_cdataend) + 1;
+                    if Pos(XeCodeTemplate_cdataend, Text) = CDataEndPos then
+                      Text := Copy(Text, 1, CDataEndPos - 1);
+
+                    // Just replace these fields to empty
+                    if Lang = 'Delphi' then
+                    begin
+                      Text := StringReplace(Text, '|variable|', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '|classtype|', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '|selected|', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '|expr|', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '|createparms|', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '|enumname|', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '|name|', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '|ident|', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '|collection|', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '|ancestor|', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '|end|', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '|type|', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '|last|', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '|collection|', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '|low|', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '|high|', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '|var|', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '|init|', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '|expression|', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '|cases|', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '|errormessage|', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '|exception|', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '|*|', '', [rfReplaceAll]);
+                    end
+                    else // Replace C fields
+                    begin
+                      Text := StringReplace(Text, '$*$', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '$expr$', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '$expr1$', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '$expr2$', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '$expr3$', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '$selected$', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '$end$', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '$name$', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '$ancestor$', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '$cases$', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '$typename$', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '$exception$', '', [rfReplaceAll]);
+                      Text := StringReplace(Text, '$except$', '', [rfReplaceAll]);
+                    end;
+                  end;
+                end;
+              end;
+
+  {$IFDEF DEBUG}
+              Inc(C);
+  {$ENDIF}
+              if (Name <> '') and (Text <> '') then
+              begin
+                Idx := Add(Name, skTemplate, csTemplateScope, Desc, Text, True);
+                Items[Idx].ForCpp := Lang = 'C';
+                Items[Idx].ForPascal := Lang <> 'C';
+              end;
+            end;
+          except
+            ;
+          end;
+        end;
+      until FindNext(Sch) <> 0;
+      FindClose(Sch);
+    end;
+  end;
 begin
   // 扫描指定目录下的 XML 文件，每个文件是一项输入列表
-  Dir := GetScanDirectory();
+  Dir := GetScanDirectory() + 'Delphi\';
+  
 {$IFDEF DEBUG}
   C := 0;
   CnDebugger.LogMsg('XECodeTemplateList Scan directory: ' + Dir);
 {$ENDIF}
-  if FindFirst(Dir + '*.xml', faAnyfile, Sch) = 0 then
-  begin
-    repeat
-      if ((Sch.Name = '.') or (Sch.Name = '..')) then Continue;
-      if DirectoryExists(Dir + Sch.Name) then
-      begin
-        // XML Dir? do nothing.
-      end
-      else
-      begin
-        try
-          FileName := Dir + Sch.Name;
-          // Load this XML and read Name/Descripttion/Text
-          Doc := CreateXMLDoc();
-          Doc.Load(FileName);
-          Root := Doc.DocumentElement;
-          if not Assigned(Root) or not
-            SameText(Root.NodeName, XeCodeTemplateTag_codetemplate) then
-            Continue;
 
-          TemplateNode := nil;
-          for I := 0 to Root.ChildNodes.Length - 1 do
-          begin
-            if SameText(Root.ChildNodes.Item[I].NodeName, XeCodeTemplateTag_template) then
-            begin
-              TemplateNode := Root.ChildNodes.Item[I] as IXMLElement;
-              Break;
-            end;
-          end;
-
-          if TemplateNode <> nil then
-          begin
-            Name := Trim(TemplateNode.GetAttribute(XeCodeTemplateAttrib_name));
-            Desc := ''; Text := '';
-            for I := 0 to TemplateNode.ChildNodes.Length - 1 do
-            begin
-              if SameText(TemplateNode.ChildNodes.Item[I].NodeName, XeCodeTemplateTag_description) then
-              begin
-                // Read Description
-                Desc := Trim(TemplateNode.ChildNodes.Item[I].Text);
-              end
-              else if SameText(TemplateNode.ChildNodes.Item[I].NodeName, XeCodeTemplateTag_code) then
-              begin
-                // Language is Delphi? read the CDATA part
-                CodeNode := TemplateNode.ChildNodes.Item[I] as IXMLElement;
-                if CodeNode.GetAttribute(XeCodeTemplateAttrib_language) = 'Delphi' then
-                begin
-                  Text := Trim(CodeNode.Text);
-                  if Pos(XeCodeTemplate_cdata, Text) = 1 then
-                    Text := Copy(Text, Length(XeCodeTemplate_cdata), MaxInt);
-                  CDataEndPos := Length(Text) - Length(XeCodeTemplate_cdataend) + 1;
-                  if Pos(XeCodeTemplate_cdataend, Text) = CDataEndPos then
-                    Text := Copy(Text, 1, CDataEndPos - 1);
-
-                  // Just replace these fields to empty
-                  Text := StringReplace(Text, '|variable|', '', [rfReplaceAll]);
-                  Text := StringReplace(Text, '|classtype|', '', [rfReplaceAll]);
-                  Text := StringReplace(Text, '|selected|', '', [rfReplaceAll]);
-                  Text := StringReplace(Text, '|expr|', '', [rfReplaceAll]);
-                  Text := StringReplace(Text, '|createparms|', '', [rfReplaceAll]);
-                  Text := StringReplace(Text, '|enumname|', '', [rfReplaceAll]);
-                  Text := StringReplace(Text, '|name|', '', [rfReplaceAll]);
-                  Text := StringReplace(Text, '|ident|', '', [rfReplaceAll]);
-                  Text := StringReplace(Text, '|collection|', '', [rfReplaceAll]);
-                  Text := StringReplace(Text, '|ancestor|', '', [rfReplaceAll]);
-                  Text := StringReplace(Text, '|end|', '', [rfReplaceAll]);
-                  Text := StringReplace(Text, '|type|', '', [rfReplaceAll]);
-                  Text := StringReplace(Text, '|last|', '', [rfReplaceAll]);
-                  Text := StringReplace(Text, '|collection|', '', [rfReplaceAll]);
-                  Text := StringReplace(Text, '|low|', '', [rfReplaceAll]);
-                  Text := StringReplace(Text, '|high|', '', [rfReplaceAll]);
-                  Text := StringReplace(Text, '|var|', '', [rfReplaceAll]);
-                  Text := StringReplace(Text, '|init|', '', [rfReplaceAll]);
-                  Text := StringReplace(Text, '|expression|', '', [rfReplaceAll]);
-                  Text := StringReplace(Text, '|cases|', '', [rfReplaceAll]);
-                  Text := StringReplace(Text, '|errormessage|', '', [rfReplaceAll]);
-                  Text := StringReplace(Text, '|exception|', '', [rfReplaceAll]);
-                  Text := StringReplace(Text, '|*|', '', [rfReplaceAll]);
-                end;
-              end;
-            end;
+  ScanAndParseDir(Dir);
+  Dir := GetScanDirectory() + 'c\';
 
 {$IFDEF DEBUG}
-            Inc(C);
+  CnDebugger.LogMsg('XECodeTemplateList Scan directory: ' + Dir);
 {$ENDIF}
-            if (Name <> '') and (Text <> '') then
-              Add(Name, skTemplate, csTemplateScope, Desc, Text, True);
-          end;
-        except
-          ;
-        end;
-      end;
-    until FindNext(Sch) <> 0;
-    FindClose(Sch);
-  end;
+
+  ScanAndParseDir(Dir);
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('XECodeTemplateList Load Tempates: ' + IntToStr(C));
 {$ENDIF}

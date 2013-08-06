@@ -172,6 +172,7 @@ USEUNIT("IdeEnhancements\CnInputHelper.pas");
 USEFORMNS("IdeEnhancements\CnInputHelperEditFrm.pas", Cninputhelpereditfrm, CnInputHelperEditForm);
 USEFORMNS("IdeEnhancements\CnInputHelperFrm.pas", Cninputhelperfrm, CnInputHelperForm);
 USEUNIT("IdeEnhancements\CnInputIdeSymbolList.pas");
+USEUNIT("IdeEnhancements\CnInputBcbIdeSymbolList.pas");
 USEFORMNS("SimpleWizards\CnFeedWizardFrm.pas", Cnfeedwizardfrm, CnFeedWizardForm);
 USEUNIT("SimpleWizards\CnFeedWizard.pas");
 USEUNIT("Utils\CnFeedParser.pas");

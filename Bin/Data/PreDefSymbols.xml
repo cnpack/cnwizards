@@ -7,6 +7,8 @@
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>1</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>Abs</Name>
@@ -16,6 +18,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>abstract</Name>
@@ -24,6 +28,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>and</Name>
@@ -32,6 +38,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>AnsiChar</Name>
@@ -40,6 +48,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>AnsiString</Name>
@@ -48,6 +58,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>array</Name>
@@ -56,6 +68,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>as</Name>
@@ -64,6 +78,8 @@
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>asm</Name>
@@ -72,6 +88,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>assembler</Name>
@@ -80,6 +98,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Assigned</Name>
@@ -89,6 +109,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>begin</Name>
@@ -97,6 +119,8 @@
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Boolean</Name>
@@ -105,6 +129,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Byte</Name>
@@ -113,6 +139,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Cardinal</Name>
@@ -121,6 +149,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>case</Name>
@@ -129,6 +159,8 @@
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>cdecl</Name>
@@ -137,6 +169,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>Ceil</Name>
@@ -146,6 +180,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Char</Name>
@@ -154,6 +190,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>class</Name>
@@ -162,6 +200,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>const</Name>
@@ -170,6 +210,8 @@
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>constructor</Name>
@@ -178,6 +220,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Copy</Name>
@@ -187,6 +231,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Cos</Name>
@@ -196,6 +242,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Currency</Name>
@@ -204,6 +252,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>default</Name>
@@ -212,6 +262,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>Delete</Name>
@@ -221,6 +273,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>deprecated</Name>
@@ -229,6 +283,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>destructor</Name>
@@ -237,6 +293,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>dispinterface</Name>
@@ -245,6 +303,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>div</Name>
@@ -253,6 +313,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>do</Name>
@@ -261,6 +323,8 @@
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>Double</Name>
@@ -269,6 +333,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>downto</Name>
@@ -277,6 +343,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>dynamic</Name>
@@ -285,6 +353,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>else</Name>
@@ -293,6 +363,8 @@
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>end</Name>
@@ -301,6 +373,8 @@
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>except</Name>
@@ -309,6 +383,8 @@
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Exit</Name>
@@ -318,6 +394,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Exp</Name>
@@ -327,6 +405,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>export</Name>
@@ -335,6 +415,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>exports</Name>
@@ -343,6 +425,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Extended</Name>
@@ -351,6 +435,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>external</Name>
@@ -359,6 +445,8 @@
     <ScopeRate>15</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>False</Name>
@@ -368,6 +456,8 @@
     <ScopeRate>1</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>far</Name>
@@ -376,6 +466,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>file</Name>
@@ -384,6 +476,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>finalization</Name>
@@ -392,6 +486,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>finally</Name>
@@ -400,6 +496,8 @@
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Floor</Name>
@@ -409,6 +507,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>for</Name>
@@ -417,6 +517,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>forward</Name>
@@ -425,6 +527,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>function</Name>
@@ -433,6 +537,8 @@
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>goto</Name>
@@ -441,6 +547,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>High</Name>
@@ -450,6 +558,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>if</Name>
@@ -458,6 +568,8 @@
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>implementation</Name>
@@ -466,6 +578,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>in</Name>
@@ -474,6 +588,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>index</Name>
@@ -482,6 +598,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>inherited</Name>
@@ -490,6 +608,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>initialization</Name>
@@ -498,6 +618,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>inline</Name>
@@ -506,6 +628,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>Int</Name>
@@ -515,6 +639,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Int64</Name>
@@ -523,6 +649,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Integer</Name>
@@ -531,6 +659,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>interface</Name>
@@ -539,6 +669,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>is</Name>
@@ -547,6 +679,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>label</Name>
@@ -555,6 +689,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Length</Name>
@@ -564,6 +700,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>library</Name>
@@ -572,6 +710,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Ln</Name>
@@ -581,6 +721,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>LongBool</Name>
@@ -589,6 +731,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>LongInt</Name>
@@ -597,6 +741,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>LongWord</Name>
@@ -605,6 +751,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Low</Name>
@@ -614,6 +762,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>message</Name>
@@ -622,6 +772,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>mod</Name>
@@ -630,6 +782,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>nil</Name>
@@ -638,6 +792,8 @@
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>not</Name>
@@ -646,6 +802,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>null</Name>
@@ -654,6 +812,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>object</Name>
@@ -662,6 +822,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>of</Name>
@@ -670,6 +832,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>OleVariant</Name>
@@ -678,6 +842,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>on</Name>
@@ -686,6 +852,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>or</Name>
@@ -694,6 +862,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Ord</Name>
@@ -703,6 +873,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>out</Name>
@@ -711,6 +883,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>overload</Name>
@@ -719,6 +893,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>override</Name>
@@ -727,6 +903,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>packed</Name>
@@ -735,6 +913,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>PAnsiChar</Name>
@@ -743,6 +923,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>pascal</Name>
@@ -751,6 +933,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>PChar</Name>
@@ -759,6 +943,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Pi</Name>
@@ -768,6 +954,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Pointer</Name>
@@ -776,6 +964,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Pos</Name>
@@ -785,6 +975,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Power</Name>
@@ -794,6 +986,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>private</Name>
@@ -802,6 +996,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>procedure</Name>
@@ -810,6 +1006,8 @@
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>program</Name>
@@ -818,6 +1016,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>property</Name>
@@ -826,6 +1026,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>protected</Name>
@@ -834,6 +1036,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>public</Name>
@@ -842,6 +1046,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>published</Name>
@@ -850,6 +1056,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>PWideChar</Name>
@@ -858,6 +1066,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>raise</Name>
@@ -866,6 +1076,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Random</Name>
@@ -875,6 +1087,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>read</Name>
@@ -883,6 +1097,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Real</Name>
@@ -891,6 +1107,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>record</Name>
@@ -899,6 +1117,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>register</Name>
@@ -907,6 +1127,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>reintroduce</Name>
@@ -915,6 +1137,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>repeat</Name>
@@ -923,6 +1147,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>resourcestring</Name>
@@ -931,6 +1157,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Round</Name>
@@ -940,6 +1168,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>safecall</Name>
@@ -948,6 +1178,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>set</Name>
@@ -956,6 +1188,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>shl</Name>
@@ -964,6 +1198,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>ShortInt</Name>
@@ -972,6 +1208,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>ShortString</Name>
@@ -980,6 +1218,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>shr</Name>
@@ -988,6 +1228,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Sin</Name>
@@ -997,6 +1239,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Single</Name>
@@ -1005,6 +1249,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>SizeOf</Name>
@@ -1014,6 +1260,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>SmallInt</Name>
@@ -1022,6 +1270,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Sqr</Name>
@@ -1031,6 +1281,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Sqrt</Name>
@@ -1040,6 +1292,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>stdcall</Name>
@@ -1048,6 +1302,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>stored</Name>
@@ -1056,6 +1312,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>string</Name>
@@ -1064,6 +1322,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>TDateTime</Name>
@@ -1072,6 +1332,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>then</Name>
@@ -1080,6 +1342,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>threadvar</Name>
@@ -1088,6 +1352,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>to</Name>
@@ -1096,6 +1362,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>True</Name>
@@ -1105,6 +1373,8 @@
     <ScopeRate>1</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Trunc</Name>
@@ -1114,6 +1384,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>try</Name>
@@ -1122,6 +1394,8 @@
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>type</Name>
@@ -1130,6 +1404,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>TypeInfo</Name>
@@ -1139,6 +1415,8 @@
     <ScopeRate>2</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>unit</Name>
@@ -1147,6 +1425,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>until</Name>
@@ -1155,6 +1435,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>uses</Name>
@@ -1163,6 +1445,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>var</Name>
@@ -1171,6 +1455,8 @@
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>Variant</Name>
@@ -1179,6 +1465,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>virtual</Name>
@@ -1187,6 +1475,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>while</Name>
@@ -1195,6 +1485,8 @@
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>WideChar</Name>
@@ -1203,6 +1495,8 @@
     <ScopeRate>5</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>with</Name>
@@ -1211,6 +1505,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>write</Name>
@@ -1219,6 +1515,8 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>xor</Name>
@@ -1227,5 +1525,1017 @@
     <ScopeRate>14</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
+  </Item>
+  <Item>
+    <Name>_CHAR_UNSIGNED</Name>
+    <Kind>skKeyword</Kind>
+    <Text>_CHAR_UNSIGNED</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>_CPPUNWIND</Name>
+    <Kind>skKeyword</Kind>
+    <Text>_CPPUNWIND</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>_M_IX86</Name>
+    <Kind>skKeyword</Kind>
+    <Text>_M_IX86</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>_WCHAR_T</Name>
+    <Kind>skKeyword</Kind>
+    <Text>_WCHAR_T</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>_WCHAR_T_DEFINED</Name>
+    <Kind>skKeyword</Kind>
+    <Text>_WCHAR_T_DEFINED</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>_Windows</Name>
+    <Kind>skKeyword</Kind>
+    <Text>_Windows</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__BCOPT__</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__BCOPT__</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__BCPLUSPLUS__</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__BCPLUSPLUS__</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__BORLANDC__</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__BORLANDC__</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__CDECL__</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__CDECL__</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__CONSOLE__</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__CONSOLE__</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__DATE__</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__DATE__</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__DLL__</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__DLL__</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__FILE__</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__FILE__</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__LINE__</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__LINE__</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__MSDOS__</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__MSDOS__</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__MT__</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__MT__</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__PASCAL__</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__PASCAL__</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__STDC__</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__STDC__</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__TCPLUSPLUS__</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__TCPLUSPLUS__</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__TEMPLATES__</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__TEMPLATES__</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__TIME__</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__TIME__</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__TLS__</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__TLS__</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__TURBOC__</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__TURBOC__</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__WIN32__</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__WIN32__</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__asm</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__asm</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__automated</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__automated</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__cdecl</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__cdecl</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__classid</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__classid</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__closure</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__closure</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__cplusplus</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__cplusplus</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__declspec</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__declspec</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__dispid</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__dispid</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__except</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__except</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__export</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__export</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__fastcall</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__fastcall</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__finally</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__finally</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__import</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__import</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__int16</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__int16</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__int32</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__int32</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__int64</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__int64</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__int8</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__int8</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__pascal</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__pascal</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__property</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__property</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__published</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__published</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__rtti</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__rtti</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__stdcall</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__stdcall</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__thread</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__thread</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>__try</Name>
+    <Kind>skKeyword</Kind>
+    <Text>__try</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>_asm</Name>
+    <Kind>skKeyword</Kind>
+    <Text>_asm</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>_cdecl</Name>
+    <Kind>skKeyword</Kind>
+    <Text>_cdecl</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>_export</Name>
+    <Kind>skKeyword</Kind>
+    <Text>_export</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>_fastcall</Name>
+    <Kind>skKeyword</Kind>
+    <Text>_fastcall</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>_import</Name>
+    <Kind>skKeyword</Kind>
+    <Text>_import</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>_pascal</Name>
+    <Kind>skKeyword</Kind>
+    <Text>_pascal</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>_stdcall</Name>
+    <Kind>skKeyword</Kind>
+    <Text>_stdcall</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>auto</Name>
+    <Kind>skKeyword</Kind>
+    <Text>auto</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>bool</Name>
+    <Kind>skKeyword</Kind>
+    <Text>bool</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>break</Name>
+    <Kind>skKeyword</Kind>
+    <Text>break</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>catch</Name>
+    <Kind>skKeyword</Kind>
+    <Text>catch</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>char</Name>
+    <Kind>skKeyword</Kind>
+    <Text>char</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>const_cast</Name>
+    <Kind>skKeyword</Kind>
+    <Text>const_cast</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>continue</Name>
+    <Kind>skKeyword</Kind>
+    <Text>continue</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>delete</Name>
+    <Kind>skKeyword</Kind>
+    <Text>delete</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>double</Name>
+    <Kind>skKeyword</Kind>
+    <Text>double</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>dynamic_cast</Name>
+    <Kind>skKeyword</Kind>
+    <Text>dynamic_cast</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>enum</Name>
+    <Kind>skKeyword</Kind>
+    <Text>enum</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>explicit</Name>
+    <Kind>skKeyword</Kind>
+    <Text>explicit</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>extern</Name>
+    <Kind>skKeyword</Kind>
+    <Text>extern</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>false</Name>
+    <Kind>skKeyword</Kind>
+    <Text>false</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>float</Name>
+    <Kind>skKeyword</Kind>
+    <Text>float</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>friend</Name>
+    <Kind>skKeyword</Kind>
+    <Text>friend</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>int</Name>
+    <Kind>skKeyword</Kind>
+    <Text>int</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>long</Name>
+    <Kind>skKeyword</Kind>
+    <Text>long</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>mutable</Name>
+    <Kind>skKeyword</Kind>
+    <Text>mutable</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>namespace</Name>
+    <Kind>skKeyword</Kind>
+    <Text>namespace</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>new</Name>
+    <Kind>skKeyword</Kind>
+    <Text>new</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>NULL</Name>
+    <Kind>skKeyword</Kind>
+    <Text>NULL</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>operator</Name>
+    <Kind>skKeyword</Kind>
+    <Text>operator</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>reinterpret_cast</Name>
+    <Kind>skKeyword</Kind>
+    <Text>reinterpret_cast</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>return</Name>
+    <Kind>skKeyword</Kind>
+    <Text>return</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>short</Name>
+    <Kind>skKeyword</Kind>
+    <Text>short</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>signed</Name>
+    <Kind>skKeyword</Kind>
+    <Text>signed</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>sizeof</Name>
+    <Kind>skKeyword</Kind>
+    <Text>sizeof</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>static</Name>
+    <Kind>skKeyword</Kind>
+    <Text>static</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>static_cast</Name>
+    <Kind>skKeyword</Kind>
+    <Text>static_cast</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>struct</Name>
+    <Kind>skKeyword</Kind>
+    <Text>struct</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>switch</Name>
+    <Kind>skKeyword</Kind>
+    <Text>switch</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>template</Name>
+    <Kind>skKeyword</Kind>
+    <Text>template</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>this</Name>
+    <Kind>skKeyword</Kind>
+    <Text>this</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>throw</Name>
+    <Kind>skKeyword</Kind>
+    <Text>throw</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>true</Name>
+    <Kind>skKeyword</Kind>
+    <Text>true</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>typedef</Name>
+    <Kind>skKeyword</Kind>
+    <Text>typedef</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>typeid</Name>
+    <Kind>skKeyword</Kind>
+    <Text>typeid</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>typename</Name>
+    <Kind>skKeyword</Kind>
+    <Text>typename</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>union</Name>
+    <Kind>skKeyword</Kind>
+    <Text>union</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>unsigned</Name>
+    <Kind>skKeyword</Kind>
+    <Text>unsigned</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>using</Name>
+    <Kind>skKeyword</Kind>
+    <Text>using</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>void</Name>
+    <Kind>skKeyword</Kind>
+    <Text>void</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>volatile</Name>
+    <Kind>skKeyword</Kind>
+    <Text>volatile</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
+  </Item>
+  <Item>
+    <Name>wchar_t</Name>
+    <Kind>skKeyword</Kind>
+    <Text>wchar_t</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>0</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
 </Symbols>

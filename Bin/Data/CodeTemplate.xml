@@ -7,6 +7,8 @@
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>//d</Name>
@@ -16,6 +18,8 @@
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>//l</Name>
@@ -25,6 +29,8 @@
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>//m</Name>
@@ -34,6 +40,8 @@
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>//t</Name>
@@ -43,6 +51,8 @@
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>be</Name>
@@ -54,6 +64,8 @@ end;</Text>
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>bee</Name>
@@ -66,6 +78,8 @@ else</Text>
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>beebe</Name>
@@ -81,6 +95,8 @@ end;</Text>
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>co</Name>
@@ -90,6 +106,8 @@ end;</Text>
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>cob</Name>
@@ -102,6 +120,8 @@ end;</Text>
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>coc</Name>
@@ -111,6 +131,8 @@ end;</Text>
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>cocb</Name>
@@ -123,6 +145,8 @@ end;</Text>
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>de</Name>
@@ -132,6 +156,8 @@ end;</Text>
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>deb</Name>
@@ -144,6 +170,8 @@ end;</Text>
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>fu</Name>
@@ -153,6 +181,8 @@ end;</Text>
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>fub</Name>
@@ -165,6 +195,8 @@ end;</Text>
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>fubm</Name>
@@ -177,6 +209,8 @@ end;</Text>
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>fum</Name>
@@ -186,6 +220,8 @@ end;</Text>
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>pr</Name>
@@ -195,6 +231,8 @@ end;</Text>
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>prb</Name>
@@ -207,6 +245,8 @@ end;</Text>
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>prbm</Name>
@@ -219,6 +259,8 @@ end;</Text>
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>prm</Name>
@@ -228,6 +270,8 @@ end;</Text>
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>pro</Name>
@@ -237,6 +281,8 @@ end;</Text>
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>prof</Name>
@@ -246,6 +292,8 @@ end;</Text>
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>profm</Name>
@@ -255,6 +303,8 @@ end;</Text>
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>prom</Name>
@@ -264,6 +314,8 @@ end;</Text>
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>prr</Name>
@@ -273,6 +325,8 @@ end;</Text>
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
   <Item>
     <Name>prrm</Name>
@@ -282,5 +336,7 @@ end;</Text>
     <ScopeRate>0</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
   </Item>
 </Symbols>

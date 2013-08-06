@@ -15,7 +15,6 @@ USEFORMNS("SimpleWizards\CnBookmarkWizard.pas", Cnbookmarkwizard, CnBookmarkForm
 USEFORMNS("SimpleWizards\CnBookmarkConfigFrm.pas", Cnbookmarkconfigfrm, CnBookmarkConfigForm);
 USEFORMNS("SrcTemplate\CnSrcTemplate.pas", Cnsrctemplate, CnSrcTemplateForm);
 USEFORMNS("SrcTemplate\CnSrcTemplateEditFrm.pas", Cnsrctemplateeditfrm, CnSrcTemplateEditForm);
-USEFORMNS("EditorWizard\CnEditorWizard.pas", Cneditorwizard, CnEditorToolsForm);
 USEFORMNS("SimpleWizards\CnMsdnWizard.pas", Cnmsdnwizard, CnMsdnConfigForm);
 USEFORMNS("SimpleWizards\CnPas2HtmlWizard.pas", Cnpas2htmlwizard, CnPas2HtmlForm);
 USEFORMNS("SimpleWizards\CnPasConvertTypeFrm.pas", Cnpasconverttypefrm, CnPasConvertTypeForm);
@@ -86,49 +85,6 @@ USEFORMNS("ScriptWizard\CnScriptFrm.pas", Cnscriptfrm, CnScriptForm);
 USEFORMNS("ScriptWizard\CnScriptWizard.pas", Cnscriptwizard, CnScriptWizardForm);
 USEFORMNS("SimpleWizards\CnFeedWizardFrm.pas", Cnfeedwizardfrm, CnFeedWizardForm);
 USEFORMNS("DesignEditors\CnImageListEditorFrm.pas", Cnimagelisteditorfrm, CnImageListEditorForm);
-//---------------------------------------------------------------------------
-USEFORMNS("IdeEnhancements\CnCompFilterFrm.pas', Cncompfilterfrm, CnCompFilterForm);
-USEFORMNS("CorProperty\CnCorPropCfgFrm.pas", Cncorpropcfgfrm, CnCorPropCfgForm);
-USEFORMNS("CorProperty\CnCorPropFrm.pas", Cncorpropfrm, CnCorPropForm);
-USEFORMNS("CorProperty\CnCorPropRulesFrm.pas", Cncorproprulesfrm, CorPropRuleForm);
-USEFORMNS("ProjectExtWizard\CnProjectViewFormsFrm.pas", Cnprojectviewformsfrm, CnProjectViewFormsForm);
-USEFORMNS("ProjectExtWizard\CnProjectViewUnitsFrm.pas", Cnprojectviewunitsfrm, CnProjectViewUnitsForm);
-USEFORMNS("ProjectExtWizard\CnProjectUseUnitsFrm.pas", Cnprojectuseunitsfrm, CnProjectUseUnitsForm);
-USEFORMNS("ProjectExtWizard\CnProjectFramesFrm.pas", Cnprojectframesfrm, CnProjectFramesForm);
-USEFORMNS("ProjectExtWizard\CnProjectListUsedFrm.pas", Cnprojectlistusedfrm, CnProjectListUsedForm);
-USEFORMNS("SimpleWizards\CnCommentCropper.pas", Cncommentcropper, CommentCropFrm);
-USEFORMNS("DesignEditors\CnMultiLineEdtToolOptFrm.pas", Cnmultilineedttooloptfrm, CnMultiLineEditorToolsOptionFrm);
-USEFORMNS("DesignEditors\CnMultiLineEdtUserFmtFrm.pas", Cnmultilineedtuserfmtfrm, CnMultiLineEditorUserFmtFrm);
-USEFORMNS("RepositoryWiz\CnDUnitSetFrm.pas", Cndunitsetfrm, CnDUnitSetForm);
-USEFORMNS("RepositoryWiz\CnIniFilerFrm.pas", Cninifilerfrm, CnIniFilerForm);
-USEFORMNS("ProjectExtWizard\CnProjectDelTempFrm.pas", Cnprojectdeltempfrm, CnProjectDelTempForm);
-USEFORMNS("Utils\CnWizIdeDock.pas", Cnwizidedock, CnIdeDockForm);
-USEFORMNS("ExplorerWizard\CnExplore.pas", Cnexplore, CnExploreForm);
-USEFORMNS("ExplorerWizard\CnExploreDirectory.pas", Cnexploredirectory, CnExploreDirctoryForm);
-USEFORMNS("ExplorerWizard\CnExploreFilter.pas", Cnexplorefilter, CnExploreFilterForm);
-USEFORMNS("ExplorerWizard\CnExploreFilterEditor.pas", Cnexplorefiltereditor, CnExploreFilterEditorForm);
-USEFORMNS("ProjectExtWizard\CnProjectViewBaseFrm.pas", Cnprojectviewbasefrm, CnProjectViewBaseForm);
-USEFORMNS("ReopenWizard\CnFilesSnapshotManageFrm.pas", Cnfilessnapshotmanagefrm, CnProjectFilesSnapshotManageForm);
-USEFORMNS("ReopenWizard\CnRoFrmFileList.pas", Cnrofrmfilelist, RecentFilesFrame); /* TFrame: File Type */
-USEFORMNS("IdeEnhancements\CnWinTopRoller.pas", Cnwintoproller, CnFrmTopRoller);
-USEFORMNS("SrcEditorEnhance\CnSrcEditorEnhance.pas", Cnsrceditorenhance, CnSrcEditorEnhanceForm);
-USEFORMNS("SrcEditorEnhance\CnIdentRenameFrm.pas", Cnidentrenamefrm, CnIdentRenameForm);
-USEFORMNS("ProjectExtWizard\CnProjectBackupFrm.pas", Cnprojectbackupfrm, CnProjectBackupForm);
-USEFORMNS("ProjectExtWizard\CnProjectBackupSaveFrm.pas", Cnprojectbackupsavefrm, CnProjectBackupSaveForm);
-USEFORMNS("SimpleWizards\CnProcListWizard.pas", Cnproclistwizard, CnProcListFrm);
-USEFORMNS("IdeEnhancements\CnVerEnhanceFrm.pas", Cnverenhancefrm, CnVerEnhanceForm);
-USEFORMNS("Utils\CnWizMacroFrm.pas", Cnwizmacrofrm, CnWizMacroForm);
-USEFORMNS("ProjectExtWizard\CnProjectDirImportFrm.pas", Cnprojectdirimportfrm, CnImportDirForm);
-USEFORMNS("SrcEditorEnhance\CnSrcEditorGroupReplace.pas", Cnsrceditorgroupreplace, CnSrcEditorGroupReplaceForm);
-USEFORMNS("EditorWizard\CnEditorCollector.pas", Cneditorcollector, CnEditorCollectorForm);
-USEFORMNS("IdeEnhancements\CnSourceHighlightFrm.pas", Cnsourcehighlightfrm, CnSourceHighlightForm);
-USEFORMNS("IdeEnhancements\CnHighlightLineFrm.pas", Cnhighlightlinefrm, CnHighlightLineForm);
-USEFORMNS("IdeEnhancements\CnInputHelperEditFrm.pas", Cninputhelpereditfrm, CnInputHelperEditForm);
-USEFORMNS("IdeEnhancements\CnInputHelperFrm.pas", Cninputhelperfrm, CnInputHelperForm);
-USEFORMNS("SrcEditorEnhance\CnSrcEditorWebSearch.pas", Cnsrceditorwebsearch, CnSrcEditorWebSearchForm);
-USEFORMNS("DesignEditors\CnPropEditorCustomizeFrm.pas", Cnpropeditorcustomizefrm, CnPropEditorCustomizeForm);
-USEFORMNS("ScriptWizard\CnScriptFrm.pas", Cnscriptfrm, CnScriptForm);
-USEFORMNS("ScriptWizard\CnScriptWizard.pas", Cnscriptwizard, CnScriptWizardForm);
 //---------------------------------------------------------------------------
 This file is used by the project manager only and should be treated like the project file
 

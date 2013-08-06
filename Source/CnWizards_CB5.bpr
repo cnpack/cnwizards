@@ -90,7 +90,7 @@
       ..\Dcu\CnImageListEditor.obj ..\Dcu\CnImageListEditorFrm.obj 
       ..\Dcu\CnImageProvider_IconFinder.obj ..\Dcu\CnImageProviderMgr.obj 
       ..\Dcu\CnImageProvider_FindIcons.obj ..\Dcu\CnImageProvider_LocalCache.obj 
-      ..\Dcu\CnWizards_CB5.obj"/>
+      ..\Dcu\CnInputBcbIdeSymbolList.obj ..\Dcu\CnWizards_CB5.obj"/>
     <RESFILES value="CnWizards_CB5.res"/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
@@ -146,6 +146,7 @@
       SrcEditorEnhance\CnIdentRenameFrm.dfm 
       IdeEnhancements\CnSourceHighlightFrm.dfm 
       IdeEnhancements\CnHighlightLineFrm.dfm 
+      IdeEnhancements\CnHighlightSeparateLineFrm.dfm 
       SrcEditorEnhance\CnSrcEditorWebSearch.dfm 
       DesignEditors\CnPropEditorCustomizeFrm.dfm 
       IdeEnhancements\CnInputHelperEditFrm.dfm 

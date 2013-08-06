@@ -88,7 +88,8 @@
       ..\Dcu\CnFeedWizardFrm.obj ..\Dcu\CnFeedWizard.obj ..\Dcu\CnFeedParser.obj 
       ..\Dcu\CnImageListEditor.obj ..\Dcu\CnImageListEditorFrm.obj 
       ..\Dcu\CnImageProvider_IconFinder.obj ..\Dcu\CnImageProviderMgr.obj 
-      ..\Dcu\CnImageProvider_FindIcons.obj ..\Dcu\CnImageProvider_LocalCache.obj"/>
+      ..\Dcu\CnImageProvider_FindIcons.obj ..\Dcu\CnImageProvider_LocalCache.obj 
+      ..\Dcu\CnInputBcbIdeSymbolList.obj"/>
     <RESFILES value="CnWizards_CB6.res"/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
@@ -368,6 +369,7 @@
       <FILE FILENAME="IdeEnhancements\CnInputHelperEditFrm.pas" FORMNAME="CnInputHelperEditForm" UNITNAME="CnInputHelperEditFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="IdeEnhancements\CnInputHelperFrm.pas" FORMNAME="CnInputHelperForm" UNITNAME="CnInputHelperFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="IdeEnhancements\CnInputIdeSymbolList.pas" FORMNAME="" UNITNAME="CnInputIdeSymbolList.pas" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="IdeEnhancements\CnInputBcbIdeSymbolList.pas" FORMNAME="" UNITNAME="CnInputBcbIdeSymbolList" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="SrcEditorEnhance\CnSrcEditorWebSearch.pas" FORMNAME="CnSrcEditorWebSearchForm" UNITNAME="CnSrcEditorWebSearch" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="SimpleWizards\CnIdeBRWizard.pas" FORMNAME="" UNITNAME="CnIdeBRWizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="DesignEditors\CnPropEditorCustomizeFrm.pas" FORMNAME="CnPropEditorCustomizeForm" UNITNAME="CnPropEditorCustomizeFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
@@ -392,9 +394,9 @@
 [Version Info]
 IncludeVerInfo=1
 AutoIncBuild=0
-MajorVer=0
-MinorVer=9
-Release=9
+MajorVer=1
+MinorVer=0
+Release=1
 Build=0
 Debug=0
 PreRelease=0
@@ -407,9 +409,9 @@ CodePage=1200
 [Version Info Keys]
 CompanyName=CnPack Team
 FileDescription=CnWizards For C++Builder 6
-FileVersion=0.9.9.0
+FileVersion=1.0.1.0
 InternalName=CnWizards_CB6
-LegalCopyright=(C)Copyright 2001-2012 CnPack Team
+LegalCopyright=(C)Copyright 2001-2013 CnPack Team
 LegalTrademarks=CnPack
 OriginalFilename=CnWizards_CB6.DLL
 ProductName=CnWizards

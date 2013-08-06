@@ -7,6 +7,8 @@
     <ScopeRate>7</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>1</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>///author</Name>
@@ -16,6 +18,8 @@
     <ScopeRate>13</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>///code</Name>
@@ -27,6 +31,8 @@
     <ScopeRate>13</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>///date</Name>
@@ -49,6 +55,8 @@
     <ScopeRate>13</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>///exception</Name>
@@ -59,6 +67,8 @@
     <ScopeRate>13</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>///func</Name>
@@ -72,6 +82,8 @@
     <ScopeRate>13</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>///list_bullet</Name>
@@ -88,6 +100,8 @@
     <ScopeRate>13</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>///list_bullet_term</Name>
@@ -106,6 +120,8 @@
     <ScopeRate>13</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>///list_number</Name>
@@ -122,6 +138,8 @@
     <ScopeRate>13</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>///list_number_term</Name>
@@ -140,6 +158,8 @@
     <ScopeRate>13</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>///list_table</Name>
@@ -159,6 +179,8 @@
     <ScopeRate>13</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>///list_table_term</Name>
@@ -181,6 +203,8 @@
     <ScopeRate>13</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>///param</Name>
@@ -190,6 +214,8 @@
     <ScopeRate>13</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>///permission</Name>
@@ -200,6 +226,8 @@
     <ScopeRate>13</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>///remarks</Name>
@@ -212,6 +240,8 @@
     <ScopeRate>13</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>///returns</Name>
@@ -221,6 +251,8 @@
     <ScopeRate>13</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>///seealso</Name>
@@ -230,6 +262,8 @@
     <ScopeRate>13</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>///summary</Name>
@@ -242,6 +276,8 @@
     <ScopeRate>13</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
   <Item>
     <Name>///value</Name>
@@ -251,5 +287,7 @@
     <ScopeRate>13</ScopeRate>
     <AutoIndent>1</AutoIndent>
     <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>1</ForCpp>
   </Item>
 </Symbols>
