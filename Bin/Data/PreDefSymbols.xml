@@ -20,7 +20,7 @@
     <AlwaysDisp>0</AlwaysDisp>
     <ForPascal>1</ForPascal>
     <ForCpp>0</ForCpp>
-  </item>
+  </Item>
   <Item>
     <Name>absolute</Name>
     <Kind>skKeyword</Kind>
