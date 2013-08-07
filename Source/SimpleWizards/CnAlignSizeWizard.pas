@@ -1322,8 +1322,13 @@ begin
 
   List := TList.Create;
   try
-    CnOtaGetSelectedControlFromCurrentForm(List);
-    Count := List.Count;
+    try
+      CnOtaGetSelectedControlFromCurrentForm(List);
+      Count := List.Count;
+    except
+      ; // Maybe XE4 FMX Style will cause AV here. Catch it
+      Count := 0;
+    end;
   finally
     List.Free;
   end;
