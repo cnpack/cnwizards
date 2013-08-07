@@ -509,7 +509,7 @@ begin
         if Assigned(BackButton) and (BackButton.Action <> FBackAction) then
         begin
           FOldImageList := TToolBar(BackButton.Parent).Images;
-          TToolBar(BackButton.Parent).Images := dmCnSharedImages.ilBackForward;
+          TToolBar(BackButton.Parent).Images := dmCnSharedImages.ilBackForwardBDS;
 
           FOldBackAction := BackButton.Action;
           FOldBackMenu := BackButton.DropdownMenu;

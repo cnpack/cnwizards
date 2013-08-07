@@ -49,6 +49,7 @@ type
     ilBackForward: TImageList;
     ilInputHelper: TImageList;
     ilProcToolBar: TImageList;
+    ilBackForwardBDS: TImageList;
     procedure DataModuleCreate(Sender: TObject);
   private
     { Private declarations }
