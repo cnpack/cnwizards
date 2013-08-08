@@ -370,7 +370,7 @@ var
   Lex: TmwPasLex;
   MethodStack, BlockStack, MidBlockStack: TObjectStack;
   Token, CurrMethod, CurrBlock, CurrMidBlock: TCnPasToken;
-  SavePos, SaveLineNumber: Integer;
+  SavePos, SaveLineNumber, SaveLinePos: Integer;
   IsClassOpen, IsClassDef, IsImpl, IsHelper, IsRecordHelper, IsSealed: Boolean;
   DeclareWithEndLevel: Integer;
   PrevTokenID: TTokenKind;
@@ -555,6 +555,7 @@ begin
                 IsRecordHelper := False;
                 SavePos := Lex.RunPos;
                 SaveLineNumber := Lex.LineNumber;
+                SaveLinePos := Lex.LinePos;
 
                 LexNextNoJunkWithoutCompDirect(Lex);
                 if Lex.TokenID in [tkSymbol, tkIdentifier] then
@@ -564,6 +565,7 @@ begin
                 end;
 
                 Lex.LineNumber := SaveLineNumber;
+                Lex.LinePos := SaveLinePos;
                 Lex.RunPos := SavePos;
               end;
 
@@ -618,6 +620,7 @@ begin
               begin
                 SavePos := Lex.RunPos;
                 SaveLineNumber := Lex.LineNumber;
+                SaveLinePos := Lex.LinePos;
 
                 LexNextNoJunkWithoutCompDirect(Lex);
                 if Lex.TokenID in [tkSymbol, tkIdentifier] then
@@ -634,6 +637,7 @@ begin
                   end;
                 end;
                 Lex.LineNumber := SaveLineNumber;
+                Lex.LinePos := SaveLinePos;
                 Lex.RunPos := SavePos;
               end;
 
@@ -643,6 +647,8 @@ begin
                 IsClassOpen := True;
                 SavePos := Lex.RunPos;
                 SaveLineNumber := Lex.LineNumber;
+                SaveLinePos := Lex.LinePos;
+
                 LexNextNoJunkWithoutCompDirect(Lex);
                 if Lex.TokenID = tkSemiColon then // 是个 class; 不需要 end;
                   IsClassOpen := False
@@ -663,8 +669,9 @@ begin
                   IsClassOpen := True;
 
                 // RunPos 重新赋值不会导致已经下移的 LineNumber 回归，是个 Bug
-                // 如果给 Lex 的 LineNumber 直接赋值，又不知道会有啥问题
+                // 如果给 Lex 的 LineNumber 以及 LinePos 直接赋值，又不知道会有啥问题
                 Lex.LineNumber := SaveLineNumber;
+                Lex.LinePos := SaveLinePos;
                 Lex.RunPos := SavePos;
               end;
 
