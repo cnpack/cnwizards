@@ -264,7 +264,7 @@ type
     property LastNoSpacePos: Integer read fLastNoSpacePos;
     property LineNumber: Integer read fLineNumber write fLineNumber;
     {* 当前行号，从 0 开始}
-    property LinePos: Integer read fLinePos;
+    property LinePos: Integer read fLinePos write fLinePos;
     {* 当前行行首所在的线性位置}
     property Origin: PAnsiChar read fOrigin write SetOrigin;
     property RunPos: Integer read Run write SetRunPos;
