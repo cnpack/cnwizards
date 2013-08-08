@@ -958,7 +958,7 @@ begin
 
   {$IFDEF VER250}  // Delphi 18/XE4
     Result := GetDelphiXE4Version;
-    Assert(Result in [ideD1700]);
+    Assert(Result in [ideDXE4]);
   {$ENDIF}
 
   if Result = ideUnknown then
