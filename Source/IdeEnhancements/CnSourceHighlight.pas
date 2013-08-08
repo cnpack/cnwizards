@@ -3005,6 +3005,21 @@ var
   CanDrawToken: Boolean;
   RectGot: Boolean;
   CanvasSaved: Boolean;
+
+  function CalcEditColBase(AToken: TCnPasToken): Integer;
+  begin
+    // 因为关键字的 Token 中不会出现双字节字符，因此只需计算一次 EditPosColBase 即可
+    Result := Token.EditCol;
+    {$IFDEF BDS}
+      // GetAttributeAtPos 需要的是 UTF8 的Pos，因此进行 Col 的 UTF8 转换
+      // 但实际上并非如此转换的简单，因为有部分双字节字符如 Accent Char
+      // 等自身只占一个字符的位置，并非如汉字字符一样占两个字符位置，因此
+      // 代码中有此等字符时会出现错位的情况，BDS 都有这个问题。
+      if FLineText <> '' then
+        Result := Length(CnAnsiToUtf8(Copy(FLineText, 1, Token.EditCol)));
+    {$ENDIF}
+  end;
+
 begin
   with Editor do
   begin
@@ -3119,17 +3134,7 @@ begin
               Continue; // 不层次高亮时，如无当前背景高亮，则不画
 
             EditCanvas.Font.Color := ColorFg;
-
-            // 因为关键字的 Token 中不会出现双字节字符，因此只需计算一次 EditPosColBase 即可
-            EditPosColBase := Token.EditCol;
-            {$IFDEF BDS}
-              // GetAttributeAtPos 需要的是 UTF8 的Pos，因此进行 Col 的 UTF8 转换
-              // 但实际上并非如此转换的简单，因为有部分双字节字符如 Accent Char
-              // 等自身只占一个字符的位置，并非如汉字字符一样占两个字符位置，因此
-              // 代码中有此等字符时会出现错位的情况，BDS 都有这个问题。
-              if FLineText <> '' then
-                EditPosColBase := Length(CnAnsiToUtf8(Copy(FLineText, 1, Token.EditCol)));
-            {$ENDIF}
+            EditPosColBase := CalcEditColBase(Token);
 
             // 挨个字符重画以免影响选择效果，如果是高亮，ColorBk已设置好
             RectGot := False;
@@ -3244,7 +3249,28 @@ begin
                 end;
 
                 Font.Color := FCurrentTokenForeground;
+//{$IFDEF BDS}
+//                // BDS 下需要挨个绘制字符，因为 BDS 自身采用的是加粗的字符间距绘制
+//                EditPosColBase := CalcEditColBase(Token);
+//                for J := 0 to Length(Token.Token) - 1 do
+//                begin
+//                  EditPos.Col := EditPosColBase + J;
+//                  EditPos.Line := Token.EditLine;
+//                  EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False,
+//                    Element, LineFlag);
+//
+//                  if (Element = atIdentifier) and (LineFlag = 0) then
+//                  begin
+//                    // 在位置上画字，颜色已先设置好
+//                    TextOut(R.Left, R.Top, string(Token.Token[J]));
+//                  end;
+//                  Inc(R.Left, CharSize.cx);
+//                  Inc(R.Right, CharSize.cx);
+//                end;
+//{$ELSE}
+                // 低版本可直接绘制
                 TextOut(R.Left, R.Top, string(Token.Token));
+//{$ENDIF}
               end;
             end;
           end;
@@ -3287,7 +3313,7 @@ begin
 
             if CanDrawToken then
             begin
-              // 在位置上画背景高亮的标识符
+              // 在位置上画背景高亮的流程控制标识符
               with EditCanvas do
               begin
                 R1 := Rect(R.Left - 1, R.Top, R.Right + 1, R.Bottom - 1);
@@ -3321,7 +3347,28 @@ begin
                     Font.Style := Font.Style + [fsUnderline];
                 end;
                 Font.Color := FFlowStatementForeground;
+{$IFDEF BDS}
+                // BDS 下需要挨个绘制字符，因为 BDS 自身采用的是加粗的字符间距绘制
+                EditPosColBase := CalcEditColBase(Token);
+                for J := 0 to Length(Token.Token) - 1 do
+                begin
+                  EditPos.Col := EditPosColBase + J;
+                  EditPos.Line := Token.EditLine;
+                  EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False,
+                    Element, LineFlag);
+
+                  if ((Element = atReservedWord) or (Element = atIdentifier)) and (LineFlag = 0) then
+                  begin
+                    // 在位置上画字，是否粗体已先设置好
+                    TextOut(R.Left, R.Top, string(Token.Token[J]));
+                  end;
+                  Inc(R.Left, CharSize.cx);
+                  Inc(R.Right, CharSize.cx);
+                end;
+{$ELSE}
+                // 低版本可直接绘制
                 TextOut(R.Left, R.Top, string(Token.Token));
+{$ENDIF}
               end;
             end;
           end;
