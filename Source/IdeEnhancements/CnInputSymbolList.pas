@@ -1356,6 +1356,7 @@ begin
   Data.Unsorted := TStringList.Create;
   try
     Data.Unsorted.Assign(AList);
+    Data.Unsorted.Sorted := False; // added to avoid exception
     EnumModules(GetModuleProc, @Data);
   finally
     AList.Sorted := False;
