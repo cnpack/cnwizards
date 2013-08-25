@@ -209,6 +209,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
           Width = 317
           Height = 345
           Align = alBottom
+          Anchors = [akLeft, akTop, akRight, akBottom]
           ItemHeight = 45
           Style = lbOwnerDrawFixed
           TabOrder = 1
@@ -420,6 +421,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
           Width = 317
           Height = 345
           Align = alBottom
+          Anchors = [akLeft, akTop, akRight, akBottom]
           ItemHeight = 32
           Style = lbOwnerDrawFixed
           TabOrder = 1
