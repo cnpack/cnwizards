@@ -4157,8 +4157,10 @@ end;
 function ConvertEditorTextToText(const Text: AnsiString): AnsiString;
 begin
 {$IFDEF IDE_WIDECONTROL}
+  // 只适合于非 Unicode 环境的 BDS。Unicode 环境下，直接用其 string 即可
   Result := CnUtf8ToAnsi(Text);
 {$ELSE}
+  // 只适合于 D7 及以下
   Result := Text;
 {$ENDIF}
 end;

@@ -29,7 +29,9 @@ unit CnSrcEditorGroupReplace;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2005.06.14
+* 修改记录：2013.09.01
+*               修正Unicode环境下可能乱码的问题
+*           2005.06.14
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -274,8 +276,8 @@ begin
     StartPos := CnOtaEditPosToLinePos(OTAEditPos(EditView.Block.StartingColumn,
       EditView.Block.StartingRow), EditView);
 
-{$IFDEF DELPHI2009_UP}
-    BlockText := Item.Execute(CnUtf8ToAnsi2(EditView.Block.Text));
+{$IFDEF UNICODE_STRING}
+    BlockText := Item.Execute(EditView.Block.Text); // Unicode 环境下无需转换
 {$ELSE}
     BlockText := Item.Execute(ConvertEditorTextToText(EditView.Block.Text));
 {$ENDIF}
