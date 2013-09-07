@@ -3233,6 +3233,12 @@ begin
               with EditCanvas do
               begin
                 R1 := Rect(R.Left - 1, R.Top, R.Right + 1, R.Bottom - 1);
+{$IFDEF BDS}
+                // BDS 下字符宽度是黑体的宽度，和 EditorGetTextRect 计算出来的不一致，
+                // 得如此弥补一下。CharSize.cx 是黑体宽度
+                if (R1.Right - R1.Left) < Length(Token.Token) * CharSize.cx then
+                  R1.Right := R1.Left + Length(Token.Token) * CharSize.cx;
+{$ENDIF}
                 if FCurrentTokenBackground <> clNone then
                 begin
                   Brush.Color := FCurrentTokenBackground;
@@ -3249,28 +3255,28 @@ begin
                 end;
 
                 Font.Color := FCurrentTokenForeground;
-//{$IFDEF BDS}
-//                // BDS 下需要挨个绘制字符，因为 BDS 自身采用的是加粗的字符间距绘制
-//                EditPosColBase := CalcEditColBase(Token);
-//                for J := 0 to Length(Token.Token) - 1 do
-//                begin
-//                  EditPos.Col := EditPosColBase + J;
-//                  EditPos.Line := Token.EditLine;
-//                  EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False,
-//                    Element, LineFlag);
-//
-//                  if (Element = atIdentifier) and (LineFlag = 0) then
-//                  begin
-//                    // 在位置上画字，颜色已先设置好
-//                    TextOut(R.Left, R.Top, string(Token.Token[J]));
-//                  end;
-//                  Inc(R.Left, CharSize.cx);
-//                  Inc(R.Right, CharSize.cx);
-//                end;
-//{$ELSE}
+{$IFDEF BDS}
+                // BDS 下需要挨个绘制字符，因为 BDS 自身采用的是加粗的字符间距绘制
+                EditPosColBase := CalcEditColBase(Token);
+                for J := 0 to Length(Token.Token) - 1 do
+                begin
+                  EditPos.Col := EditPosColBase + J;
+                  EditPos.Line := Token.EditLine;
+                  EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False,
+                    Element, LineFlag);
+
+                  if (Element = atIdentifier) and (LineFlag = 0) then
+                  begin
+                    // 在位置上画字，颜色已先设置好
+                    TextOut(R.Left, R.Top, string(Token.Token[J]));
+                  end;
+                  Inc(R.Left, CharSize.cx);
+                  Inc(R.Right, CharSize.cx);
+                end;
+{$ELSE}
                 // 低版本可直接绘制
                 TextOut(R.Left, R.Top, string(Token.Token));
-//{$ENDIF}
+{$ENDIF}
               end;
             end;
           end;
