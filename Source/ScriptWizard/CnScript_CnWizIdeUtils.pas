@@ -150,7 +150,9 @@ begin
   CL.AddDelphiFunction('Procedure GetInstalledComponents( Packages, Components : TStrings)');
   CL.AddDelphiFunction('Function GetEditControlFromEditorForm( AForm : TCustomForm) : TControl');
   CL.AddDelphiFunction('Function GetCurrentEditControl : TControl');
-  CL.AddDelphiFunction('Function GetStatusBarFromEditor(EditControl: TControl): TStatusBar');
+  CL.AddDelphiFunction('Function GetStatusBarFromEditor(EditControl: TControl) : TStatusBar');
+  CL.AddDelphiFunction('Function ConvertIDETreeNodeToTreeNode(Node: TObject) : TTreeNode');
+  CL.AddDelphiFunction('Function ConvertIDETreeNodesToTreeNodes(Nodes: TObject) : TTreeNodes');
   SIRegister_TCnPaletteWrapper(CL);
   CL.AddDelphiFunction('Function CnPaletteWrapper : TCnPaletteWrapper');
 {$IFDEF BDS}
@@ -392,6 +394,8 @@ begin
   S.RegisterDelphiFunction(@GetEditControlFromEditorForm, 'GetEditControlFromEditorForm', cdRegister);
   S.RegisterDelphiFunction(@GetCurrentEditControl, 'GetCurrentEditControl', cdRegister);
   S.RegisterDelphiFunction(@GetStatusBarFromEditor, 'GetStatusBarFromEditor', cdRegister);
+  S.RegisterDelphiFunction(@ConvertIDETreeNodeToTreeNode, 'ConvertIDETreeNodeToTreeNode', cdRegister);
+  S.RegisterDelphiFunction(@ConvertIDETreeNodesToTreeNodes, 'ConvertIDETreeNodesToTreeNodes', cdRegister);
   S.RegisterDelphiFunction(@CnPaletteWrapper, 'CnPaletteWrapper', cdRegister);
   S.RegisterDelphiFunction(@CnMessageViewWrapper, 'CnMessageViewWrapper', cdRegister);
 end;
