@@ -22,7 +22,7 @@ type
      ideD1400,
      ideD1500,
      ideD1600,
-     ideD1700, ideDXE4,
+     ideD1700, ideDXE4, ideDXE5,
      ideCSB100,
      ideBCB300, ideBCB301,
      ideBCB400, ideBCB401, ideBCB402,
@@ -844,6 +844,14 @@ begin
   Result := ideDXE4;
 end;
 
+function GetDelphiXE5Version: TBorlandIdeVersion;
+const
+  CoreIdeXE5: TVersionNumber =
+    (Major: 19; Minor: 0; Release: 0; Build: 0);
+begin
+  Result := ideDXE5;
+end;
+
 function GetBorlandIdeVersion: TBorlandIdeVersion;
 begin
   // We only actually detect the version once per session.
@@ -959,6 +967,11 @@ begin
   {$IFDEF VER250}  // Delphi 18/XE4
     Result := GetDelphiXE4Version;
     Assert(Result in [ideDXE4]);
+  {$ENDIF}
+
+  {$IFDEF VER260}  // Delphi 19/XE5
+    Result := GetDelphiXE5Version;
+    Assert(Result in [ideDXE5]);
   {$ENDIF}
 
   if Result = ideUnknown then

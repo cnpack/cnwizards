@@ -1,7 +1,7 @@
 {******************************************************************************}
 {                       CnPack For Delphi/C++Builder                           }
 {                     中国人自己的开放源码第三方开发包                         }
-{                   (C)Copyright 2001-2012 CnPack 开发组                       }
+{                   (C)Copyright 2001-2013 CnPack 开发组                       }
 {                   ------------------------------------                       }
 {                                                                              }
 {            本开发包是开源的自由软件，您可以遵照 CnPack 的发布协议来修        }
@@ -67,7 +67,7 @@ begin
   CL.AddTypeS('TCnCompilerKind', '( ckDelphi, ckBCB )');
   CL.AddTypeS('TCnCompiler', '( cnDelphi5, cnDelphi6, cnDelphi7, cnDelphi8, cnDelphi9, '
     + 'cnDelphi10, cnDelphi11, cnDelphi12, cnDelphi14, cnDelphi15, cnDelphi16, cnDelphi17, '
-    + 'cnBCB5, cnBCB6 )');
+    + 'cnDelphiXE4, cnDelphiXE5, cnBCB5, cnBCB6 )');
   CL.AddConstantN('Compiler', 'TCnCompiler').SetInt(Ord(Compiler));
   CL.AddConstantN('CompilerKind', 'TCnCompilerKind').SetInt(Ord(CompilerKind));
   CL.AddConstantN('CompilerName', 'String').SetString(CompilerName);
@@ -92,6 +92,7 @@ begin
   CL.AddConstantN('_DELPHI16', 'Boolean').SetUInt(Ord(_DELPHI16));
   CL.AddConstantN('_DELPHI17', 'Boolean').SetUInt(Ord(_DELPHI17));
   CL.AddConstantN('_DELPHIXE4', 'Boolean').SetUInt(Ord(_DELPHIXE4));
+  CL.AddConstantN('_DELPHIXE5', 'Boolean').SetUInt(Ord(_DELPHIXE5));
 
   CL.AddConstantN('_DELPHI1_UP', 'Boolean').SetUInt(Ord(_DELPHI1_UP));
   CL.AddConstantN('_DELPHI2_UP', 'Boolean').SetUInt(Ord(_DELPHI2_UP));
@@ -110,6 +111,7 @@ begin
   CL.AddConstantN('_DELPHI16_UP', 'Boolean').SetUInt(Ord(_DELPHI16_UP));
   CL.AddConstantN('_DELPHI17_UP', 'Boolean').SetUInt(Ord(_DELPHI17_UP));
   CL.AddConstantN('_DELPHIXE4_UP', 'Boolean').SetUInt(Ord(_DELPHIXE4_UP));
+  CL.AddConstantN('_DELPHIXE5_UP', 'Boolean').SetUInt(Ord(_DELPHIXE5_UP));
 
   CL.AddConstantN('_BCB1', 'Boolean').SetUInt(Ord(_BCB1));
   CL.AddConstantN('_BCB3', 'Boolean').SetUInt(Ord(_BCB3));
@@ -125,6 +127,7 @@ begin
   CL.AddConstantN('_BCB16', 'Boolean').SetUInt(Ord(_BCB16));
   CL.AddConstantN('_BCB17', 'Boolean').SetUInt(Ord(_BCB17));
   CL.AddConstantN('_BCBXE4', 'Boolean').SetUInt(Ord(_BCBXE4));
+  CL.AddConstantN('_BCBXE5', 'Boolean').SetUInt(Ord(_BCBXE5));
 
   CL.AddConstantN('_BCB1_UP', 'Boolean').SetUInt(Ord(_BCB1_UP));
   CL.AddConstantN('_BCB3_UP', 'Boolean').SetUInt(Ord(_BCB3_UP));
@@ -140,6 +143,7 @@ begin
   CL.AddConstantN('_BCB16_UP', 'Boolean').SetUInt(Ord(_BCB16_UP));
   CL.AddConstantN('_BCB17_UP', 'Boolean').SetUInt(Ord(_BCB17_UP));
   CL.AddConstantN('_BCBXE4_UP', 'Boolean').SetUInt(Ord(_BCBXE4_UP));
+  CL.AddConstantN('_BCBXE5_UP', 'Boolean').SetUInt(Ord(_BCBXE5_UP));
 
   CL.AddConstantN('_KYLIX1', 'Boolean').SetUInt(Ord(_KYLIX1));
   CL.AddConstantN('_KYLIX2', 'Boolean').SetUInt(Ord(_KYLIX2));
@@ -157,6 +161,7 @@ begin
   CL.AddConstantN('_BDS9', 'Boolean').SetUInt(Ord(_BDS9));
   CL.AddConstantN('_BDS10', 'Boolean').SetUInt(Ord(_BDS10));
   CL.AddConstantN('_BDS11', 'Boolean').SetUInt(Ord(_BDS11));
+  CL.AddConstantN('_BDS12', 'Boolean').SetUInt(Ord(_BDS12));
 
   CL.AddConstantN('_BDS2_UP', 'Boolean').SetUInt(Ord(_BDS2_UP));
   CL.AddConstantN('_BDS3_UP', 'Boolean').SetUInt(Ord(_BDS3_UP));
@@ -168,6 +173,7 @@ begin
   CL.AddConstantN('_BDS9_UP', 'Boolean').SetUInt(Ord(_BDS9_UP));
   CL.AddConstantN('_BDS10_UP', 'Boolean').SetUInt(Ord(_BDS10_UP));
   CL.AddConstantN('_BDS11_UP', 'Boolean').SetUInt(Ord(_BDS11_UP));
+  CL.AddConstantN('_BDS12_UP', 'Boolean').SetUInt(Ord(_BDS12_UP));
 
   CL.AddConstantN('_COMPILER1', 'Boolean').SetUInt(Ord(_COMPILER1));
   CL.AddConstantN('_COMPILER2', 'Boolean').SetUInt(Ord(_COMPILER2));
@@ -187,6 +193,7 @@ begin
   CL.AddConstantN('_COMPILER16', 'Boolean').SetUInt(Ord(_COMPILER16));
   CL.AddConstantN('_COMPILER17', 'Boolean').SetUInt(Ord(_COMPILER17));
   CL.AddConstantN('_COMPILER18', 'Boolean').SetUInt(Ord(_COMPILER18));
+  CL.AddConstantN('_COMPILER19', 'Boolean').SetUInt(Ord(_COMPILER19));
 
   CL.AddConstantN('_COMPILER1_UP', 'Boolean').SetUInt(Ord(_COMPILER1_UP));
   CL.AddConstantN('_COMPILER2_UP', 'Boolean').SetUInt(Ord(_COMPILER2_UP));
@@ -206,6 +213,7 @@ begin
   CL.AddConstantN('_COMPILER16_UP', 'Boolean').SetUInt(Ord(_COMPILER16_UP));
   CL.AddConstantN('_COMPILER17_UP', 'Boolean').SetUInt(Ord(_COMPILER17_UP));
   CL.AddConstantN('_COMPILER18_UP', 'Boolean').SetUInt(Ord(_COMPILER18_UP));
+  CL.AddConstantN('_COMPILER19_UP', 'Boolean').SetUInt(Ord(_COMPILER19_UP));
 
   CL.AddConstantN('_SUPPORT_OTA_PROJECT_CONFIGURATION', 'Boolean').SetUInt(Ord(_SUPPORT_OTA_PROJECT_CONFIGURATION));
   CL.AddConstantN('_SUPPORT_CROSS_PLATFORM', 'Boolean').SetUInt(Ord(_SUPPORT_CROSS_PLATFORM));
