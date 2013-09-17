@@ -337,6 +337,12 @@ procedure BeginBatchOpenClose;
 procedure EndBatchOpenClose;
 {* 结束批量打开或关闭文件 }
 
+function ConvertIDETreeNodeToTreeNode(Node: TObject): TTreeNode;
+{* 将 IDE 内部使用的 TTreeControl的 Items 属性值的 TreeNode 强行转换成公用的 TreeNode}
+
+function ConvertIDETreeNodesToTreeNodes(Nodes: TObject): TTreeNodes;
+{* 将 IDE 内部使用的 TTreeControl的 Items 属性值的 TreeNodes 强行转换成公用的 TreeNodes}
+
 //==============================================================================
 // 扩展控件
 //==============================================================================
@@ -1080,7 +1086,11 @@ begin
 {$IFDEF DELPHIXE4}
   Result := Result + 'Embarcadero\BDS\11.0';
 {$ELSE}
+{$IFDEF DELPHIXE5}
+  Result := Result + 'Embarcadero\BDS\12.0';
+{$ELSE}
   Error: Unknown Compiler
+{$ENDIF}
 {$ENDIF}
 {$ENDIF}
 {$ENDIF}
@@ -1616,6 +1626,28 @@ begin
   if Assigned(EndBatchOpenCloseProc) then
     EndBatchOpenCloseProc;
 {$ENDIF}
+end;
+
+// 将 IDE 内部使用的 TTreeControl的 Items 属性值的 TreeNode 强行转换成公用的 TreeNode
+function ConvertIDETreeNodeToTreeNode(Node: TObject): TTreeNode;
+begin
+{$IFDEF DEBUG}
+  if not (Node is TTreeNode) then
+    CnDebugger.LogFmt('Node ClassName %s. Value %8.8x. NOT our TreeNode. Manual Cast it.',
+      [Node.ClassName, Integer(Node)]);
+{$ENDIF}
+  Result := TTreeNode(Node);
+end;
+
+// 将 IDE 内部使用的 TTreeControl的 Items 属性值的 TreeNodes 强行转换成公用的 TreeNodes
+function ConvertIDETreeNodesToTreeNodes(Nodes: TObject): TTreeNodes;
+begin
+{$IFDEF DEBUG}
+  if not (Nodes is TTreeNodes) then
+    CnDebugger.LogFmt('Nodes ClassName %s. Value %8.8x. NOT our TreeNodes. Manual Cast it.',
+      [Nodes.ClassName, Integer(Nodes)]);
+{$ENDIF}
+  Result := TTreeNodes(Nodes);
 end;
 
 //==============================================================================
