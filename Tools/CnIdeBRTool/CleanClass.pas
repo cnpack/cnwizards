@@ -1,7 +1,7 @@
 {******************************************************************************}
 {                       CnPack For Delphi/C++Builder                           }
 {                     中国人自己的开放源码第三方开发包                         }
-{                   (C)Copyright 2001-2012 CnPack 开发组                       }
+{                   (C)Copyright 2001-2013 CnPack 开发组                       }
 {                   ------------------------------------                       }
 {                                                                              }
 {            本开发包是开源的自由软件，您可以遵照 CnPack 的发布协议来修        }
@@ -44,7 +44,7 @@ uses
 type
   TCnIDEs = (ciDelphi5, ciDelphi6, ciDelphi7, ciDelphi8, ciDelphi9, ciDelphi10,
     ciDelphi11, ciDelphi12, ciDelphi14, ciDelphi15, ciDelphi16, ciDelphi17,
-    ciDelphiXE4, ciBCB5, ciBCB6);
+    ciDelphiXE4, ciDelphiXE5, ciBCB5, ciBCB6);
 
   TCnHisEntry = class(TCollectionItem)
   {* 描述一待删除的文件对象}
@@ -99,7 +99,7 @@ const
   SCnIDENames: array[TCnIDEs] of string =
     ('Delphi 5', 'Delphi 6', 'Delphi 7', 'Delphi 8', 'BDS 2005', 'BDS 2006',
      'RAD Studio 2007', 'RAD Studio 2009', 'RAD Studio 2010', 'RAD Studio XE',
-     'RAD Studio XE2', 'RAD Studio XE3', 'RAD Studio XE4',
+     'RAD Studio XE2', 'RAD Studio XE3', 'RAD Studio XE4', 'RAD Studio XE5',
      'C++Builder 5', 'C++Builder 6');
 
 procedure CreateIDEHistories;
