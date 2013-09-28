@@ -1295,11 +1295,22 @@ function TCnInputHelper.AcceptDisplay: Boolean;
         Result := True;
     end;
   end;
+
+  function CanPopupInCurrentSourceType: Boolean;
+  begin
+    {$IFDEF BDS}
+      {$IFDEF BDS2009_UP}
+      Result := CurrentIsSource; // 仅 2009 以上勉强支持 C++Builder，待测
+      {$ELSE}
+      Result := CurrentIsDelphiSource; // 2007 及以下版本 OTA 有 Bug，无法支持 C++Builder
+      {$ENDIF}
+    {$ELSE} // D7 或以下，包括BCB5/6
+    Result := CurrentIsSource;
+    {$ENDIF}
+  end;
 begin
   Result := Active and IsEditControl(Screen.ActiveControl) and
-    (not CheckImmRun or not IMMIsActive) and
-    //{$IFDEF BDS} CurrentIsDelphiSource {$ELSE} CurrentIsSource {$ENDIF} and  // TODO: 目前 BDS 以上只支持 Delphi 代码
-    CurrentIsSource and
+    (not CheckImmRun or not IMMIsActive) and CanPopupInCurrentSourceType and
     not IsAutoCompleteActive and not IsReadOnly and not CnOtaIsDebugging and
     not IsInIncreSearch and not IsInMacroOp;
 end;
