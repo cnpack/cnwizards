@@ -1,7 +1,7 @@
 {******************************************************************************}
 {                       CnPack For Delphi/C++Builder                           }
 {                     中国人自己的开放源码第三方开发包                         }
-{                   (C)Copyright 2001-2012 CnPack 开发组                       }
+{                   (C)Copyright 2001-2013 CnPack 开发组                       }
 {                   ------------------------------------                       }
 {                                                                              }
 {            本开发包是开源的自由软件，您可以遵照 CnPack 的发布协议来修        }
@@ -285,7 +285,7 @@ begin
     // BDS 2005, 2006, 2007, 2009 以上的菜单模板和对象库不分开了。
     if lbxSelectApp.ItemIndex in [Ord(atBDS2005), Ord(atBDS2006), Ord(atDelphi2007),
       Ord(atDelphi2009), Ord(atDelphi2010), Ord(atDelphiXE), Ord(atDelphiXE2),
-      Ord(atDelphiXE3), Ord(atDelphiXE4)] then
+      Ord(atDelphiXE3), Ord(atDelphiXE4), Ord(atDelphiXE5)] then
     begin
       lbxBackupOptions.Checked[0] := True;
       lbxBackupOptions.ItemEnabled[0] := False;
