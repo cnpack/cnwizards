@@ -261,7 +261,7 @@ end;
 function IsDelphiXE5IdeVersionLatest: Boolean;
 const
   CoreIdeLatest: TVersionNumber =
-    (Major: 19; Minor: 0; Release: 13476; Build: 4176); //
+    (Major: 19; Minor: 0; Release: 13856; Build: 4978); // Update 1
 var
   ReadFileVersion: TVersionNumber;
 begin
