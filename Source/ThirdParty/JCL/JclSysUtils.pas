@@ -1215,7 +1215,11 @@ begin
     {$IFDEF VER250}
       C := SortFunc(List.List[I], Item);
     {$ELSE}
-      C := SortFunc(List.List^[I], Item);
+      {$IFDEF VER260}
+        C := SortFunc(List.List[I], Item);
+      {$ELSE}
+        C := SortFunc(List.List^[I], Item);
+      {$ENDIF}
     {$ENDIF}
   {$ENDIF}
 {$ENDIF}
@@ -3275,8 +3279,13 @@ initialization
     InternalDecimalSeparator := FormatSettings.DecimalSeparator;
     InternalThousandSeparator := FormatSettings.ThousandSeparator;
   {$ELSE}
-    InternalDecimalSeparator := DecimalSeparator;
-    InternalThousandSeparator := ThousandSeparator;
+    {$IFDEF VER260}
+      InternalDecimalSeparator := FormatSettings.DecimalSeparator;
+      InternalThousandSeparator := FormatSettings.ThousandSeparator;
+    {$ELSE}
+      InternalDecimalSeparator := DecimalSeparator;
+      InternalThousandSeparator := ThousandSeparator;
+    {$ENDIF}
   {$ENDIF}
 {$ENDIF}
 
