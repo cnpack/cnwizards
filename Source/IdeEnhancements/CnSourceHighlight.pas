@@ -4239,6 +4239,35 @@ end;
 
 {$IFDEF BDS2009_UP}
 
+function GetAvrTabWidth(tabWidthStr: String): Integer;
+var
+  sl: TStringList;
+  prev: Integer;
+  I: Integer;
+begin
+  sl := TStringList.Create();
+  try
+    sl.Delimiter := ' ';
+    // The tab-string might separeted by ';', too
+    if Pos(';', tabWidthStr) > 0 then
+    begin
+      // if so, use it
+      sl.Delimiter := ';';
+    end;
+    sl.DelimitedText := tabWidthStr;
+    Result := 0;
+    prev := 0;
+    for I := 0 to sl.Count - 1 do
+    begin
+      Inc(Result, StrToInt(sl[i]) - prev);
+      prev := StrToInt(sl[i]);
+    end;
+    Result := Result div sl.Count;
+  finally
+    FreeAndNil(sl);
+  end;
+end;
+
 procedure TCnSourceHighlight.UpdateTabWidth;
 var
   Options: IOTAEnvironmentOptions;
@@ -4253,7 +4282,7 @@ begin
       + VarToStr(Options.GetOptionValue('UseTabCharacter')));
 {$ENDIF}
     try
-      FTabWidth := Options.GetOptionValue('TabStops');
+      FTabWidth := GetAvrTabWidth(Options.GetOptionValue('TabStops'));
     except
       ;
     end;
