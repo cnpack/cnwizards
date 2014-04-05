@@ -91,6 +91,8 @@ type
     FSaveFormPosition: Boolean;
     FTop, FLeft, FHeight, FWidth, FWinState: Integer;
     FLongDateTimeFormat: string;
+    FEnableUDPMsg: Boolean;
+    FUDPPort: Integer;
     procedure SetTop(const Value: Integer);
     procedure SetLeft(const Value: Integer);
     procedure SetWidth(const Value: Integer);
@@ -104,6 +106,9 @@ type
     property FilterLevel: Integer read FFilterLevel write FFilterLevel;
     property FilterTag: string read FFilterTag write FFilterTag;
     property FilterTypes: TCnMsgTypes read FFilterTypes write FFilterTypes;
+
+    property EnableUDPMsg: Boolean read FEnableUDPMsg write FEnableUDPMsg;
+    property UDPPort: Integer read FUDPPort write FUDPPort default 9099;
 
     property SearchDownCount: Integer read FSearchDownCount write FSearchDownCount;
     property DateTimeFormat: string read FDateTimeFormat write FDateTimeFormat;
@@ -189,6 +194,7 @@ var
   SCnMsgTypeComponent:     string = 'Component';
   SCnMsgTypeCustom:        string = 'Custom';
   SCnMsgTypeSystem:        string = 'System';
+  SCnMsgTypeUDPMsg:        string = 'UDPMsg';
 
   SCnMsgDescriptionFmt: string =
     'No: %-5d    Level: %-1d    ThreadID: $%-8x    ProcessID: $%-8x   Tag: %-8s   TimeStamp: %s' +
@@ -279,7 +285,7 @@ const
     @SCnMsgTypeSeparator, @SCnMsgTypeEnterProc, @SCnMsgTypeLeaveProc,
     @SCnMsgTypeTimeMarkStart, @SCnMsgTypeTimeMarkStop, @SCnMsgTypeMemoryDump,
     @SCnMsgTypeException, @SCnMsgTypeObject, @SCnMsgTypeComponent,
-    @SCnMsgTypeCustom, @SCnMsgTypeSystem);
+    @SCnMsgTypeCustom, @SCnMsgTypeSystem, @SCnMsgTypeUDPMsg);
 
   SCnHotKeyId = 1;
   
@@ -515,6 +521,7 @@ end;
 
 procedure SaveOptions(const FileName: string);
 begin
+  ForceDirectories(ExtractFileDir(FileName));
   TOmniXMLWriter.SaveToFile(CnViewerOptions, FileName, pfAuto, ofIndent);
 end;
 
@@ -631,6 +638,8 @@ begin
   FHeight := Screen.Height - 25;
   FWidth := Screen.Width;
   FWinState := 0;
+  FEnableUDPMsg := False;
+  FUDPPort := 9099;
 end;
 
 destructor TCnViewerOptions.Destroy;

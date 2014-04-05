@@ -175,6 +175,7 @@ type
     function IndexOf(AProcessID: DWORD): TCnMsgStore;
     function IndexOfStore(AStore: TCnMsgStore): Integer;
     procedure RemoveStore(AStore: TCnMsgStore);
+    function FindByProcName(AProcName: string): TCnMsgStore;
 
     procedure ClearStores;
     property Store[Index: Integer]: TCnMsgStore read GetStore;
@@ -713,6 +714,19 @@ destructor TCnMsgManager.Destroy;
 begin
   FStores.Free;
   inherited;
+end;
+
+function TCnMsgManager.FindByProcName(AProcName: string): TCnMsgStore;
+var
+  I: Integer;
+begin
+  Result := nil;
+  for I := 0 to FStores.Count - 1 do
+    if TCnMsgStore(FStores[I]).ProcName = AProcName then
+    begin
+      Result := TCnMsgStore(FStores[I]);
+      Exit;
+    end;
 end;
 
 function TCnMsgManager.GetCount: Integer;

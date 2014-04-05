@@ -41,7 +41,7 @@ uses
   ExtCtrls, Menus, ComCtrls, ActnList, ImgList, ToolWin, Clipbrd, Registry, 
   Tabs, VirtualTrees, CnMdiView, CnLangMgr, CnWizLangID, CnTabSet,
   CnLangStorage, CnHashLangStorage, CnClasses, CnMsgClasses, CnTrayIcon,
-  CnWizCfgUtils;
+  CnWizCfgUtils, CnUDP, CnDebugIntf, CnCRC32;
 
 type
   TCnFormSwitch = (fsAdd, fsUpdate, fsDelete, fsActiveChange);
@@ -187,6 +187,7 @@ type
     actShowMainForm: TAction;
     btnAutoScroll: TToolButton;
     actAutoScroll: TAction;
+    CnUDP: TCnUDP;
     procedure actNewExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure actExitExecute(Sender: TObject);
@@ -232,6 +233,8 @@ type
     procedure tsSwitchDblClick(Sender: TObject);
     procedure actAutoScrollExecute(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure CnUDPDataReceived(Sender: TComponent; Buffer: Pointer;
+      Len: Integer; FromIP: String; Port: Integer);
   private
     FUpdatingSwitch: Boolean;
     FClickingSwitch: Boolean;
@@ -383,6 +386,8 @@ begin
   tryIcon.Hint := Caption;
   tryicon.Active := CnViewerOptions.ShowTrayIcon;
   tryIcon.AutoHide := CnViewerOptions.MinToTrayIcon;
+
+  CnUDP.LocalPort := CnViewerOptions.UDPPort;
 
   //Add Sesame 2008-1-18 还原窗口位置
   if CnViewerOptions.SaveFormPosition then
@@ -1149,6 +1154,8 @@ begin
       tryIcon.AutoHide := CnViewerOptions.MinToTrayIcon;
       if not RegisterViewerHotKey then
         ErrorDlg(SCnRegisterHotKeyError);
+
+      CnUDP.LocalPort := CnViewerOptions.UDPPort;
     end;
     Free;
   end;
@@ -1220,6 +1227,53 @@ procedure TCnMainViewer.FormClose(Sender: TObject;
 begin
   actStop.Execute;
   DestroyThread;
+end;
+
+procedure TCnMainViewer.CnUDPDataReceived(Sender: TComponent;
+  Buffer: Pointer; Len: Integer; FromIP: String; Port: Integer);
+var
+  ProcName: string;
+  ProcId: Cardinal;
+  AStore: TCnMsgStore;
+  StoreInited: Boolean;
+  ADesc: TCnMsgDesc;
+begin
+  if FRunningState = rsPaused then
+    Exit;
+    
+  ProcName := Format('%s:%d', [FromIP, Port]);
+  ProcId := StrCRC32(0, ProcName);
+
+  AStore := CnMsgManager.FindByProcName(ProcName);
+  StoreInited := False;
+  if AStore = nil then
+  begin
+    if Application.MainForm <> nil then
+      if not (csDestroying in Application.MainForm.ComponentState) then
+      begin
+        AStore := CnMsgManager.AddStore(ProcId, ProcName);
+        PostMessage(Application.MainForm.Handle, WM_USER_NEW_FORM, Integer(AStore), 0);
+      end;
+  end;
+
+  // 如无空余的或对应的 Store，则不输出
+  if AStore <> nil then
+  begin
+    FillChar(ADesc, SizeOf(ADesc), 0);
+
+    // 无对应信息，因此需要手工填写
+    ADesc.Annex.Level := CnDefLevel;
+    ADesc.Annex.MsgType := Ord(cmtUDPMsg);
+    
+    // 无 ThreadId、无 Tag
+    Move(Buffer^, ADesc.Msg, Len);
+
+    // 无发送端时间戳，近似采用接收端时间戳
+    ADesc.Annex.TimeStampType := Ord(ttDateTime);
+    ADesc.Annex.MsgDateTime := Date + Time;
+    ADesc.Length := Len + SizeOf(TCnMsgAnnex) + SizeOf(Integer) + 1;
+    AStore.AddMsgDesc(@ADesc);
+  end;
 end;
 
 end.

@@ -40,7 +40,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ComCtrls, CnLangMgr;
+  Dialogs, StdCtrls, ComCtrls, CnLangMgr, Spin;
 
 type
   TCnViewerOptionsFrm = class(TForm)
@@ -57,7 +57,11 @@ type
     lblHotKey: TLabel;
     chkMinStart: TCheckBox;
     chkSaveFormPosition: TCheckBox;
+    chkUDPMsg: TCheckBox;
+    seUDPPort: TSpinEdit;
+    lblPort: TLabel;
     procedure chkShowTrayIconClick(Sender: TObject);
+    procedure chkUDPMsgClick(Sender: TObject);
   private
     { Private declarations }
     procedure SwitchTrayIconControls(const AShow: Boolean);
@@ -94,7 +98,10 @@ begin
     chkSaveFormPosition.Checked := SaveFormPosition;
     hkShowFormHotKey.HotKey := MainShortCut;
     chkCapDebug.Checked := not IgnoreODString;
+    chkUDPMsg.Checked := EnableUDPMsg;
+    seUDPPort.Value := UDPPort;
     SwitchTrayIconControls(ShowTrayIcon);
+    chkUDPMsgClick(nil);
   end;
 end;
 
@@ -109,6 +116,8 @@ begin
     SaveFormPosition := chkSaveFormPosition.Checked;
     MainShortCut := hkShowFormHotKey.HotKey;
     IgnoreODString := not chkCapDebug.Checked;
+    EnableUDPMsg := chkUDPMsg.Checked;
+    UDPPort := seUDPPort.Value;
   end;
 end;
 
@@ -121,6 +130,11 @@ end;
 procedure TCnViewerOptionsFrm.chkShowTrayIconClick(Sender: TObject);
 begin
   SwitchTrayIconControls(chkShowTrayIcon.Checked);
+end;
+
+procedure TCnViewerOptionsFrm.chkUDPMsgClick(Sender: TObject);
+begin
+  seUDPPort.Enabled := chkUDPMsg.Checked;
 end;
 
 end.

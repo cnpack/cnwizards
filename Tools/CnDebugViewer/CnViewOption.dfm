@@ -3,7 +3,7 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
   Top = 239
   BorderStyle = bsDialog
   Caption = 'General Settings'
-  ClientHeight = 295
+  ClientHeight = 332
   ClientWidth = 249
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -16,8 +16,8 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
   PixelsPerInch = 96
   TextHeight = 13
   object btnOK: TButton
-    Left = 85
-    Top = 263
+    Left = 86
+    Top = 303
     Width = 75
     Height = 21
     Caption = '&OK'
@@ -26,8 +26,8 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
     TabOrder = 2
   end
   object btnCancel: TButton
-    Left = 165
-    Top = 263
+    Left = 166
+    Top = 303
     Width = 75
     Height = 21
     Cancel = True
@@ -72,7 +72,6 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
       Width = 91
       Height = 19
       HotKey = 0
-      InvalidKeys = [hcNone, hcShift]
       Modifiers = []
       TabOrder = 0
     end
@@ -108,7 +107,7 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
     Left = 8
     Top = 181
     Width = 233
-    Height = 73
+    Height = 116
     Caption = 'Ca&pture Settings'
     TabOrder = 1
     object lblCapOD: TLabel
@@ -118,14 +117,40 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
       Height = 13
       Caption = 'Need to Restart CnDebugViewer'
     end
+    object lblPort: TLabel
+      Left = 32
+      Top = 79
+      Width = 47
+      Height = 13
+      Caption = 'UDP Port:'
+    end
     object chkCapDebug: TCheckBox
       Left = 14
-      Top = 23
+      Top = 21
       Width = 211
       Height = 13
       Caption = 'Capture "Output&DebugString" API'
       TabOrder = 0
       OnClick = chkShowTrayIconClick
+    end
+    object chkUDPMsg: TCheckBox
+      Left = 14
+      Top = 58
+      Width = 211
+      Height = 13
+      Caption = 'Capture UD&P Messages'
+      TabOrder = 1
+      OnClick = chkUDPMsgClick
+    end
+    object seUDPPort: TSpinEdit
+      Left = 128
+      Top = 77
+      Width = 91
+      Height = 22
+      MaxValue = 65535
+      MinValue = 1
+      TabOrder = 2
+      Value = 9099
     end
   end
 end

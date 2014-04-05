@@ -3951,4 +3951,11 @@ object CnMainViewer: TCnMainViewer
       Action = actExit
     end
   end
+  object CnUDP: TCnUDP
+    RemotePort = 0
+    LocalPort = 0
+    OnDataReceived = CnUDPDataReceived
+    Left = 424
+    Top = 160
+  end
 end
