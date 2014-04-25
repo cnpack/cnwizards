@@ -181,7 +181,7 @@ const
   SACnRegIDEEntries: array[TCnIDEs] of string =
     ('Delphi\5.0', 'Delphi\6.0', 'Delphi\7.0', 'BDS\2.0', 'BDS\3.0', 'BDS\4.0',
     'BDS\5.0', 'BDS\6.0', 'BDS\7.0', 'BDS\8.0', 'BDS\9.0', 'BDS\10.0', 'BDS\11.0',
-    'BDS\12.0', 'C++Builder\5.0', 'C++Builder\6.0');
+    'BDS\12.0', 'BDS\14.0', 'C++Builder\5.0', 'C++Builder\6.0');
   SCnRegHisProject = '\Closed Projects';
   SCnRegHisFiles = '\Closed Files';
 
