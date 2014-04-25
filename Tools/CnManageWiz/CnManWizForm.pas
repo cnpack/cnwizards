@@ -99,7 +99,7 @@ const
     '\Software\Embarcadero\BDS\10.0',
     '\Software\Embarcadero\BDS\11.0',
     '\Software\Embarcadero\BDS\12.0',
-    '\Software\Embarcadero\BDS\13.0',
+    '\Software\Embarcadero\BDS\14.0',
     '\Software\Borland\C++Builder\5.0',
     '\Software\Borland\C++Builder\6.0');
 
