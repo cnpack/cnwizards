@@ -55,7 +55,7 @@ See http://www.suigeneris.org/want/ for details.
   <property name="exe.DXE5"       value="%{env.DXE5}" if="env.DXE5" />
   <property name="exe.DXE5"       value="${ProgramFiles}\Embarcadero\RAD Studio\12.0\Bin\DCC32.EXE" unless="env.DXE5" />
   <property name="exe.DXE6"       value="%{env.DXE6}" if="env.DXE6" />
-  <property name="exe.DXE6"       value="${ProgramFiles}\Embarcadero\RAD Studio\14.0\Bin\DCC32.EXE" unless="env.DXE6" />
+  <property name="exe.DXE6"       value="${ProgramFiles}\Embarcadero\Studio\14.0\Bin\DCC32.EXE" unless="env.DXE6" />
   <property name="exe.brcc32"     value="%{BRCC32}" />
   <property name="exe.svn"        value="%{env.svn}" if="env.svn" />
   <property name="exe.svn"        value="${ProgramFiles}\Subversion\bin\svn.exe" unless="env.svn" />
