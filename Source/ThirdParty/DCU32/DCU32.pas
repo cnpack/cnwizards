@@ -54,6 +54,7 @@ const {My own (AX) codes for Delphi/Kylix versions}
   verD17=17; // Added by shenloqi. Delphi 2013(XE3).
   verDXE4=18; // Added by Liu Xiao. Delphi XE4.
   verDXE5=19; // Added by Liu Xiao. Delphi XE5.
+  verDXE6=20; // Added by Liu Xiao. Delphi XE6.
   verK1=100; //Kylix 1.0
   verK2=101; //Kylix 2.0
   verK3=103; //Kylix 2.0
@@ -2888,6 +2889,7 @@ begin
       $1800034B, $1800234B, $1800044B: FVer := verD17; // Added by shenloqi for Delphi 2013(XE3).
       $1900034B: FVer := verDXE4; // Added by LiuXiao
       $1A00034B: FVer := verDXE5; // Added by LiuXiao
+      $1B00034D: FVer := verDXE6; // Added by LiuXiao
       ulong($F21F148C): FVer := verK1; //Kylix 1.0
       $0E1011DD,$0E0001DD: FVer := verK2; //Kylix 2.0
       $0F1001DD,$0F0001DD: FVer := verK3; //Kylix 3.0
