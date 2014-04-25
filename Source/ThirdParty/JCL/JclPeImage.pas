@@ -2320,7 +2320,11 @@ begin
       {$IFDEF VER260}
           List[I] := ExportItem;
       {$ELSE}
+        {$IFDEF VER270}
+          List[I] := ExportItem;
+        {$ELSE}
           List^[I] := ExportItem;
+        {$ENDIF}
       {$ENDIF}
     {$ENDIF}
   {$ENDIF}
