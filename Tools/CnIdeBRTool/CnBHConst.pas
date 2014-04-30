@@ -40,7 +40,7 @@ type
   // AppBuilder ¿‡–Õ
   TAbiType = (atBCB5, atBCB6, atDelphi5, atDelphi6, atDelphi7, atDelphi8,
     atBDS2005, atBDS2006, atDelphi2007, atDelphi2009, atDelphi2010, atDelphiXE,
-    atDelphiXE2, atDelphiXE3, atDelphiXE4, atDelphiXE5);
+    atDelphiXE2, atDelphiXE3, atDelphiXE4, atDelphiXE5, atDelphiXE6);
   TAbiTypes = set of TAbiType; // at := [BCB5, BCB6];
 
 var
@@ -49,7 +49,7 @@ var
       'C++Builder 5.0 ', 'C++Builder 6.0 ', 'Delphi 5.0 ', 'Delphi 6.0 ',
       'Delphi 7.0 ', 'Delphi 8.0 ', 'BDS 2005 ', 'BDS 2006 ', 'RAD Studio 2007',
       'RAD Studio 2009', 'RAD Studio 2010', 'RAD Studio XE', 'RAD Studio XE2',
-      'RAD Studio XE3', 'RAD Studio XE4', 'RAD Studio XE5'
+      'RAD Studio XE3', 'RAD Studio XE4', 'RAD Studio XE5', 'RAD Studio XE6'
   );
 
   g_strAppAbName: array[0..Integer(High(TAbiType))] of string =
@@ -58,14 +58,15 @@ var
       'Delphi8', 'BDS2005', 'BDS2006', 'RADStudio2007',
       'RADStudio2009', 'RADStudio2010', 'RADStudioXE',
       'RADStudioXE2', 'RADStudioXE3', 'RADStudioXE4',
-      'RADStudioXE5'
+      'RADStudioXE5', 'RADStudioXE6'
   );
 
   g_strRegPath: array[0..Integer(High(TAbiType))] of string =
   (
       'C++Builder\5.0', 'C++Builder\6.0', 'Delphi\5.0', 'Delphi\6.0',
       'Delphi\7.0', 'BDS\2.0', 'BDS\3.0', 'BDS\4.0', 'BDS\5.0', 'BDS\6.0',
-      'BDS\7.0', 'BDS\8.0', 'BDS\9.0', 'BDS\10.0', 'BDS\11.0', 'BDS\12.0'
+      'BDS\7.0', 'BDS\8.0', 'BDS\9.0', 'BDS\10.0', 'BDS\11.0', 'BDS\12.0',
+      'BDS\14.0'
   );
 
   g_strOpResult: array[0..1] of string =
