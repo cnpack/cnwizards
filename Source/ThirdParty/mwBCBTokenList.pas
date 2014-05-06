@@ -1394,7 +1394,7 @@ begin
 
       #39:
         begin
-          if FOrigin[Run + 2] = #39 then // this is char type ... 'a'
+          if (FOrigin[Run + 2] = #39) and (FOrigin[Run + 1] <> '\') then // this is char type ... 'a' but do not include '\''
           begin
             Run := Run + 3;
             Inc(ColNum, 3);
