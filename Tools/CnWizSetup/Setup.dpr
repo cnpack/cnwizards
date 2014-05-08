@@ -63,8 +63,8 @@ uses
 {$ENDIF}
 
 type
-  TCompilerName = (cvD5, cvD6, cvD7, cvD8, cbD9, cbD10, cbD2007, cbD2009,
-    cbD2010, cbD2011XE, cbD2012XE2, cbD2013XE3, cbDXE4, cbDXE5, cbDXE6, cvCB5, cvCB6);
+  TCompilerName = (cvD5, cvD6, cvD7, cvD8, cbD2005, cbD2006, cbD2007, cbD2009,
+    cbD2010, cbDXE, cbDXE2, cbDXE3, cbDXE4, cbDXE5, cbDXE6, cvCB5, cvCB6);
 
 const
   csCompilerNames: array[TCompilerName] of string = (
@@ -110,14 +110,14 @@ const
     'CnWizards_D6.DLL',
     'CnWizards_D7.DLL',
     'CnWizards_D8.DLL',
-    'CnWizards_D9.DLL',
-    'CnWizards_D10.DLL',
-    'CnWizards_D11.DLL',
-    'CnWizards_D12.DLL',
-    'CnWizards_D14.DLL',
-    'CnWizards_D15.DLL',
-    'CnWizards_D16.DLL',
-    'CnWizards_D17.DLL',
+    'CnWizards_D2005.DLL',
+    'CnWizards_D2006.DLL',
+    'CnWizards_D2007.DLL',
+    'CnWizards_D2009.DLL',
+    'CnWizards_D2010.DLL',
+    'CnWizards_DXE.DLL',
+    'CnWizards_DXE2.DLL',
+    'CnWizards_DXE3.DLL',
     'CnWizards_DXE4.DLL',
     'CnWizards_DXE5.DLL',
     'CnWizards_DXE6.DLL',
