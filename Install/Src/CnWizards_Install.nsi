@@ -14,14 +14,14 @@
 ;    IDE_VERSION_D5
 ;    IDE_VERSION_D6
 ;    IDE_VERSION_D7
-;    IDE_VERSION_D9
-;    IDE_VERSION_D10
-;    IDE_VERSION_D11
-;    IDE_VERSION_D12
-;    IDE_VERSION_D14
-;    IDE_VERSION_D15
-;    IDE_VERSION_D16
-;    IDE_VERSION_D17
+;    IDE_VERSION_D2005
+;    IDE_VERSION_D2006
+;    IDE_VERSION_D2007
+;    IDE_VERSION_D2009
+;    IDE_VERSION_D2010
+;    IDE_VERSION_DXE
+;    IDE_VERSION_DXE2
+;    IDE_VERSION_DXE3
 ;    IDE_VERSION_DXE4
 ;    IDE_VERSION_DXE5
 ;    IDE_VERSION_DXE6
@@ -84,14 +84,14 @@ RequestExecutionLevel admin
 !ifndef IDE_VERSION_D5
 !ifndef IDE_VERSION_D6
 !ifndef IDE_VERSION_D7
-!ifndef IDE_VERSION_D9
-!ifndef IDE_VERSION_D10
-!ifndef IDE_VERSION_D11
-!ifndef IDE_VERSION_D12
-!ifndef IDE_VERSION_D14
-!ifndef IDE_VERSION_D15
-!ifndef IDE_VERSION_D16
-!ifndef IDE_VERSION_D17
+!ifndef IDE_VERSION_D2005
+!ifndef IDE_VERSION_D2006
+!ifndef IDE_VERSION_D2007
+!ifndef IDE_VERSION_D2009
+!ifndef IDE_VERSION_D2010
+!ifndef IDE_VERSION_DXE
+!ifndef IDE_VERSION_DXE2
+!ifndef IDE_VERSION_DXE3
 !ifndef IDE_VERSION_DXE4
 !ifndef IDE_VERSION_DXE5
 !ifndef IDE_VERSION_DXE6
@@ -103,8 +103,8 @@ RequestExecutionLevel admin
 
   !define IDE_VERSION_D6  "1"
   !define IDE_VERSION_D7  "1"
-  !define IDE_VERSION_D10 "1"
-  !define IDE_VERSION_D11 "1"
+  !define IDE_VERSION_D2006 "1"
+  !define IDE_VERSION_D2007 "1"
   !define IDE_VERSION_CB6 "1"
   
   !define NO_HELP         "1"
@@ -115,14 +115,14 @@ RequestExecutionLevel admin
   !define IDE_VERSION_D5  "1"
   !define IDE_VERSION_D6  "1"
   !define IDE_VERSION_D7  "1"
-  !define IDE_VERSION_D9  "1"
-  !define IDE_VERSION_D10 "1"
-  !define IDE_VERSION_D11 "1"
-  !define IDE_VERSION_D12 "1"
-  !define IDE_VERSION_D14 "1"
-  !define IDE_VERSION_D15 "1"
-  !define IDE_VERSION_D16 "1"
-  !define IDE_VERSION_D17 "1"
+  !define IDE_VERSION_D2005  "1"
+  !define IDE_VERSION_D2006 "1"
+  !define IDE_VERSION_D2007 "1"
+  !define IDE_VERSION_D2009 "1"
+  !define IDE_VERSION_D2010 "1"
+  !define IDE_VERSION_DXE "1"
+  !define IDE_VERSION_DXE2 "1"
+  !define IDE_VERSION_DXE3 "1"
   !define IDE_VERSION_DXE4 "1"
   !define IDE_VERSION_DXE5 "1"
   !define IDE_VERSION_DXE6 "1"
@@ -163,35 +163,35 @@ RequestExecutionLevel admin
     !define IDE_SHORT_NAME "D7"
     !define IDE_LONG_NAME "Delphi 7"
   !endif
-  !ifdef IDE_VERSION_D9
+  !ifdef IDE_VERSION_D2005
     !define IDE_SHORT_NAME "D2005"
     !define IDE_LONG_NAME "BDS 2005"
   !endif
-  !ifdef IDE_VERSION_D10
+  !ifdef IDE_VERSION_D2006
     !define IDE_SHORT_NAME "D2006"
     !define IDE_LONG_NAME "BDS 2006"
   !endif
-  !ifdef IDE_VERSION_D11
+  !ifdef IDE_VERSION_D2007
     !define IDE_SHORT_NAME "D2007"
     !define IDE_LONG_NAME "RAD Studio 2007"
   !endif
-  !ifdef IDE_VERSION_D12
+  !ifdef IDE_VERSION_D2009
     !define IDE_SHORT_NAME "D2009"
     !define IDE_LONG_NAME "RAD Studio 2009"
   !endif
-  !ifdef IDE_VERSION_D14
+  !ifdef IDE_VERSION_D2010
     !define IDE_SHORT_NAME "D2010"
     !define IDE_LONG_NAME "RAD Studio 2010"
   !endif
-  !ifdef IDE_VERSION_D15
+  !ifdef IDE_VERSION_DXE
     !define IDE_SHORT_NAME "D2011"
     !define IDE_LONG_NAME "RAD Studio XE"
   !endif
-  !ifdef IDE_VERSION_D16
+  !ifdef IDE_VERSION_DXE2
     !define IDE_SHORT_NAME "D2012"
     !define IDE_LONG_NAME "RAD Studio XE2"
   !endif
-  !ifdef IDE_VERSION_D17
+  !ifdef IDE_VERSION_DXE3
     !define IDE_SHORT_NAME "D2013"
     !define IDE_LONG_NAME "RAD Studio XE3"
   !endif
@@ -381,58 +381,58 @@ FileLoop:
 !endif
 
 !ifdef SUPPORTS_BDS
-!ifdef IDE_VERSION_D9
-  IfFileExists "$INSTDIR\CnWizards_D9.dll" 0 +4
-  FileOpen $0 "$INSTDIR\CnWizards_D9.dll" a
+!ifdef IDE_VERSION_D2005
+  IfFileExists "$INSTDIR\CnWizards_D2005.dll" 0 +4
+  FileOpen $0 "$INSTDIR\CnWizards_D2005.dll" a
   IfErrors FileInUse
   FileClose $0
 !endif
 
-!ifdef IDE_VERSION_D10
-  IfFileExists "$INSTDIR\CnWizards_D10.dll" 0 +4
-  FileOpen $0 "$INSTDIR\CnWizards_D10.dll" a
+!ifdef IDE_VERSION_D2006
+  IfFileExists "$INSTDIR\CnWizards_D2006.dll" 0 +4
+  FileOpen $0 "$INSTDIR\CnWizards_D2006.dll" a
   IfErrors FileInUse
   FileClose $0
 !endif
 
-!ifdef IDE_VERSION_D11
-  IfFileExists "$INSTDIR\CnWizards_D11.dll" 0 +4
-  FileOpen $0 "$INSTDIR\CnWizards_D11.dll" a
+!ifdef IDE_VERSION_D2007
+  IfFileExists "$INSTDIR\CnWizards_D2007.dll" 0 +4
+  FileOpen $0 "$INSTDIR\CnWizards_D2007.dll" a
   IfErrors FileInUse
   FileClose $0
 !endif
 
-!ifdef IDE_VERSION_D12
-  IfFileExists "$INSTDIR\CnWizards_D12.dll" 0 +4
-  FileOpen $0 "$INSTDIR\CnWizards_D12.dll" a
+!ifdef IDE_VERSION_D2009
+  IfFileExists "$INSTDIR\CnWizards_D2009.dll" 0 +4
+  FileOpen $0 "$INSTDIR\CnWizards_D2009.dll" a
   IfErrors FileInUse
   FileClose $0
 !endif
 
-!ifdef IDE_VERSION_D14
-  IfFileExists "$INSTDIR\CnWizards_D14.dll" 0 +4
-  FileOpen $0 "$INSTDIR\CnWizards_D14.dll" a
+!ifdef IDE_VERSION_D2010
+  IfFileExists "$INSTDIR\CnWizards_D2010.dll" 0 +4
+  FileOpen $0 "$INSTDIR\CnWizards_D2010.dll" a
   IfErrors FileInUse
   FileClose $0
 !endif
 
-!ifdef IDE_VERSION_D15
-  IfFileExists "$INSTDIR\CnWizards_D15.dll" 0 +4
-  FileOpen $0 "$INSTDIR\CnWizards_D15.dll" a
+!ifdef IDE_VERSION_DXE
+  IfFileExists "$INSTDIR\CnWizards_DXE.dll" 0 +4
+  FileOpen $0 "$INSTDIR\CnWizards_DXE.dll" a
   IfErrors FileInUse
   FileClose $0
 !endif
 
-!ifdef IDE_VERSION_D16
-  IfFileExists "$INSTDIR\CnWizards_D16.dll" 0 +4
-  FileOpen $0 "$INSTDIR\CnWizards_D16.dll" a
+!ifdef IDE_VERSION_DXE2
+  IfFileExists "$INSTDIR\CnWizards_DXE2.dll" 0 +4
+  FileOpen $0 "$INSTDIR\CnWizards_DXE2.dll" a
   IfErrors FileInUse
   FileClose $0
 !endif
 
-!ifdef IDE_VERSION_D17
-  IfFileExists "$INSTDIR\CnWizards_D17.dll" 0 +4
-  FileOpen $0 "$INSTDIR\CnWizards_D17.dll" a
+!ifdef IDE_VERSION_DXE3
+  IfFileExists "$INSTDIR\CnWizards_DXE3.dll" 0 +4
+  FileOpen $0 "$INSTDIR\CnWizards_DXE3.dll" a
   IfErrors FileInUse
   FileClose $0
 !endif
@@ -551,6 +551,24 @@ InitOk:
   Delete "$SMPROGRAMS\CnPack IDE 盡產\*.*"
   RMDir /r "$SMPROGRAMS\CnPack IDE 盡產"
 
+  ; 删除以前的注册表项和文件
+  DeleteRegValue HKCU "Software\Borland\BDS\3.0\Experts" "CnWizards_D9"
+  DeleteRegValue HKCU "Software\Borland\BDS\4.0\Experts" "CnWizards_D10"
+  DeleteRegValue HKCU "Software\Borland\BDS\5.0\Experts" "CnWizards_D11"
+  DeleteRegValue HKCU "Software\CodeGear\BDS\6.0\Experts" "CnWizards_D12"
+  DeleteRegValue HKCU "Software\CodeGear\BDS\7.0\Experts" "CnWizards_D14"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\8.0\Experts" "CnWizards_D15"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\9.0\Experts" "CnWizards_D16"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\10.0\Experts" "CnWizards_D17"
+  Delete "$INSTDIR\CnWizards_D9.dll"
+  Delete "$INSTDIR\CnWizards_D10.dll"
+  Delete "$INSTDIR\CnWizards_D11.dll"
+  Delete "$INSTDIR\CnWizards_D12.dll"
+  Delete "$INSTDIR\CnWizards_D14.dll"
+  Delete "$INSTDIR\CnWizards_D15.dll"
+  Delete "$INSTDIR\CnWizards_D16.dll"
+  Delete "$INSTDIR\CnWizards_D17.dll"
+
   ;  创建开始菜单项
   CreateDirectory "$SMPROGRAMS\${APPNAMEDIR}"
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SENABLE).lnk" "$INSTDIR\Setup.exe" "-i" "$INSTDIR\Setup.exe" 1
@@ -592,83 +610,83 @@ SectionEnd
 !endif
 
 !ifdef SUPPORTS_BDS
-!ifdef IDE_VERSION_D9
-Section "BDS 2005" SecD9
+!ifdef IDE_VERSION_D2005
+Section "BDS 2005" SecD2005
   SectionIn 1 2
   SetOutPath $INSTDIR
-  File "..\..\Bin\CnWizards_D9.dll"
+  File "..\..\Bin\CnWizards_D2005.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Borland\BDS\3.0\Experts" "CnWizards_D9" "$INSTDIR\CnWizards_D9.dll"
+  WriteRegStr HKCU "Software\Borland\BDS\3.0\Experts" "CnWizards_D2005" "$INSTDIR\CnWizards_D2005.dll"
 SectionEnd
 !endif
 
-!ifdef IDE_VERSION_D10
-Section "BDS 2006" SecD10
+!ifdef IDE_VERSION_D2006
+Section "BDS 2006" SecD2006
   SectionIn 1 2
   SetOutPath $INSTDIR
-  File "..\..\Bin\CnWizards_D10.dll"
+  File "..\..\Bin\CnWizards_D2006.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Borland\BDS\4.0\Experts" "CnWizards_D10" "$INSTDIR\CnWizards_D10.dll"
+  WriteRegStr HKCU "Software\Borland\BDS\4.0\Experts" "CnWizards_D2006" "$INSTDIR\CnWizards_D2006.dll"
 SectionEnd
 !endif
 
-!ifdef IDE_VERSION_D11
-Section "RAD Studio 2007" SecD11
+!ifdef IDE_VERSION_D2007
+Section "RAD Studio 2007" SecD2007
   SectionIn 1 2
   SetOutPath $INSTDIR
-  File "..\..\Bin\CnWizards_D11.dll"
+  File "..\..\Bin\CnWizards_D2007.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Borland\BDS\5.0\Experts" "CnWizards_D11" "$INSTDIR\CnWizards_D11.dll"
+  WriteRegStr HKCU "Software\Borland\BDS\5.0\Experts" "CnWizards_D2007" "$INSTDIR\CnWizards_D2007.dll"
 SectionEnd
 !endif
 
-!ifdef IDE_VERSION_D12
-Section "RAD Studio 2009" SecD12
+!ifdef IDE_VERSION_D2009
+Section "RAD Studio 2009" SecD2009
   SectionIn 1 2
   SetOutPath $INSTDIR
-  File "..\..\Bin\CnWizards_D12.dll"
+  File "..\..\Bin\CnWizards_D2009.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\CodeGear\BDS\6.0\Experts" "CnWizards_D12" "$INSTDIR\CnWizards_D12.dll"
+  WriteRegStr HKCU "Software\CodeGear\BDS\6.0\Experts" "CnWizards_D2009" "$INSTDIR\CnWizards_D2009.dll"
 SectionEnd
 !endif
 
-!ifdef IDE_VERSION_D14
-Section "RAD Studio 2010" SecD14
+!ifdef IDE_VERSION_D2010
+Section "RAD Studio 2010" SecD2010
   SectionIn 1 2
   SetOutPath $INSTDIR
-  File "..\..\Bin\CnWizards_D14.dll"
+  File "..\..\Bin\CnWizards_D2010.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\CodeGear\BDS\7.0\Experts" "CnWizards_D14" "$INSTDIR\CnWizards_D14.dll"
+  WriteRegStr HKCU "Software\CodeGear\BDS\7.0\Experts" "CnWizards_D2010" "$INSTDIR\CnWizards_D2010.dll"
 SectionEnd
 !endif
 
-!ifdef IDE_VERSION_D15
-Section "RAD Studio XE" SecD15
+!ifdef IDE_VERSION_DXE
+Section "RAD Studio XE" SecDXE
   SectionIn 1 2
   SetOutPath $INSTDIR
-  File "..\..\Bin\CnWizards_D15.dll"
+  File "..\..\Bin\CnWizards_DXE.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Embarcadero\BDS\8.0\Experts" "CnWizards_D15" "$INSTDIR\CnWizards_D15.dll"
+  WriteRegStr HKCU "Software\Embarcadero\BDS\8.0\Experts" "CnWizards_DXE" "$INSTDIR\CnWizards_DXE.dll"
 SectionEnd
 !endif
 
-!ifdef IDE_VERSION_D16
-Section "RAD Studio XE2" SecD16
+!ifdef IDE_VERSION_DXE2
+Section "RAD Studio XE2" SecDXE2
   SectionIn 1 2
   SetOutPath $INSTDIR
-  File "..\..\Bin\CnWizards_D16.dll"
+  File "..\..\Bin\CnWizards_DXE2.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Embarcadero\BDS\9.0\Experts" "CnWizards_D16" "$INSTDIR\CnWizards_D16.dll"
+  WriteRegStr HKCU "Software\Embarcadero\BDS\9.0\Experts" "CnWizards_DXE2" "$INSTDIR\CnWizards_DXE2.dll"
 SectionEnd
 !endif
 
-!ifdef IDE_VERSION_D17
-Section "RAD Studio XE3" SecD17
+!ifdef IDE_VERSION_DXE3
+Section "RAD Studio XE3" SecDXE3
   SectionIn 1 2
   SetOutPath $INSTDIR
-  File "..\..\Bin\CnWizards_D17.dll"
+  File "..\..\Bin\CnWizards_DXE3.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Embarcadero\BDS\10.0\Experts" "CnWizards_D17" "$INSTDIR\CnWizards_D17.dll"
+  WriteRegStr HKCU "Software\Embarcadero\BDS\10.0\Experts" "CnWizards_DXE3" "$INSTDIR\CnWizards_DXE3.dll"
 SectionEnd
 !endif
 
@@ -813,37 +831,37 @@ Function .onMouseOverSection
     !insertmacro MUI_DESCRIPTION_TEXT ${SecD7} $R0
   !endif
 !ifdef SUPPORTS_BDS
-  !ifdef IDE_VERSION_D9
+  !ifdef IDE_VERSION_D2005
     ${WordReplace} "$(DESDLL)" "#DLL#" "BDS 2005" "+" $R0
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecD9} $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecD2005} $R0
   !endif
-  !ifdef IDE_VERSION_D10
+  !ifdef IDE_VERSION_D2006
     ${WordReplace} "$(DESDLL)" "#DLL#" "BDS 2006" "+" $R0
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecD10} $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecD2006} $R0
   !endif
-  !ifdef IDE_VERSION_D11
+  !ifdef IDE_VERSION_D2007
     ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio 2007" "+" $R0
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecD11} $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecD2007} $R0
   !endif
-  !ifdef IDE_VERSION_D12
+  !ifdef IDE_VERSION_D2009
     ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio 2009" "+" $R0
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecD12} $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecD2009} $R0
   !endif
-  !ifdef IDE_VERSION_D14
+  !ifdef IDE_VERSION_D2010
     ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio 2010" "+" $R0
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecD14} $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecD2010} $R0
   !endif
-  !ifdef IDE_VERSION_D15
+  !ifdef IDE_VERSION_DXE
     ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio XE" "+" $R0
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecD15} $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecDXE} $R0
   !endif
-  !ifdef IDE_VERSION_D16
+  !ifdef IDE_VERSION_DXE2
     ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio XE2" "+" $R0
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecD16} $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecDXE2} $R0
   !endif
-  !ifdef IDE_VERSION_D17
+  !ifdef IDE_VERSION_DXE3
     ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio XE3" "+" $R0
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecD17} $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecDXE3} $R0
   !endif
   !ifdef IDE_VERSION_DXE4
     ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio XE4" "+" $R0
@@ -909,29 +927,29 @@ Function SetCheckBoxes
   !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Borland\Delphi\7.0" "App" ${SecD7}
 !endif
 !ifdef SUPPORTS_BDS
-!ifdef IDE_VERSION_D9
-  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Borland\BDS\3.0" "App" ${SecD9}
+!ifdef IDE_VERSION_D2005
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Borland\BDS\3.0" "App" ${SecD2005}
 !endif
-!ifdef IDE_VERSION_D10
-  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Borland\BDS\4.0" "App" ${SecD10}
+!ifdef IDE_VERSION_D2006
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Borland\BDS\4.0" "App" ${SecD2006}
 !endif
-!ifdef IDE_VERSION_D11
-  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Borland\BDS\5.0" "App" ${SecD11}
+!ifdef IDE_VERSION_D2007
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Borland\BDS\5.0" "App" ${SecD2007}
 !endif
-!ifdef IDE_VERSION_D12
-  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\CodeGear\BDS\6.0" "App" ${SecD12}
+!ifdef IDE_VERSION_D2009
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\CodeGear\BDS\6.0" "App" ${SecD2009}
 !endif
-!ifdef IDE_VERSION_D14
-  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\CodeGear\BDS\7.0" "App" ${SecD14}
+!ifdef IDE_VERSION_D2010
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\CodeGear\BDS\7.0" "App" ${SecD2010}
 !endif
-!ifdef IDE_VERSION_D15
-  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\8.0" "App" ${SecD15}
+!ifdef IDE_VERSION_DXE
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\8.0" "App" ${SecDXE}
 !endif
-!ifdef IDE_VERSION_D16
-  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\9.0" "App" ${SecD16}
+!ifdef IDE_VERSION_DXE2
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\9.0" "App" ${SecDXE2}
 !endif
-!ifdef IDE_VERSION_D17
-  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\10.0" "App" ${SecD17}
+!ifdef IDE_VERSION_DXE3
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\10.0" "App" ${SecDXE3}
 !endif
 !ifdef IDE_VERSION_DXE4
   !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\11.0" "App" ${SecDXE4}
@@ -983,29 +1001,29 @@ Section "Uninstall"
 
   DeleteRegValue HKCU "Software\Borland\BDS\2.0\Experts" "CnWizards_D8"
 
-!ifdef IDE_VERSION_D9
-  DeleteRegValue HKCU "Software\Borland\BDS\3.0\Experts" "CnWizards_D9"
+!ifdef IDE_VERSION_D2005
+  DeleteRegValue HKCU "Software\Borland\BDS\3.0\Experts" "CnWizards_D2005"
 !endif
-!ifdef IDE_VERSION_D10
-  DeleteRegValue HKCU "Software\Borland\BDS\4.0\Experts" "CnWizards_D10"
+!ifdef IDE_VERSION_D2006
+  DeleteRegValue HKCU "Software\Borland\BDS\4.0\Experts" "CnWizards_D2006"
 !endif
-!ifdef IDE_VERSION_D11
-  DeleteRegValue HKCU "Software\Borland\BDS\5.0\Experts" "CnWizards_D11"
+!ifdef IDE_VERSION_D2007
+  DeleteRegValue HKCU "Software\Borland\BDS\5.0\Experts" "CnWizards_D2007"
 !endif
-!ifdef IDE_VERSION_D12
-  DeleteRegValue HKCU "Software\CodeGear\BDS\6.0\Experts" "CnWizards_D12"
+!ifdef IDE_VERSION_D2009
+  DeleteRegValue HKCU "Software\CodeGear\BDS\6.0\Experts" "CnWizards_D2009"
 !endif
-!ifdef IDE_VERSION_D14
-  DeleteRegValue HKCU "Software\CodeGear\BDS\7.0\Experts" "CnWizards_D14"
+!ifdef IDE_VERSION_D2010
+  DeleteRegValue HKCU "Software\CodeGear\BDS\7.0\Experts" "CnWizards_D2010"
 !endif
-!ifdef IDE_VERSION_D15
-  DeleteRegValue HKCU "Software\Embarcadero\BDS\8.0\Experts" "CnWizards_D15"
+!ifdef IDE_VERSION_DXE
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\8.0\Experts" "CnWizards_DXE"
 !endif
-!ifdef IDE_VERSION_D16
-  DeleteRegValue HKCU "Software\Embarcadero\BDS\9.0\Experts" "CnWizards_D16"
+!ifdef IDE_VERSION_DXE2
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\9.0\Experts" "CnWizards_DXE2"
 !endif
-!ifdef IDE_VERSION_D17
-  DeleteRegValue HKCU "Software\Embarcadero\BDS\10.0\Experts" "CnWizards_D17"
+!ifdef IDE_VERSION_DXE3
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\10.0\Experts" "CnWizards_DXE3"
 !endif
 !ifdef IDE_VERSION_DXE4
   DeleteRegValue HKCU "Software\Embarcadero\BDS\11.0\Experts" "CnWizards_DXE4"
