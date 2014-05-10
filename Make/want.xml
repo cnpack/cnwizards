@@ -34,22 +34,22 @@ See http://www.suigeneris.org/want/ for details.
   <!-- 从环境变量中取得系统参数 -->
   <property name="ProgramFiles"   value="%{ProgramFiles}" />
 
-  <property name="exe.D2005"         value="%{env.D2005}" if="env.D2005" />
-  <property name="exe.D2005"         value="${ProgramFiles}\Borland\BDS\3.0\Bin\DCC32.EXE" unless="env.D2005" />
-  <property name="exe.D2006"        value="%{env.D2006}" if="env.D2006" />
-  <property name="exe.D2006"        value="${ProgramFiles}\Borland\BDS\4.0\Bin\DCC32.EXE" unless="env.D2006" />
-  <property name="exe.D2007"        value="%{env.D2007}" if="env.D2007" />
-  <property name="exe.D2007"        value="${ProgramFiles}\CodeGear\RAD Studio\5.0\Bin\DCC32.EXE" unless="env.D2007" />
-  <property name="exe.D2009"        value="%{env.D2009}" if="env.D2009" />
-  <property name="exe.D2009"        value="${ProgramFiles}\CodeGear\RAD Studio\6.0\Bin\DCC32.EXE" unless="env.D2009" />
-  <property name="exe.D2010"        value="%{env.D2010}" if="env.D2010" />
-  <property name="exe.D2010"        value="${ProgramFiles}\Embarcadero\RAD Studio\7.0\Bin\DCC32.EXE" unless="env.D2010" />
+  <property name="exe.D2005"      value="%{env.D2005}" if="env.D2005" />
+  <property name="exe.D2005"      value="${ProgramFiles}\Borland\BDS\3.0\Bin\DCC32.EXE" unless="env.D2005" />
+  <property name="exe.D2006"      value="%{env.D2006}" if="env.D2006" />
+  <property name="exe.D2006"      value="${ProgramFiles}\Borland\BDS\4.0\Bin\DCC32.EXE" unless="env.D2006" />
+  <property name="exe.D2007"      value="%{env.D2007}" if="env.D2007" />
+  <property name="exe.D2007"      value="${ProgramFiles}\CodeGear\RAD Studio\5.0\Bin\DCC32.EXE" unless="env.D2007" />
+  <property name="exe.D2009"      value="%{env.D2009}" if="env.D2009" />
+  <property name="exe.D2009"      value="${ProgramFiles}\CodeGear\RAD Studio\6.0\Bin\DCC32.EXE" unless="env.D2009" />
+  <property name="exe.D2010"      value="%{env.D2010}" if="env.D2010" />
+  <property name="exe.D2010"      value="${ProgramFiles}\Embarcadero\RAD Studio\7.0\Bin\DCC32.EXE" unless="env.D2010" />
   <property name="exe.DXE"        value="%{env.DXE}" if="env.DXE" />
   <property name="exe.DXE"        value="${ProgramFiles}\Embarcadero\RAD Studio\8.0\Bin\DCC32.EXE" unless="env.DXE" />
-  <property name="exe.DXE2"        value="%{env.DXE2}" if="env.DXE2" />
-  <property name="exe.DXE2"        value="${ProgramFiles}\Embarcadero\RAD Studio\9.0\Bin\DCC32.EXE" unless="env.DXE2" />
-  <property name="exe.DXE3"        value="%{env.DXE3}" if="env.DXE3" />
-  <property name="exe.DXE3"        value="${ProgramFiles}\Embarcadero\RAD Studio\10.0\Bin\DCC32.EXE" unless="env.DXE3" />
+  <property name="exe.DXE2"       value="%{env.DXE2}" if="env.DXE2" />
+  <property name="exe.DXE2"       value="${ProgramFiles}\Embarcadero\RAD Studio\9.0\Bin\DCC32.EXE" unless="env.DXE2" />
+  <property name="exe.DXE3"       value="%{env.DXE3}" if="env.DXE3" />
+  <property name="exe.DXE3"       value="${ProgramFiles}\Embarcadero\RAD Studio\10.0\Bin\DCC32.EXE" unless="env.DXE3" />
   <property name="exe.DXE4"       value="%{env.DXE4}" if="env.DXE4" />
   <property name="exe.DXE4"       value="${ProgramFiles}\Embarcadero\RAD Studio\11.0\Bin\DCC32.EXE" unless="env.DXE4" />
   <property name="exe.DXE5"       value="%{env.DXE5}" if="env.DXE5" />
@@ -57,6 +57,8 @@ See http://www.suigeneris.org/want/ for details.
   <property name="exe.DXE6"       value="%{env.DXE6}" if="env.DXE6" />
   <property name="exe.DXE6"       value="${ProgramFiles}\Embarcadero\Studio\14.0\Bin\DCC32.EXE" unless="env.DXE6" />
   <property name="exe.brcc32"     value="%{BRCC32}" />
+  <property name="exe.git"        value="%{env.git}" if="env.git" />
+  <property name="exe.git"        value="${ProgramFiles}\Git\bin\git.exe" unless="env.git" />
   <property name="exe.svn"        value="%{env.svn}" if="env.svn" />
   <property name="exe.svn"        value="${ProgramFiles}\Subversion\bin\svn.exe" unless="env.svn" />
   <property name="exe.python"     value="%{env.python}" if="env.python" />
@@ -192,7 +194,7 @@ Usage: want [target-name] [-Dname=value]
     cleanbin   - Clean output files.
     cleanobj   - Clean temp files.
     clean      - Clean output and temp files.
-    svnupdate  - Update all files.
+    gitpull    - Update all files.
     d5         - Compile CnWizards for Delphi 5.
                  (d6, d7, d2005, d2006, d2007, d2009, d2010, dxe, dxe2, dxe3, dxe4, dxe5, dxe6, cb5, cb6 also)
     cnwizards  - Compile all CnWizards DLLs (D5, D6, etc.).
@@ -214,8 +216,8 @@ Usage: want [target-name] [-Dname=value]
     help_enu   - Compile English chm help.
     makehelp   - Compile all chm help files.
     makeinst   - Build CnWizards Installer.
-    all        - All above tasks except svnupdate.
-    allsvn     - All above tasks.
+    all        - All above tasks except gitpull.
+    allgit     - All above tasks.
     upload     - Upload Installer to Server (Master only).
     incbuild   - Increase build and commit (Master only).
     publish    - Publish a new version (Master only).
@@ -278,8 +280,8 @@ Usage: want [target-name] [-Dname=value]
     </delete>
   </target>
 
-  <!-- 更新 svn 源码 -->
-  <target name="svnupdate" ifndef="nosvn" description="Update all files." >
+  <!-- 更新 svn 源码，目前暂不用了 -->
+  <target name="svnupdate" ifndef="nosvn" description="Update all files. (Now NOT used)." >
     <exec basedir="${root}" errorlevel="1" defaultfilters="true"
           executable="${exe.svn}" if="ismaster" >
       <arg value="-R" />
@@ -289,6 +291,30 @@ Usage: want [target-name] [-Dname=value]
     <exec basedir="${root}" errorlevel="1" defaultfilters="true"
           executable="${exe.svn}" >
       <arg value="update" />
+    </exec>
+  </target>
+
+  <!-- 更新 git 源码 -->
+  <target name="gitpull" ifndef="nogit" description="Update all files." >
+    <exec basedir="${cnvcl}" errorlevel="1" defaultfilters="true"
+          executable="${exe.git}" if="ismaster" >
+      <arg value="checkout" />
+      <arg value="--" />
+      <arg value="*" />
+    </exec>
+    <exec basedir="${cnvcl}" errorlevel="1" defaultfilters="true"
+          executable="${exe.git}" >
+      <arg value="pull" />
+    </exec>
+    <exec basedir="${basedir}" errorlevel="1" defaultfilters="true"
+          executable="${exe.git}" if="ismaster" >
+      <arg value="checkout" />
+      <arg value="--" />
+      <arg value="*" />
+    </exec>
+    <exec basedir="${basedir}" errorlevel="1" defaultfilters="true"
+          executable="${exe.git}" >
+      <arg value="pull" />
     </exec>
   </target>
 
@@ -1063,11 +1089,11 @@ Usage: want [target-name] [-Dname=value]
   -->
 
   <!-- 完整构建 -->
-  <target name="all" depends="-prepare,clean,${all_list}" description="All above tasks except svnupdate." >
+  <target name="all" depends="-prepare,clean,${all_list}" description="All above tasks except gitpull." >
   </target>
 
-  <!-- 带 svn 更新的完整构建 -->
-  <target name="allsvn" depends="-prepare,clean,svnupdate,${all_list}" description="All above tasks." >
+  <!-- 带 git 更新的完整构建 -->
+  <target name="allgit" depends="-prepare,clean,gitpull,${all_list}" description="All above tasks." >
   </target>
 
   <!-- FTP 上传服务器 -->
@@ -1109,16 +1135,24 @@ Usage: want [target-name] [-Dname=value]
       <write section="Version" key="LastDate" value="${date.curr}" />
     </ini>
     <exec basedir="${basedir}" errorlevel="1" defaultfilters="true"
-          executable="${exe.svn}" >
-      <arg value="-m" />
-      <arg value='"Commit version files: ${Ver.Str.Major}.${Ver.Str.Minor}"' />
-      <arg value="commit" />
+          executable="${exe.git}" >
+      <arg value="add" />
       <arg value="Make/release.ini" />
       <arg value="Source/Version.inc" />
+    </exec>
+    <exec basedir="${basedir}" errorlevel="1" defaultfilters="true"
+          executable="${exe.git}" >
+      <arg value="commit" />
+      <arg value="-m" />
+      <arg value='"Commit version files: ${Ver.Str.Major}.${Ver.Str.Minor}"' />
+    </exec>
+    <exec basedir="${basedir}" errorlevel="1" defaultfilters="true"
+          executable="${exe.git}" >
+      <arg value="push" />
     </exec>
   </target>
 
   <!-- 完整构建并发布 -->
-  <target name="publish" depends="allsvn,incbuild,upload" description="Publish a new version (Master only)." >
+  <target name="publish" depends="allgit,incbuild,upload" description="Publish a new version (Master only)." >
   </target>
 </project>
