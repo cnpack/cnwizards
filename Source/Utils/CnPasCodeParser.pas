@@ -28,7 +28,7 @@ unit CnPasCodeParser;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 单元标识：$Id$
+* 单元标识：$Id: CnPasCodeParser.pas 1385 2013-12-31 15:39:02Z liuxiaoshanzhashu@gmail.com $
 * 修改记录：2012.02.07
 *               UTF8的位置转换去除后仍有问题，恢复之
 *           2011.11.29
@@ -371,7 +371,8 @@ var
   MethodStack, BlockStack, MidBlockStack: TObjectStack;
   Token, CurrMethod, CurrBlock, CurrMidBlock: TCnPasToken;
   SavePos, SaveLineNumber, SaveLinePos: Integer;
-  IsClassOpen, IsClassDef, IsImpl, IsHelper, IsRecordHelper, IsSealed: Boolean;
+  IsClassOpen, IsClassDef, IsImpl, IsHelper: Boolean;
+  IsRecordHelper, IsSealed, IsRecord: Boolean;
   DeclareWithEndLevel: Integer;
   PrevTokenID: TTokenKind;
 
@@ -548,7 +549,8 @@ begin
           tkTry, tkRepeat, tkIf, tkFor, tkWith, tkOn, tkWhile,
           tkRecord, tkObject:
             begin
-              if Lex.TokenID = tkRecord then
+              IsRecord := Lex.TokenID = tkRecord;
+              if IsRecord then
               begin
                 // 处理 record helper for 的情形，但在implementation部分其end会被
                 // record内部的function/procedure给干掉，暂无解决方案。
@@ -570,6 +572,7 @@ begin
               end;
 
               // 不处理 of object 的字样；不处理前面是 @@ 型的label的情形
+              // 额外用 IsRecord 变量因为 Lex.RunPos 恢复后，TokenID 可能会变
               if ((Lex.TokenID <> tkObject) or (PrevTokenID <> tkOf))
                 and not (PrevTokenID in [tkAt, tkDoubleAddressOp])
                 and not ((Lex.TokenID = tkFor) and (IsHelper or IsRecordHelper)) then
@@ -591,7 +594,7 @@ begin
                   Token.FItemLayer := 1;
                 CurrBlock := Token;
 
-                if Lex.TokenID = tkRecord then
+                if IsRecord then
                 begin
                   // 独立记录 record，因为 record 可以在函数体的 begin end 之外配 end
                   // IsInDeclareWithEnd := True;
