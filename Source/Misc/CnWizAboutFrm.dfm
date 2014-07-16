@@ -28,6 +28,7 @@ inherited CnWizAboutForm: TCnWizAboutForm
     Font.Name = 'Tahoma'
     Font.Style = [fsBold]
     ParentFont = False
+    OnDblClick = Label2DblClick
   end
   object Label4: TLabel
     Left = 96

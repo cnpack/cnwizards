@@ -73,8 +73,10 @@ type
     procedure btnLicenseClick(Sender: TObject);
     procedure imgDonationClick(Sender: TObject);
     procedure lblSourceClick(Sender: TObject);
+    procedure Label2DblClick(Sender: TObject);
   private
     { Private declarations }
+    procedure DbgEditKeyPress(Sender: TObject; var Key: Char);
   protected
     function GetHelpTopic: string; override;
   public
@@ -87,9 +89,12 @@ procedure ShowCnWizAboutForm;
 implementation
 
 uses
-  CnCommon, CnWizConsts, CnWizOptions;
+  CnCommon, CnWizConsts, CnWizOptions, CnWizManager;
 
 {$R *.DFM}
+
+var
+  DbgFrm: TForm = nil;
 
 // 显示关于窗口
 procedure ShowCnWizAboutForm;
@@ -150,6 +155,84 @@ end;
 function TCnWizAboutForm.GetHelpTopic: string;
 begin
   Result := 'License';
+end;
+
+procedure TCnWizAboutForm.Label2DblClick(Sender: TObject);
+var
+  Edit: TEdit;
+  Memo: TMemo;
+begin
+{$IFDEF DEBUG}
+  Close;
+
+  if DbgFrm <> nil then
+  begin
+    DbgFrm.Show;
+  end
+  else
+  begin
+    DbgFrm := TForm.Create(Application);
+    with DbgFrm do
+    begin
+      Width := 550;
+      Height := 400;
+      Position := poScreenCenter;
+      Caption := 'CnPack IDE Wizard Debug Command Window';
+      BorderIcons := [biSystemMenu];
+    end;
+
+    Edit := TEdit.Create(DbgFrm);
+    with Edit do
+    begin
+      Parent := DbgFrm;
+      Align := alTop;
+      OnKeyPress := DbgEditKeyPress;
+    end;
+
+    Memo := TMemo.Create(DbgFrm);
+    with Memo do
+    begin
+      Parent := DbgFrm;
+      Align := alClient;
+      ReadOnly := True;
+      Text := '';
+    end;
+
+    Edit.Tag := Integer(Memo);
+    DbgFrm.Show;
+  end;
+{$ENDIF}
+end;
+
+procedure TCnWizAboutForm.DbgEditKeyPress(Sender: TObject; var Key: Char);
+var
+  List: TStrings;
+  Memo: TMemo;
+  Cmd: string;
+begin
+  if Key = #13 then
+  begin
+    if not (Sender is TEdit) then
+      Exit;
+
+    Memo := TMemo((Sender as TEdit).Tag);
+    if Memo = nil then
+      Exit;
+
+    Cmd := Trim((Sender as TEdit).Text);
+    if Cmd = '' then
+      Exit;
+
+    List := TStringList.Create;
+    try
+      CnWizardMgr.DispatchDebugComand(Cmd, List);
+      Memo.Clear;
+      Memo.Lines.AddStrings(List);
+    finally
+      List.Free;
+    end;
+    Key := #0;
+  end;
 end;
 
 end.
