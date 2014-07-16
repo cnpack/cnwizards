@@ -153,6 +153,8 @@ type
     {* 根据专家类名字符串返回专家实例，如果找不到专家，返回为 nil}
     function IndexOf(Wizard: TCnBaseWizard): Integer;
     {* 根据专家实例查找其在专家列表中的索引号}
+    procedure DispatchDebugComand(Cmd: string; Results: TStrings);
+    {* 分发处理 Debug 输出命令并将结果放置入 Results 中，供内部调试用}
     property Menu: TMenuItem read FMenu;
     {* 插入到 IDE 主菜单中的菜单项}
     property WizardCount: Integer read GetWizardCount;
@@ -1125,6 +1127,19 @@ procedure TCnWizardMgr.SetWizardCanCreate(WizardClassName: string;
   const Value: Boolean);
 begin
   WizOptions.WriteBool(SCnCreateSection, WizardClassName, Value);
+end;
+
+// 分发处理 Debug 输出命令并将结果放置入 Results 中，供内部调试用
+procedure TCnWizardMgr.DispatchDebugComand(Cmd: string; Results: TStrings);
+begin
+  if (Cmd = '') or (Results = nil) then
+    Exit;
+  Results.Clear;
+{$IFDEF DEBUG}
+
+{$ELSE}
+  Results.Add('CnPack IDE Wizards Debug Command Disabled.');
+{$ENDIF}
 end;
 
 //------------------------------------------------------------------------------
