@@ -116,7 +116,7 @@ type
     {* 取专家名称，可以是支持本地化的字符串 }
     function GetAuthor: string; virtual;
     function GetComment: string; virtual;
-    procedure DebugComand(Cmd: string; Results: TStrings); virtual;
+    procedure DebugComand(Cmds: TStrings; Results: TStrings); virtual;
     {* 处理 Debug 输出命令并将结果放置入 Results 中，供内部调试用}
 
     // IOTAWizard methods
@@ -564,7 +564,7 @@ begin
 end;
 
 // 处理 Debug 输出命令并将结果放置入 Results 中，供内部调试用
-procedure TCnBaseWizard.DebugComand(Cmd: string; Results: TStrings);
+procedure TCnBaseWizard.DebugComand(Cmds: TStrings; Results: TStrings);
 begin
   if Results <> nil then
     Results.Add(ClassName + ' Debug Command Not Implemented.');

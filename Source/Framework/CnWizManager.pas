@@ -1131,12 +1131,52 @@ end;
 
 // 分发处理 Debug 输出命令并将结果放置入 Results 中，供内部调试用
 procedure TCnWizardMgr.DispatchDebugComand(Cmd: string; Results: TStrings);
+{$IFDEF DEBUG}
+var
+  LocalCmd, ID: string;
+  Cmds: TStrings;
+  I: Integer;
+  Wizard: TCnBaseWizard;
+  Matched: Boolean;
+{$ENDIF}
 begin
   if (Cmd = '') or (Results = nil) then
     Exit;
   Results.Clear;
-{$IFDEF DEBUG}
 
+{$IFDEF DEBUG}
+  Cmds := TStringList.Create;
+  try
+    ExtractStrings([' '], [], PChar(Cmd), Cmds);
+    if Cmds.Count = 0 then
+      Exit;
+
+    LocalCmd := Cmds[0];
+    Matched := False;
+    Wizard := nil;
+    for I := 0 to GetWizardCount - 1 do
+    begin
+      Wizard := GetWizards(I);
+      ID := Wizard.GetIDStr;
+      if Pos(LocalCmd, ID) > 0 then
+      begin
+        Matched := True;
+        Break;
+      end;
+    end;
+
+    if Matched and (Wizard <> nil) then
+    begin
+      Cmds.Delete(0);
+      Wizard.DebugComand(Cmds, Results);
+      Exit;
+    end;
+
+    // No Wizard can process this debug command, do other stuff
+    Results.Add('Unknown Debug Command ' + Cmd);
+  finally
+    Cmds.Free;
+  end;
 {$ELSE}
   Results.Add('CnPack IDE Wizards Debug Command Disabled.');
 {$ENDIF}
