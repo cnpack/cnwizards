@@ -320,6 +320,8 @@ type
     procedure SendSymbolToIDE(MatchFirstOnly, AutoEnter, RepFullToken: Boolean;
       Key: AnsiChar; var Handled: Boolean);
     procedure ShowIDECodeCompletion;
+    procedure DebugComand(Cmds: TStrings; Results: TStrings); override;
+
     property IsShowing: Boolean read GetIsShowing;
     property ListFont: TFont read GetListFont;
     property HitCountMgr: TCnSymbolHitCountMgr read FHitCountMgr;
@@ -3046,6 +3048,25 @@ begin
     end;
   end;
 
+end;
+
+procedure TCnInputHelper.DebugComand(Cmds, Results: TStrings);
+var
+  I, J: Integer;
+  List: TSymbolList;
+begin
+  for I := 0 to FSymbolListMgr.Count - 1 do
+  begin
+    List := FSymbolListMgr.List[I];
+    if List <> nil then
+    begin
+      Results.Add(IntToStr(I) + '. ' + List.ClassName + ' : Count ' + IntToStr(List.Count));
+      for J := 0 to List.Count - 1 do
+        Results.Add('  ' + List.Items[J].Name);
+
+      Results.Add('------');
+    end;
+  end;
 end;
 
 initialization

@@ -195,6 +195,7 @@ begin
       Parent := DbgFrm;
       Align := alClient;
       ReadOnly := True;
+      ScrollBars := ssBoth;
       Text := '';
     end;
 
