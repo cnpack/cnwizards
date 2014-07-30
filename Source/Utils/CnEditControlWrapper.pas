@@ -49,7 +49,7 @@ uses
   ComCtrls, TypInfo, Forms, Tabs, Registry, Contnrs,
   CnCommon, CnWizMethodHook, CnWizUtils, CnWizCompilerConst, CnWizNotifier,
   CnWizIdeUtils, CnWizOptions;
-  
+
 type
 
 //==============================================================================
@@ -89,7 +89,7 @@ type
     ctUnElided,               // 编辑器行展开，有限支持
     ctOptionChanged           // 编辑器设置对话框曾经打开过
     );
-    
+
   TEditorChangeTypes = set of TEditorChangeType;
 
   TEditorContext = record
@@ -255,7 +255,7 @@ type
     property HighlightCount: Integer read GetHighlightCount;
     property HighlightNames[Index: Integer]: string read GetHighlightName;
     property Highlights[Index: Integer]: THighlightItem read GetHighlight;
-    
+
     function GetCharHeight: Integer;
     {* 返回编辑器行高 }
     function GetCharWidth: Integer;
@@ -413,7 +413,7 @@ begin
 
     FGutterChanged := False;
   end;
-  Result := FGutterWidth;  
+  Result := FGutterWidth;
 end;
 
 function TEditorObject.GetViewBottomLine: Integer;
@@ -454,9 +454,9 @@ begin
       begin
         Result := ACtrl;
         Exit;
-      end;  
-    end;  
-  end;  
+      end;
+    end;
+  end;
 end;
 
 procedure TEditorObject.IDEShowLineNumberChanged;
@@ -621,7 +621,11 @@ end;
 
 function MySetEditView(Self: TObject; EditView: TObject): Integer;
 begin
-  if Assigned(EditView) and IsIdeEditorForm(TCustomForm(TControl(Self).Owner)) then
+  if Assigned(EditView) and
+    (Self is TControl) and
+    (TControl(Self).Owner is TCustomForm) and
+    IsIdeEditorForm(TCustomForm(TControl(Self).Owner))
+  then
   begin
     FEditControlWrapper.CheckNewEditor(TControl(Self), GetOTAEditView(EditView));
   end;
@@ -852,7 +856,7 @@ begin
     begin
       Result := i;
       Exit;
-    end;  
+    end;
   end;
   Result := -1;
 end;
@@ -911,7 +915,7 @@ begin
     Editor.FLinesChanged := False;
   finally
     Lines.Free;
-  end;          
+  end;
 end;
 
 function TCnEditControlWrapper.CheckEditorChanges(Editor: TEditorObject):
@@ -937,14 +941,14 @@ begin
       // 可能执行 Close All 导致 EditView 释放了
       Include(Result, ctView);
       Editor.FLastValid := False;
-    end;  
+    end;
     Exit;
   end;
 
   // 编辑器不在最前端时不进行后继判断
   if ACtrl <> Editor.EditControl then
     Exit;
-    
+
   try
     Context := GetEditorContext(Editor);
     Editor.FLastValid := True;
@@ -1026,7 +1030,7 @@ var
   Option: IOTAEditOptions;
 begin
   OptionType := [];
-  
+
   Option := CnOtaGetEditOptions;
   if Option <> nil then
   begin
@@ -1230,7 +1234,7 @@ begin
 
     FSaveFontName := Option.FontName;
     FSaveFontSize := Option.FontSize;
-    
+
     FontName := Option.FontName;
     FontHeight := -MulDiv(Option.FontSize, Screen.PixelsPerInch, 72);
     if not SameText(FontName, LogFont.lfFaceName) or (FontHeight <> LogFont.lfHeight) then
@@ -1277,7 +1281,7 @@ begin
         AFont.lfItalic := 1;
         CalcFont('Italic', AFont);
       end;
-      
+
       Result := (FCharSize.cx > 0) and (FCharSize.cy > 0);
     finally
       SaveFont := SelectObject(DC, SaveFont);
@@ -1429,7 +1433,7 @@ begin
         NoRef(Editors[I].FEditView) := nil;
         Break;
       end;
-  end;  
+  end;
 {$ENDIF}
 end;
 
@@ -1535,7 +1539,7 @@ begin
       Result := LineIsElided(EditControl, LineNum);
   except
     ;
-  end;            
+  end;
 end;
 
 {$IFDEF BDS}
@@ -1583,7 +1587,7 @@ begin
 {$ENDIF}
   begin
     Result := Col;
-  end;    
+  end;
 end;
 
 procedure TCnEditControlWrapper.RepaintEditControls;
@@ -1702,7 +1706,7 @@ begin
     {$ENDIF}
       Editor.FLinesChanged := True;
     end;
-  end;    
+  end;
 
   for I := 0 to FAfterPaintLineNotifiers.Count - 1 do
   try
