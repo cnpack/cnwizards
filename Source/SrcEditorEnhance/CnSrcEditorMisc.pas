@@ -123,7 +123,7 @@ type
     procedure SetAutoReadOnly(const Value: Boolean);
     procedure SetReadOnlyDirs(const Value: TStrings);
     procedure SynchronizeDirs;
-    procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm; 
+    procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm;
       Operation: TOperation);
     procedure OnAppMessage(var Msg: TMsg; var Handled: Boolean);
   {$IFDEF NEED_MODIFIED_TAB}
@@ -153,7 +153,7 @@ type
     procedure LoadSettings(Ini: TCustomIniFile);
     procedure SaveSettings(Ini: TCustomIniFile);
     procedure LanguageChanged(Sender: TObject);
-    
+
     property DblClickClosePage: Boolean read FDblClickClosePage write FDblClickClosePage;
     property RClickShellMenu: Boolean read FRClickShellMenu write FRClickShellMenu;
     property EditorTabMultiLine: Boolean read FEditorTabMultiLine write FEditorTabMultiLine;
@@ -215,7 +215,7 @@ constructor TCnSrcEditorMisc.Create;
 begin
   inherited;
   FTabControlList := TComponentList.Create;
-  
+
   FMenuHook := TCnMenuHook.Create(nil);
 {$IFDEF COMPILER6_UP}
   FMenuHook1 := TCnMenuHook.Create(nil);
@@ -380,6 +380,7 @@ var
   View: IOTAEditView;
   Control: TWinControl;
   XPos, YPos: Integer;
+  Method: TRttiMethod;
 begin
   if not Active then
     Exit;
@@ -391,7 +392,9 @@ begin
     YPos := (Msg.lParam shr 16) and $FFFF;
     Control := FindControl(Msg.hwnd);
     {$IFDEF DelphiXE2_UP}
-    Idx := TRttiContext.Create().GetType(Control.ClassType).GetMethod('ItemAtPos').Invoke(Control, [TValue.From(Point(XPos, YPos))]).AsInteger;
+    Method := TRttiContext.Create().GetType(Control.ClassType).GetMethod('ItemAtPos');
+    if Assigned(Method) then
+      Idx := Method.Invoke(Control, [TValue.From(Point(XPos, YPos))]).AsInteger;
     {$ENDIF}
     if (Control <> nil) and (Control is TXTabControl) then
     begin
@@ -618,7 +621,7 @@ begin
       // 此处不能调用UpdateMenu来实行初始化，必须手工复制所有菜单项。
       // Wizard.BlockTools.UpdateMenu(MenuItem, False);
       CloneMenuItem(Wizard.BlockTools.PopupMenu.Items, MenuItem);
-      
+
       // 不用 ImageIndex 因为 ImageList 不对头
       MenuItem.Visible := FAddMenuBlockTools;
 
@@ -628,7 +631,7 @@ begin
         if (MenuItem.Owner as TMenu).Images = nil then
           (MenuItem.Owner as TMenu).Images := GetIDEImageList;
       end;  }
-      
+
       Exit;
     end;
   end;
@@ -820,7 +823,7 @@ begin
   DispModifiedInTab := Ini.ReadBool(csMisc, csDispModifiedInTab, True);
   FEditorTabMultiLine := Ini.ReadBool(csMisc, csEditorTabMultiLine, False);
   FEditorTabFlatButtons := Ini.ReadBool(csMisc, csEditorTabFlatButtons, False);
-  
+
   FAutoSave := Ini.ReadBool(csMisc, csAutoSave, False);
   FSaveInterval := Ini.ReadInteger(csMisc, csSaveInterval, 2);
   UpdateAutoSaveTimer;
@@ -1073,7 +1076,7 @@ begin
         UpdateTab(Tab);
     end;
   end;
-{$ENDIF}  
+{$ENDIF}
 end;
 
 procedure TCnSrcEditorMisc.UpdateTab(Tab: TTabControl);
@@ -1124,7 +1127,7 @@ begin
 
     if TabCtrlPanel = nil then
       Exit;
-      
+
     if Tab.Style = tsFlatButtons then
       TabCtrlPanel.Height := (Tab.RowCount * TabCtrlHeight) - (3 * (Tab.RowCount - 1))
     else
