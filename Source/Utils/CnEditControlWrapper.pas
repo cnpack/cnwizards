@@ -621,7 +621,9 @@ end;
 
 function MySetEditView(Self: TObject; EditView: TObject): Integer;
 begin
-  if Assigned(EditView) and IsIdeEditorForm(TCustomForm(TControl(Self).Owner)) then
+  if Assigned(EditView) and (Self is TControl) and
+    (TControl(Self).Owner is TCustomForm) and
+    IsIdeEditorForm(TCustomForm(TControl(Self).Owner)) then
   begin
     FEditControlWrapper.CheckNewEditor(TControl(Self), GetOTAEditView(EditView));
   end;

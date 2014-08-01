@@ -380,6 +380,9 @@ var
   View: IOTAEditView;
   Control: TWinControl;
   XPos, YPos: Integer;
+{$IFDEF DelphiXE2_UP}
+  Method: TRttiMethod;
+{$ENDIF}
 begin
   if not Active then
     Exit;
@@ -391,7 +394,9 @@ begin
     YPos := (Msg.lParam shr 16) and $FFFF;
     Control := FindControl(Msg.hwnd);
     {$IFDEF DelphiXE2_UP}
-    Idx := TRttiContext.Create().GetType(Control.ClassType).GetMethod('ItemAtPos').Invoke(Control, [TValue.From(Point(XPos, YPos))]).AsInteger;
+    Method := TRttiContext.Create().GetType(Control.ClassType).GetMethod('ItemAtPos');
+    if Assigned(Method) then
+      Idx := Method.Invoke(Control, [TValue.From(Point(XPos, YPos))]).AsInteger;
     {$ENDIF}
     if (Control <> nil) and (Control is TXTabControl) then
     begin
