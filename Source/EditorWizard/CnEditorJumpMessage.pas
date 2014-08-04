@@ -269,7 +269,7 @@ begin
   if not CnMessageViewWrapper.MessageViewForm.Visible then
     CnMessageViewWrapper.MessageViewForm.Show;
 {$IFDEF BDS}
-  Hook := TCnMethodHook.Create(GetBplMethodAddress(@KeyDataToShiftState), @EmptyKeyDataToShiftState);
+  Hook := TCnMethodHook.Create(@KeyDataToShiftState, @EmptyKeyDataToShiftState);
   CnMessageViewWrapper.TreeView.Perform(WM_KEYDOWN, VK_DOWN, Integer($1500001));
   CnMessageViewWrapper.TreeView.Perform(WM_KEYUP, VK_DOWN, Integer($C1500001));
   Hook.Free;
@@ -306,7 +306,7 @@ begin
   if not CnMessageViewWrapper.MessageViewForm.Visible then
     CnMessageViewWrapper.MessageViewForm.Show;
 {$IFDEF BDS}
-  Hook := TCnMethodHook.Create(GetBplMethodAddress(@KeyDataToShiftState), @EmptyKeyDataToShiftState);
+  Hook := TCnMethodHook.Create(@KeyDataToShiftState, @EmptyKeyDataToShiftState);
   CnMessageViewWrapper.TreeView.Perform(WM_KEYDOWN, VK_UP, Integer($1500001));
   CnMessageViewWrapper.TreeView.Perform(WM_KEYUP, VK_UP, Integer($C1500001));
   Hook.Free;  

@@ -104,8 +104,6 @@ begin
 end;
 
 procedure CnListBeginUpdate;
-var
-  Method: TListChangeMethod;
 begin
   if FUpdateCount = 0 then
   begin
@@ -117,12 +115,10 @@ begin
 
     FCnListComponent := TCnListComponent.Create(nil);
 
-    Method := TImageListAccess(GetIDEImageList).Change;
-    FImageListHook := TCnMethodHook.Create(GetBplMethodAddress(TMethod(Method).Code),
+    FImageListHook := TCnMethodHook.Create(@TImageListAccess.Change,
       @MyImageListChange);
-      
-    Method := TActionListAccess(GetIDEActionList).Change;
-    FActionListHook := TCnMethodHook.Create(GetBplMethodAddress(TMethod(Method).Code),
+
+    FActionListHook := TCnMethodHook.Create(@TActionListAccess.Change,
       @MyActionListChange);
   end;
   

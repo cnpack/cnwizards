@@ -196,9 +196,7 @@ begin
         OldFormReadError := GetProcAddress(ACorIdeModule, SCnFormReadErrorName);
         if OldFormReadError <> nil then
         begin
-          OldFormReadError := GetBplMethodAddress(OldFormReadError);
-          if OldFormReadError <> nil then
-            MethodHook := TCnMethodHook.Create(OldFormReadError, @HookedFormReadError);
+          MethodHook := TCnMethodHook.Create(OldFormReadError, @HookedFormReadError);
         end;
       end;
 
