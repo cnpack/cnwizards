@@ -2557,16 +2557,20 @@ function CnOtaGetEditor(const FileName: string): IOTAEditor;
 var
   ModuleServices: IOTAModuleServices;
   i, j: Integer;
+  Module: IOTAModule;
 begin
   QuerySvcs(BorlandIDEServices, IOTAModuleServices, ModuleServices);
   if ModuleServices <> nil then
     for i := 0 to ModuleServices.ModuleCount - 1 do
-      for j := 0 to ModuleServices.Modules[i].GetModuleFileCount - 1 do
-        if SameFileName(FileName, ModuleServices.Modules[i].GetModuleFileEditor(j).FileName) then
+    begin
+      Module := ModuleServices.Modules[i];
+      for j := 0 to Module.GetModuleFileCount - 1 do
+        if SameFileName(FileName, Module.GetModuleFileEditor(j).FileName) then
         begin
-          Result := ModuleServices.Modules[i].GetModuleFileEditor(j);
+          Result := Module.GetModuleFileEditor(j);
           Exit;
         end;
+    end;
   Result := nil;
 end;
 
@@ -4516,8 +4520,6 @@ end;
 procedure CnOtaSaveEditorToStreamEx(Editor: IOTASourceEditor; Stream:
   TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
   PreSize: Integer = 0; CheckUtf8: Boolean = True);
-var
-  Reader: IOTAEditReader;
 begin
   if Editor = nil then
   begin
@@ -4526,12 +4528,7 @@ begin
       Exit;
   end;
 
-  Reader := Editor.CreateReader;
-  try
-    CnOtaSaveReaderToStream(Reader, Stream, StartPos, EndPos, PreSize, CheckUtf8);
-  finally
-    Reader := nil;
-  end;
+  CnOtaSaveReaderToStream(Editor.CreateReader, Stream, StartPos, EndPos, PreSize, CheckUtf8);
 end;
 
 // 保存编辑器文本到流中
