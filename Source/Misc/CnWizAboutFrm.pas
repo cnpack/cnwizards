@@ -75,12 +75,12 @@ type
     procedure lblSourceClick(Sender: TObject);
     procedure Label2DblClick(Sender: TObject);
   private
-    { Private declarations }
+{$IFDEF DEBUG}
     procedure DbgEditKeyPress(Sender: TObject; var Key: Char);
+{$ENDIF}
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
   end;
 
 // 显示关于窗口
@@ -158,9 +158,11 @@ begin
 end;
 
 procedure TCnWizAboutForm.Label2DblClick(Sender: TObject);
+{$IFDEF DEBUG}
 var
   Edit: TEdit;
   Memo: TMemo;
+{$ENDIF}
 begin
 {$IFDEF DEBUG}
   Close;
@@ -205,6 +207,7 @@ begin
 {$ENDIF}
 end;
 
+{$IFDEF DEBUG}
 procedure TCnWizAboutForm.DbgEditKeyPress(Sender: TObject; var Key: Char);
 var
   List: TStrings;
@@ -235,5 +238,6 @@ begin
     Key := #0;
   end;
 end;
+{$ENDIF}
 
 end.
