@@ -396,7 +396,9 @@ begin
     {$IFDEF DelphiXE2_UP}
     Method := TRttiContext.Create().GetType(Control.ClassType).GetMethod('ItemAtPos');
     if Assigned(Method) then
-      Idx := Method.Invoke(Control, [TValue.From(Point(XPos, YPos))]).AsInteger;
+      Idx := Method.Invoke(Control, [TValue.From(Point(XPos, YPos))]).AsInteger
+    else
+      Idx := -1;
     {$ENDIF}
     if (Control <> nil) and (Control is TXTabControl) then
     begin
