@@ -1035,7 +1035,7 @@ var
   SCnFlatToolBarRestoreDefault: string = 'Sure to Delete Your Toolbars and Restore to Default?';
   SCnFloatPropBarFilterCaption: string = 'Only Show Frequent Properties';
   SCnFloatPropBarRenameCaption: string = 'Rename Component';
-  SCnEmbeddedDesignerNotSupport: string = 'Only VCL Embedded Designer Supported.';
+  SCnEmbeddedDesignerNotSupport: string = 'Sorry. VCL Embedded Designer NOT Supported.';
 
   // CnAlignSizeWizard
   SCnAlignSizeMenuCaption: string = 'Form Design Wi&zard';
