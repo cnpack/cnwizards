@@ -446,7 +446,7 @@ type
     procedure SourceEditorNotify(SourceEditor: IOTASourceEditor;
       NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
     procedure EditorChanged(Editor: TEditorObject; ChangeType: TEditorChangeTypes);
-    procedure EditorKeyDown(Editor: TEditorObject; Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
+    procedure EditorKeyDown(Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
     procedure ClearHighlight(Editor: TEditorObject);
     procedure PaintBracketMatch(Editor: TEditorObject;
       LineNum, LogicLineNum: Integer; AElided: Boolean);
@@ -3796,7 +3796,7 @@ begin
   end;
 end;
 
-procedure TCnSourceHighlight.EditorKeyDown(Editor: TEditorObject; Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
+procedure TCnSourceHighlight.EditorKeyDown(Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
 begin
   FHighlightCurrentIdentifierTimer.Enabled := False;
   FHighlightCurrentIdentifierTimer.Enabled := True;
