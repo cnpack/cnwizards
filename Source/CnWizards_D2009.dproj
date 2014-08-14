@@ -506,9 +506,9 @@
 					<VersionInfo>
 						<VersionInfo Name="IncludeVerInfo">True</VersionInfo>
 						<VersionInfo Name="AutoIncBuild">False</VersionInfo>
-						<VersionInfo Name="MajorVer">0</VersionInfo>
-						<VersionInfo Name="MinorVer">9</VersionInfo>
-						<VersionInfo Name="Release">9</VersionInfo>
+						<VersionInfo Name="MajorVer">1</VersionInfo>
+						<VersionInfo Name="MinorVer">0</VersionInfo>
+						<VersionInfo Name="Release">3</VersionInfo>
 						<VersionInfo Name="Build">0</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">False</VersionInfo>
@@ -520,7 +520,7 @@
 					</VersionInfo>
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="FileDescription">CnWizards For Delphi 2009</VersionInfoKeys>
-						<VersionInfoKeys Name="FileVersion">0.9.9.0</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">1.0.3.0</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName">CnWizards_D2009</VersionInfoKeys>
 						<VersionInfoKeys Name="OriginalFilename">CnWizards_D2009.DLL</VersionInfoKeys>
 						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
