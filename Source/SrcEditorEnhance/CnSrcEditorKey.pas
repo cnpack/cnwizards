@@ -1129,7 +1129,7 @@ begin
     begin
       try
         lblReplacePromt.Caption := Format(SCnRenameVarHintFmt, [Cur]);
-        edtRename.Text := Cur;
+        edtRename.Text := Cur + '1';
 //        case Rit of
 //          ritCurrentProc: rbCurrentProc.Checked := True;
 //          ritInnerProc: rbCurrentInnerProc.Checked := True;
