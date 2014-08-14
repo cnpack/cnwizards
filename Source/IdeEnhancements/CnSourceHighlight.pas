@@ -372,6 +372,7 @@ type
     FBlockShortCut: TCnWizShortCut;
     FBlockMatchMaxLines: Integer;
     FTimer: TTimer;
+    FHighlightCurrentIdentifierTimer: TTimer;
     FIsChecking: Boolean;
     CharSize: TSize;
     FBlockMatchLineLimit: Boolean;
@@ -380,6 +381,7 @@ type
     FBlockMatchHighlight: Boolean;
     FBlockMatchBackground: TColor;
     FCurrentTokenHighlight: Boolean;
+    FCurrentTokenHighlightNeedPaint: Boolean;
     FHilightSeparateLine: Boolean;
     FCurrentTokenBackground: TColor;
     FCurrentTokenForeground: TColor;
@@ -429,6 +431,7 @@ type
     procedure UpdateTabWidth;
 {$ENDIF}
     procedure OnHighlightTimer(Sender: TObject);
+    procedure OnHighlightCurrentIdentifierTimer(Sender: TObject);
     procedure OnHighlightExec(Sender: TObject);
     procedure BeginUpdateEditor(Editor: TEditorObject);
     procedure EndUpdateEditor(Editor: TEditorObject);
@@ -443,6 +446,7 @@ type
     procedure SourceEditorNotify(SourceEditor: IOTASourceEditor;
       NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
     procedure EditorChanged(Editor: TEditorObject; ChangeType: TEditorChangeTypes);
+    procedure EditorKeyDown(Editor: TEditorObject; Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
     procedure ClearHighlight(Editor: TEditorObject);
     procedure PaintBracketMatch(Editor: TEditorObject;
       LineNum, LogicLineNum: Integer; AElided: Boolean);
@@ -2031,6 +2035,11 @@ begin
   FTimer.Interval := FBlockMatchDelay;
   FTimer.OnTimer := OnHighlightTimer;
 
+  FHighlightCurrentIdentifierTimer := TTimer.Create(nil);
+  FHighlightCurrentIdentifierTimer.Enabled := False;
+  FHighlightCurrentIdentifierTimer.Interval := 750;
+  FHighlightCurrentIdentifierTimer.OnTimer := OnHighlightCurrentIdentifierTimer;
+
 {$IFNDEF BDS}
   FCorIdeModule := LoadLibrary(CorIdeLibName);
   if GetProcAddress(FCorIdeModule, SSetForeAndBackColorName) <> nil then
@@ -2044,6 +2053,7 @@ begin
   EditControlWrapper.AddEditControlNotifier(EditControlNotify);
   EditControlWrapper.AddEditorChangeNotifier(EditorChanged);
   EditControlWrapper.AddAfterPaintLineNotifier(PaintLine);
+  EditControlWrapper.AddKeyDownNotifier(EditorKeyDown);
 {$IFNDEF BDS}
   EditControlWrapper.AddBeforePaintLineNotifier(BeforePaintLine);
 {$ENDIF}
@@ -2903,6 +2913,20 @@ begin
   end;
 end;
 
+procedure TCnSourceHighlight.OnHighlightCurrentIdentifierTimer(Sender: TObject);
+var
+  i: Integer;
+  Info: TBlockMatchInfo;
+begin
+  FHighlightCurrentIdentifierTimer.Enabled := False;
+  FCurrentTokenHighlightNeedPaint := True;
+  for i := 0 to FBlockMatchList.Count - 1 do
+  begin
+    Info := TBlockMatchInfo(FBlockMatchList[i]);
+    Info.Control.Invalidate;
+  end;
+end;
+
 // 上面的延时到时间了，开始解析
 procedure TCnSourceHighlight.OnHighlightTimer(Sender: TObject);
 var
@@ -3181,8 +3205,10 @@ begin
         end;
 
         // 如果有需要高亮绘制的标识符内容
-        if FCurrentTokenHighlight and (LogicLineNum < Info.IdLineCount) and
-          (Info.IdLines[LogicLineNum] <> nil) then
+        if FCurrentTokenHighlightNeedPaint and FCurrentTokenHighlight and
+          (LogicLineNum < Info.IdLineCount) and
+          (Info.IdLines[LogicLineNum] <> nil)
+        then
         begin
           with EditCanvas do
           begin
@@ -3703,6 +3729,12 @@ var
 begin
   if Active then
   begin
+    if ctModified in ChangeType then
+    begin
+      FHighlightCurrentIdentifierTimer.Enabled := False;
+      FHighlightCurrentIdentifierTimer.Enabled := True;
+      FCurrentTokenHighlightNeedPaint := False;
+    end;
     // 仅 View 切换时调用底层函数可能是不安全的，所有高亮需要重新刷新
     if ChangeType = [ctView] then
     begin
@@ -3762,6 +3794,13 @@ begin
       EndUpdateEditor(Editor);
     end;
   end;
+end;
+
+procedure TCnSourceHighlight.EditorKeyDown(Editor: TEditorObject; Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
+begin
+  FHighlightCurrentIdentifierTimer.Enabled := False;
+  FHighlightCurrentIdentifierTimer.Enabled := True;
+  FCurrentTokenHighlightNeedPaint := False;
 end;
 
 procedure TCnSourceHighlight.PaintLine(Editor: TEditorObject;
