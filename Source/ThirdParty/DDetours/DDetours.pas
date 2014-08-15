@@ -846,7 +846,7 @@ begin
     OrgProcAccess := SetMemPermission(P, Sb, PAGE_EXECUTE_READWRITE);
     CopyInstruction(Q^, P^, Sb);
     SetMemPermission(P, Sb, OrgProcAccess);
-    Result := VirtualFree(PSave, TrampolineSize, MEM_RELEASE);
+    Result := VirtualFree(PSave, 0, MEM_RELEASE);
 {$IFDEF BuildThreadSafe }
     if OpenThreadExist then
     begin
