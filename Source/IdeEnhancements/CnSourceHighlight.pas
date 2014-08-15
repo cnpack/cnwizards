@@ -372,7 +372,7 @@ type
     FBlockShortCut: TCnWizShortCut;
     FBlockMatchMaxLines: Integer;
     FTimer: TTimer;
-    FHighlightCurrentIdentifierTimer: TTimer;
+    FCurrentTokenValidateTimer: TTimer;
     FIsChecking: Boolean;
     CharSize: TSize;
     FBlockMatchLineLimit: Boolean;
@@ -381,7 +381,8 @@ type
     FBlockMatchHighlight: Boolean;
     FBlockMatchBackground: TColor;
     FCurrentTokenHighlight: Boolean;
-    FCurrentTokenHighlightNeedPaint: Boolean;
+    FCurrentTokenDelay: Integer;
+    FCurrentTokenInvalid: Boolean;
     FHilightSeparateLine: Boolean;
     FCurrentTokenBackground: TColor;
     FCurrentTokenForeground: TColor;
@@ -431,7 +432,7 @@ type
     procedure UpdateTabWidth;
 {$ENDIF}
     procedure OnHighlightTimer(Sender: TObject);
-    procedure OnHighlightCurrentIdentifierTimer(Sender: TObject);
+    procedure OnCurrentTokenValidateTimer(Sender: TObject);
     procedure OnHighlightExec(Sender: TObject);
     procedure BeginUpdateEditor(Editor: TEditorObject);
     procedure EndUpdateEditor(Editor: TEditorObject);
@@ -500,6 +501,7 @@ type
     property BlockMatchBackground: TColor read FBlockMatchBackground write FBlockMatchBackground;
     {* 光标下关键字配对高亮的背景色}
     property CurrentTokenHighlight: Boolean read FCurrentTokenHighlight write FCurrentTokenHighlight;
+    property CurrentTokenDelay: Integer read FCurrentTokenDelay write FCurrentTokenDelay;
     {* 是否光标下当前标识符背景色高亮}
     property CurrentTokenForeground: TColor read FCurrentTokenForeground write FCurrentTokenForeground;
     {* 光标下当前标识符高亮的前景色}
@@ -645,6 +647,7 @@ const
   csBlockMatchHighlight = 'BlockMatchHighlight';
   csBlockMatchBackground = 'BlockMatchBackground';
   csCurrentTokenHighlight = 'CurrentTokenHighlight';
+  csCurrentTokenDelay = 'CurrentTokenDelay';
   csCurrentTokenColor = 'CurrentTokenColor';
   csCurrentTokenColorBk = 'CurrentTokenColorBk';
   csCurrentTokenColorBd = 'CurrentTokenColorBd';
@@ -1988,6 +1991,7 @@ begin
   FDefaultHighLightLineColor := FHighLightLineColor; // 用来判断与保存
 {$ENDIF}
   FCurrentTokenHighlight := False;    // 默认改为 False
+  FCurrentTokenDelay := 750;
   FCurrentTokenBackground := csDefCurTokenColorBg;
   FCurrentTokenForeground := csDEfCurTokenColorFg;
   FCurrentTokenBorderColor := csDefCurTokenColorBd;
@@ -2035,10 +2039,10 @@ begin
   FTimer.Interval := FBlockMatchDelay;
   FTimer.OnTimer := OnHighlightTimer;
 
-  FHighlightCurrentIdentifierTimer := TTimer.Create(nil);
-  FHighlightCurrentIdentifierTimer.Enabled := False;
-  FHighlightCurrentIdentifierTimer.Interval := 750;
-  FHighlightCurrentIdentifierTimer.OnTimer := OnHighlightCurrentIdentifierTimer;
+  FCurrentTokenValidateTimer := TTimer.Create(nil);
+  FCurrentTokenValidateTimer.Enabled := False;
+  FCurrentTokenValidateTimer.Interval := CurrentTokenDelay;
+  FCurrentTokenValidateTimer.OnTimer := OnCurrentTokenValidateTimer;
 
 {$IFNDEF BDS}
   FCorIdeModule := LoadLibrary(CorIdeLibName);
@@ -2065,6 +2069,7 @@ end;
 destructor TCnSourceHighlight.Destroy;
 begin
   FTimer.Free;
+  FCurrentTokenValidateTimer.Free;
   FBracketList.Free;
   FBlockLineList.Free;
   FBlockMatchList.Free;
@@ -2913,13 +2918,13 @@ begin
   end;
 end;
 
-procedure TCnSourceHighlight.OnHighlightCurrentIdentifierTimer(Sender: TObject);
+procedure TCnSourceHighlight.OnCurrentTokenValidateTimer(Sender: TObject);
 var
   i: Integer;
   Info: TBlockMatchInfo;
 begin
-  FHighlightCurrentIdentifierTimer.Enabled := False;
-  FCurrentTokenHighlightNeedPaint := True;
+  FCurrentTokenValidateTimer.Enabled := False;
+  FCurrentTokenInvalid := False;
   for i := 0 to FBlockMatchList.Count - 1 do
   begin
     Info := TBlockMatchInfo(FBlockMatchList[i]);
@@ -3205,7 +3210,7 @@ begin
         end;
 
         // 如果有需要高亮绘制的标识符内容
-        if FCurrentTokenHighlightNeedPaint and FCurrentTokenHighlight and
+        if FCurrentTokenHighlight and not FCurrentTokenInvalid and
           (LogicLineNum < Info.IdLineCount) and
           (Info.IdLines[LogicLineNum] <> nil)
         then
@@ -3731,9 +3736,9 @@ begin
   begin
     if ctModified in ChangeType then
     begin
-      FHighlightCurrentIdentifierTimer.Enabled := False;
-      FHighlightCurrentIdentifierTimer.Enabled := True;
-      FCurrentTokenHighlightNeedPaint := False;
+      FCurrentTokenValidateTimer.Enabled := False;
+      FCurrentTokenValidateTimer.Enabled := True;
+      FCurrentTokenInvalid := True;
     end;
     // 仅 View 切换时调用底层函数可能是不安全的，所有高亮需要重新刷新
     if ChangeType = [ctView] then
@@ -3798,9 +3803,9 @@ end;
 
 procedure TCnSourceHighlight.EditorKeyDown(Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
 begin
-  FHighlightCurrentIdentifierTimer.Enabled := False;
-  FHighlightCurrentIdentifierTimer.Enabled := True;
-  FCurrentTokenHighlightNeedPaint := False;
+  FCurrentTokenValidateTimer.Enabled := False;
+  FCurrentTokenValidateTimer.Enabled := True;
+  FCurrentTokenInvalid := True;
 end;
 
 procedure TCnSourceHighlight.PaintLine(Editor: TEditorObject;
@@ -3890,6 +3895,7 @@ begin
     FBlockMatchHighlight := ReadBool('', csBlockMatchHighlight, FBlockMatchHighlight);
     FBlockMatchBackground := ReadColor('', csBlockMatchBackground, FBlockMatchBackground);
     FCurrentTokenHighlight := ReadBool('', csCurrentTokenHighlight, FCurrentTokenHighlight);
+    FCurrentTokenDelay := ReadInteger('', csCurrentTokenDelay, FCurrentTokenDelay);
     FCurrentTokenForeground := ReadColor('', csCurrentTokenColor, FCurrentTokenForeground);
     FCurrentTokenBackground := ReadColor('', csCurrentTokenColorBk, FCurrentTokenBackground);
     FCurrentTokenBorderColor := ReadColor('', csCurrentTokenColorBd, FCurrentTokenBorderColor);
@@ -3946,6 +3952,7 @@ begin
     WriteBool('', csBlockMatchHighlight, FBlockMatchHighlight);
     WriteColor('', csBlockMatchBackground, FBlockMatchBackground);
     WriteBool('', csCurrentTokenHighlight, FCurrentTokenHighlight);
+    WriteInteger('', csCurrentTokenDelay, FCurrentTokenDelay);
     WriteColor('', csCurrentTokenColor, FCurrentTokenForeground);
     WriteColor('', csCurrentTokenColorBk, FCurrentTokenBackground);
     WriteColor('', csCurrentTokenColorBd, FCurrentTokenBorderColor);
