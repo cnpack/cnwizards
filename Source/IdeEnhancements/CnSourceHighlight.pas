@@ -1898,24 +1898,7 @@ begin
     TCnList(FLineList[Token.EditLine]).Add(Token);
   end;
 
-  if FHighlight.CurrentTokenHighlight then
-  begin
-    MaxLine := 0;
-    for i := 0 to FCurTokenList.Count - 1 do
-    begin
-      if CurTokens[i].EditLine > MaxLine then
-        MaxLine := CurTokens[i].EditLine;
-    end;
-    FIdLineList.Count := MaxLine + 1;
-
-    for I := 0 to FCurTokenList.Count - 1 do
-    begin
-      Token := CurTokens[I];
-      if FIdLineList[Token.EditLine] = nil then
-        FIdLineList[Token.EditLine] := TCnList.Create;
-      TCnList(FIdLineList[Token.EditLine]).Add(Token);
-    end;
-  end;
+  ConvertIdLineList;
 end;
 
 procedure TBlockMatchInfo.ConvertIdLineList;
@@ -1924,14 +1907,14 @@ var
   Token: TCnPasToken;
   MaxLine: Integer;
 begin
-  MaxLine := 0;
-  for I := 0 to FCurTokenList.Count - 1 do
-    if CurTokens[I].EditLine > MaxLine then
-      MaxLine := CurTokens[I].EditLine;
-  FIdLineList.Count := MaxLine + 1;
-
   if FHighlight.CurrentTokenHighlight then
   begin
+    MaxLine := 0;
+    for I := 0 to FCurTokenList.Count - 1 do
+      if CurTokens[I].EditLine > MaxLine then
+        MaxLine := CurTokens[I].EditLine;
+    FIdLineList.Count := MaxLine + 1;
+
     for I := 0 to FCurTokenList.Count - 1 do
     begin
       Token := CurTokens[I];
