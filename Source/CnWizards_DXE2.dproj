@@ -43,11 +43,11 @@
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<Manifest_File>None</Manifest_File>
 			<DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
-			<VerInfo_MinorVer>9</VerInfo_MinorVer>
-			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=0.9.9.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+			<VerInfo_MinorVer>0</VerInfo_MinorVer>
+			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.3.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<VerInfo_Locale>2052</VerInfo_Locale>
-			<VerInfo_Release>9</VerInfo_Release>
-			<VerInfo_MajorVer>0</VerInfo_MajorVer>
+			<VerInfo_Release>3</VerInfo_Release>
+			<VerInfo_MajorVer>1</VerInfo_MajorVer>
 			<DCC_UsePackage>rtl;vcl;vclx;fmx;designide;$(DCC_UsePackage)</DCC_UsePackage>
 			<UsePackages>true</UsePackages>
 			<DCC_DependencyCheckOutputName>Base\Win32\CnWizards_DXE2.dll</DCC_DependencyCheckOutputName>
@@ -522,9 +522,9 @@
 					<VersionInfo>
 						<VersionInfo Name="IncludeVerInfo">False</VersionInfo>
 						<VersionInfo Name="AutoIncBuild">False</VersionInfo>
-						<VersionInfo Name="MajorVer">0</VersionInfo>
-						<VersionInfo Name="MinorVer">9</VersionInfo>
-						<VersionInfo Name="Release">8</VersionInfo>
+						<VersionInfo Name="MajorVer">1</VersionInfo>
+						<VersionInfo Name="MinorVer">0</VersionInfo>
+						<VersionInfo Name="Release">3</VersionInfo>
 						<VersionInfo Name="Build">0</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">False</VersionInfo>

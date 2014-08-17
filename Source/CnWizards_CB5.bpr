@@ -197,9 +197,9 @@
 [Version Info]
 IncludeVerInfo=1
 AutoIncBuild=0
-MajorVer=0
-MinorVer=9
-Release=9
+MajorVer=1
+MinorVer=0
+Release=3
 Build=0
 Debug=0
 PreRelease=0
@@ -212,9 +212,9 @@ CodePage=936
 [Version Info Keys]
 CompanyName=CnPack Team
 FileDescription=CnWizards For C++Builder 5
-FileVersion=0.9.9.0
+FileVersion=1.0.3.0
 InternalName=CnWizards_CB5
-LegalCopyright=(C)Copyright 2001-2012 CnPack Team
+LegalCopyright=(C)Copyright 2001-2014 CnPack Team
 LegalTrademarks=CnPack
 OriginalFilename=CnWizards_CB5.DLL
 ProductName=CnWizards
