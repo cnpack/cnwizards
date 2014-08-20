@@ -565,6 +565,7 @@ procedure HighlightCanvasLine(ACanvas: TCanvas; X1, Y1, X2, Y2: Integer;
 {* 高亮专用的画线函数，TinyDot 时不画斜线}
 
 function IsCurrentToken(AView: Pointer; AControl: TControl; Token: TCnPasToken): Boolean;
+function IsCurrentToken2(CursorPos: TOTAEditPos; Token: TCnPasToken): Boolean;
 {* 判断标识符是否在光标下，频繁调用，因此此处 View 用指针来避免引用计数从而优化速度 }
 
 function CheckTokenMatch(const T1: AnsiString; const T2: AnsiString;
@@ -855,7 +856,7 @@ end;
 
 // 判断标识符是否在光标下
 function IsCurrentToken(AView: Pointer; AControl: TControl; Token: TCnPasToken): Boolean;
-var
+var            {$MESSAGE '-oVG very slow'}
 {$IFDEF BDS}
   Text: AnsiString;
 {$ENDIF}
@@ -894,6 +895,13 @@ begin
   end;
 {$ENDIF}
   Result := (Col >= Token.EditCol) and (Col <= Token.EditCol + Length(Token.Token));
+end;
+
+function IsCurrentToken2(CursorPos: TOTAEditPos; Token: TCnPasToken): Boolean;
+begin
+  Result := (Token.EditLine = CursorPos.Line) and
+    (CursorPos.Col >= Token.EditCol) and
+    (CursorPos.Col <= Token.EditCol + Length(Token.Token));
 end;
 
 function TokenIsMethodOrClassName(const Token, Name: string): Boolean;
@@ -1380,6 +1388,7 @@ var
   CharPos: TOTACharPos;
   EditPos: TOTAEditPos;
   I: Integer;
+  CursorPos: TOTAEditPos;
 begin
   FCurrentTokenName := '';
   FCurrentToken := nil;
@@ -1431,26 +1440,30 @@ begin
       end;
 
       // 必须搜索当前所有标识符，避免只高亮光标出于当前过程内的问题
-      for I := 0 to Parser.Count - 1 do
+      if FCurrentToken = nil then
       begin
-        CharPos := OTACharPos(Parser.Tokens[I].CharIndex, Parser.Tokens[I].LineNumber + 1);
-        EditView.ConvertPos(False, EditPos, CharPos);
-        // TODO: 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
-{$IFDEF BDS2009_UP}
-        // if not FHighlight.FUseTabKey then
-        EditPos.Col := Parser.Tokens[I].CharIndex + 1;
-{$ENDIF}
-        Parser.Tokens[I].EditCol := EditPos.Col;
-        Parser.Tokens[I].EditLine := EditPos.Line;
+        CursorPos := EditView.CursorPos;
 
-        if (Parser.Tokens[I].TokenID = tkIdentifier) and // 此处判断不支持双字节字符
-          IsCurrentToken(Pointer(EditView), FControl, Parser.Tokens[I]) then
+        for I := 0 to Parser.Count - 1 do
         begin
-          if FCurrentToken = nil then
+          CharPos := OTACharPos(Parser.Tokens[I].CharIndex, Parser.Tokens[I].LineNumber + 1);
+          EditView.ConvertPos(False, EditPos, CharPos);
+          // TODO: 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
+  {$IFDEF BDS2009_UP}
+          // if not FHighlight.FUseTabKey then
+          EditPos.Col := Parser.Tokens[I].CharIndex + 1;
+  {$ENDIF}
+          Parser.Tokens[I].EditCol := EditPos.Col;
+          Parser.Tokens[I].EditLine := EditPos.Line;
+
+          if (Parser.Tokens[I].TokenID = tkIdentifier) and // 此处判断不支持双字节字符
+            IsCurrentToken2(CursorPos, Parser.Tokens[I])
+          then
           begin
-            // 不能 Break，否则 Tokens 就没 EditLine 的更新了，下面也一样
-            FCurrentToken := Parser.Tokens[I];
-            FCurrentTokenName := FCurrentToken.Token;
+              // 不能 Break，否则 Tokens 就没 EditLine 的更新了，下面也一样
+              FCurrentToken := Parser.Tokens[I];
+              FCurrentTokenName := FCurrentToken.Token;
+              Break;
           end;
         end;
       end;
@@ -1464,6 +1477,16 @@ begin
           if (Parser.Tokens[I].TokenID = tkIdentifier) and
             CheckTokenMatch(Parser.Tokens[I].Token, FCurrentTokenName, CaseSensitive) then
           begin
+            CharPos := OTACharPos(Parser.Tokens[I].CharIndex, Parser.Tokens[I].LineNumber + 1);
+            EditView.ConvertPos(False, EditPos, CharPos);
+            // TODO: 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
+    {$IFDEF BDS2009_UP}
+            // if not FHighlight.FUseTabKey then
+            EditPos.Col := Parser.Tokens[I].CharIndex + 1;
+    {$ENDIF}
+            Parser.Tokens[I].EditCol := EditPos.Col;
+            Parser.Tokens[I].EditLine := EditPos.Line;
+
             FCurTokenList.Add(Parser.Tokens[I]);
             FCurTokenListEditLine.Add(Pointer(Parser.Tokens[I].EditLine));
           end;
@@ -1475,6 +1498,16 @@ begin
           if (Parser.Tokens[I].TokenID = tkIdentifier) and
             CheckTokenMatch(Parser.Tokens[I].Token, FCurrentTokenName, CaseSensitive) then
           begin
+            CharPos := OTACharPos(Parser.Tokens[I].CharIndex, Parser.Tokens[I].LineNumber + 1);
+            EditView.ConvertPos(False, EditPos, CharPos);
+            // TODO: 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
+    {$IFDEF BDS2009_UP}
+            // if not FHighlight.FUseTabKey then
+            EditPos.Col := Parser.Tokens[I].CharIndex + 1;
+    {$ENDIF}
+            Parser.Tokens[I].EditCol := EditPos.Col;
+            Parser.Tokens[I].EditLine := EditPos.Line;
+
             FCurTokenList.Add(Parser.Tokens[I]);
             FCurTokenListEditLine.Add(Pointer(Parser.Tokens[I].EditLine));
           end;
@@ -2935,11 +2968,7 @@ begin
       // CheckBlockMatch 时会设置 FChanged
       if Info.FChanged then
       begin
-        try
-          Info.CheckBlockMatch(BlockHighlightRange);
-        except
-          ; // Hide an Unknown exception.
-        end;
+        Info.CheckBlockMatch(BlockHighlightRange);
       end;
     end;
   finally
@@ -3213,7 +3242,6 @@ begin
           for I := 0 to Info.IdLines[LogicLineNum].Count - 1 do
           begin
             Token := TCnPasToken(Info.IdLines[LogicLineNum][I]);
-            TokenLen := Length(Token.Token);
 
             EditPos := OTAEditPos(Token.EditCol, LineNum);
             if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FLineText, {$ENDIF} Token.Token, R) then
