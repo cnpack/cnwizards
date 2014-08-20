@@ -3242,6 +3242,7 @@ begin
           for I := 0 to Info.IdLines[LogicLineNum].Count - 1 do
           begin
             Token := TCnPasToken(Info.IdLines[LogicLineNum][I]);
+            TokenLen := Length(Token.Token);
 
             EditPos := OTAEditPos(Token.EditCol, LineNum);
             if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FLineText, {$ENDIF} Token.Token, R) then
