@@ -483,7 +483,7 @@ function CnOtaGetCurrLineInfo(var LineNo, CharIndex, LineLen: Integer): Boolean;
 {* 返回 SourceEditor 当前行信息}
 function CnOtaGetCurrPosToken(var Token: string; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TAnsiCharSet = [];
-  CharSet: TAnsiCharSet = []): Boolean;
+  CharSet: TAnsiCharSet = []; EditView: IOTAEditView = nil): Boolean;
 {* 取当前光标下的标识符及光标在标识符中的索引号，速度较快}
 function CnOtaGetCurrChar(OffsetX: Integer = 0; View: IOTAEditView = nil): Char;
 {* 取当前光标下的字符，允许偏移量}
@@ -3558,9 +3558,8 @@ end;
 // 取当前光标下的标识符及光标在标识符中的索引号，速度较快
 function CnOtaGetCurrPosToken(var Token: string; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TAnsiCharSet = [];
-  CharSet: TAnsiCharSet = []): Boolean;
+  CharSet: TAnsiCharSet = []; EditView: IOTAEditView = nil): Boolean;
 var
-  EditView: IOTAEditView;
   LineNo: Integer;
   CharIndex: Integer;
   LineText: string;
@@ -3578,7 +3577,9 @@ begin
   CurrIndex := 0;
   Result := False;
 
-  EditView := CnOtaGetTopMostEditView;
+  if not Assigned(EditView) then
+    EditView := CnOtaGetTopMostEditView;
+
   if (EditView <> nil) and CnNtaGetCurrLineText(LineText, LineNo, CharIndex) and
     (LineText <> '') then
   begin

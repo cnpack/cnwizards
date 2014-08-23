@@ -1379,7 +1379,10 @@ var
   EditView: IOTAEditView;
   CharPos: TOTACharPos;
   EditPos: TOTAEditPos;
-  I: Integer;
+  I, StartIndex, EndIndex: Integer;
+  Token: TCnPasToken;
+  TokenCursorIndex: Integer;
+  CurrentTokenNameU: String;
 begin
   FCurrentTokenName := '';
   FCurrentToken := nil;
@@ -1430,54 +1433,50 @@ begin
         FCurMethodCloseToken := Parser.MethodCloseToken;
       end;
 
-      // 必须搜索当前所有标识符，避免只高亮光标出于当前过程内的问题
-      for I := 0 to Parser.Count - 1 do
+      if CnOtaGetCurrPosToken(CurrentTokenNameU, TokenCursorIndex, True, [], [], EditView) and
+        (CurrentTokenNameU <> '')
+      then
       begin
-        CharPos := OTACharPos(Parser.Tokens[I].CharIndex, Parser.Tokens[I].LineNumber + 1);
-        EditView.ConvertPos(False, EditPos, CharPos);
-        // TODO: 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
-{$IFDEF BDS2009_UP}
-        // if not FHighlight.FUseTabKey then
-        EditPos.Col := Parser.Tokens[I].CharIndex + 1;
-{$ENDIF}
-        Parser.Tokens[I].EditCol := EditPos.Col;
-        Parser.Tokens[I].EditLine := EditPos.Line;
-
-        if (Parser.Tokens[I].TokenID = tkIdentifier) and // 此处判断不支持双字节字符
-          IsCurrentToken(Pointer(EditView), FControl, Parser.Tokens[I]) then
+        FCurrentTokenName := AnsiString(CurrentTokenNameU);
+        if (FHighlight.BlockHighlightRange = brAll) or
+          TokenIsMethodOrClassName(CurrentTokenNameU,
+            string(Parser.CurrentMethod)) or
+          ((FCurMethodStartToken = nil) or (FCurMethodCloseToken = nil))
+        then
         begin
-          if FCurrentToken = nil then
-          begin
-            // 不能 Break，否则 Tokens 就没 EditLine 的更新了，下面也一样
-            FCurrentToken := Parser.Tokens[I];
-            FCurrentTokenName := FCurrentToken.Token;
-          end;
+          StartIndex := 0;
+          EndIndex := Parser.Count - 1;
+        end
+        else
+        begin
+          StartIndex := FCurMethodStartToken.ItemIndex;
+          EndIndex := FCurMethodCloseToken.ItemIndex;
         end;
-      end;
 
-      // 高亮整个单元时，或当前是过程名与类名时，或无当前Method时，高亮整个单元
-      if ((FCurrentTokenName <> '') and (FHighlight.BlockHighlightRange = brAll))
-        or TokenIsMethodOrClassName(string(FCurrentTokenName), string(Parser.CurrentMethod))
-        or ((FCurMethodStartToken = nil) or (FCurMethodCloseToken = nil)) then
-      begin
-        for I := 0 to Parser.Count - 1 do
-          if (Parser.Tokens[I].TokenID = tkIdentifier) and
-            CheckTokenMatch(Parser.Tokens[I].Token, FCurrentTokenName, CaseSensitive) then
+        for I := StartIndex to EndIndex do
+        begin
+          Token := Parser.Tokens[I];
+
+          if (Token.TokenID = tkIdentifier) and
+            CheckTokenMatch(Token.Token, FCurrentTokenName, CaseSensitive) then
           begin
-            FCurTokenList.Add(Parser.Tokens[I]);
-            FCurTokenListEditLine.Add(Pointer(Parser.Tokens[I].EditLine));
+            CharPos := OTACharPos(Token.CharIndex, Token.LineNumber + 1);
+            EditView.ConvertPos(False, EditPos, CharPos);
+            // TODO: 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
+    {$IFDEF BDS2009_UP}
+            // if not FHighlight.FUseTabKey then
+            EditPos.Col := Token.CharIndex + 1;
+    {$ENDIF}
+            Token.EditCol := EditPos.Col;
+            Token.EditLine := EditPos.Line;
+
+            FCurTokenList.Add(Token);
+            FCurTokenListEditLine.Add(Pointer(Token.EditLine));
           end;
-      end
-      else if (FCurMethodStartToken <> nil) or (FCurMethodCloseToken <> nil) then // 其它范围便默认改为高亮本过程的
-      begin
-        for I := FCurMethodStartToken.ItemIndex to
-          FCurMethodCloseToken.ItemIndex do
-          if (Parser.Tokens[I].TokenID = tkIdentifier) and
-            CheckTokenMatch(Parser.Tokens[I].Token, FCurrentTokenName, CaseSensitive) then
-          begin
-            FCurTokenList.Add(Parser.Tokens[I]);
-            FCurTokenListEditLine.Add(Pointer(Parser.Tokens[I].EditLine));
-          end;
+
+          if FCurTokenList.Count > 0 then
+            FCurrentToken := FCurTokenList.Items[0];
+        end;
       end;
     end;
 
