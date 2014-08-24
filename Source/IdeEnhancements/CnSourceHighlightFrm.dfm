@@ -319,8 +319,8 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       OnClick = UpdateControls
     end
     object hkMatchHotkey: THotKey
-      Left = 201
-      Top = 348
+      Left = 184
+      Top = 365
       Width = 129
       Height = 19
       HotKey = 32833
@@ -338,8 +338,8 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       OnClick = UpdateControls
     end
     object seDelay: TCnSpinEdit
-      Left = 201
-      Top = 321
+      Left = 184
+      Top = 338
       Width = 73
       Height = 22
       Increment = 50
@@ -349,8 +349,8 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Value = 500
     end
     object pnl1: TPanel
-      Left = 281
-      Top = 321
+      Left = 264
+      Top = 338
       Width = 73
       Height = 25
       BevelOuter = bvNone
