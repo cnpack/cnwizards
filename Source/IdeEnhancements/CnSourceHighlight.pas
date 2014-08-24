@@ -469,6 +469,7 @@ type
     procedure SetFlowStatementBackground(const Value: TColor);
     procedure SetHighlightFlowStatement(const Value: Boolean);
     procedure SetFlowStatementForeground(const Value: TColor);
+    procedure SetCurrentTokenDelay(const Value: Integer);
   protected
     procedure DoEnhConfig;
     procedure SetActive(Value: Boolean); override;
@@ -501,7 +502,7 @@ type
     property BlockMatchBackground: TColor read FBlockMatchBackground write FBlockMatchBackground;
     {* 光标下关键字配对高亮的背景色}
     property CurrentTokenHighlight: Boolean read FCurrentTokenHighlight write FCurrentTokenHighlight;
-    property CurrentTokenDelay: Integer read FCurrentTokenDelay write FCurrentTokenDelay;
+    property CurrentTokenDelay: Integer read FCurrentTokenDelay write SetCurrentTokenDelay;
     {* 是否光标下当前标识符背景色高亮}
     property CurrentTokenForeground: TColor read FCurrentTokenForeground write FCurrentTokenForeground;
     {* 光标下当前标识符高亮的前景色}
@@ -3877,7 +3878,7 @@ begin
     FBlockMatchHighlight := ReadBool('', csBlockMatchHighlight, FBlockMatchHighlight);
     FBlockMatchBackground := ReadColor('', csBlockMatchBackground, FBlockMatchBackground);
     FCurrentTokenHighlight := ReadBool('', csCurrentTokenHighlight, FCurrentTokenHighlight);
-    FCurrentTokenDelay := ReadInteger('', csCurrentTokenDelay, FCurrentTokenDelay);
+    CurrentTokenDelay := ReadInteger('', csCurrentTokenDelay, CurrentTokenDelay);
     FCurrentTokenForeground := ReadColor('', csCurrentTokenColor, FCurrentTokenForeground);
     FCurrentTokenBackground := ReadColor('', csCurrentTokenColorBk, FCurrentTokenBackground);
     FCurrentTokenBorderColor := ReadColor('', csCurrentTokenColorBd, FCurrentTokenBorderColor);
@@ -4360,6 +4361,12 @@ procedure TCnSourceHighlight.SetFlowStatementForeground(
   const Value: TColor);
 begin
   FFlowStatementForeground := Value;
+end;
+
+procedure TCnSourceHighlight.SetCurrentTokenDelay(const Value: Integer);
+begin
+  FCurrentTokenDelay := Value;
+  FCurrentTokenValidateTimer.Interval := Value;
 end;
 
 { TBlockLinePair }
