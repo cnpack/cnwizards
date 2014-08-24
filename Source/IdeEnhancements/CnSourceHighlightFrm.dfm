@@ -3,7 +3,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
   Top = 95
   BorderStyle = bsDialog
   Caption = 'Source Highlight Settings'
-  ClientHeight = 577
+  ClientHeight = 594
   ClientWidth = 380
   OldCreateOrder = True
   OnCreate = FormCreate
@@ -86,7 +86,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
   end
   object btnOK: TButton
     Left = 134
-    Top = 546
+    Top = 563
     Width = 75
     Height = 21
     Caption = '&OK'
@@ -96,7 +96,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
   end
   object btnCancel: TButton
     Left = 214
-    Top = 546
+    Top = 563
     Width = 75
     Height = 21
     Cancel = True
@@ -106,7 +106,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
   end
   object btnHelp: TButton
     Left = 294
-    Top = 546
+    Top = 563
     Width = 75
     Height = 21
     Caption = '&Help'
@@ -117,7 +117,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     Left = 8
     Top = 120
     Width = 361
-    Height = 417
+    Height = 434
     Caption = 'Code &Structure Highlight'
     TabOrder = 1
     object shpBk: TShape
@@ -129,7 +129,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object shpCurLine: TShape
       Left = 329
-      Top = 84
+      Top = 101
       Width = 20
       Height = 20
       OnMouseDown = shpBracketMouseDown
@@ -178,10 +178,17 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object shpFlowControl: TShape
       Left = 329
-      Top = 120
+      Top = 137
       Width = 20
       Height = 20
       OnMouseDown = shpBracketMouseDown
+    end
+    object lblCurrentTokenDelay: TLabel
+      Left = 26
+      Top = 83
+      Width = 31
+      Height = 13
+      Caption = 'Delay:'
     end
     object chkBkHighlight: TCheckBox
       Left = 8
@@ -194,7 +201,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object chkHighlight: TCheckBox
       Left = 8
-      Top = 106
+      Top = 123
       Width = 321
       Height = 17
       Caption = 'Enable Highlight Keyword Structure.'
@@ -203,7 +210,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object rgMatchRange: TRadioGroup
       Left = 16
-      Top = 190
+      Top = 207
       Width = 137
       Height = 91
       Caption = 'Highlight &Range'
@@ -216,7 +223,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object grpHighlightColor: TGroupBox
       Left = 168
-      Top = 190
+      Top = 207
       Width = 181
       Height = 91
       Caption = 'Colors by &Level'
@@ -300,7 +307,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object rgMatchDelay: TRadioGroup
       Left = 16
-      Top = 286
+      Top = 303
       Width = 333
       Height = 89
       Caption = 'Highlight &Delay'
@@ -323,7 +330,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object chkMaxSize: TCheckBox
       Left = 24
-      Top = 386
+      Top = 403
       Width = 217
       Height = 17
       Caption = 'Disable Highlight when Unit Lines Exceeds:'
@@ -352,7 +359,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object seMaxLines: TCnSpinEdit
       Left = 248
-      Top = 384
+      Top = 401
       Width = 101
       Height = 22
       Increment = 500
@@ -363,7 +370,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object chkDrawLine: TCheckBox
       Left = 8
-      Top = 146
+      Top = 163
       Width = 249
       Height = 17
       Caption = 'Enable Structure Lines.'
@@ -372,7 +379,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object btnLineSetting: TButton
       Left = 270
-      Top = 144
+      Top = 161
       Width = 79
       Height = 21
       Caption = 'Line Se&ttings'
@@ -399,7 +406,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object chkHighlightCurLine: TCheckBox
       Left = 8
-      Top = 86
+      Top = 103
       Width = 317
       Height = 17
       Caption = 'Enable Background Highlight Current Line (Delphi 7 below only).'
@@ -408,7 +415,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object chkSeparateLine: TCheckBox
       Left = 8
-      Top = 166
+      Top = 183
       Width = 249
       Height = 17
       Caption = 'Enable Separate Lines between Functions.'
@@ -417,7 +424,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object btnSeparateLineSetting: TButton
       Left = 270
-      Top = 164
+      Top = 181
       Width = 79
       Height = 21
       Caption = 'Line Sett&ings'
@@ -426,12 +433,23 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     end
     object chkFlowControl: TCheckBox
       Left = 8
-      Top = 126
+      Top = 143
       Width = 305
       Height = 17
       Caption = 'Enable Highlight Flow Control Statement.'
       TabOrder = 5
       OnClick = UpdateControls
+    end
+    object seCurrentTokenDelay: TCnSpinEdit
+      Left = 88
+      Top = 80
+      Width = 73
+      Height = 22
+      Increment = 50
+      MaxValue = 5000
+      MinValue = 50
+      TabOrder = 18
+      Value = 500
     end
   end
   object dlgColor: TColorDialog
