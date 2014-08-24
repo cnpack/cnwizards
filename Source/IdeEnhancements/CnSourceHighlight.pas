@@ -3786,6 +3786,11 @@ end;
 
 procedure TCnSourceHighlight.EditorKeyDown(Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
 begin
+  if (Shift = []) and ((Key = VK_LEFT) or (Key = VK_UP) or
+    (Key = VK_RIGHT) or (Key = VK_DOWN))
+  then
+    Exit;
+
   FCurrentTokenValidateTimer.Enabled := False;
   FCurrentTokenValidateTimer.Enabled := True;
   FCurrentTokenInvalid := True;
