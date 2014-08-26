@@ -1369,8 +1369,8 @@ begin
         end;
   {$ENDIF}
       end;
-{$ENDIF}
     end;
+{$ENDIF}
   finally
     Vars.Free;
   end;   
