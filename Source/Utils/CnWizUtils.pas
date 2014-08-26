@@ -1363,7 +1363,6 @@ begin
         end
         else if Project <> nil then
         begin
-          CnDebugger.LogMsg(Project.CurrentPlatform);
           Result := StringReplace(Result, '$(Platform)',
             Project.CurrentPlatform, [rfReplaceAll, rfIgnoreCase]);
         end;
