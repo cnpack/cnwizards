@@ -401,7 +401,7 @@ begin
 
   // È¡ Host ³ÌÐò
   if CnOtaGetActiveProjectOption('HostApplication', HostApp) then
-    ExeName := ReplaceToActualPath(HostApp);
+    ExeName := ReplaceToActualPath(HostApp, Project);
 
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('HostApplication: ' + HostApp);

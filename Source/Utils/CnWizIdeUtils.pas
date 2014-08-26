@@ -1195,7 +1195,7 @@ begin
 
   if APath <> '' then
   begin
-    APath := ReplaceToActualPath(APath);
+    APath := ReplaceToActualPath(APath, Project);
       
     // 处理路径中的相对路径
     APaths := TStringList.Create;

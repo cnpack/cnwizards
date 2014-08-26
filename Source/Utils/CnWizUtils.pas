@@ -144,7 +144,7 @@ function GetIDEActionFromShortCut(ShortCut: TShortCut): TCustomAction;
 {* 取得 IDE 主 ActionList 中指定快捷键的 Action}
 function GetIdeRootDirectory: string;
 {* 取得 IDE 根目录}
-function ReplaceToActualPath(const Path: string): string;
+function ReplaceToActualPath(const Path: string; Project: IOTAProject = nil): string;
 {* 将 $(DELPHI) 这样的符号替换为 Delphi 所在路径}
 procedure SaveIDEActionListToFile(const FileName: string);
 {* 保存 IDE ActionList 中的内容到指定文件}
@@ -1323,11 +1323,11 @@ begin
 end;
 
 // 将 $(DELPHI) 这样的符号替换为 Delphi 所在路径
-function ReplaceToActualPath(const Path: string): string;
+function ReplaceToActualPath(const Path: string; Project: IOTAProject = nil): string;
 {$IFDEF COMPILER6_UP}
 var
   Vars: TStringList;
-  i: Integer;
+  I: Integer;
 {$IFDEF DELPHI2011_UP}
   BC: IOTAProjectOptionsConfigurations;
 {$ENDIF}
@@ -1336,22 +1336,41 @@ begin
   Vars := TStringList.Create;
   try
     GetEnvironmentVars(Vars, True);
-    for i := 0 to Vars.Count - 1 do
-      Result := StringReplace(Result, '$(' + Vars.Names[i] + ')',
-        Vars.Values[Vars.Names[i]], [rfReplaceAll, rfIgnoreCase]);
-    {$IFDEF DELPHI2011_UP}
-      BC := CnOtaGetActiveProjectOptionsConfigurations(nil);
-      if BC <> nil then
-        if BC.GetActiveConfiguration <> nil then
+    for I := 0 to Vars.Count - 1 do
+    begin
+{$IFDEF DELPHIXE6_UP}
+      // There's a $(Platform) values '' in XE6, will make Platform Empty.
+      if Trim(Vars.Values[Vars.Names[I]]) = '' then
+        Continue;
+{$ENDIF}
+      Result := StringReplace(Result, '$(' + Vars.Names[I] + ')',
+        Vars.Values[Vars.Names[I]], [rfReplaceAll, rfIgnoreCase]);
+    end;
+
+{$IFDEF DELPHI2011_UP}
+    BC := CnOtaGetActiveProjectOptionsConfigurations(Project);
+    if BC <> nil then
+    begin
+      if BC.GetActiveConfiguration <> nil then
+      begin
+        Result := StringReplace(Result, '$(Config)',
+          BC.GetActiveConfiguration.GetName, [rfReplaceAll, rfIgnoreCase]);
+  {$IFDEF DELPHI2012_UP}
+        if BC.GetActiveConfiguration.GetPlatform <> '' then
         begin
-          Result := StringReplace(Result, '$(Config)',
-            BC.GetActiveConfiguration.GetName, [rfReplaceAll, rfIgnoreCase]);
-    {$IFDEF DELPHI2012_UP}
           Result := StringReplace(Result, '$(Platform)',
             BC.GetActiveConfiguration.GetPlatform, [rfReplaceAll, rfIgnoreCase]);
-    {$ENDIF}
+        end
+        else if Project <> nil then
+        begin
+          CnDebugger.LogMsg(Project.CurrentPlatform);
+          Result := StringReplace(Result, '$(Platform)',
+            Project.CurrentPlatform, [rfReplaceAll, rfIgnoreCase]);
         end;
-    {$ENDIF}
+  {$ENDIF}
+      end;
+{$ENDIF}
+    end;
   finally
     Vars.Free;
   end;   
@@ -2758,7 +2777,8 @@ end;
 
 
 // 获得当前项目的当前BuildConfiguration中的属性值，返回字符串，如不支持此特性则返回空字符串
-function CnOtaGetProjectCurrentBuildConfigurationValue(Project:IOTAProject;const APropName: string): string;
+function CnOtaGetProjectCurrentBuildConfigurationValue(Project:IOTAProject;
+  const APropName: string): string;
 {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
 var
   POCS: IOTAProjectOptionsConfigurations;

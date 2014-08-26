@@ -257,7 +257,7 @@ var
       if (VarType(DirectoryVariant) = varString) or
         (VarType(DirectoryVariant) = varOleStr) then
       begin
-        Directory := ReplaceToActualPath(DirectoryVariant);
+        Directory := ReplaceToActualPath(DirectoryVariant, Project);
         ProjectDir := _CnExtractFileDir(Project.FileName);
         if Trim(Directory) <> '' then
         begin

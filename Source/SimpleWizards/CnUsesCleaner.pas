@@ -339,7 +339,7 @@ var
   begin
     if (AProject <> nil) and (AProject.ProjectOptions <> nil) then
     begin
-      Result := ReplaceToActualPath(AProject.ProjectOptions.Values['UnitOutputDir']);
+      Result := ReplaceToActualPath(AProject.ProjectOptions.Values['UnitOutputDir'], AProject);
       if Result <> '' then
         Result := MakePath(LinkPath(_CnExtractFilePath(AProject.FileName), Result));
     {$IFDEF DEBUG}
