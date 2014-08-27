@@ -167,6 +167,7 @@ uses
 
 type
   TControlHack = class(TControl);
+  TClickEventProc = procedure(Self : TObject; Sender : TObject); register;
 
 const
   csAutoIndentFile = 'AutoIndent.dat';
@@ -246,13 +247,7 @@ begin
   end;
 
   if FOldSrchDialogOKButtonClick <> nil then
-  begin
-    FMethodHook.UnhookMethod;
-    TMethod(ANotify).Code := FOldSrchDialogOKButtonClick;
-    TMethod(ANotify).Data := ASelf;
-    ANotify(Sender);
-    FMethodHook.HookMethod;
-  end;
+    TClickEventProc(FMethodHook.Trampoline)(ASelf, Sender);
 end;
 
 constructor TCnSrcEditorKey.Create;
@@ -268,11 +263,7 @@ begin
     FOldSrchDialogOKButtonClick := GetProcAddress(FCorIdeModule, SCnSrchDialogOKButtonClick);
     if FOldSrchDialogOKButtonClick <> nil then
     begin
-      FOldSrchDialogOKButtonClick := GetBplMethodAddress(FOldSrchDialogOKButtonClick);
-      if FOldSrchDialogOKButtonClick <> nil then
-      begin
-        FMethodHook := TCnMethodHook.Create(FOldSrchDialogOKButtonClick, @CnSrchDialogOKButtonClick);
-      end;
+      FMethodHook := TCnMethodHook.Create(FOldSrchDialogOKButtonClick, @CnSrchDialogOKButtonClick);
     end;
   end;
 

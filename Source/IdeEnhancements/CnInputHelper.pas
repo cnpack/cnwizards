@@ -1845,8 +1845,7 @@ begin
     // IDE 在无法进行 CodeInsight 时会弹出一个错误框（不是异常）
     // 此处临时替换掉显示错误框的函数 MessageDlgPosHelp，使之不显示出来
     // 待调用完成后再恢复。
-    Hook := TCnMethodHook.Create(GetBplMethodAddress(@MessageDlgPosHelp),
-      @MyMessageDlgPosHelp);
+    Hook := TCnMethodHook.Create(@MessageDlgPosHelp, @MyMessageDlgPosHelp);
     try
       (EditView as IOTAEditActions).CodeCompletion(csCodeList or csManual);
     finally

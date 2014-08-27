@@ -185,12 +185,8 @@ begin
     FOldViewDialogExecute := GetProcAddress(FCorIdeModule, SCnViewDialogExecuteName);
     if FOldViewDialogExecute <> nil then
     begin
-      FOldViewDialogExecute := GetBplMethodAddress(FOldViewDialogExecute);
-      if FOldViewDialogExecute <> nil then
-      begin
-        FMethodHook := TCnMethodHook.Create(FOldViewDialogExecute, @ShowProjectUseUnits);
-        FMethodHook.UnhookMethod;
-      end;
+      FMethodHook := TCnMethodHook.Create(FOldViewDialogExecute, @ShowProjectUseUnits);
+      FMethodHook.Disable;
     end;
   end;
 end;
@@ -662,12 +658,12 @@ begin
   begin
     // 不挂接，则需要取消 ViewDialogExecute 的挂接后跳回 IDE 原有的内容
     if FMethodHook <> nil then
-      FMethodHook.UnhookMethod;
+      FMethodHook.Disable;
     if Assigned(FOldUnitNotifyEvent) then
       FOldUnitNotifyEvent(Sender);
     // 如果以前挂了，再恢复
     if UseUnitsHookBtnChecked and (FMethodHook <> nil) then
-      FMethodHook.HookMethod;
+      FMethodHook.Enable;
   end;
 end;
 
@@ -679,12 +675,12 @@ begin
   begin
     // 不挂接，则需要取消 ViewDialogExecute 的挂接后跳回 IDE 原有的内容
     if FMethodHook <> nil then
-      FMethodHook.UnhookMethod;
+      FMethodHook.Disable;
     if Assigned(FOldFormNotifyEvent) then
       FOldFormNotifyEvent(Sender);
     // 如果以前挂了，再恢复
     if UseUnitsHookBtnChecked and (FMethodHook <> nil) then
-      FMethodHook.HookMethod;
+      FMethodHook.Enable;
   end;
 end;
 
@@ -725,9 +721,9 @@ begin
   if FMethodHook <> nil then
   begin
     if HookUseUnit then
-      FMethodHook.HookMethod
+      FMethodHook.Enable
     else
-      FMethodHook.UnhookMethod;
+      FMethodHook.Disable;
   end;
 end;
 

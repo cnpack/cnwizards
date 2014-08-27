@@ -524,7 +524,8 @@ end;
 
 procedure TCnWizOptions.SetUseOneCPUCore(const Value: Boolean);
 var
-  AMask, SysMask: TCnNativeUInt;
+  AMask,
+  SysMask: NativeUInt;
 begin
   FUseOneCPUCore := Value;
   if GetProcessAffinityMask(GetCurrentProcess, AMask, SysMask) then
