@@ -2717,9 +2717,13 @@ begin
 end;
 
 procedure TCnSourceHighlight.ClearHighlight(Editor: TEditorObject);
+var
+  Index: Integer;
 begin
-  if IndexOfBlockMatch(Editor.EditControl) >= 0 then
-    with TBlockMatchInfo(FBlockMatchList[IndexOfBlockMatch(Editor.EditControl)]) do
+  Index := IndexOfBlockMatch(Editor.EditControl);
+  if Index >= 0 then
+  begin
+    with TBlockMatchInfo(FBlockMatchList[Index]) do
     begin
       FKeyList.Clear;
       FLineList.Clear;
@@ -2729,15 +2733,18 @@ begin
       if LineInfo <> nil then
         LineInfo.Clear;
     end;
+  end;
 
-  if IndexOfBlockLine(Editor.EditControl) >= 0 then
-    with TBlockLineInfo(FBlockLineList[IndexOfBlockLine(Editor.EditControl)]) do
+  Index := IndexOfBlockLine(Editor.EditControl);
+  if Index >= 0 then
+    with TBlockLineInfo(FBlockLineList[Index]) do
     begin
       Clear;
     end;
 
-  if IndexOfBracket(Editor.EditControl) >= 0 then
-    with TBracketInfo(FBracketList[IndexOfBracket(Editor.EditControl)]) do
+  Index := IndexOfBracket(Editor.EditControl);
+  if Index >= 0 then
+    with TBracketInfo(FBracketList[Index]) do
     begin
       IsMatch := False;
     end;
