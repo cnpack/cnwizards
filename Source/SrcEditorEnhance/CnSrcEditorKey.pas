@@ -167,6 +167,7 @@ uses
 
 type
   TControlHack = class(TControl);
+  TClickEventProc = procedure(Self: TObject; Sender: TObject);
 
 const
   csAutoIndentFile = 'AutoIndent.dat';
@@ -247,11 +248,15 @@ begin
 
   if FOldSrchDialogOKButtonClick <> nil then
   begin
+{$IFDEF USE_DDETOURS_HOOK}
+    TClickEventProc(FMethodHook.Trampoline)(ASelf, Sender);
+{$ELSE}
     FMethodHook.UnhookMethod;
     TMethod(ANotify).Code := FOldSrchDialogOKButtonClick;
     TMethod(ANotify).Data := ASelf;
     ANotify(Sender);
     FMethodHook.HookMethod;
+{$ENDIF}
   end;
 end;
 

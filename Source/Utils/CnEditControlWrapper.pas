@@ -594,6 +594,14 @@ begin
     {$ENDIF}
     end;
 
+{$IFDEF USE_DDETOURS_HOOK}
+    try
+      Result := TPaintLineProc(FEditControlWrapper.FPaintLineHook.Trampoline)(Self, Ek, LineNum, LogicLineNum, V2);
+    except
+      on E: Exception do
+        DoHandleException(E.Message);
+    end;
+{$ELSE}
     FEditControlWrapper.FPaintLineHook.UnhookMethod;
     try
       try
@@ -605,6 +613,7 @@ begin
     finally
       FEditControlWrapper.FPaintLineHook.HookMethod;
     end;
+{$ENDIF}
 
     if Editor <> nil then
     begin
@@ -628,12 +637,16 @@ begin
     FEditControlWrapper.CheckNewEditor(TControl(Self), GetOTAEditView(EditView));
   end;
 
+{$IFDEF USE_DDETOURS_HOOK}
+  Result := TSetEditViewProc(FEditControlWrapper.FSetEditViewHook.Trampoline)(Self, EditView);
+{$ELSE}
   FEditControlWrapper.FSetEditViewHook.UnhookMethod;
   try
     Result := SetEditView(Self, EditView);
   finally
     FEditControlWrapper.FSetEditViewHook.HookMethod;
   end;
+{$ENDIF}
 end;
 
 constructor TCnEditControlWrapper.Create(AOwner: TComponent);

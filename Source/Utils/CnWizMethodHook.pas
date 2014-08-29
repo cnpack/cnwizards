@@ -29,7 +29,9 @@ unit CnWizMethodHook;
 * 兼容测试：
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2003.10.27
+* 修改记录：2014.08.28
+*               改用DDetours实现调用
+*           2003.10.27
 *               实现属性编辑器方法挂接核心技术
 ================================================================================
 |</PRE>}
@@ -39,14 +41,16 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, SysUtils, Classes;
+  Windows, SysUtils, Classes{$IFDEF USE_DDETOURS_HOOK}, DDetours{$ENDIF};
 
 type
+{$IFNDEF USE_DDETOURS_HOOK}
   PLongJump = ^TLongJump;
   TLongJump = packed record
     JmpOp: Byte;        // Jmp 相对跳转指令，为 $E9
     Addr: Pointer;      // 跳转到的相对地址
   end;
+{$ENDIF}
 
   TCnMethodHook = class
   {* 静态或 dynamic 方法挂接类，用于挂接类中静态方法或声明为 dynamic 的动态方法。
@@ -56,7 +60,11 @@ type
     FHooked: Boolean;
     FOldMethod: Pointer;
     FNewMethod: Pointer;
+{$IFDEF USE_DDETOURS_HOOK}
+    FTrampoline: Pointer;
+{$ELSE}
     FSaveData: TLongJump;
+{$ENDIF}
   public
     constructor Create(const AOldMethod, ANewMethod: Pointer);
     {* 构造器，参数为原方法地址和新方法地址。注意如果在专家包中使用，原方法地址
@@ -74,6 +82,9 @@ type
     {* 重新挂接，如果需要执行原过程，并使用了 UnhookMethod，请在执行完成后重新挂接}
     procedure UnhookMethod; virtual;
     {* 取消挂接，如果需要执行原过程，请先使用 UnhookMethod，再调用原过程，否则会出错}
+{$IFDEF USE_DDETOURS_HOOK}
+    property Trampoline: Pointer read FTrampoline;
+{$ENDIF}
   end;
 
 function GetBplMethodAddress(Method: Pointer): Pointer;
@@ -90,6 +101,7 @@ const
 
 // 返回在 BPL 中实际的方法地址
 function GetBplMethodAddress(Method: Pointer): Pointer;
+{$IFNDEF USE_DDETOURS_HOOK}
 type
   PJmpCode = ^TJmpCode;
   TJmpCode = packed record
@@ -98,11 +110,16 @@ type
   end;
 const
   csJmp32Code = $25FF;
+{$ENDIF}
 begin
+{$IFDEF USE_DDETOURS_HOOK}
+  Result := Method;
+{$ELSE}
   if PJmpCode(Method)^.Code = csJmp32Code then
     Result := PJmpCode(Method)^.Addr^
   else
     Result := Method;
+{$ENDIF}
 end;
 
 //==============================================================================
@@ -117,6 +134,9 @@ begin
   FHooked := False;
   FOldMethod := AOldMethod;
   FNewMethod := ANewMethod;
+{$IFDEF USE_DDETOURS_HOOK}
+  FTrampoline := nil;
+{$ENDIF}
   HookMethod;
 end;
 
@@ -127,10 +147,15 @@ begin
 end;
 
 procedure TCnMethodHook.HookMethod;
+{$IFNDEF USE_DDETOURS_HOOK}
 var
   DummyProtection: DWORD;
   OldProtection: DWORD;
+{$ENDIF}
 begin
+{$IFDEF USE_DDETOURS_HOOK}
+  FTrampoline := DDetours.InterceptCreate(FOldMethod, FNewMethod);
+{$ELSE}
   if FHooked then Exit;
   
   // 设置代码页写访问权限
@@ -153,15 +178,21 @@ begin
     if not VirtualProtect(FOldMethod, SizeOf(TLongJump), OldProtection, @DummyProtection) then
       raise Exception.CreateFmt(SMemoryWriteError, [SysErrorMessage(GetLastError)]);
   end;
-
+{$ENDIF}
   FHooked := True;
 end;
 
 procedure TCnMethodHook.UnhookMethod;
+{$IFNDEF USE_DDETOURS_HOOK}
 var
   DummyProtection: DWORD;
   OldProtection: DWORD;
+{$ENDIF}
 begin
+{$IFDEF USE_DDETOURS_HOOK}
+  DDetours.InterceptRemove(FTrampoline);
+  FTrampoline := nil;
+{$ELSE}
   if not FHooked then Exit;
   
   // 设置代码页写访问权限
@@ -179,6 +210,7 @@ begin
 
   // 保存多处理器下指令缓冲区同步
   FlushInstructionCache(GetCurrentProcess, FOldMethod, SizeOf(TLongJump));
+{$ENDIF}
 
   FHooked := False;
 end;
