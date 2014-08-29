@@ -195,7 +195,9 @@ procedure CnSrchDialogOKButtonClick(ASelf, Sender: TObject);
 var
   AForm: TCustomForm;
   AComp: TComponent;
+{$IFNDEF USE_DDETOURS_HOOK}
   ANotify: TNotifyEvent;
+{$ENDIF}
 {$IFDEF BDS}
   Len: Integer;
   WideText: WideString;
