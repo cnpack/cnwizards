@@ -212,33 +212,37 @@ var
   Client: TObject;
 begin
   // 调用原来的方法
+{$IFDEF USE_DDETOURS_HOOK}
+  TSetActionProc(FWizard.FSetActionHook.Trampoline)(Self, Value);
+{$ELSE}
   FWizard.FSetActionHook.UnhookMethod;
   try
     OldSetActionProc(Self, Value);
-
-    // 判断是否需要自动重命名组件并进行处理，如果前面有异常则跳过处理
-    if (Value <> nil) and (FWizard <> nil) and FWizard.Active and
-      FWizard.FAutoPrefix and FWizard.FUseActionName and FWizard.FWatchActionLink then
-    begin
-      if Self is TMenuActionLink then
-        Client := TMenuActionLinkAccess(Self).FClient
-      else if Self is TControlActionLink then
-        Client := TControlActionLinkAccess(Self).FClient
-      else
-        Client := nil;
-
-      if FWizard.NeedRename(Client) and
-        FWizard.NeedActionRename(TComponent(Client)) then
-      begin
-        FWizard.FRenameList.Add(Client);
-      {$IFDEF DEBUG}
-        CnDebugger.LogFmt('TBasicAction.SetAction: %s: %s',
-          [TComponent(Client).Name, Client.ClassName]);
-      {$ENDIF}
-      end;
-    end;
   finally
     FWizard.FSetActionHook.HookMethod;
+  end;
+{$ENDIF}
+
+  // 判断是否需要自动重命名组件并进行处理，如果前面有异常则跳过处理
+  if (Value <> nil) and (FWizard <> nil) and FWizard.Active and
+    FWizard.FAutoPrefix and FWizard.FUseActionName and FWizard.FWatchActionLink then
+  begin
+    if Self is TMenuActionLink then
+      Client := TMenuActionLinkAccess(Self).FClient
+    else if Self is TControlActionLink then
+      Client := TControlActionLinkAccess(Self).FClient
+    else
+      Client := nil;
+
+    if FWizard.NeedRename(Client) and
+      FWizard.NeedActionRename(TComponent(Client)) then
+    begin
+      FWizard.FRenameList.Add(Client);
+    {$IFDEF DEBUG}
+      CnDebugger.LogFmt('TBasicAction.SetAction: %s: %s',
+        [TComponent(Client).Name, Client.ClassName]);
+    {$ENDIF}
+    end;
   end;
 end;
 
@@ -252,35 +256,39 @@ begin
   CnDebugger.LogMsg('MySetValue: ' + Value);
 {$ENDIF}
 
+{$IFDEF USE_DDETOURS_HOOK}
+  TSetValueProc(FWizard.FSetValueHook.Trampoline)(Self, Value);
+{$ELSE}
   // 调用原来的方法
   FWizard.FSetValueHook.UnhookMethod;
   try
     OldSetValueProc(Self, Value);
+  finally
+    FWizard.FSetValueHook.HookMethod;
+  end;
+{$ENDIF}
 
-    // 判断是否需要自动重命名组件并进行处理，如果前面有异常则跳过处理
-    if (Value <> '') and (FWizard <> nil) and FWizard.Active and
-      FWizard.FAutoPrefix and FWizard.FUseFieldName and FWizard.FWatchFieldLink and
-      AnsiSameStr(Self.GetName, csDataField) then
+  // 判断是否需要自动重命名组件并进行处理，如果前面有异常则跳过处理
+  if (Value <> '') and (FWizard <> nil) and FWizard.Active and
+    FWizard.FAutoPrefix and FWizard.FUseFieldName and FWizard.FWatchFieldLink and
+    AnsiSameStr(Self.GetName, csDataField) then
+  begin
+    for i := 0 to Self.PropCount - 1 do
     begin
-      for i := 0 to Self.PropCount - 1 do
+      if Self.GetComponent(i) is TComponent then
       begin
-        if Self.GetComponent(i) is TComponent then
+        Client := TComponent(Self.GetComponent(i));
+        if FWizard.NeedRename(Client) and
+          FWizard.NeedFieldRename(Client) then
         begin
-          Client := TComponent(Self.GetComponent(i));
-          if FWizard.NeedRename(Client) and
-            FWizard.NeedFieldRename(Client) then
-          begin
-            FWizard.FRenameList.Add(Client);
-          {$IFDEF DEBUG}
-            CnDebugger.LogFmt('TStringProperty.SetValue: (%s: %s) %s => %s ',
-              [Client.Name, Client.ClassName, Self.GetName, Value]);
-          {$ENDIF}
-          end;
+          FWizard.FRenameList.Add(Client);
+        {$IFDEF DEBUG}
+          CnDebugger.LogFmt('TStringProperty.SetValue: (%s: %s) %s => %s ',
+            [Client.Name, Client.ClassName, Self.GetName, Value]);
+        {$ENDIF}
         end;
       end;
     end;
-  finally
-    FWizard.FSetValueHook.HookMethod;
   end;
 end;
 
