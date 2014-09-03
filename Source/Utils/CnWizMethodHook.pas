@@ -192,7 +192,8 @@ var
 {$ENDIF}
 begin
 {$IFDEF USE_DDETOURS_HOOK}
-  DDetours.InterceptRemove(FTrampoline);
+  if not DDetours.InterceptRemove(FTrampoline) then
+    raise Exception.Create('Failed to release method hook');
   FTrampoline := nil;
 {$ELSE}
   if not FHooked then Exit;
