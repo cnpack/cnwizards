@@ -17,19 +17,19 @@ inherited CnWizConfigForm: TCnWizConfigForm
   object PageControl: TPageControl
     Left = 0
     Top = 0
-    Width = 508
-    Height = 407
+    Width = 500
+    Height = 396
     ActivePage = tsWizards
-    Align = alClient
+    Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
     object tsWizards: TTabSheet
       BorderWidth = 1
       Caption = '&Wizard Settings'
       object pnlWizard: TPanel
-        Left = 317
+        Left = 309
         Top = 0
         Width = 181
-        Height = 377
+        Height = 366
         Align = alRight
         BevelOuter = bvNone
         TabOrder = 0
@@ -190,40 +190,48 @@ inherited CnWizConfigForm: TCnWizConfigForm
       object pnlListBox: TPanel
         Left = 0
         Top = 0
-        Width = 317
-        Height = 377
+        Width = 309
+        Height = 366
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 1
-        object lblSearchWizard: TLabel
-          Left = 8
-          Top = 8
-          Width = 24
-          Height = 13
-          Caption = '&Find:'
-          FocusControl = edtSearchWizard
-        end
         object lbWizards: TListBox
           Left = 0
-          Top = 32
-          Width = 317
-          Height = 345
-          Align = alBottom
-          Anchors = [akLeft, akTop, akRight, akBottom]
+          Top = 33
+          Width = 309
+          Height = 333
+          Align = alClient
           ItemHeight = 45
           Style = lbOwnerDrawFixed
-          TabOrder = 1
+          TabOrder = 0
           OnClick = lbWizardsClick
           OnDblClick = lbWizardsDblClick
           OnDrawItem = lbWizardsDrawItem
         end
-        object edtSearchWizard: TEdit
-          Left = 58
-          Top = 6
-          Width = 257
-          Height = 21
-          TabOrder = 0
-          OnChange = edtSearchWizardChange
+        object pnlListTop: TPanel
+          Left = 0
+          Top = 0
+          Width = 309
+          Height = 33
+          Align = alTop
+          BevelOuter = bvNone
+          TabOrder = 1
+          object lblSearchWizard: TLabel
+            Left = 8
+            Top = 8
+            Width = 24
+            Height = 13
+            Caption = '&Find:'
+            FocusControl = edtSearchWizard
+          end
+          object edtSearchWizard: TEdit
+            Left = 52
+            Top = 6
+            Width = 257
+            Height = 21
+            TabOrder = 0
+            OnChange = edtSearchWizardChange
+          end
         end
       end
     end
@@ -232,10 +240,10 @@ inherited CnWizConfigForm: TCnWizConfigForm
       Caption = 'Property E&ditor'
       ImageIndex = 2
       object Panel1: TPanel
-        Left = 317
+        Left = 309
         Top = 0
         Width = 181
-        Height = 377
+        Height = 366
         Align = alRight
         BevelOuter = bvNone
         TabOrder = 0
@@ -402,40 +410,48 @@ inherited CnWizConfigForm: TCnWizConfigForm
       object pnlEditors: TPanel
         Left = 0
         Top = 0
-        Width = 317
-        Height = 377
+        Width = 309
+        Height = 366
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 1
-        object lblSearchEditor: TLabel
-          Left = 8
-          Top = 8
-          Width = 24
-          Height = 13
-          Caption = '&Find:'
-          FocusControl = edtSearchEditor
-        end
         object lbDesignEditors: TListBox
           Left = 0
-          Top = 32
-          Width = 317
-          Height = 345
-          Align = alBottom
-          Anchors = [akLeft, akTop, akRight, akBottom]
+          Top = 33
+          Width = 309
+          Height = 333
+          Align = alClient
           ItemHeight = 32
           Style = lbOwnerDrawFixed
-          TabOrder = 1
+          TabOrder = 0
           OnClick = lbDesignEditorsClick
           OnDblClick = lbDesignEditorsDblClick
           OnDrawItem = lbDesignEditorsDrawItem
         end
-        object edtSearchEditor: TEdit
-          Left = 58
-          Top = 6
-          Width = 257
-          Height = 21
-          TabOrder = 0
-          OnChange = edtSearchEditorChange
+        object pnlEditorTop: TPanel
+          Left = 0
+          Top = 0
+          Width = 309
+          Height = 33
+          Align = alTop
+          BevelOuter = bvNone
+          TabOrder = 1
+          object lblSearchEditor: TLabel
+            Left = 8
+            Top = 8
+            Width = 24
+            Height = 13
+            Caption = '&Find:'
+            FocusControl = edtSearchEditor
+          end
+          object edtSearchEditor: TEdit
+            Left = 52
+            Top = 6
+            Width = 257
+            Height = 21
+            TabOrder = 0
+            OnChange = edtSearchEditorChange
+          end
         end
       end
     end
@@ -660,46 +676,37 @@ inherited CnWizConfigForm: TCnWizConfigForm
       end
     end
   end
-  object pnlButton: TPanel
-    Left = 0
-    Top = 407
-    Width = 508
-    Height = 29
-    Align = alBottom
-    BevelOuter = bvNone
+  object btnOK: TButton
+    Left = 265
+    Top = 404
+    Width = 75
+    Height = 21
+    Anchors = [akTop, akRight]
+    Caption = '&OK'
+    Default = True
+    ModalResult = 1
     TabOrder = 1
-    object btnHelp: TButton
-      Left = 433
-      Top = 8
-      Width = 75
-      Height = 21
-      Anchors = [akTop, akRight]
-      Caption = '&Help'
-      TabOrder = 2
-      OnClick = btnHelpClick
-    end
-    object btnOK: TButton
-      Left = 273
-      Top = 8
-      Width = 75
-      Height = 21
-      Anchors = [akTop, akRight]
-      Caption = '&OK'
-      Default = True
-      ModalResult = 1
-      TabOrder = 0
-    end
-    object btnCancel: TButton
-      Left = 353
-      Top = 8
-      Width = 75
-      Height = 21
-      Anchors = [akTop, akRight]
-      Cancel = True
-      Caption = '&Cancel'
-      ModalResult = 2
-      TabOrder = 1
-    end
+  end
+  object btnCancel: TButton
+    Left = 345
+    Top = 404
+    Width = 75
+    Height = 21
+    Anchors = [akTop, akRight]
+    Cancel = True
+    Caption = '&Cancel'
+    ModalResult = 2
+    TabOrder = 2
+  end
+  object btnHelp: TButton
+    Left = 425
+    Top = 404
+    Width = 75
+    Height = 21
+    Anchors = [akTop, akRight]
+    Caption = '&Help'
+    TabOrder = 3
+    OnClick = btnHelpClick
   end
   object dlgSaveActionList: TSaveDialog
     DefaultExt = 'txt'

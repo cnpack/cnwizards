@@ -67,10 +67,6 @@ type
 
   TCnWizConfigForm = class(TCnTranslateForm)
     PageControl: TPageControl;
-    pnlButton: TPanel;
-    btnHelp: TButton;
-    btnOK: TButton;
-    btnCancel: TButton;
     tsWizards: TTabSheet;
     pnlWizard: TPanel;
     lblWizardName: TLabel;
@@ -129,10 +125,15 @@ type
     chkUseOneCPUCore: TCheckBox;
     pnlListBox: TPanel;
     lbWizards: TListBox;
-    lblSearchWizard: TLabel;
-    edtSearchWizard: TEdit;
     pnlEditors: TPanel;
     lbDesignEditors: TListBox;
+    pnlListTop: TPanel;
+    edtSearchWizard: TEdit;
+    lblSearchWizard: TLabel;
+    btnOK: TButton;
+    btnCancel: TButton;
+    btnHelp: TButton;
+    pnlEditorTop: TPanel;
     edtSearchEditor: TEdit;
     lblSearchEditor: TLabel;
     procedure lbWizardsDrawItem(Control: TWinControl; Index: Integer;
