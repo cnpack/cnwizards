@@ -1092,7 +1092,11 @@ begin
 {$IFDEF DELPHIXE6}
   Result := Result + 'Embarcadero\BDS\14.0';
 {$ELSE}
+{$IFDEF DELPHIXE7}
+  Result := Result + 'Embarcadero\BDS\15.0';
+{$ELSE}
   Error: Unknown Compiler
+{$ENDIF}
 {$ENDIF}
 {$ENDIF}
 {$ENDIF}

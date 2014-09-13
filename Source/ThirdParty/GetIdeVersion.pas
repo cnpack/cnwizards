@@ -22,7 +22,7 @@ type
      ideD1400,
      ideD1500,
      ideD1600,
-     ideD1700, ideDXE4, ideDXE5, ideDXE6,
+     ideD1700, ideDXE4, ideDXE5, ideDXE6, ideDXE7,
      ideCSB100,
      ideBCB300, ideBCB301,
      ideBCB400, ideBCB401, ideBCB402,
@@ -860,6 +860,14 @@ begin
   Result := ideDXE6;
 end;
 
+function GetDelphiXE7Version: TBorlandIdeVersion;
+const
+  CoreIdeXE6: TVersionNumber =
+    (Major: 21; Minor: 0; Release: 0; Build: 0);
+begin
+  Result := ideDXE7;
+end;
+
 function GetBorlandIdeVersion: TBorlandIdeVersion;
 begin
   // We only actually detect the version once per session.
@@ -985,6 +993,11 @@ begin
   {$IFDEF VER270}  // Delphi 20/XE6
     Result := GetDelphiXE6Version;
     Assert(Result in [ideDXE6]);
+  {$ENDIF}
+
+  {$IFDEF VER280}  // Delphi 21/XE7
+    Result := GetDelphiXE7Version;
+    Assert(Result in [ideDXE7]);
   {$ENDIF}
   if Result = ideUnknown then
     MessageDlg('Unknown IDE major version detected.  Please update This File.', mtError, [mbOK], 0);
