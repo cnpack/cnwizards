@@ -93,6 +93,8 @@ begin
   CL.AddConstantN('_DELPHI17', 'Boolean').SetUInt(Ord(_DELPHI17));
   CL.AddConstantN('_DELPHIXE4', 'Boolean').SetUInt(Ord(_DELPHIXE4));
   CL.AddConstantN('_DELPHIXE5', 'Boolean').SetUInt(Ord(_DELPHIXE5));
+  CL.AddConstantN('_DELPHIXE6', 'Boolean').SetUInt(Ord(_DELPHIXE6));
+  CL.AddConstantN('_DELPHIXE7', 'Boolean').SetUInt(Ord(_DELPHIXE7));
 
   CL.AddConstantN('_DELPHI1_UP', 'Boolean').SetUInt(Ord(_DELPHI1_UP));
   CL.AddConstantN('_DELPHI2_UP', 'Boolean').SetUInt(Ord(_DELPHI2_UP));
@@ -112,6 +114,8 @@ begin
   CL.AddConstantN('_DELPHI17_UP', 'Boolean').SetUInt(Ord(_DELPHI17_UP));
   CL.AddConstantN('_DELPHIXE4_UP', 'Boolean').SetUInt(Ord(_DELPHIXE4_UP));
   CL.AddConstantN('_DELPHIXE5_UP', 'Boolean').SetUInt(Ord(_DELPHIXE5_UP));
+  CL.AddConstantN('_DELPHIXE6_UP', 'Boolean').SetUInt(Ord(_DELPHIXE6_UP));
+  CL.AddConstantN('_DELPHIXE7_UP', 'Boolean').SetUInt(Ord(_DELPHIXE7_UP));
 
   CL.AddConstantN('_BCB1', 'Boolean').SetUInt(Ord(_BCB1));
   CL.AddConstantN('_BCB3', 'Boolean').SetUInt(Ord(_BCB3));
@@ -128,6 +132,8 @@ begin
   CL.AddConstantN('_BCB17', 'Boolean').SetUInt(Ord(_BCB17));
   CL.AddConstantN('_BCBXE4', 'Boolean').SetUInt(Ord(_BCBXE4));
   CL.AddConstantN('_BCBXE5', 'Boolean').SetUInt(Ord(_BCBXE5));
+  CL.AddConstantN('_BCBXE6', 'Boolean').SetUInt(Ord(_BCBXE6));
+  CL.AddConstantN('_BCBXE7', 'Boolean').SetUInt(Ord(_BCBXE7));
 
   CL.AddConstantN('_BCB1_UP', 'Boolean').SetUInt(Ord(_BCB1_UP));
   CL.AddConstantN('_BCB3_UP', 'Boolean').SetUInt(Ord(_BCB3_UP));
@@ -144,6 +150,8 @@ begin
   CL.AddConstantN('_BCB17_UP', 'Boolean').SetUInt(Ord(_BCB17_UP));
   CL.AddConstantN('_BCBXE4_UP', 'Boolean').SetUInt(Ord(_BCBXE4_UP));
   CL.AddConstantN('_BCBXE5_UP', 'Boolean').SetUInt(Ord(_BCBXE5_UP));
+  CL.AddConstantN('_BCBXE6_UP', 'Boolean').SetUInt(Ord(_BCBXE6_UP));
+  CL.AddConstantN('_BCBXE7_UP', 'Boolean').SetUInt(Ord(_BCBXE7_UP));
 
   CL.AddConstantN('_KYLIX1', 'Boolean').SetUInt(Ord(_KYLIX1));
   CL.AddConstantN('_KYLIX2', 'Boolean').SetUInt(Ord(_KYLIX2));
@@ -162,6 +170,8 @@ begin
   CL.AddConstantN('_BDS10', 'Boolean').SetUInt(Ord(_BDS10));
   CL.AddConstantN('_BDS11', 'Boolean').SetUInt(Ord(_BDS11));
   CL.AddConstantN('_BDS12', 'Boolean').SetUInt(Ord(_BDS12));
+  CL.AddConstantN('_BDS14', 'Boolean').SetUInt(Ord(_BDS14));
+  CL.AddConstantN('_BDS15', 'Boolean').SetUInt(Ord(_BDS15));
 
   CL.AddConstantN('_BDS2_UP', 'Boolean').SetUInt(Ord(_BDS2_UP));
   CL.AddConstantN('_BDS3_UP', 'Boolean').SetUInt(Ord(_BDS3_UP));
@@ -174,6 +184,8 @@ begin
   CL.AddConstantN('_BDS10_UP', 'Boolean').SetUInt(Ord(_BDS10_UP));
   CL.AddConstantN('_BDS11_UP', 'Boolean').SetUInt(Ord(_BDS11_UP));
   CL.AddConstantN('_BDS12_UP', 'Boolean').SetUInt(Ord(_BDS12_UP));
+  CL.AddConstantN('_BDS14_UP', 'Boolean').SetUInt(Ord(_BDS14_UP));
+  CL.AddConstantN('_BDS15_UP', 'Boolean').SetUInt(Ord(_BDS15_UP));
 
   CL.AddConstantN('_COMPILER1', 'Boolean').SetUInt(Ord(_COMPILER1));
   CL.AddConstantN('_COMPILER2', 'Boolean').SetUInt(Ord(_COMPILER2));
@@ -194,6 +206,8 @@ begin
   CL.AddConstantN('_COMPILER17', 'Boolean').SetUInt(Ord(_COMPILER17));
   CL.AddConstantN('_COMPILER18', 'Boolean').SetUInt(Ord(_COMPILER18));
   CL.AddConstantN('_COMPILER19', 'Boolean').SetUInt(Ord(_COMPILER19));
+  CL.AddConstantN('_COMPILER20', 'Boolean').SetUInt(Ord(_COMPILER20));
+  CL.AddConstantN('_COMPILER21', 'Boolean').SetUInt(Ord(_COMPILER21));
 
   CL.AddConstantN('_COMPILER1_UP', 'Boolean').SetUInt(Ord(_COMPILER1_UP));
   CL.AddConstantN('_COMPILER2_UP', 'Boolean').SetUInt(Ord(_COMPILER2_UP));
@@ -214,6 +228,8 @@ begin
   CL.AddConstantN('_COMPILER17_UP', 'Boolean').SetUInt(Ord(_COMPILER17_UP));
   CL.AddConstantN('_COMPILER18_UP', 'Boolean').SetUInt(Ord(_COMPILER18_UP));
   CL.AddConstantN('_COMPILER19_UP', 'Boolean').SetUInt(Ord(_COMPILER19_UP));
+  CL.AddConstantN('_COMPILER20_UP', 'Boolean').SetUInt(Ord(_COMPILER20_UP));
+  CL.AddConstantN('_COMPILER21_UP', 'Boolean').SetUInt(Ord(_COMPILER21_UP));
 
   CL.AddConstantN('_SUPPORT_OTA_PROJECT_CONFIGURATION', 'Boolean').SetUInt(Ord(_SUPPORT_OTA_PROJECT_CONFIGURATION));
   CL.AddConstantN('_SUPPORT_CROSS_PLATFORM', 'Boolean').SetUInt(Ord(_SUPPORT_CROSS_PLATFORM));

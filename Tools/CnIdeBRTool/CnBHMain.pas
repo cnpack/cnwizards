@@ -181,7 +181,7 @@ const
   SACnRegIDEEntries: array[TCnIDEs] of string =
     ('Delphi\5.0', 'Delphi\6.0', 'Delphi\7.0', 'BDS\2.0', 'BDS\3.0', 'BDS\4.0',
     'BDS\5.0', 'BDS\6.0', 'BDS\7.0', 'BDS\8.0', 'BDS\9.0', 'BDS\10.0', 'BDS\11.0',
-    'BDS\12.0', 'BDS\14.0', 'C++Builder\5.0', 'C++Builder\6.0');
+    'BDS\12.0', 'BDS\14.0', 'BDS\15.0', 'C++Builder\5.0', 'C++Builder\6.0');
   SCnRegHisProject = '\Closed Projects';
   SCnRegHisFiles = '\Closed Files';
 
@@ -285,7 +285,8 @@ begin
     // BDS 2005, 2006, 2007, 2009 以上的菜单模板和对象库不分开了。
     if lbxSelectApp.ItemIndex in [Ord(atBDS2005), Ord(atBDS2006), Ord(atDelphi2007),
       Ord(atDelphi2009), Ord(atDelphi2010), Ord(atDelphiXE), Ord(atDelphiXE2),
-      Ord(atDelphiXE3), Ord(atDelphiXE4), Ord(atDelphiXE5), Ord(atDelphiXE6)] then
+      Ord(atDelphiXE3), Ord(atDelphiXE4), Ord(atDelphiXE5), Ord(atDelphiXE6),
+      Ord(atDelphiXE7)] then
     begin
       lbxBackupOptions.Checked[0] := True;
       lbxBackupOptions.ItemEnabled[0] := False;

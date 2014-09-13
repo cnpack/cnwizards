@@ -25,6 +25,7 @@
 ;    IDE_VERSION_DXE4
 ;    IDE_VERSION_DXE5
 ;    IDE_VERSION_DXE6
+;    IDE_VERSION_DXE7
 ;    IDE_VERSION_CB5
 ;    IDE_VERSION_CB6
 ;    NO_HELP
@@ -95,6 +96,7 @@ RequestExecutionLevel admin
 !ifndef IDE_VERSION_DXE4
 !ifndef IDE_VERSION_DXE5
 !ifndef IDE_VERSION_DXE6
+!ifndef IDE_VERSION_DXE7
 !ifndef IDE_VERSION_CB5
 !ifndef IDE_VERSION_CB6
 
@@ -126,10 +128,12 @@ RequestExecutionLevel admin
   !define IDE_VERSION_DXE4 "1"
   !define IDE_VERSION_DXE5 "1"
   !define IDE_VERSION_DXE6 "1"
+  !define IDE_VERSION_DXE7 "1"
   !define IDE_VERSION_CB5 "1"
   !define IDE_VERSION_CB6 "1"
 !endif
 
+!endif
 !endif
 !endif
 !endif
@@ -207,13 +211,17 @@ RequestExecutionLevel admin
     !define IDE_SHORT_NAME "DXE6"
     !define IDE_LONG_NAME "RAD Studio XE6"
   !endif
+  !ifdef IDE_VERSION_DXE7
+    !define IDE_SHORT_NAME "DXE7"
+    !define IDE_LONG_NAME "RAD Studio XE7"
+  !endif
   !ifdef IDE_VERSION_CB5
     !define IDE_SHORT_NAME "CB5"
     !define IDE_LONG_NAME "C++Builder 5"
   !endif
   !ifdef IDE_VERSION_CB6
     !define IDE_SHORT_NAME "CB6"
-    !define IDE_LONG_NAME "C++Builder 5"
+    !define IDE_LONG_NAME "C++Builder 6"
   !endif
 !endif
 !endif
@@ -454,6 +462,13 @@ FileLoop:
 !ifdef IDE_VERSION_DXE6
   IfFileExists "$INSTDIR\CnWizards_DXE6.dll" 0 +4
   FileOpen $0 "$INSTDIR\CnWizards_DXE6.dll" a
+  IfErrors FileInUse
+  FileClose $0
+!endif
+
+!ifdef IDE_VERSION_DXE7
+  IfFileExists "$INSTDIR\CnWizards_DXE7.dll" 0 +4
+  FileOpen $0 "$INSTDIR\CnWizards_DXE7.dll" a
   IfErrors FileInUse
   FileClose $0
 !endif
@@ -720,6 +735,16 @@ Section "RAD Studio XE6" SecDXE6
 SectionEnd
 !endif
 
+!ifdef IDE_VERSION_DXE7
+Section "RAD Studio XE7" SecDXE7
+  SectionIn 1 2
+  SetOutPath $INSTDIR
+  File "..\..\Bin\CnWizards_DXE7.dll"
+  ; 写入专家注册键值
+  WriteRegStr HKCU "Software\Embarcadero\BDS\15.0\Experts" "CnWizards_DXE7" "$INSTDIR\CnWizards_DXE7.dll"
+SectionEnd
+!endif
+
 !endif
 
 !ifdef IDE_VERSION_CB5
@@ -875,6 +900,10 @@ Function .onMouseOverSection
     ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio XE6" "+" $R0
     !insertmacro MUI_DESCRIPTION_TEXT ${SecDXE6} $R0
   !endif
+  !ifdef IDE_VERSION_DXE7
+    ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio XE7" "+" $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecDXE7} $R0
+  !endif
 !endif
   !ifdef IDE_VERSION_CB5
     ${WordReplace} "$(DESDLL)" "#DLL#" "C++Builder 5" "+" $R0
@@ -960,6 +989,9 @@ Function SetCheckBoxes
 !ifdef IDE_VERSION_DXE6
   !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\14.0" "App" ${SecDXE6}
 !endif
+!ifdef IDE_VERSION_DXE7
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\15.0" "App" ${SecDXE7}
+!endif
 !endif
 !ifdef IDE_VERSION_CB5
   !insertmacro SET_COMPILER_CHECKBOX HKLM "Software\Borland\C++Builder\5.0" "App" ${SecCB5}
@@ -1032,7 +1064,10 @@ Section "Uninstall"
   DeleteRegValue HKCU "Software\Embarcadero\BDS\12.0\Experts" "CnWizards_DXE5"
 !endif
 !ifdef IDE_VERSION_DXE6
-  DeleteRegValue HKCU "Software\Embarcadero\BDS\12.0\Experts" "CnWizards_DXE6"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\14.0\Experts" "CnWizards_DXE6"
+!endif
+!ifdef IDE_VERSION_DXE7
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\15.0\Experts" "CnWizards_DXE7"
 !endif
 !ifdef IDE_VERSION_CB5
   DeleteRegValue HKCU "Software\Borland\C++Builder\5.0\Experts" "CnWizards_CB5"

@@ -173,6 +173,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
           Top = 344
           Width = 75
           Height = 21
+          Anchors = [akRight, akBottom]
           Caption = '&Settings'
           TabOrder = 2
           OnClick = btnConfigClick
@@ -182,6 +183,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
           Top = 344
           Width = 75
           Height = 21
+          Anchors = [akRight, akBottom]
           Caption = '&Advanced'
           TabOrder = 3
           OnClick = btnSortClick
@@ -681,7 +683,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
     Top = 404
     Width = 75
     Height = 21
-    Anchors = [akTop, akRight]
+    Anchors = [akRight, akBottom]
     Caption = '&OK'
     Default = True
     ModalResult = 1
@@ -692,7 +694,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
     Top = 404
     Width = 75
     Height = 21
-    Anchors = [akTop, akRight]
+    Anchors = [akRight, akBottom]
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
@@ -703,7 +705,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
     Top = 404
     Width = 75
     Height = 21
-    Anchors = [akTop, akRight]
+    Anchors = [akRight, akBottom]
     Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
