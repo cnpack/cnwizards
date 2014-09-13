@@ -372,6 +372,7 @@ type
     FBlockShortCut: TCnWizShortCut;
     FBlockMatchMaxLines: Integer;
     FTimer: TTimer;
+    FCurrentTokenValidateTimer: TTimer;
     FIsChecking: Boolean;
     CharSize: TSize;
     FBlockMatchLineLimit: Boolean;
@@ -380,6 +381,8 @@ type
     FBlockMatchHighlight: Boolean;
     FBlockMatchBackground: TColor;
     FCurrentTokenHighlight: Boolean;
+    FCurrentTokenDelay: Integer;
+    FCurrentTokenInvalid: Boolean;
     FHilightSeparateLine: Boolean;
     FCurrentTokenBackground: TColor;
     FCurrentTokenForeground: TColor;
@@ -429,6 +432,7 @@ type
     procedure UpdateTabWidth;
 {$ENDIF}
     procedure OnHighlightTimer(Sender: TObject);
+    procedure OnCurrentTokenValidateTimer(Sender: TObject);
     procedure OnHighlightExec(Sender: TObject);
     procedure BeginUpdateEditor(Editor: TEditorObject);
     procedure EndUpdateEditor(Editor: TEditorObject);
@@ -443,6 +447,7 @@ type
     procedure SourceEditorNotify(SourceEditor: IOTASourceEditor;
       NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
     procedure EditorChanged(Editor: TEditorObject; ChangeType: TEditorChangeTypes);
+    procedure EditorKeyDown(Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
     procedure ClearHighlight(Editor: TEditorObject);
     procedure PaintBracketMatch(Editor: TEditorObject;
       LineNum, LogicLineNum: Integer; AElided: Boolean);
@@ -464,6 +469,7 @@ type
     procedure SetFlowStatementBackground(const Value: TColor);
     procedure SetHighlightFlowStatement(const Value: Boolean);
     procedure SetFlowStatementForeground(const Value: TColor);
+    procedure SetCurrentTokenDelay(const Value: Integer);
   protected
     procedure DoEnhConfig;
     procedure SetActive(Value: Boolean); override;
@@ -496,6 +502,7 @@ type
     property BlockMatchBackground: TColor read FBlockMatchBackground write FBlockMatchBackground;
     {* 光标下关键字配对高亮的背景色}
     property CurrentTokenHighlight: Boolean read FCurrentTokenHighlight write FCurrentTokenHighlight;
+    property CurrentTokenDelay: Integer read FCurrentTokenDelay write SetCurrentTokenDelay;
     {* 是否光标下当前标识符背景色高亮}
     property CurrentTokenForeground: TColor read FCurrentTokenForeground write FCurrentTokenForeground;
     {* 光标下当前标识符高亮的前景色}
@@ -641,6 +648,7 @@ const
   csBlockMatchHighlight = 'BlockMatchHighlight';
   csBlockMatchBackground = 'BlockMatchBackground';
   csCurrentTokenHighlight = 'CurrentTokenHighlight';
+  csCurrentTokenDelay = 'CurrentTokenDelay';
   csCurrentTokenColor = 'CurrentTokenColor';
   csCurrentTokenColorBk = 'CurrentTokenColorBk';
   csCurrentTokenColorBd = 'CurrentTokenColorBd';
@@ -1372,7 +1380,10 @@ var
   EditView: IOTAEditView;
   CharPos: TOTACharPos;
   EditPos: TOTAEditPos;
-  I: Integer;
+  I, StartIndex, EndIndex: Integer;
+  Token: TCnPasToken;
+  TokenCursorIndex: Integer;
+  CurrentTokenNameU: String;
 begin
   FCurrentTokenName := '';
   FCurrentToken := nil;
@@ -1423,54 +1434,50 @@ begin
         FCurMethodCloseToken := Parser.MethodCloseToken;
       end;
 
-      // 必须搜索当前所有标识符，避免只高亮光标出于当前过程内的问题
-      for I := 0 to Parser.Count - 1 do
+      if CnOtaGetCurrPosToken(CurrentTokenNameU, TokenCursorIndex, True, [], [], EditView) and
+        (CurrentTokenNameU <> '')
+      then
       begin
-        CharPos := OTACharPos(Parser.Tokens[I].CharIndex, Parser.Tokens[I].LineNumber + 1);
-        EditView.ConvertPos(False, EditPos, CharPos);
-        // TODO: 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
-{$IFDEF BDS2009_UP}
-        // if not FHighlight.FUseTabKey then
-        EditPos.Col := Parser.Tokens[I].CharIndex + 1;
-{$ENDIF}
-        Parser.Tokens[I].EditCol := EditPos.Col;
-        Parser.Tokens[I].EditLine := EditPos.Line;
-
-        if (Parser.Tokens[I].TokenID = tkIdentifier) and // 此处判断不支持双字节字符
-          IsCurrentToken(Pointer(EditView), FControl, Parser.Tokens[I]) then
+        FCurrentTokenName := AnsiString(CurrentTokenNameU);
+        if (FHighlight.BlockHighlightRange = brAll) or
+          TokenIsMethodOrClassName(CurrentTokenNameU,
+            string(Parser.CurrentMethod)) or
+          ((FCurMethodStartToken = nil) or (FCurMethodCloseToken = nil))
+        then
         begin
-          if FCurrentToken = nil then
-          begin
-            // 不能 Break，否则 Tokens 就没 EditLine 的更新了，下面也一样
-            FCurrentToken := Parser.Tokens[I];
-            FCurrentTokenName := FCurrentToken.Token;
-          end;
+          StartIndex := 0;
+          EndIndex := Parser.Count - 1;
+        end
+        else
+        begin
+          StartIndex := FCurMethodStartToken.ItemIndex;
+          EndIndex := FCurMethodCloseToken.ItemIndex;
         end;
-      end;
 
-      // 高亮整个单元时，或当前是过程名与类名时，或无当前Method时，高亮整个单元
-      if ((FCurrentTokenName <> '') and (FHighlight.BlockHighlightRange = brAll))
-        or TokenIsMethodOrClassName(string(FCurrentTokenName), string(Parser.CurrentMethod))
-        or ((FCurMethodStartToken = nil) or (FCurMethodCloseToken = nil)) then
-      begin
-        for I := 0 to Parser.Count - 1 do
-          if (Parser.Tokens[I].TokenID = tkIdentifier) and
-            CheckTokenMatch(Parser.Tokens[I].Token, FCurrentTokenName, CaseSensitive) then
+        for I := StartIndex to EndIndex do
+        begin
+          Token := Parser.Tokens[I];
+
+          if (Token.TokenID = tkIdentifier) and
+            CheckTokenMatch(Token.Token, FCurrentTokenName, CaseSensitive) then
           begin
-            FCurTokenList.Add(Parser.Tokens[I]);
-            FCurTokenListEditLine.Add(Pointer(Parser.Tokens[I].EditLine));
+            CharPos := OTACharPos(Token.CharIndex, Token.LineNumber + 1);
+            EditView.ConvertPos(False, EditPos, CharPos);
+            // TODO: 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
+    {$IFDEF BDS2009_UP}
+            // if not FHighlight.FUseTabKey then
+            EditPos.Col := Token.CharIndex + 1;
+    {$ENDIF}
+            Token.EditCol := EditPos.Col;
+            Token.EditLine := EditPos.Line;
+
+            FCurTokenList.Add(Token);
+            FCurTokenListEditLine.Add(Pointer(Token.EditLine));
           end;
-      end
-      else if (FCurMethodStartToken <> nil) or (FCurMethodCloseToken <> nil) then // 其它范围便默认改为高亮本过程的
-      begin
-        for I := FCurMethodStartToken.ItemIndex to
-          FCurMethodCloseToken.ItemIndex do
-          if (Parser.Tokens[I].TokenID = tkIdentifier) and
-            CheckTokenMatch(Parser.Tokens[I].Token, FCurrentTokenName, CaseSensitive) then
-          begin
-            FCurTokenList.Add(Parser.Tokens[I]);
-            FCurTokenListEditLine.Add(Pointer(Parser.Tokens[I].EditLine));
-          end;
+
+          if FCurTokenList.Count > 0 then
+            FCurrentToken := FCurTokenList.Items[0];
+        end;
       end;
     end;
 
@@ -1891,24 +1898,7 @@ begin
     TCnList(FLineList[Token.EditLine]).Add(Token);
   end;
 
-  if FHighlight.CurrentTokenHighlight then
-  begin
-    MaxLine := 0;
-    for i := 0 to FCurTokenList.Count - 1 do
-    begin
-      if CurTokens[i].EditLine > MaxLine then
-        MaxLine := CurTokens[i].EditLine;
-    end;
-    FIdLineList.Count := MaxLine + 1;
-
-    for I := 0 to FCurTokenList.Count - 1 do
-    begin
-      Token := CurTokens[I];
-      if FIdLineList[Token.EditLine] = nil then
-        FIdLineList[Token.EditLine] := TCnList.Create;
-      TCnList(FIdLineList[Token.EditLine]).Add(Token);
-    end;
-  end;
+  ConvertIdLineList;
 end;
 
 procedure TBlockMatchInfo.ConvertIdLineList;
@@ -1917,14 +1907,14 @@ var
   Token: TCnPasToken;
   MaxLine: Integer;
 begin
-  MaxLine := 0;
-  for I := 0 to FCurTokenList.Count - 1 do
-    if CurTokens[I].EditLine > MaxLine then
-      MaxLine := CurTokens[I].EditLine;
-  FIdLineList.Count := MaxLine + 1;
-
   if FHighlight.CurrentTokenHighlight then
   begin
+    MaxLine := 0;
+    for I := 0 to FCurTokenList.Count - 1 do
+      if CurTokens[I].EditLine > MaxLine then
+        MaxLine := CurTokens[I].EditLine;
+    FIdLineList.Count := MaxLine + 1;
+
     for I := 0 to FCurTokenList.Count - 1 do
     begin
       Token := CurTokens[I];
@@ -1984,6 +1974,7 @@ begin
   FDefaultHighLightLineColor := FHighLightLineColor; // 用来判断与保存
 {$ENDIF}
   FCurrentTokenHighlight := False;    // 默认改为 False
+  FCurrentTokenDelay := 750;
   FCurrentTokenBackground := csDefCurTokenColorBg;
   FCurrentTokenForeground := csDEfCurTokenColorFg;
   FCurrentTokenBorderColor := csDefCurTokenColorBd;
@@ -2031,6 +2022,11 @@ begin
   FTimer.Interval := FBlockMatchDelay;
   FTimer.OnTimer := OnHighlightTimer;
 
+  FCurrentTokenValidateTimer := TTimer.Create(nil);
+  FCurrentTokenValidateTimer.Enabled := False;
+  FCurrentTokenValidateTimer.Interval := CurrentTokenDelay;
+  FCurrentTokenValidateTimer.OnTimer := OnCurrentTokenValidateTimer;
+
 {$IFNDEF BDS}
   FCorIdeModule := LoadLibrary(CorIdeLibName);
   if GetProcAddress(FCorIdeModule, SSetForeAndBackColorName) <> nil then
@@ -2044,6 +2040,7 @@ begin
   EditControlWrapper.AddEditControlNotifier(EditControlNotify);
   EditControlWrapper.AddEditorChangeNotifier(EditorChanged);
   EditControlWrapper.AddAfterPaintLineNotifier(PaintLine);
+  EditControlWrapper.AddKeyDownNotifier(EditorKeyDown);
 {$IFNDEF BDS}
   EditControlWrapper.AddBeforePaintLineNotifier(BeforePaintLine);
 {$ENDIF}
@@ -2055,6 +2052,7 @@ end;
 destructor TCnSourceHighlight.Destroy;
 begin
   FTimer.Free;
+  FCurrentTokenValidateTimer.Free;
   FBracketList.Free;
   FBlockLineList.Free;
   FBlockMatchList.Free;
@@ -2910,6 +2908,20 @@ begin
   end;
 end;
 
+procedure TCnSourceHighlight.OnCurrentTokenValidateTimer(Sender: TObject);
+var
+  i: Integer;
+  Info: TBlockMatchInfo;
+begin
+  FCurrentTokenValidateTimer.Enabled := False;
+  FCurrentTokenInvalid := False;
+  for i := 0 to FBlockMatchList.Count - 1 do
+  begin
+    Info := TBlockMatchInfo(FBlockMatchList[i]);
+    Info.Control.Invalidate;
+  end;
+end;
+
 // 上面的延时到时间了，开始解析
 procedure TCnSourceHighlight.OnHighlightTimer(Sender: TObject);
 var
@@ -3188,8 +3200,10 @@ begin
         end;
 
         // 如果有需要高亮绘制的标识符内容
-        if FCurrentTokenHighlight and (LogicLineNum < Info.IdLineCount) and
-          (Info.IdLines[LogicLineNum] <> nil) then
+        if FCurrentTokenHighlight and not FCurrentTokenInvalid and
+          (LogicLineNum < Info.IdLineCount) and
+          (Info.IdLines[LogicLineNum] <> nil)
+        then
         begin
           with EditCanvas do
           begin
@@ -3710,6 +3724,12 @@ var
 begin
   if Active then
   begin
+    if ctModified in ChangeType then
+    begin
+      FCurrentTokenValidateTimer.Enabled := False;
+      FCurrentTokenValidateTimer.Enabled := True;
+      FCurrentTokenInvalid := True;
+    end;
     // 仅 View 切换时调用底层函数可能是不安全的，所有高亮需要重新刷新
     if ChangeType = [ctView] then
     begin
@@ -3769,6 +3789,18 @@ begin
       EndUpdateEditor(Editor);
     end;
   end;
+end;
+
+procedure TCnSourceHighlight.EditorKeyDown(Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
+begin
+  if (Shift = []) and ((Key = VK_LEFT) or (Key = VK_UP) or
+    (Key = VK_RIGHT) or (Key = VK_DOWN))
+  then
+    Exit;
+
+  FCurrentTokenValidateTimer.Enabled := False;
+  FCurrentTokenValidateTimer.Enabled := True;
+  FCurrentTokenInvalid := True;
 end;
 
 procedure TCnSourceHighlight.PaintLine(Editor: TEditorObject;
@@ -3858,6 +3890,7 @@ begin
     FBlockMatchHighlight := ReadBool('', csBlockMatchHighlight, FBlockMatchHighlight);
     FBlockMatchBackground := ReadColor('', csBlockMatchBackground, FBlockMatchBackground);
     FCurrentTokenHighlight := ReadBool('', csCurrentTokenHighlight, FCurrentTokenHighlight);
+    CurrentTokenDelay := ReadInteger('', csCurrentTokenDelay, CurrentTokenDelay);
     FCurrentTokenForeground := ReadColor('', csCurrentTokenColor, FCurrentTokenForeground);
     FCurrentTokenBackground := ReadColor('', csCurrentTokenColorBk, FCurrentTokenBackground);
     FCurrentTokenBorderColor := ReadColor('', csCurrentTokenColorBd, FCurrentTokenBorderColor);
@@ -3914,6 +3947,7 @@ begin
     WriteBool('', csBlockMatchHighlight, FBlockMatchHighlight);
     WriteColor('', csBlockMatchBackground, FBlockMatchBackground);
     WriteBool('', csCurrentTokenHighlight, FCurrentTokenHighlight);
+    WriteInteger('', csCurrentTokenDelay, FCurrentTokenDelay);
     WriteColor('', csCurrentTokenColor, FCurrentTokenForeground);
     WriteColor('', csCurrentTokenColorBk, FCurrentTokenBackground);
     WriteColor('', csCurrentTokenColorBd, FCurrentTokenBorderColor);
@@ -4339,6 +4373,12 @@ procedure TCnSourceHighlight.SetFlowStatementForeground(
   const Value: TColor);
 begin
   FFlowStatementForeground := Value;
+end;
+
+procedure TCnSourceHighlight.SetCurrentTokenDelay(const Value: Integer);
+begin
+  FCurrentTokenDelay := Value;
+  FCurrentTokenValidateTimer.Interval := Value;
 end;
 
 { TBlockLinePair }
