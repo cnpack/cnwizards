@@ -371,7 +371,8 @@ type
 {$ENDIF}
     FBlockShortCut: TCnWizShortCut;
     FBlockMatchMaxLines: Integer;
-    FTimer: TTimer;
+    FStructureTimer: TTimer;
+    FCurrentTokenValidateTimer: TTimer;
     FIsChecking: Boolean;
     CharSize: TSize;
     FBlockMatchLineLimit: Boolean;
@@ -380,6 +381,8 @@ type
     FBlockMatchHighlight: Boolean;
     FBlockMatchBackground: TColor;
     FCurrentTokenHighlight: Boolean;
+    FCurrentTokenDelay: Integer;
+    FCurrentTokenInvalid: Boolean;
     FHilightSeparateLine: Boolean;
     FCurrentTokenBackground: TColor;
     FCurrentTokenForeground: TColor;
@@ -430,6 +433,7 @@ type
 {$ENDIF}
     procedure OnHighlightTimer(Sender: TObject);
     procedure OnHighlightExec(Sender: TObject);
+    procedure OnCurrentTokenValidateTimer(Sender: TObject);
     procedure BeginUpdateEditor(Editor: TEditorObject);
     procedure EndUpdateEditor(Editor: TEditorObject);
     // 标记一行代码需要重画，只有在 BeginUpdateEditor 和 EndUpdateEditor 之间调用有效
@@ -443,6 +447,7 @@ type
     procedure SourceEditorNotify(SourceEditor: IOTASourceEditor;
       NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
     procedure EditorChanged(Editor: TEditorObject; ChangeType: TEditorChangeTypes);
+    procedure EditorKeyDown(Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
     procedure ClearHighlight(Editor: TEditorObject);
     procedure PaintBracketMatch(Editor: TEditorObject;
       LineNum, LogicLineNum: Integer; AElided: Boolean);
@@ -1984,6 +1989,7 @@ begin
   FDefaultHighLightLineColor := FHighLightLineColor; // 用来判断与保存
 {$ENDIF}
   FCurrentTokenHighlight := False;    // 默认改为 False
+  FCurrentTokenDelay := 500;
   FCurrentTokenBackground := csDefCurTokenColorBg;
   FCurrentTokenForeground := csDEfCurTokenColorFg;
   FCurrentTokenBorderColor := csDefCurTokenColorBd;
@@ -2003,6 +2009,8 @@ begin
   FKeywordHighlight := THighlightItem.Create;
   FIdentifierHighlight := THighlightItem.Create;
   FKeywordHighlight.Bold := True;
+
+  FHilightSeparateLine := True;  // 默认画函数间的空行分隔线
   FSeparateLineColor := clGray;
   FSeparateLineStyle := lsSmallDot;
   FSeparateLineWidth := 1;
@@ -2026,10 +2034,15 @@ begin
 {$ENDIF}
   FBlockShortCut := WizShortCutMgr.Add(SCnSourceHighlightBlock, ShortCut(Ord('H'), [ssCtrl, ssShift]),
     OnHighlightExec);
-  FTimer := TTimer.Create(nil);
-  FTimer.Enabled := False;
-  FTimer.Interval := FBlockMatchDelay;
-  FTimer.OnTimer := OnHighlightTimer;
+  FStructureTimer := TTimer.Create(nil);
+  FStructureTimer.Enabled := False;
+  FStructureTimer.Interval := FBlockMatchDelay;
+  FStructureTimer.OnTimer := OnHighlightTimer;
+
+  FCurrentTokenValidateTimer := TTimer.Create(nil);
+  FCurrentTokenValidateTimer.Enabled := False;
+  FCurrentTokenValidateTimer.Interval := FCurrentTokenDelay;
+  FCurrentTokenValidateTimer.OnTimer := OnCurrentTokenValidateTimer;
 
 {$IFNDEF BDS}
   FCorIdeModule := LoadLibrary(CorIdeLibName);
@@ -2044,6 +2057,7 @@ begin
   EditControlWrapper.AddEditControlNotifier(EditControlNotify);
   EditControlWrapper.AddEditorChangeNotifier(EditorChanged);
   EditControlWrapper.AddAfterPaintLineNotifier(PaintLine);
+  EditControlWrapper.AddKeyDownNotifier(EditorKeyDown);
 {$IFNDEF BDS}
   EditControlWrapper.AddBeforePaintLineNotifier(BeforePaintLine);
 {$ENDIF}
@@ -2054,7 +2068,8 @@ end;
 
 destructor TCnSourceHighlight.Destroy;
 begin
-  FTimer.Free;
+  FStructureTimer.Free;
+  FCurrentTokenValidateTimer.Free;
   FBracketList.Free;
   FBlockLineList.Free;
   FBlockMatchList.Free;
@@ -2077,6 +2092,7 @@ begin
   CnWizNotifierServices.RemoveActiveFormNotifier(ActiveFormChanged);
   EditControlWrapper.RemoveEditControlNotifier(EditControlNotify);
   EditControlWrapper.RemoveEditorChangeNotifier(EditorChanged);
+  EditControlWrapper.RemoveKeyDownNotifier(EditorKeyDown);
 {$IFNDEF BDS}
   EditControlWrapper.RemoveBeforePaintLineNotifier(BeforePaintLine);
 {$ENDIF}
@@ -2821,7 +2837,7 @@ begin
     if (ChangeType * [ctView, ctModified, ctElided, ctUnElided] <> []) or
       ((FBlockHighlightRange <> brAll) and (ChangeType * [ctCurrLine, ctCurrCol] <> [])) then
     begin
-      FTimer.Enabled := False;
+      FStructureTimer.Enabled := False;
 
       // 展开以及变动的情况，或者局部高亮时位置改动的情况，重新解析
       Info.FKeyList.Clear;
@@ -2848,19 +2864,19 @@ begin
         begin
           // 正常情况下，延时一段时间再解析以避免重复
           case BlockHighlightStyle of
-            bsNow: FTimer.Interval := csShortDelay;
-            bsDelay: FTimer.Interval := BlockMatchDelay;
+            bsNow: FStructureTimer.Interval := csShortDelay;
+            bsDelay: FStructureTimer.Interval := BlockMatchDelay;
             bsHotkey: Exit;
           end;
-          FTimer.Enabled := True;
+          FStructureTimer.Enabled := True;
         end
         else // 大小超过了限制
         begin
-          FTimer.Enabled := False;
+          FStructureTimer.Enabled := False;
         end;
       end;
     end
-    else if not FTimer.Enabled then // 如果定时器已经开启，则不再处理
+    else if not FStructureTimer.Enabled then // 如果定时器已经开启，则不再处理
     begin
       CurTokenRefreshed := False;
       if ChangeType * [ctCurrLine, ctCurrCol] <> [] then
@@ -2916,7 +2932,7 @@ var
   i: Integer;
   Info: TBlockMatchInfo;
 begin
-  FTimer.Enabled := False;
+  FStructureTimer.Enabled := False;
 
   if FIsChecking then Exit;
   GlobalIgnoreClass := not FBlockMatchLineClass;
@@ -3188,8 +3204,8 @@ begin
         end;
 
         // 如果有需要高亮绘制的标识符内容
-        if FCurrentTokenHighlight and (LogicLineNum < Info.IdLineCount) and
-          (Info.IdLines[LogicLineNum] <> nil) then
+        if FCurrentTokenHighlight and not FCurrentTokenInvalid and
+          (LogicLineNum < Info.IdLineCount) and (Info.IdLines[LogicLineNum] <> nil) then
         begin
           with EditCanvas do
           begin
@@ -3677,9 +3693,9 @@ procedure TCnSourceHighlight.SourceEditorNotify(SourceEditor: IOTASourceEditor;
 begin
 {$IFDEF DELPHI2009_UP}
   if NotifyType = setClosing then
-    FTimer.OnTimer := nil
+    FStructureTimer.OnTimer := nil
   else if (NotifyType = setOpened) or (NotifyType = setEditViewActivated) then
-    FTimer.OnTimer := OnHighlightTimer;
+    FStructureTimer.OnTimer := OnHighlightTimer;
 {$ENDIF}    
 end;
 
@@ -3710,6 +3726,13 @@ var
 begin
   if Active then
   begin
+    if ctModified in ChangeType then
+    begin
+      FCurrentTokenValidateTimer.Enabled := False;
+      FCurrentTokenValidateTimer.Enabled := True;
+      FCurrentTokenInvalid := True;
+    end;
+
     // 仅 View 切换时调用底层函数可能是不安全的，所有高亮需要重新刷新
     if ChangeType = [ctView] then
     begin
@@ -4339,6 +4362,34 @@ procedure TCnSourceHighlight.SetFlowStatementForeground(
   const Value: TColor);
 begin
   FFlowStatementForeground := Value;
+end;
+
+procedure TCnSourceHighlight.EditorKeyDown(Key, ScanCode: Word;
+  Shift: TShiftState; var Handled: Boolean);
+begin
+  if (Shift = []) and ((Key = VK_LEFT) or (Key = VK_UP) or
+    (Key = VK_RIGHT) or (Key = VK_DOWN) or (Key = VK_PRIOR) or
+    (Key = VK_NEXT))
+  then
+    Exit;
+
+  FCurrentTokenValidateTimer.Enabled := False;
+  FCurrentTokenValidateTimer.Enabled := True;
+  FCurrentTokenInvalid := True;
+end;
+
+procedure TCnSourceHighlight.OnCurrentTokenValidateTimer(Sender: TObject);
+var
+  I: Integer;
+  Info: TBlockMatchInfo;
+begin
+  FCurrentTokenValidateTimer.Enabled := False;
+  FCurrentTokenInvalid := False;
+  for I := 0 to FBlockMatchList.Count - 1 do
+  begin
+    Info := TBlockMatchInfo(FBlockMatchList[I]);
+    Info.Control.Invalidate;
+  end;
 end;
 
 { TBlockLinePair }
