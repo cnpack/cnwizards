@@ -1,8 +1,8 @@
 inherited CnPrefixEditForm: TCnPrefixEditForm
-  Left = 351
-  Top = 231
-  Width = 344
-  Height = 255
+  Left = 412
+  Top = 232
+  Width = 350
+  Height = 264
   ActiveControl = edtName
   BorderIcons = [biSystemMenu]
   Caption = 'Edit Component'#39's Name'
