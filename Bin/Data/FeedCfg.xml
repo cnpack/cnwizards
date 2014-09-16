@@ -8,14 +8,6 @@
     <Limit>0</Limit>
   </o>
   <o>
-    <Caption>CnPack Download</Caption>
-    <IDStr>CnPackDownload</IDStr>
-    <FeedType>ftCnPack</FeedType>
-    <Url>http://code.google.com/feeds/p/cnpack/downloads/basic</Url>
-    <CheckPeriod>240</CheckPeriod>
-    <Limit>5</Limit>
-  </o>
-  <o>
     <Caption>CnPack Partner RSS 1</Caption>
     <IDStr>PartnerRSS1</IDStr>
     <Url>http://www.cnpack.org/rss/?id=1&amp;lang=$langid$</Url>

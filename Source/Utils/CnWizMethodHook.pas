@@ -155,8 +155,6 @@ var
 begin
 {$IFDEF USE_DDETOURS_HOOK}
   FTrampoline := DDetours.InterceptCreate(FOldMethod, FNewMethod);
-  if not Assigned(FTrampoline) then
-    raise Exception.Create('Failed to install method hook');
 {$ELSE}
   if FHooked then Exit;
   
