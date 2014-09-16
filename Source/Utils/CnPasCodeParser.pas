@@ -372,9 +372,10 @@ var
   Token, CurrMethod, CurrBlock, CurrMidBlock: TCnPasToken;
   SavePos, SaveLineNumber, SaveLinePos: Integer;
   IsClassOpen, IsClassDef, IsImpl, IsHelper: Boolean;
-  IsRecordHelper, IsSealed, IsRecord: Boolean;
+  IsRecordHelper, IsSealed, IsRecord, IsForFunc: Boolean;
   DeclareWithEndLevel: Integer;
   PrevTokenID: TTokenKind;
+  PrevTokenStr: string;
 
   function CalcCharIndex(): Integer;
 {$IFDEF BDS2009_UP}
@@ -550,6 +551,8 @@ begin
           tkRecord, tkObject:
             begin
               IsRecord := Lex.TokenID = tkRecord;
+              IsForFunc := (PrevTokenID in [tkPoint]) or
+                ((PrevTokenID = tkSymbol) and (PrevTokenStr = '&'));
               if IsRecord then
               begin
                 // 处理 record helper for 的情形，但在implementation部分其end会被
@@ -575,6 +578,7 @@ begin
               // 额外用 IsRecord 变量因为 Lex.RunPos 恢复后，TokenID 可能会变
               if ((Lex.TokenID <> tkObject) or (PrevTokenID <> tkOf))
                 and not (PrevTokenID in [tkAt, tkDoubleAddressOp])
+                and not IsForFunc        // 不处理 TParalle.For 以及 .&For 这种函数
                 and not ((Lex.TokenID = tkFor) and (IsHelper or IsRecordHelper)) then
                 // 不处理 helper 中的 for
               begin
@@ -793,6 +797,7 @@ begin
       end;
 
       PrevTokenID := Lex.TokenID;
+      PrevTokenStr := Lex.Token;
       LexNextNoJunkWithoutCompDirect(Lex);
     end;
   finally
