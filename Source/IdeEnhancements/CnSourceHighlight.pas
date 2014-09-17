@@ -38,7 +38,9 @@ unit CnSourceHighlight;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2013.07.08
+* 修改记录：2014.09.17
+*               优化高亮当前标识符的绘制性能，感谢vitaliyg2
+*           2013.07.08
 *               加入绘制流程控制标识符背景的功能
 *           2012.12.24
 *               修复 jtdd 报告的绘制空行分隔线在折叠状态下可能出错的问题
@@ -1377,7 +1379,9 @@ var
   EditView: IOTAEditView;
   CharPos: TOTACharPos;
   EditPos: TOTAEditPos;
-  I: Integer;
+  I, TokenCursorIndex, StartIndex, EndIndex: Integer;
+  TmpCurTokenStr: string;
+  AToken: TCnPasToken;
 begin
   FCurrentTokenName := '';
   FCurrentToken := nil;
@@ -1428,54 +1432,53 @@ begin
         FCurMethodCloseToken := Parser.MethodCloseToken;
       end;
 
-      // 必须搜索当前所有标识符，避免只高亮光标出于当前过程内的问题
-      for I := 0 to Parser.Count - 1 do
-      begin
-        CharPos := OTACharPos(Parser.Tokens[I].CharIndex, Parser.Tokens[I].LineNumber + 1);
-        EditView.ConvertPos(False, EditPos, CharPos);
-        // TODO: 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
-{$IFDEF BDS2009_UP}
-        // if not FHighlight.FUseTabKey then
-        EditPos.Col := Parser.Tokens[I].CharIndex + 1;
-{$ENDIF}
-        Parser.Tokens[I].EditCol := EditPos.Col;
-        Parser.Tokens[I].EditLine := EditPos.Line;
+      CnOtaGetCurrPosToken(TmpCurTokenStr, TokenCursorIndex, True, [], [], EditView);
+      FCurrentTokenName := AnsiString(TmpCurTokenStr);
 
-        if (Parser.Tokens[I].TokenID = tkIdentifier) and // 此处判断不支持双字节字符
-          IsCurrentToken(Pointer(EditView), FControl, Parser.Tokens[I]) then
+      if FCurrentTokenName <> '' then
+      begin
+        StartIndex := 0;
+        EndIndex := Parser.Count - 1;
+
+        // 高亮整个单元时，或当前是过程名与类名时，或无当前Method时，高亮整个单元
+//        if (FHighlight.BlockHighlightRange = brAll)
+//          or TokenIsMethodOrClassName(string(FCurrentTokenName), string(Parser.CurrentMethod))
+//          or ((FCurMethodStartToken = nil) or (FCurMethodCloseToken = nil)) then
+//        begin
+//          StartIndex := 0;
+//          EndIndex := Parser.Count - 1;
+//        end
+//        else
+        if (FCurMethodStartToken <> nil) or (FCurMethodCloseToken <> nil) then // 其它范围便默认改为高亮本过程的
         begin
-          if FCurrentToken = nil then
+          StartIndex := FCurMethodStartToken.ItemIndex;
+          EndIndex := FCurMethodCloseToken.ItemIndex;
+        end;
+
+        // 必须搜索当前所有标识符，避免只高亮光标出于当前过程内的问题
+        for I := StartIndex to EndIndex do
+        begin
+          AToken := Parser.Tokens[I];
+          if (AToken.TokenID = tkIdentifier) and // 此处判断不支持双字节字符
+            CheckTokenMatch(AToken.Token, FCurrentTokenName, CaseSensitive) then
           begin
-            // 不能 Break，否则 Tokens 就没 EditLine 的更新了，下面也一样
-            FCurrentToken := Parser.Tokens[I];
-            FCurrentTokenName := FCurrentToken.Token;
+            CharPos := OTACharPos(AToken.CharIndex, AToken.LineNumber + 1);
+            EditView.ConvertPos(False, EditPos, CharPos);
+            // TODO: 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
+    {$IFDEF BDS2009_UP}
+            // if not FHighlight.FUseTabKey then
+            EditPos.Col := AToken.CharIndex + 1;
+    {$ENDIF}
+            AToken.EditCol := EditPos.Col;
+            AToken.EditLine := EditPos.Line;
+
+            FCurTokenList.Add(AToken);
+            FCurTokenListEditLine.Add(Pointer(AToken.EditLine));
           end;
         end;
-      end;
 
-      // 高亮整个单元时，或当前是过程名与类名时，或无当前Method时，高亮整个单元
-      if ((FCurrentTokenName <> '') and (FHighlight.BlockHighlightRange = brAll))
-        or TokenIsMethodOrClassName(string(FCurrentTokenName), string(Parser.CurrentMethod))
-        or ((FCurMethodStartToken = nil) or (FCurMethodCloseToken = nil)) then
-      begin
-        for I := 0 to Parser.Count - 1 do
-          if (Parser.Tokens[I].TokenID = tkIdentifier) and
-            CheckTokenMatch(Parser.Tokens[I].Token, FCurrentTokenName, CaseSensitive) then
-          begin
-            FCurTokenList.Add(Parser.Tokens[I]);
-            FCurTokenListEditLine.Add(Pointer(Parser.Tokens[I].EditLine));
-          end;
-      end
-      else if (FCurMethodStartToken <> nil) or (FCurMethodCloseToken <> nil) then // 其它范围便默认改为高亮本过程的
-      begin
-        for I := FCurMethodStartToken.ItemIndex to
-          FCurMethodCloseToken.ItemIndex do
-          if (Parser.Tokens[I].TokenID = tkIdentifier) and
-            CheckTokenMatch(Parser.Tokens[I].Token, FCurrentTokenName, CaseSensitive) then
-          begin
-            FCurTokenList.Add(Parser.Tokens[I]);
-            FCurTokenListEditLine.Add(Pointer(Parser.Tokens[I].EditLine));
-          end;
+        if FCurTokenList.Count > 0 then
+          FCurrentToken := FCurTokenList.Items[0];
       end;
     end;
 
@@ -1488,62 +1491,49 @@ begin
     // TCnPasToken 来表示并加入 FCurTokenList 中，但和 Pascal 语言相关的属性
     // 均无效，只有 Token 名和位置等有效。因此 C/C++ 的高亮标识符不支持范围设置
 
-    // 将解析出的同名 Token 按范围规定加入 FCurTokenList
-    for I := 0 to CppParser.Count - 1 do
-    begin
-      CharPos := OTACharPos(CppParser.Tokens[I].CharIndex - 1, CppParser.Tokens[I].LineNumber);
-      // 此处 LineNumber 无需加一了，因为 mwBCBTokenList 中的此属性是从 1 开始的
-      // 反倒 CharIndex 得减一
-      EditView.ConvertPos(False, EditPos, CharPos);
-      CppParser.Tokens[I].EditCol := EditPos.Col;
-      CppParser.Tokens[I].EditLine := EditPos.Line;
+    CnOtaGetCurrPosToken(TmpCurTokenStr, TokenCursorIndex, True, [], [], EditView);
+    FCurrentTokenName := AnsiString(TmpCurTokenStr);
 
-      if (CppParser.Tokens[I].CppTokenKind = ctkidentifier) and
-        IsCurrentToken(Pointer(EditView), FControl, CppParser.Tokens[I]) then
-      begin
-        if FCurrentToken = nil then
-        begin
-          FCurrentToken := CppParser.Tokens[I];
-          FCurrentTokenName := FCurrentToken.Token;
-        end;
-      end;
-    end;
+    if FCurrentTokenName <> '' then
+    begin
+      StartIndex := 0;
+      EndIndex := CppParser.Count - 1;
 
-    if (FHighlight.BlockHighlightRange in [brMethod, brWholeBlock])
-      and Assigned(CppParser.BlockStartToken) and Assigned(CppParser.BlockCloseToken) then
-    begin
-      for I := CppParser.BlockStartToken.ItemIndex to CppParser.BlockCloseToken.ItemIndex do
+      if (FHighlight.BlockHighlightRange in [brMethod, brWholeBlock])
+        and Assigned(CppParser.BlockStartToken) and Assigned(CppParser.BlockCloseToken) then
       begin
-        if (CppParser.Tokens[I].CppTokenKind = ctkIdentifier) and
-          CheckTokenMatch(CppParser.Tokens[I].Token, FCurrentTokenName, CaseSensitive) then
-        begin
-          FCurTokenList.Add(CppParser.Tokens[I]);
-          FCurTokenListEditLine.Add(Pointer(CppParser.Tokens[I].EditLine));
-        end;
+        StartIndex := CppParser.BlockStartToken.ItemIndex;
+        EndIndex := CppParser.BlockCloseToken.ItemIndex;
+      end
+      else if (FHighlight.BlockHighlightRange in [brInnerBlock])
+        and Assigned(CppParser.InnerBlockStartToken) and Assigned(CppParser.InnerBlockCloseToken) then
+      begin
+        StartIndex := CppParser.InnerBlockStartToken.ItemIndex;
+        EndIndex := CppParser.InnerBlockCloseToken.ItemIndex;
       end;
-    end
-    else if (FHighlight.BlockHighlightRange in [brInnerBlock])
-      and Assigned(CppParser.InnerBlockStartToken) and Assigned(CppParser.InnerBlockCloseToken) then
-    begin
-      for I := CppParser.InnerBlockStartToken.ItemIndex to CppParser.InnerBlockCloseToken.ItemIndex do
+
+      // 将解析出的同名 Token 按范围规定加入 FCurTokenList
+      for I := StartIndex to EndIndex do
       begin
-        if (CppParser.Tokens[I].CppTokenKind = ctkIdentifier) and
-          CheckTokenMatch(CppParser.Tokens[I].Token, FCurrentTokenName, CaseSensitive) then
+        AToken := CppParser.Tokens[I];
+        if (AToken.CppTokenKind = ctkIdentifier) and
+          CheckTokenMatch(AToken.Token, FCurrentTokenName, CaseSensitive) then
         begin
-          FCurTokenList.Add(CppParser.Tokens[I]);
-          FCurTokenListEditLine.Add(Pointer(CppParser.Tokens[I].EditLine));
-        end;
-      end;
-    end
-    else // 整个范围
-    begin
-      for I := 0 to CppParser.Count - 1 do
-      begin
-        if (CppParser.Tokens[I].CppTokenKind = ctkIdentifier) and
-          CheckTokenMatch(CppParser.Tokens[I].Token, FCurrentTokenName, CaseSensitive) then
-        begin
-          FCurTokenList.Add(CppParser.Tokens[I]);
-          FCurTokenListEditLine.Add(Pointer(CppParser.Tokens[I].EditLine));
+          CharPos := OTACharPos(AToken.CharIndex - 1, AToken.LineNumber);
+          // 此处 LineNumber 无需加一了，因为 mwBCBTokenList 中的此属性是从 1 开始的
+          // 反倒 CharIndex 得减一
+          EditView.ConvertPos(False, EditPos, CharPos);
+
+          // DONE: 以上这句本应在 D2009 时按以下修复，但对于C/C++文件无效，不能加！
+      {$IFDEF BDS2009_UP}
+          // if not FHighlight.FUseTabKey then
+          // EditPos.Col := AToken.CharIndex + 1;
+      {$ENDIF}
+          AToken.EditCol := EditPos.Col;
+          AToken.EditLine := EditPos.Line;
+
+          FCurTokenList.Add(AToken);
+          FCurTokenListEditLine.Add(Pointer(AToken.EditLine));
         end;
       end;
     end;
@@ -1896,24 +1886,7 @@ begin
     TCnList(FLineList[Token.EditLine]).Add(Token);
   end;
 
-  if FHighlight.CurrentTokenHighlight then
-  begin
-    MaxLine := 0;
-    for i := 0 to FCurTokenList.Count - 1 do
-    begin
-      if CurTokens[i].EditLine > MaxLine then
-        MaxLine := CurTokens[i].EditLine;
-    end;
-    FIdLineList.Count := MaxLine + 1;
-
-    for I := 0 to FCurTokenList.Count - 1 do
-    begin
-      Token := CurTokens[I];
-      if FIdLineList[Token.EditLine] = nil then
-        FIdLineList[Token.EditLine] := TCnList.Create;
-      TCnList(FIdLineList[Token.EditLine]).Add(Token);
-    end;
-  end;
+  ConvertIdLineList;
 end;
 
 procedure TBlockMatchInfo.ConvertIdLineList;
@@ -1922,14 +1895,14 @@ var
   Token: TCnPasToken;
   MaxLine: Integer;
 begin
-  MaxLine := 0;
-  for I := 0 to FCurTokenList.Count - 1 do
-    if CurTokens[I].EditLine > MaxLine then
-      MaxLine := CurTokens[I].EditLine;
-  FIdLineList.Count := MaxLine + 1;
-
   if FHighlight.CurrentTokenHighlight then
   begin
+    MaxLine := 0;
+    for I := 0 to FCurTokenList.Count - 1 do
+      if CurTokens[I].EditLine > MaxLine then
+        MaxLine := CurTokens[I].EditLine;
+    FIdLineList.Count := MaxLine + 1;
+
     for I := 0 to FCurTokenList.Count - 1 do
     begin
       Token := CurTokens[I];
@@ -1988,7 +1961,7 @@ begin
 
   FDefaultHighLightLineColor := FHighLightLineColor; // 用来判断与保存
 {$ENDIF}
-  FCurrentTokenHighlight := False;    // 默认改为 False
+  FCurrentTokenHighlight := True;    // 默认打开标识符高亮
   FCurrentTokenDelay := 500;
   FCurrentTokenBackground := csDefCurTokenColorBg;
   FCurrentTokenForeground := csDEfCurTokenColorFg;
