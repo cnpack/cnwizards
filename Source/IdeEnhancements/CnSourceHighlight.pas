@@ -1524,10 +1524,11 @@ begin
           // 反倒 CharIndex 得减一
           EditView.ConvertPos(False, EditPos, CharPos);
 
-          // DONE: 以上这句本应在 D2009 时按以下修复，但对于C/C++文件无效，不能加！
+          // DONE: 以上这句本应在 D2009 时按以下修复，
+          // 但对于C/C++文件有Tab键存在时会出错导致高亮无法显示，故此先禁用
       {$IFDEF BDS2009_UP}
           // if not FHighlight.FUseTabKey then
-          // EditPos.Col := AToken.CharIndex + 1;
+          // EditPos.Col := AToken.CharIndex;
       {$ENDIF}
           AToken.EditCol := EditPos.Col;
           AToken.EditLine := EditPos.Line;
