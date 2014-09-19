@@ -1441,15 +1441,14 @@ begin
         EndIndex := Parser.Count - 1;
 
         // 高亮整个单元时，或当前是过程名与类名时，或无当前Method时，高亮整个单元
-//        if (FHighlight.BlockHighlightRange = brAll)
-//          or TokenIsMethodOrClassName(string(FCurrentTokenName), string(Parser.CurrentMethod))
-//          or ((FCurMethodStartToken = nil) or (FCurMethodCloseToken = nil)) then
-//        begin
+        if (FHighlight.BlockHighlightRange = brAll)
+          or TokenIsMethodOrClassName(string(FCurrentTokenName), string(Parser.CurrentMethod))
+          or ((FCurMethodStartToken = nil) or (FCurMethodCloseToken = nil)) then
+        begin
 //          StartIndex := 0;
 //          EndIndex := Parser.Count - 1;
-//        end
-//        else
-        if (FCurMethodStartToken <> nil) or (FCurMethodCloseToken <> nil) then // 其它范围便默认改为高亮本过程的
+        end
+        else if (FCurMethodStartToken <> nil) or (FCurMethodCloseToken <> nil) then // 其它范围便默认改为高亮本过程的
         begin
           StartIndex := FCurMethodStartToken.ItemIndex;
           EndIndex := FCurMethodCloseToken.ItemIndex;
