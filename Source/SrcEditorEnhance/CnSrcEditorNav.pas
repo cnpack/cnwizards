@@ -138,6 +138,7 @@ type
     procedure UpdateInstall;
 {$IFDEF BDS}
     procedure DoUpdateInstallInAppBuilder(Sender: TObject);
+    procedure FixButtonArrowInComplete(Sender: TObject);
 {$ENDIF}
     procedure UpdateControls;
 
@@ -717,11 +718,45 @@ begin
       EditorNav.FEditControl := nil;
       EditorNav.Install;
       FList.Add(EditorNav);
+
+      CnWizNotifierServices.ExecuteOnApplicationIdle(FixButtonArrowInComplete);
     end;
   end
   else if Assigned(EditorNav) then
   begin
     EditorNav.Free;
+  end;
+end;
+
+procedure TCnSrcEditorNavMgr.FixButtonArrowInComplete(Sender: TObject);
+var
+  EditorNav: TCnSrcEditorNav;
+  BrowserToolbar: TToolBar;
+  ToolbarParent: TWinControl;
+  P: TPoint;
+begin
+  if Active and ExtendForwardBack then
+  begin
+    EditorNav := TCnSrcEditorNav(FindComponentByClass(GetIdeMainForm,
+      TCnSrcEditorNav, SCnSrcEditorNavName));
+    if EditorNav <> nil then
+    begin
+      // Send Drag Message to Fix its Icon Showing Problem.
+      BrowserToolbar := TToolBar(EditorNav.Owner.FindComponent(SBrowserToolBarName));
+      if BrowserToolbar <> nil then
+      begin
+        ToolbarParent := BrowserToolbar.Parent;
+        if ToolbarParent <> nil then
+        begin
+          P.X := 5;
+          P.Y := BrowserToolbar.Height div 2;
+          P := BrowserToolbar.ClientToParent(P);
+
+          SendMessage(ToolbarParent.Handle, WM_LBUTTONDOWN, 0, MakeLParam(P.X, P.Y));
+          SendMessage(ToolbarParent.Handle, WM_LBUTTONUP, 0, MakeLParam(P.X, P.Y));
+        end;
+      end;
+    end;
   end;
 end;
 
