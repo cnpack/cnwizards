@@ -76,6 +76,7 @@ function EdtGetProjectName: string;
 function EdtGetProjectGroupDir: string;
 function EdtGetProjectGroupName: string;
 function EdtGetUnitName: string;
+function EdtGetUnitPath: string;
 function EdtGetProcName: string;
 function EdtGetCurrProcName: string;
 function EdtGetResult: string;
@@ -217,6 +218,17 @@ begin
   Result := _CnExtractFileName(CnOtaGetCurrentSourceFile);
   if Result = '' then
     Result := SCnUnknownNameResult;
+end;
+
+function EdtGetUnitPath: string;
+begin
+  Result := _CnExtractFileDir(CnOtaGetCurrentSourceFile);
+  if Result = '' then
+    Result := SCnUnknownNameResult;
+  if CurrentIsDelphiSource then
+    Result := QuotedStr(Result)
+  else
+    Result := '"' + Result + '"';
 end;
 
 function EdtGetProcName: string;

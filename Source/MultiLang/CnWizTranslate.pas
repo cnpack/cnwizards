@@ -450,6 +450,7 @@ begin
   TranslateStr(SCnEMVProjectGroupDir, 'SCnEMVProjectGroupDir');
   TranslateStr(SCnEMVProjectGroupName, 'SCnEMVProjectGroupName');
   TranslateStr(SCnEMVUnit, 'SCnEMVUnit');
+  TranslateStr(SCnEMVUnitPath, 'SCnEMVUnitPath');
   TranslateStr(SCnEMVProceName, 'SCnEMVProceName');
   TranslateStr(SCnEMVResult, 'SCnEMVResult');
   TranslateStr(SCnEMVArguments, 'SCnEMVArguments');

@@ -731,6 +731,7 @@ var
   SCnEMVProjectGroupDir: string = 'Project Group Directory';
   SCnEMVProjectGroupName: string = 'Project Group Name';
   SCnEMVUnit: string = 'Unit Name';
+  SCnEMVUnitPath: string = 'Unit Full Path without File Name';
   SCnEMVProceName: string = 'Next Procedure Name';
   SCnEMVResult: string = 'The Return Type of the Procedure, or None';
   SCnEMVArguments: string = 'The Arguments Passed to the Procedure, or None';

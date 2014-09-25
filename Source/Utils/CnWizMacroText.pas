@@ -47,7 +47,7 @@ type
 { TCnWizMacroText }
 
   TCnWizMacro = (cwmProjectDir, cwmProjectName, cwmProjectGroupDir,
-    cwmProjectGroupName, cwmUnit, cwmProcName,
+    cwmProjectGroupName, cwmUnit, cwmUnitPath, cwmProcName,
     cwmResult, cwmArguments, cwmArgList, cwmRetType, cwmCurrProcName,
     cwmCurrMethodName, cwmCurrClassName, cwmCurrIDEName,
     cwmUser, cwmDateTime, cwmDate, cwmYear, cwmMonth, cwmMonthShortName,
@@ -82,7 +82,7 @@ const
 
   csCnWizMacroDescs: array[TCnWizMacro] of PString = (
     @SCnEMVProjectDir, @SCnEMVProjectName, @SCnEMVProjectGroupDir,
-    @SCnEMVProjectGroupName, @SCnEMVUnit, @SCnEMVProceName, @SCnEMVResult,
+    @SCnEMVProjectGroupName, @SCnEMVUnit, @SCnEMVUnitPath, @SCnEMVProceName, @SCnEMVResult,
     @SCnEMVArguments, @SCnEMVArgList, @SCnEMVRetType, @SCnEMVCurProceName,
     @SCnEMVCurMethodName, @SCnEMVCurClassName, @SCnEMVCurIDEName, @SCnEMVUser,
     @SCnEMVDateTime, @SCnEMVDate, @SCnEMVYear,
@@ -340,6 +340,8 @@ begin
         Result := EdtGetProjectGroupName;
       cwmUnit:
         Result := EdtGetUnitName;
+      cwmUnitPath:
+        Result := EdtGetUnitPath;
       cwmProcName:
         Result := EdtGetProcName;
       cwmResult:
