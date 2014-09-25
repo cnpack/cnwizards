@@ -481,7 +481,8 @@ begin
   if Obj <> nil then
   begin
     S := CnOtaGetCurrentSourceFileName;
-    Obj.EditorToolBar.Visible := IsDelphiSourceModule(S) or IsInc(S) or IsCppSourceModule(S);
+    Obj.EditorToolBar.Visible := Active and FUseEditorToolBar and
+      IsDelphiSourceModule(S) or IsInc(S) or IsCppSourceModule(S);
 
     if IsPas(S) or IsInc(S) then
     begin
@@ -649,7 +650,7 @@ end;
 procedure TCnProcListWizard.ToolBarCanShow(Sender: TObject;
   APage: TCnSrcEditorPage; var ACanShow: Boolean);
 begin
-  ACanShow := APage in [epCode];
+  ACanShow := Active and (APage in [epCode]);
 end;
   
 procedure TCnProcListWizard.SplitterMoved(Sender: TObject);
@@ -969,7 +970,7 @@ procedure TCnProcListWizard.EditorChange(Editor: TEditorObject;
 var
   Obj: TCnProcToolBarObj;
 begin
-  if FUseEditorToolBar then
+  if Active and FUseEditorToolBar then
   begin
     if ChangeType * [ctView] <> [] then
     begin

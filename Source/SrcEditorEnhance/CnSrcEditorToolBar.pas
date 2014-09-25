@@ -804,6 +804,11 @@ begin
         end;
       end;
 
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('CheckToolBarEnable Should Visible %d, Invisible %d',
+        [VisibleList.Count, InvisibleList.Count]);
+{$ENDIF}
+
       // Hide Invisible ToolBars
       for J := InvisibleList.Count - 1 downto 0 do
         TToolBar(InvisibleList[J]).Visible := False;
