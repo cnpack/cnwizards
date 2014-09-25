@@ -3035,7 +3035,7 @@ begin
 
       if FHilightSeparateLine and (LogicLineNum <= Info.FSeparateLineList.Count - 1)
         and (Integer(Info.FSeparateLineList[LogicLineNum]) = CN_LINE_SEPARATE_FLAG)
-        and (Trim(EditControlWrapper.GetTextAtLine(EditControl, LineNum)) = '') then
+        and (Trim(EditControlWrapper.GetTextAtLine(EditControl, LogicLineNum)) = '') then
       begin
         // 保存 EditCanvas 的旧内容
         with EditCanvas do
@@ -3050,7 +3050,7 @@ begin
         CanvasSaved := True;
 
         // 先画上分隔线再说
-        EditPos := OTAEditPos(Editor.EditView.LeftColumn, LogicLineNum);
+        EditPos := OTAEditPos(Editor.EditView.LeftColumn, LineNum);
         if EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FLineText, {$ENDIF} ' ', R) then
         begin
           EditCanvas.Pen.Color := FSeparateLineColor;

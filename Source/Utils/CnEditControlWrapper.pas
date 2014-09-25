@@ -293,7 +293,8 @@ type
     function GetTextAtLine(EditControl: TControl; LineNum: Integer): string;
     {* 取指定行的文本。注意该函数取到的文本是将 Tab 扩展成空格的，如果使用
        ConvertPos 来转换成 EditPos 可能会有问题。直接将 CharIndex + 1 赋值
-       给 EditPos.Col 即可。 }
+       给 EditPos.Col 即可。
+       另外，LineNum为逻辑行号，也就是和折叠无关的实际行号 }
     function IndexPosToCurPos(EditControl: TControl; Col, Line: Integer): Integer;
     {* 计算编辑器字符串索引到编辑器显示的实际位置 }
 
