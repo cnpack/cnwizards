@@ -1,8 +1,8 @@
 inherited CnPrefixCompForm: TCnPrefixCompForm
   Left = 251
   Top = 162
-  Width = 632
-  Height = 476
+  Width = 640
+  Height = 487
   BorderIcons = [biSystemMenu]
   Caption = 'Component Renaming List'
   Icon.Data = {
