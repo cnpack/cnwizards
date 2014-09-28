@@ -2772,6 +2772,7 @@ SCnEMVProjectName=Project Name
 SCnEMVProjectGroupDir=Project Group Directory
 SCnEMVProjectGroupName=Project Group Name
 SCnEMVUnit=Unit Name
+SCnEMVUnitPath=Unit Full Path without File Name
 SCnEMVProceName=Next Procedure Name
 SCnEMVResult=The Return Type of the Procedure, or None
 SCnEMVArguments=The Arguments Passed to the Procedure, or None

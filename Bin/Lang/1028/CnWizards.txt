@@ -2772,6 +2772,7 @@ SCnEMVProjectName=工程名稱
 SCnEMVProjectGroupDir=工程組目錄
 SCnEMVProjectGroupName=工程組名稱
 SCnEMVUnit=單元名稱
+SCnEMVUnitPath=單元所在路徑
 SCnEMVProceName=當前游標後下一過程名稱
 SCnEMVResult=函數返回值
 SCnEMVArguments=過程參數
