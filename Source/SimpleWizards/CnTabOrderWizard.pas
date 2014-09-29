@@ -1152,7 +1152,8 @@ begin
   else if (NotifyType = fetActivated) and Active then
   begin
     Root := CnOtaGetRootComponentFromEditor(FormEditor);
-    if Assigned(Root) and (Root is TWinControl) then
+    if Assigned(Root) and (Root is TWinControl) and
+      (FUpdateDrawForms.IndexOf(Root)< 0) then
     begin
       FUpdateDrawForms.Add(Root);
       FTimer.Enabled := True;
