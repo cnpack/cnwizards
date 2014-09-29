@@ -2772,6 +2772,7 @@ SCnEMVProjectName=Projekt Name
 SCnEMVProjectGroupDir=Projektgruppen Verzeichnis
 SCnEMVProjectGroupName=Projektgruppen Name
 SCnEMVUnit=Unit Name
+SCnEMVUnitPath=Unit Verzeichnis (ohne Dateiname)
 SCnEMVProceName=Nächster Prozedurname
 SCnEMVResult=Der Rückgabewert der Funktion der keine
 SCnEMVArguments=Die Übergabevariabelen der Prozedur oder keine
