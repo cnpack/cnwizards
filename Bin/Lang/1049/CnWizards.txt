@@ -2772,6 +2772,7 @@ SCnEMVProjectName=Имя проекта
 SCnEMVProjectGroupDir=Папка группы проектов
 SCnEMVProjectGroupName=Имя группы проектов
 SCnEMVUnit=Имя модуля
+SCnEMVUnitPath=Блок Полный путь без имени файла
 SCnEMVProceName=Имя след. подпрограммы
 SCnEMVResult=Тип возвращаемого подпрограммой значения или Ничего
 SCnEMVArguments=Входные параметры подпрограммы или Ничего
