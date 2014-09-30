@@ -9,11 +9,10 @@ How to add translation for CnWizards?
 CnWizards supports multi-language UI. If you want to add new translation
 for CnWizards, please do follow steps:
 
-1.You can get all language files from our SVN or download page.
-* How to access our SVN: 
-http://code.google.com/p/cnpack/source/checkout
-* Or you can download CnWizards source code from here(Maybe not latest): 
-http://code.google.com/p/cnpack/downloads/list
+1.You can get all language files from our GIT.
+* How to access our GIT: 
+http://github.com/cnpack
+There are 2 repositories named cnvcl and cnwizards.
 
 2.Our language files are in cnwizards\Bin\Lang, 1033 is English.
 Also the Lang directory is in our installation destination, such as 
