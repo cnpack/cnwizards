@@ -16,5 +16,6 @@
 {$ENDIF}
 
 {$IFDEF COMPILER9_UP}
-  {$DEFINE USE_DDETOURS_HOOK}
+//  {$DEFINE USE_DDETOURS_HOOK}
+// DDetours causes AV so disabled.
 {$ENDIF}
