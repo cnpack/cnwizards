@@ -195,9 +195,7 @@ procedure CnSrchDialogOKButtonClick(ASelf, Sender: TObject);
 var
   AForm: TCustomForm;
   AComp: TComponent;
-{$IFNDEF USE_DDETOURS_HOOK}
   ANotify: TNotifyEvent;
-{$ENDIF}
 {$IFDEF BDS}
   Len: Integer;
   WideText: WideString;
@@ -250,15 +248,16 @@ begin
 
   if FOldSrchDialogOKButtonClick <> nil then
   begin
-{$IFDEF USE_DDETOURS_HOOK}
-    TClickEventProc(FMethodHook.Trampoline)(ASelf, Sender);
-{$ELSE}
-    FMethodHook.UnhookMethod;
-    TMethod(ANotify).Code := FOldSrchDialogOKButtonClick;
-    TMethod(ANotify).Data := ASelf;
-    ANotify(Sender);
-    FMethodHook.HookMethod;
-{$ENDIF}
+    if FMethodHook.UseDDteours then
+      TClickEventProc(FMethodHook.Trampoline)(ASelf, Sender)
+    else
+    begin
+      FMethodHook.UnhookMethod;
+      TMethod(ANotify).Code := FOldSrchDialogOKButtonClick;
+      TMethod(ANotify).Data := ASelf;
+      ANotify(Sender);
+      FMethodHook.HookMethod;
+    end;
   end;
 end;
 

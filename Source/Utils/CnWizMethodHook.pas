@@ -29,7 +29,9 @@ unit CnWizMethodHook;
 * 兼容测试：
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2014.08.28
+* 修改记录：2014.10.01
+*               将 DDetours 调用改为动态
+*           2014.08.28
 *               改用DDetours实现调用
 *           2003.10.27
 *               实现属性编辑器方法挂接核心技术
@@ -44,29 +46,25 @@ uses
   Windows, SysUtils, Classes{$IFDEF USE_DDETOURS_HOOK}, DDetours{$ENDIF};
 
 type
-{$IFNDEF USE_DDETOURS_HOOK}
   PLongJump = ^TLongJump;
   TLongJump = packed record
     JmpOp: Byte;        // Jmp 相对跳转指令，为 $E9
     Addr: Pointer;      // 跳转到的相对地址
   end;
-{$ENDIF}
 
   TCnMethodHook = class
   {* 静态或 dynamic 方法挂接类，用于挂接类中静态方法或声明为 dynamic 的动态方法。
      该类通过修改原方法入口前 5字节，改为跳转指令来实现方法挂接操作，在使用时
      请保证原方法的执行体代码大于 5字节，否则可能会出现严重后果。}
   private
+    FUseDDteours: Boolean;
     FHooked: Boolean;
     FOldMethod: Pointer;
     FNewMethod: Pointer;
-{$IFDEF USE_DDETOURS_HOOK}
     FTrampoline: Pointer;
-{$ELSE}
     FSaveData: TLongJump;
-{$ENDIF}
   public
-    constructor Create(const AOldMethod, ANewMethod: Pointer);
+    constructor Create(const AOldMethod, ANewMethod: Pointer; UseDDteoursHook: Boolean = False);
     {* 构造器，参数为原方法地址和新方法地址。注意如果在专家包中使用，原方法地址
        请用 GetBplMethodAddress 转换成真实地址。构造器调用后会自动挂接传入的方法。
      |<PRE>
@@ -82,9 +80,11 @@ type
     {* 重新挂接，如果需要执行原过程，并使用了 UnhookMethod，请在执行完成后重新挂接}
     procedure UnhookMethod; virtual;
     {* 取消挂接，如果需要执行原过程，请先使用 UnhookMethod，再调用原过程，否则会出错}
-{$IFDEF USE_DDETOURS_HOOK}
     property Trampoline: Pointer read FTrampoline;
-{$ENDIF}
+    {* DDetours 挂接后的旧方法地址，供外界不切换挂接状态而直接调用。
+       如不使用 DDetours，则为 nil}
+    property UseDDteours: Boolean read FUseDDteours;
+    {* 是否使用 UseDDteours 库进行挂接}
   end;
 
 function GetBplMethodAddress(Method: Pointer): Pointer;
@@ -101,7 +101,6 @@ const
 
 // 返回在 BPL 中实际的方法地址
 function GetBplMethodAddress(Method: Pointer): Pointer;
-{$IFNDEF USE_DDETOURS_HOOK}
 type
   PJmpCode = ^TJmpCode;
   TJmpCode = packed record
@@ -110,16 +109,13 @@ type
   end;
 const
   csJmp32Code = $25FF;
-{$ENDIF}
 begin
-{$IFDEF USE_DDETOURS_HOOK}
-  Result := Method;
-{$ELSE}
+//  Result := Method;
   if PJmpCode(Method)^.Code = csJmp32Code then
     Result := PJmpCode(Method)^.Addr^
   else
     Result := Method;
-{$ENDIF}
+
 end;
 
 //==============================================================================
@@ -128,15 +124,19 @@ end;
 
 { TCnMethodHook }
 
-constructor TCnMethodHook.Create(const AOldMethod, ANewMethod: Pointer);
+constructor TCnMethodHook.Create(const AOldMethod, ANewMethod: Pointer;
+  UseDDteoursHook: Boolean);
 begin
   inherited Create;
+{$IFNDEF USE_DDETOURS_HOOK}
+  if UseDDteoursHook then
+    raise Exception.Create('DDetours NOT Included. Can NOT Hook.');
+{$ENDIF}
+  FUseDDteours := UseDDteoursHook;
   FHooked := False;
   FOldMethod := AOldMethod;
   FNewMethod := ANewMethod;
-{$IFDEF USE_DDETOURS_HOOK}
   FTrampoline := nil;
-{$ENDIF}
   HookMethod;
 end;
 
@@ -147,73 +147,79 @@ begin
 end;
 
 procedure TCnMethodHook.HookMethod;
-{$IFNDEF USE_DDETOURS_HOOK}
 var
   DummyProtection: DWORD;
   OldProtection: DWORD;
-{$ENDIF}
 begin
+  if FUseDDteours then
+  begin
 {$IFDEF USE_DDETOURS_HOOK}
-  FTrampoline := DDetours.InterceptCreate(FOldMethod, FNewMethod);
-  if not Assigned(FTrampoline) then
-    raise Exception.Create('Failed to install method hook');
-{$ELSE}
-  if FHooked then Exit;
-  
-  // 设置代码页写访问权限
-  if not VirtualProtect(FOldMethod, SizeOf(TLongJump), PAGE_EXECUTE_READWRITE, @OldProtection) then
-    raise Exception.CreateFmt(SMemoryWriteError, [SysErrorMessage(GetLastError)]);
-
-  try
-    // 保存原来的代码
-    FSaveData := PLongJump(FOldMethod)^;
-
-    // 用跳转指令替换原来方法前 5 字节代码
-    PLongJump(FOldMethod)^.JmpOp := csJmpCode;
-    PLongJump(FOldMethod)^.Addr := Pointer(Integer(FNewMethod) -
-      Integer(FOldMethod) - SizeOf(TLongJump)); // 使用 32 位相对地址
-
-    // 保存多处理器下指令缓冲区同步
-    FlushInstructionCache(GetCurrentProcess, FOldMethod, SizeOf(TLongJump));
-  finally
-    // 恢复代码页访问权限
-    if not VirtualProtect(FOldMethod, SizeOf(TLongJump), OldProtection, @DummyProtection) then
-      raise Exception.CreateFmt(SMemoryWriteError, [SysErrorMessage(GetLastError)]);
-  end;
+    FTrampoline := DDetours.InterceptCreate(FOldMethod, FNewMethod);
+    if not Assigned(FTrampoline) then
+      raise Exception.Create('Failed to install method hook');
 {$ENDIF}
+  end
+  else
+  begin
+    if FHooked then Exit;
+
+    // 设置代码页写访问权限
+    if not VirtualProtect(FOldMethod, SizeOf(TLongJump), PAGE_EXECUTE_READWRITE, @OldProtection) then
+      raise Exception.CreateFmt(SMemoryWriteError, [SysErrorMessage(GetLastError)]);
+
+    try
+      // 保存原来的代码
+      FSaveData := PLongJump(FOldMethod)^;
+
+      // 用跳转指令替换原来方法前 5 字节代码
+      PLongJump(FOldMethod)^.JmpOp := csJmpCode;
+      PLongJump(FOldMethod)^.Addr := Pointer(Integer(FNewMethod) -
+        Integer(FOldMethod) - SizeOf(TLongJump)); // 使用 32 位相对地址
+
+      // 保存多处理器下指令缓冲区同步
+      FlushInstructionCache(GetCurrentProcess, FOldMethod, SizeOf(TLongJump));
+    finally
+      // 恢复代码页访问权限
+      if not VirtualProtect(FOldMethod, SizeOf(TLongJump), OldProtection, @DummyProtection) then
+        raise Exception.CreateFmt(SMemoryWriteError, [SysErrorMessage(GetLastError)]);
+    end;
+  end;
   FHooked := True;
 end;
 
 procedure TCnMethodHook.UnhookMethod;
-{$IFNDEF USE_DDETOURS_HOOK}
 var
   DummyProtection: DWORD;
   OldProtection: DWORD;
-{$ENDIF}
 begin
+  if FUseDDteours then
+  begin
 {$IFDEF USE_DDETOURS_HOOK}
-  if not DDetours.InterceptRemove(FTrampoline) then
-    raise Exception.Create('Failed to release method hook');
-  FTrampoline := nil;
-{$ELSE}
-  if not FHooked then Exit;
-  
-  // 设置代码页写访问权限
-  if not VirtualProtect(FOldMethod, SizeOf(TLongJump), PAGE_READWRITE, @OldProtection) then
-    raise Exception.CreateFmt(SMemoryWriteError, [SysErrorMessage(GetLastError)]);
-
-  try
-    // 恢复原来的代码
-    PLongJump(FOldMethod)^ := FSaveData;
-  finally
-    // 恢复代码页访问权限
-    if not VirtualProtect(FOldMethod, SizeOf(TLongJump), OldProtection, @DummyProtection) then
-      raise Exception.CreateFmt(SMemoryWriteError, [SysErrorMessage(GetLastError)]);
-  end;
-
-  // 保存多处理器下指令缓冲区同步
-  FlushInstructionCache(GetCurrentProcess, FOldMethod, SizeOf(TLongJump));
+    if not DDetours.InterceptRemove(FTrampoline) then
+      raise Exception.Create('Failed to release method hook');
 {$ENDIF}
+    FTrampoline := nil;
+  end
+  else
+  begin
+    if not FHooked then Exit;
+
+    // 设置代码页写访问权限
+    if not VirtualProtect(FOldMethod, SizeOf(TLongJump), PAGE_READWRITE, @OldProtection) then
+      raise Exception.CreateFmt(SMemoryWriteError, [SysErrorMessage(GetLastError)]);
+
+    try
+      // 恢复原来的代码
+      PLongJump(FOldMethod)^ := FSaveData;
+    finally
+      // 恢复代码页访问权限
+      if not VirtualProtect(FOldMethod, SizeOf(TLongJump), OldProtection, @DummyProtection) then
+        raise Exception.CreateFmt(SMemoryWriteError, [SysErrorMessage(GetLastError)]);
+    end;
+
+    // 保存多处理器下指令缓冲区同步
+    FlushInstructionCache(GetCurrentProcess, FOldMethod, SizeOf(TLongJump));
+  end;
 
   FHooked := False;
 end;

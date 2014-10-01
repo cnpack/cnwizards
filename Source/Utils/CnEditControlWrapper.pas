@@ -595,26 +595,29 @@ begin
     {$ENDIF}
     end;
 
-{$IFDEF USE_DDETOURS_HOOK}
-    try
-      Result := TPaintLineProc(FEditControlWrapper.FPaintLineHook.Trampoline)(Self, Ek, LineNum, LogicLineNum, V2);
-    except
-      on E: Exception do
-        DoHandleException(E.Message);
-    end;
-{$ELSE}
-    FEditControlWrapper.FPaintLineHook.UnhookMethod;
-    try
+    if FEditControlWrapper.FPaintLineHook.UseDDteours then
+    begin
       try
-        Result := PaintLine(Self, Ek, LineNum, LogicLineNum, V2);
+        Result := TPaintLineProc(FEditControlWrapper.FPaintLineHook.Trampoline)(Self, Ek, LineNum, LogicLineNum, V2);
       except
         on E: Exception do
           DoHandleException(E.Message);
       end;
-    finally
-      FEditControlWrapper.FPaintLineHook.HookMethod;
+    end
+    else
+    begin
+      FEditControlWrapper.FPaintLineHook.UnhookMethod;
+      try
+        try
+          Result := PaintLine(Self, Ek, LineNum, LogicLineNum, V2);
+        except
+          on E: Exception do
+            DoHandleException(E.Message);
+        end;
+      finally
+        FEditControlWrapper.FPaintLineHook.HookMethod;
+      end;
     end;
-{$ENDIF}
 
     if Editor <> nil then
     begin
@@ -638,16 +641,17 @@ begin
     FEditControlWrapper.CheckNewEditor(TControl(Self), GetOTAEditView(EditView));
   end;
 
-{$IFDEF USE_DDETOURS_HOOK}
-  Result := TSetEditViewProc(FEditControlWrapper.FSetEditViewHook.Trampoline)(Self, EditView);
-{$ELSE}
-  FEditControlWrapper.FSetEditViewHook.UnhookMethod;
-  try
-    Result := SetEditView(Self, EditView);
-  finally
-    FEditControlWrapper.FSetEditViewHook.HookMethod;
+  if FEditControlWrapper.FSetEditViewHook.UseDDteours then
+    Result := TSetEditViewProc(FEditControlWrapper.FSetEditViewHook.Trampoline)(Self, EditView)
+  else
+  begin
+    FEditControlWrapper.FSetEditViewHook.UnhookMethod;
+    try
+      Result := SetEditView(Self, EditView);
+    finally
+      FEditControlWrapper.FSetEditViewHook.HookMethod;
+    end;
   end;
-{$ENDIF}
 end;
 
 constructor TCnEditControlWrapper.Create(AOwner: TComponent);

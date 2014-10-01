@@ -1235,7 +1235,6 @@ var
   ProcName: string;
   ProcId: Cardinal;
   AStore: TCnMsgStore;
-  StoreInited: Boolean;
   ADesc: TCnMsgDesc;
 begin
   if FRunningState = rsPaused then
@@ -1245,7 +1244,6 @@ begin
   ProcId := StrCRC32(0, ProcName);
 
   AStore := CnMsgManager.FindByProcName(ProcName);
-  StoreInited := False;
   if AStore = nil then
   begin
     if Application.MainForm <> nil then

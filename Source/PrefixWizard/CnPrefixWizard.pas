@@ -212,16 +212,17 @@ var
   Client: TObject;
 begin
   // 调用原来的方法
-{$IFDEF USE_DDETOURS_HOOK}
-  TSetActionProc(FWizard.FSetActionHook.Trampoline)(Self, Value);
-{$ELSE}
-  FWizard.FSetActionHook.UnhookMethod;
-  try
-    OldSetActionProc(Self, Value);
-  finally
-    FWizard.FSetActionHook.HookMethod;
+  if FWizard.FSetActionHook.UseDDteours then
+    TSetActionProc(FWizard.FSetActionHook.Trampoline)(Self, Value)
+  else
+  begin
+    FWizard.FSetActionHook.UnhookMethod;
+    try
+      OldSetActionProc(Self, Value);
+    finally
+      FWizard.FSetActionHook.HookMethod;
+    end;
   end;
-{$ENDIF}
 
   // 判断是否需要自动重命名组件并进行处理，如果前面有异常则跳过处理
   if (Value <> nil) and (FWizard <> nil) and FWizard.Active and
@@ -256,17 +257,18 @@ begin
   CnDebugger.LogMsg('MySetValue: ' + Value);
 {$ENDIF}
 
-{$IFDEF USE_DDETOURS_HOOK}
-  TSetValueProc(FWizard.FSetValueHook.Trampoline)(Self, Value);
-{$ELSE}
   // 调用原来的方法
-  FWizard.FSetValueHook.UnhookMethod;
-  try
-    OldSetValueProc(Self, Value);
-  finally
-    FWizard.FSetValueHook.HookMethod;
+  if FWizard.FSetActionHook.UseDDteours then
+    TSetValueProc(FWizard.FSetValueHook.Trampoline)(Self, Value)
+  else
+  begin
+    FWizard.FSetValueHook.UnhookMethod;
+    try
+      OldSetValueProc(Self, Value);
+    finally
+      FWizard.FSetValueHook.HookMethod;
+    end;
   end;
-{$ENDIF}
 
   // 判断是否需要自动重命名组件并进行处理，如果前面有异常则跳过处理
   if (Value <> '') and (FWizard <> nil) and FWizard.Active and
