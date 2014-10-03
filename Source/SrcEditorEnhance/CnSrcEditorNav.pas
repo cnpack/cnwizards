@@ -755,11 +755,21 @@ begin
 
           Wizard := CnWizardMgr.WizardByClassName('TCnPaletteEnhanceWizard');
           if Wizard <> nil then
+          try
             SetPropValue(Wizard, 'TempDisableLock', True);
+          except
+            ;
+          end;
           SendMessage(ToolbarParent.Handle, WM_LBUTTONDOWN, 0, MakeLParam(P.X, P.Y));
+          SendMessage(ToolbarParent.Handle, WM_MOUSEMOVE, 0, MakeLParam(P.X + 1, P.Y));
+          SendMessage(ToolbarParent.Handle, WM_MOUSEMOVE, 0, MakeLParam(P.X, P.Y));
           SendMessage(ToolbarParent.Handle, WM_LBUTTONUP, 0, MakeLParam(P.X, P.Y));
           if Wizard <> nil then
+          try
             SetPropValue(Wizard, 'TempDisableLock', False);
+          except
+            ;
+          end;
         end;
       end;
     end;
