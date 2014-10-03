@@ -197,8 +197,9 @@ type
   {$ENDIF COMPILER8_UP}
     property MenuLine: Boolean read FMenuLine write FMenuLine;
     property LockToolbar: Boolean read FLockToolbar write SetLockToolbar;
-
+  published
     property TempDisableLock: Boolean read FTempDisableLock write SetTempDisableLock;
+    {* 外部其他模块使用，供修补工具栏显示不全的问题，不开放给用户}
   end;
 
 {$ENDIF CNWIZARDS_CNPALETTEENHANCEWIZARD}

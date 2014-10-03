@@ -40,7 +40,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ToolsAPI, IniFiles, StdCtrls, ComCtrls, CnWizIdeUtils,
+  ToolsAPI, IniFiles, StdCtrls, ComCtrls, TypInfo, CnWizIdeUtils, CnWizManager,
   CnWizClasses, CnWizUtils, CnWizConsts, CnEditControlWrapper;
 
 type
@@ -97,6 +97,7 @@ var
   BrowserToolbar: TToolBar;
   ToolbarParent: TWinControl;
   P: TPoint;
+  Wizard: TCnBaseWizard;
 begin
   BrowserToolbar := TToolBar(GetIdeMainForm.FindComponent('BrowserToolBar'));
   if BrowserToolbar <> nil then
@@ -113,10 +114,25 @@ begin
       P.X := 5;
       P.Y := BrowserToolbar.Height div 2;
       P := BrowserToolbar.ClientToParent(P);
-
       CnDebugger.LogPoint(P, 'Click in Parent.');
+
+      Wizard := CnWizardMgr.WizardByClassName('TCnPaletteEnhanceWizard');
+      if Wizard <> nil then
+      try
+        SetPropValue(Wizard, 'TempDisableLock', True);
+      except
+        CnDebugger.LogMsg('Error set TempDisableLock True');
+      end;
       SendMessage(ToolbarParent.Handle, WM_LBUTTONDOWN, 0, MakeLParam(P.X, P.Y));
+      SendMessage(ToolbarParent.Handle, WM_MOUSEMOVE, 0, MakeLParam(P.X + 1, P.Y));
+      SendMessage(ToolbarParent.Handle, WM_MOUSEMOVE, 0, MakeLParam(P.X, P.Y));
       SendMessage(ToolbarParent.Handle, WM_LBUTTONUP, 0, MakeLParam(P.X, P.Y));
+      if Wizard <> nil then
+      try
+        SetPropValue(Wizard, 'TempDisableLock', False);
+      except
+        CnDebugger.LogMsg('Error set TempDisableLock False');
+      end;
     end;
   end;
   { TODO -oAnyone : 该专家的主执行过程 }
