@@ -84,6 +84,7 @@ type
   {$ENDIF COMPILER8_UP}
     FMenuLine: Boolean;
     FLockToolbar: Boolean;
+    FTempDisableLock: Boolean;
     FHookedToolbarMouseDown: Boolean;
     FOldMouseDown: TMouseEvent;
     FMainControlBar: TControlBar;
@@ -160,6 +161,7 @@ type
     procedure UpdateWizMenus;
     procedure InitControlBarMenu;
     procedure SetLockToolbar(const Value: Boolean);
+    procedure SetTempDisableLock(const Value: Boolean);
     procedure UpdateToolbarLock;
     procedure MainControlBarOnMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -195,6 +197,8 @@ type
   {$ENDIF COMPILER8_UP}
     property MenuLine: Boolean read FMenuLine write FMenuLine;
     property LockToolbar: Boolean read FLockToolbar write SetLockToolbar;
+
+    property TempDisableLock: Boolean read FTempDisableLock write SetTempDisableLock;
   end;
 
 {$ENDIF CNWIZARDS_CNPALETTEENHANCEWIZARD}
@@ -1177,7 +1181,7 @@ procedure TCnPaletteEnhanceWizard.MainControlBarOnMouseDown(Sender: TObject;
 begin
   if Sender is TControlBar then
   begin
-    if FLockToolbar then
+    if FLockToolbar and not FTempDisableLock then
       TControlHack(Sender).MouseCapture := False
     else if Assigned(FOldMouseDown) then
       FOldMouseDown(Sender, Button, Shift, X, Y);
@@ -1228,6 +1232,11 @@ procedure TCnPaletteEnhanceWizard.OnLockMenuCreated(Sender: TObject;
   MenuItem: TMenuItem);
 begin
   MenuItem.Checked := FLockToolbar;
+end;
+
+procedure TCnPaletteEnhanceWizard.SetTempDisableLock(const Value: Boolean);
+begin
+  FTempDisableLock := Value;
 end;
 
 initialization

@@ -47,7 +47,7 @@ uses
   ActnMan,
   {$ENDIF}
   CnWizUtils, CnConsts, CnWizIdeUtils, CnWizConsts, CnMenuHook, CnWizNotifier,
-  CnEditControlWrapper, CnWizShareImages, CnPopupMenu;
+  CnEditControlWrapper, CnWizShareImages, CnPopupMenu, CnWizClasses, CnWizManager;
 
 type
 
@@ -734,6 +734,7 @@ var
   BrowserToolbar: TToolBar;
   ToolbarParent: TWinControl;
   P: TPoint;
+  Wizard: TCnBaseWizard;
 begin
   if Active and ExtendForwardBack then
   begin
@@ -752,8 +753,13 @@ begin
           P.Y := BrowserToolbar.Height div 2;
           P := BrowserToolbar.ClientToParent(P);
 
+          Wizard := CnWizardMgr.WizardByClassName('TCnPaletteEnhanceWizard');
+          if Wizard <> nil then
+            SetPropValue(Wizard, 'TempDisableLock', True);
           SendMessage(ToolbarParent.Handle, WM_LBUTTONDOWN, 0, MakeLParam(P.X, P.Y));
           SendMessage(ToolbarParent.Handle, WM_LBUTTONUP, 0, MakeLParam(P.X, P.Y));
+          if Wizard <> nil then
+            SetPropValue(Wizard, 'TempDisableLock', False);
         end;
       end;
     end;
