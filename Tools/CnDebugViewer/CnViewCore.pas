@@ -197,7 +197,7 @@ var
   SCnMsgTypeUDPMsg:        string = 'UDPMsg';
 
   SCnMsgDescriptionFmt: string =
-    'No: %-5d    Level: %-1d    ThreadID: $%-8x    ProcessID: $%-8x   Tag: %-8s   TimeStamp: %s' +
+    'No: %-5d    Indent: %-3d    Level: %-1d    ThreadID: $%-8x    ProcessID: $%-8x   Tag: %-8s   TimeStamp: %s' +
     #13#10 + '%s';
   SCnTimeDescriptionFmt: string =
     'No: %-5d    Count: %8d    Tag: %-8s    Summary: %f us';

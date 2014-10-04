@@ -679,8 +679,9 @@ end;
 function TCnMsgChild.DescriptionOfMsg(Index: Integer;
   AMsgItem: TCnMsgItem): string;
 begin
-  Result := Format(SCnMsgDescriptionFmt, [Index + 1, AMsgItem.Level, AMsgItem.ThreadId,
-    AMsgItem.ProcessId, AMsgItem.Tag, GetLongTimeDesc(AMsgItem), AMsgItem.Msg]);
+  Result := Format(SCnMsgDescriptionFmt, [Index + 1, AMsgItem.Indent,
+    AMsgItem.Level, AMsgItem.ThreadId, AMsgItem.ProcessId, AMsgItem.Tag,
+    GetLongTimeDesc(AMsgItem), AMsgItem.Msg]);
 end;
 
 procedure TCnMsgChild.lvTimeClick(Sender: TObject);
