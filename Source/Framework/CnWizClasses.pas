@@ -773,7 +773,9 @@ begin
       ShowCnWizCommentForm(Self)) then
       Execute;
   except
-    DoHandleException(ClassName + '.Click');
+    on E: Exception do
+      DoHandleException(Format('% Click Error. %s - %s',
+        [ClassName, E.ClassName, E.Message]));
   end;
 end;
 
@@ -1114,8 +1116,9 @@ begin
               SubActions[i].Command) then
               SubActionExecute(i);
           except
-            DoHandleException(Format('%s.SubActions[%d].Execute',
-              [ClassName, i]));
+            on E: Exception do
+              DoHandleException(Format('%s.SubActions[%d].Execute: %s - %s',
+                [ClassName, i, E.ClassName, E.Message]));
           end;
         end;
 
