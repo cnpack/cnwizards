@@ -51,17 +51,17 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, Buttons, ComCtrls, IniFiles, Registry, Menus, ToolsAPI,
-  Contnrs,
-  {$IFDEF COMPILER6_UP}
-  DesignIntf, DesignEditors,
-  {$ELSE}
-  DsgnIntf,
-  {$ENDIF}
+  Contnrs, CnWizMethodHook, {$IFDEF SUPPORTS_FMX} CnFmxTabOrderUtils, {$ENDIF}
+  {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, {$ELSE} DsgnIntf, {$ENDIF}
   CnConsts, CnWizClasses, CnWizConsts, CnWizMenuAction, CnWizUtils, CnCommon,
   CnWizShortCut, CnWizNotifier, CnWizMultiLang;
 
 type
-
+  PCnRectRec = ^TCnRectRec;
+  TCnRectRec = record
+    Context: Pointer;
+    Rect: TRect;
+  end;
 //==============================================================================
 // Tab Order 设置工具配置窗体
 //==============================================================================
@@ -203,17 +203,6 @@ type
     procedure FormNotify(FormEditor: IOTAFormEditor;
       NotifyType: TCnWizFormEditorNotifyType; ComponentHandle: TOTAHandle;
       Component: TComponent; const OldName, NewName: string);
-
-    property TabOrderStyle: TTabOrderStyle read FTabOrderStyle write FTabOrderStyle;
-    property OrderByCenter: Boolean read FOrderByCenter write FOrderByCenter;
-    property DispFont: TFont read GetDispFont write SetDispFont;
-    property BkColor: TColor read FBkColor write FBkColor;
-    property IncludeChildren: Boolean read FIncludeChildren write FIncludeChildren;
-    property DispTabOrder: Boolean read FDispTabOrder write SetDispTabOrder;
-    property DispPos: TDispPos read FDispPos write SetDispPos;
-    property AutoReset: Boolean read FAutoReset write FAutoReset;
-    property Invert: Boolean read FInvert write FInvert;
-    property Group: Boolean read FGroup write FGroup;
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -225,6 +214,17 @@ type
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
     function GetCaption: string; override;
     function GetHint: string; override;
+
+    property TabOrderStyle: TTabOrderStyle read FTabOrderStyle write FTabOrderStyle;
+    property OrderByCenter: Boolean read FOrderByCenter write FOrderByCenter;
+    property DispFont: TFont read GetDispFont write SetDispFont;
+    property BkColor: TColor read FBkColor write FBkColor;
+    property IncludeChildren: Boolean read FIncludeChildren write FIncludeChildren;
+    property DispTabOrder: Boolean read FDispTabOrder write SetDispTabOrder;
+    property DispPos: TDispPos read FDispPos write SetDispPos;
+    property AutoReset: Boolean read FAutoReset write FAutoReset;
+    property Invert: Boolean read FInvert write FInvert;
+    property Group: Boolean read FGroup write FGroup;
   end;
 
 {$ENDIF CNWIZARDS_CNTABORDERWIZARD}
@@ -424,6 +424,11 @@ begin
   CnWizNotifierServices.AddGetMsgNotifier(OnGetMsg, [WM_PAINT]);
   CnWizNotifierServices.AddFormEditorNotifier(FormNotify);
 
+{$IFDEF SUPPORTS_FMX}
+  // Hook FMX TControl AfterPaint;
+  CreateFMXPaintHook(Self);
+{$ENDIF}
+
   FTimer := TTimer.Create(nil);
   FTimer.Enabled := False;
   FTimer.Interval := csTimerDelay;
@@ -439,7 +444,9 @@ begin
   CnWizNotifierServices.RemoveCallWndProcRetNotifier(OnCallWndProcRet);
   CnWizNotifierServices.RemoveGetMsgNotifier(OnGetMsg);
   CnWizNotifierServices.RemoveFormEditorNotifier(FormNotify);
-
+{$IFDEF SUPPORTS_FMX}
+  FreeNotificationFMXPaintHook;
+{$ENDIF}
   FTimer.Free;
   FChangedControls.Free;
   FDrawControls.Free;
@@ -553,13 +560,6 @@ end;
 // 专家调用方法
 //------------------------------------------------------------------------------
 
-type
-  PRectRec = ^TRectRec;
-  TRectRec = record
-    Context: Pointer;
-    Rect: TRect;
-  end;
-
 var
   ATabOrderStyle: TTabOrderStyle;
   AOrderByCenter: Boolean;
@@ -573,8 +573,8 @@ var
   X1, X2: Integer;
   Y1, Y2: Integer;
 begin
-  R1 := PRectRec(Item1)^.Rect;
-  R2 := PRectRec(Item2)^.Rect;
+  R1 := PCnRectRec(Item1)^.Rect;
+  R2 := PCnRectRec(Item2)^.Rect;
 
   if AOrderByCenter then               // 按中心位置排序
   begin
@@ -682,7 +682,7 @@ procedure TCnTabOrderWizard.DoSetTabOrder(WinControl: TWinControl;
 var
   List: TList;
   Rects: TList;
-  NewRect: PRectRec;
+  NewRect: PCnRectRec;
   i, j, Idx: Integer;
   L, R, T, B: Integer;
   Match: Boolean;
@@ -699,7 +699,7 @@ var
   // 增加一个控件到列表
   procedure AddList(AList: TList; AControl: TWinControl);
   var
-    ARect: PRectRec;
+    ARect: PCnRectRec;
     AL, AT, AR, AB: Integer;
   begin
     New(ARect);
@@ -741,8 +741,8 @@ begin
       begin
         for i := 0 to List.Count - 1 do
         begin
-          TWinControl(PRectRec(List[i]).Context).TabOrder := i;
-          DrawControlTabOrder(TWinControl(PRectRec(List[i]).Context));
+          TWinControl(PCnRectRec(List[i]).Context).TabOrder := i;
+          DrawControlTabOrder(TWinControl(PCnRectRec(List[i]).Context));
         end;
       end
       else                              // 分组排序
@@ -751,19 +751,19 @@ begin
         try
           for i := 0 to List.Count - 1 do
           begin
-            GetControlPos(TWinControl(PRectRec(List[i]).Context), L, T, R, B);
+            GetControlPos(TWinControl(PCnRectRec(List[i]).Context), L, T, R, B);
             Match := False;
             // 将控件分组，左右相同或上下相同的控件归为一组
             for j := 0 to Rects.Count - 1 do
-              with PRectRec(Rects[j])^.Rect do
+              with PCnRectRec(Rects[j])^.Rect do
               begin
                 if FTabOrderStyle = tsHorz then
                 begin                   // 水平优先时先判断垂直位置
                   if (L = Left) and (R = Right) and (Min(Abs(T - Bottom),
                     Abs(B - Top)) <= (B - T)) then
                   begin
-                    AddList(TList(PRectRec(Rects[j])^.Context),
-                      TWinControl(PRectRec(List[i]).Context));
+                    AddList(TList(PCnRectRec(Rects[j])^.Context),
+                      TWinControl(PCnRectRec(List[i]).Context));
                     Match := True;
                     Top := Min(T, Top);
                     Bottom := Max(B, Bottom);
@@ -772,8 +772,8 @@ begin
                   else if (T = Top) and (B = Bottom) and (Min(Abs(L - Right),
                     Abs(R - Left)) <= (R - L)) then
                   begin
-                    AddList(TList(PRectRec(Rects[j])^.Context),
-                      TWinControl(PRectRec(List[i]).Context));
+                    AddList(TList(PCnRectRec(Rects[j])^.Context),
+                      TWinControl(PCnRectRec(List[i]).Context));
                     Match := True;
                     Left := Min(L, Left);
                     Right := Max(R, Right);
@@ -785,8 +785,8 @@ begin
                   if (T = Top) and (B = Bottom) and (Min(Abs(L - Right),
                     Abs(R - Left)) <= (R - L)) then
                   begin
-                    AddList(TList(PRectRec(Rects[j])^.Context),
-                      TWinControl(PRectRec(List[i]).Context));
+                    AddList(TList(PCnRectRec(Rects[j])^.Context),
+                      TWinControl(PCnRectRec(List[i]).Context));
                     Match := True;
                     Left := Min(L, Left);
                     Right := Max(R, Right);
@@ -795,8 +795,8 @@ begin
                   else if (L = Left) and (R = Right) and (Min(Abs(T - Bottom),
                     Abs(B - Top)) <= (B - T)) then
                   begin
-                    AddList(TList(PRectRec(Rects[j])^.Context),
-                      TWinControl(PRectRec(List[i]).Context));
+                    AddList(TList(PCnRectRec(Rects[j])^.Context),
+                      TWinControl(PCnRectRec(List[i]).Context));
                     Match := True;
                     Top := Min(T, Top);
                     Bottom := Max(B, Bottom);
@@ -809,8 +809,8 @@ begin
             begin
               New(NewRect);
               NewRect.Context := TList.Create;
-              AddList(TList(PRectRec(NewRect.Context)),
-                TWinControl(PRectRec(List[i]).Context));
+              AddList(TList(PCnRectRec(NewRect.Context)),
+                TWinControl(PCnRectRec(List[i]).Context));
               NewRect.Rect := Rect(L, T, R, B);
               Rects.Add(NewRect);
             end;
@@ -819,20 +819,20 @@ begin
           Rects.Sort(TabOrderSort);       // 对控件组排序
           Idx := 0;
           for i := 0 to Rects.Count - 1 do
-            with TList(PRectRec(Rects[i]).Context) do
+            with TList(PCnRectRec(Rects[i]).Context) do
             begin
               Sort(TabOrderSort);         // 对同一组内的控件排序
               for j := 0 to Count - 1 do
               begin                       // 设置控件 Tab Order
-                TWinControl(PRectRec(Items[j]).Context).TabOrder := Idx;
-                DrawControlTabOrder(TWinControl(PRectRec(Items[j]).Context));
+                TWinControl(PCnRectRec(Items[j]).Context).TabOrder := Idx;
+                DrawControlTabOrder(TWinControl(PCnRectRec(Items[j]).Context));
                 Inc(Idx);
               end;
             end;
         finally
           for i := 0 to Rects.Count - 1 do
           begin
-            with TList(PRectRec(Rects[i]).Context) do
+            with TList(PCnRectRec(Rects[i]).Context) do
             begin
               for j := 0 to Count - 1 do
                 Dispose(Items[j]);
@@ -846,7 +846,7 @@ begin
 
       if AInludeChildren then          // 递归设置子控件
         for i := 0 to List.Count - 1 do
-          DoSetTabOrder(TWinControl(PRectRec(List[i]).Context), AInludeChildren);
+          DoSetTabOrder(TWinControl(PCnRectRec(List[i]).Context), AInludeChildren);
     end;
   finally
     for i := 0 to List.Count - 1 do
@@ -862,7 +862,7 @@ end;
 procedure TCnTabOrderWizard.SubActionExecute(Index: Integer);
 begin
   if not Active then Exit;
-  
+
   if Index = IdSetCurrControl then
     OnSetCurrControl
   else if Index = IdSetCurrForm then
@@ -945,10 +945,15 @@ begin
   if Editor = nil then Exit;
 
   Root := CnOtaGetRootComponentFromEditor(Editor);
-  if (Root = nil) or not (Root is TWinControl) then Exit;
-
-  AForm := TWinControl(Root);
-  DoSetTabOrder(AForm, True);
+  if Root = nil then Exit;
+{$IFDEF SUPPORTS_FMX}
+  DoSetFmxTabOrder(Root, True);
+{$ENDIF}
+  if Root is TWinControl then
+  begin
+    AForm := TWinControl(Root);
+    DoSetTabOrder(AForm, True);
+  end;
   CnOtaNotifyFormDesignerModified(Editor);
   Result := True;
 end;
@@ -1147,6 +1152,9 @@ begin
   begin
     FChangedControls.Clear;
     FUpdateDrawForms.Clear;
+{$IFDEF SUPPORTS_FMX}
+    NotifyFormDesignerChanged(nil);
+{$ENDIF}
     FTimer.Enabled := False;
   end
   else if (NotifyType = fetActivated) and Active then
@@ -1158,6 +1166,10 @@ begin
       FUpdateDrawForms.Add(Root);
       FTimer.Enabled := True;
     end;
+{$IFDEF SUPPORTS_FMX}
+    if Assigned(Root) then
+      NotifyFormDesignerChanged(Root);
+{$ENDIF}
   end;
 end;
 
@@ -1184,6 +1196,9 @@ begin
           if Root.Components[j] is TWinControl then
             TWinControl(Root.Components[j]).Invalidate;
       end;
+{$IFDEF SUPPORTS_FMX}
+      UpdateFMXDraw(Root);
+{$ENDIF}
     end;
   end;
 end;

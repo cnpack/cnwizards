@@ -151,6 +151,8 @@ var
   DummyProtection: DWORD;
   OldProtection: DWORD;
 begin
+  if FHooked then Exit;
+
   if FUseDDteours then
   begin
 {$IFDEF USE_DDETOURS_HOOK}
@@ -161,8 +163,6 @@ begin
   end
   else
   begin
-    if FHooked then Exit;
-
     // 设置代码页写访问权限
     if not VirtualProtect(FOldMethod, SizeOf(TLongJump), PAGE_EXECUTE_READWRITE, @OldProtection) then
       raise Exception.CreateFmt(SMemoryWriteError, [SysErrorMessage(GetLastError)]);
@@ -184,6 +184,7 @@ begin
         raise Exception.CreateFmt(SMemoryWriteError, [SysErrorMessage(GetLastError)]);
     end;
   end;
+
   FHooked := True;
 end;
 
@@ -192,6 +193,8 @@ var
   DummyProtection: DWORD;
   OldProtection: DWORD;
 begin
+  if not FHooked then Exit;
+
   if FUseDDteours then
   begin
 {$IFDEF USE_DDETOURS_HOOK}
@@ -202,8 +205,6 @@ begin
   end
   else
   begin
-    if not FHooked then Exit;
-
     // 设置代码页写访问权限
     if not VirtualProtect(FOldMethod, SizeOf(TLongJump), PAGE_READWRITE, @OldProtection) then
       raise Exception.CreateFmt(SMemoryWriteError, [SysErrorMessage(GetLastError)]);
