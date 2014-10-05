@@ -29,7 +29,9 @@ unit CnMdiView;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2008.01.18
+* 修改记录：2014.10.05
+*               显示统一使用 FViewStore 以修正和 FStore 可能不一致的问题。
+*           2008.01.18
 *               Sesame 增加分秒方式显示时间
 *           2005.01.01
 *               创建单元，实现功能
@@ -101,8 +103,8 @@ type
     procedure btnSearchClick(Sender: TObject);
     procedure pmTreePopup(Sender: TObject);
   private
-    FStore: TCnMsgStore;
-    FViewStore: TCnMsgStore; // 只处理引用的
+    FStore: TCnMsgStore;     // 交由外部线程用来读写并通知本界面更新
+    FViewStore: TCnMsgStore; // 用来显示的，其内部Item只是引用，由FStore内容同步更新
     FProcessID: DWORD;
     FProcName: string;
     FMsgTree: TVirtualStringTree;
@@ -292,46 +294,22 @@ procedure TCnMsgChild.TreeGetText(Sender: TBaseVirtualTree;
 var
   Index: Integer;
 begin
-  if FStore = nil then Exit;
+  if FViewStore = nil then Exit;
   
   Index := Node^.AbsoluteIndex - 1; //.AbsoluteIndex(Node);
   // 原始的VirtualTree中，获得该 Index 严重影响显示速度，
   // 后经修改VirtualTree源码解决，但只支持顺序增加的节点
 
-  if FFilter.Filtered then // 如果显示的是已经经过显示条件过滤的
-  begin
-    case Column of
-      0: CellText := IntToStr(Index + 1);                           // 序号
-      1: CellText := FViewStore.Msgs[Index].Msg;                        // 正文
-      2: CellText := SCnMsgTypeDescArray[FViewStore.Msgs[Index].MsgType]^;// 类型
-      3: CellText := IntToStr(FViewStore.Msgs[Index].Level);            // 层次
-      4: CellText := '$' + IntToHex(FViewStore.Msgs[Index].ThreadId, 2); // 线程 ID
-      5: CellText := FViewStore.Msgs[Index].Tag;
-      6: CellText := GetTimeDesc(FViewStore.Msgs[Index]);
-    else
-      CellText := '';
-    end;
-  end
+  case Column of
+    0: CellText := IntToStr(Index + 1);                           // 序号
+    1: CellText := FViewStore.Msgs[Index].Msg;                        // 正文
+    2: CellText := SCnMsgTypeDescArray[FViewStore.Msgs[Index].MsgType]^;// 类型
+    3: CellText := IntToStr(FViewStore.Msgs[Index].Level);            // 层次
+    4: CellText := '$' + IntToHex(FViewStore.Msgs[Index].ThreadId, 2); // 线程 ID
+    5: CellText := FViewStore.Msgs[Index].Tag;
+    6: CellText := GetTimeDesc(FViewStore.Msgs[Index]);
   else
-  begin
-    case Column of
-      0: CellText := IntToStr(Index + 1);                           // 序号
-      1: CellText := FStore.Msgs[Index].Msg;                        // 正文
-      2: CellText := SCnMsgTypeDescArray[FStore.Msgs[Index].MsgType]^;// 类型
-      3: CellText := IntToStr(FStore.Msgs[Index].Level);            // 层次
-      4: CellText := '$' + IntToHex(FStore.Msgs[Index].ThreadId, 2); // 线程 ID
-      5: CellText := FStore.Msgs[Index].Tag;
-      6: case FStore.Msgs[Index].TimeStampType of
-           ttDateTime: CellText := FormatDateTime(CnViewerOptions.DateTimeFormat,
-             FStore.Msgs[Index].MsgDateTime);
-           ttTickCount: CellText := IntToStr(FStore.Msgs[Index].MsgTickCount);
-           ttCPUPeriod: CellText := IntToStr(FStore.Msgs[Index].MsgCPUPeriod);
-         else
-           CellText := '';
-         end;
-    else
-      CellText := '';
-    end;
+    CellText := '';
   end;
 end;
 
@@ -374,6 +352,7 @@ begin
   FMsgTree.Parent := pnlTree;
   FMsgTree.PopupMenu := pmTree;
   for I := Low(SCnTreeColumnArray) to High(SCnTreeColumnArray) do
+  begin
     with FMsgTree.Header.Columns.Add do
     begin
       Text := SCnTreeColumnArray[I]^;
@@ -382,6 +361,8 @@ begin
       else
         Width := CnViewerOptions.MsgColumnWidth; // 信息列宽
     end;
+  end;
+  
   FMsgTree.Header.MainColumn := 1; // "输出信息" 列
   FMsgTree.Header.Columns[0].MinWidth := CnColumnsWidth[0];
   FMsgTree.Header.Options := FMsgTree.Header.Options - [hoDrag];
@@ -567,6 +548,7 @@ begin
     // 如果父节点是根节点，则不能再取 Parent 了，否则就会出错
     if (Parent <> nil) and (Parent <> FMsgTree.RootNode) then
       Parent := Parent.Parent;
+
     PrevNode := FMsgTree.AddChild(Parent, nil);
   end;
 
@@ -577,14 +559,11 @@ procedure TCnMsgChild.TreeChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
 var
   Index: Integer;
 begin
-  if (FStore <> nil) and (Node <> nil) then
+  if (FViewStore <> nil) and (Node <> nil) then
   begin
     Index := Node^.AbsoluteIndex - 1;
     FSelectedIndex := Index;
-    if FFilter.Filtered then
-      mmoDetail.Text := DescriptionOfMsg(Index, FViewStore.Msgs[Index])
-    else
-      mmoDetail.Text := DescriptionOfMsg(Index, FStore.Msgs[Index]);
+    mmoDetail.Text := DescriptionOfMsg(Index, FViewStore.Msgs[Index]);
     FMemContent := mcMsg;
   end;
 end;
@@ -600,14 +579,11 @@ var
   AText: string;
   ATree: TVirtualStringTree;
 begin
-  if FStore = nil then Exit;
+  if FViewStore = nil then Exit;
   
   Index := Node^.AbsoluteIndex - 1;
   // 原始的 VirtualTree 获得该 Index 严重影响显示速度，目前优化后无此问题了。
-  if FFilter.Filtered then
-    AMsgItem := FViewStore.Msgs[Index]
-  else
-    AMsgItem := FStore.Msgs[Index];
+  AMsgItem := FViewStore.Msgs[Index];
   if AMsgItem = nil then Exit;
       
   CustomDraw := (AMsgItem.MsgType in SCnMsgCustomDrawTypes);
@@ -824,10 +800,11 @@ begin
     // if not FFilter.Filtered or not FFilter.CheckVisible(AMsgItem) then
     if FFilter.Filtered and not FFilter.CheckVisible(AMsgItem) then
     begin
-      // FMsgTree.AddChild(nil, nil)
+      // 此条不可见则不处理
     end
     else
     begin
+      // FStore已由读写线程更新，此处复制可见Item到ViewStore中。
       if FViewStore.MsgCount > 0 then
         OldIndent := FViewStore.Msgs[FViewStore.MsgCount - 1].Indent
       else
@@ -871,7 +848,6 @@ procedure TCnMsgChild.FindNode(const AText: string; IsDown: Boolean;
   IsSeperator: Boolean);
 var
   I, OldPos: Integer;
-  AStore: TCnMsgStore;
   FoundNode: PVirtualNode;
 begin
   if (AText = '') or (FStore = nil) then Exit;
@@ -881,54 +857,61 @@ begin
   else
     OldPos := 0;
 
-  if FFilter.Filtered then
-    AStore := FViewStore
-  else
-    AStore := FStore;
-
   try
     Screen.Cursor := crHourGlass;
     if IsDown then
     begin
-      for I := OldPos to AStore.MsgCount - 1 do // 从选中的下一个开始搜索
-        if CheckFind(AStore.Msgs[I], AText, IsSeperator) then
+      for I := OldPos to FViewStore.MsgCount - 1 do // 从选中的下一个开始搜索
+      begin
+        if CheckFind(FViewStore.Msgs[I], AText, IsSeperator) then
         begin
           FoundNode := FMsgTree.GetNodeByAbsoluteIndex(I + 1);
           FMsgTree.FocusedNode := FoundNode;
           FMsgTree.Selected[FoundNode] := True;
           Exit;
         end;
+      end;
 
       if OldPos > 0 then
+      begin
         for I := 0 to OldPos - 1 do // 循环查找
-          if CheckFind(AStore.Msgs[I], AText, IsSeperator) then
+        begin
+          if CheckFind(FViewStore.Msgs[I], AText, IsSeperator) then
           begin
             FoundNode := FMsgTree.GetNodeByAbsoluteIndex(I + 1);
             FMsgTree.FocusedNode := FoundNode;
             FMsgTree.Selected[FoundNode] := True;
             Exit;
-         end;
+          end;
+        end;
+      end;
     end
     else // 向上找
     begin
       if OldPos > 0 then
+      begin
         for I := OldPos - 1 downto 0 do // 循环查找
-          if CheckFind(AStore.Msgs[I], AText, IsSeperator) then
+        begin
+          if CheckFind(FViewStore.Msgs[I], AText, IsSeperator) then
           begin
             FoundNode := FMsgTree.GetNodeByAbsoluteIndex(I + 1);
             FMsgTree.FocusedNode := FoundNode;
             FMsgTree.Selected[FoundNode] := True;
             Exit;
-         end;
+          end;
+        end;
+      end;
 
-      for I := AStore.MsgCount - 1 downto OldPos do // 从选中的下一个开始搜索
-        if CheckFind(AStore.Msgs[I], AText, IsSeperator) then
+      for I := FViewStore.MsgCount - 1 downto OldPos do // 从选中的下一个开始搜索
+      begin
+        if CheckFind(FViewStore.Msgs[I], AText, IsSeperator) then
         begin
           FoundNode := FMsgTree.GetNodeByAbsoluteIndex(I + 1);
           FMsgTree.FocusedNode := FoundNode;
           FMsgTree.Selected[FoundNode] := True;
           Exit;
         end;
+      end;
     end;
   finally
     Screen.Cursor := crDefault;
@@ -1014,16 +997,8 @@ begin
   if (FStore <> nil) and (Slot >= Low(FBookmarks)) and (Slot <= High(FBookmarks))
     and (FBookmarks[Slot] <> CnInvalidSlot) then
   begin
-    if FFilter.Filtered then
-    begin
-      if (FBookmarks[Slot] >= 0) and (FBookmarks[Slot] < FViewStore.MsgCount) then
-        FViewStore.Msgs[FBookmarks[Slot]].Bookmarked := False;
-    end
-    else
-    begin
-      if (FBookmarks[Slot] >= 0) and (FBookmarks[Slot] < FStore.MsgCount) then
-        FStore.Msgs[FBookmarks[Slot]].Bookmarked := False;
-    end;
+    if (FBookmarks[Slot] >= 0) and (FBookmarks[Slot] < FViewStore.MsgCount) then
+      FViewStore.Msgs[FBookmarks[Slot]].Bookmarked := False;
     FBookmarks[Slot] := CnInvalidLine;
     FMsgTree.Refresh;
   end;
@@ -1048,10 +1023,7 @@ procedure TCnMsgChild.SetSlotToBookmark(Slot, Line: Integer);
 begin
   if (FStore <> nil) and (Slot >= Low(FBookmarks)) and (Slot <= High(FBookmarks)) then
   begin
-    if FFilter.Filtered then
-      FViewStore.Msgs[Line].Bookmarked := True
-    else
-      FStore.Msgs[Line].Bookmarked := True;
+    FViewStore.Msgs[Line].Bookmarked := True;
     FBookmarks[Slot] := Line;
     FMsgTree.Refresh;
   end;
@@ -1085,10 +1057,7 @@ begin
   if FStore = nil then Exit;
   Index := Node^.AbsoluteIndex - 1;
 
-  if FFilter.Filtered then
-    AMsgItem := FViewStore.Msgs[Index]
-  else
-    AMsgItem := FStore.Msgs[Index];
+  AMsgItem := FViewStore.Msgs[Index];
   if AMsgItem = nil then Exit;
 
   EraseAction := eaDefault;
@@ -1138,20 +1107,10 @@ begin
       Index := Abs(FBookmarks[Index]);
 
     // 超界或不在显示区则隐藏
-    if FFilter.Filtered then
-    begin
-      if (FViewStore.MsgCount > 0) and (Index < FViewStore.MsgCount) then
-        BookmarkVisible := FViewStore.Msgs[Index].Bookmarked
-      else
-        BookmarkVisible := False;
-    end
+    if (FViewStore.MsgCount > 0) and (Index < FViewStore.MsgCount) then
+      BookmarkVisible := FViewStore.Msgs[Index].Bookmarked
     else
-    begin
-      if (FStore.MsgCount > 0) and (Index < FStore.MsgCount) then
-        BookmarkVisible := FStore.Msgs[Index].Bookmarked
-      else
-        BookmarkVisible := False;
-    end;
+      BookmarkVisible := False;
 
     if not BookmarkVisible then
     begin
@@ -1198,25 +1157,14 @@ begin
   Index := FMsgTree.FocusedNode.AbsoluteIndex - 1;
   // AbsoluteIndex 从 1 开始
 
-  if FFilter.Filtered then
+  for I := Index + 1 to FViewStore.MsgCount - 1 do
   begin
-    for I := Index + 1 to FViewStore.MsgCount - 1 do
-      if FViewStore.Msgs[I].Bookmarked then
-      begin
-        FMsgTree.Selected[FMsgTree.GetNodeByAbsoluteIndex(I + 1)] := True;
-        FMsgTree.FocusedNode := FMsgTree.GetNodeByAbsoluteIndex(I + 1);
-        Exit;
-      end;
-  end
-  else
-  begin
-    for I := Index + 1 to FStore.MsgCount - 1 do
-      if FStore.Msgs[I].Bookmarked then
-      begin
-        FMsgTree.Selected[FMsgTree.GetNodeByAbsoluteIndex(I + 1)] := True;
-        FMsgTree.FocusedNode := FMsgTree.GetNodeByAbsoluteIndex(I + 1);
-        Exit;
-      end;
+    if FViewStore.Msgs[I].Bookmarked then
+    begin
+      FMsgTree.Selected[FMsgTree.GetNodeByAbsoluteIndex(I + 1)] := True;
+      FMsgTree.FocusedNode := FMsgTree.GetNodeByAbsoluteIndex(I + 1);
+      Exit;
+    end;
   end;
 end;
 
@@ -1231,27 +1179,15 @@ begin
   // AbsoluteIndex 从 1 开始
   if Index = 0 then Exit;
 
-  if FFilter.Filtered then
+  for I := Index - 1 downto 0 do
   begin
-    for I := Index - 1 downto 0 do
-      if FViewStore.Msgs[I].Bookmarked then
-      begin
-        FMsgTree.Selected[FMsgTree.GetNodeByAbsoluteIndex(I + 1)] := True;
-        FMsgTree.FocusedNode := FMsgTree.GetNodeByAbsoluteIndex(I + 1);
-        Exit;
-      end;
-  end
-  else
-  begin
-    for I := Index - 1 downto 0 do
-      if FStore.Msgs[I].Bookmarked then
-      begin
-        FMsgTree.Selected[FMsgTree.GetNodeByAbsoluteIndex(I + 1)] := True;
-        FMsgTree.FocusedNode := FMsgTree.GetNodeByAbsoluteIndex(I + 1);
-        Exit;
-      end;
+    if FViewStore.Msgs[I].Bookmarked then
+    begin
+      FMsgTree.Selected[FMsgTree.GetNodeByAbsoluteIndex(I + 1)] := True;
+      FMsgTree.FocusedNode := FMsgTree.GetNodeByAbsoluteIndex(I + 1);
+      Exit;
+    end;
   end;
-
 end;
 
 procedure TCnMsgChild.ClearBookMarks;
