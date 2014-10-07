@@ -287,6 +287,8 @@ begin
     try
       Bats.Add('choice /t 2 /d y /n >nul');
       Bats.Add('REN "' + Src + '" "' + Dst + '"');
+      Bats.Add('DEL "' + MakePath(GetWindowsTempPath) +
+        _CnChangeFileExt(SCN_EDITORLINEENDS_FILE, '.cnw') + '*"');
       Bat := MakePath(GetWindowsTempPath) + 'CNW_FIX.bat';
       Bats.SaveToFile(Bat);
       WinExecute(Bat, SW_HIDE);
