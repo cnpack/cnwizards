@@ -29,7 +29,10 @@ unit CnPaletteEnhancements;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2006.09.11 V1.4 by LiuXiao
+* 修改记录：2014.10.07 V1.5 by LiuXiao
+*               增加退出时延迟改名 %TEMP%\EditorLineEnds.ttr 的功能以躲过 IDE 的
+*               和某些 Windows Update 包冲突从而无法启动问题。
+*           2006.09.11 V1.4 by LiuXiao
 *               增加查找组件的功能
 *           2005.05.31 V1.4 by LiuXiao
 *               增加自动设置 D7 以上 IDE 的主菜单下划线的功能
@@ -49,6 +52,10 @@ interface
 {$I CnWizards.inc}
 
 {$IFDEF CNWIZARDS_CNPALETTEENHANCEWIZARD}
+
+{$IFDEF COMPILER8_UP}
+  {$DEFINE FIX_EDITORLINEENDS_BUG}
+{$ENDIF}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, ToolsAPI, IniFiles,
@@ -115,8 +122,14 @@ type
     FTabPopupItem: TMenuItem;
     FTabOnClick: TNotifyEvent;
 
+
   {$ENDIF COMPILER6_UP}
   {$ENDIF COMPILER8_UP}
+
+  {$IFDEF FIX_EDITORLINEENDS_BUG}
+    FFixEditorLineEndsBug: Boolean;
+    procedure SetFixEditorLineEndsBug(const Value: Boolean);
+  {$ENDIF}
 
   {$IFNDEF COMPILER8_UP}
     procedure SetFCompFilter(const Value: Boolean);
@@ -165,6 +178,7 @@ type
     procedure UpdateToolbarLock;
     procedure MainControlBarOnMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+
   protected
     procedure SetActive(Value: Boolean); override;
     function GetHasConfig: Boolean; override;
@@ -195,6 +209,10 @@ type
     property AutoSelect: Boolean read FAutoSelect write FAutoSelect;
 
   {$ENDIF COMPILER8_UP}
+
+  {$IFDEF COMPILER8_UP}
+    property FixEditorLineEndsBug: Boolean read FFixEditorLineEndsBug write SetFixEditorLineEndsBug;
+  {$ENDIF}
     property MenuLine: Boolean read FMenuLine write FMenuLine;
     property LockToolbar: Boolean read FLockToolbar write SetLockToolbar;
   published
@@ -239,8 +257,46 @@ const
   csShowDetails = 'ShowDetails';
   csAutoSelect = 'AutoSelect';
 
+  SCN_EDITORLINEENDS_FILE = 'EditorLineEnds.ttr';
+
 type
   TControlHack = class(TControl);
+
+{$IFDEF FIX_EDITORLINEENDS_BUG}
+var
+  FixEditorLineEndsBugGlobal: Boolean = True;
+
+procedure FixEditorLineEndsTtrBug;
+var
+  Src, Dst, Bat: string;
+  Bats: TStrings;
+begin
+  if not FixEditorLineEndsBugGlobal then
+    Exit;
+
+  Src := MakePath(GetWindowsTempPath) + SCN_EDITORLINEENDS_FILE;
+  Dst := _CnChangeFileExt(SCN_EDITORLINEENDS_FILE,
+    '.cnw' + FormatDateTime('yyyymmddhhnnsszzz', Now));
+  if FileExists(Src) then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('FixEditorLineEndsTtrBug will Rename %s to %s', [Src, Dst]);
+{$ENDIF}
+//    MoveFile(Src, Dst);  // Will cause IDE hang
+    Bats := TStringList.Create;
+    try
+      Bats.Add('choice /t 2 /d y /n >nul');
+      Bats.Add('REN "' + Src + '" "' + Dst + '"');
+      Bat := MakePath(GetWindowsTempPath) + 'CNW_FIX.bat';
+      Bats.SaveToFile(Bat);
+      WinExecute(Bat, SW_HIDE);
+    finally
+      Bats.Free;
+    end;
+  end;
+end;
+
+{$ENDIF}
 
 //==============================================================================
 // 组件面板扩展专家
@@ -261,6 +317,9 @@ begin
 {$ENDIF}
 {$ENDIF COMPILER8_UP}
 
+{$IFDEF FIX_EDITORLINEENDS_BUG}
+  FixEditorLineEndsBug := True;
+{$ENDIF}
   CnWizNotifierServices.AddApplicationIdleNotifier(OnIdle);
 end;
 
@@ -1240,8 +1299,26 @@ begin
   FTempDisableLock := Value;
 end;
 
+{$IFDEF FIX_EDITORLINEENDS_BUG}
+procedure TCnPaletteEnhanceWizard.SetFixEditorLineEndsBug(
+  const Value: Boolean);
+begin
+  FFixEditorLineEndsBug := Value;
+  FixEditorLineEndsBugGlobal := Value;
+end;
+{$ENDIF}
+
 initialization
   RegisterCnWizard(TCnPaletteEnhanceWizard);
+
+{$IFDEF FIX_EDITORLINEENDS_BUG}
+finalization
+  try
+    FixEditorLineEndsTtrBug;
+  except
+    ;
+  end;
+{$ENDIF}
 
 {$ENDIF CNWIZARDS_CNPALETTEENHANCEWIZARD}
 end.
