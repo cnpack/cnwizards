@@ -104,11 +104,14 @@ end;
 function VclColorToAlphaColor(Color: TColor): TAlphaColor;
 var
   R, G, B: Byte;
-  ACR: TAlphaColorF;
+  ACR: TAlphaColorRec;
 begin
   DeRGB(Color, R, G, B);
-  ACR := TAlphaColorF.Create(R / 255, G / 255, B / 255);
-  Result := ACR.ToAlphaColor;
+  ACR.R := R;
+  ACR.G := G;
+  ACR.B := B;
+  ACR.A := $FF;
+  Result := TAlphaColor(ACR);
 end;
 
 // 根据控件嵌套级数计算背景颜色值
@@ -134,6 +137,7 @@ var
   SaveState: TCanvasSaveState;
   Rect, ShadowTextRect: TRectF;
   TH, TW: Single;
+  TabStop: Boolean;
 begin
   if Control = nil then
     Exit;
@@ -184,15 +188,29 @@ begin
         (Control.Height - TH) / 2, (Control.Width + TW) / 2, (Control.Height + TH) / 2);
     end;
 
-    if Control.TabStop then
+{$IFDEF COMPILER20_UP}
+    TabStop := Control.TabStop;
+{$ELSE}
+    TabStop := True; // XE5 or prev do not have TabStop property.
+{$ENDIF}
+
+    if TabStop then
     begin
       Canvas.Fill.Color := GetBkColor(Control);
+{$IFDEF COMPILER20_UP}
       Canvas.Stroke.Dash := TStrokeDash.Solid;
+{$ELSE}
+      Canvas.Stroke.Dash := TStrokeDash.sdSolid;
+{$ENDIF}
     end
     else
     begin
       Canvas.Fill.Color := VclColorToAlphaColor(TColor(COLOR_BTNSHADOW or $80000000));
+{$IFDEF COMPILER20_UP}
       Canvas.Stroke.Dash := TStrokeDash.Dash;
+{$ELSE}
+      Canvas.Stroke.Dash := TStrokeDash.sdDash;
+{$ENDIF}
     end;
 
     Canvas.FillRect(Rect, 0, 0, AllCorners, csDrawOpacity);
@@ -203,12 +221,22 @@ begin
     Canvas.Fill.Color := TAlphaColors.White;
     ShadowTextRect := TRectF.Create(Rect);
     ShadowTextRect.Offset(1, 1);
+{$IFDEF COMPILER20_UP}
     Canvas.FillText(ShadowTextRect, OrderStr, False, csDrawOpacity, [],
       TTextAlign.Center, TTextAlign.Center);
+{$ELSE}
+    Canvas.FillText(ShadowTextRect, OrderStr, False, csDrawOpacity, [],
+      TTextAlign.taCenter, TTextAlign.taCenter);
+{$ENDIF}
 
     Canvas.Fill.Color := VclColorToAlphaColor(TabOrderWizard.DispFont.Color);
+{$IFDEF COMPILER20_UP}
     Canvas.FillText(Rect, OrderStr, False, csDrawOpacity, [],
       TTextAlign.Center, TTextAlign.Center);
+{$ELSE}
+    Canvas.FillText(Rect, OrderStr, False, csDrawOpacity, [],
+      TTextAlign.taCenter, TTextAlign.taCenter);
+{$ENDIF}
 
     Canvas.EndScene;
   finally

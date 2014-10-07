@@ -48,10 +48,14 @@ interface
 
 {$IFDEF CNWIZARDS_CNTABORDERWIZARD}
 
+{$IFDEF COMPILER19_UP}
+  {$DEFINE TABORDER_FMX}
+{$ENDIF}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, Buttons, ComCtrls, IniFiles, Registry, Menus, ToolsAPI,
-  Contnrs, CnWizMethodHook, {$IFDEF SUPPORTS_FMX} CnFmxTabOrderUtils, {$ENDIF}
+  Contnrs, CnWizMethodHook, {$IFDEF TABORDER_FMX} CnFmxTabOrderUtils, {$ENDIF}
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, {$ELSE} DsgnIntf, {$ENDIF}
   CnConsts, CnWizClasses, CnWizConsts, CnWizMenuAction, CnWizUtils, CnCommon,
   CnWizShortCut, CnWizNotifier, CnWizMultiLang;
@@ -424,7 +428,7 @@ begin
   CnWizNotifierServices.AddGetMsgNotifier(OnGetMsg, [WM_PAINT]);
   CnWizNotifierServices.AddFormEditorNotifier(FormNotify);
 
-{$IFDEF SUPPORTS_FMX}
+{$IFDEF TABORDER_FMX}
   // Hook FMX TControl AfterPaint;
   CreateFMXPaintHook(Self);
 {$ENDIF}
@@ -444,7 +448,7 @@ begin
   CnWizNotifierServices.RemoveCallWndProcRetNotifier(OnCallWndProcRet);
   CnWizNotifierServices.RemoveGetMsgNotifier(OnGetMsg);
   CnWizNotifierServices.RemoveFormEditorNotifier(FormNotify);
-{$IFDEF SUPPORTS_FMX}
+{$IFDEF TABORDER_FMX}
   FreeNotificationFMXPaintHook;
 {$ENDIF}
   FTimer.Free;
@@ -946,7 +950,7 @@ begin
 
   Root := CnOtaGetRootComponentFromEditor(Editor);
   if Root = nil then Exit;
-{$IFDEF SUPPORTS_FMX}
+{$IFDEF TABORDER_FMX}
   DoSetFmxTabOrder(Root, True);
 {$ENDIF}
   if Root is TWinControl then
@@ -1152,7 +1156,7 @@ begin
   begin
     FChangedControls.Clear;
     FUpdateDrawForms.Clear;
-{$IFDEF SUPPORTS_FMX}
+{$IFDEF TABORDER_FMX}
     NotifyFormDesignerChanged(nil);
 {$ENDIF}
     FTimer.Enabled := False;
@@ -1166,7 +1170,7 @@ begin
       FUpdateDrawForms.Add(Root);
       FTimer.Enabled := True;
     end;
-{$IFDEF SUPPORTS_FMX}
+{$IFDEF TABORDER_FMX}
     if Assigned(Root) then
       NotifyFormDesignerChanged(Root);
 {$ENDIF}
@@ -1196,7 +1200,7 @@ begin
           if Root.Components[j] is TWinControl then
             TWinControl(Root.Components[j]).Invalidate;
       end;
-{$IFDEF SUPPORTS_FMX}
+{$IFDEF TABORDER_FMX}
       UpdateFMXDraw(Root);
 {$ENDIF}
     end;
