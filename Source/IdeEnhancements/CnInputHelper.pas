@@ -545,9 +545,9 @@ const
   CS_DROPSHADOW = $20000;
 
 {$IFDEF SUPPORT_UNITNAME_DOT}
-  csUnitDotPrefixes: array[0..9] of string = (
+  csUnitDotPrefixes: array[0..14] of string = (
     'Vcl', 'Xml', 'System', 'Winapi', 'Soap', 'FMX', 'Data', 'Posix', 'Macapi',
-    'DataSnap'
+    'DataSnap', 'FireDAC', 'REST', 'VCLTee', 'Web', 'IBX'
   );
 {$ENDIF}
 

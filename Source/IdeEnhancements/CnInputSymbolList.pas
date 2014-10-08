@@ -1256,7 +1256,7 @@ end;
 
 procedure TUnitNameList.LoadFromSysPath;
 var
-  i: Integer;
+  I: Integer;
   Paths: TStringList;
 begin
   Paths := TStringList.Create;
@@ -1267,9 +1267,11 @@ begin
     begin
       FSysUnits.Clear;
       FCurrList := FSysUnits;
-      for i := 0 to Paths.Count - 1 do
-        FindFile(Paths[i], '*.pas', DoFindFile, nil, False, False);
-
+      for I := 0 to Paths.Count - 1 do
+      begin
+        FindFile(Paths[I], '*.pas', DoFindFile, nil, False, False);
+        FindFile(Paths[I], '*.dcu', DoFindFile, nil, False, False);
+      end;
       FindFile(MakePath(GetInstallDir) + 'Lib\', '*.dcu', DoFindFile, nil,
         False, False);
       UpdateCaseFromModules(FSysUnits);
@@ -1279,8 +1281,8 @@ begin
     Paths.Free;
   end;
 
-  for i := 0 to FSysUnits.Count - 1 do
-    AddUnit(FSysUnits[i]);
+  for I := 0 to FSysUnits.Count - 1 do
+    AddUnit(FSysUnits[I]);
 end;
 
 procedure TUnitNameList.LoadFromProjectPath;
