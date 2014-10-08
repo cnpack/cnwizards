@@ -295,6 +295,7 @@ type
     function IsValidCppArrowKey(VKey: Word; Code: Word): Boolean;
     function IsValidKeyQueue: Boolean;
     function CalcFirstSet(IsPascal: Boolean): TAnsiCharSet;
+    function CalcCharSet(PosInfo: PCodePosInfo): TAnsiCharSet;
     procedure AutoCompFunc(Sender: TObject);
     function GetListFont: TFont;
     procedure ConfigChanged;
@@ -1649,7 +1650,7 @@ begin
     CnNtaGetCurrLineText(LineText, LineNo, Index);
     Len := Length(LineText);
 {$IFDEF DEBUG}
-//  CnDebugger.LogFmt('Input Helper. Line: %d, Len %d. CurLine %d, CurLen %d', [LineNo, Len, FCurrLineNo, FCurrLineLen]);
+//    CnDebugger.LogFmt('Input Helper. Line: %d, Len %d. CurLine %d, CurLen %d', [LineNo, Len, FCurrLineNo, FCurrLineLen]);
 {$ENDIF}
     // 如果此次按键对当前行作了修改才认为是有效按键，以处理增量查找等问题
     // XE4的BCB环境中，空行默认长度都是4，后以空格填充，因此不能简单比较长度，得比内容
@@ -1870,12 +1871,14 @@ begin
   if AcceptDisplay and GetCaretPosition(Pt) then
   begin
     // 取得当前标识符及光标左边的部分，C/C++情况下，允许编译指令的#也作为标识符开头
-    CnOtaGetCurrPosToken(FToken, CurrPos, True, CalcFirstSet(FPosInfo.IsPascal), CharSet);
+    CnOtaGetCurrPosToken(FToken, CurrPos, True, CalcFirstSet(FPosInfo.IsPascal),
+      CalcCharSet(@FPosInfo));
     FMatchStr := Copy(FToken, 1, CurrPos);
 {$IFDEF DEBUG}
     CnDebugger.TraceFmt('Token %s, Match %s', [FToken, FMatchStr]);
 {$ENDIF}
-    if ForcePopup or IsValidSymbol(FToken) or (FPosInfo.PosKind = pkFieldDot) then
+    if ForcePopup or IsValidSymbol(FToken) or (FPosInfo.PosKind in [pkFieldDot
+      {$IFDEF SUPPORT_UNITNAME_DOT}, pkIntfUses, pkImplUses{$ENDIF} ]) then
     begin
       // 在过滤列表中时不自动弹出
       if not ForcePopup and (FFilterSymbols.IndexOf(FMatchStr) >= 0) then
@@ -2335,7 +2338,8 @@ var
   AToken: string;
 {$ENDIF}
 begin
-  if CnOtaGetCurrPosToken(FToken, CurrPos, True, CalcFirstSet(FPosInfo.IsPascal), CharSet) or ForcePopup
+  if CnOtaGetCurrPosToken(FToken, CurrPos, True, CalcFirstSet(FPosInfo.IsPascal),
+    CalcCharSet(@FPosInfo)) or ForcePopup
     or ParsePosInfo and (FPosInfo.PosKind in [pkFieldDot, pkField]) then
   begin
   {$IFDEF DEBUG}
@@ -2345,7 +2349,7 @@ begin
     Result := UpdateCurrList(ForcePopup);
 
 {$IFDEF DEBUG}
-//  CnDebugger.LogFmt('InputHelper UpdateCurrList Returns %d', [Integer(Result)]);
+//    CnDebugger.LogFmt('InputHelper UpdateCurrList Returns %d', [Integer(Result)]);
 {$ENDIF}
 
   {$IFNDEF SUPPORT_IDESymbolList}
@@ -2474,9 +2478,9 @@ begin
       end;
 
       if DelLeft then
-        CnOtaDeleteCurrTokenLeft(CalcFirstSet(FPosInfo.IsPascal), CharSet)
+        CnOtaDeleteCurrTokenLeft(CalcFirstSet(FPosInfo.IsPascal), CalcCharSet(@FPosInfo))
       else
-        CnOtaDeleteCurrToken(CalcFirstSet(FPosInfo.IsPascal), CharSet);
+        CnOtaDeleteCurrToken(CalcFirstSet(FPosInfo.IsPascal), CalcCharSet(@FPosInfo));
 
       // DONE: 如果是Pascal编译指令并且光标后有个}则要把}删掉
       // 不能简单地在上面的Charset中加}，因为还会有其他判断
@@ -3067,6 +3071,17 @@ begin
       Results.Add('------');
     end;
   end;
+end;
+
+function TCnInputHelper.CalcCharSet(PosInfo: PCodePosInfo): TAnsiCharSet;
+begin
+  Result := CharSet;
+{$IFDEF SUPPORT_UNITNAME_DOT}
+  // 支持点号的引用里头，允许点号是标识符的一部分
+  if PosInfo^.IsPascal and (PosInfo^.AreaKind in [akIntfUses, akImplUses]) and
+    (PosInfo^.PosKind in [pkIntfUses, pkImplUses]) then
+    Result := CharSet + ['.'];
+{$ENDIF}
 end;
 
 initialization
