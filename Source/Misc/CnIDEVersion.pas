@@ -214,7 +214,7 @@ begin
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
 end;
 
-function IsDelphi15IdeVersionLatest: Boolean;
+function IsDelphiXEIdeVersionLatest: Boolean;
 const
   CoreIdeLatest: TVersionNumber = // Update 2
     (Major: 15; Minor: 0; Release: 3809; Build: 34076);
@@ -225,10 +225,10 @@ begin
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
 end;
 
-function IsDelphi16IdeVersionLatest: Boolean;
+function IsDelphiXE2IdeVersionLatest: Boolean;
 const
-  CoreIdeLatest: TVersionNumber = // Update 4
-    (Major: 16; Minor: 0; Release: 4429; Build: 46931);
+  CoreIdeLatest: TVersionNumber = // Update 4 HotFix 1
+    (Major: 16; Minor: 0; Release: 4504; Build: 48759);
 var
   ReadFileVersion: TVersionNumber;
 begin
@@ -236,7 +236,7 @@ begin
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
 end;
 
-function IsDelphi17IdeVersionLatest: Boolean;
+function IsDelphiXE3IdeVersionLatest: Boolean;
 const
   CoreIdeLatest: TVersionNumber =
     (Major: 17; Minor: 0; Release: 4771; Build: 56661); // Update 2
@@ -346,15 +346,15 @@ begin
 {$ENDIF}
 
 {$IFDEF DELPHI15}
-  CnIdeVersionIsLatest := IsDelphi15IdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphiXEIdeVersionLatest;
 {$ENDIF}
 
 {$IFDEF DELPHI16}
-  CnIdeVersionIsLatest := IsDelphi16IdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphiXE2IdeVersionLatest;
 {$ENDIF}
 
 {$IFDEF DELPHI17}
-  CnIdeVersionIsLatest := IsDelphi17IdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphiXE3IdeVersionLatest;
 {$ENDIF}
 
 {$IFDEF DELPHIXE4}
