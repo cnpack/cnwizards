@@ -125,7 +125,14 @@ begin
   while (Control <> nil) and not (Control.Parent is TCustomForm) do
   begin
     Inc(I);
+{$IFDEF COMPILER18_UP} // XE3 do not have ControlParent
     Control := Control.ParentControl;
+{$ELSE}
+    if (Control.Parent <> nil) and (Control.Parent is TControl) then
+      Control := TControl(Control.Parent)
+    else
+      Control := nil;
+{$ENDIF}
   end;
   RGBToHSL(TabOrderWizard.BkColor, H, S, L);
   Result := VclColorToAlphaColor(HSLToRGB(H + I / csMaxLevel, 0.7, 0.7));
