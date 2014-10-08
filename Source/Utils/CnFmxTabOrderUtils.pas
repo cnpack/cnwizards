@@ -39,8 +39,9 @@ interface
 
 uses
   System.Types, System.Classes, System.SysUtils, System.Contnrs, System.UITypes,
-  System.Math, FMX.Controls, FMX.Objects, FMX.Types, FMX.Graphics, FMX.Forms,
-  WinApi.Windows, CnWizMethodHook;
+  System.Math, FMX.Controls, FMX.Objects, FMX.Types,  FMX.Forms, WinApi.Windows,
+  {$IFDEF COMPILER19_UP}FMX.Graphics, {$ENDIF}
+  CnWizMethodHook;
 
 // TabOrder 专家创建时调用一次，用来初始化 FMX 的 Hook
 procedure CreateFMXPaintHook(Wizard: TObject);
