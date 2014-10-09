@@ -215,10 +215,14 @@ begin
     if TabStop then
     begin
       Canvas.Fill.Color := GetBkColor(Control);
-{$IFDEF COMPILER20_UP}
+{$IFDEF COMPILER20_UP} // XE6 Stroke Enum name changed without prefix
       Canvas.Stroke.Dash := TStrokeDash.Solid;
 {$ELSE}
+  {$IFDEF COMPILER17_UP}
       Canvas.Stroke.Dash := TStrokeDash.sdSolid;
+  {$ELSE} // XE2 do not have Stroke.Dash, but StrokeDash
+      Canvas.StrokeDash := TStrokeDash.sdSolid;
+  {$ENDIF}
 {$ENDIF}
     end
     else
@@ -227,7 +231,11 @@ begin
 {$IFDEF COMPILER20_UP}
       Canvas.Stroke.Dash := TStrokeDash.Dash;
 {$ELSE}
+  {$IFDEF COMPILER17_UP}
       Canvas.Stroke.Dash := TStrokeDash.sdDash;
+  {$ELSE} // XE2 do not have Stroke.Dash, but StrokeDash
+      Canvas.StrokeDash := TStrokeDash.sdDash;
+  {$ENDIF}
 {$ENDIF}
     end;
 
@@ -513,7 +521,7 @@ var
   L, R, T, B: Integer;
   Match: Boolean;
 
-    // 取控件的边界位置
+  // 取控件的边界位置
   procedure GetControlPos(AControl: TControl; var AL, AT, AR, AB: Integer);
   begin
     AL := Trunc(AControl.Position.X);
@@ -543,7 +551,11 @@ begin
   if Root is TControl then
   begin
     Control := TControl(Root);
+{$IFDEF COMPILER17_UP}
     if Control.ControlsCount = 0 then Exit;
+{$ELSE} // XE2 Do not have ControlsCount
+    if Control.ChildrenCount = 0 then Exit;
+{$ENDIF}
   end
   else if Root is TCustomForm then
   begin
@@ -562,9 +574,17 @@ begin
 
   TempList := TList.Create;
   if Control <> nil then
+  begin
+{$IFDEF COMPILER17_UP}
     for I := 0 to Control.ControlsCount - 1 do // 将控件放到临时列表中
       if Control.Controls[I] is TControl then
         TempList.Add(Control.Controls[I]);
+{$ELSE} // XE2 Do not have controls but children
+    for I := 0 to Control.ChildrenCount - 1 do // 将控件放到临时列表中
+      if Control.Children[I] is TControl then
+        TempList.Add(Control.Children[I]);
+{$ENDIF}
+  end;
 
   if Form <> nil then
     for I := 0 to Form.ComponentCount - 1 do // 将控件放到临时列表中
