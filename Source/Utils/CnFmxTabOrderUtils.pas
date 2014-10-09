@@ -71,7 +71,12 @@ const
 type
   TFMXControlHook = class(TControl);
 
+{$IFDEF COMPILER18_UP}
   TPaintInternalMethod = procedure (Self: TObject);
+{$ELSE}
+  // XE3 do not have PaintInternal, use DoPaint
+  TDoPaintMethod = procedure (Self: TObject);
+{$ENDIF}
 
 var
   TabOrderPaintHook: TCnMethodHook = nil; // Reference
@@ -86,8 +91,13 @@ var
 begin
   Result := False;
   // 设计期的八个控制点不画
+{$IFDEF COMPILER18_UP}  // XE4 or above
   if Control.ClassNameIs('TGrabHandle.TGrabHandleEllipse') then
     Exit;
+{$ELSE}                 // XE3
+  if Control.ClassNameIs('TEllipse') then
+    Exit;
+{$ENDIF}
 
   if FMXUpdateDrawForms <> nil then
   begin
@@ -252,6 +262,8 @@ begin
   end;
 end;
 
+{$IFDEF COMPILER18_UP}
+
 procedure TabOrderControlPaintInternal(Self: TObject);
 var
   Control: TControl;
@@ -286,14 +298,59 @@ begin
   end;
 end;
 
+{$ELSE}
+
+procedure TabOrderControlDoPaint(Self: TObject);
+var
+  Control: TControl;
+begin
+  if Self = nil then
+    Exit;
+
+  if TabOrderPaintHook.UseDDteours then
+    TDoPaintMethod(TabOrderPaintHook.Trampoline)(Self)
+  else
+  begin
+    TabOrderPaintHook.UnhookMethod;
+    TFMXControlHook(Self).DoPaint;
+    TabOrderPaintHook.HookMethod;
+  end;
+
+  if Self is TControl then
+  begin
+    if (TabOrderWizard <> nil) and TabOrderWizard.Active
+      and TabOrderWizard.DispTabOrder then
+    begin
+      Control := Self as TControl;
+      if (csDesigning in Control.ComponentState) and IsChildOfFMXDesigners(Control) then
+      begin
+        // Draw TabOrder Mark
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('TabOrderControlDoPaint Should Draw Mark: ' + Self.ClassName);
+{$ENDIF}
+        DrawControlTabOrder(Control);
+      end;
+    end;
+  end;
+end;
+
+{$ENDIF}
+
 procedure CreateFMXPaintHook(Wizard: TObject);
 begin
   TabOrderWizard := TCnTabOrderWizard(Wizard);
   FMXUpdateDrawForms := TComponentList.Create(False);
 
   if TabOrderPaintHook = nil then
+  begin
+{$IFDEF COMPILER18_UP}
     TabOrderPaintHook := TCnMethodHook.Create(@TFMXControlHook.PaintInternal,
       @TabOrderControlPaintInternal, True);
+{$ELSE}
+    TabOrderPaintHook := TCnMethodHook.Create(@TFMXControlHook.DoPaint,
+      @TabOrderControlDoPaint, True);
+{$ENDIF}
+  end;
 end;
 
 procedure FreeNotificationFMXPaintHook;
