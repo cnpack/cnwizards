@@ -98,7 +98,9 @@ type
     procedure RestorePosition;
     procedure CheckDefaultFontSize();
   protected
+{$IFNDEF COMPILER20_UP} // XE6 above moves to public
     procedure Loaded; override;
+{$ENDIF}
     procedure DoShow; override;
 
     // 以下复制自 TCnTranslateForm 以实现多语
@@ -125,6 +127,9 @@ type
        对于 Dock 窗体，默认需要 }
     procedure ShowFormHelp;
   public
+{$IFDEF COMPILER20_UP}
+    procedure Loaded; override;
+{$ENDIF}
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure DefaultHandler(var Message); override;
