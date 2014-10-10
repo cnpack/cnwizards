@@ -2787,9 +2787,9 @@ var
   POCS: IOTAProjectOptionsConfigurations;
   BC: IOTABuildConfiguration;
   I: Integer;
+{$IFDEF SUPPORTS_CROSS_PLATFORM}
   PS: string;
   PlatformConfig: IOTABuildConfiguration;
-{$IFDEF SUPPORTS_CROSS_PLATFORM}
   Proj: IOTAProject;
   CurrPs: string;
 {$ENDIF}
@@ -2851,9 +2851,9 @@ var
   POCS: IOTAProjectOptionsConfigurations;
   BC: IOTABuildConfiguration;
   I: Integer;
+{$IFDEF SUPPORTS_CROSS_PLATFORM}
   PS: string;
   PlatformConfig: IOTABuildConfiguration;
-{$IFDEF SUPPORTS_CROSS_PLATFORM}
   Proj: IOTAProject;
   CurrPs: string;
 {$ENDIF}
