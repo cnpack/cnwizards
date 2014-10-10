@@ -411,9 +411,8 @@ begin
   cbbLevel.ItemIndex := 0;
 
   cbbType.Items.Clear;
-  cbbType.Items.Add(SCnMsgTypeNone);
-  for I := Ord(Low(TCnMsgType)) to Ord(High(TCnMsgType)) do
-    cbbType.Items.Add(SCnMsgTypeDescArray[TCnMsgType(I)]^);
+  for I := Ord(Low(CnMsgTypesArray)) to Ord(High(CnMsgTypesArray)) do
+    cbbType.Items.Add(SCnMsgTypesDescArray[I]^);
   cbbType.ItemIndex := 0;
 
   cbbThread.Items.Clear;
@@ -478,11 +477,7 @@ begin
   // 根据操作，修改 Filter，然后更新界面
   if Sender = cbbType then
   begin
-    if cbbType.ItemIndex = 0 then
-      FFilter.MsgTypes := []
-    else
-      FFilter.MsgTypes := [TCnMsgType(cbbType.ItemIndex - 1)]
-      // cbbType.Items 中多了第一项的星号通配，所以减一
+    FFilter.MsgTypes := CnMsgTypesArray[cbbType.ItemIndex];
   end
   else if Sender = cbbThread then
   begin

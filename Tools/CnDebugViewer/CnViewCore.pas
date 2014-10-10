@@ -196,6 +196,8 @@ var
   SCnMsgTypeSystem:        string = 'System';
   SCnMsgTypeUDPMsg:        string = 'UDPMsg';
 
+  SCnMsgTypeEnterLeaveProc:     string = 'Enter/Leave';
+
   SCnMsgDescriptionFmt: string =
     'No: %-5d    Indent: %-3d    Level: %-1d    ThreadID: $%-8x    ProcessID: $%-8x   Tag: %-8s   TimeStamp: %s' +
     #13#10 + '%s';
@@ -279,6 +281,19 @@ const
   SCnTreeColumnArray: array[0..6] of PString = (@SCnTreeColumn0,
     @SCnTreeColumn1, @SCnTreeColumn2, @SCnTreeColumn3, @SCnTreeColumn4,
     @SCnTreeColumn5, @SCnTreeColumn6);
+
+  CnMsgTypesArray: array[0..13] of TCnMsgTypes = ( [],
+    [cmtInformation], [cmtWarning], [cmtError], [cmtSeparator], [cmtEnterProc,
+    cmtLeaveProc], [cmtTimeMarkStart, cmtTimeMarkStop], [cmtMemoryDump],
+    [cmtException], [cmtObject], [cmtComponent], [cmtCustom], [cmtSystem], [cmtUDPMsg]
+  );
+
+  SCnMsgTypesDescArray: array[0..13] of PString = ( @SCnMsgTypeNone,
+    @SCnMsgTypeInformation, @SCnMsgTypeWarning, @SCnMsgTypeError,
+    @SCnMsgTypeSeparator, @SCnMsgTypeEnterLeaveProc,
+    @SCnMsgTypeTimeMarkStart, @SCnMsgTypeMemoryDump,
+    @SCnMsgTypeException, @SCnMsgTypeObject, @SCnMsgTypeComponent,
+    @SCnMsgTypeCustom, @SCnMsgTypeSystem, @SCnMsgTypeUDPMsg);
 
   SCnMsgTypeDescArray: array[TCnMsgType] of PString = (
     @SCnMsgTypeInformation, @SCnMsgTypeWarning, @SCnMsgTypeError,
@@ -592,6 +607,9 @@ begin
   TranslateStr(SCnMsgTypeComponent, 'SCnMsgTypeComponent');
   TranslateStr(SCnMsgTypeCustom, 'SCnMsgTypeCustom');
   TranslateStr(SCnMsgTypeSystem, 'SCnMsgTypeSystem');
+  TranslateStr(SCnMsgTypeSystem, 'SCnMsgTypeSystem');
+  TranslateStr(SCnMsgTypeUDPMsg, 'SCnMsgTypeUDPMsg');
+  TranslateStr(SCnMsgTypeEnterLeaveProc, 'SCnMsgTypeEnterLeaveProc');
 
   TranslateStr(SCnMsgDescriptionFmt, 'SCnMsgDescriptionFmt');
   TranslateStr(SCnTimeDescriptionFmt, 'SCnTimeDescriptionFmt');
