@@ -270,7 +270,8 @@ begin
   FIncludeVer := (Options.GetOptionValue('IncludeVersionInfo') = '-1')
     or (Options.GetOptionValue('IncludeVersionInfo') = 'True');
 {$IFDEF DEBUG}
-//  CnDebugger.LogMsg('VerEnhance BeforeCompile ' + VarToStr(Options.GetOptionValue('IncludeVersionInfo')));
+  CnDebugger.LogMsg('VerEnhance BeforeCompile IncludeVersionInfo '
+    + VarToStr(Options.GetOptionValue('IncludeVersionInfo')));
 {$ENDIF}
 {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
   if not FIncludeVer then
@@ -281,7 +282,14 @@ begin
 
   FBeforeBuildNo := Options.GetOptionValue('Build');
 {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
+  {$IFNDEF PROJECT_VERSION_NUMBER_BUG}
+  // 2009/2010/XE has a bug that below got a wrong value.
   FBeforeBuildNo := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue(FCurrentProject,'VerInfo_Build'), 0);
+  {$ENDIF}
+{$ENDIF}
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('VerEnhance BeforeCompile BeforeBuildNo: '
+    + IntToStr(FBeforeBuildNo));
 {$ENDIF}
 
   //先增加文件版本信息, 修改OptionValue的值就可以了
