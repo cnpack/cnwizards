@@ -48,7 +48,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, ToolsAPI, IniFiles,
-  Forms, ExtCtrls, Menus, ComCtrls, Contnrs, {$IFDEF BDS}Variants, {$ENDIF}
+  Forms, ExtCtrls, Menus, ComCtrls, Contnrs, {$IFDEF COMPILER6_UP}Variants, {$ENDIF}
   CnCommon, CnWizUtils, CnWizNotifier, CnWizIdeUtils, CnWizConsts, CnMenuHook,
   CnConsts, CnWizClasses;
 
