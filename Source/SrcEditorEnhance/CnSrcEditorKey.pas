@@ -1008,7 +1008,7 @@ end;
 function TCnSrcEditorKey.DoRename(View: IOTAEditView; Key, ScanCode: Word;
   Shift: TShiftState; var Handled: Boolean): Boolean;
 var
-  Cur, UpperCur, NewName: string;
+  Cur, UpperCur, UpperHeadCur, NewName: string;
   CurIndex: Integer;
   BlockMatchInfo: TBlockMatchInfo;
   LineInfo: TBlockLineInfo;
@@ -1135,7 +1135,10 @@ begin
     begin
       try
         lblReplacePromt.Caption := Format(SCnRenameVarHintFmt, [Cur]);
-        edtRename.Text := Cur;
+        UpperHeadCur := Cur;
+        if (Length(UpperHeadCur) >= 1) and (UpperHeadCur[1] in ['a'..'z']) then
+          UpperHeadCur[1] := Chr(Ord(UpperHeadCur[1]) - 32);
+        edtRename.Text := UpperHeadCur;
 //        case Rit of
 //          ritCurrentProc: rbCurrentProc.Checked := True;
 //          ritInnerProc: rbCurrentInnerProc.Checked := True;
