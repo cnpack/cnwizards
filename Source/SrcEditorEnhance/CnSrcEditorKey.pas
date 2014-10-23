@@ -88,6 +88,7 @@ type
     FKeepSearch: Boolean;
     FCorIdeModule: HModule;
     FSearchWrap: Boolean;
+    FUpperFirstLetter: Boolean;
 {$IFNDEF DELPHI10_UP}
     FSaveLineNo: Integer;
     FNeedChangeInsert: Boolean;
@@ -150,7 +151,9 @@ type
     property AutoBracket: Boolean read FAutoBracket write FAutoBracket;
     property SemicolonLastChar: Boolean read FSemicolonLastChar write FSemicolonLastChar;
     property AutoEnterEnd: Boolean read FAutoEnterEnd write FAutoEnterEnd;
+    property UpperFirstLetter: Boolean read FUpperFirstLetter write FUpperFirstLetter;
     property OnEnhConfig: TNotifyEvent read FOnEnhConfig write FOnEnhConfig;
+
   end;
 
 {$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}
@@ -1136,14 +1139,10 @@ begin
       try
         lblReplacePromt.Caption := Format(SCnRenameVarHintFmt, [Cur]);
         UpperHeadCur := Cur;
-        if (Length(UpperHeadCur) >= 1) and (UpperHeadCur[1] in ['a'..'z']) then
+        if FUpperFirstLetter and (Length(UpperHeadCur) >= 1) and (UpperHeadCur[1] in ['a'..'z']) then
           UpperHeadCur[1] := Chr(Ord(UpperHeadCur[1]) - 32);
         edtRename.Text := UpperHeadCur;
-//        case Rit of
-//          ritCurrentProc: rbCurrentProc.Checked := True;
-//          ritInnerProc: rbCurrentInnerProc.Checked := True;
-//          ritUnit: rbUnit.Checked := True;
-//        end;
+
         rbCurrentProc.Enabled := Assigned(Parser.MethodStartToken) and
           Assigned(Parser.MethodCloseToken);
         rbCurrentInnerProc.Enabled := Assigned(Parser.ChildMethodStartToken) and
