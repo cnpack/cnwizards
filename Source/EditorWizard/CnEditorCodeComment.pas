@@ -138,7 +138,7 @@ begin
   S := Trim(Str);
   // 前面两个是 // 并且不是只有连续三个 ///
   Result := (Pos('//', S) = 1) and ((Length(S) <= 2) or (S[3] <> '/') or
-    (Pos('////', S) = 1));
+    (Pos('////', S) = 1) or (Pos('///*', S) = 1));
 end;
 
 function GetUnCommentStr(const Str: string): string;
@@ -297,9 +297,9 @@ end;
 initialization
   RegisterCnEditor(TCnEditorCodeComment);
   RegisterCnEditor(TCnEditorCodeUnComment);
-{$IFNDEF COMPILER9_UP}
+//{$IFNDEF COMPILER9_UP}
   RegisterCnEditor(TCnEditorCodeToggleComment);
-{$ENDIF}
+//{$ENDIF}
 
 {$ENDIF CNWIZARDS_CNEDITORWIZARD}
 end.
