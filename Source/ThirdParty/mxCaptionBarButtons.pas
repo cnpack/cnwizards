@@ -29,6 +29,7 @@
 // * liuxiao@cnpack.org http://www.cnpack.org
 // ****************************************************************************
 // ** 修改记录：
+// *   + 增加了对 DWM 的 Aero 风格的绘制支持 by liuxiao
 // *   + 增加了置顶按钮或整个按钮被禁用后，由置顶按钮点击导致的置顶被取消的机制
 // *   + 增加了 OnRolled 事件
 // *   + 增加了定时隐藏 Hint 窗口的功能
@@ -281,11 +282,42 @@ implementation
 
 {$R *.res}
 
+const
+  DWMNCRP_DISABLED = 1;
+  DWMWA_NCRENDERING_POLICY = 2;
+
+type
+  TDwmIsCompositionEnabled = function (var pfEnabled: BOOL): HResult; stdcall;
+  TDwmSetWindowAttribute = function (hwnd: HWND; dwAttribute: DWORD;
+    pvAttribute: Pointer; cbAttribute: DWORD): HResult; stdcall;
+
 var
   CtrlList: TThreadList;
 
+  DwmIsCompositionEnabled: TDwmIsCompositionEnabled = nil;
+  DwmSetWindowAttribute: TDwmSetWindowAttribute = nil;
+
 resourcestring
   sDuplicatedItemName = 'Duplicated button name';
+
+function DwmCompositionEnabled: Boolean;
+var
+  LEnabled: BOOL;
+begin
+  Result := (Win32MajorVersion >= 6) and (DwmIsCompositionEnabled(LEnabled) = S_OK) and LEnabled;
+end;
+
+procedure CheckDwmPainting(Hwnd: THandle);
+var
+  RenderingPolicy: DWORD;
+begin
+  if (Hwnd <> 0) and DwmCompositionEnabled then
+  begin
+    RenderingPolicy := DWMNCRP_DISABLED;
+    DwmSetWindowAttribute(Hwnd, DWMWA_NCRENDERING_POLICY,
+      @RenderingPolicy, SizeOf(RenderingPolicy));
+  end;
+end;
 
 { TmxCaptionButton }
 
@@ -480,7 +512,10 @@ begin
         if BarButtons.FAPIStayOnTop then
           BarButtons.DoStayOnTop(False)
         else
+        begin
           BarButtons.FParent.FormStyle := fsNormal;
+          CheckDwmPainting(BarButtons.FParent.Handle);
+        end;
       end;
     end;
   end;
@@ -946,6 +981,7 @@ begin
           BarButtons.FParent.FormStyle := fsStayOnTop
         else
           BarButtons.FParent.FormStyle := fsNormal;
+        CheckDwmPainting(BarButtons.FParent.Handle);
       end;
       BarButtons.Refresh;
     end;
@@ -1277,6 +1313,7 @@ const
   csOnTop: array[Boolean] of HWND = (HWND_NOTOPMOST, HWND_TOPMOST);
 begin
   SetWindowPos(FParent.Handle, csOnTop[OnTop], 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE);
+  CheckDwmPainting(FParent.Handle);
 end;
 
 procedure TmxCaptionBarButtons.Loaded;
@@ -1284,6 +1321,8 @@ begin
   inherited;
   if not (csDesigning in ComponentState) then
   begin
+    CheckDwmPainting(FParent.Handle);
+
     FWindowProc := FParent.WindowProc;
     FParent.WindowProc := MyWindowProc;
 
@@ -1704,8 +1743,21 @@ begin
   FreeAndNil(CtrlList);
 end;
 
+procedure InitDwmApis;
+var
+  DwmModule: HMODULE;
+begin
+  DwmModule := LoadLibrary('DWMAPI.DLL');
+  if DwmModule <> 0 then
+  begin
+    DwmIsCompositionEnabled := TDwmIsCompositionEnabled(GetProcAddress(DwmModule, 'DwmIsCompositionEnabled'));
+    DwmSetWindowAttribute := TDwmSetWindowAttribute(GetProcAddress(DwmModule, 'DwmSetWindowAttribute'));
+  end;
+end;
+
 initialization
   InitList;
+  InitDwmApis;
 
 finalization
   FreeList;
