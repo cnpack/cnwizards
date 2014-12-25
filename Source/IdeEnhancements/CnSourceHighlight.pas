@@ -1998,7 +1998,7 @@ begin
       begin
         CToken := TCnCppToken(FCompDirectiveTokenList[I]);
 {$IFDEF DEBUG}
-        CnDebugger.LogFmt('CompDirectiveInfo Check CompDirectivtType: %d', [Ord(CToken.CppTokenKind)]);
+//      CnDebugger.LogFmt('CompDirectiveInfo Check CompDirectivtType: %d', [Ord(CToken.CppTokenKind)]);
 {$ENDIF}
         if CToken.CppTokenKind in [ctkdirif, ctkdirifdef, ctkdirifndef] then
         begin
@@ -2052,7 +2052,7 @@ begin
       begin
         PToken := TCnPasToken(FCompDirectiveTokenList[I]);
 {$IFDEF DEBUG}
-        CnDebugger.LogFmt('CompDirectiveInfo Check CompDirectivtType: %d', [Ord(PToken.CompDirectivtType)]);
+//      CnDebugger.LogFmt('CompDirectiveInfo Check CompDirectivtType: %d', [Ord(PToken.CompDirectivtType)]);
 {$ENDIF}
         if PToken.CompDirectivtType in [ctIf, ctIfDef, ctIfNDef] then
         begin
@@ -2110,7 +2110,7 @@ begin
     end;
   end;
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('CompDirectiveInfo Pair Count: %d', [CompDirectiveInfo.Count]);
+//  CnDebugger.LogFmt('CompDirectiveInfo Pair Count: %d', [CompDirectiveInfo.Count]);
 {$ENDIF}
 end;
 
