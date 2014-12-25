@@ -29,7 +29,9 @@ unit CnEditorJumpMessage;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2012.02.25
+* 修改记录：2014.12.25
+*               加入跳至匹配的条件编译指令的功能
+*           2012.02.25
 *               加入跳至前一个/后一个相同标识符的功能
 *           2009.04.15
 *               加入对 C/C++ 大括号的支持
@@ -562,9 +564,10 @@ procedure TCnEditorJumpMatchedKeyword.Execute;
 var
   BlockMatchInfo: TBlockMatchInfo;
   LineInfo: TBlockLineInfo;
+  CompDirectiveInfo: TCompDirectiveInfo;
   EditControl: TControl;
   EditView: IOTAEditView;
-  Parser: TCnPasStructureParser;
+  PasParser: TCnPasStructureParser;
   CppParser: TCnCppStructureParser;
   Stream: TMemoryStream;
   CharPos: TOTACharPos;
@@ -591,11 +594,11 @@ begin
   if (not CurIsCpp) and (not CurIsPas) then
     Exit;
 
-  Parser := nil;
+  PasParser := nil;
   CppParser := nil;
 
   if CurIsPas then
-    Parser := TCnPasStructureParser.Create;
+    PasParser := TCnPasStructureParser.Create;
   if CurIsCpp then
     CppParser := TCnCppStructureParser.Create;
 
@@ -604,7 +607,7 @@ begin
     CnOtaSaveEditorToStream(EditView.Buffer, Stream);
     // 解析当前显示的源文件
     if CurIsPas then
-      Parser.ParseSource(PAnsiChar(Stream.Memory),
+      PasParser.ParseSource(PAnsiChar(Stream.Memory),
         IsDpr(EditView.Buffer.FileName) or IsInc(EditView.Buffer.FileName), False);
     if CurIsCpp then
       CppParser.ParseSource(PAnsiChar(Stream.Memory), Stream.Size,
@@ -618,23 +621,29 @@ begin
     // 解析后再查找当前光标所在的块
     EditPos := EditView.CursorPos;
     EditView.ConvertPos(True, EditPos, CharPos);
-    Parser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
+    PasParser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
   end;
 
   try
     BlockMatchInfo := TBlockMatchInfo.Create(EditControl);
     LineInfo := TBlockLineInfo.Create(EditControl);
+    CompDirectiveInfo := TCompDirectiveInfo.Create(EditControl);
     BlockMatchInfo.LineInfo := LineInfo;
+    BlockMatchInfo.CompDirectiveInfo := CompDirectiveInfo;
 
     if CurIsPas then
+    begin
+      if Assigned(PasParser.InnerBlockStartToken) and Assigned(PasParser.InnerBlockCloseToken) then
       begin
-      if Assigned(Parser.InnerBlockStartToken) and Assigned(Parser.InnerBlockCloseToken) then
-      begin
-        for I := Parser.InnerBlockStartToken.ItemIndex to
-          Parser.InnerBlockCloseToken.ItemIndex do
-          if Parser.Tokens[I].TokenID in csKeyTokens then
-            BlockMatchInfo.AddToKeyList(Parser.Tokens[I]);
+        for I := PasParser.InnerBlockStartToken.ItemIndex to
+          PasParser.InnerBlockCloseToken.ItemIndex do
+          if PasParser.Tokens[I].TokenID in csKeyTokens then
+            BlockMatchInfo.AddToKeyList(PasParser.Tokens[I]);
       end;
+
+      for I := 0 to PasParser.Count - 1 do
+        if CheckIsCompDirectiveToken(PasParser.Tokens[I], False) then
+          BlockMatchInfo.AddToCompDirectiveList(PasParser.Tokens[I]);
     end;
 
     if CurIsCpp then
@@ -658,7 +667,11 @@ begin
         for I := 0 to CppParser.Count - 1 do
           if CppParser.Tokens[I].CppTokenKind in [ctkbraceopen, ctkbraceclose] then
             BlockMatchInfo.AddToKeyList(CppParser.Tokens[I]);
-      end;  
+      end;
+
+      for I := 0 to CppParser.Count - 1 do
+        if CheckIsCompDirectiveToken(CppParser.Tokens[I], True) then
+          BlockMatchInfo.AddToCompDirectiveList(CppParser.Tokens[I]);
     end;
 
     if BlockMatchInfo.KeyCount > 0 then
@@ -681,8 +694,29 @@ begin
       BlockMatchInfo.ConvertLineList;
     end;
 
+    if BlockMatchInfo.CompDirectiveTokenCount > 0 then
+    begin
+      for I := 0 to BlockMatchInfo.CompDirectiveTokenCount - 1 do
+      begin
+        // 转换成 Col 与 Line
+        if CurIsPas then
+          CharPos := OTACharPos(BlockMatchInfo.CompDirectiveTokens[I].CharIndex,
+            BlockMatchInfo.CompDirectiveTokens[I].LineNumber + 1);
+        if CurIsCpp then
+          CharPos := OTACharPos(BlockMatchInfo.CompDirectiveTokens[I].CharIndex - 1,
+            BlockMatchInfo.CompDirectiveTokens[I].LineNumber);
+
+        EditView.ConvertPos(False, EditPos, CharPos);
+        // 以上这句在 D2009 中的结果可能会有偏差，暂无办法
+        BlockMatchInfo.CompDirectiveTokens[I].EditCol := EditPos.Col;
+        BlockMatchInfo.CompDirectiveTokens[I].EditLine := EditPos.Line;
+      end;
+      BlockMatchInfo.ConvertCompDirectiveLineList;
+    end;
+
     BlockMatchInfo.IsCppSource := CurIsCpp;
     BlockMatchInfo.CheckLineMatch(EditView, False);
+    BlockMatchInfo.CheckCompDirectiveMatch(EditView, False);
 
     // 解析完毕，准备定位
     DestToken := nil;
@@ -708,6 +742,29 @@ begin
             DestToken := LineInfo.CurrentPair.MiddleToken[TokenIndex + 1];
         end;
       end;
+    end
+    else if CompDirectiveInfo.CurrentPair <> nil then
+    begin
+      if CompDirectiveInfo.CurrentToken = CompDirectiveInfo.CurrentPair.StartToken then
+      begin
+        if CompDirectiveInfo.CurrentPair.MiddleCount > 0 then
+          DestToken := CompDirectiveInfo.CurrentPair.MiddleToken[0]
+        else
+          DestToken := CompDirectiveInfo.CurrentPair.EndToken
+      end
+      else if CompDirectiveInfo.CurrentToken = CompDirectiveInfo.CurrentPair.EndToken then
+        DestToken := CompDirectiveInfo.CurrentPair.StartToken
+      else
+      begin
+        if CompDirectiveInfo.CurrentPair.MiddleCount > 0 then
+        begin
+          TokenIndex := CompDirectiveInfo.CurrentPair.IndexOfMiddleToken(CompDirectiveInfo.CurrentToken);
+          if TokenIndex = CompDirectiveInfo.CurrentPair.MiddleCount - 1 then // 最后一个
+            DestToken := CompDirectiveInfo.CurrentPair.EndToken
+          else
+            DestToken := CompDirectiveInfo.CurrentPair.MiddleToken[TokenIndex + 1];
+        end;
+      end;
     end;
 
     if DestToken <> nil then
@@ -715,8 +772,9 @@ begin
   finally
     FreeAndNil(BlockMatchInfo);
     FreeAndNil(LineInfo);
+    FreeAndNil(CompDirectiveInfo);
     FreeAndNil(CppParser);
-    FreeAndNil(Parser);
+    FreeAndNil(PasParser);
   end;
 end;
 

@@ -248,6 +248,7 @@ type
     procedure AddToKeyList(AToken: TCnPasToken);
     procedure AddToCurrList(AToken: TCnPasToken);
     procedure AddToFlowList(AToken: TCnPasToken);
+    procedure AddToCompDirectiveList(AToken: TCnPasToken);
 
     property KeyTokens[Index: Integer]: TCnPasToken read GetKeyTokens;
     {* 高亮关键字列表}
@@ -644,6 +645,9 @@ function IsCurrentToken(AView: Pointer; AControl: TControl; Token: TCnPasToken):
 function CheckTokenMatch(const T1: AnsiString; const T2: AnsiString;
   CaseSensitive: Boolean): Boolean;
 {* 判断是否俩Identifer相等}
+
+function CheckIsCompDirectiveToken(AToken: TCnPasToken; IsCpp: Boolean): Boolean;
+{* 判断是否是条件编译指令}
 
 {$IFNDEF BDS}
 procedure MyEditorsCustomEditControlSetForeAndBackColor(ASelf: TObject;
@@ -2132,6 +2136,11 @@ end;
 procedure TBlockMatchInfo.AddToFlowList(AToken: TCnPasToken);
 begin
   FFlowTokenList.Add(AToken);
+end;
+
+procedure TBlockMatchInfo.AddToCompDirectiveList(AToken: TCnPasToken);
+begin
+  FCompDirectiveTokenList.Add(AToken);
 end;
 
 constructor TBlockMatchInfo.Create(AControl: TControl);
