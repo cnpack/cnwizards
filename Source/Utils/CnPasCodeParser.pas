@@ -54,6 +54,8 @@ const
   CN_TOKEN_MAX_SIZE = 63;
 
 type
+  TCnCompDirectiveType = (ctNone, ctIf, ctIfDef, ctIfNDef, ctElse, ctEndIf, ctIfEnd);
+
   TCnUseToken = class(TObject)
   private
     FIsImpl: Boolean;
@@ -71,9 +73,9 @@ type
   {* 描述一 Token 的结构高亮信息}
   private
     function GetToken: PAnsiChar;
-  
   protected
     FCppTokenKind: TCTokenKind;
+    FCompDirectiveType: TCnCompDirectiveType;
     FCharIndex: Integer;
     FEditCol: Integer;
     FEditLine: Integer;
@@ -124,6 +126,8 @@ type
     {* 是否是函数过程的开始，包括 function 和 begin/asm 的情况 }
     property IsMethodClose: Boolean read FIsMethodClose;
     {* 是否是函数过程的结束 }
+    property CompDirectivtType: TCnCompDirectiveType read FCompDirectiveType write FCompDirectiveType;
+    {* 当其类型是 Pascal 编译指令时，此域代表其详细类型，但不解析，由外部按需解析}
   end;
 
 //==============================================================================
@@ -468,8 +472,8 @@ begin
 
     while Lex.TokenID <> tkNull do
     begin
-      if {IsImpl and } (Lex.TokenID in
-        [tkProcedure, tkFunction, tkConstructor, tkDestructor,
+      if {IsImpl and } (Lex.TokenID in [tkCompDirect, // Allow CompDirect
+        tkProcedure, tkFunction, tkConstructor, tkDestructor,
         tkInitialization, tkFinalization,
         tkBegin, tkAsm,
         tkCase, tkTry, tkRepeat, tkIf, tkFor, tkWith, tkOn, tkWhile,
@@ -798,7 +802,8 @@ begin
 
       PrevTokenID := Lex.TokenID;
       PrevTokenStr := Lex.Token;
-      LexNextNoJunkWithoutCompDirect(Lex);
+      //LexNextNoJunkWithoutCompDirect(Lex);
+      Lex.NextNoJunk;
     end;
   finally
     Lex.Free;

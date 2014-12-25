@@ -661,20 +661,22 @@ begin
       end;  
     end;
 
-    if BlockMatchInfo.Count > 0 then
+    if BlockMatchInfo.KeyCount > 0 then
     begin
-      for I := 0 to BlockMatchInfo.Count - 1 do
+      for I := 0 to BlockMatchInfo.KeyCount - 1 do
       begin
         // 转换成 Col 与 Line
         if CurIsPas then
-          CharPos := OTACharPos(BlockMatchInfo.Tokens[I].CharIndex, BlockMatchInfo.Tokens[I].LineNumber + 1);
+          CharPos := OTACharPos(BlockMatchInfo.KeyTokens[I].CharIndex,
+            BlockMatchInfo.KeyTokens[I].LineNumber + 1);
         if CurIsCpp then
-          CharPos := OTACharPos(BlockMatchInfo.Tokens[I].CharIndex - 1, BlockMatchInfo.Tokens[I].LineNumber);
+          CharPos := OTACharPos(BlockMatchInfo.KeyTokens[I].CharIndex - 1,
+            BlockMatchInfo.KeyTokens[I].LineNumber);
 
         EditView.ConvertPos(False, EditPos, CharPos);
         // 以上这句在 D2009 中的结果可能会有偏差，暂无办法
-        BlockMatchInfo.Tokens[I].EditCol := EditPos.Col;
-        BlockMatchInfo.Tokens[I].EditLine := EditPos.Line;
+        BlockMatchInfo.KeyTokens[I].EditCol := EditPos.Col;
+        BlockMatchInfo.KeyTokens[I].EditLine := EditPos.Line;
       end;
       BlockMatchInfo.ConvertLineList;
     end;

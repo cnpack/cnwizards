@@ -324,6 +324,7 @@ begin
     FSource := ASource;
 
     CParser := TBCBTokenList.Create;
+    CParser.DirectivesAsComments := False;
     CParser.SetOrigin(ASource, Size);
 
     Layer := 0; // 初始层次，最外层为 0
@@ -395,8 +396,13 @@ begin
             end;
             Dec(Layer);
           end;
-        ctkidentifier,        // Need this 4 for flow control in source highlight
+        ctkidentifier,        // Need these for flow control in source highlight
         ctkreturn, ctkgoto, ctkbreak, ctkcontinue:
+          begin
+            NewToken;
+          end;
+        ctkdirif, ctkdirifdef, // Need these for conditional compile directive
+        ctkdirifndef, ctkdirelif, ctkdirelse, ctkdirendif:
           begin
             NewToken;
           end;
