@@ -131,7 +131,7 @@ const
   // If change here, CppCodeParser also need change.
 
   csPasCompDirectiveTokenStr: array[0..5] of AnsiString =
-    ('{$IF ', '{$IFDEF ', '{$IFNDEF ', '{$ELSE}', '{$ENDIF}', '{$IFEND}');
+    ('{$IF ', '{$IFDEF ', '{$IFNDEF ', '{$ELSE', '{$ENDIF', '{$IFEND');
 
   csPasCompDirectiveTypes: array[0..5] of TCnCompDirectiveType =
     (ctIf, ctIfDef, ctIfNDef, ctElse, ctEndIf, ctIfEnd);
@@ -202,8 +202,7 @@ type
     FLineInfo: TBlockLineInfo;              // 容纳解析出来的 Tokens 配对信息
     FCompDirectiveInfo: TCompDirectiveInfo; // 容纳解析出来的编译指令配对信息
 
-    FStack: TStack;  // 解析关键字配对时以及解析C括号配对时以及C编译指令配对时以及Pascal编译指令第一部分配对时使用
-    FStack2: TStack; // Pascal 编译指令第二部分配对时使用
+    FStack: TStack;  // 解析关键字配对时以及解析C括号配对时以及C编译指令配对时以及Pascal编译指令配对时使用
     FIfThenStack: TStack;
     FCurrentToken: TCnPasToken;
     FCurMethodStartToken, FCurMethodCloseToken: TCnPasToken;
@@ -1984,7 +1983,6 @@ var
   PToken: TCnPasToken;
   CToken: TCnCppToken;
   Pair: TCompDirectivePair;
-  StackRef: TStack;
 begin
   if (CompDirectiveInfo = nil) or (FCompDirectiveTokenList.Count <= 1) then
     Exit;
@@ -2045,9 +2043,8 @@ begin
   end
   else
   begin
-    // Pascal 代码，IF 与 IFEND 配对，IFDEF/IFNDEF 与 ENDIF 配对，ELSE 在中间
+    // Pascal 代码，IF/IFDEF/IFNDEF 与 ENDIF/IFEND 配对，ELSE 在中间
     try
-      StackRef := nil;
       for I := 0 to FCompDirectiveTokenList.Count - 1 do
       begin
         PToken := TCnPasToken(FCompDirectiveTokenList[I]);
@@ -2056,11 +2053,6 @@ begin
 {$ENDIF}
         if PToken.CompDirectivtType in [ctIf, ctIfDef, ctIfNDef] then
         begin
-          if PToken.CompDirectivtType = ctIf then
-            StackRef := FStack2
-          else
-            StackRef := FStack;
-
           Pair := TCompDirectivePair.Create;
           Pair.StartToken := PToken;
           Pair.Top := PToken.EditLine;
@@ -2068,28 +2060,23 @@ begin
           Pair.Left := PToken.EditCol;
           Pair.Layer := PToken.ItemLayer - 1;
 
-          StackRef.Push(Pair);
+          FStack.Push(Pair);
         end
         else if PToken.CompDirectivtType = ctElse then
         begin
-          if (StackRef <> nil) and (StackRef.Count > 0) then
+          if FStack.Count > 0 then
           begin
-            Pair := TCompDirectivePair(StackRef.Peek);
+            Pair := TCompDirectivePair(FStack.Peek);
             if Pair <> nil then
               Pair.AddMidToken(PToken, PToken.EditCol);
           end;
         end
         else if PToken.CompDirectivtType in [ctEndIf, ctIfEnd] then
         begin
-          if PToken.CompDirectivtType = ctEndIf then
-            StackRef := FStack
-          else
-            StackRef := FStack2; // IfEnd
-
-          if StackRef.Count = 0 then
+          if FStack.Count = 0 then
             Continue;
 
-          Pair := TCompDirectivePair(StackRef.Pop);
+          Pair := TCompDirectivePair(FStack.Pop);
 
           Pair.EndToken := PToken;
           Pair.EndLeft := PToken.EditCol;
@@ -2105,8 +2092,6 @@ begin
     finally
       for I := 0 to FStack.Count - 1 do
         TCompDirectivePair(FStack.Pop).Free;
-      for I := 0 to FStack.Count - 1 do
-        TCompDirectivePair(FStack2.Pop).Free;
     end;
   end;
 {$IFDEF DEBUG}
@@ -2170,7 +2155,6 @@ begin
   FCompDirectiveLineList := TCnObjectList.Create;
   
   FStack := TStack.Create;
-  FStack2 := TStack.Create;
   FIfThenStack := TStack.Create;
 
   FModified := True;
@@ -2181,7 +2165,6 @@ destructor TBlockMatchInfo.Destroy;
 begin
   Clear;
   FStack.Free;
-  FStack2.Free;
   FIfThenStack.Free;
 
   FKeyLineList.Free;
