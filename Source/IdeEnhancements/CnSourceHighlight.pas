@@ -5295,8 +5295,8 @@ var
   function InternalIsCurrentToken(Token: TCnPasToken): Boolean;
   begin
     Result := (Token <> nil) and // (Token.IsBlockStart or Token.IsBlockClose) and
-      (Token.EditLine = LineNo) and (Token.EditCol <= CharIndex) and
-      ((Token.EditCol + Integer(StrLen(Token.Token)) >= CharIndex));
+      (Token.EditLine = LineNo) and (Token.EditCol <= CharIndex + 1) and
+      ((Token.EditCol + Integer(StrLen(Token.Token)) >= CharIndex + 1));
   end;
 
   // 判断一个 Pair 是否有 Middle 的 Token 在光标下
