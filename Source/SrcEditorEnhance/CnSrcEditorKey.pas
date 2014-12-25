@@ -1031,6 +1031,7 @@ var
   LastTokenPos: Integer;
   FrmModalResult: Boolean;
   BookMarkList: TObjectList;
+  Element, LineFlag: Integer;
 begin
   Result := False;
   if (Key <> FRenameKey) or (Shift <> FRenameShift) then Exit;
@@ -1042,8 +1043,8 @@ begin
   if not CnOtaGetCurrPosToken(Cur, CurIndex) then
     Exit;
   if Cur = '' then Exit;
-
-  // DONE: 做 F2 更改当前变量名的动作
+  
+  // 做 F2 更改当前变量名的动作
   BookMarkList := nil;
   EditControl := CnOtaGetCurrentEditControl;
   if EditControl = nil then
@@ -1055,6 +1056,12 @@ begin
   end;
 
   if EditView = nil then
+    Exit;
+
+  // 如果是编译指令内部，则退出，因为现在即使弹出也不会更改。
+  EditControlWrapper.GetAttributeAtPos(EditControl, EditView.CursorPos,
+    False, Element, LineFlag);
+  if Element in [atComment, atPreproc] then
     Exit;
 
   if not IsDprOrPas(EditView.Buffer.FileName) and
