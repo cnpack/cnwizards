@@ -689,9 +689,13 @@ const
   csReservedWord = 'Reserved word'; // RegName of IDE Font for Reserved word
   csIdentifier = 'Identifier';      // RegName of IDE Font for Identifier
 {$IFDEF DELPHI5}
-  csCompDirective = 'Comment';
+  csCompDirective = 'Comment';      // Delphi 5/6 Compiler Directive = Comment
 {$ELSE}
+  {$IFDEF DELPHI6}
+  csCompDirective = 'Comment';
+  {$ELSE}
   csCompDirective = 'Preprocessor'; // RegName of IDE Font for Compiler Directive
+  {$ENDIF}
 {$ENDIF}
 
   csWhiteSpace = 'Whitespace';
@@ -4735,12 +4739,17 @@ begin
     CnDebugger.LogMsg('No IDE Font Found in Registry: ' + csCompDirective + '. Use Default.');
 {$ENDIF}
 {$IFDEF DELPHI5}
-    // Delphi 5 编译指令格式与注释一样
+    // Delphi 5/6 编译指令格式与注释一样
     FCompDirectiveHighlight.ColorFg := clNavy;
     FCompDirectiveHighlight.Italic := True;
 {$ELSE}
-    // D6 及以上及 C/C++ 代码的均是不斜的绿色
+  {$IFDEF DELPHI6}
+    FCompDirectiveHighlight.ColorFg := clNavy;
+    FCompDirectiveHighlight.Italic := True;
+  {$ELSE}
+    // D7 及以上及 C/C++ 代码的均是不斜的绿色
     FCompDirectiveHighlight.ColorFg := clGreen;
+  {$ENDIF}
 {$ENDIF}
   end;
 end;
