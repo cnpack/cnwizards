@@ -245,7 +245,7 @@ begin
     OutStream := TMemoryStream.Create;
 
     try
-      EditFiler.SaveToStream(InStream);
+      EditFiler.SaveToStream(InStream, True);
     except
       Application.HandleException(Self);
       Exit;
@@ -256,7 +256,7 @@ begin
     if Self.MergeBlank then
       MergeBlankStream(OutStream);
 
-    EditFiler.ReadFromStream(OutStream);
+    EditFiler.ReadFromStream(OutStream, True);
     Inc(FCropCount);
   finally
     EditFiler.Free;

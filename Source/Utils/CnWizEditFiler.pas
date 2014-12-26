@@ -92,7 +92,7 @@ type
     procedure SaveToStreamFromPos(Stream: TStream);
     procedure SaveToStreamToPos(Stream: TStream);
     // LiuXiao 添加三个读入流函数。
-    procedure ReadFromStream(Stream: TStream);
+    procedure ReadFromStream(Stream: TStream; CheckUtf8: Boolean = False);
     procedure ReadFromStreamInPos(Stream: TStream);
     procedure ReadFromStreamInsertToPos(Stream: TStream);
 
@@ -614,9 +614,12 @@ begin
 end;
 
 // 从Stream整个写到文件或缓冲中，覆盖原有内容，与Stream的Position和光标位置无关。
-procedure TCnEditFiler.ReadFromStream(Stream: TStream);
+procedure TCnEditFiler.ReadFromStream(Stream: TStream; CheckUtf8: Boolean );
 var
   Size: Integer;
+{$IFDEF IDE_WIDECONTROL}
+  Text: AnsiString;
+{$ENDIF}
 begin
   Assert(Stream <> nil);
 
@@ -638,10 +641,16 @@ begin
       raise Exception.Create(SNoEditWriter);
 
     FEditWrite.DeleteTo(MaxInt);
-{    if Stream is TMemoryStream then
-      FEditWrite.Insert(TMemoryStream(Stream).Memory)
-    else
-    begin }
+
+{$IFDEF IDE_WIDECONTROL}
+    if CheckUtf8 and (Stream is TMemoryStream) then
+    begin
+      Text := CnAnsiToUtf8(PAnsiChar((Stream as TMemoryStream).Memory));
+      Stream.Size := Length(Text) + 1;
+      Stream.Position := 0;
+      Stream.Write(PAnsiChar(Text)^, Length(Text) + 1);
+    end;
+{$ENDIF}
 
     if Buf = nil then
       GetMem(Buf, BufSize + 1);
