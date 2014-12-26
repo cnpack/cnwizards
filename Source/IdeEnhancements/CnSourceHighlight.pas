@@ -58,7 +58,7 @@ unit CnSourceHighlight;
 *           2009.03.28
 *               加入控制大小写匹配的机制，对 Pascal 文件，不区分大小写
 *           2009.01.06
-*               加入高亮当前行背景的功能，尚未完善。
+*               加入高亮当前行背景的功能。
 *               基本思想：挂接 Editor::TCustomEditorControl::SetForeAndBackColor
 *                         判断并设置背景色。判断在 BeforePaint 以及 AfterPaint
 *                         中结合 EditorChanged 的行位置来处理，要判断很多地方。
@@ -699,6 +699,8 @@ const
   csMaxBracketMatchLines = 50;
 
   csShortDelay = 20;
+
+  csDefaultHighlightBackgroundColor = $0066FFFF;
 
 {$IFNDEF BDS}
   {$IFDEF COMPILER5}
@@ -2387,8 +2389,8 @@ begin
   FBracketList := TObjectList.Create;
 
   FStructureHighlight := True;
-  FBlockMatchHighlight := True;
-  FBlockMatchBackground := clYellow; // 默认为黄色
+  FBlockMatchHighlight := True;     // 默认打开光标下配对的关键字高亮
+  FBlockMatchBackground := clYellow; 
 {$IFNDEF BDS}
   FHighLightCurrentLine := True;     // 默认打开当前行高亮
   FHighLightLineColor := LoadIDEDefaultCurrentColor; // 根据当前不同的色彩设置来设置不同色彩
@@ -2428,7 +2430,7 @@ begin
   FFlowStatementForeground := clBlack;
 
   FHighlightCompDirective := True;    // 默认打开光标下的编译指令背景高亮
-  FCompDirectiveBackground := clYellow;
+  FCompDirectiveBackground := csDefaultHighlightBackgroundColor;
 
   FBlockMatchLineLimit := True;
   FBlockMatchMaxLines := 40000; // 大于此行数的 unit，不解析
@@ -4718,12 +4720,28 @@ begin
   if EditControlWrapper.IndexOfHighlight(csCompDirective) >= 0 then
   begin
     AHighlight := EditControlWrapper.Highlights[EditControlWrapper.IndexOfHighlight(csCompDirective)];
-
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('Load IDE Font from Registry: ' + csCompDirective);
+{$ENDIF}
     FCompDirectiveHighlight.ColorFg := AHighlight.ColorFg;
     FCompDirectiveHighlight.ColorBk := AHighlight.ColorBk;
     FCompDirectiveHighlight.Bold := AHighlight.Bold;
     FCompDirectiveHighlight.Italic := AHighlight.Italic;
     FCompDirectiveHighlight.Underline := AHighlight.Underline;
+  end
+  else // If no default settings saved in Registry, using default.
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('No IDE Font Found in Registry: ' + csCompDirective + '. Use Default.');
+{$ENDIF}
+{$IFDEF DELPHI5}
+    // Delphi 5 编译指令格式与注释一样
+    FCompDirectiveHighlight.ColorFg := clNavy;
+    FCompDirectiveHighlight.Italic := True;
+{$ELSE}
+    // D6 及以上及 C/C++ 代码的均是不斜的绿色
+    FCompDirectiveHighlight.ColorFg := clGreen;
+{$ENDIF}
   end;
 end;
 
