@@ -445,7 +445,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Top = 140
       Width = 305
       Height = 17
-      Caption = 'Enable Highlight Conditional Compiler Directive.'
+      Caption = 'Enable Highlight Conditional Compiler Directive at Cursor.'
       TabOrder = 6
       OnClick = UpdateControls
     end
