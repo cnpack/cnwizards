@@ -112,6 +112,8 @@ type
     btnSeparateLineSetting: TButton;
     chkFlowControl: TCheckBox;
     shpFlowControl: TShape;
+    chkCompDirective: TCheckBox;
+    shpCompDirective: TShape;
     procedure UpdateControls(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure shpBracketMouseDown(Sender: TObject; Button: TMouseButton;
@@ -178,6 +180,8 @@ begin
 {$ENDIF}
     chkFlowControl.Checked := Wizard.HighlightFlowStatement;
     shpFlowControl.Brush.Color := Wizard.FlowStatementBackground;
+    chkCompDirective.Checked := Wizard.HighlightCompDirective;
+    shpCompDirective.Brush.Color := Wizard.CompDirectiveBackground;
 
     rgMatchRange.ItemIndex := Integer(Wizard.BlockHighlightRange);
     rgMatchDelay.ItemIndex := Integer(Wizard.BlockHighlightStyle);
@@ -219,6 +223,8 @@ begin
 {$ENDIF}
       Wizard.HighlightFlowStatement := chkFlowControl.Checked;
       Wizard.FlowStatementBackground := shpFlowControl.Brush.Color;
+      Wizard.HighlightCompDirective := chkCompDirective.Checked;
+      Wizard.CompDirectiveBackground := shpCompDirective.Brush.Color;
 
       Wizard.BlockHighlightRange := TBlockHighlightRange(rgMatchRange.ItemIndex);
       Wizard.BlockHighlightStyle := TBlockHighlightStyle(rgMatchDelay.ItemIndex);
