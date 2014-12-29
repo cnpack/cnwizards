@@ -440,7 +440,7 @@ begin
 
     FCurChar := GetCurChar;
   end;
-//  WriteChar(#0);
+  WriteChar(#0);
 end;
 
 procedure TCnCPPCropper.ProcessToBlockEnd;
@@ -539,7 +539,7 @@ begin
 
     FCurChar := GetCurChar;
   end;
-//  WriteChar(#0);
+  WriteChar(#0);
 end;
 
 procedure TCnPasCropper.ProcessToBlockEnd;

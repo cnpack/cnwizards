@@ -200,6 +200,11 @@ implementation
 
 {$R *.DFM}
 
+{$IFDEF DEBUG}
+uses
+  CnDebug;
+{$ENDIF}
+  
 const
   csCropOption = 'CropOption';
   csCropDirective = 'CropDirective';
@@ -333,6 +338,7 @@ var
   InStream, OutStream: TMemoryStream;
   View: IOTAEditView;
   Block: IOTAEditBlock;
+  Text: AnsiString;
   Cropper: TCnSourceCropper;
 begin
   View := CnOtaGetTopMostEditView;
@@ -345,7 +351,8 @@ begin
       InStream := TMemoryStream.Create;
       OutStream := TMemoryStream.Create;
       try
-        InStream.Write(Block.Text[1], Length(Block.Text));
+        Text := Block.Text;
+        InStream.Write(Text[1], Length(Text));
 
         if IsDelphiSourceModule(CnOtaGetCurrentSourceFile) then
           Cropper := TCnPasCropper.Create(nil)
@@ -366,7 +373,7 @@ begin
           MergeBlankStream(OutStream);
 
         CnOtaDeleteCurrentSelection;
-        CnOtaInsertTextIntoEditor(StrPas(PChar(OutStream.Memory)));
+        CnOtaInsertTextIntoEditor(StrPas(PAnsiChar(OutStream.Memory)));
       finally
         InStream.Free;
         OutStream.Free;
