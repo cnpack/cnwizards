@@ -114,7 +114,6 @@ type
     btnExportImagelist: TButton;
     btnExportActionList: TButton;
     btnExportComponents: TButton;
-    btnSort: TButton;
     chkUseToolsMenu: TCheckBox;
     btnDesignEditorCustomize: TButton;
     ilEnable: TImageList;
@@ -136,6 +135,8 @@ type
     pnlEditorTop: TPanel;
     edtSearchEditor: TEdit;
     lblSearchEditor: TLabel;
+    btnSort: TButton;
+    btnRestoreSetting: TButton;
     procedure lbWizardsDrawItem(Control: TWinControl; Index: Integer;
       Rect: TRect; State: TOwnerDrawState);
     procedure FormCreate(Sender: TObject);

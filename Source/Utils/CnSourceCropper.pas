@@ -87,7 +87,9 @@ type
     destructor Destroy; override;
   published
     property InStream: TStream read FInStream write SetInStream;
+    {* 输入要求是 Ansi 形式的 AnsiString }
     property OutStream: TStream read FOutStream write SetOutStream;
+    {* 输出会是 Ansi 形式的 AnsiString }
     property CropOption: TCropOption read FCropOption write FCropOption;
     property CropDirective: Boolean read FCropDirective write FCropDirective;
     property CropTodoList: Boolean read FCropTodoList write FCropTodoList;
@@ -440,7 +442,7 @@ begin
 
     FCurChar := GetCurChar;
   end;
-//  WriteChar(#0);
+  WriteChar(#0);
 end;
 
 procedure TCnCPPCropper.ProcessToBlockEnd;
@@ -539,7 +541,7 @@ begin
 
     FCurChar := GetCurChar;
   end;
-//  WriteChar(#0);
+  WriteChar(#0);
 end;
 
 procedure TCnPasCropper.ProcessToBlockEnd;

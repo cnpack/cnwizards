@@ -30,7 +30,9 @@ unit CnCommentCropper;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2009.01.26 V1.2
+* 修改记录：2014.12.29 V1.3
+*               修正一些对末尾空行以及字符串结束符处理失误的问题
+*           2009.01.26 V1.2
 *               增加目录搜索的功能，增加一合并空行的选项
 *           2003.07.29 V1.1
 *               增加保留自定义格式注释的功能
@@ -200,6 +202,11 @@ implementation
 
 {$R *.DFM}
 
+{$IFDEF DEBUG}
+uses
+  CnDebug;
+{$ENDIF}
+  
 const
   csCropOption = 'CropOption';
   csCropDirective = 'CropDirective';
@@ -333,6 +340,7 @@ var
   InStream, OutStream: TMemoryStream;
   View: IOTAEditView;
   Block: IOTAEditBlock;
+  Text: AnsiString;
   Cropper: TCnSourceCropper;
 begin
   View := CnOtaGetTopMostEditView;
@@ -345,7 +353,11 @@ begin
       InStream := TMemoryStream.Create;
       OutStream := TMemoryStream.Create;
       try
-        InStream.Write(Block.Text[1], Length(Block.Text));
+        Text := Block.Text;
+        InStream.Write(Text[1], Length(Text));
+{$IFDEF DEBUG}
+//      CnDebugger.LogMemDump(InStream.Memory, InStream.Size);
+{$ENDIF}
 
         if IsDelphiSourceModule(CnOtaGetCurrentSourceFile) then
           Cropper := TCnPasCropper.Create(nil)
@@ -364,9 +376,12 @@ begin
         Cropper.Parse;
         if Self.MergeBlank then
           MergeBlankStream(OutStream);
+{$IFDEF DEBUG}
+//      CnDebugger.LogMemDump(OutStream.Memory, OutStream.Size); 
+{$ENDIF}
 
         CnOtaDeleteCurrentSelection;
-        CnOtaInsertTextIntoEditor(StrPas(PChar(OutStream.Memory)));
+        CnOtaInsertTextIntoEditor(string(PAnsiChar(OutStream.Memory)));
       finally
         InStream.Free;
         OutStream.Free;
@@ -747,7 +762,9 @@ procedure TCnCommentCropperWizard.MergeBlankStream(Stream: TStream);
 var
   Strings: TStringList;
   I: Integer;
-  PreIsBlank, CurIsBlank: Boolean;
+  PreIsBlank, CurIsBlank, LastIsBlank: Boolean;
+  EofChar: AnsiChar;
+  LastLineBuf: array[0..1] of AnsiChar;
 
   function IsBlankLine(const ALine: string): Boolean;
   var
@@ -774,11 +791,22 @@ var
 begin
   Strings := TStringList.Create;
   try
+    // 无论 Stream 中的内容末尾有无空行，变成 TStringList 后再变回去都会有。
+    // 所以需要记下并后面还原
+    Stream.Position := Stream.Size - 2;
+    Stream.Read(LastLineBuf, 2);
+    LastIsBlank := (LastLineBuf[0] = #10) or (LastLineBuf[1] = #10);
+    // 只要有一个是 #10 就算末尾空行
+{$IFDEF DEBUG}
+    CnDebugger.LogBoolean(LastIsBlank, 'Before MergeBlank. Last Line is Blank?');
+{$ENDIF}
+
     Stream.Position := 0;
     Strings.LoadFromStream(Stream);
 
     I := Strings.Count - 1;
     PreIsBlank := False;
+
     while I >= 0 do
     begin
       if not IsBlankLine(Strings[I]) then
@@ -793,9 +821,22 @@ begin
       PreIsBlank := CurIsBlank;
     end;
 
-    // 最后的空行不删除了
     Stream.Size := 0;
     Strings.SaveToStream(Stream);
+
+{$IFDEF DEBUG}
+    CnDebugger.LogBoolean(IsBlankLine(Strings[Strings.Count - 1]), 'After MergeBlank. Last Line is Blank?');
+{$ENDIF}
+
+    if not LastIsBlank then
+    begin
+      // TStrings 会在末尾写入个回车换行，如之前无，则现在需要去掉
+      Stream.Position := Stream.Position - 2; // 往回移动个回车换行
+    end;
+
+    // 写入结束符
+    EofChar := #0;
+    Stream.Write(EofChar, SizeOf(EofChar));
   finally
     FreeAndNil(Strings);
   end;

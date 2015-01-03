@@ -64,7 +64,7 @@ type
     btCopyHTML, btSaveToFile,
     btLowerCase, btUpperCase, btToggleCase,
     btIndent, btIndentEx, btUnindent, btUnindentEx,
-    btCommentCode, btUnCommentCode, btToggleComment,
+    btCommentCode, btUnCommentCode, btToggleComment, btCommentCropper,
     btCodeSwap, btCodeToString, btInsertColor, btInsertDateTime, btSortLines,
     btBlockMoveUp, btBlockMoveDown, btBlockDelLines);
 
@@ -473,7 +473,7 @@ begin
     btCopy..btSaveToFile: DoBlockEdit(Kind);
     btLowerCase..btToggleCase: DoBlockCase(Kind);
     btIndent..btUnindentEx: DoBlockFormat(Kind);
-    btCommentCode..btToggleComment: DoBlockComment(Kind);
+    btCommentCode..btCommentCropper: DoBlockComment(Kind);
     btCodeSwap..btBlockDelLines: DoBlockMisc(Kind);
   end;
 end;
@@ -708,6 +708,11 @@ begin
   AddMenuItemWithAction(FCommentMenu, 'actCnEditorCodeComment', btCommentCode);
   AddMenuItemWithAction(FCommentMenu, 'actCnEditorCodeUnComment', btUnCommentCode);
   AddMenuItemWithAction(FCommentMenu, 'actCnEditorCodeToggleComment', btToggleComment);
+  if FindIDEAction('actCnCommentCropperWizard') <> nil then
+  begin
+    AddSepMenuItem(FCommentMenu);
+    AddMenuItemWithAction(FCommentMenu, 'actCnCommentCropperWizard', btCommentCropper);
+  end;
 
   // ¥˙¬Î«∂»Î≤Àµ•
   FWrapMenu := AddMenuItem(Items, SCnSrcBlockWrap, nil);
