@@ -49,7 +49,9 @@ unit CnWizClasses;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2004.06.01 V1.8
+* 修改记录：2015.01.03 V1.9
+*               LiuXiao 增加 ResetSettings 方法，供子类重载。
+*           2004.06.01 V1.8
 *               LiuXiao 调整 TCnSubMenuWizard.OnPopup 方法，在弹出菜单中加入子菜单。
 *           2004.04.27 V1.7
 *               beta 给 TCnSubMenuWizard 增加了一个方法：AddSubMenuWizard，
@@ -149,6 +151,8 @@ type
     {* 装载专家设置方法，子类重载此方法从 INI 对象中读取专家参数 }
     procedure SaveSettings(Ini: TCustomIniFile); virtual;
     {* 保存专家设置方法，子类重载此方法将专家参数保存到 INI 对象中 }
+    procedure ResetSettings(Ini: TCustomIniFile); virtual;
+    {* 重置专家设置方法，子类如有 INI 对象之外的保存动作，需要重载此方法 }
 
     class function GetIDStr: string;
     {* 返回专家唯一标识符，供管理器使用 }
@@ -157,7 +161,9 @@ type
     procedure DoLoadSettings;
     {* 装载专家设置 }
     procedure DoSaveSettings;
-    {* 装载专家设置 }
+    {* 保存专家设置 }
+    procedure DoResetSettings;
+    {* 重置专家设置}
 
     property Active: Boolean read FActive write SetActive;
     {* 活跃属性，表明专家当前是否可用 }
@@ -616,6 +622,31 @@ begin
   end;
 end;
 
+procedure TCnBaseWizard.DoResetSettings;
+var
+  Ini: TCustomIniFile;
+  List: TStrings;
+  I: Integer;
+begin
+  Ini := CreateIniFile;
+  List := TStringList.Create;
+  try
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('Reset settings: ' + ClassName);
+  {$ENDIF}
+    Ini.ReadSections(List);
+    for I := 0 to List.Count - 1 do
+      Ini.EraseSection(List[I]);
+
+    ResetSettings(Ini);
+
+    DoLoadSettings; // 重新载入设置以使专家使用默认设置
+  finally
+    Ini.Free;
+    List.Free;
+  end;
+end;
+
 procedure TCnBaseWizard.Config;
 begin
   // do nothing
@@ -644,6 +675,11 @@ begin
   finally
     Free;
   end;   
+end;
+
+procedure TCnBaseWizard.ResetSettings(Ini: TCustomIniFile);
+begin
+// do nothing
 end;
 
 procedure TCnBaseWizard.Loaded;
