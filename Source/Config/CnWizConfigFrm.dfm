@@ -178,15 +178,15 @@ inherited CnWizConfigForm: TCnWizConfigForm
           TabOrder = 2
           OnClick = btnConfigClick
         end
-        object btnSort: TButton
-          Left = 99
-          Top = 344
+        object btnRestoreSetting: TButton
+          Left = 103
+          Top = 345
           Width = 75
           Height = 21
           Anchors = [akRight, akBottom]
-          Caption = '&Advanced'
+          Caption = '&Reset'
           TabOrder = 3
-          OnClick = btnSortClick
+          Visible = False
         end
       end
       object pnlListBox: TPanel
@@ -709,6 +709,16 @@ inherited CnWizConfigForm: TCnWizConfigForm
     Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
+  end
+  object btnSort: TButton
+    Left = 3
+    Top = 404
+    Width = 75
+    Height = 21
+    Anchors = [akRight, akBottom]
+    Caption = '&Advanced'
+    TabOrder = 4
+    OnClick = btnSortClick
   end
   object dlgSaveActionList: TSaveDialog
     DefaultExt = 'txt'
