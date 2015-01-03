@@ -22,6 +22,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
     ActivePage = tsWizards
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
+    OnChange = PageControlChange
     object tsWizards: TTabSheet
       BorderWidth = 1
       Caption = '&Wizard Settings'

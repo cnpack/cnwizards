@@ -166,6 +166,7 @@ type
     procedure btnUserDirClick(Sender: TObject);
     procedure edtSearchWizardChange(Sender: TObject);
     procedure edtSearchEditorChange(Sender: TObject);
+    procedure PageControlChange(Sender: TObject);
   private
     { Private declarations }
     FShortCuts: array of TShortCut;
@@ -941,6 +942,11 @@ begin
       Result := CnDesignEditorMgr.PropEditorCount +
         CnDesignEditorMgr.IndexOfCompEditor(Editor as TCnCompEditorInfo);
   end;
+end;
+
+procedure TCnWizConfigForm.PageControlChange(Sender: TObject);
+begin
+  btnSort.Visible := (PageControl.ActivePageIndex = 0);
 end;
 
 end.
