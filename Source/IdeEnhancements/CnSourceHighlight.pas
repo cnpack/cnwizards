@@ -102,6 +102,7 @@ const
   csDefCurTokenColorFg = clBlack;
   csDefCurTokenColorBd = $00226DA8;
   csDefFlowControlBg = $FFCCCC;
+  csDefaultHighlightBackgroundColor = $0066FFFF;
 
   CN_LINE_STYLE_SMALL_DOT_STEP = 2;
 
@@ -703,8 +704,6 @@ const
   csMaxBracketMatchLines = 50;
 
   csShortDelay = 20;
-
-  csDefaultHighlightBackgroundColor = $0066FFFF;
 
 {$IFNDEF BDS}
   {$IFDEF COMPILER5}

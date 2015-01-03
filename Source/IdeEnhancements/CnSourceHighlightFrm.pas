@@ -387,6 +387,7 @@ begin
   shpCurTokenBd.Brush.Color := csDefCurTokenColorBd;
   shpCurLine.Brush.Color := LoadIDEDefaultCurrentColor;
   shpFlowControl.Brush.Color := csDefFlowControlBg;
+  shpCompDirective.Brush.Color := csDefaultHighlightBackgroundColor;
 
   shpneg1.Brush.Color := HighLightDefColors[-1];
   shp0.Brush.Color := HighLightDefColors[0];
