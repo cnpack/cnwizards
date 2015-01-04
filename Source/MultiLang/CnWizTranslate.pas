@@ -209,7 +209,9 @@ begin
 
   TranslateStr(SCnExportPCDirCaption, 'SCnExportPCDirCaption');
   TranslateStr(SCnExportPCSucc, 'SCnExportPCSucc');
-  
+  TranslateStr(SCnConfirmResetSetting, 'SCnConfirmResetSetting');
+  TranslateStr(SCnSettingsReset, 'SCnSettingsReset');
+
   // CnWizAbout
   TranslateStr(SCnConfigIONotExists, 'SCnConfigIONotExists');
   

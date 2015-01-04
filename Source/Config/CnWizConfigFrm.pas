@@ -167,6 +167,7 @@ type
     procedure edtSearchWizardChange(Sender: TObject);
     procedure edtSearchEditorChange(Sender: TObject);
     procedure PageControlChange(Sender: TObject);
+    procedure btnRestoreSettingClick(Sender: TObject);
   private
     { Private declarations }
     FShortCuts: array of TShortCut;
@@ -481,6 +482,7 @@ begin
   HotKeyWizard.Visible := (Wizard is TCnActionWizard) and
     TCnActionWizard(Wizard).EnableShortCut;
   btnConfig.Enabled := Wizard.HasConfig and cbWizardActive.Checked;
+  btnRestoreSetting.Enabled := Wizard.HasConfig and cbWizardActive.Checked;
 end;
 
 // ListBox 双击事件
@@ -525,6 +527,24 @@ begin
     with TCnBaseWizard(lbWizards.Items.Objects[lbWizards.ItemIndex]) do
       if HasConfig then Config;
     lbWizards.Refresh;
+  end;
+end;
+
+// 恢复默认设置
+procedure TCnWizConfigForm.btnRestoreSettingClick(Sender: TObject);
+var
+  Wizard: TCnBaseWizard;
+begin
+  if lbWizards.ItemIndex >= 0 then
+  begin
+    Wizard := TCnBaseWizard(lbWizards.Items.Objects[lbWizards.ItemIndex]);
+    if QueryDlg(Format(SCnConfirmResetSetting, [Wizard.WizardName])) then
+    begin
+      with Wizard do
+        if HasConfig then DoResetSettings;
+      lbWizards.Refresh;
+      InfoDlg(Format(SCnSettingsReset, [Wizard.WizardName]));
+    end;
   end;
 end;
 

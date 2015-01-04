@@ -626,7 +626,7 @@ procedure TCnBaseWizard.DoResetSettings;
 var
   Ini: TCustomIniFile;
   List: TStrings;
-  I: Integer;
+  Reg: TRegistry;
 begin
   Ini := CreateIniFile;
   List := TStringList.Create;
@@ -634,10 +634,24 @@ begin
   {$IFDEF DEBUG}
     CnDebugger.LogMsg('Reset settings: ' + ClassName);
   {$ENDIF}
-    Ini.ReadSections(List);
-    for I := 0 to List.Count - 1 do
-      Ini.EraseSection(List[I]);
 
+    if Ini is TRegistryIniFile then
+    begin
+      with (Ini as TRegistryIniFile).RegIniFile do
+      begin
+  {$IFDEF DEBUG}
+        CnDebugger.LogMsg('Remove Registry entry: ' + FileName);
+  {$ENDIF}
+
+        Reg := TRegistry.Create;
+        try
+          Reg.DeleteKey(FileName);
+        finally
+          Reg.Free;
+        end;
+      end;
+    end;
+    
     ResetSettings(Ini);
 
     DoLoadSettings; // 重新载入设置以使专家使用默认设置

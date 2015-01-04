@@ -493,6 +493,8 @@ var
   SCnQueryAbort: string = 'Sure to Abort?';
   SCnExportPCDirCaption: string = 'Select a directory.';
   SCnExportPCSucc: string = 'Component list file %s and package list file %s save succeed.';
+  SCnConfirmResetSetting: string = 'Are You Sure to Reset Settings for %s?';
+  SCnSettingsReset: string = '%s Settings Reset Successfully.';
 
   // CnWizAbout
   SCnConfigIONotExists: string = 'File NOT Found. Please Reinstall CnWizards!';

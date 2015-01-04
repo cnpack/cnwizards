@@ -188,6 +188,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
           Caption = '&Reset'
           TabOrder = 3
           Visible = False
+          OnClick = btnRestoreSettingClick
         end
       end
       object pnlListBox: TPanel
