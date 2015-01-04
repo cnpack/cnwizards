@@ -1497,7 +1497,7 @@ begin
   end;
 
   // Shift 键不需要处理
-  if Key = VK_SHIFT then
+  if Key in [VK_SHIFT, 255] then  // Some case 255 VK (Reserved) comes, Ignore.
     Exit;
 
   // 保存按键序列
