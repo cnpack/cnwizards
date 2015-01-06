@@ -77,6 +77,7 @@ TCnWizConfigForm.Label7.Caption=類型:
 TCnWizConfigForm.Label7.!Font=,,B,,,
 TCnWizConfigForm.cbWizardActive.Caption=允許該專家為活動狀態。
 TCnWizConfigForm.btnConfig.Caption=設置(&S)
+TCnWizConfigForm.btnRestoreSetting.Caption=重置(&R)
 TCnWizConfigForm.btnSort.Caption=高級(&A)
 TCnWizConfigForm.tsPropEditor.Caption=屬性編輯器(&D)
 TCnWizConfigForm.lblDesignEditorName.Caption=lblDesignEditorName

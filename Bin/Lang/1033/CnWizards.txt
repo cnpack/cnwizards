@@ -77,6 +77,7 @@ TCnWizConfigForm.Label7.Caption=Type:
 TCnWizConfigForm.Label7.!Font=,,B,,,
 TCnWizConfigForm.cbWizardActive.Caption=Enabled
 TCnWizConfigForm.btnConfig.Caption=&Settings
+TCnWizConfigForm.btnRestoreSetting.Caption=&Reset
 TCnWizConfigForm.btnSort.Caption=&Advanced
 TCnWizConfigForm.tsPropEditor.Caption=Property E&ditor
 TCnWizConfigForm.lblDesignEditorName.Caption=lblDesignEditorName
