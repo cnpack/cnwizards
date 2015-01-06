@@ -162,7 +162,7 @@ begin
   end;
 
   ErrList := nil; HasError := False;
-  Ini := TCnBaseWizard.CreateIniFile;
+  Ini := TCnProjectExtWizard.CreateIniFile;
 
   // 判断是引用单元还是添加Frame
   if IsUseUnit then
