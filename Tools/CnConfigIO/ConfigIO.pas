@@ -143,6 +143,11 @@ implementation
 {$R WindowsXP.res}
 {$ENDIF}
 
+{$IFDEF DEBUG}
+uses
+  CnDebug;
+{$ENDIF}
+
 procedure TFrmConfigIO.FormCreate(Sender: TObject);
 var
   AFileName: string;
@@ -289,6 +294,9 @@ begin
   FindFile(Self.FUserPath, '*.*', OnFindFileToBackup, nil, True, False);
   if Self.FFileList.Count > 0 then
   begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('BackupFile Count ' + IntToStr(FFileList.Count));
+{$ENDIF}
     BackupStream := nil; Writer := nil; AStream := nil;
     try
       F := _CnChangeFileExt(FileName, '.cnw');
@@ -306,6 +314,9 @@ begin
         Writer.WriteStr(_CnExtractFileName(FFileList.Strings[i]));
         if FileExists(FFileList.Strings[i]) then
         begin
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('BackupFile: ' + FFileList.Strings[i]);
+{$ENDIF}
           AStream.LoadFromFile(FFileList.Strings[i]);
           Writer.WriteInteger(AStream.Size);
           Writer.Write(AStream.Memory^, AStream.Size);
@@ -350,11 +361,17 @@ begin
     AStream := TMemoryStream.Create;
     Reader := TReader.Create(RestoreStream, 2048);
     i := Reader.ReadInteger;
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('RestoreFile Count ' + IntToStr(i));
+{$ENDIF}
     j := i;
     while i > 0 do
     begin
       TmpFile := Reader.ReadStr;
       FileSize := Reader.ReadInteger;
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('RestoreFile: ' + TmpFile + ' Size: ' + IntToStr(FileSize));
+{$ENDIF}
       AStream.SetSize(FileSize);
       Reader.Read(AStream.Memory^, FileSize);
       if j = i then
@@ -402,12 +419,27 @@ end;
 procedure TFrmConfigIO.OnFindFileToDel(const FileName: string;
   const Info: TSearchRec; var Abort: Boolean);
 begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Delete Old File: ' + FileName);
+{$ENDIF}
   DeleteFile(FileName);
 end;
 
 procedure TFrmConfigIO.OnFindFileToBackup(const FileName: string;
   const Info: TSearchRec; var Abort: Boolean);
+const
+  EXCLUDE_DIR_1 = 'FeedCache';
+  EXCLUDE_DIR_2 = 'ImageCache';
+var
+  Dir: string;
 begin
+  // Do not backup the content in those Directory.
+  Dir := ExcludeTrailingBackslash(_CnExtractFileDir(FileName));
+  if Pos(UpperCase(EXCLUDE_DIR_1), UpperCase(Dir)) = Length(Dir) - Length(EXCLUDE_DIR_1) + 1 then
+    Exit;
+  if Pos(UpperCase(EXCLUDE_DIR_2), UpperCase(Dir)) = Length(Dir) - Length(EXCLUDE_DIR_2) + 1 then
+    Exit;
+
   FFileList.Add(FileName);
 end;
 
