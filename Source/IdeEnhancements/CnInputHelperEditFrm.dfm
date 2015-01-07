@@ -107,7 +107,7 @@ inherited CnInputHelperEditForm: TCnInputHelperEditForm
       Top = 172
       Width = 113
       Height = 17
-      Caption = 'For Pascal'
+      Caption = 'For Pascal.'
       TabOrder = 6
     end
     object chkForCpp: TCheckBox
@@ -115,7 +115,7 @@ inherited CnInputHelperEditForm: TCnInputHelperEditForm
       Top = 172
       Width = 113
       Height = 17
-      Caption = 'For C/C++'
+      Caption = 'For C/C++.'
       TabOrder = 7
     end
   end
