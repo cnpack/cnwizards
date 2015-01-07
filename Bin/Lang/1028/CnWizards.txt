@@ -2494,6 +2494,7 @@ TCnVerEnhanceForm.btnHelp.Caption=幫助(&H)
 TCnVerEnhanceForm.btnOK.Caption=確定(&O)
 TCnVerEnhanceForm.Caption=版本信息擴展專家設置
 TCnVerEnhanceForm.lblNote.Caption=（註：以上兩選項只在工程選項中包含版本信息時有效。）
+TCnVerEnhanceForm.lblFormat=日期時間格式:
 TCnVerEnhanceForm.chkIncBuild.Caption=編譯時自動增加 Build 號 （僅適用於 Delphi 6 及以上版本）。
 TCnVerEnhanceForm.chkLastCompiled.Caption=版本信息中插入編譯時刻（僅適用於 Delphi 6 及以上版本）。
 TCnVerEnhanceForm.grpVerEnh.Caption=版本信息擴展專家設置(&V)

@@ -2494,6 +2494,7 @@ TCnVerEnhanceForm.btnHelp.Caption=&Help
 TCnVerEnhanceForm.btnOK.Caption=&OK
 TCnVerEnhanceForm.Caption=Version Enhancements Settings
 TCnVerEnhanceForm.lblNote.Caption=(Note: Both Only Enabled when Include Version Info in Project.)
+TCnVerEnhanceForm.lblFormat=Time Format:
 TCnVerEnhanceForm.chkIncBuild.Caption=Auto-increment Build Number when Compiling(Delphi 6 Above Only).
 TCnVerEnhanceForm.chkLastCompiled.Caption=Insert Compiling Time into Version Info(Delphi 6 Above Only).
 TCnVerEnhanceForm.grpVerEnh.Caption=&Version Enhancements Settings
