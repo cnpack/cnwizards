@@ -1,9 +1,9 @@
 inherited CnVerEnhanceForm: TCnVerEnhanceForm
-  Left = 427
-  Top = 392
+  Left = 437
+  Top = 200
   BorderStyle = bsDialog
   Caption = 'Version Enhancements Settings'
-  ClientHeight = 125
+  ClientHeight = 162
   ClientWidth = 403
   OnCreate = FormCreate
   PixelsPerInch = 96
@@ -12,15 +12,22 @@ inherited CnVerEnhanceForm: TCnVerEnhanceForm
     Left = 8
     Top = 8
     Width = 387
-    Height = 81
+    Height = 115
     Caption = '&Version Enhancements Settings'
     TabOrder = 0
     object lblNote: TLabel
       Left = 24
-      Top = 56
+      Top = 86
       Width = 306
-      Height = 13
+      Height = 15
       Caption = '(Note: Both Only Enabled when Include Version Info in Project.)'
+    end
+    object lblFormat: TLabel
+      Left = 24
+      Top = 42
+      Width = 63
+      Height = 13
+      Caption = 'Time Format:'
     end
     object chkLastCompiled: TCheckBox
       Left = 8
@@ -34,16 +41,28 @@ inherited CnVerEnhanceForm: TCnVerEnhanceForm
     end
     object chkIncBuild: TCheckBox
       Left = 8
-      Top = 36
+      Top = 64
       Width = 377
-      Height = 17
+      Height = 19
       Caption = 'Auto-increment Build Number when Compiling(Delphi 6 Above Only).'
       TabOrder = 1
+    end
+    object cbbFormat: TComboBox
+      Left = 112
+      Top = 40
+      Width = 201
+      Height = 21
+      ItemHeight = 13
+      TabOrder = 2
+      Items.Strings = (
+        'yyyy/mm/dd hh:mm:ss'
+        'yyyy-mm-dd hh:mm:ss'
+        'yyyy-mm-dd_hh-mm-ss')
     end
   end
   object btnOK: TButton
     Left = 157
-    Top = 96
+    Top = 133
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -54,7 +73,7 @@ inherited CnVerEnhanceForm: TCnVerEnhanceForm
   end
   object btnCancel: TButton
     Left = 239
-    Top = 96
+    Top = 133
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -65,7 +84,7 @@ inherited CnVerEnhanceForm: TCnVerEnhanceForm
   end
   object btnHelp: TButton
     Left = 320
-    Top = 96
+    Top = 133
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]

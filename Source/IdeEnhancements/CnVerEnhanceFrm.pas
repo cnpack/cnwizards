@@ -52,6 +52,8 @@ type
     btnCancel: TButton;
     btnHelp: TButton;
     lblNote: TLabel;
+    lblFormat: TLabel;
+    cbbFormat: TComboBox;
     procedure btnHelpClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
   private

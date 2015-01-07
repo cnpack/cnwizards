@@ -29,7 +29,9 @@ unit CnVerEnhancements;
 * 兼容测试：JWinXPPro ＋Delphi7.０１
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2013.05.23 V1.3 by liuxiao
+* 修改记录：2015.01.05 V1.4 by liuxiao
+*               加入自定义日期时间格式的设置
+*           2013.05.23 V1.3 by liuxiao
 *               Wiseinfo修正编译工程组时使用当前工程引发错误的问题
 *           2013.04.28 V1.2 by liuxiao
 *               修正XE下版本增加后未能写入目标文件的问题并修正插入编译时间的问题
@@ -70,6 +72,7 @@ type
     FAfterBuildNo: Integer;
     FIncludeVer: Boolean;
     FCompileNotifierAdded: Boolean;
+    FDateTimeFormat: string;
     function GetCompileNotifyEnabled: Boolean;
     procedure SetIncBuild(const Value: Boolean);
     procedure SetLastCompiled(const Value: Boolean);
@@ -96,6 +99,7 @@ type
     procedure Config; override;
 
     property LastCompiled: Boolean read FLastCompiled write SetLastCompiled;
+    property DateTimeFormat: string read FDateTimeFormat write FDateTimeFormat;
     property IncBuild: Boolean read FIncBuild write SetIncBuild;
   end;
 
@@ -122,7 +126,10 @@ const
   csFileVersion = 'FileVersion';
 
   csLastCompiled = 'LastCompiled';
+  csDateTimeFormat = 'DateTimeFormat';
   csIncBuild = 'IncBuild';
+
+  csDefaultDateTimeFormat = 'yyyy/mm/dd hh:mm:ss';
 
   { TCnVerEnhanceWizard }
 
@@ -162,7 +169,11 @@ begin
 
     if Active and FLastCompiled then
     begin
-      Sl.Values[csDateKeyName] := DateTimeToStr(Now);
+      try
+        Sl.Values[csDateKeyName] := FormatDateTime(FDateTimeFormat, Now);
+      except
+        Sl.Values[csDateKeyName] := DateTimeToStr(Now);
+      end;
     end
     else
     begin
@@ -369,10 +380,14 @@ begin
     try
       chkLastCompiled.Checked := FLastCompiled;
       chkIncBuild.Checked := FIncBuild;
+      cbbFormat.Text := FDateTimeFormat;
+
       if ShowModal = mrOK then
       begin
         LastCompiled := chkLastCompiled.Checked;
         IncBuild := chkIncBuild.Checked;
+        DateTimeFormat := Trim(cbbFormat.Text);
+        
         DoSaveSettings;
       end;
     finally
@@ -383,6 +398,7 @@ end;
 constructor TCnVerEnhanceWizard.Create;
 begin
   inherited;
+  FDateTimeFormat := csDefaultDateTimeFormat;
   CnWizNotifierServices.AddBeforeCompileNotifier(BeforeCompile);
   CnWizNotifierServices.AddAfterCompileNotifier(AfterCompile);
 end;
@@ -393,7 +409,11 @@ var
 begin
   Keys := TStringList(CnOtaGetVersionInfoKeys(FCurrentProject));
   try
-    Keys.Values[csDateKeyName] := DateTimeToStr(Now);
+    try
+      Keys.Values[csDateKeyName] := FormatDateTime(FDateTimeFormat, Now);
+    except
+      Keys.Values[csDateKeyName] := DateTimeToStr(Now);
+    end;
   except
     // 对于D5/BCB5/BCB6出错的，简单屏蔽
 {$IFDEF DEBUG}
@@ -449,6 +469,7 @@ procedure TCnVerEnhanceWizard.LoadSettings(Ini: TCustomIniFile);
 begin
   FLastCompiled := Ini.ReadBool('', csLastCompiled, False);
   FIncBuild := Ini.ReadBool('', csIncBuild, False);
+  FDateTimeFormat := Ini.ReadString('', csDateTimeFormat, csDefaultDateTimeFormat);
   UpdateCompileNotify; // 改为有需要才进行通知器的增加
 end;
 
@@ -456,6 +477,7 @@ procedure TCnVerEnhanceWizard.SaveSettings(Ini: TCustomIniFile);
 begin
   Ini.WriteBool('', csLastCompiled, FLastCompiled);
   Ini.WriteBool('', csIncBuild, FIncBuild);
+  Ini.WriteString('', csDateTimeFormat, FDateTimeFormat);
 end;
 
 function TCnVerEnhanceWizard.GetCompileNotifyEnabled: Boolean;
