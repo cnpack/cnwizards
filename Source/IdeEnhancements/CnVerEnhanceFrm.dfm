@@ -38,6 +38,7 @@ inherited CnVerEnhanceForm: TCnVerEnhanceForm
       Checked = True
       State = cbChecked
       TabOrder = 0
+      OnClick = chkLastCompiledClick
     end
     object chkIncBuild: TCheckBox
       Left = 8

@@ -56,6 +56,7 @@ type
     cbbFormat: TComboBox;
     procedure btnHelpClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure chkLastCompiledClick(Sender: TObject);
   private
     { Private declarations }
   protected
@@ -83,7 +84,18 @@ begin
 {$IFNDEF COMPILER6_UP}
   chkLastCompiled.Enabled := False;
   chkIncBuild.Enabled := False;
+  lblFormat.Enabled := False;
+  cbbFormat.Enabled := False;
+{$ELSE}
+  lblFormat.Enabled := chkLastCompiled.Checked;
+  cbbFormat.Enabled := chkLastCompiled.Checked;
 {$ENDIF}
+end;
+
+procedure TCnVerEnhanceForm.chkLastCompiledClick(Sender: TObject);
+begin
+  lblFormat.Enabled := chkLastCompiled.Checked;
+  cbbFormat.Enabled := chkLastCompiled.Checked;
 end;
 
 end.
