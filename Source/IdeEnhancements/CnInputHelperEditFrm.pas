@@ -62,6 +62,8 @@ type
     seScope: TCnSpinEdit;
     lbl5: TLabel;
     chkAlwaysDisp: TCheckBox;
+    chkForPascal: TCheckBox;
+    chkForCpp: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure btnOKClick(Sender: TObject);
@@ -76,7 +78,7 @@ type
 
 function CnShowInputHelperEditForm(var AName, ADesc: string;
   var AKind: TSymbolKind; var Scope: Integer; var AutoIndent,
-  AlwaysDisp: Boolean): Boolean;
+  AlwaysDisp, ForPascal, ForCpp: Boolean): Boolean;
 
 {$ENDIF CNWIZARDS_CNINPUTHELPER}
 
@@ -88,7 +90,7 @@ implementation
 
 function CnShowInputHelperEditForm(var AName, ADesc: string;
   var AKind: TSymbolKind; var Scope: Integer; var AutoIndent,
-  AlwaysDisp: Boolean): Boolean;
+  AlwaysDisp, ForPascal, ForCpp: Boolean): Boolean;
 begin
   with TCnInputHelperEditForm.Create(Application) do
   try
@@ -98,6 +100,8 @@ begin
     seScope.Value := Scope;
     chkAutoIndent.Checked := AutoIndent;
     chkAlwaysDisp.Checked := AlwaysDisp;
+    chkForPascal.Checked := ForPascal;
+    chkForCpp.Checked := ForCpp;
     cbbKindChange(nil);
 
     Result := ShowModal = mrOk;
@@ -109,6 +113,8 @@ begin
       Scope := seScope.Value;
       AutoIndent := chkAutoIndent.Checked;
       AlwaysDisp := chkAlwaysDisp.Checked;
+      ForPascal := chkForPascal.Checked;
+      ForCpp := chkForCpp.Checked;
     end;
   finally
     Free;

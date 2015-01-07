@@ -959,6 +959,9 @@ procedure TFileSymbolList.Load;
 begin
   Clear;
   LoadListFromXMLFile(Self, GetReadFileName);
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg(ClassName + ' LoadFrom ' + GetReadFileName + '. Symbol Count ' + IntToStr(List.Count));
+{$ENDIF}
   AdjustSymbolListScope(Self);
 end;
 

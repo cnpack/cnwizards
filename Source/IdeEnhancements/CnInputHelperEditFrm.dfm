@@ -3,8 +3,9 @@ inherited CnInputHelperEditForm: TCnInputHelperEditForm
   Top = 248
   BorderStyle = bsDialog
   Caption = 'Customize Symbol'
-  ClientHeight = 220
+  ClientHeight = 247
   ClientWidth = 335
+  OldCreateOrder = True
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
@@ -12,7 +13,7 @@ inherited CnInputHelperEditForm: TCnInputHelperEditForm
     Left = 8
     Top = 8
     Width = 321
-    Height = 177
+    Height = 201
     Caption = '&Symbol'
     TabOrder = 0
     object lbl1: TLabel
@@ -101,10 +102,26 @@ inherited CnInputHelperEditForm: TCnInputHelperEditForm
       Caption = 'Always Popup Even Inputting Text is Full Match.'
       TabOrder = 5
     end
+    object chkForPascal: TCheckBox
+      Left = 64
+      Top = 172
+      Width = 113
+      Height = 17
+      Caption = 'For Pascal'
+      TabOrder = 6
+    end
+    object chkForCpp: TCheckBox
+      Left = 200
+      Top = 172
+      Width = 113
+      Height = 17
+      Caption = 'For C/C++'
+      TabOrder = 7
+    end
   end
   object btnHelp: TButton
     Left = 254
-    Top = 192
+    Top = 216
     Width = 75
     Height = 21
     Caption = '&Help'
@@ -113,7 +130,7 @@ inherited CnInputHelperEditForm: TCnInputHelperEditForm
   end
   object btnOK: TButton
     Left = 94
-    Top = 192
+    Top = 216
     Width = 75
     Height = 21
     Caption = '&OK'
@@ -123,7 +140,7 @@ inherited CnInputHelperEditForm: TCnInputHelperEditForm
   end
   object btnCancel: TButton
     Left = 174
-    Top = 192
+    Top = 216
     Width = 75
     Height = 21
     Cancel = True

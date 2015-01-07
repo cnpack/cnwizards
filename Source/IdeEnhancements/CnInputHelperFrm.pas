@@ -574,15 +574,24 @@ var
   AName, ADesc: string;
   LVItem: TListItem;
   AlwaysDisp: Boolean;
+  ForPascal: Boolean;
+  ForCpp: Boolean;
+  Idx: Integer;
 begin
   AName := NewName;
   ADesc := '';
   AlwaysDisp := False;
+  ForPascal := CurrentIsDelphiSource;
+  ForCpp := CurrentIsCSource;
+
   if CnShowInputHelperEditForm(AName, ADesc, SaveKind, SaveScope,
-    SaveAutoIndent, AlwaysDisp) then
+    SaveAutoIndent, AlwaysDisp, ForPascal, ForCpp) then
   begin
-    CurrList.Add(AName, SaveKind, RateToScope(SaveScope), ADesc, '',
+    Idx := CurrList.Add(AName, SaveKind, RateToScope(SaveScope), ADesc, '',
       SaveAutoIndent, AlwaysDisp);
+    CurrList.Items[Idx].ForPascal := ForPascal;
+    CurrList.Items[Idx].ForCpp := ForCpp;
+    
     LVItem := lvList.Items.Add;
     LVItem.Data := CurrList.Items[CurrList.Count - 1];
     UpdateListItem(LVItem);
@@ -659,6 +668,8 @@ var
   AutoIndent: Boolean;
   AlwaysDisp: Boolean;
   AScope: Integer;
+  ForPascal: Boolean;
+  ForCpp: Boolean;
 begin
   if lvList.Selected <> nil then
   begin
@@ -669,9 +680,11 @@ begin
     AScope := Item.ScopeRate;
     AutoIndent := Item.AutoIndent;
     AlwaysDisp := Item.AlwaysDisp;
+    ForPascal := Item.ForPascal;
+    ForCpp := Item.ForCpp;
 
     if CnShowInputHelperEditForm(AName, ADesc, AKind, AScope, AutoIndent,
-      AlwaysDisp) then
+      AlwaysDisp, ForPascal, ForCpp) then
     begin
       Item.Name := AName;
       Item.Description := ADesc;
@@ -679,6 +692,9 @@ begin
       Item.ScopeRate := AScope;
       Item.AutoIndent := AutoIndent;
       Item.AlwaysDisp := AlwaysDisp;
+      Item.ForPascal := ForPascal;
+      Item.ForCpp := ForCpp;
+      
       UpdateListView(True);
       lvList.AlphaSort;
     end;

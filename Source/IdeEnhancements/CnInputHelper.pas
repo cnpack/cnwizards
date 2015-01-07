@@ -2205,8 +2205,8 @@ begin
     begin
       SymbolList := SymbolListMgr.List[i];
 {$IFDEF DEBUG}
-      CnDebugger.LogFmt('Input Helper To Reload %s. PosKind %s', [SymbolList.ClassName,
-        GetEnumName(TypeInfo(TCodePosKind), Ord(FPosInfo.PosKind))]);
+//      CnDebugger.LogFmt('Input Helper To Reload %s. PosKind %s', [SymbolList.ClassName,
+//        GetEnumName(TypeInfo(TCodePosKind), Ord(FPosInfo.PosKind))]);
 {$ENDIF}
       if SymbolList.Active and SymbolList.Reload(Editor, FMatchStr, FPosInfo) then
       begin
@@ -2229,13 +2229,13 @@ begin
 
           S := Item.Name;
 {$IFDEF DEBUG}
-//      CnDebugger.LogFmt('Input Helper Check Name %s, %s', [S, GetEnumName(TypeInfo(TSymbolKind), Ord(Item.Kind))]);
+//        CnDebugger.LogFmt('Input Helper Check Name %s, %s', [S, GetEnumName(TypeInfo(TSymbolKind), Ord(Item.Kind))]);
 {$ENDIF}
 
           if (Item.Kind in Kinds) and (Length(S) >= ListOnlyAtLeastLetter) then
           begin
 {$IFDEF DEBUG}
-//      CnDebugger.LogMsg('Input Helper is in Kinds. ' + IntToStr(ListOnlyAtLeastLetter));
+//          CnDebugger.LogMsg('Input Helper is in Kinds. ' + IntToStr(ListOnlyAtLeastLetter));
 {$ENDIF}
             if (HashList = nil) or not HashList.CheckExist(Item) then
             begin
@@ -2251,7 +2251,7 @@ begin
                 Item.ScopeAdjust := Item.Scope;
               end;
 {$IFDEF DEBUG}
-//          CnDebugger.LogFmt('Input Helper Add %s with Kind %s', [S, GetEnumName(TypeInfo(TSymbolKind), Ord(Item.Kind))]);
+//            CnDebugger.LogFmt('Input Helper Add %s with Kind %s', [S, GetEnumName(TypeInfo(TSymbolKind), Ord(Item.Kind))]);
 {$ENDIF}
               FSymbols.AddObject(S, Item);
             end;
