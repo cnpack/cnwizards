@@ -38,6 +38,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_CNVERENHANCEWIZARD}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
   Dialogs, CnWizMultiLang, StdCtrls, CnLangTranslator, CnLangMgr,
@@ -65,7 +67,11 @@ type
     { Public declarations }
   end;
 
+{$ENDIF CNWIZARDS_CNVERENHANCEWIZARD}
+
 implementation
+
+{$IFDEF CNWIZARDS_CNVERENHANCEWIZARD}
 
 {$R *.dfm}
 
@@ -98,5 +104,6 @@ begin
   cbbFormat.Enabled := chkLastCompiled.Checked;
 end;
 
+{$ENDIF CNWIZARDS_CNVERENHANCEWIZARD}
 end.
 
