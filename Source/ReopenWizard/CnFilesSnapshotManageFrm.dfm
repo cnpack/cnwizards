@@ -1,8 +1,8 @@
 inherited CnProjectFilesSnapshotManageForm: TCnProjectFilesSnapshotManageForm
   Left = 317
   Top = 198
-  Width = 408
-  Height = 334
+  Width = 415
+  Height = 346
   BorderIcons = [biSystemMenu]
   Caption = 'Manage File List Snapshots'
   Constraints.MinHeight = 334
@@ -145,7 +145,7 @@ inherited CnProjectFilesSnapshotManageForm: TCnProjectFilesSnapshotManageForm
     Width = 59
     Height = 21
     Action = actSnapshotDelete
-    Anchors = [akRight, akBottom]
+    Anchors = [akTop, akRight]
     ParentShowHint = False
     ShowHint = True
     TabOrder = 1
