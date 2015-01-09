@@ -135,11 +135,15 @@ type
     function GetUserFileName(const FileName: string; IsRead: Boolean; FileNameDef:
       string = ''): string;
     {* 返回用户数据文件名，如果 UserPath 下的文件不存在，返回 DataPath 中的文件名}
+    function GetAbsoluteUserFileName(const FileName: string): string;
+    {* 返回 UserPath 下的文件名，无论存在与否}
     function CheckUserFile(const FileName: string; FileNameDef: string = ''):
       Boolean;
     {* 检查用户数据文件，如果 UserPath 下的文件与 DataPath 下的一致，删除
        UserPath 下的文件，以保证 DataPath 下的文件升级后，使用默认设置的
        用户可以获得更新。如果两文件一致，返回 True}
+    function CleanUserFile(const FileName: string): Boolean;
+    {* 删除用户数据文件}
     function LoadUserFile(Lines: TStrings; const FileName: string; FileNameDef:
       string = ''; DoTrim: Boolean = True): Boolean;
     {* 装载用户文件到字符串列表 }
@@ -598,6 +602,23 @@ begin
     Result := SrcFile
   else
     Result := DstFile;
+end;
+
+function TCnWizOptions.GetAbsoluteUserFileName(
+  const FileName: string): string;
+begin
+  ForceDirectories(UserPath);
+  Result := UserPath + FileName;
+end;
+
+function TCnWizOptions.CleanUserFile(const FileName: string): Boolean;
+var
+  S: string;
+begin
+  Result := True;
+  S := GetAbsoluteUserFileName(FileName);
+  if FileExists(S) then
+    Result := DeleteFile(FileName);
 end;
 
 function TCnWizOptions.LoadUserFile(Lines: TStrings;

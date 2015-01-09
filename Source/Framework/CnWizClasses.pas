@@ -148,7 +148,9 @@ type
     procedure LanguageChanged(Sender: TObject); virtual;
     {* 专家在多语的语言发生改变的时候的处理，子类重载此过程处理语言字符串 }
     procedure LoadSettings(Ini: TCustomIniFile); virtual;
-    {* 装载专家设置方法，子类重载此方法从 INI 对象中读取专家参数 }
+    {* 装载专家设置方法，子类重载此方法从 INI 对象中读取专家参数。
+       注意此方法可能在专家一次生命周期中被调用多次，因此需要子类做好
+       防止重复加载导致多余内容的问题。 }
     procedure SaveSettings(Ini: TCustomIniFile); virtual;
     {* 保存专家设置方法，子类重载此方法将专家参数保存到 INI 对象中 }
     procedure ResetSettings(Ini: TCustomIniFile); virtual;
