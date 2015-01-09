@@ -40,6 +40,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_CNSRCEDITORENHANCE}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, ToolsAPI, IniFiles,
   Forms, ExtCtrls, Menus, ComCtrls, TypInfo, Math, CnCommon, ActnList, ImgList,
@@ -144,6 +146,7 @@ type
 
     procedure LoadSettings(Ini: TCustomIniFile);
     procedure SaveSettings(Ini: TCustomIniFile);
+    procedure ResetSettings(Ini: TCustomIniFile);
     procedure LanguageChanged(Sender: TObject);
 
     property ExtendForwardBack: Boolean read FExtendForwardBack write SetExtendForwardBack;
@@ -153,7 +156,11 @@ type
     property OnEnhConfig: TNotifyEvent read FOnEnhConfig write FOnEnhConfig;
   end;
 
+{$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}
+
 implementation
+
+{$IFDEF CNWIZARDS_CNSRCEDITORENHANCE}
 
 {$IFDEF DEBUG}
 uses
@@ -827,6 +834,11 @@ begin
   Ini.WriteInteger(csEditorNav, csMaxItems, FMaxItems);
 end;
 
+procedure TCnSrcEditorNavMgr.ResetSettings(Ini: TCustomIniFile);
+begin
+
+end;
+
 procedure TCnSrcEditorNavMgr.DoEnhConfig;
 begin
   if Assigned(FOnEnhConfig) then
@@ -860,4 +872,5 @@ begin
   end;
 end;
 
+{$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}
 end.

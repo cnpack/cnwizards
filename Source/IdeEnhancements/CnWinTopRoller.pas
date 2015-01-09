@@ -116,6 +116,8 @@ type
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
+    procedure ResetSettings(Ini: TCustomIniFile); override;
+
     procedure Config; override;
     procedure LanguageChanged(Sender: TObject); override;
 
@@ -629,6 +631,11 @@ begin
       end;
     end;
   end;
+end;
+
+procedure TCnWinTopRoller.ResetSettings(Ini: TCustomIniFile);
+begin
+  WizOptions.CleanUserFile(SCnFilterFile);
 end;
 
 procedure TCnWinTopRoller.RestoreRollerWindow(AButtons: TComponent);

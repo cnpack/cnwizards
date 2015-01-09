@@ -39,6 +39,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_CNSRCEDITORENHANCE}
+
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms, ToolsAPI,
   IniFiles, CnEditControlWrapper, CnWizNotifier, CnIni, CnPopupMenu;
@@ -132,6 +134,7 @@ type
     procedure LanguageChanged(Sender: TObject);
     procedure LoadSettings(Ini: TCustomIniFile);
     procedure SaveSettings(Ini: TCustomIniFile); 
+    procedure ResetSettings(Ini: TCustomIniFile);
 
     property Count: Integer read GetCount;
     property Gutters[Index: Integer]: TCnSrcEditorGutter read GetGutters;
@@ -148,10 +151,14 @@ type
     property OnEnhConfig: TNotifyEvent read FOnEnhConfig write FOnEnhConfig;
   end;
 
+{$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}
+
 implementation
 
+{$IFDEF CNWIZARDS_CNSRCEDITORENHANCE}
+
 uses
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
   CnCommon, CnWizClasses, CnWizManager, CnBookmarkWizard, CnWizUtils, CnWizConsts,
@@ -764,6 +771,11 @@ begin
   end;
 end;
 
+procedure TCnSrcEditorGutterMgr.ResetSettings(Ini: TCustomIniFile);
+begin
+
+end;
+
 //------------------------------------------------------------------------------
 //  Ù–‘∂¡–¥
 //------------------------------------------------------------------------------
@@ -818,4 +830,5 @@ begin
   FMinWidth := TrimInt(Value, Low(TCnGutterWidth), High(TCnGutterWidth));
 end;
 
+{$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}
 end.

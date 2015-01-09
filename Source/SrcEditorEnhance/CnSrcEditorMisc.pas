@@ -152,6 +152,7 @@ type
 
     procedure LoadSettings(Ini: TCustomIniFile);
     procedure SaveSettings(Ini: TCustomIniFile);
+    procedure ResetSettings(Ini: TCustomIniFile);
     procedure LanguageChanged(Sender: TObject);
     
     property DblClickClosePage: Boolean read FDblClickClosePage write FDblClickClosePage;
@@ -858,6 +859,11 @@ begin
   Ini.WriteBool(csMisc, csEditorTabFlatButtons, FEditorTabFlatButtons);
   Ini.WriteBool(csMisc, csAutoSave, AutoSave);
   Ini.WriteInteger(csMisc, csSaveInterval, SaveInterval);
+end;
+
+procedure TCnSrcEditorMisc.ResetSettings(Ini: TCustomIniFile);
+begin
+
 end;
 
 procedure TCnSrcEditorMisc.LanguageChanged(Sender: TObject);

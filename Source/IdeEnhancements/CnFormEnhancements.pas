@@ -211,6 +211,7 @@ type
     procedure SaveSettings(Ini: TCustomIniFile); override;
     procedure SaveActions(FileName: string = '');
     procedure LoadActions(FileName: string = '');
+    procedure ResetActions(FileName: string = '');
     procedure LanguageChanged(Sender: TObject); override;
     function ExportToFile: Boolean;
     function ImportFromFile: Boolean;
@@ -350,6 +351,8 @@ type
     procedure Config; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
+    procedure ResetSettings(Ini: TCustomIniFile); override;
+
     procedure LanguageChanged(Sender: TObject); override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
 
@@ -1258,6 +1261,14 @@ begin
   end;
   if SameText(_CnExtractFileName(FileName), ActionFileName) then
     WizOptions.CheckUserFile(ActionFileName);
+end;
+
+procedure TCnFormFloatToolBar.ResetActions(FileName: string);
+begin
+  if FileName = '' then
+    WizOptions.CleanUserFile(ActionFileName)
+  else
+    WizOptions.CleanUserFile(FileName);
 end;
 
 function TCnFormFloatToolBar.ExportToFile: Boolean;
@@ -2374,6 +2385,16 @@ begin
   PropBar.SaveSettings(Ini);
 
   CleanDataFile;
+end;
+
+procedure TCnFormEnhanceWizard.ResetSettings(Ini: TCustomIniFile);
+begin
+//  for I := 0 to FlatToolBarCount - 1 do
+//    FlatToolBars[I].ResetActions;
+//  // Remove Propbar file.
+//  WizOptions.CleanUserFile(SCnFloatPropBarFileName);
+
+  RestoreDefault;
 end;
 
 procedure TCnFormEnhanceWizard.RestoreDefault;

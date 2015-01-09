@@ -160,6 +160,7 @@ type
     procedure LanguageChanged(Sender: TObject);
     procedure LoadSettings(Ini: TCustomIniFile);
     procedure SaveSettings(Ini: TCustomIniFile);
+    procedure ResetSettings(Ini: TCustomIniFile);
 
     property Count: Integer read GetCount;
     property ToolBars[Index: Integer]: TCnSrcEditorToolBar read GetToolBar;
@@ -859,6 +860,12 @@ begin
   WizOptions.CheckUserFile(SCnEditorToolBarDataName);
   SaveToolBarActions(FDesignToolBarActions, WizOptions.GetUserFileName(SCnEditorDesignToolBarDataName, False));
   WizOptions.CheckUserFile(SCnEditorDesignToolBarDataName);
+end;
+
+procedure TCnSrcEditorToolBarMgr.ResetSettings(Ini: TCustomIniFile);
+begin
+  WizOptions.CleanUserFile(SCnEditorToolBarDataName);
+  WizOptions.CleanUserFile(SCnEditorDesignToolBarDataName);
 end;
 
 procedure TCnSrcEditorToolBarMgr.DoEnhConfig;

@@ -132,6 +132,7 @@ type
 
     procedure LoadSettings(Ini: TCustomIniFile);
     procedure SaveSettings(Ini: TCustomIniFile);
+    procedure ResetSettings(Ini: TCustomIniFile);
     procedure LanguageChanged(Sender: TObject);
 
     property Active: Boolean read FActive write SetActive;
@@ -173,7 +174,7 @@ type
   TClickEventProc = procedure(Self: TObject; Sender: TObject);
 
 const
-  csAutoIndentFile = 'AutoIndent.dat';
+  SCnAutoIndentFile = 'AutoIndent.dat';
 
   SCnSrchDialogOKButtonClick = '@Srchdlg@TSrchDialog@OKButtonClick$qqrp14System@TObject';
   SCnSrchDialogComboName = 'SearchText';
@@ -1575,7 +1576,7 @@ begin
   FAutoBracket := Ini.ReadBool(csEditorKey, csAutoBracket, False);
   FSemicolonLastChar := Ini.ReadBool(csEditorKey, csSemicolonLastChar, False);
   FAutoEnterEnd := Ini.ReadBool(csEditorKey, csAutoEnterEnd, True);
-  WizOptions.LoadUserFile(FAutoIndentList, csAutoIndentFile);
+  WizOptions.LoadUserFile(FAutoIndentList, SCnAutoIndentFile);
 end;
 
 procedure TCnSrcEditorKey.SaveSettings(Ini: TCustomIniFile);
@@ -1595,7 +1596,12 @@ begin
   Ini.WriteBool(csEditorKey, csAutoBracket, FAutoBracket);
   Ini.WriteBool(csEditorKey, csSemicolonLastChar, FSemicolonLastChar);
   Ini.WriteBool(csEditorKey, csAutoEnterEnd, FAutoEnterEnd);
-  WizOptions.SaveUserFile(FAutoIndentList, csAutoIndentFile);
+  WizOptions.SaveUserFile(FAutoIndentList, SCnAutoIndentFile);
+end;
+
+procedure TCnSrcEditorKey.ResetSettings(Ini: TCustomIniFile);
+begin
+  WizOptions.CleanUserFile(SCnAutoIndentFile);
 end;
 
 procedure TCnSrcEditorKey.DoEnhConfig;
@@ -1633,6 +1639,5 @@ begin
 end;
 
 {$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}
-
 end.
 

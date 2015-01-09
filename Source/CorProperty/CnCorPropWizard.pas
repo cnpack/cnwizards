@@ -65,6 +65,7 @@ type
     procedure Execute; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
+    procedure ResetSettings(Ini: TCustomIniFile); override;
     procedure LanguageChanged(Sender: TObject); override;
 
     procedure LoadPropertyRules(const FileName: string);
@@ -265,6 +266,11 @@ begin
     finally
       Free;
     end;
+end;
+
+procedure TCnCorPropWizard.ResetSettings(Ini: TCustomIniFile);
+begin
+  WizOptions.CleanUserFile(SCnCorPropDataName);
 end;
 
 procedure TCnCorPropWizard.LoadPropertyRules(const FileName: string);

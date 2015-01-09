@@ -127,6 +127,7 @@ type
     procedure Config; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
+    procedure ResetSettings(Ini: TCustomIniFile); override;
     function GetState: TWizardState; override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
     function GetCaption: string; override;
@@ -440,6 +441,12 @@ end;
 procedure TCnSrcTemplate.SaveSettings(Ini: TCustomIniFile);
 begin
   inherited;
+
+end;
+
+procedure TCnSrcTemplate.ResetSettings(Ini: TCustomIniFile);
+begin
+  WizOptions.CleanUserFile(SCnSrcTemplateDataName);
 end;
 
 procedure TCnSrcTemplate.SubActionExecute(Index: Integer);

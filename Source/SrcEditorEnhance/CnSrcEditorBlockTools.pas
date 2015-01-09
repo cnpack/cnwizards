@@ -121,6 +121,7 @@ type
     procedure LanguageChanged(Sender: TObject);
     procedure LoadSettings(Ini: TCustomIniFile);
     procedure SaveSettings(Ini: TCustomIniFile);
+    procedure ResetSettings(Ini: TCustomIniFile);
     procedure UpdateMenu(Items: TMenuItem; NeedImage: Boolean = True);
 
     property Active: Boolean read FActive write SetActive;
@@ -919,6 +920,11 @@ procedure TCnSrcEditorBlockTools.SaveSettings(Ini: TCustomIniFile);
 begin
   Ini.WriteBool(csBlockTools, csShowBlockTools, FShowBlockTools);
   Ini.WriteBool(csBlockTools, csTabIndent, FTabIndent);  
+end;
+
+procedure TCnSrcEditorBlockTools.ResetSettings(Ini: TCustomIniFile);
+begin
+
 end;
 
 //------------------------------------------------------------------------------

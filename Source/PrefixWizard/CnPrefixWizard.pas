@@ -143,6 +143,7 @@ type
     procedure Config; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
+    procedure ResetSettings(Ini: TCustomIniFile); override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
     function GetCaption: string; override;
     function GetHint: string; override;
@@ -1298,6 +1299,11 @@ begin
   Ini.WriteBool('', csF2Rename, FF2Rename);
   FPrefixList.SaveToFile(WizOptions.GetUserFileName(SCnPrefixDataName, False));
   WizOptions.CheckUserFile(SCnPrefixDataName);
+end;
+
+procedure TCnPrefixWizard.ResetSettings(Ini: TCustomIniFile);
+begin
+  WizOptions.CleanUserFile(SCnPrefixDataName);
 end;
 
 procedure TCnPrefixWizard.Config;

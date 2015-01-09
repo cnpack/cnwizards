@@ -207,6 +207,7 @@ type
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
+    procedure ResetSettings(Ini: TCustomIniFile); override;
     procedure Config; override;
     procedure ConfigEx(APageIndex: Integer);
     procedure LanguageChanged(Sender: TObject); override;
@@ -494,6 +495,16 @@ begin
   FNavMgr.SaveSettings(Ini);
   FBlockTools.SaveSettings(Ini);
   FEditorKey.SaveSettings(Ini);
+end;
+
+procedure TCnSrcEditorEnhance.ResetSettings(Ini: TCustomIniFile);
+begin
+  FEditorMisc.ResetSettings(Ini);
+  FToolbarMgr.ResetSettings(Ini);
+  FGutterMgr.ResetSettings(Ini);
+  FNavMgr.ResetSettings(Ini);
+  FBlockTools.ResetSettings(Ini);
+  FEditorKey.ResetSettings(Ini);
 end;
 
 procedure TCnSrcEditorEnhance.SetActive(Value: Boolean);
