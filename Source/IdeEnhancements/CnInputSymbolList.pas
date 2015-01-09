@@ -162,6 +162,7 @@ type
     procedure Load; virtual;
     procedure Save; virtual;
     procedure Sort; virtual;
+    procedure Reset; virtual;
     class function GetListName: string; virtual;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
       TCodePosInfo): Boolean; virtual;
@@ -199,6 +200,7 @@ type
   public
     procedure Load; override;
     procedure Save; override;
+    procedure Reset; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
       TCodePosInfo): Boolean; override;
     function CanCustomize: Boolean; override;
@@ -404,6 +406,7 @@ type
     constructor Create;
     destructor Destroy; override;
     procedure InitList;
+    procedure Reset;
     procedure GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet; 
       PosInfo: TCodePosInfo);
     function ListByClass(AClass: TSymbolListClass): TSymbolList;
@@ -929,9 +932,15 @@ begin
 
 end;
 
+procedure TSymbolList.Reset;
+begin
+
+end;
+
 //==============================================================================
 // 自定义符号列表
 //==============================================================================
+
 
 { TFileSymbolList }
 
@@ -972,6 +981,11 @@ begin
     Result := PosInfo.PosKind in (csNormalPosKinds + [pkCompDirect, pkComment])
   else
     Result := PosInfo.PosKind in [pkField, pkComment];
+end;
+
+procedure TFileSymbolList.Reset;
+begin
+  RestoreDefault;
 end;
 
 procedure TFileSymbolList.RestoreDefault;
@@ -1901,6 +1915,14 @@ var
 begin
   for i := 0 to Count - 1 do
     List[i].Save;
+end;
+
+procedure TSymbolListMgr.Reset;
+var
+  I: Integer;
+begin
+  for I := 0 to Count - 1 do
+    List[I].Reset;
 end;
 
 initialization

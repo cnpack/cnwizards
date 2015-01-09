@@ -318,6 +318,7 @@ type
     procedure LanguageChanged(Sender: TObject); override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
+    procedure ResetSettings(Ini: TCustomIniFile); override;
     procedure SendSymbolToIDE(MatchFirstOnly, AutoEnter, RepFullToken: Boolean;
       Key: AnsiChar; var Handled: Boolean);
     procedure ShowIDECodeCompletion;
@@ -2998,6 +2999,11 @@ begin
   finally
     Free;
   end;
+end;
+
+procedure TCnInputHelper.ResetSettings(Ini: TCustomIniFile);
+begin
+  SymbolListMgr.Reset;
 end;
 
 procedure TCnInputHelper.SetActive(Value: Boolean);
