@@ -187,7 +187,6 @@ inherited CnWizConfigForm: TCnWizConfigForm
           Anchors = [akRight, akBottom]
           Caption = '&Reset'
           TabOrder = 3
-          Visible = False
           OnClick = btnRestoreSettingClick
         end
       end
