@@ -198,6 +198,9 @@ const
 
   csLastSelectedItem = 'LastSelectedItem';
 
+type
+  TCnActionWizardHack = class(TCnActionWizard);
+
 {$R *.DFM}
 
 // 显示配置窗口
@@ -482,7 +485,8 @@ begin
   HotKeyWizard.Visible := (Wizard is TCnActionWizard) and
     TCnActionWizard(Wizard).EnableShortCut;
   btnConfig.Enabled := Wizard.HasConfig and cbWizardActive.Checked;
-  btnRestoreSetting.Enabled := Wizard.HasConfig and cbWizardActive.Checked;
+  btnRestoreSetting.Enabled := (Wizard.HasConfig or (Wizard is TCnActionWizard))
+    and cbWizardActive.Checked;
 end;
 
 // ListBox 双击事件
@@ -534,6 +538,7 @@ end;
 procedure TCnWizConfigForm.btnRestoreSettingClick(Sender: TObject);
 var
   Wizard: TCnBaseWizard;
+  Idx: Integer;
 begin
   if lbWizards.ItemIndex >= 0 then
   begin
@@ -542,7 +547,16 @@ begin
     begin
       with Wizard do
         if HasConfig then DoResetSettings;
+      if Wizard is TCnActionWizard then
+      begin
+        TCnActionWizard(Wizard).Action.ShortCut := TCnActionWizardHack(Wizard).GetDefShortCut;
+        Idx := CalcSelectedWizardIndex(Wizard);
+        if Idx >= 0 then
+          FShortCuts[Idx] := TCnActionWizard(Wizard).Action.ShortCut;
+      end;
       lbWizards.Refresh;
+      lbWizards.OnClick(lbWizards); // Refresh hotkey display.
+
       InfoDlg(Format(SCnSettingsReset, [Wizard.WizardName]));
     end;
   end;
@@ -799,7 +813,7 @@ end;
 
 procedure TCnWizConfigForm.btnSortClick(Sender: TObject);
 begin
-// 显示排序窗口
+  // 显示排序窗口
   with TCnMenuSortForm.Create(nil) do
   begin
     InitWizardMenus;
