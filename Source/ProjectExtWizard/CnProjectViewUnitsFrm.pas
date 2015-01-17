@@ -29,7 +29,9 @@ unit CnProjectViewUnitsFrm;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2004.2.22 V2.1
+* 修改记录：2015.1.17 V2.2
+*               允许显示工程中类型为 Unknown 的文件
+*           2004.2.22 V2.1
 *               重写所有代码
 *           2004.2.18 V2.0 by Leeon
 *               更改两个列表框架
@@ -123,7 +125,7 @@ const
   csViewUnits = 'ViewUnits';
 
   csUnitImageIndexs: array[TCnUnitType] of Integer =
-    (-1, 76, 77, 73, 67, 78, 79, 80, 81, 89);
+    (26, 76, 77, 73, 67, 78, 79, 80, 81, 89); // 26 means unknown
   
 function ShowProjectViewUnits(Ini: TCustomIniFile; out Hooked: Boolean): Boolean;
 
@@ -334,7 +336,11 @@ begin
         {$IFDEF SUPPORT_MODULETYPE}
           // todo: Check ModuleInfo.ModuleType
         {$ELSE}
-          if IsDpr(IProject.FileName) or IsBpr(IProject.FileName) then
+          if IsDpr(IProject.FileName) or IsBpr(IProject.FileName)
+{$IFDEF BDS}
+            or IsBdsProject(IProject.FileName) or IsDProject(IProject.FileName)
+{$ENDIF}
+            then
             UnitType := utProject
           else if IsBpk(IProject.FileName) or IsDpk(IProject.FileName) then
             UnitType := utPackage
@@ -385,6 +391,10 @@ begin
             else
               UnitType := utUnknown;
           {$ENDIF}
+
+            // 未知类型文件不隐藏扩展名
+            if UnitType = utUnknown then
+              Name := _CnExtractFileName(UnitFileName);
           end;
           
           FillUnitInfo(UnitInfo);
@@ -440,13 +450,11 @@ var
       if (MatchSearchText = '') or RegExpContainsText(FRegExpr, UnitInfo.Name,
         MatchSearchText, not IsMatchAny) then
       begin
-        if UnitInfo.UnitType <> utUnknown then
-        begin
-          CurrList.Add(UnitInfo);
-          // 全匹配时，提高首匹配的优先级，记下第一个该首匹配的项以备选中
-          if IsMatchAny and AnsiStartsText(MatchSearchText, UnitInfo.Name) then
-            ToSelUnitInfos.Add(Pointer(UnitInfo));
-        end;
+        // Unknown Type 的也显示
+        CurrList.Add(UnitInfo);
+        // 全匹配时，提高首匹配的优先级，记下第一个该首匹配的项以备选中
+        if IsMatchAny and AnsiStartsText(MatchSearchText, UnitInfo.Name) then
+          ToSelUnitInfos.Add(Pointer(UnitInfo));
       end;
     end;
   end;
