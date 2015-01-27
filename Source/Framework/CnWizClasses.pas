@@ -434,8 +434,11 @@ function GetCnWizardTypeName(AWizard: TCnBaseWizard): String;
 implementation
 
 uses
-  CnWizUtils, CnWizOptions, CnCommon, CnWizCommentFrm, CnWizSubActionShortCutFrm
-  {$IFDEF Debug}, CnDebug{$ENDIF Debug};
+  CnWizUtils, CnWizOptions, CnCommon
+{$IFNDEF CNWIZARDS_MINIMUM}
+  , CnWizCommentFrm, CnWizSubActionShortCutFrm
+{$ENDIF}  
+  {$IFDEF DEBUG}, CnDebug{$ENDIF};
 
 //==============================================================================
 // 专家类列表相关过程
@@ -821,8 +824,8 @@ end;
 procedure TCnActionWizard.Click(Sender: TObject);
 begin
   try
-    if Active and Action.Enabled and (IsInternalWizard or
-      ShowCnWizCommentForm(Self)) then
+    if Active and Action.Enabled and (IsInternalWizard {$IFNDEF CNWIZARDS_MINIMUM} or
+      ShowCnWizCommentForm(Self) {$ENDIF} ) then
       Execute;
   except
     on E: Exception do
@@ -1163,9 +1166,9 @@ begin
         begin
           try
             // 内部专家不提示
-            if IsInternalWizard or ShowCnWizCommentForm(WizardName + ' - ' +
+            if IsInternalWizard {$IFNDEF CNWIZARDS_MINIMUM} or ShowCnWizCommentForm(WizardName + ' - ' +
               GetCaptionOrgStr(SubActions[i].Caption), SubActions[i].Icon,
-              SubActions[i].Command) then
+              SubActions[i].Command) {$ENDIF} then
               SubActionExecute(i);
           except
             on E: Exception do
@@ -1198,7 +1201,11 @@ end;
 // 显示快捷键设置对话框
 function TCnSubMenuWizard.ShowShortCutDialog(const HelpStr: string): Boolean;
 begin
+{$IFNDEF CNWIZARDS_MINIMUM}
   Result := SubActionShortCutConfig(Self, HelpStr);
+{$ELSE}
+  Result := False;
+{$ENDIF}
 end;
 
 procedure TCnSubMenuWizard.OnActionUpdate(Sender: TObject);

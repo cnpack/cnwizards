@@ -464,6 +464,9 @@ procedure CnOtaEditBackspace(Many: Integer);
 {* 在编辑器中退格}
 procedure CnOtaEditDelete(Many: Integer);
 {* 在编辑器中删除}
+
+{$IFNDEF CNWIZARDS_MINIMUM}
+
 function CnOtaGetCurrentProcedure: string;
 {* 获取当前光标所在的过程或函数名}
 function CnOtaGetCurrentOuterBlock: string;
@@ -498,6 +501,9 @@ function CnOtaDeleteCurrTokenRight(FirstSet: TAnsiCharSet = [];
 {* 删除当前光标下的标识符右半部分}
 function CnOtaIsEditPosOutOfLine(EditPos: TOTAEditPos; View: IOTAEditView = nil): Boolean;
 {* 判断位置是否超出行尾了 }
+
+{$ENDIF}
+
 procedure CnOtaSelectBlock(const Editor: IOTASourceEditor; const Start, After: TOTACharPos);
 {* 选择一个代码块}
 function CnOtaCurrBlockEmpty: Boolean;
@@ -748,9 +754,11 @@ function RegExpContainsText(ARegExpr: TRegExpr; const AText: string;
   APattern: string; IsMatchStart: Boolean = False): Boolean;
 {* 判断正则表达式匹配}
 
+{$IFNDEF CNWIZARDS_MINIMUM}
 procedure TranslateFormFromLangFile(AForm: TCustomForm; const ALangDir, ALangFile: string;
   LangID: Cardinal);
 {* 加载指定的语言文件翻译窗体}
+{$ENDIF}
 
 implementation
 
@@ -761,8 +769,12 @@ uses
 {$IFDEF SUPPORTS_FMX}
   CnFmxUtils,
 {$ENDIF}
-  Math, CnWizOptions, CnWizMultiLang, CnLangMgr, CnGraphUtils, CnWizIdeUtils,
-  CnPasCodeParser, CnCppCodeParser, CnLangStorage, CnHashLangStorage, CnWizHelp;
+  Math, CnWizOptions, CnGraphUtils
+{$IFNDEF CNWIZARDS_MINIMUM}
+  , CnWizMultiLang, CnLangMgr, CnWizIdeUtils,
+  CnPasCodeParser, CnCppCodeParser, CnLangStorage, CnHashLangStorage, CnWizHelp
+{$ENDIF}
+  ;
 
 type
   TControlAccess = class(TControl);
@@ -1149,8 +1161,10 @@ end;
 // 显示指定主题的帮助内容
 procedure ShowHelp(const Topic: string);
 begin
+{$IFNDEF CNWIZARDS_MINIMUM}
   if not CnWizHelp.ShowHelp(Topic) then
     ErrorDlg(SCnNoHelpofThisLang);
+{$ENDIF}
 end;
 
 // 窗体居中
@@ -3373,6 +3387,7 @@ begin
   end;
 end;
 
+{$IFNDEF CNWIZARDS_MINIMUM}
 // 获取当前光标所在的过程或函数名
 function CnOtaGetCurrentProcedure: string;
 var
@@ -3544,6 +3559,7 @@ begin
   Text := TrimRight(string(ConvertEditorTextToText(OutStr)));
   Result := True;
 end;
+
 
 // 使用 NTA 方法取当前行源代码。速度快，但取回的文本是将 Tab 扩展成空格的。
 // 如果使用 ConvertPos 来转换成 EditPos 可能会有问题。直接将 CharIndex + 1
@@ -3729,6 +3745,7 @@ begin
     Result := not SameEditPos(EditPos, APos);
   end;  
 end;
+{$ENDIF}
 
 // 选择一个代码块
 procedure CnOtaSelectBlock(const Editor: IOTASourceEditor; const Start, After: TOTACharPos);
@@ -5171,6 +5188,8 @@ begin
   end;
 end;
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+
 // 加载指定的语言文件翻译窗体
 procedure TranslateFormFromLangFile(AForm: TCustomForm; const ALangDir, ALangFile: string;
   LangID: Cardinal);
@@ -5200,7 +5219,8 @@ begin
     Storage.Free;
   end;
 end;
-  
+{$ENDIF}
+
 initialization
   CnNoIconList := TStringList.Create;
   AddNoIconToList('TMenuItem'); // TMenuItem 等在专家加载之前已注册

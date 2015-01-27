@@ -195,10 +195,13 @@ uses
 {$IFDEF DEBUG}
   CnDebug, 
 {$ENDIF}
-  CnWizUtils, CnWizOptions, CnWizShortCut, CnCommon, CnWizConfigFrm, CnWizAbout,
-  CnWizUpgradeFrm, CnDesignEditor, CnWizShareImages, CnWizMultiLang, CnWizBoot,
-  CnWizCommentFrm, CnWizTranslate, CnWizNotifier, CnWizTipOfDayFrm, CnIDEVersion,
-  CnWizCompilerConst;
+  CnWizUtils, CnWizOptions, CnWizShortCut, CnCommon,
+{$IFNDEF CNWIZARDS_MINIMUM}
+  CnWizConfigFrm, CnWizAbout, CnWizShareImages,
+  CnWizUpgradeFrm, CnDesignEditor, CnWizMultiLang, CnWizBoot,
+  CnWizCommentFrm, CnWizTranslate, CnWizTipOfDayFrm, CnIDEVersion,
+{$ENDIF}
+  CnWizNotifier, CnWizCompilerConst;
 
 const
   csCnWizFreeMutex = 'CnWizFreeMutex';
@@ -216,7 +219,9 @@ begin
   FMenuWizards := TList.Create;
   FIDEEnhanceWizards := TList.Create;
   FRepositoryWizards := TList.Create;
+{$IFNDEF CNWIZARDS_MINIMUM}
   dmCnSharedImages := TdmCnSharedImages.Create(nil);
+{$ENDIF}
 
 {$IFDEF BDS}
   FSplashBmp := TBitmap.Create;
@@ -226,12 +231,15 @@ begin
 {$ENDIF}
   RegisterPluginInfo;
 
+{$IFNDEF CNWIZARDS_MINIMUM}
   CreateLanguageManager;
   if CnLanguageManager <> nil then
     InitLangManager;
-  CnTranslateConsts(nil);
 
+  CnTranslateConsts(nil);
+  
   CheckIDEVersion;
+{$ENDIF}
 
   CreateIDEMenu;
 
@@ -248,6 +256,7 @@ begin
   InstallPropEditors;
   InstallCompEditors;
 
+{$IFNDEF CNWIZARDS_MINIMUM}
   // 重刷新语言条目，与语言改变时的处理类似。
   if (CnLanguageManager <> nil) and (CnLanguageManager.LanguageStorage <> nil) then
   begin
@@ -256,6 +265,7 @@ begin
     ChangeWizardLanguage;
     CnDesignEditorMgr.LanguageChanged(CnLanguageManager);
   end;
+{$ENDIF}
 
   // 文件通知
   CnWizNotifierServices.AddFileNotifier(OnFileNotify);
@@ -353,9 +363,9 @@ begin
     end;
 
     FreeMenu;
-
+{$IFNDEF CNWIZARDS_MINIMUM}
     FreeAndNil(dmCnSharedImages);
-
+{$ENDIF}
   {$IFDEF BDS}
     FreeAndNil(FSplashBmp);
     FreeAndNil(FAboutBmp);
@@ -451,8 +461,10 @@ begin
   FSepMenu.Caption := '-';
   FConfigAction := WizActionMgr.AddMenuAction(SCnWizConfigCommand, SCnWizConfigCaption,
     SCnWizConfigMenuName, 0, OnConfig, SCnWizConfigIcon, SCnWizConfigHint);
+{$IFNDEF CNWIZARDS_MINIMUM}
   FWizMultiLang := TCnWizMultiLang.Create;
   FWizAbout := TCnWizAbout.Create;
+{$ENDIF}
 end;
 
 // 根据菜单专家列表和父菜单项重建菜单。
@@ -601,9 +613,10 @@ var
   IDEEnhanceWizard: TCnIDEEnhanceWizard;
   RepositoryWizard: TCnRepositoryWizard;
   WizardSvcs: IOTAWizardServices;
-
+{$IFNDEF CNWIZARDS_MINIMUM}
   frmBoot: TCnWizBootForm;
   KeyState: TKeyboardState;
+{$ENDIF}
   bUserBoot: boolean;
   BootList: array of boolean;
 begin
@@ -620,6 +633,8 @@ begin
 {$ENDIF}
 
   bUserBoot := False;
+
+{$IFNDEF CNWIZARDS_MINIMUM}
   GetKeyboardState(KeyState);
 
   if (KeyState[BootShortCutKey] and $80 <> 0) or // 是否由用户引导专家
@@ -637,6 +652,7 @@ begin
       frmBoot.Free;
     end;
   end;
+{$ENDIF}
 
   for i := 0 to GetCnWizardClassCount - 1 do
   begin
@@ -834,6 +850,7 @@ begin
     Free;
   end;
 
+{$IFNDEF CNWIZARDS_MINIMUM}
   with WizOptions.CreateRegIniFile(WizOptions.CompEditorRegPath) do
   try
     for i := 0 to CnDesignEditorMgr.CompEditorCount - 1 do
@@ -857,6 +874,7 @@ begin
   finally
     Free;
   end;
+{$ENDIF}
 
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('TCnWizardMgr.SaveSettings');
@@ -871,9 +889,11 @@ begin
 {$ENDIF}
   if Menu.Count > 0 then
     Menu.Add(FSepMenu);
+{$IFNDEF CNWIZARDS_MINIMUM}
   Menu.Add(FConfigAction.Menu);
   Menu.Add(FWizMultiLang.Menu);
   Menu.Add(FWizAbout.Menu);
+{$ENDIF}  
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('Install misc menu Leave successed.');
 {$ENDIF}
@@ -893,12 +913,15 @@ end;
 
 // 安装组件编辑器
 procedure TCnWizardMgr.InstallCompEditors;
+{$IFNDEF CNWIZARDS_MINIMUM}
 var
   i: Integer;
+{$ENDIF}
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('Begin installing component editors');
 {$ENDIF}
+{$IFNDEF CNWIZARDS_MINIMUM}
   with WizOptions.CreateRegIniFile(WizOptions.CompEditorRegPath) do
   try
     for i := 0 to CnDesignEditorMgr.CompEditorCount - 1 do
@@ -914,6 +937,7 @@ begin
   finally
     Free;
   end;
+{$ENDIF}
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('Installing component editors succeed');
 {$ENDIF}
@@ -921,12 +945,15 @@ end;
 
 // 安装属性编辑器
 procedure TCnWizardMgr.InstallPropEditors;
+{$IFNDEF CNWIZARDS_MINIMUM}
 var
   i: Integer;
+{$ENDIF}
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('Begin installing property editors');
 {$ENDIF}
+{$IFNDEF CNWIZARDS_MINIMUM}
   with WizOptions.CreateRegIniFile(WizOptions.PropEditorRegPath) do
   try
     for i := 0 to CnDesignEditorMgr.PropEditorCount - 1 do
@@ -942,6 +969,7 @@ begin
   finally
     Free;
   end;
+{$ENDIF}
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('Installing property editors succeed');
 {$ENDIF}
@@ -959,14 +987,18 @@ end;
 procedure TCnWizardMgr.ShowTipofDay(Sender: TObject);
 begin
   FreeAndNil(FTipTimer);
+{$IFNDEF CNWIZARDS_MINIMUM}
   ShowCnWizTipOfDayForm(False);
+{$ENDIF}
 end;
 
 // 检查 IDE 版本并提示
 procedure TCnWizardMgr.CheckIDEVersion;
 begin
+{$IFNDEF CNWIZARDS_MINIMUM}
   if not IsIdeVersionLatest then
     ShowSimpleCommentForm('', SCnIDENOTLatest, 'CheckIDEVersion' + CompilerShortName);
+{$ENDIF}    
 end;
 
 // 文件通知
@@ -997,6 +1029,7 @@ begin
       DoHandleException(Wizards[i].ClassName + '.Loaded');
     end;
 
+{$IFNDEF CNWIZARDS_MINIMUM}
     // 装载组件编辑器设置
     for i := 0 to CnDesignEditorMgr.CompEditorCount - 1 do
     try
@@ -1012,18 +1045,23 @@ begin
     except
       DoHandleException(CnDesignEditorMgr.PropEditors[i].IDStr + '.Loaded');
     end;
+{$ENDIF}
+
   finally
     CnListEndUpdate;
     WizShortCutMgr.UpdateBinding;   // IDE 启动后强制重新绑定一次
     WizShortCutMgr.EndUpdate;
   end;
 
+{$IFNDEF CNWIZARDS_MINIMUM}
   // IDE 启动后再注册编辑器以保证优先级最高
   CnDesignEditorMgr.Register;
+{$ENDIF}
 
   // 全部装载完成置允许保存标志
   FSettingsLoaded := True;
 
+{$IFNDEF CNWIZARDS_MINIMUM}
   // 检查升级
   if (WizOptions.UpgradeStyle = usAllUpgrade) or (WizOptions.UpgradeStyle =
     usUserDefine) and (WizOptions.UpgradeContent <> []) then
@@ -1031,6 +1069,7 @@ begin
 
   // 显示每日一帖
   SetTipShowing;
+{$ENDIF}
 
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('OnIdeLoaded');
@@ -1040,14 +1079,18 @@ end;
 
 // 显示专家设置对话框
 procedure TCnWizardMgr.OnConfig(Sender: TObject);
+{$IFNDEF CNWIZARDS_MINIMUM}
 var
   I: Integer;
+{$ENDIF}
 begin
+{$IFNDEF CNWIZARDS_MINIMUM}
   I := WizActionMgr.IndexOfCommand(SCnWizConfigCommand);
   if I >= 0 then
     ShowCnWizConfigForm(WizActionMgr.WizActions[I].Icon)
   else
     ShowCnWizConfigForm;
+{$ENDIF}
 end;
 
 //------------------------------------------------------------------------------
