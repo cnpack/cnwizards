@@ -1164,8 +1164,11 @@ end;
 procedure TCnMainViewer.OnHotKey(var Message: TMessage);
 begin
   inherited;
-  if Message.WParam = SCnHotKeyId then
+  if (Message.WParam = SCnHotKeyId) and (Message.LParamHi <> $FF) then
+  begin
+    // Ignore some 255 reversed VK.
     tryIcon.ShowApplication;
+  end;
 end;
 
 function TCnMainViewer.RegisterViewerHotKey: Boolean;
