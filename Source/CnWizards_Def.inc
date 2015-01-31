@@ -17,4 +17,11 @@
 
 {$IFDEF COMPILER9_UP}
   {$DEFINE USE_DDETOURS_HOOK}
+  
+  // DEBUG/JCL and DDETOURS conflicts under D2007 or below.
+  {$IFDEF USE_JCL}
+    {$IFNDEF COMPILER12_UP}
+      {$UNDEF USE_DDETOURS_HOOK}
+    {$ENDIF}
+  {$ENDIF}
 {$ENDIF}
