@@ -840,6 +840,39 @@ begin
   Result := False;
 end;
 
+{$IFDEF UNICODE}
+function StartWithIgnoreCase(Pattern: PAnsiChar; Content: PAnsiChar): Boolean; inline;
+var
+  PP, PC: PAnsiChar;
+
+  function AnsiCharEqualIgnoreCase(P, C: Byte): Boolean; inline;
+  begin
+    Result := P = C;
+    if not Result then
+    begin
+      // Assume Pattern already uppercase.
+      if C in [97..122] then  // if a..z to A..Z
+        Dec(C, 32);
+      Result := P = C;
+    end;
+  end;
+
+begin
+  PP := Pattern;
+  PC := Content;
+
+  while (PP^ <> #0) and (PC^ <> #0) do
+  begin
+    Result := AnsiCharEqualIgnoreCase(Ord(PP^), Ord(PC^));
+    if not Result then
+      Exit;
+    Inc(PP);
+    Inc(PC);
+  end;
+  Result := PP^ = #0;
+end;
+{$ENDIF}
+
 function CheckIsCompDirectiveToken(AToken: TCnPasToken; IsCpp: Boolean): Boolean;
 var
   I: Integer;
@@ -871,11 +904,11 @@ begin
       for I := Low(csPasCompDirectiveTokenStr) to High(csPasCompDirectiveTokenStr) do
       begin
         {$IFDEF UNICODE}
-        // Unicode 时要考虑性能问题，暂时先不管
-        Result := Pos(csPasCompDirectiveTokenStr[I], UpperCase(T)) = 1;
+        // Unicode 时要考虑性能问题
+        Result := StartWithIgnoreCase(@(csPasCompDirectiveTokenStr[I][1]), @T[1]);
         {$ELSE}
         Result := Pos(csPasCompDirectiveTokenStr[I], UpperCase(T)) = 1;
-       {$ENDIF}
+        {$ENDIF}
 
         if Result then
         begin
