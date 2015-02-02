@@ -353,7 +353,7 @@ begin
       InStream := TMemoryStream.Create;
       OutStream := TMemoryStream.Create;
       try
-        Text := Block.Text;
+        Text := AnsiString(Block.Text);
         InStream.Write(Text[1], Length(Text));
 {$IFDEF DEBUG}
 //      CnDebugger.LogMemDump(InStream.Memory, InStream.Size);
