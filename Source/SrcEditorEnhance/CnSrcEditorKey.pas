@@ -29,7 +29,9 @@ unit CnSrcEditorKey;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2011.06.14
+* 修改记录：2015.02.03
+*             加入禁止光标超出行尾的功能，默认禁用
+*           2011.06.14
 *             加入行首尾按左右键折行的功能
 *           2008.12.25
 *             加入 F2 修改当前变量名的功能
@@ -76,6 +78,7 @@ type
     FAutoIndentList: TStringList;
     FHomeExt: Boolean;
     FHomeFirstChar: Boolean;
+    FCursorBeforeEOL: Boolean;
     FLeftRightLineWrap: Boolean;
     FF3Search: Boolean;
     FAutoBracket: Boolean;
@@ -89,9 +92,12 @@ type
     FCorIdeModule: HModule;
     FSearchWrap: Boolean;
     FUpperFirstLetter: Boolean;
+
+    FCursorMoving: Boolean;
 {$IFNDEF DELPHI10_UP}
     FSaveLineNo: Integer;
     FNeedChangeInsert: Boolean;
+
     procedure IdleDoAutoInput(Sender: TObject);
     procedure IdleDoAutoIndent(Sender: TObject);
     procedure IdleDoCBracketIndent(Sender: TObject);
@@ -126,6 +132,8 @@ type
     procedure EditControlKeyUp(Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean);
     procedure ExecuteInsertCharOnIdle(Sender: TObject);
+
+    procedure EditorChanged(Editor: TEditorObject; ChangeType: TEditorChangeTypes);
   public
     constructor Create;
     destructor Destroy; override;
@@ -148,6 +156,7 @@ type
     property AutoIndentList: TStringList read FAutoIndentList;
     property HomeExt: Boolean read FHomeExt write FHomeExt;
     property HomeFirstChar: Boolean read FHomeFirstChar write FHomeFirstChar;
+    property CursorBeforeEOL: Boolean read FCursorBeforeEOL write FCursorBeforeEOL;
     property LeftRightLineWrap: Boolean read FLeftRightLineWrap write FLeftRightLineWrap;
     property AutoBracket: Boolean read FAutoBracket write FAutoBracket;
     property SemicolonLastChar: Boolean read FSemicolonLastChar write FSemicolonLastChar;
@@ -288,10 +297,12 @@ begin
 
   EditControlWrapper.AddKeyDownNotifier(EditControlKeyDown);
   EditControlWrapper.AddKeyUpNotifier(EditControlKeyUp);
+  EditControlWrapper.AddEditorChangeNotifier(EditorChanged);
 end;
 
 destructor TCnSrcEditorKey.Destroy;
 begin
+  EditControlWrapper.RemoveEditorChangeNotifier(EditorChanged);
   EditControlWrapper.RemoveKeyDownNotifier(EditControlKeyDown);
   EditControlWrapper.RemoveKeyUpNotifier(EditControlKeyUp);
 
@@ -1554,6 +1565,7 @@ const
   csAutoIndent = 'AutoIndent';
   csHomeExt = 'HomeExt';
   csHomeFirstChar = 'HomeFirstChar';
+  csCursorBeforeEOL = 'CursorBeforeEOL';
   csLeftRightLineWrap = 'LeftRightLineWrap';
   csAutoBracket = 'AutoBracket';
   csSemicolonLastChar = 'SemicolonLastChar';
@@ -1572,6 +1584,7 @@ begin
   SearchWrap := Ini.ReadBool(csEditorKey, csSearchWrap, True);
   FHomeExt := Ini.ReadBool(csEditorKey, csHomeExt, True);
   FHomeFirstChar := Ini.ReadBool(csEditorKey, csHomeFirstChar, False);
+  FCursorBeforeEOL := Ini.ReadBool(csEditorKey, csCursorBeforeEOL, False);
   FLeftRightLineWrap := Ini.ReadBool(csEditorKey, csLeftRightLineWrap, False);
   FAutoBracket := Ini.ReadBool(csEditorKey, csAutoBracket, False);
   FSemicolonLastChar := Ini.ReadBool(csEditorKey, csSemicolonLastChar, False);
@@ -1592,6 +1605,7 @@ begin
   Ini.WriteBool(csEditorKey, csAutoIndent, FAutoIndent);
   Ini.WriteBool(csEditorKey, csHomeExt, FHomeExt);
   Ini.WriteBool(csEditorKey, csHomeFirstChar, FHomeFirstChar);
+  Ini.WriteBool(csEditorKey, csCursorBeforeEOL, FCursorBeforeEOL);
   Ini.WriteBool(csEditorKey, csLeftRightLineWrap, FLeftRightLineWrap);
   Ini.WriteBool(csEditorKey, csAutoBracket, FAutoBracket);
   Ini.WriteBool(csEditorKey, csSemicolonLastChar, FSemicolonLastChar);
@@ -1636,6 +1650,45 @@ end;
 procedure TCnSrcEditorKey.SetKeepSearch(const Value: Boolean);
 begin
   FKeepSearch := Value;
+end;
+
+procedure TCnSrcEditorKey.EditorChanged(Editor: TEditorObject;
+  ChangeType: TEditorChangeTypes);
+var
+  Line: string;
+  AnsiLine: AnsiString;
+  EditView: IOTAEditView;
+  LineNo, CharIndex: Integer;
+begin
+  if not Active or not FCursorBeforeEOL then
+    Exit;
+
+  if ((ctCurrLine in ChangeType) or (ctCurrCol in ChangeType)) and not FCursorMoving then
+  begin
+    // 获得当前编辑器光标位置，并判断是否超出行尾
+    if CnNtaGetCurrLineText(Line, LineNo, CharIndex) then
+    begin
+      if Trim(Line) = '' then // 空行不强迫到行首
+        Exit;
+      AnsiLine := AnsiString(Line);
+
+      EditView := CnOtaGetTopMostEditView;
+      CharIndex := EditView.CursorPos.Col - 1;
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('Cursor Before EOL: Col %d, Len %d.', [CharIndex, Length(AnsiLine)]);
+{$ENDIF}
+      if CharIndex > Length(AnsiLine) then
+      begin
+        try
+          FCursorMoving := True;
+          EditView.Buffer.EditPosition.MoveEOL;
+          EditView.Paint;
+        finally
+          FCursorMoving := False;
+        end;
+      end;
+    end;
+  end;
 end;
 
 {$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}
