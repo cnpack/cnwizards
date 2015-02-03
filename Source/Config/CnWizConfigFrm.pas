@@ -856,11 +856,7 @@ var
       Result := True
     else // ²éÕÒÆ´ÒôÊ××ÖÄ¸
     begin
-{$IFDEF DelphiXE3_UP}
       Py := LowerCase(string(GetHzPy(AnsiString(Wizard.WizardName))));
-{$ELSE}
-      Py := LowerCase(string(GetHzPy(AnsiString(Wizard.WizardName))));
-{$ENDIF DelphiXE3_UP}
       Result := Pos(FilterText, Py) > 0;
     end;
   end;

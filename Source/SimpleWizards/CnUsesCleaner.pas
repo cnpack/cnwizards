@@ -914,7 +914,7 @@ var
       if UsesList.Count = 0 then
         Result := '';
 {$IFDEF DEBUG}
-      CnDebugger.LogMsg('GetUsesSource Return: ' + Result);
+      CnDebugger.LogMsg('GetUsesSource Return: ' + string(Result));
 {$ENDIF}
     finally
       UsesList.Free;
