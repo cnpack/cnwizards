@@ -857,9 +857,9 @@ var
     else // ²éÕÒÆ´ÒôÊ××ÖÄ¸
     begin
 {$IFDEF DelphiXE3_UP}
-      Py := LowerCase(String(GetHzPy(AnsiString(Wizard.WizardName))));
+      Py := LowerCase(string(GetHzPy(AnsiString(Wizard.WizardName))));
 {$ELSE}
-      Py := LowerCase(GetHzPy(Wizard.WizardName));
+      Py := LowerCase(string(GetHzPy(AnsiString(Wizard.WizardName))));
 {$ENDIF DelphiXE3_UP}
       Result := Pos(FilterText, Py) > 0;
     end;
@@ -897,16 +897,12 @@ var
       Result := True
     else // ²éÕÒÆ´ÒôÊ××ÖÄ¸
     begin
-{$IFDEF DelphiXE3_UP}
-      Py := LowerCase(String(GetHzPy(AnsiString(Editor.Name))));
-{$ELSE}
-      Py := LowerCase(GetHzPy(Editor.Name));
-{$ENDIF DelphiXE3_UP}
+      Py := LowerCase(string(GetHzPy(AnsiString(Editor.Name))));
       Result := Pos(FilterText, Py) > 0;
     end;
   end;
 
-   function CanShowEditor(FilterText: string; Editor: TCnCompEditorInfo): Boolean; overload;
+  function CanShowEditor(FilterText: string; Editor: TCnCompEditorInfo): Boolean; overload;
   begin
     if FilterText = '' then
     begin
@@ -920,11 +916,7 @@ var
       Result := True
     else // ²éÕÒÆ´ÒôÊ××ÖÄ¸
     begin
-{$IFDEF DelphiXE3_UP}
-      Py := LowerCase(String(GetHzPy(AnsiString(Editor.Name))));
-{$ELSE}
-      Py := LowerCase(GetHzPy(Editor.Name));
-{$ENDIF DelphiXE3_UP}
+      Py := LowerCase(string(GetHzPy(AnsiString(Editor.Name))));
       Result := Pos(FilterText, Py) > 0;
     end;
   end;
