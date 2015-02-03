@@ -2182,6 +2182,7 @@ TCnSrcEditorEnhanceForm.chkShiftEnter.Caption=Use Shift+Enter to Move to Line En
 TCnSrcEditorEnhanceForm.chkHomeExtend.Caption=Extend Home to Move Between Line Head and First No-Whitespace.
 TCnSrcEditorEnhanceForm.chkLeftRightWrapLine.Caption=Wrap Cursor when Press Left/Right at Line Head/End.
 TCnSrcEditorEnhanceForm.chkHomeFirstChar.Caption=Move to First No-Whitespace if not in Line Head.
+TCnSrcEditorEnhanceForm.chkCursorBeforeEOL.Caption=Keep Cursor Before End of Line.
 TCnSrcEditorEnhanceForm.grpAutoIndent.Caption=Auto &Indent
 TCnSrcEditorEnhanceForm.chkAutoIndent.Caption=Auto &Indent for Special Keywords in Delphi or '{' in C File.
 TCnSrcEditorEnhanceForm.grpAutoSave.Caption=Auto &Save

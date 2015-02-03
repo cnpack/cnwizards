@@ -2182,6 +2182,7 @@ TCnSrcEditorEnhanceForm.chkShiftEnter.Caption=Shift+Enter 键移到行尾再换�
 TCnSrcEditorEnhanceForm.chkHomeExtend.Caption=使用 Home 键移动到行首或第一个非空字符。
 TCnSrcEditorEnhanceForm.chkLeftRightWrapLine.Caption=光标在行首尾时按左右方向键跳行。
 TCnSrcEditorEnhanceForm.chkHomeFirstChar.Caption=不在行首时按 Home 键首先移到第一个非空字符。
+TCnSrcEditorEnhanceForm.chkCursorBeforeEOL.Caption=禁止光标超出行尾。
 TCnSrcEditorEnhanceForm.grpAutoIndent.Caption=自动缩进(&I)
 TCnSrcEditorEnhanceForm.chkAutoIndent.Caption=在 Delphi 的指定关键字或 C 的 '{' 后回车时自动缩进。
 TCnSrcEditorEnhanceForm.grpAutoSave.Caption=自动保存(&S)
