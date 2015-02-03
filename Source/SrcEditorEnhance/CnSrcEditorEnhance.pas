@@ -29,7 +29,9 @@ unit CnSrcEditorEnhance;
 * 兼容测试：暂无（PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6）
 * 本 地 化：该窗体中的字符串符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2011.06.14
+* 修改记录：2015.02.03
+*               LiuXiao 加入光标不超过行尾的选项
+*           2011.06.14
 *               LiuXiao 加入行首尾按左右键折行的选项
 *           2009.05.30 V1.3
 *               LiuXiao 修改通知器以修改工具栏的更新方式，降低 CPU 占有率
@@ -150,6 +152,7 @@ type
     chkAutoEnterEnd: TCheckBox;
     btnDesignToolBar: TButton;
     chkLeftRightWrapLine: TCheckBox;
+    chkCursorBeforeEOL: TCheckBox;
     procedure btnHelpClick(Sender: TObject);
     procedure UpdateContent(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word;
@@ -591,6 +594,7 @@ begin
     chkAutoBracket.Checked := FEditorKey.AutoBracket;
     chkShiftEnter.Checked := FEditorKey.ShiftEnter;
     chkHomeExtend.Checked := FEditorKey.HomeExt;
+    chkCursorBeforeEOL.Checked := FEditorKey.CursorBeforeEOL;
     chkLeftRightWrapLine.Checked := FEditorKey.LeftRightLineWrap;
     chkSearchAgain.Checked := FEditorKey.F3Search;
     chkF2Rename.Checked := FEditorKey.F2Rename;
@@ -676,6 +680,7 @@ begin
       FEditorKey.AutoBracket := chkAutoBracket.Checked;
       FEditorKey.ShiftEnter := chkShiftEnter.Checked;
       FEditorKey.HomeExt := chkHomeExtend.Checked;
+      FEditorKey.CursorBeforeEOL := chkCursorBeforeEOL.Checked;
       FEditorKey.LeftRightLineWrap := chkLeftRightWrapLine.Checked;
       FEditorKey.F3Search := chkSearchAgain.Checked;
       FEditorKey.F2Rename := chkF2Rename.Checked;

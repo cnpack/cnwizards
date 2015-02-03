@@ -6,6 +6,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
   ClientHeight = 473
   ClientWidth = 401
   KeyPreview = True
+  OldCreateOrder = True
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
   PixelsPerInch = 96
@@ -558,12 +559,12 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         Left = 8
         Top = 8
         Width = 361
-        Height = 244
+        Height = 254
         Caption = '&Keyboard Extend'
         TabOrder = 0
         object chkShiftEnter: TCheckBox
           Left = 8
-          Top = 40
+          Top = 39
           Width = 350
           Height = 17
           Caption = 'Use Shift+Enter to Move to Line End and Enter.'
@@ -571,7 +572,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         end
         object chkHomeExtend: TCheckBox
           Left = 8
-          Top = 140
+          Top = 134
           Width = 350
           Height = 17
           Caption = 'Extend Home to Move Between Line Head and First No-Whitespace.'
@@ -580,7 +581,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         end
         object chkHomeFirstChar: TCheckBox
           Left = 24
-          Top = 160
+          Top = 153
           Width = 329
           Height = 17
           Caption = 'Move to First No-Whitespace if not in Line Head.'
@@ -588,7 +589,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         end
         object chkSearchAgain: TCheckBox
           Left = 8
-          Top = 80
+          Top = 77
           Width = 350
           Height = 17
           Caption = 'F3/Shift+F3 to Search Selected Text.'
@@ -605,7 +606,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         end
         object chkAutoBracket: TCheckBox
           Left = 8
-          Top = 120
+          Top = 115
           Width = 350
           Height = 17
           Caption = 'Auto Input Matched Bracket and Quote (), [], {} '#39#39', "".'
@@ -613,7 +614,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         end
         object chkKeepSearch: TCheckBox
           Left = 24
-          Top = 100
+          Top = 96
           Width = 330
           Height = 17
           Caption = 'Let IDE Remember F3/Shift+F3 Search Text. '
@@ -621,7 +622,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         end
         object chkF2Rename: TCheckBox
           Left = 8
-          Top = 60
+          Top = 58
           Width = 350
           Height = 17
           Caption = 'Rename and Replace Identifier under Cursor with:'
@@ -630,7 +631,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         end
         object hkRename: THotKey
           Left = 272
-          Top = 58
+          Top = 56
           Width = 73
           Height = 19
           HotKey = 32833
@@ -640,37 +641,46 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         end
         object chkSemicolon: TCheckBox
           Left = 8
-          Top = 200
+          Top = 210
           Width = 350
           Height = 17
           Caption = 'Put to Line End when Enter ";" in Source Code.'
-          TabOrder = 10
+          TabOrder = 11
           OnClick = UpdateContent
         end
         object chkAutoEnterEnd: TCheckBox
           Left = 8
-          Top = 220
+          Top = 229
           Width = 350
           Height = 17
           Caption = 'Auto Add "end" when Pressing Enter after "begin".'
-          TabOrder = 11
+          TabOrder = 12
           OnClick = UpdateContent
         end
         object chkLeftRightWrapLine: TCheckBox
           Left = 8
-          Top = 180
+          Top = 191
           Width = 350
           Height = 17
           Caption = 'Wrap Cursor when Press Left/Right at Line Head/End.'
+          TabOrder = 10
+          OnClick = UpdateContent
+        end
+        object chkCursorBeforeEOL: TCheckBox
+          Left = 8
+          Top = 172
+          Width = 350
+          Height = 17
+          Caption = 'Keep Cursor Before End of Line.'
           TabOrder = 9
           OnClick = UpdateContent
         end
       end
       object grpAutoIndent: TGroupBox
         Left = 8
-        Top = 257
+        Top = 268
         Width = 361
-        Height = 133
+        Height = 122
         Caption = 'Auto &Indent'
         TabOrder = 1
         object lbl3: TLabel
@@ -693,7 +703,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Left = 24
           Top = 56
           Width = 325
-          Height = 64
+          Height = 54
           ScrollBars = ssVertical
           TabOrder = 1
           WordWrap = False
