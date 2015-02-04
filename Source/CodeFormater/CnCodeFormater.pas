@@ -2560,6 +2560,20 @@ end;
 procedure TCnTypeSectionFormater.FormatOrdinalType(PreSpaceCount: Byte);
 var
   Bookmark: TScannerBookmark;
+
+  procedure NextTokenWithDot;
+  begin
+    repeat
+      Scaner.NextToken;
+    until not (Scaner.Token in [tokSymbol, tokDot, tokInteger]);
+  end;
+
+  procedure MatchTokenWithDot;
+  begin
+    while Scaner.Token in [tokSymbol, tokDot] do
+      Match(Scaner.Token);
+  end;
+
 begin
   if Scaner.Token = tokLB then  // EnumeratedType
     FormatEnumeratedType(PreSpaceCount)
@@ -2568,7 +2582,8 @@ begin
     Scaner.SaveBookmark(Bookmark);
     if Scaner.Token = tokMinus then // 考虑到负号的情况
       Scaner.NextToken;
-    Scaner.NextToken;
+
+    NextTokenWithDot;
     
     if Scaner.Token = tokRange then
     begin
@@ -2582,7 +2597,8 @@ begin
       // OrdIdent
       if Scaner.Token = tokMinus then
         Match(Scaner.Token);
-      Match(Scaner.Token);
+
+      MatchTokenWithDot;
     end;
     {
     // OrdIdent
