@@ -1543,7 +1543,15 @@ var
   OnlySemicolon: Boolean;
 begin
   Match(tokKeywordOn, PreSpaceCount);
+
+  // On Exception class name allow dot
   Match(tokSymbol);
+  while Scaner.Token = tokDot do
+  begin
+    Match(Scaner.Token);
+    Match(tokSymbol);
+  end;
+
   if Scaner.Token = tokColon then
   begin
     Match(tokColon);
@@ -1886,7 +1894,7 @@ begin
 
   { TypeId -> [UnitId '.'] <type-identifier> }
   Match(tokSymbol);
-  if Scaner.Token = tokDot then
+  while Scaner.Token = tokDot do
   begin
     Match(Scaner.Token);
     Match(tokSymbol);
@@ -2230,9 +2238,16 @@ begin
   Match(tokRB);
 end;
 
-{ FormalParm -> [VAR | CONST | OUT] Parameter }
+{ FormalParm -> [Ref] [VAR | CONST | OUT] Parameter }
 procedure TCnTypeSectionFormater.FormatFormalParm(PreSpaceCount: Byte);
 begin
+  if Scaner.Token = tokSLB then
+  begin
+    Match(tokSLB);
+    Match(tokSymbol);
+    Match(tokSRB, 0, 1); // ] 后有个空格
+  end;
+
   if (Scaner.Token in [tokKeywordVar, tokKeywordConst, tokKeywordOut]) and
      not (Scaner.ForwardToken in [tokColon, tokComma])
   then
