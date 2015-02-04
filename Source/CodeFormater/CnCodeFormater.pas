@@ -2415,6 +2415,8 @@ end;
                 -> ConstructorHeading
                 -> DestructorHeading
                 -> PROCEDURE | FUNCTION InterfaceId.Ident '=' Ident
+
+                class var / class property also processed here
 }
 procedure TCnTypeSectionFormater.FormatMethodHeading(PreSpaceCount: Byte);
 begin
@@ -2423,7 +2425,9 @@ begin
     tokKeywordFunction: FormatFunctionHeading(PreSpaceCount);
     tokKeywordConstructor: FormatConstructorHeading(PreSpaceCount);
     tokKeywordDestructor: FormatDestructorHeading(PreSpaceCount);
+
     tokKeywordVar: FormatVarDeclHeading(PreSpaceCount); // class var
+    tokKeywordProperty: FormatClassProperty(PreSpaceCount); // class property
   else
     Error('MethodHeading is needed.');
   end;
@@ -4134,7 +4138,8 @@ begin
   end else
     FormatMethodHeading(PreSpaceCount);
 
-  Match(tokSemicolon);
+  if Scaner.Token = tokSemicolon then // class property already processed ;
+    Match(tokSemicolon);
 
   IsFirst := True;
   while Scaner.Token in DirectiveTokens do
