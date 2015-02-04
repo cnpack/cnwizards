@@ -481,7 +481,9 @@ function CnNtaGetCurrLineText(var Text: string; var LineNo: Integer;
   var CharIndex: Integer): Boolean;
 {* 使用 NTA 方法取当前行源代码。速度快，但取回的文本是将 Tab 扩展成空格的。
    如果使用 ConvertPos 来转换成 EditPos 可能会有问题。直接将 CharIndex + 1 
-   赋值给 EditPos.Col 即可。}
+   赋值给 EditPos.Col 即可。
+   D7以下取到的是AnsiString，BDS 非 Unicode 下取到的是 UTF8 格式的 AnsiString，
+   Unicode IDE 下取得的是 UTF16 字符串}
 function CnOtaGetCurrLineInfo(var LineNo, CharIndex, LineLen: Integer): Boolean;
 {* 返回 SourceEditor 当前行信息}
 function CnOtaGetCurrPosToken(var Token: string; var CurrIndex: Integer;
@@ -3564,6 +3566,8 @@ end;
 // 使用 NTA 方法取当前行源代码。速度快，但取回的文本是将 Tab 扩展成空格的。
 // 如果使用 ConvertPos 来转换成 EditPos 可能会有问题。直接将 CharIndex + 1
 // 赋值给 EditPos.Col 即可
+// D7以下取到的是AnsiString，BDS 非 Unicode 下取到的是 UTF8 格式的 AnsiString，
+// Unicode IDE 下取得的是 UTF16 字符串
 function CnNtaGetCurrLineText(var Text: string; var LineNo: Integer;
   var CharIndex: Integer): Boolean;
 var
@@ -3580,7 +3584,6 @@ begin
     CharIndex := Min(View.CursorPos.Col - 1, Length(Text));
     LineNo := View.CursorPos.Line;
     Result := True;
-    Exit;
   end;
 end;
 

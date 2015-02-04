@@ -2182,6 +2182,7 @@ TCnSrcEditorEnhanceForm.chkShiftEnter.Caption=Исп. Shift+Enter для пер�
 TCnSrcEditorEnhanceForm.chkHomeExtend.Caption=Исп. клав. Home для перем. между началами строк
 TCnSrcEditorEnhanceForm.chkLeftRightWrapLine.Caption=Перен. курсор при нажатии стрелок в конце/начале строки
 TCnSrcEditorEnhanceForm.chkHomeFirstChar.Caption=Перем. в своб. место, если курсор не в начале строки
+TCnSrcEditorEnhanceForm.chkCursorBeforeEOL.Caption=Держите курсор перед конца строки
 TCnSrcEditorEnhanceForm.grpAutoIndent.Caption=Авто-отступ
 TCnSrcEditorEnhanceForm.chkAutoIndent.Caption=Авто-отступ для идентификаторов в Delphi или '{' в C файле
 TCnSrcEditorEnhanceForm.grpAutoSave.Caption=Авто-сохранение
