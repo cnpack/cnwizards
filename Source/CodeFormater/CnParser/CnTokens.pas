@@ -133,8 +133,9 @@ type
     tokKeywordNot,
     tokKeywordObject,
     tokKeywordOf,
-    tokKeywordOr,
     tokKeywordOn,
+    tokKeywordOperator,
+    tokKeywordOr,
     tokKeywordOut,
     tokKeywordPacked,
     tokKeywordPrivate,
@@ -260,7 +261,7 @@ const
     tokKeywordFile, tokKeywordRecord];
 
   ClassMethodTokens = [tokKeywordClass, tokKeywordProcedure, tokKeywordFunction,
-    tokKeywordConstructor, tokKeywordDestructor];
+    tokKeywordConstructor, tokKeywordDestructor, tokKeywordOperator];
 
   ClassVisibilityTokens = [tokKeywordPublic, tokKeywordPublished, tokKeywordStrict,
     tokKeywordProtected, tokKeywordPrivate];
@@ -411,8 +412,9 @@ const
     (Value: Integer(tokKeywordNot);            Name: 'Not'),
     (Value: Integer(tokKeywordObject);         Name: 'Object'),
     (Value: Integer(tokKeywordOf);             Name: 'Of'),
-    (Value: Integer(tokKeywordOr);             Name: 'Or'),
     (Value: Integer(tokKeywordOn);             Name: 'On'),
+    (Value: Integer(tokKeywordOr);             Name: 'Or'),
+    (Value: Integer(tokKeywordOperator);       Name: 'Operator'),
     (Value: Integer(tokKeywordOut);            Name: 'Out'),
     (Value: Integer(tokKeywordPacked);         Name: 'Packed'),
     (Value: Integer(tokKeywordPrivate);        Name: 'Private'),

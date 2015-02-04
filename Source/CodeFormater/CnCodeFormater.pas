@@ -201,6 +201,7 @@ type
     procedure FormatMethodHeading(PreSpaceCount: Byte = 0);
     procedure FormatConstructorHeading(PreSpaceCount: Byte = 0);
     procedure FormatDestructorHeading(PreSpaceCount: Byte = 0);
+    procedure FormatOperatorHeading(PreSpaceCount: Byte = 0);
     procedure FormatVarDeclHeading(PreSpaceCount: Byte = 0);
     procedure FormatObjFieldList(PreSpaceCount: Byte = 0);
     procedure FormatClassType(PreSpaceCount: Byte = 0);
@@ -2047,6 +2048,16 @@ begin
     FormatFormalParameters;
 end;
 
+{ OperatorHeading -> OPERATOR Ident [FormalParameters] }
+procedure TCnTypeSectionFormater.FormatOperatorHeading(PreSpaceCount: Byte);
+begin
+  Match(tokKeywordOperator, PreSpaceCount);
+  FormatMethodName;
+
+  if Scaner.Token = tokLB then
+    FormatFormalParameters;
+end;
+
 { VarDecl -> IdentList ':' Type [(ABSOLUTE (Ident | ConstExpr)) | '=' TypedConstant] }
 procedure TCnTypeSectionFormater.FormatVarDeclHeading(PreSpaceCount: Byte);
 begin
@@ -2325,10 +2336,15 @@ begin
   if Scaner.Token = tokKeywordClass then
   begin
     Match(tokKeywordClass, PreSpaceCount); // class 后无需再手工加空格
-    Match(tokKeywordFunction);
-  end else
-    Match(tokKeywordFunction, PreSpaceCount);
-
+    if Scaner.Token in [tokKeywordFunction, tokKeywordOperator] then
+      Match(Scaner.Token);
+  end
+  else
+  begin
+    if Scaner.Token in [tokKeywordFunction, tokKeywordOperator] then
+      Match(Scaner.Token, PreSpaceCount);
+  end;
+  
   {!! Fixed. e.g. "const proc: procedure = nil;" }
   if Scaner.Token in [tokSymbol] + ComplexTokens + DirectiveTokens
     + KeywordTokens then // 函数名允许出现关键字
@@ -2447,8 +2463,8 @@ begin
     tokKeywordFunction: FormatFunctionHeading(PreSpaceCount);
     tokKeywordConstructor: FormatConstructorHeading(PreSpaceCount);
     tokKeywordDestructor: FormatDestructorHeading(PreSpaceCount);
-
-    tokKeywordVar: FormatVarDeclHeading(PreSpaceCount); // class var
+    tokKeywordOperator: FormatOperatorHeading(PreSpaceCount); // class operator
+    tokKeywordVar: FormatVarDeclHeading(PreSpaceCount);     // class var
     tokKeywordProperty: FormatClassProperty(PreSpaceCount); // class property
   else
     Error('MethodHeading is needed.');
@@ -3753,7 +3769,7 @@ begin
       FormatProcedureDecl(PreSpaceCount);
     end;
 
-    tokKeywordFunction:
+    tokKeywordFunction, tokKeywordOperator:
     begin
       Scaner.LoadBookmark(Bookmark);
       FormatFunctionDecl(PreSpaceCount);
@@ -4153,7 +4169,7 @@ begin
   begin
     case Scaner.Token of
       tokKeywordProcedure, tokKeywordFunction, tokKeywordConstructor,
-      tokKeywordDestructor, tokKeywordClass:
+      tokKeywordDestructor, tokKeywordOperator, tokKeywordClass:
         FormatClassMethod(PreSpaceCount);
 
       tokKeywordProperty:
