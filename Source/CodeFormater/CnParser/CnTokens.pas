@@ -265,7 +265,8 @@ const
   ClassVisibilityTokens = [tokKeywordPublic, tokKeywordPublished, tokKeywordStrict,
     tokKeywordProtected, tokKeywordPrivate];
 
-  ClassMemberTokens = [tokSymbol, tokKeywordProperty, tokKeywordClass, tokKeywordType] + ClassMethodTokens;
+  ClassMemberTokens = [tokSymbol, tokKeywordProperty, tokKeywordClass,
+    tokKeywordType, tokKeywordConst] + ClassMethodTokens;
 
   PropertySpecifiersTokens = [tokDirectiveDispid, tokComplexRead, tokComplexIndex,
     tokComplexWrite, tokComplexStored, tokComplexImplements, tokComplexDefault,

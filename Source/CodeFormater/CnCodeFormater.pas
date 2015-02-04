@@ -215,6 +215,8 @@ type
     procedure FormatClassMethod(PreSpaceCount: Byte = 0);
     procedure FormatClassProperty(PreSpaceCount: Byte = 0);
     procedure FormatClassTypeSection(PreSpaceCount: Byte = 0);
+    procedure FormatClassConstSection(PreSpaceCount: Byte = 0);
+    procedure FormatClassConstantDecl(PreSpaceCount: Byte = 0);
 
     // orgin grammer
     procedure FormatClassFieldList(PreSpaceCount: Byte = 0);
@@ -2203,6 +2205,11 @@ begin
       FormatClassTypeSection(PreSpaceCount);
       Writeln;
     end
+    else if Scaner.Token = tokKeywordConst then
+    begin
+      FormatClassConstSection(PreSpaceCount);
+      Writeln;
+    end
     else
     begin
       if First and IgnoreFirst then
@@ -2950,6 +2957,15 @@ end;
 procedure TCnTypeSectionFormater.FormatRecType(PreSpaceCount: Byte);
 begin
   Match(tokKeywordRecord);
+
+  // record helper for Ident
+  if (Scaner.Token = tokSymbol) and (LowerCase(Scaner.TokenString) = 'helper')
+    and (Scaner.ForwardToken = tokKeywordFor) then
+  begin
+    Match(Scaner.Token);
+    Match(tokKeywordFor);
+    FormatIdent(0);
+  end;
   Writeln;
 
   if Scaner.Token <> tokKeywordEnd then
@@ -4109,6 +4125,8 @@ begin
         FormatClassProperty(PreSpaceCount);
       tokKeywordType:
         FormatClassTypeSection(PreSpaceCount);
+      tokKeywordConst:
+        FormatClassConstSection(PreSpaceCount);
     else // 其他的都算 symbol
       FormatClassField(PreSpaceCount);
     end;
@@ -4223,6 +4241,48 @@ begin
     Match(tokDot);
     FormatTypeParamIdent;
   end;
+end;
+
+procedure TCnTypeSectionFormater.FormatClassConstSection(
+  PreSpaceCount: Byte);
+begin
+  Match(tokKeywordConst, PreSpaceCount);
+
+  while Scaner.Token in [tokSymbol] + ComplexTokens + DirectiveTokens + KeywordTokens
+   - NOTExpressionTokens do // 这些关键字不宜做变量名但也不好处理，只有先写上
+  begin
+    Writeln;
+    FormatClassConstantDecl(Tab(PreSpaceCount));
+    Match(tokSemicolon);
+  end;
+end;
+
+procedure TCnTypeSectionFormater.FormatClassConstantDecl(PreSpaceCount: Byte);
+begin
+  FormatIdent(PreSpaceCount);
+
+  case Scaner.Token of
+    tokEQUAL:
+      begin
+        Match(Scaner.Token, 1); // 等号前空一格
+        FormatConstExpr(1); // 等号后只空一格
+      end;
+
+    tokColon: // 无法直接区分 record/array/普通常量方式的初始化，需要内部解析
+      begin
+        Match(Scaner.Token);
+
+        FormatType;
+        Match(tokEQUAL, 1, 1); // 等号前后空一格
+
+        FormatTypedConstant; // 等号后空一格
+      end;
+  else
+    Error(' = or : is needed'); 
+  end;
+
+  while Scaner.Token in DirectiveTokens do
+    FormatDirective;
 end;
 
 end.
