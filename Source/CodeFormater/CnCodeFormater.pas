@@ -201,6 +201,7 @@ type
     procedure FormatMethodHeading(PreSpaceCount: Byte = 0);
     procedure FormatConstructorHeading(PreSpaceCount: Byte = 0);
     procedure FormatDestructorHeading(PreSpaceCount: Byte = 0);
+    procedure FormatVarDeclHeading(PreSpaceCount: Byte = 0);
     procedure FormatObjFieldList(PreSpaceCount: Byte = 0);
     procedure FormatClassType(PreSpaceCount: Byte = 0);
     procedure FormatClassHeritage(PreSpaceCount: Byte = 0);
@@ -2034,6 +2035,32 @@ begin
     FormatFormalParameters;
 end;
 
+{ VarDecl -> IdentList ':' Type [(ABSOLUTE (Ident | ConstExpr)) | '=' TypedConstant] }
+procedure TCnTypeSectionFormater.FormatVarDeclHeading(PreSpaceCount: Byte);
+begin
+  Match(tokKeywordVar);
+  FormatIdentList(PreSpaceCount);
+  if Scaner.Token = tokColon then // 放宽语法限制
+  begin
+    Match(tokColon);
+    FormatType(PreSpaceCount); // 长 Type 可能换行，必须传入
+  end;
+
+  if Scaner.Token = tokEQUAL then
+  begin
+    Match(Scaner.Token, 1, 1);
+    FormatTypedConstant;
+  end
+  else if Scaner.TokenSymbolIs('ABSOLUTE') then
+  begin
+    Match(Scaner.Token);
+    FormatConstExpr; // include indent
+  end;
+
+  while Scaner.Token in DirectiveTokens do
+    FormatDirective;
+end;
+
 {
   Directive -> CDECL
             -> REGISTER
@@ -2396,6 +2423,7 @@ begin
     tokKeywordFunction: FormatFunctionHeading(PreSpaceCount);
     tokKeywordConstructor: FormatConstructorHeading(PreSpaceCount);
     tokKeywordDestructor: FormatDestructorHeading(PreSpaceCount);
+    tokKeywordVar: FormatVarDeclHeading(PreSpaceCount); // class var
   else
     Error('MethodHeading is needed.');
   end;
@@ -4157,7 +4185,7 @@ begin
   begin
     Match(tokDot);
     FormatTypeParamIdent;
-  end;  
+  end;
 end;
 
 end.
