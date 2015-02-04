@@ -308,7 +308,8 @@ const
     tokKeywordDestructor, tokKeywordAsm];
 
   NOTClassTypeTokens = [tokKeywordPrivate, tokKeywordProtected, tokKeywordPublic,
-    tokKeywordPublished, tokKeywordStrict, tokKeywordClass];
+    tokKeywordPublished, tokKeywordStrict, tokKeywordClass, tokKeywordProcedure,
+    tokKeywordFunction, tokKeywordVar, tokKeywordConstructor, tokKeywordDestructor];
 
   function TokenToString(Token: TPascalToken): string;
   function StringToToken(TokenStr: string): TPascalToken;

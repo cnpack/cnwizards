@@ -2198,6 +2198,11 @@ begin
       FormatClassProperty(PreSpaceCount);
       Writeln;
     end
+    else if Scaner.Token = tokKeywordType then
+    begin
+      FormatClassTypeSection(PreSpaceCount);
+      Writeln;
+    end
     else
     begin
       if First and IgnoreFirst then
@@ -2947,7 +2952,10 @@ begin
   Match(tokKeywordRecord);
   Writeln;
 
-  FormatClassMemberList(PreSpaceCount);
+  if Scaner.Token <> tokKeywordEnd then
+    FormatFieldList(Tab(PreSpaceCount));
+
+//  FormatClassMemberList(PreSpaceCount); Classmember do not know 'case'
 
   Match(tokKeywordEnd, PreSpaceCount);
 end;
