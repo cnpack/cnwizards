@@ -1945,24 +1945,33 @@ end;
 
   or a class ref type
     TFoo = class of TBar;
+
+  or a class helper
+    TFoo = class helper for TBar
   =============Cut End==============
 }
 procedure TCnTypeSectionFormater.FormatClassType(PreSpaceCount: Byte);
 begin
   Match(tokKeywordClass);
-  
-  case Scaner.Token of
-    tokKeywordOF:  // like TFoo = class of TBar;
-      begin
-        Match(tokKeywordOF);
-        FormatIdent;
-        Exit;
-      end;
-      
-    tokSemiColon: Exit; // class declare forward, like TFoo = class;
-  else
-    FormatClassBody(PreSpaceCount);
+  if Scaner.Token = tokSemiColon then // class declare forward, like TFoo = class;
+    Exit;
+
+  if Scaner.Token = tokKeywordOF then  // like TFoo = class of TBar;
+  begin
+    Match(tokKeywordOF);
+    FormatIdent;
+    Exit;
+  end
+  else if (Scaner.Token = tokSymbol) and (Scaner.ForwardToken = tokKeywordFor)
+    and (LowerCase(Scaner.TokenString) = 'helper') then
+  begin
+    // class helper for Ident
+    Match(Scaner.Token);
+    Match(tokKeywordFor);
+    FormatIdent(0);
   end;
+  
+  FormatClassBody(PreSpaceCount);
 
 {
   while Scaner.Token <> tokKeywordEnd do
@@ -2959,8 +2968,8 @@ begin
   Match(tokKeywordRecord);
 
   // record helper for Ident
-  if (Scaner.Token = tokSymbol) and (LowerCase(Scaner.TokenString) = 'helper')
-    and (Scaner.ForwardToken = tokKeywordFor) then
+  if (Scaner.Token = tokSymbol) and (Scaner.ForwardToken = tokKeywordFor)
+    and (LowerCase(Scaner.TokenString) = 'helper') then
   begin
     Match(Scaner.Token);
     Match(tokKeywordFor);
