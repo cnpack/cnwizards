@@ -308,7 +308,7 @@ const
     tokKeywordEnd, tokKeywordLabel, tokKeywordExports, tokKeywordConstructor,
     tokKeywordDestructor, tokKeywordAsm];
 
-  NOTClassTypeTokens = [tokKeywordPrivate, tokKeywordProtected, tokKeywordPublic,
+  NOTClassTypeConstTokens = [tokKeywordPrivate, tokKeywordProtected, tokKeywordPublic,
     tokKeywordPublished, tokKeywordStrict, tokKeywordClass, tokKeywordProcedure,
     tokKeywordFunction, tokKeywordVar, tokKeywordConstructor, tokKeywordDestructor];
 

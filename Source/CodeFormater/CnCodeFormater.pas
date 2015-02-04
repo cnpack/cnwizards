@@ -3115,6 +3115,8 @@ end;
        -> ProcedureType
        -> VariantType
        -> ClassRefType
+
+       -> reference to ProcedureType
 }
 procedure TCnTypeSectionFormater.FormatType(PreSpaceCount: Byte;
   IgnoreDirective: Boolean);
@@ -3122,6 +3124,14 @@ var
   Bookmark: TScannerBookmark;
   AToken, OldLastToken: TPascalToken;
 begin
+  if (Scaner.Token = tokSymbol) and (Scaner.ForwardToken = tokKeywordTo) and
+    (LowerCase(Scaner.TokenString) = 'reference') then
+  begin
+    // Anonymous Declaration
+    Match(Scaner.Token);
+    Match(tokKeywordTo);
+  end;
+
   case Scaner.Token of // 此三类无需换行，因此无需传入 PreSpaceCount
     tokKeywordProcedure, tokKeywordFunction: FormatProcedureType();
     tokHat: FormatPointerType();
@@ -4229,7 +4239,7 @@ begin
 
   FirstType := True;
   while Scaner.Token in [tokSymbol] + ComplexTokens + DirectiveTokens
-   + KeywordTokens - NOTExpressionTokens - NOTClassTypeTokens do
+   + KeywordTokens - NOTExpressionTokens - NOTClassTypeConstTokens do
   begin
     if not FirstType then WriteLine;
     FormatTypeDecl(Tab(PreSpaceCount));
@@ -4258,7 +4268,7 @@ begin
   Match(tokKeywordConst, PreSpaceCount);
 
   while Scaner.Token in [tokSymbol] + ComplexTokens + DirectiveTokens + KeywordTokens
-   - NOTExpressionTokens do // 这些关键字不宜做变量名但也不好处理，只有先写上
+   - NOTExpressionTokens - NOTClassTypeConstTokens do // 这些关键字不宜做变量名但也不好处理，只有先写上
   begin
     Writeln;
     FormatClassConstantDecl(Tab(PreSpaceCount));
