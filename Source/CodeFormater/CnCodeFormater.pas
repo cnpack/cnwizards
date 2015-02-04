@@ -214,6 +214,7 @@ type
     procedure FormatClassField(PreSpaceCount: Byte = 0);
     procedure FormatClassMethod(PreSpaceCount: Byte = 0);
     procedure FormatClassProperty(PreSpaceCount: Byte = 0);
+    procedure FormatClassTypeSection(PreSpaceCount: Byte = 0);
 
     // orgin grammer
     procedure FormatClassFieldList(PreSpaceCount: Byte = 0);
@@ -2946,8 +2947,7 @@ begin
   Match(tokKeywordRecord);
   Writeln;
 
-  if Scaner.Token <> tokKeywordEnd then
-    FormatFieldList(Tab(PreSpaceCount));
+  FormatClassMemberList(PreSpaceCount);
 
   Match(tokKeywordEnd, PreSpaceCount);
 end;
@@ -4099,6 +4099,8 @@ begin
 
       tokKeywordProperty:
         FormatClassProperty(PreSpaceCount);
+      tokKeywordType:
+        FormatClassTypeSection(PreSpaceCount);
     else // 其他的都算 symbol
       FormatClassField(PreSpaceCount);
     end;
@@ -4178,6 +4180,28 @@ begin
   begin
     Match(Scaner.Token);
     Match(tokSemiColon);
+  end;
+end;
+
+// class/record 内的 type 声明，对结束判断不一样。
+procedure TCnTypeSectionFormater.FormatClassTypeSection(
+  PreSpaceCount: Byte);
+var
+  FirstType: Boolean;
+begin
+  Match(tokKeywordType, PreSpaceCount);
+  Writeln;
+
+  FirstType := True;
+  while Scaner.Token in [tokSymbol] + ComplexTokens + DirectiveTokens
+   + KeywordTokens - NOTExpressionTokens - NOTClassTypeTokens do
+  begin
+    if not FirstType then WriteLine;
+    FormatTypeDecl(Tab(PreSpaceCount));
+    while Scaner.Token in DirectiveTokens do
+      FormatDirective;
+    Match(tokSemicolon);
+    FirstType := False;
   end;
 end;
 

@@ -265,7 +265,7 @@ const
   ClassVisibilityTokens = [tokKeywordPublic, tokKeywordPublished, tokKeywordStrict,
     tokKeywordProtected, tokKeywordPrivate];
 
-  ClassMemberTokens = [tokSymbol, tokKeywordProperty, tokKeywordClass] + ClassMethodTokens;
+  ClassMemberTokens = [tokSymbol, tokKeywordProperty, tokKeywordClass, tokKeywordType] + ClassMethodTokens;
 
   PropertySpecifiersTokens = [tokDirectiveDispid, tokComplexRead, tokComplexIndex,
     tokComplexWrite, tokComplexStored, tokComplexImplements, tokComplexDefault,
@@ -306,6 +306,9 @@ const
     tokKeywordThreadvar, tokKeywordClass, tokKeywordType, tokKeywordBegin,
     tokKeywordEnd, tokKeywordLabel, tokKeywordExports, tokKeywordConstructor,
     tokKeywordDestructor, tokKeywordAsm];
+
+  NOTClassTypeTokens = [tokKeywordPrivate, tokKeywordProtected, tokKeywordPublic,
+    tokKeywordPublished, tokKeywordStrict, tokKeywordClass];
 
   function TokenToString(Token: TPascalToken): string;
   function StringToToken(TokenStr: string): TPascalToken;
