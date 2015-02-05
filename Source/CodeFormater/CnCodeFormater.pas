@@ -2308,21 +2308,31 @@ begin
     begin
       FormatClassMethod(PreSpaceCount);
       Writeln;
+      First := False;
     end
     else if Scaner.Token = tokKeywordProperty then
     begin
       FormatClassProperty(PreSpaceCount);
       Writeln;
+      First := False;
     end
     else if Scaner.Token = tokKeywordType then
     begin
       FormatClassTypeSection(PreSpaceCount);
       Writeln;
+      First := False;
+    end
+    else if Scaner.Token in [tokKeywordVar, tokKeywordThreadVar] then
+    begin
+      FormatVarSection(PreSpaceCount);
+      Writeln;
+      First := False;
     end
     else if Scaner.Token = tokKeywordConst then
     begin
       FormatClassConstSection(PreSpaceCount);
       Writeln;
+      First := False;
     end
     else
     begin
