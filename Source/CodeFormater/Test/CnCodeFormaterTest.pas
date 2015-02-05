@@ -131,7 +131,7 @@ end;
 
 procedure TMainForm.btnFormatClick(Sender: TObject);
 var
-  FCodeFor: TCnPascalCodeFormater;
+  FCodeFor: TCnPascalCodeFormatter;
   MemStr: TMemoryStream;
 begin
   CnPascalCodeForRule.TabSpaceCount := UpDown1.Position;
@@ -139,7 +139,7 @@ begin
 
   MemStr := TMemoryStream.Create;
   SrcMemo.Lines.SaveToStream(MemStr);
-  FCodeFor := TCnPascalCodeFormater.Create(MemStr);
+  FCodeFor := TCnPascalCodeFormatter.Create(MemStr);
 
   try
     try
@@ -265,7 +265,7 @@ end;
 procedure TMainForm.btnGoClick(Sender: TObject);
 var
   I: Integer;
-  FCodeFor: TCnPascalCodeFormater;
+  FCodeFor: TCnPascalCodeFormatter;
   FileStr: TFileStream;
 begin
   FileStr := nil;
@@ -284,7 +284,7 @@ begin
 
     if not Assigned(FileStr) then Continue;
     
-    FCodeFor := TCnPascalCodeFormater.Create(FileStr);
+    FCodeFor := TCnPascalCodeFormatter.Create(FileStr);
     try
       try
         FCodeFor.FormatCode;

@@ -1,7 +1,7 @@
 {******************************************************************************}
 {                       CnPack For Delphi/C++Builder                           }
 {                     中国人自己的开放源码第三方开发包                         }
-{                   (C)Copyright 2001-2015 CnPack 开发组                       }    
+{                   (C)Copyright 2001-2015 CnPack 开发组                       }
 {                   ------------------------------------                       }
 {                                                                              }
 {            本开发包是开源的自由软件，您可以遵照 CnPack 的发布协议来修        }
@@ -43,7 +43,7 @@ uses
   CnCodeFormatRules;
 
 type
-  TCnAbstractCodeFormater = class
+  TCnAbstractCodeFormatter = class
   private
     FScaner: TAbstractScaner;
     FCodeGen: TCnCodeGenerator;
@@ -100,11 +100,11 @@ type
     procedure SaveToStrings(AStrings: TStrings);
   end;
 
-  TCnExpressionFormater = class(TCnAbstractCodeFormater)
+  TCnBasePascalFormatter = class(TCnAbstractCodeFormatter)
   protected
-    procedure FormatExprList(PreSpaceCount: Byte = 0);
-    procedure FormatExpression(PreSpaceCount: Byte = 0);
-    procedure FormatSimpleExpression(PreSpaceCount: Byte = 0);
+    procedure FormatExprList(PreSpaceCount: Byte = 0; CurrentIndent: Byte = 0);
+    procedure FormatExpression(PreSpaceCount: Byte = 0; CurrentIndent: Byte = 0);
+    procedure FormatSimpleExpression(PreSpaceCount: Byte = 0; CurrentIndent: Byte = 0);
     procedure FormatTerm(PreSpaceCount: Byte = 0);
     procedure FormatFactor(PreSpaceCount: Byte = 0);
     procedure FormatDesignator(PreSpaceCount: Byte = 0);
@@ -125,14 +125,27 @@ type
     procedure FormatTypeParamList(PreSpaceCount: Byte = 0);
     procedure FormatTypeParamIdentList(PreSpaceCount: Byte = 0);
     procedure FormatTypeParamIdent(PreSpaceCount: Byte = 0);
-  public
-    procedure FormatCode(PreSpaceCount: Byte = 0); override;
-  end;
 
-  TCnStatementFormater = class(TCnExpressionFormater)
-  protected
+    // Anonymouse function support moving
+    procedure FormatProcedureDecl(PreSpaceCount: Byte = 0);
+    procedure FormatFunctionDecl(PreSpaceCount: Byte = 0);
+    {* 用 AllowEqual 区分 ProcType 和 ProcDecl 可否带等于号的情形}
+    procedure FormatFunctionHeading(PreSpaceCount: Byte = 0; AllowEqual: Boolean = True);
+    procedure FormatProcedureHeading(PreSpaceCount: Byte = 0; AllowEqual: Boolean = True);
+    procedure FormatMethodName(PreSpaceCount: Byte = 0);
+    procedure FormatFormalParameters(PreSpaceCount: Byte = 0);
+    procedure FormatFormalParm(PreSpaceCount: Byte = 0);
+    procedure FormatParameter(PreSpaceCount: Byte = 0);
+    procedure FormatSimpleType(PreSpaceCount: Byte = 0);
+    procedure FormatSubrangeType(PreSpaceCount: Byte = 0);
+    procedure FormatDirective(PreSpaceCount: Byte = 0; IgnoreFirst: Boolean = False);
+    procedure FormatBlock(PreSpaceCount: Byte = 0; IsInternal: Boolean = False);
+    procedure FormatDeclSection(PreSpaceCount: Byte; IndentProcs: Boolean = True;
+      IsInternal: Boolean = False);
+
     procedure FormatCompoundStmt(PreSpaceCount: Byte = 0);
     procedure FormatStmtList(PreSpaceCount: Byte = 0);
+    procedure FormatAsmBlock(PreSpaceCount: Byte = 0);
     procedure FormatStatement(PreSpaceCount: Byte = 0);
     procedure FormatLabel(PreSpaceCount: Byte = 0);
     procedure FormatSimpleStatement(PreSpaceCount: Byte = 0);
@@ -150,26 +163,23 @@ type
     procedure FormatTryEnd(PreSpaceCount: Byte = 0);
     procedure FormatExceptionHandler(PreSpaceCount: Byte = 0);
     procedure FormatRaiseStmt(PreSpaceCount: Byte = 0);
-    procedure FormatAsmBlock(PreSpaceCount: Byte = 0);
-  public
-    procedure FormatCode(PreSpaceCount: Byte = 0); override;
-  end;
 
-  TCnTypeSectionFormater = class(TCnStatementFormater)
-  protected
-    procedure FormatTypeSection(PreSpaceCount: Byte = 0);
-    procedure FormatTypeDecl(PreSpaceCount: Byte = 0);
-    procedure FormatTypedConstant(PreSpaceCount: Byte = 0);
+    procedure FormatLabelDeclSection(PreSpaceCount: Byte = 0);
+    procedure FormatConstSection(PreSpaceCount: Byte = 0);
+    procedure FormatConstantDecl(PreSpaceCount: Byte = 0);
+    procedure FormatVarSection(PreSpaceCount: Byte = 0);
+    procedure FormatVarDecl(PreSpaceCount: Byte = 0);
+    procedure FormatProcedureDeclSection(PreSpaceCount: Byte = 0);
 
-    procedure FormatArrayConstant(PreSpaceCount: Byte = 0);
-    procedure FormatRecordConstant(PreSpaceCount: Byte = 0);
-    procedure FormatRecordFieldConstant(PreSpaceCount: Byte = 0);
     procedure FormatType(PreSpaceCount: Byte = 0; IgnoreDirective: Boolean = False);
+    procedure FormatSetType(PreSpaceCount: Byte = 0);
+    procedure FormatFileType(PreSpaceCount: Byte = 0);
+    procedure FormatPointerType(PreSpaceCount: Byte = 0);
+    procedure FormatProcedureType(PreSpaceCount: Byte = 0);
+
     procedure FormatRestrictedType(PreSpaceCount: Byte = 0);
     procedure FormatClassRefType(PreSpaceCount: Byte = 0);
-    procedure FormatSimpleType(PreSpaceCount: Byte = 0);
     procedure FormatOrdinalType(PreSpaceCount: Byte = 0);
-    procedure FormatSubrangeType(PreSpaceCount: Byte = 0);
     procedure FormatEnumeratedType(PreSpaceCount: Byte = 0);
     procedure FormatEnumeratedList(PreSpaceCount: Byte = 0);
     procedure FormatEmumeratedIdent(PreSpaceCount: Byte = 0);
@@ -178,23 +188,19 @@ type
     procedure FormatArrayType(PreSpaceCount: Byte = 0);
     procedure FormatRecType(PreSpaceCount: Byte = 0);
     procedure FormatFieldList(PreSpaceCount: Byte = 0; IgnoreFirst: Boolean = False);
+    procedure FormatTypeSection(PreSpaceCount: Byte = 0);
+    procedure FormatTypeDecl(PreSpaceCount: Byte = 0);
+    procedure FormatTypedConstant(PreSpaceCount: Byte = 0);
+
+    procedure FormatArrayConstant(PreSpaceCount: Byte = 0);
+    procedure FormatRecordConstant(PreSpaceCount: Byte = 0);
+    procedure FormatRecordFieldConstant(PreSpaceCount: Byte = 0);
+
     {* 处理 record 中 case 内部的首行无需缩进的问题}
     procedure FormatFieldDecl(PreSpaceCount: Byte = 0);
     procedure FormatVariantSection(PreSpaceCount: Byte = 0);
     procedure FormatRecVariant(PreSpaceCount: Byte = 0; IgnoreFirst: Boolean = False);
-    {* 处理 record 中 case 内部的首行无需缩进的问题}
-    procedure FormatSetType(PreSpaceCount: Byte = 0);
-    procedure FormatFileType(PreSpaceCount: Byte = 0);
-    procedure FormatPointerType(PreSpaceCount: Byte = 0);
-    procedure FormatProcedureType(PreSpaceCount: Byte = 0);
-    procedure FormatFunctionHeading(PreSpaceCount: Byte = 0; AllowEqual: Boolean = True);
-    procedure FormatProcedureHeading(PreSpaceCount: Byte = 0; AllowEqual: Boolean = True);
-    {* 用 AllowEqual 区分 ProcType 和 ProcDecl 可否带等于号的情形}
-    procedure FormatMethodName(PreSpaceCount: Byte = 0);
-    procedure FormatFormalParameters(PreSpaceCount: Byte = 0);
-    procedure FormatFormalParm(PreSpaceCount: Byte = 0);
-    procedure FormatParameter(PreSpaceCount: Byte = 0);
-    procedure FormatDirective(PreSpaceCount: Byte = 0; IgnoreFirst: Boolean = False);
+
     procedure FormatObjectType(PreSpaceCount: Byte = 0);
     procedure FormatObjHeritage(PreSpaceCount: Byte = 0);
     procedure FormatMethodList(PreSpaceCount: Byte = 0);
@@ -225,44 +231,48 @@ type
     procedure FormatClassFieldList(PreSpaceCount: Byte = 0);
     procedure FormatClassMethodList(PreSpaceCount: Byte = 0);
     procedure FormatClassPropertyList(PreSpaceCount: Byte = 0);
-    
+
     procedure FormatPropertyList(PreSpaceCount: Byte = 0);
     procedure FormatPropertyInterface(PreSpaceCount: Byte = 0);
     procedure FormatPropertyParameterList(PreSpaceCount: Byte = 0);
-    procedure FormatPropertySpecifiers(PreSpaceCount: Byte = 0);    
+    procedure FormatPropertySpecifiers(PreSpaceCount: Byte = 0);
     procedure FormatInterfaceType(PreSpaceCount: Byte = 0);
     procedure FormatGuid(PreSpaceCount: Byte = 0);
     procedure FormatInterfaceHeritage(PreSpaceCount: Byte = 0);
     procedure FormatRequiresClause(PreSpaceCount: Byte = 0);
     procedure FormatContainsClause(PreSpaceCount: Byte = 0);
+
+    procedure FormatLabelID(PreSpaceCount: Byte = 0);
+    procedure FormatExportsSection(PreSpaceCount: Byte = 0);
+    procedure FormatExportsList(PreSpaceCount: Byte = 0);
+    procedure FormatExportsDecl(PreSpaceCount: Byte = 0);
+  public
+    procedure FormatCode(PreSpaceCount: Byte = 0); override;
+  end;
+
+  TCnStatementFormatter = class(TCnBasePascalFormatter)
+  protected
+
+  public
+    procedure FormatCode(PreSpaceCount: Byte = 0); override;
+  end;
+
+  TCnTypeSectionFormater = class(TCnStatementFormatter)
+  protected
+
     //procedure FormatTypeID(PreSpaceCount: Byte = 0);
   end;
 
-  TCnProgramBlockFormater = class(TCnTypeSectionFormater)
+  TCnProgramBlockFormatter = class(TCnTypeSectionFormater)
   protected
     procedure FormatProgramBlock(PreSpaceCount: Byte = 0);
     procedure FormatUsesClause(PreSpaceCount: Byte = 0; const NeedCRLF: Boolean = False);
     procedure FormatUsesList(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = True;
       const NeedCRLF: Boolean = False);
     procedure FormatUsesDecl(PreSpaceCount: Byte; const CanHaveUnitQual: Boolean = True);
-    procedure FormatBlock(PreSpaceCount: Byte = 0; IsInternal: Boolean = False);
-    procedure FormatDeclSection(PreSpaceCount: Byte; IndentProcs: Boolean = True;
-      IsInternal: Boolean = False);
-    procedure FormatLabelDeclSection(PreSpaceCount: Byte = 0);
-    procedure FormatConstSection(PreSpaceCount: Byte = 0);
-    procedure FormatConstantDecl(PreSpaceCount: Byte = 0);
-    procedure FormatVarSection(PreSpaceCount: Byte = 0);
-    procedure FormatVarDecl(PreSpaceCount: Byte = 0);
-    procedure FormatProcedureDeclSection(PreSpaceCount: Byte = 0);
-    procedure FormatProcedureDecl(PreSpaceCount: Byte = 0);
-    procedure FormatFunctionDecl(PreSpaceCount: Byte = 0);
-    procedure FormatLabelID(PreSpaceCount: Byte = 0);
-    procedure FormatExportsSection(PreSpaceCount: Byte = 0);
-    procedure FormatExportsList(PreSpaceCount: Byte = 0);
-    procedure FormatExportsDecl(PreSpaceCount: Byte = 0);
   end;
 
-  TCnGoalCodeFormater = class(TCnProgramBlockFormater)
+  TCnGoalCodeFormatter = class(TCnProgramBlockFormatter)
   protected
     procedure FormatGoal(PreSpaceCount: Byte = 0);
     procedure FormatProgram(PreSpaceCount: Byte = 0);
@@ -277,7 +287,7 @@ type
     procedure FormatCode(PreSpaceCount: Byte = 0); override;
   end;
 
-  TCnPascalCodeFormater = class(TCnGoalCodeFormater);
+  TCnPascalCodeFormatter = class(TCnGoalCodeFormatter);
 
 implementation
 
@@ -286,41 +296,41 @@ uses
 
 { TCnAbstractCodeFormater }
 
-function TCnAbstractCodeFormater.CheckFunctionName(S: string): string;
+function TCnAbstractCodeFormatter.CheckFunctionName(S: string): string;
 begin
   { TODO: Check the S with functon name e.g. ShowMessage }
   Result := S;
 end;
 
-constructor TCnAbstractCodeFormater.Create(AStream: TStream);
+constructor TCnAbstractCodeFormatter.Create(AStream: TStream);
 begin
   FCodeGen := TCnCodeGenerator.Create;
   FScaner := TScaner.Create(AStream, FCodeGen);
 end;
 
-destructor TCnAbstractCodeFormater.Destroy;
+destructor TCnAbstractCodeFormatter.Destroy;
 begin
   FScaner.Free;
   inherited;
 end;
 
-procedure TCnAbstractCodeFormater.Error(const Ident: string);
+procedure TCnAbstractCodeFormatter.Error(const Ident: string);
 begin
   ErrorStr(Ident);
 end;
 
-procedure TCnAbstractCodeFormater.ErrorFmt(const Ident: string;
+procedure TCnAbstractCodeFormatter.ErrorFmt(const Ident: string;
   const Args: array of const);
 begin
   ErrorStr(Format(Ident, Args));
 end;
 
-procedure TCnAbstractCodeFormater.ErrorNotSurpport(FurtureStr: string);
+procedure TCnAbstractCodeFormatter.ErrorNotSurpport(FurtureStr: string);
 begin
   ErrorFmt(SNotSurpport, [FurtureStr]);
 end;
 
-procedure TCnAbstractCodeFormater.ErrorStr(const Message: string);
+procedure TCnAbstractCodeFormatter.ErrorStr(const Message: string);
 begin
   raise EParserError.CreateResFmt(
         @SParseError,
@@ -328,7 +338,7 @@ begin
   );
 end;
 
-procedure TCnAbstractCodeFormater.ErrorToken(Token: TPascalToken);
+procedure TCnAbstractCodeFormatter.ErrorToken(Token: TPascalToken);
 begin
   if TokenToString(Scaner.Token) = '' then
     ErrorFmt(SSymbolExpected, [TokenToString(Token), Scaner.TokenString] )
@@ -336,7 +346,7 @@ begin
     ErrorFmt(SSymbolExpected, [TokenToString(Token), TokenToString(Scaner.Token)]);
 end;
 
-procedure TCnAbstractCodeFormater.ErrorTokens(Tokens: array of TPascalToken);
+procedure TCnAbstractCodeFormatter.ErrorTokens(Tokens: array of TPascalToken);
 var
   S: string;
   I: Integer;
@@ -348,12 +358,12 @@ begin
   ErrorExpected(S);
 end;
 
-procedure TCnAbstractCodeFormater.ErrorExpected(Str: string);
+procedure TCnAbstractCodeFormatter.ErrorExpected(Str: string);
 begin
   ErrorFmt(SSymbolExpected, [Str, TokenToString(Scaner.Token)]);
 end;
 
-function TCnAbstractCodeFormater.FormatString(const KeywordStr: string;
+function TCnAbstractCodeFormatter.FormatString(const KeywordStr: string;
   KeywordStyle: TKeywordStyle): string;
 begin
   case KeywordStyle of
@@ -365,19 +375,19 @@ begin
   end;
 end;
 
-function TCnAbstractCodeFormater.UpperFirst(const KeywordStr: string): string;
+function TCnAbstractCodeFormatter.UpperFirst(const KeywordStr: string): string;
 begin
   Result := LowerCase(KeywordStr);
   if Length(Result) >= 1 then
     Result[1] := Char(Ord(Result[1]) + Ord('A') - Ord('a'));
 end;
 
-function TCnAbstractCodeFormater.CanBeSymbol(Token: TPascalToken): Boolean;
+function TCnAbstractCodeFormatter.CanBeSymbol(Token: TPascalToken): Boolean;
 begin
   Result := Scaner.Token in ([tokSymbol] + ComplexTokens); //KeywordTokens + DirectiveTokens);
 end;
 
-procedure TCnAbstractCodeFormater.Match(Token: TPascalToken; BeforeSpaceCount,
+procedure TCnAbstractCodeFormatter.Match(Token: TPascalToken; BeforeSpaceCount,
   AfterSpaceCount: Byte; IgnorePreSpace: Boolean; SemicolonIsLineStart: Boolean);
 begin
   if (Scaner.Token = Token) or ( (Token = tokSymbol) and
@@ -397,28 +407,28 @@ begin
   end;
 end;
 
-procedure TCnAbstractCodeFormater.MatchOperator(Token: TPascalToken);
+procedure TCnAbstractCodeFormatter.MatchOperator(Token: TPascalToken);
 begin
   Match(Token, CnPascalCodeForRule.SpaceBeforeOperator,
         CnPascalCodeForRule.SpaceAfterOperator);
 end;
 
-procedure TCnAbstractCodeFormater.SaveToFile(FileName: string);
+procedure TCnAbstractCodeFormatter.SaveToFile(FileName: string);
 begin
   CodeGen.SaveToFile(FileName);
 end;
 
-procedure TCnAbstractCodeFormater.SaveToStream(Stream: TStream);
+procedure TCnAbstractCodeFormatter.SaveToStream(Stream: TStream);
 begin
   CodeGen.SaveToStream(Stream);
 end;
 
-procedure TCnAbstractCodeFormater.SaveToStrings(AStrings: TStrings);
+procedure TCnAbstractCodeFormatter.SaveToStrings(AStrings: TStrings);
 begin
   CodeGen.SaveToStrings(AStrings);
 end;
 
-function TCnAbstractCodeFormater.Space(Count: Word): string;
+function TCnAbstractCodeFormatter.Space(Count: Word): string;
 begin
   Result := 'a'#10'a'#13'sd'; // ???
   if SmallInt(Count) > 0 then
@@ -427,7 +437,7 @@ begin
     Result := '';
 end;
 
-function TCnAbstractCodeFormater.Tab(PreSpaceCount: Byte;
+function TCnAbstractCodeFormatter.Tab(PreSpaceCount: Byte;
   CareBeginBlock: Boolean): Byte;
 begin
   if CareBeginBlock then
@@ -444,7 +454,7 @@ begin
   end;
 end;
 
-procedure TCnAbstractCodeFormater.WriteLine;
+procedure TCnAbstractCodeFormatter.WriteLine;
 begin
   if (Scaner.BlankLinesBefore = 0) and (Scaner.BlankLinesAfter = 0) then
   begin
@@ -486,7 +496,7 @@ begin
   FLastToken := tokBlank; // prevent 'Symbol'#13#10#13#10' Symbol'
 end;
 
-procedure TCnAbstractCodeFormater.Writeln;
+procedure TCnAbstractCodeFormatter.Writeln;
 begin
   if (Scaner.BlankLinesBefore = 0) and (Scaner.BlankLinesAfter = 0) then
   begin
@@ -519,7 +529,7 @@ begin
   FLastToken := tokBlank; // prevent 'Symbol'#13#10' Symbol'
 end;
 
-procedure TCnAbstractCodeFormater.WriteToken(Token: TPascalToken;
+procedure TCnAbstractCodeFormatter.WriteToken(Token: TPascalToken;
   BeforeSpaceCount, AfterSpaceCount: Byte; IgnorePreSpace: Boolean;
   SemicolonIsLineStart: Boolean);
 begin
@@ -577,7 +587,7 @@ begin
   FLastToken := Token;
 end;
 
-procedure TCnAbstractCodeFormater.CheckHeadComments;
+procedure TCnAbstractCodeFormatter.CheckHeadComments;
 var
   I: Integer;
 begin
@@ -586,7 +596,7 @@ begin
       FCodeGen.Writeln;
 end;
 
-function TCnAbstractCodeFormater.BackTab(PreSpaceCount: Byte;
+function TCnAbstractCodeFormatter.BackTab(PreSpaceCount: Byte;
   CareBeginBlock: Boolean): Integer;
 begin
   if CareBeginBlock then
@@ -599,20 +609,20 @@ end;
 
 { TCnExpressionFormater }
 
-procedure TCnExpressionFormater.FormatCode;
+procedure TCnBasePascalFormatter.FormatCode;
 begin
   FormatExpression;
 end;
 
 { ConstExpr -> <constant-expression> }
-procedure TCnExpressionFormater.FormatConstExpr(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatConstExpr(PreSpaceCount: Byte);
 begin
   FormatExpression(PreSpaceCount);
 end;
 
 { 新加的用于 type 中的 ConstExpr -> <constant-expression> ，
   其中后者不允许出现 = 以及泛型 <> 运算符}
-procedure TCnExpressionFormater.FormatConstExprInType(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatConstExprInType(PreSpaceCount: Byte);
 begin
   FormatSimpleExpression(PreSpaceCount);
 
@@ -628,7 +638,7 @@ end;
 
   注：虽然有 Designator -> '(' Designator ')' 的情况，但已经包含在 QualId 的处理中了。
 }
-procedure TCnExpressionFormater.FormatDesignator(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatDesignator(PreSpaceCount: Byte);
 begin
   if Scaner.Token = tokAtSign then // 如果是 @ Designator 的形式则再次递归
   begin
@@ -651,7 +661,7 @@ begin
         begin
           { DONE: deal with index visit }
           Match(Scaner.Token);
-          FormatExprList;
+          FormatExprList(PreSpaceCount, PreSpaceCount);
           Match(Scaner.Token);
         end;
 
@@ -671,7 +681,7 @@ begin
 end;
 
 { DesignatorList -> Designator/','... }
-procedure TCnExpressionFormater.FormatDesignatorList(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatDesignatorList(PreSpaceCount: Byte);
 begin
   FormatDesignator;
 
@@ -683,9 +693,10 @@ begin
 end;
 
 { Expression -> SimpleExpression [RelOp SimpleExpression]... }
-procedure TCnExpressionFormater.FormatExpression(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatExpression(PreSpaceCount: Byte;
+  CurrentIndent: Byte);
 begin
-  FormatSimpleExpression(PreSpaceCount);
+  FormatSimpleExpression(PreSpaceCount, CurrentIndent);
 
   while Scaner.Token in RelOpTokens + [tokHat, tokSLB, tokDot] do
   begin
@@ -715,14 +726,15 @@ begin
 end;
 
 { ExprList -> Expression/','... }
-procedure TCnExpressionFormater.FormatExprList(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatExprList(PreSpaceCount: Byte;
+  CurrentIndent: Byte);
 begin
-  FormatExpression;
+  FormatExpression(0, CurrentIndent);
 
   if Scaner.Token = tokAssign then // 匹配 OLE 调用的情形
   begin
     Match(tokAssign);
-    FormatExpression;
+    FormatExpression(0, CurrentIndent);
   end;
 
   while Scaner.Token = tokComma do
@@ -732,12 +744,12 @@ begin
     if Scaner.Token in ([tokAtSign, tokLB] + ExprTokens + KeywordTokens +
       DirectiveTokens + ComplexTokens) then // 有关键字做变量名的情况也得考虑到
     begin
-      FormatExpression;
+      FormatExpression(0, CurrentIndent);
 
       if Scaner.Token = tokAssign then // 匹配 OLE 调用的情形
       begin
         Match(tokAssign);
-        FormatExpression;
+        FormatExpression(0, CurrentIndent);
       end;
     end;
   end;
@@ -758,7 +770,7 @@ end;
   这里同样有无法直接区分 '(' Expression ')' 和带括号的 Designator
   例子就是(str1+str2)[1] 等诸如此类的表达式，先姑且判断一下后续的方括号
 }
-procedure TCnExpressionFormater.FormatFactor(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatFactor(PreSpaceCount: Byte);
 begin
   case Scaner.Token of
     tokSymbol, tokAtSign,
@@ -829,10 +841,19 @@ begin
   end;
 end;
 
-procedure TCnExpressionFormater.FormatIdent(PreSpaceCount: Byte;
+procedure TCnBasePascalFormatter.FormatIdent(PreSpaceCount: Byte;
   const CanHaveUnitQual: Boolean);
 begin
-  if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
+  if Scaner.Token = tokSLB then // [Unsafe] 前缀
+  begin
+    Match(tokSLB, PreSpaceCount);
+    if Scaner.Token in KeywordTokens + [tokSymbol] then
+      Match(Scaner.Token);
+    Match(tokSRB, 0, 1); // ] 后有个空格
+    if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
+      Match(Scaner.Token); // 标识符中允许使用部分关键字
+  end
+  else if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
     Match(Scaner.Token, PreSpaceCount); // 标识符中允许使用部分关键字
 
   while CanHaveUnitQual and (Scaner.Token = tokDot) do
@@ -844,7 +865,7 @@ begin
 end;
 
 { IdentList -> Ident/','... }
-procedure TCnExpressionFormater.FormatIdentList(PreSpaceCount: Byte;
+procedure TCnBasePascalFormatter.FormatIdentList(PreSpaceCount: Byte;
   const CanHaveUnitQual: Boolean);
 begin
   FormatIdent(PreSpaceCount, CanHaveUnitQual);
@@ -867,7 +888,7 @@ end;
   Old Grammer:
   QualId -> [UnitId '.'] Ident 
 }
-procedure TCnExpressionFormater.FormatQualID(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatQualID(PreSpaceCount: Byte);
 
   procedure FormatIdentWithBracket(PreSpaceCount: Byte);
   var
@@ -910,7 +931,7 @@ end;
   SetConstructor -> '[' [SetElement/','...] ']'
   SetElement -> Expression ['..' Expression]
 }
-procedure TCnExpressionFormater.FormatSetConstructor(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatSetConstructor(PreSpaceCount: Byte);
 
   procedure FormatSetElement;
   begin
@@ -941,13 +962,22 @@ begin
 end;
 
 { SimpleExpression -> ['+' | '-'] Term [AddOp Term]... }
-procedure TCnExpressionFormater.FormatSimpleExpression(
-  PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatSimpleExpression(
+  PreSpaceCount: Byte; CurrentIndent: Byte);
 begin
   if Scaner.Token in [tokPlus, tokMinus] then
   begin
     Match(Scaner.Token, PreSpaceCount);
     FormatTerm;
+  end
+  else if Scaner.Token in [tokKeywordFunction, tokKeywordProcedure] then
+  begin
+    // Anonymous function.
+    Writeln;
+    if Scaner.Token = tokKeywordProcedure then
+      FormatProcedureDecl(Tab(CurrentIndent))
+    else
+      FormatFunctionDecl(Tab(CurrentIndent));
   end
   else
     FormatTerm(PreSpaceCount);
@@ -960,7 +990,7 @@ begin
 end;
 
 { Term -> Factor [MulOp Factor]... }
-procedure TCnExpressionFormater.FormatTerm(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatTerm(PreSpaceCount: Byte);
 begin
   FormatFactor(PreSpaceCount);
 
@@ -972,14 +1002,14 @@ begin
 end;
 
 // 泛型支持
-procedure TCnExpressionFormater.FormatFormalTypeParamList(
+procedure TCnBasePascalFormatter.FormatFormalTypeParamList(
   PreSpaceCount: Byte);
 begin
   FormatTypeParams(PreSpaceCount); // 两者等同，直接调用
 end;
 
 {TypeParamDecl -> TypeParamList [ ':' ConstraintList ]}
-procedure TCnExpressionFormater.FormatTypeParamDecl(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatTypeParamDecl(PreSpaceCount: Byte);
 begin
   FormatTypeParamList(PreSpaceCount);
   if Scaner.Token = tokColon then // ConstraintList
@@ -990,7 +1020,7 @@ begin
 end;
 
 { TypeParamDeclList -> TypeParamDecl/';'... }
-procedure TCnExpressionFormater.FormatTypeParamDeclList(
+procedure TCnBasePascalFormatter.FormatTypeParamDeclList(
   PreSpaceCount: Byte);
 begin
   FormatTypeParamDecl(PreSpaceCount);
@@ -1002,25 +1032,32 @@ begin
 end;
 
 {TypeParamList -> ( [ CAttrs ] [ '+' | '-' [ CAttrs ] ] Ident )/','...}
-procedure TCnExpressionFormater.FormatTypeParamList(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatTypeParamList(PreSpaceCount: Byte);
 begin
   FormatIdent(PreSpaceCount);
+  // 泛型中可能又套泛型
+  while Scaner.Token = tokLess do
+    FormatTypeParams(PreSpaceCount);
+
   while Scaner.Token = tokComma do // 暂不处理 CAttr
   begin
     Match(tokComma);
     FormatIdent(PreSpaceCount);
+    // 泛型中可能又套泛型
+    while Scaner.Token = tokLess do
+      FormatTypeParams(PreSpaceCount);
   end;
 end;
 
 { TypeParams -> '<' TypeParamDeclList '>' }
-procedure TCnExpressionFormater.FormatTypeParams(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatTypeParams(PreSpaceCount: Byte);
 begin
   Match(tokLess);
   FormatTypeParamDeclList(PreSpaceCount);
   Match(tokGreat);
 end;
 
-procedure TCnExpressionFormater.FormatTypeParamIdent(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatTypeParamIdent(PreSpaceCount: Byte);
 begin
   if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
     Match(Scaner.Token, PreSpaceCount); // 标识符中允许使用部分关键字
@@ -1036,7 +1073,7 @@ begin
     FormatTypeParams;
 end;
 
-procedure TCnExpressionFormater.FormatTypeParamIdentList(
+procedure TCnBasePascalFormatter.FormatTypeParamIdentList(
   PreSpaceCount: Byte);
 begin
   FormatTypeParamIdent(PreSpaceCount);
@@ -1051,7 +1088,7 @@ end;
 { TCnStatementFormater }
 
 { CaseLabel -> ConstExpr ['..' ConstExpr] }
-procedure TCnStatementFormater.FormatCaseLabel(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatCaseLabel(PreSpaceCount: Byte);
 begin
   FormatConstExpr(PreSpaceCount);
 
@@ -1063,7 +1100,7 @@ begin
 end;
 
 { CaseSelector -> CaseLabel/','... ':' Statement }
-procedure TCnStatementFormater.FormatCaseSelector(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatCaseSelector(PreSpaceCount: Byte);
 begin
   FormatCaseLabel(PreSpaceCount);
 
@@ -1083,7 +1120,7 @@ begin
 end;
 
 { CaseStmt -> CASE Expression OF CaseSelector/';'... [ELSE StmtList] [';'] END }
-procedure TCnStatementFormater.FormatCaseStmt(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatCaseStmt(PreSpaceCount: Byte);
 var
   HasElse: Boolean;
 begin
@@ -1126,7 +1163,7 @@ begin
   Match(tokKeywordEnd, PreSpaceCount);
 end;
 
-procedure TCnStatementFormater.FormatCode(PreSpaceCount: Byte);
+procedure TCnStatementFormatter.FormatCode(PreSpaceCount: Byte);
 begin
   FormatStmtList(PreSpaceCount);
 end;
@@ -1134,7 +1171,7 @@ end;
 { CompoundStmt -> BEGIN StmtList END
                -> ASM ... END
 }
-procedure TCnStatementFormater.FormatCompoundStmt(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatCompoundStmt(PreSpaceCount: Byte);
 begin
   case Scaner.Token of
     tokKeywordBegin:
@@ -1158,7 +1195,7 @@ end;
 { ForStmt -> FOR QualId ':=' Expression (TO | DOWNTO) Expression DO Statement }
 { ForStmt -> FOR QualId in Expression DO Statement }
 
-procedure TCnStatementFormater.FormatForStmt(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatForStmt(PreSpaceCount: Byte);
 begin
   Match(tokKeywordFor, PreSpaceCount);
   FormatQualId;
@@ -1194,7 +1231,7 @@ begin
 end;
 
 { IfStmt -> IF Expression THEN Statement [ELSE Statement] }
-procedure TCnStatementFormater.FormatIfStmt(PreSpaceCount: Byte; IgnorePreSpace: Boolean);
+procedure TCnBasePascalFormatter.FormatIfStmt(PreSpaceCount: Byte; IgnorePreSpace: Boolean);
 begin
   if IgnorePreSpace then
     Match(tokKeywordIF)
@@ -1225,7 +1262,7 @@ begin
 end;
 
 { RepeatStmt -> REPEAT StmtList UNTIL Expression }
-procedure TCnStatementFormater.FormatRepeatStmt(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatRepeatStmt(PreSpaceCount: Byte);
 begin
   Match(tokKeywordRepeat, PreSpaceCount, 1);
   Writeln;
@@ -1266,7 +1303,7 @@ end;
      括号嵌套的处理机制），扫描处理完毕后看后续的符号以决定是 Designator 还是
      Simplestatement，然后再次回到起点打开输出继续处理。
 }
-procedure TCnStatementFormater.FormatSimpleStatement(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatSimpleStatement(PreSpaceCount: Byte);
 var
   Bookmark: TScannerBookmark;
   OldLastToken: TPascalToken;
@@ -1282,7 +1319,7 @@ var
         tokAssign:
           begin
             Match(tokAssign);
-            FormatExpression;
+            FormatExpression(0, PreSpaceCount);
           end;
 
         tokLB:
@@ -1400,7 +1437,7 @@ begin
   end;
 end;
 
-procedure TCnStatementFormater.FormatLabel(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatLabel(PreSpaceCount: Byte);
 begin
   if Scaner.Token = tokInteger then
     Match(tokInteger, PreSpaceCount)
@@ -1409,7 +1446,7 @@ begin
 end;
 
 { Statement -> [LabelId ':']/.. [SimpleStatement | StructStmt] }
-procedure TCnStatementFormater.FormatStatement(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatStatement(PreSpaceCount: Byte);
 begin
   while Scaner.ForwardToken() = tokColon do
   begin
@@ -1431,7 +1468,7 @@ begin
 end;
 
 { StmtList -> Statement/';'... }
-procedure TCnStatementFormater.FormatStmtList(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatStmtList(PreSpaceCount: Byte);
 begin
   // 处理空语句单独分行的问题
   while Scaner.Token = tokSemicolon do
@@ -1440,7 +1477,7 @@ begin
     if Scaner.Token <> tokKeywordEnd then
       Writeln;
   end;
-  
+
   FormatStatement(PreSpaceCount);
 
   while Scaner.Token = tokSemicolon do
@@ -1471,7 +1508,7 @@ end;
              -> WithStmt
              -> TryStmt
 }
-procedure TCnStatementFormater.FormatStructStmt(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatStructStmt(PreSpaceCount: Byte);
 begin
   case Scaner.Token of
     tokKeywordBegin,
@@ -1493,7 +1530,7 @@ end;
   TryEnd -> FINALLY StmtList END
          -> EXCEPT [ StmtList | (ExceptionHandler/;... [ELSE Statement]) ] [';'] END
 }
-procedure TCnStatementFormater.FormatTryEnd(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatTryEnd(PreSpaceCount: Byte);
 begin
   case Scaner.Token of
     tokKeywordFinally:
@@ -1545,7 +1582,7 @@ end;
 {
   ExceptionHandler -> ON [ident :] Type do Statement
 }
-procedure TCnStatementFormater.FormatExceptionHandler(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatExceptionHandler(PreSpaceCount: Byte);
 var
   OnlySemicolon: Boolean;
 begin
@@ -1580,7 +1617,7 @@ begin
 end;
 
 { TryStmt -> TRY StmtList TryEnd }
-procedure TCnStatementFormater.FormatTryStmt(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatTryStmt(PreSpaceCount: Byte);
 begin
   Match(tokKeywordTry, PreSpaceCount);
   Writeln;
@@ -1590,7 +1627,7 @@ begin
 end;
 
 { WhileStmt -> WHILE Expression DO Statement }
-procedure TCnStatementFormater.FormatWhileStmt(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatWhileStmt(PreSpaceCount: Byte);
 begin
   Match(tokKeywordWhile, PreSpaceCount);
   FormatExpression;
@@ -1600,7 +1637,7 @@ begin
 end;
 
 { WithStmt -> WITH IdentList DO Statement }
-procedure TCnStatementFormater.FormatWithStmt(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatWithStmt(PreSpaceCount: Byte);
 begin
   Match(tokKeywordWith, PreSpaceCount);
   // FormatDesignatorList; // Grammer error.
@@ -1618,7 +1655,7 @@ begin
 end;
 
 { RaiseStmt -> RAISE [ Expression | Expression AT Expression ] }
-procedure TCnStatementFormater.FormatRaiseStmt(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatRaiseStmt(PreSpaceCount: Byte);
 begin
   Match(tokKeywordRaise, PreSpaceCount);
 
@@ -1633,7 +1670,7 @@ begin
 end;
 
 { AsmBlock -> AsmStmtList 按自定义规矩格式化}
-procedure TCnStatementFormater.FormatAsmBlock(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatAsmBlock(PreSpaceCount: Byte);
 var
   NewLine, AfterKeyword, IsLabel, HasAtSign: Boolean;
   T: TPascalToken;
@@ -1791,7 +1828,7 @@ end;
 { TCnTypeSectionFormater }
 
 { ArrayConstant -> '(' TypedConstant/','... ')' }
-procedure TCnTypeSectionFormater.FormatArrayConstant(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatArrayConstant(PreSpaceCount: Byte);
 begin
   Match(tokLB);
   FormatTypedConstant(PreSpaceCount);
@@ -1813,7 +1850,7 @@ begin
 end;
 
 { ArrayType -> ARRAY ['[' OrdinalType/','... ']'] OF Type }
-procedure TCnTypeSectionFormater.FormatArrayType(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatArrayType(PreSpaceCount: Byte);
 begin
   Match(tokKeywordArray);
 
@@ -1836,7 +1873,7 @@ begin
 end;
 
 { ClassFieldList -> (ClassVisibility ObjFieldList)/';'... }
-procedure TCnTypeSectionFormater.FormatClassFieldList(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatClassFieldList(PreSpaceCount: Byte);
 begin
   FormatClassVisibility(PreSpaceCount);
   FormatObjFieldList(PreSpaceCount);
@@ -1853,7 +1890,7 @@ begin
 end;
 
 { ClassHeritage -> '(' IdentList ')' }
-procedure TCnTypeSectionFormater.FormatClassHeritage(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatClassHeritage(PreSpaceCount: Byte);
 begin
   Match(tokLB);
   FormatTypeParamIdentList(); // 加入泛型的支持
@@ -1861,7 +1898,7 @@ begin
 end;
 
 { ClassMethodList -> (ClassVisibility MethodList)/';'... }
-procedure TCnTypeSectionFormater.FormatClassMethodList(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatClassMethodList(PreSpaceCount: Byte);
 begin
   FormatClassVisibility(PreSpaceCount);
   FormatMethodList(PreSpaceCount);
@@ -1874,7 +1911,7 @@ begin
 end;
 
 { ClassPropertyList -> (ClassVisibility PropertyList ';')... }
-procedure TCnTypeSectionFormater.FormatClassPropertyList(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatClassPropertyList(PreSpaceCount: Byte);
 begin
   FormatClassVisibility(PreSpaceCount);
   FormatPropertyList(PreSpaceCount);
@@ -1894,7 +1931,7 @@ begin
 end;
 
 { ClassRefType -> CLASS OF TypeId }
-procedure TCnTypeSectionFormater.FormatClassRefType(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatClassRefType(PreSpaceCount: Byte);
 begin
   Match(tokkeywordClass);
   Match(tokKeywordOf);
@@ -1953,7 +1990,7 @@ end;
     TFoo = class helper for TBar
   =============Cut End==============
 }
-procedure TCnTypeSectionFormater.FormatClassType(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatClassType(PreSpaceCount: Byte);
 begin
   Match(tokKeywordClass);
   if Scaner.Token = tokSemiColon then // class declare forward, like TFoo = class;
@@ -2005,7 +2042,7 @@ begin
 end;
 
 { ClassVisibility -> [PUBLIC | PROTECTED | PRIVATE | PUBLISHED] }
-procedure TCnTypeSectionFormater.FormatClassVisibility(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatClassVisibility(PreSpaceCount: Byte);
 begin
   if Scaner.Token = tokKeywordStrict then
   begin
@@ -2024,7 +2061,7 @@ begin
 end;
 
 { ConstructorHeading -> CONSTRUCTOR Ident [FormalParameters] }
-procedure TCnTypeSectionFormater.FormatConstructorHeading(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatConstructorHeading(PreSpaceCount: Byte);
 begin
   Match(tokKeywordConstructor, PreSpaceCount);
   FormatMethodName;
@@ -2034,7 +2071,7 @@ begin
 end;
 
 { ContainsClause -> CONTAINS IdentList... ';' }
-procedure TCnTypeSectionFormater.FormatContainsClause(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatContainsClause(PreSpaceCount: Byte);
 begin
   if Scaner.TokenSymbolIs('CONTAINS') then
   begin
@@ -2045,7 +2082,7 @@ begin
 end;
 
 { DestructorHeading -> DESTRUCTOR Ident [FormalParameters] }
-procedure TCnTypeSectionFormater.FormatDestructorHeading(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatDestructorHeading(PreSpaceCount: Byte);
 begin
   Match(tokKeywordDestructor, PreSpaceCount);
   FormatMethodName;
@@ -2055,7 +2092,7 @@ begin
 end;
 
 { OperatorHeading -> OPERATOR Ident [FormalParameters] }
-procedure TCnTypeSectionFormater.FormatOperatorHeading(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatOperatorHeading(PreSpaceCount: Byte);
 begin
   Match(tokKeywordOperator, PreSpaceCount);
   FormatMethodName;
@@ -2065,7 +2102,7 @@ begin
 end;
 
 { VarDecl -> IdentList ':' Type [(ABSOLUTE (Ident | ConstExpr)) | '=' TypedConstant] }
-procedure TCnTypeSectionFormater.FormatVarDeclHeading(PreSpaceCount: Byte;
+procedure TCnBasePascalFormatter.FormatVarDeclHeading(PreSpaceCount: Byte;
   IsClassVar: Boolean);
 begin
   if Scaner.Token in [tokKeywordVar, tokKeywordThreadVar] then
@@ -2106,7 +2143,7 @@ begin
 end;
 
 { IdentList -> [Unsafe] Ident/','... }
-procedure TCnTypeSectionFormater.FormatClassVarIdentList(PreSpaceCount: Byte;
+procedure TCnBasePascalFormatter.FormatClassVarIdentList(PreSpaceCount: Byte;
   const CanHaveUnitQual: Boolean);
 begin
   FormatClassVarIdent(PreSpaceCount, CanHaveUnitQual);
@@ -2118,7 +2155,7 @@ begin
   end;
 end;
 
-procedure TCnTypeSectionFormater.FormatClassVarIdent(PreSpaceCount: Byte;
+procedure TCnBasePascalFormatter.FormatClassVarIdent(PreSpaceCount: Byte;
   const CanHaveUnitQual: Boolean);
 begin
   if Scaner.Token = tokSLB then // [Unsafe] 前缀
@@ -2161,7 +2198,7 @@ end;
   注：Directive 分两种，一是上面说的大多在函数过程声明后的，可能需要分号分隔
   一种是类型或其他声明后的，platform library 等，无需分号分隔的。
 }
-procedure TCnTypeSectionFormater.FormatDirective(PreSpaceCount: Byte;
+procedure TCnBasePascalFormatter.FormatDirective(PreSpaceCount: Byte;
   IgnoreFirst: Boolean);
 begin
   if Scaner.Token in DirectiveTokens + ComplexTokens then
@@ -2217,7 +2254,7 @@ begin
 end;
 
 { EnumeratedType -> '(' EnumeratedList ')' }
-procedure TCnTypeSectionFormater.FormatEnumeratedType(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatEnumeratedType(PreSpaceCount: Byte);
 begin
   Match(tokLB);
   FormatEnumeratedList;
@@ -2225,7 +2262,7 @@ begin
 end;
 
 { EnumeratedList -> EmumeratedIdent/','... }
-procedure TCnTypeSectionFormater.FormatEnumeratedList(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatEnumeratedList(PreSpaceCount: Byte);
 begin
   FormatEmumeratedIdent(PreSpaceCount);
   while Scaner.Token = tokComma do
@@ -2236,7 +2273,7 @@ begin
 end;
 
 { EmumeratedIdent -> Ident ['=' ConstExpr] }
-procedure TCnTypeSectionFormater.FormatEmumeratedIdent(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatEmumeratedIdent(PreSpaceCount: Byte);
 begin
   FormatIdent(PreSpaceCount);
   if Scaner.Token = tokEQUAL then
@@ -2247,7 +2284,7 @@ begin
 end;
 
 { FieldDecl -> IdentList ':' Type }
-procedure TCnTypeSectionFormater.FormatFieldDecl(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatFieldDecl(PreSpaceCount: Byte);
 begin
   FormatIdentList(PreSpaceCount);
   Match(tokColon);
@@ -2255,7 +2292,7 @@ begin
 end;
 
 { FieldList ->  FieldDecl/';'... [VariantSection] [';'] }
-procedure TCnTypeSectionFormater.FormatFieldList(PreSpaceCount: Byte;
+procedure TCnBasePascalFormatter.FormatFieldList(PreSpaceCount: Byte;
   IgnoreFirst: Boolean);
 var
   First, AfterIsRB: Boolean;
@@ -2328,7 +2365,7 @@ begin
 end;
 
 { FileType -> FILE [OF TypeId] }
-procedure TCnTypeSectionFormater.FormatFileType(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatFileType(PreSpaceCount: Byte);
 begin
   Match(tokKeywordFile);
   if Scaner.Token = tokKeywordOf then // 可以是单独的 file
@@ -2339,7 +2376,7 @@ begin
 end;
 
 { FormalParameters -> ['(' FormalParm/';'... ')'] }
-procedure TCnTypeSectionFormater.FormatFormalParameters(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatFormalParameters(PreSpaceCount: Byte);
 begin
   Match(tokLB);
   
@@ -2356,7 +2393,7 @@ begin
 end;
 
 { FormalParm -> [Ref] [VAR | CONST | OUT] Parameter }
-procedure TCnTypeSectionFormater.FormatFormalParm(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatFormalParm(PreSpaceCount: Byte);
 begin
   if Scaner.Token = tokSLB then
   begin
@@ -2388,7 +2425,7 @@ end;
 }
 
 { FunctionHeading -> FUNCTION Ident [FormalParameters] ':' (SimpleType | STRING) }
-procedure TCnTypeSectionFormater.FormatFunctionHeading(PreSpaceCount: Byte;
+procedure TCnBasePascalFormatter.FormatFunctionHeading(PreSpaceCount: Byte;
   AllowEqual: Boolean);
 begin
   if Scaner.Token = tokKeywordClass then
@@ -2434,7 +2471,7 @@ begin
 end;
 
 { InterfaceHeritage -> '(' IdentList ')' }
-procedure TCnTypeSectionFormater.FormatInterfaceHeritage(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatInterfaceHeritage(PreSpaceCount: Byte);
 begin
   Match(tokLB);
   FormatTypeParamIdentList(); // 加入泛型的支持
@@ -2452,7 +2489,7 @@ end;
 
   然后 InterfaceMethod 和 InterfaceProperty 沿用了 ClassMethod 和 ClassProperty
 }
-procedure TCnTypeSectionFormater.FormatInterfaceType(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatInterfaceType(PreSpaceCount: Byte);
 begin
   if Scaner.Token = tokKeywordInterface then
   begin
@@ -2497,7 +2534,7 @@ begin
   Match(tokKeywordEnd, PreSpaceCount);
 end;
 
-procedure TCnTypeSectionFormater.FormatGuid(PreSpaceCount: Byte = 0);
+procedure TCnBasePascalFormatter.FormatGuid(PreSpaceCount: Byte = 0);
 begin
   Writeln;
   Match(tokSLB, PreSpaceCount + CnPascalCodeForRule.TabSpaceCount);
@@ -2514,7 +2551,7 @@ end;
 
                 class var / class property also processed here
 }
-procedure TCnTypeSectionFormater.FormatMethodHeading(PreSpaceCount: Byte;
+procedure TCnBasePascalFormatter.FormatMethodHeading(PreSpaceCount: Byte;
   HasClassPrefixForVar: Boolean);
 begin
   case Scaner.Token of
@@ -2532,7 +2569,7 @@ begin
 end;
 
 { MethodList -> (MethodHeading [';' VIRTUAL])/';'... }
-procedure TCnTypeSectionFormater.FormatMethodList(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatMethodList(PreSpaceCount: Byte);
 var
   IsFirst: Boolean;
 begin
@@ -2575,7 +2612,7 @@ begin
 end;
 
 { ObjectType -> OBJECT [ObjHeritage] [ObjFieldList] [MethodList] END }
-procedure TCnTypeSectionFormater.FormatObjectType(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatObjectType(PreSpaceCount: Byte);
 begin
   Match(tokKeywordObject);
   if Scaner.Token = tokSemicolon then
@@ -2604,7 +2641,7 @@ begin
 end;
 
 { ObjFieldList -> (IdentList ':' Type)/';'... }
-procedure TCnTypeSectionFormater.FormatObjFieldList(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatObjFieldList(PreSpaceCount: Byte);
 begin
   FormatIdentList(PreSpaceCount);
   Match(tokColon);
@@ -2625,7 +2662,7 @@ begin
 end;
 
 { ObjHeritage -> '(' QualId ')' }
-procedure TCnTypeSectionFormater.FormatObjHeritage(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatObjHeritage(PreSpaceCount: Byte);
 begin
   Match(tokLB);
   FormatQualID;
@@ -2633,7 +2670,7 @@ begin
 end;
 
 { OrdinalType -> (SubrangeType | EnumeratedType | OrdIdent) }
-procedure TCnTypeSectionFormater.FormatOrdinalType(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatOrdinalType(PreSpaceCount: Byte);
 var
   Bookmark: TScannerBookmark;
 
@@ -2705,7 +2742,7 @@ end;
         old grammer is -> Ident ':' SimpleType ['=' ConstExpr]
         // Ident ':=' Expression 是为了支持 OLE 的格式的调用
 }
-procedure TCnTypeSectionFormater.FormatParameter(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatParameter(PreSpaceCount: Byte);
 begin
   if Scaner.Token = tokKeywordConst then
     Match(Scaner.Token);
@@ -2808,14 +2845,14 @@ begin
 end;
 
 { PointerType -> '^' TypeId }
-procedure TCnTypeSectionFormater.FormatPointerType(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatPointerType(PreSpaceCount: Byte);
 begin
   Match(tokHat);
   FormatTypeID;
 end;
 
 { ProcedureHeading -> [CLASS] PROCEDURE Ident [FormalParameters] }
-procedure TCnTypeSectionFormater.FormatProcedureHeading(PreSpaceCount: Byte;
+procedure TCnBasePascalFormatter.FormatProcedureHeading(PreSpaceCount: Byte;
   AllowEqual: Boolean);
 begin
   if Scaner.Token = tokKeywordClass then
@@ -2828,7 +2865,7 @@ begin
 
   { !! Fixed. e.g. "const proc: procedure = nil;" }
   if Scaner.Token in [tokSymbol] + ComplexTokens + DirectiveTokens
-    + KeywordTokens then // 函数名允许出现关键字
+    + KeywordTokens - [tokKeywordBegin] then // 函数名允许出现关键字，但匿名函数无参而碰见 begin 除外
   begin
     // 处理 of
     if (Scaner.Token <> tokKeywordOf) or (Scaner.ForwardToken = tokLB) then
@@ -2846,7 +2883,7 @@ begin
 end;
 
 { ProcedureType -> (ProcedureHeading | FunctionHeading) [OF OBJECT] [(DIRECTIVE [';'])...] }
-procedure TCnTypeSectionFormater.FormatProcedureType(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatProcedureType(PreSpaceCount: Byte);
 var
   IsSemicolon: Boolean;
 begin
@@ -2892,7 +2929,7 @@ begin
 end;
 
 { PropertyInterface -> [PropertyParameterList] ':' Ident }
-procedure TCnTypeSectionFormater.FormatPropertyInterface(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatPropertyInterface(PreSpaceCount: Byte);
 begin
   if Scaner.Token <> tokColon then
     FormatPropertyParameterList;
@@ -2903,7 +2940,7 @@ begin
 end;
 
 { PropertyList -> PROPERTY  Ident [PropertyInterface]  PropertySpecifiers }
-procedure TCnTypeSectionFormater.FormatPropertyList(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatPropertyList(PreSpaceCount: Byte);
 begin
   Match(tokKeywordProperty, PreSpaceCount);
   FormatIdent;
@@ -2924,7 +2961,7 @@ begin
 end;
 
 { PropertyParameterList -> '[' (IdentList ':' TypeId)/';'... ']' }
-procedure TCnTypeSectionFormater.FormatPropertyParameterList(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatPropertyParameterList(PreSpaceCount: Byte);
 begin
   Match(tokSLB);
 
@@ -2958,7 +2995,7 @@ end;
 {
   TODO: Here has something wrong. The keyword can be repeat.
 }
-procedure TCnTypeSectionFormater.FormatPropertySpecifiers(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatPropertySpecifiers(PreSpaceCount: Byte);
 
   procedure ProcessBlank;
   begin
@@ -3027,7 +3064,7 @@ begin
 end;
 
 { RecordConstant -> '(' RecordFieldConstant/';'... ')' }
-procedure TCnTypeSectionFormater.FormatRecordConstant(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatRecordConstant(PreSpaceCount: Byte);
 begin
   Match(tokLB);
 
@@ -3047,7 +3084,7 @@ begin
 end;
 
 { RecordFieldConstant -> Ident ':' TypedConstant }
-procedure TCnTypeSectionFormater.FormatRecordFieldConstant(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatRecordFieldConstant(PreSpaceCount: Byte);
 begin
   FormatIdent(PreSpaceCount);
   Match(tokColon);
@@ -3055,7 +3092,7 @@ begin
 end;
 
 { RecType -> RECORD [FieldList] END }
-procedure TCnTypeSectionFormater.FormatRecType(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatRecType(PreSpaceCount: Byte);
 begin
   Match(tokKeywordRecord);
 
@@ -3078,7 +3115,7 @@ begin
 end;
 
 { RecVariant -> ConstExpr/','...  ':' '(' [FieldList] ')' }
-procedure TCnTypeSectionFormater.FormatRecVariant(PreSpaceCount: Byte;
+procedure TCnBasePascalFormatter.FormatRecVariant(PreSpaceCount: Byte;
   IgnoreFirst: Boolean);
 begin
   FormatConstExpr(PreSpaceCount);
@@ -3102,7 +3139,7 @@ begin
 end;
 
 { RequiresClause -> REQUIRES IdentList... ';' }
-procedure TCnTypeSectionFormater.FormatRequiresClause(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatRequiresClause(PreSpaceCount: Byte);
 begin
   if Scaner.TokenSymbolIs('REQUIRES') then
   begin
@@ -3117,7 +3154,7 @@ end;
                  -> ClassType
                  -> InterfaceType
 }
-procedure TCnTypeSectionFormater.FormatRestrictedType(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatRestrictedType(PreSpaceCount: Byte);
 begin
   case Scaner.Token of
     tokKeywordObject: FormatObjectType(PreSpaceCount);
@@ -3127,7 +3164,7 @@ begin
 end;
 
 { SetType -> SET OF OrdinalType }
-procedure TCnTypeSectionFormater.FormatSetType(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatSetType(PreSpaceCount: Byte);
 begin
   // Set 内部不换行因此无需使用 PreSpaceCount
   Match(tokKeywordSet);
@@ -3136,7 +3173,7 @@ begin
 end;
 
 { SimpleType -> (SubrangeType | EnumeratedType | OrdIdent | RealType) }
-procedure TCnTypeSectionFormater.FormatSimpleType(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatSimpleType(PreSpaceCount: Byte);
 begin
   if Scaner.Token = tokLB then
     FormatSubrangeType
@@ -3163,7 +3200,7 @@ end;
              -> WIDESTRING
              -> STRING '[' ConstExpr ']'
 }
-procedure TCnTypeSectionFormater.FormatStringType(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatStringType(PreSpaceCount: Byte);
 begin
   Match(Scaner.Token);
   if Scaner.Token = tokSLB then
@@ -3175,7 +3212,7 @@ begin
 end;
 
 { StrucType -> [PACKED] (ArrayType | SetType | FileType | RecType) }
-procedure TCnTypeSectionFormater.FormatStructType(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatStructType(PreSpaceCount: Byte);
 begin
   if Scaner.Token = tokkeywordPacked then
     Match(Scaner.Token);
@@ -3191,7 +3228,7 @@ begin
 end;
 
 { SubrangeType -> ConstExpr '..' ConstExpr }
-procedure TCnTypeSectionFormater.FormatSubrangeType(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatSubrangeType(PreSpaceCount: Byte);
 begin
   FormatConstExpr(PreSpaceCount);
   Match(tokRange);
@@ -3210,7 +3247,7 @@ end;
 
        -> reference to ProcedureType
 }
-procedure TCnTypeSectionFormater.FormatType(PreSpaceCount: Byte;
+procedure TCnBasePascalFormatter.FormatType(PreSpaceCount: Byte;
   IgnoreDirective: Boolean);
 var
   Bookmark: TScannerBookmark;
@@ -3317,7 +3354,7 @@ begin
 end;
 
 { TypedConstant -> (ConstExpr | SetConstructor | ArrayConstant | RecordConstant) }
-procedure TCnTypeSectionFormater.FormatTypedConstant(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatTypedConstant(PreSpaceCount: Byte);
 type
   TCnTypedConstantType = (tcConst, tcArray, tcRecord);
 var
@@ -3424,7 +3461,7 @@ end;
   TypeDecl -> Ident '=' Type
            -> Ident '=' RestrictedType
 }
-procedure TCnTypeSectionFormater.FormatTypeDecl(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatTypeDecl(PreSpaceCount: Byte);
 begin
   FormatIdent(PreSpaceCount);
 
@@ -3448,7 +3485,7 @@ begin
 end;
 
 { TypeSection -> TYPE (TypeDecl ';')... }
-procedure TCnTypeSectionFormater.FormatTypeSection(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatTypeSection(PreSpaceCount: Byte);
 var
   FirstType: Boolean;
 begin
@@ -3469,7 +3506,7 @@ begin
 end;
 
 { VariantSection -> CASE [Ident ':'] TypeId OF RecVariant/';'... }
-procedure TCnTypeSectionFormater.FormatVariantSection(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatVariantSection(PreSpaceCount: Byte);
 begin
   Match(tokKeywordCase, PreSpaceCount);
   if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens) then // case 后允许此等名字
@@ -3510,7 +3547,7 @@ end;
   Block -> [DeclSection]
            CompoundStmt
 }
-procedure TCnProgramBlockFormater.FormatBlock(PreSpaceCount: Byte;
+procedure TCnBasePascalFormatter.FormatBlock(PreSpaceCount: Byte;
   IsInternal: Boolean);
 begin
   while Scaner.Token in DeclSectionTokens do
@@ -3528,7 +3565,7 @@ end;
                -> Ident ':' TypeId '=' TypedConstant
   FIXED:       -> Ident ':' Type '=' TypedConstant [DIRECTIVE/..]
 }
-procedure TCnProgramBlockFormater.FormatConstantDecl(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatConstantDecl(PreSpaceCount: Byte);
 begin
   FormatIdent(PreSpaceCount);
 
@@ -3549,7 +3586,7 @@ begin
         FormatTypedConstant; // 等号后空一格
       end;
   else
-    Error(' = or : is needed'); 
+    Error(' = or : is needed');
   end;
 
   while Scaner.Token in DirectiveTokens do
@@ -3562,7 +3599,7 @@ end;
 
   Note: resourcestring 只支持字符型常量，但格式化时可不考虑而当做普通常量对待
 }
-procedure TCnProgramBlockFormater.FormatConstSection(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatConstSection(PreSpaceCount: Byte);
 begin
   if Scaner.Token in [tokKeywordConst, tokKeywordResourcestring] then
     Match(Scaner.Token, PreSpaceCount);
@@ -3584,7 +3621,7 @@ end;
               -> ProcedureDeclSection
               -> ExportsSelection
 }
-procedure TCnProgramBlockFormater.FormatDeclSection(PreSpaceCount: Byte;
+procedure TCnBasePascalFormatter.FormatDeclSection(PreSpaceCount: Byte;
   IndentProcs: Boolean; IsInternal: Boolean);
 var
   MakeLine, LastIsInternalProc: Boolean;
@@ -3652,7 +3689,7 @@ end;
 {
  ExportsDecl -> Ident [FormalParameters] [':' (SimpleType | STRING)] [Directive]
 }
-procedure TCnProgramBlockFormater.FormatExportsDecl(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatExportsDecl(PreSpaceCount: Byte);
 begin
   FormatIdent(PreSpaceCount);
 
@@ -3674,7 +3711,7 @@ begin
 end;
 
 { ExportsList -> ( ExportsDecl ',')... }
-procedure TCnProgramBlockFormater.FormatExportsList(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatExportsList(PreSpaceCount: Byte);
 begin
   FormatExportsDecl(PreSpaceCount);
   while Scaner.Token = tokComma do
@@ -3686,7 +3723,7 @@ begin
 end;
 
 { ExportsSection -> EXPORTS ExportsList ';' }
-procedure TCnProgramBlockFormater.FormatExportsSection(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatExportsSection(PreSpaceCount: Byte);
 begin
   Match(tokKeywordExports);
   Writeln;
@@ -3699,7 +3736,7 @@ end;
                   Block ';'
 }
 
-procedure TCnProgramBlockFormater.FormatFunctionDecl(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatFunctionDecl(PreSpaceCount: Byte);
 var
   IsExternal: Boolean;
   IsForward: Boolean;
@@ -3735,12 +3772,13 @@ begin
      (Scaner.Token in BlockStmtTokens + DeclSectionTokens) then
   begin
     FormatBlock(PreSpaceCount, True);
-    Match(tokSemicolon);
+    if Scaner.Token = tokSemicolon then
+      Match(tokSemicolon);
   end;
 end;
 
 { LabelDeclSection -> LABEL LabelId/ ',' .. ';'}
-procedure TCnProgramBlockFormater.FormatLabelDeclSection(
+procedure TCnBasePascalFormatter.FormatLabelDeclSection(
   PreSpaceCount: Byte);
 begin
   Match(tokKeywordLabel, PreSpaceCount);
@@ -3757,7 +3795,7 @@ begin
 end;
 
 { LabelID can be symbol or number }
-procedure TCnProgramBlockFormater.FormatLabelID(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatLabelID(PreSpaceCount: Byte);
 begin
   Match(Scaner.Token, PreSpaceCount);
 end;
@@ -3766,7 +3804,7 @@ end;
   ProcedureDecl -> ProcedureHeading ';' [(DIRECTIVE ';')...]
                    Block ';'
 }
-procedure TCnProgramBlockFormater.FormatProcedureDecl(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatProcedureDecl(PreSpaceCount: Byte);
 var
   IsExternal: Boolean;
   IsForward: Boolean;
@@ -3803,7 +3841,8 @@ begin
     (Scaner.Token in BlockStmtTokens + DeclSectionTokens) then
   begin
     FormatBlock(PreSpaceCount, True);
-    Match(tokSemicolon);
+    if Scaner.Token = tokSemicolon then
+      Match(tokSemicolon);
   end;
 end;
 
@@ -3811,7 +3850,7 @@ end;
   ProcedureDeclSection -> ProcedureDecl
                        -> FunctionDecl
 }
-procedure TCnProgramBlockFormater.FormatProcedureDeclSection(
+procedure TCnBasePascalFormatter.FormatProcedureDeclSection(
   PreSpaceCount: Byte);
 var
   Bookmark: TScannerBookmark;
@@ -3843,7 +3882,7 @@ end;
   ProgramBlock -> [UsesClause]
                   Block
 }
-procedure TCnProgramBlockFormater.FormatProgramBlock(PreSpaceCount: Byte);
+procedure TCnProgramBlockFormatter.FormatProgramBlock(PreSpaceCount: Byte);
 begin
   if Scaner.Token = tokKeywordUses then
   begin
@@ -3854,7 +3893,7 @@ begin
 end;
 
 { UsesClause -> USES UsesList ';' }
-procedure TCnProgramBlockFormater.FormatUsesClause(PreSpaceCount: Byte;
+procedure TCnProgramBlockFormatter.FormatUsesClause(PreSpaceCount: Byte;
   const NeedCRLF: Boolean);
 begin
   Match(tokKeywordUses);
@@ -3865,7 +3904,7 @@ begin
 end;
 
 { UsesList -> (UsesDecl ',') ... }
-procedure TCnProgramBlockFormater.FormatUsesList(PreSpaceCount: Byte;
+procedure TCnProgramBlockFormatter.FormatUsesList(PreSpaceCount: Byte;
   const CanHaveUnitQual: Boolean; const NeedCRLF: Boolean);
 var
   OldWrapMode: TCnCodeWrapMode;
@@ -3894,7 +3933,7 @@ begin
 end;
 
 { UseDecl -> Ident [IN String]}
-procedure TCnProgramBlockFormater.FormatUsesDecl(PreSpaceCount: Byte;
+procedure TCnProgramBlockFormatter.FormatUsesDecl(PreSpaceCount: Byte;
  const CanHaveUnitQual: Boolean);
 begin
   if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
@@ -3918,7 +3957,7 @@ begin
 end;
 
 { VarDecl -> IdentList ':' Type [(ABSOLUTE (Ident | ConstExpr)) | '=' TypedConstant] }
-procedure TCnProgramBlockFormater.FormatVarDecl(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatVarDecl(PreSpaceCount: Byte);
 begin
   FormatIdentList(PreSpaceCount);
   if Scaner.Token = tokColon then // 放宽语法限制
@@ -3943,13 +3982,13 @@ begin
 end;
 
 { VarSection -> VAR | THREADVAR (VarDecl ';')... }
-procedure TCnProgramBlockFormater.FormatVarSection(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatVarSection(PreSpaceCount: Byte);
 begin
   if Scaner.Token in [tokKeywordVar, tokKeywordThreadvar] then
     Match(Scaner.Token, PreSpaceCount);
 
   while Scaner.Token in [tokSymbol] + ComplexTokens + DirectiveTokens + KeywordTokens
-   - NOTExpressionTokens do // 这些关键字不宜做变量名但也不好处理，只有先写上
+   + [tokSLB] - NOTExpressionTokens do // 这些关键字不宜做变量名但也不好处理，只有先写上
   begin
     Writeln;
     FormatVarDecl(Tab(PreSpaceCount));
@@ -3957,7 +3996,7 @@ begin
   end;
 end;
 
-procedure TCnExpressionFormater.FormatTypeID(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatTypeID(PreSpaceCount: Byte);
 begin
   if Scaner.Token in BuiltInTypeTokens then
     Match(Scaner.Token)
@@ -3972,7 +4011,7 @@ end;
 
 { TCnGoalCodeFormater }
 
-procedure TCnGoalCodeFormater.FormatCode(PreSpaceCount: Byte);
+procedure TCnGoalCodeFormatter.FormatCode(PreSpaceCount: Byte);
 begin
   CheckHeadComments;
   FormatGoal(PreSpaceCount);
@@ -3982,7 +4021,7 @@ end;
   ExportedHeading -> ProcedureHeading ';' [(DIRECTIVE ';')...]
                   -> FunctionHeading ';' [(DIRECTIVE ';')...]
 }
-procedure TCnGoalCodeFormater.FormatExportedHeading(PreSpaceCount: Byte);
+procedure TCnGoalCodeFormatter.FormatExportedHeading(PreSpaceCount: Byte);
 begin
   case Scaner.Token of
     tokKeywordProcedure: FormatProcedureHeading(PreSpaceCount);
@@ -4009,7 +4048,7 @@ begin
 end;
 
 { Goal -> (Program | Package  | Library  | Unit) }
-procedure TCnGoalCodeFormater.FormatGoal(PreSpaceCount: Byte);
+procedure TCnGoalCodeFormatter.FormatGoal(PreSpaceCount: Byte);
 begin
   case Scaner.Token of
     tokKeywordProgram: FormatProgram(PreSpaceCount);
@@ -4025,7 +4064,7 @@ end;
                            [UsesClause]
                            [DeclSection]...
 }
-procedure TCnGoalCodeFormater.FormatImplementationSection(
+procedure TCnGoalCodeFormatter.FormatImplementationSection(
   PreSpaceCount: Byte);
 begin
   Match(tokKeywordImplementation);
@@ -4047,7 +4086,7 @@ end;
   InitSection -> INITIALIZATION StmtList [FINALIZATION StmtList]
               -> BEGIN StmtList END
 }
-procedure TCnGoalCodeFormater.FormatInitSection(PreSpaceCount: Byte);
+procedure TCnGoalCodeFormatter.FormatInitSection(PreSpaceCount: Byte);
 begin
   Match(tokKeywordInitialization);
   Writeln;
@@ -4069,7 +4108,7 @@ end;
                 -> ExportedHeading
                 -> ExportsSection
 }
-procedure TCnGoalCodeFormater.FormatInterfaceDecl(PreSpaceCount: Byte);
+procedure TCnGoalCodeFormatter.FormatInterfaceDecl(PreSpaceCount: Byte);
 var
   MakeLine: Boolean;
 begin
@@ -4105,7 +4144,7 @@ end;
                       [UsesClause]
                       [InterfaceDecl]...
 }
-procedure TCnGoalCodeFormater.FormatInterfaceSection(PreSpaceCount: Byte);
+procedure TCnGoalCodeFormatter.FormatInterfaceSection(PreSpaceCount: Byte);
 begin
   Match(tokKeywordInterface, PreSpaceCount);
 
@@ -4126,7 +4165,7 @@ end;
   Library -> LIBRARY Ident ';'
              ProgramBlock '.'
 }
-procedure TCnGoalCodeFormater.FormatLibrary(PreSpaceCount: Byte);
+procedure TCnGoalCodeFormatter.FormatLibrary(PreSpaceCount: Byte);
 begin
   Match(tokKeywordLibrary);
   FormatIdent(PreSpaceCount);
@@ -4144,7 +4183,7 @@ end;
   Program -> [PROGRAM Ident ['(' IdentList ')'] ';']
              ProgramBlock '.'
 }
-procedure TCnGoalCodeFormater.FormatProgram(PreSpaceCount: Byte);
+procedure TCnGoalCodeFormatter.FormatProgram(PreSpaceCount: Byte);
 begin
   Match(tokKeywordProgram, PreSpaceCount);
   FormatIdent;
@@ -4171,7 +4210,7 @@ end;
           [ InitSection ]
           END '.'
 }
-procedure TCnGoalCodeFormater.FormatUnit(PreSpaceCount: Byte);
+procedure TCnGoalCodeFormatter.FormatUnit(PreSpaceCount: Byte);
 begin
   Match(tokKeywordUnit, PreSpaceCount);
   FormatIdent;
@@ -4201,7 +4240,7 @@ begin
 end;
 
 { ClassBody -> [ClassHeritage] [ClassMemberList END] }
-procedure TCnTypeSectionFormater.FormatClassBody(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatClassBody(PreSpaceCount: Byte);
 begin
   if Scaner.Token = tokLB then
   begin
@@ -4216,7 +4255,7 @@ begin
   end;
 end;
 
-procedure TCnTypeSectionFormater.FormatClassField(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatClassField(PreSpaceCount: Byte);
 begin
   FormatClassVarIdentList(PreSpaceCount);
   Match(tokColon);
@@ -4237,7 +4276,7 @@ begin
 end;
 
 { ClassMember -> ClassField | ClassMethod | ClassProperty }
-procedure TCnTypeSectionFormater.FormatClassMember(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatClassMember(PreSpaceCount: Byte);
 begin
   // no need loop here, we have one loop outter
   if Scaner.Token in ClassMemberSymbolTokens then // 部分关键字此处可以当做 Symbol
@@ -4266,7 +4305,7 @@ begin
 end;
 
 { ClassMemberList -> ([ClassVisibility] [ClassMember]) ... }
-procedure TCnTypeSectionFormater.FormatClassMemberList(
+procedure TCnBasePascalFormatter.FormatClassMemberList(
   PreSpaceCount: Byte);
 begin
   while Scaner.Token in ClassVisibilityTokens + ClassMemberSymbolTokens do
@@ -4285,7 +4324,7 @@ begin
 end;
 
 { ClassMethod -> [CLASS] MethodHeading ';' [(DIRECTIVE ';')...] }
-procedure TCnTypeSectionFormater.FormatClassMethod(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatClassMethod(PreSpaceCount: Byte);
 var
   IsFirst: Boolean;
 begin
@@ -4330,7 +4369,7 @@ begin
 end;
 
 { ClassProperty -> PROPERTY Ident [PropertyInterface]  PropertySpecifiers ';' [DEFAULT ';']}
-procedure TCnTypeSectionFormater.FormatClassProperty(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatClassProperty(PreSpaceCount: Byte);
 begin
   Match(tokKeywordProperty, PreSpaceCount);
   FormatIdent;
@@ -4349,7 +4388,7 @@ begin
 end;
 
 // class/record 内的 type 声明，对结束判断不一样。
-procedure TCnTypeSectionFormater.FormatClassTypeSection(
+procedure TCnBasePascalFormatter.FormatClassTypeSection(
   PreSpaceCount: Byte);
 var
   FirstType: Boolean;
@@ -4371,7 +4410,7 @@ begin
 end;
 
 { procedure/function/constructor/destructor Name, can be classname.name}
-procedure TCnTypeSectionFormater.FormatMethodName(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatMethodName(PreSpaceCount: Byte);
 begin
   FormatTypeParamIdent;
   // 加入对泛型的支持
@@ -4382,7 +4421,7 @@ begin
   end;
 end;
 
-procedure TCnTypeSectionFormater.FormatClassConstSection(
+procedure TCnBasePascalFormatter.FormatClassConstSection(
   PreSpaceCount: Byte);
 begin
   Match(tokKeywordConst, PreSpaceCount);
@@ -4396,7 +4435,7 @@ begin
   end;
 end;
 
-procedure TCnTypeSectionFormater.FormatClassConstantDecl(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatClassConstantDecl(PreSpaceCount: Byte);
 begin
   FormatIdent(PreSpaceCount);
 
