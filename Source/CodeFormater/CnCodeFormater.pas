@@ -4015,6 +4015,14 @@ begin
   begin
     // TODO: 处理 Integer 等的大小写问题
     FormatIdent(0, True);
+
+    // 处理 _UTF8String = type _AnsiString(65001); 这种
+    if Scaner.Token = tokLB then
+    begin
+      Match(tokLB);
+      FormatExpression;
+      Match(tokRB);
+    end;
   end;
 end;
 
