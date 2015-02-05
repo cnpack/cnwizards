@@ -198,11 +198,11 @@ type
     procedure FormatObjectType(PreSpaceCount: Byte = 0);
     procedure FormatObjHeritage(PreSpaceCount: Byte = 0);
     procedure FormatMethodList(PreSpaceCount: Byte = 0);
-    procedure FormatMethodHeading(PreSpaceCount: Byte = 0);
+    procedure FormatMethodHeading(PreSpaceCount: Byte = 0; HasClassPrefixForVar: Boolean = True);
     procedure FormatConstructorHeading(PreSpaceCount: Byte = 0);
     procedure FormatDestructorHeading(PreSpaceCount: Byte = 0);
     procedure FormatOperatorHeading(PreSpaceCount: Byte = 0);
-    procedure FormatVarDeclHeading(PreSpaceCount: Byte = 0);
+    procedure FormatVarDeclHeading(PreSpaceCount: Byte = 0; IsClassVar: Boolean = True);
     procedure FormatClassVarIdentList(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = True);
     procedure FormatClassVarIdent(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = True);
     procedure FormatObjFieldList(PreSpaceCount: Byte = 0);
@@ -1973,7 +1973,11 @@ begin
     Match(tokKeywordFor);
     FormatIdent(0);
   end;
+
   
+  if Scaner.Token = tokKeywordSealed then // TFoo = class sealed
+    Match(tokKeywordSealed);
+
   FormatClassBody(PreSpaceCount);
 
 {
@@ -2061,11 +2065,17 @@ begin
 end;
 
 { VarDecl -> IdentList ':' Type [(ABSOLUTE (Ident | ConstExpr)) | '=' TypedConstant] }
-procedure TCnTypeSectionFormater.FormatVarDeclHeading(PreSpaceCount: Byte);
+procedure TCnTypeSectionFormater.FormatVarDeclHeading(PreSpaceCount: Byte;
+  IsClassVar: Boolean);
 begin
   if Scaner.Token in [tokKeywordVar, tokKeywordThreadVar] then
-    Match(Scaner.Token);
-
+  begin
+    if IsClassVar then
+      Match(Scaner.Token)
+    else
+      Match(Scaner.Token, BackTab(PreSpaceCount));
+  end;
+  
   repeat
     Writeln;
     
@@ -2504,7 +2514,8 @@ end;
 
                 class var / class property also processed here
 }
-procedure TCnTypeSectionFormater.FormatMethodHeading(PreSpaceCount: Byte);
+procedure TCnTypeSectionFormater.FormatMethodHeading(PreSpaceCount: Byte;
+  HasClassPrefixForVar: Boolean);
 begin
   case Scaner.Token of
     tokKeywordProcedure: FormatProcedureHeading(PreSpaceCount);
@@ -2514,7 +2525,7 @@ begin
     tokKeywordProperty: FormatClassProperty(PreSpaceCount); // class property
     tokKeywordOperator: FormatOperatorHeading(PreSpaceCount); // class operator
 
-    tokKeywordVar, tokKeywordThreadVar: FormatVarDeclHeading(Tab(PreSpaceCount));  // class var/threadvar
+    tokKeywordVar, tokKeywordThreadVar: FormatVarDeclHeading(Tab(PreSpaceCount), HasClassPrefixForVar);  // class var/threadvar
   else
     Error('MethodHeading is needed.');
   end;
@@ -4242,6 +4253,10 @@ begin
         FormatClassTypeSection(PreSpaceCount);
       tokKeywordConst:
         FormatClassConstSection(PreSpaceCount);
+        
+      // 类里出现的var/threadvar等同于 class var/threadvar 的处理，都写在 FormatClassMethod 中
+      tokKeywordVar, tokKeywordThreadvar:
+        FormatClassMethod(PreSpaceCount);
     else // 其他的都算 symbol，包括 [Weak] 前缀
       FormatClassField(PreSpaceCount);
     end;
@@ -4282,8 +4297,12 @@ begin
       tokKeywordOperator] then // Single line heading
       FormatMethodHeading
     else
-      FormatMethodHeading(PreSpaceCount);
-  end else
+      FormatMethodHeading(PreSpaceCount, True);
+  end else if Scaner.Token in [tokKeywordVar, tokKeywordThreadVar] then
+  begin
+    FormatMethodHeading(PreSpaceCount, False);
+  end
+  else
     FormatMethodHeading(PreSpaceCount);
 
   if Scaner.Token = tokSemicolon then // class property already processed ;

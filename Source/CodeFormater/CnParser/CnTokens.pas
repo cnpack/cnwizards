@@ -268,7 +268,7 @@ const
     tokKeywordProtected, tokKeywordPrivate];
 
   ClassMemberTokens = [tokSymbol, tokKeywordProperty, tokKeywordClass,
-    tokKeywordType, tokKeywordConst, tokSLB] + ClassMethodTokens;
+    tokKeywordType, tokKeywordConst, tokKeywordVar, tokSLB] + ClassMethodTokens;
 
   PropertySpecifiersTokens = [tokDirectiveDispid, tokComplexRead, tokComplexIndex,
     tokComplexWrite, tokComplexStored, tokComplexImplements, tokComplexDefault,
