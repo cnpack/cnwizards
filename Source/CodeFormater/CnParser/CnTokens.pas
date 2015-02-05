@@ -230,7 +230,8 @@ const
   DirectiveTokens = [tokDirective_BEGIN .. tokDirective_END, tokKeywordInline,
     tokKeywordLibrary, tokComplexDefault, tokComplexIndex, tokComplexName,
     tokComplexNoDefault, tokComplexRead, tokComplexReadOnly, tokComplexStored,
-    tokComplexWrite, tokComplexWriteOnly, tokKeywordStatic, tokKeywordFinal];
+    tokComplexWrite, tokComplexWriteOnly, tokKeywordStatic, tokKeywordFinal,
+    tokKeywordUnsafe];
     
   ComplexTokens = [tokComplex_BEGIN .. tokComplex_END, tokDirectiveMessage,
     tokDirectiveRegister, tokDirectiveForward];

@@ -2556,11 +2556,10 @@ procedure TCnBasePascalFormatter.FormatMethodHeading(PreSpaceCount: Byte;
 begin
   case Scaner.Token of
     tokKeywordProcedure: FormatProcedureHeading(PreSpaceCount);
-    tokKeywordFunction: FormatFunctionHeading(PreSpaceCount);
+    tokKeywordFunction, tokKeywordOperator: FormatFunctionHeading(PreSpaceCount); // class operator
     tokKeywordConstructor: FormatConstructorHeading(PreSpaceCount);
     tokKeywordDestructor: FormatDestructorHeading(PreSpaceCount);
     tokKeywordProperty: FormatClassProperty(PreSpaceCount); // class property
-    tokKeywordOperator: FormatOperatorHeading(PreSpaceCount); // class operator
 
     tokKeywordVar, tokKeywordThreadVar: FormatVarDeclHeading(Tab(PreSpaceCount), HasClassPrefixForVar);  // class var/threadvar
   else
