@@ -113,6 +113,7 @@ type
     tokKeywordExcept,
     tokKeywordExports,
     tokKeywordFile,
+    tokKeywordFinal,
     tokKeywordFinalization,
     tokKeywordFinally,
     tokKeywordFor,
@@ -229,7 +230,7 @@ const
   DirectiveTokens = [tokDirective_BEGIN .. tokDirective_END, tokKeywordInline,
     tokKeywordLibrary, tokComplexDefault, tokComplexIndex, tokComplexName,
     tokComplexNoDefault, tokComplexRead, tokComplexReadOnly, tokComplexStored,
-    tokComplexWrite, tokComplexWriteOnly, tokKeywordStatic];
+    tokComplexWrite, tokComplexWriteOnly, tokKeywordStatic, tokKeywordFinal];
     
   ComplexTokens = [tokComplex_BEGIN .. tokComplex_END, tokDirectiveMessage,
     tokDirectiveRegister, tokDirectiveForward];
@@ -267,7 +268,7 @@ const
     tokKeywordProtected, tokKeywordPrivate];
 
   ClassMemberTokens = [tokSymbol, tokKeywordProperty, tokKeywordClass,
-    tokKeywordType, tokKeywordConst] + ClassMethodTokens;
+    tokKeywordType, tokKeywordConst, tokSLB] + ClassMethodTokens;
 
   PropertySpecifiersTokens = [tokDirectiveDispid, tokComplexRead, tokComplexIndex,
     tokComplexWrite, tokComplexStored, tokComplexImplements, tokComplexDefault,
@@ -392,6 +393,7 @@ const
     (Value: Integer(tokKeywordExcept);         Name: 'Except'),
     (Value: Integer(tokKeywordExports);        Name: 'Exports'),
     (Value: Integer(tokKeywordFile);           Name: 'File'),
+    (Value: Integer(tokKeywordFinal);          Name: 'Final'),
     (Value: Integer(tokKeywordFinalization);   Name: 'Finalization'),
     (Value: Integer(tokKeywordFinally);        Name: 'Finally'),
     (Value: Integer(tokKeywordFor);            Name: 'For'),

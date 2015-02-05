@@ -203,6 +203,8 @@ type
     procedure FormatDestructorHeading(PreSpaceCount: Byte = 0);
     procedure FormatOperatorHeading(PreSpaceCount: Byte = 0);
     procedure FormatVarDeclHeading(PreSpaceCount: Byte = 0);
+    procedure FormatClassVarIdentList(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = True);
+    procedure FormatClassVarIdent(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = True);
     procedure FormatObjFieldList(PreSpaceCount: Byte = 0);
     procedure FormatClassType(PreSpaceCount: Byte = 0);
     procedure FormatClassHeritage(PreSpaceCount: Byte = 0);
@@ -2061,27 +2063,72 @@ end;
 { VarDecl -> IdentList ':' Type [(ABSOLUTE (Ident | ConstExpr)) | '=' TypedConstant] }
 procedure TCnTypeSectionFormater.FormatVarDeclHeading(PreSpaceCount: Byte);
 begin
-  Match(tokKeywordVar);
-  FormatIdentList(PreSpaceCount);
-  if Scaner.Token = tokColon then // 放宽语法限制
-  begin
-    Match(tokColon);
-    FormatType(PreSpaceCount); // 长 Type 可能换行，必须传入
-  end;
-
-  if Scaner.Token = tokEQUAL then
-  begin
-    Match(Scaner.Token, 1, 1);
-    FormatTypedConstant;
-  end
-  else if Scaner.TokenSymbolIs('ABSOLUTE') then
-  begin
+  if Scaner.Token in [tokKeywordVar, tokKeywordThreadVar] then
     Match(Scaner.Token);
-    FormatConstExpr; // include indent
-  end;
 
-  while Scaner.Token in DirectiveTokens do
-    FormatDirective;
+  repeat
+    Writeln;
+    
+    FormatClassVarIdentList(PreSpaceCount);
+    if Scaner.Token = tokColon then // 放宽语法限制
+    begin
+      Match(tokColon);
+      FormatType(PreSpaceCount); // 长 Type 可能换行，必须传入
+    end;
+
+    if Scaner.Token = tokEQUAL then
+    begin
+      Match(Scaner.Token, 1, 1);
+      FormatTypedConstant;
+    end
+    else if Scaner.TokenSymbolIs('ABSOLUTE') then
+    begin
+      Match(Scaner.Token);
+      FormatConstExpr; // include indent
+    end;
+
+    while Scaner.Token in DirectiveTokens do
+      FormatDirective;
+
+    if Scaner.Token = tokSemicolon then
+      Match(tokSemicolon);
+  until Scaner.Token in ClassMethodTokens + ClassVisibilityTokens + [tokKeywordEnd, tokEOF]; // 出现这些，认为 class var 区结束
+end;
+
+{ IdentList -> [Unsafe] Ident/','... }
+procedure TCnTypeSectionFormater.FormatClassVarIdentList(PreSpaceCount: Byte;
+  const CanHaveUnitQual: Boolean);
+begin
+  FormatClassVarIdent(PreSpaceCount, CanHaveUnitQual);
+
+  while Scaner.Token = tokComma do
+  begin
+    Match(tokComma);
+    FormatClassVarIdent(0, CanHaveUnitQual);
+  end;
+end;
+
+procedure TCnTypeSectionFormater.FormatClassVarIdent(PreSpaceCount: Byte;
+  const CanHaveUnitQual: Boolean);
+begin
+  if Scaner.Token = tokSLB then // [Unsafe] 前缀
+  begin
+    Match(tokSLB, PreSpaceCount);
+    if Scaner.Token in KeywordTokens + [tokSymbol] then
+      Match(Scaner.Token);
+    Match(tokSRB, 0, 1); // ] 后有个空格
+    if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
+      Match(Scaner.Token); // 标识符中允许使用部分关键字
+  end
+  else if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
+    Match(Scaner.Token, PreSpaceCount); // 标识符中允许使用部分关键字
+
+  while CanHaveUnitQual and (Scaner.Token = tokDot) do
+  begin
+    Match(tokDot);
+    if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
+      Match(Scaner.Token); // 也继续允许使用部分关键字
+  end;
 end;
 
 {
@@ -2304,7 +2351,8 @@ begin
   if Scaner.Token = tokSLB then
   begin
     Match(tokSLB);
-    Match(tokSymbol);
+    if Scaner.Token in KeywordTokens + [tokSymbol] then
+      Match(Scaner.Token);
     Match(tokSRB, 0, 1); // ] 后有个空格
   end;
 
@@ -2463,9 +2511,10 @@ begin
     tokKeywordFunction: FormatFunctionHeading(PreSpaceCount);
     tokKeywordConstructor: FormatConstructorHeading(PreSpaceCount);
     tokKeywordDestructor: FormatDestructorHeading(PreSpaceCount);
-    tokKeywordOperator: FormatOperatorHeading(PreSpaceCount); // class operator
-    tokKeywordVar: FormatVarDeclHeading(PreSpaceCount);     // class var
     tokKeywordProperty: FormatClassProperty(PreSpaceCount); // class property
+    tokKeywordOperator: FormatOperatorHeading(PreSpaceCount); // class operator
+
+    tokKeywordVar, tokKeywordThreadVar: FormatVarDeclHeading(Tab(PreSpaceCount));  // class var/threadvar
   else
     Error('MethodHeading is needed.');
   end;
@@ -4158,7 +4207,22 @@ end;
 
 procedure TCnTypeSectionFormater.FormatClassField(PreSpaceCount: Byte);
 begin
-  FormatObjFieldList(PreSpaceCount);
+  FormatClassVarIdentList(PreSpaceCount);
+  Match(tokColon);
+  FormatType(PreSpaceCount);
+
+  while Scaner.Token = tokSemicolon do
+  begin
+    Match(Scaner.Token);
+
+    if Scaner.Token <> tokSymbol then Exit;
+
+    Writeln;
+
+    FormatClassVarIdentList(PreSpaceCount);
+    Match(tokColon);
+    FormatType(PreSpaceCount);
+  end;
 end;
 
 { ClassMember -> ClassField | ClassMethod | ClassProperty }
@@ -4178,7 +4242,7 @@ begin
         FormatClassTypeSection(PreSpaceCount);
       tokKeywordConst:
         FormatClassConstSection(PreSpaceCount);
-    else // 其他的都算 symbol
+    else // 其他的都算 symbol，包括 [Weak] 前缀
       FormatClassField(PreSpaceCount);
     end;
 
@@ -4213,7 +4277,12 @@ begin
   if Scaner.Token = tokKeywordClass then
   begin
     Match(tokKeywordClass, PreSpaceCount);
-    FormatMethodHeading;
+    if Scaner.Token in [tokKeywordProcedure, tokKeywordFunction,
+      tokKeywordConstructor, tokKeywordDestructor, tokKeywordProperty,
+      tokKeywordOperator] then // Single line heading
+      FormatMethodHeading
+    else
+      FormatMethodHeading(PreSpaceCount);
   end else
     FormatMethodHeading(PreSpaceCount);
 
