@@ -47,7 +47,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, Menus,
   StdCtrls, IniFiles, ToolsAPI, CnConsts, CnWizUtils, CnEditorWizard, CnWizConsts,
-  CnCommon;
+  CnEditorOpenFileFrm, CnCommon, CnWizOptions;
 
 type
 
@@ -159,9 +159,8 @@ begin
 
         if SearchFileList(F) and (FFileList.Count > 0) then
         begin
-          // TODO: 搜到则弹列表
-          ShowMessage('Found Files ' + IntToStr(FFileList.Count));
-          ShowMessage(FFileList.Text);
+          // 搜到则弹列表
+          ShowOpenFileResultList(FFileList);
         end
         else
           ErrorDlg(SCnEditorOpenFileNotFind);
@@ -274,9 +273,18 @@ end;
 
 procedure TCnEditorOpenFile.DoFindFileList(const FileName: string;
   const Info: TSearchRec; var Abort: Boolean);
+var
+  Ext: string;
 begin
   if FFileList.IndexOf(FileName) < 0 then
-    FFileList.Add(FileName);
+  begin
+    Ext := UpperCase(_CnExtractFileExt(FileName));
+
+    if IsDelphiRuntime and (Pos(Ext, UpperCase(WizOptions.DelphiExt)) > 0) then
+      FFileList.Add(FileName)
+    else if not IsDelphiRuntime and (Pos(Ext, UpperCase(WizOptions.CExt)) > 0) then
+      FFileList.Add(FileName);
+  end;
 end;
 
 initialization

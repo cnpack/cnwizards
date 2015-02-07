@@ -149,6 +149,9 @@
     </DCCReference>
     <DCCReference Include="EditorWizard\CnEditorJumpMessage.pas" />
     <DCCReference Include="EditorWizard\CnEditorOpenFile.pas" />
+    <DCCReference Include="EditorWizard\CnEditorOpenFileFrm.pas">
+      <Form>CnEditorOpenFileForm</Form>
+    </DCCReference>
     <DCCReference Include="EditorWizard\CnEditorSortLines.pas" />
     <DCCReference Include="EditorWizard\CnEditorToggleUses.pas" />
     <DCCReference Include="EditorWizard\CnEditorToggleVar.pas" />

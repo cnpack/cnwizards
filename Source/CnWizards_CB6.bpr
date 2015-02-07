@@ -20,7 +20,7 @@
       ..\Dcu\CnWizNotifier.obj ..\Dcu\CnWizControlHook.obj 
       ..\Dcu\CnBookmarkConfigFrm.obj ..\Dcu\CnWizIdeUtils.obj 
       ..\Dcu\CnSrcTemplate.obj ..\Dcu\CnSrcTemplateEditFrm.obj 
-      ..\Dcu\CnEditorWizard.obj ..\Dcu\CnEditorOpenFile.obj 
+      ..\Dcu\CnEditorWizard.obj ..\Dcu\CnEditorOpenFile.obj ..\Dcu\CnEditorOpenFileFrm.obj 
       ..\Dcu\CnEditorCodeSwap.obj ..\Dcu\CnWizEditFiler.obj 
       ..\Dcu\CnMsdnWizard.obj ..\Dcu\CnPas2HtmlWizard.obj 
       ..\Dcu\CnPasConvertTypeFrm.obj ..\Dcu\CnPas2HtmlConfigFrm.obj 
@@ -109,7 +109,7 @@
       SourceDiff\CnSourceDiffFrm.dfm DesignEditors\CnHintEditorFrm.dfm 
       DesignEditors\CnMultiLineEditorFrm.dfm 
       DesignEditors\CnSizeConstraintsEditorFrm.dfm 
-      EditorWizard\CnEditorCodeToString.dfm 
+      EditorWizard\CnEditorCodeToString.dfm EditorWizard\CnEditorOpenFileFrm.dfm 
       EditorWizard\CnEditorCodeDelBlank.dfm EditorWizard\CnEditorCodeComment.dfm 
       EditorWizard\CnAsciiChart.dfm SourceStat\CnStatFrm.dfm 
       SourceStat\CnStatResultFrm.dfm PrefixWizard\CnPrefixCompFrm.dfm 
@@ -243,6 +243,7 @@
       <FILE FILENAME="SrcTemplate\CnSrcTemplate.pas" FORMNAME="CnSrcTemplateForm" UNITNAME="Cnsrctemplate" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="SrcTemplate\CnSrcTemplateEditFrm.pas" FORMNAME="CnSrcTemplateEditForm" UNITNAME="Cnsrctemplateeditfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="EditorWizard\CnEditorOpenFile.pas" FORMNAME="" UNITNAME="CnEditorOpenFile" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="EditorWizard\CnEditorOpenFileFrm.pas" FORMNAME="CnEditorOpenFileForm" UNITNAME="CnEditorOpenFileFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="EditorWizard\CnEditorCodeSwap.pas" FORMNAME="" UNITNAME="CnEditorCodeSwap" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnWizEditFiler.pas" FORMNAME="" UNITNAME="CnWizEditFiler" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="SimpleWizards\CnMsdnWizard.pas" FORMNAME="CnMsdnConfigForm" UNITNAME="Cnmsdnwizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>

@@ -213,6 +213,9 @@
 				<Form>CnEditorToolsForm</Form>
 			</DCCReference>
 			<DCCReference Include="EditorWizard\CnEditorOpenFile.pas"/>
+			<DCCReference Include="EditorWizard\CnEditorOpenFileFrm.pas">
+        <Form>CnEditorOpenFileForm</Form>
+      </DCCReference>
 			<DCCReference Include="EditorWizard\CnEditorCodeSwap.pas"/>
 			<DCCReference Include="EditorWizard\CnEditorZoomFullScreen.pas">
 				<Form>CnEditorZoomFullScreenForm</Form>

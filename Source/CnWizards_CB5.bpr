@@ -21,7 +21,7 @@
       ..\Dcu\CnWizControlHook.obj ..\Dcu\CnBookmarkConfigFrm.obj 
       ..\Dcu\CnWizIdeUtils.obj ..\Dcu\CnSrcTemplate.obj 
       ..\Dcu\CnSrcTemplateEditFrm.obj ..\Dcu\CnEditorWizard.obj 
-      ..\Dcu\CnEditorOpenFile.obj ..\Dcu\CnEditorCodeSwap.obj 
+      ..\Dcu\CnEditorOpenFile.obj ..\Dcu\CnEditorOpenFileFrm.obj ..\Dcu\CnEditorCodeSwap.obj 
       ..\Dcu\CnWizEditFiler.obj ..\Dcu\CnMsdnWizard.obj 
       ..\Dcu\CnPas2HtmlWizard.obj ..\Dcu\CnPasConvertTypeFrm.obj 
       ..\Dcu\CnPas2HtmlConfigFrm.obj ..\Dcu\CnEditorZoomFullScreen.obj 
@@ -106,7 +106,7 @@
       SrcTemplate\CnSrcTemplate.dfm SrcTemplate\CnSrcTemplateEditFrm.dfm 
       EditorWizard\CnEditorWizard.dfm SimpleWizards\CnMsdnWizard.dfm 
       SimpleWizards\CnPas2HtmlWizard.dfm SimpleWizards\CnPasConvertTypeFrm.dfm 
-      SimpleWizards\CnPas2HtmlConfigFrm.dfm 
+      SimpleWizards\CnPas2HtmlConfigFrm.dfm EditorWizard\CnEditorOpenFileFrm.dfm 
       EditorWizard\CnEditorZoomFullScreen.dfm SimpleWizards\CnReplaceWizard.dfm 
       SourceDiff\CnDiffEditorFrm.dfm SourceDiff\CnSourceDiffFrm.dfm 
       DesignEditors\CnHintEditorFrm.dfm DesignEditors\CnMultiLineEditorFrm.dfm 

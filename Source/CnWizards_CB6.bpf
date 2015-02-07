@@ -15,6 +15,7 @@ USEFORMNS("SimpleWizards\CnBookmarkWizard.pas", Cnbookmarkwizard, CnBookmarkForm
 USEFORMNS("SimpleWizards\CnBookmarkConfigFrm.pas", Cnbookmarkconfigfrm, CnBookmarkConfigForm);
 USEFORMNS("SrcTemplate\CnSrcTemplate.pas", Cnsrctemplate, CnSrcTemplateForm);
 USEFORMNS("SrcTemplate\CnSrcTemplateEditFrm.pas", Cnsrctemplateeditfrm, CnSrcTemplateEditForm);
+USEFORMNS("EditorWizard\CnEditorOpenFileFrm.pas", Cneditoropenfilefrm, CnEditorOpenFileForm);
 USEFORMNS("SimpleWizards\CnMsdnWizard.pas", Cnmsdnwizard, CnMsdnConfigForm);
 USEFORMNS("SimpleWizards\CnPas2HtmlWizard.pas", Cnpas2htmlwizard, CnPas2HtmlForm);
 USEFORMNS("SimpleWizards\CnPasConvertTypeFrm.pas", Cnpasconverttypefrm, CnPasConvertTypeForm);

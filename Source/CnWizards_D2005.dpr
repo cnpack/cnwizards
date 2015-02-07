@@ -76,6 +76,7 @@ uses
   CnSrcTemplate in 'SrcTemplate\CnSrcTemplate.pas' {CnSrcTemplateForm},
   CnSrcTemplateEditFrm in 'SrcTemplate\CnSrcTemplateEditFrm.pas' {CnSrcTemplateEditForm},
   CnEditorOpenFile in 'EditorWizard\CnEditorOpenFile.pas',
+  CnEditorOpenFileFrm in 'EditorWizard\CnEditorOpenFileFrm.pas' {CnEditorOpenFileForm},
   CnEditorCodeSwap in 'EditorWizard\CnEditorCodeSwap.pas',
   CnEditorZoomFullScreen in 'EditorWizard\CnEditorZoomFullScreen.pas' {CnEditorZoomFullScreenForm},
   CnEditorCodeTool in 'EditorWizard\CnEditorCodeTool.pas',

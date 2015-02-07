@@ -37,6 +37,7 @@ USEUNIT("Utils\CnWizIdeUtils.pas");
 USEFORMNS("SrcTemplate\CnSrcTemplate.pas", Cnsrctemplate, CnSrcTemplateForm);
 USEFORMNS("SrcTemplate\CnSrcTemplateEditFrm.pas", Cnsrctemplateeditfrm, CnSrcTemplateEditForm);
 USEUNIT("EditorWizard\CnEditorOpenFile.pas");
+USEFORMNS("EditorWizard\CnEditorOpenFileFrm.pas", Cneditoropenfilefrm, CnEditorOpenFileForm);
 USEUNIT("EditorWizard\CnEditorCodeSwap.pas");
 USEUNIT("Utils\CnWizEditFiler.pas");
 USEFORMNS("SimpleWizards\CnMsdnWizard.pas", Cnmsdnwizard, CnMsdnConfigForm);
