@@ -337,6 +337,7 @@ TCnSrcTemplateForm.OpenDialog.Title=Importiere Editor Templates
 TCnSrcTemplateForm.SaveDialog.DefaultExt=cdt
 TCnSrcTemplateForm.SaveDialog.Filter=Editor Template Dateien(*.cdt)|*.cdt
 TCnSrcTemplateForm.SaveDialog.Title=Exportiere Editor Templates
+TCnEditorOpenFileForm.Caption=Datei Suchergebnis
 TCnEditorOpenFileForm.lvList.Columns.Item0.Caption=Unit
 TCnEditorOpenFileForm.lvList.Columns.Item1.Caption=Pfad
 TCnEditorToolsForm.Caption=Quelltext Editor Wizard Einstellungen
