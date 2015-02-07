@@ -59,11 +59,16 @@ type
 
   TCnEditorOpenFile = class(TCnBaseEditorTool)
   private
+    FFileList: TStrings;
     class procedure DoFindFile(const FileName: string; const Info: TSearchRec;
+      var Abort: Boolean);
+    procedure DoFindFileList(const FileName: string; const Info: TSearchRec;
       var Abort: Boolean);
   protected
 
   public
+    destructor Destroy; override;
+
     function GetCaption: string; override;
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
@@ -71,6 +76,7 @@ type
     procedure GetEditorInfo(var Name, Author, Email: string); override;
 
     class function SearchAndOpenFile(FileName: string): Boolean;
+    function SearchFileList(FileName: string): Boolean;
   end;
 
 {$ENDIF CNWIZARDS_CNEDITORWIZARD}
@@ -123,28 +129,44 @@ end;
 
 procedure TCnEditorOpenFile.Execute;
 var
-  FileName: string;
+  FileName, F: string;
   Ini: TCustomIniFile;
 begin
   Ini := CreateIniFile;
   try
-    FileName := CnInputBox(SCnEditorOpenFileDlgCaption,
+    F := CnInputBox(SCnEditorOpenFileDlgCaption,
       SCnEditorOpenFileDlgHint, '', Ini);
   finally
     Ini.Free;
   end;
   
-  if FileName <> '' then
-    if not SearchAndOpenFile(FileName) then
+  if F <> '' then
+    if not SearchAndOpenFile(F) then
     begin
       // For Vcl.Forms like
       if IsDelphiRuntime then
-        FileName := FileName + '.pas'
+        FileName := F + '.pas'
       else
-        FileName := FileName + '.cpp';
+        FileName := F + '.cpp';
 
       if not SearchAndOpenFile(FileName) then
-        ErrorDlg(SCnEditorOpenFileNotFind);
+      begin
+        // 单一未找到，则匹配搜索
+        if FFileList = nil then
+           FFileList := TStringList.Create
+        else
+          FFileList.Clear;
+
+        if SearchFileList(F) and (FFileList.Count > 0) then
+        begin
+          // TODO: 搜到则弹列表
+          ShowMessage('Found Files ' + IntToStr(FFileList.Count));
+          ShowMessage(FFileList.Text);
+        end
+        else
+          ErrorDlg(SCnEditorOpenFileNotFind);
+      end;
+
     end;
 end;
 
@@ -223,6 +245,38 @@ begin
     FileName := FileName + '.cpp';
 
   Result := SearchAFile(FileName);
+end;
+
+function TCnEditorOpenFile.SearchFileList(FileName: string): Boolean;
+var
+  I: Integer;
+  Paths: TStrings;
+begin
+  Paths := TStringList.Create;
+  try
+    GetLibraryPath(Paths);
+    for I := 0 to Paths.Count - 1 do
+      FindFile(MakePath(Paths[I]), '*' + FileName + '*', DoFindFileList, nil, True, True);
+
+    FindFile(MakePath(GetInstallDir) + 'Source\', '*' + FileName + '*', DoFindFileList, nil, True, True);
+
+    Result := FFileList.Count > 0;
+  finally
+    Paths.Free;
+  end;
+end;
+
+destructor TCnEditorOpenFile.Destroy;
+begin
+  FreeAndNil(FFileList);
+  inherited;
+end;
+
+procedure TCnEditorOpenFile.DoFindFileList(const FileName: string;
+  const Info: TSearchRec; var Abort: Boolean);
+begin
+  if FFileList.IndexOf(FileName) < 0 then
+    FFileList.Add(FileName);
 end;
 
 initialization
