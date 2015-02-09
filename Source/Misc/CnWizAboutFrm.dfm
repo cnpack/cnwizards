@@ -342,10 +342,10 @@ inherited CnWizAboutForm: TCnWizAboutForm
   object lblSource: TLabel
     Left = 96
     Top = 200
-    Width = 215
+    Width = 190
     Height = 13
     Cursor = crHandPoint
-    Caption = 'Source Code: http://cnpack.googlecode.com'
+    Caption = 'Source Code: http://github.com/cnpack'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlue
     Font.Height = -11
