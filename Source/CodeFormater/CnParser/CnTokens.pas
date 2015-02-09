@@ -280,7 +280,7 @@ const
 
   DeclSectionTokens = ProcedureHeadingTokens + [tokKeywordLabel, tokKeywordConst,
     tokKeywordResourcestring, tokKeywordType, tokKeywordVar, tokKeywordThreadvar,
-    tokKeywordExports];
+    tokKeywordExports, tokSLB]; // [ means Attributes
 
   InterfaceDeclTokens = [tokKeywordConst, tokKeywordResourcestring,
     tokKeywordThreadvar, tokKeywordType, tokKeywordVar, tokKeywordProcedure,

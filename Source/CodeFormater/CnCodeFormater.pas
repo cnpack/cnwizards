@@ -170,7 +170,7 @@ type
     procedure FormatVarSection(PreSpaceCount: Byte = 0);
     procedure FormatVarDecl(PreSpaceCount: Byte = 0);
     procedure FormatProcedureDeclSection(PreSpaceCount: Byte = 0);
-
+    procedure FormatSingleAttribute(PreSpaceCount: Byte = 0);
     procedure FormatType(PreSpaceCount: Byte = 0; IgnoreDirective: Boolean = False);
     procedure FormatSetType(PreSpaceCount: Byte = 0);
     procedure FormatFileType(PreSpaceCount: Byte = 0);
@@ -3637,9 +3637,10 @@ var
 begin
   MakeLine := False;
   LastIsInternalProc := False;
+
   while Scaner.Token in DeclSectionTokens do
   begin
-    if MakeLine then
+    if MakeLine then // Attribute 后无须空行分隔所以 MakeLine 会被设为 False
     begin
       if IsInternal then  // 内部的定义只需要空一行
         Writeln
@@ -3647,6 +3648,7 @@ begin
         WriteLine;
     end;
 
+    MakeLine := True;
     case Scaner.Token of
       tokKeywordLabel:
         begin
@@ -3688,10 +3690,24 @@ begin
             Writeln;
           LastIsInternalProc := True;
         end;
+      tokSLB:
+        begin
+          // Attributes for procedure in implementation
+          if IsInternal then
+          begin
+            Writeln; // 与上一个 local procedure 空一行
+            FormatSingleAttribute(Tab(PreSpaceCount));
+          end
+          else
+          begin
+            FormatSingleAttribute(PreSpaceCount);
+            Writeln;
+          end;
+          MakeLine := False;
+        end;
     else
       Error('DeclSection is needed.');
     end;
-    MakeLine := True;
   end;
 end;
 
@@ -3847,7 +3863,7 @@ begin
     Writeln;
 
   if ((not IsExternal) and (not IsForward)) and
-    (Scaner.Token in BlockStmtTokens + DeclSectionTokens) then
+    (Scaner.Token in BlockStmtTokens + DeclSectionTokens) then // Local procedure also supports Attribute
   begin
     FormatBlock(PreSpaceCount, True);
     if Scaner.Token = tokSemicolon then
@@ -4478,6 +4494,20 @@ begin
 
   while Scaner.Token in DirectiveTokens do
     FormatDirective;
+end;
+
+procedure TCnBasePascalFormatter.FormatSingleAttribute(
+  PreSpaceCount: Byte);
+begin
+  Match(tokSLB, PreSpaceCount);
+  FormatIdent;
+  if Scaner.Token = tokLB then
+  begin
+    Match(tokLB);
+    FormatExprList;
+    Match(tokRB);
+  end;
+  Match(tokSRB);
 end;
 
 end.
