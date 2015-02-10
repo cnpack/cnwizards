@@ -265,7 +265,11 @@ end;
 
 function TCnEditorCodeToggleComment.GetDefShortCut: TShortCut;
 begin
+{$IFDEF COMPILER9_UP}
+  Result := 0;       // BDS does not need this shortcut for problem if current window is not editor but structured window etc.
+{$ELSE}
   Result := $40BF;   // Ctrl+/
+{$ENDIF}
 end;
 
 procedure TCnEditorCodeToggleComment.GetNewPos(var ARow, ACol: Integer);
