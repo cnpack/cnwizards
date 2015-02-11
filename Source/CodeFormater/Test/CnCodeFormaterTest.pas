@@ -116,7 +116,7 @@ var
 implementation
 
 uses
-  CnCodeFormater, CnCodeFormatRules, CnScaners, CnTokens;
+  CnCodeFormatter, CnCodeFormatRules, CnScaners, CnTokens;
 
 {$R *.DFM}
 

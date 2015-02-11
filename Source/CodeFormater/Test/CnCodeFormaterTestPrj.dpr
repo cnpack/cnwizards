@@ -5,7 +5,7 @@ uses
   CnCodeFormaterTest in 'CnCodeFormaterTest.pas' {MainForm},
   CnScaners in '..\CnParser\CnScaners.pas',
   CnTokens in '..\CnParser\CnTokens.pas',
-  CnCodeFormater in '..\CnCodeFormater.pas',
+  CnCodeFormatter in '..\CnCodeFormatter.pas',
   CnParseConsts in '..\CnParser\CnParseConsts.pas',
   CnCodeGenerators in '..\CnParser\CnCodeGenerators.pas',
   CnCodeFormatRules in '..\CnCodeFormatRules.pas',
