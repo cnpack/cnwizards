@@ -38,6 +38,8 @@ unit CnCodeFormatter;
 
 interface
 
+{$I CnPack.inc}
+
 uses
   Classes, SysUtils, Dialogs, CnTokens, CnScaners, CnCodeGenerators,
   CnCodeFormatRules;

@@ -37,6 +37,8 @@ unit CnCodeFormatRules;
 
 interface
 
+{$I CnPack.inc}
+
 type
   TCnCodeStyle = (fsNone);
 

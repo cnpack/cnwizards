@@ -38,6 +38,8 @@ unit CnCodeGenerators;
 
 interface
 
+{$I CnPack.inc}
+
 uses
   Classes, SysUtils;
 
