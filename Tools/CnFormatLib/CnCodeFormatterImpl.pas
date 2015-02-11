@@ -18,7 +18,7 @@
 {                                                                              }
 {******************************************************************************}
 
-unit CnFormatterIntf;
+unit CnCodeFormatterImpl;
 {* |<PRE>
 ================================================================================
 * 软件名称：CnPack 代码格式化专家
@@ -39,71 +39,91 @@ interface
 {$I CnPack.inc}
 
 uses
-  Classes, SysUtils, Windows;
+  CnFormatterIntf, SysUtils, Classes, Windows;
 
-const
-  // 遇见 IFDEF ELSE ENDIF 时的处理模式
-  CN_RULE_DIRECTIVE_MODE_ASCOMMENT  = 1;
-  {* 当作注释处理}
-  CN_RULE_DIRECTIVE_MODE_ONLYFIRST  = 2;
-  {* 只处理第一部分}
-  CN_RULE_DIRECTIVE_MODE_DEFAULT    = CN_RULE_DIRECTIVE_MODE_ASCOMMENT;
+function GetCodeFormatterProvider: ICnPascalFormatterIntf; stdcall;
 
-  // 关键字大小写规则
-  CN_RULE_KEYWORD_STYLE_UPPER       = 1;
-  {* 全大写}
-  CN_RULE_KEYWORD_STYLE_LOWER       = 2;
-  {* 全小写}
-  CN_RULE_KEYWORD_STYLE_UPPERFIRST  = 3;
-  {* 首字母大写}
-  CN_RULE_KEYWORD_STYLE_DEFAULT     = CN_RULE_KEYWORD_STYLE_LOWER;
+exports
+  GetCodeFormatterProvider;
 
-  // 默认缩进空格数
-  CN_RULE_TABSPACE_DEFAULT          = 2;
-
-  // 双目运算符前的默认空格数
-  CN_RULE_SPACE_BEFORE_OPERATOR      = 1;
-
-  // 双目运算符后的默认空格数
-  CN_RULE_SPACE_AFTER_OPERATOR       = 1;
-
-  // 汇编指令行首默认缩进
-  CN_RULE_SPACE_BEFORE_ASM           = 8;
-
-  // 汇编指令 Tab 宽度
-  CN_RULE_SPACE_TAB_ASM              = 8;
-
-  // 默认换行超出此宽度
-  CN_RULE_LINE_WRAP_WIDTH            = 80;
-
-  // 由外部指定的起始元素类型
-  CN_START_UNKNOWN_ALL               = 0;
-  CN_START_USES                      = 1;
-  CN_START_CONST                     = 2;
-  CN_START_TYPE                      = 3;
-  CN_START_VAR                       = 4;
-  CN_START_PROC                      = 5;
-  CN_START_STATEMENT                 = 6;
+implementation
 
 type
-  ICnPascalFormatterIntf = interface
-    ['{0CC0F874-227A-4516-9D17-6331EA86CBCA}']
+  TCnCodeFormatProvider = class(TInterfacedObject, ICnPascalFormatterIntf)
+  private
+    FResult: PAnsiChar;
+    procedure AdjustResultLength(Len: DWORD);
+  public
+    constructor Create;
+    destructor Destroy; override;
+
     procedure SetPascalFormatRule(DirectiveMode: DWORD; KeywordStyle: DWORD; TabSpace:
       DWORD; SpaceBeforeOperator: DWORD; SpaceAfterOperator: DWORD; SpaceBeforeAsm:
       DWORD; SpaceTabAsm: DWORD; LineWrapWidth: DWORD; UsesSingleLine: LongBool);
-    {* 设置格式化选项}
 
     function FormatOnePascalUnit(Input: PAnsiChar; Len: DWORD): PAnsiChar;
-    {* 格式化一整个 Pascal 文件内容，代码以 AnsiString 格式传入。
-       返回结果存储的 AnsiString 字符内容的指针，用完后无须释放}
 
     function FormatPascalBlock(StartType: DWORD; StartIndent: DWORD;
       Input: PAnsiChar; Len: DWORD): PAnsiChar;
-    {* 格式化一块代码。需要指定起始代码类型以及起始缩进。
-       代码以 AnsiString 格式传入，返回结果存储的 AnsiString 字符内容的指针，
-       用完后无须释放}
   end;
 
-implementation
+var
+  FCodeFormatProvider: TCnCodeFormatProvider = nil;
+
+function GetCodeFormatterProvider: ICnPascalFormatterIntf; stdcall;
+begin
+  if FCodeFormatProvider = nil then
+    FCodeFormatProvider := TCnCodeFormatProvider.Create;
+  Result := FCodeFormatProvider;
+end;
+
+{ FCodeFormatProvider }
+
+procedure TCnCodeFormatProvider.AdjustResultLength(Len: DWORD);
+begin
+  if FResult <> nil then
+  begin
+    StrDispose(FResult);
+    FResult := nil;
+  end;
+
+  if Len > 0 then
+    FResult := StrAlloc(Len);
+end;
+
+constructor TCnCodeFormatProvider.Create;
+begin
+
+end;
+
+destructor TCnCodeFormatProvider.Destroy;
+begin
+  AdjustResultLength(0);
+  inherited;
+end;
+
+function TCnCodeFormatProvider.FormatPascalBlock(StartType, StartIndent: DWORD;
+  Input: PAnsiChar; Len: DWORD): PAnsiChar;
+begin
+  Result := FResult;
+end;
+
+function TCnCodeFormatProvider.FormatOnePascalUnit(Input: PAnsiChar;
+  Len: DWORD): PAnsiChar;
+begin
+  Result := FResult;
+end;
+
+procedure TCnCodeFormatProvider.SetPascalFormatRule(DirectiveMode, KeywordStyle,
+  TabSpace, SpaceBeforeOperator, SpaceAfterOperator, SpaceBeforeAsm,
+  SpaceTabAsm, LineWrapWidth: DWORD; UsesSingleLine: LongBool);
+begin
+
+end;
+
+initialization
+
+finalization
+  FreeAndNil(FCodeFormatProvider);
 
 end.
