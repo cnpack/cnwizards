@@ -72,7 +72,7 @@ begin
       bmp.SaveToFile(string(BmpFile));
       Result := True;
     end;
-  except
+  finally
     png.Free;
     bmp.Free;
   end;
@@ -120,7 +120,7 @@ begin
       png.SaveToFile(string(PngFile));
       Result := True;
     end;
-  except
+  finally
     png.Free;
     bmp.Free;
   end;
