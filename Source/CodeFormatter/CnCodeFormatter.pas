@@ -4208,7 +4208,7 @@ begin
     Match(Scaner.Token);
 
   Match(tokSemicolon);
-  Writeln;
+  WriteLine;
 
   FormatProgramBlock(PreSpaceCount);
   Match(tokDot);
