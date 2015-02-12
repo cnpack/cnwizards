@@ -19,7 +19,6 @@
 {******************************************************************************}
 
 unit CnParseConsts;
-
 {* |<PRE>
 ================================================================================
 * 软件名称：CnPack 代码格式化专家
@@ -37,6 +36,8 @@ unit CnParseConsts;
 |</PRE>}
 
 interface
+
+{$I CnPack.inc}
 
 resourcestring
   SIdentifierExpected = 'Identifier expected';

@@ -18,7 +18,6 @@ uses
   CnCodeFormatter in '..\..\Source\CodeFormatter\CnCodeFormatter.pas',
   CnCodeFormatRules in '..\..\Source\CodeFormatter\CnCodeFormatRules.pas',
   CnCodeGenerators in '..\..\Source\CodeFormatter\CnParser\CnCodeGenerators.pas',
-  CnCompilerConsts in '..\..\Source\CodeFormatter\CnParser\CnCompilerConsts.pas',
   CnParseConsts in '..\..\Source\CodeFormatter\CnParser\CnParseConsts.pas',
   CnPascalGrammar in '..\..\Source\CodeFormatter\CnParser\CnPascalGrammar.pas',
   CnScaners in '..\..\Source\CodeFormatter\CnParser\CnScaners.pas',
