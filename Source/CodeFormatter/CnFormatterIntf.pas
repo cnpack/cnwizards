@@ -104,6 +104,9 @@ type
        用完后无须释放}
   end;
 
+  TCnGetFormatterProvider = function: ICnPascalFormatterIntf; stdcall;
+  {* DLL 中的函数类型}
+
 implementation
 
 end.

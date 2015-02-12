@@ -43,7 +43,7 @@ OutputDir=..\..\Bin
 UnitOutputDir=..\..\Dcu
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=..\..\Source
+SearchPath=..\..\Source;..\..\..\cnvcl\Source\Common;..\..\Source\ThirdParty\JCL
 Packages=Vcl50;Vclx50;VclSmp50;Vcldb50;vclado50;ibevnt50;Vclbde50;vcldbx50;Qrpt50;TeeUI50;TeeDB50;Tee50;Dss50;TeeQR50;VCLIB50;Vclmid50;vclie50;Inetdb50;Inet50;NMFast50;webmid50;dclocx50;dclaxserver50
 Conditionals=
 DebugSourceDirs=
@@ -53,7 +53,7 @@ RunParams=
 HostApplication=
 [Language]
 ActiveLang=
-ProjectLang=
+ProjectLang=$00000804
 RootDir=
 [Version Info]
 IncludeVerInfo=0
@@ -80,12 +80,18 @@ OriginalFilename=
 ProductName=
 ProductVersion=1.0.0.0
 Comments=
+[HistoryLists\hlConditionals]
+Count=1
+Item0=DEBUG;USE_JCL
 [HistoryLists\hlUnitAliases]
 Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlSearchPath]
-Count=1
-Item0=..\..\Source
+Count=4
+Item0=..\..\Source;..\..\..\cnvcl\Source\Common;..\..\Source\ThirdParty\JCL
+Item1=..\..\Source;..\..\..\cnvcl\Source\Common
+Item2=..\..\Source;..\..\..\..\cnvcl\Source\Common
+Item3=..\..\Source
 [HistoryLists\hlUnitOutputDirectory]
 Count=1
 Item0=..\..\Dcu

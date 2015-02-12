@@ -48,6 +48,9 @@ exports
 
 implementation
 
+uses
+  CnCodeFormatter;
+
 type
   TCnCodeFormatProvider = class(TInterfacedObject, ICnPascalFormatterIntf)
   private
@@ -88,12 +91,16 @@ begin
   end;
 
   if Len > 0 then
+  begin
     FResult := StrAlloc(Len);
+    ZeroMemory(FResult, Len);
+  end;
 end;
 
 constructor TCnCodeFormatProvider.Create;
 begin
-
+  inherited;
+  
 end;
 
 destructor TCnCodeFormatProvider.Destroy;
@@ -105,12 +112,44 @@ end;
 function TCnCodeFormatProvider.FormatPascalBlock(StartType, StartIndent: DWORD;
   Input: PAnsiChar; Len: DWORD): PAnsiChar;
 begin
+  AdjustResultLength(0);
   Result := FResult;
 end;
 
 function TCnCodeFormatProvider.FormatOnePascalUnit(Input: PAnsiChar;
   Len: DWORD): PAnsiChar;
+var
+  Stream: TStream;
+  CodeFor: TCnPascalCodeFormatter;
 begin
+  AdjustResultLength(0);
+  if (Input = nil) or (Len = 0) then
+  begin
+    Result := nil;
+    Exit;
+  end;
+
+  Stream := TMemoryStream.Create;
+  Stream.Write(Input^, Len);
+  CodeFor := TCnPascalCodeFormatter.Create(Stream);
+
+  try
+    try
+      CodeFor.FormatCode;
+    finally
+      CodeFor.SaveToStream(Stream);
+    end;
+
+    if Stream.Size > 0 then
+    begin
+      AdjustResultLength(Stream.Size + 1);
+      Stream.Position := 0;
+      Stream.Read(FResult^, Stream.Size);
+    end;
+  finally
+    Stream.Free;
+    CodeFor.Free;
+  end;
   Result := FResult;
 end;
 
