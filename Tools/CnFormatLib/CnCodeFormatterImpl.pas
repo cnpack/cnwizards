@@ -49,7 +49,7 @@ exports
 implementation
 
 uses
-  CnCodeFormatter;
+  CnCodeFormatter {$IFDEF DEBUG} , CnDebug {$ENDIF} ;
 
 type
   TCnCodeFormatProvider = class(TInterfacedObject, ICnPascalFormatterIntf)
@@ -71,7 +71,7 @@ type
   end;
 
 var
-  FCodeFormatProvider: TCnCodeFormatProvider = nil;
+  FCodeFormatProvider: ICnPascalFormatterIntf = nil;
 
 function GetCodeFormatterProvider: ICnPascalFormatterIntf; stdcall;
 begin
@@ -119,7 +119,7 @@ end;
 function TCnCodeFormatProvider.FormatOnePascalUnit(Input: PAnsiChar;
   Len: DWORD): PAnsiChar;
 var
-  Stream: TStream;
+  InStream, OutStream: TStream;
   CodeFor: TCnPascalCodeFormatter;
 begin
   AdjustResultLength(0);
@@ -129,26 +129,29 @@ begin
     Exit;
   end;
 
-  Stream := TMemoryStream.Create;
-  Stream.Write(Input^, Len);
-  CodeFor := TCnPascalCodeFormatter.Create(Stream);
+  InStream := TMemoryStream.Create;
+  OutStream := TMemoryStream.Create;
+
+  InStream.Write(Input^, Len);
+  CodeFor := TCnPascalCodeFormatter.Create(InStream);
 
   try
     try
       CodeFor.FormatCode;
     finally
-      CodeFor.SaveToStream(Stream);
+      CodeFor.SaveToStream(OutStream);
     end;
 
-    if Stream.Size > 0 then
+    if OutStream.Size > 0 then
     begin
-      AdjustResultLength(Stream.Size + 1);
-      Stream.Position := 0;
-      Stream.Read(FResult^, Stream.Size);
+      AdjustResultLength(OutStream.Size + 1);
+      OutStream.Position := 0;
+      OutStream.Read(FResult^, OutStream.Size);
     end;
   finally
-    Stream.Free;
     CodeFor.Free;
+    InStream.Free;
+    OutStream.Free;
   end;
   Result := FResult;
 end;
