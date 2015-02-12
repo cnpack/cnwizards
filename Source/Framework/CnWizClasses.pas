@@ -829,7 +829,7 @@ begin
       Execute;
   except
     on E: Exception do
-      DoHandleException(Format('% Click Error. %s - %s',
+      DoHandleException(Format('%s Click Error. %s - %s',
         [ClassName, E.ClassName, E.Message]));
   end;
 end;
