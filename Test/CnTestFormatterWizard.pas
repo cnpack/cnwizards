@@ -54,7 +54,6 @@ type
   TCnTestFormatterWizard = class(TCnMenuWizard)
   private
     FHandle: THandle;
-    FFormatter: ICnPascalFormatterIntf;
     FGetProvider: TCnGetFormatterProvider;
   protected
     function GetHasConfig: Boolean; override;
@@ -103,19 +102,16 @@ end;
 constructor TCnTestFormatterWizard.Create;
 begin
   inherited;
-  FHandle := LoadLibrary(PChar(ModulePath + DLLName));
-  if FHandle <> 0 then
-  begin
-    FGetProvider := TCnGetFormatterProvider(GetProcAddress(FHandle, 'GetCodeFormatterProvider'));
-    if FGetProvider <> nil then
-      FFormatter := FGetProvider();
-  end;
+
 end;
 
 destructor TCnTestFormatterWizard.Destroy;
 begin
-  FFormatter := nil;
-  FreeLibrary(FHandle);
+  if FHandle <> 0 then
+  begin
+    FreeLibrary(FHandle);
+    FHandle := 0;
+  end;
   inherited;
 end;
 
@@ -123,18 +119,46 @@ procedure TCnTestFormatterWizard.Execute;
 var
   S: AnsiString;
   Res: PAnsiChar;
+  Formatter: ICnPascalFormatterIntf;
 begin
-  if FFormatter = nil then
+  if FHandle = 0 then
+   FHandle := LoadLibrary(PChar(ModulePath + DLLName));
+   
+  if FHandle = 0 then
   begin
+    ShowMessage('No DLL Found.');
+    Exit;
+  end;
+
+  if not Assigned(FGetProvider) then
+    FGetProvider := TCnGetFormatterProvider(GetProcAddress(FHandle, 'GetCodeFormatterProvider'));
+  if not Assigned(FGetProvider) then
+  begin
+    FreeLibrary(FHandle);
+    FHandle := 0;
+    ShowMessage('No Provider Found.');
+    Exit;
+  end;
+
+  Formatter := FGetProvider();
+  if Formatter = nil then
+  begin
+    FGetProvider := nil;
+    FreeLibrary(FHandle);
+    FHandle := 0;
     ShowMessage('No Formatter Found.');
     Exit;
   end;
 
-  S := AnsiString(CnOtaGetCurrentEditorSource);
-  Res := FFormatter.FormatOnePascalUnit(PAnsiChar(S), Length(S));
+  try
+    S := AnsiString(CnOtaGetCurrentEditorSource);
+    Res := Formatter.FormatOnePascalUnit(PAnsiChar(S), Length(S));
 
-  if Res <> nil then
-    ShowMessage(Res);
+    if Res <> nil then
+      ShowMessage(Res);
+  finally
+    Formatter := nil;
+  end;
 end;
 
 function TCnTestFormatterWizard.GetCaption: string;

@@ -166,6 +166,6 @@ end;
 initialization
 
 finalization
-  FreeAndNil(FCodeFormatProvider);
+  FCodeFormatProvider := nil;
 
 end.
