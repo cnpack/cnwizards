@@ -630,7 +630,7 @@ function CnOtaLinePosToEditPos(LinePos: Integer; EditView: IOTAEditView = nil): 
 procedure CnOtaSaveReaderToStream(EditReader: IOTAEditReader; Stream:
   TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
   PreSize: Integer = 0; CheckUtf8: Boolean = True);
-{* 保存EditReader内容到流中}
+{* 保存EditReader内容到流中，流中的内容默认为 Ansi 格式}
 
 procedure CnOtaSaveEditorToStreamEx(Editor: IOTASourceEditor; Stream:
   TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
@@ -4484,7 +4484,7 @@ begin
   end;
 end;
 
-// 保存EditReader内容到流中
+// 保存EditReader内容到流中，流中的内容默认为 Ansi 格式
 procedure CnOtaSaveReaderToStream(EditReader: IOTAEditReader; Stream:
   TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
   PreSize: Integer = 0; CheckUtf8: Boolean = True);
@@ -4625,7 +4625,7 @@ begin
   Strm := TMemoryStream.Create;
   try
     if CnOtaSaveCurrentEditorToStream(Strm, False, True) then
-      Result := PChar(Strm.Memory);
+      Result := string(PAnsiChar(Strm.Memory));
   finally
     Strm.Free;
   end;   
