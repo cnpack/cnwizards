@@ -648,6 +648,9 @@ function CnOtaSaveCurrentEditorToStream(Stream: TMemoryStream; FromCurrPos:
 function CnOtaGetCurrentEditorSource: string;
 {* 取得当前编辑器源代码}
 
+procedure CnOtaSetCurrentEditorSource(const Text: string);
+{* 设置当前编辑器源代码}
+
 procedure CnOtaInsertLineIntoEditor(const Text: string);
 {* 插入一个字符串到当前 IOTASourceEditor，仅在 Text 为单行文本时有用
    它会替换当前所选的文本。}
@@ -4631,6 +4634,26 @@ begin
   end;   
 end;  
 
+// 设置当前编辑器源代码
+procedure CnOtaSetCurrentEditorSource(const Text: string);
+var
+  EditWriter: IOTAEditWriter;
+begin
+  if Text = '' then
+    Exit;
+  EditWriter := CnOtaGetEditWriterForSourceEditor(nil);
+  try
+    EditWriter.DeleteTo(MaxInt);
+  {$IFDEF UNICODE_STRING}
+    EditWriter.Insert(PAnsiChar(ConvertTextToEditorText(AnsiString(Text))));
+  {$ELSE}
+    EditWriter.Insert(PAnsiChar(ConvertTextToEditorText(Text)));
+  {$ENDIF}
+  finally
+    EditWriter := nil;
+  end;
+end;
+
 // 插入一个字符串到当前 IOTASourceEditor，仅在 Text 为单行文本时有用
 procedure CnOtaInsertLineIntoEditor(const Text: string);
 var
@@ -4718,7 +4741,7 @@ begin
   {$ENDIF}
   finally
     EditWriter := nil;
-  end;          
+  end;
 end;
 
 // 移动光标到指定位置，如果 EditView 为空使用当前值。
