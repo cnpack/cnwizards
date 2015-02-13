@@ -71,6 +71,7 @@
     <DelphiCompile Include="CnWizards_D2007.dpr">
       <MainSource>MainSource</MainSource>
     </DelphiCompile>
+    <DCCReference Include="CodeFormatter\CnFormatterIntf.pas" />
     <DCCReference Include="Config\CnWizConfigFrm.pas">
       <Form>CnWizConfigForm</Form>
     </DCCReference>

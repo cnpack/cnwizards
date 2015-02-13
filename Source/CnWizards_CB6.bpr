@@ -78,7 +78,8 @@
       ..\Dcu\CnEditorToggleUses.obj ..\Dcu\CnEditorJumpMessage.obj 
       ..\Dcu\CnSrcEditorKey.obj ..\Dcu\CnIdentRenameFrm.obj 
       ..\Dcu\CnIdeEnhanceMenu.obj ..\Dcu\CnSourceHighlight.obj 
-      ..\Dcu\CnSourceHighlightFrm.obj ..\Dcu\CnHighlightLineFrm.obj ..\Dcu\CnHighlightSeparateLineFrm.obj 
+      ..\Dcu\CnSourceHighlightFrm.obj ..\Dcu\CnHighlightLineFrm.obj 
+      ..\Dcu\CnHighlightSeparateLineFrm.obj ..\Dcu\CnFormatterIntf.obj
       ..\Dcu\CnInputSymbolList.obj ..\Dcu\CnInputHelper.obj 
       ..\Dcu\CnInputHelperEditFrm.obj ..\Dcu\CnInputHelperFrm.obj 
       ..\Dcu\CnInputIdeSymbolList.obj ..\Dcu\CnSrcEditorWebSearch.obj 
@@ -387,6 +388,7 @@
       <FILE FILENAME="Utils\CnImageProviderMgr.pas" FORMNAME="" UNITNAME="CnImageProviderMgr.pas" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnImageProvider_FindIcons.pas" FORMNAME="" UNITNAME="CnImageProvider_FindIcons" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnImageProvider_LocalCache.pas" FORMNAME="" UNITNAME="CnImageProvider_LocalCache" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="CodeFormatter\CnFormatterIntf.pas" FORMNAME="" UNITNAME="CnFormatterIntf" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
   </FILELIST>
   <BUILDTOOLS>
   </BUILDTOOLS>

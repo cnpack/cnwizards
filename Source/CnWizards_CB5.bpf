@@ -183,6 +183,7 @@ USEUNIT("Utils\CnImageProvider_IconFinder.pas");
 USEUNIT("Utils\CnImageProviderMgr.pas");
 USEUNIT("Utils\CnImageProvider_FindIcons.pas");
 USEUNIT("Utils\CnImageProvider_LocalCache.pas");
+USEUNIT("CodeFormatter\CnFormatterIntf.pas");
 //---------------------------------------------------------------------------
 This file is used by the project manager only and should be treated like the project file
 

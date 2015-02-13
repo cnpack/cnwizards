@@ -138,6 +138,7 @@
 			<DCCReference Include="Utils\CnWizUtils.pas"/>
 			<DCCReference Include="Utils\CnWizNotifier.pas"/>
 			<DCCReference Include="Utils\CnWizIdeUtils.pas"/>
+			<DCCReference Include="CodeFormatter\CnFormatterIntf.pas" />
 			<DCCReference Include="Config\CnWizConfigFrm.pas">
 				<Form>CnWizConfigForm</Form>
 			</DCCReference>
