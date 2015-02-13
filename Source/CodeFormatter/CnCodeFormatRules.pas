@@ -42,13 +42,17 @@ interface
 type
   TCnCodeStyle = (fsNone);
 
+  TCnCodeStyles = set of TCnCodeStyle;
+
   TKeywordStyle = (ksLowerCaseKeyword, ksUpperCaseKeyword, ksPascalKeyword);
 
-  TCnCodeStyles = set of TCnCodeStyle;
+  TCompDirectiveMode = (cdmAsComment, cdmOnlyFirst);
 
   TCnPascalCodeFormatRule = record
     ContinueAfterError: Boolean;
     CodeStyle: TCnCodeStyles;
+
+    CompDirectiveMode: TCompDirectiveMode;
     KeywordStyle: TKeywordStyle;
     TabSpaceCount: Byte;
     SpaceBeforeOperator: Byte;
@@ -64,6 +68,8 @@ const
   (
     ContinueAfterError: False;
     CodeStyle: [];
+
+    CompDirectiveMode: cdmAsComment;
     KeywordStyle: ksLowerCaseKeyword;
     TabSpaceCount: 2;
     SpaceBeforeOperator: 1;

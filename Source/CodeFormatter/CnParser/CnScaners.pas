@@ -44,10 +44,7 @@ interface
 
 uses
   Classes, SysUtils, Contnrs,
-  CnParseConsts, CnTokens, CnCodeGenerators;
-
-type
-  TCompDirectiveMode = (cdmAsComment, cdmOnlyFirst);
+  CnParseConsts, CnTokens, CnCodeGenerators, CnCodeFormatRules;
 
 type
   TScannerBookmark = class(TObject)
