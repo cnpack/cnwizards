@@ -122,7 +122,7 @@ var
   Formatter: ICnPascalFormatterIntf;
 begin
   if FHandle = 0 then
-   FHandle := LoadLibrary(PChar(ModulePath + DLLName));
+    FHandle := LoadLibrary(PChar(ModulePath + DLLName));
    
   if FHandle = 0 then
   begin
@@ -155,7 +155,10 @@ begin
     Res := Formatter.FormatOnePascalUnit(PAnsiChar(S), Length(S));
 
     if Res <> nil then
+    begin
       ShowMessage(Res);
+      CnOtaSetCurrentEditorSource(string(Res));
+    end;
   finally
     Formatter := nil;
   end;
