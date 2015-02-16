@@ -697,12 +697,45 @@ end;
 { Expression -> SimpleExpression [RelOp SimpleExpression]... }
 procedure TCnBasePascalFormatter.FormatExpression(PreSpaceCount: Byte;
   CurrentIndent: Byte);
+var
+  IsGeneric: Boolean;
+  GenericBookmark: TScannerBookmark;
 begin
   FormatSimpleExpression(PreSpaceCount, CurrentIndent);
 
   while Scaner.Token in RelOpTokens + [tokHat, tokSLB, tokDot] do
   begin
-    if Scaner.Token in RelOpTokens then
+    IsGeneric := False;
+    if Scaner.Token = tokLess then
+    begin
+      // 判断泛型，如果不是，恢复书签往下走；如果是，搞了泛型再要跳过下面
+      // 的 RelOpTokens 判断；
+      Scaner.SaveBookmark(GenericBookmark);
+
+      // 往后找，一直找到非类型的关键字或者分号或者文件尾。
+      // 如果出现标识符以及.^<>, 之外的 Token，则认为不是泛型。
+      // TODO: 判断还是不太严密，待继续验证。
+      IsGeneric := True;
+      Scaner.NextToken;
+      while not (Scaner.Token in KeywordTokens + [tokSemicolon, tokEOF] - CanBeTypeKeywordTokens) do
+      begin
+        if not (Scaner.Token in GenericTokensInExpression + CanBeTypeKeywordTokens) then
+        begin
+          IsGeneric := False;
+          Break;
+        end;
+        Scaner.NextToken;
+      end;
+
+      Scaner.LoadBookmark(GenericBookmark);
+    end;
+
+    if IsGeneric then
+    begin
+      // 格式化泛型的小于号段
+      FormatTypeParams(PreSpaceCount);
+    end
+    else if Scaner.Token in RelOpTokens then
     begin
       MatchOperator(Scaner.Token);
       FormatSimpleExpression;

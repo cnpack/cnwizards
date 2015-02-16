@@ -315,6 +315,11 @@ const
     tokKeywordPublished, tokKeywordStrict, tokKeywordClass, tokKeywordProcedure,
     tokKeywordFunction, tokKeywordVar, tokKeywordConstructor, tokKeywordDestructor];
 
+  // 标识符后出现<时无法直接确定后面是泛型还是小于比较式，用这种方式判断
+  GenericTokensInExpression = [tokSymbol, tokDot, tokLess, tokGreat, tokHat, tokComma];
+
+  CanBeTypeKeywordTokens = [tokKeywordString, tokKeywordFile];
+
   function TokenToString(Token: TPascalToken): string;
   function StringToToken(TokenStr: string): TPascalToken;
 

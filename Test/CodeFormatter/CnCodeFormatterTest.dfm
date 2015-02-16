@@ -1,7 +1,7 @@
 object MainForm: TMainForm
   Left = 80
   Top = 71
-  Width = 1087
+  Width = 1036
   Height = 729
   Caption = 'CnPack IDE 专家包 Object Pascal / Delphi 代码格式化测试程序'
   Color = clBtnFace
@@ -18,8 +18,8 @@ object MainForm: TMainForm
   object PageControl1: TPageControl
     Left = 0
     Top = 0
-    Width = 1071
-    Height = 691
+    Width = 1028
+    Height = 702
     ActivePage = tsSingleTest
     Align = alClient
     TabOrder = 0
@@ -29,14 +29,14 @@ object MainForm: TMainForm
         Left = 505
         Top = 29
         Width = 3
-        Height = 635
+        Height = 646
         Cursor = crHSplit
       end
       object Panel1: TPanel
         Left = 0
         Top = 29
         Width = 505
-        Height = 635
+        Height = 646
         Align = alLeft
         BevelOuter = bvNone
         Caption = 'Panel1'
@@ -55,7 +55,7 @@ object MainForm: TMainForm
           Left = 0
           Top = 12
           Width = 505
-          Height = 623
+          Height = 634
           Align = alClient
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
@@ -103,7 +103,11 @@ object MainForm: TMainForm
             'const'
             '  PathDelim  = {$IFDEF MSWINDOWS} '#39'\'#39'; {$ELSE} '#39'/'#39'; {$ENDIF}'
             'implementation'
-            ''
+            '[SecurityPermission(SecurityAction.Assert, UnmanagedCode=True)]'
+            'function TGraphic.DefineProperties(Filer: TFiler): TObject;'
+            'begin'
+            '  Result :=  TFiler<TList<String, TObject>>.Create;'
+            'end;'
             'end.')
           ParentFont = False
           ScrollBars = ssBoth
@@ -114,8 +118,8 @@ object MainForm: TMainForm
       object Panel2: TPanel
         Left = 508
         Top = 29
-        Width = 555
-        Height = 635
+        Width = 512
+        Height = 646
         Align = alClient
         BevelOuter = bvNone
         Caption = 'Panel1'
@@ -123,7 +127,7 @@ object MainForm: TMainForm
         object Label2: TLabel
           Left = 0
           Top = 0
-          Width = 555
+          Width = 512
           Height = 12
           Align = alTop
           Alignment = taCenter
@@ -133,8 +137,8 @@ object MainForm: TMainForm
         object DesMemo: TMemo
           Left = 0
           Top = 12
-          Width = 555
-          Height = 623
+          Width = 512
+          Height = 634
           Align = alClient
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
@@ -150,7 +154,7 @@ object MainForm: TMainForm
       object ToolBar1: TToolBar
         Left = 0
         Top = 0
-        Width = 1063
+        Width = 1020
         Height = 29
         BorderWidth = 1
         ButtonHeight = 20
