@@ -145,7 +145,7 @@ begin
     try
       FCodeFor.FormatCode;
     finally
-      FCodeFor.SaveToStream(MemStr);
+      //FCodeFor.SaveToStream(MemStr);
       FCodeFor.SaveToStrings(DesMemo.Lines);
     end;
   finally

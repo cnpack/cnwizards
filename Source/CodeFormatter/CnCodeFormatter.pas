@@ -103,6 +103,8 @@ type
   end;
 
   TCnBasePascalFormatter = class(TCnAbstractCodeFormatter)
+  private
+    function IsTokenAfterAttributeInSet(InTokens: TPascalTokenSet):Boolean;
   protected
     procedure FormatExprList(PreSpaceCount: Byte = 0; CurrentIndent: Byte = 0);
     procedure FormatExpression(PreSpaceCount: Byte = 0; CurrentIndent: Byte = 0);
@@ -700,6 +702,7 @@ procedure TCnBasePascalFormatter.FormatExpression(PreSpaceCount: Byte;
 var
   IsGeneric: Boolean;
   GenericBookmark: TScannerBookmark;
+  LessCount: Integer;
 begin
   FormatSimpleExpression(PreSpaceCount, CurrentIndent);
 
@@ -713,20 +716,27 @@ begin
       Scaner.SaveBookmark(GenericBookmark);
 
       // 往后找，一直找到非类型的关键字或者分号或者文件尾。
-      // 如果出现标识符以及.^<>, 之外的 Token，则认为不是泛型。
+      // 如果出现“标识符以及.^<>,”之外的 Token，则认为不是泛型。——此条规则不用
+      // 如果出现小于号和大于号不配对，则认为不是泛型。
       // TODO: 判断还是不太严密，待继续验证。
       IsGeneric := True;
       Scaner.NextToken;
+      LessCount := 1;
       while not (Scaner.Token in KeywordTokens + [tokSemicolon, tokEOF] - CanBeTypeKeywordTokens) do
       begin
-        if not (Scaner.Token in GenericTokensInExpression + CanBeTypeKeywordTokens) then
-        begin
-          IsGeneric := False;
-          Break;
-        end;
+        if Scaner.Token = tokLess then
+          Inc(LessCount)
+        else if Scaner.Token = tokGreat then
+          Dec(LessCount);
+
+//        if not (Scaner.Token in GenericTokensInExpression + CanBeTypeKeywordTokens) then
+//        begin
+//         IsGeneric := False;
+//          Break;
+//        end;
         Scaner.NextToken;
       end;
-
+      IsGeneric := (LessCount = 0);
       Scaner.LoadBookmark(GenericBookmark);
     end;
 
@@ -879,16 +889,12 @@ end;
 procedure TCnBasePascalFormatter.FormatIdent(PreSpaceCount: Byte;
   const CanHaveUnitQual: Boolean);
 begin
-  if Scaner.Token = tokSLB then // [Unsafe] 前缀
+  if Scaner.Token = tokSLB then // Attribute
   begin
-    Match(tokSLB, PreSpaceCount);
-    if Scaner.Token in KeywordTokens + [tokSymbol] then
-      Match(Scaner.Token);
-    Match(tokSRB, 0, 1); // ] 后有个空格
-    if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
-      Match(Scaner.Token); // 标识符中允许使用部分关键字
-  end
-  else if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
+    FormatSingleAttribute(PreSpaceCount);
+    Writeln;
+  end;
+  if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
     Match(Scaner.Token, PreSpaceCount); // 标识符中允许使用部分关键字
 
   while CanHaveUnitQual and (Scaner.Token = tokDot) do
@@ -2177,7 +2183,7 @@ begin
   until Scaner.Token in ClassMethodTokens + ClassVisibilityTokens + [tokKeywordEnd, tokEOF]; // 出现这些，认为 class var 区结束
 end;
 
-{ IdentList -> [Unsafe] Ident/','... }
+{ IdentList -> [Attribute] Ident/','... }
 procedure TCnBasePascalFormatter.FormatClassVarIdentList(PreSpaceCount: Byte;
   const CanHaveUnitQual: Boolean);
 begin
@@ -2193,16 +2199,12 @@ end;
 procedure TCnBasePascalFormatter.FormatClassVarIdent(PreSpaceCount: Byte;
   const CanHaveUnitQual: Boolean);
 begin
-  if Scaner.Token = tokSLB then // [Unsafe] 前缀
+  if Scaner.Token = tokSLB then // Attribute
   begin
-    Match(tokSLB, PreSpaceCount);
-    if Scaner.Token in KeywordTokens + [tokSymbol] then
-      Match(Scaner.Token);
-    Match(tokSRB, 0, 1); // ] 后有个空格
-    if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
-      Match(Scaner.Token); // 标识符中允许使用部分关键字
-  end
-  else if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
+    FormatSingleAttribute(PreSpaceCount);
+    Writeln;
+  end;
+  if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
     Match(Scaner.Token, PreSpaceCount); // 标识符中允许使用部分关键字
 
   while CanHaveUnitQual and (Scaner.Token = tokDot) do
@@ -2561,9 +2563,14 @@ begin
   // 放宽规则，允许出现 public 等内容
 
   // 循环放内部，因此内部需要 Writeln，这点和 Class 的 Property 处理不一样
-  while Scaner.Token in [tokKeywordProperty] + ClassMethodTokens do
+  while Scaner.Token in [tokKeywordProperty] + ClassMethodTokens + [tokSLB] do
   begin
-    if Scaner.Token = tokKeywordProperty then
+    if Scaner.Token = tokSLB then // interface 声明支持属性
+    begin
+      Writeln;
+      FormatSingleAttribute(Tab(PreSpaceCount));
+    end
+    else if Scaner.Token = tokKeywordProperty then
     begin
       Writeln;
       FormatClassPropertyList(PreSpaceCount + CnPascalCodeForRule.TabSpaceCount);
@@ -3507,6 +3514,12 @@ end;
 }
 procedure TCnBasePascalFormatter.FormatTypeDecl(PreSpaceCount: Byte);
 begin
+  if Scaner.Token = tokSLB then
+  begin
+    FormatSingleAttribute(PreSpaceCount);
+    Writeln;
+  end;
+    
   FormatIdent(PreSpaceCount);
 
   // 加入对<>泛型的支持
@@ -3530,6 +3543,9 @@ end;
 
 { TypeSection -> TYPE (TypeDecl ';')... }
 procedure TCnBasePascalFormatter.FormatTypeSection(PreSpaceCount: Byte);
+const
+  IsTypeStartTokens = [tokSymbol, tokSLB] + ComplexTokens + DirectiveTokens
+    + KeywordTokens - NOTExpressionTokens;
 var
   FirstType: Boolean;
 begin
@@ -3537,10 +3553,14 @@ begin
   Writeln;
 
   FirstType := True;
-  while Scaner.Token in [tokSymbol] + ComplexTokens + DirectiveTokens
-   + KeywordTokens - NOTExpressionTokens do
+  while Scaner.Token in IsTypeStartTokens do // Attribute will use [
   begin
+    // 如果是[，就要越过其属性，找到]后的第一个，确定它是否还是 type，如果不是，就跳出
+    if (Scaner.Token = tokSLB) and not IsTokenAfterAttributeInSet(IsTypeStartTokens) then
+      Exit;
+
     if not FirstType then WriteLine;
+
     FormatTypeDecl(Tab(PreSpaceCount));
     while Scaner.Token in DirectiveTokens do
       FormatDirective;
@@ -3644,13 +3664,19 @@ end;
   Note: resourcestring 只支持字符型常量，但格式化时可不考虑而当做普通常量对待
 }
 procedure TCnBasePascalFormatter.FormatConstSection(PreSpaceCount: Byte);
+const
+  IsConstStartTokens = [tokSymbol, tokSLB] + ComplexTokens + DirectiveTokens
+    + KeywordTokens - NOTExpressionTokens;
 begin
   if Scaner.Token in [tokKeywordConst, tokKeywordResourcestring] then
     Match(Scaner.Token, PreSpaceCount);
 
-  while Scaner.Token in [tokSymbol] + ComplexTokens + DirectiveTokens + KeywordTokens
-   - NOTExpressionTokens do // 这些关键字不宜做变量名但也不好处理，只有先写上
+  while Scaner.Token in IsConstStartTokens do // 这些关键字不宜做变量名但也不好处理，只有先写上
   begin
+    // 如果是[，就要越过其属性，找到]后的第一个，确定它是否还是 var，如果不是，就跳出
+    if (Scaner.Token = tokSLB) and not IsTokenAfterAttributeInSet(IsConstStartTokens) then
+      Exit;
+
     Writeln;
     FormatConstantDecl(Tab(PreSpaceCount));
     Match(tokSemicolon);
@@ -4043,13 +4069,19 @@ end;
 
 { VarSection -> VAR | THREADVAR (VarDecl ';')... }
 procedure TCnBasePascalFormatter.FormatVarSection(PreSpaceCount: Byte);
+const
+  IsVarStartTokens = [tokSymbol, tokSLB] + ComplexTokens + DirectiveTokens
+    + KeywordTokens - NOTExpressionTokens;
 begin
   if Scaner.Token in [tokKeywordVar, tokKeywordThreadvar] then
     Match(Scaner.Token, PreSpaceCount);
 
-  while Scaner.Token in [tokSymbol] + ComplexTokens + DirectiveTokens + KeywordTokens
-   + [tokSLB] - NOTExpressionTokens do // 这些关键字不宜做变量名但也不好处理，只有先写上
+  while Scaner.Token in IsVarStartTokens do // 这些关键字不宜做变量名但也不好处理，只有先写上
   begin
+    // 如果是[，就要越过其属性，找到]后的第一个，确定它是否还是 var，如果不是，就跳出
+    if (Scaner.Token = tokSLB) and not IsTokenAfterAttributeInSet(IsVarStartTokens) then
+      Exit;
+
     Writeln;
     FormatVarDecl(Tab(PreSpaceCount));
     Match(tokSemicolon);
@@ -4465,7 +4497,7 @@ begin
   Writeln;
 
   FirstType := True;
-  while Scaner.Token in [tokSymbol] + ComplexTokens + DirectiveTokens
+  while Scaner.Token in [tokSymbol, tokSLB] + ComplexTokens + DirectiveTokens
    + KeywordTokens - NOTExpressionTokens - NOTClassTypeConstTokens do
   begin
     if not FirstType then WriteLine;
@@ -4533,16 +4565,55 @@ end;
 
 procedure TCnBasePascalFormatter.FormatSingleAttribute(
   PreSpaceCount: Byte);
+var
+  IsFirst: Boolean;
 begin
   Match(tokSLB, PreSpaceCount);
-  FormatIdent;
-  if Scaner.Token = tokLB then
-  begin
-    Match(tokLB);
-    FormatExprList;
-    Match(tokRB);
-  end;
+  IsFirst := True;
+  repeat
+    if IsFirst then
+      FormatIdent
+    else
+      FormatIdent(PreSpaceCount);
+      
+    if Scaner.Token = tokLB then
+    begin
+      Match(tokLB);
+      FormatExprList;
+      Match(tokRB);
+    end;
+    if Scaner.Token = tokComma then // Multi-Attribute, use new line.
+    begin
+      Match(tokComma);
+      IsFirst := False;
+      Writeln;
+    end;
+  until Scaner.Token in [tokSRB, tokUnknown, tokEOF];
   Match(tokSRB);
+end;
+
+function TCnBasePascalFormatter.IsTokenAfterAttributeInSet(
+  InTokens: TPascalTokenSet): Boolean;
+var
+  Bookmark: TScannerBookmark;
+begin
+  Scaner.SaveBookmark(Bookmark);
+  try
+    Result := False;
+    if Scaner.Token <> tokSLB then
+      Exit;
+
+    while not (Scaner.Token in [tokEOF, tokUnknown, tokSRB]) do
+      Scaner.NextToken;
+
+    if Scaner.Token <> tokSRB then
+      Exit;
+
+    Scaner.NextToken;
+    Result := (Scaner.Token in InTokens);
+  finally
+    Scaner.LoadBookmark(Bookmark);
+  end;
 end;
 
 end.

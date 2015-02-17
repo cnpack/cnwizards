@@ -73,7 +73,7 @@ object MainForm: TMainForm
               '{                     中国人自己的开放源码第三方开发包          ' +
               '               }'
             
-              '{                   (C)Copyright 2001-2012 CnPack 开发组        ' +
+              '{                   (C)Copyright 2001-2015 CnPack 开发组        ' +
               '               }    '
             
               '{                   ------------------------------------        ' +
@@ -101,11 +101,27 @@ object MainForm: TMainForm
               '  Classes, SysUtils{$IFDEF DEBUG},CnDebug{$ELSE},  NDebug{$ENDIF' +
               '};'
             'const'
+            '[unsafe]'
             '  PathDelim  = {$IFDEF MSWINDOWS} '#39'\'#39'; {$ELSE} '#39'/'#39'; {$ENDIF}'
             'implementation'
+            'type [SecurityPermission(False), SecurityPermission('#39#39')]'
+            'TWMTest=class'
+            'private class threadvar'
+            '    [Unsafe] FCurrentThread: TThread;'
+            '  public type [unsafe]'
+            '    TSystemTimes = record'
+            '      IdleTime, UserTime, KernelTime, NiceTime: UInt64;'
+            '    end;'
+            'end;'
+            'threadvar'
+            '[unsafe]'
+            '  SafeCallExceptionMsg: string;'
+            '  SafeCallExceptionAddr: Pointer;'
+            ''
             '[SecurityPermission(SecurityAction.Assert, UnmanagedCode=True)]'
             'function TGraphic.DefineProperties(Filer: TFiler): TObject;'
             'begin'
+            'while I<Count do begin end;'
             '  Result :=  TFiler<TList<String, TObject>>.Create;'
             'end;'
             'end.')
@@ -226,6 +242,7 @@ object MainForm: TMainForm
           Min = 0
           Position = 2
           TabOrder = 1
+          Visible = False
           Wrap = False
         end
         object btnSep2: TToolButton
