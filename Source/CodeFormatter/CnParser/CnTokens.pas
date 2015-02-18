@@ -79,6 +79,7 @@ type
     tokDot,
     tokHat,
     tokAtSign,
+    tokAndSign,
 
     tokLB,
     tokRB,
@@ -365,7 +366,8 @@ const
     (Value: Integer(tokDot);            Name: '.'),
     (Value: Integer(tokHat);            Name: '^'),
     (Value: Integer(tokAtSign);         Name: '@'),
-
+    (Value: Integer(tokAndSign);        Name: '&'),
+    
     (Value: Integer(tokLB);             Name: '('),
     (Value: Integer(tokRB);             Name: ')'),
     (Value: Integer(tokSLB);            Name: '['),

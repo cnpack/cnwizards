@@ -935,6 +935,12 @@ begin
         Result := tokAtSign;
       end;
 
+    '&':
+      begin
+        Inc(P);
+        Result := tokAndSign;
+      end;
+      
     '+', '-':
       begin
         if P^ = '+' then

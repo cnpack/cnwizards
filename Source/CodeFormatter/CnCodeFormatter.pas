@@ -2056,9 +2056,8 @@ begin
     FormatIdent(0);
   end;
 
-  
-  if Scaner.Token = tokKeywordSealed then // TFoo = class sealed
-    Match(tokKeywordSealed);
+  if Scaner.Token in [tokKeywordSealed, tokDirectiveABSTRACT] then // TFoo = class sealed
+    Match(Scaner.Token);
 
   FormatClassBody(PreSpaceCount);
 
@@ -2313,9 +2312,12 @@ begin
   end;
 end;
 
-{ EmumeratedIdent -> Ident ['=' ConstExpr] }
+{ EmumeratedIdent -> [&] Ident ['=' ConstExpr] }
 procedure TCnBasePascalFormatter.FormatEmumeratedIdent(PreSpaceCount: Byte);
 begin
+  if Scaner.Token = tokAndSign then // e.g. TAnimationType = (&In, Out, InOut);
+    Match(tokAndSign);
+    
   FormatIdent(PreSpaceCount);
   if Scaner.Token = tokEQUAL then
   begin
