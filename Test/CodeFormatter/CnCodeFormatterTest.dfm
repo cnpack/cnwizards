@@ -104,6 +104,10 @@ object MainForm: TMainForm
             '[unsafe]'
             '  PathDelim  = {$IFDEF MSWINDOWS} '#39'\'#39'; {$ELSE} '#39'/'#39'; {$ENDIF}'
             'implementation'
+            'procedure Test;'
+            'begin'
+            '  // Do nothing'
+            'end;'
             'type [SecurityPermission(False), SecurityPermission('#39#39')]'
             'TWMTest=class'
             'private class threadvar'
@@ -119,7 +123,9 @@ object MainForm: TMainForm
             '  SafeCallExceptionAddr: Pointer;'
             ''
             '[SecurityPermission(SecurityAction.Assert, UnmanagedCode=True)]'
-            'function TGraphic.DefineProperties(Filer: TFiler): TObject;'
+            
+              'function TGraphic.DefineProperties(Filer: TFiler;[Ref] const Buf' +
+              'fer): TObject;'
             'begin'
             'while I<Count do begin end;'
             '  Result :=  TFiler<TList<String, TObject>>.Create;'

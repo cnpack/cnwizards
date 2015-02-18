@@ -54,12 +54,16 @@ type
     FTokenPtrBookmark: PChar;
     FSourcePtrBookmark: PChar;
     FSourceLineBookmark: Integer;
+    FBlankLinesBeforeBookmark: Integer;
+    FBlankLinesAfterBookmark: Integer;
   protected
     property OriginBookmark: Longint read FOriginBookmark write FOriginBookmark;
     property TokenBookmark: TPascalToken read FTokenBookmark write FTokenBookmark;
     property TokenPtrBookmark: PChar read FTokenPtrBookmark write FTokenPtrBookmark;
     property SourcePtrBookmark: PChar read FSourcePtrBookmark write FSourcePtrBookmark;
     property SourceLineBookmark: Integer read FSourceLineBookmark write FSourceLineBookmark;
+    property BlankLinesBeforeBookmark: Integer read FBlankLinesBeforeBookmark write FBlankLinesBeforeBookmark;
+    property BlankLinesAfterBookmark: Integer read FBlankLinesAfterBookmark write FBlankLinesAfterBookmark;
   end;
 
   TAbstractScaner = class(TObject)
@@ -513,6 +517,8 @@ begin
         FTokenPtr := TokenPtrBookmark;
         FToken := TokenBookmark;
         FSourceLine := SourceLineBookmark;
+        FBlankLinesBefore := BlankLinesBeforeBookmark;
+        FBlankLinesAfter := BlankLinesAfterBookmark;
       end
       else
         Error(SInvalidBookmark);
@@ -535,6 +541,8 @@ begin
     TokenBookmark := FToken;
     TokenPtrBookmark := FTokenPtr;
     SourceLineBookmark := FSourceLine;
+    BlankLinesBeforeBookmark := FBlankLinesBefore;
+    BlankLinesAfterBookmark := FBlankLinesAfter;
   end;
   FBookmarks.Add(Bookmark);
 end;

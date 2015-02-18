@@ -131,8 +131,8 @@ type
     procedure FormatTypeParamIdent(PreSpaceCount: Byte = 0);
 
     // Anonymouse function support moving
-    procedure FormatProcedureDecl(PreSpaceCount: Byte = 0);
-    procedure FormatFunctionDecl(PreSpaceCount: Byte = 0);
+    procedure FormatProcedureDecl(PreSpaceCount: Byte = 0; IsAnonymous: Boolean = False);
+    procedure FormatFunctionDecl(PreSpaceCount: Byte = 0; IsAnonymous: Boolean = False);
     {* 用 AllowEqual 区分 ProcType 和 ProcDecl 可否带等于号的情形}
     procedure FormatFunctionHeading(PreSpaceCount: Byte = 0; AllowEqual: Boolean = True);
     procedure FormatProcedureHeading(PreSpaceCount: Byte = 0; AllowEqual: Boolean = True);
@@ -719,7 +719,6 @@ begin
       // 如果出现“标识符以及.^<>,”之外的 Token，则认为不是泛型。——此条规则不用
       // 如果出现小于号和大于号不配对，则认为不是泛型。
       // TODO: 判断还是不太严密，待继续验证。
-      IsGeneric := True;
       Scaner.NextToken;
       LessCount := 1;
       while not (Scaner.Token in KeywordTokens + [tokSemicolon, tokEOF] - CanBeTypeKeywordTokens) do
@@ -1013,12 +1012,12 @@ begin
   end
   else if Scaner.Token in [tokKeywordFunction, tokKeywordProcedure] then
   begin
-    // Anonymous function.
+    // Anonymous function/procedure.
     Writeln;
     if Scaner.Token = tokKeywordProcedure then
-      FormatProcedureDecl(Tab(CurrentIndent))
+      FormatProcedureDecl(Tab(CurrentIndent), True)
     else
-      FormatFunctionDecl(Tab(CurrentIndent));
+      FormatFunctionDecl(Tab(CurrentIndent), True);
   end
   else
     FormatTerm(PreSpaceCount);
@@ -1219,8 +1218,13 @@ begin
       begin
         Match(tokKeywordBegin, PreSpaceCount);
         Writeln;
-        FormatStmtList(Tab(PreSpaceCount, False));
-        Writeln;
+
+        // 空块但 begin 后有注释的情况下，避免多出一个换行
+        if Scaner.Token <> tokKeywordEnd then
+        begin
+          FormatStmtList(Tab(PreSpaceCount, False));
+          Writeln;
+        end;
         Match(tokKeywordEnd, PreSpaceCount);
       end;
 
@@ -1616,7 +1620,7 @@ begin
         Match(tokKeywordEnd, PreSpaceCount);
       end;
   else
-    ErrorFmt(SSymbolExpected, ['except/finally']);
+    ErrorFmt(SSymbolExpected, ['except/finally', Scaner.TokenString]);
   end;
 end;
 
@@ -3822,7 +3826,8 @@ end;
                   Block ';'
 }
 
-procedure TCnBasePascalFormatter.FormatFunctionDecl(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatFunctionDecl(PreSpaceCount: Byte;
+  IsAnonymous: Boolean);
 var
   IsExternal: Boolean;
   IsForward: Boolean;
@@ -3858,7 +3863,7 @@ begin
      (Scaner.Token in BlockStmtTokens + DeclSectionTokens) then
   begin
     FormatBlock(PreSpaceCount, True);
-    if Scaner.Token = tokSemicolon then
+    if not IsAnonymous and (Scaner.Token = tokSemicolon) then // 匿名函数不包括 end 后的分号
       Match(tokSemicolon);
   end;
 end;
@@ -3890,7 +3895,8 @@ end;
   ProcedureDecl -> ProcedureHeading ';' [(DIRECTIVE ';')...]
                    Block ';'
 }
-procedure TCnBasePascalFormatter.FormatProcedureDecl(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatProcedureDecl(PreSpaceCount: Byte;
+  IsAnonymous: Boolean);
 var
   IsExternal: Boolean;
   IsForward: Boolean;
@@ -3927,7 +3933,7 @@ begin
     (Scaner.Token in BlockStmtTokens + DeclSectionTokens) then // Local procedure also supports Attribute
   begin
     FormatBlock(PreSpaceCount, True);
-    if Scaner.Token = tokSemicolon then
+    if not IsAnonymous and (Scaner.Token = tokSemicolon) then // 匿名函数不包括 end 后的分号
       Match(tokSemicolon);
   end;
 end;
