@@ -42,7 +42,7 @@ interface
 
 uses
   Classes, SysUtils, Dialogs, CnTokens, CnScaners, CnCodeGenerators,
-  CnCodeFormatRules;
+  CnCodeFormatRules, CnFormatterIntf;
 
 type
   TCnAbstractCodeFormatter = class
@@ -51,10 +51,11 @@ type
     FCodeGen: TCnCodeGenerator;
     FLastToken: TPascalToken;
     FInternalRaiseException: Boolean;
+    function ErrorTokenString: string;
   protected
     {* 错误处理函数 }
-    procedure Error(const Ident: string);
-    procedure ErrorFmt(const Ident: string; const Args: array of const);
+    procedure Error(const Ident: Integer);
+    procedure ErrorFmt(const Ident: Integer; const Args: array of const);
     procedure ErrorStr(const Message: string);
     procedure ErrorToken(Token: TPascalToken);
     procedure ErrorTokens(Tokens: array of TPascalToken);
@@ -318,26 +319,38 @@ begin
   inherited;
 end;
 
-procedure TCnAbstractCodeFormatter.Error(const Ident: string);
+procedure TCnAbstractCodeFormatter.Error(const Ident: Integer);
 begin
-  ErrorStr(Ident);
+  // 出错入口
+  PascalErrorRec.ErrorCode := Ident;
+  PascalErrorRec.SourceLine := FScaner.SourceLine;
+  PascalErrorRec.SourcePos := FScaner.SourcePos;
+  PascalErrorRec.CurrentToken := ErrorTokenString;
+
+  ErrorStr(RetrieveFormatErrorString(Ident));
 end;
 
-procedure TCnAbstractCodeFormatter.ErrorFmt(const Ident: string;
+procedure TCnAbstractCodeFormatter.ErrorFmt(const Ident: Integer;
   const Args: array of const);
 begin
-  ErrorStr(Format(Ident, Args));
+  // 出错入口
+  PascalErrorRec.ErrorCode := Ident;
+  PascalErrorRec.SourceLine := FScaner.SourceLine;
+  PascalErrorRec.SourcePos := FScaner.SourcePos;
+  PascalErrorRec.CurrentToken := ErrorTokenString;
+
+  ErrorStr(Format(RetrieveFormatErrorString(Ident), Args));
 end;
 
 procedure TCnAbstractCodeFormatter.ErrorNotSurpport(FurtureStr: string);
 begin
-  ErrorFmt(SNotSurpport, [FurtureStr]);
+  ErrorFmt(CN_ERRCODE_PASCAL_NOT_SUPPORT, [FurtureStr]);
 end;
 
 procedure TCnAbstractCodeFormatter.ErrorStr(const Message: string);
 begin
-  raise EParserError.CreateResFmt(
-        @SParseError,
+  raise EParserError.CreateFmt(
+        SParseError,
         [ Message, FScaner.SourceLine, FScaner.SourcePos ]
   );
 end;
@@ -345,9 +358,9 @@ end;
 procedure TCnAbstractCodeFormatter.ErrorToken(Token: TPascalToken);
 begin
   if TokenToString(Scaner.Token) = '' then
-    ErrorFmt(SSymbolExpected, [TokenToString(Token), Scaner.TokenString] )
+    ErrorFmt(CN_ERRCODE_PASCAL_SYMBOL_EXP, [TokenToString(Token), Scaner.TokenString] )
   else
-    ErrorFmt(SSymbolExpected, [TokenToString(Token), TokenToString(Scaner.Token)]);
+    ErrorFmt(CN_ERRCODE_PASCAL_SYMBOL_EXP, [TokenToString(Token), TokenToString(Scaner.Token)]);
 end;
 
 procedure TCnAbstractCodeFormatter.ErrorTokens(Tokens: array of TPascalToken);
@@ -364,7 +377,7 @@ end;
 
 procedure TCnAbstractCodeFormatter.ErrorExpected(Str: string);
 begin
-  ErrorFmt(SSymbolExpected, [Str, TokenToString(Scaner.Token)]);
+  ErrorFmt(CN_ERRCODE_PASCAL_SYMBOL_EXP, [Str, TokenToString(Scaner.Token)]);
 end;
 
 function TCnAbstractCodeFormatter.FormatString(const KeywordStr: string;
@@ -603,6 +616,7 @@ end;
 function TCnAbstractCodeFormatter.BackTab(PreSpaceCount: Byte;
   CareBeginBlock: Boolean): Integer;
 begin
+  Result := 0;
   if CareBeginBlock then
   begin
     Result := PreSpaceCount - CnPascalCodeForRule.TabSpaceCount;
@@ -1254,7 +1268,7 @@ begin
         if Scaner.Token in [tokKeywordTo, tokKeywordDownTo] then
           Match(Scaner.Token)
         else
-          ErrorFmt(SSymbolExpected, ['to/downto', TokenToString(Scaner.Token)]);
+          ErrorFmt(CN_ERRCODE_PASCAL_SYMBOL_EXP, ['to/downto', TokenToString(Scaner.Token)]);
 
         FormatExpression;
       end;
@@ -1478,7 +1492,7 @@ begin
         end;
       end;
   else
-    Error('Identifier or Goto or Inherited expected.');
+    Error(CN_ERRCODE_PASCAL_INVALID_STATEMENT);
   end;
 end;
 
@@ -1514,35 +1528,43 @@ end;
 
 { StmtList -> Statement/';'... }
 procedure TCnBasePascalFormatter.FormatStmtList(PreSpaceCount: Byte);
+var
+  OldKeepOneBlankLine: Boolean;
 begin
-  // 处理空语句单独分行的问题
-  while Scaner.Token = tokSemicolon do
-  begin
-    Match(tokSemicolon, PreSpaceCount, 0, False, True);
-    if Scaner.Token <> tokKeywordEnd then
-      Writeln;
-  end;
-
-  FormatStatement(PreSpaceCount);
-
-  while Scaner.Token = tokSemicolon do
-  begin
-    Match(tokSemicolon);
-
+  OldKeepOneBlankLine := Scaner.KeepOneBlankLine;
+  Scaner.KeepOneBlankLine := True;
+  try
     // 处理空语句单独分行的问题
     while Scaner.Token = tokSemicolon do
     begin
-      Writeln;
       Match(tokSemicolon, PreSpaceCount, 0, False, True);
+      if Scaner.Token <> tokKeywordEnd then
+        Writeln;
     end;
 
-    if Scaner.Token in StmtTokens + DirectiveTokens + ComplexTokens
-      + [tokInteger] then // 部分关键字能做语句开头，Label 可能以数字开头
+    FormatStatement(PreSpaceCount);
+
+    while Scaner.Token = tokSemicolon do
     begin
-      { DONE: 建立语句列表 }
-      Writeln;
-      FormatStatement(PreSpaceCount);
+      Match(tokSemicolon);
+
+      // 处理空语句单独分行的问题
+      while Scaner.Token = tokSemicolon do
+      begin
+        Writeln;
+        Match(tokSemicolon, PreSpaceCount, 0, False, True);
+      end;
+
+      if Scaner.Token in StmtTokens + DirectiveTokens + ComplexTokens
+        + [tokInteger] then // 部分关键字能做语句开头，Label 可能以数字开头
+      begin
+        { DONE: 建立语句列表 }
+        Writeln;
+        FormatStatement(PreSpaceCount);
+      end;
     end;
+  finally
+    Scaner.KeepOneBlankLine := OldKeepOneBlankLine;
   end;
 end;
 
@@ -1567,7 +1589,7 @@ begin
     tokKeywordTry:    FormatTryStmt(PreSpaceCount);
     tokKeywordRaise:  FormatRaiseStmt(PreSpaceCount);
   else
-    ErrorFmt(SSymbolExpected, ['Statement', TokenToString(Scaner.Token)]);
+    ErrorFmt(CN_ERRCODE_PASCAL_SYMBOL_EXP, ['Statement', TokenToString(Scaner.Token)]);
   end;
 end;
 
@@ -1620,7 +1642,7 @@ begin
         Match(tokKeywordEnd, PreSpaceCount);
       end;
   else
-    ErrorFmt(SSymbolExpected, ['except/finally', Scaner.TokenString]);
+    ErrorFmt(CN_ERRCODE_PASCAL_SYMBOL_EXP, ['except/finally', Scaner.TokenString]);
   end;
 end;
 
@@ -2290,7 +2312,7 @@ begin
     end;
   end
   else
-    Error('error Directive ' + Scaner.TokenString);
+    Error(CN_ERRCODE_PASCAL_ERROR_DIRECTIVE);
 end;
 
 { EnumeratedType -> '(' EnumeratedList ')' }
@@ -2621,7 +2643,7 @@ begin
 
     tokKeywordVar, tokKeywordThreadVar: FormatVarDeclHeading(Tab(PreSpaceCount), HasClassPrefixForVar);  // class var/threadvar
   else
-    Error('MethodHeading is needed.');
+    Error(CN_ERRCODE_PASCAL_NO_METHODHEADING);
   end;
 end;
 
@@ -3280,7 +3302,7 @@ begin
     tokKeywordFile: FormatFileType(PreSpaceCount);
     tokKeywordRecord: FormatRecType(PreSpaceCount);
   else
-    Error('StructType is needed.');
+    Error(CN_ERRCODE_PASCAL_NO_STRUCTTYPE);
   end;
 end;
 
@@ -3510,7 +3532,7 @@ begin
     if Scaner.Token in ConstTokens + [tokAtSign, tokPlus, tokMinus] then // 有可能初始化的值以这些开头
       FormatConstExpr(PreSpaceCount)
     else if Scaner.Token <> tokRB then
-      Error('TypeConstant is needed.');
+      Error(CN_ERRCODE_PASCAL_NO_TYPEDCONSTANT);
   end;
 end;
 
@@ -3656,7 +3678,7 @@ begin
         FormatTypedConstant; // 等号后空一格
       end;
   else
-    Error(' = or : is needed');
+    Error(CN_ERRCODE_PASCAL_NO_EQUALCOLON);
   end;
 
   while Scaner.Token in DirectiveTokens do
@@ -3773,7 +3795,7 @@ begin
           MakeLine := False;
         end;
     else
-      Error('DeclSection is needed.');
+      Error(CN_ERRCODE_PASCAL_NO_DECLSECTION);
     end;
   end;
 end;
@@ -3968,7 +3990,7 @@ begin
       FormatFunctionDecl(PreSpaceCount);
     end;
   else
-    Error('procedure or function is needed.');
+    Error(CN_ERRCODE_PASCAL_NO_PROCFUNC);
   end;
 end;
 
@@ -4135,7 +4157,7 @@ begin
     tokKeywordProcedure: FormatProcedureHeading(PreSpaceCount);
     tokKeywordFunction: FormatFunctionHeading(PreSpaceCount);
   else
-    Error('procedure/function is needed.');
+    Error(CN_ERRCODE_PASCAL_NO_PROCFUNC);
   end;
 
   if Scaner.Token = tokSemicolon then
@@ -4163,7 +4185,7 @@ begin
     tokKeywordLibrary: FormatLibrary(PreSpaceCount);
     tokKeywordUnit:    FormatUnit(PreSpaceCount);
   else
-    Error('Unknown Goal Ident');
+    Error(CN_ERRCODE_PASCAL_UNKNOWN_GOAL);
   end;
 end;
 
@@ -4235,7 +4257,7 @@ begin
       tokKeywordExports: FormatExportsSection(PreSpaceCount);
     else
       if not CnPascalCodeForRule.ContinueAfterError then
-        Error('Interface declare const, type, var or export keyword exptected.')
+        Error(CN_ERRCODE_PASCAL_ERROR_INTERFACE)
       else
       begin
         Match(Scaner.Token);
@@ -4564,7 +4586,7 @@ begin
         FormatTypedConstant; // 等号后空一格
       end;
   else
-    Error(' = or : is needed'); 
+    Error(CN_ERRCODE_PASCAL_NO_EQUALCOLON); 
   end;
 
   while Scaner.Token in DirectiveTokens do
@@ -4622,6 +4644,13 @@ begin
   finally
     Scaner.LoadBookmark(Bookmark);
   end;
+end;
+
+function TCnAbstractCodeFormatter.ErrorTokenString: string;
+begin
+  Result := TokenToString(Scaner.Token);
+  if Result = '' then
+    Result := Scaner.TokenString;
 end;
 
 end.

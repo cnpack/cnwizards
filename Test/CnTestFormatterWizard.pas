@@ -120,6 +120,8 @@ var
   S: AnsiString;
   Res: PAnsiChar;
   Formatter: ICnPascalFormatterIntf;
+  ErrCode, SourceLine, SourcePos: Integer;
+  CurrentToken: PAnsiChar;
 begin
   if FHandle = 0 then
     FHandle := LoadLibrary(PChar(ModulePath + DLLName));
@@ -158,6 +160,12 @@ begin
     begin
       ShowMessage(Res);
       CnOtaSetCurrentEditorSource(string(Res));
+    end
+    else
+    begin
+      ErrCode := Formatter.RetrievePascalLastError(SourceLine, SourcePos, CurrentToken);
+      ShowMessage(Format('Error Code %d, Line %d, Pos %d, Token %s', [ErrCode,
+        SourceLine, SourcePos, CurrentToken]));
     end;
   finally
     Formatter := nil;

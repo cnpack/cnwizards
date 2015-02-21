@@ -3,6 +3,7 @@ program CnCodeFormaterTestPrj;
 uses
   Forms,
   CnCodeFormatterTest in 'CnCodeFormatterTest.pas' {MainForm},
+  CnFormatterIntf in '..\..\Source\CodeFormatter\CnFormatterIntf.pas',
   CnScaners in '..\..\Source\CodeFormatter\CnParser\CnScaners.pas',
   CnTokens in '..\..\Source\CodeFormatter\CnParser\CnTokens.pas',
   CnCodeFormatter in '..\..\Source\CodeFormatter\CnCodeFormatter.pas',

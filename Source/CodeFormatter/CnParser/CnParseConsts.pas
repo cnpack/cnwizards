@@ -39,21 +39,89 @@ interface
 
 {$I CnPack.inc}
 
-resourcestring
-  SIdentifierExpected = 'Identifier expected';
-  SStringExpected = 'String expected';
-  SNumberExpected = 'Number expected';
-  SCharExpected = '''''%d'''' expected';
-  SSymbolExpected = '%s expected, but "%s" found';
-  SParseError = '%s on line %d:%d';
-  SInvalidBinary = 'Invalid binary value';
-  SInvalidString = 'Invalid string constant';
-  SInvalidBookmark = 'Invalid Bookmark';
-  SLineTooLong = 'Line too long';
-  SEndOfCommentExpected = 'Comment end ''}'' or ''*)'' expected';
-  SNotSurpport = 'Not Surport %s now';
+uses
+  CnFormatterIntf;
+
+const
+  SIdentifierExpected: PAnsiChar = 'Identifier expected';
+  SStringExpected: PAnsiChar = 'String expected';
+  SNumberExpected: PAnsiChar = 'Number expected';
+  SCharExpected: PAnsiChar = '''''%d'''' expected';
+  SSymbolExpected: PAnsiChar = '%s expected, but "%s" found';
+  SParseError: PAnsiChar = '%s on line %d:%d';
+  SInvalidBinary: PAnsiChar = 'Invalid binary value';
+  SInvalidString: PAnsiChar = 'Invalid string constant';
+  SInvalidBookmark: PAnsiChar = 'Invalid Bookmark';
+  SLineTooLong: PAnsiChar = 'Line too long';
+  SEndOfCommentExpected: PAnsiChar = 'Comment end ''}'' or ''*)'' expected';
+  SNotSurpport: PAnsiChar = 'Not Surport %s now';
+
+  SErrorDirective: PAnsiChar = 'Error Directive';
+  SMethodHeadingExpected: PAnsiChar = 'Method head expected';
+  SStructTypeExpected: PAnsiChar = 'Struct type expected';
+  STypedConstantExpected: PAnsiChar = 'Typed constant expected';
+  SEqualColonExpected: PAnsiChar = ' = or : expected';
+  SDeclSectionExpected: PAnsiChar = 'Declare section expected';
+  SProcFuncExpected: PAnsiChar = 'Procedure or function expected';
+  SUnknownGoal: PAnsiChar = 'Unknown file type';
+  SErrorInterface: PAnsiChar = 'Interface part error';
+  SErrorStatement: PAnsiChar = 'Statement part error';
+
+  SUnknownErrorStr: PAnsiChar = 'Unknown Error String';
+
+type
+  PPAnsiChar = ^PAnsiChar;
+
+  TCnPascalErrorRec = packed record
+    ErrorCode: Integer;
+    ErrorMessage: string;
+    SourceLine: Integer;
+    SourcePos: Integer;
+    CurrentToken: string;
+  end;
+
+var
+  ErrorStrings: array[CN_ERRCODE_START..CN_ERRCODE_END] of PPAnsiChar =
+    (
+      @SIdentifierExpected, @SStringExpected, @SNumberExpected, @SCharExpected,
+      @SSymbolExpected, @SParseError, @SInvalidBinary, @SInvalidString,
+      @SInvalidBookmark, @SLineTooLong, @SEndOfCommentExpected, @SNotSurpport,
+      @SErrorDirective, @SMethodHeadingExpected, @SStructTypeExpected,
+      @STypedConstantExpected, @SEqualColonExpected, @SDeclSectionExpected,
+      @SProcFuncExpected, @SUnknownGoal, @SErrorInterface, @SErrorStatement
+    );
+
+  // 供全局设置错误信息
+  PascalErrorRec: TCnPascalErrorRec = (
+    ErrorCode: 0;
+    ErrorMessage: '';
+    SourceLine: 0;
+    SourcePos: 0;
+    CurrentToken: '';
+  );
+
+procedure ClearPascalError;
+
+function RetrieveFormatErrorString(const Ident: Integer): PAnsiChar;
 
 implementation
+
+procedure ClearPascalError;
+begin
+  PascalErrorRec.ErrorCode := 0;
+  PascalErrorRec.ErrorMessage := '';
+  PascalErrorRec.SourceLine := 0;
+  PascalErrorRec.SourcePos := 0;
+  PascalErrorRec.CurrentToken := '';
+end;
+
+function RetrieveFormatErrorString(const Ident: Integer): PAnsiChar;
+begin
+  if Ident in [Low(ErrorStrings)..High(ErrorStrings)] then
+    Result := ErrorStrings[Ident]^
+  else
+    Result := SUnknownErrorStr;
+end;
 
 end.
 

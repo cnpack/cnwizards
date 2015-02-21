@@ -43,47 +43,77 @@ uses
 
 const
   // 遇见 IFDEF ELSE ENDIF 时的处理模式
-  CN_RULE_DIRECTIVE_MODE_ASCOMMENT  = 1;
+  CN_RULE_DIRECTIVE_MODE_ASCOMMENT    = 1;
   {* 当作注释处理}
-  CN_RULE_DIRECTIVE_MODE_ONLYFIRST  = 2;
+  CN_RULE_DIRECTIVE_MODE_ONLYFIRST    = 2;
   {* 只处理第一部分}
-  CN_RULE_DIRECTIVE_MODE_DEFAULT    = CN_RULE_DIRECTIVE_MODE_ASCOMMENT;
+  CN_RULE_DIRECTIVE_MODE_DEFAULT      = CN_RULE_DIRECTIVE_MODE_ASCOMMENT;
 
   // 关键字大小写规则
-  CN_RULE_KEYWORD_STYLE_UPPER       = 1;
+  CN_RULE_KEYWORD_STYLE_UPPER         = 1;
   {* 全大写}
-  CN_RULE_KEYWORD_STYLE_LOWER       = 2;
+  CN_RULE_KEYWORD_STYLE_LOWER         = 2;
   {* 全小写}
-  CN_RULE_KEYWORD_STYLE_UPPERFIRST  = 3;
+  CN_RULE_KEYWORD_STYLE_UPPERFIRST    = 3;
   {* 首字母大写}
-  CN_RULE_KEYWORD_STYLE_DEFAULT     = CN_RULE_KEYWORD_STYLE_LOWER;
+  CN_RULE_KEYWORD_STYLE_DEFAULT       = CN_RULE_KEYWORD_STYLE_LOWER;
 
   // 默认缩进空格数
-  CN_RULE_TABSPACE_DEFAULT          = 2;
+  CN_RULE_TABSPACE_DEFAULT            = 2;
 
   // 双目运算符前的默认空格数
-  CN_RULE_SPACE_BEFORE_OPERATOR      = 1;
+  CN_RULE_SPACE_BEFORE_OPERATOR       = 1;
 
   // 双目运算符后的默认空格数
-  CN_RULE_SPACE_AFTER_OPERATOR       = 1;
+  CN_RULE_SPACE_AFTER_OPERATOR        = 1;
 
   // 汇编指令行首默认缩进
-  CN_RULE_SPACE_BEFORE_ASM           = 8;
+  CN_RULE_SPACE_BEFORE_ASM            = 8;
 
   // 汇编指令 Tab 宽度
-  CN_RULE_SPACE_TAB_ASM              = 8;
+  CN_RULE_SPACE_TAB_ASM               = 8;
 
   // 默认换行超出此宽度
-  CN_RULE_LINE_WRAP_WIDTH            = 80;
+  CN_RULE_LINE_WRAP_WIDTH             = 80;
 
   // 由外部指定的起始元素类型
-  CN_START_UNKNOWN_ALL               = 0;
-  CN_START_USES                      = 1;
-  CN_START_CONST                     = 2;
-  CN_START_TYPE                      = 3;
-  CN_START_VAR                       = 4;
-  CN_START_PROC                      = 5;
-  CN_START_STATEMENT                 = 6;
+  CN_START_UNKNOWN_ALL                = 0;
+  CN_START_USES                       = 1;
+  CN_START_CONST                      = 2;
+  CN_START_TYPE                       = 3;
+  CN_START_VAR                        = 4;
+  CN_START_PROC                       = 5;
+  CN_START_STATEMENT                  = 6;
+
+  // 错误码
+  CN_ERRCODE_OK                       = 0;
+  CN_ERRCODE_START                    = 1;
+
+  CN_ERRCODE_PASCAL_IDENT_EXP         = 1;
+  CN_ERRCODE_PASCAL_STRING_EXP        = 2;
+  CN_ERRCODE_PASCAL_NUMBER_EXP        = 3;
+  CN_ERRCODE_PASCAL_CHAR_EXP          = 4;
+  CN_ERRCODE_PASCAL_SYMBOL_EXP        = 5;
+  CN_ERRCODE_PASCAL_PARSE_ERR         = 6;
+  CN_ERRCODE_PASCAL_INVALID_BIN       = 7;
+  CN_ERRCODE_PASCAL_INVALID_STRING    = 8;
+  CN_ERRCODE_PASCAL_INVALID_BOOKMARK  = 9;
+  CN_ERRCODE_PASCAL_LINE_TOOLONG      = 10;
+  CN_ERRCODE_PASCAL_ENDCOMMENT_EXP    = 11;
+  CN_ERRCODE_PASCAL_NOT_SUPPORT       = 12;
+
+  CN_ERRCODE_PASCAL_ERROR_DIRECTIVE   = 13;
+  CN_ERRCODE_PASCAL_NO_METHODHEADING  = 14;
+  CN_ERRCODE_PASCAL_NO_STRUCTTYPE     = 15;
+  CN_ERRCODE_PASCAL_NO_TYPEDCONSTANT  = 16;
+  CN_ERRCODE_PASCAL_NO_EQUALCOLON     = 17;
+  CN_ERRCODE_PASCAL_NO_DECLSECTION    = 18;
+  CN_ERRCODE_PASCAL_NO_PROCFUNC       = 19;
+  CN_ERRCODE_PASCAL_UNKNOWN_GOAL      = 20;
+  CN_ERRCODE_PASCAL_ERROR_INTERFACE   = 21;
+  CN_ERRCODE_PASCAL_INVALID_STATEMENT = 22;
+
+  CN_ERRCODE_END                      = 22;
 
 type
   ICnPascalFormatterIntf = interface
@@ -95,13 +125,19 @@ type
 
     function FormatOnePascalUnit(Input: PAnsiChar; Len: DWORD): PAnsiChar;
     {* 格式化一整个 Pascal 文件内容，代码以 AnsiString 格式传入。
-       返回结果存储的 AnsiString 字符内容的指针，用完后无须释放}
+       返回结果存储的 AnsiString 字符内容的指针，用完后无须释放。
+       如果返回 nil，说明出错，需要用 RetrieveLastError 获得错误码}
 
     function FormatPascalBlock(StartType: DWORD; StartIndent: DWORD;
       Input: PAnsiChar; Len: DWORD): PAnsiChar;
     {* 格式化一块代码。需要指定起始代码类型以及起始缩进。
        代码以 AnsiString 格式传入，返回结果存储的 AnsiString 字符内容的指针，
-       用完后无须释放}
+       用完后无须释放。如果返回 nil，说明出错，需要用 RetrieveLastError 获得错误}
+
+    function RetrievePascalLastError(out SourceLine: Integer; out SourcePos: Integer;
+      out CurrentToken: PAnsiChar): Integer;
+    {* 获取错误码以及出错时的代码行数与整体块偏移以及解析出错时的当前 Token，
+       CurrentToken 内容应复制出来使用，无须释放}
   end;
 
   TCnGetFormatterProvider = function: ICnPascalFormatterIntf; stdcall;

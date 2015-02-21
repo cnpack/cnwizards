@@ -49,7 +49,7 @@ exports
 implementation
 
 uses
-  CnCodeFormatter {$IFDEF DEBUG} , CnDebug {$ENDIF} ;
+  CnCodeFormatter, CnParseConsts {$IFDEF DEBUG} , CnDebug {$ENDIF} ;
 
 type
   TCnCodeFormatProvider = class(TInterfacedObject, ICnPascalFormatterIntf)
@@ -68,6 +68,9 @@ type
 
     function FormatPascalBlock(StartType: DWORD; StartIndent: DWORD;
       Input: PAnsiChar; Len: DWORD): PAnsiChar;
+
+    function RetrievePascalLastError(out SourceLine: Integer; out SourcePos: Integer;
+      out CurrentToken: PAnsiChar): Integer;
   end;
 
 var
@@ -123,6 +126,7 @@ var
   CodeFor: TCnPascalCodeFormatter;
 begin
   AdjustResultLength(0);
+  ClearPascalError;
   if (Input = nil) or (Len = 0) then
   begin
     Result := nil;
@@ -138,9 +142,11 @@ begin
   try
     try
       CodeFor.FormatCode;
-    finally
       CodeFor.SaveToStream(OutStream);
+    except
+      ; // 出错了，返回 nil 的结果
     end;
+
 
     if OutStream.Size > 0 then
     begin
@@ -161,6 +167,15 @@ procedure TCnCodeFormatProvider.SetPascalFormatRule(DirectiveMode, KeywordStyle,
   SpaceTabAsm, LineWrapWidth: DWORD; UsesSingleLine: LongBool);
 begin
 
+end;
+
+function TCnCodeFormatProvider.RetrievePascalLastError(out SourceLine,
+  SourcePos: Integer; out CurrentToken: PAnsiChar): Integer;
+begin
+  Result := PascalErrorRec.ErrorCode;
+  SourceLine := PascalErrorRec.SourceLine;
+  SourcePos := PascalErrorRec.SourcePos;
+  CurrentToken := PAnsiChar(PascalErrorRec.CurrentToken);
 end;
 
 initialization

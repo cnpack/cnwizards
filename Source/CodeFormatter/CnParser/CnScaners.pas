@@ -43,7 +43,7 @@ interface
 {$I CnPack.inc}
 
 uses
-  Classes, SysUtils, Contnrs,
+  Classes, SysUtils, Contnrs, CnFormatterIntf,
   CnParseConsts, CnTokens, CnCodeGenerators, CnCodeFormatRules;
 
 type
@@ -93,17 +93,20 @@ type
     FFirstCommentInBlock: Boolean;
     FPreviousIsComment: Boolean;
     FInDirectiveNestSearch: Boolean;
-
+    FKeepOneBlankLine: Boolean;
     procedure ReadBuffer;
     procedure SetOrigin(AOrigin: Longint);
     procedure SkipBlanks;
+    procedure CheckBlankLinesWhenSkip(BlankLines: Integer); virtual; abstract;
+    {* SkipBlanks 时遇到连续换行时被调用}
+    function ErrorTokenString: string;
   public
     constructor Create(Stream: TStream); virtual;
     destructor Destroy; override;
     procedure CheckToken(T: TPascalToken);
     procedure CheckTokenSymbol(const S: string);
-    procedure Error(const Ident: string);
-    procedure ErrorFmt(const Ident: string; const Args: array of const);
+    procedure Error(const Ident: Integer);
+    procedure ErrorFmt(const Ident: Integer; const Args: array of const);
     procedure ErrorStr(const Message: string);
     procedure HexToBinary(Stream: TStream);
 
@@ -138,6 +141,8 @@ type
     {* SkipBlank 碰到一注释时，注释和前面有效内容隔的行数，用来控制分行}
     property BlankLinesAfter: Integer read FBlankLinesAfter write FBlankLinesAfter;
     {* SkipBlank 跳过一注释后，注释和后面有效内容隔的行数，用来控制分行}
+    property KeepOneBlankLine: Boolean read FKeepOneBlankLine write FKeepOneBlankLine;
+    {* 由外界设置是否在格式化的过程中保持空行}
   end;
 
   TScaner = class(TAbstractScaner)
@@ -145,9 +150,11 @@ type
     FStream: TStream;
     FCodeGen: TCnCodeGenerator;
     FCompDirectiveMode: TCompDirectiveMode;
+  protected
+    procedure CheckBlankLinesWhenSkip(BlankLines: Integer); override;
   public
     constructor Create(AStream: TStream); overload; override;
-    constructor Create(AStream: TStream; ACodeGen: TCnCodeGenerator); reintroduce; overload; 
+    constructor Create(AStream: TStream; ACodeGen: TCnCodeGenerator); reintroduce; overload;
     destructor Destroy; override;
     function NextToken: TPascalToken; override;
     function ForwardToken(Count: Integer = 1): TPascalToken; override;
@@ -302,34 +309,46 @@ begin
   if Token <> T then
     case T of
       tokSymbol:
-        Error(SIdentifierExpected);
+        Error(CN_ERRCODE_PASCAL_IDENT_EXP);
       tokString, tokWString:
-        Error(SStringExpected);
+        Error(CN_ERRCODE_PASCAL_STRING_EXP);
       tokInteger, tokFloat:
-        Error(SNumberExpected);
+        Error(CN_ERRCODE_PASCAL_NUMBER_EXP);
     else
-      ErrorFmt(SCharExpected, [Integer(T)]);
+      ErrorFmt(CN_ERRCODE_PASCAL_CHAR_EXP, [Integer(T)]);
     end;
 end;
 
 procedure TAbstractScaner.CheckTokenSymbol(const S: string);
 begin
-  if not TokenSymbolIs(S) then ErrorFmt(SSymbolExpected, [S]);
+  if not TokenSymbolIs(S) then ErrorFmt(CN_ERRCODE_PASCAL_SYMBOL_EXP, [S]);
 end;
 
-procedure TAbstractScaner.Error(const Ident: string);
+procedure TAbstractScaner.Error(const Ident: Integer);
 begin
-  ErrorStr(Ident);
+  // 出错入口
+  PascalErrorRec.ErrorCode := Ident;
+  PascalErrorRec.SourceLine := FSourceLine;
+  PascalErrorRec.SourcePos := SourcePos;
+  PascalErrorRec.CurrentToken := ErrorTokenString;
+
+  ErrorStr(RetrieveFormatErrorString(Ident));
 end;
 
-procedure TAbstractScaner.ErrorFmt(const Ident: string; const Args: array of const);
+procedure TAbstractScaner.ErrorFmt(const Ident: Integer; const Args: array of const);
 begin
-  ErrorStr(Format(Ident, Args));
+  // 出错入口
+  PascalErrorRec.ErrorCode := Ident;
+  PascalErrorRec.SourceLine := FSourceLine;
+  PascalErrorRec.SourcePos := SourcePos;
+  PascalErrorRec.CurrentToken := ErrorTokenString;
+  
+  ErrorStr(Format(RetrieveFormatErrorString(Ident), Args));
 end;
 
 procedure TAbstractScaner.ErrorStr(const Message: string);
 begin
-  raise EParserError.CreateResFmt(@SParseError, [Message, FSourceLine, SourcePos]);
+  raise EParserError.CreateFmt(SParseError, [Message, FSourceLine, SourcePos]);
 end;
 
 procedure TAbstractScaner.HexToBinary(Stream: TStream);
@@ -341,7 +360,7 @@ begin
   while FSourcePtr^ <> '}' do
   begin
     Count := HexToBin(FSourcePtr, Buffer, SizeOf(Buffer));
-    if Count = 0 then Error(SInvalidBinary);
+    if Count = 0 then Error(CN_ERRCODE_PASCAL_INVALID_BIN);
     Stream.Write(Buffer, Count);
     Inc(FSourcePtr, Count * 2);
     SkipBlanks;
@@ -364,7 +383,7 @@ begin
   if FSourceEnd = FBufEnd then
   begin
     FSourceEnd := LineStart(FBuffer, FSourceEnd - 1);
-    if FSourceEnd = FBuffer then Error(SLineTooLong);
+    if FSourceEnd = FBuffer then Error(CN_ERRCODE_PASCAL_LINE_TOOLONG);
   end;
   FSaveChar := FSourceEnd[0];
   FSourceEnd[0] := #0;
@@ -384,7 +403,7 @@ begin
     if FSourceEnd = FBufEnd then
     begin
       FSourceEnd := LineStart(FBuffer, FSourceEnd - 1);
-      if FSourceEnd = FBuffer then Error(SLineTooLong);
+      if FSourceEnd = FBuffer then Error(CN_ERRCODE_PASCAL_LINE_TOOLONG);
     end;
     FSaveChar := FSourceEnd[0];
     FSourceEnd[0] := #0;
@@ -392,11 +411,14 @@ begin
 end;
 
 procedure TAbstractScaner.SkipBlanks;
+var
+  EmptyLines: Integer;
 begin
   FBlankStringBegin := FSourcePtr;
   FBlankStringEnd := FBlankStringBegin;
   FBlankLines := 0;
-  
+
+  EmptyLines := 0;
   while True do
   begin
     case FSourcePtr^ of
@@ -404,7 +426,11 @@ begin
         begin
           ReadBuffer;
           if FSourcePtr^ = #0 then
+          begin
+            if EmptyLines > 1 then
+              CheckBlankLinesWhenSkip(EmptyLines);
             Exit;
+          end;
           Continue;
         end;
       #10:
@@ -415,12 +441,18 @@ begin
           if FASMMode then // 需要检测回车的标志
           begin
             FBlankStringEnd := FSourcePtr;
+            if EmptyLines > 1 then
+              CheckBlankLinesWhenSkip(EmptyLines);
             Exit; // Do not exit for Inc FSourcePtr?
           end;
+          Inc(EmptyLines);
         end;
       #33..#255:
         begin
           FBlankStringEnd := FSourcePtr;
+          if EmptyLines > 1 then
+            CheckBlankLinesWhenSkip(EmptyLines);
+
           Exit;
         end;
     end;
@@ -488,7 +520,7 @@ begin
   begin
     Inc(P);
     if not (P^ in ['A'..'Z', 'a'..'z', '_']) then
-      Error(SIdentifierExpected);
+      Error(CN_ERRCODE_PASCAL_IDENT_EXP);
     repeat
       Inc(P)
     until not (P^ in ['A'..'Z', 'a'..'z', '0'..'9', '_']);
@@ -521,11 +553,11 @@ begin
         FBlankLinesAfter := BlankLinesAfterBookmark;
       end
       else
-        Error(SInvalidBookmark);
+        Error(CN_ERRCODE_PASCAL_INVALID_BOOKMARK);
     end;
   end
   else
-    Error(SInvalidBookmark);
+    Error(CN_ERRCODE_PASCAL_INVALID_BOOKMARK);
 
   if Clear then
     ClearBookmark(Bookmark);
@@ -581,7 +613,20 @@ begin
   SetString(Result, FBlankStringBegin, L);
 end;
 
+function TAbstractScaner.ErrorTokenString: string;
+begin
+  Result := TokenToString(Token);
+  if Result = '' then
+    Result := TokenString;
+end;
+
 { TScaner }
+
+procedure TScaner.CheckBlankLinesWhenSkip(BlankLines: Integer);
+begin
+  if FKeepOneBlankLine and (BlankLines > 1) then
+    FCodeGen.Writeln;
+end;
 
 constructor TScaner.Create(AStream: TStream; ACodeGen: TCnCodeGenerator);
 begin
@@ -665,7 +710,7 @@ begin
                 while True do
                   case P^ of
                     #0, #10, #13:
-                      Error(SInvalidString);
+                      Error(CN_ERRCODE_PASCAL_INVALID_STRING);
                     '''':
                       begin
                         Inc(P);
@@ -747,7 +792,7 @@ begin
           end;
         end
         else
-          Error(SEndOfCommentExpected);
+          Error(CN_ERRCODE_PASCAL_ENDCOMMENT_EXP);
       end;
 
     '/':
@@ -775,7 +820,7 @@ begin
             end;
           end
           else
-            Error(SEndOfCommentExpected);
+            Error(CN_ERRCODE_PASCAL_ENDCOMMENT_EXP);
         end
         else
           Result := tokDiv;
