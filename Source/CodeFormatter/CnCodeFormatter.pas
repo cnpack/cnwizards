@@ -1226,28 +1226,36 @@ end;
                -> ASM ... END
 }
 procedure TCnBasePascalFormatter.FormatCompoundStmt(PreSpaceCount: Byte);
+var
+  OldKeepOneBlankLine: Boolean;
 begin
-  case Scaner.Token of
-    tokKeywordBegin:
-      begin
-        Match(tokKeywordBegin, PreSpaceCount);
-        Writeln;
-
-        // 空块但 begin 后有注释的情况下，避免多出一个换行
-        if Scaner.Token <> tokKeywordEnd then
+  OldKeepOneBlankLine := Scaner.KeepOneBlankLine;
+  Scaner.KeepOneBlankLine := True;
+  try
+    case Scaner.Token of
+      tokKeywordBegin:
         begin
-          FormatStmtList(Tab(PreSpaceCount, False));
+          Match(tokKeywordBegin, PreSpaceCount);
           Writeln;
-        end;
-        Match(tokKeywordEnd, PreSpaceCount);
-      end;
 
-    tokKeywordAsm:
-      begin
-        FormatAsmBlock(PreSpaceCount);
-      end;
-  else
-    ErrorTokens([tokKeywordBegin, tokKeywordAsm]);
+          // 空块但 begin 后有注释的情况下，避免多出一个换行
+          if Scaner.Token <> tokKeywordEnd then
+          begin
+            FormatStmtList(Tab(PreSpaceCount, False));
+            Writeln;
+          end;
+          Match(tokKeywordEnd, PreSpaceCount);
+        end;
+
+      tokKeywordAsm:
+        begin
+          FormatAsmBlock(PreSpaceCount);
+        end;
+    else
+      ErrorTokens([tokKeywordBegin, tokKeywordAsm]);
+    end;
+  finally
+    Scaner.KeepOneBlankLine := OldKeepOneBlankLine;
   end;
 end;
 
@@ -4224,7 +4232,10 @@ begin
 
   if Scaner.Token = tokKeywordFinalization then
   begin
-    WriteLine;
+    if Scaner.PrevBlankLines then
+      Writeln
+    else
+      WriteLine;
     Match(Scaner.Token);
     Writeln;
     FormatStmtList(Tab);
@@ -4362,7 +4373,10 @@ begin
   if Scaner.Token = tokKeywordInitialization then
   begin
     FormatInitSection(PreSpaceCount);
-    WriteLine;
+    if Scaner.PrevBlankLines then
+      Writeln
+    else
+      WriteLine;
   end;
 
   Match(tokKeywordEnd, PreSpaceCount);

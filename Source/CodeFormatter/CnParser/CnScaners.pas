@@ -56,6 +56,7 @@ type
     FSourceLineBookmark: Integer;
     FBlankLinesBeforeBookmark: Integer;
     FBlankLinesAfterBookmark: Integer;
+    FPrevBlankLinesBookmark: Boolean;
   protected
     property OriginBookmark: Longint read FOriginBookmark write FOriginBookmark;
     property TokenBookmark: TPascalToken read FTokenBookmark write FTokenBookmark;
@@ -64,6 +65,7 @@ type
     property SourceLineBookmark: Integer read FSourceLineBookmark write FSourceLineBookmark;
     property BlankLinesBeforeBookmark: Integer read FBlankLinesBeforeBookmark write FBlankLinesBeforeBookmark;
     property BlankLinesAfterBookmark: Integer read FBlankLinesAfterBookmark write FBlankLinesAfterBookmark;
+    property PrevBlankLinesBookmark: Boolean read FPrevBlankLinesBookmark write FPrevBlankLinesBookmark;
   end;
 
   TAbstractScaner = class(TObject)
@@ -94,12 +96,15 @@ type
     FPreviousIsComment: Boolean;
     FInDirectiveNestSearch: Boolean;
     FKeepOneBlankLine: Boolean;
+    FPrevBlankLines: Boolean;
     procedure ReadBuffer;
     procedure SetOrigin(AOrigin: Longint);
     procedure SkipBlanks;
-    procedure CheckBlankLinesWhenSkip(BlankLines: Integer); virtual; abstract;
+    procedure DoBlankLinesWhenSkip(BlankLines: Integer); virtual;
     {* SkipBlanks 时遇到连续换行时被调用}
     function ErrorTokenString: string;
+  protected
+    procedure OnMoreBlankLinesWhenSkip; virtual; abstract;
   public
     constructor Create(Stream: TStream); virtual;
     destructor Destroy; override;
@@ -141,8 +146,11 @@ type
     {* SkipBlank 碰到一注释时，注释和前面有效内容隔的行数，用来控制分行}
     property BlankLinesAfter: Integer read FBlankLinesAfter write FBlankLinesAfter;
     {* SkipBlank 跳过一注释后，注释和后面有效内容隔的行数，用来控制分行}
+    property PrevBlankLines: Boolean read FPrevBlankLines write FPrevBlankLines;
+    {* 记录上一次是否输出了连续空行合并成的一个空行}
+
     property KeepOneBlankLine: Boolean read FKeepOneBlankLine write FKeepOneBlankLine;
-    {* 由外界设置是否在格式化的过程中保持空行}
+    {* 由外界设置是否在格式化的过程中保持空行，无须用 Bookmark 保存}
   end;
 
   TScaner = class(TAbstractScaner)
@@ -151,7 +159,7 @@ type
     FCodeGen: TCnCodeGenerator;
     FCompDirectiveMode: TCompDirectiveMode;
   protected
-    procedure CheckBlankLinesWhenSkip(BlankLines: Integer); override;
+    procedure OnMoreBlankLinesWhenSkip; override;    
   public
     constructor Create(AStream: TStream); overload; override;
     constructor Create(AStream: TStream; ACodeGen: TCnCodeGenerator); reintroduce; overload;
@@ -427,8 +435,7 @@ begin
           ReadBuffer;
           if FSourcePtr^ = #0 then
           begin
-            if EmptyLines > 1 then
-              CheckBlankLinesWhenSkip(EmptyLines);
+            DoBlankLinesWhenSkip(EmptyLines);
             Exit;
           end;
           Continue;
@@ -441,8 +448,7 @@ begin
           if FASMMode then // 需要检测回车的标志
           begin
             FBlankStringEnd := FSourcePtr;
-            if EmptyLines > 1 then
-              CheckBlankLinesWhenSkip(EmptyLines);
+            DoBlankLinesWhenSkip(EmptyLines);
             Exit; // Do not exit for Inc FSourcePtr?
           end;
           Inc(EmptyLines);
@@ -450,8 +456,7 @@ begin
       #33..#255:
         begin
           FBlankStringEnd := FSourcePtr;
-          if EmptyLines > 1 then
-            CheckBlankLinesWhenSkip(EmptyLines);
+          DoBlankLinesWhenSkip(EmptyLines);
 
           Exit;
         end;
@@ -551,6 +556,7 @@ begin
         FSourceLine := SourceLineBookmark;
         FBlankLinesBefore := BlankLinesBeforeBookmark;
         FBlankLinesAfter := BlankLinesAfterBookmark;
+        FPrevBlankLines := PrevBlankLinesBookmark;
       end
       else
         Error(CN_ERRCODE_PASCAL_INVALID_BOOKMARK);
@@ -575,6 +581,7 @@ begin
     SourceLineBookmark := FSourceLine;
     BlankLinesBeforeBookmark := FBlankLinesBefore;
     BlankLinesAfterBookmark := FBlankLinesAfter;
+    PrevBlankLinesBookmark := FPrevBlankLines;
   end;
   FBookmarks.Add(Bookmark);
 end;
@@ -620,13 +627,20 @@ begin
     Result := TokenString;
 end;
 
-{ TScaner }
-
-procedure TScaner.CheckBlankLinesWhenSkip(BlankLines: Integer);
+procedure TAbstractScaner.DoBlankLinesWhenSkip(BlankLines: Integer);
 begin
   if FKeepOneBlankLine and (BlankLines > 1) then
-    FCodeGen.Writeln;
+  begin
+    FPrevBlankLines := True;
+    OnMoreBlankLinesWhenSkip;
+  end
+  else
+  begin
+    FPrevBlankLines := False;
+  end;
 end;
+
+{ TScaner }
 
 constructor TScaner.Create(AStream: TStream; ACodeGen: TCnCodeGenerator);
 begin
@@ -1235,6 +1249,11 @@ begin
       FBackwardToken := FToken;
     end;
   end;
+end;
+
+procedure TScaner.OnMoreBlankLinesWhenSkip;
+begin
+  FCodeGen.Writeln;
 end;
 
 end.
