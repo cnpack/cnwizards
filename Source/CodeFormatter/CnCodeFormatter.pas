@@ -2475,7 +2475,7 @@ begin
     end;
   end;
 
-  if First then // 没有声明则先换行
+  if First and not (Scaner.Token = tokKeywordCase) then // 没有声明则先换行，case 除外
     Writeln;
 
   if Scaner.Token = tokKeywordCase then
@@ -3254,8 +3254,9 @@ begin
     FormatConstExpr;
   end;
 
-  Match(tokColon);
-  Match(tokLB);
+  Match(tokColon); // case 后换行写分类标志，分类标志后换行缩进写()
+  Writeln;
+  Match(tokLB, Tab(PreSpaceCount));
   if Scaner.Token <> tokRB then
     FormatFieldList(Tab(PreSpaceCount), IgnoreFirst);
 
@@ -3661,7 +3662,7 @@ begin
   end
   else
   // TypeID 中有 Dot，前面的为 UnitId，这个为 TypeId
-  if Scaner.Token = tokDot then
+  while Scaner.Token = tokDot do
   begin
     Match(tokDot);
     FormatTypeID;
