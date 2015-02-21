@@ -85,6 +85,10 @@ type
     {* 格式结果换行 }
     procedure WriteLine; 
     {* 格式结果加一空行 }
+    procedure WriteBlankLineByPrevCondition;
+    {* 根据上一次是否输出了批量空行来决定本次输出单个回车还是双回车的空行，某些场合用来取代 WriteLine}
+    procedure WriteLineFeedByPrevCondition;
+    {* 根据上一次是否输出了批量空行来决定本次输出不换行还是单个回车，某些场合用来取代 Writeln}
     function FormatString(const KeywordStr: string; KeywordStyle: TKeywordStyle): string;
     {* 返回指定关键字风格的字符串}
     function UpperFirst(const KeywordStr: string): string;
@@ -1414,7 +1418,7 @@ var
   end;
 begin
   case Scaner.Token of
-    tokSymbol, tokAtSign,
+    tokSymbol, tokAtSign, tokKeywordFinal,
     tokDirective_BEGIN..tokDirective_END, // 允许语句以部分关键字开头
     tokComplex_BEGIN..tokComplex_END:
       begin
@@ -1517,7 +1521,7 @@ procedure TCnBasePascalFormatter.FormatStatement(PreSpaceCount: Byte);
 begin
   while Scaner.ForwardToken() = tokColon do
   begin
-    Writeln;
+    WriteLineFeedByPrevCondition;
     FormatLabel;
     Match(tokColon);
 
@@ -4232,10 +4236,7 @@ begin
 
   if Scaner.Token = tokKeywordFinalization then
   begin
-    if Scaner.PrevBlankLines then
-      Writeln
-    else
-      WriteLine;
+    WriteBlankLineByPrevCondition;
     Match(Scaner.Token);
     Writeln;
     FormatStmtList(Tab);
@@ -4373,10 +4374,7 @@ begin
   if Scaner.Token = tokKeywordInitialization then
   begin
     FormatInitSection(PreSpaceCount);
-    if Scaner.PrevBlankLines then
-      Writeln
-    else
-      WriteLine;
+    WriteBlankLineByPrevCondition;
   end;
 
   Match(tokKeywordEnd, PreSpaceCount);
@@ -4665,6 +4663,20 @@ begin
   Result := TokenToString(Scaner.Token);
   if Result = '' then
     Result := Scaner.TokenString;
+end;
+
+procedure TCnAbstractCodeFormatter.WriteBlankLineByPrevCondition;
+begin
+  if Scaner.PrevBlankLines then
+    Writeln
+  else
+    WriteLine;
+end;
+
+procedure TCnAbstractCodeFormatter.WriteLineFeedByPrevCondition;
+begin
+  if not Scaner.PrevBlankLines then
+    Writeln;
 end;
 
 end.

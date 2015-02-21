@@ -1072,8 +1072,8 @@ begin
     begin
       if Assigned(FCodeGen) then
       begin
-        FCodeGen.Write(BlankString);
-        FCodeGen.Write(TokenString);
+        FCodeGen.Write(BlankString); // 把上回内容尾巴，到现在注释开头的空白部分写入
+        FCodeGen.Write(TokenString); // 再写注释本身
       end;
 
       if not FFirstCommentInBlock then // 第一次碰到 Comment 时设置这个
@@ -1129,8 +1129,8 @@ begin
       // 当前是 Comment，或非ELSE编译指令，当普通注释处理
       if Assigned(FCodeGen) then
       begin
-        FCodeGen.Write(BlankString);
-        FCodeGen.Write(TokenString);
+        FCodeGen.Write(BlankString); // 把上回内容尾巴，到现在注释开头的空白部分写入
+        FCodeGen.Write(TokenString); // 再写注释本身
       end;
 
       if not FFirstCommentInBlock then // 第一次碰到 Comment 时设置这个
