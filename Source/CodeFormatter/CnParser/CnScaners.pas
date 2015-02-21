@@ -126,6 +126,9 @@ type
 {$ENDIF}
     function BlankString: string;
     function TokenString: string;
+    function TrimBlank(const Str: string): string;
+    {* 处理 BlankString，如果上次曾经多输出了一个分隔的空行，则本次 BlankString
+       需要去掉前导空行（是去掉一个以保持原有空行数量呢，还是去掉所有前导保持一个空行？}
     function TokenChar: Char;
     function TokenWideString: WideString;
     function TokenSymbolIs(const S: string): Boolean;
@@ -142,6 +145,7 @@ type
 
     property ASMMode: Boolean read FASMMode write FASMMode;
     {* 用来控制是否将回车当作空白，asm 块中需要此选项}
+
     property BlankLinesBefore: Integer read FBlankLinesBefore write FBlankLinesBefore;
     {* SkipBlank 碰到一注释时，注释和前面有效内容隔的行数，用来控制分行}
     property BlankLinesAfter: Integer read FBlankLinesAfter write FBlankLinesAfter;
@@ -172,8 +176,6 @@ type
 
 implementation
 
-{ TAbstractScaner }
-
 {$IFDEF DEBUG}
 uses
   CnDebug;
@@ -182,7 +184,7 @@ uses
 const
   ScanBufferSize = 512 * 1024 {KB};
 
-procedure BinToHex(Buffer, Text: PChar; BufSize: Integer); assembler;
+procedure BinToHex(Buffer, Text: PChar; BufSize: Integer); 
 const
   Convert: array[0..15] of Char = '0123456789ABCDEF';
 var
@@ -217,7 +219,7 @@ end;
         POP     ESI
 end;}
 
-function HexToBin(Text, Buffer: PChar; BufSize: Integer): Integer; assembler;
+function HexToBin(Text, Buffer: PChar; BufSize: Integer): Integer;
 const
   Convert: array['0'..'f'] of SmallInt =
     ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,-1,-1,-1,-1,-1,-1,
@@ -640,6 +642,18 @@ begin
   end;
 end;
 
+function TAbstractScaner.TrimBlank(const Str: string): string;
+begin
+  Result := Str;
+  if PrevBlankLines and (Length(Str) >= 2) then
+  begin
+    if Str[1] = #10 then
+      Delete(Result, 1, 1)
+    else if Str[2] = #10 then
+      Delete(Result, 1, 2);
+  end;
+end;
+
 { TScaner }
 
 constructor TScaner.Create(AStream: TStream; ACodeGen: TCnCodeGenerator);
@@ -648,7 +662,7 @@ begin
   FStream := AStream;
   FCodeGen := ACodeGen;
 
-  FCompDirectiveMode := cdmOnlyFirst; // Set CompDirective Process Mode
+  FCompDirectiveMode := CnPascalCodeForRule.CompDirectiveMode; // Set CompDirective Process Mode
   inherited Create(AStream);
 end;
 
@@ -673,6 +687,8 @@ begin
 end;
 
 function TScaner.NextToken: TPascalToken;
+var
+  BlankStr: string;
 
   procedure SkipTo(var P: PChar; TargetChar: Char);
   begin
@@ -1072,7 +1088,8 @@ begin
     begin
       if Assigned(FCodeGen) then
       begin
-        FCodeGen.Write(BlankString); // 把上回内容尾巴，到现在注释开头的空白部分写入
+        BlankStr := TrimBlank(BlankString);
+        FCodeGen.Write(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
         FCodeGen.Write(TokenString); // 再写注释本身
       end;
 
@@ -1129,7 +1146,8 @@ begin
       // 当前是 Comment，或非ELSE编译指令，当普通注释处理
       if Assigned(FCodeGen) then
       begin
-        FCodeGen.Write(BlankString); // 把上回内容尾巴，到现在注释开头的空白部分写入
+        BlankStr := TrimBlank(BlankString);
+        FCodeGen.Write(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
         FCodeGen.Write(TokenString); // 再写注释本身
       end;
 

@@ -69,7 +69,7 @@ const
     ContinueAfterError: False;
     CodeStyle: [];
 
-    CompDirectiveMode: cdmAsComment;
+    CompDirectiveMode: cdmOnlyFirst;
     KeywordStyle: ksLowerCaseKeyword;
     TabSpaceCount: 2;
     SpaceBeforeOperator: 1;
