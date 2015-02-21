@@ -679,9 +679,9 @@ begin
           FormatIdent;
         end;
 
-      tokLB, tokSLB: // [ ]
+      tokLB, tokSLB: // [ ] ()
         begin
-          { DONE: deal with index visit }
+          { DONE: deal with index visit and function/procedure call}
           Match(Scaner.Token);
           FormatExprList(PreSpaceCount, PreSpaceCount);
           Match(Scaner.Token);
@@ -726,43 +726,44 @@ begin
 
   while Scaner.Token in RelOpTokens + [tokHat, tokSLB, tokDot] do
   begin
-    IsGeneric := False;
-    if Scaner.Token = tokLess then
-    begin
-      // 判断泛型，如果不是，恢复书签往下走；如果是，搞了泛型再要跳过下面
-      // 的 RelOpTokens 判断；
-      Scaner.SaveBookmark(GenericBookmark);
+    // 这块对泛型的处理已移动到内部以处理 function call 的情形
 
-      // 往后找，一直找到非类型的关键字或者分号或者文件尾。
-      // 如果出现“标识符以及.^<>,”之外的 Token，则认为不是泛型。——此条规则不用
-      // 如果出现小于号和大于号不配对，则认为不是泛型。
-      // TODO: 判断还是不太严密，待继续验证。
-      Scaner.NextToken;
-      LessCount := 1;
-      while not (Scaner.Token in KeywordTokens + [tokSemicolon, tokEOF] - CanBeTypeKeywordTokens) do
-      begin
-        if Scaner.Token = tokLess then
-          Inc(LessCount)
-        else if Scaner.Token = tokGreat then
-          Dec(LessCount);
-
-//        if not (Scaner.Token in GenericTokensInExpression + CanBeTypeKeywordTokens) then
-//        begin
-//         IsGeneric := False;
+//    IsGeneric := False;
+//    if Scaner.Token = tokLess then
+//    begin
+//      // 判断泛型，如果不是，恢复书签往下走；如果是，搞了泛型再要跳过下面
+//      // 的 RelOpTokens 判断；
+//      Scaner.SaveBookmark(GenericBookmark);
+//
+//      // 往后找，一直找到非类型的关键字或者分号或者文件尾。
+//      // 如果出现小于号和大于号一直不配对，则认为不是泛型。
+//      // TODO: 判断还是不太严密，待继续验证。
+//      Scaner.NextToken;
+//      LessCount := 1;
+//      while not (Scaner.Token in KeywordTokens + [tokSemicolon, tokEOF] - CanBeTypeKeywordTokens) do
+//      begin
+//        if Scaner.Token = tokLess then
+//          Inc(LessCount)
+//        else if Scaner.Token = tokGreat then
+//          Dec(LessCount);
+//
+//        if LessCount = 0 then // Test<TObject><1 的情况，需要为 0 配对时就提前跳出
 //          Break;
-//        end;
-        Scaner.NextToken;
-      end;
-      IsGeneric := (LessCount = 0);
-      Scaner.LoadBookmark(GenericBookmark);
-    end;
+//
+//        Scaner.NextToken;
+//      end;
+//      IsGeneric := (LessCount = 0);
+//      Scaner.LoadBookmark(GenericBookmark);
+//    end;
+//
+//    if IsGeneric then
+//    begin
+//      // 格式化泛型的小于号段
+//      FormatTypeParams(PreSpaceCount);
+//    end
+//    else
 
-    if IsGeneric then
-    begin
-      // 格式化泛型的小于号段
-      FormatTypeParams(PreSpaceCount);
-    end
-    else if Scaner.Token in RelOpTokens then
+    if Scaner.Token in RelOpTokens then
     begin
       MatchOperator(Scaner.Token);
       FormatSimpleExpression;
@@ -938,19 +939,21 @@ end;
 {
   New Grammer:
   QualID -> '(' Designator [AS TypeId]')'
-         -> [UnitId '.'] Ident
+         -> [UnitId '.'] Ident<>
          -> '(' pointervar + expr ')'
 
   for typecast, e.g. "(x as Ty)" or just bracketed, as in (x).y();
 
   Old Grammer:
-  QualId -> [UnitId '.'] Ident 
+  QualId -> [UnitId '.'] Ident
 }
 procedure TCnBasePascalFormatter.FormatQualID(PreSpaceCount: Byte);
 
   procedure FormatIdentWithBracket(PreSpaceCount: Byte);
   var
-    I, BracketCount: Integer;
+    I, BracketCount, LessCount: Integer;
+    IsGeneric: Boolean;
+    GenericBookmark: TScannerBookmark;
   begin
     BracketCount := 0;
     while Scaner.Token = tokLB do
@@ -961,6 +964,37 @@ procedure TCnBasePascalFormatter.FormatQualID(PreSpaceCount: Byte);
 
     FormatIdent(PreSpaceCount, True);
 
+    // 这儿应该加入泛型判断
+    IsGeneric := False;
+    if Scaner.Token = tokLess then
+    begin
+      // 判断泛型，如果不是，恢复书签往下走；如果是，就恢复书签处理泛型
+      Scaner.SaveBookmark(GenericBookmark);
+
+      // 往后找，一直找到非类型的关键字或者分号或者文件尾。
+      // 如果出现小于号和大于号一直不配对，则认为不是泛型。
+      // TODO: 判断还是不太严密，待继续验证。
+      Scaner.NextToken;
+      LessCount := 1;
+      while not (Scaner.Token in KeywordTokens + [tokSemicolon, tokEOF] - CanBeTypeKeywordTokens) do
+      begin
+        if Scaner.Token = tokLess then
+          Inc(LessCount)
+        else if Scaner.Token = tokGreat then
+          Dec(LessCount);
+
+        if LessCount = 0 then // Test<TObject><1 的情况，需要为 0 配对时就提前跳出
+          Break;
+
+        Scaner.NextToken;
+      end;
+      IsGeneric := (LessCount = 0);
+      Scaner.LoadBookmark(GenericBookmark);
+    end;
+
+    if IsGeneric then
+      FormatTypeParams(PreSpaceCount);
+      
     for I := 1 to BracketCount do
       Match(tokRB);
   end;
@@ -1418,7 +1452,7 @@ var
   end;
 begin
   case Scaner.Token of
-    tokSymbol, tokAtSign, tokKeywordFinal,
+    tokSymbol, tokAtSign, tokKeywordFinal, tokKeywordIn, tokKeywordOut,
     tokDirective_BEGIN..tokDirective_END, // 允许语句以部分关键字开头
     tokComplex_BEGIN..tokComplex_END:
       begin
@@ -1529,7 +1563,8 @@ begin
   end;
 
   // 允许语句以部分关键字开头，比如变量名等
-  if Scaner.Token in SimpStmtTokens + DirectiveTokens + ComplexTokens then
+  if Scaner.Token in SimpStmtTokens + DirectiveTokens + ComplexTokens +
+    [tokKeywordIn, tokKeywordOut] then
     FormatSimpleStatement(PreSpaceCount)
   else if Scaner.Token in StructStmtTokens then
   begin
@@ -1568,7 +1603,7 @@ begin
       end;
 
       if Scaner.Token in StmtTokens + DirectiveTokens + ComplexTokens
-        + [tokInteger] then // 部分关键字能做语句开头，Label 可能以数字开头
+        + [tokInteger, tokKeywordIn, tokKeywordOut] then // 部分关键字能做语句开头，Label 可能以数字开头
       begin
         { DONE: 建立语句列表 }
         Writeln;

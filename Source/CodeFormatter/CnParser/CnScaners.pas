@@ -973,12 +973,8 @@ begin
       begin
         Inc(P);
         Result := tokGreat;
-          
-        if P^ = '<' then
-        begin
-          Result := tokNotEqual;
-          Inc(P);
-        end else
+
+        // >< 不是不等于，原来的代码将其判断成不等于了，去掉
         if P^ = '=' then
         begin
           Result := tokGreatOrEqu;
@@ -995,9 +991,8 @@ begin
         begin
           Result := tokLessOrEqu;
           Inc(P);
-        end;
-
-        if P^ = '>' then
+        end
+        else if P^ = '>' then
         begin
           Result := tokNotEqual;
           Inc(P);
