@@ -739,10 +739,17 @@ begin
         while P^ in ['A'..'Z', 'a'..'z', '0'..'9', '_'] do Inc(P);
         Result := tokSymbol;
       end;
+
+    '^':       // if a string starts with ^H, we can't know.
+      begin
+        Inc(P);
+        Result := tokHat;
+      end;
+
     '#', '''':
       begin
         IsWideStr := False;
-        // parser string like this: 'abc'#10#13'def'#10#13
+        // parser string like this: 'abc'#10^M#13'def'#10#13
         while True do
           case P^ of
             '#':
@@ -767,12 +774,20 @@ begin
                     Inc(P);
                   end;
               end;
+            '^':
+              begin
+                Inc(P);
+                if not (P^ in [#33..#126]) then
+                  Error(CN_ERRCODE_PASCAL_INVALID_STRING)
+                else
+                  Inc(P);
+              end;
           else
             Break;
           end; // case P^ of
 
         FStringPtr := P;
-        
+
         if IsWideStr then
           Result := tokWString
         else
@@ -937,12 +952,6 @@ begin
       begin
         Inc(P);
         Result := tokSRB;
-      end;
-
-    '^':
-      begin
-        Inc(P);
-        Result := tokHat;
       end;
 
     '=':

@@ -610,6 +610,8 @@ begin
         end;
       end;
     end
+    else if (FLastToken = tokHat) and (Length(Scaner.TokenString) = 1) then
+      CodeGen.Write(Scaner.TokenString, 0, 0) // ^= 这种字符转义得紧挨着
     else
       CodeGen.Write(Scaner.TokenString, BeforeSpaceCount, AfterSpaceCount);
   end;
@@ -3591,7 +3593,7 @@ begin
         end;
       end;
   else // 不是括号开头，说明是简单的常量，直接处理
-    if Scaner.Token in ConstTokens + [tokAtSign, tokPlus, tokMinus] then // 有可能初始化的值以这些开头
+    if Scaner.Token in ConstTokens + [tokAtSign, tokPlus, tokMinus, tokHat] then // 有可能初始化的值以这些开头
       FormatConstExpr(PreSpaceCount)
     else if Scaner.Token <> tokRB then
       Error(CN_ERRCODE_PASCAL_NO_TYPEDCONSTANT);
