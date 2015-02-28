@@ -908,8 +908,15 @@ begin
     FormatSingleAttribute(PreSpaceCount);
     Writeln;
   end;
-  if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
-    Match(Scaner.Token, PreSpaceCount); // 标识符中允许使用部分关键字
+
+  if Scaner.Token = tokAndSign then // & 表示后面的声明使用的关键字是转义的
+  begin
+    Match(Scaner.Token, PreSpaceCount); // 在此缩进
+    if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
+      Match(Scaner.Token); // 标识符中允许使用部分关键字
+  end
+  else if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
+    Match(Scaner.Token, PreSpaceCount); // 标识符中允许使用部分关键字，在此缩进
 
   while CanHaveUnitQual and (Scaner.Token = tokDot) do
   begin
