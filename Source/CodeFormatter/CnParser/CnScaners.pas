@@ -57,12 +57,14 @@ type
     FBlankLinesBeforeBookmark: Integer;
     FBlankLinesAfterBookmark: Integer;
     FPrevBlankLinesBookmark: Boolean;
+    FSourceColBookmark: Integer;
   protected
     property OriginBookmark: Longint read FOriginBookmark write FOriginBookmark;
     property TokenBookmark: TPascalToken read FTokenBookmark write FTokenBookmark;
     property TokenPtrBookmark: PChar read FTokenPtrBookmark write FTokenPtrBookmark;
     property SourcePtrBookmark: PChar read FSourcePtrBookmark write FSourcePtrBookmark;
     property SourceLineBookmark: Integer read FSourceLineBookmark write FSourceLineBookmark;
+    property SourceColBookmark: Integer read FSourceColBookmark write FSourceColBookmark;
     property BlankLinesBeforeBookmark: Integer read FBlankLinesBeforeBookmark write FBlankLinesBeforeBookmark;
     property BlankLinesAfterBookmark: Integer read FBlankLinesAfterBookmark write FBlankLinesAfterBookmark;
     property PrevBlankLinesBookmark: Boolean read FPrevBlankLinesBookmark write FPrevBlankLinesBookmark;
@@ -97,12 +99,14 @@ type
     FInDirectiveNestSearch: Boolean;
     FKeepOneBlankLine: Boolean;
     FPrevBlankLines: Boolean;
+    FSourceCol: Integer;
     procedure ReadBuffer;
     procedure SetOrigin(AOrigin: Longint);
     procedure SkipBlanks;
     procedure DoBlankLinesWhenSkip(BlankLines: Integer); virtual;
     {* SkipBlanks 时遇到连续换行时被调用}
     function ErrorTokenString: string;
+    procedure NewLine;
   protected
     procedure OnMoreBlankLinesWhenSkip; virtual; abstract;
   public
@@ -140,7 +144,9 @@ type
     function ForwardToken(Count: Integer = 1): TPascalToken; virtual;
 
     property FloatType: Char read FFloatType;
-    property SourceLine: Integer read FSourceLine;
+    property SourceLine: Integer read FSourceLine;  // 行，以 1 开始
+    property SourceCol: Integer read FSourceCol;    // 列，以 1 开始
+
     property Token: TPascalToken read FToken;
 
     property ASMMode: Boolean read FASMMode write FASMMode;
@@ -298,6 +304,7 @@ begin
   FSourceEnd := FBuffer;
   FTokenPtr := FBuffer;
   FSourceLine := 1;
+  FSourceCol := 1;
   FBackwardToken := tokNoToken;
 
   NextToken;
@@ -339,6 +346,7 @@ begin
   // 出错入口
   PascalErrorRec.ErrorCode := Ident;
   PascalErrorRec.SourceLine := FSourceLine;
+  PascalErrorRec.SourceCol := FSourceCol;
   PascalErrorRec.SourcePos := SourcePos;
   PascalErrorRec.CurrentToken := ErrorTokenString;
 
@@ -350,6 +358,7 @@ begin
   // 出错入口
   PascalErrorRec.ErrorCode := Ident;
   PascalErrorRec.SourceLine := FSourceLine;
+  PascalErrorRec.SourceCol := FSourceCol;  
   PascalErrorRec.SourcePos := SourcePos;
   PascalErrorRec.CurrentToken := ErrorTokenString;
   
@@ -444,7 +453,7 @@ begin
         end;
       #10:
         begin
-          Inc(FSourceLine);
+          NewLine;
           Inc(FBlankLines);
 
           if FASMMode then // 需要检测回车的标志
@@ -556,6 +565,7 @@ begin
         FTokenPtr := TokenPtrBookmark;
         FToken := TokenBookmark;
         FSourceLine := SourceLineBookmark;
+        FSourceCol := SourceColBookmark;
         FBlankLinesBefore := BlankLinesBeforeBookmark;
         FBlankLinesAfter := BlankLinesAfterBookmark;
         FPrevBlankLines := PrevBlankLinesBookmark;
@@ -581,6 +591,7 @@ begin
     TokenBookmark := FToken;
     TokenPtrBookmark := FTokenPtr;
     SourceLineBookmark := FSourceLine;
+    SourceColBookmark := FSourceCol;
     BlankLinesBeforeBookmark := FBlankLinesBefore;
     BlankLinesAfterBookmark := FBlankLinesAfter;
     PrevBlankLinesBookmark := FPrevBlankLines;
@@ -652,6 +663,12 @@ begin
     else if Str[2] = #10 then
       Delete(Result, 1, 2);
   end;
+end;
+
+procedure TAbstractScaner.NewLine;
+begin
+  Inc(FSourceLine);
+  FSourceCol := 1;
 end;
 
 { TScaner }
@@ -797,7 +814,7 @@ begin
         while ((P^ <> #0) and (P^ <> '}')) do
         begin
           if P^ = #10 then
-            Inc(FSourceLine);
+            NewLine;
           Inc(P);
         end;
 
@@ -815,7 +832,7 @@ begin
             // ASM 模式下，换行作为语句结束符，不在注释内处理，所以这也不加
             if not FASMMode then
             begin
-              Inc(FSourceLine);
+              NewLine;
               Inc(FBlankLinesAfterComment);
               Inc(P);
             end;
@@ -844,7 +861,7 @@ begin
             // ASM 模式下，换行作为语句结束符，不在注释内处理，所以这也不加
             if not FASMMode then
             begin
-              Inc(FSourceLine);
+              NewLine;
               Inc(FBlankLinesAfterComment);
               Inc(P);
             end;
@@ -885,7 +902,7 @@ begin
                   // ASM 模式下，换行作为语句结束符，不在注释内处理，所以这也不加
                   if not FASMMode then
                   begin
-                    Inc(FSourceLine);
+                    NewLine;
                     Inc(FBlankLinesAfterComment);
                     Inc(P);
                   end;
@@ -897,7 +914,7 @@ begin
             else
             begin
               if P^ = #10 then
-                Inc(FSourceLine);
+                NewLine;
               Inc(P);
             end;
           end;
@@ -1057,7 +1074,7 @@ begin
       begin
         Result := tokCRLF;
         if not FASMMode then // FSourceLine Inc-ed at another place
-          Inc(FSourceLine);
+          NewLine;
         Inc(P);
       end;
   else

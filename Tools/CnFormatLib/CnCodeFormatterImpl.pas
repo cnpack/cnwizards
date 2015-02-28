@@ -69,8 +69,8 @@ type
     function FormatPascalBlock(StartType: DWORD; StartIndent: DWORD;
       Input: PAnsiChar; Len: DWORD): PAnsiChar;
 
-    function RetrievePascalLastError(out SourceLine: Integer; out SourcePos: Integer;
-      out CurrentToken: PAnsiChar): Integer;
+    function RetrievePascalLastError(out SourceLine: Integer; out SourceCol: Integer;
+      out SourcePos: Integer; out CurrentToken: PAnsiChar): Integer;
   end;
 
 var
@@ -169,11 +169,12 @@ begin
 
 end;
 
-function TCnCodeFormatProvider.RetrievePascalLastError(out SourceLine,
+function TCnCodeFormatProvider.RetrievePascalLastError(out SourceLine, SourceCol,
   SourcePos: Integer; out CurrentToken: PAnsiChar): Integer;
 begin
   Result := PascalErrorRec.ErrorCode;
   SourceLine := PascalErrorRec.SourceLine;
+  SourceCol := PascalErrorRec.SourceCol;
   SourcePos := PascalErrorRec.SourcePos;
   CurrentToken := PAnsiChar(PascalErrorRec.CurrentToken);
 end;

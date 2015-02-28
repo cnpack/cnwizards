@@ -328,6 +328,7 @@ begin
   // 出错入口
   PascalErrorRec.ErrorCode := Ident;
   PascalErrorRec.SourceLine := FScaner.SourceLine;
+  PascalErrorRec.SourceCol := FScaner.SourceCol;
   PascalErrorRec.SourcePos := FScaner.SourcePos;
   PascalErrorRec.CurrentToken := ErrorTokenString;
 
@@ -340,6 +341,7 @@ begin
   // 出错入口
   PascalErrorRec.ErrorCode := Ident;
   PascalErrorRec.SourceLine := FScaner.SourceLine;
+  PascalErrorRec.SourceCol := FScaner.SourceCol;
   PascalErrorRec.SourcePos := FScaner.SourcePos;
   PascalErrorRec.CurrentToken := ErrorTokenString;
 
@@ -2389,8 +2391,8 @@ end;
 { EmumeratedIdent -> [&] Ident ['=' ConstExpr] }
 procedure TCnBasePascalFormatter.FormatEmumeratedIdent(PreSpaceCount: Byte);
 begin
-  if Scaner.Token = tokAndSign then // e.g. TAnimationType = (&In, Out, InOut);
-    Match(tokAndSign);
+//  if Scaner.Token = tokAndSign then // e.g. TAnimationType = (&In, Out, InOut);
+//    Match(tokAndSign);              // Moved to FormatIdent
     
   FormatIdent(PreSpaceCount);
   if Scaner.Token = tokEQUAL then

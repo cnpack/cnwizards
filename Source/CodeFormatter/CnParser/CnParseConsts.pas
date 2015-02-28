@@ -75,8 +75,9 @@ type
   TCnPascalErrorRec = packed record
     ErrorCode: Integer;
     ErrorMessage: string;
-    SourceLine: Integer;
-    SourcePos: Integer;
+    SourceLine: Integer; // 出错时当前行，1 开始
+    SourceCol: Integer;  // 出错时当前列，1 开始
+    SourcePos: Integer;  // 出错时当前总偏移
     CurrentToken: string;
   end;
 
@@ -96,6 +97,7 @@ var
     ErrorCode: 0;
     ErrorMessage: '';
     SourceLine: 0;
+    SourceCol: 0;
     SourcePos: 0;
     CurrentToken: '';
   );
@@ -108,11 +110,15 @@ implementation
 
 procedure ClearPascalError;
 begin
-  PascalErrorRec.ErrorCode := 0;
-  PascalErrorRec.ErrorMessage := '';
-  PascalErrorRec.SourceLine := 0;
-  PascalErrorRec.SourcePos := 0;
-  PascalErrorRec.CurrentToken := '';
+  with PascalErrorRec do
+  begin
+    ErrorCode := 0;
+    ErrorMessage := '';
+    SourceLine := 0;
+    SourceCol := 0;
+    SourcePos := 0;
+    CurrentToken := '';
+  end;
 end;
 
 function RetrieveFormatErrorString(const Ident: Integer): PAnsiChar;

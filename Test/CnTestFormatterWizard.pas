@@ -120,7 +120,7 @@ var
   S: AnsiString;
   Res: PAnsiChar;
   Formatter: ICnPascalFormatterIntf;
-  ErrCode, SourceLine, SourcePos: Integer;
+  ErrCode, SourceLine, SourceCol, SourcePos: Integer;
   CurrentToken: PAnsiChar;
 begin
   if FHandle = 0 then
@@ -163,9 +163,10 @@ begin
     end
     else
     begin
-      ErrCode := Formatter.RetrievePascalLastError(SourceLine, SourcePos, CurrentToken);
-      ShowMessage(Format('Error Code %d, Line %d, Pos %d, Token %s', [ErrCode,
-        SourceLine, SourcePos, CurrentToken]));
+      ErrCode := Formatter.RetrievePascalLastError(SourceLine, SourceCol,
+        SourcePos, CurrentToken);
+      ShowMessage(Format('Error Code %d, Line %d, Col %d, Pos %d, Token %s', [ErrCode,
+        SourceLine, SourceCol, SourcePos, CurrentToken]));
     end;
   finally
     Formatter := nil;

@@ -134,9 +134,9 @@ type
        代码以 AnsiString 格式传入，返回结果存储的 AnsiString 字符内容的指针，
        用完后无须释放。如果返回 nil，说明出错，需要用 RetrieveLastError 获得错误}
 
-    function RetrievePascalLastError(out SourceLine: Integer; out SourcePos: Integer;
-      out CurrentToken: PAnsiChar): Integer;
-    {* 获取错误码以及出错时的代码行数与整体块偏移以及解析出错时的当前 Token，
+    function RetrievePascalLastError(out SourceLine: Integer; out SourceCol: Integer;
+      out SourcePos: Integer; out CurrentToken: PAnsiChar): Integer;
+    {* 获取错误码以及出错时的代码行数列数与整体块偏移以及解析出错时的当前 Token，
        CurrentToken 内容应复制出来使用，无须释放}
   end;
 
