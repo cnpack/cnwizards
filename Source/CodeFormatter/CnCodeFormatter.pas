@@ -717,10 +717,6 @@ end;
 { Expression -> SimpleExpression [RelOp SimpleExpression]... }
 procedure TCnBasePascalFormatter.FormatExpression(PreSpaceCount: Byte;
   CurrentIndent: Byte);
-var
-  IsGeneric: Boolean;
-  GenericBookmark: TScannerBookmark;
-  LessCount: Integer;
 begin
   FormatSimpleExpression(PreSpaceCount, CurrentIndent);
 
@@ -1053,11 +1049,11 @@ begin
   Match(tokSRB);
 end;
 
-{ SimpleExpression -> ['+' | '-'] Term [AddOp Term]... }
+{ SimpleExpression -> ['+' | '-' | '^'] Term [AddOp Term]... }
 procedure TCnBasePascalFormatter.FormatSimpleExpression(
   PreSpaceCount: Byte; CurrentIndent: Byte);
 begin
-  if Scaner.Token in [tokPlus, tokMinus] then
+  if Scaner.Token in [tokPlus, tokMinus, tokHat] then // ^H also support
   begin
     Match(Scaner.Token, PreSpaceCount);
     FormatTerm;
