@@ -590,17 +590,24 @@ begin
 
     if (Token in KeywordTokens + ComplexTokens + DirectiveTokens) then // 关键字范围扩大
     begin
-      if (Token <> tokKeywordEnd) and (Token <> tokKeywordString) then
+      if FLastToken = tokAndSign then // 关键字前是 & 表示非关键字
       begin
-          CodeGen.Write(
-            FormatString(Scaner.TokenString, CnPascalCodeForRule.KeywordStyle),
-            BeforeSpaceCount, AfterSpaceCount);
+        CodeGen.Write(Scaner.TokenString, BeforeSpaceCount, AfterSpaceCount);
       end
       else
       begin
-        CodeGen.Write(
-          FormatString(Scaner.TokenString, CnPascalCodeForRule.KeywordStyle),
-          BeforeSpaceCount, AfterSpaceCount);
+        if (Token <> tokKeywordEnd) and (Token <> tokKeywordString) then
+        begin
+            CodeGen.Write(
+              FormatString(Scaner.TokenString, CnPascalCodeForRule.KeywordStyle),
+              BeforeSpaceCount, AfterSpaceCount);
+        end
+        else
+        begin
+          CodeGen.Write(
+            FormatString(Scaner.TokenString, CnPascalCodeForRule.KeywordStyle),
+            BeforeSpaceCount, AfterSpaceCount);
+        end;
       end;
     end
     else
