@@ -4263,7 +4263,7 @@ procedure TCnGoalCodeFormatter.FormatImplementationSection(
 begin
   Match(tokKeywordImplementation);
 
-  if Scaner.Token = tokKeywordUses then
+  while Scaner.Token = tokKeywordUses do
   begin
     WriteLine;
     FormatUsesClause(PreSpaceCount, CnPascalCodeForRule.UsesUnitSingleLine);
@@ -4284,7 +4284,16 @@ procedure TCnGoalCodeFormatter.FormatInitSection(PreSpaceCount: Byte);
 begin
   Match(tokKeywordInitialization);
   Writeln;
-  FormatStmtList(Tab);
+  if Scaner.Token = tokKeywordFinalization then // Empty initialization
+  begin
+    Writeln;
+    Match(Scaner.Token);
+    Writeln;
+    FormatStmtList(Tab);
+    Exit;
+  end
+  else
+    FormatStmtList(Tab);
 
   if Scaner.Token = tokKeywordFinalization then
   begin
@@ -4342,7 +4351,7 @@ procedure TCnGoalCodeFormatter.FormatInterfaceSection(PreSpaceCount: Byte);
 begin
   Match(tokKeywordInterface, PreSpaceCount);
 
-  if Scaner.Token = tokKeywordUses then
+  while Scaner.Token = tokKeywordUses do
   begin
     WriteLine;
     FormatUsesClause(PreSpaceCount, CnPascalCodeForRule.UsesUnitSingleLine);
