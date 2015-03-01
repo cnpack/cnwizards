@@ -3520,6 +3520,11 @@ begin
     tokSLB:
       begin
         FormatSetConstructor;
+        while Scaner.Token in (AddOPTokens + MulOpTokens) do // Set 之间的运算
+        begin
+          MatchOperator(Scaner.Token);
+          FormatSetConstructor;
+        end;
       end;  
     tokLB:
       begin // 是括号的，表示是组合的Type
