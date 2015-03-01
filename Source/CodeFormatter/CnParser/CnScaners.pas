@@ -1034,7 +1034,7 @@ begin
     '&':
       begin
         Inc(P);
-        Result := tokAndSign;
+        Result := tokAmpersand;
       end;
       
     '+', '-':

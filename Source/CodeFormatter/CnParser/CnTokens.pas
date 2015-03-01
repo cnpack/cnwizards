@@ -79,7 +79,7 @@ type
     tokDot,
     tokHat,
     tokAtSign,
-    tokAndSign,
+    tokAmpersand,
 
     tokLB,
     tokRB,
@@ -285,7 +285,7 @@ const
 
   InterfaceDeclTokens = [tokKeywordConst, tokKeywordResourcestring,
     tokKeywordThreadvar, tokKeywordType, tokKeywordVar, tokKeywordProcedure,
-    tokKeywordFunction, tokKeywordExports];
+    tokKeywordFunction, tokKeywordExports, tokSLB]; // [ means Attributes
 
   BuiltInTypeTokens = [tokKeywordProcedure, tokKeywordFunction];
 
@@ -366,7 +366,7 @@ const
     (Value: Integer(tokDot);            Name: '.'),
     (Value: Integer(tokHat);            Name: '^'),
     (Value: Integer(tokAtSign);         Name: '@'),
-    (Value: Integer(tokAndSign);        Name: '&'),
+    (Value: Integer(tokAmpersand);      Name: '&'),
     
     (Value: Integer(tokLB);             Name: '('),
     (Value: Integer(tokRB);             Name: ')'),

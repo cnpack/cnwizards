@@ -109,7 +109,7 @@ type
 
   TCnBasePascalFormatter = class(TCnAbstractCodeFormatter)
   private
-    function IsTokenAfterAttributeInSet(InTokens: TPascalTokenSet):Boolean;
+    function IsTokenAfterAttributesInSet(InTokens: TPascalTokenSet):Boolean;
   protected
     procedure FormatExprList(PreSpaceCount: Byte = 0; CurrentIndent: Byte = 0);
     procedure FormatExpression(PreSpaceCount: Byte = 0; CurrentIndent: Byte = 0);
@@ -590,7 +590,7 @@ begin
 
     if (Token in KeywordTokens + ComplexTokens + DirectiveTokens) then // 关键字范围扩大
     begin
-      if FLastToken = tokAndSign then // 关键字前是 & 表示非关键字
+      if FLastToken = tokAmpersand then // 关键字前是 & 表示非关键字
       begin
         CodeGen.Write(Scaner.TokenString, BeforeSpaceCount, AfterSpaceCount);
       end
@@ -920,7 +920,7 @@ begin
     Writeln;
   end;
 
-  if Scaner.Token = tokAndSign then // & 表示后面的声明使用的关键字是转义的
+  if Scaner.Token = tokAmpersand then // & 表示后面的声明使用的关键字是转义的
   begin
     Match(Scaner.Token, PreSpaceCount); // 在此缩进
     if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
@@ -984,6 +984,7 @@ procedure TCnBasePascalFormatter.FormatQualID(PreSpaceCount: Byte);
     begin
       // 判断泛型，如果不是，恢复书签往下走；如果是，就恢复书签处理泛型
       Scaner.SaveBookmark(GenericBookmark);
+      CodeGen.LockOutput;
 
       // 往后找，一直找到非类型的关键字或者分号或者文件尾。
       // 如果出现小于号和大于号一直不配对，则认为不是泛型。
@@ -1003,7 +1004,9 @@ procedure TCnBasePascalFormatter.FormatQualID(PreSpaceCount: Byte);
         Scaner.NextToken;
       end;
       IsGeneric := (LessCount = 0);
+      
       Scaner.LoadBookmark(GenericBookmark);
+      CodeGen.UnLockOutput;
     end;
 
     if IsGeneric then
@@ -2835,6 +2838,8 @@ begin
   else
   begin
     Scaner.SaveBookmark(Bookmark);
+    CodeGen.LockOutput;
+
     if Scaner.Token = tokMinus then // 考虑到负号的情况
       Scaner.NextToken;
 
@@ -2843,12 +2848,14 @@ begin
     if Scaner.Token = tokRange then
     begin
       Scaner.LoadBookmark(Bookmark);
+      CodeGen.UnLockOutput;
       // SubrangeType
       FormatSubrangeType(PreSpaceCount);
     end
     else
     begin
       Scaner.LoadBookmark(Bookmark);
+      CodeGen.UnLockOutput;
       // OrdIdent
       if Scaner.Token = tokMinus then
         Match(Scaner.Token);
@@ -3648,7 +3655,7 @@ begin
   while Scaner.Token in IsTypeStartTokens do // Attribute will use [
   begin
     // 如果是[，就要越过其属性，找到]后的第一个，确定它是否还是 type，如果不是，就跳出
-    if (Scaner.Token = tokSLB) and not IsTokenAfterAttributeInSet(IsTypeStartTokens) then
+    if (Scaner.Token = tokSLB) and not IsTokenAfterAttributesInSet(IsTypeStartTokens) then
       Exit;
 
     if not FirstType then WriteLine;
@@ -3765,8 +3772,8 @@ begin
 
   while Scaner.Token in IsConstStartTokens do // 这些关键字不宜做变量名但也不好处理，只有先写上
   begin
-    // 如果是[，就要越过其属性，找到]后的第一个，确定它是否还是 var，如果不是，就跳出
-    if (Scaner.Token = tokSLB) and not IsTokenAfterAttributeInSet(IsConstStartTokens) then
+    // 如果是[，就要越过其属性，找到]后的第一个，确定它是否还是 const，如果不是，就跳出
+    if (Scaner.Token = tokSLB) and not IsTokenAfterAttributesInSet(IsConstStartTokens) then
       Exit;
 
     Writeln;
@@ -4036,6 +4043,8 @@ var
   Bookmark: TScannerBookmark;
 begin
   Scaner.SaveBookmark(Bookmark);
+  CodeGen.LockOutput;
+
   if Scaner.Token = tokKeywordClass then
   begin
     Scaner.NextToken;
@@ -4045,12 +4054,14 @@ begin
     tokKeywordProcedure, tokKeywordConstructor, tokKeywordDestructor:
     begin
       Scaner.LoadBookmark(Bookmark);
+      CodeGen.UnLockOutput;
       FormatProcedureDecl(PreSpaceCount);
     end;
 
     tokKeywordFunction, tokKeywordOperator:
     begin
       Scaner.LoadBookmark(Bookmark);
+      CodeGen.UnLockOutput;
       FormatFunctionDecl(PreSpaceCount);
     end;
   else
@@ -4173,7 +4184,7 @@ begin
   while Scaner.Token in IsVarStartTokens do // 这些关键字不宜做变量名但也不好处理，只有先写上
   begin
     // 如果是[，就要越过其属性，找到]后的第一个，确定它是否还是 var，如果不是，就跳出
-    if (Scaner.Token = tokSLB) and not IsTokenAfterAttributeInSet(IsVarStartTokens) then
+    if (Scaner.Token = tokSLB) and not IsTokenAfterAttributesInSet(IsVarStartTokens) then
       Exit;
 
     Writeln;
@@ -4328,6 +4339,7 @@ begin
       tokKeywordVar, tokKeywordThreadvar: FormatVarSection(PreSpaceCount);
       tokKeywordProcedure, tokKeywordFunction: FormatExportedHeading(PreSpaceCount);
       tokKeywordExports: FormatExportsSection(PreSpaceCount);
+      tokSLB: FormatSingleAttribute(PreSpaceCount);
     else
       if not CnPascalCodeForRule.ContinueAfterError then
         Error(CN_ERRCODE_PASCAL_ERROR_INTERFACE)
@@ -4684,7 +4696,13 @@ begin
       Match(tokLB);
       FormatExprList;
       Match(tokRB);
+    end
+    else if Scaner.Token = tokColon then
+    begin
+      Match(tokColon);
+      FormatIdent;
     end;
+
     if Scaner.Token = tokComma then // Multi-Attribute, use new line.
     begin
       Match(tokComma);
@@ -4695,27 +4713,34 @@ begin
   Match(tokSRB);
 end;
 
-function TCnBasePascalFormatter.IsTokenAfterAttributeInSet(
+function TCnBasePascalFormatter.IsTokenAfterAttributesInSet(
   InTokens: TPascalTokenSet): Boolean;
 var
   Bookmark: TScannerBookmark;
 begin
   Scaner.SaveBookmark(Bookmark);
+  CodeGen.LockOutput;
+
   try
     Result := False;
     if Scaner.Token <> tokSLB then
       Exit;
 
-    while not (Scaner.Token in [tokEOF, tokUnknown, tokSRB]) do
+    // 要跳过多个可能紧邻的属性，而不止一个
+    while Scaner.Token = tokSLB do
+    begin
+      while not (Scaner.Token in [tokEOF, tokUnknown, tokSRB]) do
+        Scaner.NextToken;
+
+      if Scaner.Token <> tokSRB then
+        Exit;
+
       Scaner.NextToken;
-
-    if Scaner.Token <> tokSRB then
-      Exit;
-
-    Scaner.NextToken;
+    end;
     Result := (Scaner.Token in InTokens);
   finally
     Scaner.LoadBookmark(Bookmark);
+    CodeGen.UnLockOutput;
   end;
 end;
 
