@@ -3071,9 +3071,11 @@ begin
   begin
     FormatDirective(0, IsSemicolon);
 
-    // leave one semicolon for procedure type define
-    // if Scaner.Token = tokSemicolon then
-    //  Match(tokSemicolon);
+    if (Scaner.Token = tokSemicolon) and
+      (Scaner.ForwardToken() in DirectiveTokens) then
+      Match(tokSemicolon);
+
+    // leave one semicolon for procedure type define at last.
   end;
 end;
 
