@@ -257,6 +257,8 @@ const
 
   StmtTokens = [tokKeywordLabel] + SimpStmtTokens + StructStmtTokens;
 
+  StmtKeywordTokens = [tokKeywordIn, tokKeywordOut, tokKeywordString];
+
   RestrictedTypeTokens = [tokKeywordObject, tokKeywordClass, tokKeywordInterface,
     tokKeywordDispinterface];
 

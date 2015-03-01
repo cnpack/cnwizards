@@ -1470,6 +1470,7 @@ var
 begin
   case Scaner.Token of
     tokSymbol, tokAtSign, tokKeywordFinal, tokKeywordIn, tokKeywordOut,
+    tokKeywordString,
     tokDirective_BEGIN..tokDirective_END, // 允许语句以部分关键字开头
     tokComplex_BEGIN..tokComplex_END:
       begin
@@ -1581,7 +1582,7 @@ begin
 
   // 允许语句以部分关键字开头，比如变量名等
   if Scaner.Token in SimpStmtTokens + DirectiveTokens + ComplexTokens +
-    [tokKeywordIn, tokKeywordOut] then
+    StmtKeywordTokens then
     FormatSimpleStatement(PreSpaceCount)
   else if Scaner.Token in StructStmtTokens then
   begin
@@ -1620,7 +1621,7 @@ begin
       end;
 
       if Scaner.Token in StmtTokens + DirectiveTokens + ComplexTokens
-        + [tokInteger, tokKeywordIn, tokKeywordOut] then // 部分关键字能做语句开头，Label 可能以数字开头
+        + [tokInteger] + StmtKeywordTokens then // 部分关键字能做语句开头，Label 可能以数字开头
       begin
         { DONE: 建立语句列表 }
         Writeln;
