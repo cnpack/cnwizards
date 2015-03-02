@@ -229,7 +229,7 @@
       <FILE FILENAME="Config\CnWizMenuSortFrm.pas" FORMNAME="CnMenuSortFrm" UNITNAME="Cnwizmenusortfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnWizUtils.pas" FORMNAME="" UNITNAME="CnWizUtils" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="IdeEnhancements\CnFastCodeWizard.pas" FORMNAME="" UNITNAME="CnFastCodeWizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="SimpleWizards\CnAlignSizeWizard.pas" FORMNAME="" UNITNAME="CnAlignSizeWizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="SimpleWizards\CnAlignSizeWizard.pas" FORMNAME="CnNonArrangeForm" UNITNAME="CnAlignSizeWizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="EditorWizard\CnEditorWizard.pas" FORMNAME="CnEditorToolsForm" UNITNAME="Cneditorwizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="SimpleWizards\CnListCompFrm.pas" FORMNAME="" UNITNAME="CnListCompFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="SimpleWizards\CnCompToCodeFrm.pas" FORMNAME="" UNITNAME="CnCompToCodeFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
@@ -366,6 +366,7 @@
       <FILE FILENAME="IdeEnhancements\CnSourceHighlight.pas" FORMNAME="" UNITNAME="CnSourceHighlight.pas" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="IdeEnhancements\CnSourceHighlightFrm.pas" FORMNAME="CnSourceHighlightForm" UNITNAME="CnSourceHighlightFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="IdeEnhancements\CnHighlightLineFrm.pas" FORMNAME="CnHighlightLineForm" UNITNAME="CnHighlightLineFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="IdeEnhancements\CnHighlightSeparateLineFrm.pas" FORMNAME="CnHighlightSeparateLineForm" UNITNAME="CnHighlightSeparateLineFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="IdeEnhancements\CnInputSymbolList.pas" FORMNAME="" UNITNAME="CnInputSymbolList.pas" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="IdeEnhancements\CnInputHelper.pas" FORMNAME="" UNITNAME="CnInputHelper.pas" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="IdeEnhancements\CnInputHelperEditFrm.pas" FORMNAME="CnInputHelperEditForm" UNITNAME="CnInputHelperEditFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
