@@ -14,43 +14,44 @@
       ..\Dcu\CnWizConfigFrm.obj ..\Dcu\CnWizSubActionShortCutFrm.obj 
       ..\Dcu\CnWizMenuSortFrm.obj ..\Dcu\CnWizUtils.obj 
       ..\Dcu\CnFastCodeWizard.obj ..\Dcu\CnAlignSizeWizard.obj 
-      ..\Dcu\CnListCompFrm.obj ..\Dcu\CnCompToCodeFrm.obj 
-      ..\Dcu\CnMessageBoxWizard.obj ..\Dcu\CnComponentSelector.obj 
-      ..\Dcu\CnTabOrderWizard.obj ..\Dcu\CnBookmarkWizard.obj 
-      ..\Dcu\CnWizNotifier.obj ..\Dcu\CnWizControlHook.obj 
-      ..\Dcu\CnBookmarkConfigFrm.obj ..\Dcu\CnWizIdeUtils.obj 
-      ..\Dcu\CnSrcTemplate.obj ..\Dcu\CnSrcTemplateEditFrm.obj 
-      ..\Dcu\CnEditorWizard.obj ..\Dcu\CnEditorOpenFile.obj ..\Dcu\CnEditorOpenFileFrm.obj 
-      ..\Dcu\CnEditorCodeSwap.obj ..\Dcu\CnWizEditFiler.obj 
-      ..\Dcu\CnMsdnWizard.obj ..\Dcu\CnPas2HtmlWizard.obj 
-      ..\Dcu\CnPasConvertTypeFrm.obj ..\Dcu\CnPas2HtmlConfigFrm.obj 
-      ..\Dcu\CnEditorZoomFullScreen.obj ..\Dcu\CnWizSearch.obj 
-      ..\Dcu\CnReplaceWizard.obj ..\Dcu\CnDiffEditorFrm.obj 
-      ..\Dcu\CnSourceDiffFrm.obj ..\Dcu\CnSourceDiffWizard.obj 
-      ..\Dcu\CnDesignEditor.obj ..\Dcu\CnDesignEditorConsts.obj 
-      ..\Dcu\CnDesignEditorUtils.obj ..\Dcu\CnHintEditorFrm.obj 
-      ..\Dcu\CnMultiLineEditorFrm.obj ..\Dcu\CnSetPropEditor.obj 
-      ..\Dcu\CnShenPropEditors.obj ..\Dcu\CnSizeConstraintsEditorFrm.obj 
-      ..\Dcu\CnEditorCodeToString.obj ..\Dcu\CnEditorCodeDelBlank.obj 
-      ..\Dcu\CnEditorCodeTool.obj ..\Dcu\CnLineParser.obj 
-      ..\Dcu\CnEditorCodeComment.obj ..\Dcu\CnEditorCodeIndent.obj 
-      ..\Dcu\CnAsciiChart.obj ..\Dcu\CnStatFrm.obj ..\Dcu\CnStatResultFrm.obj 
-      ..\Dcu\CnStatWizard.obj ..\Dcu\CnPrefixCompFrm.obj 
-      ..\Dcu\CnPrefixConfigFrm.obj ..\Dcu\CnPrefixEditFrm.obj 
-      ..\Dcu\CnPrefixExecuteFrm.obj ..\Dcu\CnPrefixList.obj 
-      ..\Dcu\CnPrefixNewFrm.obj ..\Dcu\CnPrefixWizard.obj 
-      ..\Dcu\CnFlatToolbarConfigFrm.obj ..\Dcu\CnFormEnhancements.obj 
-      ..\Dcu\CnPaletteEnhancements.obj ..\Dcu\CnPaletteEnhanceFrm.obj 
-      ..\Dcu\CnCompFilterFrm.obj ..\Dcu\CnCorPropCfgFrm.obj 
-      ..\Dcu\CnCorPropFrm.obj ..\Dcu\CnCorPropRulesFrm.obj 
-      ..\Dcu\CnCorPropWizard.obj ..\Dcu\CnProjectExtWizard.obj 
-      ..\Dcu\CnProjectViewFormsFrm.obj ..\Dcu\CnProjectViewUnitsFrm.obj 
-      ..\Dcu\CnProjectUseUnitsFrm.obj ..\Dcu\CnProjectFramesFrm.obj 
-      ..\Dcu\CnProjectListUsedFrm.obj ..\Dcu\CnCommentCropper.obj 
-      ..\Dcu\CnSourceCropper.obj ..\Dcu\CnCpuWinEnhancements.obj 
-      ..\Dcu\CnCpuWinEnhanceFrm.obj ..\Dcu\CnMultiLineEdtToolOptFrm.obj 
-      ..\Dcu\CnMultiLineEdtUserFmtFrm.obj ..\Dcu\CnRepositoryMenu.obj 
-      ..\Dcu\CnDUnitWizard.obj ..\Dcu\CnDUnitSetFrm.obj ..\Dcu\CnIniFilerFrm.obj 
+      ..\Dcu\CnEditorWizard.obj ..\Dcu\CnListCompFrm.obj 
+      ..\Dcu\CnCompToCodeFrm.obj ..\Dcu\CnMessageBoxWizard.obj 
+      ..\Dcu\CnComponentSelector.obj ..\Dcu\CnTabOrderWizard.obj 
+      ..\Dcu\CnBookmarkWizard.obj ..\Dcu\CnWizNotifier.obj 
+      ..\Dcu\CnWizControlHook.obj ..\Dcu\CnBookmarkConfigFrm.obj 
+      ..\Dcu\CnWizIdeUtils.obj ..\Dcu\CnSrcTemplate.obj 
+      ..\Dcu\CnSrcTemplateEditFrm.obj ..\Dcu\CnEditorOpenFile.obj 
+      ..\Dcu\CnEditorOpenFileFrm.obj ..\Dcu\CnEditorCodeSwap.obj 
+      ..\Dcu\CnWizEditFiler.obj ..\Dcu\CnMsdnWizard.obj 
+      ..\Dcu\CnPas2HtmlWizard.obj ..\Dcu\CnPasConvertTypeFrm.obj 
+      ..\Dcu\CnPas2HtmlConfigFrm.obj ..\Dcu\CnEditorZoomFullScreen.obj 
+      ..\Dcu\CnWizSearch.obj ..\Dcu\CnReplaceWizard.obj 
+      ..\Dcu\CnDiffEditorFrm.obj ..\Dcu\CnSourceDiffFrm.obj 
+      ..\Dcu\CnSourceDiffWizard.obj ..\Dcu\CnDesignEditor.obj 
+      ..\Dcu\CnDesignEditorConsts.obj ..\Dcu\CnDesignEditorUtils.obj 
+      ..\Dcu\CnHintEditorFrm.obj ..\Dcu\CnMultiLineEditorFrm.obj 
+      ..\Dcu\CnSetPropEditor.obj ..\Dcu\CnShenPropEditors.obj 
+      ..\Dcu\CnSizeConstraintsEditorFrm.obj ..\Dcu\CnEditorCodeToString.obj 
+      ..\Dcu\CnEditorCodeDelBlank.obj ..\Dcu\CnEditorCodeTool.obj 
+      ..\Dcu\CnLineParser.obj ..\Dcu\CnEditorCodeComment.obj 
+      ..\Dcu\CnEditorCodeIndent.obj ..\Dcu\CnAsciiChart.obj ..\Dcu\CnStatFrm.obj 
+      ..\Dcu\CnStatResultFrm.obj ..\Dcu\CnStatWizard.obj 
+      ..\Dcu\CnPrefixCompFrm.obj ..\Dcu\CnPrefixConfigFrm.obj 
+      ..\Dcu\CnPrefixEditFrm.obj ..\Dcu\CnPrefixExecuteFrm.obj 
+      ..\Dcu\CnPrefixList.obj ..\Dcu\CnPrefixNewFrm.obj 
+      ..\Dcu\CnPrefixWizard.obj ..\Dcu\CnFlatToolbarConfigFrm.obj 
+      ..\Dcu\CnFormEnhancements.obj ..\Dcu\CnPaletteEnhancements.obj 
+      ..\Dcu\CnPaletteEnhanceFrm.obj ..\Dcu\CnCompFilterFrm.obj 
+      ..\Dcu\CnCorPropCfgFrm.obj ..\Dcu\CnCorPropFrm.obj 
+      ..\Dcu\CnCorPropRulesFrm.obj ..\Dcu\CnCorPropWizard.obj 
+      ..\Dcu\CnProjectExtWizard.obj ..\Dcu\CnProjectViewFormsFrm.obj 
+      ..\Dcu\CnProjectViewUnitsFrm.obj ..\Dcu\CnProjectUseUnitsFrm.obj 
+      ..\Dcu\CnProjectFramesFrm.obj ..\Dcu\CnProjectListUsedFrm.obj 
+      ..\Dcu\CnCommentCropper.obj ..\Dcu\CnSourceCropper.obj 
+      ..\Dcu\CnCpuWinEnhancements.obj ..\Dcu\CnCpuWinEnhanceFrm.obj 
+      ..\Dcu\CnMultiLineEdtToolOptFrm.obj ..\Dcu\CnMultiLineEdtUserFmtFrm.obj 
+      ..\Dcu\CnRepositoryMenu.obj ..\Dcu\CnDUnitWizard.obj 
+      ..\Dcu\CnDUnitSetFrm.obj ..\Dcu\CnIniFilerFrm.obj 
       ..\Dcu\CnIniFilerWizard.obj ..\Dcu\CnOTACreators.obj 
       ..\Dcu\CnProjectDelTempFrm.obj ..\Dcu\CnWizIdeDock.obj 
       ..\Dcu\CnExplore.obj ..\Dcu\CnExploreDirectory.obj 
@@ -79,10 +80,10 @@
       ..\Dcu\CnSrcEditorKey.obj ..\Dcu\CnIdentRenameFrm.obj 
       ..\Dcu\CnIdeEnhanceMenu.obj ..\Dcu\CnSourceHighlight.obj 
       ..\Dcu\CnSourceHighlightFrm.obj ..\Dcu\CnHighlightLineFrm.obj 
-      ..\Dcu\CnHighlightSeparateLineFrm.obj ..\Dcu\CnFormatterIntf.obj
-      ..\Dcu\CnInputSymbolList.obj ..\Dcu\CnInputHelper.obj 
-      ..\Dcu\CnInputHelperEditFrm.obj ..\Dcu\CnInputHelperFrm.obj 
-      ..\Dcu\CnInputIdeSymbolList.obj ..\Dcu\CnSrcEditorWebSearch.obj 
+      ..\Dcu\CnHighlightSeparateLineFrm.obj ..\Dcu\CnInputSymbolList.obj 
+      ..\Dcu\CnInputHelper.obj ..\Dcu\CnInputHelperEditFrm.obj 
+      ..\Dcu\CnInputHelperFrm.obj ..\Dcu\CnInputIdeSymbolList.obj 
+      ..\Dcu\CnInputBcbIdeSymbolList.obj ..\Dcu\CnSrcEditorWebSearch.obj 
       ..\Dcu\CnIdeBRWizard.obj ..\Dcu\CnPropEditorCustomizeFrm.obj 
       ..\Dcu\CnScriptClasses.obj ..\Dcu\CnScriptRegister.obj 
       ..\Dcu\CnScriptFrm.obj ..\Dcu\CnScriptWizard.obj 
@@ -90,7 +91,7 @@
       ..\Dcu\CnImageListEditor.obj ..\Dcu\CnImageListEditorFrm.obj 
       ..\Dcu\CnImageProvider_IconFinder.obj ..\Dcu\CnImageProviderMgr.obj 
       ..\Dcu\CnImageProvider_FindIcons.obj ..\Dcu\CnImageProvider_LocalCache.obj 
-      ..\Dcu\CnInputBcbIdeSymbolList.obj"/>
+      ..\Dcu\CnFormatterIntf.obj"/>
     <RESFILES value="CnWizards_CB6.res"/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
@@ -99,10 +100,11 @@
       Misc\CnWizUpgradeFrm.dfm Misc\CnWizShareImages.dfm 
       MultiLang\CnWizMultiLang.dfm Config\CnWizConfigFrm.dfm 
       Config\CnWizSubActionShortCutFrm.dfm Config\CnWizMenuSortFrm.dfm 
+      SimpleWizards\CnAlignSizeWizard.dfm EditorWizard\CnEditorWizard.dfm 
       SimpleWizards\CnMessageBoxWizard.dfm SimpleWizards\CnComponentSelector.dfm 
       SimpleWizards\CnTabOrderWizard.dfm SimpleWizards\CnBookmarkWizard.dfm 
       SimpleWizards\CnBookmarkConfigFrm.dfm SrcTemplate\CnSrcTemplate.dfm 
-      SrcTemplate\CnSrcTemplateEditFrm.dfm EditorWizard\CnEditorWizard.dfm 
+      SrcTemplate\CnSrcTemplateEditFrm.dfm EditorWizard\CnEditorOpenFileFrm.dfm 
       SimpleWizards\CnMsdnWizard.dfm SimpleWizards\CnPas2HtmlWizard.dfm 
       SimpleWizards\CnPasConvertTypeFrm.dfm 
       SimpleWizards\CnPas2HtmlConfigFrm.dfm EditorWizard\CnEditorZoomFullScreen.dfm 
@@ -110,7 +112,7 @@
       SourceDiff\CnSourceDiffFrm.dfm DesignEditors\CnHintEditorFrm.dfm 
       DesignEditors\CnMultiLineEditorFrm.dfm 
       DesignEditors\CnSizeConstraintsEditorFrm.dfm 
-      EditorWizard\CnEditorCodeToString.dfm EditorWizard\CnEditorOpenFileFrm.dfm 
+      EditorWizard\CnEditorCodeToString.dfm 
       EditorWizard\CnEditorCodeDelBlank.dfm EditorWizard\CnEditorCodeComment.dfm 
       EditorWizard\CnAsciiChart.dfm SourceStat\CnStatFrm.dfm 
       SourceStat\CnStatResultFrm.dfm PrefixWizard\CnPrefixCompFrm.dfm 
@@ -144,6 +146,7 @@
       SrcEditorEnhance\CnIdentRenameFrm.dfm 
       IdeEnhancements\CnSourceHighlightFrm.dfm 
       IdeEnhancements\CnHighlightLineFrm.dfm 
+      IdeEnhancements\CnHighlightSeparateLineFrm.dfm 
       IdeEnhancements\CnInputHelperEditFrm.dfm 
       IdeEnhancements\CnInputHelperFrm.dfm 
       SrcEditorEnhance\CnSrcEditorWebSearch.dfm 
@@ -151,20 +154,21 @@
       ScriptWizard\CnScriptWizard.dfm SimpleWizards\CnFeedWizardFrm.dfm 
       DesignEditors\CnImageListEditorFrm.dfm"/>
     <LIBFILES value=""/>
-    <LIBRARIES value="dbxcds.lib soaprtl.lib bcbie.lib nmfast.lib dbexpress.lib inetdbxpress.lib 
-      inetdbbde.lib bcbsmp.lib dsnapcon.lib dsnapcrba.lib visualdbclx.lib 
-      teeqr.lib dss.lib tee.lib teedb.lib teeui.lib qrpt.lib bdecds.lib 
-      dsnap.lib cds.lib ibxpress.lib vcldbx.lib bdertl.lib adortl.lib dbrtl.lib 
-      vcldb.lib inet.lib vclie.lib wininet.lib"/>
+    <LIBRARIES value="bcb2kaxserver.lib indy.lib dclocx.lib dbxcds.lib soaprtl.lib bcbie.lib 
+      nmfast.lib dbexpress.lib inetdbxpress.lib inetdbbde.lib bcbsmp.lib 
+      dsnapcon.lib dsnapcrba.lib visualdbclx.lib teeqr.lib dss.lib tee.lib 
+      teedb.lib teeui.lib qrpt.lib bdecds.lib dsnap.lib cds.lib ibxpress.lib 
+      vcldbx.lib bdertl.lib adortl.lib dbrtl.lib vcldb.lib inet.lib vclie.lib 
+      wininet.lib"/>
     <SPARELIBS value="rtl.lib vcl.lib vclx.lib wininet.lib designide.lib vclie.lib inet.lib 
       vcldb.lib dbrtl.lib adortl.lib bdertl.lib vcldbx.lib ibxpress.lib cds.lib 
       dsnap.lib bdecds.lib qrpt.lib teeui.lib teedb.lib tee.lib dss.lib 
       teeqr.lib visualdbclx.lib dsnapcrba.lib dsnapcon.lib bcbsmp.lib 
       inetdbbde.lib inetdbxpress.lib dbexpress.lib nmfast.lib bcbie.lib 
-      soaprtl.lib dbxcds.lib"/>
+      soaprtl.lib dbxcds.lib dclocx.lib indy.lib bcb2kaxserver.lib"/>
     <PACKAGES value="rtl.bpi vcl.bpi vclx.bpi vclsmp.bpi designide.bpi"/>
     <PATHCPP value=".;"/>
-    <PATHPAS value=".;Framework;Misc;MultiLang;Config;Utils;IdeEnhancements;SimpleWizards;SrcTemplate;EditorWizard;SourceDiff;DesignEditors;SourceStat;PrefixWizard;CorProperty;ProjectExtWizard;RepositoryWiz;ExplorerWizard;ReopenWizard;SrcEditorEnhance;ScriptWizard"/>
+    <PATHPAS value=".;Framework;Misc;MultiLang;Config;Utils;IdeEnhancements;SimpleWizards;EditorWizard;SrcTemplate;SourceDiff;DesignEditors;SourceStat;PrefixWizard;CorProperty;ProjectExtWizard;RepositoryWiz;ExplorerWizard;ReopenWizard;SrcEditorEnhance;ScriptWizard;CodeFormatter"/>
     <PATHRC value=".;"/>
     <PATHASM value=".;"/>
     <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
@@ -173,23 +177,23 @@
     <USERDEFINES value="${define.add}"/>
     <SYSDEFINES value="NO_STRICT;USEPACKAGES"/>
     <MAINSOURCE value="CnWizards_CB6.bpf"/>
-    <INCLUDEPATH value="ScriptWizard;SrcTemplate;ReopenWizard;SimpleWizards;Config;MultiLang;Misc;SrcEditorEnhance;ExplorerWizard;RepositoryWiz;ProjectExtWizard;CorProperty;IdeEnhancements;PrefixWizard;SourceStat;DesignEditors;SourceDiff;EditorWizard;Utils;Framework;$(BCB)\include;$(BCB)\include\vcl;$(BCB)\source\toolsapi;thirdparty;thirdparty\tpabbrevia;thirdparty\ddetours;thirdparty\jcl;thirdparty\fastcode;thirdparty\pascalscript;..\dcu;..\..\cnvcl\source\common;..\..\cnvcl\source\nonvisual;..\..\cnvcl\source\graphics;..\..\cnvcl\source\netcomm;..\..\cnvcl\source\multilang;..\..\cnvcl\source\objrep"/>
-    <LIBPATH value="ScriptWizard;SrcTemplate;SrcEditorEnhance;ReopenWizard;SimpleWizards;Config;MultiLang;Misc;ExplorerWizard;RepositoryWiz;ProjectExtWizard;CorProperty;IdeEnhancements;PrefixWizard;SourceStat;DesignEditors;SourceDiff;EditorWizard;Utils;Framework;$(BCB)\lib;$(BCB)\lib\obj;$(BCB)\source\toolsapi;thirdparty;thirdparty\tpabbrevia;thirdparty\ddetours;thirdparty\fastcode;thirdparty\pascalscript;thirdparty\jcl;..\dcu;..\..\cnvcl\source\common;..\..\cnvcl\source\nonvisual;..\..\cnvcl\source\graphics;..\..\cnvcl\source\netcomm;..\..\cnvcl\source\multilang;..\..\cnvcl\source\objrep"/>
+    <INCLUDEPATH value="CodeFormatter;ScriptWizard;SrcTemplate;ReopenWizard;SimpleWizards;Config;MultiLang;Misc;SrcEditorEnhance;ExplorerWizard;RepositoryWiz;ProjectExtWizard;CorProperty;IdeEnhancements;PrefixWizard;SourceStat;DesignEditors;SourceDiff;EditorWizard;Utils;Framework;$(BCB)\include;$(BCB)\include\vcl;$(BCB)\source\toolsapi;thirdparty;thirdparty\tpabbrevia;thirdparty\ddetours;thirdparty\jcl;thirdparty\fastcode;thirdparty\pascalscript;..\dcu;..\..\cnvcl\source\common;..\..\cnvcl\source\nonvisual;..\..\cnvcl\source\graphics;..\..\cnvcl\source\netcomm;..\..\cnvcl\source\multilang;..\..\cnvcl\source\objrep"/>
+    <LIBPATH value="CodeFormatter;ScriptWizard;SrcTemplate;SrcEditorEnhance;ReopenWizard;SimpleWizards;Config;MultiLang;Misc;ExplorerWizard;RepositoryWiz;ProjectExtWizard;CorProperty;IdeEnhancements;PrefixWizard;SourceStat;DesignEditors;SourceDiff;EditorWizard;Utils;Framework;$(BCB)\lib;$(BCB)\lib\obj;$(BCB)\source\toolsapi;thirdparty;thirdparty\tpabbrevia;thirdparty\ddetours;thirdparty\fastcode;thirdparty\pascalscript;thirdparty\jcl;..\dcu;..\..\cnvcl\source\common;..\..\cnvcl\source\nonvisual;..\..\cnvcl\source\graphics;..\..\cnvcl\source\netcomm;..\..\cnvcl\source\multilang;..\..\cnvcl\source\objrep"/>
     <WARNINGS value="-w-par"/>
     <OTHERFILES value=""/>
   </MACROS>
   <OPTIONS>
-    <IDLCFLAGS value="-IScriptWizard -ISrcTemplate -IReopenWizard -ISimpleWizards -IConfig 
-      -IMultiLang -IMisc -ISrcEditorEnhance -IExplorerWizard -IRepositoryWiz 
-      -IProjectExtWizard -ICorProperty -IIdeEnhancements -IPrefixWizard 
-      -ISourceStat -IDesignEditors -ISourceDiff -IEditorWizard -IUtils 
-      -IFramework -I$(BCB)\include -I$(BCB)\include\vcl -I$(BCB)\source\toolsapi 
-      -Ithirdparty -Ithirdparty\tpabbrevia -Ithirdparty\ddetours -Ithirdparty\jcl 
-      -Ithirdparty\fastcode -Ithirdparty\pascalscript -I..\dcu 
-      -I..\..\cnvcl\source\common -I..\..\cnvcl\source\nonvisual 
-      -I..\..\cnvcl\source\graphics -I..\..\cnvcl\source\netcomm 
-      -I..\..\cnvcl\source\multilang -I..\..\cnvcl\source\objrep -src_suffix cpp 
-      -boa"/>
+    <IDLCFLAGS value="-ICodeFormatter -IScriptWizard -ISrcTemplate -IReopenWizard 
+      -ISimpleWizards -IConfig -IMultiLang -IMisc -ISrcEditorEnhance 
+      -IExplorerWizard -IRepositoryWiz -IProjectExtWizard -ICorProperty 
+      -IIdeEnhancements -IPrefixWizard -ISourceStat -IDesignEditors -ISourceDiff 
+      -IEditorWizard -IUtils -IFramework -I$(BCB)\include -I$(BCB)\include\vcl 
+      -I$(BCB)\source\toolsapi -Ithirdparty -Ithirdparty\tpabbrevia 
+      -Ithirdparty\ddetours -Ithirdparty\jcl -Ithirdparty\fastcode 
+      -Ithirdparty\pascalscript -I..\dcu -I..\..\cnvcl\source\common 
+      -I..\..\cnvcl\source\nonvisual -I..\..\cnvcl\source\graphics 
+      -I..\..\cnvcl\source\netcomm -I..\..\cnvcl\source\multilang 
+      -I..\..\cnvcl\source\objrep -src_suffix cpp -boa"/>
     <CFLAG1 value="-WD -O2 -Vx -Ve -X- -a8 -b- -k- -vi -tWD -tWM -c"/>
     <PFLAGS value="-N2..\Dcu -N0..\Dcu -$Y- -$W -$O- -$L- -$D- -$A8 -LUvcl;designide -v 
       -JPHNE -M"/>
