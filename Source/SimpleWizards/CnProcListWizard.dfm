@@ -89,7 +89,6 @@ inherited CnProcListForm: TCnProcListForm
         Caption = 'Unit'
         Width = 130
       end>
-    MultiSelect = False
     OwnerData = True
     OnData = lvListData
   end
