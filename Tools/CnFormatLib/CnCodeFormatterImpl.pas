@@ -49,7 +49,7 @@ exports
 implementation
 
 uses
-  CnCodeFormatter, CnParseConsts {$IFDEF DEBUG} , CnDebug {$ENDIF} ;
+  CnCodeFormatter, CnParseConsts, CnCodeFormatRules {$IFDEF DEBUG} , CnDebug {$ENDIF} ;
 
 type
   TCnCodeFormatProvider = class(TInterfacedObject, ICnPascalFormatterIntf)
@@ -166,7 +166,29 @@ procedure TCnCodeFormatProvider.SetPascalFormatRule(DirectiveMode, KeywordStyle,
   TabSpace, SpaceBeforeOperator, SpaceAfterOperator, SpaceBeforeAsm,
   SpaceTabAsm, LineWrapWidth: DWORD; UsesSingleLine: LongBool);
 begin
+  case DirectiveMode of
+    CN_RULE_DIRECTIVE_MODE_ASCOMMENT:
+      CnPascalCodeForRule.CompDirectiveMode := cdmAsComment;
+    CN_RULE_DIRECTIVE_MODE_ONLYFIRST:
+      CnPascalCodeForRule.CompDirectiveMode := cdmOnlyFirst;
+  end;
 
+  case KeywordStyle of
+    CN_RULE_KEYWORD_STYLE_UPPER:
+      CnPascalCodeForRule.KeywordStyle := ksUpperCaseKeyword;
+    CN_RULE_KEYWORD_STYLE_LOWER:
+      CnPascalCodeForRule.KeywordStyle := ksLowerCaseKeyword;
+    CN_RULE_KEYWORD_STYLE_UPPERFIRST:
+      CnPascalCodeForRule.KeywordStyle := ksPascalKeyword;
+  end;
+
+  CnPascalCodeForRule.TabSpaceCount := TabSpace;
+  CnPascalCodeForRule.SpaceBeforeOperator := SpaceBeforeOperator;
+  CnPascalCodeForRule.SpaceAfterOperator := SpaceAfterOperator;
+  CnPascalCodeForRule.SpaceBeforeASM := SpaceBeforeAsm;
+  CnPascalCodeForRule.SpaceTabASMKeyword := SpaceTabAsm;
+  CnPascalCodeForRule.WrapWidth := LineWrapWidth;
+  CnPascalCodeForRule.UsesUnitSingleLine := UsesSingleLine;
 end;
 
 function TCnCodeFormatProvider.RetrievePascalLastError(out SourceLine, SourceCol,
