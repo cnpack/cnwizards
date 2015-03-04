@@ -942,11 +942,14 @@ begin
       if (Intf.Count > 0) and (Lex.TokenID = tkUses) then
       begin
         Writer.CopyTo(Lex.TokenPos);
-        Source := string(GetUsesSource(Intf));
+        Source := string(ConvertEditorTextToText(GetUsesSource(Intf)));
         Writer.DeleteTo(Lex.TokenPos);
         if Source <> '' then
         begin
           Writer.Insert(PAnsiChar(ConvertTextToEditorText({$IFDEF DELPHI2009_UP}AnsiString{$ENDIF}(Source))));
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('Intf write: ' + Source);
+{$ENDIF}
         end;
       end;
       
@@ -962,11 +965,14 @@ begin
         if Lex.TokenID = tkUses then
         begin
           Writer.CopyTo(Lex.TokenPos);
-          Source := string(GetUsesSource(Impl));
+          Source := string(ConvertEditorTextToText(GetUsesSource(Impl)));
           Writer.DeleteTo(Lex.TokenPos);
           if Source <> '' then
           begin
             Writer.Insert(PAnsiChar(ConvertTextToEditorText({$IFDEF DELPHI2009_UP}AnsiString{$ENDIF}(Source))));
+{$IFDEF DEBUG}
+            CnDebugger.LogMsg('Impl write: ' + Source);
+{$ENDIF}
           end;
         end;
       end;
