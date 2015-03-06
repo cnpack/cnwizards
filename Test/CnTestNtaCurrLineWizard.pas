@@ -18,19 +18,19 @@
 {                                                                              }
 {******************************************************************************}
 
-unit CnTestCppPosKindWizard;
+unit CnTestNtaCurrLineWizard;
 { |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包测试用例
-* 单元名称：测试 CnCppCodeParser 中 ParseCppCodePosInfo 的测试用例单元
+* 单元名称：测试 CnNtaGetCurrLineText 函数的测试用例单元
 * 单元作者：CnPack 开发组
-* 备    注：测试 CnCppCodeParser 中 ParseCppCodePosInfo 以查看是否获得了光标
-            所在处的位置类型。运行时当前正在打开 C/C++ 文件即可测试。
-* 开发平台：WinXP + BCB 5/6
-* 兼容测试：PWin9X/2000/XP + C++Builder 5/6
+* 备    注：测试 CnNtaGetCurrLineText 以查看是否获得了正确的光标
+            所在处的位置类型与文字，需要在 D5/2007/2009 等测试通过。
+* 开发平台：WinXP + Delphi 5
+* 兼容测试：PWin9X/2000/XP + Delphi All
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式
-* 单元标识：$Id: CnTestCppPosKindWizard.pas 1146 2012-10-24 06:25:41Z liuxiaoshanzhashu@gmail.com $
-* 修改记录：2013.07.16 V1.0
+* 单元标识：$Id: CnTestNtaCurrLineWizard.pas 1146 2012-10-24 06:25:41Z liuxiaoshanzhashu@gmail.com $
+* 修改记录：2015.03.05 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -41,18 +41,17 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ToolsAPI, IniFiles, CnWizClasses, CnWizUtils, CnWizConsts, CnPasCodeParser,
-  CnCppCodeParser, TypInfo, mPasLex, mwBCBTokenList;
+  ToolsAPI, IniFiles, CnCommon, CnWizClasses, CnWizUtils, CnWizConsts;
 
 type
 
 //==============================================================================
-// 测试 CnCppCodeParser 中 ParseCppCodePosInfo 的菜单专家
+// 测试 CnNtaGetCurrLineText 函数的菜单专家
 //==============================================================================
 
-{ TCnTestCppPosKindWizard }
+{ TCnTestNtaCurrLineWizard }
 
-  TCnTestCppPosKindWizard = class(TCnMenuWizard)
+  TCnTestNtaCurrLineWizard = class(TCnMenuWizard)
   private
 
   protected
@@ -75,90 +74,95 @@ uses
   CnDebug;
 
 //==============================================================================
-// 测试 CnCppCodeParser 中 ParseCppCodePosInfo 的菜单专家
+// 测试 CnNtaGetCurrLineText 函数的菜单专家
 //==============================================================================
 
-{ TCnTestCppPosKindWizard }
+{ TCnTestNtaCurrLineWizard }
 
-procedure TCnTestCppPosKindWizard.Config;
+procedure TCnTestNtaCurrLineWizard.Config;
 begin
   ShowMessage('No option for this test case.');
 end;
 
-procedure TCnTestCppPosKindWizard.Execute;
+procedure TCnTestNtaCurrLineWizard.Execute;
 var
-  Stream: TMemoryStream;
-  View: IOTAEditView;
-  CurrPos: Integer;
-  PosInfo: TCodePosInfo;
+  LineNo: Integer;
+  CharIndex: Integer;
+  LineText: string;
+  EditView: IOTAEditView;
+  S: string;
 begin
-  View := CnOtaGetTopMostEditView;
-  if not Assigned(View) then Exit;
+  EditView := CnOtaGetTopMostEditView;
+  if EditView <> nil then
+    InfoDlg('View.CursorPos.Col - 1 = ' + IntToStr(EditView.CursorPos.Col - 1));
+    
+  if (EditView <> nil) and CnNtaGetCurrLineText(LineText, LineNo, CharIndex) and
+    (LineText <> '') then
+  begin
+    S := Format('Get Text at Line %d and CharIndex is %d.', [LineNo, CharIndex]);
+    S := S + #13#10#13#10 + '''';
+    // Insert('|', LineText, CharIndex);
+    // LineText 必须转换成 AnsiString 并做 UTF8 解码（如果UTF8编码过），才能和 CharIndex 对上号
+    
+    S := S + LineText + '''';
+    InfoDlg(S);
+  end
+  else
+  begin
+    ErrorDlg('Can NOT NtaGetCurrLineText');
+    Exit;
+  end;
 
-  Stream := TMemoryStream.Create;
-  CurrPos := CnOtaGetCurrPos(View.Buffer);
-  CnDebugger.LogMsg('CurrPos: ' + IntToStr(CurrPos));
-  
-  CnOtaSaveCurrentEditorToStream(Stream, False, False);
-  // 解析 C++ 文件，判断光标所属的位置类型
-  PosInfo := ParseCppCodePosInfo(PAnsiChar(Stream.Memory), CurrPos, True, True);
-  with PosInfo do
-    CnDebugger.LogMsg(
-        'CTokenID: ' + GetEnumName(TypeInfo(TCTokenKind), Ord(CTokenID)) + #13#10 +
-        ' AreaKind: ' + GetEnumName(TypeInfo(TCodeAreaKind), Ord(AreaKind)) + #13#10 +
-        ' PosKind: ' + GetEnumName(TypeInfo(TCodePosKind), Ord(PosKind)) + #13#10 +
-        ' LineNumber: ' + IntToStr(LineNumber) + #13#10 +
-        ' LinePos: ' + IntToStr(LinePos) + #13#10 +
-        ' LastToken: ' + GetEnumName(TypeInfo(TTokenKind), Ord(LastNoSpace)) + #13#10 +
-        ' Token: ' + string(Token));
-        
-  Stream.Free;
+  if (EditView <> nil) and CnOtaGetCurrPosToken(S, CharIndex) then
+    InfoDlg(Format('Current Token Under Cursor is: %s. Offset %d.', [S, CharIndex]))
+  else
+    ErrorDlg('Can NOT OtaGetCurrPosToken');
 end;
 
-function TCnTestCppPosKindWizard.GetCaption: string;
+function TCnTestNtaCurrLineWizard.GetCaption: string;
 begin
-  Result := 'Test ParseCppCodePosInfo';
+  Result := 'Test NtaGetCurrLineText';
 end;
 
-function TCnTestCppPosKindWizard.GetDefShortCut: TShortCut;
+function TCnTestNtaCurrLineWizard.GetDefShortCut: TShortCut;
 begin
   Result := 0;
 end;
 
-function TCnTestCppPosKindWizard.GetHasConfig: Boolean;
+function TCnTestNtaCurrLineWizard.GetHasConfig: Boolean;
 begin
   Result := True;
 end;
 
-function TCnTestCppPosKindWizard.GetHint: string;
+function TCnTestNtaCurrLineWizard.GetHint: string;
 begin
   Result := 'Test hint';
 end;
 
-function TCnTestCppPosKindWizard.GetState: TWizardState;
+function TCnTestNtaCurrLineWizard.GetState: TWizardState;
 begin
   Result := [wsEnabled];
 end;
 
-class procedure TCnTestCppPosKindWizard.GetWizardInfo(var Name, Author, Email, Comment: string);
+class procedure TCnTestNtaCurrLineWizard.GetWizardInfo(var Name, Author, Email, Comment: string);
 begin
-  Name := 'Test CppCodePosInfo Menu Wizard';
+  Name := 'Test NtaGetCurrLineText Menu Wizard';
   Author := 'Liu Xiao';
   Email := 'master@cnpack.org';
-  Comment := 'Test for ParseCppCodePosInfo under C++Builder';
+  Comment := 'Test for NtaGetCurrLineText under All Delphi';
 end;
 
-procedure TCnTestCppPosKindWizard.LoadSettings(Ini: TCustomIniFile);
+procedure TCnTestNtaCurrLineWizard.LoadSettings(Ini: TCustomIniFile);
 begin
 
 end;
 
-procedure TCnTestCppPosKindWizard.SaveSettings(Ini: TCustomIniFile);
+procedure TCnTestNtaCurrLineWizard.SaveSettings(Ini: TCustomIniFile);
 begin
 
 end;
 
 initialization
-  RegisterCnWizard(TCnTestCppPosKindWizard); // 注册此测试专家
+  RegisterCnWizard(TCnTestNtaCurrLineWizard); // 注册此测试专家
 
 end.
