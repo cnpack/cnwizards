@@ -349,12 +349,16 @@ function TCnSrcEditorKey.DoAutoMatchEnter(View: IOTAEditView; Key, ScanCode: Wor
 var
   AChar: Char;
   Line: string;
+  AnsiLine: AnsiString;
   LineNo, CharIndex: Integer;
   NeedAutoMatch: Boolean;
 begin
   if CnNtaGetCurrLineText(Line, LineNo, CharIndex) then
   begin
     AChar := Char(VK_ScanCodeToAscii(Key, ScanCode));
+
+    // UNICODE 环境下 CharIndex 和 string 不一致，需要转换成 AnsiString 来处理
+    AnsiLine := AnsiString(Line);
 
     if CharInSet(AChar, ['(', '[', '{', '''', '"']) then
     begin
@@ -365,13 +369,13 @@ begin
       end;
 
       NeedAutoMatch := False;
-      if Length(Line) > CharIndex then
+      if Length(AnsiLine) > CharIndex then
       begin
         // 当前位置后是标识符以及左括号引号时不自动输入括号
-        NeedAutoMatch := not CharInSet(Line[CharIndex + 1], ['_', 'A'..'Z',
+        NeedAutoMatch := not CharInSet(Char(AnsiLine[CharIndex + 1]), ['_', 'A'..'Z',
           'a'..'z', '0'..'9', '(', '''', '[']);
       end
-      else if Length(Line) = CharIndex then
+      else if Length(AnsiLine) = CharIndex then
         NeedAutoMatch := True; // 行尾
 
       // 自动输入括号配对
@@ -409,9 +413,9 @@ begin
       begin
         // 判断当前光标右边是否是相应的右括号
         NeedAutoMatch := False;
-        if Length(Line) > CharIndex then
+        if Length(AnsiLine) > CharIndex then
         begin
-          AChar := Line[CharIndex + 1]; // 重新使用 AChar
+          AChar := Char(AnsiLine[CharIndex + 1]); // 重新使用 AChar
           case FAutoMatchType of
             btBracket: NeedAutoMatch := AChar = ')';
             btSquare:  NeedAutoMatch := AChar = ']';
