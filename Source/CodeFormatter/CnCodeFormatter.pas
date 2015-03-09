@@ -521,6 +521,12 @@ end;
 
 procedure TCnAbstractCodeFormatter.Writeln;
 begin
+  if Scaner.InIgnoreArea then  // 在忽略区，不主动写换行，让 SkipBlank 写。
+  begin
+    FLastToken := tokBlank;
+    Exit;
+  end;
+
   if (Scaner.BlankLinesBefore = 0) and (Scaner.BlankLinesAfter = 0) then
   begin
     FCodeGen.Writeln;
@@ -556,6 +562,14 @@ procedure TCnAbstractCodeFormatter.WriteToken(Token: TPascalToken;
   BeforeSpaceCount, AfterSpaceCount: Byte; IgnorePreSpace: Boolean;
   SemicolonIsLineStart: Boolean);
 begin
+  if Scaner.InIgnoreArea then
+  begin
+    // 在忽略块内部，将非注释非空白内容原始输出，其中空白与注释由 Scaner 内部处理
+    CodeGen.Write(Scaner.TokenString);
+    FLastToken := Token;
+    Exit;
+  end;
+
   // 两个标识符之间以空格分离
   if ( (FLastToken in IdentTokens) and (Token in IdentTokens + [tokAtSign]) ) then
     CodeGen.Write(' ')

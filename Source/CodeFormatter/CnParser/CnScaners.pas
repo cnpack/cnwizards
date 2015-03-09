@@ -58,6 +58,7 @@ type
     FBlankLinesAfterBookmark: Integer;
     FPrevBlankLinesBookmark: Boolean;
     FSourceColBookmark: Integer;
+    FInIgnoreAreaBookmark: Boolean;
   protected
     property OriginBookmark: Longint read FOriginBookmark write FOriginBookmark;
     property TokenBookmark: TPascalToken read FTokenBookmark write FTokenBookmark;
@@ -68,6 +69,7 @@ type
     property BlankLinesBeforeBookmark: Integer read FBlankLinesBeforeBookmark write FBlankLinesBeforeBookmark;
     property BlankLinesAfterBookmark: Integer read FBlankLinesAfterBookmark write FBlankLinesAfterBookmark;
     property PrevBlankLinesBookmark: Boolean read FPrevBlankLinesBookmark write FPrevBlankLinesBookmark;
+    property InIgnoreAreaBookmark: Boolean read FInIgnoreAreaBookmark write FInIgnoreAreaBookmark;
   end;
 
   TAbstractScaner = class(TObject)
@@ -100,6 +102,7 @@ type
     FKeepOneBlankLine: Boolean;
     FPrevBlankLines: Boolean;
     FSourceCol: Integer;
+    FInIgnoreArea: Boolean;
     procedure ReadBuffer;
     procedure SetOrigin(AOrigin: Longint);
     procedure SkipBlanks;
@@ -161,6 +164,9 @@ type
 
     property KeepOneBlankLine: Boolean read FKeepOneBlankLine write FKeepOneBlankLine;
     {* 由外界设置是否在格式化的过程中保持空行，无须用 Bookmark 保存}
+
+    property InIgnoreArea: Boolean read FInIgnoreArea write FInIgnoreArea;
+    {* 由内部前进 Token 时解析设置当前是否忽略格式化标记，供外界使用}
   end;
 
   TScaner = class(TAbstractScaner)
@@ -569,6 +575,7 @@ begin
         FBlankLinesBefore := BlankLinesBeforeBookmark;
         FBlankLinesAfter := BlankLinesAfterBookmark;
         FPrevBlankLines := PrevBlankLinesBookmark;
+        FInIgnoreArea := InIgnoreAreaBookmark;
       end
       else
         Error(CN_ERRCODE_PASCAL_INVALID_BOOKMARK);
@@ -595,6 +602,7 @@ begin
     BlankLinesBeforeBookmark := FBlankLinesBefore;
     BlankLinesAfterBookmark := FBlankLinesAfter;
     PrevBlankLinesBookmark := FPrevBlankLines;
+    InIgnoreAreaBookmark := FInIgnoreArea;
   end;
   FBookmarks.Add(Bookmark);
 end;
@@ -724,7 +732,7 @@ var
 
 var
   IsWideStr: Boolean;
-  P: PChar;
+  P, IgnoreP: PChar;
   Directive: TPascalToken;
   DirectiveNest: Integer;
   TmpToken: string;
@@ -732,6 +740,7 @@ begin
   SkipBlanks;
   P := FSourcePtr;
   FTokenPtr := P;
+
   case P^ of
     'A'..'Z', 'a'..'z', '_':
       begin
@@ -820,6 +829,8 @@ begin
 
     '{':
       begin
+        IgnoreP := P;
+
         Inc(P);
         { Check Directive sign $}
         if P^ = '$' then
@@ -835,6 +846,24 @@ begin
 
         if P^ = '}' then
         begin
+          // 判断 IgnoreP 与 P 之间是否是 IgnoreFormat 标记
+          if (Result = tokComment) and (Integer(P) - Integer(IgnoreP) = 3) then // 3 means '{(*}'
+          begin
+            Inc(IgnoreP);
+            if IgnoreP^ = '(' then
+            begin
+              Inc(IgnoreP);
+              if IgnoreP^ = '*' then
+                InIgnoreArea := True;            // {(*} start to not format
+            end
+            else if IgnoreP^ = '*' then
+            begin
+              Inc(IgnoreP);
+              if IgnoreP^ = ')' then
+                InIgnoreArea := False;           // {*)} end of not format
+            end;
+          end;
+
           FBlankLinesAfterComment := 0;
           Inc(P);
           while P^ in [' ', #9] do
@@ -1100,17 +1129,24 @@ begin
   FToken := Result;
 
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('Line: %5.5d. Token: %s', [FSourceLine, TokenString]);
+  CnDebugger.LogFmt('Line: %5.5d. Token: %s. InIgnoreArea %d', [FSourceLine, TokenString,
+    Integer(InIgnoreArea)]);
 {$ENDIF}
 
+  if InIgnoreArea then
+    FCodeGen.Write(BlankString);
+     
   if FCompDirectiveMode = cdmAsComment then
   begin
     if (Result = tokComment) or (Result = tokCompDirective) then // 当前是 Comment
     begin
       if Assigned(FCodeGen) then
       begin
-        BlankStr := TrimBlank(BlankString);
-        FCodeGen.Write(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
+        if not InIgnoreArea then
+        begin
+          BlankStr := TrimBlank(BlankString);
+          FCodeGen.Write(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
+        end;
         FCodeGen.Write(TokenString); // 再写注释本身
       end;
 
@@ -1144,7 +1180,7 @@ begin
         FBlankLines := 0;
       end;
 
-      if (FBackwardToken = tokComment) or (FBackwardToken = tokCompDirective) then // 当前不是 Comment，但前一个是 Comment
+      if not InIgnoreArea and (FBackwardToken = tokComment) or (FBackwardToken = tokCompDirective) then // 当前不是 Comment，但前一个是 Comment
         FCodeGen.Write(BlankString);
 
       if (Result = tokString) and (Length(TokenString) = 1) then
@@ -1167,8 +1203,11 @@ begin
       // 当前是 Comment，或非ELSE编译指令，当普通注释处理
       if Assigned(FCodeGen) then
       begin
-        BlankStr := TrimBlank(BlankString);
-        FCodeGen.Write(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
+        if not InIgnoreArea then
+        begin
+          BlankStr := TrimBlank(BlankString);
+          FCodeGen.Write(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
+        end;
         FCodeGen.Write(TokenString); // 再写注释本身
       end;
 
@@ -1201,7 +1240,8 @@ begin
 
       if Assigned(FCodeGen) then
       begin
-        FCodeGen.Write(BlankString);
+        if not InIgnoreArea then
+          FCodeGen.Write(BlankString);
         FCodeGen.Write(TokenString); // Write ELSE/ELSEIF itself
       end;
 
@@ -1218,7 +1258,8 @@ begin
         begin
           if Assigned(FCodeGen) then
           begin
-            FCodeGen.Write(BlankString);
+            if not InIgnoreArea then
+              FCodeGen.Write(BlankString);
             FCodeGen.Write(TmpToken);
           end;
 
@@ -1276,7 +1317,7 @@ begin
         FBlankLines := 0;
       end;
 
-      if FBackwardToken = tokComment then // 当前不是 Comment，但前一个是 Comment
+      if not InIgnoreArea and (FBackwardToken = tokComment) then // 当前不是 Comment，但前一个是 Comment
         FCodeGen.Write(BlankString);
 
       if (Result = tokString) and (Length(TokenString) = 1) then
