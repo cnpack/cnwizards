@@ -393,6 +393,7 @@ begin
     ksPascalKeyword:    Result := UpperFirst(KeywordStr);
     ksUpperCaseKeyword: Result := UpperCase(KeywordStr);
     ksLowerCaseKeyword: Result := LowerCase(KeywordStr);
+    ksNoChange:         Result := KeywordStr;
   else
     Result := KeywordStr;
   end;
@@ -479,6 +480,12 @@ end;
 
 procedure TCnAbstractCodeFormatter.WriteLine;
 begin
+  if Scaner.InIgnoreArea then  // 在忽略区，不主动写换行，让 SkipBlank 写。
+  begin
+    FLastToken := tokBlank;
+    Exit;
+  end;
+
   if (Scaner.BlankLinesBefore = 0) and (Scaner.BlankLinesAfter = 0) then
   begin
     FCodeGen.Writeln;

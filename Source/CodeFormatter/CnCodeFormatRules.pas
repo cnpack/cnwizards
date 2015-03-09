@@ -44,7 +44,7 @@ type
 
   TCnCodeStyles = set of TCnCodeStyle;
 
-  TKeywordStyle = (ksLowerCaseKeyword, ksUpperCaseKeyword, ksPascalKeyword);
+  TKeywordStyle = (ksLowerCaseKeyword, ksUpperCaseKeyword, ksPascalKeyword, ksNoChange);
 
   TCompDirectiveMode = (cdmAsComment, cdmOnlyFirst);
 

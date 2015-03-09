@@ -56,6 +56,8 @@ const
   {* 全小写}
   CN_RULE_KEYWORD_STYLE_UPPERFIRST    = 3;
   {* 首字母大写}
+  CN_RULE_KEYWORD_STYLE_NOCHANGE      = 4;
+  {*不改变原有的}
   CN_RULE_KEYWORD_STYLE_DEFAULT       = CN_RULE_KEYWORD_STYLE_LOWER;
 
   // 默认缩进空格数
