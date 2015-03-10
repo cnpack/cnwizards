@@ -245,4 +245,16 @@ end;</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>-1</TailIndentLevel>
   </o>
+  <o>
+    <Caption>{(*}..{*)}</Caption>
+    <ShortCut>0</ShortCut>
+    <LineBlockMode>1</LineBlockMode>
+    <IndentLevel>0</IndentLevel>
+    <HeadText>{(*}</HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>-1</HeadIndentLevel>
+    <TailText>{*)}</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>-1</TailIndentLevel>
+  </o>
 </TCnCodeWrapCollection>
