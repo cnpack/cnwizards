@@ -63,8 +63,8 @@ object GroupReplaceForm: TGroupReplaceForm
     Height = 169
     Lines.Strings = (
       'begin'
-      '  {吃的} X := 1;'
-      ' {喝的}Y := 2;'
+      '  {吃的} X := 1; X :=0;'
+      ' {喝的}Y := 2; Y := 3;'
       'end;')
     TabOrder = 2
   end

@@ -38,6 +38,8 @@ unit CnLineParser;
 
 interface
 
+{$I CnWizards.inc}
+
 uses
   Classes, SysUtils;
 

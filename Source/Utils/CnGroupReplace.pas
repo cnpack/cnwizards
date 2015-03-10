@@ -24,7 +24,10 @@ unit CnGroupReplace;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：组替换单元
 * 单元作者：周劲羽 (zjy@cnpack.org)
-* 备    注：
+* 备    注：TCnGroupReplacements：总管理器，供继承实现从不同途径载入
+*           TCnGroupReplacement：上面的 Item，描述一个组替换功能
+*           TCnReplacements：上面的一个属性，管理一组中的所有替换项
+*           TCnReplacement：上面的 Item，描述一个单项替换功能
 * 开发平台：PWinXP SP2 + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
@@ -36,11 +39,12 @@ unit CnGroupReplace;
 
 interface
 
+{$I CnWizards.inc}
+
 uses
   Windows, SysUtils, Classes, CnClasses, CnCommon;
 
 type
-
   TCnReplacement = class(TCnAssignableCollectionItem)
   private
     FSource: string;
@@ -49,7 +53,7 @@ type
     FIgnoreCase: Boolean;
   public
     constructor Create(Collection: TCollection); override;
-    function FindInText(Text: string): Integer;
+    function FindInText(Text: AnsiString): Integer;
   published
     property Source: string read FSource write FSource;
     property Dest: string read FDest write FDest;
@@ -105,28 +109,28 @@ begin
   FWholeWord := True;
 end;
 
-function TCnReplacement.FindInText(Text: string): Integer;
+function TCnReplacement.FindInText(Text: AnsiString): Integer;
 var
-  ASrc: string;
-  PSub, PText: PChar;
+  ASrc: AnsiString;
+  PSub, PText: PAnsiChar;
   L: Integer;
 begin
   if FIgnoreCase then
   begin
-    ASrc := UpperCase(Source);
-    Text := UpperCase(Text);
+    ASrc := AnsiString(UpperCase(Source));
+    Text := AnsiString(UpperCase(string(Text)));
   end
   else
-    ASrc := Source;
+    ASrc := AnsiString(Source);
 
   Result := -1;
   if (Text = '') or (ASrc = '') then Exit;
 
   L := Length(ASrc);
-  PText := PChar(Text);
+  PText := PAnsiChar(Text);
   PSub := PText;
   repeat
-    PSub := AnsiStrPos(PSub, PChar(ASrc));
+    PSub := AnsiStrPos(PSub, PAnsiChar(ASrc)); // Must using AnsiString in Unicode IDE
     if PSub <> nil then
     begin
       if not FWholeWord then
@@ -136,10 +140,10 @@ begin
       end
       else
       begin
-        if (Cardinal(PSub) > Cardinal(PText)) and IsValidIdentChar(PSub[-1]) or
-          IsValidIdentChar(PSub[L]) then
+        if (Cardinal(PSub) > Cardinal(PText)) and IsValidIdentChar(Char(PSub[-1])) or
+          IsValidIdentChar(Char(PSub[L])) then
         begin
-          PSub := PChar(Integer(PSub) + L);
+          PSub := PAnsiChar(Integer(PSub) + L);
         end
         else
         begin
@@ -191,15 +195,19 @@ end;
 function TCnGroupReplacement.Execute(Text: string): string;
 var
   i, APos, MinPos, ItemIdx: Integer;
+  AnsiText, AnsiResult: AnsiString;
 begin
   Result := '';
   if Text = '' then Exit;
+  AnsiText := AnsiString(Text);
+  AnsiResult := '';
+
   repeat
     MinPos := MaxInt;
     ItemIdx := -1;
     for i := 0 to Items.Count - 1 do
     begin
-      APos := Items[i].FindInText(Text);
+      APos := Items[i].FindInText(AnsiText);
       if (APos >= 0) and (APos < MinPos) then
       begin
         ItemIdx := i;
@@ -211,11 +219,11 @@ begin
     
     if (ItemIdx >= 0) then
     begin
-      Result := Result + Copy(Text, 1, MinPos) + Items[ItemIdx].Dest;
-      Delete(Text, 1, MinPos + Length(Items[ItemIdx].Source));
+      AnsiResult := AnsiResult + Copy(AnsiText, 1, MinPos) + AnsiString(Items[ItemIdx].Dest);
+      Delete(AnsiText, 1, MinPos + Length(Items[ItemIdx].Source));
     end;
-  until (ItemIdx = -1) or (Text = '');
-  Result := Result + Text;
+  until (ItemIdx = -1) or (AnsiText = '');
+  Result := string(AnsiResult + AnsiText);
 end;
 
 procedure TCnGroupReplacement.SetItems(const Value: TCnReplacements);

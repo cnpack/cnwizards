@@ -52,10 +52,14 @@ begin
   Rep.Clear;
 
   Item := Rep.Add;
+  Item.WholeWord := True;
+  Item.IgnoreCase := True;
   Item.Source := edtExchange1.Text;
   Item.Dest := edtExchange2.Text;
 
   Item := Rep.Add;
+  Item.WholeWord := True;
+  Item.IgnoreCase := True;
   Item.Source := edtExchange2.Text;
   Item.Dest := edtExchange1.Text;
 
