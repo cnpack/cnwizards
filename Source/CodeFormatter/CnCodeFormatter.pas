@@ -109,7 +109,8 @@ type
 
   TCnBasePascalFormatter = class(TCnAbstractCodeFormatter)
   private
-    function IsTokenAfterAttributesInSet(InTokens: TPascalTokenSet):Boolean;
+    function IsTokenAfterAttributesInSet(InTokens: TPascalTokenSet): Boolean;
+    procedure CheckWriteBeginln;
   protected
     procedure FormatExprList(PreSpaceCount: Byte = 0; CurrentIndent: Byte = 0);
     procedure FormatExpression(PreSpaceCount: Byte = 0; CurrentIndent: Byte = 0);
@@ -1311,7 +1312,11 @@ begin
     case Scaner.Token of
       tokKeywordBegin:
         begin
-          Match(tokKeywordBegin, PreSpaceCount);
+          if CnPascalCodeForRule.BeginStyle = bsNextLine then
+            Match(tokKeywordBegin, PreSpaceCount)
+          else
+            Match(tokKeywordBegin); // begin 前是否换行由外面控制，begin 前缩进这儿控制
+
           Writeln;
 
           // 空块但 begin 后有注释的情况下，避免多出一个换行
@@ -1369,7 +1374,7 @@ begin
   end;
 
   Match(tokKeywordDo);
-  Writeln;
+  CheckWriteBeginln; // 检查 do begin 是否同行
   FormatStatement(Tab(PreSpaceCount));
 end;
 
@@ -1384,7 +1389,8 @@ begin
   { TODO: Apply more if stmt rule }
   FormatExpression;
   Match(tokKeywordThen);
-  Writeln;
+
+  CheckWriteBeginln; // 检查 if then begin 是否同行
   FormatStatement(Tab(PreSpaceCount));
 
   if Scaner.Token = tokKeywordElse then
@@ -1398,7 +1404,7 @@ begin
     end
     else
     begin
-      Writeln;
+      CheckWriteBeginln; // 检查 else begin 是否同行
       FormatStatement(Tab(PreSpaceCount));
     end;
   end;
@@ -1755,7 +1761,7 @@ begin
     Match(tokSymbol);
   end;
   Match(tokKeywordDo);
-  Writeln;
+  CheckWriteBeginln; // 检查 do begin 是否同行;
 
   OnlySemicolon := Scaner.Token = tokSemicolon;
   FormatStatement(Tab(PreSpaceCount));
@@ -1785,7 +1791,7 @@ begin
   Match(tokKeywordWhile, PreSpaceCount);
   FormatExpression;
   Match(tokKeywordDo);
-  Writeln;
+  CheckWriteBeginln; // 检查 do begin 是否同行
   FormatStatement(Tab(PreSpaceCount));
 end;
 
@@ -1803,7 +1809,7 @@ begin
   end;
 
   Match(tokKeywordDo);
-  Writeln;
+  CheckWriteBeginln; // 检查 do begin 是否同行
   FormatStatement(Tab(PreSpaceCount));
 end;
 
@@ -4791,6 +4797,13 @@ end;
 procedure TCnAbstractCodeFormatter.WriteLineFeedByPrevCondition;
 begin
   if not Scaner.PrevBlankLines then
+    Writeln;
+end;
+
+procedure TCnBasePascalFormatter.CheckWriteBeginln;
+begin
+  if (Scaner.Token <> tokKeywordBegin) or
+    (CnPascalCodeForRule.BeginStyle <> bsSameLine) then
     Writeln;
 end;
 

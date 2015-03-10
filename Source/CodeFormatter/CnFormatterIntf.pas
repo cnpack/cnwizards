@@ -60,6 +60,13 @@ const
   {*不改变原有的}
   CN_RULE_KEYWORD_STYLE_DEFAULT       = CN_RULE_KEYWORD_STYLE_LOWER;
 
+  // Begin 块开始模式
+  CN_RULE_BEGIN_STYLE_NEXTLINE        = 1;
+  {* begin 在下一行}
+  CN_RULE_BEGIN_STYLE_SAMELINE        = 2;
+  {* begin 在本行}
+  CN_RULE_BEGIN_STYLE_DEFAULT         = CN_RULE_BEGIN_STYLE_NEXTLINE;
+
   // 默认缩进空格数
   CN_RULE_TABSPACE_DEFAULT            = 2;
 

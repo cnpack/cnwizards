@@ -46,6 +46,8 @@ type
 
   TKeywordStyle = (ksLowerCaseKeyword, ksUpperCaseKeyword, ksPascalKeyword, ksNoChange);
 
+  TBeginStyle = (bsNextLine, bsSameLine);
+
   TCompDirectiveMode = (cdmAsComment, cdmOnlyFirst);
 
   TCnPascalCodeFormatRule = record
@@ -54,6 +56,7 @@ type
 
     CompDirectiveMode: TCompDirectiveMode;
     KeywordStyle: TKeywordStyle;
+    BeginStyle: TBeginStyle;
     TabSpaceCount: Byte;
     SpaceBeforeOperator: Byte;
     SpaceAfterOperator: Byte;
@@ -71,6 +74,7 @@ const
 
     CompDirectiveMode: cdmOnlyFirst;
     KeywordStyle: ksLowerCaseKeyword;
+    BeginStyle: bsNextLine;
     TabSpaceCount: 2;
     SpaceBeforeOperator: 1;
     SpaceAfterOperator: 1;
