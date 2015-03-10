@@ -545,12 +545,12 @@ const
 
   CS_DROPSHADOW = $20000;
 
-{$IFDEF SUPPORT_UNITNAME_DOT}
-  csUnitDotPrefixes: array[0..14] of string = (
-    'Vcl', 'Xml', 'System', 'Winapi', 'Soap', 'FMX', 'Data', 'Posix', 'Macapi',
-    'DataSnap', 'FireDAC', 'REST', 'VCLTee', 'Web', 'IBX'
-  );
-{$ENDIF}
+//{$IFDEF SUPPORT_UNITNAME_DOT}
+//  csUnitDotPrefixes: array[0..14] of string = (
+//    'Vcl', 'Xml', 'System', 'Winapi', 'Soap', 'FMX', 'Data', 'Posix', 'Macapi',
+//    'DataSnap', 'FireDAC', 'REST', 'VCLTee', 'Web', 'IBX'
+//  );
+//{$ENDIF}
 
 {$IFNDEF SUPPORT_IDESymbolList}
 
@@ -1474,7 +1474,7 @@ var
   ScanCode: Word;
   Key: Word;
   KeyDownChar: AnsiChar;
-  IgnoreOfDot: Boolean;
+  ShouldIgnoreDot: Boolean;
 begin
   Result := False;
 
@@ -1517,20 +1517,22 @@ begin
         end;
       VK_TAB, VK_DECIMAL, 190: // '.'
         begin
-          IgnoreOfDot := False;
+          ShouldIgnoreDot := False;
 {$IFDEF SUPPORT_UNITNAME_DOT}
-          if Key = 190 then
+          if (Key = 190) and CurrentIsDelphiSource then
           begin
-            if IndexStr(FToken, csUnitDotPrefixes, CurrentIsDelphiSource) >= 0 then
+            // if IndexStr(FToken, csUnitDotPrefixes, CurrentIsDelphiSource) >= 0 then
+            // 支持 Unit 名的 IDE 下，uses 区的点号应该忽略，而不是之前查找固定前缀
+            if FPosInfo.PosKind in [pkIntfUses, pkImplUses] then
             begin
-              IgnoreOfDot := True;
+              ShouldIgnoreDot := True;
 {$IFDEF DEBUG}
-              CnDebugger.LogMsg('Dot Got. Unit Prefix Detected. Ignore ' + FToken);
+              CnDebugger.LogMsg('Dot Got. In Uses Area. Ignore ' + FToken);
 {$ENDIF}
             end;
           end;
 {$ENDIF}
-          if not IgnoreOfDot then
+          if not ShouldIgnoreDot then
           begin
             SendSymbolToIDE(SelMidMatchByEnterOnly, False, False, #0, Result);
             if IsValidDotKey(Key) or IsValidCppArrowKey(Key, ScanCode) then
@@ -1651,7 +1653,7 @@ begin
     CnNtaGetCurrLineText(LineText, LineNo, Index);
     Len := Length(LineText);
 {$IFDEF DEBUG}
-//    CnDebugger.LogFmt('Input Helper. Line: %d, Len %d. CurLine %d, CurLen %d', [LineNo, Len, FCurrLineNo, FCurrLineLen]);
+//  CnDebugger.LogFmt('Input Helper. Line: %d, Len %d. CurLine %d, CurLen %d', [LineNo, Len, FCurrLineNo, FCurrLineLen]);
 {$ENDIF}
     // 如果此次按键对当前行作了修改才认为是有效按键，以处理增量查找等问题
     // XE4的BCB环境中，空行默认长度都是4，后以空格填充，因此不能简单比较长度，得比内容
@@ -2206,8 +2208,8 @@ begin
     begin
       SymbolList := SymbolListMgr.List[i];
 {$IFDEF DEBUG}
-//      CnDebugger.LogFmt('Input Helper To Reload %s. PosKind %s', [SymbolList.ClassName,
-//        GetEnumName(TypeInfo(TCodePosKind), Ord(FPosInfo.PosKind))]);
+//    CnDebugger.LogFmt('Input Helper To Reload %s. PosKind %s', [SymbolList.ClassName,
+//      GetEnumName(TypeInfo(TCodePosKind), Ord(FPosInfo.PosKind))]);
 {$ENDIF}
       if SymbolList.Active and SymbolList.Reload(Editor, FMatchStr, FPosInfo) then
       begin
