@@ -636,7 +636,8 @@ var
 begin
   if not Assigned(Project) then Exit;
 
-  ReplaceFile(Project.FileName);        // 处理工程文件自身
+  if IsDpr(Project.FileName) then
+    ReplaceFile(Project.FileName);        // 处理 dpr 工程文件自身，但不处理 bdsproj/dproj 等
   if FAbort then Exit;
   
   for i := 0 to Project.GetModuleCount - 1 do
