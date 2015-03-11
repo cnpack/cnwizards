@@ -60,9 +60,10 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    procedure SetPascalFormatRule(DirectiveMode: DWORD; KeywordStyle: DWORD; TabSpace:
-      DWORD; SpaceBeforeOperator: DWORD; SpaceAfterOperator: DWORD; SpaceBeforeAsm:
-      DWORD; SpaceTabAsm: DWORD; LineWrapWidth: DWORD; UsesSingleLine: LongBool);
+    procedure SetPascalFormatRule(DirectiveMode: DWORD; KeywordStyle: DWORD;
+      BeginStyle: DWORD; TabSpace: DWORD; SpaceBeforeOperator: DWORD;
+      SpaceAfterOperator: DWORD; SpaceBeforeAsm: DWORD; SpaceTabAsm: DWORD;
+      LineWrapWidth: DWORD; UsesSingleLine: LongBool);
 
     function FormatOnePascalUnit(Input: PAnsiChar; Len: DWORD): PAnsiChar;
 
@@ -147,7 +148,6 @@ begin
       ; // 出错了，返回 nil 的结果
     end;
 
-
     if OutStream.Size > 0 then
     begin
       AdjustResultLength(OutStream.Size + 1);
@@ -163,7 +163,7 @@ begin
 end;
 
 procedure TCnCodeFormatProvider.SetPascalFormatRule(DirectiveMode, KeywordStyle,
-  TabSpace, SpaceBeforeOperator, SpaceAfterOperator, SpaceBeforeAsm,
+  BeginStyle, TabSpace, SpaceBeforeOperator, SpaceAfterOperator, SpaceBeforeAsm,
   SpaceTabAsm, LineWrapWidth: DWORD; UsesSingleLine: LongBool);
 begin
   case DirectiveMode of
@@ -180,6 +180,13 @@ begin
       CnPascalCodeForRule.KeywordStyle := ksLowerCaseKeyword;
     CN_RULE_KEYWORD_STYLE_UPPERFIRST:
       CnPascalCodeForRule.KeywordStyle := ksPascalKeyword;
+  end;
+
+  case BeginStyle of
+    CN_RULE_BEGIN_STYLE_NEXTLINE:
+      CnPascalCodeForRule.BeginStyle := bsNextLine;
+    CN_RULE_BEGIN_STYLE_SAMELINE:
+      CnPascalCodeForRule.BeginStyle := bsSameLine;
   end;
 
   CnPascalCodeForRule.TabSpaceCount := TabSpace;

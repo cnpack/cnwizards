@@ -127,9 +127,10 @@ const
 type
   ICnPascalFormatterIntf = interface
     ['{0CC0F874-227A-4516-9D17-6331EA86CBCA}']
-    procedure SetPascalFormatRule(DirectiveMode: DWORD; KeywordStyle: DWORD; TabSpace:
-      DWORD; SpaceBeforeOperator: DWORD; SpaceAfterOperator: DWORD; SpaceBeforeAsm:
-      DWORD; SpaceTabAsm: DWORD; LineWrapWidth: DWORD; UsesSingleLine: LongBool);
+    procedure SetPascalFormatRule(DirectiveMode: DWORD; KeywordStyle: DWORD;
+      BeginStyle: DWORD; TabSpace: DWORD; SpaceBeforeOperator: DWORD;
+      SpaceAfterOperator: DWORD; SpaceBeforeAsm: DWORD; SpaceTabAsm: DWORD;
+      LineWrapWidth: DWORD; UsesSingleLine: LongBool);
     {* 设置格式化选项}
 
     function FormatOnePascalUnit(Input: PAnsiChar; Len: DWORD): PAnsiChar;
