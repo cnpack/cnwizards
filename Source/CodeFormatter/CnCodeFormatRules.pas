@@ -64,6 +64,7 @@ type
     SpaceTabASMKeyword: Byte;
     WrapWidth: Integer;
     UsesUnitSingleLine: Boolean;
+    UseIgnoreArea: Boolean;
   end;
 
 const
@@ -82,6 +83,7 @@ const
     SpaceTabASMKeyword: 8;
     WrapWidth: 80;
     UsesUnitSingleLine: False;
+    UseIgnoreArea: True;
   );
 
 var

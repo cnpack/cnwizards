@@ -130,7 +130,7 @@ type
     procedure SetPascalFormatRule(DirectiveMode: DWORD; KeywordStyle: DWORD;
       BeginStyle: DWORD; TabSpace: DWORD; SpaceBeforeOperator: DWORD;
       SpaceAfterOperator: DWORD; SpaceBeforeAsm: DWORD; SpaceTabAsm: DWORD;
-      LineWrapWidth: DWORD; UsesSingleLine: LongBool);
+      LineWrapWidth: DWORD; UsesSingleLine: LongBool; UseIgnoreArea: LongBool);
     {* 设置格式化选项}
 
     function FormatOnePascalUnit(Input: PAnsiChar; Len: DWORD): PAnsiChar;

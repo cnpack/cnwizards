@@ -481,7 +481,7 @@ end;
 
 procedure TCnAbstractCodeFormatter.WriteLine;
 begin
-  if Scaner.InIgnoreArea then  // 在忽略区，不主动写换行，让 SkipBlank 写。
+  if CnPascalCodeForRule.UseIgnoreArea and Scaner.InIgnoreArea then  // 在忽略区，不主动写换行，让 SkipBlank 写。
   begin
     FLastToken := tokBlank;
     Exit;
@@ -529,7 +529,7 @@ end;
 
 procedure TCnAbstractCodeFormatter.Writeln;
 begin
-  if Scaner.InIgnoreArea then  // 在忽略区，不主动写换行，让 SkipBlank 写。
+  if CnPascalCodeForRule.UseIgnoreArea and Scaner.InIgnoreArea then  // 在忽略区，不主动写换行，让 SkipBlank 写。
   begin
     FLastToken := tokBlank;
     Exit;
@@ -570,7 +570,7 @@ procedure TCnAbstractCodeFormatter.WriteToken(Token: TPascalToken;
   BeforeSpaceCount, AfterSpaceCount: Byte; IgnorePreSpace: Boolean;
   SemicolonIsLineStart: Boolean);
 begin
-  if Scaner.InIgnoreArea then
+  if CnPascalCodeForRule.UseIgnoreArea and Scaner.InIgnoreArea then
   begin
     // 在忽略块内部，将非注释非空白内容原始输出，其中空白与注释由 Scaner 内部处理
     CodeGen.Write(Scaner.TokenString);
