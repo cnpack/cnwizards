@@ -180,6 +180,8 @@ begin
       CnPascalCodeForRule.KeywordStyle := ksLowerCaseKeyword;
     CN_RULE_KEYWORD_STYLE_UPPERFIRST:
       CnPascalCodeForRule.KeywordStyle := ksPascalKeyword;
+    CN_RULE_KEYWORD_STYLE_NOCHANGE:
+      CnPascalCodeForRule.KeywordStyle := ksNoChange;
   end;
 
   case BeginStyle of

@@ -143,6 +143,9 @@
 // Wizard: CnFeedReaderWizard
 {$DEFINE CNWIZARDS_CNFEEDREADERWIZARD}
 
+// Wizard: CnCodeFormatterWizard
+{$DEFINE CNWIZARDS_CNCODEFORMATTERWIZARD}
+
 {$ENDIF}
 
 {$I CnWizards_Def.inc}

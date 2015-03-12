@@ -338,6 +338,10 @@ resourcestring
   SCnScriptFileDir = 'Scripts';
   SCnScriptDefName = 'Script%d.pas';
 
+  // CodeFormatterWizard
+  SCnCodeFormatterWizardConfig = 'CnCodeFormatterWizardConfig';
+  SCnCodeFormatterWizardFormatCurrent = 'CnCodeFormatterWizardFormatCurrent';
+
 //==============================================================================
 // Need to Localize
 //==============================================================================
@@ -1508,6 +1512,16 @@ var
   SCnFeedCloseQuery: string = 'Sure to Close FeedReader Wizard?';
   SCnFeedNewItem: string = 'New Feed';
 
+  // CnCodeFormatterWizard
+  SCnCodeFormatterWizardName: string = 'Code Formatter Wizard';
+  SCnCodeFormatterWizardComment: string = 'Format Code';
+  SCnCodeFormatterWizardMenuCaption: string = 'Code Formatter';
+  SCnCodeFormatterWizardMenuHint: string = 'Code Formatter Wizard';
+  SCnCodeFormatterWizardConfigCaption: string = '&Options...';
+  SCnCodeFormatterWizardConfigHint: string = '&Options...';
+  SCnCodeFormatterWizardFormatCurrentCaption: string = 'Format Current File/Selection';
+  SCnCodeFormatterWizardFormatCurrentHint: string = 'Format Current File or Selection';
+  
 implementation
 
 end.
