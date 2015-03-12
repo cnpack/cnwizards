@@ -1965,7 +1965,7 @@ begin
           else
           begin
             Added := False;
-            if Token.TokenID in [tkElse, tkExcept, tkFinally] then
+            if Token.TokenID in [tkElse, tkExcept, tkFinally, tkOf] then
             begin
               // 处理几个中间带高亮语句的情形
               if FStack.Count > 0 then
