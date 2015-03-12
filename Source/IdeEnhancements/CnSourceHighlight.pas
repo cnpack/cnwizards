@@ -117,7 +117,7 @@ const
     tkFor, tkWith, tkOn, tkWhile, tkDo,
     tkAsm, tkBegin, tkEnd,
     tkTry, tkExcept, tkFinally,
-    tkCase,
+    tkCase, tkOf,
     tkRepeat, tkUntil];
 
   csPasFlowTokenStr: array[0..3] of AnsiString =
@@ -1118,6 +1118,20 @@ var
   EditPos: TOTAEditPos;
   i: Integer;
   StartIndex, EndIndex: Integer;
+
+  function IsHighlightKeywords(TokenID: TTokenKind): Boolean;
+  var
+    AToken: TCnPasToken;
+  begin
+    Result := TokenID in csKeyTokens;
+    if Result and (TokenID = tkOf) and (FKeyTokenList.Count > 0) then // 对于 of 前一个关键字必须是 case 才配对
+    begin
+      AToken := TCnPasToken(FKeyTokenList[FKeyTokenList.Count - 1]);
+      if (AToken = nil) or (AToken.TokenID <> tkCase) then
+        Result := False;
+    end;
+  end;
+
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('TBlockMatchInfo.CheckBlockMatch');
@@ -1291,10 +1305,10 @@ begin
     if BlockHighlightRange = brAll then
     begin
       // 处理本单元中的所有需要的匹配
-      for i := 0 to Parser.Count - 1 do
+      for I := 0 to Parser.Count - 1 do
       begin
-        if Parser.Tokens[i].TokenID in csKeyTokens then
-          FKeyTokenList.Add(Parser.Tokens[i]);
+        if IsHighlightKeywords(Parser.Tokens[I].TokenID) then
+          FKeyTokenList.Add(Parser.Tokens[I]);
       end;
     end
     else if (BlockHighlightRange = brMethod) and Assigned(Parser.MethodStartToken)
@@ -1303,7 +1317,7 @@ begin
       // 只把本过程中需要的 Token 加进来
       for I := Parser.MethodStartToken.ItemIndex to
         Parser.MethodCloseToken.ItemIndex do
-        if Parser.Tokens[I].TokenID in csKeyTokens then
+        if IsHighlightKeywords(Parser.Tokens[I].TokenID) then
           FKeyTokenList.Add(Parser.Tokens[I]);
     end
     else if (BlockHighlightRange = brWholeBlock) and Assigned(Parser.BlockStartToken)
@@ -1311,7 +1325,7 @@ begin
     begin
       for I := Parser.BlockStartToken.ItemIndex to
         Parser.BlockCloseToken.ItemIndex do
-        if Parser.Tokens[I].TokenID in csKeyTokens then
+        if IsHighlightKeywords(Parser.Tokens[I].TokenID) then
           FKeyTokenList.Add(Parser.Tokens[I]);
     end
     else if (BlockHighlightRange = brInnerBlock) and Assigned(Parser.InnerBlockStartToken)
@@ -1319,7 +1333,7 @@ begin
     begin
       for I := Parser.InnerBlockStartToken.ItemIndex to
         Parser.InnerBlockCloseToken.ItemIndex do
-        if Parser.Tokens[I].TokenID in csKeyTokens then
+        if IsHighlightKeywords(Parser.Tokens[I].TokenID) then
           FKeyTokenList.Add(Parser.Tokens[I]);
     end;
 
