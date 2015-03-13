@@ -331,12 +331,14 @@ var
   MemStr: TStream;
   Tree: TCnCompDirectiveTree;
   I: Integer;
+  List: TList;
 begin
   // ±àÒëÖ¸Áî·ÖÊ÷²Ù×÷
   MemStr := TMemoryStream.Create;
   SrcMemo.Lines.SaveToStream(MemStr);
 
   Tree := TCnCompDirectiveTree.Create(MemStr);
+  List := TList.Create;
   try
     Tree.ParseTree;
 
@@ -344,8 +346,17 @@ begin
     ShowMessage('Parse Slice Node Count: ' + IntToStr(Tree.Count - 1));
     if Tree.Count > 1 then
       for I := 1 to Tree.Count - 1 do
-        ShowMessage(Tree.Items[I].ToString)
+        ShowMessage('Level ' + IntToStr(Tree.Items[I].Level) + #13#10#13#10 + Tree.Items[I].ToString);
+
+    Tree.SearchMultiNodes(List);
+    ShowMessage('Parse Route Count: ' + IntToStr(List.Count));
+    for I := 0 to List.Count - 1 do
+      ShowMessage((TCnSliceNode(List[I])).ToString);
+
+    for I := 0 to List.Count - 1 do
+      ShowMessage(Tree.ReachNode(TCnSliceNode(List[I])));
   finally
+    List.Free;
     Tree.Free;
     MemStr.Free;
   end;

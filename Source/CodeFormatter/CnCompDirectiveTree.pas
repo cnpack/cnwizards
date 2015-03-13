@@ -75,6 +75,10 @@ interface
   规则是见IFDEF就进一层并把IFDEF和后面代码塞进去，
   见ENDIF退一层把ENDIF和后面代码塞进去，
   见ELSE/ELIF等同级生成个新的。
+
+  分树完毕后，查找树中直属子节点排除 ENDIF/IFEND外数目大于等于两个的节点的直属子节点
+  针对每一个子节点，生成头到这个节点的源码字符串，可拿来格式化。
+  这个节点对应生成的源码字符串需要对应到格式化后的内容。
 *)
 
 uses
@@ -87,6 +91,7 @@ type
   private
     FCompDirectiveStream: TMemoryStream;
     FNormalCodeStream: TMemoryStream;
+    FCompDirectiveType: TPascalCompDirectiveType;
     function GetItems(Index: Integer): TCnSliceNode;
   protected
 
@@ -99,7 +104,8 @@ type
 
     property CompDirectiveStream: TMemoryStream read FCompDirectiveStream write FCompDirectiveStream;
     property NormalCodeStream: TMemoryStream read FNormalCodeStream write FNormalCodeStream;
-    
+    property CompDirectivtType: TPascalCompDirectiveType read FCompDirectiveType write FCompDirectiveType;
+
     property Items[Index: Integer]: TCnSliceNode read GetItems; default;
     {* 直属叶节点数组 }
   end;
@@ -113,8 +119,17 @@ type
     destructor Destroy; override;
 
     procedure ParseTree;
+    {* 生成编译指令分树}
 
-    property Items[AbsoluteIndex: Integer]: TCnSliceNode read GetItems; 
+    procedure SearchMultiNodes(Results: TList);
+    {* 查找树中直属子节点数目大于等于两个的节点的直属子节点，并且要排除 ENDIF/IFEND}
+
+    function ReachNode(EndNode: TCnSliceNode): string;
+    {* 深度优先遍历，生成从头到此节点的源码字符串，保证凡是并列的区域只选一个。
+      规则是如果前一个 Node 和本 Node 同级，则本 Node 跳过（本 Node 以下的子节点均跳过），
+      直到 EndNode 的 Parent 为止，再加 EndNode 本身}
+
+    property Items[AbsoluteIndex: Integer]: TCnSliceNode read GetItems;
   end;
 
 implementation
@@ -269,12 +284,14 @@ begin
           begin
             // 进一层并把本编译指令塞进去
             CurNode := TCnSliceNode(AddChild(CurNode));
+            CurNode.CompDirectivtType := CompDirectType;
             PutCompDirectiveToNode;
           end;
         cdtElse:
           begin
             // 同级生成个新的并把本编译指令塞进去
             CurNode := TCnSliceNode(AddChild(CurNode.Parent));
+            CurNode.CompDirectivtType := CompDirectType;
             PutCompDirectiveToNode;
           end;
         cdtIfEnd, cdtEndIf:
@@ -283,6 +300,7 @@ begin
             if CurNode.Parent <> nil then
             begin
               CurNode := TCnSliceNode(Add(CurNode.Parent));
+              CurNode.CompDirectivtType := CompDirectType;
               PutCompDirectiveToNode;
             end;
           end;
@@ -295,6 +313,84 @@ begin
       PutNormalCodeToNode;
 
     FScaner.NextToken;
+  end;
+end;
+
+function TCnCompDirectiveTree.ReachNode(EndNode: TCnSliceNode): string;
+var
+  I: Integer;
+  Node: TCnSliceNode;
+  ParentNode: TCnSliceNode;
+  PreviousNode: TCnSliceNode;
+begin
+  ParentNode := TCnSliceNode(EndNode.Parent);
+  PreviousNode := nil;
+  Result := '';
+
+  if Count <= 1 then // Only root，no content
+    Exit;
+
+  for I := 1 to Count - 1 do
+  begin
+    Node := Items[I];
+    if ParentNode = Node then // 到达目的地上层，取目的地上层以及目的地本身
+    begin
+      Result := Result + Node.ToString;
+      Result := Result + EndNode.ToString;
+      Exit;
+    end
+    else if PreviousNode = nil then
+    begin
+      Result := Result + Node.ToString;
+      PreviousNode := Node;
+    end
+    else if PreviousNode.Parent = Node.Parent then // 本节点和上个节点同父，跳过
+      Continue    
+    else // 普通节点，累加并记录前一个
+    begin
+      Result := Result + Node.ToString;
+      PreviousNode := Node;
+    end;
+  end;
+end;
+
+procedure TCnCompDirectiveTree.SearchMultiNodes(Results: TList);
+var
+  I, J, Cnt: Integer;
+  Node, Node2: TCnSliceNode;
+begin
+  if Results = nil then
+    Exit;
+  Results.Clear;
+
+  if Count <= 1 then // Only root，no content
+    Exit;
+
+  for I := 1 to Count - 1 do
+  begin
+    Node := Items[I];
+    if Node.Count > 1 then
+    begin
+      Cnt := Node.Count;
+      // 内部任何一个 ENDIF/IFEND 可能是属于内层嵌套块而退出来的
+      // 如果有 ENDIF/IFEND，则把这个除外，数量减一
+      for J := 0 to Node.Count - 1 do
+      begin
+        Node2 := TCnSliceNode(Node.Items[J]);
+        if Node2.CompDirectivtType in [cdtEndIf, cdtIfEnd] then
+          Dec(Cnt);
+      end;
+
+      if Cnt > 1 then // 去掉内层退出的 ENDIF/IFEND 后如数量还足够，则重新加
+      begin
+        for J := 0 to Node.Count - 1 do
+        begin
+          Node2 := TCnSliceNode(Node.Items[J]);
+          if not (Node2.CompDirectivtType in [cdtEndIf, cdtIfEnd]) then
+            Results.Add(Node2);
+        end;
+      end;
+    end;
   end;
 end;
 
