@@ -18,8 +18,8 @@ object MainForm: TMainForm
   object PageControl1: TPageControl
     Left = 0
     Top = 0
-    Width = 1028
-    Height = 702
+    Width = 1020
+    Height = 691
     ActivePage = tsSingleTest
     Align = alClient
     TabOrder = 0
@@ -29,14 +29,14 @@ object MainForm: TMainForm
         Left = 505
         Top = 29
         Width = 3
-        Height = 646
+        Height = 635
         Cursor = crHSplit
       end
       object Panel1: TPanel
         Left = 0
         Top = 29
         Width = 505
-        Height = 646
+        Height = 635
         Align = alLeft
         BevelOuter = bvNone
         Caption = 'Panel1'
@@ -55,7 +55,7 @@ object MainForm: TMainForm
           Left = 0
           Top = 12
           Width = 505
-          Height = 634
+          Height = 623
           Align = alClient
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
@@ -140,8 +140,8 @@ object MainForm: TMainForm
       object Panel2: TPanel
         Left = 508
         Top = 29
-        Width = 512
-        Height = 646
+        Width = 504
+        Height = 635
         Align = alClient
         BevelOuter = bvNone
         Caption = 'Panel1'
@@ -149,7 +149,7 @@ object MainForm: TMainForm
         object Label2: TLabel
           Left = 0
           Top = 0
-          Width = 512
+          Width = 504
           Height = 12
           Align = alTop
           Alignment = taCenter
@@ -159,8 +159,8 @@ object MainForm: TMainForm
         object DesMemo: TMemo
           Left = 0
           Top = 12
-          Width = 512
-          Height = 634
+          Width = 504
+          Height = 623
           Align = alClient
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
@@ -176,11 +176,11 @@ object MainForm: TMainForm
       object ToolBar1: TToolBar
         Left = 0
         Top = 0
-        Width = 1020
+        Width = 1012
         Height = 29
         BorderWidth = 1
         ButtonHeight = 20
-        ButtonWidth = 55
+        ButtonWidth = 67
         Caption = 'ToolBar1'
         EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
         Flat = True
@@ -194,7 +194,7 @@ object MainForm: TMainForm
           OnClick = btnLoadFileClick
         end
         object ToolButton3: TToolButton
-          Left = 55
+          Left = 67
           Top = 0
           Width = 8
           Caption = 'ToolButton3'
@@ -202,14 +202,14 @@ object MainForm: TMainForm
           Style = tbsSeparator
         end
         object btnFormat: TToolButton
-          Left = 63
+          Left = 75
           Top = 0
           Caption = '格式化！'
           ImageIndex = 0
           OnClick = btnFormatClick
         end
         object btnSep1: TToolButton
-          Left = 118
+          Left = 142
           Top = 0
           Width = 8
           Caption = 'btnSep1'
@@ -217,13 +217,13 @@ object MainForm: TMainForm
           Style = tbsSeparator
         end
         object lbl1: TLabel
-          Left = 126
+          Left = 150
           Top = 0
           Width = 6
           Height = 20
         end
         object Label3: TLabel
-          Left = 132
+          Left = 156
           Top = 0
           Width = 60
           Height = 20
@@ -232,7 +232,7 @@ object MainForm: TMainForm
           Layout = tlCenter
         end
         object Edit1: TEdit
-          Left = 192
+          Left = 216
           Top = 0
           Width = 25
           Height = 20
@@ -240,7 +240,7 @@ object MainForm: TMainForm
           Text = '2'
         end
         object UpDown1: TUpDown
-          Left = 217
+          Left = 241
           Top = 0
           Width = 15
           Height = 20
@@ -252,7 +252,7 @@ object MainForm: TMainForm
           Wrap = False
         end
         object btnSep2: TToolButton
-          Left = 232
+          Left = 256
           Top = 0
           Width = 8
           Caption = 'btnSep2'
@@ -260,7 +260,7 @@ object MainForm: TMainForm
           Style = tbsSeparator
         end
         object Label4: TLabel
-          Left = 240
+          Left = 264
           Top = 0
           Width = 48
           Height = 20
@@ -270,7 +270,7 @@ object MainForm: TMainForm
           Layout = tlCenter
         end
         object ComboBox1: TComboBox
-          Left = 288
+          Left = 312
           Top = 0
           Width = 112
           Height = 20
@@ -283,7 +283,7 @@ object MainForm: TMainForm
             '首字母大写')
         end
         object btn1: TToolButton
-          Left = 400
+          Left = 424
           Top = 0
           Width = 8
           Caption = 'btn1'
@@ -291,11 +291,26 @@ object MainForm: TMainForm
           Style = tbsSeparator
         end
         object ToolButton1: TToolButton
-          Left = 408
+          Left = 432
           Top = 0
           Caption = '保存结果'
           ImageIndex = 2
           OnClick = ToolButton1Click
+        end
+        object btn2: TToolButton
+          Left = 499
+          Top = 0
+          Width = 8
+          Caption = 'btn2'
+          ImageIndex = 4
+          Style = tbsSeparator
+        end
+        object btnParseCompDirective: TToolButton
+          Left = 507
+          Top = 0
+          Caption = '编译指令树'
+          ImageIndex = 3
+          OnClick = btnParseCompDirectiveClick
         end
       end
     end

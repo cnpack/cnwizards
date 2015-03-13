@@ -132,7 +132,10 @@ type
     function TokenInt: Int64;
 {$ENDIF}
     function BlankString: string;
+    function BlankStringLength: Integer;
     function TokenString: string;
+    function TokenStringLength: Integer;
+    
     function TrimBlank(const Str: string): string;
     {* 处理 BlankString，如果上次曾经多输出了一个分隔的空行，则本次 BlankString
        需要去掉前导空行（是去掉一个以保持原有空行数量呢，还是去掉所有前导保持一个空行？}
@@ -151,6 +154,7 @@ type
     property SourceCol: Integer read FSourceCol;    // 列，以 1 开始
 
     property Token: TPascalToken read FToken;
+    property TokenPtr: PChar read FTokenPtr;
 
     property ASMMode: Boolean read FASMMode write FASMMode;
     {* 用来控制是否将回车当作空白，asm 块中需要此选项}
@@ -178,7 +182,8 @@ type
     procedure OnMoreBlankLinesWhenSkip; override;    
   public
     constructor Create(AStream: TStream); overload; override;
-    constructor Create(AStream: TStream; ACodeGen: TCnCodeGenerator); reintroduce; overload;
+    constructor Create(AStream: TStream; ACodeGen: TCnCodeGenerator;
+      ACompDirectiveMode: TCompDirectiveMode); reintroduce; overload;
     destructor Destroy; override;
     function NextToken: TPascalToken; override;
     function ForwardToken(Count: Integer = 1): TPascalToken; override;
@@ -679,21 +684,34 @@ begin
   FSourceCol := 1;
 end;
 
+function TAbstractScaner.TokenStringLength: Integer;
+begin
+  if FToken = tokString then
+    Result := FStringPtr - FTokenPtr
+  else
+    Result := FSourcePtr - FTokenPtr;
+end;
+
+function TAbstractScaner.BlankStringLength: Integer;
+begin
+  Result := FBlankStringEnd - FBlankStringBegin;
+end;
+
 { TScaner }
 
-constructor TScaner.Create(AStream: TStream; ACodeGen: TCnCodeGenerator);
+constructor TScaner.Create(AStream: TStream; ACodeGen: TCnCodeGenerator; ACompDirectiveMode: TCompDirectiveMode);
 begin
   AStream.Seek(0, soFromBeginning);
   FStream := AStream;
   FCodeGen := ACodeGen;
 
-  FCompDirectiveMode := CnPascalCodeForRule.CompDirectiveMode; // Set CompDirective Process Mode
+  FCompDirectiveMode := ACompDirectiveMode; // Set CompDirective Process Mode
   inherited Create(AStream);
 end;
 
 constructor TScaner.Create(AStream: TStream);
 begin
-  Create(AStream, nil); //TCnCodeGenerator.Create);
+  Create(AStream, nil, CnPascalCodeForRule.CompDirectiveMode); //TCnCodeGenerator.Create);
 end;
 
 destructor TScaner.Destroy;
@@ -703,11 +721,13 @@ end;
 
 function TScaner.ForwardToken(Count: Integer): TPascalToken;
 begin
-  FCodeGen.LockOutput;
+  if FCodeGen <> nil then
+    FCodeGen.LockOutput;
   try
     Result := inherited ForwardToken(Count);
   finally
-    FCodeGen.UnLockOutput;
+    if FCodeGen <> nil then
+      FCodeGen.UnLockOutput;
   end;
 end;
 
@@ -1133,9 +1153,11 @@ begin
     Integer(InIgnoreArea)]);
 {$ENDIF}
 
-  if InIgnoreArea then
+  if InIgnoreArea and (FCodeGen <> nil) then
     FCodeGen.Write(BlankString);
-     
+
+  // FCompDirectiveMode = cdmNone 表示忽略，此处啥都不做，供低级扫描使用。
+
   if FCompDirectiveMode = cdmAsComment then
   begin
     if (Result = tokComment) or (Result = tokCompDirective) then // 当前是 Comment
@@ -1180,7 +1202,8 @@ begin
         FBlankLines := 0;
       end;
 
-      if not InIgnoreArea and (FBackwardToken = tokComment) or (FBackwardToken = tokCompDirective) then // 当前不是 Comment，但前一个是 Comment
+      if not InIgnoreArea and (FCodeGen <> nil) and
+        (FBackwardToken = tokComment) or (FBackwardToken = tokCompDirective) then // 当前不是 Comment，但前一个是 Comment
         FCodeGen.Write(BlankString);
 
       if (Result = tokString) and (Length(TokenString) = 1) then
@@ -1317,7 +1340,8 @@ begin
         FBlankLines := 0;
       end;
 
-      if not InIgnoreArea and (FBackwardToken = tokComment) then // 当前不是 Comment，但前一个是 Comment
+      if not InIgnoreArea and (FCodeGen <> nil) and
+        (FBackwardToken = tokComment) then // 当前不是 Comment，但前一个是 Comment
         FCodeGen.Write(BlankString);
 
       if (Result = tokString) and (Length(TokenString) = 1) then
@@ -1333,7 +1357,8 @@ end;
 
 procedure TScaner.OnMoreBlankLinesWhenSkip;
 begin
-  FCodeGen.Writeln;
+  if FCodeGen <> nil then
+    FCodeGen.Writeln;
 end;
 
 end.

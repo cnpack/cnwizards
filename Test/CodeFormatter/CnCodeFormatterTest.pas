@@ -91,6 +91,8 @@ type
     ToolButton1: TToolButton;
     btn1: TToolButton;
     SaveDialog1: TSaveDialog;
+    btnParseCompDirective: TToolButton;
+    btn2: TToolButton;
     procedure btnLoadFileClick(Sender: TObject);
     procedure btnFormatClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -104,6 +106,7 @@ type
     procedure btnSingleTestClick(Sender: TObject);
     procedure fltcbb1Change(Sender: TObject);
     procedure ToolButton1Click(Sender: TObject);
+    procedure btnParseCompDirectiveClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -116,7 +119,8 @@ var
 implementation
 
 uses
-  CnCodeFormatter, CnCodeFormatRules, CnScaners, CnTokens;
+  CnCodeFormatter, CnCodeFormatRules, CnScaners, CnTokens,
+  CnCompDirectiveTree;
 
 {$R *.DFM}
 
@@ -319,6 +323,31 @@ begin
   if SaveDialog1.Execute then
   begin
     DesMemo.Lines.SaveToFile(SaveDialog1.FileName);
+  end;
+end;
+
+procedure TMainForm.btnParseCompDirectiveClick(Sender: TObject);
+var
+  MemStr: TStream;
+  Tree: TCnCompDirectiveTree;
+  I: Integer;
+begin
+  // 编译指令分树操作
+  MemStr := TMemoryStream.Create;
+  SrcMemo.Lines.SaveToStream(MemStr);
+
+  Tree := TCnCompDirectiveTree.Create(MemStr);
+  try
+    Tree.ParseTree;
+
+    // Root 节点不算进去
+    ShowMessage('Parse Slice Node Count: ' + IntToStr(Tree.Count - 1));
+    if Tree.Count > 1 then
+      for I := 1 to Tree.Count - 1 do
+        ShowMessage(Tree.Items[I].ToString)
+  finally
+    Tree.Free;
+    MemStr.Free;
   end;
 end;
 

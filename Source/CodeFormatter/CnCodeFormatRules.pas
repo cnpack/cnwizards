@@ -48,7 +48,7 @@ type
 
   TBeginStyle = (bsNextLine, bsSameLine);
 
-  TCompDirectiveMode = (cdmAsComment, cdmOnlyFirst);
+  TCompDirectiveMode = (cdmAsComment, cdmOnlyFirst, cdmNone); // None 表示扔给外面处理
 
   TCnPascalCodeFormatRule = record
     ContinueAfterError: Boolean;

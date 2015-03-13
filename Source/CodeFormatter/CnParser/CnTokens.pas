@@ -223,6 +223,9 @@ type
 
   TPascalTokenSet = set of TPascalToken;
 
+  TPascalCompDirectiveType = (cdtUnknown, cdtIf, cdtIfDef, cdtIfNDef, cdtElse,
+    cdtEndIf, cdtIfEnd);
+
 const
   KeywordTokens = [tokKeyword_BEGIN .. tokKeyword_END];
 

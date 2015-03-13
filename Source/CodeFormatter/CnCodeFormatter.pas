@@ -315,7 +315,7 @@ end;
 constructor TCnAbstractCodeFormatter.Create(AStream: TStream);
 begin
   FCodeGen := TCnCodeGenerator.Create;
-  FScaner := TScaner.Create(AStream, FCodeGen);
+  FScaner := TScaner.Create(AStream, FCodeGen, CnPascalCodeForRule.CompDirectiveMode);
 end;
 
 destructor TCnAbstractCodeFormatter.Destroy;
