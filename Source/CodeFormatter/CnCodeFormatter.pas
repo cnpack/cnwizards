@@ -51,6 +51,7 @@ type
     FCodeGen: TCnCodeGenerator;
     FLastToken: TPascalToken;
     FInternalRaiseException: Boolean;
+    FSliceMode: Boolean;
     function ErrorTokenString: string;
   protected
     {* 错误处理函数 }
@@ -105,6 +106,9 @@ type
     procedure SaveToFile(FileName: string);
     procedure SaveToStream(Stream: TStream);
     procedure SaveToStrings(AStrings: TStrings);
+
+    property SliceMode: Boolean read FSliceMode write FSliceMode;
+    {* 片段模式，供外界控制。为 True 时碰到 EOF 应该平常退出而不报错}
   end;
 
   TCnBasePascalFormatter = class(TCnAbstractCodeFormatter)
@@ -297,7 +301,10 @@ type
     procedure FormatCode(PreSpaceCount: Byte = 0); override;
   end;
 
-  TCnPascalCodeFormatter = class(TCnGoalCodeFormatter);
+  TCnPascalCodeFormatter = class(TCnGoalCodeFormatter)
+  public
+    procedure FormatCode(PreSpaceCount: Byte = 0); override;
+  end;
 
 implementation
 
@@ -423,7 +430,12 @@ begin
     Scaner.NextToken;
   end
   else if FInternalRaiseException or not CnPascalCodeForRule.ContinueAfterError then
-    ErrorToken(Token)
+  begin
+    if FSliceMode and (Scaner.Token = tokEOF) then
+      raise EReadError.Create('Eof')
+    else
+      ErrorToken(Token);
+  end
   else // 要继续的场合，写了再说
   begin
     WriteToken(Token, BeforeSpaceCount, AfterSpaceCount,
@@ -4805,6 +4817,23 @@ begin
   if (Scaner.Token <> tokKeywordBegin) or
     (CnPascalCodeForRule.BeginStyle <> bsSameLine) then
     Writeln;
+end;
+
+{ TCnPascalCodeFormatter }
+
+procedure TCnPascalCodeFormatter.FormatCode(PreSpaceCount: Byte);
+begin
+  if FSliceMode then
+    try
+      inherited FormatCode(PreSpaceCount);
+    except
+      on E: EReadError do
+      begin
+        ; // Catch Eof Exception and give the result
+      end;
+    end
+  else
+    inherited FormatCode(PreSpaceCount);
 end;
 
 end.

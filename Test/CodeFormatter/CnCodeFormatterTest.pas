@@ -93,6 +93,7 @@ type
     SaveDialog1: TSaveDialog;
     btnParseCompDirective: TToolButton;
     btn2: TToolButton;
+    chkSliceMode: TCheckBox;
     procedure btnLoadFileClick(Sender: TObject);
     procedure btnFormatClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -144,7 +145,7 @@ begin
   MemStr := TMemoryStream.Create;
   SrcMemo.Lines.SaveToStream(MemStr);
   FCodeFor := TCnPascalCodeFormatter.Create(MemStr);
-
+  FCodeFor.SliceMode := chkSliceMode.Checked;
   try
     try
       FCodeFor.FormatCode;
