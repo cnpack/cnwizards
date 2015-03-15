@@ -1,6 +1,6 @@
 object MainForm: TMainForm
-  Left = 67
-  Top = 141
+  Left = 33
+  Top = 42
   Width = 1036
   Height = 729
   Caption = 'CnPack IDE 专家包 Object Pascal / Delphi 代码格式化测试程序'

@@ -54,22 +54,38 @@ type
     FColumnPos: Integer;
     FCodeWrapMode: TCnCodeWrapMode;
     FPrevStr: string;
+    FPrevRow: Integer;
+    FPrevColumn: Integer;
+    FOnAfterWrite: TNotifyEvent;
     function GetCurIndentSpace: Integer;
     function GetLockedCount: Word;
+    function GetPrevColumn: Integer;
+    function GetPrevRow: Integer;
+    function GetCurrColumn: Integer;
+    function GetCurrRow: Integer;
+  protected
+    procedure DoAfterWrite; virtual;
   public
     constructor Create;
+    destructor Destroy; override;
+
     procedure Reset;
-    procedure Write(S: String; BeforeSpaceCount:Word = 0;
-        AfterSpaceCount: Word = 0);
+    procedure Write(S: string; BeforeSpaceCount:Word = 0;
+      AfterSpaceCount: Word = 0);
+    procedure InternalWriteln;
     procedure Writeln;
     function SourcePos: Word;
+    {* 最后一行光标所在列数，暂未使用}
     procedure SaveToStream(Stream: TStream);
-    procedure SaveToFile(FileName: String);
+    procedure SaveToFile(FileName: string);
     procedure SaveToStrings(AStrings: TStrings);
+
+    function CopyPartOut(StartRow, StartColumn, EndRow, EndColumn: Integer): string;
+    {* 从输出中指定起止位置复制内容出来，可以直接使用 Row/Column 相关属性}
 
     procedure LockOutput;
     procedure UnLockOutput;
-    
+
     procedure ClearOutputLock;
     {* 直接将输出锁定置零}
 
@@ -81,6 +97,20 @@ type
     {* 当前行最前面的空格数}
     property CodeWrapMode: TCnCodeWrapMode read FCodeWrapMode write FCodeWrapMode;
     {* 代码换行的设置}
+
+    property PrevRow: Integer read GetPrevRow;
+    {* 一次 Write 成功后，写之前的光标行号，0 开始。
+      可能与实际情况不符，因为 Write 可能自行写回车换行符}
+    property PrevColumn: Integer read GetPrevColumn;
+    {* 一次 Write 成功后，写之前的光标列号，0 开始}
+    property CurrRow: Integer read GetCurrRow;
+    {* 一次 Write 成功后，写之后的光标行号，0 开始。
+      可能与实际情况不符，因为 Write 可能自行写回车换行符}
+    property CurrColumn: Integer read GetCurrColumn;
+    {* 一次 Write 成功后，写之后的光标行号，0 开始}
+
+    property OnAfterWrite: TNotifyEvent read FOnAfterWrite write FOnAfterWrite;
+    {* 写内容一次成功后被调用}
   end;
 
 implementation
@@ -88,17 +118,63 @@ implementation
 { TCnCodeGenerator }
 
 uses
-  CnCodeFormatRules;
+  CnCodeFormatRules {$IFDEF DEBUG}, CnDebug {$ENDIF};
+
+const
+  CRLF = #13#10;
 
 procedure TCnCodeGenerator.ClearOutputLock;
 begin
   FLock := 0;
 end;
 
+function TCnCodeGenerator.CopyPartOut(StartRow, StartColumn, EndRow,
+  EndColumn: Integer): string;
+var
+  I: Integer;
+begin
+  Result := '';
+  if EndRow > FCode.Count - 1 then
+    EndRow := FCode.Count - 1;
+    
+  if EndRow < StartRow then Exit;
+  if (EndRow = StartRow) and (EndColumn < StartColumn) then Exit;
+
+  Inc(StartColumn);
+  Inc(EndColumn); // Column 们以 0 开始，但字符串下标以 1 开始，所以都要加一
+
+  if EndRow = StartRow then
+    Result := Copy(FCode[StartRow], StartColumn, EndColumn - StartColumn)
+  else
+  begin
+    for I := StartRow to EndRow do
+    begin
+      if I = StartRow then
+        Result := Result + Copy(FCode[StartRow], StartColumn, MaxInt) + CRLF
+      else if I = EndRow then
+        Result := Result + Copy(FCode[EndRow], 1, EndColumn)
+      else
+        Result := Result + FCode[I] + CRLF;
+    end;
+  end;
+end;
+
 constructor TCnCodeGenerator.Create;
 begin
   FCode := TStringList.Create;
   FLock := 0;
+end;
+
+destructor TCnCodeGenerator.Destroy;
+begin
+  FCode.Free;
+  inherited;
+end;
+
+procedure TCnCodeGenerator.DoAfterWrite;
+begin
+  if Assigned(FOnAfterWrite) then
+    FOnAfterWrite(Self);
 end;
 
 function TCnCodeGenerator.GetCurIndentSpace: Integer;
@@ -120,9 +196,39 @@ begin
   end;
 end;
 
+function TCnCodeGenerator.GetCurrColumn: Integer;
+begin
+  Result := FColumnPos;
+end;
+
+function TCnCodeGenerator.GetCurrRow: Integer;
+begin
+  Result := FCode.Count - 1;
+end;
+
 function TCnCodeGenerator.GetLockedCount: Word;
 begin
   Result := FLock;
+end;
+
+function TCnCodeGenerator.GetPrevColumn: Integer;
+begin
+  Result := FPrevColumn;
+end;
+
+function TCnCodeGenerator.GetPrevRow: Integer;
+begin
+  Result := FPrevRow;
+end;
+
+procedure TCnCodeGenerator.InternalWriteln;
+begin
+  if FLock <> 0 then Exit;
+
+  FCode[FCode.Count - 1] := TrimRight(FCode[FCode.Count - 1]);
+  FCode.Add('');
+
+  FColumnPos := 0;
 end;
 
 procedure TCnCodeGenerator.LockOutput;
@@ -168,12 +274,15 @@ var
 begin
   if FLock <> 0 then Exit;
   
-  if FCode.Count = 0 then FCode.Add('');
+  if FCode.Count = 0 then
+    FCode.Add('');
 
   Str := Format('%s%s%s', [StringOfChar(' ', BeforeSpaceCount), S,
     StringOfChar(' ', AfterSpaceCount)]);
   Len := Length(Str);
 
+  FPrevRow := FCode.Count - 1;
+  
   if CodeWrapMode = cwmNone then
   begin
     // 不自动换行时无需处理
@@ -186,7 +295,7 @@ begin
       (FColumnPos > CnPascalCodeForRule.WrapWidth)) then
     begin
       Str := StringOfChar(' ', CurIndentSpace) + Str; // 加上原有的缩进
-      Writeln;
+      InternalWriteln;
     end;
   end
   else if CodeWrapMode = cwmAdvanced then // TODO: 还未处理
@@ -197,8 +306,16 @@ begin
   FCode[FCode.Count - 1] :=
     Format('%s%s', [FCode[FCode.Count - 1], Str]);
 
+  FPrevColumn := FColumnPos;
   FColumnPos := Length(FCode[FCode.Count - 1]);
   FPrevStr := S;
+
+  DoAfterWrite;
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('String Wrote from %d %d to %d %d: %s', [FPrevRow, FPrevColumn,
+    GetCurrRow, GetCurrColumn, Str]);
+  CnDebugger.LogMsg(CopyPartOut(FPrevRow, FPrevColumn, GetCurrRow, GetCurrColumn));
+{$ENDIF}
 end;
 
 procedure TCnCodeGenerator.Writeln;
@@ -208,8 +325,18 @@ begin
   // Write(S, BeforeSpaceCount, AfterSpaceCount);
   // delete trailing blanks
   FCode[FCode.Count - 1] := TrimRight(FCode[FCode.Count - 1]);
+  FPrevRow := FCode.Count - 1;
+
   FCode.Add('');
+
+  FPrevColumn := FColumnPos;
   FColumnPos := 0;
+  
+  DoAfterWrite;
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('NewLine Wrote from %d %d to %d %d', [FPrevRow, FPrevColumn,
+    GetCurrRow, GetCurrColumn]);
+{$ENDIF}
 end;
 
 end.

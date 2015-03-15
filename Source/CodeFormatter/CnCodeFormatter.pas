@@ -52,7 +52,14 @@ type
     FLastToken: TPascalToken;
     FInternalRaiseException: Boolean;
     FSliceMode: Boolean;
+    FMatchedInStart: Integer;
+    FMatchedOutStartRow: Integer;
+    FMatchedOutStartCol: Integer;
+    FMatchedOutEndCol: Integer;
+    FMatchedInEnd: Integer;
+    FMatchedOutEndRow: Integer;
     function ErrorTokenString: string;
+    procedure CodeGenAfterWrite(Sender: TObject);
   protected
     {* 错误处理函数 }
     procedure Error(const Ident: Integer);
@@ -99,7 +106,7 @@ type
     property Scaner: TAbstractScaner read FScaner;
     {* 词法扫描器}
   public
-    constructor Create(AStream: TStream);
+    constructor Create(AStream: TStream; ACompDirectiveMode: TCompDirectiveMode = cdmOnlyFirst);
     destructor Destroy; override;
 
     procedure FormatCode(PreSpaceCount: Byte = 0); virtual; abstract;
@@ -109,6 +116,16 @@ type
 
     property SliceMode: Boolean read FSliceMode write FSliceMode;
     {* 片段模式，供外界控制。为 True 时碰到 EOF 应该平常退出而不报错}
+    property MatchedInStart: Integer read FMatchedInStart write FMatchedInStart;
+    {* 当需要 Scaner 输出到此起始位置时触发事件时设置，用于片断模式}
+    property MatchedInEnd: Integer read FMatchedInEnd write FMatchedInEnd;
+    {* 当需要 Scaner 输出到此结束位置时触发事件时设置，用于片断模式}
+
+    property MatchedOutStartRow: Integer read FMatchedOutStartRow write FMatchedOutStartRow;
+    property MatchedOutStartCol: Integer read FMatchedOutStartCol write FMatchedOutStartCol;
+    property MatchedOutEndRow: Integer read FMatchedOutEndRow write FMatchedOutEndRow;
+    property MatchedOutEndCol: Integer read FMatchedOutEndCol write FMatchedOutEndCol;
+
   end;
 
   TCnBasePascalFormatter = class(TCnAbstractCodeFormatter)
@@ -304,12 +321,13 @@ type
   TCnPascalCodeFormatter = class(TCnGoalCodeFormatter)
   public
     procedure FormatCode(PreSpaceCount: Byte = 0); override;
+    property CodeGen;
   end;
 
 implementation
 
 uses
-  CnParseConsts;
+  CnParseConsts {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 { TCnAbstractCodeFormater }
 
@@ -319,10 +337,12 @@ begin
   Result := S;
 end;
 
-constructor TCnAbstractCodeFormatter.Create(AStream: TStream);
+constructor TCnAbstractCodeFormatter.Create(AStream: TStream;
+  ACompDirectiveMode: TCompDirectiveMode);
 begin
   FCodeGen := TCnCodeGenerator.Create;
-  FScaner := TScaner.Create(AStream, FCodeGen, CnPascalCodeForRule.CompDirectiveMode);
+  FScaner := TScaner.Create(AStream, FCodeGen, ACompDirectiveMode);
+  FCodeGen.OnAfterWrite := CodeGenAfterWrite;
 end;
 
 destructor TCnAbstractCodeFormatter.Destroy;
@@ -4834,6 +4854,31 @@ begin
     end
   else
     inherited FormatCode(PreSpaceCount);
+end;
+
+procedure TCnAbstractCodeFormatter.CodeGenAfterWrite(Sender: TObject);
+begin
+  // CodeGen 写完一段字符串但 Scaner 还没 NextToken 时调用
+  // 用来判断 Scaner 的位置是否是指定 Offset
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('OnAfter Write. From %d %d to %d %d. Scaner Offset is %d.',
+    [TCnCodeGenerator(Sender).PrevRow, TCnCodeGenerator(Sender).PrevColumn,
+    TCnCodeGenerator(Sender).CurrRow, TCnCodeGenerator(Sender).CurrColumn,
+    FScaner.SourcePos]);
+{$ENDIF}
+  if not FSliceMode then
+    Exit;
+    
+  if FScaner.SourcePos = FMatchedInStart then
+  begin
+    FMatchedOutStartRow := TCnCodeGenerator(Sender).PrevRow;
+    FMatchedOutStartCol := TCnCodeGenerator(Sender).PrevColumn;
+  end
+  else if FScaner.SourcePos + FScaner.TokenStringLength = FMatchedInEnd then
+  begin
+    FMatchedOutEndRow := TCnCodeGenerator(Sender).CurrRow;
+    FMatchedOutEndCol := TCnCodeGenerator(Sender).CurrColumn;
+  end;
 end;
 
 end.

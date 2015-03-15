@@ -92,7 +92,12 @@ type
     FCompDirectiveStream: TMemoryStream;
     FNormalCodeStream: TMemoryStream;
     FCompDirectiveType: TPascalCompDirectiveType;
+    FStartOffset: Integer;
+    FReachingStart: Integer;
+    FEndBlankLength: Integer;
     function GetItems(Index: Integer): TCnSliceNode;
+    function GetLength: Integer;
+    function GetReachingEnd: Integer;
   protected
 
   public
@@ -106,6 +111,17 @@ type
     property NormalCodeStream: TMemoryStream read FNormalCodeStream write FNormalCodeStream;
     property CompDirectivtType: TPascalCompDirectiveType read FCompDirectiveType write FCompDirectiveType;
 
+    property StartOffset: Integer read FStartOffset write FStartOffset;
+    {* 本分片在原始源码中的起始偏移，根据实际情况看可以是编译指令的也可以是代码的}
+    property ReachingStart: Integer read FReachingStart write FReachingStart;
+    {* 本分片在直达源码中的起始偏移，根据实际情况看可以是编译指令的也可以是代码的}
+    property Length: Integer read GetLength;
+    {* 本分片包含的代码与编译指令长度}
+    property ReachingEnd: Integer read GetReachingEnd;
+    {* 本分片在直达源码中的终点偏移，是上述俩相加}
+    property EndBlankLength: Integer read FEndBlankLength write FEndBlankLength;
+    {* 分片末尾的空白字符串长度，格式化时需要用到，用 ReachingEnd 减本段}
+    
     property Items[Index: Integer]: TCnSliceNode read GetItems; default;
     {* 直属叶节点数组 }
   end;
@@ -125,9 +141,9 @@ type
     {* 查找树中直属子节点数目大于等于两个的节点的直属子节点，并且要排除 ENDIF/IFEND}
 
     function ReachNode(EndNode: TCnSliceNode): string;
-    {* 深度优先遍历，生成从头到此节点的源码字符串，保证凡是并列的区域只选一个。
+    {* 深度优先遍历，生成从头到此节点的直达源码字符串，保证凡是并列的区域只选一个。
       规则是如果前一个 Node 和本 Node 同级，则本 Node 跳过（本 Node 以下的子节点均跳过），
-      直到 EndNode 的 Parent 为止，再加 EndNode 本身}
+      直到 EndNode 的 Parent 为止，再加 EndNode 本身，同时给 EndNode 设置 ReachingOffset}
 
     property Items[AbsoluteIndex: Integer]: TCnSliceNode read GetItems;
   end;
@@ -159,6 +175,20 @@ end;
 function TCnSliceNode.GetItems(Index: Integer): TCnSliceNode;
 begin
   Result := TCnSliceNode(inherited GetItems(Index));
+end;
+
+function TCnSliceNode.GetLength: Integer;
+begin
+  Result := 0;
+  if FCompDirectiveStream <> nil then
+    Inc(Result, FCompDirectiveStream.Size);
+  if FNormalCodeStream <> nil then
+    Inc(Result, FNormalCodeStream.Size);
+end;
+
+function TCnSliceNode.GetReachingEnd: Integer;
+begin
+  Result := FReachingStart + GetLength;
 end;
 
 function TCnSliceNode.IsSingleSlice: Boolean;
@@ -240,6 +270,9 @@ var
   var
     Blank: string;
   begin
+    if (CurNode.CompDirectiveStream = nil) and (CurNode.NormalCodeStream = nil) then
+      CurNode.StartOffset := FScaner.SourcePos;
+      
     if CurNode.NormalCodeStream = nil then
       CurNode.NormalCodeStream := TMemoryStream.Create;
 
@@ -251,18 +284,28 @@ var
     CurNode.NormalCodeStream.Write(FScaner.TokenPtr^, FScaner.TokenStringLength);
   end;
 
-  procedure PutCompDirectiveToNode;
+  procedure PutBlankToNode;
   var
     Blank: string;
   begin
-    if CurNode.CompDirectiveStream = nil then
-      CurNode.CompDirectiveStream := TMemoryStream.Create;
-
     if FScaner.BlankStringLength > 0 then
     begin
+      CurNode.EndBlankLength := FScaner.BlankStringLength;
       Blank := FScaner.BlankString;
-      CurNode.CompDirectiveStream.Write((PChar(Blank))^, FScaner.BlankStringLength);
+      if CurNode.NormalCodeStream = nil then
+        CurNode.NormalCodeStream := TMemoryStream.Create;
+      CurNode.NormalCodeStream.Write((PChar(Blank))^, FScaner.BlankStringLength);
     end;
+  end;
+
+  procedure PutCompDirectiveToNode;
+  begin
+    if CurNode.CompDirectiveStream = nil then
+    begin
+      CurNode.CompDirectiveStream := TMemoryStream.Create;
+      CurNode.StartOffset := FScaner.SourcePos;
+    end;
+    // 之前的空白与回车由 PutBlankToNode 写入上一个末尾，保证节点是 CompDirective 开头
     CurNode.CompDirectiveStream.Write(FScaner.TokenPtr^, FScaner.TokenStringLength);
   end;
 
@@ -283,6 +326,7 @@ begin
         cdtIf, cdtIfDef, cdtIfNDef:
           begin
             // 进一层并把本编译指令塞进去
+            PutBlankToNode;
             CurNode := TCnSliceNode(AddChild(CurNode));
             CurNode.CompDirectivtType := CompDirectType;
             PutCompDirectiveToNode;
@@ -290,6 +334,7 @@ begin
         cdtElse:
           begin
             // 同级生成个新的并把本编译指令塞进去
+            PutBlankToNode;
             CurNode := TCnSliceNode(AddChild(CurNode.Parent));
             CurNode.CompDirectivtType := CompDirectType;
             PutCompDirectiveToNode;
@@ -299,6 +344,7 @@ begin
             // 退一层并把本编译指令塞进去
             if CurNode.Parent <> nil then
             begin
+              PutBlankToNode;
               CurNode := TCnSliceNode(Add(CurNode.Parent));
               CurNode.CompDirectivtType := CompDirectType;
               PutCompDirectiveToNode;
@@ -322,6 +368,7 @@ var
   Node: TCnSliceNode;
   ParentNode: TCnSliceNode;
   PreviousNode: TCnSliceNode;
+  ParentReached: Boolean;
 begin
   ParentNode := TCnSliceNode(EndNode.Parent);
   PreviousNode := nil;
@@ -330,14 +377,28 @@ begin
   if Count <= 1 then // Only root，no content
     Exit;
 
+  ParentReached := False;
   for I := 1 to Count - 1 do
   begin
     Node := Items[I];
+
+    // 到目的地上层时已经取过 EndNode 了，Parent 下的所有 Node 都要忽略，
+    // 但 Previous 还是要设以跟踪
+    if ParentReached and (Node.Parent = ParentNode) then
+    begin
+      PreviousNode := Node;
+      Continue;
+    end;
+
     if ParentNode = Node then // 到达目的地上层，取目的地上层以及目的地本身
     begin
       Result := Result + Node.ToString;
+      EndNode.ReachingStart := Length(Result); // 记录此分片在直达源码中的起始位置
       Result := Result + EndNode.ToString;
-      Exit;
+      ParentReached := True;
+
+      PreviousNode := Node;  // 如不用这句而直接 Exit，则只得到到此为止的 ReachingSource
+      // Exit;
     end
     else if PreviousNode = nil then
     begin
@@ -345,7 +406,10 @@ begin
       PreviousNode := Node;
     end
     else if PreviousNode.Parent = Node.Parent then // 本节点和上个节点同父，跳过
-      Continue    
+    begin
+      PreviousNode := Node;  // 但 Previous 还是要设以跟踪
+      Continue
+    end
     else // 普通节点，累加并记录前一个
     begin
       Result := Result + Node.ToString;

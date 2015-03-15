@@ -329,10 +329,13 @@ end;
 
 procedure TMainForm.btnParseCompDirectiveClick(Sender: TObject);
 var
-  MemStr: TStream;
+  MemStr, M: TStream;
   Tree: TCnCompDirectiveTree;
   I: Integer;
   List: TList;
+  Node: TCnSliceNode;
+  S: string;
+  Fmt: TCnPascalCodeFormatter;
 begin
   // 编译指令分树操作
   MemStr := TMemoryStream.Create;
@@ -352,10 +355,50 @@ begin
     Tree.SearchMultiNodes(List);
     ShowMessage('Parse Route Count: ' + IntToStr(List.Count));
     for I := 0 to List.Count - 1 do
-      ShowMessage((TCnSliceNode(List[I])).ToString);
+      ShowMessage(Format('Start from %d Length %d', [(TCnSliceNode(List[I])).StartOffset,
+        (TCnSliceNode(List[I])).Length]) + #13#10#13#10 + (TCnSliceNode(List[I])).ToString);
 
+    ShowMessage('Start to Show ReachNode string.');
     for I := 0 to List.Count - 1 do
-      ShowMessage(Tree.ReachNode(TCnSliceNode(List[I])));
+      ShowMessage(Tree.ReachNode(TCnSliceNode(List[I])) + '| '
+      + IntToStr(TCnSliceNode(List[I]).ReachingStart) + ' to '
+      + IntToStr(TCnSliceNode(List[I]).ReachingEnd));
+
+    // 格式化每一个 ReachNode 得到的 string 源码时要传入此 Node 的 ReachingOffset
+    // 给 Formatter 的 MatchedInOffset，供格式化时的 CodeGen 输出后发现匹配时，
+    // 再记录输出的位置到 Formatter 的 MatchedOutStartRow/MatchedOutStartCol。
+    ShowMessage('Start to Show ReachNode Format Result.');
+    for I := 0 to List.Count - 1 do
+    begin
+      Node := TCnSliceNode(List[I]);
+      S := Tree.ReachNode(Node);
+      M := nil;
+      Fmt := nil;
+
+      try
+        M := TMemoryStream.Create;
+        M.Write(PChar(S)^, Length(S));
+
+        Fmt := TCnPascalCodeFormatter.Create(M, cdmAsComment);
+        Fmt.SliceMode := True;
+        Fmt.MatchedInStart := Node.ReachingStart;
+        Fmt.MatchedInEnd := Node.ReachingEnd - Node.EndBlankLength;
+
+        Fmt.FormatCode;
+        if (Fmt.MatchedOutStartRow > 0) and (Fmt.MatchedOutStartCol > 0)
+          and (Fmt.MatchedOutEndRow > 0) and (Fmt.MatchedOutEndCol > 0) then
+        begin
+          // 有匹配结果
+          S := Fmt.CodeGen.CopyPartOut(Fmt.MatchedOutStartRow, Fmt.MatchedOutStartCol,
+            Fmt.MatchedOutEndRow, Fmt.MatchedOutEndCol);
+          ShowMessage(S);
+          DesMemo.Lines.Add(S);
+        end;
+      finally
+        Fmt.Free;
+        M.Free;
+      end;
+    end;
   finally
     List.Free;
     Tree.Free;

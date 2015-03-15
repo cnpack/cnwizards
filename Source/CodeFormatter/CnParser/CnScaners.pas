@@ -699,7 +699,8 @@ end;
 
 { TScaner }
 
-constructor TScaner.Create(AStream: TStream; ACodeGen: TCnCodeGenerator; ACompDirectiveMode: TCompDirectiveMode);
+constructor TScaner.Create(AStream: TStream; ACodeGen: TCnCodeGenerator;
+  ACompDirectiveMode: TCompDirectiveMode);
 begin
   AStream.Seek(0, soFromBeginning);
   FStream := AStream;
@@ -716,7 +717,8 @@ end;
 
 destructor TScaner.Destroy;
 begin
-  inherited Destroy;
+
+  inherited;
 end;
 
 function TScaner.ForwardToken(Count: Integer): TPascalToken;
