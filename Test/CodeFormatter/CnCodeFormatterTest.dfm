@@ -1,6 +1,6 @@
 object MainForm: TMainForm
-  Left = 33
-  Top = 42
+  Left = 189
+  Top = 0
   Width = 1036
   Height = 729
   Caption = 'CnPack IDE 专家包 Object Pascal / Delphi 代码格式化测试程序'
@@ -18,8 +18,8 @@ object MainForm: TMainForm
   object PageControl1: TPageControl
     Left = 0
     Top = 0
-    Width = 1028
-    Height = 702
+    Width = 1020
+    Height = 691
     ActivePage = tsSingleTest
     Align = alClient
     TabOrder = 0
@@ -29,14 +29,14 @@ object MainForm: TMainForm
         Left = 505
         Top = 29
         Width = 3
-        Height = 646
+        Height = 635
         Cursor = crHSplit
       end
       object Panel1: TPanel
         Left = 0
         Top = 29
         Width = 505
-        Height = 646
+        Height = 635
         Align = alLeft
         BevelOuter = bvNone
         Caption = 'Panel1'
@@ -55,7 +55,7 @@ object MainForm: TMainForm
           Left = 0
           Top = 12
           Width = 505
-          Height = 634
+          Height = 623
           Align = alClient
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
@@ -140,8 +140,8 @@ object MainForm: TMainForm
       object Panel2: TPanel
         Left = 508
         Top = 29
-        Width = 512
-        Height = 646
+        Width = 504
+        Height = 635
         Align = alClient
         BevelOuter = bvNone
         Caption = 'Panel1'
@@ -149,18 +149,26 @@ object MainForm: TMainForm
         object Label2: TLabel
           Left = 0
           Top = 0
-          Width = 512
+          Width = 504
           Height = 12
           Align = alTop
           Alignment = taCenter
           Caption = '格式化结果'
           Layout = tlCenter
         end
+        object spl1: TSplitter
+          Left = 0
+          Top = 452
+          Width = 504
+          Height = 3
+          Cursor = crVSplit
+          Align = alBottom
+        end
         object DesMemo: TMemo
           Left = 0
           Top = 12
-          Width = 512
-          Height = 634
+          Width = 504
+          Height = 440
           Align = alClient
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
@@ -172,11 +180,21 @@ object MainForm: TMainForm
           TabOrder = 0
           WordWrap = False
         end
+        object tvCompDirective: TTreeView
+          Left = 0
+          Top = 455
+          Width = 504
+          Height = 180
+          Align = alBottom
+          Indent = 19
+          TabOrder = 1
+          OnCustomDrawItem = tvCompDirectiveCustomDrawItem
+        end
       end
       object ToolBar1: TToolBar
         Left = 0
         Top = 0
-        Width = 1020
+        Width = 1012
         Height = 29
         BorderWidth = 1
         ButtonHeight = 20

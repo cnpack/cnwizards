@@ -95,9 +95,14 @@ type
     FStartOffset: Integer;
     FReachingStart: Integer;
     FEndBlankLength: Integer;
+    FKeepFlag: Boolean;
+    FProcessed: Boolean;
     function GetItems(Index: Integer): TCnSliceNode;
     function GetLength: Integer;
     function GetReachingEnd: Integer;
+
+    function ToString: string;
+    procedure SetKeepFlag(const Value: Boolean);
   protected
 
   public
@@ -105,7 +110,6 @@ type
     destructor Destroy; override;
 
     function IsSingleSlice: Boolean;
-    function ToString: string;
 
     property CompDirectiveStream: TMemoryStream read FCompDirectiveStream write FCompDirectiveStream;
     property NormalCodeStream: TMemoryStream read FNormalCodeStream write FNormalCodeStream;
@@ -124,12 +128,24 @@ type
     
     property Items[Index: Integer]: TCnSliceNode read GetItems; default;
     {* 直属叶节点数组 }
+
+    property KeepFlag: Boolean read FKeepFlag write SetKeepFlag;
+    property Processed: Boolean read FProcessed write FProcessed;
   end;
 
   TCnCompDirectiveTree = class(TCnTree)
   private
     FScaner: TAbstractScaner;
     function GetItems(AbsoluteIndex: Integer): TCnSliceNode;
+
+    procedure SyncTexts;
+    {* 将分树的内容赋值到 Text 属性中供多次使用}
+    procedure ClearFlags;
+    {* 清除 KeepFlag 标记}
+    procedure PruneDuplicated;
+    {* 通过广度优先遍历的方式做标记，把凡是并列的区域保留得只剩一个}
+
+    procedure WidthFirstTravelSlice(Sender: TObject);
   public
     constructor Create(AStream: TStream);
     destructor Destroy; override;
@@ -196,6 +212,14 @@ begin
   Result := not GetHasChildren;
 end;
 
+procedure TCnSliceNode.SetKeepFlag(const Value: Boolean);
+begin
+  FKeepFlag := Value;
+{$IFDEF DEBUG}
+  Data := Integer(Value);
+{$ENDIF}
+end;
+
 function TCnSliceNode.ToString: string;
 var
   Len: Integer;
@@ -226,6 +250,17 @@ begin
 end;
 
 { TCnCompDirectiveTree }
+
+procedure TCnCompDirectiveTree.ClearFlags;
+var
+  I: Integer;
+begin
+  for I := 0 to Count - 1 do
+  begin
+    Items[I].KeepFlag := False;
+    Items[I].Processed := False;
+  end;
+end;
 
 constructor TCnCompDirectiveTree.Create(AStream: TStream);
 begin
@@ -360,60 +395,44 @@ begin
 
     FScaner.NextToken;
   end;
+  SyncTexts;
+end;
+
+procedure TCnCompDirectiveTree.PruneDuplicated;
+begin
+  OnWidthFirstTravelLeaf := WidthFirstTravelSlice;
+  WidthFirstTravel;
 end;
 
 function TCnCompDirectiveTree.ReachNode(EndNode: TCnSliceNode): string;
 var
   I: Integer;
   Node: TCnSliceNode;
-  ParentNode: TCnSliceNode;
-  PreviousNode: TCnSliceNode;
-  ParentReached: Boolean;
 begin
-  ParentNode := TCnSliceNode(EndNode.Parent);
-  PreviousNode := nil;
   Result := '';
+  if EndNode = nil then
+    Exit;
 
   if Count <= 1 then // Only root，no content
     Exit;
 
-  ParentReached := False;
-  for I := 1 to Count - 1 do
+  ClearFlags;
+  Node := EndNode;
+  while Node <> nil do
   begin
-    Node := Items[I];
+    Node.KeepFlag := True;
+    Node.Processed := False;
+    Node := TCnSliceNode(Node.Parent);
+  end;
 
-    // 到目的地上层时已经取过 EndNode 了，Parent 下的所有 Node 都要忽略，
-    // 但 Previous 还是要设以跟踪
-    if ParentReached and (Node.Parent = ParentNode) then
+  PruneDuplicated;
+  for I := 0 to Count - 1 do
+  begin
+    if Items[I].KeepFlag then
     begin
-      PreviousNode := Node;
-      Continue;
-    end;
-
-    if ParentNode = Node then // 到达目的地上层，取目的地上层以及目的地本身
-    begin
-      Result := Result + Node.ToString;
-      EndNode.ReachingStart := Length(Result); // 记录此分片在直达源码中的起始位置
-      Result := Result + EndNode.ToString;
-      ParentReached := True;
-
-      PreviousNode := Node;  // 如不用这句而直接 Exit，则只得到到此为止的 ReachingSource
-      // Exit;
-    end
-    else if PreviousNode = nil then
-    begin
-      Result := Result + Node.ToString;
-      PreviousNode := Node;
-    end
-    else if PreviousNode.Parent = Node.Parent then // 本节点和上个节点同父，跳过
-    begin
-      PreviousNode := Node;  // 但 Previous 还是要设以跟踪
-      Continue
-    end
-    else // 普通节点，累加并记录前一个
-    begin
-      Result := Result + Node.ToString;
-      PreviousNode := Node;
+      if Items[I] = EndNode then
+        EndNode.ReachingStart := Length(Result); // 记录此分片在直达源码中的起始位置
+      Result := Result + Items[I].Text;
     end;
   end;
 end;
@@ -456,6 +475,113 @@ begin
       end;
     end;
   end;
+end;
+
+procedure TCnCompDirectiveTree.SyncTexts;
+var
+  I: Integer;
+begin
+  for I := 0 to Count - 1 do
+    Items[I].Text := Items[I].ToString;
+end;
+
+procedure TCnCompDirectiveTree.WidthFirstTravelSlice(Sender: TObject);
+var
+  Node, Node2: TCnSliceNode;
+  I, Cnt, KeepIdx: Integer;
+  HasKeep: Boolean;
+
+  procedure RecursiveSetKeepFlag(ANode: TCnSliceNode; Value: Boolean);
+  var
+    I: Integer;
+  begin
+    ANode.KeepFlag := Value;
+    for I := 0 to ANode.Count - 1 do
+      RecursiveSetKeepFlag(ANode.Items[I], Value);
+  end;
+
+  procedure RecursiveSetProcessed(ANode: TCnSliceNode; Value: Boolean);
+  var
+    I: Integer;
+  begin
+    ANode.Processed := Value;
+    for I := 0 to ANode.Count - 1 do
+      RecursiveSetProcessed(ANode.Items[I], Value);
+  end;
+
+begin
+  // 剪枝处理
+  Node := TCnSliceNode(Sender);
+  if Node.Processed then  // Root 得处理，用来区分第一层代码
+    Exit;
+
+  if Node.Count > 1 then
+  begin
+    Cnt := Node.Count;
+    // 如果直属子节点有 ENDIF/IFEND，则把这个除外，数量减一
+    for I := 0 to Node.Count - 1 do
+    begin
+      Node2 := TCnSliceNode(Node.Items[I]);
+      if Node2.CompDirectivtType in [cdtEndIf, cdtIfEnd] then
+        Dec(Cnt);
+    end;
+
+    if Cnt > 1 then // 去掉内层退出的 ENDIF/IFEND 后如数量还超过2，则开始剪枝
+    begin
+      HasKeep := False;
+      KeepIdx := -1;
+      for I := 0 to Node.Count - 1 do
+      begin
+        if Node.Items[I].KeepFlag then
+        begin
+          HasKeep := True;
+          KeepIdx := I;
+          Break;
+        end;
+      end;
+
+      if not HasKeep then
+        KeepIdx := 0;
+
+      // 子中有个已先设为 Keep 的就用 KeepIdx 所指的，否则用第一个
+      // 凡是设置了 KeepFlag 的节点，其子还得再次处理，所以必须 Processed 设为 False
+      for I := 0 to Node.Count - 1 do
+      begin
+        if I = KeepIdx then
+        begin
+          Node.Items[I].KeepFlag := True;
+          Node.Items[I].Processed := False;
+        end
+        else if (I = KeepIdx + 1) and (Node.Items[I].CompDirectivtType in
+          [cdtIfEnd, cdtEndIf]) then
+        begin
+          Node.Items[I].KeepFlag := True;
+          Node.Items[I].Processed := False;
+        end
+        else
+        begin
+          RecursiveSetKeepFlag(Node.Items[I], False);
+          RecursiveSetProcessed(Node.Items[I], True);
+          // 递归设置其属性，并包括其所有子节点
+          // 凡是 KeepFlag 设为 False的，其子全部抛弃
+        end;
+      end;
+    end
+    else // 如果子节点数量大于一，但只有一个有效的，则取它，但不包括孙子
+    begin
+      for I := 0 to Node.Count - 1 do
+      begin
+        Node.Items[I].KeepFlag := True;
+        Node.Items[I].Processed := False;
+      end;
+    end;
+  end
+  else if Node.Count = 1 then // 如果子节点数量等于一，则取它，但不包括孙子
+  begin
+    Node.Items[0].KeepFlag := True;
+    Node.Items[0].Processed := False;
+  end;
+  Node.Processed := True; // 本节点处理过了
 end;
 
 end.

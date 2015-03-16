@@ -94,6 +94,8 @@ type
     btnParseCompDirective: TToolButton;
     btn2: TToolButton;
     chkSliceMode: TCheckBox;
+    spl1: TSplitter;
+    tvCompDirective: TTreeView;
     procedure btnLoadFileClick(Sender: TObject);
     procedure btnFormatClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -108,6 +110,8 @@ type
     procedure fltcbb1Change(Sender: TObject);
     procedure ToolButton1Click(Sender: TObject);
     procedure btnParseCompDirectiveClick(Sender: TObject);
+    procedure tvCompDirectiveCustomDrawItem(Sender: TCustomTreeView;
+      Node: TTreeNode; State: TCustomDrawState; var DefaultDraw: Boolean);
   private
     { Private declarations }
   public
@@ -345,24 +349,33 @@ begin
   List := TList.Create;
   try
     Tree.ParseTree;
+    Tree.SaveToTreeView(tvCompDirective);
+    tvCompDirective.FullExpand;
 
     // Root 节点不算进去
     ShowMessage('Parse Slice Node Count: ' + IntToStr(Tree.Count - 1));
-    if Tree.Count > 1 then
-      for I := 1 to Tree.Count - 1 do
-        ShowMessage('Level ' + IntToStr(Tree.Items[I].Level) + #13#10#13#10 + Tree.Items[I].ToString);
+//    if Tree.Count > 1 then
+//      for I := 1 to Tree.Count - 1 do
+//        ShowMessage('Level ' + IntToStr(Tree.Items[I].Level) + #13#10#13#10 + Tree.Items[I].Text);
 
     Tree.SearchMultiNodes(List);
     ShowMessage('Parse Route Count: ' + IntToStr(List.Count));
     for I := 0 to List.Count - 1 do
       ShowMessage(Format('Start from %d Length %d', [(TCnSliceNode(List[I])).StartOffset,
-        (TCnSliceNode(List[I])).Length]) + #13#10#13#10 + (TCnSliceNode(List[I])).ToString);
+        (TCnSliceNode(List[I])).Length]) + #13#10#13#10 + (TCnSliceNode(List[I])).Text);
 
     ShowMessage('Start to Show ReachNode string.');
     for I := 0 to List.Count - 1 do
-      ShowMessage(Tree.ReachNode(TCnSliceNode(List[I])) + '| '
+    begin
+      S := Tree.ReachNode(TCnSliceNode(List[I]));
+      Tree.SaveToTreeView(tvCompDirective);
+      tvCompDirective.FullExpand;
+      tvCompDirective.Invalidate;
+
+      ShowMessage(S + '| '
       + IntToStr(TCnSliceNode(List[I]).ReachingStart) + ' to '
       + IntToStr(TCnSliceNode(List[I]).ReachingEnd));
+    end;
 
     // 格式化每一个 ReachNode 得到的 string 源码时要传入此 Node 的 ReachingOffset
     // 给 Formatter 的 MatchedInOffset，供格式化时的 CodeGen 输出后发现匹配时，
@@ -404,6 +417,17 @@ begin
     Tree.Free;
     MemStr.Free;
   end;
+end;
+
+procedure TMainForm.tvCompDirectiveCustomDrawItem(Sender: TCustomTreeView;
+  Node: TTreeNode; State: TCustomDrawState; var DefaultDraw: Boolean);
+begin
+  if Node.Data <> nil then // Means TCnSliceNode.KeepFlag is True.
+  begin
+    tvCompDirective.Canvas.Font.Color := clRed;
+  end
+  else
+    tvCompDirective.Canvas.Font.Color := clBlack;
 end;
 
 end.
