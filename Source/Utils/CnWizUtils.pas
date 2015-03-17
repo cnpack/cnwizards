@@ -102,6 +102,13 @@ var
 
 function CnIntToObject(AInt: Integer): TObject;
 {* 供 Pascal Script 使用的将整型值转换成 TObject 的函数}
+function CnObjectToInt(AObject: TObject): Integer;
+{* 供 Pascal Script 使用的将 TObject 转换成整型值的函数}
+function CnIntToInterface(AInt: Integer): IUnknown;
+{* 供 Pascal Script 使用的将整型值转换成 TObject 的函数}
+function CnInterfaceToInt(Intf: IUnknown): Integer;
+{* 供 Pascal Script 使用的将 TObject 转换成整型值的函数}
+
 function CnWizLoadIcon(AIcon: TIcon; const ResName: string): Boolean;
 {* 从资源或文件中装载图标，执行时先从图标目录中查找，如果失败再从资源中查找，
    返回结果为图标装载成功标志。参数 ResName 请不要带 .ico 扩展名}
@@ -840,6 +847,24 @@ end;
 function CnIntToObject(AInt: Integer): TObject;
 begin
   Result := TObject(AInt);
+end;
+
+// 供 Pascal Script 使用的将 TObject 转换成整型值的函数}\
+function CnObjectToInt(AObject: TObject): Integer;
+begin
+  Result := Integer(AObject);
+end;
+
+// 供 Pascal Script 使用的将整型值转换成 TObject 的函数
+function CnIntToInterface(AInt: Integer): IUnknown;
+begin
+  Result := IUnknown(AInt);
+end;
+
+// 供 Pascal Script 使用的将 TObject 转换成整型值的函数
+function CnInterfaceToInt(Intf: IUnknown): Integer;
+begin
+  Result := Integer(Intf);
 end;
 
 var

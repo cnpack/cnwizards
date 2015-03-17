@@ -240,6 +240,9 @@ begin
   CL.AddTypeS('TFormType', '( ftBinary, ftText, ftUnknown )');
   CL.AddTypeS('TCnCharSet', 'set of Char');
   CL.AddDelphiFunction('Function CnIntToObject(AInt: Integer): TObject');
+  CL.AddDelphiFunction('Function CnObjectToInt(AObject: TObject): Integer');
+  CL.AddDelphiFunction('Function CnIntToInterface(AInt: Integer): IUnknown');
+  CL.AddDelphiFunction('Function CnInterfaceToInt(Intf: IUnknown): Integer');
   CL.AddDelphiFunction('Function CnWizLoadIcon( AIcon : TIcon; const ResName : string) : Boolean');
   CL.AddDelphiFunction('Function CnWizLoadBitmap( ABitmap : TBitmap; const ResName : string) : Boolean');
   CL.AddDelphiFunction('Function AddIconToImageList( AIcon : TIcon; ImageList : TCustomImageList) : Integer');
@@ -483,6 +486,9 @@ end;
 procedure RIRegister_CnWizUtils_Routines(S: TPSExec);
 begin
   S.RegisterDelphiFunction(@CnIntToObject, 'CnIntToObject', cdRegister);
+  S.RegisterDelphiFunction(@CnObjectToInt, 'CnObjectToInt', cdRegister);
+  S.RegisterDelphiFunction(@CnIntToInterface, 'CnIntToInterface', cdRegister);
+  S.RegisterDelphiFunction(@CnInterfaceToInt, 'CnInterfaceToInt', cdRegister);
   S.RegisterDelphiFunction(@CnWizLoadIcon, 'CnWizLoadIcon', cdRegister);
   S.RegisterDelphiFunction(@CnWizLoadBitmap, 'CnWizLoadBitmap', cdRegister);
   S.RegisterDelphiFunction(@AddIconToImageList, 'AddIconToImageList', cdRegister);
