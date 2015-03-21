@@ -210,7 +210,7 @@ type
 
     procedure FormatRestrictedType(PreSpaceCount: Byte = 0);
     procedure FormatClassRefType(PreSpaceCount: Byte = 0);
-    procedure FormatOrdinalType(PreSpaceCount: Byte = 0);
+    procedure FormatOrdinalType(PreSpaceCount: Byte = 0; FromSetOf: Boolean = False);
     procedure FormatEnumeratedType(PreSpaceCount: Byte = 0);
     procedure FormatEnumeratedList(PreSpaceCount: Byte = 0);
     procedure FormatEmumeratedIdent(PreSpaceCount: Byte = 0);
@@ -2444,7 +2444,7 @@ end;
 { EnumeratedType -> '(' EnumeratedList ')' }
 procedure TCnBasePascalFormatter.FormatEnumeratedType(PreSpaceCount: Byte);
 begin
-  Match(tokLB);
+  Match(tokLB, PreSpaceCount);
   FormatEnumeratedList;
   Match(tokRB);
 end;
@@ -2875,7 +2875,8 @@ begin
 end;
 
 { OrdinalType -> (SubrangeType | EnumeratedType | OrdIdent) }
-procedure TCnBasePascalFormatter.FormatOrdinalType(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatOrdinalType(PreSpaceCount: Byte;
+  FromSetOf: Boolean);
 var
   Bookmark: TScannerBookmark;
 
@@ -2894,7 +2895,12 @@ var
 
 begin
   if Scaner.Token = tokLB then  // EnumeratedType
-    FormatEnumeratedType(PreSpaceCount)
+  begin
+    if FromSetOf then // 如果前面是 set of 括号前需要空一格
+      FormatEnumeratedType(1)
+    else
+      FormatEnumeratedType(PreSpaceCount);
+  end
   else
   begin
     Scaner.SaveBookmark(Bookmark);
@@ -3381,7 +3387,7 @@ begin
   // Set 内部不换行因此无需使用 PreSpaceCount
   Match(tokKeywordSet);
   Match(tokKeywordOf);
-  FormatOrdinalType;
+  FormatOrdinalType(0, True);
 end;
 
 { SimpleType -> (SubrangeType | EnumeratedType | OrdIdent | RealType) }
