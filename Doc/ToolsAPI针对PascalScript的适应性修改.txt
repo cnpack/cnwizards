@@ -5,33 +5,57 @@
 **********************************************************************
 
                     ToolsAPI针对PascalScript的适应性修改
-                            Revision 1.0.0.0
+                            Revision 1.0.0.1
                        =========================
-                        作者：刘啸 2015.03.19
+                        作者：刘啸 2015.03.23
 
     CnWizards 中集成的 Pascal Script 引擎能够允许脚本使用 IDE 接口，因此需要在编译期将每个版本 IDE 所对应的 ToolsAPI.pas 文件翻译成 Pascal Script 的运行期注册文件，以便脚本能够顺利调用其功能。之前 CnWizards 只针对 D5 以及 D5 以上版本翻译过两个独立版本，但后期 IDE 升级导致 ToolsAPI.pas 变化过大，无法完全兼容，所以需要将每个版本 IDE 的 ToolsAPI.pas 文件独立翻译，以下是说明（待继续补充）：
 
 工具：
-使用 Pascal Script 3 安装后自带的 UnitImporter。但此工具对源文件语法要求较高，需要做一下改动：
+使用 Pascal Script 3 安装后自带的 UnitImporter。但此工具对源文件语法要求较高，需要对转换前的 ToolsAPI.pas 做以下改动：
 
 1、对于类似于 function: Boolean stdcall; 的合法语法，Pascal Script 认为有错，需要在 stdcall 前补上分号。
+
 2、无 GUID 的 Interface 声明 Pascal Script 认为其不合法，只能把这个 interface 全删掉。本来可以生成一个 GUID 补上。比如IOTACodeInsightSymbolList80，要加个['{9D76DD60-0D5A-405B-9695-C1F13092898E}']（此GUID从XE7的ToolsAPI中复制而来）。但编译注册文件时此实际接口无 GUID 无法通过参数类型为 TGUID 的编译，所以只能删掉。
+
 3、类型名如使用了 UnitName.Type 这种方式，要去掉UnitName，否则不认。典型的地方是 DesignIntf.IDesigner 要改成 IDesigner。
-4、所有 packed record 都不支持，只能统统改成record（出错再说）。
+
+4、所有 packed record 都不支持，只能统统改成 record（出错再说）。
+
 5、IFDEF LINUX 内部的都去掉，不需要。尤其是 TGetSrcLinesFunc 后的声明，只留 pascal。
+
 6、结构指针类型都删掉，用的地方替换成 Pointer。
-7、TOTAThreadContext 声明太复杂无法识别只能全删掉，用它的地方替换成Pointer（出错再说）。TOTAXMMRegs/TOTAXMMReg 几个用到的地方不删貌似不要紧）。
+
+7、TOTAThreadContext 声明太复杂无法识别只能全删掉，用它的地方替换成Pointer（出错再说）。TOTAXMMRegs/TOTAXMMReg 几个用到的地方不删貌似不要紧。
+
 8、TWizardState = set of (wsEnabled, wsChecked) 这种语法 Pascal Script 不认识，必须拆成 TWizardStateE = (wsEnabled, wsChecked); 和 TWizardState = set of TWizardStateE; 类似的还有 TOTAAlignableState。
-9、{$IFDEF FATCHAR} POTAEdChar = PWideChar; {$ELSE} POTAEdChar = PChar; {$ENDIF} 这种，只能保留一个，可留后者。
-10、找带 overload 关键字声明的函数。凡是并排声明的，在第一个加上后缀1；分基类中和子类中的，基类中的不变，在子类对应方法后面挨个加1 2 3，并同时删掉所有 overload 关键字。
-11、函数声明中的部分默认参数不支持。像枚举和 string = '' 这种，= '' 要统统删除，但 = nil 与 = True 这种似乎可以不用去，也能转。
+
+9、{$IFDEF FATCHAR} POTAEdChar = PWideChar; {$ELSE} POTAEdChar = PChar; {$ENDIF} 这种，只能保留一个，可留后者。但 Unicode 版本变成了 AnsiChar 和 PAnsiChar，得改成 Char 和 PChar。
+ 
+10、找带 overload 关键字声明的函数。凡是并排声明的，在第一个加上后缀 1；分基类中和子类中的，基类中的不变，在子类对应方法后面挨个加 1 2 3，并同时删掉所有 overload 关键字。
+
+11、函数声明中的部分默认参数不支持。像集合和 string = '' 这种，集合类型初始化值与 字符串初始化值 = '' 要统统删除，但 = nil 与 = True 以及枚举这种似乎可以不用去，也能转。
+
 12、因为 Pascal Script 无法处理变量 BorlandIDEServices，所以需要在注册 SIRegister_IBorlandIDEServices(CL); 后面加一句 CL.AddDelphiFunction('Function BorlandIDEServices : IBorlandIDEServices'); 并且函数后加个新函数：
 function BorlandIDEServices: IBorlandIDEServices;
 begin
   Result := ToolsAPI.BorlandIDEServices;
 end;
+
 13、TOTASyntaxHighlighter = (shNone = 0, …… 这种带赋值的枚举定义，Pascal Script 不支持，如果本来就从 0 开始，可以删掉赋值，如果不是，就只有整个删掉，然后用的地方都换成 Integer。
-14、遇上长声明函数时，生成的字符串常量太长，需要手工加号分开分行。
-15、sCSApplication 等四个常量赋值不能用其他常量名，得直接把字符串值复制过来。
+
+14、sCSApplication 等四个常量赋值不能用其他常量名，得直接把字符串值复制过来。类似的还有其他整型常量相加，必须替换成计算出来的结果，包括svpHighest 这种 Low(Integer) 型的表达式。
+
+15、procedure Destruct; deprecated 'Use IOTADebuggerServices.RemoveBreakpoint'; 这样的 deprecated 后面加一串字符串说明的语法不支持，得改成procedure Destruct; deprecated;。
+
+16、Pascal Script 不支持泛型，出现类似于 TArray<string> 这种类型，只能替换成 TObject 以通过编译，但相关方法无法使用。
+
+17、UInt64 类型不支持，简单改成 Int64 就行了。
+
+转换后的文件仍然可能有问题需要按以下处理：
+
+18、svpHighest 这种负值的表达式被翻译成了 SetUInt，得改成 SetInt。
+
+19、遇上长声明函数时，生成的字符串常量太长，需要手工加号分开分行。
 
 此外，XE5 与 XE6 的 ToolsAPI.pas 相同，XE7 则多了一行常量定义。
