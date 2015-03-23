@@ -5857,6 +5857,7 @@ Begin T := Self.FSource; end;
 (*----------------------------------------------------------------------------*)
 procedure RIRegister_ToolsAPI_Routines(S: TPSExec);
 begin
+ S.RegisterDelphiFunction(@BorlandIDEServices, 'BorlandIDEServices', cdRegister);
  S.RegisterDelphiFunction(@RegisterPackageWizard, 'RegisterPackageWizard', cdRegister);
  S.RegisterDelphiFunction(@StringToIOTAFile, 'StringToIOTAFile', cdRegister);
  S.RegisterDelphiFunction(@GetActiveProject, 'GetActiveProject', cdRegister);

@@ -2098,6 +2098,7 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure RIRegister_ToolsAPI_Routines(S: TPSExec);
 begin
+ S.RegisterDelphiFunction(@BorlandIDEServices, 'BorlandIDEServices', cdRegister);
  S.RegisterDelphiFunction(@RegisterPackageWizard, 'RegisterPackageWizard', cdRegister);
 end;
 

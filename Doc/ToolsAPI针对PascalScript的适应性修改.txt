@@ -36,7 +36,7 @@
 
 11、函数声明中的部分默认参数不支持。像集合和 string = '' 这种，集合类型初始化值与 字符串初始化值 = '' 要统统删除，但 = nil 与 = True 以及枚举这种似乎可以不用去，也能转。
 
-12、因为 Pascal Script 无法处理变量 BorlandIDEServices，所以需要在注册 SIRegister_IBorlandIDEServices(CL); 后面加一句 CL.AddDelphiFunction('Function BorlandIDEServices : IBorlandIDEServices'); 并且函数后加个新函数：
+12、因为 Pascal Script 无法处理变量 BorlandIDEServices，所以需要在注册 SIRegister_IBorlandIDEServices(CL); 后面加一句 CL.AddDelphiFunction('Function BorlandIDEServices : IBorlandIDEServices'); 并在 RIRegister_ToolsAPI_Routines 函数里加句：S.RegisterDelphiFunction(@BorlandIDEServices, 'BorlandIDEServices', cdRegister); 并且函数后加个新函数：
 function BorlandIDEServices: IBorlandIDEServices;
 begin
   Result := ToolsAPI.BorlandIDEServices;
