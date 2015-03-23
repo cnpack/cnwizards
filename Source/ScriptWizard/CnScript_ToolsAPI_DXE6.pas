@@ -5779,6 +5779,7 @@ begin
   SIRegister_INTAPersonalityDevelopers(CL);
   SIRegister_IBorlandIDEServices70(CL);
   SIRegister_IBorlandIDEServices(CL);
+  CL.AddDelphiFunction('Function BorlandIDEServices : IBorlandIDEServices');
   SIRegister_IOTASplashScreenServices(CL);
   SIRegister_IOTAAboutBoxServices120(CL);
   CL.AddTypeS('TOTAAlphaFormat', '( otaafIgnored, otaafDefined, otaafPremultipl'
@@ -5828,6 +5829,11 @@ begin
  CL.AddDelphiFunction('Function StringToIOTAFile( const CodeString : string) : IOTAFile');
  CL.AddDelphiFunction('Function GetActiveProject : IOTAProject');
  CL.AddDelphiFunction('Function PersonalityServices : IOTAPersonalityServices');
+end;
+
+function BorlandIDEServices: IBorlandIDEServices;
+begin
+  Result := ToolsAPI.BorlandIDEServices;
 end;
 
 (* === run-time registration functions === *)
