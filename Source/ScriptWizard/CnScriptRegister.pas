@@ -71,6 +71,8 @@ uses
   {$IFDEF DELPHIXE5} CnScript_ToolsAPI_DXE5, {$ENDIF}
   {$IFDEF DELPHIXE6} CnScript_ToolsAPI_DXE6, {$ENDIF}
   {$IFDEF DELPHIXE7} CnScript_ToolsAPI_DXE7, {$ENDIF}
+  {$IFDEF BCB5} CnScript_ToolsAPI_D5, {$ENDIF}
+  {$IFDEF BCB6} CnScript_ToolsAPI_D6, {$ENDIF}
   CnScript_IdeInstComp, CnScript_CnCommon, CnScript_CnDebug, CnScript_CnWizUtils,
   CnScript_CnWizIdeUtils, CnScript_CnWizOptions, CnScript_ScriptEvent,
   CnScript_RegExpr;
