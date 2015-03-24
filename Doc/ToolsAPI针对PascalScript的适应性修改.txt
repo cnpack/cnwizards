@@ -16,9 +16,9 @@
 
 1、对于类似于 function: Boolean stdcall; 的合法语法，Pascal Script 认为有错，需要在 stdcall 前补上分号。
 
-2、无 GUID 的 Interface 声明 Pascal Script 认为其不合法，只能把这个 interface 全删掉。本来可以生成一个 GUID 补上。比如IOTACodeInsightSymbolList80，要加个['{9D76DD60-0D5A-405B-9695-C1F13092898E}']（此GUID从XE7的ToolsAPI中复制而来）。但编译注册文件时此实际接口无 GUID 无法通过参数类型为 TGUID 的编译，所以只能删掉。
+2、无 GUID 的 Interface 声明 Pascal Script 认为其不合法，只能把这个 interface 全删掉。本来可以生成一个 GUID 补上。比如 IOTACodeInsightSymbolList80，要加个 ['{9D76DD60-0D5A-405B-9695-C1F13092898E}']（此 GUID 从 XE7 的 ToolsAPI 中复制而来）。但编译注册文件时此实际接口无 GUID 无法通过参数类型为 TGUID 的编译，所以只能删掉。
 
-3、类型名如使用了 UnitName.Type 这种方式，要去掉UnitName，否则不认。典型的地方是 DesignIntf.IDesigner 要改成 IDesigner。
+3、类型名如使用了 UnitName.Type 这种方式，要去掉 UnitName，否则不认。典型的地方是 DesignIntf.IDesigner 要改成 IDesigner。
 
 4、所有 packed record 都不支持，只能统统改成 record（出错再说）。
 
@@ -26,7 +26,7 @@
 
 6、结构指针类型都删掉，用的地方替换成 Pointer。
 
-7、TOTAThreadContext 声明太复杂无法识别只能全删掉，用它的地方替换成Pointer（出错再说）。TOTAXMMRegs/TOTAXMMReg 几个用到的地方不删貌似不要紧。
+7、TOTAThreadContext 声明太复杂无法识别只能全删掉，用它的地方替换成 Pointer（出错再说）。TOTAXMMRegs/TOTAXMMReg 几个用到的地方不删貌似不要紧。
 
 8、TWizardState = set of (wsEnabled, wsChecked) 这种语法 Pascal Script 不认识，必须拆成 TWizardStateE = (wsEnabled, wsChecked); 和 TWizardState = set of TWizardStateE; 类似的还有 TOTAAlignableState。
 
