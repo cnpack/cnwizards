@@ -53,11 +53,24 @@ uses
   CnScript_Buttons, CnScript_Dialogs, CnScript_ExtDlgs, CnScript_ComObj,
 {$IFDEF COMPILER6_UP}
   CnScript_DesignIntf,
-  CnScript_ToolsAPI,
 {$ELSE}
   CnScript_DsgnIntf,
-  CnScript_ToolsAPI_D5,
 {$ENDIF}
+  {$IFDEF DELPHI5} CnScript_ToolsAPI_D5, {$ENDIF}
+  {$IFDEF DELPHI6} CnScript_ToolsAPI_D6, {$ENDIF}
+  {$IFDEF DELPHI7} CnScript_ToolsAPI_D7, {$ENDIF}
+  {$IFDEF DELPHI2005} CnScript_ToolsAPI_D2005, {$ENDIF}
+  {$IFDEF DELPHI2006} CnScript_ToolsAPI_D2006, {$ENDIF}
+  {$IFDEF DELPHI2007} CnScript_ToolsAPI_D2007, {$ENDIF}
+  {$IFDEF DELPHI2009} CnScript_ToolsAPI_D2009, {$ENDIF}
+  {$IFDEF DELPHI2010} CnScript_ToolsAPI_D2010, {$ENDIF}
+  {$IFDEF DELPHIXE} CnScript_ToolsAPI_DXE, {$ENDIF}
+  {$IFDEF DELPHIXE2} CnScript_ToolsAPI_DXE2, {$ENDIF}
+  {$IFDEF DELPHIXE3} CnScript_ToolsAPI_DXE3, {$ENDIF}
+  {$IFDEF DELPHIXE4} CnScript_ToolsAPI_DXE4, {$ENDIF}
+  {$IFDEF DELPHIXE5} CnScript_ToolsAPI_DXE5, {$ENDIF}
+  {$IFDEF DELPHIXE6} CnScript_ToolsAPI_DXE6, {$ENDIF}
+  {$IFDEF DELPHIXE7} CnScript_ToolsAPI_DXE7, {$ENDIF}
   CnScript_IdeInstComp, CnScript_CnCommon, CnScript_CnDebug, CnScript_CnWizUtils,
   CnScript_CnWizIdeUtils, CnScript_CnWizOptions, CnScript_ScriptEvent,
   CnScript_RegExpr;
