@@ -1345,7 +1345,7 @@ begin
   {$IFDEF DEBUG}
     CnDebugger.LogInteger(FKeyTokenList.Count, 'HighLight Pas KeyList Count.');
   {$ENDIF}
-    Result := FKeyTokenList.Count > 0;
+    Result := (FKeyTokenList.Count > 0) or (FCompDirectiveTokenList.Count > 0);
 
     if Result then
     begin
@@ -3625,7 +3625,7 @@ begin
         end;
       end;
 
-      if (Info.KeyCount > 0) or (Info.CurTokenCount > 0) then
+      if (Info.KeyCount > 0) or (Info.CurTokenCount > 0) or (Info.CompDirectiveTokenCount > 0) then
       begin
         // 同时做关键字背景匹配高亮，可能由 MarkLinesDirty 调用
         KeyPair := nil;
