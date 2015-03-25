@@ -74,8 +74,8 @@ See http://www.suigeneris.org/want/ for details.
   <property name="cnwizards_list" value="-d6,-d7,-d2006,-d2007,-cb6" if="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cndfm6to5,cnascii,cnidebr,cnmanagewiz,cnselectlang,cnsmr,cnwizsetup" unless="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cnwizsetup" if="lite" />
-  <property name="all_list"       value="cnwizards,resdll,cnwizhelperdll,cnpnglib,tools,makehelp,makeinst" unless="lite" />
-  <property name="all_list"       value="cnwizards,resdll,cnpnglib,tools,makeinst" if="lite" />
+  <property name="all_list"       value="cnwizards,resdll,cnwizhelperdll,cnpnglib,cnformatlib,tools,makehelp,makeinst" unless="lite" />
+  <property name="all_list"       value="cnwizards,resdll,cnpnglib,cnformatlib,tools,makeinst" if="lite" />
 
   <property name="install_lite"   value=""          unless="lite"/>
   <property name="install_lite"   value="/DLITE"    if="lite"/>
@@ -202,6 +202,7 @@ Usage: want [target-name] [-Dname=value]
     resdll     - Compile CnWizards Resource DLL.
     cnwizhelperdll - Compile CnWizards Helper DLL.
     cnpnglib   - Compile CnPngLib DLL.
+    cnformatlib - Compile cnFormatLib DLL.
     cnconfigio - Compile CnConfigIO.
     cndebugviewer  - Compile CnDebugViewer.
     cndfm6to5  - Compile CnDfm6To5.
@@ -864,6 +865,27 @@ Usage: want [target-name] [-Dname=value]
     </delete>
     <move tofile="${tools}/CnPngLib/CnPngLib.res" >
        <include name="${tools}/CnPngLib/CnPngLib.res.old" />
+    </move>
+  </target>
+
+  <!-- 编译 CnFormatLib DLL -->  
+  <target name="cnformatlib" depends="-prepare" description="Compile CnFormatLib DLL." >
+    <property name="Ver.FileDescription"  value="CnFormatLib DLL" />
+    <property name="Ver.InternalName"     value="CnFormatLib" />
+    <property name="Ver.OriginalFilename" value="CnFormatLib.DLL" />
+    <copy tofile="${tools}/CnFormatLib/CnFormatLib.res.old" >
+       <include name="${tools}/CnFormatLib/CnFormatLib.res" />
+    </copy>
+    <echo input="${tools}/CnDll.template.rc" file="${tools}/CnFormatLib/CnFormatLib.rc" />
+    <brcc file="${tools}/CnFormatLib/CnFormatLib.rc" output="${tools}/CnFormatLib/CnFormatLib.res" />
+    <dcc basedir="${tools}/CnFormatLib" source="CnFormatLib.dpr" versions="5" usecfg="true" />
+    <delete dir="${tools}/CnFormatLib">
+       <include name="CnFormatLib.res" />
+       <include name="CnFormatLib.rc" />
+       <include name="CnFormatLib.drc" />
+    </delete>
+    <move tofile="${tools}/CnFormatLib/CnFormatLib.res" >
+       <include name="${tools}/CnFormatLib/CnFormatLib.res.old" />
     </move>
   </target>
 
