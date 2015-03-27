@@ -42,12 +42,37 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ToolsAPI, IniFiles,
+  ToolsAPI, IniFiles, StdCtrls, ComCtrls, CnSpin,
   CnConsts, CnCommon, CnWizConsts, CnWizClasses, CnWizMultiLang, CnWizOptions,
   CnWizUtils, CnFormatterIntf, CnCodeFormatRules;
 
 type
   TCnCodeFormatterForm = class(TCnTranslateForm)
+    pgcFormatter: TPageControl;
+    tsPascal: TTabSheet;
+    grpCommon: TGroupBox;
+    lblKeyword: TLabel;
+    cbbKeywordStyle: TComboBox;
+    lblBegin: TLabel;
+    cbbBeginStyle: TComboBox;
+    lblTab: TLabel;
+    seTab: TCnSpinEdit;
+    lblWrapWidth: TLabel;
+    seWrapLine: TCnSpinEdit;
+    Label1: TLabel;
+    seSpaceBefore: TCnSpinEdit;
+    lblSpaceAfter: TLabel;
+    seSpaceAfter: TCnSpinEdit;
+    chkUsesSinglieLine: TCheckBox;
+    grpAsm: TGroupBox;
+    chkIgnoreArea: TCheckBox;
+    seASMHeadIndent: TCnSpinEdit;
+    lblAsmHeadIndent: TLabel;
+    lblASMTab: TLabel;
+    seAsmTab: TCnSpinEdit;
+    btnOK: TButton;
+    btnCancel: TButton;
+    btnHelp: TButton;
   private
     { Private declarations }
   public
@@ -145,7 +170,37 @@ end;
 
 procedure TCnCodeFormatterWizard.Config;
 begin
-  InfoDlg('Not Implemented.');
+  with TCnCodeFormatterForm.Create(nil) do
+  begin
+    cbbKeywordStyle.ItemIndex := Ord(FKeywordStyle);
+    cbbBeginStyle.ItemIndex := Ord(FBeginStyle);
+    seTab.Value := FTabSpaceCount;
+    seWrapLine.Value := FWrapWidth;
+    seSpaceBefore.Value := FSpaceBeforeOperator;
+    seSpaceAfter.Value := FSpaceAfterOperator;
+    chkUsesSinglieLine.Checked := FUsesUnitSingleLine;
+
+    seASMHeadIndent.Value := FSpaceBeforeASM;
+    seAsmTab.Value := FSpaceTabASMKeyword;
+    chkIgnoreArea.Checked := FUseIgnoreArea;
+
+    if ShowModal = mrOK then
+    begin
+      FKeywordStyle := TKeywordStyle(cbbKeywordStyle.ItemIndex);
+      FBeginStyle := TBeginStyle(cbbBeginStyle.ItemIndex);
+      FTabSpaceCount := seTab.Value;
+      FWrapWidth := seWrapLine.Value;
+      FSpaceBeforeOperator := seSpaceBefore.Value;
+      FSpaceAfterOperator := seSpaceAfter.Value;
+      FUsesUnitSingleLine := chkUsesSinglieLine.Checked;
+
+      FSpaceBeforeASM := seASMHeadIndent.Value;
+      FSpaceTabASMKeyword := seAsmTab.Value;
+      FUseIgnoreArea := chkIgnoreArea.Checked;
+    end;
+    
+    Free;
+  end;
 end;
 
 constructor TCnCodeFormatterWizard.Create;

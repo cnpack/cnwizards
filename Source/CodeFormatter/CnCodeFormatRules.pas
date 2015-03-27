@@ -48,15 +48,18 @@ type
 
   TBeginStyle = (bsNextLine, bsSameLine);
 
+  TTypeIDStyle = (tisUpperFirst, tisNoChange); // 类型标识符的处理方式，首字母大写或不变
+
   TCompDirectiveMode = (cdmAsComment, cdmOnlyFirst, cdmNone); // None 表示扔给外面处理
 
   TCnPascalCodeFormatRule = record
     ContinueAfterError: Boolean;
     CodeStyle: TCnCodeStyles;
 
-    CompDirectiveMode: TCompDirectiveMode;
+    CompDirectiveMode: TCompDirectiveMode;  // 此项不开放
     KeywordStyle: TKeywordStyle;
     BeginStyle: TBeginStyle;
+    TypeIDStyle: TTypeIDStyle;    // 此项无法处理分词，意义不大，暂不对外开放
     TabSpaceCount: Byte;
     SpaceBeforeOperator: Byte;
     SpaceAfterOperator: Byte;
@@ -76,6 +79,7 @@ const
     CompDirectiveMode: cdmOnlyFirst;
     KeywordStyle: ksLowerCaseKeyword;
     BeginStyle: bsNextLine;
+    TypeIDStyle: tisNoChange;
     TabSpaceCount: 2;
     SpaceBeforeOperator: 1;
     SpaceAfterOperator: 1;

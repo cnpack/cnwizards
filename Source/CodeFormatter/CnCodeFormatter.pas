@@ -61,6 +61,7 @@ type
     function ErrorTokenString: string;
     procedure CodeGenAfterWrite(Sender: TObject);
   protected
+    FIsTypeID: Boolean;
     {* 错误处理函数 }
     procedure Error(const Ident: Integer);
     procedure ErrorFmt(const Ident: Integer; const Args: array of const);
@@ -81,8 +82,10 @@ type
       AfterSpaceCount: Byte = 0; IgnorePreSpace: Boolean = False;
       SemicolonIsLineStart: Boolean = False);
 
-    function CheckFunctionName(S: string): string;
+    function CheckFunctionName(const S: string): string;
     {* 检查给定字符串是否是一个常用函数名，如果是则返回正确的格式 }
+    function CheckTypeID(const S: string): string;
+    {* 根据给定类型名的字符串返回设置中的类型格式}
     function Tab(PreSpaceCount: Byte = 0; CareBeginBlock: Boolean = True): Byte;
     {* 根据代码格式风格设置返回缩进一次的前导空格数 }
     function BackTab(PreSpaceCount: Byte = 0; CareBeginBlock: Boolean = True): Integer;
@@ -331,10 +334,18 @@ uses
 
 { TCnAbstractCodeFormater }
 
-function TCnAbstractCodeFormatter.CheckFunctionName(S: string): string;
+function TCnAbstractCodeFormatter.CheckFunctionName(const S: string): string;
 begin
   { TODO: Check the S with functon name e.g. ShowMessage }
   Result := S;
+end;
+
+function TCnAbstractCodeFormatter.CheckTypeID(const S: string): string;
+begin
+  Result := S;
+  case CnPascalCodeForVCLRule.TypeIDStyle of
+    tisUpperFirst: Result := UpperFirst(S);
+  end;
 end;
 
 constructor TCnAbstractCodeFormatter.Create(AStream: TStream;
@@ -499,7 +510,6 @@ function TCnAbstractCodeFormatter.Tab(PreSpaceCount: Byte;
 begin
   if CareBeginBlock then
   begin
-    { TODO: customize Begin..End Block style }
     if Scaner.Token <> tokKeywordBegin then // 处理了连续俩 begin 而需要缩进的情况
       Result := PreSpaceCount + CnPascalCodeForRule.TabSpaceCount
     else
@@ -666,8 +676,14 @@ begin
     end
     else if (FLastToken = tokHat) and (Length(Scaner.TokenString) = 1) then
       CodeGen.Write(Scaner.TokenString, 0, 0) // ^= 这种字符转义得紧挨着
+    else if FIsTypeID then // 如果是类型名，则按规则处理 Scaner.TokenString
+    begin
+      CodeGen.Write(CheckTypeID(Scaner.TokenString), BeforeSpaceCount, AfterSpaceCount);
+    end
     else
+    begin
       CodeGen.Write(Scaner.TokenString, BeforeSpaceCount, AfterSpaceCount);
+    end;
   end;
 
   FLastToken := Token;
@@ -710,8 +726,17 @@ end;
 { 新加的用于 type 中的 ConstExpr -> <constant-expression> ，
   其中后者不允许出现 = 以及泛型 <> 运算符}
 procedure TCnBasePascalFormatter.FormatConstExprInType(PreSpaceCount: Byte);
+var
+  Old: Boolean;
 begin
-  FormatSimpleExpression(PreSpaceCount);
+  // 处理类型名等的大小写问题
+  Old := FIsTypeID;
+  try
+    FIsTypeID := True;
+    FormatSimpleExpression(PreSpaceCount);
+  finally
+    FIsTypeID := Old;
+  end;
 
   while Scaner.Token in (RelOpTokens - [tokEqual, tokLess, tokGreat])  do
   begin
@@ -3685,14 +3710,22 @@ end;
            -> Ident '=' RestrictedType
 }
 procedure TCnBasePascalFormatter.FormatTypeDecl(PreSpaceCount: Byte);
+var
+  Old: Boolean;
 begin
   if Scaner.Token = tokSLB then
   begin
     FormatSingleAttribute(PreSpaceCount);
     Writeln;
   end;
-    
-  FormatIdent(PreSpaceCount);
+
+  Old := FIsTypeID;
+  try
+    FIsTypeID := True;
+    FormatIdent(PreSpaceCount);
+  finally
+    FIsTypeID := Old;
+  end;
 
   // 加入对<>泛型的支持
   if Scaner.Token = tokLess then
@@ -4267,6 +4300,8 @@ begin
 end;
 
 procedure TCnBasePascalFormatter.FormatTypeID(PreSpaceCount: Byte);
+var
+  Old: Boolean;
 begin
   if Scaner.Token in BuiltInTypeTokens then
     Match(Scaner.Token)
@@ -4274,9 +4309,15 @@ begin
     Match(tokKeywordFile)
   else
   begin
-    // TODO: 处理 Integer 等的大小写问题
-    FormatIdent(0, True);
-
+    // 处理类型名等的大小写问题
+    Old := FIsTypeID;
+    try
+      FIsTypeID := True;
+      FormatIdent(0, True);
+    finally
+      FIsTypeID := Old;
+    end;
+    
     // 处理 _UTF8String = type _AnsiString(65001); 这种
     if Scaner.Token = tokLB then
     begin
