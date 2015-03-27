@@ -68,6 +68,7 @@ inherited CnPasConvertTypeForm: TCnPasConvertTypeForm
     Items.Strings = (
       'gb2312'
       'big5'
-      'iso-8859-1')
+      'iso-8859-1'
+      'utf-8')
   end
 end

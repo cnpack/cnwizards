@@ -118,7 +118,7 @@ interface
 {$IFDEF CNWIZARDS_CNPAS2HTMLWIZARD}
 
 uses
-  Classes, SysUtils, Graphics, Windows;
+  Classes, SysUtils, Graphics, Windows, CnCommon;
 
 {$IFDEF DEBUG}
   {$DEFINE CNPASCONVERT_DEBUG}
@@ -127,7 +127,7 @@ uses
 
 const
   {key words list here}
-  CnPasConvertKeywords: array[0..109] of string =
+  CnPasConvertKeywords: array[0..110] of string =
   ('ABSOLUTE', 'ABSTRACT', 'AND', 'ARRAY', 'AS', 'ASM', 'ASSEMBLER',
     'AUTOMATED', 'BEGIN', 'CASE', 'CDECL', 'CLASS', 'CONST', 'CONSTRUCTOR',
     'DEFAULT', 'DEPRECATED', 'DESTRUCTOR', 'DISPID', 'DISPINTERFACE', 'DIV',
@@ -139,7 +139,7 @@ const
     'NOT', 'OBJECT', 'OF', 'ON', 'OPERATOR', 'OR', 'OUT', 'OVERLOAD', 'OVERRIDE', 'PACKED',
     'PASCAL', 'PLATFORM', 'PRIVATE', 'PROCEDURE', 'PROGRAM', 'PROPERTY',
     'PROTECTED', 'PUBLIC', 'PUBLISHED', 'RAISE', 'READ', 'READONLY', 'RECORD',
-    'REGISTER', 'REINTRODUCE', 'REPEAT', 'RESIDENT', 'RESOURCESTRING',
+    'REGISTER', 'REINTRODUCE', 'REPEAT', 'RESIDENT', 'RESOURCESTRING', 'SEALED',
     'SAFECALL', 'SET', 'SHL', 'SHR', 'STDCALL', 'STATIC', 'STORED', 'STRICT', 'STRING',
     'STRINGRESOURCE', 'THEN', 'THREADVAR', 'TO', 'TRY', 'TYPE', 'UNIT', 'UNTIL',
     'USES', 'VAR', 'VARARGS', 'VIRTUAL', 'WHILE', 'WITH', 'WRITE', 'WRITEONLY',
@@ -322,8 +322,10 @@ type
 
   TCnSourceToHtmlConversion = class(TCnSourceConversion)
   private
+    FIsUtf8: Boolean;
     FHTMLEncode: string;
     function ConvertFontToCss(AFont: TFont): string;
+    procedure SetHTMLEncode(const Value: string);
   protected
     procedure WriteTokenToStream; override;
     procedure SetPreFixAndPosFix(AFont: TFont; ATokenType: TCnPasConvertTokenType);
@@ -331,8 +333,10 @@ type
 
     procedure ConvertBegin; override;
     procedure ConvertEnd; override;
+
+    property IsUtf8: Boolean read FIsUtf8;
   public
-    property HTMLEncode: string read FHTMLEncode write FHTMLEncode;
+    property HTMLEncode: string read FHTMLEncode write SetHTMLEncode;
   end;
 
 { TCnSourceToRTFConversion }
@@ -394,6 +398,8 @@ const
   PosStartSelection = 111;
   PosEndSelection = 134;
   PosLength = 9;                        // 写入的长度。
+
+  SCnUtf8Encoding = 'utf-8';
 
 {-------------------------------------------------------------------------------
   过程名:    ConvertHTMLToClipBoardHtml
@@ -1693,6 +1699,12 @@ begin
     + IntToHex(GetGValue(TempColor), 2) + IntToHex(GetBValue(TempColor), 2);
 end;
 
+procedure TCnSourceToHtmlConversion.SetHTMLEncode(const Value: string);
+begin
+  FHTMLEncode := Value;
+  FIsUtf8 := (LowerCase(Value) = SCnUtf8Encoding);
+end;
+
 procedure TCnSourceToHtmlConversion.SetPreFixAndPosFix(AFont: TFont;
   ATokenType: TCnPasConvertTokenType);
 begin
@@ -1722,13 +1734,30 @@ procedure TCnSourceToHtmlConversion.WriteTokenToStream;
 var
   StartPtr, CurPtr: PAnsiChar;
   i, j, Len, nCount: Integer;
+  Utf8Str, AnsiStr: AnsiString;
 begin
-  StartPtr := FToken;
-  CurPtr := FToken;
-
   {v0.96: Optimized, sure not call StrLen ,call TokenLength instead}
   Len := TokenLength;
+  if Len = 0 then
+    Exit;
+
   nCount := 0;
+
+  if FIsUtf8 then
+  begin
+    SetLength(AnsiStr, Len);
+    CopyMemory(@(AnsiStr[1]), FToken, Len);
+    Utf8Str := CnAnsiToUtf8(AnsiStr);
+
+    Len := Length(Utf8Str);
+    StartPtr := @(Utf8Str[1]);
+    CurPtr := StartPtr;
+  end
+  else
+  begin
+    StartPtr := FToken;
+    CurPtr := FToken;
+  end;
 
   for i := 1 to Len do
   begin
