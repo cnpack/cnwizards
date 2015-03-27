@@ -7,6 +7,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
   ClientWidth = 379
   Font.Charset = ANSI_CHARSET
   OldCreateOrder = True
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object pgcFormatter: TPageControl
@@ -46,23 +47,16 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           Height = 13
           Caption = 'Tab Indent:'
         end
-        object lblWrapWidth: TLabel
+        object lblSpaceBefore: TLabel
           Left = 16
           Top = 114
-          Width = 83
-          Height = 13
-          Caption = 'Line Wrap Width:'
-        end
-        object Label1: TLabel
-          Left = 16
-          Top = 144
           Width = 115
           Height = 13
           Caption = 'Space Before Operator:'
         end
         object lblSpaceAfter: TLabel
           Left = 16
-          Top = 174
+          Top = 144
           Width = 108
           Height = 13
           Caption = 'Space After Operator:'
@@ -105,15 +99,25 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         end
         object seWrapLine: TCnSpinEdit
           Left = 224
-          Top = 112
+          Top = 172
           Width = 97
           Height = 22
           MaxValue = 256
           MinValue = 16
-          TabOrder = 3
+          TabOrder = 5
           Value = 16
         end
         object seSpaceBefore: TCnSpinEdit
+          Left = 224
+          Top = 112
+          Width = 97
+          Height = 22
+          MaxValue = 32
+          MinValue = 1
+          TabOrder = 3
+          Value = 1
+        end
+        object seSpaceAfter: TCnSpinEdit
           Left = 224
           Top = 142
           Width = 97
@@ -123,23 +127,22 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           TabOrder = 4
           Value = 1
         end
-        object seSpaceAfter: TCnSpinEdit
-          Left = 224
-          Top = 172
-          Width = 97
-          Height = 22
-          MaxValue = 32
-          MinValue = 1
-          TabOrder = 5
-          Value = 1
-        end
         object chkUsesSinglieLine: TCheckBox
           Left = 16
           Top = 204
           Width = 249
           Height = 17
-          Caption = 'Single Line Mode for Every Uses Units.'
+          Caption = 'Single Line Mode for Every Uses Unit.'
+          TabOrder = 7
+        end
+        object chkAutoWrap: TCheckBox
+          Left = 16
+          Top = 174
+          Width = 177
+          Height = 17
+          Caption = 'Auto Wrap Line Width:'
           TabOrder = 6
+          OnClick = chkAutoWrapClick
         end
       end
       object grpAsm: TGroupBox
@@ -189,7 +192,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         Top = 352
         Width = 281
         Height = 17
-        Caption = 'Do NOT Format Contents between {(*}..{*)}'
+        Caption = 'Do NOT Format Contents between {(*} and {*)}'
         TabOrder = 2
       end
     end

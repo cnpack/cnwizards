@@ -4204,7 +4204,7 @@ end;
 procedure TCnProgramBlockFormatter.FormatUsesList(PreSpaceCount: Byte;
   const CanHaveUnitQual: Boolean; const NeedCRLF: Boolean);
 var
-  OldWrapMode: TCnCodeWrapMode;
+  OldWrapMode: TCodeWrapMode;
 begin
   FormatUsesDecl(PreSpaceCount, CanHaveUnitQual);
 

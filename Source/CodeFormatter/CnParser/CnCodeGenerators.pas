@@ -41,18 +41,15 @@ interface
 {$I CnPack.inc}
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, CnCodeFormatRules;
 
 type
-  TCnCodeWrapMode = (cwmNone, cwmSimple, cwmAdvanced);
-  {* 代码换行的设置，不自动换行，简单的超过就换行，高级换行（还不知道是啥;-(）}
-
   TCnCodeGenerator = class
   private
     FCode: TStrings;
     FLock: Word;
     FColumnPos: Integer;
-    FCodeWrapMode: TCnCodeWrapMode;
+    FCodeWrapMode: TCodeWrapMode;
     FPrevStr: string;
     FPrevRow: Integer;
     FPrevColumn: Integer;
@@ -95,7 +92,7 @@ type
     {* 当前光标的横向位置，用于换行}
     property CurIndentSpace: Integer read GetCurIndentSpace;
     {* 当前行最前面的空格数}
-    property CodeWrapMode: TCnCodeWrapMode read FCodeWrapMode write FCodeWrapMode;
+    property CodeWrapMode: TCodeWrapMode read FCodeWrapMode write FCodeWrapMode;
     {* 代码换行的设置}
 
     property PrevRow: Integer read GetPrevRow;
@@ -117,8 +114,10 @@ implementation
 
 { TCnCodeGenerator }
 
+{$IFDEF DEBUG}
 uses
-  CnCodeFormatRules {$IFDEF DEBUG}, CnDebug {$ENDIF};
+  CnDebug;
+{$ENDIF}
 
 const
   CRLF = #13#10;
@@ -163,6 +162,7 @@ constructor TCnCodeGenerator.Create;
 begin
   FCode := TStringList.Create;
   FLock := 0;
+  FCodeWrapMode := cwmSimple;
 end;
 
 destructor TCnCodeGenerator.Destroy;
@@ -294,7 +294,7 @@ begin
       (FColumnPos + Len > CnPascalCodeForRule.WrapWidth)) or
       (FColumnPos > CnPascalCodeForRule.WrapWidth)) then
     begin
-      Str := StringOfChar(' ', CurIndentSpace) + Str; // 加上原有的缩进
+      Str := StringOfChar(' ', CurIndentSpace + CnPascalCodeForRule.TabSpaceCount) + Str; // 加上原有的缩进再缩进一次
       InternalWriteln;
     end;
   end

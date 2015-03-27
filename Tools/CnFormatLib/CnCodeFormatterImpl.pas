@@ -61,7 +61,7 @@ type
     destructor Destroy; override;
 
     procedure SetPascalFormatRule(DirectiveMode: DWORD; KeywordStyle: DWORD;
-      BeginStyle: DWORD; TabSpace: DWORD; SpaceBeforeOperator: DWORD;
+      BeginStyle: DWORD; WrapMode: DWORD; TabSpace: DWORD; SpaceBeforeOperator: DWORD;
       SpaceAfterOperator: DWORD; SpaceBeforeAsm: DWORD; SpaceTabAsm: DWORD;
       LineWrapWidth: DWORD; UsesSingleLine: LongBool; UseIgnoreArea: LongBool);
 
@@ -163,7 +163,7 @@ begin
 end;
 
 procedure TCnCodeFormatProvider.SetPascalFormatRule(DirectiveMode, KeywordStyle,
-  BeginStyle, TabSpace, SpaceBeforeOperator, SpaceAfterOperator, SpaceBeforeAsm,
+  BeginStyle, WrapMode, TabSpace, SpaceBeforeOperator, SpaceAfterOperator, SpaceBeforeAsm,
   SpaceTabAsm, LineWrapWidth: DWORD; UsesSingleLine, UseIgnoreArea: LongBool);
 begin
   case DirectiveMode of
@@ -191,6 +191,13 @@ begin
       CnPascalCodeForRule.BeginStyle := bsSameLine;
   end;
 
+  case WrapMode of
+    CN_RULE_CODE_WRAP_MODE_NONE:
+      CnPascalCodeForRule.CodeWrapMode := cwmNone;
+    CN_RULE_CODE_WRAP_MODE_SIMPLE:
+      CnPascalCodeForRule.CodeWrapMode := cwmSimple;
+  end;
+  
   CnPascalCodeForRule.TabSpaceCount := TabSpace;
   CnPascalCodeForRule.SpaceBeforeOperator := SpaceBeforeOperator;
   CnPascalCodeForRule.SpaceAfterOperator := SpaceAfterOperator;

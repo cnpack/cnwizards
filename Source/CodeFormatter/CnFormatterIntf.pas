@@ -67,6 +67,13 @@ const
   {* begin 在本行}
   CN_RULE_BEGIN_STYLE_DEFAULT         = CN_RULE_BEGIN_STYLE_NEXTLINE;
 
+  // 代码换行模式
+  CN_RULE_CODE_WRAP_MODE_NONE         = 1;
+  {* 超宽不自动换行}
+  CN_RULE_CODE_WRAP_MODE_SIMPLE       = 2;
+  {* 超过设置的 WrapWidth 后自动换行}
+  CN_RULE_CODE_WRAP_MODE_DEFAULT      = CN_RULE_CODE_WRAP_MODE_NONE;
+
   // 默认缩进空格数
   CN_RULE_TABSPACE_DEFAULT            = 2;
 
@@ -128,7 +135,7 @@ type
   ICnPascalFormatterIntf = interface
     ['{0CC0F874-227A-4516-9D17-6331EA86CBCA}']
     procedure SetPascalFormatRule(DirectiveMode: DWORD; KeywordStyle: DWORD;
-      BeginStyle: DWORD; TabSpace: DWORD; SpaceBeforeOperator: DWORD;
+      BeginStyle: DWORD; WrapMode: DWORD; TabSpace: DWORD; SpaceBeforeOperator: DWORD;
       SpaceAfterOperator: DWORD; SpaceBeforeAsm: DWORD; SpaceTabAsm: DWORD;
       LineWrapWidth: DWORD; UsesSingleLine: LongBool; UseIgnoreArea: LongBool);
     {* 设置格式化选项}
