@@ -178,7 +178,7 @@ begin
     if m_AbiType in [atBDS2005, atBDS2006, atDelphi2007, atDelphi2009, atDelphi2010] then
       strFileName := m_strRootDir + 'Objrepos\' + GetAbiOptionFile(aoCodeTemp)
     else if m_AbiType in [atDelphiXE, atDelphiXE2, atDelphiXE3, atDelphiXE4,
-      atDelphiXE5, atDelphiXE6, atDelphiXE7] then
+      atDelphiXE5, atDelphiXE6, atDelphiXE7, atDelphiXE8] then
       strFileName := m_strRootDir + 'Objrepos\en\' + GetAbiOptionFile(aoCodeTemp)
     else
       strFileName := m_strRootDir + 'bin\' + GetAbiOptionFile(aoCodeTemp);
@@ -198,7 +198,7 @@ begin
     if m_AbiType in [atBDS2005, atBDS2006, atDelphi2007, atDelphi2009, atDelphi2010] then
       strFileName := m_strRootDir + 'Objrepos\' + GetAbiOptionFile(aoObjRep)
     else if m_AbiType in [atDelphiXE, atDelphiXE2, atDelphiXE3, atDelphiXE4,
-      atDelphiXE5, atDelphiXE6, atDelphiXE7] then
+      atDelphiXE5, atDelphiXE6, atDelphiXE7, atDelphiXE8] then
       strFileName := m_strRootDir + 'Objrepos\en\' + GetAbiOptionFile(aoObjRep)
     else
       strFileName := m_strRootDir + 'bin\' + GetAbiOptionFile(aoObjRep);
@@ -219,7 +219,7 @@ begin
   if aoMenuTemp in m_AbiOption then
   begin
     if m_AbiType in [atDelphiXE, atDelphiXE2, atDelphiXE3, atDelphiXE4,
-      atDelphiXE5, atDelphiXE6, atDelphiXE7] then
+      atDelphiXE5, atDelphiXE6, atDelphiXE7, atDelphiXE8] then
       strFileName := m_strRootDir + 'Objrepos\en\' + GetAbiOptionFile(aoMenuTemp)
     else
       strFileName := m_strRootDir + 'bin\' + GetAbiOptionFile(aoMenuTemp);
@@ -415,7 +415,7 @@ begin
 
   if m_AbiType in [atBDS2005, atBDS2006, atDelphi2007, atDelphi2009, atDelphi2010,
     atDelphiXE, atDelphiXE2, atDelphiXE3, atDelphiXE4, atDelphiXE5, atDelphiXE6,
-    atDelphiXE7] then
+    atDelphiXE7, atDelphiXE8] then
   begin
     // 以 XML 格式处理 BorlandStudioRepository.xml
     XMLDoc := CreateXMLDoc;
@@ -746,7 +746,7 @@ begin
         bResult := CopyFile(PChar(strFileName),
           PChar(m_strRootDir + 'Objrepos\' + GetAbiOptionFile(aoCodeTemp)), False)
       else if m_AbiType in [atDelphiXE, atDelphiXE2, atDelphiXE3, atDelphiXE4,
-        atDelphiXE5, atDelphiXE6, atDelphiXE7] then
+        atDelphiXE5, atDelphiXE6, atDelphiXE7, atDelphiXE8] then
         bResult := CopyFile(PChar(strFileName),
           PChar(m_strRootDir + 'Objrepos\en\' + GetAbiOptionFile(aoCodeTemp)), False)
       else
@@ -774,7 +774,7 @@ begin
         bResult := CopyFile(PChar(strFileName),
           PChar(m_strRootDir + 'Objrepos\' + GetAbiOptionFile(aoObjRep)), False)
       else if m_AbiType in [atDelphiXE, atDelphiXE2, atDelphiXE3, atDelphiXE4,
-        atDelphiXE5, atDelphiXE6, atDelphiXE7] then
+        atDelphiXE5, atDelphiXE6, atDelphiXE7, atDelphiXE8] then
         bResult := CopyFile(PChar(strFileName),
           PChar(m_strRootDir + 'Objrepos\en' + GetAbiOptionFile(aoObjRep)), False)
       else
@@ -792,7 +792,7 @@ begin
     if FileExists(strFileName) then
     begin
       if m_AbiType in [atDelphiXE, atDelphiXE2, atDelphiXE3, atDelphiXE4,
-        atDelphiXE5, atDelphiXE6, atDelphiXE7] then
+        atDelphiXE5, atDelphiXE6, atDelphiXE7, atDelphiXE8] then
         bResult := CopyFile(PChar(strFileName),
           PChar(m_strRootDir + 'ObjRepos\en\' + GetAbiOptionFile(aoMenuTemp)), False)
       else
@@ -928,7 +928,7 @@ begin
         aoMenuTemp: Result := 'bds.dmt'; // 菜单模板
       end;
     atDelphi2010, atDelphiXE, atDelphiXE2, atDelphiXE3, atDelphiXE4, atDelphiXE5,
-      atDelphiXE6, atDelphiXE7:
+      atDelphiXE6, atDelphiXE7, atDelphiXE8:
       case ao of
         aoCodeTemp: Result := 'bds.dci'; // 代码模板
         aoObjRep: Result := 'RADStudioRepository.xml';   // 对象库

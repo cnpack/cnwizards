@@ -286,7 +286,7 @@ begin
     if lbxSelectApp.ItemIndex in [Ord(atBDS2005), Ord(atBDS2006), Ord(atDelphi2007),
       Ord(atDelphi2009), Ord(atDelphi2010), Ord(atDelphiXE), Ord(atDelphiXE2),
       Ord(atDelphiXE3), Ord(atDelphiXE4), Ord(atDelphiXE5), Ord(atDelphiXE6),
-      Ord(atDelphiXE7)] then
+      Ord(atDelphiXE7), Ord(atDelphiXE8)] then
     begin
       lbxBackupOptions.Checked[0] := True;
       lbxBackupOptions.ItemEnabled[0] := False;
