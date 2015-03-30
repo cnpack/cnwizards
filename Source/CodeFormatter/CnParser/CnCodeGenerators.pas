@@ -294,13 +294,10 @@ begin
       (FColumnPos + Len > CnPascalCodeForRule.WrapWidth)) or
       (FColumnPos > CnPascalCodeForRule.WrapWidth)) then
     begin
-      Str := StringOfChar(' ', CurIndentSpace + CnPascalCodeForRule.TabSpaceCount) + Str; // 加上原有的缩进再缩进一次
+      Str := StringOfChar(' ', CurIndentSpace) + Str;
+      // 加上原有的缩进，但不能直接再缩进一格，避免 uses 区出现不必要的缩进。
       InternalWriteln;
     end;
-  end
-  else if CodeWrapMode = cwmAdvanced then // TODO: 还未处理
-  begin
-
   end;
 
   FCode[FCode.Count - 1] :=

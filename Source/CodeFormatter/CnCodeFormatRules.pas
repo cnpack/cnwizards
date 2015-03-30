@@ -48,8 +48,8 @@ type
 
   TBeginStyle = (bsNextLine, bsSameLine);
 
-  TCodeWrapMode = (cwmNone, cwmSimple, cwmAdvanced);
-  {* 代码换行的设置，不自动换行，简单的超过就换行，高级换行（还不知道是啥;-(）}
+  TCodeWrapMode = (cwmNone, cwmSimple);
+  {* 代码换行的设置，不自动换行、简单的超过就换行}
 
   TTypeIDStyle = (tisUpperFirst, tisNoChange); // 类型标识符的处理方式，首字母大写或不变
 
@@ -63,7 +63,7 @@ type
     KeywordStyle: TKeywordStyle;
     BeginStyle: TBeginStyle;
     CodeWrapMode: TCodeWrapMode;
-    TypeIDStyle: TTypeIDStyle;    // 此项无法处理分词，意义不大，暂不对外开放
+    TypeIDStyle: TTypeIDStyle;    // 此项无法处理标识符内的分词，意义不大，暂不对外开放
     TabSpaceCount: Byte;
     SpaceBeforeOperator: Byte;
     SpaceAfterOperator: Byte;
