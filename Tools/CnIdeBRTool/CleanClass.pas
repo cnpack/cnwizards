@@ -39,13 +39,9 @@ unit CleanClass;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, CnWizCompilerConst;
 
 type
-  TCnIDEs = (ciDelphi5, ciDelphi6, ciDelphi7, ciDelphi8, ciDelphi9, ciDelphi10,
-    ciDelphi11, ciDelphi12, ciDelphi14, ciDelphi15, ciDelphi16, ciDelphi17,
-    ciDelphiXE4, ciDelphiXE5, ciDelphiXE6, ciDelphiXE7, ciBCB5, ciBCB6);
-
   TCnHisEntry = class(TCollectionItem)
   {* 描述一待删除的文件对象}
   private
@@ -87,7 +83,7 @@ type
   end;
 
 var
-  IDEHistories: array[TCnIDEs] of TCnIDEHistory;
+  IDEHistories: array[TCnCompiler] of TCnIDEHistory;
 
 procedure CreateIDEHistories;
 
@@ -96,17 +92,18 @@ procedure FreeIDEHistories;
 implementation
 
 const
-  SCnIDENames: array[TCnIDEs] of string =
+  SCnIDENames: array[TCnCompiler] of string =
     ('Delphi 5', 'Delphi 6', 'Delphi 7', 'Delphi 8', 'BDS 2005', 'BDS 2006',
      'RAD Studio 2007', 'RAD Studio 2009', 'RAD Studio 2010', 'RAD Studio XE',
      'RAD Studio XE2', 'RAD Studio XE3', 'RAD Studio XE4', 'RAD Studio XE5',
-     'RAD Studio XE6', 'RAD Studio XE7', 'C++Builder 5', 'C++Builder 6');
+     'RAD Studio XE6', 'RAD Studio XE7', 'RAD Studio XE8',
+     'C++Builder 5', 'C++Builder 6');
 
 procedure CreateIDEHistories;
 var
-  IDE: TCnIDEs;
+  IDE: TCnCompiler;
 begin
-  for IDE := Low(TCnIDEs) to High(TCnIDEs) do
+  for IDE := Low(TCnCompiler) to High(TCnCompiler) do
   begin
     IDEHistories[IDE] := TCnIDEHistory.Create;
     IDEHistories[IDE].IDEName := SCnIDENames[IDE];
@@ -115,9 +112,9 @@ end;
 
 procedure FreeIDEHistories;
 var
-  IDE: TCnIDEs;
+  IDE: TCnCompiler;
 begin
-  for IDE := Low(TCnIDEs) to High(TCnIDEs) do
+  for IDE := Low(TCnCompiler) to High(TCnCompiler) do
     FreeAndNil(IDEHistories[IDE]);
 end;
 

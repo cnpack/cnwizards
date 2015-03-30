@@ -40,7 +40,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Registry,
   Dialogs, ExtCtrls, StdCtrls, Buttons, CnAppBuilderInfo, ComCtrls, CheckLst,
-  ImgList, ShellApi, CleanClass, CnCommon, CnWizMultiLang,
+  ImgList, ShellApi, CleanClass, CnCommon, CnWizCompilerConst, CnWizMultiLang, 
   CnBHConst, CnLangMgr, CnLangStorage, CnHashLangStorage, CnClasses;
 
 type
@@ -150,7 +150,7 @@ type
     function MyValidLbxItemChecked(lbx: TCheckListBox): boolean;
     procedure lstProjectsFilesClickCheck(Sender: TObject);
 
-    function GetRegIDEBase(IDE: TCnIDEs): string;
+    function GetRegIDEBase(IDE: TCnCompiler): string;
   protected
     procedure DoCreate; override;
     procedure DoLanguageChanged(Sender: TObject); override;
@@ -178,10 +178,10 @@ const
   SCnRegIDEBase12 = '\Software\CodeGear\';
   SCnRegIDEBase15 = '\Software\Embarcadero\';
 
-  SACnRegIDEEntries: array[TCnIDEs] of string =
+  SACnRegIDEEntries: array[TCnCompiler] of string =
     ('Delphi\5.0', 'Delphi\6.0', 'Delphi\7.0', 'BDS\2.0', 'BDS\3.0', 'BDS\4.0',
     'BDS\5.0', 'BDS\6.0', 'BDS\7.0', 'BDS\8.0', 'BDS\9.0', 'BDS\10.0', 'BDS\11.0',
-    'BDS\12.0', 'BDS\14.0', 'BDS\15.0', 'C++Builder\5.0', 'C++Builder\6.0');
+    'BDS\12.0', 'BDS\14.0', 'BDS\15.0', 'BDS\16.0', 'C++Builder\5.0', 'C++Builder\6.0');
   SCnRegHisProject = '\Closed Projects';
   SCnRegHisFiles = '\Closed Files';
 
@@ -436,8 +436,8 @@ begin
       ErrorDlg(SCnIDERunning, SCnErrorCaption);
       Exit;
     end;
-    UpdateToHisEntries(lstProjects, IDEHistories[TCnIDEs(lstIDEs.ItemIndex)].Projects);
-    UpdateToHisEntries(lstFiles, IDEHistories[TCnIDEs(lstIDEs.ItemIndex)].Files);
+    UpdateToHisEntries(lstProjects, IDEHistories[TCnCompiler(lstIDEs.ItemIndex)].Projects);
+    UpdateToHisEntries(lstFiles, IDEHistories[TCnCompiler(lstIDEs.ItemIndex)].Files);
 
     CleanHis;
 
@@ -833,7 +833,7 @@ end;
 procedure TCnIdeBRMainForm.LoadHistories;
 var
   I: Integer;
-  IDE: TCnIDEs;
+  IDE: TCnCompiler;
   Reg: TRegistry;
   Strs: TStringList;
 begin
@@ -842,7 +842,7 @@ begin
     Reg := TRegistry.Create;
     Strs := TStringList.Create;
     Reg.RootKey := HKEY_CURRENT_USER;
-    for IDE := Low(TCnIDEs) to High(TCnIDEs) do
+    for IDE := Low(TCnCompiler) to High(TCnCompiler) do
     begin
       if Reg.OpenKey(GetRegIDEBase(IDE) + SACnRegIDEEntries[IDE]
         + SCnRegHisProject, False) then
@@ -897,11 +897,11 @@ end;
 
 procedure TCnIdeBRMainForm.UpdateToList;
 var
-  IDE: TCnIDEs;
+  IDE: TCnCompiler;
 begin
   // 将显示更新到界面
   lstIDEs.Clear;
-  for IDE := Low(TCnIDEs) to High(TCnIDEs) do
+  for IDE := Low(TCnCompiler) to High(TCnCompiler) do
   begin
     lstIDEs.Items.Add(IDEHistories[IDE].IDEName);
     lstIDEs.Checked[lstIDEs.Items.Count - 1] := IDEHistories[IDE].Exists;
@@ -941,7 +941,7 @@ end;
 procedure TCnIdeBRMainForm.CleanHis;
 var
   I: Integer;
-  IDE: TCnIDEs;
+  IDE: TCnCompiler;
   Reg: TRegistry;
 begin
   Reg := nil;
@@ -949,7 +949,7 @@ begin
     Reg := TRegistry.Create;
     Reg.RootKey := HKEY_CURRENT_USER;
 
-    for IDE := Low(TCnIDEs) to High(TCnIDEs) do
+    for IDE := Low(TCnCompiler) to High(TCnCompiler) do
     begin
       if Reg.OpenKey(GetRegIDEBase(IDE) + SACnRegIDEEntries[IDE]
         + SCnRegHisProject, False) then
@@ -978,19 +978,19 @@ end;
 procedure TCnIdeBRMainForm.lstIDEsClick(Sender: TObject);
 var
   I: Integer;
-  IDE: TCnIDEs;
+  IDE: TCnCompiler;
 begin
   if lstIDEs.Items.Count = 0 then Exit;
 
   if lstIDEs.ItemIndex <> FOldSel then
   begin
-    if (FOldSel >= 0) and (FOldSel <= Ord(High(TCnIDEs))) then
+    if (FOldSel >= 0) and (FOldSel <= Ord(High(TCnCompiler))) then
     begin
-      UpdateToHisEntries(lstProjects, IDEHistories[TCnIDEs(FOldSel)].Projects);
-      UpdateToHisEntries(lstFiles, IDEHistories[TCnIDEs(FOldSel)].Files);
+      UpdateToHisEntries(lstProjects, IDEHistories[TCnCompiler(FOldSel)].Projects);
+      UpdateToHisEntries(lstFiles, IDEHistories[TCnCompiler(FOldSel)].Files);
     end;
 
-    IDE := TCnIDEs(lstIDEs.ItemIndex);
+    IDE := TCnCompiler(lstIDEs.ItemIndex);
     lstProjects.Clear;
     for I := 0 to IDEHistories[IDE].Projects.Count - 1 do
     begin
@@ -1244,11 +1244,11 @@ begin
   ShowFormHelp;
 end;
 
-function TCnIdeBRMainForm.GetRegIDEBase(IDE: TCnIDEs): string;
+function TCnIdeBRMainForm.GetRegIDEBase(IDE: TCnCompiler): string;
 begin
-  if (Integer(IDE) >= Integer(ciDelphi12)) and not (IDE in [ciBCB5, ciBCB6]) then
+  if (Integer(IDE) >= Integer(cnDelphi12)) and not (IDE in [cnBCB5, cnBCB6]) then
   begin
-    if (Integer(IDE) >= Integer(ciDelphi15)) then
+    if (Integer(IDE) >= Integer(cnDelphi15)) then
       Result := SCnRegIDEBase15
     else
       Result := SCnRegIDEBase12;
