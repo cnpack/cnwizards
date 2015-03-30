@@ -2714,8 +2714,10 @@ begin
 {$IFNDEF VER260}
 {$IFNDEF VER270}
 {$IFNDEF VER280}
+{$IFNDEF VER290}
     // Extended and Real size equals from XE4
     SizeOf(Real): E := Real(DP^);
+{$ENDIF}
 {$ENDIF}
 {$ENDIF}
 {$ENDIF}

@@ -64,7 +64,7 @@ uses
 
 type
   TCompilerName = (cvD5, cvD6, cvD7, cvD8, cbD2005, cbD2006, cbD2007, cbD2009,
-    cbD2010, cbDXE, cbDXE2, cbDXE3, cbDXE4, cbDXE5, cbDXE6, cbDXE7,
+    cbD2010, cbDXE, cbDXE2, cbDXE3, cbDXE4, cbDXE5, cbDXE6, cbDXE7, cbXE8,
     cvCB5, cvCB6);
 
 const
@@ -85,6 +85,7 @@ const
     'RAD Studio XE5',
     'RAD Studio XE6',
     'RAD Studio XE7',
+    'RAD Studio XE8',
     'C++Builder 5',
     'C++Builder 6');
 
@@ -105,6 +106,7 @@ const
     '\Software\Embarcadero\BDS\12.0',
     '\Software\Embarcadero\BDS\14.0',
     '\Software\Embarcadero\BDS\15.0',
+    '\Software\Embarcadero\BDS\16.0',
     '\Software\Borland\C++Builder\5.0',
     '\Software\Borland\C++Builder\6.0');
 
@@ -125,6 +127,7 @@ const
     'CnWizards_DXE5.DLL',
     'CnWizards_DXE6.DLL',
     'CnWizards_DXE7.DLL',
+    'CnWizards_DXE8.DLL',
     'CnWizards_CB5.DLL',
     'CnWizards_CB6.DLL');
 
