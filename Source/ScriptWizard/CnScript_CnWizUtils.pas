@@ -67,7 +67,7 @@ begin
   CL.AddTypeS('TCnCompilerKind', '( ckDelphi, ckBCB )');
   CL.AddTypeS('TCnCompiler', '( cnDelphi5, cnDelphi6, cnDelphi7, cnDelphi8, cnDelphi9, '
     + 'cnDelphi10, cnDelphi11, cnDelphi12, cnDelphi14, cnDelphi15, cnDelphi16, cnDelphi17, '
-    + 'cnDelphiXE4, cnDelphiXE5, cnBCB5, cnBCB6 )');
+    + 'cnDelphiXE4, cnDelphiXE5, cnDelphiXE6, cnDelphiXE7, cnDelphiXE8, cnBCB5, cnBCB6 )');
   CL.AddConstantN('Compiler', 'TCnCompiler').SetInt(Ord(Compiler));
   CL.AddConstantN('CompilerKind', 'TCnCompilerKind').SetInt(Ord(CompilerKind));
   CL.AddConstantN('CompilerName', 'String').SetString(CompilerName);
@@ -95,6 +95,7 @@ begin
   CL.AddConstantN('_DELPHIXE5', 'Boolean').SetUInt(Ord(_DELPHIXE5));
   CL.AddConstantN('_DELPHIXE6', 'Boolean').SetUInt(Ord(_DELPHIXE6));
   CL.AddConstantN('_DELPHIXE7', 'Boolean').SetUInt(Ord(_DELPHIXE7));
+  CL.AddConstantN('_DELPHIXE8', 'Boolean').SetUInt(Ord(_DELPHIXE8));
 
   CL.AddConstantN('_DELPHI1_UP', 'Boolean').SetUInt(Ord(_DELPHI1_UP));
   CL.AddConstantN('_DELPHI2_UP', 'Boolean').SetUInt(Ord(_DELPHI2_UP));
@@ -116,6 +117,7 @@ begin
   CL.AddConstantN('_DELPHIXE5_UP', 'Boolean').SetUInt(Ord(_DELPHIXE5_UP));
   CL.AddConstantN('_DELPHIXE6_UP', 'Boolean').SetUInt(Ord(_DELPHIXE6_UP));
   CL.AddConstantN('_DELPHIXE7_UP', 'Boolean').SetUInt(Ord(_DELPHIXE7_UP));
+  CL.AddConstantN('_DELPHIXE8_UP', 'Boolean').SetUInt(Ord(_DELPHIXE8_UP));
 
   CL.AddConstantN('_BCB1', 'Boolean').SetUInt(Ord(_BCB1));
   CL.AddConstantN('_BCB3', 'Boolean').SetUInt(Ord(_BCB3));
@@ -134,6 +136,7 @@ begin
   CL.AddConstantN('_BCBXE5', 'Boolean').SetUInt(Ord(_BCBXE5));
   CL.AddConstantN('_BCBXE6', 'Boolean').SetUInt(Ord(_BCBXE6));
   CL.AddConstantN('_BCBXE7', 'Boolean').SetUInt(Ord(_BCBXE7));
+  CL.AddConstantN('_BCBXE8', 'Boolean').SetUInt(Ord(_BCBXE8));
 
   CL.AddConstantN('_BCB1_UP', 'Boolean').SetUInt(Ord(_BCB1_UP));
   CL.AddConstantN('_BCB3_UP', 'Boolean').SetUInt(Ord(_BCB3_UP));
@@ -152,6 +155,7 @@ begin
   CL.AddConstantN('_BCBXE5_UP', 'Boolean').SetUInt(Ord(_BCBXE5_UP));
   CL.AddConstantN('_BCBXE6_UP', 'Boolean').SetUInt(Ord(_BCBXE6_UP));
   CL.AddConstantN('_BCBXE7_UP', 'Boolean').SetUInt(Ord(_BCBXE7_UP));
+  CL.AddConstantN('_BCBXE8_UP', 'Boolean').SetUInt(Ord(_BCBXE8_UP));
 
   CL.AddConstantN('_KYLIX1', 'Boolean').SetUInt(Ord(_KYLIX1));
   CL.AddConstantN('_KYLIX2', 'Boolean').SetUInt(Ord(_KYLIX2));
@@ -172,6 +176,7 @@ begin
   CL.AddConstantN('_BDS12', 'Boolean').SetUInt(Ord(_BDS12));
   CL.AddConstantN('_BDS14', 'Boolean').SetUInt(Ord(_BDS14));
   CL.AddConstantN('_BDS15', 'Boolean').SetUInt(Ord(_BDS15));
+  CL.AddConstantN('_BDS16', 'Boolean').SetUInt(Ord(_BDS16));
 
   CL.AddConstantN('_BDS2_UP', 'Boolean').SetUInt(Ord(_BDS2_UP));
   CL.AddConstantN('_BDS3_UP', 'Boolean').SetUInt(Ord(_BDS3_UP));
@@ -186,6 +191,7 @@ begin
   CL.AddConstantN('_BDS12_UP', 'Boolean').SetUInt(Ord(_BDS12_UP));
   CL.AddConstantN('_BDS14_UP', 'Boolean').SetUInt(Ord(_BDS14_UP));
   CL.AddConstantN('_BDS15_UP', 'Boolean').SetUInt(Ord(_BDS15_UP));
+  CL.AddConstantN('_BDS16_UP', 'Boolean').SetUInt(Ord(_BDS16_UP));
 
   CL.AddConstantN('_COMPILER1', 'Boolean').SetUInt(Ord(_COMPILER1));
   CL.AddConstantN('_COMPILER2', 'Boolean').SetUInt(Ord(_COMPILER2));
@@ -208,6 +214,7 @@ begin
   CL.AddConstantN('_COMPILER19', 'Boolean').SetUInt(Ord(_COMPILER19));
   CL.AddConstantN('_COMPILER20', 'Boolean').SetUInt(Ord(_COMPILER20));
   CL.AddConstantN('_COMPILER21', 'Boolean').SetUInt(Ord(_COMPILER21));
+  CL.AddConstantN('_COMPILER22', 'Boolean').SetUInt(Ord(_COMPILER22));
 
   CL.AddConstantN('_COMPILER1_UP', 'Boolean').SetUInt(Ord(_COMPILER1_UP));
   CL.AddConstantN('_COMPILER2_UP', 'Boolean').SetUInt(Ord(_COMPILER2_UP));
@@ -230,6 +237,7 @@ begin
   CL.AddConstantN('_COMPILER19_UP', 'Boolean').SetUInt(Ord(_COMPILER19_UP));
   CL.AddConstantN('_COMPILER20_UP', 'Boolean').SetUInt(Ord(_COMPILER20_UP));
   CL.AddConstantN('_COMPILER21_UP', 'Boolean').SetUInt(Ord(_COMPILER21_UP));
+  CL.AddConstantN('_COMPILER22_UP', 'Boolean').SetUInt(Ord(_COMPILER22_UP));
 
   CL.AddConstantN('_SUPPORT_OTA_PROJECT_CONFIGURATION', 'Boolean').SetUInt(Ord(_SUPPORT_OTA_PROJECT_CONFIGURATION));
   CL.AddConstantN('_SUPPORT_CROSS_PLATFORM', 'Boolean').SetUInt(Ord(_SUPPORT_CROSS_PLATFORM));
