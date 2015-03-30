@@ -48,7 +48,7 @@ type
   TCnCompilerKind = (ckDelphi, ckBCB);
   TCnCompiler = (cnDelphi5, cnDelphi6, cnDelphi7, cnDelphi8, cnDelphi9,
     cnDelphi10, cnDelphi11, cnDelphi12, cnDelphi14, cnDelphi15, cnDelphi16,
-    cnDelphi17, cnDelphiXE4, cnDelphiXE5, cnDelphiXE6, cnDelphiXE7,
+    cnDelphi17, cnDelphiXE4, cnDelphiXE5, cnDelphiXE6, cnDelphiXE7, cnDelphiXE8,
     cnBCB5, cnBCB6);
   TCnCompilers = set of TCnCompiler;
 
@@ -77,6 +77,7 @@ const
   _DELPHIXE5 = {$IFDEF DELPHIXE5}True{$ELSE}False{$ENDIF};
   _DELPHIXE6 = {$IFDEF DELPHIXE6}True{$ELSE}False{$ENDIF};
   _DELPHIXE7 = {$IFDEF DELPHIXE7}True{$ELSE}False{$ENDIF};
+  _DELPHIXE8 = {$IFDEF DELPHIXE8}True{$ELSE}False{$ENDIF};
 
   _DELPHI1_UP = {$IFDEF DELPHI1_UP}True{$ELSE}False{$ENDIF};
   _DELPHI2_UP = {$IFDEF DELPHI2_UP}True{$ELSE}False{$ENDIF};
@@ -98,6 +99,7 @@ const
   _DELPHIXE5_UP = {$IFDEF DELPHIXE5_UP}True{$ELSE}False{$ENDIF};
   _DELPHIXE6_UP = {$IFDEF DELPHIXE6_UP}True{$ELSE}False{$ENDIF};
   _DELPHIXE7_UP = {$IFDEF DELPHIXE7_UP}True{$ELSE}False{$ENDIF};
+  _DELPHIXE8_UP = {$IFDEF DELPHIXE8_UP}True{$ELSE}False{$ENDIF};
 
   _BCB1 = {$IFDEF BCB1}True{$ELSE}False{$ENDIF};
   _BCB3 = {$IFDEF BCB3}True{$ELSE}False{$ENDIF};
@@ -116,6 +118,7 @@ const
   _BCBXE5 = {$IFDEF BCBXE5}True{$ELSE}False{$ENDIF};
   _BCBXE6 = {$IFDEF BCBXE6}True{$ELSE}False{$ENDIF};
   _BCBXE7 = {$IFDEF BCBXE7}True{$ELSE}False{$ENDIF};
+  _BCBXE8 = {$IFDEF BCBXE8}True{$ELSE}False{$ENDIF};
 
   _BCB1_UP = {$IFDEF BCB1_UP}True{$ELSE}False{$ENDIF};
   _BCB3_UP = {$IFDEF BCB3_UP}True{$ELSE}False{$ENDIF};
@@ -134,6 +137,7 @@ const
   _BCBXE5_UP = {$IFDEF BCBXE5_UP}True{$ELSE}False{$ENDIF};
   _BCBXE6_UP = {$IFDEF BCBXE6_UP}True{$ELSE}False{$ENDIF};
   _BCBXE7_UP = {$IFDEF BCBXE7_UP}True{$ELSE}False{$ENDIF};
+  _BCBXE8_UP = {$IFDEF BCBXE8_UP}True{$ELSE}False{$ENDIF};
 
   _KYLIX1 = {$IFDEF KYLIX1}True{$ELSE}False{$ENDIF};
   _KYLIX2 = {$IFDEF KYLIX2}True{$ELSE}False{$ENDIF};
@@ -156,6 +160,7 @@ const
   _BDS12 = {$IFDEF BDS12}True{$ELSE}False{$ENDIF};
   _BDS14 = {$IFDEF BDS14}True{$ELSE}False{$ENDIF};
   _BDS15 = {$IFDEF BDS15}True{$ELSE}False{$ENDIF};
+  _BDS16 = {$IFDEF BDS16}True{$ELSE}False{$ENDIF};
 
   _BDS2_UP = {$IFDEF BDS2_UP}True{$ELSE}False{$ENDIF};
   _BDS3_UP = {$IFDEF BDS3_UP}True{$ELSE}False{$ENDIF};
@@ -170,6 +175,7 @@ const
   _BDS12_UP = {$IFDEF BDS12_UP}True{$ELSE}False{$ENDIF};
   _BDS14_UP = {$IFDEF BDS14_UP}True{$ELSE}False{$ENDIF};
   _BDS15_UP = {$IFDEF BDS15_UP}True{$ELSE}False{$ENDIF};
+  _BDS16_UP = {$IFDEF BDS16_UP}True{$ELSE}False{$ENDIF};
 
   _COMPILER1 = {$IFDEF COMPILER1}True{$ELSE}False{$ENDIF};
   _COMPILER2 = {$IFDEF COMPILER2}True{$ELSE}False{$ENDIF};
@@ -192,6 +198,7 @@ const
   _COMPILER19 = {$IFDEF COMPILER19}True{$ELSE}False{$ENDIF};
   _COMPILER20 = {$IFDEF COMPILER20}True{$ELSE}False{$ENDIF};
   _COMPILER21 = {$IFDEF COMPILER21}True{$ELSE}False{$ENDIF};
+  _COMPILER22 = {$IFDEF COMPILER22}True{$ELSE}False{$ENDIF};
 
   _COMPILER1_UP = {$IFDEF COMPILER1_UP}True{$ELSE}False{$ENDIF};
   _COMPILER2_UP = {$IFDEF COMPILER2_UP}True{$ELSE}False{$ENDIF};
@@ -214,6 +221,7 @@ const
   _COMPILER19_UP = {$IFDEF COMPILER19_UP}True{$ELSE}False{$ENDIF};
   _COMPILER20_UP = {$IFDEF COMPILER20_UP}True{$ELSE}False{$ENDIF};
   _COMPILER21_UP = {$IFDEF COMPILER21_UP}True{$ELSE}False{$ENDIF};
+  _COMPILER22_UP = {$IFDEF COMPILER22_UP}True{$ELSE}False{$ENDIF};
 
   _SUPPORT_OTA_PROJECT_CONFIGURATION = {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}True{$ELSE}False{$ENDIF};
   _SUPPORT_CROSS_PLATFORM = {$IFDEF SUPPORTS_CROSS_PLATFORM}True{$ELSE}False{$ENDIF};
@@ -317,19 +325,26 @@ const
                                 CompilerName = 'RAD Studio XE7';
                                 CompilerShortName = 'DXE7';
                               {$ELSE}
-                                {$IFDEF BCB5}
-                                  Compiler: TCnCompiler = cnBCB5;
-                                  CompilerKind: TCnCompilerKind = ckBCB;
-                                  CompilerName = 'C++BUILDER 5';
-                                  CompilerShortName = 'CB5';
+                                {$IFDEF DELPHIXE8}
+                                  Compiler: TCnCompiler = cnDelphiXE8;
+                                  CompilerKind: TCnCompilerKind = ckDelphi;
+                                  CompilerName = 'RAD Studio XE8';
+                                  CompilerShortName = 'DXE8';
                                 {$ELSE}
-                                  {$IFDEF BCB6}
-                                    Compiler: TCnCompiler = cnBCB6;
+                                  {$IFDEF BCB5}
+                                    Compiler: TCnCompiler = cnBCB5;
                                     CompilerKind: TCnCompilerKind = ckBCB;
-                                    CompilerName = 'C++BUILDER 6';
-                                    CompilerShortName = 'CB6';
+                                    CompilerName = 'C++BUILDER 5';
+                                    CompilerShortName = 'CB5';
                                   {$ELSE}
-                                    Unknow Compiler;
+                                    {$IFDEF BCB6}
+                                      Compiler: TCnCompiler = cnBCB6;
+                                      CompilerKind: TCnCompilerKind = ckBCB;
+                                      CompilerName = 'C++BUILDER 6';
+                                      CompilerShortName = 'CB6';
+                                    {$ELSE}
+                                      Unknow Compiler;
+                                    {$ENDIF}
                                   {$ENDIF}
                                 {$ENDIF}
                               {$ENDIF}
@@ -476,6 +491,14 @@ const
   dccLibName = 'dcc32210.dll';
   {$DEFINE LibNamesDefined}
 {$ENDIF COMPILER21}
+
+{$IFDEF COMPILER22}
+  CorIdeLibName = 'coreide220.bpl';
+  DphIdeLibName = 'delphicoreide220.bpl';
+  dccLibName = 'dcc32220.dll';
+  {$DEFINE LibNamesDefined}
+{$ENDIF COMPILER22}
+
 implementation
 
 end.
