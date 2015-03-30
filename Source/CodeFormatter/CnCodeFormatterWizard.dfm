@@ -3,7 +3,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
   Top = 98
   BorderStyle = bsDialog
   Caption = 'Code Formatter Settings'
-  ClientHeight = 464
+  ClientHeight = 458
   ClientWidth = 379
   Font.Charset = ANSI_CHARSET
   OldCreateOrder = True
@@ -199,7 +199,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
   end
   object btnOK: TButton
     Left = 134
-    Top = 429
+    Top = 427
     Width = 75
     Height = 21
     Caption = '&OK'
@@ -209,7 +209,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
   end
   object btnCancel: TButton
     Left = 214
-    Top = 429
+    Top = 427
     Width = 75
     Height = 21
     Cancel = True
@@ -219,7 +219,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
   end
   object btnHelp: TButton
     Left = 294
-    Top = 429
+    Top = 427
     Width = 75
     Height = 21
     Caption = '&Help'

@@ -1519,9 +1519,35 @@ var
   SCnCodeFormatterWizardMenuHint: string = 'Code Formatter Wizard';
   SCnCodeFormatterWizardConfigCaption: string = '&Options...';
   SCnCodeFormatterWizardConfigHint: string = '&Options...';
-  SCnCodeFormatterWizardFormatCurrentCaption: string = 'Format Current File/Selection';
-  SCnCodeFormatterWizardFormatCurrentHint: string = 'Format Current File or Selection';
-  
+  SCnCodeFormatterWizardFormatCurrentCaption: string = 'Format Current File';
+  SCnCodeFormatterWizardFormatCurrentHint: string = 'Format Current File';
+
+  SCnCodeFormatterErrUnknown: string = 'Unknown Error.';
+  SCnCodeFormatterErrPascalFmt: string = 'Format Error(%d, %d): %s' + #13#10#13#10 + 'Current: ''%s''';
+
+  SCnCodeFormatterErrPascalIdentExp: string = 'Identifier Expected.';
+  SCnCodeFormatterErrPascalStringExp: string = 'String Expected.';
+  SCnCodeFormatterErrPascalNumberExp: string = 'Number Expected.';
+  SCnCodeFormatterErrPascalCharExp: string = 'Char Expected.';
+  SCnCodeFormatterErrPascalSymbolExp: string = 'Symbol Expected.';
+  SCnCodeFormatterErrPascalParseErr: string = 'Parse Error.';
+  SCnCodeFormatterErrPascalInvalidBin: string = 'Invalid Binary.';
+  SCnCodeFormatterErrPascalInvalidString: string = 'Invalid String.';
+  SCnCodeFormatterErrPascalInvalidBookmark: string = 'Invalid Bookmark.';
+  SCnCodeFormatterErrPascalLineTooLong: string = 'Line Too Long.';
+  SCnCodeFormatterErrPascalEndCommentExp: string = 'Comment End Expected.';
+  SCnCodeFormatterErrPascalNotSupport: string = 'Not Support.';
+  SCnCodeFormatterErrPascalErrorDirective: string = 'Error Directive.';
+  SCnCodeFormatterErrPascalNoMethodHeading: string = 'No Method Found.';
+  SCnCodeFormatterErrPascalNoStructType: string = 'No Structured Type Found.';
+  SCnCodeFormatterErrPascalNoTypedConstant: string = 'No Typed Constant Found.';
+  SCnCodeFormatterErrPascalNoEqualColon: string = 'No Equal or Colon Found.';
+  SCnCodeFormatterErrPascalNoDeclSection: string = 'No Declaration Selection Found.';
+  SCnCodeFormatterErrPascalNoProcFunc: string = 'No Procedure or Function Found.';
+  SCnCodeFormatterErrPascalUnknownGoal: string = 'Unknown Target Source File.';
+  SCnCodeFormatterErrPascalErrorInterface: string = 'Interface Error.';
+  SCnCodeFormatterErrPascalInvalidStatement: string = 'Invalid Statement.';
+
 implementation
 
 end.

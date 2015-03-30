@@ -1319,6 +1319,41 @@ begin
   TranslateStr(SCnFeedCloseCaption, 'SCnFeedCloseCaption');
   TranslateStr(SCnFeedCloseQuery, 'SCnFeedCloseQuery');
   TranslateStr(SCnFeedNewItem, 'SCnFeedNewItem');
+
+  // CnCodeFormatterWizard
+  TranslateStr(SCnCodeFormatterWizardName, 'SCnCodeFormatterWizardName');
+  TranslateStr(SCnCodeFormatterWizardComment, 'SCnCodeFormatterWizardComment');
+  TranslateStr(SCnCodeFormatterWizardMenuCaption, 'SCnCodeFormatterWizardMenuCaption');
+  TranslateStr(SCnCodeFormatterWizardMenuHint, 'SCnCodeFormatterWizardMenuHint');
+  TranslateStr(SCnCodeFormatterWizardConfigCaption, 'SCnCodeFormatterWizardConfigCaption');
+  TranslateStr(SCnCodeFormatterWizardConfigHint, 'SCnCodeFormatterWizardConfigHint');
+  TranslateStr(SCnCodeFormatterWizardFormatCurrentCaption, 'SCnCodeFormatterWizardFormatCurrentCaption');
+  TranslateStr(SCnCodeFormatterWizardFormatCurrentHint, 'SCnCodeFormatterWizardFormatCurrentHint');
+  TranslateStr(SCnCodeFormatterErrUnknown, 'SCnCodeFormatterErrUnknown');
+  TranslateStr(SCnCodeFormatterErrPascalFmt, 'SCnCodeFormatterErrPascalFmt');
+  TranslateStr(SCnCodeFormatterErrPascalIdentExp, 'SCnCodeFormatterErrPascalIdentExp');
+  TranslateStr(SCnCodeFormatterErrPascalStringExp, 'SCnCodeFormatterErrPascalStringExp');
+  TranslateStr(SCnCodeFormatterErrPascalNumberExp, 'SCnCodeFormatterErrPascalNumberExp');
+  TranslateStr(SCnCodeFormatterErrPascalCharExp, 'SCnCodeFormatterErrPascalCharExp');
+  TranslateStr(SCnCodeFormatterErrPascalSymbolExp, 'SCnCodeFormatterErrPascalSymbolExp');
+  TranslateStr(SCnCodeFormatterErrPascalParseErr, 'SCnCodeFormatterErrPascalParseErr');
+  TranslateStr(SCnCodeFormatterErrPascalInvalidBin, 'SCnCodeFormatterErrPascalInvalidBin');
+  TranslateStr(SCnCodeFormatterErrPascalInvalidString, 'SCnCodeFormatterErrPascalInvalidString');
+  TranslateStr(SCnCodeFormatterErrPascalInvalidBookmark, 'SCnCodeFormatterErrPascalInvalidBookmark');
+  TranslateStr(SCnCodeFormatterErrPascalLineTooLong, 'SCnCodeFormatterErrPascalLineTooLong');
+  TranslateStr(SCnCodeFormatterErrPascalEndCommentExp, 'SCnCodeFormatterErrPascalEndCommentExp');
+  TranslateStr(SCnCodeFormatterErrPascalNotSupport, 'SCnCodeFormatterErrPascalNotSupport');
+  TranslateStr(SCnCodeFormatterErrPascalErrorDirective, 'SCnCodeFormatterErrPascalErrorDirective');
+  TranslateStr(SCnCodeFormatterErrPascalNoMethodHeading, 'SCnCodeFormatterErrPascalNoMethodHeading');
+  TranslateStr(SCnCodeFormatterErrPascalNoStructType, 'SCnCodeFormatterErrPascalNoStructType');
+  TranslateStr(SCnCodeFormatterErrPascalNoTypedConstant, 'SCnCodeFormatterErrPascalNoTypedConstant');
+  TranslateStr(SCnCodeFormatterErrPascalNoEqualColon, 'SCnCodeFormatterErrPascalNoEqualColon');
+  TranslateStr(SCnCodeFormatterErrPascalNoDeclSection, 'SCnCodeFormatterErrPascalNoDeclSection');
+  TranslateStr(SCnCodeFormatterErrPascalNoProcFunc, 'SCnCodeFormatterErrPascalNoProcFunc');
+  TranslateStr(SCnCodeFormatterErrPascalUnknownGoal, 'SCnCodeFormatterErrPascalUnknownGoal');
+  TranslateStr(SCnCodeFormatterErrPascalErrorInterface, 'SCnCodeFormatterErrPascalErrorInterface');
+  TranslateStr(SCnCodeFormatterErrPascalInvalidStatement, 'SCnCodeFormatterErrPascalInvalidStatement');
+
 end;
 
 end.

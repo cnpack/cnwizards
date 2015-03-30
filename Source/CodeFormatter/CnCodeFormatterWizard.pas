@@ -77,6 +77,8 @@ type
     procedure FormShow(Sender: TObject);
   private
     { Private declarations }
+  protected
+    function GetHelpTopic: string; override;
   public
     { Public declarations }
   end;
@@ -103,6 +105,7 @@ type
     FWrapMode: TCodeWrapMode;
 
     function PutPascalFormatRules: Boolean;
+    function GetErrorStr(Err: Integer): string;
   protected
     function GetHasConfig: Boolean; override;
     procedure SubActionExecute(Index: Integer); override;
@@ -241,6 +244,58 @@ end;
 function TCnCodeFormatterWizard.GetDefShortCut: TShortCut;
 begin
   Result := 0;
+end;
+
+function TCnCodeFormatterWizard.GetErrorStr(Err: Integer): string;
+begin
+  case Err of
+    CN_ERRCODE_PASCAL_IDENT_EXP:
+      Result := SCnCodeFormatterErrPascalIdentExp;
+    CN_ERRCODE_PASCAL_STRING_EXP:
+      Result := SCnCodeFormatterErrPascalStringExp;
+    CN_ERRCODE_PASCAL_NUMBER_EXP:
+      Result := SCnCodeFormatterErrPascalNumberExp;
+    CN_ERRCODE_PASCAL_CHAR_EXP:
+      Result := SCnCodeFormatterErrPascalCharExp;
+    CN_ERRCODE_PASCAL_SYMBOL_EXP:
+      Result := SCnCodeFormatterErrPascalSymbolExp;
+    CN_ERRCODE_PASCAL_PARSE_ERR:
+      Result := SCnCodeFormatterErrPascalParseErr;
+    CN_ERRCODE_PASCAL_INVALID_BIN:
+      Result := SCnCodeFormatterErrPascalInvalidBin;
+    CN_ERRCODE_PASCAL_INVALID_STRING:
+      Result := SCnCodeFormatterErrPascalInvalidString;
+    CN_ERRCODE_PASCAL_INVALID_BOOKMARK:
+      Result := SCnCodeFormatterErrPascalInvalidBookmark;
+    CN_ERRCODE_PASCAL_LINE_TOOLONG:
+      Result := SCnCodeFormatterErrPascalLineTooLong;
+    CN_ERRCODE_PASCAL_ENDCOMMENT_EXP:
+      Result := SCnCodeFormatterErrPascalEndCommentExp;
+    CN_ERRCODE_PASCAL_NOT_SUPPORT:
+      Result := SCnCodeFormatterErrPascalNotSupport;
+    CN_ERRCODE_PASCAL_ERROR_DIRECTIVE:
+      Result := SCnCodeFormatterErrPascalErrorDirective;
+    CN_ERRCODE_PASCAL_NO_METHODHEADING:
+      Result := SCnCodeFormatterErrPascalNoMethodHeading;
+    CN_ERRCODE_PASCAL_NO_STRUCTTYPE:
+      Result := SCnCodeFormatterErrPascalNoStructType;
+    CN_ERRCODE_PASCAL_NO_TYPEDCONSTANT:
+      Result := SCnCodeFormatterErrPascalNoTypedConstant;
+    CN_ERRCODE_PASCAL_NO_EQUALCOLON:
+      Result := SCnCodeFormatterErrPascalNoEqualColon;
+    CN_ERRCODE_PASCAL_NO_DECLSECTION:
+      Result := SCnCodeFormatterErrPascalNoDeclSection;
+    CN_ERRCODE_PASCAL_NO_PROCFUNC:
+      Result := SCnCodeFormatterErrPascalNoProcFunc;
+    CN_ERRCODE_PASCAL_UNKNOWN_GOAL:
+      Result := SCnCodeFormatterErrPascalUnknownGoal;
+    CN_ERRCODE_PASCAL_ERROR_INTERFACE:
+      Result := SCnCodeFormatterErrPascalErrorInterface;
+    CN_ERRCODE_PASCAL_INVALID_STATEMENT:
+      Result := SCnCodeFormatterErrPascalInvalidStatement;
+  else
+    Result := SCnCodeFormatterErrUnknown;
+  end;
 end;
 
 function TCnCodeFormatterWizard.GetHasConfig: Boolean;
@@ -395,8 +450,13 @@ begin
         begin
           ErrCode := Formatter.RetrievePascalLastError(SourceLine, SourceCol,
             SourcePos, CurrentToken);
-          ErrorDlg(Format('Error Code %d, Line %d, Col %d, Pos %d, Token %s', [ErrCode,
-            SourceLine, SourceCol, SourcePos, CurrentToken]));
+
+          CnOtaGotoEditPos(OTAEditPos(SourceCol, SourceLine));
+          ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine, SourceCol,
+            GetErrorStr(ErrCode), CurrentToken]));
+
+//          ErrorDlg(Format('Error Code %d, Line %d, Col %d, Pos %d, Token %s', [ErrCode,
+//            SourceLine, SourceCol, SourcePos, CurrentToken]));
         end;
       finally
         Formatter := nil;
@@ -418,6 +478,11 @@ end;
 procedure TCnCodeFormatterForm.FormShow(Sender: TObject);
 begin
   chkAutoWrapClick(chkAutoWrap);
+end;
+
+function TCnCodeFormatterForm.GetHelpTopic: string;
+begin
+  Result := 'CnCodeFormatterWizard';
 end;
 
 initialization
