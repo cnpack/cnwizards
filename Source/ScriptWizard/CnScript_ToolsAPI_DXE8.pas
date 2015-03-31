@@ -874,7 +874,8 @@ begin
   with CL.AddInterface(CL.FindInterface('IOTAAboutBoxServices120'),IOTAAboutBoxServices, 'IOTAAboutBoxServices') do
   begin
     RegisterMethod('Function AddPluginInfo( const ATitle, ADescription : string; AImage : HBITMAP; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string; AAlphaFormat : TOTAAlphaFormat) : Integer', cdRegister);
-    RegisterMethod('Function AddProductInfo( const ADialogTitle, ACopyright, ATitle, ADescription : string; AAboutImage, AProductImage : HBITMAP; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string; AAboutImageAlphaFormat : TOTAAlphaFormat; AProductImageAlphaFormat : TOTAAlphaFormat) : Integer', cdRegister);
+    RegisterMethod('Function AddProductInfo( const ADialogTitle, ACopyright, ATitle, ADescription : string;' +
+      ' AAboutImage, AProductImage : HBITMAP; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string; AAboutImageAlphaFormat : TOTAAlphaFormat; AProductImageAlphaFormat : TOTAAlphaFormat) : Integer', cdRegister);
   end;
 end;
 
