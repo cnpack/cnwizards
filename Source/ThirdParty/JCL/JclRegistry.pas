@@ -1964,7 +1964,11 @@ initialization
         {$IFDEF VER280}
           InternalDecimalSeparator := FormatSettings.DecimalSeparator;
         {$ELSE}
-          InternalDecimalSeparator := DecimalSeparator;
+          {$IFDEF VER290}
+            InternalDecimalSeparator := FormatSettings.DecimalSeparator;
+          {$ELSE}
+            InternalDecimalSeparator := DecimalSeparator;
+          {$ENDIF}
         {$ENDIF}
       {$ENDIF}
     {$ENDIF}
