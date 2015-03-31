@@ -121,8 +121,8 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
         Height = 26
         Caption = 
           'Now Delphi 5/6/7/8, C++Builder 5/6 and BDS 2005/2006, RAD Studio' +
-          ' 2007/2009/2010 Supported.'#13#10'And, IDE History Cleaner also Includ' +
-          'ed Here.'
+          ' 2007/2009/2010/XE/XE2/XE3'#13#10'/XE4/XE5/XE6/XE7/XE8 Supported.'#13#10'And' +
+          ', IDE History Cleaner also Included Here.'
       end
       object rbBackup: TRadioButton
         Left = 40
@@ -355,8 +355,9 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
         Caption = 
           'This Tool can be Used to Clean IDE Opened Projects and Files His' +
           'tory.'#13#10'Delphi 5/6/7/8, C++Builder 5/6 and BDS 2005/2006 RAD Stud' +
-          'io 2007/2009/2010 are Supported.'#13#10'Notice: Please make sure that ' +
-          'IDE are NOT running when executing this Tool.'
+          'io 2007/2009/2010/XE/XE2/XE3/XE4/XE5/XE6/XE7/XE8 are Supported.'#13 +
+          #10'Notice: Please make sure that IDE are NOT running when executin' +
+          'g this Tool.'
         WordWrap = True
       end
       object lblProjects: TLabel
