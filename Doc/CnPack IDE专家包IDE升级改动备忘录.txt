@@ -5,9 +5,9 @@
 **********************************************************************
 
                     CnPack IDE专家包IDE升级改动备忘录
-                           Revision 1.0.0.0
+                           Revision 1.0.0.1
                        =========================
-                         作者：刘啸 2008.06.07
+                         作者：刘啸 2015.03.31
 
 
 
@@ -28,7 +28,7 @@
 
   四、专家包安装工具。cnwizards\Tools\CnWizSetup\Setup.dpr 中加入新的 IDE 的定义。
 
-  五、专家包设置备份工具。cnwizards\Tools\CnIDEBRTool目录下，CnBHConst.pas 中加入新的定义，
+  五、专家包设置备份工具。cnwizards\Tools\CnIDEBRTool 目录下，CnBHConst.pas 中加入新的定义，
       CnBHMain.pas、CleanClass.pas 与 CnAppBuilderInfo.pas 中在各个 IDE 的常量使用处加入新的常量。
 
   六、专家包外部专家管理工具。cnwizards\Tools\CnManageWiz\CnManWizForm.pas 中加入新的定义。
@@ -39,13 +39,17 @@
 
   九、cnwizards\Source 下加新版的专家包工程文件。
 
-  十、CnInputSymbolList.pas中加入新的Section名称和读入时的编译条件定义。
+  十、CnInputSymbolList.pas中加入新的 Section 名称和读入时的编译条件定义。
 
-  十一、UsesCleaner中检查DCU32是否支持新版本的dcu格式，不支持的话需要调试支持。
+  十一、UsesCleaner 中增加 DCU32 的新编译条件，并检查 DCU32 是否支持新版本的 dcu 格式，不支持的话需要调试支持。
 
   十二、多语文件中更新所有对应的字符串常量，有多个工具的多语字符串需更新。
 
-  十三、其他兼容性测试！这是最重要的。
+  十三、Pascal Script 的 Unicode 版本需要修改其 eDefines.inc 来支持新 IDE，另外还需要生成一个新的 CnScript_Register_ToolsAPI_Dxxx.pas，供此 IDE 版本的 Pascal Script 使用，并在 CnScriptRegister 中增加注册。
+
+  十四、USE_JCL 宏启用的情况下，JCL 1.94 版也要修改以增加对新 IDE 的支持。
+
+  十五、其他兼容性测试！这是最重要的。
 
 文档方面：
 

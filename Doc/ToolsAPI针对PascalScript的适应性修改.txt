@@ -58,4 +58,6 @@ end;
 
 19、遇上长声明函数时，生成的字符串常量太长，需要手工加号分开分行。
 
+20、D2009 以上版本，TPSImport_ToolsAPI = class(TPSPlugin) 的声明下方，需要把 protected 改成 public 以修正编译警告。
+
 此外，XE5 与 XE6 的 ToolsAPI.pas 相同，XE7 则多了一行常量定义。

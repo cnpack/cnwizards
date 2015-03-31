@@ -463,6 +463,16 @@ const
   csCompD10 = 'D10';
   csCompD11 = 'D11';
   csCompD12 = 'D12';
+  csCompD2010 = 'D2010';
+  csCompDXE = 'DXE';
+  csCompDXE2 = 'DXE2';
+  csCompDXE3 = 'DXE3';
+  csCompDXE4 = 'DXE4';
+  csCompDXE5 = 'DXE5';
+  csCompDXE6 = 'DXE6';
+  csCompDXE7 = 'DXE7';
+  csCompDXE8 = 'DXE8';
+
   csCompBCB = 'BCB';
   csCompUser = 'User';
 
@@ -1080,6 +1090,16 @@ begin
   {$IFDEF DELPHI10_UP} AddSection(Ini, csCompD10); {$ENDIF}
   {$IFDEF DELPHI11_UP} AddSection(Ini, csCompD11); {$ENDIF}
   {$IFDEF DELPHI12_UP} AddSection(Ini, csCompD12); {$ENDIF}
+  {$IFDEF DELPHI2010_UP} AddSection(Ini, csCompD2010); {$ENDIF}
+  {$IFDEF DELPHIXE_UP} AddSection(Ini, csCompDXE); {$ENDIF}
+  {$IFDEF DELPHIXE2_UP} AddSection(Ini, csCompDXE2); {$ENDIF}
+  {$IFDEF DELPHIXE3_UP} AddSection(Ini, csCompDXE3); {$ENDIF}
+  {$IFDEF DELPHIXE4_UP} AddSection(Ini, csCompDXE4); {$ENDIF}
+  {$IFDEF DELPHIXE5_UP} AddSection(Ini, csCompDXE5); {$ENDIF}
+  {$IFDEF DELPHIXE6_UP} AddSection(Ini, csCompDXE6); {$ENDIF}
+  {$IFDEF DELPHIXE7_UP} AddSection(Ini, csCompDXE7); {$ENDIF}
+  {$IFDEF DELPHIXE8_UP} AddSection(Ini, csCompDXE8); {$ENDIF}
+
    AddSection(Ini, csCompBCB); // 加进来并设为C/C++专用的再说
   finally
     Ini.Free;
