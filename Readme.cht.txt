@@ -5,9 +5,9 @@
 **********************************************************************
 
                            CnPack IDE 專家包
-                             Version 1.0.5
+                             Version 1.0.6
                          =======================
-                          CnPack 開發組 2015.01
+                          CnPack 開發組 2015.04
 
 
 ======================================================================
@@ -21,7 +21,7 @@
 
     CnWizards 產品主要面對使用 Delphi 5 6 7、C++Builder 5 6 以及 BDS
 2005 2006、RAD Studio 2007 2009 2010、XE、XE2、XE3、XE4、XE5、XE6、XE7
-進行開發的程式師。
+、XE8 進行開發的程式師。
 
     CnWizards 目前包括以下幾種語言的發佈版本：簡體中文、繁體中文、英語、
 俄語、德語。
@@ -77,8 +77,8 @@
     CnWizards 安裝程序: http://download.cnpack.org/CnWizards.exe
     CnWizards 源代碼:   http://download.cnpack.org/CnWizards_Src.zip
 
-    SVN 源代碼檢出：
-    http://code.google.com/p/cnpack/source/checkout
+    GIT 源代碼檢出：
+    http://github.com/cnpack
 
 ======================================================================
 6. 編譯及自動構建

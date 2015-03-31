@@ -5,9 +5,9 @@
 **********************************************************************
 
                          CnPack IDE-Мастер
-                           Version 1.0.5
+                           Version 1.0.6
                        =======================
-                         CnPack Team 2015.01
+                         CnPack Team 2015.04
 
 
 =====================================================
@@ -19,7 +19,7 @@
 C++Builder/BDS для повышения эффективности разработки.
 
     CnPack IDE-Мастер предназначен для разработчиков, использующих 
-Delphi 5 6 7, C++Builder 5 6 и BDS 2005 2006, RAD Studio 2007 2009 2010, XE, XE2, XE3, XE4, XE5, XE6, XE7.
+Delphi 5 6 7, C++Builder 5 6 и BDS 2005 2006, RAD Studio 2007 2009 2010, XE, XE2, XE3, XE4, XE5, XE6, XE7, XE8.
 
     Официальная версия CnPack IDE-Мастера включает следующие языки: 
 Китайский (упрощенный и традиционный), Английский, Русский и Немецкий.
@@ -75,7 +75,7 @@ Delphi 5 6 7, C++Builder 5 6 и BDS 2005 2006, RAD Studio 2007 2009 2010, XE, XE
     Дистрибутив CnPack IDE-Мастера:  http://download.cnpack.org/CnWizards.exe
     Исходный код CnPack IDE-Мастера: http://download.cnpack.org/CnWizards_Src.zip
 
-    SVN: http://code.google.com/p/cnpack/source/checkout
+    GIT: http://github.com/cnpack
 
 ======================================================================
 6. Компиляция и сборка
