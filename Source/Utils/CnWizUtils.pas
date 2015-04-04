@@ -691,6 +691,11 @@ procedure CnOtaSetCurrentEditorSourceW(const Text: string);
 
 {$ENDIF}
 
+{$IFDEF IDE_STRING_ANSI_UTF8}
+procedure CnOtaSetCurrentEditorSourceUtf8(const Text: string);
+{* 设置当前编辑器源代码，只在 D2005~2007 版本使用，参数为原始 UTF8 内容}
+{$ENDIF}
+
 procedure CnOtaSetCurrentEditorSource(const Text: string);
 {* 设置当前编辑器源代码，可在各版本使用，但有多余的转换可能导致丢内容}
 
@@ -4893,6 +4898,27 @@ begin
 end;
 
 {$ENDIF}
+
+{$IFDEF IDE_STRING_ANSI_UTF8}
+
+// 设置当前编辑器源代码，只在 D2005~2007 版本使用，参数为原始 UTF8 内容
+procedure CnOtaSetCurrentEditorSourceUtf8(const Text: string);
+var
+  EditWriter: IOTAEditWriter;
+begin
+  if Text = '' then
+    Exit;
+  EditWriter := CnOtaGetEditWriterForSourceEditor(nil);
+  try
+    EditWriter.DeleteTo(MaxInt);
+    EditWriter.Insert(PAnsiChar(Text));
+  finally
+    EditWriter := nil;
+  end;
+end;
+
+{$ENDIF}
+
 
 // 设置当前编辑器源代码
 procedure CnOtaSetCurrentEditorSource(const Text: string);

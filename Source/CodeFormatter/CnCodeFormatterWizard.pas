@@ -445,13 +445,16 @@ begin
     begin
       try
 {$IFDEF UNICODE}
+        // Src/Res Utf16
         Src := CnOtaGetCurrentEditorSourceW;
         Res := Formatter.FormatOnePascalUnitW(PChar(Src), Length(Src));
 {$ELSE}
   {$IFDEF IDE_STRING_ANSI_UTF8}
+        // Src/Res Utf8
         Src := CnOtaGetCurrentEditorSource(False);
         Res := Formatter.FormatOnePascalUnitUtf8(PAnsiChar(Src), Length(Src));
   {$ELSE}
+        // Src/Res Ansi
         Src := CnOtaGetCurrentEditorSource(True);
         Res := Formatter.FormatOnePascalUnit(PAnsiChar(Src), Length(Src));
   {$ENDIF}
@@ -461,7 +464,13 @@ begin
 {$IFDEF UNICODE}
           CnOtaSetCurrentEditorSourceW(string(Res));
 {$ELSE}
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+          // Utf8 直接写入
+          CnOtaSetCurrentEditorSourceUtf8(string(Res));
+  {$ELSE}
+          // Ansi 转 Utf8 写入
           CnOtaSetCurrentEditorSource(string(Res));
+  {$ENDIF}
 {$ENDIF}
         end
         else
