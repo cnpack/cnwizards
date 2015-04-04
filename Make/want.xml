@@ -75,8 +75,8 @@ See http://www.suigeneris.org/want/ for details.
   <property name="cnwizards_list" value="-d6,-d7,-d2006,-d2007,-cb6" if="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cndfm6to5,cnascii,cnidebr,cnmanagewiz,cnselectlang,cnsmr,cnwizsetup" unless="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cnwizsetup" if="lite" />
-  <property name="all_list"       value="cnwizards,resdll,cnwizhelperdll,cnpnglib,cnformatlib,tools,makehelp,makeinst" unless="lite" />
-  <property name="all_list"       value="cnwizards,resdll,cnpnglib,cnformatlib,tools,makeinst" if="lite" />
+  <property name="all_list"       value="cnwizards,resdll,cnwizhelperdll,cnpnglib,cnformatlib,cnformatlibw,tools,makehelp,makeinst" unless="lite" />
+  <property name="all_list"       value="cnwizards,resdll,cnpnglib,cnformatlib,cnformatlibw,tools,makeinst" if="lite" />
 
   <property name="install_lite"   value=""          unless="lite"/>
   <property name="install_lite"   value="/DLITE"    if="lite"/>
@@ -204,6 +204,7 @@ Usage: want [target-name] [-Dname=value]
     cnwizhelperdll - Compile CnWizards Helper DLL.
     cnpnglib   - Compile CnPngLib DLL.
     cnformatlib - Compile cnFormatLib DLL.
+    cnformatlibw - Compile cnFormatLibW DLL for Unicode.
     cnconfigio - Compile CnConfigIO.
     cndebugviewer  - Compile CnDebugViewer.
     cndfm6to5  - Compile CnDfm6To5.
@@ -849,8 +850,8 @@ Usage: want [target-name] [-Dname=value]
        <include name="${tools}/CnWizRes/CnWizRes.res.old" />
     </move>
   </target>
-  
-  <!-- 编译 ZIP DLL -->  
+
+  <!-- 编译 ZIP DLL -->
   <target name="cnwizhelperdll" depends="-prepare" description="Compile CnWizards Helper DLL." >
     <property name="Ver.FileDescription"  value="CnWizards Helper DLL" />
     <property name="Ver.InternalName"     value="CnWizHelper" />
@@ -871,7 +872,7 @@ Usage: want [target-name] [-Dname=value]
     </move>
   </target>
 
-  <!-- 编译 CnPngLib DLL -->  
+  <!-- 编译 CnPngLib DLL -->
   <target name="cnpnglib" depends="-prepare" description="Compile CnPngLib DLL." >
     <property name="Ver.FileDescription"  value="CnPngLib DLL" />
     <property name="Ver.InternalName"     value="CnPngLib" />
@@ -892,7 +893,7 @@ Usage: want [target-name] [-Dname=value]
     </move>
   </target>
 
-  <!-- 编译 CnFormatLib DLL -->  
+  <!-- 编译 CnFormatLib DLL -->
   <target name="cnformatlib" depends="-prepare" description="Compile CnFormatLib DLL." >
     <property name="Ver.FileDescription"  value="CnFormatLib DLL" />
     <property name="Ver.InternalName"     value="CnFormatLib" />
@@ -910,6 +911,27 @@ Usage: want [target-name] [-Dname=value]
     </delete>
     <move tofile="${tools}/CnFormatLib/CnFormatLib.res" >
        <include name="${tools}/CnFormatLib/CnFormatLib.res.old" />
+    </move>
+  </target>
+
+  <!-- 编译 CnFormatLibW DLL -->
+  <target name="cnformatlibw" depends="-prepare" description="Compile CnFormatLibW DLL for Unicode." >
+    <property name="Ver.FileDescription"  value="CnFormatLibW DLL" />
+    <property name="Ver.InternalName"     value="CnFormatLibW" />
+    <property name="Ver.OriginalFilename" value="CnFormatLibW.DLL" />
+    <copy tofile="${tools}/CnFormatLib/CnFormatLibW.res.old" >
+       <include name="${tools}/CnFormatLib/CnFormatLibW.res" />
+    </copy>
+    <echo input="${tools}/CnDll.template.rc" file="${tools}/CnFormatLib/CnFormatLibW.rc" />
+    <brcc file="${tools}/CnFormatLib/CnFormatLibW.rc" output="${tools}/CnFormatLib/CnFormatLibW.res" />
+    <dcc basedir="${tools}/CnFormatLib" source="CnFormatLibW.dpr" exename="${exe.D2009}"  usecfg="true" />
+    <delete dir="${tools}/CnFormatLib">
+       <include name="CnFormatLibW.res" />
+       <include name="CnFormatLibW.rc" />
+       <include name="CnFormatLibW.drc" />
+    </delete>
+    <move tofile="${tools}/CnFormatLib/CnFormatLibW.res" >
+       <include name="${tools}/CnFormatLib/CnFormatLibW.res.old" />
     </move>
   </target>
 
