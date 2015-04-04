@@ -221,7 +221,7 @@ begin
   InStream := TMemoryStream.Create;
   OutStream := TMemoryStream.Create;
 
-  InStream.Write((PAnsiChar(UInput))^, Len * SizeOf(Char));
+  InStream.Write((PChar(UInput))^, Len * SizeOf(Char));
   CodeFor := TCnPascalCodeFormatter.Create(InStream);
 
   try
@@ -252,7 +252,9 @@ begin
     CopyMemory(FUtf8Result, @(Utf8Res[1]), Len);
 
     Result := FUtf8Result;
-  end;
+  end
+  else
+    Result := nil;
 
   AdjustResultLength(0);
 end;
