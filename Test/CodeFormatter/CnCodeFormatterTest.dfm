@@ -219,8 +219,16 @@ object MainForm: TMainForm
           ImageIndex = 1
           Style = tbsSeparator
         end
-        object chkSliceMode: TCheckBox
+        object chkAutoWrap: TCheckBox
           Left = 75
+          Top = 0
+          Width = 70
+          Height = 20
+          Caption = '自动换行'
+          TabOrder = 4
+        end
+        object chkSliceMode: TCheckBox
+          Left = 145
           Top = 0
           Width = 70
           Height = 20
@@ -228,14 +236,14 @@ object MainForm: TMainForm
           TabOrder = 3
         end
         object btnFormat: TToolButton
-          Left = 145
+          Left = 215
           Top = 0
           Caption = '格式化！'
           ImageIndex = 0
           OnClick = btnFormatClick
         end
         object btnSep1: TToolButton
-          Left = 212
+          Left = 282
           Top = 0
           Width = 8
           Caption = 'btnSep1'
@@ -243,13 +251,13 @@ object MainForm: TMainForm
           Style = tbsSeparator
         end
         object lbl1: TLabel
-          Left = 220
+          Left = 290
           Top = 0
           Width = 6
           Height = 20
         end
         object Label3: TLabel
-          Left = 226
+          Left = 296
           Top = 0
           Width = 60
           Height = 20
@@ -258,7 +266,7 @@ object MainForm: TMainForm
           Layout = tlCenter
         end
         object Edit1: TEdit
-          Left = 286
+          Left = 356
           Top = 0
           Width = 25
           Height = 20
@@ -266,7 +274,7 @@ object MainForm: TMainForm
           Text = '2'
         end
         object UpDown1: TUpDown
-          Left = 311
+          Left = 381
           Top = 0
           Width = 15
           Height = 20
@@ -278,7 +286,7 @@ object MainForm: TMainForm
           Wrap = False
         end
         object btnSep2: TToolButton
-          Left = 326
+          Left = 396
           Top = 0
           Width = 8
           Caption = 'btnSep2'
@@ -286,7 +294,7 @@ object MainForm: TMainForm
           Style = tbsSeparator
         end
         object Label4: TLabel
-          Left = 334
+          Left = 404
           Top = 0
           Width = 48
           Height = 20
@@ -296,7 +304,7 @@ object MainForm: TMainForm
           Layout = tlCenter
         end
         object ComboBox1: TComboBox
-          Left = 382
+          Left = 452
           Top = 0
           Width = 112
           Height = 20
@@ -309,7 +317,7 @@ object MainForm: TMainForm
             '首字母大写')
         end
         object btn1: TToolButton
-          Left = 494
+          Left = 564
           Top = 0
           Width = 8
           Caption = 'btn1'
@@ -317,14 +325,14 @@ object MainForm: TMainForm
           Style = tbsSeparator
         end
         object ToolButton1: TToolButton
-          Left = 502
+          Left = 572
           Top = 0
           Caption = '保存结果'
           ImageIndex = 2
           OnClick = ToolButton1Click
         end
         object btn2: TToolButton
-          Left = 569
+          Left = 639
           Top = 0
           Width = 8
           Caption = 'btn2'
@@ -332,7 +340,7 @@ object MainForm: TMainForm
           Style = tbsSeparator
         end
         object btnParseCompDirective: TToolButton
-          Left = 577
+          Left = 647
           Top = 0
           Caption = '编译指令树'
           ImageIndex = 3

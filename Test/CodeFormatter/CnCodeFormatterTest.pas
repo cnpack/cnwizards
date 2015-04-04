@@ -96,6 +96,7 @@ type
     chkSliceMode: TCheckBox;
     spl1: TSplitter;
     tvCompDirective: TTreeView;
+    chkAutoWrap: TCheckBox;
     procedure btnLoadFileClick(Sender: TObject);
     procedure btnFormatClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -146,9 +147,14 @@ begin
   CnPascalCodeForRule.TabSpaceCount := UpDown1.Position;
   CnPascalCodeForRule.KeywordStyle := TKeywordStyle(ComboBox1.ItemIndex);
 
+  if chkAutoWrap.Checked then
+    CnPascalCodeForRule.CodeWrapMode := cwmSimple
+  else
+    CnPascalCodeForRule.CodeWrapMode := cwmNone;
+
   MemStr := TMemoryStream.Create;
   SrcMemo.Lines.SaveToStream(MemStr);
-  FCodeFor := TCnPascalCodeFormatter.Create(MemStr);
+  FCodeFor := TCnPascalCodeFormatter.Create(MemStr {$IFDEF UNICODE}, TEncoding.Unicode {$ENDIF});
   FCodeFor.SliceMode := chkSliceMode.Checked;
   try
     try
