@@ -53,13 +53,19 @@ type
     FPrevStr: string;
     FPrevRow: Integer;
     FPrevColumn: Integer;
+    FLastNoAutoWrapLine: Integer;
+    FAutoWrapLines: TList; // 记录自动换行的行号，用来搜寻最近一次非自动换行的行缩进
     FOnAfterWrite: TNotifyEvent;
+    FAutoWrapButNoIndent: Boolean;
     function GetCurIndentSpace: Integer;
     function GetLockedCount: Word;
     function GetPrevColumn: Integer;
     function GetPrevRow: Integer;
     function GetCurrColumn: Integer;
     function GetCurrRow: Integer;
+    function GetLastIndentSpace: Integer;
+    // 自动换行缩进时，找出上一个非自动换行的缩进行
+    procedure CalcLastNoAutoIndentLine;
   protected
     procedure DoAfterWrite; virtual;
   public
@@ -92,6 +98,8 @@ type
     {* 当前光标的横向位置，用于换行}
     property CurIndentSpace: Integer read GetCurIndentSpace;
     {* 当前行最前面的空格数}
+    property LastIndentSpace: Integer read GetLastIndentSpace;
+    {* 上一个非自动换行的行的最前面的空格数}
     property CodeWrapMode: TCodeWrapMode read FCodeWrapMode write FCodeWrapMode;
     {* 代码换行的设置}
 
@@ -106,6 +114,8 @@ type
     property CurrColumn: Integer read GetCurrColumn;
     {* 一次 Write 成功后，写之后的光标行号，0 开始}
 
+    property AutoWrapButNoIndent: Boolean read FAutoWrapButNoIndent write FAutoWrapButNoIndent;
+    {* 超宽时自动换行时是否缩进，供外界控制，如 uses 区用 True}
     property OnAfterWrite: TNotifyEvent read FOnAfterWrite write FOnAfterWrite;
     {* 写内容一次成功后被调用}
   end;
@@ -121,6 +131,42 @@ uses
 
 const
   CRLF = #13#10;
+
+procedure TCnCodeGenerator.CalcLastNoAutoIndentLine;
+var
+  I: Integer;
+  MaxAuto, MaxLine: Integer;
+begin
+  if FAutoWrapLines.Count = 0 then // 如果没自动换行的行，就最后一行
+  begin
+    FLastNoAutoWrapLine := FCode.Count - 1;
+    Exit;
+  end;
+
+  MaxAuto := Integer(FAutoWrapLines[FAutoWrapLines.Count - 1]);
+  MaxLine := FCode.Count - 1;
+
+  if MaxLine > MaxAuto then // 如果最后一行是非自动换行的行，就它了
+  begin
+    FLastNoAutoWrapLine := MaxLine;
+    Exit;
+  end
+  else if MaxLine = MaxAuto then
+  begin
+  for I := FAutoWrapLines.Count - 1 downto 0 do
+  begin
+    // 找到不在 FAutoWrapLines 里头最大的一行
+    if MaxAuto > Integer(FAutoWrapLines[I]) then
+    begin
+      FLastNoAutoWrapLine := MaxAuto;
+      Exit;
+    end;
+    Dec(MaxAuto);
+  end;
+  end
+  else
+    FLastNoAutoWrapLine := -1; // Should not here
+end;
 
 procedure TCnCodeGenerator.ClearOutputLock;
 begin
@@ -163,10 +209,12 @@ begin
   FCode := TStringList.Create;
   FLock := 0;
   FCodeWrapMode := cwmNone;
+  FAutoWrapLines := TList.Create;
 end;
 
 destructor TCnCodeGenerator.Destroy;
 begin
+  FAutoWrapLines.Free;
   FCode.Free;
   inherited;
 end;
@@ -206,6 +254,27 @@ begin
   Result := FCode.Count - 1;
 end;
 
+function TCnCodeGenerator.GetLastIndentSpace: Integer;
+var
+  I, Len: Integer;
+begin
+  Result := 0;
+  CalcLastNoAutoIndentLine;
+  if (FCode.Count > 0) and (FLastNoAutoWrapLine >= 0) and
+    (FLastNoAutoWrapLine < FCode.Count) then
+  begin
+    Len := Length(FCode[FLastNoAutoWrapLine]);
+    if Len > 0 then
+    begin
+      for I := 1 to Len do
+        if FCode[FLastNoAutoWrapLine][I] in [' ', #09] then
+          Inc(Result)
+        else
+          Exit;
+    end;
+  end;
+end;
+
 function TCnCodeGenerator.GetLockedCount: Word;
 begin
   Result := FLock;
@@ -239,6 +308,7 @@ end;
 procedure TCnCodeGenerator.Reset;
 begin
   FCode.Clear;
+  FAutoWrapLines.Clear;
 end;
 
 procedure TCnCodeGenerator.SaveToFile(FileName: String);
@@ -282,21 +352,30 @@ begin
   Len := Length(Str);
 
   FPrevRow := FCode.Count - 1;
-  
-  if CodeWrapMode = cwmNone then
+  if FCodeWrapMode = cwmNone then
   begin
     // 不自动换行时无需处理
   end
-  else if CodeWrapMode = cwmSimple then // 简单换行，判断是否超出宽度
+  else if FCodeWrapMode = cwmSimple then // 简单换行，判断是否超出宽度
   begin
     if (FPrevStr <> '.') and // Dot in unitname should not new line.
      (((FColumnPos <= CnPascalCodeForRule.WrapWidth) and
       (FColumnPos + Len > CnPascalCodeForRule.WrapWidth)) or
       (FColumnPos > CnPascalCodeForRule.WrapWidth)) then
     begin
-      Str := StringOfChar(' ', CurIndentSpace) + Str;
-      // 加上原有的缩进，但不能直接再缩进一格，避免 uses 区出现不必要的缩进。
+      if FAutoWrapButNoIndent then
+      begin
+        Str := StringOfChar(' ', CurIndentSpace) + TrimLeft(Str);
+        // 加上原有的缩进，不要直接再缩进一格，避免 uses 区出现不必要的缩进。
+      end
+      else
+      begin
+        Str := StringOfChar(' ', LastIndentSpace + CnPascalCodeForRule.TabSpaceCount)
+          + TrimLeft(Str); // 自动换行后左边原有的空格就不需要了
+        // 找出上一次非自动缩进的缩进，而不是简单的上一行缩进值，避免多重缩进
+      end;
       InternalWriteln;
+      FAutoWrapLines.Add(Pointer(FCode.Count - 1)); // 自动换行的行号要记录
     end;
   end;
 
