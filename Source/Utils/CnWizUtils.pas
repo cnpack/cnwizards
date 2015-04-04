@@ -567,6 +567,14 @@ function ConvertTextToEditorText(const Text: AnsiString): AnsiString;
 function ConvertEditorTextToText(const Text: AnsiString): AnsiString;
 {* 转换编辑器使用的字符串为普通字符串 }
 
+{$IFDEF UNICODE}
+function ConvertTextToEditorTextW(const Text: string): AnsiString;
+{* 转换字符串为编辑器使用的字符串(UTF8)，D2009 以上版本使用 }
+
+function ConvertEditorTextToTextW(const Text: AnsiString): string;
+{* 转换编辑器使用的字符串(UTF8)为 Unicode 字符串，D2009 以上版本使用 }
+{$ENDIF}
+
 function CnOtaGetCurrentSourceFile: string;
 {* 取当前编辑的源文件}
 
@@ -655,8 +663,36 @@ function CnOtaSaveCurrentEditorToStream(Stream: TMemoryStream; FromCurrPos:
 function CnOtaGetCurrentEditorSource: string;
 {* 取得当前编辑器源代码}
 
+{$IFDEF UNICODE}
+
+procedure CnOtaSaveReaderToStreamW(EditReader: IOTAEditReader; Stream:
+  TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
+  PreSize: Integer = 0);
+{* 保存 EditReader 内容到流中，流中的内容默认为 Unicode 格式，2009 以上使用}
+
+procedure CnOtaSaveEditorToStreamWEx(Editor: IOTASourceEditor; Stream:
+  TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
+  PreSize: Integer = 0);
+{* 保存编辑器文本到流中，Unicode 版本，2009 以上使用}
+
+function CnOtaSaveEditorToStreamW(Editor: IOTASourceEditor; Stream: TMemoryStream;
+  FromCurrPos: Boolean = False): Boolean;
+{* 保存编辑器文本到流中，Unicode 版本，2009 以上使用}
+
+function CnOtaSaveCurrentEditorToStreamW(Stream: TMemoryStream; FromCurrPos:
+  Boolean): Boolean;
+{* 保存当前编辑器文本到流中，Unicode 版本，2009 以上使用}
+
+function CnOtaGetCurrentEditorSourceW: string;
+{* 取得当前编辑器源代码，Unicode 版本，2009 以上使用}
+
+procedure CnOtaSetCurrentEditorSourceW(const Text: string);
+{* 设置当前编辑器源代码，Unicode 版本，2009 以上使用}
+
+{$ENDIF}
+
 procedure CnOtaSetCurrentEditorSource(const Text: string);
-{* 设置当前编辑器源代码}
+{* 设置当前编辑器源代码，可在各版本使用，但有多余的转换可能导致丢内容}
 
 procedure CnOtaInsertLineIntoEditor(const Text: string);
 {* 插入一个字符串到当前 IOTASourceEditor，仅在 Text 为单行文本时有用
@@ -4258,6 +4294,22 @@ begin
 {$ENDIF}
 end;
 
+{$IFDEF UNICODE}
+
+// 转换字符串为编辑器使用的字符串(UTF8)，D2009 以上版本使用
+function ConvertTextToEditorTextW(const Text: string): AnsiString;
+begin
+  Result := Utf8Encode(Text);
+end;
+
+// 转换编辑器使用的字符串(UTF8)为 Unicode 字符串，D2009 以上版本使用
+function ConvertEditorTextToTextW(const Text: AnsiString): string;
+begin
+  Result := UTF8ToUnicodeString(Text);
+end;
+
+{$ENDIF}
+
 // 取当前编辑的源文件  (来自 GExperts Src 1.12，有改动)
 function CnOtaGetCurrentSourceFile: string;
 {$IFDEF COMPILER6_UP}
@@ -4678,8 +4730,169 @@ begin
       Result := string(PAnsiChar(Strm.Memory));
   finally
     Strm.Free;
-  end;   
-end;  
+  end;
+end;
+
+{$IFDEF UNICODE}
+
+// 保存 EditReader 内容到流中，流中的内容默认为 Unicode 格式，2009 以上使用
+procedure CnOtaSaveReaderToStreamW(EditReader: IOTAEditReader; Stream:
+  TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
+  PreSize: Integer = 0);
+const
+  // Leave typed constant as is - needed for streaming code.
+  TerminatingNulChar: AnsiChar = #0;
+  BufferSize = 1024 * 24;
+var
+  Buffer: PAnsiChar;
+  EditReaderPos: Integer;
+  DataLen: Integer;
+  ReadDataSize: Integer;
+  Text: string;
+begin
+  Assert(EditReader <> nil);
+  Assert(Stream <> nil);
+
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('CnOtaSaveReaderToStreamW. StartPos %d, EndPos %d, PreSize %d.',
+    [StartPos, EndPos, PreSize]);
+{$ENDIF}
+
+  if EndPos > 0 then
+  begin
+    DataLen := EndPos - StartPos;
+    Stream.Size := DataLen + 1;
+  end
+  else
+  begin
+    // 分配预计的内存以提高性能
+    DataLen := MaxInt;
+    Stream.Size := PreSize;
+  end;
+  Stream.Position := 0;
+  GetMem(Buffer, BufferSize);
+  try
+    EditReaderPos := StartPos;
+    ReadDataSize := EditReader.GetText(EditReaderPos, Buffer, Min(BufferSize, DataLen));
+    Inc(EditReaderPos, ReadDataSize);
+    Dec(DataLen, ReadDataSize);
+    while (ReadDataSize = BufferSize) and (DataLen > 0) do
+    begin
+      Stream.Write(Buffer^, ReadDataSize);
+      ReadDataSize := EditReader.GetText(EditReaderPos, Buffer, Min(BufferSize, DataLen));
+      Inc(EditReaderPos, ReadDataSize);
+      Dec(DataLen, ReadDataSize);
+    end;
+    Stream.Write(Buffer^, ReadDataSize);
+    Stream.Write(TerminatingNulChar, SizeOf(TerminatingNulChar));
+    if Stream.Size > Stream.Position then
+      Stream.Size := Stream.Position;
+  finally
+    FreeMem(Buffer);
+  end;
+
+  // 即使 Unicode 环境下，EditReader 读到的仍然是 Utf8 的 AnsiString，在此转成 UnicodeString
+  Text := UTF8ToUnicodeString(PAnsiChar(Stream.Memory));
+  Stream.Size := (Length(Text) + 1) * SizeOf(Char);
+  Stream.Position := 0;
+  Stream.Write(PChar(Text)^, (Length(Text) + 1)* SizeOf(Char));
+
+  Stream.Position := 0;
+end;
+
+// 保存编辑器文本到流中，Unicode 版本，2009 以上使用
+procedure CnOtaSaveEditorToStreamWEx(Editor: IOTASourceEditor; Stream:
+  TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
+  PreSize: Integer = 0);
+begin
+  if Editor = nil then
+  begin
+    Editor := CnOtaGetCurrentSourceEditor;
+    if Editor = nil then
+      Exit;
+  end;
+
+  CnOtaSaveReaderToStreamW(Editor.CreateReader, Stream, StartPos, EndPos, PreSize);
+end;
+
+// 保存编辑器文本到流中，Unicode 版本，2009 以上使用
+function CnOtaSaveEditorToStreamW(Editor: IOTASourceEditor; Stream: TMemoryStream;
+  FromCurrPos: Boolean = False): Boolean;
+var
+  IPos: Integer;
+  PreSize: Integer;
+begin
+  Assert(Stream <> nil);
+  Result := False;
+
+  if Editor = nil then
+  begin
+    Editor := CnOtaGetCurrentSourceEditor;
+    if Editor = nil then
+      Exit;
+  end;
+
+  if Editor.EditViewCount > 0 then
+  begin
+    if FromCurrPos then
+      IPos := CnOtaGetCurrPos(Editor)
+    else
+      IPos := 0;
+
+    // 如果此文件未保存，则会出现 FileSize 与其不一致的情况，
+    // 可能导致 PreSize 为负从而出现问题
+    if FileExists(Editor.FileName) then
+      PreSize := Round(GetFileSize(Editor.FileName) * 1.5) - IPos
+    else
+      PreSize := 0;
+
+    // 修补上述问题
+    if PreSize < 0 then
+      PreSize := 0;
+
+    CnOtaSaveEditorToStreamWEx(Editor, Stream, IPos, 0, PreSize);
+    Result := True;
+  end;
+end;
+
+// 保存当前编辑器文本到流中，Unicode 版本，2009 以上使用
+function CnOtaSaveCurrentEditorToStreamW(Stream: TMemoryStream; FromCurrPos:
+  Boolean): Boolean;
+begin
+  Result := CnOtaSaveEditorToStreamW(nil, Stream, FromCurrPos);
+end;
+
+// 取得当前编辑器源代码，Unicode 版本，2009 以上使用
+function CnOtaGetCurrentEditorSourceW: string;
+var
+  Stream: TMemoryStream;
+begin
+  Stream := TMemoryStream.Create;
+  try
+    if CnOtaSaveCurrentEditorToStreamW(Stream, False) then
+      Result := string(PChar(Stream.Memory));
+  finally
+    Stream.Free;
+  end;
+end;
+
+// 设置当前编辑器源代码，Unicode 版本，2009 以上使用
+procedure CnOtaSetCurrentEditorSourceW(const Text: string);
+var
+  EditWriter: IOTAEditWriter;
+begin
+  if Text = '' then
+    Exit;
+  EditWriter := CnOtaGetEditWriterForSourceEditor(nil);
+  try
+    EditWriter.DeleteTo(MaxInt);
+    EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW(Text)));
+  finally
+    EditWriter := nil;
+  end;
+end;
+
+{$ENDIF}
 
 // 设置当前编辑器源代码
 procedure CnOtaSetCurrentEditorSource(const Text: string);

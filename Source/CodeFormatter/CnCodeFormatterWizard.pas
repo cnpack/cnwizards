@@ -149,7 +149,11 @@ implementation
 {$R *.DFM}
 
 const
+{$IFDEF UNICODE}
+  DLLName: string = 'CnFormatLibW.dll';
+{$ELSE}
   DLLName: string = 'CnFormatLib.dll';
+{$ENDIF}
 
   csUsesUnitSingleLine = 'UsesUnitSingleLine';
   csUseIgnoreArea = 'UseIgnoreArea';
@@ -424,8 +428,13 @@ end;
 procedure TCnCodeFormatterWizard.SubActionExecute(Index: Integer);
 var
   Formatter: ICnPascalFormatterIntf;
+{$IFDEF UNICODE}
+  S: string;
+  Res: PChar;
+{$ELSE}
   S: AnsiString;
   Res: PAnsiChar;
+{$ENDIF}
   ErrCode, SourceLine, SourceCol, SourcePos: Integer;
   CurrentToken: PAnsiChar;
 begin
@@ -439,12 +448,20 @@ begin
     if Formatter <> nil then
     begin
       try
+{$IFDEF UNICODE}
+        S := CnOtaGetCurrentEditorSourceW;
+        Res := Formatter.FormatOnePascalUnitW(PChar(S), Length(S));
+{$ELSE}
         S := AnsiString(CnOtaGetCurrentEditorSource);
         Res := Formatter.FormatOnePascalUnit(PAnsiChar(S), Length(S));
-
+{$ENDIF}
         if Res <> nil then
         begin
+{$IFDEF UNICODE}
+          CnOtaSetCurrentEditorSourceW(string(Res));
+{$ELSE}
           CnOtaSetCurrentEditorSource(string(Res));
+{$ENDIF}
         end
         else
         begin

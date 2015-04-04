@@ -151,7 +151,7 @@ type
        如果返回 nil，说明出错，需要用 RetrieveLastError 获得错误码}
 
     function FormatOnePascalUnitW(Input: PWideChar; Len: DWORD): PWideChar;
-    {* 格式化一整个 Pascal 文件内容，代码以 UnicodeString 格式传入。
+    {* 格式化一整个 Pascal 文件内容，代码以 UnicodeString 格式传入。Len 字符长度
        返回结果存储的 UnicodeString 字符内容的指针，用完后无须释放。
        如果返回 nil，说明出错，需要用 RetrieveLastError 获得错误码}
 
