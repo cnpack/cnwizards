@@ -449,7 +449,7 @@ begin
   CL.AddDelphiFunction('Procedure CnOtaSaveReaderToStream( EditReader : IOTAEditReader; Stream : TMemoryStream; StartPos : Integer; EndPos : Integer; PreSize : Integer; CheckUtf8 : Boolean)');
   CL.AddDelphiFunction('Function CnOtaSaveEditorToStream( Editor : IOTASourceEditor; Stream : TMemoryStream; FromCurrPos : Boolean; CheckUtf8 : Boolean) : Boolean');
   CL.AddDelphiFunction('Function CnOtaSaveCurrentEditorToStream( Stream : TMemoryStream; FromCurrPos : Boolean; CheckUtf8 : Boolean) : Boolean');
-  CL.AddDelphiFunction('Function CnOtaGetCurrentEditorSource : string');
+  CL.AddDelphiFunction('Function CnOtaGetCurrentEditorSource( CheckUtf8 : Boolean) : string');
   CL.AddDelphiFunction('Procedure CnOtaInsertLineIntoEditor( const Text : string)');
   CL.AddDelphiFunction('Procedure CnOtaInsertSingleLine( Line : Integer; const Text : string; EditView : IOTAEditView)');
   CL.AddDelphiFunction('Procedure CnOtaInsertTextIntoEditor( const Text : string)');

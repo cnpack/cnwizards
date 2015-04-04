@@ -660,7 +660,7 @@ function CnOtaSaveCurrentEditorToStream(Stream: TMemoryStream; FromCurrPos:
   Boolean; CheckUtf8: Boolean = True): Boolean;
 {* 保存当前编辑器文本到流中}
 
-function CnOtaGetCurrentEditorSource: string;
+function CnOtaGetCurrentEditorSource(CheckUtf8: Boolean = True): string;
 {* 取得当前编辑器源代码}
 
 {$IFDEF UNICODE}
@@ -4720,13 +4720,13 @@ begin
 end;
 
 // 取得当前编辑器源代码
-function CnOtaGetCurrentEditorSource: string;
+function CnOtaGetCurrentEditorSource(CheckUtf8: Boolean): string;
 var
   Strm: TMemoryStream;
 begin
   Strm := TMemoryStream.Create;
   try
-    if CnOtaSaveCurrentEditorToStream(Strm, False, True) then
+    if CnOtaSaveCurrentEditorToStream(Strm, False, CheckUtf8) then
       Result := string(PAnsiChar(Strm.Memory));
   finally
     Strm.Free;

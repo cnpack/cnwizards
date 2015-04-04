@@ -738,7 +738,7 @@ function CnOtaSaveCurrentEditorToStream(Stream: TMemoryStream; FromCurrPos:
   Boolean; CheckUtf8: Boolean = True): Boolean;
 {* 保存当前编辑器文本到流中}
 
-function CnOtaGetCurrentEditorSource: string;
+function CnOtaGetCurrentEditorSource(CheckUtf8: Boolean): string;
 {* 取得当前编辑器源代码}
 
 procedure CnOtaInsertLineIntoEditor(const Text: string);
@@ -1622,7 +1622,7 @@ function CnOtaSaveCurrentEditorToStream(Stream: TMemoryStream; FromCurrPos:
 begin
 end;
 
-function CnOtaGetCurrentEditorSource: string;
+function CnOtaGetCurrentEditorSource(CheckUtf8: Boolean): string;
 begin
 end;
 

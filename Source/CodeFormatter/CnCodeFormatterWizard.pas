@@ -137,9 +137,6 @@ type
     property UseIgnoreArea: Boolean read FUseIgnoreArea write FUseIgnoreArea;
   end;
 
-var
-  CnCodeFormatterForm: TCnCodeFormatterForm;
-
 {$ENDIF CNWIZARDS_CNCODEFORMATTERWIZARD}
 
 implementation
@@ -432,13 +429,8 @@ end;
 procedure TCnCodeFormatterWizard.SubActionExecute(Index: Integer);
 var
   Formatter: ICnPascalFormatterIntf;
-{$IFDEF UNICODE}
   Src: string;
   Res: PChar;
-{$ELSE}
-  Src: AnsiString;
-  Res: PAnsiChar;
-{$ENDIF}
   ErrCode, SourceLine, SourceCol, SourcePos: Integer;
   CurrentToken: PAnsiChar;
 begin
@@ -456,10 +448,11 @@ begin
         Src := CnOtaGetCurrentEditorSourceW;
         Res := Formatter.FormatOnePascalUnitW(PChar(Src), Length(Src));
 {$ELSE}
-        Src := AnsiString(CnOtaGetCurrentEditorSource);
   {$IFDEF IDE_STRING_ANSI_UTF8}
+        Src := CnOtaGetCurrentEditorSource(False);
         Res := Formatter.FormatOnePascalUnitUtf8(PAnsiChar(Src), Length(Src));
   {$ELSE}
+        Src := CnOtaGetCurrentEditorSource(True);
         Res := Formatter.FormatOnePascalUnit(PAnsiChar(Src), Length(Src));
   {$ENDIF}
 {$ENDIF}
