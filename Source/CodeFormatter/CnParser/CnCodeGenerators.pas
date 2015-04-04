@@ -162,7 +162,7 @@ constructor TCnCodeGenerator.Create;
 begin
   FCode := TStringList.Create;
   FLock := 0;
-  FCodeWrapMode := cwmSimple;
+  FCodeWrapMode := cwmNone;
 end;
 
 destructor TCnCodeGenerator.Destroy;
