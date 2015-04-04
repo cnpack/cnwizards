@@ -150,9 +150,13 @@ implementation
 
 const
 {$IFDEF UNICODE}
-  DLLName: string = 'CnFormatLibW.dll';
+  DLLName: string = 'CnFormatLibW.dll'; // D2009 ~ 最新 用 Unicode 版
 {$ELSE}
-  DLLName: string = 'CnFormatLib.dll';
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+  DLLName: string = 'CnFormatLibW.dll'; // D2005 ~ 2007 也用 Unicode 版但用 UTF8
+  {$ELSE}
+  DLLName: string = 'CnFormatLib.dll';  // D5~7 下用 Ansi 版
+  {$ENDIF}
 {$ENDIF}
 
   csUsesUnitSingleLine = 'UsesUnitSingleLine';
@@ -429,10 +433,10 @@ procedure TCnCodeFormatterWizard.SubActionExecute(Index: Integer);
 var
   Formatter: ICnPascalFormatterIntf;
 {$IFDEF UNICODE}
-  S: string;
+  Src: string;
   Res: PChar;
 {$ELSE}
-  S: AnsiString;
+  Src: AnsiString;
   Res: PAnsiChar;
 {$ENDIF}
   ErrCode, SourceLine, SourceCol, SourcePos: Integer;
@@ -449,14 +453,14 @@ begin
     begin
       try
 {$IFDEF UNICODE}
-        S := CnOtaGetCurrentEditorSourceW;
-        Res := Formatter.FormatOnePascalUnitW(PChar(S), Length(S));
+        Src := CnOtaGetCurrentEditorSourceW;
+        Res := Formatter.FormatOnePascalUnitW(PChar(Src), Length(Src));
 {$ELSE}
-        S := AnsiString(CnOtaGetCurrentEditorSource);
+        Src := AnsiString(CnOtaGetCurrentEditorSource);
   {$IFDEF IDE_STRING_ANSI_UTF8}
-        Res := Formatter.FormatOnePascalUnitUtf8(PAnsiChar(S), Length(S));
+        Res := Formatter.FormatOnePascalUnitUtf8(PAnsiChar(Src), Length(Src));
   {$ELSE}
-        Res := Formatter.FormatOnePascalUnit(PAnsiChar(S), Length(S));
+        Res := Formatter.FormatOnePascalUnit(PAnsiChar(Src), Length(Src));
   {$ENDIF}
 {$ENDIF}
         if Res <> nil then
