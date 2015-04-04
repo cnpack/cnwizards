@@ -453,7 +453,11 @@ begin
         Res := Formatter.FormatOnePascalUnitW(PChar(S), Length(S));
 {$ELSE}
         S := AnsiString(CnOtaGetCurrentEditorSource);
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+        Res := Formatter.FormatOnePascalUnitUtf8(PAnsiChar(S), Length(S));
+  {$ELSE}
         Res := Formatter.FormatOnePascalUnit(PAnsiChar(S), Length(S));
+  {$ENDIF}
 {$ENDIF}
         if Res <> nil then
         begin

@@ -199,16 +199,62 @@ end;
 
 function TCnCodeFormatProvider.FormatOnePascalUnitUtf8(Input: PAnsiChar;
   Len: DWORD): PAnsiChar;
+var
+  InStream, OutStream: TStream;
+  CodeFor: TCnPascalCodeFormatter;
+  UInput: string;
+  Utf8Res: AnsiString;
 begin
-  ClearPascalError;
   AdjustResultLength(0);
-  Result := nil;
+  AdjustUtf8ResultLength(0);
 
-  PascalErrorRec.ErrorCode := CN_ERRCODE_PASCAL_NOT_SUPPORT;
-  PascalErrorRec.SourceLine := 0;
-  PascalErrorRec.SourceCol := 0;
-  PascalErrorRec.SourcePos := 0;
-  PascalErrorRec.CurrentToken := '';
+  ClearPascalError;
+  if (Input = nil) or (Len = 0) then
+  begin
+    Result := nil;
+    Exit;
+  end;
+
+  UInput := UTF8ToUnicodeString(Input);
+  Len := Length(UInput);
+
+  InStream := TMemoryStream.Create;
+  OutStream := TMemoryStream.Create;
+
+  InStream.Write((PAnsiChar(UInput))^, Len * SizeOf(Char));
+  CodeFor := TCnPascalCodeFormatter.Create(InStream);
+
+  try
+    try
+      CodeFor.FormatCode;
+      CodeFor.SaveToStream(OutStream);
+    except
+      ; // 出错了，返回 nil 的结果
+    end;
+
+    if OutStream.Size > 0 then
+    begin
+      AdjustResultLength(OutStream.Size + SizeOf(Char));
+      OutStream.Position := 0;
+      OutStream.Read(FResult^, OutStream.Size);
+    end;
+  finally
+    CodeFor.Free;
+    InStream.Free;
+    OutStream.Free;
+  end;
+
+  if FResult <> nil then
+  begin
+    Utf8Res := UTF8Encode(FResult);
+    Len := Length(Utf8Res);
+    AdjustUtf8ResultLength(Len);
+    CopyMemory(FUtf8Result, @(Utf8Res[1]), Len);
+
+    Result := FUtf8Result;
+  end;
+
+  AdjustResultLength(0);
 end;
 
 function TCnCodeFormatProvider.FormatOnePascalUnitW(Input: PWideChar;
