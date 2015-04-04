@@ -18,18 +18,19 @@
 {                                                                              }
 {******************************************************************************}
 
-unit CnCodeFormatterImpl;
+unit CnCodeFormatterImplW;
 {* |<PRE>
 ================================================================================
 * 软件名称：CnPack 代码格式化专家
 * 单元名称：代码格式化对外接口
 * 单元作者：CnPack开发组
-* 备    注：该单元实现代码格式化的对外接口，Ansi 版供 D5~7 使用
-* 开发平台：WinXP + Delphi 5.0
+* 备    注：该单元实现代码格式化的对外接口，Unicode 版供 D2005~2007（UTF8版）
+*           以及 2009 以上（Utf16版）使用。由 D2009 编译
+* 开发平台：WinXP + Delphi 2009
 * 兼容测试：not test yet
 * 本 地 化：not test hell
 * 单元标识：$Id$
-* 修改记录：2015.02.11 V1.0
+* 修改记录：2015.04.04 V1.0
 *               创建单元。
 ================================================================================
 |</PRE>}
@@ -54,8 +55,11 @@ uses
 type
   TCnCodeFormatProvider = class(TInterfacedObject, ICnPascalFormatterIntf)
   private
-    FResult: PAnsiChar;
+    FResult: PChar;
+    FUtf8Result: PAnsiChar;
+    // 调整返回区长度，Len 单位为字符
     procedure AdjustResultLength(Len: DWORD);
+    procedure AdjustUtf8ResultLength(Len: DWORD);
   public
     constructor Create;
     destructor Destroy; override;
@@ -99,7 +103,7 @@ begin
   if Len > 0 then
   begin
     FResult := StrAlloc(Len);
-    ZeroMemory(FResult, Len);
+    ZeroMemory(FResult, Len * SizeOf(Char));
   end;
 end;
 
@@ -112,6 +116,7 @@ end;
 destructor TCnCodeFormatProvider.Destroy;
 begin
   AdjustResultLength(0);
+  AdjustUtf8ResultLength(0);
   inherited;
 end;
 
@@ -119,49 +124,21 @@ function TCnCodeFormatProvider.FormatPascalBlock(StartType, StartIndent: DWORD;
   Input: PAnsiChar; Len: DWORD): PAnsiChar;
 begin
   AdjustResultLength(0);
-  Result := FResult;
+  Result := nil;
 end;
 
 function TCnCodeFormatProvider.FormatOnePascalUnit(Input: PAnsiChar;
   Len: DWORD): PAnsiChar;
-var
-  InStream, OutStream: TStream;
-  CodeFor: TCnPascalCodeFormatter;
 begin
-  AdjustResultLength(0);
   ClearPascalError;
-  if (Input = nil) or (Len = 0) then
-  begin
-    Result := nil;
-    Exit;
-  end;
+  AdjustResultLength(0);
+  Result := nil;
 
-  InStream := TMemoryStream.Create;
-  OutStream := TMemoryStream.Create;
-
-  InStream.Write(Input^, Len);
-  CodeFor := TCnPascalCodeFormatter.Create(InStream);
-
-  try
-    try
-      CodeFor.FormatCode;
-      CodeFor.SaveToStream(OutStream);
-    except
-      ; // 出错了，返回 nil 的结果
-    end;
-
-    if OutStream.Size > 0 then
-    begin
-      AdjustResultLength(OutStream.Size + 1);
-      OutStream.Position := 0;
-      OutStream.Read(FResult^, OutStream.Size);
-    end;
-  finally
-    CodeFor.Free;
-    InStream.Free;
-    OutStream.Free;
-  end;
-  Result := FResult;
+  PascalErrorRec.ErrorCode := CN_ERRCODE_PASCAL_NOT_SUPPORT;
+  PascalErrorRec.SourceLine := 0;
+  PascalErrorRec.SourceCol := 0;
+  PascalErrorRec.SourcePos := 0;
+  PascalErrorRec.CurrentToken := '';
 end;
 
 procedure TCnCodeFormatProvider.SetPascalFormatRule(DirectiveMode, KeywordStyle,
@@ -217,25 +194,11 @@ begin
   SourceLine := PascalErrorRec.SourceLine;
   SourceCol := PascalErrorRec.SourceCol;
   SourcePos := PascalErrorRec.SourcePos;
-  CurrentToken := PAnsiChar(PascalErrorRec.CurrentToken);
+  CurrentToken := PAnsiChar(AnsiString(PascalErrorRec.CurrentToken));
 end;
 
 function TCnCodeFormatProvider.FormatOnePascalUnitUtf8(Input: PAnsiChar;
   Len: DWORD): PAnsiChar;
-begin
-  ClearPascalError;
-  AdjustResultLength(0);
-  Result := FResult;
-
-  PascalErrorRec.ErrorCode := CN_ERRCODE_PASCAL_NOT_SUPPORT;
-  PascalErrorRec.SourceLine := 0;
-  PascalErrorRec.SourceCol := 0;
-  PascalErrorRec.SourcePos := 0;
-  PascalErrorRec.CurrentToken := '';
-end;
-
-function TCnCodeFormatProvider.FormatOnePascalUnitW(Input: PWideChar;
-  Len: DWORD): PWideChar;
 begin
   ClearPascalError;
   AdjustResultLength(0);
@@ -246,6 +209,63 @@ begin
   PascalErrorRec.SourceCol := 0;
   PascalErrorRec.SourcePos := 0;
   PascalErrorRec.CurrentToken := '';
+end;
+
+function TCnCodeFormatProvider.FormatOnePascalUnitW(Input: PWideChar;
+  Len: DWORD): PWideChar;
+var
+  InStream, OutStream: TStream;
+  CodeFor: TCnPascalCodeFormatter;
+begin
+  AdjustResultLength(0);
+  ClearPascalError;
+  if (Input = nil) or (Len = 0) then
+  begin
+    Result := nil;
+    Exit;
+  end;
+
+  InStream := TMemoryStream.Create;
+  OutStream := TMemoryStream.Create;
+
+  InStream.Write(Input^, Len * SizeOf(Char));
+  CodeFor := TCnPascalCodeFormatter.Create(InStream);
+
+  try
+    try
+      CodeFor.FormatCode;
+      CodeFor.SaveToStream(OutStream);
+    except
+      ; // 出错了，返回 nil 的结果
+    end;
+
+    if OutStream.Size > 0 then
+    begin
+      AdjustResultLength(OutStream.Size + SizeOf(Char));
+      OutStream.Position := 0;
+      OutStream.Read(FResult^, OutStream.Size);
+    end;
+  finally
+    CodeFor.Free;
+    InStream.Free;
+    OutStream.Free;
+  end;
+  Result := FResult;
+end;
+
+procedure TCnCodeFormatProvider.AdjustUtf8ResultLength(Len: DWORD);
+begin
+  if FUtf8Result <> nil then
+  begin
+    StrDispose(FUtf8Result);
+    FUtf8Result := nil;
+  end;
+
+  if Len > 0 then
+  begin
+    FUtf8Result := AnsiStrAlloc(Len);
+    ZeroMemory(FUtf8Result, Len * SizeOf(AnsiChar));
+  end;
 end;
 
 initialization

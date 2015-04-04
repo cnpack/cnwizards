@@ -145,6 +145,16 @@ type
        返回结果存储的 AnsiString 字符内容的指针，用完后无须释放。
        如果返回 nil，说明出错，需要用 RetrieveLastError 获得错误码}
 
+    function FormatOnePascalUnitUtf8(Input: PAnsiChar; Len: DWORD): PAnsiChar;
+    {* 格式化一整个 Pascal 文件内容，代码以 UTF8String 格式传入。
+       返回结果存储的 Utf8String 字符内容的指针，用完后无须释放。
+       如果返回 nil，说明出错，需要用 RetrieveLastError 获得错误码}
+
+    function FormatOnePascalUnitW(Input: PWideChar; Len: DWORD): PWideChar;
+    {* 格式化一整个 Pascal 文件内容，代码以 UnicodeString 格式传入。
+       返回结果存储的 UnicodeString 字符内容的指针，用完后无须释放。
+       如果返回 nil，说明出错，需要用 RetrieveLastError 获得错误码}
+
     function FormatPascalBlock(StartType: DWORD; StartIndent: DWORD;
       Input: PAnsiChar; Len: DWORD): PAnsiChar;
     {* 格式化一块代码。需要指定起始代码类型以及起始缩进。

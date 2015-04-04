@@ -318,7 +318,7 @@ end;
 
 procedure TCnCodeGenerator.SaveToStream(Stream: TStream);
 begin
-  FCode.SaveToStream(Stream);
+  FCode.SaveToStream(Stream {$IFDEF UNICODE}, TEncoding.Unicode {$ENDIF});
 end;
 
 procedure TCnCodeGenerator.SaveToStrings(AStrings: TStrings);

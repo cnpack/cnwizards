@@ -352,6 +352,7 @@ constructor TCnAbstractCodeFormatter.Create(AStream: TStream;
   ACompDirectiveMode: TCompDirectiveMode);
 begin
   FCodeGen := TCnCodeGenerator.Create;
+  FCodeGen.CodeWrapMode := CnPascalCodeForRule.CodeWrapMode;
   FScaner := TScaner.Create(AStream, FCodeGen, ACompDirectiveMode);
   FCodeGen.OnAfterWrite := CodeGenAfterWrite;
 end;
@@ -4205,6 +4206,7 @@ procedure TCnProgramBlockFormatter.FormatUsesList(PreSpaceCount: Byte;
   const CanHaveUnitQual: Boolean; const NeedCRLF: Boolean);
 var
   OldWrapMode: TCodeWrapMode;
+  OldAuto: Boolean;
 begin
   FormatUsesDecl(PreSpaceCount, CanHaveUnitQual);
 
@@ -4219,11 +4221,14 @@ begin
     else // 无需手工换行时也无需缩进
     begin
       OldWrapMode := CodeGen.CodeWrapMode;
+      OldAuto := CodeGen.AutoWrapButNoIndent;
       try
         CodeGen.CodeWrapMode := cwmSimple; // uses 要求简单换行
+        CodeGen.AutoWrapButNoIndent := True; // uses 单元换行后无需缩进
         FormatUsesDecl(0, CanHaveUnitQual);
       finally
         CodeGen.CodeWrapMode := OldWrapMode;
+        CodeGen.AutoWrapButNoIndent := OldAuto;
       end;
     end;
   end;
