@@ -347,7 +347,7 @@ end;
 function TCnSrcEditorKey.DoAutoMatchEnter(View: IOTAEditView; Key, ScanCode: Word;
   Shift: TShiftState; var Handled: Boolean): Boolean;
 var
-  AChar: Char;
+  AChar, Char1, Char2: Char;
   Line: string;
   AnsiLine: AnsiString;
   LineNo, CharIndex: Integer;
@@ -432,6 +432,24 @@ begin
           FAutoMatchEntered := False;
           Handled := True;
         end;
+      end;
+    end
+    else if FAutoMatchEntered and (AChar = #08) and (CharIndex < Length(AnsiLine)) then
+    begin
+      // 如果是退格键，并且光标左边是左括号右边是右括号，则把右括号也删掉
+      Char1 := Char(AnsiLine[CharIndex]);
+      Char2 := Char(AnsiLine[CharIndex + 1]);
+      if ( (Char1 = '(') and (Char2 = ')') ) or
+        ((Char1 = '[') and (Char2 = ']')) or
+        ((Char1 = '{') and (Char2 = '}')) or
+        ((Char1 = '''') and (Char2 = '''')) or
+        ((Char1 = '"') and (Char2 = '"')) then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('Should Delete AutoMatched Chars.');
+{$ENDIF}
+        CnOtaEditDelete(1);
+        Handled := False;
       end;
     end;
   end;
@@ -1088,6 +1106,9 @@ begin
   Stream := TMemoryStream.Create;
   try
     CnOtaSaveEditorToStream(EditView.Buffer, Stream);
+{$IFDEF DEBUG}
+    CnDebugger.LogMemDump(Stream.Memory, Stream.Size);
+{$ENDIF}
     // 解析当前显示的源文件
     Parser.ParseSource(PAnsiChar(Stream.Memory),
       IsDpr(EditView.Buffer.FileName) or IsInc(EditView.Buffer.FileName), False);
@@ -1258,7 +1279,9 @@ begin
             NewCode := NewCode + string(Copy(AnsiString(Parser.Source), LastTokenPos + 1,
               BlockMatchInfo.CurTokens[I].TokenPos - LastTokenPos)) + NewName;
           end;
-
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('NewCode: ' + NewCode);
+{$ENDIF}
           // 同一行前面的会影响光标位置
           if (BlockMatchInfo.CurTokens[I].EditLine = BlockMatchInfo.CurrentToken.EditLine) and
             (BlockMatchInfo.CurTokens[I].EditCol < BlockMatchInfo.CurrentToken.EditCol) then
