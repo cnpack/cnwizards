@@ -145,6 +145,11 @@ implementation
 
 {$R *.DFM}
 
+{$IFDEF DEBUG}
+uses
+  CnDebug;
+{$ENDIF}
+
 const
 {$IFDEF UNICODE}
   DLLName: string = 'CnFormatLibW.dll'; // D2009 ~ 最新 用 Unicode 版
@@ -448,11 +453,22 @@ begin
         // Src/Res Utf16
         Src := CnOtaGetCurrentEditorSourceW;
         Res := Formatter.FormatOnePascalUnitW(PChar(Src), Length(Src));
+
+        // Remove FF FE BOM if exists
+        if (Length(Res) > 1) and (Res[0] = #$FEFF) then
+          Inc(Res);
+        // CnDebugger.LogMemDump(PChar(Res), Length(Res) * SizeOf(Char));
 {$ELSE}
   {$IFDEF IDE_STRING_ANSI_UTF8}
         // Src/Res Utf8
         Src := CnOtaGetCurrentEditorSource(False);
         Res := Formatter.FormatOnePascalUnitUtf8(PAnsiChar(Src), Length(Src));
+
+        // Remove EF BB BF BOM if exist
+        if (Length(Res) > 3) and
+          (Res[0] = #$EF) and (Res[1] = #$BB) and (Res[2] = #$BF) then
+          Inc(Res, 3);
+        // CnDebugger.LogMemDump(PAnsiChar(Res), Length(Res));
   {$ELSE}
         // Src/Res Ansi
         Src := CnOtaGetCurrentEditorSource(True);
@@ -462,6 +478,7 @@ begin
         if Res <> nil then
         begin
 {$IFDEF UNICODE}
+          // Utf16 内部转 Utf8 写入
           CnOtaSetCurrentEditorSourceW(string(Res));
 {$ELSE}
   {$IFDEF IDE_STRING_ANSI_UTF8}
