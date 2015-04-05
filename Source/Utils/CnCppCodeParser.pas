@@ -81,7 +81,7 @@ type
     FInnerBlockCloseToken: TCnCppToken;
     FInnerBlockStartToken: TCnCppToken;
     FCurrentClass: AnsiString;
-    FSource: PAnsiChar;
+    FSource: AnsiString;
     function GetCount: Integer;
     function GetToken(Index: Integer): TCnCppToken;
   public
@@ -108,7 +108,7 @@ type
     property CurrentClass: AnsiString read FCurrentClass;
     property CurrentChildMethod: AnsiString read FCurrentChildMethod;
 
-    property Source: PAnsiChar read FSource;
+    property Source: AnsiString read FSource;
   end;
 
 function ParseCppCodePosInfo(const Source: AnsiString; CurrPos: Integer;
