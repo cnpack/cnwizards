@@ -217,7 +217,7 @@ var
   BraceStartToken: TCnCppToken;
   BeginBracePosition: Integer;
   FunctionName, OwnerClass: string;
-  PrevIsOperator: Boolean;
+  PrevIsOperator, RunReachedZero: Boolean;
 
   procedure NewToken;
   var
@@ -438,9 +438,16 @@ begin
           while CParser.RunPosition < FBlockStartToken.TokenPos do
             CParser.NextNonJunk;
 
+        RunReachedZero := False;
         while not (CParser.RunID in [ctkNull, ctkbraceclose, ctksemicolon])
-          and (CParser.RunPosition > 0) do               //  防止 using namespace std; 这种
+          and (CParser.RunPosition >= 0) do               //  防止 using namespace std; 这种
         begin
+          if RunReachedZero and (CParser.RunPosition = 0) then
+            Break; // 曾经到 0，现在还是 0，表示出现了死循环
+          if CParser.RunPosition = 0 then
+            RunReachedZero := True;
+
+          // 如果 namespace 是最开头，则 RunPosition 可以是 0
           if CParser.RunID in [ctknamespace] then
           begin
             // 本层是 namespace，处理第二层去

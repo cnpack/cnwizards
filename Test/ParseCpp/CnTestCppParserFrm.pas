@@ -60,7 +60,8 @@ begin
     mmoC.Lines.SaveToStream(Stream);
     NilChar := 0;
     Stream.Write(NilChar, SizeOf(NilChar));
-    Parser.ParseSource(Stream.Memory, Stream.Size, mmoC.CaretPos.Y + 1, mmoC.CaretPos.X + 1);
+    Parser.ParseSource(Stream.Memory, Stream.Size, mmoC.CaretPos.Y + 1,
+      mmoC.CaretPos.X + 1, True);
 
     for I := 0 to Parser.Count - 1 do
     begin
@@ -79,6 +80,20 @@ begin
       mmoParse.Lines.Add(Format('OuterClose: Line: %d, Col %2.2d. Layer: %d. Token: %s',
        [Parser.BlockCloseToken.LineNumber, Parser.BlockCloseToken.CharIndex,
         Parser.BlockCloseToken.ItemLayer, Parser.BlockCloseToken.Token]));
+    if Parser.BlockIsNamespace then
+      mmoParse.Lines.Add('Outer is namespace.')
+    else
+      mmoParse.Lines.Add('Outer is NOT namespace.');
+
+    if Parser.ChildStartToken <> nil then
+      mmoParse.Lines.Add(Format('ChildStart: Line: %d, Col %2.2d. Layer: %d. Token: %s',
+       [Parser.ChildStartToken.LineNumber, Parser.ChildStartToken.CharIndex,
+        Parser.ChildStartToken.ItemLayer, Parser.ChildStartToken.Token]));
+    if Parser.ChildCloseToken <> nil then
+      mmoParse.Lines.Add(Format('ChildClose: Line: %d, Col %2.2d. Layer: %d. Token: %s',
+       [Parser.ChildCloseToken.LineNumber, Parser.ChildCloseToken.CharIndex,
+        Parser.ChildCloseToken.ItemLayer, Parser.ChildCloseToken.Token]));
+
     if Parser.InnerBlockStartToken <> nil then
       mmoParse.Lines.Add(Format('InnerStart: Line: %d, Col %2.2d. Layer: %d. Token: %s',
        [Parser.InnerBlockStartToken.LineNumber, Parser.InnerBlockStartToken.CharIndex,

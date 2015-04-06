@@ -72,6 +72,7 @@ object Form1: TForm1
     Top = 272
     Width = 625
     Height = 225
+    ScrollBars = ssVertical
     TabOrder = 3
   end
   object dlgOpen1: TOpenDialog
