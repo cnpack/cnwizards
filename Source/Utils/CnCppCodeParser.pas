@@ -82,6 +82,7 @@ type
     FInnerBlockStartToken: TCnCppToken;
     FCurrentClass: AnsiString;
     FSource: AnsiString;
+    FBlockIsNamespace: Boolean;
     function GetCount: Integer;
     function GetToken(Index: Integer): TCnCppToken;
   public
@@ -93,17 +94,25 @@ type
     function IndexOfToken(Token: TCnCppToken): Integer;
     property Count: Integer read GetCount;
     property Tokens[Index: Integer]: TCnCppToken read GetToken;
+
     property MethodStartToken: TCnCppToken read FMethodStartToken;
     property MethodCloseToken: TCnCppToken read FMethodCloseToken;
+    {* 上面俩未解析}
+
     property ChildStartToken: TCnCppToken read FChildStartToken;
     property ChildCloseToken: TCnCppToken read FChildCloseToken;
     {* 当前层次为 2 的大括号}
+
     property BlockStartToken: TCnCppToken read FBlockStartToken;
     property BlockCloseToken: TCnCppToken read FBlockCloseToken;
     {* 当前层次为 1 的大括号}
+    property BlockIsNamespace: Boolean read FBlockIsNamespace;
+    {* 当前层次为 1 的大括号是否是 namespace}
+
     property InnerBlockStartToken: TCnCppToken read FInnerBlockStartToken;
     property InnerBlockCloseToken: TCnCppToken read FInnerBlockCloseToken;
     {* 当前最内层次的大括号}
+
     property CurrentMethod: AnsiString read FCurrentMethod;
     property CurrentClass: AnsiString read FCurrentClass;
     property CurrentChildMethod: AnsiString read FCurrentChildMethod;
@@ -313,6 +322,7 @@ begin
   FInnerBlockCloseToken := nil;
   FBlockStartToken := nil;
   FBlockCloseToken := nil;
+  FBlockIsNamespace := False;
 
   FCurrentClass := '';
   FCurrentMethod := '';
@@ -413,7 +423,7 @@ begin
 
     if ParseCurrent then
     begin
-      // DONE: 处理第一层或第二层（如果第一层是 namespace 的话）的内容
+      // 处理第一层或第二层（如果第一层是 namespace 的话）的内容
       if FBlockStartToken <> nil then
       begin
         BraceStartToken := FBlockStartToken;
@@ -428,13 +438,14 @@ begin
           while CParser.RunPosition < FBlockStartToken.TokenPos do
             CParser.NextNonJunk;
 
-        while not (CParser.RunID in [ctkNull, ctkbraceclose])
-          and (CParser.RunPosition > 0) do
+        while not (CParser.RunID in [ctkNull, ctkbraceclose, ctksemicolon])
+          and (CParser.RunPosition > 0) do               //  防止 using namespace std; 这种
         begin
           if CParser.RunID in [ctknamespace] then
           begin
             // 本层是 namespace，处理第二层去
             BraceStartToken := FChildStartToken;
+            FBlockIsNamespace := True;
             Break;
           end;
           CParser.PreviousNonJunk;
