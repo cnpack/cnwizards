@@ -55,7 +55,11 @@ uses
 
 type
   TCnAutoMatchType = (btNone, btBracket, btSquare, btCurly, btQuote, btDitto); // () [] {} '' ""
+
   TCnRenameIdentifierType = (ritInvalid, ritUnit, ritCurrentProc, ritInnerProc);
+  // Pascal： 整个文件、当前最外层过程、当前最内层过程
+  // C/C++：  整个文件、当前最外层大括号（如果非namespace）或次外层（最外是namespace)
+              // 当前最内层大括号
 
 //==============================================================================
 // 代码编辑器按键扩展功能
@@ -1062,6 +1066,7 @@ var
   NewCode: string;
   EditWriter: IOTAEditWriter;
   LastToken, StartToken, EndToken, StartCurToken, EndCurToken: TCnPasToken;
+  CurFuncStartToken, CurFuncEndToken: TCnCppToken;
   FirstEnter: Boolean;
   LastTokenPos: Integer;
   FrmModalResult: Boolean;
@@ -1226,11 +1231,12 @@ begin
 
         StartToken := nil;
         EndToken := nil;
+
+        // 注意 StartToken 和 EndToken 未必是属于 CurTokens 中的。
+        // StartCurToken 和 EndCurToken 才是 CurTokens 列表中的头尾俩
         if Rit = ritUnit then
         begin
           // 替换范围为整个 unit 时，起始和终结 Token 为列表中头尾俩
-          // 注意 StartToken 和 EndToken 未必是属于 CurTokens 中的。
-          // StartCurToken 和 EndCurToken 才是 CurTokens 列表中的头尾俩
           StartToken := BlockMatchInfo.CurTokens[0];
           EndToken := BlockMatchInfo.CurTokens[BlockMatchInfo.CurTokenCount - 1];
         end
@@ -1356,7 +1362,7 @@ begin
       CnOtaSaveEditorToStream(EditView.Buffer, Stream);
       // 解析当前显示的源文件
       CParser.ParseSource(PAnsiChar(Stream.Memory), Stream.Size,
-        EditView.CursorPos.Line, EditView.CursorPos.Col);
+        EditView.CursorPos.Line, EditView.CursorPos.Col, True);
     finally
       Stream.Free;
     end;
@@ -1397,7 +1403,56 @@ begin
       end;
       if BlockMatchInfo.CurTokenCount = 0 then Exit;
 
-      Rit := ritUnit;
+      CurFuncStartToken := nil;
+      CurFuncEndToken := nil;
+
+      // 首先，找出正确的 CurrentFunc：最外层的非 namespace，或次外层（当最外层是 namespace）
+      if not CParser.BlockIsNamespace and (CParser.BlockStartToken <> nil) and
+        (CParser.BlockCloseToken <> nil) then
+      begin
+        CnDebugger.LogMsg('Block is not Namespace.Using.');
+        CurFuncStartToken := CParser.BlockStartToken;
+        CurFuncEndToken := CParser.BlockCloseToken;
+      end
+      else if CParser.BlockIsNamespace and (CParser.ChildStartToken <> nil) and
+        (CParser.ChildCloseToken <> nil) then
+      begin
+        CnDebugger.LogMsg('Block isNamespace.Using child');
+        CurFuncStartToken := CParser.ChildStartToken;
+        CurFuncEndToken := CParser.ChildCloseToken;
+      end;
+
+      // 如果当前光标下的 Token 在 InnerBlock 之间，并且所有的 Token 都在
+      // InnerBlock 之间，并且 InnerBlock 不是 CurFunc，则 RIT 为 InnerProc
+      // 如果当前光标下的 Token 在 CurFunc 之间，并且所有的 Token 都在
+      // CurFun 之间，则 RIT 为 CurrentProc
+      // 俩都不是时，RIT 为 Unit
+      Rit := ritInvalid;
+      if (CParser.InnerBlockStartToken <> nil) and (CParser.InnerBlockCloseToken <> nil)
+        and (CParser.InnerBlockStartToken <> CurFuncStartToken) and
+            (CParser.InnerBlockCloseToken <> CurFuncEndToken) then
+      begin
+        if (BlockMatchInfo.CurTokens[0].ItemIndex >= CParser.InnerBlockStartToken.ItemIndex)
+          and (BlockMatchInfo.CurTokens[BlockMatchInfo.CurTokenCount - 1].ItemIndex
+          <= CParser.InnerBlockCloseToken.ItemIndex) then
+          Rit := ritInnerProc;
+      end;
+
+      if (Rit = ritInvalid) and (CurFuncStartToken <> nil) and (CurFuncEndToken <> nil) then
+      begin
+        if (BlockMatchInfo.CurTokens[0].ItemIndex >= CurFuncStartToken.ItemIndex)
+          and (BlockMatchInfo.CurTokens[BlockMatchInfo.CurTokenCount - 1].ItemIndex
+          <= CurFuncEndToken.ItemIndex) then
+          Rit := ritCurrentProc;
+      end;
+
+      if Rit = ritInvalid then
+        Rit := ritUnit;
+
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('Cpp F2 Rename. Calc Rit to ' + IntToStr(Ord(Rit)));
+{$ENDIF}
+
       // 弹出对话框，暂时只支持整个文件
       with TCnIdentRenameForm.Create(nil) do
       begin
@@ -1408,12 +1463,29 @@ begin
             UpperHeadCur[1] := Chr(Ord(UpperHeadCur[1]) - 32);
           edtRename.Text := UpperHeadCur;
 
-          rbCurrentProc.Enabled := False;
-          rbCurrentInnerProc.Enabled := False;
-          rbUnit.Checked := True;
+          rbCurrentProc.Enabled := Assigned(CurFuncStartToken) and
+            Assigned(CurFuncEndToken);
+          rbCurrentInnerProc.Enabled := Assigned(CParser.InnerBlockStartToken) and
+            Assigned(CParser.InnerBlockCloseToken) and
+            (CParser.InnerBlockStartToken <> CurFuncStartToken) and
+            (CParser.InnerBlockCloseToken <> CurFuncEndToken);
+
+          if rbCurrentProc.Enabled and (Rit <> ritUnit) then // 标识符范围超出 CurFunc 时，默认不选中外层函数这项
+            rbCurrentProc.Checked := True;
+          if rbCurrentInnerProc.Enabled and (Rit = ritInnerProc) then // 标识符只在最内层内时，选中最内层选项
+            rbCurrentInnerProc.Checked := True;
+          if (not rbCurrentProc.Checked) and (not rbCurrentInnerProc.Checked) then
+            rbUnit.Checked := True;
 
           FrmModalResult := ShowModal = mrOk;
           NewName := edtRename.Text;
+
+          if rbCurrentProc.Checked then
+            Rit := ritCurrentProc
+          else if rbCurrentInnerProc.Checked then
+            Rit := ritInnerProc
+          else
+            Rit := ritUnit;
         finally
           Free;
         end;
@@ -1427,9 +1499,25 @@ begin
           Exit;
         end;
 
-        // 替换范围为整个 C 时，起始和终结 Token 为列表中头尾俩
-        StartToken := BlockMatchInfo.CurTokens[0];
-        EndToken := BlockMatchInfo.CurTokens[BlockMatchInfo.CurTokenCount - 1];
+        StartToken := nil;
+        EndToken := nil;
+        if Rit = ritUnit then
+        begin
+          // 替换范围为整个 C 时，起始和终结 Token 为列表中头尾俩
+          StartToken := BlockMatchInfo.CurTokens[0];
+          EndToken := BlockMatchInfo.CurTokens[BlockMatchInfo.CurTokenCount - 1];
+        end
+        else if Rit = ritCurrentProc then
+        begin
+          StartToken := CurFuncStartToken;
+          EndToken := CurFuncEndToken;
+        end
+        else if Rit = ritInnerProc then
+        begin
+          StartToken := CParser.InnerBlockStartToken;
+          EndToken := CParser.InnerBlockCloseToken;
+        end;
+
         if (StartToken = nil) or (EndToken = nil) then Exit;
 
         // 记录此 View 的 Bookmarks
