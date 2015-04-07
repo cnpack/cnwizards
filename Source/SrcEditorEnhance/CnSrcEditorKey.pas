@@ -1410,14 +1410,12 @@ begin
       if not CParser.BlockIsNamespace and (CParser.BlockStartToken <> nil) and
         (CParser.BlockCloseToken <> nil) then
       begin
-        CnDebugger.LogMsg('Block is not Namespace.Using.');
         CurFuncStartToken := CParser.BlockStartToken;
         CurFuncEndToken := CParser.BlockCloseToken;
       end
       else if CParser.BlockIsNamespace and (CParser.ChildStartToken <> nil) and
         (CParser.ChildCloseToken <> nil) then
       begin
-        CnDebugger.LogMsg('Block isNamespace.Using child');
         CurFuncStartToken := CParser.ChildStartToken;
         CurFuncEndToken := CParser.ChildCloseToken;
       end;
