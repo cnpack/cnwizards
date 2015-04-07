@@ -59,6 +59,8 @@ type
       Shift: TShiftState);
   private
     { Private declarations }
+  protected
+    function GetHelpTopic: string; override;
   public
     { Public declarations }
   end;
@@ -74,6 +76,11 @@ implementation
 procedure TCnIdentRenameForm.FormShow(Sender: TObject);
 begin
   edtRename.SetFocus;
+end;
+
+function TCnIdentRenameForm.GetHelpTopic: string;
+begin
+  Result := 'CnSrcEditorIdentRename';
 end;
 
 procedure TCnIdentRenameForm.edtRenameKeyDown(Sender: TObject;
