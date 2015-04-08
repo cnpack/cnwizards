@@ -341,6 +341,14 @@ procedure TCnCodeGenerator.Write(S: string; BeforeSpaceCount,
 var
   Str: string;
   Len: Integer;
+
+  function ExceedLineWrap: Boolean;
+  begin
+    Result := ((FColumnPos <= CnPascalCodeForRule.WrapWidth) and
+      (FColumnPos + Len > CnPascalCodeForRule.WrapWidth)) or
+      (FColumnPos > CnPascalCodeForRule.WrapWidth);
+  end;
+
 begin
   if FLock <> 0 then Exit;
   
@@ -349,7 +357,12 @@ begin
 
   Str := Format('%s%s%s', [StringOfChar(' ', BeforeSpaceCount), S,
     StringOfChar(' ', AfterSpaceCount)]);
-  Len := Length(Str);
+
+{$IFDEF UNICODE}
+  Len := Length(AnsiString(Str)); // Unicode 模式下，转成 Ansi 长度才符合一般规则
+{$ELSE}
+  Len := Length(Str); // Ansi 模式下，长度直接符合一般规则
+{$ENDIF}
 
   FPrevRow := FCode.Count - 1;
   if FCodeWrapMode = cwmNone then
@@ -358,10 +371,7 @@ begin
   end
   else if FCodeWrapMode = cwmSimple then // 简单换行，判断是否超出宽度
   begin
-    if (FPrevStr <> '.') and // Dot in unitname should not new line.
-     (((FColumnPos <= CnPascalCodeForRule.WrapWidth) and
-      (FColumnPos + Len > CnPascalCodeForRule.WrapWidth)) or
-      (FColumnPos > CnPascalCodeForRule.WrapWidth)) then
+    if (FPrevStr <> '.') and ExceedLineWrap then // Dot in unitname should not new line.
     begin
       if FAutoWrapButNoIndent then
       begin
@@ -383,7 +393,15 @@ begin
     Format('%s%s', [FCode[FCode.Count - 1], Str]);
 
   FPrevColumn := FColumnPos;
+
+{$IFDEF UNICODE}
+  // Unicode 模式下，转成 Ansi 长度才符合一般规则
+  FColumnPos := Length(AnsiString(FCode[FCode.Count - 1]));
+{$ELSE}
+  // Ansi 模式下，长度直接符合一般规则
   FColumnPos := Length(FCode[FCode.Count - 1]);
+{$ENDIF}
+
   FPrevStr := S;
 
   DoAfterWrite;
