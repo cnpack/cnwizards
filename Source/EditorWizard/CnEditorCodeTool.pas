@@ -142,7 +142,8 @@ const
 var
   View: IOTAEditView;
   Block: IOTAEditBlock;
-  Text: AnsiString;
+  OrigText: AnsiString;
+  Text: string;
   Buf: PAnsiChar;
   BlockStartLine, BlockEndLine: Integer;
   StartPos, EndPos, ReadStart: Integer;
@@ -227,8 +228,8 @@ begin
 
     Len := EndPos - StartPos;
     Assert(Len >= 0);
-    SetLength(Text, Len);
-    Buf := Pointer(Text);
+    SetLength(OrigText, Len);
+    Buf := Pointer(OrigText);
     ReadStart := StartPos;
 
     Reader := View.Buffer.CreateReader;
@@ -246,17 +247,21 @@ begin
       Reader := nil;
     end;
 
-    if Text <> '' then
+    if OrigText <> '' then
     begin
     {$IFDEF UNICODE_STRING}
-      Text := AnsiString(ProcessText(string(ConvertEditorTextToText(Text)))); // 处理文本
+      Text := ProcessText((ConvertEditorTextToTextW(OrigText))); // 处理文本
     {$ELSE}
-      Text := ProcessText(ConvertEditorTextToText(Text)); // 处理文本
+      Text := ProcessText(ConvertEditorTextToText(OrigText)); // 处理文本
     {$ENDIF}
       Writer := View.Buffer.CreateUndoableWriter;
       try
         Writer.CopyTo(StartPos);
+        {$IFDEF UNICODE_STRING}
+        Writer.Insert(PAnsiChar(ConvertTextToEditorTextW(Text)));
+        {$ELSE}
         Writer.Insert(PAnsiChar(ConvertTextToEditorText(Text)));
+        {$ENDIF}
         Writer.DeleteTo(EndPos);
       finally
         Writer := nil;
