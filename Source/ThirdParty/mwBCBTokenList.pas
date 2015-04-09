@@ -1386,7 +1386,10 @@ begin
           end;
 
           if FOrigin[Run] <> #0 then // Maybe reached end #0 when handlecomments or other
-            Inc(Run); Inc(ColNum);
+          begin
+            Inc(Run);
+            Inc(ColNum);
+          end;
           FTokenPositionsList.Add(Run);
           FTokenLineNumberList.Add(LineNum);
           FTokenColNumberList.Add(ColNum);
