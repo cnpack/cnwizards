@@ -519,6 +519,8 @@ InitOk:
   File "..\..\Bin\Setup.exe"
   File "..\..\Bin\CnWizRes.dll"
   File "..\..\Bin\CnPngLib.dll"
+  File "..\..\Bin\CnFormatLib.dll"
+  File "..\..\Bin\CnFormatLibW.dll"
 !ifndef LITE_VERSION
   File "..\..\Bin\CnWizHelper.dll"
 !endif

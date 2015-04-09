@@ -75,8 +75,8 @@ See http://www.suigeneris.org/want/ for details.
   <property name="cnwizards_list" value="-d6,-d7,-d2006,-d2007,-cb6" if="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cndfm6to5,cnascii,cnidebr,cnmanagewiz,cnselectlang,cnsmr,cnwizsetup" unless="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cnwizsetup" if="lite" />
-  <property name="all_list"       value="cnwizards,resdll,cnwizhelperdll,cnpnglib,tools,makehelp,makeinst" unless="lite" />
-  <property name="all_list"       value="cnwizards,resdll,cnpnglib,tools,makeinst" if="lite" />
+  <property name="all_list"       value="cnwizards,resdll,cnwizhelperdll,cnpnglib,cnformatlib,cnformatlibw,tools,makehelp,makeinst" unless="lite" />
+  <property name="all_list"       value="cnwizards,resdll,cnpnglib,cnformatlib,cnformatlibw,tools,makeinst" if="lite" />
 
   <property name="install_lite"   value=""          unless="lite"/>
   <property name="install_lite"   value="/DLITE"    if="lite"/>
@@ -203,8 +203,8 @@ Usage: want [target-name] [-Dname=value]
     resdll     - Compile CnWizards Resource DLL.
     cnwizhelperdll - Compile CnWizards Helper DLL.
     cnpnglib   - Compile CnPngLib DLL.
-    cnformatlib - Compile cnFormatLib DLL.
-    cnformatlibw - Compile cnFormatLibW DLL for Unicode.
+    cnformatlib - Compile CnFormatLib DLL.
+    cnformatlibw - Compile CnFormatLibW DLL for Unicode.
     cnconfigio - Compile CnConfigIO.
     cndebugviewer  - Compile CnDebugViewer.
     cndfm6to5  - Compile CnDfm6To5.
