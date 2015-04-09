@@ -3626,8 +3626,12 @@ begin
     Reader.GetText(L1, PAnsiChar(OutStr), L2 - L1);
   finally
     Reader := nil;
-  end;          
+  end;
+  {$IFDEF UNICODE}
+  Text := TrimRight(ConvertEditorTextToTextW(OutStr));
+  {$ELSE}
   Text := TrimRight(string(ConvertEditorTextToText(OutStr)));
+  {$ENDIF}
   Result := True;
 end;
 

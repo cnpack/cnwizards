@@ -595,6 +595,7 @@ const
 var
   View: IOTAEditView;
   Text: AnsiString;
+  Res: string;
   Buf: PAnsiChar;
   BlockStartLine, BlockEndLine: Integer;
   StartPos, EndPos, Len, ReadStart, ASize: Integer;
@@ -630,10 +631,13 @@ begin
       Reader := nil;
     end;                  
 
-    Text := ConvertEditorTextToText(Text);
+    {$IFDEF UNICODE}
+    Res := ConvertEditorTextToTextW(Text); // Unicode 下不经过 Ansi 转换以避免丢字符
+    {$ELSE}
+    Res := ConvertEditorTextToText(Text);
+    {$ENDIF}
 
-    Lines.Text := string(Text);
-    
+    Lines.Text := Res;
     Result := Text <> '';
   end;
 end;
