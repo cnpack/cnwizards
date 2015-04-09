@@ -1691,7 +1691,7 @@ end; { GetTokenID }
 
 procedure TBCBTokenList.Next;
 begin
-  if Run < Count - 1 then Inc(Run);
+  if Run <= Count - 1 then Inc(Run);
 end; { Next }
 
 procedure TBCBTokenList.Previous;
