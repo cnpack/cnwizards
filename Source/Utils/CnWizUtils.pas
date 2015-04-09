@@ -3584,7 +3584,12 @@ begin
       finally
         Reader := nil;
       end;
+      {$IFDEF UNICODE}
+      Result := ConvertEditorTextToTextW(OutStr);
+      {$ELSE}
       Result := string(ConvertEditorTextToText(OutStr));
+      {$ENDIF}
+
     {$IFDEF UNICODE_STRING}
       // 此函数在 D2009 下 Result 长度不对，需要 TrimRight
       Result := TrimRight(Result);
