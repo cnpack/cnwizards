@@ -4,21 +4,23 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls;
+  StdCtrls, TypInfo;
 
 type
-  TForm1 = class(TForm)
+  TCppParseForm = class(TForm)
     btnLoad: TButton;
     mmoC: TMemo;
     dlgOpen1: TOpenDialog;
     btnParse: TButton;
     mmoParse: TMemo;
     Label1: TLabel;
+    btnTokenList: TButton;
     procedure btnLoadClick(Sender: TObject);
     procedure btnParseClick(Sender: TObject);
     procedure mmoCClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure mmoCChange(Sender: TObject);
+    procedure btnTokenListClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -26,16 +28,16 @@ type
   end;
 
 var
-  Form1: TForm1;
+  CppParseForm: TCppParseForm;
 
 implementation
 
 uses
-  CnCppCodeParser;
+  CnCppCodeParser, mwBCBTokenList;
 
 {$R *.DFM}
 
-procedure TForm1.btnLoadClick(Sender: TObject);
+procedure TCppParseForm.btnLoadClick(Sender: TObject);
 begin
   if dlgOpen1.Execute then
   begin
@@ -44,7 +46,7 @@ begin
   end;
 end;
 
-procedure TForm1.btnParseClick(Sender: TObject);
+procedure TCppParseForm.btnParseClick(Sender: TObject);
 var
   Parser: TCnCppStructureParser;
   Stream: TMemoryStream;
@@ -108,19 +110,42 @@ begin
   end;
 end;
 
-procedure TForm1.mmoCClick(Sender: TObject);
+procedure TCppParseForm.mmoCClick(Sender: TObject);
 begin
   Self.Label1.Caption := Format('Line: %d, Col %d.', [mmoC.CaretPos.Y + 1, mmoC.CaretPos.X + 1]);
 end;
 
-procedure TForm1.FormCreate(Sender: TObject);
+procedure TCppParseForm.FormCreate(Sender: TObject);
 begin
   Self.Label1.Caption := Format('Line: %d, Col %d.', [mmoC.CaretPos.Y + 1, mmoC.CaretPos.X + 1]);
 end;
 
-procedure TForm1.mmoCChange(Sender: TObject);
+procedure TCppParseForm.mmoCChange(Sender: TObject);
 begin
   Self.Label1.Caption := Format('Line: %d, Col %d.', [mmoC.CaretPos.Y + 1, mmoC.CaretPos.X + 1]);
+end;
+
+procedure TCppParseForm.btnTokenListClick(Sender: TObject);
+var
+  CP: TBCBTokenList;
+  S: string;
+  I: Integer;
+begin
+  CP := TBCBTokenList.Create;
+  CP.DirectivesAsComments := False;
+  S := mmoC.Lines.Text;
+  CP.SetOrigin(PChar(S), Length(S));
+
+  mmoParse.Lines.Clear;
+  I := 1;
+  while CP.RunID <> ctknull do
+  begin
+    mmoParse.Lines.Add(Format('%3.3d. Line: %d, Col %2.2d, Len %2.2d, Position %4.4d. %s, Token: %s',
+        [I, CP.RunLineNumber, CP.RunColNumber, CP.TokenLength, CP.RunPosition, GetEnumName(TypeInfo(TCTokenKind),
+         Ord(CP.RunID)), CP.RunToken]));
+    CP.Next;
+    Inc(I);
+  end;
 end;
 
 end.

@@ -2,7 +2,7 @@ program CnTestCppParser;
 
 uses
   Forms,
-  CnTestCppParserFrm in 'CnTestCppParserFrm.pas' {Form1},
+  CnTestCppParserFrm in 'CnTestCppParserFrm.pas' {CppParseForm},
   CnCppCodeParser in '..\..\Source\Utils\CnCppCodeParser.pas',
   mwBCBTokenList in '..\..\Source\ThirdParty\mwBCBTokenList.pas',
   CnFastList in '..\..\Source\Utils\CnFastList.pas',
@@ -13,6 +13,6 @@ uses
 
 begin
   Application.Initialize;
-  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TCppParseForm, CppParseForm);
   Application.Run;
 end.

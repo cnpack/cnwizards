@@ -1,4 +1,4 @@
-object Form1: TForm1
+object CppParseForm: TCppParseForm
   Left = 192
   Top = 107
   Width = 665
@@ -54,7 +54,7 @@ object Form1: TForm1
       '}')
     ParentFont = False
     ScrollBars = ssVertical
-    TabOrder = 2
+    TabOrder = 3
     OnChange = mmoCChange
     OnClick = mmoCClick
   end
@@ -64,7 +64,7 @@ object Form1: TForm1
     Width = 75
     Height = 25
     Caption = 'Parse'
-    TabOrder = 1
+    TabOrder = 2
     OnClick = btnParseClick
   end
   object mmoParse: TMemo
@@ -73,7 +73,16 @@ object Form1: TForm1
     Width = 625
     Height = 225
     ScrollBars = ssVertical
-    TabOrder = 3
+    TabOrder = 4
+  end
+  object btnTokenList: TButton
+    Left = 454
+    Top = 16
+    Width = 75
+    Height = 25
+    Caption = 'Tokenize'
+    TabOrder = 1
+    OnClick = btnTokenListClick
   end
   object dlgOpen1: TOpenDialog
     Filter = 'C/C++ Files (*.c;*.cpp;*.h;*.hpp)|*.c;*.cpp;*.h;*.hpp'
