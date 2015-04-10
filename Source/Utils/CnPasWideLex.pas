@@ -521,12 +521,12 @@ end;
 function TCnPasWideLex.KeyHash(ToHash: PChar): Integer;
 begin
   Result := 0;
-  while ToHash^ in ['a'..'z', 'A'..'Z'] do
+  while CharInSet(ToHash^, ['a'..'z', 'A'..'Z']) do
   begin
     Inc(Result, mHashTable[ToHash^]);
     Inc(ToHash);
   end;
-  if ToHash^ in ['_', '0'..'9'] then
+  if CharInSet(ToHash^, ['_', '0'..'9']) then
     Inc(ToHash);
   FStringLen := ToHash - FToIdent;
 end;  { KeyHash }
@@ -1378,7 +1378,7 @@ procedure TCnPasWideLex.AsciiCharProc;
 begin
   FTokenID := tkAsciiChar;
   StepRun;
-  while FOrigin[FRun] in ['0'..'9'] do
+  while CharInSet(FOrigin[FRun], ['0'..'9']) do
     StepRun;
 end;
 
@@ -1527,7 +1527,7 @@ end;
 
 function TCnPasWideLex.InSymbols(aChar: Char): Boolean;
 begin
-  if aChar in ['#', '$', '&', #39, '(', ')', '*', '+', ',', '?', '.', '/', ':', ';', '<', '=', '>', '@', '[', ']', '^'] then
+  if CharInSet(aChar, ['#', '$', '&', #39, '(', ')', '*', '+', ',', '?', '.', '/', ':', ';', '<', '=', '>', '@', '[', ']', '^']) then
     Result := True
   else
     Result := False;
@@ -1538,7 +1538,7 @@ var
   P: PChar;
 begin
   P := FOrigin + FRun + Count;
-  while P^ in [#1..#9, #11, #12, #14..#32] do
+  while CharInSet(P^, [#1..#9, #11, #12, #14..#32]) do
     Inc(P);
   Result := P^;
 end;
@@ -1555,7 +1555,7 @@ procedure TCnPasWideLex.IntegerProc;
 begin
   StepRun;
   FTokenID := tkInteger;
-  while FOrigin[FRun] in ['0'..'9', 'A'..'F', 'a'..'f'] do
+  while CharInSet(FOrigin[FRun], ['0'..'9', 'A'..'F', 'a'..'f']) do
     StepRun;
 end;
 
@@ -1644,7 +1644,7 @@ procedure TCnPasWideLex.NumberProc;
 begin
   StepRun;
   FTokenID := tkNumber;
-  while FOrigin[FRun] in ['0'..'9', '.', 'e', 'E'] do
+  while CharInSet(FOrigin[FRun], ['0'..'9', '.', 'e', 'E']) do
   begin
     case FOrigin[FRun] of
       '.':
@@ -1846,7 +1846,7 @@ procedure TCnPasWideLex.SpaceProc;
 begin
   StepRun;
   FTokenID := tkSpace;
-  while FOrigin[FRun] in [#1..#9, #11, #12, #14..#32] do
+  while CharInSet(FOrigin[FRun], [#1..#9, #11, #12, #14..#32]) do
     StepRun;
 end;
 
