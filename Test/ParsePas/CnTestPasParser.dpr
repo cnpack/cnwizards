@@ -2,7 +2,7 @@ program CnTestPasParser;
 
 uses
   Forms,
-  CnTestPasParserFrm in 'CnTestPasParserFrm.pas' {Form1},
+  CnTestPasParserFrm in 'CnTestPasParserFrm.pas' {CnTestPasForm},
   CnFastList in '..\..\Source\Utils\CnFastList.pas',
   CnPasCodeParser in '..\..\Source\Utils\CnPasCodeParser.pas',
   mPasLex in '..\..\Source\ThirdParty\mPasLex.pas';
@@ -11,6 +11,6 @@ uses
 
 begin
   Application.Initialize;
-  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TCnTestPasForm, CnTestPasForm);
   Application.Run;
 end.

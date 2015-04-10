@@ -1,4 +1,4 @@
-object Form1: TForm1
+object CnTestPasForm: TCnTestPasForm
   Left = 192
   Top = 107
   Width = 665
@@ -46,7 +46,7 @@ object Form1: TForm1
       '  end;')
     ParentFont = False
     ScrollBars = ssVertical
-    TabOrder = 2
+    TabOrder = 3
     OnChange = mmoCChange
     OnClick = mmoCClick
   end
@@ -56,7 +56,7 @@ object Form1: TForm1
     Width = 75
     Height = 25
     Caption = 'Parse'
-    TabOrder = 1
+    TabOrder = 2
     OnClick = btnParseClick
   end
   object mmoParse: TMemo
@@ -64,10 +64,19 @@ object Form1: TForm1
     Top = 272
     Width = 625
     Height = 225
-    TabOrder = 3
+    TabOrder = 4
+  end
+  object btnUses: TButton
+    Left = 312
+    Top = 16
+    Width = 75
+    Height = 25
+    Caption = 'Get Uses'
+    TabOrder = 1
+    OnClick = btnUsesClick
   end
   object dlgOpen1: TOpenDialog
-    Filter = 'C/C++ Files (*.c;*.cpp;*.h;*.hpp)|*.c;*.cpp;*.h;*.hpp'
+    Filter = 'Pascal Files(*.pas)|*.pas'
     Left = 144
     Top = 16
   end

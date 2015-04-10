@@ -7,18 +7,20 @@ uses
   StdCtrls;
 
 type
-  TForm1 = class(TForm)
+  TCnTestPasForm = class(TForm)
     btnLoad: TButton;
     mmoC: TMemo;
     dlgOpen1: TOpenDialog;
     btnParse: TButton;
     mmoParse: TMemo;
     Label1: TLabel;
+    btnUses: TButton;
     procedure btnLoadClick(Sender: TObject);
     procedure btnParseClick(Sender: TObject);
     procedure mmoCClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure mmoCChange(Sender: TObject);
+    procedure btnUsesClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -26,7 +28,7 @@ type
   end;
 
 var
-  Form1: TForm1;
+  CnTestPasForm: TCnTestPasForm;
 
 implementation
 
@@ -35,7 +37,7 @@ uses
 
 {$R *.DFM}
 
-procedure TForm1.btnLoadClick(Sender: TObject);
+procedure TCnTestPasForm.btnLoadClick(Sender: TObject);
 begin
   if dlgOpen1.Execute then
   begin
@@ -44,7 +46,7 @@ begin
   end;
 end;
 
-procedure TForm1.btnParseClick(Sender: TObject);
+procedure TCnTestPasForm.btnParseClick(Sender: TObject);
 var
   Parser: TCnPasStructureParser;
   Stream: TMemoryStream;
@@ -94,19 +96,33 @@ begin
   end;
 end;
 
-procedure TForm1.mmoCClick(Sender: TObject);
+procedure TCnTestPasForm.mmoCClick(Sender: TObject);
 begin
   Self.Label1.Caption := Format('Line: %d, Col %d.', [mmoC.CaretPos.Y + 1, mmoC.CaretPos.X + 1]);
 end;
 
-procedure TForm1.FormCreate(Sender: TObject);
+procedure TCnTestPasForm.FormCreate(Sender: TObject);
 begin
   Self.Label1.Caption := Format('Line: %d, Col %d.', [mmoC.CaretPos.Y + 1, mmoC.CaretPos.X + 1]);
 end;
 
-procedure TForm1.mmoCChange(Sender: TObject);
+procedure TCnTestPasForm.mmoCChange(Sender: TObject);
 begin
   Self.Label1.Caption := Format('Line: %d, Col %d.', [mmoC.CaretPos.Y + 1, mmoC.CaretPos.X + 1]);
+end;
+
+procedure TCnTestPasForm.btnUsesClick(Sender: TObject);
+var
+  List: TStrings;
+begin
+  List := TStringList.Create;
+
+  try
+    ParseUnitUses(mmoC.Lines.Text, List);
+    ShowMessage(List.Text);
+  finally
+    List.Free;
+  end;
 end;
 
 end.
