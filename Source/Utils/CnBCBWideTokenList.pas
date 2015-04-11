@@ -921,7 +921,7 @@ begin
       #1..#9, #11, #12, #14..#32:
         begin
           Inc(FRun); Inc(ColNum);
-          while FOrigin[FRun] in [#1..#9, #11, #12, #14..#32] do
+          while CharInSet(FOrigin[FRun], [#1..#9, #11, #12, #14..#32]) do
           begin
             Inc(FRun);
             Inc(ColNum);
@@ -934,7 +934,7 @@ begin
       'A'..'Z', 'a'..'z', '_', '~':
         begin
           Inc(FRun); Inc(ColNum);
-          while FOrigin[FRun] in ['A'..'Z', 'a'..'z', '0'..'9', '_'] do
+          while CharInSet(FOrigin[FRun], ['A'..'Z', 'a'..'z', '0'..'9', '_']) do
           begin
             Inc(FRun);
             Inc(ColNum);
@@ -947,7 +947,7 @@ begin
       '0'..'9':
         begin
           Inc(FRun); Inc(ColNum);
-          while FOrigin[FRun] in ['0'..'9', '.', 'e', 'E'] do
+          while CharInSet(FOrigin[FRun], ['0'..'9', '.', 'e', 'E']) do
           begin
             case FOrigin[FRun] of
               '.':
@@ -1021,7 +1021,7 @@ begin
                       Inc(ColNum);
                       if (FOrigin[FRun] = '\') then
                       begin
-                        while not (FOrigin[FRun + 1] in [#10, #13, #0]) do
+                        while not CharInSet(FOrigin[FRun + 1], [#10, #13, #0]) do
                         begin
                           Inc(FRun);
                           Inc(ColNum);
@@ -1036,7 +1036,7 @@ begin
                         Inc(FRun);
                         Inc(ColNum);
                       end;
-                    until (FOrigin[FRun + 1] in [#10, #13, #0]);
+                    until CharInSet(FOrigin[FRun + 1], [#10, #13, #0]);
 
                     if FOrigin[FRun + 1] = #13 then
                       Inc(FRun);
@@ -1052,7 +1052,7 @@ begin
                   begin
                     Inc(FRun);
                     Inc(ColNum);
-                    while FOrigin[FRun] in ['A'..'Z', 'a'..'z'] do
+                    while CharInSet(FOrigin[FRun], ['A'..'Z', 'a'..'z']) do
                     begin
                       Inc(FRun);
                       Inc(ColNum);
@@ -1276,7 +1276,7 @@ begin
       begin
         Inc(Running);
         Result := ctknumber;
-        while FOrigin[Running] in ['0'..'9', '.'] do
+        while CharInSet(FOrigin[Running], ['0'..'9', '.']) do
         begin
           case FOrigin[Running] of
             '.':
@@ -1323,7 +1323,7 @@ begin
                   begin
                     Inc(Running);
                     TempRun := Running;
-                    while FOrigin[Running] in ['A'..'Z', 'a'..'z'] do Inc(Running);
+                    while CharInSet(FOrigin[Running], ['A'..'Z', 'a'..'z']) do Inc(Running);
                     Result := DirKind(TempRun, Running);
                   end;
                 end;

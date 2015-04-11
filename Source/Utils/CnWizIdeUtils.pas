@@ -65,6 +65,7 @@ uses
   {$ELSE}
   DsgnIntf, LibIntf,
   {$ENDIF}
+  CnPasCodeParser, {$IFDEF UNICODE} CnWidePasParser, {$ENDIF}
   CnWizUtils, CnWizEditFiler, CnCommon, CnWizOptions, CnWizCompilerConst;
 
 //==============================================================================
@@ -203,6 +204,14 @@ function IdeSetSourceByFileName(const FileName: string; Source: TStrings;
   OpenInIde: Boolean): Boolean;
 {* 根据文件名写入内容。如果文件在 IDE 中打开，写入内容到编辑器中，否则如果
    OpenInIde 为真打开文件写入到编辑器，OpenInIde 为假直接写入文件。}
+
+function IsCurrentToken(AView: Pointer; AControl: TControl; Token: TCnPasToken): Boolean;
+{* 判断标识符是否在光标下，频繁调用，因此此处 View 用指针来避免引用计数从而优化速度，各版本均可使用 }
+
+{$IFDEF UNICODE}
+function IsCurrentTokenW(AView: Pointer; AControl: TControl; Token: TCnWidePasToken): Boolean;
+{* 判断标识符是否在光标下，同上，但使用 WideToken，只 Unicode 环境下调用}
+{$ENDIF}
 
 //==============================================================================
 // IDE 窗体编辑器功能函数
@@ -803,6 +812,76 @@ begin
     Source.SaveToFile(FileName);
   Result := True;
 end;  
+
+// 判断标识符是否在光标下，各版本均可使用
+function IsCurrentToken(AView: Pointer; AControl: TControl; Token: TCnPasToken): Boolean;
+var
+{$IFDEF BDS}
+  Text: AnsiString;
+{$ENDIF}
+  LineNo, Col: Integer;
+  View: IOTAEditView;
+begin
+  if not Assigned(AView) then
+  begin
+    Result := False;
+    Exit;
+  end;
+  View := IOTAEditView(AView);
+  LineNo := View.CursorPos.Line;
+  Col := View.CursorPos.Col;
+
+  if Token.EditLine <> LineNo then // 行号不等时直接退出
+  begin
+    Result := False;
+    Exit;
+  end;
+
+  // 行相等才需要读出行内容进行比较，其中 Col 是直观的 Ansi 概念，双字节字符占 2 列
+{$IFDEF BDS}
+  Text := AnsiString(GetStrProp(AControl, 'LineText')); // D2009 以上 Unicode 也得转换成 Ansi
+  if Text <> '' then
+  begin
+    // TODO: 用 TextWidth 获得光标位置精确对应的源码字符位置，但实现较难。
+    // 当存在占据单字符位置的双字节字符时，以下算法会有偏差。
+
+    {$IFNDEF DELPHI2009_UP}
+    // D2005~2007 获得的是 Utf8 字符串，需要转换为 Ansi 才能进行直观列比较
+    Col := Length(CnUtf8ToAnsi(Copy(Text, 1, Col)));
+    {$ENDIF}
+  end;
+{$ENDIF}
+  Result := (Col >= Token.EditCol) and (Col <= Token.EditCol + Length(Token.Token));
+end;
+
+{$IFDEF UNICODE}
+
+{* 判断标识符是否在光标下，使用 WideToken，只 Unicode 环境下调用}
+function IsCurrentTokenW(AView: Pointer; AControl: TControl; Token: TCnWidePasToken): Boolean;
+var
+  LineNo, Col: Integer;
+  View: IOTAEditView;
+begin
+  if not Assigned(AView) then
+  begin
+    Result := False;
+    Exit;
+  end;
+  View := IOTAEditView(AView);
+  LineNo := View.CursorPos.Line;
+  Col := View.CursorPos.Col;
+
+  if Token.EditLine <> LineNo then // 行号不等时直接退出
+  begin
+    Result := False;
+    Exit;
+  end;
+
+  // 行相等才需要比较列
+  Result := (Col >= Token.EditCol) and (Col <= Token.EditCol + Length(Token.Token));
+end;
+
+{$ENDIF}
 
 //==============================================================================
 // IDE 窗体编辑器功能函数

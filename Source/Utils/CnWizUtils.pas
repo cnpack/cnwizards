@@ -3672,6 +3672,9 @@ begin
   if (EditControl <> nil) and (View <> nil) then
   begin
     Text := GetStrProp(EditControl, 'LineText');
+    // LineText 在 D5~D7 下为 AnsiString，在 D2005~2007 下是包含 UTF8 字符的 AnsiString
+    // 在 D2009 以上直接是 UnicodeString
+
     //CnDebugger.TraceFmt('Col %d, Len %d, Text %s', [View.CursorPos.Col - 1, Length(Text), Text]);
 
 {$IFDEF UNICODE}

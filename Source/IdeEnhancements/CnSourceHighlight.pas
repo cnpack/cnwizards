@@ -640,9 +640,6 @@ procedure HighlightCanvasLine(ACanvas: TCanvas; X1, Y1, X2, Y2: Integer;
   AStyle: TCnLineStyle);
 {* 高亮专用的画线函数，TinyDot 时不画斜线}
 
-function IsCurrentToken(AView: Pointer; AControl: TControl; Token: TCnPasToken): Boolean;
-{* 判断标识符是否在光标下，频繁调用，因此此处 View 用指针来避免引用计数从而优化速度 }
-
 function CheckTokenMatch(const T1: AnsiString; const T2: AnsiString;
   CaseSensitive: Boolean): Boolean;
 {* 判断是否俩Identifer相等}
@@ -1025,49 +1022,6 @@ begin
       ACanvas.Brush.Color := OldColor;
     end;
   end;
-end;
-
-// 判断标识符是否在光标下
-function IsCurrentToken(AView: Pointer; AControl: TControl; Token: TCnPasToken): Boolean;
-var
-{$IFDEF BDS}
-  Text: AnsiString;
-{$ENDIF}
-  LineNo, Col: Integer;
-  View: IOTAEditView;
-begin
-  if not Assigned(AView) then
-  begin
-    Result := False;
-    Exit;
-  end;
-  View := IOTAEditView(AView);
-  LineNo := View.CursorPos.Line;
-  Col := View.CursorPos.Col;
-  
-  if Token.EditLine <> LineNo then // 行号不等时直接退出
-  begin
-    Result := False;
-    Exit;
-  end;
-
-  // 行相等才需要读出行内容进行比较
-{$IFDEF BDS}
-  Text := AnsiString(GetStrProp(AControl, 'LineText'));
-  if Text <> '' then
-  begin
-    // TODO: 用 TextWidth 获得光标位置精确对应的源码字符位置，但实现较难。
-    // 当存在占据单字符位置的双字节字符时，以下算法会有偏差。
-
-    {$IFDEF DELPHI2009_UP}
-    // Delphi 2009 下，LineText 不是 UTF8 需要转换为 UTF8 计算
-    // Col := Length(CnUtf8ToAnsi(Copy(CnAnsiToUtf8(Text), 1, Col)));
-    {$ELSE}
-    Col := Length(CnUtf8ToAnsi(Copy(Text, 1, Col)));
-    {$ENDIF}
-  end;
-{$ENDIF}
-  Result := (Col >= Token.EditCol) and (Col <= Token.EditCol + Length(Token.Token));
 end;
 
 function TokenIsMethodOrClassName(const Token, Name: string): Boolean;
