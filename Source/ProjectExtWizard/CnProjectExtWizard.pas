@@ -666,7 +666,7 @@ begin
     if Assigned(FOldUnitNotifyEvent) then
       FOldUnitNotifyEvent(Sender);
     // 如果以前挂了，再恢复
-    if UseUnitsHookBtnChecked and (FMethodHook <> nil) then
+    if Active and UseUnitsHookBtnChecked and (FMethodHook <> nil) then
       FMethodHook.HookMethod;
   end;
 end;
@@ -683,7 +683,7 @@ begin
     if Assigned(FOldFormNotifyEvent) then
       FOldFormNotifyEvent(Sender);
     // 如果以前挂了，再恢复
-    if UseUnitsHookBtnChecked and (FMethodHook <> nil) then
+    if Active and UseUnitsHookBtnChecked and (FMethodHook <> nil) then
       FMethodHook.HookMethod;
   end;
 end;
@@ -714,7 +714,7 @@ begin
     FormsListHookBtnChecked := HookFormsList;
   end;
     
-  // 恢复时不直接恢复OnExecute，而是在挂接后的内容中做必要处理再跳回来
+  // 恢复时不直接恢复 OnExecute，而是在挂接后的内容中做必要处理再跳回来
   // FUnitsListAction.OnExecute := FOldUnitNotifyEvent;
   // FFormsListAction.OnExecute := FOldFormNotifyEvent;
 end;

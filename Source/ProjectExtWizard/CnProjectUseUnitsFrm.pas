@@ -114,7 +114,7 @@ const
 
 { TCnProjectUseUnitsForm }
 
-// 此过程还可能会被插入Frame时调用，因此过程内部根据 HelpContext 分别处理了这俩情况
+// 此过程还可能会被插入 Frame 时调用，因此过程内部根据 HelpContext 分别处理了这俩情况
 function ShowProjectUseUnits(ASelf: TCustomForm): Boolean;
 var
   I, Idx: Integer;
