@@ -11,6 +11,7 @@ object TeststructParseForm: TTeststructParseForm
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object pgc1: TPageControl
@@ -18,15 +19,17 @@ object TeststructParseForm: TTeststructParseForm
     Top = 8
     Width = 757
     Height = 460
-    ActivePage = tsPascal
+    ActivePage = tsCpp
     TabOrder = 0
     object tsPascal: TTabSheet
       Caption = 'Pascal'
       object lblPascal: TLabel
-        Left = 152
-        Top = 184
-        Width = 3
+        Left = 131
+        Top = 181
+        Width = 181
         Height = 13
+        AutoSize = False
+        Caption = 'Line: Col:'
       end
       object mmoPasSrc: TMemo
         Left = 7
@@ -67,6 +70,7 @@ object TeststructParseForm: TTeststructParseForm
           'end.')
         TabOrder = 0
         OnChange = mmoPasSrcChange
+        OnClick = mmoPasSrcClick
       end
       object btnParsePas: TButton
         Left = 8
@@ -97,12 +101,35 @@ object TeststructParseForm: TTeststructParseForm
     object tsCpp: TTabSheet
       Caption = 'C/C++'
       ImageIndex = 1
+      object lblCpp: TLabel
+        Left = 152
+        Top = 184
+        Width = 185
+        Height = 13
+        AutoSize = False
+        Caption = 'Line: Col:'
+      end
       object mmoCppSrc: TMemo
         Left = 7
         Top = 7
         Width = 734
         Height = 158
+        Lines.Strings = (
+          '#include <stdio.h>'
+          'void do_some(int a)'
+          '{'
+          '    printf("Test.\n"); // Test'
+          '#define XXXX \'
+          '    yyyy'
+          '        Move(); {   ;  \'
+          '    }'
+          '/*'
+          'Test Comment'
+          '*/ Test();'
+          '}')
         TabOrder = 0
+        OnChange = mmoCppSrcChange
+        OnClick = mmoCppSrcClick
       end
       object btnParseCpp: TButton
         Left = 8
@@ -111,6 +138,7 @@ object TeststructParseForm: TTeststructParseForm
         Height = 25
         Caption = 'Parse'
         TabOrder = 1
+        OnClick = btnParseCppClick
       end
       object mmoCppResult: TMemo
         Left = 7

@@ -74,18 +74,20 @@ type
 
     property UseAsC: Boolean read FUseAsC;
     {* 是否是 C 方式的解析，默认不是}
+    property LineNumber: Integer read FLineNumber; // Start 0
+    {* 所在行号，从零开始，由 ParseSource 计算而来 }
     property CharIndex: Integer read FCharIndex; // Start 0
-    {* 从本行开始数的字符位置，从零开始 }
+    {* 从本行开始数的字符位置，从零开始，由 ParseSource 内据需展开 Tab 计算而来 }
+
     property EditCol: Integer read FEditCol write FEditCol;
-    {* 所在列，从一开始 }
+    {* 所在列，从一开始，由外界转换而来 }
     property EditLine: Integer read FEditLine write FEditLine;
-    {* 所在行，从一开始 }
+    {* 所在行，从一开始，由外界转换而来 }
+
     property ItemIndex: Integer read FItemIndex;
     {* 在整个 Parser 中的序号 }
     property ItemLayer: Integer read FItemLayer;
     {* 所在高亮的层次 }
-    property LineNumber: Integer read FLineNumber; // Start 0
-    {* 所在行号，从零开始 }
     property MethodLayer: Integer read FMethodLayer;
     {* 所在函数的嵌套层次，最外层为一 }
     property Token: PChar read GetToken;
@@ -115,7 +117,7 @@ type
   { TCnPasStructureParser }
 
   TCnWidePasStructParser = class(TObject)
-  {* 利用 Lex 进行语法解析得到各个 Token 和位置信息}
+  {* 利用 BCBWideTokenList 进行语法解析得到各个 Token 和位置信息}
   private
     FBlockCloseToken: TCnWidePasToken;
     FBlockStartToken: TCnWidePasToken;
@@ -282,12 +284,9 @@ var
   PrevTokenStr: string;
 
   function CalcCharIndex(): Integer;
-{$IFDEF BDS2009_UP}
   var
     I, Len: Integer;
-{$ENDIF}
   begin
-{$IFDEF BDS2009_UP}
     if FUseTabKey and (FTabWidth >= 2) then
     begin
       // 遍历当前行内容进行 Tab 键展开
@@ -304,7 +303,6 @@ var
       Result := Len;
     end
     else
-{$ENDIF}
       Result := Lex.TokenPos - Lex.LineStartOffset;
   end;
 
@@ -322,7 +320,7 @@ var
     CopyMemory(@Token.FToken[0], Lex.TokenAddr, Len * SizeOf(Char));
 
     Token.FLineNumber := Lex.LineNumber - 1; // 1 开始变成 0 开始
-    Token.FCharIndex := CalcCharIndex();
+    Token.FCharIndex := CalcCharIndex();     // 不使用 Col 属性，而是据需 Tab 展开，也会由 1 开始变成 0 开始
     Token.FTokenID := Lex.TokenID;
     Token.FItemIndex := FList.Count;
     if CurrBlock <> nil then

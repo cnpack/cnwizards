@@ -18,24 +18,18 @@
 {                                                                              }
 {******************************************************************************}
 
-unit CnCppCodeParser;
+unit CnWideCppParser;
 {* |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：C/C++ 源代码分析器
 * 单元作者：刘啸 liuxiao@cnpack.org
-* 备    注：
-* 开发平台：PWin2000Pro + Delphi 5.01
+* 备    注：CnCppCodeParser 的 Unicode 版本
+* 开发平台：PWin2000Pro + Delphi 2009
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2012.02.07
-*               UTF8的位置转换去除后仍有问题，恢复之
-*           2011.11.29
-*               XE/XE2 的位置解析无需UTF8的位置转换
-*           2011.05.29
-*               修正BDS下对汉字UTF8未处理而导致解析出错的问题
-*           2009.04.10
+* 修改记录：2015.04.11
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -44,9 +38,13 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFNDEF UNICODE}
+  #Error: 'Unicode Compiler Only!'
+{$ENDIF}
+
 uses
-  Windows, SysUtils, Classes, Contnrs, CnPasCodeParser, 
-  mwBCBTokenList, CnCommon, CnFastList;
+  Windows, SysUtils, Classes, Contnrs, CnPasCodeParser, CnWidePasParser,
+  mwBCBTokenList, CnBCBWideTokenList, CnCommon, CnFastList;
   
 type
 
@@ -54,9 +52,9 @@ type
 // C/C++ 解析器封装类，目前只实现解析大括号层次与普通标识符位置的功能
 //==============================================================================
 
-{ TCnCppStructureParser }
+{ TCnWideCppStructParser }
 
-  TCnCppToken = class(TCnPasToken)
+  TCnWideCppToken = class(TCnWidePasToken)
   {* 描述一 Token 的结构高亮信息}
   private
 
@@ -66,64 +64,59 @@ type
 
   end;
 
-  TCnCppStructureParser = class(TObject)
+  TCnWideCppStructParser = class(TObject)
   {* 利用 CParser 进行语法解析得到各个 Token 和位置信息}
   private
-    FBlockCloseToken: TCnCppToken;
-    FBlockStartToken: TCnCppToken;
-    FChildCloseToken: TCnCppToken;
-    FChildStartToken: TCnCppToken;
-    FCurrentChildMethod: AnsiString;
-    FCurrentMethod: AnsiString;
+    FBlockCloseToken: TCnWideCppToken;
+    FBlockStartToken: TCnWideCppToken;
+    FChildCloseToken: TCnWideCppToken;
+    FChildStartToken: TCnWideCppToken;
+    FCurrentChildMethod: string;
+    FCurrentMethod: string;
     FList: TCnList;
-    FMethodCloseToken: TCnCppToken;
-    FMethodStartToken: TCnCppToken;
-    FInnerBlockCloseToken: TCnCppToken;
-    FInnerBlockStartToken: TCnCppToken;
-    FCurrentClass: AnsiString;
-    FSource: AnsiString;
+    FMethodCloseToken: TCnWideCppToken;
+    FMethodStartToken: TCnWideCppToken;
+    FInnerBlockCloseToken: TCnWideCppToken;
+    FInnerBlockStartToken: TCnWideCppToken;
+    FCurrentClass: string;
+    FSource: string;
     FBlockIsNamespace: Boolean;
     function GetCount: Integer;
-    function GetToken(Index: Integer): TCnCppToken;
+    function GetToken(Index: Integer): TCnWideCppToken;
   public
     constructor Create;
     destructor Destroy; override;
     procedure Clear;
-    procedure ParseSource(ASource: PAnsiChar; Size: Integer; CurrLine: Integer = 0;
+    procedure ParseSource(ASource: PChar; Size: Integer; CurrLine: Integer = 0;
       CurCol: Integer = 0; ParseCurrent: Boolean = False);
-    {* 解析代码结构，行列均以 1 开始}
-    function IndexOfToken(Token: TCnCppToken): Integer;
+    function IndexOfToken(Token: TCnWideCppToken): Integer;
     property Count: Integer read GetCount;
-    property Tokens[Index: Integer]: TCnCppToken read GetToken;
+    property Tokens[Index: Integer]: TCnWideCppToken read GetToken;
 
-    property MethodStartToken: TCnCppToken read FMethodStartToken;
-    property MethodCloseToken: TCnCppToken read FMethodCloseToken;
+    property MethodStartToken: TCnWideCppToken read FMethodStartToken;
+    property MethodCloseToken: TCnWideCppToken read FMethodCloseToken;
     {* 上面俩未解析}
 
-    property ChildStartToken: TCnCppToken read FChildStartToken;
-    property ChildCloseToken: TCnCppToken read FChildCloseToken;
+    property ChildStartToken: TCnWideCppToken read FChildStartToken;
+    property ChildCloseToken: TCnWideCppToken read FChildCloseToken;
     {* 当前层次为 2 的大括号}
 
-    property BlockStartToken: TCnCppToken read FBlockStartToken;
-    property BlockCloseToken: TCnCppToken read FBlockCloseToken;
+    property BlockStartToken: TCnWideCppToken read FBlockStartToken;
+    property BlockCloseToken: TCnWideCppToken read FBlockCloseToken;
     {* 当前层次为 1 的大括号}
     property BlockIsNamespace: Boolean read FBlockIsNamespace;
     {* 当前层次为 1 的大括号是否是 namespace}
 
-    property InnerBlockStartToken: TCnCppToken read FInnerBlockStartToken;
-    property InnerBlockCloseToken: TCnCppToken read FInnerBlockCloseToken;
+    property InnerBlockStartToken: TCnWideCppToken read FInnerBlockStartToken;
+    property InnerBlockCloseToken: TCnWideCppToken read FInnerBlockCloseToken;
     {* 当前最内层次的大括号}
 
-    property CurrentMethod: AnsiString read FCurrentMethod;
-    property CurrentClass: AnsiString read FCurrentClass;
-    property CurrentChildMethod: AnsiString read FCurrentChildMethod;
+    property CurrentMethod: string read FCurrentMethod;
+    property CurrentClass: string read FCurrentClass;
+    property CurrentChildMethod: string read FCurrentChildMethod;
 
-    property Source: AnsiString read FSource;
+    property Source: string read FSource;
   end;
-
-function ParseCppCodePosInfo(const Source: AnsiString; CurrPos: Integer;
-  FullSource: Boolean = True; IsUtf8: Boolean = False): TCodePosInfo;
-{* 分析源代码中当前位置的信息}
 
 implementation
 
@@ -131,18 +124,18 @@ var
   TokenPool: TCnList;
 
 // 用池方式来管理 PasTokens 以提高性能
-function CreateCppToken: TCnCppToken;
+function CreateCppToken: TCnWideCppToken;
 begin
   if TokenPool.Count > 0 then
   begin
-    Result := TCnCppToken(TokenPool.Last);
+    Result := TCnWideCppToken(TokenPool.Last);
     TokenPool.Delete(TokenPool.Count - 1);
   end
   else
-    Result := TCnCppToken.Create;
+    Result := TCnWideCppToken.Create;
 end;
 
-procedure FreeCppToken(Token: TCnCppToken);
+procedure FreeCppToken(Token: TCnWideCppToken);
 begin
   if Token <> nil then
   begin
@@ -163,26 +156,26 @@ end;
 // C/C++ 解析器封装类
 //==============================================================================
 
-{ TCnCppStructureParser }
+{ TCnWideCppStructParser }
 
-constructor TCnCppStructureParser.Create;
+constructor TCnWideCppStructParser.Create;
 begin
   inherited;
   FList := TCnList.Create;
 end;
 
-destructor TCnCppStructureParser.Destroy;
+destructor TCnWideCppStructParser.Destroy;
 begin
   FList.Free;
   inherited;
 end;
 
-procedure TCnCppStructureParser.Clear;
+procedure TCnWideCppStructParser.Clear;
 var
   I: Integer;
 begin
   for I := 0 to FList.Count - 1 do
-    FreeCppToken(TCnCppToken(FList[I]));
+    FreeCppToken(TCnWideCppToken(FList[I]));
   FList.Clear;
   FMethodStartToken := nil;
   FMethodCloseToken := nil;
@@ -194,28 +187,28 @@ begin
   FCurrentChildMethod := '';
 end;
 
-function TCnCppStructureParser.GetCount: Integer;
+function TCnWideCppStructParser.GetCount: Integer;
 begin
   Result := FList.Count;
 end;
 
-function TCnCppStructureParser.GetToken(Index: Integer): TCnCppToken;
+function TCnWideCppStructParser.GetToken(Index: Integer): TCnWideCppToken;
 begin
-  Result := TCnCppToken(FList[Index]);
+  Result := TCnWideCppToken(FList[Index]);
 end;
 
-procedure TCnCppStructureParser.ParseSource(ASource: PAnsiChar; Size: Integer;
+procedure TCnWideCppStructParser.ParseSource(ASource: PChar; Size: Integer;
   CurrLine: Integer; CurCol: Integer; ParseCurrent: Boolean);
 const
   IdentToIgnore: array[0..2] of string = ('CATCH', 'CATCH_ALL', 'AND_CATCH_ALL');
 var
-  CParser: TBCBTokenList;
-  Token: TCnCppToken;
+  CParser: TCnBCBWideTokenList;
+  Token: TCnWideCppToken;
   Layer: Integer;
   BraceStack: TStack;
   Brace1Stack: TStack;
   Brace2Stack: TStack;
-  BraceStartToken: TCnCppToken;
+  BraceStartToken: TCnWideCppToken;
   BeginBracePosition: Integer;
   FunctionName, OwnerClass: string;
   PrevIsOperator, RunReachedZero: Boolean;
@@ -231,12 +224,10 @@ var
     if Len > CN_TOKEN_MAX_SIZE then
       Len := CN_TOKEN_MAX_SIZE;
     FillChar(Token.FToken[0], SizeOf(Token.FToken), 0);
-    CopyMemory(@Token.FToken[0], CParser.TokenAddr, Len);
+    CopyMemory(@Token.FToken[0], CParser.TokenAddr, Len * SizeOf(Char));
 
-    // Token.FToken := AnsiString(CParser.RunToken);
-
-    Token.FLineNumber := CParser.RunLineNumber;
-    Token.FCharIndex := CParser.RunColNumber;
+    Token.FLineNumber := CParser.LineNumber - 1;    // 1 开始变成 0 开始
+    Token.FCharIndex := CParser.ColumnNumber - 1;   // 暂无 Tab 展开的机制，1 开始变成 0 开始
     Token.FCppTokenKind := CParser.RunID;
     Token.FItemLayer := Layer;
     Token.FItemIndex := FList.Count;
@@ -334,7 +325,7 @@ begin
     Brace2Stack := TStack.Create;
     FSource := ASource;
 
-    CParser := TBCBTokenList.Create;
+    CParser := TCnBCBWideTokenList.Create;
     CParser.DirectivesAsComments := False;
     CParser.SetOrigin(ASource, Size);
 
@@ -347,8 +338,8 @@ begin
             Inc(Layer);
             NewToken;
 
-            if CompareLineCol(CParser.RunLineNumber, CurrLine,
-              CParser.RunColNumber, CurCol) <= 0 then // 在光标前
+            if CompareLineCol(CParser.LineNumber, CurrLine,
+              CParser.ColumnNumber, CurCol) <= 0 then // 在光标前
             begin
               BraceStack.Push(Token);
               if Layer = 1 then // 如果是第一层，又是 OuterBlock 的 Begin
@@ -359,25 +350,25 @@ begin
             else // 一旦在光标后了，就可以判断Start了
             begin
               if (FInnerBlockStartToken = nil) and (BraceStack.Count > 0) then
-                FInnerBlockStartToken := TCnCppToken(BraceStack.Pop);
+                FInnerBlockStartToken := TCnWideCppToken(BraceStack.Pop);
               if (FBlockStartToken = nil) and (Brace1Stack.Count > 0) then
-                FBlockStartToken := TCnCppToken(Brace1Stack.Pop);
+                FBlockStartToken := TCnWideCppToken(Brace1Stack.Pop);
               if (FChildStartToken = nil) and (Brace2Stack.Count > 0) then
-                FChildStartToken := TCnCppToken(Brace2Stack.Pop);
+                FChildStartToken := TCnWideCppToken(Brace2Stack.Pop);
             end;
           end;
         ctkbraceclose:
           begin
             NewToken;
-            if CompareLineCol(CParser.RunLineNumber, CurrLine,
-              CParser.RunColNumber, CurCol) >= 0 then // 一旦在光标后了就可判断
+            if CompareLineCol(CParser.LineNumber, CurrLine,
+              CParser.ColumnNumber, CurCol) >= 0 then // 一旦在光标后了就可判断
             begin
               if (FInnerBlockStartToken = nil) and (BraceStack.Count > 0) then
-                FInnerBlockStartToken := TCnCppToken(BraceStack.Pop);
+                FInnerBlockStartToken := TCnWideCppToken(BraceStack.Pop);
               if (FBlockStartToken = nil) and (Brace1Stack.Count > 0) then
-                FBlockStartToken := TCnCppToken(Brace1Stack.Pop);
+                FBlockStartToken := TCnWideCppToken(Brace1Stack.Pop);
               if (FChildStartToken = nil) and (Brace2Stack.Count > 0) then
-                FChildStartToken := TCnCppToken(Brace2Stack.Pop);
+                FChildStartToken := TCnWideCppToken(Brace2Stack.Pop);
 
               if (FInnerBlockCloseToken = nil) and (FInnerBlockStartToken <> nil) then
               begin
@@ -486,7 +477,7 @@ begin
               // 找到个 class 或 struct，那么名称是紧靠 : 或 { 前的东西
               while not (CParser.RunID in [ctkcolon, ctkbraceopen, ctknull]) do
               begin
-                FCurrentClass := AnsiString(CParser.RunToken); // 找到类名或者结构名
+                FCurrentClass := string(CParser.RunToken); // 找到类名或者结构名
                 CParser.NextNonJunk;
               end;
               if FCurrentClass <> '' then // 找到类名了，不会有其它名称了，退出
@@ -586,12 +577,12 @@ begin
                 if CParser.RunID = ctkcoloncolon then
                   OwnerClass := CParser.RunToken + OwnerClass;
               end;
-              FCurrentClass := AnsiString(OwnerClass);
+              FCurrentClass := string(OwnerClass);
             end;
             if OwnerClass <> '' then
-              FCurrentMethod := AnsiString(OwnerClass + '::' + FunctionName)
+              FCurrentMethod := string(OwnerClass + '::' + FunctionName)
             else
-              FCurrentMethod := AnsiString(FunctionName);
+              FCurrentMethod := string(FunctionName);
           end;
         end;
       end;
@@ -604,142 +595,17 @@ begin
   end;
 end;
 
-function TCnCppStructureParser.IndexOfToken(Token: TCnCppToken): Integer;
+function TCnWideCppStructParser.IndexOfToken(Token: TCnWideCppToken): Integer;
 begin
   Result := FList.IndexOf(Token);
 end;
 
-{ TCnCppToken }
+{ TCnWideCppToken }
 
-constructor TCnCppToken.Create;
+constructor TCnWideCppToken.Create;
 begin
   inherited;
   FUseAsC := True;
-end;
-
-// 分析源代码中当前位置的信息
-function ParseCppCodePosInfo(const Source: AnsiString; CurrPos: Integer;
-  FullSource: Boolean = True; IsUtf8: Boolean = False): TCodePosInfo;
-var
-  CanExit: Boolean;
-  CParser: TBCBTokenList;
-  Text: AnsiString;
-
-  procedure DoNext;
-  var
-    OldPosition: Integer;
-  begin
-    Result.LineNumber := CParser.RunLineNumber - 1;
-    Result.LinePos := CParser.RunColNumber;
-    Result.TokenPos := CParser.RunPosition;
-    Result.Token := AnsiString(CParser.RunToken);
-    Result.CTokenID := CParser.RunID;
-
-    OldPosition := CParser.RunPosition;
-    CParser.Next;
-
-    CanExit := CParser.RunPosition = OldPosition;
-    // 当 Next 再也前进不了的时候，就是该撤了
-    // 这样做的原因是，CParser 在结尾时，有时候不会进行到ctknull，而一直打转
-  end;
-begin
-  if CurrPos <= 0 then
-    CurrPos := MaxInt;
-  CParser := nil;
-  Result.IsPascal := False;
-
-  try
-    CParser := TBCBTokenList.Create;
-    CParser.DirectivesAsComments := False;
-{$IFDEF BDS}
-    if IsUtf8 then
-    begin
-      Text := CnUtf8ToAnsi(PAnsiChar(Source));
-//{$IFNDEF BDS2009_UP}
-      // XE/XE2 下的CurrPos 已经是 UTF8 的位置，无需再次转换，否则出错。2009 未知。
-      CurrPos := Length(CnUtf8ToAnsi(Copy(Source, 1, CurrPos)));
-      // 不转换会导致其他问题如字符串里弹出代码助手，还是得转。
-//{$ENDIF}
-    end
-    else
-      Text := Source;
-{$ELSE}
-    Text := Source;
-{$ENDIF}
-    CParser.SetOrigin(PAnsiChar(Text), Length(Text));
-
-    if FullSource then
-    begin
-      Result.AreaKind := akHead; // 未使用
-      Result.PosKind := pkField; // 常规空白区，以pkField
-    end
-    else
-    begin
-
-    end;
-
-    while (CParser.RunPosition < CurrPos) and (CParser.RunID <> ctknull) do
-    begin
-      // 至少要区分出字符（串）、注释、->或.后、标识符、编译指令等
-      case CParser.RunID of
-        ctkansicomment, ctkslashescomment:
-          begin
-            Result.PosKind := pkComment;
-          end;
-        ctkstring:
-          begin
-            Result.PosKind := pkString;
-          end;
-        ctkcrlf:
-          begin
-            // 行注释与#编译指令，以回车结尾
-            if (Result.PosKind = pkCompDirect) or (Result.CTokenID = ctkslashescomment) then
-              Result.PosKind := pkField;
-          end;
-//        ctksemicolon, ctkbraceopen, ctkbraceclose, ctkbracepair,
-//        ctkint, ctkfloat, ctkdouble, ctkchar,
-//        ctkidentifier, ctkcoloncolon,
-//        ctkroundopen, ctkroundpair, ctksquareopen, ctksquarepair,
-//        ctkcomma, ctkequal, ctknumber:
-//          begin
-//            Result.PosKind := pkField;
-//          end;
-        ctkselectelement:
-          begin
-            Result.PosKind := pkFieldDot; // -> 视作 . 处理
-          end;
-        ctkpoint:
-          begin
-            if Result.CTokenID = ctkidentifier then
-              Result.PosKind := pkFieldDot; // 上一个标识符后的点才算
-          end;
-        ctkdirdefine, ctkdirelif, ctkdirelse, ctkdirendif, ctkdirerror, ctkdirif,
-        ctkdirifdef, ctkdirifndef, ctkdirinclude, ctkdirline, ctkdirnull,
-        ctkdirpragma, ctkdirundef:
-          begin
-            Result.PosKind := pkCompDirect;
-          end;
-        ctkUnknown:
-          begin
-            // #后的编译指令未完成时
-            if (Length(CParser.RunToken) >= 1 ) and (CParser.RunToken[1] = '#') then
-            begin
-              Result.PosKind := pkCompDirect;
-            end
-            else
-              Result.PosKind := pkField;
-          end;
-      else
-        Result.PosKind := pkField;
-      end;
-
-      DoNext;
-      if CanExit then
-        Break;
-    end;
-  finally
-    CParser.Free;
-  end;
 end;
 
 initialization

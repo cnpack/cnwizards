@@ -325,7 +325,8 @@ type
     property Origin: PChar read FOrigin write SetOrigin;
     property RunPos: Integer read FRun write SetRunPos;
     property TokenPos: Integer read FTokenPos;
-    {* 当前 Token 所在的线性位置，减去 LineStartOffset 即是当前原始列位置}
+    {* 当前 Token 所在的线性位置，减去 LineStartOffset 即是当前原始列位置
+    （原始列：每个双字节字符占一列，0 开始，不展开 Tab}
     property TokenID: TTokenKind read FTokenID;
     {* 当前 Token 类型}
     property Token: string read GetToken;

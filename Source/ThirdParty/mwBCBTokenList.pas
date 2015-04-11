@@ -240,7 +240,9 @@ type
     property RunID: TCTokenKind read GetRunID;
     property RunPosition: LongInt read GetRunPosition;
     property RunLineNumber: Integer read GetRunLineNumber;
-    property RunColNumber: Integer read GetRunColNumber;    
+    {* 当前行，以 1 开始}
+    property RunColNumber: Integer read GetRunColNumber;
+    {* 当前列，以 1 开始}
     property RunToken: string read GetRunToken;
     {* 此俩属性为 PAnsiChar 方式使用，以避免 D2010 下性能问题}
     property TokenAddr: PAnsiChar read GetTokenAddr;

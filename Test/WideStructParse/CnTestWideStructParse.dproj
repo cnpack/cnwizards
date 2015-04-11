@@ -48,6 +48,7 @@
 				<Form>TeststructParseForm</Form>
 			</DCCReference>
 			<DCCReference Include="..\..\Source\Utils\CnWidePasParser.pas"/>
+			<DCCReference Include="..\..\Source\Utils\CnWideCppParser.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>

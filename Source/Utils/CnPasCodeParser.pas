@@ -96,18 +96,20 @@ type
 
     property UseAsC: Boolean read FUseAsC;
     {* 是否是 C 方式的解析，默认不是}
+    property LineNumber: Integer read FLineNumber; // Start 0
+    {* 所在行号，从零开始，由 ParseSource 计算而来 }
     property CharIndex: Integer read FCharIndex; // Start 0
-    {* 从本行开始数的字符位置，从零开始 }
+    {* 从本行开始数的字符位置，从零开始，由 ParseSource 计算而来 }
+
     property EditCol: Integer read FEditCol write FEditCol;
-    {* 所在列，从一开始 }
+    {* 所在列，从一开始，由外界转换而来 }
     property EditLine: Integer read FEditLine write FEditLine;
-    {* 所在行，从一开始 }
+    {* 所在行，从一开始，由外界转换而来 }
+
     property ItemIndex: Integer read FItemIndex;
     {* 在整个 Parser 中的序号 }
     property ItemLayer: Integer read FItemLayer;
     {* 所在高亮的层次 }
-    property LineNumber: Integer read FLineNumber; // Start 0
-    {* 所在行号，从零开始 }
     property MethodLayer: Integer read FMethodLayer;
     {* 所在函数的嵌套层次，最外层为一 }
     property Token: PAnsiChar read GetToken;
@@ -163,6 +165,7 @@ type
     procedure ParseSource(ASource: PAnsiChar; AIsDpr, AKeyOnly: Boolean);
     function FindCurrentDeclaration(LineNumber, CharIndex: Integer): AnsiString;
     procedure FindCurrentBlock(LineNumber, CharIndex: Integer);
+    {* 根据当前光标位置查找当前块，行列都是 1 开始}
     function IndexOfToken(Token: TCnPasToken): Integer;
     property Count: Integer read GetCount;
     property Tokens[Index: Integer]: TCnPasToken read GetToken;
