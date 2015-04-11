@@ -51,7 +51,8 @@ uses
   Forms, Menus, Clipbrd, ActnList, StdCtrls, ComCtrls, Imm, Math, TypInfo,
   CnPasCodeParser, CnCommon, CnConsts, CnWizUtils, CnWizConsts, CnWizOptions,
   CnWizIdeUtils, CnEditControlWrapper, CnWizNotifier, CnWizMethodHook,
-  CnWizCompilerConst, CnCppCodeParser, Contnrs;
+  CnWizCompilerConst, {$IFDEF UNICODE} CnWidePasParser, CnWideCppParser, {$ENDIF}
+  CnCppCodeParser, Contnrs;
 
 type
   TCnAutoMatchType = (btNone, btBracket, btSquare, btCurly, btQuote, btDitto); // () [] {} '' ""
@@ -130,6 +131,9 @@ type
     function DoSearchAgain(View: IOTAEditView; Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean): Boolean;
     function DoRename(View: IOTAEditView; Key, ScanCode: Word; Shift: TShiftState;
+      var Handled: Boolean): Boolean;
+    // Unicode 版本，用于 D2009 或以上，解决转换成 Ansi 后会丢字符的问题
+    function DoRenameW(View: IOTAEditView; Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean): Boolean;
     procedure EditControlKeyDown(Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean);
@@ -356,6 +360,8 @@ var
   AnsiLine: AnsiString;
   LineNo, CharIndex: Integer;
   NeedAutoMatch: Boolean;
+  EditControl: TControl;
+  Element, LineFlag: Integer;
 begin
   if CnNtaGetCurrLineText(Line, LineNo, CharIndex) then
   begin
@@ -381,6 +387,21 @@ begin
       end
       else if Length(AnsiLine) = CharIndex then
         NeedAutoMatch := True; // 行尾
+
+      if AChar = '''' then
+      begin
+        // 字符串内部不自动输入单引号
+        EditControl := CnOtaGetCurrentEditControl;
+        if EditControl = nil then
+        begin
+          Result := False;
+          Exit;
+        end;
+        EditControlWrapper.GetAttributeAtPos(EditControl, View.CursorPos,
+          False, Element, LineFlag);
+        if Element in [atString] then
+          NeedAutoMatch := False;
+      end;
 
       // 自动输入括号配对
       if NeedAutoMatch then
@@ -896,12 +917,15 @@ begin
   Handled := False;
 
   EditControl := CnOtaGetCurrentEditControl;
-  if EditControl = nil then Exit;
+  if EditControl = nil then
+    Exit;
 
   Text := GetStrProp(EditControl, 'LineText');
-  if Trim(Text) = '' then Exit;
+  if Trim(Text) = '' then
+    Exit;
 
-  if CanIgnoreFromIME then Exit;
+  if CanIgnoreFromIME then
+    Exit;
 
   AChar := Char(VK_ScanCodeToAscii(Key, ScanCode));
 
@@ -1622,6 +1646,532 @@ begin
 
   Handled := True;
 end;
+
+// 绝大部分复制自 DoRename，但处理代码部分是 Unicode，用于 D2009 或以上版本
+function TCnSrcEditorKey.DoRenameW(View: IOTAEditView; Key, ScanCode: Word;
+  Shift: TShiftState; var Handled: Boolean): Boolean;
+var
+  Cur, UpperCur, UpperHeadCur, NewName: string;
+  CurIndex: Integer;
+  EditControl: TControl;
+  EditView: IOTAEditView;
+  Parser: TCnWidePasStructParser;
+  CParser: TCnWideCppStructParser;
+  Stream: TMemoryStream;
+  CharPos: TOTACharPos;
+  EditPos: TOTAEditPos;
+  I, iMaxCursorOffset: Integer;
+  Rit: TCnRenameIdentifierType;
+  iStart, iOldTokenLen: Integer;
+  NewCode: string;
+  EditWriter: IOTAEditWriter;
+  CurToken, LastToken, StartToken, EndToken, StartCurToken, EndCurToken: TCnWidePasToken;
+  CurFuncStartToken, CurFuncEndToken: TCnWideCppToken;
+  FirstEnter: Boolean;
+  LastTokenPos: Integer;
+  FrmModalResult: Boolean;
+  BookMarkList: TObjectList;
+  Element, LineFlag: Integer;
+  CurTokens: TList;
+begin
+  Result := False;
+  if (Key <> FRenameKey) or (Shift <> FRenameShift) then Exit;
+
+  if (GetIDEActionFromShortCut(ShortCut(VK_F2, [])) <> nil) and
+    GetIDEActionFromShortCut(ShortCut(VK_F2, [])).Visible then
+    Exit; // 如果已经有了 F2 的快捷键的 Action，则不处理
+
+  if not CnOtaGetCurrPosToken(Cur, CurIndex) then
+    Exit;
+  if Cur = '' then
+    Exit;
+
+  // 做 F2 更改当前变量名的动作
+  BookMarkList := nil;
+  EditControl := CnOtaGetCurrentEditControl;
+  if EditControl = nil then
+    Exit;
+  try
+    EditView := EditControlWrapper.GetEditView(EditControl);
+  except
+    Exit;
+  end;
+
+  if EditView = nil then
+    Exit;
+
+  // 如果是编译指令内部，则退出，因为现在即使弹出也不会更改。
+  EditControlWrapper.GetAttributeAtPos(EditControl, EditView.CursorPos,
+    False, Element, LineFlag);
+  if Element in [atComment, atPreproc] then
+    Exit;
+
+  // 处理 Pascal 文件
+  if IsDprOrPas(EditView.Buffer.FileName) or IsInc(EditView.Buffer.FileName) then
+  begin
+    Parser := TCnWidePasStructParser.Create;
+    Stream := TMemoryStream.Create;
+    try
+      CnOtaSaveEditorToStreamW(EditView.Buffer, Stream);
+
+      // 解析当前显示的源文件
+      Parser.ParseSource(PChar(Stream.Memory),
+        IsDpr(EditView.Buffer.FileName) or IsInc(EditView.Buffer.FileName), False);
+    finally
+      Stream.Free;
+    end;
+
+    // 解析后再查找当前光标所在的块
+    EditPos := EditView.CursorPos;
+    EditView.ConvertPos(True, EditPos, CharPos);
+    Parser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
+
+    try
+      CurToken := nil;
+      CurTokens := TList.Create;
+      UpperCur := UpperCase(Cur);
+
+      // 先转换并加入所有与光标下标识符相同的 Token
+      for I := 0 to Parser.Count - 1 do
+      begin
+        CharPos := OTACharPos(Parser.Tokens[I].CharIndex, Parser.Tokens[I].LineNumber + 1);
+        EditView.ConvertPos(False, EditPos, CharPos);
+        // 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，
+        // 因此直接采用下面 CharIndex + 1 的方式，Parser 本身已对 Tab 键展开。
+        EditPos.Col := Parser.Tokens[I].CharIndex + 1;
+        Parser.Tokens[I].EditCol := EditPos.Col;
+        Parser.Tokens[I].EditLine := EditPos.Line;
+
+        if (Parser.Tokens[I].TokenID = tkIdentifier) and (UpperCase(string(Parser.Tokens[I].Token)) = UpperCur) then
+        begin
+          CurTokens.Add(Parser.Tokens[I]);
+          if (CurToken = nil) and
+            IsCurrentTokenW(Pointer(EditView), EditControl, Parser.Tokens[I]) then
+            CurToken := Parser.Tokens[I];
+        end;
+      end;
+      if CurTokens.Count = 0 then Exit;
+
+      // 如果当前光标下的 Token 在 InnerMethod 之间，并且所有的 Token 都在
+      // InnerMethod 之间，则 RIT 为 InnerProc
+      // else 如果当前光标下的 Token 在 CurrentMethod 之间，并且所有的 Token 都在
+      // CurrentMethod 之间，则 RIT 为 CurrentProc
+      // else RIT 为 Unit
+
+      Rit := ritInvalid;
+      if Assigned(Parser.ChildMethodStartToken) and
+        Assigned(Parser.ChildMethodCloseToken) then
+      begin
+        if (TCnWidePasToken(CurTokens[0]).ItemIndex >= Parser.ChildMethodStartToken.ItemIndex)
+          and (TCnWidePasToken(CurTokens[CurTokens.Count - 1]).ItemIndex
+          <= Parser.ChildMethodCloseToken.ItemIndex) then
+          Rit := ritInnerProc;
+      end;
+      if Rit = ritInvalid then
+      begin
+        if Assigned(Parser.MethodStartToken) and
+          Assigned(Parser.MethodCloseToken) then
+        begin
+          if (TCnWidePasToken(CurTokens[0]).ItemIndex >= Parser.MethodStartToken.ItemIndex)
+            and (TCnWidePasToken(CurTokens[CurTokens.Count - 1]).ItemIndex
+            <= Parser.MethodCloseToken.ItemIndex) then
+            Rit := ritCurrentProc;
+        end;
+      end;
+      if Rit = ritInvalid then
+        Rit := ritUnit;
+
+      // 弹出对话框，设置其替换范围，并根据是否有当前 Method/Child 等控制界面使能
+      with TCnIdentRenameForm.Create(nil) do
+      begin
+        try
+          lblReplacePromt.Caption := Format(SCnRenameVarHintFmt, [Cur]);
+          UpperHeadCur := Cur;
+          if FUpperFirstLetter and (Length(UpperHeadCur) >= 1) and (CharInSet(UpperHeadCur[1], ['a'..'z'])) then
+            UpperHeadCur[1] := Chr(Ord(UpperHeadCur[1]) - 32);
+          edtRename.Text := UpperHeadCur;
+
+          rbCurrentProc.Enabled := Assigned(Parser.MethodStartToken) and
+            Assigned(Parser.MethodCloseToken);
+          rbCurrentInnerProc.Enabled := Assigned(Parser.ChildMethodStartToken) and
+            Assigned(Parser.ChildMethodCloseToken);
+
+          if rbCurrentProc.Enabled then
+            rbCurrentProc.Checked := True;
+          if rbCurrentInnerProc.Enabled then
+            rbCurrentInnerProc.Checked := True;
+          if (not rbCurrentProc.Checked) and (not rbCurrentInnerProc.Checked) then
+            rbUnit.Checked := True;
+
+          FrmModalResult := ShowModal = mrOk;
+          NewName := edtRename.Text;
+
+          if rbCurrentProc.Checked then
+            Rit := ritCurrentProc
+          else if rbCurrentInnerProc.Checked then
+            Rit := ritInnerProc
+          else
+            Rit := ritUnit;
+        finally
+          Free;
+        end;
+      end;
+
+      if FrmModalResult then
+      begin
+        if not IsValidIdent(NewName) then
+        begin
+          ErrorDlg(SCnRenameErrorValid);
+          Exit;
+        end;
+
+        StartToken := nil;
+        EndToken := nil;
+
+        // 注意 StartToken 和 EndToken 未必是属于 CurTokens 中的。
+        // StartCurToken 和 EndCurToken 才是 CurTokens 列表中的头尾俩
+        if Rit = ritUnit then
+        begin
+          // 替换范围为整个 unit 时，起始和终结 Token 为列表中头尾俩
+          StartToken := TCnWidePasToken(CurTokens[0]);
+          EndToken := TCnWidePasToken(CurTokens[CurTokens.Count - 1]);
+        end
+        else if Rit = ritCurrentProc then
+        begin
+          StartToken := Parser.MethodStartToken;
+          EndToken := Parser. MethodCloseToken;
+        end
+        else if Rit = ritInnerProc then
+        begin
+          StartToken := Parser.ChildMethodStartToken;
+          EndToken := Parser.ChildMethodCloseToken;
+        end;
+
+        if (StartToken = nil) or (EndToken = nil) then Exit;
+
+        // 记录此 View 的 Bookmarks
+        BookMarkList := TObjectList.Create(True);
+        SaveBookMarksToObjectList(EditView, BookMarkList);
+
+        NewCode := '';
+        LastToken := nil;
+        FirstEnter := True;
+        iStart := 0;
+        iMaxCursorOffset := EditView.CursorPos.Col - CurToken.EditCol;
+        StartCurToken := nil;
+        EndCurToken := nil;
+        EditWriter := CnOtaGetEditWriterForSourceEditor;
+
+        // 执行完循环后，NewCode 应该为覆盖了需要替换的所有 Token 的替换后内容
+        for I := 0 to CurTokens.Count - 1 do
+        begin
+          if (TCnWidePasToken(CurTokens[I]).ItemIndex >= StartToken.ItemIndex) and
+            (TCnWidePasToken(CurTokens[I]).ItemIndex <= EndToken.ItemIndex) then
+          begin
+            // 属于要处理之列。第一回，处理头，最后循环后处理尾
+            if FirstEnter then
+            begin
+              StartCurToken := TCnWidePasToken(CurTokens[I]); // 记录第一个 CurToken
+              FirstEnter := False;
+            end;
+
+            if LastToken = nil then
+              NewCode := NewName
+            else
+            begin
+              // 从上一 Token 的尾巴，到现任 Token 的头，再加替换后的文字，都用 AnsiString 来计算
+              LastTokenPos := LastToken.TokenPos + Length(LastToken.Token);
+              NewCode := NewCode + Copy(Parser.Source, LastTokenPos + 1,
+                TCnWidePasToken(CurTokens[I]).TokenPos - LastTokenPos) + NewName;
+            end;
+  {$IFDEF DEBUG}
+            CnDebugger.LogMsg('Pas NewCode: ' + NewCode);
+  {$ENDIF}
+            // 同一行前面的会影响光标位置
+            if (TCnWidePasToken(CurTokens[I]).EditLine = CurToken.EditLine) and
+              (TCnWidePasToken(CurTokens[I]).EditCol < CurToken.EditCol) then
+              Inc(iStart);
+
+            LastToken := TCnWidePasToken(CurTokens[I]);   // 记录上一个处理过的 CurToken
+            EndCurToken := TCnWidePasToken(CurTokens[I]); // 记录最后一个 CurToken
+          end;
+        end;
+
+        if StartCurToken <> nil then
+        begin
+          // 要处理的是 UTF8 的长度，而 Paser 算出的 TokenPos 是 Unicode 的因此需要转换
+          EditWriter.CopyTo(Length(UTF8Encode(Copy(Parser.Source, 1, StartCurToken.TokenPos))));
+        end;
+
+        if EndCurToken <> nil then
+        begin
+          // 要处理的是 UTF8 的长度，而 Paser 算出的 TokenPos 是 Unicode 的因此需要转换
+          EditWriter.DeleteTo(Length(UTF8Encode(Copy(Parser.Source, 1,
+            EndCurToken.TokenPos + Length(EndCurToken.Token)))));
+        end;
+
+        EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW(NewCode)));
+
+        // 调整光标位置
+        iOldTokenLen := Length(Cur);
+        if iStart > 0 then
+          CnOtaMovePosInCurSource(ipCur, 0, iStart * (Length(NewName) - iOldTokenLen))
+        else if iStart = 0 then
+          CnOtaMovePosInCurSource(ipCur, 0, Max(-iMaxCursorOffset, Length(NewName) - iOldTokenLen));
+        EditView.Paint;
+
+        // 恢复此 View 的 Bookmarks
+        LoadBookMarksFromObjectList(EditView, BookMarkList);
+      end;
+    finally
+      FreeAndNil(CurTokens);
+      FreeAndNil(Parser);
+      FreeAndNil(BookMarkList);
+    end;
+  end
+  else if IsCppSourceModule(EditView.Buffer.FileName) then // C/C++ 文件
+  begin
+    // 判断位置，根据需要弹出改名窗体。目前暂只支持整个文件
+    CParser := TCnWideCppStructParser.Create;
+    Stream := TMemoryStream.Create;
+    try
+      CnOtaSaveEditorToStreamW(EditView.Buffer, Stream);
+      // 解析当前显示的源文件
+      CParser.ParseSource(PChar(Stream.Memory), Stream.Size,
+        EditView.CursorPos.Line, EditView.CursorPos.Col, True);
+    finally
+      Stream.Free;
+    end;
+
+    try
+      CurToken := nil;
+      CurTokens := TList.Create;
+
+      // 先转换并加入所有与光标下标识符相同的 Token，区分大小写
+      for I := 0 to CParser.Count - 1 do
+      begin
+        CharPos := OTACharPos(CParser.Tokens[I].CharIndex - 1, CParser.Tokens[I].LineNumber);
+        try
+          EditView.ConvertPos(False, EditPos, CharPos);
+        except
+          Continue; // D5/6 下 ConvertPos 在只有一个大于号时会出错，只能屏蔽
+        end;
+
+        // 以上这句 ConvertPos 在 D2009 或以上中带汉字时的结果可能会有偏差，
+        // 因此直接采用下面 CharIndex + 1 的方式，但对 Tab 键展开缺乏处理。
+        EditPos.Col := CParser.Tokens[I].CharIndex + 1;
+        CParser.Tokens[I].EditCol := EditPos.Col;
+        CParser.Tokens[I].EditLine := EditPos.Line;
+
+        if (CParser.Tokens[I].CppTokenKind = ctkidentifier) and (string(CParser.Tokens[I].Token) = Cur) then
+        begin
+          CurTokens.Add(CParser.Tokens[I]);
+          if (CurToken = nil) and
+            IsCurrentTokenW(Pointer(EditView), EditControl, CParser.Tokens[I]) then
+            CurToken := CParser.Tokens[I];
+        end;
+      end;
+      if CurTokens.Count = 0 then Exit;
+
+      CurFuncStartToken := nil;
+      CurFuncEndToken := nil;
+
+      // 首先，找出正确的 CurrentFunc：最外层的非 namespace，或次外层（当最外层是 namespace）
+      if not CParser.BlockIsNamespace and (CParser.BlockStartToken <> nil) and
+        (CParser.BlockCloseToken <> nil) then
+      begin
+        CurFuncStartToken := CParser.BlockStartToken;
+        CurFuncEndToken := CParser.BlockCloseToken;
+      end
+      else if CParser.BlockIsNamespace and (CParser.ChildStartToken <> nil) and
+        (CParser.ChildCloseToken <> nil) then
+      begin
+        CurFuncStartToken := CParser.ChildStartToken;
+        CurFuncEndToken := CParser.ChildCloseToken;
+      end;
+
+      // 如果当前光标下的 Token 在 InnerBlock 之间，并且所有的 Token 都在
+      // InnerBlock 之间，并且 InnerBlock 不是 CurFunc，则 RIT 为 InnerProc
+      // 如果当前光标下的 Token 在 CurFunc 之间，并且所有的 Token 都在
+      // CurFun 之间，则 RIT 为 CurrentProc
+      // 俩都不是时，RIT 为 Unit
+      Rit := ritInvalid;
+      if (CParser.InnerBlockStartToken <> nil) and (CParser.InnerBlockCloseToken <> nil)
+        and (CParser.InnerBlockStartToken <> CurFuncStartToken) and
+            (CParser.InnerBlockCloseToken <> CurFuncEndToken) then
+      begin
+        if (TCnWideCppToken(CurTokens[0]).ItemIndex >= CParser.InnerBlockStartToken.ItemIndex)
+          and (TCnWideCppToken(CurTokens[CurTokens.Count - 1]).ItemIndex
+          <= CParser.InnerBlockCloseToken.ItemIndex) then
+          Rit := ritInnerProc;
+      end;
+
+      if (Rit = ritInvalid) and (CurFuncStartToken <> nil) and (CurFuncEndToken <> nil) then
+      begin
+        if (TCnWideCppToken(CurTokens[0]).ItemIndex >= CurFuncStartToken.ItemIndex)
+          and (TCnWideCppToken(CurTokens[CurTokens.Count - 1]).ItemIndex
+          <= CurFuncEndToken.ItemIndex) then
+          Rit := ritCurrentProc;
+      end;
+
+      if Rit = ritInvalid then
+        Rit := ritUnit;
+
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('Cpp F2 Rename. Calc Rit to ' + IntToStr(Ord(Rit)));
+{$ENDIF}
+
+      // 弹出对话框，暂时只支持整个文件
+      with TCnIdentRenameForm.Create(nil) do
+      begin
+        try
+          lblReplacePromt.Caption := Format(SCnRenameVarHintFmt, [Cur]);
+          UpperHeadCur := Cur;
+          if FUpperFirstLetter and (Length(UpperHeadCur) >= 1) and (CharInSet(UpperHeadCur[1], ['a'..'z'])) then
+            UpperHeadCur[1] := Chr(Ord(UpperHeadCur[1]) - 32);
+          edtRename.Text := UpperHeadCur;
+
+          rbCurrentProc.Enabled := Assigned(CurFuncStartToken) and
+            Assigned(CurFuncEndToken);
+          rbCurrentInnerProc.Enabled := Assigned(CParser.InnerBlockStartToken) and
+            Assigned(CParser.InnerBlockCloseToken) and
+            (CParser.InnerBlockStartToken <> CurFuncStartToken) and
+            (CParser.InnerBlockCloseToken <> CurFuncEndToken);
+
+          if rbCurrentProc.Enabled and (Rit <> ritUnit) then // 标识符范围超出 CurFunc 时，默认不选中外层函数这项
+            rbCurrentProc.Checked := True;
+          if rbCurrentInnerProc.Enabled and (Rit = ritInnerProc) then // 标识符只在最内层内时，选中最内层选项
+            rbCurrentInnerProc.Checked := True;
+          if (not rbCurrentProc.Checked) and (not rbCurrentInnerProc.Checked) then
+            rbUnit.Checked := True;
+
+          FrmModalResult := ShowModal = mrOk;
+          NewName := edtRename.Text;
+
+          if rbCurrentProc.Checked then
+            Rit := ritCurrentProc
+          else if rbCurrentInnerProc.Checked then
+            Rit := ritInnerProc
+          else
+            Rit := ritUnit;
+        finally
+          Free;
+        end;
+      end;
+
+      if FrmModalResult then
+      begin
+        if not IsValidIdent(NewName) then
+        begin
+          ErrorDlg(SCnRenameErrorValid);
+          Exit;
+        end;
+
+        StartToken := nil;
+        EndToken := nil;
+        if Rit = ritUnit then
+        begin
+          // 替换范围为整个 C 时，起始和终结 Token 为列表中头尾俩
+          StartToken := TCnWideCppToken(CurTokens[0]);
+          EndToken := TCnWideCppToken(CurTokens[CurTokens.Count - 1]);
+        end
+        else if Rit = ritCurrentProc then
+        begin
+          StartToken := CurFuncStartToken;
+          EndToken := CurFuncEndToken;
+        end
+        else if Rit = ritInnerProc then
+        begin
+          StartToken := CParser.InnerBlockStartToken;
+          EndToken := CParser.InnerBlockCloseToken;
+        end;
+
+        if (StartToken = nil) or (EndToken = nil) then Exit;
+
+        // 记录此 View 的 Bookmarks
+        BookMarkList := TObjectList.Create(True);
+        SaveBookMarksToObjectList(EditView, BookMarkList);
+
+        NewCode := '';
+        LastToken := nil;
+        FirstEnter := True;
+        iStart := 0;
+        iMaxCursorOffset := EditView.CursorPos.Col - CurToken.EditCol;
+
+        StartCurToken := nil;
+        EndCurToken := nil;
+        EditWriter := CnOtaGetEditWriterForSourceEditor;
+
+        // 执行完循环后，NewCode 应该为覆盖了需要替换的所有 Token 的替换后内容
+        for I := 0 to CurTokens.Count - 1 do
+        begin
+          if (TCnWideCppToken(CurTokens[I]).ItemIndex >= StartToken.ItemIndex) and
+            (TCnWideCppToken(CurTokens[I]).ItemIndex <= EndToken.ItemIndex) then
+          begin
+            // 属于要处理之列。第一回，处理头，最后循环后处理尾
+            if FirstEnter then
+            begin
+              StartCurToken := TCnWideCppToken(CurTokens[I]); // 记录第一个 CurToken
+              FirstEnter := False;
+            end;
+
+            if LastToken = nil then
+              NewCode := NewName
+            else
+            begin
+              // 从上一 Token 的尾巴，到现任 Token 的头，再加替换后的文字，都用 AnsiString 来计算
+              LastTokenPos := LastToken.TokenPos + Length(LastToken.Token);
+              NewCode := NewCode + string(Copy(AnsiString(CParser.Source), LastTokenPos + 1,
+                TCnWideCppToken(CurTokens[I]).TokenPos - LastTokenPos)) + NewName;
+            end;
+  {$IFDEF DEBUG}
+            CnDebugger.LogMsg('Cpp NewCode: ' + NewCode);
+  {$ENDIF}
+            // 同一行前面的会影响光标位置
+            if (TCnWideCppToken(CurTokens[I]).EditLine = CurToken.EditLine) and
+              (TCnWideCppToken(CurTokens[I]).EditCol < CurToken.EditCol) then
+              Inc(iStart);
+
+            LastToken := TCnWideCppToken(CurTokens[I]);   // 记录上一个处理过的 CurToken
+            EndCurToken := TCnWideCppToken(CurTokens[I]); // 记录最后一个 CurToken
+          end;
+        end;
+
+        if StartCurToken <> nil then
+        begin
+          // 要处理的是 UTF8 的长度，而 Paser 算出的 TokenPos 是 Unicode 的因此需要转换
+          EditWriter.CopyTo(Length(UTF8Encode(Copy(Parser.Source, 1, StartCurToken.TokenPos))));
+        end;
+
+        if EndCurToken <> nil then
+        begin
+          // 要处理的是 UTF8 的长度，而 Paser 算出的 TokenPos 是 Unicode 的因此需要转换
+          EditWriter.DeleteTo(Length(UTF8Encode(Copy(Parser.Source, 1,
+            EndCurToken.TokenPos + Length(EndCurToken.Token)))));
+        end;
+        EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW(NewCode)));
+
+        // 调整光标位置
+        iOldTokenLen := Length(Cur);
+        if iStart > 0 then
+          CnOtaMovePosInCurSource(ipCur, 0, iStart * (Length(NewName) - iOldTokenLen))
+        else if iStart = 0 then
+          CnOtaMovePosInCurSource(ipCur, 0, Max(-iMaxCursorOffset, Length(NewName) - iOldTokenLen));
+        EditView.Paint;
+
+        // 恢复此 View 的 Bookmarks
+        LoadBookMarksFromObjectList(EditView, BookMarkList);
+      end;
+    finally
+      FreeAndNil(CurTokens);
+      FreeAndNil(CParser);
+      FreeAndNil(BookMarkList);
+    end;
+  end;
+
+  Handled := True;
+end;
+
 {$HINTS ON}
 
 function TCnSrcEditorKey.DoSearchAgain(View: IOTAEditView; Key, ScanCode: Word;
@@ -1811,8 +2361,13 @@ begin
     if FF3Search and DoSearchAgain(View, Key, ScanCode, Shift, Handled) then
       Exit;
 
+{$IFDEF UNICODE}
+    if FF2Rename and DoRenameW(View, Key, ScanCode, Shift, Handled) then
+      Exit;
+{$ELSE}
     if FF2Rename and DoRename(View, Key, ScanCode, Shift, Handled) then
       Exit;
+{$ENDIF}
 
     if FHomeExt and DoHomeExtend(View, Key, ScanCode, Shift, Handled) then
       Exit;
