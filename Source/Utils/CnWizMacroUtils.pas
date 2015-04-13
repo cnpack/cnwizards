@@ -524,7 +524,7 @@ begin
   Position := EditView.CharPosToPos(CharPos);
 
 {$IFDEF UNICODE}
-  CnOtaInsertTextIntoEditorAtPosW(AContent, Position)
+  CnOtaInsertTextIntoEditorAtPosW(AContent, Position);
 {$ELSE}
   CnOtaInsertTextIntoEditorAtPos(AContent, Position);
 {$ENDIF}
