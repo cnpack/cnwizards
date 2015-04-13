@@ -522,8 +522,13 @@ begin
   EditPos := EditView.CursorPos;
   EditView.ConvertPos(True, EditPos, CharPos);
   Position := EditView.CharPosToPos(CharPos);
+
+{$IFDEF UNICODE}
+  CnOtaInsertTextIntoEditorAtPosW(AContent, Position)
+{$ELSE}
   CnOtaInsertTextIntoEditorAtPos(AContent, Position);
-  
+{$ENDIF}
+
   if ASavePos then
     CnOtaGotoPosition(SavePos)
   else

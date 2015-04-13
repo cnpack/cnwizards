@@ -717,6 +717,12 @@ procedure CnOtaInsertTextIntoEditorAtPos(const Text: string; Position: Longint;
   SourceEditor: IOTASourceEditor = nil);
 {* 在指定位置处插入文本，如果 SourceEditor 为空使用当前值。}
 
+{$IFDEF UNICODE}
+procedure CnOtaInsertTextIntoEditorAtPosW(const Text: string; Position: Longint;
+  SourceEditor: IOTASourceEditor = nil);
+{* 在指定位置处插入文本，如果 SourceEditor 为空使用当前值，D2009 以上使用。}
+{$ENDIF}
+
 procedure CnOtaGotoPosition(Position: Longint; EditView: IOTAEditView = nil;
   Middle: Boolean = True);
 {* 移动光标到指定位置，如果 EditView 为空使用当前值。}
@@ -5041,6 +5047,27 @@ begin
     EditWriter := nil;
   end;
 end;
+
+{$IFDEF UNICODE}
+
+// 在指定位置处插入文本，如果 SourceEditor 为空使用当前值，D2009 以上使用。
+procedure CnOtaInsertTextIntoEditorAtPosW(const Text: string; Position: Longint;
+  SourceEditor: IOTASourceEditor = nil);
+var
+  EditWriter: IOTAEditWriter;
+begin
+  if Text = '' then
+    Exit;
+  EditWriter := CnOtaGetEditWriterForSourceEditor(SourceEditor);
+  try
+    EditWriter.CopyTo(Position);
+    EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW((Text))));
+  finally
+    EditWriter := nil;
+  end;
+end;
+
+{$ENDIF}
 
 // 移动光标到指定位置，如果 EditView 为空使用当前值。
 procedure CnOtaGotoPosition(Position: Longint; EditView: IOTAEditView; Middle: Boolean);

@@ -303,8 +303,8 @@ begin
         EditView.Position.Move(StartRow, 1);
         EditView.Position.MoveEOL;
       end;
-      {$IFDEF DELPHI2009_UP}
-      CnOtaInsertTextIntoEditorAtPos(InsertingText,
+      {$IFDEF UNICODE}
+      CnOtaInsertTextIntoEditorAtPosW(InsertingText,
         CnOtaEditPosToLinePos(EditView.CursorPos, EditView) , EditView.Buffer);
       {$ELSE}
       CnOtaInsertTextIntoEditorAtPos(ConvertEditorTextToText(InsertingText),
@@ -380,8 +380,8 @@ begin
         InsertingText := EditView.Block.Text;
       end;
       CnOtaDeleteCurrentSelection();
-      {$IFDEF DELPHI2009_UP}
-      CnOtaInsertTextIntoEditorAtPos(InsertingText,
+      {$IFDEF UNICODE}
+      CnOtaInsertTextIntoEditorAtPosW(InsertingText,
         CnOtaEditPosToLinePos(OTAEditPos(1, StartRow - 1), EditView),
         EditView.Buffer);
       {$ELSE}
@@ -447,8 +447,8 @@ begin
         EditView.Block.EndingRow), EditView);
       TextLen := EditView.Block.Size;
 
-    {$IFDEF DELPHI2009_UP}
-      CnOtaInsertTextIntoEditorAtPos(EditView.Block.Text, StartPos, EditView.Buffer);
+    {$IFDEF UNICODE}
+      CnOtaInsertTextIntoEditorAtPosW(EditView.Block.Text, StartPos, EditView.Buffer);
     {$ELSE}
       CnOtaInsertTextIntoEditorAtPos(ConvertEditorTextToText(EditView.Block.Text), StartPos, EditView.Buffer);
     {$ENDIF}

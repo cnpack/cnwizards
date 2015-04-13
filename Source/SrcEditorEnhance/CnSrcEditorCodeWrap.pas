@@ -468,8 +468,14 @@ begin
       TailText := StringReplace(TailText, '|', '', [rfReplaceAll]);
 
       EditView.Block.Delete;
+
+{$IFDEF UNICODE}
+      CnOtaInsertTextIntoEditorAtPosW(HeadText + BlockText + TailText, StartPos,
+        EditView.Buffer);
+{$ELSE}
       CnOtaInsertTextIntoEditorAtPos(HeadText + BlockText + TailText, StartPos,
         EditView.Buffer);
+{$ENDIF}
 
       if CurPos > 0 then
         EditView.CursorPos := CnOtaLinePosToEditPos(StartPos + CurPos - 1, EditView);

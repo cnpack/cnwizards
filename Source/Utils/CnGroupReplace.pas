@@ -53,6 +53,9 @@ type
     FIgnoreCase: Boolean;
   public
     constructor Create(Collection: TCollection); override;
+{$IFDEF UNICODE}
+    function FindInTextW(Text: string): Integer;
+{$ENDIF}
     function FindInText(Text: AnsiString): Integer;
   published
     property Source: string read FSource write FSource;
@@ -151,9 +154,59 @@ begin
           Exit;
         end;
       end;
-    end; 
+    end;
   until (PSub = nil) or (PSub^ = #0);
 end;
+
+{$IFDEF UNICODE}
+
+function TCnReplacement.FindInTextW(Text: string): Integer;
+var
+  ASrc: string;
+  PSub, PText: PChar;
+  L: Integer;
+begin
+  if FIgnoreCase then
+  begin
+    ASrc := UpperCase(Source);
+    Text := UpperCase(Text);
+  end
+  else
+    ASrc := Source;
+
+  Result := -1;
+  if (Text = '') or (ASrc = '') then Exit;
+
+  L := Length(ASrc);
+  PText := PChar(Text);
+  PSub := PText;
+  repeat
+    PSub := StrPos(PSub, PChar(ASrc)); // Must using AnsiString in Unicode IDE
+    if PSub <> nil then
+    begin
+      if not FWholeWord then
+      begin
+        Result := Integer(PSub) - Integer(PText);
+        Exit;
+      end
+      else
+      begin
+        if (Cardinal(PSub) > Cardinal(PText)) and IsValidIdentChar(Char(PSub[-1])) or
+          IsValidIdentChar(Char(PSub[L])) then
+        begin
+          PSub := PChar(Integer(PSub) + L);
+        end
+        else
+        begin
+          Result := Integer(PSub) - Integer(PText);
+          Exit;
+        end;
+      end;
+    end;
+  until (PSub = nil) or (PSub^ = #0);
+end;
+
+{$ENDIF}
 
 { TCnReplacements }
 
@@ -195,10 +248,39 @@ end;
 function TCnGroupReplacement.Execute(Text: string): string;
 var
   i, APos, MinPos, ItemIdx: Integer;
-  AnsiText, AnsiResult: AnsiString;
+  AnsiText, AnsiResult: {$IFDEF UNICODE} string {$ELSE} AnsiString {$ENDIF};
 begin
   Result := '';
   if Text = '' then Exit;
+
+{$IFDEF UNICODE}
+  AnsiText := Text;
+  AnsiResult := '';
+
+  repeat
+    MinPos := MaxInt;
+    ItemIdx := -1;
+    for i := 0 to Items.Count - 1 do
+    begin
+      APos := Items[i].FindInTextW(AnsiText);
+      if (APos >= 0) and (APos < MinPos) then
+      begin
+        ItemIdx := i;
+        MinPos := APos;
+        if MinPos = 0 then
+          Break;
+      end;
+    end;
+
+    if (ItemIdx >= 0) then
+    begin
+      AnsiResult := AnsiResult + Copy(AnsiText, 1, MinPos) + Items[ItemIdx].Dest;
+      Delete(AnsiText, 1, MinPos + Length(Items[ItemIdx].Source));
+    end;
+  until (ItemIdx = -1) or (AnsiText = '');
+  Result := AnsiResult + AnsiText;
+
+{$ELSE}
   AnsiText := AnsiString(Text);
   AnsiResult := '';
 
@@ -216,7 +298,7 @@ begin
           Break;
       end;
     end;
-    
+
     if (ItemIdx >= 0) then
     begin
       AnsiResult := AnsiResult + Copy(AnsiText, 1, MinPos) + AnsiString(Items[ItemIdx].Dest);
@@ -224,6 +306,7 @@ begin
     end;
   until (ItemIdx = -1) or (AnsiText = '');
   Result := string(AnsiResult + AnsiText);
+{$ENDIF}
 end;
 
 procedure TCnGroupReplacement.SetItems(const Value: TCnReplacements);

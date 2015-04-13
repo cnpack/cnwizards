@@ -136,7 +136,7 @@ type
     // Unicode 版本，用于 D2009 或以上，解决转换成 Ansi 后会丢字符的问题
     function DoRenameW(View: IOTAEditView; Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean): Boolean;
-{$ENDIF}      
+{$ENDIF}
     procedure EditControlKeyDown(Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean);
     procedure EditControlKeyUp(Key, ScanCode: Word; Shift: TShiftState;

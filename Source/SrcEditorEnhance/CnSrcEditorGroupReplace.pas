@@ -276,15 +276,18 @@ begin
     StartPos := CnOtaEditPosToLinePos(OTAEditPos(EditView.Block.StartingColumn,
       EditView.Block.StartingRow), EditView);
 
-{$IFDEF UNICODE_STRING}
+{$IFDEF UNICODE}
     BlockText := Item.Execute(EditView.Block.Text); // Unicode 环境下无需转换
 {$ELSE}
     BlockText := Item.Execute(ConvertEditorTextToText(EditView.Block.Text));
 {$ENDIF}
     
     EditView.Block.Delete;
+{$IFDEF UNICODE}
+    CnOtaInsertTextIntoEditorAtPosW(BlockText, StartPos, EditView.Buffer);
+{$ELSE}
     CnOtaInsertTextIntoEditorAtPos(BlockText, StartPos, EditView.Buffer);
-
+{$ENDIF}
     Application.ProcessMessages;
     EditView.Paint;
   end;
