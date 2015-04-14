@@ -215,7 +215,8 @@ uses
   CnImageProvider_IconFinder in 'Utils\CnImageProvider_IconFinder.pas',
   CnImageProvider_FindIcons in 'Utils\CnImageProvider_FindIcons.pas',
   CnImageProvider_LocalCache in 'Utils\CnImageProvider_LocalCache.pas',
-  CnFormatterIntf in 'CodeFormatter\CnFormatterIntf.pas';
+  CnFormatterIntf in 'CodeFormatter\CnFormatterIntf.pas',
+  CnCodeFormatterWizard in 'CodeFormatter\CnCodeFormatterWizard.pas' {CnCodeFormatterForm};
 
 {$R *.RES}
 

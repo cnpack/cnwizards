@@ -123,7 +123,7 @@
 			<Directories Name="UnitOutputDir">..\Dcu</Directories>
 			<Directories Name="PackageDLLOutputDir"></Directories>
 			<Directories Name="PackageDCPOutputDir"></Directories>
-			<Directories Name="SearchPath">..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;ThirdParty\FastCode;Utils;ScriptWizard</Directories>
+			<Directories Name="SearchPath">..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;ThirdParty\FastCode;Utils;CodeFormatter;ScriptWizard</Directories>
 			<Directories Name="Packages">rtl;vcl;vclx;designide</Directories>
 			<Directories Name="Conditionals"></Directories>
 			<Directories Name="DebugSourceDirs"></Directories>
