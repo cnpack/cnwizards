@@ -361,6 +361,11 @@ begin
   AddFile(_CnChangeFileExt(FileName, '.nfm'));
   AddFile(_CnChangeFileExt(FileName, '.todo'));
   AddFile(_CnChangeFileExt(FileName, '.tlb'));
+
+{$IFDEF SUPPORTS_FMX}
+  // 加入 fmx 的支持
+  AddFile(_CnChangeFileExt(FileName, '.fmx'));
+{$ENDIF}
 end;
 
 function TCnBackupProjectInfo.GetCount: Integer;
