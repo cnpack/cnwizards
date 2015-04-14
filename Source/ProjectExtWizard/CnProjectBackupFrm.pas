@@ -99,7 +99,7 @@ type
 
     procedure Add(FileInfo: TCnBackupFileInfo);
     procedure Delete(Index: Integer);
-    procedure AddFiles(FileName, UnitName, FormName: string);
+    procedure AddFiles(const FileName, UnitName, FormName: string);
     property Count: Integer read GetCount;
     property Items[Index: Integer]: TCnBackupFileInfo read GetItem;
   end;
@@ -320,20 +320,20 @@ begin
   FInfoList.Add(FileInfo);
 end;
 
-procedure TCnBackupProjectInfo.AddFiles(FileName, UnitName, FormName: string);
+procedure TCnBackupProjectInfo.AddFiles(const FileName, UnitName, FormName: string);
 var
   TempFileName: string;
 
-  function AddFile(FileName: string): Boolean;
+  function AddFile(const F: string): Boolean;
   var
     FileInfo: TCnBackupFileInfo;
   begin
     Result := False;
-    if not FileExists(FileName) then
+    if not FileExists(F) then
       Exit;
 
     FileInfo := TCnBackupFileInfo.Create;
-    FileInfo.SetFileInfo(FileName);
+    FileInfo.SetFileInfo(F);
     Add(FileInfo);
 
     Result := True;
@@ -344,7 +344,7 @@ begin
   if (TempFileName = '.DCP') or (TempFileName = '.BPI') or (TempFileName = '.DLL') then
     Exit;
 
-  AddFile( FileName );
+  AddFile(FileName);
 
   // 加入 cpp 文件对应的 h/hpp/bpr/bpk
   if TempFileName = '.CPP' then
