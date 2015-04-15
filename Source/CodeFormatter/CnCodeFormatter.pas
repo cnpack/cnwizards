@@ -4630,7 +4630,9 @@ begin
       // 类里出现的var/threadvar等同于 class var/threadvar 的处理，都写在 FormatClassMethod 中
       tokKeywordVar, tokKeywordThreadvar:
         FormatClassMethod(PreSpaceCount);
-    else // 其他的都算 symbol，包括 [Weak] 前缀
+      tokSLB:
+        FormatSingleAttribute(PreSpaceCount); // 属性，包括 [Weak] 前缀
+    else // 其他的都算 symbol
       FormatClassField(PreSpaceCount);
     end;
 
