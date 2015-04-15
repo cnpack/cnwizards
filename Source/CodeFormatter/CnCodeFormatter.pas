@@ -994,7 +994,7 @@ end;
 procedure TCnBasePascalFormatter.FormatIdent(PreSpaceCount: Byte;
   const CanHaveUnitQual: Boolean);
 begin
-  if Scaner.Token = tokSLB then // Attribute
+  while Scaner.Token = tokSLB do // Attribute
   begin
     FormatSingleAttribute(PreSpaceCount);
     Writeln;
@@ -2376,7 +2376,7 @@ end;
 procedure TCnBasePascalFormatter.FormatClassVarIdent(PreSpaceCount: Byte;
   const CanHaveUnitQual: Boolean);
 begin
-  if Scaner.Token = tokSLB then // Attribute
+  while Scaner.Token = tokSLB do // Attribute
   begin
     FormatSingleAttribute(PreSpaceCount);
     Writeln;
@@ -3714,7 +3714,7 @@ procedure TCnBasePascalFormatter.FormatTypeDecl(PreSpaceCount: Byte);
 var
   Old: Boolean;
 begin
-  if Scaner.Token = tokSLB then
+  while Scaner.Token = tokSLB do
   begin
     FormatSingleAttribute(PreSpaceCount);
     Writeln;
