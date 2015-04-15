@@ -484,6 +484,7 @@ begin
   HotKeyWizard.HotKey := FShortCuts[Idx];
   HotKeyWizard.Visible := (Wizard is TCnActionWizard) and
     TCnActionWizard(Wizard).EnableShortCut;
+  Label4.Visible := HotKeyWizard.Visible;
   btnConfig.Enabled := Wizard.HasConfig and cbWizardActive.Checked;
   btnRestoreSetting.Enabled := (Wizard.HasConfig or (Wizard is TCnActionWizard))
     and cbWizardActive.Checked;
