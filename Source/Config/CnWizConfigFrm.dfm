@@ -103,7 +103,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
           Top = 256
           Width = 53
           Height = 13
-          Caption = 'ShortCut:'
+          Caption = 'Shortcut:'
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11

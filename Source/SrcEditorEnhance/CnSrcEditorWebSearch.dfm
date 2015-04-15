@@ -29,7 +29,7 @@ inherited CnSrcEditorWebSearchForm: TCnSrcEditorWebSearchForm
       Top = 176
       Width = 43
       Height = 13
-      Caption = 'ShortCut'
+      Caption = 'Shortcut'
     end
     object lbl3: TLabel
       Left = 8
@@ -49,7 +49,7 @@ inherited CnSrcEditorWebSearchForm: TCnSrcEditorWebSearchForm
           Width = 80
         end
         item
-          Caption = 'ShortCut'
+          Caption = 'Shortcut'
           Width = 80
         end
         item

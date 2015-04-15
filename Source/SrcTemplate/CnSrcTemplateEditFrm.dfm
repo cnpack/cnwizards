@@ -56,7 +56,7 @@ inherited CnSrcTemplateEditForm: TCnSrcTemplateEditForm
       Top = 19
       Width = 47
       Height = 13
-      Caption = 'ShortCut:'
+      Caption = 'Shortcut:'
     end
     object lbl4: TLabel
       Left = 384

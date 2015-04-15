@@ -22,7 +22,7 @@ inherited CnWizSubActionShortCutForm: TCnWizSubActionShortCutForm
       Top = 260
       Width = 47
       Height = 13
-      Caption = 'ShortCut:'
+      Caption = 'Shortcut:'
     end
     object ListView: TListView
       Left = 8
