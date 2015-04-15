@@ -42,47 +42,11 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ToolsAPI, IniFiles, StdCtrls, ComCtrls, CnSpin,
+  ToolsAPI, IniFiles, StdCtrls, ComCtrls, Menus, CnSpin,
   CnConsts, CnCommon, CnWizConsts, CnWizClasses, CnWizMultiLang, CnWizOptions,
   CnWizUtils, CnFormatterIntf, CnCodeFormatRules;
 
 type
-  TCnCodeFormatterForm = class(TCnTranslateForm)
-    pgcFormatter: TPageControl;
-    tsPascal: TTabSheet;
-    grpCommon: TGroupBox;
-    lblKeyword: TLabel;
-    cbbKeywordStyle: TComboBox;
-    lblBegin: TLabel;
-    cbbBeginStyle: TComboBox;
-    lblTab: TLabel;
-    seTab: TCnSpinEdit;
-    seWrapLine: TCnSpinEdit;
-    lblSpaceBefore: TLabel;
-    seSpaceBefore: TCnSpinEdit;
-    lblSpaceAfter: TLabel;
-    seSpaceAfter: TCnSpinEdit;
-    chkUsesSinglieLine: TCheckBox;
-    grpAsm: TGroupBox;
-    chkIgnoreArea: TCheckBox;
-    seASMHeadIndent: TCnSpinEdit;
-    lblAsmHeadIndent: TLabel;
-    lblASMTab: TLabel;
-    seAsmTab: TCnSpinEdit;
-    btnOK: TButton;
-    btnCancel: TButton;
-    btnHelp: TButton;
-    chkAutoWrap: TCheckBox;
-    procedure chkAutoWrapClick(Sender: TObject);
-    procedure FormShow(Sender: TObject);
-  private
-    { Private declarations }
-  protected
-    function GetHelpTopic: string; override;
-  public
-    { Public declarations }
-  end;
-
   TCnCodeFormatterWizard = class(TCnSubMenuWizard)
   private
     FIdOptions: Integer;
@@ -137,6 +101,44 @@ type
     property UseIgnoreArea: Boolean read FUseIgnoreArea write FUseIgnoreArea;
   end;
 
+  TCnCodeFormatterForm = class(TCnTranslateForm)
+    pgcFormatter: TPageControl;
+    tsPascal: TTabSheet;
+    grpCommon: TGroupBox;
+    lblKeyword: TLabel;
+    cbbKeywordStyle: TComboBox;
+    lblBegin: TLabel;
+    cbbBeginStyle: TComboBox;
+    lblTab: TLabel;
+    seTab: TCnSpinEdit;
+    seWrapLine: TCnSpinEdit;
+    lblSpaceBefore: TLabel;
+    seSpaceBefore: TCnSpinEdit;
+    lblSpaceAfter: TLabel;
+    seSpaceAfter: TCnSpinEdit;
+    chkUsesSinglieLine: TCheckBox;
+    grpAsm: TGroupBox;
+    chkIgnoreArea: TCheckBox;
+    seASMHeadIndent: TCnSpinEdit;
+    lblAsmHeadIndent: TLabel;
+    lblASMTab: TLabel;
+    seAsmTab: TCnSpinEdit;
+    btnOK: TButton;
+    btnCancel: TButton;
+    btnHelp: TButton;
+    chkAutoWrap: TCheckBox;
+    btnShortCut: TButton;
+    procedure chkAutoWrapClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure btnShortCutClick(Sender: TObject);
+  private
+    FWizard: TCnCodeFormatterWizard;
+  protected
+    function GetHelpTopic: string; override;
+  public
+    { Public declarations }
+  end;
+
 {$ENDIF CNWIZARDS_CNCODEFORMATTERWIZARD}
 
 implementation
@@ -178,7 +180,8 @@ const
 procedure TCnCodeFormatterWizard.AcquireSubActions;
 begin
   FIdFormatCurrent := RegisterASubAction(SCnCodeFormatterWizardFormatCurrent,
-    SCnCodeFormatterWizardFormatCurrentCaption, 0, SCnCodeFormatterWizardFormatCurrentHint);
+    SCnCodeFormatterWizardFormatCurrentCaption, TextToShortCut('Ctrl+W'),
+    SCnCodeFormatterWizardFormatCurrentHint);
   // Other Menus
   
   AddSepMenu;
@@ -190,6 +193,8 @@ procedure TCnCodeFormatterWizard.Config;
 begin
   with TCnCodeFormatterForm.Create(nil) do
   begin
+    FWizard := Self;
+
     cbbKeywordStyle.ItemIndex := Ord(FKeywordStyle);
     cbbBeginStyle.ItemIndex := Ord(FBeginStyle);
     seTab.Value := FTabSpaceCount;
@@ -527,6 +532,12 @@ end;
 function TCnCodeFormatterForm.GetHelpTopic: string;
 begin
   Result := 'CnCodeFormatterWizard';
+end;
+
+procedure TCnCodeFormatterForm.btnShortCutClick(Sender: TObject);
+begin
+  if FWizard.ShowShortCutDialog(GetHelpTopic) then
+    FWizard.DoSaveSettings;
 end;
 
 initialization

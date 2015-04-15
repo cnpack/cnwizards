@@ -4,7 +4,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
   BorderStyle = bsDialog
   Caption = 'Code Formatter Settings'
   ClientHeight = 458
-  ClientWidth = 379
+  ClientWidth = 377
   Font.Charset = ANSI_CHARSET
   OldCreateOrder = True
   OnShow = FormShow
@@ -224,5 +224,15 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
     Height = 21
     Caption = '&Help'
     TabOrder = 3
+  end
+  object btnShortCut: TButton
+    Left = 8
+    Top = 427
+    Width = 75
+    Height = 21
+    Caption = '&Shortcut'
+    ModalResult = 2
+    TabOrder = 4
+    OnClick = btnShortCutClick
   end
 end
