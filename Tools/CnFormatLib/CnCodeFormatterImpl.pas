@@ -69,8 +69,12 @@ type
     function FormatOnePascalUnitUtf8(Input: PAnsiChar; Len: DWORD): PAnsiChar;
     function FormatOnePascalUnitW(Input: PWideChar; Len: DWORD): PWideChar;
 
-    function FormatPascalBlock(StartType: DWORD; StartIndent: DWORD;
-      Input: PAnsiChar; Len: DWORD): PAnsiChar;
+    function FormatPascalBlock(Input: PAnsiChar; Len: DWORD; StartOffset: DWORD;
+      EndOffset: DWORD): PAnsiChar;
+    function FormatPascalBlockUtf8(Input: PAnsiChar; Len: DWORD; StartOffset: DWORD;
+      EndOffset: DWORD): PAnsiChar;
+    function FormatPascalBlockW(Input: PWideChar; Len: DWORD; StartOffset: DWORD;
+      EndOffset: DWORD): PWideChar;
 
     function RetrievePascalLastError(out SourceLine: Integer; out SourceCol: Integer;
       out SourcePos: Integer; out CurrentToken: PAnsiChar): Integer;
@@ -113,13 +117,6 @@ destructor TCnCodeFormatProvider.Destroy;
 begin
   AdjustResultLength(0);
   inherited;
-end;
-
-function TCnCodeFormatProvider.FormatPascalBlock(StartType, StartIndent: DWORD;
-  Input: PAnsiChar; Len: DWORD): PAnsiChar;
-begin
-  AdjustResultLength(0);
-  Result := FResult;
 end;
 
 function TCnCodeFormatProvider.FormatOnePascalUnit(Input: PAnsiChar;
@@ -228,10 +225,6 @@ begin
   Result := FResult;
 
   PascalErrorRec.ErrorCode := CN_ERRCODE_PASCAL_NOT_SUPPORT;
-  PascalErrorRec.SourceLine := 0;
-  PascalErrorRec.SourceCol := 0;
-  PascalErrorRec.SourcePos := 0;
-  PascalErrorRec.CurrentToken := '';
 end;
 
 function TCnCodeFormatProvider.FormatOnePascalUnitW(Input: PWideChar;
@@ -242,10 +235,45 @@ begin
   Result := nil;
 
   PascalErrorRec.ErrorCode := CN_ERRCODE_PASCAL_NOT_SUPPORT;
-  PascalErrorRec.SourceLine := 0;
-  PascalErrorRec.SourceCol := 0;
-  PascalErrorRec.SourcePos := 0;
-  PascalErrorRec.CurrentToken := '';
+end;
+
+function TCnCodeFormatProvider.FormatPascalBlockUtf8(Input: PAnsiChar; Len,
+  StartOffset, EndOffset: DWORD): PAnsiChar;
+begin
+  ClearPascalError;
+  AdjustResultLength(0);
+  Result := FResult;
+
+  PascalErrorRec.ErrorCode := CN_ERRCODE_PASCAL_NOT_SUPPORT;
+end;
+
+function TCnCodeFormatProvider.FormatPascalBlockW(Input: PWideChar; Len,
+  StartOffset, EndOffset: DWORD): PWideChar;
+begin
+  ClearPascalError;
+  AdjustResultLength(0);
+  Result := nil;
+
+  PascalErrorRec.ErrorCode := CN_ERRCODE_PASCAL_NOT_SUPPORT;
+end;
+
+function TCnCodeFormatProvider.FormatPascalBlock(Input: PAnsiChar; Len,
+  StartOffset, EndOffset: DWORD): PAnsiChar;
+begin
+  ClearPascalError;
+  AdjustResultLength(0);
+  if (Input = nil) or (Len = 0) then
+  begin
+    Result := nil;
+    Exit;
+  end;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('FormatPascalBlock ' + Copy(Input, StartOffset, EndOffset - StartOffset));
+{$ENDIF}
+  Result := nil;
+
+  PascalErrorRec.ErrorCode := CN_ERRCODE_PASCAL_NOT_SUPPORT;
 end;
 
 initialization

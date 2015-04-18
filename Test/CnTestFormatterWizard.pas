@@ -78,7 +78,15 @@ uses
   CnDebug, CnCommon;
 
 const
-  DLLName: string = 'CnFormatLib.dll';
+{$IFDEF UNICODE}
+  DLLName: string = 'CnFormatLibW.dll'; // D2009 ~ 最新 用 Unicode 版
+{$ELSE}
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+  DLLName: string = 'CnFormatLibW.dll'; // D2005 ~ 2007 也用 Unicode 版但用 UTF8
+  {$ELSE}
+  DLLName: string = 'CnFormatLib.dll';  // D5~7 下用 Ansi 版
+  {$ENDIF}
+{$ENDIF}
 
 function ModulePath: string;
 var
@@ -117,11 +125,14 @@ end;
 
 procedure TCnTestFormatterWizard.Execute;
 var
-  S: AnsiString;
-  Res: PAnsiChar;
+  Src: string;
+  Res: PChar;
   Formatter: ICnPascalFormatterIntf;
   ErrCode, SourceLine, SourceCol, SourcePos: Integer;
   CurrentToken: PAnsiChar;
+  View: IOTAEditView;
+  Block: IOTAEditBlock;
+  StartPos, EndPos: Integer;
 begin
   if FHandle = 0 then
     FHandle := LoadLibrary(PChar(ModulePath + DLLName));
@@ -152,14 +163,48 @@ begin
     Exit;
   end;
 
-  try
-    S := AnsiString(CnOtaGetCurrentEditorSource);
-    Res := Formatter.FormatOnePascalUnit(PAnsiChar(S), Length(S));
+  if CnOtaCurrBlockEmpty then
+  begin
+{$IFDEF UNICODE}
+    // Src/Res Utf16
+    Src := CnOtaGetCurrentEditorSourceW;
+    Res := Formatter.FormatOnePascalUnitW(PChar(Src), Length(Src));
+
+    // Remove FF FE BOM if exists
+    if (Length(Res) > 1) and (Res[0] = #$FEFF) then
+      Inc(Res);
+{$ELSE}
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+    // Src/Res Utf8
+    Src := CnOtaGetCurrentEditorSource(False);
+    Res := Formatter.FormatOnePascalUnitUtf8(PAnsiChar(Src), Length(Src));
+
+    // Remove EF BB BF BOM if exist
+    if (Length(Res) > 3) and
+      (Res[0] = #$EF) and (Res[1] = #$BB) and (Res[2] = #$BF) then
+      Inc(Res, 3);
+  {$ELSE}
+    // Src/Res Ansi
+    Src := CnOtaGetCurrentEditorSource(True);
+    Res := Formatter.FormatOnePascalUnit(PAnsiChar(Src), Length(Src));
+  {$ENDIF}
+{$ENDIF}
 
     if Res <> nil then
     begin
       ShowMessage(Res);
+{$IFDEF UNICODE}
+      // Utf16 内部转 Utf8 写入
+      CnOtaSetCurrentEditorSourceW(string(Res));
+{$ELSE}
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+      // Utf8 直接写入
+      CnOtaSetCurrentEditorSourceUtf8(string(Res));
+  {$ELSE}
+      // Ansi 转 Utf8 写入
       CnOtaSetCurrentEditorSource(string(Res));
+  {$ENDIF}
+{$ENDIF}
     end
     else
     begin
@@ -168,9 +213,83 @@ begin
       ShowMessage(Format('Error Code %d, Line %d, Col %d, Pos %d, Token %s', [ErrCode,
         SourceLine, SourceCol, SourcePos, CurrentToken]));
     end;
-  finally
-    Formatter := nil;
+  end
+  else // 有选择区
+  begin
+{$IFDEF UNICODE}
+    // Src/Res Utf16
+    Src := CnOtaGetCurrentEditorSourceW;
+{$ELSE}
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+    // Src/Res Utf8
+    Src := CnOtaGetCurrentEditorSource(False);
+  {$ELSE}
+    // Src/Res Ansi
+    Src := CnOtaGetCurrentEditorSource(True);
+  {$ENDIF}
+{$ENDIF}
+
+    View := CnOtaGetTopMostEditView;
+    if View <> nil then
+    begin
+      Block := View.Block;
+      if (Block <> nil) and Block.IsValid then
+      begin
+        StartPos := CnOtaEditPosToLinePos(OTAEditPos(1, Block.StartingRow), View);
+        // 光标不在行首时，处理到下一行行首
+        if Block.EndingColumn > 1 then
+        begin
+          if  Block.EndingRow < View.Buffer.GetLinesInBuffer then
+          begin
+            EndPos := CnOtaEditPosToLinePos(OTAEditPos(1, Block.EndingRow + 1), View);
+          end
+          else
+            EndPos := CnOtaEditPosToLinePos(OTAEditPos(255, Block.EndingRow), View);
+        end
+        else
+          EndPos := CnOtaEditPosToLinePos(OTAEditPos(1, Block.EndingRow), View);
+
+        // 此时 StartPos 和 EndPos 标记了当前选择区内要处理的文本
+{$IFDEF UNICODE}
+        // Src/Res Utf16，LinePos 是 Utf8 的偏移量，需要转换
+        StartPos := Length(UTF8Decode(Copy(Utf8Encode(Src), 1, StartPos)));
+        EndPos := Length(UTF8Decode(Copy(Utf8Encode(Src), 1, EndPos)));
+        Res := Formatter.FormatPascalBlockW(PChar(Src), Length(Src), StartPos, EndPos);
+
+        // Remove FF FE BOM if exists
+        if (Length(Res) > 1) and (Res[0] = #$FEFF) then
+          Inc(Res);
+{$ELSE}
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+        // Src/Res Utf8
+        Res := Formatter.FormatPascalBlockUtf8(PAnsiChar(Src), Length(Src), StartPos, EndPos);
+
+        // Remove EF BB BF BOM if exist
+        if (Length(Res) > 3) and
+          (Res[0] = #$EF) and (Res[1] = #$BB) and (Res[2] = #$BF) then
+          Inc(Res, 3);
+  {$ELSE}
+        // Src/Res Ansi
+        Res := Formatter.FormatPascalBlock(PAnsiChar(Src), Length(Src), StartPos, EndPos);
+  {$ENDIF}
+{$ENDIF}
+
+        if Res <> nil then
+        begin
+          ShowMessage(Res);
+        end
+        else
+        begin
+          ErrCode := Formatter.RetrievePascalLastError(SourceLine, SourceCol,
+            SourcePos, CurrentToken);
+          ShowMessage(Format('Error Code %d, Line %d, Col %d, Pos %d, Token %s', [ErrCode,
+            SourceLine, SourceCol, SourcePos, CurrentToken]));
+        end;
+      end;
+    end;
   end;
+
+  Formatter := nil;
 end;
 
 function TCnTestFormatterWizard.GetCaption: string;

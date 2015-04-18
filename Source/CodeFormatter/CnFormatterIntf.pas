@@ -155,11 +155,30 @@ type
        返回结果存储的 UnicodeString 字符内容的指针，用完后无须释放。
        如果返回 nil，说明出错，需要用 RetrieveLastError 获得错误码}
 
-    function FormatPascalBlock(StartType: DWORD; StartIndent: DWORD;
-      Input: PAnsiChar; Len: DWORD): PAnsiChar;
-    {* 格式化一块代码。需要指定起始代码类型以及起始缩进。
-       代码以 AnsiString 格式传入，返回结果存储的 AnsiString 字符内容的指针，
-       用完后无须释放。如果返回 nil，说明出错，需要用 RetrieveLastError 获得错误}
+    function FormatPascalBlock(Input: PAnsiChar; Len: DWORD; StartOffset: DWORD;
+      EndOffset: DWORD): PAnsiChar;
+    {* 格式化一代码块，所属整个 Pascal 文件内容以 AnsiString 格式传入。
+       StartOffset 与 EndOffset 是代码块在整个文件中的偏移量，从 IDE 中的选择区直接获得。
+       用 Copy 方法从 Input 中获得从 StartOffset 到 EndOffset 的内容正对应选择区的内容。
+       返回结果存储的 AnsiString 字符内容的指针，用完后无须释放。
+       如果返回 nil，说明出错，需要用 RetrieveLastError 获得错误码}
+
+    function FormatPascalBlockUtf8(Input: PAnsiChar; Len: DWORD; StartOffset: DWORD;
+      EndOffset: DWORD): PAnsiChar;
+    {* 格式化一代码块，整个 Pascal 文件内容以 UTF8String 格式传入。
+       StartOffset 与 EndOffset 是代码块在整个文件中的 UTF8 偏移量，从 IDE 中的选择区直接获得。
+       用 Copy 方法从 Input 中获得从 StartOffset 到 EndOffset 的内容正对应选择区的 Utf8内容。
+       返回结果存储的 Utf8String 字符内容的指针，用完后无须释放。
+       如果返回 nil，说明出错，需要用 RetrieveLastError 获得错误码}
+
+    function FormatPascalBlockW(Input: PWideChar; Len: DWORD; StartOffset: DWORD;
+      EndOffset: DWORD): PWideChar;
+    {* 格式化一代码块，整个 Pascal 文件内容以 UnicodeString 格式传入。Len 字符长度
+       StartOffset 与 EndOffset 是代码块在整个文件中的 Unicode 字符偏移量，
+       不可从 IDE 中的选择区直接获得，需要进行一次 Utf8 转换后才能传入。
+       用 Copy 方法从 Input 中获得从 StartOffset 到 EndOffset 的内容正对应选择区的 Unicode 内容。
+       返回结果存储的 UnicodeString 字符内容的指针，用完后无须释放。
+       如果返回 nil，说明出错，需要用 RetrieveLastError 获得错误码}
 
     function RetrievePascalLastError(out SourceLine: Integer; out SourceCol: Integer;
       out SourcePos: Integer; out CurrentToken: PAnsiChar): Integer;

@@ -396,7 +396,7 @@ begin
 
       try
         M := TMemoryStream.Create;
-        M.Write(PChar(S)^, Length(S));
+        M.Write(PChar(S)^, Length(S) * SizeOf(Char));
 
         Fmt := TCnPascalCodeFormatter.Create(M, cdmAsComment);
         Fmt.SliceMode := True;

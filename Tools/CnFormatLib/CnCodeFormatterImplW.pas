@@ -73,8 +73,14 @@ type
     function FormatOnePascalUnitUtf8(Input: PAnsiChar; Len: DWORD): PAnsiChar;
     function FormatOnePascalUnitW(Input: PWideChar; Len: DWORD): PWideChar;
 
-    function FormatPascalBlock(StartType: DWORD; StartIndent: DWORD;
-      Input: PAnsiChar; Len: DWORD): PAnsiChar;
+    function FormatPascalBlock(Input: PAnsiChar; Len: DWORD; StartOffset: DWORD;
+      EndOffset: DWORD): PAnsiChar;
+
+    function FormatPascalBlockUtf8(Input: PAnsiChar; Len: DWORD; StartOffset: DWORD;
+      EndOffset: DWORD): PAnsiChar;
+
+    function FormatPascalBlockW(Input: PWideChar; Len: DWORD; StartOffset: DWORD;
+      EndOffset: DWORD): PWideChar;
 
     function RetrievePascalLastError(out SourceLine: Integer; out SourceCol: Integer;
       out SourcePos: Integer; out CurrentToken: PAnsiChar): Integer;
@@ -120,11 +126,63 @@ begin
   inherited;
 end;
 
-function TCnCodeFormatProvider.FormatPascalBlock(StartType, StartIndent: DWORD;
-  Input: PAnsiChar; Len: DWORD): PAnsiChar;
+function TCnCodeFormatProvider.FormatPascalBlock(Input: PAnsiChar; Len,
+  StartOffset, EndOffset: DWORD): PAnsiChar;
 begin
+  ClearPascalError;
   AdjustResultLength(0);
   Result := nil;
+
+  PascalErrorRec.ErrorCode := CN_ERRCODE_PASCAL_NOT_SUPPORT;
+end;
+
+function TCnCodeFormatProvider.FormatPascalBlockUtf8(Input: PAnsiChar; Len,
+  StartOffset, EndOffset: DWORD): PAnsiChar;
+var
+  UInput: string;
+begin
+  ClearPascalError;
+  AdjustResultLength(0);
+
+  if (Input = nil) or (Len = 0) then
+  begin
+    Result := nil;
+    Exit;
+  end;
+
+  // Utf8 字符串与 Utf8 偏移量全部转换成 Unicode 的
+  UInput := UTF8ToUnicodeString(Input);
+  Len := Length(UInput);
+
+  StartOffset := Length(UTF8Decode(Copy(Input, 1, StartOffset)));
+  EndOffset := Length(UTF8Decode(Copy(Input, 1, EndOffset)));
+
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('FormatPascalBlockUtf8 ' + Copy(UInput, StartOffset, EndOffset - StartOffset));
+{$ENDIF}
+  Result := nil;
+
+  PascalErrorRec.ErrorCode := CN_ERRCODE_PASCAL_NOT_SUPPORT;
+end;
+
+function TCnCodeFormatProvider.FormatPascalBlockW(Input: PWideChar; Len,
+  StartOffset, EndOffset: DWORD): PWideChar;
+begin
+  ClearPascalError;
+  AdjustResultLength(0);
+
+  if (Input = nil) or (Len = 0) then
+  begin
+    Result := nil;
+    Exit;
+  end;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('FormatPascalBlockW ' + Copy(Input, StartOffset, EndOffset - StartOffset));
+{$ENDIF}
+  Result := nil;
+
+  PascalErrorRec.ErrorCode := CN_ERRCODE_PASCAL_NOT_SUPPORT;
 end;
 
 function TCnCodeFormatProvider.FormatOnePascalUnit(Input: PAnsiChar;
@@ -135,10 +193,6 @@ begin
   Result := nil;
 
   PascalErrorRec.ErrorCode := CN_ERRCODE_PASCAL_NOT_SUPPORT;
-  PascalErrorRec.SourceLine := 0;
-  PascalErrorRec.SourceCol := 0;
-  PascalErrorRec.SourcePos := 0;
-  PascalErrorRec.CurrentToken := '';
 end;
 
 procedure TCnCodeFormatProvider.SetPascalFormatRule(DirectiveMode, KeywordStyle,
