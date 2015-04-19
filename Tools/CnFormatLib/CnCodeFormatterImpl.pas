@@ -259,6 +259,10 @@ end;
 
 function TCnCodeFormatProvider.FormatPascalBlock(Input: PAnsiChar; Len,
   StartOffset, EndOffset: DWORD): PAnsiChar;
+var
+  InStream, OutStream: TStream;
+  CodeFor: TCnPascalCodeFormatter;
+  Res: string;
 begin
   ClearPascalError;
   AdjustResultLength(0);
@@ -271,9 +275,41 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('FormatPascalBlock ' + Copy(Input, StartOffset, EndOffset - StartOffset));
 {$ENDIF}
-  Result := nil;
+  InStream := TMemoryStream.Create;
+  OutStream := TMemoryStream.Create;
 
-  PascalErrorRec.ErrorCode := CN_ERRCODE_PASCAL_NOT_SUPPORT;
+  InStream.Write(Input^, Len);
+  // Formatter 内部的偏移量以 0 开始，而传入的 Offset 以 1 开始所以需要减一
+  CodeFor := TCnPascalCodeFormatter.Create(InStream, StartOffset - 1, EndOffset - 1);
+  CodeFor.SliceMode := True;
+
+  try
+    try
+      CodeFor.FormatCode;
+      Res := CodeFor.CopyMatchedSliceResult;
+      if Res = '' then
+      begin
+        Result := nil;
+        Exit;
+      end;
+
+      OutStream.Write(PChar(Res)^, Length(Res));
+    except
+      ; // 出错了，返回 nil 的结果
+    end;
+
+    if OutStream.Size > 0 then
+    begin
+      AdjustResultLength(OutStream.Size + 1);
+      OutStream.Position := 0;
+      OutStream.Read(FResult^, OutStream.Size);
+    end;
+  finally
+    CodeFor.Free;
+    InStream.Free;
+    OutStream.Free;
+  end;
+  Result := FResult;;
 end;
 
 initialization

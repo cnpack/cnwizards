@@ -80,7 +80,7 @@ const
     ContinueAfterError: False;
     CodeStyle: [];
 
-    CompDirectiveMode: cdmOnlyFirst;
+    CompDirectiveMode: cdmAsComment;
     KeywordStyle: ksLowerCaseKeyword;
     BeginStyle: bsNextLine;
     CodeWrapMode: cwmNone;

@@ -44,6 +44,9 @@ uses
   Classes, SysUtils, Dialogs, CnTokens, CnScaners, CnCodeGenerators,
   CnCodeFormatRules, CnFormatterIntf;
 
+const
+  CN_MATCHED_INVALID = -1;
+
 type
   TCnAbstractCodeFormatter = class
   private
@@ -58,6 +61,8 @@ type
     FMatchedOutEndCol: Integer;
     FMatchedInEnd: Integer;
     FMatchedOutEndRow: Integer;
+    FFirstMatchStart: Boolean;
+    FFirstMatchEnd: Boolean;
     function ErrorTokenString: string;
     procedure CodeGenAfterWrite(Sender: TObject);
   protected
@@ -109,7 +114,9 @@ type
     property Scaner: TAbstractScaner read FScaner;
     {* 词法扫描器}
   public
-    constructor Create(AStream: TStream; ACompDirectiveMode: TCompDirectiveMode = cdmOnlyFirst);
+    constructor Create(AStream: TStream; AMatchedInStart: Integer = CN_MATCHED_INVALID;
+      AMatchedInEnd: Integer = CN_MATCHED_INVALID;
+      ACompDirectiveMode: TCompDirectiveMode = cdmAsComment);
     destructor Destroy; override;
 
     procedure FormatCode(PreSpaceCount: Byte = 0); virtual; abstract;
@@ -324,6 +331,7 @@ type
   TCnPascalCodeFormatter = class(TCnGoalCodeFormatter)
   public
     procedure FormatCode(PreSpaceCount: Byte = 0); override;
+    function CopyMatchedSliceResult: string;
     property CodeGen;
   end;
 
@@ -349,12 +357,22 @@ begin
 end;
 
 constructor TCnAbstractCodeFormatter.Create(AStream: TStream;
-  ACompDirectiveMode: TCompDirectiveMode);
+   AMatchedInStart, AMatchedInEnd: Integer;
+   ACompDirectiveMode: TCompDirectiveMode);
 begin
+  FMatchedInStart := AMatchedInStart;
+  FMatchedInEnd := AMatchedInEnd;
+
+  FMatchedOutStartRow := CN_MATCHED_INVALID;
+  FMatchedOutStartCol := CN_MATCHED_INVALID;
+  FMatchedOutEndRow := CN_MATCHED_INVALID;
+  FMatchedOutEndCol := CN_MATCHED_INVALID;
+
   FCodeGen := TCnCodeGenerator.Create;
   FCodeGen.CodeWrapMode := CnPascalCodeForRule.CodeWrapMode;
-  FScaner := TScaner.Create(AStream, FCodeGen, ACompDirectiveMode);
   FCodeGen.OnAfterWrite := CodeGenAfterWrite;
+  FScaner := TScaner.Create(AStream, FCodeGen, ACompDirectiveMode);
+  FScaner.NextToken;
 end;
 
 destructor TCnAbstractCodeFormatter.Destroy;
@@ -4895,6 +4913,21 @@ end;
 
 { TCnPascalCodeFormatter }
 
+function TCnPascalCodeFormatter.CopyMatchedSliceResult: string;
+begin
+  Result := '';
+  if FSliceMode then
+  begin
+    if (MatchedOutStartRow <> CN_MATCHED_INVALID) and (MatchedOutStartCol <> CN_MATCHED_INVALID)
+      and (MatchedOutEndRow <> CN_MATCHED_INVALID) and (MatchedOutEndCol <> CN_MATCHED_INVALID) then
+    begin
+      // 有匹配结果
+      Result := CodeGen.CopyPartOut(MatchedOutStartRow, MatchedOutStartCol,
+        MatchedOutEndRow, MatchedOutEndCol);
+    end;
+  end;
+end;
+
 procedure TCnPascalCodeFormatter.FormatCode(PreSpaceCount: Byte);
 begin
   if FSliceMode then
@@ -4920,18 +4953,25 @@ begin
     TCnCodeGenerator(Sender).CurrRow, TCnCodeGenerator(Sender).CurrColumn,
     FScaner.SourcePos]);
 {$ENDIF}
-  if not FSliceMode then
-    Exit;
     
-  if FScaner.SourcePos = FMatchedInStart then
+  if (FScaner.SourcePos >= FMatchedInStart) and not FFirstMatchStart then
   begin
     FMatchedOutStartRow := TCnCodeGenerator(Sender).PrevRow;
     FMatchedOutStartCol := TCnCodeGenerator(Sender).PrevColumn;
+    FFirstMatchStart := True;
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('OnAfter Write. Got MatchStart.');
+{$ENDIF}
   end
-  else if FScaner.SourcePos + FScaner.TokenStringLength = FMatchedInEnd then
+  else if (FScaner.SourcePos + FScaner.TokenStringLength >= FMatchedInEnd) and
+    not FFirstMatchEnd then
   begin
     FMatchedOutEndRow := TCnCodeGenerator(Sender).CurrRow;
     FMatchedOutEndCol := TCnCodeGenerator(Sender).CurrColumn;
+    FFirstMatchEnd := True;
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('OnAfter Write. Got MatchEnd.');
+{$ENDIF}
   end;
 end;
 

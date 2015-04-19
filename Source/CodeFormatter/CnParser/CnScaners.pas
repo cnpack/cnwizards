@@ -124,6 +124,7 @@ type
 
     function NextToken: TPascalToken; virtual; abstract;
     function SourcePos: Longint;
+    // 当前 Token 在整个源码中的偏移量，0 开始
     function TokenComponentIdent: string;
     function TokenFloat: Extended;
 {$IFDEF DELPHI5}
@@ -318,7 +319,7 @@ begin
   FSourceCol := 1;
   FBackwardToken := tokNoToken;
 
-  NextToken;
+  // NextToken;  Let outside call it.
 end;
 
 destructor TAbstractScaner.Destroy;
@@ -1169,7 +1170,8 @@ begin
         if not InIgnoreArea then
         begin
           BlankStr := TrimBlank(BlankString);
-          FCodeGen.Write(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
+          if BlankStr <> '' then
+            FCodeGen.Write(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
         end;
         FCodeGen.Write(TokenString); // 再写注释本身
       end;
@@ -1231,7 +1233,8 @@ begin
         if not InIgnoreArea then
         begin
           BlankStr := TrimBlank(BlankString);
-          FCodeGen.Write(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
+          if BlankStr <> '' then
+            FCodeGen.Write(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
         end;
         FCodeGen.Write(TokenString); // 再写注释本身
       end;

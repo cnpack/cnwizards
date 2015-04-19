@@ -152,20 +152,45 @@ begin
   else
     CnPascalCodeForRule.CodeWrapMode := cwmNone;
 
-  MemStr := TMemoryStream.Create;
-  SrcMemo.Lines.SaveToStream(MemStr);
-  FCodeFor := TCnPascalCodeFormatter.Create(MemStr {$IFDEF UNICODE}, TEncoding.Unicode {$ENDIF});
-  FCodeFor.SliceMode := chkSliceMode.Checked;
-  try
+  if SrcMemo.SelLength <= 0 then
+  begin
+    MemStr := TMemoryStream.Create;
+    SrcMemo.Lines.SaveToStream(MemStr {$IFDEF UNICODE}, TEncoding.Unicode {$ENDIF});
+    FCodeFor := TCnPascalCodeFormatter.Create(MemStr);
+    FCodeFor.SliceMode := chkSliceMode.Checked;
     try
-      FCodeFor.FormatCode;
+      try
+        FCodeFor.FormatCode;
+      finally
+        //FCodeFor.SaveToStream(MemStr);
+        FCodeFor.SaveToStrings(DesMemo.Lines);
+      end;
     finally
-      //FCodeFor.SaveToStream(MemStr);
-      FCodeFor.SaveToStrings(DesMemo.Lines);
+      FCodeFor.Free;
+      MemStr.Free;
     end;
-  finally
-    FCodeFor.Free;
-    MemStr.Free;
+  end
+  else // 处理选择区
+  begin
+    MemStr := TMemoryStream.Create;
+    SrcMemo.Lines.SaveToStream(MemStr {$IFDEF UNICODE}, TEncoding.Unicode {$ENDIF});
+    FCodeFor := TCnPascalCodeFormatter.Create(MemStr, SrcMemo.SelStart, SrcMemo.SelStart + SrcMemo.SelLength);
+    FCodeFor.SliceMode := True;
+
+    // MatchedInStart/MatchedInEnd 匹配均是 0 开始，而 Copy 的字符串是 1 开始，所以需要加 1
+    ShowMessage(Copy(SrcMemo.Lines.Text, FCodeFor.MatchedInStart + 1, FCodeFor.MatchedInEnd - FCodeFor.MatchedInStart));
+    try
+      try
+        FCodeFor.FormatCode;
+        DesMemo.Lines.Text := FCodeFor.CopyMatchedSliceResult;
+      finally
+        //FCodeFor.SaveToStream(MemStr);
+        //FCodeFor.SaveToStrings(DesMemo.Lines);
+      end;
+    finally
+      FCodeFor.Free;
+      MemStr.Free;
+    end;
   end;
 end;
 
@@ -398,10 +423,8 @@ begin
         M := TMemoryStream.Create;
         M.Write(PChar(S)^, Length(S) * SizeOf(Char));
 
-        Fmt := TCnPascalCodeFormatter.Create(M, cdmAsComment);
+        Fmt := TCnPascalCodeFormatter.Create(M, Node.ReachingStart, Node.ReachingEnd - Node.EndBlankLength);
         Fmt.SliceMode := True;
-        Fmt.MatchedInStart := Node.ReachingStart;
-        Fmt.MatchedInEnd := Node.ReachingEnd - Node.EndBlankLength;
 
         Fmt.FormatCode;
         if (Fmt.MatchedOutStartRow > 0) and (Fmt.MatchedOutStartCol > 0)
