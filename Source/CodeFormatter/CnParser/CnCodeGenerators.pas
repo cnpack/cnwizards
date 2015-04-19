@@ -426,7 +426,7 @@ begin
   FPrevColumn := FColumnPos;
   FColumnPos := 0;
   
-  DoAfterWrite;
+  // DoAfterWrite;
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('NewLine Wrote from %d %d to %d %d', [FPrevRow, FPrevColumn,
     GetCurrRow, GetCurrColumn]);
