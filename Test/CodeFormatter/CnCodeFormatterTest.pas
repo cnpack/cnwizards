@@ -126,7 +126,7 @@ implementation
 
 uses
   CnCodeFormatter, CnCodeFormatRules, CnScaners, CnTokens,
-  CnCompDirectiveTree;
+  CnCompDirectiveTree, CnDebug;
 
 {$R *.DFM}
 
@@ -178,7 +178,8 @@ begin
     FCodeFor.SliceMode := True;
 
     // MatchedInStart/MatchedInEnd 匹配均是 0 开始，而 Copy 的字符串是 1 开始，所以需要加 1
-    ShowMessage(Copy(SrcMemo.Lines.Text, FCodeFor.MatchedInStart + 1, FCodeFor.MatchedInEnd - FCodeFor.MatchedInStart));
+    ShowMessage(IntToStr(SrcMemo.SelStart) + ':' + IntToStr(SrcMemo.SelStart + SrcMemo.SelLength));
+    CnDebugger.LogRawString(Copy(SrcMemo.Lines.Text, FCodeFor.MatchedInStart + 1, FCodeFor.MatchedInEnd - FCodeFor.MatchedInStart));
     try
       try
         FCodeFor.FormatCode;

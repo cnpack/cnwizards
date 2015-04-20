@@ -273,14 +273,16 @@ begin
   end;
 
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('FormatPascalBlock ' + Copy(Input, StartOffset, EndOffset - StartOffset));
+  CnDebugger.LogFmt('Start %d, End %d', [StartOffset, EndOffset]);
+  CnDebugger.LogRawString(Copy(Input, StartOffset + 1, EndOffset - StartOffset));
 {$ENDIF}
+
   InStream := TMemoryStream.Create;
   OutStream := TMemoryStream.Create;
 
   InStream.Write(Input^, Len);
-  // Formatter 内部的偏移量以 0 开始，而传入的 Offset 以 1 开始所以需要减一
-  CodeFor := TCnPascalCodeFormatter.Create(InStream, StartOffset - 1, EndOffset - 1);
+  // Formatter 内部的偏移量以 0 开始，而传入的 Offset 也以 0 开始，无需转换
+  CodeFor := TCnPascalCodeFormatter.Create(InStream, StartOffset, EndOffset);
   CodeFor.SliceMode := True;
 
   try
@@ -309,7 +311,7 @@ begin
     InStream.Free;
     OutStream.Free;
   end;
-  Result := FResult;;
+  Result := FResult;
 end;
 
 initialization

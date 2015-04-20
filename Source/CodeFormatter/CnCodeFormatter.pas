@@ -64,7 +64,7 @@ type
     FFirstMatchStart: Boolean;
     FFirstMatchEnd: Boolean;
     function ErrorTokenString: string;
-    procedure CodeGenAfterWrite(Sender: TObject);
+    procedure CodeGenAfterWrite(Sender: TObject; IsWriteln: Boolean);
   protected
     FIsTypeID: Boolean;
     {* 错误处理函数 }
@@ -4943,7 +4943,7 @@ begin
     inherited FormatCode(PreSpaceCount);
 end;
 
-procedure TCnAbstractCodeFormatter.CodeGenAfterWrite(Sender: TObject);
+procedure TCnAbstractCodeFormatter.CodeGenAfterWrite(Sender: TObject; IsWriteln: Boolean);
 begin
   // CodeGen 写完一段字符串但 Scaner 还没 NextToken 时调用
   // 用来判断 Scaner 的位置是否是指定 Offset
@@ -4953,8 +4953,9 @@ begin
     TCnCodeGenerator(Sender).CurrRow, TCnCodeGenerator(Sender).CurrColumn,
     FScaner.SourcePos]);
 {$ENDIF}
-    
-  if (FScaner.SourcePos >= FMatchedInStart) and not FFirstMatchStart then
+
+  // 写出不属于代码本身的空行时超出标记的话，不算
+  if (FScaner.SourcePos >= FMatchedInStart) and not FFirstMatchStart and not IsWriteln then
   begin
     FMatchedOutStartRow := TCnCodeGenerator(Sender).PrevRow;
     FMatchedOutStartCol := TCnCodeGenerator(Sender).PrevColumn;

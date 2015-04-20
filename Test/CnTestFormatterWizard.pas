@@ -132,7 +132,8 @@ var
   CurrentToken: PAnsiChar;
   View: IOTAEditView;
   Block: IOTAEditBlock;
-  StartPos, EndPos: Integer;
+  StartPos, EndPos, StartPosIn, EndPosIn: Integer;
+  Writer: IOTAEditWriter;
 begin
   if FHandle = 0 then
     FHandle := LoadLibrary(PChar(ModulePath + DLLName));
@@ -252,9 +253,11 @@ begin
         // 此时 StartPos 和 EndPos 标记了当前选择区内要处理的文本
 {$IFDEF UNICODE}
         // Src/Res Utf16，LinePos 是 Utf8 的偏移量，需要转换
-        StartPos := Length(UTF8Decode(Copy(Utf8Encode(Src), 1, StartPos)));
-        EndPos := Length(UTF8Decode(Copy(Utf8Encode(Src), 1, EndPos)));
-        Res := Formatter.FormatPascalBlockW(PChar(Src), Length(Src), StartPos, EndPos);
+        StartPosIn := Length(UTF8Decode(Copy(Utf8Encode(Src), 1, StartPos + 1))) - 1;
+        EndPosIn := Length(UTF8Decode(Copy(Utf8Encode(Src), 1, EndPos + 1))) - 1;
+
+        CnDebugger.LogRawString(Copy(Src, StartPosIn + 1, EndPosIn - StartPosIn));
+        Res := Formatter.FormatPascalBlockW(PChar(Src), Length(Src), StartPosIn, EndPosIn);
 
         // Remove FF FE BOM if exists
         if (Length(Res) > 1) and (Res[0] = #$FEFF) then
@@ -262,7 +265,10 @@ begin
 {$ELSE}
   {$IFDEF IDE_STRING_ANSI_UTF8}
         // Src/Res Utf8
-        Res := Formatter.FormatPascalBlockUtf8(PAnsiChar(Src), Length(Src), StartPos, EndPos);
+        StartPosIn := StartPos;
+        EndPosIn := EndPos;
+        CnDebugger.LogRawString(Copy(Src, StartPosIn + 1, EndPosIn - StartPosIn));
+        Res := Formatter.FormatPascalBlockUtf8(PAnsiChar(Src), Length(Src), StartPosIn, EndPosIn);
 
         // Remove EF BB BF BOM if exist
         if (Length(Res) > 3) and
@@ -270,13 +276,29 @@ begin
           Inc(Res, 3);
   {$ELSE}
         // Src/Res Ansi
-        Res := Formatter.FormatPascalBlock(PAnsiChar(Src), Length(Src), StartPos, EndPos);
+        StartPosIn := StartPos;
+        EndPosIn := EndPos;
+        // IDE 内的线性 Pos 是 0 开始的，使用 Src 来 Copy 时的下标以 1 开始，因此需要加 1
+        CnDebugger.LogRawString(Copy(Src, StartPosIn + 1, EndPosIn - StartPosIn));
+        Res := Formatter.FormatPascalBlock(PAnsiChar(Src), Length(Src), StartPosIn, EndPosIn);
   {$ENDIF}
 {$ENDIF}
 
         if Res <> nil then
         begin
           ShowMessage(Res);
+          Writer := View.Buffer.CreateUndoableWriter;
+          try
+            Writer.CopyTo(StartPos);
+            {$IFDEF UNICODE}
+            Writer.Insert(PAnsiChar(ConvertTextToEditorTextW(Res)));
+            {$ELSE}
+            Writer.Insert(PAnsiChar(ConvertTextToEditorText(Res)));
+            {$ENDIF}
+            Writer.DeleteTo(EndPos);
+          finally
+            Writer := nil;
+          end;
         end
         else
         begin

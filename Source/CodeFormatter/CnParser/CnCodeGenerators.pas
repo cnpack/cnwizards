@@ -44,6 +44,8 @@ uses
   Classes, SysUtils, CnCodeFormatRules;
 
 type
+  TCnAfterWriteEvent = procedure (Sender: TObject; IsWriteln: Boolean) of object;
+
   TCnCodeGenerator = class
   private
     FCode: TStrings;
@@ -55,7 +57,7 @@ type
     FPrevColumn: Integer;
     FLastNoAutoWrapLine: Integer;
     FAutoWrapLines: TList; // 记录自动换行的行号，用来搜寻最近一次非自动换行的行缩进
-    FOnAfterWrite: TNotifyEvent;
+    FOnAfterWrite: TCnAfterWriteEvent;
     FAutoWrapButNoIndent: Boolean;
     function GetCurIndentSpace: Integer;
     function GetLockedCount: Word;
@@ -67,7 +69,7 @@ type
     // 自动换行缩进时，找出上一个非自动换行的缩进行
     procedure CalcLastNoAutoIndentLine;
   protected
-    procedure DoAfterWrite; virtual;
+    procedure DoAfterWrite(IsWriteln: Boolean); virtual;
   public
     constructor Create;
     destructor Destroy; override;
@@ -84,7 +86,8 @@ type
     procedure SaveToStrings(AStrings: TStrings);
 
     function CopyPartOut(StartRow, StartColumn, EndRow, EndColumn: Integer): string;
-    {* 从输出中指定起止位置复制内容出来，可以直接使用 Row/Column 相关属性}
+    {* 从输出中指定起止位置复制内容出来，直接使用 Row/Column 相关属性
+       逻辑上，复制范围内的内容不包括 EndColumn 所指的字符}
 
     procedure LockOutput;
     procedure UnLockOutput;
@@ -95,7 +98,10 @@ type
     property LockedCount: Word read GetLockedCount;
     {* 输出锁数}
     property ColumnPos: Integer read FColumnPos;
-    {* 当前光标的横向位置，用于换行}
+    {* 当前光标的横向位置，用于换行。值为当前行长度，当前行刚换行无内容时为 0，
+       可以理解为指向当前已经输出内容的紧邻后的位置。它作为 StartCol 时得加一，
+       而作为 EndCol 时，因为当前行字符串下标从一开始的第 FColumnPos 个字符，
+       是属于 CopyPartout 的最后一个字符，因此无需加一}
     property CurIndentSpace: Integer read GetCurIndentSpace;
     {* 当前行最前面的空格数}
     property LastIndentSpace: Integer read GetLastIndentSpace;
@@ -112,11 +118,11 @@ type
     {* 一次 Write 成功后，写之后的光标行号，0 开始。
       可能与实际情况不符，因为 Write 可能自行写回车换行符}
     property CurrColumn: Integer read GetCurrColumn;
-    {* 一次 Write 成功后，写之后的光标行号，0 开始}
+    {* 一次 Write 成功后，写之后的光标列号，0 开始}
 
     property AutoWrapButNoIndent: Boolean read FAutoWrapButNoIndent write FAutoWrapButNoIndent;
     {* 超宽时自动换行时是否缩进，供外界控制，如 uses 区用 True}
-    property OnAfterWrite: TNotifyEvent read FOnAfterWrite write FOnAfterWrite;
+    property OnAfterWrite: TCnAfterWriteEvent read FOnAfterWrite write FOnAfterWrite;
     {* 写内容一次成功后被调用}
   end;
 
@@ -185,11 +191,11 @@ begin
   if EndRow < StartRow then Exit;
   if (EndRow = StartRow) and (EndColumn < StartColumn) then Exit;
 
-  Inc(StartColumn);
-  Inc(EndColumn); // Column 们以 0 开始，但字符串下标以 1 开始，所以都要加一
+  Inc(StartColumn); // 是否加一见 FColumnPos 的注释
+  // Inc(EndColumn);
 
   if EndRow = StartRow then
-    Result := Copy(FCode[StartRow], StartColumn, EndColumn - StartColumn)
+    Result := Copy(FCode[StartRow], StartColumn, EndColumn - StartColumn + 1) // 加一是因为 StartColumn 加了一
   else
   begin
     for I := StartRow to EndRow do
@@ -219,10 +225,10 @@ begin
   inherited;
 end;
 
-procedure TCnCodeGenerator.DoAfterWrite;
+procedure TCnCodeGenerator.DoAfterWrite(IsWriteln: Boolean);
 begin
   if Assigned(FOnAfterWrite) then
-    FOnAfterWrite(Self);
+    FOnAfterWrite(Self, IsWriteln);
 end;
 
 function TCnCodeGenerator.GetCurIndentSpace: Integer;
@@ -404,7 +410,7 @@ begin
 
   FPrevStr := S;
 
-  DoAfterWrite;
+  DoAfterWrite(False);
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('String Wrote from %d %d to %d %d: %s', [FPrevRow, FPrevColumn,
     GetCurrRow, GetCurrColumn, Str]);
@@ -426,7 +432,7 @@ begin
   FPrevColumn := FColumnPos;
   FColumnPos := 0;
   
-  // DoAfterWrite;
+  DoAfterWrite(True);
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('NewLine Wrote from %d %d to %d %d', [FPrevRow, FPrevColumn,
     GetCurrRow, GetCurrColumn]);

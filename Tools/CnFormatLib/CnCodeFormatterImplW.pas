@@ -75,10 +75,8 @@ type
 
     function FormatPascalBlock(Input: PAnsiChar; Len: DWORD; StartOffset: DWORD;
       EndOffset: DWORD): PAnsiChar;
-
     function FormatPascalBlockUtf8(Input: PAnsiChar; Len: DWORD; StartOffset: DWORD;
       EndOffset: DWORD): PAnsiChar;
-
     function FormatPascalBlockW(Input: PWideChar; Len: DWORD; StartOffset: DWORD;
       EndOffset: DWORD): PWideChar;
 
@@ -139,7 +137,10 @@ end;
 function TCnCodeFormatProvider.FormatPascalBlockUtf8(Input: PAnsiChar; Len,
   StartOffset, EndOffset: DWORD): PAnsiChar;
 var
-  UInput: string;
+  InStream, OutStream: TStream;
+  CodeFor: TCnPascalCodeFormatter;
+  UInput, Res: string;
+  Utf8Res: AnsiString;
 begin
   ClearPascalError;
   AdjustResultLength(0);
@@ -154,19 +155,68 @@ begin
   UInput := UTF8ToUnicodeString(Input);
   Len := Length(UInput);
 
-  StartOffset := Length(UTF8Decode(Copy(Input, 1, StartOffset)));
-  EndOffset := Length(UTF8Decode(Copy(Input, 1, EndOffset)));
+  StartOffset := Length(UTF8Decode(Copy(Input, 1, StartOffset + 1))) - 1;
+  EndOffset := Length(UTF8Decode(Copy(Input, 1, EndOffset + 1))) - 1;
 
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('FormatPascalBlockUtf8 ' + Copy(UInput, StartOffset, EndOffset - StartOffset));
+  CnDebugger.LogRawString(Copy(UInput, StartOffset + 1, EndOffset - StartOffset));
 {$ENDIF}
-  Result := nil;
 
-  PascalErrorRec.ErrorCode := CN_ERRCODE_PASCAL_NOT_SUPPORT;
+  InStream := TMemoryStream.Create;
+  OutStream := TMemoryStream.Create;
+
+  InStream.Write((PChar(UInput))^, Len * SizeOf(Char));
+  CodeFor := TCnPascalCodeFormatter.Create(InStream, StartOffset, EndOffset);
+  CodeFor.SliceMode := True;
+
+  try
+    try
+      CodeFor.FormatCode;
+      Res := CodeFor.CopyMatchedSliceResult;
+      if Res = '' then
+      begin
+        Result := nil;
+        Exit;
+      end;
+
+      OutStream.Write(PChar(Res)^, Length(Res) * SizeOf(Char));
+    except
+      ; // 出错了，返回 nil 的结果
+    end;
+
+    if OutStream.Size > 0 then
+    begin
+      AdjustResultLength(OutStream.Size + SizeOf(Char));
+      OutStream.Position := 0;
+      OutStream.Read(FResult^, OutStream.Size);
+    end;
+  finally
+    CodeFor.Free;
+    InStream.Free;
+    OutStream.Free;
+  end;
+
+  if FResult <> nil then
+  begin
+    Utf8Res := UTF8Encode(FResult);
+    Len := Length(Utf8Res);
+    AdjustUtf8ResultLength(Len);
+    CopyMemory(FUtf8Result, @(Utf8Res[1]), Len);
+
+    Result := FUtf8Result;
+  end
+  else
+    Result := nil;
+
+  AdjustResultLength(0);
 end;
 
 function TCnCodeFormatProvider.FormatPascalBlockW(Input: PWideChar; Len,
   StartOffset, EndOffset: DWORD): PWideChar;
+var
+  InStream, OutStream: TStream;
+  CodeFor: TCnPascalCodeFormatter;
+  Res: string;
 begin
   ClearPascalError;
   AdjustResultLength(0);
@@ -178,11 +228,44 @@ begin
   end;
 
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('FormatPascalBlockW ' + Copy(Input, StartOffset, EndOffset - StartOffset));
+  CnDebugger.LogRawString(Copy(Input, StartOffset + 1, EndOffset - StartOffset));
 {$ENDIF}
-  Result := nil;
 
-  PascalErrorRec.ErrorCode := CN_ERRCODE_PASCAL_NOT_SUPPORT;
+  InStream := TMemoryStream.Create;
+  OutStream := TMemoryStream.Create;
+
+  InStream.Write(Input^, Len * SizeOf(Char));
+  // Formatter 内部的偏移量以 0 开始，传入的 Offset 也以 0 开始
+  CodeFor := TCnPascalCodeFormatter.Create(InStream, StartOffset, EndOffset);
+  CodeFor.SliceMode := True;
+
+  try
+    try
+      CodeFor.FormatCode;
+      Res := CodeFor.CopyMatchedSliceResult;
+      if Res = '' then
+      begin
+        Result := nil;
+        Exit;
+      end;
+
+      OutStream.Write(PChar(Res)^, Length(Res) * SizeOf(Char));
+    except
+      ; // 出错了，返回 nil 的结果
+    end;
+
+    if OutStream.Size > 0 then
+    begin
+      AdjustResultLength(OutStream.Size + SizeOf(Char));
+      OutStream.Position := 0;
+      OutStream.Read(FResult^, OutStream.Size);
+    end;
+  finally
+    CodeFor.Free;
+    InStream.Free;
+    OutStream.Free;
+  end;
+  Result := FResult;;
 end;
 
 function TCnCodeFormatProvider.FormatOnePascalUnit(Input: PAnsiChar;
