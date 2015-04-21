@@ -340,7 +340,7 @@ begin
   begin
     FStream.Seek(0, soBeginning);
     FStream.Read(Bom, SizeOf(Bom));
-    if (Bom[0] = #$FE) and (Bom[1] = #$FF) then
+    if (Bom[0] = #$FF) and (Bom[1] = #$FE) then
     begin
       // Has Utf16 BOM, remove
       TS := TMemoryStream.Create;

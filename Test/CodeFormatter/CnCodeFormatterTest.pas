@@ -383,7 +383,10 @@ var
 begin
   // ±àÒëÖ¸Áî·ÖÊ÷²Ù×÷
   MemStr := TMemoryStream.Create;
-  SrcMemo.Lines.SaveToStream(MemStr);
+{$IFDEF TSTRINGS_HAS_WRITEBOM}
+    SrcMemo.Lines.WriteBOM := False;
+{$ENDIF}
+  SrcMemo.Lines.SaveToStream(MemStr {$IFDEF UNICODE}, TEncoding.Unicode {$ENDIF});
 
   Tree := TCnCompDirectiveTree.Create(MemStr);
   List := TList.Create;
