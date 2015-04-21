@@ -467,6 +467,11 @@ function CnOtaGetCurrentSelection: string;
 {* 取当前选择的文本}
 procedure CnOtaDeleteCurrentSelection;
 {* 删除选中的文本}
+procedure CnOtaReplaceCurrentSelection(const Text: string; NoSelectionInsert: Boolean = True;
+  KeepSelecting: Boolean = False);
+{* 替换选中的文本。NoSelectionInsert：控制无选择区时是否在当前位置插入，
+  KeepSelecting：控制插入后是否选中插入内容，2007 下 Text 是 AnsiString
+  2009 以上是 UnicodeString}
 procedure CnOtaEditBackspace(Many: Integer);
 {* 在编辑器中退格}
 procedure CnOtaEditDelete(Many: Integer);
@@ -3432,6 +3437,53 @@ begin
     EditBlock.Delete;
 end;
 
+// 替换选中的文本
+procedure CnOtaReplaceCurrentSelection(const Text: string; NoSelectionInsert:
+  Boolean; KeepSelecting: Boolean);
+var
+  EditView: IOTAEditView;
+  EditBlock: IOTAEditBlock;
+  EditPos: TOTAEditPos;
+  StartPos: TOTACharPos;
+  InsertLen: Integer;
+begin
+  EditView := CnOtaGetTopMostEditView;
+  if not Assigned(EditView) then
+    Exit;
+
+  EditBlock := EditView.Block;
+  if not Assigned(EditBlock) and not EditBlock.IsValid then
+  begin
+    EditPos := EditView.CursorPos;
+    EditView.ConvertPos(True, EditPos, StartPos);
+    // 无选择区
+    if not NoSelectionInsert then
+      Exit;
+
+    // 插入当前光标所在位置
+    CnOtaInsertTextIntoEditor(Text);
+  end
+  else
+  begin
+    StartPos.Line := EditBlock.StartingRow;
+    StartPos.CharIndex := EditBlock.StartingColumn;
+    EditBlock.Delete;
+
+    CnOtaInsertTextIntoEditor(Text);
+  end;
+
+{$IFDEF UNICODE}
+  InsertLen := Length(ConvertTextToEditorTextW(Text));
+{$ELSE}
+  InsertLen := Length(ConvertTextToEditorText(Text));
+{$ENDIF}
+  // StartPos 是没选择区时的当前光标位置或有选择区的选择区头
+  if KeepSelecting then
+  begin
+    // 选中插入的内容，从 StartPos 到 StartPos 加线性位置
+  end;
+end;
+
 // 在编辑器中退格
 procedure CnOtaEditBackspace(Many: Integer);
 var
@@ -4415,7 +4467,7 @@ end;
 procedure CnOtaPositionInsertText(EditPosition: IOTAEditPosition; const Text: string);
 begin
 {$IFDEF UNICODE_STRING}
-  EditPosition.InsertText(string(ConvertTextToEditorText(AnsiString(Text))));
+  EditPosition.InsertText(Text); // InsertText 在 Unicode 环境里使用 Unicode 字符串，无需 Utf8 转换
 {$ELSE}
   EditPosition.InsertText(ConvertTextToEditorText(Text));
 {$ENDIF}
@@ -4937,7 +4989,6 @@ end;
 
 {$ENDIF}
 
-
 // 设置当前编辑器源代码
 procedure CnOtaSetCurrentEditorSource(const Text: string);
 var
@@ -4949,7 +5000,7 @@ begin
   try
     EditWriter.DeleteTo(MaxInt);
   {$IFDEF UNICODE_STRING}
-    EditWriter.Insert(PAnsiChar(ConvertTextToEditorText(AnsiString(Text))));
+    EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW(Text)));
   {$ELSE}
     EditWriter.Insert(PAnsiChar(ConvertTextToEditorText(Text)));
   {$ENDIF}
@@ -5010,7 +5061,11 @@ begin
   EditPos := EditView.CursorPos;
   EditView.ConvertPos(True, EditPos, CharPos);
   Position := EditView.CharPosToPos(CharPos);
+{$IFDEF UNICODE}
+  CnOtaInsertTextIntoEditorAtPosW(Text, Position);
+{$ELSE}
   CnOtaInsertTextIntoEditorAtPos(Text, Position);
+{$ENDIF}
   EditView.MoveViewToCursor;
   EditView.Paint;
 end;
@@ -5039,7 +5094,7 @@ begin
   try
     EditWriter.CopyTo(Position);
   {$IFDEF UNICODE_STRING}
-    EditWriter.Insert(PAnsiChar(ConvertTextToEditorText(AnsiString(Text))));
+    EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW(Text)));
   {$ELSE}
     EditWriter.Insert(PAnsiChar(ConvertTextToEditorText(Text)));
   {$ENDIF}
