@@ -3444,7 +3444,8 @@ var
   EditView: IOTAEditView;
   EditBlock: IOTAEditBlock;
   EditPos: TOTAEditPos;
-  StartPos: TOTACharPos;
+  StartPos, EndPos: TOTACharPos;
+  LinearPos: Integer;
   InsertLen: Integer;
 begin
   EditView := CnOtaGetTopMostEditView;
@@ -3472,15 +3473,26 @@ begin
     CnOtaInsertTextIntoEditor(Text);
   end;
 
-{$IFDEF UNICODE}
-  InsertLen := Length(ConvertTextToEditorTextW(Text));
-{$ELSE}
-  InsertLen := Length(ConvertTextToEditorText(Text));
-{$ENDIF}
-  // StartPos 是没选择区时的当前光标位置或有选择区的选择区头
   if KeepSelecting then
   begin
-    // 选中插入的内容，从 StartPos 到 StartPos 加线性位置
+    // StartPos 此时是没选择区时的当前光标位置或有选择区的选择区头
+    // InsertLen 参与线性偏移运算，是 Ansi 的偏移，不是 Utf8 的。
+  {$IFDEF UNICODE}
+    InsertLen := Length(AnsiString(Text));
+  {$ELSE}
+    InsertLen := Length(Text);
+  {$ENDIF}
+
+    LinearPos := EditView.CharPosToPos(StartPos); // 起始位置转为线性位置
+    EndPos := EditView.PosToCharPos(LinearPos + InsertLen); // 线性位置加后转换为结束位置
+
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('CnOtaReplaceCurrentSelection StartPos %d:%d. Linear %d. Insert Length %d. EndPos %d:%d',
+      [StartPos.Line, StartPos.CharIndex, LinearPos, InsertLen, EndPos.Line, EndPos.CharIndex]);
+{$ENDIF}
+
+    // 选中插入的内容，从 StartPos 到 EndPos 加线性位置
+    CnOtaSelectBlock(EditView.Buffer, StartPos, EndPos);
   end;
 end;
 

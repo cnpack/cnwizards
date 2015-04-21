@@ -54,6 +54,7 @@ type
   private
     FIdInsertTextIntoEditor: Integer;
     FIdInsertLineIntoEditor: Integer;
+    FIdReplaceCurrentSelection: Integer;
     IdConfig: Integer;
   protected
     function GetHasConfig: Boolean; override;
@@ -98,6 +99,9 @@ begin
   FIdInsertLineIntoEditor := RegisterASubAction('CnOtaInsertLineIntoEditor',
     'Test CnOtaInsertLineIntoEditor', 0, 'Test CnOtaInsertLineIntoEditor',
     'CnOtaInsertLineIntoEditor');
+  FIdReplaceCurrentSelection := RegisterASubAction('CnOtaReplaceCurrentSelection',
+    'Test CnOtaReplaceCurrentSelection', 0, 'Test CnOtaReplaceCurrentSelection',
+    'CnOtaReplaceCurrentSelection');
 end;
 
 function TCnTestEditorInsertTextWizard.GetCaption: string;
@@ -144,11 +148,15 @@ begin
 
   if Index = FIdInsertTextIntoEditor then
   begin
-    CnOtaInsertTextIntoEditor('{³Ô·¹}');
+    CnOtaInsertTextIntoEditor('{³Ô·¹}'); // Using EditWriter.Insert
   end
   else if Index = FIdInsertLineIntoEditor then
   begin
-    CnOtaInsertLineIntoEditor('{Ë¯¾õ}');
+    CnOtaInsertLineIntoEditor('{Ë¯¾õ}'); // Using EditPosition.Insert
+  end
+  else if Index = FIdReplaceCurrentSelection then
+  begin
+    CnOtaReplaceCurrentSelection('{»¨Ç®}', True, True);
   end
   else if Index = IdConfig then
     Config;
