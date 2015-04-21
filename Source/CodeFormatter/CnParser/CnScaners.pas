@@ -110,6 +110,10 @@ type
     {* SkipBlanks 时遇到连续换行时被调用}
     function ErrorTokenString: string;
     procedure NewLine;
+
+{$IFDEF UNICODE}
+    procedure FixStreamBom;
+{$ENDIF}
   protected
     procedure OnMoreBlankLinesWhenSkip; virtual; abstract;
   public
@@ -306,6 +310,9 @@ end;}
 constructor TAbstractScaner.Create(Stream: TStream);
 begin
   FStream := Stream;
+{$IFDEF UNICODE}
+  FixStreamBom;
+{$ENDIF}
   FBookmarks := TObjectList.Create;
     
   GetMem(FBuffer, ScanBufferSize);
@@ -321,6 +328,36 @@ begin
 
   // NextToken;  Let outside call it.
 end;
+
+{$IFDEF UNICODE}
+
+procedure TAbstractScaner.FixStreamBom;
+var
+  Bom: array[0..1] of AnsiChar;
+  TS: TMemoryStream;
+begin
+  if (FStream <> nil) and (FStream.Size > 2) then
+  begin
+    FStream.Seek(0, soBeginning);
+    FStream.Read(Bom, SizeOf(Bom));
+    if (Bom[0] = #$FE) and (Bom[1] = #$FF) then
+    begin
+      // Has Utf16 BOM, remove
+      TS := TMemoryStream.Create;
+      try
+        TS.CopyFrom(FStream, FStream.Size - SizeOf(Bom));
+        FStream.Position := 0;
+        FStream.Size := 0;
+        FStream.CopyFrom(TS, 0);
+      finally
+        TS.Free;
+      end;
+    end;
+    FStream.Position := 0;
+  end;
+end;
+
+{$ENDIF}
 
 destructor TAbstractScaner.Destroy;
 begin

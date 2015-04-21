@@ -36,6 +36,8 @@ unit CnCodeFormatterTest;
 
 interface
 
+{$I CnPack.inc}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, ToolWin, ComCtrls, FileCtrl, Buttons;
@@ -155,6 +157,9 @@ begin
   if SrcMemo.SelLength <= 0 then
   begin
     MemStr := TMemoryStream.Create;
+{$IFDEF TSTRINGS_HAS_WRITEBOM}
+    SrcMemo.Lines.WriteBOM := False;
+{$ENDIF}
     SrcMemo.Lines.SaveToStream(MemStr {$IFDEF UNICODE}, TEncoding.Unicode {$ENDIF});
     FCodeFor := TCnPascalCodeFormatter.Create(MemStr);
     FCodeFor.SliceMode := chkSliceMode.Checked;
@@ -173,6 +178,9 @@ begin
   else // 处理选择区
   begin
     MemStr := TMemoryStream.Create;
+{$IFDEF TSTRINGS_HAS_WRITEBOM}
+    SrcMemo.Lines.WriteBOM := False;
+{$ENDIF}
     SrcMemo.Lines.SaveToStream(MemStr {$IFDEF UNICODE}, TEncoding.Unicode {$ENDIF});
     FCodeFor := TCnPascalCodeFormatter.Create(MemStr, SrcMemo.SelStart, SrcMemo.SelStart + SrcMemo.SelLength);
     FCodeFor.SliceMode := True;
