@@ -470,10 +470,16 @@ function CnOtaGetCurrentSelection: string;
 procedure CnOtaDeleteCurrentSelection;
 {* 删除选中的文本}
 function CnOtaReplaceCurrentSelection(const Text: string; NoSelectionInsert: Boolean = True;
-  KeepSelecting: Boolean = False): Boolean;
-{* 用文本替换选中的文本。NoSelectionInsert：控制无选择区时是否在当前位置插入，
-  KeepSelecting：控制插入后是否选中插入内容，2007 下 Text 是 AnsiString
-  2009 以上是 UnicodeString。返回是否成功。已知问题：D5下似乎选择无效}
+  KeepSelecting: Boolean = False; LineMode: Boolean = False): Boolean;
+{* 用文本替换选中的文本。
+  Text：插入的内容，2007 下 Text 是 AnsiString，2009 以上是 UnicodeString。
+  NoSelectionInsert：控制无选择区时是否在当前位置插入。
+  KeepSelecting：控制插入后是否选中插入内容。
+  LineMode 是否先将选区扩展到整行。
+  返回是否成功。已知问题：D5下似乎选择无效}
+function CnOtaReplaceCurrentSelectionUtf8(const Utf8Text: AnsiString; NoSelectionInsert: Boolean = True;
+  KeepSelecting: Boolean = False; LineMode: Boolean = False): Boolean;
+{* 用文本替换选中的文本，参数是 Utf8 的 Ansi 字符串，可在 D2005~2007 下使用}
 procedure CnOtaEditBackspace(Many: Integer);
 {* 在编辑器中退格}
 procedure CnOtaEditDelete(Many: Integer);
@@ -717,12 +723,21 @@ procedure CnOtaInsertSingleLine(Line: Integer; const Text: string;
 procedure CnOtaInsertTextIntoEditor(const Text: string);
 {* 插入文本到当前 IOTASourceEditor，允许多行文本。}
 
+procedure CnOtaInsertTextIntoEditorUtf8(const Utf8Text: AnsiString);
+{* 插入文本到当前 IOTASourceEditor，允许多行文本。
+  可在 D2005~2007 下替代上面的 CnOtaInsertTextIntoEditor 以避免转成 Ansi 而可能丢字符的问题}
+
 function CnOtaGetEditWriterForSourceEditor(SourceEditor: IOTASourceEditor = nil): IOTAEditWriter;
 {* 为指定 SourceEditor 返回一个 Writer，如果输入为空返回当前值。}
 
 procedure CnOtaInsertTextIntoEditorAtPos(const Text: string; Position: Longint;
   SourceEditor: IOTASourceEditor = nil);
-{* 在指定位置处插入文本，如果 SourceEditor 为空使用当前值。}
+{* 在指定位置处插入文本，内部会根据需要做 Utf8 转换，如果 SourceEditor 为空使用当前值。}
+
+procedure CnOtaInsertTextIntoEditorAtPosUtf8(const Utf8Text: AnsiString; Position: Longint;
+  SourceEditor: IOTASourceEditor = nil);
+{* 在指定位置处插入 Utf8 字符串，如果 SourceEditor 为空使用当前值。
+  可在 D2005~2007 下替代上面的 CnOtaInsertTextIntoEditorAtPos 以避免转成 Ansi 而可能丢字符的问题}
 
 {$IFDEF UNICODE}
 procedure CnOtaInsertTextIntoEditorAtPosW(const Text: string; Position: Longint;
@@ -3441,7 +3456,7 @@ end;
 
 // 用文本替换选中的文本
 function CnOtaReplaceCurrentSelection(const Text: string; NoSelectionInsert:
-  Boolean; KeepSelecting: Boolean): Boolean;
+  Boolean; KeepSelecting: Boolean; LineMode: Boolean): Boolean;
 var
   EditView: IOTAEditView;
   EditBlock: IOTAEditBlock;
@@ -3449,6 +3464,18 @@ var
   StartPos, EndPos: TOTACharPos;
   LinearPos: Integer;
   InsertLen: Integer;
+
+  procedure MoveAndSelect;
+  begin
+    EditView.Position.Move(StartPos.Line, StartPos.CharIndex);
+    EditBlock := EditView.Block;
+    EditBlock.Reset;
+    EditBlock.Style := btNonInclusive;
+    EditBlock.BeginBlock;
+    EditView.Position.Move(EndPos.Line, EndPos.CharIndex);
+    EditBlock.EndBlock;
+  end;
+
 begin
   Result := False;
   EditView := CnOtaGetTopMostEditView;
@@ -3469,6 +3496,22 @@ begin
   end
   else
   begin
+    if LineMode then
+    begin
+      // 把块延伸到行头尾，暂时不用下一行尾
+      StartPos.Line := EditBlock.StartingRow;
+      StartPos.CharIndex := 1;
+      EndPos.Line := EditBlock.EndingRow;
+      EndPos.CharIndex := EditBlock.EndingColumn;
+      if EndPos.CharIndex > 1 then
+        EndPos.CharIndex := 1024; // 用个大数代替行尾
+
+      MoveAndSelect;
+{$IFDEF DEBUG}
+//    CnDebugger.LogFmt('CnOtaReplaceCurrentSelection Line Selection %s', [EditBlock.Text]);
+{$ENDIF}
+    end;
+
     StartPos.Line := EditBlock.StartingRow;
     StartPos.CharIndex := EditBlock.StartingColumn;
     EditBlock.Delete;
@@ -3496,6 +3539,24 @@ begin
 {$ENDIF}
 
     // 选中插入的内容，从 StartPos 到 EndPos 加线性位置
+    MoveAndSelect;
+  end;
+  Result := True;
+end;
+
+// 用文本替换选中的文本，参数是 Utf8 的 Ansi 字符串，可在 D2005~2007 下使用
+function CnOtaReplaceCurrentSelectionUtf8(const Utf8Text: AnsiString;
+  NoSelectionInsert: Boolean; KeepSelecting: Boolean; LineMode: Boolean): Boolean;
+var
+  EditView: IOTAEditView;
+  EditBlock: IOTAEditBlock;
+  EditPos: TOTAEditPos;
+  StartPos, EndPos: TOTACharPos;
+  LinearPos: Integer;
+  InsertLen: Integer;
+
+  procedure MoveAndSelect;
+  begin
     EditView.Position.Move(StartPos.Line, StartPos.CharIndex);
     EditBlock := EditView.Block;
     EditBlock.Reset;
@@ -3503,6 +3564,67 @@ begin
     EditBlock.BeginBlock;
     EditView.Position.Move(EndPos.Line, EndPos.CharIndex);
     EditBlock.EndBlock;
+  end;
+
+begin
+  Result := False;
+  EditView := CnOtaGetTopMostEditView;
+  if not Assigned(EditView) then
+    Exit;
+
+  EditBlock := EditView.Block;
+  if not Assigned(EditBlock) and not EditBlock.IsValid then
+  begin
+    EditPos := EditView.CursorPos;
+    EditView.ConvertPos(True, EditPos, StartPos);
+    // 无选择区
+    if not NoSelectionInsert then
+      Exit;
+
+    // 插入当前光标所在位置
+    CnOtaInsertTextIntoEditorUtf8(Utf8Text);
+  end
+  else
+  begin
+    if LineMode then
+    begin
+      // 把块延伸到行头尾，暂时不用下一行尾
+      StartPos.Line := EditBlock.StartingRow;
+      StartPos.CharIndex := 1;
+      EndPos.Line := EditBlock.EndingRow;
+      EndPos.CharIndex := EditBlock.EndingColumn;
+      if EndPos.CharIndex > 1 then
+        EndPos.CharIndex := 1024; // 用个大数代替行尾
+
+      MoveAndSelect;
+{$IFDEF DEBUG}
+//    CnDebugger.LogFmt('CnOtaReplaceCurrentSelection Line Selection %s', [EditBlock.Text]);
+{$ENDIF}
+    end;
+
+    StartPos.Line := EditBlock.StartingRow;
+    StartPos.CharIndex := EditBlock.StartingColumn;
+    EditBlock.Delete;
+
+    CnOtaInsertTextIntoEditorUtf8(Utf8Text);
+  end;
+
+  EditBlock := nil;
+  if KeepSelecting then
+  begin
+    // StartPos 此时是没选择区时的当前光标位置或有选择区的选择区头
+    // InsertLen 参与线性偏移运算，是 Utf8 (D2007以上) 的偏移。
+    InsertLen := Length(Utf8Text);
+    LinearPos := EditView.CharPosToPos(StartPos); // 起始位置转为线性位置
+    EndPos := EditView.PosToCharPos(LinearPos + InsertLen); // 线性位置加后转换为结束位置
+
+{$IFDEF DEBUG}
+//  CnDebugger.LogFmt('CnOtaReplaceCurrentSelection StartPos %d:%d. Linear %d. Insert Length %d. EndPos %d:%d',
+//    [StartPos.Line, StartPos.CharIndex, LinearPos, InsertLen, EndPos.Line, EndPos.CharIndex]);
+{$ENDIF}
+
+    // 选中插入的内容，从 StartPos 到 EndPos 加线性位置
+    MoveAndSelect;
   end;
   Result := True;
 end;
@@ -5093,6 +5215,23 @@ begin
   EditView.Paint;
 end;
 
+procedure CnOtaInsertTextIntoEditorUtf8(const Utf8Text: AnsiString);
+var
+  EditView: IOTAEditView;
+  Position: Longint;
+  CharPos: TOTACharPos;
+  EditPos: TOTAEditPos;
+begin
+  EditView := CnOtaGetTopMostEditView;
+  Assert(Assigned(EditView));
+  EditPos := EditView.CursorPos;
+  EditView.ConvertPos(True, EditPos, CharPos);
+  Position := EditView.CharPosToPos(CharPos);
+  CnOtaInsertTextIntoEditorAtPosUtf8(Utf8Text, Position);
+  EditView.MoveViewToCursor;
+  EditView.Paint;
+end;
+
 // 为指定 SourceEditor 返回一个 Writer，如果输入为空返回当前值。
 function CnOtaGetEditWriterForSourceEditor(SourceEditor: IOTASourceEditor = nil): IOTAEditWriter;
 resourcestring
@@ -5121,6 +5260,22 @@ begin
   {$ELSE}
     EditWriter.Insert(PAnsiChar(ConvertTextToEditorText(Text)));
   {$ENDIF}
+  finally
+    EditWriter := nil;
+  end;
+end;
+
+procedure CnOtaInsertTextIntoEditorAtPosUtf8(const Utf8Text: AnsiString; Position: Longint;
+  SourceEditor: IOTASourceEditor);
+var
+  EditWriter: IOTAEditWriter;
+begin
+  if Utf8Text = '' then
+    Exit;
+  EditWriter := CnOtaGetEditWriterForSourceEditor(SourceEditor);
+  try
+    EditWriter.CopyTo(Position);
+    EditWriter.Insert(PAnsiChar(Utf8Text));
   finally
     EditWriter := nil;
   end;

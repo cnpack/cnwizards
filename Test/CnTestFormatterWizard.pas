@@ -287,18 +287,12 @@ begin
         if Res <> nil then
         begin
           ShowMessage(Res);
-          Writer := View.Buffer.CreateUndoableWriter;
-          try
-            Writer.CopyTo(StartPos);
-            {$IFDEF UNICODE}
-            Writer.Insert(PAnsiChar(ConvertTextToEditorTextW(Res)));
-            {$ELSE}
-            Writer.Insert(PAnsiChar(ConvertTextToEditorText(Res)));
-            {$ENDIF}
-            Writer.DeleteTo(EndPos);
-          finally
-            Writer := nil;
-          end;
+          {$IFDEF IDE_STRING_ANSI_UTF8}
+          CnOtaReplaceCurrentSelectionUtf8(Res, True, True, True);
+          {$ELSE}
+          // Ansi/Unicode ¾ù¿ÉÓÃ
+          CnOtaReplaceCurrentSelection(Res, True, True, True);
+          {$ENDIF}
         end
         else
         begin
