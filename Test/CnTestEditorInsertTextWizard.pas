@@ -40,7 +40,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ToolsAPI, IniFiles, CnWizClasses, CnWizUtils, CnWizConsts;
+  ToolsAPI, IniFiles, CnWizClasses, CnWizUtils, CnWizConsts, CnCommon;
 
 type
 
@@ -55,7 +55,6 @@ type
     FIdInsertTextIntoEditor: Integer;
     FIdInsertLineIntoEditor: Integer;
     FIdReplaceCurrentSelection: Integer;
-    IdConfig: Integer;
   protected
     function GetHasConfig: Boolean; override;
     procedure SubActionExecute(Index: Integer); override;
@@ -143,23 +142,24 @@ begin
 end;
 
 procedure TCnTestEditorInsertTextWizard.SubActionExecute(Index: Integer);
+var
+  S: string;
 begin
   if not Active then Exit;
+  S := CnInputBox('Enter Text', 'Enter Text:', '{³Ô·¹Ë¯¾õ}');
 
   if Index = FIdInsertTextIntoEditor then
   begin
-    CnOtaInsertTextIntoEditor('{³Ô·¹}'); // Using EditWriter.Insert
+    CnOtaInsertTextIntoEditor(S); // Using EditWriter.Insert
   end
   else if Index = FIdInsertLineIntoEditor then
   begin
-    CnOtaInsertLineIntoEditor('{Ë¯¾õ}'); // Using EditPosition.Insert
+    CnOtaInsertLineIntoEditor(S); // Using EditPosition.Insert
   end
   else if Index = FIdReplaceCurrentSelection then
   begin
-    CnOtaReplaceCurrentSelection('{»¨Ç®}', True, True);
-  end
-  else if Index = IdConfig then
-    Config;
+    CnOtaReplaceCurrentSelection(S, True, True);
+  end;
 end;
 
 procedure TCnTestEditorInsertTextWizard.SubActionUpdate(Index: Integer);

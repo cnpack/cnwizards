@@ -40,7 +40,9 @@ unit CnWizUtils;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2012.10.01 by shenloqi
+* 修改记录：2015.04 by liuxiao
+*               加入一批 Unicode 版本的函数
+*           2012.10.01 by shenloqi
 *               修复CnOtaGetCurrLineText不能获取最后一行和未TrimRight的BUG
 *               修复CnOtaInsertSingleLine不能正确在第一行插入的BUG
 *           2012.09.19 by shenloqi
@@ -467,11 +469,11 @@ function CnOtaGetCurrentSelection: string;
 {* 取当前选择的文本}
 procedure CnOtaDeleteCurrentSelection;
 {* 删除选中的文本}
-procedure CnOtaReplaceCurrentSelection(const Text: string; NoSelectionInsert: Boolean = True;
-  KeepSelecting: Boolean = False);
-{* 替换选中的文本。NoSelectionInsert：控制无选择区时是否在当前位置插入，
+function CnOtaReplaceCurrentSelection(const Text: string; NoSelectionInsert: Boolean = True;
+  KeepSelecting: Boolean = False): Boolean;
+{* 用文本替换选中的文本。NoSelectionInsert：控制无选择区时是否在当前位置插入，
   KeepSelecting：控制插入后是否选中插入内容，2007 下 Text 是 AnsiString
-  2009 以上是 UnicodeString}
+  2009 以上是 UnicodeString。返回是否成功。已知问题：D5下似乎选择无效}
 procedure CnOtaEditBackspace(Many: Integer);
 {* 在编辑器中退格}
 procedure CnOtaEditDelete(Many: Integer);
@@ -3437,9 +3439,9 @@ begin
     EditBlock.Delete;
 end;
 
-// 替换选中的文本
-procedure CnOtaReplaceCurrentSelection(const Text: string; NoSelectionInsert:
-  Boolean; KeepSelecting: Boolean);
+// 用文本替换选中的文本
+function CnOtaReplaceCurrentSelection(const Text: string; NoSelectionInsert:
+  Boolean; KeepSelecting: Boolean): Boolean;
 var
   EditView: IOTAEditView;
   EditBlock: IOTAEditBlock;
@@ -3448,6 +3450,7 @@ var
   LinearPos: Integer;
   InsertLen: Integer;
 begin
+  Result := False;
   EditView := CnOtaGetTopMostEditView;
   if not Assigned(EditView) then
     Exit;
@@ -3473,27 +3476,35 @@ begin
     CnOtaInsertTextIntoEditor(Text);
   end;
 
+  EditBlock := nil;
   if KeepSelecting then
   begin
     // StartPos 此时是没选择区时的当前光标位置或有选择区的选择区头
-    // InsertLen 参与线性偏移运算，是 Ansi 的偏移，不是 Utf8 的。
-  {$IFDEF UNICODE}
-    InsertLen := Length(AnsiString(Text));
-  {$ELSE}
+    // InsertLen 参与线性偏移运算，是 Ansi(D7y以下) 或 Utf8 (D2007以上)的偏移。
+{$IFDEF IDE_WIDECONTROL}
+    InsertLen := Length(CnAnsiToUtf8(AnsiString(Text)));
+{$ELSE}
     InsertLen := Length(Text);
-  {$ENDIF}
+{$ENDIF}
 
     LinearPos := EditView.CharPosToPos(StartPos); // 起始位置转为线性位置
     EndPos := EditView.PosToCharPos(LinearPos + InsertLen); // 线性位置加后转换为结束位置
 
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('CnOtaReplaceCurrentSelection StartPos %d:%d. Linear %d. Insert Length %d. EndPos %d:%d',
-      [StartPos.Line, StartPos.CharIndex, LinearPos, InsertLen, EndPos.Line, EndPos.CharIndex]);
+//  CnDebugger.LogFmt('CnOtaReplaceCurrentSelection StartPos %d:%d. Linear %d. Insert Length %d. EndPos %d:%d',
+//    [StartPos.Line, StartPos.CharIndex, LinearPos, InsertLen, EndPos.Line, EndPos.CharIndex]);
 {$ENDIF}
 
     // 选中插入的内容，从 StartPos 到 EndPos 加线性位置
-    CnOtaSelectBlock(EditView.Buffer, StartPos, EndPos);
+    EditView.Position.Move(StartPos.Line, StartPos.CharIndex);
+    EditBlock := EditView.Block;
+    EditBlock.Reset;
+    EditBlock.Style := btNonInclusive;
+    EditBlock.BeginBlock;
+    EditView.Position.Move(EndPos.Line, EndPos.CharIndex);
+    EditBlock.EndBlock;
   end;
+  Result := True;
 end;
 
 // 在编辑器中退格
