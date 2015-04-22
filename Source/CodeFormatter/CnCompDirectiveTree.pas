@@ -120,7 +120,7 @@ type
     property ReachingStart: Integer read FReachingStart write FReachingStart;
     {* 本分片在直达源码中的起始偏移，根据实际情况看可以是编译指令的也可以是代码的}
     property Length: Integer read GetLength;
-    {* 本分片包含的代码与编译指令长度}
+    {* 本分片包含的代码与编译指令的字符长度}
     property ReachingEnd: Integer read GetReachingEnd;
     {* 本分片在直达源码中的终点偏移，是上述俩相加}
     property EndBlankLength: Integer read FEndBlankLength write FEndBlankLength;
@@ -197,9 +197,9 @@ function TCnSliceNode.GetLength: Integer;
 begin
   Result := 0;
   if FCompDirectiveStream <> nil then
-    Inc(Result, FCompDirectiveStream.Size);
+    Inc(Result, FCompDirectiveStream.Size div SizeOf(Char));
   if FNormalCodeStream <> nil then
-    Inc(Result, FNormalCodeStream.Size);
+    Inc(Result, FNormalCodeStream.Size div SizeOf(Char));
 end;
 
 function TCnSliceNode.GetReachingEnd: Integer;
