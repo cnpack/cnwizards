@@ -137,10 +137,13 @@ type
     function TokenInt: Int64;
 {$ENDIF}
     function BlankString: string;
+    {* 当前空白区域的字符串值}
     function BlankStringLength: Integer;
+    {* 当前空白区域的字符长度}
     function TokenString: string;
+    {* 当前 Token 的字符串值}
     function TokenStringLength: Integer;
-    
+    {* 当前 Token 的字符长度}
     function TrimBlank(const Str: string): string;
     {* 处理 BlankString，如果上次曾经多输出了一个分隔的空行，则本次 BlankString
        需要去掉前导空行（是去掉一个以保持原有空行数量呢，还是去掉所有前导保持一个空行？}
@@ -596,7 +599,10 @@ end;
 
 function TAbstractScaner.TokenChar: Char;
 begin
-  Result := TokenString[1];
+  if Length(TokenString) > 0 then
+    Result := TokenString[1]
+  else
+    Result := #0;
 end;
 
 procedure TAbstractScaner.LoadBookmark(var Bookmark: TScannerBookmark; Clear:

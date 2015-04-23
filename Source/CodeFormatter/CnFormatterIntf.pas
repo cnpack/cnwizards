@@ -72,6 +72,8 @@ const
   {* 超宽不自动换行}
   CN_RULE_CODE_WRAP_MODE_SIMPLE       = 2;
   {* 超过设置的 WrapWidth 后自动换行}
+  CN_RULE_CODE_WRAP_MODE_ADVANCED     = 3;
+  {* 超过设置的 WrapNewLineWidth 后 从 WrapWidth 处自动换行}
   CN_RULE_CODE_WRAP_MODE_DEFAULT      = CN_RULE_CODE_WRAP_MODE_NONE;
 
   // 默认缩进空格数
@@ -91,6 +93,9 @@ const
 
   // 默认换行超出此宽度
   CN_RULE_LINE_WRAP_WIDTH             = 80;
+
+  // 默认高级换行超出此宽度
+  CN_RULE_LINE_WRAP_NEWLINE_WIDTH     = 100;
 
   // 由外部指定的起始元素类型
   CN_START_UNKNOWN_ALL                = 0;
@@ -137,7 +142,8 @@ type
     procedure SetPascalFormatRule(DirectiveMode: DWORD; KeywordStyle: DWORD;
       BeginStyle: DWORD; WrapMode: DWORD; TabSpace: DWORD; SpaceBeforeOperator: DWORD;
       SpaceAfterOperator: DWORD; SpaceBeforeAsm: DWORD; SpaceTabAsm: DWORD;
-      LineWrapWidth: DWORD; UsesSingleLine: LongBool; UseIgnoreArea: LongBool);
+      LineWrapWidth: DWORD; NewLineWrapWidth: DWORD; UsesSingleLine: LongBool;
+      UseIgnoreArea: LongBool);
     {* 设置格式化选项}
 
     function FormatOnePascalUnit(Input: PAnsiChar; Len: DWORD): PAnsiChar;

@@ -48,8 +48,8 @@ type
 
   TBeginStyle = (bsNextLine, bsSameLine);
 
-  TCodeWrapMode = (cwmNone, cwmSimple);
-  {* 代码换行的设置，不自动换行、简单的超过就换行}
+  TCodeWrapMode = (cwmNone, cwmSimple, cwmAdvanced);
+  {* 代码换行的设置，不自动换行、简单的超过就换行，高级的超过多了才从少的地方换行}
 
   TTypeIDStyle = (tisUpperFirst, tisNoChange); // 类型标识符的处理方式，首字母大写或不变
 
@@ -70,6 +70,7 @@ type
     SpaceBeforeASM: Byte;
     SpaceTabASMKeyword: Byte;
     WrapWidth: Integer;
+    WrapNewLineWidth: Integer;
     UsesUnitSingleLine: Boolean;
     UseIgnoreArea: Boolean;
   end;
@@ -91,6 +92,7 @@ const
     SpaceBeforeASM: 8;
     SpaceTabASMKeyword: 8;
     WrapWidth: 80;
+    WrapNewLineWidth: 100;
     UsesUnitSingleLine: False;
     UseIgnoreArea: True;
   );

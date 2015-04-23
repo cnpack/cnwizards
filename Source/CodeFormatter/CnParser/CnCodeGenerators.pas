@@ -56,6 +56,7 @@ type
     FPrevRow: Integer;
     FPrevColumn: Integer;
     FLastNoAutoWrapLine: Integer;
+    FLastExceedPosition: Integer; // 本行超出 WrapWidth 的点，供行尾超长时回溯重新换行使用
     FAutoWrapLines: TList; // 记录自动换行的行号，用来搜寻最近一次非自动换行的行缩进
     FOnAfterWrite: TCnAfterWriteEvent;
     FAutoWrapButNoIndent: Boolean;
@@ -304,6 +305,7 @@ begin
   FCode.Add('');
 
   FColumnPos := 0;
+  FLastExceedPosition := 0;
 end;
 
 procedure TCnCodeGenerator.LockOutput;
@@ -345,14 +347,14 @@ end;
 procedure TCnCodeGenerator.Write(S: string; BeforeSpaceCount,
   AfterSpaceCount: Word);
 var
-  Str: string;
+  Str, WrapStr, Tmp: string;
   Len: Integer;
 
-  function ExceedLineWrap: Boolean;
+  function ExceedLineWrap(Width: Integer): Boolean;
   begin
-    Result := ((FColumnPos <= CnPascalCodeForRule.WrapWidth) and
-      (FColumnPos + Len > CnPascalCodeForRule.WrapWidth)) or
-      (FColumnPos > CnPascalCodeForRule.WrapWidth);
+    Result := ((FColumnPos <= Width) and
+      (FColumnPos + Len > Width)) or
+      (FColumnPos > Width);
   end;
 
 begin
@@ -377,7 +379,7 @@ begin
   end
   else if FCodeWrapMode = cwmSimple then // 简单换行，判断是否超出宽度
   begin
-    if (FPrevStr <> '.') and ExceedLineWrap then // Dot in unitname should not new line.
+    if (FPrevStr <> '.') and ExceedLineWrap(CnPascalCodeForRule.WrapWidth) then // Dot in unitname should not new line.
     begin
       if FAutoWrapButNoIndent then
       begin
@@ -393,6 +395,38 @@ begin
       InternalWriteln;
       FAutoWrapLines.Add(Pointer(FCode.Count - 1)); // 自动换行的行号要记录
     end;
+  end
+  else if FCodeWrapMode = cwmAdvanced then
+  begin
+    // 高级。超出大行后，回溯到从小行处开始换行
+    if ExceedLineWrap(CnPascalCodeForRule.WrapWidth) and not
+      ExceedLineWrap(CnPascalCodeForRule.WrapNewLineWidth) and (FLastExceedPosition = 0) then
+    begin
+      // 第一次只超小行未超大行时，照常输出，记录输出前小行待回溯的位置
+      FLastExceedPosition := FColumnPos;
+    end
+    else if (FPrevStr <> '.') and ExceedLineWrap(CnPascalCodeForRule.WrapNewLineWidth) then
+    begin
+      WrapStr := Copy(FCode[FCode.Count - 1], FLastExceedPosition + 1, MaxInt);
+      Tmp := FCode[FCode.Count - 1];
+      Delete(Tmp, FLastExceedPosition + 1, MaxInt);
+      FCode[FCode.Count - 1] := Tmp;
+
+      if FAutoWrapButNoIndent then
+      begin
+        Str := StringOfChar(' ', CurIndentSpace) + TrimLeft(WrapStr) + Str;
+        // 加上原有的缩进，不要直接再缩进一格，避免 uses 区出现不必要的缩进。
+      end
+      else
+      begin
+        Str := StringOfChar(' ', LastIndentSpace + CnPascalCodeForRule.TabSpaceCount)
+          + TrimLeft(WrapStr) + Str; // 自动换行后左边原有的空格就不需要了
+        // 找出上一次非自动缩进的缩进，而不是简单的上一行缩进值，避免多重缩进
+      end;
+      InternalWriteln;
+      FAutoWrapLines.Add(Pointer(FCode.Count - 1)); // 自动换行的行号要记录
+    end;
+    // 未超宽，照常处理
   end;
 
   FCode[FCode.Count - 1] :=
@@ -400,14 +434,13 @@ begin
 
   FPrevColumn := FColumnPos;
 
-{$IFDEF UNICODE}
-  // Unicode 模式下，转成 Ansi 长度才符合一般规则
-  FColumnPos := Length(AnsiString(FCode[FCode.Count - 1]));
-{$ELSE}
-  // Ansi 模式下，长度直接符合一般规则
-  FColumnPos := Length(FCode[FCode.Count - 1]);
-{$ENDIF}
+//{$IFDEF UNICODE}
+//  // Unicode 模式下，转成 Ansi 长度才符合一般规则
+//  FColumnPos := Length(AnsiString(FCode[FCode.Count - 1]));
+//{$ELSE}
+// Ansi 模式下，长度直接符合一般规则
 
+  FColumnPos := Length(FCode[FCode.Count - 1]);
   FPrevStr := S;
 
   DoAfterWrite(False);
@@ -431,6 +464,7 @@ begin
 
   FPrevColumn := FColumnPos;
   FColumnPos := 0;
+  FLastExceedPosition := 0;
   
   DoAfterWrite(True);
 {$IFDEF DEBUG}
