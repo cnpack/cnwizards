@@ -411,7 +411,8 @@ begin
       // 第一次只超小行未超大行时，照常输出，记录输出前小行待回溯的位置
       FLastExceedPosition := FColumnPos;
     end
-    else if (FPrevStr <> '.') and ExceedLineWrap(CnPascalCodeForRule.WrapNewLineWidth) then
+    else if (FPrevStr <> '.') and (FLastExceedPosition > 0) and // 有可换行之处才换
+      ExceedLineWrap(CnPascalCodeForRule.WrapNewLineWidth) then
     begin
       WrapStr := Copy(FCode[FCode.Count - 1], FLastExceedPosition + 1, MaxInt);
       Tmp := FCode[FCode.Count - 1];
