@@ -4102,6 +4102,7 @@ begin
       else
         EndPos.CharIndex := 1024; // 用个大数代替行尾
     end;
+    Result := True;
   end;
 end;
 
