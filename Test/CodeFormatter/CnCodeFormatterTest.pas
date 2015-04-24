@@ -191,11 +191,12 @@ begin
     try
       try
         FCodeFor.FormatCode;
-        DesMemo.Lines.Text := FCodeFor.CopyMatchedSliceResult;
-      finally
-        //FCodeFor.SaveToStream(MemStr);
-        //FCodeFor.SaveToStrings(DesMemo.Lines);
+      except
+        on E: Exception do
+          if not FCodeFor.HasSliceResult then
+            raise;
       end;
+      DesMemo.Lines.Text := FCodeFor.CopyMatchedSliceResult;
     finally
       FCodeFor.Free;
       MemStr.Free;

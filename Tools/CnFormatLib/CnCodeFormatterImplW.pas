@@ -173,18 +173,18 @@ begin
   try
     try
       CodeFor.FormatCode;
-      Res := CodeFor.CopyMatchedSliceResult;
-      if Res = '' then
-      begin
-        Result := nil;
-        Exit;
-      end;
-
-      OutStream.Write(PChar(Res)^, Length(Res) * SizeOf(Char));
     except
-      ; // 出错了，返回 nil 的结果
+      ; // 出错了，先屏蔽，后面看看有无结果
     end;
 
+    Res := CodeFor.CopyMatchedSliceResult;
+    if Res = '' then
+    begin
+      Result := nil;
+      Exit;
+    end;
+
+    OutStream.Write(PChar(Res)^, Length(Res) * SizeOf(Char));
     if OutStream.Size > 0 then
     begin
       AdjustResultLength(OutStream.Size + SizeOf(Char));
@@ -243,18 +243,18 @@ begin
   try
     try
       CodeFor.FormatCode;
-      Res := CodeFor.CopyMatchedSliceResult;
-      if Res = '' then
-      begin
-        Result := nil;
-        Exit;
-      end;
-
-      OutStream.Write(PChar(Res)^, Length(Res) * SizeOf(Char));
     except
-      ; // 出错了，返回 nil 的结果
+      ; // 出错了，先屏蔽，后面看看有无结果
     end;
 
+    Res := CodeFor.CopyMatchedSliceResult;
+    if Res = '' then
+    begin
+      Result := nil;
+      Exit;
+    end;
+
+    OutStream.Write(PChar(Res)^, Length(Res) * SizeOf(Char));
     if OutStream.Size > 0 then
     begin
       AdjustResultLength(OutStream.Size + SizeOf(Char));

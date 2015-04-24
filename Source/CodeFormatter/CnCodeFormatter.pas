@@ -331,6 +331,7 @@ type
   TCnPascalCodeFormatter = class(TCnGoalCodeFormatter)
   public
     procedure FormatCode(PreSpaceCount: Byte = 0); override;
+    function HasSliceResult: Boolean;
     function CopyMatchedSliceResult: string;
     property CodeGen;
   end;
@@ -4916,15 +4917,11 @@ end;
 function TCnPascalCodeFormatter.CopyMatchedSliceResult: string;
 begin
   Result := '';
-  if FSliceMode then
+  if FSliceMode and HasSliceResult then
   begin
-    if (MatchedOutStartRow <> CN_MATCHED_INVALID) and (MatchedOutStartCol <> CN_MATCHED_INVALID)
-      and (MatchedOutEndRow <> CN_MATCHED_INVALID) and (MatchedOutEndCol <> CN_MATCHED_INVALID) then
-    begin
-      // 有匹配结果
-      Result := CodeGen.CopyPartOut(MatchedOutStartRow, MatchedOutStartCol,
-        MatchedOutEndRow, MatchedOutEndCol);
-    end;
+    // 有匹配结果
+    Result := CodeGen.CopyPartOut(MatchedOutStartRow, MatchedOutStartCol,
+      MatchedOutEndRow, MatchedOutEndCol);
   end;
 end;
 
@@ -4974,6 +4971,14 @@ begin
     CnDebugger.LogMsg('OnAfter Write. Got MatchEnd.');
 {$ENDIF}
   end;
+end;
+
+function TCnPascalCodeFormatter.HasSliceResult: Boolean;
+begin
+  Result := (MatchedOutStartRow <> CN_MATCHED_INVALID)
+    and (MatchedOutStartCol <> CN_MATCHED_INVALID)
+    and (MatchedOutEndRow <> CN_MATCHED_INVALID)
+    and (MatchedOutEndCol <> CN_MATCHED_INVALID);
 end;
 
 end.

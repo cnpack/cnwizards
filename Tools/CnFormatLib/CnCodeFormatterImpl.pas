@@ -290,18 +290,18 @@ begin
   try
     try
       CodeFor.FormatCode;
-      Res := CodeFor.CopyMatchedSliceResult;
-      if Res = '' then
-      begin
-        Result := nil;
-        Exit;
-      end;
-
-      OutStream.Write(PChar(Res)^, Length(Res));
     except
-      ; // 出错了，返回 nil 的结果
+      ; // 出错了，先屏蔽，看看后面有无结果
     end;
 
+    Res := CodeFor.CopyMatchedSliceResult;
+    if Res = '' then
+    begin
+      Result := nil;
+      Exit;
+    end;
+
+    OutStream.Write(PChar(Res)^, Length(Res));
     if OutStream.Size > 0 then
     begin
       AdjustResultLength(OutStream.Size + 1);
