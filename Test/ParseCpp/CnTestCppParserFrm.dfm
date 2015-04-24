@@ -15,10 +15,17 @@ object CppParseForm: TCppParseForm
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
-    Left = 208
+    Left = 124
     Top = 24
     Width = 3
     Height = 13
+  end
+  object bvl1: TBevel
+    Left = 384
+    Top = 16
+    Width = 25
+    Height = 25
+    Shape = bsLeftLine
   end
   object btnLoad: TButton
     Left = 16
@@ -54,16 +61,16 @@ object CppParseForm: TCppParseForm
       '}')
     ParentFont = False
     ScrollBars = ssVertical
-    TabOrder = 3
+    TabOrder = 4
     OnChange = mmoCChange
     OnClick = mmoCClick
   end
   object btnParse: TButton
-    Left = 568
+    Left = 296
     Top = 16
     Width = 75
     Height = 25
-    Caption = 'Parse'
+    Caption = 'Ansi Parse'
     TabOrder = 2
     OnClick = btnParseClick
   end
@@ -73,16 +80,25 @@ object CppParseForm: TCppParseForm
     Width = 625
     Height = 225
     ScrollBars = ssVertical
-    TabOrder = 4
+    TabOrder = 5
   end
   object btnTokenList: TButton
-    Left = 454
+    Left = 198
     Top = 16
-    Width = 75
+    Width = 83
     Height = 25
-    Caption = 'Tokenize'
+    Caption = 'Ansi Tokenize'
     TabOrder = 1
     OnClick = btnTokenListClick
+  end
+  object btnWideTokenize: TButton
+    Left = 398
+    Top = 16
+    Width = 83
+    Height = 25
+    Caption = 'Wide Tokenize'
+    TabOrder = 3
+    OnClick = btnWideTokenizeClick
   end
   object dlgOpen1: TOpenDialog
     Filter = 'C/C++ Files (*.c;*.cpp;*.h;*.hpp)|*.c;*.cpp;*.h;*.hpp'

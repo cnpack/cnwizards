@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, TypInfo;
+  StdCtrls, TypInfo, ExtCtrls;
 
 type
   TCppParseForm = class(TForm)
@@ -15,12 +15,15 @@ type
     mmoParse: TMemo;
     Label1: TLabel;
     btnTokenList: TButton;
+    bvl1: TBevel;
+    btnWideTokenize: TButton;
     procedure btnLoadClick(Sender: TObject);
     procedure btnParseClick(Sender: TObject);
     procedure mmoCClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure mmoCChange(Sender: TObject);
     procedure btnTokenListClick(Sender: TObject);
+    procedure btnWideTokenizeClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -33,7 +36,7 @@ var
 implementation
 
 uses
-  CnCppCodeParser, mwBCBTokenList;
+  CnCppCodeParser, mwBCBTokenList, CnBCBWideTokenList;
 
 {$R *.DFM}
 
@@ -147,6 +150,30 @@ begin
     CP.Next;
     Inc(I);
   end;
+end;
+
+procedure TCppParseForm.btnWideTokenizeClick(Sender: TObject);
+var
+  P: TCnBCBWideTokenList;
+  S: WideString;
+  I: Integer;
+begin
+  P := TCnBCBWideTokenList.Create;
+  P.DirectivesAsComments := False;
+  S := mmoC.Lines.Text;
+  P.SetOrigin(PWideChar(S), Length(S));
+  I := 1;
+  mmoParse.Lines.Clear;
+  while P.RunID <> ctknull do
+  begin
+    mmoParse.Lines.Add(Format('%3.3d. Line: %d, Col %2.2d, Len %2.2d, Position %4.4d. %s, Token: %s',
+        [I, P.LineNumber, P.ColumnNumber, P.TokenLength, P.RunPosition, GetEnumName(TypeInfo(TCTokenKind),
+         Ord(P.RunID)), P.RunToken]));
+    P.Next;
+    Inc(I);
+  end;
+
+  P.Free;
 end;
 
 end.

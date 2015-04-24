@@ -7,7 +7,8 @@ uses
   mwBCBTokenList in '..\..\Source\ThirdParty\mwBCBTokenList.pas',
   CnFastList in '..\..\Source\Utils\CnFastList.pas',
   CnPasCodeParser in '..\..\Source\Utils\CnPasCodeParser.pas',
-  mPasLex in '..\..\Source\ThirdParty\mPasLex.pas';
+  mPasLex in '..\..\Source\ThirdParty\mPasLex.pas',
+  CnBCBWideTokenList in '..\..\Source\Utils\CnBCBWideTokenList.pas';
 
 {$R *.RES}
 

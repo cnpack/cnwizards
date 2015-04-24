@@ -44,12 +44,14 @@ unit CnBCBWideTokenList;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：mwBCBTokenList 的 Unicode 版本实现
 * 单元作者：刘啸(LiuXiao) liuxiao@cnpack.org
-* 备    注：此单元自 mwBCBTokenList 移植而来并改为 Unicode 实现，保留原始版权声明
+* 备    注：此单元自 mwBCBTokenList 移植而来并改为 Unicode/WideString 实现，保留原始版权声明
 * 开发平台：Windows 7 + Delphi XE
 * 兼容测试：PWin9X/2000/XP/7 + Delphi 2009 ~
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2015.04.09 V1.0
+* 修改记录：2015.04.25 V1.1
+*               增加 WideString 实现
+*           2015.04.09 V1.0
 *               移植单元，实现功能
 ================================================================================
 |</PRE>}
@@ -60,21 +62,29 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFNDEF UNICODE}
-  #Error: 'Unicode Compiler Only!'
-{$ENDIF}
-
 uses
   Windows, SysUtils, mwBCBTokenList;
 
 type
+{$IFDEF UNICODE}
+  PCnChar = PChar;
+  CnChar = Char;
+  CnIndexChar = Char;
+  CnString = string;
+{$ELSE}
+  PCnChar = PWideChar;
+  CnChar = WideChar;
+  CnIndexChar = AnsiChar;
+  CnString = WideString;
+{$ENDIF}
+
   TCnBCBWideTokenList = class;
 
   TCnSearcher = class(Tobject)
   private
     FBCBTokenList: TCnBCBWideTokenList;
-    FSearchOrigin: PChar;
-    Pat: string;
+    FSearchOrigin: PCnChar;
+    Pat: CnString;
     FPos: Integer;
     HalfLen: Integer;
     PatLenPlus: Integer;
@@ -99,12 +109,12 @@ type
     function Next: Integer;
     procedure Add(aPosition: Integer);
     procedure FillClassList;
-    procedure Init(const NewPattern: string);
-    procedure Retrive(aToken: string);
-    function GetMethodImplementation(const aClassName, aMethodIdentifier: string): LongInt;
+    procedure Init(const NewPattern: CnString);
+    procedure Retrive(aToken: CnString);
+    function GetMethodImplementation(const aClassName, aMethodIdentifier: CnString): LongInt;
     procedure FillMethodList;
     procedure FillInterfaceList;
-    function GetMethodImpLine(const aClassName, aMethodIdentifier: string): LongInt;
+    function GetMethodImpLine(const aClassName, aMethodIdentifier: CnString): LongInt;
     property Finished: Boolean read GetFinished;
     property Found: Boolean read FFound;
     property Position: Integer read FPosition write FPos;
@@ -117,7 +127,7 @@ type
     FTokenPositionsList: TLongIntList;
     FTokenLineNumberList: TLongIntList;
     FTokenColNumberList: TLongIntList;
-    FOrigin: PChar;
+    FOrigin: PCnChar;
     FPCharSize: Longint;
     FPCharCapacity: Longint;
     FComment: TCommentState;
@@ -130,7 +140,7 @@ type
     FColNumber: Integer;
     FVisibility: TCTokenKind;
     FDirectivesAsComments: Boolean;
-    procedure WriteTo(InsPos, DelPos: LongInt; const Item: string);
+    procedure WriteTo(InsPos, DelPos: LongInt; const Item: CnString);
     function GetCount: Integer;
     procedure SetCount(value: Integer);
     function GetCapacity: Integer;
@@ -145,36 +155,37 @@ type
     function GetRunPosition: LongInt;
     function GetLineNumber: LongInt;
     function GetColumnNumber: LongInt;
-    function GetRunToken: string;
-    function GetTokenAddr: PChar;
+    function GetRunToken: CnString;
+    function GetTokenAddr: PCnChar;
     function GetTokenLength: Integer;
   protected
-    function GetToken(Index: Integer): string;
+    function GetToken(Index: Integer): CnString;
     procedure SetCapacity(NewCapacity: Integer);
-    procedure SetToken(Index: Integer; const Item: string);
+    procedure SetToken(Index: Integer; const Item: CnString);
   public
     Searcher: TCnSearcher;
     constructor Create;
     destructor Destroy; override;
-    procedure SetOrigin(NewOrigin: PChar; NewSize: LongInt);
-    function Add(const Item: string): Integer;
+    procedure SetOrigin(NewOrigin: PCnChar; NewSize: LongInt);
+    {* 设置被解析的内容，NewSize 是字符长度}
+    function Add(const Item: CnString): Integer;
     procedure Clear;
     procedure Delete(Index: Integer);
     procedure Exchange(Index1, Index2: Integer);
-    function First: string;
-    function IndexOf(const Item: string): Integer;
-    procedure Insert(Index: Integer; const Item: string);
-    function Last: string;
+    function First: CnString;
+    function IndexOf(const Item: CnString): Integer;
+    procedure Insert(Index: Integer; const Item: CnString);
+    function Last: CnString;
     procedure Move(CurIndex, NewIndex: Integer);
-    function Remove(const Item: string): Integer;
+    function Remove(const Item: CnString): Integer;
     property Capacity: Integer read GetCapacity write SetCapacity;
     property Count: Integer read GetCount write SetCount;
-    property Token[Index: Integer]: string read GetToken write SetToken; default;
+    property Token[Index: Integer]: CnString read GetToken write SetToken; default;
     property TokenPositionsList: TLongIntList read FTokenPositionsList;
-    property Origin: PChar read FOrigin;
+    property Origin: PCnChar read FOrigin;
     property PCharSize: Longint read FPCharSize;
     property PCharCapacity: Longint read FPCharCapacity;
-    function GetSubString(StartPos, EndPos: LongInt): string;
+    function GetSubString(StartPos, EndPos: LongInt): CnString;
     procedure Next;
     procedure Previous;
     procedure NextID(ID: TCTokenKind);
@@ -210,15 +221,58 @@ type
     {* 当前 Token 所在的行，1 开始}
     property ColumnNumber: Integer read GetColumnNumber;
     {* 当前 Token 所在的列，1 开始}
-    property RunToken: string read GetRunToken;
+    property RunToken: CnString read GetRunToken;
     {* 当前 Token 的 Unicode 字符串}
-    property TokenAddr: PChar read GetTokenAddr;
+    property TokenAddr: PCnChar read GetTokenAddr;
     {* 当前 Token 的 Unicode 字符串地址}
     property TokenLength: Integer read GetTokenLength;
     {* 当前 Token 的 Unicode 字符长度}
   end; { TCnBCBWideTokenList }
 
 implementation
+
+type
+  TAnsiCharSet = set of AnsiChar;
+
+function _WideCharInSet(C: CnChar; CharSet: TAnsiCharSet): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+begin
+  if Ord(C) <= $FF then
+    Result := AnsiChar(C) in CharSet
+  else
+    Result := False;
+end;
+
+function _AnsiStrIComp(S1, S2: PCnChar): Integer; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+begin
+  Result := CompareStringW(LOCALE_USER_DEFAULT, NORM_IGNORECASE, S1, -1,
+    S2, -1) - 2;
+end;
+
+function _IndexChar(C: CnChar): CnIndexChar; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+begin
+{$IFDEF UNICODE}
+  Result := C;
+{$ELSE}
+  Result := CnIndexChar(C);
+{$ENDIF}
+end;
+
+function _StrEWideCopy(Dest: PCnChar; const Source: PCnChar): PCnChar;
+var
+  Len: Integer;
+{$IFNDEF UNICODE}
+  S: CnString;
+{$ENDIF}
+begin
+{$IFDEF UNICODE}
+  Len := StrLen(Source);
+{$ELSE}
+  S := Source;
+  Len := Length(S);
+{$ENDIF}
+  Move(Source^, Dest^, (Len + 1) * SizeOf(CnChar));
+  Result := Dest + Len;
+end;
 
 constructor TCnSearcher.Create(Value: TCnBCBWideTokenList);
 begin
@@ -255,7 +309,7 @@ begin
   Result := FFinished;
 end; { GetFinished }
 
-procedure TCnSearcher.Init(const NewPattern: string);
+procedure TCnSearcher.Init(const NewPattern: CnString);
 var
   I: Byte;
 begin
@@ -283,7 +337,7 @@ begin
   begin
     I := PatLen;
     if (Pat[I] <> FSearchOrigin[FPos]) then
-      Inc(FPos, Shift[ord(FSearchOrigin[FPos + 1])])
+      Inc(FPos, Shift[Ord(FSearchOrigin[FPos + 1])])
     else
     begin
       J := FPos;
@@ -342,7 +396,7 @@ begin
   Assert(False);
 end; { FillMethodList }
 
-procedure TCnSearcher.Retrive(aToken: string);
+procedure TCnSearcher.Retrive(aToken: CnString);
 var
   RPos: LongInt;
   RIndex: LongInt;
@@ -355,12 +409,12 @@ begin
     begin
       RIndex := FBCBTokenList.PositionToIndex(RPos);
       if (RPos = FBCBTokenList.FTokenPositionsList[RIndex]) then
-        if AnsiStrIComp(PChar(aToken), PChar(FBCBTokenList[RIndex])) = 0 then Add(RIndex);
+        if _AnsiStrIComp(PCnChar(aToken), PCnChar(FBCBTokenList[RIndex])) = 0 then Add(RIndex);
     end;
   end;
 end; { Retrive }
 
-function TCnSearcher.GetMethodImplementation(const aClassName, aMethodIdentifier: string): LongInt;
+function TCnSearcher.GetMethodImplementation(const aClassName, aMethodIdentifier: CnString): LongInt;
 //var
 //  RPos: LongInt;
 //  RIndex: LongInt;
@@ -371,7 +425,7 @@ begin
   Result := 0;
 end; { GetMethodImplementation }
 
-function TCnSearcher.GetMethodImpLine(const aClassName, aMethodIdentifier: string): LongInt;
+function TCnSearcher.GetMethodImpLine(const aClassName, aMethodIdentifier: CnString): LongInt;
 var
   ImpIndex: LongInt;
 begin
@@ -404,7 +458,7 @@ begin
   inherited Destroy;
 end; { Destroy }
 
-procedure TCnBCBWideTokenList.SetOrigin(NewOrigin: PChar; NewSize: LongInt);
+procedure TCnBCBWideTokenList.SetOrigin(NewOrigin: PCnChar; NewSize: LongInt);
 begin
   FOrigin := NewOrigin;
   FRun := 0;
@@ -420,10 +474,10 @@ begin
 end; { SetOrigin }
 
 procedure TCnBCBWideTokenList.WriteTo(InsPos, DelPos: LongInt;
-  const Item: string);
+  const Item: CnString);
 var
   StringCount, NewSize: Longint;
-  aString: string;
+  aString: CnString;
 begin
   aString := Item + (FOrigin + DelPos);
   StringCount := Length(aString);
@@ -436,12 +490,12 @@ begin
       begin
         try
           FPCharCapacity := FPCharCapacity + 16384;
-          ReAllocMem(FOrigin, PCharCapacity);
+          ReAllocMem(FOrigin, PCharCapacity * SizeOf(CnChar));
         except
           raise exception.Create('unable to reallocate PChar');
         end;
       end;
-      StrECopy((FOrigin + InsPos), PChar(aString));
+      _StrEWideCopy((FOrigin + InsPos), PCnChar(aString));
       FPCharSize := NewSize;
       FOrigin[FPCharSize] := #0;
       aString := '';
@@ -473,7 +527,7 @@ begin
   end
 end; { ResetPositionsFrom }
 
-function TCnBCBWideTokenList.GetToken(Index: Integer): string;
+function TCnBCBWideTokenList.GetToken(Index: Integer): CnString;
 var
   StartPos, EndPos, StringLen: LongInt;
 begin
@@ -493,7 +547,7 @@ begin
   FTokenPositionsList.Capacity := NewCapacity;
 end; { SetCapacity }
 
-procedure TCnBCBWideTokenList.SetToken(Index: Integer; const Item: string);
+procedure TCnBCBWideTokenList.SetToken(Index: Integer; const Item: CnString);
 var
   StartPos, EndPos, OldLen, NewLen, Diff: LongInt;
 begin
@@ -506,7 +560,7 @@ begin
   ResetPositionsFrom(Index + 1, Diff);
 end; { SetItems }
 
-function TCnBCBWideTokenList.Add(const Item: string): Integer;
+function TCnBCBWideTokenList.Add(const Item: CnString): Integer;
 var
   StartPos, EndPos: LongInt;
 begin
@@ -538,26 +592,26 @@ end; { Delete }
 
 procedure TCnBCBWideTokenList.Exchange(Index1, Index2: Integer);
 var
-  Item: string;
+  Item: CnString;
 begin
   Item := GetToken(Index1);
   SetToken(Index1, GetToken(Index2));
   SetToken(Index2, Item);
 end; { Exchange }
 
-function TCnBCBWideTokenList.First: string;
+function TCnBCBWideTokenList.First: CnString;
 begin
   Result := GetToken(0);
 end; { First }
 
-function TCnBCBWideTokenList.IndexOf(const Item: string): Integer;
+function TCnBCBWideTokenList.IndexOf(const Item: CnString): Integer;
 begin
   Result := 0;
   while (Result < Count) and (GetToken(Result) <> Item) do Inc(Result);
   if Result = Count then Result := -1;
 end; { IndexOf }
 
-procedure TCnBCBWideTokenList.Insert(Index: Integer; const Item: string);
+procedure TCnBCBWideTokenList.Insert(Index: Integer; const Item: CnString);
 var
   StartPos, EndPos, ItemLen: LongInt;
 begin
@@ -569,14 +623,14 @@ begin
   FTokenPositionsList.Insert(Index + 1, EndPos);
 end; { Insert }
 
-function TCnBCBWideTokenList.Last: string;
+function TCnBCBWideTokenList.Last: CnString;
 begin
   Result := GetToken(Count - 1);
 end; { Last }
 
 procedure TCnBCBWideTokenList.Move(CurIndex, NewIndex: Integer);
 var
-  Item: string;
+  Item: CnString;
 begin
   if CurIndex <> NewIndex then
   begin
@@ -586,13 +640,13 @@ begin
   end;
 end; { Move }
 
-function TCnBCBWideTokenList.Remove(const Item: string): Integer;
+function TCnBCBWideTokenList.Remove(const Item: CnString): Integer;
 begin
   Result := IndexOf(Item);
   if Result <> -1 then Delete(Result);
 end; { Remove }
 
-function TCnBCBWideTokenList.GetSubString(StartPos, EndPos: LongInt): string;
+function TCnBCBWideTokenList.GetSubString(StartPos, EndPos: LongInt): CnString;
 var
   SubLen: Integer;
 begin
@@ -609,7 +663,7 @@ end; { SetRunPos }
 function TCnBCBWideTokenList.IdentKind(Index: LongInt): TCTokenKind;
 var
   HashKey: Integer;
-  aToken: string;
+  aToken: CnString;
   StartPos, EndPos, StringLen: LongInt;
 
   function KeyHash: Integer;
@@ -779,7 +833,7 @@ end; { IdentKind }
 function TCnBCBWideTokenList.DirKind(StartPos, EndPos: LongInt): TCTokenKind;
 var
   HashKey: Integer;
-  aToken: string;
+  aToken: CnString;
   StringLen: LongInt;
 
   function KeyHash: Integer;
@@ -921,7 +975,7 @@ begin
       #1..#9, #11, #12, #14..#32:
         begin
           Inc(FRun); Inc(ColNum);
-          while CharInSet(FOrigin[FRun], [#1..#9, #11, #12, #14..#32]) do
+          while _WideCharInSet(FOrigin[FRun], [#1..#9, #11, #12, #14..#32]) do
           begin
             Inc(FRun);
             Inc(ColNum);
@@ -934,7 +988,7 @@ begin
       'A'..'Z', 'a'..'z', '_', '~':
         begin
           Inc(FRun); Inc(ColNum);
-          while CharInSet(FOrigin[FRun], ['A'..'Z', 'a'..'z', '0'..'9', '_']) do
+          while _WideCharInSet(FOrigin[FRun], ['A'..'Z', 'a'..'z', '0'..'9', '_']) do
           begin
             Inc(FRun);
             Inc(ColNum);
@@ -947,7 +1001,7 @@ begin
       '0'..'9':
         begin
           Inc(FRun); Inc(ColNum);
-          while CharInSet(FOrigin[FRun], ['0'..'9', '.', 'e', 'E']) do
+          while _WideCharInSet(FOrigin[FRun], ['0'..'9', '.', 'e', 'E']) do
           begin
             case FOrigin[FRun] of
               '.':
@@ -1021,7 +1075,7 @@ begin
                       Inc(ColNum);
                       if (FOrigin[FRun] = '\') then
                       begin
-                        while not CharInSet(FOrigin[FRun + 1], [#10, #13, #0]) do
+                        while not _WideCharInSet(FOrigin[FRun + 1], [#10, #13, #0]) do
                         begin
                           Inc(FRun);
                           Inc(ColNum);
@@ -1036,7 +1090,7 @@ begin
                         Inc(FRun);
                         Inc(ColNum);
                       end;
-                    until CharInSet(FOrigin[FRun + 1], [#10, #13, #0]);
+                    until _WideCharInSet(FOrigin[FRun + 1], [#10, #13, #0]);
 
                     if FOrigin[FRun + 1] = #13 then
                       Inc(FRun);
@@ -1052,7 +1106,7 @@ begin
                   begin
                     Inc(FRun);
                     Inc(ColNum);
-                    while CharInSet(FOrigin[FRun], ['A'..'Z', 'a'..'z']) do
+                    while _WideCharInSet(FOrigin[FRun], ['A'..'Z', 'a'..'z']) do
                     begin
                       Inc(FRun);
                       Inc(ColNum);
@@ -1276,7 +1330,7 @@ begin
       begin
         Inc(Running);
         Result := ctknumber;
-        while CharInSet(FOrigin[Running], ['0'..'9', '.']) do
+        while _WideCharInSet(FOrigin[Running], ['0'..'9', '.']) do
         begin
           case FOrigin[Running] of
             '.':
@@ -1323,7 +1377,7 @@ begin
                   begin
                     Inc(Running);
                     TempRun := Running;
-                    while CharInSet(FOrigin[Running], ['A'..'Z', 'a'..'z']) do Inc(Running);
+                    while _WideCharInSet(FOrigin[Running], ['A'..'Z', 'a'..'z']) do Inc(Running);
                     Result := DirKind(TempRun, Running);
                   end;
                 end;
@@ -1668,10 +1722,10 @@ begin
   Result := FTokenColNumberList[FRun];
 end; { GetRunColNumber }
 
-function TCnBCBWideTokenList.GetRunToken: string;
+function TCnBCBWideTokenList.GetRunToken: CnString;
 var
   StartPos, EndPos, StringLen: LongInt;
-  OutStr: string;
+  OutStr: CnString;
 begin
   StartPos := FTokenPositionsList[FRun];
   EndPos := FTokenPositionsList[FRun + 1];
@@ -1703,7 +1757,7 @@ begin
   end;
 end; { PositionToIndex }
 
-function TCnBCBWideTokenList.GetTokenAddr: PChar;
+function TCnBCBWideTokenList.GetTokenAddr: PCnChar;
 begin
   Result := FOrigin + FTokenPositionsList[FRun];
 end;
