@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, TypInfo;
+  StdCtrls, TypInfo, ExtCtrls;
 
 type
   TCnTestPasForm = class(TForm)
@@ -15,12 +15,15 @@ type
     mmoParse: TMemo;
     Label1: TLabel;
     btnUses: TButton;
+    btnWideParse: TButton;
+    bvl1: TBevel;
     procedure btnLoadClick(Sender: TObject);
     procedure btnParseClick(Sender: TObject);
     procedure mmoCClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure mmoCChange(Sender: TObject);
     procedure btnUsesClick(Sender: TObject);
+    procedure btnWideParseClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -33,7 +36,7 @@ var
 implementation
 
 uses
-  CnPasCodeParser, mPasLex;
+  CnPasCodeParser, mPasLex, CnPasWideLex;
 
 {$R *.DFM}
 
@@ -123,6 +126,31 @@ begin
   finally
     List.Free;
   end;
+end;
+
+procedure TCnTestPasForm.btnWideParseClick(Sender: TObject);
+var
+  P: TCnPasWideLex;
+  S: WideString;
+  I: Integer;
+begin
+  ShowMessage('Will show Parsing Pascal using WideString under Non-Unicode Compiler.');
+
+  P := TCnPasWideLex.Create;
+  S := mmoC.Lines.Text;
+  P.Origin := PWideChar(S);
+
+  mmoParse.Clear;
+  I := 1;
+  while P.TokenID <> tkNull do
+  begin
+    mmoParse.Lines.Add(Format('%3.3d. Line: %d, Col %2.2d, Len %2.2d, Position %4.4d. %s, Token: %s',
+        [I, P.LineNumber, P.ColumnNumber, P.TokenLength, P.RunPos, GetEnumName(TypeInfo(TTokenKind),
+         Ord(P.TokenID)), P.Token]));
+    P.Next;
+    Inc(I);
+  end;
+  P.Free;
 end;
 
 end.

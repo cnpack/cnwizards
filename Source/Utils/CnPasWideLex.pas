@@ -98,12 +98,14 @@ unit CnPasWideLex;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：mwPasLex 的 Unicode 版本实现
 * 单元作者：刘啸(LiuXiao) liuxiao@cnpack.org
-* 备    注：此单元自 mwPasLex 移植而来并改为 Unicode 实现，保留原始版权声明
+* 备    注：此单元自 mwPasLex 移植而来并改为 Unicode/WideString 实现，保留原始版权声明
 * 开发平台：Windows 7 + Delphi XE
 * 兼容测试：PWin9X/2000/XP/7 + Delphi 2009 ~
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2015.04.05 V1.0
+* 修改记录：2015.04.25 V1.1
+*               增加 WideString 实现
+*           2015.04.05 V1.0
 *               移植单元，实现功能
 ================================================================================
 |</PRE>}
@@ -112,14 +114,20 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFNDEF UNICODE}
-  #Error: 'Unicode Compiler Only!'
-{$ENDIF}
-
 uses
   SysUtils, Classes, Controls, mPasLex;
 
 type
+{$IFDEF UNICODE}
+  PCnChar = PChar;
+  CnChar = Char;
+  CnIndexChar = Char;
+{$ELSE}
+  PCnChar = PWideChar;
+  CnChar = WideChar;
+  CnIndexChar = AnsiChar;
+{$ENDIF}
+
   TCnPasWideBookmark = class(TObject)
   private
     FRunBookmark: LongInt;
@@ -131,7 +139,7 @@ type
     FStringLenBookmark: Integer;
     FRoundCountBookmark: Integer;
     FLastNoSpaceBookmark: TTokenKind;
-    FToIdentBookmark: PChar;
+    FToIdentBookmark: PCnChar;
     FIsClassBookmark: Boolean;
     FTokenIDBookmark: TTokenKind;
     FTokenPosBookmark: Integer;
@@ -156,7 +164,7 @@ type
     property IsClassBookmark: Boolean read FIsClassBookmark write FIsClassBookmark;
     property StringLenBookmark: Integer read FStringLenBookmark write FStringLenBookmark;
     property TokenPosBookmark: Integer read FTokenPosBookmark write FTokenPosBookmark;
-    property ToIdentBookmark: PChar read FToIdentBookmark write FToIdentBookmark;
+    property ToIdentBookmark: PCnChar read FToIdentBookmark write FToIdentBookmark;
   end;
 
   TCnPasWideLex = class(TObject)
@@ -177,13 +185,13 @@ type
     FIsClass: Boolean;
     FStringLen: Integer;
     FTokenPos: Integer;
-    FToIdent: PChar;
+    FToIdent: PCnChar;
 
-    FOrigin: PChar;
+    FOrigin: PCnChar;
     FProcTable: array[#0..#255] of procedure of object;
     FIdentFuncTable: array[0..191] of function: TTokenKind of object;
 
-    function KeyHash(ToHash: PChar): Integer;
+    function KeyHash(ToHash: PCnChar): Integer;
     function KeyComp(const aKey: AnsiString): Boolean;
     function Func15: TTokenKind;
     function Func19: TTokenKind;
@@ -256,8 +264,8 @@ type
     function Func191: TTokenKind;
     function AltFunc: TTokenKind;
     procedure InitIdent;
-    function IdentKind(MayBe: PChar): TTokenKind;
-    procedure SetOrigin(NewValue: PChar);
+    function IdentKind(MayBe: PCnChar): TTokenKind;
+    procedure SetOrigin(NewValue: PCnChar);
     procedure SetRunPos(Value: Integer);
     procedure MakeMethodTables;
     procedure AddressOpProc;
@@ -293,15 +301,15 @@ type
     procedure SymbolProc;
     procedure UnknownProc;
     function GetToken: string;
-    function InSymbols(aChar: Char): Boolean;
-    function GetTokenAddr: PChar;
+    function InSymbols(aChar: CnChar): Boolean;
+    function GetTokenAddr: PCnChar;
     function GetTokenLength: Integer;
   protected
     procedure StepRun(Count: Integer = 1; CalcColumn: Boolean = False);
   public
     constructor Create;
     destructor Destroy; override;
-    function CharAhead(Count: Integer): Char;
+    function CharAhead(Count: Integer): CnChar;
     procedure Next;
     procedure NextID(ID: TTokenKind);
     procedure NextNoJunk;
@@ -322,7 +330,7 @@ type
     {* 当前直观列号，从 1 开始}
     property LineStartOffset: Integer read FLineStartOffset write FLineStartOffset;
     {* 当前行行首所在的线性位置，相对 FOrigin 的偏移量}
-    property Origin: PChar read FOrigin write SetOrigin;
+    property Origin: PCnChar read FOrigin write SetOrigin;
     property RunPos: Integer read FRun write SetRunPos;
     property TokenPos: Integer read FTokenPos;
     {* 当前 Token 所在的线性位置，减去 LineStartOffset 即是当前原始列位置
@@ -331,7 +339,7 @@ type
     {* 当前 Token 类型}
     property Token: string read GetToken;
     {* 当前 Token 的 Unicode 字符串}
-    property TokenAddr: PChar read GetTokenAddr;
+    property TokenAddr: PCnChar read GetTokenAddr;
     {* 当前 Token 的 Unicode 字符串地址}
     property TokenLength: Integer read GetTokenLength;
     {* 当前 Token 的 Unicode 字符长度}
@@ -339,12 +347,32 @@ type
 
 implementation
 
+type
+  TAnsiCharSet = set of AnsiChar;
+
 var
   Identifiers: array[#0..#255] of ByteBool;
   // 用来直接判断某开始字符是否 idenetifier，包括数字字母下划线
 
   mHashTable: array[#0..#255] of Integer;
   // 用来存储大小写比较的，大写字母和对应小写字母的位置存储的值相同
+
+function _WideCharInSet(C: CnChar; CharSet: TAnsiCharSet): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+begin
+  if Ord(C) <= $FF then
+    Result := AnsiChar(C) in CharSet
+  else
+    Result := False;
+end;
+
+function _IndexChar(C: CnChar): CnIndexChar; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+begin
+{$IFDEF UNICODE}
+  Result := C;
+{$ELSE}
+  Result := CnIndexChar(C);
+{$ENDIF}
+end;
 
 procedure MakeIdentTable;
 var
@@ -519,15 +547,15 @@ begin
     end;
 end;
 
-function TCnPasWideLex.KeyHash(ToHash: PChar): Integer;
+function TCnPasWideLex.KeyHash(ToHash: PCnChar): Integer;
 begin
   Result := 0;
-  while CharInSet(ToHash^, ['a'..'z', 'A'..'Z']) do
+  while _WideCharInSet(ToHash^, ['a'..'z', 'A'..'Z']) do
   begin
-    Inc(Result, mHashTable[ToHash^]);
+    Inc(Result, mHashTable[_IndexChar(ToHash^)]);
     Inc(ToHash);
   end;
-  if CharInSet(ToHash^, ['_', '0'..'9']) then
+  if _WideCharInSet(ToHash^, ['_', '0'..'9']) then
     Inc(ToHash);
   FStringLen := ToHash - FToIdent;
 end;  { KeyHash }
@@ -535,7 +563,7 @@ end;  { KeyHash }
 function TCnPasWideLex.KeyComp(const aKey: AnsiString): Boolean;
 var
   I: Integer;
-  P: PChar;
+  P: PCnChar;
 begin
   P := FToIdent;
   if Length(aKey) = FStringLen then
@@ -543,7 +571,7 @@ begin
     Result := True;
     for I := 1 to FStringLen do
     begin
-      if mHashTable[P^] <> mHashTable[aKey[I]] then
+      if mHashTable[_IndexChar(P^)] <> mHashTable[aKey[I]] then
       begin
         Result := False;
         Break;
@@ -777,7 +805,7 @@ begin
     if FLastNoSpace = tkEqual then
     begin
       FIsClass := True;
-      if Identifiers[CharAhead(FStringLen)] then
+      if Identifiers[_IndexChar(CharAhead(FStringLen))] then
         FIsClass := False;
     end
     else
@@ -1243,7 +1271,7 @@ begin
   Result := tkIdentifier
 end;
 
-function TCnPasWideLex.IdentKind(MayBe: PChar): TTokenKind;
+function TCnPasWideLex.IdentKind(MayBe: PCnChar): TTokenKind;
 var
   HashKey: Integer;
 begin
@@ -1341,7 +1369,7 @@ begin
   inherited Destroy;
 end;  { Destroy }
 
-procedure TCnPasWideLex.SetOrigin(NewValue: PChar);
+procedure TCnPasWideLex.SetOrigin(NewValue: PCnChar);
 begin
   FOrigin := NewValue;
   FComment := csNo;
@@ -1379,7 +1407,7 @@ procedure TCnPasWideLex.AsciiCharProc;
 begin
   FTokenID := tkAsciiChar;
   StepRun;
-  while CharInSet(FOrigin[FRun], ['0'..'9']) do
+  while _WideCharInSet(FOrigin[FRun], ['0'..'9']) do
     StepRun;
 end;
 
@@ -1526,20 +1554,20 @@ begin
   end;
 end;
 
-function TCnPasWideLex.InSymbols(aChar: Char): Boolean;
+function TCnPasWideLex.InSymbols(aChar: CnChar): Boolean;
 begin
-  if CharInSet(aChar, ['#', '$', '&', #39, '(', ')', '*', '+', ',', '?', '.', '/', ':', ';', '<', '=', '>', '@', '[', ']', '^']) then
+  if _WideCharInSet(aChar, ['#', '$', '&', #39, '(', ')', '*', '+', ',', '?', '.', '/', ':', ';', '<', '=', '>', '@', '[', ']', '^']) then
     Result := True
   else
     Result := False;
 end;
 
-function TCnPasWideLex.CharAhead(Count: Integer): Char;
+function TCnPasWideLex.CharAhead(Count: Integer): CnChar;
 var
-  P: PChar;
+  P: PCnChar;
 begin
   P := FOrigin + FRun + Count;
-  while CharInSet(P^, [#1..#9, #11, #12, #14..#32]) do
+  while _WideCharInSet(P^, [#1..#9, #11, #12, #14..#32]) do
     Inc(P);
   Result := P^;
 end;
@@ -1548,7 +1576,7 @@ procedure TCnPasWideLex.IdentProc;
 begin
   FTokenID := IdentKind((FOrigin + FRun));
   StepRun(FStringLen);
-  while Identifiers[FOrigin[FRun]] do
+  while Identifiers[_IndexChar(FOrigin[FRun])] do
     StepRun;
 end;
 
@@ -1556,7 +1584,7 @@ procedure TCnPasWideLex.IntegerProc;
 begin
   StepRun;
   FTokenID := tkInteger;
-  while CharInSet(FOrigin[FRun], ['0'..'9', 'A'..'F', 'a'..'f']) do
+  while _WideCharInSet(FOrigin[FRun], ['0'..'9', 'A'..'F', 'a'..'f']) do
     StepRun;
 end;
 
@@ -1645,7 +1673,7 @@ procedure TCnPasWideLex.NumberProc;
 begin
   StepRun;
   FTokenID := tkNumber;
-  while CharInSet(FOrigin[FRun], ['0'..'9', '.', 'e', 'E']) do
+  while _WideCharInSet(FOrigin[FRun], ['0'..'9', '.', 'e', 'E']) do
   begin
     case FOrigin[FRun] of
       '.':
@@ -1847,7 +1875,7 @@ procedure TCnPasWideLex.SpaceProc;
 begin
   StepRun;
   FTokenID := tkSpace;
-  while CharInSet(FOrigin[FRun], [#1..#9, #11, #12, #14..#32]) do
+  while _WideCharInSet(FOrigin[FRun], [#1..#9, #11, #12, #14..#32]) do
     StepRun;
 end;
 
@@ -1942,7 +1970,7 @@ begin
 
   case FComment of
     csNo:
-      FProcTable[FOrigin[FRun]];
+      FProcTable[_IndexChar(FOrigin[FRun])];
   else
     case FComment of
       csBor:
@@ -1997,7 +2025,7 @@ begin
   until(FTokenID = tkClass) and (IsClass);
 end;
 
-function TCnPasWideLex.GetTokenAddr: PChar;
+function TCnPasWideLex.GetTokenAddr: PCnChar;
 begin
   Result := FOrigin + FTokenPos;
 end;

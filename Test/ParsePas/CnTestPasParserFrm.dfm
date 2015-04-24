@@ -15,10 +15,17 @@ object CnTestPasForm: TCnTestPasForm
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
-    Left = 208
+    Left = 136
     Top = 24
     Width = 3
     Height = 13
+  end
+  object bvl1: TBevel
+    Left = 424
+    Top = 16
+    Width = 17
+    Height = 25
+    Shape = bsLeftLine
   end
   object btnLoad: TButton
     Left = 16
@@ -46,16 +53,16 @@ object CnTestPasForm: TCnTestPasForm
       '  end;')
     ParentFont = False
     ScrollBars = ssVertical
-    TabOrder = 3
+    TabOrder = 4
     OnChange = mmoCChange
     OnClick = mmoCClick
   end
   object btnParse: TButton
-    Left = 568
+    Left = 336
     Top = 16
     Width = 75
     Height = 25
-    Caption = 'Parse'
+    Caption = 'Ansi Parse'
     TabOrder = 2
     OnClick = btnParseClick
   end
@@ -64,16 +71,25 @@ object CnTestPasForm: TCnTestPasForm
     Top = 272
     Width = 625
     Height = 225
-    TabOrder = 4
+    TabOrder = 5
   end
   object btnUses: TButton
-    Left = 312
+    Left = 248
     Top = 16
     Width = 75
     Height = 25
     Caption = 'Get Uses'
     TabOrder = 1
     OnClick = btnUsesClick
+  end
+  object btnWideParse: TButton
+    Left = 432
+    Top = 16
+    Width = 97
+    Height = 25
+    Caption = 'Wide Parse Lex'
+    TabOrder = 3
+    OnClick = btnWideParseClick
   end
   object dlgOpen1: TOpenDialog
     Filter = 'Pascal Files(*.pas)|*.pas'
