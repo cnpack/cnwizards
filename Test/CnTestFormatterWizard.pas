@@ -133,6 +133,7 @@ var
   View: IOTAEditView;
   Block: IOTAEditBlock;
   StartPos, EndPos, StartPosIn, EndPosIn: Integer;
+  StartRec, EndRec: TOTACharPos;
   Writer: IOTAEditWriter;
   Len: Integer;
 begin
@@ -237,23 +238,15 @@ begin
       Block := View.Block;
       if (Block <> nil) and Block.IsValid then
       begin
-        StartPos := CnOtaEditPosToLinePos(OTAEditPos(1, Block.StartingRow), View);
-        // 光标不在行首时，处理到下一行行首
-        if Block.EndingColumn > 1 then
-        begin
-          if  Block.EndingRow < View.Buffer.GetLinesInBuffer then
-          begin
-            EndPos := CnOtaEditPosToLinePos(OTAEditPos(1, Block.EndingRow + 1), View);
-          end
-          else
-            EndPos := CnOtaEditPosToLinePos(OTAEditPos(255, Block.EndingRow), View);
-        end
-        else
-          EndPos := CnOtaEditPosToLinePos(OTAEditPos(1, Block.EndingRow), View);
+        // 选择块起止位置延伸到行模式
+        if not CnOtaGetBlockOffsetForLineMode(StartRec, EndRec, View) then
+          Exit;
+        StartPos := CnOtaEditPosToLinePos(OTAEditPos(StartRec.CharIndex, StartRec.Line), View);
+        EndPos := CnOtaEditPosToLinePos(OTAEditPos(EndRec.CharIndex, EndRec.Line), View);
 
         // 此时 StartPos 和 EndPos 标记了当前选择区内要处理的文本
 {$IFDEF UNICODE}
-        // Src/Res Utf16，LinePos 是 Utf8 的偏移量，需要转换
+        // Src/Res Utf16，俩 LinearPos 是 Utf8 的偏移量，需要转换
         StartPosIn := Length(UTF8Decode(Copy(Utf8Encode(Src), 1, StartPos + 1))) - 1;
         EndPosIn := Length(UTF8Decode(Copy(Utf8Encode(Src), 1, EndPos + 1))) - 1;
 

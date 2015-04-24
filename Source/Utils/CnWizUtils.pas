@@ -528,8 +528,13 @@ function CnOtaIsEditPosOutOfLine(EditPos: TOTAEditPos; View: IOTAEditView = nil)
 
 procedure CnOtaSelectBlock(const Editor: IOTASourceEditor; const Start, After: TOTACharPos);
 {* 选择一个代码块}
+function CnOtaMoveAndSelectBlock(const Start, After: TOTACharPos; View: IOTAEditView = nil): Boolean;
+{* 用 Block 的方式设置代码块选区，返回是否成功}
 function CnOtaCurrBlockEmpty: Boolean;
-{* 返回当前选择的块是否为空 }
+{* 返回当前选择的块是否为空}
+function CnOtaGetBlockOffsetForLineMode(var StartPos: TOTACharPos; var EndPos: TOTACharPos;
+  View: IOTAEditView = nil): Boolean;
+{* 返回当前选择的块扩展成行模式后的起始位置，不实际扩展选择区}
 function CnOtaOpenFile(const FileName: string): Boolean;
 {* 打开文件}
 function CnOtaOpenUnSaveForm(const FormName: string): Boolean;
@@ -3464,18 +3469,6 @@ var
   StartPos, EndPos: TOTACharPos;
   LinearPos: Integer;
   InsertLen: Integer;
-
-  procedure MoveAndSelect;
-  begin
-    EditView.Position.Move(StartPos.Line, StartPos.CharIndex);
-    EditBlock := EditView.Block;
-    EditBlock.Reset;
-    EditBlock.Style := btNonInclusive;
-    EditBlock.BeginBlock;
-    EditView.Position.Move(EndPos.Line, EndPos.CharIndex);
-    EditBlock.EndBlock;
-  end;
-
 begin
   Result := False;
   EditView := CnOtaGetTopMostEditView;
@@ -3498,23 +3491,11 @@ begin
   begin
     if LineMode then
     begin
-      // 把块延伸到行头尾，暂时不用下一行尾
-      StartPos.Line := EditBlock.StartingRow;
-      StartPos.CharIndex := 1;
-      EndPos.Line := EditBlock.EndingRow;
-      EndPos.CharIndex := EditBlock.EndingColumn;
-      if EndPos.CharIndex > 1 then
-      begin
-        if EndPos.Line < EditView.Buffer.GetLinesInBuffer then
-        begin
-          Inc(EndPos.Line);
-          EndPos.CharIndex := 1;
-        end
-        else
-          EndPos.CharIndex := 1024; // 用个大数代替行尾
-      end;
+      // 把块延伸到行头尾
+      if not CnOtaGetBlockOffsetForLineMode(StartPos, EndPos, EditView) then
+        Exit;
 
-      MoveAndSelect;
+      CnOtaMoveAndSelectBlock(StartPos, EndPos, EditView);
 {$IFDEF DEBUG}
 //    CnDebugger.LogFmt('CnOtaReplaceCurrentSelection Line Selection %s', [EditBlock.Text]);
 {$ENDIF}
@@ -3547,7 +3528,7 @@ begin
 {$ENDIF}
 
     // 选中插入的内容，从 StartPos 到 EndPos 加线性位置
-    MoveAndSelect;
+    CnOtaMoveAndSelectBlock(StartPos, EndPos, EditView);
   end;
   Result := True;
 end;
@@ -3562,18 +3543,6 @@ var
   StartPos, EndPos: TOTACharPos;
   LinearPos: Integer;
   InsertLen: Integer;
-
-  procedure MoveAndSelect;
-  begin
-    EditView.Position.Move(StartPos.Line, StartPos.CharIndex);
-    EditBlock := EditView.Block;
-    EditBlock.Reset;
-    EditBlock.Style := btNonInclusive;
-    EditBlock.BeginBlock;
-    EditView.Position.Move(EndPos.Line, EndPos.CharIndex);
-    EditBlock.EndBlock;
-  end;
-
 begin
   Result := False;
   EditView := CnOtaGetTopMostEditView;
@@ -3596,23 +3565,11 @@ begin
   begin
     if LineMode then
     begin
-      // 把块延伸到行头尾，非行头时延伸到下一行尾
-      StartPos.Line := EditBlock.StartingRow;
-      StartPos.CharIndex := 1;
-      EndPos.Line := EditBlock.EndingRow;
-      EndPos.CharIndex := EditBlock.EndingColumn;
-      if EndPos.CharIndex > 1 then
-      begin
-        if EndPos.Line < EditView.Buffer.GetLinesInBuffer then
-        begin
-          Inc(EndPos.Line);
-          EndPos.CharIndex := 1;
-        end
-        else
-          EndPos.CharIndex := 1024; // 用个大数代替行尾
-      end;
+      // 把块延伸到行头尾
+      if not CnOtaGetBlockOffsetForLineMode(StartPos, EndPos, EditView) then
+        Exit;
 
-      MoveAndSelect;
+      CnOtaMoveAndSelectBlock(StartPos, EndPos, EditView);
 {$IFDEF DEBUG}
 //    CnDebugger.LogFmt('CnOtaReplaceCurrentSelection Line Selection %s', [EditBlock.Text]);
 {$ENDIF}
@@ -3640,7 +3597,7 @@ begin
 {$ENDIF}
 
     // 选中插入的内容，从 StartPos 到 EndPos 加线性位置
-    MoveAndSelect;
+    CnOtaMoveAndSelectBlock(StartPos, EndPos, EditView);
   end;
   Result := True;
 end;
@@ -4084,6 +4041,30 @@ begin
   end;
 end;
 
+// 用 Block 的方式设置代码块选区，返回是否成功
+function CnOtaMoveAndSelectBlock(const Start, After: TOTACharPos; View: IOTAEditView): Boolean;
+var
+  Block: IOTAEditBlock;
+begin
+  Result := False;
+  if View = nil then
+    View := CnOtaGetTopMostEditView;
+  if View = nil then
+    Exit;
+
+  View.Position.Move(Start.Line, Start.CharIndex);
+  Block := View.Block;
+  if Block = nil then
+    Exit;
+
+  Block.Reset;
+  Block.Style := btNonInclusive;
+  Block.BeginBlock;
+  View.Position.Move(After.Line, After.CharIndex);
+  Block.EndBlock;
+  Result := True;
+end;
+
 // 返回当前选择的块是否为空
 function CnOtaCurrBlockEmpty: Boolean;
 var
@@ -4093,6 +4074,35 @@ begin
   View := CnOtaGetTopMostEditView;
   if Assigned(View) and View.Block.IsValid then
     Result := False;
+end;
+
+// 返回当前选择的块扩展成行模式后的起始位置，不实际扩展选择区
+function CnOtaGetBlockOffsetForLineMode(var StartPos: TOTACharPos; var EndPos: TOTACharPos;
+  View: IOTAEditView = nil): Boolean;
+var
+  Block: IOTAEditBlock;
+begin
+  Result := False;
+  if View = nil then
+    View := CnOtaGetTopMostEditView;
+  if Assigned(View) and View.Block.IsValid then
+  begin
+    Block := View.Block;
+    StartPos.Line := Block.StartingRow;
+    StartPos.CharIndex := 1;
+    EndPos.Line := Block.EndingRow;
+    EndPos.CharIndex := Block.EndingColumn;
+    if EndPos.CharIndex > 1 then
+    begin
+      if EndPos.Line < View.Buffer.GetLinesInBuffer then
+      begin
+        Inc(EndPos.Line);
+        EndPos.CharIndex := 1;
+      end
+      else
+        EndPos.CharIndex := 1024; // 用个大数代替行尾
+    end;
+  end;
 end;
 
 // 打开文件
