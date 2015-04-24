@@ -348,7 +348,8 @@ procedure TCnCodeGenerator.Write(S: string; BeforeSpaceCount,
   AfterSpaceCount: Word);
 var
   Str, WrapStr, Tmp: string;
-  Len: Integer;
+  ALen, Len: Integer;
+  IsCRLFEnd: Boolean;
 
   function ExceedLineWrap(Width: Integer): Boolean;
   begin
@@ -366,16 +367,21 @@ begin
   Str := Format('%s%s%s', [StringOfChar(' ', BeforeSpaceCount), S,
     StringOfChar(' ', AfterSpaceCount)]);
 
+  IsCRLFEnd := False;
+  ALen := Length(Str);
+  if ALen > 2 then
+    IsCRLFEnd := (Str[ALen - 1] = #13) and (Str[ALen] = #10);
+
 {$IFDEF UNICODE}
-  Len := Length(AnsiString(Str)); // Unicode 模式下，转成 Ansi 长度才符合一般规则
+  Len := Length(AnsiString(TrimRight(Str))); // Unicode 模式下，转成 Ansi 长度才符合一般规则
 {$ELSE}
-  Len := Length(Str); // Ansi 模式下，长度直接符合一般规则
+  Len := Length(TrimRight(Str)); // Ansi 模式下，长度直接符合一般规则
 {$ENDIF}
 
   FPrevRow := FCode.Count - 1;
-  if FCodeWrapMode = cwmNone then
+  if (FCodeWrapMode = cwmNone) or IsCRLFEnd then
   begin
-    // 不自动换行时无需处理
+    // 不自动换行时，或者本次写入内容尾部本来就是换行时，无需处理
   end
   else if FCodeWrapMode = cwmSimple then // 简单换行，判断是否超出宽度
   begin

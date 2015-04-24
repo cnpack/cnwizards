@@ -225,6 +225,8 @@ object MainForm: TMainForm
           Width = 70
           Height = 20
           Caption = '×Ô¶¯»»ÐÐ'
+          Checked = True
+          State = cbChecked
           TabOrder = 4
         end
         object chkSliceMode: TCheckBox

@@ -150,7 +150,7 @@ begin
   CnPascalCodeForRule.KeywordStyle := TKeywordStyle(ComboBox1.ItemIndex);
 
   if chkAutoWrap.Checked then
-    CnPascalCodeForRule.CodeWrapMode := cwmSimple
+    CnPascalCodeForRule.CodeWrapMode := cwmAdvanced
   else
     CnPascalCodeForRule.CodeWrapMode := cwmNone;
 
