@@ -439,15 +439,9 @@ begin
         Fmt.SliceMode := True;
 
         Fmt.FormatCode;
-        if (Fmt.MatchedOutStartRow > 0) and (Fmt.MatchedOutStartCol > 0)
-          and (Fmt.MatchedOutEndRow > 0) and (Fmt.MatchedOutEndCol > 0) then
-        begin
-          // ÓÐÆ¥Åä½á¹û
-          S := Fmt.CodeGen.CopyPartOut(Fmt.MatchedOutStartRow, Fmt.MatchedOutStartCol,
-            Fmt.MatchedOutEndRow, Fmt.MatchedOutEndCol);
-          ShowMessage(S);
-          DesMemo.Lines.Add(S);
-        end;
+        S := Fmt.CopyMatchedSliceResult;
+        ShowMessage(S);
+        DesMemo.Lines.Add(S);
       finally
         Fmt.Free;
         M.Free;

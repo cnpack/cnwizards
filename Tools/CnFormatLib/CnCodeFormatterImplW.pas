@@ -67,7 +67,8 @@ type
     procedure SetPascalFormatRule(DirectiveMode: DWORD; KeywordStyle: DWORD;
       BeginStyle: DWORD; WrapMode: DWORD; TabSpace: DWORD; SpaceBeforeOperator: DWORD;
       SpaceAfterOperator: DWORD; SpaceBeforeAsm: DWORD; SpaceTabAsm: DWORD;
-      LineWrapWidth: DWORD; UsesSingleLine: LongBool; UseIgnoreArea: LongBool);
+      LineWrapWidth: DWORD; NewLineWrapWidth: DWORD; UsesSingleLine: LongBool;
+      UseIgnoreArea: LongBool);
 
     function FormatOnePascalUnit(Input: PAnsiChar; Len: DWORD): PAnsiChar;
     function FormatOnePascalUnitUtf8(Input: PAnsiChar; Len: DWORD): PAnsiChar;
@@ -280,7 +281,7 @@ end;
 
 procedure TCnCodeFormatProvider.SetPascalFormatRule(DirectiveMode, KeywordStyle,
   BeginStyle, WrapMode, TabSpace, SpaceBeforeOperator, SpaceAfterOperator, SpaceBeforeAsm,
-  SpaceTabAsm, LineWrapWidth: DWORD; UsesSingleLine, UseIgnoreArea: LongBool);
+  SpaceTabAsm, LineWrapWidth, NewLineWrapWidth: DWORD; UsesSingleLine, UseIgnoreArea: LongBool);
 begin
   case DirectiveMode of
     CN_RULE_DIRECTIVE_MODE_ASCOMMENT:
@@ -320,6 +321,7 @@ begin
   CnPascalCodeForRule.SpaceBeforeASM := SpaceBeforeAsm;
   CnPascalCodeForRule.SpaceTabASMKeyword := SpaceTabAsm;
   CnPascalCodeForRule.WrapWidth := LineWrapWidth;
+  CnPascalCodeForRule.WrapNewLineWidth := NewLineWrapWidth;
   CnPascalCodeForRule.UsesUnitSingleLine := UsesSingleLine;
   CnPascalCodeForRule.UseIgnoreArea := UseIgnoreArea;
 end;

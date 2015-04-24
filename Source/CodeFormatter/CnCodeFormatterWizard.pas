@@ -67,6 +67,7 @@ type
     FBeginStyle: TBeginStyle;
     FKeywordStyle: TKeywordStyle;
     FWrapMode: TCodeWrapMode;
+    FWrapNewLineWidth: Integer;
 
     function PutPascalFormatRules: Boolean;
     function GetErrorStr(Err: Integer): string;
@@ -97,6 +98,7 @@ type
     property SpaceBeforeASM: Byte read FSpaceBeforeASM write FSpaceBeforeASM;
     property SpaceTabASMKeyword: Byte read FSpaceTabASMKeyword write FSpaceTabASMKeyword;
     property WrapWidth: Integer read FWrapWidth write FWrapWidth;
+    property WrapNewLineWidth: Integer read FWrapNewLineWidth write FWrapNewLineWidth;
     property UsesUnitSingleLine: Boolean read FUsesUnitSingleLine write FUsesUnitSingleLine;
     property UseIgnoreArea: Boolean read FUseIgnoreArea write FUseIgnoreArea;
   end;
@@ -128,6 +130,8 @@ type
     btnHelp: TButton;
     chkAutoWrap: TCheckBox;
     btnShortCut: TButton;
+    lblNewLine: TLabel;
+    seNewLine: TCnSpinEdit;
     procedure chkAutoWrapClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure btnShortCutClick(Sender: TObject);
@@ -171,10 +175,11 @@ const
   csTabSpaceCount = 'TabSpaceCount';
   csSpaceTabASMKeyword = 'SpaceTabASMKeyword';
   csWrapWidth = 'WrapWidth';
+  csWrapNewLineWidth = 'WrapNewLineWidth';
   csWrapMode = 'WrapMode';
   csBeginStyle = 'BeginStyle';
   csKeywordStyle = 'KeywordStyle';
-  
+
 { TCnCodeFormatterWizard }
 
 procedure TCnCodeFormatterWizard.AcquireSubActions;
@@ -183,7 +188,7 @@ begin
     SCnCodeFormatterWizardFormatCurrentCaption, TextToShortCut('Ctrl+W'),
     SCnCodeFormatterWizardFormatCurrentHint);
   // Other Menus
-  
+
   AddSepMenu;
   FIdOptions := RegisterASubAction(SCnCodeFormatterWizardConfig,
     SCnCodeFormatterWizardConfigCaption, 0, SCnCodeFormatterWizardConfigHint);
@@ -198,8 +203,9 @@ begin
     cbbKeywordStyle.ItemIndex := Ord(FKeywordStyle);
     cbbBeginStyle.ItemIndex := Ord(FBeginStyle);
     seTab.Value := FTabSpaceCount;
-    chkAutoWrap.Checked := (FWrapMode = cwmSimple);
+    chkAutoWrap.Checked := (FWrapMode <> cwmNone);
     seWrapLine.Value := FWrapWidth;
+    seNewLine.Value := FWrapNewLineWidth;
     seSpaceBefore.Value := FSpaceBeforeOperator;
     seSpaceAfter.Value := FSpaceAfterOperator;
     chkUsesSinglieLine.Checked := FUsesUnitSingleLine;
@@ -214,8 +220,9 @@ begin
       FBeginStyle := TBeginStyle(cbbBeginStyle.ItemIndex);
       FTabSpaceCount := seTab.Value;
       FWrapWidth := seWrapLine.Value;
+      FWrapNewLineWidth := seNewLine.Value;
       if chkAutoWrap.Checked then
-        FWrapMode := cwmSimple
+        FWrapMode := cwmAdvanced
       else
         FWrapMode := cwmNone;
 
@@ -350,6 +357,7 @@ begin
   FTabSpaceCount := Ini.ReadInteger('', csTabSpaceCount, CnPascalCodeForVCLRule.TabSpaceCount);
   FSpaceTabASMKeyword := Ini.ReadInteger('', csSpaceTabASMKeyword, CnPascalCodeForVCLRule.SpaceTabASMKeyword);
   FWrapWidth := Ini.ReadInteger('', csWrapWidth, CnPascalCodeForVCLRule.WrapWidth);
+  FWrapNewLineWidth := Ini.ReadInteger('', csWrapNewLineWidth, CnPascalCodeForVCLRule.WrapNewLineWidth);
   FWrapMode := TCodeWrapMode(Ini.ReadInteger('', csWrapMode, Ord(CnPascalCodeForVCLRule.CodeWrapMode)));
   FBeginStyle := TBeginStyle(Ini.ReadInteger('', csBeginStyle, Ord(CnPascalCodeForVCLRule.BeginStyle)));
   FKeywordStyle := TKeywordStyle(Ini.ReadInteger('', csKeywordStyle, Ord(CnPascalCodeForVCLRule.KeywordStyle)));
@@ -367,6 +375,7 @@ var
   ASpaceBeforeAsm: DWORD;
   ASpaceTabAsm: DWORD;
   ALineWrapWidth: DWORD;
+  ANewLineWrapWidth: DWORD;
   AWrapMode: DWORD;
   AUsesSingleLine: LongBool;
   AUseIgnoreArea: LongBool;
@@ -406,10 +415,12 @@ begin
   ASpaceBeforeAsm := FSpaceBeforeASM;
   ASpaceTabAsm := FSpaceTabASMKeyword;
   ALineWrapWidth := FWrapWidth;
+  ANewLineWrapWidth := FWrapNewLineWidth;
 
   case FWrapMode of
     cwmNone: AWrapMode := CN_RULE_CODE_WRAP_MODE_NONE;
     cwmSimple: AWrapMode := CN_RULE_CODE_WRAP_MODE_SIMPLE;
+    cwmAdvanced: AWrapMode := CN_RULE_CODE_WRAP_MODE_ADVANCED;
   end;
 
   AUsesSingleLine := LongBool(FUsesUnitSingleLine);
@@ -417,7 +428,7 @@ begin
 
   Intf.SetPascalFormatRule(ADirectiveMode, AKeywordStyle, ABeginStyle, AWrapMode,
     ATabSpace, ASpaceBeforeOperator, ASpaceAfterOperator, ASpaceBeforeAsm,
-    ASpaceTabAsm, ALineWrapWidth, AUsesSingleLine, AUseIgnoreArea);
+    ASpaceTabAsm, ALineWrapWidth, ANewLineWrapWidth, AUsesSingleLine, AUseIgnoreArea);
   Result := True;
 end;
 
@@ -431,6 +442,7 @@ begin
   Ini.WriteInteger('', csTabSpaceCount, FTabSpaceCount);
   Ini.WriteInteger('', csSpaceTabASMKeyword, FSpaceTabASMKeyword);
   Ini.WriteInteger('', csWrapWidth, FWrapWidth);
+  Ini.WriteInteger('', csWrapNewLineWidth, FWrapNewLineWidth);
   Ini.WriteInteger('', csWrapMode, Ord(FWrapMode));
   Ini.WriteInteger('', csBeginStyle, Ord(FBeginStyle));
   Ini.WriteInteger('', csKeywordStyle, Ord(FKeywordStyle));

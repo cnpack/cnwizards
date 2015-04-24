@@ -4,7 +4,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
   BorderStyle = bsDialog
   Caption = 'Code Formatter Settings'
   ClientHeight = 458
-  ClientWidth = 377
+  ClientWidth = 451
   Font.Charset = ANSI_CHARSET
   OldCreateOrder = True
   OnShow = FormShow
@@ -13,7 +13,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
   object pgcFormatter: TPageControl
     Left = 8
     Top = 8
-    Width = 361
+    Width = 433
     Height = 409
     ActivePage = tsPascal
     TabOrder = 0
@@ -22,7 +22,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
       object grpCommon: TGroupBox
         Left = 8
         Top = 8
-        Width = 337
+        Width = 409
         Height = 235
         Caption = 'Common Settings'
         TabOrder = 0
@@ -61,10 +61,17 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           Height = 13
           Caption = 'Space After Operator:'
         end
+        object lblNewLine: TLabel
+          Left = 232
+          Top = 176
+          Width = 68
+          Height = 13
+          Caption = 'when Exceed:'
+        end
         object cbbKeywordStyle: TComboBox
           Left = 136
           Top = 22
-          Width = 185
+          Width = 257
           Height = 21
           Style = csDropDownList
           ItemHeight = 13
@@ -78,7 +85,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         object cbbBeginStyle: TComboBox
           Left = 136
           Top = 52
-          Width = 185
+          Width = 257
           Height = 21
           Style = csDropDownList
           ItemHeight = 13
@@ -88,7 +95,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
             'This Line')
         end
         object seTab: TCnSpinEdit
-          Left = 224
+          Left = 296
           Top = 82
           Width = 97
           Height = 22
@@ -98,9 +105,9 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           Value = 1
         end
         object seWrapLine: TCnSpinEdit
-          Left = 224
+          Left = 144
           Top = 172
-          Width = 97
+          Width = 81
           Height = 22
           MaxValue = 256
           MinValue = 16
@@ -108,7 +115,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           Value = 16
         end
         object seSpaceBefore: TCnSpinEdit
-          Left = 224
+          Left = 296
           Top = 112
           Width = 97
           Height = 22
@@ -118,7 +125,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           Value = 1
         end
         object seSpaceAfter: TCnSpinEdit
-          Left = 224
+          Left = 296
           Top = 142
           Width = 97
           Height = 22
@@ -138,17 +145,27 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         object chkAutoWrap: TCheckBox
           Left = 16
           Top = 174
-          Width = 177
+          Width = 121
           Height = 17
-          Caption = 'Auto Wrap Line Width:'
+          Caption = 'Auto Wrap Line at:'
           TabOrder = 6
           OnClick = chkAutoWrapClick
+        end
+        object seNewLine: TCnSpinEdit
+          Left = 312
+          Top = 172
+          Width = 81
+          Height = 22
+          MaxValue = 256
+          MinValue = 16
+          TabOrder = 8
+          Value = 16
         end
       end
       object grpAsm: TGroupBox
         Left = 8
         Top = 256
-        Width = 337
+        Width = 409
         Height = 85
         Caption = 'ASM Settings'
         TabOrder = 1
@@ -167,7 +184,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           Caption = 'Tab Width:'
         end
         object seASMHeadIndent: TCnSpinEdit
-          Left = 224
+          Left = 296
           Top = 19
           Width = 97
           Height = 22
@@ -177,7 +194,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           Value = 1
         end
         object seAsmTab: TCnSpinEdit
-          Left = 224
+          Left = 296
           Top = 49
           Width = 97
           Height = 22
@@ -198,7 +215,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
     end
   end
   object btnOK: TButton
-    Left = 134
+    Left = 206
     Top = 427
     Width = 75
     Height = 21
@@ -208,7 +225,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
     TabOrder = 1
   end
   object btnCancel: TButton
-    Left = 214
+    Left = 286
     Top = 427
     Width = 75
     Height = 21
@@ -218,7 +235,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
     TabOrder = 2
   end
   object btnHelp: TButton
-    Left = 294
+    Left = 366
     Top = 427
     Width = 75
     Height = 21
