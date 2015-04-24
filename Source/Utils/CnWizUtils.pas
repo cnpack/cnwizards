@@ -3504,7 +3504,15 @@ begin
       EndPos.Line := EditBlock.EndingRow;
       EndPos.CharIndex := EditBlock.EndingColumn;
       if EndPos.CharIndex > 1 then
-        EndPos.CharIndex := 1024; // 用个大数代替行尾
+      begin
+        if EndPos.Line < EditView.Buffer.GetLinesInBuffer then
+        begin
+          Inc(EndPos.Line);
+          EndPos.CharIndex := 1;
+        end
+        else
+          EndPos.CharIndex := 1024; // 用个大数代替行尾
+      end;
 
       MoveAndSelect;
 {$IFDEF DEBUG}
@@ -3588,13 +3596,21 @@ begin
   begin
     if LineMode then
     begin
-      // 把块延伸到行头尾，暂时不用下一行尾
+      // 把块延伸到行头尾，非行头时延伸到下一行尾
       StartPos.Line := EditBlock.StartingRow;
       StartPos.CharIndex := 1;
       EndPos.Line := EditBlock.EndingRow;
       EndPos.CharIndex := EditBlock.EndingColumn;
       if EndPos.CharIndex > 1 then
-        EndPos.CharIndex := 1024; // 用个大数代替行尾
+      begin
+        if EndPos.Line < EditView.Buffer.GetLinesInBuffer then
+        begin
+          Inc(EndPos.Line);
+          EndPos.CharIndex := 1;
+        end
+        else
+          EndPos.CharIndex := 1024; // 用个大数代替行尾
+      end;
 
       MoveAndSelect;
 {$IFDEF DEBUG}

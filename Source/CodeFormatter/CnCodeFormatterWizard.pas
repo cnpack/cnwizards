@@ -451,6 +451,7 @@ end;
 procedure TCnCodeFormatterWizard.SubActionExecute(Index: Integer);
 var
   Formatter: ICnPascalFormatterIntf;
+  View: IOTAEditView;
   Src: string;
   Res: PChar;
   ErrCode, SourceLine, SourceCol, SourcePos: Integer;
@@ -463,7 +464,13 @@ begin
     PutPascalFormatRules;
 
     Formatter := FGetProvider();
-    if Formatter <> nil then
+    if Formatter = nil then
+      Exit;
+    View := CnOtaGetTopMostEditView;
+    if not Assigned(View) then
+      Exit;
+
+    if (View.Block = nil) or not View.Block.IsValid then // 无选择区
     begin
       try
 {$IFDEF UNICODE}
@@ -472,7 +479,7 @@ begin
         Res := Formatter.FormatOnePascalUnitW(PChar(Src), Length(Src));
 
         // Remove FF FE BOM if exists
-        if (Length(Res) > 1) and (Res[0] = #$FEFF) then
+        if (StrLen(Res) > 1) and (Res[0] = #$FEFF) then
           Inc(Res);
         // CnDebugger.LogMemDump(PChar(Res), Length(Res) * SizeOf(Char));
 {$ELSE}
@@ -482,7 +489,7 @@ begin
         Res := Formatter.FormatOnePascalUnitUtf8(PAnsiChar(Src), Length(Src));
 
         // Remove EF BB BF BOM if exist
-        if (Length(Res) > 3) and
+        if (StrLen(Res) > 3) and
           (Res[0] = #$EF) and (Res[1] = #$BB) and (Res[2] = #$BF) then
           Inc(Res, 3);
         // CnDebugger.LogMemDump(PAnsiChar(Res), Length(Res));
@@ -522,6 +529,11 @@ begin
       finally
         Formatter := nil;
       end;
+    end
+    else // 有选择区
+    begin
+
+
     end;
   end;
 end;

@@ -134,6 +134,7 @@ var
   Block: IOTAEditBlock;
   StartPos, EndPos, StartPosIn, EndPosIn: Integer;
   Writer: IOTAEditWriter;
+  Len: Integer;
 begin
   if FHandle = 0 then
     FHandle := LoadLibrary(PChar(ModulePath + DLLName));
@@ -172,7 +173,7 @@ begin
     Res := Formatter.FormatOnePascalUnitW(PChar(Src), Length(Src));
 
     // Remove FF FE BOM if exists
-    if (Length(Res) > 1) and (Res[0] = #$FEFF) then
+    if (StrLen(Res) > 1) and (Res[0] = #$FEFF) then
       Inc(Res);
 {$ELSE}
   {$IFDEF IDE_STRING_ANSI_UTF8}
@@ -181,7 +182,7 @@ begin
     Res := Formatter.FormatOnePascalUnitUtf8(PAnsiChar(Src), Length(Src));
 
     // Remove EF BB BF BOM if exist
-    if (Length(Res) > 3) and
+    if (StrLen(Res) > 3) and
       (Res[0] = #$EF) and (Res[1] = #$BB) and (Res[2] = #$BF) then
       Inc(Res, 3);
   {$ELSE}
@@ -260,7 +261,7 @@ begin
         Res := Formatter.FormatPascalBlockW(PChar(Src), Length(Src), StartPosIn, EndPosIn);
 
         // Remove FF FE BOM if exists
-        if (Length(Res) > 1) and (Res[0] = #$FEFF) then
+        if (StrLen(Res) > 1) and (Res[0] = #$FEFF) then
           Inc(Res);
 {$ELSE}
   {$IFDEF IDE_STRING_ANSI_UTF8}
@@ -271,7 +272,7 @@ begin
         Res := Formatter.FormatPascalBlockUtf8(PAnsiChar(Src), Length(Src), StartPosIn, EndPosIn);
 
         // Remove EF BB BF BOM if exist
-        if (Length(Res) > 3) and
+        if (StrLen(Res) > 3) and
           (Res[0] = #$EF) and (Res[1] = #$BB) and (Res[2] = #$BF) then
           Inc(Res, 3);
   {$ELSE}
@@ -287,6 +288,10 @@ begin
         if Res <> nil then
         begin
           ShowMessage(Res);
+//          Len := StrLen(Res);
+//          if (Len > 2) and (Res[Len - 2] = #13) and (Res[Len - 1] = #10) then
+//            Res[Len - 2] := #0;  // 去除尾部的多余的换行
+
           {$IFDEF IDE_STRING_ANSI_UTF8}
           CnOtaReplaceCurrentSelectionUtf8(Res, True, True, True);
           {$ELSE}
