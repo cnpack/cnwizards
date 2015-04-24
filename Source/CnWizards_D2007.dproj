@@ -46,10 +46,10 @@
     <DCC_DcuOutput>..\Dcu</DCC_DcuOutput>
     <DCC_ObjOutput>..\Dcu</DCC_ObjOutput>
     <DCC_HppOutput>..\Dcu</DCC_HppOutput>
-    <DCC_UnitSearchPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;ThirdParty\FastCode;Utils;ScriptWizard</DCC_UnitSearchPath>
-    <DCC_ResourcePath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;ThirdParty\FastCode;Utils;ScriptWizard</DCC_ResourcePath>
-    <DCC_ObjPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;ThirdParty\FastCode;Utils;ScriptWizard</DCC_ObjPath>
-    <DCC_IncludePath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;ThirdParty\FastCode;Utils;ScriptWizard</DCC_IncludePath>
+    <DCC_UnitSearchPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;ThirdParty\FastCode;Utils;CodeFormatter;ScriptWizard</DCC_UnitSearchPath>
+    <DCC_ResourcePath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;ThirdParty\FastCode;Utils;CodeFormatter;ScriptWizard</DCC_ResourcePath>
+    <DCC_ObjPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;ThirdParty\FastCode;Utils;CodeFormatter;ScriptWizard</DCC_ObjPath>
+    <DCC_IncludePath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;ThirdParty\FastCode;Utils;CodeFormatter;ScriptWizard</DCC_IncludePath>
     <DCC_Define>DEBUG</DCC_Define>
     <DCC_SYMBOL_DEPRECATED>False</DCC_SYMBOL_DEPRECATED>
     <DCC_SYMBOL_LIBRARY>False</DCC_SYMBOL_LIBRARY>
@@ -450,6 +450,7 @@
     <DCCReference Include="Utils\CnImageProviderMgr.pas" />
     <DCCReference Include="Utils\CnImageProvider_FindIcons.pas" />
     <DCCReference Include="Utils\CnImageProvider_IconFinder.pas" />
+    <DCCReference Include="Utils\CnImageProvider_LocalCache.pas" />
     <DCCReference Include="Utils\CnLineParser.pas" />
     <DCCReference Include="Utils\CnPasCodeParser.pas" />
     <DCCReference Include="Utils\CnPasConvert.pas" />
