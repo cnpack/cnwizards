@@ -67,13 +67,9 @@ uses
 
 type
 {$IFDEF UNICODE}
-  PCnChar = PChar;
-  CnChar = Char;
   CnIndexChar = Char;
   CnString = string;
 {$ELSE}
-  PCnChar = PWideChar;
-  CnChar = WideChar;
   CnIndexChar = AnsiChar;
   CnString = WideString;
 {$ENDIF}
@@ -83,7 +79,7 @@ type
   TCnSearcher = class(Tobject)
   private
     FBCBTokenList: TCnBCBWideTokenList;
-    FSearchOrigin: PCnChar;
+    FSearchOrigin: PWideChar;
     Pat: CnString;
     FPos: Integer;
     HalfLen: Integer;
@@ -127,7 +123,7 @@ type
     FTokenPositionsList: TLongIntList;
     FTokenLineNumberList: TLongIntList;
     FTokenColNumberList: TLongIntList;
-    FOrigin: PCnChar;
+    FOrigin: PWideChar;
     FPCharSize: Longint;
     FPCharCapacity: Longint;
     FComment: TCommentState;
@@ -156,7 +152,7 @@ type
     function GetLineNumber: LongInt;
     function GetColumnNumber: LongInt;
     function GetRunToken: CnString;
-    function GetTokenAddr: PCnChar;
+    function GetTokenAddr: PWideChar;
     function GetTokenLength: Integer;
   protected
     function GetToken(Index: Integer): CnString;
@@ -166,7 +162,7 @@ type
     Searcher: TCnSearcher;
     constructor Create;
     destructor Destroy; override;
-    procedure SetOrigin(NewOrigin: PCnChar; NewSize: LongInt);
+    procedure SetOrigin(NewOrigin: PWideChar; NewSize: LongInt);
     {* 设置被解析的内容，NewSize 是字符长度}
     function Add(const Item: CnString): Integer;
     procedure Clear;
@@ -182,7 +178,7 @@ type
     property Count: Integer read GetCount write SetCount;
     property Token[Index: Integer]: CnString read GetToken write SetToken; default;
     property TokenPositionsList: TLongIntList read FTokenPositionsList;
-    property Origin: PCnChar read FOrigin;
+    property Origin: PWideChar read FOrigin;
     property PCharSize: Longint read FPCharSize;
     property PCharCapacity: Longint read FPCharCapacity;
     function GetSubString(StartPos, EndPos: LongInt): CnString;
@@ -223,7 +219,7 @@ type
     {* 当前 Token 所在的列，1 开始}
     property RunToken: CnString read GetRunToken;
     {* 当前 Token 的 Unicode 字符串}
-    property TokenAddr: PCnChar read GetTokenAddr;
+    property TokenAddr: PWideChar read GetTokenAddr;
     {* 当前 Token 的 Unicode 字符串地址}
     property TokenLength: Integer read GetTokenLength;
     {* 当前 Token 的 Unicode 字符长度}
@@ -234,7 +230,7 @@ implementation
 type
   TAnsiCharSet = set of AnsiChar;
 
-function _WideCharInSet(C: CnChar; CharSet: TAnsiCharSet): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+function _WideCharInSet(C: WideChar; CharSet: TAnsiCharSet): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
 begin
   if Ord(C) <= $FF then
     Result := AnsiChar(C) in CharSet
@@ -242,13 +238,13 @@ begin
     Result := False;
 end;
 
-function _AnsiStrIComp(S1, S2: PCnChar): Integer; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+function _AnsiStrIComp(S1, S2: PWideChar): Integer; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
 begin
   Result := CompareStringW(LOCALE_USER_DEFAULT, NORM_IGNORECASE, S1, -1,
     S2, -1) - 2;
 end;
 
-function _IndexChar(C: CnChar): CnIndexChar; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+function _IndexChar(C: WideChar): CnIndexChar; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
 begin
 {$IFDEF UNICODE}
   Result := C;
@@ -257,7 +253,7 @@ begin
 {$ENDIF}
 end;
 
-function _StrEWideCopy(Dest: PCnChar; const Source: PCnChar): PCnChar;
+function _StrEWideCopy(Dest: PWideChar; const Source: PWideChar): PWideChar;
 var
   Len: Integer;
 {$IFNDEF UNICODE}
@@ -270,7 +266,7 @@ begin
   S := Source;
   Len := Length(S);
 {$ENDIF}
-  Move(Source^, Dest^, (Len + 1) * SizeOf(CnChar));
+  Move(Source^, Dest^, (Len + 1) * SizeOf(WideChar));
   Result := Dest + Len;
 end;
 
@@ -409,7 +405,7 @@ begin
     begin
       RIndex := FBCBTokenList.PositionToIndex(RPos);
       if (RPos = FBCBTokenList.FTokenPositionsList[RIndex]) then
-        if _AnsiStrIComp(PCnChar(aToken), PCnChar(FBCBTokenList[RIndex])) = 0 then Add(RIndex);
+        if _AnsiStrIComp(PWideChar(aToken), PWideChar(FBCBTokenList[RIndex])) = 0 then Add(RIndex);
     end;
   end;
 end; { Retrive }
@@ -458,7 +454,7 @@ begin
   inherited Destroy;
 end; { Destroy }
 
-procedure TCnBCBWideTokenList.SetOrigin(NewOrigin: PCnChar; NewSize: LongInt);
+procedure TCnBCBWideTokenList.SetOrigin(NewOrigin: PWideChar; NewSize: LongInt);
 begin
   FOrigin := NewOrigin;
   FRun := 0;
@@ -490,12 +486,12 @@ begin
       begin
         try
           FPCharCapacity := FPCharCapacity + 16384;
-          ReAllocMem(FOrigin, PCharCapacity * SizeOf(CnChar));
+          ReAllocMem(FOrigin, PCharCapacity * SizeOf(WideChar));
         except
           raise exception.Create('unable to reallocate PChar');
         end;
       end;
-      _StrEWideCopy((FOrigin + InsPos), PCnChar(aString));
+      _StrEWideCopy((FOrigin + InsPos), PWideChar(aString));
       FPCharSize := NewSize;
       FOrigin[FPCharSize] := #0;
       aString := '';
@@ -1757,7 +1753,7 @@ begin
   end;
 end; { PositionToIndex }
 
-function TCnBCBWideTokenList.GetTokenAddr: PCnChar;
+function TCnBCBWideTokenList.GetTokenAddr: PWideChar;
 begin
   Result := FOrigin + FTokenPositionsList[FRun];
 end;
