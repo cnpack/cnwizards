@@ -456,6 +456,9 @@ var
   Res: PChar;
   ErrCode, SourceLine, SourceCol, SourcePos: Integer;
   CurrentToken: PAnsiChar;
+  Block: IOTAEditBlock;
+  StartPos, EndPos, StartPosIn, EndPosIn: Integer;
+  StartRec, EndRec: TOTACharPos;
 begin
   if Index = FIdOptions then
     Config
@@ -473,6 +476,7 @@ begin
     if (View.Block = nil) or not View.Block.IsValid then // 无选择区
     begin
       try
+        Screen.Cursor := crHourGlass;
 {$IFDEF UNICODE}
         // Src/Res Utf16
         Src := CnOtaGetCurrentEditorSourceW;
@@ -518,29 +522,112 @@ begin
         begin
           ErrCode := Formatter.RetrievePascalLastError(SourceLine, SourceCol,
             SourcePos, CurrentToken);
+          Screen.Cursor := crDefault;
 
           CnOtaGotoEditPos(OTAEditPos(SourceCol, SourceLine));
           ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine, SourceCol,
             GetErrorStr(ErrCode), CurrentToken]));
 
-//          ErrorDlg(Format('Error Code %d, Line %d, Col %d, Pos %d, Token %s', [ErrCode,
-//            SourceLine, SourceCol, SourcePos, CurrentToken]));
         end;
       finally
         Formatter := nil;
+        Screen.Cursor := crDefault;
       end;
     end
     else // 有选择区
     begin
+      try
+        Screen.Cursor := crHourGlass;
+{$IFDEF UNICODE}
+        // Src/Res Utf16
+        Src := CnOtaGetCurrentEditorSourceW;
+{$ELSE}
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+        // Src/Res Utf8
+        Src := CnOtaGetCurrentEditorSource(False);
+  {$ELSE}
+        // Src/Res Ansi
+        Src := CnOtaGetCurrentEditorSource(True);
+  {$ENDIF}
+{$ENDIF}
 
+        View := CnOtaGetTopMostEditView;
+        if View <> nil then
+        begin
+          Block := View.Block;
+          if (Block <> nil) and Block.IsValid then
+          begin
+            // 选择块起止位置延伸到行模式
+            if not CnOtaGetBlockOffsetForLineMode(StartRec, EndRec, View) then
+              Exit;
+            StartPos := CnOtaEditPosToLinePos(OTAEditPos(StartRec.CharIndex, StartRec.Line), View);
+            EndPos := CnOtaEditPosToLinePos(OTAEditPos(EndRec.CharIndex, EndRec.Line), View);
 
+            // 此时 StartPos 和 EndPos 标记了当前选择区内要处理的文本
+{$IFDEF UNICODE}
+            // Src/Res Utf16，俩 LinearPos 是 Utf8 的偏移量，需要转换
+            StartPosIn := Length(UTF8Decode(Copy(Utf8Encode(Src), 1, StartPos + 1))) - 1;
+            EndPosIn := Length(UTF8Decode(Copy(Utf8Encode(Src), 1, EndPos + 1))) - 1;
+            Res := Formatter.FormatPascalBlockW(PChar(Src), Length(Src), StartPosIn, EndPosIn);
+
+            // Remove FF FE BOM if exists
+            if (StrLen(Res) > 1) and (Res[0] = #$FEFF) then
+              Inc(Res);
+{$ELSE}
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+            // Src/Res Utf8
+            StartPosIn := StartPos;
+            EndPosIn := EndPos;
+            Res := Formatter.FormatPascalBlockUtf8(PAnsiChar(Src), Length(Src), StartPosIn, EndPosIn);
+
+            // Remove EF BB BF BOM if exist
+            if (StrLen(Res) > 3) and
+              (Res[0] = #$EF) and (Res[1] = #$BB) and (Res[2] = #$BF) then
+              Inc(Res, 3);
+  {$ELSE}
+            // Src/Res Ansi
+            StartPosIn := StartPos;
+            EndPosIn := EndPos;
+            // IDE 内的线性 Pos 是 0 开始的，使用 Src 来 Copy 时的下标以 1 开始，因此需要加 1
+            Res := Formatter.FormatPascalBlock(PAnsiChar(Src), Length(Src), StartPosIn, EndPosIn);
+  {$ENDIF}
+{$ENDIF}
+
+            if Res <> nil then
+            begin
+              {$IFDEF IDE_STRING_ANSI_UTF8}
+              CnOtaReplaceCurrentSelectionUtf8(Res, True, True, True);
+              {$ELSE}
+              // Ansi/Unicode 均可用
+              CnOtaReplaceCurrentSelection(Res, True, True, True);
+              {$ENDIF}
+            end
+            else
+            begin
+              ErrCode := Formatter.RetrievePascalLastError(SourceLine, SourceCol,
+                SourcePos, CurrentToken);
+              Screen.Cursor := crDefault;
+
+              CnOtaGotoEditPos(OTAEditPos(SourceCol, SourceLine));
+              ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine, SourceCol,
+                GetErrorStr(ErrCode), CurrentToken]));
+            end;
+          end;
+        end;
+      finally
+        Screen.Cursor := crDefault;
+        Formatter := nil;
+      end;
     end;
   end;
 end;
 
 procedure TCnCodeFormatterWizard.SubActionUpdate(Index: Integer);
 begin
-
+  if Index = FIdFormatCurrent then
+    SubActions[Index].Enabled := CurrentIsDelphiSource
+  else
+    SubActions[Index].Enabled := True;
 end;
 
 procedure TCnCodeFormatterForm.chkAutoWrapClick(Sender: TObject);

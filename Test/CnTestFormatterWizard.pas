@@ -134,8 +134,6 @@ var
   Block: IOTAEditBlock;
   StartPos, EndPos, StartPosIn, EndPosIn: Integer;
   StartRec, EndRec: TOTACharPos;
-  Writer: IOTAEditWriter;
-  Len: Integer;
 begin
   if FHandle = 0 then
     FHandle := LoadLibrary(PChar(ModulePath + DLLName));
