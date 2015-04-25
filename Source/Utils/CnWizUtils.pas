@@ -585,6 +585,12 @@ function ConvertTextToEditorText(const Text: AnsiString): AnsiString;
 function ConvertEditorTextToText(const Text: AnsiString): AnsiString;
 {* 转换编辑器使用的字符串为普通字符串 }
 
+function ConvertWTextToEditorText(const Text: WideString): AnsiString;
+{* 转换宽字符串为编辑器使用的字符串(UTF8)，D2005~2007 版本使用}
+
+function ConvertEditorTextToWText(const Text: AnsiString): WideString;
+{* 转换编辑器使用的字符串(UTF8)为宽字符串，D2005~2007 版本使用 }
+
 {$IFDEF UNICODE}
 function ConvertTextToEditorTextW(const Text: string): AnsiString;
 {* 转换字符串为编辑器使用的字符串(UTF8)，D2009 以上版本使用 }
@@ -663,7 +669,7 @@ function CnOtaLinePosToEditPos(LinePos: Integer; EditView: IOTAEditView = nil): 
 procedure CnOtaSaveReaderToStream(EditReader: IOTAEditReader; Stream:
   TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
   PreSize: Integer = 0; CheckUtf8: Boolean = True);
-{* 保存EditReader内容到流中，流中的内容默认为 Ansi 格式}
+{* 保存EditReader内容到流中，流中的内容默认为 Ansi 格式，带末尾 #0 字符}
 
 procedure CnOtaSaveEditorToStreamEx(Editor: IOTASourceEditor; Stream:
   TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
@@ -686,7 +692,7 @@ function CnOtaGetCurrentEditorSource(CheckUtf8: Boolean = True): string;
 procedure CnOtaSaveReaderToStreamW(EditReader: IOTAEditReader; Stream:
   TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
   PreSize: Integer = 0);
-{* 保存 EditReader 内容到流中，流中的内容默认为 Unicode 格式，2009 以上使用}
+{* 保存 EditReader 内容到流中，流中的内容默认为 Unicode 格式，带末尾 #0 字符，2009 以上使用}
 
 procedure CnOtaSaveEditorToStreamWEx(Editor: IOTASourceEditor; Stream:
   TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
@@ -4541,6 +4547,18 @@ begin
 {$ENDIF}
 end;
 
+// 转换宽字符串为编辑器使用的字符串(UTF8)，D2005~2007 版本使用
+function ConvertWTextToEditorText(const Text: WideString): AnsiString;
+begin
+  Result := Utf8Encode(Text);
+end;
+
+// 转换编辑器使用的字符串(UTF8)为宽字符串，D2005~2007 版本使用
+function ConvertEditorTextToWText(const Text: AnsiString): WideString;
+begin
+  Result := UTF8Decode(Text);
+end;
+
 {$IFDEF UNICODE}
 
 // 转换字符串为编辑器使用的字符串(UTF8)，D2009 以上版本使用
@@ -4854,8 +4872,8 @@ begin
   Assert(Stream <> nil);
 
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('CnOtaSaveReaderToStream. StartPos %d, EndPos %d, PreSize %d.',
-    [StartPos, EndPos, PreSize]);
+//  CnDebugger.LogFmt('CnOtaSaveReaderToStream. StartPos %d, EndPos %d, PreSize %d.',
+//    [StartPos, EndPos, PreSize]);
 {$ENDIF}
 
   if EndPos > 0 then
@@ -5001,8 +5019,8 @@ begin
   Assert(Stream <> nil);
 
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('CnOtaSaveReaderToStreamW. StartPos %d, EndPos %d, PreSize %d.',
-    [StartPos, EndPos, PreSize]);
+//  CnDebugger.LogFmt('CnOtaSaveReaderToStreamW. StartPos %d, EndPos %d, PreSize %d.',
+//    [StartPos, EndPos, PreSize]);
 {$ENDIF}
 
   if EndPos > 0 then
@@ -5042,7 +5060,7 @@ begin
   Text := UTF8ToUnicodeString(PAnsiChar(Stream.Memory));
   Stream.Size := (Length(Text) + 1) * SizeOf(Char);
   Stream.Position := 0;
-  Stream.Write(PChar(Text)^, (Length(Text) + 1)* SizeOf(Char));
+  Stream.Write(PChar(Text)^, (Length(Text) + 1) * SizeOf(Char));
 
   Stream.Position := 0;
 end;

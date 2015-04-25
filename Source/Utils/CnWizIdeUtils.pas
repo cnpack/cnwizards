@@ -65,7 +65,7 @@ uses
   {$ELSE}
   DsgnIntf, LibIntf,
   {$ENDIF}
-  CnPasCodeParser, {$IFDEF UNICODE} CnWidePasParser, {$ENDIF}
+  CnPasCodeParser, CnWidePasParser,
   CnWizUtils, CnWizEditFiler, CnCommon, CnWizOptions, CnWizCompilerConst;
 
 //==============================================================================
@@ -208,10 +208,8 @@ function IdeSetSourceByFileName(const FileName: string; Source: TStrings;
 function IsCurrentToken(AView: Pointer; AControl: TControl; Token: TCnPasToken): Boolean;
 {* 判断标识符是否在光标下，频繁调用，因此此处 View 用指针来避免引用计数从而优化速度，各版本均可使用 }
 
-{$IFDEF UNICODE}
 function IsCurrentTokenW(AView: Pointer; AControl: TControl; Token: TCnWidePasToken): Boolean;
-{* 判断标识符是否在光标下，同上，但使用 WideToken，只 Unicode 环境下调用}
-{$ENDIF}
+{* 判断标识符是否在光标下，同上，但使用 WideToken，可供 Unicode/Utf8 环境下调用}
 
 //==============================================================================
 // IDE 窗体编辑器功能函数
@@ -854,9 +852,7 @@ begin
   Result := (Col >= Token.EditCol) and (Col <= Token.EditCol + Length(Token.Token));
 end;
 
-{$IFDEF UNICODE}
-
-{* 判断标识符是否在光标下，使用 WideToken，只 Unicode 环境下调用}
+{* 判断标识符是否在光标下，使用 WideToken，可供 Unicode/Utf8 环境下调用}
 function IsCurrentTokenW(AView: Pointer; AControl: TControl; Token: TCnWidePasToken): Boolean;
 var
   LineNo, Col: Integer;
@@ -880,8 +876,6 @@ begin
   // 行相等才需要比较列
   Result := (Col >= Token.EditCol) and (Col <= Token.EditCol + Length(Token.Token));
 end;
-
-{$ENDIF}
 
 //==============================================================================
 // IDE 窗体编辑器功能函数

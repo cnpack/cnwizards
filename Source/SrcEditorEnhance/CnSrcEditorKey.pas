@@ -29,7 +29,10 @@ unit CnSrcEditorKey;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2015.02.03
+* 修改记录：2015.04.25
+*             在 D2005 以上使用 Wide Parser 修正 Utf8/Unicode 转换为 AnsiString
+*                 解析时可能丢字符信息的问题。
+*           2015.02.03
 *             加入禁止光标超出行尾的功能，默认禁用
 *           2011.06.14
 *             加入行首尾按左右键折行的功能
@@ -51,7 +54,10 @@ uses
   Forms, Menus, Clipbrd, ActnList, StdCtrls, ComCtrls, Imm, Math, TypInfo,
   CnPasCodeParser, CnCommon, CnConsts, CnWizUtils, CnWizConsts, CnWizOptions,
   CnWizIdeUtils, CnEditControlWrapper, CnWizNotifier, CnWizMethodHook,
-  CnWizCompilerConst, {$IFDEF UNICODE} CnWidePasParser, CnWideCppParser, {$ENDIF}
+  CnWizCompilerConst,
+  {$IFDEF IDE_WIDECONTROL}
+  CnWidePasParser, CnWideCppParser,
+  {$ENDIF}
   CnCppCodeParser, Contnrs;
 
 type
@@ -132,10 +138,11 @@ type
       var Handled: Boolean): Boolean;
     function DoRename(View: IOTAEditView; Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean): Boolean;
-{$IFDEF UNICODE}
-    // Unicode 版本，用于 D2009 或以上，解决转换成 Ansi 后会丢字符的问题
+{$IFDEF IDE_WIDECONTROL}
+    // Unicode/Utf8 版本，用于 D2007 或以上，解决转换成 Ansi 后会丢字符的问题
     function DoRenameW(View: IOTAEditView; Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean): Boolean;
+    procedure ConvertToUtf8Stream(Stream: TStream);
 {$ENDIF}
     procedure EditControlKeyDown(Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean);
@@ -1649,13 +1656,33 @@ begin
   Handled := True;
 end;
 
-{$IFDEF UNICODE}
+{$IFDEF IDE_WIDECONTROL}
 
-// 绝大部分复制自 DoRename，但处理代码部分是 Unicode，用于 D2009 或以上版本
+procedure TCnSrcEditorKey.ConvertToUtf8Stream(Stream: TStream);
+var
+  S: AnsiString;
+  Res: WideString;
+begin
+  if Stream = nil then
+    Exit;
+  SetLength(S, Stream.Size);
+  Stream.Position := 0;
+
+  Stream.Read(PAnsiChar(S)^, Stream.Size);
+  Res := Utf8Decode(S);
+  Stream.Size := 0;
+  Stream.Position := 0;
+
+  Stream.Write(PWideChar(Res)^, (Length(Res) + 1) * SizeOf(WideChar));
+  Stream.Position := 0;
+end;
+
+// 绝大部分复制自 DoRename，但处理代码部分是 Unicode/Utf8，用于 D2007 或以上版本
 function TCnSrcEditorKey.DoRenameW(View: IOTAEditView; Key, ScanCode: Word;
   Shift: TShiftState; var Handled: Boolean): Boolean;
 var
-  Cur, UpperCur, UpperHeadCur, NewName: string;
+  TmpCur: string;
+  Cur, UpperCur, UpperHeadCur, NewName: WideString;
   CurIndex: Integer;
   EditControl: TControl;
   EditView: IOTAEditView;
@@ -1667,7 +1694,7 @@ var
   I, iMaxCursorOffset: Integer;
   Rit: TCnRenameIdentifierType;
   iStart, iOldTokenLen: Integer;
-  NewCode: string;
+  NewCode: WideString;
   EditWriter: IOTAEditWriter;
   CurToken, LastToken, StartToken, EndToken, StartCurToken, EndCurToken: TCnWidePasToken;
   CurFuncStartToken, CurFuncEndToken: TCnWideCppToken;
@@ -1685,10 +1712,12 @@ begin
     GetIDEActionFromShortCut(ShortCut(VK_F2, [])).Visible then
     Exit; // 如果已经有了 F2 的快捷键的 Action，则不处理
 
-  if not CnOtaGetCurrPosToken(Cur, CurIndex) then
+  if not CnOtaGetCurrPosToken(TmpCur, CurIndex) then
     Exit;
-  if Cur = '' then
+  if TmpCur = '' then
     Exit;
+
+  Cur := TmpCur;
 
   // 做 F2 更改当前变量名的动作
   BookMarkList := nil;
@@ -1716,10 +1745,15 @@ begin
     Parser := TCnWidePasStructParser.Create;
     Stream := TMemoryStream.Create;
     try
+{$IFDEF UNICODE}
       CnOtaSaveEditorToStreamW(EditView.Buffer, Stream);
-
+{$ELSE}
+      CnOtaSaveEditorToStream(EditView.Buffer, Stream, False, False); // 读出 Utf8 流
+      // D2005~2007 下转成 WideString 重新写入 Stream
+      ConvertToUtf8Stream(Stream);
+{$ENDIF}
       // 解析当前显示的源文件
-      Parser.ParseSource(PChar(Stream.Memory),
+      Parser.ParseSource(PWideChar(Stream.Memory),
         IsDpr(EditView.Buffer.FileName) or IsInc(EditView.Buffer.FileName), False);
     finally
       Stream.Free;
@@ -1791,8 +1825,8 @@ begin
         try
           lblReplacePromt.Caption := Format(SCnRenameVarHintFmt, [Cur]);
           UpperHeadCur := Cur;
-          if FUpperFirstLetter and (Length(UpperHeadCur) >= 1) and (CharInSet(UpperHeadCur[1], ['a'..'z'])) then
-            UpperHeadCur[1] := Chr(Ord(UpperHeadCur[1]) - 32);
+          if FUpperFirstLetter and (Length(UpperHeadCur) >= 1) and (CharInSet(Char(UpperHeadCur[1]), ['a'..'z'])) then
+            UpperHeadCur[1] := WideChar(Chr(Ord(UpperHeadCur[1]) - 32));
           edtRename.Text := UpperHeadCur;
 
           rbCurrentProc.Enabled := Assigned(Parser.MethodStartToken) and
@@ -1913,9 +1947,11 @@ begin
           EditWriter.DeleteTo(Length(UTF8Encode(Copy(Parser.Source, 1,
             EndCurToken.TokenPos + Length(EndCurToken.Token)))));
         end;
-
+{$IFDEF UNICODE}
         EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW(NewCode)));
-
+{$ELSE}
+        EditWriter.Insert(PAnsiChar(ConvertWTextToEditorText(NewCode)));
+{$ENDIF}
         // 调整光标位置
         iOldTokenLen := Length(Cur);
         if iStart > 0 then
@@ -1939,9 +1975,15 @@ begin
     CParser := TCnWideCppStructParser.Create;
     Stream := TMemoryStream.Create;
     try
+{$IFDEF UNICODE}
       CnOtaSaveEditorToStreamW(EditView.Buffer, Stream);
+{$ELSE}
+      CnOtaSaveEditorToStream(EditView.Buffer, Stream, False, False); // 读出 Utf8 流
+      // D2005~2007 下转成 WideString 重新写入 Stream
+      ConvertToUtf8Stream(Stream);
+{$ENDIF}
       // 解析当前显示的源文件
-      CParser.ParseSource(PChar(Stream.Memory), Stream.Size,
+      CParser.ParseSource(PWideChar(Stream.Memory), Stream.Size div SizeOf(WideChar),
         EditView.CursorPos.Line, EditView.CursorPos.Col, True);
     finally
       Stream.Free;
@@ -2031,8 +2073,8 @@ begin
         try
           lblReplacePromt.Caption := Format(SCnRenameVarHintFmt, [Cur]);
           UpperHeadCur := Cur;
-          if FUpperFirstLetter and (Length(UpperHeadCur) >= 1) and (CharInSet(UpperHeadCur[1], ['a'..'z'])) then
-            UpperHeadCur[1] := Chr(Ord(UpperHeadCur[1]) - 32);
+          if FUpperFirstLetter and (Length(UpperHeadCur) >= 1) and (CharInSet(Char(UpperHeadCur[1]), ['a'..'z'])) then
+            UpperHeadCur[1] := WideChar(Chr(Ord(UpperHeadCur[1]) - 32));
           edtRename.Text := UpperHeadCur;
 
           rbCurrentProc.Enabled := Assigned(CurFuncStartToken) and
@@ -2153,8 +2195,11 @@ begin
           EditWriter.DeleteTo(Length(UTF8Encode(Copy(Parser.Source, 1,
             EndCurToken.TokenPos + Length(EndCurToken.Token)))));
         end;
+{$IFDEF UNICODE}
         EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW(NewCode)));
-
+{$ELSE}
+        EditWriter.Insert(PAnsiChar(ConvertWTextToEditorText(NewCode)));
+{$ENDIF}
         // 调整光标位置
         iOldTokenLen := Length(Cur);
         if iStart > 0 then
@@ -2367,7 +2412,7 @@ begin
     if FF3Search and DoSearchAgain(View, Key, ScanCode, Shift, Handled) then
       Exit;
 
-{$IFDEF UNICODE}
+{$IFDEF IDE_WIDECONTROL}
     if FF2Rename and DoRenameW(View, Key, ScanCode, Shift, Handled) then
       Exit;
 {$ELSE}
