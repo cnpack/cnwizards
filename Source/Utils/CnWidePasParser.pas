@@ -29,7 +29,9 @@ unit CnWidePasParser;
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id: CnPasCodeParser.pas 1385 2013-12-31 15:39:02Z liuxiaoshanzhashu@gmail.com $
-* 修改记录：2015.04.10
+* 修改记录：2015.04.25 V1.1
+*               增加 WideString 实现
+*           2015.04.10
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -38,19 +40,21 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFNDEF UNICODE}
-  #Error: 'Unicode Compiler Only!'
-{$ENDIF}
-
 uses
   Windows, SysUtils, Classes, mPasLex, CnPasWideLex, mwBCBTokenList,
   Contnrs, CnCommon, CnFastList, CnPasCodeParser;
 
 type
+{$IFDEF UNICODE}
+  CnWideString = string;
+{$ELSE}
+  CnWideString = WideString;
+{$ENDIF}
+
   TCnWidePasToken = class(TPersistent)
   {* 描述一 Token 的结构高亮信息}
   private
-    function GetToken: PChar;
+    function GetToken: PWideChar;
   protected
     FCppTokenKind: TCTokenKind;
     FCompDirectiveType: TCnCompDirectiveType;
@@ -90,7 +94,7 @@ type
     {* 所在高亮的层次 }
     property MethodLayer: Integer read FMethodLayer;
     {* 所在函数的嵌套层次，最外层为一 }
-    property Token: PChar read GetToken;
+    property Token: PWideChar read GetToken;
     {* 该 Token 的字符串内容 }
     property TokenID: TTokenKind read FTokenID;
     {* Token 的语法类型 }
@@ -123,13 +127,13 @@ type
     FBlockStartToken: TCnWidePasToken;
     FChildMethodCloseToken: TCnWidePasToken;
     FChildMethodStartToken: TCnWidePasToken;
-    FCurrentChildMethod: string;
-    FCurrentMethod: string;
+    FCurrentChildMethod: CnWideString;
+    FCurrentMethod: CnWideString;
     FKeyOnly: Boolean;
     FList: TCnList;
     FMethodCloseToken: TCnWidePasToken;
     FMethodStartToken: TCnWidePasToken;
-    FSource: string;
+    FSource: CnWideString;
     FInnerBlockCloseToken: TCnWidePasToken;
     FInnerBlockStartToken: TCnWidePasToken;
     FUseTabKey: Boolean;
@@ -140,8 +144,8 @@ type
     constructor Create;
     destructor Destroy; override;
     procedure Clear;
-    procedure ParseSource(ASource: PChar; AIsDpr, AKeyOnly: Boolean);
-    function FindCurrentDeclaration(LineNumber, CharIndex: Integer): string;
+    procedure ParseSource(ASource: PWideChar; AIsDpr, AKeyOnly: Boolean);
+    function FindCurrentDeclaration(LineNumber, CharIndex: Integer): CnWideString;
     procedure FindCurrentBlock(LineNumber, CharIndex: Integer);
     function IndexOfToken(Token: TCnWidePasToken): Integer;
     property Count: Integer read GetCount;
@@ -162,11 +166,11 @@ type
     {* 当前最内层块}
     property InnerBlockCloseToken: TCnWidePasToken read FInnerBlockCloseToken;
     {* 当前最内层块}
-    property CurrentMethod: string read FCurrentMethod;
+    property CurrentMethod: CnWideString read FCurrentMethod;
     {* 当前最外层的过程或函数名}
-    property CurrentChildMethod: string read FCurrentChildMethod;
+    property CurrentChildMethod: CnWideString read FCurrentChildMethod;
     {* 当前最内层的过程或函数名，用于有嵌套过程或函数定义的情况}
-    property Source: string read FSource;
+    property Source: CnWideString read FSource;
     property KeyOnly: Boolean read FKeyOnly;
     {* 是否只处理出关键字}
 
@@ -176,7 +180,7 @@ type
     {* Tab 键的宽度}
   end;
 
-procedure ParseUnitUsesW(const Source: string; UsesList: TStrings);
+procedure ParseUnitUsesW(const Source: CnWideString; UsesList: TStrings);
 {* 分析源代码中引用的单元}
 
 implementation
@@ -270,7 +274,7 @@ begin
   Result := TCnWidePasToken(FList[Index]);
 end;
 
-procedure TCnWidePasStructParser.ParseSource(ASource: PChar; AIsDpr, AKeyOnly:
+procedure TCnWidePasStructParser.ParseSource(ASource: PWideChar; AIsDpr, AKeyOnly:
   Boolean);
 var
   Lex: TCnPasWideLex;
@@ -281,7 +285,7 @@ var
   IsRecordHelper, IsSealed, IsRecord, IsForFunc: Boolean;
   DeclareWithEndLevel: Integer;
   PrevTokenID: TTokenKind;
-  PrevTokenStr: string;
+  PrevTokenStr: CnWideString;
 
   function CalcCharIndex(): Integer;
   var
@@ -317,7 +321,7 @@ var
     if Len > CN_TOKEN_MAX_SIZE then
       Len := CN_TOKEN_MAX_SIZE;
     FillChar(Token.FToken[0], SizeOf(Token.FToken), 0);
-    CopyMemory(@Token.FToken[0], Lex.TokenAddr, Len * SizeOf(Char));
+    CopyMemory(@Token.FToken[0], Lex.TokenAddr, Len * SizeOf(WideChar));
 
     Token.FLineNumber := Lex.LineNumber - 1; // 1 开始变成 0 开始
     Token.FCharIndex := CalcCharIndex();     // 不使用 Col 属性，而是据需 Tab 展开，也会由 1 开始变成 0 开始
@@ -355,7 +359,7 @@ begin
     MidBlockStack := TObjectStack.Create;
 
     Lex := TCnPasWideLex.Create;
-    Lex.Origin := PChar(ASource);
+    Lex.Origin := PWideChar(ASource);
 
     DeclareWithEndLevel := 0; // 嵌套的需要end的定义层数
     Token := nil;
@@ -861,7 +865,7 @@ var
     end;
   end;
 
-  function _GetMethodName(StartToken, CloseToken: TCnWidePasToken): string;
+  function _GetMethodName(StartToken, CloseToken: TCnWidePasToken): CnWideString;
   var
     I: Integer;
   begin
@@ -870,7 +874,7 @@ var
       for I := StartToken.ItemIndex + 1 to CloseToken.ItemIndex do
       begin
         Token := Tokens[I];
-        if (Token.Token = '(') or (Token.Token = ':') or (Token.Token = ';') then
+        if (Token.Token^ = '(') or (Token.Token^ = ':') or (Token.Token^ = ';') then
           Break;
         Result := Result + Trim(Token.Token);
       end;
@@ -930,7 +934,7 @@ begin
   Result := FList.IndexOf(Token);
 end;
 
-function TCnWidePasStructParser.FindCurrentDeclaration(LineNumber, CharIndex: Integer): string;
+function TCnWidePasStructParser.FindCurrentDeclaration(LineNumber, CharIndex: Integer): CnWideString;
 var
   Idx: Integer;
 begin
@@ -959,11 +963,11 @@ begin
 end;
 
 // 分析源代码中引用的单元
-procedure ParseUnitUsesW(const Source: string; UsesList: TStrings);
+procedure ParseUnitUsesW(const Source: CnWideString; UsesList: TStrings);
 var
   Lex: TCnPasWideLex;
   Flag: Integer;
-  S: string;
+  S: CnWideString;
 begin
   UsesList.Clear;
   Lex := TCnPasWideLex.Create;
@@ -971,7 +975,7 @@ begin
   Flag := 0;
   S := '';
   try
-    Lex.Origin := PChar(Source);
+    Lex.Origin := PWideChar(Source);
     while Lex.TokenID <> tkNull do
     begin
       if Lex.TokenID = tkUses then
@@ -981,7 +985,7 @@ begin
           Lex.Next;
           if Lex.TokenID = tkIdentifier then
           begin
-            S := S + string(Lex.Token);
+            S := S + CnWideString(Lex.Token);
           end
           else if Lex.TokenID = tkPoint then
           begin
@@ -1027,7 +1031,7 @@ begin
   FIsBlockClose := False;
 end;
 
-function TCnWidePasToken.GetToken: PChar;
+function TCnWidePasToken.GetToken: PWideChar;
 begin
   Result := @FToken[0];
 end;

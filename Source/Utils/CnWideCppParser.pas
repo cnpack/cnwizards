@@ -24,12 +24,14 @@ unit CnWideCppParser;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：C/C++ 源代码分析器
 * 单元作者：刘啸 liuxiao@cnpack.org
-* 备    注：CnCppCodeParser 的 Unicode 版本
+* 备    注：CnCppCodeParser 的 Unicode/WideString 版本
 * 开发平台：PWin2000Pro + Delphi 2009
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2015.04.11
+* 修改记录：2015.04.25 V1.1
+*               增加 WideString 实现
+*           2015.04.11
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -38,15 +40,16 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFNDEF UNICODE}
-  #Error: 'Unicode Compiler Only!'
-{$ENDIF}
-
 uses
   Windows, SysUtils, Classes, Contnrs, CnPasCodeParser, CnWidePasParser,
   mwBCBTokenList, CnBCBWideTokenList, CnCommon, CnFastList;
   
 type
+{$IFDEF UNICODE}
+  CnWideString = string;
+{$ELSE}
+  CnWideString = WideString;
+{$ENDIF}
 
 //==============================================================================
 // C/C++ 解析器封装类，目前只实现解析大括号层次与普通标识符位置的功能
@@ -71,15 +74,15 @@ type
     FBlockStartToken: TCnWideCppToken;
     FChildCloseToken: TCnWideCppToken;
     FChildStartToken: TCnWideCppToken;
-    FCurrentChildMethod: string;
-    FCurrentMethod: string;
+    FCurrentChildMethod: CnWideString;
+    FCurrentMethod: CnWideString;
     FList: TCnList;
     FMethodCloseToken: TCnWideCppToken;
     FMethodStartToken: TCnWideCppToken;
     FInnerBlockCloseToken: TCnWideCppToken;
     FInnerBlockStartToken: TCnWideCppToken;
-    FCurrentClass: string;
-    FSource: string;
+    FCurrentClass: CnWideString;
+    FSource: CnWideString;
     FBlockIsNamespace: Boolean;
     function GetCount: Integer;
     function GetToken(Index: Integer): TCnWideCppToken;
@@ -87,7 +90,7 @@ type
     constructor Create;
     destructor Destroy; override;
     procedure Clear;
-    procedure ParseSource(ASource: PChar; Size: Integer; CurrLine: Integer = 0;
+    procedure ParseSource(ASource: PWideChar; Size: Integer; CurrLine: Integer = 0;
       CurCol: Integer = 0; ParseCurrent: Boolean = False);
     function IndexOfToken(Token: TCnWideCppToken): Integer;
     property Count: Integer read GetCount;
@@ -111,11 +114,11 @@ type
     property InnerBlockCloseToken: TCnWideCppToken read FInnerBlockCloseToken;
     {* 当前最内层次的大括号}
 
-    property CurrentMethod: string read FCurrentMethod;
-    property CurrentClass: string read FCurrentClass;
-    property CurrentChildMethod: string read FCurrentChildMethod;
+    property CurrentMethod: CnWideString read FCurrentMethod;
+    property CurrentClass: CnWideString read FCurrentClass;
+    property CurrentChildMethod: CnWideString read FCurrentChildMethod;
 
-    property Source: string read FSource;
+    property Source: CnWideString read FSource;
   end;
 
 implementation
@@ -197,7 +200,7 @@ begin
   Result := TCnWideCppToken(FList[Index]);
 end;
 
-procedure TCnWideCppStructParser.ParseSource(ASource: PChar; Size: Integer;
+procedure TCnWideCppStructParser.ParseSource(ASource: PWideChar; Size: Integer;
   CurrLine: Integer; CurCol: Integer; ParseCurrent: Boolean);
 const
   IdentToIgnore: array[0..2] of string = ('CATCH', 'CATCH_ALL', 'AND_CATCH_ALL');
@@ -224,7 +227,7 @@ var
     if Len > CN_TOKEN_MAX_SIZE then
       Len := CN_TOKEN_MAX_SIZE;
     FillChar(Token.FToken[0], SizeOf(Token.FToken), 0);
-    CopyMemory(@Token.FToken[0], CParser.TokenAddr, Len * SizeOf(Char));
+    CopyMemory(@Token.FToken[0], CParser.TokenAddr, Len * SizeOf(WideChar));
 
     Token.FLineNumber := CParser.LineNumber - 1;    // 1 开始变成 0 开始
     Token.FCharIndex := CParser.ColumnNumber - 1;   // 暂无 Tab 展开的机制，1 开始变成 0 开始

@@ -120,8 +120,10 @@ uses
 type
 {$IFDEF UNICODE}
   CnIndexChar = Char;
+  CnWideString = string;
 {$ELSE}
   CnIndexChar = AnsiChar;
+  CnWideString = WideString;
 {$ENDIF}
 
   TCnPasWideBookmark = class(TObject)
@@ -165,7 +167,7 @@ type
 
   TCnPasWideLex = class(TObject)
   private
-    FRun: LongInt;       // 步进变量，解析过程中变化
+    FRun: LongInt;       // 步进变量，解析过程中变化，从 0 开始，1 代表一字符长度
     FColumn: Integer;    // 步进变量，解析过程中变化
     FLineNumber: Integer;
     FColumnNumber: Integer;
@@ -179,7 +181,7 @@ type
     FLineStartOffset: Integer;
     FIsInterface: Boolean;
     FIsClass: Boolean;
-    FStringLen: Integer;
+    FStringLen: Integer; // 当前字符串的字符长度
     FTokenPos: Integer;
     FToIdent: PWideChar;
 
@@ -188,7 +190,7 @@ type
     FIdentFuncTable: array[0..191] of function: TTokenKind of object;
 
     function KeyHash(ToHash: PWideChar): Integer;
-    function KeyComp(const aKey: AnsiString): Boolean;
+    function KeyComp(const aKey: CnWideString): Boolean;
     function Func15: TTokenKind;
     function Func19: TTokenKind;
     function Func20: TTokenKind;
@@ -296,7 +298,7 @@ type
     procedure StringProc;
     procedure SymbolProc;
     procedure UnknownProc;
-    function GetToken: string;
+    function GetToken: CnWideString;
     function InSymbols(aChar: WideChar): Boolean;
     function GetTokenAddr: PWideChar;
     function GetTokenLength: Integer;
@@ -333,7 +335,7 @@ type
     （原始列：每个双字节字符占一列，0 开始，不展开 Tab}
     property TokenID: TTokenKind read FTokenID;
     {* 当前 Token 类型}
-    property Token: string read GetToken;
+    property Token: CnWideString read GetToken;
     {* 当前 Token 的 Unicode 字符串}
     property TokenAddr: PWideChar read GetTokenAddr;
     {* 当前 Token 的 Unicode 字符串地址}
@@ -556,7 +558,7 @@ begin
   FStringLen := ToHash - FToIdent;
 end;  { KeyHash }
 
-function TCnPasWideLex.KeyComp(const aKey: AnsiString): Boolean;
+function TCnPasWideLex.KeyComp(const aKey: CnWideString): Boolean;
 var
   I: Integer;
   P: PWideChar;
@@ -567,7 +569,7 @@ begin
     Result := True;
     for I := 1 to FStringLen do
     begin
-      if mHashTable[_IndexChar(P^)] <> mHashTable[aKey[I]] then
+      if mHashTable[_IndexChar(P^)] <> mHashTable[_IndexChar(aKey[I])] then
       begin
         Result := False;
         Break;
@@ -1977,14 +1979,14 @@ begin
   end;
 end;
 
-function TCnPasWideLex.GetToken: string;
+function TCnPasWideLex.GetToken: CnWideString;
 var
   Len: LongInt;
   OutStr: AnsiString;
 begin
   Len := FRun - FTokenPos;
   SetString(OutStr, (FOrigin + FTokenPos), Len);
-  Result := string(OutStr);
+  Result := CnWideString(OutStr);
 end;
 
 procedure TCnPasWideLex.NextID(ID: TTokenKind);

@@ -1,9 +1,11 @@
 object TeststructParseForm: TTeststructParseForm
-  Left = 0
-  Top = 0
-  Caption = 'Test Unicode Structure Parse '
-  ClientHeight = 476
-  ClientWidth = 773
+  Left = 132
+  Top = 103
+  Width = 797
+  Height = 503
+  Caption = 
+    'Test Unicode Structure Parse - Should Run OK under Non-Unicode a' +
+    'nd Unicode  Compiler. D7/2009.'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -19,7 +21,7 @@ object TeststructParseForm: TTeststructParseForm
     Top = 8
     Width = 757
     Height = 460
-    ActivePage = tsCpp
+    ActivePage = tsPascal
     TabOrder = 0
     object tsPascal: TTabSheet
       Caption = 'Pascal'

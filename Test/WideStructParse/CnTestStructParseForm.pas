@@ -3,7 +3,7 @@ unit CnTestStructParseForm;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ComCtrls, TypInfo;
 
 type
@@ -61,7 +61,7 @@ end;
 procedure TTeststructParseForm.btnParseCppClick(Sender: TObject);
 var
   Parser: TCnWideCppStructParser;
-  S: string;
+  S: WideString;
   I: Integer;
   Token: TCnWideCppToken;
 begin
@@ -70,7 +70,7 @@ begin
 
   try
     S := mmoCppSrc.Lines.Text;
-    Parser.ParseSource(PChar(S), Length(S), mmoCppSrc.CaretPos.Y + 1,
+    Parser.ParseSource(PWideChar(S), Length(S), mmoCppSrc.CaretPos.Y + 1,
       mmoCppSrc.CaretPos.X + 1, True);
 
     for I := 0 to Parser.Count - 1 do
@@ -120,7 +120,7 @@ end;
 procedure TTeststructParseForm.btnParsePasClick(Sender: TObject);
 var
   Parser: TCnWidePasStructParser;
-  S: string;
+  S: WideString;
   I: Integer;
   Token: TCnWidePasToken;
 begin
@@ -129,7 +129,7 @@ begin
 
   S := mmoPasSrc.Lines.Text;
   try
-    Parser.ParseSource(PChar(S), False, False);
+    Parser.ParseSource(PWideChar(S), False, False);
     Parser.FindCurrentBlock(mmoPasSrc.CaretPos.Y + 1, mmoPasSrc.CaretPos.X + 1);
 
     for I := 0 to Parser.Count - 1 do
