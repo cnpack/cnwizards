@@ -585,11 +585,15 @@ function ConvertTextToEditorText(const Text: AnsiString): AnsiString;
 function ConvertEditorTextToText(const Text: AnsiString): AnsiString;
 {* 转换编辑器使用的字符串为普通字符串 }
 
+{$IFDEF IDE_WIDECONTROL}
+
 function ConvertWTextToEditorText(const Text: WideString): AnsiString;
 {* 转换宽字符串为编辑器使用的字符串(UTF8)，D2005~2007 版本使用}
 
 function ConvertEditorTextToWText(const Text: AnsiString): WideString;
 {* 转换编辑器使用的字符串(UTF8)为宽字符串，D2005~2007 版本使用 }
+
+{$ENDIF}
 
 {$IFDEF UNICODE}
 function ConvertTextToEditorTextW(const Text: string): AnsiString;
@@ -4547,6 +4551,8 @@ begin
 {$ENDIF}
 end;
 
+{$IFDEF IDE_WIDECONTROL}
+
 // 转换宽字符串为编辑器使用的字符串(UTF8)，D2005~2007 版本使用
 function ConvertWTextToEditorText(const Text: WideString): AnsiString;
 begin
@@ -4558,6 +4564,8 @@ function ConvertEditorTextToWText(const Text: AnsiString): WideString;
 begin
   Result := UTF8Decode(Text);
 end;
+
+{$ENDIF}
 
 {$IFDEF UNICODE}
 
