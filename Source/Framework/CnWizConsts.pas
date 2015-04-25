@@ -1519,8 +1519,8 @@ var
   SCnCodeFormatterWizardMenuHint: string = 'Code Formatter Wizard';
   SCnCodeFormatterWizardConfigCaption: string = '&Options...';
   SCnCodeFormatterWizardConfigHint: string = '&Options...';
-  SCnCodeFormatterWizardFormatCurrentCaption: string = 'Format Current File';
-  SCnCodeFormatterWizardFormatCurrentHint: string = 'Format Current File';
+  SCnCodeFormatterWizardFormatCurrentCaption: string = 'Format Current File/Selection';
+  SCnCodeFormatterWizardFormatCurrentHint: string = 'Format Current File or Selection';
 
   SCnCodeFormatterErrUnknown: string = 'Unknown Error.';
   SCnCodeFormatterErrPascalFmt: string = 'Format Error(%d, %d): %s' + #13#10#13#10 + 'Current: ''%s''';
