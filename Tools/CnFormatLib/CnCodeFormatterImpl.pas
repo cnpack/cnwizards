@@ -196,6 +196,8 @@ begin
       CnPascalCodeForRule.CodeWrapMode := cwmNone;
     CN_RULE_CODE_WRAP_MODE_SIMPLE:
       CnPascalCodeForRule.CodeWrapMode := cwmSimple;
+    CN_RULE_CODE_WRAP_MODE_ADVANCED:
+      CnPascalCodeForRule.CodeWrapMode := cwmAdvanced;
   end;
   
   CnPascalCodeForRule.TabSpaceCount := TabSpace;
