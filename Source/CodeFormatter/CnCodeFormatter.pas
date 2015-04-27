@@ -140,6 +140,7 @@ type
 
   TCnBasePascalFormatter = class(TCnAbstractCodeFormatter)
   private
+    FNextBeginShouldIndent: Boolean; // 控制是否本 begin 必须换行即使设置为 SameLine
     function IsTokenAfterAttributesInSet(InTokens: TPascalTokenSet): Boolean;
     procedure CheckWriteBeginln;
   protected
@@ -1319,8 +1320,10 @@ begin
   end;
 
   Match(tokColon);
-  // TODO: 此处控制每个 caselabel 后是否换行，但如不换，碰上 begin end 就乱了
+  // 每个 caselabel 后的 begin 都换行，不受 begin 风格的影响
   Writeln;
+  FNextBeginShouldIndent := True;
+
   if Scaner.Token <> tokSemicolon then
     FormatStatement(Tab(PreSpaceCount, False))
   else // 是空语句就手工写缩进
@@ -1389,10 +1392,11 @@ begin
     case Scaner.Token of
       tokKeywordBegin:
         begin
-          if CnPascalCodeForRule.BeginStyle = bsNextLine then
+          if (CnPascalCodeForRule.BeginStyle = bsNextLine) or FNextBeginShouldIndent then
             Match(tokKeywordBegin, PreSpaceCount)
           else
             Match(tokKeywordBegin); // begin 前是否换行由外面控制，begin 前缩进这儿控制
+          FNextBeginShouldIndent := False;
 
           Writeln;
 
@@ -4078,7 +4082,10 @@ begin
   end;
 
   if (not IsExternal) and (not IsForward) then
+  begin
+    FNextBeginShouldIndent := True; // 过程声明后 begin 必须换行
     Writeln;
+  end;
 
   if ((not IsExternal)  and (not IsForward))and
      (Scaner.Token in BlockStmtTokens + DeclSectionTokens) then
@@ -4148,7 +4155,10 @@ begin
   end;
 
   if (not IsExternal) and (not IsForward) then
+  begin
+    FNextBeginShouldIndent := True; // 函数声明后 begin 必须换行
     Writeln;
+  end;
 
   if ((not IsExternal) and (not IsForward)) and
     (Scaner.Token in BlockStmtTokens + DeclSectionTokens) then // Local procedure also supports Attribute
