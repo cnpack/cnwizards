@@ -111,7 +111,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           Height = 22
           MaxValue = 256
           MinValue = 16
-          TabOrder = 5
+          TabOrder = 6
           Value = 16
         end
         object seSpaceBefore: TCnSpinEdit
@@ -140,7 +140,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           Width = 249
           Height = 17
           Caption = 'Single Line Mode for Every Uses Unit.'
-          TabOrder = 7
+          TabOrder = 8
         end
         object chkAutoWrap: TCheckBox
           Left = 16
@@ -148,7 +148,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           Width = 121
           Height = 17
           Caption = 'Auto Wrap Line at:'
-          TabOrder = 6
+          TabOrder = 5
           OnClick = chkAutoWrapClick
         end
         object seNewLine: TCnSpinEdit
@@ -158,7 +158,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           Height = 22
           MaxValue = 256
           MinValue = 16
-          TabOrder = 8
+          TabOrder = 7
           Value = 16
         end
       end
@@ -222,7 +222,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
     Caption = '&OK'
     Default = True
     ModalResult = 1
-    TabOrder = 1
+    TabOrder = 2
   end
   object btnCancel: TButton
     Left = 286
@@ -232,7 +232,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
-    TabOrder = 2
+    TabOrder = 3
   end
   object btnHelp: TButton
     Left = 366
@@ -240,7 +240,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
     Width = 75
     Height = 21
     Caption = '&Help'
-    TabOrder = 3
+    TabOrder = 4
   end
   object btnShortCut: TButton
     Left = 8
@@ -249,7 +249,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
     Height = 21
     Caption = '&Shortcut'
     ModalResult = 2
-    TabOrder = 4
+    TabOrder = 1
     OnClick = btnShortCutClick
   end
 end
