@@ -248,7 +248,6 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
     Width = 75
     Height = 21
     Caption = '&Shortcut'
-    ModalResult = 2
     TabOrder = 1
     OnClick = btnShortCutClick
   end
