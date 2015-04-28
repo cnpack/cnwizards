@@ -623,9 +623,14 @@ begin
 end;
 
 procedure TCnCodeFormatterWizard.SubActionUpdate(Index: Integer);
+var
+  S: string;
 begin
   if Index = FIdFormatCurrent then
-    SubActions[Index].Enabled := CurrentIsDelphiSource
+  begin
+    S := CnOtaGetCurrentSourceFile;
+    SubActions[Index].Enabled := IsDprOrPas(S) or IsInc(S) or IsDpk(S);
+  end
   else
     SubActions[Index].Enabled := True;
 end;
