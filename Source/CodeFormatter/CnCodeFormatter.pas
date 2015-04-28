@@ -308,6 +308,7 @@ type
   TCnProgramBlockFormatter = class(TCnTypeSectionFormater)
   protected
     procedure FormatProgramBlock(PreSpaceCount: Byte = 0);
+    procedure FormatPackageBlock(PreSpaceCount: Byte = 0);
     procedure FormatUsesClause(PreSpaceCount: Byte = 0; const NeedCRLF: Boolean = False);
     procedure FormatUsesList(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = True;
       const NeedCRLF: Boolean = False);
@@ -320,6 +321,7 @@ type
     procedure FormatProgram(PreSpaceCount: Byte = 0);
     procedure FormatUnit(PreSpaceCount: Byte = 0);
     procedure FormatLibrary(PreSpaceCount: Byte = 0);
+    procedure FormatPackage(PreSpaceCount: Byte = 0);
     procedure FormatInterfaceSection(PreSpaceCount: Byte = 0);
     procedure FormatInterfaceDecl(PreSpaceCount: Byte = 0);
     procedure FormatExportedHeading(PreSpaceCount: Byte = 0);
@@ -4219,11 +4221,27 @@ begin
   FormatBlock(PreSpaceCount);
 end;
 
+procedure TCnProgramBlockFormatter.FormatPackageBlock(PreSpaceCount: Byte);
+begin
+  if Scaner.Token = tokKeywordRequires then
+  begin
+    FormatUsesClause(PreSpaceCount, True); // 不带 IN 的 requires，需要分行
+    WriteLine;
+  end;
+
+  if Scaner.Token = tokKeywordContains then
+  begin
+    FormatUsesClause(PreSpaceCount, True); // 带 IN 的，需要分行
+    WriteLine;
+  end;
+end;
+
 { UsesClause -> USES UsesList ';' }
 procedure TCnProgramBlockFormatter.FormatUsesClause(PreSpaceCount: Byte;
   const NeedCRLF: Boolean);
 begin
-  Match(tokKeywordUses);
+  if Scaner.Token in [tokKeywordUses, tokKeywordRequires, tokKeywordContains] then
+    Match(Scaner.Token);
 
   Writeln;
   FormatUsesList(Tab(PreSpaceCount), True, NeedCRLF);
@@ -4407,6 +4425,7 @@ begin
     tokKeywordProgram: FormatProgram(PreSpaceCount);
     tokKeywordLibrary: FormatLibrary(PreSpaceCount);
     tokKeywordUnit:    FormatUnit(PreSpaceCount);
+    tokKeywordPackage: FormatPackage(PreSpaceCount);
   else
     Error(CN_ERRCODE_PASCAL_UNKNOWN_GOAL);
   end;
@@ -4546,6 +4565,20 @@ end;
   Program -> [PROGRAM Ident ['(' IdentList ')'] ';']
              ProgramBlock '.'
 }
+procedure TCnGoalCodeFormatter.FormatPackage(PreSpaceCount: Byte);
+begin
+  Match(tokKeywordPackage, PreSpaceCount);
+  FormatIdent;
+
+  if Scaner.Token = tokSemicolon then
+    Match(Scaner.Token, PreSpaceCount);
+
+  WriteLine;
+  FormatPackageBlock(PreSpaceCount);
+  Match(tokKeywordEnd);
+  Match(tokDot);
+end;
+
 procedure TCnGoalCodeFormatter.FormatProgram(PreSpaceCount: Byte);
 begin
   Match(tokKeywordProgram, PreSpaceCount);
