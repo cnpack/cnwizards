@@ -232,8 +232,6 @@ type
 const
   KeywordTokens = [tokKeyword_BEGIN .. tokKeyword_END];
 
-  // The reserved word inline and are maintained for backward compatibility
-  // only. They have no effect on the compiler
   DirectiveTokens = [tokDirective_BEGIN .. tokDirective_END, tokKeywordInline,
     tokKeywordLibrary, tokComplexDefault, tokComplexIndex, tokComplexName,
     tokComplexNoDefault, tokComplexRead, tokComplexReadOnly, tokComplexStored,
@@ -322,7 +320,8 @@ const
 
   NOTClassTypeConstTokens = [tokKeywordPrivate, tokKeywordProtected, tokKeywordPublic,
     tokKeywordPublished, tokKeywordStrict, tokKeywordClass, tokKeywordProcedure,
-    tokKeywordFunction, tokKeywordVar, tokKeywordConstructor, tokKeywordDestructor];
+    tokKeywordFunction, tokKeywordVar, tokKeywordConstructor, tokKeywordDestructor,
+    tokKeywordProperty];
 
   // 标识符后出现<时无法直接确定后面是泛型还是小于比较式，用这种方式判断
   GenericTokensInExpression = [tokSymbol, tokDot, tokLess, tokGreat, tokHat, tokComma];

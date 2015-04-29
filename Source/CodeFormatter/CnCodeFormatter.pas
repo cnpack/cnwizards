@@ -48,6 +48,11 @@ const
   CN_MATCHED_INVALID = -1;
 
 type
+  // 用来指明当前位置处于哪些不能嵌套的基本位置，
+  // 如属性的修饰符区域、函数调用修饰符区域等
+  TCnPascalFormattingElementType = (pfetUnknown, pfetPropertySpecifier,
+    pfetDirective);
+
   TCnAbstractCodeFormatter = class
   private
     FScaner: TAbstractScaner;
@@ -63,8 +68,14 @@ type
     FMatchedOutEndRow: Integer;
     FFirstMatchStart: Boolean;
     FFirstMatchEnd: Boolean;
+    // 用来粗略记录当前正在格式化的点，以备输出时根据场景判断是否使用关键字规则
+    FOldElementType: TCnPascalFormattingElementType;
+    FElementType: TCnPascalFormattingElementType;
     function ErrorTokenString: string;
     procedure CodeGenAfterWrite(Sender: TObject; IsWriteln: Boolean);
+    procedure SpecifyElementType(Element: TCnPascalFormattingElementType);
+    procedure RestoreElementType;
+    procedure ResetElementType;
   protected
     FIsTypeID: Boolean;
     {* 错误处理函数 }
@@ -113,6 +124,8 @@ type
     {* 目标代码生成器}
     property Scaner: TAbstractScaner read FScaner;
     {* 词法扫描器}
+    property ElementType: TCnPascalFormattingElementType read FElementType;
+    {* 标识当前区域的一个辅助变量}
   public
     constructor Create(AStream: TStream; AMatchedInStart: Integer = CN_MATCHED_INVALID;
       AMatchedInEnd: Integer = CN_MATCHED_INVALID;
@@ -682,10 +695,11 @@ begin
       begin
         CodeGen.Write(Scaner.TokenString, BeforeSpaceCount, AfterSpaceCount);
       end
-      else if ((FLastToken = tokKeywordProperty) and (Token = tokComplexIndex))
-        or ((FLastToken in [tokKeywordProcedure, tokKeywordFunction]) and (Token = tokDirectiveRegister)) then
+      else if ((Token = tokComplexIndex) and (ElementType <> pfetPropertySpecifier))
+        or ((Token in [tokDirectiveMESSAGE, tokDirectiveREGISTER]) and (ElementType <> pfetDirective)) then
       begin
-        // property Index 与 procedure Register 这种的不当关键字，原样输出
+        // 只有 property 里的 Index 才是关键字，其他地方的 Index 均在此原样输出
+        // 只有在函数声明修饰符区域上述 Tokens 才是关键字，其他地方均在此原样输出
         CodeGen.Write(Scaner.TokenString, BeforeSpaceCount, AfterSpaceCount);
       end
       else
@@ -2448,56 +2462,61 @@ end;
 procedure TCnBasePascalFormatter.FormatDirective(PreSpaceCount: Byte;
   IgnoreFirst: Boolean);
 begin
-  if Scaner.Token in DirectiveTokens + ComplexTokens then
-  begin
-    // deal with the Directive use like this
-    // function MessageBox(...): Integer; stdcall; external 'user32.dll' name 'MessageBoxA';
-{
-    while not (Scaner.Token in [tokSemicolon] + KeywordTokens) do
+  try
+    SpecifyElementType(pfetDirective);
+    if Scaner.Token in DirectiveTokens + ComplexTokens then
     begin
-      CodeGen.Write(FormatString(Scaner.TokenString, CnCodeForRule.KeywordStyle), 1);
-      FLastToken := Scaner.Token;
-      Scaner.NextToken;
-    end;
-}
-    if Scaner.Token in [   // 这些是后面可以加参数的
-      tokDirectiveDispID,
-      tokDirectiveExternal,
-      tokDirectiveMESSAGE,
-      tokDirectiveDEPRECATED,
-      tokComplexName,
-      tokComplexImplements,
-      tokComplexStored,
-      tokComplexRead,
-      tokComplexWrite,
-      tokComplexIndex
-    ] then
-    begin
-      if not IgnoreFirst then
-        CodeGen.Write(' '); // 关键字空格分隔
-      CodeGen.Write(FormatString(Scaner.TokenString, CnPascalCodeForRule.KeywordStyle));
-      FLastToken := Scaner.Token;
-      Scaner.NextToken;
-      
-      if not (Scaner.Token in DirectiveTokens) then // 加个后续的表达式
+      // deal with the Directive use like this
+      // function MessageBox(...): Integer; stdcall; external 'user32.dll' name 'MessageBoxA';
+  {
+      while not (Scaner.Token in [tokSemicolon] + KeywordTokens) do
       begin
-        if Scaner.Token in [tokString, tokWString, tokLB, tokPlus, tokMinus] then
-          CodeGen.Write(' '); // 后续表达式空格分隔
-        FormatConstExpr;
+        CodeGen.Write(FormatString(Scaner.TokenString, CnCodeForRule.KeywordStyle), 1);
+        FLastToken := Scaner.Token;
+        Scaner.NextToken;
       end;
-      //  Match(Scaner.Token);
+  }
+      if Scaner.Token in [   // 这些是后面可以加参数的
+        tokDirectiveDispID,
+        tokDirectiveExternal,
+        tokDirectiveMESSAGE,
+        tokDirectiveDEPRECATED,
+        tokComplexName,
+        tokComplexImplements,
+        tokComplexStored,
+        tokComplexRead,
+        tokComplexWrite,
+        tokComplexIndex
+      ] then
+      begin
+        if not IgnoreFirst then
+          CodeGen.Write(' '); // 关键字空格分隔
+        CodeGen.Write(FormatString(Scaner.TokenString, CnPascalCodeForRule.KeywordStyle));
+        FLastToken := Scaner.Token;
+        Scaner.NextToken;
+
+        if not (Scaner.Token in DirectiveTokens) then // 加个后续的表达式
+        begin
+          if Scaner.Token in [tokString, tokWString, tokLB, tokPlus, tokMinus] then
+            CodeGen.Write(' '); // 后续表达式空格分隔
+          FormatConstExpr;
+        end;
+        //  Match(Scaner.Token);
+      end
+      else
+      begin
+        if not IgnoreFirst then
+          CodeGen.Write(' '); // 关键字空格分隔
+        CodeGen.Write(FormatString(Scaner.TokenString, CnPascalCodeForRule.KeywordStyle));
+        FLastToken := Scaner.Token;
+        Scaner.NextToken;
+      end;
     end
     else
-    begin
-      if not IgnoreFirst then
-        CodeGen.Write(' '); // 关键字空格分隔
-      CodeGen.Write(FormatString(Scaner.TokenString, CnPascalCodeForRule.KeywordStyle));
-      FLastToken := Scaner.Token;
-      Scaner.NextToken;
-    end;
-  end
-  else
-    Error(CN_ERRCODE_PASCAL_ERROR_DIRECTIVE);
+      Error(CN_ERRCODE_PASCAL_ERROR_DIRECTIVE);
+  finally
+    RestoreElementType;
+  end;
 end;
 
 { EnumeratedType -> '(' EnumeratedList ')' }
@@ -3278,64 +3297,70 @@ procedure TCnBasePascalFormatter.FormatPropertySpecifiers(PreSpaceCount: Byte);
     if Scaner.Token in [tokString, tokWString, tokLB, tokPlus, tokMinus] then
       CodeGen.Write(' '); // 后续表达式空格分隔
   end;
+
 begin
-  while Scaner.Token in PropertySpecifiersTokens do
-  begin
-    case Scaner.Token of
-      tokComplexIndex:
-      begin
-        Match(Scaner.Token);
-        ProcessBlank;
-        FormatConstExpr;
-      end;
+  try
+    SpecifyElementType(pfetPropertySpecifier);
+    while Scaner.Token in PropertySpecifiersTokens do
+    begin
+      case Scaner.Token of
+        tokComplexIndex:
+        begin
+          Match(Scaner.Token);
+          ProcessBlank;
+          FormatConstExpr;
+        end;
 
-      tokComplexRead:
-      begin
-        Match(Scaner.Token);
-        ProcessBlank;
-        FormatDesignator(0);
-        //FormatIdent(0, True);
-      end;
+        tokComplexRead:
+        begin
+          Match(Scaner.Token);
+          ProcessBlank;
+          FormatDesignator(0);
+          //FormatIdent(0, True);
+        end;
 
-      tokComplexWrite:
-      begin
-        Match(Scaner.Token);
-        ProcessBlank;
-        FormatDesignator(0);
-        //FormatIdent(0, True);
-      end;
+        tokComplexWrite:
+        begin
+          Match(Scaner.Token);
+          ProcessBlank;
+          FormatDesignator(0);
+          //FormatIdent(0, True);
+        end;
 
-      tokComplexStored:
-      begin
-        Match(Scaner.Token);
-        ProcessBlank;
-        FormatConstExpr; // Constrant is an Expression
-      end;
+        tokComplexStored:
+        begin
+          Match(Scaner.Token);
+          ProcessBlank;
+          FormatConstExpr; // Constrant is an Expression
+        end;
 
-      tokComplexImplements:
-      begin
-        Match(Scaner.Token);
-        ProcessBlank;
-        FormatTypeID;
-      end;
+        tokComplexImplements:
+        begin
+          Match(Scaner.Token);
+          ProcessBlank;
+          FormatTypeID;
+        end;
 
-      tokComplexDEFAULT:
-      begin
-        Match(Scaner.Token);
-        ProcessBlank;
-        FormatConstExpr;
-      end;
+        tokComplexDEFAULT:
+        begin
+          Match(Scaner.Token);
+          ProcessBlank;
+          FormatConstExpr;
+        end;
 
-      tokDirectiveDispID:
-      begin
-        Match(Scaner.Token);
-        ProcessBlank;
-        FormatExpression;
-      end;
+        tokDirectiveDispID:
+        begin
+          Match(Scaner.Token);
+          ProcessBlank;
+          FormatExpression;
+        end;
 
-      tokComplexNODEFAULT, tokComplexREADONLY, tokComplexWRITEONLY:
-        Match(Scaner.Token);
+        tokComplexNODEFAULT, tokComplexREADONLY, tokComplexWRITEONLY:
+          Match(Scaner.Token);
+      end;
     end;
+  finally
+    RestoreElementType;
   end;
 end;
 
@@ -4392,6 +4417,7 @@ end;
 
 procedure TCnGoalCodeFormatter.FormatCode(PreSpaceCount: Byte);
 begin
+  ResetElementType;
   CheckHeadComments;
   FormatGoal(PreSpaceCount);
 end;
@@ -5030,6 +5056,27 @@ begin
     and (MatchedOutStartCol <> CN_MATCHED_INVALID)
     and (MatchedOutEndRow <> CN_MATCHED_INVALID)
     and (MatchedOutEndCol <> CN_MATCHED_INVALID);
+end;
+
+procedure TCnAbstractCodeFormatter.RestoreElementType;
+begin
+  FElementType := FOldElementType;
+end;
+
+procedure TCnAbstractCodeFormatter.SpecifyElementType(
+  Element: TCnPascalFormattingElementType);
+begin
+  if Element <> FElementType then
+  begin
+    FOldElementType := FElementType;
+    FElementType := Element;
+  end;
+end;
+
+procedure TCnAbstractCodeFormatter.ResetElementType;
+begin
+  FOldElementType := pfetUnknown;
+  FElementType := pfetUnknown;
 end;
 
 end.
