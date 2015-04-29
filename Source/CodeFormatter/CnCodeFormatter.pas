@@ -650,7 +650,7 @@ begin
     tokKeywordOf, tokKeywordTo, tokKeywordDownto]) then
     CodeGen.Write(' ')
   else if (Token in LeftBracket) and (FLastToken in [tokKeywordIf, tokKeywordWhile,
-    tokKeywordFor, tokKeywordWith, tokKeywordCase]) then
+    tokKeywordFor, tokKeywordWith, tokKeywordCase, tokKeywordTo, tokKeywordDownto]) then
     CodeGen.Write(' ');
     // 强行分离括号与关键字
 
@@ -698,8 +698,9 @@ begin
         end;
       end;
     end
-    else if (FLastToken = tokHat) and (Length(Scaner.TokenString) = 1) then
-      CodeGen.Write(Scaner.TokenString, 0, 0) // ^= 这种字符转义得紧挨着
+// 不处理 ^= 这种得紧挨着的字符转义，因为没法和 P^ = 0 这种区分，而后者明显使用更广泛
+//    else if (FLastToken = tokHat) and (Length(Scaner.TokenString) = 1) then
+//      CodeGen.Write(Scaner.TokenString, 0, 0)
     else if FIsTypeID then // 如果是类型名，则按规则处理 Scaner.TokenString
     begin
       CodeGen.Write(CheckTypeID(Scaner.TokenString), BeforeSpaceCount, AfterSpaceCount);
