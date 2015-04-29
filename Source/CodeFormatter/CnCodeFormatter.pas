@@ -682,6 +682,12 @@ begin
       begin
         CodeGen.Write(Scaner.TokenString, BeforeSpaceCount, AfterSpaceCount);
       end
+      else if ((FLastToken = tokKeywordProperty) and (Token = tokComplexIndex))
+        or ((FLastToken in [tokKeywordProcedure, tokKeywordFunction]) and (Token = tokDirectiveRegister)) then
+      begin
+        // property Index 与 procedure Register 这种的不当关键字，原样输出
+        CodeGen.Write(Scaner.TokenString, BeforeSpaceCount, AfterSpaceCount);
+      end
       else
       begin
         if (Token <> tokKeywordEnd) and (Token <> tokKeywordString) then
