@@ -59,13 +59,17 @@ type
     FPrevBlankLinesBookmark: Boolean;
     FSourceColBookmark: Integer;
     FInIgnoreAreaBookmark: Boolean;
+    FNewSourceColBookmark: Integer;
+    FOldSourceColPtrBookmark: PChar;
   protected
     property OriginBookmark: Longint read FOriginBookmark write FOriginBookmark;
     property TokenBookmark: TPascalToken read FTokenBookmark write FTokenBookmark;
     property TokenPtrBookmark: PChar read FTokenPtrBookmark write FTokenPtrBookmark;
     property SourcePtrBookmark: PChar read FSourcePtrBookmark write FSourcePtrBookmark;
+    property OldSourceColPtrBookmark: PChar read FOldSourceColPtrBookmark write FOldSourceColPtrBookmark;
     property SourceLineBookmark: Integer read FSourceLineBookmark write FSourceLineBookmark;
     property SourceColBookmark: Integer read FSourceColBookmark write FSourceColBookmark;
+    property NewSourceColBookmark: Integer read FNewSourceColBookmark write FNewSourceColBookmark;
     property BlankLinesBeforeBookmark: Integer read FBlankLinesBeforeBookmark write FBlankLinesBeforeBookmark;
     property BlankLinesAfterBookmark: Integer read FBlankLinesAfterBookmark write FBlankLinesAfterBookmark;
     property PrevBlankLinesBookmark: Boolean read FPrevBlankLinesBookmark write FPrevBlankLinesBookmark;
@@ -80,9 +84,10 @@ type
     FBuffer: PChar;
     FBufPtr: PChar;
     FBufEnd: PChar;
-    FSourcePtr: PChar;
+    FSourcePtr: PChar; // 用于步进，在外部始终指向当前 Token 尾部
     FSourceEnd: PChar;
-    FTokenPtr: PChar;
+    FTokenPtr: PChar;  // 用于步进，在外部始终指向当前 Token 头部
+    FOldSourceColPtr: PChar; // 用于步进，在外部始终指向上一个列开始计算的位置
     FStringPtr: PChar;
     FSourceLine: Integer;
     FSaveChar: Char;
@@ -101,11 +106,12 @@ type
     FInDirectiveNestSearch: Boolean;
     FKeepOneBlankLine: Boolean;
     FPrevBlankLines: Boolean;
+    FNewSourceCol: Integer; // 用于步进，指向下一个 Token 的列
     FSourceCol: Integer;
     FInIgnoreArea: Boolean;
     procedure ReadBuffer;
     procedure SetOrigin(AOrigin: Longint);
-    procedure SkipBlanks;
+    procedure SkipBlanks; // 越过空白和回车换行
     procedure DoBlankLinesWhenSkip(BlankLines: Integer); virtual;
     {* SkipBlanks 时遇到连续换行时被调用}
     function ErrorTokenString: string;
@@ -327,6 +333,7 @@ begin
   FTokenPtr := FBuffer;
   FSourceLine := 1;
   FSourceCol := 1;
+  FNewSourceCol := 1;
   FBackwardToken := tokNoToken;
 
   // NextToken;  Let outside call it.
@@ -506,6 +513,8 @@ begin
       #10:
         begin
           NewLine;
+          FOldSourceColPtr := FSourcePtr;
+          Inc(FOldSourceColPtr);
           Inc(FBlankLines);
 
           if FASMMode then // 需要检测回车的标志
@@ -618,9 +627,11 @@ begin
           SetOrigin(OriginBookmark);
         FSourcePtr := SourcePtrBookmark;
         FTokenPtr := TokenPtrBookmark;
+        FOldSourceColPtr := OldSourceColPtrBookmark;
         FToken := TokenBookmark;
         FSourceLine := SourceLineBookmark;
         FSourceCol := SourceColBookmark;
+        FNewSourceCol := NewSourceColBookmark;
         FBlankLinesBefore := BlankLinesBeforeBookmark;
         FBlankLinesAfter := BlankLinesAfterBookmark;
         FPrevBlankLines := PrevBlankLinesBookmark;
@@ -646,8 +657,10 @@ begin
     SourcePtrBookmark := FSourcePtr;
     TokenBookmark := FToken;
     TokenPtrBookmark := FTokenPtr;
+    OldSourceColPtrBookmark := FOldSourceColPtr;
     SourceLineBookmark := FSourceLine;
     SourceColBookmark := FSourceCol;
+    NewSourceColBookmark := FNewSourceCol;
     BlankLinesBeforeBookmark := FBlankLinesBefore;
     BlankLinesAfterBookmark := FBlankLinesAfter;
     PrevBlankLinesBookmark := FPrevBlankLines;
@@ -725,7 +738,7 @@ end;
 procedure TAbstractScaner.NewLine;
 begin
   Inc(FSourceLine);
-  FSourceCol := 1;
+  FNewSourceCol := 1;
 end;
 
 function TAbstractScaner.TokenStringLength: Integer;
@@ -803,9 +816,17 @@ var
   DirectiveNest: Integer;
   TmpToken: string;
 begin
+  FOldSourceColPtr := FSourcePtr;
+
   SkipBlanks;
+  FSourceCol := FNewSourceCol;
+
   P := FSourcePtr;
   FTokenPtr := P;
+  // FTokenPtr 保存了本次步进的原始位置，步进完毕后，P 与 FTokenPtr 的差就是当前 Token 的长度
+
+  // FOldSourceColPtr 保存本次步进的原始列位置，步进完毕后，如未出现换行，P 与 OldColPtr 的差就是 NewSourceCol 需要增加的长度
+  // 如出现换行，换行处 SourceCol 被置 1、OldCol 被赋值为换行处，末了仍然是 NewSourceCol += P - OldCol;
 
   case P^ of
     'A'..'Z', 'a'..'z', '_':
@@ -906,7 +927,11 @@ begin
         while ((P^ <> #0) and (P^ <> '}')) do
         begin
           if P^ = #10 then
+          begin
             NewLine;
+            FOldSourceColPtr := P;
+            Inc(FOldSourceColPtr);
+          end;
           Inc(P);
         end;
 
@@ -945,6 +970,7 @@ begin
               NewLine;
               Inc(FBlankLinesAfterComment);
               Inc(P);
+              FOldSourceColPtr := P;
             end;
           end;
         end
@@ -974,6 +1000,7 @@ begin
               NewLine;
               Inc(FBlankLinesAfterComment);
               Inc(P);
+              FOldSourceColPtr := P;
             end;
           end
           else
@@ -1015,6 +1042,7 @@ begin
                     NewLine;
                     Inc(FBlankLinesAfterComment);
                     Inc(P);
+                    FOldSourceColPtr := P;
                   end;
                 end;
 
@@ -1024,7 +1052,11 @@ begin
             else
             begin
               if P^ = #10 then
+              begin
                 NewLine;
+                FOldSourceColPtr := P;
+                Inc(FOldSourceColPtr);
+              end;
               Inc(P);
             end;
           end;
@@ -1178,7 +1210,11 @@ begin
       begin
         Result := tokCRLF;
         if not FASMMode then // FSourceLine Inc-ed at another place
+        begin
           NewLine;
+          FOldSourceColPtr := P;
+          Inc(FOldSourceColPtr);
+        end;
         Inc(P);
       end;
   else
@@ -1194,9 +1230,11 @@ begin
   FSourcePtr := P;
   FToken := Result;
 
+  Inc(FNewSourceCol, FSourcePtr - FOldSourceColPtr);
+
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('Line: %5.5d. Token: %s. InIgnoreArea %d', [FSourceLine, TokenString,
-    Integer(InIgnoreArea)]);
+  CnDebugger.LogFmt('Line: %5.5d: Col %4.4d. Token: %s. InIgnoreArea %d', [FSourceLine,
+    FSourceCol, TokenString, Integer(InIgnoreArea)]);
 {$ENDIF}
 
   if InIgnoreArea and (FCodeGen <> nil) then
