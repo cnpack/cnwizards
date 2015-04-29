@@ -769,7 +769,7 @@ function CnOtaGetEditPos(EditView: IOTAEditView): TOTAEditPos;
 
 procedure CnOtaGotoEditPos(EditPos: TOTAEditPos; EditView: IOTAEditView = nil;
   Middle: Boolean = True);
-{* 移动光标到指定位置，如果 EditView 为空使用当前值。}
+{* 移动光标到指定位置，BDS 以上的列使用 Utf8 的列值。如果 EditView 为空使用当前值。}
 
 function CnOtaGetCharPosFromPos(Position: LongInt; EditView: IOTAEditView): TOTACharPos;
 {* 转换一个线性位置到 TOTACharPos，因为在 D5/D6 下 IOTAEditView.PosToCharPos
