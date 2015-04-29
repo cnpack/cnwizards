@@ -459,6 +459,48 @@ var
   Block: IOTAEditBlock;
   StartPos, EndPos, StartPosIn, EndPosIn: Integer;
   StartRec, EndRec: TOTACharPos;
+  ErrLine: string;
+
+  // 将解析器中返回的出错列转换成 IDE 里内部使用的列供定位，BDS 以上是 Utf8
+  function ConvertToEditorCol(const Line: string; Col: Integer): Integer;
+  var
+    S: WideString;
+  begin
+    Result := Col;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+    // Col 返回的是 Unicode 的列，Line 是 Ansi 的，需要转成 Utf8 的列
+    S := WideString(Line);
+    S := Copy(S, 1, Col);
+    Result := Length(UTF8Encode(S));
+{$ELSE}
+  {$IFDEF UNICODE}
+    // Col 返回的是 Unicode 的列，Line 是 Unicode 的，需要转成 Utf8 的列
+    S := Copy(Line, 1, Col);
+    Result := Length(UTF8Encode(S));
+  {$ENDIF}
+{$ENDIF}
+  end;
+
+  // 将解析器中返回的出错列转换成 IDE 里显示的列供显示，均是 Ansi
+  function ConvertToVisibleCol(const Line: string; Col: Integer): Integer;
+  var
+    S: WideString;
+  begin
+    Result := Col;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+    // Col 返回的是 Unicode 的列，Line 是 Ansi 的，需要转成 Ansi 的列
+    S := WideString(Line);
+    S := Copy(S, 1, Col);
+    Result := Length(AnsiString(S));
+{$ELSE}
+  {$IFDEF UNICODE}
+    // Col 返回的是 Unicode 的列，Line 是 Unicode 的，需要转成 Ansi 的列
+    S := Copy(Line, 1, Col);
+    Result := Length(AnsiString(S));
+  {$ENDIF}
+{$ENDIF}
+  end;
+
 begin
   if Index = FIdOptions then
     Config
@@ -524,10 +566,10 @@ begin
             SourcePos, CurrentToken);
           Screen.Cursor := crDefault;
 
-          CnOtaGotoEditPos(OTAEditPos(SourceCol, SourceLine));
-          ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine, SourceCol,
+          ErrLine := CnOtaGetLineText(SourceLine, View.Buffer);
+          CnOtaGotoEditPos(OTAEditPos(ConvertToEditorCol(ErrLine, SourceCol), SourceLine));
+          ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine, ConvertToVisibleCol(ErrLine, SourceCol),
             GetErrorStr(ErrCode), CurrentToken]));
-
         end;
       finally
         Formatter := nil;
@@ -608,8 +650,9 @@ begin
                 SourcePos, CurrentToken);
               Screen.Cursor := crDefault;
 
-              CnOtaGotoEditPos(OTAEditPos(SourceCol, SourceLine));
-              ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine, SourceCol,
+              ErrLine := CnOtaGetLineText(SourceLine, View.Buffer);
+              CnOtaGotoEditPos(OTAEditPos(ConvertToEditorCol(ErrLine, SourceCol), SourceLine));
+              ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine, ConvertToVisibleCol(ErrLine, SourceCol),
                 GetErrorStr(ErrCode), CurrentToken]));
             end;
           end;
