@@ -331,6 +331,7 @@ begin
   FSourcePtr := FBuffer;
   FSourceEnd := FBuffer;
   FTokenPtr := FBuffer;
+  FOldSourceColPtr := FBuffer;
   FSourceLine := 1;
   FSourceCol := 1;
   FNewSourceCol := 1;

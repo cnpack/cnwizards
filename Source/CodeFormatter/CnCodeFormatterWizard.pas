@@ -483,7 +483,7 @@ begin
         Res := Formatter.FormatOnePascalUnitW(PChar(Src), Length(Src));
 
         // Remove FF FE BOM if exists
-        if (StrLen(Res) > 1) and (Res[0] = #$FEFF) then
+        if (Res <> nil) and (StrLen(Res) > 1) and (Res[0] = #$FEFF) then
           Inc(Res);
         // CnDebugger.LogMemDump(PChar(Res), Length(Res) * SizeOf(Char));
 {$ELSE}
@@ -493,7 +493,7 @@ begin
         Res := Formatter.FormatOnePascalUnitUtf8(PAnsiChar(Src), Length(Src));
 
         // Remove EF BB BF BOM if exist
-        if (StrLen(Res) > 3) and
+        if (Res <> nil) and (StrLen(Res) > 3) and
           (Res[0] = #$EF) and (Res[1] = #$BB) and (Res[2] = #$BF) then
           Inc(Res, 3);
         // CnDebugger.LogMemDump(PAnsiChar(Res), Length(Res));
@@ -571,7 +571,7 @@ begin
             Res := Formatter.FormatPascalBlockW(PChar(Src), Length(Src), StartPosIn, EndPosIn);
 
             // Remove FF FE BOM if exists
-            if (StrLen(Res) > 1) and (Res[0] = #$FEFF) then
+            if (Res <> nil) and (StrLen(Res) > 1) and (Res[0] = #$FEFF) then
               Inc(Res);
 {$ELSE}
   {$IFDEF IDE_STRING_ANSI_UTF8}
@@ -581,7 +581,7 @@ begin
             Res := Formatter.FormatPascalBlockUtf8(PAnsiChar(Src), Length(Src), StartPosIn, EndPosIn);
 
             // Remove EF BB BF BOM if exist
-            if (StrLen(Res) > 3) and
+            if (Res <> nil) and (StrLen(Res) > 3) and
               (Res[0] = #$EF) and (Res[1] = #$BB) and (Res[2] = #$BF) then
               Inc(Res, 3);
   {$ELSE}

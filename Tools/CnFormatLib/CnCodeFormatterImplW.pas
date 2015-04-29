@@ -266,7 +266,7 @@ begin
     InStream.Free;
     OutStream.Free;
   end;
-  Result := FResult;;
+  Result := FResult;
 end;
 
 function TCnCodeFormatProvider.FormatOnePascalUnit(Input: PAnsiChar;
