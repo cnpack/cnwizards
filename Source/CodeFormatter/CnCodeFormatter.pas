@@ -646,7 +646,8 @@ begin
   // 两个标识符之间以空格分离
   if ( (FLastToken in IdentTokens) and (Token in IdentTokens + [tokAtSign]) ) then
     CodeGen.Write(' ')
-  else if (FLastToken in RightBracket) and (Token in [tokKeywordThen, tokKeywordDo, tokKeywordOf]) then
+  else if (FLastToken in RightBracket) and (Token in [tokKeywordThen, tokKeywordDo,
+    tokKeywordOf, tokKeywordTo, tokKeywordDownto]) then
     CodeGen.Write(' ')
   else if (Token in LeftBracket) and (FLastToken in [tokKeywordIf, tokKeywordWhile,
     tokKeywordFor, tokKeywordWith, tokKeywordCase]) then
@@ -4988,10 +4989,10 @@ begin
   // CodeGen 写完一段字符串但 Scaner 还没 NextToken 时调用
   // 用来判断 Scaner 的位置是否是指定 Offset
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('OnAfter Write. From %d %d to %d %d. Scaner Offset is %d.',
-    [TCnCodeGenerator(Sender).PrevRow, TCnCodeGenerator(Sender).PrevColumn,
-    TCnCodeGenerator(Sender).CurrRow, TCnCodeGenerator(Sender).CurrColumn,
-    FScaner.SourcePos]);
+//  CnDebugger.LogFmt('OnAfter Write. From %d %d to %d %d. Scaner Offset is %d.',
+//    [TCnCodeGenerator(Sender).PrevRow, TCnCodeGenerator(Sender).PrevColumn,
+//    TCnCodeGenerator(Sender).CurrRow, TCnCodeGenerator(Sender).CurrColumn,
+//    FScaner.SourcePos]);
 {$ENDIF}
 
   // 写出不属于代码本身的空行时超出标记的话，不算
@@ -5001,7 +5002,7 @@ begin
     FMatchedOutStartCol := TCnCodeGenerator(Sender).PrevColumn;
     FFirstMatchStart := True;
 {$IFDEF DEBUG}
-    CnDebugger.LogMsg('OnAfter Write. Got MatchStart.');
+//    CnDebugger.LogMsg('OnAfter Write. Got MatchStart.');
 {$ENDIF}
   end
   else if (FScaner.SourcePos + FScaner.TokenStringLength >= FMatchedInEnd) and
@@ -5011,7 +5012,7 @@ begin
     FMatchedOutEndCol := TCnCodeGenerator(Sender).CurrColumn;
     FFirstMatchEnd := True;
 {$IFDEF DEBUG}
-    CnDebugger.LogMsg('OnAfter Write. Got MatchEnd.');
+//    CnDebugger.LogMsg('OnAfter Write. Got MatchEnd.');
 {$ENDIF}
   end;
 end;
