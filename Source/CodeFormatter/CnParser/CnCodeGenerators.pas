@@ -50,7 +50,8 @@ type
   private
     FCode: TStrings;
     FLock: Word;
-    FColumnPos: Integer;
+    FColumnPos: Integer;            // 当前列值，注意它和实际情况不一定一致，因为 FCode 中的字符串可能带回车换行
+    FActualColumn: Integer;         // 当前实际列值，等于 FCode 最后一行最后一个 #13#10 后的内容
     FCodeWrapMode: TCodeWrapMode;
     FPrevStr: string;
     FPrevRow: Integer;
@@ -76,7 +77,7 @@ type
     destructor Destroy; override;
 
     procedure Reset;
-    procedure Write(S: string; BeforeSpaceCount:Word = 0;
+    procedure Write(const Text: string; BeforeSpaceCount:Word = 0;
       AfterSpaceCount: Word = 0);
     procedure InternalWriteln;
     procedure Writeln;
@@ -138,6 +139,8 @@ uses
 
 const
   CRLF = #13#10;
+  NOTLineHeadChars: set of Char = ['.', ',', ':', ')', ']'];
+  NOTLineTailChars: set of Char = ['.', '(', '['];
 
 procedure TCnCodeGenerator.CalcLastNoAutoIndentLine;
 var
@@ -264,17 +267,22 @@ end;
 function TCnCodeGenerator.GetLastIndentSpace: Integer;
 var
   I, Len: Integer;
+  S: string;
 begin
   Result := 0;
   CalcLastNoAutoIndentLine;
   if (FCode.Count > 0) and (FLastNoAutoWrapLine >= 0) and
     (FLastNoAutoWrapLine < FCode.Count) then
   begin
-    Len := Length(FCode[FLastNoAutoWrapLine]);
+    S := FCode[FLastNoAutoWrapLine];
+    if Pos(CRLF, S) > 0 then
+      S := Copy(S, LastDelimiter(#10, S) + 1, MaxInt);
+
+    Len := Length(S);    // 不能简单拿最后一行，必须把最后一行的最后一个换行符号后的空格长度整过来
     if Len > 0 then
     begin
       for I := 1 to Len do
-        if FCode[FLastNoAutoWrapLine][I] in [' ', #09] then
+        if S[I] in [' ', #09] then
           Inc(Result)
         else
           Exit;
@@ -305,6 +313,7 @@ begin
   FCode.Add('');
 
   FColumnPos := 0;
+  FActualColumn := 0;
   FLastExceedPosition := 0;
 end;
 
@@ -344,18 +353,62 @@ begin
   Dec(FLock);
 end;
 
-procedure TCnCodeGenerator.Write(S: string; BeforeSpaceCount,
+procedure TCnCodeGenerator.Write(const Text: string; BeforeSpaceCount,
   AfterSpaceCount: Word);
 var
   Str, WrapStr, Tmp: string;
-  ALen, Len: Integer;
-  IsCRLFEnd: Boolean;
+  CanBeHead, CanBeTail: Boolean;
+  Len: Integer;
 
   function ExceedLineWrap(Width: Integer): Boolean;
   begin
-    Result := ((FColumnPos <= Width) and
-      (FColumnPos + Len > Width)) or
-      (FColumnPos > Width);
+    Result := ((FActualColumn <= Width) and
+      (FActualColumn + Len > Width)) or
+      (FActualColumn > Width);
+  end;
+
+  // 获得一个字符串最后一行的长度
+  function ActualColumn(const S: string): Integer;
+  var
+    LPos: Integer;
+  begin
+    if Pos(CRLF, S) > 0 then
+    begin
+      LPos := LastDelimiter(#10, S);
+      Result := Length(S) - LPos;
+    end
+    else
+      Result := Length(S);
+  end;
+
+  // 获得一个字符串最后一行的长度
+  function AnsiActualColumn(const S: AnsiString): Integer;
+  var
+    LPos: Integer;
+  begin
+    if Pos(CRLF, S) > 0 then
+    begin
+      LPos := LastDelimiter(#10, S);
+      Result := Length(S) - LPos;
+    end
+    else
+      Result := Length(S);
+  end;
+
+  // 某些单个字符不宜做行头
+  function StrCanBeHead(const S: string): Boolean;
+  begin
+    Result := True;
+    if (Length(S) = 1) and (S[1] in NOTLineHeadChars) then
+      Result := False;
+  end;
+
+  // 某些单个字符不宜做行尾
+  function StrCanBeTail(const S: string): Boolean;
+  begin
+    Result := True;
+    if (Length(S) = 1) and (S[1] in NOTLineTailChars) then
+      Result := False;
   end;
 
 begin
@@ -364,24 +417,22 @@ begin
   if FCode.Count = 0 then
     FCode.Add('');
 
-  Str := Format('%s%s%s', [StringOfChar(' ', BeforeSpaceCount), S,
+  CanBeHead := StrCanBeHead(Text);
+  CanBeTail := StrCanBeTail(FPrevStr);
+
+  Str := Format('%s%s%s', [StringOfChar(' ', BeforeSpaceCount), Text,
     StringOfChar(' ', AfterSpaceCount)]);
 
-  IsCRLFEnd := False;
-  ALen := Length(Str);
-  if ALen > 2 then
-    IsCRLFEnd := (Str[ALen - 1] = #13) and (Str[ALen] = #10);
-
 {$IFDEF UNICODE}
-  Len := Length(AnsiString(TrimRight(Str))); // Unicode 模式下，转成 Ansi 长度才符合一般规则
+  Len := AnsiActualColumn(AnsiString(TrimRight(Str))); // Unicode 模式下，转成 Ansi 长度才符合一般规则
 {$ELSE}
-  Len := Length(TrimRight(Str)); // Ansi 模式下，长度直接符合一般规则
+  Len := ActualColumn(TrimRight(Str)); // Ansi 模式下，长度直接符合一般规则
 {$ENDIF}
 
   FPrevRow := FCode.Count - 1;
-  if (FCodeWrapMode = cwmNone) or IsCRLFEnd then
+  if FCodeWrapMode = cwmNone then
   begin
-    // 不自动换行时，或者本次写入内容尾部本来就是换行时，无需处理
+    // 不自动换行时，无需处理
   end
   else if FCodeWrapMode = cwmSimple then // 简单换行，判断是否超出宽度
   begin
@@ -406,9 +457,11 @@ begin
   begin
     // 高级。超出大行后，回溯到从小行处开始换行
     if ExceedLineWrap(CnPascalCodeForRule.WrapWidth) and not
-      ExceedLineWrap(CnPascalCodeForRule.WrapNewLineWidth) and (FLastExceedPosition = 0) then
+      ExceedLineWrap(CnPascalCodeForRule.WrapNewLineWidth)
+      and CanBeHead and CanBeTail and (FLastExceedPosition = 0) then
     begin
-      // 第一次只超小行未超大行时，照常输出，记录输出前小行待回溯的位置
+      // 第一次只超小行未超大行时，并且“上次输出的字符串能做尾并且本次输出的字符串能做头”时，照常输出，记录输出前小行待回溯的位置
+      // 如果字符不能做行尾，则此处不进入
       FLastExceedPosition := FColumnPos;
     end
     else if (FPrevStr <> '.') and (FLastExceedPosition > 0) and // 有可换行之处才换
@@ -447,14 +500,21 @@ begin
 //{$ELSE}
 // Ansi 模式下，长度直接符合一般规则
 
-  FColumnPos := Length(FCode[FCode.Count - 1]);
-  FPrevStr := S;
+  FPrevStr := Text;
+
+  // 如果本次写入的内容有回车换行，则将上次该换行的位置置零
+  if Pos(CRLF, Str) > 0 then
+    FLastExceedPosition := 0;
+
+  Str := FCode[FCode.Count - 1];
+  FColumnPos := Length(Str);
+  FActualColumn := ActualColumn(Str);
 
   DoAfterWrite(False);
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('String Wrote from %d %d to %d %d: %s', [FPrevRow, FPrevColumn,
-    GetCurrRow, GetCurrColumn, Str]);
-  CnDebugger.LogMsg(CopyPartOut(FPrevRow, FPrevColumn, GetCurrRow, GetCurrColumn));
+//  CnDebugger.LogFmt('String Wrote from %d %d to %d %d: %s', [FPrevRow, FPrevColumn,
+//    GetCurrRow, GetCurrColumn, Str]);
+//  CnDebugger.LogMsg(CopyPartOut(FPrevRow, FPrevColumn, GetCurrRow, GetCurrColumn));
 {$ENDIF}
 end;
 
@@ -475,8 +535,8 @@ begin
   
   DoAfterWrite(True);
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('NewLine Wrote from %d %d to %d %d', [FPrevRow, FPrevColumn,
-    GetCurrRow, GetCurrColumn]);
+//  CnDebugger.LogFmt('NewLine Wrote from %d %d to %d %d', [FPrevRow, FPrevColumn,
+//    GetCurrRow, GetCurrColumn]);
 {$ENDIF}
 end;
 
