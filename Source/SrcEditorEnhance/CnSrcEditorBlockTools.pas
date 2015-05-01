@@ -65,8 +65,8 @@ type
     btLowerCase, btUpperCase, btToggleCase,
     btIndent, btIndentEx, btUnindent, btUnindentEx,
     btCommentCode, btUnCommentCode, btToggleComment, btCommentCropper,
-    btCodeSwap, btCodeToString, btInsertColor, btInsertDateTime, btSortLines,
-    btBlockMoveUp, btBlockMoveDown, btBlockDelLines);
+    btFormatCode, btCodeSwap, btCodeToString, btInsertColor, btInsertDateTime,
+    btSortLines, btBlockMoveUp, btBlockMoveDown, btBlockDelLines);
 
   TCnSrcEditorBlockTools = class(TObject)
   private
@@ -475,7 +475,7 @@ begin
     btLowerCase..btToggleCase: DoBlockCase(Kind);
     btIndent..btUnindentEx: DoBlockFormat(Kind);
     btCommentCode..btCommentCropper: DoBlockComment(Kind);
-    btCodeSwap..btBlockDelLines: DoBlockMisc(Kind);
+    btFormatCode..btBlockDelLines: DoBlockMisc(Kind);
   end;
 end;
 
@@ -729,6 +729,7 @@ begin
 
   // ÆäËü²Ëµ¥
   FMiscMenu := AddMenuItem(Items, SCnSrcBlockMisc, nil);
+  AddMenuItemWithAction(FMiscMenu, 'actCnCodeFormatterWizardFormatCurrent', btFormatCode);
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorCodeSwap', btCodeSwap);
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorCodeToString', btCodeToString);
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorInsertColor', btInsertColor);
