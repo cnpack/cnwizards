@@ -681,6 +681,7 @@ end;
 procedure TCnCodeFormatterForm.chkAutoWrapClick(Sender: TObject);
 begin
   seWrapLine.Enabled := chkAutoWrap.Checked;
+  seNewLine.Enabled := chkAutoWrap.Checked;
 end;
 
 procedure TCnCodeFormatterForm.FormShow(Sender: TObject);
