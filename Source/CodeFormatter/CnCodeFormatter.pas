@@ -684,7 +684,8 @@ begin
         else if SemicolonIsLineStart then
           CodeGen.Write(Scaner.TokenString, BeforeSpaceCount, 1)
         else
-          CodeGen.Write(Scaner.TokenString, 0, 1);
+          CodeGen.Write(Scaner.TokenString, 0, 0);
+          // 之前是 0、1，导致行尾注释不断后退，现在改为0、0，Directives 的由它们自己加空格
       end;
     tokAssign:    CodeGen.Write(Scaner.TokenString, 1, 1);
   else
@@ -2489,8 +2490,7 @@ begin
         tokComplexIndex
       ] then
       begin
-        if not IgnoreFirst then
-          CodeGen.Write(' '); // 关键字空格分隔
+        CodeGen.Write(' '); // 和之前的内容空格分隔，无论是不是第一个 Directive
         CodeGen.Write(FormatString(Scaner.TokenString, CnPascalCodeForRule.KeywordStyle));
         FLastToken := Scaner.Token;
         Scaner.NextToken;
@@ -2505,8 +2505,7 @@ begin
       end
       else
       begin
-        if not IgnoreFirst then
-          CodeGen.Write(' '); // 关键字空格分隔
+        CodeGen.Write(' '); // 和之前的内容空格分隔，无论是不是第一个 Directive
         CodeGen.Write(FormatString(Scaner.TokenString, CnPascalCodeForRule.KeywordStyle));
         FLastToken := Scaner.Token;
         Scaner.NextToken;
