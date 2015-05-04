@@ -357,7 +357,7 @@ procedure TCnCodeGenerator.Write(const Text: string; BeforeSpaceCount,
   AfterSpaceCount: Word);
 var
   Str, WrapStr, Tmp: string;
-  CanBeHead, CanBeTail: Boolean;
+  ThisCanBeHead, PrevCanBeTail: Boolean;
   Len: Integer;
 
   function ExceedLineWrap(Width: Integer): Boolean;
@@ -417,8 +417,8 @@ begin
   if FCode.Count = 0 then
     FCode.Add('');
 
-  CanBeHead := StrCanBeHead(Text);
-  CanBeTail := StrCanBeTail(FPrevStr);
+  ThisCanBeHead := StrCanBeHead(Text);
+  PrevCanBeTail := StrCanBeTail(FPrevStr);
 
   Str := Format('%s%s%s', [StringOfChar(' ', BeforeSpaceCount), Text,
     StringOfChar(' ', AfterSpaceCount)]);
@@ -436,8 +436,10 @@ begin
   end
   else if FCodeWrapMode = cwmSimple then // 简单换行，判断是否超出宽度
   begin
-    if (FPrevStr <> '.') and ExceedLineWrap(CnPascalCodeForRule.WrapWidth) then // Dot in unitname should not new line.
+    if (FPrevStr <> '.') and ExceedLineWrap(CnPascalCodeForRule.WrapWidth)
+      and ThisCanBeHead and PrevCanBeTail then // Dot in unitname should not new line.
     begin
+      // “上次输出的字符串能做尾并且本次输出的字符串能做头”才换行
       if FAutoWrapButNoIndent then
       begin
         Str := StringOfChar(' ', CurIndentSpace) + TrimLeft(Str);
@@ -458,7 +460,7 @@ begin
     // 高级。超出大行后，回溯到从小行处开始换行
     if ExceedLineWrap(CnPascalCodeForRule.WrapWidth) and not
       ExceedLineWrap(CnPascalCodeForRule.WrapNewLineWidth)
-      and CanBeHead and CanBeTail and (FLastExceedPosition = 0) then
+      and ThisCanBeHead and PrevCanBeTail and (FLastExceedPosition = 0) then
     begin
       // 第一次只超小行未超大行时，并且“上次输出的字符串能做尾并且本次输出的字符串能做头”时，照常输出，记录输出前小行待回溯的位置
       // 如果字符不能做行尾，则此处不进入
