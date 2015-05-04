@@ -216,7 +216,7 @@
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="代碼格式化專家">
 		<param name="Name" value="代碼格式化專家">
-		<param name="Local" value="wizards\codeforamtter.htm">
+		<param name="Local" value="wizards\codeformatter.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="代碼塊取消註釋工具">

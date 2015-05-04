@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Code Formatter Wizard</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">Code Formatter Wizard</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">Code Formatter Wizard</p>
+<p class="text" align="left">This Wizard is used to Format Code in IDE. Now only Supports Pascal.</p>
+<p class="text" align="left">With the Default short Ctrl+W, You can Format Current Pascal Source File or Selection in Editor. If Formatting Section, Section will be Extended to Whole Lines before Formatting.</p>
+<p class="text" align="left"></p>
+<p class="title">&nbsp;</p>
+<p class="title">Settings</p>
+<p class="text" align="left">The Setting Dialog of This Wizard is as below:</p>
+<p class="text" align="center">&nbsp;<img src="formatterconfig.png"></p>
+<p class="text" align="left"> 
+<ul>
+	<li>
+<p class="text"><b>Common Settings</b></p></li>
+	<ul>
+  <li>
+<p class="text"><b>Keyword</b>: Specify how to Process Keywords. Default is Lower Case.</p></li>
+	<li>
+<p class="text"><b>Begin Style</b>: Specify where to Put "begin" when Meeting Structureed Statements like if...then or with...do. Defaultly Put to Next Line. Note: This Option does NOT Affect Procedure or Function Body.(Always use Next Line.)</p></li>
+  <li>
+<p class="text"><b>̵Tab Indent</b>: Space Count for Tab Indent. Default is 2.</p></li>
+	<li>
+<p class="text"><b>Space Before Operator</b>: Space Count before an Operator. Default is 1.</p></li>
+	<li>
+<p class="text"><b>Space After Operator</b>: Space Count after an Operator. Default is 1.</p></li>
+	<li>
+<p class="text"><b>Auto Wrap</b>: There are 2 Line Width in Auto Wrap Setting: the Smaller One "Break Line Width" and the Bigger One "Exceeding Width". When a Line Exceeds the "Exceeding Width", it will be Broken to Next Line at "Breake Line Width". This Feature can avoid some Minor Contents at Next Line when the Original Line is a Little Longer than "Exceeding Width".</p></li>
+	<li>
+<p class="text"><b>Single Line Mode for Every Uses Unit</b>: If Checked, Every Unit Name in Uses Area will Occupy One Line, Otherwise Use a Simple auto Wrap Mode with the above Break Line Width.</p></li>
+</ul>
+	<li>
+<p class="text"><b>ASM Settings</b></p></li>
+	<ul>
+	<li>
+<p class="text"><b>Line Head Indent</b>: Space Count at Line Head (Except Label) in Inline ASM Code. Default is 8.</p></li>
+	<li>
+<p class="text"><b>Tab Width</b>: Tab Width in Inline ASM Code. Default is 8.</p></li>
+</ul>
+<li>
+<p class="text"><b>Do NOT Format Content between {(*} and {*)}</b>: If Checked, Contents between {(*} and {*)} won't be Formatted and will Keep its Original Format.</p></li>
+<li>
+<p class="text"><b>Shortcut</b>: Change Shortcut for Menu Items Here.</li>
+	<li> 
+    <p class="text"><b>OK</b>: Confirm modification.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Cancel</b>: Cancel this modification.</p>
+  </li>
+  <li> 
+    <p class="text"><b>Help</b>: Show this help.</p>
+  </li>
+</ul>
+<p class="title">&nbsp;</p>
+<p class="title">Limitation and Known Problems</p>
+<p class="text" align="left"> 
+<ul>
+	<li>
+<p class="text"><b>About Compiler Directive</b>: We Treat Compiler Directives as Comments. So if You have Code such as {$IFDEF XXX} var A: Byte; {$ELSE} Word;{$ENDIF}, Code Formatter will Raise Error. Please Notice it.</p></li>
+	<li>
+<p class="text"><b>About Comment</b>: We Keep the Original Format when Processing Comments, basically NO Change compared to Formatting Results. So maybe seems NOT so Good.</p></li>
+<li>
+<p class="text"><b>Settings Limited</b>: Now This Wizard only Provides A Few Settings. We'll Provide More Later.</p></li>
+	<li>
+<p class="text"><b>C/C++ Code</b>: Not Supported yet.</p></li>
+</ul>
+<p class="title" align="left">&nbsp;
+<p class="title">Links</p>
+<p class="text" align="left">
+<a href="wizards.htm">Basic Operation</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">CnWizards Settings</a><p class="text" align="left">
+<a href="../cnpack/index.htm">About CnWizards</a>
+<p class="text" align="left">&nbsp; 
+<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">Copyrights 2001-2015 CnPack Team</a></p>
+</body>
+</html>

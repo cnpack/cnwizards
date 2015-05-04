@@ -79,6 +79,11 @@
 		<param name="Local" value="wizards\editors\wizeditors.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Code Formatter Wizard">
+		<param name="Name" value="Code Formatter Wizard">
+		<param name="Local" value="wizards\codeformatter.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Code Input Helper">
 		<param name="Name" value="Code Input Helper">
 		<param name="Local" value="ideenhance\inputhelper.htm">

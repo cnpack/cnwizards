@@ -145,6 +145,10 @@
 			<param name="Local" value="wizards\feedreader.htm">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Code Formatter Wizard">
+			<param name="Local" value="wizards\codeformatter.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="IDE External Wizard Management">
 			<param name="Local" value="wizards\cnmanagewiz.htm">
 			</OBJECT>
