@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>代碼格式化專家</title>
+<meta http-equiv="Content-Type" content="text/html; charset=big5">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">代碼格式化專家</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">代碼格式化專家</p>
+<p class="text" align="left"> 該專家用於格式化代碼，目前只支持 Pascal。</p>
+<p class="text" align="left">代碼格式化功能可格式化當前編輯器內的 Pascal 單元源碼或選擇區的內容，默認熱鍵 Ctrl+W。如果有選擇區，格式化之前會將選擇區擴展至整行模式再進行格式化。</p>
+<p class="text" align="left"></p>
+<p class="title">　</p>
+<p class="title">參數設置</p>
+<p class="text" align="left">代碼格式化專家的設置界面如圖：</p>
+<p class="text" align="center">　<img src="formatterconfig.png"></p>
+<p class="text" align="left"> 
+<ul>
+	<li>
+<p class="text"><b>普通設置</b></p></li>
+	<ul>
+  <li>
+<p class="text"><b>關鍵字大小寫</b>：設置格式化時關鍵字的大小寫處理規則，有大寫、小寫、首字母大寫、不改變原有大小寫四種選擇，默認為小寫。</p></li>
+	<li>
+<p class="text"><b>Begin 位置</b>：處理一些結構化語句如 if then 或 with do 後續的 begin end 代碼塊時，begin 是置於語句當前行之後，還是另起一行，默認另起一行。注意此選項不包括過程或函數的實現塊。</p></li>
+  <li>
+<p class="text"><b>縮進空格數</b>：指定縮進的空格數，默認為 2。</p></li>
+	<li>
+<p class="text"><b>運算符前的空格數</b>：指定運算符之前所放置的空格數，默認為 1，此選項常用於雙目運算符，注意括號等符號不在此列。</p></li>
+	<li>
+<p class="text"><b>運算符後的空格數</b>：指定運算符之後所放置的空格數，默認為 1，此選項常用於雙目運算符，注意括號等符號同樣不在此列。</p></li>
+	<li>
+<p class="text"><b>自動換行選項</b>：本選項有兩個寬度值，一個是換行寬度值，一個是超出寬度值。當勾選此自動換行選項後，當一行代碼超過後者較大的超出寬度值時，將本行代碼在剛超過前者較小的換行寬度處開始重新換行。這樣做的目的是為了避免一行代碼剛剛超長時，使用簡單換行帶來的新行內容太少的問題。注意由於部分符號不適合做行頭或行尾，由此帶來的調整可能導致分行的列值不完全和設置的換行值一致，使用時請注意。</p></li>
+	<li>
+<p class="text"><b>Uses 區的每個單元名獨佔一行</b>：勾選此選項後，Uses 區的每個單元獨佔一行。如果不勾，則使用上面設置的自動換行的換行寬度進行自動換行。</p></li>
+</ul>
+	<li>
+<p class="text"><b>彙編設置</b></p></li>
+	<ul>
+	<li>
+<p class="text"><b>行首縮進空格數</b>：Pascal 嵌入彙編代碼時，此選項指定行首除 Label 外的縮進空格數，默認為 8。</p></li>
+	<li>
+<p class="text"><b>縮進空格數</b>：此選項指定彙編代碼內的 Tab 鍵縮進空格數，默認為 8。</p></li>
+</ul>
+<li>
+<p class="text"><b>不格式化 {(*} 與 {*)} 之間的內容</b>：勾選此選項可控制對代碼中的部分區域不予格式化。</p></li>
+<li>
+<p class="text"><b>快捷鍵</b>：可在此設置格式化功能以及設置等的快捷鍵。</p></li>
+	<li> 
+    <p class="text"><b>確定</b>：保存選項並關閉設置對話框。</p>
+  </li>
+  <li> 
+    <p class="text"><b>取消</b>：關閉設置對話框，不保存選項改動。</p>
+  </li>
+  <li> 
+    <p class="text"><b>幫助</b>：顯示幫助信息。</p>
+  </li>
+</ul>
+<p class="title">　</p>
+<p class="title">局限與已知問題</p>
+<p class="text" align="left"> 
+<ul>
+	<li>
+<p class="text"><b>對編譯指令的處理</b>：目前，代碼格式化專家採用的是針對整個源文件進行語法分析與排版的工作方式，並且把編譯指令當作註釋來處理。因此如果出現類似如{$IFDEF XXX} var A: Byte; {$ELSE} Word;{$ENDIF} 這種分隔的並列語法結構時會導致解析出錯，使用時請注意。</p></li>
+	<li>
+<p class="text"><b>對註釋的處理</b>：註釋風格千變萬化各各不同，目前我們對註釋的處理也沒有一定的規範，只盡可能保持註釋原有的風格，而無法做到和代碼聯動。</p></li>
+<li>
+<p class="text"><b>選項較少</b>：目前代碼格式化專家未提供太多的控制選項，以後會逐步豐富。</p></li>
+	<li>
+<p class="text"><b>C/C++代碼</b>：尚不支持。</p></li>
+</ul>
+<p class="title" align="left">　<p class="title" align="left">相關主題<p class="text" align="left">
+<a href="wizards.htm">IDE 專家基本操作</a><p class="text" align="left">
+<a href="../options/wizconfig.htm">IDE 專家設置</a><p class="text" align="left">
+<a href="../cnpack/index.htm">關於 IDE 專家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版權所有 2001-2015 CnPack 開發組</a></p>
+</body>
+</html>

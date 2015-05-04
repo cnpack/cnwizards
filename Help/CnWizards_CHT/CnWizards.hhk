@@ -214,6 +214,11 @@
 		<param name="Local" value="wizards\editors\editorcodeunindent.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="代碼格式化專家">
+		<param name="Name" value="代碼格式化專家">
+		<param name="Local" value="wizards\codeforamtter.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="代碼塊取消註釋工具">
 		<param name="Name" value="代碼塊取消註釋工具">
 		<param name="Local" value="wizards\editors\editorcodeuncomment.htm">
