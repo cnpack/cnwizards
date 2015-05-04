@@ -1329,6 +1329,7 @@ begin
   TranslateStr(SCnCodeFormatterWizardConfigHint, 'SCnCodeFormatterWizardConfigHint');
   TranslateStr(SCnCodeFormatterWizardFormatCurrentCaption, 'SCnCodeFormatterWizardFormatCurrentCaption');
   TranslateStr(SCnCodeFormatterWizardFormatCurrentHint, 'SCnCodeFormatterWizardFormatCurrentHint');
+  TranslateStr(SCnCodeFormatterWizardErrLineWidth, 'SCnCodeFormatterWizardErrLineWidth');
   TranslateStr(SCnCodeFormatterErrUnknown, 'SCnCodeFormatterErrUnknown');
   TranslateStr(SCnCodeFormatterErrPascalFmt, 'SCnCodeFormatterErrPascalFmt');
   TranslateStr(SCnCodeFormatterErrPascalIdentExp, 'SCnCodeFormatterErrPascalIdentExp');

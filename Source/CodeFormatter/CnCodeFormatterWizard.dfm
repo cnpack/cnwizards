@@ -7,6 +7,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
   ClientWidth = 451
   Font.Charset = ANSI_CHARSET
   OldCreateOrder = True
+  OnCloseQuery = FormCloseQuery
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
@@ -113,6 +114,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           MinValue = 16
           TabOrder = 6
           Value = 16
+          OnChange = seWrapLineChange
         end
         object seSpaceBefore: TCnSpinEdit
           Left = 296

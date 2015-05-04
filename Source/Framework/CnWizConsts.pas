@@ -1521,6 +1521,7 @@ var
   SCnCodeFormatterWizardConfigHint: string = '&Options...';
   SCnCodeFormatterWizardFormatCurrentCaption: string = 'Format Current File/Selection';
   SCnCodeFormatterWizardFormatCurrentHint: string = 'Format Current File or Selection';
+  SCnCodeFormatterWizardErrLineWidth: string = 'Wrap Line Width Error.';
 
   SCnCodeFormatterErrUnknown: string = 'Unknown Error.';
   SCnCodeFormatterErrPascalFmt: string = 'Format Error(%d, %d): %s' + #13#10#13#10 + 'Current: ''%s''';

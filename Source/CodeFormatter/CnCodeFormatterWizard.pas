@@ -135,6 +135,8 @@ type
     procedure chkAutoWrapClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure btnShortCutClick(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure seWrapLineChange(Sender: TObject);
   private
     FWizard: TCnCodeFormatterWizard;
   protected
@@ -698,6 +700,21 @@ procedure TCnCodeFormatterForm.btnShortCutClick(Sender: TObject);
 begin
   if FWizard.ShowShortCutDialog(GetHelpTopic) then
     FWizard.DoSaveSettings;
+end;
+
+procedure TCnCodeFormatterForm.FormCloseQuery(Sender: TObject;
+  var CanClose: Boolean);
+begin
+  if seNewLine.Value < seWrapLine.Value then
+  begin
+    ErrorDlg(SCnCodeFormatterWizardErrLineWidth);
+    CanClose := False;
+  end;
+end;
+
+procedure TCnCodeFormatterForm.seWrapLineChange(Sender: TObject);
+begin
+  seNewLine.MinValue := seWrapLine.Value;
 end;
 
 initialization

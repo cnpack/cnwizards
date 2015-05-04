@@ -3585,6 +3585,7 @@ SCnCodeFormatterWizardConfigCaption=设置(&O)...
 SCnCodeFormatterWizardConfigHint=设置(&O)...
 SCnCodeFormatterWizardFormatCurrentCaption=格式化当前源文件或选择区(&W)
 SCnCodeFormatterWizardFormatCurrentHint=格式化当前源文件或选择区
+SCnCodeFormatterWizardErrLineWidth=自动换行宽度设置错误。
 SCnCodeFormatterErrUnknown=未知错误。
 SCnCodeFormatterErrPascalFmt=格式化错误（%d，%d）：%s<BR><BR>当前标识符：''%s''
 SCnCodeFormatterErrPascalIdentExp=缺失有效标识符。

@@ -3585,6 +3585,7 @@ SCnCodeFormatterWizardConfigCaption=&Options...
 SCnCodeFormatterWizardConfigHint=&Options...
 SCnCodeFormatterWizardFormatCurrentCaption=Format Current &File/Selection
 SCnCodeFormatterWizardFormatCurrentHint=Format Current File or Selection
+SCnCodeFormatterWizardErrLineWidth=Wrap Line Width Error.
 SCnCodeFormatterErrUnknown=Unknown Error.
 SCnCodeFormatterErrPascalFmt=Format Error(%d, %d): %s<BR><BR>Current: ''%s''
 SCnCodeFormatterErrPascalIdentExp=Identifier Expected.
