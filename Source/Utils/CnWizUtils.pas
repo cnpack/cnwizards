@@ -326,6 +326,10 @@ function IsKnownSourceFile(const FileName: string): Boolean;
 {* 判断是否未知文件}
 function IsTypeLibrary(const FileName: string): Boolean;
 {* 判断是否是 TypeLibrary 文件}
+function IsLua(const FileName: string): Boolean;
+{* 判断是否是 lua 文件}
+function IsSpecifiedExt(const FileName: string; const Ext: string): Boolean;
+{* 判断是否是指定扩展名的文件，Ext 参数要带点号}
 function ObjectIsInheritedFromClass(AObj: TObject; const AClassName: string): Boolean;
 {* 使用字符串的方式判断对象是否继承自此类}
 function FindControlByClassName(AParent: TWinControl; const AClassName: string): TControl;
@@ -2285,6 +2289,19 @@ begin
           or (FileExt = '.OCX')
           or (FileExt = '.DLL')
           or (FileExt = '.EXE'));
+end;
+
+function IsLua(const FileName: string): Boolean;
+begin
+  Result := IsSpecifiedExt(FileName, '.LUA');
+end;
+
+function IsSpecifiedExt(const FileName: string; const Ext: string): Boolean;
+var
+  FileExt: string;
+begin
+  FileExt := ExtractUpperFileExt(FileName);
+  Result := FileExt = UpperCase(Ext);
 end;
 
 // 使用字符串的方式判断对象是否继承自此类

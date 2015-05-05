@@ -242,6 +242,7 @@ type
     procedure SquareOpenProc;
     procedure StarProc;
     procedure StringProc;
+    procedure BadStringProc; // ´úÌæË«ÒýºÅ×Ö·û´®
     procedure SymbolProc;
     procedure UnknownProc;
     function GetToken: string;
@@ -908,6 +909,7 @@ begin
             '[': fProcTable[I]:=SquareOpenProc;
             ']': fProcTable[I]:=SquareCloseProc;
             '^': fProcTable[I]:=PointerSymbolProc;
+            '"': fProcTable[I]:=BadStringProc;
           else fProcTable[I]:=SymbolProc;
           end;
         end;
@@ -1378,6 +1380,18 @@ begin
     end;
     inc(Run);
   until FOrigin[Run]=#39;
+  if FOrigin[Run]<>#0 then inc(Run);
+end;
+
+procedure TmwPasLex.BadStringProc;
+begin
+  fTokenID:=tkBadString;
+  repeat
+    case FOrigin[Run]of
+      #0, #10, #13: break;
+    end;
+    inc(Run);
+  until FOrigin[Run]='"';
   if FOrigin[Run]<>#0 then inc(Run);
 end;
 

@@ -296,6 +296,7 @@ type
     procedure SquareOpenProc;
     procedure StarProc;
     procedure StringProc;
+    procedure BadStringProc; // 代替双引号字符串
     procedure SymbolProc;
     procedure UnknownProc;
     function GetToken: CnWideString;
@@ -1346,6 +1347,8 @@ begin
               FProcTable[I] := SquareCloseProc;
             '^':
               FProcTable[I] := PointerSymbolProc;
+            '"':
+              FProcTable[I] := BadStringProc;
           else
             FProcTable[I] := SymbolProc;
           end;
@@ -1930,6 +1933,20 @@ begin
     end;
     StepRun(1, True); // 目前只在字符串内部进行宽字符宽度计算
   until FOrigin[FRun] = #39;
+  if FOrigin[FRun] <> #0 then
+    StepRun;
+end;
+
+procedure TCnPasWideLex.BadStringProc;
+begin
+  FTokenID := tkBadString;
+  repeat
+    case FOrigin[FRun] of
+      #0, #10, #13:
+        Break;
+    end;
+    StepRun(1, True); // 目前只在字符串内部进行宽字符宽度计算
+  until FOrigin[FRun] = '"';
   if FOrigin[FRun] <> #0 then
     StepRun;
 end;
