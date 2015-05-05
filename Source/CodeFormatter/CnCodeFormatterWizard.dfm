@@ -243,6 +243,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
     Height = 21
     Caption = '&Help'
     TabOrder = 4
+    OnClick = btnHelpClick
   end
   object btnShortCut: TButton
     Left = 8

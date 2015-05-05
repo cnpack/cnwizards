@@ -137,6 +137,7 @@ type
     procedure btnShortCutClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure seWrapLineChange(Sender: TObject);
+    procedure btnHelpClick(Sender: TObject);
   private
     FWizard: TCnCodeFormatterWizard;
   protected
@@ -715,6 +716,11 @@ end;
 procedure TCnCodeFormatterForm.seWrapLineChange(Sender: TObject);
 begin
   seNewLine.MinValue := seWrapLine.Value;
+end;
+
+procedure TCnCodeFormatterForm.btnHelpClick(Sender: TObject);
+begin
+  ShowFormHelp;
 end;
 
 initialization
