@@ -516,11 +516,10 @@ begin
   else if FCodeWrapMode = cwmAdvanced then
   begin
     // 高级。超出大行后，回溯到从小行处开始换行
-    if ExceedLineWrap(CnPascalCodeForRule.WrapWidth) and not
-      ExceedLineWrap(CnPascalCodeForRule.WrapNewLineWidth)
+    if ExceedLineWrap(CnPascalCodeForRule.WrapWidth)
       and ThisCanBeHead and PrevCanBeTail and (FLastExceedPosition = 0) then
     begin
-      // 第一次只超小行未超大行时，并且“上次输出的字符串能做尾并且本次输出的字符串能做头”时，照常输出，记录输出前小行待回溯的位置
+      // 第一次超小行时，并且“上次输出的字符串能做尾并且本次输出的字符串能做头”时，照常输出，记录输出前小行待回溯的位置
       // 如果字符不能做行尾，则此处不进入
       FLastExceedPosition := FColumnPos;
     end

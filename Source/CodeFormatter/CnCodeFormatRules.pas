@@ -92,7 +92,7 @@ const
     SpaceBeforeASM: 8;
     SpaceTabASMKeyword: 8;
     WrapWidth: 80;
-    WrapNewLineWidth: 100;
+    WrapNewLineWidth: 90;
     UsesUnitSingleLine: False;
     UseIgnoreArea: True;
   );
