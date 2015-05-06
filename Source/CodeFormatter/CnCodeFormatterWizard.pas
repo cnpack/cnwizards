@@ -469,7 +469,6 @@ var
   var
     S: WideString;
   begin
-    Result := Col;
 {$IFDEF IDE_STRING_ANSI_UTF8}
     // Col 返回的是 Unicode 的列，Line 是 Ansi 的，需要转成 Utf8 的列
     S := WideString(Line);
@@ -480,6 +479,8 @@ var
     // Col 返回的是 Unicode 的列，Line 是 Unicode 的，需要转成 Utf8 的列
     S := Copy(Line, 1, Col);
     Result := Length(UTF8Encode(S));
+  {$ELSE}
+    Result := Col;
   {$ENDIF}
 {$ENDIF}
   end;
@@ -489,7 +490,6 @@ var
   var
     S: WideString;
   begin
-    Result := Col;
 {$IFDEF IDE_STRING_ANSI_UTF8}
     // Col 返回的是 Unicode 的列，Line 是 Ansi 的，需要转成 Ansi 的列
     S := WideString(Line);
@@ -500,6 +500,8 @@ var
     // Col 返回的是 Unicode 的列，Line 是 Unicode 的，需要转成 Ansi 的列
     S := Copy(Line, 1, Col);
     Result := Length(AnsiString(S));
+  {$ELSE}
+    Result := Col;
   {$ENDIF}
 {$ENDIF}
   end;

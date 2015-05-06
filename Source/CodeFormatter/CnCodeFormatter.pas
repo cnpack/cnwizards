@@ -5037,8 +5037,8 @@ begin
 //    CnDebugger.LogMsg('OnAfter Write. Got MatchStart.');
 {$ENDIF}
   end
-  else if (FScaner.SourcePos + FScaner.TokenStringLength >= FMatchedInEnd) and
-    not FFirstMatchEnd then
+  else if (FScaner.SourcePos + FScaner.TokenStringLength >= FMatchedInEnd)
+    and not IsWriteln and not FFirstMatchEnd then
   begin
     FMatchedOutEndRow := TCnCodeGenerator(Sender).CurrRow;
     FMatchedOutEndCol := TCnCodeGenerator(Sender).CurrColumn;

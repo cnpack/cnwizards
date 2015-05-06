@@ -490,8 +490,10 @@ begin
   begin
     // 不自动换行时，无需处理
   end
-  else if FCodeWrapMode = cwmSimple then // 简单换行，判断是否超出宽度
+  else if (FCodeWrapMode = cwmSimple) or ( (FCodeWrapMode = cwmAdvanced) and
+    (CnPascalCodeForRule.WrapWidth >= CnPascalCodeForRule.WrapNewLineWidth) ) then
   begin
+    // 简单换行，或复杂换行但行值设置不对，就简单判断是否超出宽度
     if (FPrevStr <> '.') and ExceedLineWrap(CnPascalCodeForRule.WrapWidth)
       and ThisCanBeHead and PrevCanBeTail then // Dot in unitname should not new line.
     begin
@@ -580,7 +582,7 @@ begin
   FColumnPos := Length(Str);
   FActualColumn := ActualColumn(Str);
 
-  DoAfterWrite(False);
+  DoAfterWrite(Text = CRLF);
 {$IFDEF DEBUG}
 //  CnDebugger.LogFmt('String Wrote from %d %d to %d %d: %s', [FPrevRow, FPrevColumn,
 //    GetCurrRow, GetCurrColumn, Str]);
