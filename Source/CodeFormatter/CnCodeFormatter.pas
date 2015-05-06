@@ -96,7 +96,7 @@ type
     procedure MatchOperator(Token: TPascalToken); //操作符
     procedure WriteToken(Token: TPascalToken; BeforeSpaceCount: Byte = 0;
       AfterSpaceCount: Byte = 0; IgnorePreSpace: Boolean = False;
-      SemicolonIsLineStart: Boolean = False);
+      SemicolonIsLineStart: Boolean = False; NoSeparateSpace: Boolean = False);
 
     function CheckFunctionName(const S: string): string;
     {* 检查给定字符串是否是一个常用函数名，如果是则返回正确的格式 }
@@ -646,7 +646,7 @@ end;
 
 procedure TCnAbstractCodeFormatter.WriteToken(Token: TPascalToken;
   BeforeSpaceCount, AfterSpaceCount: Byte; IgnorePreSpace: Boolean;
-  SemicolonIsLineStart: Boolean);
+  SemicolonIsLineStart: Boolean; NoSeparateSpace: Boolean);
 begin
   if CnPascalCodeForRule.UseIgnoreArea and Scaner.InIgnoreArea then
   begin
@@ -656,16 +656,19 @@ begin
     Exit;
   end;
 
-  // 两个标识符之间以空格分离
-  if ( (FLastToken in IdentTokens) and (Token in IdentTokens + [tokAtSign]) ) then
-    CodeGen.Write(' ')
-  else if (FLastToken in RightBracket) and (Token in [tokKeywordThen, tokKeywordDo,
-    tokKeywordOf, tokKeywordTo, tokKeywordDownto]) then
-    CodeGen.Write(' ')
-  else if (Token in LeftBracket) and (FLastToken in [tokKeywordIf, tokKeywordWhile,
-    tokKeywordFor, tokKeywordWith, tokKeywordCase, tokKeywordTo, tokKeywordDownto]) then
-    CodeGen.Write(' ');
-    // 强行分离括号与关键字
+  if not NoSeparateSpace then  // 如果不要插入分隔空格，则跳过此段
+  begin
+    // 两个标识符之间以空格分离
+    if ( (FLastToken in IdentTokens) and (Token in IdentTokens + [tokAtSign]) ) then
+      CodeGen.Write(' ')
+    else if (FLastToken in RightBracket) and (Token in [tokKeywordThen, tokKeywordDo,
+      tokKeywordOf, tokKeywordTo, tokKeywordDownto]) then
+      CodeGen.Write(' ')
+    else if (Token in LeftBracket) and (FLastToken in [tokKeywordIf, tokKeywordWhile,
+      tokKeywordFor, tokKeywordWith, tokKeywordCase, tokKeywordTo, tokKeywordDownto]) then
+      CodeGen.Write(' ');
+      // 强行分离括号与关键字
+  end;
 
   //标点符号的设置
   case Token of
@@ -2492,8 +2495,7 @@ begin
       begin
         if not IgnoreFirst then
           CodeGen.Write(' '); // 非第一个 Directive，和之前的内容空格分隔
-        CodeGen.Write(FormatString(Scaner.TokenString, CnPascalCodeForRule.KeywordStyle));
-        FLastToken := Scaner.Token;
+        WriteToken(Scaner.Token, 0, 0, False, False, True);
         Scaner.NextToken;
 
         if not (Scaner.Token in DirectiveTokens) then // 加个后续的表达式
@@ -2508,8 +2510,7 @@ begin
       begin
         if not IgnoreFirst then
           CodeGen.Write(' '); // 非第一个 Directive，和之前的内容空格分隔
-        CodeGen.Write(FormatString(Scaner.TokenString, CnPascalCodeForRule.KeywordStyle));
-        FLastToken := Scaner.Token;
+        WriteToken(Scaner.Token, 0, 0, False, False, True);
         Scaner.NextToken;
       end;
     end
