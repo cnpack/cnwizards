@@ -669,20 +669,20 @@ begin
 
   //标点符号的设置
   case Token of
-    tokComma:     CodeGen.Write(Scaner.TokenString, 0, 1);
+    tokComma:     CodeGen.Write(Scaner.TokenString, 0, 1);   // 1 也会导致行尾注释后退，现多出的空格已由 Generator 删除
     tokColon:
       begin
         if IgnorePreSpace then
           CodeGen.Write(Scaner.TokenString)
         else
-          CodeGen.Write(Scaner.TokenString, 0, 1);
+          CodeGen.Write(Scaner.TokenString, 0, 1);  // 1 也会导致行尾注释后退，现多出的空格已由 Generator 删除
       end;
     tokSemiColon:
       begin
         if IgnorePreSpace then
           CodeGen.Write(Scaner.TokenString)
         else if SemicolonIsLineStart then
-          CodeGen.Write(Scaner.TokenString, BeforeSpaceCount, 1)
+          CodeGen.Write(Scaner.TokenString, BeforeSpaceCount, 0)
         else
           CodeGen.Write(Scaner.TokenString, 0, 0);
           // 之前是 0、1，导致行尾注释不断后退，现在改为0、0，Directives 的由它们自己加空格

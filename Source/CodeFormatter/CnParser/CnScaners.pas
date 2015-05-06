@@ -1253,7 +1253,10 @@ begin
         begin
           BlankStr := TrimBlank(BlankString);
           if BlankStr <> '' then
+          begin
+            FCodeGen.BackSpaceLastSpaces;
             FCodeGen.Write(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
+          end;
         end;
         FCodeGen.Write(TokenString); // 再写注释本身
       end;
@@ -1316,7 +1319,10 @@ begin
         begin
           BlankStr := TrimBlank(BlankString);
           if BlankStr <> '' then
+          begin
+            FCodeGen.BackSpaceLastSpaces;
             FCodeGen.Write(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
+          end;
         end;
         FCodeGen.Write(TokenString); // 再写注释本身
       end;

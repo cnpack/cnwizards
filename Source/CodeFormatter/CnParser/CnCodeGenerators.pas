@@ -56,6 +56,7 @@ type
     FPrevStr: string;
     FPrevRow: Integer;
     FPrevColumn: Integer;
+    FPrevIsCRLFEnd: Boolean;
     FLastNoAutoWrapLine: Integer;
     FLastExceedPosition: Integer; // 本行超出 WrapWidth 的点，供行尾超长时回溯重新换行使用
     FAutoWrapLines: TList; // 记录自动换行的行号，用来搜寻最近一次非自动换行的行缩进
@@ -70,6 +71,7 @@ type
     function GetLastIndentSpace: Integer;
     // 自动换行缩进时，找出上一个非自动换行的缩进行
     procedure CalcLastNoAutoIndentLine;
+    function GetLastIndentSpaceWithOutLineHeadCRLF: Integer;
   protected
     procedure DoAfterWrite(IsWriteln: Boolean); virtual;
   public
@@ -91,6 +93,9 @@ type
     {* 从输出中指定起止位置复制内容出来，直接使用 Row/Column 相关属性
        逻辑上，复制范围内的内容不包括 EndColumn 所指的字符}
 
+    procedure BackSpaceLastSpaces;
+    {* 把最后一行的行尾空格删掉一个，避免因为已经输出了带空格的内容，导致行尾注释后移的问题}
+
     procedure LockOutput;
     procedure UnLockOutput;
 
@@ -108,6 +113,8 @@ type
     {* 当前行最前面的空格数}
     property LastIndentSpace: Integer read GetLastIndentSpace;
     {* 上一个非自动换行的行的最前面的空格数}
+    property LastIndentSpaceWithOutLineHeadCRLF: Integer read GetLastIndentSpaceWithOutLineHeadCRLF;
+    {* 上一个非自动换行的行的最前面的空格数，不包括行尾是回车的情况}
     property CodeWrapMode: TCodeWrapMode read FCodeWrapMode write FCodeWrapMode;
     {* 代码换行的设置}
 
@@ -141,6 +148,20 @@ const
   CRLF = #13#10;
   NOTLineHeadChars: set of Char = ['.', ',', ':', ')', ']'];
   NOTLineTailChars: set of Char = ['.', '(', '['];
+
+procedure TCnCodeGenerator.BackSpaceLastSpaces;
+var
+  S: string;
+  Len: Integer;
+begin
+  if FCode.Count > 0 then
+  begin
+    S := FCode[FCode.Count - 1];
+    Len := Length(S);
+    if (Len > 0) and (S[Len] = ' ') then
+      FCode[FCode.Count - 1] := TrimRight(S);
+  end;
+end;
 
 procedure TCnCodeGenerator.CalcLastNoAutoIndentLine;
 var
@@ -290,6 +311,36 @@ begin
   end;
 end;
 
+function TCnCodeGenerator.GetLastIndentSpaceWithOutLineHeadCRLF: Integer;
+var
+  I, Len: Integer;
+  S: string;
+begin
+  Result := 0;
+  S := FCode[FCode.Count - 1];
+  if (S = '') and (FCode.Count > 1) then
+    S := FCode[FCode.Count - 2];
+
+  Len := Length(S);  // 去掉本行尾部的单个回车换行
+  if Len > 2 then
+    if (S[Len - 1] = #13) and (S[Len] = #10) then
+      Delete(S, Len - 1, 2);
+
+  if Pos(CRLF, S) > 0 then
+    S := Copy(S, LastDelimiter(#10, S) + 1, MaxInt);
+
+  Len := Length(S);    // 把最后一行的最后一个换行符号后的空格长度整过来
+  if Len > 0 then
+  begin
+    for I := 1 to Len do
+      if S[I] in [' ', #09] then
+        Inc(Result)
+      else
+        Exit;
+  end;
+
+end;
+
 function TCnCodeGenerator.GetLockedCount: Word;
 begin
   Result := FLock;
@@ -357,8 +408,8 @@ procedure TCnCodeGenerator.Write(const Text: string; BeforeSpaceCount,
   AfterSpaceCount: Word);
 var
   Str, WrapStr, Tmp: string;
-  ThisCanBeHead, PrevCanBeTail: Boolean;
-  Len: Integer;
+  ThisCanBeHead, PrevCanBeTail, IsCRLFEnd: Boolean;
+  Len, ALen: Integer;
 
   function ExceedLineWrap(Width: Integer): Boolean;
   begin
@@ -419,6 +470,11 @@ begin
 
   ThisCanBeHead := StrCanBeHead(Text);
   PrevCanBeTail := StrCanBeTail(FPrevStr);
+
+  IsCRLFEnd := False;
+  ALen := Length(Text);
+  if ALen > 2 then
+    IsCRLFEnd := (Text[ALen - 1] = #13) and (Text[ALen] = #10);
 
   Str := Format('%s%s%s', [StringOfChar(' ', BeforeSpaceCount), Text,
     StringOfChar(' ', AfterSpaceCount)]);
@@ -488,13 +544,25 @@ begin
       InternalWriteln;
       FAutoWrapLines.Add(Pointer(FCode.Count - 1)); // 自动换行的行号要记录
     end;
-    // 未超宽，照常处理
+
+{
+    // 未超宽，照常处理。如果上一次输出的内容是回车结尾（比如//行尾注释），
+    // 则本行输出需要加上必要的空格缩进，但无需换行
+    if FPrevIsCRLFEnd then
+    begin
+      Str := StringOfChar(' ', LastIndentSpaceWithOutLineHeadCRLF) + TrimLeft(Str);
+      // 同样找出上一次非自动缩进的缩进（不包括行尾空格）。
+      // 而不是简单的上一行缩进值，避免多重缩进
+      // FAutoWrapLines.Add(Pointer(FCode.Count - 1));  // 再记录一下
+    end;
+}
   end;
 
   FCode[FCode.Count - 1] :=
     Format('%s%s', [FCode[FCode.Count - 1], Str]);
 
   FPrevColumn := FColumnPos;
+  FPrevIsCRLFEnd := IsCRLFEnd;
 
 //{$IFDEF UNICODE}
 //  // Unicode 模式下，转成 Ansi 长度才符合一般规则
