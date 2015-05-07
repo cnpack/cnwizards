@@ -3586,6 +3586,7 @@ SCnCodeFormatterWizardConfigHint=設置(&O)...
 SCnCodeFormatterWizardFormatCurrentCaption=格式化當前源文件或選擇區(&W)
 SCnCodeFormatterWizardFormatCurrentHint=格式化當前源文件或選擇區
 SCnCodeFormatterWizardErrLineWidth=自動換行寬度設置錯誤。
+SCnCodeFormatterWizardErrSelection=選擇區起止位置不恰當，無法進行代碼塊格式化。請重新選擇。
 SCnCodeFormatterErrUnknown=未知錯誤。
 SCnCodeFormatterErrPascalFmt=格式化錯誤（%d，%d）：%s<BR><BR>當前標識符：''%s''
 SCnCodeFormatterErrPascalIdentExp=缺失有效標識符。

@@ -70,6 +70,8 @@ type
     FWrapNewLineWidth: Integer;
 
     function PutPascalFormatRules: Boolean;
+    function CheckSelectionPosition(StartPos: TOTACharPos; EndPos: TOTACharPos;
+      View: IOTAEditView): Boolean;
     function GetErrorStr(Err: Integer): string;
   protected
     function GetHasConfig: Boolean; override;
@@ -190,11 +192,17 @@ begin
   FIdFormatCurrent := RegisterASubAction(SCnCodeFormatterWizardFormatCurrent,
     SCnCodeFormatterWizardFormatCurrentCaption, TextToShortCut('Ctrl+W'),
     SCnCodeFormatterWizardFormatCurrentHint);
-  // Other Menus
 
   AddSepMenu;
   FIdOptions := RegisterASubAction(SCnCodeFormatterWizardConfig,
     SCnCodeFormatterWizardConfigCaption, 0, SCnCodeFormatterWizardConfigHint);
+end;
+
+function TCnCodeFormatterWizard.CheckSelectionPosition(StartPos,
+  EndPos: TOTACharPos; View: IOTAEditView): Boolean;
+begin
+  // TODO: 检查起始位置是否合法，比如不能在注释里面等
+  Result := True;
 end;
 
 procedure TCnCodeFormatterWizard.Config;
@@ -607,6 +615,14 @@ begin
             // 选择块起止位置延伸到行模式
             if not CnOtaGetBlockOffsetForLineMode(StartRec, EndRec, View) then
               Exit;
+
+            // 如果选择区起始位置在注释中间，无法处理，出错
+            if not CheckSelectionPosition(StartRec, EndRec, View) then
+            begin
+              ErrorDlg(SCnCodeFormatterWizardErrSelection);
+              Exit;
+            end;
+
             StartPos := CnOtaEditPosToLinePos(OTAEditPos(StartRec.CharIndex, StartRec.Line), View);
             EndPos := CnOtaEditPosToLinePos(OTAEditPos(EndRec.CharIndex, EndRec.Line), View);
 
