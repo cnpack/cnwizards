@@ -64,12 +64,16 @@ type
     FFirstMatchStart: Boolean;
     FFirstMatchEnd: Boolean;
     // 用来粗略记录当前正在格式化的点，以备输出时根据场景判断是否使用关键字规则
-    FOldElementType: TCnPascalFormattingElementType;
+    FOldElementTypes: TStack;
     FElementType: TCnPascalFormattingElementType;
     function ErrorTokenString: string;
     procedure CodeGenAfterWrite(Sender: TObject; IsWriteln: Boolean);
+
+    // 区分当前的位置，必须配对使用
     procedure SpecifyElementType(Element: TCnPascalFormattingElementType);
     procedure RestoreElementType;
+    // 区分当前位置并恢复，必须配对使用
+
     procedure ResetElementType;
   protected
     FIsTypeID: Boolean;
@@ -352,74 +356,39 @@ implementation
 uses
   CnParseConsts {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
-type
-  TCnKeywordsValidAreaMap = class
-  {* 一条目类，用来描述哪些关键字只在哪些区域中才是关键字}
-  public
-    Keywords: TPascalTokenSet;
-    Areas: TCnPascalFormattingElementTypeSet;
-  end;
-
 var
-  FKeywordsValidAreas: TObjectList = nil;
+  FKeywordsValidArray: array[Low(TPascalToken)..High(TPascalToken)] of
+    TCnPascalFormattingElementTypeSet;
+  {* 容纳关键字与其作用域的一个快速访问的数组}
 
 procedure MakeKeywordsValidAreas;
 var
-  Item: TCnKeywordsValidAreaMap;
+  I: TPascalToken;
 begin
-  FKeywordsValidAreas := TObjectList.Create(True);
+  for I := Low(TPascalToken) to High(TPascalToken) do
+    FKeywordsValidArray[I] := [];
 
-  Item := TCnKeywordsValidAreaMap.Create;
-  Item.Keywords := [tokComplexIndex, tokComplexRead, tokComplexWrite, tokComplexDefault, tokComplexStored];
-  Item.Areas := [pfetPropertySpecifier];
-  FKeywordsValidAreas.Add(Item);
+  FKeywordsValidArray[tokComplexIndex] := [pfetPropertyIndex, pfetDirective];
+  FKeywordsValidArray[tokComplexRead] := [pfetPropertySpecifier];
+  FKeywordsValidArray[tokComplexWrite] := [pfetPropertySpecifier];
+  FKeywordsValidArray[tokComplexDefault] := [pfetPropertySpecifier];
+  FKeywordsValidArray[tokComplexStored] := [pfetPropertySpecifier];
 
-  Item := TCnKeywordsValidAreaMap.Create;
-  Item.Keywords := [tokDirectiveMESSAGE, tokDirectiveREGISTER];
-  Item.Areas := [pfetDirective];
-  FKeywordsValidAreas.Add(Item);
+  FKeywordsValidArray[tokDirectiveMESSAGE] := [pfetDirective];
+  FKeywordsValidArray[tokDirectiveREGISTER] := [pfetDirective];
 
-  Item := TCnKeywordsValidAreaMap.Create;
-  Item.Keywords := [tokComplexIndex, tokComplexName];
-  Item.Areas := [pfetDirective];
-  FKeywordsValidAreas.Add(Item);
+  FKeywordsValidArray[tokComplexName] := [pfetDirective];
 
   // 未列出的关键字，表示在哪都是关键字
 end;
 
-procedure FreeKeywordsValidAreas;
-begin
-  FKeywordsValidAreas.Free;
-end;
-
 // 检查对应关键字是否在其作用域外面，返回 True 表示在外面，不该作为关键字处理
 function CheckOutOfKeywordsValidArea(Key: TPascalToken; Element: TCnPascalFormattingElementType): Boolean;
-var
-  I: Integer;
-  Matched: Boolean;
-  Item: TCnKeywordsValidAreaMap;
 begin
-  // 对于单条规则来讲，结果代表 Key 是否在本条规则指定的作用域外。
-  // 如果 Key 不属于 Keywords，则本条规则跳过。
-  // 如果 Key 属于 Keywords 且 Element 属于 Areas，此规则的匹配结果为 False，表示在作用域内，是关键字
-  // 否则本条规则匹配结果为 True，表示不在作用域内，要做标识符处理
-  // 所有的规则得全为 True，结果才为 True
-
-  Result := False; // 一开始默认关键字都在其作用域内
-  Matched := False;
-  for I := 0 to FKeywordsValidAreas.Count - 1 do
-  begin
-    Item := TCnKeywordsValidAreaMap(FKeywordsValidAreas[I]);
-    if not (Key in Item.Keywords) then
-      Continue;
-
-    Matched := True;
-    if Element in Item.Areas then
-      Exit;
-  end;
-
-  if Matched then // 有匹配的规则，并且匹配结果都为 True（False 的跳出了），最终才为 True
-    Result := True;
+  Result := False;
+  if FKeywordsValidArray[Key] = [] then // 未指定的，表示在哪都是关键字
+    Exit;
+  Result := not (Element in FKeywordsValidArray[Key]);
 end;
 
 { TCnAbstractCodeFormater }
@@ -454,12 +423,16 @@ begin
   FCodeGen.CodeWrapMode := CnPascalCodeForRule.CodeWrapMode;
   FCodeGen.OnAfterWrite := CodeGenAfterWrite;
   FScaner := TScaner.Create(AStream, FCodeGen, ACompDirectiveMode);
+
+  FOldElementTypes := TStack.Create;
   FScaner.NextToken;
 end;
 
 destructor TCnAbstractCodeFormatter.Destroy;
 begin
+  FOldElementTypes.Free;
   FScaner.Free;
+  FCodeGen.Free;
   inherited;
 end;
 
@@ -3371,7 +3344,12 @@ begin
       case Scaner.Token of
         tokComplexIndex:
         begin
-          Match(Scaner.Token);
+          try
+            SpecifyElementType(pfetPropertyIndex);
+            Match(Scaner.Token);
+          finally
+            RestoreElementType;
+          end;
           ProcessBlank;
           FormatConstExpr;
         end;
@@ -5125,7 +5103,10 @@ end;
 
 procedure TCnAbstractCodeFormatter.RestoreElementType;
 begin
-  FElementType := FOldElementType;
+  if FOldElementTypes <> nil then
+    FElementType := TCnPascalFormattingElementType(FOldElementTypes.Pop)
+  else
+    FElementType := pfetUnknown;
 end;
 
 procedure TCnAbstractCodeFormatter.SpecifyElementType(
@@ -5133,21 +5114,21 @@ procedure TCnAbstractCodeFormatter.SpecifyElementType(
 begin
   if Element <> FElementType then
   begin
-    FOldElementType := FElementType;
+    if FOldElementTypes <> nil then
+      FOldElementTypes.Push(Pointer(FElementType));
     FElementType := Element;
   end;
 end;
 
 procedure TCnAbstractCodeFormatter.ResetElementType;
 begin
-  FOldElementType := pfetUnknown;
+  FOldElementTypes.Free;
+  FOldElementTypes := TStack.Create;
+
   FElementType := pfetUnknown;
 end;
 
 initialization
   MakeKeywordsValidAreas;
-
-finalization
-  FreeKeywordsValidAreas;
 
 end.
