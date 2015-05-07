@@ -96,7 +96,7 @@ PackageDLLOutputDir=
 PackageDCPOutputDir=
 SearchPath=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;ThirdParty\FastCode;Utils;CodeFormatter;ScriptWizard
 Packages=rtl;vcl;vclx;vclsmp;designide
-Conditionals=
+Conditionals=debug;use_jcl
 DebugSourceDirs=
 UsePackages=1
 [Parameters]
@@ -115,7 +115,7 @@ AutoIncBuild=0
 MajorVer=1
 MinorVer=0
 Release=0
-Build=0
+Build=9
 Debug=0
 PreRelease=0
 Special=0
@@ -126,7 +126,7 @@ CodePage=1200
 [Version Info Keys]
 CompanyName=CnPack Team
 FileDescription=CnWizards For Delphi 7
-FileVersion=1.0.0.0
+FileVersion=1.0.0.9
 InternalName=CnWizards_D7
 LegalCopyright=(C)Copyright 2001-2015 CnPack Team
 LegalTrademarks=CnPack
@@ -142,9 +142,10 @@ Item1=debug
 Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlSearchPath]
-Count=2
-Item0=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;ThirdParty\FastCode;Utils;ScriptWizard
-Item1=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;ThirdParty\FastCode;Utils
+Count=3
+Item0=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;ThirdParty\FastCode;Utils;CodeFormatter;ScriptWizard
+Item1=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;ThirdParty\FastCode;Utils;ScriptWizard
+Item2=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;ThirdParty\FastCode;Utils
 [HistoryLists\hlUnitOutputDirectory]
 Count=1
 Item0=..\Dcu

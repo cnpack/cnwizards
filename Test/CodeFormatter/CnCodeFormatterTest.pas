@@ -187,7 +187,9 @@ begin
 
     // MatchedInStart/MatchedInEnd 匹配均是 0 开始，而 Copy 的字符串是 1 开始，所以需要加 1
     ShowMessage(IntToStr(SrcMemo.SelStart) + ':' + IntToStr(SrcMemo.SelStart + SrcMemo.SelLength));
+{$IFDEF DEBUG}
     CnDebugger.LogRawString(Copy(SrcMemo.Lines.Text, FCodeFor.MatchedInStart + 1, FCodeFor.MatchedInEnd - FCodeFor.MatchedInStart));
+{$ENDIF}
     try
       try
         FCodeFor.FormatCode;

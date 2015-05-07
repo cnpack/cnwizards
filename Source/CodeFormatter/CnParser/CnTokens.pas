@@ -229,6 +229,13 @@ type
   TPascalCompDirectiveType = (cdtUnknown, cdtIf, cdtIfDef, cdtIfNDef, cdtElse,
     cdtEndIf, cdtIfEnd);
 
+  // 用来指明当前位置处于哪些不能嵌套的基本位置，
+  // 如属性的修饰符区域、函数调用修饰符区域等
+  TCnPascalFormattingElementType = (pfetUnknown, pfetPropertySpecifier,
+    pfetDirective);
+
+  TCnPascalFormattingElementTypeSet = set of TCnPascalFormattingElementType;
+
 const
   KeywordTokens = [tokKeyword_BEGIN .. tokKeyword_END];
 

@@ -162,10 +162,12 @@ type
     constructor Create;
     destructor Destroy; override;
     procedure Clear;
-    procedure ParseSource(ASource: PAnsiChar; AIsDpr, AKeyOnly: Boolean);
+    procedure ParseSource(ASource: PAnsiChar; AIsDpr, AKeyOnly: Boolean); virtual;
+    {* 解析代码}
     function FindCurrentDeclaration(LineNumber, CharIndex: Integer): AnsiString;
-    procedure FindCurrentBlock(LineNumber, CharIndex: Integer);
-    {* 根据当前光标位置查找当前块，行列都是 1 开始}
+    {* 根据光标位置查找所在的声明区}
+    procedure FindCurrentBlock(LineNumber, CharIndex: Integer); virtual;
+    {* 根据光标位置查找当前块，行列都是 1 开始}
     function IndexOfToken(Token: TCnPasToken): Integer;
     property Count: Integer read GetCount;
     property Tokens[Index: Integer]: TCnPasToken read GetToken;

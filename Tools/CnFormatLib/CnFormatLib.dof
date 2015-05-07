@@ -29,10 +29,10 @@ ShowHints=1
 ShowWarnings=1
 UnitAliases=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [Linker]
-MapFile=0
+MapFile=3
 OutputObjs=0
 ConsoleApp=1
-DebugInfo=0
+DebugInfo=1
 RemoteSymbols=0
 MinStackSize=16384
 MaxStackSize=1048576
@@ -81,8 +81,9 @@ ProductName=
 ProductVersion=1.0.0.0
 Comments=
 [HistoryLists\hlConditionals]
-Count=1
-Item0=DEBUG;USE_JCL
+Count=2
+Item0=NDEBUG
+Item1=DEBUG;USE_JCL
 [HistoryLists\hlUnitAliases]
 Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;

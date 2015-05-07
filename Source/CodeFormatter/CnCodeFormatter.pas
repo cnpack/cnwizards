@@ -41,18 +41,13 @@ interface
 {$I CnPack.inc}
 
 uses
-  Classes, SysUtils, Dialogs, CnTokens, CnScaners, CnCodeGenerators,
+  Classes, SysUtils, Dialogs, Contnrs, CnTokens, CnScaners, CnCodeGenerators,
   CnCodeFormatRules, CnFormatterIntf;
 
 const
   CN_MATCHED_INVALID = -1;
 
 type
-  // 用来指明当前位置处于哪些不能嵌套的基本位置，
-  // 如属性的修饰符区域、函数调用修饰符区域等
-  TCnPascalFormattingElementType = (pfetUnknown, pfetPropertySpecifier,
-    pfetDirective);
-
   TCnAbstractCodeFormatter = class
   private
     FScaner: TAbstractScaner;
@@ -356,6 +351,76 @@ implementation
 
 uses
   CnParseConsts {$IFDEF DEBUG}, CnDebug {$ENDIF};
+
+type
+  TCnKeywordsValidAreaMap = class
+  {* 一条目类，用来描述哪些关键字只在哪些区域中才是关键字}
+  public
+    Keywords: TPascalTokenSet;
+    Areas: TCnPascalFormattingElementTypeSet;
+  end;
+
+var
+  FKeywordsValidAreas: TObjectList = nil;
+
+procedure MakeKeywordsValidAreas;
+var
+  Item: TCnKeywordsValidAreaMap;
+begin
+  FKeywordsValidAreas := TObjectList.Create(True);
+
+  Item := TCnKeywordsValidAreaMap.Create;
+  Item.Keywords := [tokComplexIndex, tokComplexRead, tokComplexWrite, tokComplexDefault, tokComplexStored];
+  Item.Areas := [pfetPropertySpecifier];
+  FKeywordsValidAreas.Add(Item);
+
+  Item := TCnKeywordsValidAreaMap.Create;
+  Item.Keywords := [tokDirectiveMESSAGE, tokDirectiveREGISTER];
+  Item.Areas := [pfetDirective];
+  FKeywordsValidAreas.Add(Item);
+
+  Item := TCnKeywordsValidAreaMap.Create;
+  Item.Keywords := [tokComplexIndex, tokComplexName];
+  Item.Areas := [pfetDirective];
+  FKeywordsValidAreas.Add(Item);
+
+  // 未列出的关键字，表示在哪都是关键字
+end;
+
+procedure FreeKeywordsValidAreas;
+begin
+  FKeywordsValidAreas.Free;
+end;
+
+// 检查对应关键字是否在其作用域外面，返回 True 表示在外面，不该作为关键字处理
+function CheckOutOfKeywordsValidArea(Key: TPascalToken; Element: TCnPascalFormattingElementType): Boolean;
+var
+  I: Integer;
+  Matched: Boolean;
+  Item: TCnKeywordsValidAreaMap;
+begin
+  // 对于单条规则来讲，结果代表 Key 是否在本条规则指定的作用域外。
+  // 如果 Key 不属于 Keywords，则本条规则跳过。
+  // 如果 Key 属于 Keywords 且 Element 属于 Areas，此规则的匹配结果为 False，表示在作用域内，是关键字
+  // 否则本条规则匹配结果为 True，表示不在作用域内，要做标识符处理
+  // 所有的规则得全为 True，结果才为 True
+
+  Result := False; // 一开始默认关键字都在其作用域内
+  Matched := False;
+  for I := 0 to FKeywordsValidAreas.Count - 1 do
+  begin
+    Item := TCnKeywordsValidAreaMap(FKeywordsValidAreas[I]);
+    if not (Key in Item.Keywords) then
+      Continue;
+
+    Matched := True;
+    if Element in Item.Areas then
+      Exit;
+  end;
+
+  if Matched then // 有匹配的规则，并且匹配结果都为 True（False 的跳出了），最终才为 True
+    Result := True;
+end;
 
 { TCnAbstractCodeFormater }
 
@@ -699,11 +764,9 @@ begin
       begin
         CodeGen.Write(Scaner.TokenString, BeforeSpaceCount, AfterSpaceCount);
       end
-      else if ((Token = tokComplexIndex) and (ElementType <> pfetPropertySpecifier))
-        or ((Token in [tokDirectiveMESSAGE, tokDirectiveREGISTER]) and (ElementType <> pfetDirective)) then
+      else if CheckOutOfKeywordsValidArea(Token, ElementType) then
       begin
-        // 只有 property 里的 Index 才是关键字，其他地方的 Index 均在此原样输出
-        // 只有在函数声明修饰符区域上述 Tokens 才是关键字，其他地方均在此原样输出
+        // 如果关键字在其作用域外，则在此原样输出
         CodeGen.Write(Scaner.TokenString, BeforeSpaceCount, AfterSpaceCount);
       end
       else
@@ -5080,5 +5143,11 @@ begin
   FOldElementType := pfetUnknown;
   FElementType := pfetUnknown;
 end;
+
+initialization
+  MakeKeywordsValidAreas;
+
+finalization
+  FreeKeywordsValidAreas;
 
 end.

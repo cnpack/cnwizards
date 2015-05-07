@@ -635,6 +635,9 @@ begin
   b := False;
   for i := 0 to Engine.Engine.CompilerMessageCount - 1 do
   begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg(SCnScriptCompiler + ': ' + string(Engine.Engine.CompilerErrorToStr(i)));
+{$ENDIF}
     mmoOut.Lines.Add(SCnScriptCompiler + ': ' + string(Engine.Engine.CompilerErrorToStr(i)));
     if (not b) and (Engine.Engine.CompilerMessages[i] is TIFPSPascalCompilerError) then
     begin
