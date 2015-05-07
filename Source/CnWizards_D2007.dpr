@@ -214,9 +214,7 @@ uses
   CnImageProvider_FindIcons in 'Utils\CnImageProvider_FindIcons.pas',
   CnImageProvider_LocalCache in 'Utils\CnImageProvider_LocalCache.pas',
   CnFormatterIntf in 'CodeFormatter\CnFormatterIntf.pas',
-  CnCodeFormatterWizard in 'CodeFormatter\CnCodeFormatterWizard.pas' {CnCodeFormatterForm},
-  CnTestFormatterWizard in '..\Test\CnTestFormatterWizard.pas',
-  CnTestEditorInsertTextWizard in '..\Test\CnTestEditorInsertTextWizard.pas';
+  CnCodeFormatterWizard in 'CodeFormatter\CnCodeFormatterWizard.pas' {CnCodeFormatterForm};
 
 {$R *.RES}
 

@@ -1138,8 +1138,8 @@ begin
 
     // 判断如果是 C/C++，则解析并保存各个 Tokens，供光标改变时更新 FCurTokenList
     // 如果只是光标位置变化，但高亮范围不是当前整个文件的话，仍需要重新解析，这点和 Pascal 解析器不同
-    if (IsCppSourceModule(EditView.Buffer.FileName) or IsLua(EditView.Buffer.FileName))
-      and (Modified or (CppParser.Source = '') or (FHighlight.BlockHighlightRange <> brAll)) then
+    if IsCppSourceModule(EditView.Buffer.FileName) and (Modified or (CppParser.Source = '') or
+      (FHighlight.BlockHighlightRange <> brAll)) then
     begin
       FIsCppSource := True;
       CaseSensitive := True;
@@ -1226,7 +1226,7 @@ begin
       end;
     end;
   end
-  else  // 处理解析 Pascal 中的配对关键字。应某些需求，lua 也在此用 Pascal 解析
+  else  // 处理解析 Pascal 中的配对关键字
   begin
     if Modified or (Parser.Source = '') then
     begin

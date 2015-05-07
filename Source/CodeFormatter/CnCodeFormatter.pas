@@ -41,13 +41,18 @@ interface
 {$I CnPack.inc}
 
 uses
-  Classes, SysUtils, Dialogs, Contnrs, CnTokens, CnScaners, CnCodeGenerators,
+  Classes, SysUtils, Dialogs, CnTokens, CnScaners, CnCodeGenerators,
   CnCodeFormatRules, CnFormatterIntf;
 
 const
   CN_MATCHED_INVALID = -1;
 
 type
+  // 用来指明当前位置处于哪些不能嵌套的基本位置，
+  // 如属性的修饰符区域、函数调用修饰符区域等
+  TCnPascalFormattingElementType = (pfetUnknown, pfetPropertySpecifier,
+    pfetDirective);
+
   TCnAbstractCodeFormatter = class
   private
     FScaner: TAbstractScaner;
@@ -737,9 +742,11 @@ begin
       begin
         CodeGen.Write(Scaner.TokenString, BeforeSpaceCount, AfterSpaceCount);
       end
-      else if CheckOutOfKeywordsValidArea(Token, ElementType) then
+      else if ((Token = tokComplexIndex) and (ElementType <> pfetPropertySpecifier))
+        or ((Token in [tokDirectiveMESSAGE, tokDirectiveREGISTER]) and (ElementType <> pfetDirective)) then
       begin
-        // 如果关键字在其作用域外，则在此原样输出
+        // 只有 property 里的 Index 才是关键字，其他地方的 Index 均在此原样输出
+        // 只有在函数声明修饰符区域上述 Tokens 才是关键字，其他地方均在此原样输出
         CodeGen.Write(Scaner.TokenString, BeforeSpaceCount, AfterSpaceCount);
       end
       else
