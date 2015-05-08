@@ -44,8 +44,8 @@ uses
   Classes, SysUtils, CnCodeFormatRules;
 
 type
-  TCnAfterWriteEvent = procedure (Sender: TObject; IsWriteln: Boolean;
-    PrefixSpaces: Integer) of object;
+  TCnAfterWriteEvent = procedure (Sender: TObject; IsWriteBlank: Boolean;
+    IsWriteln: Boolean; PrefixSpaces: Integer) of object;
 
   TCnCodeGenerator = class
   private
@@ -63,6 +63,7 @@ type
     FAutoWrapLines: TList; // 记录自动换行的行号，用来搜寻最近一次非自动换行的行缩进
     FOnAfterWrite: TCnAfterWriteEvent;
     FAutoWrapButNoIndent: Boolean;
+    FWritingBlank: Boolean;
     function GetCurIndentSpace: Integer;
     function GetLockedCount: Word;
     function GetPrevColumn: Integer;
@@ -83,6 +84,7 @@ type
     procedure Reset;
     procedure Write(const Text: string; BeforeSpaceCount:Word = 0;
       AfterSpaceCount: Word = 0);
+    procedure WriteBlank(const Text: string);
     procedure InternalWriteln;
     procedure Writeln;
     function SourcePos: Word;
@@ -255,7 +257,7 @@ end;
 procedure TCnCodeGenerator.DoAfterWrite(IsWriteln: Boolean; PrefixSpaces: Integer);
 begin
   if Assigned(FOnAfterWrite) then
-    FOnAfterWrite(Self, IsWriteln, PrefixSpaces);
+    FOnAfterWrite(Self, FWritingBlank, IsWriteln, PrefixSpaces);
 end;
 
 function TCnCodeGenerator.GetCurIndentSpace: Integer;
@@ -611,6 +613,13 @@ begin
 //    GetCurrRow, GetCurrColumn, Str]);
 //  CnDebugger.LogMsg(CopyPartOut(FPrevRow, FPrevColumn, GetCurrRow, GetCurrColumn));
 {$ENDIF}
+end;
+
+procedure TCnCodeGenerator.WriteBlank(const Text: string);
+begin
+  FWritingBlank := True;
+  Write(Text);
+  FWritingBlank := False;
 end;
 
 procedure TCnCodeGenerator.Writeln;

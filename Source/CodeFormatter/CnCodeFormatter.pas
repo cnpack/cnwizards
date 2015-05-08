@@ -68,7 +68,8 @@ type
     FElementType: TCnPascalFormattingElementType;
     FPrefixSpaces: Integer;
     function ErrorTokenString: string;
-    procedure CodeGenAfterWrite(Sender: TObject; IsWriteln: Boolean; PrefixSpaces: Integer);
+    procedure CodeGenAfterWrite(Sender: TObject; IsWriteBlank: Boolean;
+      IsWriteln: Boolean; PrefixSpaces: Integer);
 
     // 区分当前的位置，必须配对使用
     procedure SpecifyElementType(Element: TCnPascalFormattingElementType);
@@ -5063,7 +5064,9 @@ begin
 end;
 
 procedure TCnAbstractCodeFormatter.CodeGenAfterWrite(Sender: TObject;
-  IsWriteln: Boolean; PrefixSpaces: Integer);
+  IsWriteBlank: Boolean; IsWriteln: Boolean; PrefixSpaces: Integer);
+var
+  StartPos, EndPos: Integer;
 begin
   // CodeGen 写完一段字符串但 Scaner 还没 NextToken 时调用
   // 用来判断 Scaner 的位置是否是指定 Offset
@@ -5074,12 +5077,23 @@ begin
 //    FScaner.SourcePos]);
 {$ENDIF}
 
+  if IsWriteBlank then
+  begin
+    StartPos := FScaner.BlankStringPos;
+    EndPos := FScaner.BlankStringPos + FScaner.BlankStringLength;
+  end
+  else
+  begin
+    StartPos := FScaner.SourcePos;
+    EndPos := FScaner.SourcePos + FScaner.TokenStringLength;
+  end;
+
   // 写出不属于代码本身的空行时超出标记的话，不算
-  if (FScaner.SourcePos >= FMatchedInStart) and not FFirstMatchStart and not IsWriteln then
+  if (StartPos >= FMatchedInStart) and not IsWriteln and not FFirstMatchStart then
   begin
     FMatchedOutStartRow := TCnCodeGenerator(Sender).PrevRow;
     FMatchedOutStartCol := TCnCodeGenerator(Sender).PrevColumn - FPrefixSpaces;
-    // 碰到注释时还要减去上次记录的空白换行时的起始空格
+    // 碰上注释时还得补上上回输出空白时留下来的空白
     if FMatchedOutStartCol < 0 then
       FMatchedOutStartCol := 0;
     FFirstMatchStart := True;
@@ -5087,9 +5101,9 @@ begin
 //    CnDebugger.LogMsg('OnAfter Write. Got MatchStart.');
 {$ENDIF}
   end
-  else if (FScaner.SourcePos + FScaner.TokenStringLength >= FMatchedInEnd)
-    and not IsWriteln and not FFirstMatchEnd then
+  else if (EndPos >= FMatchedInEnd) and IsWriteln and not FFirstMatchEnd then
   begin
+    // 要写出代码外的空行时才算，以保证输出结果尾处有回车
     FMatchedOutEndRow := TCnCodeGenerator(Sender).CurrRow;
     FMatchedOutEndCol := TCnCodeGenerator(Sender).CurrColumn;
     FFirstMatchEnd := True;

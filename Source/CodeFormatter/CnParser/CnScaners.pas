@@ -80,8 +80,8 @@ type
   private
     FStream: TStream;
     FBookmarks: TObjectList;
-    FOrigin: Longint;
-    FBuffer: PChar;
+    FOrigin: Longint;  // 表示本块 Buffer 开头在整个流中的线性位置
+    FBuffer: PChar;    // 表示本块 Buffer 开头的地址
     FBufPtr: PChar;
     FBufEnd: PChar;
     FSourcePtr: PChar; // 用于步进，在外部始终指向当前 Token 尾部
@@ -96,7 +96,8 @@ type
     FWideStr: WideString;
     FBackwardToken: TPascalToken;
 
-    FBlankStringBegin, FBlankStringEnd: PChar;
+    FBlankStringBegin: PChar;  // 用于步进，在外部始终指向当前空白的头部
+    FBlankStringEnd: PChar;    // 用于步进，在外部始终指向当前空白的尾部
     FBlankLines, FBlankLinesAfterComment: Integer;
     FBlankLinesBefore: Integer;
     FBlankLinesAfter: Integer;
@@ -133,8 +134,11 @@ type
     procedure HexToBinary(Stream: TStream);
 
     function NextToken: TPascalToken; virtual; abstract;
-    function SourcePos: Longint;
+    function SourcePos: LongInt;
     // 当前 Token 在整个源码中的偏移量，0 开始
+    function BlankStringPos: LongInt;
+    // 当前空白在整个源码中的偏移量，0 开始
+
     function TokenComponentIdent: string;
     function TokenFloat: Extended;
 {$IFDEF DELPHI5}
@@ -146,6 +150,7 @@ type
     {* 当前空白区域的字符串值}
     function BlankStringLength: Integer;
     {* 当前空白区域的字符长度}
+
     function TokenString: string;
     {* 当前 Token 的字符串值}
     function TokenStringLength: Integer;
@@ -543,6 +548,11 @@ end;
 function TAbstractScaner.SourcePos: Longint;
 begin
   Result := FOrigin + (FTokenPtr - FBuffer);
+end;
+
+function TAbstractScaner.BlankStringPos: Longint;
+begin
+  Result := FOrigin + (FBlankStringBegin - FBuffer);
 end;
 
 function TAbstractScaner.TokenFloat: Extended;
@@ -1239,7 +1249,7 @@ begin
 {$ENDIF}
 
   if InIgnoreArea and (FCodeGen <> nil) then
-    FCodeGen.Write(BlankString);
+    FCodeGen.WriteBlank(BlankString);
 
   // FCompDirectiveMode = cdmNone 表示忽略，此处啥都不做，供低级扫描使用。
 
@@ -1255,7 +1265,7 @@ begin
           if BlankStr <> '' then
           begin
             FCodeGen.BackSpaceLastSpaces;
-            FCodeGen.Write(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
+            FCodeGen.WriteBlank(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
           end;
         end;
         FCodeGen.Write(TokenString); // 再写注释本身
@@ -1321,7 +1331,7 @@ begin
           if BlankStr <> '' then
           begin
             FCodeGen.BackSpaceLastSpaces;
-            FCodeGen.Write(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
+            FCodeGen.WriteBlank(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
           end;
         end;
         FCodeGen.Write(TokenString); // 再写注释本身
