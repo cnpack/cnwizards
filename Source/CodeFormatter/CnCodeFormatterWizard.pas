@@ -42,7 +42,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ToolsAPI, IniFiles, StdCtrls, ComCtrls, Menus, CnSpin,
+  ToolsAPI, IniFiles, StdCtrls, ComCtrls, Menus, TypInfo, mPasLex, CnSpin,
   CnConsts, CnCommon, CnWizConsts, CnWizClasses, CnWizMultiLang, CnWizOptions,
   CnWizUtils, CnFormatterIntf, CnCodeFormatRules;
 
@@ -200,8 +200,102 @@ end;
 
 function TCnCodeFormatterWizard.CheckSelectionPosition(StartPos,
   EndPos: TOTACharPos; View: IOTAEditView): Boolean;
+const
+  InvalidTokens: set of TTokenKind =
+    [tkBorComment, tkAnsiComment, tkSlashesComment, tkString];
+var
+  Stream: TMemoryStream;
+  Lex: TmwPasLex;
+  NowPos: TOTACharPos;
+  PrevToken: TTokenKind;
+  FirstStart, FirstEnd: Boolean;
+
+  // 1 > = < 2 分别返回 1 0 -1
+  function CompareCharPos(Pos1, Pos2: TOTACharPos): Integer;
+  begin
+    if Pos1.Line > Pos2.Line then
+      Result := 1
+    else if Pos1.Line < Pos2.Line then
+      Result := -1
+    else
+    begin
+      if Pos1.CharIndex > Pos2.CharIndex then
+        Result := 1
+      else if Pos1.CharIndex < Pos2.CharIndex then
+        Result := -1
+      else
+        Result := 0;
+    end;
+  end;
+
 begin
-  // TODO: 检查起始位置是否合法，比如不能在注释里面等
+  // 检查起始位置是否合法，比如不能在注释里面等
+  Result := True;
+  Stream := TMemoryStream.Create;
+  try
+    CnOtaSaveEditorToStream(View.Buffer, Stream);
+    Lex := TmwPasLex.Create;
+    Lex.Origin := PAnsiChar(Stream.Memory);
+
+    PrevToken := tkUnknown;
+    NowPos.CharIndex := 0;
+    NowPos.Line := 0;
+    FirstStart := False;
+    FirstEnd := False;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('StartPos %d:%d. EndPos %d:%d', [StartPos.Line, StartPos.CharIndex,
+      EndPos.Line, EndPos.CharIndex]);
+{$ENDIF}
+
+    while Lex.TokenID <> tkNull do
+    begin
+      NowPos.CharIndex := Lex.TokenPos - Lex.LinePos + 1;
+      NowPos.Line := Lex.LineNumber + 1;
+
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('Now Pos %d:%d. Token %s', [NowPos.Line, NowPos.CharIndex,
+        GetEnumName(TypeInfo(TTokenKind), Ord(Lex.TokenID))]);
+{$ENDIF}
+
+      if not FirstStart and (CompareCharPos(NowPos, StartPos) > 0) then
+      begin
+        // 当前位置第一次大于起始位置
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('Exceed StartPos. PrevToken is ' + GetEnumName(TypeInfo(TTokenKind), Ord(PrevToken)));
+{$ENDIF}
+        FirstStart := True;
+        if PrevToken in InvalidTokens then
+        begin
+          Result := False;
+          Exit;
+        end;
+      end;
+
+      if not FirstEnd and (CompareCharPos(NowPos, StartPos) > 0) then
+      begin
+        // 当前位置第一次大于结束位置，说明结束位置在 PrevToken 中
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('Exceed EndPos. PrevToken is ' + GetEnumName(TypeInfo(TTokenKind), Ord(PrevToken)));
+{$ENDIF}
+        FirstEnd := True;
+        if PrevToken in InvalidTokens then
+        begin
+          Result := False;
+          Exit;
+        end;
+      end;
+
+      if FirstStart and FirstEnd then // 俩都比过了
+        Exit;
+
+      PrevToken := Lex.TokenID;
+      Lex.Next;
+    end;
+  finally
+    Stream.Free;
+    Lex.Free;
+  end;
   Result := True;
 end;
 
