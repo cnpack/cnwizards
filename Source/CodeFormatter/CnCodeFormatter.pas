@@ -66,8 +66,9 @@ type
     // 用来粗略记录当前正在格式化的点，以备输出时根据场景判断是否使用关键字规则
     FOldElementTypes: TStack;
     FElementType: TCnPascalFormattingElementType;
+    FPrefixSpaces: Integer;
     function ErrorTokenString: string;
-    procedure CodeGenAfterWrite(Sender: TObject; IsWriteln: Boolean);
+    procedure CodeGenAfterWrite(Sender: TObject; IsWriteln: Boolean; PrefixSpaces: Integer);
 
     // 区分当前的位置，必须配对使用
     procedure SpecifyElementType(Element: TCnPascalFormattingElementType);
@@ -4461,6 +4462,7 @@ end;
 procedure TCnGoalCodeFormatter.FormatCode(PreSpaceCount: Byte);
 begin
   ResetElementType;
+  FPrefixSpaces := 0;
   CheckHeadComments;
   FormatGoal(PreSpaceCount);
 end;
@@ -5060,7 +5062,8 @@ begin
     inherited FormatCode(PreSpaceCount);
 end;
 
-procedure TCnAbstractCodeFormatter.CodeGenAfterWrite(Sender: TObject; IsWriteln: Boolean);
+procedure TCnAbstractCodeFormatter.CodeGenAfterWrite(Sender: TObject;
+  IsWriteln: Boolean; PrefixSpaces: Integer);
 begin
   // CodeGen 写完一段字符串但 Scaner 还没 NextToken 时调用
   // 用来判断 Scaner 的位置是否是指定 Offset
@@ -5075,7 +5078,10 @@ begin
   if (FScaner.SourcePos >= FMatchedInStart) and not FFirstMatchStart and not IsWriteln then
   begin
     FMatchedOutStartRow := TCnCodeGenerator(Sender).PrevRow;
-    FMatchedOutStartCol := TCnCodeGenerator(Sender).PrevColumn;
+    FMatchedOutStartCol := TCnCodeGenerator(Sender).PrevColumn - FPrefixSpaces;
+    // 碰到注释时还要减去上次记录的空白换行时的起始空格
+    if FMatchedOutStartCol < 0 then
+      FMatchedOutStartCol := 0;
     FFirstMatchStart := True;
 {$IFDEF DEBUG}
 //    CnDebugger.LogMsg('OnAfter Write. Got MatchStart.');
@@ -5091,6 +5097,7 @@ begin
 //    CnDebugger.LogMsg('OnAfter Write. Got MatchEnd.');
 {$ENDIF}
   end;
+  FPrefixSpaces := PrefixSpaces;
 end;
 
 function TCnPascalCodeFormatter.HasSliceResult: Boolean;

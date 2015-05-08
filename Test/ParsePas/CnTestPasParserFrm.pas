@@ -17,6 +17,7 @@ type
     btnUses: TButton;
     btnWideParse: TButton;
     bvl1: TBevel;
+    btnAnsiLex: TButton;
     procedure btnLoadClick(Sender: TObject);
     procedure btnParseClick(Sender: TObject);
     procedure mmoCClick(Sender: TObject);
@@ -24,6 +25,7 @@ type
     procedure mmoCChange(Sender: TObject);
     procedure btnUsesClick(Sender: TObject);
     procedure btnWideParseClick(Sender: TObject);
+    procedure btnAnsiLexClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -146,6 +148,31 @@ begin
   begin
     mmoParse.Lines.Add(Format('%3.3d. Line: %d, Col %2.2d, Len %2.2d, Position %4.4d. %s, Token: %s',
         [I, P.LineNumber, P.ColumnNumber, P.TokenLength, P.RunPos, GetEnumName(TypeInfo(TTokenKind),
+         Ord(P.TokenID)), P.Token]));
+    P.Next;
+    Inc(I);
+  end;
+  P.Free;
+end;
+
+procedure TCnTestPasForm.btnAnsiLexClick(Sender: TObject);
+var
+  P: TmwPasLex;
+  S: string;
+  I: Integer;
+begin
+  ShowMessage('Will show Parsing Pascal using string under Non-Unicode Compiler.');
+
+  P := TmwPasLex.Create;
+  S := mmoC.Lines.Text;
+  P.Origin := PChar(S);
+
+  mmoParse.Clear;
+  I := 1;
+  while P.TokenID <> tkNull do
+  begin
+    mmoParse.Lines.Add(Format('%3.3d. Line: %d, Col %2.2d, Len %2.2d, Position %4.4d. %s, Token: %s',
+        [I, P.LineNumber + 1, P.TokenPos - P.LinePos + 1, P.TokenLength, P.RunPos, GetEnumName(TypeInfo(TTokenKind),
          Ord(P.TokenID)), P.Token]));
     P.Next;
     Inc(I);

@@ -44,7 +44,8 @@ uses
   Classes, SysUtils, CnCodeFormatRules;
 
 type
-  TCnAfterWriteEvent = procedure (Sender: TObject; IsWriteln: Boolean) of object;
+  TCnAfterWriteEvent = procedure (Sender: TObject; IsWriteln: Boolean;
+    PrefixSpaces: Integer) of object;
 
   TCnCodeGenerator = class
   private
@@ -73,7 +74,8 @@ type
     procedure CalcLastNoAutoIndentLine;
     function GetLastIndentSpaceWithOutLineHeadCRLF: Integer;
   protected
-    procedure DoAfterWrite(IsWriteln: Boolean); virtual;
+    procedure DoAfterWrite(IsWriteln: Boolean; PrefixSpaces: Integer = 0); virtual;
+    // 当 IsWriteln 为 True 时，PrefixSpaces 表示本次写入回车后可能写的空格数，否则为 0
   public
     constructor Create;
     destructor Destroy; override;
@@ -250,10 +252,10 @@ begin
   inherited;
 end;
 
-procedure TCnCodeGenerator.DoAfterWrite(IsWriteln: Boolean);
+procedure TCnCodeGenerator.DoAfterWrite(IsWriteln: Boolean; PrefixSpaces: Integer);
 begin
   if Assigned(FOnAfterWrite) then
-    FOnAfterWrite(Self, IsWriteln);
+    FOnAfterWrite(Self, IsWriteln, PrefixSpaces);
 end;
 
 function TCnCodeGenerator.GetCurIndentSpace: Integer;
@@ -409,7 +411,7 @@ procedure TCnCodeGenerator.Write(const Text: string; BeforeSpaceCount,
 var
   Str, WrapStr, Tmp: string;
   ThisCanBeHead, PrevCanBeTail, IsCRLFEnd: Boolean;
-  Len, ALen: Integer;
+  Len, ALen, Blanks: Integer;
 
   function ExceedLineWrap(Width: Integer): Boolean;
   begin
@@ -460,6 +462,26 @@ var
     Result := True;
     if (Length(S) = 1) and (S[1] in NOTLineTailChars) then
       Result := False;
+  end;
+
+  // 是否字符串包括至少一个回车换行并且其余只包含空格或 Tab
+  function IsTextCRLFSpace(const S: string; out TrailBlanks: Integer): Boolean;
+  var
+    I: Integer;
+  begin
+    Result := False;
+    TrailBlanks := 0;
+    I := Pos(CRLF, S);
+    if I <= 0 then // 无回车换行，返回 False
+      Exit;
+
+    for I := 1 to Length(S) do
+      if not (S[I] in [' ', #09, #13, #10]) then
+        Exit;
+
+    Result := True;
+    I := LastDelimiter(#10, S);
+    TrailBlanks := Length(S) - I;
   end;
 
 begin
@@ -581,7 +603,9 @@ begin
   FColumnPos := Length(Str);
   FActualColumn := ActualColumn(Str);
 
-  DoAfterWrite(Text = CRLF);
+  IsCRLFEnd := IsTextCRLFSpace(Text, Blanks);
+  DoAfterWrite(IsCRLFEnd, Blanks);
+
 {$IFDEF DEBUG}
 //  CnDebugger.LogFmt('String Wrote from %d %d to %d %d: %s', [FPrevRow, FPrevColumn,
 //    GetCurrRow, GetCurrColumn, Str]);
