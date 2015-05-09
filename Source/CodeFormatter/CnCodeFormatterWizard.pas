@@ -202,13 +202,13 @@ function TCnCodeFormatterWizard.CheckSelectionPosition(StartPos,
   EndPos: TOTACharPos; View: IOTAEditView): Boolean;
 const
   InvalidTokens: set of TTokenKind =
-    [tkBorComment, tkAnsiComment, tkSlashesComment, tkString];
+    [tkBorComment, tkAnsiComment];
 var
   Stream: TMemoryStream;
   Lex: TmwPasLex;
   NowPos: TOTACharPos;
   PrevToken: TTokenKind;
-  FirstStart, FirstEnd: Boolean;
+  NS, NE: Integer;
 
   // 1 > = < 2 分别返回 1 0 -1
   function CompareCharPos(Pos1, Pos2: TOTACharPos): Integer;
@@ -240,8 +240,6 @@ begin
     PrevToken := tkUnknown;
     NowPos.CharIndex := 0;
     NowPos.Line := 0;
-    FirstStart := False;
-    FirstEnd := False;
 
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('StartPos %d:%d. EndPos %d:%d', [StartPos.Line, StartPos.CharIndex,
@@ -258,35 +256,22 @@ begin
         GetEnumName(TypeInfo(TTokenKind), Ord(Lex.TokenID))]);
 {$ENDIF}
 
-      if not FirstStart and (CompareCharPos(NowPos, StartPos) > 0) then
+      // 当前 Token 是注释、位置等于光标位置且前一 Token 是 CRLFCo
+      NS := CompareCharPos(NowPos, StartPos);
+      if (NS = 0) and (PrevToken = tkCRLFCo) and (Lex.TokenID in InvalidTokens) then
       begin
-        // 当前位置第一次大于起始位置
-{$IFDEF DEBUG}
-        CnDebugger.LogMsg('Exceed StartPos. PrevToken is ' + GetEnumName(TypeInfo(TTokenKind), Ord(PrevToken)));
-{$ENDIF}
-        FirstStart := True;
-        if PrevToken in InvalidTokens then
-        begin
-          Result := False;
-          Exit;
-        end;
+        Result := False;
+        Exit;
       end;
 
-      if not FirstEnd and (CompareCharPos(NowPos, StartPos) > 0) then
+      NE := CompareCharPos(NowPos, EndPos);
+      if (NE = 0) and (PrevToken = tkCRLFCo) and (Lex.TokenID in InvalidTokens) then
       begin
-        // 当前位置第一次大于结束位置，说明结束位置在 PrevToken 中
-{$IFDEF DEBUG}
-        CnDebugger.LogMsg('Exceed EndPos. PrevToken is ' + GetEnumName(TypeInfo(TTokenKind), Ord(PrevToken)));
-{$ENDIF}
-        FirstEnd := True;
-        if PrevToken in InvalidTokens then
-        begin
-          Result := False;
-          Exit;
-        end;
+        Result := False;
+        Exit;
       end;
 
-      if FirstStart and FirstEnd then // 俩都比过了
+      if (NS > 0) and (NE > 0) then // 俩都比过了
         Exit;
 
       PrevToken := Lex.TokenID;
