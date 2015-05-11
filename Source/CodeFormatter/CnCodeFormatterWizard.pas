@@ -232,9 +232,9 @@ begin
   // 检查起始位置是否合法，比如不能在注释里面等
   Result := True;
   Stream := TMemoryStream.Create;
+  Lex := TmwPasLex.Create;
   try
     CnOtaSaveEditorToStream(View.Buffer, Stream);
-    Lex := TmwPasLex.Create;
     Lex.Origin := PAnsiChar(Stream.Memory);
 
     PrevToken := tkUnknown;
