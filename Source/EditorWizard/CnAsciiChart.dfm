@@ -1,8 +1,8 @@
 inherited CnAsciiForm: TCnAsciiForm
   Left = 293
   Top = 145
-  Width = 220
-  Height = 417
+  Width = 237
+  Height = 454
   ActiveControl = Grid
   Caption = 'ASCII Chart'
   Icon.Data = {
@@ -116,7 +116,7 @@ inherited CnAsciiForm: TCnAsciiForm
   object Panel1: TPanel
     Left = 0
     Top = 0
-    Width = 212
+    Width = 229
     Height = 33
     Align = alTop
     BevelOuter = bvNone
@@ -189,7 +189,7 @@ inherited CnAsciiForm: TCnAsciiForm
       Width = 35
       Height = 22
       MaxLength = 2
-      MaxValue = 12
+      MaxValue = 14
       MinValue = 4
       TabOrder = 1
       Value = 4
@@ -199,12 +199,12 @@ inherited CnAsciiForm: TCnAsciiForm
   object Grid: TStringGrid
     Left = 0
     Top = 33
-    Width = 212
-    Height = 291
+    Width = 229
+    Height = 328
     Align = alClient
     ColCount = 9
-    DefaultColWidth = 22
-    DefaultRowHeight = 16
+    DefaultColWidth = 24
+    DefaultRowHeight = 18
     RowCount = 17
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -223,8 +223,8 @@ inherited CnAsciiForm: TCnAsciiForm
   end
   object StatusBar: TStatusBar
     Left = 0
-    Top = 371
-    Width = 212
+    Top = 408
+    Width = 229
     Height = 19
     Panels = <
       item
@@ -245,14 +245,14 @@ inherited CnAsciiForm: TCnAsciiForm
   end
   object Panel2: TPanel
     Left = 0
-    Top = 324
-    Width = 212
+    Top = 361
+    Width = 229
     Height = 47
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 3
     object sbToHex: TSpeedButton
-      Left = 188
+      Left = 205
       Top = 2
       Width = 20
       Height = 20
@@ -289,7 +289,7 @@ inherited CnAsciiForm: TCnAsciiForm
     object edtOut: TEdit
       Left = 52
       Top = 27
-      Width = 157
+      Width = 174
       Height = 21
       Anchors = [akLeft, akTop, akRight, akBottom]
       TabOrder = 1
@@ -297,7 +297,7 @@ inherited CnAsciiForm: TCnAsciiForm
     object edtSource: TEdit
       Left = 52
       Top = 2
-      Width = 134
+      Width = 151
       Height = 21
       Anchors = [akLeft, akTop, akRight, akBottom]
       TabOrder = 2
