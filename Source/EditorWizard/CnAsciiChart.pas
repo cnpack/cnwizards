@@ -119,6 +119,7 @@ type
       Shift: TShiftState);
     procedure btnTopClick(Sender: TObject);
   private
+    FDigitalFont: TFont;
     FHex: Boolean;
     FPage: Integer;
     FOldCol: Integer;
@@ -276,6 +277,9 @@ begin
   btnTop.Visible := True;
 {$ENDIF}
 
+  FDigitalFont := TFont.Create;
+  FDigitalFont.Name := 'Tahoma';
+  FDigitalFont.Size := Grid.Font.Size;
   cbFont.Items.Assign(Screen.Fonts);
   cbFont.ItemIndex := cbFont.Items.IndexOf(Grid.Font.Name);
 end;
@@ -296,6 +300,7 @@ end;
 procedure TCnAsciiForm.FormDestroy(Sender: TObject);
 begin
   CnAsciiForm := nil;
+  FDigitalFont.Free;
   inherited;
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('TCnAsciiForm.FormDestroy');
@@ -325,7 +330,10 @@ begin
     if FCells <> nil then
     begin
       OutStr := FCells[ACol, ARow];
-      Canvas.Font := Grid.Font;
+      if gdFixed in State then
+        Canvas.Font := FDigitalFont
+      else
+        Canvas.Font := Grid.Font;
       Canvas.TextRect(Rect, Rect.Left + ((Rect.Right - Rect.Left -
         Canvas.TextWidth(OutStr)) shr 1), Rect.Top + ((Rect.Bottom - Rect.top
         - Canvas.TextHeight(OutStr)) shr 1), OutStr);
@@ -398,6 +406,8 @@ end;
 procedure TCnAsciiForm.seFontSizeChange(Sender: TObject);
 begin
   Grid.Font.Size := seFontSize.Value;
+  if FDigitalFont <> nil then
+    FDigitalFont.Size := seFontSize.Value;
 end;
 
 procedure TCnAsciiForm.sbHexClick(Sender: TObject);

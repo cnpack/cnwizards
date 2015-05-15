@@ -189,7 +189,7 @@ inherited CnAsciiForm: TCnAsciiForm
       Width = 35
       Height = 22
       MaxLength = 2
-      MaxValue = 10
+      MaxValue = 12
       MinValue = 4
       TabOrder = 1
       Value = 4
