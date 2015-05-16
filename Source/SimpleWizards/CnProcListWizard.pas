@@ -59,11 +59,16 @@ interface
 
 {$IFDEF CNWIZARDS_CNPROCLISTWIZARD}
 
+{$IFDEF DELPHIXE4_UP}
+  {$DEFINE USE_CUSTOMIZED_SPLITTER}
+{$ENDIF}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ComCtrls, ToolWin, StdCtrls, ExtCtrls, IniFiles, ToolsAPI, Math, Menus, ActnList,
   CnProjectViewBaseFrm, CnWizClasses, CnWizManager, CnIni, CnWizEditFiler, mPasLex,
   mwBCBTokenList, Contnrs, Clipbrd, CnEditControlWrapper, CnPasCodeParser,
+  {$IFDEF USE_CUSTOMIZED_SPLITTER} CnSplitter, {$ENDIF}
   CnPopupMenu, CnWizIdeUtils, CnCppCodeParser, CnEdit, RegExpr;
 
 type
@@ -108,6 +113,12 @@ type
 
   TCnProcListWizard = class;
 
+{$IFDEF USE_CUSTOMIZED_SPLITTER}
+  TCnCustomizedSplitter = TCnSplitter;
+{$ELSE}
+  TCnCustomizedSplitter = TSplitter;
+{$ENDIF}
+
   TCnProcListForm = class(TCnProjectViewBaseForm)
     mmoContent: TMemo;
     Splitter: TSplitter;
@@ -134,7 +145,6 @@ type
     procedure SplitterMoved(Sender: TObject);
   private
     { Private declarations }
-
     FFileName: string;
     FFiler: TCnEditFiler;
     FFilesGot: Boolean;
@@ -282,8 +292,8 @@ type
     FPopupMenu: TPopupMenu;
     FEditControl: TControl;
     FEditorToolBar: TControl;
-    FSplitter1: TSplitter;
-    FSplitter2: TSplitter;
+    FSplitter1: TCnCustomizedSplitter;
+    FSplitter2: TCnCustomizedSplitter;
   public
     property EditControl: TControl read FEditControl write FEditControl;
     property EditorToolBar: TControl read FEditorToolBar write FEditorToolBar;
@@ -296,8 +306,8 @@ type
     property ToolBtnJumpIntf: TCnProcToolButton read FToolBtnJumpIntf write FToolBtnJumpIntf;
     property ToolBtnJumpImpl: TCnProcToolButton read FToolBtnJumpImpl write FToolBtnJumpImpl;
     property ClassCombo: TCnProcListComboBox read FClassCombo write FClassCombo;
-    property Splitter1: TSplitter read FSplitter1 write FSplitter1;
-    property Splitter2: TSplitter read FSplitter2 write FSplitter2;
+    property Splitter1: TCnCustomizedSplitter read FSplitter1 write FSplitter1;
+    property Splitter2: TCnCustomizedSplitter read FSplitter2 write FSplitter2;
     property ProcCombo: TCnProcListComboBox read FProcCombo write FProcCombo;
     property ToolBtnMatchStart: TCnProcToolButton read FToolBtnMatchStart write FToolBtnMatchStart;
     property ToolBtnMatchAny: TCnProcToolButton read FToolBtnMatchAny write FToolBtnMatchAny;
@@ -658,9 +668,9 @@ var
   AComp, AToolbar: TComponent;
   AClassCombo, AProcCombo: TCnProcListComboBox;
 begin
-  if Sender is TSplitter then
+  if Sender is TComponent then
   begin
-    AToolbar := (Sender as TSplitter).Owner;
+    AToolbar := (Sender as TComponent).Owner;
     if (AToolbar <> nil) then
     begin
       AComp := AToolbar.FindComponent(csClassComboName);
@@ -777,7 +787,7 @@ begin
     OnButtonClick := ClassComboDropDown;
   end;
 
-  Obj.FSplitter1 := TSplitter.Create(ToolBar);
+  Obj.FSplitter1 := TCnCustomizedSplitter.Create(ToolBar);
   with Obj.FSplitter1 do
   begin
     Align := alLeft;
@@ -806,7 +816,7 @@ begin
     OnButtonClick := ProcComboDropDown;
   end;
 
-  Obj.FSplitter2 := TSplitter.Create(ToolBar);
+  Obj.FSplitter2 := TCnCustomizedSplitter.Create(ToolBar);
   with Obj.FSplitter2 do
   begin
     Align := alLeft;
