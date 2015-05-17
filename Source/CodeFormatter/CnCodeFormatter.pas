@@ -3933,7 +3933,15 @@ begin
   if MultiCompound then
   begin
     while Scaner.Token in BlockStmtTokens do
+    begin
       FormatCompoundStmt(PreSpaceCount);
+      if Scaner.Token = tokSemicolon then
+      begin
+        Match(Scaner.Token);
+        if Scaner.Token in BlockStmtTokens then // 后面还有则换行
+          Writeln;
+      end;
+    end;
   end
   else
     FormatCompoundStmt(PreSpaceCount);
@@ -4979,6 +4987,11 @@ begin
       IsFirst := False;
       Writeln;
     end;
+
+    // If not Attribute, maybe infinite loop here, fix partly.
+    if Scaner.Token in [tokString] then
+      Match(Scaner.Token);
+      
   until Scaner.Token in [tokSRB, tokUnknown, tokEOF];
   Match(tokSRB);
 end;
