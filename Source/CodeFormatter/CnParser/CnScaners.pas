@@ -176,7 +176,7 @@ type
     property TokenPtr: PChar read FTokenPtr;
 
     property ASMMode: Boolean read FASMMode write FASMMode;
-    {* 用来控制是否将回车当作空白，asm 块中需要此选项}
+    {* 用来控制是否将回车当作空白以及其他解析，asm 块中需要此选项}
 
     property BlankLinesBefore: Integer read FBlankLinesBefore write FBlankLinesBefore;
     {* SkipBlank 碰到一注释时，注释和前面有效内容隔的行数，用来控制分行}
@@ -1187,9 +1187,18 @@ begin
 
     '0'..'9':
       begin
-        Inc(P);
-        while P^ in ['0'..'9'] do Inc(P);
-        Result := tokInteger;
+        if FASMMode then
+        begin
+          Inc(P);
+          while P^ in ['0'..'9', 'A'..'F', 'a'..'f', 'H', 'h'] do Inc(P);
+          Result := tokAsmHex;
+        end
+        else
+        begin
+          Inc(P);
+          while P^ in ['0'..'9'] do Inc(P);
+          Result := tokInteger;
+        end;
 
         if (P^ = '.') and ((P+1)^ <> '.') then
         begin
