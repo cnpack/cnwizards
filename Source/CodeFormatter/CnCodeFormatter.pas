@@ -1465,7 +1465,8 @@ begin
     case Scaner.Token of
       tokKeywordBegin:
         begin
-          if (CnPascalCodeForRule.BeginStyle = bsNextLine) or FNextBeginShouldIndent then
+          if (CnPascalCodeForRule.BeginStyle = bsNextLine) or FNextBeginShouldIndent
+            or not (FElementType in [pfetAfterDo, pfetAfterElse, pfetAfterThen]) then
             Match(tokKeywordBegin, PreSpaceCount)
           else
             Match(tokKeywordBegin); // begin 前是否换行由外面控制，begin 前缩进这儿控制
@@ -1528,8 +1529,13 @@ begin
   end;
 
   Match(tokKeywordDo);
+  SpecifyElementType(pfetAfterDo);
   CheckWriteBeginln; // 检查 do begin 是否同行
-  FormatStatement(Tab(PreSpaceCount));
+  try
+    FormatStatement(Tab(PreSpaceCount));
+  finally
+    RestoreElementType;
+  end;
 end;
 
 { IfStmt -> IF Expression THEN Statement [ELSE Statement] }
@@ -1544,8 +1550,13 @@ begin
   FormatExpression;
   Match(tokKeywordThen);
 
+  SpecifyElementType(pfetAfterDo);
   CheckWriteBeginln; // 检查 if then begin 是否同行
-  FormatStatement(Tab(PreSpaceCount));
+  try
+    FormatStatement(Tab(PreSpaceCount));
+  finally
+    RestoreElementType;
+  end;
 
   if Scaner.Token = tokKeywordElse then
   begin
@@ -1558,8 +1569,13 @@ begin
     end
     else
     begin
+      SpecifyElementType(pfetAfterElse);
       CheckWriteBeginln; // 检查 else begin 是否同行
-      FormatStatement(Tab(PreSpaceCount));
+      try
+        FormatStatement(Tab(PreSpaceCount));
+      finally
+        RestoreElementType;
+      end;
     end;
   end;
 end;
@@ -1915,10 +1931,15 @@ begin
     Match(tokSymbol);
   end;
   Match(tokKeywordDo);
+  SpecifyElementType(pfetAfterDo);
   CheckWriteBeginln; // 检查 do begin 是否同行;
 
-  OnlySemicolon := Scaner.Token = tokSemicolon;
-  FormatStatement(Tab(PreSpaceCount));
+  try
+    OnlySemicolon := Scaner.Token = tokSemicolon;
+    FormatStatement(Tab(PreSpaceCount));
+  finally
+    RestoreElementType;
+  end;
   
   if Scaner.Token = tokSemicolon then
   begin
@@ -1945,8 +1966,13 @@ begin
   Match(tokKeywordWhile, PreSpaceCount);
   FormatExpression;
   Match(tokKeywordDo);
+  SpecifyElementType(pfetAfterDo);
   CheckWriteBeginln; // 检查 do begin 是否同行
-  FormatStatement(Tab(PreSpaceCount));
+  try
+    FormatStatement(Tab(PreSpaceCount));
+  finally
+    RestoreElementType;
+  end;
 end;
 
 { WithStmt -> WITH IdentList DO Statement }
@@ -1963,8 +1989,13 @@ begin
   end;
 
   Match(tokKeywordDo);
+  SpecifyElementType(pfetAfterDo);
   CheckWriteBeginln; // 检查 do begin 是否同行
-  FormatStatement(Tab(PreSpaceCount));
+  try
+    FormatStatement(Tab(PreSpaceCount));
+  finally
+    RestoreElementType;
+  end;
 end;
 
 { RaiseStmt -> RAISE [ Expression | Expression AT Expression ] }
