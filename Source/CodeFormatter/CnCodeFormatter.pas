@@ -3008,7 +3008,8 @@ var
   begin
     repeat
       Scaner.NextToken;
-    until not (Scaner.Token in [tokSymbol, tokDot, tokInteger]);
+    until not (Scaner.Token in [tokSymbol, tokDot, tokInteger, tokLB, tokRB]);
+    // 包括 () 是因为可能有类似于 Low(Integer)..High(Integer) 的情况
   end;
 
   procedure MatchTokenWithDot;
