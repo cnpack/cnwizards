@@ -95,7 +95,7 @@ type
     function CanBeSymbol(Token: TPascalToken): Boolean;
     procedure Match(Token: TPascalToken; BeforeSpaceCount: Byte = 0;
       AfterSpaceCount: Byte = 0; IgnorePreSpace: Boolean = False;
-      SemicolonIsLineStart: Boolean = False);
+      SemicolonIsLineStart: Boolean = False; NoSeparateSpace: Boolean = False);
     procedure MatchOperator(Token: TPascalToken); //操作符
     procedure WriteToken(Token: TPascalToken; BeforeSpaceCount: Byte = 0;
       AfterSpaceCount: Byte = 0; IgnorePreSpace: Boolean = False;
@@ -533,13 +533,14 @@ begin
 end;
 
 procedure TCnAbstractCodeFormatter.Match(Token: TPascalToken; BeforeSpaceCount,
-  AfterSpaceCount: Byte; IgnorePreSpace: Boolean; SemicolonIsLineStart: Boolean);
+  AfterSpaceCount: Byte; IgnorePreSpace: Boolean; SemicolonIsLineStart: Boolean;
+  NoSeparateSpace: Boolean);
 begin
   if (Scaner.Token = Token) or ( (Token = tokSymbol) and
     CanBeSymbol(Scaner.Token) ) then
   begin
     WriteToken(Token, BeforeSpaceCount, AfterSpaceCount,
-      IgnorePreSpace, SemicolonIsLineStart);
+      IgnorePreSpace, SemicolonIsLineStart, NoSeparateSpace);
     Scaner.NextToken;
   end
   else if FInternalRaiseException or not CnPascalCodeForRule.ContinueAfterError then
@@ -552,7 +553,7 @@ begin
   else // 要继续的场合，写了再说
   begin
     WriteToken(Token, BeforeSpaceCount, AfterSpaceCount,
-      IgnorePreSpace, SemicolonIsLineStart);
+      IgnorePreSpace, SemicolonIsLineStart, NoSeparateSpace);
     Scaner.NextToken;
   end;
 end;
@@ -1995,6 +1996,8 @@ begin
   Match(tokKeywordAsm, PreSpaceCount);
   Writeln;
   Scaner.ASMMode := True;
+  SpecifyElementType(pfetAsm);
+
   OldKeywordStyle := CnPascalCodeForRule.KeywordStyle;
   CnPascalCodeForRule.KeywordStyle := ksUpperCaseKeyword; // 临时替换
 
@@ -2109,6 +2112,8 @@ begin
               Match(Scaner.Token, 0, 0, True)
             else if Scaner.Token in (AddOPTokens + MulOPTokens) then
               Match(Scaner.Token, 1, 1) // 二元运算符前后各空一格
+            else if (FLastToken = tokFloat) and (UpperCase(Scaner.TokenString) = 'H') then
+              Match(Scaner.Token, 0, 0, False, False, True) // 修补数字开头的十六进制与 H 间的空格，但不完善
             else
               Match(Scaner.Token);
             AfterKeyword := False;
@@ -2130,6 +2135,7 @@ begin
     end;
   finally
     Scaner.ASMMode := False;
+    RestoreElementType;
     if Scaner.Token in [tokBlank, tokCRLF] then
       Scaner.NextToken;
     CnPascalCodeForRule.KeywordStyle := OldKeywordStyle; // 恢复 KeywordStyle
