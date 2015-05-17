@@ -2112,7 +2112,8 @@ begin
               Match(Scaner.Token, 0, 0, True)
             else if Scaner.Token in (AddOPTokens + MulOPTokens) then
               Match(Scaner.Token, 1, 1) // 二元运算符前后各空一格
-            else if (FLastToken = tokFloat) and (UpperCase(Scaner.TokenString) = 'H') then
+            else if (FLastToken in [tokInteger, tokFloat]) and
+              (UpperCase(Scaner.TokenString) = 'H') then
               Match(Scaner.Token, 0, 0, False, False, True) // 修补数字开头的十六进制与 H 间的空格，但不完善
             else
               Match(Scaner.Token);
