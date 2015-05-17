@@ -291,7 +291,8 @@ begin
   for I:=#0 to #255 do
   begin
     Case I of
-      '_', '0'..'9', 'a'..'z', 'A'..'Z': Identifiers[I]:=True;
+      '_', '0'..'9', 'a'..'z', 'A'..'Z', #128..#255: Identifiers[I]:=True;
+      // Allows WideChar Identifier
     else Identifiers[I]:=False;
     end;
     Case I of
@@ -885,7 +886,7 @@ begin
       '$': fProcTable[I]:=IntegerProc;
       #39: fProcTable[I]:=StringProc;
       '0'..'9': fProcTable[I]:=NumberProc;
-      'A'..'Z', 'a'..'z', '_':
+      'A'..'Z', 'a'..'z', '_', #127..#255:
         fProcTable[I]:=IdentProc;
       '{': fProcTable[I]:=BraceOpenProc;
       '}': fProcTable[I]:=BraceCloseProc;
