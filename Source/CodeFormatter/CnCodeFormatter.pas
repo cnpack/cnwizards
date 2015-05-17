@@ -195,7 +195,8 @@ type
     procedure FormatSimpleType(PreSpaceCount: Byte = 0);
     procedure FormatSubrangeType(PreSpaceCount: Byte = 0);
     procedure FormatDirective(PreSpaceCount: Byte = 0; IgnoreFirst: Boolean = False);
-    procedure FormatBlock(PreSpaceCount: Byte = 0; IsInternal: Boolean = False);
+    procedure FormatBlock(PreSpaceCount: Byte = 0; IsInternal: Boolean = False;
+      MultiCompound: Boolean = False);
     procedure FormatDeclSection(PreSpaceCount: Byte; IndentProcs: Boolean = True;
       IsInternal: Boolean = False);
 
@@ -3921,7 +3922,7 @@ end;
            CompoundStmt
 }
 procedure TCnBasePascalFormatter.FormatBlock(PreSpaceCount: Byte;
-  IsInternal: Boolean);
+  IsInternal: Boolean; MultiCompound: Boolean);
 begin
   while Scaner.Token in DeclSectionTokens do
   begin
@@ -3929,7 +3930,13 @@ begin
     Writeln;
   end;
 
-  FormatCompoundStmt(PreSpaceCount);
+  if MultiCompound then
+  begin
+    while Scaner.Token in BlockStmtTokens do
+      FormatCompoundStmt(PreSpaceCount);
+  end
+  else
+    FormatCompoundStmt(PreSpaceCount);
 end;
 
 {
@@ -4170,7 +4177,7 @@ begin
   if ((not IsExternal)  and (not IsForward))and
      (Scaner.Token in BlockStmtTokens + DeclSectionTokens) then
   begin
-    FormatBlock(PreSpaceCount, True);
+    FormatBlock(PreSpaceCount, True, True);
     if not IsAnonymous and (Scaner.Token = tokSemicolon) then // 匿名函数不包括 end 后的分号
       Match(tokSemicolon);
   end;
@@ -4243,7 +4250,7 @@ begin
   if ((not IsExternal) and (not IsForward)) and
     (Scaner.Token in BlockStmtTokens + DeclSectionTokens) then // Local procedure also supports Attribute
   begin
-    FormatBlock(PreSpaceCount, True);
+    FormatBlock(PreSpaceCount, True, True);
     if not IsAnonymous and (Scaner.Token = tokSemicolon) then // 匿名函数不包括 end 后的分号
       Match(tokSemicolon);
   end;
