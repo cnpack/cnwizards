@@ -48,6 +48,8 @@ const
   CN_MATCHED_INVALID = -1;
 
 type
+  TCnGoalType = (gtUnknown, gtProgram, gtLibrary, gtUnit, gtPackage);
+
   TCnAbstractCodeFormatter = class
   private
     FScaner: TAbstractScaner;
@@ -154,6 +156,7 @@ type
 
   TCnBasePascalFormatter = class(TCnAbstractCodeFormatter)
   private
+    FGoalType: TCnGoalType;
     FNextBeginShouldIndent: Boolean; // 控制是否本 begin 必须换行即使设置为 SameLine
     function IsTokenAfterAttributesInSet(InTokens: TPascalTokenSet): Boolean;
     procedure CheckWriteBeginln;
@@ -197,6 +200,8 @@ type
     procedure FormatDirective(PreSpaceCount: Byte = 0; IgnoreFirst: Boolean = False);
     procedure FormatBlock(PreSpaceCount: Byte = 0; IsInternal: Boolean = False;
       MultiCompound: Boolean = False);
+    // MultiCompound 控制可处理多个并列的 begin end，但易和 program/library 的主 begin end 混淆，
+    // 所以上述俩类型的单元不用
     procedure FormatDeclSection(PreSpaceCount: Byte; IndentProcs: Boolean = True;
       IsInternal: Boolean = False);
 
@@ -3930,7 +3935,7 @@ begin
     Writeln;
   end;
 
-  if MultiCompound then
+  if MultiCompound and not (FGoalType in [gtProgram, gtLibrary]) then
   begin
     while Scaner.Token in BlockStmtTokens do
     begin
@@ -4517,11 +4522,28 @@ end;
 procedure TCnGoalCodeFormatter.FormatGoal(PreSpaceCount: Byte);
 begin
   case Scaner.Token of
-    tokKeywordProgram: FormatProgram(PreSpaceCount);
-    tokKeywordLibrary: FormatLibrary(PreSpaceCount);
-    tokKeywordUnit:    FormatUnit(PreSpaceCount);
-    tokKeywordPackage: FormatPackage(PreSpaceCount);
+    tokKeywordProgram:
+      begin
+        FGoalType := gtProgram;
+        FormatProgram(PreSpaceCount);
+      end;
+    tokKeywordLibrary:
+      begin
+        FGoalType := gtLibrary;
+        FormatLibrary(PreSpaceCount);
+      end;
+    tokKeywordUnit:
+      begin
+        FGoalType := gtUnit;
+        FormatUnit(PreSpaceCount);
+      end;
+    tokKeywordPackage:
+      begin
+        FGoalType := gtPackage;
+        FormatPackage(PreSpaceCount);
+      end;
   else
+    FGoalType := gtUnknown;
     Error(CN_ERRCODE_PASCAL_UNKNOWN_GOAL);
   end;
 end;
