@@ -804,6 +804,7 @@ end;
 function TScaner.NextToken: TPascalToken;
 var
   BlankStr: string;
+  S: string;
 
   procedure SkipTo(var P: PChar; TargetChar: Char);
   begin
@@ -982,9 +983,7 @@ begin
               Inc(FBlankLinesAfterComment);
               Inc(P);
               FOldSourceColPtr := P;
-            end
-            else
-              Inc(P);
+            end;
           end;
         end
         else
@@ -1014,9 +1013,7 @@ begin
               Inc(FBlankLinesAfterComment);
               Inc(P);
               FOldSourceColPtr := P;
-            end
-            else
-              Inc(P);
+            end;
           end
           else
             Error(CN_ERRCODE_PASCAL_ENDCOMMENT_EXP);
@@ -1058,9 +1055,7 @@ begin
                     Inc(FBlankLinesAfterComment);
                     Inc(P);
                     FOldSourceColPtr := P;
-                  end
-                  else
-                    Inc(P);
+                  end;
                 end;
 
                 Break;
@@ -1301,7 +1296,11 @@ begin
             FCodeGen.WriteBlank(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
           end;
         end;
-        FCodeGen.Write(TokenString); // 再写注释本身
+        S := TokenString;
+        if FASMMode and (Length(S) >= 1) and (S[Length(S)] = #13) then
+          FCodeGen.Write(S + #10)
+        else
+          FCodeGen.Write(S); // 再写注释本身，注意 ASM 下这个注释可能是 #13 结尾，需要人为加个 #10
       end;
 
       if not FFirstCommentInBlock then // 第一次碰到 Comment 时设置这个
@@ -1367,7 +1366,11 @@ begin
             FCodeGen.WriteBlank(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
           end;
         end;
-        FCodeGen.Write(TokenString); // 再写注释本身
+        S := TokenString;
+        if FASMMode and (Length(S) >= 1) and (S[Length(S)] = #13) then
+          FCodeGen.Write(S + #10)
+        else
+          FCodeGen.Write(S); // 再写注释本身，注意 ASM 下这个注释可能是 #13 结尾，需要人为加个 #10
       end;
 
       if not FFirstCommentInBlock then // 第一次碰到 Comment 时设置这个
