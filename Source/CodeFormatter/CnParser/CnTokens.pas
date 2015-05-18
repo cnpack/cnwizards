@@ -336,6 +336,8 @@ const
 
   CanBeTypeKeywordTokens = [tokKeywordString, tokKeywordFile];
 
+  CanBeNewIdentifierTokens = [tokInteger, tokFloat]; // 新语法允许 1.toString 这种
+
   function TokenToString(Token: TPascalToken): string;
   function StringToToken(TokenStr: string): TPascalToken;
 

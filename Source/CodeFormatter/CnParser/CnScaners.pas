@@ -821,10 +821,10 @@ var
   end;
 
 var
-  IsWideStr: Boolean;
-  P, IgnoreP: PChar;
+  IsWideStr, FloatStop: Boolean;
+  P, IgnoreP, OldP: PChar;
   Directive: TPascalToken;
-  DirectiveNest: Integer;
+  DirectiveNest, FloatCount: Integer;
   TmpToken: string;
 begin
   FOldSourceColPtr := FSourcePtr;
@@ -1193,6 +1193,7 @@ begin
 
     '0'..'9':
       begin
+        FloatStop := False;
         if FASMMode then
         begin
           Inc(P);
@@ -1208,29 +1209,46 @@ begin
 
         if (P^ = '.') and ((P+1)^ <> '.') then
         begin
+          OldP := P;
           Inc(P);
-          while P^ in ['0'..'9'] do Inc(P);
-          Result := tokFloat;
-        end;
-
-        if P^ in ['e', 'E'] then
-        begin
-          Inc(P);
-          if P^ in ['-', '+'] then
-            Inc(P);
+          FloatCount := 0;
           while P^ in ['0'..'9'] do
+          begin
+            Inc(FloatCount);
             Inc(P);
-          Result := tokFloat;
+          end;
+
+          // 有小数点并且小数点后有数字才算 Float
+          if FloatCount = 0 then
+          begin
+            P := OldP;
+            FloatStop := True;
+          end
+          else
+            Result := tokFloat;
         end;
 
-        if (P^ in ['c', 'C', 'd', 'D', 's', 'S']) then
+        if not FloatStop then // 不是 Float 就不用处理了
         begin
-          Result := tokFloat;
-          FFloatType := P^;
-          Inc(P);
-        end
-        else
-          FFloatType := #0;
+          if P^ in ['e', 'E'] then
+          begin
+            Inc(P);
+            if P^ in ['-', '+'] then
+              Inc(P);
+            while P^ in ['0'..'9'] do
+              Inc(P);
+            Result := tokFloat;
+          end;
+
+          if (P^ in ['c', 'C', 'd', 'D', 's', 'S']) then
+          begin
+            Result := tokFloat;
+            FFloatType := P^;
+            Inc(P);
+          end
+          else
+            FFloatType := #0;
+        end;
       end;
     #10:  // 如果有回车则处理，以 #10 为准
       begin
