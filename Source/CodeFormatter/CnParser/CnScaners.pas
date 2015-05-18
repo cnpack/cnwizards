@@ -982,7 +982,9 @@ begin
               Inc(FBlankLinesAfterComment);
               Inc(P);
               FOldSourceColPtr := P;
-            end;
+            end
+            else
+              Inc(P);
           end;
         end
         else
@@ -1012,7 +1014,9 @@ begin
               Inc(FBlankLinesAfterComment);
               Inc(P);
               FOldSourceColPtr := P;
-            end;
+            end
+            else
+              Inc(P);
           end
           else
             Error(CN_ERRCODE_PASCAL_ENDCOMMENT_EXP);
@@ -1054,7 +1058,9 @@ begin
                     Inc(FBlankLinesAfterComment);
                     Inc(P);
                     FOldSourceColPtr := P;
-                  end;
+                  end
+                  else
+                    Inc(P);
                 end;
 
                 Break;
