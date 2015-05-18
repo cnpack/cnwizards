@@ -1099,13 +1099,13 @@ begin
     if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
       Match(Scaner.Token); // 标识符中允许使用部分关键字
   end
-  else if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
+  else if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens + CanBeNewIdentifierTokens) then
     Match(Scaner.Token, PreSpaceCount); // 标识符中允许使用部分关键字，在此缩进
 
   while CanHaveUnitQual and (Scaner.Token = tokDot) do
   begin
     Match(tokDot);
-    if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
+    if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens + CanBeNewIdentifierTokens) then
       Match(Scaner.Token); // 也继续允许使用部分关键字
   end;
 end;
@@ -1667,8 +1667,8 @@ var
 begin
   case Scaner.Token of
     tokSymbol, tokAtSign, tokKeywordFinal, tokKeywordIn, tokKeywordOut,
-    tokKeywordString,
-    tokDirective_BEGIN..tokDirective_END, // 允许语句以部分关键字开头
+    tokKeywordString, tokInteger, tokFloat,
+    tokDirective_BEGIN..tokDirective_END, // 允许语句以部分关键字以及数字开头
     tokComplex_BEGIN..tokComplex_END:
       begin
         FormatDesignatorAndOthers(PreSpaceCount);
@@ -1779,7 +1779,7 @@ begin
 
   // 允许语句以部分关键字开头，比如变量名等
   if Scaner.Token in SimpStmtTokens + DirectiveTokens + ComplexTokens +
-    StmtKeywordTokens then
+    StmtKeywordTokens + CanBeNewIdentifierTokens then
     FormatSimpleStatement(PreSpaceCount)
   else if Scaner.Token in StructStmtTokens then
   begin
@@ -2143,7 +2143,7 @@ begin
               Match(Scaner.Token, 0, 0, True)
             else if Scaner.Token in (AddOPTokens + MulOPTokens) then
               Match(Scaner.Token, 1, 1) // 二元运算符前后各空一格
-            else if (FLastToken in [tokInteger, tokFloat]) and
+            else if (FLastToken in CanBeNewIdentifierTokens) and
               (UpperCase(Scaner.TokenString) = 'H') then
               Match(Scaner.Token, 0, 0, False, False, True) // 修补数字开头的十六进制与 H 间的空格，但不完善
             else
@@ -5214,12 +5214,9 @@ end;
 procedure TCnAbstractCodeFormatter.SpecifyElementType(
   Element: TCnPascalFormattingElementType);
 begin
-  if Element <> FElementType then
-  begin
-    if FOldElementTypes <> nil then
-      FOldElementTypes.Push(Pointer(FElementType));
-    FElementType := Element;
-  end;
+  if FOldElementTypes <> nil then
+    FOldElementTypes.Push(Pointer(FElementType));
+  FElementType := Element;
 end;
 
 procedure TCnAbstractCodeFormatter.ResetElementType;
