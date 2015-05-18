@@ -13,7 +13,7 @@ type
     procedure btnCreateClick(Sender: TObject);
   private
     { Private declarations }
-    Toolbar: TToolBar;
+    Toolbar: TWinControl;
     Combo1, Combo2:TComboBox;
     Splitter: TSplitter;
   public
@@ -40,6 +40,7 @@ begin
   Combo1.Top := 0;
   Combo1.Width := 150;
   Combo1.Height := 21;
+  // Combo1.Align := alLeft; // If use this line, OK. if commented, Not OK under XE4 or above.
 
   Splitter := TSplitter.Create(Toolbar);
   Splitter.Align := alLeft;
