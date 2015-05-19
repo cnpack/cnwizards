@@ -172,7 +172,7 @@ var
   szBuf: array[0..MAX_PATH] of char;
 begin
   m_bSaveUsrObjRep2Sys := bFlag;
-  // 代码模板文件：dci
+  // 代码模板文件：dci 或 CodeSnippets.xml
   if aoCodeTemp in m_AbiOption then
   begin
     if m_AbiType in [atBDS2005, atBDS2006, atDelphi2007, atDelphi2009, atDelphi2010] then
@@ -736,7 +736,7 @@ begin
     FreeAndNil(dcmp);
     FreeAndNil(fs);
   end;
-  // 代码模板文件：dci
+  // 代码模板文件：dci/CodeSnippets.xml
   if aoCodeTemp in m_abiOption then
   begin
     strFileName := m_strTempPath + GetAbiOptionFile(aoCodeTemp);
@@ -930,7 +930,13 @@ begin
     atDelphi2010, atDelphiXE, atDelphiXE2, atDelphiXE3, atDelphiXE4, atDelphiXE5,
       atDelphiXE6, atDelphiXE7, atDelphiXE8:
       case ao of
-        aoCodeTemp: Result := 'bds.dci'; // 代码模板
+        aoCodeTemp:
+          begin
+            if m_AbiType > atDelphi2010 then
+              Result := 'CodeSnippets.xml'
+            else
+              Result := 'bds.dci'; // 代码模板
+          end;
         aoObjRep: Result := 'RADStudioRepository.xml';   // 对象库
         aoRegInfo: Result := '';        // 注册表信息
         aoMenuTemp: Result := 'bds.dmt'; // 菜单模板
