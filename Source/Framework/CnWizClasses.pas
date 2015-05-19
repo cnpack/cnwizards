@@ -49,7 +49,9 @@ unit CnWizClasses;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2015.01.03 V1.9
+* 修改记录：2015.05.19 V2.0
+*               LiuXiao 增加设计器右键菜单的相关类。
+*           2015.01.03 V1.9
 *               LiuXiao 增加 ResetSettings 方法，供子类重载。
 *           2004.06.01 V1.8
 *               LiuXiao 调整 TCnSubMenuWizard.OnPopup 方法，在弹出菜单中加入子菜单。
@@ -80,8 +82,8 @@ interface
 
 uses
   Windows, Classes, Sysutils, Graphics, Menus, ActnList, IniFiles, ToolsAPI,
-  Registry, ComCtrls, Forms, CnWizShortCut, CnWizMenuAction, CnIni, CnWizConsts,
-  CnPopupMenu;
+  Registry, ComCtrls, Forms,
+  CnWizShortCut, CnWizMenuAction, CnIni, CnWizConsts, CnPopupMenu;
 
 type
 
@@ -433,7 +435,7 @@ type
     function GetEnabled: Boolean; virtual;
     {* 控制条目是否使能}
     function Execute: Boolean; virtual;
-    {* 条目执行方法，默认什么都不做}
+    {* 条目执行方法，基类默认什么都不做}
 
     property Wizard: TCnBaseWizard read FWizard;
     {* 所属 Wizard 实例}
@@ -456,10 +458,10 @@ function GetCnWizardClassCount: Integer;
 function GetCnWizardClassByIndex(const Index: Integer): TCnWizardClass;
 {* 根据索引号取指定的专家类引用 }
 
-function GetCnWizardTypeNameFromClass(AClass: TClass): String; 
+function GetCnWizardTypeNameFromClass(AClass: TClass): string;
 {* 根据专家类名取专家类型名称 }
 
-function GetCnWizardTypeName(AWizard: TCnBaseWizard): String;
+function GetCnWizardTypeName(AWizard: TCnBaseWizard): string;
 {* 根据专家实例名取指定的专家类引用 }
 
 implementation
@@ -649,9 +651,9 @@ var
 begin
   Ini := CreateIniFile;
   try
-  {$IFDEF Debug}
+  {$IFDEF DEBUG}
     CnDebugger.LogMsg('Saving settings: ' + ClassName);
-  {$ENDIF Debug}
+  {$ENDIF}
     SaveSettings(Ini);
   finally
     Ini.Free;
@@ -1382,6 +1384,10 @@ begin
   Result := SCnWizardsPage;
 end;
 
+//==============================================================================
+// 设计器右键菜单执行条目的基类
+//==============================================================================
+
 { TCnDesignSelectionExecutor }
 
 // 类构造器
@@ -1397,26 +1403,31 @@ begin
 
 end;
 
+// 条目执行方法，基类默认什么都不做
 function TCnDesignSelectionExecutor.Execute: Boolean;
 begin
   Result := True;
 end;
 
+// 控制条目是否显示
 function TCnDesignSelectionExecutor.GetActive: Boolean;
 begin
   Result := True;
 end;
 
+// 条目显示的标题
 function TCnDesignSelectionExecutor.GetCaption: string;
 begin
   Result := '';
 end;
 
+// 控制条目是否使能
 function TCnDesignSelectionExecutor.GetEnabled: Boolean;
 begin
   Result := True;
 end;
 
+// 条目的提示
 function TCnDesignSelectionExecutor.GetHint: string;
 begin
   Result := '';
@@ -1426,18 +1437,15 @@ initialization
   CnWizardClassList := TList.Create;
 
 finalization
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogEnter('CnBaseWizard finalization.');
-{$ENDIF Debug}
+{$ENDIF}
 
   FreeAndNil(CnWizardClassList);
 
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogLeave('CnBaseWizard finalization.');
-{$ENDIF Debug}
+{$ENDIF}
 
 end.
-
-
-
 

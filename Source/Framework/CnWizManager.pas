@@ -30,7 +30,9 @@ unit CnWizManager;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2003.10.03 V1.2 by 何清(QSoft)
+* 修改记录：2015.05.19 V1.3 by 何清(QSoft)
+*               增加 D6 以上版本的注册设计器右键菜单执行项的机制
+*           2003.10.03 V1.2 by 何清(QSoft)
 *               增加专家引导工具
 *           2003.08.02 V1.1
 *               LiuXiao 加入 WizardCanCreate 属性。
@@ -45,9 +47,9 @@ interface
 
 uses
   Windows, Messages, Classes, Graphics, Controls, Sysutils, Menus, ActnList,
-  Forms, ImgList, ExtCtrls, IniFiles, Dialogs, Registry, ToolsAPI, 
+  Forms, ImgList, ExtCtrls, IniFiles, Dialogs, Registry, ToolsAPI, Contnrs,
   {$IFDEF COMPILER6_UP}
-  DesignIntf, DesignEditors,
+  DesignIntf, DesignEditors, DesignMenus,
   {$ELSE}
   DsgnIntf,
   {$ENDIF}
@@ -182,12 +184,29 @@ type
     property OffSet[Index: Integer]: Integer read GetOffSet;
   end;
 
+{$IFDEF COMPILER6_UP}
+
+  TCnDesignSelectionManager = class(TBaseSelectionEditor, ISelectionEditor)
+  {* 设计器右键菜单执行项目管理器}
+  public
+    procedure ExecuteVerb(Index: Integer; const List: IDesignerSelections);
+    function GetVerb(Index: Integer): string;
+    function GetVerbCount: Integer;
+    procedure PrepareItem(Index: Integer; const AItem: IMenuItem);
+    procedure RequiresUnits(Proc: TGetStrProc);
+  end;
+
+{$ENDIF}
+
 var
   CnWizardMgr: TCnWizardMgr;
   {* TCnWizardMgr 主专家实例}
 
   InitSplashProc: TProcedure = nil;
   {* 处理封面窗口图片等内容的外挂模块}
+
+procedure RegisterDesignSelectionExecutor(Executor: TCnDesignSelectionExecutor);
+{* 注册一个设计器右键菜单的执行对象实例，应该在专家创建时注册}
 
 implementation
 
@@ -206,6 +225,17 @@ uses
 const
   csCnWizFreeMutex = 'CnWizFreeMutex';
   csMaxWaitFreeTick = 5000;
+
+var
+  CnDesignExecutorList: TObjectList = nil; // 设计器右键菜单执行对象列表
+
+// 注册一个设计器右键菜单的执行对象实例，应该在专家创建时注册
+procedure RegisterDesignSelectionExecutor(Executor: TCnDesignSelectionExecutor);
+begin
+  Assert(CnDesignExecutorList <> nil, 'CnDesignExecutorList is nil!');
+  if CnDesignExecutorList.IndexOf(Executor) < 0 then
+    CnDesignExecutorList.Add(Executor);
+end;
 
 //==============================================================================
 // TCnWizardMgr 主专家类
@@ -1254,6 +1284,57 @@ function TCnWizardMgr.GetState: TWizardState;
 begin
   Result := [wsEnabled];
 end;
+
+{$IFDEF COMPILER6_UP}
+
+//==============================================================================
+// 设计器右键菜单执行项目管理器
+//==============================================================================
+
+{ TCnDesignSelectionManager }
+
+procedure TCnDesignSelectionManager.ExecuteVerb(Index: Integer;
+  const List: IDesignerSelections);
+begin
+  TCnDesignSelectionExecutor(CnDesignExecutorList[Index]).Execute;
+end;
+
+function TCnDesignSelectionManager.GetVerb(Index: Integer): string;
+begin
+  Result := TCnDesignSelectionExecutor(CnDesignExecutorList[Index]).GetCaption;
+end;
+
+function TCnDesignSelectionManager.GetVerbCount: Integer;
+begin
+  Result := CnDesignExecutorList.Count;
+end;
+
+procedure TCnDesignSelectionManager.PrepareItem(Index: Integer;
+  const AItem: IMenuItem);
+var
+  Executor: TCnDesignSelectionExecutor;
+begin
+  Executor := TCnDesignSelectionExecutor(CnDesignExecutorList[Index]);
+  AItem.Visible := (Executor <> nil) and
+    ((Executor.Wizard = nil) or Executor.Wizard.Active)
+    and Executor.GetActive;
+  if AItem.Visible then
+    AItem.Enabled := Executor.GetEnabled;
+end;
+
+procedure TCnDesignSelectionManager.RequiresUnits(Proc: TGetStrProc);
+begin
+
+end;
+
+initialization
+  CnDesignExecutorList := TObjectList.Create(True);
+  RegisterSelectionEditor(TComponent, TCnDesignSelectionManager);
+
+finalization
+  FreeAndNil(CnDesignExecutorList);
+
+{$ENDIF}
 
 end.
 
