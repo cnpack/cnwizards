@@ -409,6 +409,37 @@ type
   TCnProjectWizard = class(TCnRepositoryWizard, IOTAProjectWizard);
 
 //==============================================================================
+// 设计器右键菜单执行条目的基类
+//==============================================================================
+
+{ TCnDesignSelectionExecutor }
+
+  TCnDesignSelectionExecutor = class(TObject)
+  {* 设计器右键菜单执行条目的基类，可从属于某一专家实例}
+  private
+    FWizard: TCnBaseWizard;
+  public
+    constructor Create(OwnWizard: TCnBaseWizard); virtual;
+    {* 类构造器 }
+    destructor Destroy; override;
+    {* 类析构器 }
+
+    function GetActive: Boolean; virtual;
+    {* 控制条目是否显示}
+    function GetCaption: string; virtual;
+    {* 条目显示的标题}
+    function GetHint: string; virtual;
+    {* 条目的提示}
+    function GetEnabled: Boolean; virtual;
+    {* 控制条目是否使能}
+    function Execute: Boolean; virtual;
+    {* 条目执行方法，默认什么都不做}
+
+    property Wizard: TCnBaseWizard read FWizard;
+    {* 所属 Wizard 实例}
+  end;
+
+//==============================================================================
 // 专家类列表相关过程
 //==============================================================================
 
@@ -1349,6 +1380,46 @@ end;
 function TCnRepositoryWizard.GetPage: string;
 begin
   Result := SCnWizardsPage;
+end;
+
+{ TCnDesignSelectionExecutor }
+
+// 类构造器
+constructor TCnDesignSelectionExecutor.Create(OwnWizard: TCnBaseWizard);
+begin
+  FWizard := OwnWizard;
+end;
+
+// 类析构器
+destructor TCnDesignSelectionExecutor.Destroy;
+begin
+  inherited;
+
+end;
+
+function TCnDesignSelectionExecutor.Execute: Boolean;
+begin
+  Result := True;
+end;
+
+function TCnDesignSelectionExecutor.GetActive: Boolean;
+begin
+  Result := True;
+end;
+
+function TCnDesignSelectionExecutor.GetCaption: string;
+begin
+  Result := '';
+end;
+
+function TCnDesignSelectionExecutor.GetEnabled: Boolean;
+begin
+  Result := True;
+end;
+
+function TCnDesignSelectionExecutor.GetHint: string;
+begin
+  Result := '';
 end;
 
 initialization
