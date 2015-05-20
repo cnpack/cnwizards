@@ -201,7 +201,7 @@ type
     procedure FormatBlock(PreSpaceCount: Byte = 0; IsInternal: Boolean = False;
       MultiCompound: Boolean = False);
     // MultiCompound 控制可处理多个并列的 begin end，但易和 program/library 的主 begin end 混淆，
-    // 所以上述俩类型的单元不用
+    // 并且容易和嵌套的过程函数混淆，所以目前暂时不用
     procedure FormatDeclSection(PreSpaceCount: Byte; IndentProcs: Boolean = True;
       IsInternal: Boolean = False);
 
@@ -1955,7 +1955,7 @@ procedure TCnBasePascalFormatter.FormatTryStmt(PreSpaceCount: Byte);
 begin
   Match(tokKeywordTry, PreSpaceCount);
   Writeln;
-  FormatStmtList(Tab(PreSpaceCount));
+  FormatStmtList(Tab(PreSpaceCount, False));
   Writeln;
   FormatTryEnd(PreSpaceCount);
 end;
@@ -4229,7 +4229,7 @@ begin
   if ((not IsExternal)  and (not IsForward))and
      (Scaner.Token in BlockStmtTokens + DeclSectionTokens) then
   begin
-    FormatBlock(PreSpaceCount, True, True);
+    FormatBlock(PreSpaceCount, True);
     if not IsAnonymous and (Scaner.Token = tokSemicolon) then // 匿名函数不包括 end 后的分号
       Match(tokSemicolon);
   end;
@@ -4302,7 +4302,7 @@ begin
   if ((not IsExternal) and (not IsForward)) and
     (Scaner.Token in BlockStmtTokens + DeclSectionTokens) then // Local procedure also supports Attribute
   begin
-    FormatBlock(PreSpaceCount, True, True);
+    FormatBlock(PreSpaceCount, True);
     if not IsAnonymous and (Scaner.Token = tokSemicolon) then // 匿名函数不包括 end 后的分号
       Match(tokSemicolon);
   end;
