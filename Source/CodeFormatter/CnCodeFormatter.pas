@@ -106,7 +106,9 @@ type
     function CheckTypeID(const S: string): string;
     {* 根据给定类型名的字符串返回设置中的类型格式}
     function Tab(PreSpaceCount: Byte = 0; CareBeginBlock: Boolean = True): Byte;
-    {* 根据代码格式风格设置返回缩进一次的前导空格数 }
+    {* 根据代码格式风格设置返回缩进一次的前导空格数。
+       CareBeginBlock 用于处理当后面是 begin 时，begin 是否需要缩进。如 if then
+       后的 begin 无需缩进，而 try 后的 begin 则需要缩进。 }
     function BackTab(PreSpaceCount: Byte = 0; CareBeginBlock: Boolean = True): Integer;
     {* 根据代码格式风格设置返回上一次缩进的前导空格数 }
     function Space(Count: Word): string;
@@ -1866,7 +1868,7 @@ begin
       begin
         Match(Scaner.Token, PreSpaceCount);
         Writeln;
-        FormatStmtList(Tab(PreSpaceCount));
+        FormatStmtList(Tab(PreSpaceCount, False));
         Writeln;
         Match(tokKeywordEnd, PreSpaceCount);
       end;
@@ -1878,14 +1880,14 @@ begin
         if Scaner.Token <> tokKeywordOn then
         begin
           Writeln;
-          FormatStmtList(Tab(PreSpaceCount))
+          FormatStmtList(Tab(PreSpaceCount, False))
         end
         else
         begin
           while Scaner.Token = tokKeywordOn do
           begin
             Writeln;
-            FormatExceptionHandler(Tab(PreSpaceCount));
+            FormatExceptionHandler(Tab(PreSpaceCount, False));
           end;
 
           if Scaner.Token = tokKeywordElse then
