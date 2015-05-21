@@ -115,7 +115,7 @@ begin
 
   if FExecutor2 = nil then
   begin
-    FExecutor2 := TCnDesignSelectionExecutor2.Create(Self);
+    FExecutor2 := TCnDesignSelectionExecutor2.Create;
     FExecutor2.Active := True;
     FExecutor2.Enabled := True;
     FExecutor2.Caption := '2 Caption';
@@ -178,6 +178,7 @@ end;
 function TCnTestDesignMenu1.Execute: Boolean;
 begin
   ShowMessage('Should NOT Run Here.');
+  Result := True;
 end;
 
 function TCnTestDesignMenu1.GetActive: Boolean;
@@ -200,6 +201,7 @@ end;
 function TCnTestDesignMenu2.Execute: Boolean;
 begin
   ShowMessage('Should NOT Run Here.');
+  Result := True;
 end;
 
 function TCnTestDesignMenu2.GetActive: Boolean;
@@ -222,6 +224,7 @@ end;
 function TCnTestDesignMenu3.Execute: Boolean;
 begin
   ShowMessage('Should Run Here.');
+  Result := True;
 end;
 
 function TCnTestDesignMenu3.GetActive: Boolean;

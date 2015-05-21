@@ -456,6 +456,8 @@ type
   protected
     procedure DoExecute; virtual;
   public
+    constructor Create; reintroduce; virtual;
+
     function GetActive: Boolean; override;
     function GetCaption: string; override;
     function GetHint: string; override;
@@ -1467,6 +1469,11 @@ begin
 end;
 
 { TCnDesignSelectionExecutor2 }
+
+constructor TCnDesignSelectionExecutor2.Create;
+begin
+  inherited Create(nil);
+end;
 
 procedure TCnDesignSelectionExecutor2.DoExecute;
 begin
