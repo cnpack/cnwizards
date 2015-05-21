@@ -52,7 +52,8 @@ type
 
   TCnTestDesignMenuWizard = class(TCnMenuWizard)
   private
-
+    FExecutor2: TCnDesignSelectionExecutor2;
+    procedure Executor2Execute(Sender: TObject);
   protected
     function GetHasConfig: Boolean; override;
   public
@@ -109,7 +110,24 @@ begin
   RegisterDesignSelectionExecutor(TCnTestDesignMenu1.Create(Self));
   RegisterDesignSelectionExecutor(TCnTestDesignMenu2.Create(Self));
   RegisterDesignSelectionExecutor(TCnTestDesignMenu3.Create(Self));
-  ShowMessage('3 Menu Items Registered with 1 Hidden, 1 Disabled and 1 Enabled. Please Check Designer Context Menu.');
+  ShowMessage('3 Menu Items Registered using TCnDesignSelectionExecutor.' + #13#10
+    + '1 Hidden, 1 Disabled and 1 Enabled. Please Check Designer Context Menu.');
+
+  if FExecutor2 = nil then
+  begin
+    FExecutor2 := TCnDesignSelectionExecutor2.Create(Self);
+    FExecutor2.Active := True;
+    FExecutor2.Enabled := True;
+    FExecutor2.Caption := '2 Caption';
+    FExecutor2.Hint := '2 Hint';
+    FExecutor2.OnExecute := Executor2Execute;
+    RegisterDesignSelectionExecutor(FExecutor2);
+  end;
+end;
+
+procedure TCnTestDesignMenuWizard.Executor2Execute(Sender: TObject);
+begin
+  ShowMessage('Executor 2 Run Here.');
 end;
 
 function TCnTestDesignMenuWizard.GetCaption: string;

@@ -411,7 +411,7 @@ type
   TCnProjectWizard = class(TCnRepositoryWizard, IOTAProjectWizard);
 
 //==============================================================================
-// 设计器右键菜单执行条目的基类
+// 设计器右键菜单执行条目的基类，子类可重载相应方法实现功能
 //==============================================================================
 
 { TCnDesignSelectionExecutor }
@@ -439,6 +439,39 @@ type
 
     property Wizard: TCnBaseWizard read FWizard;
     {* 所属 Wizard 实例}
+  end;
+
+//==============================================================================
+// 设计器右键菜单执行条目的另一形式的基类，可用属性与事件来指定执行参数
+//==============================================================================
+
+  TCnDesignSelectionExecutor2 = class(TCnDesignSelectionExecutor)
+  {* 设计器右键菜单执行条目的另一形式的基类，可用属性与事件来指定执行参数}
+  private
+    FActive: Boolean;
+    FEnabled: Boolean;
+    FCaption: string;
+    FHint: string;
+    FOnExecute: TNotifyEvent;
+  protected
+    procedure DoExecute; virtual;
+  public
+    function GetActive: Boolean; override;
+    function GetCaption: string; override;
+    function GetHint: string; override;
+    function GetEnabled: Boolean; override;
+    function Execute: Boolean; override;
+
+    property Caption: string read FCaption write FCaption;
+    {* 条目显示的标题}
+    property Hint: string read FHint write FHint;
+    {* 条目显示的提示}
+    property Active: Boolean read FActive write FActive;
+    {* 控制条目是否显示}
+    property Enabled: Boolean read FEnabled write FEnabled;
+    {* 控制条目是否使能}
+    property OnExecute: TNotifyEvent read FOnExecute write FOnExecute;
+    {* 条目执行方法，执行时触发}
   end;
 
 //==============================================================================
@@ -1431,6 +1464,40 @@ end;
 function TCnDesignSelectionExecutor.GetHint: string;
 begin
   Result := '';
+end;
+
+{ TCnDesignSelectionExecutor2 }
+
+procedure TCnDesignSelectionExecutor2.DoExecute;
+begin
+  if Assigned(FOnExecute) then
+    FOnExecute(Self);
+end;
+
+function TCnDesignSelectionExecutor2.Execute: Boolean;
+begin
+  DoExecute;
+  Result := True;
+end;
+
+function TCnDesignSelectionExecutor2.GetActive: Boolean;
+begin
+  Result := FActive;
+end;
+
+function TCnDesignSelectionExecutor2.GetCaption: string;
+begin
+  Result := FCaption;
+end;
+
+function TCnDesignSelectionExecutor2.GetEnabled: Boolean;
+begin
+  Result := FEnabled;
+end;
+
+function TCnDesignSelectionExecutor2.GetHint: string;
+begin
+  Result := FHint;
 end;
 
 initialization

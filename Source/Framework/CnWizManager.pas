@@ -206,7 +206,8 @@ var
   {* 处理封面窗口图片等内容的外挂模块}
 
 procedure RegisterDesignSelectionExecutor(Executor: TCnDesignSelectionExecutor);
-{* 注册一个设计器右键菜单的执行对象实例，应该在专家创建时注册}
+{* 注册一个设计器右键菜单的执行对象实例，应该在专家创建时注册
+  注意此方法调用后，Executor 便由此处统一管理并负责释放，请勿外部先行释放它}
 
 implementation
 
