@@ -1473,6 +1473,8 @@ end;
 constructor TCnDesignSelectionExecutor2.Create;
 begin
   inherited Create(nil);
+  FActive := True;
+  FEnabled := True;
 end;
 
 procedure TCnDesignSelectionExecutor2.DoExecute;
