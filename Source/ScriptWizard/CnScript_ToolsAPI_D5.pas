@@ -22,7 +22,7 @@ unit CnScript_ToolsAPI_D5;
 { |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包
-* 单元名称：脚本扩展 SysUtils 注册类
+* 单元名称：脚本扩展 ToolsAPI 注册类
 * 单元作者：周劲羽 (zjy@cnpack.org)
 * 备    注：该单元由 UnitParser v0.7 自动生成的文件修改而来
 * 开发平台：PWinXP SP2 + Delphi 5.01
