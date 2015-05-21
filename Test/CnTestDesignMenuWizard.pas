@@ -121,7 +121,7 @@ begin
     FExecutor2.Caption := '2 Caption';
     FExecutor2.Hint := '2 Hint';
     FExecutor2.OnExecute := Executor2Execute;
-    RegisterDesignSelectionExecutor(FExecutor2);
+    RegisterDesignSelectionExecutor2(FExecutor2);
   end;
 end;
 

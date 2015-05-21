@@ -209,6 +209,9 @@ procedure RegisterDesignSelectionExecutor(Executor: TCnDesignSelectionExecutor);
 {* 注册一个设计器右键菜单的执行对象实例，应该在专家创建时注册
   注意此方法调用后，Executor 便由此处统一管理并负责释放，请勿外部先行释放它}
 
+procedure RegisterDesignSelectionExecutor2(Executor: TCnDesignSelectionExecutor2);
+{* 注册一个设计器右键菜单的执行对象实例的另一形式}
+
 implementation
 
 uses
@@ -236,6 +239,12 @@ begin
   Assert(CnDesignExecutorList <> nil, 'CnDesignExecutorList is nil!');
   if CnDesignExecutorList.IndexOf(Executor) < 0 then
     CnDesignExecutorList.Add(Executor);
+end;
+
+// 注册一个设计器右键菜单的执行对象实例的另一形式
+procedure RegisterDesignSelectionExecutor2(Executor: TCnDesignSelectionExecutor2);
+begin
+  RegisterDesignSelectionExecutor(Executor);
 end;
 
 //==============================================================================
