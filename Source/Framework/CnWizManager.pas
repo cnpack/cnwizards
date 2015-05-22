@@ -205,11 +205,11 @@ var
   InitSplashProc: TProcedure = nil;
   {* 处理封面窗口图片等内容的外挂模块}
 
-procedure RegisterDesignSelectionExecutor(Executor: TCnDesignSelectionExecutor);
+procedure RegisterBaseDesignMenuExecutor(Executor: TCnBaseDesignMenuExecutor);
 {* 注册一个设计器右键菜单的执行对象实例，应该在专家创建时注册
   注意此方法调用后，Executor 便由此处统一管理并负责释放，请勿外部先行释放它}
 
-procedure RegisterDesignSelectionExecutor2(Executor: TCnDesignSelectionExecutor2);
+procedure RegisterDesignMenuExecutor(Executor: TCnDesignMenuExecutor);
 {* 注册一个设计器右键菜单的执行对象实例的另一形式}
 
 implementation
@@ -234,7 +234,7 @@ var
   CnDesignExecutorList: TObjectList = nil; // 设计器右键菜单执行对象列表
 
 // 注册一个设计器右键菜单的执行对象实例，应该在专家创建时注册
-procedure RegisterDesignSelectionExecutor(Executor: TCnDesignSelectionExecutor);
+procedure RegisterBaseDesignMenuExecutor(Executor: TCnBaseDesignMenuExecutor);
 begin
   Assert(CnDesignExecutorList <> nil, 'CnDesignExecutorList is nil!');
   if CnDesignExecutorList.IndexOf(Executor) < 0 then
@@ -242,9 +242,9 @@ begin
 end;
 
 // 注册一个设计器右键菜单的执行对象实例的另一形式
-procedure RegisterDesignSelectionExecutor2(Executor: TCnDesignSelectionExecutor2);
+procedure RegisterDesignMenuExecutor(Executor: TCnDesignMenuExecutor);
 begin
-  RegisterDesignSelectionExecutor(Executor);
+  RegisterBaseDesignMenuExecutor(Executor);
 end;
 
 //==============================================================================
@@ -1306,12 +1306,12 @@ end;
 procedure TCnDesignSelectionManager.ExecuteVerb(Index: Integer;
   const List: IDesignerSelections);
 begin
-  TCnDesignSelectionExecutor(CnDesignExecutorList[Index]).Execute;
+  TCnBaseDesignMenuExecutor(CnDesignExecutorList[Index]).Execute;
 end;
 
 function TCnDesignSelectionManager.GetVerb(Index: Integer): string;
 begin
-  Result := TCnDesignSelectionExecutor(CnDesignExecutorList[Index]).GetCaption;
+  Result := TCnBaseDesignMenuExecutor(CnDesignExecutorList[Index]).GetCaption;
 end;
 
 function TCnDesignSelectionManager.GetVerbCount: Integer;
@@ -1322,9 +1322,9 @@ end;
 procedure TCnDesignSelectionManager.PrepareItem(Index: Integer;
   const AItem: IMenuItem);
 var
-  Executor: TCnDesignSelectionExecutor;
+  Executor: TCnBaseDesignMenuExecutor;
 begin
-  Executor := TCnDesignSelectionExecutor(CnDesignExecutorList[Index]);
+  Executor := TCnBaseDesignMenuExecutor(CnDesignExecutorList[Index]);
   AItem.Visible := (Executor <> nil) and
     ((Executor.Wizard = nil) or Executor.Wizard.Active)
     and Executor.GetActive;

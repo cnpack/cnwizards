@@ -414,9 +414,9 @@ type
 // 设计器右键菜单执行条目的基类，子类可重载相应方法实现功能
 //==============================================================================
 
-{ TCnDesignSelectionExecutor }
+{ TCnBaseDesignMenuExecutor }
 
-  TCnDesignSelectionExecutor = class(TObject)
+  TCnBaseDesignMenuExecutor = class(TObject)
   {* 设计器右键菜单执行条目的基类，可从属于某一专家实例}
   private
     FWizard: TCnBaseWizard;
@@ -445,7 +445,7 @@ type
 // 设计器右键菜单执行条目的另一形式的基类，可用属性与事件来指定执行参数
 //==============================================================================
 
-  TCnDesignSelectionExecutor2 = class(TCnDesignSelectionExecutor)
+  TCnDesignMenuExecutor = class(TCnBaseDesignMenuExecutor)
   {* 设计器右键菜单执行条目的另一形式的基类，可用属性与事件来指定执行参数}
   private
     FActive: Boolean;
@@ -1426,85 +1426,85 @@ end;
 { TCnDesignSelectionExecutor }
 
 // 类构造器
-constructor TCnDesignSelectionExecutor.Create(OwnWizard: TCnBaseWizard);
+constructor TCnBaseDesignMenuExecutor.Create(OwnWizard: TCnBaseWizard);
 begin
   FWizard := OwnWizard;
 end;
 
 // 类析构器
-destructor TCnDesignSelectionExecutor.Destroy;
+destructor TCnBaseDesignMenuExecutor.Destroy;
 begin
   inherited;
 
 end;
 
 // 条目执行方法，基类默认什么都不做
-function TCnDesignSelectionExecutor.Execute: Boolean;
+function TCnBaseDesignMenuExecutor.Execute: Boolean;
 begin
   Result := True;
 end;
 
 // 控制条目是否显示
-function TCnDesignSelectionExecutor.GetActive: Boolean;
+function TCnBaseDesignMenuExecutor.GetActive: Boolean;
 begin
   Result := True;
 end;
 
 // 条目显示的标题
-function TCnDesignSelectionExecutor.GetCaption: string;
+function TCnBaseDesignMenuExecutor.GetCaption: string;
 begin
   Result := '';
 end;
 
 // 控制条目是否使能
-function TCnDesignSelectionExecutor.GetEnabled: Boolean;
+function TCnBaseDesignMenuExecutor.GetEnabled: Boolean;
 begin
   Result := True;
 end;
 
 // 条目的提示
-function TCnDesignSelectionExecutor.GetHint: string;
+function TCnBaseDesignMenuExecutor.GetHint: string;
 begin
   Result := '';
 end;
 
 { TCnDesignSelectionExecutor2 }
 
-constructor TCnDesignSelectionExecutor2.Create;
+constructor TCnDesignMenuExecutor.Create;
 begin
   inherited Create(nil);
   FActive := True;
   FEnabled := True;
 end;
 
-procedure TCnDesignSelectionExecutor2.DoExecute;
+procedure TCnDesignMenuExecutor.DoExecute;
 begin
   if Assigned(FOnExecute) then
     FOnExecute(Self);
 end;
 
-function TCnDesignSelectionExecutor2.Execute: Boolean;
+function TCnDesignMenuExecutor.Execute: Boolean;
 begin
   DoExecute;
   Result := True;
 end;
 
-function TCnDesignSelectionExecutor2.GetActive: Boolean;
+function TCnDesignMenuExecutor.GetActive: Boolean;
 begin
   Result := FActive;
 end;
 
-function TCnDesignSelectionExecutor2.GetCaption: string;
+function TCnDesignMenuExecutor.GetCaption: string;
 begin
   Result := FCaption;
 end;
 
-function TCnDesignSelectionExecutor2.GetEnabled: Boolean;
+function TCnDesignMenuExecutor.GetEnabled: Boolean;
 begin
   Result := FEnabled;
 end;
 
-function TCnDesignSelectionExecutor2.GetHint: string;
+function TCnDesignMenuExecutor.GetHint: string;
 begin
   Result := FHint;
 end;

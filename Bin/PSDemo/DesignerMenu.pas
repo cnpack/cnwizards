@@ -52,13 +52,13 @@ begin
 end;
 
 var
-  Executor: TCnDesignSelectionExecutor2;
+  Executor: TCnDesignMenuExecutor;
 begin
   InfoDlg('Will Add a Copy Name Item to the Designer Component Context Menu.');
   
-  Executor := TCnDesignSelectionExecutor2.Create;
+  Executor := TCnDesignMenuExecutor.Create;
   Executor.Caption := 'Copy Component &Name';
   Executor.OnExecute := @Execute;
-  RegisterDesignSelectionExecutor2(Executor);
+  RegisterDesignMenuExecutor(Executor);
 end.
  

@@ -44,7 +44,7 @@ type
 // 设计器右键菜单执行条目基类，可用属性与事件来指定执行参数
 //==============================================================================
 
-  TCnDesignSelectionExecutor2 = class(TCnDesignSelectionExecutor)
+  TCnDesignMenuExecutor = class(TCnBaseDesignMenuExecutor)
   {* 设计器右键菜单执行条目的基类，可用属性与事件来指定执行参数}
   private
     FActive: Boolean;
@@ -75,49 +75,49 @@ type
     {* 条目执行方法，执行时触发}
   end;
 
-procedure RegisterDesignSelectionExecutor2(Executor: TCnDesignSelectionExecutor2);
+procedure RegisterDesignMenuExecutor(Executor: TCnDesignMenuExecutor);
 {* 注册一个设计器右键菜单的执行对象实例}
 
 implementation
 
-procedure RegisterDesignSelectionExecutor2(Executor: TCnDesignSelectionExecutor2);
+procedure RegisterDesignMenuExecutor(Executor: TCnDesignMenuExecutor);
 begin
 
 end;
 
-{ TCnDesignSelectionExecutor2 }
+{ TCnDesignMenuExecutor }
 
-constructor TCnDesignSelectionExecutor2.Create;
+constructor TCnDesignMenuExecutor.Create;
 begin
 
 end;
 
-procedure TCnDesignSelectionExecutor2.DoExecute;
+procedure TCnDesignMenuExecutor.DoExecute;
 begin
 
 end;
 
-function TCnDesignSelectionExecutor2.Execute: Boolean;
+function TCnDesignMenuExecutor.Execute: Boolean;
 begin
 
 end;
 
-function TCnDesignSelectionExecutor2.GetActive: Boolean;
+function TCnDesignMenuExecutor.GetActive: Boolean;
 begin
 
 end;
 
-function TCnDesignSelectionExecutor2.GetCaption: string;
+function TCnDesignMenuExecutor.GetCaption: string;
 begin
 
 end;
 
-function TCnDesignSelectionExecutor2.GetEnabled: Boolean;
+function TCnDesignMenuExecutor.GetEnabled: Boolean;
 begin
 
 end;
 
-function TCnDesignSelectionExecutor2.GetHint: string;
+function TCnDesignMenuExecutor.GetHint: string;
 begin
 
 end;
