@@ -142,6 +142,8 @@ begin
 end;
 
 procedure TMainForm.btnFormatClick(Sender: TObject);
+const
+  Names: array[0..1] of PAnsiChar = ('tESt', 'sYstem');
 var
   FCodeFor: TCnPascalCodeFormatter;
   MemStr: TMemoryStream;
@@ -162,6 +164,7 @@ begin
 {$ENDIF}
     SrcMemo.Lines.SaveToStream(MemStr {$IFDEF UNICODE}, TEncoding.Unicode {$ENDIF});
     FCodeFor := TCnPascalCodeFormatter.Create(MemStr);
+    FCodeFor.SpecifyIdentifiers(@Names[0]);
     FCodeFor.SliceMode := chkSliceMode.Checked;
     try
       try

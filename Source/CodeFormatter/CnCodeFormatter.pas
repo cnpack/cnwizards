@@ -41,8 +41,8 @@ interface
 {$I CnPack.inc}
 
 uses
-  Classes, SysUtils, Dialogs, Contnrs, CnTokens, CnScaners, CnCodeGenerators,
-  CnCodeFormatRules, CnFormatterIntf;
+  Classes, SysUtils, Windows, Dialogs, Contnrs, CnHashMap,
+  CnTokens, CnScaners, CnCodeGenerators, CnCodeFormatRules, CnFormatterIntf;
 
 const
   CN_MATCHED_INVALID = -1;
@@ -69,6 +69,8 @@ type
     FOldElementTypes: TStack;
     FElementType: TCnPascalFormattingElementType;
     FPrefixSpaces: Integer;
+
+    FNamesMap: TCnStrToStrHashMap;
     function ErrorTokenString: string;
     procedure CodeGenAfterWrite(Sender: TObject; IsWriteBlank: Boolean;
       IsWriteln: Boolean; PrefixSpaces: Integer);
@@ -101,10 +103,8 @@ type
       AfterSpaceCount: Byte = 0; IgnorePreSpace: Boolean = False;
       SemicolonIsLineStart: Boolean = False; NoSeparateSpace: Boolean = False);
 
-    function CheckFunctionName(const S: string): string;
-    {* 检查给定字符串是否是一个常用函数名，如果是则返回正确的格式 }
-    function CheckTypeID(const S: string): string;
-    {* 根据给定类型名的字符串返回设置中的类型格式}
+    function CheckIdentifierName(const S: string): string;
+    {* 检查给定字符串是否是一个外部指定的标识符，如果是则返回正确的格式 }
     function Tab(PreSpaceCount: Byte = 0; CareBeginBlock: Boolean = True): Byte;
     {* 根据代码格式风格设置返回缩进一次的前导空格数。
        CareBeginBlock 用于处理当后面是 begin 时，begin 是否需要缩进。如 if then
@@ -137,6 +137,8 @@ type
       ACompDirectiveMode: TCompDirectiveMode = cdmAsComment);
     destructor Destroy; override;
 
+    procedure SpecifyIdentifiers(Names: PLPSTR);
+    // 以 PPAnsiChar 方式传入的字符指针数组，用来指定特定符号的大小写
     procedure FormatCode(PreSpaceCount: Byte = 0); virtual; abstract;
     procedure SaveToFile(FileName: string);
     procedure SaveToStream(Stream: TStream);
@@ -403,18 +405,11 @@ end;
 
 { TCnAbstractCodeFormater }
 
-function TCnAbstractCodeFormatter.CheckFunctionName(const S: string): string;
+function TCnAbstractCodeFormatter.CheckIdentifierName(const S: string): string;
 begin
-  { TODO: Check the S with functon name e.g. ShowMessage }
-  Result := S;
-end;
-
-function TCnAbstractCodeFormatter.CheckTypeID(const S: string): string;
-begin
-  Result := S;
-  case CnPascalCodeForVCLRule.TypeIDStyle of
-    tisUpperFirst: Result := UpperFirst(S);
-  end;
+  { Check the S with pre-specified names e.g. ShowMessage }
+  if (FNamesMap = nil) or not FNamesMap.Find(UpperCase(S), Result) then
+    Result := S;
 end;
 
 constructor TCnAbstractCodeFormatter.Create(AStream: TStream;
@@ -429,6 +424,7 @@ begin
   FMatchedOutEndRow := CN_MATCHED_INVALID;
   FMatchedOutEndCol := CN_MATCHED_INVALID;
 
+  // FNamesMap := TCnStrToStrHashMap.Create; // Lazy Create
   FCodeGen := TCnCodeGenerator.Create;
   FCodeGen.CodeWrapMode := CnPascalCodeForRule.CodeWrapMode;
   FCodeGen.OnAfterWrite := CodeGenAfterWrite;
@@ -443,6 +439,7 @@ begin
   FOldElementTypes.Free;
   FScaner.Free;
   FCodeGen.Free;
+  FNamesMap.Free;
   inherited;
 end;
 
@@ -746,26 +743,28 @@ begin
     begin
       if FLastToken = tokAmpersand then // 关键字前是 & 表示非关键字
       begin
-        CodeGen.Write(Scaner.TokenString, BeforeSpaceCount, AfterSpaceCount);
+        CodeGen.Write(CheckIdentifierName(Scaner.TokenString), BeforeSpaceCount, AfterSpaceCount);
       end
       else if CheckOutOfKeywordsValidArea(Token, ElementType) then
       begin
         // 关键字有效作用域外均在此原样输出
-        CodeGen.Write(Scaner.TokenString, BeforeSpaceCount, AfterSpaceCount);
+        CodeGen.Write(CheckIdentifierName(Scaner.TokenString),
+          BeforeSpaceCount, AfterSpaceCount);
       end
       else
       begin
         if (Token <> tokKeywordEnd) and (Token <> tokKeywordString) then
         begin
             CodeGen.Write(
-              FormatString(Scaner.TokenString, CnPascalCodeForRule.KeywordStyle),
+              FormatString(CheckIdentifierName(Scaner.TokenString),
+                CnPascalCodeForRule.KeywordStyle),
               BeforeSpaceCount, AfterSpaceCount);
         end
         else
         begin
           CodeGen.Write(
-            FormatString(Scaner.TokenString, CnPascalCodeForRule.KeywordStyle),
-            BeforeSpaceCount, AfterSpaceCount);
+            FormatString(CheckIdentifierName(Scaner.TokenString),
+            CnPascalCodeForRule.KeywordStyle), BeforeSpaceCount, AfterSpaceCount);
         end;
       end;
     end
@@ -774,11 +773,11 @@ begin
 //      CodeGen.Write(Scaner.TokenString, 0, 0)
     else if FIsTypeID then // 如果是类型名，则按规则处理 Scaner.TokenString
     begin
-      CodeGen.Write(CheckTypeID(Scaner.TokenString), BeforeSpaceCount, AfterSpaceCount);
+      CodeGen.Write(CheckIdentifierName(Scaner.TokenString), BeforeSpaceCount, AfterSpaceCount);
     end
     else
     begin
-      CodeGen.Write(Scaner.TokenString, BeforeSpaceCount, AfterSpaceCount);
+      CodeGen.Write(CheckIdentifierName(Scaner.TokenString), BeforeSpaceCount, AfterSpaceCount);
     end;
   end;
 
@@ -5229,6 +5228,24 @@ begin
   FOldElementTypes := TStack.Create;
 
   FElementType := pfetUnknown;
+end;
+
+procedure TCnAbstractCodeFormatter.SpecifyIdentifiers(Names: PLPSTR);
+var
+  P: LPSTR;
+  S: string;
+begin
+  if FNamesMap <> nil then
+    FreeAndNil(FNamesMap);
+  FNamesMap := TCnStrToStrHashMap.Create;
+
+  while Names^ <> nil do
+  begin
+    P := Names^;
+    S := string(StrPas(P));
+    FNamesMap.Add(UpperCase(S), S);
+    Inc(Names);
+  end;
 end;
 
 initialization
