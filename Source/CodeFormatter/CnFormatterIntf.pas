@@ -146,6 +146,9 @@ type
       UseIgnoreArea: LongBool);
     {* 设置格式化选项}
 
+    procedure SetPreIdentifierNames(Names: PLPSTR);
+    {* 设置预先设置好的标识符，供改正大小写用，注意所指的内存区须在格式化完毕后再释放}
+
     function FormatOnePascalUnit(Input: PAnsiChar; Len: DWORD): PAnsiChar;
     {* 格式化一整个 Pascal 文件内容，代码以 AnsiString 格式传入。
        返回结果存储的 AnsiString 字符内容的指针，用完后无须释放。

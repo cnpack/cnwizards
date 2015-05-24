@@ -137,8 +137,10 @@ type
       ACompDirectiveMode: TCompDirectiveMode = cdmAsComment);
     destructor Destroy; override;
 
-    procedure SpecifyIdentifiers(Names: PLPSTR);
-    // 以 PPAnsiChar 方式传入的字符指针数组，用来指定特定符号的大小写
+    procedure SpecifyIdentifiers(Names: PLPSTR); overload;
+    {* 以 PPAnsiChar 方式传入的字符指针数组，用来指定特定符号的大小写}
+    procedure SpecifyIdentifiers(Names: TStrings); overload;
+    {* 以 TStrings 方式传入的字符串，用来指定特定符号的大小写}
     procedure FormatCode(PreSpaceCount: Byte = 0); virtual; abstract;
     procedure SaveToFile(FileName: string);
     procedure SaveToStream(Stream: TStream);
@@ -5239,6 +5241,9 @@ begin
     FreeAndNil(FNamesMap);
   FNamesMap := TCnStrToStrHashMap.Create;
 
+  if Names = nil then
+    Exit;
+
   while Names^ <> nil do
   begin
     P := Names^;
@@ -5246,6 +5251,21 @@ begin
     FNamesMap.Add(UpperCase(S), S);
     Inc(Names);
   end;
+end;
+
+procedure TCnAbstractCodeFormatter.SpecifyIdentifiers(Names: TStrings);
+var
+  I: Integer;
+begin
+  if FNamesMap <> nil then
+    FreeAndNil(FNamesMap);
+  FNamesMap := TCnStrToStrHashMap.Create;
+
+  if Names = nil then
+    Exit;
+
+  for I := 0 to Names.Count - 1 do
+    FNamesMap.Add(UpperCase(Names[I]), Names[I]);
 end;
 
 initialization

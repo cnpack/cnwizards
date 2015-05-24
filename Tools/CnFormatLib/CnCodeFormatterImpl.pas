@@ -65,6 +65,7 @@ type
       SpaceAfterOperator: DWORD; SpaceBeforeAsm: DWORD; SpaceTabAsm: DWORD;
       LineWrapWidth: DWORD; NewLineWrapWidth: DWORD; UsesSingleLine: LongBool;
       UseIgnoreArea: LongBool);
+    procedure SetPreIdentifierNames(Names: PLPSTR);
 
     function FormatOnePascalUnit(Input: PAnsiChar; Len: DWORD): PAnsiChar;
     function FormatOnePascalUnitUtf8(Input: PAnsiChar; Len: DWORD): PAnsiChar;
@@ -83,6 +84,7 @@ type
 
 var
   FCodeFormatProvider: ICnPascalFormatterIntf = nil;
+  FPreNameList: TStrings = nil;
 
 function GetCodeFormatterProvider: ICnPascalFormatterIntf; stdcall;
 begin
@@ -139,6 +141,7 @@ begin
 
   InStream.Write(Input^, Len);
   CodeFor := TCnPascalCodeFormatter.Create(InStream);
+  CodeFor.SpecifyIdentifiers(FPreNameList);
 
   try
     try
@@ -287,6 +290,7 @@ begin
   InStream.Write(Input^, Len);
   // Formatter 内部的偏移量以 0 开始，而传入的 Offset 也以 0 开始，无需转换
   CodeFor := TCnPascalCodeFormatter.Create(InStream, StartOffset, EndOffset);
+  CodeFor.SpecifyIdentifiers(FPreNameList);
   CodeFor.SliceMode := True;
 
   try
@@ -318,9 +322,30 @@ begin
   Result := FResult;
 end;
 
+procedure TCnCodeFormatProvider.SetPreIdentifierNames(Names: PLPSTR);
+var
+  S: string;
+begin
+  if FPreNameList = nil then
+    FPreNameList := TStringList.Create
+  else
+    FPreNameList.Clear;
+
+  if Names <> nil then
+  begin
+    while Names^ <> nil do
+    begin
+      S := StrNew(Names^);
+      FPreNameList.Add(S);
+      Inc(Names);
+    end;
+  end;
+end;
+
 initialization
 
 finalization
   FCodeFormatProvider := nil;
+  FPreNameList.Free;
 
 end.

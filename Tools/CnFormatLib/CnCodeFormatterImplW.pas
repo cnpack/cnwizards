@@ -69,6 +69,7 @@ type
       SpaceAfterOperator: DWORD; SpaceBeforeAsm: DWORD; SpaceTabAsm: DWORD;
       LineWrapWidth: DWORD; NewLineWrapWidth: DWORD; UsesSingleLine: LongBool;
       UseIgnoreArea: LongBool);
+    procedure SetPreIdentifierNames(Names: PLPSTR);
 
     function FormatOnePascalUnit(Input: PAnsiChar; Len: DWORD): PAnsiChar;
     function FormatOnePascalUnitUtf8(Input: PAnsiChar; Len: DWORD): PAnsiChar;
@@ -87,6 +88,7 @@ type
 
 var
   FCodeFormatProvider: ICnPascalFormatterIntf = nil;
+  FPreNameList: TStrings = nil;
 
 function GetCodeFormatterProvider: ICnPascalFormatterIntf; stdcall;
 begin
@@ -168,6 +170,7 @@ begin
 
   InStream.Write((PChar(UInput))^, Len * SizeOf(Char));
   CodeFor := TCnPascalCodeFormatter.Create(InStream, StartOffset, EndOffset);
+  CodeFor.SpecifyIdentifiers(FPreNameList);
   CodeFor.SliceMode := True;
 
   try
@@ -238,6 +241,7 @@ begin
   InStream.Write(Input^, Len * SizeOf(Char));
   // Formatter 内部的偏移量以 0 开始，传入的 Offset 也以 0 开始
   CodeFor := TCnPascalCodeFormatter.Create(InStream, StartOffset, EndOffset);
+  CodeFor.SpecifyIdentifiers(FPreNameList);
   CodeFor.SliceMode := True;
 
   try
@@ -328,6 +332,26 @@ begin
   CnPascalCodeForRule.UseIgnoreArea := UseIgnoreArea;
 end;
 
+procedure TCnCodeFormatProvider.SetPreIdentifierNames(Names: PLPSTR);
+var
+  S: string;
+begin
+  if FPreNameList = nil then
+    FPreNameList := TStringList.Create
+  else
+    FPreNameList.Clear;
+
+  if Names <> nil then
+  begin
+    while Names^ <> nil do
+    begin
+      S := StrNew(Names^);
+      FPreNameList.Add(S);
+      Inc(Names);
+    end;
+  end;
+end;
+
 function TCnCodeFormatProvider.RetrievePascalLastError(out SourceLine, SourceCol,
   SourcePos: Integer; out CurrentToken: PAnsiChar): Integer;
 begin
@@ -364,6 +388,7 @@ begin
 
   InStream.Write((PChar(UInput))^, Len * SizeOf(Char));
   CodeFor := TCnPascalCodeFormatter.Create(InStream);
+  CodeFor.SpecifyIdentifiers(FPreNameList);
 
   try
     try
@@ -419,6 +444,7 @@ begin
 
   InStream.Write(Input^, Len * SizeOf(Char));
   CodeFor := TCnPascalCodeFormatter.Create(InStream);
+  CodeFor.SpecifyIdentifiers(FPreNameList);
 
   try
     try
@@ -461,5 +487,6 @@ initialization
 
 finalization
   FCodeFormatProvider := nil;
+  FPreNameList.Free;
 
 end.
