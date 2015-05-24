@@ -1840,7 +1840,8 @@ var
               IsClassForForward := False;
               PrevElementForForward := nil;
 
-              if (Parser.TokenID = tkClass) and Parser.IsClass then
+              if ((Parser.TokenID = tkClass) and Parser.IsClass) or
+                (Parser.TokenID = tkRecord) then
                 CurClass := CurIdent;
               if Parser.TokenID = tkInterface then
               begin
@@ -1974,7 +1975,7 @@ var
               else if Parser.TokenID = tkRecord then
               begin
                 InTypeDeclaration := True;
-                InIntfDeclaration := True;
+                InIntfDeclaration := False;
                 FoundNonEmptyType := False;
 
                 // 记录记录信息
