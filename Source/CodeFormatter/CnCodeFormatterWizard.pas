@@ -44,7 +44,10 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ToolsAPI, IniFiles, StdCtrls, ComCtrls, Menus, TypInfo, mPasLex, CnSpin,
   CnConsts, CnCommon, CnWizConsts, CnWizClasses, CnWizMultiLang, CnWizOptions,
-  CnWizUtils, CnFormatterIntf, CnCodeFormatRules;
+{$IFDEF CNWIZARDS_CNINPUTHELPER}
+  CnWizManager, CnInputHelper, CnInputSymbolList, CnInputIdeSymbolList,
+{$ENDIF}
+  CnStrings, CnPasCodeParser, CnWizUtils, CnFormatterIntf, CnCodeFormatRules;
 
 type
   TCnCodeFormatterWizard = class(TCnSubMenuWizard)
@@ -69,6 +72,14 @@ type
     FWrapMode: TCodeWrapMode;
     FWrapNewLineWidth: Integer;
 
+    FUseIDESymbols: Boolean;
+{$IFDEF CNWIZARDS_CNINPUTHELPER}
+    FInputHelper: TCnInputHelper;
+    FSymbolListMgr: TSymbolListMgr;
+    FPreNamesList: TCnAnsiStringList;  // Lazy Create
+    FPreNamesArray: array of PAnsiChar;
+    procedure CheckObtainIDESymbols;
+{$ENDIF}
     function PutPascalFormatRules: Boolean;
     function CheckSelectionPosition(StartPos: TOTACharPos; EndPos: TOTACharPos;
       View: IOTAEditView): Boolean;
@@ -103,6 +114,7 @@ type
     property WrapNewLineWidth: Integer read FWrapNewLineWidth write FWrapNewLineWidth;
     property UsesUnitSingleLine: Boolean read FUsesUnitSingleLine write FUsesUnitSingleLine;
     property UseIgnoreArea: Boolean read FUseIgnoreArea write FUseIgnoreArea;
+    property UseIDESymbols: Boolean read FUseIDESymbols write FUseIDESymbols;
   end;
 
   TCnCodeFormatterForm = class(TCnTranslateForm)
@@ -184,6 +196,8 @@ const
   csWrapMode = 'WrapMode';
   csBeginStyle = 'BeginStyle';
   csKeywordStyle = 'KeywordStyle';
+
+  csUseIDESymbols = 'UseIDESymbols';
 
 { TCnCodeFormatterWizard }
 
@@ -339,6 +353,10 @@ end;
 
 destructor TCnCodeFormatterWizard.Destroy;
 begin
+{$IFDEF CNWIZARDS_CNINPUTHELPER}
+  FPreNamesList.Free;
+  SetLength(FPreNamesArray, 0);
+{$ENDIF}
   FreeLibrary(FLibHandle);
   inherited;
 end;
@@ -451,7 +469,83 @@ begin
   FWrapMode := TCodeWrapMode(Ini.ReadInteger('', csWrapMode, Ord(CnPascalCodeForVCLRule.CodeWrapMode)));
   FBeginStyle := TBeginStyle(Ini.ReadInteger('', csBeginStyle, Ord(CnPascalCodeForVCLRule.BeginStyle)));
   FKeywordStyle := TKeywordStyle(Ini.ReadInteger('', csKeywordStyle, Ord(CnPascalCodeForVCLRule.KeywordStyle)));
+{$IFDEF CNWIZARDS_CNINPUTHELPER}
+  FUseIDESymbols := Ini.ReadBool('', csUseIDESymbols, False);
+{$ENDIF}
 end;
+
+{$IFDEF CNWIZARDS_CNINPUTHELPER}
+
+procedure TCnCodeFormatterWizard.CheckObtainIDESymbols;
+var
+  IDESymbols, UnitNames: TSymbolList;
+  Buffer: IOTAEditBuffer;
+  PosInfo: TCodePosInfo;
+  I: Integer;
+begin
+  SetLength(FPreNamesArray, 0);
+  if not FUseIDESymbols then
+    Exit;
+
+  Buffer := CnOtaGetEditBuffer;
+  if Buffer = nil then
+    Exit;
+
+  FInputHelper := TCnInputHelper(CnWizardMgr.WizardByClassName('TCnInputHelper'));
+  if (FInputHelper = nil) or not FInputHelper.Active then
+    Exit;
+
+  FSymbolListMgr := FInputHelper.SymbolListMgr;
+  if FSymbolListMgr = nil then
+    Exit;
+
+  PosInfo.IsPascal := True;
+
+  IDESymbols := FSymbolListMgr.ListByClass(TIDESymbolList);
+  if IDESymbols <> nil then
+  begin
+    PosInfo.PosKind := pkProcedure;
+    PosInfo.AreaKind := akImplementation;
+    IDESymbols.Reload(Buffer, '', PosInfo);
+
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnCodeFormatterWizard IDE Symbols Got Count: ' + IntToStr(IDESymbols.Count));
+{$ENDIF}
+  end;
+
+  UnitNames := FSymbolListMgr.ListByClass(TUnitNameList);
+  if UnitNames <> nil then
+  begin
+    PosInfo.PosKind := pkIntfUses;
+    PosInfo.AreaKind := akIntfUses;
+    UnitNames.Reload(Buffer, '', PosInfo);
+
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnCodeFormatterWizard Unit Names Got Count: ' + IntToStr(UnitNames.Count));
+{$ENDIF}
+  end;
+
+  if FPreNamesList <> nil then
+    FPreNamesList.Clear
+  else
+    FPreNamesList := TCnAnsiStringList.Create;
+
+  if (IDESymbols.Count = 0) and (UnitNames.Count = 0) then
+    Exit;
+
+  for I := 0 to IDESymbols.Count - 1 do
+    FPreNamesList.Add(AnsiString(IDESymbols.Items[I].Name));
+  for I := 0 to UnitNames.Count - 1 do
+    FPreNamesList.Add(AnsiString(UnitNames.Items[I].Name));
+
+  SetLength(FPreNamesArray, FPreNamesList.Count + 1); // 末尾一个 nil
+  FillChar(FPreNamesArray[0], Length(FPreNamesArray) * SizeOf(PAnsiChar), 0);
+
+  for I := 0 to FPreNamesList.Count - 1 do
+    FPreNamesArray[I] := PAnsiChar(FPreNamesList[I]);
+end;
+
+{$ENDIF}
 
 function TCnCodeFormatterWizard.PutPascalFormatRules: Boolean;
 var
@@ -536,6 +630,9 @@ begin
   Ini.WriteInteger('', csWrapMode, Ord(FWrapMode));
   Ini.WriteInteger('', csBeginStyle, Ord(FBeginStyle));
   Ini.WriteInteger('', csKeywordStyle, Ord(FKeywordStyle));
+{$IFDEF CNWIZARDS_CNINPUTHELPER}
+  Ini.WriteBool('', csUseIDESymbols, FUseIDESymbols);
+{$ENDIF}
 end;
 
 procedure TCnCodeFormatterWizard.SubActionExecute(Index: Integer);
@@ -606,6 +703,17 @@ begin
     View := CnOtaGetTopMostEditView;
     if not Assigned(View) then
       Exit;
+
+
+{$IFDEF CNWIZARDS_CNINPUTHELPER}
+    CheckObtainIDESymbols;
+    if Length(FPreNamesArray) > 0 then
+    begin
+      Formatter.SetPreIdentifierNames(PLPSTR(FPreNamesArray));
+      SetLength(FPreNamesArray, 0);
+      FPreNamesList.Clear;
+    end;
+{$ENDIF}
 
     if (View.Block = nil) or not View.Block.IsValid then // 无选择区
     begin
