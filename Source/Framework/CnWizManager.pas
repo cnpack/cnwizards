@@ -1337,14 +1337,17 @@ begin
 
 end;
 
+{$ENDIF}
+
 initialization
   CnDesignExecutorList := TObjectList.Create(True);
+
+{$IFDEF COMPILER6_UP}
   RegisterSelectionEditor(TComponent, TCnDesignSelectionManager);
+{$ENDIF}
 
 finalization
   FreeAndNil(CnDesignExecutorList);
-
-{$ENDIF}
 
 end.
 
