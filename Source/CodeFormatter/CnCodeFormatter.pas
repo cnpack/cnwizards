@@ -164,6 +164,7 @@ type
   private
     FGoalType: TCnGoalType;
     FNextBeginShouldIndent: Boolean; // 控制是否本 begin 必须换行即使设置为 SameLine
+    FStructStmtEmptyEnd: Boolean;    // 标记结构语句的结束语句是否是空语句，用来控制后面单个分号的位置
     function IsTokenAfterAttributesInSet(InTokens: TPascalTokenSet): Boolean;
     procedure CheckWriteBeginln;
   protected
@@ -1535,6 +1536,8 @@ begin
   SpecifyElementType(pfetAfterDo);
   CheckWriteBeginln; // 检查 do begin 是否同行
   try
+    if Scaner.Token = tokSemicolon then
+      FStructStmtEmptyEnd := True;
     FormatStatement(Tab(PreSpaceCount));
   finally
     RestoreElementType;
@@ -1556,6 +1559,8 @@ begin
   SpecifyElementType(pfetAfterDo);
   CheckWriteBeginln; // 检查 if then begin 是否同行
   try
+    if Scaner.Token = tokSemicolon then
+      FStructStmtEmptyEnd := True;
     FormatStatement(Tab(PreSpaceCount));
   finally
     RestoreElementType;
@@ -1575,6 +1580,8 @@ begin
       SpecifyElementType(pfetAfterElse);
       CheckWriteBeginln; // 检查 else begin 是否同行
       try
+        if Scaner.Token = tokSemicolon then
+          FStructStmtEmptyEnd := True;
         FormatStatement(Tab(PreSpaceCount));
       finally
         RestoreElementType;
@@ -1591,7 +1598,7 @@ begin
   FormatStmtList(Tab(PreSpaceCount));
   Writeln;
   
-  if Scaner.Token = tokLB then // 处理后面的空格
+  if Scaner.ForwardToken = tokLB then // 处理后面的空格
     Match(tokKeywordUntil, PreSpaceCount, 1)
   else
     Match(tokKeywordUntil, PreSpaceCount);
@@ -1805,7 +1812,8 @@ begin
     while Scaner.Token = tokSemicolon do
     begin
       Match(tokSemicolon, PreSpaceCount, 0, False, True);
-      if Scaner.Token <> tokKeywordEnd then
+      if not (Scaner.Token in [tokKeywordEnd, tokKeywordUntil, tokKeywordExcept,
+        tokKeywordFinally, tokKeywordFinalization]) then // 这些关键字自身会分行，所以无需此处分行
         Writeln;
     end;
 
@@ -1813,7 +1821,15 @@ begin
 
     while Scaner.Token = tokSemicolon do
     begin
-      Match(tokSemicolon);
+      if FStructStmtEmptyEnd then
+      begin
+        FStructStmtEmptyEnd := False;
+        Match(tokSemicolon, Tab(PreSpaceCount), 0, False, True);
+      end
+      else
+        Match(tokSemicolon);
+      // 输出语句间的分割分号用，但如果前一句的子语句为空，如if True then ;
+      // 则本句就可能顶行首去了，需要在 FormatStructStmt 里头标记并控制
 
       // 处理空语句单独分行的问题
       while Scaner.Token = tokSemicolon do
@@ -1844,6 +1860,7 @@ end;
 }
 procedure TCnBasePascalFormatter.FormatStructStmt(PreSpaceCount: Byte);
 begin
+  FStructStmtEmptyEnd := False;
   case Scaner.Token of
     tokKeywordBegin,
     tokKeywordAsm:    FormatCompoundStmt(PreSpaceCount);
@@ -1974,6 +1991,8 @@ begin
   SpecifyElementType(pfetAfterDo);
   CheckWriteBeginln; // 检查 do begin 是否同行
   try
+    if Scaner.Token = tokSemicolon then
+      FStructStmtEmptyEnd := True;
     FormatStatement(Tab(PreSpaceCount));
   finally
     RestoreElementType;
@@ -1997,6 +2016,8 @@ begin
   SpecifyElementType(pfetAfterDo);
   CheckWriteBeginln; // 检查 do begin 是否同行
   try
+    if Scaner.Token = tokSemicolon then
+      FStructStmtEmptyEnd := True;
     FormatStatement(Tab(PreSpaceCount));
   finally
     RestoreElementType;

@@ -57,7 +57,7 @@ type
     FPrevStr: string;
     FPrevRow: Integer;
     FPrevColumn: Integer;
-    FPrevIsCRLFEnd: Boolean;
+    FPrevIsComentCRLFEnd: Boolean;
     FLastNoAutoWrapLine: Integer;
     FLastExceedPosition: Integer; // 本行超出 WrapWidth 的点，供行尾超长时回溯重新换行使用
     FAutoWrapLines: TList; // 记录自动换行的行号，用来搜寻最近一次非自动换行的行缩进
@@ -412,7 +412,7 @@ procedure TCnCodeGenerator.Write(const Text: string; BeforeSpaceCount,
   AfterSpaceCount: Word);
 var
   Str, WrapStr, Tmp: string;
-  ThisCanBeHead, PrevCanBeTail, IsCRLFEnd: Boolean;
+  ThisCanBeHead, PrevCanBeTail, IsCommentCRLFEnd, IsCRLFSpace: Boolean;
   Len, ALen, Blanks: Integer;
 
   function ExceedLineWrap(Width: Integer): Boolean;
@@ -486,6 +486,22 @@ var
     TrailBlanks := Length(S) - I;
   end;
 
+  // 字符串头部连续的空格数
+  function HeadSpaceCount(const S: string): Integer;
+  var
+    I: Integer;
+  begin
+    Result := 0;
+    if Length(S) > 0 then
+    begin
+      for I := 1 to Length(S) do
+        if S[I] = ' ' then
+          Inc(Result)
+        else
+          Exit;
+    end;
+  end;
+
 begin
   if FLock <> 0 then Exit;
   
@@ -495,10 +511,11 @@ begin
   ThisCanBeHead := StrCanBeHead(Text);
   PrevCanBeTail := StrCanBeTail(FPrevStr);
 
-  IsCRLFEnd := False;
+  IsCommentCRLFEnd := False;
   ALen := Length(Text);
-  if ALen > 2 then
-    IsCRLFEnd := (Text[ALen - 1] = #13) and (Text[ALen] = #10);
+  if ALen >= 4 then
+    IsCommentCRLFEnd := (Text[1] = '/') and (Text[2] = '/') and
+      (Text[ALen - 1] = #13) and (Text[ALen] = #10);
 
   Str := Format('%s%s%s', [StringOfChar(' ', BeforeSpaceCount), Text,
     StringOfChar(' ', AfterSpaceCount)]);
@@ -570,24 +587,20 @@ begin
       FAutoWrapLines.Add(Pointer(FCode.Count - 1)); // 自动换行的行号要记录
     end;
 
-{
-    // 未超宽，照常处理。如果上一次输出的内容是回车结尾（比如//行尾注释），
-    // 则本行输出需要加上必要的空格缩进，但无需换行
-    if FPrevIsCRLFEnd then
+    // 如果上一次输出的内容是//行尾注释包括回车结尾，
+    // 并且本次输出如果头部空格太少，就需要简单加上上一行的空格缩进
+    if FPrevIsComentCRLFEnd then
     begin
-      Str := StringOfChar(' ', LastIndentSpaceWithOutLineHeadCRLF) + TrimLeft(Str);
-      // 同样找出上一次非自动缩进的缩进（不包括行尾空格）。
-      // 而不是简单的上一行缩进值，避免多重缩进
-      // FAutoWrapLines.Add(Pointer(FCode.Count - 1));  // 再记录一下
+      if HeadSpaceCount(Str) < LastIndentSpaceWithOutLineHeadCRLF then
+        Str := StringOfChar(' ', LastIndentSpaceWithOutLineHeadCRLF) + TrimLeft(Str);
     end;
-}
   end;
 
   FCode[FCode.Count - 1] :=
     Format('%s%s', [FCode[FCode.Count - 1], Str]);
 
   FPrevColumn := FColumnPos;
-  FPrevIsCRLFEnd := IsCRLFEnd;
+  FPrevIsComentCRLFEnd := IsCommentCRLFEnd;
 
 //{$IFDEF UNICODE}
 //  // Unicode 模式下，转成 Ansi 长度才符合一般规则
@@ -605,8 +618,8 @@ begin
   FColumnPos := Length(Str);
   FActualColumn := ActualColumn(Str);
 
-  IsCRLFEnd := IsTextCRLFSpace(Text, Blanks);
-  DoAfterWrite(IsCRLFEnd, Blanks);
+  IsCRLFSpace := IsTextCRLFSpace(Text, Blanks);
+  DoAfterWrite(IsCRLFSpace, Blanks);
 
 {$IFDEF DEBUG}
 //  CnDebugger.LogFmt('String Wrote from %d %d to %d %d: %s', [FPrevRow, FPrevColumn,
