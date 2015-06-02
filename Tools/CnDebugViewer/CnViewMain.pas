@@ -188,6 +188,7 @@ type
     btnAutoScroll: TToolButton;
     actAutoScroll: TAction;
     CnUDP: TCnUDP;
+    btnClear: TToolButton;
     procedure actNewExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure actExitExecute(Sender: TObject);

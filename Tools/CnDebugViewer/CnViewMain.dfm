@@ -21,8 +21,8 @@ object CnMainViewer: TCnMainViewer
   TextHeight = 13
   object statMain: TStatusBar
     Left = 0
-    Top = 404
-    Width = 643
+    Top = 392
+    Width = 635
     Height = 19
     AutoHint = True
     Panels = <
@@ -43,7 +43,7 @@ object CnMainViewer: TCnMainViewer
   object tlbMain: TToolBar
     Left = 0
     Top = 0
-    Width = 643
+    Width = 635
     Height = 29
     BorderWidth = 1
     Caption = 'tlbMain'
@@ -74,8 +74,13 @@ object CnMainViewer: TCnMainViewer
       Top = 0
       Action = actSave
     end
-    object ToolButton6: TToolButton
+    object btnClear: TToolButton
       Left = 92
+      Top = 0
+      Action = actClear
+    end
+    object ToolButton6: TToolButton
+      Left = 115
       Top = 0
       Width = 8
       Caption = 'ToolButton6'
@@ -83,17 +88,17 @@ object CnMainViewer: TCnMainViewer
       Style = tbsSeparator
     end
     object btn9: TToolButton
-      Left = 100
+      Left = 123
       Top = 0
       Action = actCopy
     end
     object btn10: TToolButton
-      Left = 123
+      Left = 146
       Top = 0
       Action = actFind
     end
     object ToolButton9: TToolButton
-      Left = 146
+      Left = 169
       Top = 0
       Width = 8
       Caption = 'ToolButton9'
@@ -101,22 +106,22 @@ object CnMainViewer: TCnMainViewer
       Style = tbsSeparator
     end
     object btn11: TToolButton
-      Left = 154
+      Left = 177
       Top = 0
       Action = actStart
     end
     object btn12: TToolButton
-      Left = 177
+      Left = 200
       Top = 0
       Action = actPause
     end
     object btn13: TToolButton
-      Left = 200
+      Left = 223
       Top = 0
       Action = actStop
     end
     object ToolButton2: TToolButton
-      Left = 223
+      Left = 246
       Top = 0
       Width = 8
       Caption = 'ToolButton2'
@@ -124,43 +129,43 @@ object CnMainViewer: TCnMainViewer
       Style = tbsSeparator
     end
     object btn14: TToolButton
-      Left = 231
+      Left = 254
       Top = 0
       Action = actGotoFirst
     end
     object btn15: TToolButton
-      Left = 254
+      Left = 277
       Top = 0
       Action = actGotoLast
     end
     object btn16: TToolButton
-      Left = 277
+      Left = 300
       Top = 0
       Action = actGotoPrev
     end
     object btn17: TToolButton
-      Left = 300
+      Left = 323
       Top = 0
       Action = actGotoNext
     end
     object btn18: TToolButton
-      Left = 323
+      Left = 346
       Top = 0
       Action = actGotoPrevLine
     end
     object btn19: TToolButton
-      Left = 346
+      Left = 369
       Top = 0
       Action = actGotoNextLine
     end
     object btnAutoScroll: TToolButton
-      Left = 369
+      Left = 392
       Top = 0
       Action = actAutoScroll
       Style = tbsCheck
     end
     object ToolButton19: TToolButton
-      Left = 392
+      Left = 415
       Top = 0
       Width = 8
       Caption = 'ToolButton19'
@@ -168,22 +173,22 @@ object CnMainViewer: TCnMainViewer
       Style = tbsSeparator
     end
     object btn1: TToolButton
-      Left = 400
+      Left = 423
       Top = 0
       Action = actBookmark
     end
     object btn2: TToolButton
-      Left = 423
+      Left = 446
       Top = 0
       Action = actPrevBookmark
     end
     object btn3: TToolButton
-      Left = 446
+      Left = 469
       Top = 0
       Action = actNextBookmark
     end
     object btn4: TToolButton
-      Left = 469
+      Left = 492
       Top = 0
       Width = 8
       Caption = 'btn4'
@@ -191,17 +196,17 @@ object CnMainViewer: TCnMainViewer
       Style = tbsSeparator
     end
     object btn20: TToolButton
-      Left = 477
+      Left = 500
       Top = 0
       Action = actOptions
     end
     object btn21: TToolButton
-      Left = 500
+      Left = 523
       Top = 0
       Action = actFilter
     end
     object ToolButton22: TToolButton
-      Left = 523
+      Left = 546
       Top = 0
       Width = 8
       Caption = 'ToolButton22'
@@ -209,20 +214,20 @@ object CnMainViewer: TCnMainViewer
       Style = tbsSeparator
     end
     object btn22: TToolButton
-      Left = 531
+      Left = 554
       Top = 0
       Action = actHelp
     end
     object btn23: TToolButton
-      Left = 554
+      Left = 577
       Top = 0
       Action = actAbout
     end
   end
   object pnlSwitch: TPanel
     Left = 0
-    Top = 384
-    Width = 643
+    Top = 372
+    Width = 635
     Height = 20
     Align = alBottom
     BevelOuter = bvNone
@@ -230,7 +235,7 @@ object CnMainViewer: TCnMainViewer
     object tsSwitch: TCnTabSet
       Left = 0
       Top = 0
-      Width = 643
+      Width = 635
       Height = 20
       Align = alClient
       DitherBackground = False
@@ -444,6 +449,7 @@ object CnMainViewer: TCnMainViewer
       Category = 'Edit'
       Caption = 'Clear &Display'
       Hint = 'Clear Display'
+      ImageIndex = 31
       OnExecute = actClearExecute
     end
     object actSelAll: TAction
