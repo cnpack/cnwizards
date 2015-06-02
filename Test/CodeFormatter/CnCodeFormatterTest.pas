@@ -113,8 +113,8 @@ type
     procedure fltcbb1Change(Sender: TObject);
     procedure ToolButton1Click(Sender: TObject);
     procedure btnParseCompDirectiveClick(Sender: TObject);
-    procedure tvCompDirectiveCustomDrawItem(Sender: TCustomTreeView;
-      Node: TTreeNode; State: TCustomDrawState; var DefaultDraw: Boolean);
+    procedure tvCompDirectiveCustomDrawItem(Sender: TCustomTreeView; Node:
+      TTreeNode; State: TCustomDrawState; var DefaultDraw: Boolean);
   private
     { Private declarations }
   public
@@ -127,8 +127,8 @@ var
 implementation
 
 uses
-  CnCodeFormatter, CnCodeFormatRules, CnScaners, CnTokens,
-  CnCompDirectiveTree, CnDebug;
+  CnCodeFormatter, CnCodeFormatRules, CnScaners, CnTokens, CnCompDirectiveTree,
+  CnDebug;
 
 {$R *.DFM}
 
@@ -143,10 +143,12 @@ end;
 
 procedure TMainForm.btnFormatClick(Sender: TObject);
 const
-  Names: array[0..1] of PAnsiChar = ('tESt', 'sYstem');
+  Names: array[0..2] of PAnsiChar = ('tESt', 'sYstem', nil);
 var
   FCodeFor: TCnPascalCodeFormatter;
   MemStr: TMemoryStream;
+  OutMarks: PDWORD;
+  Marks: array[0..1] of DWORD;
 begin
   CnPascalCodeForRule.TabSpaceCount := UpDown1.Position;
   CnPascalCodeForRule.KeywordStyle := TKeywordStyle(ComboBox1.ItemIndex);
@@ -165,6 +167,11 @@ begin
     SrcMemo.Lines.SaveToStream(MemStr {$IFDEF UNICODE}, TEncoding.Unicode {$ENDIF});
     FCodeFor := TCnPascalCodeFormatter.Create(MemStr);
     FCodeFor.SpecifyIdentifiers(@Names[0]);
+
+    Marks[0] := SrcMemo.CaretPos.y;
+    Marks[1] := 0;
+    FCodeFor.SpecifyLineMarks(@Marks[0]);
+
     FCodeFor.SliceMode := chkSliceMode.Checked;
     try
       try
@@ -172,6 +179,15 @@ begin
       finally
         //FCodeFor.SaveToStream(MemStr);
         FCodeFor.SaveToStrings(DesMemo.Lines);
+        OutMarks := nil;
+        FCodeFor.SaveOutputLineMarks(OutMarks);
+
+        if OutMarks <> nil then
+        begin
+          DesMemo.SelStart := DesMemo.Perform(EM_LINEINDEX, OutMarks^, 0);
+          DesMemo.SetFocus;
+        end;
+        FreeMemory(OutMarks);
       end;
     finally
       FCodeFor.Free;
@@ -185,12 +201,14 @@ begin
     SrcMemo.Lines.WriteBOM := False;
 {$ENDIF}
     SrcMemo.Lines.SaveToStream(MemStr {$IFDEF UNICODE}, TEncoding.Unicode {$ENDIF});
-    FCodeFor := TCnPascalCodeFormatter.Create(MemStr, SrcMemo.SelStart, SrcMemo.SelStart + SrcMemo.SelLength);
+    FCodeFor := TCnPascalCodeFormatter.Create(MemStr, SrcMemo.SelStart, SrcMemo.SelStart
+      + SrcMemo.SelLength);
     FCodeFor.SliceMode := True;
 
     // MatchedInStart/MatchedInEnd 匹配均是 0 开始，而 Copy 的字符串是 1 开始，所以需要加 1
     ShowMessage(IntToStr(SrcMemo.SelStart) + ':' + IntToStr(SrcMemo.SelStart + SrcMemo.SelLength));
-    CnDebugger.LogRawString(Copy(SrcMemo.Lines.Text, FCodeFor.MatchedInStart + 1, FCodeFor.MatchedInEnd - FCodeFor.MatchedInStart));
+    CnDebugger.LogRawString(Copy(SrcMemo.Lines.Text, FCodeFor.MatchedInStart + 1,
+      FCodeFor.MatchedInEnd - FCodeFor.MatchedInStart));
     try
       try
         FCodeFor.FormatCode;
@@ -240,7 +258,8 @@ begin
     begin
       Memo2.Lines.Add(Scaner.TokenString);
       Scaner.NextToken;
-      if Scaner.Token = tokEOF then Break;
+      if Scaner.Token = tokEOF then
+        Break;
     end;
 
     Scaner.SaveBookmark(Bookmark);
@@ -252,7 +271,8 @@ begin
     begin
       Memo2.Lines.Add(Scaner.TokenString);
       Scaner.NextToken;
-      if Scaner.Token = tokEOF then Break;
+      if Scaner.Token = tokEOF then
+        Break;
     end;
 
     Scaner.LoadBookmark(Bookmark);
@@ -264,8 +284,9 @@ begin
     begin
       Memo2.Lines.Add(Scaner.TokenString);
       Scaner.NextToken;
-      if Scaner.Token = tokEOF then Break;
-    end;   
+      if Scaner.Token = tokEOF then
+        Break;
+    end;
   finally
     Scaner.Free;
     MemStr.Free;
@@ -275,9 +296,10 @@ end;
 procedure TMainForm.btnAddClick(Sender: TObject);
 var
   I: Integer;
-  Item: TListItem; 
+  Item: TListItem;
 begin
-  if fllst1.SelCount = 0 then Exit;
+  if fllst1.SelCount = 0 then
+    Exit;
 
   for I := 0 to fllst1.Items.Count - 1 do
   begin
@@ -293,7 +315,7 @@ end;
 procedure TMainForm.btnAddAllClick(Sender: TObject);
 var
   I: Integer;
-  Item: TListItem; 
+  Item: TListItem;
 begin
   lvTestFiles.Items.Clear;
   for I := 0 to fllst1.Items.Count - 1 do
@@ -307,7 +329,7 @@ end;
 procedure TMainForm.btnRemoveClick(Sender: TObject);
 begin
   if Assigned(lvTestFiles.Selected) then
-    lvTestFiles.Selected.Delete; 
+    lvTestFiles.Selected.Delete;
 end;
 
 procedure TMainForm.btnRemoveAllClick(Sender: TObject);
@@ -322,7 +344,7 @@ var
   FileStr: TFileStream;
 begin
   FileStr := nil;
-  
+
   for I := 0 to lvTestFiles.Items.Count - 1 do
   begin
     try
@@ -335,8 +357,9 @@ begin
       end;
     end;
 
-    if not Assigned(FileStr) then Continue;
-    
+    if not Assigned(FileStr) then
+      Continue;
+
     FCodeFor := TCnPascalCodeFormatter.Create(FileStr);
     try
       try
@@ -388,7 +411,7 @@ begin
   // 编译指令分树操作
   MemStr := TMemoryStream.Create;
 {$IFDEF TSTRINGS_HAS_WRITEBOM}
-    SrcMemo.Lines.WriteBOM := False;
+  SrcMemo.Lines.WriteBOM := False;
 {$ENDIF}
   SrcMemo.Lines.SaveToStream(MemStr {$IFDEF UNICODE}, TEncoding.Unicode {$ENDIF});
 
@@ -404,7 +427,6 @@ begin
 //    if Tree.Count > 1 then
 //      for I := 1 to Tree.Count - 1 do
 //        ShowMessage('Level ' + IntToStr(Tree.Items[I].Level) + #13#10#13#10 + Tree.Items[I].Text);
-
     Tree.SearchMultiNodes(List);
     ShowMessage('Parse Route Count: ' + IntToStr(List.Count));
     for I := 0 to List.Count - 1 do
@@ -419,9 +441,8 @@ begin
       tvCompDirective.FullExpand;
       tvCompDirective.Invalidate;
 
-      ShowMessage(S + '| '
-      + IntToStr(TCnSliceNode(List[I]).ReachingStart) + ' to '
-      + IntToStr(TCnSliceNode(List[I]).ReachingEnd));
+      ShowMessage(S + '| ' + IntToStr(TCnSliceNode(List[I]).ReachingStart) +
+        ' to ' + IntToStr(TCnSliceNode(List[I]).ReachingEnd));
     end;
 
     // 格式化每一个 ReachNode 得到的 string 源码时要传入此 Node 的 ReachingOffset
@@ -439,7 +460,8 @@ begin
         M := TMemoryStream.Create;
         M.Write(PChar(S)^, Length(S) * SizeOf(Char));
 
-        Fmt := TCnPascalCodeFormatter.Create(M, Node.ReachingStart, Node.ReachingEnd - Node.EndBlankLength);
+        Fmt := TCnPascalCodeFormatter.Create(M, Node.ReachingStart, Node.ReachingEnd
+          - Node.EndBlankLength);
         Fmt.SliceMode := True;
 
         Fmt.FormatCode;
@@ -458,8 +480,8 @@ begin
   end;
 end;
 
-procedure TMainForm.tvCompDirectiveCustomDrawItem(Sender: TCustomTreeView;
-  Node: TTreeNode; State: TCustomDrawState; var DefaultDraw: Boolean);
+procedure TMainForm.tvCompDirectiveCustomDrawItem(Sender: TCustomTreeView; Node:
+  TTreeNode; State: TCustomDrawState; var DefaultDraw: Boolean);
 begin
   if Node.Data <> nil then // Means TCnSliceNode.KeepFlag is True.
   begin
@@ -470,3 +492,4 @@ begin
 end;
 
 end.
+

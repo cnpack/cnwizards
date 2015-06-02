@@ -233,7 +233,8 @@ type
   // 用来指明当前位置处于哪些基本位置（可嵌套但互斥），
   // 如属性的修饰符区域、函数调用修饰符区域等
   TCnPascalFormattingElementType = (pfetUnknown, pfetAsm, pfetPropertySpecifier,
-    pfetDirective, pfetPropertyIndex, pfetAfterThen, pfetAfterDo, pfetAfterElse);
+    pfetDirective, pfetPropertyIndex, pfetAfterThen, pfetAfterDo, pfetAfterElse,
+    pfetSimpleStatment);
 
   TCnPascalFormattingElementTypeSet = set of TCnPascalFormattingElementType;
 

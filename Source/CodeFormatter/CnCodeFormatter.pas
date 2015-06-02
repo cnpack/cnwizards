@@ -71,6 +71,8 @@ type
     FPrefixSpaces: Integer;
 
     FNamesMap: TCnStrToStrHashMap;
+    FInputLineMarks: TList;         // 源与结果的行映射关系中的源行
+    FOutputLineMarks: TList;        // 源与结果的行映射关系中的结果行
     function ErrorTokenString: string;
     procedure CodeGenAfterWrite(Sender: TObject; IsWriteBlank: Boolean;
       IsWriteln: Boolean; PrefixSpaces: Integer);
@@ -141,10 +143,15 @@ type
     {* 以 PPAnsiChar 方式传入的字符指针数组，用来指定特定符号的大小写}
     procedure SpecifyIdentifiers(Names: TStrings); overload;
     {* 以 TStrings 方式传入的字符串，用来指定特定符号的大小写}
+    procedure SpecifyLineMarks(Marks: PDWORD);
+    {* 以 PDWORD 指向数组的方式传入的源文件的行映射的行}
+
     procedure FormatCode(PreSpaceCount: Byte = 0); virtual; abstract;
     procedure SaveToFile(FileName: string);
     procedure SaveToStream(Stream: TStream);
     procedure SaveToStrings(AStrings: TStrings);
+    procedure SaveOutputLineMarks(var Marks: PDWORD);
+    {* 将格式化结果中的行映射结果复制到数组中，数组指针须在外界释放}
 
     property SliceMode: Boolean read FSliceMode write FSliceMode;
     {* 片段模式，供外界控制。为 True 时碰到 EOF 应该平常退出而不报错}
@@ -158,6 +165,8 @@ type
     property MatchedOutEndRow: Integer read FMatchedOutEndRow write FMatchedOutEndRow;
     property MatchedOutEndCol: Integer read FMatchedOutEndCol write FMatchedOutEndCol;
 
+    property InputLineMarks: TList read FInputLineMarks;
+    property OutputLineMarks: TList read FOutputLineMarks;
   end;
 
   TCnBasePascalFormatter = class(TCnAbstractCodeFormatter)
@@ -443,6 +452,8 @@ begin
   FScaner.Free;
   FCodeGen.Free;
   FNamesMap.Free;
+  FOutputLineMarks.Free;
+  FInputLineMarks.Free;
   inherited;
 end;
 
@@ -696,6 +707,8 @@ end;
 procedure TCnAbstractCodeFormatter.WriteToken(Token: TPascalToken;
   BeforeSpaceCount, AfterSpaceCount: Byte; IgnorePreSpace: Boolean;
   SemicolonIsLineStart: Boolean; NoSeparateSpace: Boolean);
+var
+  NeedPadding: Boolean;
 begin
   if CnPascalCodeForRule.UseIgnoreArea and Scaner.InIgnoreArea then
   begin
@@ -719,27 +732,28 @@ begin
       // 强行分离括号与关键字
   end;
 
+  NeedPadding := (FElementType = pfetSimpleStatment);
   //标点符号的设置
   case Token of
-    tokComma:     CodeGen.Write(Scaner.TokenString, 0, 1);   // 1 也会导致行尾注释后退，现多出的空格已由 Generator 删除
+    tokComma:     CodeGen.Write(Scaner.TokenString, 0, 1, NeedPadding);   // 1 也会导致行尾注释后退，现多出的空格已由 Generator 删除
     tokColon:
       begin
         if IgnorePreSpace then
-          CodeGen.Write(Scaner.TokenString)
+          CodeGen.Write(Scaner.TokenString, 0, 0, NeedPadding)
         else
-          CodeGen.Write(Scaner.TokenString, 0, 1);  // 1 也会导致行尾注释后退，现多出的空格已由 Generator 删除
+          CodeGen.Write(Scaner.TokenString, 0, 1, NeedPadding);  // 1 也会导致行尾注释后退，现多出的空格已由 Generator 删除
       end;
     tokSemiColon:
       begin
         if IgnorePreSpace then
           CodeGen.Write(Scaner.TokenString)
         else if SemicolonIsLineStart then
-          CodeGen.Write(Scaner.TokenString, BeforeSpaceCount, 0)
+          CodeGen.Write(Scaner.TokenString, BeforeSpaceCount, 0, NeedPadding)
         else
-          CodeGen.Write(Scaner.TokenString, 0, 1);
+          CodeGen.Write(Scaner.TokenString, 0, 1, NeedPadding);
           // 1 也会导致行尾注释后退，现多出的空格已由 Generator 删除
       end;
-    tokAssign:    CodeGen.Write(Scaner.TokenString, 1, 1);
+    tokAssign:    CodeGen.Write(Scaner.TokenString, 1, 1, NeedPadding);
   else
 
     if (Token in KeywordTokens + ComplexTokens + DirectiveTokens) then // 关键字范围扩大
@@ -752,7 +766,7 @@ begin
       begin
         // 关键字有效作用域外均在此原样输出
         CodeGen.Write(CheckIdentifierName(Scaner.TokenString),
-          BeforeSpaceCount, AfterSpaceCount);
+          BeforeSpaceCount, AfterSpaceCount, NeedPadding);
       end
       else
       begin
@@ -761,13 +775,14 @@ begin
             CodeGen.Write(
               FormatString(CheckIdentifierName(Scaner.TokenString),
                 CnPascalCodeForRule.KeywordStyle),
-              BeforeSpaceCount, AfterSpaceCount);
+              BeforeSpaceCount, AfterSpaceCount, NeedPadding);
         end
         else
         begin
           CodeGen.Write(
             FormatString(CheckIdentifierName(Scaner.TokenString),
-            CnPascalCodeForRule.KeywordStyle), BeforeSpaceCount, AfterSpaceCount);
+            CnPascalCodeForRule.KeywordStyle), BeforeSpaceCount,
+            AfterSpaceCount, NeedPadding);
         end;
       end;
     end
@@ -776,11 +791,13 @@ begin
 //      CodeGen.Write(Scaner.TokenString, 0, 0)
     else if FIsTypeID then // 如果是类型名，则按规则处理 Scaner.TokenString
     begin
-      CodeGen.Write(CheckIdentifierName(Scaner.TokenString), BeforeSpaceCount, AfterSpaceCount);
+      CodeGen.Write(CheckIdentifierName(Scaner.TokenString), BeforeSpaceCount,
+        AfterSpaceCount, NeedPadding);
     end
     else
     begin
-      CodeGen.Write(CheckIdentifierName(Scaner.TokenString), BeforeSpaceCount, AfterSpaceCount);
+      CodeGen.Write(CheckIdentifierName(Scaner.TokenString), BeforeSpaceCount,
+        AfterSpaceCount, NeedPadding);
     end;
   end;
 
@@ -1562,7 +1579,7 @@ begin
   FormatExpression;
   Match(tokKeywordThen);
 
-  SpecifyElementType(pfetAfterDo);
+  SpecifyElementType(pfetAfterThen);
   CheckWriteBeginln; // 检查 if then begin 是否同行
   try
     if Scaner.Token = tokSemicolon then
@@ -1681,97 +1698,102 @@ var
     end;
   end;
 begin
-  case Scaner.Token of
-    tokSymbol, tokAtSign, tokKeywordFinal, tokKeywordIn, tokKeywordOut,
-    tokKeywordString, tokInteger, tokFloat,
-    tokDirective_BEGIN..tokDirective_END, // 允许语句以部分关键字以及数字开头
-    tokComplex_BEGIN..tokComplex_END:
-      begin
-        FormatDesignatorAndOthers(PreSpaceCount);
-      end;
-
-    tokKeywordInherited:
-      begin
-        {
-          inherited can be:
-          inherited;
-          inherited Foo;
-          inherited Foo(bar);
-          inherited FooProp := bar;
-          inherited FooProp[Bar] := Fish;
-          bar :=  inherited FooProp[Bar];
-        }
-        Match(Scaner.Token, PreSpaceCount);
-
-        if CanBeSymbol(Scaner.Token) then
-          FormatSimpleStatement;
-      end;
-
-    tokKeywordGoto:
-      begin
-        Match(Scaner.Token, PreSpaceCount);
-        { DONE: FormatLabel }
-        FormatLabel;
-      end;
-
-    tokLB: // 括号开头的未必是 (SimpleStatement)，还可能是 (a)^ := 1 这种 Designator
-      begin
-        // found in D9 surpport: if ... then (...)
-
-        // can delete the LB & RB, code optimize ??
-        // 先当做 Designator 来看，处理完毕看后续有无 := ( 来判断是否结束
-        // 如果是结束了，则 Designator 的处理是对的，否则按 Simplestatement 来。
-
-        Scaner.SaveBookmark(Bookmark);
-        OldLastToken := FLastToken;
-        OldInternalRaiseException := FInternalRaiseException;
-        FInternalRaiseException := True;
-        // 需要 Exception 来判断后续内容
-
-        try
-          CodeGen.LockOutput;
-
-          try
-            FormatDesignator(PreSpaceCount);
-            // 假设 Designator 处理完毕，判断后续是啥
-
-            IsDesignator := Scaner.Token in [tokAssign, tokLB, tokSemicolon,
-              tokKeywordElse, tokKeywordEnd];
-            // TODO: 目前只想到这几个。Semicolon 是怕 Designator 已经作为语句处理完了，
-            // else/end 是怕语句结束没分号导致判断失误。
-          except
-            IsDesignator := False;
-            // 如果后面碰到了 := 等情形，FormatDesignator 会出错，
-            // 说明本句是带括号嵌套的 Simplestatement
-          end;
-        finally
-          Scaner.LoadBookmark(Bookmark);
-          FLastToken := OldLastToken;
-          CodeGen.UnLockOutput;
-          FInternalRaiseException := OldInternalRaiseException;
-        end;
-
-        if not IsDesignator then
-        begin
-          //Match(tokLB);  优化不用的括号
-          Scaner.NextToken;
-
-          FormatSimpleStatement(PreSpaceCount);
-
-          if Scaner.Token = tokRB then
-            Scaner.NextToken
-          else
-            ErrorToken(tokRB);
-
-          //Match(tokRB);
-          end
-        else
+  SpecifyElementType(pfetSimpleStatment);
+  try
+    case Scaner.Token of
+      tokSymbol, tokAtSign, tokKeywordFinal, tokKeywordIn, tokKeywordOut,
+      tokKeywordString, tokInteger, tokFloat,
+      tokDirective_BEGIN..tokDirective_END, // 允许语句以部分关键字以及数字开头
+      tokComplex_BEGIN..tokComplex_END:
         begin
           FormatDesignatorAndOthers(PreSpaceCount);
         end;
-      end;
-  else
-    Error(CN_ERRCODE_PASCAL_INVALID_STATEMENT);
+
+      tokKeywordInherited:
+        begin
+          {
+            inherited can be:
+            inherited;
+            inherited Foo;
+            inherited Foo(bar);
+            inherited FooProp := bar;
+            inherited FooProp[Bar] := Fish;
+            bar :=  inherited FooProp[Bar];
+          }
+          Match(Scaner.Token, PreSpaceCount);
+
+          if CanBeSymbol(Scaner.Token) then
+            FormatSimpleStatement;
+        end;
+
+      tokKeywordGoto:
+        begin
+          Match(Scaner.Token, PreSpaceCount);
+          { DONE: FormatLabel }
+          FormatLabel;
+        end;
+
+      tokLB: // 括号开头的未必是 (SimpleStatement)，还可能是 (a)^ := 1 这种 Designator
+        begin
+          // found in D9 surpport: if ... then (...)
+
+          // can delete the LB & RB, code optimize ??
+          // 先当做 Designator 来看，处理完毕看后续有无 := ( 来判断是否结束
+          // 如果是结束了，则 Designator 的处理是对的，否则按 Simplestatement 来。
+
+          Scaner.SaveBookmark(Bookmark);
+          OldLastToken := FLastToken;
+          OldInternalRaiseException := FInternalRaiseException;
+          FInternalRaiseException := True;
+          // 需要 Exception 来判断后续内容
+
+          try
+            CodeGen.LockOutput;
+
+            try
+              FormatDesignator(PreSpaceCount);
+              // 假设 Designator 处理完毕，判断后续是啥
+
+              IsDesignator := Scaner.Token in [tokAssign, tokLB, tokSemicolon,
+                tokKeywordElse, tokKeywordEnd];
+              // TODO: 目前只想到这几个。Semicolon 是怕 Designator 已经作为语句处理完了，
+              // else/end 是怕语句结束没分号导致判断失误。
+            except
+              IsDesignator := False;
+              // 如果后面碰到了 := 等情形，FormatDesignator 会出错，
+              // 说明本句是带括号嵌套的 Simplestatement
+            end;
+          finally
+            Scaner.LoadBookmark(Bookmark);
+            FLastToken := OldLastToken;
+            CodeGen.UnLockOutput;
+            FInternalRaiseException := OldInternalRaiseException;
+          end;
+
+          if not IsDesignator then
+          begin
+            //Match(tokLB);  优化不用的括号
+            Scaner.NextToken;
+
+            FormatSimpleStatement(PreSpaceCount);
+
+            if Scaner.Token = tokRB then
+              Scaner.NextToken
+            else
+              ErrorToken(tokRB);
+
+            //Match(tokRB);
+            end
+          else
+          begin
+            FormatDesignatorAndOthers(PreSpaceCount);
+          end;
+        end;
+    else
+      Error(CN_ERRCODE_PASCAL_INVALID_STATEMENT);
+    end;
+  finally
+    RestoreElementType;
   end;
 end;
 
@@ -5179,7 +5201,7 @@ end;
 procedure TCnAbstractCodeFormatter.CodeGenAfterWrite(Sender: TObject;
   IsWriteBlank: Boolean; IsWriteln: Boolean; PrefixSpaces: Integer);
 var
-  StartPos, EndPos: Integer;
+  StartPos, EndPos, I: Integer;
 begin
   // CodeGen 写完一段字符串但 Scaner 还没 NextToken 时调用
   // 用来判断 Scaner 的位置是否是指定 Offset
@@ -5189,6 +5211,17 @@ begin
 //    TCnCodeGenerator(Sender).CurrRow, TCnCodeGenerator(Sender).CurrColumn,
 //    FScaner.SourcePos]);
 {$ENDIF}
+
+  // 记录目的与源的行映射
+  if not IsWriteBlank and (FInputLineMarks <> nil) then
+  begin
+    for I := 0 to FInputLineMarks.Count - 1 do
+    begin
+      if Scaner.SourceLine = Integer(FInputLineMarks[I]) then
+        if Integer(FOutputLineMarks[I]) = 0 then // 第一回匹配
+          FOutputLineMarks[I] := Pointer(TCnCodeGenerator(Sender).ActualRow);
+    end;
+  end;
 
   if IsWriteBlank then
   begin
@@ -5293,6 +5326,47 @@ begin
 
   for I := 0 to Names.Count - 1 do
     FNamesMap.Add(UpperCase(Names[I]), Names[I]);
+end;
+
+procedure TCnAbstractCodeFormatter.SpecifyLineMarks(Marks: PDWORD);
+begin
+  if FInputLineMarks <> nil then
+    FreeAndNil(FInputLineMarks);
+  if FOutputLineMarks <> nil then
+    FreeAndNil(FOutputLineMarks);
+
+  if Marks = nil then
+    Exit;
+  if Marks^ = 0 then
+    Exit;
+
+  FInputLineMarks := TList.Create;
+  FOutputLineMarks := TList.Create;
+
+  while Marks^ <> 0 do
+  begin
+    FInputLineMarks.Add(Pointer(Marks^));
+    FOutputLineMarks.Add(nil);
+    Inc(Marks);
+  end;
+end;
+
+procedure TCnAbstractCodeFormatter.SaveOutputLineMarks(var Marks: PDWORD);
+var
+  I: Integer;
+  M: PDWORD;
+begin
+  if (FOutputLineMarks = nil) or (FOutputLineMarks.Count = 0) or (Marks <> nil) then
+    Exit;
+
+  Marks := GetMemory((FOutputLineMarks.Count + 1) * SizeOf(DWORD));
+  M := Marks;
+  for I := 0 to FOutputLineMarks.Count - 1 do
+  begin
+    M^ := DWORD(FOutputLineMarks[I]);
+    Inc(M);
+  end;
+  M^ := 0;
 end;
 
 initialization

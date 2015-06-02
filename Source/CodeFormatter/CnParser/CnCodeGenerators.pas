@@ -74,6 +74,7 @@ type
     // 自动换行缩进时，找出上一个非自动换行的缩进行
     procedure CalcLastNoAutoIndentLine;
     function GetLastIndentSpaceWithOutLineHeadCRLF: Integer;
+    function GetActualRow: Integer;
   protected
     procedure DoAfterWrite(IsWriteln: Boolean; PrefixSpaces: Integer = 0); virtual;
     // 当 IsWriteln 为 True 时，PrefixSpaces 表示本次写入回车后可能写的空格数，否则为 0
@@ -83,7 +84,7 @@ type
 
     procedure Reset;
     procedure Write(const Text: string; BeforeSpaceCount:Word = 0;
-      AfterSpaceCount: Word = 0);
+      AfterSpaceCount: Word = 0; NeedPadding: Boolean = False);
     procedure WriteBlank(const Text: string);
     procedure InternalWriteln;
     procedure Writeln;
@@ -132,6 +133,9 @@ type
       可能与实际情况不符，因为 Write 可能自行写回车换行符}
     property CurrColumn: Integer read GetCurrColumn;
     {* 一次 Write 成功后，写之后的光标列号，0 开始}
+
+    property ActualRow: Integer read GetActualRow;
+    {* 一次 Write 成功后，写之后的实际光标行号，回车换行已换算，从 1 开始}
 
     property AutoWrapButNoIndent: Boolean read FAutoWrapButNoIndent write FAutoWrapButNoIndent;
     {* 超宽时自动换行时是否缩进，供外界控制，如 uses 区用 True}
@@ -258,6 +262,16 @@ procedure TCnCodeGenerator.DoAfterWrite(IsWriteln: Boolean; PrefixSpaces: Intege
 begin
   if Assigned(FOnAfterWrite) then
     FOnAfterWrite(Self, FWritingBlank, IsWriteln, PrefixSpaces);
+end;
+
+function TCnCodeGenerator.GetActualRow: Integer;
+var
+  List: TStrings;
+begin
+  List := TStringList.Create;
+  List.Text := FCode.Text;
+  Result := List.Count; // ActualRow 从 1 开始
+  List.Free;
 end;
 
 function TCnCodeGenerator.GetCurIndentSpace: Integer;
@@ -409,7 +423,7 @@ begin
 end;
 
 procedure TCnCodeGenerator.Write(const Text: string; BeforeSpaceCount,
-  AfterSpaceCount: Word);
+  AfterSpaceCount: Word; NeedPadding: Boolean);
 var
   Str, WrapStr, Tmp: string;
   ThisCanBeHead, PrevCanBeTail, IsCommentCRLFEnd, IsCRLFSpace: Boolean;
@@ -590,7 +604,7 @@ begin
 
   // 如果上一次输出的内容是//行尾注释包括回车结尾，
   // 并且本次输出如果头部空格太少，就需要简单加上上一行的空格缩进，无论是不是自动换行
-  if FPrevIsComentCRLFEnd then
+  if NeedPadding and FPrevIsComentCRLFEnd then
   begin
     if HeadSpaceCount(Str) < LastIndentSpaceWithOutLineHeadCRLF then
       Str := StringOfChar(' ', LastIndentSpaceWithOutLineHeadCRLF) + TrimLeft(Str);
