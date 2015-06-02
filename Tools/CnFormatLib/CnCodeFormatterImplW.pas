@@ -70,6 +70,7 @@ type
       LineWrapWidth: DWORD; NewLineWrapWidth: DWORD; UsesSingleLine: LongBool;
       UseIgnoreArea: LongBool);
     procedure SetPreIdentifierNames(Names: PLPSTR);
+    procedure SetInputLineMarks(Marks: PDWORD);
 
     function FormatOnePascalUnit(Input: PAnsiChar; Len: DWORD): PAnsiChar;
     function FormatOnePascalUnitUtf8(Input: PAnsiChar; Len: DWORD): PAnsiChar;
@@ -82,6 +83,8 @@ type
     function FormatPascalBlockW(Input: PWideChar; Len: DWORD; StartOffset: DWORD;
       EndOffset: DWORD): PWideChar;
 
+    function RetrieveOutputLinkMarks: PDWORD;
+
     function RetrievePascalLastError(out SourceLine: Integer; out SourceCol: Integer;
       out SourcePos: Integer; out CurrentToken: PAnsiChar): Integer;
   end;
@@ -90,11 +93,32 @@ var
   FCodeFormatProvider: ICnPascalFormatterIntf = nil;
   FPreNameList: TStrings = nil;
 
+  FInputLineMarks: PDWORD = nil;
+  FOutputLineMarks: PDWORD = nil;
+
 function GetCodeFormatterProvider: ICnPascalFormatterIntf; stdcall;
 begin
   if FCodeFormatProvider = nil then
     FCodeFormatProvider := TCnCodeFormatProvider.Create;
   Result := FCodeFormatProvider;
+end;
+
+procedure ClearInputLineMarks;
+begin
+  if FInputLineMarks <> nil then
+  begin
+    FreeMemory(FInputLineMarks);
+    FInputLineMarks := nil;
+  end;
+end;
+
+procedure ClearOutputLineMarks;
+begin
+  if FOutputLineMarks <> nil then
+  begin
+    FreeMemory(FOutputLineMarks);
+    FOutputLineMarks := nil;
+  end;
 end;
 
 { FCodeFormatProvider }
@@ -171,6 +195,7 @@ begin
   InStream.Write((PChar(UInput))^, Len * SizeOf(Char));
   CodeFor := TCnPascalCodeFormatter.Create(InStream, StartOffset, EndOffset);
   CodeFor.SpecifyIdentifiers(FPreNameList);
+  CodeFor.SpecifyLineMarks(FInputLineMarks);
   CodeFor.SliceMode := True;
 
   try
@@ -194,6 +219,9 @@ begin
       OutStream.Position := 0;
       OutStream.Read(FResult^, OutStream.Size);
     end;
+
+    ClearOutputLineMarks;
+    CodeFor.SaveOutputLineMarks(FOutputLineMarks);
   finally
     CodeFor.Free;
     InStream.Free;
@@ -242,6 +270,7 @@ begin
   // Formatter 内部的偏移量以 0 开始，传入的 Offset 也以 0 开始
   CodeFor := TCnPascalCodeFormatter.Create(InStream, StartOffset, EndOffset);
   CodeFor.SpecifyIdentifiers(FPreNameList);
+  CodeFor.SpecifyLineMarks(FInputLineMarks);
   CodeFor.SliceMode := True;
 
   try
@@ -265,6 +294,9 @@ begin
       OutStream.Position := 0;
       OutStream.Read(FResult^, OutStream.Size);
     end;
+
+    ClearOutputLineMarks;
+    CodeFor.SaveOutputLineMarks(FOutputLineMarks);
   finally
     CodeFor.Free;
     InStream.Free;
@@ -281,6 +313,29 @@ begin
   Result := nil;
 
   PascalErrorRec.ErrorCode := CN_ERRCODE_PASCAL_NOT_SUPPORT;
+end;
+
+procedure TCnCodeFormatProvider.SetInputLineMarks(Marks: PDWORD);
+var
+  Len: Integer;
+  M: PDWORD;
+begin
+  ClearInputLineMarks;
+  if (Marks <> nil) and (Marks^ <> 0) then
+  begin
+    M := Marks;
+    Len := 0;
+
+    while M^ <> 0 do
+    begin
+      Inc(Len);
+      Inc(M);
+    end;
+
+    // Len 是有效内容的长度
+    FInputLineMarks := PDWORD(GetMemory((Len + 1) * SizeOf(DWORD)));
+    CopyMemory(FInputLineMarks, Marks, (Len + 1) * SizeOf(DWORD));
+  end;
 end;
 
 procedure TCnCodeFormatProvider.SetPascalFormatRule(DirectiveMode, KeywordStyle,
@@ -345,11 +400,16 @@ begin
   begin
     while Names^ <> nil do
     begin
-      S := StrNew(Names^);
+      S := StrNew(PChar(string(Names^)));
       FPreNameList.Add(S);
       Inc(Names);
     end;
   end;
+end;
+
+function TCnCodeFormatProvider.RetrieveOutputLinkMarks: PDWORD;
+begin
+  Result := FOutputLineMarks;
 end;
 
 function TCnCodeFormatProvider.RetrievePascalLastError(out SourceLine, SourceCol,
@@ -389,6 +449,7 @@ begin
   InStream.Write((PChar(UInput))^, Len * SizeOf(Char));
   CodeFor := TCnPascalCodeFormatter.Create(InStream);
   CodeFor.SpecifyIdentifiers(FPreNameList);
+  CodeFor.SpecifyLineMarks(FInputLineMarks);
 
   try
     try
@@ -404,6 +465,9 @@ begin
       OutStream.Position := 0;
       OutStream.Read(FResult^, OutStream.Size);
     end;
+
+    ClearOutputLineMarks;
+    CodeFor.SaveOutputLineMarks(FOutputLineMarks);
   finally
     CodeFor.Free;
     InStream.Free;
@@ -445,6 +509,7 @@ begin
   InStream.Write(Input^, Len * SizeOf(Char));
   CodeFor := TCnPascalCodeFormatter.Create(InStream);
   CodeFor.SpecifyIdentifiers(FPreNameList);
+  CodeFor.SpecifyLineMarks(FInputLineMarks);
 
   try
     try
@@ -460,6 +525,9 @@ begin
       OutStream.Position := 0;
       OutStream.Read(FResult^, OutStream.Size);
     end;
+
+    ClearOutputLineMarks;
+    CodeFor.SaveOutputLineMarks(FOutputLineMarks);
   finally
     CodeFor.Free;
     InStream.Free;
@@ -488,5 +556,7 @@ initialization
 finalization
   FCodeFormatProvider := nil;
   FPreNameList.Free;
+  ClearInputLineMarks;
+  ClearOutputLineMarks;
 
 end.

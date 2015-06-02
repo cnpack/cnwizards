@@ -149,6 +149,10 @@ type
     procedure SetPreIdentifierNames(Names: PLPSTR);
     {* 设置预先设置好的标识符，供改正大小写用，注意所指的内存区须在格式化完毕后再释放}
 
+    procedure SetInputLineMarks(Marks: PDWORD);
+    {* 设置源文件与结果的行映射关系中的源行，供保留书签、断点等使用。
+       以一个 DWORD 数组的方式传递，0 结尾}
+
     function FormatOnePascalUnit(Input: PAnsiChar; Len: DWORD): PAnsiChar;
     {* 格式化一整个 Pascal 文件内容，代码以 AnsiString 格式传入。
        返回结果存储的 AnsiString 字符内容的指针，用完后无须释放。
@@ -188,6 +192,10 @@ type
        用 Copy 方法从 Input 中获得从 StartOffset 到 EndOffset 的内容正对应选择区的 Unicode 内容。
        返回结果存储的 UnicodeString 字符内容的指针，用完后无须释放。
        如果返回 nil，说明出错，需要用 RetrieveLastError 获得错误码}
+
+    function RetrieveOutputLinkMarks: PDWORD;
+    {* 获取源文件与结果的行映射关系中的目标行，供格式化完毕后保留书签、断点等使用。
+       以一个 DWORD 数组的方式传递，0 结尾}
 
     function RetrievePascalLastError(out SourceLine: Integer; out SourceCol: Integer;
       out SourcePos: Integer; out CurrentToken: PAnsiChar): Integer;

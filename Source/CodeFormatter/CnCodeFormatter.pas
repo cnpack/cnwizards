@@ -5213,7 +5213,7 @@ begin
 {$ENDIF}
 
   // 记录目的与源的行映射
-  if not IsWriteBlank and (FInputLineMarks <> nil) then
+  if not IsWriteBlank and not IsWriteln and (FInputLineMarks <> nil) then
   begin
     for I := 0 to FInputLineMarks.Count - 1 do
     begin
