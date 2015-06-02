@@ -586,14 +586,14 @@ begin
       InternalWriteln;
       FAutoWrapLines.Add(Pointer(FCode.Count - 1)); // 自动换行的行号要记录
     end;
+  end;
 
-    // 如果上一次输出的内容是//行尾注释包括回车结尾，
-    // 并且本次输出如果头部空格太少，就需要简单加上上一行的空格缩进
-    if FPrevIsComentCRLFEnd then
-    begin
-      if HeadSpaceCount(Str) < LastIndentSpaceWithOutLineHeadCRLF then
-        Str := StringOfChar(' ', LastIndentSpaceWithOutLineHeadCRLF) + TrimLeft(Str);
-    end;
+  // 如果上一次输出的内容是//行尾注释包括回车结尾，
+  // 并且本次输出如果头部空格太少，就需要简单加上上一行的空格缩进，无论是不是自动换行
+  if FPrevIsComentCRLFEnd then
+  begin
+    if HeadSpaceCount(Str) < LastIndentSpaceWithOutLineHeadCRLF then
+      Str := StringOfChar(' ', LastIndentSpaceWithOutLineHeadCRLF) + TrimLeft(Str);
   end;
 
   FCode[FCode.Count - 1] :=
