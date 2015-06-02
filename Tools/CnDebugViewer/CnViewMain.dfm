@@ -457,6 +457,7 @@ object CnMainViewer: TCnMainViewer
       Caption = '&Copy'
       Hint = 'Copy to Clipboard'
       ImageIndex = 10
+      ShortCut = 16451
       OnExecute = actCopyExecute
     end
     object actViewTime: TAction
