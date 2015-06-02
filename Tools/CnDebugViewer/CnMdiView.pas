@@ -148,6 +148,7 @@ type
     procedure BookmarkMenuClick(Sender: TObject);
     procedure pnlTreeOnResize(Sender: TObject);
     procedure SetStore(const Value: TCnMsgStore);
+    function GetSelectedContent: string;
   protected
     procedure DoCreate; override;
     procedure LanguageChanged(Sender: TObject);
@@ -177,6 +178,7 @@ type
     property MsgTree: TVirtualStringTree read FMsgTree;
     property HasBookmarks: Boolean read FHasBookmarks;
     property IsResizing: Boolean read FIsResizing write FIsResizing;
+    property SelectedContent: string read GetSelectedContent;
   end;
 
 var
@@ -338,7 +340,7 @@ begin
   FMsgTree.Hint := SCnHintMsgTree;
   FMsgTree.Header.Options := FMsgTree.Header.Options + [hoVisible];
   FMsgtree.TreeOptions.SelectionOptions := FMsgtree.TreeOptions.SelectionOptions
-    + [toFullRowSelect, toMiddleClickSelect, toRightClickSelect];
+    + [toFullRowSelect, toMiddleClickSelect, toRightClickSelect, toMultiSelect];
   FMsgTree.TreeOptions.PaintOptions := FMsgTree.TreeOptions.PaintOptions + [toHideFocusRect];
   FMsgTree.TreeOptions.AutoOptions := FMsgTree.TreeOptions.AutoOptions + [toAutoExpand, toAutoScroll];
   FMsgTree.OnGetText := TreeGetText;
@@ -1028,10 +1030,14 @@ procedure TCnMsgChild.ToggleBookmark;
 var
   Slot: Integer;
 begin
+  if FMsgTree.ObtainFirstSelection <> nil then
+    FSelectedIndex := FMsgTree.ObtainFirstSelection^.AbsoluteIndex - 1;
+
   Slot := GetSlotFromBookmarkLine(FSelectedIndex);
   if Slot = CnInvalidSlot then
   begin
     Slot := GetAnEmptyBookmarkSlot;
+
     if Slot <> CnInvalidSlot then
       SetSlotToBookmark(Slot, FSelectedIndex)
     else
@@ -1225,6 +1231,30 @@ begin
     finally
       Visible := True;
     end;
+  end;
+end;
+
+function TCnMsgChild.GetSelectedContent: string;
+var
+  I, Index: Integer;
+  List: TList;
+  Node: PVirtualNode;
+begin
+  if FMsgTree.SelectedCount = 1 then
+    Result := mmoDetail.Lines.Text
+  else
+  begin
+    List := TList.Create;
+    FMsgTree.ObtainSelections(List);
+
+    for I := 0 to List.Count - 1 do
+    begin
+      Node := PVirtualNode(List[I]);
+      Index := Node^.AbsoluteIndex - 1;
+      Result := Result + DescriptionOfMsg(Index, FViewStore.Msgs[Index]) + #13#10#13#10;
+    end;
+
+    List.Free;
   end;
 end;
 

@@ -2473,6 +2473,8 @@ type
     procedure MoveTo(Source, Target: PVirtualNode; Mode: TVTNodeAttachMode; ChildrenOnly: Boolean); overload;
     procedure MoveTo(Node: PVirtualNode; Tree: TBaseVirtualTree; Mode: TVTNodeAttachMode;
       ChildrenOnly: Boolean); overload;
+    procedure ObtainSelections(List: TList);
+    function ObtainFirstSelection: PVirtualNode;
     procedure PaintTree(TargetCanvas: TCanvas; Window: TRect; Target: TPoint; PaintOptions: TVTInternalPaintOptions;
       PixelFormat: TPixelFormat = pfDevice);
     function PasteFromClipboard: Boolean; virtual;
@@ -30729,9 +30731,32 @@ begin
     Result := GetNext(Result);
 end;
 
+procedure TBaseVirtualTree.ObtainSelections(List: TList);
+var
+  I, C: Integer;
+begin
+  if List = nil then
+    Exit;
+
+  C := FSelectionCount;
+  if High(FSelection) + 1 < C then
+    C := High(FSelection) + 1;
+  for I := 0 to C - 1 do
+    if FSelection[I] <> nil then
+      List.Add(FSelection[I]);
+end;
+
+function TBaseVirtualTree.ObtainFirstSelection: PVirtualNode;
+begin
+  Result := nil;
+  if FSelectionCount >= 1 then
+    Result := FSelection[0];
+end;
+
 initialization
   // This watcher is used whenever a global structure could be modified by more than one thread.
   Watcher := TCriticalSection.Create;
+
 finalization
   if Initialized then
     FinalizeGlobalStructures;

@@ -826,7 +826,7 @@ end;
 procedure TCnMainViewer.actCopyExecute(Sender: TObject);
 begin
   if CurrentChild <> nil then
-    Clipboard.AsText := CurrentChild.mmoDetail.Text;
+    Clipboard.AsText := CurrentChild.SelectedContent;
 end;
 
 procedure TCnMainViewer.dlgFindFind(Sender: TObject);
