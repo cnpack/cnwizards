@@ -112,7 +112,7 @@ function CnWizDebuggerNotifierServices: ICnWizDebuggerNotifierServices;
 
 function EvaluateExpression(AThreadIntf: IOTAThread; const ExprStr: string;
   ResultStr: PChar; ResultStrSize: LongWord; out CanModify: Boolean;
-  AllowSideEffects: Boolean; FormatSpecifiers: PChar; out ResultAddr: LongWord;
+  AllowSideEffects: Boolean; FormatSpecifiers: PAnsiChar; out ResultAddr: LongWord;
   out ResultSize, ResultVal: LongWord; WaitMilliSec: Cardinal = 1000): Boolean;
 {* 以阻塞方式求目标线程内的表达式值，返回的结果如下：
    如果是对象，则其地址在 ResultAddr 中，([csInheritable]) 之类的放入 ResultStr
@@ -150,10 +150,10 @@ type
     constructor Create(AProcess: TCnOTAProcess);
     destructor Destroy; override;
 
-    procedure ThreadCreated(Thread: IOTAThread);
-    procedure ThreadDestroyed(Thread: IOTAThread);
-    procedure ProcessModuleCreated(ProcessModule: IOTAProcessModule);
-    procedure ProcessModuleDestroyed(ProcessModule: IOTAProcessModule);
+    procedure ThreadCreated({$IFDEF BDS} const {$ENDIF} Thread: IOTAThread);
+    procedure ThreadDestroyed({$IFDEF BDS} const {$ENDIF}Thread: IOTAThread);
+    procedure ProcessModuleCreated({$IFDEF BDS} const {$ENDIF}ProcessModule: IOTAProcessModule);
+    procedure ProcessModuleDestroyed({$IFDEF BDS} const {$ENDIF}ProcessModule: IOTAProcessModule);
   end;
 
   TCnOTAThreadNotifier = class(TNotifierObject, IOTAThreadNotifier)
@@ -316,7 +316,7 @@ end;
 // 以阻塞方式求线程内的表达式值
 function EvaluateExpression(AThreadIntf: IOTAThread; const ExprStr: string;
   ResultStr: PChar; ResultStrSize: LongWord; out CanModify: Boolean;
-  AllowSideEffects: Boolean; FormatSpecifiers: PChar; out ResultAddr: LongWord;
+  AllowSideEffects: Boolean; FormatSpecifiers: PAnsiChar; out ResultAddr: LongWord;
   out ResultSize, ResultVal: LongWord; WaitMilliSec: Cardinal): Boolean;
 const
   SEvaluateTimeout = 'Evaluate Time Out.';
@@ -808,19 +808,19 @@ begin
   inherited;
 end;
 
-procedure TCnOTAProcessNotifier.ProcessModuleCreated(
+procedure TCnOTAProcessNotifier.ProcessModuleCreated({$IFDEF BDS} const {$ENDIF}
   ProcessModule: IOTAProcessModule);
 begin
 
 end;
 
-procedure TCnOTAProcessNotifier.ProcessModuleDestroyed(
+procedure TCnOTAProcessNotifier.ProcessModuleDestroyed({$IFDEF BDS} const {$ENDIF}
   ProcessModule: IOTAProcessModule);
 begin
 
 end;
 
-procedure TCnOTAProcessNotifier.ThreadCreated(Thread: IOTAThread);
+procedure TCnOTAProcessNotifier.ThreadCreated({$IFDEF BDS} const {$ENDIF}Thread: IOTAThread);
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('TCnOTAProcessNotifier ThreadCreated. FProcess = %d', [Integer(FProcess)]);
@@ -829,7 +829,7 @@ begin
   FDebuggerNotifierServices.ThreadNotify(FProcessIntf, Thread, ctrCreated);
 end;
 
-procedure TCnOTAProcessNotifier.ThreadDestroyed(Thread: IOTAThread);
+procedure TCnOTAProcessNotifier.ThreadDestroyed({$IFDEF BDS} const {$ENDIF}Thread: IOTAThread);
 begin
   FDebuggerNotifierServices.ThreadNotify(FProcessIntf, Thread, ctrDestroyed);
   FProcess.RemoveThread(Thread);
