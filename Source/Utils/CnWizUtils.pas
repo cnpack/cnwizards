@@ -560,7 +560,8 @@ function CnOtaGetBaseModuleFileName(const FileName: string): string;
 function CnOtaIsPersistentBlocks: Boolean;
 {* 当前 PersistentBlocks 是否为 True}
 procedure CnOtaGetCurrentBreakpoints(Results: TList);
-{* 获取当前源文件内的断点，List 中返回 TCnBreakpointDescriptor 实例}
+{* 使用 CnWizDebuggerNotifierServices 获取当前源文件内的断点，
+   List 中返回 TCnBreakpointDescriptor 实例}
 
 //==============================================================================
 // 源代码操作相关函数
@@ -3531,10 +3532,17 @@ begin
     end;
 
     StartPos.Line := EditBlock.StartingRow;
-    StartPos.CharIndex := EditBlock.StartingColumn;
+    StartPos.CharIndex := EditBlock.StartingColumn - 1; // 1 开始变成 0 开始
     EditBlock.Delete;
 
-    CnOtaInsertTextIntoEditor(Text);
+    // EditBlock.Delete 后当前光标位置不确定，不能直接调用 CnOtaInsertTextIntoEditor
+    // 来在当前光标位置处插入文本，否则可能产生插入位置偏差
+    LinearPos := EditView.CharPosToPos(StartPos);
+{$IFDEF UNICODE}
+    CnOtaInsertTextIntoEditorAtPosW(Text, LinearPos);
+{$ELSE}
+    CnOtaInsertTextIntoEditorAtPos(Text, LinearPos);
+{$ENDIF}
   end;
 
   EditBlock := nil;
@@ -4382,7 +4390,7 @@ begin
   end;
 end;
 
-// 获取当前源文件内的断点，List 中返回 TCnBreakpointDescriptor 实例
+// 使用 CnWizDebuggerNotifierServices 获取当前源文件内的断点，List 中返回 TCnBreakpointDescriptor 实例
 procedure CnOtaGetCurrentBreakpoints(Results: TList);
 begin
   if Results <> nil then
