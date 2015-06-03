@@ -30,7 +30,9 @@ unit CnWizDebuggerNotifier;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2006.11.10
+* 修改记录：2013.06.03
+*               增加获取当前断点信息的方法
+*           2006.11.10
 *               增加 Evaluate 的相关求值方法
 *           2006.10.06
 *               创建单元
@@ -43,7 +45,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, ToolsAPI, AppEvnts,
-  Consts, CnWizUtils, CnClasses;
+  Contnrs, Consts, CnWizUtils, CnClasses;
 
 type
   // 进程通知的类型，自定义
@@ -83,6 +85,26 @@ type
     {* 增加一个断点的通知事件}
     procedure RemoveBreakpointNotifier(Notify: TCnBreakpointNotifier);
     {* 删除一个断点通知事件}
+
+    procedure RetrieveBreakpoints(Results: TList; const FileName: string = '');
+    {* 获取指定文件中的全部断点列表，如文件名未指定，则当前所有断点列表
+       注意 List 中容纳的是 TCnBreakpointDescriptor 实例，内部管理，外部不可释放}
+  end;
+
+  TCnBreakpointDescriptor = class(TPersistent)
+  {* 用于本 Service 中保存断点的基本信息}
+  private
+    FEnabled: Boolean;
+    FLineNumber: Integer;
+    FFileName: string;
+  protected
+    procedure AssignTo(Dest: TPersistent); override;
+  public
+    function ToString: string; {$IFDEF OBJECT_HAS_TOSTRING} override; {$ENDIF}
+
+    property FileName: string read FFileName write FFileName;
+    property Enabled: Boolean read FEnabled write FEnabled;
+    property LineNumber: Integer read FLineNumber write FLineNumber;
   end;
 
 function CnWizDebuggerNotifierServices: ICnWizDebuggerNotifierServices;
@@ -96,9 +118,6 @@ function EvaluateExpression(AThreadIntf: IOTAThread; const ExprStr: string;
    如果是对象，则其地址在 ResultAddr 中，([csInheritable]) 之类的放入 ResultStr
    如果是字符串值或数值，则内容已被转换成字符串存放在传入的 ResultStr 缓冲区中
    如果表达式出错，则 ResultAddr 会被赋值成 -1, ResultStr 赋值为 Inaccessable...}
-
-procedure CropQuota(Str: PChar);
-{* 去掉 PChar 字符串中两头的单引号引用}
 
 implementation
 
@@ -201,7 +220,8 @@ type
     ICnWizDebuggerNotifierServices)
   {* 实现 IDE 的 Debugger 事件通知服务接口的私有类}
   private
-    FProcesses: TList; // Contains TCnOTAProcess
+    FProcesses: TList;         // Contains TCnOTAProcess
+    FBreakpoints: TObjectList; // Contains Breakpoints
     FThreadNotifiers: TList;
     FProcessNotifiers: TList;
     FBreakpointNotifiers: TList;
@@ -210,6 +230,11 @@ type
     procedure AddNotifier(List: TList; Notifier: TMethod);
     procedure RemoveNotifier(List: TList; Notifier: TMethod);
     procedure ClearAndFreeList(var List: TList);
+
+    procedure AddBreakpointDescriptor(const FileName: string; LineNumber: Integer;
+      Enabled: Boolean);
+    function FindBreakpointDescriptor(const FileName: string; LineNumber: Integer): TCnBreakpointDescriptor;
+    procedure RemoveBreakpointDescriptor(const FileName: string; LineNumber: Integer);
   protected
     // 注册到 ICnWizNotifierService 的被通知器
     procedure ProcessCreated(Process: IOTAProcess);
@@ -230,6 +255,8 @@ type
     procedure RemoveProcessNotifier(Notify: TCnProcessNotifier);
     procedure AddBreakpointNotifier(Notify: TCnBreakpointNotifier);
     procedure RemoveBreakpointNotifier(Notify: TCnBreakpointNotifier);
+
+    procedure RetrieveBreakpoints(Results: TList; const FileName: string = '');
   end;
 
 var
@@ -238,6 +265,45 @@ var
   EvaluateResult: TCnEvaluateResult;
   CSInited: Boolean = False;
   CSEvaluate: TRTLCriticalSection;
+
+// 去掉 PChar 字符串中两头的单引号引用
+procedure CropQuota(Str: PChar);
+var
+  Len, I: Integer;
+  // Idx: PChar;
+begin
+  if Str <> nil then
+  begin
+    // PChar 的下标从 0 开始，不同于 string 的从 1 开始
+    Len := StrLen(Str);
+    if (Str[0] = '''') and (Str[Len - 1] = '''') then // 得两头都是引号才行
+    begin
+      Str[Len - 1] := #0; // 去掉末尾的单引号
+      Dec(Len);
+
+      if Str[0] = '''' then  // 移动，去掉头的单引号
+      begin
+        Dec(Len);
+        for I := 0 to Len - 1 do
+          Str[I] := Str[I + 1];
+        Str[Len] := #0;
+      end;
+    end;
+
+{   Idx := StrPos(Str, '''''');
+    while Idx <> nil do
+    begin
+      Len := StrLen(Idx);
+      for I := 0 to Len - 1 do
+        Idx[I] := Idx[I + 1];
+      Idx[Len] := #0;
+
+      Idx := StrPos(Str, '''''');
+
+    end; }
+    // 无需找俩连续的单引号再移动以挤掉一个，因为 IDE 不会将单个引号换成两个
+  end;
+end;
 
 // 获取 IDE Debugger 通知服务接口
 function CnWizDebuggerNotifierServices: ICnWizDebuggerNotifierServices;
@@ -337,6 +403,8 @@ begin
   FThreadNotifiers := TList.Create;
   FBreakpointNotifiers := TList.Create;
 
+  FBreakpoints := TObjectList.Create(True);
+
   CnWizNotifierServices.AddProcessCreatedNotifier(ProcessCreated);
   CnWizNotifierServices.AddProcessDestroyedNotifier(ProcessDestroyed);
   CnWizNotifierServices.AddBreakpointAddedNotifier(BreakpointAdded);
@@ -352,6 +420,7 @@ begin
       TCnOTAProcess(FProcesses[I]).Free;
 
   FProcesses.Free;
+  FBreakpoints.Free;
   ClearAndFreeList(FThreadNotifiers);
   ClearAndFreeList(FProcessNotifiers);
   ClearAndFreeList(FBreakpointNotifiers);
@@ -435,6 +504,8 @@ begin
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('TCnWizDebuggerNotifierServices BreakpointNotified, Reason Added.');
 {$ENDIF DEBUG}
+    AddBreakpointDescriptor(Breakpoint.FileName, Breakpoint.LineNumber, Breakpoint.Enabled);
+
     for I := FBreakpointNotifiers.Count - 1 downto 0 do
     try
       with PCnWizNotifierRecord(FBreakpointNotifiers[I])^ do
@@ -455,6 +526,8 @@ begin
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('TCnWizDebuggerNotifierServices BreakpointNotified, Reason Deleted.');
 {$ENDIF DEBUG}
+    RemoveBreakpointDescriptor(Breakpoint.FileName, Breakpoint.LineNumber);
+
     for I := FBreakpointNotifiers.Count - 1 downto 0 do
     try
       with PCnWizNotifierRecord(FBreakpointNotifiers[I])^ do
@@ -574,6 +647,75 @@ procedure TCnWizDebuggerNotifierServices.RemoveBreakpointNotifier(
   Notify: TCnBreakpointNotifier);
 begin
   RemoveNotifier(FBreakpointNotifiers, TMethod(Notify));
+end;
+
+function TCnWizDebuggerNotifierServices.FindBreakpointDescriptor(
+  const FileName: string; LineNumber: Integer): TCnBreakpointDescriptor;
+var
+  I: Integer;
+  B: TCnBreakpointDescriptor;
+begin
+  Result := nil;
+  for I := 0 to FBreakpoints.Count - 1 do
+  begin
+    B := TCnBreakpointDescriptor(FBreakpoints[I]);
+    if (B <> nil) and (B.FileName = FileName) and (B.LineNumber = LineNumber) then
+    begin
+      Result := B;
+      Exit;
+    end;
+  end;
+end;
+
+procedure TCnWizDebuggerNotifierServices.RemoveBreakpointDescriptor(
+  const FileName: string; LineNumber: Integer);
+var
+  I: Integer;
+  B: TCnBreakpointDescriptor;
+begin
+  for I := FBreakpoints.Count - 1 downto 0 do
+  begin
+    B := TCnBreakpointDescriptor(FBreakpoints[I]);
+    if (B <> nil) and (B.FileName = FileName) and (B.LineNumber = LineNumber) then
+    begin
+      FBreakpoints.Delete(I);
+      Exit;
+    end;
+  end;
+end;
+
+procedure TCnWizDebuggerNotifierServices.AddBreakpointDescriptor(
+  const FileName: string; LineNumber: Integer; Enabled: Boolean);
+var
+  B: TCnBreakpointDescriptor;
+begin
+  B := FindBreakpointDescriptor(FileName, LineNumber);
+  if B <> nil then
+    B.Enabled := Enabled
+  else
+  begin
+    B := TCnBreakpointDescriptor.Create;
+    B.Enabled := Enabled;
+    B.FileName := FileName;
+    B.LineNumber := LineNumber;
+    FBreakpoints.Add(B);
+  end;
+end;
+
+procedure TCnWizDebuggerNotifierServices.RetrieveBreakpoints(
+  Results: TList; const FileName: string);
+var
+  I: Integer;
+begin
+  if Results = nil then
+    Exit;
+
+  Results.Clear;
+  for I := 0 to FBreakpoints.Count - 1 do
+  begin
+    if (FileName = '') or (TCnBreakpointDescriptor(FBreakpoints[I]).FileName = FileName) then
+      Results.Add(FBreakpoints[I]);
+  end;
 end;
 
 { TCnOTAProcess }
@@ -781,42 +923,21 @@ begin
   FDebuggerNotifierServices.ThreadNotify(FProcessIntf, FThreadIntf, TCnThreadNotifyReason(Ord(Reason)));
 end;
 
-procedure CropQuota(Str: PChar);
-var
-  Len, I: Integer;
-  // Idx: PChar;
+{ TCnBreakpointDescriptor }
+
+procedure TCnBreakpointDescriptor.AssignTo(Dest: TPersistent);
 begin
-  if Str <> nil then
+  if Dest is TCnBreakpointDescriptor then
   begin
-    // PChar 的下标从 0 开始，不同于 string 的从 1 开始
-    Len := StrLen(Str);
-    if (Str[0] = '''') and (Str[Len - 1] = '''') then // 得两头都是引号才行
-    begin
-      Str[Len - 1] := #0; // 去掉末尾的单引号
-      Dec(Len);
-      
-      if Str[0] = '''' then  // 移动，去掉头的单引号
-      begin
-        Dec(Len);
-        for I := 0 to Len - 1 do
-          Str[I] := Str[I + 1];
-        Str[Len] := #0;
-      end;
-    end;
-
-{   Idx := StrPos(Str, '''''');
-    while Idx <> nil do
-    begin
-      Len := StrLen(Idx);
-      for I := 0 to Len - 1 do
-        Idx[I] := Idx[I + 1];
-      Idx[Len] := #0;
-
-      Idx := StrPos(Str, '''''');
-      
-    end; }
-    // 无需找俩连续的单引号再移动以挤掉一个，因为 IDE 不会将单个引号换成两个
+    TCnBreakpointDescriptor(Dest).Enabled := FEnabled;
+    TCnBreakpointDescriptor(Dest).FileName := FFileName;
+    TCnBreakpointDescriptor(Dest).LineNumber := FLineNumber;
   end;
+end;
+
+function TCnBreakpointDescriptor.ToString: string;
+begin
+  Result := Format('Enabled %d. Line: %d. File: %s', [Integer(FEnabled), FLineNumber, FFileName]);
 end;
 
 initialization

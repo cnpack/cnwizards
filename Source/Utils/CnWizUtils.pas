@@ -559,6 +559,8 @@ function CnOtaGetBaseModuleFileName(const FileName: string): string;
 {* 取模块的单元文件名}
 function CnOtaIsPersistentBlocks: Boolean;
 {* 当前 PersistentBlocks 是否为 True}
+procedure CnOtaGetCurrentBreakpoints(Results: TList);
+{* 获取当前源文件内的断点，List 中返回 TCnBreakpointDescriptor 实例}
 
 //==============================================================================
 // 源代码操作相关函数
@@ -871,7 +873,7 @@ uses
 {$ENDIF}
   Math, CnWizOptions, CnGraphUtils
 {$IFNDEF CNWIZARDS_MINIMUM}
-  , CnWizMultiLang, CnLangMgr, CnWizIdeUtils,
+  , CnWizMultiLang, CnLangMgr, CnWizIdeUtils, CnWizDebuggerNotifier,
   CnPasCodeParser, CnCppCodeParser, CnLangStorage, CnHashLangStorage, CnWizHelp
 {$ENDIF}
   ;
@@ -4378,6 +4380,13 @@ begin
   except
     ;
   end;
+end;
+
+// 获取当前源文件内的断点，List 中返回 TCnBreakpointDescriptor 实例
+procedure CnOtaGetCurrentBreakpoints(Results: TList);
+begin
+  if Results <> nil then
+    CnWizDebuggerNotifierServices.RetrieveBreakpoints(Results, CnOtaGetCurrentSourceFileName);
 end;
 
 //==============================================================================

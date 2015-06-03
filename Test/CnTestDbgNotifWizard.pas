@@ -91,7 +91,7 @@ var
 procedure TCnTestDbgNotifMenuWizard.BreakPointNotify(Breakpoint: IOTABreakpoint;
   Reason: TCnBreakpointNotifyReason);
 begin
-  CnDebugger.TraceFmt('Breakpoint! Reason %d. Bkpt %x', [Ord(Reason), Integer(Breakpoint)])
+  CnDebugger.TraceFmt('Breakpoint! Reason %d. Bkpt %x', [Ord(Reason), Integer(Breakpoint)]);
 end;
 
 procedure TCnTestDbgNotifMenuWizard.Config;
@@ -164,7 +164,7 @@ end;
 procedure TCnTestDbgNotifMenuWizard.ProcessNotify(Process: IOTAProcess;
   Reason: TCnProcessNotifyReason);
 begin
-  CnDebugger.TraceFmt('Process! Reason %d. Process %x', [Ord(Reason), Integer(Process)])
+  CnDebugger.TraceFmt('Process! Reason %d. Process %x', [Ord(Reason), Integer(Process)]);
 end;
 
 procedure TCnTestDbgNotifMenuWizard.SaveSettings(Ini: TCustomIniFile);
