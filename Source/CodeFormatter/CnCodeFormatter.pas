@@ -1493,7 +1493,7 @@ begin
       tokKeywordBegin:
         begin
           if (CnPascalCodeForRule.BeginStyle = bsNextLine) or FNextBeginShouldIndent
-            or not (FElementType in [pfetAfterDo, pfetAfterElse, pfetAfterThen]) then
+            or not (FLastToken in [tokKeywordDo, tokKeywordElse, tokKeywordThen]) then
             Match(tokKeywordBegin, PreSpaceCount)
           else
             Match(tokKeywordBegin); // begin 前是否换行由外面控制，begin 前缩进这儿控制
@@ -1556,15 +1556,11 @@ begin
   end;
 
   Match(tokKeywordDo);
-  SpecifyElementType(pfetAfterDo);
   CheckWriteBeginln; // 检查 do begin 是否同行
-  try
-    if Scaner.Token = tokSemicolon then
-      FStructStmtEmptyEnd := True;
-    FormatStatement(Tab(PreSpaceCount));
-  finally
-    RestoreElementType;
-  end;
+
+  if Scaner.Token = tokSemicolon then
+    FStructStmtEmptyEnd := True;
+  FormatStatement(Tab(PreSpaceCount));
 end;
 
 { IfStmt -> IF Expression THEN Statement [ELSE Statement] }
@@ -1578,16 +1574,11 @@ begin
   { TODO: Apply more if stmt rule }
   FormatExpression;
   Match(tokKeywordThen);
-
-  SpecifyElementType(pfetAfterThen);
   CheckWriteBeginln; // 检查 if then begin 是否同行
-  try
-    if Scaner.Token = tokSemicolon then
-      FStructStmtEmptyEnd := True;
-    FormatStatement(Tab(PreSpaceCount));
-  finally
-    RestoreElementType;
-  end;
+
+  if Scaner.Token = tokSemicolon then
+    FStructStmtEmptyEnd := True;
+  FormatStatement(Tab(PreSpaceCount));
 
   if Scaner.Token = tokKeywordElse then
   begin
@@ -1600,15 +1591,10 @@ begin
     end
     else
     begin
-      SpecifyElementType(pfetAfterElse);
       CheckWriteBeginln; // 检查 else begin 是否同行
-      try
-        if Scaner.Token = tokSemicolon then
-          FStructStmtEmptyEnd := True;
-        FormatStatement(Tab(PreSpaceCount));
-      finally
-        RestoreElementType;
-      end;
+      if Scaner.Token = tokSemicolon then
+        FStructStmtEmptyEnd := True;
+      FormatStatement(Tab(PreSpaceCount));
     end;
   end;
 end;
@@ -1981,15 +1967,10 @@ begin
     Match(tokSymbol);
   end;
   Match(tokKeywordDo);
-  SpecifyElementType(pfetAfterDo);
   CheckWriteBeginln; // 检查 do begin 是否同行;
 
-  try
-    OnlySemicolon := Scaner.Token = tokSemicolon;
-    FormatStatement(Tab(PreSpaceCount));
-  finally
-    RestoreElementType;
-  end;
+  OnlySemicolon := Scaner.Token = tokSemicolon;
+  FormatStatement(Tab(PreSpaceCount));
   
   if Scaner.Token = tokSemicolon then
   begin
@@ -2016,15 +1997,11 @@ begin
   Match(tokKeywordWhile, PreSpaceCount);
   FormatExpression;
   Match(tokKeywordDo);
-  SpecifyElementType(pfetAfterDo);
   CheckWriteBeginln; // 检查 do begin 是否同行
-  try
-    if Scaner.Token = tokSemicolon then
-      FStructStmtEmptyEnd := True;
-    FormatStatement(Tab(PreSpaceCount));
-  finally
-    RestoreElementType;
-  end;
+
+  if Scaner.Token = tokSemicolon then
+    FStructStmtEmptyEnd := True;
+  FormatStatement(Tab(PreSpaceCount));
 end;
 
 { WithStmt -> WITH IdentList DO Statement }
@@ -2041,15 +2018,11 @@ begin
   end;
 
   Match(tokKeywordDo);
-  SpecifyElementType(pfetAfterDo);
   CheckWriteBeginln; // 检查 do begin 是否同行
-  try
-    if Scaner.Token = tokSemicolon then
-      FStructStmtEmptyEnd := True;
-    FormatStatement(Tab(PreSpaceCount));
-  finally
-    RestoreElementType;
-  end;
+
+  if Scaner.Token = tokSemicolon then
+    FStructStmtEmptyEnd := True;
+  FormatStatement(Tab(PreSpaceCount));
 end;
 
 { RaiseStmt -> RAISE [ Expression | Expression AT Expression ] }
@@ -3485,7 +3458,7 @@ begin
           FormatTypeID;
         end;
 
-        tokComplexDEFAULT:
+        tokComplexDefault:
         begin
           Match(Scaner.Token);
           ProcessBlank;
@@ -3499,7 +3472,7 @@ begin
           FormatExpression;
         end;
 
-        tokComplexNODEFAULT, tokComplexREADONLY, tokComplexWRITEONLY:
+        tokComplexNodefault, tokComplexReadonly, tokComplexWriteonly:
           Match(Scaner.Token);
       end;
     end;

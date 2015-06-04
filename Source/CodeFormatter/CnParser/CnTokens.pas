@@ -233,8 +233,7 @@ type
   // 用来指明当前位置处于哪些基本位置（可嵌套但互斥），
   // 如属性的修饰符区域、函数调用修饰符区域等
   TCnPascalFormattingElementType = (pfetUnknown, pfetAsm, pfetPropertySpecifier,
-    pfetDirective, pfetPropertyIndex, pfetAfterThen, pfetAfterDo, pfetAfterElse,
-    pfetSimpleStatment);
+    pfetDirective, pfetPropertyIndex, pfetSimpleStatment);
 
   TCnPascalFormattingElementTypeSet = set of TCnPascalFormattingElementType;
 
@@ -243,8 +242,8 @@ const
 
   DirectiveTokens = [tokDirective_BEGIN .. tokDirective_END, tokKeywordInline,
     tokKeywordLibrary, tokComplexDefault, tokComplexIndex, tokComplexName,
-    tokComplexNoDefault, tokComplexRead, tokComplexReadOnly, tokComplexStored,
-    tokComplexWrite, tokComplexWriteOnly, tokKeywordStatic, tokKeywordFinal,
+    tokComplexNoDefault, tokComplexRead, tokComplexReadonly, tokComplexStored,
+    tokComplexWrite, tokComplexWriteonly, tokKeywordStatic, tokKeywordFinal,
     tokKeywordUnsafe, tokComplexImplements];
     
   ComplexTokens = [tokComplex_BEGIN .. tokComplex_END, tokDirectiveMessage,
