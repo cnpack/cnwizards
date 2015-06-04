@@ -245,7 +245,7 @@ const
     tokKeywordLibrary, tokComplexDefault, tokComplexIndex, tokComplexName,
     tokComplexNoDefault, tokComplexRead, tokComplexReadOnly, tokComplexStored,
     tokComplexWrite, tokComplexWriteOnly, tokKeywordStatic, tokKeywordFinal,
-    tokKeywordUnsafe];
+    tokKeywordUnsafe, tokComplexImplements];
     
   ComplexTokens = [tokComplex_BEGIN .. tokComplex_END, tokDirectiveMessage,
     tokDirectiveRegister, tokDirectiveForward];
