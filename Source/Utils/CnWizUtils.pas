@@ -3495,7 +3495,7 @@ function CnOtaReplaceCurrentSelection(const Text: string; NoSelectionInsert:
 var
   EditView: IOTAEditView;
   EditBlock: IOTAEditBlock;
-  EditPos: TOTAEditPos;
+  EditPos, InsPos: TOTAEditPos;
   StartPos, EndPos: TOTACharPos;
   LinearPos: Integer;
   InsertLen: Integer;
@@ -3531,8 +3531,10 @@ begin
 {$ENDIF}
     end;
 
-    StartPos.Line := EditBlock.StartingRow;
-    StartPos.CharIndex := EditBlock.StartingColumn - 1; // 1 开始变成 0 开始
+    InsPos.Line := EditBlock.StartingRow;
+    InsPos.Col := EditBlock.StartingColumn;
+
+    EditView.ConvertPos(True, InsPos, StartPos); // 1 开始变成了 0 开始
     EditBlock.Delete;
 
     // EditBlock.Delete 后当前光标位置不确定，不能直接调用 CnOtaInsertTextIntoEditor
