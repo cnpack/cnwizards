@@ -151,7 +151,7 @@ type
 
     procedure SetInputLineMarks(Marks: PDWORD);
     {* 设置源文件与结果的行映射关系中的源行，供保留书签、断点等使用。
-       以一个 DWORD 数组的方式传递，0 结尾}
+       以一个 DWORD 数组的方式传递，0 结尾，如果传 nil 表示清除结果}
 
     function FormatOnePascalUnit(Input: PAnsiChar; Len: DWORD): PAnsiChar;
     {* 格式化一整个 Pascal 文件内容，代码以 AnsiString 格式传入。
@@ -195,7 +195,7 @@ type
 
     function RetrieveOutputLinkMarks: PDWORD;
     {* 获取源文件与结果的行映射关系中的目标行，供格式化完毕后保留书签、断点等使用。
-       以一个 DWORD 数组的方式传递，0 结尾}
+       以一个 DWORD 数组指针的方式传递，0 结尾，调用者不得释放此数组内存}
 
     function RetrievePascalLastError(out SourceLine: Integer; out SourceCol: Integer;
       out SourcePos: Integer; out CurrentToken: PAnsiChar): Integer;
