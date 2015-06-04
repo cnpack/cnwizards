@@ -606,7 +606,8 @@ function TCnAbstractCodeFormatter.Tab(PreSpaceCount: Byte;
 begin
   if CareBeginBlock then
   begin
-    if Scaner.Token <> tokKeywordBegin then // 处理了连续俩 begin 而需要缩进的情况
+    // 处理了连续俩 begin 而需要缩进的情况，以及with do try 这种的 try 无需再次缩进
+    if not (Scaner.Token in [tokKeywordBegin, tokKeywordTry]) then
       Result := PreSpaceCount + CnPascalCodeForRule.TabSpaceCount
     else
       Result := PreSpaceCount;

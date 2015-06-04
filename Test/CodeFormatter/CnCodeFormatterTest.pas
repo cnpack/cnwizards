@@ -157,6 +157,7 @@ begin
     CnPascalCodeForRule.CodeWrapMode := cwmAdvanced
   else
     CnPascalCodeForRule.CodeWrapMode := cwmNone;
+  // CnPascalCodeForRule.BeginStyle := bsSameLine;
 
   if SrcMemo.SelLength <= 0 then
   begin
