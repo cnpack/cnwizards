@@ -3297,8 +3297,8 @@ begin
 
   { !! Fixed. e.g. "const proc: procedure = nil;" }
   if Scaner.Token in [tokSymbol] + ComplexTokens + DirectiveTokens
-    + KeywordTokens - [tokKeywordBegin] then // 函数名允许出现关键字，但匿名函数无参而碰见 begin 除外
-  begin
+    + KeywordTokens - [tokKeywordBegin, tokKeywordVar, tokKeywordConst, tokKeywordType] then
+  begin // 函数名允许出现关键字，但匿名函数无参而碰见 begin/var/const/type 等除外
     // 处理 of
     if (Scaner.Token <> tokKeywordOf) or (Scaner.ForwardToken = tokLB) then
       FormatMethodName;
