@@ -733,7 +733,7 @@ begin
       // 强行分离括号与关键字
   end;
 
-  NeedPadding := (FElementType = pfetSimpleStatment);
+  NeedPadding := (FElementType in [pfetSimpleStatment, pfetEnumType]);
   //标点符号的设置
   case Token of
     tokComma:     CodeGen.Write(Scaner.TokenString, 0, 1, NeedPadding);   // 1 也会导致行尾注释后退，现多出的空格已由 Generator 删除
@@ -2642,11 +2642,16 @@ end;
 { EnumeratedList -> EmumeratedIdent/','... }
 procedure TCnBasePascalFormatter.FormatEnumeratedList(PreSpaceCount: Byte);
 begin
-  FormatEmumeratedIdent(PreSpaceCount);
-  while Scaner.Token = tokComma do
-  begin
-    Match(tokComma);
-    FormatEmumeratedIdent;
+  SpecifyElementType(pfetEnumType);
+  try
+    FormatEmumeratedIdent(PreSpaceCount);
+    while Scaner.Token = tokComma do
+    begin
+      Match(tokComma);
+      FormatEmumeratedIdent;
+    end;
+  finally
+    RestoreElementType;
   end;
 end;
 
