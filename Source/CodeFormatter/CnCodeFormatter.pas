@@ -2634,24 +2634,24 @@ end;
 { EnumeratedType -> '(' EnumeratedList ')' }
 procedure TCnBasePascalFormatter.FormatEnumeratedType(PreSpaceCount: Byte);
 begin
-  Match(tokLB, PreSpaceCount);
-  FormatEnumeratedList;
-  Match(tokRB);
+  SpecifyElementType(pfetEnumType);
+  try
+    Match(tokLB, PreSpaceCount);
+    FormatEnumeratedList;
+    Match(tokRB);
+  finally
+    RestoreElementType;
+  end;
 end;
 
 { EnumeratedList -> EmumeratedIdent/','... }
 procedure TCnBasePascalFormatter.FormatEnumeratedList(PreSpaceCount: Byte);
 begin
-  SpecifyElementType(pfetEnumType);
-  try
-    FormatEmumeratedIdent(PreSpaceCount);
-    while Scaner.Token = tokComma do
-    begin
-      Match(tokComma);
-      FormatEmumeratedIdent;
-    end;
-  finally
-    RestoreElementType;
+  FormatEmumeratedIdent(PreSpaceCount);
+  while Scaner.Token = tokComma do
+  begin
+    Match(tokComma);
+    FormatEmumeratedIdent;
   end;
 end;
 

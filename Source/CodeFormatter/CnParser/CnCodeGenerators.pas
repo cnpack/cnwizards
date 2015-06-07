@@ -190,18 +190,20 @@ begin
     FLastNoAutoWrapLine := MaxLine;
     Exit;
   end
-  else if MaxLine = MaxAuto then
+  else if MaxLine = MaxAuto then // 如果最后一行是自动换行的行，则需要往回找
   begin
-  for I := FAutoWrapLines.Count - 1 downto 0 do
-  begin
-    // 找到不在 FAutoWrapLines 里头最大的一行
-    if MaxAuto > Integer(FAutoWrapLines[I]) then
+    for I := FAutoWrapLines.Count - 1 downto 0 do
     begin
-      FLastNoAutoWrapLine := MaxAuto;
-      Exit;
+      // 找到不在 FAutoWrapLines 里头最大的一行
+      if MaxAuto > Integer(FAutoWrapLines[I]) then
+      begin
+        FLastNoAutoWrapLine := MaxAuto;
+        Exit;
+      end;
+      Dec(MaxAuto);
     end;
-    Dec(MaxAuto);
-  end;
+    // 如果到此处，说明 FAutoWrapLines 中只有一行且等于当前行且正好是自动换行的行
+    FLastNoAutoWrapLine := MaxAuto;
   end
   else
     FLastNoAutoWrapLine := -1; // Should not here
@@ -527,9 +529,27 @@ begin
 
   IsCommentCRLFEnd := False;
   ALen := Length(Text);
-  if ALen >= 4 then
-    IsCommentCRLFEnd := (Text[1] = '/') and (Text[2] = '/') and
-      (Text[ALen - 1] = #13) and (Text[ALen] = #10);
+  if ALen >= 4 then   // 末尾是回车换行，并且是//或{}注释，暂未处理(**)
+  begin
+    if (Text[ALen - 1] = #13) and (Text[ALen] = #10) then
+    begin
+      if (Text[1] = '/') and (Text[2] = '/') then
+        IsCommentCRLFEnd := True
+      else
+      begin
+        Tmp := TrimRight(Text);
+        ALen := Length(Tmp);
+        if (ALen >= 2) and (Tmp[1] = '{') and (Tmp[ALen] = '}') then
+          IsCommentCRLFEnd := True
+        else if ALen >= 4 then
+        begin
+          if (Tmp[1] = '(') and (Tmp[2] = '*') and
+            (Tmp[ALen - 1] = '*') and (Tmp[ALen] = ')') then
+            IsCommentCRLFEnd := True;
+        end;
+      end;
+    end
+  end;
 
   Str := Format('%s%s%s', [StringOfChar(' ', BeforeSpaceCount), Text,
     StringOfChar(' ', AfterSpaceCount)]);
@@ -596,6 +616,8 @@ begin
         Str := StringOfChar(' ', LastIndentSpace + CnPascalCodeForRule.TabSpaceCount)
           + TrimLeft(WrapStr) + Str; // 自动换行后左边原有的空格就不需要了
         // 找出上一次非自动缩进的缩进，而不是简单的上一行缩进值，避免多重缩进
+        // 然而上一次非自动缩进的缩进如果是由于上上一行的带换行的注释引入，
+        // 则很可能不符合自动换行的缩进规则，还是会引起本行不必要的多余缩进
       end;
       InternalWriteln;
       FAutoWrapLines.Add(Pointer(FCode.Count - 1)); // 自动换行的行号要记录
@@ -604,10 +626,15 @@ begin
 
   // 如果上一次输出的内容是//行尾注释包括回车结尾，
   // 并且本次输出如果头部空格太少，就需要简单加上上一行的空格缩进，无论是不是自动换行
+  // 然而会有上面自动换行时说到的副作用
   if NeedPadding and FPrevIsComentCRLFEnd then
   begin
     if HeadSpaceCount(Str) < LastIndentSpaceWithOutLineHeadCRLF then
+    begin
       Str := StringOfChar(' ', LastIndentSpaceWithOutLineHeadCRLF) + TrimLeft(Str);
+      // 记录本行被上一行注释调整过，不能算作 LastIndentSpace，算自动换行的行号
+      FAutoWrapLines.Add(Pointer(FCode.Count - 1));
+    end;
   end;
 
   FCode[FCode.Count - 1] :=
