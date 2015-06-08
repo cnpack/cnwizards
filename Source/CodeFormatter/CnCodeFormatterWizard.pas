@@ -48,7 +48,7 @@ uses
   CnWizManager, CnInputHelper, CnInputSymbolList, CnInputIdeSymbolList,
 {$ENDIF}
   CnStrings, CnPasCodeParser, CnWizUtils, CnFormatterIntf, CnCodeFormatRules,
-  CnWizDebuggerNotifier;
+  CnWizDebuggerNotifier, CnEditControlWrapper;
 
 type
   TCnCodeFormatterWizard = class(TCnSubMenuWizard)
@@ -74,9 +74,7 @@ type
     FWrapNewLineWidth: Integer;
 
     FUseIDESymbols: Boolean;
-{$IFDEF OTA_NEW_BREAKPOINT_NOBUG}
     FBreakpoints: TObjectList;
-{$ENDIF}
 
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
     FInputHelper: TCnInputHelper;
@@ -86,10 +84,8 @@ type
     procedure CheckObtainIDESymbols;
 {$ENDIF}
 
-{$IFDEF OTA_NEW_BREAKPOINT_NOBUG}
     procedure ObtainBreakpointsByFile(const FileName: string);
     procedure RestoreBreakpoints(LineMarks: PDWORD);
-{$ENDIF}
 
     function PutPascalFormatRules: Boolean;
     function CheckSelectionPosition(StartPos: TOTACharPos; EndPos: TOTACharPos;
@@ -357,9 +353,7 @@ end;
 constructor TCnCodeFormatterWizard.Create;
 begin
   inherited;
-{$IFDEF OTA_NEW_BREAKPOINT_NOBUG}
   FBreakpoints := TObjectList.Create(True);
-{$ENDIF}
   FLibHandle := LoadLibrary(PChar(MakePath(WizOptions.DllPath) + DLLName));
   if FLibHandle <> 0 then
     FGetProvider := TCnGetFormatterProvider(GetProcAddress(FLibHandle, 'GetCodeFormatterProvider'));
@@ -372,9 +366,7 @@ begin
   SetLength(FPreNamesArray, 0);
 {$ENDIF}
 
-{$IFDEF OTA_NEW_BREAKPOINT_NOBUG}
   FBreakpoints.Free;
-{$ENDIF}
   FreeLibrary(FLibHandle);
   inherited;
 end;
@@ -665,10 +657,8 @@ var
   StartPos, EndPos, StartPosIn, EndPosIn: Integer;
   StartRec, EndRec: TOTACharPos;
   ErrLine: string;
-{$IFDEF OTA_NEW_BREAKPOINT_NOBUG}
   BreakpointsLineMarks: array of DWORD;
   OutLineMarks: PDWORD;
-{$ENDIF}
 
   // 将解析器中返回的出错列转换成 IDE 里内部使用的列供定位，BDS 以上是 Utf8
   function ConvertToEditorCol(const Line: string; Col: Integer): Integer;
@@ -726,14 +716,10 @@ begin
     if not Assigned(View) then
       Exit;
 
-{$IFDEF OTA_NEW_BREAKPOINT_NOBUG}
     // 记录断点信息
     ObtainBreakpointsByFile(CnOtaGetCurrentSourceFileName);
     if FBreakpoints.Count = 0 then
       Formatter.SetInputLineMarks(nil);
-{$ELSE}
-    Formatter.SetInputLineMarks(nil);
-{$ENDIF}
 
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
     CheckObtainIDESymbols;
@@ -750,7 +736,6 @@ begin
       try
         Screen.Cursor := crHourGlass;
 
-{$IFDEF OTA_NEW_BREAKPOINT_NOBUG}
         // 传递断点的行号
         if FBreakpoints.Count > 0 then
         begin
@@ -762,7 +747,6 @@ begin
           Formatter.SetInputLineMarks(@(BreakpointsLineMarks[0]));
         end;
         SetLength(BreakpointsLineMarks, 0);
-{$ENDIF}
 
 {$IFDEF UNICODE}
         // Src/Res Utf16
@@ -805,11 +789,9 @@ begin
   {$ENDIF}
 {$ENDIF}
 
-{$IFDEF OTA_NEW_BREAKPOINT_NOBUG}
           // 恢复断点信息
           OutLineMarks := Formatter.RetrieveOutputLinkMarks;
           RestoreBreakpoints(OutLineMarks);
-{$ENDIF}
         end
         else
         begin
@@ -861,7 +843,6 @@ begin
               Exit;
             end;
 
-{$IFDEF OTA_NEW_BREAKPOINT_NOBUG}
             // 传递选择区间断点的行号
             if FBreakpoints.Count > 0 then
             begin
@@ -883,7 +864,6 @@ begin
                 Formatter.SetInputLineMarks(nil);
             end;
             SetLength(BreakpointsLineMarks, 0);
-{$ENDIF}
 
             StartPos := CnOtaEditPosToLinePos(OTAEditPos(StartRec.CharIndex, StartRec.Line), View);
             EndPos := CnOtaEditPosToLinePos(OTAEditPos(EndRec.CharIndex, EndRec.Line), View);
@@ -930,11 +910,9 @@ begin
               CnOtaReplaceCurrentSelection(Res, True, True, True);
               {$ENDIF}
 
-{$IFDEF OTA_NEW_BREAKPOINT_NOBUG}
               // 恢复断点信息
               OutLineMarks := Formatter.RetrieveOutputLinkMarks;
               RestoreBreakpoints(OutLineMarks);
-{$ENDIF}
             end
             else
             begin
@@ -1012,8 +990,6 @@ begin
   ShowFormHelp;
 end;
 
-{$IFDEF OTA_NEW_BREAKPOINT_NOBUG}
-
 procedure TCnCodeFormatterWizard.ObtainBreakpointsByFile(
   const FileName: string);
 var
@@ -1070,29 +1046,41 @@ var
   DS: IOTADebuggerServices;
   BP: IOTABreakpoint;
 begin
-  if LineMarks <> nil then
-  begin
-    I := 0;
-    if BorlandIDEServices.QueryInterface(IOTADebuggerServices, DS) = S_OK then
-    begin
-      while LineMarks^ <> 0 do
-      begin
-{$IFDEF DEBUG}
-        CnDebugger.LogInteger(LineMarks^, 'Will Create Breakpoint at');
-{$ENDIF}
-        // 当前文件新增 OutLineMarks^ 行的断点，并设置 Enabled
-        BP := DS.NewSourceBreakpoint(CnOtaGetCurrentSourceFileName, LineMarks^, nil);
-        if (BP <> nil) and not TCnBreakpointDescriptor(FBreakpoints[I]).Enabled then
-          BP.Enabled := False;
+  if LineMarks = nil then
+    Exit;
 
-        Inc(I);
-        Inc(LineMarks);
-      end;
+{$IFDEF OTA_NEW_BREAKPOINT_NOBUG}
+  // 如果 OTA 接口没 Bug 而支持新增断点的话
+  I := 0;
+  if BorlandIDEServices.QueryInterface(IOTADebuggerServices, DS) = S_OK then
+  begin
+    while LineMarks^ <> 0 do
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogInteger(LineMarks^, 'Will Create Breakpoint using OTA at');
+{$ENDIF}
+      // 当前文件新增 OutLineMarks^ 行的断点，并设置 Enabled
+      BP := DS.NewSourceBreakpoint(CnOtaGetCurrentSourceFileName, LineMarks^, nil);
+      if (BP <> nil) and not TCnBreakpointDescriptor(FBreakpoints[I]).Enabled then
+        BP.Enabled := False;
+
+      Inc(I);
+      Inc(LineMarks);
     end;
   end;
-end;
-
+{$ELSE}
+  // OTA 接口有 Bug 无法新增断点，只能用滚屏并模拟点击的方式新增
+  while LineMarks^ <> 0 do
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogInteger(LineMarks^, 'Will Create Breakpoint using Click at');
 {$ENDIF}
+    // 当前文件新增 OutLineMarks^ 行的断点，但无法处理 Enabled
+    EditControlWrapper.ClickBreakpointAtActualLine(LineMarks^);
+    Inc(LineMarks);
+  end;
+{$ENDIF}
+end;
 
 initialization
 {$IFNDEF BCB5}  // 目前只支持 Delphi。

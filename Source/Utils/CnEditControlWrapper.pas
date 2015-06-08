@@ -142,6 +142,7 @@ type
     property EditWindow: TCustomForm read FEditWindow;
     property EditView: IOTAEditView read FEditView;
     property GutterWidth: Integer read GetGutterWidth;
+
     // 当前显示在最前面的编辑控件
     property TopControl: TControl read FTopControl;
     // 视图中有效行数
@@ -300,6 +301,9 @@ type
 
     procedure RepaintEditControls;
     {* 挨个强行让编辑器控件们重画}
+
+    function ClickBreakpointAtActualLine(ActualLineNum: Integer; EditControl: TControl = nil): Boolean;
+    {* 点击编辑器控件左侧指定行的断点栏以增加/删除断点}
 
     procedure AddKeyDownNotifier(Notifier: TKeyMessageNotifier);
     {* 增加编辑器按键通知 }
@@ -1620,6 +1624,69 @@ begin
         ;
       end;
     end;
+  end;
+end;
+
+function TCnEditControlWrapper.ClickBreakpointAtActualLine(ActualLineNum: Integer;
+  EditControl: TControl): Boolean;
+var
+  Obj: TEditorObject;
+  I, Delta: Integer;
+  X, Y: Word;
+begin
+  Result := False;
+  if ActualLineNum <=0 then Exit;
+
+  if EditControl = nil then
+    EditControl := CnOtaGetCurrentEditControl;
+
+  if EditControl = nil then
+    Exit;
+
+  I := IndexOfEditor(EditControl);
+  if I < 0 then
+    Exit;
+
+  Obj := Editors[I];
+  if Obj = nil then
+    Exit;
+
+  if Obj.ViewLineCount = 0 then
+    Exit;
+
+  X := 5;
+  if (ActualLineNum > Obj.ViewBottomLine - Obj.ViewLineCount) and (ActualLineNum <= Obj.ViewBottomLine) then
+  begin
+    // 在可见区域
+    for I := 0 to Obj.ViewLineCount - 1 do
+    begin
+      if Obj.ViewLineNumber[I] = ActualLineNum then
+      begin
+        Y := I * GetCharHeight + (GetCharHeight div 2);
+
+        // EditControl 上做点击
+        EditControl.Perform(WM_LBUTTONDOWN, 0, MakeLParam(X, Y));
+        EditControl.Perform(WM_LBUTTONUP, 0, MakeLParam(X, Y));
+
+        Result := True;
+        Exit;
+      end;
+    end;
+  end
+  else // 在不可见区域，需要滚动到可见区域
+  begin
+    // 滚过去
+    Delta := ActualLineNum - Obj.ViewLineNumber[0];
+    Obj.EditView.Scroll(Delta, 0);
+    Y := GetCharHeight div 2;
+
+    // EditControl 上做点击
+    EditControl.Perform(WM_LBUTTONDOWN, 0, MakeLParam(X, Y));
+    EditControl.Perform(WM_LBUTTONUP, 0, MakeLParam(X, Y));
+
+    // 滚回去
+    Obj.EditView.Scroll(-Delta, 0);
+    Result := True;
   end;
 end;
 

@@ -41,7 +41,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ToolsAPI, IniFiles, CnWizClasses, CnWizUtils, CnWizConsts,
+  ToolsAPI, IniFiles, CnWizClasses, CnWizUtils, CnWizConsts, CnEditControlWrapper,
   CnWizDebuggerNotifier;
 
 type
@@ -102,6 +102,12 @@ begin
         S := S + TCnBreakpointDescriptor(List[I]).ToString + #13#10;
       ShowMessage(S);
     end;
+
+    ShowMessage('To Add a Breakpoint at Line 15');
+    if EditControlWrapper.ClickBreakpointAtActualLine(15) then
+      ShowMessage('Breakpoint Clicked.')
+    else
+      ShowMessage('Breakpoint Click Fail.');
   finally
     List.Free;
   end;
