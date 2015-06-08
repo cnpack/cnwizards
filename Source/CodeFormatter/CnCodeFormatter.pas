@@ -83,6 +83,7 @@ type
     // 区分当前位置并恢复，必须配对使用
 
     procedure ResetElementType;
+    function CalcNeedPadding: Boolean;
   protected
     FIsTypeID: Boolean;
     {* 错误处理函数 }
@@ -733,7 +734,7 @@ begin
       // 强行分离括号与关键字
   end;
 
-  NeedPadding := (FElementType in [pfetSimpleStatment, pfetEnumType]);
+  NeedPadding := CalcNeedPadding;
   //标点符号的设置
   case Token of
     tokComma:     CodeGen.Write(Scaner.TokenString, 0, 1, NeedPadding);   // 1 也会导致行尾注释后退，现多出的空格已由 Generator 删除
@@ -1036,6 +1037,8 @@ end;
   例子就是(str1+str2)[1] 等诸如此类的表达式，先姑且判断一下后续的方括号
 }
 procedure TCnBasePascalFormatter.FormatFactor(PreSpaceCount: Byte);
+var
+  NeedPadding: Boolean;
 begin
   case Scaner.Token of
     tokSymbol, tokAtSign,
@@ -1064,16 +1067,17 @@ begin
 
     tokChar, tokWString, tokString, tokInteger, tokFloat, tokTrue, tokFalse:
       begin
+        NeedPadding := CalcNeedPadding;
         case Scaner.Token of
           tokInteger, tokFloat:
             WriteToken(Scaner.Token, PreSpaceCount);
           tokTrue, tokFalse:
-            CodeGen.Write(UpperFirst(Scaner.TokenString), PreSpaceCount);
+            CodeGen.Write(UpperFirst(Scaner.TokenString), PreSpaceCount, 0, NeedPadding);
             // CodeGen.Write(FormatString(Scaner.TokenString, CnCodeForRule.KeywordStyle), PreSpaceCount);
           tokChar, tokString:
-            CodeGen.Write(Scaner.TokenString, PreSpaceCount); //QuotedStr
+            CodeGen.Write(Scaner.TokenString, PreSpaceCount, 0, NeedPadding); //QuotedStr
           tokWString:
-            CodeGen.Write(Scaner.TokenString, PreSpaceCount);
+            CodeGen.Write(Scaner.TokenString, PreSpaceCount, 0, NeedPadding);
         end;
 
         FLastToken := Scaner.Token;
@@ -5346,6 +5350,11 @@ begin
     Inc(M);
   end;
   M^ := 0;
+end;
+
+function TCnAbstractCodeFormatter.CalcNeedPadding: Boolean;
+begin
+  Result := FElementType in [pfetSimpleStatment, pfetEnumType];
 end;
 
 initialization
