@@ -40,6 +40,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_CNCOMMENTCROPPERWIZARD}
+
 uses
   Classes, SysUtils;
 
@@ -125,7 +127,11 @@ type
 
   end;
 
+{$ENDIF CNWIZARDS_CNCOMMENTCROPPERWIZARD}
+
 implementation
+
+{$IFDEF CNWIZARDS_CNCOMMENTCROPPERWIZARD}
 
 { TCnSourceCropper }
 
@@ -578,4 +584,5 @@ begin
   // 该字符已经经过了写处理。
 end;
 
+{$ENDIF CNWIZARDS_CNCOMMENTCROPPERWIZARD}
 end.
