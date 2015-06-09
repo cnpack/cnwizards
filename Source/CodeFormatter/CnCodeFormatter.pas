@@ -3637,6 +3637,12 @@ begin
     Match(Scaner.Token);
     FormatConstExpr;
     Match(tokSRB);
+  end
+  else if Scaner.Token = tokLB then   // 处理 _UTF8String = type AnsiString(65001); 这种
+  begin
+    Match(tokLB);
+    FormatExpression;
+    Match(tokRB);
   end;
 end;
 
