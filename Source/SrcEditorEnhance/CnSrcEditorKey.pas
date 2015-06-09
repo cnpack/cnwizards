@@ -117,6 +117,7 @@ type
     procedure SetRenameShortCut(const Value: TShortCut);
   protected
     procedure SetActive(Value: Boolean);
+    function IsValidRenameIdent(const Ident: string): Boolean;
     procedure DoEnhConfig;
     function DoAutoMatchEnter(View: IOTAEditView; Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean): Boolean;
@@ -1256,7 +1257,7 @@ begin
 
       if FrmModalResult then
       begin
-        if not IsValidIdent(NewName) then
+        if not IsValidRenameIdent(NewName) then
         begin
           ErrorDlg(SCnRenameErrorValid);
           Exit;
@@ -1524,7 +1525,7 @@ begin
 
       if FrmModalResult then
       begin
-        if not IsValidIdent(NewName) then
+        if not IsValidRenameIdent(NewName) then
         begin
           ErrorDlg(SCnRenameErrorValid);
           Exit;
@@ -1857,7 +1858,7 @@ begin
 
       if FrmModalResult then
       begin
-        if not IsValidIdent(NewName) then
+        if not IsValidRenameIdent(NewName) then
         begin
           ErrorDlg(SCnRenameErrorValid);
           Exit;
@@ -2107,7 +2108,7 @@ begin
 
       if FrmModalResult then
       begin
-        if not IsValidIdent(NewName) then
+        if not IsValidRenameIdent(NewName) then
         begin
           ErrorDlg(SCnRenameErrorValid);
           Exit;
@@ -2598,6 +2599,19 @@ begin
       end;
     end;
   end;
+end;
+
+function TCnSrcEditorKey.IsValidRenameIdent(const Ident: string): Boolean;
+const
+  Alpha = ['A'..'Z', 'a'..'z', '_'];
+  AlphaNumeric = Alpha + ['0'..'9', '.'];
+var
+  I: Integer;
+begin
+  Result := False;
+  if (Length(Ident) = 0) or not (Ident[1] in Alpha) then Exit;
+  for I := 2 to Length(Ident) do if not (Ident[I] in AlphaNumeric) then Exit;
+  Result := True;
 end;
 
 {$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}
