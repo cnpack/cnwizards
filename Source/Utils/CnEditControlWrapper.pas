@@ -184,6 +184,19 @@ type
     var Handled: Boolean) of object;
   {* 按键事件 }
 
+  TCnBreakPointClickItem = class
+  private
+    FBpPosY: Integer;
+    FBpDeltaLine: Integer;
+    FBpEditView: IOTAEditView;
+    FBpEditControl: TControl;
+  public
+    property BpEditControl: TControl read FBpEditControl write FBpEditControl;
+    property BpEditView: IOTAEditView read FBpEditView write FBpEditView;
+    property BpPosY: Integer read FBpPosY write FBpPosY;
+    property BpDeltaLine: Integer read FBpDeltaLine write FBpDeltaLine;
+  end;
+
   TCnEditControlWrapper = class(TComponent)
   private
     CorIdeModule: HMODULE;
@@ -204,6 +217,10 @@ type
     FOptionDlgVisible: Boolean;
     FSaveFontName: string;
     FSaveFontSize: Integer;
+
+    FBpClickQueue: TQueue;
+    procedure ScrollAndClickEditControl(Sender: TObject);
+
     procedure AddNotifier(List: TList; Notifier: TMethod);
     function CalcCharSize: Boolean;
     procedure GetHighlightFromReg;
@@ -358,8 +375,10 @@ type
 
   TCustomControlHack = class(TCustomControl);
 
-{$IFDEF BDS}
 const
+  CN_BP_CLICK_POS_X = 5;
+
+{$IFDEF BDS}
 {$IFDEF BDS2005}
   CnWideControlCanvasOffset = $230;
   // BDS 2005 下 EditControl 的 Canvas 属性的偏移量
@@ -676,6 +695,7 @@ begin
   InitEditControlHook;
 
   FHighlights := TStringList.Create;
+  FBpClickQueue := TQueue.Create;
 
   CnWizNotifierServices.AddSourceEditorNotifier(OnSourceEditorNotify);
   CnWizNotifierServices.AddActiveFormNotifier(OnActiveFormChange);
@@ -695,6 +715,10 @@ begin
   CnWizNotifierServices.RemoveCallWndProcRetNotifier(OnCallWndProcRet);
   CnWizNotifierServices.RemoveApplicationMessageNotifier(ApplicationMessage);
   CnWizNotifierServices.RemoveApplicationIdleNotifier(OnIdle);
+
+  while FBpClickQueue.Count > 0 do
+    TObject(FBpClickQueue.Pop).Free;
+  FBpClickQueue.Free;
 
   if CorIdeModule <> 0 then
     FreeLibrary(CorIdeModule);
@@ -1631,8 +1655,9 @@ function TCnEditControlWrapper.ClickBreakpointAtActualLine(ActualLineNum: Intege
   EditControl: TControl): Boolean;
 var
   Obj: TEditorObject;
-  I, Delta: Integer;
+  I: Integer;
   X, Y: Word;
+  Item: TCnBreakPointClickItem;
 begin
   Result := False;
   if ActualLineNum <=0 then Exit;
@@ -1676,16 +1701,16 @@ begin
   else // 在不可见区域，需要滚动到可见区域
   begin
     // 滚过去
-    Delta := ActualLineNum - Obj.ViewLineNumber[0];
-    Obj.EditView.Scroll(Delta, 0);
-    Y := GetCharHeight div 2;
+    Item := TCnBreakPointClickItem.Create;
+    Item.BpDeltaLine := ActualLineNum - Obj.ViewLineNumber[0];
 
-    // EditControl 上做点击
-    EditControl.Perform(WM_LBUTTONDOWN, 0, MakeLParam(X, Y));
-    EditControl.Perform(WM_LBUTTONUP, 0, MakeLParam(X, Y));
+    Item.BpEditControl := EditControl;
+    Item.BpEditView := Obj.EditView;
+    Item.BpPosY := GetCharHeight div 2;
 
-    // 滚回去
-    Obj.EditView.Scroll(-Delta, 0);
+    FBpClickQueue.Push(Item);
+    CnWizNotifierServices.StopExecuteOnApplicationIdle(ScrollAndClickEditControl);
+    CnWizNotifierServices.ExecuteOnApplicationIdle(ScrollAndClickEditControl);
     Result := True;
   end;
 end;
@@ -1987,6 +2012,34 @@ begin
     except
       DoHandleException('TCnEditControlWrapper.KeyMessage[' + IntToStr(I) + ']');
     end;
+  end;
+end;
+
+procedure TCnEditControlWrapper.ScrollAndClickEditControl(Sender: TObject);
+var
+  Item: TCnBreakPointClickItem;
+begin
+  while FBpClickQueue.Count > 0 do
+  begin
+    Item := TCnBreakPointClickItem(FBpClickQueue.Pop);
+    if (Item = nil) or (Item.BpEditControl = nil) or (Item.BpEditView = nil)
+       or (Item.BpDeltaLine = 0) then
+       Continue;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('ScrollAndClickEditControl Scroll %d. X %d Y: %d.', [Item.BpDeltaLine,
+      CN_BP_CLICK_POS_X, Item.BpPosY]);
+{$ENDIF}
+
+    Item.BpEditView.Scroll(Item.BpDeltaLine, 0);
+
+    // EditControl 上做点击
+    Item.BpEditControl.Perform(WM_LBUTTONDOWN, 0, MakeLParam(CN_BP_CLICK_POS_X, Item.BpPosY));
+    Item.BpEditControl.Perform(WM_LBUTTONUP, 0, MakeLParam(CN_BP_CLICK_POS_X, Item.BpPosY));
+
+    // 滚回去
+    Item.BpEditView.Scroll(-Item.BpDeltaLine, 0);
+    Item.Free;
   end;
 end;
 
