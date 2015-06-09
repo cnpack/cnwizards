@@ -46,7 +46,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ToolsAPI, IniFiles, Contnrs, CnWizMultiLang, CnWizClasses, CnWizConsts,
   CnCommon, CnConsts, CnWizUtils, CnDCU32, CnWizIdeUtils, CnWizEditFiler,
-  CnWizOptions, mPasLex, Math, TypInfo;
+  CnWizOptions, mPasLex, Math, TypInfo, RegExpr;
 
 type
 
@@ -91,6 +91,8 @@ type
     FIgnoreCompRef: Boolean;
     FIgnoreList: TStringList;
     FCleanList: TStringList;
+    FRegExpr: TRegExpr;
+    function MatchInListWithExpr(List: TStrings; const Str: string): Boolean;
     function GetProjectFromModule(AModule: IOTAModule): IOTAProject;
     function ShowKindForm(var AKind: TCnUsesCleanKind): Boolean;
     function CompileUnits(AKind: TCnUsesCleanKind): Boolean;
@@ -150,10 +152,14 @@ begin
   FIgnoreCompRef := True;
   FIgnoreList := TStringList.Create;
   FCleanList := TStringList.Create;
+
+  FRegExpr := TRegExpr.Create;
+  FRegExpr.ModifierI := True;
 end;
 
 destructor TCnUsesCleaner.Destroy;
 begin
+  FRegExpr.Free;
   FCleanList.Free;
   FIgnoreList.Free;
   inherited;
@@ -657,11 +663,12 @@ begin
     for u := 0 to UnitList.Count - 1 do
     begin
       Kinds := [];
-      if FCleanList.IndexOf(UnitList[u]) >= 0 then
+
+      if MatchInListWithExpr(FCleanList, UnitList[u]) then
         Include(Kinds, ukInCleanList);
-      if FIgnoreList.IndexOf(UnitList[u]) >= 0 then
+      if MatchInListWithExpr(FIgnoreList, UnitList[u]) then
         Include(Kinds, ukInIgnoreList);
-        
+
       FileName := GetFileNameFromModuleName(UnitList[u],
         IOTAProject(Pointer(UnitList.Objects[u])));
     {$IFDEF DEBUG}
@@ -1103,6 +1110,25 @@ begin
   Author := SCnPack_Zjy;
   Email := SCnPack_ZjyEmail;
   Comment := SCnUsesCleanerComment;
+end;
+
+function TCnUsesCleaner.MatchInListWithExpr(List: TStrings;
+  const Str: string): Boolean;
+var
+  I: Integer;
+begin
+  Result := False;
+  if (List = nil) or (Str = '') then
+    Exit;
+
+  for I := 0 to List.Count - 1 do
+  begin
+    if (Str = List[I]) or RegExpContainsText(FRegExpr, Str, List[I]) then
+    begin
+      Result := True;
+      Exit;
+    end;
+  end;
 end;
 
 { TCnUsesCleanerForm }
