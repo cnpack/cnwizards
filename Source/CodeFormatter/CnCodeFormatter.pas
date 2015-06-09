@@ -3540,6 +3540,11 @@ begin
 //  FormatClassMemberList(PreSpaceCount); Classmember do not know 'case'
 
   Match(tokKeywordEnd, PreSpaceCount);
+  if Scaner.Token = tokKeywordAlign then  // 支持 record end align 16 这种新语法
+  begin
+    Match(tokKeywordAlign);
+    FormatConstExpr;
+  end;
 end;
 
 { RecVariant -> ConstExpr/','...  ':' '(' [FieldList] ')' }

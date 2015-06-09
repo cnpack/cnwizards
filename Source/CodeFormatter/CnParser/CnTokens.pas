@@ -95,6 +95,7 @@ type
     // Keyword
     tokKeyword_BEGIN,
     tokKeywordAbsolute,
+    tokKeywordAlign,
     tokKeywordAnd,
     tokKeywordArray,
     tokKeywordAs,
@@ -399,6 +400,7 @@ const
     // Keyword
     (Value: Integer(tokKeyword_BEGIN);         Name: ''),
     (Value: Integer(tokKeywordAbsolute);       Name: 'Absolute'),
+    (Value: Integer(tokKeywordAlign);          Name: 'Align'),
     (Value: Integer(tokKeywordAnd);            Name: 'And'),
     (Value: Integer(tokKeywordArray);          Name: 'Array'),
     (Value: Integer(tokKeywordAs);             Name: 'As'),
