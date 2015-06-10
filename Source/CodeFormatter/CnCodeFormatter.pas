@@ -178,12 +178,13 @@ type
     function IsTokenAfterAttributesInSet(InTokens: TPascalTokenSet): Boolean;
     procedure CheckWriteBeginln;
   protected
-    procedure FormatExprList(PreSpaceCount: Byte = 0; CurrentIndent: Byte = 0);
-    procedure FormatExpression(PreSpaceCount: Byte = 0; CurrentIndent: Byte = 0);
-    procedure FormatSimpleExpression(PreSpaceCount: Byte = 0; CurrentIndent: Byte = 0);
-    procedure FormatTerm(PreSpaceCount: Byte = 0);
-    procedure FormatFactor(PreSpaceCount: Byte = 0);
-    procedure FormatDesignator(PreSpaceCount: Byte = 0);
+    // IndentForAnonymous 参数用来控制内部可能出现的匿名函数的缩进
+    procedure FormatExprList(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
+    procedure FormatExpression(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
+    procedure FormatSimpleExpression(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
+    procedure FormatTerm(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
+    procedure FormatFactor(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
+    procedure FormatDesignator(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
     procedure FormatDesignatorList(PreSpaceCount: Byte = 0);
     procedure FormatQualID(PreSpaceCount: Byte = 0);
     procedure FormatTypeID(PreSpaceCount: Byte = 0);
@@ -867,12 +868,13 @@ end;
 
   注：虽然有 Designator -> '(' Designator ')' 的情况，但已经包含在 QualId 的处理中了。
 }
-procedure TCnBasePascalFormatter.FormatDesignator(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatDesignator(PreSpaceCount: Byte;
+  IndentForAnonymous: Byte);
 begin
   if Scaner.Token = tokAtSign then // 如果是 @ Designator 的形式则再次递归
   begin
     Match(tokAtSign, PreSpaceCount);
-    FormatDesignator;
+    FormatDesignator(0, IndentForAnonymous);
     Exit;
   end;
 
@@ -890,7 +892,7 @@ begin
         begin
           { DONE: deal with index visit and function/procedure call}
           Match(Scaner.Token);
-          FormatExprList(PreSpaceCount, PreSpaceCount);
+          FormatExprList(PreSpaceCount, IndentForAnonymous);
           Match(Scaner.Token);
         end;
 
@@ -923,9 +925,9 @@ end;
 
 { Expression -> SimpleExpression [RelOp SimpleExpression]... }
 procedure TCnBasePascalFormatter.FormatExpression(PreSpaceCount: Byte;
-  CurrentIndent: Byte);
+  IndentForAnonymous: Byte);
 begin
-  FormatSimpleExpression(PreSpaceCount, CurrentIndent);
+  FormatSimpleExpression(PreSpaceCount, IndentForAnonymous);
 
   while Scaner.Token in RelOpTokens + [tokHat, tokSLB, tokDot] do
   begin
@@ -993,14 +995,14 @@ end;
 
 { ExprList -> Expression/','... }
 procedure TCnBasePascalFormatter.FormatExprList(PreSpaceCount: Byte;
-  CurrentIndent: Byte);
+  IndentForAnonymous: Byte);
 begin
-  FormatExpression(0, CurrentIndent);
+  FormatExpression(0, IndentForAnonymous);
 
   if Scaner.Token = tokAssign then // 匹配 OLE 调用的情形
   begin
     Match(tokAssign);
-    FormatExpression(0, CurrentIndent);
+    FormatExpression(0, IndentForAnonymous);
   end;
 
   while Scaner.Token = tokComma do
@@ -1010,12 +1012,12 @@ begin
     if Scaner.Token in ([tokAtSign, tokLB] + ExprTokens + KeywordTokens +
       DirectiveTokens + ComplexTokens) then // 有关键字做变量名的情况也得考虑到
     begin
-      FormatExpression(0, CurrentIndent);
+      FormatExpression(0, IndentForAnonymous);
 
       if Scaner.Token = tokAssign then // 匹配 OLE 调用的情形
       begin
         Match(tokAssign);
-        FormatExpression(0, CurrentIndent);
+        FormatExpression(0, IndentForAnonymous);
       end;
     end;
   end;
@@ -1036,7 +1038,8 @@ end;
   这里同样有无法直接区分 '(' Expression ')' 和带括号的 Designator
   例子就是(str1+str2)[1] 等诸如此类的表达式，先姑且判断一下后续的方括号
 }
-procedure TCnBasePascalFormatter.FormatFactor(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatFactor(PreSpaceCount: Byte;
+  IndentForAnonymous: Byte);
 var
   NeedPadding: Boolean;
 begin
@@ -1048,7 +1051,7 @@ begin
     tokDirective_BEGIN..tokDirective_END,
     tokComplex_BEGIN..tokComplex_END:
       begin
-        FormatDesignator(PreSpaceCount);
+        FormatDesignator(PreSpaceCount, IndentForAnonymous);
 
         if Scaner.Token = tokLB then
         begin
@@ -1277,7 +1280,7 @@ end;
 
 { SimpleExpression -> ['+' | '-' | '^'] Term [AddOp Term]... }
 procedure TCnBasePascalFormatter.FormatSimpleExpression(
-  PreSpaceCount: Byte; CurrentIndent: Byte);
+  PreSpaceCount: Byte; IndentForAnonymous: Byte);
 begin
   if Scaner.Token in [tokPlus, tokMinus, tokHat] then // ^H also support
   begin
@@ -1286,32 +1289,32 @@ begin
   end
   else if Scaner.Token in [tokKeywordFunction, tokKeywordProcedure] then
   begin
-    // Anonymous function/procedure.
+    // Anonymous function/procedure. 匿名函数的缩进使用 IndentForAnonymous 参数
     Writeln;
     if Scaner.Token = tokKeywordProcedure then
-      FormatProcedureDecl(Tab(CurrentIndent), True)
+      FormatProcedureDecl(Tab(IndentForAnonymous), True)
     else
-      FormatFunctionDecl(Tab(CurrentIndent), True);
+      FormatFunctionDecl(Tab(IndentForAnonymous), True);
   end
   else
-    FormatTerm(PreSpaceCount);
+    FormatTerm(PreSpaceCount, IndentForAnonymous);
 
   while Scaner.Token in AddOpTokens do
   begin
     MatchOperator(Scaner.Token);
-    FormatTerm;
+    FormatTerm(0, IndentForAnonymous);
   end;
 end;
 
 { Term -> Factor [MulOp Factor]... }
-procedure TCnBasePascalFormatter.FormatTerm(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatTerm(PreSpaceCount: Byte; IndentForAnonymous: Byte);
 begin
-  FormatFactor(PreSpaceCount);
+  FormatFactor(PreSpaceCount, IndentForAnonymous);
 
   while Scaner.Token in (MulOPTokens + ShiftOpTokens) do
   begin
     MatchOperator(Scaner.Token);
-    FormatFactor;
+    FormatFactor(0, IndentForAnonymous);
   end;
 end;
 
