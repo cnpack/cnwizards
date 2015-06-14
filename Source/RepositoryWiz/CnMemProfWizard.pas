@@ -82,7 +82,6 @@ type
     destructor Destroy; override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
     procedure Execute; override;
-
   end;
 
   // 创建工程的 Creator
@@ -129,10 +128,10 @@ type
     {* 返回 True 表示是工程的 MainForm }
   end;
 
-var
-  SCnMemProfProjectTemplateFile: string = 'CnMemProfProject.dpr';
-  SCnMemProfUnit1ModuleTemplateFile: string = 'CnMemProf_Unit1.pas';
-  SCnMemProfUnit1DFMModuleTemplateFile: string = 'CnMemProf_Unit1.dfm';
+const
+  SCnMemProfProjectTemplateFile = 'CnMemProfProject.dpr';
+  SCnMemProfUnit1ModuleTemplateFile = 'CnMemProf_Unit1.pas';
+  SCnMemProfUnit1DFMModuleTemplateFile = 'CnMemProf_Unit1.dfm';
 
 {$ENDIF CNWIZARDS_CNMEMPROFWIZARD}
 
