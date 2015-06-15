@@ -927,69 +927,39 @@ end;
 procedure TCnBasePascalFormatter.FormatExpression(PreSpaceCount: Byte;
   IndentForAnonymous: Byte);
 begin
-  FormatSimpleExpression(PreSpaceCount, IndentForAnonymous);
+  SpecifyElementType(pfetExpression);
+  try
+    FormatSimpleExpression(PreSpaceCount, IndentForAnonymous);
 
-  while Scaner.Token in RelOpTokens + [tokHat, tokSLB, tokDot] do
-  begin
-    // 这块对泛型的处理已移动到内部以处理 function call 的情形
-
-//    IsGeneric := False;
-//    if Scaner.Token = tokLess then
-//    begin
-//      // 判断泛型，如果不是，恢复书签往下走；如果是，搞了泛型再要跳过下面
-//      // 的 RelOpTokens 判断；
-//      Scaner.SaveBookmark(GenericBookmark);
-//
-//      // 往后找，一直找到非类型的关键字或者分号或者文件尾。
-//      // 如果出现小于号和大于号一直不配对，则认为不是泛型。
-//      // TODO: 判断还是不太严密，待继续验证。
-//      Scaner.NextToken;
-//      LessCount := 1;
-//      while not (Scaner.Token in KeywordTokens + [tokSemicolon, tokEOF] - CanBeTypeKeywordTokens) do
-//      begin
-//        if Scaner.Token = tokLess then
-//          Inc(LessCount)
-//        else if Scaner.Token = tokGreat then
-//          Dec(LessCount);
-//
-//        if LessCount = 0 then // Test<TObject><1 的情况，需要为 0 配对时就提前跳出
-//          Break;
-//
-//        Scaner.NextToken;
-//      end;
-//      IsGeneric := (LessCount = 0);
-//      Scaner.LoadBookmark(GenericBookmark);
-//    end;
-//
-//    if IsGeneric then
-//    begin
-//      // 格式化泛型的小于号段
-//      FormatTypeParams(PreSpaceCount);
-//    end
-//    else
-
-    if Scaner.Token in RelOpTokens then
+    while Scaner.Token in RelOpTokens + [tokHat, tokSLB, tokDot] do
     begin
-      MatchOperator(Scaner.Token);
-      FormatSimpleExpression;
+      // 这块对泛型的处理已移动到内部以处理 function call 的情形
+
+      if Scaner.Token in RelOpTokens then
+      begin
+        MatchOperator(Scaner.Token);
+        FormatSimpleExpression;
+      end;
+
+      // 这几处额外的内容，不知道有啥副作用
+
+      // pchar(ch)^
+      if Scaner.Token = tokHat then
+        Match(tokHat)
+      else if Scaner.Token = tokSLB then  // PString(PStr)^[1]
+      begin
+        Match(tokSLB);
+        FormatExprList;
+        Match(tokSRB);
+      end
+      else if Scaner.Token = tokDot then // typecase
+      begin
+        Match(tokDot);
+        FormatExpression;
+      end;
     end;
-
-    // 这几处额外的内容，不知道有啥副作用
-
-    // pchar(ch)^
-    if Scaner.Token = tokHat then
-      Match(tokHat)
-    else if Scaner.Token = tokSLB then  // PString(PStr)^[1]
-    begin
-      Match(tokSLB);
-      FormatExprList;
-      Match(tokSRB);
-    end
-    else if Scaner.Token = tokDot then // typecase
-    begin
-      Match(tokDot);
-      FormatExpression;
-    end;
+  finally
+    RestoreElementType;
   end;
 end;
 
@@ -1692,102 +1662,97 @@ var
     end;
   end;
 begin
-  SpecifyElementType(pfetSimpleStatment);
-  try
-    case Scaner.Token of
-      tokSymbol, tokAtSign, tokKeywordFinal, tokKeywordIn, tokKeywordOut,
-      tokKeywordString, tokInteger, tokFloat,
-      tokDirective_BEGIN..tokDirective_END, // 允许语句以部分关键字以及数字开头
-      tokComplex_BEGIN..tokComplex_END:
+  case Scaner.Token of
+    tokSymbol, tokAtSign, tokKeywordFinal, tokKeywordIn, tokKeywordOut,
+    tokKeywordString, tokInteger, tokFloat,
+    tokDirective_BEGIN..tokDirective_END, // 允许语句以部分关键字以及数字开头
+    tokComplex_BEGIN..tokComplex_END:
+      begin
+        FormatDesignatorAndOthers(PreSpaceCount);
+      end;
+
+    tokKeywordInherited:
+      begin
+        {
+          inherited can be:
+          inherited;
+          inherited Foo;
+          inherited Foo(bar);
+          inherited FooProp := bar;
+          inherited FooProp[Bar] := Fish;
+          bar :=  inherited FooProp[Bar];
+        }
+        Match(Scaner.Token, PreSpaceCount);
+
+        if CanBeSymbol(Scaner.Token) then
+          FormatSimpleStatement;
+      end;
+
+    tokKeywordGoto:
+      begin
+        Match(Scaner.Token, PreSpaceCount);
+        { DONE: FormatLabel }
+        FormatLabel;
+      end;
+
+    tokLB: // 括号开头的未必是 (SimpleStatement)，还可能是 (a)^ := 1 这种 Designator
+      begin
+        // found in D9 surpport: if ... then (...)
+
+        // can delete the LB & RB, code optimize ??
+        // 先当做 Designator 来看，处理完毕看后续有无 := ( 来判断是否结束
+        // 如果是结束了，则 Designator 的处理是对的，否则按 Simplestatement 来。
+
+        Scaner.SaveBookmark(Bookmark);
+        OldLastToken := FLastToken;
+        OldInternalRaiseException := FInternalRaiseException;
+        FInternalRaiseException := True;
+        // 需要 Exception 来判断后续内容
+
+        try
+          CodeGen.LockOutput;
+
+          try
+            FormatDesignator(PreSpaceCount);
+            // 假设 Designator 处理完毕，判断后续是啥
+
+            IsDesignator := Scaner.Token in [tokAssign, tokLB, tokSemicolon,
+              tokKeywordElse, tokKeywordEnd];
+            // TODO: 目前只想到这几个。Semicolon 是怕 Designator 已经作为语句处理完了，
+            // else/end 是怕语句结束没分号导致判断失误。
+          except
+            IsDesignator := False;
+            // 如果后面碰到了 := 等情形，FormatDesignator 会出错，
+            // 说明本句是带括号嵌套的 Simplestatement
+          end;
+        finally
+          Scaner.LoadBookmark(Bookmark);
+          FLastToken := OldLastToken;
+          CodeGen.UnLockOutput;
+          FInternalRaiseException := OldInternalRaiseException;
+        end;
+
+        if not IsDesignator then
+        begin
+          //Match(tokLB);  优化不用的括号
+          Scaner.NextToken;
+
+          FormatSimpleStatement(PreSpaceCount);
+
+          if Scaner.Token = tokRB then
+            Scaner.NextToken
+          else
+            ErrorToken(tokRB);
+
+          //Match(tokRB);
+          end
+        else
         begin
           FormatDesignatorAndOthers(PreSpaceCount);
         end;
-
-      tokKeywordInherited:
-        begin
-          {
-            inherited can be:
-            inherited;
-            inherited Foo;
-            inherited Foo(bar);
-            inherited FooProp := bar;
-            inherited FooProp[Bar] := Fish;
-            bar :=  inherited FooProp[Bar];
-          }
-          Match(Scaner.Token, PreSpaceCount);
-
-          if CanBeSymbol(Scaner.Token) then
-            FormatSimpleStatement;
-        end;
-
-      tokKeywordGoto:
-        begin
-          Match(Scaner.Token, PreSpaceCount);
-          { DONE: FormatLabel }
-          FormatLabel;
-        end;
-
-      tokLB: // 括号开头的未必是 (SimpleStatement)，还可能是 (a)^ := 1 这种 Designator
-        begin
-          // found in D9 surpport: if ... then (...)
-
-          // can delete the LB & RB, code optimize ??
-          // 先当做 Designator 来看，处理完毕看后续有无 := ( 来判断是否结束
-          // 如果是结束了，则 Designator 的处理是对的，否则按 Simplestatement 来。
-
-          Scaner.SaveBookmark(Bookmark);
-          OldLastToken := FLastToken;
-          OldInternalRaiseException := FInternalRaiseException;
-          FInternalRaiseException := True;
-          // 需要 Exception 来判断后续内容
-
-          try
-            CodeGen.LockOutput;
-
-            try
-              FormatDesignator(PreSpaceCount);
-              // 假设 Designator 处理完毕，判断后续是啥
-
-              IsDesignator := Scaner.Token in [tokAssign, tokLB, tokSemicolon,
-                tokKeywordElse, tokKeywordEnd];
-              // TODO: 目前只想到这几个。Semicolon 是怕 Designator 已经作为语句处理完了，
-              // else/end 是怕语句结束没分号导致判断失误。
-            except
-              IsDesignator := False;
-              // 如果后面碰到了 := 等情形，FormatDesignator 会出错，
-              // 说明本句是带括号嵌套的 Simplestatement
-            end;
-          finally
-            Scaner.LoadBookmark(Bookmark);
-            FLastToken := OldLastToken;
-            CodeGen.UnLockOutput;
-            FInternalRaiseException := OldInternalRaiseException;
-          end;
-
-          if not IsDesignator then
-          begin
-            //Match(tokLB);  优化不用的括号
-            Scaner.NextToken;
-
-            FormatSimpleStatement(PreSpaceCount);
-
-            if Scaner.Token = tokRB then
-              Scaner.NextToken
-            else
-              ErrorToken(tokRB);
-
-            //Match(tokRB);
-            end
-          else
-          begin
-            FormatDesignatorAndOthers(PreSpaceCount);
-          end;
-        end;
-    else
-      Error(CN_ERRCODE_PASCAL_INVALID_STATEMENT);
-    end;
-  finally
-    RestoreElementType;
+      end;
+  else
+    Error(CN_ERRCODE_PASCAL_INVALID_STATEMENT);
   end;
 end;
 
@@ -5368,7 +5333,8 @@ end;
 
 function TCnAbstractCodeFormatter.CalcNeedPadding: Boolean;
 begin
-  Result := FElementType in [pfetSimpleStatment, pfetEnumType];
+  Result := FElementType in [pfetExpression, pfetEnumType];
+  // 暂且表达式内部与枚举定义内部，碰到注释导致的换行时，才要求自动和上一行对齐
 end;
 
 initialization
