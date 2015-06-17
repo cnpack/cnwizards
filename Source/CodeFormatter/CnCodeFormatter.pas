@@ -905,7 +905,7 @@ begin
       tokPlus, tokMinus:
         begin
           MatchOperator(Scaner.Token);
-          FormatExpression;
+          FormatExpression(0, PreSpaceCount);
         end;
     end; // case
   end; // while
@@ -949,13 +949,13 @@ begin
       else if Scaner.Token = tokSLB then  // PString(PStr)^[1]
       begin
         Match(tokSLB);
-        FormatExprList;
+        FormatExprList(0, PreSpaceCount);
         Match(tokSRB);
       end
       else if Scaner.Token = tokDot then // typecase
       begin
         Match(tokDot);
-        FormatExpression;
+        FormatExpression(0, PreSpaceCount);
       end;
     end;
   finally
@@ -1414,7 +1414,7 @@ var
   HasElse: Boolean;
 begin
   Match(tokKeywordCase, PreSpaceCount);
-  FormatExpression;
+  FormatExpression(0, PreSpaceCount);
   Match(tokKeywordOf);
   Writeln;
   FormatCaseSelector(Tab(PreSpaceCount));
@@ -1550,7 +1550,7 @@ begin
     Match(tokKeywordIF, PreSpaceCount);
 
   { TODO: Apply more if stmt rule }
-  FormatExpression;
+  FormatExpression(0, PreSpaceCount);
   Match(tokKeywordThen);
   CheckWriteBeginln; // 检查 if then begin 是否同行
 
@@ -1590,7 +1590,7 @@ begin
   else
     Match(tokKeywordUntil, PreSpaceCount);
     
-  FormatExpression;
+  FormatExpression(0, PreSpaceCount);
 end;
 
 {
@@ -1968,7 +1968,7 @@ end;
 procedure TCnBasePascalFormatter.FormatWhileStmt(PreSpaceCount: Byte);
 begin
   Match(tokKeywordWhile, PreSpaceCount);
-  FormatExpression;
+  FormatExpression(0, PreSpaceCount);
   Match(tokKeywordDo);
   CheckWriteBeginln; // 检查 do begin 是否同行
 
@@ -1983,11 +1983,11 @@ begin
   Match(tokKeywordWith, PreSpaceCount);
   // FormatDesignatorList; // Grammer error.
 
-  FormatExpression;
+  FormatExpression(0, PreSpaceCount);
   while Scaner.Token = tokComma do
   begin
     MatchOperator(tokComma);
-    FormatExpression;
+    FormatExpression(0, PreSpaceCount);
   end;
 
   Match(tokKeywordDo);
@@ -2004,12 +2004,12 @@ begin
   Match(tokKeywordRaise, PreSpaceCount);
 
   if not (Scaner.Token in [tokSemicolon, tokKeywordEnd, tokKeywordElse]) then
-    FormatExpression;
+    FormatExpression(0, PreSpaceCount);
 
   if Scaner.TokenSymbolIs('AT') then
   begin
     Match(Scaner.Token, 1, 1);
-    FormatExpression;
+    FormatExpression(0, PreSpaceCount);
   end;
 end;
 
