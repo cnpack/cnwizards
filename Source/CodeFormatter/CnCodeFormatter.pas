@@ -1255,7 +1255,7 @@ begin
   if Scaner.Token in [tokPlus, tokMinus, tokHat] then // ^H also support
   begin
     Match(Scaner.Token, PreSpaceCount);
-    FormatTerm;
+    FormatTerm(0, IndentForAnonymous);
   end
   else if Scaner.Token in [tokKeywordFunction, tokKeywordProcedure] then
   begin
