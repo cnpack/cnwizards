@@ -30,7 +30,9 @@ unit CnSrcEditorGutter;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2004.12.25
+* 修改记录：2016.06.17
+*               加入侧边改动栏的绘制，然而暂无法获取改动的行号，只能屏蔽
+*           2004.12.25
 *               创建单元，从原 CnSrcEditorEnhancements 移出
 ================================================================================
 |</PRE>}
@@ -43,7 +45,7 @@ interface
 
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms, ToolsAPI,
-  IniFiles, CnEditControlWrapper, CnWizNotifier, CnIni, CnPopupMenu;
+  IniFiles, CnEditControlWrapper, CnWizNotifier, CnIni, CnPopupMenu, CnFastList;
 
 type
 
@@ -65,6 +67,9 @@ type
 {$ENDIF}
     FOldLineWidth: Integer;
     FPosInfo: TEditControlInfo;
+{$IFNDEF BDS}
+    FLineInfo: TCnList;
+{$ENDIF}
     function GetTextHeight: Integer;
     procedure MenuPopup(Sender: TObject);
     procedure EditorChanged(Editor: TEditorObject; ChangeType: TEditorChangeTypes);
@@ -110,6 +115,7 @@ type
     FAutoWidth: Boolean;
     FMinWidth: TCnGutterWidth;
     FFixedWidth: TCnGutterWidth;
+    FShowModifier: Boolean;
     procedure SetFont(const Value: TFont);
     procedure SetShowLineNumber(const Value: Boolean);
     procedure SetActive(const Value: Boolean);
@@ -120,6 +126,7 @@ type
       Operation: TOperation);
     procedure SetFixedWidth(const Value: TCnGutterWidth);
     procedure SetMinWidth(const Value: TCnGutterWidth);
+    procedure SetShowModifier(const Value: Boolean);
   protected
     procedure DoUpdateGutters(EditWindow: TCustomForm; EditControl: TControl; Context: 
       Pointer);
@@ -148,6 +155,7 @@ type
     property FixedWidth: TCnGutterWidth read FFixedWidth write SetFixedWidth;
 
     property Active: Boolean read FActive write SetActive;
+    property ShowModifier: Boolean read FShowModifier write SetShowModifier;
     property OnEnhConfig: TNotifyEvent read FOnEnhConfig write FOnEnhConfig;
   end;
 
@@ -169,13 +177,21 @@ const
   csIDEShowLineNumbers = 'ShowLineNumbers';
 
   csBevelWidth = 4;
+  csModifierWidth = 5;
+  csDefaultModifiedColor = clYellow;
+  csDefaultModifiedSavedColor = clGreen;
+
   csGutter = 'Gutter';
 {$IFDEF BDS}
   csShowLineNumber = 'ShowLineNumberBDS';
   csShowLineNumberDef = True;
+  csShowModifier = 'ShowModifierBDS';
+  csShowModifierDef = False; // BDS 下已经有修改过的行显示了，无需
 {$ELSE}
   csShowLineNumber = 'ShowLineNumber';
   csShowLineNumberDef = True;
+  csShowModifier = 'ShowModifier';
+  csShowModifierDef = False; // D5、6、7 下无法获取修改的行，只能先置为 False;
 {$ENDIF}
   csFont = 'Font';
   csCurrFont = 'CurrFont';
@@ -183,6 +199,9 @@ const
   csAutoWidth = 'AutoWidth';
   csMinWidth = 'MinWidth';
   csFixedWidth = 'FixedWidth';
+
+  CN_GUTTER_LINE_MODIFIER_CHANGED = 1;
+  CN_GUTTER_LINE_MODIFIER_SAVED = 2;
 
 { TCnSrcEditorGutter }
 
@@ -199,6 +218,9 @@ begin
   FMenu.OnPopup := MenuPopup;
   InitPopupMenu;
   PopupMenu := FMenu;
+{$IFNDEF BDS}
+  FLineInfo := TCnList.Create;
+{$ENDIF}
   EditControlWrapper.AddEditorChangeNotifier(EditorChanged);
 end;
 
@@ -206,6 +228,9 @@ destructor TCnSrcEditorGutter.Destroy;
 begin
   FGutterMgr.FList.Remove(Self);
   EditControlWrapper.RemoveEditorChangeNotifier(EditorChanged);
+{$IFNDEF BDS}
+  FLineInfo.Free;
+{$ENDIF}
   inherited;
 end;
 
@@ -290,6 +315,9 @@ begin
   MaxRowWidth := Max(MaxRowWidth, MaxCurRowWidth);
   // 当前行字体可能更宽，免得绘制不足，取宽者
   Width := MaxRowWidth + csBevelWidth + 1; // 多空一点点
+  if FGutterMgr.ShowModifier then
+    Width := Width + csModifierWidth;
+
   Invalidate;
 end;
 
@@ -311,6 +339,7 @@ var
   StrNum: string;
   I, Idx, TextHeight, MaxRow: Integer;
   EditorObj: TEditorObject;
+  OldColor: TColor;
 begin
   if FPainting or not Visible or (EditControl = nil) or (Parent = nil) then
     Exit;
@@ -338,7 +367,6 @@ begin
         end;
       end;
 
-      Canvas.Brush.Style := bsClear;
       for I := 0 to EditorObj.ViewLineCount - 1 do
       begin
         Idx := EditorObj.ViewLineNumber[I];
@@ -349,9 +377,22 @@ begin
 
         StrNum := IntToStr(Idx);
         R := Rect(1, I * TextHeight, Width - csBevelWidth, (I + 1) * TextHeight);
+        if FGutterMgr.ShowModifier then
+          R.Right := R.Right - csModifierWidth;
 
+        Canvas.Brush.Style := bsClear;
         DrawText(Canvas.Handle, PChar(StrNum), Length(StrNum), R, DT_VCENTER or
           DT_RIGHT);
+
+        if FGutterMgr.ShowModifier then
+        begin
+          OldColor := Canvas.Brush.Color;
+          Canvas.Brush.Color := csDefaultModifiedColor;
+          R.Left := Width - csBevelWidth - csModifierWidth + 2;
+          R.Right := Width - csBevelWidth;
+          Canvas.FillRect(R);
+          Canvas.Brush.Color := OldColor;
+        end;
       end;
 
       if FGutterMgr.ShowLineCount then
@@ -361,6 +402,9 @@ begin
         Canvas.Font.Color := clWhite;
         StrNum := IntToStr(FPosInfo.LineCount);
         Canvas.Brush.Color := clNavy;
+        if FGutterMgr.ShowModifier then
+          R.Right := R.Right - csModifierWidth;
+
         Canvas.FillRect(R);
         DrawText(Canvas.Handle, PChar(StrNum), Length(StrNum), R, DT_VCENTER or
           DT_RIGHT);
@@ -644,6 +688,7 @@ begin
   FMinWidth := 2;
   FFixedWidth := 4;
   FAutoWidth := True;
+  FShowModifier := False;
   
   EditControlWrapper.AddEditControlNotifier(EditControlNotify);
   UpdateGutters;
@@ -651,11 +696,11 @@ end;
 
 destructor TCnSrcEditorGutterMgr.Destroy;
 var
-  i: Integer;
+  I: Integer;
 begin
   EditControlWrapper.RemoveEditControlNotifier(EditControlNotify);
-  for i := FList.Count - 1 downto 0 do
-    TCnSrcEditorGutter(FList[i]).Free;
+  for I := FList.Count - 1 downto 0 do
+    TCnSrcEditorGutter(FList[I]).Free;
   FList.Free;
   FFont.Free;
   FCurrFont.Free;
@@ -719,11 +764,11 @@ end;
 
 procedure TCnSrcEditorGutterMgr.UpdateGutters;
 var
-  i: Integer;
+  I: Integer;
 begin
   EnumEditControl(DoUpdateGutters, nil);
-  for i := 0 to Count - 1 do
-    Gutters[i].UpdateStatus;
+  for I := 0 to Count - 1 do
+    Gutters[I].UpdateStatus;
 end;
 
 //------------------------------------------------------------------------------
@@ -732,10 +777,10 @@ end;
 
 procedure TCnSrcEditorGutterMgr.LanguageChanged(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to Count - 1 do
-    Gutters[i].LanguageChanged(Sender);
+  for I := 0 to Count - 1 do
+    Gutters[I].LanguageChanged(Sender);
 end;
 
 procedure TCnSrcEditorGutterMgr.LoadSettings(Ini: TCustomIniFile);
@@ -744,6 +789,11 @@ begin
   try
     FShowLineNumber := ReadBool(csGutter, csShowLineNumber, csShowLineNumberDef);
     FShowLineCount := ReadBool(csGutter, csShowLineCount, True);
+{$IFNDEF BDS}
+    FShowModifier := ReadBool(csGutter, csShowModifier, csShowModifierDef);
+{$ELSE}
+    FShowModifier := False;
+{$ENDIF}
     FFont := ReadFont(csGutter, csFont, FFont);
     FCurrFont := ReadFont(csGutter, csCurrFont, FCurrFont);
     FAutoWidth := ReadBool(csGutter, csAutoWidth, FAutoWidth);
@@ -761,6 +811,7 @@ begin
   try
     WriteBool(csGutter, csShowLineNumber, FShowLineNumber);
     WriteBool(csGutter, csShowLineCount, FShowLineCount);
+    WriteBool(csGutter, csShowModifier, FShowModifier);
     WriteFont(csGutter, csFont, FFont);
     WriteFont(csGutter, csCurrFont, FCurrFont);
     WriteBool(csGutter, csAutoWidth, FAutoWidth);
@@ -828,6 +879,15 @@ end;
 procedure TCnSrcEditorGutterMgr.SetMinWidth(const Value: TCnGutterWidth);
 begin
   FMinWidth := TrimInt(Value, Low(TCnGutterWidth), High(TCnGutterWidth));
+end;
+
+procedure TCnSrcEditorGutterMgr.SetShowModifier(const Value: Boolean);
+begin
+  if FShowModifier <> Value then
+  begin
+    FShowModifier := Value;
+    UpdateGutters;
+  end;
 end;
 
 {$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}
