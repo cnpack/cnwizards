@@ -1627,7 +1627,7 @@ var
 
   procedure FormatDesignatorAndOthers(PreSpaceCount: Byte);
   begin
-    FormatDesignator(PreSpaceCount);
+    FormatDesignator(PreSpaceCount, PreSpaceCount);
 
     while Scaner.Token in [tokAssign, tokLB, tokLess] do
     begin
@@ -1642,7 +1642,7 @@ var
           begin
             { DONE: deal with function call, save to symboltable }
             Match(tokLB);
-            FormatExprList;
+            FormatExprList(0, PreSpaceCount);
             Match(tokRB);
 
             if Scaner.Token = tokHat then
