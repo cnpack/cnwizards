@@ -1043,6 +1043,7 @@ end;
 procedure TCnCodeFormatterWizard.RestoreBreakpoints(LineMarks: PDWORD);
 var
   I: Integer;
+  Prev: DWORD;
   DS: IOTADebuggerServices;
   BP: IOTABreakpoint;
 begin
@@ -1070,8 +1071,16 @@ begin
   end;
 {$ELSE}
   // OTA 接口有 Bug 无法新增断点，只能用滚屏并模拟点击的方式新增
+  Prev := 0;
   while LineMarks^ <> 0 do
   begin
+    if LineMarks^ = Prev then // 相邻的同行的要忽略一个，免得两次点击后消失
+    begin
+      Inc(LineMarks);
+      Continue;
+    end;
+
+    Prev := LineMarks^;
 {$IFDEF DEBUG}
     CnDebugger.LogInteger(LineMarks^, 'Will Create Breakpoint using Click at');
 {$ENDIF}
