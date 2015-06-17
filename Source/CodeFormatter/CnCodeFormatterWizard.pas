@@ -1043,9 +1043,12 @@ end;
 procedure TCnCodeFormatterWizard.RestoreBreakpoints(LineMarks: PDWORD);
 var
   I: Integer;
-  Prev: DWORD;
+{$IFDEF OTA_NEW_BREAKPOINT_NOBUG}
   DS: IOTADebuggerServices;
   BP: IOTABreakpoint;
+{$ELSE}
+  Prev: DWORD;
+{$ENDIF}
 begin
   if LineMarks = nil then
     Exit;
