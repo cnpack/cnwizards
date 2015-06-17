@@ -140,6 +140,10 @@ begin
     RegisterMethod('Procedure LogCollectionWithTag( ACollection : TCollection; const ATag : string)');
     RegisterMethod('Procedure LogComponent( AComponent : TComponent)');
     RegisterMethod('Procedure LogComponentWithTag( AComponent : TComponent; const ATag : string)');
+    RegisterMethod('Procedure LogCurrentStack( const AMsg : string)');
+    RegisterMethod('Procedure LogConstArray( const Arr : array of const; const AMsg : string)');
+    RegisterMethod('Procedure LogClass( const AClass : TClass; const AMsg: string)');
+    RegisterMethod('Procedure LogInterface( const AIntf : IUnknown; const AMsg : string)');
     RegisterMethod('Procedure TraceMsg( const AMsg : string)');
     RegisterMethod('Procedure TraceMsgWithTag( const AMsg : string; const ATag : string)');
     RegisterMethod('Procedure TraceMsgWithLevel( const AMsg : string; ALevel : Integer)');
@@ -180,6 +184,10 @@ begin
     RegisterMethod('Procedure TraceCollectionWithTag( ACollection : TCollection; const ATag : string)');
     RegisterMethod('Procedure TraceComponent( AComponent : TComponent)');
     RegisterMethod('Procedure TraceComponentWithTag( AComponent : TComponent; const ATag : string)');
+    RegisterMethod('Procedure TraceCurrentStack( const AMsg : string)');
+    RegisterMethod('Procedure TraceConstArray( const Arr : array of const; const AMsg : string)');
+    RegisterMethod('Procedure TraceClass( const AClass : TClass; const AMsg: string)');
+    RegisterMethod('Procedure TraceInterface( const AIntf : IUnknown; const AMsg : string)');
     RegisterMethod('Procedure EvaluateObject( AObject : TObject);');
     RegisterProperty('Channel', 'TCnDebugChannel', iptr);
     RegisterProperty('Filter', 'TCnDebugFilter', iptr);
@@ -449,6 +457,10 @@ begin
     RegisterMethod(@TCnDebugger.LogCollectionWithTag, 'LogCollectionWithTag');
     RegisterMethod(@TCnDebugger.LogComponent, 'LogComponent');
     RegisterMethod(@TCnDebugger.LogComponentWithTag, 'LogComponentWithTag');
+    RegisterMethod(@TCnDebugger.LogCurrentStack, 'LogCurrentStack');
+    RegisterMethod(@TCnDebugger.LogConstArray, 'LogConstArray');
+    RegisterMethod(@TCnDebugger.LogClass, 'LogClass');
+    RegisterMethod(@TCnDebugger.LogInterface, 'LogInterface');
     RegisterMethod(@TCnDebugger.TraceMsg, 'TraceMsg');
     RegisterMethod(@TCnDebugger.TraceMsgWithTag, 'TraceMsgWithTag');
     RegisterMethod(@TCnDebugger.TraceMsgWithLevel, 'TraceMsgWithLevel');
@@ -489,6 +501,10 @@ begin
     RegisterMethod(@TCnDebugger.TraceCollectionWithTag, 'TraceCollectionWithTag');
     RegisterMethod(@TCnDebugger.TraceComponent, 'TraceComponent');
     RegisterMethod(@TCnDebugger.TraceComponentWithTag, 'TraceComponentWithTag');
+    RegisterMethod(@TCnDebugger.TraceCurrentStack, 'TraceCurrentStack');
+    RegisterMethod(@TCnDebugger.TraceConstArray, 'TraceConstArray');
+    RegisterMethod(@TCnDebugger.TraceClass, 'TraceClass');
+    RegisterMethod(@TCnDebugger.TraceInterface, 'TraceInterface');
     RegisterMethod(@TCnDebuggerEvaluateObject_P, 'EvaluateObject');
     RegisterPropertyHelper(@TCnDebuggerChannel_R, nil, 'Channel');
     RegisterPropertyHelper(@TCnDebuggerFilter_R, nil, 'Filter');
