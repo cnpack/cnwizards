@@ -841,10 +841,12 @@ begin
   // 如出现换行，换行处 SourceCol 被置 1、OldCol 被赋值为换行处，末了仍然是 NewSourceCol += P - OldCol;
 
   case P^ of
-    'A'..'Z', 'a'..'z', '_':
+    'A'..'Z', 'a'..'z', '_' {$IFDEF UNICODE}, #$0100..#$FFFF {$ENDIF}:
       begin
         Inc(P);
-        while P^ in ['A'..'Z', 'a'..'z', '0'..'9', '_'] do Inc(P);
+        while (P^ in ['A'..'Z', 'a'..'z', '0'..'9', '_'])
+          {$IFDEF UNICODE} or (P^ >= #$0100) {$ENDIF} do
+          Inc(P);
         Result := tokSymbol;
       end;
 
