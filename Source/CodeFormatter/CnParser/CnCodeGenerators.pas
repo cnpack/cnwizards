@@ -429,7 +429,7 @@ procedure TCnCodeGenerator.Write(const Text: string; BeforeSpaceCount,
 var
   Str, WrapStr, Tmp: string;
   ThisCanBeHead, PrevCanBeTail, IsCommentCRLFEnd, IsCRLFSpace: Boolean;
-  Len, ALen, Blanks: Integer;
+  Len, ALen, Blanks, LastSpaces: Integer;
 
   function ExceedLineWrap(Width: Integer): Boolean;
   begin
@@ -624,14 +624,15 @@ begin
     end;
   end;
 
-  // 如果上一次输出的内容是//行尾注释包括回车结尾，
-  // 并且本次输出如果头部空格太少，就需要简单加上上一行的空格缩进，无论是不是自动换行
-  // 然而会有上面自动换行时说到的副作用
+  // TODO: 如果上一次输出的内容是//行尾注释包括回车结尾，并且外头要求 Padding，
+  // 并且本次输出如果头部空格太少，则根据某基数缩进，这个基数是上面最近一行符合
+  // 以下条件的：非自动换行的行，非本行这种缩进行，非纯注释行。(条件未完整实现)
   if NeedPadding and FPrevIsComentCRLFEnd then
   begin
-    if HeadSpaceCount(Str) < LastIndentSpaceWithOutLineHeadCRLF then
+    LastSpaces := LastIndentSpaceWithOutLineHeadCRLF;
+    if HeadSpaceCount(Str) < LastSpaces then
     begin
-      Str := StringOfChar(' ', LastIndentSpaceWithOutLineHeadCRLF) + TrimLeft(Str);
+      Str := StringOfChar(' ', LastSpaces) + TrimLeft(Str);
       // 记录本行被上一行注释调整过，不能算作 LastIndentSpace，算自动换行的行号
       FAutoWrapLines.Add(Pointer(FCode.Count - 1));
     end;
