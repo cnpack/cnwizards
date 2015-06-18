@@ -1769,7 +1769,7 @@ procedure TCnBasePascalFormatter.FormatStatement(PreSpaceCount: Byte);
 begin
   while Scaner.ForwardToken() = tokColon do
   begin
-    WriteLineFeedByPrevCondition;
+    // WriteLineFeedByPrevCondition;  label 前面不刻意留一行，怕 begin 后空行显得难看
     FormatLabel;
     Match(tokColon);
 
