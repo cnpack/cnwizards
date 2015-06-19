@@ -729,8 +729,7 @@ begin
     else if (FLastToken in RightBracket) and (Token in [tokKeywordThen, tokKeywordDo,
       tokKeywordOf, tokKeywordTo, tokKeywordDownto]) then
       CodeGen.Write(' ')
-    else if (Token in LeftBracket) and (FLastToken in [tokKeywordIf, tokKeywordWhile,
-      tokKeywordFor, tokKeywordWith, tokKeywordCase, tokKeywordTo, tokKeywordDownto]) then
+    else if (Token in LeftBracket) and (FLastToken in NeedSpaceAfterKeywordTokens) then
       CodeGen.Write(' ');
       // 强行分离括号与关键字
   end;
@@ -1047,10 +1046,13 @@ begin
           tokTrue, tokFalse:
             CodeGen.Write(UpperFirst(Scaner.TokenString), PreSpaceCount, 0, NeedPadding);
             // CodeGen.Write(FormatString(Scaner.TokenString, CnCodeForRule.KeywordStyle), PreSpaceCount);
-          tokChar, tokString:
-            CodeGen.Write(Scaner.TokenString, PreSpaceCount, 0, NeedPadding); //QuotedStr
-          tokWString:
-            CodeGen.Write(Scaner.TokenString, PreSpaceCount, 0, NeedPadding);
+          tokChar, tokString, tokWString:
+            begin
+              if (FLastToken in NeedSpaceAfterKeywordTokens) // 字符串前面是这些关键字时，要以至少一个空格分隔
+                and (PreSpaceCount = 0) then
+                PreSpaceCount := 1;
+              CodeGen.Write(Scaner.TokenString, PreSpaceCount, 0, NeedPadding);
+            end;
         end;
 
         FLastToken := Scaner.Token;
@@ -1585,11 +1587,7 @@ begin
   FormatStmtList(Tab(PreSpaceCount));
   Writeln;
   
-  if Scaner.ForwardToken = tokLB then // 处理后面的空格
-    Match(tokKeywordUntil, PreSpaceCount, 1)
-  else
-    Match(tokKeywordUntil, PreSpaceCount);
-    
+  Match(tokKeywordUntil, PreSpaceCount);
   FormatExpression(0, PreSpaceCount);
 end;
 

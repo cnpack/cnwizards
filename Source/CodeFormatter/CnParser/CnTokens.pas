@@ -339,6 +339,10 @@ const
 
   CanBeNewIdentifierTokens = [tokInteger, tokFloat]; // 新语法允许 1.toString 这种
 
+  // 这批关键字后可跟表达式，所以后面需要空格
+  NeedSpaceAfterKeywordTokens = [tokKeywordIf, tokKeywordWhile, tokKeywordFor,
+    tokKeywordWith, tokKeywordCase, tokKeywordTo, tokKeywordDownto, tokKeywordUntil];
+
   function TokenToString(Token: TPascalToken): string;
   function StringToToken(TokenStr: string): TPascalToken;
 
