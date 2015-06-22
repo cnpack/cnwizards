@@ -123,16 +123,18 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
       Top = 120
       Width = 177
       Height = 89
-      ScrollBars = ssVertical
+      ScrollBars = ssBoth
       TabOrder = 4
+      WordWrap = False
     end
     object mmoIgnore: TMemo
       Left = 192
       Top = 120
       Width = 177
       Height = 89
-      ScrollBars = ssVertical
+      ScrollBars = ssBoth
       TabOrder = 5
+      WordWrap = False
     end
     object chkIgnoreNoSrc: TCheckBox
       Left = 8

@@ -245,6 +245,7 @@ begin
         AKind := ukCurrProject
       else
         AKind := ukProjectGroup;
+
       DoSaveSettings;
       Result := True;
     end;
