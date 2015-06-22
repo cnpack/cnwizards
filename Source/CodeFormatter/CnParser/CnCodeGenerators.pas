@@ -335,30 +335,47 @@ function TCnCodeGenerator.GetLastIndentSpaceWithOutLineHeadCRLF: Integer;
 var
   I, Len: Integer;
   S: string;
+  List: TStrings;
 begin
   Result := 0;
-  S := FCode[FCode.Count - 1];
-  if (S = '') and (FCode.Count > 1) then
-    S := FCode[FCode.Count - 2];
+  List := TStringList.Create;
+  try
+    List.Assign(FCode);
+    for I := FAutoWrapLines.Count - 1 downto 0 do
+      List.Delete(Integer(FAutoWrapLines[I]));
 
-  Len := Length(S);  // 去掉本行尾部的单个回车换行
-  if Len > 2 then
-    if (S[Len - 1] = #13) and (S[Len] = #10) then
-      Delete(S, Len - 1, 2);
+    // 此时 List 里是不包括自动换行的行
+    S := List.Text;
+    List.Text := S;
 
-  if Pos(CRLF, S) > 0 then
-    S := Copy(S, LastDelimiter(#10, S) + 1, MaxInt);
+    // 此时 List 里的回车换行均已变成分隔符
+    S := '';
+    for I := List.Count - 1 downto 0 do
+    begin
+      if (List[I] <> '') and IsCommentLine(List[I]) then
+      begin
+        S := List[I];
+        Break;
+      end;
+    end;
 
-  Len := Length(S);    // 把最后一行的最后一个换行符号后的空格长度整过来
-  if Len > 0 then
-  begin
-    for I := 1 to Len do
-      if S[I] in [' ', #09] then
-        Inc(Result)
-      else
-        Exit;
+    if S = '' then
+      Exit;
+
+    // 此时 S 是最后一个有内容的并且不是注释的并且不是自动换行的行
+
+    Len := Length(S);    // 把 S 的左边空格长度整过来
+    if Len > 0 then
+    begin
+      for I := 1 to Len do
+        if S[I] in [' ', #09] then
+          Inc(Result)
+        else
+          Exit;
+    end;
+  finally
+    List.Free;
   end;
-
 end;
 
 function TCnCodeGenerator.GetLockedCount: Word;
