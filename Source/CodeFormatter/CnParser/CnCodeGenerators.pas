@@ -49,7 +49,9 @@ type
 
   TCnCodeGenerator = class
   private
-    FCode: TStrings;
+    FCode: TStrings;                // 存储输出内容，内容中可能有注释引入的回车换行
+    FActualLines: TStrings;         // 存储规范了的输出内容，也就是不包含回车换行
+    FActualWriteHelper: TStrings;    
     FLock: Word;
     FColumnPos: Integer;            // 当前列值，注意它和实际情况不一定一致，因为 FCode 中的字符串可能带回车换行
     FActualColumn: Integer;         // 当前实际列值，等于 FCode 最后一行最后一个 #13#10 后的内容
@@ -58,9 +60,10 @@ type
     FPrevRow: Integer;
     FPrevColumn: Integer;
     FPrevIsComentCRLFEnd: Boolean;
-    FLastNoAutoWrapLine: Integer;
     FLastExceedPosition: Integer; // 本行超出 WrapWidth 的点，供行尾超长时回溯重新换行使用
-    FAutoWrapLines: TList; // 记录自动换行的行号，用来搜寻最近一次非自动换行的行缩进
+    FAutoWrapLines: TList;        // 记录自动换行的行号，用来搜寻最近一次非自动换行的行缩进。
+    // 注意行号存储的是规范行。
+
     FOnAfterWrite: TCnAfterWriteEvent;
     FAutoWrapButNoIndent: Boolean;
     FWritingBlank: Boolean;
@@ -70,11 +73,10 @@ type
     function GetPrevRow: Integer;
     function GetCurrColumn: Integer;
     function GetCurrRow: Integer;
-    function GetLastIndentSpace: Integer;
-    // 自动换行缩进时，找出上一个非自动换行的缩进行
-    procedure CalcLastNoAutoIndentLine;
-    function GetLastIndentSpaceWithOutLineHeadCRLF: Integer;
+    function GetLastIndentSpaceWithOutComments: Integer;
     function GetActualRow: Integer;
+    function LineIsEmptyOrComment(const Str: string): Boolean;
+    procedure RecordAutoWrapLines(Line: Integer);
   protected
     procedure DoAfterWrite(IsWriteln: Boolean; PrefixSpaces: Integer = 0); virtual;
     // 当 IsWriteln 为 True 时，PrefixSpaces 表示本次写入回车后可能写的空格数，否则为 0
@@ -116,10 +118,8 @@ type
        是属于 CopyPartout 的最后一个字符，因此无需加一}
     property CurIndentSpace: Integer read GetCurIndentSpace;
     {* 当前行最前面的空格数}
-    property LastIndentSpace: Integer read GetLastIndentSpace;
-    {* 上一个非自动换行的行的最前面的空格数}
-    property LastIndentSpaceWithOutLineHeadCRLF: Integer read GetLastIndentSpaceWithOutLineHeadCRLF;
-    {* 上一个非自动换行的行的最前面的空格数，不包括行尾是回车的情况}
+    property LastIndentSpaceWithOutComments: Integer read GetLastIndentSpaceWithOutComments;
+    {* 上一个非自动换以及非注释的行的最前面的空格数}
     property CodeWrapMode: TCodeWrapMode read FCodeWrapMode write FCodeWrapMode;
     {* 代码换行的设置}
 
@@ -171,44 +171,6 @@ begin
   end;
 end;
 
-procedure TCnCodeGenerator.CalcLastNoAutoIndentLine;
-var
-  I: Integer;
-  MaxAuto, MaxLine: Integer;
-begin
-  if FAutoWrapLines.Count = 0 then // 如果没自动换行的行，就最后一行
-  begin
-    FLastNoAutoWrapLine := FCode.Count - 1;
-    Exit;
-  end;
-
-  MaxAuto := Integer(FAutoWrapLines[FAutoWrapLines.Count - 1]);
-  MaxLine := FCode.Count - 1;
-
-  if MaxLine > MaxAuto then // 如果最后一行是非自动换行的行，就它了
-  begin
-    FLastNoAutoWrapLine := MaxLine;
-    Exit;
-  end
-  else if MaxLine = MaxAuto then // 如果最后一行是自动换行的行，则需要往回找
-  begin
-    for I := FAutoWrapLines.Count - 1 downto 0 do
-    begin
-      // 找到不在 FAutoWrapLines 里头最大的一行
-      if MaxAuto > Integer(FAutoWrapLines[I]) then
-      begin
-        FLastNoAutoWrapLine := MaxAuto;
-        Exit;
-      end;
-      Dec(MaxAuto);
-    end;
-    // 如果到此处，说明 FAutoWrapLines 中只有一行且等于当前行且正好是自动换行的行
-    FLastNoAutoWrapLine := MaxAuto;
-  end
-  else
-    FLastNoAutoWrapLine := -1; // Should not here
-end;
-
 procedure TCnCodeGenerator.ClearOutputLock;
 begin
   FLock := 0;
@@ -222,7 +184,7 @@ begin
   Result := '';
   if EndRow > FCode.Count - 1 then
     EndRow := FCode.Count - 1;
-    
+
   if EndRow < StartRow then Exit;
   if (EndRow = StartRow) and (EndColumn < StartColumn) then Exit;
 
@@ -251,10 +213,14 @@ begin
   FLock := 0;
   FCodeWrapMode := cwmNone;
   FAutoWrapLines := TList.Create;
+  FActualLines := TStringList.Create;
+  FActualWriteHelper := TStringList.Create;
 end;
 
 destructor TCnCodeGenerator.Destroy;
 begin
+  FActualWriteHelper.Free;
+  FActualLines.Free;
   FAutoWrapLines.Free;
   FCode.Free;
   inherited;
@@ -305,76 +271,49 @@ begin
   Result := FCode.Count - 1;
 end;
 
-function TCnCodeGenerator.GetLastIndentSpace: Integer;
+function TCnCodeGenerator.GetLastIndentSpaceWithOutComments: Integer;
 var
   I, Len: Integer;
   S: string;
+
+  function IsAutoWrapLineNumber(Line: Integer): Boolean;
+  var
+    J: Integer;
+  begin
+    Result := True;
+    for J := FAutoWrapLines.Count - 1 downto 0 do
+      if Integer(FAutoWrapLines[J]) = Line then
+        Exit;
+
+    Result := False;
+  end;
+
 begin
   Result := 0;
-  CalcLastNoAutoIndentLine;
-  if (FCode.Count > 0) and (FLastNoAutoWrapLine >= 0) and
-    (FLastNoAutoWrapLine < FCode.Count) then
-  begin
-    S := FCode[FLastNoAutoWrapLine];
-    if Pos(CRLF, S) > 0 then
-      S := Copy(S, LastDelimiter(#10, S) + 1, MaxInt);
 
-    Len := Length(S);    // 不能简单拿最后一行，必须把最后一行的最后一个换行符号后的空格长度整过来
-    if Len > 0 then
+  S := '';
+  for I := FActualLines.Count - 1 downto 0 do
+  begin
+    if (FActualLines[I] <> '') and not IsAutoWrapLineNumber(I) and not
+      LineIsEmptyOrComment(FActualLines[I]) then
     begin
-      for I := 1 to Len do
-        if S[I] in [' ', #09] then
-          Inc(Result)
-        else
-          Exit;
+      S := FActualLines[I];
+      Break;
     end;
   end;
-end;
 
-function TCnCodeGenerator.GetLastIndentSpaceWithOutLineHeadCRLF: Integer;
-var
-  I, Len: Integer;
-  S: string;
-  List: TStrings;
-begin
-  Result := 0;
-  List := TStringList.Create;
-  try
-    List.Assign(FCode);
-    for I := FAutoWrapLines.Count - 1 downto 0 do
-      List.Delete(Integer(FAutoWrapLines[I]));
+  if S = '' then
+    Exit;
 
-    // 此时 List 里是不包括自动换行的行
-    S := List.Text;
-    List.Text := S;
-
-    // 此时 List 里的回车换行均已变成分隔符
-    S := '';
-    for I := List.Count - 1 downto 0 do
-    begin
-      if (List[I] <> '') and IsCommentLine(List[I]) then
-      begin
-        S := List[I];
-        Break;
-      end;
-    end;
-
-    if S = '' then
-      Exit;
-
-    // 此时 S 是最后一个有内容的并且不是注释的并且不是自动换行的行
-
-    Len := Length(S);    // 把 S 的左边空格长度整过来
-    if Len > 0 then
-    begin
-      for I := 1 to Len do
-        if S[I] in [' ', #09] then
-          Inc(Result)
-        else
-          Exit;
-    end;
-  finally
-    List.Free;
+  // 此时 S 是最后一个有内容的并且不是注释的并且不是自动换行的行，把 S 的左边空格长度整过来
+  Len := Length(S);
+  if Len > 0 then
+  begin
+    for I := 1 to Len do
+      if S[I] in [' ', #09] then
+        Inc(Result)
+      else
+        Exit;
   end;
 end;
 
@@ -400,14 +339,74 @@ begin
   FCode[FCode.Count - 1] := TrimRight(FCode[FCode.Count - 1]);
   FCode.Add('');
 
+  FActualLines[FActualLines.Count - 1] := TrimRight(FActualLines[FActualLines.Count - 1]);
+  FActualLines.Add('');
+
   FColumnPos := 0;
   FActualColumn := 0;
   FLastExceedPosition := 0;
 end;
 
+function TCnCodeGenerator.LineIsEmptyOrComment(const Str: string): Boolean;
+var
+  Line: string;
+  I: Integer;
+  InComment1, InComment2: Boolean;
+begin
+  Result := False;
+  Line := Trim(Str);
+  if Length(Line) = 0 then
+    Exit;
+
+  InComment1 := False;
+  InComment2 := False;
+  I := 1;
+  while I <= Length(Line) do
+  begin
+    if Line[I] = '{' then
+      InComment1 := True
+    else if Line[I] = '}' then
+      InComment1 := False
+    else if (Line[I] = '(') and ((I < Length(Line)) and (Line[I + 1] = '*')) then
+    begin
+      InComment2 := True;
+      Inc(I);
+    end
+    else if (Line[I] = '*') and ((I < Length(Line)) and (Line[I + 1] = ')')) then
+    begin
+      InComment2 := False;
+      Inc(I);
+    end
+    else if not InComment1 and not InComment2 then
+    begin
+      // 当前不是在两种括号注释内的话
+      if (Line[I] = '/') and ((I < Length(Line)) and (Line[I + 1] = '/')) then
+      begin
+        // 后面是整行注释
+        Result := True;
+        Exit;
+      end;
+
+      if Line[I] >= ' ' then // 有非空白字符，直接返回 False
+        Exit;
+    end;
+
+    Inc(I);
+  end;
+  Result := True;
+end;
+
 procedure TCnCodeGenerator.LockOutput;
 begin
   Inc(FLock);
+end;
+
+procedure TCnCodeGenerator.RecordAutoWrapLines(Line: Integer);
+begin
+  if FAutoWrapLines.Count = 0 then
+    FAutoWrapLines.Add(Pointer(Line))
+  else if FAutoWrapLines[FAutoWrapLines.Count - 1] <> Pointer(Line) then
+    FAutoWrapLines.Add(Pointer(Line));
 end;
 
 procedure TCnCodeGenerator.Reset;
@@ -444,9 +443,9 @@ end;
 procedure TCnCodeGenerator.Write(const Text: string; BeforeSpaceCount,
   AfterSpaceCount: Word; NeedPadding: Boolean);
 var
-  Str, WrapStr, Tmp: string;
-  ThisCanBeHead, PrevCanBeTail, IsCommentCRLFEnd, IsCRLFSpace: Boolean;
-  Len, ALen, Blanks, LastSpaces: Integer;
+  Str, WrapStr, Tmp, S: string;
+  ThisCanBeHead, PrevCanBeTail, IsCommentCRLFEnd, IsCRLFSpace, IsAfterCommentAuto: Boolean;
+  Len, ALen, Blanks, LastSpaces, CRLFPos, I: Integer;
 
   function ExceedLineWrap(Width: Integer): Boolean;
   begin
@@ -540,7 +539,9 @@ begin
   
   if FCode.Count = 0 then
     FCode.Add('');
-
+  if FActualLines.Count = 0 then
+    FActualLines.Add('');
+  
   ThisCanBeHead := StrCanBeHead(Text);
   PrevCanBeTail := StrCanBeTail(FPrevStr);
 
@@ -597,12 +598,12 @@ begin
       end
       else
       begin
-        Str := StringOfChar(' ', LastIndentSpace + CnPascalCodeForRule.TabSpaceCount)
+        Str := StringOfChar(' ', LastIndentSpaceWithOutComments + CnPascalCodeForRule.TabSpaceCount)
           + TrimLeft(Str); // 自动换行后左边原有的空格就不需要了
         // 找出上一次非自动缩进的缩进，而不是简单的上一行缩进值，避免多重缩进
       end;
       InternalWriteln;
-      FAutoWrapLines.Add(Pointer(FCode.Count - 1)); // 自动换行的行号要记录
+      RecordAutoWrapLines(FActualLines.Count - 1); // 自动换行的行号要记录
     end;
   end
   else if FCodeWrapMode = cwmAdvanced then
@@ -630,33 +631,70 @@ begin
       end
       else
       begin
-        Str := StringOfChar(' ', LastIndentSpace + CnPascalCodeForRule.TabSpaceCount)
+        Str := StringOfChar(' ', LastIndentSpaceWithOutComments + CnPascalCodeForRule.TabSpaceCount)
           + TrimLeft(WrapStr) + Str; // 自动换行后左边原有的空格就不需要了
         // 找出上一次非自动缩进的缩进，而不是简单的上一行缩进值，避免多重缩进
         // 然而上一次非自动缩进的缩进如果是由于上上一行的带换行的注释引入，
         // 则很可能不符合自动换行的缩进规则，还是会引起本行不必要的多余缩进
       end;
       InternalWriteln;
-      FAutoWrapLines.Add(Pointer(FCode.Count - 1)); // 自动换行的行号要记录
+      RecordAutoWrapLines(FActualLines.Count - 1); // 自动换行的行号要记录
     end;
   end;
 
-  // TODO: 如果上一次输出的内容是//行尾注释包括回车结尾，并且外头要求 Padding，
+  // 如果上一次输出的内容是//行尾注释包括回车结尾，并且外头要求 Padding，
   // 并且本次输出如果头部空格太少，则根据某基数缩进，这个基数是上面最近一行符合
-  // 以下条件的：非自动换行的行，非本行这种缩进行，非纯注释行。(条件未完整实现)
+  // 以下条件的：非自动换行的行，非本行这种缩进行，非纯注释行。
+  IsAfterCommentAuto := False;
   if NeedPadding and FPrevIsComentCRLFEnd then
   begin
-    LastSpaces := LastIndentSpaceWithOutLineHeadCRLF;
+    LastSpaces := LastIndentSpaceWithOutComments;
     if HeadSpaceCount(Str) < LastSpaces then
-    begin
-      Str := StringOfChar(' ', LastSpaces) + TrimLeft(Str);
-      // 记录本行被上一行注释调整过，不能算作 LastIndentSpace，算自动换行的行号
-      FAutoWrapLines.Add(Pointer(FCode.Count - 1));
-    end;
+      Str := StringOfChar(' ', LastSpaces + CnPascalCodeForRule.TabSpaceCount) + TrimLeft(Str);
+
+    IsAfterCommentAuto := True;
   end;
 
   FCode[FCode.Count - 1] :=
     Format('%s%s', [FCode[FCode.Count - 1], Str]);
+
+  CRLFPos := Pos(CRLF, Str);
+  if CRLFPos > 0 then
+  begin
+    // 如果本次写入的内容有回车换行，则将上次该换行的位置置零
+    FLastExceedPosition := 0;
+
+    // 不能直接用 TStringList 的 Text 赋值再转回，会造成空行以及两头尾丢失
+    S := '';
+    Tmp := Str;
+    FActualWriteHelper.Clear;
+    repeat
+      S := Copy(Tmp, 1, CRLFPos - 1);
+      FActualWriteHelper.Add(S);
+      Delete(Tmp, 1, CRLFPos - 1 + Length(CRLF));
+      CRLFPos := Pos(CRLF, Tmp);
+    until CRLFPos = 0;
+    FActualWriteHelper.Add(Tmp);
+
+    FActualLines[FActualLines.Count - 1] :=
+      Format('%s%s', [FActualLines[FActualLines.Count - 1], FActualWriteHelper[0]]);
+
+    if FActualWriteHelper.Count > 1 then
+    begin
+      for I := 1 to FActualWriteHelper.Count - 1 do
+        FActualLines.Add(FActualWriteHelper[I]);
+    end;
+  end
+  else
+  begin
+    FActualLines[FActualLines.Count - 1] :=
+      Format('%s%s', [FActualLines[FActualLines.Count - 1], Str]);
+  end;
+  // 同步更新 FCode 和 FActualLines
+
+  // 输出完毕后，记录本行被上一行注释调整过，不能算作 LastIndentSpace，算自动换行的行号
+  if IsAfterCommentAuto then
+    RecordAutoWrapLines(FActualLines.Count - 1);
 
   FPrevColumn := FColumnPos;
   FPrevIsComentCRLFEnd := IsCommentCRLFEnd;
@@ -668,10 +706,6 @@ begin
 // Ansi 模式下，长度直接符合一般规则
 
   FPrevStr := Text;
-
-  // 如果本次写入的内容有回车换行，则将上次该换行的位置置零
-  if Pos(CRLF, Str) > 0 then
-    FLastExceedPosition := 0;
 
   Str := FCode[FCode.Count - 1];
   FColumnPos := Length(Str);
@@ -704,6 +738,9 @@ begin
   FPrevRow := FCode.Count - 1;
 
   FCode.Add('');
+
+  FActualLines[FActualLines.Count - 1] := TrimRight(FActualLines[FActualLines.Count - 1]);
+  FActualLines.Add('');
 
   FPrevColumn := FColumnPos;
   FColumnPos := 0;

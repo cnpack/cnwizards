@@ -837,7 +837,36 @@ end;
 { ConstExpr -> <constant-expression> }
 procedure TCnBasePascalFormatter.FormatConstExpr(PreSpaceCount: Byte);
 begin
-  FormatExpression(PreSpaceCount);
+  // 从 FormatExpression 复制而来，为了区分来源
+  FormatSimpleExpression(PreSpaceCount, PreSpaceCount);
+
+  while Scaner.Token in RelOpTokens + [tokHat, tokSLB, tokDot] do
+  begin
+    // 这块对泛型的处理已移动到内部以处理 function call 的情形
+
+    if Scaner.Token in RelOpTokens then
+    begin
+      MatchOperator(Scaner.Token);
+      FormatSimpleExpression;
+    end;
+
+    // 这几处额外的内容，不知道有啥副作用
+
+    // pchar(ch)^
+    if Scaner.Token = tokHat then
+      Match(tokHat)
+    else if Scaner.Token = tokSLB then  // PString(PStr)^[1]
+    begin
+      Match(tokSLB);
+      FormatExprList(0, PreSpaceCount);
+      Match(tokSRB);
+    end
+    else if Scaner.Token = tokDot then // typecase
+    begin
+      Match(tokDot);
+      FormatExpression(0, PreSpaceCount);
+    end;
+  end;
 end;
 
 { 新加的用于 type 中的 ConstExpr -> <constant-expression> ，
@@ -2604,24 +2633,24 @@ end;
 { EnumeratedType -> '(' EnumeratedList ')' }
 procedure TCnBasePascalFormatter.FormatEnumeratedType(PreSpaceCount: Byte);
 begin
-  SpecifyElementType(pfetEnumType);
-  try
-    Match(tokLB, PreSpaceCount);
-    FormatEnumeratedList;
-    Match(tokRB);
-  finally
-    RestoreElementType;
-  end;
+  Match(tokLB, PreSpaceCount);
+  FormatEnumeratedList;
+  Match(tokRB);
 end;
 
 { EnumeratedList -> EmumeratedIdent/','... }
 procedure TCnBasePascalFormatter.FormatEnumeratedList(PreSpaceCount: Byte);
 begin
-  FormatEmumeratedIdent(PreSpaceCount);
-  while Scaner.Token = tokComma do
-  begin
-    Match(tokComma);
-    FormatEmumeratedIdent;
+  SpecifyElementType(pfetEnumList);
+  try
+    FormatEmumeratedIdent(PreSpaceCount);
+    while Scaner.Token = tokComma do
+    begin
+      Match(tokComma);
+      FormatEmumeratedIdent;
+    end;
+  finally
+    RestoreElementType;
   end;
 end;
 
@@ -5331,7 +5360,7 @@ end;
 
 function TCnAbstractCodeFormatter.CalcNeedPadding: Boolean;
 begin
-  Result := FElementType in [pfetExpression, pfetEnumType];
+  Result := FElementType in [pfetExpression, pfetEnumList];
   // 暂且表达式内部与枚举定义内部，碰到注释导致的换行时，才要求自动和上一行对齐
 end;
 

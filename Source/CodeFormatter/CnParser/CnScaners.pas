@@ -1274,8 +1274,8 @@ begin
   Inc(FNewSourceCol, FSourcePtr - FOldSourceColPtr);
 
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('Line: %5.5d: Col %4.4d. Token: %s. InIgnoreArea %d', [FSourceLine,
-    FSourceCol, TokenString, Integer(InIgnoreArea)]);
+//  CnDebugger.LogFmt('Line: %5.5d: Col %4.4d. Token: %s. InIgnoreArea %d', [FSourceLine,
+//    FSourceCol, TokenString, Integer(InIgnoreArea)]);
 {$ENDIF}
 
   if InIgnoreArea and (FCodeGen <> nil) then
