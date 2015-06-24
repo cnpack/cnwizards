@@ -246,7 +246,7 @@ type
 
   TCnProcListComboBox = class(TCnEdit)
   private
-    FChangeDown: Boolean; // 是否由于文字改变导致的下拉
+    FChangeDown: Boolean;
     FDisableChange: Boolean;
     FOnKillFocus: TNotifyEvent;
     FDropDownList: TCnProcDropDownBox;
@@ -271,6 +271,7 @@ type
     property DropDownList: TCnProcDropDownBox read FDropDownList;
     property OnKillFocus: TNotifyEvent read FOnKillFocus write FOnKillFocus;
     property ChangeDown: Boolean read FChangeDown write FChangeDown;
+    // 是否由于文字改变导致的下拉，为 False 时大概是点击导致的下拉
   end;
 
   TCnProcToolButton = class(TToolButton);
@@ -590,9 +591,10 @@ end;
 procedure TCnProcListWizard.ClassComboDropDown(Sender: TObject);
 var
   ClassCombo: TCnProcListComboBox;
-  I: Integer;
+  I, Idx: Integer;
   Info: TCnElementInfo;
   Obj: TCnProcToolBarObj;
+  AText: string;
 begin
   CheckReparse;
   ClassCombo := Sender as TCnProcListComboBox;
@@ -610,12 +612,26 @@ begin
 
   if not ClassCombo.ChangeDown then
   begin
+    AText := ClassCombo.Text;
     ClassCombo.SetTextWithoutChange('');
     ClassCombo.DropDownList.MatchStr := '';
     ClassCombo.DropDownList.MatchStart := Obj.ToolBtnMatchStart.Down;
     ClassCombo.DropDownList.UpdateDisplay;
-    if ClassCombo.DropDownList.DisplayItems.Count > 0 then  
+    if ClassCombo.DropDownList.DisplayItems.Count > 0 then
+    begin
+      // DropDownList 定位并显示到 AText
+      Idx := ClassCombo.DropDownList.DisplayItems.IndexOf(AText);
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('TCnProcListWizard.ClassComboDropDown. To Select %d, Text: %s',
+        [Idx, AText]);
+{$ENDIF}
+
+      // 有待选中条目，则选中其上一个，UpdateDisplay 会再下移一个条目
+      if Idx >= 1 then
+        ClassCombo.DropDownList.ItemIndex := Idx - 1;
+
       ClassCombo.ShowDropBox;
+    end;
   end;
 
   CnWizNotifierServices.ExecuteOnApplicationIdle(ClassCombo.RefreshDropBox);
@@ -1308,9 +1324,10 @@ end;
 procedure TCnProcListWizard.ProcComboDropDown(Sender: TObject);
 var
   ProcCombo: TCnProcListComboBox;
-  I: Integer;
+  I, Idx: Integer;
   Info: TCnElementInfo;
   Obj: TCnProcToolBarObj;
+  AText: string;
 begin
   CheckReparse;
   ProcCombo := Sender as TCnProcListComboBox;
@@ -1329,12 +1346,26 @@ begin
 
   if not ProcCombo.ChangeDown then
   begin
+    AText := ProcCombo.Text;
     ProcCombo.SetTextWithoutChange('');
     ProcCombo.DropDownList.MatchStr := '';
     ProcCombo.DropDownList.MatchStart := Obj.ToolBtnMatchStart.Down;
     ProcCombo.DropDownList.UpdateDisplay;
     if ProcCombo.DropDownList.DisplayItems.Count > 0 then
+    begin
+      // DropDownList 定位并显示到 AText
+      Idx := ProcCombo.DropDownList.DisplayItems.IndexOf(AText);
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('TCnProcListWizard.ProcComboDropDown. To Select %d, Text: %s',
+        [Idx, AText]);
+{$ENDIF}
+
+      // 有待选中条目，则选中其上一个，UpdateDisplay 会再下移一个条目
+      if Idx >= 1 then
+        ProcCombo.DropDownList.ItemIndex := Idx - 1;
+
       ProcCombo.ShowDropBox;
+    end;
   end;
 
   CnWizNotifierServices.ExecuteOnApplicationIdle(ProcCombo.RefreshDropBox);
