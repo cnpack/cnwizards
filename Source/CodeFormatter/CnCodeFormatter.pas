@@ -91,6 +91,7 @@ type
 
     procedure ResetElementType;
     function CalcNeedPadding: Boolean;
+    procedure WriteOneSpace;
   protected
     FIsTypeID: Boolean;
     {* 错误处理函数 }
@@ -732,14 +733,14 @@ begin
   begin
     // 两个标识符之间以空格分离
     if ( (FLastToken in IdentTokens) and (Token in IdentTokens + [tokAtSign]) ) then
-      CodeGen.Write(' ')
+      WriteOneSpace
     else if (FLastToken in RightBracket) and (Token in [tokKeywordThen, tokKeywordDo,
       tokKeywordOf, tokKeywordTo, tokKeywordDownto]) then
-      CodeGen.Write(' ')  // 强行分离右括号与关键字
+      WriteOneSpace  // 强行分离右括号与关键字
     else if (Token in LeftBracket + [tokPlus, tokMinus, tokHat]) and
       ((FLastToken in NeedSpaceAfterKeywordTokens)
       or ((FLastToken = tokKeywordAt) and UpperContainElementType(pfetRaiseAt))) then
-      CodeGen.Write(' '); // 强行分离左括号/前置运算符号，与关键字以及 raise 语句中的 at，注意 at 后的表达式盖掉了pfetRaiseAt，所以需要获取上一层
+      WriteOneSpace; // 强行分离左括号/前置运算符号，与关键字以及 raise 语句中的 at，注意 at 后的表达式盖掉了pfetRaiseAt，所以需要获取上一层
   end;
 
   NeedPadding := CalcNeedPadding;
@@ -2155,7 +2156,7 @@ begin
         if AfterKeyword and not (Scaner.Token in [tokCRLF, tokSemicolon]) then // 第一字后面必须有空格
         begin
           if InstrucLen >= CnPascalCodeForRule.SpaceTabASMKeyword then
-            CodeGen.Write(' ')
+            WriteOneSpace
           else
             CodeGen.Write(Space(CnPascalCodeForRule.SpaceTabASMKeyword - InstrucLen));
         end;
@@ -2616,14 +2617,14 @@ begin
       ] then
       begin
         if not IgnoreFirst then
-          CodeGen.Write(' '); // 非第一个 Directive，和之前的内容空格分隔
+          WriteOneSpace; // 非第一个 Directive，和之前的内容空格分隔
         WriteToken(Scaner.Token, 0, 0, False, False, True);
         Scaner.NextToken;
 
         if not (Scaner.Token in DirectiveTokens) then // 加个后续的表达式
         begin
           if Scaner.Token in [tokString, tokWString, tokLB, tokPlus, tokMinus] then
-            CodeGen.Write(' '); // 后续表达式空格分隔
+            WriteOneSpace; // 后续表达式空格分隔
           FormatConstExpr;
         end;
         //  Match(Scaner.Token);
@@ -2631,7 +2632,7 @@ begin
       else
       begin
         if not IgnoreFirst then
-          CodeGen.Write(' '); // 非第一个 Directive，和之前的内容空格分隔
+          WriteOneSpace; // 非第一个 Directive，和之前的内容空格分隔
         WriteToken(Scaner.Token, 0, 0, False, False, True);
         Scaner.NextToken;
       end;
@@ -3332,7 +3333,7 @@ begin
   end;
 
   // deal with the Directive after OF OBJECT
-  // if Scaner.Token in DirectiveTokens then CodeGen.Write(' ');
+  // if Scaner.Token in DirectiveTokens then WriteOneSpace;
 
   IsSemicolon := False;
   if (Scaner.Token = tokSemicolon) and (Scaner.ForwardToken in DirectiveTokens) then
@@ -3425,7 +3426,7 @@ procedure TCnBasePascalFormatter.FormatPropertySpecifiers(PreSpaceCount: Byte);
   procedure ProcessBlank;
   begin
     if Scaner.Token in [tokString, tokWString, tokLB, tokPlus, tokMinus] then
-      CodeGen.Write(' '); // 后续表达式空格分隔
+      WriteOneSpace; // 后续表达式空格分隔
   end;
 
 begin
@@ -5398,6 +5399,11 @@ begin
     if List[I] = Pointer(ElementType) then
       Exit;
   Result := False;
+end;
+
+procedure TCnAbstractCodeFormatter.WriteOneSpace;
+begin
+  CodeGen.WriteOneSpace;
 end;
 
 initialization

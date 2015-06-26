@@ -87,6 +87,9 @@ type
     procedure Reset;
     procedure Write(const Text: string; BeforeSpaceCount:Word = 0;
       AfterSpaceCount: Word = 0; NeedPadding: Boolean = False);
+    procedure WriteOneSpace;
+    // 供格式化写语句中的单个分隔空格用，会判断是否已有注释带来的空格而决定是否写一个空格
+
     procedure WriteBlank(const Text: string);
     procedure InternalWriteln;
     procedure Writeln;
@@ -751,6 +754,20 @@ begin
 //  CnDebugger.LogFmt('NewLine Wrote from %d %d to %d %d', [FPrevRow, FPrevColumn,
 //    GetCurrRow, GetCurrColumn]);
 {$ENDIF}
+end;
+
+procedure TCnCodeGenerator.WriteOneSpace;
+var
+  S: string;
+begin
+  // 如果上一个是空格，则忽略
+  if FCode.Count > 0 then
+  begin
+    S := FCode[FCode.Count - 1];
+    if (Length(S) > 0) and (S[Length(S)] = ' ') then
+      Exit;
+  end;
+  Write(' ');
 end;
 
 end.
