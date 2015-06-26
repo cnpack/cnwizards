@@ -100,6 +100,7 @@ type
     tokKeywordArray,
     tokKeywordAs,
     tokKeywordAsm,
+    tokKeywordAt,
     tokKeywordAutomated,
     tokKeywordBegin,
     tokKeywordCase,
@@ -234,7 +235,7 @@ type
   // 用来指明当前位置处于哪些基本位置（可嵌套但互斥），
   // 如属性的修饰符区域、函数调用修饰符区域等
   TCnPascalFormattingElementType = (pfetUnknown, pfetAsm, pfetPropertySpecifier,
-    pfetDirective, pfetPropertyIndex, pfetExpression, pfetEnumList);
+    pfetDirective, pfetPropertyIndex, pfetExpression, pfetEnumList, pfetRaiseAt);
 
   TCnPascalFormattingElementTypeSet = set of TCnPascalFormattingElementType;
 
@@ -409,6 +410,7 @@ const
     (Value: Integer(tokKeywordArray);          Name: 'Array'),
     (Value: Integer(tokKeywordAs);             Name: 'As'),
     (Value: Integer(tokKeywordAsm);            Name: 'Asm'),
+    (Value: Integer(tokKeywordAt);             Name: 'At'),
     (Value: Integer(tokKeywordAutomated);      Name: 'Automated'),
     (Value: Integer(tokKeywordBegin);          Name: 'Begin'),
     (Value: Integer(tokKeywordCase);           Name: 'Case'),

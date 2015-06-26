@@ -50,6 +50,11 @@ const
 type
   TCnGoalType = (gtUnknown, gtProgram, gtLibrary, gtUnit, gtPackage);
 
+  TCnElementStack = class(TStack)
+  public
+    function Contains(ElementType: TCnPascalFormattingElementType): Boolean;
+  end;
+
   TCnAbstractCodeFormatter = class
   private
     FScaner: TAbstractScaner;
@@ -66,7 +71,7 @@ type
     FFirstMatchStart: Boolean;
     FFirstMatchEnd: Boolean;
     // 用来粗略记录当前正在格式化的点，以备输出时根据场景判断是否使用关键字规则
-    FOldElementTypes: TStack;
+    FOldElementTypes: TCnElementStack;
     FElementType: TCnPascalFormattingElementType;
     FPrefixSpaces: Integer;
 
@@ -81,6 +86,8 @@ type
     procedure SpecifyElementType(Element: TCnPascalFormattingElementType);
     procedure RestoreElementType;
     // 区分当前位置并恢复，必须配对使用
+    function UpperContainElementType(ElementType: TCnPascalFormattingElementType): Boolean;
+    // 上层是否包含指定 ElementType
 
     procedure ResetElementType;
     function CalcNeedPadding: Boolean;
@@ -444,7 +451,7 @@ begin
   FCodeGen.OnAfterWrite := CodeGenAfterWrite;
   FScaner := TScaner.Create(AStream, FCodeGen, ACompDirectiveMode);
 
-  FOldElementTypes := TStack.Create;
+  FOldElementTypes := TCnElementStack.Create;
   FScaner.NextToken;
 end;
 
@@ -728,10 +735,11 @@ begin
       CodeGen.Write(' ')
     else if (FLastToken in RightBracket) and (Token in [tokKeywordThen, tokKeywordDo,
       tokKeywordOf, tokKeywordTo, tokKeywordDownto]) then
-      CodeGen.Write(' ')
-    else if (Token in LeftBracket) and (FLastToken in NeedSpaceAfterKeywordTokens) then
-      CodeGen.Write(' ');
-      // 强行分离括号与关键字
+      CodeGen.Write(' ')  // 强行分离右括号与关键字
+    else if (Token in LeftBracket + [tokPlus, tokMinus, tokHat]) and
+      ((FLastToken in NeedSpaceAfterKeywordTokens)
+      or ((FLastToken = tokKeywordAt) and UpperContainElementType(pfetRaiseAt))) then
+      CodeGen.Write(' '); // 强行分离左括号/前置运算符号，与关键字以及 raise 语句中的 at，注意 at 后的表达式盖掉了pfetRaiseAt，所以需要获取上一层
   end;
 
   NeedPadding := CalcNeedPadding;
@@ -2033,10 +2041,15 @@ begin
   if not (Scaner.Token in [tokSemicolon, tokKeywordEnd, tokKeywordElse]) then
     FormatExpression(0, PreSpaceCount);
 
-  if Scaner.TokenSymbolIs('AT') then
+  if Scaner.Token = tokKeywordAt then
   begin
-    Match(Scaner.Token, 1, 1);
-    FormatExpression(0, PreSpaceCount);
+    SpecifyElementType(pfetRaiseAt);
+    try
+      Match(Scaner.Token);
+      FormatExpression(0, PreSpaceCount);
+    finally
+      RestoreElementType;
+    end;
   end;
 end;
 
@@ -5276,7 +5289,7 @@ end;
 procedure TCnAbstractCodeFormatter.ResetElementType;
 begin
   FOldElementTypes.Free;
-  FOldElementTypes := TStack.Create;
+  FOldElementTypes := TCnElementStack.Create;
 
   FElementType := pfetUnknown;
 end;
@@ -5362,6 +5375,29 @@ function TCnAbstractCodeFormatter.CalcNeedPadding: Boolean;
 begin
   Result := FElementType in [pfetExpression, pfetEnumList];
   // 暂且表达式内部与枚举定义内部，碰到注释导致的换行时，才要求自动和上一行对齐
+end;
+
+function TCnAbstractCodeFormatter.UpperContainElementType(ElementType:
+  TCnPascalFormattingElementType): Boolean;
+begin
+  if FOldElementTypes = nil then
+    Result := False
+  else
+    Result := FOldElementTypes.Contains(ElementType);
+end;
+
+{ TCnElementStack }
+
+function TCnElementStack.Contains(
+  ElementType: TCnPascalFormattingElementType): Boolean;
+var
+  I: Integer;
+begin
+  Result := True;
+  for I := 0 to Count - 1 do
+    if List[I] = Pointer(ElementType) then
+      Exit;
+  Result := False;
 end;
 
 initialization
