@@ -159,8 +159,10 @@ end;
 
 function TCnBaseList.Get(Index: Integer): Pointer;
 begin
-  if (Index < 0) or (Index >= FCount) then
-    Error(SListIndexError, Index);
+//  if (Index < 0) or (Index >= FCount) then
+//    Error(SListIndexError, Index);
+// Do NOT check bounds for performance.
+
   Result := FList^[Index];
 end;
 
