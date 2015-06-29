@@ -421,11 +421,10 @@ var
     Len := Lex.TokenLength;
     if Len > CN_TOKEN_MAX_SIZE then
       Len := CN_TOKEN_MAX_SIZE;
-    FillChar(Token.FToken[0], SizeOf(Token.FToken), 0);
+    // FillChar(Token.FToken[0], SizeOf(Token.FToken), 0);
     CopyMemory(@Token.FToken[0], Lex.TokenAddr, Len);
+    Token.FToken[Len] := #0;
 
-    // Token.FToken := AnsiString(Lex.Token);
-    
     Token.FLineNumber := Lex.LineNumber;
     Token.FCharIndex := CalcCharIndex();
     Token.FTokenID := Lex.TokenID;
@@ -1433,7 +1432,7 @@ begin
   FItemLayer := 0;
   FLineNumber := 0;
   FMethodLayer := 0;
-  FillChar(FToken[0], SizeOf(FToken), 0);
+  FToken[0] := #0;
   FTokenID := TTokenKind(0);
   FTokenPos := 0;
   FIsMethodStart := False;

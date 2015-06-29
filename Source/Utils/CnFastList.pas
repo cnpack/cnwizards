@@ -29,7 +29,9 @@ unit CnFastList;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2008.06.20 V1.0
+* 修改记录：2015.06.29 V1.1
+*               去除几处边界检查操作以增加性能，略危险
+*           2008.06.20 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -130,8 +132,10 @@ procedure TCnBaseList.Delete(Index: Integer);
 var
   Temp: Pointer;
 begin
-  if (Index < 0) or (Index >= FCount) then
-    Error(SListIndexError, Index);
+//  if (Index < 0) or (Index >= FCount) then
+//    Error(SListIndexError, Index);
+// Do NOT check bounds for performance.
+
   Temp := Items[Index];
   Dec(FCount);
   if Index < FCount then
