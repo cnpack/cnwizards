@@ -68,6 +68,7 @@ type
     FTitleRect, FTextRect: TRect;
     FWizard: TCnFeedReaderWizard;
     FLastTick: Cardinal;
+
     procedure CalcRects;
     procedure OnFadeTimer(Sender: TObject);
     procedure SetFadeAlpha(const Value: Byte);
@@ -237,6 +238,7 @@ type
     function FeedHTMLToTxt(const Text: WideString): WideString;
     procedure SetFeedCfgToThread;
     procedure SetFeedToPanels;
+    function StatusBarIsHot: Boolean;
     procedure OnFeedUpdate(Sender: TObject);
     procedure OnForceUpdateFeed(Sender: TObject);
     procedure OnPrevFeed(Sender: TObject);
@@ -494,13 +496,15 @@ end;
 
 procedure TCnFeedHintForm.OnFadeTimer(Sender: TObject);
 var
-  MouseInForm: Boolean;
+  KeepFormVisible: Boolean;
   Test: TCnHintHitTest;
 begin
   if not Visible then
     Exit;
+                     //MouseInForm
+  KeepFormVisible := PtInRect(Bounds(Left, Top, Width, Height), Mouse.CursorPos)
+    or FWizard.StatusBarIsHot;
 
-  MouseInForm := PtInRect(Bounds(Left, Top, Width, Height), Mouse.CursorPos);
   if FFadeMode = fmFadeIn then
   begin
     FadeAlpha := TrimInt(FadeAlpha + 20, 0, 255);
@@ -512,7 +516,7 @@ begin
   end
   else if FFadeMode = fmFadeOut then
   begin
-    if MouseInForm then
+    if KeepFormVisible then
       FFadeMode := fmFadeIn;
     FadeAlpha := TrimInt(FadeAlpha - 20, 0, 255);
     if FadeAlpha = 0 then
@@ -521,10 +525,9 @@ begin
       Hide;
     end;
   end
-  else if Abs(GetTickCount - FLastTick) > csHintKeepTime then
+  else if not KeepFormVisible and ((GetTickCount - FLastTick) > csHintKeepTime) then
   begin
-    if not MouseInForm then
-      FFadeMode := fmFadeOut;
+    FFadeMode := fmFadeOut;
   end;
 
   Test := CalcHitTest;
@@ -1503,20 +1506,20 @@ begin
     FThread.DoForceUpdate;
 end;
 
-procedure TCnFeedReaderWizard.OnTimer(Sender: TObject);
+function TCnFeedReaderWizard.StatusBarIsHot: Boolean;
+var
+  i: Integer;
+begin
+  Result := False;
+  for i := 0 to PanelCount - 1 do
+    if Panels[i].IsHot then
+    begin
+      Result := True;
+      Exit;
+    end;
+end;
 
-  function StatusBarIsHot: Boolean;
-  var
-    i: Integer;
-  begin
-    Result := False;
-    for i := 0 to PanelCount - 1 do
-      if Panels[i].IsHot then
-      begin
-        Result := True;
-        Exit;
-      end;  
-  end;  
+procedure TCnFeedReaderWizard.OnTimer(Sender: TObject);
 begin
   if not Active then
     Exit;
