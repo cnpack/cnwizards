@@ -61,7 +61,7 @@ type
     FCount: Integer;
     FCapacity: Integer;
   protected
-    function Get(Index: Integer): Pointer;
+    function Get(Index: Integer): Pointer; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
     procedure Grow;
     procedure Put(Index: Integer; Item: Pointer);
     procedure SetCapacity(NewCapacity: Integer);
@@ -244,5 +244,3 @@ begin
 end;
 
 end.
-
-

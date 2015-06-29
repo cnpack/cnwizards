@@ -157,7 +157,7 @@ type
     FUseTabKey: Boolean;
     FTabWidth: Integer;
     function GetCount: Integer;
-    function GetToken(Index: Integer): TCnPasToken;
+    function GetToken(Index: Integer): TCnPasToken; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
   public
     constructor Create;
     destructor Destroy; override;
