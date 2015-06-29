@@ -1853,14 +1853,14 @@ var
               else if Parser.TokenID = tkIdentifier then
               begin
                 if IsInTemplate then
-                  CurIdent := CurIdent + Parser.Token
+                  CurIdent := CurIdent + string(Parser.Token)
                 else
-                  CurIdent := Parser.Token;
+                  CurIdent := string(Parser.Token);
               end
               else if Parser.TokenID = tkComma then
               begin
                 if IsInTemplate then
-                  CurIdent := CurIdent + Parser.Token;
+                  CurIdent := CurIdent + string(Parser.Token);
               end
               else if Parser.TokenID = tkSemicolon then
               begin
@@ -1923,7 +1923,7 @@ var
                     Break;
 
                   if not (Parser.TokenID in [tkCRLF, tkCRLFCo]) then
-                    ProcLine := ProcLine + Parser.Token;
+                    ProcLine := ProcLine + string(Parser.Token);
                   Parser.Next;
                 end; // while
 
@@ -1963,7 +1963,7 @@ var
               end;
 
               if not InIntfDeclaration and (Parser.TokenID = tkIdentifier) then
-                IntfName := Parser.Token;
+                IntfName := string(Parser.Token);
 
               if (Parser.TokenID = tkClass) and Parser.IsClass then
               begin
@@ -2042,14 +2042,14 @@ var
                     ElementInfo.ElementType := etIntfProperty;
                     ElementInfo.ElementTypeStr := 'interface property';
                     ElementInfo.OwnerClass := CurIntf;
-                    ElementInfo.DisplayName := CurIntf + '.' + Parser.Token;
+                    ElementInfo.DisplayName := CurIntf + '.' + string(Parser.Token);
                   end
                   else
                   begin
                     ElementInfo.ElementType := etProperty;
                     ElementInfo.ElementTypeStr := 'property';
                     ElementInfo.OwnerClass := CurClass;
-                    ElementInfo.DisplayName := CurClass + '.' + Parser.Token;
+                    ElementInfo.DisplayName := CurClass + '.' + string(Parser.Token);
                   end;
                   AddElement(ElementInfo);
                 end;

@@ -55,7 +55,7 @@ uses
   StdCtrls, IniFiles, Menus, ToolsAPI, CnWizUtils, CnConsts, CnCommon,
   CnWizEditFiler, CnEditorWizard, CnWizConsts, CnEditorCodeTool, CnWizIdeUtils,
   CnSourceHighlight, CnPasCodeParser, CnEditControlWrapper, mPasLex,
-  CnCppCodeParser, mwBCBTokenList;
+  CnCppCodeParser, mwBCBTokenList, CnFastList;
 
 type
 

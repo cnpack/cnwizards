@@ -245,7 +245,7 @@ type
     procedure BadStringProc; // 代替双引号字符串
     procedure SymbolProc;
     procedure UnknownProc;
-    function GetToken: string;
+    function GetToken: AnsiString;
     function InSymbols(aChar: AnsiChar): Boolean;
     function GetTokenAddr: PAnsiChar;
     function GetTokenLength: Integer;
@@ -271,7 +271,7 @@ type
     property RunPos: Integer read Run write SetRunPos;
     property TokenPos: Integer read fTokenPos;
     {* 当前 Token 所在的线性位置，减去 LinePos 即是当前列位置}
-    property Token: string read GetToken;
+    property Token: AnsiString read GetToken;
     {* 此俩属性为 PAnsiChar 方式使用，以避免 D2010 下性能问题}
     property TokenAddr: PAnsiChar read GetTokenAddr;
     property TokenLength: Integer read GetTokenLength;
@@ -1435,14 +1435,14 @@ begin
   end;
 end;
 
-function TmwPasLex.GetToken: string;
+function TmwPasLex.GetToken: AnsiString;
 var
   Len: LongInt;
   OutStr: AnsiString;
 begin
   Len:=Run-fTokenPos;
   SetString(OutStr, (FOrigin+fTokenPos), Len);
-  Result := string(OutStr);
+  Result := OutStr;
 end;
 
 procedure TmwPasLex.NextID(ID: TTokenKind);

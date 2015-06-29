@@ -382,7 +382,7 @@ var
   IsRecordHelper, IsSealed, IsRecord, IsForFunc: Boolean;
   DeclareWithEndLevel: Integer;
   PrevTokenID: TTokenKind;
-  PrevTokenStr: string;
+  PrevTokenStr: AnsiString;
 
   function CalcCharIndex(): Integer;
 {$IFDEF BDS2009_UP}
@@ -572,7 +572,7 @@ begin
                 LexNextNoJunkWithoutCompDirect(Lex);
                 if Lex.TokenID in [tkSymbol, tkIdentifier] then
                 begin
-                  if LowerCase(Lex.Token) = 'helper' then
+                  if LowerCase(string(Lex.Token)) = 'helper' then
                     IsRecordHelper := True;
                 end;
 
@@ -639,12 +639,12 @@ begin
                 LexNextNoJunkWithoutCompDirect(Lex);
                 if Lex.TokenID in [tkSymbol, tkIdentifier] then
                 begin
-                  if LowerCase(Lex.Token) = 'helper' then
+                  if LowerCase(string(Lex.Token)) = 'helper' then
                   begin
                     IsClassDef := True;
                     IsHelper := True;
                   end
-                  else if LowerCase(Lex.Token) = 'sealed' then
+                  else if LowerCase(string(Lex.Token)) = 'sealed' then
                   begin
                     IsClassDef := True;
                     IsSealed := True;
@@ -1088,7 +1088,7 @@ var
     Result.LineNumber := Lex.LineNumber;
     Result.LinePos := Lex.LinePos;
     Result.TokenPos := Lex.TokenPos;
-    Result.Token := AnsiString(Lex.Token);
+    Result.Token := Lex.Token;
     Result.TokenID := Lex.TokenID;
     if NoJunk then
       Lex.NextNoJunk
