@@ -1273,19 +1273,23 @@ procedure TCnBasePascalFormatter.FormatSetConstructor(PreSpaceCount: Byte);
   
 begin
   Match(tokSLB);
+  SpecifyElementType(pfetSetConstructor);
+  try
+    if Scaner.Token <> tokSRB then
+    begin
+      FormatSetElement;
+    end;
 
-  if Scaner.Token <> tokSRB then
-  begin
-    FormatSetElement;
+    while Scaner.Token = tokComma do
+    begin
+      MatchOperator(tokComma);
+      FormatSetElement;
+    end;
+
+    Match(tokSRB);
+  finally
+    RestoreElementType;
   end;
-
-  while Scaner.Token = tokComma do
-  begin
-    MatchOperator(tokComma);
-    FormatSetElement;
-  end;
-
-  Match(tokSRB);
 end;
 
 { SimpleExpression -> ['+' | '-' | '^'] Term [AddOp Term]... }
@@ -2222,22 +2226,28 @@ end;
 procedure TCnBasePascalFormatter.FormatArrayConstant(PreSpaceCount: Byte);
 begin
   Match(tokLB);
-  FormatTypedConstant(PreSpaceCount);
 
-//  if Scaner.Token = tokLB then // 数组的括号可能嵌套
-//    FormatArrayConstant(PreSpaceCount)
-//  else
-
-  while Scaner.Token = tokComma do
-  begin
-    Match(Scaner.Token);
+  SpecifyElementType(pfetArrayConstant);
+  try
     FormatTypedConstant(PreSpaceCount);
-//    if Scaner.Token = tokLB then // 数组的括号可能嵌套
-//      FormatArrayConstant(PreSpaceCount)
-//    else
-  end;
 
-  Match(tokRB);
+  //  if Scaner.Token = tokLB then // 数组的括号可能嵌套
+  //    FormatArrayConstant(PreSpaceCount)
+  //  else
+
+    while Scaner.Token = tokComma do
+    begin
+      Match(Scaner.Token);
+      FormatTypedConstant(PreSpaceCount);
+  //    if Scaner.Token = tokLB then // 数组的括号可能嵌套
+  //      FormatArrayConstant(PreSpaceCount)
+  //    else
+    end;
+
+    Match(tokRB);
+  finally
+    RestoreElementType;
+  end;
 end;
 
 { ArrayType -> ARRAY ['[' OrdinalType/','... ']'] OF Type }
@@ -5374,8 +5384,10 @@ end;
 
 function TCnAbstractCodeFormatter.CalcNeedPadding: Boolean;
 begin
-  Result := FElementType in [pfetExpression, pfetEnumList];
-  // 暂且表达式内部与枚举定义内部，碰到注释导致的换行时，才要求自动和上一行对齐
+  Result := FElementType in [pfetExpression, pfetEnumList, pfetArrayConstant,
+    pfetSetConstructor];
+  // 暂且表达式内部与枚举定义内部等一系列元素内部，
+  // 碰到注释导致的换行时，才要求自动和上一行对齐
 end;
 
 function TCnAbstractCodeFormatter.UpperContainElementType(ElementType:
