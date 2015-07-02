@@ -52,7 +52,7 @@ type
 
   TCnTestDesignMenuWizard = class(TCnMenuWizard)
   private
-    FExecutor2: TCnDesignSelectionExecutor2;
+    FExecutor: TCnDesignMenuExecutor;
     procedure Executor2Execute(Sender: TObject);
   protected
     function GetHasConfig: Boolean; override;
@@ -68,21 +68,21 @@ type
     procedure Execute; override;
   end;
 
-  TCnTestDesignMenu1 = class(TCnDesignSelectionExecutor)
+  TCnTestDesignMenu1 = class(TCnBaseDesignMenuExecutor)
     function GetActive: Boolean; override;
     function GetCaption: string; override;
     function GetEnabled: Boolean; override;
     function Execute: Boolean; override;
   end;
 
-  TCnTestDesignMenu2 = class(TCnDesignSelectionExecutor)
+  TCnTestDesignMenu2 = class(TCnBaseDesignMenuExecutor)
     function GetActive: Boolean; override;
     function GetCaption: string; override;
     function GetEnabled: Boolean; override;
     function Execute: Boolean; override;
   end;
 
-  TCnTestDesignMenu3 = class(TCnDesignSelectionExecutor)
+  TCnTestDesignMenu3 = class(TCnBaseDesignMenuExecutor)
     function GetActive: Boolean; override;
     function GetCaption: string; override;
     function GetEnabled: Boolean; override;
@@ -107,21 +107,21 @@ end;
 
 procedure TCnTestDesignMenuWizard.Execute;
 begin
-  RegisterDesignSelectionExecutor(TCnTestDesignMenu1.Create(Self));
-  RegisterDesignSelectionExecutor(TCnTestDesignMenu2.Create(Self));
-  RegisterDesignSelectionExecutor(TCnTestDesignMenu3.Create(Self));
+  RegisterBaseDesignMenuExecutor(TCnTestDesignMenu1.Create(Self));
+  RegisterBaseDesignMenuExecutor(TCnTestDesignMenu2.Create(Self));
+  RegisterBaseDesignMenuExecutor(TCnTestDesignMenu3.Create(Self));
   ShowMessage('3 Menu Items Registered using TCnDesignSelectionExecutor.' + #13#10
     + '1 Hidden, 1 Disabled and 1 Enabled. Please Check Designer Context Menu.');
 
-  if FExecutor2 = nil then
+  if FExecutor = nil then
   begin
-    FExecutor2 := TCnDesignSelectionExecutor2.Create;
-    FExecutor2.Active := True;
-    FExecutor2.Enabled := True;
-    FExecutor2.Caption := '2 Caption';
-    FExecutor2.Hint := '2 Hint';
-    FExecutor2.OnExecute := Executor2Execute;
-    RegisterDesignSelectionExecutor2(FExecutor2);
+    FExecutor := TCnDesignMenuExecutor.Create;
+    FExecutor.Active := True;
+    FExecutor.Enabled := True;
+    FExecutor.Caption := '2 Caption';
+    FExecutor.Hint := '2 Hint';
+    FExecutor.OnExecute := Executor2Execute;
+    RegisterDesignMenuExecutor(FExecutor);
   end;
 end;
 
