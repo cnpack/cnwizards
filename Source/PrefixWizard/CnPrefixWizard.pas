@@ -130,6 +130,9 @@ type
     function GetRuleComponentName(Component: TComponent; const CompText: string;
       var NewName: string; FormEditor: IOTAFormEditor; UserMode: Boolean;
       FromObjectInspector: Boolean = False): Boolean;
+    function GetActionName(Action: TBasicAction): string;
+    function GetFieldName(Component: TComponent): string;
+
     procedure RenameList(AList: TCompList);
     procedure RenameComponent(Component: TComponent; FormEditor: IOTAFormEditor);
     property Updating: Boolean read FUpdating;
@@ -422,6 +425,7 @@ var
     while (Result <> '') and CharInSet(Result[Length(Result)], ['0'..'9']) do
       Delete(Result, Length(Result), 1);
   end;
+
 begin
   CName := RemoveClassPrefix(ComponentType);
   // 如果原名称为 IDE 默认组件名，去掉前面的组件名称和后面的数字
@@ -659,6 +663,23 @@ begin
   end;
 end;
 
+function TCnPrefixWizard.GetActionName(Action: TBasicAction): string;
+var
+  APrefix: string;
+begin
+  APrefix := PrefixList.Prefixs[Action.ClassName];
+  Result := Action.Name;
+  if (APrefix <> '') and (Pos(APrefix, Result) = 1) then
+    Delete(Result, 1, Length(APrefix));
+  while (Result <> '') and (Result[1] = '_') do
+    Delete(Result, 1, 1);
+end;
+
+function TCnPrefixWizard.GetFieldName(Component: TComponent): string;
+begin
+  Result := ExtractIdentName(GetStrProp(Component, csDataField));
+end;
+
 function TCnPrefixWizard.GetRuleComponentName(Component: TComponent;
   const CompText: string; var NewName: string; FormEditor: IOTAFormEditor;
   UserMode: Boolean; FromObjectInspector: Boolean): Boolean;
@@ -687,22 +708,6 @@ var
     end;
   end;
 
-  function GetActionName(Action: TBasicAction): string;
-  var
-    APrefix: string;
-  begin
-    APrefix := PrefixList.Prefixs[Action.ClassName];
-    Result := Action.Name;
-    if (APrefix <> '') and (Pos(APrefix, Result) = 1) then
-      Delete(Result, 1, Length(APrefix));
-    while (Result <> '') and (Result[1] = '_') do
-      Delete(Result, 1, 1);
-  end;
-
-  function GetFieldName(Component: TComponent): string;
-  begin
-    Result := ExtractIdentName(GetStrProp(Component, csDataField));
-  end;
 begin
   Result := False;
   if not (Component is TComponent) then Exit;
@@ -1095,6 +1100,23 @@ begin
   begin
     // 计算新名称
     NewBase := GetNewName(Component.ClassName, Prefix, OldName);
+
+    if NeedFieldRename(Component) then
+    begin
+      // 检查关联的 DataField 属性
+      if FUseUnderLine then
+        NewBase := Prefix + '_' + GetFieldName(Component)
+      else
+        NewBase := Prefix + GetFieldName(Component);
+    end
+    else if NeedActionRename(Component) then
+    begin
+      // 检查关联的 Action
+      if FUseUnderLine then
+        NewBase := Prefix + '_' + GetActionName(Action)
+      else
+        NewBase := Prefix + GetActionName(Action);
+    end;
 
     // 取一个唯一的名字
     i := 1;
