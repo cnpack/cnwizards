@@ -1082,14 +1082,22 @@ begin
           tokInteger, tokFloat:
             WriteToken(Scaner.Token, PreSpaceCount);
           tokTrue, tokFalse:
-            CodeGen.Write(UpperFirst(Scaner.TokenString), PreSpaceCount, 0, NeedPadding);
+            if CnPascalCodeForRule.UseIgnoreArea and Scaner.InIgnoreArea then
+              CodeGen.Write(Scaner.TokenString)
+            else
+              CodeGen.Write(UpperFirst(Scaner.TokenString), PreSpaceCount, 0, NeedPadding);
             // CodeGen.Write(FormatString(Scaner.TokenString, CnCodeForRule.KeywordStyle), PreSpaceCount);
           tokChar, tokString, tokWString:
             begin
-              if (FLastToken in NeedSpaceAfterKeywordTokens) // 字符串前面是这些关键字时，要以至少一个空格分隔
-                and (PreSpaceCount = 0) then
-                PreSpaceCount := 1;
-              CodeGen.Write(Scaner.TokenString, PreSpaceCount, 0, NeedPadding);
+              if CnPascalCodeForRule.UseIgnoreArea and Scaner.InIgnoreArea then
+                CodeGen.Write(Scaner.TokenString)
+              else
+              begin
+                if (FLastToken in NeedSpaceAfterKeywordTokens) // 字符串前面是这些关键字时，要以至少一个空格分隔
+                  and (PreSpaceCount = 0) then
+                  PreSpaceCount := 1;
+                CodeGen.Write(Scaner.TokenString, PreSpaceCount, 0, NeedPadding);
+              end;
             end;
         end;
 
