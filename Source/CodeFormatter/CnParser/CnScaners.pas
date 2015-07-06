@@ -952,7 +952,7 @@ begin
         if P^ = '}' then
         begin
           // 判断 IgnoreP 与 P 之间是否是 IgnoreFormat 标记
-          if (Result = tokComment) and (Integer(P) - Integer(IgnoreP) = 3) then // 3 means '{(*}'
+          if (Result = tokComment) and (Integer(P) - Integer(IgnoreP) = 3 * SizeOf(Char)) then // 3 means '{(*}'
           begin
             Inc(IgnoreP);
             if IgnoreP^ = '(' then
