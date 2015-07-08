@@ -3,7 +3,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
   Top = 163
   BorderStyle = bsDialog
   Caption = 'Uses Units Cleaner'
-  ClientHeight = 365
+  ClientHeight = 384
   ClientWidth = 392
   PixelsPerInch = 96
   TextHeight = 13
@@ -11,7 +11,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
     Left = 8
     Top = 8
     Width = 377
-    Height = 97
+    Height = 120
     Caption = '&Select Content to Process'
     TabOrder = 0
     object rbCurrUnit: TRadioButton
@@ -51,10 +51,18 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
       TabOrder = 1
       TabStop = True
     end
+    object chkProcessDependencies: TCheckBox
+      Left = 8
+      Top = 96
+      Width = 361
+      Height = 17
+      Caption = 'Include indirecty used units'
+      TabOrder = 4
+    end
   end
   object btnOK: TButton
     Left = 150
-    Top = 336
+    Top = 356
     Width = 75
     Height = 21
     Caption = '&Process'
@@ -64,7 +72,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
   end
   object btnCancel: TButton
     Left = 230
-    Top = 336
+    Top = 356
     Width = 75
     Height = 21
     Cancel = True
@@ -74,7 +82,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
   end
   object btnHelp: TButton
     Left = 310
-    Top = 336
+    Top = 356
     Width = 75
     Height = 21
     Caption = '&Help'
@@ -83,7 +91,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
   end
   object grpSettings: TGroupBox
     Left = 8
-    Top = 112
+    Top = 132
     Width = 377
     Height = 217
     Caption = 'Clean &Settings'

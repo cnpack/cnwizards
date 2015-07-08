@@ -95,22 +95,25 @@ type
 
   TCnEmptyUsesInfo = class
   private
-    FBuffer: IOTAEditBuffer;
+    FSourceFileName: string;
     FProject: IOTAProject;
     FDcuName: string;
     FIntfItems: TObjectList;
     FImplItems: TObjectList;
+
     function GetImplCount: Integer;
     function GetImplItem(Index: Integer): TCnUsesItem;
     function GetIntfCount: Integer;
     function GetIntfItem(Index: Integer): TCnUsesItem;
   public
-    constructor Create(const ADcuName: string; ABuffer: IOTAEditBuffer; AProject:
-      IOTAProject);
+    constructor Create(const ADcuName, ASourceFileName: string;
+      AProject: IOTAProject);
     destructor Destroy; override;
+
     function Process: Boolean;
+
     property DcuName: string read FDcuName;
-    property Buffer: IOTAEditBuffer read FBuffer;
+    property SourceFileName: string read FSourceFileName;
     property Project: IOTAProject read FProject;
     property IntfCount: Integer read GetIntfCount;
     property IntfItems[Index: Integer]: TCnUsesItem read GetIntfItem;
@@ -236,14 +239,14 @@ end;
 
 { TCnEmptyUsesInfo }
 
-constructor TCnEmptyUsesInfo.Create(const ADcuName: string; ABuffer: 
-  IOTAEditBuffer; AProject: IOTAProject);
+constructor TCnEmptyUsesInfo.Create(const ADcuName, ASourceFileName: string;
+  AProject: IOTAProject);
 begin
   inherited Create;
   FIntfItems := TObjectList.Create;
   FImplItems := TObjectList.Create;
   FDcuName := ADcuName;
-  FBuffer := ABuffer;
+  FSourceFileName := ASourceFileName;
   FProject := AProject;
 end;
 
@@ -271,7 +274,7 @@ begin
       try
         Stream := TMemoryStream.Create;
         try
-          EditFilerSaveFileToStream(Buffer.FileName, Stream);
+          EditFilerSaveFileToStream(FSourceFileName, Stream);
           // CnOtaSaveEditorToStream(Buffer, Stream);
           ParseUnitUses(PAnsiChar(Stream.Memory), UsesList);
         finally
