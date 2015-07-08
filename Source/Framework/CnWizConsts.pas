@@ -1544,7 +1544,7 @@ var
   SCnCodeFormatterErrPascalNoStructType: string = 'No Structured Type Found.';
   SCnCodeFormatterErrPascalNoTypedConstant: string = 'No Typed Constant Found.';
   SCnCodeFormatterErrPascalNoEqualColon: string = 'No Equal or Colon Found.';
-  SCnCodeFormatterErrPascalNoDeclSection: string = 'No Declaration Selection Found.';
+  SCnCodeFormatterErrPascalNoDeclSection: string = 'No Declaration Section Found.';
   SCnCodeFormatterErrPascalNoProcFunc: string = 'No Procedure or Function Found.';
   SCnCodeFormatterErrPascalUnknownGoal: string = 'Unknown Target Source File.';
   SCnCodeFormatterErrPascalErrorInterface: string = 'Interface Error.';
