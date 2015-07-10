@@ -20,6 +20,7 @@ var
   Count: Integer;
   List: TList;
   Root: TComponent;
+  ProcSelect: Boolean;
 
 procedure ProcessContainer(Parent: TWinControl);
 var
@@ -123,7 +124,16 @@ begin
   List := TList.Create;
   Count := 0;
   try
+    ProcSelect := False;
+
     if not CnOtaGetSelectedControlFromCurrentForm(List) then
+      ProcSelect := False;
+
+    if (List.Count = 1) and (CnIntToObject(List[0]) is TWinControl) then
+      if (TWinControl(CnIntToObject(List[0])).ControlCount > 1) then
+        ProcSelect := True;
+
+    if not ProcSelect then
     begin
       InfoDlg('Will Process the Label/Edit Pairs in Current Form.');
       Root := CnOtaGetRootComponentFromEditor(CnOtaGetCurrentFormEditor);
@@ -135,15 +145,12 @@ begin
       else
         ErrorDlg('No Designer Found. Nothing to Process.');
     end
-    else if (List.Count = 1) and (CnIntToObject(List[0]) is TWinControl)
-      and (TWinControl(CnIntToObject(List[0])).ControlCount > 1) then
+    else
     begin
       InfoDlg('Will Process the Label Label/Edit Pairs in ' + TWinControl(CnIntToObject(List[0])).Name);
       ProcessContainer(TWinControl(CnIntToObject(List[0])));
       InfoDlg(IntToStr(Count) + ' Label FocusControl Set.');
-    end
-    else
-      ErrorDlg('No Control to Process.');
+    end;
   finally
     List.Free;
   end;
