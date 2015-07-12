@@ -29,7 +29,9 @@ unit CnEditControlWrapper;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2009.05.30 V1.3
+* 修改记录：2015.07.13 V1.4
+*               增加三个编辑器鼠标事件通知，采用延迟 Hook 的机制
+*           2009.05.30 V1.3
 *               增加两个 BDS 下的顶、底页面切换变化通知
 *           2008.08.20 V1.2
 *               增加一 BDS 下的总行数位数变化通知，用来处理行号重画区变化的情况
@@ -184,6 +186,17 @@ type
     var Handled: Boolean) of object;
   {* 按键事件 }
 
+  // 鼠标事件类似于 TControl 内的定义，但 Sender 是 TEditorObject
+  TEditorMouseUpNotifier = procedure(Editor: TEditorObject; Button: TMouseButton;
+    Shift: TShiftState; X, Y: Integer) of object;
+  {* 编辑器内鼠标抬起通知}
+  TEditorMouseDownNotifier =  procedure(Editor: TEditorObject; Button: TMouseButton;
+    Shift: TShiftState; X, Y: Integer) of object;
+  {* 编辑器内鼠标按下通知}
+  TEditorMouseMoveNotifier = procedure(Editor: TEditorObject; Shift: TShiftState;
+    X, Y: Integer) of object;
+  {* 编辑器内鼠标移动通知}
+
   TCnBreakPointClickItem = class
   private
     FBpPosY: Integer;
@@ -209,8 +222,17 @@ type
     FCharSize: TSize;
     FHighlights: TStringList;
     FPaintNotifyAvailable: Boolean;
+    FMouseNotifyAvailable: Boolean;
     FPaintLineHook: TCnMethodHook;
     FSetEditViewHook: TCnMethodHook;
+
+    FMouseUpNotifiers: TList;
+    FMouseDownNotifiers: TList;
+    FMouseMoveNotifiers: TList;
+    FMouseUpHook: TCnMethodHook;
+    FMouseDownHook: TCnMethodHook;
+    FMouseMoveHook: TCnMethodHook;
+
     FEditorList: TObjectList;
     FEditControlList: TList;
     FOptionChanged: Boolean;
@@ -227,6 +249,7 @@ type
     procedure ClearAndFreeList(var List: TList);
     function IndexOf(List: TList; Notifier: TMethod): Integer;
     procedure InitEditControlHook;
+    procedure CheckAndInitEditControlMouseHook;
     procedure RemoveNotifier(List: TList; Notifier: TMethod);
     function UpdateCharSize: Boolean;
     procedure EditControlProc(EditWindow: TCustomForm; EditControl:
@@ -255,6 +278,14 @@ type
     procedure DoAfterUnElide(EditControl: TControl); // 暂不支持
     procedure DoEditControlNotify(EditControl: TControl; Operation: TOperation);
     procedure DoEditorChange(Editor: TEditorObject; ChangeType: TEditorChangeTypes);
+
+    procedure DoMouseDown(Editor: TEditorObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure DoMouseUp(Editor: TEditorObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure DoMouseMove(Editor: TEditorObject; Shift: TShiftState;
+      X, Y: Integer);
+
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
     procedure CheckNewEditor(EditControl: TControl; View: IOTAEditView);
@@ -353,7 +384,25 @@ type
     {* 删除编辑器变更通知 }
 
     property PaintNotifyAvailable: Boolean read FPaintNotifyAvailable;
-    {* 返回编辑器的重绘通知服务中否可用 }
+    {* 返回编辑器的重绘通知服务是否可用 }
+
+    procedure AddEditorMouseUpNotifier(Notifier: TEditorMouseUpNotifier);
+    {* 增加编辑器鼠标抬起通知 }
+    procedure RemoveEditorMouseUpNotifier(Notifier: TEditorMouseUpNotifier);
+    {* 删除编辑器鼠标抬起通知 }
+
+    procedure AddEditorMouseDownNotifier(Notifier: TEditorMouseDownNotifier);
+    {* 增加编辑器鼠标按下通知 }
+    procedure RemoveEditorMouseDownNotifier(Notifier: TEditorMouseDownNotifier);
+    {* 删除编辑器鼠标按下通知 }
+
+    procedure AddEditorMouseMoveNotifier(Notifier: TEditorMouseMoveNotifier);
+    {* 增加编辑器鼠标移动通知 }
+    procedure RemoveEditorMouseMoveNotifier(Notifier: TEditorMouseMoveNotifier);
+    {* 删除编辑器鼠标移动通知 }
+
+    property MouseNotifyAvailable: Boolean read FMouseNotifyAvailable;
+    {* 返回编辑器的鼠标事件通知服务是否可用 }
   end;
 
 function EditControlWrapper: TCnEditControlWrapper;
@@ -515,6 +564,11 @@ const
   STabsChangedName = '@Editorform@TEditWindow@TabsChanged$qqrp14System@TObject';
 
   SViewBarChangedName = '@Editorform@TEditWindow@ViewBarChange$qqrp14System@TObjectiro';
+
+  SEditControlMouseUp = '@Editorcontrol@TCustomEditControl@MouseUp$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
+  SEditControlMouseDown = '@Editorcontrol@TCustomEditControl@MouseDown$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
+  SEditControlMouseMove = '@Editorcontrol@TCustomEditControl@MouseMove$qqr46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
+
 {$IFDEF COMPILER10_UP}
   SIndexPosToCurPosName = '@Editorcontrol@TCustomEditControl@IndexPosToCurPos$qqrsi';
 {$ELSE}
@@ -527,6 +581,11 @@ const
   SGetTextAtLineName = '@Editors@TCustomEditControl@GetTextAtLine$qqri';
   SGetOTAEditViewName = '@Editors@TEditView@GetOTAEditView$qqrv';
   SSetEditViewName = '@Editors@TCustomEditControl@SetEditView$qqrp17Editors@TEditView';
+
+  SEditControlMouseUp = '@Editors@TCustomEditControl@MouseUp$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
+  SEditControlMouseDown = '@Editors@TCustomEditControl@MouseDown$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
+  SEditControlMouseMove = '@Editors@TCustomEditControl@MouseMove$qqr46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
+
 {$IFDEF COMPILER7_UP}
   SGetAttributeAtPosName = '@Editors@TCustomEditControl@GetAttributeAtPos$qqrrx9Ek@TEdPosrit2oo';
 {$ELSE}
@@ -545,6 +604,10 @@ type
   TGetOTAEditViewProc = function(Self: TObject): IOTAEditView; register;
   TSetEditViewProc = function(Self: TObject; EditView: TObject): Integer;
   TLineIsElidedProc = function(Self: TObject; LineNum: Integer): Boolean;
+
+  TMouseUpDownProc = procedure(Self: TObject; Button: TMouseButton;
+    Shift: TShiftState; X, Y: Integer);
+  TMouseMoveProc = procedure(Self: TObject; Shift: TShiftState; X, Y: Integer);
 
 {$IFDEF BDS}
   TPointFromEdPosProc = function(Self: TObject; const EdPos: TOTAEditPos;
@@ -573,6 +636,10 @@ var
   PointFromEdPos: TPointFromEdPosProc = nil;
   IndexPosToCurPosProc: TIndexPosToCurPosProc = nil;
 {$ENDIF}
+
+  EditControlMouseUp: TMouseUpDownProc = nil;
+  EditControlMouseDown: TMouseUpDownProc = nil;
+  EditControlMouseMove: TMouseMoveProc = nil;
 
   PaintLineLock: TRTLCriticalSection;
 
@@ -677,6 +744,140 @@ begin
   end;
 end;
 
+procedure MyEditControlMouseDown(Self: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+var
+  Idx: Integer;
+  Editor: TEditorObject;
+begin
+  if FEditControlWrapper.FMouseDownHook.UseDDteours then
+  begin
+    try
+      TMouseUpDownProc(FEditControlWrapper.FMouseDownHook.Trampoline)(Self, Button, Shift, X, Y);
+    except
+      on E: Exception do
+        DoHandleException(E.Message);
+    end;
+  end
+  else
+  begin
+    FEditControlWrapper.FMouseDownHook.UnhookMethod;
+    try
+      try
+        EditControlMouseDown(Self, Button, Shift, X, Y);
+      except
+        on E: Exception do
+          DoHandleException(E.Message);
+      end;
+    finally
+      FEditControlWrapper.FMouseDownHook.HookMethod;
+    end;
+  end;
+
+  // Dispatch Notification after Original calling.
+  Editor := nil;
+  if IsIdeEditorForm(TCustomForm(TControl(Self).Owner)) then
+  begin
+    Idx := FEditControlWrapper.IndexOfEditor(TControl(Self));
+    if Idx >= 0 then
+    begin
+      Editor := FEditControlWrapper.GetEditors(Idx);
+    end;
+  end;
+
+  if Editor <> nil then
+    FEditControlWrapper.DoMouseDown(Editor, Button, Shift, X, Y);
+end;
+
+procedure MyEditControlMouseUp(Self: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+var
+  Idx: Integer;
+  Editor: TEditorObject;
+begin
+  if FEditControlWrapper.FMouseUpHook.UseDDteours then
+  begin
+    try
+      TMouseUpDownProc(FEditControlWrapper.FMouseUpHook.Trampoline)(Self, Button, Shift, X, Y);
+    except
+      on E: Exception do
+        DoHandleException(E.Message);
+    end;
+  end
+  else
+  begin
+    FEditControlWrapper.FMouseUpHook.UnhookMethod;
+    try
+      try
+        EditControlMouseUp(Self, Button, Shift, X, Y);
+      except
+        on E: Exception do
+          DoHandleException(E.Message);
+      end;
+    finally
+      FEditControlWrapper.FMouseUpHook.HookMethod;
+    end;
+  end;
+
+  // Dispatch Notification after Original calling.
+  Editor := nil;
+  if IsIdeEditorForm(TCustomForm(TControl(Self).Owner)) then
+  begin
+    Idx := FEditControlWrapper.IndexOfEditor(TControl(Self));
+    if Idx >= 0 then
+    begin
+      Editor := FEditControlWrapper.GetEditors(Idx);
+    end;
+  end;
+
+  if Editor <> nil then
+    FEditControlWrapper.DoMouseUp(Editor, Button, Shift, X, Y);
+end;
+
+procedure MyEditControlMouseMove(Self: TObject; Shift: TShiftState; X, Y: Integer);
+var
+  Idx: Integer;
+  Editor: TEditorObject;
+begin
+  if FEditControlWrapper.FMouseMoveHook.UseDDteours then
+  begin
+    try
+      TMouseMoveProc(FEditControlWrapper.FMouseMoveHook.Trampoline)(Self, Shift, X, Y);
+    except
+      on E: Exception do
+        DoHandleException(E.Message);
+    end;
+  end
+  else
+  begin
+    FEditControlWrapper.FMouseMoveHook.UnhookMethod;
+    try
+      try
+        EditControlMouseMove(Self, Shift, X, Y);
+      except
+        on E: Exception do
+          DoHandleException(E.Message);
+      end;
+    finally
+      FEditControlWrapper.FMouseMoveHook.HookMethod;
+    end;
+  end;
+
+  // Dispatch Notification after Original calling.
+  Editor := nil;
+  if IsIdeEditorForm(TCustomForm(TControl(Self).Owner)) then
+  begin
+    Idx := FEditControlWrapper.IndexOfEditor(TControl(Self));
+    if Idx >= 0 then
+    begin
+      Editor := FEditControlWrapper.GetEditors(Idx);
+    end;
+  end;
+
+  if Editor <> nil then
+    FEditControlWrapper.DoMouseMove(Editor, Shift, X, Y);
+end;
+
 constructor TCnEditControlWrapper.Create(AOwner: TComponent);
 begin
   inherited;
@@ -688,6 +889,9 @@ begin
   FEditorChangeNotifiers := TList.Create;
   FKeyDownNotifiers := TList.Create;
   FKeyUpNotifiers := TList.Create;
+  FMouseUpNotifiers := TList.Create;
+  FMouseDownNotifiers := TList.Create;
+  FMouseMoveNotifiers := TList.Create;
 
   FEditControlList := TList.Create;
 
@@ -726,12 +930,20 @@ begin
     FPaintLineHook.Free;
   if FSetEditViewHook <> nil then
     FSetEditViewHook.Free;
+
+  FMouseUpHook.Free;
+  FMouseDownHook.Free;
+  FMouseMoveHook.Free;
+
   FEditControlList.Free;
   FEditorList.Free;
 
   ClearHighlights;
   FHighlights.Free;
 
+  ClearAndFreeList(FMouseUpNotifiers);
+  ClearAndFreeList(FMouseDownNotifiers);
+  ClearAndFreeList(FMouseMoveNotifiers);
   ClearAndFreeList(FBeforePaintLineNotifiers);
   ClearAndFreeList(FAfterPaintLineNotifiers);
   ClearAndFreeList(FEditControlNotifiers);
@@ -2040,6 +2252,132 @@ begin
     // 滚回去
     Item.BpEditView.Scroll(-Item.BpDeltaLine, 0);
     Item.Free;
+  end;
+end;
+
+procedure TCnEditControlWrapper.CheckAndInitEditControlMouseHook;
+var
+  UseDDetours: Boolean;
+begin
+  if FMouseNotifyAvailable then
+    Exit;
+
+  try
+    EditControlMouseUp := GetBplMethodAddress(GetProcAddress(CorIdeModule, SEditControlMouseUp));
+    Assert(Assigned(EditControlMouseUp), 'Failed to load EditControlMouseUp from CorIdeModule');
+
+    EditControlMouseDown := GetBplMethodAddress(GetProcAddress(CorIdeModule, SEditControlMouseDown));
+    Assert(Assigned(EditControlMouseDown), 'Failed to load EditControlMouseDown from CorIdeModule');
+
+    EditControlMouseMove := GetBplMethodAddress(GetProcAddress(CorIdeModule, SEditControlMouseMove));
+    Assert(Assigned(EditControlMouseMove), 'Failed to load EditControlMouseMove from CorIdeModule');
+
+{$IFDEF USE_DDETOURS_HOOK}
+    UseDDetours := True;
+{$ELSE}
+    UseDDetours := False;
+{$ENDIF}
+
+    FMouseUpHook := TCnMethodHook.Create(@EditControlMouseUp, @MyEditControlMouseUp, UseDDetours);
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('EditControl.MouseUp Hooked');
+  {$ENDIF}
+
+    FMouseDownHook := TCnMethodHook.Create(@EditControlMouseDown, @MyEditControlMouseDown, UseDDetours);
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('EditControl.MouseDown Hooked');
+  {$ENDIF}
+
+    FMouseMoveHook := TCnMethodHook.Create(@EditControlMouseMove, @MyEditControlMouseMove, UseDDetours);
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('EditControl.MouseMove Hooked');
+  {$ENDIF}
+
+    FMouseNotifyAvailable := True;
+  except
+    FMouseNotifyAvailable := False;
+  end;
+
+end;
+
+procedure TCnEditControlWrapper.AddEditorMouseDownNotifier(
+  Notifier: TEditorMouseDownNotifier);
+begin
+  CheckAndInitEditControlMouseHook;
+  AddNotifier(FMouseDownNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnEditControlWrapper.AddEditorMouseMoveNotifier(
+  Notifier: TEditorMouseMoveNotifier);
+begin
+  CheckAndInitEditControlMouseHook;
+  AddNotifier(FMouseMoveNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnEditControlWrapper.AddEditorMouseUpNotifier(
+  Notifier: TEditorMouseUpNotifier);
+begin
+  CheckAndInitEditControlMouseHook;
+  AddNotifier(FMouseMoveNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnEditControlWrapper.RemoveEditorMouseDownNotifier(
+  Notifier: TEditorMouseDownNotifier);
+begin
+  RemoveNotifier(FMouseDownNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnEditControlWrapper.RemoveEditorMouseMoveNotifier(
+  Notifier: TEditorMouseMoveNotifier);
+begin
+  RemoveNotifier(FMouseMoveNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnEditControlWrapper.RemoveEditorMouseUpNotifier(
+  Notifier: TEditorMouseUpNotifier);
+begin
+  RemoveNotifier(FMouseUpNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnEditControlWrapper.DoMouseDown(Editor: TEditorObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+  I: Integer;
+begin
+  for I := 0 to FMouseDownNotifiers.Count - 1 do
+  try
+    with PCnWizNotifierRecord(FMouseDownNotifiers[I])^ do
+      TEditorMouseDownNotifier(Notifier)(Editor, Button, Shift, X, Y);
+  except
+    DoHandleException('TCnEditControlWrapper.DoMouseDown[' + IntToStr(I) + ']');
+  end;
+end;
+
+procedure TCnEditControlWrapper.DoMouseMove(Editor: TEditorObject;
+  Shift: TShiftState; X, Y: Integer);
+var
+  I: Integer;
+begin
+  for I := 0 to FMouseMoveNotifiers.Count - 1 do
+  try
+    with PCnWizNotifierRecord(FMouseMoveNotifiers[I])^ do
+      TEditorMouseMoveNotifier(Notifier)(Editor, Shift, X, Y);
+  except
+    DoHandleException('TCnEditControlWrapper.DoMouseMove[' + IntToStr(I) + ']');
+  end;
+end;
+
+procedure TCnEditControlWrapper.DoMouseUp(Editor: TEditorObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+  I: Integer;
+begin
+  for I := 0 to FMouseUpNotifiers.Count - 1 do
+  try
+    with PCnWizNotifierRecord(FMouseUpNotifiers[I])^ do
+      TEditorMouseUpNotifier(Notifier)(Editor, Button, Shift, X, Y);
+  except
+    DoHandleException('TCnEditControlWrapper.DoMouseUp[' + IntToStr(I) + ']');
   end;
 end;
 
