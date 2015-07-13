@@ -53,12 +53,17 @@ type
 
   TCnTestEditCtrlMouseHookWizard = class(TCnMenuWizard)
   private
+    FInScrollBar: Boolean;
+    FScrollBarWidthGot: Boolean;
+    FScrollBarLeft: Integer;
+    FScrollbarRight: Integer;
     procedure HookMouseUp(Editor: TEditorObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure HookMouseDown(Editor: TEditorObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure HookMouseMove(Editor: TEditorObject; Shift: TShiftState;
       X, Y: Integer);
+    procedure SetInScrollBar(const Value: Boolean);
   protected
     function GetHasConfig: Boolean; override;
   public
@@ -74,6 +79,8 @@ type
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
     procedure Execute; override;
+
+    property InScrollBar: Boolean read FInScrollBar write SetInScrollBar;
   end;
 
 implementation
@@ -111,6 +118,7 @@ begin
   EditControlWrapper.AddEditorMouseDownNotifier(HookMouseDown);
   EditControlWrapper.AddEditorMouseUpNotifier(HookMouseUp);
   EditControlWrapper.AddEditorMouseMoveNotifier(HookMouseMove);
+  InfoDlg('Mouse Event Hooked.');
 end;
 
 function TCnTestEditCtrlMouseHookWizard.GetCaption: string;
@@ -154,8 +162,26 @@ end;
 
 procedure TCnTestEditCtrlMouseHookWizard.HookMouseMove(Editor: TEditorObject;
   Shift: TShiftState; X, Y: Integer);
+var
+  SBI: TScrollBarInfo;
 begin
   CnDebugger.TraceFmt('MouseMove at X %d, Y %d.', [X, Y]);
+  if not FScrollBarWidthGot then
+  begin
+    FillChar(SBI, 0, SizeOf(TScrollBarInfo));
+    SBI.cbSize := SizeOf(TScrollBarInfo);
+    if not GetScrollBarInfo(TWinControl(Editor.EditControl).Handle, OBJID_VSCROLL, SBI) then
+    begin
+      CnDebugger.TraceMsg('Can NOT Get ScrollBar Info from EditControl. ' + GetLastErrorMsg(True));
+      Exit;
+    end;
+
+    CnDebugger.TraceRect(SBI.rcScrollBar, 'Current EditControl ScrollBar Rect in Screen.');
+    FScrollBarLeft := SBI.rcScrollBar.Left;
+    FScrollbarRight := SBI.rcScrollBar.Right;
+
+    FScrollBarWidthGot := True;
+  end;
 end;
 
 procedure TCnTestEditCtrlMouseHookWizard.HookMouseUp(Editor: TEditorObject;
@@ -172,6 +198,16 @@ end;
 procedure TCnTestEditCtrlMouseHookWizard.SaveSettings(Ini: TCustomIniFile);
 begin
 
+end;
+
+procedure TCnTestEditCtrlMouseHookWizard.SetInScrollBar(
+  const Value: Boolean);
+begin
+  if FInScrollBar <> Value then
+  begin
+    FInScrollBar := Value;
+    CnDebugger.TraceBoolean(FInScrollBar, 'InScrollBar  Changed to');
+  end;
 end;
 
 initialization
