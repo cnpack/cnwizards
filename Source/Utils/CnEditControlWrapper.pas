@@ -566,9 +566,15 @@ const
 
   SViewBarChangedName = '@Editorform@TEditWindow@ViewBarChange$qqrp14System@TObjectiro';
 
+{$IFDEF DELPHIXE2_UP} // XE2 ºó¸ÄÁË
+  SEditControlMouseUp = '@Editorcontrol@TCustomEditControl@MouseUp$qqr27System@Uitypes@TMouseButton60System@%Set$32System@Classes@System_Classes__1t1$i0$t1$i10$%ii';
+  SEditControlMouseDown = '@Editorcontrol@TCustomEditControl@MouseDown$qqr27System@Uitypes@TMouseButton60System@%Set$32System@Classes@System_Classes__1t1$i0$t1$i10$%ii';
+  SEditControlMouseMove = '@Editorcontrol@TCustomEditControl@MouseMove$qqr60System@%Set$32System@Classes@System_Classes__1t1$i0$t1$i10$%ii';
+{$ELSE}
   SEditControlMouseUp = '@Editorcontrol@TCustomEditControl@MouseUp$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
   SEditControlMouseDown = '@Editorcontrol@TCustomEditControl@MouseDown$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
   SEditControlMouseMove = '@Editorcontrol@TCustomEditControl@MouseMove$qqr46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
+{$ENDIF}
 
 {$IFDEF COMPILER10_UP}
   SIndexPosToCurPosName = '@Editorcontrol@TCustomEditControl@IndexPosToCurPos$qqrsi';
@@ -2358,7 +2364,6 @@ begin
   except
     FMouseNotifyAvailable := False;
   end;
-
 end;
 
 procedure TCnEditControlWrapper.AddEditorMouseDownNotifier(
