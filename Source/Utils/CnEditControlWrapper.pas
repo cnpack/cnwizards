@@ -2318,7 +2318,7 @@ procedure TCnEditControlWrapper.AddEditorMouseUpNotifier(
   Notifier: TEditorMouseUpNotifier);
 begin
   CheckAndInitEditControlMouseHook;
-  AddNotifier(FMouseMoveNotifiers, TMethod(Notifier));
+  AddNotifier(FMouseUpNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.RemoveEditorMouseDownNotifier(
