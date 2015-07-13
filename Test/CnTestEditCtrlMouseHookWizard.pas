@@ -164,6 +164,7 @@ procedure TCnTestEditCtrlMouseHookWizard.HookMouseMove(Editor: TEditorObject;
   Shift: TShiftState; X, Y: Integer);
 var
   SBI: TScrollBarInfo;
+  PL, PR: TPoint;
 begin
   CnDebugger.TraceFmt('MouseMove at X %d, Y %d.', [X, Y]);
   if not FScrollBarWidthGot then
@@ -176,12 +177,24 @@ begin
       Exit;
     end;
 
-    CnDebugger.TraceRect(SBI.rcScrollBar, 'Current EditControl ScrollBar Rect in Screen.');
-    FScrollBarLeft := SBI.rcScrollBar.Left;
-    FScrollbarRight := SBI.rcScrollBar.Right;
+    CnDebugger.TraceRect(SBI.rcScrollBar, 'Current EditControl ScrollBar Rect at Screen.');
+    PL.x := SBI.rcScrollBar.Left;
+    PL.y := 0;
+    PR.x := SBI.rcScrollBar.Right;
+    PR.y := 0;
 
+    PL := Editor.EditControl.ScreenToClient(PL);
+    PR := Editor.EditControl.ScreenToClient(PR);
+
+    FScrollBarLeft := PL.x;
+    FScrollbarRight := PR.x;
+
+    CnDebugger.TraceFmt('EditControl ScrollBar Left %d, Right %d. ClientWidth %d.',
+      [FScrollBarLeft, FScrollbarRight, Editor.EditControl.ClientWidth]);
     FScrollBarWidthGot := True;
   end;
+
+  InScrollBar := FScrollBarWidthGot and (X >= FScrollBarLeft) and (X <= FScrollbarRight);
 end;
 
 procedure TCnTestEditCtrlMouseHookWizard.HookMouseUp(Editor: TEditorObject;
@@ -206,7 +219,7 @@ begin
   if FInScrollBar <> Value then
   begin
     FInScrollBar := Value;
-    CnDebugger.TraceBoolean(FInScrollBar, 'InScrollBar  Changed to');
+    CnDebugger.TraceBoolean(FInScrollBar, 'InScrollBar Changed to');
   end;
 end;
 

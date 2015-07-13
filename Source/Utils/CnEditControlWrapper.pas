@@ -264,6 +264,7 @@ type
       NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
     procedure ApplicationMessage(var Msg: TMsg; var Handled: Boolean);
     procedure OnCallWndProcRet(Handle: HWND; Control: TWinControl; Msg: TMessage);
+    procedure OGetMsgProc(Handle: HWND; Control: TWinControl; Msg: TMessage);
     procedure OnIdle(Sender: TObject);
     function GetEditorCount: Integer;
     function GetEditors(Index: Integer): TEditorObject;
@@ -903,6 +904,9 @@ begin
 
   CnWizNotifierServices.AddSourceEditorNotifier(OnSourceEditorNotify);
   CnWizNotifierServices.AddActiveFormNotifier(OnActiveFormChange);
+  CnWizNotifierServices.AddGetMsgNotifier(OGetMsgProc, [WM_NCMOUSEMOVE,
+    WM_NCLBUTTONDOWN, WM_NCLBUTTONUP, WM_NCRBUTTONDOWN, WM_NCRBUTTONUP,
+    WM_NCMBUTTONDOWN, WM_NCMBUTTONUP]);
   CnWizNotifierServices.AddCallWndProcRetNotifier(OnCallWndProcRet,
     [WM_VSCROLL, WM_HSCROLL]);
   CnWizNotifierServices.AddApplicationMessageNotifier(ApplicationMessage);
@@ -917,6 +921,7 @@ begin
   CnWizNotifierServices.RemoveSourceEditorNotifier(OnSourceEditorNotify);
   CnWizNotifierServices.RemoveActiveFormNotifier(OnActiveFormChange);
   CnWizNotifierServices.RemoveCallWndProcRetNotifier(OnCallWndProcRet);
+  CnWizNotifierServices.RemoveGetMsgNotifier(OGetMsgProc);
   CnWizNotifierServices.RemoveApplicationMessageNotifier(ApplicationMessage);
   CnWizNotifierServices.RemoveApplicationIdleNotifier(OnIdle);
 
@@ -2185,6 +2190,62 @@ begin
     for I := 0 to EditorCount - 1 do
     begin
       DoEditorChange(Editors[I], ChangeType + CheckEditorChanges(Editors[i]));
+    end;
+  end;
+end;
+
+procedure TCnEditControlWrapper.OGetMsgProc(Handle: HWND;
+  Control: TWinControl; Msg: TMessage);
+var
+  Idx: Integer;
+  Editor: TEditorObject;
+  P: TPoint;
+begin
+  if FMouseNotifyAvailable and ((Msg.Msg >= WM_NCMOUSEMOVE) and (Msg.Msg <= WM_NCMBUTTONUP))
+    and IsEditControl(Control) then
+  begin
+    Editor := nil;
+    Idx := FEditControlWrapper.IndexOfEditor(Control);
+    if Idx >= 0 then
+      Editor := FEditControlWrapper.GetEditors(Idx);
+
+    if Editor <> nil then
+    begin
+      P.x := Msg.LParamLo;
+      P.y := Msg.LParamHi;
+      P := Control.ScreenToClient(P);
+      case Msg.Msg of
+      WM_NCMOUSEMOVE:
+        begin
+          DoMouseMove(Editor, KeysToShiftState(Msg.WParam), P.x, P.y);
+        end;
+      WM_NCLBUTTONDOWN:
+        begin
+          DoMouseDown(Editor, mbLeft, KeysToShiftState(Msg.WParam), P.x, P.y);
+        end;
+      WM_NCLBUTTONUP:
+        begin
+          DoMouseUp(Editor, mbLeft, KeysToShiftState(Msg.WParam), P.x, P.y);
+        end;
+      WM_NCRBUTTONDOWN:
+        begin
+          DoMouseDown(Editor, mbRight, KeysToShiftState(Msg.WParam), P.x, P.y);
+        end;
+      WM_NCRBUTTONUP:
+        begin
+          DoMouseUp(Editor, mbRight, KeysToShiftState(Msg.WParam), P.x, P.y);
+        end;
+      WM_NCMBUTTONDOWN:
+        begin
+          DoMouseDown(Editor, mbMiddle, KeysToShiftState(Msg.WParam), P.x, P.y);
+        end;
+      WM_NCMBUTTONUP:
+        begin
+          DoMouseUp(Editor, mbMiddle, KeysToShiftState(Msg.WParam), P.x, P.y);
+        end;
+      else
+        ; // DBLCLICKs do nothing
+      end;
     end;
   end;
 end;
