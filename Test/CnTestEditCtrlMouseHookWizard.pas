@@ -58,11 +58,13 @@ type
     FScrollBarLeft: Integer;
     FScrollbarRight: Integer;
     procedure HookMouseUp(Editor: TEditorObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
+      Shift: TShiftState; X, Y: Integer; IsNC: Boolean);
     procedure HookMouseDown(Editor: TEditorObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
+      Shift: TShiftState; X, Y: Integer; IsNC: Boolean);
     procedure HookMouseMove(Editor: TEditorObject; Shift: TShiftState;
-      X, Y: Integer);
+      X, Y: Integer; IsNC: Boolean);
+    procedure HookMouseLeave(Editor: TEditorObject; IsNC: Boolean);
+
     procedure SetInScrollBar(const Value: Boolean);
   protected
     function GetHasConfig: Boolean; override;
@@ -110,6 +112,7 @@ begin
   EditControlWrapper.RemoveEditorMouseDownNotifier(HookMouseDown);
   EditControlWrapper.RemoveEditorMouseUpNotifier(HookMouseUp);
   EditControlWrapper.RemoveEditorMouseMoveNotifier(HookMouseMove);
+  EditControlWrapper.RemoveEditorMouseLeaveNotifier(HookMouseLeave);
   inherited;
 end;
 
@@ -118,6 +121,7 @@ begin
   EditControlWrapper.AddEditorMouseDownNotifier(HookMouseDown);
   EditControlWrapper.AddEditorMouseUpNotifier(HookMouseUp);
   EditControlWrapper.AddEditorMouseMoveNotifier(HookMouseMove);
+  EditControlWrapper.AddEditorMouseLeaveNotifier(HookMouseLeave);
   InfoDlg('Mouse Event Hooked.');
 end;
 
@@ -155,18 +159,33 @@ begin
 end;
 
 procedure TCnTestEditCtrlMouseHookWizard.HookMouseDown(Editor: TEditorObject;
-  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer; IsNC: Boolean);
+var
+  Tme: TTrackMouseEvent;
 begin
   CnDebugger.TraceFmt('MouseDown at X %d, Y %d. Button %d.', [X, Y, Ord(Button)]);
+  if IsNC then
+  begin
+    Tme.cbSize := SizeOf(TTrackMouseEvent);
+    Tme.dwFlags := TME_LEAVE;
+    Tme.hwndTrack := TWinControl(Editor.EditControl).Handle;
+    TrackMouseEvent(Tme);
+  end;
+end;
+
+procedure TCnTestEditCtrlMouseHookWizard.HookMouseLeave(
+  Editor: TEditorObject; IsNC: Boolean);
+begin
+  CnDebugger.TraceFmt('Mouse Leave Edit Control. Is from NC: %d', [Integer(IsNc)]);
 end;
 
 procedure TCnTestEditCtrlMouseHookWizard.HookMouseMove(Editor: TEditorObject;
-  Shift: TShiftState; X, Y: Integer);
+  Shift: TShiftState; X, Y: Integer; IsNC: Boolean);
 var
   SBI: TScrollBarInfo;
   PL, PR: TPoint;
 begin
-  CnDebugger.TraceFmt('MouseMove at X %d, Y %d.', [X, Y]);
+  CnDebugger.TraceFmt('MouseMove at X %d, Y %d. Is in NC: %d', [X, Y, Integer(IsNc)]);
   if not FScrollBarWidthGot then
   begin
     FillChar(SBI, 0, SizeOf(TScrollBarInfo));
@@ -198,7 +217,7 @@ begin
 end;
 
 procedure TCnTestEditCtrlMouseHookWizard.HookMouseUp(Editor: TEditorObject;
-  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer; IsNC: Boolean);
 begin
   CnDebugger.TraceFmt('MouseUp at X %d, Y %d. Button %d.', [X, Y, Ord(Button)]);
 end;

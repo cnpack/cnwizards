@@ -186,16 +186,18 @@ type
     var Handled: Boolean) of object;
   {* 按键事件 }
 
-  // 鼠标事件类似于 TControl 内的定义，但 Sender 是 TEditorObject
+  // 鼠标事件类似于 TControl 内的定义，但 Sender 是 TEditorObject，并且加了是否是非客户区的标志
   TEditorMouseUpNotifier = procedure(Editor: TEditorObject; Button: TMouseButton;
-    Shift: TShiftState; X, Y: Integer) of object;
+    Shift: TShiftState; X, Y: Integer; IsNC: Boolean) of object;
   {* 编辑器内鼠标抬起通知}
   TEditorMouseDownNotifier =  procedure(Editor: TEditorObject; Button: TMouseButton;
-    Shift: TShiftState; X, Y: Integer) of object;
+    Shift: TShiftState; X, Y: Integer; IsNC: Boolean) of object;
   {* 编辑器内鼠标按下通知}
   TEditorMouseMoveNotifier = procedure(Editor: TEditorObject; Shift: TShiftState;
-    X, Y: Integer) of object;
+    X, Y: Integer; IsNC: Boolean) of object;
   {* 编辑器内鼠标移动通知}
+  TEditorMouseLeaveNotifier = procedure(Editor: TEditorObject; IsNC: Boolean) of object;
+  {* 编辑器内鼠标离开通知}
 
   TCnBreakPointClickItem = class
   private
@@ -229,6 +231,8 @@ type
     FMouseUpNotifiers: TList;
     FMouseDownNotifiers: TList;
     FMouseMoveNotifiers: TList;
+    FMouseLeaveNotifiers: TList;
+
     FMouseUpHook: TCnMethodHook;
     FMouseDownHook: TCnMethodHook;
     FMouseMoveHook: TCnMethodHook;
@@ -264,7 +268,7 @@ type
       NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
     procedure ApplicationMessage(var Msg: TMsg; var Handled: Boolean);
     procedure OnCallWndProcRet(Handle: HWND; Control: TWinControl; Msg: TMessage);
-    procedure OGetMsgProc(Handle: HWND; Control: TWinControl; Msg: TMessage);
+    procedure OnGetMsgProc(Handle: HWND; Control: TWinControl; Msg: TMessage);
     procedure OnIdle(Sender: TObject);
     function GetEditorCount: Integer;
     function GetEditors(Index: Integer): TEditorObject;
@@ -281,11 +285,12 @@ type
     procedure DoEditorChange(Editor: TEditorObject; ChangeType: TEditorChangeTypes);
 
     procedure DoMouseDown(Editor: TEditorObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
+      Shift: TShiftState; X, Y: Integer; IsNC: Boolean);
     procedure DoMouseUp(Editor: TEditorObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
+      Shift: TShiftState; X, Y: Integer; IsNC: Boolean);
     procedure DoMouseMove(Editor: TEditorObject; Shift: TShiftState;
-      X, Y: Integer);
+      X, Y: Integer; IsNC: Boolean);
+    procedure DoMouseLeave(Editor: TEditorObject; IsNC: Boolean);
 
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
@@ -402,6 +407,11 @@ type
     procedure RemoveEditorMouseMoveNotifier(Notifier: TEditorMouseMoveNotifier);
     {* 删除编辑器鼠标移动通知 }
 
+    procedure AddEditorMouseLeaveNotifier(Notifier: TEditorMouseLeaveNotifier);
+    {* 增加编辑器鼠标离开通知 }
+    procedure RemoveEditorMouseLeaveNotifier(Notifier: TEditorMouseLeaveNotifier);
+    {* 删除编辑器鼠标离开通知 }
+
     property MouseNotifyAvailable: Boolean read FMouseNotifyAvailable;
     {* 返回编辑器的鼠标事件通知服务是否可用 }
   end;
@@ -427,6 +437,8 @@ type
 
 const
   CN_BP_CLICK_POS_X = 5;
+
+  WM_NCMOUSELEAVE       = $02A2;
 
 {$IFDEF BDS}
 {$IFDEF BDS2005}
@@ -793,7 +805,7 @@ begin
   end;
 
   if Editor <> nil then
-    FEditControlWrapper.DoMouseDown(Editor, Button, Shift, X, Y);
+    FEditControlWrapper.DoMouseDown(Editor, Button, Shift, X, Y, False);
 end;
 
 procedure MyEditControlMouseUp(Self: TObject; Button: TMouseButton;
@@ -838,7 +850,7 @@ begin
   end;
 
   if Editor <> nil then
-    FEditControlWrapper.DoMouseUp(Editor, Button, Shift, X, Y);
+    FEditControlWrapper.DoMouseUp(Editor, Button, Shift, X, Y, False);
 end;
 
 procedure MyEditControlMouseMove(Self: TObject; Shift: TShiftState; X, Y: Integer);
@@ -882,7 +894,7 @@ begin
   end;
 
   if Editor <> nil then
-    FEditControlWrapper.DoMouseMove(Editor, Shift, X, Y);
+    FEditControlWrapper.DoMouseMove(Editor, Shift, X, Y, False);
 end;
 
 constructor TCnEditControlWrapper.Create(AOwner: TComponent);
@@ -899,7 +911,7 @@ begin
   FMouseUpNotifiers := TList.Create;
   FMouseDownNotifiers := TList.Create;
   FMouseMoveNotifiers := TList.Create;
-
+  FMouseLeaveNotifiers := TList.Create;
   FEditControlList := TList.Create;
 
   FEditorList := TObjectList.Create;
@@ -910,9 +922,9 @@ begin
 
   CnWizNotifierServices.AddSourceEditorNotifier(OnSourceEditorNotify);
   CnWizNotifierServices.AddActiveFormNotifier(OnActiveFormChange);
-  CnWizNotifierServices.AddGetMsgNotifier(OGetMsgProc, [WM_NCMOUSEMOVE,
+  CnWizNotifierServices.AddGetMsgNotifier(OnGetMsgProc, [WM_NCMOUSEMOVE,
     WM_NCLBUTTONDOWN, WM_NCLBUTTONUP, WM_NCRBUTTONDOWN, WM_NCRBUTTONUP,
-    WM_NCMBUTTONDOWN, WM_NCMBUTTONUP]);
+    WM_NCMBUTTONDOWN, WM_NCMBUTTONUP, WM_MOUSELEAVE, WM_NCMOUSELEAVE]);
   CnWizNotifierServices.AddCallWndProcRetNotifier(OnCallWndProcRet,
     [WM_VSCROLL, WM_HSCROLL]);
   CnWizNotifierServices.AddApplicationMessageNotifier(ApplicationMessage);
@@ -927,7 +939,7 @@ begin
   CnWizNotifierServices.RemoveSourceEditorNotifier(OnSourceEditorNotify);
   CnWizNotifierServices.RemoveActiveFormNotifier(OnActiveFormChange);
   CnWizNotifierServices.RemoveCallWndProcRetNotifier(OnCallWndProcRet);
-  CnWizNotifierServices.RemoveGetMsgNotifier(OGetMsgProc);
+  CnWizNotifierServices.RemoveGetMsgNotifier(OnGetMsgProc);
   CnWizNotifierServices.RemoveApplicationMessageNotifier(ApplicationMessage);
   CnWizNotifierServices.RemoveApplicationIdleNotifier(OnIdle);
 
@@ -955,6 +967,7 @@ begin
   ClearAndFreeList(FMouseUpNotifiers);
   ClearAndFreeList(FMouseDownNotifiers);
   ClearAndFreeList(FMouseMoveNotifiers);
+  ClearAndFreeList(FMouseLeaveNotifiers);
   ClearAndFreeList(FBeforePaintLineNotifiers);
   ClearAndFreeList(FAfterPaintLineNotifiers);
   ClearAndFreeList(FEditControlNotifiers);
@@ -2200,15 +2213,14 @@ begin
   end;
 end;
 
-procedure TCnEditControlWrapper.OGetMsgProc(Handle: HWND;
+procedure TCnEditControlWrapper.OnGetMsgProc(Handle: HWND;
   Control: TWinControl; Msg: TMessage);
 var
   Idx: Integer;
   Editor: TEditorObject;
   P: TPoint;
 begin
-  if FMouseNotifyAvailable and ((Msg.Msg >= WM_NCMOUSEMOVE) and (Msg.Msg <= WM_NCMBUTTONUP))
-    and IsEditControl(Control) then
+  if FMouseNotifyAvailable and IsEditControl(Control) then
   begin
     Editor := nil;
     Idx := FEditControlWrapper.IndexOfEditor(Control);
@@ -2223,31 +2235,39 @@ begin
       case Msg.Msg of
       WM_NCMOUSEMOVE:
         begin
-          DoMouseMove(Editor, KeysToShiftState(Msg.WParam), P.x, P.y);
+          DoMouseMove(Editor, KeysToShiftState(Msg.WParam), P.x, P.y, True);
         end;
       WM_NCLBUTTONDOWN:
         begin
-          DoMouseDown(Editor, mbLeft, KeysToShiftState(Msg.WParam), P.x, P.y);
+          DoMouseDown(Editor, mbLeft, KeysToShiftState(Msg.WParam), P.x, P.y, True);
         end;
       WM_NCLBUTTONUP:
         begin
-          DoMouseUp(Editor, mbLeft, KeysToShiftState(Msg.WParam), P.x, P.y);
+          DoMouseUp(Editor, mbLeft, KeysToShiftState(Msg.WParam), P.x, P.y, True);
         end;
       WM_NCRBUTTONDOWN:
         begin
-          DoMouseDown(Editor, mbRight, KeysToShiftState(Msg.WParam), P.x, P.y);
+          DoMouseDown(Editor, mbRight, KeysToShiftState(Msg.WParam), P.x, P.y, True);
         end;
       WM_NCRBUTTONUP:
         begin
-          DoMouseUp(Editor, mbRight, KeysToShiftState(Msg.WParam), P.x, P.y);
+          DoMouseUp(Editor, mbRight, KeysToShiftState(Msg.WParam), P.x, P.y, True);
         end;
       WM_NCMBUTTONDOWN:
         begin
-          DoMouseDown(Editor, mbMiddle, KeysToShiftState(Msg.WParam), P.x, P.y);
+          DoMouseDown(Editor, mbMiddle, KeysToShiftState(Msg.WParam), P.x, P.y, True);
         end;
       WM_NCMBUTTONUP:
         begin
-          DoMouseUp(Editor, mbMiddle, KeysToShiftState(Msg.WParam), P.x, P.y);
+          DoMouseUp(Editor, mbMiddle, KeysToShiftState(Msg.WParam), P.x, P.y, True);
+        end;
+      WM_NCMOUSELEAVE:
+        begin
+          DoMouseLeave(Editor, True);
+        end;
+      WM_MOUSELEAVE:
+        begin
+          DoMouseLeave(Editor, False);
         end;
       else
         ; // DBLCLICKs do nothing
@@ -2406,45 +2426,71 @@ begin
 end;
 
 procedure TCnEditControlWrapper.DoMouseDown(Editor: TEditorObject;
-  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer; IsNC: Boolean);
 var
   I: Integer;
 begin
   for I := 0 to FMouseDownNotifiers.Count - 1 do
   try
     with PCnWizNotifierRecord(FMouseDownNotifiers[I])^ do
-      TEditorMouseDownNotifier(Notifier)(Editor, Button, Shift, X, Y);
+      TEditorMouseDownNotifier(Notifier)(Editor, Button, Shift, X, Y, IsNC);
   except
     DoHandleException('TCnEditControlWrapper.DoMouseDown[' + IntToStr(I) + ']');
   end;
 end;
 
 procedure TCnEditControlWrapper.DoMouseMove(Editor: TEditorObject;
-  Shift: TShiftState; X, Y: Integer);
+  Shift: TShiftState; X, Y: Integer; IsNC: Boolean);
 var
   I: Integer;
 begin
   for I := 0 to FMouseMoveNotifiers.Count - 1 do
   try
     with PCnWizNotifierRecord(FMouseMoveNotifiers[I])^ do
-      TEditorMouseMoveNotifier(Notifier)(Editor, Shift, X, Y);
+      TEditorMouseMoveNotifier(Notifier)(Editor, Shift, X, Y, IsNC);
   except
     DoHandleException('TCnEditControlWrapper.DoMouseMove[' + IntToStr(I) + ']');
   end;
 end;
 
 procedure TCnEditControlWrapper.DoMouseUp(Editor: TEditorObject;
-  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer; IsNC: Boolean);
 var
   I: Integer;
 begin
   for I := 0 to FMouseUpNotifiers.Count - 1 do
   try
     with PCnWizNotifierRecord(FMouseUpNotifiers[I])^ do
-      TEditorMouseUpNotifier(Notifier)(Editor, Button, Shift, X, Y);
+      TEditorMouseUpNotifier(Notifier)(Editor, Button, Shift, X, Y, IsNC);
   except
     DoHandleException('TCnEditControlWrapper.DoMouseUp[' + IntToStr(I) + ']');
   end;
+end;
+
+procedure TCnEditControlWrapper.DoMouseLeave(Editor: TEditorObject; IsNC: Boolean);
+var
+  I: Integer;
+begin
+  for I := 0 to FMouseLeaveNotifiers.Count - 1 do
+  try
+    with PCnWizNotifierRecord(FMouseLeaveNotifiers[I])^ do
+      TEditorMouseLeaveNotifier(Notifier)(Editor, IsNC);
+  except
+    DoHandleException('TCnEditControlWrapper.DoMouseLeave[' + IntToStr(I) + ']');
+  end;
+end;
+
+procedure TCnEditControlWrapper.AddEditorMouseLeaveNotifier(
+  Notifier: TEditorMouseLeaveNotifier);
+begin
+  CheckAndInitEditControlMouseHook;
+  AddNotifier(FMouseLeaveNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnEditControlWrapper.RemoveEditorMouseLeaveNotifier(
+  Notifier: TEditorMouseLeaveNotifier);
+begin
+  RemoveNotifier(FMouseLeaveNotifiers, TMethod(Notifier));
 end;
 
 initialization
@@ -2464,3 +2510,4 @@ finalization
 {$ENDIF}
 
 end.
+
