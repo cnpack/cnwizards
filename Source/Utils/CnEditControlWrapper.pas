@@ -578,16 +578,6 @@ const
 
   SViewBarChangedName = '@Editorform@TEditWindow@ViewBarChange$qqrp14System@TObjectiro';
 
-{$IFDEF DELPHIXE2_UP} // XE2 后改了
-  SEditControlMouseUp = '@Editorcontrol@TCustomEditControl@MouseUp$qqr27System@Uitypes@TMouseButton60System@%Set$32System@Classes@System_Classes__1t1$i0$t1$i10$%ii';
-  SEditControlMouseDown = '@Editorcontrol@TCustomEditControl@MouseDown$qqr27System@Uitypes@TMouseButton60System@%Set$32System@Classes@System_Classes__1t1$i0$t1$i10$%ii';
-  SEditControlMouseMove = '@Editorcontrol@TCustomEditControl@MouseMove$qqr60System@%Set$32System@Classes@System_Classes__1t1$i0$t1$i10$%ii';
-{$ELSE}
-  SEditControlMouseUp = '@Editorcontrol@TCustomEditControl@MouseUp$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
-  SEditControlMouseDown = '@Editorcontrol@TCustomEditControl@MouseDown$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
-  SEditControlMouseMove = '@Editorcontrol@TCustomEditControl@MouseMove$qqr46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
-{$ENDIF}
-
 {$IFDEF COMPILER10_UP}
   SIndexPosToCurPosName = '@Editorcontrol@TCustomEditControl@IndexPosToCurPos$qqrsi';
 {$ELSE}
@@ -601,14 +591,41 @@ const
   SGetOTAEditViewName = '@Editors@TEditView@GetOTAEditView$qqrv';
   SSetEditViewName = '@Editors@TCustomEditControl@SetEditView$qqrp17Editors@TEditView';
 
-  SEditControlMouseUp = '@Editors@TCustomEditControl@MouseUp$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
-  SEditControlMouseDown = '@Editors@TCustomEditControl@MouseDown$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
-  SEditControlMouseMove = '@Editors@TCustomEditControl@MouseMove$qqr46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
-
 {$IFDEF COMPILER7_UP}
   SGetAttributeAtPosName = '@Editors@TCustomEditControl@GetAttributeAtPos$qqrrx9Ek@TEdPosrit2oo';
 {$ELSE}
   SGetAttributeAtPosName = '@Editors@TCustomEditControl@GetAttributeAtPos$qqrrx9Ek@TEdPosrit2o';
+{$ENDIF}
+{$ENDIF}
+
+  // 编辑器控件鼠标事件处理函数名
+{$IFDEF DELPHIXE8_UP} // XE8 又改了
+  SEditControlMouseUp = '@Editorcontrol@TCustomEditControl@MouseUp$qqr27System@Uitypes@TMouseButton60System@%Set$32System@Classes@System_Classes__1uc$i0$uc$i10$%ii';
+  SEditControlMouseDown = '@Editorcontrol@TCustomEditControl@MouseDown$qqr27System@Uitypes@TMouseButton60System@%Set$32System@Classes@System_Classes__1uc$i0$uc$i10$%ii';
+  SEditControlMouseMove = '@Editorcontrol@TCustomEditControl@MouseMove$qqr60System@%Set$32System@Classes@System_Classes__1uc$i0$uc$i10$%ii';
+{$ELSE} {$IFDEF DELPHIXE3} // XE3 单独改了
+  SEditControlMouseUp = '@Editorcontrol@TCustomEditControl@MouseUp$qqr27System@Uitypes@TMouseButton60System@%Set$t32System@Classes@System_Classes__1$iuc$0$iuc$9%ii';
+  SEditControlMouseDown = '@Editorcontrol@TCustomEditControl@MouseDown$qqr27System@Uitypes@TMouseButton60System@%Set$t32System@Classes@System_Classes__1$iuc$0$iuc$9%ii';
+  SEditControlMouseMove = '@Editorcontrol@TCustomEditControl@MouseMove$qqr60System@%Set$t32System@Classes@System_Classes__1$iuc$0$iuc$9%ii';
+{$ELSE} {$IFDEF DELPHIXE2_UP} // XE2 后改了
+  SEditControlMouseUp = '@Editorcontrol@TCustomEditControl@MouseUp$qqr27System@Uitypes@TMouseButton60System@%Set$32System@Classes@System_Classes__1t1$i0$t1$i10$%ii';
+  SEditControlMouseDown = '@Editorcontrol@TCustomEditControl@MouseDown$qqr27System@Uitypes@TMouseButton60System@%Set$32System@Classes@System_Classes__1t1$i0$t1$i10$%ii';
+  SEditControlMouseMove = '@Editorcontrol@TCustomEditControl@MouseMove$qqr60System@%Set$32System@Classes@System_Classes__1t1$i0$t1$i10$%ii';
+{$ELSE} {$IFDEF DELPHI2010_UP} // 2010 后改了
+  SEditControlMouseUp = '@Editorcontrol@TCustomEditControl@MouseUp$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$8%ii';
+  SEditControlMouseDown = '@Editorcontrol@TCustomEditControl@MouseDown$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$8%ii';
+  SEditControlMouseMove = '@Editorcontrol@TCustomEditControl@MouseMove$qqr46System@%Set$t18Classes@Classes__1$iuc$0$iuc$8%ii';
+{$ELSE} {$IFDEF COMPILER8_UP}  // BDS 后改了
+  SEditControlMouseUp = '@Editorcontrol@TCustomEditControl@MouseUp$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
+  SEditControlMouseDown = '@Editorcontrol@TCustomEditControl@MouseDown$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
+  SEditControlMouseMove = '@Editorcontrol@TCustomEditControl@MouseMove$qqr46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
+{$ELSE} // Delphi 5、6、7 是这仨
+  SEditControlMouseUp = '@Editors@TCustomEditControl@MouseUp$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
+  SEditControlMouseDown = '@Editors@TCustomEditControl@MouseDown$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
+  SEditControlMouseMove = '@Editors@TCustomEditControl@MouseMove$qqr46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
+{$ENDIF}
+{$ENDIF}
+{$ENDIF}
 {$ENDIF}
 {$ENDIF}
 
