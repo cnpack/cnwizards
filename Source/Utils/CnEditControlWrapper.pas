@@ -636,6 +636,8 @@ const
 {$ENDIF}
 {$ENDIF}
 {$ENDIF}
+{$ENDIF}
+{$ENDIF}
 
 type
   TControlHack = class(TControl);
