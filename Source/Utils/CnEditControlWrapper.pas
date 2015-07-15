@@ -603,19 +603,27 @@ const
   SEditControlMouseUp = '@Editorcontrol@TCustomEditControl@MouseUp$qqr27System@Uitypes@TMouseButton60System@%Set$32System@Classes@System_Classes__1uc$i0$uc$i10$%ii';
   SEditControlMouseDown = '@Editorcontrol@TCustomEditControl@MouseDown$qqr27System@Uitypes@TMouseButton60System@%Set$32System@Classes@System_Classes__1uc$i0$uc$i10$%ii';
   SEditControlMouseMove = '@Editorcontrol@TCustomEditControl@MouseMove$qqr60System@%Set$32System@Classes@System_Classes__1uc$i0$uc$i10$%ii';
+{$ELSE} {$IFDEF DELPHIXE7} // XE7 改成和 XE2 一样
+  SEditControlMouseUp = '@Editorcontrol@TCustomEditControl@MouseUp$qqr27System@Uitypes@TMouseButton60System@%Set$32System@Classes@System_Classes__1t1$i0$t1$i10$%ii';
+  SEditControlMouseDown = '@Editorcontrol@TCustomEditControl@MouseDown$qqr27System@Uitypes@TMouseButton60System@%Set$32System@Classes@System_Classes__1t1$i0$t1$i10$%ii';
+  SEditControlMouseMove = '@Editorcontrol@TCustomEditControl@MouseMove$qqr60System@%Set$32System@Classes@System_Classes__1t1$i0$t1$i10$%ii';
+{$ELSE} {$IFDEF DELPHIXE4_UP} // XE4 又改了：XE4、XE5、XE6
+  SEditControlMouseUp = '@Editorcontrol@TCustomEditControl@MouseUp$qqr27System@Uitypes@TMouseButton61System@%Set$t32System@Classes@System_Classes__1$iuc$0$iuc$10%ii';
+  SEditControlMouseDown = '@Editorcontrol@TCustomEditControl@MouseDown$qqr27System@Uitypes@TMouseButton61System@%Set$t32System@Classes@System_Classes__1$iuc$0$iuc$10%ii';
+  SEditControlMouseMove = '@Editorcontrol@TCustomEditControl@MouseMove$qqr61System@%Set$t32System@Classes@System_Classes__1$iuc$0$iuc$10%ii';
 {$ELSE} {$IFDEF DELPHIXE3} // XE3 单独改了
   SEditControlMouseUp = '@Editorcontrol@TCustomEditControl@MouseUp$qqr27System@Uitypes@TMouseButton60System@%Set$t32System@Classes@System_Classes__1$iuc$0$iuc$9%ii';
   SEditControlMouseDown = '@Editorcontrol@TCustomEditControl@MouseDown$qqr27System@Uitypes@TMouseButton60System@%Set$t32System@Classes@System_Classes__1$iuc$0$iuc$9%ii';
   SEditControlMouseMove = '@Editorcontrol@TCustomEditControl@MouseMove$qqr60System@%Set$t32System@Classes@System_Classes__1$iuc$0$iuc$9%ii';
-{$ELSE} {$IFDEF DELPHIXE2_UP} // XE2 后改了
+{$ELSE} {$IFDEF DELPHIXE2} // XE2 改了：和 XE7 一样
   SEditControlMouseUp = '@Editorcontrol@TCustomEditControl@MouseUp$qqr27System@Uitypes@TMouseButton60System@%Set$32System@Classes@System_Classes__1t1$i0$t1$i10$%ii';
   SEditControlMouseDown = '@Editorcontrol@TCustomEditControl@MouseDown$qqr27System@Uitypes@TMouseButton60System@%Set$32System@Classes@System_Classes__1t1$i0$t1$i10$%ii';
   SEditControlMouseMove = '@Editorcontrol@TCustomEditControl@MouseMove$qqr60System@%Set$32System@Classes@System_Classes__1t1$i0$t1$i10$%ii';
-{$ELSE} {$IFDEF DELPHI2010_UP} // 2010 后改了
+{$ELSE} {$IFDEF DELPHI2010_UP} // 2010 后改了：2010、XE
   SEditControlMouseUp = '@Editorcontrol@TCustomEditControl@MouseUp$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$8%ii';
   SEditControlMouseDown = '@Editorcontrol@TCustomEditControl@MouseDown$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$8%ii';
   SEditControlMouseMove = '@Editorcontrol@TCustomEditControl@MouseMove$qqr46System@%Set$t18Classes@Classes__1$iuc$0$iuc$8%ii';
-{$ELSE} {$IFDEF COMPILER8_UP}  // BDS 后改了
+{$ELSE} {$IFDEF COMPILER8_UP}  // BDS 后改了：2005、2006、2007、2009
   SEditControlMouseUp = '@Editorcontrol@TCustomEditControl@MouseUp$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
   SEditControlMouseDown = '@Editorcontrol@TCustomEditControl@MouseDown$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
   SEditControlMouseMove = '@Editorcontrol@TCustomEditControl@MouseMove$qqr46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
