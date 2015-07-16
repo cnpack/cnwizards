@@ -732,8 +732,10 @@ begin
   if not NoSeparateSpace then  // 如果不要插入分隔空格，则跳过此段
   begin
     // 两个标识符之间以空格分离
-    if ( (FLastToken in IdentTokens) and (Token in IdentTokens + [tokAtSign]) ) then
+    if ((FLastToken in IdentTokens) and (Token in IdentTokens + [tokAtSign])) then
       WriteOneSpace
+    else if ((BeforeSpaceCount = 0) and (FLastToken = tokGreat) and (Token in IdentTokens + [tokAtSign])) then
+      WriteOneSpace // 泛型 property 后面加 read 时，需要用这种方式加空格分开
     else if (FLastToken in RightBracket) and (Token in [tokKeywordThen, tokKeywordDo,
       tokKeywordOf, tokKeywordTo, tokKeywordDownto]) then
       WriteOneSpace  // 强行分离右括号与关键字
