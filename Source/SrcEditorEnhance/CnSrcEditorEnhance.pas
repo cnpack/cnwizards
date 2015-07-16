@@ -55,7 +55,8 @@ uses
   IniFiles, Menus, CnCommon, CnWizUtils, CnConsts, CnWizClasses, CnWizConsts,
   CnWizManager, ComCtrls, ActnList, CnSpin, StdCtrls, ExtCtrls, CnWizMultiLang,
   Forms, CnSrcEditorMisc, CnSrcEditorGutter, CnSrcEditorToolBar, CnSrcEditorNav,
-  CnSrcEditorBlockTools, CnSrcEditorKey, CnEditControlWrapper, CnWizNotifier;
+  CnSrcEditorBlockTools, CnSrcEditorKey, CnSrcEditorThumbnail,
+  CnEditControlWrapper, CnWizNotifier;
 
 type
 
@@ -185,6 +186,7 @@ type
   TCnSrcEditorEnhance = class(TCnIDEEnhanceWizard)
   private
     FEditorMisc: TCnSrcEditorMisc;
+    FThumbnail: TCnSrcEditorThumbnail;
     FToolbarMgr: TCnSrcEditorToolBarMgr;
     FGutterMgr: TCnSrcEditorGutterMgr;
     FNavMgr: TCnSrcEditorNavMgr;
@@ -207,6 +209,7 @@ type
   public
     constructor Create; override;
     destructor Destroy; override;
+
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
@@ -424,6 +427,7 @@ constructor TCnSrcEditorEnhance.Create;
 begin
   inherited;
   FEditorMisc := TCnSrcEditorMisc.Create;
+  FThumbnail := TCnSrcEditorThumbnail.Create;
   FToolbarMgr := TCnSrcEditorToolBarMgr.Create;
 
   if Assigned(CreateEditorToolBarServiceProc) then
@@ -452,6 +456,7 @@ begin
   EditControlWrapper.RemoveEditorChangeNotifier(EditorChanged);
   EditControlWrapper.RemoveEditControlNotifier(EditControlNotify);
 {$ENDIF}
+  FThumbnail.Free;
   FEditorMisc.Free;
   FToolbarMgr.Free;
   
@@ -483,6 +488,7 @@ end;
 procedure TCnSrcEditorEnhance.LoadSettings(Ini: TCustomIniFile);
 begin
   FEditorMisc.LoadSettings(Ini);
+  FThumbnail.LoadSettings(Ini);
   FToolbarMgr.LoadSettings(Ini);
   FGutterMgr.LoadSettings(Ini);
   FNavMgr.LoadSettings(Ini);
@@ -493,6 +499,7 @@ end;
 procedure TCnSrcEditorEnhance.SaveSettings(Ini: TCustomIniFile);
 begin
   FEditorMisc.SaveSettings(Ini);
+  FThumbnail.SaveSettings(Ini);
   FToolbarMgr.SaveSettings(Ini);
   FGutterMgr.SaveSettings(Ini);
   FNavMgr.SaveSettings(Ini);
@@ -503,6 +510,7 @@ end;
 procedure TCnSrcEditorEnhance.ResetSettings(Ini: TCustomIniFile);
 begin
   FEditorMisc.ResetSettings(Ini);
+  FThumbnail.ResetSettings(Ini);
   FToolbarMgr.ResetSettings(Ini);
   FGutterMgr.ResetSettings(Ini);
   FNavMgr.ResetSettings(Ini);
@@ -514,6 +522,7 @@ procedure TCnSrcEditorEnhance.SetActive(Value: Boolean);
 begin
   inherited;
   FEditorMisc.Active := Value;
+  FThumbnail.Active := Value;
   FToolbarMgr.Active := Value;
   FGutterMgr.Active := Value;
   FNavMgr.Active := Value;
