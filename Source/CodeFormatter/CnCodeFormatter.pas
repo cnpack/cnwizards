@@ -2808,16 +2808,20 @@ end;
 procedure TCnBasePascalFormatter.FormatFormalParameters(PreSpaceCount: Byte);
 begin
   Match(tokLB);
-  
-  if Scaner.Token <> tokRB then
-    FormatFormalParm;
-  
-  while Scaner.Token = tokSemicolon do
-  begin
-    Match(Scaner.Token);
-    FormatFormalParm;
-  end;
 
+  SpecifyElementType(pfetFormalParameters);
+  try
+    if Scaner.Token <> tokRB then
+      FormatFormalParm;
+
+    while Scaner.Token = tokSemicolon do
+    begin
+      Match(Scaner.Token);
+      FormatFormalParm;
+    end;
+  finally
+    RestoreElementType;
+  end;
   Match(tokRB);
 end;
 
@@ -5394,9 +5398,9 @@ end;
 
 function TCnAbstractCodeFormatter.CalcNeedPadding: Boolean;
 begin
-  Result := FElementType in [pfetExpression, pfetEnumList, pfetArrayConstant,
-    pfetSetConstructor];
-  // 暂且表达式内部与枚举定义内部等一系列元素内部，
+  Result := (FElementType in [pfetExpression, pfetEnumList, pfetArrayConstant,
+    pfetSetConstructor]) or UpperContainElementType(pfetFormalParameters);
+  // 暂且表达式内部与枚举定义内部等一系列元素内部，或者在参数列表中
   // 碰到注释导致的换行时，才要求自动和上一行对齐
 end;
 
