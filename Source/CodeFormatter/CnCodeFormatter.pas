@@ -1055,6 +1055,7 @@ begin
   case Scaner.Token of
     tokSymbol, tokAtSign,
     tokKeyword_BEGIN..tokKeywordIn,  // 此三行表示部分关键字也可做 Factor
+    tokAmpersand,                    // & 号也可作为 Identifier
     tokKeywordInitialization..tokKeywordNil,
     tokKeywordObject..tokKeyword_END,
     tokDirective_BEGIN..tokDirective_END,
