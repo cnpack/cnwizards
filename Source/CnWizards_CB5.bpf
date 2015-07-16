@@ -137,6 +137,7 @@ USEFORMNS("ProjectExtWizard\CnProjectBackupFrm.pas", Cnprojectbackupfrm, CnProje
 USEFORMNS("ProjectExtWizard\CnProjectBackupSaveFrm.pas", Cnprojectbackupsavefrm, CnProjectBackupSaveForm);
 USEUNIT("SrcEditorEnhance\CnSrcEditorNav.pas");
 USEUNIT("SrcEditorEnhance\CnSrcEditorMisc.pas");
+USEUNIT("SrcEditorEnhance\CnSrcEditorThumbnail.pas");
 USEUNIT("Utils\CnWizFlatButton.pas");
 USEUNIT("SrcEditorEnhance\CnSrcEditorBlockTools.pas");
 USEFORMNS("SimpleWizards\CnProcListWizard.pas", Cnproclistwizard, CnProcListFrm);

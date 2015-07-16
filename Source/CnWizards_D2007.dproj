@@ -431,6 +431,7 @@
     <DCCReference Include="SrcEditorEnhance\CnSrcEditorGutter.pas" />
     <DCCReference Include="SrcEditorEnhance\CnSrcEditorKey.pas" />
     <DCCReference Include="SrcEditorEnhance\CnSrcEditorMisc.pas" />
+    <DCCReference Include="SrcEditorEnhance\CnSrcEditorThumbnail.pas"/>
     <DCCReference Include="SrcEditorEnhance\CnSrcEditorNav.pas" />
     <DCCReference Include="SrcEditorEnhance\CnSrcEditorToolBar.pas" />
     <DCCReference Include="SrcEditorEnhance\CnSrcEditorWebSearch.pas">

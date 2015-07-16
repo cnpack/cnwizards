@@ -69,7 +69,7 @@
       ..\Dcu\CnSrcEditorToolBar.obj ..\Dcu\CnSrcEditorGutter.obj 
       ..\Dcu\CnSrcEditorEnhance.obj ..\Dcu\CnProjectBackupFrm.obj 
       ..\Dcu\CnProjectBackupSaveFrm.obj ..\Dcu\CnSrcEditorNav.obj 
-      ..\Dcu\CnSrcEditorMisc.obj ..\Dcu\CnWizFlatButton.obj 
+      ..\Dcu\CnSrcEditorMisc.obj ..\Dcu\CnSrcEditorThumbnail.obj ..\Dcu\CnWizFlatButton.obj 
       ..\Dcu\CnSrcEditorBlockTools.obj ..\Dcu\CnProcListWizard.obj 
       ..\Dcu\CnWizDfmParser.obj ..\Dcu\CnNamePropEditor.obj 
       ..\Dcu\CnVerEnhanceFrm.obj ..\Dcu\CnVerEnhancements.obj 

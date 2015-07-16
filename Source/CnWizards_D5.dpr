@@ -182,6 +182,7 @@ uses
   CnProjectBackupFrm in 'ProjectExtWizard\CnProjectBackupFrm.pas' {CnProjectBackupForm},
   CnProjectBackupSaveFrm in 'ProjectExtWizard\CnProjectBackupSaveFrm.pas' {CnProjectBackupSaveForm},
   CnSrcEditorMisc in 'SrcEditorEnhance\CnSrcEditorMisc.pas',
+  CnSrcEditorThumbnail in 'SrcEditorEnhance\CnSrcEditorThumbnail.pas',
   CnSrcEditorNav in 'SrcEditorEnhance\CnSrcEditorNav.pas',
   CnSrcEditorBlockTools in 'SrcEditorEnhance\CnSrcEditorBlockTools.pas',
   CnSrcEditorCodeWrap in 'SrcEditorEnhance\CnSrcEditorCodeWrap.pas' {CnSrcEditorCodeWrapForm},

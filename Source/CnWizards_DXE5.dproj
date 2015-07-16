@@ -423,6 +423,7 @@
             <Form>CnProjectBackupSaveForm</Form>
         </DCCReference>
         <DCCReference Include="SrcEditorEnhance\CnSrcEditorMisc.pas"/>
+        <DCCReference Include="SrcEditorEnhance\CnSrcEditorThumbnail.pas"/>
         <DCCReference Include="SrcEditorEnhance\CnSrcEditorNav.pas"/>
         <DCCReference Include="SrcEditorEnhance\CnSrcEditorBlockTools.pas"/>
         <DCCReference Include="SrcEditorEnhance\CnSrcEditorCodeWrap.pas">

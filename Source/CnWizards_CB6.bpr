@@ -66,7 +66,7 @@
       ..\Dcu\CnSrcEditorToolBar.obj ..\Dcu\CnSrcEditorGutter.obj 
       ..\Dcu\CnSrcEditorEnhance.obj ..\Dcu\CnProjectBackupFrm.obj 
       ..\Dcu\CnProjectBackupSaveFrm.obj ..\Dcu\CnSrcEditorNav.obj 
-      ..\Dcu\CnSrcEditorMisc.obj ..\Dcu\CnWizFlatButton.obj 
+      ..\Dcu\CnSrcEditorMisc.obj ..\Dcu\CnSrcEditorThumbnail.obj ..\Dcu\CnWizFlatButton.obj 
       ..\Dcu\CnSrcEditorBlockTools.obj ..\Dcu\CnProcListWizard.obj 
       ..\Dcu\CnWizDfmParser.obj ..\Dcu\CnNamePropEditor.obj 
       ..\Dcu\CnVerEnhanceFrm.obj ..\Dcu\CnVerEnhancements.obj 
@@ -343,6 +343,7 @@
       <FILE FILENAME="ProjectExtWizard\CnProjectBackupSaveFrm.pas" FORMNAME="CnProjectBackupSaveForm" UNITNAME="Cnprojectbackupsavefrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="SrcEditorEnhance\CnSrcEditorNav.pas" FORMNAME="" UNITNAME="CnSrcEditorNav" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="SrcEditorEnhance\CnSrcEditorMisc.pas" FORMNAME="" UNITNAME="CnSrcEditorMisc" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="SrcEditorEnhance\CnSrcEditorThumbnail.pas" FORMNAME="" UNITNAME="CnSrcEditorThumbnail" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnWizFlatButton.pas" FORMNAME="" UNITNAME="CnWizFlatButton" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="SrcEditorEnhance\CnSrcEditorBlockTools.pas" FORMNAME="" UNITNAME="CnSrcEditorBlockTools" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="SimpleWizards\CnProcListWizard.pas" FORMNAME="CnProcListFrm" UNITNAME="Cnproclistwizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
