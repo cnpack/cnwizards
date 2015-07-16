@@ -202,11 +202,6 @@ end;
 
 procedure TCnSrcEditorThumbnail.CheckNotifiers;
 begin
-{$IFDEF DEBUG}
-  CnDebugger.TraceCurrentStack;
-  CnDebugger.TraceBoolean(Active);
-  CnDebugger.TraceBoolean(ShowThumbnail);
-{$ENDIF}
   if Active and ShowThumbnail then
   begin
     EditControlWrapper.AddEditorMouseMoveNotifier(EditControlMouseMove);
@@ -257,9 +252,6 @@ procedure TCnSrcEditorThumbnail.EditControlMouseLeave(
 begin
   if not Active or not FShowThumbnail or (Editor.EditControl <> CnOtaGetCurrentEditControl) then
     Exit;
-{$IFDEF DEBUG}
-  CnDebugger.TraceFmt('MouseLeave. Is from NC: %d', [Integer(IsNc)]);
-{$ENDIF}
 
   FInScroll := False;
   FShowTimer.Enabled := False; // 离开了的话，准备显示的就停了
@@ -271,9 +263,6 @@ procedure TCnSrcEditorThumbnail.EditControlMouseMove(Editor: TEditorObject;
 var
   InRightScroll: Boolean;
 begin
-{$IFDEF DEBUG}
-  CnDebugger.TraceFmt('MouseMove at X %d, Y %d. Is in NC: %d', [X, Y, Integer(IsNc)]);
-{$ENDIF}
   if not Active or not FShowThumbnail or (Editor.EditControl <> CnOtaGetCurrentEditControl) then
     Exit;
 
@@ -285,25 +274,16 @@ begin
   if not FInScroll and InRightScroll then // 第一次进入了滚动条区
   begin
     // 只有第一次进入了滚动条区，才要求捕获 MouseLeave
-{$IFDEF DEBUG}
-  CnDebugger.TraceMsg('First enter scroll.');
-{$ENDIF}
     FPoint.x := X;
     FPoint.y := Y;
     if not FThumbForm.Visible then
     begin
       // 第一次进，才启动显示 Thumbnail Form 的定时器
-{$IFDEF DEBUG}
-  CnDebugger.TraceMsg('First enter scroll. enable timer');
-{$ENDIF}
       FShowTimer.Enabled := True;
     end
     else
     begin
       // 调整已显示的 Thumbnail 的位置并更新内容位置
-{$IFDEF DEBUG}
-  CnDebugger.TraceMsg('First enter scroll. Update position');
-{$ENDIF}
       UpdateThumbnailForm(False, False);
     end;
   end
@@ -341,9 +321,6 @@ end;
 
 procedure TCnSrcEditorThumbnail.OnShowTimer(Sender: TObject);
 begin
-{$IFDEF DEBUG}
-  CnDebugger.TraceMsg('OnShowTimer');
-{$ENDIF}
   FShowTimer.Enabled := False;
   UpdateThumbnailForm(True, False);
 end;
@@ -465,10 +442,6 @@ var
   View: IOTAEditView;
   P: TOTAEditPos;
 begin
-{$IFDEF DEBUG}
-  CnDebugger.TraceMsg('FThumbmail Mouse Dblclick');
-{$ENDIF}
-
   // 去 TopLine 所标识的地方
   View := CnOtaGetTopMostEditView;
   if View <> nil then
@@ -483,10 +456,6 @@ end;
 
 procedure TCnSrcThumbnailForm.MouseLeave(var Msg: TMessage);
 begin
-{$IFDEF DEBUG}
-  CnDebugger.TraceMsg('FThumbmail Mouse Hover');
-{$ENDIF}
-
   FMouseIn := False;
   FThumbnail.FHideTimer.Enabled := True;
 end;
@@ -496,9 +465,6 @@ var
   Tme: TTrackMouseEvent;
 begin
   inherited;
-{$IFDEF DEBUG}
-  CnDebugger.TraceMsg('FThumbmail Mouse Move');
-{$ENDIF}
   if not FMouseIn then
   begin
     Tme.cbSize := SizeOf(TTrackMouseEvent);
@@ -515,9 +481,6 @@ procedure TCnSrcThumbnailForm.MouseWheel(var Msg: TWMMouseWheel);
 var
   NewLine: Integer;
 begin
-{$IFDEF DEBUG}
-  CnDebugger.TraceMsg('FThumbmail Mouse Wheel ' + IntToStr(Msg.WheelDelta));
-{$ENDIF}
   if Msg.WheelDelta > 0 then
     NewLine := TopLine - Mouse.WheelScrollLines
   else
