@@ -5399,7 +5399,8 @@ end;
 function TCnAbstractCodeFormatter.CalcNeedPadding: Boolean;
 begin
   Result := (FElementType in [pfetExpression, pfetEnumList, pfetArrayConstant,
-    pfetSetConstructor]) or UpperContainElementType(pfetFormalParameters);
+    pfetSetConstructor, pfetFormalParameters])
+    or UpperContainElementType(pfetFormalParameters);
   // 暂且表达式内部与枚举定义内部等一系列元素内部，或者在参数列表中
   // 碰到注释导致的换行时，才要求自动和上一行对齐
 end;

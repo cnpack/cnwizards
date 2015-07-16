@@ -652,7 +652,7 @@ begin
   if NeedPadding and FPrevIsComentCRLFEnd then
   begin
     LastSpaces := LastIndentSpaceWithOutComments;
-    if HeadSpaceCount(Str) < LastSpaces then
+    if (HeadSpaceCount(Str) < LastSpaces) or (LastSpaces = 0) then
       Str := StringOfChar(' ', LastSpaces + CnPascalCodeForRule.TabSpaceCount) + TrimLeft(Str);
 
     IsAfterCommentAuto := True;
