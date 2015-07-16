@@ -490,7 +490,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         Left = 8
         Top = 281
         Width = 361
-        Height = 87
+        Height = 72
         Caption = 'Auto &Save'
         TabOrder = 3
         object lblSaveInterval: TLabel
@@ -550,6 +550,14 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Caption = 'Replace Token under Cursor when Pasting.'
           TabOrder = 1
         end
+      end
+      object chkShowThumbnail: TCheckBox
+        Left = 16
+        Top = 360
+        Width = 350
+        Height = 17
+        Caption = 'Show Preview Hint Window when Cursor on Vertical ScrollBar.'
+        TabOrder = 4
       end
     end
     object ts4: TTabSheet

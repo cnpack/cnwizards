@@ -129,8 +129,8 @@ implementation
 
 {$IFDEF CNWIZARDS_CNSRCEDITORENHANCE}
 
-uses
 {$IFDEF DEBUG}
+uses
   CnDebug;
 {$ENDIF}
 

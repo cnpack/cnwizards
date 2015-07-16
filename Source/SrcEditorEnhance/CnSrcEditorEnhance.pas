@@ -154,6 +154,7 @@ type
     btnDesignToolBar: TButton;
     chkLeftRightWrapLine: TCheckBox;
     chkCursorBeforeEOL: TCheckBox;
+    chkShowThumbnail: TCheckBox;
     procedure btnHelpClick(Sender: TObject);
     procedure UpdateContent(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word;
@@ -624,6 +625,8 @@ begin
     chkAutoEnterEnd.Enabled := False;
   {$ENDIF}
 
+    chkShowThumbnail.Checked := FThumbnail.ShowThumbnail;
+
     UpdateContent(nil);
 
     if ShowModal = mrOK then
@@ -703,6 +706,7 @@ begin
       FEditorKey.AutoIndentList.Assign(mmoAutoIndent.Lines);
     {$ENDIF}
 
+      FThumbnail.ShowThumbnail := chkShowThumbnail.Checked;
       DoSaveSettings;
     end;
   finally
