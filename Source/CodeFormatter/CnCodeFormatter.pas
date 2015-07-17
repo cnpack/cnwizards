@@ -228,6 +228,10 @@ type
       MultiCompound: Boolean = False);
     // MultiCompound 控制可处理多个并列的 begin end，但易和 program/library 的主 begin end 混淆，
     // 并且容易和嵌套的过程函数混淆，所以目前暂时不用
+
+    procedure FormatProgramInnerBlock(PreSpaceCount: Byte = 0; IsInternal: Boolean = False);
+    // Program 中的主 begin end 之前的声明不同于嵌套 fucntion 这种声明，因此此处独立
+
     procedure FormatDeclSection(PreSpaceCount: Byte; IndentProcs: Boolean = True;
       IsInternal: Boolean = False);
 
@@ -4070,7 +4074,22 @@ begin
     end;
   end
   else
+  begin
     FormatCompoundStmt(PreSpaceCount);
+  end;
+end;
+
+procedure TCnBasePascalFormatter.FormatProgramInnerBlock(PreSpaceCount: Byte;
+  IsInternal: Boolean);
+begin
+  while Scaner.Token in DeclSectionTokens do
+  begin
+    FormatDeclSection(PreSpaceCount, False, IsInternal);
+    Writeln;
+  end;
+
+  Writeln;
+  FormatCompoundStmt(PreSpaceCount);
 end;
 
 {
@@ -4437,7 +4456,7 @@ begin
     FormatUsesClause(PreSpaceCount, True); // 带 IN 的，需要分行
     WriteLine;
   end;
-  FormatBlock(PreSpaceCount);
+  FormatProgramInnerBlock(PreSpaceCount);
 end;
 
 procedure TCnProgramBlockFormatter.FormatPackageBlock(PreSpaceCount: Byte);
