@@ -564,12 +564,12 @@ var
   SCnBookmarkFileCount: string = 'Units Count: %d';
 
   // CnEditorWizard
-  SCnEditorWizardMenuCaption: string = 'Code &Editor Wizard';
-  SCnEditorWizardMenuHint: string = 'Code Editor Tools';
-  SCnEditorWizardName: string = 'Code Editor Wizard';
-  SCnEditorWizardComment: string = 'Code Editor Tools.';
+  SCnEditorWizardMenuCaption: string = 'Coding Tools&et';
+  SCnEditorWizardMenuHint: string = 'Code Editor Toolset';
+  SCnEditorWizardName: string = 'Coding Toolset';
+  SCnEditorWizardComment: string = 'Code Editor Toolset.';
   SCnEditorWizardConfigCaption: string = '&Options...';
-  SCnEditorWizardConfigHint: string = 'Configurate the Code Editor Wizard';
+  SCnEditorWizardConfigHint: string = 'Configurate the Coding Toolset';
 
   // CnEditorCodeTool
   SCnEditorCodeToolSelIsEmpty: string = 'Please Select the Code Block to Process.';
