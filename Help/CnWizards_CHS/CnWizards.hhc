@@ -194,11 +194,11 @@
 				</OBJECT>
 		</UL>
 		<LI> <OBJECT type="text/sitemap">
-			<param name="Name" value="代码编辑器专家">
+			<param name="Name" value="编码工具集">
 			</OBJECT>
 		<UL>
 			<LI> <OBJECT type="text/sitemap">
-				<param name="Name" value="代码编辑器设置">
+				<param name="Name" value="编码工具集设置">
 				<param name="Local" value="wizards/editors/wizeditors.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">

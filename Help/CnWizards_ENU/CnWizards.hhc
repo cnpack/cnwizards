@@ -194,11 +194,11 @@
 				</OBJECT>
 		</UL>
 		<LI> <OBJECT type="text/sitemap">
-			<param name="Name" value="Code Editor Wizard">
+			<param name="Name" value="Coding Toolset">
 			</OBJECT>
 		<UL>
 			<LI> <OBJECT type="text/sitemap">
-				<param name="Name" value="Code Editor Wizard Settings">
+				<param name="Name" value="Coding Toolset Settings">
 				<param name="Local" value="wizards/editors/wizeditors.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">

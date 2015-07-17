@@ -199,8 +199,8 @@
 		<param name="Local" value="srcedtenh\srcedtenh.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="代碼編輯器設置">
-		<param name="Name" value="代碼編輯器設置">
+		<param name="Name" value="編碼工具集設置">
+		<param name="Name" value="編碼工具集設置">
 		<param name="Local" value="wizards\editors\wizeditors.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
