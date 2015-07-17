@@ -129,9 +129,10 @@ begin
     if not CnOtaGetSelectedControlFromCurrentForm(List) then
       ProcSelect := False;
 
-    if (List.Count = 1) and (CnIntToObject(List[0]) is TWinControl) then
-      if (TWinControl(CnIntToObject(List[0])).ControlCount > 1) then
-        ProcSelect := True;
+    if List.Count = 1 then
+      if (CnIntToObject(List[0]) is TWinControl) then
+        if (TWinControl(CnIntToObject(List[0])).ControlCount > 1) then
+          ProcSelect := True;
 
     if not ProcSelect then
     begin
