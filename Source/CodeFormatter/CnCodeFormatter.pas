@@ -1243,7 +1243,7 @@ procedure TCnBasePascalFormatter.FormatQualID(PreSpaceCount: Byte);
     end;
 
     if IsGeneric then
-      FormatTypeParams(PreSpaceCount);
+      FormatTypeParams;
       
     for I := 1 to BracketCount do
       Match(tokRB);
