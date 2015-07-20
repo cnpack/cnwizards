@@ -461,7 +461,7 @@ begin
   Count := FBufPtr - FSourcePtr;
   if Count <> 0 then Move(FSourcePtr[0], FBuffer[0], Count);
   FBufPtr := FBuffer + Count;
-  Inc(FBufPtr, FStream.Read(FBufPtr[0], FBufEnd - FBufPtr));
+  Inc(FBufPtr, FStream.Read(FBufPtr[0], (FBufEnd - FBufPtr)) div 2); // Inc 的是 Char，所以 Byte 数得 div 2
   FSourcePtr := FBuffer;
   FSourceEnd := FBufPtr;
   if FSourceEnd = FBufEnd then

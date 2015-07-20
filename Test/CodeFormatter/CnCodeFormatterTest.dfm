@@ -98,11 +98,11 @@ object MainForm: TMainForm
             '{I CnPack.inc}'
             'uses'
             
-              '  Classes, SysUtils{$IFDEF DEBUG},CnDebug{$ELSE},  NDebug{$ENDIF' +
-              '};'
+              '  Classes, SysUtils{$IFDEF DEBUG},CnDebug {$ELSE},  NDebug{$ENDI' +
+              'F};'
             'const'
             '[unsafe]'
-            '  PathDelim  = {$IFDEF MSWINDOWS} '#39'\'#39'; {$ELSE} '#39'/'#39'; {$ENDIF}'
+            '  PathDelim  = {$IFDEF MSWINDOWS} '#39'\'#39'; (*{$ELSE} '#39'/'#39';*) {$ENDIF}'
             'implementation'
             'procedure Test;'
             'begin'
@@ -582,6 +582,7 @@ object MainForm: TMainForm
     end
   end
   object OpenDialog: TOpenDialog
+    Filter = 'Pascal Source|*.pas|All Files|*.*'
     Top = 21
   end
   object SaveDialog1: TSaveDialog
