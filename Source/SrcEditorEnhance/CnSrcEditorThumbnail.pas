@@ -42,7 +42,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Dialogs, ToolsAPI,
-  IniFiles, Forms, ExtCtrls, Menus, StdCtrls, CnCommon,
+  IniFiles, Forms, ExtCtrls, Menus, StdCtrls, CnCommon, CnFloatWindow,
   CnWizUtils, CnWizIdeUtils, CnWizNotifier, CnEditControlWrapper, CnWizClasses;
 
 const
@@ -51,11 +51,13 @@ const
 type
   TCnSrcEditorThumbnail = class;
 
-  TCnSrcThumbnailForm = class(TCustomMemo)
+  TCnSrcThumbnailWindow = class(TCustomMemo)
   private
     FMouseIn: Boolean;
     FThumbnail: TCnSrcEditorThumbnail;
     FPopup: TPopupMenu;
+    FLineHintWindow: TCnFloatWindow;
+    FLineHintLabel: TLabel;
     FTopLine: Integer;
   protected
     procedure CreateParams(var Params: TCreateParams); override;
@@ -71,10 +73,12 @@ type
     destructor Destroy; override;
 
     procedure SetPos(X, Y: Integer);
+    procedure UpdateHintPos;
     procedure SetTopLine(const Value: Integer; UseRelative: Boolean);
 
     property Thumbnail: TCnSrcEditorThumbnail read FThumbnail write FThumbnail;
     property TopLine: Integer read FTopLine; // 显示的顶行行号，0 开始
+    property LineHintWindow: TCnFloatWindow read FLineHintWindow;
   end;
 
 //==============================================================================
@@ -86,7 +90,7 @@ type
   TCnSrcEditorThumbnail = class(TObject)
   private
     FActive: Boolean;
-    FThumbForm: TCnSrcThumbnailForm;
+    FThumbWindow: TCnSrcThumbnailWindow;
     // FThumbMemo: TMemo;
     FInScroll: Boolean;
     FEditControl: TWinControl;
@@ -136,8 +140,8 @@ uses
 
 const
   SHOW_INTERVAL = 1000;
-
-  CS_DROPSHADOW = $20000;
+  csHintWidth = 90;
+  csHintHeight = 24;
 
   csThumbnail = 'Thumbnail';                   
   csShowThumbnail = 'ShowThumbnail';
@@ -151,18 +155,18 @@ const
 procedure TCnSrcEditorThumbnail.ApplicationMessage(var Msg: TMsg;
   var Handled: Boolean);
 begin
-  if (Msg.message = WM_MOUSEWHEEL) and FThumbForm.Visible then
+  if (Msg.message = WM_MOUSEWHEEL) and FThumbWindow.Visible then
   begin
-    SendMessage(FThumbForm.Handle, WM_MOUSEWHEEL, Msg.wParam, Msg.lParam);
+    SendMessage(FThumbWindow.Handle, WM_MOUSEWHEEL, Msg.wParam, Msg.lParam);
     Handled := True;
   end
-  else if FThumbForm.Visible and (Msg.hwnd = FThumbForm.Handle) and
+  else if FThumbWindow.Visible and (Msg.hwnd = FThumbWindow.Handle) and
    (Msg.message > WM_MOUSEFIRST) and (Msg.message < WM_MOUSELAST) then
   begin
     // 屏蔽除 MOUSEMOVE 与 MOUSEWHEEL 之外的一切鼠标消息
     // 但双击还是处理为跳转
     if Msg.message = WM_LBUTTONDBLCLK then
-      SendMessage(FThumbForm.Handle, WM_LBUTTONDBLCLK, Msg.wParam, Msg.lParam);
+      SendMessage(FThumbWindow.Handle, WM_LBUTTONDBLCLK, Msg.wParam, Msg.lParam);
     Handled := True;
   end;
 end;
@@ -172,18 +176,18 @@ var
   AFont: TFont;
   Canvas: TControlCanvas;
 begin
-  if FThumbForm = nil then
+  if FThumbWindow = nil then
   begin
-    FThumbForm := TCnSrcThumbnailForm.Create(nil);
-    FThumbForm.Thumbnail := Self;
-    FThumbForm.DoubleBuffered := True;
-    FThumbForm.ReadOnly := True;
-    FThumbForm.Parent := Application.MainForm;
-    FThumbForm.Visible := False;
-    FThumbForm.BorderStyle := bsSingle;
-    FThumbForm.Color := clInfoBk;
-    FThumbForm.Width := 500;
-    FThumbForm.Height := 200;
+    FThumbWindow := TCnSrcThumbnailWindow.Create(nil);
+    FThumbWindow.Thumbnail := Self;
+    FThumbWindow.DoubleBuffered := True;
+    FThumbWindow.ReadOnly := True;
+    FThumbWindow.Parent := Application.MainForm;
+    FThumbWindow.Visible := False;
+    FThumbWindow.BorderStyle := bsSingle;
+    FThumbWindow.Color := clInfoBk;
+    FThumbWindow.Width := 500;
+    FThumbWindow.Height := 200;
     // FThumbForm.ScrollBars := ssVertical;
 
     AFont := TFont.Create;
@@ -191,11 +195,12 @@ begin
     AFont.Size := 10;
 
     GetIDERegistryFont('', AFont);
-    FThumbForm.Font := AFont;
+    FThumbWindow.Font := AFont;
     Canvas := TControlCanvas.Create;
-    Canvas.Control := FThumbForm;
+    Canvas.Control := FThumbWindow;
     Canvas.Font := AFont;
-    FThumbForm.Width := Canvas.TextWidth(Spc(82));
+    FThumbWindow.Width := Canvas.TextWidth(Spc(82));
+
     Canvas.Free;
   end;
 end;
@@ -243,7 +248,7 @@ begin
   FHideTimer.Free;
   FShowTimer.Free;
 
-  FThumbForm.Free;
+  FThumbWindow.Free;
   inherited;
 end;
 
@@ -276,7 +281,7 @@ begin
     // 只有第一次进入了滚动条区，才要求捕获 MouseLeave
     FPoint.x := X;
     FPoint.y := Y;
-    if not FThumbForm.Visible then
+    if not FThumbWindow.Visible then
     begin
       // 第一次进，才启动显示 Thumbnail Form 的定时器
       FShowTimer.Enabled := True;
@@ -292,7 +297,7 @@ begin
     FPoint.x := X;
     FPoint.y := Y;
     // 在内部，并且已经显示 Thumbnail 了，则立即更新内容
-    if FThumbForm.Visible then
+    if FThumbWindow.Visible then
     begin
       FHideTimer.Enabled := False;
       UpdateThumbnailForm(False, True);
@@ -315,8 +320,11 @@ end;
 procedure TCnSrcEditorThumbnail.OnHideTimer(Sender: TObject);
 begin
   FHideTimer.Enabled := False;
-  if FThumbForm <> nil then
-    FThumbForm.Hide;
+  if FThumbWindow <> nil then
+  begin
+    FThumbWindow.Visible := False;
+    FThumbWindow.LineHintWindow.Visible := False;
+  end;
 end;
 
 procedure TCnSrcEditorThumbnail.OnShowTimer(Sender: TObject);
@@ -343,8 +351,8 @@ begin
     CheckNotifiers;
 
     if not FActive then
-      if FThumbForm <> nil then
-        FThumbForm.Hide;
+      if FThumbWindow <> nil then
+        FThumbWindow.Hide;
   end;
 end;
 
@@ -355,8 +363,8 @@ begin
     FShowThumbnail := Value;
     CheckNotifiers;
 
-    if FThumbForm <> nil then
-      FreeAndNil(FThumbForm);
+    if FThumbWindow <> nil then
+      FreeAndNil(FThumbWindow);
   end;
 end;
 
@@ -368,16 +376,16 @@ begin
   CheckCreateForm;
 
   // 加载内容、设置缩略图窗口的位置滚动点、显示缩略图窗口
-  if IsShow or (FThumbForm.Lines.Text = '') then
-    FThumbForm.Lines.Text := CnOtaGetCurrentEditorSource;
+  if IsShow or (FThumbWindow.Lines.Text = '') then
+    FThumbWindow.Lines.Text := CnOtaGetCurrentEditorSource;
 
   // FPoint 是要弹出时的 FEditControl 内的鼠标位置 ，以此为准设置窗口位置
   P := FPoint;
   P.x := FEditControl.Width;
   P := FEditControl.ClientToScreen(P);
 
-  P.x := P.x - FThumbForm.Width - 20;
-  P.y := P.y - FThumbForm.Height div 2;
+  P.x := P.x - FThumbWindow.Width - 20;
+  P.y := P.y - FThumbWindow.Height div 2;
 
   // 避免超出屏幕
   if P.x < 0 then
@@ -385,32 +393,50 @@ begin
   if P.y < 0 then
     P.y := 0;
 
-  if P.x + FThumbForm.Width > Screen.Width then
-    P.x := Screen.Width - FThumbForm.Width;
-  if P.y + FThumbForm.Height > Screen.Height then
-    P.y := Screen.Height - FThumbForm.Height;
+  if P.x + FThumbWindow.Width > Screen.Width then
+    P.x := Screen.Width - FThumbWindow.Width;
+  if P.y + FThumbWindow.Height > Screen.Height then
+    P.y := Screen.Height - FThumbWindow.Height;
 
-  FThumbForm.SetPos(P.x, P.y) ;
+  FThumbWindow.SetPos(P.x, P.y) ;
 
   // 根据位置滚动行
-  ThisLine := FThumbForm.Lines.Count * FPoint.y div FEditControl.ClientHeight;
-  FThumbForm.SetTopLine(ThisLine, UseRelative);
+  ThisLine := FThumbWindow.Lines.Count * FPoint.y div FEditControl.ClientHeight;
+  FThumbWindow.SetTopLine(ThisLine, UseRelative);
 
-  if IsShow then
-    FThumbForm.Visible := True;
+  if IsShow and not FThumbWindow.Visible then
+  begin
+    FThumbWindow.Visible := True;
+    // FThumbWindow.LineHintWindow.Visible := True;
+    // TODO: 暂时禁用，因为会出现内容出不来，原因未知
+    
+    FThumbWindow.SetPos(P.x, P.y) ;
+  end;
 end;
 
 { TCnSrcThumbnailForm }
 
-constructor TCnSrcThumbnailForm.Create(AOwner: TComponent);
+constructor TCnSrcThumbnailWindow.Create(AOwner: TComponent);
 begin
   inherited;
   FPopup := TPopupMenu.Create(Self);
   WordWrap := False;
   PopupMenu := FPopup;  // 取代并屏蔽自带的右键菜单
+
+  FLineHintWindow := TCnFloatWindow.Create(Self);
+  FLineHintWindow.Parent := Application.MainForm;
+  FLineHintWindow.Height := csHintHeight;
+  FLineHintWindow.Width := csHintWidth;
+  FLineHintWindow.Visible := False;
+
+  FLineHintLabel := TLabel.Create(Self);
+  FLineHintLabel.Align := alClient;
+  FLineHintLabel.Alignment := taCenter;
+  FLineHintLabel.Layout := tlCenter;
+  FLineHintLabel.Parent := FLineHintWindow;
 end;
 
-procedure TCnSrcThumbnailForm.CreateParams(var Params: TCreateParams);
+procedure TCnSrcThumbnailWindow.CreateParams(var Params: TCreateParams);
 begin
   inherited;
   Params.Style := Params.Style or WS_CHILDWINDOW {or WS_SIZEBOX} or WS_MAXIMIZEBOX
@@ -422,7 +448,7 @@ begin
     Params.WindowClass.style := CS_DBLCLKS;
 end;
 
-procedure TCnSrcThumbnailForm.CreateWnd;
+procedure TCnSrcThumbnailWindow.CreateWnd;
 begin
   inherited;
   Windows.SetParent(Handle, 0);
@@ -432,13 +458,13 @@ begin
   SendMessage(Handle, EM_SETMARGINS, EC_RIGHTMARGIN, 5);
 end;
 
-destructor TCnSrcThumbnailForm.Destroy;
+destructor TCnSrcThumbnailWindow.Destroy;
 begin
   inherited;
 
 end;
 
-procedure TCnSrcThumbnailForm.MouseDblClick(var Msg: TWMMouse);
+procedure TCnSrcThumbnailWindow.MouseDblClick(var Msg: TWMMouse);
 var
   View: IOTAEditView;
   P: TOTAEditPos;
@@ -452,16 +478,17 @@ begin
     CnOtaGotoEditPos(P, View, True);
   end;
 
-  Hide;
+  Visible := False;
+  FLineHintWindow.Visible := False;
 end;
 
-procedure TCnSrcThumbnailForm.MouseLeave(var Msg: TMessage);
+procedure TCnSrcThumbnailWindow.MouseLeave(var Msg: TMessage);
 begin
   FMouseIn := False;
   FThumbnail.FHideTimer.Enabled := True;
 end;
 
-procedure TCnSrcThumbnailForm.MouseMove(Shift: TShiftState; X, Y: Integer);
+procedure TCnSrcThumbnailWindow.MouseMove(Shift: TShiftState; X, Y: Integer);
 var
   Tme: TTrackMouseEvent;
 begin
@@ -478,7 +505,7 @@ begin
   FThumbnail.FHideTimer.Enabled := False;
 end;
 
-procedure TCnSrcThumbnailForm.MouseWheel(var Msg: TWMMouseWheel);
+procedure TCnSrcThumbnailWindow.MouseWheel(var Msg: TWMMouseWheel);
 var
   NewLine: Integer;
 begin
@@ -495,12 +522,18 @@ begin
   SetTopLine(NewLine, True);
 end;
 
-procedure TCnSrcThumbnailForm.SetPos(X, Y: Integer);
+procedure TCnSrcThumbnailWindow.SetPos(X, Y: Integer);
 begin
-  SetWindowPos(Handle, HWND_TOPMOST, X, Y, 0, 0, SWP_NOACTIVATE or SWP_NOSIZE);
+  Left := X;
+  Top := Y;
+  if Visible then
+  begin
+    SetWindowPos(Handle, HWND_TOPMOST, X, Y, 0, 0, SWP_NOACTIVATE or SWP_NOSIZE);
+    UpdateHintPos;
+  end;
 end;
 
-procedure TCnSrcThumbnailForm.SetTopLine(const Value: Integer; UseRelative: Boolean);
+procedure TCnSrcThumbnailWindow.SetTopLine(const Value: Integer; UseRelative: Boolean);
 begin
   if FTopLine <> Value then
   begin
@@ -512,6 +545,17 @@ begin
       SendMessage(Handle, EM_LINESCROLL, 0, Value);
     end;
     FTopLine := Value;
+    FLineHintLabel.Caption := IntToStr(FTopLine + 1);
+  end;
+end;
+
+procedure TCnSrcThumbnailWindow.UpdateHintPos;
+begin
+  if FLineHintWindow.Visible then
+  begin
+    SetWindowPos(FLineHintWindow.Handle, HWND_TOPMOST, Left + Width - FLineHintWindow.Width,
+      Top - FLineHintWindow.Height - 5, 0, 0, SWP_NOACTIVATE or SWP_NOSIZE);
+    FLineHintWindow.Invalidate;
   end;
 end;
 
