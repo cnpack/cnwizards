@@ -57,7 +57,7 @@ uses
   Buttons, TypInfo, mPasLex, AppEvnts,
   CnConsts, CnCommon, CnWizClasses, CnWizConsts, CnWizUtils, CnWizIdeUtils,
   CnInputSymbolList, CnInputIdeSymbolList, CnIni, CnWizMultiLang, CnWizNotifier,
-  CnPasCodeParser, CnWizShareImages, CnWizShortCut, CnWizOptions,
+  CnPasCodeParser, CnWizShareImages, CnWizShortCut, CnWizOptions, CnFloatWindow,
   CnEditControlWrapper, CnWizMethodHook, CnCppCodeParser, CnPopupMenu;
 
 const
@@ -69,19 +69,6 @@ const
 
 type
   TCnInputHelper = class;
-
-{ TCnInputExtraForm }
-
-  TCnInputExtraForm = class(TCustomControl)
-  private
-    FOnPaint: TNotifyEvent;
-  protected
-    procedure CreateParams(var Params: TCreateParams); override;
-    procedure CreateWnd; override;
-    procedure Paint; override;
-  public
-    property OnPaint: TNotifyEvent read FOnPaint write FOnPaint;
-  end;
 
 { TCnInputListBox }
 
@@ -97,8 +84,8 @@ type
     FLastItem: Integer;
     FOnItemHint: TCnItemHintEvent;
     FOnButtonClick: TBtnClickEvent;
-    FBtnForm: TCnInputExtraForm;
-    FHintForm: TCnInputExtraForm;
+    FBtnForm: TCnFloatWindow;
+    FHintForm: TCnFloatWindow;
     FHintCnt: Integer;
     FHintTimer: TTimer;
     FDispButtons: Boolean;
@@ -128,8 +115,8 @@ type
     procedure CloseUp;
     procedure Popup;
     property DispButtons: Boolean read FDispButtons write FDispButtons;
-    property BtnForm: TCnInputExtraForm read FBtnForm;
-    property HintForm: TCnInputExtraForm read FHintForm;
+    property BtnForm: TCnFloatWindow read FBtnForm;
+    property HintForm: TCnFloatWindow read FHintForm;
     property OnItemHint: TCnItemHintEvent read FOnItemHint write FOnItemHint;
     property OnButtonClick: TBtnClickEvent read FOnButtonClick write FOnButtonClick;
   end;
@@ -543,8 +530,6 @@ const
   csBtnHeight = 16;
   csHintHeight = 16;
 
-  CS_DROPSHADOW = $20000;
-
 //{$IFDEF SUPPORT_UNITNAME_DOT}
 //  csUnitDotPrefixes: array[0..14] of string = (
 //    'Vcl', 'Xml', 'System', 'Winapi', 'Soap', 'FMX', 'Data', 'Posix', 'Macapi',
@@ -564,36 +549,6 @@ begin
 end;
 
 {$ENDIF}
-
-//==============================================================================
-// 输入列表框按钮窗体
-//==============================================================================
-
-{ TCnInputExtraForm }
-
-procedure TCnInputExtraForm.CreateParams(var Params: TCreateParams);
-begin
-  inherited;
-  Params.Style := Params.Style or WS_CHILDWINDOW or WS_MAXIMIZEBOX;
-  Params.ExStyle := WS_EX_TOOLWINDOW or WS_EX_WINDOWEDGE;
-  if CheckWinXP then
-    Params.WindowClass.style := CS_DBLCLKS or CS_DROPSHADOW
-  else
-    Params.WindowClass.style := CS_DBLCLKS;
-end;
-
-procedure TCnInputExtraForm.CreateWnd;
-begin
-  inherited;
-  Windows.SetParent(Handle, 0);
-  CallWindowProc(DefWndProc, Handle, WM_SETFOCUS, 0, 0);
-end;
-
-procedure TCnInputExtraForm.Paint;
-begin
-  if Assigned(FOnPaint) then
-    FOnPaint(Self);
-end;
 
 //==============================================================================
 // 输入列表框
@@ -706,7 +661,7 @@ var
   Btn: TCnInputButton;
   SpeedBtn: TSpeedButton;
 begin
-  FBtnForm := TCnInputExtraForm.Create(Self);
+  FBtnForm := TCnFloatWindow.Create(Self);
   BtnForm.Parent := Application.MainForm;
   BtnForm.Visible := False;
   BtnForm.Width := csBtnWidth;
@@ -723,7 +678,7 @@ begin
     dmCnSharedImages.ilInputHelper.GetBitmap(Ord(Btn), SpeedBtn.Glyph);
   end;
 
-  FHintForm := TCnInputExtraForm.Create(Self);
+  FHintForm := TCnFloatWindow.Create(Self);
   HintForm.Parent := Application.MainForm;
   HintForm.Visible := False;
   HintForm.Width := Width;
