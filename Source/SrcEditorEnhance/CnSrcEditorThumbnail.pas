@@ -406,6 +406,7 @@ constructor TCnSrcThumbnailForm.Create(AOwner: TComponent);
 begin
   inherited;
   FPopup := TPopupMenu.Create(Self);
+  WordWrap := False;
   PopupMenu := FPopup;  // 取代并屏蔽自带的右键菜单
 end;
 
