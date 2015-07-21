@@ -42,7 +42,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Dialogs, ToolsAPI,
-  IniFiles, Forms, ExtCtrls, Menus, StdCtrls, CnCommon, CnFloatWindow,
+  IniFiles, Forms, ExtCtrls, Menus, StdCtrls, AppEvnts, CnCommon, CnFloatWindow,
   CnWizUtils, CnWizIdeUtils, CnWizNotifier, CnEditControlWrapper, CnWizClasses;
 
 const
@@ -97,6 +97,7 @@ type
     FPoint: TPoint; // 根据这儿存储的鼠标位置来显示窗体，x、y 是 FEditControl 内的坐标
     FShowTimer: TTimer;
     FHideTimer: TTimer;
+    FAppEvents: TApplicationEvents;
     FShowThumbnail: Boolean;
     procedure EditControlMouseMove(Editor: TEditorObject; Shift: TShiftState;
       X, Y: Integer; IsNC: Boolean);
@@ -104,6 +105,7 @@ type
 
     procedure OnShowTimer(Sender: TObject);
     procedure OnHideTimer(Sender: TObject);
+    procedure AppDeactivate(Sender: TObject);
 
     procedure CheckCreateForm;
     procedure UpdateThumbnailForm(IsShow: Boolean; UseRelative: Boolean);
@@ -151,6 +153,11 @@ const
 //==============================================================================
 
 { TCnSrcEditorThumbnail }
+
+procedure TCnSrcEditorThumbnail.AppDeactivate(Sender: TObject);
+begin
+  FThumbWindow.Visible := False;
+end;
 
 procedure TCnSrcEditorThumbnail.ApplicationMessage(var Msg: TMsg;
   var Handled: Boolean);
@@ -234,6 +241,9 @@ begin
   FHideTimer.Interval := SHOW_INTERVAL;
   FHideTimer.OnTimer := OnHideTimer;
 
+  FAppEvents := TApplicationEvents.Create(nil);
+  FAppEvents.OnDeactivate := AppDeactivate;
+
   CheckCreateForm;
   CheckNotifiers;
   CnWizNotifierServices.AddApplicationMessageNotifier(ApplicationMessage);
@@ -245,6 +255,7 @@ begin
   EditControlWrapper.RemoveEditorMouseMoveNotifier(EditControlMouseMove);
   EditControlWrapper.REmoveEditorMouseLeaveNotifier(EditControlMouseLeave);
 
+  FAppEvents.Free;
   FHideTimer.Free;
   FShowTimer.Free;
 
