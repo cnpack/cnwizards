@@ -80,12 +80,22 @@ type
   private
     FStream: TStream;
     FBookmarks: TObjectList;
-    FOrigin: Longint;  // 表示本块 Buffer 开头在整个流中的线性位置
-    FBuffer: PChar;    // 表示本块 Buffer 开头的地址
+
+    // 缓冲区机制：一块固定长度的缓冲区，读入代码内容后找到最后一个换行，以此为结尾。
+    // 扫描至结尾后，重新 ReadBuffer，把本区域结尾到缓冲区尾的内容重新填回缓冲区首，
+    // 再在其后跟读满缓冲区，再找最后一个换行并标记结尾。
+    // 但问题的极端情况是，当结尾是块注释中的行末时，未能有效重新 ReadBuffer，
+    // 即使在处理注释块内部碰到 #0 时加入 ReadBuffer 的处理，也会因为可能的
+    // ”整个缓冲区全是注释“导致 FSourcePtr 没有步进从而无法读入新内容的情况。
+    // 唯一办法：使用足够大的单块缓冲区！
+
+    FOrigin: Longint;  // 表示缓冲区本块内容开头在整个流中的线性位置
+    FBuffer: PChar;    // 一块固定长度的缓冲区的开始地址
     FBufPtr: PChar;
     FBufEnd: PChar;
     FSourcePtr: PChar; // 用于步进，在外部始终指向当前 Token 尾部
-    FSourceEnd: PChar;
+    FSourceEnd: PChar; // 读入内容至缓冲区后，用 LineStart 找到的最后一个换行，作为本次扫描的结尾，而不是缓冲区尾
+
     FTokenPtr: PChar;  // 用于步进，在外部始终指向当前 Token 头部
     FOldSourceColPtr: PChar; // 用于步进，在外部始终指向上一个列开始计算的位置
     FStringPtr: PChar;
@@ -218,7 +228,7 @@ uses
 {$ENDIF}
 
 const
-  ScanBufferSize = 512 * 1024 {KB};
+  MIN_SCAN_BUF_SIZE = 512 * 1024 {KB};
 
 procedure BinToHex(Buffer, Text: PChar; BufSize: Integer); 
 const
@@ -329,10 +339,10 @@ begin
 {$ENDIF}
   FBookmarks := TObjectList.Create;
     
-  GetMem(FBuffer, ScanBufferSize);
+  GetMem(FBuffer, MIN_SCAN_BUF_SIZE);
   FBuffer[0] := #0;
   FBufPtr := FBuffer;
-  FBufEnd := FBuffer + ScanBufferSize;
+  FBufEnd := FBuffer + MIN_SCAN_BUF_SIZE;
   FSourcePtr := FBuffer;
   FSourceEnd := FBuffer;
   FTokenPtr := FBuffer;
@@ -380,7 +390,7 @@ begin
   if FBuffer <> nil then
   begin
     FStream.Seek(Longint(FTokenPtr) - Longint(FBufPtr), 1);
-    FreeMem(FBuffer, ScanBufferSize);
+    FreeMem(FBuffer);
   end;
 
   FBookmarks.Free;
@@ -481,7 +491,7 @@ begin
     FSourceEnd[0] := FSaveChar;
     FStream.Seek(AOrigin, soFromBeginning);
     FBufPtr := FBuffer;
-    Inc(FBufPtr, FStream.Read(FBuffer[0], ScanBufferSize));
+    Inc(FBufPtr, FStream.Read(FBuffer[0], MIN_SCAN_BUF_SIZE));
     FSourcePtr := FBuffer;
     FSourceEnd := FBufPtr;
     if FSourceEnd = FBufEnd then
