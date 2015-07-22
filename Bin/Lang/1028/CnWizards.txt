@@ -2145,6 +2145,7 @@ TCnSrcEditorEnhanceForm.chkExtendForwardBack.Caption=擴展代碼編輯器的前
 TCnSrcEditorEnhanceForm.chkEditorMultiLine.Caption=設置代碼編輯器標籤為多行方式（不適用於BDS）。
 TCnSrcEditorEnhanceForm.chkEditorFlatButtons.Caption=設置代碼編輯器標籤為平面按鈕風格（不適用於BDS）。
 TCnSrcEditorEnhanceForm.chkShowInDesign.Caption=在 BDS 窗體設計界面顯示工具欄。
+TCnSrcEditorEnhanceForm.chkShowThumbnail.Caption=鼠標指向縱向滾動條時顯示代碼預覽窗口。
 TCnSrcEditorEnhanceForm.chkTabIndent.Caption=Tab/Shift+Tab 縮進/反縮進選中代碼塊。
 TCnSrcEditorEnhanceForm.chkF2Rename.Caption=使用此熱鍵輸入並替換光標下的標識符：
 TCnSrcEditorEnhanceForm.chkSearchAgain.Caption=F3/Shift+F3 查找選中的文字。

@@ -2145,6 +2145,7 @@ TCnSrcEditorEnhanceForm.chkExtendForwardBack.Caption=Improve the Jumping Feature
 TCnSrcEditorEnhanceForm.chkEditorMultiLine.Caption=Set Editor Tab to Multi-line(N.A. for BDS).
 TCnSrcEditorEnhanceForm.chkEditorFlatButtons.Caption=Set Editor Tab's Style to Flat Button(N.A. for BDS).
 TCnSrcEditorEnhanceForm.chkShowInDesign.Caption=Show Toolbar in BDS Embedded Designer.
+TCnSrcEditorEnhanceForm.chkShowThumbnail.Caption=Show Preview Hint Window when Cursor on Vertical ScrollBar.
 TCnSrcEditorEnhanceForm.chkTabIndent.Caption=Tab/Shift+Tab to Indent/Unindent Selected Block.
 TCnSrcEditorEnhanceForm.chkF2Rename.Caption=Rename and Replace Identifier under Cursor with:
 TCnSrcEditorEnhanceForm.chkSearchAgain.Caption=F3/Shift+F3 to Search Selected Text.
