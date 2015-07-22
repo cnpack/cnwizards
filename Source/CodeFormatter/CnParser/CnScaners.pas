@@ -25,6 +25,13 @@ unit CnScaners;
 * 单元名称：Object Pascal 词法分析器
 * 单元作者：CnPack开发组
 * 备    注：该单元实现了Object Pascal 词法分析器
+*    缓冲区机制：一块固定长度的缓冲区，读入代码内容后找到最后一个换行，以此为结尾。
+*    扫描至结尾后，重新 ReadBuffer，把本区域结尾到缓冲区尾的内容重新填回缓冲区首，
+*    再在其后跟读满缓冲区，再找最后一个换行并标记结尾。
+*    但问题的极端情况是，当结尾是块注释中的行末时，未能有效重新 ReadBuffer，
+*    即使在处理注释块内部碰到 #0 时加入 ReadBuffer 的处理，也会因为可能的
+*    ”整个缓冲区全是注释“导致 FSourcePtr 没有步进从而无法读入新内容的情况。
+*           唯一办法：使用足够大的单块缓冲区！
 * 开发平台：Win2003 + Delphi 5.0
 * 兼容测试：not test yet
 * 本 地 化：not test hell
@@ -81,16 +88,10 @@ type
     FStream: TStream;
     FBookmarks: TObjectList;
 
-    // 缓冲区机制：一块固定长度的缓冲区，读入代码内容后找到最后一个换行，以此为结尾。
-    // 扫描至结尾后，重新 ReadBuffer，把本区域结尾到缓冲区尾的内容重新填回缓冲区首，
-    // 再在其后跟读满缓冲区，再找最后一个换行并标记结尾。
-    // 但问题的极端情况是，当结尾是块注释中的行末时，未能有效重新 ReadBuffer，
-    // 即使在处理注释块内部碰到 #0 时加入 ReadBuffer 的处理，也会因为可能的
-    // ”整个缓冲区全是注释“导致 FSourcePtr 没有步进从而无法读入新内容的情况。
-    // 唯一办法：使用足够大的单块缓冲区！
-
+    // 缓冲区机制的问题见头部注释
     FOrigin: Longint;  // 表示缓冲区本块内容开头在整个流中的线性位置
     FBuffer: PChar;    // 一块固定长度的缓冲区的开始地址
+    FBufSize: Cardinal;
     FBufPtr: PChar;
     FBufEnd: PChar;
     FSourcePtr: PChar; // 用于步进，在外部始终指向当前 Token 尾部
@@ -228,7 +229,8 @@ uses
 {$ENDIF}
 
 const
-  MIN_SCAN_BUF_SIZE = 512 * 1024 {KB};
+  MIN_SCAN_BUF_SIZE = 512 * 1024 {512KB};
+  MAX_SCAN_BUF_SIZE = 32 * 1024 * 1024 {32MB};
 
 procedure BinToHex(Buffer, Text: PChar; BufSize: Integer); 
 const
@@ -338,11 +340,18 @@ begin
   FixStreamBom;
 {$ENDIF}
   FBookmarks := TObjectList.Create;
-    
-  GetMem(FBuffer, MIN_SCAN_BUF_SIZE);
+
+  if Stream.Size < MIN_SCAN_BUF_SIZE then
+    FBufSize := MIN_SCAN_BUF_SIZE
+  else if Stream.Size > MAX_SCAN_BUF_SIZE then
+    FBufSize := MAX_SCAN_BUF_SIZE
+  else
+    FBufSize := Stream.Size;
+
+  GetMem(FBuffer, FBufSize);
   FBuffer[0] := #0;
   FBufPtr := FBuffer;
-  FBufEnd := FBuffer + MIN_SCAN_BUF_SIZE;
+  FBufEnd := FBuffer + FBufSize div SizeOf(Char); // PChar 运算以 Char 为单位，所以得除以 Char 的大小
   FSourcePtr := FBuffer;
   FSourceEnd := FBuffer;
   FTokenPtr := FBuffer;
@@ -466,12 +475,15 @@ procedure TAbstractScaner.ReadBuffer;
 var
   Count: Integer;
 begin
-  Inc(FOrigin, FSourcePtr - FBuffer);
+  Inc(FOrigin, Integer(FSourcePtr) - Integer(FBuffer));
   FSourceEnd[0] := FSaveChar;
-  Count := FBufPtr - FSourcePtr;
+  Count := Integer(FBufPtr) - Integer(FSourcePtr);
   if Count <> 0 then Move(FSourcePtr[0], FBuffer[0], Count);
-  FBufPtr := FBuffer + Count;
-  Inc(FBufPtr, FStream.Read(FBufPtr[0], (FBufEnd - FBufPtr)) div SizeOf(Char)); // Inc 的是 Char，所以 Byte 数得 div 2
+  FBufPtr := PChar(Integer(FBuffer) + Count);
+
+  Count := FStream.Read(FBufPtr[0], (Integer(FBufEnd) - Integer(FBufPtr))); // 读进来的 Byte 数
+  FBufPtr := PChar(Integer(FBufPtr) + Count);
+
   FSourcePtr := FBuffer;
   FSourceEnd := FBufPtr;
   if FSourceEnd = FBufEnd then
@@ -484,6 +496,8 @@ begin
 end;
 
 procedure TAbstractScaner.SetOrigin(AOrigin: Integer);
+var
+  Count: Integer;
 begin
   if AOrigin <> FOrigin then
   begin
@@ -491,7 +505,10 @@ begin
     FSourceEnd[0] := FSaveChar;
     FStream.Seek(AOrigin, soFromBeginning);
     FBufPtr := FBuffer;
-    Inc(FBufPtr, FStream.Read(FBuffer[0], MIN_SCAN_BUF_SIZE));
+
+    Count := FStream.Read(FBuffer[0], FBufSize);
+    FBufPtr := PChar(Integer(FBufPtr) + Count);
+
     FSourcePtr := FBuffer;
     FSourceEnd := FBufPtr;
     if FSourceEnd = FBufEnd then
