@@ -1459,7 +1459,8 @@ begin
   Match(tokColon);
   // 每个 caselabel 后的 begin 都换行，不受 begin 风格的影响
   Writeln;
-  FNextBeginShouldIndent := True;
+  if Scaner.Token = tokKeywordBegin then // 得有 begin 才这样设置，否则会影响后续语句
+    FNextBeginShouldIndent := True;
 
   if Scaner.Token <> tokSemicolon then
     FormatStatement(Tab(PreSpaceCount, False))
