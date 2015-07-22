@@ -83,6 +83,9 @@ type
   TProcCnWiz_ZipAddFile = procedure (FileName: PAnsiChar); stdcall;
   {* 添加文件到 Zip}
 
+  TProcCnWiz_ZipSetComment = procedure (Comment: PAnsiChar); stdcall;
+  {* 设置 Zip 文件注释}
+
   TFuncCnWiz_ZipSaveAndClose = function : Boolean; stdcall;
   {* 压缩保存 Zip 文件并释放内部对象}
 
@@ -93,6 +96,7 @@ var
 
   fnCnWiz_StartZip: TProcCnWiz_StartZip;
   fnCnWiz_ZipAddFile: TProcCnWiz_ZipAddFile;
+  fnCnWiz_ZipSetComment: TProcCnWiz_ZipSetComment;
   fnCnWiz_ZipSaveAndClose: TFuncCnWiz_ZipSaveAndClose;
   fnCnWiz_Inet_GetFile: TFuncCnWiz_Inet_GetFile;
 
@@ -107,6 +111,7 @@ begin
   begin
     fnCnWiz_StartZip := TProcCnWiz_StartZip(GetProcAddress(hHelperDll, 'CnWiz_StartZip'));
     fnCnWiz_ZipAddFile := TProcCnWiz_ZipAddFile(GetProcAddress(hHelperDll, 'CnWiz_ZipAddFile'));
+    fnCnWiz_ZipSetComment := TProcCnWiz_ZipSetComment(GetProcAddress(hHelperDll, 'CnWiz_ZipSetComment'));
     fnCnWiz_ZipSaveAndClose := TFuncCnWiz_ZipSaveAndClose(GetProcAddress(hHelperDll, 'CnWiz_ZipSaveAndClose'));
     fnCnWiz_Inet_GetFile := TFuncCnWiz_Inet_GetFile(GetProcAddress(hHelperDll, 'CnWiz_Inet_GetFile'));
   end
@@ -144,7 +149,8 @@ end;
 function CnWizHelperZipValid: Boolean;
 begin
   Result := CnWizHelperLoaded and Assigned(fnCnWiz_StartZip) and
-    Assigned(fnCnWiz_ZipAddFile) and Assigned(fnCnWiz_ZipSaveAndClose);
+    Assigned(fnCnWiz_ZipAddFile) and Assigned(fnCnWiz_ZipSetComment)
+    and Assigned(fnCnWiz_ZipSaveAndClose);
 end;  
 
 procedure CnWiz_StartZip(const SaveFileName: PAnsiChar; const Password: PAnsiChar;

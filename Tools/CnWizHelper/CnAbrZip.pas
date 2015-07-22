@@ -29,7 +29,9 @@ unit CnAbrZip;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id: CnAbrZip.pas 418 2010-02-08 04:53:54Z zhoujingyu $
-* 修改记录：2009.05.23 V1.0 by liuxiao
+* 修改记录：2015.07.23 V1.1 by liuxiao
+*               加入设置注释的接口
+*           2009.05.23 V1.0 by liuxiao
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -47,15 +49,22 @@ procedure CnWiz_StartZip(const SaveFileName: PAnsiChar; const Password: PAnsiCha
 procedure CnWiz_ZipAddFile(FileName: PAnsiChar); stdcall;
 {* 添加文件到 Zip}
 
+procedure CnWiz_ZipSetComment(Comment: PAnsiChar); stdcall;
+{* 设置 Zip 文件注释}
+
 function CnWiz_ZipSaveAndClose: Boolean; stdcall;
 {* 压缩保存 Zip 文件并释放内部对象}
 
 exports
   CnWiz_StartZip,
   CnWiz_ZipAddFile,
+  CnWiz_ZipSetComment,
   CnWiz_ZipSaveAndClose;
 
 implementation
+
+type
+  TAbZipperHack = class(TAbZipper);
 
 var
   Zip: TAbZipper = nil;
@@ -81,6 +90,12 @@ procedure CnWiz_ZipAddFile(FileName: PAnsiChar); stdcall;
 begin
   if Zip = nil then Exit;
   Zip.AddFiles(FileName, 0);
+end;
+
+procedure CnWiz_ZipSetComment(Comment: PAnsiChar); stdcall;
+begin
+  if (Zip = nil) or (Comment = nil) then Exit;
+  TAbZipperHack(Zip).SetZipfileComment(Comment);
 end;
 
 function CnWiz_ZipSaveAndClose: Boolean; stdcall;
