@@ -747,6 +747,7 @@ begin
 
   FPrevColumn := FColumnPos;
   FColumnPos := 0;
+  FActualColumn := 0;
   FLastExceedPosition := 0;
   
   DoAfterWrite(True);
