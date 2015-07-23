@@ -90,6 +90,8 @@ type
     btnAfterCmd: TButton;
     mmoAfterCmd: TMemo;
     chkShowPass: TCheckBox;
+    lblComments: TLabel;
+    mmoComments: TMemo;
     procedure btnSelectClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -133,6 +135,8 @@ type
     procedure SetExecAfterFile(const Value: string);
     function GetShowPass: Boolean;
     procedure SetShowPass(const Value: Boolean);
+    function GetComments: string;
+    procedure SetComments(const Value: string);
   protected
     function GetHelpTopic: string; override;
     procedure UpdateContent;
@@ -146,6 +150,7 @@ type
     property RemovePath: Boolean read GetRemovePath write SetRemovePath;
     property RememberPass: Boolean read GetRememberPass write SetRememberPass;
     property ShowPass: Boolean read GetShowPass write SetShowPass;
+    property Comments: string read GetComments write SetComments;
     property SaveFileName: string read GetSaveFileName write SetSaveFileName;
     property Confirmed: Boolean read FConfirmed write FConfirmed;
     property UseExternal: Boolean read GetUseExternal write SetUseExternal;
@@ -511,6 +516,16 @@ begin
     edtPass.PasswordChar := #0
   else
     edtPass.PasswordChar := '*';
+end;
+
+function TCnProjectBackupSaveForm.GetComments: string;
+begin
+  Result := mmoComments.Lines.Text;
+end;
+
+procedure TCnProjectBackupSaveForm.SetComments(const Value: string);
+begin
+  mmoComments.Lines.Text := Value;
 end;
 
 {$ENDIF SUPPORT_PRJ_BACKUP}

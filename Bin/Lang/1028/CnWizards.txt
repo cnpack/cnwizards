@@ -2418,6 +2418,7 @@ TCnProjectBackupSaveForm.chkRememberPass.Caption=記住密碼
 TCnProjectBackupSaveForm.chkShowPass.Caption=顯示密碼
 TCnProjectBackupSaveForm.chkRemovePath.Caption=刪除壓縮檔中的路徑資訊（可能導致同名檔無法保存）。
 TCnProjectBackupSaveForm.grpSave.Caption=工程壓縮保存選項(&Z)
+TCnProjectBackupSaveForm.lblComments.Caption=壓縮包注釋：
 TCnProjectBackupSaveForm.lblFile.Caption=保存為：
 TCnProjectBackupSaveForm.lblPass.Caption=密碼：
 TCnProjectBackupSaveForm.lblTime.Caption=檔案名日期時間格式：

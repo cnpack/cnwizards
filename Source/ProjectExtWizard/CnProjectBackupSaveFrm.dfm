@@ -3,7 +3,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
   Top = 247
   BorderStyle = bsDialog
   Caption = 'Compress and Save Settings'
-  ClientHeight = 369
+  ClientHeight = 409
   ClientWidth = 388
   OldCreateOrder = True
   OnCloseQuery = FormCloseQuery
@@ -13,7 +13,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
   TextHeight = 13
   object btnOK: TButton
     Left = 146
-    Top = 335
+    Top = 375
     Width = 75
     Height = 21
     Caption = '&Save'
@@ -23,7 +23,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
   end
   object btnCancel: TButton
     Left = 224
-    Top = 335
+    Top = 375
     Width = 75
     Height = 21
     Cancel = True
@@ -33,7 +33,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
   end
   object btnHelp: TButton
     Left = 302
-    Top = 335
+    Top = 375
     Width = 75
     Height = 21
     Caption = '&Help'
@@ -44,7 +44,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
     Left = 8
     Top = 8
     Width = 369
-    Height = 318
+    Height = 353
     ActivePage = ts1
     TabOrder = 0
     object ts1: TTabSheet
@@ -110,19 +110,26 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
         Left = 8
         Top = 109
         Width = 345
-        Height = 173
+        Height = 204
         Caption = 'C&ompress Settings'
         TabOrder = 1
         object lblPass: TLabel
           Left = 32
-          Top = 81
+          Top = 77
           Width = 50
           Height = 13
           Caption = 'Password:'
         end
+        object lblComments: TLabel
+          Left = 16
+          Top = 121
+          Width = 54
+          Height = 13
+          Caption = 'Comments:'
+        end
         object chkRememberPass: TCheckBox
           Left = 88
-          Top = 108
+          Top = 100
           Width = 129
           Height = 17
           Caption = 'Remember Password'
@@ -131,7 +138,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
         end
         object edtPass: TEdit
           Left = 88
-          Top = 77
+          Top = 73
           Width = 241
           Height = 21
           PasswordChar = '*'
@@ -156,12 +163,19 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
         end
         object chkShowPass: TCheckBox
           Left = 232
-          Top = 108
+          Top = 100
           Width = 105
           Height = 17
           Caption = 'Show Password'
           TabOrder = 4
           OnClick = chkShowPassClick
+        end
+        object mmoComments: TMemo
+          Left = 16
+          Top = 140
+          Width = 313
+          Height = 53
+          TabOrder = 5
         end
       end
     end
@@ -172,7 +186,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
         Left = 8
         Top = 8
         Width = 345
-        Height = 274
+        Height = 305
         Caption = 'External C&ompressor'
         TabOrder = 0
         object lblPredefine: TLabel
@@ -241,7 +255,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
           Left = 16
           Top = 144
           Width = 313
-          Height = 113
+          Height = 145
           TabOrder = 4
         end
       end
@@ -253,7 +267,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
         Left = 8
         Top = 8
         Width = 345
-        Height = 274
+        Height = 305
         Caption = 'After &Backup'
         TabOrder = 0
         object lblPreParams: TLabel
@@ -323,7 +337,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
           Left = 16
           Top = 144
           Width = 313
-          Height = 113
+          Height = 145
           TabOrder = 4
         end
       end

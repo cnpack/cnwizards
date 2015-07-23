@@ -2418,6 +2418,7 @@ TCnProjectBackupSaveForm.chkRememberPass.Caption=Remember Password
 TCnProjectBackupSaveForm.chkShowPass.Caption=Show Password
 TCnProjectBackupSaveForm.chkRemovePath.Caption=Remove Path (May Cause Error when File Names are Equal).
 TCnProjectBackupSaveForm.grpSave.Caption=&Save Settings
+TCnProjectBackupSaveForm.lblComments.Caption=Comments:
 TCnProjectBackupSaveForm.lblFile.Caption=Save to:
 TCnProjectBackupSaveForm.lblPass.Caption=Password:
 TCnProjectBackupSaveForm.lblTime.Caption=File Timestamp Format:

@@ -244,6 +244,7 @@ const
   csVersionInfo = '<VersionInfo>';
   csCmdListFile = '<ListFile>';
   csCmdPassword = '<Password>';
+  csComments = '<Comments>';
   csAfterCmd = '<externfile.exe>';
 
 function ShowProjectBackupForm(Ini: TCustomIniFile): Boolean;
@@ -926,11 +927,13 @@ begin
         finally
           List.Free;
         end;
+
         // ππ‘Ï√¸¡Ó––
         CompressorCommand := StringReplace(FCompressCmd, csCmdCompress, '"' + FCompressor + '"', [rfReplaceAll]);
         CompressorCommand := StringReplace(CompressorCommand, csCmdBackupFile, '"' + SaveFileName + '"', [rfReplaceAll]);
         CompressorCommand := StringReplace(CompressorCommand, csCmdListFile, '"' + ListFileName + '"', [rfReplaceAll]);
         CompressorCommand := StringReplace(CompressorCommand, csVersionInfo, '"' + VerStr + '"', [rfReplaceAll]);
+        CompressorCommand := StringReplace(CompressorCommand, csComments, '"' + Comments + '"', [rfReplaceAll]);
         if FUsePassword then
           CompressorCommand := StringReplace(CompressorCommand, csCmdPassword, '"' + Password + '"', [rfReplaceAll])
         else
@@ -960,6 +963,9 @@ begin
             for I := 0 to Self.lvFileView.Items.Count - 1 do
               if Self.lvFileView.Items[I].Data <> nil then
                 CnWiz_ZipAddFile(_CnPChar(TCnBackupFileInfo(Self.lvFileView.Items[I].Data).FullFileName));
+
+            if mmoComments.Lines.Text <> '' then
+              CnWiz_ZipSetComment(mmoComments.Lines.GetText);
 
             if CnWiz_ZipSaveAndClose then
               InfoDlg(Format(SCnProjExtBackupSuccFmt, [SaveFileName]));
