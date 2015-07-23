@@ -156,7 +156,8 @@ const
 
 procedure TCnSrcEditorThumbnail.AppDeactivate(Sender: TObject);
 begin
-  FThumbWindow.Visible := False;
+  if FThumbWindow <> nil then
+    FThumbWindow.Visible := False;
 end;
 
 procedure TCnSrcEditorThumbnail.ApplicationMessage(var Msg: TMsg;
