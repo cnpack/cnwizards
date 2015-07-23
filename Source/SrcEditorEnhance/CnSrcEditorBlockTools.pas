@@ -779,6 +779,7 @@ begin
       Button.Name := SCnSrcEditorBlockButton;
       Button.Image := FIcon;
       Button.DropdownMenu := FPopupMenu;
+      Button.AutoDropdown := True;
       Button.Hint := SCnSrcBlockToolsHint;
       // BDS 下 Parent 在 EditControl.Parent 上可能导致 ModelMaker Explorer
       // 工具栏自动隐藏判断错误

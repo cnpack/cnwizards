@@ -52,6 +52,7 @@ type
     FIsMouseEnter: Boolean;
     FIsDropdown: Boolean;
     FTimer: TTimer;
+    FAutoDropdown: Boolean;
     procedure SetImage(Value: TGraphic);
     procedure ImageChange(Sender: TObject);
     procedure OnTimer(Sender: TObject);
@@ -61,6 +62,7 @@ type
     procedure CreateParams(var Params: TCreateParams); override;
     procedure CMMouseEnter(var Message: TMessage); message CM_MOUSEENTER;
     procedure CMMouseLeave(var Message: TMessage); message CM_MOUSELEAVE;
+    procedure CMHintShow(var Message: TMessage); message CM_HINTSHOW;
     procedure Click; override;
     procedure Paint; override;
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState;
@@ -79,6 +81,8 @@ type
     {* 下拉菜单，需要由用户自己创建及设置 }
     property Image: TGraphic read FImage write SetImage;
     {* 按钮图标，需要由用户自己创建及设置 }
+    property AutoDropdown: Boolean read FAutoDropdown write FAutoDropdown;
+    {* 是否鼠标移入后自动下拉}
     property IsDropdown: Boolean read FIsDropdown write SetIsDropdown;
     property IsMouseEnter: Boolean read FIsMouseEnter write SetIsMouseEnter;
   end;
@@ -240,7 +244,9 @@ begin
     if not PtInRect(ClientRect, ScreenToClient(P)) then
     begin
       IsMouseEnter := False;
-    end;
+    end
+    else if FAutoDropdown then
+      Dropdown;
   end;
 end;
 
@@ -276,6 +282,14 @@ begin
     UpdateSize;
     FTimer.Enabled := IsMouseEnter;
   end;
+end;
+
+procedure TCnWizFlatButton.CMHintShow(var Message: TMessage);
+begin
+  if FAutoDropdown then // 自动下拉时，移动 Hint 防止遮住窗口
+    Dec(TCMHintShow(Message).HintInfo^.HintPos.y, Height * 2 + 10);
+
+  Message.Result := 0; // 不处理
 end;
 
 end.
