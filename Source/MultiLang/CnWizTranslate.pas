@@ -687,6 +687,7 @@ begin
   TranslateStr(SCnMenuCloseOtherPagesCaption, 'SCnMenuCloseOtherPagesCaption');
   TranslateStr(SCnMenuShellMenuCaption, 'SCnMenuShellMenuCaption');
   TranslateStr(SCnMenuSelAllCaption, 'SCnMenuSelAllCaption');
+  TranslateStr(SCnMenuEnableThumbnailCaption, 'SCnMenuEnableThumbnailCaption');
   TranslateStr(SCnMenuBlockToolsCaption, 'SCnMenuBlockToolsCaption');
   TranslateStr(SCnMenuExploreCaption, 'SCnMenuExploreCaption');
   TranslateStr(SCnMenuCopyFileNameMenuCaption, 'SCnMenuCopyFileNameMenuCaption');

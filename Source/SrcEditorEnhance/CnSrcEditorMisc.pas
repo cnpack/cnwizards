@@ -67,6 +67,7 @@ type
   {$ENDIF COMPILER6_UP}
     FExploreMenu: TCnMenuItemDef;
     FSelAllMenu: TCnMenuItemDef;
+    FThumbnailMenu: TCnMenuItemDef;
     FBlockToolsMenu: TCnMenuItemDef;
     FBlockToolMenuItem: TMenuItem;
     FCloseOtherPagesMenu: TCnMenuItemDef;
@@ -115,6 +116,8 @@ type
     procedure OnCopyFileName(Sender: TObject);
     procedure OnBlockToolsMenuCreated(Sender: TObject; MenuItem: TMenuItem);
     procedure OnSelectAll(Sender: TObject);
+    procedure OnThumbnailClick(Sender: TObject);
+    procedure OnThumbnailMenuCreated(Sender: TObject; MenuItem: TMenuItem);
     procedure OnExplore(Sender: TObject);
     procedure SetChangeCodeComKey(const Value: Boolean);
     procedure UpdateCodeCompletionHotKey;
@@ -467,9 +470,15 @@ begin
   FBlockToolsMenu.OnCreated := OnBlockToolsMenuCreated;
   FMenuHook.AddMenuItemDef(FBlockToolsMenu);
 
+  FThumbnailMenu := TCnMenuItemDef.Create(SCnMenuEnableThumbnail, SCnMenuEnableThumbnailCaption,
+    OnThumbnailClick, ipAfter, SMenuEditPasteItemName);
+  FThumbnailMenu.OnCreated := OnThumbnailMenuCreated;
+  FMenuHook.AddMenuItemDef(FThumbnailMenu);
+
   FSelAllMenu := TCnMenuItemDef.Create(SCnMenuSelAllName, SCnMenuSelAllCaption,
     OnSelectAll, ipAfter, SMenuEditPasteItemName);
   FMenuHook.AddMenuItemDef(FSelAllMenu);
+
 
   FCopyFileNameMenu := TCnMenuItemDef.Create(SCnCopyFileNameMenuName,
     SCnMenuCopyFileNameMenuCaption, OnCopyFileName, ipAfter, SMenuOpenFileAtCursorName);
@@ -1145,6 +1154,25 @@ begin
 
     Tab.Height := TabCtrlPanel.Height;
   end;
+end;
+
+procedure TCnSrcEditorMisc.OnThumbnailClick(Sender: TObject);
+var
+  Wizard: TCnSrcEditorEnhance;
+begin
+  Wizard := (CnWizardMgr.WizardByClass(TCnSrcEditorEnhance)) as TCnSrcEditorEnhance;
+  if Wizard <> nil then
+    Wizard.Thumbnail.ShowThumbnail := not Wizard.Thumbnail.ShowThumbnail;
+end;
+
+procedure TCnSrcEditorMisc.OnThumbnailMenuCreated(Sender: TObject;
+  MenuItem: TMenuItem);
+var
+  Wizard: TCnSrcEditorEnhance;
+begin
+  Wizard := (CnWizardMgr.WizardByClass(TCnSrcEditorEnhance)) as TCnSrcEditorEnhance;
+  if Wizard <> nil then
+    MenuItem.Checked := Wizard.Thumbnail.ShowThumbnail;
 end;
 
 {$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}

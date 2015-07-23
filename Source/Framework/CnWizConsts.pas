@@ -253,6 +253,7 @@ resourcestring
   SCnMenuCloseOtherPagesName = 'CnCloseOtherPages';
   SCnShellMenuName = 'CnShellMenu';
   SCnMenuSelAllName = 'CnSelAll';
+  SCnMenuEnableThumbnail = 'CnEnableThumbnail';
   SCnMenuBlockToolsName = 'CnMenuBlockTools';
   SCnMenuExploreName = 'CnExplore';
   SCnCopyFileNameMenuName = 'CnCopyFileName';
@@ -959,6 +960,7 @@ var
   SCnMenuCloseOtherPagesCaption: string = 'Close All Other Pages';
   SCnMenuShellMenuCaption: string = 'Shell Context Menu';
   SCnMenuSelAllCaption: string = 'Select All';
+  SCnMenuEnableThumbnailCaption: string = 'Code Preview Window';
   SCnMenuBlockToolsCaption: string = 'CnPack Editor Menu';
   SCnMenuExploreCaption: string = 'Open "%s" in Windows Explorer';
   SCnMenuCopyFileNameMenuCaption: string = 'Copy Full Path/FileName';

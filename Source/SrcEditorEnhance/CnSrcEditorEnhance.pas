@@ -224,6 +224,7 @@ type
   
     property ToolBarMgr: TCnSrcEditorToolBarMgr read FToolbarMgr;
     property EditorMisc: TCnSrcEditorMisc read FEditorMisc;
+    property Thumbnail: TCnSrcEditorThumbnail read FThumbnail;
     property BlockTools: TCnSrcEditorBlockTools read FBlockTools;
     property EditorKey: TCnSrcEditorKey read FEditorKey;
   end;
