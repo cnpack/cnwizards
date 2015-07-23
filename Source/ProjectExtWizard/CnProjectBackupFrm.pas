@@ -831,6 +831,7 @@ var
   CompressorCommand, ListFileName, ExecCommand, VerStr: string;
   List: TStrings;
   Options: IOTAProjectOptions;
+  Comment: AnsiString;
 begin
   if lvFileView.Items.Count = 0 then
   begin
@@ -965,7 +966,10 @@ begin
                 CnWiz_ZipAddFile(_CnPChar(TCnBackupFileInfo(Self.lvFileView.Items[I].Data).FullFileName));
 
             if mmoComments.Lines.Text <> '' then
-              CnWiz_ZipSetComment(mmoComments.Lines.GetText);
+            begin
+              Comment := AnsiString(mmoComments.Lines.Text);
+              CnWiz_ZipSetComment(PAnsiChar(Comment));
+            end;
 
             if CnWiz_ZipSaveAndClose then
               InfoDlg(Format(SCnProjExtBackupSuccFmt, [SaveFileName]));
