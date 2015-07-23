@@ -2417,7 +2417,6 @@ TCnProjectBackupSaveForm.chkRemovePath.Caption=Удалять путь (возм
 TCnProjectBackupSaveForm.grpSave.Caption=Сохранить настройки
 TCnProjectBackupSaveForm.lblFile.Caption=Сохр. в:
 TCnProjectBackupSaveForm.lblPass.Caption=Пароль:
-TCnProjectBackupSaveForm.lblSecond.Caption=Еще раз:
 TCnProjectBackupSaveForm.lblTime.Caption=Формат времени файла:
 TCnProjectBackupSaveForm.ts1.Caption=Архивация и сохранение
 TCnProjectBackupSaveForm.ts2.Caption=Внешний архиватор

@@ -57,6 +57,9 @@ procedure CnWiz_StartZip(const SaveFileName: PAnsiChar; const Password: PAnsiCha
 procedure CnWiz_ZipAddFile(FileName: PAnsiChar); stdcall;
 {* 添加文件到 Zip}
 
+procedure CnWiz_ZipSetComment(Comment: PAnsiChar); stdcall;
+{* 设置 Zip 文件注释}
+
 function CnWiz_ZipSaveAndClose: Boolean; stdcall;
 {* 压缩保存 Zip 文件并释放内部对象}
 
@@ -164,6 +167,12 @@ procedure CnWiz_ZipAddFile(FileName: PAnsiChar); stdcall;
 begin
   if CnWizHelperZipValid then
     fnCnWiz_ZipAddFile(FileName);
+end;
+
+procedure CnWiz_ZipSetComment(Comment: PAnsiChar); stdcall;
+begin
+  if CnWizHelperZipValid then
+    fnCnWiz_ZipSetComment(Comment);
 end;
 
 function CnWiz_ZipSaveAndClose: Boolean; stdcall;

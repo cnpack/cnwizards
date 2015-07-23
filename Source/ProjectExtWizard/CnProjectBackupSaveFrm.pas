@@ -66,10 +66,8 @@ type
     edtFile: TEdit;
     cbbTimeFormat: TComboBox;
     grp1: TGroupBox;
-    lblSecond: TLabel;
     lblPass: TLabel;
     chkRememberPass: TCheckBox;
-    edtSecond: TEdit;
     edtPass: TEdit;
     chkPassword: TCheckBox;
     chkRemovePath: TCheckBox;
@@ -91,6 +89,7 @@ type
     edtAfterCmd: TEdit;
     btnAfterCmd: TButton;
     mmoAfterCmd: TMemo;
+    chkShowPass: TCheckBox;
     procedure btnSelectClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -104,12 +103,12 @@ type
     procedure chkUseExternalClick(Sender: TObject);
     procedure btnAfterCmdClick(Sender: TObject);
     procedure cbbParamsChange(Sender: TObject);
+    procedure chkShowPassClick(Sender: TObject);
   private
     FConfirmed: Boolean;
     FSavePath: string;
     FCurrentName: string;
     FExt: string;
-    { Private declarations }
     function GetPassword: string;
     function GetRemovePath: Boolean;
     function GetUsePassword: Boolean;
@@ -132,9 +131,12 @@ type
     procedure SetExecAfter(const Value: Boolean);
     function GetExecAfterFile: string;
     procedure SetExecAfterFile(const Value: string);
+    function GetShowPass: Boolean;
+    procedure SetShowPass(const Value: Boolean);
   protected
     function GetHelpTopic: string; override;
     procedure UpdateContent;
+    procedure CheckShowPass;
   public
     { Public declarations }
     function GetExtFromCompressor(Compressor: string): string;
@@ -143,6 +145,7 @@ type
     property Password: string read GetPassword write SetPassword;
     property RemovePath: Boolean read GetRemovePath write SetRemovePath;
     property RememberPass: Boolean read GetRememberPass write SetRememberPass;
+    property ShowPass: Boolean read GetShowPass write SetShowPass;
     property SaveFileName: string read GetSaveFileName write SetSaveFileName;
     property Confirmed: Boolean read FConfirmed write FConfirmed;
     property UseExternal: Boolean read GetUseExternal write SetUseExternal;
@@ -216,7 +219,6 @@ end;
 procedure TCnProjectBackupSaveForm.SetPassword(const Value: string);
 begin
   edtPass.Text := Value;
-  edtSecond.Text := Value;
 end;
 
 procedure TCnProjectBackupSaveForm.SetUsePassword(const Value: Boolean);
@@ -281,13 +283,13 @@ begin
       Exit;
     end;
 
-    if chkPassword.Checked and (edtPass.Text = '') or (edtPass.Text <> edtSecond.Text) then
-    begin
-      ErrorDlg(SCnDoublePasswordError);
-      CanClose := False;
-      edtPass.SetFocus;
-      Exit;
-    end;
+//    if chkPassword.Checked and (edtPass.Text = '') or (edtPass.Text <> edtSecond.Text) then
+//    begin
+//      ErrorDlg(SCnDoublePasswordError);
+//      CanClose := False;
+//      edtPass.SetFocus;
+//      Exit;
+//    end;
   end;
 end;
 
@@ -372,7 +374,8 @@ end;
 procedure TCnProjectBackupSaveForm.UpdateContent;
 begin
   edtPass.Enabled := chkPassword.Checked;
-  edtSecond.Enabled := chkPassword.Checked;
+  chkRememberPass.Enabled := chkPassword.Checked;
+  chkShowPass.Enabled := chkPassword.Checked;
   chkRemovePath.Enabled := not chkUseExternal.Checked;
   lblPredefine.Enabled := chkUseExternal.Checked;
   lblCompressor.Enabled := chkUseExternal.Checked;
@@ -484,6 +487,30 @@ end;
 procedure TCnProjectBackupSaveForm.SetExecAfterFile(const Value: string);
 begin
   edtAfterCmd.Text := Trim(Value);
+end;
+
+function TCnProjectBackupSaveForm.GetShowPass: Boolean;
+begin
+  Result := chkShowPass.Checked;
+end;
+
+procedure TCnProjectBackupSaveForm.SetShowPass(const Value: Boolean);
+begin
+  chkShowPass.Checked := Value;
+  CheckShowPass;
+end;
+
+procedure TCnProjectBackupSaveForm.chkShowPassClick(Sender: TObject);
+begin
+  CheckShowPass;
+end;
+
+procedure TCnProjectBackupSaveForm.CheckShowPass;
+begin
+  if chkShowPass.Checked then
+    edtPass.PasswordChar := #0
+  else
+    edtPass.PasswordChar := '*';
 end;
 
 {$ENDIF SUPPORT_PRJ_BACKUP}

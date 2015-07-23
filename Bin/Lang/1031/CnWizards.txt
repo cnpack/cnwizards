@@ -2418,7 +2418,6 @@ TCnProjectBackupSaveForm.chkRemovePath.Caption=lösche Pfad (könnte Fehler veru
 TCnProjectBackupSaveForm.grpSave.Caption=&speichern Einstellungen
 TCnProjectBackupSaveForm.lblFile.Caption=Ort: 
 TCnProjectBackupSaveForm.lblPass.Caption=Passwort:
-TCnProjectBackupSaveForm.lblSecond.Caption=überprüfen:
 TCnProjectBackupSaveForm.lblTime.Caption=Datei Datum/Zeit Format:
 TCnProjectBackupSaveForm.ts1.Caption=Packe und sicher Einstellungen
 TCnProjectBackupSaveForm.ts2.Caption=&externer Packer

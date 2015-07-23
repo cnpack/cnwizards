@@ -165,6 +165,7 @@ type
     FRemovePath: Boolean;
     FUsePassword: Boolean;
     FRememberPass: Boolean;
+    FShowPass: Boolean;
     FPassword: string;
     FSavePath: string;
     FCurrentName: string;
@@ -226,6 +227,7 @@ const
   csUsePassword = 'UsePassword';
   csSavePath = 'SavePath';
   csRememberPass = 'RememberPass';
+  csShowPass = 'ShowPass';
   csZipPass = 'ZipPass';
   csTimeFormatIndex = 'TimeFormatIndex';
   
@@ -462,6 +464,7 @@ procedure TCnProjectBackupForm.LoadSettings(Ini: TCustomIniFile);
 begin
   FUsePassword := Ini.ReadBool(csBackupSection, csUsePassword, False);
   FRememberPass := Ini.ReadBool(csBackupSection, csRememberPass, False);
+  FShowPass := Ini.ReadBool(csBackupSection, csShowPass, False);
   FRemovePath := Ini.ReadBool(csBackupSection, csRemovePath, False);
   FSavePath := Ini.ReadString(csBackupSection, csSavePath, '');
   FTimeFormatIndex := Ini.ReadInteger(csBackupSection, csTimeFormatIndex, 0);
@@ -483,6 +486,7 @@ procedure TCnProjectBackupForm.SaveSettings(Ini: TCustomIniFile);
 begin
   Ini.WriteBool(csBackupSection, csUsePassword, FUsePassword);
   Ini.WriteBool(csBackupSection, csRememberPass, FRememberPass);
+  Ini.WriteBool(csBackupSection, csShowPass, FShowPass);
   Ini.WriteBool(csBackupSection, csRemovePath, FRemovePath);
   Ini.WriteString(csBackupSection, csSavePath, FSavePath);
   Ini.WriteInteger(csBackupSection, csTimeFormatIndex, FTimeFormatIndex);
@@ -837,6 +841,7 @@ begin
   try
     RemovePath := FRemovePath;
     RememberPass := FRememberPass;
+    ShowPass := FShowPass;
     UsePassword := FUsePassword;
     UseExternal := FUseExternal;
     Compressor := FCompressor;
@@ -869,6 +874,7 @@ begin
       FRemovePath := RemovePath;
       FUsePassword := UsePassword;
       FRememberPass := RememberPass;
+      FShowPass := ShowPass;
       FUseExternal := UseExternal;
       FCompressor := Compressor;
       FCompressCmd := CompressCmd;
@@ -938,7 +944,7 @@ begin
       end
       else
       begin
-        // 调用外部 DLL 来实现压缩
+        // 调用 CnWizards 自带的外部 DLL 来实现压缩
         if not CnWizHelperZipValid then
         begin
           ErrorDlg(SCnProjExtBackupDllMissCorrupt);
