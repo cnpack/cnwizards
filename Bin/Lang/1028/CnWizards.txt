@@ -3009,6 +3009,7 @@ SCnEditorEnhanceWizardComment=擴展代碼編輯器的功能
 SCnMenuCloseOtherPagesCaption=關閉其他的頁面
 SCnMenuShellMenuCaption=外殼關聯菜單
 SCnMenuSelAllCaption=選擇全部
+SCnMenuEnableThumbnailCaption=代碼預覽窗口
 SCnMenuBlockToolsCaption=CnPack 編輯菜單
 SCnMenuExploreCaption=在資源管理器中打開 "%s"
 SCnMenuCopyFileNameMenuCaption=複製完整的路徑名/文件名

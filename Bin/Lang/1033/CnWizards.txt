@@ -3009,6 +3009,7 @@ SCnEditorEnhanceWizardComment=Editor Enhancements
 SCnMenuCloseOtherPagesCaption=Close All Other Pages
 SCnMenuShellMenuCaption=Shell Context Menu
 SCnMenuSelAllCaption=Select All
+SCnMenuEnableThumbnailCaption=Code Preview Window
 SCnMenuBlockToolsCaption=CnPack Editor Menu
 SCnMenuExploreCaption=Open "%s" in Windows Explorer
 SCnMenuCopyFileNameMenuCaption=Copy Full Path/FileName
