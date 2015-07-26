@@ -5,8 +5,8 @@ object EditLangForm: TEditLangForm
   ClientHeight = 442
   ClientWidth = 892
   Color = clBtnFace
-  Constraints.MinHeight = 480
-  Constraints.MinWidth = 908
+  Constraints.MinHeight = 469
+  Constraints.MinWidth = 900
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -35,7 +35,6 @@ object EditLangForm: TEditLangForm
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitHeight = 442
     object pnlLeftTop: TPanel
       Left = 0
       Top = 0
@@ -66,23 +65,6 @@ object EditLangForm: TEditLangForm
         OnChange = cbbLeftFileChange
       end
     end
-    object mmoLeft: TMemo
-      Left = 0
-      Top = 33
-      Width = 441
-      Height = 390
-      Align = alClient
-      Font.Charset = GB2312_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -16
-      Font.Name = 'Fixedsys'
-      Font.Style = []
-      ParentFont = False
-      ScrollBars = ssBoth
-      TabOrder = 1
-      WordWrap = False
-      ExplicitHeight = 409
-    end
   end
   object pnlRight: TPanel
     Left = 446
@@ -92,7 +74,6 @@ object EditLangForm: TEditLangForm
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitHeight = 442
     object pnlRightTop: TPanel
       Left = 0
       Top = 0
@@ -123,23 +104,6 @@ object EditLangForm: TEditLangForm
         OnChange = cbbRightFileChange
       end
     end
-    object mmoRight: TMemo
-      Left = 0
-      Top = 33
-      Width = 446
-      Height = 390
-      Align = alClient
-      Font.Charset = GB2312_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -16
-      Font.Name = 'Fixedsys'
-      Font.Style = []
-      ParentFont = False
-      ScrollBars = ssBoth
-      TabOrder = 1
-      WordWrap = False
-      ExplicitHeight = 409
-    end
   end
   object statMain: TStatusBar
     Left = 0
@@ -153,8 +117,5 @@ object EditLangForm: TEditLangForm
       item
         Width = 50
       end>
-    ExplicitLeft = 448
-    ExplicitTop = 320
-    ExplicitWidth = 0
   end
 end

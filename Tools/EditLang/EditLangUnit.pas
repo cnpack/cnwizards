@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  FileCtrl, CnCommon, ExtCtrls, StdCtrls, ComCtrls;
+  FileCtrl, CnCommon, ExtCtrls, StdCtrls, ComCtrls, CnMemo;
 
 type
   TEditLangForm = class(TForm)
@@ -17,8 +17,6 @@ type
     pnlRightTop: TPanel;
     cbbRightDir: TComboBox;
     cbbRightFile: TComboBox;
-    mmoLeft: TMemo;
-    mmoRight: TMemo;
     statMain: TStatusBar;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -28,6 +26,9 @@ type
     procedure cbbLeftFileChange(Sender: TObject);
     procedure cbbRightFileChange(Sender: TObject);
   private
+    mmoLeft: TCnMemo;
+    mmoRight: TCnMemo;
+
     FLangRoot: string;
     FLangDirs: TStrings;
     FLeftLangFiles: TStrings;
@@ -60,6 +61,24 @@ begin
 
   cbbLeftDir.Items.Assign(FLangDirs);
   cbbRightDir.Items.Assign(FLangDirs);
+
+  mmoLeft := TCnMemo.Create(Self);
+  with mmoLeft do
+  begin
+    Align := alClient;
+    ShowLineNumber := True;
+    Parent := pnlLeft;
+    ScrollBars := ssBoth;
+  end;
+
+  mmoRight := TCnMemo.Create(Self);
+  with mmoRight do
+  begin
+    Align := alClient;
+    ShowLineNumber := True;
+    Parent := pnlRight;
+    ScrollBars := ssBoth;
+  end;
 end;
 
 procedure TEditLangForm.FormDestroy(Sender: TObject);
