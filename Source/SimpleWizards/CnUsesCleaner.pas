@@ -70,6 +70,7 @@ type
     mmoIgnore: TMemo;
     chkIgnoreNoSrc: TCheckBox;
     chkIgnoreCompRef: TCheckBox;
+    chkProcessDependencies: TCheckBox;
     procedure btnHelpClick(Sender: TObject);
   private
     { Private declarations }
@@ -89,6 +90,7 @@ type
     FIgnoreReg: Boolean;
     FIgnoreNoSrc: Boolean;
     FIgnoreCompRef: Boolean;
+    FProcessDependencies: Boolean;
     FIgnoreList: TStringList;
     FCleanList: TStringList;
     FRegExpr: TRegExpr;
@@ -98,7 +100,7 @@ type
     function CompileUnits(AKind: TCnUsesCleanKind): Boolean;
     function ProcessUnits(AKind: TCnUsesCleanKind; List: TObjectList): Boolean;
     procedure ParseUnitKind(const FileName: string; var Kinds: TCnUsesKinds);
-    procedure GetCompRefUnits(AModule: IOTAModule; AProject: IOTAProject; Units: 
+    procedure GetCompRefUnits(AModule: IOTAModule; AProject: IOTAProject; Units:
       TStrings);
     procedure CheckUnits(List: TObjectList);
     function DoCleanUnit(Buffer: IOTAEditBuffer; Intf, Impl: TStrings): Boolean;
@@ -139,6 +141,7 @@ const
   csIgnoreReg = 'IgnoreReg';
   csIgnoreNoSrc = 'IgnoreNoSrc';
   csIgnoreCompRef = 'IgnoreCompRef';
+  csProcessDependencies = 'ProcessDependencies';
   csDcuExt = '.dcu';
 
 { TCnUsesCleaner }
@@ -150,6 +153,7 @@ begin
   FIgnoreReg := True;
   FIgnoreNoSrc := False;
   FIgnoreCompRef := True;
+  FProcessDependencies := False;
   FIgnoreList := TStringList.Create;
   FCleanList := TStringList.Create;
 
@@ -218,6 +222,7 @@ begin
     chkIgnoreReg.Checked := FIgnoreReg;
     chkIgnoreNoSrc.Checked := FIgnoreNoSrc;
     chkIgnoreCompRef.Checked := FIgnoreCompRef;
+    chkProcessDependencies.Checked := FProcessDependencies;
     mmoIgnore.Lines.Assign(FIgnoreList);
     mmoClean.Lines.Assign(FCleanList);
     Module := CnOtaGetCurrentModule;
@@ -236,6 +241,7 @@ begin
       FIgnoreNoSrc := chkIgnoreNoSrc.Checked;
       FIgnoreList.Assign(mmoIgnore.Lines);
       FIgnoreCompRef := chkIgnoreCompRef.Checked;
+      FProcessDependencies := chkProcessDependencies.Checked;
       FCleanList.Assign(mmoClean.Lines);
       if rbCurrUnit.Checked then
         AKind := ukCurrUnit
@@ -333,7 +339,7 @@ var
     for i := 0 to List.Count - 1 do
       with TCnProjectUsesInfo(List[i]) do
         for j := 0 to Units.Count - 1 do
-          if SameFileName(TCnEmptyUsesInfo(Units[i]).Buffer.Module.FileName,
+          if SameFileName(TCnEmptyUsesInfo(Units[i]).SourceFileName,
             FileName) then
           begin
             Result := True;
@@ -357,30 +363,25 @@ var
       Result := '';    
   end;
 
-  function GetDcuName(const ADcuPath: string; AModule: IOTAModule): string;
+  function GetDcuName(const ADcuPath, ASourceFileName: string): string;
   begin
     if ADcuPath = '' then
-      Result := _CnChangeFileExt(Module.FileName, csDcuExt)
+      Result := _CnChangeFileExt(ASourceFileName, csDcuExt)
     else
-      Result := _CnChangeFileExt(ADcuPath + _CnExtractFileName(Module.FileName), csDcuExt);
+      Result := _CnChangeFileExt(ADcuPath + _CnExtractFileName(ASourceFileName), csDcuExt);
   end;
 
-  function ProcessAUnit(const ADcuName: string; AModule: IOTAModule;
+  function ProcessAUnit(const ADcuName, ASourceFileName: string;
     AProject: IOTAProject; var AInfo: TCnEmptyUsesInfo): Boolean;
-  var
-    Editor: IOTASourceEditor;
   begin
     AInfo := nil;
     Result := False;
   {$IFDEF DEBUG}
     CnDebugger.LogMsg('UsesCleaner ProcessAUnit: ' + ADcuName);
   {$ENDIF}
-    if IsDprOrPas(AModule.FileName) and FileExists(ADcuName) then
+    if IsDprOrPas(ASourceFileName) and FileExists(ADcuName) then
     begin
-      Editor := CnOtaGetSourceEditorFromModule(AModule);
-      Assert(Assigned(Editor));
-      AInfo := TCnEmptyUsesInfo.Create(ADcuName, Editor as IOTAEditBuffer,
-        AProject);
+      AInfo := TCnEmptyUsesInfo.Create(ADcuName, ASourceFileName, AProject);
       Result := AInfo.Process;
       if not Result then
       begin
@@ -389,7 +390,93 @@ var
     end;
   end;
 
-  function ProcessAProject(AProject: IOTAProject; OpenedOnly: Boolean): Boolean;
+  function ProcessAProject(AProject: IOTAProject; OpenedOnly, AProcessDependencies: Boolean): Boolean;
+  var
+    ProcessedUnitNames: TStringList;
+
+    function RecursiveProcessUnit(const AUnitName: string): Boolean;
+    var
+      UnitUsesInfo: TCnUnitUsesInfo;
+      DcuName: string;
+      SourceFileName: string;
+      i: Integer;
+    begin
+      Result := True;
+      if ProcessedUnitNames.IndexOf(LowerCase(AUnitName)) <> -1 then
+        Exit;
+
+      DcuName := GetDcuName(DcuPath, AUnitName + '.pas');
+      if not FileExists(DcuName) then
+        Exit;
+
+      SourceFileName := GetFileNameFromModuleName(AUnitName);
+
+      if (SourceFileName = '') or not FileExists(SourceFileName) or
+        ModuleExists(SourceFileName) then
+        Exit;
+
+      if ProcessAUnit(DcuName, SourceFileName, Project, UsesInfo) then
+      begin
+        if (UsesInfo.IntfCount > 0) or (UsesInfo.ImplCount > 0) then
+          ProjectInfo.Units.Add(UsesInfo)
+        else
+          FreeAndNil(UsesInfo);
+      end
+      else if not QueryDlg(Format(SCnUsesCleanerProcessError,
+        [_CnExtractFileName(SourceFileName)])) then
+      begin
+        Result := False;
+        Exit;
+      end;
+
+      ProcessedUnitNames.Add(LowerCase(AUnitName));
+
+      UnitUsesInfo := TCnUnitUsesInfo.Create(DcuName);
+      try
+        for i := 0 to UnitUsesInfo.IntfUsesCount - 1 do
+        begin
+          Result := RecursiveProcessUnit(UnitUsesInfo.IntfUses[i]);
+          if not Result then
+            Exit;
+        end;
+
+        for i := 0 to UnitUsesInfo.ImplUsesCount - 1 do
+        begin
+          Result := RecursiveProcessUnit(UnitUsesInfo.ImplUses[i]);
+          if not Result then
+            Exit;
+        end;
+      finally
+        FreeAndNil(UnitUsesInfo);
+      end;
+      Result := True;
+    end;
+
+    function ProcessModuleDependencies(const ADcuName: string): Boolean;
+    var
+      UnitUsesInfo: TCnUnitUsesInfo;
+      i: Integer;
+    begin
+      UnitUsesInfo := TCnUnitUsesInfo.Create(ADcuName);
+      try
+        for i := 0 to UnitUsesInfo.IntfUsesCount - 1 do
+        begin
+          Result := RecursiveProcessUnit(UnitUsesInfo.IntfUses[i]);
+          if not Result then
+            Exit;
+        end;
+
+        for i := 0 to UnitUsesInfo.ImplUsesCount - 1 do
+        begin
+          Result := RecursiveProcessUnit(UnitUsesInfo.ImplUses[i]);
+          if not Result then
+            Exit;
+        end;
+      finally
+        FreeAndNil(UnitUsesInfo);
+      end;
+      Result := True;
+    end;
   var
     i: Integer;
     ModuleInfo: IOTAModuleInfo;
@@ -413,11 +500,11 @@ var
         if not Assigned(Module) or not IsDprOrPas(Module.FileName) then
           Continue;
 
-        DcuName := GetDcuName(DcuPath, Module);
+        DcuName := GetDcuName(DcuPath, Module.FileName);
         if not FileExists(DcuName) then
           Continue;
-          
-        if ProcessAUnit(DcuName, Module, Project, UsesInfo) then
+
+        if ProcessAUnit(DcuName, Module.FileName, Project, UsesInfo) then
         begin
           if (UsesInfo.IntfCount > 0) or (UsesInfo.ImplCount > 0) then
             ProjectInfo.Units.Add(UsesInfo)
@@ -430,6 +517,29 @@ var
           Exit;
         end;
       end;
+
+      if AProcessDependencies then
+      begin
+        ProcessedUnitNames := TStringList.Create;
+        try
+          for i := 0 to AProject.GetModuleCount - 1 do
+          begin
+            ModuleInfo := AProject.GetModule(i);
+            if not Assigned(ModuleInfo) or not IsPas(ModuleInfo.FileName) then
+              Continue;
+
+            DcuName := GetDcuName(DcuPath, Module.FileName);
+            if not FileExists(DcuName) then
+              Continue;
+
+            if not ProcessModuleDependencies(DcuName) then
+              Exit;
+          end;
+        finally
+          FreeAndNil(ProcessedUnitNames);
+        end;
+      end;
+
       if ProjectInfo.Units.Count > 0 then
         List.Add(ProjectInfo);
       Result := True;
@@ -449,8 +559,8 @@ begin
           Assert(Assigned(Module) and (Module.OwnerCount > 0));
           Project := GetProjectFromModule(Module);
           DcuPath := GetProjectDcuPath(Project);
-          DcuName := GetDcuName(DcuPath, Module);
-          Result := ProcessAUnit(DcuName, Module, Project, UsesInfo);
+          DcuName := GetDcuName(DcuPath, Module.FileName);
+          Result := ProcessAUnit(DcuName, Module.FileName, Project, UsesInfo);
           if Result then
           begin
             if (UsesInfo.IntfCount > 0) or (UsesInfo.ImplCount > 0) then
@@ -472,7 +582,7 @@ begin
         begin
           Project := CnOtaGetCurrentProject;
           Assert(Assigned(Project));
-          Result := ProcessAProject(Project, False);
+          Result := ProcessAProject(Project, False, FProcessDependencies);
         end;
     else
       begin
@@ -481,7 +591,7 @@ begin
         for i := 0 to ProjectGroup.ProjectCount - 1 do
         begin
           Project := ProjectGroup.GetProject(i);
-          Result := ProcessAProject(Project, AKind = ukOpenedUnits);
+          Result := ProcessAProject(Project, AKind = ukOpenedUnits, FProcessDependencies);
           if not Result then
             Break;
         end;
@@ -725,7 +835,8 @@ begin
       for j := 0 to TCnProjectUsesInfo(List[i]).Units.Count - 1 do
         with TCnEmptyUsesInfo(TCnProjectUsesInfo(List[i]).Units[j]) do
         begin
-          GetCompRefUnits(Buffer.Module, Project, CompRef);
+          CompRef.Clear;
+          GetCompRefUnits(CnOtaGetModule(SourceFileName), Project, CompRef);
           if CompRef.Count > 0 then
           begin
             for k := 0 to IntfCount - 1 do
@@ -932,7 +1043,7 @@ begin
   Result := False;
   try
     if Buffer.IsReadOnly then Exit;
-    
+
     SrcStream := nil;
     Lex := nil;
     try
@@ -998,11 +1109,31 @@ begin
 end;
 
 procedure TCnUsesCleaner.CleanUnitUses(List: TObjectList);
+  function GetEditBuffer(const aUsesInfo: TCnEmptyUsesInfo; out ABuffer: IOTAEditBuffer): Boolean;
+  var
+    SrcEditor: IOTAEditor;
+  begin
+    ABuffer := nil;
+    SrcEditor := CnOtaGetEditor(aUsesInfo.SourceFileName);
+    if not Assigned(SrcEditor) then
+    begin
+      if CnOtaOpenFile(aUsesInfo.SourceFileName) then
+        SrcEditor := CnOtaGetEditor(aUsesInfo.SourceFileName);
+    end;
+
+    if Assigned(SrcEditor) then
+      ABuffer := SrcEditor as IOTAEditBuffer;
+
+    Result := Assigned(ABuffer);
+  end;
+
 var
   Intf, Impl, Logs: TStringList;
   i, j, k: Integer;
   UCnt, Cnt: Integer;
   FileName: string;
+  Buffer: IOTAEditBuffer;
+  UsesInfo: TCnEmptyUsesInfo;
 begin
   Intf := nil;
   Impl := nil;
@@ -1015,34 +1146,35 @@ begin
     Logs := TStringList.Create;
     for i := 0 to List.Count - 1 do
       for j := 0 to TCnProjectUsesInfo(List[i]).Units.Count - 1 do
-        with TCnEmptyUsesInfo(TCnProjectUsesInfo(List[i]).Units[j]) do
+      begin
+        UsesInfo := TCnEmptyUsesInfo(TCnProjectUsesInfo(List[i]).Units[j]);
+        Intf.Clear;
+        Impl.Clear;
+        for k := 0 to UsesInfo.IntfCount - 1 do
+          if UsesInfo.IntfItems[k].Checked then
+            Intf.Add(UsesInfo.IntfItems[k].Name);
+        for k := 0 to UsesInfo.ImplCount - 1 do
+          if UsesInfo.ImplItems[k].Checked then
+            Impl.Add(UsesInfo.ImplItems[k].Name);
+
+        if (Intf.Count > 0) or (Impl.Count > 0) then
         begin
-          Intf.Clear;        
-          Impl.Clear;
-          for k := 0 to IntfCount - 1 do
-            if IntfItems[k].Checked then
-              Intf.Add(IntfItems[k].Name);
-          for k := 0 to ImplCount - 1 do
-            if ImplItems[k].Checked then
-              Impl.Add(ImplItems[k].Name);
-              
-          if (Intf.Count > 0) or (Impl.Count > 0) then
+          if GetEditBuffer(UsesInfo, Buffer) and
+            DoCleanUnit(Buffer, Intf, Impl) then
           begin
-            if DoCleanUnit(Buffer, Intf, Impl) then
-            begin
-              Inc(UCnt);
-              Inc(Cnt, Intf.Count + Impl.Count);
-              Logs.Add(Buffer.FileName);
-              if Intf.Count > 0 then
-                Logs.Add('  Interface Uses: ' + Intf.CommaText);
-              if Impl.Count > 0 then
-                Logs.Add('  Implementation Uses: ' + Impl.CommaText);
-            end
-            else if not QueryDlg(Format(SCnUsesCleanerProcessError,
-              [_CnExtractFileName(Buffer.FileName)])) then
-              Exit;
-          end;
+            Inc(UCnt);
+            Inc(Cnt, Intf.Count + Impl.Count);
+            Logs.Add(UsesInfo.SourceFileName);
+            if Intf.Count > 0 then
+              Logs.Add('  Interface Uses: ' + Intf.CommaText);
+            if Impl.Count > 0 then
+              Logs.Add('  Implementation Uses: ' + Impl.CommaText);
+          end
+          else if not QueryDlg(Format(SCnUsesCleanerProcessError,
+            [_CnExtractFileName(UsesInfo.SourceFileName)])) then
+            Exit;
         end;
+      end;
   finally
     Intf.Free;
     Impl.Free;
@@ -1066,6 +1198,7 @@ begin
   FIgnoreReg := Ini.ReadBool('', csIgnoreReg, FIgnoreReg);
   FIgnoreNoSrc := Ini.ReadBool('', csIgnoreNoSrc, FIgnoreNoSrc);
   FIgnoreCompRef := Ini.ReadBool('', csIgnoreCompRef, FIgnoreCompRef);
+  FProcessDependencies := Ini.ReadBool('', csProcessDependencies, FProcessDependencies);
   WizOptions.LoadUserFile(FIgnoreList, csIgnoreList);
   WizOptions.LoadUserFile(FCleanList, csCleanList);
 end;
@@ -1077,6 +1210,7 @@ begin
   Ini.WriteBool('', csIgnoreReg, FIgnoreReg);
   Ini.WriteBool('', csIgnoreNoSrc, FIgnoreNoSrc);
   Ini.WriteBool('', csIgnoreCompRef, FIgnoreCompRef);
+  Ini.WriteBool('', csProcessDependencies, FProcessDependencies);
   WizOptions.SaveUserFile(FIgnoreList, csIgnoreList);
   WizOptions.SaveUserFile(FCleanList, csCleanList);
 end;

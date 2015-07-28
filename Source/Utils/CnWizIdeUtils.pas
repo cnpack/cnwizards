@@ -1367,7 +1367,7 @@ function GetFileNameFromModuleName(AName: string; AProject: IOTAProject = nil): 
 var
   Paths: TStringList;
   i: Integer;
-  Ext: string;
+  Ext, ProjectPath: string;
 begin
   if AProject = nil then
     AProject := CnOtaGetCurrentProject;
@@ -1386,18 +1386,22 @@ begin
         Result := AProject.GetModule(i).FileName;
         Exit;
       end;
+
+    ProjectPath := MakePath(_CnExtractFilePath(AProject.FileName));
+    if FileExists(ProjectPath + AName) then
+    begin
+      Result := ProjectPath + AName;
+      Exit;
+    end;
   end;
-  
+
   Paths := TStringList.Create;
   try
-    // 在工程搜索路径里查找
-    AddProjectPath(AProject, Paths, 'SrcDir');
-    for i := 0 to Paths.Count - 1 do
-      if FileExists(MakePath(Paths[i]) + AName) then
-      begin
-        Result := MakePath(Paths[i]) + AName;
-        Exit;
-      end;
+    if Assigned(AProject) then
+    begin
+      // 在工程搜索路径里查找
+      AddProjectPath(AProject, Paths, 'SrcDir');
+    end;
 
     // 在系统搜索路径里查找
     GetLibraryPath(Paths, False);

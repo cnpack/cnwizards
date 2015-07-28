@@ -184,7 +184,7 @@ begin
         with TCnEmptyUsesInfo(ProjectInfo.Units[j]) do
         begin
           UnitNode := chktvResult.Items.AddChildObject(ProjNode,
-            _CnExtractFileName(Buffer.FileName), ProjectInfo.Units[j]);
+            _CnExtractFileName(SourceFileName), ProjectInfo.Units[j]);
           UnitNode.ImageIndex := IdxUnit;
           UnitNode.SelectedIndex := IdxUnit;
 
@@ -319,7 +319,7 @@ begin
     else if Obj is TCnUsesItem then
       Clipboard.AsText := TCnUsesItem(Obj).Name
     else if Obj is TCnEmptyUsesInfo then
-      Clipboard.AsText := _CnExtractFileName(TCnEmptyUsesInfo(Obj).Buffer.FileName)
+      Clipboard.AsText := _CnExtractFileName(TCnEmptyUsesInfo(Obj).SourceFileName)
     else
       Clipboard.AsText := FSelection.Text;
   end;
