@@ -1956,9 +1956,9 @@ begin
           if Scaner.Token = tokKeywordElse then
           begin
             Writeln;
-            Match(tokKeywordElse, PreSpaceCount, 1);
+            Match(tokKeywordElse, Tab(PreSpaceCount), 1);
             Writeln;
-            FormatStmtList(Tab(PreSpaceCount, False));
+            FormatStmtList(Tab(Tab(PreSpaceCount, False), False));
           end;
 
           if Scaner.Token = tokSemicolon then
