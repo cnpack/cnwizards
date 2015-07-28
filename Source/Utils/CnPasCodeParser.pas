@@ -724,7 +724,7 @@ begin
               else if (CurrBlock.TokenID = tkTry) and (CurrMidBlock <> nil) and
                 (CurrMidBlock.TokenID = tkExcept) and
                 (PrevTokenID in [tkSemiColon, tkExcept]) then
-                Token.FItemLayer := CurrBlock.FItemLayer
+                Token.FItemLayer := CurrBlock.FItemLayer + 1
               else if not ((CurrBlock.TokenID = tkCase)
                 and (PrevTokenID = tkSemiColon)) then
                 Token.FItemLayer := Token.FItemLayer + 1;
