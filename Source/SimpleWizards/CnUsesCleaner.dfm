@@ -1,10 +1,11 @@
 inherited CnUsesCleanerForm: TCnUsesCleanerForm
-  Left = 335
-  Top = 163
+  Left = 562
+  Top = 145
   BorderStyle = bsDialog
   Caption = 'Uses Units Cleaner'
   ClientHeight = 384
   ClientWidth = 392
+  OldCreateOrder = True
   PixelsPerInch = 96
   TextHeight = 13
   object grpKind: TGroupBox
@@ -23,6 +24,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
       Checked = True
       TabOrder = 0
       TabStop = True
+      OnClick = rbCurrUnitClick
     end
     object rbCurrProject: TRadioButton
       Left = 8
@@ -32,6 +34,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
       Caption = 'All Units in Current Project(&3).'
       TabOrder = 2
       TabStop = True
+      OnClick = rbCurrUnitClick
     end
     object rbProjectGroup: TRadioButton
       Left = 8
@@ -41,6 +44,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
       Caption = 'All Units in Current ProjectGroup(&4).'
       TabOrder = 3
       TabStop = True
+      OnClick = rbCurrUnitClick
     end
     object rbOpenedUnits: TRadioButton
       Left = 8
@@ -50,13 +54,15 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
       Caption = 'Opened Units in Current ProjectGroup(&2).'
       TabOrder = 1
       TabStop = True
+      OnClick = rbCurrUnitClick
     end
     object chkProcessDependencies: TCheckBox
-      Left = 8
-      Top = 96
-      Width = 361
+      Left = 24
+      Top = 94
+      Width = 340
       Height = 17
-      Caption = 'Include indirecty used units'
+      Caption = 'Include Indirecty Used Units'
+      Enabled = False
       TabOrder = 4
     end
   end

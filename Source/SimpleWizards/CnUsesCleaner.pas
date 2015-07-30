@@ -72,6 +72,7 @@ type
     chkIgnoreCompRef: TCheckBox;
     chkProcessDependencies: TCheckBox;
     procedure btnHelpClick(Sender: TObject);
+    procedure rbCurrUnitClick(Sender: TObject);
   private
     { Private declarations }
   protected
@@ -1276,6 +1277,11 @@ end;
 procedure TCnUsesCleanerForm.btnHelpClick(Sender: TObject);
 begin
   ShowFormHelp;
+end;
+
+procedure TCnUsesCleanerForm.rbCurrUnitClick(Sender: TObject);
+begin
+  chkProcessDependencies.Enabled := not rbCurrUnit.Checked;
 end;
 
 initialization
