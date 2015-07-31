@@ -61,7 +61,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
       Top = 94
       Width = 340
       Height = 17
-      Caption = 'Include Indirecty Used Units'
+      Caption = 'Include Indirecty Used Units.'
       Enabled = False
       TabOrder = 4
     end

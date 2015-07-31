@@ -2291,6 +2291,7 @@ TCnUsesCleanerForm.chkIgnoreInit.Caption=忽略包含初始化節的引用單元
 TCnUsesCleanerForm.chkIgnoreNoSrc.Caption=忽略無源碼的引用單元。
 TCnUsesCleanerForm.chkIgnoreReg.Caption=忽略包含 Register 過程的引用單元。
 TCnUsesCleanerForm.chkIgnoreCompRef.Caption=忽略表單元件間接引用的單元。
+TCnUsesCleanerForm.chkProcessDependencies.Caption=處理間接引用到的單元。
 TCnUsesCleanerForm.grpKind.Caption=請選擇處理內容(&N)
 TCnUsesCleanerForm.grpSettings.Caption=清理設置(&S)
 TCnUsesCleanerForm.lbl1.Caption=強行忽略以下引用單元：

@@ -2291,6 +2291,7 @@ TCnUsesCleanerForm.chkIgnoreInit.Caption=Skip Used Units including Initializatio
 TCnUsesCleanerForm.chkIgnoreNoSrc.Caption=Skip Used Units without Source.
 TCnUsesCleanerForm.chkIgnoreReg.Caption=Skip Used Units including Register Procedure.
 TCnUsesCleanerForm.chkIgnoreCompRef.Caption=Skip Used Units Referred by Component Indirectly.
+TCnUsesCleanerForm.chkProcessDependencies.Caption=Include Indirecty Used Units.
 TCnUsesCleanerForm.grpKind.Caption=&Select Content to Process
 TCnUsesCleanerForm.grpSettings.Caption=Clean &Settings
 TCnUsesCleanerForm.lbl1.Caption=Skip Units Directly:
