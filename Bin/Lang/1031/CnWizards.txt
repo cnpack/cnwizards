@@ -2291,6 +2291,7 @@ TCnUsesCleanerForm.chkIgnoreInit.Caption=überspringe benutzte Units inklusive I
 TCnUsesCleanerForm.chkIgnoreNoSrc.Caption=überspringe benutzte Units ohne Quelltext.
 TCnUsesCleanerForm.chkIgnoreReg.Caption=überspringe benutzte Units inklusive Register Prozedur.
 TCnUsesCleanerForm.chkIgnoreCompRef.Caption=überspringe benutzte Units indirekt durch Komponente referenziert.
+TCnUsesCleanerForm.chkProcessDependencies.Caption=einschließlich indirekt benutzte Units.
 TCnUsesCleanerForm.grpKind.Caption=&wähle Inhalt zum Verarbeiten
 TCnUsesCleanerForm.grpSettings.Caption=Säuberung &Einstellungen
 TCnUsesCleanerForm.lbl1.Caption=überspringe Units:
