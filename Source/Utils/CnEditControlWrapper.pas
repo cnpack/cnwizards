@@ -253,7 +253,7 @@ type
     procedure ClearAndFreeList(var List: TList);
     function IndexOf(List: TList; Notifier: TMethod): Integer;
     procedure InitEditControlHook;
-    procedure CheckAndInitEditControlMouseHook;
+    procedure CheckAndSetEditControlMouseHookFlag;
     procedure RemoveNotifier(List: TList; Notifier: TMethod);
     function UpdateCharSize: Boolean;
     procedure EditControlProc(EditWindow: TCustomForm; EditControl:
@@ -598,47 +598,6 @@ const
 {$ENDIF}
 {$ENDIF}
 
-  // 编辑器控件鼠标事件处理函数名
-{$IFDEF DELPHIXE8_UP} // XE8 又改了
-  SEditControlMouseUp = '@Editorcontrol@TCustomEditControl@MouseUp$qqr27System@Uitypes@TMouseButton60System@%Set$32System@Classes@System_Classes__1uc$i0$uc$i10$%ii';
-  SEditControlMouseDown = '@Editorcontrol@TCustomEditControl@MouseDown$qqr27System@Uitypes@TMouseButton60System@%Set$32System@Classes@System_Classes__1uc$i0$uc$i10$%ii';
-  SEditControlMouseMove = '@Editorcontrol@TCustomEditControl@MouseMove$qqr60System@%Set$32System@Classes@System_Classes__1uc$i0$uc$i10$%ii';
-{$ELSE} {$IFDEF DELPHIXE7} // XE7 改成和 XE2 一样
-  SEditControlMouseUp = '@Editorcontrol@TCustomEditControl@MouseUp$qqr27System@Uitypes@TMouseButton60System@%Set$32System@Classes@System_Classes__1t1$i0$t1$i10$%ii';
-  SEditControlMouseDown = '@Editorcontrol@TCustomEditControl@MouseDown$qqr27System@Uitypes@TMouseButton60System@%Set$32System@Classes@System_Classes__1t1$i0$t1$i10$%ii';
-  SEditControlMouseMove = '@Editorcontrol@TCustomEditControl@MouseMove$qqr60System@%Set$32System@Classes@System_Classes__1t1$i0$t1$i10$%ii';
-{$ELSE} {$IFDEF DELPHIXE4_UP} // XE4 又改了：XE4、XE5、XE6
-  SEditControlMouseUp = '@Editorcontrol@TCustomEditControl@MouseUp$qqr27System@Uitypes@TMouseButton61System@%Set$t32System@Classes@System_Classes__1$iuc$0$iuc$10%ii';
-  SEditControlMouseDown = '@Editorcontrol@TCustomEditControl@MouseDown$qqr27System@Uitypes@TMouseButton61System@%Set$t32System@Classes@System_Classes__1$iuc$0$iuc$10%ii';
-  SEditControlMouseMove = '@Editorcontrol@TCustomEditControl@MouseMove$qqr61System@%Set$t32System@Classes@System_Classes__1$iuc$0$iuc$10%ii';
-{$ELSE} {$IFDEF DELPHIXE3} // XE3 单独改了
-  SEditControlMouseUp = '@Editorcontrol@TCustomEditControl@MouseUp$qqr27System@Uitypes@TMouseButton60System@%Set$t32System@Classes@System_Classes__1$iuc$0$iuc$9%ii';
-  SEditControlMouseDown = '@Editorcontrol@TCustomEditControl@MouseDown$qqr27System@Uitypes@TMouseButton60System@%Set$t32System@Classes@System_Classes__1$iuc$0$iuc$9%ii';
-  SEditControlMouseMove = '@Editorcontrol@TCustomEditControl@MouseMove$qqr60System@%Set$t32System@Classes@System_Classes__1$iuc$0$iuc$9%ii';
-{$ELSE} {$IFDEF DELPHIXE2} // XE2 改了：和 XE7 一样
-  SEditControlMouseUp = '@Editorcontrol@TCustomEditControl@MouseUp$qqr27System@Uitypes@TMouseButton60System@%Set$32System@Classes@System_Classes__1t1$i0$t1$i10$%ii';
-  SEditControlMouseDown = '@Editorcontrol@TCustomEditControl@MouseDown$qqr27System@Uitypes@TMouseButton60System@%Set$32System@Classes@System_Classes__1t1$i0$t1$i10$%ii';
-  SEditControlMouseMove = '@Editorcontrol@TCustomEditControl@MouseMove$qqr60System@%Set$32System@Classes@System_Classes__1t1$i0$t1$i10$%ii';
-{$ELSE} {$IFDEF DELPHI2010_UP} // 2010 后改了：2010、XE
-  SEditControlMouseUp = '@Editorcontrol@TCustomEditControl@MouseUp$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$8%ii';
-  SEditControlMouseDown = '@Editorcontrol@TCustomEditControl@MouseDown$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$8%ii';
-  SEditControlMouseMove = '@Editorcontrol@TCustomEditControl@MouseMove$qqr46System@%Set$t18Classes@Classes__1$iuc$0$iuc$8%ii';
-{$ELSE} {$IFDEF COMPILER8_UP}  // BDS 后改了：2005、2006、2007、2009
-  SEditControlMouseUp = '@Editorcontrol@TCustomEditControl@MouseUp$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
-  SEditControlMouseDown = '@Editorcontrol@TCustomEditControl@MouseDown$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
-  SEditControlMouseMove = '@Editorcontrol@TCustomEditControl@MouseMove$qqr46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
-{$ELSE} // Delphi 5、6、7 是这仨
-  SEditControlMouseUp = '@Editors@TCustomEditControl@MouseUp$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
-  SEditControlMouseDown = '@Editors@TCustomEditControl@MouseDown$qqr21Controls@TMouseButton46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
-  SEditControlMouseMove = '@Editors@TCustomEditControl@MouseMove$qqr46System@%Set$t18Classes@Classes__1$iuc$0$iuc$6%ii';
-{$ENDIF}
-{$ENDIF}
-{$ENDIF}
-{$ENDIF}
-{$ENDIF}
-{$ENDIF}
-{$ENDIF}
-
 type
   TControlHack = class(TControl);
   TPaintLineProc = function (Self: TObject; Ek: Pointer;
@@ -650,10 +609,6 @@ type
   TGetOTAEditViewProc = function(Self: TObject): IOTAEditView; register;
   TSetEditViewProc = function(Self: TObject; EditView: TObject): Integer;
   TLineIsElidedProc = function(Self: TObject; LineNum: Integer): Boolean;
-
-  TMouseUpDownProc = procedure(Self: TObject; Button: TMouseButton;
-    Shift: TShiftState; X, Y: Integer);
-  TMouseMoveProc = procedure(Self: TObject; Shift: TShiftState; X, Y: Integer);
 
 {$IFDEF BDS}
   TPointFromEdPosProc = function(Self: TObject; const EdPos: TOTAEditPos;
@@ -682,10 +637,6 @@ var
   PointFromEdPos: TPointFromEdPosProc = nil;
   IndexPosToCurPosProc: TIndexPosToCurPosProc = nil;
 {$ENDIF}
-
-  EditControlMouseUp: TMouseUpDownProc = nil;
-  EditControlMouseDown: TMouseUpDownProc = nil;
-  EditControlMouseMove: TMouseMoveProc = nil;
 
   PaintLineLock: TRTLCriticalSection;
 
@@ -790,140 +741,6 @@ begin
   end;
 end;
 
-procedure MyEditControlMouseDown(Self: TObject; Button: TMouseButton;
-  Shift: TShiftState; X, Y: Integer);
-var
-  Idx: Integer;
-  Editor: TEditorObject;
-begin
-  if FEditControlWrapper.FMouseDownHook.UseDDteours then
-  begin
-    try
-      TMouseUpDownProc(FEditControlWrapper.FMouseDownHook.Trampoline)(Self, Button, Shift, X, Y);
-    except
-      on E: Exception do
-        DoHandleException(E.Message);
-    end;
-  end
-  else
-  begin
-    FEditControlWrapper.FMouseDownHook.UnhookMethod;
-    try
-      try
-        EditControlMouseDown(Self, Button, Shift, X, Y);
-      except
-        on E: Exception do
-          DoHandleException(E.Message);
-      end;
-    finally
-      FEditControlWrapper.FMouseDownHook.HookMethod;
-    end;
-  end;
-
-  // Dispatch Notification after Original calling.
-  Editor := nil;
-  if IsIdeEditorForm(TCustomForm(TControl(Self).Owner)) then
-  begin
-    Idx := FEditControlWrapper.IndexOfEditor(TControl(Self));
-    if Idx >= 0 then
-    begin
-      Editor := FEditControlWrapper.GetEditors(Idx);
-    end;
-  end;
-
-  if Editor <> nil then
-    FEditControlWrapper.DoMouseDown(Editor, Button, Shift, X, Y, False);
-end;
-
-procedure MyEditControlMouseUp(Self: TObject; Button: TMouseButton;
-  Shift: TShiftState; X, Y: Integer);
-var
-  Idx: Integer;
-  Editor: TEditorObject;
-begin
-  if FEditControlWrapper.FMouseUpHook.UseDDteours then
-  begin
-    try
-      TMouseUpDownProc(FEditControlWrapper.FMouseUpHook.Trampoline)(Self, Button, Shift, X, Y);
-    except
-      on E: Exception do
-        DoHandleException(E.Message);
-    end;
-  end
-  else
-  begin
-    FEditControlWrapper.FMouseUpHook.UnhookMethod;
-    try
-      try
-        EditControlMouseUp(Self, Button, Shift, X, Y);
-      except
-        on E: Exception do
-          DoHandleException(E.Message);
-      end;
-    finally
-      FEditControlWrapper.FMouseUpHook.HookMethod;
-    end;
-  end;
-
-  // Dispatch Notification after Original calling.
-  Editor := nil;
-  if IsIdeEditorForm(TCustomForm(TControl(Self).Owner)) then
-  begin
-    Idx := FEditControlWrapper.IndexOfEditor(TControl(Self));
-    if Idx >= 0 then
-    begin
-      Editor := FEditControlWrapper.GetEditors(Idx);
-    end;
-  end;
-
-  if Editor <> nil then
-    FEditControlWrapper.DoMouseUp(Editor, Button, Shift, X, Y, False);
-end;
-
-procedure MyEditControlMouseMove(Self: TObject; Shift: TShiftState; X, Y: Integer);
-var
-  Idx: Integer;
-  Editor: TEditorObject;
-begin
-  if FEditControlWrapper.FMouseMoveHook.UseDDteours then
-  begin
-    try
-      TMouseMoveProc(FEditControlWrapper.FMouseMoveHook.Trampoline)(Self, Shift, X, Y);
-    except
-      on E: Exception do
-        DoHandleException(E.Message);
-    end;
-  end
-  else
-  begin
-    FEditControlWrapper.FMouseMoveHook.UnhookMethod;
-    try
-      try
-        EditControlMouseMove(Self, Shift, X, Y);
-      except
-        on E: Exception do
-          DoHandleException(E.Message);
-      end;
-    finally
-      FEditControlWrapper.FMouseMoveHook.HookMethod;
-    end;
-  end;
-
-  // Dispatch Notification after Original calling.
-  Editor := nil;
-  if IsIdeEditorForm(TCustomForm(TControl(Self).Owner)) then
-  begin
-    Idx := FEditControlWrapper.IndexOfEditor(TControl(Self));
-    if Idx >= 0 then
-    begin
-      Editor := FEditControlWrapper.GetEditors(Idx);
-    end;
-  end;
-
-  if Editor <> nil then
-    FEditControlWrapper.DoMouseMove(Editor, Shift, X, Y, False);
-end;
-
 constructor TCnEditControlWrapper.Create(AOwner: TComponent);
 begin
   inherited;
@@ -949,9 +766,10 @@ begin
 
   CnWizNotifierServices.AddSourceEditorNotifier(OnSourceEditorNotify);
   CnWizNotifierServices.AddActiveFormNotifier(OnActiveFormChange);
-  CnWizNotifierServices.AddGetMsgNotifier(OnGetMsgProc, [WM_NCMOUSEMOVE,
-    WM_NCLBUTTONDOWN, WM_NCLBUTTONUP, WM_NCRBUTTONDOWN, WM_NCRBUTTONUP,
-    WM_NCMBUTTONDOWN, WM_NCMBUTTONUP, WM_MOUSELEAVE, WM_NCMOUSELEAVE]);
+  CnWizNotifierServices.AddGetMsgNotifier(OnGetMsgProc, [WM_MOUSEMOVE,
+    WM_LBUTTONDOWN, WM_LBUTTONUP, WM_RBUTTONDOWN, WM_RBUTTONUP, WM_MBUTTONDOWN,
+    WM_MBUTTONUP, WM_NCMOUSEMOVE, WM_NCLBUTTONDOWN, WM_NCLBUTTONUP, WM_NCRBUTTONDOWN,
+    WM_NCRBUTTONUP, WM_NCMBUTTONDOWN, WM_NCMBUTTONUP, WM_MOUSELEAVE, WM_NCMOUSELEAVE]);
   CnWizNotifierServices.AddCallWndProcRetNotifier(OnCallWndProcRet,
     [WM_VSCROLL, WM_HSCROLL]);
   CnWizNotifierServices.AddApplicationMessageNotifier(ApplicationMessage);
@@ -2260,6 +2078,34 @@ begin
       P.y := Msg.LParamHi;
       P := Control.ScreenToClient(P);
       case Msg.Msg of
+      WM_MOUSEMOVE:
+        begin
+          DoMouseMove(Editor, KeysToShiftState(Msg.WParam), P.x, P.y, False);
+        end;
+      WM_LBUTTONDOWN:
+        begin
+          DoMouseDown(Editor, mbLeft, KeysToShiftState(Msg.WParam), P.x, P.y, False);
+        end;
+      WM_LBUTTONUP:
+        begin
+          DoMouseUp(Editor, mbLeft, KeysToShiftState(Msg.WParam), P.x, P.y, False);
+        end;
+      WM_RBUTTONDOWN:
+        begin
+          DoMouseDown(Editor, mbRight, KeysToShiftState(Msg.WParam), P.x, P.y, False);
+        end;
+      WM_RBUTTONUP:
+        begin
+          DoMouseUp(Editor, mbRight, KeysToShiftState(Msg.WParam), P.x, P.y, False);
+        end;
+      WM_MBUTTONDOWN:
+        begin
+          DoMouseDown(Editor, mbMiddle, KeysToShiftState(Msg.WParam), P.x, P.y, False);
+        end;
+      WM_MBUTTONUP:
+        begin
+          DoMouseUp(Editor, mbMiddle, KeysToShiftState(Msg.WParam), P.x, P.y, False);
+        end;
       WM_NCMOUSEMOVE:
         begin
           DoMouseMove(Editor, KeysToShiftState(Msg.WParam), P.x, P.y, True);
@@ -2369,68 +2215,32 @@ begin
   end;
 end;
 
-procedure TCnEditControlWrapper.CheckAndInitEditControlMouseHook;
-var
-  UseDDetours: Boolean;
+procedure TCnEditControlWrapper.CheckAndSetEditControlMouseHookFlag;
 begin
   if FMouseNotifyAvailable then
     Exit;
 
-  try
-    EditControlMouseUp := GetBplMethodAddress(GetProcAddress(CorIdeModule, SEditControlMouseUp));
-    Assert(Assigned(EditControlMouseUp), 'Failed to load EditControlMouseUp from CorIdeModule');
-
-    EditControlMouseDown := GetBplMethodAddress(GetProcAddress(CorIdeModule, SEditControlMouseDown));
-    Assert(Assigned(EditControlMouseDown), 'Failed to load EditControlMouseDown from CorIdeModule');
-
-    EditControlMouseMove := GetBplMethodAddress(GetProcAddress(CorIdeModule, SEditControlMouseMove));
-    Assert(Assigned(EditControlMouseMove), 'Failed to load EditControlMouseMove from CorIdeModule');
-
-{$IFDEF USE_DDETOURS_HOOK}
-    UseDDetours := True;
-{$ELSE}
-    UseDDetours := False;
-{$ENDIF}
-
-    FMouseUpHook := TCnMethodHook.Create(@EditControlMouseUp, @MyEditControlMouseUp, UseDDetours);
-  {$IFDEF DEBUG}
-    CnDebugger.LogMsg('EditControl.MouseUp Hooked');
-  {$ENDIF}
-
-    FMouseDownHook := TCnMethodHook.Create(@EditControlMouseDown, @MyEditControlMouseDown, UseDDetours);
-  {$IFDEF DEBUG}
-    CnDebugger.LogMsg('EditControl.MouseDown Hooked');
-  {$ENDIF}
-
-    FMouseMoveHook := TCnMethodHook.Create(@EditControlMouseMove, @MyEditControlMouseMove, UseDDetours);
-  {$IFDEF DEBUG}
-    CnDebugger.LogMsg('EditControl.MouseMove Hooked');
-  {$ENDIF}
-
-    FMouseNotifyAvailable := True;
-  except
-    FMouseNotifyAvailable := False;
-  end;
+  FMouseNotifyAvailable := True;
 end;
 
 procedure TCnEditControlWrapper.AddEditorMouseDownNotifier(
   Notifier: TEditorMouseDownNotifier);
 begin
-  CheckAndInitEditControlMouseHook;
+  CheckAndSetEditControlMouseHookFlag;
   AddNotifier(FMouseDownNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.AddEditorMouseMoveNotifier(
   Notifier: TEditorMouseMoveNotifier);
 begin
-  CheckAndInitEditControlMouseHook;
+  CheckAndSetEditControlMouseHookFlag;
   AddNotifier(FMouseMoveNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.AddEditorMouseUpNotifier(
   Notifier: TEditorMouseUpNotifier);
 begin
-  CheckAndInitEditControlMouseHook;
+  CheckAndSetEditControlMouseHookFlag;
   AddNotifier(FMouseUpNotifiers, TMethod(Notifier));
 end;
 
@@ -2510,7 +2320,7 @@ end;
 procedure TCnEditControlWrapper.AddEditorMouseLeaveNotifier(
   Notifier: TEditorMouseLeaveNotifier);
 begin
-  CheckAndInitEditControlMouseHook;
+  CheckAndSetEditControlMouseHookFlag;
   AddNotifier(FMouseLeaveNotifiers, TMethod(Notifier));
 end;
 
