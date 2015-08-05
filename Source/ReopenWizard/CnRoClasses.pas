@@ -746,9 +746,10 @@ var
       '.DPR', '.BPR', '.BPF',
       '.PAS', '.H', '.HPP', '.C', '.CPP',
       '.DPK', '.BPK',
-      '.FAV', '.BDSPROJ', 'DPROJ', 'CBPROJ']);
+      '.FAV', '.BDSPROJ', '.DPROJ', '.CBPROJ',
+      '.GROUPPROJ']);
     case Index of
-      0:
+      0, 15:
         Result := GetFiles(SProjectGroup);
       1, 2, 3, 12, 13, 14:
         Result := GetFiles(SProject);
