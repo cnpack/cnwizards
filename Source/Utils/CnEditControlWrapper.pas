@@ -2076,9 +2076,8 @@ begin
     begin
       P.x := Msg.LParamLo;
       P.y := Msg.LParamHi;
-      P := Control.ScreenToClient(P);
       case Msg.Msg of
-      WM_MOUSEMOVE:
+      WM_MOUSEMOVE:  // 普通鼠标消息，座标为自身相对座标，无需转换
         begin
           DoMouseMove(Editor, KeysToShiftState(Msg.WParam), P.x, P.y, False);
         end;
@@ -2106,16 +2105,19 @@ begin
         begin
           DoMouseUp(Editor, mbMiddle, KeysToShiftState(Msg.WParam), P.x, P.y, False);
         end;
-      WM_NCMOUSEMOVE:
+      WM_NCMOUSEMOVE: // NC 系列，座标为屏幕座标，需要转换
         begin
+          P := Control.ScreenToClient(P);
           DoMouseMove(Editor, KeysToShiftState(Msg.WParam), P.x, P.y, True);
         end;
       WM_NCLBUTTONDOWN:
         begin
+          P := Control.ScreenToClient(P);
           DoMouseDown(Editor, mbLeft, KeysToShiftState(Msg.WParam), P.x, P.y, True);
         end;
       WM_NCLBUTTONUP:
         begin
+          P := Control.ScreenToClient(P);
           DoMouseUp(Editor, mbLeft, KeysToShiftState(Msg.WParam), P.x, P.y, True);
         end;
       WM_NCRBUTTONDOWN:
@@ -2124,14 +2126,17 @@ begin
         end;
       WM_NCRBUTTONUP:
         begin
+          P := Control.ScreenToClient(P);
           DoMouseUp(Editor, mbRight, KeysToShiftState(Msg.WParam), P.x, P.y, True);
         end;
       WM_NCMBUTTONDOWN:
         begin
+          P := Control.ScreenToClient(P);
           DoMouseDown(Editor, mbMiddle, KeysToShiftState(Msg.WParam), P.x, P.y, True);
         end;
       WM_NCMBUTTONUP:
         begin
+          P := Control.ScreenToClient(P);
           DoMouseUp(Editor, mbMiddle, KeysToShiftState(Msg.WParam), P.x, P.y, True);
         end;
       WM_NCMOUSELEAVE:

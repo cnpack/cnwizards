@@ -171,6 +171,13 @@ begin
     Tme.hwndTrack := TWinControl(Editor.EditControl).Handle;
     TrackMouseEvent(Tme);
   end;
+
+  if (Button = mbLeft) and (ssCtrl in Shift) then
+  begin
+    CnDebugger.TraceMsg('Mouse Down Left Button with Ctrl Pressed.');
+    if Editor.EditControl.Cursor = crHandPoint then
+      CnDebugger.TraceMsg('Mouse Down with HandPoint.');
+  end;
 end;
 
 procedure TCnTestEditCtrlMouseHookWizard.HookMouseLeave(
