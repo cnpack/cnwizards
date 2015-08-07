@@ -56,8 +56,8 @@ uses
   Windows, SysUtils, Classes, IniFiles, CnRoConst, CnRoInterfaces, CnWizIni;
 
 type
-  PRoFileEntry = ^TRoFileEntry;
-  TRoFileEntry = record
+  PCnRoFileEntry = ^TCnRoFileEntry;
+  TCnRoFileEntry = record
     FileName: string;
     OpenedTime: string;
     ClosingTime: string;
@@ -78,13 +78,13 @@ uses
   CnWizOptions, CnCommon;
 
 type
-  PGenericNode = ^TGenericNode;
-  TGenericNode = packed record
-    gnNext: PGenericNode;
+  PCnGenericNode = ^TCnGenericNode;
+  TCnGenericNode = packed record
+    gnNext: PCnGenericNode;
     gnData: record end;
   end;
   
-  TNodeManager = class(TInterfacedObject, ICnNodeManager)
+  TCnNodeManager = class(TInterfacedObject, ICnNodeManager)
   private
     FFreeList: Pointer;
     FNodeSize: Cardinal;
@@ -100,7 +100,7 @@ type
     procedure FreeNode(aNode: Pointer);
   end;
 
-  TBaseClass = class(TInterfacedObject)
+  TCnBaseClass = class(TInterfacedObject)
   private
     FNodeMgr: ICnNodeManager;
   protected
@@ -109,14 +109,14 @@ type
     constructor Create(ANodeSize: Integer); virtual;
     destructor Destroy; override;
   end;
-  
-  PStrIntfMapEntry = ^TStrIntfMapEntry;
-  TStrIntfMapEntry = record
+
+  PCnStrIntfMapEntry = ^TCnStrIntfMapEntry;
+  TCnStrIntfMapEntry = record
     Key: string;
     Value: IUnknown;
   end;
 
-  TStrIntfMap = class(TBaseClass, ICnStrIntfMap)
+  TCnStrIntfMap = class(TCnBaseClass, ICnStrIntfMap)
   private
     FItems: TList;
   protected
@@ -130,8 +130,8 @@ type
     constructor Create(ANodeSize: Integer); override;
     destructor Destroy; override;
   end;
-  
-  TRoFiles = class(TBaseClass, ICnRoFiles)
+
+  TCnRoFiles = class(TCnBaseClass, ICnRoFiles)
   private
     FCapacity: Integer;
     FColumnSorting: string;
@@ -159,7 +159,7 @@ type
   
   TSetTimeEvent = procedure (AFiles: ICnRoFiles; AIndex: Integer; ALocalData: Boolean);
 
-  TIniContainer = class(TInterfacedObject, ICnReopener, ICnRoOptions)
+  TCnIniContainer = class(TInterfacedObject, ICnReopener, ICnRoOptions)
   private
     FColumnPersistance: Boolean;
     FDefaultPage: Integer;
@@ -230,13 +230,13 @@ end;
 
 function CompareOpenedTime(Item1, Item2: Pointer): Integer;
 begin
-  Result := AnsiCompareStr(PRoFileEntry(Item1)^.OpenedTime, PRoFileEntry(Item2)^.OpenedTime);
+  Result := AnsiCompareStr(PCnRoFileEntry(Item1)^.OpenedTime, PCnRoFileEntry(Item2)^.OpenedTime);
 end;
 
 {
 ******************************************* TNodeManager *******************************************
 }
-constructor TNodeManager.Create(aNodeSize: Cardinal);
+constructor TCnNodeManager.Create(aNodeSize: Cardinal);
 begin
   inherited Create;
   if (aNodeSize <= SizeOf(Pointer)) then
@@ -256,26 +256,26 @@ begin
   end;
 end;
 
-destructor TNodeManager.Destroy;
+destructor TCnNodeManager.Destroy;
 var
   Temp: Pointer;
 begin
   while (FPageHead <> nil) do
   begin
-    Temp := PGenericNode(FPageHead)^.gnNext;
+    Temp := PCnGenericNode(FPageHead)^.gnNext;
     FreeMem(FPageHead, FPageSize);
     FPageHead := Temp;
   end;
   inherited Destroy;
 end;
 
-procedure TNodeManager.AllocNewPage;
+procedure TCnNodeManager.AllocNewPage;
 var
   NewPage: PAnsiChar;
   index: Integer;
 begin
   GetMem(NewPage, FPageSize);
-  PGenericNode(NewPage)^.gnNext := FPageHead;
+  PCnGenericNode(NewPage)^.gnNext := FPageHead;
   FPageHead := NewPage;
   
   Inc(NewPage, SizeOf(Pointer));
@@ -286,62 +286,56 @@ begin
   end;
 end;
 
-function TNodeManager.AllocNode: Pointer;
+function TCnNodeManager.AllocNode: Pointer;
 begin
   if (FFreeList = nil) then AllocNewPage;
   Result := FFreeList;
-  FFreeList := PGenericNode(FFreeList)^.gnNext;
+  FFreeList := PCnGenericNode(FFreeList)^.gnNext;
 end;
 
-function TNodeManager.AllocNodeClear: Pointer;
+function TCnNodeManager.AllocNodeClear: Pointer;
 begin
   if (FFreeList = nil) then AllocNewPage;
   Result := FFreeList;
-  FFreeList := PGenericNode(FFreeList)^.gnNext;
+  FFreeList := PCnGenericNode(FFreeList)^.gnNext;
   FillChar(Result^, FNodeSize, 0);
 end;
 
-procedure TNodeManager.FreeNode(aNode: Pointer);
+procedure TCnNodeManager.FreeNode(aNode: Pointer);
 begin
   if (aNode = nil) then Exit;
-  PGenericNode(aNode)^.gnNext := FFreeList;
+  PCnGenericNode(aNode)^.gnNext := FFreeList;
   FFreeList := aNode;
 end;
 
-{
-******************************************** TBaseClass ********************************************
-}
-constructor TBaseClass.Create(ANodeSize: Integer);
+constructor TCnBaseClass.Create(ANodeSize: Integer);
 begin
   inherited Create;
   FNodeMgr := GetNodeManager(ANodeSize);
 end;
 
-destructor TBaseClass.Destroy;
+destructor TCnBaseClass.Destroy;
 begin
   FNodeMgr := nil;
   inherited Destroy;
 end;
 
-{
-******************************************* TStrIntfMap ********************************************
-}
-constructor TStrIntfMap.Create(ANodeSize: Integer);
+constructor TCnStrIntfMap.Create(ANodeSize: Integer);
 begin
   inherited Create(ANodeSize);
   FItems := TList.Create();
 end;
 
-destructor TStrIntfMap.Destroy;
+destructor TCnStrIntfMap.Destroy;
 begin
   Clear;
   FreeAndNil(FItems);
   inherited Destroy;
 end;
 
-procedure TStrIntfMap.Add(const Key: string; Value: IUnknown);
+procedure TCnStrIntfMap.Add(const Key: string; Value: IUnknown);
 var
-  P: PStrIntfMapEntry;
+  P: PCnStrIntfMapEntry;
 begin
   P := NodeMgr.AllocNodeClear;
   P^.Key := Key;
@@ -349,10 +343,10 @@ begin
   FItems.Add(P);
 end;
 
-procedure TStrIntfMap.Clear;
+procedure TCnStrIntfMap.Clear;
 var
   I: Integer;
-  Temp: PStrIntfMapEntry;
+  Temp: PCnStrIntfMapEntry;
 begin
   for I := 0 to FItems.Count - 1 do
   begin
@@ -364,44 +358,44 @@ begin
   FItems.Clear;
 end;
 
-function TStrIntfMap.GetValue(const Key: string): IUnknown;
+function TCnStrIntfMap.GetValue(const Key: string): IUnknown;
 var
   I: Integer;
 begin
   Result := nil;
   for I := 0 to FItems.Count - 1 do
   begin
-    if (AnsiSameText(PStrIntfMapEntry(FItems[I]).Key, Key)) then
+    if (AnsiSameText(PCnStrIntfMapEntry(FItems[I]).Key, Key)) then
     begin
-      Result := PStrIntfMapEntry(FItems[I]).Value;
+      Result := PCnStrIntfMapEntry(FItems[I]).Value;
       Exit;
     end;
   end; //end for
 end;
 
-function TStrIntfMap.IsEmpty: Boolean;
+function TCnStrIntfMap.IsEmpty: Boolean;
 begin
   Result := FItems.Count = 0;
 end;
 
-function TStrIntfMap.KeyOf(Value: IUnknown): string;
+function TCnStrIntfMap.KeyOf(Value: IUnknown): string;
 var
   I: Integer;
 begin
   for I := 0 to FItems.Count - 1 do
   begin
-    if (PStrIntfMapEntry(FItems[I]).Value = Value) then
+    if (PCnStrIntfMapEntry(FItems[I]).Value = Value) then
     begin
-      Result := PStrIntfMapEntry(FItems[I]).Key;
+      Result := PCnStrIntfMapEntry(FItems[I]).Key;
       Exit;
     end;
   end; //end for
 end;
 
-procedure TStrIntfMap.Remove(const Key: string);
+procedure TCnStrIntfMap.Remove(const Key: string);
 var
   I: Integer;
-  Temp: PStrIntfMapEntry;
+  Temp: PCnStrIntfMapEntry;
 begin
   for I := 0 to FItems.Count - 1 do
   begin
@@ -417,30 +411,28 @@ begin
   end; //end for
 end;
 
-{************************************ TRoFiles ********************************}
-
-constructor TRoFiles.Create(ADefaultCap: Integer);
+constructor TCnRoFiles.Create(ADefaultCap: Integer);
 begin
-  inherited Create(SizeOf(TRoFileEntry));
+  inherited Create(SizeOf(TCnRoFileEntry));
   FItems := TList.Create();
   FCapacity := ADefaultCap;
 end;
 
-destructor TRoFiles.Destroy;
+destructor TCnRoFiles.Destroy;
 begin
   Clear;
   FreeAndNil(FItems);
   inherited Destroy;
 end;
 
-procedure TRoFiles.AddFile(AFileName: string);
+procedure TCnRoFiles.AddFile(AFileName: string);
 begin
   AddFileAndTime(AFileName, '', '');
 end;
 
-procedure TRoFiles.AddFileAndTime(AFileName, AOpenedTime, AClosingTime: string);
+procedure TCnRoFiles.AddFileAndTime(AFileName, AOpenedTime, AClosingTime: string);
 var
-  Node: PRoFileEntry;
+  Node: PCnRoFileEntry;
 begin
   Node := NodeMgr.AllocNodeClear;
   with Node^ do
@@ -452,7 +444,7 @@ begin
   FItems.Add(Node);
 end;
 
-procedure TRoFiles.Clear;
+procedure TCnRoFiles.Clear;
 var
   I: Integer;
 begin
@@ -462,14 +454,14 @@ begin
   end; //end for
 end;
 
-function TRoFiles.Count: Integer;
+function TCnRoFiles.Count: Integer;
 begin
   Result := FItems.Count;
 end;
 
-procedure TRoFiles.Delete(AIndex: Integer);
+procedure TCnRoFiles.Delete(AIndex: Integer);
 var
-  Temp: PRoFileEntry;
+  Temp: PCnRoFileEntry;
 begin
   Temp := FItems[AIndex];
   with Temp^ do
@@ -482,47 +474,47 @@ begin
   FItems.Delete(AIndex);
 end;
 
-function TRoFiles.GetCapacity: Integer;
+function TCnRoFiles.GetCapacity: Integer;
 begin
   Result := FCapacity;
 end;
 
-function TRoFiles.GetColumnSorting: string;
+function TCnRoFiles.GetColumnSorting: string;
 begin
   Result := FColumnSorting;
 end;
 
-function TRoFiles.GetNodes(Index: Integer): Pointer;
+function TCnRoFiles.GetNodes(Index: Integer): Pointer;
 begin
   Result := FItems[Index];
 end;
 
-function TRoFiles.GetString(Index: Integer): string;
+function TCnRoFiles.GetString(Index: Integer): string;
 begin
-  with PRoFileEntry(FItems[Index])^ do
+  with PCnRoFileEntry(FItems[Index])^ do
   begin
     Result := FileName + SSeparator + OpenedTime + SSeparator + ClosingTime + SSeparator;
   end; //end with
 end;
 
-function TRoFiles.IndexOf(AFileName: string): Integer;
+function TCnRoFiles.IndexOf(AFileName: string): Integer;
 begin
   for Result := 0 to FItems.Count - 1 do
-    if (AnsiSameText(PRoFileEntry(GetNodes(Result))^.FileName, AFileName)) then Exit;
+    if (AnsiSameText(PCnRoFileEntry(GetNodes(Result))^.FileName, AFileName)) then Exit;
   Result := -1;
 end;
 
-procedure TRoFiles.SetCapacity(const AValue: Integer);
+procedure TCnRoFiles.SetCapacity(const AValue: Integer);
 begin
   FCapacity := AValue;
 end;
 
-procedure TRoFiles.SetColumnSorting(const AValue: string);
+procedure TCnRoFiles.SetColumnSorting(const AValue: string);
 begin
   FColumnSorting := AValue;
 end;
 
-procedure TRoFiles.SetString(Index: Integer; AValue: string);
+procedure TCnRoFiles.SetString(Index: Integer; AValue: string);
 var
   I: Integer;
   AParam: array[0..2] of string;
@@ -548,30 +540,28 @@ begin
     AddFileAndTime(AParam[0], AParam[1], AParam[2]);
   end else
   begin
-    PRoFileEntry(FItems[Index])^.FileName := AParam[0];
-    PRoFileEntry(FItems[Index])^.OpenedTime:= AParam[1];
-    PRoFileEntry(FItems[Index])^.ClosingTime := AParam[2];
+    PCnRoFileEntry(FItems[Index])^.FileName := AParam[0];
+    PCnRoFileEntry(FItems[Index])^.OpenedTime:= AParam[1];
+    PCnRoFileEntry(FItems[Index])^.ClosingTime := AParam[2];
   end;
 end;
 
-procedure TRoFiles.SortByTimeOpened;
+procedure TCnRoFiles.SortByTimeOpened;
 begin
   FItems.Sort(CompareOpenedTime);
 end;
 
-procedure TRoFiles.UpdateTime(AIndex: Integer; AOpenedTime, AClosingTime: string);
+procedure TCnRoFiles.UpdateTime(AIndex: Integer; AOpenedTime, AClosingTime: string);
 begin
   if (AIndex < 0) then Exit;
-  with PRoFileEntry(FItems[AIndex])^ do
+  with PCnRoFileEntry(FItems[AIndex])^ do
   begin
     if (AOpenedTime <> '') then OpenedTime := AOpenedTime;
     if (AClosingTime <> '') then ClosingTime := AClosingTime;
   end; //end with
 end;
 
-{****************************** TIniContainer *********************************}
-
-constructor TIniContainer.Create;
+constructor TCnIniContainer.Create;
 begin
   inherited Create;
   CheckForIni;
@@ -580,7 +570,7 @@ begin
   ReadAll;
 end;
 
-destructor TIniContainer.Destroy;
+destructor TCnIniContainer.Destroy;
 begin
   SaveAll;
   FreeAndNil(FIniFile);
@@ -588,7 +578,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TIniContainer.CheckForIni;
+procedure TCnIniContainer.CheckForIni;
 var
   F: Text;
   
@@ -639,7 +629,7 @@ begin
   Close(F);
 end;
 
-procedure TIniContainer.CreateRoFilesList;
+procedure TCnIniContainer.CreateRoFilesList;
 var
   I: Integer;
 begin
@@ -649,52 +639,52 @@ begin
       Add(FileType[I], GetRoFiles(iDefaultFileQty));
 end;
 
-procedure TIniContainer.DestroyRoFilesList;
+procedure TCnIniContainer.DestroyRoFilesList;
 begin
   FRoFilesList := nil;
 end;
 
-function TIniContainer.GetColumnPersistance: Boolean;
+function TCnIniContainer.GetColumnPersistance: Boolean;
 begin
   Result := FColumnPersistance;
 end;
 
-function TIniContainer.GetDefaultPage: Integer;
+function TCnIniContainer.GetDefaultPage: Integer;
 begin
   Result := FDefaultPage;
 end;
 
-function TIniContainer.GetFiles(Name: string): ICnRoFiles;
+function TCnIniContainer.GetFiles(Name: string): ICnRoFiles;
 begin
   Result := ICnRoFiles(FRoFilesList[Name]);
 end;
 
-function TIniContainer.GetFormPersistance: Boolean;
+function TCnIniContainer.GetFormPersistance: Boolean;
 begin
   Result := FFormPersistance;
 end;
 
-function TIniContainer.GetIgnoreDefaultUnits: Boolean;
+function TCnIniContainer.GetIgnoreDefaultUnits: Boolean;
 begin
   Result := FIgnoreDefaultUnits;
 end;
 
-function TIniContainer.GetIniFileName: string;
+function TCnIniContainer.GetIniFileName: string;
 begin
   Result := WizOptions.UserPath + SCnRecentFile;
 end;
 
-function TIniContainer.GetLocalDate: Boolean;
+function TCnIniContainer.GetLocalDate: Boolean;
 begin
   Result := FLocalDate;
 end;
 
-function TIniContainer.GetSortPersistance: Boolean;
+function TCnIniContainer.GetSortPersistance: Boolean;
 begin
   Result := FSortPersistance;
 end;
 
-procedure TIniContainer.GetValues(const ASection: string; Strings: TStrings);
+procedure TCnIniContainer.GetValues(const ASection: string; Strings: TStrings);
 var
   I, J: Integer;
   S: string;
@@ -726,12 +716,12 @@ begin
   end;          
 end;
 
-procedure TIniContainer.LogClosingFile(AFileName: string);
+procedure TCnIniContainer.LogClosingFile(AFileName: string);
 begin
   LogFile(AFileName, SetClosingTime);
 end;
 
-procedure TIniContainer.LogFile(AFileName: string; ASetTime: TSetTimeEvent);
+procedure TCnIniContainer.LogFile(AFileName: string; ASetTime: TSetTimeEvent);
 var
   I: Integer;
   vFiles: ICnRoFiles;
@@ -799,12 +789,12 @@ begin
   end;
 end;
 
-procedure TIniContainer.LogOpenedFile(AFileName: string);
+procedure TCnIniContainer.LogOpenedFile(AFileName: string);
 begin
   LogFile(AFileName, SetOpenedTime);
 end;
 
-procedure TIniContainer.ReadAll;
+procedure TCnIniContainer.ReadAll;
 var
   I: Integer;
 begin
@@ -826,7 +816,7 @@ begin
   end;
 end;
 
-procedure TIniContainer.ReadFiles(ASection: string);
+procedure TCnIniContainer.ReadFiles(ASection: string);
 var
   I: Integer;
   vFiles: ICnRoFiles;
@@ -851,13 +841,13 @@ begin
   end;
 end;
 
-procedure TIniContainer.SaveAll;
+procedure TCnIniContainer.SaveAll;
 begin
   SaveSetting;
   SaveFiles;
 end;
 
-procedure TIniContainer.SaveFiles;
+procedure TCnIniContainer.SaveFiles;
 var
   I: Integer;
 begin
@@ -868,7 +858,7 @@ begin
   UpdateIniFile;
 end;
 
-procedure TIniContainer.SaveSetting;
+procedure TCnIniContainer.SaveSetting;
 var
   I: Integer;
 begin
@@ -893,42 +883,42 @@ begin
   UpdateIniFile;
 end;
 
-procedure TIniContainer.SetColumnPersistance(const AValue: Boolean);
+procedure TCnIniContainer.SetColumnPersistance(const AValue: Boolean);
 begin
   FColumnPersistance := AValue;
 end;
 
-procedure TIniContainer.SetDefaultPage(const AValue: Integer);
+procedure TCnIniContainer.SetDefaultPage(const AValue: Integer);
 begin
   FDefaultPage := AValue;
 end;
 
-procedure TIniContainer.SetFormPersistance(const AValue: Boolean);
+procedure TCnIniContainer.SetFormPersistance(const AValue: Boolean);
 begin
   FFormPersistance := AValue;
 end;
 
-procedure TIniContainer.SetIgnoreDefaultUnits(const AValue: Boolean);
+procedure TCnIniContainer.SetIgnoreDefaultUnits(const AValue: Boolean);
 begin
   FIgnoreDefaultUnits := AValue;
 end;
 
-procedure TIniContainer.SetLocalDate(const AValue: Boolean);
+procedure TCnIniContainer.SetLocalDate(const AValue: Boolean);
 begin
   FLocalDate := AValue;
 end;
 
-procedure TIniContainer.SetSortPersistance(const AValue: Boolean);
+procedure TCnIniContainer.SetSortPersistance(const AValue: Boolean);
 begin
   FSortPersistance := AValue;
 end;
 
-procedure TIniContainer.UpdateIniFile;
+procedure TCnIniContainer.UpdateIniFile;
 begin
   FIniFile.UpdateFile;
 end;
 
-procedure TIniContainer.WriteFiles(ASection: string);
+procedure TCnIniContainer.WriteFiles(ASection: string);
 var
   I: Integer;
 begin
@@ -946,30 +936,30 @@ end;
 
 function GetNodeManager(ANodeSize: Cardinal): ICnNodeManager;
 begin
-  Result := TNodeManager.Create(ANodeSize);
+  Result := TCnNodeManager.Create(ANodeSize);
 end;
 
 function GetStrIntfMap(): ICnStrIntfMap;
 begin
-  Result := TStrIntfMap.Create(SizeOf(TStrIntfMapEntry));
+  Result := TCnStrIntfMap.Create(SizeOf(TCnStrIntfMapEntry));
 end;
 
 function GetRoFiles(ADefaultCap: Integer = iDefaultFileQty): ICnRoFiles;
 begin
-  Result := TRoFiles.Create(ADefaultCap);
+  Result := TCnRoFiles.Create(ADefaultCap);
 end;
 
 function GetReopener(): ICnReopener;
 begin
-  Result := TIniContainer.Create;
+  Result := TCnIniContainer.Create;
 end;
 
-function TIniContainer.GetAutoSaveInterval: Cardinal;
+function TCnIniContainer.GetAutoSaveInterval: Cardinal;
 begin
   Result := FAutoSaveInterval;
 end;
 
-procedure TIniContainer.SetAutoSaveInterval(const AValue: Cardinal);
+procedure TCnIniContainer.SetAutoSaveInterval(const AValue: Cardinal);
 begin
   FAutoSaveInterval := AValue;
 end;

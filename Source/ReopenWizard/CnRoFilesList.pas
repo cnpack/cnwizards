@@ -343,7 +343,7 @@ begin
     Items.Clear;
     for I := 0 to Files.Count - 1 do
     begin
-      with Items.Add, PRoFileEntry(Files.Nodes[I])^ do
+      with Items.Add, PCnRoFileEntry(Files.Nodes[I])^ do
       begin
         ImageIndex := 2;
         Caption := _CnExtractFileName(FileName);
