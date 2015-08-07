@@ -25,11 +25,11 @@ unit CnRoClasses;
 * 单元名称：打开历史文件的各个类单元
 * 单元作者：Leeon (real-like@163.com); John Howe
 * 备    注：
-*           - TNodeManager : 节点管理器
-*           - TStrIntfMap  : 字符串对应接口Map
-*           - TRoFiles     : 记录保存文件
-*           - TIniContainer: Ini文件处理类
-*           使用对应的Get函数实现接口实例
+*           - TCnNodeManager : 节点管理器
+*           - TCnStrIntfMap  : 字符串对应接口Map
+*           - TCnRoFiles     : 记录保存文件
+*           - TCnIniContainer: Ini文件处理类
+*           使用对应的 Get 函数获取接口实例
 *
 * 开发平台：PWin2000Pro + Delphi 5.02
 * 兼容测试：PWin2000 + Delphi 5/6/7
@@ -40,7 +40,7 @@ unit CnRoClasses;
 *           2004-12-12 V1.1
 *               去除TMyStringList，改用TList来管理。
 *               添加节点管理器，以及提取接口的Map
-*               将TIniContainer移动到此文件
+*               将TCnIniContainer移动到此文件
 *           2004-03-02 V1.0
 *               创建并移植单元
 ================================================================================
@@ -64,8 +64,11 @@ type
   end;
 
 function GetNodeManager(ANodeSize: Cardinal): ICnNodeManager;
+
 function GetStrIntfMap(): ICnStrIntfMap;
+
 function GetRoFiles(ADefaultCap: Integer = iDefaultFileQty): ICnRoFiles;
+
 function GetReopener(): ICnReopener;
 
 {$ENDIF CNWIZARDS_CNFILESSNAPSHOTWIZARD}
@@ -233,9 +236,6 @@ begin
   Result := AnsiCompareStr(PCnRoFileEntry(Item1)^.OpenedTime, PCnRoFileEntry(Item2)^.OpenedTime);
 end;
 
-{
-******************************************* TNodeManager *******************************************
-}
 constructor TCnNodeManager.Create(aNodeSize: Cardinal);
 begin
   inherited Create;
