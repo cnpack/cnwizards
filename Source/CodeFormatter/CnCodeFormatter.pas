@@ -5153,8 +5153,8 @@ begin
       Writeln;
     end;
 
-    // If not Attribute, maybe infinite loop here, fix partly.
-    if Scaner.Token in [tokString, tokRange] then
+    // If not Attribute, maybe infinite loop here, jump and fix.
+    if not (Scaner.Token in [tokSRB, tokUnknown, tokEOF]) then
       Match(Scaner.Token);
       
   until Scaner.Token in [tokSRB, tokUnknown, tokEOF];
