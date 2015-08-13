@@ -5154,7 +5154,7 @@ begin
     end;
 
     // If not Attribute, maybe infinite loop here, fix partly.
-    if Scaner.Token in [tokString] then
+    if Scaner.Token in [tokString, tokRange] then
       Match(Scaner.Token);
       
   until Scaner.Token in [tokSRB, tokUnknown, tokEOF];
