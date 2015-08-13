@@ -3122,8 +3122,10 @@ var
   begin
     repeat
       Scaner.NextToken;
-    until not (Scaner.Token in [tokSymbol, tokDot, tokInteger, tokLB, tokRB]);
+    until not (Scaner.Token in [tokSymbol, tokDot, tokInteger, tokLB, tokRB,
+      tokPlus, tokMinus, tokStar, tokDiv, tokKeywordDiv, tokKeywordMod]);
     // 包括 () 是因为可能有类似于 Low(Integer)..High(Integer) 的情况
+    // 还得包括四则运算符等，以备有其他常量运算的情形
   end;
 
   procedure MatchTokenWithDot;
