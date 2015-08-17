@@ -18,7 +18,7 @@
 {                                                                              }
 {******************************************************************************}
 
-unit  CnTestDesignMenuWizard;
+unit CnTestDesignMenuWizard;
 { |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包测试用例
@@ -52,7 +52,7 @@ type
 
   TCnTestDesignMenuWizard = class(TCnMenuWizard)
   private
-    FExecutor: TCnDesignMenuExecutor;
+    FExecutor: TCnContextMenuExecutor;
     procedure Executor2Execute(Sender: TObject);
   protected
     function GetHasConfig: Boolean; override;
@@ -68,21 +68,21 @@ type
     procedure Execute; override;
   end;
 
-  TCnTestDesignMenu1 = class(TCnBaseDesignMenuExecutor)
+  TCnTestDesignMenu1 = class(TCnBaseMenuExecutor)
     function GetActive: Boolean; override;
     function GetCaption: string; override;
     function GetEnabled: Boolean; override;
     function Execute: Boolean; override;
   end;
 
-  TCnTestDesignMenu2 = class(TCnBaseDesignMenuExecutor)
+  TCnTestDesignMenu2 = class(TCnBaseMenuExecutor)
     function GetActive: Boolean; override;
     function GetCaption: string; override;
     function GetEnabled: Boolean; override;
     function Execute: Boolean; override;
   end;
 
-  TCnTestDesignMenu3 = class(TCnBaseDesignMenuExecutor)
+  TCnTestDesignMenu3 = class(TCnBaseMenuExecutor)
     function GetActive: Boolean; override;
     function GetCaption: string; override;
     function GetEnabled: Boolean; override;
@@ -110,12 +110,12 @@ begin
   RegisterBaseDesignMenuExecutor(TCnTestDesignMenu1.Create(Self));
   RegisterBaseDesignMenuExecutor(TCnTestDesignMenu2.Create(Self));
   RegisterBaseDesignMenuExecutor(TCnTestDesignMenu3.Create(Self));
-  ShowMessage('3 Menu Items Registered using TCnDesignSelectionExecutor.' + #13#10
+  ShowMessage('3 Menu Items Registered using TCnBaseMenuExecutor.' + #13#10
     + '1 Hidden, 1 Disabled and 1 Enabled. Please Check Designer Context Menu.');
 
   if FExecutor = nil then
   begin
-    FExecutor := TCnDesignMenuExecutor.Create;
+    FExecutor := TCnContextMenuExecutor.Create;
     FExecutor.Active := True;
     FExecutor.Enabled := True;
     FExecutor.Caption := '2 Caption';
