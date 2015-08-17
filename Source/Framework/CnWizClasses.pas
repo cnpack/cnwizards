@@ -411,13 +411,13 @@ type
   TCnProjectWizard = class(TCnRepositoryWizard, IOTAProjectWizard);
 
 //==============================================================================
-// 设计器右键菜单执行条目的基类，子类可重载相应方法实现功能
+// 设计器或编辑器右键菜单执行条目的基类，子类可重载相应方法实现功能
 //==============================================================================
 
-{ TCnBaseDesignMenuExecutor }
+{ TCnBaseMenuExecutor }
 
-  TCnBaseDesignMenuExecutor = class(TObject)
-  {* 设计器右键菜单执行条目的基类，可从属于某一专家实例}
+  TCnBaseMenuExecutor = class(TObject)
+  {* 设计器或编辑器右键菜单执行条目的基类，可从属于某一专家实例}
   private
     FWizard: TCnBaseWizard;
   public
@@ -442,11 +442,13 @@ type
   end;
 
 //==============================================================================
-// 设计器右键菜单执行条目的另一形式的基类，可用属性与事件来指定执行参数
+// 设计器或编辑器右键菜单执行条目的另一形式的基类，可用属性与事件来指定执行参数
 //==============================================================================
 
-  TCnDesignMenuExecutor = class(TCnBaseDesignMenuExecutor)
-  {* 设计器右键菜单执行条目的另一形式的基类，可用属性与事件来指定执行参数}
+{ TCnContextMenuExecutor }
+
+  TCnContextMenuExecutor = class(TCnBaseMenuExecutor)
+  {* 设计器或编辑器右键菜单执行条目的另一形式的基类，可用属性与事件来指定执行参数}
   private
     FActive: Boolean;
     FEnabled: Boolean;
@@ -1423,88 +1425,88 @@ end;
 // 设计器右键菜单执行条目的基类
 //==============================================================================
 
-{ TCnDesignSelectionExecutor }
+{ TCnBaseMenuExecutor }
 
 // 类构造器
-constructor TCnBaseDesignMenuExecutor.Create(OwnWizard: TCnBaseWizard);
+constructor TCnBaseMenuExecutor.Create(OwnWizard: TCnBaseWizard);
 begin
   FWizard := OwnWizard;
 end;
 
 // 类析构器
-destructor TCnBaseDesignMenuExecutor.Destroy;
+destructor TCnBaseMenuExecutor.Destroy;
 begin
-  inherited;
 
+  inherited;
 end;
 
 // 条目执行方法，基类默认什么都不做
-function TCnBaseDesignMenuExecutor.Execute: Boolean;
+function TCnBaseMenuExecutor.Execute: Boolean;
 begin
   Result := True;
 end;
 
 // 控制条目是否显示
-function TCnBaseDesignMenuExecutor.GetActive: Boolean;
+function TCnBaseMenuExecutor.GetActive: Boolean;
 begin
   Result := True;
 end;
 
 // 条目显示的标题
-function TCnBaseDesignMenuExecutor.GetCaption: string;
+function TCnBaseMenuExecutor.GetCaption: string;
 begin
   Result := '';
 end;
 
 // 控制条目是否使能
-function TCnBaseDesignMenuExecutor.GetEnabled: Boolean;
+function TCnBaseMenuExecutor.GetEnabled: Boolean;
 begin
   Result := True;
 end;
 
 // 条目的提示
-function TCnBaseDesignMenuExecutor.GetHint: string;
+function TCnBaseMenuExecutor.GetHint: string;
 begin
   Result := '';
 end;
 
-{ TCnDesignSelectionExecutor2 }
+{ TCnContextMenuExecutor }
 
-constructor TCnDesignMenuExecutor.Create;
+constructor TCnContextMenuExecutor.Create;
 begin
   inherited Create(nil);
   FActive := True;
   FEnabled := True;
 end;
 
-procedure TCnDesignMenuExecutor.DoExecute;
+procedure TCnContextMenuExecutor.DoExecute;
 begin
   if Assigned(FOnExecute) then
     FOnExecute(Self);
 end;
 
-function TCnDesignMenuExecutor.Execute: Boolean;
+function TCnContextMenuExecutor.Execute: Boolean;
 begin
   DoExecute;
   Result := True;
 end;
 
-function TCnDesignMenuExecutor.GetActive: Boolean;
+function TCnContextMenuExecutor.GetActive: Boolean;
 begin
   Result := FActive;
 end;
 
-function TCnDesignMenuExecutor.GetCaption: string;
+function TCnContextMenuExecutor.GetCaption: string;
 begin
   Result := FCaption;
 end;
 
-function TCnDesignMenuExecutor.GetEnabled: Boolean;
+function TCnContextMenuExecutor.GetEnabled: Boolean;
 begin
   Result := FEnabled;
 end;
 
-function TCnDesignMenuExecutor.GetHint: string;
+function TCnContextMenuExecutor.GetHint: string;
 begin
   Result := FHint;
 end;

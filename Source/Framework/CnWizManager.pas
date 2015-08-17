@@ -205,12 +205,18 @@ var
   InitSplashProc: TProcedure = nil;
   {* 处理封面窗口图片等内容的外挂模块}
 
-procedure RegisterBaseDesignMenuExecutor(Executor: TCnBaseDesignMenuExecutor);
+procedure RegisterBaseDesignMenuExecutor(Executor: TCnBaseMenuExecutor);
 {* 注册一个设计器右键菜单的执行对象实例，应该在专家创建时注册
   注意此方法调用后，Executor 便由此处统一管理并负责释放，请勿外部先行释放它}
 
-procedure RegisterDesignMenuExecutor(Executor: TCnDesignMenuExecutor);
+procedure RegisterDesignMenuExecutor(Executor: TCnContextMenuExecutor);
 {* 注册一个设计器右键菜单的执行对象实例的另一形式}
+
+procedure RegisterBaseEditorMenuExecutor(Executor: TCnBaseMenuExecutor);
+{* 注册一个编辑器右键菜单的执行对象实例，应该在专家创建时注册}
+
+procedure RegisterEditorMenuExecutor(Executor: TCnContextMenuExecutor);
+{* 注册一个编辑器右键菜单的执行对象实例的另一形式}
 
 implementation
 
@@ -233,8 +239,10 @@ const
 var
   CnDesignExecutorList: TObjectList = nil; // 设计器右键菜单执行对象列表
 
+  CnEditorExecutorList: TObjectList = nil; // 编辑器右键菜单执行对象列表
+
 // 注册一个设计器右键菜单的执行对象实例，应该在专家创建时注册
-procedure RegisterBaseDesignMenuExecutor(Executor: TCnBaseDesignMenuExecutor);
+procedure RegisterBaseDesignMenuExecutor(Executor: TCnBaseMenuExecutor);
 begin
   Assert(CnDesignExecutorList <> nil, 'CnDesignExecutorList is nil!');
   if CnDesignExecutorList.IndexOf(Executor) < 0 then
@@ -242,7 +250,21 @@ begin
 end;
 
 // 注册一个设计器右键菜单的执行对象实例的另一形式
-procedure RegisterDesignMenuExecutor(Executor: TCnDesignMenuExecutor);
+procedure RegisterDesignMenuExecutor(Executor: TCnContextMenuExecutor);
+begin
+  RegisterBaseDesignMenuExecutor(Executor);
+end;
+
+// 注册一个编辑器右键菜单的执行对象实例，应该在专家创建时注册
+procedure RegisterBaseEditorMenuExecutor(Executor: TCnBaseMenuExecutor);
+begin
+  Assert(CnEditorExecutorList <> nil, 'CnEditorExecutorList is nil!');
+  if CnEditorExecutorList.IndexOf(Executor) < 0 then
+    CnEditorExecutorList.Add(Executor);
+end;
+
+// 注册一个编辑器右键菜单的执行对象实例的另一形式
+procedure RegisterEditorMenuExecutor(Executor: TCnContextMenuExecutor);
 begin
   RegisterBaseDesignMenuExecutor(Executor);
 end;
@@ -1341,6 +1363,7 @@ end;
 
 initialization
   CnDesignExecutorList := TObjectList.Create(True);
+  CnEditorExecutorList := TObjectList.Create(True);
 
 {$IFDEF COMPILER6_UP}
   RegisterSelectionEditor(TComponent, TCnDesignSelectionManager);
@@ -1348,6 +1371,7 @@ initialization
 
 finalization
   FreeAndNil(CnDesignExecutorList);
+  FreeAndNil(CnEditorExecutorList);
 
 end.
 
