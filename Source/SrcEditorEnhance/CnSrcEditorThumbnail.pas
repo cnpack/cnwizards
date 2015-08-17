@@ -163,6 +163,9 @@ end;
 procedure TCnSrcEditorThumbnail.ApplicationMessage(var Msg: TMsg;
   var Handled: Boolean);
 begin
+  if FThumbWindow = nil then
+    Exit;
+
   if (Msg.message = WM_MOUSEWHEEL) and FThumbWindow.Visible then
   begin
     SendMessage(FThumbWindow.Handle, WM_MOUSEWHEEL, Msg.wParam, Msg.lParam);
