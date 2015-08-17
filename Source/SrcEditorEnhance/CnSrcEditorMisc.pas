@@ -104,6 +104,7 @@ type
     procedure SetBoolean(const Index: Integer; const Value: Boolean);
 
     procedure RegisterUserMenuItems;
+    procedure RegisterMenuExecutor(Sender: TObject);
     procedure OnSourceEditorNotify(SourceEditor: IOTASourceEditor;
       NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
 {$IFNDEF BDS4_UP}
@@ -242,6 +243,8 @@ begin
   CnWizNotifierServices.AddSourceEditorNotifier(OnSourceEditorNotify);
   EditControlWrapper.AddEditControlNotifier(EditControlNotify);
   UpdateInstall;
+
+  CnWizNotifierServices.ExecuteOnApplicationIdle(RegisterMenuExecutor);
 end;
 
 destructor TCnSrcEditorMisc.Destroy;
@@ -479,7 +482,6 @@ begin
     OnSelectAll, ipAfter, SMenuEditPasteItemName);
   FMenuHook.AddMenuItemDef(FSelAllMenu);
 
-
   FCopyFileNameMenu := TCnMenuItemDef.Create(SCnCopyFileNameMenuName,
     SCnMenuCopyFileNameMenuCaption, OnCopyFileName, ipAfter, SMenuOpenFileAtCursorName);
   FMenuHook.AddMenuItemDef(FCopyFileNameMenu);
@@ -511,6 +513,29 @@ begin
   FExploreMenu1.OnCreated := OnExploreMenuCreated;
   FMenuHook1.AddMenuItemDef(FExploreMenu1);
 {$ENDIF COMPILER6_UP}
+end;
+
+procedure TCnSrcEditorMisc.RegisterMenuExecutor(Sender: TObject);
+var
+  I: Integer;
+  Def: TCnMenuItemDef;
+  Executor: TCnContextMenuExecutor;
+begin
+  // 设置由外部注册的编辑器右键菜单项（如脚本专家）
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('RegisterMenuExecutor Found Menu Executor %d.', [GetEditorMenuExecutorCount]);
+{$ENDIF}
+
+  for I := GetEditorMenuExecutorCount - 1 downto 0 do
+  begin
+    if GetEditorMenuExecutor(I) is TCnContextMenuExecutor then
+    begin
+      Executor := GetEditorMenuExecutor(I) as TCnContextMenuExecutor;
+      Def := TCnMenuItemDef.Create(Executor.ClassName + IntToStr(I), Executor.Caption,
+        Executor.OnExecute, ipAfter, SCnMenuBlockToolsName); // 放在浮动编辑菜单下
+      FMenuHook.AddMenuItemDef(Def);
+    end;
+  end;
 end;
 
 procedure TCnSrcEditorMisc.DoCloseOtherPages(Sender: TObject);
