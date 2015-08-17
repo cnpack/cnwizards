@@ -14,7 +14,8 @@ uses
 
 procedure Execute(Sender: TObject);
 begin
-  InfoDlg('NOT Implemented.');
+  // WinExec(PChar('Notepad.exe "' + CnOtaGetCurrentSourceFileName + '"', SW_SHOW);
+  InfoDlg('Will Open ' + CnOtaGetCurrentSourceFile + ' using Notepad.');
 end;
 
 var
@@ -23,13 +24,8 @@ begin
   // InfoDlg('Will Add 2 Items to the Editor Context Menu.');
   
   Executor := TCnContextMenuExecutor.Create;
-  Executor.Caption := 'Test 1';
-  Executor.OnExecute := @Execute;
-  RegisterEditorMenuExecutor(Executor);
-
-  Executor := TCnContextMenuExecutor.Create;
-  Executor.Caption := 'Test 2';
+  Executor.Caption := 'Open File in External Editor';
   Executor.OnExecute := @Execute;
   RegisterEditorMenuExecutor(Executor);
 end.
- 
+

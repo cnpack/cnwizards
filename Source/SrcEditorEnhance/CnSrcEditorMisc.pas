@@ -530,7 +530,7 @@ begin
   begin
     if GetEditorMenuExecutor(I) is TCnContextMenuExecutor then
     begin
-      Executor := GetEditorMenuExecutor(I) as TCnContextMenuExecutor;
+      Executor := GetEditorMenuExecutor(I);
       Def := TCnMenuItemDef.Create(Executor.ClassName + IntToStr(I), Executor.Caption,
         Executor.OnExecute, ipAfter, SCnMenuBlockToolsName); // 放在浮动编辑菜单下
       FMenuHook.AddMenuItemDef(Def);

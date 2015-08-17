@@ -52,8 +52,7 @@ type
 
   TCnTestEditorMenuWizard = class(TCnMenuWizard)
   private
-    FExecutor: TCnContextMenuExecutor;
-    procedure Executor2Execute(Sender: TObject);
+    procedure ExecutorExecute(Sender: TObject);
   protected
     function GetHasConfig: Boolean; override;
   public
@@ -68,27 +67,6 @@ type
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
     procedure Execute; override;
-  end;
-
-  TCnTestEditorMenu1 = class(TCnBaseMenuExecutor)
-    function GetActive: Boolean; override;
-    function GetCaption: string; override;
-    function GetEnabled: Boolean; override;
-    function Execute: Boolean; override;
-  end;
-
-  TCnTestEditorMenu2 = class(TCnBaseMenuExecutor)
-    function GetActive: Boolean; override;
-    function GetCaption: string; override;
-    function GetEnabled: Boolean; override;
-    function Execute: Boolean; override;
-  end;
-
-  TCnTestEditorMenu3 = class(TCnBaseMenuExecutor)
-    function GetActive: Boolean; override;
-    function GetCaption: string; override;
-    function GetEnabled: Boolean; override;
-    function Execute: Boolean; override;
   end;
 
 implementation
@@ -108,22 +86,30 @@ begin
 end;
 
 constructor TCnTestEditorMenuWizard.Create;
+var
+  Ext: TCnContextMenuExecutor;
 begin
   inherited;
-  RegisterBaseEditorMenuExecutor(TCnTestEditorMenu1.Create(Self));
-  RegisterBaseEditorMenuExecutor(TCnTestEditorMenu2.Create(Self));
-  RegisterBaseEditorMenuExecutor(TCnTestEditorMenu3.Create(Self));
+  Ext := TCnContextMenuExecutor.Create;
+  Ext.OnExecute := ExecutorExecute;
+  Ext.Caption := 'Test Case 1';
+  RegisterEditorMenuExecutor(Ext);
+
+  Ext := TCnContextMenuExecutor.Create;
+  Ext.OnExecute := ExecutorExecute;
+  Ext.Caption := 'Test Item 2';
+  RegisterEditorMenuExecutor(Ext);
 end;
 
 procedure TCnTestEditorMenuWizard.Execute;
 begin
-  ShowMessage('3 Menu Items Registered using TCnBaseMenuExecutor.' + #13#10
-    + '1 Hidden, 1 Disabled and 1 Enabled. Please Check Editor Context Menu.');
+  ShowMessage('2 Menu Items Registered using TCnContextMenuExecutor.' + #13#10
+    + 'Please Check Editor Context Menu.');
 end;
 
-procedure TCnTestEditorMenuWizard.Executor2Execute(Sender: TObject);
+procedure TCnTestEditorMenuWizard.ExecutorExecute(Sender: TObject);
 begin
-  ShowMessage('Executor 2 Run Here.');
+  ShowMessage('Executor Run Here.');
 end;
 
 function TCnTestEditorMenuWizard.GetCaption: string;
@@ -167,75 +153,6 @@ end;
 procedure TCnTestEditorMenuWizard.SaveSettings(Ini: TCustomIniFile);
 begin
 
-end;
-
-{ TCnTestEditorMenu1 }
-
-function TCnTestEditorMenu1.Execute: Boolean;
-begin
-  ShowMessage('Should NOT Run Here.');
-  Result := True;
-end;
-
-function TCnTestEditorMenu1.GetActive: Boolean;
-begin
-  Result := False;
-end;
-
-function TCnTestEditorMenu1.GetCaption: string;
-begin
-  Result := 'Hidden Caption';
-end;
-
-function TCnTestEditorMenu1.GetEnabled: Boolean;
-begin
-  Result := True;
-end;
-
-{ TCnTestEditorMenu2 }
-
-function TCnTestEditorMenu2.Execute: Boolean;
-begin
-  ShowMessage('Should NOT Run Here.');
-  Result := True;
-end;
-
-function TCnTestEditorMenu2.GetActive: Boolean;
-begin
-  Result := True;
-end;
-
-function TCnTestEditorMenu2.GetCaption: string;
-begin
-  Result := 'Disabled Caption'
-end;
-
-function TCnTestEditorMenu2.GetEnabled: Boolean;
-begin
-  Result := False;
-end;
-
-{ TCnTestEditorMenu3 }
-
-function TCnTestEditorMenu3.Execute: Boolean;
-begin
-  ShowMessage('Should Run Here.');
-  Result := True;
-end;
-
-function TCnTestEditorMenu3.GetActive: Boolean;
-begin
-  Result := True;
-end;
-
-function TCnTestEditorMenu3.GetCaption: string;
-begin
-  Result := 'Enabled Caption';
-end;
-
-function TCnTestEditorMenu3.GetEnabled: Boolean;
-begin
-  Result := True;
 end;
 
 initialization
