@@ -55,11 +55,11 @@ type
   end;
 
 { compile-time registration functions }
-procedure SIRegister_TCnDesignMenuExecutor(CL: TPSPascalCompiler);
+procedure SIRegister_TCnContextMenuExecutor(CL: TPSPascalCompiler);
 
 { run-time registration functions }
 procedure RIRegister_CnWizClasses_Routines(S: TPSExec);
-procedure RIRegister_TCnDesignMenuExecutor(CL: TPSRuntimeClassImporter);
+procedure RIRegister_TCnContextMenuExecutor(CL: TPSRuntimeClassImporter);
 
 implementation
 
@@ -84,10 +84,10 @@ uses
 
 (* === compile-time registration functions === *)
 (*----------------------------------------------------------------------------*)
-procedure SIRegister_TCnDesignMenuExecutor(CL: TPSPascalCompiler);
+procedure SIRegister_TCnContextMenuExecutor(CL: TPSPascalCompiler);
 begin
-  //with RegClassS(CL,'TCnBaseDesignMenuExecutor', 'TCnDesignMenuExecutor') do
-  with CL.AddClassN(CL.FindClass('TCnBaseDesignMenuExecutor'),'TCnDesignMenuExecutor') do
+  //with RegClassS(CL,'TCnBaseMenuExecutor', 'TCnContextMenuExecutor') do
+  with CL.AddClassN(CL.FindClass('TCnBaseMenuExecutor'),'TCnContextMenuExecutor') do
   begin
     RegisterMethod('Constructor Create');
     RegisterProperty('Caption', 'string', iptrw);
@@ -101,68 +101,70 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_CnWizClasses(CL: TPSPascalCompiler);
 begin
-  SIRegister_TCnDesignMenuExecutor(CL);
-  CL.AddDelphiFunction('Procedure RegisterDesignMenuExecutor( Executor : TCnDesignMenuExecutor)');
+  SIRegister_TCnContextMenuExecutor(CL);
+  CL.AddDelphiFunction('Procedure RegisterDesignMenuExecutor( Executor : TCnContextMenuExecutor)');
+  CL.AddDelphiFunction('Procedure RegisterEditorMenuExecutor( Executor : TCnContextMenuExecutor)');
 end;
 
 (* === run-time registration functions === *)
 (*----------------------------------------------------------------------------*)
-procedure TCnDesignMenuExecutorOnExecute_W(Self: TCnDesignMenuExecutor; const T: TNotifyEvent);
+procedure TCnContextMenuExecutorOnExecute_W(Self: TCnContextMenuExecutor; const T: TNotifyEvent);
 begin Self.OnExecute := T; end;
 
 (*----------------------------------------------------------------------------*)
-procedure TCnDesignMenuExecutorOnExecute_R(Self: TCnDesignMenuExecutor; var T: TNotifyEvent);
+procedure TCnContextMenuExecutorOnExecute_R(Self: TCnContextMenuExecutor; var T: TNotifyEvent);
 begin T := Self.OnExecute; end;
 
 (*----------------------------------------------------------------------------*)
-procedure TCnDesignMenuExecutorEnabled_W(Self: TCnDesignMenuExecutor; const T: Boolean);
+procedure TCnContextMenuExecutorEnabled_W(Self: TCnContextMenuExecutor; const T: Boolean);
 begin Self.Enabled := T; end;
 
 (*----------------------------------------------------------------------------*)
-procedure TCnDesignMenuExecutorEnabled_R(Self: TCnDesignMenuExecutor; var T: Boolean);
+procedure TCnContextMenuExecutorEnabled_R(Self: TCnContextMenuExecutor; var T: Boolean);
 begin T := Self.Enabled; end;
 
 (*----------------------------------------------------------------------------*)
-procedure TCnDesignMenuExecutorActive_W(Self: TCnDesignMenuExecutor; const T: Boolean);
+procedure TCnContextMenuExecutorActive_W(Self: TCnContextMenuExecutor; const T: Boolean);
 begin Self.Active := T; end;
 
 (*----------------------------------------------------------------------------*)
-procedure TCnDesignMenuExecutorActive_R(Self: TCnDesignMenuExecutor; var T: Boolean);
+procedure TCnContextMenuExecutorActive_R(Self: TCnContextMenuExecutor; var T: Boolean);
 begin T := Self.Active; end;
 
 (*----------------------------------------------------------------------------*)
-procedure TCnDesignMenuExecutorHint_W(Self: TCnDesignMenuExecutor; const T: string);
+procedure TCnContextMenuExecutorHint_W(Self: TCnContextMenuExecutor; const T: string);
 begin Self.Hint := T; end;
 
 (*----------------------------------------------------------------------------*)
-procedure TCnDesignMenuExecutorHint_R(Self: TCnDesignMenuExecutor; var T: string);
+procedure TCnContextMenuExecutorHint_R(Self: TCnContextMenuExecutor; var T: string);
 begin T := Self.Hint; end;
 
 (*----------------------------------------------------------------------------*)
-procedure TCnDesignMenuExecutorCaption_W(Self: TCnDesignMenuExecutor; const T: string);
+procedure TCnContextMenuExecutorCaption_W(Self: TCnContextMenuExecutor; const T: string);
 begin Self.Caption := T; end;
 
 (*----------------------------------------------------------------------------*)
-procedure TCnDesignMenuExecutorCaption_R(Self: TCnDesignMenuExecutor; var T: string);
+procedure TCnContextMenuExecutorCaption_R(Self: TCnContextMenuExecutor; var T: string);
 begin T := Self.Caption; end;
 
 (*----------------------------------------------------------------------------*)
 procedure RIRegister_CnWizClasses_Routines(S: TPSExec);
 begin
   S.RegisterDelphiFunction(@RegisterDesignMenuExecutor, 'RegisterDesignMenuExecutor', cdRegister);
+  S.RegisterDelphiFunction(@RegisterEditorMenuExecutor, 'RegisterEditorMenuExecutor', cdRegister);
 end;
 
 (*----------------------------------------------------------------------------*)
-procedure RIRegister_TCnDesignMenuExecutor(CL: TPSRuntimeClassImporter);
+procedure RIRegister_TCnContextMenuExecutor(CL: TPSRuntimeClassImporter);
 begin
-  with CL.Add(TCnDesignMenuExecutor) do
+  with CL.Add(TCnContextMenuExecutor) do
   begin
-    RegisterVirtualConstructor(@TCnDesignMenuExecutor.Create, 'Create');
-    RegisterPropertyHelper(@TCnDesignMenuExecutorCaption_R,@TCnDesignMenuExecutorCaption_W,'Caption');
-    RegisterPropertyHelper(@TCnDesignMenuExecutorHint_R,@TCnDesignMenuExecutorHint_W,'Hint');
-    RegisterPropertyHelper(@TCnDesignMenuExecutorActive_R,@TCnDesignMenuExecutorActive_W,'Active');
-    RegisterPropertyHelper(@TCnDesignMenuExecutorEnabled_R,@TCnDesignMenuExecutorEnabled_W,'Enabled');
-    RegisterPropertyHelper(@TCnDesignMenuExecutorOnExecute_R,@TCnDesignMenuExecutorOnExecute_W,'OnExecute');
+    RegisterVirtualConstructor(@TCnContextMenuExecutor.Create, 'Create');
+    RegisterPropertyHelper(@TCnContextMenuExecutorCaption_R,@TCnContextMenuExecutorCaption_W,'Caption');
+    RegisterPropertyHelper(@TCnContextMenuExecutorHint_R,@TCnContextMenuExecutorHint_W,'Hint');
+    RegisterPropertyHelper(@TCnContextMenuExecutorActive_R,@TCnContextMenuExecutorActive_W,'Active');
+    RegisterPropertyHelper(@TCnContextMenuExecutorEnabled_R,@TCnContextMenuExecutorEnabled_W,'Enabled');
+    RegisterPropertyHelper(@TCnContextMenuExecutorOnExecute_R,@TCnContextMenuExecutorOnExecute_W,'OnExecute');
   end;
 end;
 
@@ -170,7 +172,7 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure RIRegister_CnWizClasses(CL: TPSRuntimeClassImporter);
 begin
-  RIRegister_TCnDesignMenuExecutor(CL);
+  RIRegister_TCnContextMenuExecutor(CL);
 end;
 
  

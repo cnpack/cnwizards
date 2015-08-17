@@ -218,6 +218,12 @@ procedure RegisterBaseEditorMenuExecutor(Executor: TCnBaseMenuExecutor);
 procedure RegisterEditorMenuExecutor(Executor: TCnContextMenuExecutor);
 {* 注册一个编辑器右键菜单的执行对象实例的另一形式}
 
+function GetEditorMenuExecutorCount: Integer;
+{* 返回已注册的编辑器右键菜单条目数量，供编辑器扩展实现自定义编辑器菜单用}
+
+function GetEditorMenuExecutor(Index: Integer): TCnBaseMenuExecutor;
+{* 返回已注册的编辑器右键菜单条目，供编辑器扩展实现自定义编辑器菜单用}
+
 implementation
 
 uses
@@ -267,6 +273,18 @@ end;
 procedure RegisterEditorMenuExecutor(Executor: TCnContextMenuExecutor);
 begin
   RegisterBaseDesignMenuExecutor(Executor);
+end;
+
+// 返回已注册的编辑器右键菜单条目数量，供编辑器扩展实现自定义编辑器菜单用
+function GetEditorMenuExecutorCount: Integer;
+begin
+  Result := CnEditorExecutorList.Count;
+end;
+
+// 返回已注册的编辑器右键菜单条目，供编辑器扩展实现自定义编辑器菜单用
+function GetEditorMenuExecutor(Index: Integer): TCnBaseMenuExecutor;
+begin
+  Result := TCnBaseMenuExecutor(CnEditorExecutorList[Index]);
 end;
 
 //==============================================================================
