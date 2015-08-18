@@ -12,17 +12,18 @@ program EditorMenu;
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs;
 
+const
+  SW_SHOW = 1;
+
 procedure Execute(Sender: TObject);
 begin
-  // WinExec(PChar('Notepad.exe "' + CnOtaGetCurrentSourceFileName + '"', SW_SHOW);
   InfoDlg('Will Open ' + CnOtaGetCurrentSourceFile + ' using Notepad.');
+  WinExecute('Notepad.exe "' + CnOtaGetCurrentSourceFile + '"', SW_SHOW);
 end;
 
 var
   Executor: TCnContextMenuExecutor;
 begin
-  // InfoDlg('Will Add 2 Items to the Editor Context Menu.');
-  
   Executor := TCnContextMenuExecutor.Create;
   Executor.Caption := 'Open File in External Editor';
   Executor.OnExecute := @Execute;
