@@ -1337,12 +1337,12 @@ end;
 procedure TCnDesignSelectionManager.ExecuteVerb(Index: Integer;
   const List: IDesignerSelections);
 begin
-  TCnBaseDesignMenuExecutor(CnDesignExecutorList[Index]).Execute;
+  TCnBaseMenuExecutor(CnDesignExecutorList[Index]).Execute;
 end;
 
 function TCnDesignSelectionManager.GetVerb(Index: Integer): string;
 begin
-  Result := TCnBaseDesignMenuExecutor(CnDesignExecutorList[Index]).GetCaption;
+  Result := TCnBaseMenuExecutor(CnDesignExecutorList[Index]).GetCaption;
 end;
 
 function TCnDesignSelectionManager.GetVerbCount: Integer;
@@ -1353,9 +1353,9 @@ end;
 procedure TCnDesignSelectionManager.PrepareItem(Index: Integer;
   const AItem: IMenuItem);
 var
-  Executor: TCnBaseDesignMenuExecutor;
+  Executor: TCnBaseMenuExecutor;
 begin
-  Executor := TCnBaseDesignMenuExecutor(CnDesignExecutorList[Index]);
+  Executor := TCnBaseMenuExecutor(CnDesignExecutorList[Index]);
   AItem.Visible := (Executor <> nil) and
     ((Executor.Wizard = nil) or Executor.Wizard.Active)
     and Executor.GetActive;
