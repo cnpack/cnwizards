@@ -77,7 +77,7 @@ type
     FDupShortCut: TCnWizShortCut;
     FBlockMoveUpShortCut: TCnWizShortCut;
     FBlockMoveDownShortCut: TCnWizShortCut;
-    FBlockDelLinesShortCut: TCnWizShortCut;
+    // FBlockDelLinesShortCut: TCnWizShortCut;
     FActive: Boolean;
     FOnEnhConfig: TNotifyEvent;
     FShowBlockTools: Boolean;
@@ -166,8 +166,8 @@ begin
     ShortCut(Word('U'), [ssCtrl, ssAlt, ssShift]), OnEditBlockMoveUp);
   FBlockMoveDownShortCut := WizShortCutMgr.Add('CnEditBlockMoveDown',
     ShortCut(Word('D'), [ssCtrl, ssAlt, ssShift]), OnEditBlockMoveDown);
-  FBlockDelLinesShortCut := WizShortCutMgr.Add('CnEditBlockDeleteLines',
-    ShortCut(Word('D'), [ssCtrl, ssShift]), OnEditBlockDelLines);
+//  FBlockDelLinesShortCut := WizShortCutMgr.Add('CnEditBlockDeleteLines',
+//    ShortCut(Word('D'), [ssCtrl, ssShift]), OnEditBlockDelLines);
 
   FPopupMenu := TPopupMenu.Create(nil);
   FPopupMenu.AutoPopup := False;
@@ -192,7 +192,7 @@ begin
   FGroupReplace.Free;
   FWebSearch.Free;
 
-  WizShortCutMgr.DeleteShortCut(FBlockDelLinesShortCut);
+//  WizShortCutMgr.DeleteShortCut(FBlockDelLinesShortCut);
   WizShortCutMgr.DeleteShortCut(FBlockMoveDownShortCut);
   WizShortCutMgr.DeleteShortCut(FBlockMoveUpShortCut);
   WizShortCutMgr.DeleteShortCut(FDupShortCut);
@@ -739,7 +739,7 @@ begin
 {$IFDEF BDS} // Only for BDS because of bug. ;-(
   DoAddMenuItem(FMiscMenu, SCnSrcBlockMoveUp, btBlockMoveUp, FBlockMoveUpShortCut.ShortCut);
   DoAddMenuItem(FMiscMenu, SCnSrcBlockMoveDown, btBlockMoveDown, FBlockMoveDownShortCut.ShortCut);
-  DoAddMenuItem(FMiscMenu, SCnSrcBlockDeleteLines, btBlockDelLines, FBlockDelLinesShortCut.ShortCut);
+  DoAddMenuItem(FMiscMenu, SCnSrcBlockDeleteLines, btBlockDelLines);
 {$ENDIF}
 
   // …Ë÷√≤Àµ•
