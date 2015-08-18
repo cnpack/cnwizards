@@ -1593,7 +1593,13 @@ begin
     ErrorExpected(':= or in');
   end;
 
-  Match(tokKeywordDo);
+  SpecifyElementType(pfetDo);
+  try
+    Match(tokKeywordDo);
+  finally
+    RestoreElementType;
+  end;
+
   CheckWriteBeginln; // 检查 do begin 是否同行
 
   if Scaner.Token = tokSemicolon then
@@ -1611,7 +1617,12 @@ begin
 
   { TODO: Apply more if stmt rule }
   FormatExpression(0, PreSpaceCount);
-  Match(tokKeywordThen);
+  SpecifyElementType(pfetThen);
+  try
+    Match(tokKeywordThen);
+  finally
+    RestoreElementType;
+  end;
   CheckWriteBeginln; // 检查 if then begin 是否同行
 
   if Scaner.Token = tokSemicolon then
@@ -1995,7 +2006,14 @@ begin
     Match(tokColon);
     Match(tokSymbol);
   end;
-  Match(tokKeywordDo);
+
+  SpecifyElementType(pfetDo);
+  try
+    Match(tokKeywordDo);
+  finally
+    RestoreElementType;
+  end;
+
   CheckWriteBeginln; // 检查 do begin 是否同行;
 
   OnlySemicolon := Scaner.Token = tokSemicolon;
@@ -2025,7 +2043,14 @@ procedure TCnBasePascalFormatter.FormatWhileStmt(PreSpaceCount: Byte);
 begin
   Match(tokKeywordWhile, PreSpaceCount);
   FormatExpression(0, PreSpaceCount);
-  Match(tokKeywordDo);
+
+  SpecifyElementType(pfetDo);
+  try
+    Match(tokKeywordDo);
+  finally
+    RestoreElementType;
+  end;
+
   CheckWriteBeginln; // 检查 do begin 是否同行
 
   if Scaner.Token = tokSemicolon then
@@ -2046,7 +2071,13 @@ begin
     FormatExpression(0, PreSpaceCount);
   end;
 
-  Match(tokKeywordDo);
+  SpecifyElementType(pfetDo);
+  try
+    Match(tokKeywordDo);
+  finally
+    RestoreElementType;
+  end;
+
   CheckWriteBeginln; // 检查 do begin 是否同行
 
   if Scaner.Token = tokSemicolon then
@@ -5422,10 +5453,12 @@ end;
 function TCnAbstractCodeFormatter.CalcNeedPadding: Boolean;
 begin
   Result := (FElementType in [pfetExpression, pfetEnumList, pfetArrayConstant,
-    pfetSetConstructor, pfetFormalParameters])
+    pfetSetConstructor, pfetFormalParameters, pfetThen, pfetDo])
     or UpperContainElementType(pfetFormalParameters);
   // 暂且表达式内部与枚举定义内部等一系列元素内部，或者在参数列表中
   // 碰到注释导致的换行时，才要求自动和上一行对齐
+  // 还要求在本来不换行的组合语句里，比如 if then ，while do 里，for do 里
+  // 严格来讲 then/do 这种还不同，不需要进一步缩进，不过暂时当作进一步缩进处理。
 end;
 
 function TCnAbstractCodeFormatter.UpperContainElementType(ElementType:

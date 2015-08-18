@@ -760,6 +760,7 @@ end;
 procedure TCnCodeGenerator.WriteOneSpace;
 var
   S: string;
+  Old: Boolean;
 begin
   // 如果上一个是空格，则忽略
   if FCode.Count > 0 then
@@ -768,7 +769,11 @@ begin
     if (Length(S) > 0) and (S[Length(S)] = ' ') then
       Exit;
   end;
+
+  // 写入空格需要不影响上一行关于是否是行注释结尾的判断
+  Old := FPrevIsComentCRLFEnd;
   Write(' ');
+  FPrevIsComentCRLFEnd := Old;
 end;
 
 end.

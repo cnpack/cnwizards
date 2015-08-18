@@ -236,7 +236,8 @@ type
   // 如属性的修饰符区域、函数调用修饰符区域等
   TCnPascalFormattingElementType = (pfetUnknown, pfetAsm, pfetPropertySpecifier,
     pfetDirective, pfetPropertyIndex, pfetExpression, pfetEnumList, pfetRaiseAt,
-    pfetArrayConstant, pfetSetConstructor, pfetFormalParameters);
+    pfetArrayConstant, pfetSetConstructor, pfetFormalParameters,
+    pfetThen, pfetDo);
 
   TCnPascalFormattingElementTypeSet = set of TCnPascalFormattingElementType;
 
