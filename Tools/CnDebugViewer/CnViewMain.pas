@@ -1018,6 +1018,7 @@ begin
     AChild.Show;
     AChild.Store := TCnMsgStore(Msg.WParam);
     UpdateFormInSwitch(AChild, fsUpdate);
+    AChild.RequireRefreshTime;
   end;
 end;
 

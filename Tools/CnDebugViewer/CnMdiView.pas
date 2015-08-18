@@ -167,7 +167,7 @@ type
     procedure GotoPrevBookmark;
     procedure GotoNextBookmark;
     procedure ClearAllBookmarks;
-
+    procedure RequireRefreshTime;
     function DescriptionOfMsg(Index: Integer; AMsgItem: TCnMsgItem): string;
     function DescriptionOfTime(Index: Integer ): string;
 
@@ -1256,6 +1256,11 @@ begin
 
     List.Free;
   end;
+end;
+
+procedure TCnMsgChild.RequireRefreshTime;
+begin
+  RefreshTime(FStore);
 end;
 
 end.
