@@ -852,35 +852,40 @@ end;
 { ConstExpr -> <constant-expression> }
 procedure TCnBasePascalFormatter.FormatConstExpr(PreSpaceCount: Byte);
 begin
-  // 从 FormatExpression 复制而来，为了区分来源
-  FormatSimpleExpression(PreSpaceCount, PreSpaceCount);
+  SpecifyElementType(pfetConstExpr);
+  try
+    // 从 FormatExpression 复制而来，为了区分来源
+    FormatSimpleExpression(PreSpaceCount, PreSpaceCount);
 
-  while Scaner.Token in RelOpTokens + [tokHat, tokSLB, tokDot] do
-  begin
-    // 这块对泛型的处理已移动到内部以处理 function call 的情形
-
-    if Scaner.Token in RelOpTokens then
+    while Scaner.Token in RelOpTokens + [tokHat, tokSLB, tokDot] do
     begin
-      MatchOperator(Scaner.Token);
-      FormatSimpleExpression;
+      // 这块对泛型的处理已移动到内部以处理 function call 的情形
+
+      if Scaner.Token in RelOpTokens then
+      begin
+        MatchOperator(Scaner.Token);
+        FormatSimpleExpression;
+      end;
+
+      // 这几处额外的内容，不知道有啥副作用
+
+      // pchar(ch)^
+      if Scaner.Token = tokHat then
+        Match(tokHat)
+      else if Scaner.Token = tokSLB then  // PString(PStr)^[1]
+      begin
+        Match(tokSLB);
+        FormatExprList(0, PreSpaceCount);
+        Match(tokSRB);
+      end
+      else if Scaner.Token = tokDot then // typecase
+      begin
+        Match(tokDot);
+        FormatExpression(0, PreSpaceCount);
+      end;
     end;
-
-    // 这几处额外的内容，不知道有啥副作用
-
-    // pchar(ch)^
-    if Scaner.Token = tokHat then
-      Match(tokHat)
-    else if Scaner.Token = tokSLB then  // PString(PStr)^[1]
-    begin
-      Match(tokSLB);
-      FormatExprList(0, PreSpaceCount);
-      Match(tokSRB);
-    end
-    else if Scaner.Token = tokDot then // typecase
-    begin
-      Match(tokDot);
-      FormatExpression(0, PreSpaceCount);
-    end;
+  finally
+    RestoreElementType;
   end;
 end;
 
@@ -5461,7 +5466,7 @@ end;
 function TCnAbstractCodeFormatter.CalcNeedPadding: Boolean;
 begin
   Result := (FElementType in [pfetExpression, pfetEnumList, pfetArrayConstant,
-    pfetSetConstructor, pfetFormalParameters, pfetThen, pfetDo])
+    pfetSetConstructor, pfetFormalParameters, pfetConstExpr, pfetThen, pfetDo])
     or UpperContainElementType(pfetFormalParameters);
   // 暂且表达式内部与枚举定义内部等一系列元素内部，或者在参数列表中
   // 碰到注释导致的换行时，才要求自动和上一行对齐

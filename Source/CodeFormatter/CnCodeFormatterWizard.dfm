@@ -201,7 +201,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           Width = 97
           Height = 22
           MaxValue = 32
-          MinValue = 6
+          MinValue = 1
           TabOrder = 1
           Value = 16
         end
