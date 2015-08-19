@@ -359,7 +359,10 @@ begin
   Result := False;
   Line := Trim(Str);
   if Length(Line) = 0 then
+  begin
+    Result := True;
     Exit;
+  end;
 
   InComment1 := False;
   InComment2 := False;
@@ -537,6 +540,22 @@ var
     end;
   end;
 
+  function IsAllSpace(const S: string): Boolean;
+  var
+    K: Integer;
+  begin
+    Result := False;
+    if S = '' then
+      Exit;
+
+    for K := 1 to Length(S) do
+    begin
+      if S[K] <> ' ' then
+        Exit;
+    end;
+    Result := True;
+  end;
+
 begin
   if FLock <> 0 then Exit;
   
@@ -653,8 +672,20 @@ begin
   begin
     LastSpaces := LastIndentSpaceWithOutComments;
     if (HeadSpaceCount(Str) < LastSpaces) or (LastSpaces = 0) then
-      Str := StringOfChar(' ', LastSpaces + CnPascalCodeForRule.TabSpaceCount) + TrimLeft(Str);
+    begin
+      // 不能直接加上 Tab 个空格，还得考虑末尾行已经被写入了一批空格的情况
+      I := LastSpaces + CnPascalCodeForRule.TabSpaceCount;
+      if FActualLines.Count > 0 then
+      begin
+        Tmp := FActualLines[FActualLines.Count - 1];
+        if IsAllSpace(Tmp) then
+          Dec(I, Length(Tmp));
 
+        if I < 0 then
+          I := 0;
+      end;
+      Str := StringOfChar(' ', I) + TrimLeft(Str);
+    end;
     IsAfterCommentAuto := True;
   end;
 
