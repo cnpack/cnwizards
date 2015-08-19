@@ -2038,8 +2038,11 @@ procedure TCnBasePascalFormatter.FormatTryStmt(PreSpaceCount: Byte);
 begin
   Match(tokKeywordTry, PreSpaceCount);
   Writeln;
-  FormatStmtList(Tab(PreSpaceCount, False));
-  Writeln;
+  if not (Scaner.Token in [tokKeywordExcept, tokKeywordFinally]) then // ±‹√‚ø’––
+  begin
+    FormatStmtList(Tab(PreSpaceCount, False));
+    Writeln;
+  end;
   FormatTryEnd(PreSpaceCount);
 end;
 
