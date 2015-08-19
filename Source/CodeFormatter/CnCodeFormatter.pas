@@ -1942,41 +1942,46 @@ begin
       begin
         Match(Scaner.Token, PreSpaceCount);
         Writeln;
-        FormatStmtList(Tab(PreSpaceCount, False));
-        Writeln;
+        if Scaner.Token <> tokKeywordEnd then
+        begin
+          FormatStmtList(Tab(PreSpaceCount, False));
+          Writeln;
+        end;
         Match(tokKeywordEnd, PreSpaceCount);
       end;
 
     tokKeywordExcept:
       begin
         Match(Scaner.Token, PreSpaceCount);
-
-        if Scaner.Token <> tokKeywordOn then
+        if Scaner.Token <> tokKeywordEnd then // 避免紧跟时多出空行
         begin
-          Writeln;
-          FormatStmtList(Tab(PreSpaceCount, False))
-        end
-        else
-        begin
-          while Scaner.Token = tokKeywordOn do
+          if Scaner.Token <> tokKeywordOn then
           begin
             Writeln;
-            FormatExceptionHandler(Tab(PreSpaceCount, False));
-          end;
-
-          if Scaner.Token = tokKeywordElse then
+            FormatStmtList(Tab(PreSpaceCount, False))
+          end
+          else
           begin
-            Writeln;
-            Match(tokKeywordElse, Tab(PreSpaceCount), 1);
-            Writeln;
-            FormatStmtList(Tab(Tab(PreSpaceCount, False), False));
-          end;
+            while Scaner.Token = tokKeywordOn do
+            begin
+              Writeln;
+              FormatExceptionHandler(Tab(PreSpaceCount, False));
+            end;
 
-          if Scaner.Token = tokSemicolon then
-            Match(tokSemicolon);
+            if Scaner.Token = tokKeywordElse then
+            begin
+              Writeln;
+              Match(tokKeywordElse, Tab(PreSpaceCount), 1);
+              Writeln;
+              FormatStmtList(Tab(Tab(PreSpaceCount, False), False));
+            end;
+
+            if Scaner.Token = tokSemicolon then
+              Match(tokSemicolon);
+          end;
         end;
-
         Writeln;
+
         Match(tokKeywordEnd, PreSpaceCount);
       end;
   else
