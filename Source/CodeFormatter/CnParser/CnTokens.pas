@@ -237,7 +237,7 @@ type
   TCnPascalFormattingElementType = (pfetUnknown, pfetAsm, pfetPropertySpecifier,
     pfetDirective, pfetPropertyIndex, pfetExpression, pfetEnumList, pfetRaiseAt,
     pfetArrayConstant, pfetSetConstructor, pfetFormalParameters, pfetConstExpr,
-    pfetThen, pfetDo);
+    pfetUsesList, pfetThen, pfetDo);
 
   TCnPascalFormattingElementTypeSet = set of TCnPascalFormattingElementType;
 

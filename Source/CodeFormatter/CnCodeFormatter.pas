@@ -4529,7 +4529,13 @@ begin
     Match(Scaner.Token);
 
   Writeln;
-  FormatUsesList(Tab(PreSpaceCount), True, NeedCRLF);
+  SpecifyElementType(pfetUsesList);
+  try
+    FormatUsesList(Tab(PreSpaceCount), True, NeedCRLF);
+  finally
+    RestoreElementType;
+  end;
+
   Match(tokSemicolon);
 end;
 
@@ -5466,9 +5472,10 @@ end;
 function TCnAbstractCodeFormatter.CalcNeedPadding: Boolean;
 begin
   Result := (FElementType in [pfetExpression, pfetEnumList, pfetArrayConstant,
-    pfetSetConstructor, pfetFormalParameters, pfetConstExpr, pfetThen, pfetDo])
+    pfetSetConstructor, pfetFormalParameters, pfetConstExpr, pfetUsesList,
+    pfetThen, pfetDo])
     or UpperContainElementType(pfetFormalParameters);
-  // 暂且表达式内部与枚举定义内部等一系列元素内部，或者在参数列表中
+  // 暂且表达式内部与枚举定义内部等一系列元素内部，或者在参数列表、uses 中
   // 碰到注释导致的换行时，才要求自动和上一行对齐
   // 还要求在本来不换行的组合语句里，比如 if then ，while do 里，for do 里
   // 严格来讲 then/do 这种还不同，不需要进一步缩进，不过暂时当作进一步缩进处理。
