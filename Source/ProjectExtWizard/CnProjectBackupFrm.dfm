@@ -79,6 +79,7 @@ inherited CnProjectBackupForm: TCnProjectBackupForm
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object statMain: TStatusBar

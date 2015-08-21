@@ -156,11 +156,13 @@ type
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure lvFileViewKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
+    procedure FormShow(Sender: TObject);
   private
     { Private declarations }
     CustomFiles: TCnBackupProjectInfo;
     ProjectList: TCnBackupProjectList;
     FExt: string;
+    FListViewWidthStr: string;
 
     FRemovePath: Boolean;
     FUsePassword: Boolean;
@@ -238,7 +240,10 @@ const
   csExecCmdFile = 'ExecCmdFile';
   csExecCmdString = 'ExecCmdString';
 
-const
+  csWidth = 'Width';
+  csHeight = 'Height';
+  csListViewWidth = 'ListViewWidth';
+
   csCmdCompress = '<compress.exe>';
   csCmdBackupFile = '<BackupFile>';
   csVersionInfo = '<VersionInfo>';
@@ -481,6 +486,13 @@ begin
   except
     FPassword := '';
   end;
+
+  Width := Ini.ReadInteger(csBackupSection, csWidth, Width);
+  Height := Ini.ReadInteger(csBackupSection, csHeight, Height);
+  CenterForm(Self);
+
+  FListViewWidthStr := Ini.ReadString(csBackupSection, csListViewWidth, '');
+  SetListViewWidthString(lvFileView, FListViewWidthStr);
 end;
 
 procedure TCnProjectBackupForm.SaveSettings(Ini: TCustomIniFile);
@@ -508,6 +520,10 @@ begin
   end
   else
     Ini.WriteString(csBackupSection, csZipPass, '');
+
+  Ini.WriteInteger(csBackupSection, csWidth, Width);
+  Ini.WriteInteger(csBackupSection, csHeight, Height);
+  Ini.WriteString(csBackupSection, csListViewWidth, GetListViewWidthString(lvFileView));
 end;
 
 function TCnProjectBackupForm.GetHelpTopic: string;
@@ -1142,6 +1158,13 @@ procedure TCnProjectBackupForm.lvFileViewKeyDown(Sender: TObject;
 begin
   if (Key = VK_DELETE) and (Shift = []) then
     Self.actRemoveFile.Execute;
+end;
+
+procedure TCnProjectBackupForm.FormShow(Sender: TObject);
+begin
+{$IFDEF BDS}
+  SetListViewWidthString(lvList, FListViewWidthStr);
+{$ENDIF}
 end;
 
 {$ENDIF SUPPORT_PRJ_BACKUP}
