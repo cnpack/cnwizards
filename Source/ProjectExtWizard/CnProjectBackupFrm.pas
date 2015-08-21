@@ -1163,7 +1163,7 @@ end;
 procedure TCnProjectBackupForm.FormShow(Sender: TObject);
 begin
 {$IFDEF BDS}
-  SetListViewWidthString(lvList, FListViewWidthStr);
+  SetListViewWidthString(lvFileView, FListViewWidthStr);
 {$ENDIF}
 end;
 
