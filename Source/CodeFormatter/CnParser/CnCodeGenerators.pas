@@ -673,12 +673,12 @@ begin
     LastSpaces := LastIndentSpaceWithOutComments;
     if (HeadSpaceCount(Str) < LastSpaces) or (LastSpaces = 0) then
     begin
-      // 不能直接加上 Tab 个空格，还得考虑末尾行已经被写入了一批空格的情况
-      if FCodeWrapMode = cwmAdvanced then
-        I := LastSpaces + CnPascalCodeForRule.TabSpaceCount
-      else  // uses 区无需进一步缩进
-        I := LastSpaces;
+      if FCodeWrapMode = cwmSimple then // uses 区无需进一步缩进
+        I := LastSpaces
+      else
+        I := LastSpaces + CnPascalCodeForRule.TabSpaceCount;        
 
+      // 不能直接加上 Tab 个空格，还得考虑末尾行已经被写入了一批空格的情况
       if FActualLines.Count > 0 then
       begin
         Tmp := FActualLines[FActualLines.Count - 1];
