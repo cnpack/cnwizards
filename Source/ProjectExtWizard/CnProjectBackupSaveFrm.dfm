@@ -1,11 +1,11 @@
 inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
-  Left = 429
-  Top = 247
-  BorderStyle = bsDialog
+  Left = 369
+  Top = 86
+  Width = 396
+  Height = 436
   Caption = 'Compress and Save Settings'
-  ClientHeight = 409
-  ClientWidth = 388
-  OldCreateOrder = True
+  Constraints.MinHeight = 436
+  Constraints.MinWidth = 396
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnShow = FormShow
@@ -16,6 +16,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
     Top = 375
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&Save'
     Default = True
     ModalResult = 1
@@ -26,6 +27,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
     Top = 375
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
@@ -36,6 +38,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
     Top = 375
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
@@ -46,6 +49,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
     Width = 369
     Height = 353
     ActivePage = ts1
+    Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
     object ts1: TTabSheet
       Caption = 'Co&mpress and Save Settings'
@@ -54,6 +58,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
         Top = 8
         Width = 345
         Height = 89
+        Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = '&Save Settings'
         TabOrder = 0
         object lblFile: TLabel
@@ -76,6 +81,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
           Width = 21
           Height = 21
           Hint = 'Select File to Save'
+          Anchors = [akTop, akRight]
           Caption = '...'
           ParentShowHint = False
           ShowHint = True
@@ -87,6 +93,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
           Top = 23
           Width = 241
           Height = 21
+          Anchors = [akLeft, akTop, akRight]
           TabOrder = 0
           OnChange = edtFileChange
         end
@@ -96,6 +103,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
           Width = 187
           Height = 21
           Style = csDropDownList
+          Anchors = [akLeft, akTop, akRight]
           ItemHeight = 13
           TabOrder = 2
           OnChange = cbbTimeFormatChange
@@ -111,6 +119,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
         Top = 109
         Width = 345
         Height = 204
+        Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'C&ompress Settings'
         TabOrder = 1
         object lblPass: TLabel
@@ -141,6 +150,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
           Top = 73
           Width = 241
           Height = 21
+          Anchors = [akLeft, akTop, akRight]
           PasswordChar = '*'
           TabOrder = 2
         end
@@ -175,6 +185,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
           Top = 140
           Width = 313
           Height = 53
+          Anchors = [akLeft, akTop, akRight, akBottom]
           TabOrder = 5
         end
       end
@@ -187,6 +198,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
         Top = 8
         Width = 345
         Height = 305
+        Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'External C&ompressor'
         TabOrder = 0
         object lblPredefine: TLabel
@@ -225,6 +237,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
           Width = 175
           Height = 21
           Style = csDropDownList
+          Anchors = [akLeft, akTop, akRight]
           ItemHeight = 13
           TabOrder = 3
           OnChange = cbbPredefineChange
@@ -239,6 +252,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
           Top = 55
           Width = 209
           Height = 21
+          Anchors = [akLeft, akTop, akRight]
           TabOrder = 1
           OnChange = edtFileChange
         end
@@ -247,6 +261,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
           Top = 55
           Width = 21
           Height = 21
+          Anchors = [akTop, akRight]
           Caption = '...'
           TabOrder = 2
           OnClick = btnCompressorClick
@@ -256,6 +271,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
           Top = 144
           Width = 313
           Height = 145
+          Anchors = [akLeft, akTop, akRight, akBottom]
           TabOrder = 4
         end
       end
@@ -268,6 +284,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
         Top = 8
         Width = 345
         Height = 305
+        Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'After &Backup'
         TabOrder = 0
         object lblPreParams: TLabel
@@ -306,6 +323,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
           Width = 175
           Height = 21
           Style = csDropDownList
+          Anchors = [akLeft, akTop, akRight]
           ItemHeight = 13
           TabOrder = 3
           OnChange = cbbParamsChange
@@ -318,6 +336,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
           Top = 55
           Width = 209
           Height = 21
+          Anchors = [akLeft, akTop, akRight]
           TabOrder = 1
           OnChange = edtFileChange
         end
@@ -327,6 +346,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
           Width = 21
           Height = 21
           Hint = 'Select External Executable'
+          Anchors = [akTop, akRight]
           Caption = '...'
           ParentShowHint = False
           ShowHint = True
@@ -338,6 +358,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
           Top = 144
           Width = 313
           Height = 145
+          Anchors = [akLeft, akTop, akRight, akBottom]
           TabOrder = 4
         end
       end
