@@ -2159,7 +2159,7 @@ begin
         AfterKeyword := False;
         InstrucLen := Length(Scaner.TokenString); // 记住可能是的汇编指令关键字的长度
 
-        while Scaner.Token in [tokAtSign, tokSymbol, tokInteger] + KeywordTokens +
+        while Scaner.Token in [tokAtSign, tokSymbol, tokInteger, tokAsmHex] + KeywordTokens +
           DirectiveTokens + ComplexTokens do
         begin
           if Scaner.Token = tokAtSign then
@@ -2169,7 +2169,7 @@ begin
             Inc(LabelLen);
             Scaner.NextToken;
           end
-          else if Scaner.Token in [tokSymbol, tokInteger] + KeywordTokens +
+          else if Scaner.Token in [tokSymbol, tokInteger, tokAsmHex] + KeywordTokens +
             DirectiveTokens + ComplexTokens then // 关键字可以做 label 名
           begin
             ALabel := ALabel + Scaner.TokenString;
@@ -2203,7 +2203,7 @@ begin
           Scaner.NextToken; // 跳过 label 的冒号
           InstrucLen := Length(Scaner.TokenString); // 记住应该是的汇编指令关键字的长度
         end
-        else
+        else // 不是 Label 的话，回到开头
         begin
           Scaner.LoadBookmark(Bookmark);
           FLastToken := OldLastToken;
