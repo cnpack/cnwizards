@@ -178,7 +178,7 @@ begin
 
     if OutStream.Size > 0 then
     begin
-      AdjustResultLength(OutStream.Size + 1);
+      AdjustResultLength(OutStream.Size + SizeOf(Char));
       OutStream.Position := 0;
       OutStream.Read(FResult^, OutStream.Size);
     end;
@@ -342,7 +342,7 @@ begin
     OutStream.Write(PChar(Res)^, Length(Res));
     if OutStream.Size > 0 then
     begin
-      AdjustResultLength(OutStream.Size + 1);
+      AdjustResultLength(OutStream.Size + SizeOf(Char));
       OutStream.Position := 0;
       OutStream.Read(FResult^, OutStream.Size);
     end;

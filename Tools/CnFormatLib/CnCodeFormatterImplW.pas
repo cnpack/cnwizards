@@ -232,7 +232,7 @@ begin
   begin
     Utf8Res := UTF8Encode(FResult);
     Len := Length(Utf8Res);
-    AdjustUtf8ResultLength(Len);
+    AdjustUtf8ResultLength(Len + SizeOf(Char));
     CopyMemory(FUtf8Result, @(Utf8Res[1]), Len);
 
     Result := FUtf8Result;
@@ -478,7 +478,7 @@ begin
   begin
     Utf8Res := UTF8Encode(FResult);
     Len := Length(Utf8Res);
-    AdjustUtf8ResultLength(Len);
+    AdjustUtf8ResultLength(Len + SizeOf(Char));
     CopyMemory(FUtf8Result, @(Utf8Res[1]), Len);
 
     Result := FUtf8Result;
