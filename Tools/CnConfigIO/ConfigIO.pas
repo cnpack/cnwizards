@@ -155,7 +155,7 @@ var
 begin
   Application.Title := Caption;
   FRegPath := MakePath(SCnPackRegPath);
-  FRegFile := MakePath(_CnExtractFilePath(Application.ExeName)) + SCnWizardsReg;
+  FRegFile := MakePath(GetWindowsTempPath) + SCnWizardsReg; // Use Temp Directory to avoid read only.
   FFileList := TStringList.Create;
   FParmNoMsg := (FindCmdLineSwitch('n', ['-', '/'], True) or
     FindCmdLineSwitch('NoMsg', ['-', '/'], True));
