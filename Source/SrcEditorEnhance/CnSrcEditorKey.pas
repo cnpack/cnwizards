@@ -847,7 +847,7 @@ begin
       end
       else if Key = VK_RIGHT then  // 行尾右移至下一行头
       begin
-{$IFDEF DELPHI2009_UP}
+{$IFDEF UNICODE}
         CharIdx := View.CursorPos.Col - 1;
         Len := Length(AnsiString(Text));
 {$ELSE}
@@ -887,9 +887,9 @@ var
 
   procedure MoveToLineEnd;
   begin
-{$IFDEF DELPHI2009_UP}
-    // GetAttributeAtPos 需要的是 UTF8 的Pos，因此 D2009 下进行 Col 的 UTF8 转换
-    EditPos.Col := Length(CnAnsiToUtf8({$IFDEF DELPHI2009_UP}AnsiString{$ENDIF}(Text)));
+{$IFDEF UNICODE}
+    // GetAttributeAtPos 需要的是 UTF8 的Pos，因此 UNICODE 下进行 Col 的 UTF8 转换
+    EditPos.Col := Length(CnAnsiToUtf8({$IFDEF UNICODE}AnsiString{$ENDIF}(Text)));
 {$ELSE}
     EditPos.Col := Length(Text);
 {$ENDIF}
@@ -911,9 +911,9 @@ var
       if EditPos.Col > 0 then
       begin
         // 找到了最后一个不是注释的地方
-{$IFDEF DELPHI2009_UP}
+{$IFDEF UNICODE}
         // 从 UTF8 的 Pos，转换回 Ansi 的
-        EditPos.Col := Length(CnUtf8ToAnsi({$IFDEF DELPHI2009_UP}AnsiString{$ENDIF}(Copy(Text, 1, EditPos.Col))));
+        EditPos.Col := Length(CnUtf8ToAnsi({$IFDEF UNICODE}AnsiString{$ENDIF}(Copy(Text, 1, EditPos.Col))));
 {$ENDIF}
         View.Buffer.EditPosition.Move(EditPos.Line, EditPos.Col);
         View.Paint;
@@ -942,9 +942,9 @@ begin
   if (AChar = ';') and (Shift = []) then
   begin
     EditPos := View.CursorPos;
-{$IFDEF DELPHI2009_UP}
+{$IFDEF UNICODE}
     // GetAttributeAtPos 需要的是 UTF8 的Pos，因此 D2009 下进行 Col 的 UTF8 转换
-    EditPos.Col := Length(CnAnsiToUtf8({$IFDEF DELPHI2009_UP}AnsiString{$ENDIF}(Copy(Text, 1, EditPos.Col))));
+    EditPos.Col := Length(CnAnsiToUtf8({$IFDEF UNICODE}AnsiString{$ENDIF}(Copy(Text, 1, EditPos.Col))));
 {$ENDIF}
 
     EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False, Element, LineFlag);

@@ -38,7 +38,7 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF DELPHI2009_UP}
+{$IFDEF UNICODE}
 
 uses
   Windows, SysUtils, Classes, RTLConsts, CnCommon, IniFiles;
@@ -62,7 +62,7 @@ type
 
 implementation
 
-{$IFDEF DELPHI2009_UP}
+{$IFDEF UNICODE}
   
 { TCnAnsiMemIniFile }
 

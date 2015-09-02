@@ -843,7 +843,7 @@ begin
     // TODO: 用 TextWidth 获得光标位置精确对应的源码字符位置，但实现较难。
     // 当存在占据单字符位置的双字节字符时，以下算法会有偏差。
 
-    {$IFNDEF DELPHI2009_UP}
+    {$IFNDEF UNICODE}
     // D2005~2007 获得的是 Utf8 字符串，需要转换为 Ansi 才能进行直观列比较
     Col := Length(CnUtf8ToAnsi(Copy(Text, 1, Col)));
     {$ENDIF}

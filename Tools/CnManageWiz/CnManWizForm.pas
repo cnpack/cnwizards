@@ -746,8 +746,8 @@ end;
 procedure TCnManageWizardForm.actExploreExecute(Sender: TObject);
 begin
   if lvWizards.Selected <> nil then
-    WinExec({$IFDEF DELPHI2009_UP}PAnsiChar{$ELSE}PChar{$ENDIF}(
-    {$IFDEF DELPHI2009_UP}AnsiString{$ENDIF}(Format('EXPLORER.EXE /e,/select,%s',
+    WinExec({$IFDEF UNICODE}PAnsiChar{$ELSE}PChar{$ENDIF}(
+    {$IFDEF UNICODE}AnsiString{$ENDIF}(Format('EXPLORER.EXE /e,/select,%s',
      [lvWizards.Selected.SubItems[0]]))
      ), SW_SHOWNORMAL);
 end;

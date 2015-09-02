@@ -90,7 +90,7 @@ begin
       Exit;
   end ;
   if not (
-  {$IFDEF DELPHI2009_UP}
+  {$IFDEF UNICODE}
   CharInSet(AnsiLastChar(S)^, [{$IFNDEF Linux}':',{$ENDIF} DirSep])
   {$ELSE}
   AnsiLastChar(S)^ in [{$IFNDEF Linux}':',{$ENDIF} DirSep]
@@ -115,7 +115,7 @@ begin
     I := P;
     while (P <= L) and (DirList[P] <> PathSep) do begin
       if
-      {$IFDEF DELPHI2009_UP}
+      {$IFDEF UNICODE}
       CharInSet(DirList[P], LeadBytes)
       {$ELSE}
       DirList[P] in LeadBytes

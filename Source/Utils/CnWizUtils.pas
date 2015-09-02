@@ -456,7 +456,7 @@ function CnOtaGetActiveProjectOption(const Option: string; var Value: Variant): 
 function CnOtaGetPackageServices: IOTAPackageServices;
 {* 取当前包与组件服务}
 
-{$IFDEF DELPHI2009_UP}
+{$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
 function CnOtaGetActiveProjectOptionsConfigurations(Project: IOTAProject = nil): IOTAProjectOptionsConfigurations;
 {* 取当前工程配置选项，2009 后才有效}
 {$ENDIF}
@@ -3347,7 +3347,7 @@ begin
     Result := nil;
 end;
 
-{$IFDEF DELPHI2009_UP}
+{$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
 // * 取当前工程配置选项，2009 后才有效
 function CnOtaGetActiveProjectOptionsConfigurations
   (Project: IOTAProject = nil): IOTAProjectOptionsConfigurations;

@@ -2737,7 +2737,7 @@ var
           Continue;
       {$ENDIF}
         LineText := AnsiString(EditControlWrapper.GetTextAtLine(EditControl, i));
-      {$IFDEF DELPHI2009_UP}
+      {$IFDEF UNICODE}
         LineText := CnAnsiToUtf8(LineText);
       {$ENDIF}
         if i = TopLine then
@@ -2787,7 +2787,7 @@ var
           Continue;
       {$ENDIF}
         LineText := AnsiString(EditControlWrapper.GetTextAtLine(EditControl, i));
-      {$IFDEF DELPHI2009_UP}
+      {$IFDEF UNICODE}
         LineText := CnAnsiToUtf8(LineText);
       {$ENDIF}
         if i = BottomLine then
@@ -2845,7 +2845,7 @@ var
           Continue;
       {$ENDIF}
         LineText := AnsiString(EditControlWrapper.GetTextAtLine(EditControl, i));
-      {$IFDEF DELPHI2009_UP}
+      {$IFDEF UNICODE}
         LineText := CnAnsiToUtf8(LineText);
       {$ENDIF}
         if i = CharPos.Line then
@@ -2898,7 +2898,7 @@ var
           Continue;
       {$ENDIF}
         LineText := AnsiString(EditControlWrapper.GetTextAtLine(EditControl, i));
-      {$IFDEF DELPHI2009_UP}
+      {$IFDEF UNICODE}
         LineText := CnAnsiToUtf8(LineText);
       {$ENDIF}
         if i = CharPos.Line then
@@ -2976,7 +2976,7 @@ begin
 
       // 此处 CursorPos 是 utf8 的位置，LText 在 BDS 下是 UTF8，但在 D2009 下是
       // UnicodeString，因此下面的取下标等会出问题，所以全转成 UTF8 来处理。
-      {$IFDEF DELPHI2009_UP}
+      {$IFDEF UNICODE}
       LText := CnAnsiToUtf8(LText);
       {$ENDIF}
       if LText <> '' then
@@ -4293,7 +4293,7 @@ end;
 procedure TCnSourceHighlight.SourceEditorNotify(SourceEditor: IOTASourceEditor;
   NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
 begin
-{$IFDEF DELPHI2009_UP}
+{$IFDEF UNICODE}
   if NotifyType = setClosing then
     FStructureTimer.OnTimer := nil
   else if (NotifyType = setOpened) or (NotifyType = setEditViewActivated) then
@@ -4405,7 +4405,7 @@ begin
   begin
 {$IFDEF BDS}
     // 预先获得当前行，供重画时重新进行 UTF8 位置计算
-  {$IFDEF DELPHI2009_UP}
+  {$IFDEF UNICODE}
     // Delphi 2009 下不用进行额外的 UTF8 转换
     FLineText := AnsiString(EditControlWrapper.GetTextAtLine(Editor.EditControl,
       LogicLineNum));
@@ -5173,7 +5173,7 @@ begin
   // 获得的是 UTF8 字符串与 Pos，需要转换成 Ansi 的，但 D2009 无需转换
   if Text <> '' then
   begin
-    {$IFDEF DELPHI2009_UP}
+    {$IFDEF UNICODE}
     //Col := Length(CnUtf8ToAnsi(Copy(CnAnsiToUtf8(Text), 1, Col)));
     {$ELSE}
     Col := Length(CnUtf8ToAnsi(Copy(Text, 1, Col)));
@@ -5351,7 +5351,7 @@ begin
   // 获得的是 UTF8 字符串与 Pos，需要转换成 Ansi 的，但 D2009 无需转换
   if Text <> '' then
   begin
-    {$IFDEF DELPHI2009_UP}
+    {$IFDEF UNICODE}
     //Col := Length(CnUtf8ToAnsi(Copy(CnAnsiToUtf8(Text), 1, Col)));
     {$ELSE}
     Col := Length(CnUtf8ToAnsi(Copy(Text, 1, Col)));

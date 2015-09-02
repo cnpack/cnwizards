@@ -115,7 +115,7 @@ uses
 { TCnStatWizard }
 
 const
-{$IFDEF DELPHI2009_UP}
+{$IFDEF UNICODE}
   SCnFormReadErrorName = '@Formread@FormReadError$qqrx20System@UnicodeString';
 {$ELSE}
   SCnFormReadErrorName = '@Formread@FormReadError$qqrx17System@AnsiString';
