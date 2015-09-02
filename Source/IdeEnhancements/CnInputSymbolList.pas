@@ -472,6 +472,7 @@ const
   csCompDXE6 = 'DXE6';
   csCompDXE7 = 'DXE7';
   csCompDXE8 = 'DXE8';
+  csCompD10S = 'D10S';
 
   csCompBCB = 'BCB';
   csCompUser = 'User';
@@ -1099,6 +1100,7 @@ begin
   {$IFDEF DELPHIXE6_UP} AddSection(Ini, csCompDXE6); {$ENDIF}
   {$IFDEF DELPHIXE7_UP} AddSection(Ini, csCompDXE7); {$ENDIF}
   {$IFDEF DELPHIXE8_UP} AddSection(Ini, csCompDXE8); {$ENDIF}
+  {$IFDEF DELPHI10_SEATTLE_UP} AddSection(Ini, csCompD10S); {$ENDIF}
 
    AddSection(Ini, csCompBCB); // 加进来并设为C/C++专用的再说
   finally

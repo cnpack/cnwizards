@@ -22,7 +22,7 @@ type
      ideD1400,
      ideD1500,
      ideD1600,
-     ideD1700, ideDXE4, ideDXE5, ideDXE6, ideDXE7, ideDXE8,
+     ideD1700, ideDXE4, ideDXE5, ideDXE6, ideDXE7, ideDXE8, ideD10S,
      ideCSB100,
      ideBCB300, ideBCB301,
      ideBCB400, ideBCB401, ideBCB402,
@@ -876,6 +876,14 @@ begin
   Result := ideDXE8;
 end;
 
+function GetDelphi10SVersion: TBorlandIdeVersion;
+const
+  CoreIde10S: TVersionNumber =
+    (Major: 23; Minor: 0; Release: 0; Build: 0);
+begin
+  Result := ideD10S;
+end;
+
 function GetBorlandIdeVersion: TBorlandIdeVersion;
 begin
   // We only actually detect the version once per session.
@@ -1011,6 +1019,11 @@ begin
   {$IFDEF VER290}  // Delphi 22/XE8
     Result := GetDelphiXE8Version;
     Assert(Result in [ideDXE8]);
+  {$ENDIF}
+
+  {$IFDEF VER300}  // Delphi 23/10S
+    Result := GetDelphi10SVersion;
+    Assert(Result in [ideD10S]);
   {$ENDIF}
 
   if Result = ideUnknown then
