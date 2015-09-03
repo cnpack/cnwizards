@@ -300,6 +300,10 @@ begin
       if FileExists(strAppFile) and Reg.ValueExists('RootDir') then
         Result := IncludeTrailingBackslash(Reg.ReadString('RootDir'));
     end;
+
+    // 10 Seattle do not have "App" Key
+    if (IDE in [cnDelphi10S]) and Reg.ValueExists('RootDir') then
+      Result := IncludeTrailingBackslash(Reg.ReadString('RootDir'));
   end;
 
   Reg.CloseKey;
