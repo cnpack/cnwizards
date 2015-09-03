@@ -1056,7 +1056,7 @@ Function SetCheckBoxes
   !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\16.0" "App" ${SecDXE8}
 !endif
 !ifdef IDE_VERSION_D10S
-  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\17.0" "App" ${SecD10S}
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\17.0" "RootDir" ${SecD10S}
 !endif
 !endif
 !ifdef IDE_VERSION_CB5
