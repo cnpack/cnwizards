@@ -342,7 +342,7 @@ Usage: want [target-name] [-Dname=value]
   <target name="dxe6" depends="-dxe6,-cw_final" description="Compile CnWizards for RAD Studio XE6." />
   <target name="dxe7" depends="-dxe7,-cw_final" description="Compile CnWizards for RAD Studio XE7." />
   <target name="dxe8" depends="-dxe8,-cw_final" description="Compile CnWizards for RAD Studio XE8." />
-  <target name="dxe8" depends="-d10s,-cw_final" description="Compile CnWizards for RAD Studio 10 Seattle." />
+  <target name="d10s" depends="-d10s,-cw_final" description="Compile CnWizards for RAD Studio 10 Seattle." />
   <target name="cb5" depends="-cb5,-cw_final" description="Compile CnWizards for C++Builder 5." />
   <target name="cb6" depends="-cb6,-cw_final" description="Compile CnWizards for C++Builder 6." />
 
