@@ -30,7 +30,7 @@ unit CnWizManager;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2015.05.19 V1.3 by 何清(QSoft)
+* 修改记录：2015.05.19 V1.3 by liuxiao
 *               增加 D6 以上版本的注册设计器右键菜单执行项的机制
 *           2003.10.03 V1.2 by 何清(QSoft)
 *               增加专家引导工具
@@ -98,6 +98,7 @@ type
     procedure FreeWizards;
     procedure CreateMiscMenu;
     procedure InstallMiscMenu;
+    procedure EnsureNoParent(Menu: TMenuItem);
     procedure FreeMiscMenu;
 
     procedure RegisterPluginInfo;
@@ -542,22 +543,34 @@ end;
 procedure TCnWizardMgr.ConstructSortedMenu;
 var
   List: TList;
-  i: Integer;
+  I: Integer;
 begin
   if (FMenuWizards = nil) or (Menu = nil) then Exit;
 
   List := TList.Create;
   try
-    for i := 0 to FMenuWizards.Count - 1 do
-      List.Add(FMenuWizards.Items[i]);
+    for I := 0 to FMenuWizards.Count - 1 do
+    begin
+      List.Add(FMenuWizards.Items[I]);
+      EnsureNoParent(TCnMenuWizard(FMenuWizards.Items[I]).Menu);
+    end;
 
-    for i := Menu.Count - 1 downto 0 do
-      Menu.Delete(i);
+    for I := Menu.Count - 1 downto 0 do
+      Menu.Delete(I);
 
     SortListByMenuOrder(List);
 
-    for i := 0 to List.Count - 1 do
-      Menu.Add(TCnMenuWizard(List.Items[i]).Menu);
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('ConstructSortedMenu. Before Insert: %d', [Menu.Count]);
+{$ENDIF}
+
+    for I := 0 to List.Count - 1 do
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('ConstructSortedMenu. Insert %s', [TCnMenuWizard(List.Items[I]).Menu.Caption]);
+{$ENDIF}
+      Menu.Add(TCnMenuWizard(List.Items[I]).Menu);
+    end;  
 
     InstallMiscMenu;
   finally
@@ -952,6 +965,12 @@ begin
 {$ENDIF}
 end;
 
+procedure TCnWizardMgr.EnsureNoParent(Menu: TMenuItem);
+begin
+  if (Menu <> nil) and (Menu.Parent <> nil) then
+    Menu.Parent.Remove(Menu);
+end;
+
 // 安装其它辅助菜单
 procedure TCnWizardMgr.InstallMiscMenu;
 begin
@@ -959,8 +978,16 @@ begin
   CnDebugger.LogEnter('Install misc menu Entered.');
 {$ENDIF}
   if Menu.Count > 0 then
+  begin
+    EnsureNoParent(FSepMenu);
     Menu.Add(FSepMenu);
+  end;
+
 {$IFNDEF CNWIZARDS_MINIMUM}
+  EnsureNoParent(FConfigAction.Menu);
+  EnsureNoParent(FWizMultiLang.Menu);
+  EnsureNoParent(FWizAbout.Menu);
+
   Menu.Add(FConfigAction.Menu);
   Menu.Add(FWizMultiLang.Menu);
   Menu.Add(FWizAbout.Menu);
