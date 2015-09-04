@@ -78,7 +78,7 @@ const
       '' + #13#10 +
     'EditBlock := EditView.Block;' + #13#10 + 
     'if Assigned(EditBlock) then' + #13#10 + 
-      'EditBlock.Delete;'
+      'EditBlock.Delete;';
 
 //==============================================================================
 // 测试用指定内容替换编辑器的选择区的相关接口的菜单专家
@@ -96,7 +96,7 @@ var
   Res: string;
 begin
   Res := Content;
-  Application.MessageBox(Res, 'Will Replace Current Selection with Below:',
+  Application.MessageBox(PChar(Res), 'Will Replace Current Selection with Below:',
     MB_OK + MB_ICONINFORMATION);
 
 {$IFDEF IDE_STRING_ANSI_UTF8}
