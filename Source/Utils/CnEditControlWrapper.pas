@@ -826,42 +826,45 @@ procedure TCnEditControlWrapper.InitEditControlHook;
 begin
   try
     CorIdeModule := LoadLibrary(CorIdeLibName);
-    Assert(CorIdeModule <> 0, 'Failed to load CorIdeModule');
+    CnWizAssert(CorIdeModule <> 0, 'Failed to load CorIdeModule');
 
     GetOTAEditView := GetBplMethodAddress(GetProcAddress(CorIdeModule, SGetOTAEditViewName));
-    Assert(Assigned(GetOTAEditView), 'Failed to load GetOTAEditView from CorIdeModule');
+    CnWizAssert(Assigned(GetOTAEditView), 'Failed to load GetOTAEditView from CorIdeModule');
 
     DoGetAttributeAtPos := GetBplMethodAddress(GetProcAddress(CorIdeModule, SGetAttributeAtPosName));
-    Assert(Assigned(DoGetAttributeAtPos), 'Failed to load GetAttributeAtPos from CorIdeModule');
+    CnWizAssert(Assigned(DoGetAttributeAtPos), 'Failed to load GetAttributeAtPos from CorIdeModule');
 
     PaintLine := GetBplMethodAddress(GetProcAddress(CorIdeModule, SPaintLineName));
-    Assert(Assigned(PaintLine), 'Failed to load PaintLine from CorIdeModule');
+    CnWizAssert(Assigned(PaintLine), 'Failed to load PaintLine from CorIdeModule');
 
     DoMarkLinesDirty := GetBplMethodAddress(GetProcAddress(CorIdeModule, SMarkLinesDirtyName));
-    Assert(Assigned(DoMarkLinesDirty), 'Failed to load MarkLinesDirty from CorIdeModule');
+    CnWizAssert(Assigned(DoMarkLinesDirty), 'Failed to load MarkLinesDirty from CorIdeModule');
 
     EdRefresh := GetBplMethodAddress(GetProcAddress(CorIdeModule, SEdRefreshName));
-    Assert(Assigned(EdRefresh), 'Failed to load EdRefresh from CorIdeModule');
+    CnWizAssert(Assigned(EdRefresh), 'Failed to load EdRefresh from CorIdeModule');
 
     DoGetTextAtLine := GetBplMethodAddress(GetProcAddress(CorIdeModule, SGetTextAtLineName));
-    Assert(Assigned(DoGetTextAtLine), 'Failed to load GetTextAtLine from CorIdeModule');
+    CnWizAssert(Assigned(DoGetTextAtLine), 'Failed to load GetTextAtLine from CorIdeModule');
 
   {$IFDEF BDS}
     // BDS 下才有效
     LineIsElided := GetBplMethodAddress(GetProcAddress(CorIdeModule, SLineIsElidedName));
-    Assert(Assigned(LineIsElided), 'Failed to load LineIsElided from CorIdeModule');
+    CnWizAssert(Assigned(LineIsElided), 'Failed to load LineIsElided from CorIdeModule');
 
     PointFromEdPos := GetBplMethodAddress(GetProcAddress(CorIdeModule, SPointFromEdPosName));
-    Assert(Assigned(PointFromEdPos), 'Failed to load PointFromEdPos from CorIdeModule');
+    CnWizAssert(Assigned(PointFromEdPos), 'Failed to load PointFromEdPos from CorIdeModule');
 
     IndexPosToCurPosProc := GetBplMethodAddress(GetProcAddress(CorIdeModule, SIndexPosToCurPosName));
-    Assert(Assigned(IndexPosToCurPosProc), 'Failed to load IndexPosToCurPos from CorIdeModule');
+    CnWizAssert(Assigned(IndexPosToCurPosProc), 'Failed to load IndexPosToCurPos from CorIdeModule');
   {$ENDIF}
 
     SetEditView := GetBplMethodAddress(GetProcAddress(CorIdeModule, SSetEditViewName));
-    Assert(Assigned(SetEditView), 'Failed to load SetEditView from CorIdeModule');
+    CnWizAssert(Assigned(SetEditView), 'Failed to load SetEditView from CorIdeModule');
 
+  {$IFNDEF DELPHI10_SEATTLE_UP}
     FPaintLineHook := TCnMethodHook.Create(@PaintLine, @MyPaintLine);
+  {$ENDIF}
+
   {$IFDEF DEBUG}
     CnDebugger.LogMsg('EditControl.PaintLine Hooked');
   {$ENDIF}

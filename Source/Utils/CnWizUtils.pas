@@ -863,6 +863,9 @@ procedure TranslateFormFromLangFile(AForm: TCustomForm; const ALangDir, ALangFil
 {* 加载指定的语言文件翻译窗体}
 {$ENDIF}
 
+procedure CnWizAssert(Expr: Boolean; const Msg: string = '');
+{* 封装 Assert 判断}
+
 implementation
 
 uses
@@ -5893,6 +5896,18 @@ begin
   end;
 end;
 {$ENDIF}
+
+// 封装 Assert 判断
+procedure CnWizAssert(Expr: Boolean; const Msg: string = '');
+begin
+{$IFDEF DEBUG}
+  if Expr then
+    CnDebugger.LogMsg('Assert Passed: ' + Msg)
+  else
+    CnDebugger.LogMsgError('Assert Failed! ' + Msg);
+{$ENDIF}
+  Assert(Expr, Msg);
+end;
 
 initialization
   CnNoIconList := TStringList.Create;
