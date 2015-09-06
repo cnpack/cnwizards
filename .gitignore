@@ -1,0 +1,12 @@
+/Bin/User
+__history
+*.dcu
+*.dsk
+*.drc
+*.local
+*.old
+*.identcache
+*.map
+*.dll
+*.exe
+*.~*
