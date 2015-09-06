@@ -233,10 +233,6 @@ type
     FMouseMoveNotifiers: TList;
     FMouseLeaveNotifiers: TList;
 
-    FMouseUpHook: TCnMethodHook;
-    FMouseDownHook: TCnMethodHook;
-    FMouseMoveHook: TCnMethodHook;
-
     FEditorList: TObjectList;
     FEditControlList: TList;
     FOptionChanged: Boolean;
@@ -601,7 +597,7 @@ const
 type
   TControlHack = class(TControl);
   TPaintLineProc = function (Self: TObject; Ek: Pointer;
-    LineNum, V1, V2: Integer): Integer; register;
+    LineNum, V1, V2{$IFDEF DELPHI10_SEATTLE_UP}, V3 {$ENDIF}: Integer): Integer; register;
   TMarkLinesDirtyProc = procedure(Self: TObject; LineNum: Integer; Count: Word;
     Flag: Integer); register;
   TEdRefreshProc = procedure(Self: TObject; DirtyOnly: Boolean); register;
@@ -655,7 +651,8 @@ begin
 end;
 
 // Ìæ»»µôµÄ TCustomEditControl.PaintLine º¯Êý
-function MyPaintLine(Self: TObject; Ek: Pointer; LineNum, LogicLineNum, V2: Integer): Integer;
+function MyPaintLine(Self: TObject; Ek: Pointer; LineNum, LogicLineNum, V2: Integer
+  {$IFDEF DELPHI10_SEATTLE_UP}; V3: Integer {$ENDIF}): Integer;
 var
   Idx: Integer;
   Editor: TEditorObject;
@@ -685,7 +682,7 @@ begin
     if FEditControlWrapper.FPaintLineHook.UseDDteours then
     begin
       try
-        Result := TPaintLineProc(FEditControlWrapper.FPaintLineHook.Trampoline)(Self, Ek, LineNum, LogicLineNum, V2);
+        Result := TPaintLineProc(FEditControlWrapper.FPaintLineHook.Trampoline)(Self, Ek, LineNum, LogicLineNum, V2{$IFDEF DELPHI10_SEATTLE_UP}, V3 {$ENDIF});
       except
         on E: Exception do
           DoHandleException(E.Message);
@@ -696,7 +693,7 @@ begin
       FEditControlWrapper.FPaintLineHook.UnhookMethod;
       try
         try
-          Result := PaintLine(Self, Ek, LineNum, LogicLineNum, V2);
+          Result := PaintLine(Self, Ek, LineNum, LogicLineNum, V2{$IFDEF DELPHI10_SEATTLE_UP}, V3 {$ENDIF});
         except
           on E: Exception do
             DoHandleException(E.Message);
@@ -799,10 +796,6 @@ begin
   if FSetEditViewHook <> nil then
     FSetEditViewHook.Free;
 
-  FMouseUpHook.Free;
-  FMouseDownHook.Free;
-  FMouseMoveHook.Free;
-
   FEditControlList.Free;
   FEditorList.Free;
 
@@ -861,9 +854,7 @@ begin
     SetEditView := GetBplMethodAddress(GetProcAddress(CorIdeModule, SSetEditViewName));
     CnWizAssert(Assigned(SetEditView), 'Failed to load SetEditView from CorIdeModule');
 
-  {$IFNDEF DELPHI10_SEATTLE_UP}
     FPaintLineHook := TCnMethodHook.Create(@PaintLine, @MyPaintLine);
-  {$ENDIF}
 
   {$IFDEF DEBUG}
     CnDebugger.LogMsg('EditControl.PaintLine Hooked');
