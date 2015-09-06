@@ -1432,7 +1432,7 @@ begin
     if EditorCanvas.Font.Name <> mmoContent.Font.Name then
       mmoContent.Font.Name := EditorCanvas.Font.Name;
     mmoContent.Font.Size := EditorCanvas.Font.Size;
-    mmoContent.Font.Style := EditorCanvas.Font.Style;
+    mmoContent.Font.Style := EditorCanvas.Font.Style - [fsUnderline, fsStrikeOut];
   end;
   
   {$IFDEF COMPILER6_UP}
