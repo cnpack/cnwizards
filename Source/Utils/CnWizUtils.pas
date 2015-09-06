@@ -1508,6 +1508,13 @@ begin
       end;
     end;
 {$ENDIF}
+
+    if Project <> nil then
+    begin
+      Result := StringReplace(Result, '$(MSBuildProjectName)',
+        _CnChangeFileExt(_CnExtractFileName(Project.FileName), ''),
+        [rfReplaceAll, rfIgnoreCase]);
+    end;
   finally
     Vars.Free;
   end;   
