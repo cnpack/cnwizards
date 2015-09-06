@@ -1225,7 +1225,8 @@ begin
         try
           lblReplacePromt.Caption := Format(SCnRenameVarHintFmt, [Cur]);
           UpperHeadCur := Cur;
-          if FUpperFirstLetter and (Length(UpperHeadCur) >= 1) and (UpperHeadCur[1] in ['a'..'z']) then
+          if FUpperFirstLetter and (Length(UpperHeadCur) >= 1) and
+            CharInSet(UpperHeadCur[1], ['a'..'z']) then
             UpperHeadCur[1] := Chr(Ord(UpperHeadCur[1]) - 32);
           edtRename.Text := UpperHeadCur;
 
@@ -1491,7 +1492,8 @@ begin
         try
           lblReplacePromt.Caption := Format(SCnRenameVarHintFmt, [Cur]);
           UpperHeadCur := Cur;
-          if FUpperFirstLetter and (Length(UpperHeadCur) >= 1) and (UpperHeadCur[1] in ['a'..'z']) then
+          if FUpperFirstLetter and (Length(UpperHeadCur) >= 1) and
+            CharInSet(UpperHeadCur[1], ['a'..'z']) then
             UpperHeadCur[1] := Chr(Ord(UpperHeadCur[1]) - 32);
           edtRename.Text := UpperHeadCur;
 
@@ -2609,8 +2611,8 @@ var
   I: Integer;
 begin
   Result := False;
-  if (Length(Ident) = 0) or not (Ident[1] in Alpha) then Exit;
-  for I := 2 to Length(Ident) do if not (Ident[I] in AlphaNumeric) then Exit;
+  if (Length(Ident) = 0) or not CharInSet(Ident[1], Alpha) then Exit;
+  for I := 2 to Length(Ident) do if not CharInSet(Ident[I], AlphaNumeric) then Exit;
   Result := True;
 end;
 
