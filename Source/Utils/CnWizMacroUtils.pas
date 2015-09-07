@@ -455,6 +455,8 @@ var
   Position: Integer;
   CharPos: TOTACharPos;
   EditPos: TOTAEditPos;
+  LineText: string;
+  DummyIdx1, DummyIdx2: Integer;
 
   procedure MovePosToProcHead;
   label BeginFindProcHead;
@@ -523,11 +525,33 @@ begin
   EditView.ConvertPos(True, EditPos, CharPos);
   Position := EditView.CharPosToPos(CharPos);
 
+  // 当光标在空行非行首时，Position 指向空行行首，会造成偏差，需要纠正
+  if CnNtaGetCurrLineText(LineText, DummyIdx1, DummyIdx2) then
+  begin
+    if Trim(LineText) = '' then
+    begin
+      // 空行，需要纠正
+      if EditPos.Col > 1 then
+        Inc(Position, (EditPos.Col -1));
+    end;
+  end;
+
+  if InsertPos = ipCurrPos then
+  begin
 {$IFDEF UNICODE}
-  CnOtaInsertTextIntoEditorAtPosW(AContent, Position);
+    EditView.Buffer.EditPosition.InsertText(string(ConvertTextToEditorText(AnsiString(AContent))));
 {$ELSE}
-  CnOtaInsertTextIntoEditorAtPos(AContent, Position);
+    EditView.Buffer.EditPosition.InsertText(ConvertTextToEditorText(AContent));
 {$ENDIF}
+  end
+  else
+  begin
+{$IFDEF UNICODE}
+    CnOtaInsertTextIntoEditorAtPosW(AContent, Position);
+{$ELSE}
+    CnOtaInsertTextIntoEditorAtPos(AContent, Position);
+{$ENDIF}
+  end;
 
   if ASavePos then
     CnOtaGotoPosition(SavePos)
