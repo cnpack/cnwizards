@@ -52,7 +52,7 @@ type
 
   TCnElementStack = class(TStack)
   public
-    function Contains(ElementType: TCnPascalFormattingElementType): Boolean;
+    function Contains(ElementTypes: TCnPascalFormattingElementTypeSet): Boolean;
   end;
 
   TCnAbstractCodeFormatter = class
@@ -86,8 +86,8 @@ type
     procedure SpecifyElementType(Element: TCnPascalFormattingElementType);
     procedure RestoreElementType;
     // 区分当前位置并恢复，必须配对使用
-    function UpperContainElementType(ElementType: TCnPascalFormattingElementType): Boolean;
-    // 上层是否包含指定 ElementType
+    function UpperContainElementType(ElementTypes: TCnPascalFormattingElementTypeSet): Boolean;
+    // 上层是否包含指定的几个 ElementType 之一
 
     procedure ResetElementType;
     function CalcNeedPadding: Boolean;
@@ -745,7 +745,7 @@ begin
       WriteOneSpace  // 强行分离右括号与关键字
     else if (Token in LeftBracket + [tokPlus, tokMinus, tokHat]) and
       ((FLastToken in NeedSpaceAfterKeywordTokens)
-      or ((FLastToken = tokKeywordAt) and UpperContainElementType(pfetRaiseAt))) then
+      or ((FLastToken = tokKeywordAt) and UpperContainElementType([pfetRaiseAt]))) then
       WriteOneSpace; // 强行分离左括号/前置运算符号，与关键字以及 raise 语句中的 at，注意 at 后的表达式盖掉了pfetRaiseAt，所以需要获取上一层
   end;
 
@@ -5471,35 +5471,35 @@ end;
 
 function TCnAbstractCodeFormatter.CalcNeedPadding: Boolean;
 begin
-  Result := (FElementType in [pfetExpression, pfetEnumList, pfetArrayConstant,
+  Result := (FElementType in [pfetExpression, pfetEnumList,pfetArrayConstant,
     pfetSetConstructor, pfetFormalParameters, pfetConstExpr, pfetUsesList,
     pfetThen, pfetDo])
-    or UpperContainElementType(pfetFormalParameters);
+    or UpperContainElementType([pfetFormalParameters, pfetArrayConstant]);
   // 暂且表达式内部与枚举定义内部等一系列元素内部，或者在参数列表、uses 中
   // 碰到注释导致的换行时，才要求自动和上一行对齐
   // 还要求在本来不换行的组合语句里，比如 if then ，while do 里，for do 里
   // 严格来讲 then/do 这种还不同，不需要进一步缩进，不过暂时当作进一步缩进处理。
 end;
 
-function TCnAbstractCodeFormatter.UpperContainElementType(ElementType:
-  TCnPascalFormattingElementType): Boolean;
+function TCnAbstractCodeFormatter.UpperContainElementType(ElementTypes:
+  TCnPascalFormattingElementTypeSet): Boolean;
 begin
   if FOldElementTypes = nil then
     Result := False
   else
-    Result := FOldElementTypes.Contains(ElementType);
+    Result := FOldElementTypes.Contains(ElementTypes);
 end;
 
 { TCnElementStack }
 
 function TCnElementStack.Contains(
-  ElementType: TCnPascalFormattingElementType): Boolean;
+  ElementTypes: TCnPascalFormattingElementTypeSet): Boolean;
 var
   I: Integer;
 begin
   Result := True;
   for I := 0 to Count - 1 do
-    if List[I] = Pointer(ElementType) then
+    if TCnPascalFormattingElementType(List[I]) in ElementTypes then
       Exit;
   Result := False;
 end;
