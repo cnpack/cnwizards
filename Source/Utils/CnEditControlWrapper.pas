@@ -559,6 +559,10 @@ end;
 
 const
   STEditViewClass = 'TEditView';
+{$IFDEF DELPHI10_SEATTLE_UP}
+  SGetCanvas = '@Editorcontrol@TCustomEditControl@GetCanvas$qqrv';
+{$ENDIF}
+
 {$IFDEF COMPILER8_UP}
   SPaintLineName = '@Editorcontrol@TCustomEditControl@PaintLine$qqrr16Ek@TPaintContextiii';
   SMarkLinesDirtyName = '@Editorcontrol@TCustomEditControl@MarkLinesDirty$qqriusi';
@@ -596,6 +600,9 @@ const
 
 type
   TControlHack = class(TControl);
+{$IFDEF DELPHI10_SEATTLE_UP}
+  TGetCanvasProc = function (Self: TObject): TCanvas;
+{$ENDIF}
   TPaintLineProc = function (Self: TObject; Ek: Pointer;
     LineNum, V1, V2{$IFDEF DELPHI10_SEATTLE_UP}, V3 {$ENDIF}: Integer): Integer; register;
   TMarkLinesDirtyProc = procedure(Self: TObject; LineNum: Integer; Count: Word;
@@ -622,6 +629,9 @@ type
 
 var
   PaintLine: TPaintLineProc = nil;
+{$IFDEF DELPHI10_SEATTLE_UP}
+  GetCanvas: TGetCanvasProc = nil;
+{$ENDIF}
   GetOTAEditView: TGetOTAEditViewProc = nil;
   DoGetAttributeAtPos: TGetAttributeAtPosProc = nil;
   DoMarkLinesDirty: TMarkLinesDirtyProc = nil;
@@ -829,6 +839,11 @@ begin
 
     PaintLine := GetBplMethodAddress(GetProcAddress(CorIdeModule, SPaintLineName));
     CnWizAssert(Assigned(PaintLine), 'Failed to load PaintLine from CorIdeModule');
+
+{$IFDEF DELPHI10_SEATTLE}
+    GetCanvas := GetBplMethodAddress(GetProcAddress(CorIdeModule, SGetCanvas));
+    CnWizAssert(Assigned(GetCanvas), 'Failed to load GetCanvas from CorIdeModule');
+{$ENDIF}
 
     DoMarkLinesDirty := GetBplMethodAddress(GetProcAddress(CorIdeModule, SMarkLinesDirtyName));
     CnWizAssert(Assigned(DoMarkLinesDirty), 'Failed to load MarkLinesDirty from CorIdeModule');
@@ -1452,12 +1467,17 @@ begin
   Result := nil;
   if EditControl = nil then Exit;
 {$IFDEF BDS}
-  {$IFDEF BDS2009_UP}
-    // BDS 2009 的 TControl 已经 Unicode 化了，直接用
-    Result := TCustomControlHack(EditControl).Canvas;
+  {$IFDEF DELPHI10_SEATTLE_UP}
+    // Delphi 10 Seattle 的绘制 Canvas 是其内部的一个 Bitmap 的 Canvas，不是 Control 本身的
+    Result := GetCanvas(EditControl);
   {$ELSE}
-    // BDS 2009 以下的 EditControl 不再继承自 TCustomControl，因此得用硬办法来获得画布
-    Result := TCanvas((PInteger(Integer(EditControl) + CnWideControlCanvasOffset))^);
+    {$IFDEF BDS2009_UP}
+      // BDS 2009 的 TControl 已经 Unicode 化了，直接用
+      Result := TCustomControlHack(EditControl).Canvas;
+    {$ELSE}
+      // BDS 2009 以下的 EditControl 不再继承自 TCustomControl，因此得用硬办法来获得画布
+      Result := TCanvas((PInteger(Integer(EditControl) + CnWideControlCanvasOffset))^);
+    {$ENDIF}
   {$ENDIF}
 {$ELSE}
   Result := TCustomControlHack(EditControl).Canvas;
