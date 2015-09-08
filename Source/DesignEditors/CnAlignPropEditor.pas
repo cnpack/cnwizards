@@ -240,7 +240,10 @@ begin
 end;
 
 initialization
+{$IFNDEF COMPILER22_UP}
+  // XE8 及以上，自带 Align 属性编辑器，因此不需要了。
   CnDesignEditorMgr.RegisterPropEditor(TCnAlignProperty,
     TCnAlignProperty.GetInfo, TCnAlignProperty.Register);
-  
+{$ENDIF}
+
 end.
