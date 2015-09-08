@@ -146,13 +146,17 @@ begin
   inherited;
 end;
 
-// APos返回宏在当前行中的位置。
+// APos 返回宏在当前行中的位置，AllPos 返回宏在整个宏文本中的位置。
 function TCnWizMacroText.FindNextMacro(var P: PChar; Stream: TMemoryStream;
   var AMacro: string; var APos, AllPos: Integer): Boolean;
 var
   PStart: PChar;
   PMem: PChar;
   Len: Integer;
+{$IFDEF UNICODE}
+  Buf: PChar;
+  Size: Integer;
+{$ENDIF}
 begin
   Result := False;
   while P^ <> #0 do
@@ -185,9 +189,15 @@ begin
         Inc(P);
         if Assigned(Stream) then
         begin
-        {$IFDEF UNICODE_STRING}
+        {$IFDEF UNICODE}
           PMem := PChar(Integer(Stream.Memory));
-          AllPos := Length(AnsiString(PMem));
+          Size := Stream.Size + SizeOf(Char);
+          Buf := GetMemory(Size);
+          ZeroMemory(Buf, Size);
+          CopyMemory(Buf, PMem, Stream.Size);
+
+          AllPos := Length(AnsiString(Buf));
+          FreeMemory(Buf);
         {$ELSE}
           AllPos := Stream.Size;
         {$ENDIF}
@@ -200,7 +210,7 @@ begin
               Break
             else
             begin
-            {$IFDEF UNICODE_STRING}
+            {$IFDEF UNICODE}
               Inc(APos, Length(AnsiString(PMem^)));
             {$ELSE}
               Inc(APos);
@@ -501,9 +511,13 @@ begin
   try
     while FindNextMacro(P, Stream, Macro, APos, AllPos) do
     begin
+    {$IFDEF DEBUG}
+      CnDebugger.LogFmt('FindNextMacro Macro (%s). APos %d, AllPos %d.',
+        [Macro, Value, APos, AllPos]);
+    {$ENDIF}
       Value := GetMacroValue(Macro, APos, AllPos, CursorPos);
     {$IFDEF DEBUG}
-      CnDebugger.LogFmt('Macro (%s) --> Value (%s)', [Macro, Value]);
+      CnDebugger.LogFmt('Macro (%s) --> Value (%s).', [Macro, Value]);
     {$ENDIF}
       Stream.Write(PChar(Value)^, Length(Value) * SizeOf(Char));
     end;

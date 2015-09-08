@@ -559,6 +559,10 @@ begin
   begin
     if PosInText > 0 then
     begin
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('EdtInsertTextToCurSource Position %d, PosInText %d.',
+        [Position, PosInText]);
+{$ENDIF}
       CnOtaGotoPosition(Position + PosInText); // ±ØÐë¼õ1
       EditView.Paint;
     end;
