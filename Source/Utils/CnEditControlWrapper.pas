@@ -840,7 +840,7 @@ begin
     PaintLine := GetBplMethodAddress(GetProcAddress(CorIdeModule, SPaintLineName));
     CnWizAssert(Assigned(PaintLine), 'Failed to load PaintLine from CorIdeModule');
 
-{$IFDEF DELPHI10_SEATTLE}
+{$IFDEF DELPHI10_SEATTLE_UP}
     GetCanvas := GetBplMethodAddress(GetProcAddress(CorIdeModule, SGetCanvas));
     CnWizAssert(Assigned(GetCanvas), 'Failed to load GetCanvas from CorIdeModule');
 {$ENDIF}
