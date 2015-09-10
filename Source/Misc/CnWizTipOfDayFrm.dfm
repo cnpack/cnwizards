@@ -551,7 +551,7 @@ inherited CnWizTipOfDayForm: TCnWizTipOfDayForm
       Height = 151
       Align = alClient
       BevelOuter = bvNone
-      Color = clInfoBk
+      Color = 14811135
       TabOrder = 0
       object lblTip: TLabel
         Left = 8
