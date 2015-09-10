@@ -50,11 +50,13 @@ const
   CnDebugMagicName = 'CNDEBUG';
   
   SCnDebugPrefix = 'Global\';
-  SCnDebugMapName = SCnDebugPrefix + 'CnDebugMap';
-  SCnDebugQueueEventName = SCnDebugPrefix + 'CnDebugQueueEvent';
-  SCnDebugQueueMutexName = SCnDebugPrefix + 'CnDebugQueueMutex';
-  SCnDebugStartEventName = SCnDebugPrefix + 'CnDebugStartEvent';
-  SCnDebugFlushEventName = SCnDebugPrefix + 'CnDebugFlushEvent';
+
+var
+  SCnDebugMapName: string = SCnDebugPrefix + 'CnDebugMap';
+  SCnDebugQueueEventName: string = SCnDebugPrefix + 'CnDebugQueueEvent';
+  SCnDebugQueueMutexName: string = SCnDebugPrefix + 'CnDebugQueueMutex';
+  SCnDebugStartEventName: string = SCnDebugPrefix + 'CnDebugStartEvent';
+  SCnDebugFlushEventName: string = SCnDebugPrefix + 'CnDebugFlushEvent';
 
 type
   // ===================== 以下结构定义需要和 Viewer 共享 ======================
@@ -125,6 +127,17 @@ type
 
   // ===================== 以上结构定义需要和 Viewer 共享 ======================
 
+procedure ReInitLocalConsts;
+
 implementation
+
+procedure ReInitLocalConsts;
+begin
+  SCnDebugMapName := 'CnDebugMap';
+  SCnDebugQueueEventName := 'CnDebugQueueEvent';
+  SCnDebugQueueMutexName := 'CnDebugQueueMutex';
+  SCnDebugStartEventName := 'CnDebugStartEvent';
+  SCnDebugFlushEventName := 'CnDebugFlushEvent';
+end;
 
 end.

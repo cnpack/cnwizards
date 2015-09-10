@@ -93,6 +93,7 @@ type
     FLongDateTimeFormat: string;
     FEnableUDPMsg: Boolean;
     FUDPPort: Integer;
+    FLocalSession: Boolean;
     procedure SetTop(const Value: Integer);
     procedure SetLeft(const Value: Integer);
     procedure SetWidth(const Value: Integer);
@@ -139,6 +140,9 @@ type
     {* 窗口宽度}  
     property WinState: Integer read FWinState write FWinState;
     {* 窗口状态}
+
+    property LocalSession: Boolean read FLocalSession write FLocalSession;
+    {* 是否使用本地模式}
   end;
 
 var
@@ -343,10 +347,10 @@ end;
 
 procedure InitializeCore;
 begin
-  HEvent := CreateEvent(nil, False, False, SCnDebugQueueEventName);
-  HMutex := CreateMutex(nil, False, SCnDebugQueueMutexName);
+  HEvent := CreateEvent(nil, False, False, PChar(SCnDebugQueueEventName));
+  HMutex := CreateMutex(nil, False, PChar(SCnDebugQueueMutexName));
   HMap := CreateFileMapping(INVALID_HANDLE_VALUE, nil, PAGE_READWRITE, 0,
-    CnMapSize + CnProtectSize, SCnDebugMapName);
+    CnMapSize + CnProtectSize, PChar(SCnDebugMapName));
 
   if HMap <> 0 then
   begin
@@ -693,6 +697,9 @@ end;
 initialization
   CalcCPUSpeed;
   CnViewerOptions := TCnViewerOptions.Create;
+
+  if CnViewerOptions.LocalSession then
+    ReInitLocalConsts;
 
 finalization
   FreeAndNil(CnViewerOptions);

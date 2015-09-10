@@ -116,7 +116,7 @@ begin
   PostStartEvent;
   QueueSize := CnMapSize - CnHeadSize;
   if HMutex = 0 then
-    HMutex := CreateMutex(nil, False, SCnDebugQueueMutexName);
+    HMutex := CreateMutex(nil, False, PChar(SCnDebugQueueMutexName));
 
   while not Terminated do
   begin
@@ -206,7 +206,7 @@ begin
     end;
     ReleaseMutex(HMutex);
     if HFlush = 0 then
-      HFlush := OpenEvent(EVENT_MODIFY_STATE, False, SCnDebugFlushEventName);
+      HFlush := OpenEvent(EVENT_MODIFY_STATE, False, PChar(SCnDebugFlushEventName));
     if HFlush <> 0 then
       SetEvent(hFlush);
   end;
