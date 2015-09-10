@@ -849,7 +849,7 @@ var
   end;
 
 var
-  IsWideStr, FloatStop: Boolean;
+  IsWideStr, FloatStop, IsString: Boolean;
   P, IgnoreP, OldP: PChar;
   Directive: TPascalToken;
   DirectiveNest, FloatCount: Integer;
@@ -877,10 +877,43 @@ begin
         Result := tokSymbol;
       end;
 
-    '^':       // if a string starts with ^H, we can't know.
+    '^':
       begin
         Inc(P);
         Result := tokHat;
+
+        // 目前只处理 ^H^J 这种尖号后单个字符的场合，暂未处理混合''型字符串的情形
+        OldP := P;
+        IsString := True;
+
+        repeat // 进入此循环时，P 必定指向 ^ 后的一个字符
+          if not (P^ in [#33..#126]) then
+          begin // ^ 后字符不对则表示不是字符串，跳出
+            IsString := False;
+            Break;
+          end;
+
+          Inc(P);
+          if P^ = '^' then
+          begin
+            Inc(P);
+            Continue;
+          end;
+
+          // ^后的字符之后如果不是^，就需要退出，如果同时还是标识符，说明不是字符串，回溯。
+          if P^ in ['A'..'Z', 'a'..'z', '0'..'9', '_'] then
+            IsString := False;
+
+          Break;
+        until False;
+
+        if IsString then
+        begin
+          Result := tokString;
+          FStringPtr := P;
+        end
+        else
+          P := OldP;
       end;
 
     '#', '''':

@@ -803,9 +803,7 @@ begin
         end;
       end;
     end
-// 不处理 ^= 这种得紧挨着的字符转义，因为没法和 P^ = 0 这种区分，而后者明显使用更广泛
-//    else if (FLastToken = tokHat) and (Length(Scaner.TokenString) = 1) then
-//      CodeGen.Write(Scaner.TokenString, 0, 0)
+
     else if FIsTypeID then // 如果是类型名，则按规则处理 Scaner.TokenString
     begin
       CodeGen.Write(CheckIdentifierName(Scaner.TokenString), BeforeSpaceCount,
