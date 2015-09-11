@@ -36,6 +36,8 @@ unit CnWizUtils;
 * 备    注：该单元定义了 CnWizards 专家包的公共过程库
 *           该单元部分内容移植自 GExperts
 *           其原始内容受 GExperts License 的保护
+*           注意：IOTAEditBlock.Start/Ending/Column/Row 是 1 开始的。
+*           IOTAEditView.Position.Move的参数，其 Col 也是 1 开始的。
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
@@ -3516,7 +3518,7 @@ begin
     Exit;
 
   EditBlock := EditView.Block;
-  if not Assigned(EditBlock) and not EditBlock.IsValid then
+  if not Assigned(EditBlock) or not EditBlock.IsValid then
   begin
     EditPos := EditView.CursorPos;
     EditView.ConvertPos(True, EditPos, StartPos);
@@ -3599,7 +3601,7 @@ begin
     Exit;
 
   EditBlock := EditView.Block;
-  if not Assigned(EditBlock) and not EditBlock.IsValid then
+  if not Assigned(EditBlock) or not EditBlock.IsValid then
   begin
     EditPos := EditView.CursorPos;
     EditView.ConvertPos(True, EditPos, StartPos);
