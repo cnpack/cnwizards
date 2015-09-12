@@ -3590,7 +3590,7 @@ function CnOtaReplaceCurrentSelectionUtf8(const Utf8Text: AnsiString;
 var
   EditView: IOTAEditView;
   EditBlock: IOTAEditBlock;
-  EditPos: TOTAEditPos;
+  EditPos, InsPos: TOTAEditPos;
   StartPos, EndPos: TOTACharPos;
   LinearPos: Integer;
   InsertLen: Integer;
@@ -3626,11 +3626,16 @@ begin
 {$ENDIF}
     end;
 
-    StartPos.Line := EditBlock.StartingRow;
-    StartPos.CharIndex := EditBlock.StartingColumn;
+    InsPos.Line := EditBlock.StartingRow;
+    InsPos.Col := EditBlock.StartingColumn;
+
+    EditView.ConvertPos(True, InsPos, StartPos); // 1 开始变成了 0 开始
     EditBlock.Delete;
 
-    CnOtaInsertTextIntoEditorUtf8(Utf8Text);
+    // EditBlock.Delete 后当前光标位置不确定，不能直接调用 CnOtaInsertTextIntoEditor
+    // 来在当前光标位置处插入文本，否则可能产生插入位置偏差
+    LinearPos := EditView.CharPosToPos(StartPos);
+    CnOtaInsertTextIntoEditorAtPosUtf8(Utf8Text, LinearPos);
   end;
 
   EditBlock := nil;
@@ -4096,6 +4101,7 @@ end;
 function CnOtaMoveAndSelectBlock(const Start, After: TOTACharPos; View: IOTAEditView): Boolean;
 var
   Block: IOTAEditBlock;
+  Row, Col: Integer;
 begin
   Result := False;
   if View = nil then
@@ -4103,7 +4109,12 @@ begin
   if View = nil then
     Exit;
 
-  View.Position.Move(Start.Line, Start.CharIndex);
+  Row := Start.Line;       // 2005~2007 下 Col 为 0 会导致光标随机出现在行中间所以必须限制最小为 1
+  Col := Start.CharIndex;
+  if Col <= 0 then
+    Col := 1;
+
+  View.Position.Move(Row, Col);
   Block := View.Block;
   if Block = nil then
     Exit;
@@ -4111,7 +4122,13 @@ begin
   Block.Reset;
   Block.Style := btNonInclusive;
   Block.BeginBlock;
-  View.Position.Move(After.Line, After.CharIndex);
+
+  Row := After.Line;
+  Col := After.CharIndex;
+  if Col <= 0 then
+    Col := 1;
+
+  View.Position.Move(Row, Col);
   Block.EndBlock;
   Result := True;
 end;
