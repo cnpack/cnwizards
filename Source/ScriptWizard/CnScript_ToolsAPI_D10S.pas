@@ -60,6 +60,7 @@ procedure SIRegister_TOTAStringsAdapter(CL: TPSPascalCompiler);
 procedure SIRegister_TOTAFile(CL: TPSPascalCompiler);
 procedure SIRegister_TModuleNotifierObject(CL: TPSPascalCompiler);
 procedure SIRegister_TNotifierObject(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAGetItService220(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAGetItService(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAProjectUnitScopes(CL: TPSPascalCompiler);
 procedure SIRegister_IOTABuildEventProvider(CL: TPSPascalCompiler);
@@ -472,13 +473,23 @@ begin
 end;
 
 (*----------------------------------------------------------------------------*)
-procedure SIRegister_IOTAGetItService(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAGetItService220(CL: TPSPascalCompiler);
 begin
-  //with RegInterfaceS(CL,'IUNKNOWN', 'IOTAGetItService') do
-  with CL.AddInterface(CL.FindInterface('IUNKNOWN'),IOTAGetItService, 'IOTAGetItService') do
+  //with RegInterfaceS(CL,'IUNKNOWN', 'IOTAGetItService220') do
+  with CL.AddInterface(CL.FindInterface('IUNKNOWN'),IOTAGetItService220, 'IOTAGetItService220') do
   begin
     RegisterMethod('Function Install( const CatalogId : string) : Boolean', cdRegister);
     RegisterMethod('Function Uninstall( const CatalogId : string) : Boolean', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAGetItService(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTAGetItService220', 'IOTAGetItService') do
+  with CL.AddInterface(CL.FindInterface('IOTAGetItService220'),IOTAGetItService, 'IOTAGetItService') do
+  begin
+    RegisterMethod('Function IsInstalled(const CatalogId: string): Boolean', cdRegister);
   end;
 end;
 
@@ -5196,6 +5207,7 @@ begin
  CL.AddConstantN('kfImplicitShift','LongWord').SetUInt( $01);
  CL.AddConstantN('kfImplicitModifier','LongWord').SetUInt( $02);
  CL.AddConstantN('kfImplicitKeypad','LongWord').SetUInt( $04);
+ CL.AddConstantN('kfLiteralChar','LongWord').SetUInt( $08);
  CL.AddConstantN('rfBackward','LongWord').SetUInt( $0100);
  CL.AddConstantN('rfInvertLegalChars','LongWord').SetUInt( $1000);
  CL.AddConstantN('rfIncludeUpperAlphaChars','LongWord').SetUInt( $0001);
@@ -5247,6 +5259,7 @@ begin
  CL.AddConstantN('cDefEdDefault','String').SetString( 'Borland.EditOptions.Default');
  CL.AddConstantN('cDefEdPascal','String').SetString( 'Borland.EditOptions.Pascal');
  CL.AddConstantN('cDefEdC','String').SetString( 'Borland.EditOptions.C');
+ CL.AddConstantN('cDefEdObjCpp','String').SetString( 'Borland.EditOptions.ObjectiveC++');
  CL.AddConstantN('cDefEdCSharp','String').SetString( 'Borland.EditOptions.C#');
  CL.AddConstantN('cDefEdHTML','String').SetString( 'Borland.EditOptions.HTML');
  CL.AddConstantN('cDefEdXML','String').SetString( 'Borland.EditOptions.XML');
@@ -5265,6 +5278,7 @@ begin
  CL.AddConstantN('dcLockControls','String').SetString( 'LockControls');
  CL.AddConstantN('dcFlipChildrenAll','String').SetString( 'FlipChildrenAll');
  CL.AddConstantN('dcFlipChildrenSelected','String').SetString( 'FilpChildrenSelected');
+ CL.AddConstantN('dcToggleNonVisualComponentVisibility','String').SetString( 'ToggleNonVisualComponentVisibility');
  CL.AddConstantN('sBorlandEditorCodeExplorer','String').SetString( 'BorlandEditorCodeExplorer');
  CL.AddConstantN('sBaseContainer','String').SetString( 'BaseContainer');
  CL.AddConstantN('sFileContainer','String').SetString( 'FileContainer');
@@ -5859,6 +5873,7 @@ begin
   SIRegister_IOTABuildEvent(CL);
   SIRegister_IOTABuildEventProvider(CL);
   SIRegister_IOTAProjectUnitScopes(CL);
+  SIRegister_IOTAGetItService220(CL);
   SIRegister_IOTAGetItService(CL);
   SIRegister_TNotifierObject(CL);
   SIRegister_TModuleNotifierObject(CL);
