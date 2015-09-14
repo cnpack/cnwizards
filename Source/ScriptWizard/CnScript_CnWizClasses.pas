@@ -49,7 +49,11 @@ uses
 type 
 (*----------------------------------------------------------------------------*)
   TPSImport_CnWizClasses = class(TPSPlugin)
+{$IFDEF COMPILER12_UP}
+  public
+{$ELSE}
   protected
+{$ENDIF}
     procedure CompileImport1(CompExec: TPSScript); override;
     procedure ExecImport1(CompExec: TPSScript; const ri: TPSRuntimeClassImporter); override;
   end;
