@@ -416,6 +416,7 @@ begin
   FKeywordsValidArray[tokDirectiveREGISTER] := [pfetDirective];
 
   FKeywordsValidArray[tokComplexName] := [pfetDirective];
+  FKeywordsValidArray[tokKeywordAlign] := [pfetRecordEnd];
 
   // 未列出的关键字，表示在哪都是关键字
 end;
@@ -1734,7 +1735,7 @@ var
 begin
   case Scaner.Token of
     tokSymbol, tokAtSign, tokKeywordFinal, tokKeywordIn, tokKeywordOut,
-    tokKeywordString, tokInteger, tokFloat,
+    tokKeywordString, tokKeywordAlign, tokInteger, tokFloat,
     tokDirective_BEGIN..tokDirective_END, // 允许语句以部分关键字以及数字开头
     tokComplex_BEGIN..tokComplex_END:
       begin
@@ -3625,8 +3626,13 @@ begin
   Match(tokKeywordEnd, PreSpaceCount);
   if Scaner.Token = tokKeywordAlign then  // 支持 record end align 16 这种新语法
   begin
-    Match(tokKeywordAlign);
-    FormatConstExpr;
+    SpecifyElementType(pfetRecordEnd);
+    try
+      Match(tokKeywordAlign);
+      FormatConstExpr;
+    finally
+      RestoreElementType;
+    end;
   end;
 end;
 

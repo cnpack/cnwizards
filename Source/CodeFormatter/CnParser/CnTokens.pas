@@ -237,7 +237,7 @@ type
   TCnPascalFormattingElementType = (pfetUnknown, pfetAsm, pfetPropertySpecifier,
     pfetDirective, pfetPropertyIndex, pfetExpression, pfetEnumList, pfetRaiseAt,
     pfetArrayConstant, pfetSetConstructor, pfetFormalParameters, pfetConstExpr,
-    pfetUsesList, pfetThen, pfetDo);
+    pfetUsesList, pfetThen, pfetDo, pfetRecordEnd);
 
   TCnPascalFormattingElementTypeSet = set of TCnPascalFormattingElementType;
 
@@ -273,7 +273,7 @@ const
 
   StmtTokens = [tokKeywordLabel] + SimpStmtTokens + StructStmtTokens;
 
-  StmtKeywordTokens = [tokKeywordIn, tokKeywordOut, tokKeywordString];
+  StmtKeywordTokens = [tokKeywordIn, tokKeywordOut, tokKeywordString, tokKeywordAlign];
 
   RestrictedTypeTokens = [tokKeywordObject, tokKeywordClass, tokKeywordInterface,
     tokKeywordDispinterface];
@@ -346,8 +346,9 @@ const
   NeedSpaceAfterKeywordTokens = [tokKeywordIf, tokKeywordWhile, tokKeywordFor,
     tokKeywordWith, tokKeywordCase, tokKeywordTo, tokKeywordDownto, tokKeywordUntil];
 
-  function TokenToString(Token: TPascalToken): string;
-  function StringToToken(TokenStr: string): TPascalToken;
+function TokenToString(Token: TPascalToken): string;
+
+function StringToToken(TokenStr: string): TPascalToken;
 
 implementation
 
