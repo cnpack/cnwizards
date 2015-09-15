@@ -29,7 +29,7 @@ unit CnScript_ToolsAPI_D10S;
 * 兼容测试：PWin9X/2000/XP + Delphi
 * 本 地 化：该窗体中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2015.04.30 V1.0
+* 修改记录：2015.09.03 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -355,7 +355,9 @@ procedure SIRegister_IOTAElideActions120(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAEditActions(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAEditActions100(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAEditActions60(CL: TPSPascalCompiler);
+procedure SIRegister_INTAEditViewNotifier(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAEditView(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAEditView220(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAEditView145(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAEditView140(CL: TPSPascalCompiler);
 procedure SIRegister_INTAEditServicesNotifier(CL: TPSPascalCompiler);
@@ -4492,10 +4494,36 @@ begin
 end;
 
 (*----------------------------------------------------------------------------*)
+procedure SIRegister_INTAEditViewNotifier(CL: TPSPascalCompiler);
+begin
+  // INTAEditViewNotifier HAS NO GUID so comment it.
+  //with RegInterfaceS(CL,'IOTANotifier', 'INTAEditViewNotifier') do
+//  with CL.AddInterface(CL.FindInterface('IOTANotifier'),INTAEditViewNotifier, 'INTAEditViewNotifier') do
+//  begin
+//    RegisterMethod('Procedure EditorIdle( const View : IOTAEditView)', cdRegister);
+//    RegisterMethod('Procedure BeginPaint( const View : IOTAEditView; var FullRepaint : Boolean)', cdRegister);
+//    RegisterMethod('Procedure PaintLine( const View : IOTAEditView; LineNumber : Integer; const LineText : PAnsiChar; const TextWidth : Word; const LineAttributes : TOTAAttributeArray; const Canvas : TCanvas; const TextRect : TRect; const LineRect : TRect; const CellSize : TSize)', cdRegister);
+//    RegisterMethod('Procedure EndPaint( const View : IOTAEditView)', cdRegister);
+//  end;
+end;
+
+(*----------------------------------------------------------------------------*)
 procedure SIRegister_IOTAEditView(CL: TPSPascalCompiler);
 begin
-  //with RegInterfaceS(CL,'IOTAEditView145', 'IOTAEditView') do
-  with CL.AddInterface(CL.FindInterface('IOTAEditView145'),IOTAEditView, 'IOTAEditView') do
+  //with RegInterfaceS(CL,'IOTAEditView220', 'IOTAEditView') do
+  with CL.AddInterface(CL.FindInterface('IOTAEditView220'),IOTAEditView, 'IOTAEditView') do
+  begin
+    RegisterMethod('Procedure IncreaseDecreaseFontSize( const ActionMode : TOTAIncreaseDecreaseFontSizeMode)', cdRegister);
+    RegisterMethod('Function AddNotifier( const Extension : IOTANotifier) : Integer', cdRegister);
+    RegisterMethod('Procedure RemoveNotifier( Index : Integer)', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAEditView220(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTAEditView145', 'IOTAEditView220') do
+  with CL.AddInterface(CL.FindInterface('IOTAEditView145'),IOTAEditView220, 'IOTAEditView220') do
   begin
     RegisterMethod('Procedure NavigateToModification( Direction : TSearchDirection; ModificationType : TOTAModificationType)', cdRegister);
   end;
@@ -5481,7 +5509,12 @@ begin
   SIRegister_IOTAEditView145(CL);
   CL.AddTypeS('TOTAModificationType', '( mtModSinceLoad, mtModSinceSave, mtAnyM'
    +'od )');
+  SIRegister_IOTAEditView220(CL);
+  CL.AddTypeS('TOTAIncreaseDecreaseFontSizeMode', '( idFontIncrease, idFontDecr'
+   +'ease )');
   SIRegister_IOTAEditView(CL);
+  CL.AddTypeS('TOTAAttributeArray', 'array of Byte');
+  SIRegister_INTAEditViewNotifier(CL);
   CL.AddTypeS('TClassNavigateStyle', 'Byte');
   CL.AddTypeS('TCodeCompleteStyle', 'Byte');
   CL.AddTypeS('TOTANavigateType', '( ntUp, ntDown, ntHome, ntEnd )');
