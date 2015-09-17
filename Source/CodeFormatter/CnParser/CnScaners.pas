@@ -879,33 +879,47 @@ begin
 
     '^':
       begin
-        Inc(P);
-        Result := tokHat;
-
-        // 目前只处理 ^H^J 这种尖号后单个字符的场合，暂未处理混合''型字符串的情形
         OldP := P;
-        IsString := True;
 
-        repeat // 进入此循环时，P 必定指向 ^ 后的一个字符
-          if not (P^ in [#33..#126]) then
-          begin // ^ 后字符不对则表示不是字符串，跳出
-            IsString := False;
-            Break;
-          end;
+        Inc(P);
+        Result := tokNoToken;
 
-          Inc(P);
-          if P^ = '^' then
-          begin
+        // 回溯两步，如果^之前是字母数字或^，就表示不是字符串而是Hat
+        if OldP > FBuffer then
+        begin
+          Dec(OldP);
+          if OldP^ in ['A'..'Z', 'a'..'z', '0'..'9', '^'] then
+            Result := tokHat;
+        end;
+
+        OldP := P;
+        IsString := False;
+        if Result <> tokHat then // 没有确定是 Hat 的情况下，再判断是否是字符串
+        begin
+          // 目前只处理 ^H^J 这种尖号后单个字符的场合，暂未处理混合''型字符串的情形
+          IsString := True;
+
+          repeat // 进入此循环时，P 必定指向 ^ 后的一个字符
+            if not (P^ in [#33..#126]) then
+            begin // ^ 后字符不对则表示不是字符串，跳出
+              IsString := False;
+              Break;
+            end;
+
             Inc(P);
-            Continue;
-          end;
+            if P^ = '^' then
+            begin
+              Inc(P);
+              Continue;
+            end;
 
-          // ^后的字符之后如果不是^，就需要退出，如果同时还是标识符，说明不是字符串，回溯。
-          if P^ in ['A'..'Z', 'a'..'z', '0'..'9', '_'] then
-            IsString := False;
+            // ^后的字符之后如果不是^，就需要退出，如果同时还是标识符，说明不是字符串，回溯。
+            if P^ in ['A'..'Z', 'a'..'z', '0'..'9', '_'] then
+              IsString := False;
 
-          Break;
-        until False;
+            Break;
+          until False;
+        end;
 
         if IsString then
         begin
@@ -913,7 +927,10 @@ begin
           FStringPtr := P;
         end
         else
+        begin
           P := OldP;
+          Result := tokHat;
+        end;
       end;
 
     '#', '''':
