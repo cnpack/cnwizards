@@ -526,7 +526,8 @@ begin
   Position := EditView.CharPosToPos(CharPos);
 
   // 当光标在空行非行首时，Position 指向空行行首，会造成偏差，需要纠正
-  if CnNtaGetCurrLineText(LineText, DummyIdx1, DummyIdx2) then
+  // 但 ipCurrPos 时 CnOtaInsertTextIntoEditor 已经考虑到了这种情况，因此不需要纠正
+  if (InsertPos <> ipCurrPos) and CnNtaGetCurrLineText(LineText, DummyIdx1, DummyIdx2) then
   begin
     if Trim(LineText) = '' then
     begin
@@ -539,10 +540,12 @@ begin
   if InsertPos = ipCurrPos then
   begin
 {$IFDEF UNICODE}
-    EditView.Buffer.EditPosition.InsertText(string(ConvertTextToEditorText(AnsiString(AContent))));
+//  EditView.Buffer.EditPosition.InsertText(string(ConvertTextToEditorText(AnsiString(AContent))));
 {$ELSE}
-    EditView.Buffer.EditPosition.InsertText(ConvertTextToEditorText(AContent));
+//  EditView.Buffer.EditPosition.InsertText(ConvertTextToEditorText(AContent));
 {$ENDIF}
+    // EditPosition.InsertText 对于多行文本插入会出现不必要的缩进，得换
+    CnOtaInsertTextIntoEditor(AContent);
   end
   else
   begin
