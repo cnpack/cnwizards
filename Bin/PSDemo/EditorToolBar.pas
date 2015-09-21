@@ -43,7 +43,11 @@ begin
     Writeln(Parent.Controls[I].ClassName);
 
     if Parent.Controls[I].ClassNameIs('TEditorNavigationToolbar') then
-      Parent.Controls[I].Visible := not Parent.Controls[I].Visible;
+    begin
+      (Parent.Controls[I] as TToolbar).AutoSize := False;
+      Parent.Controls[I].Height := 0;
+      Parent.Controls[I].Visible := False;
+    end;
   end;
 end.
  
