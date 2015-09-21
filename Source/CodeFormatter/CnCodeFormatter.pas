@@ -1440,12 +1440,17 @@ end;
 { CaseLabel -> ConstExpr ['..' ConstExpr] }
 procedure TCnBasePascalFormatter.FormatCaseLabel(PreSpaceCount: Byte);
 begin
-  FormatConstExpr(PreSpaceCount);
+  SpecifyElementType(pfetCaseLabel);
+  try
+    FormatConstExpr(PreSpaceCount);
 
-  if Scaner.Token = tokRange then
-  begin
-    Match(tokRange);
-    FormatConstExpr;
+    if Scaner.Token = tokRange then
+    begin
+      Match(tokRange);
+      FormatConstExpr;
+    end;
+  finally
+    RestoreElementType;
   end;
 end;
 
@@ -5476,8 +5481,9 @@ end;
 function TCnAbstractCodeFormatter.CalcNeedPadding: Boolean;
 begin
   Result := (FElementType in [pfetExpression, pfetEnumList,pfetArrayConstant,
-    pfetSetConstructor, pfetFormalParameters, pfetConstExpr, pfetUsesList,
+    pfetSetConstructor, pfetFormalParameters, pfetUsesList,
     pfetThen, pfetDo])
+    or ((FElementType in [pfetConstExpr]) and not UpperContainElementType([pfetCaseLabel])) // Case Label 的无需跟随上面一行注释缩进
     or UpperContainElementType([pfetFormalParameters, pfetArrayConstant]);
   // 暂且表达式内部与枚举定义内部等一系列元素内部，或者在参数列表、uses 中
   // 碰到注释导致的换行时，才要求自动和上一行对齐
