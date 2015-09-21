@@ -884,11 +884,11 @@ begin
         Inc(P);
         Result := tokNoToken;
 
-        // 回溯两步，如果^之前是字母数字或^，就表示不是字符串而是Hat
+        // 回溯两步，如果^之前是字母数字或)]^，就表示不是字符串而是Hat
         if OldP > FBuffer then
         begin
           Dec(OldP);
-          if OldP^ in ['A'..'Z', 'a'..'z', '0'..'9', '^'] then
+          if OldP^ in ['A'..'Z', 'a'..'z', '0'..'9', '^', ')', ']'] then
             Result := tokHat;
         end;
 
