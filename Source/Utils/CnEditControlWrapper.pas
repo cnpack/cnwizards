@@ -203,6 +203,9 @@ type
   TEditorNcPaintNotifier = procedure(Editor: TEditorObject) of object;
   {* 编辑器非客户区重画通知}
 
+  TEditorVScrollNotifier = procedure(Editor: TEditorObject) of object;
+  {* 编辑器纵向滚动通知}
+
   TCnBreakPointClickItem = class
   private
     FBpPosY: Integer;
@@ -237,6 +240,7 @@ type
     FMouseMoveNotifiers: TList;
     FMouseLeaveNotifiers: TList;
     FNcPaintNotifiers: TList;
+    FVScrollNotifiers: TList;
 
     FEditorList: TObjectList;
     FEditControlList: TList;
@@ -293,6 +297,7 @@ type
       X, Y: Integer; IsNC: Boolean);
     procedure DoMouseLeave(Editor: TEditorObject; IsNC: Boolean);
     procedure DoNcPaint(Editor: TEditorObject);
+    procedure DoVScroll(Editor: TEditorObject);
 
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
@@ -417,6 +422,11 @@ type
     procedure AddEditorNcPaintNotifier(Notifier: TEditorNcPaintNotifier);
     {* 增加编辑器非客户区重画通知 }
     procedure RemoveEditorNcPaintNotifier(Notifier: TEditorNcPaintNotifier);
+    {* 删除编辑器非客户区重画通知 }
+
+    procedure AddEditorVScrollNotifier(Notifier: TEditorVScrollNotifier);
+    {* 增加编辑器非客户区重画通知 }
+    procedure RemoveEditorVScrollNotifier(Notifier: TEditorVScrollNotifier);
     {* 删除编辑器非客户区重画通知 }
 
     property MouseNotifyAvailable: Boolean read FMouseNotifyAvailable;
@@ -776,6 +786,7 @@ begin
   FMouseLeaveNotifiers := TList.Create;
   FEditControlList := TList.Create;
   FNcPaintNotifiers := TList.Create;
+  FVScrollNotifiers := TList.Create;
 
   FEditorList := TObjectList.Create;
   InitEditControlHook;
@@ -824,6 +835,7 @@ begin
   ClearHighlights;
   FHighlights.Free;
 
+  ClearAndFreeList(FVScrollNotifiers);
   ClearAndFreeList(FNcPaintNotifiers);
   ClearAndFreeList(FMouseUpNotifiers);
   ClearAndFreeList(FMouseDownNotifiers);
@@ -2075,7 +2087,15 @@ begin
     and IsEditControl(Control) then
   begin
     if Msg.Msg = WM_VSCROLL then
-      ChangeType := [ctVScroll]
+    begin
+      ChangeType := [ctVScroll];
+      Editor := nil;
+      Idx := FEditControlWrapper.IndexOfEditor(Control);
+      if Idx >= 0 then
+        Editor := FEditControlWrapper.GetEditors(Idx);
+
+      DoVScroll(Editor);
+    end
     else
       ChangeType := [ctHScroll];
 
@@ -2395,6 +2415,31 @@ begin
       TEditorNcPaintNotifier(Notifier)(Editor);
   except
     DoHandleException('TCnEditControlWrapper.DoNcPaint[' + IntToStr(I) + ']');
+  end;
+end;
+
+procedure TCnEditControlWrapper.AddEditorVScrollNotifier(
+  Notifier: TEditorVScrollNotifier);
+begin
+  AddNotifier(FVScrollNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnEditControlWrapper.RemoveEditorVScrollNotifier(
+  Notifier: TEditorVScrollNotifier);
+begin
+  RemoveNotifier(FVScrollNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnEditControlWrapper.DoVScroll(Editor: TEditorObject);
+var
+  I: Integer;
+begin
+  for I := 0 to FVScrollNotifiers.Count - 1 do
+  try
+    with PCnWizNotifierRecord(FVScrollNotifiers[I])^ do
+      TEditorVScrollNotifier(Notifier)(Editor);
+  except
+    DoHandleException('TCnEditControlWrapper.DoVScroll[' + IntToStr(I) + ']');
   end;
 end;
 

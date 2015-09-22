@@ -64,8 +64,11 @@ type
     procedure HookMouseMove(Editor: TEditorObject; Shift: TShiftState;
       X, Y: Integer; IsNC: Boolean);
     procedure HookMouseLeave(Editor: TEditorObject; IsNC: Boolean);
+    procedure OnNcPaint(Editor: TEditorObject);
+    procedure OnVScroll(Editor: TEditorObject);
 
     procedure SetInScrollBar(const Value: Boolean);
+    procedure DrawNc(Edit: TWinControl);
   protected
     function GetHasConfig: Boolean; override;
   public
@@ -113,7 +116,36 @@ begin
   EditControlWrapper.RemoveEditorMouseUpNotifier(HookMouseUp);
   EditControlWrapper.RemoveEditorMouseMoveNotifier(HookMouseMove);
   EditControlWrapper.RemoveEditorMouseLeaveNotifier(HookMouseLeave);
+
+  EditControlWrapper.RemoveEditorNcPaintNotifier(OnNcPaint);
+  EditControlWrapper.RemoveEditorVScrollNotifier(OnVScroll);
   inherited;
+end;
+
+procedure TCnTestEditCtrlMouseHookWizard.DrawNc(Edit: TWinControl);
+var
+  Canvas: TCanvas;
+  Handle: THandle;
+  ScrollWidth: Integer;
+begin
+  Canvas := TCanvas.Create;
+  Handle := Edit.Handle;
+
+  try
+    Canvas.Handle := GetWindowDC(Handle) ;
+    Canvas.Pen.Color := clNavy;
+    Canvas.Pen.Width := 2;
+    Canvas.Brush.Color := clRed;
+    Canvas.Brush.Style := bsSolid;
+
+    ScrollWidth := Edit.Width - Edit.ClientWidth;
+    CnDebugger.TraceFmt('DrawNc ScrollBar Width %d.', [ScrollWidth]);
+
+    Canvas.Rectangle(Rect(Edit.ClientWidth, 40, Edit.Width, 80) );
+  finally
+    ReleaseDC(Handle, Canvas.Handle) ;
+    Canvas.Free;
+  end;
 end;
 
 procedure TCnTestEditCtrlMouseHookWizard.Execute;
@@ -122,6 +154,9 @@ begin
   EditControlWrapper.AddEditorMouseUpNotifier(HookMouseUp);
   EditControlWrapper.AddEditorMouseMoveNotifier(HookMouseMove);
   EditControlWrapper.AddEditorMouseLeaveNotifier(HookMouseLeave);
+
+  EditControlWrapper.AddEditorNcPaintNotifier(OnNcPaint);
+  EditControlWrapper.AddEditorVScrollNotifier(OnVScroll);
   InfoDlg('Mouse Event Hooked.');
 end;
 
@@ -232,6 +267,24 @@ end;
 procedure TCnTestEditCtrlMouseHookWizard.LoadSettings(Ini: TCustomIniFile);
 begin
 
+end;
+
+procedure TCnTestEditCtrlMouseHookWizard.OnNcPaint(Editor: TEditorObject);
+begin
+  CnDebugger.TraceMsg('Editor NcPaint.');
+  if not (Editor.EditControl is TWinControl) then
+    Exit;
+
+  DrawNc(TWinControl(Editor.EditControl));
+end;
+
+procedure TCnTestEditCtrlMouseHookWizard.OnVScroll(Editor: TEditorObject);
+begin
+  CnDebugger.TraceMsg('Editor VScroll.');
+  if not (Editor.EditControl is TWinControl) then
+    Exit;
+
+  DrawNc(TWinControl(Editor.EditControl));
 end;
 
 procedure TCnTestEditCtrlMouseHookWizard.SaveSettings(Ini: TCustomIniFile);
