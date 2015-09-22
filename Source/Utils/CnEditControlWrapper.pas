@@ -199,6 +199,10 @@ type
   TEditorMouseLeaveNotifier = procedure(Editor: TEditorObject; IsNC: Boolean) of object;
   {* 编辑器内鼠标离开通知}
 
+  // 编辑器非客户区相关通知，用于滚动条重绘
+  TEditorNcPaintNotifier = procedure(Editor: TEditorObject) of object;
+  {* 编辑器非客户区重画通知}
+
   TCnBreakPointClickItem = class
   private
     FBpPosY: Integer;
@@ -232,6 +236,7 @@ type
     FMouseDownNotifiers: TList;
     FMouseMoveNotifiers: TList;
     FMouseLeaveNotifiers: TList;
+    FNcPaintNotifiers: TList;
 
     FEditorList: TObjectList;
     FEditControlList: TList;
@@ -287,6 +292,7 @@ type
     procedure DoMouseMove(Editor: TEditorObject; Shift: TShiftState;
       X, Y: Integer; IsNC: Boolean);
     procedure DoMouseLeave(Editor: TEditorObject; IsNC: Boolean);
+    procedure DoNcPaint(Editor: TEditorObject);
 
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
@@ -407,6 +413,11 @@ type
     {* 增加编辑器鼠标离开通知 }
     procedure RemoveEditorMouseLeaveNotifier(Notifier: TEditorMouseLeaveNotifier);
     {* 删除编辑器鼠标离开通知 }
+
+    procedure AddEditorNcPaintNotifier(Notifier: TEditorNcPaintNotifier);
+    {* 增加编辑器非客户区重画通知 }
+    procedure RemoveEditorNcPaintNotifier(Notifier: TEditorNcPaintNotifier);
+    {* 删除编辑器非客户区重画通知 }
 
     property MouseNotifyAvailable: Boolean read FMouseNotifyAvailable;
     {* 返回编辑器的鼠标事件通知服务是否可用 }
@@ -764,6 +775,7 @@ begin
   FMouseMoveNotifiers := TList.Create;
   FMouseLeaveNotifiers := TList.Create;
   FEditControlList := TList.Create;
+  FNcPaintNotifiers := TList.Create;
 
   FEditorList := TObjectList.Create;
   InitEditControlHook;
@@ -773,12 +785,12 @@ begin
 
   CnWizNotifierServices.AddSourceEditorNotifier(OnSourceEditorNotify);
   CnWizNotifierServices.AddActiveFormNotifier(OnActiveFormChange);
-  CnWizNotifierServices.AddGetMsgNotifier(OnGetMsgProc, [WM_MOUSEMOVE,
-    WM_LBUTTONDOWN, WM_LBUTTONUP, WM_RBUTTONDOWN, WM_RBUTTONUP, WM_MBUTTONDOWN,
-    WM_MBUTTONUP, WM_NCMOUSEMOVE, WM_NCLBUTTONDOWN, WM_NCLBUTTONUP, WM_NCRBUTTONDOWN,
+  CnWizNotifierServices.AddGetMsgNotifier(OnGetMsgProc, [WM_MOUSEMOVE, WM_NCMOUSEMOVE,
+    WM_LBUTTONDOWN, WM_LBUTTONUP, WM_RBUTTONDOWN, WM_RBUTTONUP,
+    WM_MBUTTONDOWN, WM_MBUTTONUP, WM_NCLBUTTONDOWN, WM_NCLBUTTONUP, WM_NCRBUTTONDOWN,
     WM_NCRBUTTONUP, WM_NCMBUTTONDOWN, WM_NCMBUTTONUP, WM_MOUSELEAVE, WM_NCMOUSELEAVE]);
   CnWizNotifierServices.AddCallWndProcRetNotifier(OnCallWndProcRet,
-    [WM_VSCROLL, WM_HSCROLL]);
+    [WM_VSCROLL, WM_HSCROLL, WM_NCPAINT, WM_NCACTIVATE]);
   CnWizNotifierServices.AddApplicationMessageNotifier(ApplicationMessage);
   CnWizNotifierServices.AddApplicationIdleNotifier(OnIdle);
 
@@ -812,6 +824,7 @@ begin
   ClearHighlights;
   FHighlights.Free;
 
+  ClearAndFreeList(FNcPaintNotifiers);
   ClearAndFreeList(FMouseUpNotifiers);
   ClearAndFreeList(FMouseDownNotifiers);
   ClearAndFreeList(FMouseMoveNotifiers);
@@ -2054,7 +2067,8 @@ end;
 procedure TCnEditControlWrapper.OnCallWndProcRet(Handle: HWND;
   Control: TWinControl; Msg: TMessage);
 var
-  I: Integer;
+  I, Idx: Integer;
+  Editor: TEditorObject;
   ChangeType: TEditorChangeTypes;
 begin
   if ((Msg.Msg = WM_VSCROLL) or (Msg.Msg = WM_HSCROLL))
@@ -2069,6 +2083,15 @@ begin
     begin
       DoEditorChange(Editors[I], ChangeType + CheckEditorChanges(Editors[i]));
     end;
+  end
+  else if (Msg.Msg = WM_NCPAINT) and IsEditControl(Control) then
+  begin
+    Editor := nil;
+    Idx := FEditControlWrapper.IndexOfEditor(Control);
+    if Idx >= 0 then
+      Editor := FEditControlWrapper.GetEditors(Idx);
+
+    DoNcPaint(Editor);
   end;
 end;
 
@@ -2347,6 +2370,32 @@ procedure TCnEditControlWrapper.RemoveEditorMouseLeaveNotifier(
   Notifier: TEditorMouseLeaveNotifier);
 begin
   RemoveNotifier(FMouseLeaveNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnEditControlWrapper.AddEditorNcPaintNotifier(
+  Notifier: TEditorNcPaintNotifier);
+begin
+  CheckAndSetEditControlMouseHookFlag;
+  AddNotifier(FNcPaintNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnEditControlWrapper.RemoveEditorNcPaintNotifier(
+  Notifier: TEditorNcPaintNotifier);
+begin
+  RemoveNotifier(FNcPaintNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnEditControlWrapper.DoNcPaint(Editor: TEditorObject);
+var
+  I: Integer;
+begin
+  for I := 0 to FNcPaintNotifiers.Count - 1 do
+  try
+    with PCnWizNotifierRecord(FNcPaintNotifiers[I])^ do
+      TEditorNcPaintNotifier(Notifier)(Editor);
+  except
+    DoHandleException('TCnEditControlWrapper.DoNcPaint[' + IntToStr(I) + ']');
+  end;
 end;
 
 initialization
