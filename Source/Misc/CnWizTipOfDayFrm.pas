@@ -124,6 +124,10 @@ begin
   FTips := TStringList.Create;
   FIni.ReadSectionValues(csTipItem, FTips);
   FCurIndex := Random(FTips.Count);
+
+{$IFDEF DELPHI10_SEATTLE_UP}
+  PanelBack.ParentBackground := False;
+{$ENDIF}
   ShowTip;
 end;
 
