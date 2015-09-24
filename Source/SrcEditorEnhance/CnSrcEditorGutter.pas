@@ -45,9 +45,21 @@ interface
 
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms, ToolsAPI,
-  IniFiles, CnEditControlWrapper, CnWizNotifier, CnIni, CnPopupMenu, CnFastList;
+  IniFiles, CnEditControlWrapper, CnWizNotifier, CnIni, CnPopupMenu, CnFastList,
+  CnEventBus;
 
 type
+  TCnSrcEditorGutter = class;
+
+  TCnIdentReceiver = class(TInterfacedObject, ICnEventBusReceiver)
+  private
+    FGutter: TCnSrcEditorGutter;
+  public
+    constructor Create(AGutter: TCnSrcEditorGutter);
+    destructor Destroy; override;
+
+    procedure OnEvent(Event: ICnEvent);
+  end;
 
 { TCnSrcEditorGutter }
 
@@ -62,6 +74,8 @@ type
     FEditControl: TControl;
     FEditWindow: TCustomForm;
     FMenu: TPopupMenu;
+    FLinesReceiver: ICnEventBusReceiver;
+    FIdentLines: TCnList;
 {$IFDEF BDS}
     FIDELineNumMenu: TMenuItem;
 {$ENDIF}
@@ -218,6 +232,11 @@ begin
   FMenu.OnPopup := MenuPopup;
   InitPopupMenu;
   PopupMenu := FMenu;
+
+  FIdentLines := TCnList.Create;
+  FLinesReceiver := TCnIdentReceiver.Create(Self);
+  EventBus.RegisterReceiver(FLinesReceiver, EVENT_HIGHLIGHT_IDENT_POSITION);
+
 {$IFNDEF BDS}
   FLineInfo := TCnList.Create;
 {$ENDIF}
@@ -226,8 +245,12 @@ end;
 
 destructor TCnSrcEditorGutter.Destroy;
 begin
+  EventBus.UnRegisterReceiver(FLinesReceiver);
+  FLinesReceiver := nil;
+
   FGutterMgr.FList.Remove(Self);
   EditControlWrapper.RemoveEditorChangeNotifier(EditorChanged);
+  FIdentLines.Free;
 {$IFNDEF BDS}
   FLineInfo.Free;
 {$ENDIF}
@@ -337,7 +360,7 @@ procedure TCnSrcEditorGutter.Paint;
 var
   R: TRect;
   StrNum: string;
-  I, Idx, TextHeight, MaxRow: Integer;
+  I, Y, Idx, TextHeight, MaxRow: Integer;
   EditorObj: TEditorObject;
   OldColor: TColor;
 begin
@@ -346,6 +369,21 @@ begin
 
   FPainting := True;
   try
+    if GetCurrentEditControl = EditControl then // 行位置缩略图只在最前画
+    begin
+      MaxRow := FPosInfo.LineCount;
+      Canvas.Pen.Color := clGray;
+      Canvas.Pen.Style := psSolid;
+      Canvas.Pen.Width := 1;
+
+      for I := 0 to FIdentLines.Count - 1 do
+      begin
+        Y := Height * Integer(FIdentLines[I]) div MaxRow;
+        Canvas.MoveTo(0, Y);
+        Canvas.LineTo(Width - 2, Y);
+      end;
+    end;
+
     TextHeight := EditControlWrapper.GetCharHeight;
     if TextHeight > 0 then
     begin
@@ -887,6 +925,35 @@ begin
   begin
     FShowModifier := Value;
     UpdateGutters;
+  end;
+end;
+
+{ TCnIdentReceiver }
+
+constructor TCnIdentReceiver.Create(AGutter: TCnSrcEditorGutter);
+begin
+  inherited Create;
+  FGutter := AGutter;
+end;
+
+destructor TCnIdentReceiver.Destroy;
+begin
+
+  inherited;
+end;
+
+procedure TCnIdentReceiver.OnEvent(Event: ICnEvent);
+begin
+  if FGutter <> nil then
+  begin
+    if Event.EventData = nil then
+      FGutter.FIdentLines.Clear
+    else
+      FGutter.FIdentLines.Assign(TCnList(Event.EventData));
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('TCnIdentReceiver OnEvent. %d Lines should Paint.', [FGutter.FIdentLines.Count]);
+{$ENDIF}
+    FGutter.Invalidate;
   end;
 end;
 
