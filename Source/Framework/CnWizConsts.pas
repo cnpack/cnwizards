@@ -344,6 +344,13 @@ resourcestring
   SCnCodeFormatterWizardFormatCurrent = 'CnCodeFormatterWizardFormatCurrent';
 
 //==============================================================================
+// Event Names used around CnEventBus
+//==============================================================================
+
+  // Source Highlight Event used to show Identifiers Positions
+  EVENT_HIGHLIGHT_IDENT_POSITION = 'HighlightIdentPosition';
+
+//==============================================================================
 // Need to Localize
 //==============================================================================
 

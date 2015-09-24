@@ -87,6 +87,8 @@ type
   TCnList = class(TCnBaseList)
   public
     constructor Create;
+
+    procedure Assign(Source: TCnList); virtual;
   end;
 
   TCnObjectList = class(TCnBaseList)
@@ -234,6 +236,18 @@ begin
 end;
 
 { TCnList }
+
+procedure TCnList.Assign(Source: TCnList);
+var
+  I: Integer;
+begin
+  if Source <> nil then
+  begin
+    Clear;
+    for I := 0 to Source.Count - 1 do
+      Add(Source[I]);
+  end;
+end;
 
 constructor TCnList.Create;
 begin

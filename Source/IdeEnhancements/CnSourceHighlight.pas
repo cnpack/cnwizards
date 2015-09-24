@@ -190,8 +190,8 @@ type
     FKeyTokenList: TCnList;           // 容纳解析出来的关键字 Tokens
     FCurTokenList: TCnList;           // 容纳解析出来的与光标当前词相同的 Tokens
     FCurTokenListEditLine: TCnList;   // 容纳解析出来的光标当前词相同的词的行数
-    FFlowTokenList: TCnList;          // 容纳解析出来的流程控制标识符的Token
-    FCompDirectiveTokenList: TCnList; // 容纳解析出来的编译指令Token
+    FFlowTokenList: TCnList;          // 容纳解析出来的流程控制标识符的 Tokens
+    FCompDirectiveTokenList: TCnList; // 容纳解析出来的编译指令 Tokens
 
     // *LineList 容纳快速访问结果
     FKeyLineList: TCnObjectList;      // 容纳按行方式存储的快速访问的关键字内容
@@ -662,7 +662,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnWizMethodHook, CnSourceHighlightFrm, CnWizCompilerConst;
+  CnWizMethodHook, CnSourceHighlightFrm, CnWizCompilerConst, CnEventBus;
 
 type
   TBracketChars = array[0..1] of AnsiChar;
@@ -1708,6 +1708,9 @@ begin
     FIdLineList.Clear;
     ConvertIdLineList;
   end;
+
+  // 朝外界发送标识符所在行信息的更新通知
+  EventBus.PostEvent(EVENT_HIGHLIGHT_IDENT_POSITION, FCurTokenListEditLine);
 
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('FCurTokenList.Count: %d; FCurrentTokenName: %s',
