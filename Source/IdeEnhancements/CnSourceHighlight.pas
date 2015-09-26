@@ -190,6 +190,7 @@ type
     FKeyTokenList: TCnList;           // 容纳解析出来的关键字 Tokens
     FCurTokenList: TCnList;           // 容纳解析出来的与光标当前词相同的 Tokens
     FCurTokenListEditLine: TCnList;   // 容纳解析出来的光标当前词相同的词的行数
+    FCurTokenListEditCol: TCnList;    // 容纳解析出来的光标当前词相同的词的列数
     FFlowTokenList: TCnList;          // 容纳解析出来的流程控制标识符的 Tokens
     FCompDirectiveTokenList: TCnList; // 容纳解析出来的编译指令 Tokens
 
@@ -451,6 +452,7 @@ type
     FCurrentTokenBackground: TColor;
     FCurrentTokenForeground: TColor;
     FCurrentTokenBorderColor: TColor;
+    FShowTokenPosAtGutter: Boolean;
     FBlockMatchLineEnd: Boolean;
     FBlockMatchLineHori: Boolean;
     FBlockMatchLineHoriDot: Boolean;
@@ -579,6 +581,8 @@ type
     {* 光标下当前标识符高亮的背景色}
     property CurrentTokenBorderColor: TColor read FCurrentTokenBorderColor write FCurrentTokenBorderColor;
     {* 光标下当前标识符高亮的边框色}
+    property ShowTokenPosAtGutter: Boolean read FShowTokenPosAtGutter write FShowTokenPosAtGutter;
+    {* 是否把光标下当前标识符们的位置显示在行号栏上}
     property BlockHighlightRange: TBlockHighlightRange read FBlockHighlightRange write FBlockHighlightRange;
     {* 高亮范围，默认改成了 brAll}
     property BlockHighlightStyle: TBlockHighlightStyle read FBlockHighlightStyle write FBlockHighlightStyle;
@@ -732,10 +736,14 @@ const
   csBlockMatchLineHoriDot = 'BlockMatchLineHoriDot';
   csBlockMatchHighlight = 'BlockMatchHighlight';
   csBlockMatchBackground = 'BlockMatchBackground';
+
   csCurrentTokenHighlight = 'CurrentTokenHighlight';
   csCurrentTokenColor = 'CurrentTokenColor';
   csCurrentTokenColorBk = 'CurrentTokenColorBk';
   csCurrentTokenColorBd = 'CurrentTokenColorBd';
+  csShowTokenPosAtGutter = 'ShowTokenPosAtGutter';
+  csLineGutterColor = 'LineGutterColor';
+
   csHilightSeparateLine = 'HilightSeparateLine';
   csSeparateLineColor = 'SeparateLineColor';
   csSeparateLineStyle = 'SeparateLineStyle';
@@ -1574,6 +1582,7 @@ begin
 
   FCurTokenList.Clear;
   FCurTokenListEditLine.Clear;
+  FCurTokenListEditCol.Clear;
   if not FIsCppSource then
   begin
     if Assigned(Parser) then
@@ -1640,6 +1649,8 @@ begin
 
             FCurTokenList.Add(AToken);
             FCurTokenListEditLine.Add(Pointer(AToken.EditLine));
+            if FHighlight.ShowTokenPosAtGutter then
+              FCurTokenListEditCol.Add(Pointer(AToken.EditCol));
           end;
         end;
 
@@ -1701,6 +1712,8 @@ begin
 
           FCurTokenList.Add(AToken);
           FCurTokenListEditLine.Add(Pointer(AToken.EditLine));
+          if FHighlight.ShowTokenPosAtGutter then
+              FCurTokenListEditCol.Add(Pointer(AToken.EditCol));
         end;
       end;
     end;
@@ -1710,7 +1723,11 @@ begin
   end;
 
   // 朝外界发送标识符所在行信息的更新通知
-  EventBus.PostEvent(EVENT_HIGHLIGHT_IDENT_POSITION, FCurTokenListEditLine);
+  if FHighlight.ShowTokenPosAtGutter then
+  begin
+    EventBus.PostEvent(EVENT_HIGHLIGHT_IDENT_POSITION, FCurTokenListEditLine,
+      FCurTokenListEditCol);
+  end;
 
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('FCurTokenList.Count: %d; FCurrentTokenName: %s',
@@ -2117,6 +2134,7 @@ begin
   FKeyTokenList.Clear;
   FCurTokenList.Clear;
   FCurTokenListEditLine.Clear;
+  FCurTokenListEditCol.Clear;
   FFlowTokenList.Clear;
   FCompDirectiveTokenList.Clear;
 
@@ -2163,6 +2181,7 @@ begin
   FKeyTokenList := TCnList.Create;
   FCurTokenList := TCnList.Create;
   FCurTokenListEditLine := TCnList.Create;
+  FCurTokenListEditCol := TCnList.Create;
   FFlowTokenList := TCnList.Create;
   FCompDirectiveTokenList := TCnList.Create;
 
@@ -2194,6 +2213,7 @@ begin
   FCompDirectiveTokenList.Free;
   FFlowTokenList.Free;
   FCurTokenListEditLine.Free;
+  FCurTokenListEditCol.Free;
   FCurTokenList.Free;
   FKeyTokenList.Free;
   
@@ -2409,6 +2429,8 @@ begin
   FCurrentTokenBackground := csDefCurTokenColorBg;
   FCurrentTokenForeground := csDEfCurTokenColorFg;
   FCurrentTokenBorderColor := csDefCurTokenColorBd;
+
+  FShowTokenPosAtGutter := False; // 默认把标识符的位置显示在行号栏上
 
   FBlockHighlightRange := brAll;
   FBlockMatchDelay := 600;  // 默认延时 600 毫秒
@@ -4489,6 +4511,8 @@ begin
     FCurrentTokenForeground := ReadColor('', csCurrentTokenColor, FCurrentTokenForeground);
     FCurrentTokenBackground := ReadColor('', csCurrentTokenColorBk, FCurrentTokenBackground);
     FCurrentTokenBorderColor := ReadColor('', csCurrentTokenColorBd, FCurrentTokenBorderColor);
+    FShowTokenPosAtGutter := ReadBool('', csShowTokenPosAtGutter, FShowTokenPosAtGutter);
+
     FHilightSeparateLine := ReadBool('', csHilightSeparateLine, FHilightSeparateLine);
     FSeparateLineColor := ReadColor('', csSeparateLineColor, FSeparateLineColor);
     FSeparateLineStyle := TCnLineStyle(ReadInteger('', csSeparateLineStyle, Ord(FSeparateLineStyle)));
@@ -4547,6 +4571,8 @@ begin
     WriteColor('', csCurrentTokenColor, FCurrentTokenForeground);
     WriteColor('', csCurrentTokenColorBk, FCurrentTokenBackground);
     WriteColor('', csCurrentTokenColorBd, FCurrentTokenBorderColor);
+    WriteBool('', csShowTokenPosAtGutter, FShowTokenPosAtGutter);
+
     WriteBool('', csHilightSeparateLine, FHilightSeparateLine);
     WriteColor('', csSeparateLineColor, FSeparateLineColor);
     WriteInteger('', csSeparateLineStyle, Ord(FSeparateLineStyle));

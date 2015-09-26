@@ -45,15 +45,17 @@ interface
 
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms, ToolsAPI,
-  IniFiles, CnEditControlWrapper, CnWizNotifier, CnIni, CnPopupMenu, CnFastList,
-  CnEventBus;
+  IniFiles, ExtCtrls,
+  CnEditControlWrapper, CnWizNotifier, CnIni, CnPopupMenu, CnFastList, CnEventBus;
 
 type
   TCnSrcEditorGutter = class;
 
   TCnIdentReceiver = class(TInterfacedObject, ICnEventBusReceiver)
   private
+    FTimer: TTimer;
     FGutter: TCnSrcEditorGutter;
+    procedure TimerOnTimer(Sender: TObject);
   public
     constructor Create(AGutter: TCnSrcEditorGutter);
     destructor Destroy; override;
@@ -76,6 +78,7 @@ type
     FMenu: TPopupMenu;
     FLinesReceiver: ICnEventBusReceiver;
     FIdentLines: TCnList;
+    FIdentCols: TCnList;
 {$IFDEF BDS}
     FIDELineNumMenu: TMenuItem;
 {$ENDIF}
@@ -96,13 +99,20 @@ type
 {$ENDIF}
     procedure SubItemClick(Sender: TObject);
     function GetLineCountRect: TRect;
+
+    // 二分法查找并返回 LinesList 中的匹配的下标，-1表示没有匹配。
+    function MatchPointToLineArea(LinesList: TCnList; const Delta, Y, AreaHeight,
+      TotalLine: Integer): Integer;
   protected
 {$IFDEF BDS}
     procedure SetEnabled(Value: Boolean); override;
 {$ENDIF}
+    procedure DblClick; override;
     procedure Click; override;
     procedure InitPopupMenu;
     procedure Paint; override;
+
+    procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -192,6 +202,12 @@ const
 
   csBevelWidth = 4;
   csModifierWidth = 5;
+
+  csIdentLineHeightDrawDelta = 1;
+  csIdentLineHeightMouseDelta = 2;
+  csIdentLineRightMargin = 4;
+  csIdentLineShowDelay = 200; // 200ms for show delay
+
   csDefaultModifiedColor = clYellow;
   csDefaultModifiedSavedColor = clGreen;
 
@@ -234,6 +250,7 @@ begin
   PopupMenu := FMenu;
 
   FIdentLines := TCnList.Create;
+  FIdentCols := TCnList.Create;
   FLinesReceiver := TCnIdentReceiver.Create(Self);
   EventBus.RegisterReceiver(FLinesReceiver, EVENT_HIGHLIGHT_IDENT_POSITION);
 
@@ -251,6 +268,7 @@ begin
   FGutterMgr.FList.Remove(Self);
   EditControlWrapper.RemoveEditorChangeNotifier(EditorChanged);
   FIdentLines.Free;
+  FIdentCols.Free;
 {$IFNDEF BDS}
   FLineInfo.Free;
 {$ENDIF}
@@ -360,7 +378,7 @@ procedure TCnSrcEditorGutter.Paint;
 var
   R: TRect;
   StrNum: string;
-  I, Y, Idx, TextHeight, MaxRow: Integer;
+  I, Y, Idx, TextHeight, MaxRow, OldWidth: Integer;
   EditorObj: TEditorObject;
   OldColor: TColor;
 begin
@@ -372,15 +390,15 @@ begin
     if GetCurrentEditControl = EditControl then // 行位置缩略图只在最前画
     begin
       MaxRow := FPosInfo.LineCount;
-      Canvas.Pen.Color := clGray;
+      Canvas.Pen.Color := $00B0B0B0;
       Canvas.Pen.Style := psSolid;
-      Canvas.Pen.Width := 1;
+      Canvas.Pen.Width := csIdentLineHeightDrawDelta * 2 + 1;
 
       for I := 0 to FIdentLines.Count - 1 do
       begin
         Y := Height * Integer(FIdentLines[I]) div MaxRow;
         Canvas.MoveTo(0, Y);
-        Canvas.LineTo(Width - 2, Y);
+        Canvas.LineTo(Width - csIdentLineRightMargin, Y);
       end;
     end;
 
@@ -449,6 +467,7 @@ begin
       end;
     end;
 
+    Canvas.Pen.Width := 1;
     Canvas.Pen.Color := clBtnHighlight;
     Canvas.MoveTo(Width - 1, 0);
     Canvas.LineTo(Width - 1, Height);
@@ -465,7 +484,7 @@ end;
 // 鼠标事件
 //------------------------------------------------------------------------------
 
-procedure TCnSrcEditorGutter.Click;
+procedure TCnSrcEditorGutter.DblClick;
 var
   EditView: IOTAEditView;
   Row: Integer;
@@ -506,7 +525,7 @@ begin
   begin
     Pt := Mouse.CursorPos;
     Pt := ScreenToClient(Pt);
-    
+
     if FGutterMgr.ShowLineCount and PtInRect(GetLineCountRect, Pt) then
     begin
       OnGotoLine(Self);
@@ -529,6 +548,32 @@ begin
         ID := GetBlankBookmarkID;
       EditView.BookmarkToggle(ID);
       EditView.CursorPos := SavePos;
+      EditView.Paint;
+    end;
+  end;
+end;
+
+procedure TCnSrcEditorGutter.Click;
+var
+  EditView: IOTAEditView;
+  Pt: TPoint;
+  LineIdx: Integer;
+  EditorObj: TEditorObject;
+begin
+  EditView := EditControlWrapper.GetEditView(EditControl);
+  if Assigned(EditView) then
+  begin
+    Pt := Mouse.CursorPos;
+    Pt := ScreenToClient(Pt);
+
+    LineIdx := MatchPointToLineArea(FIdentLines, csIdentLineHeightDrawDelta, Pt.y, Height,
+      FPosInfo.LineCount);
+
+    if LineIdx >= 0 then
+    begin
+      // EditView.Position.GotoLine(Integer(FIdentLines[LineIdx]));
+      EditView.Position.Move(Integer(FIdentLines[LineIdx]), Integer(FIdentCols[LineIdx]));
+      EditView.MoveViewToCursor;
       EditView.Paint;
     end;
   end;
@@ -703,6 +748,76 @@ begin
       end;
     end;
   end;
+end;
+
+function TCnSrcEditorGutter.MatchPointToLineArea(LinesList: TCnList; const Delta,
+  Y, AreaHeight, TotalLine: Integer): Integer;
+var
+  I, J, M: Integer;
+
+  // Y 位置和某行区域比较，大、内、小返回 1 、0、-1
+  function ComparePointWithLinePos(LineNo: Integer): Integer;
+  var
+    Up, Down, YPos: Integer;
+  begin
+    YPos := (LineNo * AreaHeight) div TotalLine;
+
+    Up := YPos - Delta;
+    if Y < Up then
+    begin
+      Result := -1;
+      Exit;
+    end;
+
+    Down := YPos + Delta;
+    if Y <= Down then
+    begin
+      Result := 0;
+      Exit;
+    end;
+
+    Result := 1;
+  end;
+
+begin
+  Result := -1;
+  if (LinesList = nil) or (LinesList.Count = 0) then
+    Exit;
+
+  I := 0;
+  J := LinesList.Count - 1;
+
+  while I <= J do
+  begin
+    M := (I + J) div 2;
+    case ComparePointWithLinePos(Integer(LinesList[M])) of
+    1:
+      begin
+        // Y 比这点的区域大
+        I := M + 1;
+      end;
+    0:
+      begin
+        Result := M;
+        Exit;
+      end;
+    -1:
+      begin
+        // Y 比这点的区域小
+        J := M - 1;
+      end;
+    end;
+  end;
+end;
+
+procedure TCnSrcEditorGutter.MouseMove(Shift: TShiftState; X, Y: Integer);
+begin
+  inherited;
+  if MatchPointToLineArea(FIdentLines, csIdentLineHeightDrawDelta, Y, Height,
+    FPosInfo.LineCount) >= 0 then
+    Cursor := crHandPoint
+  else
+    Cursor := crDefault;
 end;
 
 { TCnSrcEditorGutterMgr }
@@ -934,11 +1049,15 @@ constructor TCnIdentReceiver.Create(AGutter: TCnSrcEditorGutter);
 begin
   inherited Create;
   FGutter := AGutter;
+  FTimer := TTimer.Create(nil);
+  FTimer.Enabled := False;
+  FTimer.Interval := csIdentLineShowDelay;
+  FTimer.OnTimer := TimerOnTimer;
 end;
 
 destructor TCnIdentReceiver.Destroy;
 begin
-
+  FTimer.Free;
   inherited;
 end;
 
@@ -947,14 +1066,27 @@ begin
   if FGutter <> nil then
   begin
     if Event.EventData = nil then
-      FGutter.FIdentLines.Clear
+    begin
+      FGutter.FIdentLines.Clear;
+      FGutter.FIdentCols.Clear;
+    end
     else
       FGutter.FIdentLines.Assign(TCnList(Event.EventData));
+      FGutter.FIdentCols.Assign(TCnList(Event.EventTag));
+
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('TCnIdentReceiver OnEvent. %d Lines should Paint.', [FGutter.FIdentLines.Count]);
 {$ENDIF}
-    FGutter.Invalidate;
+
+    FTimer.Enabled := False;
+    FTimer.Enabled := True;
   end;
+end;
+
+procedure TCnIdentReceiver.TimerOnTimer(Sender: TObject);
+begin
+  if FGutter <> nil then
+    FGutter.Invalidate;
 end;
 
 {$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}
