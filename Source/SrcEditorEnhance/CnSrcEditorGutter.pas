@@ -204,8 +204,8 @@ const
   csModifierWidth = 5;
 
   csIdentLineHeightDrawDelta = 1;
-  csIdentLineHeightMouseDelta = 2;
-  csIdentLineRightMargin = 4;
+  csIdentLineHeightMouseDelta = 1;
+  csIdentLineRightMargin = 3;
   csIdentLineShowDelay = 200; // 200ms for show delay
 
   csDefaultModifiedColor = clYellow;
@@ -390,16 +390,22 @@ begin
     if GetCurrentEditControl = EditControl then // 行位置缩略图只在最前画
     begin
       MaxRow := FPosInfo.LineCount;
-      Canvas.Pen.Color := $00B0B0B0;
-      Canvas.Pen.Style := psSolid;
-      Canvas.Pen.Width := csIdentLineHeightDrawDelta * 2 + 1;
+
+      OldColor := Canvas.Brush.Color;
+
+      Canvas.Pen.Style := psClear;
+      Canvas.Brush.Color := $00B0B0B0;
+      Canvas.Brush.Style := bsSolid;
 
       for I := 0 to FIdentLines.Count - 1 do
       begin
         Y := Height * Integer(FIdentLines[I]) div MaxRow;
-        Canvas.MoveTo(0, Y);
-        Canvas.LineTo(Width - csIdentLineRightMargin, Y);
+        R := Rect(0, Y - csIdentLineHeightDrawDelta, Width - csIdentLineRightMargin,
+          Y + csIdentLineHeightDrawDelta);
+        Canvas.FillRect(R);
       end;
+
+      Canvas.Brush.Color := OldColor;
     end;
 
     TextHeight := EditControlWrapper.GetCharHeight;
@@ -468,6 +474,7 @@ begin
     end;
 
     Canvas.Pen.Width := 1;
+    Canvas.Pen.Style := psSolid;
     Canvas.Pen.Color := clBtnHighlight;
     Canvas.MoveTo(Width - 1, 0);
     Canvas.LineTo(Width - 1, Height);
@@ -566,7 +573,7 @@ begin
     Pt := Mouse.CursorPos;
     Pt := ScreenToClient(Pt);
 
-    LineIdx := MatchPointToLineArea(FIdentLines, csIdentLineHeightDrawDelta, Pt.y, Height,
+    LineIdx := MatchPointToLineArea(FIdentLines, csIdentLineHeightMouseDelta, Pt.y, Height,
       FPosInfo.LineCount);
 
     if LineIdx >= 0 then
@@ -811,13 +818,25 @@ begin
 end;
 
 procedure TCnSrcEditorGutter.MouseMove(Shift: TShiftState; X, Y: Integer);
+var
+  Idx: Integer;
 begin
   inherited;
-  if MatchPointToLineArea(FIdentLines, csIdentLineHeightDrawDelta, Y, Height,
-    FPosInfo.LineCount) >= 0 then
-    Cursor := crHandPoint
+  Idx := MatchPointToLineArea(FIdentLines, csIdentLineHeightMouseDelta, Y, Height,
+    FPosInfo.LineCount);
+  if Idx >= 0 then
+  begin
+    Cursor := crHandPoint;
+    Hint := IntToStr(Integer(FIdentLines[Idx]));
+    ShowHint := True;
+  end
   else
+  begin
     Cursor := crDefault;
+    Hint := '';
+    ShowHint := False;
+    Application.CancelHint;
+  end;
 end;
 
 { TCnSrcEditorGutterMgr }
