@@ -58,6 +58,12 @@ uses
   CnSrcEditorBlockTools, CnSrcEditorKey, CnSrcEditorThumbnail,
   CnEditControlWrapper, CnWizNotifier;
 
+const
+  CN_SRC_ENH_CONFIG_PAGE_IDX_0 = 0;
+  CN_SRC_ENH_CONFIG_PAGE_IDX_1 = 1;
+  CN_SRC_ENH_CONFIG_PAGE_IDX_2 = 2;
+  CN_SRC_ENH_CONFIG_PAGE_IDX_3 = 3;
+
 type
 
 { TCnSrcEditorEnhanceForm }
@@ -539,7 +545,7 @@ end;
 
 procedure TCnSrcEditorEnhance.Config;
 begin
-  ConfigEx(0);
+  ConfigEx(CN_SRC_ENH_CONFIG_PAGE_IDX_0);
 end;
 
 procedure TCnSrcEditorEnhance.ConfigEx(APageIndex: Integer);
@@ -739,22 +745,22 @@ end;
 
 procedure TCnSrcEditorEnhance.OnEnhConfig_0(Sender: TObject);
 begin
-  ConfigEx(0);
+  ConfigEx(CN_SRC_ENH_CONFIG_PAGE_IDX_0);
 end;
 
 procedure TCnSrcEditorEnhance.OnEnhConfig_1(Sender: TObject);
 begin
-  ConfigEx(1);
+  ConfigEx(CN_SRC_ENH_CONFIG_PAGE_IDX_1);
 end;
 
 procedure TCnSrcEditorEnhance.OnEnhConfig_2(Sender: TObject);
 begin
-  ConfigEx(2);
+  ConfigEx(CN_SRC_ENH_CONFIG_PAGE_IDX_2);
 end;
 
 procedure TCnSrcEditorEnhance.OnEnhConfig_3(Sender: TObject);
 begin
-  ConfigEx(3);
+  ConfigEx(CN_SRC_ENH_CONFIG_PAGE_IDX_3);
 end;
 
 class procedure TCnSrcEditorEnhance.GetWizardInfo(var Name, Author,

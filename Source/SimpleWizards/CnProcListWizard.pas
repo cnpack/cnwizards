@@ -348,6 +348,7 @@ type
     procedure PopupSubItemSortByClick(Sender: TObject);
     procedure PopupSubItemReverseClick(Sender: TObject);
     procedure PopupExportItemClick(Sender: TObject);
+    procedure PopupEditorEnhanceConfigItemClick(Sender: TObject);
 
     procedure EditorToolBarEnable(const Value: Boolean);
     procedure SetUseEditorToolBar(const Value: Boolean);
@@ -773,6 +774,12 @@ begin
   Item.Caption := '-';
   Obj.PopupMenu.Items.Add(Item);
 
+  // ±‡º≠∆˜¿©’π≈‰÷√
+  Item := TMenuItem.Create(Obj.PopupMenu);
+  Item.Caption := SCnEditorEnhanceConfig;
+  Item.OnClick := PopupEditorEnhanceConfigItemClick;
+  Obj.PopupMenu.Items.Add(Item);
+
   // πÿ±’
   Item := TMenuItem.Create(Obj.PopupMenu);
   Item.Caption := SCnProcListCloseMenuCaption;
@@ -1176,7 +1183,8 @@ begin
 
   Obj.PopupMenu.Items[1].Caption := SCnProcListExportMenuCaption;
   Obj.PopupMenu.Items[2].Caption := '-';
-  Obj.PopupMenu.Items[3].Caption := SCnProcListCloseMenuCaption;
+  Obj.PopupMenu.Items[3].Caption := SCnEditorEnhanceConfig;
+  Obj.PopupMenu.Items[4].Caption := SCnProcListCloseMenuCaption;
   
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('ProcList: Init Proc ToolBar Complete.');
@@ -3940,6 +3948,15 @@ end;
 procedure TCnProcDropDownBox.SetPos(X, Y: Integer);
 begin
   SetWindowPos(Handle, HWND_TOPMOST, X, Y, 0, 0, SWP_NOACTIVATE or SWP_NOSIZE);  
+end;
+
+procedure TCnProcListWizard.PopupEditorEnhanceConfigItemClick(Sender: TObject);
+var
+  Wizard: TCnIDEEnhanceWizard;
+begin
+  Wizard := TCnIDEEnhanceWizard(CnWizardMgr.WizardByClassName('TCnSrcEditorEnhance'));
+  if Wizard <> nil then
+    Wizard.Config;
 end;
 
 { TCnProcListComboBox }

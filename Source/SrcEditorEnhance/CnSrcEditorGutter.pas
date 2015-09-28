@@ -387,7 +387,7 @@ begin
 
   FPainting := True;
   try
-    if GetCurrentEditControl = EditControl then // 行位置缩略图只在最前画
+    if (FIdentLines.Count > 1) and (GetCurrentEditControl = EditControl) then // 行位置缩略图只在有多个并在最前时画
     begin
       MaxRow := FPosInfo.LineCount;
 
@@ -1090,8 +1090,10 @@ begin
       FGutter.FIdentCols.Clear;
     end
     else
+    begin
       FGutter.FIdentLines.Assign(TCnList(Event.EventData));
       FGutter.FIdentCols.Assign(TCnList(Event.EventTag));
+    end;
 
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('TCnIdentReceiver OnEvent. %d Lines should Paint.', [FGutter.FIdentLines.Count]);
