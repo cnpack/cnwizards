@@ -4651,6 +4651,9 @@ begin
     end;
     OnHighlightExec(nil);
   end;
+
+  if not FShowTokenPosAtGutter then
+    EventBus.PostEvent(EVENT_HIGHLIGHT_IDENT_POSITION);
 end;
 
 procedure TCnSourceHighlight.BeginUpdateEditor(Editor: TEditorObject);

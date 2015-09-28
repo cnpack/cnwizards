@@ -114,6 +114,7 @@ type
     shpFlowControl: TShape;
     chkCompDirective: TCheckBox;
     shpCompDirective: TShape;
+    chkShowLinePosAtGutter: TCheckBox;
     procedure UpdateControls(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure shpBracketMouseDown(Sender: TObject; Button: TMouseButton;
@@ -170,6 +171,7 @@ begin
     shpCurTokenFg.Brush.Color := Wizard.CurrentTokenForeground;
     shpCurTokenBg.Brush.Color := Wizard.CurrentTokenBackground;
     shpCurTokenBd.Brush.Color := Wizard.CurrentTokenBorderColor;
+    chkShowLinePosAtGutter.Checked := Wizard.ShowTokenPosAtGutter;
     chkSeparateLine.Checked := Wizard.HilightSeparateLine;
 {$IFDEF BDS}
     chkHighlightCurLine.Enabled := False;
@@ -216,6 +218,7 @@ begin
       Wizard.CurrentTokenForeground := shpCurTokenFg.Brush.Color;
       Wizard.CurrentTokenBackground := shpCurTokenBg.Brush.Color;
       Wizard.CurrentTokenBorderColor := shpCurTokenBd.Brush.Color;
+      Wizard.ShowTokenPosAtGutter := chkShowLinePosAtGutter.Checked;
       Wizard.HilightSeparateLine := chkSeparateLine.Checked;
 {$IFNDEF BDS}
       Wizard.HighLightCurrentLine := chkHighlightCurLine.Checked;
