@@ -238,19 +238,17 @@ end;
 { TCnList }
 
 procedure TCnList.Assign(Source: TCnList);
-var
-  I: Integer;
 begin
   if Source <> nil then
   begin
-    Clear;
-    for I := 0 to Source.Count - 1 do
-      Add(Source[I]);
+//    Clear;
+//    for I := 0 to Source.Count - 1 do
+//      Add(Source[I]);
 
-//    Capacity := Source.Capacity;
-//    Count := Source.Count;
-//    if Source.FList <> nil then
-//      Move(Source.FList^[0], FList^[0], Source.Count * SizeOf(Pointer));
+    Capacity := Source.Capacity;
+    FCount := Source.Count;
+    if Source.FList <> nil then
+      Move(Source.FList^[0], FList^[0], Source.Count * SizeOf(Pointer));
   end;
 end;
 
