@@ -2333,6 +2333,7 @@ TCnSourceHighlightForm.chkDrawLine.Caption=Enable Structure Lines.
 TCnSourceHighlightForm.chkSeparateLine.Caption=Enable Separate Lines between Functions.
 TCnSourceHighlightForm.chkBkHighlight.Caption=Enable Background Highlight Keyword Structure at Cursor.
 TCnSourceHighlightForm.chkCurrentToken.Caption=Enable Background Highlight Current Identifier at Cursor.
+TCnSourceHighlightForm.chkShowLinePosAtGutter.Caption=Show Current Identifier Positions at Gutter.
 TCnSourceHighlightForm.chkHighlightCurLine.Caption=Enable Background Highlight Current Line (Delphi 7 below only).
 TCnSourceHighlightForm.lblBk.Caption=Background
 TCnSourceHighlightForm.chkMaxSize.Caption=Disable Highlight when Unit Lines Exceeds:

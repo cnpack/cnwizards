@@ -2333,6 +2333,7 @@ TCnSourceHighlightForm.chkDrawLine.Caption=允许代码结构匹配连线显示�
 TCnSourceHighlightForm.chkSeparateLine.Caption=允许函数间的空行显示分隔线。
 TCnSourceHighlightForm.chkBkHighlight.Caption=允许光标处匹配关键字高亮背景显示。
 TCnSourceHighlightForm.chkCurrentToken.Caption=允许光标处匹配当前标识符高亮背景显示。
+TCnSourceHighlightForm.chkShowLinePosAtGutter.Caption=在编辑器左侧的行号栏上显示位置标记。
 TCnSourceHighlightForm.chkHighlightCurLine.Caption=允许高亮当前行背景（仅适用于Delphi 7或以下版本）。
 TCnSourceHighlightForm.lblBk.Caption=背景色
 TCnSourceHighlightForm.chkMaxSize.Caption=不高亮匹配行数超过此数量的单元：
