@@ -767,12 +767,22 @@ begin
 end;
 
 procedure TCnCodeGenerator.Writeln;
+
+  function TrimRightWithoutCRLF(const S: string): string;
+  var
+    I: Integer;
+  begin
+    I := Length(S);
+    while (I > 0) and (S[I] <= ' ') and not (S[I] in [#13, #10]) do Dec(I);
+    Result := Copy(S, 1, I);
+  end;
+
 begin
   if FLock <> 0 then Exit;
 
   // Write(S, BeforeSpaceCount, AfterSpaceCount);
-  // delete trailing blanks
-  FCode[FCode.Count - 1] := TrimRight(FCode[FCode.Count - 1]);
+  // must delete trailing blanks, but can't use TrimRight for Deleting CRLF at line end.
+  FCode[FCode.Count - 1] := TrimRightWithoutCRLF(FCode[FCode.Count - 1]);
   FPrevRow := FCode.Count - 1;
 
   FCode.Add('');
