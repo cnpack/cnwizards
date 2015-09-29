@@ -62,6 +62,7 @@ type
     FObjectList: Boolean;
     FCount: Integer;
     FCapacity: Integer;
+    procedure DirectSetCapacity(NewCapacity: Integer);
   protected
     function Get(Index: Integer): Pointer; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
     procedure Grow;
@@ -235,6 +236,21 @@ begin
   FCount := NewCount;
 end;
 
+procedure TCnBaseList.DirectSetCapacity(NewCapacity: Integer);
+begin
+  if NewCapacity > MaxListSize then
+    Error(SListCapacityError, NewCapacity);
+
+  if NewCapacity <> FCapacity then
+  begin
+    ReallocMem(FList, NewCapacity * SizeOf(Pointer));
+    FCapacity := NewCapacity;
+
+    if NewCapacity < FCount then // 缩小容量时直接抛弃过多的 Count
+      FCount := NewCapacity;
+  end;
+end;
+
 { TCnList }
 
 procedure TCnList.Assign(Source: TCnList);
@@ -245,7 +261,7 @@ begin
 //    for I := 0 to Source.Count - 1 do
 //      Add(Source[I]);
 
-    Capacity := Source.Capacity;
+    DirectSetCapacity(Source.Capacity);
     FCount := Source.Count;
     if Source.FList <> nil then
       Move(Source.FList^[0], FList^[0], Source.Count * SizeOf(Pointer));
