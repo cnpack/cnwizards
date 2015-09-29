@@ -60,7 +60,7 @@ type
     constructor Create(AGutter: TCnSrcEditorGutter);
     destructor Destroy; override;
 
-    procedure OnEvent(Event: ICnEvent);
+    procedure OnEvent(Event: TCnEvent);
   end;
 
 { TCnSrcEditorGutter }
@@ -1080,7 +1080,7 @@ begin
   inherited;
 end;
 
-procedure TCnIdentReceiver.OnEvent(Event: ICnEvent);
+procedure TCnIdentReceiver.OnEvent(Event: TCnEvent);
 begin
   if FGutter <> nil then
   begin
