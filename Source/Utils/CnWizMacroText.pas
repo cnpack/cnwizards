@@ -47,7 +47,7 @@ type
 { TCnWizMacroText }
 
   TCnWizMacro = (cwmProjectDir, cwmProjectName, cwmProjectGroupDir,
-    cwmProjectGroupName, cwmUnit, cwmUnitPath, cwmProcName,
+    cwmProjectGroupName, cwmUnit, cwmUnitName, cwmUnitPath, cwmProcName,
     cwmResult, cwmArguments, cwmArgList, cwmRetType, cwmCurrProcName,
     cwmCurrMethodName, cwmCurrClassName, cwmCurrIDEName,
     cwmUser, cwmDateTime, cwmDate, cwmYear, cwmMonth, cwmMonthShortName,
@@ -82,7 +82,8 @@ const
 
   csCnWizMacroDescs: array[TCnWizMacro] of PString = (
     @SCnEMVProjectDir, @SCnEMVProjectName, @SCnEMVProjectGroupDir,
-    @SCnEMVProjectGroupName, @SCnEMVUnit, @SCnEMVUnitPath, @SCnEMVProceName, @SCnEMVResult,
+    @SCnEMVProjectGroupName, @SCnEMVUnit, @SCnEMVUnitName, @SCnEMVUnitPath,
+    @SCnEMVProceName, @SCnEMVResult,
     @SCnEMVArguments, @SCnEMVArgList, @SCnEMVRetType, @SCnEMVCurProceName,
     @SCnEMVCurMethodName, @SCnEMVCurClassName, @SCnEMVCurIDEName, @SCnEMVUser,
     @SCnEMVDateTime, @SCnEMVDate, @SCnEMVYear,
@@ -350,6 +351,8 @@ begin
         Result := EdtGetProjectGroupName;
       cwmUnit:
         Result := EdtGetUnitName;
+      cwmUnitName:
+        Result := _CnChangeFileExt(EdtGetUnitName, '');
       cwmUnitPath:
         Result := EdtGetUnitPath;
       cwmProcName:
