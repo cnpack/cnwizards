@@ -2333,6 +2333,7 @@ TCnSourceHighlightForm.chkDrawLine.Caption=aktiviere Linien.
 TCnSourceHighlightForm.chkSeparateLine.Caption=aktiviere Trennlinien zwischen Funktionen.
 TCnSourceHighlightForm.chkBkHighlight.Caption=akt. Hintergr. Highl. Schlüsselwort Struktur am Cursor.
 TCnSourceHighlightForm.chkCurrentToken.Caption=akt. Hintergr. Highl. derzeitiger Identifier am Cursor.
+TCnSourceHighlightForm.chkShowLinePosAtGutter.Caption=zeige aktuellen Identifier beim Gutter an.
 TCnSourceHighlightForm.chkHighlightCurLine.Caption=akt. Hintergr. Highl. derzeitige Zeile (Delphi 7 und früher).
 TCnSourceHighlightForm.lblBk.Caption=Hintergrund
 TCnSourceHighlightForm.chkMaxSize.Caption=deaktiviere Highlight bei mehr Zeilen als:
