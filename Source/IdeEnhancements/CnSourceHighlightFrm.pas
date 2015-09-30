@@ -276,6 +276,7 @@ begin
   shpCurTokenBg.Enabled := chkCurrentToken.Checked;
   lblCurTokenBd.Enabled := chkCurrentToken.Checked;
   shpCurTokenBd.Enabled := chkCurrentToken.Checked;
+  chkShowLinePosAtGutter.Enabled := chkCurrentToken.Checked;
 
   shpCurLine.Enabled := chkHighlightCurLine.Checked;
   shpFlowControl.Enabled := chkFlowControl.Checked;

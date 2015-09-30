@@ -279,16 +279,16 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       end
       object pnlBtn: TPanel
         Left = 136
-        Top = 56
+        Top = 54
         Width = 25
         Height = 24
         BevelOuter = bvNone
         TabOrder = 0
         object btnReset: TSpeedButton
           Left = 0
-          Top = 53
+          Top = 0
           Width = 20
-          Height = 22
+          Height = 20
           Hint = 'Color Setting Functions'
           Flat = True
           Glyph.Data = {
