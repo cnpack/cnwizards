@@ -66,7 +66,7 @@ type
     btIndent, btIndentEx, btUnindent, btUnindentEx,
     btCommentCode, btUnCommentCode, btToggleComment, btCommentCropper,
     btFormatCode, btCodeSwap, btCodeToString, btInsertColor, btInsertDateTime,
-    btSortLines, btBlockMoveUp, btBlockMoveDown, btBlockDelLines);
+    btSortLines, btBlockMoveUp, btBlockMoveDown, btBlockDelLines, btShortCutConfig);
 
   TCnSrcEditorBlockTools = class(TObject)
   private
@@ -77,7 +77,7 @@ type
     FDupShortCut: TCnWizShortCut;
     FBlockMoveUpShortCut: TCnWizShortCut;
     FBlockMoveDownShortCut: TCnWizShortCut;
-    // FBlockDelLinesShortCut: TCnWizShortCut;
+    FBlockDelLinesShortCut: TCnWizShortCut;
     FActive: Boolean;
     FOnEnhConfig: TNotifyEvent;
     FShowBlockTools: Boolean;
@@ -105,6 +105,7 @@ type
     procedure DoBlockFormat(Kind: TBlockToolKind);
     procedure DoBlockComment(Kind: TBlockToolKind);
     procedure DoBlockMisc(Kind: TBlockToolKind);
+    procedure DoShortCutConfig;
     procedure ShowFlatButton(EditWindow: TCustomForm; EditControl: TControl;
       EditView: IOTAEditView);
     procedure SetShowBlockTools(Value: Boolean);
@@ -137,10 +138,10 @@ implementation
 
 {$IFDEF CNWIZARDS_CNSRCEDITORENHANCE}
 
-{$IFDEF DEBUG}
+
 uses
-  CnDebug;
-{$ENDIF}
+  CnWizSubActionShortCutFrm {$IFDEF DEBUG}, CnDebug{$ENDIF};
+
 
 const
   csLeftKeep = 2;
@@ -166,8 +167,8 @@ begin
     ShortCut(Word('U'), [ssCtrl, ssAlt, ssShift]), OnEditBlockMoveUp);
   FBlockMoveDownShortCut := WizShortCutMgr.Add('CnEditBlockMoveDown',
     ShortCut(Word('D'), [ssCtrl, ssAlt, ssShift]), OnEditBlockMoveDown);
-//  FBlockDelLinesShortCut := WizShortCutMgr.Add('CnEditBlockDeleteLines',
-//    ShortCut(Word('D'), [ssCtrl, ssShift]), OnEditBlockDelLines);
+  FBlockDelLinesShortCut := WizShortCutMgr.Add('CnEditBlockDeleteLines',
+    ShortCut(Word('D'), [ssCtrl, ssShift]), OnEditBlockDelLines);
 
   FPopupMenu := TPopupMenu.Create(nil);
   FPopupMenu.AutoPopup := False;
@@ -192,7 +193,7 @@ begin
   FGroupReplace.Free;
   FWebSearch.Free;
 
-//  WizShortCutMgr.DeleteShortCut(FBlockDelLinesShortCut);
+  WizShortCutMgr.DeleteShortCut(FBlockDelLinesShortCut);
   WizShortCutMgr.DeleteShortCut(FBlockMoveDownShortCut);
   WizShortCutMgr.DeleteShortCut(FBlockMoveUpShortCut);
   WizShortCutMgr.DeleteShortCut(FDupShortCut);
@@ -476,6 +477,7 @@ begin
     btIndent..btUnindentEx: DoBlockFormat(Kind);
     btCommentCode..btCommentCropper: DoBlockComment(Kind);
     btFormatCode..btBlockDelLines: DoBlockMisc(Kind);
+    btShortCutConfig: DoShortCutConfig;
   end;
 end;
 
@@ -739,8 +741,11 @@ begin
 {$IFDEF BDS} // Only for BDS because of bug. ;-(
   DoAddMenuItem(FMiscMenu, SCnSrcBlockMoveUp, btBlockMoveUp, FBlockMoveUpShortCut.ShortCut);
   DoAddMenuItem(FMiscMenu, SCnSrcBlockMoveDown, btBlockMoveDown, FBlockMoveDownShortCut.ShortCut);
-  DoAddMenuItem(FMiscMenu, SCnSrcBlockDeleteLines, btBlockDelLines);
+  DoAddMenuItem(FMiscMenu, SCnSrcBlockDeleteLines, btBlockDelLines, FBlockDelLinesShortCut.ShortCut);
 {$ENDIF}
+
+  AddSepMenuItem(FMiscMenu);
+  DoAddMenuItem(FMiscMenu, SCnWizConfigCaption, btShortCutConfig);
 
   // …Ë÷√≤Àµ•
   AddSepMenuItem(Items);
@@ -953,6 +958,35 @@ begin
   begin
     FShowBlockTools := Value;
     UpdateFlatButtons;
+  end;
+end;
+
+procedure TCnSrcEditorBlockTools.DoShortCutConfig;
+var
+  I: Integer;
+  List: TList;
+  Holder: TCnShortCutHolder;
+begin
+  List := TList.Create;
+  try
+    Holder := TCnShortCutHolder.Create(SCnSrcBlockDuplicate, FDupShortCut);
+    List.Add(Holder);
+
+{$IFDEF BDS}
+    Holder := TCnShortCutHolder.Create(SCnSrcBlockMoveUp, FBlockMoveUpShortCut);
+    List.Add(Holder);
+    Holder := TCnShortCutHolder.Create(SCnSrcBlockMoveDown, FBlockMoveDownShortCut);
+    List.Add(Holder);
+    Holder := TCnShortCutHolder.Create(SCnSrcBlockDeleteLines, FBlockDelLinesShortCut);
+    List.Add(Holder);
+{$ENDIF}
+
+    if ShowShortCutConfigForHolders(List, SCnSrcBlockToolsHint, 'CnSrcEditorEnhance') then
+      UpdateMenu(FPopupMenu.Items);;
+  finally
+    for I := List.Count - 1 downto 0 do
+      TCnShortCutHolder(List[I]).Free;
+    List.Free;
   end;
 end;
 

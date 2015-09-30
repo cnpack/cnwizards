@@ -44,6 +44,20 @@ uses
   CnWizMenuAction, CnWizConsts, CnWizMultiLang;
 
 type
+  TCnShortCutHolder = class(TObject)
+  private
+    FImageIndex: Integer;
+    FCaption: string;
+    FWizShortCut: TCnWizShortCut;
+  public
+    constructor Create(const ACaption: string; AWizShortCut: TCnWizShortCut; AImageIndex: Integer = -1);
+    destructor Destroy; override;
+
+    property ImageIndex: Integer read FImageIndex write FImageIndex;
+    property WizShortCut: TCnWizShortCut read FWizShortCut write FWizShortCut;
+    property Caption: string read FCaption write FCaption;
+  end;
+
   TCnWizSubActionShortCutForm = class(TCnTranslateForm)
     grp1: TGroupBox;
     ListView: TListView;
@@ -64,9 +78,14 @@ type
     { Private declarations }
     FWizard: TCnSubMenuWizard;
     FHelpStr: string;
+    FHolders: TList;
+    FWizardName: string;
+
     FShortCuts: array of TShortCut;
     procedure GetShortCutsFromWizard;
+    procedure GetShortCutsFromHolders;
     procedure SetShortCutsToWizard;
+    procedure SetShortCutsToHolders;
     function GetShortCut(Index: Integer): TShortCut;
     procedure SetShortCut(Index: Integer; const Value: TShortCut);
   protected
@@ -79,6 +98,12 @@ type
 
 function SubActionShortCutConfig(AWizard: TCnSubMenuWizard;
   const HelpStr: string = ''): Boolean;
+{* 供一子菜单专家显示其子菜单项的快捷键设置对话框}
+
+function ShowShortCutConfigForHolders(Holders: TList; const WizardName: string;
+  const HelpStr: string = ''): Boolean;
+{* 供外部显示指定一批快捷键设置对话框，Holders 列表中应该存放 TCnShortCutHolder
+  的实例，其 WizShortCut 属性应该指向要配置的属性}
 
 implementation
 
@@ -89,7 +114,26 @@ function SubActionShortCutConfig(AWizard: TCnSubMenuWizard;
 begin
   with TCnWizSubActionShortCutForm.Create(nil) do
   try
+    FHolders := nil;
     FWizard := AWizard;
+
+    if HelpStr <> '' then
+      FHelpStr := HelpStr;
+    Result := ShowModal = mrOk;
+  finally
+    Free;
+  end;
+end;
+
+function ShowShortCutConfigForHolders(Holders: TList; const WizardName: string;
+  const HelpStr: string = ''): Boolean;
+begin
+  with TCnWizSubActionShortCutForm.Create(nil) do
+  try
+    FWizard := nil;
+    FHolders := Holders;
+    FWizardName := WizardName;
+
     if HelpStr <> '' then
       FHelpStr := HelpStr;
     Result := ShowModal = mrOk;
@@ -106,8 +150,16 @@ end;
 
 procedure TCnWizSubActionShortCutForm.FormShow(Sender: TObject);
 begin
-  GetShortCutsFromWizard;
-  Caption := Format(SCnWizSubActionShortCutFormCaption, [Wizard.WizardName]);
+  if FWizard <> nil then
+  begin
+    GetShortCutsFromWizard;
+    Caption := Format(SCnWizSubActionShortCutFormCaption, [Wizard.WizardName]);
+  end
+  else if FHolders <> nil then
+  begin
+    GetShortCutsFromHolders;
+    Caption := Format(SCnWizSubActionShortCutFormCaption, [FWizardName]);
+  end;
 end;
 
 procedure TCnWizSubActionShortCutForm.FormDestroy(Sender: TObject);
@@ -118,7 +170,11 @@ end;
 
 procedure TCnWizSubActionShortCutForm.btnOKClick(Sender: TObject);
 begin
-  SetShortCutsToWizard;
+  if FWizard <> nil then
+    SetShortCutsToWizard
+  else if FHolders <> nil then
+    SetShortCutsToHolders;
+
   ModalResult := mrOk;
 end;
 
@@ -150,28 +206,28 @@ end;
 
 procedure TCnWizSubActionShortCutForm.GetShortCutsFromWizard;
 var
-  i: Integer;
+  I: Integer;
 begin
   ListView.Items.Clear;
   SetLength(FShortCuts, Wizard.SubActionCount);
-  for i := 0 to Wizard.SubActionCount - 1 do
+  for I := 0 to Wizard.SubActionCount - 1 do
     with ListView.Items.Add do
     begin
-      Caption := StripHotkey(Wizard.SubActions[i].Caption);
-      ImageIndex := Wizard.SubActions[i].ImageIndex;
-      Data := Wizard.SubActions[i];
-      ShortCuts[i] := Wizard.SubActions[i].ShortCut;
+      Caption := StripHotkey(Wizard.SubActions[I].Caption);
+      ImageIndex := Wizard.SubActions[I].ImageIndex;
+      Data := Wizard.SubActions[I];
+      ShortCuts[I] := Wizard.SubActions[I].ShortCut;
     end;
 end;
 
 procedure TCnWizSubActionShortCutForm.SetShortCutsToWizard;
 var
-  i: Integer;
+  I: Integer;
 begin
   WizShortCutMgr.BeginUpdate;
   try
-    for i := 0 to ListView.Items.Count - 1 do
-      TCnWizMenuAction(ListView.Items[i].Data).ShortCut := ShortCuts[i];
+    for I := 0 to ListView.Items.Count - 1 do
+      TCnWizMenuAction(ListView.Items[I].Data).ShortCut := ShortCuts[I];
   finally
     WizShortCutMgr.EndUpdate;
   end;
@@ -190,6 +246,54 @@ procedure TCnWizSubActionShortCutForm.HotKeyExit(Sender: TObject);
 begin
   if Assigned(ListView.Selected) then
     ShortCuts[ListView.Selected.Index] := HotKey.HotKey;
+end;
+
+procedure TCnWizSubActionShortCutForm.GetShortCutsFromHolders;
+var
+  I: Integer;
+begin
+  ListView.Items.Clear;
+  SetLength(FShortCuts, FHolders.Count);
+  for I := 0 to FHolders.Count - 1 do
+  begin
+    with ListView.Items.Add do
+    begin
+      Caption := StripHotkey(TCnShortCutHolder(FHolders[I]).Caption);
+      ImageIndex := TCnShortCutHolder(FHolders[I]).ImageIndex;
+      Data := TCnShortCutHolder(FHolders[I]);
+      ShortCuts[I] := TCnShortCutHolder(FHolders[I]).WizShortCut.ShortCut;
+    end;
+  end;
+end;
+
+procedure TCnWizSubActionShortCutForm.SetShortCutsToHolders;
+var
+  I: Integer;
+begin
+  WizShortCutMgr.BeginUpdate;
+  try
+    for I := 0 to ListView.Items.Count - 1 do
+      TCnShortCutHolder(ListView.Items[I].Data).WizShortCut.ShortCut := ShortCuts[I];
+  finally
+    WizShortCutMgr.EndUpdate;
+  end;
+end;
+
+{ TCnShortCutHolder }
+
+constructor TCnShortCutHolder.Create(const ACaption: string;
+  AWizShortCut: TCnWizShortCut; AImageIndex: Integer = -1);
+begin
+  inherited Create;
+  FImageIndex := AImageIndex;
+  FCaption := ACaption;
+  FWizShortCut := AWizShortCut;
+end;
+
+destructor TCnShortCutHolder.Destroy;
+begin
+
+  inherited;
 end;
 
 end.
