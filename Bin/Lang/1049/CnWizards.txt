@@ -2332,6 +2332,7 @@ TCnSourceHighlightForm.chkDrawLine.Caption=Включить линии
 TCnSourceHighlightForm.chkSeparateLine.Caption=Разделитель между подпрограммами
 TCnSourceHighlightForm.chkBkHighlight.Caption=Фон. подсветка конструкции под курсором
 TCnSourceHighlightForm.chkCurrentToken.Caption=Фон. подсветка идентификатора под курсором
+TCnSourceHighlightForm.chkShowLinePosAtGutter.Caption=Показывать позиции текущего идентификатора на номерах строк.
 TCnSourceHighlightForm.chkHighlightCurLine.Caption=Фон. подсветка текущей строки (Delphi 7 и ниже)
 TCnSourceHighlightForm.lblBk.Caption=Фон
 TCnSourceHighlightForm.chkMaxSize.Caption=Отключать, если кол-во строк больше
