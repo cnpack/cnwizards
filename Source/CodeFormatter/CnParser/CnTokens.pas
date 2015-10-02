@@ -56,7 +56,8 @@ type
     tokAsmHex,
     tokFloat,
     tokWString,
-    tokComment,
+    tokLineComment,
+    tokBlockComment,
     tokCompDirective,
 
     // Const value
@@ -369,7 +370,8 @@ const
     (Value: Integer(tokAsmHex);         Name: ''),
     (Value: Integer(tokFloat);          Name: ''),
     (Value: Integer(tokWString);        Name: ''),
-    (Value: Integer(tokComment);        Name: ''),
+    (Value: Integer(tokLineComment);    Name: ''),
+    (Value: Integer(tokBlockComment);   Name: ''),
     (Value: Integer(tokCompDirective);  Name: ''),
 
     // Const Value

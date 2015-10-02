@@ -1014,7 +1014,7 @@ begin
         if P^ = '$' then
           Result := tokCompDirective
         else
-          Result := tokComment;
+          Result := tokBlockComment;
         while ((P^ <> #0) and (P^ <> '}')) do
         begin
           if P^ = #10 then
@@ -1029,7 +1029,7 @@ begin
         if P^ = '}' then
         begin
           // 判断 IgnoreP 与 P 之间是否是 IgnoreFormat 标记
-          if (Result = tokComment) and (Integer(P) - Integer(IgnoreP) = 3 * SizeOf(Char)) then // 3 means '{(*}'
+          if (Result = tokBlockComment) and (Integer(P) - Integer(IgnoreP) = 3 * SizeOf(Char)) then // 3 means '{(*}'
           begin
             Inc(IgnoreP);
             if IgnoreP^ = '(' then
@@ -1075,7 +1075,7 @@ begin
 
         if P^ = '/' then
         begin
-          Result := tokComment;
+          Result := tokLineComment;
           while (P^ <> #0) and (P^ <> #13) and (P^ <> #10) do
             Inc(P); // 找行尾
 
@@ -1108,7 +1108,7 @@ begin
 
         if P^ = '*' then
         begin
-          Result := tokComment;
+          Result := tokBlockComment;
 
           Inc(P);
           FBlankLinesAfterComment := 0;
@@ -1362,7 +1362,7 @@ begin
 
   if FCompDirectiveMode = cdmAsComment then
   begin
-    if (Result = tokComment) or (Result = tokCompDirective) then // 当前是 Comment
+    if Result in [tokBlockComment, tokLineComment, tokCompDirective] then // 当前是 Comment
     begin
       if Assigned(FCodeGen) then
       begin
@@ -1375,11 +1375,26 @@ begin
             FCodeGen.WriteBlank(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
           end;
         end;
+
         S := TokenString;
+        // 再写注释本身
         if FASMMode and (Length(S) >= 1) and (S[Length(S)] = #13) then
-          FCodeGen.Write(S + #10)
+        begin
+          // 注意 ASM 下这个注释可能是 #13 结尾，需要砍掉
+          Delete(S, Length(S), 1);
+          FCodeGen.Write(S);
+          FCodeGen.WriteCommentEndln;
+        end
+        else if (Length(S) >= 2) and (S[Length(S) - 1] = #13) and (S[Length(S)] = #10) then
+        begin
+          Delete(S, Length(S) - 1, 2);
+          FCodeGen.Write(S);
+          FCodeGen.WriteCommentEndln;
+        end
         else
-          FCodeGen.Write(S); // 再写注释本身，注意 ASM 下这个注释可能是 #13 结尾，需要人为加个 #10
+        begin
+          FCodeGen.Write(S);
+        end;
       end;
 
       if not FFirstCommentInBlock then // 第一次碰到 Comment 时设置这个
@@ -1413,7 +1428,7 @@ begin
       end;
 
       if not InIgnoreArea and (FCodeGen <> nil) and
-        (FBackwardToken = tokComment) or (FBackwardToken = tokCompDirective) then // 当前不是 Comment，但前一个是 Comment
+        (FBackwardToken in [tokBlockComment, tokLineComment, tokCompDirective]) then // 当前不是 Comment，但前一个是 Comment
         FCodeGen.Write(BlankString);
 
       if (Result = tokString) and (Length(TokenString) = 1) then
@@ -1427,7 +1442,7 @@ begin
   end
   else if FCompDirectiveMode = cdmOnlyFirst then
   begin
-    if (Result = tokComment) or ((Result = tokCompDirective) and
+    if (Result in [tokBlockComment, tokLineComment]) or ((Result = tokCompDirective) and
       (Pos('{$ELSE', UpperCase(TokenString)) = 0) ) then // NOT $ELSE/$ELSEIF
     begin
       if FInDirectiveNestSearch then // In a Nested search for ENDIF/IFEND
@@ -1445,11 +1460,26 @@ begin
             FCodeGen.WriteBlank(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
           end;
         end;
+
         S := TokenString;
+        // 再写注释本身
         if FASMMode and (Length(S) >= 1) and (S[Length(S)] = #13) then
-          FCodeGen.Write(S + #10)
+        begin
+          // 注意 ASM 下这个注释可能是 #13 结尾，需要砍掉
+          Delete(S, Length(S), 1);
+          FCodeGen.Write(S);
+          FCodeGen.WriteCommentEndln;
+        end
+        else if (Length(S) >= 2) and (S[Length(S) - 1] = #13) and (S[Length(S)] = #10) then
+        begin
+          Delete(S, Length(S) - 1, 2);
+          FCodeGen.Write(S);
+          FCodeGen.WriteCommentEndln;
+        end
         else
-          FCodeGen.Write(S); // 再写注释本身，注意 ASM 下这个注释可能是 #13 结尾，需要人为加个 #10
+        begin
+          FCodeGen.Write(S);
+        end;
       end;
 
       if not FFirstCommentInBlock then // 第一次碰到 Comment 时设置这个
@@ -1559,7 +1589,7 @@ begin
       end;
 
       if not InIgnoreArea and (FCodeGen <> nil) and
-        (FBackwardToken = tokComment) then // 当前不是 Comment，但前一个是 Comment
+        (FBackwardToken in [tokBlockComment, tokLineComment]) then // 当前不是 Comment，但前一个是 Comment
         FCodeGen.Write(BlankString);
 
       if (Result = tokString) and (Length(TokenString) = 1) then

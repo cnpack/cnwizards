@@ -67,6 +67,7 @@ type
     FOnAfterWrite: TCnAfterWriteEvent;
     FAutoWrapButNoIndent: Boolean;
     FWritingBlank: Boolean;
+    FWritingCommentEndLn: Boolean;
     function GetCurIndentSpace: Integer;
     function GetLockedCount: Word;
     function GetPrevColumn: Integer;
@@ -93,6 +94,7 @@ type
     procedure WriteBlank(const Text: string);
     procedure InternalWriteln;
     procedure Writeln;
+    procedure WriteCommentEndln;
     function SourcePos: Word;
     {* 最后一行光标所在列数，暂未使用}
     procedure SaveToStream(Stream: TStream);
@@ -348,6 +350,7 @@ begin
   FColumnPos := 0;
   FActualColumn := 0;
   FLastExceedPosition := 0;
+  FWritingCommentEndLn := False;
 end;
 
 function TCnCodeGenerator.LineIsEmptyOrComment(const Str: string): Boolean;
@@ -750,6 +753,7 @@ begin
   FActualColumn := ActualColumn(Str);
 
   IsCRLFSpace := IsTextCRLFSpace(Text, Blanks);
+  FWritingCommentEndLn := False;
   DoAfterWrite(IsCRLFSpace, Blanks);
 
 {$IFDEF DEBUG}
@@ -766,6 +770,12 @@ begin
   FWritingBlank := False;
 end;
 
+procedure TCnCodeGenerator.WriteCommentEndln;
+begin
+  Writeln;
+  FWritingCommentEndLn := True;
+end;
+
 procedure TCnCodeGenerator.Writeln;
 
   function TrimRightWithoutCRLF(const S: string): string;
@@ -773,7 +783,9 @@ procedure TCnCodeGenerator.Writeln;
     I: Integer;
   begin
     I := Length(S);
-    while (I > 0) and (S[I] <= ' ') and not (S[I] in [#13, #10]) do Dec(I);
+    while (I > 0) and (S[I] <= ' ') and not (S[I] in [#13, #10]) do
+      Dec(I);
+
     Result := Copy(S, 1, I);
   end;
 
@@ -785,16 +797,23 @@ begin
   FCode[FCode.Count - 1] := TrimRightWithoutCRLF(FCode[FCode.Count - 1]);
   FPrevRow := FCode.Count - 1;
 
-  FCode.Add('');
-
   FActualLines[FActualLines.Count - 1] := TrimRight(FActualLines[FActualLines.Count - 1]);
-  FActualLines.Add('');
+
+  if FWritingCommentEndLn then  // 如果上一个输出是注释块的结尾换行，则本次 Writeln 忽略
+    FWritingCommentEndLn := False
+  else
+  begin
+    FCode.Add('');
+    FActualLines.Add('');
+  end;
 
   FPrevColumn := FColumnPos;
   FColumnPos := 0;
   FActualColumn := 0;
   FLastExceedPosition := 0;
-  
+
+  FWritingCommentEndLn := False;
+
   DoAfterWrite(True);
 {$IFDEF DEBUG}
 //  CnDebugger.LogFmt('NewLine Wrote from %d %d to %d %d', [FPrevRow, FPrevColumn,
