@@ -66,7 +66,7 @@ uses
   Windows, Messages, Classes, Graphics, Controls, SysUtils, Menus, ActnList,
   Forms, ImgList, ExtCtrls, ExptIntf, ToolsAPI, ComObj, IniFiles, FileCtrl,
   {$IFDEF COMPILER6_UP}
-  DesignIntf, DesignEditors, ComponentDesigner,
+  DesignIntf, DesignEditors, ComponentDesigner, Variants,
   {$ELSE}
   DsgnIntf, LibIntf,
   {$ENDIF}
