@@ -699,15 +699,19 @@ begin
     begin
       // 注释块和上一行在一起，照常输出空行
       FCodeGen.Writeln;
+
+      // 注释块后面有空行，则相应保持
+      if Scaner.BlankLinesAfter > 1 then
+        FCodeGen.Writeln;
     end
     else if (Scaner.BlankLinesBefore > 1) and (Scaner.BlankLinesAfter = 1) then
     begin
       // 注释块空上不空下，那就让下面挨着下，不需要额外输出空行了
       ;
     end
-    else if (Scaner.BlankLinesBefore > 1) and (Scaner.BlankLinesAfter > 1) then
+    else if (Scaner.BlankLinesBefore >= 1) and (Scaner.BlankLinesAfter > 1) then
     begin
-      // 注释块上下都空，那下面保留一空行
+      // 注释块上下都空或者上不空下空，那下面保留一空行
       FCodeGen.Writeln;
       FCodeGen.Writeln;
     end

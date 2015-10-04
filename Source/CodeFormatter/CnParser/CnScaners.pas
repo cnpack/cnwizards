@@ -106,6 +106,7 @@ type
     FFloatType: Char;
     FWideStr: WideString;
     FBackwardToken: TPascalToken;
+    // FBackwardNonBlankToken: TPascalToken;
 
     FBlankStringBegin: PChar;  // 用于步进，在外部始终指向当前空白的头部
     FBlankStringEnd: PChar;    // 用于步进，在外部始终指向当前空白的尾部
@@ -190,9 +191,12 @@ type
     {* 用来控制是否将回车当作空白以及其他解析，asm 块中需要此选项}
 
     property BlankLinesBefore: Integer read FBlankLinesBefore write FBlankLinesBefore;
-    {* SkipBlank 碰到一注释时，注释和前面有效内容隔的行数，用来控制分行}
+    {* SkipBlank 碰到一注释时，注释和前面有效内容隔的行数，用来控制分行。
+      0 表示在同一行，1 表示注释在紧邻的下一行，2 表示注释和前面的内容隔一个空行}
     property BlankLinesAfter: Integer read FBlankLinesAfter write FBlankLinesAfter;
-    {* SkipBlank 跳过一注释后，注释和后面有效内容隔的行数，用来控制分行}
+    {* SkipBlank 跳过一注释后，注释和后面有效内容隔的行数，用来控制分行。
+      0 表示在同一行，1 表示后续内容在紧邻的下一行，2 表示注释和后续内容隔一个空行}
+
     property PrevBlankLines: Boolean read FPrevBlankLines write FPrevBlankLines;
     {* 记录上一次是否输出了连续空行合并成的一个空行}
 

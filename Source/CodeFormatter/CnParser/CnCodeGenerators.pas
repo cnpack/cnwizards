@@ -68,6 +68,7 @@ type
     FAutoWrapButNoIndent: Boolean;
     FWritingBlank: Boolean;
     FWritingCommentEndLn: Boolean;
+    FJustWrittenCommentEndLn: Boolean;
     function GetCurIndentSpace: Integer;
     function GetLockedCount: Word;
     function GetPrevColumn: Integer;
@@ -350,7 +351,7 @@ begin
   FColumnPos := 0;
   FActualColumn := 0;
   FLastExceedPosition := 0;
-  FWritingCommentEndLn := False;
+  FJustWrittenCommentEndLn := False;
 end;
 
 function TCnCodeGenerator.LineIsEmptyOrComment(const Str: string): Boolean;
@@ -753,7 +754,9 @@ begin
   FActualColumn := ActualColumn(Str);
 
   IsCRLFSpace := IsTextCRLFSpace(Text, Blanks);
-  FWritingCommentEndLn := False;
+
+  if not FWritingBlank then
+    FJustWrittenCommentEndLn := False;
   DoAfterWrite(IsCRLFSpace, Blanks);
 
 {$IFDEF DEBUG}
@@ -772,8 +775,11 @@ end;
 
 procedure TCnCodeGenerator.WriteCommentEndln;
 begin
-  Writeln;
   FWritingCommentEndLn := True;
+  Writeln;
+  FWritingCommentEndLn := False;
+  FJustWrittenCommentEndLn := True;
+  // 如果连续调用两次 WriteCommentEndln，则会漏掉后一次，但似乎没这种场景。
 end;
 
 procedure TCnCodeGenerator.Writeln;
@@ -799,8 +805,9 @@ begin
 
   FActualLines[FActualLines.Count - 1] := TrimRight(FActualLines[FActualLines.Count - 1]);
 
-  if FWritingCommentEndLn then  // 如果上一个输出是注释块的结尾换行，则本次 Writeln 忽略
-    FWritingCommentEndLn := False
+  // 如果上一个输出是注释块的结尾换行，且本次不是输出注释尾，则本次 Writeln 忽略
+  if not FWritingCommentEndLn and FJustWrittenCommentEndLn then
+    FJustWrittenCommentEndLn := False
   else
   begin
     FCode.Add('');
@@ -812,7 +819,7 @@ begin
   FActualColumn := 0;
   FLastExceedPosition := 0;
 
-  FWritingCommentEndLn := False;
+  FJustWrittenCommentEndLn := False;
 
   DoAfterWrite(True);
 {$IFDEF DEBUG}
