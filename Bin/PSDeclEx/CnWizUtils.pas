@@ -527,6 +527,8 @@ function CnOtaGetProjectGroupFileName: string;
 {* 取当前工程组文件名}
 function CnOtaGetProjectResource(Project: IOTAProject): IOTAProjectResource;
 {* 取工程资源}
+function CnOtaGetProjectVersion(Project: IOTAProject): string;
+{* 取工程版本号字符串}
 function CnOtaGetCurrentProject: IOTAProject;
 {* 取当前工程}
 function CnOtaGetProject: IOTAProject;
@@ -1316,6 +1318,10 @@ begin
 end;
 
 function CnOtaGetProjectResource(Project: IOTAProject): IOTAProjectResource;
+begin
+end;
+
+function CnOtaGetProjectVersion(Project: IOTAProject): string;
 begin
 end;
 

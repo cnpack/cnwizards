@@ -38,6 +38,8 @@ var
   iColInSource, iCol, iLine: Integer;
   sFiller: string;
 begin
+  Writeln(CnOtaGetProjectVersion(nil));
+
   Options := CnOtaGetActiveProjectOptions(nil);
   if Options = nil then Exit;
   Project := CnOtaGetCurrentProject;
