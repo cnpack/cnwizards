@@ -376,6 +376,7 @@ begin
   CL.AddDelphiFunction('Function CnOtaGetProjectGroup : IOTAProjectGroup');
   CL.AddDelphiFunction('Function CnOtaGetProjectGroupFileName : string');
   CL.AddDelphiFunction('Function CnOtaGetProjectResource( Project : IOTAProject) : IOTAProjectResource');
+  CL.AddDelphiFunction('Function CnOtaGetProjectVersion( Project : IOTAProject) : string');
   CL.AddDelphiFunction('Function CnOtaGetCurrentProject : IOTAProject');
   CL.AddDelphiFunction('Function CnOtaGetProject : IOTAProject');
   CL.AddDelphiFunction('Function CnOtaGetProjectCountFromGroup : Integer');
@@ -618,6 +619,7 @@ begin
   S.RegisterDelphiFunction(@CnOtaGetProjectGroup, 'CnOtaGetProjectGroup', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetProjectGroupFileName, 'CnOtaGetProjectGroupFileName', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetProjectResource, 'CnOtaGetProjectResource', cdRegister);
+  S.RegisterDelphiFunction(@CnOtaGetProjectVersion, 'CnOtaGetProjectVersion', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetCurrentProject, 'CnOtaGetCurrentProject', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetProject, 'CnOtaGetProject', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetProjectCountFromGroup, 'CnOtaGetProjectCountFromGroup', cdRegister);

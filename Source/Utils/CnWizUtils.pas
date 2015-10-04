@@ -403,6 +403,8 @@ function CnOtaGetProjectGroupFileName: string;
 {* 取当前工程组文件名}
 function CnOtaGetProjectResource(Project: IOTAProject): IOTAProjectResource;
 {* 取工程资源}
+function CnOtaGetProjectVersion(Project: IOTAProject = nil): string;
+{* 取工程版本号字符串}
 function CnOtaGetCurrentProject: IOTAProject;
 {* 取当前工程}
 function CnOtaGetProject: IOTAProject;
@@ -2883,6 +2885,27 @@ begin
       Exit;
   end;
   Result := nil;
+end;
+
+// 取工程版本号字符串
+function CnOtaGetProjectVersion(Project: IOTAProject = nil): string;
+var
+  Options: IOTAProjectOptions;
+begin
+  Result := '';
+  Options := CnOtaGetActiveProjectOptions(Project);
+  if not Assigned(Options) then
+    Exit;
+
+  try
+    Result := Format('%d.%d.%d.%d',
+      [StrToIntDef(VarToStr(Options.GetOptionValue('MajorVersion')), 0),
+      StrToIntDef(VarToStr(Options.GetOptionValue('MinorVersion')), 0),
+      StrToIntDef(VarToStr(Options.GetOptionValue('Release')), 0),
+      StrToIntDef(VarToStr(Options.GetOptionValue('Build')), 0)]);
+  except
+    ;
+  end;
 end;
 
 // 取当前工程

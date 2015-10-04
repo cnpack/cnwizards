@@ -449,6 +449,7 @@ begin
 
   TranslateStr(SCnEMVProjectDir, 'SCnEMVProjectDir');
   TranslateStr(SCnEMVProjectName, 'SCnEMVProjectName');
+  TranslateStr(SCnEMVProjectVersion, 'SCnEMVProjectVersion');
   TranslateStr(SCnEMVProjectGroupDir, 'SCnEMVProjectGroupDir');
   TranslateStr(SCnEMVProjectGroupName, 'SCnEMVProjectGroupName');
   TranslateStr(SCnEMVUnit, 'SCnEMVUnit');

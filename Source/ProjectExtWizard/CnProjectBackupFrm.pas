@@ -846,7 +846,6 @@ var
   I: Integer;
   CompressorCommand, ListFileName, ExecCommand, VerStr: string;
   List: TStrings;
-  Options: IOTAProjectOptions;
   Comment: AnsiString;
 begin
   if lvFileView.Items.Count = 0 then
@@ -916,21 +915,7 @@ begin
           Exit;
 
       // 处理 Version 信息来生成 VerStr
-      VerStr := '';
-      Options := CnOtaGetActiveProjectOptions;
-      if Assigned(Options) then
-      begin
-        try
-          VerStr := Format('%d.%d.%d.%d',
-            [StrToIntDef(VarToStr(Options.GetOptionValue('MajorVersion')), 0),
-            StrToIntDef(VarToStr(Options.GetOptionValue('MinorVersion')), 0),
-            StrToIntDef(VarToStr(Options.GetOptionValue('Release')), 0),
-            StrToIntDef(VarToStr(Options.GetOptionValue('Build')), 0)]);
-        except
-          ;
-        end;
-      end;
-
+      VerStr := CnOtaGetProjectVersion;
       if FUseExternal then
       begin
         ListFileName := MakePath(GetWindowsTempPath) + 'BackupList.txt';

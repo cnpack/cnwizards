@@ -742,6 +742,7 @@ var
   SCnEIPProcHead: string = 'Next Procedure Head';
   SCnEMVProjectDir: string = 'Project Directory';
   SCnEMVProjectName: string = 'Project Name';
+  SCnEMVProjectVersion: string = 'Project Version';
   SCnEMVProjectGroupDir: string = 'Project Group Directory';
   SCnEMVProjectGroupName: string = 'Project Group Name';
   SCnEMVUnit: string = 'Unit Name';
