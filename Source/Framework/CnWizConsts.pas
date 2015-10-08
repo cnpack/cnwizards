@@ -274,6 +274,7 @@ resourcestring
   // CnPaletteEnhancements
   SCnPaletteTabsMenuName = 'CnPaletteTabs';
   SCnPaletteMutiLineMenuName = 'CnPaletteMultiLine';
+  SCnPaletteSearchCompMenuName = 'CnPaletteSearchComp';
   SCnLockToolbarMenuName = 'CnLockToolBar';
   SCnWizMenuName = 'CnWizToolMenu';
   SCnWizOptionMenuName = 'CnWizToolOptionMenu';

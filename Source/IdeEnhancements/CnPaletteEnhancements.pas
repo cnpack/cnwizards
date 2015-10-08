@@ -87,6 +87,7 @@ type
     FTabMenuItem: TCnMenuItemDef;
   {$ENDIF COMPILER5}
     FMultiLineMenuItem: TCnMenuItemDef;
+    FSearchCompMenuItem: TCnMenuItemDef;
     FSepMenuItem: TCnSepMenuItemDef;
   {$ENDIF COMPILER8_UP}
     FMenuLine: Boolean;
@@ -140,6 +141,8 @@ type
     procedure OnActiveFormChanged(Sender: TObject);
     procedure DoUpdateComponentPalette(AMultiLine: Boolean; AButtonStyle: Boolean);
     procedure OnMultiLineItemClick(Sender: TObject);
+    procedure OnSearchCompItemClick(Sender: TObject);
+    procedure OnSearchCompMenuCreated(Sender: TObject; MenuItem: TMenuItem);
   {$IFDEF COMPILER5}
     procedure OnMenuItemClick(Sender: TObject);
     procedure OnTabMenuCreated(Sender: TObject; MenuItem: TMenuItem);
@@ -448,6 +451,17 @@ begin
   MenuItem.Checked := MultiLine;
 end;
 
+procedure TCnPaletteEnhanceWizard.OnSearchCompMenuCreated(Sender: TObject;
+  MenuItem: TMenuItem);
+begin
+  MenuItem.Checked := FCompFilter;
+end;
+
+procedure TCnPaletteEnhanceWizard.OnSearchCompItemClick(Sender: TObject);
+begin
+  CompFilter := not CompFilter;
+end;
+
 procedure TCnPaletteEnhanceWizard.UpdateOtherWindows(OldHeight: Integer);
 const
   WinClasses: array[0..2] of string = ('TObjectTreeView',
@@ -497,6 +511,12 @@ begin
 {$ENDIF COMPILER5}
   FMultiLineMenuItem.OnCreated := OnMultiLineMenuCreated;
   FMenuHook.AddMenuItemDef(FMultiLineMenuItem);
+
+  FSearchCompMenuItem := TCnMenuItemDef.Create(SCnPaletteSearchCompMenuName,
+    SCnSearchComponent, OnSearchCompItemClick, ipAfter, SCnPaletteMutiLineMenuName);
+
+  FSearchCompMenuItem.OnCreated := OnSearchCompMenuCreated;
+  FMenuHook.AddMenuItemDef(FSearchCompMenuItem);
 
 {$IFDEF COMPILER5}
   FTabMenuItem := TCnMenuItemDef.Create(SCnPaletteTabsMenuName,
@@ -1044,6 +1064,8 @@ begin
   UpdateCompFilterButton;
   if FMultiLineMenuItem <> nil then
     FMultiLineMenuItem.SetCaption(SCnPaletteMultiLineMenuCaption);
+  if FSearchCompMenuItem <> nil then
+    FSearchCompMenuItem.SetCaption(SCnSearchComponent);
 {$ENDIF}
   FWizOptionMenu.Hint := StripHotkey(SCnWizConfigCaption);
   if FLockMenuItem <> nil then
