@@ -378,7 +378,7 @@ procedure TCnSrcEditorGutter.Paint;
 var
   R: TRect;
   StrNum: string;
-  I, Y, Idx, TextHeight, MaxRow, OldWidth: Integer;
+  I, Y, Idx, TextHeight, MaxRow: Integer;
   EditorObj: TEditorObject;
   OldColor: TColor;
 begin
@@ -565,7 +565,6 @@ var
   EditView: IOTAEditView;
   Pt: TPoint;
   LineIdx: Integer;
-  EditorObj: TEditorObject;
 begin
   EditView := EditControlWrapper.GetEditView(EditControl);
   if Assigned(EditView) then

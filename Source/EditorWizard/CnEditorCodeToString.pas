@@ -100,6 +100,9 @@ implementation
 // 代码转换为字符串
 //==============================================================================
 
+const
+  MAX_STRING_LENGTH = 250;
+
 { TCnEditorCodeToString }
 
 constructor TCnEditorCodeToString.Create(AOwner: TCnEditorWizard);
@@ -119,7 +122,7 @@ var
   s: string;
 begin
   AdjustRet := StrRight(Text, 2) = #13#10;
-  Result := StrToSourceCode(Text, FDelphiReturn, FCReturn, True);
+  Result := StrToSourceCode(Text, FDelphiReturn, FCReturn, True, MAX_STRING_LENGTH);
 
   if FSkipSpace then                    // 跳过行首空格
   begin

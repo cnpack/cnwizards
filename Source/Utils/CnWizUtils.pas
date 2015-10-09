@@ -572,7 +572,7 @@ procedure CnOtaGetCurrentBreakpoints(Results: TList);
 //==============================================================================
 
 function StrToSourceCode(const Str, ADelphiReturn, ACReturn: string;
-  Wrap: Boolean): string;
+  Wrap: Boolean; MaxLen: Integer = 0): string;
 {* 字符串转为源代码串}
 
 function CodeAutoWrap(Code: string; Width, Indent: Integer;
@@ -4457,11 +4457,16 @@ end;
 
 // 字符串转为源代码串
 function StrToSourceCode(const Str, ADelphiReturn, ACReturn: string;
-  Wrap: Boolean): string;
+  Wrap: Boolean; MaxLen: Integer): string;
 var
   Strings: TStrings;
-  i, j: Integer;
-  s, Line: string;
+  i, J: Integer;
+  s, Line, SingleLine: string;
+{$IFDEF UNICODE}
+  TmpLine: string;
+{$ELSE}
+  TmpLine: WideString;
+{$ENDIF}
   IsDelphi: Boolean;
 begin
   Result := '';
@@ -4486,16 +4491,51 @@ begin
     for i := 0 to Strings.Count - 1 do
     begin
       Line := Strings[i];
-      for j := Length(Line) downto 1 do 
-        if IsDelphi then             // Delphi 将 ' 号转换为 ''
+
+      if MaxLen <= 1 then
+      begin
+        for J := Length(Line) downto 1 do
         begin
-          if Line[j] = '''' then
-            Insert('''', Line, j);
-        end
-        else begin                   // C++Builder 将 " 号转换为 \"
-          if Line[j] = '"' then
-            Insert('\', Line, j);
+          if IsDelphi then             // Delphi 将 ' 号转换为 ''
+          begin
+            if Line[J] = '''' then
+              Insert('''', Line, J);
+          end
+          else begin                   // C++Builder 将 " 号转换为 \"
+            if Line[J] = '"' then
+              Insert('\', Line, J);
+          end;
         end;
+      end
+      else
+      begin
+        // 把 Line 按长度劈成多个字符串，然后分别转换，然后再拼起来。
+        // ANSI 模式下要考虑宽字符串的问题，所以转成 WideString 处理。
+        TmpLine := Line;
+        Line := '';
+        repeat
+          SingleLine := string(Copy(TmpLine, 1, MaxLen));
+          Delete(TmpLine, 1, MaxLen);
+
+          for J := Length(SingleLine) downto 1 do
+          begin
+            if IsDelphi then             // Delphi 将 ' 号转换为 ''
+            begin
+              if SingleLine[J] = '''' then
+                Insert('''', SingleLine, J);
+            end
+            else begin                   // C++Builder 将 " 号转换为 \"
+              if SingleLine[J] = '"' then
+                Insert('\', SingleLine, J);
+            end;
+          end;
+
+          if Line = '' then
+            Line := SingleLine
+          else
+            Line := Line + ''' + ''' + SingleLine;
+        until Length(TmpLine) = 0;
+      end;
 
       if IsDelphi then
       begin
