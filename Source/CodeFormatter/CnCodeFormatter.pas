@@ -745,9 +745,9 @@ begin
       WriteOneSpace
     else if ((BeforeSpaceCount = 0) and (FLastToken = tokGreat) and (Token in IdentTokens + [tokAtSign])) then
       WriteOneSpace // 泛型 property 后面加 read 时，需要用这种方式加空格分开
-    else if (FLastToken in RightBracket) and (Token in [tokKeywordThen, tokKeywordDo,
+    else if (FLastToken in RightBracket + [tokHat]) and (Token in [tokKeywordThen, tokKeywordDo,
       tokKeywordOf, tokKeywordTo, tokKeywordDownto]) then
-      WriteOneSpace  // 强行分离右括号与关键字
+      WriteOneSpace  // 强行分离右括号/指针符与关键字
     else if (Token in LeftBracket + [tokPlus, tokMinus, tokHat]) and
       ((FLastToken in NeedSpaceAfterKeywordTokens)
       or ((FLastToken = tokKeywordAt) and UpperContainElementType([pfetRaiseAt]))) then
