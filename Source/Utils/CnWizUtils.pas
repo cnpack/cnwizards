@@ -535,9 +535,17 @@ function CnOtaIsEditPosOutOfLine(EditPos: TOTAEditPos; View: IOTAEditView = nil)
 {$ENDIF}
 
 procedure CnOtaSelectBlock(const Editor: IOTASourceEditor; const Start, After: TOTACharPos);
-{* 选择一个代码块}
+{* 选择一个代码块，貌似不特别可靠}
 function CnOtaMoveAndSelectBlock(const Start, After: TOTACharPos; View: IOTAEditView = nil): Boolean;
-{* 用 Block 的方式设置代码块选区，返回是否成功}
+{* 用 Block 的方式设置代码块选区，返回是否成功。D5 下有 Bug 可能导致 D5 下无法选中。
+   另外起始位置必须小于结束位置，否则也无法选中。选择成功后光标停留在结束处}
+function CnOtaMoveAndSelectLine(LineNum: Integer; View: IOTAEditView = nil): Boolean;
+{* 用 Block 的方式选中一行，返回是否成功}
+function CnOtaMoveAndSelectLines(StartLineNum, EndLineNum: Integer; View: IOTAEditView = nil): Boolean;
+{* 用 Block 的方式选中多行，返回是否成功}
+function CnOtaMoveAndSelectByRowCol(const OneBasedStartRow, OneBasedStartCol,
+  OneBasedEndRow, OneBasedEndCol: Integer; View: IOTAEditView = nil): Boolean;
+{* 直接用起止行列为参数选中代码快，返回是否成功}
 function CnOtaCurrBlockEmpty: Boolean;
 {* 返回当前选择的块是否为空}
 function CnOtaGetBlockOffsetForLineMode(var StartPos: TOTACharPos; var EndPos: TOTACharPos;
@@ -885,6 +893,9 @@ uses
   CnPasCodeParser, CnCppCodeParser, CnLangStorage, CnHashLangStorage, CnWizHelp
 {$ENDIF}
   ;
+
+const
+  MAX_LINE_LENGTH = 2048;
 
 type
   TControlAccess = class(TControl);
@@ -4154,6 +4165,84 @@ begin
   View.Position.Move(Row, Col);
   Block.EndBlock;
   Result := True;
+end;
+
+// 用 Block 的方式选中一行，返回是否成功
+function CnOtaMoveAndSelectLine(LineNum: Integer; View: IOTAEditView): Boolean;
+var
+  Block: IOTAEditBlock;
+begin
+  Result := False;
+  if View = nil then
+    View := CnOtaGetTopMostEditView;
+  if View = nil then
+    Exit;
+
+  View.Position.Move(LineNum, 1);
+  Block := View.Block;
+  if Block = nil then
+    Exit;
+
+  Block.Reset;
+  Block.Style := btNonInclusive;
+  Block.BeginBlock;
+
+  View.Position.MoveEOL;
+  Block.EndBlock;
+  Result := True;
+end;
+
+// 用 Block 的方式选中多行，返回是否成功
+function CnOtaMoveAndSelectLines(StartLineNum, EndLineNum: Integer;
+  View: IOTAEditView = nil): Boolean;
+var
+  Block: IOTAEditBlock;
+begin
+  if StartLineNum = EndLineNum then
+    Result := CnOtaMoveAndSelectLine(StartLineNum, View)
+  else
+  begin
+    Result := False;
+    if View = nil then
+      View := CnOtaGetTopMostEditView;
+    if View = nil then
+      Exit;
+
+    if StartLineNum > EndLineNum then // 交换
+    begin
+      StartLineNum := StartLineNum + EndLineNum;
+      EndLineNum := StartLineNum - EndLineNum;
+      StartLineNum := StartLineNum - EndLineNum;
+    end;
+
+    View.Position.Move(StartLineNum, 1);
+    Block := View.Block;
+    if Block = nil then
+      Exit;
+
+    Block.Reset;
+    Block.Style := btNonInclusive;
+    Block.BeginBlock;
+
+    View.Position.Move(EndLineNum, 1);
+    View.Position.MoveEOL;
+    Block.EndBlock;
+    Result := True;
+  end;
+end;
+
+// 直接用起止行列为参数选中代码快，返回是否成功
+function CnOtaMoveAndSelectByRowCol(const OneBasedStartRow, OneBasedStartCol,
+  OneBasedEndRow, OneBasedEndCol: Integer; View: IOTAEditView = nil): Boolean;
+var
+  Start, After: TOTACharPos;
+begin
+  Start.Line := OneBasedStartRow;
+  Start.CharIndex := OneBasedStartCol;
+  After.Line := OneBasedEndRow;
+  After.CharIndex := OneBasedEndCol;
+
+  Result := CnOtaMoveAndSelectBlock(Start, After, View);
 end;
 
 // 返回当前选择的块是否为空
