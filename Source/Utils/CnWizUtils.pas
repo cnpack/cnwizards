@@ -4120,14 +4120,29 @@ end;
 
 // 选择一个代码块
 procedure CnOtaSelectBlock(const Editor: IOTASourceEditor; const Start, After: TOTACharPos);
+var
+  View: IOTAEditView;
+  Ed: IOTASourceEditor;
 begin
-  Editor.BlockVisible := False;
+  Ed := Editor;
+  if Ed = nil then
+  begin
+    View := CnOtaGetTopMostEditView;
+    if View = nil then
+      Exit;
+    Ed := View.GetBuffer;
+  end;
+
+  if Ed = nil then
+    Exit;
+
+  Ed.BlockVisible := False;
   try
-    Editor.BlockType := btNonInclusive;
-    Editor.BlockStart := Start;
-    Editor.BlockAfter := After;
+    Ed.BlockType := btNonInclusive;
+    Ed.BlockStart := Start;
+    Ed.BlockAfter := After;
   finally
-    Editor.BlockVisible := True;
+    Ed.BlockVisible := True;
   end;
 end;
 

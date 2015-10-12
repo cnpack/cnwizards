@@ -29,9 +29,11 @@ unit CnCodeGenerators;
 * 兼容测试：not test yet
 * 本 地 化：not test hell
 * 单元标识：$Id$
-* 修改记录：2007-10-13 V1.0
+* 修改记录：2015.10.12 V1.1
+*               由于注释后的换行已由外部写入，此处不再分析写入内容是否注释与换行结尾。
+*           2007.10.13 V1.0
 *               加入换行的部分设置处理，但不完善。
-*           2003-12-16 V0.1
+*           2003.12.16 V0.1
 *               建立。简单的代理代码的写入以及保存操作。
 ================================================================================
 |</PRE>}
@@ -59,7 +61,6 @@ type
     FPrevStr: string;
     FPrevRow: Integer;
     FPrevColumn: Integer;
-    FPrevIsComentCRLFEnd: Boolean;
     FLastExceedPosition: Integer; // 本行超出 WrapWidth 的点，供行尾超长时回溯重新换行使用
     FAutoWrapLines: TList;        // 记录自动换行的行号，用来搜寻最近一次非自动换行的行缩进。
     // 注意行号存储的是规范行。
@@ -454,8 +455,8 @@ procedure TCnCodeGenerator.Write(const Text: string; BeforeSpaceCount,
   AfterSpaceCount: Word; NeedPadding: Boolean);
 var
   Str, WrapStr, Tmp, S: string;
-  ThisCanBeHead, PrevCanBeTail, IsCommentCRLFEnd, IsCRLFSpace, IsAfterCommentAuto: Boolean;
-  Len, ALen, Blanks, LastSpaces, CRLFPos, I: Integer;
+  ThisCanBeHead, PrevCanBeTail, IsCRLFSpace, IsAfterCommentAuto: Boolean;
+  Len, Blanks, LastSpaces, CRLFPos, I: Integer;
 
   function ExceedLineWrap(Width: Integer): Boolean;
   begin
@@ -562,38 +563,14 @@ var
 
 begin
   if FLock <> 0 then Exit;
-  
+
   if FCode.Count = 0 then
     FCode.Add('');
   if FActualLines.Count = 0 then
     FActualLines.Add('');
-  
+
   ThisCanBeHead := StrCanBeHead(Text);
   PrevCanBeTail := StrCanBeTail(FPrevStr);
-
-  IsCommentCRLFEnd := False;
-  ALen := Length(Text);
-  if ALen >= 4 then   // 末尾是回车换行，并且是//或{}注释，暂未处理(**)
-  begin
-    if (Text[ALen - 1] = #13) and (Text[ALen] = #10) then
-    begin
-      if (Text[1] = '/') and (Text[2] = '/') then
-        IsCommentCRLFEnd := True
-      else
-      begin
-        Tmp := TrimRight(Text);
-        ALen := Length(Tmp);
-        if (ALen >= 2) and (Tmp[1] = '{') and (Tmp[ALen] = '}') then
-          IsCommentCRLFEnd := True
-        else if ALen >= 4 then
-        begin
-          if (Tmp[1] = '(') and (Tmp[2] = '*') and
-            (Tmp[ALen - 1] = '*') and (Tmp[ALen] = ')') then
-            IsCommentCRLFEnd := True;
-        end;
-      end;
-    end
-  end;
 
   Str := Format('%s%s%s', [StringOfChar(' ', BeforeSpaceCount), Text,
     StringOfChar(' ', AfterSpaceCount)]);
@@ -672,7 +649,7 @@ begin
   // 并且本次输出如果头部空格太少，则根据某基数缩进，这个基数是上面最近一行符合
   // 以下条件的：非自动换行的行，非本行这种缩进行，非纯注释行。
   IsAfterCommentAuto := False;
-  if NeedPadding and FPrevIsComentCRLFEnd then
+  if NeedPadding and FJustWrittenCommentEndLn then
   begin
     LastSpaces := LastIndentSpaceWithOutComments;
     if (HeadSpaceCount(Str) < LastSpaces) or (LastSpaces = 0) then
@@ -739,14 +716,6 @@ begin
     RecordAutoWrapLines(FActualLines.Count - 1);
 
   FPrevColumn := FColumnPos;
-  FPrevIsComentCRLFEnd := IsCommentCRLFEnd;
-
-//{$IFDEF UNICODE}
-//  // Unicode 模式下，转成 Ansi 长度才符合一般规则
-//  FColumnPos := Length(AnsiString(FCode[FCode.Count - 1]));
-//{$ELSE}
-// Ansi 模式下，长度直接符合一般规则
-
   FPrevStr := Text;
 
   Str := FCode[FCode.Count - 1];
@@ -842,9 +811,9 @@ begin
   end;
 
   // 写入空格需要不影响上一行关于是否是行注释结尾的判断
-  Old := FPrevIsComentCRLFEnd;
+  Old := FJustWrittenCommentEndLn;
   Write(' ');
-  FPrevIsComentCRLFEnd := Old;
+  FJustWrittenCommentEndLn := Old;
 end;
 
 end.
