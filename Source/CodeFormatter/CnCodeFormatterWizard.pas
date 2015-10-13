@@ -501,6 +501,20 @@ var
   Buffer: IOTAEditBuffer;
   PosInfo: TCodePosInfo;
   I: Integer;
+
+  procedure AddNameWithoutDuplicate(const AName: AnsiString);
+  var
+    Idx: Integer;
+  begin
+    if FPreNamesList.Find(AName, Idx) then
+    begin
+      // 有同名的，连原先同名的都要删掉，免得混乱
+      FPreNamesList.Delete(Idx);
+    end
+    else
+      FPreNamesList.Add(AName);
+  end;
+
 begin
   SetLength(FPreNamesArray, 0);
   if not FUseIDESymbols then
@@ -547,15 +561,24 @@ begin
   if FPreNamesList <> nil then
     FPreNamesList.Clear
   else
+  begin
     FPreNamesList := TCnAnsiStringList.Create;
+    FPreNamesList.CaseSensitive := False;
+    FPreNamesList.Duplicates := dupIgnore;
+    FPreNamesList.Sorted := True;
+  end;
 
   if (IDESymbols.Count = 0) and (UnitNames.Count = 0) then
     Exit;
 
   for I := 0 to IDESymbols.Count - 1 do
-    FPreNamesList.Add(AnsiString(IDESymbols.Items[I].Name));
+    AddNameWithoutDuplicate(AnsiString(IDESymbols.Items[I].Name));
   for I := 0 to UnitNames.Count - 1 do
-    FPreNamesList.Add(AnsiString(UnitNames.Items[I].Name));
+    AddNameWithoutDuplicate(AnsiString(UnitNames.Items[I].Name));
+
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnCodeFormatterWizard Pre Names Count: ' + IntToStr(FPreNamesList.Count));
+{$ENDIF}
 
   SetLength(FPreNamesArray, FPreNamesList.Count + 1); // 末尾一个 nil
   FillChar(FPreNamesArray[0], Length(FPreNamesArray) * SizeOf(PAnsiChar), 0);
