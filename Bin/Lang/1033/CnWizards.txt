@@ -2568,6 +2568,7 @@ TCnCodeFormatterForm.cbbBeginStyle.Items.Text=Next Line<BR>This Line<BR>
 TCnCodeFormatterForm.cbbKeywordStyle.Items.Text=Lower Case<BR>Upper Case<BR>Upper First Letter<BR>No Change<BR>
 TCnCodeFormatterForm.chkAutoWrap.Caption=Auto Wrap Line at:
 TCnCodeFormatterForm.chkIgnoreArea.Caption=Do NOT Format Contents between {(*} and {*)}
+TCnCodeFormatterForm.chkUseIDESymbols.Caption=Use IDE Internal Symbols to Correct Identifiers.
 TCnCodeFormatterForm.chkUsesSinglieLine.Caption=Single Line Mode for Every Uses Unit.
 TCnCodeFormatterForm.grpAsm.Caption=ASM Settings
 TCnCodeFormatterForm.grpCommon.Caption=Common Settings
