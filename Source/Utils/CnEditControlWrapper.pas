@@ -348,6 +348,10 @@ type
     {* 返回 BDS 中编辑器控件某字符位置处的座标，只在 BDS 下有效}
 {$ENDIF}
 
+    function GetLineFromPoint(Point: TPoint; EditControl: TControl;
+      EditView: IOTAEditView = nil): Integer;
+    {* 返回编辑器控件内鼠标座标对应的行，行结果从一开始，返回 -1 表示失败}
+
     procedure MarkLinesDirty(EditControl: TControl; Line: Integer; Count: Integer);
     {* 标记编辑器指定行需要重绘，屏幕可见第一行为 0 }
     procedure EditorRefresh(EditControl: TControl; DirtyOnly: Boolean);
@@ -2441,6 +2445,28 @@ begin
   except
     DoHandleException('TCnEditControlWrapper.DoVScroll[' + IntToStr(I) + ']');
   end;
+end;
+
+function TCnEditControlWrapper.GetLineFromPoint(Point: TPoint;
+  EditControl: TControl; EditView: IOTAEditView): Integer;
+var
+  EditorObj: TEditorObject;
+begin
+  Result := -1;
+  if EditControl = nil then
+    Exit;
+
+  if EditView = nil then
+    EditView := GetEditView(EditControl);
+  if EditView = nil then
+    Exit;
+
+  Result := Point.y div GetCharHeight;
+  EditorObj := GetEditorObject(EditControl);
+  if (EditorObj <> nil) and (Result < EditorObj.ViewLineCount) then
+    Result := EditorObj.ViewLineNumber[Result]
+  else
+    Result := EditView.TopRow + Result;
 end;
 
 initialization

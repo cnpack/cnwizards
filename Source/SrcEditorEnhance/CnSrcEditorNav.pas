@@ -103,6 +103,9 @@ type
 {$IFDEF BDS}
     function FindActionByNameFromActionManager(ActionManager: TActionManager; AName: string): TBasicAction;
 {$ENDIF}
+
+    procedure HookMouseDown(Editor: TEditorObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer; IsNC: Boolean);
   protected
     procedure OnEnhConfig(Sender: TObject);
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
@@ -207,11 +210,13 @@ begin
   FForwardList := TStringList.Create;
 
   CnWizNotifierServices.AddApplicationIdleNotifier(AppIdle);
+  EditControlWrapper.AddEditorMouseDownNotifier(HookMouseDown);
 end;
 
 destructor TCnSrcEditorNav.Destroy;
 begin
   CnWizNotifierServices.RemoveApplicationIdleNotifier(AppIdle);
+  EditControlWrapper.RemoveEditorMouseDownNotifier(HookMouseDown);
 
   Uninstall;
   FBackList.Free;
@@ -257,6 +262,7 @@ var
         Result := True;
     end;
   end;
+
 begin
   if not FUpdating and not FPause and Assigned(Owner) and
     TCustomForm(Owner).Active then
@@ -655,6 +661,48 @@ begin
 end;
 
 {$ENDIF}
+
+procedure TCnSrcEditorNav.HookMouseDown(Editor: TEditorObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer; IsNC: Boolean);
+var
+  Line: Integer;
+  P: TPoint;
+begin
+  if (Button = mbLeft) and (ssCtrl in Shift) then
+  begin
+    if Editor.EditControl.Cursor = crHandPoint then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('Mouse Down with HandPoint. IDE Find Declaration Jump Found.');
+{$ENDIF}
+      // 获取光标下的当前行，并判断并记录入历史记录
+      P.x := X;
+      P.y := Y;
+      Line := EditControlWrapper.GetLineFromPoint(P, Editor.EditControl, Editor.EditView);
+
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('IDE Find Declaration Jump From ' + IntToStr(Line));
+{$ENDIF}
+
+      if FFileName = '' then
+      begin
+        FFileName := Editor.EditView.Buffer.FileName;
+        FLine := Line;
+      end
+      else if (not SameText(Editor.EditView.Buffer.FileName, FFileName) or
+        (Abs(Line - FLine) > FNavMgr.MinLineDiff)) then
+      begin
+        AddItem(FBackList, FFileName, FLine);
+        FFileName := Editor.EditView.Buffer.FileName;
+        FLine := Line;
+
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('Add IDE Find Declaration Jump to History.');
+{$ENDIF}
+      end;
+    end;
+  end;
+end;
 
 { TCnSrcEditorNavMgr }
 
