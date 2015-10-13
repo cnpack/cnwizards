@@ -153,6 +153,7 @@ type
     btnShortCut: TButton;
     lblNewLine: TLabel;
     seNewLine: TCnSpinEdit;
+    chkUseIDESymbols: TCheckBox;
     procedure chkAutoWrapClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure btnShortCutClick(Sender: TObject);
@@ -321,6 +322,12 @@ begin
     seSpaceAfter.Value := FSpaceAfterOperator;
     chkUsesSinglieLine.Checked := FUsesUnitSingleLine;
 
+{$IFDEF CNWIZARDS_CNINPUTHELPER}
+    chkUseIDESymbols.Checked := FUseIDESymbols;
+{$ELSE}
+    chkUseIDESymbols.Enabled := False;
+{$ENDIF}
+
     seASMHeadIndent.Value := FSpaceBeforeASM;
     seAsmTab.Value := FSpaceTabASMKeyword;
     chkIgnoreArea.Checked := FUseIgnoreArea;
@@ -340,7 +347,9 @@ begin
       FSpaceBeforeOperator := seSpaceBefore.Value;
       FSpaceAfterOperator := seSpaceAfter.Value;
       FUsesUnitSingleLine := chkUsesSinglieLine.Checked;
-
+{$IFDEF CNWIZARDS_CNINPUTHELPER}
+      FUseIDESymbols := chkUseIDESymbols.Checked;
+{$ENDIF}
       FSpaceBeforeASM := seASMHeadIndent.Value;
       FSpaceTabASMKeyword := seAsmTab.Value;
       FUseIgnoreArea := chkIgnoreArea.Checked;

@@ -1,9 +1,9 @@
 inherited CnCodeFormatterForm: TCnCodeFormatterForm
-  Left = 307
-  Top = 98
+  Left = 375
+  Top = 152
   BorderStyle = bsDialog
   Caption = 'Code Formatter Settings'
-  ClientHeight = 458
+  ClientHeight = 462
   ClientWidth = 451
   Font.Charset = ANSI_CHARSET
   OldCreateOrder = True
@@ -15,7 +15,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
     Left = 8
     Top = 8
     Width = 433
-    Height = 409
+    Height = 413
     ActivePage = tsPascal
     TabOrder = 0
     object tsPascal: TTabSheet
@@ -24,7 +24,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         Left = 8
         Top = 8
         Width = 409
-        Height = 235
+        Height = 249
         Caption = 'Common Settings'
         TabOrder = 0
         object lblKeyword: TLabel
@@ -36,35 +36,35 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         end
         object lblBegin: TLabel
           Left = 16
-          Top = 54
+          Top = 52
           Width = 57
           Height = 13
           Caption = 'Begin Style:'
         end
         object lblTab: TLabel
           Left = 16
-          Top = 84
+          Top = 80
           Width = 57
           Height = 13
           Caption = 'Tab Indent:'
         end
         object lblSpaceBefore: TLabel
           Left = 16
-          Top = 114
+          Top = 108
           Width = 115
           Height = 13
           Caption = 'Space Before Operator:'
         end
         object lblSpaceAfter: TLabel
           Left = 16
-          Top = 144
+          Top = 136
           Width = 108
           Height = 13
           Caption = 'Space After Operator:'
         end
         object lblNewLine: TLabel
           Left = 232
-          Top = 176
+          Top = 166
           Width = 68
           Height = 13
           Caption = 'when Exceed:'
@@ -85,7 +85,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         end
         object cbbBeginStyle: TComboBox
           Left = 136
-          Top = 52
+          Top = 50
           Width = 257
           Height = 21
           Style = csDropDownList
@@ -97,7 +97,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         end
         object seTab: TCnSpinEdit
           Left = 296
-          Top = 82
+          Top = 78
           Width = 97
           Height = 22
           MaxValue = 32
@@ -107,7 +107,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         end
         object seWrapLine: TCnSpinEdit
           Left = 144
-          Top = 172
+          Top = 162
           Width = 81
           Height = 22
           MaxValue = 256
@@ -118,7 +118,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         end
         object seSpaceBefore: TCnSpinEdit
           Left = 296
-          Top = 112
+          Top = 106
           Width = 97
           Height = 22
           MaxValue = 32
@@ -128,7 +128,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         end
         object seSpaceAfter: TCnSpinEdit
           Left = 296
-          Top = 142
+          Top = 134
           Width = 97
           Height = 22
           MaxValue = 32
@@ -138,7 +138,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         end
         object chkUsesSinglieLine: TCheckBox
           Left = 16
-          Top = 204
+          Top = 192
           Width = 249
           Height = 17
           Caption = 'Single Line Mode for Every Uses Unit.'
@@ -146,7 +146,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         end
         object chkAutoWrap: TCheckBox
           Left = 16
-          Top = 174
+          Top = 164
           Width = 121
           Height = 17
           Caption = 'Auto Wrap Line at:'
@@ -155,7 +155,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         end
         object seNewLine: TCnSpinEdit
           Left = 312
-          Top = 172
+          Top = 162
           Width = 81
           Height = 22
           MaxValue = 256
@@ -163,12 +163,20 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           TabOrder = 7
           Value = 16
         end
+        object chkUseIDESymbols: TCheckBox
+          Left = 16
+          Top = 216
+          Width = 361
+          Height = 17
+          Caption = 'Use IDE Internal Symbols to Correct Identifiers.'
+          TabOrder = 9
+        end
       end
       object grpAsm: TGroupBox
         Left = 8
-        Top = 256
+        Top = 264
         Width = 409
-        Height = 85
+        Height = 83
         Caption = 'ASM Settings'
         TabOrder = 1
         object lblAsmHeadIndent: TLabel
@@ -180,7 +188,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         end
         object lblASMTab: TLabel
           Left = 16
-          Top = 50
+          Top = 48
           Width = 53
           Height = 13
           Caption = 'Tab Width:'
@@ -197,7 +205,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         end
         object seAsmTab: TCnSpinEdit
           Left = 296
-          Top = 49
+          Top = 47
           Width = 97
           Height = 22
           MaxValue = 32
@@ -208,7 +216,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
       end
       object chkIgnoreArea: TCheckBox
         Left = 8
-        Top = 352
+        Top = 358
         Width = 281
         Height = 17
         Caption = 'Do NOT Format Contents between {(*} and {*)}'
@@ -218,7 +226,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
   end
   object btnOK: TButton
     Left = 206
-    Top = 427
+    Top = 431
     Width = 75
     Height = 21
     Caption = '&OK'
@@ -228,7 +236,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
   end
   object btnCancel: TButton
     Left = 286
-    Top = 427
+    Top = 431
     Width = 75
     Height = 21
     Cancel = True
@@ -238,7 +246,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
   end
   object btnHelp: TButton
     Left = 366
-    Top = 427
+    Top = 431
     Width = 75
     Height = 21
     Caption = '&Help'
@@ -247,7 +255,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
   end
   object btnShortCut: TButton
     Left = 8
-    Top = 427
+    Top = 431
     Width = 75
     Height = 21
     Caption = '&Shortcut'
