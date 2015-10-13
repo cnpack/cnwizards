@@ -46,7 +46,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ToolsAPI, IniFiles, Contnrs, CnWizMultiLang, CnWizClasses, CnWizConsts,
   CnCommon, CnConsts, CnWizUtils, CnDCU32, CnWizIdeUtils, CnWizEditFiler,
-  CnWizOptions, mPasLex, Math, TypInfo, RegExpr;
+  CnWizOptions, mPasLex, Math, TypInfo, RegExpr, ActnList;
 
 type
 
@@ -92,6 +92,7 @@ type
     FIgnoreNoSrc: Boolean;
     FIgnoreCompRef: Boolean;
     FProcessDependencies: Boolean;
+    FUseBuildAction: Boolean;
     FIgnoreList: TStringList;
     FCleanList: TStringList;
     FRegExpr: TRegExpr;
@@ -143,7 +144,11 @@ const
   csIgnoreNoSrc = 'IgnoreNoSrc';
   csIgnoreCompRef = 'IgnoreCompRef';
   csProcessDependencies = 'ProcessDependencies';
+  csUseBuildAction = 'UseBuildAction';
   csDcuExt = '.dcu';
+
+  csProjectBuildCommand = 'ProjectBuildCommand';
+  csProjectBuildAllCommand = 'ProjectBuildAllCommand';
 
 { TCnUsesCleaner }
 
@@ -155,6 +160,7 @@ begin
   FIgnoreNoSrc := False;
   FIgnoreCompRef := True;
   FProcessDependencies := False;
+  FUseBuildAction := False;
   FIgnoreList := TStringList.Create;
   FCleanList := TStringList.Create;
 
@@ -285,34 +291,94 @@ var
   begin
     Result := not AProject.ProjectBuilder.ShouldBuild or
       AProject.ProjectBuilder.BuildProject(cmOTAMake, False);
-  end;  
+  end;
+
+  function DoBuildProjectAction: Boolean;
+  var
+    Action: TContainedAction;
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogEnter('DoBuildProjectAction');
+{$ENDIF}
+
+    InfoDlg('Will Build Current Project.');
+
+    Action := FindIDEAction(csProjectBuildCommand);
+    if Action <> nil then
+      Result := Action.Execute
+    else
+      Result := False;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogLeave('DoBuildProjectAction');
+{$ENDIF}
+  end;
+
+  function DoBuildAllProjectAction: Boolean;
+  var
+    Action: TContainedAction;
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogEnter('DoBuildAllProjectAction');
+{$ENDIF}
+
+    InfoDlg('Will Build All Projects.');
+
+    Action := FindIDEAction(csProjectBuildAllCommand);
+    if Action <> nil then
+      Result := Action.Execute
+    else
+      Result := False;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogLeave('DoBuildAllProjectAction');
+{$ENDIF}
+  end;
+
 begin
   Result := False;
   try
     case AKind of
       ukCurrUnit:
         begin
-          Module := CnOtaGetCurrentModule;
-          Assert(Assigned(Module) and (Module.OwnerCount > 0));
-          Project := GetProjectFromModule(Module);
-          Result := DoCompileProject(Project);
+          if FUseBuildAction then
+          begin
+            Result := DoBuildAllProjectAction; // 不知道当前单元属于哪个 Project，只能全编译
+          end
+          else
+          begin
+            Module := CnOtaGetCurrentModule;
+            Assert(Assigned(Module) and (Module.OwnerCount > 0));
+            Project := GetProjectFromModule(Module);
+            Result := DoCompileProject(Project);
+          end;
         end;
       ukCurrProject:
         begin
           Project := CnOtaGetCurrentProject;
           Assert(Assigned(Project));
-          Result := DoCompileProject(Project);
+          if FUseBuildAction then
+            Result := DoBuildProjectAction
+          else
+            Result := DoCompileProject(Project);
         end;
     else
       begin
-        ProjectGroup := CnOtaGetProjectGroup;
-        Assert(Assigned(ProjectGroup));
-        for i := 0 to ProjectGroup.ProjectCount - 1 do
+        if FUseBuildAction then
         begin
-          Result := DoCompileProject(ProjectGroup.Projects[i]);
-          if not Result then
-            Break;
-        end;  
+          Result := DoBuildAllProjectAction;
+        end
+        else
+        begin
+          ProjectGroup := CnOtaGetProjectGroup;
+          Assert(Assigned(ProjectGroup));
+          for i := 0 to ProjectGroup.ProjectCount - 1 do
+          begin
+            Result := DoCompileProject(ProjectGroup.Projects[i]);
+            if not Result then
+              Break;
+          end;
+        end;
       end;
     end;
   except
@@ -1200,6 +1266,7 @@ begin
   FIgnoreNoSrc := Ini.ReadBool('', csIgnoreNoSrc, FIgnoreNoSrc);
   FIgnoreCompRef := Ini.ReadBool('', csIgnoreCompRef, FIgnoreCompRef);
   FProcessDependencies := Ini.ReadBool('', csProcessDependencies, FProcessDependencies);
+  FUseBuildAction := Ini.ReadBool('', csUseBuildAction, FUseBuildAction);
   WizOptions.LoadUserFile(FIgnoreList, csIgnoreList);
   WizOptions.LoadUserFile(FCleanList, csCleanList);
 end;
@@ -1212,6 +1279,7 @@ begin
   Ini.WriteBool('', csIgnoreNoSrc, FIgnoreNoSrc);
   Ini.WriteBool('', csIgnoreCompRef, FIgnoreCompRef);
   Ini.WriteBool('', csProcessDependencies, FProcessDependencies);
+  Ini.WriteBool('', csUseBuildAction, FUseBuildAction);
   WizOptions.SaveUserFile(FIgnoreList, csIgnoreList);
   WizOptions.SaveUserFile(FCleanList, csCleanList);
 end;
