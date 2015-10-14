@@ -96,7 +96,7 @@ type
     FIgnoreNoSrc: Boolean;
     FIgnoreCompRef: Boolean;
     FProcessDependencies: Boolean;
-    FUseBuildAction: Boolean;
+    FUseBuildAction: Boolean;  // 是否使用 IDE 的 Build 菜单项点击来编译而不是使用 OTA 接口
     FIgnoreList: TStringList;
     FCleanList: TStringList;
     FRegExpr: TRegExpr;
@@ -164,7 +164,7 @@ begin
   FIgnoreNoSrc := False;
   FIgnoreCompRef := True;
   FProcessDependencies := False;
-  FUseBuildAction := False;
+  FUseBuildAction := False; // 默认使用 OTA 接口，True 时未完整测试，选项不对外开放
   FIgnoreList := TStringList.Create;
   FCleanList := TStringList.Create;
 
@@ -197,6 +197,10 @@ begin
       ErrorDlg(SCnUsesCleanerCompileFail);
       Exit;
     end;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('UsesCleaner Compile OK. Start to Process Files.');
+{$ENDIF}
 
     // 进行分析
     List := TObjectList.Create;
