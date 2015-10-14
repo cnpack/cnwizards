@@ -454,14 +454,13 @@ var
   {$IFDEF DEBUG}
     CnDebugger.LogMsg('UsesCleaner ProcessAUnit: ' + ADcuName);
   {$ENDIF}
+
     if IsDprOrPas(ASourceFileName) and FileExists(ADcuName) then
     begin
       AInfo := TCnEmptyUsesInfo.Create(ADcuName, ASourceFileName, AProject);
       Result := AInfo.Process;
       if not Result then
-      begin
         FreeAndNil(AInfo);
-      end;
     end;
   end;
 
@@ -555,6 +554,7 @@ var
   var
     i: Integer;
     ModuleInfo: IOTAModuleInfo;
+    Opened: Boolean;
   begin
     Result := False;
     DcuPath := GetProjectDcuPath(Project);
@@ -568,28 +568,34 @@ var
           ModuleExists(ModuleInfo.FileName) then
           Continue;
 
-        if OpenedOnly and not CnOtaIsFileOpen(ModuleInfo.FileName) then
+        Opened := CnOtaIsFileOpen(ModuleInfo.FileName);
+        if OpenedOnly and not Opened then
           Continue;
 
         Module := ModuleInfo.OpenModule;
-        if not Assigned(Module) or not IsDprOrPas(Module.FileName) then
-          Continue;
+        try
+          if not Assigned(Module) or not IsDprOrPas(Module.FileName) then
+            Continue;
 
-        DcuName := GetDcuName(DcuPath, Module.FileName);
-        if not FileExists(DcuName) then
-          Continue;
+          DcuName := GetDcuName(DcuPath, Module.FileName);
+          if not FileExists(DcuName) then
+            Continue;
 
-        if ProcessAUnit(DcuName, Module.FileName, Project, UsesInfo) then
-        begin
-          if (UsesInfo.IntfCount > 0) or (UsesInfo.ImplCount > 0) then
-            ProjectInfo.Units.Add(UsesInfo)
-          else
-            FreeAndNil(UsesInfo);
-        end
-        else if not QueryDlg(Format(SCnUsesCleanerProcessError,
-          [_CnExtractFileName(Module.FileName)])) then
-        begin
-          Exit;
+          if ProcessAUnit(DcuName, Module.FileName, Project, UsesInfo) then
+          begin
+            if (UsesInfo.IntfCount > 0) or (UsesInfo.ImplCount > 0) then
+              ProjectInfo.Units.Add(UsesInfo)
+            else
+              FreeAndNil(UsesInfo);
+          end
+          else if not QueryDlg(Format(SCnUsesCleanerProcessError,
+            [_CnExtractFileName(Module.FileName)])) then
+          begin
+            Exit;
+          end;
+        finally
+          if not Opened and Assigned(Module) then
+            Module.CloseModule(True);
         end;
       end;
 
@@ -1184,6 +1190,7 @@ begin
 end;
 
 procedure TCnUsesCleaner.CleanUnitUses(List: TObjectList);
+
   function GetEditBuffer(const aUsesInfo: TCnEmptyUsesInfo; out ABuffer: IOTAEditBuffer): Boolean;
   var
     SrcEditor: IOTAEditor;
@@ -1220,6 +1227,7 @@ begin
     Impl := TStringList.Create;
     Logs := TStringList.Create;
     for i := 0 to List.Count - 1 do
+    begin
       for j := 0 to TCnProjectUsesInfo(List[i]).Units.Count - 1 do
       begin
         UsesInfo := TCnEmptyUsesInfo(TCnProjectUsesInfo(List[i]).Units[j]);
@@ -1250,6 +1258,7 @@ begin
             Exit;
         end;
       end;
+    end;
   finally
     Intf.Free;
     Impl.Free;
