@@ -228,9 +228,9 @@ inherited CnWizConfigForm: TCnWizConfigForm
             FocusControl = edtSearchWizard
           end
           object edtSearchWizard: TEdit
-            Left = 52
+            Left = 56
             Top = 6
-            Width = 257
+            Width = 253
             Height = 21
             TabOrder = 0
             OnChange = edtSearchWizardChange
@@ -448,9 +448,9 @@ inherited CnWizConfigForm: TCnWizConfigForm
             FocusControl = edtSearchEditor
           end
           object edtSearchEditor: TEdit
-            Left = 52
+            Left = 56
             Top = 6
-            Width = 257
+            Width = 253
             Height = 21
             TabOrder = 0
             OnChange = edtSearchEditorChange
