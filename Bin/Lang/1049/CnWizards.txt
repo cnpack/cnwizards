@@ -2568,6 +2568,7 @@ TCnCodeFormatterForm.cbbKeywordStyle.Items.Text=Нижний регистр<BR>�
 TCnCodeFormatterForm.chkAutoWrap.Caption=Перенос строки на:
 TCnCodeFormatterForm.chkIgnoreArea.Caption=НЕ форматировать содержимое между {(*} и {*)}
 TCnCodeFormatterForm.chkUsesSinglieLine.Caption=По одному модулю на строку в разделе Uses.
+TCnCodeFormatterForm.chkUseIDESymbols.Caption=Использовать внутренние символы среды для коррекции идентификаторов.
 TCnCodeFormatterForm.grpAsm.Caption=Настройки ASM
 TCnCodeFormatterForm.grpCommon.Caption=Основные настройки
 TCnCodeFormatterForm.lblAsmHeadIndent.Caption=Первый отступ в строке:
