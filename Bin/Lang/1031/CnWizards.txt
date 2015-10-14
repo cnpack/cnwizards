@@ -2569,6 +2569,7 @@ TCnCodeFormatterForm.cbbKeywordStyle.Items.Text=klein<BR>groß<BR>erster Buchsta
 TCnCodeFormatterForm.chkAutoWrap.Caption=automatischer Umbruch bei:
 TCnCodeFormatterForm.chkIgnoreArea.Caption=Formatiere keinen Inhalt zwischen {(*} and {*)}
 TCnCodeFormatterForm.chkUsesSinglieLine.Caption=Einzel Zeilen Modus für jede Uses Unit.
+TCnCodeFormatterForm.chkUseIDESymbols.Caption=nutze IDE interne Symbole, um die Identifier auszutauschen.
 TCnCodeFormatterForm.grpAsm.Caption=ASM Einstellungen
 TCnCodeFormatterForm.grpCommon.Caption=allgemeine Einstellungen
 TCnCodeFormatterForm.lblAsmHeadIndent.Caption=Zeilenkopf Einzug:
