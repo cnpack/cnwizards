@@ -46,7 +46,11 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ToolsAPI, IniFiles, Contnrs, CnWizMultiLang, CnWizClasses, CnWizConsts,
   CnCommon, CnConsts, CnWizUtils, CnDCU32, CnWizIdeUtils, CnWizEditFiler,
-  CnWizOptions, mPasLex, Math, TypInfo, RegExpr, ActnList;
+  CnWizOptions, mPasLex, Math, TypInfo, RegExpr, ActnList
+  {$IFDEF DELPHIXE3_UP}
+  , System.Actions
+  {$ENDIF}
+  ;
 
 type
 
