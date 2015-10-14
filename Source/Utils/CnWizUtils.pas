@@ -557,6 +557,8 @@ function CnOtaOpenUnSaveForm(const FormName: string): Boolean;
 {* 打开未保存的窗体}
 function CnOtaIsFileOpen(const FileName: string): Boolean;
 {* 判断文件是否打开}
+procedure CnOtaCloseFile(const FileName: string; ForceClosed: Boolean = False);
+{* 关闭文件}
 function CnOtaIsFormOpen(const FormName: string): Boolean;
 {* 判断窗体是否打开}
 function CnOtaIsModuleModified(AModule: IOTAModule): Boolean;
@@ -4353,6 +4355,20 @@ begin
         Exit;
     end;
   end;
+end;
+
+// 关闭文件
+procedure CnOtaCloseFile(const FileName: string; ForceClosed: Boolean);
+var
+  ModuleServices: IOTAModuleServices;
+  Module: IOTAModule;
+begin
+  ModuleServices := BorlandIDEServices as IOTAModuleServices;
+  if ModuleServices = nil then Exit;
+
+  Module := ModuleServices.FindModule(FileName);
+  if Assigned(Module) then
+    Module.CloseModule(ForceClosed);
 end;
 
 // 判断窗体是否打开
