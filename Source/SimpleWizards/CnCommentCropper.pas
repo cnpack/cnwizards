@@ -156,7 +156,7 @@ type
     procedure OnFindFile(const FileName: string; const Info: TSearchRec;
       var Abort: Boolean);
 
-    procedure CropAUnit(const FileName: string);
+    procedure CropAUnit(const FileName: string; IsCurrent: Boolean = False);
     procedure CropStream(InStream, OutStream: TStream; IsDelphi: Boolean = True);
     procedure MergeBlankStream(Stream: TStream);
   public
@@ -237,13 +237,17 @@ begin
   FFileMasksHistory := TStringList.Create;
 end;
 
-procedure TCnCommentCropperWizard.CropAUnit(const FileName: string);
+procedure TCnCommentCropperWizard.CropAUnit(const FileName: string;
+  IsCurrent: Boolean);
 var
   EditFiler: TCnEditFiler;
   InStream, OutStream: TStream;
 begin
-  if not Self.CropProjectSrc then
-    if IsDpr(FileName) or IsBpr(FileName) or IsBpg(FileName) then Exit;
+  // 处理当前文件的话，即使不处理 Project Source，但当前文件是 Project Source，
+  // 还是照常处理。
+  if not Self.CropProjectSrc and not IsCurrent then
+    if IsDpr(FileName) or IsBpr(FileName) or IsBpg(FileName) then
+      Exit;
 
   EditFiler := nil; InStream := nil; OutStream := nil;
   try
@@ -296,7 +300,7 @@ end;
 procedure TCnCommentCropperWizard.CropCurrentUnit;
 begin
   if IsSourceModule(CnOtaGetCurrentSourceFile) then
-    Self.CropAUnit(CnOtaGetCurrentSourceFile);
+    Self.CropAUnit(CnOtaGetCurrentSourceFile, True);
 end;
 
 procedure TCnCommentCropperWizard.CropOpenedUnits;
@@ -600,7 +604,7 @@ begin
   Self.rbCurrProject.Enabled := CnOtaGetCurrentProject <> nil;
   Self.rbProjectGroup.Enabled := CnOtaGetProjectGroup <> nil;
   Self.edReserveStr.Enabled := Self.chkReserve.Checked;
-  Self.chkCropProjectSrc.Enabled := chkCropProjectSrc.Checked or rbProjectGroup.Checked;
+  Self.chkCropProjectSrc.Enabled := rbCurrProject.Checked or rbProjectGroup.Checked;
 
   if (CnOtaGetCurrentProject = nil) and (CnOtaGetCurrentSourceFile = '') then
     rbDirectory.Checked := True;
@@ -686,7 +690,7 @@ procedure TCommentCropForm.UpdateClick(Sender: TObject);
 var
   I: Integer;
 begin
-  chkCropProjectSrc.Enabled := chkCropProjectSrc.Checked or rbProjectGroup.Checked;
+  chkCropProjectSrc.Enabled := rbCurrProject.Checked or rbProjectGroup.Checked;
   grpDir.Enabled := rbDirectory.Checked;
 
   for I := 0 to grpDir.ControlCount - 1 do
