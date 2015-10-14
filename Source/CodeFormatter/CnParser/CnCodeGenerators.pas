@@ -65,6 +65,8 @@ type
     FAutoWrapLines: TList;        // 记录自动换行的行号，用来搜寻最近一次非自动换行的行缩进。
     // 注意行号存储的是规范行。
 
+    FEnsureEmptyLine: Boolean;
+
     FOnAfterWrite: TCnAfterWriteEvent;
     FAutoWrapButNoIndent: Boolean;
     FWritingBlank: Boolean;
@@ -80,6 +82,10 @@ type
     function GetActualRow: Integer;
     function LineIsEmptyOrComment(const Str: string): Boolean;
     procedure RecordAutoWrapLines(Line: Integer);
+
+{$IFDEF DEBUG}
+    function GetDebugCodeString: string;
+{$ENDIF}
   protected
     procedure DoAfterWrite(IsWriteln: Boolean; PrefixSpaces: Integer = 0); virtual;
     // 当 IsWriteln 为 True 时，PrefixSpaces 表示本次写入回车后可能写的空格数，否则为 0
@@ -97,6 +103,7 @@ type
     procedure InternalWriteln;
     procedure Writeln;
     procedure WriteCommentEndln;
+    procedure CheckAndWriteOneEmptyLine;
     function SourcePos: Word;
     {* 最后一行光标所在列数，暂未使用}
     procedure SaveToStream(Stream: TStream);
@@ -148,6 +155,11 @@ type
     {* 超宽时自动换行时是否缩进，供外界控制，如 uses 区用 True}
     property OnAfterWrite: TCnAfterWriteEvent read FOnAfterWrite write FOnAfterWrite;
     {* 写内容一次成功后被调用}
+
+{$IFDEF DEBUG}
+    property DebugCodeString: string read GetDebugCodeString;
+    {* 调试模式下返回 FCode 的全部内容}
+{$ENDIF}
   end;
 
 implementation
@@ -176,6 +188,13 @@ begin
     if (Len > 0) and (S[Len] = ' ') then
       FCode[FCode.Count - 1] := TrimRight(S);
   end;
+end;
+
+procedure TCnCodeGenerator.CheckAndWriteOneEmptyLine;
+begin
+  FEnsureEmptyLine := True;
+  Writeln;
+  FEnsureEmptyLine := False;
 end;
 
 procedure TCnCodeGenerator.ClearOutputLock;
@@ -277,6 +296,29 @@ function TCnCodeGenerator.GetCurrRow: Integer;
 begin
   Result := FCode.Count - 1;
 end;
+
+{$IFDEF DEBUG}
+
+function TCnCodeGenerator.GetDebugCodeString: string;
+var
+  I: Integer;
+begin
+  if (FCode = nil) or (FCode.Count = 0) then
+  begin
+    Result := '<none>';
+    Exit;
+  end;
+
+  Result := '';
+  for I := 0 to FCode.Count - 1 do
+  begin
+    Result := Result + Format('%d:%s', [I, FCode[I]]);
+    if I < FCode.Count - 1 then
+      Result := Result + CRLF;
+  end;
+end;
+
+{$ENDIF}
 
 function TCnCodeGenerator.GetLastIndentSpaceWithOutComments: Integer;
 var
@@ -764,6 +806,17 @@ procedure TCnCodeGenerator.Writeln;
     Result := Copy(S, 1, I);
   end;
 
+  // 判断 FCode 最尾巴上是不是连续俩回车换行
+  function HasLastOneEmptyLine: Boolean;
+  var
+    C: Integer;
+  begin
+    Result := False;
+    C := FActualLines.Count;
+    if (C > 1) and (FActualLines[C - 1] = '') and (FActualLines[C - 2] = '') then
+      Result := True;
+  end;
+
 begin
   if FLock <> 0 then Exit;
 
@@ -776,7 +829,13 @@ begin
 
   // 如果上一个输出是注释块的结尾换行，且本次不是输出注释尾，则本次 Writeln 忽略
   if not FWritingCommentEndLn and FJustWrittenCommentEndLn then
-    FJustWrittenCommentEndLn := False
+  begin
+    FJustWrittenCommentEndLn := False;
+  end
+  else if FEnsureEmptyLine and HasLastOneEmptyLine then // 如果已经有一个空行了，并且外界要求保证一个空行，则忽略
+  begin
+    FJustWrittenCommentEndLn := False;
+  end
   else
   begin
     FCode.Add('');
@@ -809,6 +868,11 @@ begin
     if (Length(S) > 0) and (S[Length(S)] = ' ') then
       Exit;
   end;
+
+{$IFDEF DEBUG}
+  if DebugCodeString = '' then
+    Exit;
+{$ENDIF}
 
   // 写入空格需要不影响上一行关于是否是行注释结尾的判断
   Old := FJustWrittenCommentEndLn;

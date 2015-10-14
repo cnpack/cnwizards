@@ -74,6 +74,7 @@ type
     FOldElementTypes: TCnElementStack;
     FElementType: TCnPascalFormattingElementType;
     FPrefixSpaces: Integer;
+    FEnsureOneEmptyLine: Boolean;
 
     FNamesMap: TCnStrToStrHashMap;
     FInputLineMarks: TList;         // 源与结果的行映射关系中的源行
@@ -128,6 +129,8 @@ type
     {* 格式结果换行 }
     procedure WriteLine; 
     {* 格式结果加一空行 }
+    procedure EnsureOneEmptyLine;
+    {* 格式结果保证当前出现一空行}
     procedure WriteBlankLineByPrevCondition;
     {* 根据上一次是否输出了批量空行来决定本次输出单个回车还是双回车的空行，某些场合用来取代 WriteLine}
     procedure WriteLineFeedByPrevCondition;
@@ -689,7 +692,11 @@ begin
     Exit;
   end;
 
-  if (Scaner.BlankLinesBefore = 0) and (Scaner.BlankLinesAfter = 0) then
+  if FEnsureOneEmptyLine then // 如果外部要求本次保持一空行
+  begin
+    FCodeGen.CheckAndWriteOneEmptyLine;
+  end
+  else if (Scaner.BlankLinesBefore = 0) and (Scaner.BlankLinesAfter = 0) then
   begin
     FCodeGen.Writeln;
   end
@@ -4233,7 +4240,7 @@ begin
     if MakeLine then // Attribute 后无须空行分隔所以 MakeLine 会被设为 False
     begin
       if IsInternal then  // 内部的定义只需要空一行
-        Writeln
+        EnsureOneEmptyLine
       else
         WriteLine;
     end;
@@ -4271,7 +4278,7 @@ begin
           if IndentProcs then
           begin
             if not LastIsInternalProc then // 上一个也是 proc，只空一行
-              Writeln;
+              EnsureOneEmptyLine;
             FormatProcedureDeclSection(Tab(PreSpaceCount));
           end
           else
@@ -4285,7 +4292,7 @@ begin
           // Attributes for procedure in implementation
           if IsInternal then
           begin
-            Writeln; // 与上一个 local procedure 空一行
+            EnsureOneEmptyLine; // 与上一个 local procedure 空一行
             FormatSingleAttribute(Tab(PreSpaceCount));
           end
           else
@@ -5521,6 +5528,13 @@ end;
 procedure TCnAbstractCodeFormatter.WriteOneSpace;
 begin
   CodeGen.WriteOneSpace;
+end;
+
+procedure TCnAbstractCodeFormatter.EnsureOneEmptyLine;
+begin
+  FEnsureOneEmptyLine := True;
+  Writeln;
+  FEnsureOneEmptyLine := False;
 end;
 
 initialization
