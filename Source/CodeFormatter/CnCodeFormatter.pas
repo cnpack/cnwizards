@@ -1629,6 +1629,8 @@ end;
 
 { IfStmt -> IF Expression THEN Statement [ELSE Statement] }
 procedure TCnBasePascalFormatter.FormatIfStmt(PreSpaceCount: Byte; IgnorePreSpace: Boolean);
+var
+  OldKeepOneBlankLine, ElseAfterThen: Boolean;
 begin
   if IgnorePreSpace then
     Match(tokKeywordIF)
@@ -1639,7 +1641,10 @@ begin
   FormatExpression(0, PreSpaceCount);
   SpecifyElementType(pfetThen);
   try
-    Match(tokKeywordThen);
+    OldKeepOneBlankLine := Scaner.KeepOneBlankLine;
+    Scaner.KeepOneBlankLine := False;
+    Match(tokKeywordThen);  // To Avoid 2 Empty Line after then in 'if True then (CRLFCRLF) else Exit;'
+    Scaner.KeepOneBlankLine := OldKeepOneBlankLine;
   finally
     RestoreElementType;
   end;
@@ -1647,11 +1652,16 @@ begin
 
   if Scaner.Token = tokSemicolon then
     FStructStmtEmptyEnd := True;
+
+  ElseAfterThen := Scaner.Token = tokKeywordElse;
   FormatStatement(Tab(PreSpaceCount));
 
   if Scaner.Token = tokKeywordElse then
   begin
-    Writeln;
+    if ElseAfterThen then // 如果 then 后紧跟 else，则 then 和 else 间空一行。
+      EnsureOneEmptyLine
+    else
+      Writeln;
     Match(tokKeywordElse, PreSpaceCount);
     if Scaner.Token = tokKeywordIf then // 处理 else if
     begin
