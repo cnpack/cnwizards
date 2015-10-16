@@ -934,7 +934,9 @@ begin
     Match(tokAtSign, PreSpaceCount);
     FormatDesignator(0, IndentForAnonymous);
     Exit;
-  end;
+  end
+  else if Scaner.Token = tokKeywordInherited then // 处理 (inherited a).a; 这种语法
+    Match(tokKeywordInherited);
 
   FormatQualID(PreSpaceCount);
   while Scaner.Token in [tokDot, tokLB, tokSLB, tokHat, tokPlus, tokMinus] do
