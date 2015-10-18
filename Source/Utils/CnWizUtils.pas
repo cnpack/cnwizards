@@ -540,12 +540,13 @@ function CnOtaMoveAndSelectBlock(const Start, After: TOTACharPos; View: IOTAEdit
 {* 用 Block 的方式设置代码块选区，返回是否成功。D5 下有 Bug 可能导致 D5 下无法选中。
    另外起始位置必须小于结束位置，否则也无法选中。选择成功后光标停留在结束处}
 function CnOtaMoveAndSelectLine(LineNum: Integer; View: IOTAEditView = nil): Boolean;
-{* 用 Block 的方式选中一行，返回是否成功}
+{* 用 Block Extend 的方式选中一行，返回是否成功，光标处于行首}
 function CnOtaMoveAndSelectLines(StartLineNum, EndLineNum: Integer; View: IOTAEditView = nil): Boolean;
 {* 用 Block 的方式选中多行，返回是否成功}
 function CnOtaMoveAndSelectByRowCol(const OneBasedStartRow, OneBasedStartCol,
   OneBasedEndRow, OneBasedEndCol: Integer; View: IOTAEditView = nil): Boolean;
-{* 直接用起止行列为参数选中代码快，返回是否成功}
+{* 直接用起止行列为参数选中代码快，均以一开始，返回是否成功
+   如果起行列大于止行列，内部会互换}
 function CnOtaCurrBlockEmpty: Boolean;
 {* 返回当前选择的块是否为空}
 function CnOtaGetBlockOffsetForLineMode(var StartPos: TOTACharPos; var EndPos: TOTACharPos;
@@ -4184,10 +4185,12 @@ begin
   Result := True;
 end;
 
-// 用 Block 的方式选中一行，返回是否成功
+// 用 Block Extend 的方式选中一行，返回是否成功，光标处于行首
 function CnOtaMoveAndSelectLine(LineNum: Integer; View: IOTAEditView): Boolean;
 var
+  Position: IOTAEditPosition;
   Block: IOTAEditBlock;
+  EndRow, EndCol: Integer;
 begin
   Result := False;
   if View = nil then
@@ -4195,17 +4198,25 @@ begin
   if View = nil then
     Exit;
 
-  View.Position.Move(LineNum, 1);
+  Position := View.Position;
   Block := View.Block;
-  if Block = nil then
-    Exit;
+  Block.Save;
+  try
+    Position.Move(LineNum, 1);
+    Position.MoveEOL;
+    Position.Save;
+    try
+      Position.MoveBOL;
+      EndRow := Position.Row;
+      EndCol := Position.Column;
+    finally
+      Position.Restore;
+    end;
+  finally
+    Block.Restore;
+  end;
+  Block.Extend(EndRow, EndCol);
 
-  Block.Reset;
-  Block.Style := btNonInclusive;
-  Block.BeginBlock;
-
-  View.Position.MoveEOL;
-  Block.EndBlock;
   Result := True;
 end;
 
@@ -4248,16 +4259,29 @@ begin
   end;
 end;
 
-// 直接用起止行列为参数选中代码快，返回是否成功
+// 直接用起止行列为参数选中代码块，均以一开始，返回是否成功
 function CnOtaMoveAndSelectByRowCol(const OneBasedStartRow, OneBasedStartCol,
   OneBasedEndRow, OneBasedEndCol: Integer; View: IOTAEditView = nil): Boolean;
 var
   Start, After: TOTACharPos;
+  R1, R2, C1, C2, T: Integer;
 begin
-  Start.Line := OneBasedStartRow;
-  Start.CharIndex := OneBasedStartCol;
-  After.Line := OneBasedEndRow;
-  After.CharIndex := OneBasedEndCol;
+  R1 := OneBasedStartRow;
+  R2 := OneBasedEndRow;
+  C1 := OneBasedStartCol;
+  C2 := OneBasedEndCol;
+
+  // 如果起始位置大于结束位置，则互换
+  if (R1 > R2) or ((R1 = R2) and (C1 > C2)) then
+  begin
+    T := R1; R1 := R2; R2 := T;
+    T := C1; C1 := C2; C2 := T;
+  end;
+
+  Start.Line := R1;
+  Start.CharIndex := C1;
+  After.Line := R2;
+  After.CharIndex := C2;
 
   Result := CnOtaMoveAndSelectBlock(Start, After, View);
 end;

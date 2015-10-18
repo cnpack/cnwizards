@@ -629,6 +629,12 @@ function CnOtaIsEditPosOutOfLine(EditPos: TOTAEditPos; View: IOTAEditView = nil)
 {* 判断位置是否超出行尾了 }
 procedure CnOtaSelectBlock(const Editor: IOTASourceEditor; const Start, After: TOTACharPos);
 {* 选择一个代码块}
+function CnOtaMoveAndSelectLine(LineNum: Integer; View: IOTAEditView = nil): Boolean;
+{* 用 Block Extend 的方式选中一行，返回是否成功，光标处于行首}
+function CnOtaMoveAndSelectByRowCol(const OneBasedStartRow, OneBasedStartCol,
+  OneBasedEndRow, OneBasedEndCol: Integer; View: IOTAEditView = nil): Boolean;
+{* 直接用起止行列为参数选中代码快，均以一开始，返回是否成功
+   如果起行列大于止行列，内部会互换}
 function CnOtaCurrBlockEmpty: Boolean;
 {* 返回当前选择的块是否为空 }
 function CnOtaOpenFile(const FileName: string): Boolean;
@@ -1514,6 +1520,15 @@ begin
 end;
 
 procedure CnOtaSelectBlock(const Editor: IOTASourceEditor; const Start, After: TOTACharPos);
+begin
+end;
+
+function CnOtaMoveAndSelectLine(LineNum: Integer; View: IOTAEditView = nil): Boolean;
+begin
+end;
+
+function CnOtaMoveAndSelectByRowCol(const OneBasedStartRow, OneBasedStartCol,
+  OneBasedEndRow, OneBasedEndCol: Integer; View: IOTAEditView = nil): Boolean;
 begin
 end;
 
