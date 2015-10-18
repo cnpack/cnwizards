@@ -542,7 +542,7 @@ function CnOtaMoveAndSelectBlock(const Start, After: TOTACharPos; View: IOTAEdit
 function CnOtaMoveAndSelectLine(LineNum: Integer; View: IOTAEditView = nil): Boolean;
 {* 用 Block Extend 的方式选中一行，返回是否成功，光标处于行首}
 function CnOtaMoveAndSelectLines(StartLineNum, EndLineNum: Integer; View: IOTAEditView = nil): Boolean;
-{* 用 Block 的方式选中多行，返回是否成功}
+{* 用 Block Extend 的方式选中多行，光标停留在 End 行所标识的地方，返回是否成功}
 function CnOtaMoveAndSelectByRowCol(const OneBasedStartRow, OneBasedStartCol,
   OneBasedEndRow, OneBasedEndCol: Integer; View: IOTAEditView = nil): Boolean;
 {* 直接用起止行列为参数选中代码快，均以一开始，返回是否成功
@@ -4220,11 +4220,13 @@ begin
   Result := True;
 end;
 
-// 用 Block 的方式选中多行，返回是否成功
+// 用 Block Extend 的方式选中多行，光标停留在 End 行所标识的地方，返回是否成功
 function CnOtaMoveAndSelectLines(StartLineNum, EndLineNum: Integer;
   View: IOTAEditView = nil): Boolean;
 var
   Block: IOTAEditBlock;
+  Position: IOTAEditPosition;
+  EndRow, EndCol: Integer;
 begin
   if StartLineNum = EndLineNum then
     Result := CnOtaMoveAndSelectLine(StartLineNum, View)
@@ -4236,25 +4238,33 @@ begin
     if View = nil then
       Exit;
 
-    if StartLineNum > EndLineNum then // 交换
-    begin
-      StartLineNum := StartLineNum + EndLineNum;
-      EndLineNum := StartLineNum - EndLineNum;
-      StartLineNum := StartLineNum - EndLineNum;
-    end;
-
-    View.Position.Move(StartLineNum, 1);
+    Position := View.Position;
     Block := View.Block;
-    if Block = nil then
-      Exit;
+    Block.Save;
+    try
+      Position.Move(StartLineNum, 1);
+      if StartLineNum > EndLineNum then
+        Position.MoveEOL
+      else
+        Position.MoveBOL;
 
-    Block.Reset;
-    Block.Style := btNonInclusive;
-    Block.BeginBlock;
+      Position.Save;
+      try
+        Position.Move(EndLineNum, 1);
+        if StartLineNum > EndLineNum then
+          Position.MoveBOL
+        else
+          Position.MoveEOL;
+        EndRow := Position.Row;
+        EndCol := Position.Column;
+      finally
+        Position.Restore;
+      end;
+    finally
+      Block.Restore;
+    end;
+    Block.Extend(EndRow, EndCol);
 
-    View.Position.Move(EndLineNum, 1);
-    View.Position.MoveEOL;
-    Block.EndBlock;
     Result := True;
   end;
 end;

@@ -429,6 +429,7 @@ begin
   CL.AddDelphiFunction('Function CnOtaIsEditPosOutOfLine( EditPos : TOTAEditPos; View : IOTAEditView) : Boolean');
   CL.AddDelphiFunction('Procedure CnOtaSelectBlock( const Editor : IOTASourceEditor; const Start, After : TOTACharPos)');
   CL.AddDelphiFunction('Function CnOtaMoveAndSelectLine( LineNum: Integer; View: IOTAEditView) : Boolean');
+  CL.AddDelphiFunction('Function CnOtaMoveAndSelectLines( StartLineNum, EndLineNum: Integer; View: IOTAEditView): Boolean');
   CL.AddDelphiFunction('Function CnOtaMoveAndSelectByRowCol( const OneBasedStartRow, OneBasedStartCol, OneBasedEndRow, OneBasedEndCol : Integer; View : IOTAEditView): Boolean');
   CL.AddDelphiFunction('Function CnOtaCurrBlockEmpty : Boolean');
   CL.AddDelphiFunction('Function CnOtaOpenFile( const FileName : string) : Boolean');
@@ -674,6 +675,7 @@ begin
   S.RegisterDelphiFunction(@CnOtaIsEditPosOutOfLine, 'CnOtaIsEditPosOutOfLine', cdRegister);
   S.RegisterDelphiFunction(@CnOtaSelectBlock, 'CnOtaSelectBlock', cdRegister);
   S.RegisterDelphiFunction(@CnOtaMoveAndSelectLine, 'CnOtaMoveAndSelectLine', cdRegister);
+  S.RegisterDelphiFunction(@CnOtaMoveAndSelectLines, 'CnOtaMoveAndSelectLines', cdRegister);
   S.RegisterDelphiFunction(@CnOtaMoveAndSelectByRowCol, 'CnOtaMoveAndSelectByRowCol', cdRegister);
   S.RegisterDelphiFunction(@CnOtaCurrBlockEmpty, 'CnOtaCurrBlockEmpty', cdRegister);
   S.RegisterDelphiFunction(@CnOtaOpenFile, 'CnOtaOpenFile', cdRegister);
