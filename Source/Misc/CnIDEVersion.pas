@@ -399,7 +399,7 @@ begin
   CnIdeVersionIsLatest := IsDelphiXE8IdeVersionLatest;
 {$ENDIF}
 
-{$IFDEF DELPHIXE8}
+{$IFDEF DELPHI10_SEATTLE}
   CnIdeVersionIsLatest := IsDelphi10SIdeVersionLatest;
 {$ENDIF}
 
