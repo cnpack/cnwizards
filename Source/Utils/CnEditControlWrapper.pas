@@ -2463,9 +2463,9 @@ begin
 
   Result := Point.y div GetCharHeight;
   EditorObj := GetEditorObject(EditControl);
-  if (EditorObj <> nil) and (Result < EditorObj.ViewLineCount) then
+  if (EditorObj <> nil) and (Result >= 0) and (Result < EditorObj.ViewLineCount) then
     Result := EditorObj.ViewLineNumber[Result]
-  else
+  else if Result >= 0 then
     Result := EditView.TopRow + Result;
 end;
 
