@@ -4216,6 +4216,7 @@ begin
     Block.Restore;
   end;
   Block.Extend(EndRow, EndCol);
+  View.Paint;
 
   Result := True;
 end;
@@ -4264,6 +4265,7 @@ begin
       Block.Restore;
     end;
     Block.Extend(EndRow, EndCol);
+    View.Paint;
 
     Result := True;
   end;

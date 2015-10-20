@@ -43,6 +43,11 @@ interface
 
 {$IFDEF CNWIZARDS_CNSRCEDITORENHANCE}
 
+{$IFDEF BDS}
+  // BDS 下自身侧边栏已经有了拖动选择的功能
+  {$DEFINE IDE_CAN_DRAG_SELECT}
+{$ENDIF}
+
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms, ToolsAPI,
   IniFiles, ExtCtrls,
@@ -72,6 +77,10 @@ type
   private
     FActive: Boolean;
     FPainting: Boolean;
+    FMouseDown: Boolean;
+    FDragging: Boolean;
+    FStartLine: Integer;
+    FEndLine: Integer;
     FGutterMgr: TCnSrcEditorGutterMgr;
     FEditControl: TControl;
     FEditWindow: TCustomForm;
@@ -79,6 +88,7 @@ type
     FLinesReceiver: ICnEventBusReceiver;
     FIdentLines: TCnList;
     FIdentCols: TCnList;
+    FSelectLineTimer: TTimer;
 {$IFDEF BDS}
     FIDELineNumMenu: TMenuItem;
 {$ENDIF}
@@ -87,7 +97,6 @@ type
 {$IFNDEF BDS}
     FLineInfo: TCnList;
 {$ENDIF}
-    function GetTextHeight: Integer;
     procedure MenuPopup(Sender: TObject);
     procedure EditorChanged(Editor: TEditorObject; ChangeType: TEditorChangeTypes);
     procedure OnClearBookMarks(Sender: TObject);
@@ -99,6 +108,7 @@ type
 {$ENDIF}
     procedure SubItemClick(Sender: TObject);
     function GetLineCountRect: TRect;
+    function MapYToLine(Y: Integer; EditView: IOTAEditView = nil): Integer;
 
     // 二分法查找并返回 LinesList 中的匹配的下标，-1表示没有匹配。
     function MatchPointToLineArea(LinesList: TCnList; const Delta, Y, AreaHeight,
@@ -108,11 +118,17 @@ type
     procedure SetEnabled(Value: Boolean); override;
 {$ENDIF}
     procedure DblClick; override;
-    procedure Click; override;
+    function CheckPosNavigate: Boolean;
     procedure InitPopupMenu;
     procedure Paint; override;
 
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState;
+      X, Y: Integer); override;
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
+    procedure MouseUp(Button: TMouseButton; Shift: TShiftState;
+      X, Y: Integer); override;
+    procedure Click; override;
+    procedure OnSelectLineTimer(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -140,6 +156,9 @@ type
     FMinWidth: TCnGutterWidth;
     FFixedWidth: TCnGutterWidth;
     FShowModifier: Boolean;
+    FDblClickToggleBookmark: Boolean;
+    FClickSelectLine: Boolean;
+    FDragSelectLines: Boolean;
     procedure SetFont(const Value: TFont);
     procedure SetShowLineNumber(const Value: Boolean);
     procedure SetActive(const Value: Boolean);
@@ -178,6 +197,13 @@ type
     property MinWidth: TCnGutterWidth read FMinWidth write SetMinWidth;
     property FixedWidth: TCnGutterWidth read FFixedWidth write SetFixedWidth;
 
+    property ClickSelectLine: Boolean read FClickSelectLine write FClickSelectLine;
+    {* 是否单击选中整行}
+    property DragSelectLines: Boolean read FDragSelectLines write FDragSelectLines;
+    {* 是否拖动选择多行，BDS 下已经有此功能了因而禁用}
+    property DblClickToggleBookmark: Boolean read FDblClickToggleBookmark write FDblClickToggleBookmark;
+    {* 是否双击切换书签}
+
     property Active: Boolean read FActive write SetActive;
     property ShowModifier: Boolean read FShowModifier write SetShowModifier;
     property OnEnhConfig: TNotifyEvent read FOnEnhConfig write FOnEnhConfig;
@@ -207,6 +233,7 @@ const
   csIdentLineHeightMouseDelta = 1;
   csIdentLineRightMargin = 3;
   csIdentLineShowDelay = 200; // 200ms for show delay
+  csMaxLineLength = 2048;
 
   csDefaultModifiedColor = clYellow;
   csDefaultModifiedSavedColor = clGreen;
@@ -229,6 +256,10 @@ const
   csAutoWidth = 'AutoWidth';
   csMinWidth = 'MinWidth';
   csFixedWidth = 'FixedWidth';
+
+  csClickSelectLine = 'ClickSelectLine';
+  csDragSelectLines = 'DragSelectLines';
+  csDblClickToggleBookmark = 'csDblClickToggleBookmark';
 
   CN_GUTTER_LINE_MODIFIER_CHANGED = 1;
   CN_GUTTER_LINE_MODIFIER_SAVED = 2;
@@ -253,6 +284,10 @@ begin
   FIdentCols := TCnList.Create;
   FLinesReceiver := TCnIdentReceiver.Create(Self);
   EventBus.RegisterReceiver(FLinesReceiver, EVENT_HIGHLIGHT_IDENT_POSITION);
+  FSelectLineTimer := TTimer.Create(Self);
+  FSelectLineTimer.Enabled := False;
+  FSelectLineTimer.Interval := 200;
+  FSelectLineTimer.OnTimer := OnSelectLineTimer;
 
 {$IFNDEF BDS}
   FLineInfo := TCnList.Create;
@@ -285,11 +320,6 @@ begin
 // 什么也不做，以阻挡 BDS 下切换页面时 Disable 工具栏的操作
 end;
 {$ENDIF}
-
-function TCnSrcEditorGutter.GetTextHeight: Integer;
-begin
-  Result := EditControlWrapper.GetCharHeight;
-end;
 
 procedure TCnSrcEditorGutter.EditorChanged(Editor: TEditorObject;
   ChangeType: TEditorChangeTypes);
@@ -498,7 +528,6 @@ var
   ID: Integer;
   EditPos, SavePos: TOTAEditPos;
   Pt: TPoint;
-  EditorObj: TEditorObject;
 
   function GetBlankBookmarkID: Integer;
   var
@@ -527,6 +556,14 @@ var
   end;
 
 begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnSrcEditorGutter.DoubleClick. Cancel SelectLine Timer.');
+{$ENDIF}
+
+  FSelectLineTimer.Enabled := False;
+  if not FGutterMgr.DblClickToggleBookmark then
+    Exit;
+
   EditView := EditControlWrapper.GetEditView(EditControl);
   if Assigned(EditView) then
   begin
@@ -539,12 +576,8 @@ begin
     end
     else
     begin
-      Row := Pt.y div GetTextHeight;
-      EditorObj := EditControlWrapper.GetEditorObject(EditControl);
-      if (EditorObj <> nil) and (Row < EditorObj.ViewLineCount) then
-        Row := EditorObj.ViewLineNumber[Row]
-      else
-        Row := EditView.TopRow + Row;
+      Row := MapYToLine(Pt.y, EditView);
+
       SavePos := EditView.CursorPos;
       EditPos := EditView.CursorPos;
       EditPos.Line := Row;
@@ -560,12 +593,13 @@ begin
   end;
 end;
 
-procedure TCnSrcEditorGutter.Click;
+function TCnSrcEditorGutter.CheckPosNavigate: Boolean;
 var
   EditView: IOTAEditView;
   Pt: TPoint;
   LineIdx: Integer;
 begin
+  Result := False;
   EditView := EditControlWrapper.GetEditView(EditControl);
   if Assigned(EditView) then
   begin
@@ -577,7 +611,7 @@ begin
 
     if LineIdx >= 0 then
     begin
-      // EditView.Position.GotoLine(Integer(FIdentLines[LineIdx]));
+      Result := True;
       EditView.Position.Move(Integer(FIdentLines[LineIdx]), Integer(FIdentCols[LineIdx]));
       EditView.MoveViewToCursor;
       EditView.Paint;
@@ -819,8 +853,78 @@ end;
 procedure TCnSrcEditorGutter.MouseMove(Shift: TShiftState; X, Y: Integer);
 var
   Idx: Integer;
+{$IFNDEF IDE_CAN_DRAG_SELECT}
+  Line: Integer;
+  FirstDrag: Boolean;
+  View: IOTAEditView;
+  Block: IOTAEditBlock;
+  Position: IOTAEditPosition;
+{$ENDIF}
 begin
   inherited;
+{$IFDEF DEBUG}
+//  CnDebugger.LogMsg('TCnSrcEditorGutter.MouseMove: Dragging ' + IntToStr(Integer(FDragging)));
+{$ENDIF}
+
+  if FMouseDown then
+  begin
+{$IFNDEF IDE_CAN_DRAG_SELECT}
+    FirstDrag := not FDragging;
+{$ENDIF}
+
+    FDragging := True;
+
+{$IFNDEF IDE_CAN_DRAG_SELECT}
+    if FGutterMgr.DragSelectLines then // BDS 下禁用拖动选择
+    begin
+      // 选择区域
+      Line := MapYToLine(Y);
+      if Line <> FEndLine then
+      begin
+        FEndLine := Line;
+        if FEndLine >= 0 then
+        begin
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('TCnSrcEditorGutter.MouseMove: Select From Line %d to %d.',
+            [FStartLine, FEndLine]);
+{$ENDIF}
+
+          View := CnOtaGetTopMostEditView;
+          if View = nil then
+            Exit;
+
+          Position := View.Position;
+          Block := View.Block;
+          if FirstDrag then
+          begin
+            // 刚开始拖动，重新开始选择
+            CnOtaMoveAndSelectLine(FStartLine, View);
+            Position.Move(FStartLine, 1);
+            Position.MoveBOL;
+            View.Paint;
+          end
+          else
+          begin
+            // 已经开始拖动选择了，扩展选择区
+            if FEndLine > FStartLine then
+            begin
+              Block.Extend(FEndLine + 1, 1);
+              //View.MoveViewToCursor;
+            end
+            else if FEndLine < FStartLine then
+            begin
+              Block.Extend(FEndLine, 1);
+              //View.MoveViewToCursor;
+            end;
+          end;
+        end;
+      end;
+    end;
+{$ENDIF}
+
+    Exit;
+  end;
+
   Idx := MatchPointToLineArea(FIdentLines, csIdentLineHeightMouseDelta, Y, Height,
     FPosInfo.LineCount);
   if Idx >= 0 then
@@ -836,6 +940,91 @@ begin
     ShowHint := False;
     Application.CancelHint;
   end;
+end;
+
+procedure TCnSrcEditorGutter.MouseDown(Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+var
+  Pt: TPoint;
+begin
+  inherited;
+  if Button = mbLeft then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('TCnSrcEditorGutter.MouseDown');
+{$ENDIF}
+
+    Pt.x := X;
+    Pt.y := Y;
+    if FGutterMgr.ShowLineCount and PtInRect(GetLineCountRect, Pt) then
+      Exit;
+
+    FMouseDown := True;
+    FDragging := False;
+    FEndLine := -1; // 清除结束行
+
+    // 记录行的开始位置供拖动选择用
+    FStartLine := MapYToLine(Y);
+  end;
+end;
+
+procedure TCnSrcEditorGutter.MouseUp(Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  inherited;
+  if Button = mbLeft then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('TCnSrcEditorGutter.MouseUp');
+{$ENDIF}
+
+    FMouseDown := False;
+    FEndLine := -1; // 清除结束行
+    FDragging := False;
+  end;
+end;
+
+procedure TCnSrcEditorGutter.Click;
+begin
+  inherited;
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnSrcEditorGutter.Click');
+{$ENDIF}
+
+  if not FDragging then
+  begin
+    if not CheckPosNavigate then
+    begin
+      // 选择整行
+      if FGutterMgr.ClickSelectLine and (FStartLine > -1) then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('TCnSrcEditorGutter.Click. Start Timer.');
+{$ENDIF}
+        FSelectLineTimer.Enabled := True;
+      end;
+    end;
+  end;
+end;
+
+function TCnSrcEditorGutter.MapYToLine(Y: Integer; EditView: IOTAEditView): Integer;
+var
+  P: TPoint;
+begin
+  P.x := 0;
+  P.y := Y;
+  Result := EditControlWrapper.GetLineFromPoint(P, EditControl, EditView);
+end;
+
+procedure TCnSrcEditorGutter.OnSelectLineTimer(Sender: TObject);
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnSrcEditorGutter.OnSelectLineTimer. Timer Triggered to Select Line.');
+{$ENDIF}
+
+  if FGutterMgr.ClickSelectLine and (FStartLine > -1) then
+    CnOtaMoveAndSelectLine(FStartLine);
+  FSelectLineTimer.Enabled := False;
 end;
 
 { TCnSrcEditorGutterMgr }
@@ -860,7 +1049,11 @@ begin
   FFixedWidth := 4;
   FAutoWidth := True;
   FShowModifier := False;
-  
+
+  FDblClickToggleBookmark := True; // 默认启用双击切换书签
+  FClickSelectLine := False;       // 默认不启用单击选行
+  FDragSelectLines := False;       // 默认不启用拖动选择行，并且 BDS 下无效
+
   EditControlWrapper.AddEditControlNotifier(EditControlNotify);
   UpdateGutters;
 end;
@@ -970,6 +1163,14 @@ begin
     FAutoWidth := ReadBool(csGutter, csAutoWidth, FAutoWidth);
     MinWidth := ReadInteger(csGutter, csMinWidth, FMinWidth);
     FixedWidth := ReadInteger(csGutter, csFixedWidth, FFixedWidth);
+
+    FClickSelectLine := ReadBool(csGutter, csClickSelectLine, FClickSelectLine);
+{$IFNDEF IDE_CAN_DRAG_SELECT}
+    FDragSelectLines := ReadBool(csGutter, csDragSelectLines, FDragSelectLines);
+{$ELSE}
+    FDragSelectLines := False;
+{$ENDIF}
+    FDblClickToggleBookmark := ReadBool(csGutter, csDblClickToggleBookmark, FDblClickToggleBookmark);
     UpdateGutters;
   finally
     Free;
@@ -988,6 +1189,9 @@ begin
     WriteBool(csGutter, csAutoWidth, FAutoWidth);
     WriteInteger(csGutter, csMinWidth, FMinWidth);
     WriteInteger(csGutter, csFixedWidth, FFixedWidth);
+    WriteBool(csGutter, csClickSelectLine, FClickSelectLine);
+    WriteBool(csGutter, csDragSelectLines, FDragSelectLines);
+    WriteBool(csGutter, csDblClickToggleBookmark, FDblClickToggleBookmark);
   finally
     Free;
   end;
