@@ -161,6 +161,9 @@ type
     chkLeftRightWrapLine: TCheckBox;
     chkCursorBeforeEOL: TCheckBox;
     chkShowThumbnail: TCheckBox;
+    chkGutterClickSelectLine: TCheckBox;
+    chkGutterDblClickToggleBookmark: TCheckBox;
+    chkGutterDragSelectLines: TCheckBox;
     procedure btnHelpClick(Sender: TObject);
     procedure UpdateContent(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word;
@@ -588,6 +591,15 @@ begin
     seLinePanelMinWidth.Value := FGutterMgr.MinWidth;
     seLinePanelFixWidth.Value := FGutterMgr.FixedWidth;
 
+    chkGutterClickSelectLine.Checked := FGutterMgr.ClickSelectLine;
+    chkGutterDblClickToggleBookmark.Checked := FGutterMgr.DblClickToggleBookmark;
+{$IFDEF BDS}
+    chkGutterDragSelectLines.Checked := False;
+    chkGutterDragSelectLines.Enabled := False;
+{$ELSE}
+    chkGutterDragSelectLines.Checked := FGutterMgr.DragSelectLines;
+{$ENDIF}
+
     chkEditorMultiLine.Checked := FEditorMisc.EditorTabMultiLine;
     chkEditorFlatButtons.Checked := FEditorMisc.EditorTabFlatButton;  
 
@@ -682,6 +694,11 @@ begin
       FGutterMgr.CurrFont := dlgFontCurrLine.Font;
       FGutterMgr.MinWidth := seLinePanelMinWidth.Value;
       FGutterMgr.FixedWidth := seLinePanelFixWidth.Value;
+      FGutterMgr.ClickSelectLine := chkGutterClickSelectLine.Checked;
+      FGutterMgr.DblClickToggleBookmark := chkGutterDblClickToggleBookmark.Checked;
+{$IFNDEF BDS}
+      FGutterMgr.DragSelectLines := chkGutterDragSelectLines.Checked;
+{$ENDIF}
       FGutterMgr.UpdateGutters;
 
       FNavMgr.MinLineDiff := seNavMinLineDiff.Value;
