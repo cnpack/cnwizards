@@ -29,7 +29,9 @@ unit CnSrcEditorMisc;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2004.12.25
+* 修改记录：2015.10.25
+*               加入隐藏 Delphi 10 Seattle 下的编辑器工具栏的选项
+*           2004.12.25
 *               创建单元，从原 CnEditorEnhancements 移出
 ================================================================================
 |</PRE>}
@@ -100,6 +102,7 @@ type
     FEditorTabMultiLine: Boolean;
     FEditorTabFlatButtons: Boolean;
     FExploreCmdLine: string;
+    FHideOrigToolbar: Boolean;
     function GetBoolean(const Index: Integer): Boolean;
     procedure SetBoolean(const Index: Integer; const Value: Boolean);
 
@@ -177,6 +180,7 @@ type
     property AutoSave: Boolean read FAutoSave write SetAutoSave;
     property SaveInterval: Integer read FSaveInterval write SetSaveInterval;
     property ExploreCmdLine: string read FExploreCmdLine write FExploreCmdLine;
+    property HideOrigToolbar: Boolean read FHideOrigToolbar write FHideOrigToolbar;
 
     property Active: Boolean read FActive write SetActive;
   end;
@@ -725,18 +729,57 @@ procedure TCnSrcEditorMisc.OnSourceEditorNotify(
 var
   I: Integer;
   EditBuff: IOTAEditBuffer;
+{$IFDEF DELPHI10_SEATTLE_UP}
+  Control: TControl;
+  Parent: TWinControl;
+{$ENDIF}
 begin
   if FActive then
   begin
     // 只读保护
     if FAutoReadOnly and (NotifyType = setOpened) and (SourceEditor <> nil) and
       Supports(SourceEditor, IOTAEditBuffer, EditBuff) then
-    for I := 0 to FActualDirs.Count - 1 do
-      if AnsiPos(FActualDirs[I], UpperCase(SourceEditor.FileName)) = 1 then
+    begin
+      for I := 0 to FActualDirs.Count - 1 do
       begin
-        EditBuff.IsReadOnly := True;
-        Break;
+        if AnsiPos(FActualDirs[I], UpperCase(SourceEditor.FileName)) = 1 then
+        begin
+          EditBuff.IsReadOnly := True;
+          Break;
+        end;
       end;
+    end;
+
+{$IFDEF DELPHI10_SEATTLE_UP}
+    if FHideOrigToolbar and (NotifyType = setOpened) then
+    begin
+      Control := CnOtaGetCurrentEditControl;
+      if Control = nil then
+        Exit;
+
+      Parent := Control.Parent;
+      if Parent = nil then
+        Exit;
+
+      Parent := Parent.Parent;
+      if Parent = nil then
+        Exit;
+
+      for I := 0 to Parent.ControlCount - 1 do
+      begin
+        if Parent.Controls[I].ClassNameIs('TEditorNavigationToolbar') then
+        begin
+          if Parent.Controls[I].Height > 0 then
+          begin
+            (Parent.Controls[I] as TToolbar).AutoSize := False;
+            Parent.Controls[I].Height := 0;
+            Parent.Controls[I].Visible := False;
+          end;
+          Exit;
+        end;
+      end;
+    end;
+{$ENDIF}
   end;
 end;
 
@@ -836,6 +879,7 @@ const
   csEditorTabFlatButtons = 'EditorTabFlatButtons';
   csAutoSave = 'AutoSave';
   csSaveInterval = 'SaveInterval';
+  csHideOrigToolbar = 'HideOrigToolbar';
 
 procedure TCnSrcEditorMisc.LoadSettings(Ini: TCustomIniFile);
 var
@@ -865,6 +909,7 @@ begin
   
   FAutoSave := Ini.ReadBool(csMisc, csAutoSave, False);
   FSaveInterval := Ini.ReadInteger(csMisc, csSaveInterval, 2);
+  FHideOrigToolbar := Ini.ReadBool(csMisc, csHideOrigToolbar, FHideOrigToolbar);
   UpdateAutoSaveTimer;
 
   UpdateCodeCompletionHotKey;
@@ -893,6 +938,7 @@ begin
   Ini.WriteBool(csMisc, csEditorTabFlatButtons, FEditorTabFlatButtons);
   Ini.WriteBool(csMisc, csAutoSave, AutoSave);
   Ini.WriteInteger(csMisc, csSaveInterval, SaveInterval);
+  Ini.WriteBool(csMisc, csHideOrigToolbar, FHideOrigToolbar);
 end;
 
 procedure TCnSrcEditorMisc.ResetSettings(Ini: TCustomIniFile);
