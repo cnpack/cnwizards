@@ -106,6 +106,7 @@ type
     function GetBoolean(const Index: Integer): Boolean;
     procedure SetBoolean(const Index: Integer; const Value: Boolean);
 
+    procedure CheckAndHideOrigToolbar(Sender: TObject);
     procedure RegisterUserMenuItems;
     procedure RegisterMenuExecutor(Sender: TObject);
     procedure OnSourceEditorNotify(SourceEditor: IOTASourceEditor;
@@ -360,7 +361,10 @@ procedure TCnSrcEditorMisc.EditControlNotify(EditControl: TControl; EditWindow:
   TCustomForm; Operation: TOperation);
 begin
   if Operation = opInsert then
+  begin
     UpdateInstall;
+    CheckAndHideOrigToolbar(nil);
+  end;
 end;
 
 //------------------------------------------------------------------------------
@@ -723,16 +727,52 @@ begin
     FActualDirs.Add(UpperCase(MakePath(ReplaceToActualPath(FReadOnlyDirs[I]))));
 end;
 
+procedure TCnSrcEditorMisc.CheckAndHideOrigToolbar(Sender: TObject);
+var
+{$IFDEF DELPHI10_SEATTLE_UP}
+  I: Integer;
+  Control: TControl;
+  Parent: TWinControl;
+{$ENDIF}
+begin
+{$IFDEF DELPHI10_SEATTLE_UP}
+  if FHideOrigToolbar then
+  begin
+    Control := CnOtaGetCurrentEditControl;
+    if Control = nil then
+      Exit;
+
+    Parent := Control.Parent;
+    if Parent = nil then
+      Exit;
+
+    Parent := Parent.Parent;
+    if Parent = nil then
+      Exit;
+
+    for I := 0 to Parent.ControlCount - 1 do
+    begin
+      if Parent.Controls[I].ClassNameIs('TEditorNavigationToolbar') then
+      begin
+        if Parent.Controls[I].Height > 0 then
+        begin
+          (Parent.Controls[I] as TToolbar).AutoSize := False;
+          Parent.Controls[I].Height := 0;
+          Parent.Controls[I].Visible := False;
+        end;
+        Exit;
+      end;
+    end;
+  end;
+{$ENDIF}
+end;
+
 procedure TCnSrcEditorMisc.OnSourceEditorNotify(
   SourceEditor: IOTASourceEditor; NotifyType: TCnWizSourceEditorNotifyType;
   EditView: IOTAEditView);
 var
   I: Integer;
   EditBuff: IOTAEditBuffer;
-{$IFDEF DELPHI10_SEATTLE_UP}
-  Control: TControl;
-  Parent: TWinControl;
-{$ENDIF}
 begin
   if FActive then
   begin
@@ -749,37 +789,6 @@ begin
         end;
       end;
     end;
-
-{$IFDEF DELPHI10_SEATTLE_UP}
-    if FHideOrigToolbar and (NotifyType = setOpened) then
-    begin
-      Control := CnOtaGetCurrentEditControl;
-      if Control = nil then
-        Exit;
-
-      Parent := Control.Parent;
-      if Parent = nil then
-        Exit;
-
-      Parent := Parent.Parent;
-      if Parent = nil then
-        Exit;
-
-      for I := 0 to Parent.ControlCount - 1 do
-      begin
-        if Parent.Controls[I].ClassNameIs('TEditorNavigationToolbar') then
-        begin
-          if Parent.Controls[I].Height > 0 then
-          begin
-            (Parent.Controls[I] as TToolbar).AutoSize := False;
-            Parent.Controls[I].Height := 0;
-            Parent.Controls[I].Visible := False;
-          end;
-          Exit;
-        end;
-      end;
-    end;
-{$ENDIF}
   end;
 end;
 
