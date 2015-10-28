@@ -2830,7 +2830,7 @@ begin
       Writeln;
       First := False;
     end
-    else
+    else if Scaner.Token <> tokKeywordEnd then
     begin
       if First and IgnoreFirst then
         FormatFieldDecl
