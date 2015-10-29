@@ -728,8 +728,8 @@ begin
 end;
 
 procedure TCnSrcEditorMisc.CheckAndHideOrigToolbar(Sender: TObject);
-var
 {$IFDEF DELPHI10_SEATTLE_UP}
+var
   I: Integer;
   Control: TControl;
   Parent: TWinControl;
