@@ -5206,11 +5206,12 @@ end;
 procedure TCnBasePascalFormatter.FormatSingleAttribute(
   PreSpaceCount: Byte);
 var
-  IsFirst: Boolean;
+  IsFirst, JustLn: Boolean;
 begin
   Match(tokSLB, PreSpaceCount);
   IsFirst := True;
   repeat
+    JustLn := False;
     if IsFirst then
       FormatIdent
     else
@@ -5233,12 +5234,18 @@ begin
       Match(tokComma);
       IsFirst := False;
       Writeln;
+      JustLn := True;
     end;
 
     // If not Attribute, maybe infinite loop here, jump and fix.
     if not (Scaner.Token in [tokSRB, tokUnknown, tokEOF]) then
-      Match(Scaner.Token);
-      
+    begin
+      if JustLn then
+        Match(Scaner.Token, PreSpaceCount)
+      else
+        Match(Scaner.Token);
+    end;
+
   until Scaner.Token in [tokSRB, tokUnknown, tokEOF];
   Match(tokSRB);
 end;

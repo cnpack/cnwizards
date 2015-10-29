@@ -65,12 +65,12 @@ interface
 
   则：
   Root:
-    SliceNode 0    -- 前缀：无。内容：begin 1111
-      SliceNode 1  -- 前缀：{$IFDEF DEBUG}。内容：22222
-        SliceNode 2-- 前缀：{$IFDEF NDEBUG}。内容：3333
-      SliceNode 3  -- 前缀：{$ENDIF}。内容：4444
-      SliceNode 4  -- 前缀：{$ELSE}。内容：5555
-    SliceNode 5    -- 前缀：{$ENDIF}。内容：END;
+    SliceNode 0     -- 前缀：无。内容：begin 1111
+      SliceNode 1   -- 前缀：{$IFDEF DEBUG}。内容：22222
+        SliceNode 2 -- 前缀：{$IFDEF NDEBUG}。内容：3333
+      SliceNode 3   -- 前缀：{$ENDIF}。内容：4444
+      SliceNode 4   -- 前缀：{$ELSE}。内容：5555
+    SliceNode 5     -- 前缀：{$ENDIF}。内容：END;
   
   规则是见IFDEF就进一层并把IFDEF和后面代码塞进去，
   见ENDIF退一层把ENDIF和后面代码塞进去，
