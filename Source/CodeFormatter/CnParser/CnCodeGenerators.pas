@@ -768,11 +768,15 @@ begin
 
   if not FWritingBlank then
     FJustWrittenCommentEndLn := False;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('GodeGen: String Wrote from %d %d to %d %d: %s', [FPrevRow, FPrevColumn,
+    GetCurrRow, GetCurrColumn, Str]);
+{$ENDIF}
+
   DoAfterWrite(IsCRLFSpace, Blanks);
 
 {$IFDEF DEBUG}
-//  CnDebugger.LogFmt('String Wrote from %d %d to %d %d: %s', [FPrevRow, FPrevColumn,
-//    GetCurrRow, GetCurrColumn, Str]);
 //  CnDebugger.LogMsg(CopyPartOut(FPrevRow, FPrevColumn, GetCurrRow, GetCurrColumn));
 {$ENDIF}
 end;
@@ -794,6 +798,8 @@ begin
 end;
 
 procedure TCnCodeGenerator.Writeln;
+var
+  Wrote: Boolean;
 
   function TrimRightWithoutCRLF(const S: string): string;
   var
@@ -819,7 +825,7 @@ procedure TCnCodeGenerator.Writeln;
 
 begin
   if FLock <> 0 then Exit;
-
+  Wrote := False;
   // Write(S, BeforeSpaceCount, AfterSpaceCount);
   // must delete trailing blanks, but can't use TrimRight for Deleting CRLF at line end.
   FCode[FCode.Count - 1] := TrimRightWithoutCRLF(FCode[FCode.Count - 1]);
@@ -840,6 +846,7 @@ begin
   begin
     FCode.Add('');
     FActualLines.Add('');
+    Wrote := True;
   end;
 
   FPrevColumn := FColumnPos;
@@ -849,11 +856,13 @@ begin
 
   FJustWrittenCommentEndLn := False;
 
-  DoAfterWrite(True);
 {$IFDEF DEBUG}
-//  CnDebugger.LogFmt('NewLine Wrote from %d %d to %d %d', [FPrevRow, FPrevColumn,
-//    GetCurrRow, GetCurrColumn]);
+  if Wrote then
+    CnDebugger.LogFmt('GodeGen: NewLine Wrote from %d %d to %d %d', [FPrevRow, FPrevColumn,
+      GetCurrRow, GetCurrColumn]);
 {$ENDIF}
+  if Wrote then
+    DoAfterWrite(True);
 end;
 
 procedure TCnCodeGenerator.WriteOneSpace;
@@ -870,7 +879,7 @@ begin
   end;
 
 {$IFDEF DEBUG}
-  if DebugCodeString = '' then
+  if DebugCodeString = '' then  // Make DebugCodeString useful and not ignored by Linker.
     Exit;
 {$ENDIF}
 
