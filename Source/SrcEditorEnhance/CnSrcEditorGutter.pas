@@ -999,9 +999,12 @@ begin
       if FGutterMgr.ClickSelectLine and (FStartLine > -1) then
       begin
 {$IFDEF DEBUG}
-        CnDebugger.LogMsg('TCnSrcEditorGutter.Click. Start Timer.');
+        CnDebugger.LogMsg('TCnSrcEditorGutter.Click. May Start Timer.');
 {$ENDIF}
-        FSelectLineTimer.Enabled := True;
+        if FGutterMgr.DblClickToggleBookmark then // 有双击切换书签时要延时一小会儿
+          FSelectLineTimer.Enabled := True
+        else
+          CnOtaMoveAndSelectLine(FStartLine);
       end;
     end;
   end;
