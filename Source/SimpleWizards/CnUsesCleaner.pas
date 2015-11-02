@@ -714,8 +714,10 @@ begin
         if RegDecl and (Lex.TokenID = tkRegister) and (Token = {$IFDEF DELPHI2010_UP}TTokenKind.{$ENDIF}tkProcedure) then
           Include(Kinds, ukHasRegProc);
 
-        if (Lex.TokenID = tkIdentifier) and (Token = tkInitialization) then
-          Include(Kinds, ukHasInitSection);
+        // initialization 后是标识符或 begin 等才表示有效初始化节，不太严谨。
+        if Token = tkInitialization then
+          if (Lex.TokenID in [tkIdentifier, tkBegin, tkFinalization, tkCompDirect]) then
+            Include(Kinds, ukHasInitSection);
 
         Token := Lex.TokenID;
         Lex.NextNoJunk;
