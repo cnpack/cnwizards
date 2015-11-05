@@ -23639,7 +23639,9 @@ begin
             {$endif COMPILER_5_UP}
           end;
         end;
+    {$ifdef COMPILER_5_UP}
     end;
+    {$endif COMPILER_5_UP}
   end;
 end;
 
