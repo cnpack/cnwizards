@@ -245,6 +245,7 @@ begin
     // 不改版本号时如果需要插入时间，则需要这样重写一下让插入时间有效
 {$IFDEF COMPILER6_UP} // 只 D6 及以上增加版本号，D5 由于 Bug 而无效
     CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [FAfterBuildNo]));
+    // 以上一句在 XE 下可能导致 dpk 源文件被破坏，原因未知
   {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
     UpdateConfigurationFileVersionAndTime(FIncBuild, FLastCompiled);
   {$ENDIF}
