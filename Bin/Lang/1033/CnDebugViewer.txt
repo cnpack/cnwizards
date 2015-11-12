@@ -103,6 +103,7 @@ TCnMsgChild.lvTime.Hint=Timing Display
 TCnMsgChild.mmoDetail.Hint=Detailed Display
 TCnViewerOptionsFrm.btnCancel.Caption=&Cancel
 TCnViewerOptionsFrm.btnOK.Caption=&OK
+TCnViewerOptionsFrm.btnFont.Caption=&Font
 TCnViewerOptionsFrm.Caption=General Settings
 TCnViewerOptionsFrm.chkCapDebug.Caption=Capture "Output&DebugString" API
 TCnViewerOptionsFrm.chkMinStart.Caption=M&inimize when Startup.

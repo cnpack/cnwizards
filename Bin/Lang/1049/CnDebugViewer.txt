@@ -103,6 +103,7 @@ TCnMsgChild.lvTime.Hint=
 TCnMsgChild.mmoDetail.Hint=Подробное описание
 TCnViewerOptionsFrm.btnCancel.Caption=Отмена
 TCnViewerOptionsFrm.btnOK.Caption=&OK
+TCnViewerOptionsFrm.btnFont.Caption=шрифта
 TCnViewerOptionsFrm.Caption=Общие настройки
 TCnViewerOptionsFrm.chkCapDebug.Caption=Перехватывать "Output&DebugString" API
 TCnViewerOptionsFrm.chkMinStart.Caption=Сворачивать при запуске

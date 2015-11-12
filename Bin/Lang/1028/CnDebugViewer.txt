@@ -103,6 +103,7 @@ TCnMsgChild.lvTime.Hint=計時資訊顯示區
 TCnMsgChild.mmoDetail.Hint=詳細資訊顯示區
 TCnViewerOptionsFrm.btnCancel.Caption=取消(&C)
 TCnViewerOptionsFrm.btnOK.Caption=確定(&O)
+TCnViewerOptionsFrm.btnFont.Caption=字體(&F)
 TCnViewerOptionsFrm.Caption=常規選項設置
 TCnViewerOptionsFrm.chkCapDebug.Caption=捕獲 OutputDebugString 的輸出(&D)
 TCnViewerOptionsFrm.chkMinStart.Caption=啟動時最小化(&I)
