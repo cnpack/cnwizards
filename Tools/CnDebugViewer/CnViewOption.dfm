@@ -1,10 +1,10 @@
 object CnViewerOptionsFrm: TCnViewerOptionsFrm
-  Left = 370
-  Top = 239
+  Left = 360
+  Top = 169
   BorderStyle = bsDialog
   Caption = 'General Settings'
-  ClientHeight = 332
-  ClientWidth = 249
+  ClientHeight = 362
+  ClientWidth = 251
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -17,7 +17,7 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
   TextHeight = 13
   object btnOK: TButton
     Left = 86
-    Top = 303
+    Top = 335
     Width = 75
     Height = 21
     Caption = '&OK'
@@ -27,7 +27,7 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
   end
   object btnCancel: TButton
     Left = 166
-    Top = 303
+    Top = 335
     Width = 75
     Height = 21
     Cancel = True
@@ -35,11 +35,61 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
     ModalResult = 2
     TabOrder = 3
   end
+  object grpCapture: TGroupBox
+    Left = 8
+    Top = 209
+    Width = 233
+    Height = 116
+    Caption = 'Ca&pture Settings'
+    TabOrder = 1
+    object lblCapOD: TLabel
+      Left = 32
+      Top = 40
+      Width = 156
+      Height = 13
+      Caption = 'Need to Restart CnDebugViewer'
+    end
+    object lblPort: TLabel
+      Left = 32
+      Top = 79
+      Width = 47
+      Height = 13
+      Caption = 'UDP Port:'
+    end
+    object chkCapDebug: TCheckBox
+      Left = 14
+      Top = 21
+      Width = 211
+      Height = 13
+      Caption = 'Capture "Output&DebugString" API'
+      TabOrder = 0
+      OnClick = chkShowTrayIconClick
+    end
+    object chkUDPMsg: TCheckBox
+      Left = 14
+      Top = 58
+      Width = 211
+      Height = 13
+      Caption = 'Capture UD&P Messages'
+      TabOrder = 1
+      OnClick = chkUDPMsgClick
+    end
+    object seUDPPort: TSpinEdit
+      Left = 128
+      Top = 77
+      Width = 91
+      Height = 22
+      MaxValue = 65535
+      MinValue = 1
+      TabOrder = 2
+      Value = 9099
+    end
+  end
   object grpTrayIcon: TGroupBox
     Left = 8
     Top = 8
     Width = 233
-    Height = 160
+    Height = 193
     Caption = '&User Interface Settings'
     TabOrder = 0
     object lblHotKey: TLabel
@@ -102,55 +152,23 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
       TabOrder = 5
       OnClick = chkShowTrayIconClick
     end
+    object btnFont: TButton
+      Left = 16
+      Top = 158
+      Width = 201
+      Height = 21
+      Caption = '&Font'
+      TabOrder = 6
+      OnClick = btnFontClick
+    end
   end
-  object grpCapture: TGroupBox
-    Left = 8
-    Top = 181
-    Width = 233
-    Height = 116
-    Caption = 'Ca&pture Settings'
-    TabOrder = 1
-    object lblCapOD: TLabel
-      Left = 32
-      Top = 40
-      Width = 156
-      Height = 13
-      Caption = 'Need to Restart CnDebugViewer'
-    end
-    object lblPort: TLabel
-      Left = 32
-      Top = 79
-      Width = 47
-      Height = 13
-      Caption = 'UDP Port:'
-    end
-    object chkCapDebug: TCheckBox
-      Left = 14
-      Top = 21
-      Width = 211
-      Height = 13
-      Caption = 'Capture "Output&DebugString" API'
-      TabOrder = 0
-      OnClick = chkShowTrayIconClick
-    end
-    object chkUDPMsg: TCheckBox
-      Left = 14
-      Top = 58
-      Width = 211
-      Height = 13
-      Caption = 'Capture UD&P Messages'
-      TabOrder = 1
-      OnClick = chkUDPMsgClick
-    end
-    object seUDPPort: TSpinEdit
-      Left = 128
-      Top = 77
-      Width = 91
-      Height = 22
-      MaxValue = 65535
-      MinValue = 1
-      TabOrder = 2
-      Value = 9099
-    end
+  object dlgFont: TFontDialog
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    Left = 112
+    Top = 96
   end
 end

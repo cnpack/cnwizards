@@ -132,6 +132,7 @@ type
 
     procedure InitTree;
     procedure InitControls;
+
     procedure UpdateToViewStore(Source, Dest: TCnMsgStore);
     procedure UpdateConditionsToView(Content: TCnFilterUpdates);
     procedure UpdateViewStoreToTree;
@@ -168,6 +169,7 @@ type
     procedure GotoNextBookmark;
     procedure ClearAllBookmarks;
     procedure RequireRefreshTime;
+    procedure InitFont;
     function DescriptionOfMsg(Index: Integer; AMsgItem: TCnMsgItem): string;
     function DescriptionOfTime(Index: Integer ): string;
 
@@ -425,7 +427,19 @@ begin
 
   for I := Low(FBookmarks) to High(FBookmarks) do
     FBookmarks[I] := CnInvalidLine;
-  btnBookmark.Enabled := FHasBookmarks;     
+  btnBookmark.Enabled := FHasBookmarks;
+
+  InitFont;
+end;
+
+procedure TCnMsgChild.InitFont;
+begin
+  if CnViewerOptions.DisplayFont <> nil then
+  begin
+    FMsgTree.Font.Assign(CnViewerOptions.DisplayFont);
+    mmoDetail.Font := CnViewerOptions.DisplayFont;
+    lvTime.Font := CnViewerOptions.DisplayFont;
+  end;
 end;
 
 procedure TCnMsgChild.UpdateConditionsToView(Content: TCnFilterUpdates);

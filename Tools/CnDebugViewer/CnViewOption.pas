@@ -60,10 +60,13 @@ type
     chkUDPMsg: TCheckBox;
     seUDPPort: TSpinEdit;
     lblPort: TLabel;
+    dlgFont: TFontDialog;
+    btnFont: TButton;
     procedure chkShowTrayIconClick(Sender: TObject);
     procedure chkUDPMsgClick(Sender: TObject);
+    procedure btnFontClick(Sender: TObject);
   private
-    { Private declarations }
+    FFontChanged: Boolean;
     procedure SwitchTrayIconControls(const AShow: Boolean);
   protected
     procedure DoCreate; override;    
@@ -71,6 +74,8 @@ type
     { Public declarations }
     procedure LoadFromOptions;
     procedure SaveToOptions;
+
+    property FontChanged: Boolean read FFontChanged;
   end;
 
 implementation
@@ -102,7 +107,13 @@ begin
     seUDPPort.Value := UDPPort;
     SwitchTrayIconControls(ShowTrayIcon);
     chkUDPMsgClick(nil);
+
+    if DisplayFont = nil then
+      dlgFont.Font.Assign(Application.MainForm.Font)
+    else
+      dlgFont.Font.Assign(DisplayFont);
   end;
+  FFontChanged := False;
 end;
 
 procedure TCnViewerOptionsFrm.SaveToOptions;
@@ -118,6 +129,9 @@ begin
     IgnoreODString := not chkCapDebug.Checked;
     EnableUDPMsg := chkUDPMsg.Checked;
     UDPPort := seUDPPort.Value;
+
+    if FFontChanged then
+      DisplayFont := dlgFont.Font;
   end;
 end;
 
@@ -135,6 +149,14 @@ end;
 procedure TCnViewerOptionsFrm.chkUDPMsgClick(Sender: TObject);
 begin
   seUDPPort.Enabled := chkUDPMsg.Checked;
+end;
+
+procedure TCnViewerOptionsFrm.btnFontClick(Sender: TObject);
+begin
+  if dlgFont.Execute then
+  begin
+    FFontChanged := True;
+  end;
 end;
 
 end.

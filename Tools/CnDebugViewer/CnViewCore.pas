@@ -39,8 +39,8 @@ unit CnViewCore;
 interface
 
 uses
-  SysUtils, Classes, Windows, Forms, TLHelp32, OmniXML, OmniXMLPersistent,
-  CnLangMgr, CnDebugIntf;
+  SysUtils, Classes, Windows, Forms, Graphics, TLHelp32,
+  OmniXML, OmniXMLPersistent, CnLangMgr, CnIniStrUtils, CnDebugIntf;
 
 const
   CnMapSize = 65536;
@@ -94,13 +94,22 @@ type
     FEnableUDPMsg: Boolean;
     FUDPPort: Integer;
     FLocalSession: Boolean;
+    FDisplayFont: TFont;
+    FDisplayFontStr: string;
     procedure SetTop(const Value: Integer);
     procedure SetLeft(const Value: Integer);
     procedure SetWidth(const Value: Integer);
     procedure SetHeight(const Value: Integer);
+    procedure SetDisplayFontStr(const Value: string);
+    procedure SetDisplayFont(const Value: TFont);
   public
     constructor Create;
     destructor Destroy; override;
+
+    procedure FontNeeded;
+
+    property DisplayFont: TFont read FDisplayFont write SetDisplayFont;
+    {* 显示的字体，默认为 nil 也即使用系统字体}
   published
     property IgnoreODString: Boolean read FIgnoreODString write FIgnoreODString;
     property EnableFilter: Boolean read FEnableFilter write FEnableFilter;
@@ -143,6 +152,8 @@ type
 
     property LocalSession: Boolean read FLocalSession write FLocalSession;
     {* 是否使用本地模式}
+    property DisplayFontStr: string read FDisplayFontStr write SetDisplayFontStr;
+    {* 代表字体的字符串，用于存储}
   end;
 
 var
@@ -666,7 +677,7 @@ end;
 
 destructor TCnViewerOptions.Destroy;
 begin
-
+  FDisplayFont.Free;
   inherited;
 end;
 
@@ -692,6 +703,36 @@ procedure TCnViewerOptions.SetHeight(const Value: Integer);
 begin
   if (Value > 0) and (Value <> FHeight) then
     FHeight := Value;
+end;
+
+procedure TCnViewerOptions.FontNeeded;
+begin
+  if FDisplayFont = nil then
+    FDisplayFont := TFont.Create;
+end;
+
+procedure TCnViewerOptions.SetDisplayFontStr(const Value: string);
+begin
+  FDisplayFontStr := Value;
+  if Value = '' then
+    FreeAndNil(FDisplayFont)
+  else
+  begin
+    FontNeeded;
+    StringToFont(Value, FDisplayFont);
+  end;
+end;
+
+procedure TCnViewerOptions.SetDisplayFont(const Value: TFont);
+begin
+  if Value = nil then
+    FreeAndNil(FDisplayFont)
+  else
+  begin
+    FontNeeded;
+    FDisplayFont.Assign(Value);
+    FDisplayFontStr := FontToString(FDisplayFont);
+  end;
 end;
 
 initialization

@@ -1143,6 +1143,8 @@ begin
 end;
 
 procedure TCnMainViewer.actOptionsExecute(Sender: TObject);
+var
+  I: Integer;
 begin
   // π˝¬À…Ë÷√
   with TCnViewerOptionsFrm.Create(nil) do
@@ -1158,6 +1160,15 @@ begin
         ErrorDlg(SCnRegisterHotKeyError);
 
       CnUDP.LocalPort := CnViewerOptions.UDPPort;
+
+      if FontChanged then
+      begin
+        for I := 0 to Self.MDIChildCount - 1 do
+        begin
+          if Self.MDIChildren[I] is TCnMsgChild then
+            (Self.MDIChildren[I] as TCnMsgChild).InitFont;
+        end;
+      end;
     end;
     Free;
   end;
