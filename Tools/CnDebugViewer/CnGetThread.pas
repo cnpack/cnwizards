@@ -65,6 +65,9 @@ implementation
 uses
   CnMdiView;
 
+const
+  MAX_WAIT_COUNT = 10;
+
 { GetDebug }
 
 procedure TGetDebugThread.AddADescToStore(var ADesc: TCnMsgDesc);
@@ -112,6 +115,26 @@ var
   ADesc: TCnMsgDesc;
   Front, Tail: Integer;
   Res: DWORD;
+
+  procedure CheckExit;
+  var
+    Count: Integer;
+  begin
+    if HMutex <> 0 then
+    begin
+      Count := 0;
+      repeat
+        Res := WaitForSingleObject(HMutex, CnWaitMutexTime);
+        if Count > 0 then
+          Sleep(0);
+        Inc(Count);
+      until (Res = WAIT_OBJECT_0) or (Count = MAX_WAIT_COUNT);
+
+      CloseHandle(HMutex);
+      HMutex := 0;
+    end;
+  end;
+
 begin
   PostStartEvent;
   QueueSize := CnMapSize - CnHeadSize;
@@ -149,8 +172,7 @@ begin
     begin
       if Terminated then
       begin
-        CloseHandle(HMutex);
-        HMutex := 0;
+        CheckExit;
         Exit;
       end;
       ReleaseMutex(HMutex);
@@ -169,8 +191,7 @@ begin
         PHeader^.QueueTail := 0;
         if Terminated then
         begin
-          CloseHandle(HMutex);
-          HMutex := 0;
+          CheckExit;
           Exit;
         end;
         ReleaseMutex(HMutex);
@@ -200,15 +221,21 @@ begin
 
     if Terminated then
     begin
-      CloseHandle(HMutex);
-      HMutex := 0;
+      CheckExit;
       Exit;
     end;
+
     ReleaseMutex(HMutex);
     if HFlush = 0 then
       HFlush := OpenEvent(EVENT_MODIFY_STATE, False, PChar(SCnDebugFlushEventName));
     if HFlush <> 0 then
       SetEvent(hFlush);
+  end;
+
+  if Terminated then
+  begin
+    CheckExit;
+    Exit;
   end;
 end;
 

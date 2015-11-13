@@ -242,8 +242,6 @@ type
     FRunningState: TCnRunningState;
     FThread, FDbgThread: TThread;
     FCloseFromMenu: Boolean;
-    procedure ThreadOnTerminate(Sender: TObject);
-    procedure DbgThreadOnTerminate(Sender: TObject);
     function GetCurrentChild: TCnMsgChild;
     function RegisterViewerHotKey: Boolean;
 
@@ -467,22 +465,14 @@ begin
   if FThread <> nil then
   begin
     FThread.Terminate;
-    try
-      FThread.WaitFor;
-    except
-      ;
-    end;
+    FThread.WaitFor;
     FThread := nil;
   end;
 
   if FDbgThread <> nil then
   begin
     FDbgThread.Terminate;
-    try
-      FDbgThread.WaitFor;
-    except
-      ;
-    end;
+    FDbgThread.WaitFor;
     FDbgThread := nil;
   end;
 
@@ -500,8 +490,6 @@ begin
   if FThread = nil then
   begin
     FThread := TGetDebugThread.Create(True);
-    (FThread as TGetDebugThread).FreeOnTerminate := True;
-    FThread.OnTerminate := ThreadOnTerminate;
     FThread.Resume;
   end
   else
@@ -512,8 +500,6 @@ begin
   if FDbgThread = nil then
   begin
     FDbgThread := TDbgGetDebugThread.Create(True);
-    (FDbgThread as TDbgGetDebugThread).FreeOnTerminate := True;
-    FDbgThread.OnTerminate := DbgThreadOnTerminate;
     FDbgThread.Resume;
   end
   else
@@ -542,31 +528,6 @@ end;
 procedure TCnMainViewer.actPauseExecute(Sender: TObject);
 begin
   PauseThread;
-end;
-
-procedure TCnMainViewer.ThreadOnTerminate(Sender: TObject);
-var
-  Res: Cardinal;
-  Count: Integer;
-begin
-  if HMutex <> 0 then
-  begin
-    Count := 0;
-    repeat
-      Res := WaitForSingleObject(HMutex, CnWaitMutexTime);
-      Sleep(0);
-      Inc(Count);
-    until (Res = WAIT_OBJECT_0) or (Count = 10);
-
-    CloseHandle(HMutex);
-    HMutex := 0;
-  end;
-  FThread := nil;
-end;
-
-procedure TCnMainViewer.DbgThreadOnTerminate(Sender: TObject);
-begin
-  FDbgThread := nil;
 end;
 
 procedure TCnMainViewer.actSwtCloseExecute(Sender: TObject);
@@ -1241,7 +1202,6 @@ end;
 procedure TCnMainViewer.FormClose(Sender: TObject;
   var Action: TCloseAction);
 begin
-  actStop.Execute;
   DestroyThread;
 end;
 
