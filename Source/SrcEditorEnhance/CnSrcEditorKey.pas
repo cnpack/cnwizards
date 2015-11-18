@@ -1999,7 +1999,7 @@ begin
       // 先转换并加入所有与光标下标识符相同的 Token，区分大小写
       for I := 0 to CParser.Count - 1 do
       begin
-        CharPos := OTACharPos(CParser.Tokens[I].CharIndex - 1, CParser.Tokens[I].LineNumber);
+        CharPos := OTACharPos(CParser.Tokens[I].CharIndex - 1, CParser.Tokens[I].LineNumber + 1);
         try
           EditView.ConvertPos(False, EditPos, CharPos);
         except
@@ -2145,8 +2145,8 @@ begin
         LastToken := nil;
         FirstEnter := True;
         iStart := 0;
-        iMaxCursorOffset := EditView.CursorPos.Col - CurToken.EditCol;
 
+        iMaxCursorOffset := EditView.CursorPos.Col - CurToken.EditCol;
         StartCurToken := nil;
         EndCurToken := nil;
         EditWriter := CnOtaGetEditWriterForSourceEditor;
@@ -2173,9 +2173,9 @@ begin
               NewCode := NewCode + string(Copy(AnsiString(CParser.Source), LastTokenPos + 1,
                 TCnWideCppToken(CurTokens[I]).TokenPos - LastTokenPos)) + NewName;
             end;
-  {$IFDEF DEBUG}
+{$IFDEF DEBUG}
             CnDebugger.LogMsg('Cpp NewCode: ' + NewCode);
-  {$ENDIF}
+{$ENDIF}
             // 同一行前面的会影响光标位置
             if (TCnWideCppToken(CurTokens[I]).EditLine = CurToken.EditLine) and
               (TCnWideCppToken(CurTokens[I]).EditCol < CurToken.EditCol) then
@@ -2189,13 +2189,13 @@ begin
         if StartCurToken <> nil then
         begin
           // 要处理的是 UTF8 的长度，而 Paser 算出的 TokenPos 是 Unicode 的因此需要转换
-          EditWriter.CopyTo(Length(UTF8Encode(Copy(Parser.Source, 1, StartCurToken.TokenPos))));
+          EditWriter.CopyTo(Length(UTF8Encode(Copy(CParser.Source, 1, StartCurToken.TokenPos))));
         end;
 
         if EndCurToken <> nil then
         begin
           // 要处理的是 UTF8 的长度，而 Paser 算出的 TokenPos 是 Unicode 的因此需要转换
-          EditWriter.DeleteTo(Length(UTF8Encode(Copy(Parser.Source, 1,
+          EditWriter.DeleteTo(Length(UTF8Encode(Copy(CParser.Source, 1,
             EndCurToken.TokenPos + Length(EndCurToken.Token)))));
         end;
 {$IFDEF UNICODE}
