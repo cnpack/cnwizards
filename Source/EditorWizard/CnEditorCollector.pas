@@ -404,7 +404,8 @@ begin
     if (Idx >= 0) and FileExists(FPath + TabSet.Tabs[Idx]) then
       mmoEdit.Lines.LoadFromFile(FPath + TabSet.Tabs[Idx]);
   except
-    DoHandleException('TCnEditorCollectorForm.LoadPage');
+    on E: Exception do
+      DoHandleException('TCnEditorCollectorForm.LoadPage', E);
   end;
 end;
 
@@ -416,7 +417,8 @@ begin
       ForceDirectories(FPath);
       mmoEdit.Lines.SaveToFile(FPath + TabSet.Tabs[TabSet.TabIndex]);
     except
-      DoHandleException('TCnEditorCollectorForm.SavePage');
+      on E: Exception do
+        DoHandleException('TCnEditorCollectorForm.SavePage', E);
     end;
   end;
 end;

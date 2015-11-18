@@ -1945,7 +1945,8 @@ begin
     with PCnWizNotifierRecord(FAfterPaintLineNotifiers[I])^ do
       TEditorPaintLineNotifier(Notifier)(Editor, LineNum, LogicLineNum);
   except
-    DoHandleException('TCnEditControlWrapper.DoAfterPaintLine[' + IntToStr(I) + ']');
+    on E: Exception do
+      DoHandleException('TCnEditControlWrapper.DoAfterPaintLine[' + IntToStr(I) + ']', E);
   end;
 end;
 
@@ -1959,7 +1960,8 @@ begin
     with PCnWizNotifierRecord(FBeforePaintLineNotifiers[I])^ do
       TEditorPaintLineNotifier(Notifier)(Editor, LineNum, LogicLineNum);
   except
-    DoHandleException('TCnEditControlWrapper.DoBeforePaintLine[' + IntToStr(I) + ']');
+    on E: Exception do
+      DoHandleException('TCnEditControlWrapper.DoBeforePaintLine[' + IntToStr(I) + ']', E);
   end;
 end;
 
@@ -2009,7 +2011,8 @@ begin
     with PCnWizNotifierRecord(FEditControlNotifiers[I])^ do
       TEditorNotifier(Notifier)(EditControl, EditWindow, Operation);
   except
-    DoHandleException('TCnEditControlWrapper.DoEditControlNotify[' + IntToStr(I) + ']');
+    on E: Exception do
+      DoHandleException('TCnEditControlWrapper.DoEditControlNotify[' + IntToStr(I) + ']', E);
   end;
 end;
 
@@ -2048,7 +2051,8 @@ begin
     with PCnWizNotifierRecord(FEditorChangeNotifiers[I])^ do
       TEditorChangeNotifier(Notifier)(Editor, ChangeType);
   except
-    DoHandleException('TCnEditControlWrapper.DoEditorChange[' + IntToStr(I) + ']');
+    on E: Exception do
+      DoHandleException('TCnEditControlWrapper.DoEditorChange[' + IntToStr(I) + ']', E);
   end;
 end;
 
@@ -2248,7 +2252,8 @@ begin
         TKeyMessageNotifier(Notifier)(Key, ScanCode, Shift, Handled);
       if Handled then Break;
     except
-      DoHandleException('TCnEditControlWrapper.KeyMessage[' + IntToStr(I) + ']');
+      on E: Exception do
+        DoHandleException('TCnEditControlWrapper.KeyMessage[' + IntToStr(I) + ']', E);
     end;
   end;
 end;
@@ -2338,7 +2343,8 @@ begin
     with PCnWizNotifierRecord(FMouseDownNotifiers[I])^ do
       TEditorMouseDownNotifier(Notifier)(Editor, Button, Shift, X, Y, IsNC);
   except
-    DoHandleException('TCnEditControlWrapper.DoMouseDown[' + IntToStr(I) + ']');
+    on E: Exception do
+      DoHandleException('TCnEditControlWrapper.DoMouseDown[' + IntToStr(I) + ']', E);
   end;
 end;
 
@@ -2352,7 +2358,8 @@ begin
     with PCnWizNotifierRecord(FMouseMoveNotifiers[I])^ do
       TEditorMouseMoveNotifier(Notifier)(Editor, Shift, X, Y, IsNC);
   except
-    DoHandleException('TCnEditControlWrapper.DoMouseMove[' + IntToStr(I) + ']');
+    on E: Exception do
+      DoHandleException('TCnEditControlWrapper.DoMouseMove[' + IntToStr(I) + ']', E);
   end;
 end;
 
@@ -2366,7 +2373,8 @@ begin
     with PCnWizNotifierRecord(FMouseUpNotifiers[I])^ do
       TEditorMouseUpNotifier(Notifier)(Editor, Button, Shift, X, Y, IsNC);
   except
-    DoHandleException('TCnEditControlWrapper.DoMouseUp[' + IntToStr(I) + ']');
+    on E: Exception do
+      DoHandleException('TCnEditControlWrapper.DoMouseUp[' + IntToStr(I) + ']', E);
   end;
 end;
 
@@ -2379,7 +2387,8 @@ begin
     with PCnWizNotifierRecord(FMouseLeaveNotifiers[I])^ do
       TEditorMouseLeaveNotifier(Notifier)(Editor, IsNC);
   except
-    DoHandleException('TCnEditControlWrapper.DoMouseLeave[' + IntToStr(I) + ']');
+    on E: Exception do
+      DoHandleException('TCnEditControlWrapper.DoMouseLeave[' + IntToStr(I) + ']', E);
   end;
 end;
 
@@ -2418,7 +2427,8 @@ begin
     with PCnWizNotifierRecord(FNcPaintNotifiers[I])^ do
       TEditorNcPaintNotifier(Notifier)(Editor);
   except
-    DoHandleException('TCnEditControlWrapper.DoNcPaint[' + IntToStr(I) + ']');
+    on E: Exception do
+      DoHandleException('TCnEditControlWrapper.DoNcPaint[' + IntToStr(I) + ']', E);
   end;
 end;
 
@@ -2443,7 +2453,8 @@ begin
     with PCnWizNotifierRecord(FVScrollNotifiers[I])^ do
       TEditorVScrollNotifier(Notifier)(Editor);
   except
-    DoHandleException('TCnEditControlWrapper.DoVScroll[' + IntToStr(I) + ']');
+    on E: Exception do
+      DoHandleException('TCnEditControlWrapper.DoVScroll[' + IntToStr(I) + ']', E);
   end;
 end;
 

@@ -177,7 +177,7 @@ procedure SortListByMenuOrder(List: TList);
 {* 根据 TCnMenuWizard 列表中的 MenuOrder 值进行由小到大的排序}
 function IsTextForm(const FileName: string): Boolean;
 {* 返回 DFM 文件是否文本格式}
-procedure DoHandleException(const ErrorMsg: string);
+procedure DoHandleException(const ErrorMsg: string; E: Exception = nil);
 {* 处理一些执行方法中的异常}
 function FindComponentByClass(AWinControl: TWinControl;
   AClass: TClass; const AComponentName: string = ''): TComponent;
@@ -1693,11 +1693,17 @@ begin
 end;
 
 // 处理一些执行方法中的异常
-procedure DoHandleException(const ErrorMsg: string);
+procedure DoHandleException(const ErrorMsg: string; E: Exception = nil);
 begin
-{$IFDEF Debug}
-  CnDebugger.LogMsgWithType('Error: ' + ErrorMsg, cmtError);
-{$ENDIF Debug}
+{$IFDEF DEBUG}
+  if E = nil then
+    CnDebugger.LogMsgWithType('Error: ' + ErrorMsg, cmtError)
+  else
+  begin
+    CnDebugger.LogMsgWithType('Error ' + ErrorMsg + ' : ' + E.Message, cmtError);
+    CnDebugger.LogStackFromAddress(ExceptAddr, 'Call Stack');
+  end;
+{$ENDIF}
 end;
 
 // 在窗口控件中查找指定类的子组件

@@ -294,7 +294,8 @@ begin
       FControl := nil;
     end;
   except
-    DoHandleException('TCnWizHookObject.Destroy');
+    on E: Exception do
+      DoHandleException('TCnWizHookObject.Destroy', E);
   end;
   inherited;
 end;
@@ -318,7 +319,8 @@ begin
       FControl.WindowProc := FOldWndProc;
       FControl := nil;
     except
-      DoHandleException('TCnWizHookObject.DoFree');
+      on E: Exception do
+        DoHandleException('TCnWizHookObject.DoFree', E);
     end;
   end
   else
@@ -349,7 +351,8 @@ begin
     if FAutoFree then
       Free;
   except
-    DoHandleException('TCnWizHookObject.WndProc');
+    on E: Exception do
+      DoHandleException('TCnWizHookObject.WndProc', E);
   end;
 end;
 
@@ -633,7 +636,8 @@ begin
       with PCnWizNotifierRecord(FAfterNotifiers[i])^ do
         TCnWizMessageNotifier(Notifier)(Control, Msg, Result);
     except
-      DoHandleException('TCnWizControlServices.DoAfterMessage[' + IntToStr(i) + ']');
+      on E: Exception do
+        DoHandleException('TCnWizControlServices.DoAfterMessage[' + IntToStr(i) + ']', E);
     end;
 
     if Result then Exit;
@@ -652,7 +656,8 @@ begin
       with PCnWizNotifierRecord(FBeforeNotifiers[i])^ do
         TCnWizMessageNotifier(Notifier)(Control, Msg, Result);
     except
-      DoHandleException('TCnWizControlServices.DoBeforeMessage[' + IntToStr(i) + ']');
+      on E: Exception do
+        DoHandleException('TCnWizControlServices.DoBeforeMessage[' + IntToStr(i) + ']', E);
     end;
 
     if Result then Exit;
