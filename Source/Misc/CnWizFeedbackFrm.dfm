@@ -110,6 +110,7 @@ inherited CnWizFeedbackForm: TCnWizFeedbackForm
     9FFF3F8027FF3F0033FF1E001DFF8C000EFF8400077F800003BFC00001DFC000
     00EFC0000077800000370000003B0000001B0000001D0000001D0000001B0000
     00130000000F0004003F800E007FC01F00FFF0FFC1FFFFFFFFFFFFFFFFFF}
+  OldCreateOrder = True
   OnClose = FormClose
   OnCreate = FormCreate
   PixelsPerInch = 96
@@ -479,7 +480,7 @@ inherited CnWizFeedbackForm: TCnWizFeedbackForm
           Left = 0
           Top = 8
           Width = 281
-          Height = 177
+          Height = 201
           Caption = 'Other Feedback &Data'
           TabOrder = 0
           object cbCnPackVer: TCheckBox
@@ -564,6 +565,16 @@ inherited CnWizFeedbackForm: TCnWizFeedbackForm
             Checked = True
             State = cbChecked
             TabOrder = 3
+          end
+          object chkKeyMapping: TCheckBox
+            Left = 8
+            Top = 171
+            Width = 264
+            Height = 17
+            Caption = 'Key Mapping.'
+            Checked = True
+            State = cbChecked
+            TabOrder = 8
           end
         end
       end

@@ -109,6 +109,7 @@ type
     actPrev: TAction;
     actNext: TAction;
     dlgSaveReport: TSaveDialog;
+    chkKeyMapping: TCheckBox;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure actPrevUpdate(Sender: TObject);
     procedure actNextUpdate(Sender: TObject);
@@ -168,6 +169,8 @@ const
   IdBugSteps = 3;
   IdConfig = 4;
   IdFinished = 5;
+
+  SCRLF = #13#10;
 
 var
   FeedbackForm: TCnWizFeedbackForm;
@@ -520,13 +523,13 @@ begin
   Result := '';
   case Idx of
     IdType:
-      Result := 'CnPack IDE Wizards ' + GetFeedbackTypeString + #13#10#13#10;
+      Result := 'CnPack IDE Wizards ' + GetFeedbackTypeString + SCRLF + SCRLF;
     IdDesc:
-      Result := SDescription + #13#10 + memDesc.Lines.Text + #13#10#13#10;
+      Result := SDescription + SCRLF + memDesc.Lines.Text + SCRLF + SCRLF;
     IdBugDetails:
       Result := GetBugDetailsString;
     IdBugSteps:
-      Result := SSteps + #13#10 + memBugSteps.Lines.Text + #13#10#13#10;
+      Result := SSteps + SCRLF + memBugSteps.Lines.Text + SCRLF + SCRLF;
     IdConfig:
       Result := GetSystemConfigurationString;
   end;
@@ -542,21 +545,21 @@ end;
 
 function TCnWizFeedbackForm.GetBugDetailsString: string;
 begin
-  Result := SBugDetails + #13#10;
+  Result := SBugDetails + SCRLF;
   if cbReproducible.Checked then
-    Result := Result + Format(SBugIsReproducible + #13#10, [edtPercent.Text])
+    Result := Result + Format(SBugIsReproducible + SCRLF, [edtPercent.Text])
   else
-    Result := Result + SBugIsNotReproducible + #13#10;
+    Result := Result + SBugIsNotReproducible + SCRLF;
   if cbMultipleMachines.Checked then
-    Result := Result + '  ' + cbMultipleMachines.Caption + #13#10; // Do not localize.
+    Result := Result + '  ' + cbMultipleMachines.Caption + SCRLF; // Do not localize.
   if cbProjectSpecific.Checked then
-    Result := Result + '  ' + cbProjectSpecific.Caption + #13#10; // Do not localize.
-  Result := Result + #13#10;
+    Result := Result + '  ' + cbProjectSpecific.Caption + SCRLF; // Do not localize.
+  Result := Result + SCRLF;
 end;
 
 function GetCnPackVersionString: string;
 begin
-  Result := Format('%s Ver: %s.%s Build %s' + #13#10, [_CnExtractFileName(WizOptions.DllName),
+  Result := Format('%s Ver: %s.%s Build %s' + SCRLF, [_CnExtractFileName(WizOptions.DllName),
     SCnWizardMajorVersion, SCnWizardMinorVersion, SCnWizardBuildDate]);
 end;
 
@@ -630,7 +633,7 @@ begin
     Data.Add(Format('  Monetary Decimal Separator: ''%s''', [GetLocaleStr(0, LOCALE_SMONDECIMALSEP, '0')]));
     Data.Add(Format('  Monetary Group Separator: ''%s''', [GetLocaleStr(0, LOCALE_SMONTHOUSANDSEP, '0')]));
   finally
-    Result := Data.Text + #13#10;
+    Result := Data.Text + SCRLF;
     Data.Free;
   end;
 end;
@@ -688,18 +691,36 @@ begin
       Integer(SysInfo.wProcessorRevision shr 8), Integer(SysInfo.wProcessorRevision and $00FF)]));
     Data.Add(Format('  Speed: %.2f MHz', [GetCpuSpeed / 1000000]));
   finally
-    Result := Data.Text + #13#10;
+    Result := Data.Text + SCRLF;
     Data.Free;
   end;
 end;
 
-function ReportItemsInRegistryKey(const Header, Key: string): string;
+function GetKeysInRegistryKey(const Key: string; List: TStrings): Boolean;
+var
+  Reg: TRegistry;
+begin
+  Result := False;
+  Reg := TRegistry.Create(KEY_READ);
+  try
+    if Reg.OpenKey(Key, False) then
+    begin
+      Reg.GetKeyNames(List);
+      Result := True;
+    end;
+  finally
+    Reg.Free;
+  end;
+end;
+
+function ReportItemsInRegistryKey(const Header, Key: string; Invert: Boolean = False): string;
 var
   Reg: TRegistry;
   Names: TStringList;
-  i: Integer;
+  I: Integer;
   Value: string;
 begin
+  Result := '';
   Reg := TRegistry.Create(KEY_READ);
   try
     if Reg.OpenKey(Key, False) then
@@ -707,18 +728,32 @@ begin
       Names := TStringList.Create;
       try
         Reg.GetValueNames(Names);
-        Result := Result + Header + #13#10;
-        for i := 0 to Names.Count - 1 do
+        Result := Result + Header + SCRLF;
+        for I := 0 to Names.Count - 1 do
         begin
-          Value := Reg.ReadString(Names[i]);
-          Result := Result + Format('  %s = %s', [Value, Names[i]]) + #13#10;
+          try
+            Value := Reg.ReadString(Names[I]);
+            if Invert then
+              Result := Result + Format('  %s = %s', [Names[I], Value]) + SCRLF
+            else
+              Result := Result + Format('  %s = %s', [Value, Names[I]]) + SCRLF;
+          except
+            on E: ERegistryException do
+            begin
+              Value := IntToStr(Reg.ReadInteger(Names[I]));
+              if Invert then
+                Result := Result + Format('  %s = %s', [Names[I], Value]) + SCRLF
+              else
+                Result := Result + Format('  %s = %s', [Value, Names[I]]) + SCRLF;
+            end;
+          end;
         end;
       finally
         Names.Free;
       end;
     end
     else
-      Result := 'No data for ' + Key + #13#10#13#10;
+      Result := 'No data for ' + Key + SCRLF + SCRLF;
   finally
     Reg.Free;
   end;
@@ -727,34 +762,57 @@ end;
 function GetInstalledExpertsString: string;
 begin
   Result := ReportItemsInRegistryKey(SOutExperts,
-    WizOptions.CompilerRegPath + '\Experts') + #13#10;
+    WizOptions.CompilerRegPath + '\Experts') + SCRLF;
 end;
 
 function GetInstalledPackagesString: string;
 begin
   Result := ReportItemsInRegistryKey(SOutPackages,
-    WizOptions.CompilerRegPath + '\Known Packages') + #13#10;
+    WizOptions.CompilerRegPath + '\Known Packages') + SCRLF;
   Result := Result + ReportItemsInRegistryKey(SOutIDEPackages,
-    WizOptions.CompilerRegPath + '\Known IDE Packages') + #13#10;
+    WizOptions.CompilerRegPath + '\Known IDE Packages') + SCRLF;
 end;
 
 function GetCnPackSettingsString: string;
 begin
   Result := ReportItemsInRegistryKey(SOutCnWizardsActive,
-    WizOptions.RegPath + SCnActiveSection) + #13#10;
+    WizOptions.RegPath + SCnActiveSection) + SCRLF;
   Result := Result + ReportItemsInRegistryKey(SOutCnWizardsCreated,
-    WizOptions.RegPath + SCnCreateSection) + #13#10;
+    WizOptions.RegPath + SCnCreateSection) + SCRLF;
+end;
+
+function GetKeyMappingString: string;
+const
+  KEY_MAPPING_REG = '\Editor\Options\Known Editor Enhancements';
+var
+  List: TStrings;
+  I: Integer;
+begin
+  Result := '';
+  List := TStringList.Create;
+  try
+    if GetKeysInRegistryKey(WizOptions.CompilerRegPath + KEY_MAPPING_REG, List) then
+    begin
+      for I := 0 to List.Count - 1 do
+      begin
+        Result := Result + ReportItemsInRegistryKey(List[I],
+          WizOptions.CompilerRegPath + KEY_MAPPING_REG + '\' + List[I], True);
+      end;
+    end;
+  finally
+    List.Free;
+  end;
 end;
 
 function TCnWizFeedbackForm.GetSystemConfigurationString: string;
 begin
-  Result := SOutConfig + #13#10;
-  Result := Result + '  OS: ' + GetOSString + #13#10;
+  Result := SOutConfig + SCRLF;
+  Result := Result + '  OS: ' + GetOSString + SCRLF;
   Result := Result + '  CnWizards: ' + GetCnPackVersionString;
   Result := Result + '  IDE: ' + TypInfo.GetEnumName(TypeInfo(TBorlandIdeVersion),
-    Ord(GetBorlandIdeVersion)) + ' ' + GetIdeEdition + #13#10;
+    Ord(GetBorlandIdeVersion)) + ' ' + GetIdeEdition + SCRLF;
   Result := Result + '  ComCtl32: ' + GetFileVersionStr(MakePath(GetSystemDir)
-    + 'comctl32.dll') + #13#10#13#10;
+    + 'comctl32.dll') + SCRLF + SCRLF;
 
   if cbExperts.Checked then
     Result := Result + GetInstalledExpertsString;
@@ -766,6 +824,8 @@ begin
     Result := Result + GetCpuInfoString;
   if cbLocaleKeyboard.Checked then
     Result := Result + GetLocaleKeyboardString;
+  if chkKeyMapping.Checked then
+    Result := Result + GetKeyMappingString;
 end;
 
 procedure TCnWizFeedbackForm.DoLanguageChanged(Sender: TObject);
