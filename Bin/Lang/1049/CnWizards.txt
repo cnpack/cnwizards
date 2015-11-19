@@ -1080,6 +1080,7 @@ TCnWizFeedbackForm.cbIdeVer.Caption=Версия IDE
 TCnWizFeedbackForm.cbPackages.Caption=Установленные пакеты
 TCnWizFeedbackForm.cbLocaleKeyboard.Caption=Региональные настройки
 TCnWizFeedbackForm.cbCpu.Caption=Информация о ЦП
+TCnWizFeedbackForm.chkKeyMapping.Caption=Ключевые Mapping аксессуаров модули
 TCnWizFeedbackForm.cbCnPackSettings.Caption=Настройки CnPack IDE-Мастера
 TCnWizFeedbackForm.btnSave.Caption=Сохранить...
 TCnWizFeedbackForm.btnCopy.Caption=Скопировать

@@ -571,7 +571,7 @@ inherited CnWizFeedbackForm: TCnWizFeedbackForm
             Top = 171
             Width = 264
             Height = 17
-            Caption = 'Key Mapping.'
+            Caption = 'Key Mapping Enhancement Modules.'
             Checked = True
             State = cbChecked
             TabOrder = 8
