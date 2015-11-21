@@ -305,7 +305,7 @@ end;
 function IsDelphi10SIdeVersionLatest: Boolean;
 const
   CoreIdeLatest: TVersionNumber =
-    (Major: 23; Minor: 0; Release: 20618; Build: 2753);
+    (Major: 23; Minor: 0; Release: 21418; Build: 4207); // Update 1
 var
   ReadFileVersion: TVersionNumber;
 begin
