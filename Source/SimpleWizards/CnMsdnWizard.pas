@@ -226,7 +226,7 @@ const
   SMicrosoftSearchHomepage = 'http://search.msdn.microsoft.com';
   SMsdnLibrary = 'MSDN Library';
   SDefaultCollections = 'ms-help://MS.VSCC';
-  SOnlineWeb = 'http://search.msdn.microsoft.com/Default.aspx?locale=en-US&Query=%s';
+  SOnlineWeb = 'https://social.msdn.microsoft.com/search/en-US/en_us?query=%s';
 
   csKeywordComboBoxWidth = 120;
 
@@ -342,8 +342,6 @@ procedure TCnMsdnWizard.InitBar;
 const
   SToolbarName = 'CnMSDNToolbar';
   SViewStdCmd = 'ViewStandardCommand';  // DO NOT LOCALIZE
-  vsCustomToolbar =
-    'HKEY_CURRENT_USER\Software\Borland\Delphi\5.0\Toolbars\CustomToolBar';
 type
   TToolBarClass = class of TToolBar;
 var
@@ -846,7 +844,7 @@ const
 //  vsBarTop = 'Toolbar_Top';
   vsBarVisible = 'Toolbar_Visible';
   vsQueryMode = 'QueryMode';
-  vsURL = 'URL';
+  vsURL = 'URL1';  // Change Load/Save Key for default URL changed.
   vsSelectedMsdn = 'SelectedMsdn';
 
 procedure TCnMsdnWizard.LoadSettings(Ini: TCustomIniFile);
@@ -1039,22 +1037,25 @@ begin
         if rbFollow.Checked then
         begin
           m_QueryMode := qmCustom;
-          for i := 0 to lstMsdn.Items.Count - 1 do
-          begin
-            if lstMsdn.Selected[i] then
-            begin
-              m_SelectedCaption := lstMsdn.Items.Strings[i];
-              Break;
-            end;
-          end;
         end
         else
         if rbWeb.Checked then
         begin
           m_QueryMode := qmWeb;
-          m_URL := edtWeb.Text;
           m_SelectedCaption := '';
         end;
+
+        for i := 0 to lstMsdn.Items.Count - 1 do
+        begin
+          if lstMsdn.Selected[i] then
+          begin
+            m_SelectedCaption := lstMsdn.Items.Strings[i];
+            Break;
+          end;
+        end;
+        if Trim(edtWeb.Text) <> '' then
+          m_URL := edtWeb.Text;
+
         DoSaveSettings;
       end;
     finally
