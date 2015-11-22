@@ -60,6 +60,9 @@ const
   BootShortCutKey = VK_LSHIFT; // 快捷键为 左 Shift，用户可以在启动 Delphi 时
                                // 按下该键来开启专家引导工具
 
+const
+  KEY_MAPPING_REG = '\Editor\Options\Known Editor Enhancements';
+
 type
 
 //==============================================================================
@@ -108,7 +111,9 @@ type
     procedure SetTipShowing;
     procedure ShowTipofDay(Sender: TObject);
     procedure CheckIDEVersion;
-    
+{$IFDEF IDE_INTEGRATE_CASTALIA}
+    procedure CheckKeyMappingEnhModulesSequence;
+{$ENDIF}
     function GetWizards(Index: Integer): TCnBaseWizard;
     function GetWizardCount: Integer;
     function GetMenuWizardCount: Integer;
@@ -381,6 +386,10 @@ begin
   // 处理封面窗口
   if @InitSplashProc <> nil then
     InitSplashProc();
+
+{$IFDEF IDE_INTEGRATE_CASTALIA}
+  CheckKeyMappingEnhModulesSequence;
+{$ENDIF}
 
   WizShortCutMgr.BeginUpdate;
   CnListBeginUpdate;
@@ -1352,6 +1361,17 @@ function TCnWizardMgr.GetState: TWizardState;
 begin
   Result := [wsEnabled];
 end;
+
+{$IFDEF IDE_INTEGRATE_CASTALIA}
+
+procedure TCnWizardMgr.CheckKeyMappingEnhModulesSequence;
+begin
+  // XE8/10 Seattle 下 IDE 集成的 Castalia 的快捷键和 CnPack 有冲突，
+  // TODO: 在此检测并提示
+
+end;
+
+{$ENDIF}
 
 {$IFDEF COMPILER6_UP}
 

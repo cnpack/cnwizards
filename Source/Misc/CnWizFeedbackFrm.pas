@@ -56,7 +56,7 @@ uses
   ExtCtrls, CnWizardImage, StdCtrls, ComCtrls, ToolsAPI, CnConsts, CnWizConsts,
   CnWizOptions, CnWizUtils, CnWizCompilerConst, Clipbrd, ActnList, ShellAPI,
   Registry, Math, TypInfo, CnCommon, GetIdeVersion, CnWizIdeUtils, CnLangMgr,
-  CnWizMultiLang;
+  CnWizMultiLang, CnWizManager;
 
 type
   TFeedbackType = (fbBug, fbFeature);
@@ -696,23 +696,6 @@ begin
   end;
 end;
 
-function GetKeysInRegistryKey(const Key: string; List: TStrings): Boolean;
-var
-  Reg: TRegistry;
-begin
-  Result := False;
-  Reg := TRegistry.Create(KEY_READ);
-  try
-    if Reg.OpenKey(Key, False) then
-    begin
-      Reg.GetKeyNames(List);
-      Result := True;
-    end;
-  finally
-    Reg.Free;
-  end;
-end;
-
 function ReportItemsInRegistryKey(const Header, Key: string; Invert: Boolean = False): string;
 var
   Reg: TRegistry;
@@ -782,8 +765,6 @@ begin
 end;
 
 function GetKeyMappingString: string;
-const
-  KEY_MAPPING_REG = '\Editor\Options\Known Editor Enhancements';
 var
   List: TStrings;
   I: Integer;
