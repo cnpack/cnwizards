@@ -3397,6 +3397,7 @@ SOutIDEPackages=已安装的 IDE 包：
 SOutCnWizardsActive=CnPack IDE 专家启用状态：
 SOutCnWizardsCreated=CnPack IDE 专家创建状态：
 SOutConfig=设置：
+SCnKeyMappingConflictsHint=CnPack 检测到当前 IDE 已安装的专家包可能存在冲突！<BR><BR>如果后续出现 Access Violation 出错提示但能进入 IDE，您可按照以下办法尝试解决：<BR>1、点击 IDE 中的“Tools”菜单项，点击“Options...”，进入选项对话框。<BR>2、选中对话框左边的“Editor Options”项下面的“Key Mappings”子项。<BR>3、在对话框右边的“Enhancement Modules”列表中，选中“CnPack BufferList”项。<BR>4、连续点击“Move Down”按钮，使其移动到最下方。<BR>5、关闭 IDE 并重启。<BR><BR>如果后续出现 Access Violation 且无法启动 IDE，您可按照以下办法尝试解决：<BR>1、在开始菜单中运行 regedit，进入注册表编辑器。<BR>2、指向并展开键 %s。<BR>3、每一子键代表一项“Key Mapping Enhancement Module”，查看各子键中的“Priority”值。<BR>4、找到“Priority”值最大的一项，将“CnPack.BufferList”的“Priority”值和其互换。<BR>5、再次启动 IDE。<BR><BR>如果仍有问题，欢迎反馈至：master@cnpack.org
 SCnResMgrWizardMenuCaption=资源管理专家
 SCnResMgrWizardMenuHint=资源管理专家
 SCnResMgrWizardName=资源管理专家
