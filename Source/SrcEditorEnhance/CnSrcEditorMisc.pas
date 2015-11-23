@@ -105,8 +105,10 @@ type
     FHideOrigToolbar: Boolean;
     function GetBoolean(const Index: Integer): Boolean;
     procedure SetBoolean(const Index: Integer; const Value: Boolean);
-
+{$IFDEF DELPHI10_SEATTLE_UP}
     procedure CheckAndHideOrigToolbar(Sender: TObject);
+    procedure OrigToolbarClose(Sender: TObject);
+{$ENDIF}
     procedure RegisterUserMenuItems;
     procedure RegisterMenuExecutor(Sender: TObject);
     procedure OnSourceEditorNotify(SourceEditor: IOTASourceEditor;
@@ -202,7 +204,7 @@ uses
 {$IFDEF DelphiXE2_UP}
   Rtti,
 {$ENDIF}
-  CnSrcEditorEnhance, CnWizOptions, CnWizShortCut;
+  CnSrcEditorEnhance, CnWizOptions, CnWizShortCut, CnNativeDecl;
 
 const
   SCnCodeCompletion = 'CnCodeCompletion';
@@ -363,7 +365,9 @@ begin
   if Operation = opInsert then
   begin
     UpdateInstall;
+{$IFDEF DELPHI10_SEATTLE_UP}
     CheckAndHideOrigToolbar(nil);
+{$ENDIF}
   end;
 end;
 
@@ -727,29 +731,30 @@ begin
     FActualDirs.Add(UpperCase(MakePath(ReplaceToActualPath(FReadOnlyDirs[I]))));
 end;
 
-procedure TCnSrcEditorMisc.CheckAndHideOrigToolbar(Sender: TObject);
 {$IFDEF DELPHI10_SEATTLE_UP}
+
+procedure TCnSrcEditorMisc.CheckAndHideOrigToolbar(Sender: TObject);
 var
   I: Integer;
   Control: TControl;
   Parent: TWinControl;
-{$ENDIF}
+  Popup: TPopupMenu;
+  CloseItem: TMenuItem;
 begin
-{$IFDEF DELPHI10_SEATTLE_UP}
+  Control := CnOtaGetCurrentEditControl;
+  if Control = nil then
+    Exit;
+
+  Parent := Control.Parent;
+  if Parent = nil then
+    Exit;
+
+  Parent := Parent.Parent;
+  if Parent = nil then
+    Exit;
+
   if FHideOrigToolbar then
   begin
-    Control := CnOtaGetCurrentEditControl;
-    if Control = nil then
-      Exit;
-
-    Parent := Control.Parent;
-    if Parent = nil then
-      Exit;
-
-    Parent := Parent.Parent;
-    if Parent = nil then
-      Exit;
-
     for I := 0 to Parent.ControlCount - 1 do
     begin
       if Parent.Controls[I].ClassNameIs('TEditorNavigationToolbar') then
@@ -763,9 +768,54 @@ begin
         Exit;
       end;
     end;
-  end;
+  end
+  else
+  begin
+    for I := 0 to Parent.ControlCount - 1 do
+    begin
+      if Parent.Controls[I].ClassNameIs('TEditorNavigationToolbar') then
+      begin
+        if TControlHack(Parent.Controls[I]).PopupMenu = nil then
+        begin
+          Popup := TPopupMenu.Create(Parent.Controls[I]);
+          CloseItem := TMenuItem.Create(Popup);
+          CloseItem.Caption := '&Hide';
+          CloseItem.OnClick := OrigToolbarClose;
+          CloseItem.Tag := TCnNativeInt(Parent.Controls[I]);
+
+          Popup.Items.Add(CloseItem);
+          TControlHack(Parent.Controls[I]).PopupMenu := Popup;
+
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('Set a PopupMenu to Toolbar.');
 {$ENDIF}
+        end;
+        Exit;
+      end;
+    end;
+  end;
 end;
+
+procedure TCnSrcEditorMisc.OrigToolbarClose(Sender: TObject);
+var
+  Toolbar: TControl;
+begin
+  HideOrigToolbar := False;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Hide Toolbar Menu Item Clicked.');
+{$ENDIF}
+
+  Toolbar := TControl((Sender as TComponent).Tag);
+  if Toolbar.Height > 0 then
+  begin
+    (Toolbar as TToolbar).AutoSize := False;
+    Toolbar.Height := 0;
+    Toolbar.Visible := False;
+  end;
+end;
+
+{$ENDIF}
 
 procedure TCnSrcEditorMisc.OnSourceEditorNotify(
   SourceEditor: IOTASourceEditor; NotifyType: TCnWizSourceEditorNotifyType;
