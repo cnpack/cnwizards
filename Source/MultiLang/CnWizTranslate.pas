@@ -142,6 +142,7 @@ begin
   TranslateStr(SOutCnWizardsActive, 'SOutCnWizardsActive');
   TranslateStr(SOutCnWizardsCreated, 'SOutCnWizardsCreated');
   TranslateStr(SOutConfig, 'SOutConfig');
+  TranslateStr(SCnKeyMappingConflictsHint, 'SCnKeyMappingConflictsHint');
 
   //----------------------------------------------------------------------------
   //  Wizards

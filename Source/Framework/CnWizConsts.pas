@@ -456,6 +456,26 @@ var
   SOutCnWizardsCreated: string = 'CnPack IDE Wizards Created State:';
   SOutConfig: string = 'Settings:';
 
+  // Key Mapping Conflicts
+  SCnKeyMappingConflictsHint: string =
+    'Possible Access Violation of Installed Wizards Detected!' + #13#10 +
+    '' + #13#10 +
+    'If Access Violation Pops Up and IDE Running, You can Follow these Steps to Fix It:' + #13#10 +
+    '1. Click "Tools" Menu, Click "Opitons..." Item to Show the Options Dialog.' + #13#10 +
+    '2. Select the "Key Mappings" Sub-Item under "Editor Options" Item.' + #13#10 +
+    '3. Select "CnPack BufferList" in "Enhancement Modules" List.' + #13#10 +
+    '4. Click "Move Down" to Move it to the Bottom.' + #13#10 +
+    '5. Exit and Restart IDE.' + #13#10 +
+    '' + #13#10 +
+    'If Access Violation Pops Up and IDE can NOT Run, You can Follow these Steps to Fix It:' + #13#10 +
+    '1. Click Start Menu, run "regedit" to Enter Registry Editor.' + #13#10 +
+    '2. Expand %s.' + #13#10 +
+    '3. Check Every "Priority" Values in Every Sub-Keys for "Key Mapping Enhancement Module".' + #13#10 +
+    '4. Find the Max Value of "Priority", Exchange its Value and the Value of "CnPack.BufferList".' + #13#10 +
+    '5. Restart IDE.' + #13#10 +
+    '' + #13#10 +
+    'If Problem still Exists, please contact master@cnpack.org';
+
   // CnWizUpgrade
   SCnWizUpgradeName: string = 'Check Update';
   SCnWizUpgradeComment: string = 'Check the Latest Version of CnPack IDE Wizards';

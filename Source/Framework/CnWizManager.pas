@@ -1365,10 +1365,124 @@ end;
 {$IFDEF IDE_INTEGRATE_CASTALIA}
 
 procedure TCnWizardMgr.CheckKeyMappingEnhModulesSequence;
+const
+  PRIORITY_KEY = 'Priority';
+  CASTALIA_KEYNAME = 'Castalia';
+  CNPACK_KEYNAME = 'CnPack';
+var
+  List: TStringList;
+  Reg: TRegistry;
+  I, {MinIdx,} MaxIdx, CnPackIdx, MinValue, MaxValue: Integer;
+  Contain: Boolean;
 begin
   // XE8/10 Seattle 下 IDE 集成的 Castalia 的快捷键和 CnPack 有冲突，
-  // TODO: 在此检测并提示
+  // 规则：有 Castalia 名字存在，且 CnPack 的 Priority 不是最大，则提示。
+  List := TStringList.Create;
+  try
+    if GetKeysInRegistryKey(WizOptions.CompilerRegPath + KEY_MAPPING_REG, List) then
+    begin
+      if List.Count <= 1 then
+        Exit;
 
+      // List 中存了每个 Key 的名字，Objects 里头存其 Priority 值
+      for I := 0 to List.Count - 1 do
+      begin
+        List.Objects[I] := Pointer(-1);
+        Reg := TRegistry.Create(KEY_READ);
+        try
+          if Reg.OpenKey(WizOptions.CompilerRegPath + KEY_MAPPING_REG + '\' + List[I], False) then
+          begin
+            List.Objects[I] := Pointer(Reg.ReadInteger(PRIORITY_KEY));
+          end;
+        finally
+          Reg.Free;
+        end;
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('Key Mapping: %s: Priority %d.', [List[I], Integer(List.Objects[I])]);
+{$ENDIF}
+      end;
+
+      Contain := False;
+      for I := 0 to List.Count - 1 do
+      begin
+        if Pos(CASTALIA_KEYNAME, List[I]) > 0 then
+        begin
+          Contain := True;
+          Break;
+        end;
+      end;
+
+      if not Contain then // 如果没 Castalia，大概就没冲突，不处理
+        Exit;
+
+      Contain := False;
+      CnPackIdx := -1;
+      for I := 0 to List.Count - 1 do
+      begin
+        if Pos(CNPACK_KEYNAME, List[I]) > 0 then
+        begin
+          Contain := True;
+          CnPackIdx := I;
+          Break;
+        end;
+      end;
+
+      if not Contain then // 没 CnPack 的值，可能是第一次运行，只能提示
+      begin
+        InfoDlg(Format(SCnKeyMappingConflictsHint, [WizOptions.CompilerRegPath + KEY_MAPPING_REG]));
+        Exit;
+      end;
+
+      // Both exist, check the priority of CnPack
+      // MinIdx := 0;
+      MaxIdx := 0;
+      MinValue := Integer(List.Objects[0]);
+      MaxValue := Integer(List.Objects[0]);
+      for I := 0 to List.Count - 1 do
+      begin
+        if Integer(List.Objects[I]) < MinValue then
+        begin
+          //MinIdx := I;
+          MinValue := Integer(List.Objects[0]);
+        end;
+
+        if Integer(List.Objects[I]) > MaxValue then
+        begin
+          MaxIdx := I;
+          MaxValue := Integer(List.Objects[0]);
+        end;
+      end;
+
+      if MaxIdx = CnPackIdx then // CnPack 键盘映射顺序已在最下面。
+        Exit;
+
+      InfoDlg(Format(SCnKeyMappingConflictsHint, [WizOptions.CompilerRegPath + KEY_MAPPING_REG]));
+
+      // 交换最大的值和 CnPack 的值。但未必有效，先不这么整。
+//      Reg := TRegistry.Create(KEY_WRITE);
+//      try
+//        if Reg.OpenKey(WizOptions.CompilerRegPath + KEY_MAPPING_REG + '\' + List[CnPackIdx], False) then
+//        begin
+//          Reg.WriteInteger(PRIORITY_KEY, Integer(List.Objects[MaxIdx]));
+//          Reg.CloseKey;
+//        end;
+//        if Reg.OpenKey(WizOptions.CompilerRegPath + KEY_MAPPING_REG + '\' + List[MaxIdx], False) then
+//        begin
+//          Reg.WriteInteger(PRIORITY_KEY, Integer(List.Objects[CnPackIdx]));
+//          Reg.CloseKey;
+//        end;
+//{$IFDEF DEBUG}
+//        CnDebugger.LogFmt('Key Mapping Exchange Priority: %s to %d; %s to %d.',
+//          [List[MaxIdx], Integer(List.Objects[CnPackIdx]),
+//          List[CnPackIdx], Integer(List.Objects[MaxIdx])]);
+//{$ENDIF}
+//      finally
+//        Reg.Free;
+//      end;
+    end;
+  finally
+    List.Free;
+  end;
 end;
 
 {$ENDIF}
