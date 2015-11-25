@@ -1443,13 +1443,13 @@ begin
         if Integer(List.Objects[I]) < MinValue then
         begin
           //MinIdx := I;
-          MinValue := Integer(List.Objects[0]);
+          MinValue := Integer(List.Objects[I]);
         end;
 
         if Integer(List.Objects[I]) > MaxValue then
         begin
           MaxIdx := I;
-          MaxValue := Integer(List.Objects[0]);
+          MaxValue := Integer(List.Objects[I]);
         end;
       end;
 
