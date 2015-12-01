@@ -29,7 +29,9 @@ unit CnIdentRenameFrm;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2009.01.15
+* 修改记录：2015.12.01
+*              加入 Cpp/H 文件的选项
+*           2009.01.15
 *             创建单元
 ================================================================================
 |</PRE>}
@@ -54,6 +56,7 @@ type
     edtRename: TEdit;
     btnOK: TButton;
     btnCancel: TButton;
+    rbCppHPair: TRadioButton;
     procedure FormShow(Sender: TObject);
     procedure edtRenameKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
@@ -99,7 +102,9 @@ begin
         NextRadioButton := rbCurrentProc;
     end
     else if rbCurrentInnerProc.Checked then
-      NextRadioButton := rbCurrentProc;
+      NextRadioButton := rbCurrentProc
+    else if rbCppHPair.Checked and rbCppHPair.Enabled then
+      NextRadioButton := rbUnit;
 
     Key := 0;
   end
@@ -113,7 +118,9 @@ begin
         NextRadioButton := rbUnit;
     end
     else if rbCurrentInnerProc.Checked then
-      NextRadioButton := rbUnit;
+      NextRadioButton := rbUnit
+    else if rbUnit.Checked then
+      NextRadioButton := rbCppHPair;
 
     Key := 0;
   end;

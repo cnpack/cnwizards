@@ -3,8 +3,9 @@ inherited CnIdentRenameForm: TCnIdentRenameForm
   Top = 202
   BorderStyle = bsDialog
   Caption = 'Rename Identifier'
-  ClientHeight = 211
+  ClientHeight = 235
   ClientWidth = 242
+  OldCreateOrder = True
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
@@ -18,7 +19,7 @@ inherited CnIdentRenameForm: TCnIdentRenameForm
     Left = 8
     Top = 72
     Width = 225
-    Height = 97
+    Height = 121
     Caption = 'Replace &Range'
     TabOrder = 1
     object rbCurrentProc: TRadioButton
@@ -45,6 +46,14 @@ inherited CnIdentRenameForm: TCnIdentRenameForm
       Caption = 'Whole Unit(&3)'
       TabOrder = 2
     end
+    object rbCppHPair: TRadioButton
+      Left = 8
+      Top = 92
+      Width = 161
+      Height = 17
+      Caption = 'Whole Cpp/H Files Pair(&4)'
+      TabOrder = 3
+    end
   end
   object edtRename: TEdit
     Left = 8
@@ -56,7 +65,7 @@ inherited CnIdentRenameForm: TCnIdentRenameForm
   end
   object btnOK: TButton
     Left = 78
-    Top = 180
+    Top = 204
     Width = 75
     Height = 21
     Caption = '&OK'
@@ -66,7 +75,7 @@ inherited CnIdentRenameForm: TCnIdentRenameForm
   end
   object btnCancel: TButton
     Left = 158
-    Top = 180
+    Top = 204
     Width = 75
     Height = 21
     Cancel = True

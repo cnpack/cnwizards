@@ -63,10 +63,10 @@ uses
 type
   TCnAutoMatchType = (btNone, btBracket, btSquare, btCurly, btQuote, btDitto); // () [] {} '' ""
 
-  TCnRenameIdentifierType = (ritInvalid, ritUnit, ritCurrentProc, ritInnerProc);
+  TCnRenameIdentifierType = (ritInvalid, ritUnit, ritCurrentProc, ritInnerProc, ritCppHPair);
   // Pascal： 整个文件、当前最外层过程、当前最内层过程
   // C/C++：  整个文件、当前最外层大括号（如果非namespace）或次外层（最外是namespace)
-              // 当前最内层大括号
+              // 当前最内层大括号、整个 Cpp 以及相应的 H文 件。
 
 //==============================================================================
 // 代码编辑器按键扩展功能
@@ -1080,13 +1080,12 @@ begin
 end;
 
 {$HINTS OFF}
+
 function TCnSrcEditorKey.DoRename(View: IOTAEditView; Key, ScanCode: Word;
   Shift: TShiftState; var Handled: Boolean): Boolean;
 var
   Cur, UpperCur, UpperHeadCur, NewName: string;
   CurIndex: Integer;
-  BlockMatchInfo: TBlockMatchInfo;
-  LineInfo: TBlockLineInfo;
   EditControl: TControl;
   EditView: IOTAEditView;
   Parser: TCnPasStructureParser;
@@ -1099,13 +1098,15 @@ var
   iStart, iOldTokenLen: Integer;
   NewCode: string;
   EditWriter: IOTAEditWriter;
-  LastToken, StartToken, EndToken, StartCurToken, EndCurToken: TCnPasToken;
+  CurToken, LastToken, StartToken, EndToken, StartCurToken, EndCurToken: TCnPasToken;
   CurFuncStartToken, CurFuncEndToken: TCnCppToken;
   FirstEnter: Boolean;
   LastTokenPos: Integer;
   FrmModalResult: Boolean;
   BookMarkList: TObjectList;
   Element, LineFlag: Integer;
+  CurTokens: TList;
+  F: string;
 begin
   Result := False;
   if (Key <> FRenameKey) or (Shift <> FRenameShift) then Exit;
@@ -1159,9 +1160,8 @@ begin
     Parser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
 
     try
-      BlockMatchInfo := TBlockMatchInfo.Create(EditControl);
-      LineInfo := TBlockLineInfo.Create(EditControl);
-      BlockMatchInfo.LineInfo := LineInfo;
+      CurToken := nil;
+      CurTokens := TList.Create;
       UpperCur := UpperCase(Cur);
 
       // 先转换并加入所有与光标下标识符相同的 Token
@@ -1179,16 +1179,13 @@ begin
 
         if (Parser.Tokens[I].TokenID = tkIdentifier) and (UpperCase(string(Parser.Tokens[I].Token)) = UpperCur) then
         begin
-          BlockMatchInfo.AddToCurrList(Parser.Tokens[I]);
-          if (BlockMatchInfo.CurrentToken = nil) and
+          CurTokens.Add(Parser.Tokens[I]);
+          if (CurToken = nil) and
             IsCurrentToken(Pointer(EditView), EditControl, Parser.Tokens[I]) then
-          begin
-            BlockMatchInfo.CurrentToken := Parser.Tokens[I];
-            BlockMatchInfo.CurrentTokenName := BlockMatchInfo.CurrentToken.Token;
-          end;
+            CurToken := Parser.Tokens[I];
         end;
       end;
-      if BlockMatchInfo.CurTokenCount = 0 then Exit;
+      if CurTokens.Count = 0 then Exit;
 
       // 如果当前光标下的 Token 在 InnerMethod 之间，并且所有的 Token 都在
       // InnerMethod 之间，则 RIT 为 InnerProc
@@ -1200,8 +1197,8 @@ begin
       if Assigned(Parser.ChildMethodStartToken) and
         Assigned(Parser.ChildMethodCloseToken) then
       begin
-        if (BlockMatchInfo.CurTokens[0].ItemIndex >= Parser.ChildMethodStartToken.ItemIndex)
-          and (BlockMatchInfo.CurTokens[BlockMatchInfo.CurTokenCount - 1].ItemIndex
+        if (TCnPasToken(CurTokens[0]).ItemIndex >= Parser.ChildMethodStartToken.ItemIndex)
+          and (TCnPasToken(CurTokens[CurTokens.Count - 1]).ItemIndex
           <= Parser.ChildMethodCloseToken.ItemIndex) then
           Rit := ritInnerProc;
       end;
@@ -1210,8 +1207,8 @@ begin
         if Assigned(Parser.MethodStartToken) and
           Assigned(Parser.MethodCloseToken) then
         begin
-          if (BlockMatchInfo.CurTokens[0].ItemIndex >= Parser.MethodStartToken.ItemIndex)
-            and (BlockMatchInfo.CurTokens[BlockMatchInfo.CurTokenCount - 1].ItemIndex
+          if (TCnPasToken(CurTokens[0]).ItemIndex >= Parser.MethodStartToken.ItemIndex)
+            and (TCnPasToken(CurTokens[CurTokens.Count - 1]).ItemIndex
             <= Parser.MethodCloseToken.ItemIndex) then
             Rit := ritCurrentProc;
         end;
@@ -1241,6 +1238,9 @@ begin
             rbCurrentInnerProc.Checked := True;
           if (not rbCurrentProc.Checked) and (not rbCurrentInnerProc.Checked) then
             rbUnit.Checked := True;
+
+          rbCppHPair.Enabled := False;
+          rbCppHPair.Checked := False;
 
           FrmModalResult := ShowModal = mrOk;
           NewName := edtRename.Text;
@@ -1272,8 +1272,8 @@ begin
         if Rit = ritUnit then
         begin
           // 替换范围为整个 unit 时，起始和终结 Token 为列表中头尾俩
-          StartToken := BlockMatchInfo.CurTokens[0];
-          EndToken := BlockMatchInfo.CurTokens[BlockMatchInfo.CurTokenCount - 1];
+          StartToken := TCnPasToken(CurTokens[0]);
+          EndToken := TCnPasToken(CurTokens[CurTokens.Count - 1]);
         end
         else if Rit = ritCurrentProc then
         begin
@@ -1296,21 +1296,21 @@ begin
         LastToken := nil;
         FirstEnter := True;
         iStart := 0;
-        iMaxCursorOffset := EditView.CursorPos.Col - BlockMatchInfo.CurrentToken.EditCol;
+        iMaxCursorOffset := EditView.CursorPos.Col - CurToken.EditCol;
         StartCurToken := nil;
         EndCurToken := nil;
         EditWriter := CnOtaGetEditWriterForSourceEditor;
 
         // 执行完循环后，NewCode 应该为覆盖了需要替换的所有 Token 的替换后内容
-        for I := 0 to BlockMatchInfo.CurTokenCount - 1 do
+        for I := 0 to CurTokens.Count - 1 do
         begin
-          if (BlockMatchInfo.CurTokens[I].ItemIndex >= StartToken.ItemIndex) and
-            (BlockMatchInfo.CurTokens[I].ItemIndex <= EndToken.ItemIndex) then
+          if (TCnPasToken(CurTokens[I]).ItemIndex >= StartToken.ItemIndex) and
+            (TCnPasToken(CurTokens[I]).ItemIndex <= EndToken.ItemIndex) then
           begin
             // 属于要处理之列。第一回，处理头，最后循环后处理尾
             if FirstEnter then
             begin
-              StartCurToken := BlockMatchInfo.CurTokens[I]; // 记录第一个 CurToken
+              StartCurToken := TCnPasToken(CurTokens[I]); // 记录第一个 CurToken
               FirstEnter := False;
             end;
 
@@ -1321,18 +1321,18 @@ begin
               // 从上一 Token 的尾巴，到现任 Token 的头，再加替换后的文字，都用 AnsiString 来计算
               LastTokenPos := LastToken.TokenPos + Length(LastToken.Token);
               NewCode := NewCode + string(Copy(AnsiString(Parser.Source), LastTokenPos + 1,
-                BlockMatchInfo.CurTokens[I].TokenPos - LastTokenPos)) + NewName;
+                TCnPasToken(CurTokens[I]).TokenPos - LastTokenPos)) + NewName;
             end;
   {$IFDEF DEBUG}
             CnDebugger.LogMsg('Pas NewCode: ' + NewCode);
   {$ENDIF}
             // 同一行前面的会影响光标位置
-            if (BlockMatchInfo.CurTokens[I].EditLine = BlockMatchInfo.CurrentToken.EditLine) and
-              (BlockMatchInfo.CurTokens[I].EditCol < BlockMatchInfo.CurrentToken.EditCol) then
+            if (TCnPasToken(CurTokens[I]).EditLine = CurToken.EditLine) and
+              (TCnPasToken(CurTokens[I]).EditCol < CurToken.EditCol) then
               Inc(iStart);
 
-            LastToken := BlockMatchInfo.CurTokens[I];   // 记录上一个处理过的 CurToken
-            EndCurToken := BlockMatchInfo.CurTokens[I]; // 记录最后一个 CurToken
+            LastToken := TCnPasToken(CurTokens[I]);   // 记录上一个处理过的 CurToken
+            EndCurToken := TCnPasToken(CurTokens[I]); // 记录最后一个 CurToken
           end;
         end;
 
@@ -1382,15 +1382,14 @@ begin
         LoadBookMarksFromObjectList(EditView, BookMarkList);
       end;
     finally
-      FreeAndNil(BlockMatchInfo);
-      FreeAndNil(LineInfo);
+      FreeAndNil(CurTokens);
       FreeAndNil(Parser);
       FreeAndNil(BookMarkList);
     end;
   end
   else if IsCppSourceModule(EditView.Buffer.FileName) then // C/C++ 文件
   begin
-    // 判断位置，根据需要弹出改名窗体。目前暂只支持整个文件
+    // 判断位置，根据需要弹出改名窗体。
     CParser := TCnCppStructureParser.Create;
     Stream := TMemoryStream.Create;
     try
@@ -1403,9 +1402,8 @@ begin
     end;
 
     try
-      BlockMatchInfo := TBlockMatchInfo.Create(EditControl);
-      LineInfo := TBlockLineInfo.Create(EditControl);
-      BlockMatchInfo.LineInfo := LineInfo;
+      CurToken := nil;
+      CurTokens := TList.Create;
 
       // 先转换并加入所有与光标下标识符相同的 Token，区分大小写
       for I := 0 to CParser.Count - 1 do
@@ -1427,16 +1425,13 @@ begin
 
         if (CParser.Tokens[I].CppTokenKind = ctkidentifier) and (string(CParser.Tokens[I].Token) = Cur) then
         begin
-          BlockMatchInfo.AddToCurrList(CParser.Tokens[I]);
-          if (BlockMatchInfo.CurrentToken = nil) and
+          CurTokens.Add(CParser.Tokens[I]);
+          if (CurToken = nil) and
             IsCurrentToken(Pointer(EditView), EditControl, CParser.Tokens[I]) then
-          begin
-            BlockMatchInfo.CurrentToken := CParser.Tokens[I];
-            BlockMatchInfo.CurrentTokenName := BlockMatchInfo.CurrentToken.Token;
-          end;
+            CurToken := CParser.Tokens[I];
         end;
       end;
-      if BlockMatchInfo.CurTokenCount = 0 then Exit;
+      if CurTokens.Count = 0 then Exit;
 
       CurFuncStartToken := nil;
       CurFuncEndToken := nil;
@@ -1465,16 +1460,16 @@ begin
         and (CParser.InnerBlockStartToken <> CurFuncStartToken) and
             (CParser.InnerBlockCloseToken <> CurFuncEndToken) then
       begin
-        if (BlockMatchInfo.CurTokens[0].ItemIndex >= CParser.InnerBlockStartToken.ItemIndex)
-          and (BlockMatchInfo.CurTokens[BlockMatchInfo.CurTokenCount - 1].ItemIndex
+        if (TCnPasToken(CurTokens[0]).ItemIndex >= CParser.InnerBlockStartToken.ItemIndex)
+          and (TCnPasToken(CurTokens[CurTokens.Count - 1]).ItemIndex
           <= CParser.InnerBlockCloseToken.ItemIndex) then
           Rit := ritInnerProc;
       end;
 
       if (Rit = ritInvalid) and (CurFuncStartToken <> nil) and (CurFuncEndToken <> nil) then
       begin
-        if (BlockMatchInfo.CurTokens[0].ItemIndex >= CurFuncStartToken.ItemIndex)
-          and (BlockMatchInfo.CurTokens[BlockMatchInfo.CurTokenCount - 1].ItemIndex
+        if (TCnPasToken(CurTokens[0]).ItemIndex >= CurFuncStartToken.ItemIndex)
+          and (TCnPasToken(CurTokens[CurTokens.Count - 1]).ItemIndex
           <= CurFuncEndToken.ItemIndex) then
           Rit := ritCurrentProc;
       end;
@@ -1486,7 +1481,7 @@ begin
       CnDebugger.LogMsg('Cpp F2 Rename. Calc Rit to ' + IntToStr(Ord(Rit)));
 {$ENDIF}
 
-      // 弹出对话框，暂时只支持整个文件
+      // 弹出对话框
       with TCnIdentRenameForm.Create(nil) do
       begin
         try
@@ -1511,6 +1506,11 @@ begin
           if (not rbCurrentProc.Checked) and (not rbCurrentInnerProc.Checked) then
             rbUnit.Checked := True;
 
+          F := EditView.Buffer.FileName;
+          // Cpp/H 文件均在打开状态则此选项使能
+          rbCppHPair.Enabled := (IsCpp(F) and CnOtaIsFileOpen(_CnChangeFileExt(F, '.h')))
+            or (IsH(F) and CnOtaIsFileOpen(_CnChangeFileExt(F, '.cpp')));
+
           FrmModalResult := ShowModal = mrOk;
           NewName := edtRename.Text;
 
@@ -1518,8 +1518,10 @@ begin
             Rit := ritCurrentProc
           else if rbCurrentInnerProc.Checked then
             Rit := ritInnerProc
+          else if rbUnit.Checked then
+            Rit := ritUnit
           else
-            Rit := ritUnit;
+            Rit := ritCppHPair;
         finally
           Free;
         end;
@@ -1535,11 +1537,11 @@ begin
 
         StartToken := nil;
         EndToken := nil;
-        if Rit = ritUnit then
+        if Rit in [ritUnit, ritCppHPair] then
         begin
           // 替换范围为整个 C 时，起始和终结 Token 为列表中头尾俩
-          StartToken := BlockMatchInfo.CurTokens[0];
-          EndToken := BlockMatchInfo.CurTokens[BlockMatchInfo.CurTokenCount - 1];
+          StartToken := TCnPasToken(CurTokens[0]);
+          EndToken := TCnPasToken(CurTokens[CurTokens.Count - 1]);
         end
         else if Rit = ritCurrentProc then
         begin
@@ -1562,22 +1564,22 @@ begin
         LastToken := nil;
         FirstEnter := True;
         iStart := 0;
-        iMaxCursorOffset := EditView.CursorPos.Col - BlockMatchInfo.CurrentToken.EditCol;
+        iMaxCursorOffset := EditView.CursorPos.Col - CurToken.EditCol;
 
         StartCurToken := nil;
         EndCurToken := nil;
         EditWriter := CnOtaGetEditWriterForSourceEditor;
 
         // 执行完循环后，NewCode 应该为覆盖了需要替换的所有 Token 的替换后内容
-        for I := 0 to BlockMatchInfo.CurTokenCount - 1 do
+        for I := 0 to CurTokens.Count - 1 do
         begin
-          if (BlockMatchInfo.CurTokens[I].ItemIndex >= StartToken.ItemIndex) and
-            (BlockMatchInfo.CurTokens[I].ItemIndex <= EndToken.ItemIndex) then
+          if (TCnPasToken(CurTokens[I]).ItemIndex >= StartToken.ItemIndex) and
+            (TCnPasToken(CurTokens[I]).ItemIndex <= EndToken.ItemIndex) then
           begin
             // 属于要处理之列。第一回，处理头，最后循环后处理尾
             if FirstEnter then
             begin
-              StartCurToken := BlockMatchInfo.CurTokens[I]; // 记录第一个 CurToken
+              StartCurToken := TCnPasToken(CurTokens[I]); // 记录第一个 CurToken
               FirstEnter := False;
             end;
 
@@ -1588,18 +1590,18 @@ begin
               // 从上一 Token 的尾巴，到现任 Token 的头，再加替换后的文字，都用 AnsiString 来计算
               LastTokenPos := LastToken.TokenPos + Length(LastToken.Token);
               NewCode := NewCode + string(Copy(AnsiString(CParser.Source), LastTokenPos + 1,
-                BlockMatchInfo.CurTokens[I].TokenPos - LastTokenPos)) + NewName;
+                TCnPasToken(CurTokens[I]).TokenPos - LastTokenPos)) + NewName;
             end;
   {$IFDEF DEBUG}
             CnDebugger.LogMsg('Cpp NewCode: ' + NewCode);
   {$ENDIF}
             // 同一行前面的会影响光标位置
-            if (BlockMatchInfo.CurTokens[I].EditLine = BlockMatchInfo.CurrentToken.EditLine) and
-              (BlockMatchInfo.CurTokens[I].EditCol < BlockMatchInfo.CurrentToken.EditCol) then
+            if (TCnPasToken(CurTokens[I]).EditLine = CurToken.EditLine) and
+              (TCnPasToken(CurTokens[I]).EditCol < CurToken.EditCol) then
               Inc(iStart);
 
-            LastToken := BlockMatchInfo.CurTokens[I];   // 记录上一个处理过的 CurToken
-            EndCurToken := BlockMatchInfo.CurTokens[I]; // 记录最后一个 CurToken
+            LastToken := TCnPasToken(CurTokens[I]);   // 记录上一个处理过的 CurToken
+            EndCurToken := TCnPasToken(CurTokens[I]); // 记录最后一个 CurToken
           end;
         end;
 
@@ -1647,10 +1649,11 @@ begin
 
         // 恢复此 View 的 Bookmarks
         LoadBookMarksFromObjectList(EditView, BookMarkList);
+
+        // TODO: 改另一个文件
       end;
     finally
-      FreeAndNil(BlockMatchInfo);
-      FreeAndNil(LineInfo);
+      FreeAndNil(CurTokens);
       FreeAndNil(CParser);
       FreeAndNil(BookMarkList);
     end;
@@ -1844,6 +1847,9 @@ begin
           if (not rbCurrentProc.Checked) and (not rbCurrentInnerProc.Checked) then
             rbUnit.Checked := True;
 
+          rbCppHPair.Enabled := False;
+          rbCppHPair.Checked := False;
+
           FrmModalResult := ShowModal = mrOk;
           NewName := edtRename.Text;
 
@@ -1974,7 +1980,7 @@ begin
   end
   else if IsCppSourceModule(EditView.Buffer.FileName) then // C/C++ 文件
   begin
-    // 判断位置，根据需要弹出改名窗体。目前暂只支持整个文件
+    // 判断位置，根据需要弹出改名窗体。
     CParser := TCnWideCppStructParser.Create;
     Stream := TMemoryStream.Create;
     try
