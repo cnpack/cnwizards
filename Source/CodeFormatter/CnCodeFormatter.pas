@@ -2042,6 +2042,13 @@ begin
   begin
     Match(tokColon);
     Match(tokSymbol);
+
+    // On Exception class name allow dot
+    while Scaner.Token = tokDot do
+    begin
+      Match(Scaner.Token);
+      Match(tokSymbol);
+    end;
   end;
 
   SpecifyElementType(pfetDo);
