@@ -1658,7 +1658,12 @@ begin
         if CurTokens.Count = 0 then Exit;
 
         // 另一个文件，无需判断范围，全部处理，并且不处理光标
-         NewCode := '';
+        // 记录此 View 的 Bookmarks
+        FreeAndNil(BookMarkList);
+        BookMarkList := TObjectList.Create(True);
+        SaveBookMarksToObjectList(EditView, BookMarkList);
+
+        NewCode := '';
         LastToken := nil;
         FirstEnter := True;
         iStart := 0;
@@ -1700,6 +1705,8 @@ begin
           EditWriter.DeleteTo(EndCurToken.TokenPos + Length(EndCurToken.Token));
 
         EditWriter.Insert(PAnsiChar(ConvertTextToEditorText(AnsiString(NewCode))));
+        // 恢复此 View 的 Bookmarks
+        LoadBookMarksFromObjectList(EditView, BookMarkList);
       end;
     finally
       FreeAndNil(CurTokens);
@@ -1759,6 +1766,9 @@ var
   BookMarkList: TObjectList;
   Element, LineFlag: Integer;
   CurTokens: TList;
+  F: string;
+  FEditor: IOTAEditor;
+  FSrcEditor: IOTASourceEditor;
 begin
   Result := False;
   if (Key <> FRenameKey) or (Shift <> FRenameShift) then Exit;
@@ -2125,7 +2135,7 @@ begin
       CnDebugger.LogMsg('Cpp F2 Rename. Calc Rit to ' + IntToStr(Ord(Rit)));
 {$ENDIF}
 
-      // 弹出对话框，暂时只支持整个文件
+      // 弹出对话框
       with TCnIdentRenameForm.Create(nil) do
       begin
         try
@@ -2149,6 +2159,11 @@ begin
           if (not rbCurrentProc.Checked) and (not rbCurrentInnerProc.Checked) then
             rbUnit.Checked := True;
 
+          F := EditView.Buffer.FileName;
+          // Cpp/H 文件均在打开状态则此选项使能
+          rbCppHPair.Enabled := (IsCpp(F) and CnOtaIsFileOpen(_CnChangeFileExt(F, '.h')))
+            or (IsH(F) and CnOtaIsFileOpen(_CnChangeFileExt(F, '.cpp')));
+
           FrmModalResult := ShowModal = mrOk;
           NewName := edtRename.Text;
 
@@ -2156,8 +2171,10 @@ begin
             Rit := ritCurrentProc
           else if rbCurrentInnerProc.Checked then
             Rit := ritInnerProc
+          else if rbUnit.Checked then
+            Rit := ritUnit
           else
-            Rit := ritUnit;
+            Rit := ritCppHPair;
         finally
           Free;
         end;
@@ -2173,7 +2190,7 @@ begin
 
         StartToken := nil;
         EndToken := nil;
-        if Rit = ritUnit then
+        if Rit in [ritUnit, ritCppHPair] then
         begin
           // 替换范围为整个 C 时，起始和终结 Token 为列表中头尾俩
           StartToken := TCnWideCppToken(CurTokens[0]);
@@ -2265,6 +2282,145 @@ begin
         else if iStart = 0 then
           CnOtaMovePosInCurSource(ipCur, 0, Max(-iMaxCursorOffset, Length(NewName) - iOldTokenLen));
         EditView.Paint;
+
+        // 恢复此 View 的 Bookmarks
+        LoadBookMarksFromObjectList(EditView, BookMarkList);
+
+        // 改另一个文件
+        if Rit <> ritCppHPair then
+          Exit;
+
+        if IsCpp(F) then
+          F := _CnChangeFileExt(F, '.h')
+        else if IsH(F) then
+          F := _CnChangeFileExt(F, '.cpp');
+
+        if not CnOtaIsFileOpen(F) then
+          Exit;
+
+        // 从头解析另一个文件并查找替换
+        FreeAndNil(CParser);
+        FreeAndNil(CurTokens);
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('Cpp Another Starting: ' + F);
+{$ENDIF}
+        FEditor := CnOtaGetEditor(F);
+        if FEditor = nil then
+          Exit;
+
+        if not Supports(FEditor, IOTASourceEditor, FSrcEditor) then
+          Exit;
+
+        if FSrcEditor.EditViewCount = 0 then
+          Exit;
+
+        EditView := FSrcEditor.EditViews[0];
+        if EditView = nil then
+          Exit;
+
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('Cpp Another SourceEditor and EditView Got.');
+{$ENDIF}
+        CurToken := nil;
+        CurTokens := TList.Create;
+
+        CParser := TCnWideCppStructParser.Create;
+        Stream := TMemoryStream.Create;
+        try
+{$IFDEF UNICODE}
+          CnOtaSaveEditorToStreamW(FSrcEditor, Stream);
+{$ELSE}
+          CnOtaSaveEditorToStream(FSrcEditor, Stream, False, False); // 读出 Utf8 流
+          // D2005~2007 下转成 WideString 重新写入 Stream
+          ConvertToUtf8Stream(Stream);
+{$ENDIF}
+          // 解析当前显示的源文件
+          CParser.ParseSource(PWideChar(Stream.Memory), Stream.Size div SizeOf(WideChar),
+            1, 1, True);
+        finally
+          Stream.Free;
+        end;
+
+        // 先转换并加入所有与光标下标识符相同的 Token，区分大小写
+        for I := 0 to CParser.Count - 1 do
+        begin
+          CharPos := OTACharPos(CParser.Tokens[I].CharIndex - 1, CParser.Tokens[I].LineNumber + 1);
+          try
+            EditView.ConvertPos(False, EditPos, CharPos);
+          except
+            Continue; // D5/6 下 ConvertPos 在只有一个大于号时会出错，只能屏蔽
+          end;
+
+          // 以上这句 ConvertPos 在 D2009 或以上中带汉字时的结果可能会有偏差，
+          // 因此直接采用下面 CharIndex + 1 的方式，但对 Tab 键展开缺乏处理。
+          EditPos.Col := CParser.Tokens[I].CharIndex + 1;
+          CParser.Tokens[I].EditCol := EditPos.Col;
+          CParser.Tokens[I].EditLine := EditPos.Line;
+
+          if (CParser.Tokens[I].CppTokenKind = ctkidentifier) and (string(CParser.Tokens[I].Token) = Cur) then
+            CurTokens.Add(CParser.Tokens[I]);
+        end;
+        if CurTokens.Count = 0 then Exit;
+
+        // 另一个文件，无需判断范围，全部处理，并且不处理光标
+        // 记录此 View 的 Bookmarks
+        FreeAndNil(BookMarkList);
+        BookMarkList := TObjectList.Create(True);
+        SaveBookMarksToObjectList(EditView, BookMarkList);
+
+        NewCode := '';
+        LastToken := nil;
+        FirstEnter := True;
+        iStart := 0;
+
+        StartCurToken := nil;
+        EndCurToken := nil;
+        EditWriter := CnOtaGetEditWriterForSourceEditor(FSrcEditor);
+
+        // 执行完循环后，NewCode 应该为覆盖了需要替换的所有 Token 的替换后内容
+        for I := 0 to CurTokens.Count - 1 do
+        begin
+          // 属于要处理之列。第一回，处理头，最后循环后处理尾
+          if FirstEnter then
+          begin
+            StartCurToken := TCnWideCppToken(CurTokens[I]); // 记录第一个 CurToken
+            FirstEnter := False;
+          end;
+
+          if LastToken = nil then
+            NewCode := NewName
+          else
+          begin
+            // 从上一 Token 的尾巴，到现任 Token 的头，再加替换后的文字，都用 AnsiString 来计算
+            LastTokenPos := LastToken.TokenPos + Length(LastToken.Token);
+            NewCode := NewCode + string(Copy(AnsiString(CParser.Source), LastTokenPos + 1,
+              TCnWideCppToken(CurTokens[I]).TokenPos - LastTokenPos)) + NewName;
+          end;
+  {$IFDEF DEBUG}
+          CnDebugger.LogMsg('Cpp Another NewCode: ' + NewCode);
+  {$ENDIF}
+          LastToken := TCnWideCppToken(CurTokens[I]);   // 记录上一个处理过的 CurToken
+          EndCurToken := TCnWideCppToken(CurTokens[I]); // 记录最后一个 CurToken
+        end;
+
+        if StartCurToken <> nil then
+        begin
+          // 要处理的是 UTF8 的长度，而 Paser 算出的 TokenPos 是 Unicode 的因此需要转换
+          EditWriter.CopyTo(Length(UTF8Encode(Copy(CParser.Source, 1, StartCurToken.TokenPos))));
+        end;
+
+        if EndCurToken <> nil then
+        begin
+          // 要处理的是 UTF8 的长度，而 Paser 算出的 TokenPos 是 Unicode 的因此需要转换
+          EditWriter.DeleteTo(Length(UTF8Encode(Copy(CParser.Source, 1,
+            EndCurToken.TokenPos + Length(EndCurToken.Token)))));
+        end;
+
+{$IFDEF UNICODE}
+        EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW(NewCode)));
+{$ELSE}
+        EditWriter.Insert(PAnsiChar(ConvertWTextToEditorText(NewCode)));
+{$ENDIF}
 
         // 恢复此 View 的 Bookmarks
         LoadBookMarksFromObjectList(EditView, BookMarkList);
