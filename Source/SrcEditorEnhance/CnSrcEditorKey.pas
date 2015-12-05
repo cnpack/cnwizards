@@ -140,7 +140,7 @@ type
     function DoRename(View: IOTAEditView; Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean): Boolean;
 {$IFDEF IDE_WIDECONTROL}
-    // Unicode/Utf8 版本，用于 D2007 或以上，解决转换成 Ansi 后会丢字符的问题
+    // Unicode/Utf8 版本，用于 D2005 或以上，解决转换成 Ansi 后会丢字符的问题
     function DoRenameW(View: IOTAEditView; Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean): Boolean;
     procedure ConvertToUtf8Stream(Stream: TStream);
@@ -1107,6 +1107,8 @@ var
   Element, LineFlag: Integer;
   CurTokens: TList;
   F: string;
+  FEditor: IOTAEditor;
+  FSrcEditor: IOTASourceEditor;
 begin
   Result := False;
   if (Key <> FRenameKey) or (Shift <> FRenameShift) then Exit;
@@ -1169,11 +1171,7 @@ begin
       begin
         CharPos := OTACharPos(Parser.Tokens[I].CharIndex, Parser.Tokens[I].LineNumber + 1);
         EditView.ConvertPos(False, EditPos, CharPos);
-        // 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，
-        // 因此直接采用下面 CharIndex + 1 的方式，Parser 本身已对 Tab 键展开。
-{$IFDEF BDS2009_UP}
-        EditPos.Col := Parser.Tokens[I].CharIndex + 1;
-{$ENDIF}
+
         Parser.Tokens[I].EditCol := EditPos.Col;
         Parser.Tokens[I].EditLine := EditPos.Line;
 
@@ -1337,36 +1335,10 @@ begin
         end;
 
         if StartCurToken <> nil then
-        begin
-  {$IFDEF BDS}
-          // BDS 下要处理的是 UTF8 的长度，而 Paser 算出的 TokenPos 是 Ansi 因此需要转换
-    {$IFDEF UNICODE}
-          // 用 AnsiString
-          EditWriter.CopyTo(Length(CnAnsiToUtf8(Copy(Parser.Source, 1, StartCurToken.TokenPos))));
-    {$ELSE}
-          EditWriter.CopyTo(Length(AnsiToUtf8(Copy(Parser.Source, 1, StartCurToken.TokenPos))));
-    {$ENDIF}
-  {$ELSE}
           EditWriter.CopyTo(StartCurToken.TokenPos);
-  {$ENDIF}
-        end;
 
         if EndCurToken <> nil then
-        begin
-  {$IFDEF BDS}
-          // BDS 下要处理的是 UTF8 的长度，而 Paser 算出的 TokenPos 是 Ansi 因此需要转换
-    {$IFDEF UNICODE}
-          // 用 AnsiString
-          EditWriter.DeleteTo(Length(CnAnsiToUtf8(Copy(Parser.Source, 1,
-            EndCurToken.TokenPos + Length(EndCurToken.Token)))));
-    {$ELSE}
-          EditWriter.DeleteTo(Length(AnsiToUtf8(Copy(Parser.Source, 1,
-            EndCurToken.TokenPos + Length(EndCurToken.Token)))));
-    {$ENDIF}
-  {$ELSE}
           EditWriter.DeleteTo(EndCurToken.TokenPos + Length(EndCurToken.Token));
-  {$ENDIF}
-        end;
 
         EditWriter.Insert(PAnsiChar(ConvertTextToEditorText(AnsiString(NewCode))));
 
@@ -1415,11 +1387,6 @@ begin
           Continue; // D5/6 下 ConvertPos 在只有一个大于号时会出错，只能屏蔽
         end;
 
-        // 以上这句 ConvertPos 在 D2009 或以上中带汉字时的结果可能会有偏差，
-        // 因此直接采用下面 CharIndex + 1 的方式，但对 Tab 键展开缺乏处理。
-{$IFDEF BDS2009_UP}
-        EditPos.Col := CParser.Tokens[I].CharIndex + 1;
-{$ENDIF}
         CParser.Tokens[I].EditCol := EditPos.Col;
         CParser.Tokens[I].EditLine := EditPos.Line;
 
@@ -1606,36 +1573,10 @@ begin
         end;
 
         if StartCurToken <> nil then
-        begin
-  {$IFDEF BDS}
-          // BDS 下要处理的是 UTF8 的长度，而 Paser 算出的 TokenPos 是 Ansi 因此需要转换
-    {$IFDEF UNICODE}
-          // 用 AnsiString
-          EditWriter.CopyTo(Length(CnAnsiToUtf8(Copy(CParser.Source, 1, StartCurToken.TokenPos))));
-    {$ELSE}
-          EditWriter.CopyTo(Length(AnsiToUtf8(Copy(CParser.Source, 1, StartCurToken.TokenPos))));
-    {$ENDIF}
-  {$ELSE}
           EditWriter.CopyTo(StartCurToken.TokenPos);
-  {$ENDIF}
-        end;
 
         if EndCurToken <> nil then
-        begin
-  {$IFDEF BDS}
-          // BDS 下要处理的是 UTF8 的长度，而 Paser 算出的 TokenPos 是 Ansi 因此需要转换
-    {$IFDEF UNICODE}
-          // 用 AnsiString
-          EditWriter.DeleteTo(Length(CnAnsiToUtf8(Copy(CParser.Source, 1,
-            EndCurToken.TokenPos + Length(EndCurToken.Token)))));
-    {$ELSE}
-          EditWriter.DeleteTo(Length(AnsiToUtf8(Copy(CParser.Source, 1,
-            EndCurToken.TokenPos + Length(EndCurToken.Token)))));
-    {$ENDIF}
-  {$ELSE}
           EditWriter.DeleteTo(EndCurToken.TokenPos + Length(EndCurToken.Token));
-  {$ENDIF}
-        end;
 
         EditWriter.Insert(PAnsiChar(ConvertTextToEditorText(AnsiString(NewCode))));
 
@@ -1650,7 +1591,115 @@ begin
         // 恢复此 View 的 Bookmarks
         LoadBookMarksFromObjectList(EditView, BookMarkList);
 
-        // TODO: 改另一个文件
+        // 改另一个文件
+        if Rit <> ritCppHPair then
+          Exit;
+
+        if IsCpp(F) then
+          F := _CnChangeFileExt(F, '.h')
+        else if IsH(F) then
+          F := _CnChangeFileExt(F, '.cpp');
+        if not CnOtaIsFileOpen(F) then
+          Exit;
+
+        // 从头解析另一个文件并查找替换
+        FreeAndNil(CParser);
+        FreeAndNil(CurTokens);
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('Cpp Another Starting: ' + F);
+{$ENDIF}
+        FEditor := CnOtaGetEditor(F);
+        if FEditor = nil then
+          Exit;
+
+        if not Supports(FEditor, IOTASourceEditor, FSrcEditor) then
+          Exit;
+
+        if FSrcEditor.EditViewCount = 0 then
+          Exit;
+
+        EditView := FSrcEditor.EditViews[0];
+        if EditView = nil then
+          Exit;
+
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('Cpp Another SourceEditor and EditView Got.');
+{$ENDIF}
+        CurToken := nil;
+        CurTokens := TList.Create;
+
+        CParser := TCnCppStructureParser.Create;
+        Stream := TMemoryStream.Create;
+        try
+          CnOtaSaveEditorToStream(FSrcEditor, Stream);
+          // 解析当前显示的源文件
+          CParser.ParseSource(PAnsiChar(Stream.Memory), Stream.Size,
+            1, 1, True);
+        finally
+          Stream.Free;
+        end;
+
+        // 先转换并加入所有与光标下标识符相同的 Token，区分大小写
+        for I := 0 to CParser.Count - 1 do
+        begin
+          CharPos := OTACharPos(CParser.Tokens[I].CharIndex - 1, CParser.Tokens[I].LineNumber);
+          try
+            EditView.ConvertPos(False, EditPos, CharPos);
+          except
+            Continue; // D5/6 下 ConvertPos 在只有一个大于号时会出错，只能屏蔽
+          end;
+
+          CParser.Tokens[I].EditCol := EditPos.Col;
+          CParser.Tokens[I].EditLine := EditPos.Line;
+
+          if (CParser.Tokens[I].CppTokenKind = ctkidentifier) and (string(CParser.Tokens[I].Token) = Cur) then
+            CurTokens.Add(CParser.Tokens[I]);
+        end;
+        if CurTokens.Count = 0 then Exit;
+
+        // 另一个文件，无需判断范围，全部处理，并且不处理光标
+         NewCode := '';
+        LastToken := nil;
+        FirstEnter := True;
+        iStart := 0;
+
+        StartCurToken := nil;
+        EndCurToken := nil;
+        EditWriter := CnOtaGetEditWriterForSourceEditor(FSrcEditor);
+
+        // 执行完循环后，NewCode 应该为覆盖了需要替换的所有 Token 的替换后内容
+        for I := 0 to CurTokens.Count - 1 do
+        begin
+          // 属于要处理之列。第一回，处理头，最后循环后处理尾
+          if FirstEnter then
+          begin
+            StartCurToken := TCnPasToken(CurTokens[I]); // 记录第一个 CurToken
+            FirstEnter := False;
+          end;
+
+          if LastToken = nil then
+            NewCode := NewName
+          else
+          begin
+            // 从上一 Token 的尾巴，到现任 Token 的头，再加替换后的文字，都用 AnsiString 来计算
+            LastTokenPos := LastToken.TokenPos + Length(LastToken.Token);
+            NewCode := NewCode + string(Copy(AnsiString(CParser.Source), LastTokenPos + 1,
+              TCnPasToken(CurTokens[I]).TokenPos - LastTokenPos)) + NewName;
+          end;
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('Cpp Another NewCode: ' + NewCode);
+{$ENDIF}
+          LastToken := TCnPasToken(CurTokens[I]);   // 记录上一个处理过的 CurToken
+          EndCurToken := TCnPasToken(CurTokens[I]); // 记录最后一个 CurToken
+        end;
+
+        if StartCurToken <> nil then
+          EditWriter.CopyTo(StartCurToken.TokenPos);
+
+        if EndCurToken <> nil then
+          EditWriter.DeleteTo(EndCurToken.TokenPos + Length(EndCurToken.Token));
+
+        EditWriter.Insert(PAnsiChar(ConvertTextToEditorText(AnsiString(NewCode))));
       end;
     finally
       FreeAndNil(CurTokens);
