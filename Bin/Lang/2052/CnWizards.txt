@@ -2398,6 +2398,7 @@ TCnIdentRenameForm.grpBrowse.Caption=替换范围(&R)
 TCnIdentRenameForm.rbCurrentInnerProc.Caption=当前最内层过程或函数(&2)
 TCnIdentRenameForm.rbCurrentProc.Caption=当前最外层过程或函数(&1)
 TCnIdentRenameForm.rbUnit.Caption=整个单元(&3)
+TCnIdentRenameForm.rbCppHPair.Caption=整个文件及其相应的 Cpp/H 文件(&4)
 TCnProjectBackupForm.actAddFile.Caption=添加文件
 TCnProjectBackupForm.actAddFile.Hint=添加文件到工程备份列表
 TCnProjectBackupForm.actClose.Caption=关闭
