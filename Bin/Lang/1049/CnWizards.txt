@@ -2397,6 +2397,7 @@ TCnIdentRenameForm.grpBrowse.Caption=Область замены
 TCnIdentRenameForm.rbCurrentInnerProc.Caption=Вложенная процедура(&2)
 TCnIdentRenameForm.rbCurrentProc.Caption=Текущая процедура(&1)
 TCnIdentRenameForm.rbUnit.Caption=Весь модуль(&3)
+TCnIdentRenameForm.rbCppHPair.Caption=Всего Cpp/Н Файлы Пара(&4)
 TCnProjectBackupForm.actAddFile.Caption=Добавить файлы
 TCnProjectBackupForm.actAddFile.Hint=Добавить файлы в список
 TCnProjectBackupForm.actClose.Caption=Выход

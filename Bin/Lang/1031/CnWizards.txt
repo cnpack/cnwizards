@@ -2398,6 +2398,7 @@ TCnIdentRenameForm.grpBrowse.Caption=&Range ersetzen
 TCnIdentRenameForm.rbCurrentInnerProc.Caption=eingebettete innere Prozedur(&2)
 TCnIdentRenameForm.rbCurrentProc.Caption=derzeitige Prozedur(&1)
 TCnIdentRenameForm.rbUnit.Caption=ganze Unit(&3)
+TCnIdentRenameForm.rbCppHPair.Caption=Whole Cpp/H Files Pair(&4)
 TCnProjectBackupForm.actAddFile.Caption=Dateien hinzufügen
 TCnProjectBackupForm.actAddFile.Hint=Füge Dateien zur Liste
 TCnProjectBackupForm.actClose.Caption=Exit
