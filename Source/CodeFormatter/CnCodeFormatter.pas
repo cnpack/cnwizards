@@ -928,6 +928,8 @@ end;
 }
 procedure TCnBasePascalFormatter.FormatDesignator(PreSpaceCount: Byte;
   IndentForAnonymous: Byte);
+var
+  IsRB: Boolean;
 begin
   if Scaner.Token = tokAtSign then // 如果是 @ Designator 的形式则再次递归
   begin
@@ -953,7 +955,16 @@ begin
           { DONE: deal with index visit and function/procedure call}
           Match(Scaner.Token);
           FormatExprList(PreSpaceCount, IndentForAnonymous);
-          Match(Scaner.Token);
+
+          IsRB := Scaner.Token = tokRB;
+          if IsRB then
+            SpecifyElementType(pfetExprListRightBracket);
+          try
+            Match(Scaner.Token);
+          finally
+            if IsRB then
+              RestoreElementType;
+          end;
         end;
 
       tokHat: // ^
@@ -5519,7 +5530,7 @@ function TCnAbstractCodeFormatter.CalcNeedPadding: Boolean;
 begin
   Result := (FElementType in [pfetExpression, pfetEnumList,pfetArrayConstant,
     pfetSetConstructor, pfetFormalParameters, pfetUsesList,
-    pfetThen, pfetDo])
+    pfetThen, pfetDo, pfetExprListRightBracket])
     or ((FElementType in [pfetConstExpr]) and not UpperContainElementType([pfetCaseLabel])) // Case Label 的无需跟随上面一行注释缩进
     or UpperContainElementType([pfetFormalParameters, pfetArrayConstant]);
   // 暂且表达式内部与枚举定义内部等一系列元素内部，或者在参数列表、uses 中
