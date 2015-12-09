@@ -174,7 +174,7 @@ uses
 const
   CRLF = #13#10;
   NOTLineHeadChars: set of Char = ['.', ',', ':', ')', ']', ';'];
-  NOTLineTailChars: set of Char = ['.', '(', '['];
+  NOTLineTailChars: set of Char = ['.', '(', '[', '@'];
 
 procedure TCnCodeGenerator.BackSpaceLastSpaces;
 var
