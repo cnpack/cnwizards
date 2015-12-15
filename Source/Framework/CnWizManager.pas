@@ -309,12 +309,6 @@ begin
   RegisterPluginInfo;
 
 {$IFNDEF CNWIZARDS_MINIMUM}
-  CreateLanguageManager;
-  if CnLanguageManager <> nil then
-    InitLangManager;
-
-  CnTranslateConsts(nil);
-  
   CheckIDEVersion;
 {$ENDIF}
 
@@ -387,8 +381,17 @@ begin
   if @InitSplashProc <> nil then
     InitSplashProc();
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+  // 提前初始化多语
+  CreateLanguageManager;
+  if CnLanguageManager <> nil then
+    InitLangManager;
+
+  CnTranslateConsts(nil);
+
 {$IFDEF IDE_INTEGRATE_CASTALIA}
   CheckKeyMappingEnhModulesSequence;
+{$ENDIF}
 {$ENDIF}
 
   WizShortCutMgr.BeginUpdate;
@@ -1104,7 +1107,7 @@ procedure TCnWizardMgr.CheckIDEVersion;
 begin
 {$IFNDEF CNWIZARDS_MINIMUM}
   if not IsIdeVersionLatest then
-    ShowSimpleCommentForm('', SCnIDENOTLatest, 'CheckIDEVersion' + CompilerShortName);
+    ShowSimpleCommentForm('', SCnIDENOTLatest, SCnCheckIDEVersion + CompilerShortName);
 {$ENDIF}    
 end;
 
@@ -1375,6 +1378,10 @@ var
   I, {MinIdx,} MaxIdx, CnPackIdx, MinValue, MaxValue: Integer;
   Contain: Boolean;
 begin
+  // 如果上回勾选了不再显示则不再显示。
+  if not WizOptions.ReadBool(SCnCommentSection, SCnCheckKeyMappingEnhModulesSequence + CompilerShortName, True) then
+    Exit;
+
   // XE8/10 Seattle 下 IDE 集成的 Castalia 的快捷键和 CnPack 有冲突，
   // 规则：有 Castalia 名字存在，且 CnPack 的 Priority 不是最大，则提示。
   List := TStringList.Create;
@@ -1429,7 +1436,8 @@ begin
 
       if not Contain then // 没 CnPack 的值，可能是第一次运行，只能提示
       begin
-        InfoDlg(Format(SCnKeyMappingConflictsHint, [WizOptions.CompilerRegPath + KEY_MAPPING_REG]));
+        ShowSimpleCommentForm('', Format(SCnKeyMappingConflictsHint, [WizOptions.CompilerRegPath + KEY_MAPPING_REG]),
+          SCnCheckKeyMappingEnhModulesSequence + CompilerShortName, False);
         Exit;
       end;
 
@@ -1456,7 +1464,8 @@ begin
       if MaxIdx = CnPackIdx then // CnPack 键盘映射顺序已在最下面。
         Exit;
 
-      InfoDlg(Format(SCnKeyMappingConflictsHint, [WizOptions.CompilerRegPath + KEY_MAPPING_REG]));
+      ShowSimpleCommentForm('', Format(SCnKeyMappingConflictsHint, [WizOptions.CompilerRegPath + KEY_MAPPING_REG]),
+        SCnCheckKeyMappingEnhModulesSequence + CompilerShortName, False);
 
       // 交换最大的值和 CnPack 的值。但未必有效，先不这么整。
 //      Reg := TRegistry.Create(KEY_WRITE);

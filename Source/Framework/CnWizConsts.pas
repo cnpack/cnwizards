@@ -116,6 +116,8 @@ resourcestring
   SCnOptionSection = 'Option';
   SCnCommentSection = 'Comment';
   SCnUpgradeSection = 'Upgrade';
+  SCnCheckIDEVersion = 'CheckIDEVersion';
+  SCnCheckKeyMappingEnhModulesSequence = 'CheckKeyMappingEnhModulesSequence';
 
   SCnWizConfigCommand = 'CnWizConfig';
   SCnWizConfigIcon = 'CnWizConfig';

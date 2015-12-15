@@ -4,8 +4,9 @@ inherited CnWizCommentForm: TCnWizCommentForm
   ActiveControl = btnContinue
   BorderStyle = bsDialog
   Caption = 'CnPack IDE Wizards Hint'
-  ClientHeight = 219
-  ClientWidth = 360
+  ClientHeight = 292
+  ClientWidth = 438
+  OldCreateOrder = True
   PixelsPerInch = 96
   TextHeight = 13
   object imgIcon: TImage
@@ -297,39 +298,44 @@ inherited CnWizCommentForm: TCnWizCommentForm
   object Bevel1: TBevel
     Left = 48
     Top = 4
-    Width = 305
+    Width = 383
     Height = 10
+    Anchors = [akLeft, akTop, akRight]
     Shape = bsBottomLine
   end
   object Bevel2: TBevel
     Left = 8
-    Top = 176
-    Width = 345
+    Top = 249
+    Width = 423
     Height = 10
+    Anchors = [akLeft, akRight, akBottom]
     Shape = bsBottomLine
   end
   object memHint: TMemo
     Left = 48
     Top = 24
-    Width = 305
-    Height = 153
+    Width = 383
+    Height = 226
     TabStop = False
+    Anchors = [akLeft, akTop, akRight, akBottom]
     ReadOnly = True
     TabOrder = 0
   end
   object cbNotShow: TCheckBox
     Left = 8
-    Top = 195
+    Top = 268
     Width = 97
     Height = 17
+    Anchors = [akLeft, akBottom]
     Caption = 'Don'#39't Show'
     TabOrder = 1
   end
   object btnCancel: TButton
-    Left = 280
-    Top = 192
+    Left = 358
+    Top = 265
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
@@ -337,17 +343,19 @@ inherited CnWizCommentForm: TCnWizCommentForm
   end
   object chkCloseAll: TCheckBox
     Left = 104
-    Top = 195
+    Top = 268
     Width = 97
     Height = 17
+    Anchors = [akLeft, akBottom]
     Caption = 'Disable All'
     TabOrder = 2
   end
   object btnContinue: TButton
-    Left = 200
-    Top = 192
+    Left = 278
+    Top = 265
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = 'C&ontinue'
     Default = True
     ModalResult = 1
