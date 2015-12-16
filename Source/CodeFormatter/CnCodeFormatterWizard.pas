@@ -75,6 +75,7 @@ type
 
     FUseIDESymbols: Boolean;
     FBreakpoints: TObjectList;
+    FBookmarks: TObjectList;
 
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
     FInputHelper: TCnInputHelper;
@@ -363,6 +364,7 @@ constructor TCnCodeFormatterWizard.Create;
 begin
   inherited;
   FBreakpoints := TObjectList.Create(True);
+  FBookmarks := TObjectList.Create(True);
   FLibHandle := LoadLibrary(PChar(MakePath(WizOptions.DllPath) + DLLName));
   if FLibHandle <> 0 then
     FGetProvider := TCnGetFormatterProvider(GetProcAddress(FLibHandle, 'GetCodeFormatterProvider'));
@@ -375,6 +377,7 @@ begin
   SetLength(FPreNamesArray, 0);
 {$ENDIF}
 
+  FBookmarks.Free;
   FBreakpoints.Free;
   FreeLibrary(FLibHandle);
   inherited;
@@ -689,7 +692,7 @@ var
   StartPos, EndPos, StartPosIn, EndPosIn: Integer;
   StartRec, EndRec: TOTACharPos;
   ErrLine: string;
-  BreakpointsLineMarks: array of DWORD;
+  BpBmLineMarks: array of DWORD;
   OutLineMarks: PDWORD;
 
   // 将解析器中返回的出错列转换成 IDE 里内部使用的列供定位，BDS 以上是 Utf8
@@ -750,7 +753,8 @@ begin
 
     // 记录断点信息
     ObtainBreakpointsByFile(CnOtaGetCurrentSourceFileName);
-    if FBreakpoints.Count = 0 then
+    SaveBookMarksToObjectList(View, FBookmarks);
+    if (FBreakpoints.Count = 0) and (FBookmarks.Count = 0) then
       Formatter.SetInputLineMarks(nil);
 
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
@@ -768,17 +772,19 @@ begin
       try
         Screen.Cursor := crHourGlass;
 
-        // 传递断点的行号
-        if FBreakpoints.Count > 0 then
+        // 传递断点与书签的行号
+        if FBreakpoints.Count + FBookmarks.Count > 0 then
         begin
-          SetLength(BreakpointsLineMarks, FBreakpoints.Count + 1); // 末尾多一个 0
+          SetLength(BpBmLineMarks, FBreakpoints.Count + FBookmarks.Count + 1); // 末尾多一个 0
           for I := 0 to FBreakpoints.Count - 1 do
-            BreakpointsLineMarks[I] := DWORD(TCnBreakpointDescriptor(FBreakpoints[I]).LineNumber);
-          BreakpointsLineMarks[FBreakpoints.Count] := 0;
+            BpBmLineMarks[I] := DWORD(TCnBreakpointDescriptor(FBreakpoints[I]).LineNumber);
+          for I := 0 to FBookmarks.Count - 1 do
+            BpBmLineMarks[I + FBreakpoints.Count] := DWORD(TCnBookmarkObject(FBookmarks[I]).Line);
+          BpBmLineMarks[FBreakpoints.Count + FBookmarks.Count] := 0;
 
-          Formatter.SetInputLineMarks(@(BreakpointsLineMarks[0]));
+          Formatter.SetInputLineMarks(@(BpBmLineMarks[0]));
         end;
-        SetLength(BreakpointsLineMarks, 0);
+        SetLength(BpBmLineMarks, 0);
 
 {$IFDEF UNICODE}
         // Src/Res Utf16
@@ -821,9 +827,14 @@ begin
   {$ENDIF}
 {$ENDIF}
 
-          // 恢复断点信息
+          // 恢复断点与书签信息
           OutLineMarks := Formatter.RetrieveOutputLinkMarks;
-          RestoreBreakpoints(OutLineMarks);
+          if FBookmarks.Count = 0 then
+            RestoreBreakpoints(OutLineMarks)
+          else
+          begin
+            // TODO: 先恢复书签
+          end;
         end
         else
         begin
@@ -882,20 +893,30 @@ begin
                 if not TCnBreakpointDescriptor(FBreakpoints[I]).LineNumber in
                   [StartRec.Line, EndRec.Line] then
                   FBreakpoints.Delete(I);
-
-              if FBreakpoints.Count > 0 then
-              begin
-                SetLength(BreakpointsLineMarks, FBreakpoints.Count + 1); // 末尾多一个 0
-                for I := 0 to FBreakpoints.Count - 1 do
-                  BreakpointsLineMarks[I] := DWORD(TCnBreakpointDescriptor(FBreakpoints[I]).LineNumber);
-                BreakpointsLineMarks[FBreakpoints.Count] := 0;
-
-                Formatter.SetInputLineMarks(@(BreakpointsLineMarks[0]));
-              end
-              else
-                Formatter.SetInputLineMarks(nil);
             end;
-            SetLength(BreakpointsLineMarks, 0);
+
+            if FBookmarks.Count > 0 then
+            begin
+              for I := FBookmarks.Count - 1 downto 0 do
+                if not TCnBookmarkObject(FBookmarks[I]).Line in
+                  [StartRec.Line, EndRec.Line] then
+                  FBookmarks.Delete(I);
+            end;
+
+            if FBreakpoints.Count + FBookmarks.Count > 0 then
+            begin
+              SetLength(BpBmLineMarks, FBreakpoints.Count + FBookmarks.Count + 1); // 末尾多一个 0
+              for I := 0 to FBreakpoints.Count - 1 do
+                BpBmLineMarks[I] := DWORD(TCnBreakpointDescriptor(FBreakpoints[I]).LineNumber);
+              for I := 0 to FBookmarks.Count - 1 do
+                BpBmLineMarks[I + FBreakpoints.Count] := DWORD(TCnBookmarkObject(FBookmarks[I]).Line);
+
+              BpBmLineMarks[FBreakpoints.Count + FBookmarks.Count] := 0;
+              Formatter.SetInputLineMarks(@(BpBmLineMarks[0]));
+            end
+            else
+              Formatter.SetInputLineMarks(nil);
+            SetLength(BpBmLineMarks, 0);
 
             StartPos := CnOtaEditPosToLinePos(OTAEditPos(StartRec.CharIndex, StartRec.Line), View);
             EndPos := CnOtaEditPosToLinePos(OTAEditPos(EndRec.CharIndex, EndRec.Line), View);
@@ -942,9 +963,14 @@ begin
               CnOtaReplaceCurrentSelection(Res, True, True, True);
               {$ENDIF}
 
-              // 恢复断点信息
+              // 恢复断点与书签信息
               OutLineMarks := Formatter.RetrieveOutputLinkMarks;
-              RestoreBreakpoints(OutLineMarks);
+              if FBookmarks.Count = 0 then
+                RestoreBreakpoints(OutLineMarks);
+              else
+              begin
+                // TODO: 先恢复书签信息
+              end;
             end
             else
             begin
