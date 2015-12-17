@@ -85,8 +85,12 @@ type
     procedure CheckObtainIDESymbols;
 {$ENDIF}
 
+    // 获取指定文件中的断点信息
     procedure ObtainBreakpointsByFile(const FileName: string);
-    procedure RestoreBreakpoints(LineMarks: PDWORD);
+    // 根据 DWORD 数组还原断点信息，碰到 0 或超过 Count 时结束
+    procedure RestoreBreakpoints(LineMarks: PDWORD; Count: Integer = MaxInt);
+    // 根据 DWORD 数组以及之前存储的 FBookmarks 还原书签信息
+    procedure RestoreBookmarks(EditView: IOTAEditView; LineMarks: PDWORD);
 
     function PutPascalFormatRules: Boolean;
     function CheckSelectionPosition(StartPos: TOTACharPos; EndPos: TOTACharPos;
@@ -833,7 +837,10 @@ begin
             RestoreBreakpoints(OutLineMarks)
           else
           begin
-            // TODO: 先恢复书签
+            RestoreBreakpoints(OutLineMarks, FBreakpoints.Count);
+            // 恢复书签
+            Inc(OutLineMarks, FBreakpoints.Count);
+            RestoreBookmarks(View, OutLineMarks);
           end;
         end
         else
@@ -966,10 +973,13 @@ begin
               // 恢复断点与书签信息
               OutLineMarks := Formatter.RetrieveOutputLinkMarks;
               if FBookmarks.Count = 0 then
-                RestoreBreakpoints(OutLineMarks);
+                RestoreBreakpoints(OutLineMarks)
               else
               begin
-                // TODO: 先恢复书签信息
+                RestoreBreakpoints(OutLineMarks, FBreakpoints.Count);
+                // 恢复书签信息
+                Inc(OutLineMarks, FBreakpoints.Count);
+                RestoreBookmarks(View, OutLineMarks);
               end;
             end
             else
@@ -1098,17 +1108,17 @@ begin
   end;
 end;
 
-procedure TCnCodeFormatterWizard.RestoreBreakpoints(LineMarks: PDWORD);
+procedure TCnCodeFormatterWizard.RestoreBreakpoints(LineMarks: PDWORD; Count: Integer);
 var
-{$IFDEF OTA_NEW_BREAKPOINT_NOBUG}
   I: Integer;
+{$IFDEF OTA_NEW_BREAKPOINT_NOBUG}
   DS: IOTADebuggerServices;
   BP: IOTABreakpoint;
 {$ELSE}
   Prev: DWORD;
 {$ENDIF}
 begin
-  if LineMarks = nil then
+  if (LineMarks = nil) or (Count = 0) then
     Exit;
 
 {$IFDEF OTA_NEW_BREAKPOINT_NOBUG}
@@ -1116,7 +1126,7 @@ begin
   I := 0;
   if BorlandIDEServices.QueryInterface(IOTADebuggerServices, DS) = S_OK then
   begin
-    while LineMarks^ <> 0 do
+    while (LineMarks^ <> 0) and (I < Count) do
     begin
 {$IFDEF DEBUG}
       CnDebugger.LogInteger(LineMarks^, 'Will Create Breakpoint using OTA at');
@@ -1133,11 +1143,13 @@ begin
 {$ELSE}
   // OTA 接口有 Bug 无法新增断点，只能用滚屏并模拟点击的方式新增
   Prev := 0;
-  while LineMarks^ <> 0 do
+  I := 0;
+  while (LineMarks^ <> 0) and (I < Count) do
   begin
     if LineMarks^ = Prev then // 相邻的同行的要忽略一个，免得两次点击后消失
     begin
       Inc(LineMarks);
+      Inc(I);
       Continue;
     end;
 
@@ -1147,9 +1159,31 @@ begin
 {$ENDIF}
     // 当前文件新增 OutLineMarks^ 行的断点，但无法处理 Enabled
     EditControlWrapper.ClickBreakpointAtActualLine(LineMarks^);
+    Inc(I);
     Inc(LineMarks);
   end;
 {$ENDIF}
+end;
+
+procedure TCnCodeFormatterWizard.RestoreBookmarks(EditView: IOTAEditView; LineMarks: PDWORD);
+var
+  I: Integer;
+begin
+  if (LineMarks = nil) or (EditView = nil) then
+    Exit;
+
+  I := 0;
+  while LineMarks^ <> 0 do
+  begin
+    if I >= FBookmarks.Count then
+      Break;
+
+    TCnBookmarkObject(FBookmarks[I]).Line := LineMarks^;
+    Inc(I);
+    Inc(LineMarks);
+  end;
+
+  ReplaceBookMarksFromObjectList(EditView, FBookmarks);
 end;
 
 initialization

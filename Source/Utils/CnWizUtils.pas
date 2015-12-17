@@ -877,7 +877,10 @@ procedure SaveBookMarksToObjectList(EditView: IOTAEditView; BookMarkList: TObjec
 {* 将一 EditView 中的书签信息保存至一 ObjectList 中}
 
 procedure LoadBookMarksFromObjectList(EditView: IOTAEditView; BookMarkList: TObjectList);
-{* 从 ObjectList 中恢复一 EditView 中的书签}
+{* 从 ObjectList 中全部恢复一 EditView 中的书签}
+
+procedure ReplaceBookMarksFromObjectList(EditView: IOTAEditView; BookMarkList: TObjectList);
+{* 从 ObjectList 中替换一部分 EditView 中的书签}
 
 function RegExpContainsText(ARegExpr: TRegExpr; const AText: string;
   APattern: string; IsMatchStart: Boolean = False): Boolean;
@@ -6075,6 +6078,63 @@ begin
     SavePos := EditView.CursorPos;
     for I := 0 to 9 do // 先清除以前的书签
     begin
+      APos := EditView.BookmarkPos[I];
+      if (APos.Line <> 0) or (APos.CharIndex <> 0) then
+      begin
+        EditPos := EditView.CursorPos;
+        EditPos.Line := APos.Line;
+        EditView.CursorPos := EditPos;
+        EditView.BookmarkToggle(I);
+      end;
+    end;
+
+    for I := 0 to BookMarkList.Count - 1 do
+    begin
+      BookMarkObj := TCnBookmarkObject(BookMarkList.Extract(BookMarkList.First));
+      EditPos := EditView.CursorPos;
+      EditPos.Line := BookMarkObj.Line;
+      EditView.CursorPos := EditPos;
+      EditView.BookmarkToggle(BookMarkObj.ID);
+      BookMarkObj.Free;
+    end;
+    EditView.CursorPos := SavePos;
+  end;
+end;
+
+// 从 ObjectList 中替换一部分 EditView 中的书签
+procedure ReplaceBookMarksFromObjectList(EditView: IOTAEditView; BookMarkList: TObjectList);
+var
+  I: Integer;
+  APos: TOTACharPos;
+  EditPos, SavePos: TOTAEditPos;
+  BookMarkObj: TCnBookmarkObject;
+
+  function BookMarkIdInList(BID: Integer): Boolean;
+  var
+    J: Integer;
+  begin
+    for J := 0 to BookMarkList.Count - 1 do
+    begin
+      if TCnBookmarkObject(BookMarkList[J]).ID = BID then
+      begin
+        Result := True;
+        Exit;
+      end;
+    end;
+    Result := False;
+  end;
+
+begin
+  if (EditView = nil) or (BookMarkList = nil) then Exit;
+
+  if BookMarkList.Count > 0 then
+  begin
+    SavePos := EditView.CursorPos;
+    for I := 0 to 9 do // 先清除存在于 BookMarkList 中的书签
+    begin
+      if not BookMarkIdInList(I) then
+        Continue;
+
       APos := EditView.BookmarkPos[I];
       if (APos.Line <> 0) or (APos.CharIndex <> 0) then
       begin
