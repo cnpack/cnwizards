@@ -1212,13 +1212,18 @@ begin
   Result := Pointer(PKeys);
 end;
 
-// 取环境设置中的 LibraryPath 内容
+// 取环境设置中的 LibraryPath 内容，注意 XE2 以上版本，GetEnvironmentOptions 里头
+// 得到的值并不是当前工程的 Platform 对应的值，所以只能改成根据工程平台从注册表里读。
 procedure GetLibraryPath(Paths: TStrings; IncludeProjectPath: Boolean);
 var
   Svcs: IOTAServices;
   Options: IOTAEnvironmentOptions;
   Text: string;
   List: TStrings;
+{$IFDEF OTA_ENVOPTIONS_PLATFORM_BUG}
+  CurPlatform: string;
+  Project: IOTAProject;
+{$ENDIF}
 
   procedure AddList(AList: TStrings);
   var
@@ -1238,16 +1243,46 @@ begin
   Options := Svcs.GetEnvironmentOptions;
   if not Assigned(Options) then Exit;
 
+{$IFDEF OTA_ENVOPTIONS_PLATFORM_BUG}
+  CurPlatform := '';
+  Project := CnOtaGetCurrentProject;
+  if Project <> nil then
+  begin
+    CurPlatform := Project.CurrentPlatform;
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('Project.CurrentPlatform  is ' + CurPlatform);
+  {$ENDIF}
+  end;
+{$ENDIF}
+
   List := TStringList.Create;
   try
+{$IFDEF OTA_ENVOPTIONS_PLATFORM_BUG}
+    if CurPlatform = '' then
+      Text := ReplaceToActualPath(Options.GetOptionValue('LibraryPath'))
+    else
+      Text := ReplaceToActualPath(RegReadStringDef(HKEY_CURRENT_USER,
+        WizOptions.CompilerRegPath + '\Library\' + CurPlatform, 'Search Path', ''));
+{$ELSE}
     Text := ReplaceToActualPath(Options.GetOptionValue('LibraryPath'));
+{$ENDIF}
+
   {$IFDEF DEBUG}
     CnDebugger.LogMsg('LibraryPath' + #13#10 + Text);
   {$ENDIF}
     List.Text := StringReplace(Text, ';', #13#10, [rfReplaceAll]);
     AddList(List);
 
+{$IFDEF OTA_ENVOPTIONS_PLATFORM_BUG}
+    if CurPlatform = '' then
+      Text := ReplaceToActualPath(Options.GetOptionValue('BrowsingPath'))
+    else
+      Text := ReplaceToActualPath(RegReadStringDef(HKEY_CURRENT_USER,
+        WizOptions.CompilerRegPath + '\Library\' + CurPlatform, 'Browsing Path', ''));
+{$ELSE}
     Text := ReplaceToActualPath(Options.GetOptionValue('BrowsingPath'));
+{$ENDIF}
+
   {$IFDEF DEBUG}
     CnDebugger.LogMsg('BrowsingPath' + #13#10 + Text);
   {$ENDIF}

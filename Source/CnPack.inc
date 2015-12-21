@@ -2157,10 +2157,12 @@
   {$DEFINE TSTRINGS_HAS_WRITEBOM} // XE TStrings has WriteBOM property.
 {$ENDIF}
 
-{$IFDEF BDS2012_UP}
+{$IFDEF BDS2012_UP}               // 2012 = XE2
   {$DEFINE SUPPORTS_32_AND_64}
   {$DEFINE SUPPORTS_FMX}
   {$DEFINE SUPPORTS_CROSS_PLATFORM}
+  {$DEFINE OTA_ENVOPTIONS_PLATFORM_BUG}
+    // A Bug Can't get Correct Env Option Values for Current Platform.
   {$DEFINE LIST_NEW_POINTER}
 {$ENDIF}
 
