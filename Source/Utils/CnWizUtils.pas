@@ -443,6 +443,11 @@ procedure CnOtaSetProjectCurrentBuildConfigurationValue(Project:IOTAProject; con
   AValue: string);
 {* 设置项目的当前BuildConfiguration中的属性值，如不支持此特性则什么都不做}
 
+{$IFDEF SUPPORTS_CROSS_PLATFORM}
+procedure CnOtaGetPlatformsFromBuildConfiguration(BuildConfig: IOTABuildConfiguration; Platforms: TStrings);
+{* 获取 BuildConfiguration 的 Platforms 至 TStrings 中，以避免低版本与脚本不支持泛型的问题}
+{$ENDIF}
+
 procedure CnOtaGetProjectList(const List: TInterfaceList);
 {* 取得所有工程列表}
 function CnOtaGetCurrentProjectName: string;
@@ -2921,11 +2926,22 @@ begin
     Exit;
 
   try
+{$IFDEF VERSIONINFO_PER_CONFIGURATION}
+    if Project = nil then
+      Project := CnOtaGetCurrentProject;
+
+    Result := Format('%d.%d.%d.%d',
+      [StrToIntDef(VarToStr(CnOtaGetProjectCurrentBuildConfigurationValue(Project, 'VerInfo_MajorVer')), 0),
+      StrToIntDef(VarToStr(CnOtaGetProjectCurrentBuildConfigurationValue(Project, 'VerInfo_MinorVer')), 0),
+      StrToIntDef(VarToStr(CnOtaGetProjectCurrentBuildConfigurationValue(Project, 'VerInfo_Release')), 0),
+      StrToIntDef(VarToStr(CnOtaGetProjectCurrentBuildConfigurationValue(Project, 'VerInfo_Build')), 0)]);
+{$ELSE}
     Result := Format('%d.%d.%d.%d',
       [StrToIntDef(VarToStr(Options.GetOptionValue('MajorVersion')), 0),
       StrToIntDef(VarToStr(Options.GetOptionValue('MinorVersion')), 0),
       StrToIntDef(VarToStr(Options.GetOptionValue('Release')), 0),
       StrToIntDef(VarToStr(Options.GetOptionValue('Build')), 0)]);
+{$ENDIF}
   except
     ;
   end;
@@ -3111,7 +3127,23 @@ begin
     end;
   end;
 {$ENDIF}
-end;  
+end;
+
+{$IFDEF SUPPORTS_CROSS_PLATFORM}
+// 获取 BuildConfiguration 的 Platforms 至 TStrings 中，以避免低版本与脚本不支持泛型的问题}
+procedure CnOtaGetPlatformsFromBuildConfiguration(BuildConfig: IOTABuildConfiguration;
+  Platforms: TStrings);
+var
+  S: string;
+begin
+  if (BuildConfig = nil) or (Platforms = nil) then
+    Exit;
+
+  Platforms.Clear;
+  for S in BuildConfig.Platforms do
+    Platforms.Add(S);
+end;
+{$ENDIF}
 
 // 取得 IDE 设置变量名列表
 procedure CnOtaGetOptionsNames(Options: IOTAOptions; List: TStrings;

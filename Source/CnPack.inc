@@ -2161,6 +2161,7 @@
   {$DEFINE SUPPORTS_32_AND_64}
   {$DEFINE SUPPORTS_FMX}
   {$DEFINE SUPPORTS_CROSS_PLATFORM}
+  {$DEFINE VERSIONINFO_PER_CONFIGURATION}  // Every Configuruation can have a Version Info
   {$DEFINE OTA_ENVOPTIONS_PLATFORM_BUG}
     // A Bug Can't get Correct Env Option Values for Current Platform.
   {$DEFINE LIST_NEW_POINTER}
