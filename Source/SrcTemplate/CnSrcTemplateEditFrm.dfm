@@ -1,10 +1,9 @@
 inherited CnSrcTemplateEditForm: TCnSrcTemplateEditForm
-  Left = 363
-  Top = 135
-  BorderStyle = bsDialog
+  Left = 189
+  Top = 97
+  Width = 624
+  Height = 472
   Caption = 'Source Template Editor'
-  ClientHeight = 445
-  ClientWidth = 616
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
@@ -13,6 +12,7 @@ inherited CnSrcTemplateEditForm: TCnSrcTemplateEditForm
     Top = 416
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&Help'
     TabOrder = 2
     OnClick = btnHelpClick
@@ -22,6 +22,7 @@ inherited CnSrcTemplateEditForm: TCnSrcTemplateEditForm
     Top = 416
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&OK'
     Default = True
     TabOrder = 0
@@ -32,6 +33,7 @@ inherited CnSrcTemplateEditForm: TCnSrcTemplateEditForm
     Top = 416
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
@@ -42,6 +44,7 @@ inherited CnSrcTemplateEditForm: TCnSrcTemplateEditForm
     Top = 8
     Width = 601
     Height = 121
+    Anchors = [akLeft, akTop, akRight]
     Caption = '&Options'
     TabOrder = 3
     object lbl2: TLabel
@@ -54,7 +57,7 @@ inherited CnSrcTemplateEditForm: TCnSrcTemplateEditForm
     object lbl3: TLabel
       Left = 384
       Top = 19
-      Width = 47
+      Width = 45
       Height = 13
       Caption = 'Shortcut:'
     end
@@ -107,6 +110,7 @@ inherited CnSrcTemplateEditForm: TCnSrcTemplateEditForm
       Top = 16
       Width = 155
       Height = 19
+      Anchors = [akLeft, akTop, akRight]
       HotKey = 0
       InvalidKeys = [hcNone, hcShift]
       Modifiers = []
@@ -118,6 +122,7 @@ inherited CnSrcTemplateEditForm: TCnSrcTemplateEditForm
       Width = 155
       Height = 21
       Style = csDropDownList
+      Anchors = [akLeft, akTop, akRight]
       ItemHeight = 13
       TabOrder = 4
     end
@@ -173,6 +178,7 @@ inherited CnSrcTemplateEditForm: TCnSrcTemplateEditForm
     Top = 136
     Width = 601
     Height = 273
+    Anchors = [akLeft, akTop, akRight, akBottom]
     Caption = 'Conte&nt'
     TabOrder = 4
     object lbl6: TLabel
@@ -187,7 +193,7 @@ inherited CnSrcTemplateEditForm: TCnSrcTemplateEditForm
       Top = 44
       Width = 585
       Height = 217
-      Anchors = [akLeft, akTop, akBottom]
+      Anchors = [akLeft, akTop, akRight, akBottom]
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -12
@@ -205,6 +211,7 @@ inherited CnSrcTemplateEditForm: TCnSrcTemplateEditForm
       Width = 433
       Height = 21
       Style = csDropDownList
+      Anchors = [akLeft, akTop, akRight]
       ItemHeight = 13
       TabOrder = 0
     end
@@ -213,6 +220,7 @@ inherited CnSrcTemplateEditForm: TCnSrcTemplateEditForm
       Top = 15
       Width = 75
       Height = 21
+      Anchors = [akTop, akRight]
       Caption = '&Insert'
       TabOrder = 1
       OnClick = btnInsertClick
