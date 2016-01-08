@@ -747,8 +747,9 @@ begin
 
   if not NoSeparateSpace then  // 如果不要插入分隔空格，则跳过此段
   begin
-    // 两个标识符之间以空格分离
-    if ((FLastToken in IdentTokens) and (Token in IdentTokens + [tokAtSign])) then
+    // 两个标识符之间以空格分离，前提是本行未被注释等分行从而隔开 FLastToken
+    if not FCodeGen.NextOutputWillbeLineHead and
+      ((FLastToken in IdentTokens) and (Token in IdentTokens + [tokAtSign])) then
       WriteOneSpace
     else if ((BeforeSpaceCount = 0) and (FLastToken = tokGreat) and (Token in IdentTokens + [tokAtSign])) then
       WriteOneSpace // 泛型 property 后面加 read 时，需要用这种方式加空格分开
@@ -1564,6 +1565,7 @@ begin
       tokKeywordBegin:
         begin
           if (CnPascalCodeForRule.BeginStyle = bsNextLine) or FNextBeginShouldIndent
+            or FCodeGen.NextOutputWillbeLineHead // 如果已输出的最后一行还没有其他元素，说明本行的 begin 必须缩进
             or not (FLastToken in [tokKeywordDo, tokKeywordElse, tokKeywordThen]) then
             Match(tokKeywordBegin, PreSpaceCount)
           else

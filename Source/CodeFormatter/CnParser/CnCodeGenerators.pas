@@ -80,6 +80,8 @@ type
     function GetCurrRow: Integer;
     function GetLastIndentSpaceWithOutComments: Integer;
     function GetActualRow: Integer;
+    function GetLastLine: string;
+    function GetNextOutputWillbeLineHead: Boolean;
     function LineIsEmptyOrComment(const Str: string): Boolean;
     procedure RecordAutoWrapLines(Line: Integer);
 
@@ -150,6 +152,11 @@ type
 
     property ActualRow: Integer read GetActualRow;
     {* 一次 Write 成功后，写之后的实际光标行号，回车换行已换算，从 1 开始}
+
+    property LastLine: string read GetLastLine;
+    {* 获得最后输出的一行内容}
+    property NextOutputWillbeLineHead: Boolean read GetNextOutputWillbeLineHead;
+    {* 下一个输出内容是否是新起一行，其实就是判断 Trim(GetLastLine) 是否为空 }
 
     property AutoWrapButNoIndent: Boolean read FAutoWrapButNoIndent write FAutoWrapButNoIndent;
     {* 超宽时自动换行时是否缩进，供外界控制，如 uses 区用 True}
@@ -366,9 +373,22 @@ begin
   end;
 end;
 
+function TCnCodeGenerator.GetLastLine: string;
+begin
+  if FActualLines.Count > 0 then
+    Result := FActualLines[FActualLines.Count - 1]
+  else
+    Result := '';
+end;
+
 function TCnCodeGenerator.GetLockedCount: Word;
 begin
   Result := FLock;
+end;
+
+function TCnCodeGenerator.GetNextOutputWillbeLineHead: Boolean;
+begin
+  Result := Trim(GetLastLine) = '';
 end;
 
 function TCnCodeGenerator.GetPrevColumn: Integer;
