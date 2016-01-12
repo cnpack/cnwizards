@@ -54,8 +54,10 @@ unit CnPasConvert;
   it in next version.
 
   Version:
+       v1.06   2016/01/12 by liuxiao
+        .
        v1.05   2008/08/03 by liuxiao
-        Fix a Length Problem when copy HTML.
+        Supports DPK keywords.
        v1.04   2006/09/08 by Ð¡¶¬ (kendling)
         Add RTF Conversion.
        v1.03   2004/04/14 by Icebird
@@ -127,23 +129,23 @@ uses
 
 const
   {key words list here}
-  CnPasConvertKeywords: array[0..110] of string =
+  CnPasConvertKeywords: array[0..113] of string =
   ('ABSOLUTE', 'ABSTRACT', 'AND', 'ARRAY', 'AS', 'ASM', 'ASSEMBLER',
-    'AUTOMATED', 'BEGIN', 'CASE', 'CDECL', 'CLASS', 'CONST', 'CONSTRUCTOR',
+    'AUTOMATED', 'BEGIN', 'CASE', 'CDECL', 'CLASS', 'CONST', 'CONSTRUCTOR', 'CONTAINS',
     'DEFAULT', 'DEPRECATED', 'DESTRUCTOR', 'DISPID', 'DISPINTERFACE', 'DIV',
     'DO', 'DOWNTO', 'DYNAMIC', 'ELSE', 'END', 'EXCEPT', 'EXPORT', 'EXPORTS',
     'EXTERNAL', 'FAR', 'FILE', 'FINALIZATION', 'FINALLY', 'FOR', 'FORWARD',
     'FUNCTION', 'GOTO', 'IF', 'IMPLEMENTATION', 'IMPLEMENTS', 'IN', 'INDEX',
     'INHERITED', 'INITIALIZATION', 'INLINE', 'INTERFACE', 'IS', 'LABEL',
     'LIBRARY', 'LOCAL', 'MESSAGE', 'MOD', 'NAME', 'NEAR', 'NIL', 'NODEFAULT',
-    'NOT', 'OBJECT', 'OF', 'ON', 'OPERATOR', 'OR', 'OUT', 'OVERLOAD', 'OVERRIDE', 'PACKED',
-    'PASCAL', 'PLATFORM', 'PRIVATE', 'PROCEDURE', 'PROGRAM', 'PROPERTY',
-    'PROTECTED', 'PUBLIC', 'PUBLISHED', 'RAISE', 'READ', 'READONLY', 'RECORD',
-    'REGISTER', 'REINTRODUCE', 'REPEAT', 'RESIDENT', 'RESOURCESTRING', 'SEALED',
-    'SAFECALL', 'SET', 'SHL', 'SHR', 'STDCALL', 'STATIC', 'STORED', 'STRICT', 'STRING',
-    'STRINGRESOURCE', 'THEN', 'THREADVAR', 'TO', 'TRY', 'TYPE', 'UNIT', 'UNTIL',
-    'USES', 'VAR', 'VARARGS', 'VIRTUAL', 'WHILE', 'WITH', 'WRITE', 'WRITEONLY',
-    'XOR');
+    'NOT', 'OBJECT', 'OF', 'ON', 'OPERATOR', 'OR', 'OUT', 'OVERLOAD', 'OVERRIDE',
+    'PACKAGE', 'PACKED', 'PASCAL', 'PLATFORM', 'PRIVATE', 'PROCEDURE', 'PROGRAM',
+    'PROPERTY', 'PROTECTED', 'PUBLIC', 'PUBLISHED', 'RAISE', 'READ', 'READONLY',
+    'RECORD', 'REGISTER', 'REINTRODUCE', 'REPEAT', 'REQUIRES', 'RESIDENT',
+    'RESOURCESTRING', 'SEALED', 'SAFECALL', 'SET', 'SHL', 'SHR', 'STDCALL',
+    'STATIC', 'STORED', 'STRICT', 'STRING', 'STRINGRESOURCE', 'THEN', 'THREADVAR',
+    'TO', 'TRY', 'TYPE', 'UNIT', 'UNTIL', 'USES', 'VAR', 'VARARGS', 'VIRTUAL',
+    'WHILE', 'WITH', 'WRITE', 'WRITEONLY', 'XOR');
 
   CnPasConvertDirectives: array[0..12] of string =
     ('DEFAULT', 'IMPLEMENTS', 'INDEX', 'LOCAL', 'NAME', 'NODEFAULT', 'READ',

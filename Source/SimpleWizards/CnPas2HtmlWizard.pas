@@ -345,7 +345,7 @@ begin
       Block := View.Block;
       if (Block <> nil) and (Block.Size > 0) then
       begin
-        if not CurrentIsDelphiSource and not CurrentIsCSource then
+        if not CurrentIsDelphiSource and not IsDpk(CnOtaGetCurrentSourceFile) and not CurrentIsCSource then
         begin
           ErrorDlg(SCnPas2HtmlErrorNOTSupport);
           Exit;
@@ -363,7 +363,7 @@ begin
 {$ENDIF}
           InMStream.Write(S[1], Length(S));
 
-          if CurrentIsDelphiSource then
+          if CurrentIsDelphiSource or IsDpk(CnOtaGetCurrentSourceFile) then
             SourceType := stPas
           else
             SourceType := stCpp;
@@ -607,7 +607,7 @@ begin
 
   if Index = FIdCopySelected then
   begin
-    if CurrentIsSource then
+    if CurrentIsSource or IsDpk(CnOtaGetCurrentSourceFile) then
     begin
       View := CnOtaGetTopMostEditView;
       if View <> nil then
@@ -624,12 +624,12 @@ begin
   end
   else if Index = FIdExportUnit then
   begin
-    SubActions[Index].Enabled := CurrentIsSource; // 当前打开了文件编辑
+    SubActions[Index].Enabled := CurrentIsSource or IsDpk(CnOtaGetCurrentSourceFile); // 当前打开了文件编辑
   end
   else if Index = FIdExportOpened then
   begin
     // 当前打开了文件编辑
-    SubActions[Index].Enabled := CurrentIsSource;
+    SubActions[Index].Enabled := CurrentIsSource or IsDpk(CnOtaGetCurrentSourceFile);
   end
   else if Index = FIdExportDPR then
   begin
