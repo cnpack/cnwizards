@@ -18,6 +18,7 @@ type
     mmoCppSrc: TMemo;
     btnParseCpp: TButton;
     mmoCppResult: TMemo;
+    chkWideIdent: TCheckBox;
     procedure btnParsePasClick(Sender: TObject);
     procedure btnParseCppClick(Sender: TObject);
   private
@@ -68,7 +69,7 @@ var
   I: Integer;
 begin
 {$IFDEF UNICODE}
-  P := TCnPasWideLex.Create;
+  P := TCnPasWideLex.Create(chkWideIdent.Checked);
   S := mmoPasSrc.Lines.Text;
   P.Origin := PChar(S);
 

@@ -99,12 +99,15 @@ unit CnPasWideLex;
 * 单元名称：mwPasLex 的 Unicode 版本实现
 * 单元作者：刘啸(LiuXiao) liuxiao@cnpack.org
 * 备    注：此单元自 mwPasLex 移植而来并改为 Unicode/WideString 实现，保留原始版权声明
-*           当 SupportUnicodeIdent 为 False 时，Unicode 字符作为 tkUnknown 解析
+*           当 SupportUnicodeIdent 为 False 时，Unicode 字符挨个作为 tkUnknown 解析
+*           为 True 时整个作为 Identifier 解析
 * 开发平台：Windows 7 + Delphi XE
 * 兼容测试：PWin9X/2000/XP/7 + Delphi 2009 ~
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2015.04.25 V1.1
+* 修改记录：2016.01.13 V1.2
+*               增加 Unicode 标识符的实现，可控制是否支持 Unicode 标识符
+*           2015.04.25 V1.1
 *               增加 WideString 实现
 *           2015.04.05 V1.0
 *               移植单元，实现功能
@@ -1363,7 +1366,7 @@ end;
 constructor TCnPasWideLex.Create(SupportUnicodeIdent: Boolean);
 begin
   inherited Create;
-  FSupportUnicodeIdent := True;
+  FSupportUnicodeIdent := SupportUnicodeIdent;
   InitIdent;
   MakeMethodTables;
 end;  { Create }
@@ -1580,7 +1583,8 @@ procedure TCnPasWideLex.IdentProc;
 begin
   FTokenID := IdentKind((FOrigin + FRun));
   StepRun(FStringLen);
-  while Identifiers[_IndexChar(FOrigin[FRun])] do
+  while Identifiers[_IndexChar(FOrigin[FRun])] or
+    (FSupportUnicodeIdent and (Ord(_IndexChar(FOrigin[FRun])) > 127)) do
     StepRun;
 end;
 
@@ -1992,12 +1996,20 @@ begin
     csNo:
     begin
       C := _IndexChar(FOrigin[FRun]);
-      if Ord(C) > 255 then
+      if FSupportUnicodeIdent then
       begin
-        UnknownProc;
+        if Ord(C) > 127 then
+          IdentProc
+        else
+          FProcTable[C];
       end
       else
-        FProcTable[C];
+      begin
+        if Ord(C) > 255 then
+          UnknownProc
+        else
+          FProcTable[C];
+      end;
     end;
   else
     case FComment of

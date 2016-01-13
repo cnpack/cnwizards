@@ -18,7 +18,7 @@ object CnTestUnicodeParseForm: TCnTestUnicodeParseForm
     Top = 16
     Width = 753
     Height = 363
-    ActivePage = tsBCB
+    ActivePage = tsPasLex
     TabOrder = 0
     object tsPasLex: TTabSheet
       Caption = 'Pascal'
@@ -77,6 +77,16 @@ object CnTestUnicodeParseForm: TCnTestUnicodeParseForm
         Width = 385
         Height = 305
         TabOrder = 2
+      end
+      object chkWideIdent: TCheckBox
+        Left = 265
+        Top = 64
+        Width = 73
+        Height = 17
+        Caption = 'Wide Ident'
+        Checked = True
+        State = cbChecked
+        TabOrder = 3
       end
     end
     object tsBCB: TTabSheet
