@@ -986,7 +986,8 @@ begin
       'A'..'Z', 'a'..'z', '_', '~':
         begin
           Inc(FRun); Inc(ColNum);
-          while _WideCharInSet(FOrigin[FRun], ['A'..'Z', 'a'..'z', '0'..'9', '_']) do
+          while _WideCharInSet(FOrigin[FRun], ['A'..'Z', 'a'..'z', '0'..'9', '_'])
+            or (FSupportUnicodeIdent and (Ord(FOrigin[FRun]) > 127)) do
           begin
             Inc(FRun);
             Inc(ColNum);

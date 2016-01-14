@@ -19,6 +19,7 @@ type
     btnParseCpp: TButton;
     mmoCppResult: TMemo;
     chkWideIdent: TCheckBox;
+    chkWideIdentC: TCheckBox;
     procedure btnParsePasClick(Sender: TObject);
     procedure btnParseCppClick(Sender: TObject);
   private
@@ -40,7 +41,7 @@ var
   S: string;
   I: Integer;
 begin
-  P := TCnBCBWideTokenList.Create;
+  P := TCnBCBWideTokenList.Create(chkWideIdentC.Checked);
   P.DirectivesAsComments := False;
   S := mmoCppSrc.Lines.Text;
   P.SetOrigin(PChar(S), Length(S));

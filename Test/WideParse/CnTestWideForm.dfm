@@ -141,6 +141,16 @@ object CnTestUnicodeParseForm: TCnTestUnicodeParseForm
         Height = 305
         TabOrder = 2
       end
+      object chkWideIdentC: TCheckBox
+        Left = 265
+        Top = 64
+        Width = 73
+        Height = 17
+        Caption = 'Wide Ident'
+        Checked = True
+        State = cbChecked
+        TabOrder = 3
+      end
     end
   end
 end
