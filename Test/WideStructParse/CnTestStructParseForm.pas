@@ -21,6 +21,7 @@ type
     lblPascal: TLabel;
     lblCpp: TLabel;
     chkWidePas: TCheckBox;
+    chkWideCpp: TCheckBox;
     procedure btnParsePasClick(Sender: TObject);
     procedure mmoPasSrcChange(Sender: TObject);
     procedure btnGetUsesClick(Sender: TObject);
@@ -67,7 +68,7 @@ var
   Token: TCnWideCppToken;
 begin
   mmoCppResult.Lines.Clear;
-  Parser := TCnWideCppStructParser.Create;
+  Parser := TCnWideCppStructParser.Create(chkWideCpp.Checked);
 
   try
     S := mmoCppSrc.Lines.Text;

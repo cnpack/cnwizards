@@ -236,6 +236,7 @@ end;
 
 constructor TCnWidePasStructParser.Create(SupportUnicodeIdent: Boolean);
 begin
+  inherited Create;
   FList := TCnList.Create;
   FTabWidth := 2;
   FSupportUnicodeIdent := SupportUnicodeIdent;

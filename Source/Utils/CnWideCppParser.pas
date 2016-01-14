@@ -70,6 +70,7 @@ type
   TCnWideCppStructParser = class(TObject)
   {* 利用 CParser 进行语法解析得到各个 Token 和位置信息}
   private
+    FSupportUnicodeIdent: Boolean;
     FBlockCloseToken: TCnWideCppToken;
     FBlockStartToken: TCnWideCppToken;
     FChildCloseToken: TCnWideCppToken;
@@ -87,7 +88,7 @@ type
     function GetCount: Integer;
     function GetToken(Index: Integer): TCnWideCppToken;
   public
-    constructor Create;
+    constructor Create(SupportUnicodeIdent: Boolean = False);
     destructor Destroy; override;
     procedure Clear;
     procedure ParseSource(ASource: PWideChar; Size: Integer; CurrLine: Integer = 0;
@@ -161,10 +162,11 @@ end;
 
 { TCnWideCppStructParser }
 
-constructor TCnWideCppStructParser.Create;
+constructor TCnWideCppStructParser.Create(SupportUnicodeIdent: Boolean);
 begin
-  inherited;
+  inherited Create;
   FList := TCnList.Create;
+  FSupportUnicodeIdent := SupportUnicodeIdent;
 end;
 
 destructor TCnWideCppStructParser.Destroy;
@@ -328,7 +330,7 @@ begin
     Brace2Stack := TStack.Create;
     FSource := ASource;
 
-    CParser := TCnBCBWideTokenList.Create;
+    CParser := TCnBCBWideTokenList.Create(FSupportUnicodeIdent);
     CParser.DirectivesAsComments := False;
     CParser.SetOrigin(ASource, Size);
 

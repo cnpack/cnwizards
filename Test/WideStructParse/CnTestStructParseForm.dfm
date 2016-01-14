@@ -159,6 +159,16 @@ object TeststructParseForm: TTeststructParseForm
         Height = 210
         TabOrder = 2
       end
+      object chkWideCpp: TCheckBox
+        Left = 568
+        Top = 183
+        Width = 97
+        Height = 17
+        Caption = 'Wide Identifier'
+        Checked = True
+        State = cbChecked
+        TabOrder = 3
+      end
     end
   end
 end
