@@ -1685,9 +1685,11 @@ begin
       end;
 
     #39: if (FOrigin[Running + 2] = #39) or ((FOrigin[Running + 1] = '\') and (FOrigin[Running + 3] = #39)) then
-           Result := ctkCharType;
+           Result := ctkCharType
          else
            Result := ctkapostrophe;
+  else
+    Result := ctkUnknown;
   end;
 end; { GetTokenID }
 

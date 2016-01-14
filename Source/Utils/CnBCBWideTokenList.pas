@@ -136,6 +136,7 @@ type
     FColNumber: Integer;
     FVisibility: TCTokenKind;
     FDirectivesAsComments: Boolean;
+    FSupportUnicodeIdent: Boolean;
     procedure WriteTo(InsPos, DelPos: LongInt; const Item: CnWideString);
     function GetCount: Integer;
     procedure SetCount(value: Integer);
@@ -160,7 +161,7 @@ type
     procedure SetToken(Index: Integer; const Item: CnWideString);
   public
     Searcher: TCnSearcher;
-    constructor Create;
+    constructor Create(SupportUnicodeIdent: Boolean = False);
     destructor Destroy; override;
     procedure SetOrigin(NewOrigin: PWideChar; NewSize: LongInt);
     {* 设置被解析的内容，NewSize 是字符长度}
@@ -429,7 +430,7 @@ begin
   Result := FBCBTokenList.IndexAtLine(ImpIndex);
 end; { GetMethodImpLine }
 
-constructor TCnBCBWideTokenList.Create;
+constructor TCnBCBWideTokenList.Create(SupportUnicodeIdent: Boolean);
 begin
   inherited Create;
   FTokenPositionsList := TLongIntList.Create;
@@ -443,6 +444,7 @@ begin
   Visibility := ctkUnknown;
   Searcher := TCnSearcher.Create(Self);
   FDirectivesAsComments := True;
+  FSupportUnicodeIdent := SupportUnicodeIdent;
 end; { Create }
 
 destructor TCnBCBWideTokenList.Destroy;
@@ -1552,9 +1554,11 @@ begin
       end;
 
     #39: if (FOrigin[Running + 2] = #39) or ((FOrigin[Running + 1] = '\') and (FOrigin[Running + 3] = #39)) then
-           Result := ctkCharType;
+           Result := ctkCharType
          else
            Result := ctkapostrophe;
+  else
+     Result := ctkUnknown;
   end;
 end; { GetTokenID }
 
