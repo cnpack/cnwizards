@@ -80,6 +80,7 @@ type
     procedure UpdateStatusBar; override;
     procedure DrawListItem(ListView: TCustomListView; Item: TListItem); override;
     procedure DoLanguageChanged(Sender: TObject); override;
+    procedure DoSortListView; override;
   public
     { Public declarations }
   end;
@@ -125,6 +126,28 @@ type
 var
   FDestList: IDesignerSelections;
   FSourceList: IDesignerSelections;
+  _SortIndex: Integer;
+  _SortDown: Boolean;
+  _MatchStr: string;
+
+function DoListSort(List: TStringList; Index1, Index2: Integer): Integer;
+var
+  Info1, Info2: TCnCompInfo;
+begin
+  Info1 := TCnCompInfo(List.Objects[Index1]);
+  Info2 := TCnCompInfo(List.Objects[Index2]);
+
+  case _SortIndex of
+    0: Result := CompareTextPos(_MatchStr, Info1.CompName, Info2.CompName);
+    1: Result := CompareText(Info1.CompClass, Info2.CompClass);
+    2: Result := CompareText(Info1.CaptionText, Info2.CaptionText);
+  else
+    Result := 0;
+  end;
+
+  if _SortDown then
+    Result := -Result;
+end;
 
 function CnListComponent(Ini: TCustomIniFile): Boolean;
 var
@@ -425,6 +448,29 @@ procedure TCnListCompForm.FormShow(Sender: TObject);
 begin
   inherited;
   actHookIDE.Checked := False;
+end;
+
+procedure TCnListCompForm.DoSortListView;
+var
+  Sel: Pointer;
+begin
+  if lvList.Selected <> nil then
+    Sel := lvList.Selected.Data
+  else
+    Sel := nil;
+
+  _SortIndex := SortIndex;
+  _SortDown := SortDown;
+  if MatchAny then
+    _MatchStr := edtMatchSearch.Text
+  else
+    _MatchStr := '';
+
+  QuickSortStringList(FDisplayList, 0, FDisplayList.Count - 1, DoListSort);
+  lvList.Invalidate;
+
+  if Sel <> nil then
+    SelectItemByIndex(CurrList.IndexOf(Sel));
 end;
 
 {$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}
