@@ -20,6 +20,7 @@ type
     btnGetUses: TButton;
     lblPascal: TLabel;
     lblCpp: TLabel;
+    chkWidePas: TCheckBox;
     procedure btnParsePasClick(Sender: TObject);
     procedure mmoPasSrcChange(Sender: TObject);
     procedure btnGetUsesClick(Sender: TObject);
@@ -51,7 +52,7 @@ begin
   List := TStringList.Create;
 
   try
-    ParseUnitUsesW(mmoPasSrc.Lines.Text, List);
+    ParseUnitUsesW(mmoPasSrc.Lines.Text, List, chkWidePas.Checked);
     ShowMessage(List.Text);
   finally
     List.Free;
@@ -125,7 +126,7 @@ var
   Token: TCnWidePasToken;
 begin
   mmoPasResult.Lines.Clear;
-  Parser := TCnWidePasStructParser.Create;
+  Parser := TCnWidePasStructParser.Create(chkWidePas.Checked);
 
   S := mmoPasSrc.Lines.Text;
   try

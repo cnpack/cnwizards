@@ -121,8 +121,9 @@ type
   { TCnPasStructureParser }
 
   TCnWidePasStructParser = class(TObject)
-  {* 利用 BCBWideTokenList 进行语法解析得到各个 Token 和位置信息}
+  {* 利用 TCnPasWideLex 进行语法解析得到各个 Token 和位置信息}
   private
+    FSupportUnicodeIdent: Boolean;
     FBlockCloseToken: TCnWidePasToken;
     FBlockStartToken: TCnWidePasToken;
     FChildMethodCloseToken: TCnWidePasToken;
@@ -141,7 +142,7 @@ type
     function GetCount: Integer;
     function GetToken(Index: Integer): TCnWidePasToken;
   public
-    constructor Create;
+    constructor Create(SupportUnicodeIdent: Boolean = False);
     destructor Destroy; override;
     procedure Clear;
     procedure ParseSource(ASource: PWideChar; AIsDpr, AKeyOnly: Boolean);
@@ -180,7 +181,8 @@ type
     {* Tab 键的宽度}
   end;
 
-procedure ParseUnitUsesW(const Source: CnWideString; UsesList: TStrings);
+procedure ParseUnitUsesW(const Source: CnWideString; UsesList: TStrings;
+  SupportUnicodeIdent: Boolean = False);
 {* 分析源代码中引用的单元}
 
 implementation
@@ -232,10 +234,11 @@ end;
 
 { TCnPasStructureParser }
 
-constructor TCnWidePasStructParser.Create;
+constructor TCnWidePasStructParser.Create(SupportUnicodeIdent: Boolean);
 begin
   FList := TCnList.Create;
   FTabWidth := 2;
+  FSupportUnicodeIdent := SupportUnicodeIdent;
 end;
 
 destructor TCnWidePasStructParser.Destroy;
@@ -358,7 +361,7 @@ begin
     BlockStack := TObjectStack.Create;
     MidBlockStack := TObjectStack.Create;
 
-    Lex := TCnPasWideLex.Create;
+    Lex := TCnPasWideLex.Create(FSupportUnicodeIdent);
     Lex.Origin := PWideChar(ASource);
 
     DeclareWithEndLevel := 0; // 嵌套的需要end的定义层数
@@ -963,14 +966,15 @@ begin
 end;
 
 // 分析源代码中引用的单元
-procedure ParseUnitUsesW(const Source: CnWideString; UsesList: TStrings);
+procedure ParseUnitUsesW(const Source: CnWideString; UsesList: TStrings;
+  SupportUnicodeIdent: Boolean);
 var
   Lex: TCnPasWideLex;
   Flag: Integer;
   S: CnWideString;
 begin
   UsesList.Clear;
-  Lex := TCnPasWideLex.Create;
+  Lex := TCnPasWideLex.Create(SupportUnicodeIdent);
 
   Flag := 0;
   S := '';

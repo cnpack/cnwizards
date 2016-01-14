@@ -2005,9 +2005,11 @@ begin
       end
       else
       begin
+{$IFDEF UNICODE}
         if Ord(C) > 255 then
           UnknownProc
         else
+{$ENDIF}
           FProcTable[C];
       end;
     end;
