@@ -524,16 +524,34 @@ function CnOtaGetCurrLineText(var Text: string; var LineNo: Integer;
 function CnNtaGetCurrLineText(var Text: string; var LineNo: Integer;
   var CharIndex: Integer): Boolean;
 {* 使用 NTA 方法取当前行源代码。速度快，但取回的文本是将 Tab 扩展成空格的。
-   如果使用 ConvertPos 来转换成 EditPos 可能会有问题。直接将 CharIndex + 1 
+   如果使用 ConvertPos 来转换成 EditPos 可能会有问题。直接将 CharIndex + 1
    赋值给 EditPos.Col 即可。
    D7以下取到的是AnsiString，BDS 非 Unicode 下取到的是 UTF8 格式的 AnsiString，
    Unicode IDE 下取得的是 UTF16 字符串}
+
+{$IFDEF UNICODE}
+function CnNtaGetCurrLineTextW(var Text: string; var LineNo: Integer;
+  var CharIndex: Integer): Boolean;
+{* 使用 NTA 方法取当前行源代码的Unicode版本。速度快，但取回的文本是将 Tab 扩展成空格的。
+   如果使用 ConvertPos 来转换成 EditPos 可能会有问题。直接将 CharIndex + 1
+   赋值给 EditPos.Col 即可。
+   Unicode IDE 下取得的是 UTF16 字符串与 UTF16 的偏移量}
+{$ENDIF}
+
 function CnOtaGetCurrLineInfo(var LineNo, CharIndex, LineLen: Integer): Boolean;
 {* 返回 SourceEditor 当前行信息}
 function CnOtaGetCurrPosToken(var Token: string; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TAnsiCharSet = [];
   CharSet: TAnsiCharSet = []; EditView: IOTAEditView = nil): Boolean;
 {* 取当前光标下的标识符及光标在标识符中的索引号，速度较快}
+
+{$IFDEF UNICODE}
+function CnOtaGetCurrPosTokenW(var Token: string; var CurrIndex: Integer;
+  CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TCharSet = [];
+  CharSet: TCharSet = []; EditView: IOTAEditView = nil): Boolean;
+{* 取当前光标下的标识符及光标在标识符中的索引号的 Unicode 版本，允许 Unicode 标识符}
+{$ENDIF}
+
 function CnOtaGetCurrChar(OffsetX: Integer = 0; View: IOTAEditView = nil): Char;
 {* 取当前光标下的字符，允许偏移量}
 function CnOtaDeleteCurrToken(FirstSet: TAnsiCharSet = [];
@@ -546,7 +564,7 @@ function CnOtaDeleteCurrTokenRight(FirstSet: TAnsiCharSet = [];
   CharSet: TAnsiCharSet = []): Boolean;
 {* 删除当前光标下的标识符右半部分}
 function CnOtaIsEditPosOutOfLine(EditPos: TOTAEditPos; View: IOTAEditView = nil): Boolean;
-{* 判断位置是否超出行尾了 }
+{* 判断位置是否超出行尾了。此机制在 Unicode 环境下当前行含有超过一个宽字符时可能会不准，慎用 }
 
 {$ENDIF}
 
@@ -3966,9 +3984,9 @@ end;
 
   Delphi5/6/7         Ansi               同左、一致                同左、一致
 
-  Delphi 2005~2007    Ansi with UTF8     同左、与 UTF8 一致        Ansi、不一致
+  Delphi 2005~2007    Ansi with UTF8     同左、与 UTF8 一致        Ansi、与 TF8 不一致
 
-  Delphi 2009~        UTF16              Ansi、与 UTF16 不一致     同左 Ansi、与UTF16不一致
+  Delphi 2009~        UTF16              Ansi、与 UTF16 不一致     同左 Ansi、与 UTF16 不一致
 }
 function CnNtaGetCurrLineText(var Text: string; var LineNo: Integer;
   var CharIndex: Integer): Boolean;
@@ -3996,6 +4014,36 @@ begin
     Result := True;
   end;
 end;
+
+{$IFDEF UNICODE}
+
+// 使用 NTA 方法取当前行源代码的Unicode版本。速度快，但取回的文本是将 Tab 扩展成空格的。
+// 如果使用 ConvertPos 来转换成 EditPos 可能会有问题。直接将 CharIndex + 1
+// 赋值给 EditPos.Col 即可。
+// Unicode IDE 下取得的是 UTF16 字符串与 UTF16 的偏移量}
+function CnNtaGetCurrLineTextW(var Text: string; var LineNo: Integer;
+  var CharIndex: Integer): Boolean;
+var
+  EditControl: TControl;
+  View: IOTAEditView;
+begin
+  Result := False;
+  EditControl := GetCurrentEditControl;
+  View := CnOtaGetTopMostEditView;
+  if (EditControl <> nil) and (View <> nil) then
+  begin
+    Text := GetStrProp(EditControl, 'LineText');
+
+    // CursorPos 反映的是 Ansi （非UTF8）方式的列，需要把 string 转成 Ansi 后才能
+    // 得到光标对应到 Text 中的真实位置
+    CharIndex := Length(string(Copy(AnsiString(Text), 1, View.CursorPos.Col - 1)));
+
+    LineNo := View.CursorPos.Line;
+    Result := True;
+  end;
+end;
+
+{$ENDIF}
 
 // 返回 SourceEditor 当前行信息
 function CnOtaGetCurrLineInfo(var LineNo, CharIndex, LineLen: Integer): Boolean;
@@ -4025,6 +4073,7 @@ var
     else
       Result := CharInSet(Char(C), FirstSet + CharSet);
   end;
+
 begin
   Token := '';
   CurrIndex := 0;
@@ -4067,6 +4116,100 @@ begin
   if not Result then
     Token := '';
 end;
+
+{$IFDEF UNICODE}
+
+// 取当前光标下的标识符及光标在标识符中的索引号的 Unicode 版本，允许 Unicode 标识符
+function CnOtaGetCurrPosTokenW(var Token: string; var CurrIndex: Integer;
+  CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TCharSet = [];
+  CharSet: TCharSet = []; EditView: IOTAEditView = nil): Boolean;
+var
+  LineNo: Integer;
+  CharIndex: Integer;
+  LineText: string;
+  i: Integer;
+
+  function _IsValidIdentChar(C: Char; First: Boolean): Boolean;
+  begin
+    if (FirstSet = []) and (CharSet = []) then
+      Result := IsValidIdentChar(C, First) or (Ord(C) > 127)
+    else
+      Result := CharInSet(Char(C), FirstSet + CharSet);
+  end;
+
+  function StrHasUnicodeChar(const S: string): Boolean;
+  var
+    I: Integer;
+  begin
+    Result := False;
+    if Length(S) = 0 then
+      Exit;
+    for I := 0 to Length(S) - 1 do
+    begin
+      if Ord(S[I]) > 127 then
+      begin
+        Result := True;
+        Exit;
+      end;
+    end;
+  end;
+
+begin
+  Token := '';
+  CurrIndex := 0;
+  Result := False;
+
+  if not Assigned(EditView) then
+    EditView := CnOtaGetTopMostEditView;
+  if (EditView <> nil) and CnNtaGetCurrLineTextW(LineText, LineNo, CharIndex) and
+    (LineText <> '') then
+  begin
+    // CnDebugger.TraceFmt('CharIndex %d, LineText %s', [CharIndex, LineText]);
+    if CheckCursorOutOfLineEnd then
+    begin
+      if StrHasUnicodeChar(LineText) then
+      begin
+        // CnOtaIsEditPosOutOfLine 的判断在当前行文字有宽字节字符时可能不准
+        // 改用直接判断，两者都是 UTF16，可直接判断。
+        if CharIndex > Length(LineText) then
+          Exit;
+      end
+      else
+      begin
+        if CnOtaIsEditPosOutOfLine(EditView.CursorPos) then
+          Exit;
+      end;
+    end;
+
+    i := CharIndex;
+    CurrIndex := 0;
+    // 查找起始字符
+    while (i > 0) and _IsValidIdentChar(LineText[i], False) do
+    begin
+      Dec(i);
+      Inc(CurrIndex);
+    end;
+    Delete(LineText, 1, i);
+
+    // 查找结束字符
+    i := 1;
+    while (i <= Length(LineText)) and _IsValidIdentChar(LineText[i], False) do
+      Inc(i);
+    Delete(LineText, i, MaxInt);
+    Token := LineText;
+  end;
+
+  if Token <> '' then
+  begin
+    if CharInSet(Token[1], FirstSet) or IsValidIdentW(Token) then
+      Result := True;
+  end;
+
+  if not Result then
+    Token := '';
+end;
+
+{$ENDIF}
 
 // 取当前光标下的字符，允许偏移量
 function CnOtaGetCurrChar(OffsetX: Integer = 0; View: IOTAEditView = nil): Char;
@@ -4144,7 +4287,7 @@ begin
   Result := _DeleteCurrToken(False, True, FirstSet, CharSet);
 end;
 
-// 判断位置是否超出行尾了
+// 判断位置是否超出行尾了。此机制在 Unicode 环境下当前行含有超过一个宽字符时可能会不准，慎用
 function CnOtaIsEditPosOutOfLine(EditPos: TOTAEditPos; View: IOTAEditView): Boolean;
 var
   APos: TOTAEditPos;
@@ -4157,6 +4300,10 @@ begin
   begin
     View.ConvertPos(True, EditPos, CPos);
     View.ConvertPos(False, APos, CPos);
+{$IFDEF DEBUG}
+//  CnDebugger.LogFmt('CnOtaIsEditPosOutOfLine EditPos: %d,%d. APos %d,%d.',
+//   [EditPos.Line, EditPos.Col, APos.Line, APos.Col]);
+{$ENDIF}
     Result := not SameEditPos(EditPos, APos);
   end;  
 end;
