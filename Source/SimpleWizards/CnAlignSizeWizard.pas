@@ -94,7 +94,8 @@ type
     asMakeMinHeight, asMakeMaxHeight, asMakeSameHeight, asMakeSameSize,
     asParentHCenter, asParentVCenter, asBringToFront, asSendToBack,
     asSnapToGrid, {$IFDEF DELPHI10_UP} asUseGuidelines, {$ENDIF} asAlignToGrid,
-    asSizeToGrid, asLockControls, asSelectRoot, asCopyCompName, asHideComponent,
+    asSizeToGrid, asLockControls, asSelectRoot, asCopyCompName,
+    {$IFNDEF IDE_HAS_HIDE_NONVISUAL} asHideComponent, {$ENDIF}
     asNonArrange, asListComp, asCompToCode, asCompRename, asShowFlatForm);
 
   TNonArrangeStyle = (asRow, asCol);
@@ -103,7 +104,9 @@ type
   TCnAlignSizeWizard = class(TCnSubMenuWizard)
   private
     Indexes: array[TAlignSizeStyle] of Integer;
+{$IFNDEF IDE_HAS_HIDE_NONVISUAL}
     FHideNonVisual: Boolean;
+{$ENDIF}
     FNonArrangeStyle: TNonArrangeStyle;
     FNonMoveStyle: TNonMoveStyle;
     FRowSpace, FColSpace: Integer;
@@ -118,8 +121,10 @@ type
       Desc: Boolean = False);
     procedure DoAlignSize(AlignSizeStyle: TAlignSizeStyle);
 
+{$IFNDEF IDE_HAS_HIDE_NONVISUAL}
     function UpdateNonVisualComponent(FormEditor: IOTAFormEditor): Boolean;
     procedure HideNonVisualComponent;
+{$ENDIF}
 
     procedure ShowFlatForm;
     procedure NonVisualArrange;
@@ -149,7 +154,9 @@ type
     function GetCaption: string; override;
     function GetHint: string; override;
 
+{$IFNDEF IDE_HAS_HIDE_NONVISUAL}
     property HideNonVisual: Boolean read FHideNonVisual;
+{$ENDIF}
   end;
 
 //==============================================================================
@@ -239,7 +246,8 @@ const
   // Action 生效需要选择的最小控件数
   csAlignNeedControls: array[TAlignSizeStyle] of Integer = (2, 2, 2, 2, 2, 2,
     3, 2, 2, 2, 2, 3, 2, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 0,
-    {$IFDEF DELPHI10_UP} 0, {$ENDIF} 1, 1, -1, -1, -1, 0, 0, 0, 0, 1, -1);
+    {$IFDEF DELPHI10_UP} 0, {$ENDIF} 1, 1, -1, -1, -1,
+    {$IFNDEF IDE_HAS_HIDE_NONVISUAL} 0, {$ENDIF}  0, 0, 0, 1, -1);
 
   csAlignNeedSepMenu: set of TAlignSizeStyle =
     [asAlignVCenter, asSpaceRemoveV, asMakeSameSize, asParentVCenter,
@@ -255,8 +263,8 @@ const
     'CnParentVCenter', 'CnBringToFront', 'CnSendToBack', 'CnSnapToGrid',
     {$IFDEF DELPHI10_UP} 'CnUseGuidelines', {$ENDIF}
     'CnAlignToGrid', 'CnSizeToGrid', 'CnLockControls', 'CnSelectRoot',
-    'CnCopyCompName', 'CnHideComponent', 'CnNonArrange', 'CnListComp',
-    'CnCompToCode', 'CnCompRename', 'CnShowFlatForm');
+    'CnCopyCompName', {$IFNDEF IDE_HAS_HIDE_NONVISUAL} 'CnHideComponent', {$ENDIF}
+    'CnNonArrange', 'CnListComp', 'CnCompToCode', 'CnCompRename', 'CnShowFlatForm');
 
   csAlignSizeCaptions: array[TAlignSizeStyle] of PString = (
     @SCnAlignLeftCaption, @SCnAlignRightCaption, @SCnAlignTopCaption,
@@ -270,7 +278,8 @@ const
     @SCnBringToFrontCaption, @SCnSendToBackCaption, @SCnSnapToGridCaption,
     {$IFDEF DELPHI10_UP} @SCnUseGuidelinesCaption, {$ENDIF}
     @SCnAlignToGridCaption, @SCnSizeToGridCaption, @SCnLockControlsCaption,
-    @SCnSelectRootCaption, @SCnCopyCompNameCaption, @SCnHideComponentCaption,
+    @SCnSelectRootCaption, @SCnCopyCompNameCaption,
+    {$IFNDEF IDE_HAS_HIDE_NONVISUAL} @SCnHideComponentCaption, {$ENDIF}
     @SCnNonArrangeCaption, @SCnListCompCaption, @SCnCompToCodeCaption,
     @SCnFloatPropBarRenameCaption, @SCnShowFlatFormCaption);
 
@@ -286,7 +295,8 @@ const
     @SCnBringToFrontHint, @SCnSendToBackHint, @SCnSnapToGridHint,
     {$IFDEF DELPHI10_UP} @SCnUseGuidelinesHint, {$ENDIF}
     @SCnAlignToGridHint, @SCnSizeToGridHint, @SCnLockControlsHint,
-    @SCnSelectRootHint, @SCnCopyCompNameHint, @SCnHideComponentHint,
+    @SCnSelectRootHint, @SCnCopyCompNameHint,
+    {$IFNDEF IDE_HAS_HIDE_NONVISUAL} @SCnHideComponentHint, {$ENDIF}
     @SCnNonArrangeHint, @SCnListCompHint, @SCnCompToCodeHint,
     @SCnFloatPropBarRenameCaption, @SCnShowFlatFormHint);
 
@@ -705,11 +715,13 @@ begin
           
           IsModified := False;
         end;
+{$IFNDEF IDE_HAS_HIDE_NONVISUAL}
       asHideComponent:
         begin
           HideNonvisualComponent;
           IsModified := False;
         end;
+{$ENDIF}
       asNonArrange:
         begin
           NonVisualArrange;
@@ -765,6 +777,8 @@ end;
 //------------------------------------------------------------------------------
 // 隐藏不可视组件
 //------------------------------------------------------------------------------
+
+{$IFNDEF IDE_HAS_HIDE_NONVISUAL}
 
 procedure TCnAlignSizeWizard.HideNonvisualComponent;
 begin
@@ -828,12 +842,16 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 procedure TCnAlignSizeWizard.FormEditorNotifier(FormEditor: IOTAFormEditor;
   NotifyType: TCnWizFormEditorNotifyType; ComponentHandle: TOTAHandle;
   Component: TComponent; const OldName, NewName: string);
 begin
+{$IFNDEF IDE_HAS_HIDE_NONVISUAL}
   if Active and (NotifyType = fetActivated) then
     UpdateNonVisualComponent(FormEditor);
+{$ENDIF}
 end;
 
 //------------------------------------------------------------------------------
