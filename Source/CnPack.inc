@@ -2193,6 +2193,10 @@
   {$DEFINE IDE_INTEGRATE_CASTALIA} // XE8 and 10S integrate Castalia
 {$ENDIF}
 
+{$IFDEF DELPHI10_SEATTLE_UP}
+  {$DEFINE IDE_HAS_HIDE_NONVISUAL} // 10S has "Hide Nonvisual" Feature
+{$ENDIF}
+
 //==============================================================================
 // µ˜ ‘…Ë÷√
 //==============================================================================
