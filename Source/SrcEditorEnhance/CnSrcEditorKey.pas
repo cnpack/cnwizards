@@ -1769,6 +1769,7 @@ var
   F: string;
   FEditor: IOTAEditor;
   FSrcEditor: IOTASourceEditor;
+  SupportUnicode: Boolean;
 begin
   Result := False;
   if (Key <> FRenameKey) or (Shift <> FRenameShift) then Exit;
@@ -1777,8 +1778,16 @@ begin
     GetIDEActionFromShortCut(ShortCut(VK_F2, [])).Visible then
     Exit; // 如果已经有了 F2 的快捷键的 Action，则不处理
 
+{$IFDEF UNICODE}
+  SupportUnicode := True;
+  if not CnOtaGetCurrPosTokenW(TmpCur, CurIndex) then
+    Exit;
+{$ELSE}
+  SupportUnicode := False;
   if not CnOtaGetCurrPosToken(TmpCur, CurIndex) then
     Exit;
+{$ENDIF}
+
   if TmpCur = '' then
     Exit;
 
@@ -1807,7 +1816,7 @@ begin
   // 处理 Pascal 文件
   if IsDprOrPas(EditView.Buffer.FileName) or IsInc(EditView.Buffer.FileName) then
   begin
-    Parser := TCnWidePasStructParser.Create;
+    Parser := TCnWidePasStructParser.Create(SupportUnicode);
     Stream := TMemoryStream.Create;
     try
 {$IFDEF UNICODE}
@@ -2040,7 +2049,7 @@ begin
   else if IsCppSourceModule(EditView.Buffer.FileName) then // C/C++ 文件
   begin
     // 判断位置，根据需要弹出改名窗体。
-    CParser := TCnWideCppStructParser.Create;
+    CParser := TCnWideCppStructParser.Create(SupportUnicode);
     Stream := TMemoryStream.Create;
     try
 {$IFDEF UNICODE}
@@ -2822,8 +2831,16 @@ var
   I: Integer;
 begin
   Result := False;
+{$IFDEF UNICODE} // Unicode Identifier Supports
+  if (Length(Ident) = 0) or not (CharInSet(Ident[1], Alpha) or (Ord(Ident[1]) > 127)) then
+    Exit;
+  for I := 2 to Length(Ident) do
+    if not (CharInSet(Ident[I], AlphaNumeric) or (Ord(Ident[I]) > 127)) then
+      Exit;
+{$ELSE}
   if (Length(Ident) = 0) or not CharInSet(Ident[1], Alpha) then Exit;
   for I := 2 to Length(Ident) do if not CharInSet(Ident[I], AlphaNumeric) then Exit;
+{$ENDIF}
   Result := True;
 end;
 
