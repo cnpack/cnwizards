@@ -1629,12 +1629,17 @@ begin
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   ActionList := Svcs40.ActionList;
   for i := 0 to ActionList.ActionCount - 1 do
+  begin
     if SameText(ActionList.Actions[i].Name, ActionName) then
     begin
       Result := ActionList.Actions[i];
       Exit;
     end;
+  end;
   Result := nil;
+{$IFDEF DEBUG}
+  CnDebugger.LogMsgError('FindIDEAction can NOT find ' + ActionName);
+{$ENDIF}
 end;
 
 // 根据 IDE Action 名，执行它
@@ -1646,7 +1651,12 @@ begin
   if Assigned(Action) then
     Result := Action.Execute
   else
+  begin
     Result := False;
+{$IFDEF DEBUG}
+    CnDebugger.LogMsgError('ExecuteIDEAction can NOT find ' + ActionName);
+{$ENDIF}
+  end;
 end;
 
 // 创建一个子菜单项
