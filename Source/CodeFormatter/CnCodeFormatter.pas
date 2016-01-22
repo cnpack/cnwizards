@@ -414,6 +414,7 @@ begin
   FKeywordsValidArray[tokComplexWrite] := [pfetPropertySpecifier];
   FKeywordsValidArray[tokComplexDefault] := [pfetPropertySpecifier];
   FKeywordsValidArray[tokComplexStored] := [pfetPropertySpecifier];
+  FKeywordsValidArray[tokComplexReadonly] := [pfetPropertySpecifier];
 
   FKeywordsValidArray[tokDirectiveMESSAGE] := [pfetDirective];
   FKeywordsValidArray[tokDirectiveREGISTER] := [pfetDirective];
