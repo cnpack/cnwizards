@@ -25,7 +25,7 @@ unit CnTestLockControlWizard;
 * 单元名称：测试 LockControl 菜单项更新机制的测试用例单元
 * 单元作者：CnPack 开发组
 * 备    注：挂接 LockControl 菜单项以查看何时更新了状态。
-            需要在 D5/2007/2009/XE7 等测试通过。
+            需要在 2005 以及以上的版本中测试通过。
 * 开发平台：WinXP + Delphi 5
 * 兼容测试：PWin9X/2000/XP + Delphi All
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式
@@ -42,7 +42,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, Menus,
   ToolsAPI, IniFiles, CnCommon, CnWizClasses, CnWizUtils, CnWizConsts, CnEventHook,
-  CnWizMethodHook, ActnList, Vcl.ActnMenus, Vcl.ActnMan;
+  CnWizMethodHook, ActnList, ActnMenus, ActnMan;
 
 type
 
