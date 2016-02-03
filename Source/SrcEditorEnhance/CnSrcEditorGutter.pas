@@ -113,6 +113,7 @@ type
     // 二分法查找并返回 LinesList 中的匹配的下标，-1表示没有匹配。
     function MatchPointToLineArea(LinesList: TCnList; const Delta, Y, AreaHeight,
       TotalLine: Integer): Integer;
+    procedure ToggleBookmark;
   protected
 {$IFDEF BDS}
     procedure SetEnabled(Value: Boolean); override;
@@ -521,7 +522,7 @@ end;
 // 鼠标事件
 //------------------------------------------------------------------------------
 
-procedure TCnSrcEditorGutter.DblClick;
+procedure TCnSrcEditorGutter.ToggleBookmark;
 var
   EditView: IOTAEditView;
   Row: Integer;
@@ -548,13 +549,41 @@ var
   begin
     Result:= -1;
     for I := 0 to 9 do
+    begin
       if EditView.BookmarkPos[I].Line = Row then
       begin
         Result := I;
         Exit;
       end;
+    end;
   end;
 
+begin
+  EditView := EditControlWrapper.GetEditView(EditControl);
+  if Assigned(EditView) then
+  begin
+    Pt := Mouse.CursorPos;
+    Pt := ScreenToClient(Pt);
+    Row := MapYToLine(Pt.y, EditView);
+
+    SavePos := EditView.CursorPos;
+    EditPos := EditView.CursorPos;
+    EditPos.Line := Row;
+    EditView.CursorPos := EditPos;
+
+    ID := FindBookmark(Row);
+    if ID = -1 then
+      ID := GetBlankBookmarkID;
+    EditView.BookmarkToggle(ID);
+    EditView.CursorPos := SavePos;
+    EditView.Paint;
+  end;
+end;
+
+procedure TCnSrcEditorGutter.DblClick;
+var
+  EditView: IOTAEditView;
+  Pt: TPoint;
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('TCnSrcEditorGutter.DoubleClick. Cancel SelectLine Timer.');
@@ -576,19 +605,7 @@ begin
     end
     else
     begin
-      Row := MapYToLine(Pt.y, EditView);
-
-      SavePos := EditView.CursorPos;
-      EditPos := EditView.CursorPos;
-      EditPos.Line := Row;
-      EditView.CursorPos := EditPos;
-
-      ID := FindBookmark(Row);
-      if ID = -1 then
-        ID := GetBlankBookmarkID;
-      EditView.BookmarkToggle(ID);
-      EditView.CursorPos := SavePos;
-      EditView.Paint;
+      ToggleBookmark;
     end;
   end;
 end;
@@ -1005,7 +1022,9 @@ begin
           FSelectLineTimer.Enabled := True
         else
           CnOtaMoveAndSelectLine(FStartLine);
-      end;
+      end
+      else if not FGutterMgr.ClickSelectLine then // 单击不选定行时，使用单击切换书签
+        ToggleBookmark;
     end;
   end;
 end;
