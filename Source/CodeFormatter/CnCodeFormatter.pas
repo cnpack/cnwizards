@@ -92,6 +92,7 @@ type
 
     procedure ResetElementType;
     function CalcNeedPadding: Boolean;
+    function CalcNeedPaddingAndUnIndent: Boolean;
     procedure WriteOneSpace;
   protected
     FIsTypeID: Boolean;
@@ -737,6 +738,7 @@ procedure TCnAbstractCodeFormatter.WriteToken(Token: TPascalToken;
   SemicolonIsLineStart: Boolean; NoSeparateSpace: Boolean);
 var
   NeedPadding: Boolean;
+  NeedUnIndent: Boolean;
 begin
   if CnPascalCodeForRule.UseIgnoreArea and Scaner.InIgnoreArea then
   begin
@@ -764,9 +766,12 @@ begin
   end;
 
   NeedPadding := CalcNeedPadding;
+  NeedUnIndent := CalcNeedPaddingAndUnIndent;
+
   //标点符号的设置
   case Token of
-    tokComma:     CodeGen.Write(Scaner.TokenString, 0, 1, NeedPadding);   // 1 也会导致行尾注释后退，现多出的空格已由 Generator 删除
+    tokComma:
+      CodeGen.Write(Scaner.TokenString, 0, 1, NeedPadding);   // 1 也会导致行尾注释后退，现多出的空格已由 Generator 删除
     tokColon:
       begin
         if IgnorePreSpace then
@@ -784,9 +789,9 @@ begin
           CodeGen.Write(Scaner.TokenString, 0, 1, NeedPadding);
           // 1 也会导致行尾注释后退，现多出的空格已由 Generator 删除
       end;
-    tokAssign:    CodeGen.Write(Scaner.TokenString, 1, 1, NeedPadding);
+    tokAssign:
+      CodeGen.Write(Scaner.TokenString, 1, 1, NeedPadding);
   else
-
     if (Token in KeywordTokens + ComplexTokens + DirectiveTokens) then // 关键字范围扩大
     begin
       if FLastToken = tokAmpersand then // 关键字前是 & 表示非关键字
@@ -817,16 +822,15 @@ begin
         end;
       end;
     end
-
     else if FIsTypeID then // 如果是类型名，则按规则处理 Scaner.TokenString
     begin
       CodeGen.Write(CheckIdentifierName(Scaner.TokenString), BeforeSpaceCount,
         AfterSpaceCount, NeedPadding);
     end
-    else
+    else // 目前只有右括号部分
     begin
       CodeGen.Write(CheckIdentifierName(Scaner.TokenString), BeforeSpaceCount,
-        AfterSpaceCount, NeedPadding);
+        AfterSpaceCount, NeedPadding, NeedUnIndent);
     end;
   end;
 
@@ -2920,7 +2924,13 @@ begin
   finally
     RestoreElementType;
   end;
-  Match(tokRB);
+
+  SpecifyElementType(pfetFormalParametersRightBracket);
+  try
+    Match(tokRB);
+  finally
+    RestoreElementType;
+  end;
 end;
 
 { FormalParm -> [Ref] [VAR | CONST | OUT] Parameter }
@@ -5533,13 +5543,19 @@ function TCnAbstractCodeFormatter.CalcNeedPadding: Boolean;
 begin
   Result := (FElementType in [pfetExpression, pfetEnumList,pfetArrayConstant,
     pfetSetConstructor, pfetFormalParameters, pfetUsesList,
-    pfetThen, pfetDo, pfetExprListRightBracket])
+    pfetThen, pfetDo, pfetExprListRightBracket, pfetFormalParametersRightBracket])
     or ((FElementType in [pfetConstExpr]) and not UpperContainElementType([pfetCaseLabel])) // Case Label 的无需跟随上面一行注释缩进
     or UpperContainElementType([pfetFormalParameters, pfetArrayConstant]);
   // 暂且表达式内部与枚举定义内部等一系列元素内部，或者在参数列表、uses 中
   // 碰到注释导致的换行时，才要求自动和上一行对齐
   // 还要求在本来不换行的组合语句里，比如 if then ，while do 里，for do 里
   // 严格来讲 then/do 这种还不同，不需要进一步缩进，不过暂时当作进一步缩进处理。
+end;
+
+function TCnAbstractCodeFormatter.CalcNeedPaddingAndUnIndent: Boolean;
+begin
+  Result := FElementType in [pfetExprListRightBracket, pfetFormalParametersRightBracket];
+  // 在 CalcNeedPadding 为 True 的前提下，以上要反缩进
 end;
 
 function TCnAbstractCodeFormatter.UpperContainElementType(ElementTypes:

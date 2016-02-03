@@ -97,9 +97,10 @@ type
 
     procedure Reset;
     procedure Write(const Text: string; BeforeSpaceCount:Word = 0;
-      AfterSpaceCount: Word = 0; NeedPadding: Boolean = False);
+      AfterSpaceCount: Word = 0; NeedPadding: Boolean = False; NeedUnIndent: Boolean = False);
     procedure WriteOneSpace;
     // 供格式化写语句中的单个分隔空格用，会判断是否已有注释带来的空格而决定是否写一个空格
+    // NeedUnIndent 指外部需要回退空格，仅当 NeedPadding 为 True 时有效
 
     procedure WriteBlank(const Text: string);
     procedure InternalWriteln;
@@ -514,7 +515,7 @@ begin
 end;
 
 procedure TCnCodeGenerator.Write(const Text: string; BeforeSpaceCount,
-  AfterSpaceCount: Word; NeedPadding: Boolean);
+  AfterSpaceCount: Word; NeedPadding: Boolean; NeedUnIndent: Boolean);
 var
   Str, WrapStr, Tmp, S: string;
   ThisCanBeHead, PrevCanBeTail, IsCRLFSpace, IsAfterCommentAuto: Boolean;
@@ -719,7 +720,10 @@ begin
       if FCodeWrapMode = cwmSimple then // uses 区无需进一步缩进
         I := LastSpaces
       else
-        I := LastSpaces + CnPascalCodeForRule.TabSpaceCount;        
+        I := LastSpaces + CnPascalCodeForRule.TabSpaceCount;
+
+      if NeedUnIndent then
+        Dec(I, CnPascalCodeForRule.TabSpaceCount);
 
       // 不能直接加上 Tab 个空格，还得考虑末尾行已经被写入了一批空格的情况
       if FActualLines.Count > 0 then
