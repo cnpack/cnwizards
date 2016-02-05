@@ -30,7 +30,7 @@ unit CnSourceHighlight;
 * 备    注：BDS 下 UTF8 的问题有三个地方需要标明：
 *                              D7或以下、  D2009以下的BDS、D2009：
 *           LineText 属性：    AnsiString、UTF8、          UncodeString
-*           EditView.CusorPos：Ansi字节、  UTF8的字节Col、 UTF8的字节Col
+*           EditView.CusorPos：Ansi字节、  UTF8的字节Col、 转成Ansi的字符Col
 *           GetAttributeAtPos：Ansi字节、  UTF8的字节Col、 UTF8的字节Col
 *               因此 D2009 下处理时，需要额外将获得的 UnicodeString 的 LineText
 *               转成 UTF8 来适应相关的 CursorPos 和 GetAttributeAtPos
@@ -38,7 +38,9 @@ unit CnSourceHighlight;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2014.12.25
+* 修改记录：2016.02.05
+*               修正 Unicode IDE 下括号配对功能对于包含汉字的行可能出现位置偏差的问题
+*           2014.12.25
 *               增加高亮光标下配对的条件编译指令功能
 *           2014.09.17
 *               优化高亮当前标识符的绘制性能，感谢vitaliyg2
@@ -47,7 +49,7 @@ unit CnSourceHighlight;
 *           2012.12.24
 *               修复 jtdd 报告的绘制空行分隔线在折叠状态下可能出错的问题
 *           2011.09.04
-*               加入 white_nigger 的修补以针对修复 CloseAll 时出错的问题，待测试
+*               加入 white_nigger 的修补以针对修复 CloseAll 时出错的问题
 *           2010.10.04
 *               2009 以上 Unicode 环境下，各个 Token 的 Col 采用 ConvertPos 进行
 *               转换时，对汉字以及单位置双字节字符等的判断会有错误，因此采用
@@ -2762,9 +2764,7 @@ var
           Continue;
       {$ENDIF}
         LineText := AnsiString(EditControlWrapper.GetTextAtLine(EditControl, i));
-      {$IFDEF UNICODE}
-        LineText := CnAnsiToUtf8(LineText);
-      {$ENDIF}
+
         if i = TopLine then
           l := CharPos.CharIndex + 1
         else
@@ -2812,9 +2812,7 @@ var
           Continue;
       {$ENDIF}
         LineText := AnsiString(EditControlWrapper.GetTextAtLine(EditControl, i));
-      {$IFDEF UNICODE}
-        LineText := CnAnsiToUtf8(LineText);
-      {$ENDIF}
+
         if i = BottomLine then
           l := CharPos.CharIndex - 1
         else
@@ -2870,9 +2868,7 @@ var
           Continue;
       {$ENDIF}
         LineText := AnsiString(EditControlWrapper.GetTextAtLine(EditControl, i));
-      {$IFDEF UNICODE}
-        LineText := CnAnsiToUtf8(LineText);
-      {$ENDIF}
+
         if i = CharPos.Line then
           l := Min(CharPos.CharIndex, Length(LineText)) - 1
         else
@@ -2923,9 +2919,7 @@ var
           Continue;
       {$ENDIF}
         LineText := AnsiString(EditControlWrapper.GetTextAtLine(EditControl, i));
-      {$IFDEF UNICODE}
-        LineText := CnAnsiToUtf8(LineText);
-      {$ENDIF}
+
         if i = CharPos.Line then
           l := CharPos.CharIndex
         else
@@ -2998,12 +2992,9 @@ begin
       CharPos.CharIndex := EditView.CursorPos.Col - 1;
       CharPos.Line := EditView.CursorPos.Line;
       LText := AnsiString(EditControlWrapper.GetTextAtLine(EditControl, CharPos.Line));
+      // BDS 下 CursorPos 是 utf8 的位置，LText 在 BDS 下是 UTF8，一致。
+      // 在 D2009 下是 UnicodeString，CursorPos 是 Ansi 位置，因此需要转成 Ansi。
 
-      // 此处 CursorPos 是 utf8 的位置，LText 在 BDS 下是 UTF8，但在 D2009 下是
-      // UnicodeString，因此下面的取下标等会出问题，所以全转成 UTF8 来处理。
-      {$IFDEF UNICODE}
-      LText := CnAnsiToUtf8(LText);
-      {$ENDIF}
       if LText <> '' then
       begin
         if CharPos.CharIndex > 0 then
@@ -3018,6 +3009,9 @@ begin
           PL := OTAEditPos(0, 0);
         end;
         CR := LText[CharPos.CharIndex + 1];
+{$IFDEF DEBUG}
+//      CnDebugger.LogFmt('GetBracketMatch Chars Left and Right to Cursor: ''%s'', ''%s''', [CL, CR]);
+{$ENDIF}
         PR := EditView.CursorPos;
         for i := 0 to BracketCount - 1 do
           if CL = BracketChars^[i][0] then
@@ -3051,10 +3045,9 @@ begin
     if not Result and FBracketMiddle then
       Result := _FindMatchTokenMiddle;
 
-{$IFDEF BDS}
+{$IFDEF IDE_STRING_ANSI_UTF8}
     // BDS 下 LineText 是 Utf8，EditView.CursorPos.Col 也是 Utf8 字符串中的位置
-    // 此处转换为 AnsiString 位置。D2009 中 LineText 虽不是 Utf8，但已经在上面转
-    // 成了 UTF8 来参与计算，因此这儿仍然需要转回。
+    // 此处转换为 AnsiString 位置。D2009 中 LineText 不是 Utf8，因此这儿不需要转回。
     if Result then
     begin
       AInfo.FTokenPos.Col := Length(CnUtf8ToAnsi(AnsiString(Copy(AInfo.TokenLine, 1,

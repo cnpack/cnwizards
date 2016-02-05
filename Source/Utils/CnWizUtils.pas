@@ -3994,7 +3994,7 @@ end;
 
   Delphi5/6/7         Ansi               同左、一致                同左、一致
 
-  Delphi 2005~2007    Ansi with UTF8     同左、与 UTF8 一致        Ansi、与 TF8 不一致
+  Delphi 2005~2007    Ansi with UTF8     同左、与 UTF8 一致        Ansi、与 UTF8 不一致
 
   Delphi 2009~        UTF16              Ansi、与 UTF16 不一致     同左 Ansi、与 UTF16 不一致
 }
