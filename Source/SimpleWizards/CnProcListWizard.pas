@@ -1825,10 +1825,10 @@ var
     PrevElementForForward: TCnElementInfo;
     IsClassForForward, IsInTemplate: Boolean;
 
-    // For class sealed
-    IsClassButSealedNotKnown: Boolean;
-    CurClassForSealed: string;
-    SealedNotKnownLineNo: Integer;
+    // For class sealed or abstract
+    IsClassButSealedOrAbstractNotKnown: Boolean;
+    CurClassForSealedorAbstract: string;
+    SealedOrAbstractNotKnownLineNo: Integer;
   begin
     FElementList.BeginUpdate;
     try
@@ -1842,14 +1842,14 @@ var
             InIntfDeclaration := False;
             FoundNonEmptyType := False;
             IsClassForForward := False;
-            IsClassButSealedNotKnown := False;
+            IsClassButSealedOrAbstractNotKnown := False;
             IsInTemplate := False;
             PrevElementForForward := nil;
             IntfName := '';
             CurIdent := '';
             CurClass := '';
             CurIntf := '';
-            CurClassForSealed := '';
+            CurClassForSealedorAbstract := '';
             PrevTokenID := tkNull;
 
             while Parser.TokenID <> tkNull do
@@ -1891,7 +1891,7 @@ var
                 CurClass := CurIdent
               else if (Parser.TokenID = tkClass) and not Parser.IsClass then
               begin
-                CurClassForSealed := CurIdent;
+                CurClassForSealedorAbstract := CurIdent;
               end;
               if Parser.TokenID = tkInterface then
               begin
@@ -1984,20 +1984,25 @@ var
               if not InIntfDeclaration and (Parser.TokenID = tkIdentifier) then
                 IntfName := string(Parser.Token);
 
-              if IsClassButSealedNotKnown then
+              if IsClassButSealedOrAbstractNotKnown then
               begin
-                IsClassButSealedNotKnown := False;
-                if Parser.TokenID = tkSealed then
+                IsClassButSealedOrAbstractNotKnown := False;
+                if Parser.TokenID in [tkSealed, tkAbstract] then
                 begin
-                  // 记录 sealed 类信息
+                  // 记录 sealed 或 abstract 类信息
                   ElementInfo := TCnElementInfo.Create;
-                  ElementInfo.LineNo := SealedNotKnownLineNo;
+                  ElementInfo.LineNo := SealedOrAbstractNotKnownLineNo;
                   ElementInfo.FileName := _CnExtractFileName(aFileName);
                   ElementInfo.AllName := aFileName;
                   ElementInfo.ElementType := etClass;
-                  ElementInfo.ElementTypeStr := 'class sealed';
-                  ElementInfo.DisplayName := CurClassForSealed;
-                  ElementInfo.OwnerClass := CurClassForSealed;
+
+                  if Parser.TokenID = tkSealed then
+                    ElementInfo.ElementTypeStr := 'class sealed'
+                  else
+                    ElementInfo.ElementTypeStr := 'class abstract';
+
+                  ElementInfo.DisplayName := CurClassForSealedorAbstract;
+                  ElementInfo.OwnerClass := CurClassForSealedorAbstract;
                   AddElement(ElementInfo);
 
                   IsClassForForward := True; // 以备后面判断是否是 class; 的前向声明
@@ -2027,9 +2032,9 @@ var
               end
               else if (Parser.TokenID = tkClass) and not Parser.IsClass then
               begin
-                // Parser 遇到 class sealed 时，IsClass 判断有误，需要如此处理一下
-                IsClassButSealedNotKnown := True;
-                SealedNotKnownLineNo := Parser.LineNumber + 1;
+                // Parser 遇到 class sealed/abstract 时，IsClass 判断有误，需要如此处理一下
+                IsClassButSealedOrAbstractNotKnown := True;
+                SealedOrAbstractNotKnownLineNo := Parser.LineNumber + 1;
               end
               else if ((Parser.TokenID = tkInterface) and Parser.IsInterface) or
                 (Parser.TokenID = tkDispInterface) then
