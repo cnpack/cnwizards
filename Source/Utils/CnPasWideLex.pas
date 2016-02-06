@@ -215,6 +215,7 @@ type
     function Func41: TTokenKind;
     function Func44: TTokenKind;
     function Func45: TTokenKind;
+    function Func46: TTokenKind;
     function Func47: TTokenKind;
     function Func49: TTokenKind;
     function Func52: TTokenKind;
@@ -446,6 +447,8 @@ begin
         FIdentFuncTable[I] := Func44;
       45:
         FIdentFuncTable[I] := Func45;
+      46:
+        FIdentFuncTable[I] := Func46;
       47:
         FIdentFuncTable[I] := Func47;
       49:
@@ -771,6 +774,14 @@ function TCnPasWideLex.Func45: TTokenKind;
 begin
   if KeyComp('Shr') then
     Result := tkShr
+  else
+    Result := tkIdentifier;
+end;
+
+function TCnPasWideLex.Func46: TTokenKind;
+begin
+  if KeyComp('Sealed') then
+    Result := tkSealed
   else
     Result := tkIdentifier;
 end;

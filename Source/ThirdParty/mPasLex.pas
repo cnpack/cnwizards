@@ -102,7 +102,7 @@ type
     tkPacked, tkPascal, tkPlus, tkPoint, tkPointerSymbol, tkPrivate, tkProcedure,
     tkProgram, tkProperty, tkProtected, tkPublic, tkPublished, tkRaise, tkRead,
     tkReadonly, tkRecord, tkRegister, tkReintroduce, tkRepeat, tkResident,
-    tkResourcestring, tkRoundClose, tkRoundOpen, tkSafecall, tkSemiColon, tkSet,
+    tkResourcestring, tkRoundClose, tkRoundOpen, tkSafecall, tkSealed, tkSemiColon, tkSet,
     tkShl, tkShr, tkSlash, tkSlashesComment, tkSquareClose, tkSquareOpen,
     tkSpace, tkStar, tkStdcall, tkStored, tkString, tkStringresource, tkSymbol,
     tkThen, tkThreadvar, tkTo, tkTry, tkType, tkUnit, tkUnknown, tkUntil, tkUses,
@@ -156,6 +156,7 @@ type
     function Func41: TTokenKind;
     function Func44: TTokenKind;
     function Func45: TTokenKind;
+    function Func46: TTokenKind;
     function Func47: TTokenKind;
     function Func49: TTokenKind;
     function Func52: TTokenKind;
@@ -331,6 +332,7 @@ begin
       41: fIdentFuncTable[I]:=Func41;
       44: fIdentFuncTable[I]:=Func44;
       45: fIdentFuncTable[I]:=Func45;
+      46: fIdentFuncTable[I]:=Func46;
       47: fIdentFuncTable[I]:=Func47;
       49: fIdentFuncTable[I]:=Func49;
       52: fIdentFuncTable[I]:=Func52;
@@ -531,6 +533,11 @@ end;
 function TmwPasLex.Func45: TTokenKind;
 begin
   if KeyComp('Shr')then Result:=tkShr else Result:=tkIdentifier;
+end;
+
+function TmwPasLex.Func46: TTokenKind;
+begin
+  if KeyComp('Sealed')then Result:=tkSealed else Result:=tkIdentifier;
 end;
 
 function TmwPasLex.Func47: TTokenKind;
