@@ -379,7 +379,7 @@ var
   Token, CurrMethod, CurrBlock, CurrMidBlock: TCnPasToken;
   SavePos, SaveLineNumber, SaveLinePos: Integer;
   IsClassOpen, IsClassDef, IsImpl, IsHelper: Boolean;
-  IsRecordHelper, IsSealed, IsRecord, IsForFunc: Boolean;
+  IsRecordHelper, IsSealed, IsAbstract, IsRecord, IsForFunc: Boolean;
   DeclareWithEndLevel: Integer;
   PrevTokenID: TTokenKind;
   PrevTokenStr: AnsiString;
@@ -624,6 +624,7 @@ begin
             begin
               IsHelper := False;
               IsSealed := False;
+              IsAbstract := False;
               IsClassDef := ((Lex.TokenID = tkClass) and Lex.IsClass)
                 or ((Lex.TokenID = tkInterface) and Lex.IsInterface) or
                 (Lex.TokenID = tkDispInterface);
@@ -636,17 +637,22 @@ begin
                 SaveLinePos := Lex.LinePos;
 
                 LexNextNoJunkWithoutCompDirect(Lex);
-                if Lex.TokenID in [tkSymbol, tkIdentifier] then
+                if Lex.TokenID in [tkSymbol, tkIdentifier, tkSealed, tkAbstract] then
                 begin
                   if LowerCase(string(Lex.Token)) = 'helper' then
                   begin
                     IsClassDef := True;
                     IsHelper := True;
                   end
-                  else if LowerCase(string(Lex.Token)) = 'sealed' then
+                  else if Lex.TokenID = tkSealed then
                   begin
                     IsClassDef := True;
                     IsSealed := True;
+                  end
+                  else if Lex.TokenID = tkAbstract then
+                  begin
+                    IsClassDef := True;
+                    IsAbstract := True;
                   end;
                 end;
                 Lex.LineNumber := SaveLineNumber;
@@ -665,7 +671,7 @@ begin
                 LexNextNoJunkWithoutCompDirect(Lex);
                 if Lex.TokenID = tkSemiColon then // 是个 class; 不需要 end;
                   IsClassOpen := False
-                else if IsHelper or IsSealed then
+                else if IsHelper or IsSealed or IsAbstract then
                   LexNextNoJunkWithoutCompDirect(Lex);
 
                 if Lex.TokenID = tkRoundOpen then // 有括号，看是不是();
