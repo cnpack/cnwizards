@@ -1826,7 +1826,7 @@ var
     IsClassForForward, IsInTemplate: Boolean;
 
     // For class sealed or abstract
-    IsClassButSealedOrAbstractNotKnown: Boolean;
+    IsClassButNotKnown: Boolean;
     CurClassForSealedorAbstract: string;
     SealedOrAbstractNotKnownLineNo: Integer;
   begin
@@ -1842,7 +1842,7 @@ var
             InIntfDeclaration := False;
             FoundNonEmptyType := False;
             IsClassForForward := False;
-            IsClassButSealedOrAbstractNotKnown := False;
+            IsClassButNotKnown := False;
             IsInTemplate := False;
             PrevElementForForward := nil;
             IntfName := '';
@@ -1984,9 +1984,9 @@ var
               if not InIntfDeclaration and (Parser.TokenID = tkIdentifier) then
                 IntfName := string(Parser.Token);
 
-              if IsClassButSealedOrAbstractNotKnown then
+              if IsClassButNotKnown then
               begin
-                IsClassButSealedOrAbstractNotKnown := False;
+                IsClassButNotKnown := False;
                 if Parser.TokenID in [tkSealed, tkAbstract] then
                 begin
                   // 记录 sealed 或 abstract 类信息
@@ -2033,7 +2033,7 @@ var
               else if (Parser.TokenID = tkClass) and not Parser.IsClass then
               begin
                 // Parser 遇到 class sealed/abstract 时，IsClass 判断有误，需要如此处理一下
-                IsClassButSealedOrAbstractNotKnown := True;
+                IsClassButNotKnown := True;
                 SealedOrAbstractNotKnownLineNo := Parser.LineNumber + 1;
               end
               else if ((Parser.TokenID = tkInterface) and Parser.IsInterface) or
