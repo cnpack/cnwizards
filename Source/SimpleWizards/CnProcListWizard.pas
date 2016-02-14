@@ -1827,8 +1827,8 @@ var
 
     // For class sealed or abstract
     IsClassButNotKnown: Boolean;
-    CurClassForSealedorAbstract: string;
-    SealedOrAbstractNotKnownLineNo: Integer;
+    CurClassForNotKnown: string;
+    NotKnownLineNo: Integer;
   begin
     FElementList.BeginUpdate;
     try
@@ -1849,7 +1849,7 @@ var
             CurIdent := '';
             CurClass := '';
             CurIntf := '';
-            CurClassForSealedorAbstract := '';
+            CurClassForNotKnown := '';
             PrevTokenID := tkNull;
 
             while Parser.TokenID <> tkNull do
@@ -1891,7 +1891,7 @@ var
                 CurClass := CurIdent
               else if (Parser.TokenID = tkClass) and not Parser.IsClass then
               begin
-                CurClassForSealedorAbstract := CurIdent;
+                CurClassForNotKnown := CurIdent;
               end;
               if Parser.TokenID = tkInterface then
               begin
@@ -1991,7 +1991,7 @@ var
                 begin
                   // 记录 sealed 或 abstract 类信息
                   ElementInfo := TCnElementInfo.Create;
-                  ElementInfo.LineNo := SealedOrAbstractNotKnownLineNo;
+                  ElementInfo.LineNo := NotKnownLineNo;
                   ElementInfo.FileName := _CnExtractFileName(aFileName);
                   ElementInfo.AllName := aFileName;
                   ElementInfo.ElementType := etClass;
@@ -2001,8 +2001,8 @@ var
                   else
                     ElementInfo.ElementTypeStr := 'class abstract';
 
-                  ElementInfo.DisplayName := CurClassForSealedorAbstract;
-                  ElementInfo.OwnerClass := CurClassForSealedorAbstract;
+                  ElementInfo.DisplayName := CurClassForNotKnown;
+                  ElementInfo.OwnerClass := CurClassForNotKnown;
                   AddElement(ElementInfo);
 
                   IsClassForForward := True; // 以备后面判断是否是 class; 的前向声明
@@ -2034,7 +2034,7 @@ var
               begin
                 // Parser 遇到 class sealed/abstract 时，IsClass 判断有误，需要如此处理一下
                 IsClassButNotKnown := True;
-                SealedOrAbstractNotKnownLineNo := Parser.LineNumber + 1;
+                NotKnownLineNo := Parser.LineNumber + 1;
               end
               else if ((Parser.TokenID = tkInterface) and Parser.IsInterface) or
                 (Parser.TokenID = tkDispInterface) then
