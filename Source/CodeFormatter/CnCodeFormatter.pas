@@ -88,7 +88,9 @@ type
     procedure RestoreElementType;
     // 区分当前位置并恢复，必须配对使用
     function UpperContainElementType(ElementTypes: TCnPascalFormattingElementTypeSet): Boolean;
-    // 上层是否包含指定的几个 ElementType 之一
+    // 上层是否包含指定的几个 ElementType 之一，不包括当前
+    function CurrentContainElementType(ElementTypes: TCnPascalFormattingElementTypeSet): Boolean;
+    // 上层与当前是否包含指定的几个 ElementType 之一
 
     procedure ResetElementType;
     function CalcNeedPadding: Boolean;
@@ -1178,6 +1180,7 @@ begin
   while Scaner.Token = tokSLB do // Attribute
   begin
     FormatSingleAttribute(PreSpaceCount);
+    // if not CurrentContainElementType([pfetFormalParameters]) then // 参数列表里的属性不换行
     Writeln;
   end;
 
@@ -2933,7 +2936,7 @@ begin
   end;
 end;
 
-{ FormalParm -> [Ref] [VAR | CONST | OUT] Parameter }
+{ FormalParm -> [Ref] [VAR | CONST | OUT] [Ref] Parameter }
 procedure TCnBasePascalFormatter.FormatFormalParm(PreSpaceCount: Byte);
 begin
   if Scaner.Token = tokSLB then
@@ -2947,7 +2950,17 @@ begin
   if (Scaner.Token in [tokKeywordVar, tokKeywordConst, tokKeywordOut]) and
      not (Scaner.ForwardToken in [tokColon, tokComma])
   then
+  begin
     Match(Scaner.Token);
+
+    if Scaner.Token = tokSLB then
+    begin
+      Match(tokSLB, 1, 0); // [ 前有个空格
+      if Scaner.Token in KeywordTokens + [tokSymbol] then
+        Match(Scaner.Token);
+      Match(tokSRB, 0, 1); // ] 后有个空格
+    end;
+  end;
 
   FormatParameter;
 end;
@@ -5591,6 +5604,12 @@ begin
   FEnsureOneEmptyLine := True;
   Writeln;
   FEnsureOneEmptyLine := False;
+end;
+
+function TCnAbstractCodeFormatter.CurrentContainElementType(
+  ElementTypes: TCnPascalFormattingElementTypeSet): Boolean;
+begin
+  Result := (FElementType in ElementTypes) or UpperContainElementType(ElementTypes);
 end;
 
 initialization
