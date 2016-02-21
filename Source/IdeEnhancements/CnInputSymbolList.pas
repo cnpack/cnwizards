@@ -1113,7 +1113,7 @@ function TCompDirectSymbolList.Reload(Editor: IOTAEditBuffer;
   const InputText: string; PosInfo: TCodePosInfo): Boolean;
 begin
   if PosInfo.IsPascal then
-    Result := PosInfo.PosKind in (csNormalPosKinds + [pkCompDirect])
+    Result := PosInfo.PosKind in (csNormalPosKinds + [pkCompDirect, pkIntfUses, pkImplUses])
   else
     Result := PosInfo.PosKind in (csNormalPosKinds + [pkCompDirect, pkField]);
 end;

@@ -464,7 +464,7 @@ const
   csNoneSymbolKind = [];
   csCompDirectSymbolKind = [skCompDirect];
   csCommentSymbolKind = [skComment];
-  csUnitSymbolKind = [skUnit];
+  csUnitSymbolKind = [skUnit, skCompDirect];
   csDeclearSymbolKind = csAllSymbolKind - [skUnknown, skLabel];
   csDefineSymbolKind = csAllSymbolKind - [skUnknown, skUnit, skLabel];
   csCodeSymbolKind = csAllSymbolKind;
