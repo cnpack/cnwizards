@@ -161,8 +161,10 @@ begin
     Exit;
   end;
 
-  ErrList := nil; HasError := False;
-  Ini := TCnProjectExtWizard.CreateIniFile;
+  ErrList := nil;
+  HasError := False;
+  AWizard := TCnProjectExtWizard(CnWizardMgr.WizardByClass(TCnProjectExtWizard));
+  Ini := AWizard.CreateIniFile;
 
   // 判断是引用单元还是添加Frame
   if IsUseUnit then
@@ -187,11 +189,7 @@ begin
       UseUnitsHookBtnChecked := actHookIDE.Checked;
       SaveSettings(Ini, csUseUnits);
       if NeedUpdateMethodHook then
-      begin
-        AWizard := TCnProjectExtWizard(CnWizardMgr.WizardByClass(TCnProjectExtWizard));
-        if AWizard <> nil then
-          AWizard.UpdateMethodHook(UseUnitsHookBtnChecked);
-      end;
+        AWizard.UpdateMethodHook(UseUnitsHookBtnChecked);
 
       if Result then
       begin

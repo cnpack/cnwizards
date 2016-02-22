@@ -82,7 +82,7 @@ interface
 
 uses
   Windows, Classes, Sysutils, Graphics, Menus, ActnList, IniFiles, ToolsAPI,
-  Registry, ComCtrls, Forms,
+  Registry, ComCtrls, Forms, CnHashMap,
   CnWizShortCut, CnWizMenuAction, CnIni, CnWizConsts, CnPopupMenu;
 
 type
@@ -100,6 +100,7 @@ type
   private
     FActive: Boolean;
     FWizardIndex: Integer;
+    FDefaultsMap: TCnBaseHashMap;
   protected
     procedure SetActive(Value: Boolean); virtual;
     {* Active 属性写方法，子类重载该方法处理 Active 属性变更事件 }
@@ -160,7 +161,7 @@ type
 
     class function GetIDStr: string;
     {* 返回专家唯一标识符，供管理器使用 }
-    class function CreateIniFile(CompilerSection: Boolean = False): TCustomIniFile;
+    function CreateIniFile(CompilerSection: Boolean = False): TCustomIniFile;
     {* 返回一个用于存取专家设置参数的 INI 对象，用户使用后须自己释放 }
     procedure DoLoadSettings;
     {* 装载专家设置 }
@@ -597,6 +598,7 @@ end;
 // 类析构器
 destructor TCnBaseWizard.Destroy;
 begin
+  FreeAndNil(FDefaultsMap);
   inherited Destroy;
 end;
 
@@ -656,10 +658,13 @@ end;
 //------------------------------------------------------------------------------
 
 // 返回一个用于存取专家设置参数的 INI 对象，用户使用后须自己释放
-class function TCnBaseWizard.CreateIniFile(CompilerSection: Boolean): TCustomIniFile;
+function TCnBaseWizard.CreateIniFile(CompilerSection: Boolean): TCustomIniFile;
 var
   Path: string;
 begin
+  if FDefaultsMap = nil then
+    FDefaultsMap := TCnBaseHashMap.Create;
+
   if CompilerSection then
     Path := MakePath(MakePath(WizOptions.RegPath) + GetIDStr) + WizOptions.CompilerID
   else
