@@ -61,6 +61,7 @@ object TestWizIniForm: TTestWizIniForm
       Height = 21
       TabOrder = 0
       Text = '0'
+      OnChange = SyncValues
     end
     object udSetting2: TUpDown
       Left = 313
@@ -79,6 +80,7 @@ object TestWizIniForm: TTestWizIniForm
       Width = 145
       Height = 21
       TabOrder = 2
+      OnChange = SyncValues
     end
     object dtpSetting4Date: TDateTimePicker
       Left = 144
@@ -93,6 +95,7 @@ object TestWizIniForm: TTestWizIniForm
       Kind = dtkDate
       ParseInput = False
       TabOrder = 3
+      OnChange = SyncValues
     end
     object dtpSetting4Time: TDateTimePicker
       Left = 304
@@ -107,6 +110,7 @@ object TestWizIniForm: TTestWizIniForm
       Kind = dtkTime
       ParseInput = False
       TabOrder = 4
+      OnChange = SyncValues
     end
     object chkSetting1: TCheckBox
       Left = 24
@@ -115,6 +119,7 @@ object TestWizIniForm: TTestWizIniForm
       Height = 17
       Caption = 'Setting 1 Boolean'
       TabOrder = 5
+      OnClick = SyncValues
     end
   end
   object btnSaveSetting: TButton

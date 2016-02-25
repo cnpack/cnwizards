@@ -26,9 +26,11 @@ type
     procedure btnDumpClick(Sender: TObject);
     procedure btnLoadSettingClick(Sender: TObject);
     procedure btnSaveSettingClick(Sender: TObject);
+    procedure SyncValues(Sender: TObject);
   private
     FIni: TCnWizIniFile;
     FMap: TCnStrToVariantHashMap;
+    FShowing: Boolean;
     procedure ShowValues;
   public
     { Public declarations }
@@ -64,8 +66,8 @@ var
 begin
   FMap := TCnStrToVariantHashMap.Create();
 
-  Path := IncludeTrailingBackslash(IncludeTrailingBackslash((SCnPackRegPath)
-    + SCnWizardRegPath)) + 'TestWizIni';
+  Path := IncludeTrailingBackslash(IncludeTrailingBackslash(SCnPackRegPath)
+    + SCnWizardRegPath) + 'TestWizIni';
   FIni := TCnWizIniFile.Create(Path, KEY_ALL_ACCESS, FMap);
 
   ShowValues;
@@ -96,11 +98,13 @@ end;
 
 procedure TTestWizIniForm.ShowValues;
 begin
+  FShowing := True;
   chkSetting1.Checked := Setting1;
   udSetting2.Position := Setting2;
   edtSetting3.Text := Setting3;
   dtpSetting4Date.DateTime := Setting4;
   dtpSetting4Time.DateTime := Setting4;
+  FShowing := False;
 end;
 
 procedure TTestWizIniForm.btnLoadSettingClick(Sender: TObject);
@@ -121,6 +125,17 @@ begin
   FIni.WriteDateTime('', csTestSettingKey4, Setting4);
 
   ShowMessage('Settings Saved. Please Check Registry.');
+end;
+
+procedure TTestWizIniForm.SyncValues(Sender: TObject);
+begin
+  if FShowing then
+    Exit;
+
+  Setting1 := chkSetting1.Checked;
+  Setting2 := udSetting2.Position;
+  Setting3 := edtSetting3.Text;
+  Setting4 := dtpSetting4Date.Date;
 end;
 
 end.

@@ -100,7 +100,7 @@ type
   private
     FActive: Boolean;
     FWizardIndex: Integer;
-    FDefaultsMap: TCnBaseHashMap;
+    FDefaultsMap: TCnStrToVariantHashMap;
   protected
     procedure SetActive(Value: Boolean); virtual;
     {* Active 属性写方法，子类重载该方法处理 Active 属性变更事件 }
@@ -663,7 +663,7 @@ var
   Path: string;
 begin
   if FDefaultsMap = nil then
-    FDefaultsMap := TCnBaseHashMap.Create;
+    FDefaultsMap := TCnStrToVariantHashMap.Create;
 
   if CompilerSection then
     Path := MakePath(MakePath(WizOptions.RegPath) + GetIDStr) + WizOptions.CompilerID

@@ -262,7 +262,7 @@ begin
     inherited WriteInteger(Section, Ident, Value)
   else if not FDefaultsMap.Find(Ident, AValue) then // 缓存里没有默认值也写
     inherited WriteInteger(Section, Ident, Value)
-  else if Value <> AValue then       // 缓存的默认值和要写的值不同也写
+  else if Value <> Integer(AValue) then       // 缓存的默认值和要写的值不同也写
     inherited WriteInteger(Section, Ident, Value)
   else if ReadInteger(Section, Ident, AValue) <> Value then
     inherited WriteInteger(Section, Ident, Value)
@@ -277,7 +277,7 @@ begin
     inherited WriteString(Section, Ident, Value)
   else if not FDefaultsMap.Find(Ident, AValue) then // 缓存里没有默认值也写
     inherited WriteString(Section, Ident, Value)
-  else if Value <> AValue then       // 缓存的默认值和要写的值不同也写
+  else if Value <> VarToStr(AValue) then       // 缓存的默认值和要写的值不同也写
     inherited WriteString(Section, Ident, Value)
   else if ReadString(Section, Ident, AValue) <> Value then
     inherited WriteString(Section, Ident, Value)
