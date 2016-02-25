@@ -43,7 +43,8 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, Menus,
   StdCtrls, ComCtrls, IniFiles, ToolsAPI, Registry, CnWizClasses, CnConsts, CnIni,
-  CnWizConsts, CnWizMenuAction, ExtCtrls, CnWizMultiLang, CnWizManager;
+  CnWizConsts, CnWizMenuAction, ExtCtrls, CnWizMultiLang, CnWizManager, CnHashMap,
+  CnWizIni;
 
 type
 
@@ -95,6 +96,7 @@ type
     FActive: Boolean;
     FOwner: TCnEditorWizard;
     FAction: TCnWizMenuAction;
+    FDefaultsMap: TCnStrToVariantHashMap;
   protected
     function GetIDStr: string;
     procedure SetActive(Value: Boolean); virtual;
@@ -265,14 +267,17 @@ end;
 
 function TCnBaseEditorTool.CreateIniFile: TCustomIniFile;
 begin
+  if FDefaultsMap = nil then
+    FDefaultsMap := TCnStrToVariantHashMap.Create;
+
   Result := TRegistryIniFile.Create(MakePath(WizOptions.RegPath) + Owner.GetIDStr +
     '\' + GetIDStr, KEY_ALL_ACCESS);
 end;
 
 destructor TCnBaseEditorTool.Destroy;
 begin
+  FDefaultsMap.Free;
   inherited;
-
 end;
 
 procedure TCnBaseEditorTool.Loaded;

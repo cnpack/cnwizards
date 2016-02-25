@@ -598,7 +598,7 @@ end;
 // ÀàÎö¹¹Æ÷
 destructor TCnBaseWizard.Destroy;
 begin
-  FreeAndNil(FDefaultsMap);
+  FDefaultsMap.Free;
   inherited Destroy;
 end;
 
