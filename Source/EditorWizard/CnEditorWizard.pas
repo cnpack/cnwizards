@@ -270,8 +270,8 @@ begin
   if FDefaultsMap = nil then
     FDefaultsMap := TCnStrToVariantHashMap.Create;
 
-  Result := TRegistryIniFile.Create(MakePath(WizOptions.RegPath) + Owner.GetIDStr +
-    '\' + GetIDStr, KEY_ALL_ACCESS);
+  Result := TCnWizIniFile.Create(MakePath(WizOptions.RegPath) + Owner.GetIDStr +
+    '\' + GetIDStr, KEY_ALL_ACCESS, FDefaultsMap);
 end;
 
 destructor TCnBaseEditorTool.Destroy;

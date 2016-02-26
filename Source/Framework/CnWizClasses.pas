@@ -82,7 +82,7 @@ interface
 
 uses
   Windows, Classes, Sysutils, Graphics, Menus, ActnList, IniFiles, ToolsAPI,
-  Registry, ComCtrls, Forms, CnHashMap,
+  Registry, ComCtrls, Forms, CnHashMap, CnWizIni,
   CnWizShortCut, CnWizMenuAction, CnIni, CnWizConsts, CnPopupMenu;
 
 type
@@ -669,7 +669,7 @@ begin
     Path := MakePath(MakePath(WizOptions.RegPath) + GetIDStr) + WizOptions.CompilerID
   else
     Path := MakePath(WizOptions.RegPath) + GetIDStr;
-  Result := TRegistryIniFile.Create(Path, KEY_ALL_ACCESS);
+  Result := TCnWizIniFile.Create(Path, KEY_ALL_ACCESS, FDefaultsMap);
 end;
 
 procedure TCnBaseWizard.DoLoadSettings;
