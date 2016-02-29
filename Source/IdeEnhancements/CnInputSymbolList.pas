@@ -30,7 +30,9 @@ unit CnInputSymbolList;
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2012.09.19 by shenloqi
+* 修改记录：2016.03.01 by liuxiao
+*               TUnitNameList 增加路径机制供外部使用
+*           2012.09.19 by shenloqi
 *               移植到Delphi XE3
 *           2012.03.26
 *               增加对XE/XE2独有的XML格式的模板的支持，有部分内容兼容问题
@@ -309,25 +311,34 @@ type
 
   TUnitNameList = class(TSymbolList)
   private
+    FUseFullPath: Boolean;
     FSysPath: string;
-    FSysUnits: TStringList;
+    FSysUnitsName: TStringList;
+    FSysUnitsPath: TStringList;
     FProjectPath: string;
-    FProjectUnits: TStringList;
-    FUnits: TStringList;
-    FCurrList: TStringList;
-    procedure AddUnit(const UnitName: string);
+    FProjectUnitsName: TStringList;
+    FProjectUnitsPath: TStringList;
+    FUnitNames: TStringList;   // 存储单独的文件名
+    FUnitPaths: TStringList;    // FUseFullPath 为 True 时存储对应的单元路径
+    FCurrFileList: TStringList;
+    FCurrPathList: TStringList;
+    function AddUnit(const UnitName: string; IsInProject: Boolean = False): Boolean;
+    procedure AddUnitPaths(const UnitPath: string);
     procedure DoFindFile(const FileName: string; const Info: TSearchRec; var Abort: 
       Boolean);
     procedure LoadFromSysPath;
     procedure LoadFromProjectPath;
     procedure LoadFromCurrProject;
     procedure UpdateCaseFromModules(AList: TStringList);
+    procedure UpdatePathsSequence(Names, Paths: TStringList);
   public
     constructor Create; override;
     destructor Destroy; override;
     class function GetListName: string; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
       TCodePosInfo): Boolean; override;
+    procedure DoInternalLoad(UseFullPath: Boolean = False);
+    procedure ExportToStringList(Names, Paths: TStringList);
   end;
 
 //==============================================================================
@@ -1225,21 +1236,28 @@ end;
 constructor TUnitNameList.Create;
 begin
   inherited;
-  FSysUnits := TStringList.Create;
-  FProjectUnits := TStringList.Create;
-  FUnits := TStringList.Create;
-  FCurrList := nil;
-  FSysUnits.Sorted := True;
-  FProjectUnits.Sorted := True;
-  FUnits.Sorted := True;
+  FSysUnitsName := TStringList.Create;
+  FSysUnitsPath := TStringList.Create;
+  FProjectUnitsName := TStringList.Create;
+  FProjectUnitsPath := TStringList.Create;
+  FUnitNames := TStringList.Create;
+  FUnitPaths := TStringList.Create;
+  FCurrFileList := nil;
+  FCurrPathList := nil;
+  FSysUnitsName.Sorted := True;
+  FProjectUnitsName.Sorted := True;
+  FUnitNames.Sorted := True;
   LoadFromSysPath;
 end;
 
 destructor TUnitNameList.Destroy;
 begin
-  FProjectUnits.Free;
-  FSysUnits.Free;
-  FUnits.Free;
+  FProjectUnitsPath.Free;
+  FProjectUnitsName.Free;
+  FSysUnitsPath.Free;
+  FSysUnitsName.Free;
+  FUnitPaths.Free;
+  FUnitNames.Free;
   inherited;
 end;
 
@@ -1248,13 +1266,25 @@ begin
   Result := SCnInputHelperUnitNameList;
 end;
 
-procedure TUnitNameList.AddUnit(const UnitName: string);
+function TUnitNameList.AddUnit(const UnitName: string; IsInProject: Boolean): Boolean;
 begin
-  if FUnits.IndexOf(UnitName) < 0 then
+  Result := False;
+  if FUnitNames.IndexOf(UnitName) < 0 then
   begin
-    FUnits.Add(UnitName);
+    if IsInProject then
+      FUnitNames.AddObject(UnitName, TObject(Integer(IsInProject)))
+    else
+      FUnitNames.Add(UnitName);
+
     Add(UnitName, skUnit, csUnitScope);
+    Result := True;
   end;
+end;
+
+procedure TUnitNameList.AddUnitPaths(const UnitPath: string);
+begin
+  FUnitPaths.Add(UnitPath);
+  // 必须允许重复
 end;
 
 procedure TUnitNameList.LoadFromCurrProject;
@@ -1263,6 +1293,7 @@ var
   Project: IOTAProject;
   FileName: string;
   i, j: Integer;
+  Added: Boolean;
 begin
   ProjectGroup := CnOtaGetProjectGroup;
   if Assigned(ProjectGroup) then
@@ -1276,7 +1307,12 @@ begin
         begin
           FileName := Project.GetModule(j).FileName;
           if IsPas(FileName) or IsDcu(FileName) then
-            AddUnit(_CnChangeFileExt(_CnExtractFileName(FileName), ''));
+          begin
+            Added := AddUnit(_CnChangeFileExt(_CnExtractFileName(FileName), ''), True);
+
+            if FUseFullPath and Added then
+              AddUnitPaths(_CnExtractFileDir(FileName));
+          end;
         end;
       end;
     end;
@@ -1286,26 +1322,37 @@ end;
 procedure TUnitNameList.DoFindFile(const FileName: string; const Info:
   TSearchRec; var Abort: Boolean);
 var
-  S: string;
+  FilePart: string;
 begin
-  S := _CnChangeFileExt(Info.Name, '');
-  if IsValidIdent(StringReplace(S, '.', '', [rfReplaceAll])) and (FCurrList.IndexOf(S) < 0) then
-    FCurrList.Add(S);
+  FilePart := _CnChangeFileExt(Info.Name, '');
+
+  if IsValidIdent(StringReplace(FilePart, '.', '', [rfReplaceAll])) and (FCurrFileList.IndexOf(FilePart) < 0) then
+  begin
+    // 加入指示对应路径在 FCurrPathList 中的位置，供排序后对应使用
+    FCurrFileList.AddObject(FilePart, TObject(FCurrFileList.Count));
+
+    if FUseFullPath then
+      FCurrPathList.Add( _CnExtractFileDir(FileName));
+  end;
 end;
 
 procedure TUnitNameList.LoadFromSysPath;
 var
   I: Integer;
   Paths: TStringList;
+  Added: Boolean;
 begin
   Paths := TStringList.Create;
   try
     Paths.Sorted := True;
     GetLibraryPath(Paths, False);
-    if not SameText(Paths.Text, FSysPath) then
+    if not SameText(Paths.Text, FSysPath) or FUseFullPath then // 强行加载完整路径
     begin
-      FSysUnits.Clear;
-      FCurrList := FSysUnits;
+      FSysUnitsName.Clear;
+      FSysUnitsPath.Clear;
+      FCurrFileList := FSysUnitsName;
+      FCurrPathList := FSysUnitsPath;
+
       for I := 0 to Paths.Count - 1 do
       begin
         FindFile(Paths[I], '*.pas', DoFindFile, nil, False, False);
@@ -1313,41 +1360,65 @@ begin
       end;
       FindFile(MakePath(GetInstallDir) + 'Lib\', '*.dcu', DoFindFile, nil,
         False, False);
-      UpdateCaseFromModules(FSysUnits);
+      UpdateCaseFromModules(FSysUnitsName);
+      UpdatePathsSequence(FSysUnitsName, FSysUnitsPath);
       FSysPath := Paths.Text;
+
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('SysNames %d. SysPaths %d.', [FSysUnitsName.Count,
+        FSysUnitsPath.Count]);
+{$ENDIF}
     end;
   finally
     Paths.Free;
   end;
 
-  for I := 0 to FSysUnits.Count - 1 do
-    AddUnit(FSysUnits[I]);
+  for I := 0 to FSysUnitsName.Count - 1 do
+  begin
+    Added := AddUnit(FSysUnitsName[I]);
+    if FUseFullPath and Added then
+      AddUnitPaths(FSysUnitsPath[I]);
+  end;
 end;
 
 procedure TUnitNameList.LoadFromProjectPath;
 var
-  i: Integer;
+  I: Integer;
   Paths: TStringList;
+  Added: Boolean;
 begin
   Paths := TStringList.Create;
   try
     Paths.Sorted := True;
     GetProjectLibPath(Paths);
-    if not SameText(Paths.Text, FProjectPath) then
+    if not SameText(Paths.Text, FProjectPath) or FUseFullPath then // 强行加载完整路径
     begin
-      FProjectUnits.Clear;
-      FCurrList := FProjectUnits;
-      for i := 0 to Paths.Count - 1 do
-        FindFile(Paths[i], '*.pas', DoFindFile, nil, False, False);
-      UpdateCaseFromModules(FProjectUnits);
+      FProjectUnitsName.Clear;
+      FProjectUnitsPath.Clear;
+      FCurrFileList := FProjectUnitsName;
+      FCurrPathList := FProjectUnitsPath;
+
+      for I := 0 to Paths.Count - 1 do
+        FindFile(Paths[I], '*.pas', DoFindFile, nil, False, False);
+      UpdateCaseFromModules(FProjectUnitsName);
+      UpdatePathsSequence(FProjectUnitsName, FProjectUnitsPath);
       FProjectPath := Paths.Text;
+
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('ProjNames %d. ProjPaths %d.', [FProjectUnitsName.Count,
+        FProjectUnitsPath.Count]);
+{$ENDIF}
     end;
   finally
     Paths.Free;
   end;
 
-  for i := 0 to FProjectUnits.Count - 1 do
-    AddUnit(FProjectUnits[i]);
+  for I := 0 to FProjectUnitsName.Count - 1 do
+  begin
+    Added := AddUnit(FProjectUnitsName[I]);
+    if FUseFullPath and Added then
+      AddUnitPaths(FProjectUnitsPath[I]);
+  end;
 end;
 
 type
@@ -1407,6 +1478,28 @@ begin
   end;
 end;
 
+// 上面更新大小写时会影响排序，此处根据预先记录的下标更新对应的路径
+procedure TUnitNameList.UpdatePathsSequence(Names, Paths: TStringList);
+var
+  I, Idx: Integer;
+  List: TStringList;
+begin
+  if not FUseFullPath or (Names.Count <> Paths.Count) then
+    Exit;
+
+  List := TStringList.Create;
+  try
+    for I := 0 to Names.Count - 1 do
+    begin
+      Idx := Integer(Names.Objects[I]);
+      List.Add(Paths[Idx]);
+    end;
+    Paths.Assign(List);
+  finally
+    List.Free;
+  end;
+end;
+
 function TUnitNameList.Reload(Editor: IOTAEditBuffer; const InputText: string;
   PosInfo: TCodePosInfo): Boolean;
 begin
@@ -1414,17 +1507,37 @@ begin
   try
     if PosInfo.IsPascal and (PosInfo.PosKind in [pkIntfUses, pkImplUses]) then
     begin
-      FUnits.Clear;
-      Clear;
-      LoadFromCurrProject;
-      LoadFromSysPath;
-      LoadFromProjectPath;
+      DoInternalLoad;
       AdjustSymbolListScope(Self);
       Result := True;
     end;
   except
     ;
-  end;            
+  end;
+end;
+
+procedure TUnitNameList.DoInternalLoad(UseFullPath: Boolean);
+begin
+  FUseFullPath := UseFullPath;
+  FUnitNames.Sorted := not FUseFullPath;
+  FSysUnitsName.Sorted := not FUseFullPath;
+  FProjectUnitsName.Sorted := not FUseFullPath;
+
+  FUnitNames.Clear;
+  FUnitPaths.Clear;
+  Clear;
+  LoadFromCurrProject;
+  LoadFromSysPath;
+  LoadFromProjectPath;
+end;
+
+procedure TUnitNameList.ExportToStringList(Names, Paths: TStringList);
+begin
+  if Names <> nil then
+    Names.Assign(FUnitNames);
+
+  if Paths <> nil then
+    Paths.Assign(FUnitPaths);
 end;
 
 //==============================================================================
