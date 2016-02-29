@@ -73,7 +73,7 @@ object MainForm: TMainForm
               '{                     中国人自己的开放源码第三方开发包          ' +
               '               }'
             
-              '{                   (C)Copyright 2001-2015 CnPack 开发组        ' +
+              '{                   (C)Copyright 2001-2016 CnPack 开发组        ' +
               '               }    '
             
               '{                   ------------------------------------        ' +
