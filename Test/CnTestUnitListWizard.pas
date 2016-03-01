@@ -40,7 +40,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ToolsAPI, IniFiles, CnWizClasses, CnWizUtils, CnWizConsts, CnInputSymbolList;
+  ToolsAPI, IniFiles, CnWizClasses, CnWizUtils, CnWizConsts, CnInputSymbolList,
+  CnPasCodeParser;
 
 type
 
@@ -85,7 +86,9 @@ end;
 
 procedure TCnTestUnitListWizard.Execute;
 var
-  I: Integer;
+  I, Idx: Integer;
+  Stream: TMemoryStream;
+  UsesList: TStringList;
   List: TUnitNameList;
   Names: TStringList;
   Paths: TStringList;
@@ -93,16 +96,36 @@ begin
   List := TUnitNameList.Create;
   Names := TStringList.Create;
   Paths := TStringList.Create;
+  Stream := TMemoryStream.Create;
+  UsesList := TStringList.Create;
   CnDebugger.LogMsg('TUnitNameList Created.');
 
   try
     List.DoInternalLoad(True);
     List.ExportToStringList(Names, Paths);
 
-    ShowMessage('Found Units Count: ' + IntToStr(List.Count));
+    ShowMessage('Found Units Count: ' + IntToStr(Names.Count));
+
+    CnOtaSaveCurrentEditorToStream(Stream, False);
+    ParseUnitUses(PAnsiChar(Stream.Memory), UsesList);
+
+    for I := 0 to UsesList.Count - 1 do
+    begin
+      Idx := Names.IndexOf(UsesList[I]);
+      if Idx >= 0 then
+      begin
+        CnDebugger.LogMsg('Remove Existing ' + UsesList[I]);
+        Names.Delete(Idx);
+        Paths.Delete(Idx);
+      end;
+    end;
+
+    ShowMessage('Found Units not used: ' + IntToStr(Names.Count));
     for I := 0 to Names.Count - 1 do
       CnDebugger.LogFmt('%d. %s in %s', [Integer(Names.Objects[I]), Names[I], Paths[I]]);
   finally
+    UsesList.Free;
+    Stream.Free;
     List.Free;
     Names.Free;
     Paths.Free;
