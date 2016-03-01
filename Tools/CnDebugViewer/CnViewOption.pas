@@ -62,6 +62,8 @@ type
     lblPort: TLabel;
     dlgFont: TFontDialog;
     btnFont: TButton;
+    lblRestart: TLabel;
+    chkLocalSession: TCheckBox;
     procedure chkShowTrayIconClick(Sender: TObject);
     procedure chkUDPMsgClick(Sender: TObject);
     procedure btnFontClick(Sender: TObject);
@@ -103,6 +105,7 @@ begin
     chkSaveFormPosition.Checked := SaveFormPosition;
     hkShowFormHotKey.HotKey := MainShortCut;
     chkCapDebug.Checked := not IgnoreODString;
+    chkLocalSession.Checked := LocalSession;
     chkUDPMsg.Checked := EnableUDPMsg;
     seUDPPort.Value := UDPPort;
     SwitchTrayIconControls(ShowTrayIcon);
@@ -127,6 +130,7 @@ begin
     SaveFormPosition := chkSaveFormPosition.Checked;
     MainShortCut := hkShowFormHotKey.HotKey;
     IgnoreODString := not chkCapDebug.Checked;
+    LocalSession := chkLocalSession.Checked;
     EnableUDPMsg := chkUDPMsg.Checked;
     UDPPort := seUDPPort.Value;
 

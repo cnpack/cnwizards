@@ -1,9 +1,9 @@
 object CnViewerOptionsFrm: TCnViewerOptionsFrm
-  Left = 360
-  Top = 169
+  Left = 395
+  Top = 170
   BorderStyle = bsDialog
   Caption = 'General Settings'
-  ClientHeight = 362
+  ClientHeight = 409
   ClientWidth = 251
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -17,7 +17,7 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
   TextHeight = 13
   object btnOK: TButton
     Left = 86
-    Top = 335
+    Top = 374
     Width = 75
     Height = 21
     Caption = '&OK'
@@ -27,7 +27,7 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
   end
   object btnCancel: TButton
     Left = 166
-    Top = 335
+    Top = 374
     Width = 75
     Height = 21
     Cancel = True
@@ -39,7 +39,7 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
     Left = 8
     Top = 209
     Width = 233
-    Height = 116
+    Height = 154
     Caption = 'Ca&pture Settings'
     TabOrder = 1
     object lblCapOD: TLabel
@@ -51,10 +51,17 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
     end
     object lblPort: TLabel
       Left = 32
-      Top = 79
+      Top = 117
       Width = 47
       Height = 13
       Caption = 'UDP Port:'
+    end
+    object lblRestart: TLabel
+      Left = 32
+      Top = 78
+      Width = 156
+      Height = 13
+      Caption = 'Need to Restart CnDebugViewer'
     end
     object chkCapDebug: TCheckBox
       Left = 14
@@ -67,22 +74,31 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
     end
     object chkUDPMsg: TCheckBox
       Left = 14
-      Top = 58
+      Top = 96
       Width = 211
       Height = 13
       Caption = 'Capture UD&P Messages'
-      TabOrder = 1
+      TabOrder = 2
       OnClick = chkUDPMsgClick
     end
     object seUDPPort: TSpinEdit
       Left = 128
-      Top = 77
+      Top = 115
       Width = 91
       Height = 22
       MaxValue = 65535
       MinValue = 1
-      TabOrder = 2
+      TabOrder = 3
       Value = 9099
+    end
+    object chkLocalSession: TCheckBox
+      Left = 14
+      Top = 59
+      Width = 211
+      Height = 13
+      Caption = 'Use Local S&ession Mode'
+      TabOrder = 1
+      OnClick = chkShowTrayIconClick
     end
   end
   object grpTrayIcon: TGroupBox
