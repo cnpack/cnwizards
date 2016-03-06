@@ -57,6 +57,7 @@
 			<DCC_UNIT_EXPERIMENTAL>False</DCC_UNIT_EXPERIMENTAL>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2)'!=''">
+			<DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
 			<DCC_DependencyCheckOutputName>..\Bin\CnWizards_D2010.dll</DCC_DependencyCheckOutputName>
 			<Version>7.0</Version>
 			<DCC_WriteableConstants>True</DCC_WriteableConstants>
@@ -169,10 +170,6 @@
 			<DCCReference Include="Utils\CnWizUtils.pas"/>
 			<DCCReference Include="Utils\CnWizNotifier.pas"/>
 			<DCCReference Include="Utils\CnWizIdeUtils.pas"/>
-			<DCCReference Include="CodeFormatter\CnFormatterIntf.pas" />
-			<DCCReference Include="CodeFormatter\CnCodeFormatterWizard.pas">
-				<Form>CnCodeFormatterForm</Form>
-			</DCCReference>
 			<DCCReference Include="Config\CnWizConfigFrm.pas">
 				<Form>CnWizConfigForm</Form>
 			</DCCReference>
@@ -211,6 +208,9 @@
 			<DCCReference Include="SimpleWizards\CnAlignSizeWizard.pas">
 				<Form>CnNonArrangeForm</Form>
 			</DCCReference>
+			<DCCReference Include="EditorWizard\CnEditorWizard.pas">
+				<Form>CnEditorToolsForm</Form>
+			</DCCReference>
 			<DCCReference Include="SimpleWizards\CnListCompFrm.pas">
 				<Form>CnListCompForm</Form>
 			</DCCReference>
@@ -244,13 +244,10 @@
 			<DCCReference Include="SrcTemplate\CnSrcTemplateEditFrm.pas">
 				<Form>CnSrcTemplateEditForm</Form>
 			</DCCReference>
-			<DCCReference Include="EditorWizard\CnEditorWizard.pas">
-				<Form>CnEditorToolsForm</Form>
-			</DCCReference>
 			<DCCReference Include="EditorWizard\CnEditorOpenFile.pas"/>
 			<DCCReference Include="EditorWizard\CnEditorOpenFileFrm.pas">
-        <Form>CnEditorOpenFileForm</Form>
-      </DCCReference>
+				<Form>CnEditorOpenFileForm</Form>
+			</DCCReference>
 			<DCCReference Include="EditorWizard\CnEditorCodeSwap.pas"/>
 			<DCCReference Include="EditorWizard\CnEditorZoomFullScreen.pas">
 				<Form>CnEditorZoomFullScreenForm</Form>
@@ -487,8 +484,8 @@
 				<Form>CnHighlightLineForm</Form>
 			</DCCReference>
 			<DCCReference Include="IdeEnhancements\CnHighlightSeparateLineFrm.pas">
-        <Form>CnHighlightSeparateLineForm</Form>
-      </DCCReference>
+				<Form>CnHighlightSeparateLineForm</Form>
+			</DCCReference>
 			<DCCReference Include="SimpleWizards\CnProcListWizard.pas">
 				<Form>CnProcListForm</Form>
 			</DCCReference>
@@ -532,6 +529,10 @@
 			<DCCReference Include="Utils\CnImageProvider_IconFinder.pas"/>
 			<DCCReference Include="Utils\CnImageProvider_FindIcons.pas"/>
 			<DCCReference Include="Utils\CnImageProvider_LocalCache.pas"/>
+			<DCCReference Include="CodeFormatter\CnFormatterIntf.pas"/>
+			<DCCReference Include="CodeFormatter\CnCodeFormatterWizard.pas">
+				<Form>CnCodeFormatterForm</Form>
+			</DCCReference>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>

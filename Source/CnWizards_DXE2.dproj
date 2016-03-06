@@ -43,11 +43,8 @@
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<Manifest_File>None</Manifest_File>
 			<DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
-			<VerInfo_MinorVer>0</VerInfo_MinorVer>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<VerInfo_Locale>2052</VerInfo_Locale>
-			<VerInfo_Release>0</VerInfo_Release>
-			<VerInfo_MajorVer>1</VerInfo_MajorVer>
 			<DCC_UsePackage>rtl;vcl;vclx;fmx;designide;$(DCC_UsePackage)</DCC_UsePackage>
 			<UsePackages>true</UsePackages>
 			<DCC_DependencyCheckOutputName>Base\Win32\CnWizards_DXE2.dll</DCC_DependencyCheckOutputName>
@@ -68,7 +65,6 @@
 			<VerInfo_Locale>1033</VerInfo_Locale>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base_Win32)'!=''">
-			<Manifest_File>None</Manifest_File>
 			<DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1)'!=''">
@@ -82,6 +78,7 @@
 			<DCC_DebugInformation>false</DCC_DebugInformation>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2)'!=''">
+			<DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
 			<DCC_ExeOutput>..\Bin</DCC_ExeOutput>
 			<DCC_UnitSearchPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript_2009;ThirdParty\FastCode;Utils;CodeFormatter;ScriptWizard;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<DCC_DcuOutput>..\Dcu</DCC_DcuOutput>
@@ -93,7 +90,6 @@
 		<PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
 			<DCC_Define>USE_JCL;$(DCC_Define)</DCC_Define>
 			<DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
-			<Manifest_File>None</Manifest_File>
 		</PropertyGroup>
 		<ItemGroup>
 			<DelphiCompile Include="$(MainSource)">
@@ -138,10 +134,6 @@
 			<DCCReference Include="Utils\CnWizUtils.pas"/>
 			<DCCReference Include="Utils\CnWizNotifier.pas"/>
 			<DCCReference Include="Utils\CnWizIdeUtils.pas"/>
-			<DCCReference Include="CodeFormatter\CnFormatterIntf.pas" />
-			<DCCReference Include="CodeFormatter\CnCodeFormatterWizard.pas">
-				<Form>CnCodeFormatterForm</Form>
-			</DCCReference>
 			<DCCReference Include="Config\CnWizConfigFrm.pas">
 				<Form>CnWizConfigForm</Form>
 			</DCCReference>
@@ -180,6 +172,9 @@
 			<DCCReference Include="SimpleWizards\CnAlignSizeWizard.pas">
 				<Form>CnNonArrangeForm</Form>
 			</DCCReference>
+			<DCCReference Include="EditorWizard\CnEditorWizard.pas">
+				<Form>CnEditorToolsForm</Form>
+			</DCCReference>
 			<DCCReference Include="SimpleWizards\CnListCompFrm.pas">
 				<Form>CnListCompForm</Form>
 			</DCCReference>
@@ -213,13 +208,10 @@
 			<DCCReference Include="SrcTemplate\CnSrcTemplateEditFrm.pas">
 				<Form>CnSrcTemplateEditForm</Form>
 			</DCCReference>
-			<DCCReference Include="EditorWizard\CnEditorWizard.pas">
-				<Form>CnEditorToolsForm</Form>
-			</DCCReference>
 			<DCCReference Include="EditorWizard\CnEditorOpenFile.pas"/>
 			<DCCReference Include="EditorWizard\CnEditorOpenFileFrm.pas">
-        <Form>CnEditorOpenFileForm</Form>
-      </DCCReference>
+				<Form>CnEditorOpenFileForm</Form>
+			</DCCReference>
 			<DCCReference Include="EditorWizard\CnEditorCodeSwap.pas"/>
 			<DCCReference Include="EditorWizard\CnEditorZoomFullScreen.pas">
 				<Form>CnEditorZoomFullScreenForm</Form>
@@ -456,8 +448,8 @@
 				<Form>CnHighlightLineForm</Form>
 			</DCCReference>
 			<DCCReference Include="IdeEnhancements\CnHighlightSeparateLineFrm.pas">
-        <Form>CnHighlightSeparateLineForm</Form>
-      </DCCReference>
+				<Form>CnHighlightSeparateLineForm</Form>
+			</DCCReference>
 			<DCCReference Include="SimpleWizards\CnProcListWizard.pas">
 				<Form>CnProcListForm</Form>
 			</DCCReference>
@@ -501,6 +493,10 @@
 			<DCCReference Include="Utils\CnImageProvider_IconFinder.pas"/>
 			<DCCReference Include="Utils\CnImageProvider_FindIcons.pas"/>
 			<DCCReference Include="Utils\CnImageProvider_LocalCache.pas"/>
+			<DCCReference Include="CodeFormatter\CnFormatterIntf.pas"/>
+			<DCCReference Include="CodeFormatter\CnCodeFormatterWizard.pas">
+				<Form>CnCodeFormatterForm</Form>
+			</DCCReference>
 			<BuildConfiguration Include="Debug">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
@@ -555,8 +551,6 @@
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
 					<Excluded_Packages>
-						<Excluded_Packages Name="$(BDSBIN)\bcboffice2k160.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
-						<Excluded_Packages Name="$(BDSBIN)\bcbofficexp160.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\dcloffice2k160.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\dclofficexp160.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
 					</Excluded_Packages>

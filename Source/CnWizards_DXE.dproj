@@ -5,7 +5,11 @@
 			<Config Condition="'$(Config)'==''">Release</Config>
 			<Platform Condition="'$(Platform)'==''">Win32</Platform>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
-			<ProjectVersion>12.0</ProjectVersion>
+			<ProjectVersion>12.2</ProjectVersion>
+			<Base>True</Base>
+			<Platform>Win32</Platform>
+			<AppType>Library</AppType>
+			<FrameworkType>None</FrameworkType>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
 			<Base>true</Base>
@@ -26,7 +30,7 @@
 			<DCC_DependencyCheckOutputName>Base\Win32\CnWizards_DXE.dll</DCC_DependencyCheckOutputName>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
 			<DCC_DcuOutput>.\$(Config)\$(Platform)</DCC_DcuOutput>
-			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;$(DCC_UnitAlias)</DCC_UnitAlias>
+			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
 			<DCC_Platform>x86</DCC_Platform>
 			<DCC_ExeOutput>.\$(Config)\$(Platform)</DCC_ExeOutput>
 			<DCC_N>false</DCC_N>
@@ -47,6 +51,7 @@
 			<DCC_DebugInformation>false</DCC_DebugInformation>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2)'!=''">
+			<DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
 			<DCC_ExeOutput>..\Bin</DCC_ExeOutput>
 			<DCC_UnitSearchPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript_2009;ThirdParty\FastCode;Utils;CodeFormatter;ScriptWizard;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<DCC_DcuOutput>..\Dcu</DCC_DcuOutput>
@@ -98,10 +103,6 @@
 			<DCCReference Include="Utils\CnWizUtils.pas"/>
 			<DCCReference Include="Utils\CnWizNotifier.pas"/>
 			<DCCReference Include="Utils\CnWizIdeUtils.pas"/>
-			<DCCReference Include="CodeFormatter\CnFormatterIntf.pas" />
-			<DCCReference Include="CodeFormatter\CnCodeFormatterWizard.pas">
-				<Form>CnCodeFormatterForm</Form>
-			</DCCReference>
 			<DCCReference Include="Config\CnWizConfigFrm.pas">
 				<Form>CnWizConfigForm</Form>
 			</DCCReference>
@@ -140,6 +141,9 @@
 			<DCCReference Include="SimpleWizards\CnAlignSizeWizard.pas">
 				<Form>CnNonArrangeForm</Form>
 			</DCCReference>
+			<DCCReference Include="EditorWizard\CnEditorWizard.pas">
+				<Form>CnEditorToolsForm</Form>
+			</DCCReference>
 			<DCCReference Include="SimpleWizards\CnListCompFrm.pas">
 				<Form>CnListCompForm</Form>
 			</DCCReference>
@@ -173,13 +177,10 @@
 			<DCCReference Include="SrcTemplate\CnSrcTemplateEditFrm.pas">
 				<Form>CnSrcTemplateEditForm</Form>
 			</DCCReference>
-			<DCCReference Include="EditorWizard\CnEditorWizard.pas">
-				<Form>CnEditorToolsForm</Form>
-			</DCCReference>
 			<DCCReference Include="EditorWizard\CnEditorOpenFile.pas"/>
 			<DCCReference Include="EditorWizard\CnEditorOpenFileFrm.pas">
-        <Form>CnEditorOpenFileForm</Form>
-      </DCCReference>
+				<Form>CnEditorOpenFileForm</Form>
+			</DCCReference>
 			<DCCReference Include="EditorWizard\CnEditorCodeSwap.pas"/>
 			<DCCReference Include="EditorWizard\CnEditorZoomFullScreen.pas">
 				<Form>CnEditorZoomFullScreenForm</Form>
@@ -416,8 +417,8 @@
 				<Form>CnHighlightLineForm</Form>
 			</DCCReference>
 			<DCCReference Include="IdeEnhancements\CnHighlightSeparateLineFrm.pas">
-        <Form>CnHighlightSeparateLineForm</Form>
-      </DCCReference>
+				<Form>CnHighlightSeparateLineForm</Form>
+			</DCCReference>
 			<DCCReference Include="SimpleWizards\CnProcListWizard.pas">
 				<Form>CnProcListForm</Form>
 			</DCCReference>
@@ -461,19 +462,23 @@
 			<DCCReference Include="Utils\CnImageProvider_IconFinder.pas"/>
 			<DCCReference Include="Utils\CnImageProvider_FindIcons.pas"/>
 			<DCCReference Include="Utils\CnImageProvider_LocalCache.pas"/>
-			<BuildConfiguration Include="Base">
-				<Key>Base</Key>
-			</BuildConfiguration>
+			<DCCReference Include="CodeFormatter\CnCodeFormatterWizard.pas">
+				<Form>CnCodeFormatterForm</Form>
+			</DCCReference>
 			<BuildConfiguration Include="Debug">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
+			</BuildConfiguration>
+			<BuildConfiguration Include="Base">
+				<Key>Base</Key>
 			</BuildConfiguration>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_1</Key>
 				<CfgParent>Base</CfgParent>
 			</BuildConfiguration>
 		</ItemGroup>
-		<Import Project="$(BDS)\Bin\CodeGear.Delphi.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')"/>
+		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')" Project="$(BDS)\Bin\CodeGear.Delphi.Targets"/>
+		<Import Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\8.0\UserTools.proj')" Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\8.0\UserTools.proj"/>
 		<ProjectExtensions>
 			<Borland.Personality>Delphi.Personality.12</Borland.Personality>
 			<Borland.ProjectType>VCLApplication</Borland.ProjectType>
@@ -482,11 +487,7 @@
 					<Source>
 						<Source Name="MainSource">CnWizards_DXE.dpr</Source>
 					</Source>
-					<Parameters>
-						<Parameters Name="UseLauncher">False</Parameters>
-						<Parameters Name="LoadAllSymbols">True</Parameters>
-						<Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
-					</Parameters>
+					<Parameters/>
 					<VersionInfo>
 						<VersionInfo Name="IncludeVerInfo">False</VersionInfo>
 						<VersionInfo Name="AutoIncBuild">False</VersionInfo>
@@ -515,10 +516,10 @@
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
 					<Excluded_Packages>
-						<Excluded_Packages Name="$(BDS)\bin\bcboffice2k150.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
-						<Excluded_Packages Name="$(BDS)\bin\bcbofficexp150.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
-						<Excluded_Packages Name="$(BDS)\bin\dcloffice2k150.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
-						<Excluded_Packages Name="$(BDS)\bin\dclofficexp150.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDSBIN)\bcboffice2k150.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
+						<Excluded_Packages Name="$(BDSBIN)\bcbofficexp150.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
+						<Excluded_Packages Name="$(BDSBIN)\dcloffice2k150.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDSBIN)\dclofficexp150.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
 					</Excluded_Packages>
 				</Delphi.Personality>
 				<Platforms>

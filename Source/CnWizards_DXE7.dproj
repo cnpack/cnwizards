@@ -75,6 +75,8 @@
         <DCC_ExeOutput>..\Bin</DCC_ExeOutput>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
+        <DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
+        <Manifest_File>None</Manifest_File>
         <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
         <DCC_Optimize>false</DCC_Optimize>
         <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
@@ -132,10 +134,6 @@
         <DCCReference Include="Utils\CnWizUtils.pas"/>
         <DCCReference Include="Utils\CnWizNotifier.pas"/>
         <DCCReference Include="Utils\CnWizIdeUtils.pas"/>
-        <DCCReference Include="CodeFormatter\CnFormatterIntf.pas" />
-        <DCCReference Include="CodeFormatter\CnCodeFormatterWizard.pas">
-            <Form>CnCodeFormatterForm</Form>
-        </DCCReference>
         <DCCReference Include="Config\CnWizConfigFrm.pas">
             <Form>CnWizConfigForm</Form>
         </DCCReference>
@@ -495,6 +493,10 @@
         <DCCReference Include="Utils\CnImageProvider_IconFinder.pas"/>
         <DCCReference Include="Utils\CnImageProvider_FindIcons.pas"/>
         <DCCReference Include="Utils\CnImageProvider_LocalCache.pas"/>
+        <DCCReference Include="CodeFormatter\CnFormatterIntf.pas"/>
+        <DCCReference Include="CodeFormatter\CnCodeFormatterWizard.pas">
+            <Form>CnCodeFormatterForm</Form>
+        </DCCReference>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -551,17 +553,15 @@
                     <VersionInfoKeys Name="CFBundleExecutable"/>
                 </VersionInfoKeys>
                 <Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\bcboffice2k170.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\bcbofficexp170.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k170.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp170.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k210.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp210.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
                 </Excluded_Packages>
             </Delphi.Personality>
             <Platforms>
                 <Platform value="Win32">True</Platform>
                 <Platform value="Win64">False</Platform>
             </Platforms>
-            <Deployment> </Deployment>
+            <Deployment/>
         </BorlandProject>
         <ProjectFileVersion>12</ProjectFileVersion>
     </ProjectExtensions>

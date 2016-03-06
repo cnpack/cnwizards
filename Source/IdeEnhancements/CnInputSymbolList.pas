@@ -333,7 +333,7 @@ type
     procedure UpdatePathsSequence(Names, Paths: TStringList);
   public
     constructor Create; overload; override;
-    constructor Create(UseFullPath: Boolean); overload;
+    constructor Create(UseFullPath: Boolean); reintroduce; overload;
     destructor Destroy; override;
     class function GetListName: string; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
