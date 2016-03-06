@@ -72,6 +72,8 @@ const
   SDbWinBuffer = 'DBWIN_BUFFER';
 
 type
+  TCnCoreInitResults = (ciOK, ciCreateEventFail, ciCreateMutexFail, ciCreateMapFail, ciMapViewFail);
+
   TCnViewerOptions = class(TPersistent)
   private
     FDateTimeFormat: string;
@@ -319,7 +321,7 @@ const
 
   SCnHotKeyId = 1;
   
-procedure InitializeCore;
+function InitializeCore: TCnCoreInitResults;
 
 procedure FinalizeCore;
 
@@ -356,31 +358,51 @@ asm
   DB 031H;
 end;
 
-procedure InitializeCore;
+function InitializeCore: TCnCoreInitResults;
 begin
   HEvent := CreateEvent(nil, False, False, PChar(SCnDebugQueueEventName));
+  if HEvent = 0 then
+  begin
+    Result := ciCreateEventFail;
+    Exit;
+  end;
+
   HMutex := CreateMutex(nil, False, PChar(SCnDebugQueueMutexName));
+  if HMutex = 0 then
+  begin
+    Result := ciCreateMutexFail;
+    Exit;
+  end;
+
   HMap := CreateFileMapping(INVALID_HANDLE_VALUE, nil, PAGE_READWRITE, 0,
     CnMapSize + CnProtectSize, PChar(SCnDebugMapName));
 
-  if HMap <> 0 then
+  if HMap = 0 then
   begin
-    PBase := MapViewOfFile(HMap, FILE_MAP_WRITE or FILE_MAP_READ, 0, 0, 0);
-    if PBase <> nil then
-    begin
-      PHeader := PBase;
-      PHeader^.MapSize := CnMapSize;
-      PHeader^.DataOffset := CnHeadSize;
-      PHeader^.QueueFront := 0;
-      PHeader^.QueueTail := 0;
-      PHeader^.MapEnabled := CnDebugMapEnabled;
-      StrCopy(Pointer(PHeader), CnDebugMagicName);
-    end;
+    Result := ciCreateMapFail;
+    Exit;
   end;
+
+  PBase := MapViewOfFile(HMap, FILE_MAP_WRITE or FILE_MAP_READ, 0, 0, 0);
+  if PBase = nil then
+  begin
+    Result := ciMapViewFail;
+    Exit;
+  end;
+
+  PHeader := PBase;
+  PHeader^.MapSize := CnMapSize;
+  PHeader^.DataOffset := CnHeadSize;
+  PHeader^.QueueFront := 0;
+  PHeader^.QueueTail := 0;
+  PHeader^.MapEnabled := CnDebugMapEnabled;
+  StrCopy(Pointer(PHeader), CnDebugMagicName);
 
   InitializeCriticalSection(CSMsgStore);
   if not CnViewerOptions.IgnoreODString then
     InitSysDebug;
+
+  Result := ciOK;
 end;
 
 procedure InitSysDebug;

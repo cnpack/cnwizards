@@ -360,8 +360,27 @@ begin
 end;
 
 procedure TCnMainViewer.FormCreate(Sender: TObject);
+var
+  Res: TCnCoreInitResults;
+  S: string;
 begin
-  InitializeCore;
+  Res := InitializeCore;
+  if Res <> ciOK then
+  begin
+    S := '';
+    case Res of
+      ciCreateEventFail:
+        S := 'Create Event Fail: ' + IntToStr(GetLastError);
+      ciCreateMutexFail:
+        S := 'Create Mutex Fail: ' + IntToStr(GetLastError);
+      ciCreateMapFail:
+        S := 'Create FileMapping Fail: ' + IntToStr(GetLastError);
+      ciMapViewFail:
+        S := 'MapView of File Fail: ' + IntToStr(GetLastError);
+    end;
+    statMain.Panels[3].Text := S;
+  end;
+
   if GetCWUseCustomUserDir then
     LoadOptions(GetCWUserPath + SCnOptionFileName)
   else
