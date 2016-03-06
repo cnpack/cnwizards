@@ -53,11 +53,14 @@ type
 
   TCnTestUnitListWizard = class(TCnMenuWizard)
   private
+    FList: TUnitNameList;
     function SearchInsertPos(IsIntf: Boolean; out HasUses: Boolean; out CharPos: TOTACharPos): Boolean;
-    procedure SearchInsertPosW(IsIntf: Boolean; out HasUses: Boolean);
   protected
     function GetHasConfig: Boolean; override;
   public
+    constructor Create; override;
+    destructor Destroy; override;
+
     function GetState: TWizardState; override;
     procedure Config; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
@@ -72,7 +75,7 @@ type
 implementation
 
 uses
-  CnDebug, mPasLex, CnCommon;
+  CnDebug, mPasLex, CnCommon, CnPasWideLex;
 
 //==============================================================================
 // 测试 TUnitNameList 相关功能的菜单专家
@@ -85,12 +88,23 @@ begin
   ShowMessage('No option for this test case.');
 end;
 
+constructor TCnTestUnitListWizard.Create;
+begin
+  inherited;
+  FList := TUnitNameList.Create(True);
+end;
+
+destructor TCnTestUnitListWizard.Destroy;
+begin
+  FList.Free;
+  inherited;
+end;
+
 procedure TCnTestUnitListWizard.Execute;
 var
   I, Idx: Integer;
   Stream: TMemoryStream;
   UsesList: TStringList;
-  List: TUnitNameList;
   Names: TStringList;
   Paths: TStringList;
   HasUses: Boolean;
@@ -98,7 +112,6 @@ var
   LinearPos: LongInt;
   EditView: IOTAEditView;
 begin
-  List := TUnitNameList.Create;
   Names := TStringList.Create;
   Paths := TStringList.Create;
   Stream := TMemoryStream.Create;
@@ -106,8 +119,8 @@ begin
   CnDebugger.LogMsg('TUnitNameList Created.');
 
   try
-    List.DoInternalLoad(True);
-    List.ExportToStringList(Names, Paths);
+    FList.DoInternalLoad;
+    FList.ExportToStringList(Names, Paths);
 
     ShowMessage('Found Units Count: ' + IntToStr(Names.Count));
 
@@ -180,7 +193,6 @@ begin
   finally
     UsesList.Free;
     Stream.Free;
-    List.Free;
     Names.Free;
     Paths.Free;
   end;
@@ -233,17 +245,26 @@ function TCnTestUnitListWizard.SearchInsertPos(IsIntf: Boolean; out HasUses: Boo
   out CharPos: TOTACharPos): Boolean;
 var
   Stream: TMemoryStream;
+{$IFDEF UNICODE}
+  Lex: TCnPasWideLex;
+{$ELSE}
   Lex: TmwPasLex;
-  FoundUses: Boolean;
+{$ENDIF}
   IntfMeet: Boolean;
   ImplMeet: Boolean;
   IntfLine, ImplLine: Integer;
 begin
   Result := False;
   Stream := TMemoryStream.Create;
-  CnOtaSaveCurrentEditorToStream(Stream, False);
 
+{$IFDEF UNICODE}
+  Lex := TCnPasWideLex.Create;
+  CnOtaSaveCurrentEditorToStreamW(Stream, False);
+{$ELSE}
   Lex := TmwPasLex.Create;
+  CnOtaSaveCurrentEditorToStream(Stream, False);
+{$ENDIF}
+
   IntfMeet := False;
   ImplMeet := False;
   HasUses := False;
@@ -254,7 +275,12 @@ begin
   CharPos.CharIndex := -1;
 
   try
+{$IFDEF UNICODE}
+    Lex.Origin := PWideChar(Stream.Memory);
+{$ELSE}
     Lex.Origin := PAnsiChar(Stream.Memory);
+{$ENDIF}
+
     while Lex.TokenID <> tkNull do
     begin
       case Lex.TokenID of
@@ -270,8 +296,13 @@ begin
             begin
               // 插入位置就在分号前
               Result := True;
+{$IFDEF UNICODE}
+              CharPos.Line := Lex.LineNumber;
+              CharPos.CharIndex := Lex.ColumnNumber - 1;
+{$ELSE}
               CharPos.Line := Lex.LineNumber + 1;
               CharPos.CharIndex := Lex.TokenPos - Lex.LinePos;
+{$ENDIF}
               Exit;
             end
             else // uses 后找不着分号，出错
@@ -284,12 +315,20 @@ begin
       tkInterface:
         begin
           IntfMeet := True;
+{$IFDEF UNICODE}
+          IntfLine := Lex.LineNumber;
+{$ELSE}
           IntfLine := Lex.LineNumber + 1;
+{$ENDIF}
         end;
       tkImplementation:
         begin
           ImplMeet := True;
+{$IFDEF UNICODE}
+          ImplLine := Lex.LineNumber;
+{$ELSE}
           ImplLine := Lex.LineNumber + 1;
+{$ENDIF}
         end;
       end;
       Lex.Next;
@@ -311,11 +350,6 @@ begin
     Lex.Free;
     Stream.Free;
   end;
-end;
-
-procedure TCnTestUnitListWizard.SearchInsertPosW;
-begin
-
 end;
 
 initialization

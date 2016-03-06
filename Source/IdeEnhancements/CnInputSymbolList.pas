@@ -332,12 +332,13 @@ type
     procedure UpdateCaseFromModules(AList: TStringList);
     procedure UpdatePathsSequence(Names, Paths: TStringList);
   public
-    constructor Create; override;
+    constructor Create; overload; override;
+    constructor Create(UseFullPath: Boolean); overload;
     destructor Destroy; override;
     class function GetListName: string; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
       TCodePosInfo): Boolean; override;
-    procedure DoInternalLoad(UseFullPath: Boolean = False);
+    procedure DoInternalLoad;
     procedure ExportToStringList(Names, Paths: TStringList);
   end;
 
@@ -1233,6 +1234,12 @@ end;
 
 { TUnitNameList }
 
+constructor TUnitNameList.Create(UseFullPath: Boolean);
+begin
+  FUseFullPath := UseFullPath;
+  Create;
+end;
+
 constructor TUnitNameList.Create;
 begin
   inherited;
@@ -1244,9 +1251,9 @@ begin
   FUnitPaths := TStringList.Create;
   FCurrFileList := nil;
   FCurrPathList := nil;
-  FSysUnitsName.Sorted := True;
-  FProjectUnitsName.Sorted := True;
-  FUnitNames.Sorted := True;
+  FSysUnitsName.Sorted := not FUseFullPath;
+  FProjectUnitsName.Sorted := not FUseFullPath;
+  FUnitNames.Sorted := not FUseFullPath;
   LoadFromSysPath;
 end;
 
@@ -1346,7 +1353,7 @@ begin
   try
     Paths.Sorted := True;
     GetLibraryPath(Paths, False);
-    if not SameText(Paths.Text, FSysPath) or FUseFullPath then // 强行加载完整路径
+    if not SameText(Paths.Text, FSysPath) then
     begin
       FSysUnitsName.Clear;
       FSysUnitsPath.Clear;
@@ -1391,7 +1398,7 @@ begin
   try
     Paths.Sorted := True;
     GetProjectLibPath(Paths);
-    if not SameText(Paths.Text, FProjectPath) or FUseFullPath then // 强行加载完整路径
+    if not SameText(Paths.Text, FProjectPath) then // 强行加载完整路径
     begin
       FProjectUnitsName.Clear;
       FProjectUnitsPath.Clear;
@@ -1516,13 +1523,8 @@ begin
   end;
 end;
 
-procedure TUnitNameList.DoInternalLoad(UseFullPath: Boolean);
+procedure TUnitNameList.DoInternalLoad;
 begin
-  FUseFullPath := UseFullPath;
-  FUnitNames.Sorted := not FUseFullPath;
-  FSysUnitsName.Sorted := not FUseFullPath;
-  FProjectUnitsName.Sorted := not FUseFullPath;
-
   FUnitNames.Clear;
   FUnitPaths.Clear;
   Clear;
