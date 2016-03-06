@@ -133,7 +133,7 @@ implementation
 
 procedure ReInitLocalConsts;
 const
-  SCnDebugLocalPrefix := 'Local\';
+  SCnDebugLocalPrefix = 'Local\';
 begin
   SCnDebugMapName := SCnDebugLocalPrefix + 'CnDebugMap';
   SCnDebugQueueEventName := SCnDebugLocalPrefix + 'CnDebugQueueEvent';
