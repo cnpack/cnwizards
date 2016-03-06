@@ -166,7 +166,7 @@ begin
     end
     else
     begin
-      ShowMessage('Will insert uses ' + Names[0] + ' after interface. Line ' + IntToStr(CharPos.Line));
+      ShowMessage('Will insert uses ' + Names[0] + ' after implementation. Line ' + IntToStr(CharPos.Line));
       CnOtaInsertTextIntoEditorAtPos(#13#10#13#10 + 'uses' + #13#10 + '  ' + Names[0] + ';', LinearPos);
     end;
 
@@ -187,7 +187,7 @@ begin
     end
     else
     begin
-      ShowMessage('Will insert uses ' + Names[1] + ' after implementation. Line ' + IntToStr(CharPos.Line));
+      ShowMessage('Will insert uses ' + Names[1] + ' after interface. Line ' + IntToStr(CharPos.Line));
       CnOtaInsertTextIntoEditorAtPos(#13#10#13#10 + 'uses' + #13#10 + '  ' + Names[1] + ';', LinearPos);
     end;
   finally
@@ -245,13 +245,17 @@ function TCnTestUnitListWizard.SearchInsertPos(IsIntf: Boolean; out HasUses: Boo
   out CharPos: TOTACharPos): Boolean;
 var
   Stream: TMemoryStream;
+  LineText: string;
+  S: AnsiString;
 {$IFDEF UNICODE}
   Lex: TCnPasWideLex;
 {$ELSE}
   Lex: TmwPasLex;
 {$ENDIF}
-  IntfMeet: Boolean;
-  ImplMeet: Boolean;
+  InIntf: Boolean;
+  MeetIntf: Boolean;
+  InImpl: Boolean;
+  MeetImpl: Boolean;
   IntfLine, ImplLine: Integer;
 begin
   Result := False;
@@ -265,8 +269,11 @@ begin
   CnOtaSaveCurrentEditorToStream(Stream, False);
 {$ENDIF}
 
-  IntfMeet := False;
-  ImplMeet := False;
+  InIntf := False;
+  InImpl := False;
+  MeetIntf := False;
+  MeetImpl := False;
+
   HasUses := False;
   IntfLine := 0;
   ImplLine := 0;
@@ -286,7 +293,7 @@ begin
       case Lex.TokenID of
       tkUses:
         begin
-          if (IsIntf and IntfMeet) or (not IsIntf and ImplMeet) then
+          if (IsIntf and InIntf) or (not IsIntf and InImpl) then
           begin
             HasUses := True; // 到达了自己需要的 uses 处
             while not (Lex.TokenID in [tkNull, tkSemiColon]) do
@@ -298,10 +305,27 @@ begin
               Result := True;
 {$IFDEF UNICODE}
               CharPos.Line := Lex.LineNumber;
-              CharPos.CharIndex := Lex.ColumnNumber - 1;
+              CharPos.CharIndex := Lex.TokenPos - Lex.LineStartOffset;
+              CnDebugger.LogMsg('Insertion Col for Unicode (Zero Based) is: ' + IntToStr(CharPos.CharIndex));
+
+              LineText := CnOtaGetLineText(CharPos.Line);
+              S := AnsiString(Copy(LineText, 1, CharPos.CharIndex));
+              CnDebugger.LogMsg('Line Text before Insertion: ' + S);
+
+              CharPos.CharIndex := Length(CnAnsiToUtf8(S));
 {$ELSE}
               CharPos.Line := Lex.LineNumber + 1;
               CharPos.CharIndex := Lex.TokenPos - Lex.LinePos;
+              CnDebugger.LogMsg('Insertion Col for Ansi (Zero Based) is: ' + IntToStr(CharPos.CharIndex));
+
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+              LineText := CnOtaGetLineText(CharPos.Line);
+              S := AnsiString(Copy(LineText, 1, CharPos.CharIndex));
+
+              CnDebugger.LogMsg('Line Text before Insertion: ' + S);
+
+              CharPos.CharIndex := Length(CnAnsiToUtf8(S));              
+  {$ENDIF}
 {$ENDIF}
               Exit;
             end
@@ -314,7 +338,9 @@ begin
         end;
       tkInterface:
         begin
-          IntfMeet := True;
+          MeetIntf := True;
+          InIntf := True;
+          InImpl := False;
 {$IFDEF UNICODE}
           IntfLine := Lex.LineNumber;
 {$ELSE}
@@ -323,7 +349,9 @@ begin
         end;
       tkImplementation:
         begin
-          ImplMeet := True;
+          MeetImpl := True;
+          InIntf := False;
+          InImpl := True;
 {$IFDEF UNICODE}
           ImplLine := Lex.LineNumber;
 {$ELSE}
@@ -334,13 +362,14 @@ begin
       Lex.Next;
     end;
 
-    if IsIntf and IntfMeet then
+    // 解析完毕，到此处是没有 uses 的情形
+    if IsIntf and MeetIntf then    // 曾经遇到过 interface 就以 interface 为插入点
     begin
       Result := True;
       CharPos.Line := IntfLine;
       CharPos.CharIndex := Length('interface');
     end
-    else if not IsIntf and ImplMeet then
+    else if not IsIntf and MeetImpl then // 曾经遇到过 interface 就以 interface 为插入点
     begin
       Result := True;
       CharPos.Line := ImplLine;

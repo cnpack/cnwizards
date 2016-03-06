@@ -517,7 +517,7 @@ function CnOtaGetCurrentOuterBlock: string;
 {* 获取当前光标所在的类名或声明}
 function CnOtaGetLineText(LineNum: Integer; EditBuffer: IOTAEditBuffer = nil;
   Count: Integer = 1): string;
-{* 取指定行的源代码}
+{* 取指定行的源代码，行号以 1 开始，返回结果为 Ansi/Unicode，非 UTF8}
 function CnOtaGetCurrLineText(var Text: string; var LineNo: Integer;
   var CharIndex: Integer; View: IOTAEditView = nil): Boolean;
 {* 取当前行源代码}
@@ -3886,7 +3886,7 @@ begin
   Parser.Free;
 end;
 
-// 取指定行的源代码
+// 取指定行的源代码，行号以 1 开始，返回结果为 Ansi/Unicode，非 UTF8
 function CnOtaGetLineText(LineNum: Integer; EditBuffer: IOTAEditBuffer = nil;
   Count: Integer = 1): string;
 var
@@ -3990,13 +3990,13 @@ end;
 //   如果要根据 CharIndex 处理 Text，则需要将 Text 转换为 AnsiString
 {
   以如下表格为准：
-                      获取的 Text 格式   CharIndex(CursorPos.Col)  编辑器状态栏的真实列状况（Ansi）
+                      获取的 Text 格式   CharIndex(CursorPos.Col)  编辑器状态栏的真实列状况（Ansi）   TOTACharPos
 
-  Delphi5/6/7         Ansi               同左、一致                同左、一致
+  Delphi5/6/7         Ansi               同左、一致                同左、一致                         Ansi
 
-  Delphi 2005~2007    Ansi with UTF8     同左、与 UTF8 一致        Ansi、与 UTF8 不一致
+  Delphi 2005~2007    Ansi with UTF8     同左、与 UTF8 一致        Ansi、与 UTF8 不一致               Utf8
 
-  Delphi 2009~        UTF16              Ansi、与 UTF16 不一致     同左 Ansi、与 UTF16 不一致
+  Delphi 2009~        UTF16              Ansi、与 UTF16 不一致     同左 Ansi、与 UTF16 不一致         Utf8，为啥？
 }
 function CnNtaGetCurrLineText(var Text: string; var LineNo: Integer;
   var CharIndex: Integer): Boolean;

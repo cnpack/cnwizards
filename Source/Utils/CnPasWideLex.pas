@@ -332,7 +332,7 @@ type
     property LineNumber: Integer read FLineNumber write FLineNumber;
     {* 当前行号，从 1 开始}
     property ColumnNumber: Integer read FColumnNumber write FColumnNumber;
-    {* 当前直观列号，从 1 开始}
+    {* 当前直观列号，从 1 开始，类似于 Ansi}
     property LineStartOffset: Integer read FLineStartOffset write FLineStartOffset;
     {* 当前行行首所在的线性位置，相对 FOrigin 的偏移量}
     property Origin: PWideChar read FOrigin write SetOrigin;
