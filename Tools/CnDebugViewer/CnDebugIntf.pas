@@ -48,7 +48,7 @@ const
   CnDebugMagicLength = 8;
   CnDebugMapEnabled = $7F3D92E0; // 随便定义的一个值表示 MapEnable
   CnDebugMagicName = 'CNDEBUG';
-  
+
   SCnDebugPrefix = 'Global\';
 
 var
@@ -132,12 +132,14 @@ procedure ReInitLocalConsts;
 implementation
 
 procedure ReInitLocalConsts;
+const
+  SCnDebugLocalPrefix := 'Local\';
 begin
-  SCnDebugMapName := 'CnDebugMap';
-  SCnDebugQueueEventName := 'CnDebugQueueEvent';
-  SCnDebugQueueMutexName := 'CnDebugQueueMutex';
-  SCnDebugStartEventName := 'CnDebugStartEvent';
-  SCnDebugFlushEventName := 'CnDebugFlushEvent';
+  SCnDebugMapName := SCnDebugLocalPrefix + 'CnDebugMap';
+  SCnDebugQueueEventName := SCnDebugLocalPrefix + 'CnDebugQueueEvent';
+  SCnDebugQueueMutexName := SCnDebugLocalPrefix + 'CnDebugQueueMutex';
+  SCnDebugStartEventName := SCnDebugLocalPrefix + 'CnDebugStartEvent';
+  SCnDebugFlushEventName := SCnDebugLocalPrefix + 'CnDebugFlushEvent';
 end;
 
 end.
