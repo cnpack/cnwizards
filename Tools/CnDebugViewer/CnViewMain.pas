@@ -396,9 +396,7 @@ begin
 
   Screen.OnActiveFormChange := ActiveFormChanged;
   if SysDebugExists then
-    statMain.Panels[3].Text := SCnDebuggerExists
-  else
-    statMain.Panels[3].Text := '';
+    statMain.Panels[3].Text := SCnDebuggerExists;
 
   // ¥¥Ω®Õ–≈Ã¿∏Õº±Í
   tryIcon.Hint := Caption;
