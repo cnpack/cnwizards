@@ -761,9 +761,6 @@ initialization
   CalcCPUSpeed;
   CnViewerOptions := TCnViewerOptions.Create;
 
-  if CnViewerOptions.LocalSession then
-    ReInitLocalConsts;
-
 finalization
   FreeAndNil(CnViewerOptions);
   FinalizeCore;

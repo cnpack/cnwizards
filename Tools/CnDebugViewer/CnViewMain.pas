@@ -364,6 +364,14 @@ var
   Res: TCnCoreInitResults;
   S: string;
 begin
+  if GetCWUseCustomUserDir then
+    LoadOptions(GetCWUserPath + SCnOptionFileName)
+  else
+    LoadOptions(_CnExtractFilePath(Application.ExeName) + SCnOptionFileName);
+
+  if CnViewerOptions.LocalSession then
+    ReInitLocalConsts;
+
   Res := InitializeCore;
   if Res <> ciOK then
   begin
@@ -381,10 +389,6 @@ begin
     statMain.Panels[3].Text := S;
   end;
 
-  if GetCWUseCustomUserDir then
-    LoadOptions(GetCWUserPath + SCnOptionFileName)
-  else
-    LoadOptions(_CnExtractFilePath(Application.ExeName) + SCnOptionFileName);
   UpdateFilterToMap;
   InitializeLang;
 
