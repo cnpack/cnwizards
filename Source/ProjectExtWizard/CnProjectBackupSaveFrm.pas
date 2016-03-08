@@ -42,8 +42,6 @@ interface
 
 {$IFDEF CNWIZARDS_CNPROJECTEXTWIZARD}
 
-{$IFDEF SUPPORT_PRJ_BACKUP}
-
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   CnCommon, CnWizConsts, CnWizMultiLang, StdCtrls, ExtCtrls, ComCtrls;
@@ -165,15 +163,11 @@ type
     property CurrentName: string read FCurrentName write FCurrentName;
   end;
 
-{$ENDIF SUPPORT_PRJ_BACKUP}
-
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}
 
 implementation
 
 {$IFDEF CNWIZARDS_CNPROJECTEXTWIZARD}
-
-{$IFDEF SUPPORT_PRJ_BACKUP}
 
 {$R *.DFM}
 
@@ -527,8 +521,6 @@ procedure TCnProjectBackupSaveForm.SetComments(const Value: string);
 begin
   mmoComments.Lines.Text := Value;
 end;
-
-{$ENDIF SUPPORT_PRJ_BACKUP}
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}
 end.

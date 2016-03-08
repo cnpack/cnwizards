@@ -103,9 +103,7 @@ type
     IdUseUnits: Integer;
   {$ENDIF}
     IdListUsed: Integer;
-  {$IFDEF SUPPORT_PRJ_BACKUP}
     IdProjBackup: Integer;
-  {$ENDIF}
     IdDelTemp: Integer;
     IdDirBuilder: Integer;
 
@@ -481,11 +479,9 @@ begin
 
   AddSepMenu;
 
-{$IFDEF SUPPORT_PRJ_BACKUP}
   IdProjBackup := RegisterASubAction(SCnProjExtBackup,
     SCnProjExtBackupCaption, 0,
     SCnProjExtBackupHint, SCnProjExtBackup);
-{$ENDIF}
 
   IdDelTemp := RegisterASubAction(SCnProjExtDelTemp,
     SCnProjExtDelTempCaption, 0,
@@ -562,7 +558,6 @@ begin
       Ini.Free;
     end;
   end
-{$IFDEF SUPPORT_PRJ_BACKUP}
   else if Index = IdProjBackup then
   begin
     begin
@@ -574,7 +569,6 @@ begin
       end;
     end;
   end
-{$ENDIF}
   else if Index = IdDelTemp then
   begin
     Ini := CreateIniFile;
@@ -622,10 +616,8 @@ begin
   SetVisible([IdExploreUnit, IdExploreProject, IdExploreExe, IdDelTemp], Active);
   SetEnabled([IdExploreProject, IdExploreExe], AEnabled);
   
-{$IFDEF SUPPORT_PRJ_BACKUP}
   SetVisible([IdProjBackup], Active);
   SetEnabled([IdProjBackup], AEnabled);
-{$ENDIF}
 
 {$IFDEF SUPPORT_USE_UNIT}
   if FUseUnitAction <> nil then

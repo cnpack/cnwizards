@@ -50,8 +50,6 @@ interface
 
 {$IFDEF CNWIZARDS_CNPROJECTEXTWIZARD}
 
-{$IFDEF SUPPORT_PRJ_BACKUP}
-
 uses
   Windows, SysUtils, Messages, Classes, Graphics, Forms, Controls, StdCtrls,
   Buttons, ExtCtrls, CheckLst, IniFiles, Menus, ActnList, FileCtrl, CnCommon,
@@ -205,15 +203,11 @@ function ShowProjectBackupForm(Ini: TCustomIniFile): Boolean;
 
 function GetFileIconIndex(FileName: string): Integer;
 
-{$ENDIF SUPPORT_PRJ_BACKUP}
-
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}
 
 implementation
 
 {$IFDEF CNWIZARDS_CNPROJECTEXTWIZARD}
-
-{$IFDEF SUPPORT_PRJ_BACKUP}
 
 {$R *.DFM}
 
@@ -1151,8 +1145,6 @@ begin
   SetListViewWidthString(lvFileView, FListViewWidthStr);
 {$ENDIF}
 end;
-
-{$ENDIF SUPPORT_PRJ_BACKUP}
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}
 end.
