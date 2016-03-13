@@ -317,13 +317,13 @@ type
     FSysUnitsPath: TStringList;
     FProjectPath: string;
     FProjectUnitsName: TStringList;
-    FProjectUnitsPath: TStringList;
+    FProjectUnitsPath: TStringList;  // 这几个 Path StringList 存储的都是带路径的完整文件名
     FUnitNames: TStringList;   // 存储单独的文件名
-    FUnitPaths: TStringList;    // FUseFullPath 为 True 时存储对应的单元路径
+    FUnitPaths: TStringList;   // FUseFullPath 为 True 时存储对应的包括路径的完整单元名
     FCurrFileList: TStringList;
     FCurrPathList: TStringList;
     function AddUnit(const UnitName: string; IsInProject: Boolean = False): Boolean;
-    procedure AddUnitPaths(const UnitPath: string);
+    procedure AddUnitFullNameWithPath(const UnitFullName: string);
     procedure DoFindFile(const FileName: string; const Info: TSearchRec; var Abort: 
       Boolean);
     procedure LoadFromSysPath;
@@ -340,6 +340,7 @@ type
       TCodePosInfo): Boolean; override;
     procedure DoInternalLoad;
     procedure ExportToStringList(Names, Paths: TStringList);
+    // 将不包括扩展名的文件名以及带完整路径的文件名输出至外部列表
   end;
 
 //==============================================================================
@@ -1288,9 +1289,9 @@ begin
   end;
 end;
 
-procedure TUnitNameList.AddUnitPaths(const UnitPath: string);
+procedure TUnitNameList.AddUnitFullNameWithPath(const UnitFullName: string);
 begin
-  FUnitPaths.Add(UnitPath);
+  FUnitPaths.Add(UnitFullName);
   // 必须允许重复
 end;
 
@@ -1318,7 +1319,7 @@ begin
             Added := AddUnit(_CnChangeFileExt(_CnExtractFileName(FileName), ''), True);
 
             if FUseFullPath and Added then
-              AddUnitPaths(_CnExtractFileDir(FileName));
+              AddUnitFullNameWithPath(FileName);
           end;
         end;
       end;
@@ -1339,7 +1340,7 @@ begin
     FCurrFileList.AddObject(FilePart, TObject(FCurrFileList.Count));
 
     if FUseFullPath then
-      FCurrPathList.Add( _CnExtractFileDir(FileName));
+      FCurrPathList.Add(FileName);
   end;
 end;
 
@@ -1384,7 +1385,7 @@ begin
   begin
     Added := AddUnit(FSysUnitsName[I]);
     if FUseFullPath and Added then
-      AddUnitPaths(FSysUnitsPath[I]);
+      AddUnitFullNameWithPath(FSysUnitsPath[I]);
   end;
 end;
 
@@ -1424,7 +1425,7 @@ begin
   begin
     Added := AddUnit(FProjectUnitsName[I]);
     if FUseFullPath and Added then
-      AddUnitPaths(FProjectUnitsPath[I]);
+      AddUnitFullNameWithPath(FProjectUnitsPath[I]);
   end;
 end;
 
