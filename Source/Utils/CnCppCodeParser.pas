@@ -125,6 +125,9 @@ function ParseCppCodePosInfo(const Source: AnsiString; CurrPos: Integer;
   FullSource: Boolean = True; IsUtf8: Boolean = False): TCodePosInfo;
 {* 分析源代码中当前位置的信息}
 
+procedure ParseUnitIncludes(const Source: AnsiString; IncludeList: TStrings);
+{* 分析源代码中引用的头文件}
+
 implementation
 
 var
@@ -736,6 +739,32 @@ begin
       DoNext;
       if CanExit then
         Break;
+    end;
+  finally
+    CParser.Free;
+  end;
+end;
+
+// 分析源代码中引用的头文件
+procedure ParseUnitIncludes(const Source: AnsiString; IncludeList: TStrings);
+var
+  CParser: TBCBTokenList;
+begin
+  IncludeList.Clear;
+
+  CParser := TBCBTokenList.Create;
+  CParser.DirectivesAsComments := False;
+
+  try
+    CParser.SetOrigin(PAnsiChar(Source), Length(Source));
+
+    while CParser.RunID <> ctknull do
+    begin
+      if CParser.RunID = ctkdirinclude then
+      begin
+
+      end;
+      CParser.Next;
     end;
   finally
     CParser.Free;

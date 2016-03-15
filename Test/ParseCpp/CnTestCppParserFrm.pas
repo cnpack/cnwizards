@@ -17,6 +17,7 @@ type
     btnTokenList: TButton;
     bvl1: TBevel;
     btnWideTokenize: TButton;
+    btnInc: TButton;
     procedure btnLoadClick(Sender: TObject);
     procedure btnParseClick(Sender: TObject);
     procedure mmoCClick(Sender: TObject);
@@ -24,6 +25,7 @@ type
     procedure mmoCChange(Sender: TObject);
     procedure btnTokenListClick(Sender: TObject);
     procedure btnWideTokenizeClick(Sender: TObject);
+    procedure btnIncClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -174,6 +176,20 @@ begin
   end;
 
   P.Free;
+end;
+
+procedure TCppParseForm.btnIncClick(Sender: TObject);
+var
+  List: TStrings;
+begin
+  List := TStringList.Create;
+
+  try
+    ParseUnitIncludes(mmoC.Lines.Text, List);
+    ShowMessage(List.Text);
+  finally
+    List.Free;
+  end;
 end;
 
 end.

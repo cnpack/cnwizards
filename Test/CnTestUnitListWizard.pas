@@ -312,7 +312,7 @@ begin
               S := AnsiString(Copy(LineText, 1, CharPos.CharIndex));
               CnDebugger.LogMsg('Line Text before Insertion: ' + S);
 
-              CharPos.CharIndex := Length(CnAnsiToUtf8(S));
+              CharPos.CharIndex := Length(CnAnsiToUtf8(S));  // 不明白 Unicode 环境里的 TOTACharPos 为什么也需要做 Utf8 转换
 {$ELSE}
               CharPos.Line := Lex.LineNumber + 1;
               CharPos.CharIndex := Lex.TokenPos - Lex.LinePos;
