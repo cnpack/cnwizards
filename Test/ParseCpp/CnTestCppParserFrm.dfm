@@ -48,6 +48,8 @@ object CppParseForm: TCppParseForm
     Font.Style = []
     Lines.Strings = (
       '#include <stdio.h>'
+      '#include "io.h"'
+      ''
       'void do_some(int a)'
       '{'
       '    printf("Test.\n"); // Test'

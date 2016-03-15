@@ -29,7 +29,9 @@ unit CnCppCodeParser;
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2012.02.07
+* 修改记录：2016.03.15
+*               增加解析并获取源文件中 include 内容的功能
+*           2012.02.07
 *               UTF8的位置转换去除后仍有问题，恢复之
 *           2011.11.29
 *               XE/XE2 的位置解析无需UTF8的位置转换
@@ -748,6 +750,7 @@ end;
 // 分析源代码中引用的头文件
 procedure ParseUnitIncludes(const Source: AnsiString; IncludeList: TStrings);
 var
+  S: string;
   CParser: TBCBTokenList;
 begin
   IncludeList.Clear;
@@ -762,9 +765,35 @@ begin
     begin
       if CParser.RunID = ctkdirinclude then
       begin
+        CParser.NextNonJunk;
+        if CParser.RunID = ctkstring then
+        begin
+          S := CParser.RunToken;
+          if S <> '' then
+          begin
+            // 去除字符串两端的引号
+            if S[1] = '"' then
+              Delete(S, 1, 1);
+            if (S <> '') and (S[Length(S)] = '"') then
+              Delete(S, Length(S), 1);
 
+            IncludeList.Add(S);
+          end;
+        end
+        else if CParser.RunID = ctklower then
+        begin
+          CParser.NextNonJunk;
+          S := '';
+          while CParser.RunID in [ctkidentifier, ctkpoint] do
+          begin
+            S := S + CParser.RunToken;
+            CParser.Next;
+          end;
+          IncludeList.Add(S);
+        end;
       end;
-      CParser.Next;
+
+      CParser.NextNonJunk;
     end;
   finally
     CParser.Free;
