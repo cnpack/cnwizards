@@ -30,8 +30,8 @@ unit CnInputSymbolList;
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2016.03.01 by liuxiao
-*               TUnitNameList 增加路径机制供外部使用
+* 修改记录：2016.03.15 by liuxiao
+*               TUnitNameList 增加路径机制与 h/hpp 支持供外部使用
 *           2012.09.19 by shenloqi
 *               移植到Delphi XE3
 *           2012.03.26
@@ -312,6 +312,7 @@ type
   TUnitNameList = class(TSymbolList)
   private
     FUseFullPath: Boolean;
+    FCppMode: Boolean;
     FSysPath: string;
     FSysUnitsName: TStringList;
     FSysUnitsPath: TStringList;
@@ -333,7 +334,7 @@ type
     procedure UpdatePathsSequence(Names, Paths: TStringList);
   public
     constructor Create; overload; override;
-    constructor Create(UseFullPath: Boolean); reintroduce; overload;
+    constructor Create(UseFullPath: Boolean; IsCppMode: Boolean); reintroduce; overload;
     destructor Destroy; override;
     class function GetListName: string; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
@@ -1235,9 +1236,10 @@ end;
 
 { TUnitNameList }
 
-constructor TUnitNameList.Create(UseFullPath: Boolean);
+constructor TUnitNameList.Create(UseFullPath: Boolean; IsCppMode: Boolean);
 begin
   FUseFullPath := UseFullPath;
+  FCppMode := IsCppMode;
   Create;
 end;
 
@@ -1314,12 +1316,26 @@ begin
         for j := 0 to Project.GetModuleCount - 1 do
         begin
           FileName := Project.GetModule(j).FileName;
-          if IsPas(FileName) or IsDcu(FileName) then
-          begin
-            Added := AddUnit(_CnChangeFileExt(_CnExtractFileName(FileName), ''), True);
 
-            if FUseFullPath and Added then
-              AddUnitFullNameWithPath(FileName);
+          if FCppMode then
+          begin
+            if IsHpp(FileName) or IsH(FileName) then
+            begin
+              Added := AddUnit(_CnExtractFileName(FileName), True);
+
+              if FUseFullPath and Added then
+                AddUnitFullNameWithPath(FileName);
+            end;
+          end
+          else
+          begin
+            if IsPas(FileName) or IsDcu(FileName) then
+            begin
+              Added := AddUnit(_CnChangeFileExt(_CnExtractFileName(FileName), ''), True);
+
+              if FUseFullPath and Added then
+                AddUnitFullNameWithPath(FileName);
+            end;
           end;
         end;
       end;
@@ -1332,7 +1348,10 @@ procedure TUnitNameList.DoFindFile(const FileName: string; const Info:
 var
   FilePart: string;
 begin
-  FilePart := _CnChangeFileExt(Info.Name, '');
+  if FCppMode then // C 中 include 的需要扩展名
+    FilePart := Info.Name
+  else
+    FilePart := _CnChangeFileExt(Info.Name, '');
 
   if IsValidIdent(StringReplace(FilePart, '.', '', [rfReplaceAll])) and (FCurrFileList.IndexOf(FilePart) < 0) then
   begin
@@ -1361,13 +1380,27 @@ begin
       FCurrFileList := FSysUnitsName;
       FCurrPathList := FSysUnitsPath;
 
-      for I := 0 to Paths.Count - 1 do
+      if FCppMode then
       begin
-        FindFile(Paths[I], '*.pas', DoFindFile, nil, False, False);
-        FindFile(Paths[I], '*.dcu', DoFindFile, nil, False, False);
+        for I := 0 to Paths.Count - 1 do
+        begin
+          FindFile(Paths[I], '*.hpp', DoFindFile, nil, False, False);
+          FindFile(Paths[I], '*.h', DoFindFile, nil, False, False);
+        end;
+        FindFile(MakePath(GetInstallDir) + 'Include\', '*.h', DoFindFile, nil,
+          False, False);
+      end
+      else
+      begin
+        for I := 0 to Paths.Count - 1 do
+        begin
+          FindFile(Paths[I], '*.pas', DoFindFile, nil, False, False);
+          FindFile(Paths[I], '*.dcu', DoFindFile, nil, False, False);
+        end;
+        FindFile(MakePath(GetInstallDir) + 'Lib\', '*.dcu', DoFindFile, nil,
+          False, False);
       end;
-      FindFile(MakePath(GetInstallDir) + 'Lib\', '*.dcu', DoFindFile, nil,
-        False, False);
+
       UpdateCaseFromModules(FSysUnitsName);
       UpdatePathsSequence(FSysUnitsName, FSysUnitsPath);
       FSysPath := Paths.Text;
@@ -1399,15 +1432,25 @@ begin
   try
     Paths.Sorted := True;
     GetProjectLibPath(Paths);
-    if not SameText(Paths.Text, FProjectPath) then // 强行加载完整路径
+    if not SameText(Paths.Text, FProjectPath) then
     begin
       FProjectUnitsName.Clear;
       FProjectUnitsPath.Clear;
       FCurrFileList := FProjectUnitsName;
       FCurrPathList := FProjectUnitsPath;
 
-      for I := 0 to Paths.Count - 1 do
-        FindFile(Paths[I], '*.pas', DoFindFile, nil, False, False);
+      if FCppMode then
+      begin
+        for I := 0 to Paths.Count - 1 do
+        begin
+          FindFile(Paths[I], '*.hpp', DoFindFile, nil, False, False);
+          FindFile(Paths[I], '*.h', DoFindFile, nil, False, False);
+        end;
+      end
+      else
+        for I := 0 to Paths.Count - 1 do
+          FindFile(Paths[I], '*.pas', DoFindFile, nil, False, False);
+
       UpdateCaseFromModules(FProjectUnitsName);
       UpdatePathsSequence(FProjectUnitsName, FProjectUnitsPath);
       FProjectPath := Paths.Text;

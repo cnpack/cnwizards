@@ -41,7 +41,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ToolsAPI, IniFiles, CnWizClasses, CnWizUtils, CnWizConsts, CnInputSymbolList,
-  CnPasCodeParser;
+  CnPasCodeParser, CnCppCodeParser;
 
 type
 
@@ -54,7 +54,8 @@ type
   TCnTestUnitListWizard = class(TCnMenuWizard)
   private
     FList: TUnitNameList;
-    function SearchInsertPos(IsIntf: Boolean; out HasUses: Boolean; out CharPos: TOTACharPos): Boolean;
+    function SearchPasInsertPos(IsIntf: Boolean; out HasUses: Boolean;
+      out CharPos: TOTACharPos): Boolean;
   protected
     function GetHasConfig: Boolean; override;
   public
@@ -91,7 +92,7 @@ end;
 constructor TCnTestUnitListWizard.Create;
 begin
   inherited;
-  FList := TUnitNameList.Create(True);
+
 end;
 
 destructor TCnTestUnitListWizard.Destroy;
@@ -102,6 +103,7 @@ end;
 
 procedure TCnTestUnitListWizard.Execute;
 var
+  IsCppMode: Boolean;
   I, Idx: Integer;
   Stream: TMemoryStream;
   UsesList: TStringList;
@@ -112,6 +114,19 @@ var
   LinearPos: LongInt;
   EditView: IOTAEditView;
 begin
+  if CurrentIsDelphiSource then
+  begin
+    FList := TUnitNameList.Create(True, False);
+    IsCppMode := False;
+  end
+  else if CurrentIsCSource then
+  begin
+    FList := TUnitNameList.Create(True, True);
+    IsCppMode := True;
+  end
+  else
+    Exit;
+
   Names := TStringList.Create;
   Paths := TStringList.Create;
   Stream := TMemoryStream.Create;
@@ -122,12 +137,15 @@ begin
     FList.DoInternalLoad;
     FList.ExportToStringList(Names, Paths);
 
-    ShowMessage('Found Units Count: ' + IntToStr(Names.Count));
+    ShowMessage('Found Units/Headers Count: ' + IntToStr(Names.Count));
 
     // 此时得到了所有可引用的单元列表
 
     CnOtaSaveCurrentEditorToStream(Stream, False);
-    ParseUnitUses(PAnsiChar(Stream.Memory), UsesList);
+    if not IsCppMode then
+      ParseUnitUses(PAnsiChar(Stream.Memory), UsesList)
+    else
+      ParseUnitIncludes(PAnsiChar(Stream.Memory), UsesList);
 
     for I := 0 to UsesList.Count - 1 do
     begin
@@ -140,7 +158,7 @@ begin
       end;
     end;
 
-    ShowMessage('Found Units not used: ' + IntToStr(Names.Count));
+    ShowMessage('Found Units/Headers not used: ' + IntToStr(Names.Count));
     for I := 0 to Names.Count - 1 do
       CnDebugger.LogFmt('%d. %s in %s', [Integer(Names.Objects[I]), Names[I], Paths[I]]);
 
@@ -150,7 +168,7 @@ begin
     EditView := CnOtaGetTopMostEditView;
 
     // 插入至 interface 处的 uses，还得处理无 uses 的情况
-    if not SearchInsertPos(False, HasUses, CharPos) then
+    if not SearchPasInsertPos(False, HasUses, CharPos) then
     begin
       ErrorDlg('Can NOT Find an Insert Position for implementation uses.');
       Exit;
@@ -173,7 +191,7 @@ begin
     if Names.Count = 1 then
       Exit;
 
-    if not SearchInsertPos(True, HasUses, CharPos) then
+    if not SearchPasInsertPos(True, HasUses, CharPos) then
     begin
       ErrorDlg('Can NOT Find an Insert Position for interface uses.');
       Exit;
@@ -195,6 +213,7 @@ begin
     Stream.Free;
     Names.Free;
     Paths.Free;
+    FreeAndNil(FList);
   end;
 end;
 
@@ -241,7 +260,7 @@ begin
 
 end;
 
-function TCnTestUnitListWizard.SearchInsertPos(IsIntf: Boolean; out HasUses: Boolean;
+function TCnTestUnitListWizard.SearchPasInsertPos(IsIntf: Boolean; out HasUses: Boolean;
   out CharPos: TOTACharPos): Boolean;
 var
   Stream: TMemoryStream;
