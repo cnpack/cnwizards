@@ -1851,6 +1851,7 @@ var
             CurIntf := '';
             CurClassForNotKnown := '';
             PrevTokenID := tkNull;
+            NotKnownLineNo := -1;
 
             while Parser.TokenID <> tkNull do
             begin

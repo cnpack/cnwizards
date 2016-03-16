@@ -1301,7 +1301,7 @@ procedure TUnitNameList.LoadFromCurrProject;
 var
   ProjectGroup: IOTAProjectGroup;
   Project: IOTAProject;
-  FileName: string;
+  FileName, S: string;
   i, j: Integer;
   Added: Boolean;
 begin
@@ -1319,12 +1319,24 @@ begin
 
           if FCppMode then
           begin
-            if IsHpp(FileName) or IsH(FileName) then
+            FileName := _CnChangeFileExt(FileName, '.h');
+            if FileExists(FileName) or CnOtaIsFileOpen(FileName) then
             begin
               Added := AddUnit(_CnExtractFileName(FileName), True);
 
               if FUseFullPath and Added then
                 AddUnitFullNameWithPath(FileName);
+            end
+            else
+            begin
+              FileName := _CnChangeFileExt(FileName, '.hpp');
+              if FileExists(FileName) or CnOtaIsFileOpen(FileName) then
+              begin
+                Added := AddUnit(_CnExtractFileName(FileName), True);
+
+                if FUseFullPath and Added then
+                  AddUnitFullNameWithPath(FileName);
+              end;
             end;
           end
           else
