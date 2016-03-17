@@ -56,6 +56,7 @@ type
     FList: TUnitNameList;
     function SearchPasInsertPos(IsIntf: Boolean; out HasUses: Boolean;
       out CharPos: TOTACharPos): Boolean;
+    function SearchCppInsertPos(IsH: Boolean; out CharPos: TOTACharPos): Boolean;
   protected
     function GetHasConfig: Boolean; override;
   public
@@ -76,7 +77,7 @@ type
 implementation
 
 uses
-  CnDebug, mPasLex, CnCommon, CnPasWideLex;
+  CnDebug, mPasLex, CnCommon, CnPasWideLex, mwBCBTokenList, CnBCBWideTokenList;
 
 //==============================================================================
 // 测试 TUnitNameList 相关功能的菜单专家
@@ -167,46 +168,86 @@ begin
       Exit;
     EditView := CnOtaGetTopMostEditView;
 
-    // 插入至 interface 处的 uses，还得处理无 uses 的情况
-    if not SearchPasInsertPos(False, HasUses, CharPos) then
+    if IsCppMode then
     begin
-      ErrorDlg('Can NOT Find an Insert Position for implementation uses.');
-      Exit;
+      // 插入至 Cpp 文件头部最后一个 include 后，如无就插最头上
+      if not SearchCppInsertPos(False, CharPos) then
+      begin
+        ErrorDlg('Can NOT Find an Insert Position for Cpp Include.');
+        Exit;
+      end;
+    end
+    else
+    begin
+      // 插入至 interface 处的 uses，还得处理无 uses 的情况
+      if not SearchPasInsertPos(False, HasUses, CharPos) then
+      begin
+        ErrorDlg('Can NOT Find an Insert Position for implementation uses.');
+        Exit;
+      end;
     end;
 
     // 已经得到行 1 列 0 开始的 CharPos，用 EditView.CharPosToPos(CharPos) 转换为线性;
     LinearPos := EditView.CharPosToPos(CharPos);
 
-    if HasUses then
+    if IsCppMode then
     begin
-      ShowMessage('Will insert ' + Names[0] + ' to Position ' + IntToStr(CharPos.Line) + ':' + IntToStr(CharPos.CharIndex));
-      CnOtaInsertTextIntoEditorAtPos(', ' + Names[0], LinearPos);
+      ShowMessage('Will insert #include ' + Names[0] + ' to Position ' + IntToStr(CharPos.Line) + ':' + IntToStr(CharPos.CharIndex));
+      CnOtaInsertTextIntoEditorAtPos('#include "' + Names[0] + '"' + #13#10, LinearPos);
     end
     else
     begin
-      ShowMessage('Will insert uses ' + Names[0] + ' after implementation. Line ' + IntToStr(CharPos.Line));
-      CnOtaInsertTextIntoEditorAtPos(#13#10#13#10 + 'uses' + #13#10 + '  ' + Names[0] + ';', LinearPos);
+      if HasUses then
+      begin
+        ShowMessage('Will insert ' + Names[0] + ' to Position ' + IntToStr(CharPos.Line) + ':' + IntToStr(CharPos.CharIndex));
+        CnOtaInsertTextIntoEditorAtPos(', ' + Names[0], LinearPos);
+      end
+      else
+      begin
+        ShowMessage('Will insert uses ' + Names[0] + ' after implementation. Line ' + IntToStr(CharPos.Line));
+        CnOtaInsertTextIntoEditorAtPos(#13#10#13#10 + 'uses' + #13#10 + '  ' + Names[0] + ';', LinearPos);
+      end;
     end;
 
     if Names.Count = 1 then
       Exit;
 
-    if not SearchPasInsertPos(True, HasUses, CharPos) then
+    if IsCppMode then
     begin
-      ErrorDlg('Can NOT Find an Insert Position for interface uses.');
-      Exit;
-    end;
-
-    LinearPos := EditView.CharPosToPos(CharPos);
-    if HasUses then
-    begin
-      ShowMessage('Will insert ' + Names[1] + ' to Position ' + IntToStr(CharPos.Line) + ':' + IntToStr(CharPos.CharIndex));
-      CnOtaInsertTextIntoEditorAtPos(', ' + Names[1], LinearPos);
+      // 插入至 H 文件头部最后一个 include 后，如无就查ifdef def，插它后面
+      if not SearchCppInsertPos(True, CharPos) then
+      begin
+        ErrorDlg('Can NOT Find an Insert Position for Cpp Include.');
+        Exit;
+      end
     end
     else
     begin
-      ShowMessage('Will insert uses ' + Names[1] + ' after interface. Line ' + IntToStr(CharPos.Line));
-      CnOtaInsertTextIntoEditorAtPos(#13#10#13#10 + 'uses' + #13#10 + '  ' + Names[1] + ';', LinearPos);
+      if not SearchPasInsertPos(True, HasUses, CharPos) then
+      begin
+        ErrorDlg('Can NOT Find an Insert Position for interface uses.');
+        Exit;
+      end;
+    end;
+
+    LinearPos := EditView.CharPosToPos(CharPos);
+    if IsCppMode then
+    begin
+      ShowMessage('Will insert #include ' + Names[1] + ' to Position ' + IntToStr(CharPos.Line) + ':' + IntToStr(CharPos.CharIndex));
+      CnOtaInsertTextIntoEditorAtPos('#include "' + Names[1] + '"' + #13#10, LinearPos);
+    end
+    else
+    begin
+      if HasUses then
+      begin
+        ShowMessage('Will insert ' + Names[1] + ' to Position ' + IntToStr(CharPos.Line) + ':' + IntToStr(CharPos.CharIndex));
+        CnOtaInsertTextIntoEditorAtPos(', ' + Names[1], LinearPos);
+      end
+      else
+      begin
+        ShowMessage('Will insert uses ' + Names[1] + ' after interface. Line ' + IntToStr(CharPos.Line));
+        CnOtaInsertTextIntoEditorAtPos(#13#10#13#10 + 'uses' + #13#10 + '  ' + Names[1] + ';', LinearPos);
+      end;
     end;
   finally
     UsesList.Free;
@@ -258,6 +299,59 @@ end;
 procedure TCnTestUnitListWizard.SaveSettings(Ini: TCustomIniFile);
 begin
 
+end;
+
+function TCnTestUnitListWizard.SearchCppInsertPos(IsH: Boolean;
+  out CharPos: TOTACharPos): Boolean;
+var
+  Stream: TMemoryStream;
+  LineText: string;
+  S: AnsiString;
+  LastIncLine: Integer;
+{$IFDEF UNICODE}
+  CParser: TCnWideBCBTokenList;
+{$ELSE}
+  CParser: TBCBTokenList;
+{$ENDIF}
+begin
+  // 插在最后一个 include 前面。如无 include，h 文件和 cpp 处理还不同。
+  Result := False;
+  Stream := nil;
+  CParser := nil;
+
+  try
+    Stream := TMemoryStream.Create;
+
+{$IFDEF UNICODE}
+    CParser := TCnWideBCBTokenList.Create;
+    CParser.DirectivesAsComments := False;
+    CnOtaSaveCurrentEditorToStreamW(Stream, False);
+    CParser.SetOrigin(PWideChar(Stream.Memory), Stream.Size div SizeOf(Char));
+{$ELSE}
+    CParser := TBCBTokenList.Create;
+    CParser.DirectivesAsComments := False;
+    CnOtaSaveCurrentEditorToStream(Stream, False);
+    CParser.SetOrigin(PAnsiChar(Stream.Memory), Stream.Size);
+{$ENDIF}
+
+    LastIncLine := -1;
+    while CParser.RunID <> ctknull do
+    begin
+      if CParser.RunID = ctkdirinclude then
+        LastIncLine := CParser.RunLineNumber;
+      CParser.NextNonJunk;
+    end;
+
+    if LastIncLine >= 0 then
+    begin
+      Result := True;
+      CharPos.Line := LastIncLine + 1; // 最后一个 inc 的行首
+      CharPos.CharIndex := 0;
+    end;
+  finally
+    CParser.Free;
+    Stream.Free;
+  end;
 end;
 
 function TCnTestUnitListWizard.SearchPasInsertPos(IsIntf: Boolean; out HasUses: Boolean;

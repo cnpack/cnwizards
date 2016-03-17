@@ -1301,7 +1301,7 @@ procedure TUnitNameList.LoadFromCurrProject;
 var
   ProjectGroup: IOTAProjectGroup;
   Project: IOTAProject;
-  FileName, S: string;
+  FileName: string;
   i, j: Integer;
   Added: Boolean;
 begin
