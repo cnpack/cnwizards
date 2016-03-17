@@ -1396,10 +1396,10 @@ begin
       begin
         for I := 0 to Paths.Count - 1 do
         begin
-          FindFile(Paths[I], '*.hpp', DoFindFile, nil, False, False);
-          FindFile(Paths[I], '*.h', DoFindFile, nil, False, False);
+          FindFile(Paths[I], '*.h*', DoFindFile, nil, False, False);
+          // FindFile(Paths[I], '*.h', DoFindFile, nil, False, False);
         end;
-        FindFile(MakePath(GetInstallDir) + 'Include\', '*.h', DoFindFile, nil,
+        FindFile(MakePath(GetInstallDir) + 'Include\', '*.h*', DoFindFile, nil,
           False, False);
       end
       else
@@ -1455,8 +1455,8 @@ begin
       begin
         for I := 0 to Paths.Count - 1 do
         begin
-          FindFile(Paths[I], '*.hpp', DoFindFile, nil, False, False);
-          FindFile(Paths[I], '*.h', DoFindFile, nil, False, False);
+          FindFile(Paths[I], '*.h*', DoFindFile, nil, False, False);
+          // FindFile(Paths[I], '*.h', DoFindFile, nil, False, False);
         end;
       end
       else
@@ -1487,6 +1487,7 @@ end;
 type
   PUnitsInfoRec = ^TUnitsInfoRec;
   TUnitsInfoRec = record
+    IsCppMode: Boolean;
     Sorted: TStringList;
     Unsorted: TStringList;
   end;
@@ -1495,13 +1496,30 @@ procedure GetInfoProc(const Name: string; NameType: TNameType; Flags: Byte;
   Param: Pointer);
 var
   Idx: Integer;
+  Cpp: Boolean;
 begin
-  // 将单元名替换成正确的大小写格式
+  // 将单元名或头文件名替换成正确的大小写格式
   if NameType = ntContainsUnit then
   begin
-    Idx := PUnitsInfoRec(Param).Sorted.IndexOf(Name);
-    if Idx >= 0 then
-      PUnitsInfoRec(Param).Unsorted[Idx] := Name;
+    Cpp := PUnitsInfoRec(Param).IsCppMode;
+    if not Cpp then
+    begin
+      Idx := PUnitsInfoRec(Param).Sorted.IndexOf(Name);
+      if Idx >= 0 then
+        PUnitsInfoRec(Param).Unsorted[Idx] := Name;
+    end
+    else
+    begin
+      Idx := PUnitsInfoRec(Param).Sorted.IndexOf(Name + '.hpp');
+      if Idx >= 0 then
+        PUnitsInfoRec(Param).Unsorted[Idx] := Name + '.hpp'
+      else
+      begin
+        Idx := PUnitsInfoRec(Param).Sorted.IndexOf(Name + '.h');
+        if Idx >= 0 then
+          PUnitsInfoRec(Param).Unsorted[Idx] := Name + '.h'
+      end;
+    end;
   end;
 end;
 
@@ -1527,6 +1545,7 @@ begin
     which is manipulated in GetInfoProc(). After that the unsorted list is
     copied back to the original sorted list. BinSearch is a lot faster than
     linear search. (by AHUser) }
+  Data.IsCppMode := FCppMode;
   Data.Sorted := AList;
   Data.Unsorted := TStringList.Create;
   try

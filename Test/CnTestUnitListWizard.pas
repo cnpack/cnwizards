@@ -114,6 +114,15 @@ var
   CharPos: TOTACharPos;
   LinearPos: LongInt;
   EditView: IOTAEditView;
+
+  function JoinInclude(IsSystem: Boolean; const IncFile: string): string;
+  begin
+    if IsSystem then
+      Result := Format('#include <%s>' + #13#10, [IncFile])
+    else
+      Result := Format('#include "%s"' + #13#10, [IncFile]);
+  end;
+
 begin
   if CurrentIsDelphiSource then
   begin
@@ -193,7 +202,7 @@ begin
     if IsCppMode then
     begin
       ShowMessage('Will insert #include ' + Names[0] + ' to Position ' + IntToStr(CharPos.Line) + ':' + IntToStr(CharPos.CharIndex));
-      CnOtaInsertTextIntoEditorAtPos('#include "' + Names[0] + '"' + #13#10, LinearPos);
+      CnOtaInsertTextIntoEditorAtPos(JoinInclude(True, Names[0]), LinearPos);
     end
     else
     begin
@@ -234,7 +243,7 @@ begin
     if IsCppMode then
     begin
       ShowMessage('Will insert #include ' + Names[1] + ' to Position ' + IntToStr(CharPos.Line) + ':' + IntToStr(CharPos.CharIndex));
-      CnOtaInsertTextIntoEditorAtPos('#include "' + Names[1] + '"' + #13#10, LinearPos);
+      CnOtaInsertTextIntoEditorAtPos(JoinInclude(False, Names[1]), LinearPos);
     end
     else
     begin
