@@ -1258,6 +1258,8 @@ var
   SCnProjExtFileIsReadOnly: string = 'The File is ReadOnly, Set its Attribute to Normal and Continue to Convert It?';
   SCnProjExtCreatePrjListError: string = 'Create ProjectList Error!';
   SCnProjExtErrorInUse: string = 'Can NOT Find these Files.' + #13#10 + 'Maybe They''re in Different Projects.';
+  SCnProjExtUsesNoPasPosition: string = 'Can NOT Find a Position for interface/implementation uses Inserting.';
+  SCnProjExtUsesNoCppPosition: string = 'Can NOT Find a Position for Inserting Header File Including.';
   SCnProjExtAddExtension: string = 'Add File Extension';
   SCnProjExtAddNewText: string = 'Enter a File Extension:';
   SCnProjExtCleaningComplete: string = 'Cleaning complete. ' + #13#10 + 'Total delete %d files, ' + #13#10 + '%s bytes.';

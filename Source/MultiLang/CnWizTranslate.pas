@@ -965,6 +965,8 @@ begin
   TranslateStr(SCnProjExtFileIsReadOnly, 'SCnProjExtFileIsReadOnly');
   TranslateStr(SCnProjExtCreatePrjListError, 'SCnProjExtCreatePrjListError');
   TranslateStr(SCnProjExtErrorInUse, 'SCnProjExtErrorInUse');
+  TranslateStr(SCnProjExtUsesNoPasPosition, 'SCnProjExtUsesNoPasPosition');
+  TranslateStr(SCnProjExtUsesNoCppPosition, 'SCnProjExtUsesNoCppPosition');
   TranslateStr(SCnProjExtAddExtension, 'SCnProjExtAddExtension');
   TranslateStr(SCnProjExtAddNewText, 'SCnProjExtAddNewText');
   TranslateStr(SCnProjExtCleaningComplete, 'SCnProjExtCleaningComplete');
