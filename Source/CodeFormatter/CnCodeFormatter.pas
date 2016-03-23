@@ -421,6 +421,8 @@ begin
 
   FKeywordsValidArray[tokDirectiveMESSAGE] := [pfetDirective];
   FKeywordsValidArray[tokDirectiveREGISTER] := [pfetDirective];
+  FKeywordsValidArray[tokDirectiveEXPORT] := [pfetDirective];
+  // TODO: 加入其他 Directive
 
   FKeywordsValidArray[tokComplexName] := [pfetDirective];
   FKeywordsValidArray[tokKeywordAlign] := [pfetRecordEnd];
