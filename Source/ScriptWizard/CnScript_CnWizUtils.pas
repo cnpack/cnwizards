@@ -351,6 +351,7 @@ begin
   CL.AddDelphiFunction('Function FindControlByClassName( AParent : TWinControl; const AClassName : string) : TControl');
   CL.AddDelphiFunction('Function CnOtaGetEditBuffer : IOTAEditBuffer');
   CL.AddDelphiFunction('Function CnOtaGetEditPosition : IOTAEditPosition');
+  CL.AddDelphiFunction('Function CnOtaGetTopOpenedEditViewFromFileName( const FileName : string) : IOTAEditView');
   CL.AddDelphiFunction('Function CnOtaGetTopMostEditView( SourceEditor : IOTASourceEditor) : IOTAEditView;');
   CL.AddDelphiFunction('Function CnOtaGetTopMostEditActions : IOTAEditActions');
   CL.AddDelphiFunction('Function CnOtaGetCurrentModule : IOTAModule');
@@ -598,6 +599,7 @@ begin
   S.RegisterDelphiFunction(@FindControlByClassName, 'FindControlByClassName', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetEditBuffer, 'CnOtaGetEditBuffer', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetEditPosition, 'CnOtaGetEditPosition', cdRegister);
+  S.RegisterDelphiFunction(@CnOtaGetTopOpenedEditViewFromFileName, 'CnOtaGetTopOpenedEditViewFromFileName', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetTopMostEditView_P, 'CnOtaGetTopMostEditView', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetTopMostEditActions, 'CnOtaGetTopMostEditActions', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetCurrentModule, 'CnOtaGetCurrentModule', cdRegister);

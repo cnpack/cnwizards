@@ -1107,7 +1107,6 @@ var
   Element, LineFlag: Integer;
   CurTokens: TList;
   F: string;
-  FEditor: IOTAEditor;
   FSrcEditor: IOTASourceEditor;
 begin
   Result := False;
@@ -1608,17 +1607,8 @@ begin
 {$IFDEF DEBUG}
         CnDebugger.LogMsg('Cpp Another Starting: ' + F);
 {$ENDIF}
-        FEditor := CnOtaGetEditor(F);
-        if FEditor = nil then
-          Exit;
 
-        if not Supports(FEditor, IOTASourceEditor, FSrcEditor) then
-          Exit;
-
-        if FSrcEditor.EditViewCount = 0 then
-          Exit;
-
-        EditView := FSrcEditor.EditViews[0];
+        EditView := CnOtaGetTopOpenedEditViewFromFileName(F);
         if EditView = nil then
           Exit;
 
@@ -2313,17 +2303,8 @@ begin
 {$IFDEF DEBUG}
         CnDebugger.LogMsg('Cpp Another Starting: ' + F);
 {$ENDIF}
-        FEditor := CnOtaGetEditor(F);
-        if FEditor = nil then
-          Exit;
 
-        if not Supports(FEditor, IOTASourceEditor, FSrcEditor) then
-          Exit;
-
-        if FSrcEditor.EditViewCount = 0 then
-          Exit;
-
-        EditView := FSrcEditor.EditViews[0];
+        EditView := CnOtaGetTopOpenedEditViewFromFileName(F);
         if EditView = nil then
           Exit;
 
