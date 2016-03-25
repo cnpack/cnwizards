@@ -351,7 +351,7 @@ begin
   CL.AddDelphiFunction('Function FindControlByClassName( AParent : TWinControl; const AClassName : string) : TControl');
   CL.AddDelphiFunction('Function CnOtaGetEditBuffer : IOTAEditBuffer');
   CL.AddDelphiFunction('Function CnOtaGetEditPosition : IOTAEditPosition');
-  CL.AddDelphiFunction('Function CnOtaGetTopOpenedEditViewFromFileName( const FileName : string) : IOTAEditView');
+  CL.AddDelphiFunction('Function CnOtaGetTopOpenedEditViewFromFileName( const FileName : string; ForceOpen : Boolean) : IOTAEditView');
   CL.AddDelphiFunction('Function CnOtaGetTopMostEditView( SourceEditor : IOTASourceEditor) : IOTAEditView;');
   CL.AddDelphiFunction('Function CnOtaGetTopMostEditActions : IOTAEditActions');
   CL.AddDelphiFunction('Function CnOtaGetCurrentModule : IOTAModule');

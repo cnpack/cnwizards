@@ -477,7 +477,7 @@ function CnOtaGetEditBuffer: IOTAEditBuffer;
 {* 取IOTAEditBuffer接口}
 function CnOtaGetEditPosition: IOTAEditPosition;
 {* 取IOTAEditPosition接口}
-function CnOtaGetTopOpenedEditViewFromFileName(const FileName: string): IOTAEditView;
+function CnOtaGetTopOpenedEditViewFromFileName(const FileName: string; ForceOpen: Boolean): IOTAEditView;
 {* 根据文件名返回编辑器中打开的第一个 EditView，未打开则返回 nil}
 function CnOtaGetTopMostEditView(SourceEditor: IOTASourceEditor): IOTAEditView; overload;
 {* 取指定编辑器最前端的IOTAEditView接口}
@@ -1231,7 +1231,7 @@ function CnOtaGetEditPosition: IOTAEditPosition;
 begin
 end;
 
-function CnOtaGetTopOpenedEditViewFromFileName(const FileName: string): IOTAEditView;
+function CnOtaGetTopOpenedEditViewFromFileName(const FileName: string; ForceOpen: Boolean): IOTAEditView;
 begin
 end;
 

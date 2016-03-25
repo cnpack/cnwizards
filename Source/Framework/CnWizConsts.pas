@@ -234,6 +234,11 @@ resourcestring
   SCnProjExtFileReopen = 'CnProjExtFileReopen';
   SCnProjExtDirBuilder = 'CnProjExtDirBuilder';
 
+  SCnProjExtPasIntf = 'interface';
+  SCnProjExtPasImpl = 'implementation';
+  SCnProjExtCppHead = 'h';
+  SCnProjExtCppSource = 'cpp';
+
   // CnFilesSnapshotWizard
   SCnProjExtFilesSnapshotAdd = 'CnProjExtFilesSnapshotAdd';
   SCnProjExtFilesSnapshotManage = 'CnProjExtFilesSnapshotManage';

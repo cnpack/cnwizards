@@ -358,8 +358,8 @@ function CnOtaGetEditBuffer: IOTAEditBuffer;
 {* 取IOTAEditBuffer接口}
 function CnOtaGetEditPosition: IOTAEditPosition;
 {* 取IOTAEditPosition接口}
-function CnOtaGetTopOpenedEditViewFromFileName(const FileName: string): IOTAEditView;
-{* 根据文件名返回编辑器中打开的第一个 EditView，未打开则返回 nil}
+function CnOtaGetTopOpenedEditViewFromFileName(const FileName: string; ForceOpen: Boolean = True): IOTAEditView;
+{* 根据文件名返回编辑器中打开的第一个 EditView，未打开时如 ForceOpen 为 True 则尝试打开，否则返回 nil}
 function CnOtaGetTopMostEditView: IOTAEditView; overload;
 {* 取当前最前端的IOTAEditView接口}
 function CnOtaGetTopMostEditView(SourceEditor: IOTASourceEditor): IOTAEditView; overload;
@@ -2456,15 +2456,19 @@ begin
   Result := nil;
 end;
 
-// 根据文件名返回编辑器中打开的第一个 EditView，未打开则返回 nil
-function CnOtaGetTopOpenedEditViewFromFileName(const FileName: string): IOTAEditView;
+// 根据文件名返回编辑器中打开的第一个 EditView，未打开时如 ForceOpen 为 True 则尝试打开，否则返回 nil
+function CnOtaGetTopOpenedEditViewFromFileName(const FileName: string;
+  ForceOpen: Boolean): IOTAEditView;
 var
   Editor: IOTAEditor;
   SrcEditor: IOTASourceEditor;
 begin
   Result := nil;
   Editor := CnOtaGetEditor(FileName);
-  if Editor = nil then
+  if (Editor = nil) and not ForceOpen then
+    Exit;
+
+  if not CnOtaOpenFile(FileName) then
     Exit;
 
   if not Supports(Editor, IOTASourceEditor, SrcEditor) then

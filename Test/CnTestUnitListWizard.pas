@@ -318,7 +318,7 @@ var
   S: AnsiString;
   LastIncLine: Integer;
 {$IFDEF UNICODE}
-  CParser: TCnWideBCBTokenList;
+  CParser: TCnBCBWideTokenList;
 {$ELSE}
   CParser: TBCBTokenList;
 {$ENDIF}
@@ -332,7 +332,7 @@ begin
     Stream := TMemoryStream.Create;
 
 {$IFDEF UNICODE}
-    CParser := TCnWideBCBTokenList.Create;
+    CParser := TCnBCBWideTokenList.Create;
     CParser.DirectivesAsComments := False;
     CnOtaSaveCurrentEditorToStreamW(Stream, False);
     CParser.SetOrigin(PWideChar(Stream.Memory), Stream.Size div SizeOf(Char));
@@ -347,7 +347,13 @@ begin
     while CParser.RunID <> ctknull do
     begin
       if CParser.RunID = ctkdirinclude then
+      begin
+{$IFDEF UNICODE}
+        LastIncLine := CParser.LineNumber;
+{$ELSE}
         LastIncLine := CParser.RunLineNumber;
+{$ENDIF}
+      end;
       CParser.NextNonJunk;
     end;
 
