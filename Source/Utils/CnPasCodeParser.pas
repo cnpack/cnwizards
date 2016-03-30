@@ -474,15 +474,16 @@ begin
 
     while Lex.TokenID <> tkNull do
     begin
-      if {IsImpl and } (Lex.TokenID in [tkCompDirect, // Allow CompDirect
-        tkProcedure, tkFunction, tkConstructor, tkDestructor,
+      if (Lex.TokenID in [tkCompDirect]) // Allow CompDirect
+        or ((PrevTokenID <> tkAmpersand) and (Lex.TokenID in 
+        [tkProcedure, tkFunction, tkConstructor, tkDestructor,
         tkInitialization, tkFinalization,
         tkBegin, tkAsm,
         tkCase, tkTry, tkRepeat, tkIf, tkFor, tkWith, tkOn, tkWhile,
         tkRecord, tkObject, tkOf, tkEqual,
         tkClass, tkInterface, tkDispInterface,
         tkExcept, tkFinally, tkElse,
-        tkEnd, tkUntil, tkThen, tkDo]) then
+        tkEnd, tkUntil, tkThen, tkDo])) then
       begin
         NewToken;
         case Lex.TokenID of
@@ -804,7 +805,7 @@ begin
             CurrMethod := nil;
         end;
 
-        if not AKeyOnly then
+        if not AKeyOnly and (PrevTokenID <> tkAmpersand) then
           NewToken;
       end;
 
