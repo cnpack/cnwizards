@@ -86,7 +86,7 @@ var
   mHashTable: array[#0..#255]of Integer;
 
 type
-  TTokenKind=(tkAbsolute, tkAbstract, tkAddressOp, tkAnd, tkAnsiComment,
+  TTokenKind=(tkAbsolute, tkAbstract, tkAddressOp, tkAmpersand, tkAnd, tkAnsiComment,
     tkArray, tkAs, tkAt, tkAsciiChar, tkAsm, tkAssembler, tkAssign, tkAutomated,
     tkBegin, tkBadString, tkBorComment, tkCase, tkCdecl, tkClass, tkColon,
     tkComma, tkCompDirect, tkConst, tkConstructor, tkCRLF, tkCRLFCo, tkDefault,
@@ -245,6 +245,7 @@ type
     procedure StringProc;
     procedure BadStringProc; // ´úÌæË«ÒýºÅ×Ö·û´®
     procedure SymbolProc;
+    procedure AmpersandProc; // &
     procedure UnknownProc;
     function GetToken: AnsiString;
     function InSymbols(aChar: AnsiChar): Boolean;
@@ -918,6 +919,7 @@ begin
             ']': fProcTable[I]:=SquareCloseProc;
             '^': fProcTable[I]:=PointerSymbolProc;
             '"': fProcTable[I]:=BadStringProc;
+            '&': fProcTable[I]:=AmpersandProc;
           else fProcTable[I]:=SymbolProc;
           end;
         end;
@@ -1407,6 +1409,12 @@ procedure TmwPasLex.SymbolProc;
 begin
   inc(Run);
   fTokenID:=tkSymbol;
+end;
+
+procedure TmwPasLex.AmpersandProc;
+begin
+  inc(Run);
+  fTokenID:=tkAmpersand;
 end;
 
 procedure TmwPasLex.UnknownProc;

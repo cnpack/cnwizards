@@ -304,6 +304,7 @@ type
     procedure StringProc;
     procedure BadStringProc; // ´úÌæË«ÒýºÅ×Ö·û´®
     procedure SymbolProc;
+    procedure AmpersandProc; // &
     procedure UnknownProc;
     function GetToken: CnWideString;
     function InSymbols(aChar: WideChar): Boolean;
@@ -1365,6 +1366,8 @@ begin
               FProcTable[I] := PointerSymbolProc;
             '"':
               FProcTable[I] := BadStringProc;
+            '&':
+              FProcTable[I] := AmpersandProc;
           else
             FProcTable[I] := SymbolProc;
           end;
@@ -1973,6 +1976,12 @@ procedure TCnPasWideLex.SymbolProc;
 begin
   StepRun;
   FTokenID := tkSymbol;
+end;
+
+procedure TCnPasWideLex.AmpersandProc;
+begin
+  StepRun;
+  FTokenID := tkAmpersand;
 end;
 
 procedure TCnPasWideLex.UnknownProc;
