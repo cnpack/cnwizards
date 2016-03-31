@@ -82,6 +82,7 @@ type
       Shift: TShiftState);
     procedure edtMatchSearchKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
+    procedure rbIntfClick(Sender: TObject);
   private
     FIsCppMode: Boolean;
     FUsesList: TObjectList; // ´æ´¢ËùÓÐµÄ UseUnitInfo
@@ -1002,6 +1003,11 @@ begin
       end;
     end;
   end;
+end;
+
+procedure TCnProjectUseUnitsForm.rbIntfClick(Sender: TObject);
+begin
+  ModalResult := mrOk;
 end;
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}

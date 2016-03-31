@@ -27,6 +27,7 @@ inherited CnProjectUseUnitsForm: TCnProjectUseUnitsForm
       Checked = True
       TabOrder = 2
       TabStop = True
+      OnClick = rbIntfClick
       OnKeyDown = rbIntfKeyDown
     end
     object rbImpl: TRadioButton
@@ -36,6 +37,7 @@ inherited CnProjectUseUnitsForm: TCnProjectUseUnitsForm
       Height = 17
       Caption = 'Implementation'
       TabOrder = 3
+      OnClick = rbIntfClick
       OnKeyDown = rbImplKeyDown
     end
   end
@@ -59,6 +61,7 @@ inherited CnProjectUseUnitsForm: TCnProjectUseUnitsForm
         Caption = 'File State'
         Width = 66
       end>
+    MultiSelect = False
     OwnerData = True
     OnData = lvListData
   end
@@ -69,6 +72,9 @@ inherited CnProjectUseUnitsForm: TCnProjectUseUnitsForm
   end
   inherited ToolBar: TToolBar
     Width = 651
+    inherited btnQuery: TToolButton
+      Visible = False
+    end
   end
   inherited ActionList: TActionList
     inherited actOpen: TAction
