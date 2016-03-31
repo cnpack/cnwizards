@@ -69,9 +69,9 @@ interface
 
 {$IFDEF CNWIZARDS_CNPROJECTEXTWIZARD}
 
-{$IFNDEF BDS2010_UP}
+//{$IFNDEF BDS2010_UP}
   {$DEFINE SUPPORT_USE_UNIT}
-{$ENDIF}
+//{$ENDIF}
 
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, Dialogs, ActnList,
@@ -79,7 +79,8 @@ uses
   {$IFDEF DelphiXE3_UP}Actions,{$ENDIF}
   CnCommon, CnWizClasses, CnWizUtils, CnConsts, CnWizConsts, CnProjectViewUnitsFrm,
   CnProjectViewFormsFrm, CnProjectListUsedFrm, CnProjectDelTempFrm, CnIni,
-  CnWizCompilerConst, CnProjectBackupFrm, CnProjectDirBuilderFrm, CnWizMethodHook;
+  CnWizCompilerConst, CnProjectBackupFrm, CnProjectDirBuilderFrm, CnWizMethodHook,
+  CnInputSymbolList;
                                            
 type
 
@@ -109,13 +110,17 @@ type
 
     FUnitsListAction: TContainedAction;
     FFormsListAction: TContainedAction;
+    FUseUnitAction: TContainedAction;
     FOldUnitNotifyEvent: TNotifyEvent;
     FOldFormNotifyEvent: TNotifyEvent;
-
-    FUseUnitAction: TContainedAction;
+  {$IFDEF SUPPORT_USE_UNIT}
+    FOldUseUnitNotifyEvent: TNotifyEvent;
+  {$ENDIF}
     FCorIdeModule: HModule;
     FMethodHook: TCnMethodHook;
     FOldViewDialogExecute: Pointer;
+    FPasUnitNameList: TUnitNameList;
+    FCppUnitNameList: TUnitNameList;
     function GetOutputDir: string;
   {$IFNDEF BDS}
     procedure RunSeparately;
@@ -125,6 +130,9 @@ type
     procedure ExploreExe;
     procedure FormsListActionOnExecute(Sender: TObject);
     procedure UnitsListActionOnExecute(Sender: TObject);
+  {$IFDEF SUPPORT_USE_UNIT}
+    procedure UseUnitActionOnExecute(Sender: TObject);
+  {$ENDIF}
   protected
     function GetHasConfig: Boolean; override;
 
@@ -132,7 +140,7 @@ type
     procedure SubActionUpdate(Index: Integer); override;
     procedure SetActive(Value: Boolean); override;
   public
-    procedure UpdateActionHook(HookUnitsList, HookFormsList: Boolean);
+    procedure UpdateActionHook(HookUnitsList, HookFormsList, HookUseUnit: Boolean);
     procedure UpdateMethodHook(HookUseUnit: Boolean);
     constructor Create; override;
     destructor Destroy; override;
@@ -186,7 +194,7 @@ begin
       FOldViewDialogExecute := GetBplMethodAddress(FOldViewDialogExecute);
       if FOldViewDialogExecute <> nil then
       begin
-        FMethodHook := TCnMethodHook.Create(FOldViewDialogExecute, @ShowProjectUseUnits);
+        FMethodHook := TCnMethodHook.Create(FOldViewDialogExecute, @ShowProjectInsertFrame);
         FMethodHook.UnhookMethod;
       end;
     end;
@@ -195,6 +203,8 @@ end;
 
 destructor TCnProjectExtWizard.Destroy;
 begin
+  FPasUnitNameList.Free;
+  FCppUnitNameList.Free;
   FMethodHook.Free;
   if FCorIdeModule <> 0 then
     FreeLibrary(FCorIdeModule);
@@ -214,13 +224,14 @@ begin
     FOldUnitNotifyEvent := FUnitsListAction.OnExecute;
   if (FFormsListAction <> nil) and not Assigned(FOldFormNotifyEvent) then
     FOldFormNotifyEvent := FFormsListAction.OnExecute;
+{$IFDEF SUPPORT_USE_UNIT}
+  if (FUseUnitAction <> nil) and not Assigned(FOldUseUnitNotifyEvent) then
+    FOldUseUnitNotifyEvent := FUseUnitAction.OnExecute;
+{$ENDIF}
 
   // 更新对应 IDE 的 Action
   if Active then
-  begin
-    UpdateActionHook(UnitsListHookBtnChecked, FormsListHookBtnChecked);
-    UpdateMethodHook(UseUnitsHookBtnChecked);
-  end;
+    UpdateActionHook(UnitsListHookBtnChecked, FormsListHookBtnChecked, UseUnitsHookBtnChecked);
 end;
 
 //------------------------------------------------------------------------------
@@ -515,7 +526,7 @@ begin
     Ini := CreateIniFile;
     try
       ShowProjectViewUnits(Ini, UnitsListHookBtnChecked);
-      UpdateActionHook(UnitsListHookBtnChecked, FormsListHookBtnChecked);
+      UpdateActionHook(UnitsListHookBtnChecked, FormsListHookBtnChecked, UseUnitsHookBtnChecked);
     finally
       Ini.Free;
     end;
@@ -525,7 +536,7 @@ begin
     Ini := CreateIniFile;
     try
       ShowProjectViewForms(Ini, FormsListHookBtnChecked);
-      UpdateActionHook(UnitsListHookBtnChecked, FormsListHookBtnChecked);
+      UpdateActionHook(UnitsListHookBtnChecked, FormsListHookBtnChecked, UseUnitsHookBtnChecked);
     finally
       Ini.Free;
     end;
@@ -533,20 +544,32 @@ begin
 {$IFDEF SUPPORT_USE_UNIT}
   else if Index = IdUseUnits then
   begin
-    CnProjectUseUnitsFrm.Ini := CreateIniFile;
+    Ini := CreateIniFile;
     try
-      if FUseUnitAction <> nil then
-      begin
-        NeedUpdateMethodHook := False;
-        UpdateMethodHook(True);
-        FUseUnitAction.Execute;
-        UpdateMethodHook(UseUnitsHookBtnChecked);
-        NeedUpdateMethodHook := True;
-      end;
+      if CurrentSourceIsC then
+        ShowProjectUseUnits(Ini, UseUnitsHookBtnChecked, FCppUnitNameList)
+      else
+        ShowProjectUseUnits(Ini, UseUnitsHookBtnChecked, FPasUnitNameList);
+
+      UpdateActionHook(UnitsListHookBtnChecked, FormsListHookBtnChecked, UseUnitsHookBtnChecked);
     finally
-      CnProjectUseUnitsFrm.Ini.Free;
-      CnProjectUseUnitsFrm.Ini := nil;
+      Ini.Free;
     end;
+
+//    CnProjectUseUnitsFrm.Ini := CreateIniFile;
+//    try
+//      if FUseUnitAction <> nil then
+//      begin
+//        NeedUpdateMethodHook := False;
+//        UpdateMethodHook(True);
+//        FUseUnitAction.Execute;
+//        UpdateMethodHook(UseUnitsHookBtnChecked);
+//        NeedUpdateMethodHook := True;
+//      end;
+//    finally
+//      CnProjectUseUnitsFrm.Ini.Free;
+//      CnProjectUseUnitsFrm.Ini := nil;
+//    end;
   end
 {$ENDIF}
   else if Index = IdListUsed then
@@ -620,13 +643,14 @@ begin
   SetEnabled([IdProjBackup], AEnabled);
 
 {$IFDEF SUPPORT_USE_UNIT}
-  if FUseUnitAction <> nil then
-  begin
-    SetEnabled([IdUseUnits], (FUseUnitAction as TCustomAction).Enabled);
-    SetVisible([IdUseUnits], True);
-  end
-  else
-    SetVisible([IdUseUnits], False);
+//  if FUseUnitAction <> nil then
+//  begin
+//    SetEnabled([IdUseUnits], (FUseUnitAction as TCustomAction).Enabled);
+//    SetVisible([IdUseUnits], True);
+//  end
+//  else
+  SetEnabled([IdUseUnits], CurrentSourceIsDelphiOrCSource);
+  SetVisible([IdUseUnits], True);
 {$ENDIF}
 
   if FUnitsListAction is TCustomAction then
@@ -680,7 +704,29 @@ begin
   end;
 end;
 
-procedure TCnProjectExtWizard.UpdateActionHook(HookUnitsList, HookFormsList: Boolean);
+{$IFDEF SUPPORT_USE_UNIT}
+
+procedure TCnProjectExtWizard.UseUnitActionOnExecute(Sender: TObject);
+begin
+  if Active and UseUnitsHookBtnChecked then
+    SubActionExecute(IdUseUnits)  // 执行 SubActionExecute 方法中的 IdUseUnits
+  else
+  begin
+    // 不挂接，则需要取消 ViewDialogExecute 的挂接后跳回 IDE 原有的内容
+    if FMethodHook <> nil then
+      FMethodHook.UnhookMethod;
+    if Assigned(FOldUseUnitNotifyEvent) then
+      FOldUseUnitNotifyEvent(Sender);
+    // 如果以前挂了，再恢复
+    if Active and UseUnitsHookBtnChecked and (FMethodHook <> nil) then
+      FMethodHook.HookMethod;
+  end;
+end;
+
+{$ENDIF}
+
+procedure TCnProjectExtWizard.UpdateActionHook(HookUnitsList, HookFormsList,
+  HookUseUnit: Boolean);
 begin
   // 实际上强行进行挂接，
   // 在挂接后的内容中才处理是否挂接的参数而决定调用新的还是旧的
@@ -705,10 +751,23 @@ begin
     FFormsListAction.OnExecute := FormsListActionOnExecute;
     FormsListHookBtnChecked := HookFormsList;
   end;
-    
+
+{$IFDEF SUPPORT_USE_UNIT}
+  if FUseUnitAction = nil then
+    FUseUnitAction := FindIDEAction(SCnUseUnitActionName);
+
+  if FUseUnitAction <> nil then
+  begin
+    if not Assigned(FOldUseUnitNotifyEvent) then
+      FOldUseUnitNotifyEvent := FUseUnitAction.OnExecute;
+    FUseUnitAction.OnExecute := UseUnitActionOnExecute;
+    UseUnitsHookBtnChecked := HookUseUnit;
+  end;
+{$ENDIF}
   // 恢复时不直接恢复 OnExecute，而是在挂接后的内容中做必要处理再跳回来
   // FUnitsListAction.OnExecute := FOldUnitNotifyEvent;
   // FFormsListAction.OnExecute := FOldFormNotifyEvent;
+  // FUseUnitAction.OnExecute := FOldUseUnitNotifyEvent;
 end;
 
 // 处理挂接
@@ -729,7 +788,7 @@ var
 begin
   inherited;
   // 原 IDE 的 Action 挂接标记不变，是否使用新功能在挂接的新过程中决定
-  UpdateActionHook(UnitsListHookBtnChecked, FormsListHookBtnChecked);
+  UpdateActionHook(UnitsListHookBtnChecked, FormsListHookBtnChecked, UseUnitsHookBtnChecked);
   if Value then
   begin
     Ini := CreateIniFile;

@@ -269,6 +269,12 @@ function CurrentIsCSource: Boolean;
 {* 当前编辑的文件是C源文件}
 function CurrentIsSource: Boolean;
 {* 当前编辑的文件是Delphi或C源文件}
+function CurrentSourceIsDelphi: Boolean;
+{* 当前编辑的源文件（非窗体）是Delphi源文件}
+function CurrentSourceIsC: Boolean;
+{* 当前编辑的源文件（非窗体）是C源文件}
+function CurrentSourceIsDelphiOrCSource: Boolean;
+{* 当前编辑的源文件（非窗体）是Delphi或C源文件}
 function CurrentIsForm: Boolean;
 {* 当前编辑的文件是窗体文件}
 function IsVCLFormEditor(FormEditor: IOTAFormEditor = nil): Boolean;
@@ -2099,6 +2105,24 @@ begin
 {$ELSE}
   Result := CurrentIsDelphiSource or CurrentIsCSource;
 {$ENDIF}
+end;
+
+// 当前编辑的源文件（非窗体）是Delphi源文件
+function CurrentSourceIsDelphi: Boolean;
+begin
+  Result := WizOptions.IsDelphiSource(CnOtaGetCurrentSourceFileName);
+end;
+
+// 当前编辑的源文件（非窗体）是C源文件
+function CurrentSourceIsC: Boolean;
+begin
+  Result := WizOptions.IsCSource(CnOtaGetCurrentSourceFileName);
+end;
+
+// 当前编辑的源文件（非窗体）是Delphi或C源文件
+function CurrentSourceIsDelphiOrCSource: Boolean;
+begin
+  Result := CurrentSourceIsDelphi or CurrentSourceIsC;
 end;
 
 // 当前编辑的文件是窗体文件

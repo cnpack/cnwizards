@@ -135,7 +135,6 @@ var
   Stream: TMemoryStream;
   TmpName: string;
 begin
-  FreeAndNil(FUsedList);
   if FUsedList = nil then
     FUsedList := TStringList.Create
   else

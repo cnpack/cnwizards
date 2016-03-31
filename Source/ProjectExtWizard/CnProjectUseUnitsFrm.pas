@@ -49,9 +49,18 @@ uses
   Graphics, CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnWizUtils, CnIni,
   CnWizIdeUtils, CnWizMultiLang, CnProjectViewBaseFrm, CnProjectViewUnitsFrm,
   CnWizEditFiler, CnProjectExtWizard, CnWizClasses, CnWizManager, ActnList,
-  ImgList, CnProjectViewFormsFrm, CnProjectFramesFrm;
+  ImgList, CnProjectViewFormsFrm, CnProjectFramesFrm, CnInputSymbolList;
 
 type
+  TCnUseUnitInfo = class
+  public
+    Name: string;
+    FullNameWithPath: string; // 带路径的完整文件名
+    IsInProject: Boolean;
+    IsOpened: Boolean;
+    IsSaved: Boolean;
+    ImageIndex: Integer;
+  end;
 
 //==============================================================================
 // 工程组 use 单元列表窗体
@@ -60,13 +69,30 @@ type
 { TCnProjectUseUnitsForm }
 
   TCnProjectUseUnitsForm = class(TCnProjectViewBaseForm)
+    rbIntf: TRadioButton;
+    rbImpl: TRadioButton;
     procedure StatusBarDrawPanel(StatusBar: TStatusBar;
       Panel: TStatusPanel; const Rect: TRect);
     procedure lvListData(Sender: TObject; Item: TListItem);
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure rbIntfKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure rbImplKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure edtMatchSearchKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
   private
-    procedure FillUnitInfo(AInfo: TCnUnitInfo);
+    FIsCppMode: Boolean;
+    FUsesList: TObjectList; // 存储所有的 UseUnitInfo
+    FUnitNameListRef: TUnitNameList;
+    procedure FillUnitInfo(AInfo: TCnUseUnitInfo);
+    function SearchPasInsertPos(IsIntf: Boolean; out HasUses: Boolean;
+      out CharPos: TOTACharPos): Boolean;
+    function SearchCppInsertPos(IsH: Boolean; out CharPos: TOTACharPos; SourceEditor: IOTASourceEditor = nil): Boolean;
   protected
     function DoSelectOpenedItem: string; override;
+    procedure DoSelectItemChanged(Sender: TObject); override;
     function GetSelectedFileName: string; override;
     procedure UpdateStatusBar; override;
     procedure OpenSelect; override;
@@ -77,10 +103,18 @@ type
     procedure DoSortListView; override;
     procedure DrawListItem(ListView: TCustomListView; Item: TListItem); override;
   public
-    { Public declarations }
+    constructor Create(AOwner: TComponent; CppMode: Boolean;
+      UnitNameList: TUnitNameList); reintroduce;
+
+    property IsCppMode: Boolean read FIsCppMode write FIsCppMode;
+    property UnitNameListRef: TUnitNameList read FUnitNameListRef write FUnitNameListRef;
   end;
 
-function ShowProjectUseUnits(ASelf: TCustomForm): Boolean;
+function ShowProjectInsertFrame(ASelf: TCustomForm): Boolean;
+
+// UnitNameList 允许外部传入，避免每次打开 Form 时加载过慢
+function ShowProjectUseUnits(Ini: TCustomIniFile; out Hooked: Boolean;
+  var UnitNameList: TUnitNameList): Boolean;
 
 var
   Ini: TCustomIniFile = nil;
@@ -98,13 +132,13 @@ implementation
 
 {$R *.DFM}
 
-{$IFDEF DEBUG}
 uses
-  CnDebug;
-{$ENDIF}
+  {$IFDEF DEBUG} CnDebug, {$ENDIF} CnPasWideLex, CnBCBWideTokenList,
+  mPasLex, mwBCBTokenList, CnPasCodeParser, CnCppCodeParser;
 
 const
-  csUseUnits = 'UseUnits';
+  SProject = 'Project';
+  csUseUnits = 'UseUnitsAndHdr';
 
   UseUnitHelpContext = 3135;
   // ViewDialog 在 UseUnit 被调用时的 HelpContext
@@ -112,10 +146,45 @@ const
   SelectFrameHelpContext = 6030;
   // ViewDialog 在 Select Frame 被调用时的 HelpContext
 
-{ TCnProjectUseUnitsForm }
+{ TCnUseUnitInfo }
+
+function ShowProjectUseUnits(Ini: TCustomIniFile; out Hooked: Boolean;
+  var UnitNameList: TUnitNameList): Boolean;
+var
+  IsCppMode: Boolean;
+begin
+  if CurrentSourceIsC then
+  begin
+    IsCppMode := True;
+    if UnitNameList = nil then
+      UnitNameList := TUnitNameList.Create(True, True);
+  end
+  else
+  begin
+    IsCppMode := False;
+    if UnitNameList = nil then
+      UnitNameList := TUnitNameList.Create(True, False);
+  end;
+
+  with TCnProjectUseUnitsForm.Create(nil, IsCppMode, UnitNameList) do
+  begin
+    try
+      ShowHint := WizOptions.ShowHint;
+      LoadSettings(Ini, csUseUnits);
+
+      Result := ShowModal = mrOk;
+      Hooked := actHookIDE.Checked;
+      SaveSettings(Ini, csUseUnits);
+      UnitNameListRef := nil;
+    finally
+      Free;
+    end;
+  end;
+end;
+
 
 // 此过程还可能会被插入 Frame 时调用，因此过程内部根据 HelpContext 分别处理了这俩情况
-function ShowProjectUseUnits(ASelf: TCustomForm): Boolean;
+function ShowProjectInsertFrame(ASelf: TCustomForm): Boolean;
 var
   I, Idx: Integer;
   AListBox: TListBox;
@@ -167,9 +236,9 @@ begin
   Ini := AWizard.CreateIniFile;
 
   // 判断是引用单元还是添加Frame
-  if IsUseUnit then
-    AForm := TCnProjectUseUnitsForm.Create(nil)
-  else
+//  if IsUseUnit then
+//    AForm := TCnProjectUseUnitsForm.Create(nil)
+//  else
     AForm := TCnProjectFramesForm.Create(nil);
 
   with AForm do
@@ -206,7 +275,7 @@ begin
           if lvList.Items[I].Selected then
           begin
             if IsUseUnit then
-              AName := _CnChangeFileExt(TCnUnitInfo(lvList.Items[I].Data).FileName, '')
+              AName := _CnChangeFileExt(TCnUseUnitInfo(lvList.Items[I].Data).FullNameWithPath, '')
             else
               AName := _CnChangeFileExt(TCnFormInfo(lvList.Items[I].Data).Name, '');
 
@@ -249,6 +318,14 @@ end;
 
 { TCnProjectUseUnitsForm }
 
+constructor TCnProjectUseUnitsForm.Create(AOwner: TComponent; CppMode: Boolean;
+  UnitNameList: TUnitNameList);
+begin
+  FIsCppMode := CppMode;
+  FUnitNameListRef := UnitNameList;
+  inherited Create(AOwner);
+end;
+
 function TCnProjectUseUnitsForm.DoSelectOpenedItem: string;
 var
   CurrentModule: IOTAModule;
@@ -260,7 +337,7 @@ end;
 function TCnProjectUseUnitsForm.GetSelectedFileName: string;
 begin
   if Assigned(lvList.ItemFocused) then
-    Result := Trim(TCnUnitInfo(lvList.ItemFocused.Data).FileName);
+    Result := Trim(TCnUseUnitInfo(lvList.ItemFocused.Data).FullNameWithPath);
 end;
 
 function TCnProjectUseUnitsForm.GetHelpTopic: string;
@@ -268,38 +345,132 @@ begin
   Result := 'CnProjectExtUseUnits';
 end;
 
-procedure TCnProjectUseUnitsForm.FillUnitInfo(AInfo: TCnUnitInfo);
-var
-  Reader: TCnEditFiler;
+procedure TCnProjectUseUnitsForm.FillUnitInfo(AInfo: TCnUseUnitInfo);
 begin
-  AInfo.IsOpened := CnOtaIsFileOpen(AInfo.FileName);
+  AInfo.IsOpened := CnOtaIsFileOpen(AInfo.FullNameWithPath);
+  AInfo.IsSaved := FileExists(AInfo.FullNameWithPath);
 
-  Reader := nil;
-  try
-    try
-      if not AInfo.IsOpened then
-      begin
-        AInfo.Size := GetFileSize(AInfo.FileName);
-      end
-      else
-      begin
-        Reader := TCnEditFiler.Create(AInfo.FileName);
-        AInfo.Size := Reader.FileSize;
-      end;
-    except
-      AInfo.Size := 0;
-    end;
-  finally
-    Reader.Free;
-  end;
-
-  AInfo.ImageIndex := csUnitImageIndexs[AInfo.UnitType];
+  AInfo.ImageIndex := 78; // Unit Icon
 end;
 
 procedure TCnProjectUseUnitsForm.OpenSelect;
+var
+  CharPos: TOTACharPos;
+  Info: TCnUseUnitInfo;
+  IsIntfOrH: Boolean;
+  IsFromSystem: Boolean;
+  EditView: IOTAEditView;
+  SrcEditor: IOTASourceEditor;
+  HasUses: Boolean;
+  LinearPos: LongInt;
+  S, F: string;
+
+  // 根据源码类型得到插入的 uses 或 include 字符串，FileHasUses 只对 Pascal 代码
+  // 有效、IsHFromSystem 只对 Cpp 文件有效
+  function JoinUsesOrInclude(FileHasUses: Boolean; IsHFromSystem: Boolean;
+    const IncFile: string): string;
+  var
+    Indent: Integer;
+    Options: IOTAEditOptions;
+  begin
+    if FIsCppMode then
+    begin
+      if IsHFromSystem then
+        Result := Format('#include <%s>' + #13#10, [IncFile])
+      else
+        Result := Format('#include "%s"' + #13#10, [IncFile]);
+    end
+    else
+    begin
+      if FileHasUses then
+        Result := Format(', %s', [IncFile])
+      else
+      begin
+        Options := CnOtaGetEditOptions;
+        if Options <> nil then
+          Indent := Options.BlockIndent
+        else
+          Indent := 2;
+        Result := Format(#13#10#13#10 + 'uses' + #13#10 + '%s%s;', [Spc(Indent), IncFile]);
+      end;
+    end;
+  end;
+
 begin
   if lvList.SelCount > 0 then
-    ModalResult := mrOK;
+  begin
+    ModalResult := mrOk;
+    S := lvList.Selected.Caption;
+    IsIntfOrH := rbIntf.Checked;
+
+    EditView := CnOtaGetTopMostEditView;
+    if EditView = nil then
+      Exit;
+
+    if FIsCppMode then
+    begin
+      // 获取 Cpp 或 H 的 EditView 与 SourceEditor
+      F := EditView.Buffer.FileName;
+      SrcEditor := CnOtaGetSourceEditorFromModule(CnOtaGetCurrentModule, F);
+
+      if IsIntfOrH and not (IsH(F) or IsHpp(F)) then
+      begin
+        F := _CnChangeFileExt(F, '.h');
+        EditView := CnOtaGetTopOpenedEditViewFromFileName(F);
+        SrcEditor := CnOtaGetSourceEditorFromModule(CnOtaGetCurrentModule, F);
+      end
+      else if not IsIntfOrH and not IsCpp(F) then
+      begin
+        F := _CnChangeFileExt(f, '.cpp');
+        EditView := CnOtaGetTopOpenedEditViewFromFileName(F);
+        SrcEditor := CnOtaGetSourceEditorFromModule(CnOtaGetCurrentModule, F);
+      end;
+
+      if (EditView = nil) or (SrcEditor = nil) then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogMsgError('Insert include: No EditView or SourceEditor.');
+{$ENDIF}
+        Exit;
+      end;
+
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('EditView and SourceEditor Got. %s - %s', [EditView.Buffer.FileName,
+        SrcEditor.FileName]);
+{$ENDIF}
+
+      // 插入 include
+      if not SearchCppInsertPos(IsIntfOrH, CharPos, SrcEditor) then
+      begin
+        ErrorDlg(SCnProjExtUsesNoCppPosition);
+        Exit;
+      end;
+
+      Info := TCnUseUnitInfo(lvList.Selected.Data);
+      if Info <> nil then
+        IsFromSystem := not Info.IsInProject
+      else
+        IsFromSystem := False;
+
+      // 已经得到行 1 列 0 开始的 CharPos，用 EditView.CharPosToPos(CharPos) 转换为线性;
+      LinearPos := EditView.CharPosToPos(CharPos);
+      CnOtaInsertTextIntoEditorAtPos(JoinUsesOrInclude(HasUses, IsFromSystem, S),
+        LinearPos, SrcEditor);
+    end
+    else
+    begin
+      // Pascal 只需要使用当前文件的 EditView 插入 uses，还得处理无 uses 的情况
+      if not SearchPasInsertPos(IsIntfOrH, HasUses, CharPos) then
+      begin
+        ErrorDlg(SCnProjExtUsesNoPasPosition);
+        Exit;
+      end;
+
+      // 已经得到行 1 列 0 开始的 CharPos，用 EditView.CharPosToPos(CharPos) 转换为线性;
+      LinearPos := EditView.CharPosToPos(CharPos);
+      CnOtaInsertTextIntoEditorAtPos(JoinUsesOrInclude(HasUses, False, S), LinearPos);
+    end;
+  end;
 end;
 
 procedure TCnProjectUseUnitsForm.StatusBarDrawPanel(StatusBar: TStatusBar;
@@ -310,163 +481,114 @@ begin
   Item := lvList.ItemFocused;
   if Assigned(Item) then
   begin
-    if FileExists(TCnUnitInfo(Item.Data).FileName) then
-      DrawCompactPath(StatusBar.Canvas.Handle, Rect, TCnUnitInfo(Item.Data).FileName)
+    if FileExists(TCnUseUnitInfo(Item.Data).FullNameWithPath) then
+      DrawCompactPath(StatusBar.Canvas.Handle, Rect, TCnUseUnitInfo(Item.Data).FullNameWithPath)
     else
       DrawCompactPath(StatusBar.Canvas.Handle, Rect,
-        TCnUnitInfo(Item.Data).FileName + SCnProjExtNotSave);
+        TCnUseUnitInfo(Item.Data).FullNameWithPath + SCnProjExtNotSave);
 
-    StatusBar.Hint := TCnUnitInfo(Item.Data).FileName;
+    StatusBar.Hint := TCnUseUnitInfo(Item.Data).FullNameWithPath;
   end;
 end;
 
 procedure TCnProjectUseUnitsForm.CreateList;
 var
-  ProjectInfo: TCnProjectInfo;
-  UnitInfo: TCnUnitInfo;
-  i, j: Integer;
-  UnitFileName: string;
-  IProject: IOTAProject;
-  IModuleInfo: IOTAModuleInfo;
-  ProjectInterfaceList: TInterfaceList;
-{$IFDEF BDS}
-  ProjectGroup: IOTAProjectGroup;
-{$ENDIF}
+  I, Idx: Integer;
+  Stream: TMemoryStream;
+  UsesList: TStringList;
+  Names: TStringList;
+  Paths: TStringList;
+  Info: TCnUseUnitInfo;
 begin
-  ProjectInterfaceList := TInterfaceList.Create;
+  Names := nil;
+  Paths := nil;
+  UsesList := nil;
+  Stream := nil;
+
+  if FIsCppMode then
+  begin
+    rbIntf.Caption := SCnProjExtCppHead;
+    rbImpl.Caption := SCnProjExtCppSource;
+  end
+  else
+  begin
+    rbIntf.Caption := SCnProjExtPasIntf;
+    rbImpl.Caption := SCnProjExtPasImpl;
+  end;
+
   try
-    CnOtaGetProjectList(ProjectInterfaceList);
+    if FUsesList = nil then
+      FUsesList := TObjectList.Create(True)
+    else
+      FUsesList.Clear;
 
-    try
-      for i := 0 to ProjectInterfaceList.Count - 1 do
+    Names := TStringList.Create;
+    Paths := TStringList.Create;
+    UsesList := TStringList.Create;
+    Stream := TMemoryStream.Create;
+
+    FUnitNameListRef.DoInternalLoad;
+    FUnitNameListRef.ExportToStringList(Names, Paths);
+
+    // 此时得到了所有可引用的单元列表
+    CnOtaSaveCurrentEditorToStream(Stream, False);
+    if FIsCppMode then
+      ParseUnitIncludes(PAnsiChar(Stream.Memory), UsesList)
+    else
+      ParseUnitUses(PAnsiChar(Stream.Memory), UsesList);
+
+    if not FIsCppMode then // Pascal 不 uses 自己
+    begin
+      Idx := Names.IndexOf(_CnChangeFileExt(_CnExtractFileName(CnOtaGetCurrentSourceFile), ''));
+      if Idx >= 0 then
       begin
-        IProject := IOTAProject(ProjectInterfaceList[i]);
-
-        if IProject.FileName = '' then
-          Continue;
-
-{$IFDEF BDS}
-        // BDS 后，ProjectGroup 也支持 Project 接口，因此需要去掉
-        if Supports(IProject, IOTAProjectGroup, ProjectGroup) then
-          Continue;
-{$ENDIF}
-
-        ProjectInfo := TCnProjectInfo.Create;
-        ProjectInfo.Name := _CnExtractFileName(IProject.FileName);
-        ProjectInfo.FileName := IProject.FileName;
-
-        // Project 源文件信息无需添加到 UnitInfo
-        // 添加模块信息到 PModuleRecord
-        for j := 0 to IProject.GetModuleCount - 1 do
-        begin
-          IModuleInfo := IProject.GetModule(j);
-          UnitFileName := IModuleInfo.FileName;
-
-          if UnitFileName = '' then
-            Continue;
-
-          if SameText(_CnExtractFileExt(UnitFileName), '.RES') then
-            Continue;
-
-          UnitInfo := TCnUnitInfo.Create;
-          with UnitInfo do
-          begin
-            Name := _CnChangeFileExt(_CnExtractFileName(UnitFileName), '');
-            FileName := UnitFileName;
-            Project := _CnExtractFileName(IProject.FileName);
-
-          {$IFDEF SUPPORT_MODULETYPE}
-            // todo: Check ModuleInfo.ModuleType
-          {$ELSE}
-            if AnsiPos('DataModule', IModuleInfo.DesignClass) > 0 then
-              UnitType := utDataModule
-            else if IsRC(IModuleInfo.FileName) then
-              UnitType := utRC
-            else if (IModuleInfo.FormName <> '') then
-              UnitType := utForm
-            else if IsPas(IModuleInfo.FileName) or IsCpp(IModuleInfo.FileName) then
-              UnitType := utUnit
-            else if IsAsm(IModuleInfo.FileName) then
-              UnitType := utAsm
-            else if IsC(IModuleInfo.FileName) then
-              UnitType := utC
-            else if IsH(IModuleInfo.FileName) then
-              UnitType := utH
-            else
-              UnitType := utUnknown;
-          {$ENDIF}
-          end;
-
-          FillUnitInfo(UnitInfo);
-          ProjectInfo.InfoList.Add(UnitInfo);  // 添加模块信息到 ProjectInfo
-        end;
-        ProjectList.Add(ProjectInfo);  // PProjectRecord 中包含模块信息
+        Names.Delete(Idx);
+        Paths.Delete(Idx);
       end;
-    except
-      raise Exception.Create(SCnProjExtCreatePrjListError);
+    end;
+
+    for I := 0 to UsesList.Count - 1 do
+    begin
+      Idx := Names.IndexOf(UsesList[I]);
+      if Idx >= 0 then
+      begin
+        Names.Delete(Idx);
+        Paths.Delete(Idx);
+      end;
+    end;
+
+    for I := 0 to Names.Count - 1 do
+    begin
+      Info := TCnUseUnitInfo.Create;
+      Info.Name := Names[I];
+      Info.FullNameWithPath := Paths[I];
+      Info.IsInProject := Integer(Names.Objects[I]) <> 0;
+      FillUnitInfo(Info);
+      FUsesList.Add(Info);
     end;
   finally
-    ProjectInterfaceList.Free;
+    UsesList.Free;
+    Stream.Free;
+    Names.Free;
+    Paths.Free;
   end;
 end;
 
 procedure TCnProjectUseUnitsForm.UpdateComboBox;
-var
-  i: Integer;
-  ProjectInfo: TCnProjectInfo;
 begin
-  with cbbProjectList do
-  begin
-    Clear;
-    Items.Add(SCnProjExtProjectAll);
-    Items.Add(SCnProjExtCurrentProject);
-    if Assigned(ProjectList) then
-    begin
-      for i := 0 to ProjectList.Count - 1 do
-      begin
-        ProjectInfo := TCnProjectInfo(ProjectList[i]);
-        Items.AddObject(_CnExtractFileName(ProjectInfo.Name), ProjectInfo);
-      end;
-    end;
-  end;
+  // Do nothing about combobox because hidden.
 end;
 
 procedure TCnProjectUseUnitsForm.DoUpdateListView;
 var
-  i, ToSelIndex: Integer;
-  ProjectInfo: TCnProjectInfo;
+  I, ToSelIndex: Integer;
   MatchSearchText: string;
   IsMatchAny: Boolean;
   ToSelUnitInfos: TList;
-
-  procedure DoAddProject(AProject: TCnProjectInfo; IsCurrent: Boolean);
-  var
-    I: Integer;
-    UnitInfo: TCnUnitInfo;
-  begin
-    for I := 0 to AProject.InfoList.Count - 1 do
-    begin
-      UnitInfo := TCnUnitInfo(AProject.InfoList[I]);
-      if (MatchSearchText = '') or
-        RegExpContainsText(FRegExpr, UnitInfo.Name, MatchSearchText, not IsMatchAny) then
-      begin
-        if IsCurrent and (OriginalList.IndexOf(_CnChangeFileExt(UnitInfo.Name, '')) < 0) then // 当前工程，不在列表内，不加
-          Continue;
-
-        if UnitInfo.UnitType <> utUnknown then
-        begin
-          CurrList.Add(UnitInfo);
-          // 全匹配时，提高首匹配的优先级，记下第一个该首匹配的项以备选中
-          if IsMatchAny and AnsiStartsText(MatchSearchText, UnitInfo.Name) then
-            ToSelUnitInfos.Add(Pointer(UnitInfo));
-        end;
-      end;
-    end;
-  end;
-
+  UnitInfo: TCnUseUnitInfo;
 begin
 {$IFDEF DEBUG}
-  CnDebugger.LogEnter('DoUpdateListView');
+  CnDebugger.LogEnter('TCnProjectUseUnitsForm DoUpdateListView');
 {$ENDIF DEBUG}
 
   ToSelIndex := 0;
@@ -477,34 +599,16 @@ begin
     MatchSearchText := edtMatchSearch.Text;
     IsMatchAny := MatchAny;
 
-    if cbbProjectList.ItemIndex <= 0 then  // All Projects
+    for I := 0 to FUsesList.Count - 1 do
     begin
-      for i := 0 to ProjectList.Count - 1 do
+      UnitInfo := TCnUseUnitInfo(FUsesList[I]);
+      if (MatchSearchText = '') or
+        RegExpContainsText(FRegExpr, UnitInfo.Name, MatchSearchText, not IsMatchAny) then
       begin
-        ProjectInfo := TCnProjectInfo(ProjectList[i]);
-        DoAddProject(ProjectInfo, False);
-      end;
-    end
-    else if cbbProjectList.ItemIndex = 1 then // Current Project
-    begin
-      for i := 0 to ProjectList.Count - 1 do
-      begin
-        ProjectInfo := TCnProjectInfo(ProjectList[i]);
-        if _CnChangeFileExt(ProjectInfo.FileName, '') = CnOtaGetCurrentProjectFileNameEx then
-          DoAddProject(ProjectInfo, True);
-      end;
-    end
-    else
-    begin
-      for i := 0 to ProjectList.Count - 1 do
-      begin
-        ProjectInfo := TCnProjectInfo(ProjectList[i]);
-        if cbbProjectList.Items.Objects[cbbProjectList.ItemIndex] <> nil then
-          if TCnProjectInfo(cbbProjectList.Items.Objects[cbbProjectList.ItemIndex]).FileName
-            = ProjectInfo.FileName then
-          begin
-            DoAddProject(ProjectInfo, _CnChangeFileExt(ProjectInfo.FileName, '') = CnOtaGetCurrentProjectFileNameEx);
-          end;
+        CurrList.Add(UnitInfo);
+        // 全匹配时，提高首匹配的优先级，记下第一个该首匹配的项以备选中
+        if IsMatchAny and AnsiStartsText(MatchSearchText, UnitInfo.Name) then
+          ToSelUnitInfos.Add(Pointer(UnitInfo));
       end;
     end;
 
@@ -533,7 +637,7 @@ begin
     ToSelUnitInfos.Free;
   end;
 {$IFDEF DEBUG}
-  CnDebugger.LogLeave('DoUpdateListView');
+  CnDebugger.LogLeave('TCnProjectUseUnitsForm DoUpdateListView');
 {$ENDIF DEBUG}
 end;
 
@@ -541,7 +645,7 @@ procedure TCnProjectUseUnitsForm.UpdateStatusBar;
 begin
   with StatusBar do
   begin
-    Panels[1].Text := Format(SCnProjExtProjectCount, [ProjectList.Count]);
+    Panels[1].Text := '';
     Panels[2].Text := Format(SCnProjExtUnitsFileCount, [lvList.Items.Count]);
   end;
 end;
@@ -549,28 +653,31 @@ end;
 procedure TCnProjectUseUnitsForm.DrawListItem(ListView: TCustomListView;
   Item: TListItem);
 begin
-  if Assigned(Item) and TCnUnitInfo(Item.Data).IsOpened then
+  if Assigned(Item) and TCnUseUnitInfo(Item.Data).IsOpened then
     ListView.Canvas.Font.Color := clRed;
 end;
 
 procedure TCnProjectUseUnitsForm.lvListData(Sender: TObject;
   Item: TListItem);
 var
-  Info: TCnUnitInfo;
+  Info: TCnUseUnitInfo;
 begin
   if (Item.Index >= 0) and (Item.Index < CurrList.Count) then
   begin
-    Info := TCnUnitInfo(CurrList[Item.Index]);
+    Info := TCnUseUnitInfo(CurrList[Item.Index]);
     Item.Caption := Info.Name;
     Item.ImageIndex := Info.ImageIndex;
     Item.Data := Info;
 
     with Item.SubItems do
     begin
-      Add(SUnitTypes[Info.UnitType]);
-      Add(Info.Project);
-      Add(IntToStrSp(Info.Size));
-      if Info.Size > 0 then
+      Add(_CnExtractFileDir(Info.FullNameWithPath));
+      if Info.IsInProject then
+        Add(SProject)
+      else
+        Add('');
+
+      if Info.IsSaved then
         Add('')
       else
         Add(SNotSaved);
@@ -586,16 +693,16 @@ var
 
 function DoListSort(Item1, Item2: Pointer): Integer;
 var
-  Info1, Info2: TCnUnitInfo;
+  Info1, Info2: TCnUseUnitInfo;
 begin
-  Info1 := TCnUnitInfo(Item1);
-  Info2 := TCnUnitInfo(Item2);
+  Info1 := TCnUseUnitInfo(Item1);
+  Info2 := TCnUseUnitInfo(Item2);
   
   case _SortIndex of
     0: Result := CompareTextPos(_MatchStr, Info1.Name, Info2.Name);
-    1: Result := CompareText(SUnitTypes[Info1.UnitType], SUnitTypes[Info2.UnitType]);
-    2: Result := CompareText(Info1.Project, Info2.Project);
-    3, 4: Result := CompareValue(Info1.Size, Info2.Size);
+    1: Result := CompareTextPos(_MatchStr, Info1.FullNameWithPath, Info2.FullNameWithPath);
+    2: Result := CompareInt(Ord(Info1.IsInProject), Ord(Info2.IsInProject));
+    3: Result := CompareInt(Ord(Info1.IsSaved), Ord(Info2.IsSaved));
   else
     Result := 0;
   end;
@@ -624,6 +731,277 @@ begin
 
   if Sel <> nil then
     SelectItemByIndex(CurrList.IndexOf(Sel));
+end;
+
+procedure TCnProjectUseUnitsForm.FormCreate(Sender: TObject);
+begin
+  FUsesList := TObjectList.Create(True);
+  inherited;
+end;
+
+procedure TCnProjectUseUnitsForm.FormDestroy(Sender: TObject);
+begin
+  inherited;
+  FUsesList.Free;
+end;
+
+function TCnProjectUseUnitsForm.SearchCppInsertPos(IsH: Boolean;
+  out CharPos: TOTACharPos; SourceEditor: IOTASourceEditor): Boolean;
+var
+  Stream: TMemoryStream;
+  LineText: string;
+  S: AnsiString;
+  LastIncLine: Integer;
+{$IFDEF UNICODE}
+  CParser: TCnBCBWideTokenList;
+{$ELSE}
+  CParser: TBCBTokenList;
+{$ENDIF}
+begin
+  // 插在最后一个 include 前面。如无 include，h 文件和 cpp 处理还不同。
+  Result := False;
+  Stream := nil;
+  CParser := nil;
+
+  try
+    Stream := TMemoryStream.Create;
+
+{$IFDEF UNICODE}
+    CParser := TCnBCBWideTokenList.Create;
+    CParser.DirectivesAsComments := False;
+    CnOtaSaveEditorToStreamW(SourceEditor, Stream, False);
+    CParser.SetOrigin(PWideChar(Stream.Memory), Stream.Size div SizeOf(Char));
+{$ELSE}
+    CParser := TBCBTokenList.Create;
+    CParser.DirectivesAsComments := False;
+    CnOtaSaveEditorToStream(SourceEditor, Stream, False);
+    CParser.SetOrigin(PAnsiChar(Stream.Memory), Stream.Size);
+{$ENDIF}
+
+    LastIncLine := -1;
+    while CParser.RunID <> ctknull do
+    begin
+      if CParser.RunID = ctkdirinclude then
+      begin
+{$IFDEF UNICODE}
+        LastIncLine := CParser.LineNumber;
+{$ELSE}
+        LastIncLine := CParser.RunLineNumber;
+{$ENDIF}
+      end;
+      CParser.NextNonJunk;
+    end;
+
+    if LastIncLine >= 0 then
+    begin
+      Result := True;
+      CharPos.Line := LastIncLine + 1; // 最后一个 inc 的行首
+      CharPos.CharIndex := 0;
+    end;
+  finally
+    CParser.Free;
+    Stream.Free;
+  end;
+end;
+
+function TCnProjectUseUnitsForm.SearchPasInsertPos(IsIntf: Boolean; out HasUses: Boolean;
+  out CharPos: TOTACharPos): Boolean;
+var
+  Stream: TMemoryStream;
+  LineText: string;
+  S: AnsiString;
+{$IFDEF UNICODE}
+  Lex: TCnPasWideLex;
+{$ELSE}
+  Lex: TmwPasLex;
+{$ENDIF}
+  InIntf: Boolean;
+  MeetIntf: Boolean;
+  InImpl: Boolean;
+  MeetImpl: Boolean;
+  IntfLine, ImplLine: Integer;
+begin
+  Result := False;
+  Stream := TMemoryStream.Create;
+
+{$IFDEF UNICODE}
+  Lex := TCnPasWideLex.Create;
+  CnOtaSaveCurrentEditorToStreamW(Stream, False);
+{$ELSE}
+  Lex := TmwPasLex.Create;
+  CnOtaSaveCurrentEditorToStream(Stream, False);
+{$ENDIF}
+
+  InIntf := False;
+  InImpl := False;
+  MeetIntf := False;
+  MeetImpl := False;
+
+  HasUses := False;
+  IntfLine := 0;
+  ImplLine := 0;
+
+  CharPos.Line := 0;
+  CharPos.CharIndex := -1;
+
+  try
+{$IFDEF UNICODE}
+    Lex.Origin := PWideChar(Stream.Memory);
+{$ELSE}
+    Lex.Origin := PAnsiChar(Stream.Memory);
+{$ENDIF}
+
+    while Lex.TokenID <> tkNull do
+    begin
+      case Lex.TokenID of
+      tkUses:
+        begin
+          if (IsIntf and InIntf) or (not IsIntf and InImpl) then
+          begin
+            HasUses := True; // 到达了自己需要的 uses 处
+            while not (Lex.TokenID in [tkNull, tkSemiColon]) do
+              Lex.Next;
+
+            if Lex.TokenID = tkSemiColon then
+            begin
+              // 插入位置就在分号前
+              Result := True;
+{$IFDEF UNICODE}
+              CharPos.Line := Lex.LineNumber;
+              CharPos.CharIndex := Lex.TokenPos - Lex.LineStartOffset;
+
+              LineText := CnOtaGetLineText(CharPos.Line);
+              S := AnsiString(Copy(LineText, 1, CharPos.CharIndex));
+
+              CharPos.CharIndex := Length(CnAnsiToUtf8(S));  // 不明白 Unicode 环境里的 TOTACharPos 为什么也需要做 Utf8 转换
+{$ELSE}
+              CharPos.Line := Lex.LineNumber + 1;
+              CharPos.CharIndex := Lex.TokenPos - Lex.LinePos;
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+              LineText := CnOtaGetLineText(CharPos.Line);
+              S := AnsiString(Copy(LineText, 1, CharPos.CharIndex));
+
+              CharPos.CharIndex := Length(CnAnsiToUtf8(S));
+  {$ENDIF}
+{$ENDIF}
+              Exit;
+            end
+            else // uses 后找不着分号，出错
+            begin
+              Result := False;
+              Exit;
+            end;
+          end;
+        end;
+      tkInterface:
+        begin
+          MeetIntf := True;
+          InIntf := True;
+          InImpl := False;
+{$IFDEF UNICODE}
+          IntfLine := Lex.LineNumber;
+{$ELSE}
+          IntfLine := Lex.LineNumber + 1;
+{$ENDIF}
+        end;
+      tkImplementation:
+        begin
+          MeetImpl := True;
+          InIntf := False;
+          InImpl := True;
+{$IFDEF UNICODE}
+          ImplLine := Lex.LineNumber;
+{$ELSE}
+          ImplLine := Lex.LineNumber + 1;
+{$ENDIF}
+        end;
+      end;
+      Lex.Next;
+    end;
+
+    // 解析完毕，到此处是没有 uses 的情形
+    if IsIntf and MeetIntf then    // 曾经遇到过 interface 就以 interface 为插入点
+    begin
+      Result := True;
+      CharPos.Line := IntfLine;
+      CharPos.CharIndex := Length('interface');
+    end
+    else if not IsIntf and MeetImpl then // 曾经遇到过 interface 就以 interface 为插入点
+    begin
+      Result := True;
+      CharPos.Line := ImplLine;
+      CharPos.CharIndex := Length('implementation');
+    end;
+  finally
+    Lex.Free;
+    Stream.Free;
+  end;
+end;
+
+procedure TCnProjectUseUnitsForm.DoSelectItemChanged(Sender: TObject);
+var
+  Item: TListItem;
+  Info: TCnUseUnitInfo;
+begin
+  inherited;
+  Item := lvList.Selected;
+  if Item <> nil then
+  begin
+    Info := TCnUseUnitInfo(Item.Data);
+    if Info <> nil then
+    begin
+      rbIntf.Checked := not Info.IsInProject; // 系统库默认往 intf / h 文件中加
+      rbImpl.Checked := Info.IsInProject;
+    end;
+  end;
+end;
+
+procedure TCnProjectUseUnitsForm.rbIntfKeyDown(Sender: TObject;
+  var Key: Word; Shift: TShiftState);
+begin
+  if Key = VK_LEFT then
+    edtMatchSearch.SetFocus
+  else if Key = VK_RIGHT then
+  begin
+    rbIntf.Checked := False;
+    rbImpl.Checked := True;
+    rbImpl.SetFocus;
+  end;
+end;
+
+procedure TCnProjectUseUnitsForm.rbImplKeyDown(Sender: TObject;
+  var Key: Word; Shift: TShiftState);
+begin
+  if Key = VK_LEFT then
+  begin
+    rbIntf.Checked := True;
+    rbImpl.Checked := False;
+    rbIntf.SetFocus;
+  end;
+end;
+
+procedure TCnProjectUseUnitsForm.edtMatchSearchKeyDown(Sender: TObject;
+  var Key: Word; Shift: TShiftState);
+begin
+  inherited;
+  if Key = VK_RIGHT then
+  begin
+    if edtMatchSearch.SelStart = Length(edtMatchSearch.Text) then
+    begin
+      if rbIntf.Checked then
+      begin
+        rbIntf.Checked := False;
+        rbImpl.Checked := True;
+        rbImpl.SetFocus;
+      end
+      else
+      begin
+        rbIntf.Checked := True;
+        rbImpl.Checked := False;
+        rbIntf.SetFocus;
+      end;
+    end;
+  end;
 end;
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}
