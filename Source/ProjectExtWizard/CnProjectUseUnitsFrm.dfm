@@ -27,7 +27,7 @@ inherited CnProjectUseUnitsForm: TCnProjectUseUnitsForm
       Checked = True
       TabOrder = 2
       TabStop = True
-      OnClick = rbIntfClick
+      OnDblClick = rbIntfDblClick
       OnKeyDown = rbIntfKeyDown
     end
     object rbImpl: TRadioButton
@@ -37,7 +37,7 @@ inherited CnProjectUseUnitsForm: TCnProjectUseUnitsForm
       Height = 17
       Caption = 'Implementation'
       TabOrder = 3
-      OnClick = rbIntfClick
+      OnDblClick = rbIntfDblClick
       OnKeyDown = rbImplKeyDown
     end
   end

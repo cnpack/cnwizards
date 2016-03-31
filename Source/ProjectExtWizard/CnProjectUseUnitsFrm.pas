@@ -82,7 +82,7 @@ type
       Shift: TShiftState);
     procedure edtMatchSearchKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
-    procedure rbIntfClick(Sender: TObject);
+    procedure rbIntfDblClick(Sender: TObject);
   private
     FIsCppMode: Boolean;
     FUsesList: TObjectList; // ´æ´¢ËùÓÐµÄ UseUnitInfo
@@ -750,8 +750,6 @@ function TCnProjectUseUnitsForm.SearchCppInsertPos(IsH: Boolean;
   out CharPos: TOTACharPos; SourceEditor: IOTASourceEditor): Boolean;
 var
   Stream: TMemoryStream;
-  LineText: string;
-  S: AnsiString;
   LastIncLine: Integer;
 {$IFDEF UNICODE}
   CParser: TCnBCBWideTokenList;
@@ -809,12 +807,16 @@ function TCnProjectUseUnitsForm.SearchPasInsertPos(IsIntf: Boolean; out HasUses:
   out CharPos: TOTACharPos): Boolean;
 var
   Stream: TMemoryStream;
-  LineText: string;
-  S: AnsiString;
 {$IFDEF UNICODE}
   Lex: TCnPasWideLex;
+  LineText: string;
+  S: AnsiString;
 {$ELSE}
   Lex: TmwPasLex;
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+  LineText: string;
+  S: AnsiString;
+  {$ENDIF}
 {$ENDIF}
   InIntf: Boolean;
   MeetIntf: Boolean;
@@ -1005,9 +1007,9 @@ begin
   end;
 end;
 
-procedure TCnProjectUseUnitsForm.rbIntfClick(Sender: TObject);
+procedure TCnProjectUseUnitsForm.rbIntfDblClick(Sender: TObject);
 begin
-  ModalResult := mrOk;
+  OpenSelect;
 end;
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}
