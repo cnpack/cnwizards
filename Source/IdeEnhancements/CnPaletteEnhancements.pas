@@ -61,7 +61,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, ToolsAPI, IniFiles,
   Forms, ExtCtrls, Menus, ComCtrls, Contnrs, StdCtrls, Buttons,
   CnCommon, CnWizUtils, CnWizNotifier, CnWizIdeUtils, CnWizConsts, CnMenuHook,
-  CnConsts, CnCompUtils, CnWizClasses,
+  CnConsts, CnCompUtils, CnWizClasses, CnWizMenuAction,
   {$IFDEF COMPILER7_UP}
   ActnMenus,
   {$ENDIF}
@@ -109,11 +109,13 @@ type
     FWizMenu: TMenuItem;
     FWizOptionMenu: TMenuItem;
     FWizSepMenu: TMenuItem;
-  {$IFNDEF COMPILER8_UP}
+{$IFNDEF COMPILER8_UP}
     FDivTab: Boolean;
     FCompFilter: Boolean;
+    FCompFilterShortCut: TShortCut;
     FCompFilterPnl: TPanel;
     FCompFilterBtn: TSpeedButton;
+    FCompFilterAction: TCnWizAction;
 
     FShowPrefix: Boolean;
     FUseSmallImg: Boolean;
@@ -122,10 +124,8 @@ type
   {$IFDEF COMPILER6_UP}
     FTabPopupItem: TMenuItem;
     FTabOnClick: TNotifyEvent;
-
-
   {$ENDIF COMPILER6_UP}
-  {$ENDIF COMPILER8_UP}
+{$ENDIF COMPILER8_UP}
 
   {$IFDEF FIX_EDITORLINEENDS_BUG}
     FFixEditorLineEndsBug: Boolean;
@@ -133,9 +133,10 @@ type
   {$ENDIF}
 
   {$IFNDEF COMPILER8_UP}
-    procedure SetFCompFilter(const Value: Boolean);
+    procedure SetCompFilter(const Value: Boolean);
+    procedure SetCompFilterShortCut(const Value: TShortCut);    
     procedure UpdateCompFilterButton;
-    procedure OnCompFilterBtnClick(Sender: TObject);
+    procedure OnCompFilterActionExecute(Sender: TObject);
     procedure OnCompFilterStyleChanged(Sender: TObject);
     procedure OnSettingChanged(Sender: TObject);
     procedure OnActiveFormChanged(Sender: TObject);
@@ -181,7 +182,6 @@ type
     procedure UpdateToolbarLock;
     procedure MainControlBarOnMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
-
   protected
     procedure SetActive(Value: Boolean); override;
     function GetHasConfig: Boolean; override;
@@ -204,7 +204,8 @@ type
     property MultiLine: Boolean read FMultiLine write FMultiLine;
     property ButtonStyle: Boolean read FButtonStyle write FButtonStyle;
     property DivTab: Boolean read FDivTab write FDivTab;
-    property CompFilter: Boolean read FCompFilter write SetFCompFilter;
+    property CompFilter: Boolean read FCompFilter write SetCompFilter;
+    property CompFilterShortCut: TShortCut read FCompFilterShortCut write SetCompFilterShortCut;
 
     property ShowPrefix: Boolean read FShowPrefix write FShowPrefix;
     property UseSmallImg: Boolean read FUseSmallImg write FUseSmallImg;
@@ -255,6 +256,7 @@ const
   csLockToolbar = 'LockToolbar';
 
   csCompFilter = 'CompFilter';
+  csCompFilterShortCut = 'CompFilterShortCut';
   csShowPrefix = 'ShowPrefix';
   csUseSmallImg = 'UseSmallImg';
   csShowDetails = 'ShowDetails';
@@ -315,6 +317,10 @@ begin
   InitWizMenus;
   InitControlBarMenu;
 {$IFNDEF COMPILER8_UP}
+  FCompFilterAction := WizActionMgr.AddAction('CnCompFilter',
+    SCnSearchComponent, 0, OnCompFilterActionExecute,
+    'CnCompFilter', SCnSearchComponent);
+
   FMenuHook := TCnMenuHook.Create(nil);
   CnWizNotifierServices.AddActiveFormNotifier(OnActiveFormChanged);
 {$IFDEF COMPILER6_UP}
@@ -334,9 +340,12 @@ begin
   CnWizNotifierServices.RemoveApplicationIdleNotifier(OnIdle);
   FinalMenuBar;
 {$ENDIF COMPILER7_UP}
+
 {$IFNDEF COMPILER8_UP}
   CnWizNotifierServices.RemoveActiveFormNotifier(OnActiveFormChanged);
   FMenuHook.Free;
+  if FCompFilterAction <> nil then
+    WizActionMgr.DeleteAction(FCompFilterAction);
 {$ENDIF COMPILER8_UP}
   FControlBarMenuHook.Free;
   FinalWizMenus;
@@ -935,6 +944,7 @@ begin
   FButtonStyle := Ini.ReadBool('', csPalButtonStyle, False);
   FDivTab := Ini.ReadBool('', csDivTabMenu, True);
   FCompFilter := Ini.ReadBool('', csCompFilter, True);
+  FCompFilterShortCut := Ini.ReadInteger('', csCompFilterShortCut, 0);
   FShowPrefix := Ini.ReadBool('', csShowPrefix, False);
   FUseSmallImg := Ini.ReadBool('', csUseSmallImg, False);
   FShowDetails := Ini.ReadBool('',  csShowDetails, True);
@@ -961,6 +971,7 @@ begin
   Ini.WriteBool('', csPalButtonStyle, FButtonStyle);
   Ini.WriteBool('', csDivTabMenu, FDivTab);
   Ini.WriteBool('', csCompFilter, FCompFilter);
+  Ini.WriteInteger('', csCompFilterShortCut, FCompFilterShortCut);
   Ini.WriteBool('', csShowPrefix, FShowPrefix);
   Ini.WriteBool('', csUseSmallImg, FUseSmallImg);
   Ini.WriteBool('',  csShowDetails, FShowDetails);
@@ -1088,7 +1099,7 @@ begin
 end;
 
 {$IFNDEF COMPILER8_UP}
-procedure TCnPaletteEnhanceWizard.SetFCompFilter(const Value: Boolean);
+procedure TCnPaletteEnhanceWizard.SetCompFilter(const Value: Boolean);
 begin
   if FCompFilter <> Value then
   begin
@@ -1097,10 +1108,21 @@ begin
   end;
 end;
 
+procedure TCnPaletteEnhanceWizard.SetCompFilterShortCut(
+  const Value: TShortCut);
+begin
+  FCompFilterShortCut := Value;
+  if FCompFilterAction <> nil then
+    FCompFilterAction.ShortCut := Value;
+end;
+
 procedure TCnPaletteEnhanceWizard.UpdateCompFilterButton;
 begin
   if Active and FCompFilter then
   begin
+    if FCompFilterAction <> nil then
+      FCompFilterAction.ShortCut := FCompFilterShortCut;
+
     if FCompFilterPnl = nil then
     begin
       FCompFilterPnl := TPanel.Create(Application);
@@ -1124,7 +1146,7 @@ begin
 
       FCompFilterBtn.Parent := FCompFilterPnl;
       FCompFilterBtn.Flat := True;
-      FCompFilterBtn.OnClick := OnCompFilterBtnClick;
+      FCompFilterBtn.Action := FCompFilterAction;
       FCompFilterBtn.Top := 1;
       FCompFilterBtn.Left := 1;
       FCompFilterBtn.Height := 11;
@@ -1152,7 +1174,7 @@ begin
   end;
 end;
 
-procedure TCnPaletteEnhanceWizard.OnCompFilterBtnClick(Sender: TObject);
+procedure TCnPaletteEnhanceWizard.OnCompFilterActionExecute(Sender: TObject);
 var
   P: TPoint;
 begin
