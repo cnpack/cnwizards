@@ -153,18 +153,35 @@ function ShowProjectUseUnits(Ini: TCustomIniFile; out Hooked: Boolean;
   var UnitNameList: TUnitNameList): Boolean;
 var
   IsCppMode: Boolean;
+  OldCursor: TCursor;
 begin
   if CurrentSourceIsC then
   begin
     IsCppMode := True;
     if UnitNameList = nil then
-      UnitNameList := TUnitNameList.Create(True, True);
+    begin
+      OldCursor := Screen.Cursor;
+      Screen.Cursor := crHourGlass;
+      try
+        UnitNameList := TUnitNameList.Create(True, True);
+      finally
+        Screen.Cursor := OldCursor;
+      end;
+    end;
   end
   else
   begin
     IsCppMode := False;
     if UnitNameList = nil then
-      UnitNameList := TUnitNameList.Create(True, False);
+    begin
+      OldCursor := Screen.Cursor;
+      Screen.Cursor := crHourGlass;
+      try
+        UnitNameList := TUnitNameList.Create(True, False);
+      finally
+        Screen.Cursor := OldCursor;
+      end;
+    end;
   end;
 
   with TCnProjectUseUnitsForm.Create(nil, IsCppMode, UnitNameList) do

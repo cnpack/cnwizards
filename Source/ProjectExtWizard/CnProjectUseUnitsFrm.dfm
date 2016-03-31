@@ -19,7 +19,7 @@ inherited CnProjectUseUnitsForm: TCnProjectUseUnitsForm
       Visible = False
     end
     object rbIntf: TRadioButton
-      Left = 368
+      Left = 388
       Top = 12
       Width = 97
       Height = 17
@@ -31,7 +31,7 @@ inherited CnProjectUseUnitsForm: TCnProjectUseUnitsForm
       OnKeyDown = rbIntfKeyDown
     end
     object rbImpl: TRadioButton
-      Left = 456
+      Left = 476
       Top = 11
       Width = 97
       Height = 17
@@ -72,9 +72,6 @@ inherited CnProjectUseUnitsForm: TCnProjectUseUnitsForm
   end
   inherited ToolBar: TToolBar
     Width = 651
-    inherited btnQuery: TToolButton
-      Visible = False
-    end
   end
   inherited ActionList: TActionList
     inherited actOpen: TAction
@@ -103,6 +100,7 @@ inherited CnProjectUseUnitsForm: TCnProjectUseUnitsForm
       Hint = 'Hook Project Unit List to IDE'
     end
     inherited actQuery: TAction
+      Enabled = False
       Hint = '&Prompt when Open More than ONE Unit'
     end
   end
