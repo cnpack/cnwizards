@@ -1268,6 +1268,7 @@ TCnPalEnhanceForm.chkMoveWizMenus.Caption=移動主功能表上的功能表項�
 TCnPalEnhanceForm.lbl1.Caption=可用菜單項：
 TCnPalEnhanceForm.lbl2.Caption=菜單標題：
 TCnPalEnhanceForm.lbl3.Caption=要移動的菜單項：
+TCnPalEnhanceForm.lblShortcut.Caption=快捷鍵：
 TCnPalEnhanceForm.btnHelp.Caption=說明(&H)
 TCnPalEnhanceForm.btnOK.Caption=確定(&O)
 TCnPalEnhanceForm.btnCancel.Caption=取消(&C)

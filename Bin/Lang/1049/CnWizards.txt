@@ -1268,6 +1268,7 @@ TCnPalEnhanceForm.chkMoveWizMenus.Caption=Преобразовать следу�
 TCnPalEnhanceForm.lbl1.Caption=Доступные меню:
 TCnPalEnhanceForm.lbl2.Caption=Заголовок:
 TCnPalEnhanceForm.lbl3.Caption=Выбранные меню:
+TCnPalEnhanceForm.lblShortcut.Caption=Гор. кл.:
 TCnPalEnhanceForm.btnHelp.Caption=Справка
 TCnPalEnhanceForm.btnOK.Caption=&OK
 TCnPalEnhanceForm.btnCancel.Caption=Отмена

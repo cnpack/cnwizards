@@ -1268,6 +1268,7 @@ TCnPalEnhanceForm.chkMoveWizMenus.Caption=verschiebe folgende Menu Punkte in ein
 TCnPalEnhanceForm.lbl1.Caption=verfügbare Punkte:
 TCnPalEnhanceForm.lbl2.Caption=Caption:
 TCnPalEnhanceForm.lbl3.Caption=selektierte Punkte:
+TCnPalEnhanceForm.lblShortcut.Caption=Tastenkürzel:
 TCnPalEnhanceForm.btnHelp.Caption=&Hilfe
 TCnPalEnhanceForm.btnOK.Caption=&OK
 TCnPalEnhanceForm.btnCancel.Caption=&Abbruch

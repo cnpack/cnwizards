@@ -1268,6 +1268,7 @@ TCnPalEnhanceForm.chkMoveWizMenus.Caption=移动主菜单上的菜单项到二�
 TCnPalEnhanceForm.lbl1.Caption=可用菜单项：
 TCnPalEnhanceForm.lbl2.Caption=菜单标题：
 TCnPalEnhanceForm.lbl3.Caption=要移动的菜单项：
+TCnPalEnhanceForm.lblShortcut.Caption=快捷键：
 TCnPalEnhanceForm.btnHelp.Caption=帮助(&H)
 TCnPalEnhanceForm.btnOK.Caption=确定(&O)
 TCnPalEnhanceForm.btnCancel.Caption=取消(&C)

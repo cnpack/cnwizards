@@ -1268,6 +1268,7 @@ TCnPalEnhanceForm.chkMoveWizMenus.Caption=Move Following Menu Items into Sub Men
 TCnPalEnhanceForm.lbl1.Caption=Available Items:
 TCnPalEnhanceForm.lbl2.Caption=Caption:
 TCnPalEnhanceForm.lbl3.Caption=Selected Items:
+TCnPalEnhanceForm.lblShortcut.Caption=Shortcut:
 TCnPalEnhanceForm.btnHelp.Caption=&Help
 TCnPalEnhanceForm.btnOK.Caption=&OK
 TCnPalEnhanceForm.btnCancel.Caption=&Cancel
