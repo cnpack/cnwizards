@@ -23,6 +23,7 @@ inherited CnPalEnhanceForm: TCnPalEnhanceForm
       Width = 45
       Height = 13
       Caption = 'Shortcut:'
+      FocusControl = hkCompFilter
     end
     object chkAddTabs: TCheckBox
       Left = 8
@@ -72,17 +73,17 @@ inherited CnPalEnhanceForm: TCnPalEnhanceForm
       Width = 409
       Height = 17
       Caption = 'Lock IDE Toolbar to Disable Drag.'
-      TabOrder = 5
+      TabOrder = 6
     end
     object hkCompFilter: THotKey
-      Left = 112
+      Left = 120
       Top = 116
       Width = 121
       Height = 19
       HotKey = 32833
       InvalidKeys = [hcNone, hcShift]
       Modifiers = [hkAlt]
-      TabOrder = 6
+      TabOrder = 5
     end
   end
   object btnHelp: TButton
