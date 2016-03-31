@@ -70,6 +70,8 @@ type
     chkCompFilter: TCheckBox;
     chkButtonStyle: TCheckBox;
     chkLockToolbar: TCheckBox;
+    lblShortcut: TLabel;
+    hkCompFilter: THotKey;
     procedure FormCreate(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure UpdateControls(Sender: TObject);

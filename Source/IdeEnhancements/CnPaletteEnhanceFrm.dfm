@@ -1,10 +1,11 @@
 inherited CnPalEnhanceForm: TCnPalEnhanceForm
-  Left = 340
-  Top = 195
+  Left = 341
+  Top = 101
   BorderStyle = bsDialog
   Caption = 'IDE Main Form Enhancements Wizard Settings'
-  ClientHeight = 435
+  ClientHeight = 463
   ClientWidth = 448
+  OldCreateOrder = True
   OnCreate = FormCreate
   OnShow = FormShow
   PixelsPerInch = 96
@@ -13,9 +14,16 @@ inherited CnPalEnhanceForm: TCnPalEnhanceForm
     Left = 8
     Top = 8
     Width = 433
-    Height = 145
+    Height = 172
     Caption = 'Component &Palette Extension Settings'
     TabOrder = 0
+    object lblShortcut: TLabel
+      Left = 24
+      Top = 119
+      Width = 45
+      Height = 13
+      Caption = 'Shortcut:'
+    end
     object chkAddTabs: TCheckBox
       Left = 8
       Top = 16
@@ -60,16 +68,26 @@ inherited CnPalEnhanceForm: TCnPalEnhanceForm
     end
     object chkLockToolbar: TCheckBox
       Left = 8
-      Top = 116
+      Top = 144
       Width = 409
       Height = 17
       Caption = 'Lock IDE Toolbar to Disable Drag.'
       TabOrder = 5
     end
+    object hkCompFilter: THotKey
+      Left = 112
+      Top = 116
+      Width = 121
+      Height = 19
+      HotKey = 32833
+      InvalidKeys = [hcNone, hcShift]
+      Modifiers = [hkAlt]
+      TabOrder = 6
+    end
   end
   object btnHelp: TButton
     Left = 366
-    Top = 404
+    Top = 432
     Width = 75
     Height = 21
     Caption = '&Help'
@@ -78,7 +96,7 @@ inherited CnPalEnhanceForm: TCnPalEnhanceForm
   end
   object btnOK: TButton
     Left = 206
-    Top = 404
+    Top = 432
     Width = 75
     Height = 21
     Caption = '&OK'
@@ -88,7 +106,7 @@ inherited CnPalEnhanceForm: TCnPalEnhanceForm
   end
   object btnCancel: TButton
     Left = 286
-    Top = 404
+    Top = 432
     Width = 75
     Height = 21
     Cancel = True
@@ -98,7 +116,7 @@ inherited CnPalEnhanceForm: TCnPalEnhanceForm
   end
   object grpMisc: TGroupBox
     Left = 8
-    Top = 156
+    Top = 184
     Width = 433
     Height = 41
     Caption = 'O&ther Settings'
@@ -117,7 +135,7 @@ inherited CnPalEnhanceForm: TCnPalEnhanceForm
   end
   object grpMenu: TGroupBox
     Left = 8
-    Top = 204
+    Top = 232
     Width = 433
     Height = 193
     Caption = 'M&ain Form Settings'

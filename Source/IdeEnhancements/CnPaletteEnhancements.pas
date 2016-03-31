@@ -1024,6 +1024,7 @@ begin
     chkButtonStyle.Checked := ButtonStyle;
     chkDivTabMenu.Checked := DivTab;
     chkCompFilter.Checked := CompFilter;
+    hkCompFilter.HotKey := CompFilterShortCut;
   {$ENDIF COMPILER8_UP}
     chkMenuLine.Checked := MenuLine;
     chkLockToolbar.Checked := LockToolbar;
@@ -1040,6 +1041,7 @@ begin
       ButtonStyle := chkButtonStyle.Checked;
       DivTab := chkDivTabMenu.Checked;
       CompFilter := chkCompFilter.Checked;
+      CompFilterShortCut := hkCompFilter.HotKey;
     {$ENDIF COMPILER8_UP}
       MenuLine := chkMenuLine.Checked;
       LockToolbar := chkLockToolbar.Checked;
