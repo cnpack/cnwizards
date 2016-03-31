@@ -157,6 +157,7 @@ begin
       end;
     end;
 
+    Caption := Caption + ' - ' + FCurFile;
     Stream := TMemoryStream.Create;
     try
       CnOtaSaveCurrentEditorToStream(Stream, False);
