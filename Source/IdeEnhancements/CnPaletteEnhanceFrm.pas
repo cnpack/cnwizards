@@ -114,11 +114,15 @@ begin
   chkButtonStyle.Enabled := False;
   chkDivTabMenu.Enabled := False;
   chkCompFilter.Enabled := False;
+  lblShortcut.Enabled := False;
+  hkCompFilter.Enabled := False;
   {$ELSE}
   chkMultiLine.Enabled := True;
   chkButtonStyle.Enabled := True;
   chkDivTabMenu.Enabled := True;
   chkCompFilter.Enabled := True;
+  lblShortcut.Enabled := True;
+  hkCompFilter.Enabled := True;
   {$ENDIF}
 end;
 
@@ -146,6 +150,8 @@ begin
   btnDelete.Enabled := chkMoveWizMenus.Checked and (lstDest.SelCount > 0);
   btnUp.Enabled := chkMoveWizMenus.Checked and (lstDest.SelCount > 0);
   btnDown.Enabled := chkMoveWizMenus.Checked and (lstDest.SelCount > 0);
+  lblShortcut.Enabled := chkCompFilter.Checked;
+  hkCompFilter.Enabled := chkCompFilter.Checked;
 end;
 
 procedure TCnPalEnhanceForm.GetWizMenuNames(AList: TStrings);

@@ -58,6 +58,7 @@ inherited CnPalEnhanceForm: TCnPalEnhanceForm
       Height = 17
       Caption = 'Add "Search Component" Button in Pallete(Delphi 7 Below Only).'
       TabOrder = 4
+      OnClick = UpdateControls
     end
     object chkButtonStyle: TCheckBox
       Left = 8
