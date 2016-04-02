@@ -3200,6 +3200,7 @@ SCnPaletteMultiLineMenuCaption=&Multi-Line
 SCnLockToolbarMenuCaption=&Lock Toolbar
 SCnPaletteMoreCaption=&More...
 SCnSearchComponent=Search Component
+SCnPalSettingsCaption=Setti&ngs...
 SCnComponentDetailFmt=ClassName: %s<BR>Unit: %s<BR>Tab: %s<BR><BR>Inheritance List: <BR><BR>
 SCnVerEnhanceWizardName=Version Enhancements
 SCnVerEnhanceWizardComment=Version Enhancements Wizard

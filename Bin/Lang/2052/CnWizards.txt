@@ -3200,6 +3200,7 @@ SCnPaletteMultiLineMenuCaption=多行方式(&M)
 SCnLockToolbarMenuCaption=锁定工具栏(&L)
 SCnPaletteMoreCaption=更多(&M)...
 SCnSearchComponent=查找组件
+SCnPalSettingsCaption=扩展配置(&C)...
 SCnComponentDetailFmt=组件类：%s<BR>单元名：%s<BR>标签页：%s<BR><BR>继承关系：<BR><BR>
 SCnVerEnhanceWizardName=版本信息扩展
 SCnVerEnhanceWizardComment=版本信息内容扩展专家

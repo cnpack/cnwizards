@@ -3199,6 +3199,7 @@ SCnPaletteMultiLineMenuCaption=Многострочная
 SCnLockToolbarMenuCaption=Закрепить панель инструментов
 SCnPaletteMoreCaption=Еще...
 SCnSearchComponent=Поиск компонента
+SCnPalSettingsCaption=Настройки...
 SCnComponentDetailFmt=Имя класса: %s<BR>Модуль: %s<BR>Вкладка: %s<BR><BR>Список наследования: <BR><BR>
 SCnVerEnhanceWizardName=Информация о версии
 SCnVerEnhanceWizardComment=Информация о версии
