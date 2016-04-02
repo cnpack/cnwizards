@@ -282,6 +282,7 @@ resourcestring
   SCnPaletteTabsMenuName = 'CnPaletteTabs';
   SCnPaletteMutiLineMenuName = 'CnPaletteMultiLine';
   SCnPaletteSearchCompMenuName = 'CnPaletteSearchComp';
+  SCnPaletteSettingsMenuName = 'CnPaletteSettings';
   SCnLockToolbarMenuName = 'CnLockToolBar';
   SCnWizMenuName = 'CnWizToolMenu';
   SCnWizOptionMenuName = 'CnWizToolOptionMenu';
@@ -1193,6 +1194,7 @@ var
   SCnLockToolbarMenuCaption: string = '&Lock Toolbar';
   SCnPaletteMoreCaption: string = '&More...';
   SCnSearchComponent: string = 'Search Component';
+  SCnPalSettingsCaption: string = 'Setti&ngs...';
   SCnComponentDetailFmt: string = 'ClassName: %s' + #13#10 + 'Unit: %s' + #13#10 + 'Tab: %s' + #13#10#13#10 + 'Inheritance List: ' + #13#10#13#10;
 
   // CnVerEnhanceWizard

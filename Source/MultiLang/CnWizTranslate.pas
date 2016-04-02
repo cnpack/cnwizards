@@ -890,6 +890,7 @@ begin
   TranslateStr(SCnPaletteMoreCaption, 'SCnPaletteMoreCaption');
   
   TranslateStr(SCnSearchComponent, 'SCnSearchComponent');
+  TranslateStr(SCnPalSettingsCaption, 'SCnPalSettingsCaption');
   TranslateStr(SCnComponentDetailFmt, 'SCnComponentDetailFmt');
 
   // CnVerEnhanceWizard

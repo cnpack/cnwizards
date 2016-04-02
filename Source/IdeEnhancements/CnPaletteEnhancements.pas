@@ -88,6 +88,7 @@ type
   {$ENDIF COMPILER5}
     FMultiLineMenuItem: TCnMenuItemDef;
     FSearchCompMenuItem: TCnMenuItemDef;
+    FSettingsMenuItem: TCnMenuItemDef;
     FSepMenuItem: TCnSepMenuItemDef;
   {$ENDIF COMPILER8_UP}
     FMenuLine: Boolean;
@@ -143,6 +144,7 @@ type
     procedure DoUpdateComponentPalette(AMultiLine: Boolean; AButtonStyle: Boolean);
     procedure OnMultiLineItemClick(Sender: TObject);
     procedure OnSearchCompItemClick(Sender: TObject);
+    procedure OnSettingsItemClick(Sender: TObject);
     procedure OnSearchCompMenuCreated(Sender: TObject; MenuItem: TMenuItem);
   {$IFDEF COMPILER5}
     procedure OnMenuItemClick(Sender: TObject);
@@ -471,6 +473,11 @@ begin
   CompFilter := not CompFilter;
 end;
 
+procedure TCnPaletteEnhanceWizard.OnSettingsItemClick(Sender: TObject);
+begin
+  Config;
+end;
+
 procedure TCnPaletteEnhanceWizard.UpdateOtherWindows(OldHeight: Integer);
 const
   WinClasses: array[0..2] of string = ('TObjectTreeView',
@@ -527,6 +534,10 @@ begin
   FSearchCompMenuItem.OnCreated := OnSearchCompMenuCreated;
   FMenuHook.AddMenuItemDef(FSearchCompMenuItem);
 
+  FSettingsMenuItem := TCnMenuItemDef.Create(SCnPaletteSettingsMenuName,
+    SCnPalSettingsCaption, OnSettingsItemClick, ipAfter, SCnPaletteSearchCompMenuName);
+
+  FMenuHook.AddMenuItemDef(FSettingsMenuItem);
 {$IFDEF COMPILER5}
   FTabMenuItem := TCnMenuItemDef.Create(SCnPaletteTabsMenuName,
     SCnPaletteTabsMenuCaption, nil, ipFirst, '');
