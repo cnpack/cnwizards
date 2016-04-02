@@ -2161,7 +2161,7 @@
   {$DEFINE SUPPORTS_32_AND_64}
   {$DEFINE SUPPORTS_FMX}
   {$DEFINE SUPPORTS_CROSS_PLATFORM}
-  {$DEFINE VERSIONINFO_PER_CONFIGURATION}  // Every Configuruation can have a Version Info
+  {$DEFINE VERSIONINFO_PER_CONFIGURATION}  // Every Configuruation can have a Version Info.
   {$DEFINE OTA_ENVOPTIONS_PLATFORM_BUG}
     // A Bug Can't get Correct Env Option Values for Current Platform.
   {$DEFINE LIST_NEW_POINTER}
@@ -2169,6 +2169,7 @@
 
 {$IFDEF BDS2010_UP}
   {$DEFINE SUPPORTS_INTERFACE_AS_OBJECT}
+  {$DEFINE IDE_HAS_NEW_COMPONENT_PALETTE}  // IDE has a new style Component Palette.
 {$ENDIF}
 
 {$IFDEF BDS2009_UP}
@@ -2176,7 +2177,7 @@
   {$DEFINE OBJECT_HAS_TOSTRING}  // TObject.ToString Function
   {$DEFINE OBJECT_HAS_EQUAL}     // TObject.Equal Function
   {$DEFINE SUPPORT_OTA_PROJECT_CONFIGURATION}
-  {$IFNDEF DELPHIXE2_UP}  // 2009/2010/XE has a Project Version Number Bug
+  {$IFNDEF DELPHIXE2_UP}  // 2009/2010/XE has a Project Version Number Bug.
     {$DEFINE PROJECT_VERSION_NUMBER_BUG}
   {$ENDIF}
 {$ENDIF}
@@ -2186,7 +2187,7 @@
 {$ENDIF}
 
 {$IFDEF BDS}
-  {$DEFINE IDE_ACTION_UPDATE_DELAY} // IDE's Action Menu Update will Delay in 2005 or Up
+  {$DEFINE IDE_ACTION_UPDATE_DELAY} // IDE's Action Menu Update will Delay in 2005 or Up.
 {$ENDIF}
 
 {$IFDEF COMPILER21_UP}
@@ -2194,11 +2195,11 @@
 {$ENDIF}
 
 {$IFDEF DELPHIXE8_UP}
-  {$DEFINE IDE_INTEGRATE_CASTALIA} // XE8 and 10S integrate Castalia
+  {$DEFINE IDE_INTEGRATE_CASTALIA} // XE8 and 10S integrate Castalia.
 {$ENDIF}
 
 {$IFDEF DELPHI10_SEATTLE_UP}
-  {$DEFINE IDE_HAS_HIDE_NONVISUAL} // 10S has "Hide Nonvisual" Feature
+  {$DEFINE IDE_HAS_HIDE_NONVISUAL} // 10S has "Hide Nonvisual" Feature.
 {$ENDIF}
 
 //==============================================================================
