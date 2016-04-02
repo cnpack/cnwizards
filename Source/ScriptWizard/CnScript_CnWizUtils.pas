@@ -314,6 +314,9 @@ begin
   CL.AddDelphiFunction('Function CurrentIsDelphiSource : Boolean');
   CL.AddDelphiFunction('Function CurrentIsCSource : Boolean');
   CL.AddDelphiFunction('Function CurrentIsSource : Boolean');
+  CL.AddDelphiFunction('Function CurrentSourceIsDelphi : Boolean');
+  CL.AddDelphiFunction('Function CurrentSourceIsC : Boolean');
+  CL.AddDelphiFunction('Function CurrentSourceIsDelphiOrCSource : Boolean');
   CL.AddDelphiFunction('Function CurrentIsForm : Boolean');
   CL.AddDelphiFunction('Function ExtractUpperFileExt( const FileName : string) : string');
   CL.AddDelphiFunction('Procedure AssertIsDprOrPas( const FileName : string)');
@@ -565,6 +568,9 @@ begin
   S.RegisterDelphiFunction(@CurrentIsDelphiSource, 'CurrentIsDelphiSource', cdRegister);
   S.RegisterDelphiFunction(@CurrentIsCSource, 'CurrentIsCSource', cdRegister);
   S.RegisterDelphiFunction(@CurrentIsSource, 'CurrentIsSource', cdRegister);
+  S.RegisterDelphiFunction(@CurrentSourceIsDelphi, 'CurrentSourceIsDelphi', cdRegister);
+  S.RegisterDelphiFunction(@CurrentSourceIsC, 'CurrentSourceIsC', cdRegister);
+  S.RegisterDelphiFunction(@CurrentSourceIsDelphiOrCSource, 'CurrentSourceIsDelphiOrCSource', cdRegister);
   S.RegisterDelphiFunction(@CurrentIsForm, 'CurrentIsForm', cdRegister);
   S.RegisterDelphiFunction(@ExtractUpperFileExt, 'ExtractUpperFileExt', cdRegister);
   S.RegisterDelphiFunction(@AssertIsDprOrPas, 'AssertIsDprOrPas', cdRegister);

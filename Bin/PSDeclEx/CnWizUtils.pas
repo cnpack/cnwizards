@@ -397,6 +397,12 @@ function CurrentIsCSource: Boolean;
 {* 当前编辑的文件是C源文件}
 function CurrentIsSource: Boolean;
 {* 当前编辑的文件是Delphi或C源文件}
+function CurrentSourceIsDelphi: Boolean;
+{* 当前编辑的源文件（非窗体）是Delphi源文件}
+function CurrentSourceIsC: Boolean;
+{* 当前编辑的源文件（非窗体）是C源文件}
+function CurrentSourceIsDelphiOrCSource: Boolean;
+{* 当前编辑的源文件（非窗体）是Delphi或C源文件}
 function CurrentIsForm: Boolean;
 {* 当前编辑的文件是窗体文件}
 function ExtractUpperFileExt(const FileName: string): string;
@@ -1080,6 +1086,18 @@ begin
 end;
 
 function CurrentIsSource: Boolean;
+begin
+end;
+
+function CurrentSourceIsDelphi: Boolean;
+begin
+end;
+
+function CurrentSourceIsC: Boolean;
+begin
+end;
+
+function CurrentSourceIsDelphiOrCSource: Boolean;
 begin
 end;
 
