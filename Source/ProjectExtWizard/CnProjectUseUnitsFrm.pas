@@ -387,9 +387,6 @@ var
   // 有效、IsHFromSystem 只对 Cpp 文件有效
   function JoinUsesOrInclude(FileHasUses: Boolean; IsHFromSystem: Boolean;
     const IncFile: string): string;
-  var
-    Indent: Integer;
-    Options: IOTAEditOptions;
   begin
     if FIsCppMode then
     begin
@@ -403,14 +400,8 @@ var
       if FileHasUses then
         Result := Format(', %s', [IncFile])
       else
-      begin
-        Options := CnOtaGetEditOptions;
-        if Options <> nil then
-          Indent := Options.BlockIndent
-        else
-          Indent := 2;
-        Result := Format(#13#10#13#10 + 'uses' + #13#10 + '%s%s;', [Spc(Indent), IncFile]);
-      end;
+        Result := Format(#13#10#13#10 + 'uses' + #13#10 + '%s%s;',
+          [Spc(CnOtaGetBlockIndent), IncFile]);
     end;
   end;
 
