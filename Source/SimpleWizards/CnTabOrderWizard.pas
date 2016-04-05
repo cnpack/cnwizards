@@ -103,6 +103,8 @@ type
     cbInvert: TCheckBox;
     cbGroup: TCheckBox;
     btnShortCut: TButton;
+    imgVF: TImage;
+    imgHF: TImage;
     procedure cbDispTabOrderClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure btnFontClick(Sender: TObject);

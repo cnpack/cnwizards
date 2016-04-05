@@ -23,7 +23,7 @@
 Delphi/C++Builder。當 IDE 當前編輯物件為表單編輯器時，該工具可用。繪製時會根據控制項的嵌套層數不同而採用不同的標籤顏色。當控制項的 TabStop 值為 False 的時候，使用虛線繪製標籤邊框，以表示 Tab 鍵不停留。</p>
 <p class="text" align="left"> 專家菜單如圖所示：</p>
   <p align="center">
-  <img src="TabOrder.png"> </p>
+  <img src="taborder.png"> </p>
 <ul>
 <li><p class="text"><b>已選擇的控制項：</b>對當前選擇的控制項進行處理
 ，如果當前選擇的控制項為容器控制項，則處理容器控制項的所有子控制項，否則處理選擇控制項同級的所有控制項。</p></li>
@@ -36,13 +36,13 @@ Delphi/C++Builder。當 IDE 當前編輯物件為表單編輯器時，該工具可用。繪製時會根據控
 </ul>
   <p class="text" align="left">下圖顯示了一個正在設計期並使用 Tab Order 專家設置後的表單：</p>
 <p class="text" align="center">
-<img src="TabOrderDemo.png"></p>
+<img src="taborderdemo.png"></p>
   <p class="text" align="left"> </p>
   <p class="title">　</p>
   <p class="title">參數設置</p>
   <p class="text">Tab Order 專家的設置介面如下圖所示：</p>
   <p align="center">
-    <img src="TabOrderSetup.png"></p>
+    <img src="tabordersetup.png"></p>
   <p class="text" align="left"></p>
 <ul>
 <li><p class="text"><b>排序方式</b></p>
@@ -54,8 +54,8 @@ Delphi/C++Builder。當 IDE 當前編輯物件為表單編輯器時，該工具可用。繪製時會根據控
 </ul></li>
 <li><p class="text"><b>附加處理</b></p>
 <ul>
-<li><p class="text"><b>反向排序</b>：設置 Tab Order
-時使用反方向排列，即從下到上（垂直方向為主）或從右到左（水準方向為主）。</p></li>
+<li><p class="text"><b>反向排序</b>：設置 Tab Order 
+時使用反方向排列，即從下到上（先垂直再水平）或從右到左（先水平再垂直）。</p></li>
 <li><p class="text"><b>組件分組處理</b>：如果選擇分組處理，專家在排序控制項時會將高、寬相同且位置鄰近的控制項作為一組來處理，保證其
 Tab Order 連續。</p></li>
 </ul></li>

@@ -23,7 +23,7 @@
 Delphi/C++Builder。当 IDE 当前编辑对象为窗体编辑器时，该工具可用。绘制时会根据控件的嵌套层数不同而采用不同的标签颜色。当控件的 TabStop 值为 False 的时候，使用虚线绘制标签边框，以表示 Tab 键不停留。</p>
 <p class="text" align="left"> 专家菜单如图所示：</p>
   <p align="center">
-  <img src="TabOrder.png"></p>
+  <img src="taborder.png"></p>
 <ul>
 <li><p class="text"><b>已选择的控件：</b>对当前选择的控件进行处理
 ，如果当前选择的控件为容器控件，则处理容器控件的所有子控件，否则处理选择控件同级的所有控件。</p></li>
@@ -36,13 +36,13 @@ Delphi/C++Builder。当 IDE 当前编辑对象为窗体编辑器时，该工具可用。绘制时会根据控
 </ul>
   <p class="text" align="left">下图显示了一个正在设计期并使用 Tab Order 专家设置后的窗体：</p>
 <p class="text" align="center">
-<img src="TabOrderDemo.png"></p>
+<img src="taborderdemo.png"></p>
   <p class="text" align="left"> </p>
   <p class="title">　</p>
   <p class="title">参数设置</p>
   <p class="text">Tab Order 专家的设置界面如下图所示：</p>
   <p align="center">
-    <img src="TabOrderSetup.png"></p>
+    <img src="tabordersetup.png"></p>
   <p class="text" align="left"></p>
 <ul>  
 <li><p class="text"><b>排序方式</b></p>
@@ -55,7 +55,7 @@ Delphi/C++Builder。当 IDE 当前编辑对象为窗体编辑器时，该工具可用。绘制时会根据控
 <li><p class="text"><b>附加处理</b></p>
 <ul>
 <li><p class="text"><b>反向排序</b>：设置 Tab Order 
-时使用反方向排列，即从下到上（垂直方向为主）或从右到左（水平方向为主）。</p></li>
+时使用反方向排列，即从下到上（先垂直再水平）或从右到左（先水平再垂直）。</p></li>
 <li><p class="text"><b>组件分组处理</b>：如果选择分组处理，专家在排序控件时会将高、宽相同且位置邻近的控件作为一组来处理，保证其 
 Tab Order 连续。</p></li>
 </ul></li>
