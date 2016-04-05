@@ -2227,10 +2227,10 @@ begin
 {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
     SetOrdProp(FPalTab, SCnNewPaletteTabIndexPropName, Value);
 {$ELSE}
-    (FPalTab as TTabControl).TabIndex := Value;     
-{$ENDIF}
+    (FPalTab as TTabControl).TabIndex := Value;
     if Assigned((FPalTab as TTabControl).OnChange) then
       (FPalTab as TTabControl).OnChange(FPalTab);
+{$ENDIF}
   end;
 end;
 
