@@ -393,6 +393,9 @@ type
     FPalette: TWinControl; // 低版本指大的 TabControl 内的组件容器，高版本指下半部分的组件容器
     FPageScroller: TWinControl;
     FUpdateCount: Integer;
+{$IFDEF COMPILER6_UP}
+    FOldRootClass: TClass;
+{$ENDIF}
 {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
     function ParseNameFromHint(const Hint: string): string;
 {$ENDIF}
@@ -411,6 +414,11 @@ type
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
     function GetTabs(Index: Integer): string;
+{$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
+    procedure GetComponentImageFromNewPalette(Bmp: TBitmap; const AComponentClassName: string);
+{$ELSE}
+    procedure GetComponentImageFromOldPalette(Bmp: TBitmap; const AComponentClassName: string);
+{$ENDIF}
   public
     constructor Create;
 
@@ -422,6 +430,8 @@ type
     {* 根据类名选中控件板中的某控件，返回是否成功 }
     function FindTab(const ATab: string): Integer;
     {* 查找某页面的索引 }
+    procedure GetComponentImage(Bmp: TBitmap; const AComponentClassName: string);
+    {* 将控件板上指定的组件名的图标绘制到 Bmp 中，Bmp 推荐尺寸为 26 * 26}
     property SelectedIndex: Integer read GetSelectedIndex write SetSelectedIndex;
     {* 按下的控件在本页的序号，0 开头，支持高版本的新控件板 }
     property SelectedToolName: string read GetSelectedToolName;
@@ -429,7 +439,7 @@ type
     property Selector: TSpeedButton read GetSelector;
     {* 获得用来切换到鼠标光标的 SpeedButton，低版本在组件区内，高版本在 Tab 头中 }
     property PalToolCount: Integer read GetPalToolCount;
-    {* 当前页控件个数 }
+    {* 当前页控件个数，支持高版本的新控件板 }
     property ActiveTab: string read GetActiveTab;
     {* 当前页标题，支持高版本的新控件板 }
     property TabIndex: Integer read GetTabIndex write SetTabIndex;
@@ -1937,6 +1947,75 @@ begin
 {$ENDIF}
   end;
 end;
+procedure TCnPaletteWrapper.GetComponentImage(Bmp: TBitmap;
+  const AComponentClassName: string);
+begin
+{$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
+  GetComponentImageFromNewPalette(Bmp, AComponentClassName);
+{$ELSE}
+  GetComponentImageFromOldPalette(Bmp, AComponentClassName);
+{$ENDIF}
+end;
+
+{$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
+
+procedure TCnPaletteWrapper.GetComponentImageFromNewPalette(Bmp: TBitmap;
+  const AComponentClassName: string);
+begin
+
+end;
+
+{$ELSE}
+
+procedure TCnPaletteWrapper.GetComponentImageFromOldPalette(Bmp: TBitmap;
+  const AComponentClassName: string);
+var
+  AClass: TComponentClass;
+{$IFDEF COMPILER6_UP}
+  FormEditor: IOTAFormEditor;
+  Root: TPersistent;
+  PalItem: IPaletteItem;
+  PalItemPaint: IPalettePaint;
+{$ENDIF}
+begin
+  if (Bmp = nil) or (AComponentClassName = '') then
+    Exit;
+  try
+{$IFDEF COMPILER6_UP}
+    FormEditor := CnOtaGetCurrentFormEditor;
+    if Assigned(FormEditor) and (FormEditor.GetSelComponent(0) <> nil) then
+    begin
+      Root := TPersistent(FormEditor.GetSelComponent(0).GetComponentHandle);
+      if (Root <> nil) and not ObjectIsInheritedFromClass(Root, 'TDataModule') then
+      begin
+        // 只处理 CLX 和 VCL 设计期窗体变化的情况，转变 CLX/VCL 后，无需恢复
+        if FOldRootClass <> Root.ClassType then
+        begin
+          ActivateClassGroup(TPersistentClass(Root.ClassType));
+          FOldRootClass := Root.ClassType;
+        end;
+      end;
+    end;
+{$ENDIF}
+
+    AClass := TComponentClass(GetClass(AComponentClassName));
+    if AClass <> nil then
+    begin
+      Bmp.Canvas.FillRect(Bounds(0, 0, Bmp.Width, Bmp.Height));
+{$IFDEF COMPILER6_UP}
+      PalItem := ComponentDesigner.ActiveDesigner.Environment.GetPaletteItem(AClass) as IPaletteItem;
+      if Supports(PalItem, IPalettePaint, PalItemPaint) then
+        PalItemPaint.Paint(Bmp.Canvas, 0, 0);
+{$ELSE}
+      DelphiIDE.GetPaletteItem(TComponentClass(AClass)).Paint(Bmp.Canvas, -1, -1);
+{$ENDIF}
+    end;
+  except
+    ;
+  end;
+end;
+
+{$ENDIF}
 
 function TCnPaletteWrapper.GetEnabled: Boolean;
 begin
@@ -1960,6 +2039,17 @@ var
   I: Integer;
 begin
   Result := -1;
+{$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
+  if FPalette <> nil then
+  begin
+    for I := 0 to FPalette.ControlCount - 1 do
+    begin
+      if (FPalette.Controls[I] is TSpeedButton) and
+        FPalette.Controls[I].ClassNameIs(SCnNewPaletteButtonClassName) then
+        Inc(Result);
+    end;
+  end;
+{$ELSE}
   try
     if FPalette <> nil then
       Result := GetPropValue(FPalette, SCnPalettePropPalToolCount)
@@ -1970,6 +2060,7 @@ begin
         if Self.FPageScroller.Controls[I] is TSpeedButton then
           Inc(Result);
   end;
+{$ENDIF}
 end;
 
 function TCnPaletteWrapper.GetSelectedIndex: Integer;

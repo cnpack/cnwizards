@@ -49,8 +49,16 @@ type
     btnSetTab: TButton;
     lstTabs: TListBox;
     bvl1: TBevel;
+    edtFind: TEdit;
+    btnFindTab: TButton;
+    btnShowComp: TButton;
+    btnShowComps: TButton;
+    lstComps: TListBox;
     procedure btnShowTabsClick(Sender: TObject);
     procedure btnSetTabClick(Sender: TObject);
+    procedure btnFindTabClick(Sender: TObject);
+    procedure btnShowCompClick(Sender: TObject);
+    procedure btnShowCompsClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -85,7 +93,7 @@ type
 implementation
 
 uses
-  CnWizIdeUtils;
+  CnWizIdeUtils, CnDebug;
 
 {$R *.DFM}
 
@@ -169,6 +177,52 @@ procedure TTestPaletteForm.btnSetTabClick(Sender: TObject);
 begin
   CnPaletteWrapper.TabIndex := lstTabs.ItemIndex;
   InfoDlg('Set Tab Index to ' + IntToStr(lstTabs.ItemIndex));
+end;
+
+procedure TTestPaletteForm.btnFindTabClick(Sender: TObject);
+var
+  Idx: Integer;
+begin
+  Idx := CnPaletteWrapper.FindTab(edtFind.Text);
+  if Idx < 0 then
+    InfoDlg(edtFind.Text + ' Tab NOT Found.')
+  else
+    InfoDlg(edtFind.Text + ' Tab Found at Index ' + IntToStr(Idx));
+end;
+
+procedure TTestPaletteForm.btnShowCompClick(Sender: TObject);
+var
+  Bmp: TBitmap;
+begin
+  InfoDlg(Format('%s at %d.', [CnPaletteWrapper.SelectedToolName,
+    CnPaletteWrapper.SelectedIndex]));
+
+  if CnPaletteWrapper.SelectedToolName = '' then
+    Exit;
+
+  Bmp := TBitmap.Create;
+  try
+    Bmp.Width := 26;
+    Bmp.Height := 26;
+    Bmp.Canvas.Brush.Color := clBtnFace;
+
+    CnPaletteWrapper.GetComponentImage(Bmp, CnPaletteWrapper.SelectedToolName);
+    CnDebugger.EvaluateObject(Bmp, True);
+  finally
+    Bmp.Free;
+  end;
+end;
+
+procedure TTestPaletteForm.btnShowCompsClick(Sender: TObject);
+var
+  I: Integer;
+begin
+  lstComps.Clear;
+  for I := 0 to CnPaletteWrapper.PalToolCount - 1 do
+  begin
+    CnPaletteWrapper.SelectedIndex := I;
+    lstComps.Items.Add(CnPaletteWrapper.SelectedToolName);
+  end;
 end;
 
 initialization

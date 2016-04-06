@@ -264,6 +264,7 @@ var
     {$IFDEF COMPILER7_UP} const {$ENDIF} ComponentClasses: array of TComponentClass) = nil;
 
   ComponentTabListMap: TStringList = nil;
+  {* 内部每一行存储的是 ComponentClassName=Page，Object 是 TCnIdeCompType 值}
 
 procedure CnCompRegisterComponents(const Page: string;
   {$IFDEF COMPILER7_UP} const {$ENDIF} ComponentClasses: array of TComponentClass);

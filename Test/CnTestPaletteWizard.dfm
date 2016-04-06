@@ -1,8 +1,8 @@
 object TestPaletteForm: TTestPaletteForm
-  Left = 349
-  Top = 287
-  Width = 513
-  Height = 331
+  Left = 412
+  Top = 223
+  Width = 539
+  Height = 363
   Caption = 'Test Palette Wrapper'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -17,7 +17,7 @@ object TestPaletteForm: TTestPaletteForm
     Left = 216
     Top = 16
     Width = 17
-    Height = 265
+    Height = 305
     Shape = bsLeftLine
   end
   object btnShowTabs: TButton
@@ -45,5 +45,48 @@ object TestPaletteForm: TTestPaletteForm
     Height = 225
     ItemHeight = 13
     TabOrder = 2
+  end
+  object edtFind: TEdit
+    Left = 16
+    Top = 296
+    Width = 89
+    Height = 21
+    TabOrder = 3
+    Text = 'Win32'
+  end
+  object btnFindTab: TButton
+    Left = 120
+    Top = 296
+    Width = 75
+    Height = 25
+    Caption = 'Find Tab'
+    TabOrder = 4
+    OnClick = btnFindTabClick
+  end
+  object btnShowComp: TButton
+    Left = 360
+    Top = 16
+    Width = 145
+    Height = 25
+    Caption = 'Show Selected Component'
+    TabOrder = 5
+    OnClick = btnShowCompClick
+  end
+  object btnShowComps: TButton
+    Left = 240
+    Top = 16
+    Width = 105
+    Height = 25
+    Caption = 'Show Components'
+    TabOrder = 6
+    OnClick = btnShowCompsClick
+  end
+  object lstComps: TListBox
+    Left = 240
+    Top = 56
+    Width = 177
+    Height = 225
+    ItemHeight = 13
+    TabOrder = 7
   end
 end
