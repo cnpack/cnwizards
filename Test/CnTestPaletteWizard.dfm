@@ -1,9 +1,10 @@
 object TestPaletteForm: TTestPaletteForm
   Left = 412
   Top = 223
-  Width = 539
-  Height = 363
+  BorderStyle = bsDialog
   Caption = 'Test Palette Wrapper'
+  ClientHeight = 336
+  ClientWidth = 523
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -11,6 +12,7 @@ object TestPaletteForm: TTestPaletteForm
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
+  Position = poScreenCenter
   PixelsPerInch = 96
   TextHeight = 13
   object bvl1: TBevel

@@ -194,8 +194,11 @@ procedure TTestPaletteForm.btnShowCompClick(Sender: TObject);
 var
   Bmp: TBitmap;
 begin
-  InfoDlg(Format('%s at %d.', [CnPaletteWrapper.SelectedToolName,
-    CnPaletteWrapper.SelectedIndex]));
+  if CnPaletteWrapper.SelectedIndex < 0 then
+    ErrorDlg('No Component Selected.')
+  else
+    InfoDlg(Format('Selected %s at %d.', [CnPaletteWrapper.SelectedToolName,
+      CnPaletteWrapper.SelectedIndex]));
 
   if CnPaletteWrapper.SelectedToolName = '' then
     Exit;

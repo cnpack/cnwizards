@@ -1961,8 +1961,34 @@ end;
 
 procedure TCnPaletteWrapper.GetComponentImageFromNewPalette(Bmp: TBitmap;
   const AComponentClassName: string);
+var
+  I, J: Integer;
+  S: string;
 begin
-
+  if (Bmp = nil) or (AComponentClassName = '') then
+    Exit;
+  try
+    BeginUpdate;
+    for I := 0 to TabCount - 1 do
+    begin
+      TabIndex := I;
+      for J := 0 to FPalette.ControlCount - 1 do
+      begin
+        if (FPalette.Controls[J] is TSpeedButton) and
+          FPalette.Controls[J].ClassNameIs(SCnNewPaletteButtonClassName) then
+        begin
+          S := ParseNameFromHint((FPalette.Controls[J] as TSpeedButton).Hint);
+          if S = AComponentClassName then
+          begin
+            GetControlBitmap(FPalette.Controls[J], Bmp);
+            Exit;
+          end;
+        end;
+      end;
+    end;
+  finally
+    EndUpdate;
+  end;
 end;
 
 {$ELSE}
@@ -1980,6 +2006,7 @@ var
 begin
   if (Bmp = nil) or (AComponentClassName = '') then
     Exit;
+
   try
 {$IFDEF COMPILER6_UP}
     FormEditor := CnOtaGetCurrentFormEditor;
