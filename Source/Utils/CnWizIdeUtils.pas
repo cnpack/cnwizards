@@ -381,6 +381,8 @@ type
 
 type
 
+{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+
 { TCnPaletteWrapper }
 
   TCnPaletteWrapper = class(TObject)
@@ -456,6 +458,10 @@ type
     {* 控件板是否使能，支持高版本的新控件板 }
   end;
 
+function CnPaletteWrapper: TCnPaletteWrapper;
+
+{$ENDIF}
+
 {TCnMessageViewWrapper}
 
   TCnMessageViewWrapper = class(TObject)
@@ -509,8 +515,6 @@ type
     property EditMenuItem: TMenuItem read FEditMenuItem;
     {* '编辑'菜单项}
   end;
-
-function CnPaletteWrapper: TCnPaletteWrapper;
 
 function CnMessageViewWrapper: TCnMessageViewWrapper;
 
@@ -1850,15 +1854,19 @@ begin
     inherited;
 end;
 
+var
+  FCnMessageViewWrapper: TCnMessageViewWrapper = nil;
+
 //==============================================================================
 // 组件面板封装类
 //==============================================================================
+
+{$IFDEF SUPPORTS_PALETTE_ENHANCE}
 
 { TCnPaletteWrapper }
 
 var
   FCnPaletteWrapper: TCnPaletteWrapper = nil;
-  FCnMessageViewWrapper: TCnMessageViewWrapper = nil;
 
 function CnPaletteWrapper: TCnPaletteWrapper;
 begin
@@ -2358,6 +2366,8 @@ begin
     FPalTab.Visible := Value;
 end;
 
+{$ENDIF}
+
 { TCnMessageViewWrapper }
 
 function CnMessageViewWrapper: TCnMessageViewWrapper;
@@ -2497,8 +2507,10 @@ finalization
   CnDebugger.LogEnter('CnWizIdeUtils finalization.');
 {$ENDIF}
 
+{$IFDEF SUPPORTS_PALETTE_ENHANCE}
   if FCnPaletteWrapper <> nil then
     FreeAndNil(FCnPaletteWrapper);
+{$ENDIF}
 
   if FCnMessageViewWrapper <> nil then
     FreeAndNil(FCnMessageViewWrapper);

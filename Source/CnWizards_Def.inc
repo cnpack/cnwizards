@@ -24,3 +24,12 @@
     {$ENDIF}
   {$ENDIF}
 {$ENDIF}
+
+{$IFDEF BDS2010_UP}
+  {$DEFINE SUPPORTS_PALETTE_ENHANCE}     // CnPack Supports 2010 New Style Component Palette Enhancement
+{$ELSE}
+  {$IFNDEF COMPILER8_UP}
+    {$DEFINE SUPPORTS_PALETTE_ENHANCE}   // CnPack Supports 7 old Style Component Palette Enhancement
+  {$ENDIF}
+{$ENDIF}
+

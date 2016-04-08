@@ -2812,9 +2812,14 @@ end;
 { FieldDecl -> IdentList ':' Type }
 procedure TCnBasePascalFormatter.FormatFieldDecl(PreSpaceCount: Byte);
 begin
-  FormatIdentList(PreSpaceCount);
-  Match(tokColon);
-  FormatType(PreSpaceCount);
+  SpecifyElementType(pfetFieldDecl);
+  try
+    FormatIdentList(PreSpaceCount);
+    Match(tokColon);
+    FormatType(PreSpaceCount);
+  finally
+    RestoreElementType;
+  end;
 end;
 
 { FieldList ->  FieldDecl/';'... [VariantSection] [';'] }
@@ -5041,21 +5046,26 @@ end;
 
 procedure TCnBasePascalFormatter.FormatClassField(PreSpaceCount: Byte);
 begin
-  FormatClassVarIdentList(PreSpaceCount);
-  Match(tokColon);
-  FormatType(PreSpaceCount);
-
-  while Scaner.Token = tokSemicolon do
-  begin
-    Match(Scaner.Token);
-
-    if Scaner.Token <> tokSymbol then Exit;
-
-    Writeln;
-
+  SpecifyElementType(pfetClassField);
+  try
     FormatClassVarIdentList(PreSpaceCount);
     Match(tokColon);
     FormatType(PreSpaceCount);
+
+    while Scaner.Token = tokSemicolon do
+    begin
+      Match(Scaner.Token);
+
+      if Scaner.Token <> tokSymbol then Exit;
+
+      Writeln;
+
+      FormatClassVarIdentList(PreSpaceCount);
+      Match(tokColon);
+      FormatType(PreSpaceCount);
+    end;
+  finally
+    RestoreElementType;
   end;
 end;
 
@@ -5557,7 +5567,7 @@ end;
 function TCnAbstractCodeFormatter.CalcNeedPadding: Boolean;
 begin
   Result := (FElementType in [pfetExpression, pfetEnumList,pfetArrayConstant,
-    pfetSetConstructor, pfetFormalParameters, pfetUsesList,
+    pfetSetConstructor, pfetFormalParameters, pfetUsesList, pfetFieldDecl, pfetClassField,
     pfetThen, pfetDo, pfetExprListRightBracket, pfetFormalParametersRightBracket])
     or ((FElementType in [pfetConstExpr]) and not UpperContainElementType([pfetCaseLabel])) // Case Label 的无需跟随上面一行注释缩进
     or UpperContainElementType([pfetFormalParameters, pfetArrayConstant]);
@@ -5569,7 +5579,8 @@ end;
 
 function TCnAbstractCodeFormatter.CalcNeedPaddingAndUnIndent: Boolean;
 begin
-  Result := FElementType in [pfetExprListRightBracket, pfetFormalParametersRightBracket];
+  Result := FElementType in [pfetExprListRightBracket, pfetFormalParametersRightBracket,
+    pfetFieldDecl, pfetClassField];
   // 在 CalcNeedPadding 为 True 的前提下，以上要反缩进
 end;
 
