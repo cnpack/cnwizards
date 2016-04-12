@@ -334,7 +334,7 @@ begin
     end
     else
       s := csUnInstallFail;
-    MessageBox(0, PChar(s), PChar(csHintStr), MB_OK + MB_ICONINFORMATION);
+    MessageBox(0, PChar(s), PChar(csHintStr), MB_OK + MB_ICONWARNING);
   end;
 end;
 
