@@ -255,10 +255,14 @@ begin
 
   CL.AddTypeS('TFormType', '( ftBinary, ftText, ftUnknown )');
   CL.AddTypeS('TCnCharSet', 'set of Char');
-  CL.AddDelphiFunction('Function CnIntToObject(AInt: Integer): TObject');
-  CL.AddDelphiFunction('Function CnObjectToInt(AObject: TObject): Integer');
-  CL.AddDelphiFunction('Function CnIntToInterface(AInt: Integer): IUnknown');
-  CL.AddDelphiFunction('Function CnInterfaceToInt(Intf: IUnknown): Integer');
+  CL.AddDelphiFunction('Function CnIntToObject(AInt : Integer) : TObject');
+  CL.AddDelphiFunction('Function CnObjectToInt(AObject : TObject) : Integer');
+  CL.AddDelphiFunction('Function CnIntToInterface(AInt : Integer) : IUnknown');
+  CL.AddDelphiFunction('Function CnInterfaceToInt(Intf : IUnknown) : Integer');
+  CL.AddDelphiFunction('Function CnGetClassFromClassName(const AClassName : string) : Integer');
+  CL.AddDelphiFunction('Function CnGetClassFromObject(AObject : TObject) : Integer');
+  CL.AddDelphiFunction('Function CnGetClassNameFromClass(AClass : Integer) : string');
+  CL.AddDelphiFunction('Function CnGetClassParentFromClass(AClass : Integer) : Integer');
   CL.AddDelphiFunction('Function CnWizLoadIcon( AIcon : TIcon; const ResName : string) : Boolean');
   CL.AddDelphiFunction('Function CnWizLoadBitmap( ABitmap : TBitmap; const ResName : string) : Boolean');
   CL.AddDelphiFunction('Function AddIconToImageList( AIcon : TIcon; ImageList : TCustomImageList) : Integer');
@@ -514,6 +518,10 @@ begin
   S.RegisterDelphiFunction(@CnObjectToInt, 'CnObjectToInt', cdRegister);
   S.RegisterDelphiFunction(@CnIntToInterface, 'CnIntToInterface', cdRegister);
   S.RegisterDelphiFunction(@CnInterfaceToInt, 'CnInterfaceToInt', cdRegister);
+  S.RegisterDelphiFunction(@CnGetClassFromClassName, 'CnGetClassFromClassName', cdRegister);
+  S.RegisterDelphiFunction(@CnGetClassFromObject, 'CnGetClassFromObject', cdRegister);
+  S.RegisterDelphiFunction(@CnGetClassNameFromClass, 'CnGetClassNameFromClass', cdRegister);
+  S.RegisterDelphiFunction(@CnGetClassParentFromClass, 'CnGetClassParentFromClass', cdRegister);
   S.RegisterDelphiFunction(@CnWizLoadIcon, 'CnWizLoadIcon', cdRegister);
   S.RegisterDelphiFunction(@CnWizLoadBitmap, 'CnWizLoadBitmap', cdRegister);
   S.RegisterDelphiFunction(@AddIconToImageList, 'AddIconToImageList', cdRegister);

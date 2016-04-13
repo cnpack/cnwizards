@@ -262,6 +262,21 @@ type
 
 function CnIntToObject(AInt: Integer): TObject;
 {* 供 Pascal Script 使用的将整型值转换成 TObject 的函数}
+function CnObjectToInt(AObject: TObject): Integer;
+{* 供 Pascal Script 使用的将 TObject 转换成整型值的函数}
+function CnIntToInterface(AInt: Integer): IUnknown;
+{* 供 Pascal Script 使用的将整型值转换成 TObject 的函数}
+function CnInterfaceToInt(Intf: IUnknown): Integer;
+{* 供 Pascal Script 使用的将 TObject 转换成整型值的函数}
+function CnGetClassFromClassName(const AClassName: string): Integer;
+{* 供 Pascal Script 使用的从类名获取类信息并转换成整型值的函数}
+function CnGetClassFromObject(AObject: TObject): Integer;
+{* 供 Pascal Script 使用的从对象获取类信息并转换成整型值的函数}
+function CnGetClassNameFromClass(AClass: Integer): string;
+{* 供 Pascal Script 使用的从整型的类信息获取类名的函数}
+function CnGetClassParentFromClass(AClass: Integer): Integer;
+{* 供 Pascal Script 使用的从整型的类信息获取父类信息的函数}
+
 function CnWizLoadIcon(AIcon: TIcon; const ResName: string): Boolean;
 {* 从资源或文件中装载图标，执行时先从图标目录中查找，如果失败再从资源中查找，
    返回结果为图标装载成功标志。参数 ResName 请不要带 .ico 扩展名}
@@ -867,6 +882,34 @@ implementation
 {$WARNINGS OFF}
 
 function CnIntToObject(AInt: Integer): TObject;
+begin
+end;
+
+function CnObjectToInt(AObject: TObject): Integer;
+begin
+end;
+
+function CnIntToInterface(AInt: Integer): IUnknown;
+begin
+end;
+
+function CnInterfaceToInt(Intf: IUnknown): Integer;
+begin
+end;
+
+function CnGetClassFromClassName(const AClassName: string): Integer;
+begin
+end;
+
+function CnGetClassFromObject(AObject: TObject): Integer;
+begin
+end;
+
+function CnGetClassNameFromClass(AClass: Integer): string;
+begin
+end;
+
+function CnGetClassParentFromClass(AClass: Integer): Integer;
 begin
 end;
 

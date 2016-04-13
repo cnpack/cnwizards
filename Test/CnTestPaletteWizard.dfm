@@ -91,4 +91,21 @@ object TestPaletteForm: TTestPaletteForm
     ItemHeight = 13
     TabOrder = 7
   end
+  object edtSelComp: TEdit
+    Left = 240
+    Top = 296
+    Width = 121
+    Height = 21
+    TabOrder = 8
+    Text = 'TActionList'
+  end
+  object btnSelectComp: TButton
+    Left = 376
+    Top = 296
+    Width = 105
+    Height = 25
+    Caption = 'Select Component'
+    TabOrder = 9
+    OnClick = btnSelectCompClick
+  end
 end

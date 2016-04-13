@@ -54,11 +54,14 @@ type
     btnShowComp: TButton;
     btnShowComps: TButton;
     lstComps: TListBox;
+    edtSelComp: TEdit;
+    btnSelectComp: TButton;
     procedure btnShowTabsClick(Sender: TObject);
     procedure btnSetTabClick(Sender: TObject);
     procedure btnFindTabClick(Sender: TObject);
     procedure btnShowCompClick(Sender: TObject);
     procedure btnShowCompsClick(Sender: TObject);
+    procedure btnSelectCompClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -226,6 +229,11 @@ begin
     CnPaletteWrapper.SelectedIndex := I;
     lstComps.Items.Add(CnPaletteWrapper.SelectedToolName);
   end;
+end;
+
+procedure TTestPaletteForm.btnSelectCompClick(Sender: TObject);
+begin
+  CnPaletteWrapper.SelectComponent(edtSelComp.Text, '');
 end;
 
 initialization

@@ -259,7 +259,10 @@ function GetComponentPaletteTabControl: TTabControl;
 {* 返回组件面板对象，可能为空，只支持 2010 以下版本}
 
 function GetNewComponentPaletteTabControl: TWinControl;
-{* 返回 2010 或以上的新组件面板对象，可能为空}
+{* 返回 2010 或以上的新组件面板上半部分 Tab 对象，可能为空}
+
+function GetNewComponentPaletteComponentPanel: TWinControl;
+{* 返回 2010 或以上的新组件面板下半部分容纳组件列表的容器对象，可能为空}
 
 function GetObjectInspectorForm: TCustomForm;
 {* 返回对象检查器窗体，可能为空}
@@ -381,8 +384,6 @@ type
 
 type
 
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
-
 { TCnPaletteWrapper }
 
   TCnPaletteWrapper = class(TObject)
@@ -416,10 +417,12 @@ type
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
     function GetTabs(Index: Integer): string;
-{$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
+{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+  {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
     procedure GetComponentImageFromNewPalette(Bmp: TBitmap; const AComponentClassName: string);
-{$ELSE}
+  {$ELSE}
     procedure GetComponentImageFromOldPalette(Bmp: TBitmap; const AComponentClassName: string);
+  {$ENDIF}
 {$ENDIF}
   public
     constructor Create;
@@ -457,10 +460,6 @@ type
     property Enabled: Boolean read GetEnabled write SetEnabled;
     {* 控件板是否使能，支持高版本的新控件板 }
   end;
-
-function CnPaletteWrapper: TCnPaletteWrapper;
-
-{$ENDIF}
 
 {TCnMessageViewWrapper}
 
@@ -515,6 +514,8 @@ function CnPaletteWrapper: TCnPaletteWrapper;
     property EditMenuItem: TMenuItem read FEditMenuItem;
     {* '编辑'菜单项}
   end;
+
+function CnPaletteWrapper: TCnPaletteWrapper;
 
 function CnMessageViewWrapper: TCnMessageViewWrapper;
 
@@ -1007,7 +1008,7 @@ begin
   Result := Application.FindComponent('AppBuilder') as TCustomForm;
 {$IFDEF DEBUG}
   if Result = nil then
-    CnDebugger.LogMsg('Unable to find AppBuilder!');
+    CnDebugger.LogMsgError('Unable to Find AppBuilder!');
 {$ENDIF}
 end;
 
@@ -1042,11 +1043,11 @@ begin
 
 {$IFDEF DEBUG}
   if Result = nil then
-    CnDebugger.LogMsg('Unable to Find ComponentPalette TabControl!');
+    CnDebugger.LogMsgError('Unable to Find ComponentPalette TabControl!');
 {$ENDIF}
 end;
 
-// 返回 2010 或以上的组件面板对象，可能为空
+// 返回 2010 或以上的新组件面板上半部分 Tab 对象，可能为空
 function GetNewComponentPaletteTabControl: TWinControl;
 var
   MainForm: TCustomForm;
@@ -1061,7 +1062,26 @@ begin
 
 {$IFDEF DEBUG}
   if Result = nil then
-    CnDebugger.LogMsg('Unable to Find New ComponentPalette TabControl!');
+    CnDebugger.LogMsgError('Unable to Find New ComponentPalette TabControl!');
+{$ENDIF}
+end;
+
+// 返回 2010 或以上的新组件面板下半部分容纳组件列表的容器对象，可能为空
+function GetNewComponentPaletteComponentPanel: TWinControl;
+var
+  MainForm: TCustomForm;
+begin
+  Result := nil;
+
+  MainForm := GetIdeMainForm;
+  if MainForm <> nil then
+    Result := MainForm.FindComponent(SCnNewPaletteFrameName) as TWinControl;
+  if Result <> nil then
+    Result := Result.FindComponent(SCnNewPalettePanelContainerName) as TWinControl;
+
+{$IFDEF DEBUG}
+  if Result = nil then
+    CnDebugger.LogMsgError('Unable to Find New ComponentPalette Panel!');
 {$ENDIF}
 end;
 
@@ -1073,7 +1093,7 @@ begin
     Result := TCustomForm(Result.FindComponent('PropertyInspector'));
 {$IFDEF DEBUG}
   if Result = nil then
-    CnDebugger.LogMsg('Unable to find object inspector!');
+    CnDebugger.LogMsgError('Unable to Find Oject Inspector!');
 {$ENDIF}
 end;
 
@@ -1088,7 +1108,7 @@ begin
     Result := TPopupMenu(MainForm.FindComponent('PaletteMenu'));
 {$IFDEF DEBUG}
   if Result = nil then
-    CnDebugger.LogMsg('Unable to find PaletteMenu!');
+    CnDebugger.LogMsgError('Unable to Find PaletteMenu!');
 {$ENDIF}
 end;
 
@@ -1111,7 +1131,7 @@ begin
       
 {$IFDEF DEBUG}
   if Result = nil then
-    CnDebugger.LogMsg('Unable to find ControlBar!');
+    CnDebugger.LogMsgError('Unable to Find ControlBar!');
 {$ENDIF}
 end;
 
@@ -1861,8 +1881,6 @@ var
 // 组件面板封装类
 //==============================================================================
 
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
-
 { TCnPaletteWrapper }
 
 var
@@ -1870,9 +1888,13 @@ var
 
 function CnPaletteWrapper: TCnPaletteWrapper;
 begin
+{$IFDEF SUPPORTS_PALETTE_ENHANCE}
   if FCnPaletteWrapper = nil then
     FCnPaletteWrapper := TCnPaletteWrapper.Create;
   Result := FCnPaletteWrapper;
+{$ELSE}
+  raise Exception.Create('Palette NOT Support.');
+{$ENDIF}
 end;
 
 procedure TCnPaletteWrapper.BeginUpdate;
@@ -1955,15 +1977,20 @@ begin
 {$ENDIF}
   end;
 end;
+
 procedure TCnPaletteWrapper.GetComponentImage(Bmp: TBitmap;
   const AComponentClassName: string);
 begin
-{$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
+{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+  {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
   GetComponentImageFromNewPalette(Bmp, AComponentClassName);
-{$ELSE}
+  {$ELSE}
   GetComponentImageFromOldPalette(Bmp, AComponentClassName);
+  {$ENDIF}
 {$ENDIF}
 end;
+
+{$IFDEF SUPPORTS_PALETTE_ENHANCE}
 
 {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
 
@@ -2049,6 +2076,8 @@ begin
     ;
   end;
 end;
+
+{$ENDIF}
 
 {$ENDIF}
 
@@ -2271,6 +2300,32 @@ function TCnPaletteWrapper.SelectComponent(const AComponent,
   ATab: string): Boolean;
 var
   I, J, Idx: Integer;
+
+{$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
+  function SelectComponentInCurrentTab: Boolean;
+  var
+    K: Integer;
+    S: string;
+  begin
+    Result := False;
+    for K := 0 to FPalette.ControlCount - 1 do
+    begin
+      if (FPalette.Controls[K] is TSpeedButton) and
+        FPalette.Controls[K].ClassNameIs(SCnNewPaletteButtonClassName) then
+      begin
+        S := ParseNameFromHint((FPalette.Controls[K] as TSpeedButton).Hint);
+        if S = AComponent then
+        begin
+          if not (FPalette.Controls[K] as TSpeedButton).Down then
+            (FPalette.Controls[K] as TSpeedButton).Click;
+          Result := True;
+          Exit;
+        end;
+      end;
+    end;
+  end;
+{$ENDIF}
+
 begin
   Result := True;
   Idx := FindTab(ATab);
@@ -2284,25 +2339,37 @@ begin
     Exit;
   end
   else
-  for I := 0 to PalToolCount - 1 do
   begin
-    SelectedIndex := I;
-    if SelectedToolName = AComponent then
+{$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
+    if SelectComponentInCurrentTab then
       Exit;
+{$ELSE}
+    for I := 0 to PalToolCount - 1 do
+    begin
+      SelectedIndex := I;
+      if SelectedToolName = AComponent then
+        Exit;
+    end;
+{$ENDIF}
   end;
 
   // 该 Tab 内无此组件时，全盘搜索
   for I := 0 to TabCount - 1 do
   begin
     TabIndex := I;
+{$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
+    if SelectComponentInCurrentTab then
+      Exit;
+{$ELSE}
     for J := 0 to PalToolCount - 1 do
     begin
       SelectedIndex := J;
       if SelectedToolName = AComponent then
         Exit;
     end;
+{$ENDIF}
   end;
-  
+
   SelectedIndex := -1;
   Result := False;
 end;
@@ -2315,9 +2382,10 @@ end;
 
 procedure TCnPaletteWrapper.SetSelectedIndex(const Value: Integer);
 var
-  PropInfo: PPropInfo;
 {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
   I, Idx: Integer;
+{$ELSE}
+  PropInfo: PPropInfo;
 {$ENDIF}
 begin
   if FPalette <> nil then
@@ -2330,13 +2398,16 @@ begin
         FPalette.Controls[I].ClassNameIs(SCnNewPaletteButtonClassName) then
       begin
         Inc(Idx);
-        if Idx = Value then
+        if (Idx = Value) and not (FPalette.Controls[I] as TSpeedButton).Down then
         begin
-          (FPalette.Controls[I] as TSpeedButton).Down := True;
+          (FPalette.Controls[I] as TSpeedButton).Click;
           Exit;
         end
         else if (Value = -1) and (FPalette.Controls[I] as TSpeedButton).Down then
-          (FPalette.Controls[I] as TSpeedButton).Down := False;
+        begin
+          (FPalette.Controls[I] as TSpeedButton).Click;
+          Exit;
+        end;
       end;
     end;
 {$ELSE}
@@ -2365,8 +2436,6 @@ begin
   if FPalTab <> nil then
     FPalTab.Visible := Value;
 end;
-
-{$ENDIF}
 
 { TCnMessageViewWrapper }
 
@@ -2507,10 +2576,8 @@ finalization
   CnDebugger.LogEnter('CnWizIdeUtils finalization.');
 {$ENDIF}
 
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
   if FCnPaletteWrapper <> nil then
     FreeAndNil(FCnPaletteWrapper);
-{$ENDIF}
 
   if FCnMessageViewWrapper <> nil then
     FreeAndNil(FCnMessageViewWrapper);
