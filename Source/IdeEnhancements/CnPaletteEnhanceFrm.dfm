@@ -56,7 +56,9 @@ inherited CnPalEnhanceForm: TCnPalEnhanceForm
       Top = 96
       Width = 409
       Height = 17
-      Caption = 'Add "Search Component" Button in Pallete(Delphi 7 Below Only).'
+      Caption = 
+        'Add "Search Component" Button in Palette(Delphi 7 Below or 2010 ' +
+        'Above Only).'
       TabOrder = 4
       OnClick = UpdateControls
     end
