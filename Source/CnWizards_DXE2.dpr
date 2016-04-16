@@ -124,6 +124,7 @@ uses
   CnFlatToolbarConfigFrm in 'IdeEnhancements\CnFlatToolbarConfigFrm.pas' {CnFlatToolbarConfigForm},
   CnPaletteEnhancements in 'IdeEnhancements\CnPaletteEnhancements.pas',
   CnPaletteEnhanceFrm in 'IdeEnhancements\CnPaletteEnhanceFrm.pas' {CnPalEnhanceForm},
+  CnCompFilterFrm in 'IdeEnhancements\CnCompFilterFrm.pas' {CnCompFilterForm},
   CnCorPropWizard in 'CorProperty\CnCorPropWizard.pas',
   CnCorPropFrm in 'CorProperty\CnCorPropFrm.pas' {CnCorPropForm},
   CnCorPropCfgFrm in 'CorProperty\CnCorPropCfgFrm.pas' {CnCorPropCfgForm},

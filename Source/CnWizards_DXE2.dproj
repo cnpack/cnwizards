@@ -306,6 +306,9 @@
 			<DCCReference Include="IdeEnhancements\CnPaletteEnhanceFrm.pas">
 				<Form>CnPalEnhanceForm</Form>
 			</DCCReference>
+			<DCCReference Include="IdeEnhancements\CnCompFilterFrm.pas">
+				<Form>CnCompFilterForm</Form>
+			</DCCReference>
 			<DCCReference Include="CorProperty\CnCorPropWizard.pas"/>
 			<DCCReference Include="CorProperty\CnCorPropFrm.pas">
 				<Form>CnCorPropForm</Form>

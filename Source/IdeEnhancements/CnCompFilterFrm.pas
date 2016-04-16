@@ -63,7 +63,7 @@ type
   private
     FCompName: string;
     FTabName: string;
-    FUnitName: string;
+    FCompUnitName: string;
     FImgIndex: Integer;
     FInternalName: string;
     FCompType: TCnIdeCompType;
@@ -73,7 +73,7 @@ type
     property CompName: string read FCompName write FCompName;
     {* 用来显示的组件名，根据设置可能不带 T 前缀}
     property TabName: string read FTabName write FTabName;
-    property UnitName: string read FUnitName write FUnitName;
+    property CompUnitName: string read FCompUnitName write FCompUnitName;
     property ImgIndex: Integer read FImgIndex write FImgIndex;
     property CompType: TCnIdeCompType read FCompType write FCompType;
   end;
@@ -180,7 +180,9 @@ type
 {$IFDEF COMPILER6_UP}
     FOldDesignerType: string;
     FIsDataModule: Boolean;
-    FOldRootClass: TClass;    
+  {$IFNDEF IDE_HAS_NEW_COMPONENT_PALETTE}
+    FOldRootClass: TClass;
+  {$ENDIF}
 {$ENDIF}
 
     FShowPrefix: Boolean;
@@ -319,8 +321,6 @@ end;
 {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
 
 function TCnCompFilterForm.AddNewCompImage(const AComp: string): Integer;
-var
-  OldIdx, Idx: Integer;
 begin
   if FCompBmp = nil then
   begin
@@ -467,7 +467,7 @@ begin
 
             AClass := GetClass(Info.InternalName);
             if (AClass <> nil) and (PTypeInfo(AClass.ClassInfo).Kind = tkClass) then
-              Info.UnitName := GetTypeData(PTypeInfo(AClass.ClassInfo)).UnitName;
+              Info.CompUnitName := GetTypeData(PTypeInfo(AClass.ClassInfo)).UnitName;
 
             FCompList.AddObject(Info.CompName, Info);
           end;
@@ -504,7 +504,7 @@ begin
 
             AClass := GetClass(Info.InternalName);
             if (AClass <> nil) and (PTypeInfo(AClass.ClassInfo).Kind = tkClass) then
-              Info.UnitName := GetTypeData(PTypeInfo(AClass.ClassInfo)).UnitName;
+              Info.CompUnitName := GetTypeData(PTypeInfo(AClass.ClassInfo)).UnitName;
 
             FCompList.AddObject(Info.CompName, Info);
           end;

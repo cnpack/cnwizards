@@ -394,10 +394,14 @@ type
   private
     FPalTab: TWinControl;  // 低版本指大的 TabControl 容器，高版本指上半部分的 TGradientTabSet
     FPalette: TWinControl; // 低版本指大的 TabControl 内的组件容器，高版本指下半部分的组件容器
+{$IFNDEF IDE_HAS_NEW_COMPONENT_PALETTE}
     FPageScroller: TWinControl;
+{$ENDIF}
     FUpdateCount: Integer;
 {$IFDEF COMPILER6_UP}
+  {$IFNDEF IDE_HAS_NEW_COMPONENT_PALETTE}
     FOldRootClass: TClass;
+  {$ENDIF}
 {$ENDIF}
 {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
     function ParseNameFromHint(const Hint: string): string;
@@ -1908,8 +1912,10 @@ begin
 end;
 
 constructor TCnPaletteWrapper.Create;
+{$IFNDEF IDE_HAS_NEW_COMPONENT_PALETTE}
 var
   I, J: Integer;
+{$ENDIF}
 begin
 {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
   FPalTab := GetNewComponentPaletteTabControl;
@@ -2299,7 +2305,10 @@ end;
 function TCnPaletteWrapper.SelectComponent(const AComponent,
   ATab: string): Boolean;
 var
-  I, J, Idx: Integer;
+  I, Idx: Integer;
+{$IFNDEF IDE_HAS_NEW_COMPONENT_PALETTE}
+  J: Integer;
+{$ENDIF}
 
 {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
   function SelectComponentInCurrentTab: Boolean;
