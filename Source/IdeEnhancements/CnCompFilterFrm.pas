@@ -1185,7 +1185,7 @@ begin
     if lvComps.Selected.Data <> nil then
     begin
       Info := TCnIdeCompInfo(lvComps.Selected.Data);
-      FDetailStr := Format(SCnComponentDetailFmt, [Info.InternalName, Info.UnitName, Info.TabName]);
+      FDetailStr := Format(SCnComponentDetailFmt, [Info.InternalName, Info.CompUnitName, Info.TabName]);
 
       FClassNameList.Clear;
       AClass := GetClass(Info.InternalName);
