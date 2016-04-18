@@ -22,6 +22,7 @@
       cnwizards\Source\Utils\CnWizIdeUtils.pas 的 GetBDSUserDataDir 中，加入新的定义。
       cnwizards\Misc\CnIDEVersion.pas 加入新的版本判断。
       cnwizards\ThirdParty\GetIdeVersion.pas 加入新的版本判断。
+      cnwizards\Source\ThirdParty\DCU32\DCURecs.pas 2720行左右增加新版定义判断
 
   三、cnwizards\Source\ScriptWizard\CnScript_CnWizUtils.pas 以及 
       cnwizards\Bin\PSDeclEx\CnWizUtils.pas中照着 CnCompilerConst.pas 进行同样的改动。
