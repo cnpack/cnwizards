@@ -1165,6 +1165,9 @@ begin
     FSearchCompMenuItem.SetCaption(SCnSearchComponent);
 {$ENDIF}
 
+  if FSettingsMenuItem <> nil then
+    FSettingsMenuItem.SetCaption(SCnPalSettingsCaption);
+
 {$IFNDEF COMPILER8_UP}
   if FMultiLineMenuItem <> nil then
     FMultiLineMenuItem.SetCaption(SCnPaletteMultiLineMenuCaption);

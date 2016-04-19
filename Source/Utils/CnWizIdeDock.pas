@@ -418,7 +418,7 @@ begin
   else
   begin
 {$IFDEF DEBUG}
-    CnDebugger.LogMsgError('MultiLang Initialization Error. Use English Font as default.');
+    CnDebugger.LogMsgError('DockForm MultiLang Initialization Error. Use English Font as default.');
 {$ENDIF}
     // 因初始化失败而无语言条目，因原始窗体是英文，故设置为英文字体
     Font.Charset := DEFAULT_CHARSET;
