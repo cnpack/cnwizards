@@ -6,7 +6,6 @@ inherited CnInputHelperForm: TCnInputHelperForm
   ClientHeight = 522
   ClientWidth = 592
   KeyPreview = True
-  OldCreateOrder = True
   OnActivate = FormActivate
   OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
@@ -185,7 +184,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 99
           Width = 353
           Height = 17
-          Caption = 'Replace Code Insight when Later is Disabled.'
+          Caption = 'Replace Code Completion when Later is Disabled.'
           TabOrder = 5
           OnClick = chkDispOnIDECompDisabledClick
         end
@@ -210,7 +209,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 94
           Width = 153
           Height = 21
-          Caption = 'Disable Code Insight'
+          Caption = 'Disable Code Completion'
           TabOrder = 4
           OnClick = btnDisableCompletionClick
         end

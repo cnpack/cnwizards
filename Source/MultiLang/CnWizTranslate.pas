@@ -1214,7 +1214,7 @@ begin
   TranslateStr(SCnInputHelperSymbolKindError, 'SCnInputHelperSymbolKindError');
   TranslateStr(SCnInputHelperUserMacroCaption, 'SCnInputHelperUserMacroCaption');
   TranslateStr(SCnInputHelperUserMacroPrompt, 'SCnInputHelperUserMacroPrompt');
-  TranslateStr(SCnInputHelperDisableCodeInsightSucc, 'SCnInputHelperDisableCodeInsightSucc');
+  TranslateStr(SCnInputHelperDisableCodeCompletionSucc, 'SCnInputHelperDisableCodeCompletionSucc');
   TranslateStr(SCnKeywordDefault, 'SCnKeywordDefault');
   TranslateStr(SCnKeywordLower, 'SCnKeywordLower');
   TranslateStr(SCnKeywordUpper, 'SCnKeywordUpper');

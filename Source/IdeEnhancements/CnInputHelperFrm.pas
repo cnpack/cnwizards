@@ -835,12 +835,12 @@ const
 var
   Options: IOTAEnvironmentOptions;
 begin
-  Options := CnOtaGetEnvironmentOptions();
+  Options := CnOtaGetEnvironmentOptions;
   if Options = nil then
     Exit;
 
   Options.SetOptionValue(SCnCodeCompletionKey, 0);
-  InfoDlg(SCnInputHelperDisableCodeInsightSucc);
+  InfoDlg(SCnInputHelperDisableCodeCompletionSucc);
 end;
 
 {$ENDIF CNWIZARDS_CNINPUTHELPER}
