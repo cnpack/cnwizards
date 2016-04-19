@@ -6,6 +6,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
   ClientHeight = 522
   ClientWidth = 592
   KeyPreview = True
+  OldCreateOrder = True
   OnActivate = FormActivate
   OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
@@ -159,7 +160,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           HotKey = 32833
           InvalidKeys = [hcNone, hcShift]
           Modifiers = [hkAlt]
-          TabOrder = 6
+          TabOrder = 8
         end
         object hkPopup: THotKey
           Left = 248
@@ -169,7 +170,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           HotKey = 32833
           InvalidKeys = [hcNone, hcShift]
           Modifiers = [hkAlt]
-          TabOrder = 7
+          TabOrder = 9
         end
         object chkCheckImmRun: TCheckBox
           Left = 8
@@ -177,22 +178,23 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 401
           Height = 17
           Caption = 'Disable Input Helper when IME Opened.'
-          TabOrder = 8
+          TabOrder = 10
         end
         object chkDispOnIDECompDisabled: TCheckBox
           Left = 24
           Top = 99
-          Width = 409
+          Width = 353
           Height = 17
           Caption = 'Replace Code Insight when Later is Disabled.'
-          TabOrder = 4
+          TabOrder = 5
+          OnClick = chkDispOnIDECompDisabledClick
         end
         object edtAutoSymbols: TEdit
           Left = 248
           Top = 121
           Width = 289
           Height = 21
-          TabOrder = 5
+          TabOrder = 6
         end
         object chkKeySeq: TCheckBox
           Left = 24
@@ -200,8 +202,17 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 209
           Height = 13
           Caption = 'Auto Popup after Key Sequences:'
-          TabOrder = 9
+          TabOrder = 7
           OnClick = UpdateControls
+        end
+        object btnDisableCompletion: TButton
+          Left = 384
+          Top = 94
+          Width = 153
+          Height = 21
+          Caption = 'Disable Code Insight'
+          TabOrder = 4
+          OnClick = btnDisableCompletionClick
         end
       end
       object grp3: TGroupBox
@@ -365,7 +376,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 249
           Height = 21
           Style = csDropDownList
-          ItemHeight = 0
+          ItemHeight = 13
           TabOrder = 0
         end
         object btnFont: TButton
@@ -407,7 +418,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 249
           Height = 21
           Style = csDropDownList
-          ItemHeight = 0
+          ItemHeight = 13
           TabOrder = 3
         end
         object chkUseKibitzCompileThread: TCheckBox
@@ -641,7 +652,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 401
           Height = 21
           Style = csDropDownList
-          ItemHeight = 0
+          ItemHeight = 13
           TabOrder = 0
           OnChange = cbbListChange
         end

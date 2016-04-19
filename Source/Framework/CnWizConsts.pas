@@ -1444,6 +1444,7 @@ var
   SCnInputHelperSymbolKindError: string = 'Please select the Symbol Type!';
   SCnInputHelperUserMacroCaption: string = 'User-defined Macro';
   SCnInputHelperUserMacroPrompt: string = 'Please Input Macro Name:';
+  SCnInputHelperDisableCodeInsightSucc: string = 'IDE Code Insight Disabled.';
   SCnKeywordDefault: string = 'Unchange';
   SCnKeywordLower: string = 'Lower case';
   SCnKeywordUpper: string = 'Upper case';

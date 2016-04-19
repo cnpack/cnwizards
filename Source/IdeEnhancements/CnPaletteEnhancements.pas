@@ -112,6 +112,7 @@ type
     FShowDetails: Boolean;
     FAutoSelect: Boolean;
     FSearchCompMenuItem: TCnMenuItemDef;
+    FSettingsMenuItem: TCnMenuItemDef;
 
   {$IFNDEF IDE_HAS_NEW_COMPONENT_PALETTE}
     FComponentPalette: TTabControl;
@@ -124,7 +125,6 @@ type
     FTabMenuItem: TCnMenuItemDef;
   {$ENDIF COMPILER5}
     FMultiLineMenuItem: TCnMenuItemDef;
-    FSettingsMenuItem: TCnMenuItemDef;
     FSepMenuItem: TCnSepMenuItemDef;
 
     FDivTab: Boolean;
@@ -1163,10 +1163,9 @@ begin
   {$ENDIF}
   if FSearchCompMenuItem <> nil then
     FSearchCompMenuItem.SetCaption(SCnSearchComponent);
-{$ENDIF}
-
   if FSettingsMenuItem <> nil then
     FSettingsMenuItem.SetCaption(SCnPalSettingsCaption);
+{$ENDIF}
 
 {$IFNDEF COMPILER8_UP}
   if FMultiLineMenuItem <> nil then

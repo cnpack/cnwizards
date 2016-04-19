@@ -43,7 +43,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   CheckLst, StdCtrls, ComCtrls, ExtCtrls, Menus, CnConsts, CnCommon, IniFiles,
-  CnWizMultiLang, CnSpin, CnWizConsts, CnInputHelper, CnInputSymbolList,
+  ToolsAPI, CnWizMultiLang, CnSpin, CnWizConsts, CnInputHelper, CnInputSymbolList,
   CnInputIdeSymbolList, CnInputHelperEditFrm, CnWizMacroText, CnWizUtils;
 
 type
@@ -127,6 +127,7 @@ type
     chkUseKibitzCompileThread: TCheckBox;
     edtAutoSymbols: TEdit;
     chkKeySeq: TCheckBox;
+    btnDisableCompletion: TButton;
     procedure FormShow(Sender: TObject);
     procedure PaintBoxPaint(Sender: TObject);
     procedure btnFontClick(Sender: TObject);
@@ -157,6 +158,8 @@ type
     procedure FormKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure chkSpcCompleteClick(Sender: TObject);
+    procedure chkDispOnIDECompDisabledClick(Sender: TObject);
+    procedure btnDisableCompletionClick(Sender: TObject);
   private
     InputHelper: TCnInputHelper;
     NewSymbol: string;
@@ -478,6 +481,7 @@ begin
   chkDispOnIDECompDisabled.Enabled := chkAutoPopup.Checked;
   chkKeySeq.Enabled := chkAutoPopup.Checked;
   edtAutoSymbols.Enabled := chkAutoPopup.Checked and chkKeySeq.Checked;
+  btnDisableCompletion.Enabled := chkDispOnIDECompDisabled.Checked;
 end;
 
 procedure TCnInputHelperForm.UpdateListItem(Item: TListItem);
@@ -817,6 +821,26 @@ end;
 procedure TCnInputHelperForm.chkSpcCompleteClick(Sender: TObject);
 begin
   chkIgnoreSpace.Enabled := chkSpcComplete.Checked;
+end;
+
+procedure TCnInputHelperForm.chkDispOnIDECompDisabledClick(
+  Sender: TObject);
+begin
+  btnDisableCompletion.Enabled := chkDispOnIDECompDisabled.Checked;
+end;
+
+procedure TCnInputHelperForm.btnDisableCompletionClick(Sender: TObject);
+const
+  SCnCodeCompletionKey = 'CodeCompletion';
+var
+  Options: IOTAEnvironmentOptions;
+begin
+  Options := CnOtaGetEnvironmentOptions();
+  if Options = nil then
+    Exit;
+
+  Options.SetOptionValue(SCnCodeCompletionKey, 0);
+  InfoDlg(SCnInputHelperDisableCodeInsightSucc);
 end;
 
 {$ENDIF CNWIZARDS_CNINPUTHELPER}
