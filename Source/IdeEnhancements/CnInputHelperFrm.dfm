@@ -205,11 +205,11 @@ inherited CnInputHelperForm: TCnInputHelperForm
           OnClick = UpdateControls
         end
         object btnDisableCompletion: TButton
-          Left = 384
+          Left = 376
           Top = 94
-          Width = 153
+          Width = 161
           Height = 21
-          Caption = 'Disable Code Completion'
+          Caption = 'Disable Code Com&pletion'
           TabOrder = 4
           OnClick = btnDisableCompletionClick
         end
