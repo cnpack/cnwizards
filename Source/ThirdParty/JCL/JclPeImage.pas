@@ -2332,7 +2332,11 @@ begin
               {$IFDEF VER300}
                 List[I] := ExportItem;
               {$ELSE}
-                List^[I] := ExportItem;
+                {$IFDEF VER310}
+                  List[I] := ExportItem;
+                {$ELSE}
+                  List^[I] := ExportItem;
+                {$ENDIF}
               {$ENDIF}
             {$ENDIF}
           {$ENDIF}
