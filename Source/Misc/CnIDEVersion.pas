@@ -313,10 +313,10 @@ begin
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
 end;
 
-function IsDelphi101IdeVersionLatest: Boolean;
+function IsDelphi101BIdeVersionLatest: Boolean;
 const           //24.0.22858.6822
   CoreIdeLatest: TVersionNumber =
-    (Major: 24; Minor: 0; Release: 22858; Build: 6822); // Update 1
+    (Major: 24; Minor: 0; Release: 22858; Build: 6822);
 var
   ReadFileVersion: TVersionNumber;
 begin
@@ -415,7 +415,7 @@ begin
 {$ENDIF}
 
 {$IFDEF DELPHI101_BERLIN}
-  CnIdeVersionIsLatest := IsDelphi101IdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphi101BIdeVersionLatest;
 {$ENDIF}
 
   Result := CnIdeVersionIsLatest;

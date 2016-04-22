@@ -65,7 +65,7 @@ uses
 type
   TCompilerName = (cvD5, cvD6, cvD7, cvD8, cbD2005, cbD2006, cbD2007, cbD2009,
     cbD2010, cbDXE, cbDXE2, cbDXE3, cbDXE4, cbDXE5, cbDXE6, cbDXE7, cbXE8, cb10S,
-    cb101, cvCB5, cvCB6);
+    cb101B, cvCB5, cvCB6);
 
 const
   csCompilerNames: array[TCompilerName] of string = (
@@ -133,7 +133,7 @@ const
     'CnWizards_DXE7.DLL',
     'CnWizards_DXE8.DLL',
     'CnWizards_D10S.DLL',
-    'CnWizards_D101.DLL',
+    'CnWizards_D101B.DLL',
     'CnWizards_CB5.DLL',
     'CnWizards_CB6.DLL');
 

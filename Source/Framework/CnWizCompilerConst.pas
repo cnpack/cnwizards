@@ -49,7 +49,7 @@ type
   TCnCompiler = (cnDelphi5, cnDelphi6, cnDelphi7, cnDelphi8, cnDelphi9,
     cnDelphi10, cnDelphi11, cnDelphi12, cnDelphi14, cnDelphi15, cnDelphi16,
     cnDelphi17, cnDelphiXE4, cnDelphiXE5, cnDelphiXE6, cnDelphiXE7, cnDelphiXE8,
-    cnDelphi10S, cnDelphi101, cnBCB5, cnBCB6);
+    cnDelphi10S, cnDelphi101B, cnBCB5, cnBCB6);
   TCnCompilers = set of TCnCompiler;
 
 const
@@ -354,10 +354,10 @@ const
                                     CompilerShortName = 'D10S';
                                   {$ELSE}
                                     {$IFDEF DELPHI101_BERLIN}
-                                    Compiler: TCnCompiler = cnDelphi101;
+                                    Compiler: TCnCompiler = cnDelphi101B;
                                     CompilerKind: TCnCompilerKind = ckDelphi;
                                     CompilerName = 'RAD Studio 101_BERLIN';
-                                    CompilerShortName = 'D101';
+                                    CompilerShortName = 'D101B';
                                     {$ELSE}
                                       {$IFDEF BCB5}
                                         Compiler: TCnCompiler = cnBCB5;
@@ -541,7 +541,7 @@ const
   DphIdeLibName = 'delphicoreide240.bpl';
   dccLibName = 'dcc32240.dll';
   {$DEFINE LibNamesDefined}
-{$ENDIF COMPILER23}
+{$ENDIF COMPILER24}
 
 implementation
 

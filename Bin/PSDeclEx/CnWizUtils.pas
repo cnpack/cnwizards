@@ -58,7 +58,7 @@ type
   TCnCompiler = (cnDelphi5, cnDelphi6, cnDelphi7, cnDelphi8, cnDelphi9,
     cnDelphi10, cnDelphi11, cnDelphi12, cnDelphi14, cnDelphi15, cnDelphi16,
     cnDelphi17, cnDelphiXE4, cnDelphiXE5, cnDelphiXE6, cnDelphiXE7, cnDelphiXE8,
-    cnDelphi10S, cnDelphi101, cnBCB5, cnBCB6);
+    cnDelphi10S, cnDelphi101B, cnBCB5, cnBCB6);
   TCnCompilers = set of TCnCompiler;
 
 const
