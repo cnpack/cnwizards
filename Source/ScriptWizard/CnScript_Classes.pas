@@ -119,8 +119,10 @@ begin
     RegisterMethod('Procedure UpdateTarget( Target : TObject)');
     RegisterMethod('Procedure ExecuteTarget( Target : TObject)');
     RegisterMethod('Function Execute : Boolean');
+{$IFNDEF DELPHI101_BERLIN_UP}
     RegisterMethod('Procedure RegisterChanges( Value : TBasicActionLink)');
     RegisterMethod('Procedure UnRegisterChanges( Value : TBasicActionLink)');
+{$ENDIF}
     RegisterMethod('Function Update : Boolean');
     RegisterProperty('OnExecute', 'TNotifyEvent', iptrw);
     RegisterProperty('OnUpdate', 'TNotifyEvent', iptrw);
@@ -1418,8 +1420,10 @@ begin
     RegisterVirtualMethod(@TBasicAction.UpdateTarget, 'UpdateTarget');
     RegisterVirtualMethod(@TBasicAction.ExecuteTarget, 'ExecuteTarget');
     RegisterVirtualMethod(@TBasicAction.Execute, 'Execute');
+{$IFNDEF DELPHI101_BERLIN_UP}
     RegisterMethod(@TBasicAction.RegisterChanges, 'RegisterChanges');
     RegisterMethod(@TBasicAction.UnRegisterChanges, 'UnRegisterChanges');
+{$ENDIF}
     RegisterVirtualMethod(@TBasicAction.Update, 'Update');
     RegisterPropertyHelper(@TBasicActionOnExecute_R, @TBasicActionOnExecute_W, 'OnExecute');
     RegisterPropertyHelper(@TBasicActionOnUpdate_R, @TBasicActionOnUpdate_W, 'OnUpdate');
