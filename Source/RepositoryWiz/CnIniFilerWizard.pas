@@ -145,7 +145,7 @@ type
 {$ENDIF}
   end;
 
-var
+const
   SCnIniFilerModuleTemplatePasFile: string = 'CnIniFiler.pas';
   SCnIniFilerModuleTemplateCppFile: string = 'CnIniFiler.cpp';
   SCnIniFilerModuleTemplateHeadFile: string = 'CnIniFiler.h';

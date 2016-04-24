@@ -149,6 +149,7 @@ uses
   CnIniFilerWizard in 'RepositoryWiz\CnIniFilerWizard.pas',
   CnIniFilerFrm in 'RepositoryWiz\CnIniFilerFrm.pas' {CnIniFilerForm},
   CnMemProfWizard in 'RepositoryWiz\CnMemProfWizard.pas' {CnMemProfForm},
+  CnTestWizard in 'RepositoryWiz\CnTestWizard.pas' {CnTestWizardForm},
   CnWizMethodHook in 'Utils\CnWizMethodHook.pas',
   CnWizIdeDock in 'Utils\CnWizIdeDock.pas' {CnIdeDockForm},
   CnExplore in 'ExplorerWizard\CnExplore.pas' {CnExploreForm},

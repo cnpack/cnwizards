@@ -38,6 +38,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_CNINIFILERWIZARD}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, Buttons, CnWizMultiLang, CnCommon, CnWizConsts;
@@ -90,7 +92,11 @@ type
 var
   CnIniFilerForm: TCnIniFilerForm;
 
+{$ENDIF CNWIZARDS_CNINIFILERWIZARD}
+
 implementation
+
+{$IFDEF CNWIZARDS_CNINIFILERWIZARD}
 
 {$R *.DFM}
 
@@ -191,4 +197,5 @@ begin
   chkBool.Enabled := chkIsAllStr.Checked;
 end;
 
+{$ENDIF CNWIZARDS_CNINIFILERWIZARD}
 end.
