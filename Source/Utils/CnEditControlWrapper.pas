@@ -341,7 +341,10 @@ type
     procedure GetAttributeAtPos(EditControl: TControl; const EdPos: TOTAEditPos;
       IncludeMargin: Boolean; var Element, LineFlag: Integer);
     {* 返回指定位置的高亮属性，用于替换 IOTAEditView 的函数，后者可能会导致编辑区问题。
-       此指定位置可由 CursorPos 而来，是 utf8 的字节位置（一个汉字跨 3 列 }
+       此指定位置在非 Unicode 环境里可由 CursorPos 而来，D5/6/7 是 Ansi 位置，
+       2005~2007 是 UTF8 的字节位置（一个汉字跨 3 列），
+       2009 以上要注意，EdPos 居然也要求是 UTF8 字节位置。而 2009 下 CursorPos 是 Ansi，
+       不能直接拿 CursorPos 来作为 EdPos 参数，而必须经过一次 UTF8 转换 }
     function GetLineIsElided(EditControl: TControl; LineNum: Integer): Boolean;
     {* 返回指定行是否折叠，不包括折叠的头尾，也就是返回是否隐藏。
        只对 BDS 有效，其余情况返回 False}
@@ -362,7 +365,7 @@ type
     function GetTextAtLine(EditControl: TControl; LineNum: Integer): string;
     {* 取指定行的文本。注意该函数取到的文本是将 Tab 扩展成空格的，如果使用
        ConvertPos 来转换成 EditPos 可能会有问题。直接将 CharIndex + 1 赋值
-       给 EditPos.Col 即可。
+       给 EditPos.Col 即可。返回类型：AnsiString/Ansi-Utf8/UnicodeString
        另外，LineNum为逻辑行号，也就是和折叠无关的实际行号，1 开始 }
     function IndexPosToCurPos(EditControl: TControl; Col, Line: Integer): Integer;
     {* 计算编辑器字符串索引到编辑器显示的实际位置 }

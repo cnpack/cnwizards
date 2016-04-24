@@ -164,9 +164,13 @@ type
     property IsMatch: Boolean read FIsMatch write FIsMatch;
     property LastMatchPos: TOTAEditPos read FLastMatchPos write FLastMatchPos;
     property LastPos: TOTAEditPos read FLastPos write FLastPos;
+
+    // 光标下，或主括号的括号字符串、行内容、位置信息
     property TokenStr: AnsiString read FTokenStr write FTokenStr;
     property TokenLine: AnsiString read FTokenLine write FTokenLine;
     property TokenPos: TOTAEditPos read FTokenPos write FTokenPos;
+
+    // 和上面配对的括号字符串、行内容、位置信息
     property TokenMatchStr: AnsiString read FTokenMatchStr write FTokenMatchStr;
     property TokenMatchLine: AnsiString read FTokenMatchLine write FTokenMatchLine;
     property TokenMatchPos: TOTAEditPos read FTokenMatchPos write FTokenMatchPos;
@@ -2876,6 +2880,7 @@ var
         for j := l downto 0 do
         begin
           for k := 0 to BracketCount - 1 do
+          begin
             if (LineText[j + 1] = BracketChars^[k][0]) and
               not InCommentOrString(OTAEditPos(j + 1, i)) then
             begin
@@ -2896,6 +2901,7 @@ var
             begin
               Inc(Layers[k]);
             end;
+          end;
           if AInfo.TokenStr <> '' then
             Break;
         end;
@@ -2927,6 +2933,7 @@ var
         for j := l to Length(LineText) - 1 do
         begin
           for k := ml to mr do
+          begin
             if (LineText[j + 1] = BracketChars^[k][1]) and
               not InCommentOrString(OTAEditPos(j + 1, i)) then
             begin
@@ -2945,6 +2952,7 @@ var
             begin
               Inc(Layers[k]);
             end;
+          end;
           if AInfo.TokenMatchStr <> '' then
             Break;
         end;
@@ -3014,6 +3022,7 @@ begin
 {$ENDIF}
         PR := EditView.CursorPos;
         for i := 0 to BracketCount - 1 do
+        begin
           if CL = BracketChars^[i][0] then
           begin
             AInfo.TokenStr := CL;
@@ -3038,6 +3047,7 @@ begin
             Result := True;
             Break;
           end;
+        end;
       end;
     end;
 
@@ -3054,6 +3064,15 @@ begin
         AInfo.TokenPos.Col))));
       AInfo.FTokenMatchPos.Col := Length(CnUtf8ToAnsi(AnsiString(Copy(AInfo.TokenMatchLine, 1,
         AInfo.TokenMatchPos.Col))));
+    end;
+{$ENDIF}
+
+{$IFDEF DEBUG}
+    if Result then
+    begin
+      CnDebugger.LogFmt('TCnSourceHighlight.GetBracketMatch Matched! %s at %d:%d and %s at %d:%d.',
+        [AInfo.TokenStr, AInfo.TokenPos.Line, AInfo.TokenPos.Col,
+        AInfo.TokenMatchStr, AInfo.TokenMatchPos.Line, AInfo.TokenMatchPos.Col]);
     end;
 {$ENDIF}
   finally
