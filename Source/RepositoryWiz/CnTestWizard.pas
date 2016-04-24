@@ -114,9 +114,6 @@ type
 
 implementation
 
-uses
-  CnDebug;
-
 {$R *.DFM}
 
 const
@@ -189,7 +186,6 @@ procedure TCnTestWizardCreator.DoReplaceTagsSource(const TagString: string;
   TagParams: TStrings; var ReplaceText: string; ASourceType: TCnSourceType;
   ModuleIdent, FormIdent, AncestorIdent: string);
 begin
-  CnDebugger.LogMsg(TagString);
   if ASourceType = stImplSource then
   begin
     if TagString = csClassName then

@@ -4379,11 +4379,18 @@ begin
   Result := _DeleteCurrToken(False, True, FirstSet, CharSet);
 end;
 
-// 判断位置是否超出行尾了。此机制在 Unicode 环境下当前行含有超过一个宽字符时可能会不准，慎用
+// 判断位置是否超出行尾了。此机制在 Unicode 环境下当前行含有宽字符时可能会不准，慎用
+// 一般 Unicode 环境下，行内含有几个宽字符，使用 ConvertPos 就会可能产生几列的偏差，
+// 也即超过行尾再加几列才会判断为超出行尾，而且这个规则还不靠谱，需要另做处理
 function CnOtaIsEditPosOutOfLine(EditPos: TOTAEditPos; View: IOTAEditView): Boolean;
 var
   APos: TOTAEditPos;
   CPos: TOTACharPos;
+{$IFDEF UNICODE}
+  S: AnsiString;
+  I, Idx, Len: Integer;
+  HasWide: Boolean;
+{$ENDIF}
 begin
   Result := True;
   if View = nil then
@@ -4397,6 +4404,36 @@ begin
 //   [EditPos.Line, EditPos.Col, APos.Line, APos.Col]);
 {$ENDIF}
     Result := not SameEditPos(EditPos, APos);
+
+{$IFDEF UNICODE}
+    // Unicode 环境下可能有误差，补算一把
+    S := TrimRight(AnsiString(CnOtaGetLineText(EditPos.Line)));
+    if S = '' then
+      Exit;
+
+    HasWide := False;
+    Idx := -1;
+    Len := Length(S);
+
+    for I := 1 to Len do
+    begin
+      if Ord(S[I]) > 127 then
+      begin
+        HasWide := True;
+        Idx := I;
+        Break;
+      end;
+    end;
+
+    if not HasWide then
+      Exit;
+    if EditPos.Col < Idx + 1 then
+      Exit;
+
+    // Unicode 环境下含有双字节字符时，并且需要判断的位置在第一个双字节字符后时
+    // 可能有偏差，换这种判断方式，但据说未处理 Tab 展开，也有危险
+    Result := EditPos.Col > Len + 1; // Col is 0 based.
+{$ENDIF}
   end;  
 end;
 {$ENDIF}
