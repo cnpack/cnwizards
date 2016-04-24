@@ -308,7 +308,8 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
-    function IndexOfEditor(EditControl: TControl): Integer;
+    function IndexOfEditor(EditControl: TControl): Integer; overload;
+    function IndexOfEditor(EditView: IOTAEditView): Integer; overload;
     function GetEditorObject(EditControl: TControl): TEditorObject;
     property Editors[Index: Integer]: TEditorObject read GetEditors;
     property EditorCount: Integer read GetEditorCount;
@@ -330,6 +331,8 @@ type
     {* 返回编辑器的画布属性}
     function GetEditView(EditControl: TControl): IOTAEditView;
     {* 返回指定编辑器当前关联的 EditView }
+    function GetEditControl(EditView: IOTAEditView): TControl;
+    {* 返回指定 EditView 当前关联的编辑器 }
     function GetTopMostEditControl: TControl;
     {* 返回当前最前端的 EditControl}
     function GetEditViewFromTabs(TabControl: TXTabControl; Index: Integer):
@@ -360,7 +363,7 @@ type
     {* 取指定行的文本。注意该函数取到的文本是将 Tab 扩展成空格的，如果使用
        ConvertPos 来转换成 EditPos 可能会有问题。直接将 CharIndex + 1 赋值
        给 EditPos.Col 即可。
-       另外，LineNum为逻辑行号，也就是和折叠无关的实际行号 }
+       另外，LineNum为逻辑行号，也就是和折叠无关的实际行号，1 开始 }
     function IndexPosToCurPos(EditControl: TControl; Col, Line: Integer): Integer;
     {* 计算编辑器字符串索引到编辑器显示的实际位置 }
 
@@ -1008,18 +1011,32 @@ begin
     Result := nil;
 end;
 
-function TCnEditControlWrapper.IndexOfEditor(
-  EditControl: TControl): Integer;
+function TCnEditControlWrapper.IndexOfEditor(EditControl: TControl): Integer;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to EditorCount - 1 do
+  for I := 0 to EditorCount - 1 do
   begin
-    if Editors[i].EditControl = EditControl then
+    if Editors[I].EditControl = EditControl then
     begin
-      Result := i;
+      Result := I;
       Exit;
-    end;  
+    end;
+  end;
+  Result := -1;
+end;
+
+function TCnEditControlWrapper.IndexOfEditor(EditView: IOTAEditView): Integer;
+var
+  I: Integer;
+begin
+  for I := 0 to EditorCount - 1 do
+  begin
+    if Editors[I].EditView = EditView then
+    begin
+      Result := I;
+      Exit;
+    end;
   end;
   Result := -1;
 end;
@@ -1653,6 +1670,22 @@ begin
 //  CnDebugger.LogMsgWarning('GetEditView: not found in list.');
 {$ENDIF}
     Result := CnOtaGetTopMostEditView;
+  end;
+end;
+
+function TCnEditControlWrapper.GetEditControl(EditView: IOTAEditView): TControl;
+var
+  Idx: Integer;
+begin
+  Idx := IndexOfEditor(EditView);
+  if Idx >= 0 then
+    Result := Editors[Idx].EditControl
+  else
+  begin
+{$IFDEF DEBUG}
+//  CnDebugger.LogMsgWarning('GetEditControl: not found in list.');
+{$ENDIF}
+    Result := CnOtaGetCurrentEditControl;
   end;
 end;
 

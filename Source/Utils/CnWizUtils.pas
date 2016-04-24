@@ -945,7 +945,7 @@ uses
 {$ENDIF}
   Math, CnWizOptions, CnGraphUtils
 {$IFNDEF CNWIZARDS_MINIMUM}
-  , CnWizMultiLang, CnLangMgr, CnWizIdeUtils, CnWizDebuggerNotifier,
+  , CnWizMultiLang, CnLangMgr, CnWizIdeUtils, CnWizDebuggerNotifier, CnEditControlWrapper,
   CnPasCodeParser, CnCppCodeParser, CnLangStorage, CnHashLangStorage, CnWizHelp
 {$ENDIF}
   ;
@@ -4387,6 +4387,7 @@ var
   APos: TOTAEditPos;
   CPos: TOTACharPos;
 {$IFDEF UNICODE}
+  EditControl: TControl;
   S: AnsiString;
   I, Idx, Len: Integer;
   HasWide: Boolean;
@@ -4407,7 +4408,12 @@ begin
 
 {$IFDEF UNICODE}
     // Unicode 环境下可能有误差，补算一把
-    S := TrimRight(AnsiString(CnOtaGetLineText(EditPos.Line)));
+    EditControl := EditControlWrapper.GetEditControl(View);
+    if EditControl = nil then
+      Exit;
+
+    // 使用 EditControlWrapper.GetTextAtLine 较快获取行文字，并且 Tab 已展开
+    S := TrimRight(AnsiString(EditControlWrapper.GetTextAtLine(EditControl, EditPos.Line)));
     if S = '' then
       Exit;
 
@@ -4431,7 +4437,7 @@ begin
       Exit;
 
     // Unicode 环境下含有双字节字符时，并且需要判断的位置在第一个双字节字符后时
-    // 可能有偏差，换这种判断方式，但据说未处理 Tab 展开，也有危险
+    // 可能有偏差，换这种判断方式。
     Result := EditPos.Col > Len + 1; // Col is 0 based.
 {$ENDIF}
   end;  
