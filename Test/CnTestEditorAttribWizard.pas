@@ -29,7 +29,9 @@ unit CnTestEditorAttribWizard;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2009.01.07 V1.0
+* 修改记录：2016.04.25 V1.1
+*               修改成子菜单专家以集成另一个测试用例
+*           2009.01.07 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -40,19 +42,23 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ToolsAPI, IniFiles, CnWizClasses, CnWizUtils, CnWizConsts, CnEditControlWrapper;
+  ToolsAPI, IniFiles, CnCommon, CnWizClasses, CnWizUtils, CnWizConsts,
+  CnEditControlWrapper;
 
 type
 
 //==============================================================================
-// 编辑器属性获取菜单专家
+// 编辑器属性获取子菜单专家
 //==============================================================================
 
 { TCnTestEditorAttribWizard }
 
-  TCnTestEditorAttribWizard = class(TCnMenuWizard)
+  TCnTestEditorAttribWizard = class(TCnSubMenuWizard)
   private
-
+    FIdAttrib: Integer;
+    FIdLine: Integer;
+    procedure TestAttributeAtCursor;
+    procedure TestAttributeLine;
   protected
     function GetHasConfig: Boolean; override;
   public
@@ -64,23 +70,40 @@ type
     function GetCaption: string; override;
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
-    procedure Execute; override;
+
+    procedure AcquireSubActions; override;
+    procedure SubActionExecute(Index: Integer); override;
   end;
 
 implementation
 
+uses
+  CnDebug;
+
+const
+  SCnAttribCommand = 'CnAttribCommand';
+  SCnLineAttribCommand = 'CnLineAttribCommand';
+  SCnAttribCaption = 'Show Attribute at Cursor';
+  SCnLineAttribCaption = 'Show Attribute in Whole Line';
+
 //==============================================================================
-// 演示用菜单专家
+// 编辑器属性获取子菜单专家
 //==============================================================================
 
 { TCnTestEditorAttribWizard }
 
-procedure TCnTestEditorAttribWizard.Config;
+procedure TCnTestEditorAttribWizard.AcquireSubActions;
 begin
-  { TODO -oAnyone : 在此显示配置窗口 }
+  FIdAttrib := RegisterASubAction(SCnAttribCommand, SCnAttribCaption);
+  FIdLine := RegisterASubAction(SCnLineAttribCommand, SCnLineAttribCaption);
 end;
 
-procedure TCnTestEditorAttribWizard.Execute;
+procedure TCnTestEditorAttribWizard.Config;
+begin
+
+end;
+
+procedure TCnTestEditorAttribWizard.TestAttributeAtCursor;
 var
   EditPos: TOTAEditPos;
   EditControl: TControl;
@@ -89,7 +112,6 @@ var
   S, T: string;
   Block: IOTAEditBlock;
 begin
-  { TODO -oAnyone : 该专家的主执行过程 }
   EditControl := CnOtaGetCurrentEditControl;
   EditView := CnOtaGetTopMostEditView;
 
@@ -164,32 +186,27 @@ end;
 
 function TCnTestEditorAttribWizard.GetCaption: string;
 begin
-  Result := 'Show Attribute at Cursor';
-  { TODO -oAnyone : 返回专家菜单的标题，字符串请进行本地化处理 }
+  Result := 'Test Editor Attribute';
 end;
 
 function TCnTestEditorAttribWizard.GetDefShortCut: TShortCut;
 begin
   Result := 0;
-  { TODO -oAnyone : 返回默认的快捷键 }
 end;
 
 function TCnTestEditorAttribWizard.GetHasConfig: Boolean;
 begin
   Result := False;
-  { TODO -oAnyone : 返回专家是否有配置窗口 }
 end;
 
 function TCnTestEditorAttribWizard.GetHint: string;
 begin
-  Result := 'Show Attribute at Cursor in Current Editor';
-  { TODO -oAnyone : 返回专家菜单提示信息，字符串请进行本地化处理 }
+  Result := 'Show Attributes in Current Editor';
 end;
 
 function TCnTestEditorAttribWizard.GetState: TWizardState;
 begin
   Result := [wsEnabled];
-  { TODO -oAnyone : 返回专家菜单状态，可根据指定条件来设定 }
 end;
 
 class procedure TCnTestEditorAttribWizard.GetWizardInfo(var Name, Author, Email, Comment: string);
@@ -198,17 +215,116 @@ begin
   Author := 'CnPack Team';
   Email := 'liuxiao@cnpack.org';
   Comment := 'Test Editor Attribute Menu Wizard';
-  { TODO -oAnyone : 返回专家的名称、作者、邮箱及备注，字符串请进行本地化处理 }
 end;
 
 procedure TCnTestEditorAttribWizard.LoadSettings(Ini: TCustomIniFile);
 begin
-  { TODO -oAnyone : 在此装载专家内部用到的参数，专家创建时自动被调用 }
+
 end;
 
 procedure TCnTestEditorAttribWizard.SaveSettings(Ini: TCustomIniFile);
 begin
-  { TODO -oAnyone : 在此保存专家内部用到的参数，专家释放时自动被调用 }
+
+end;
+
+procedure TCnTestEditorAttribWizard.SubActionExecute(Index: Integer);
+begin
+  if Index = FIdAttrib then
+    TestAttributeAtCursor
+  else if Index = FIdLine then
+    TestAttributeLine;
+end;
+
+procedure TCnTestEditorAttribWizard.TestAttributeLine;
+var
+  EdPos: TOTAEditPos;
+  View: IOTAEditView;
+  Line: AnsiString;
+{$IFDEF UNICODE}
+  ULine: string;
+  ALine, Utf8Line: AnsiString;
+  UCol: Integer;
+{$ENDIF}
+  EditControl: TControl;
+  I, Element, LineFlag: Integer;
+begin
+  View := CnOtaGetTopMostEditView;
+  if View = nil then
+    Exit;
+
+  EditControl := EditControlWrapper.GetEditControl(View);
+  if EditControl = nil then
+    Exit;
+
+  EdPos := View.CursorPos;
+
+  ULine := EditControlWrapper.GetTextAtLine(EditControl, EdPos.Line);
+  CnDebugger.LogRawString(ULine);
+
+  Line := AnsiString(ULine);
+  CnDebugger.LogRawAnsiString(Line);
+
+  Utf8Line := Line;
+
+  CnDebugger.LogInteger(EdPos.Col, 'Before Possible UTF8 Convertion CursorPos Col');
+{$IFDEF UNICODE}
+  // Unicode 环境下 GetTextAtLine 返回的是 Unicode，
+  // GetAttributeAtPos 要求的是 UTF8，
+  // 但 CursorPos 对应 Ansi，所以需要复杂的转换：
+  // 先把 Unicode 转换成 Ansi，用 Col 截断，转回 Unicode，其长度就是 Col在 Unicode中的位置，
+  // 再把整行 Unicode 用新 Col 截断，再转换成 Ansi-Utf8，其长度就是 UTF8 的 Col
+
+  ALine := Copy(Line, 1, EdPos.Col - 1);            // 截断
+  CnDebugger.LogRawAnsiString(ALine);
+
+  UCol := Length(string(ALine)) + 1;                // 转回 Unicode
+  CnDebugger.LogInteger(UCol, 'Temp Unicode Col');
+
+  ULine := Copy(ULine, 1, UCol - 1);                // 重新截断
+  CnDebugger.LogRawString(ULine);
+
+  ALine := CnAnsiToUtf8(AnsiString(ULine));         // 转成 Ansi-Utf8
+  CnDebugger.LogRawAnsiString(ALine);
+
+  EdPos.Col := Length(CnAnsiToUtf8(ALine)) + 1;     // 取长度
+
+  Line := CnAnsiToUtf8(Line);                       // 最后整行转成 Utf8，以让下面的处理一致
+{$ENDIF}
+
+  CnDebugger.LogInteger(EdPos.Col, 'After Possible UTF8 Conversion. CursorPos Col');
+
+  if EdPos.Col > Length(Line) then
+    Exit;
+
+  if Line <> '' then
+  begin
+    for I := 1 to Length(Line) do
+    begin
+      if EdPos.Col = I then
+        CnDebugger.LogInteger(I, 'Here is the Cursor Position.');
+      EditControlWrapper.GetAttributeAtPos(EditControl, OTAEditPos(I, EdPos.Line),
+        False, Element, LineFlag);
+      case Element of
+        atWhiteSpace:
+          CnDebugger.LogAnsiChar(Line[I], IntToStr(I) + ' WhiteSpace');
+        atComment:
+          CnDebugger.LogAnsiChar(Line[I], IntToStr(I) + ' Comment');
+        atReservedWord:
+          CnDebugger.LogAnsiChar(Line[I], IntToStr(I) + ' ReservedWord');
+        atIdentifier:
+          CnDebugger.LogAnsiChar(Line[I], IntToStr(I) + ' Identifier');
+        atSymbol:
+          CnDebugger.LogAnsiChar(Line[I], IntToStr(I) + ' Symbol');
+        atString:
+          CnDebugger.LogAnsiChar(Line[I], IntToStr(I) + ' String');
+        atNumber:
+          CnDebugger.LogAnsiChar(Line[I], IntToStr(I) + ' Number');
+      else
+        CnDebugger.LogAnsiChar(Line[I], IntToStr(I) + ' Unknown');
+      end;
+    end;
+  end;
+  ShowMessage('Information Sent to CnDebugViewer for Current Line.');
 end;
 
 initialization
