@@ -2017,6 +2017,7 @@ TCnInputHelperForm.btnClear.Caption=Очистить
 TCnInputHelperForm.btnCursor.Caption=Курсор
 TCnInputHelperForm.btnDefault.Caption=По умолч.
 TCnInputHelperForm.btnDelete.Caption=Удалить
+TCnInputHelperForm.btnDisableCompletion.Caption=Отключение кода Завершение
 TCnInputHelperForm.btnDup.Caption=Скопир.
 TCnInputHelperForm.btnEdit.Caption=Редакт.
 TCnInputHelperForm.btnExport.Caption=Экспорт

@@ -240,9 +240,9 @@ var
   EdPos: TOTAEditPos;
   View: IOTAEditView;
   Line: AnsiString;
-{$IFDEF UNICODE}
   ULine: string;
-  ALine, Utf8Line: AnsiString;
+{$IFDEF UNICODE}
+  ALine: AnsiString;
   UCol: Integer;
 {$ENDIF}
   EditControl: TControl;
@@ -260,11 +260,8 @@ begin
 
   ULine := EditControlWrapper.GetTextAtLine(EditControl, EdPos.Line);
   CnDebugger.LogRawString(ULine);
-
   Line := AnsiString(ULine);
   CnDebugger.LogRawAnsiString(Line);
-
-  Utf8Line := Line;
 
   CnDebugger.LogInteger(EdPos.Col, 'Before Possible UTF8 Convertion CursorPos Col');
 {$IFDEF UNICODE}

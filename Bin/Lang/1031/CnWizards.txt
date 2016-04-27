@@ -2017,6 +2017,7 @@ TCnInputHelperForm.btnClear.Caption=löschen
 TCnInputHelperForm.btnCursor.Caption=Curso&r
 TCnInputHelperForm.btnDefault.Caption=Defaul&t
 TCnInputHelperForm.btnDelete.Caption=&löschen
+TCnInputHelperForm.btnDisableCompletion.Caption=Deaktivieren Code-Vervollständigung
 TCnInputHelperForm.btnDup.Caption=duplizieren
 TCnInputHelperForm.btnEdit.Caption=&editieren
 TCnInputHelperForm.btnExport.Caption=E&xport
