@@ -2734,23 +2734,51 @@ var
   CharPos: TOTACharPos;
   BracketCount: Integer;
   BracketChars: PBracketArray;
+  TmpPos: TOTAEditPos;
+  TmpULine: string;
+
+{$IFDEF UNICODE}
+
+  function ConvertAnsiPositionToUtf8OnUnicodeText(const Text: string;
+    AnsiCol: Integer): Integer;
+  var
+    ULine: string;
+    UCol: Integer;
+    ALine: AnsiString;
+  begin
+    Result := AnsiCol;
+    if Result <= 0 then
+      Exit;
+
+    ALine := AnsiString(Text);
+    ALine := Copy(ALine, 1, AnsiCol - 1);         // 按 Ansi 的 Col 截断
+    UCol := Length(string(ALine)) + 1;            // 转回 Unicode 的 Col
+    ULine := Copy(Text, 1, UCol - 1);             // 重新截断
+    ALine := CnAnsiToUtf8(AnsiString(ULine));     // 转成 Ansi-Utf8
+    Result := Length(CnAnsiToUtf8(ALine)) + 1;    // 取 UTF8 的长度
+  end;
+
+{$ENDIF}
 
   function InCommentOrString(APos: TOTAEditPos): Boolean;
   var
     Element, LineFlag: Integer;
   begin
     // IOTAEditView.GetAttributeAtPos 会导致选择区域失效、Undo 区混乱，故此处
-    // 直接使用底层调用
+    // 直接使用底层调用。注意，Unicode 环境下这个 APos 的 Col 必须是 UTF8 的。
     EditControlWrapper.GetAttributeAtPos(EditControl, APos, False, Element, LineFlag);
     Result := (Element = atComment) or (Element = atString) or
       (Element = atCharacter);
   end;
 
   function _FindMatchTokenDown(const FindToken, MatchToken: AnsiString;
-    var ALine: AnsiString): TOTAEditPos;
+    out ALine: AnsiString): TOTAEditPos;
   var
-    i, j, l, Layer: Integer;
+    I, J, L, Layer: Integer;
     TopLine, BottomLine: Integer;
+  {$IFDEF UNICODE}
+    ULine: string;
+  {$ENDIF}
     LineText: AnsiString;
   begin
     Result.Col := 0;
@@ -2761,31 +2789,51 @@ var
     if TopLine <= BottomLine then
     begin
       Layer := 1;
-      for i := TopLine to BottomLine do
+      for I := TopLine to BottomLine do
       begin
       {$IFDEF BDS}
-        if EditControlWrapper.GetLineIsElided(EditControl, i) then
+        if EditControlWrapper.GetLineIsElided(EditControl, I) then
           Continue;
       {$ENDIF}
-        LineText := AnsiString(EditControlWrapper.GetTextAtLine(EditControl, i));
 
-        if i = TopLine then
-          l := CharPos.CharIndex + 1
-        else
-          l := 0;
-        for j := l to Length(LineText) - 1 do
+{$IFDEF UNICODE}
+        // Unicode 环境下必须把返回的 UnicodeString 内容转成 UTF8，因为 InCommentOrString 所使用的底层调用要求必须 UTF8
+        ULine := EditControlWrapper.GetTextAtLine(EditControl, I);
+        LineText := CnAnsiToUtf8(AnsiString(ULine));
+{$ELSE}
+        LineText := AnsiString(EditControlWrapper.GetTextAtLine(EditControl, I));
+{$ENDIF}
+
+        if I = TopLine then
         begin
-          if (LineText[j + 1] = FindToken) and
-            not InCommentOrString(OTAEditPos(j + 1, i)) then
+          L := CharPos.CharIndex + 1;
+{$IFDEF UNICODE}
+          // L 是 CursorPos.Col，Unicode 环境下是 Ansi 的，需要转成 UTF8 以符合 LineText 的计算
+          L := ConvertAnsiPositionToUtf8OnUnicodeText(ULine, L);
+{$ENDIF}
+        end
+        else
+          L := 0;
+
+        for J := L to Length(LineText) - 1 do
+        begin
+          if (LineText[J + 1] = FindToken) and
+            not InCommentOrString(OTAEditPos(J + 1, I)) then
             Inc(Layer)
-          else if (LineText[j + 1] = MatchToken) and
-            not InCommentOrString(OTAEditPos(j + 1, i)) then
+          else if (LineText[J + 1] = MatchToken) and
+            not InCommentOrString(OTAEditPos(J + 1, I)) then
           begin
             Dec(Layer);
             if Layer = 0 then
             begin
               ALine := LineText;
-              Result := OTAEditPos(j + 1, i);
+              Result := OTAEditPos(J + 1, I);
+{$IFDEF UNICODE}
+              // LineText 是 Utf8 的，转回 Ansi，Result 是 Utf8 的，转回 Ansi
+              ALine := CnUtf8ToAnsi(ALine);
+              LineText := Copy(LineText, 1, Result.Col - 1);
+              Result.Col := Length(CnUtf8ToAnsi(LineText)) + 1;
+{$ENDIF}
               Exit;
             end;
           end;
@@ -2795,10 +2843,13 @@ var
   end;
 
   function _FindMatchTokenUp(const FindToken, MatchToken: AnsiString;
-    var ALine: AnsiString): TOTAEditPos;
+    out ALine: AnsiString): TOTAEditPos;
   var
-    i, j, l, Layer: Integer;
+    I, J, L, Layer: Integer;
     TopLine, BottomLine: Integer;
+  {$IFDEF UNICODE}
+    ULine: string;
+  {$ENDIF}
     LineText: AnsiString;
   begin
     Result.Col := 0;
@@ -2809,31 +2860,51 @@ var
     if TopLine <= BottomLine then
     begin
       Layer := 1;
-      for i := BottomLine downto TopLine do
+      for I := BottomLine downto TopLine do
       begin
       {$IFDEF BDS}
-        if EditControlWrapper.GetLineIsElided(EditControl, i) then
+        if EditControlWrapper.GetLineIsElided(EditControl, I) then
           Continue;
       {$ENDIF}
-        LineText := AnsiString(EditControlWrapper.GetTextAtLine(EditControl, i));
 
-        if i = BottomLine then
-          l := CharPos.CharIndex - 1
-        else
-          l := Length(LineText) - 1;
-        for j := l downto 0 do
+{$IFDEF UNICODE}
+        // Unicode 环境下必须把返回的 UnicodeString 内容转成 UTF8，因为 InCommentOrString 所使用的底层调用要求必须 UTF8
+        ULine := EditControlWrapper.GetTextAtLine(EditControl, I);
+        LineText := CnAnsiToUtf8(AnsiString(ULine));
+{$ELSE}
+        LineText := AnsiString(EditControlWrapper.GetTextAtLine(EditControl, I));
+{$ENDIF}
+
+        if I = BottomLine then
         begin
-          if (LineText[j + 1] = FindToken) and
-            not InCommentOrString(OTAEditPos(j + 1, i)) then
+          L := CharPos.CharIndex - 1;
+{$IFDEF UNICODE}
+          // L 是 CursorPos.Col，Unicode 环境下是 Ansi 的，需要转成 UTF8 以符合 LineText 的计算
+          L := ConvertAnsiPositionToUtf8OnUnicodeText(ULine, L);
+{$ENDIF}
+        end
+        else
+          L := Length(LineText) - 1;
+
+        for J := L downto 0 do
+        begin
+          if (LineText[J + 1] = FindToken) and
+            not InCommentOrString(OTAEditPos(J + 1, I)) then
             Inc(Layer)
-          else if (LineText[j + 1] = MatchToken) and
-            not InCommentOrString(OTAEditPos(j + 1, i)) then
+          else if (LineText[J + 1] = MatchToken) and
+            not InCommentOrString(OTAEditPos(J + 1, I)) then
           begin
             Dec(Layer);
             if Layer = 0 then
             begin
               ALine := LineText;
-              Result := OTAEditPos(j + 1, i);
+              Result := OTAEditPos(J + 1, I);
+{$IFDEF UNICODE}
+              // LineText 是 Utf8 的，转回 Ansi，Result 是 Utf8 的，转回 Ansi
+              ALine := CnUtf8ToAnsi(ALine);
+              LineText := Copy(LineText, 1, Result.Col - 1);
+              Result.Col := Length(CnUtf8ToAnsi(LineText)) + 1;
+{$ENDIF}
               Exit;
             end;
           end;
@@ -2994,15 +3065,22 @@ begin
     else
       Exit;
 
-    if not CnOtaIsEditPosOutOfLine(EditView.CursorPos, EditView) and
-      not InCommentOrString(EditView.CursorPos) then
-    begin
-      CharPos.CharIndex := EditView.CursorPos.Col - 1;
-      CharPos.Line := EditView.CursorPos.Line;
-      LText := AnsiString(EditControlWrapper.GetTextAtLine(EditControl, CharPos.Line));
-      // BDS 下 CursorPos 是 utf8 的位置，LText 在 BDS 下是 UTF8，一致。
-      // 在 D2009 下是 UnicodeString，CursorPos 是 Ansi 位置，因此需要转成 Ansi。
+    CharPos.CharIndex := EditView.CursorPos.Col - 1;
+    CharPos.Line := EditView.CursorPos.Line;
+    TmpULine := EditControlWrapper.GetTextAtLine(EditControl, CharPos.Line);
+    LText := AnsiString(TmpULine);
+    // BDS 下 CursorPos 是 utf8 的位置，LText 在 BDS 下是 UTF8，一致。
+    // 在 D2009 下是 UnicodeString，CursorPos 是 Ansi 位置，因此需要转成 Ansi。
 
+    TmpPos := EditView.CursorPos;
+{$IFDEF UNICODE}
+    // 把 Ansi 的 TmpPos 的 Col 转成 UTF8 的
+    TmpPos.Col := ConvertAnsiPositionToUtf8OnUnicodeText(TmpULine, TmpPos.Col);
+{$ENDIF}
+
+    if not CnOtaIsEditPosOutOfLine(EditView.CursorPos, EditView) and
+      not InCommentOrString(TmpPos) then
+    begin
       if LText <> '' then
       begin
         if CharPos.CharIndex > 0 then
