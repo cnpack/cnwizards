@@ -2915,11 +2915,15 @@ var
 
   function _FindMatchTokenMiddle: Boolean;
   var
-    i, j, k, l: Integer;
-    ml, mr: Integer;
+    I, J, K, L: Integer;
+    ML, MR: Integer;
     TopLine, BottomLine, Cnt: Integer;
     LineText: AnsiString;
     Layers: array of Integer;
+  {$IFDEF UNICODE}
+    ULine: string;
+    ALine: AnsiString;
+  {$ENDIF}
   begin
     Result := False;
     SetLength(Layers, BracketCount);
@@ -2929,48 +2933,68 @@ var
     BottomLine := Min(EditBuffer.GetLinesInBuffer, Max(CharPos.Line, EditView.BottomRow));
     if TopLine <= BottomLine then
     begin
-      ml := 0;
-      mr := BracketCount - 1;
-      for i := 0 to BracketCount - 1 do
-        Layers[i] := 0;
+      ML := 0;
+      MR := BracketCount - 1;
+      for I := 0 to BracketCount - 1 do
+        Layers[I] := 0;
 
       // 向前查找左括号
       Cnt := 0;
-      for i := CharPos.Line downto TopLine do
+      for I := CharPos.Line downto TopLine do
       begin
       {$IFDEF BDS}
-        if EditControlWrapper.GetLineIsElided(EditControl, i) then
+        if EditControlWrapper.GetLineIsElided(EditControl, I) then
           Continue;
       {$ENDIF}
-        LineText := AnsiString(EditControlWrapper.GetTextAtLine(EditControl, i));
 
-        if i = CharPos.Line then
-          l := Min(CharPos.CharIndex, Length(LineText)) - 1
-        else
-          l := Length(LineText) - 1;
-        for j := l downto 0 do
+{$IFDEF UNICODE}
+        // Unicode 环境下必须把返回的 UnicodeString 内容转成 UTF8，因为 InCommentOrString 所使用的底层调用要求必须 UTF8
+        ULine := EditControlWrapper.GetTextAtLine(EditControl, I);
+        LineText := CnAnsiToUtf8(AnsiString(ULine));
+{$ELSE}
+        LineText := AnsiString(EditControlWrapper.GetTextAtLine(EditControl, I));
+{$ENDIF}
+
+        if I = CharPos.Line then
         begin
-          for k := 0 to BracketCount - 1 do
+          L := Min(CharPos.CharIndex, Length(LineText)) - 1;
+{$IFDEF UNICODE}
+          // L 是 CursorPos.Col，Unicode 环境下是 Ansi 的，需要转成 UTF8 以符合 LineText 的计算
+          L := ConvertAnsiPositionToUtf8OnUnicodeText(ULine, L);
+{$ENDIF}
+        end
+        else
+          L := Length(LineText) - 1;
+
+        for J := L downto 0 do
+        begin
+          for K := 0 to BracketCount - 1 do
           begin
-            if (LineText[j + 1] = BracketChars^[k][0]) and
-              not InCommentOrString(OTAEditPos(j + 1, i)) then
+            if (LineText[J + 1] = BracketChars^[K][0]) and
+              not InCommentOrString(OTAEditPos(J + 1, I)) then
             begin
-              if Layers[k] = 0 then
+              if Layers[K] = 0 then
               begin
-                AInfo.TokenStr := BracketChars^[k][0];
+                AInfo.TokenStr := BracketChars^[K][0];
                 AInfo.TokenLine := LineText;
-                AInfo.TokenPos := OTAEditPos(j + 1, i);
-                ml := k;
-                mr := k;
+                AInfo.TokenPos := OTAEditPos(J + 1, I);
+{$IFDEF UNICODE}
+                // LineText 是 Utf8 的，转回 Ansi，Result 是 Utf8 的，转回 Ansi
+                AInfo.TokenLine := CnUtf8ToAnsi(AInfo.TokenLine);
+                ALine := Copy(LineText, 1, AInfo.TokenPos.Col - 1);
+                AInfo.TokenPos := OTAEditPos(Length(CnUtf8ToAnsi(ALine)) + 1, I);
+{$ENDIF}
+                ML := K;
+                MR := K;
                 Break;
               end
               else
-                Dec(Layers[k]);
+                Dec(Layers[K]);
             end
-            else if (LineText[j + 1] = BracketChars^[k][1]) and
-              not InCommentOrString(OTAEditPos(j + 1, i)) then
+            else if (LineText[J + 1] = BracketChars^[K][1]) and
+              not InCommentOrString(OTAEditPos(J + 1, I)) then
             begin
-              Inc(Layers[k]);
+              Inc(Layers[K]);
             end;
           end;
           if AInfo.TokenStr <> '' then
@@ -2984,44 +3008,64 @@ var
           Break;
       end;
 
-      for i := 0 to BracketCount - 1 do
-        Layers[i] := 0;
+      for I := 0 to BracketCount - 1 do
+        Layers[I] := 0;
 
       // 向后查找右括号
       Cnt := 0;
-      for i := CharPos.Line to BottomLine do
+      for I := CharPos.Line to BottomLine do
       begin
       {$IFDEF BDS}
-        if EditControlWrapper.GetLineIsElided(EditControl, i) then
+        if EditControlWrapper.GetLineIsElided(EditControl, I) then
           Continue;
       {$ENDIF}
-        LineText := AnsiString(EditControlWrapper.GetTextAtLine(EditControl, i));
 
-        if i = CharPos.Line then
-          l := CharPos.CharIndex
-        else
-          l := 0;
-        for j := l to Length(LineText) - 1 do
+{$IFDEF UNICODE}
+        // Unicode 环境下必须把返回的 UnicodeString 内容转成 UTF8，因为 InCommentOrString 所使用的底层调用要求必须 UTF8
+        ULine := EditControlWrapper.GetTextAtLine(EditControl, I);
+        LineText := CnAnsiToUtf8(AnsiString(ULine));
+{$ELSE}
+        LineText := AnsiString(EditControlWrapper.GetTextAtLine(EditControl, I));
+{$ENDIF}
+
+        if I = CharPos.Line then
         begin
-          for k := ml to mr do
+          L := CharPos.CharIndex;
+{$IFDEF UNICODE}
+          // L 是 CursorPos.Col，Unicode 环境下是 Ansi 的，需要转成 UTF8 以符合 LineText 的计算
+          L := ConvertAnsiPositionToUtf8OnUnicodeText(ULine, L);
+{$ENDIF}
+        end
+        else
+          L := 0;
+
+        for J := L to Length(LineText) - 1 do
+        begin
+          for K := ML to MR do
           begin
-            if (LineText[j + 1] = BracketChars^[k][1]) and
-              not InCommentOrString(OTAEditPos(j + 1, i)) then
+            if (LineText[J + 1] = BracketChars^[K][1]) and
+              not InCommentOrString(OTAEditPos(J + 1, I)) then
             begin
-              if Layers[k] = 0 then
+              if Layers[K] = 0 then
               begin
-                AInfo.TokenMatchStr := BracketChars^[k][1];
+                AInfo.TokenMatchStr := BracketChars^[K][1];
                 AInfo.TokenMatchLine := LineText;
-                AInfo.TokenMatchPos := OTAEditPos(j + 1, i);
+                AInfo.TokenMatchPos := OTAEditPos(J + 1, I);
+{$IFDEF UNICODE}
+                // LineText 是 Utf8 的，转回 Ansi，Result 是 Utf8 的，转回 Ansi
+                AInfo.TokenMatchLine := CnUtf8ToAnsi(AInfo.TokenMatchLine);
+                ALine := Copy(LineText, 1, AInfo.TokenMatchPos.Col - 1);
+                AInfo.TokenMatchPos := OTAEditPos(Length(CnUtf8ToAnsi(ALine)) + 1, I);
+{$ENDIF}
                 Break;
               end
               else
-                Dec(Layers[k]);
+                Dec(Layers[K]);
             end
-            else if (LineText[j + 1] = BracketChars^[k][0]) and
-              not InCommentOrString(OTAEditPos(j + 1, i)) then
+            else if (LineText[J + 1] = BracketChars^[K][0]) and
+              not InCommentOrString(OTAEditPos(J + 1, I)) then
             begin
-              Inc(Layers[k]);
+              Inc(Layers[K]);
             end;
           end;
           if AInfo.TokenMatchStr <> '' then
