@@ -59,6 +59,7 @@ See http://www.suigeneris.org/want/ for details.
   <property name="exe.DXE7"       value="${ProgramFiles}\Embarcadero\Studio\15.0\Bin\DCC32.EXE" unless="env.DXE7" />
   <property name="exe.DXE8"       value="${ProgramFiles}\Embarcadero\Studio\16.0\Bin\DCC32.EXE" unless="env.DXE8" />
   <property name="exe.D10S"       value="${ProgramFiles}\Embarcadero\Studio\17.0\Bin\DCC32.EXE" unless="env.D10S" />
+  <property name="exe.D101B"      value="${ProgramFiles}\Embarcadero\Studio\18.0\Bin\DCC32.EXE" unless="env.D101B" />
   <property name="exe.brcc32"     value="%{BRCC32}" />
   <property name="exe.git"        value="%{env.git}" if="env.git" />
   <property name="exe.git"        value="${ProgramFiles}\Git\bin\git.exe" unless="env.git" />
@@ -343,6 +344,7 @@ Usage: want [target-name] [-Dname=value]
   <target name="dxe7" depends="-dxe7,-cw_final" description="Compile CnWizards for RAD Studio XE7." />
   <target name="dxe8" depends="-dxe8,-cw_final" description="Compile CnWizards for RAD Studio XE8." />
   <target name="d10s" depends="-d10s,-cw_final" description="Compile CnWizards for RAD Studio 10 Seattle." />
+  <target name="d101b" depends="-d101b,-cw_final" description="Compile CnWizards for RAD Studio 10.1 Berlin." />
   <target name="cb5" depends="-cb5,-cw_final" description="Compile CnWizards for C++Builder 5." />
   <target name="cb6" depends="-cb6,-cw_final" description="Compile CnWizards for C++Builder 6." />
 
@@ -745,6 +747,28 @@ Usage: want [target-name] [-Dname=value]
     </delete>
     <move tofile="${src}/CnWizards_D10S.res" >
        <include name="${src}/CnWizards_D10S.res.old" />
+    </move>
+  </target>
+
+  <target name="-d101b" depends="-cw_prepare" >
+    <property name="Ver.FileDescription"  value="CnWizards For RAD Studio 10.1 Berlin" />
+    <property name="Ver.InternalName"     value="CnWizards_D101B" />
+    <property name="Ver.OriginalFilename" value="CnWizards_D101B.DLL" />
+    <copy tofile="${src}/CnWizards_D101B.res.old" >
+       <include name="${src}/CnWizards_D101B.res" />
+    </copy>
+    <echo input="${src}/CnWizards.template.rc" file="${src}/CnWizards_D101B.rc" />
+    <brcc file="${src}/CnWizards_D101B.rc" exename="${exe.brcc32}" output="${src}/CnWizards_D101B.res" />
+    <dcc basedir="${src}" source="CnWizards_D101B.dpr" exename="${exe.D101B}" usecfg="true" arguments="${dcc_arg}" >
+      <define name="${define.add}" />
+    </dcc>
+    <delete dir="${src}">
+       <include name="CnWizards_D101B.res" />
+       <include name="CnWizards_D101B.rc" />
+       <include name="CnWizards_D101B.drc" />
+    </delete>
+    <move tofile="${src}/CnWizards_D101B.res" >
+       <include name="${src}/CnWizards_D101B.res.old" />
     </move>
   </target>
 
