@@ -45,6 +45,12 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF IDE_INTEGRATE_CASTALIA}
+  {$IFNDEF DELPHI101_BERLIN_UP}
+    {$DEFINE CASTALIA_KEYMAPPING_CONFLICT_BUG}
+  {$ENDIF}
+{$ENDIF}
+
 uses
   Windows, Messages, Classes, Graphics, Controls, Sysutils, Menus, ActnList,
   Forms, ImgList, ExtCtrls, IniFiles, Dialogs, Registry, ToolsAPI, Contnrs,
@@ -111,7 +117,7 @@ type
     procedure SetTipShowing;
     procedure ShowTipofDay(Sender: TObject);
     procedure CheckIDEVersion;
-{$IFDEF IDE_INTEGRATE_CASTALIA}
+{$IFDEF CASTALIA_KEYMAPPING_CONFLICT_BUG}
     procedure CheckKeyMappingEnhModulesSequence;
 {$ENDIF}
     function GetWizards(Index: Integer): TCnBaseWizard;
@@ -389,7 +395,7 @@ begin
 
   CnTranslateConsts(nil);
 
-{$IFDEF IDE_INTEGRATE_CASTALIA}
+{$IFDEF CASTALIA_KEYMAPPING_CONFLICT_BUG}
   CheckKeyMappingEnhModulesSequence;
 {$ENDIF}
 {$ENDIF}
@@ -1365,7 +1371,7 @@ begin
   Result := [wsEnabled];
 end;
 
-{$IFDEF IDE_INTEGRATE_CASTALIA}
+{$IFDEF CASTALIA_KEYMAPPING_CONFLICT_BUG}
 
 procedure TCnWizardMgr.CheckKeyMappingEnhModulesSequence;
 const
