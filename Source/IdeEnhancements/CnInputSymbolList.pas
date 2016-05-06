@@ -709,7 +709,7 @@ begin
       Idx := Pos('|', S);
       S := StringReplace(S, '|', '', [rfReplaceAll]);
     {$IFDEF UNICODE}
-      Editor.EditPosition.InsertText(ConvertTextToEditorTextW(S));
+      Editor.EditPosition.InsertText(ConvertTextToEditorUnicodeText(S));
     {$ELSE}
       Editor.EditPosition.InsertText(ConvertTextToEditorText(S));
     {$ENDIF}
