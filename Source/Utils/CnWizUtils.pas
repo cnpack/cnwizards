@@ -651,6 +651,11 @@ function FastUtf8ToAnsi(const Text: AnsiString): AnsiString;
 {* 快速转换Utf8到Ansi字符串，适用于长度短且主要是Ansi字符的字符串 }
 {$ENDIF}
 
+{$IFDEF UNICODE}
+function ConvertTextToEditorTextW(const Text: string): string;
+{* Unicode 环境下转换字符串为编辑器使用的字符串，避免 AnsiString 转换}
+{$ENDIF}
+
 function ConvertTextToEditorText(const Text: AnsiString): AnsiString;
 {* 转换字符串为编辑器使用的字符串 }
 
@@ -5131,6 +5136,16 @@ begin
   end
   else
     Result := '';
+end;
+
+{$ENDIF}
+
+{$IFDEF UNICODE}
+
+// Unicode 环境下转换字符串为编辑器使用的字符串，避免 AnsiString 转换
+function ConvertTextToEditorTextW(const Text: string): string;
+begin
+  Result := Text;
 end;
 
 {$ENDIF}

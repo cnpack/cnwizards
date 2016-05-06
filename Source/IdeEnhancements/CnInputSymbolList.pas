@@ -708,8 +708,8 @@ begin
       S := GetKeywordText(KeywordStyle);
       Idx := Pos('|', S);
       S := StringReplace(S, '|', '', [rfReplaceAll]);
-    {$IFDEF UNICODE_STRING}
-      Editor.EditPosition.InsertText(string(ConvertTextToEditorText(AnsiString(S))));
+    {$IFDEF UNICODE}
+      Editor.EditPosition.InsertText(ConvertTextToEditorTextW(S));
     {$ELSE}
       Editor.EditPosition.InsertText(ConvertTextToEditorText(S));
     {$ENDIF}
