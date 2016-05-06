@@ -673,7 +673,7 @@ function ConvertEditorTextToWText(const Text: AnsiString): WideString;
 {$ENDIF}
 
 {$IFDEF UNICODE}
-function ConvertTextToEditorTextW(const Text: string): string;
+function ConvertTextToEditorTextW(const Text: string): AnsiString;
 {* 转换字符串为编辑器使用的字符串(UTF8)，D2009 以上版本使用 }
 
 function ConvertEditorTextToTextW(const Text: AnsiString): string;
