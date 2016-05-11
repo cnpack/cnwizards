@@ -190,7 +190,7 @@ type
     FControl: TControl;
     FModified: Boolean;
     FChanged: Boolean;
-    FParser: TCnPasStructureParser;
+    FPasParser: TCnPasStructureParser;
 
     // *TokenList 容纳初步解析结果
     FKeyTokenList: TCnList;           // 容纳解析出来的关键字 Tokens
@@ -297,7 +297,7 @@ type
     {* 当前匹配时是否大小写敏感，由外部设定}
     property IsCppSource: Boolean read FIsCppSource write FIsCppSource;
     {* 是否是 C/C++ 文件，默认是 False，也就是 Pascal}
-    property Parser: TCnPasStructureParser read FParser;
+    property PasParser: TCnPasStructureParser read FPasParser;
     property CppParser: TCnCppStructureParser read FCppParser;
 
     property LineInfo: TBlockLineInfo read FLineInfo write FLineInfo;
@@ -1242,7 +1242,7 @@ begin
   end
   else  // 处理解析 Pascal 中的配对关键字
   begin
-    if Modified or (Parser.Source = '') then
+    if Modified or (PasParser.Source = '') then
     begin
       FIsCppSource := False;
       CaseSensitive := False;
@@ -1254,9 +1254,9 @@ begin
         CnOtaSaveEditorToStream(EditView.Buffer, Stream);
         // 解析当前显示的源文件，需要高亮当前标识符时不设置KeyOnly
 {$IFDEF BDS2009_UP}
-        Parser.TabWidth := FHighlight.FTabWidth;
+        PasParser.TabWidth := FHighlight.FTabWidth;
 {$ENDIF}
-        Parser.ParseSource(PAnsiChar(Stream.Memory),
+        PasParser.ParseSource(PAnsiChar(Stream.Memory),
           IsDpr(EditView.Buffer.FileName),
           not (FHighlight.CurrentTokenHighlight or FHighlight.HighlightFlowStatement));
       finally
@@ -1267,42 +1267,42 @@ begin
     // 解析后再查找当前光标所在的块
     EditPos := EditView.CursorPos;
     EditView.ConvertPos(True, EditPos, CharPos);
-    Parser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
+    PasParser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
     FCurrentBlockSearched := True;
 
     if BlockHighlightRange = brAll then
     begin
       // 处理本单元中的所有需要的匹配
-      for I := 0 to Parser.Count - 1 do
+      for I := 0 to PasParser.Count - 1 do
       begin
-        if IsHighlightKeywords(Parser.Tokens[I].TokenID) then
-          FKeyTokenList.Add(Parser.Tokens[I]);
+        if IsHighlightKeywords(PasParser.Tokens[I].TokenID) then
+          FKeyTokenList.Add(PasParser.Tokens[I]);
       end;
     end
-    else if (BlockHighlightRange = brMethod) and Assigned(Parser.MethodStartToken)
-      and Assigned(Parser.MethodCloseToken) then
+    else if (BlockHighlightRange = brMethod) and Assigned(PasParser.MethodStartToken)
+      and Assigned(PasParser.MethodCloseToken) then
     begin
       // 只把本过程中需要的 Token 加进来
-      for I := Parser.MethodStartToken.ItemIndex to
-        Parser.MethodCloseToken.ItemIndex do
-        if IsHighlightKeywords(Parser.Tokens[I].TokenID) then
-          FKeyTokenList.Add(Parser.Tokens[I]);
+      for I := PasParser.MethodStartToken.ItemIndex to
+        PasParser.MethodCloseToken.ItemIndex do
+        if IsHighlightKeywords(PasParser.Tokens[I].TokenID) then
+          FKeyTokenList.Add(PasParser.Tokens[I]);
     end
-    else if (BlockHighlightRange = brWholeBlock) and Assigned(Parser.BlockStartToken)
-      and Assigned(Parser.BlockCloseToken) then
+    else if (BlockHighlightRange = brWholeBlock) and Assigned(PasParser.BlockStartToken)
+      and Assigned(PasParser.BlockCloseToken) then
     begin
-      for I := Parser.BlockStartToken.ItemIndex to
-        Parser.BlockCloseToken.ItemIndex do
-        if IsHighlightKeywords(Parser.Tokens[I].TokenID) then
-          FKeyTokenList.Add(Parser.Tokens[I]);
+      for I := PasParser.BlockStartToken.ItemIndex to
+        PasParser.BlockCloseToken.ItemIndex do
+        if IsHighlightKeywords(PasParser.Tokens[I].TokenID) then
+          FKeyTokenList.Add(PasParser.Tokens[I]);
     end
-    else if (BlockHighlightRange = brInnerBlock) and Assigned(Parser.InnerBlockStartToken)
-      and Assigned(Parser.InnerBlockCloseToken) then
+    else if (BlockHighlightRange = brInnerBlock) and Assigned(PasParser.InnerBlockStartToken)
+      and Assigned(PasParser.InnerBlockCloseToken) then
     begin
-      for I := Parser.InnerBlockStartToken.ItemIndex to
-        Parser.InnerBlockCloseToken.ItemIndex do
-        if IsHighlightKeywords(Parser.Tokens[I].TokenID) then
-          FKeyTokenList.Add(Parser.Tokens[I]);
+      for I := PasParser.InnerBlockStartToken.ItemIndex to
+        PasParser.InnerBlockCloseToken.ItemIndex do
+        if IsHighlightKeywords(PasParser.Tokens[I].TokenID) then
+          FKeyTokenList.Add(PasParser.Tokens[I]);
     end;
 
     UpdateCurTokenList;
@@ -1436,59 +1436,59 @@ begin
   FFlowTokenList.Clear;
   if not FIsCppSource then
   begin
-    if Assigned(Parser) then
+    if Assigned(PasParser) then
     begin
       if not FCurrentBlockSearched then   // 找当前块，供转换Token位置
       begin
         EditPos := EditView.CursorPos;
         EditView.ConvertPos(True, EditPos, CharPos);
-        Parser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
+        PasParser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
       end;
 
 {$IFDEF DEBUG}
-      if Assigned(Parser.MethodStartToken) and
-        Assigned(Parser.MethodCloseToken) then
+      if Assigned(PasParser.MethodStartToken) and
+        Assigned(PasParser.MethodCloseToken) then
         CnDebugger.LogFmt('CurrentMethod: %s, MethodStartToken: %d, MethodCloseToken: %d',
-          [Parser.CurrentMethod, Parser.MethodStartToken.ItemIndex, Parser.MethodCloseToken.ItemIndex]);
+          [PasParser.CurrentMethod, PasParser.MethodStartToken.ItemIndex, PasParser.MethodCloseToken.ItemIndex]);
 {$ENDIF}
 
-      if Assigned(Parser.MethodStartToken) and
-        Assigned(Parser.MethodCloseToken) then
+      if Assigned(PasParser.MethodStartToken) and
+        Assigned(PasParser.MethodCloseToken) then
       begin
-        FCurMethodStartToken := Parser.MethodStartToken;
-        FCurMethodCloseToken := Parser.MethodCloseToken;
+        FCurMethodStartToken := PasParser.MethodStartToken;
+        FCurMethodCloseToken := PasParser.MethodCloseToken;
       end;
 
       // 无当前过程或高亮所有内容时搜索当前所有标识符，避免只高亮光标出于当前过程内的问题
-      for I := 0 to Parser.Count - 1 do
+      for I := 0 to PasParser.Count - 1 do
       begin
-        CharPos := OTACharPos(Parser.Tokens[I].CharIndex, Parser.Tokens[I].LineNumber + 1);
+        CharPos := OTACharPos(PasParser.Tokens[I].CharIndex, PasParser.Tokens[I].LineNumber + 1);
         EditView.ConvertPos(False, EditPos, CharPos);
         // TODO: 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
 {$IFDEF BDS2009_UP}
         // if not FHighlight.FUseTabKey then
-        EditPos.Col := Parser.Tokens[I].CharIndex + 1;
+        EditPos.Col := PasParser.Tokens[I].CharIndex + 1;
 {$ENDIF}
-        Parser.Tokens[I].EditCol := EditPos.Col;
-        Parser.Tokens[I].EditLine := EditPos.Line;
+        PasParser.Tokens[I].EditCol := EditPos.Col;
+        PasParser.Tokens[I].EditLine := EditPos.Line;
       end;
 
       // 高亮整个单元时，或当前无块时，高亮整个单元
       if (FCurMethodStartToken = nil) or (FCurMethodCloseToken = nil) or
         (FHighlight.BlockHighlightRange = brAll) then
       begin
-        for I := 0 to Parser.Count - 1 do
+        for I := 0 to PasParser.Count - 1 do
         begin
-          if CheckIsFlowToken(Parser.Tokens[I], FIsCppSource) then
-            FFlowTokenList.Add(Parser.Tokens[I]);
+          if CheckIsFlowToken(PasParser.Tokens[I], FIsCppSource) then
+            FFlowTokenList.Add(PasParser.Tokens[I]);
         end;
       end
       else if (FCurMethodStartToken <> nil) or (FCurMethodCloseToken <> nil) then // 其它范围便默认改为高亮本过程的
       begin
         for I := FCurMethodStartToken.ItemIndex to FCurMethodCloseToken.ItemIndex do
         begin
-          if CheckIsFlowToken(Parser.Tokens[I], FIsCppSource) then
-            FFlowTokenList.Add(Parser.Tokens[I]);
+          if CheckIsFlowToken(PasParser.Tokens[I], FIsCppSource) then
+            FFlowTokenList.Add(PasParser.Tokens[I]);
         end;
       end;
     end;
@@ -1591,27 +1591,27 @@ begin
   FCurTokenListEditCol.Clear;
   if not FIsCppSource then
   begin
-    if Assigned(Parser) then
+    if Assigned(PasParser) then
     begin
       if not FCurrentBlockSearched then
       begin
         EditPos := EditView.CursorPos;
         EditView.ConvertPos(True, EditPos, CharPos);
-        Parser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
+        PasParser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
       end;
 
 {$IFDEF DEBUG}
-      if Assigned(Parser.MethodStartToken) and
-        Assigned(Parser.MethodCloseToken) then
+      if Assigned(PasParser.MethodStartToken) and
+        Assigned(PasParser.MethodCloseToken) then
         CnDebugger.LogFmt('CurrentMethod: %s, MethodStartToken: %d, MethodCloseToken: %d',
-          [Parser.CurrentMethod, Parser.MethodStartToken.ItemIndex, Parser.MethodCloseToken.ItemIndex]);
+          [PasParser.CurrentMethod, PasParser.MethodStartToken.ItemIndex, PasParser.MethodCloseToken.ItemIndex]);
 {$ENDIF}
 
-      if Assigned(Parser.MethodStartToken) and
-        Assigned(Parser.MethodCloseToken) then
+      if Assigned(PasParser.MethodStartToken) and
+        Assigned(PasParser.MethodCloseToken) then
       begin
-        FCurMethodStartToken := Parser.MethodStartToken;
-        FCurMethodCloseToken := Parser.MethodCloseToken;
+        FCurMethodStartToken := PasParser.MethodStartToken;
+        FCurMethodCloseToken := PasParser.MethodCloseToken;
       end;
 
       CnOtaGetCurrPosToken(TmpCurTokenStr, TokenCursorIndex, True, [], [], EditView);
@@ -1620,11 +1620,11 @@ begin
       if FCurrentTokenName <> '' then
       begin
         StartIndex := 0;
-        EndIndex := Parser.Count - 1;
+        EndIndex := PasParser.Count - 1;
 
         // 高亮整个单元时，或当前是过程名与类名时，或无当前Method时，高亮整个单元
         if (FHighlight.BlockHighlightRange = brAll)
-          or TokenIsMethodOrClassName(string(FCurrentTokenName), string(Parser.CurrentMethod))
+          or TokenIsMethodOrClassName(string(FCurrentTokenName), string(PasParser.CurrentMethod))
           or ((FCurMethodStartToken = nil) or (FCurMethodCloseToken = nil)) then
         begin
 //          StartIndex := 0;
@@ -1639,7 +1639,7 @@ begin
         // 必须搜索当前所有标识符，避免只高亮光标出于当前过程内的问题
         for I := StartIndex to EndIndex do
         begin
-          AToken := Parser.Tokens[I];
+          AToken := PasParser.Tokens[I];
           if (AToken.TokenID = tkIdentifier) and // 此处判断不支持双字节字符
             CheckTokenMatch(AToken.Token, FCurrentTokenName, CaseSensitive) then
           begin
@@ -1768,27 +1768,27 @@ begin
   FCompDirectiveTokenList.Clear;
   if not FIsCppSource then
   begin
-    if Assigned(Parser) then
+    if Assigned(PasParser) then
     begin
 {$IFDEF DEBUG}
 //    CnDebugger.LogFmt('UpdateCompDirectiveList.Count: %d', [Parser.Count]);
 {$ENDIF}
-      for I := 0 to Parser.Count - 1 do // 编译指令直接针对整个单元
+      for I := 0 to PasParser.Count - 1 do // 编译指令直接针对整个单元
       begin
-        if not CheckIsCompDirectiveToken(Parser.Tokens[I], FIsCppSource) then
+        if not CheckIsCompDirectiveToken(PasParser.Tokens[I], FIsCppSource) then
           Continue;
 
-        CharPos := OTACharPos(Parser.Tokens[I].CharIndex, Parser.Tokens[I].LineNumber + 1);
+        CharPos := OTACharPos(PasParser.Tokens[I].CharIndex, PasParser.Tokens[I].LineNumber + 1);
         EditView.ConvertPos(False, EditPos, CharPos);
         // TODO: 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
 {$IFDEF BDS2009_UP}
         // if not FHighlight.FUseTabKey then
-        EditPos.Col := Parser.Tokens[I].CharIndex + 1;
+        EditPos.Col := PasParser.Tokens[I].CharIndex + 1;
 {$ENDIF}
-        Parser.Tokens[I].EditCol := EditPos.Col;
-        Parser.Tokens[I].EditLine := EditPos.Line;
+        PasParser.Tokens[I].EditCol := EditPos.Col;
+        PasParser.Tokens[I].EditLine := EditPos.Line;
 
-        FCompDirectiveTokenList.Add(Parser.Tokens[I]);
+        FCompDirectiveTokenList.Add(PasParser.Tokens[I]);
       end;
     end;
   end
@@ -2180,8 +2180,8 @@ constructor TBlockMatchInfo.Create(AControl: TControl);
 begin
   inherited Create;
   FControl := AControl;
-  FParser := TCnPasStructureParser.Create;
-  FParser.UseTabKey := True;
+  FPasParser := TCnPasStructureParser.Create;
+  FPasParser.UseTabKey := True;
   FCppParser := TCnCppStructureParser.Create;
 
   FKeyTokenList := TCnList.Create;
@@ -2224,7 +2224,7 @@ begin
   FKeyTokenList.Free;
   
   FCppParser.Free;
-  FParser.Free;
+  FPasParser.Free;
   inherited;
 end;
 
@@ -2799,7 +2799,7 @@ var
 {$IFDEF UNICODE}
         // Unicode 环境下必须把返回的 UnicodeString 内容转成 UTF8，因为 InCommentOrString 所使用的底层调用要求必须 UTF8
         ULine := EditControlWrapper.GetTextAtLine(EditControl, I);
-        LineText := CnAnsiToUtf8(AnsiString(ULine));
+        LineText := Utf8Encode(ULine); // UTF16 直接转换成 Ansi 的 Utf8，中间不经过 AnsiString
 {$ELSE}
         LineText := AnsiString(EditControlWrapper.GetTextAtLine(EditControl, I));
 {$ENDIF}
@@ -2870,7 +2870,7 @@ var
 {$IFDEF UNICODE}
         // Unicode 环境下必须把返回的 UnicodeString 内容转成 UTF8，因为 InCommentOrString 所使用的底层调用要求必须 UTF8
         ULine := EditControlWrapper.GetTextAtLine(EditControl, I);
-        LineText := CnAnsiToUtf8(AnsiString(ULine));
+        LineText := Utf8Encode(ULine); // UTF16 直接转换成 Ansi 的 Utf8，中间不经过 AnsiString
 {$ELSE}
         LineText := AnsiString(EditControlWrapper.GetTextAtLine(EditControl, I));
 {$ENDIF}
@@ -2950,7 +2950,7 @@ var
 {$IFDEF UNICODE}
         // Unicode 环境下必须把返回的 UnicodeString 内容转成 UTF8，因为 InCommentOrString 所使用的底层调用要求必须 UTF8
         ULine := EditControlWrapper.GetTextAtLine(EditControl, I);
-        LineText := CnAnsiToUtf8(AnsiString(ULine));
+        LineText := Utf8Encode(ULine); // UTF16 直接转换成 Ansi 的 Utf8，中间不经过 AnsiString
 {$ELSE}
         LineText := AnsiString(EditControlWrapper.GetTextAtLine(EditControl, I));
 {$ENDIF}
@@ -3023,7 +3023,7 @@ var
 {$IFDEF UNICODE}
         // Unicode 环境下必须把返回的 UnicodeString 内容转成 UTF8，因为 InCommentOrString 所使用的底层调用要求必须 UTF8
         ULine := EditControlWrapper.GetTextAtLine(EditControl, I);
-        LineText := CnAnsiToUtf8(AnsiString(ULine));
+        LineText := Utf8Encode(ULine); // UTF16 直接转换成 Ansi 的 Utf8，中间不经过 AnsiString
 {$ELSE}
         LineText := AnsiString(EditControlWrapper.GetTextAtLine(EditControl, I));
 {$ENDIF}
