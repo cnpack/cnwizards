@@ -61,6 +61,7 @@ procedure SIRegister_TOTAFile(CL: TPSPascalCompiler);
 procedure SIRegister_TModuleNotifierObject(CL: TPSPascalCompiler);
 procedure SIRegister_TNotifierObject(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAGetItService220(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAGetItService230(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAGetItService(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAProjectUnitScopes(CL: TPSPascalCompiler);
 procedure SIRegister_IOTABuildEventProvider(CL: TPSPascalCompiler);
@@ -314,6 +315,7 @@ procedure SIRegister_IOTAProjectCompileNotifier(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAProjectBuilder40(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAProjectOptionsConfigurations(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAProjectOptionsConfigurations140(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAProjectOptionsConfigurations230(CL: TPSPascalCompiler);
 procedure SIRegister_IOTABuildConfiguration(CL: TPSPascalCompiler);
 procedure SIRegister_IOTABuildConfiguration150(CL: TPSPascalCompiler);
 procedure SIRegister_IOTABuildConfiguration140(CL: TPSPascalCompiler);
@@ -486,10 +488,24 @@ begin
 end;
 
 (*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAGetItService230(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTAGetItService220', 'IOTAGetItService230') do
+  with CL.AddInterface(CL.FindInterface('IOTAGetItService220'),IOTAGetItService230, 'IOTAGetItService230') do
+  begin
+    RegisterMethod('Procedure CheckProjectDependencies(const Project:  IOTAProject)', cdRegister);
+    RegisterMethod('Function InstallAndroidSDK : Boolean', cdRegister);
+    RegisterMethod('Function InstallAndroidSDKTools : Boolean', cdRegister);
+    RegisterMethod('Function Install1(const CatalogId : string): Boolean', cdRegister);
+    RegisterMethod('Function Install(const CatalogId : string; AutoCloseProgressDlg : Boolean) : Boolean', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
 procedure SIRegister_IOTAGetItService(CL: TPSPascalCompiler);
 begin
-  //with RegInterfaceS(CL,'IOTAGetItService220', 'IOTAGetItService') do
-  with CL.AddInterface(CL.FindInterface('IOTAGetItService220'),IOTAGetItService, 'IOTAGetItService') do
+  //with RegInterfaceS(CL,'IOTAGetItService230', 'IOTAGetItService') do
+  with CL.AddInterface(CL.FindInterface('IOTAGetItService230'),IOTAGetItService, 'IOTAGetItService') do
   begin
     RegisterMethod('Function IsInstalled(const CatalogId: string): Boolean', cdRegister);
   end;
@@ -3883,8 +3899,18 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_IOTAProjectOptionsConfigurations(CL: TPSPascalCompiler);
 begin
-  //with RegInterfaceS(CL,'IOTAProjectOptionsConfigurations140', 'IOTAProjectOptionsConfigurations') do
-  with CL.AddInterface(CL.FindInterface('IOTAProjectOptionsConfigurations140'),IOTAProjectOptionsConfigurations, 'IOTAProjectOptionsConfigurations') do
+  //with RegInterfaceS(CL,'IOTAProjectOptionsConfigurations230', 'IOTAProjectOptionsConfigurations') do
+  with CL.AddInterface(CL.FindInterface('IOTAProjectOptionsConfigurations230'),IOTAProjectOptionsConfigurations, 'IOTAProjectOptionsConfigurations') do
+  begin
+    RegisterMethod('Function GetActiveMobileDevice( const PlatformName : string) : string', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAProjectOptionsConfigurations230(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTAProjectOptionsConfigurations140', 'IOTAProjectOptionsConfigurations230') do
+  with CL.AddInterface(CL.FindInterface('IOTAProjectOptionsConfigurations140'),IOTAProjectOptionsConfigurations230, 'IOTAProjectOptionsConfigurations230') do
   begin
     RegisterMethod('Function GetCurrentConfigurationName : string', cdRegister);
     RegisterMethod('Function GetCurrentPlatformName : string', cdRegister);
@@ -5327,7 +5353,10 @@ begin
  CL.AddConstantN('vvfPublished','LongWord').SetUInt( $03);
  CL.AddConstantN('vvfVisMask','LongWord').SetUInt( $04);
  CL.AddConstantN('vvfDeprecated','LongWord').SetUInt( $08);
- CL.AddConstantN('sBaseConfigurationKey','String').SetString( 'Base');
+ CL.AddConstantN('sBT_BuildType','String').SetString( 'BT_BuildType');
+ CL.AddConstantN('cbtiOSDeviceDebug','String').SetString( 'Debug');
+ CL.AddConstantN('cbtiOSDeviceAdhoc','String').SetString( 'Adhoc');
+ CL.AddConstantN('cbtiOSDeviceAppStore','String').SetString( 'AppStore');
  CL.AddConstantN('svpHighest','LongWord').SetInt( - 2147483648);
  CL.AddConstantN('svpHigh','LongInt').SetInt( - 255);
  CL.AddConstantN('svpNormal','LongInt').SetInt( 0);
@@ -5571,6 +5600,7 @@ begin
   SIRegister_IOTABuildConfiguration150(CL);
   SIRegister_IOTABuildConfiguration(CL);
   SIRegister_IOTAProjectOptionsConfigurations140(CL);
+  SIRegister_IOTAProjectOptionsConfigurations230(CL);
   SIRegister_IOTAProjectOptionsConfigurations(CL);
   SIRegister_IOTAProjectBuilder40(CL);
   CL.AddTypeS('TOTAProjectCompileInfo', 'record Mode : TOTACompileMode; Configu'
@@ -5666,7 +5696,7 @@ begin
   SIRegister_IOTAProcess90(CL);
   SIRegister_IOTAProcess150(CL);
   CL.AddTypeS('TOTAProcessType', '( optWin32, optOSX32, optWin64, optiOS32, opt'
-   +'Android, optiOS64 )');
+   +'Android, optiOS64, optLinux64 )');
   SIRegister_IOTAProcess(CL);
   SIRegister_INTAProcess150(CL);
   SIRegister_INTAProcess(CL);
@@ -5907,6 +5937,7 @@ begin
   SIRegister_IOTABuildEventProvider(CL);
   SIRegister_IOTAProjectUnitScopes(CL);
   SIRegister_IOTAGetItService220(CL);
+  SIRegister_IOTAGetItService230(CL);
   SIRegister_IOTAGetItService(CL);
   SIRegister_TNotifierObject(CL);
   SIRegister_TModuleNotifierObject(CL);
