@@ -21,7 +21,7 @@
 
     CnWizards 产品主要面对使用 Delphi 5 6 7、C++Builder 5 6 以及 BDS
 2005 2006、RAD Studio 2007 2009 2010、XE、XE2、XE3、XE4、XE5、XE6、XE7
-、XE8、10 Seattle 进行开发的程序员。
+、XE8、10 Seattle、10.1 Berlin 进行开发的程序员。
 
     CnWizards 目前包括以下几种语言的发布版本：简体中文、繁体中文、英语、
 俄语、德语。
