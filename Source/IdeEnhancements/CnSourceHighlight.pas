@@ -472,8 +472,8 @@ type
     FViewFileNameIsPascalList: TList;
 {$IFDEF BDS}
     FAnsiLineText: AnsiString;
-  {$IFDEF BDS2009_UP}
     FUniLineText: string;
+  {$IFDEF BDS2009_UP}
     FUseTabKey: Boolean;
     FTabWidth: Integer;
   {$ENDIF}
