@@ -2977,7 +2977,6 @@ var
     Layers: array of Integer;
   {$IFDEF UNICODE}
     ULine: string;
-    ALine: AnsiString;
   {$ENDIF}
   begin
     Result := False;
