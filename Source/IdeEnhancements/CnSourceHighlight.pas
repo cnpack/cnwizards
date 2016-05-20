@@ -2563,9 +2563,12 @@ function TCnSourceHighlight.EditorGetTextRect(Editor: TEditorObject;
   APos: TOTAEditPos; const {$IFDEF BDS}LineText, {$ENDIF} AText: string; var ARect: TRect): Boolean;
 {$IFDEF BDS}
 var
-  I, TotalWidth, UCol: Integer;
+  I, TotalWidth: Integer;
   S: AnsiString;
   UseTab: Boolean;
+{$IFDEF BDS}
+  UCol: Integer;
+{$ENDIF}
 {$IFDEF UNICODE}
   U: string;
 {$ELSE}
