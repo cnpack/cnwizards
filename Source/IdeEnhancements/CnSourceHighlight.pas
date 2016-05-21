@@ -2565,7 +2565,7 @@ function TCnSourceHighlight.EditorGetTextRect(Editor: TEditorObject;
 var
   I, TotalWidth, UCol: Integer;
   S: AnsiString;
-  UseTab: Boolean;
+  UseTab, UnicodeCanNotDirectlyToAnsi: Boolean;
 {$IFDEF UNICODE}
   U: string;
 {$ELSE}
@@ -2599,7 +2599,13 @@ begin
         EditCanvas := EditControlWrapper.GetEditControlCanvas(Editor.EditControl);
         TotalWidth := 0;
 
-        if {$IFNDEF UNICODE} False and {$ENDIF} CodePageOnlySupportsEnglish then
+{$IFDEF UNICODE}
+        UnicodeCanNotDirectlyToAnsi := CodePageOnlySupportsEnglish;
+{$ELSE}
+        UnicodeCanNotDirectlyToAnsi := True;
+{$ENDIF}
+
+        if UnicodeCanNotDirectlyToAnsi then
         begin
           // 纯英文平台下 D2009 以上转 AnsiString 会丢字符导致计算错误，此处换一种方法
           UCol := CalcWideStringLengthFromAnsiOffset(PWideChar(LineText), APos.Col);
