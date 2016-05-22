@@ -749,20 +749,23 @@ function CnOtaLinePosToEditPos(LinePos: Integer; EditView: IOTAEditView = nil): 
 
 procedure CnOtaSaveReaderToStream(EditReader: IOTAEditReader; Stream:
   TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
-  PreSize: Integer = 0; CheckUtf8: Boolean = True);
-{* 保存EditReader内容到流中，流中的内容默认为 Ansi 格式，带末尾 #0 字符}
+  PreSize: Integer = 0; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False);
+{* 保存EditReader内容到流中，流中的内容默认为 Ansi 格式，带末尾 #0 字符，
+   AlternativeWideChar 表示 CheckUtf8 为 True 时，在纯英文 OS 的 Unicode 环境下，
+   是否将转换成的 Ansi 中的每个宽字符手动替换成两个空格。此选项用于躲过纯英文 OS
+   的 Unicode 环境下 UnicodeString 直接转 Ansi 时的丢字符问题}
 
 procedure CnOtaSaveEditorToStreamEx(Editor: IOTASourceEditor; Stream:
   TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
-  PreSize: Integer = 0; CheckUtf8: Boolean = True);
+  PreSize: Integer = 0; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False);
 {* 保存编辑器文本到流中}
 
 function CnOtaSaveEditorToStream(Editor: IOTASourceEditor; Stream: TMemoryStream;
-  FromCurrPos: Boolean = False; CheckUtf8: Boolean = True): Boolean;
+  FromCurrPos: Boolean = False; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False): Boolean;
 {* 保存编辑器文本到流中}
 
 function CnOtaSaveCurrentEditorToStream(Stream: TMemoryStream; FromCurrPos:
-  Boolean; CheckUtf8: Boolean = True): Boolean;
+  Boolean; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False): Boolean;
 {* 保存当前编辑器文本到流中}
 
 function CnOtaGetCurrentEditorSource(CheckUtf8: Boolean = True): string;
@@ -5484,7 +5487,7 @@ end;
 // 保存EditReader内容到流中，流中的内容默认为 Ansi 格式
 procedure CnOtaSaveReaderToStream(EditReader: IOTAEditReader; Stream:
   TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
-  PreSize: Integer = 0; CheckUtf8: Boolean = True);
+  PreSize: Integer = 0; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False);
 const
   // Leave typed constant as is - needed for streaming code.
   TerminatingNulChar: Char = #0;
@@ -5497,6 +5500,56 @@ var
 {$IFDEF IDE_WIDECONTROL}
   Text: AnsiString;
 {$ENDIF}
+
+{$IFDEF UNICODE}
+  UniText: string;
+
+  // 在纯英文环境下将宽字符串转换成 Ansi，把其中的宽字符都替换成两个 AlterChar
+  function ConvertUtf16ToAlterAnsi(WideText: PWideChar; AlterChar: AnsiChar = ' '): AnsiString;
+  var
+    Len: Integer;
+  begin
+    if WideText = nil then
+    begin
+      Result := '';
+      Exit;
+    end;
+
+    Len := StrLen(WideText);
+    if Len = 0 then
+    begin
+      Result := '';
+      Exit;
+    end;
+
+    SetLength(Result, Len * SizeOf(WideChar));
+    CnDebugger.LogMsg('ConvertUtf16ToAlterAnsi Len is ' + IntToStr(Len));
+    Len := 0;
+    while WideText^ <> #0 do
+    begin
+      if WideCharIsWideLength(WideText^) then
+      begin
+        Inc(Len);
+        Result[Len] := AlterChar;
+        Inc(Len);
+        Result[Len] := AlterChar;
+      end
+      else
+      begin
+        Inc(Len);
+        if Ord(WideText^) < 255 then // Absolutely 'Single' Char
+          Result[Len] := AnsiChar(WideText^)
+        else                         // Extended 'Single' Char, Replace
+          Result[Len] := AlterChar;
+      end;
+      Inc(WideText);
+    end;
+    CnDebugger.LogMsg('ConvertUtf16ToAlterAnsi New Len is ' + IntToStr(Len));
+    SetLength(Result, Len);
+  end;
+
+{$ENDIF}
+
 begin
   Assert(EditReader <> nil);
   Assert(Stream <> nil);
@@ -5542,7 +5595,23 @@ begin
 {$IFDEF IDE_WIDECONTROL}
   if CheckUtf8 then
   begin
-    Text := CnUtf8ToAnsi(PAnsiChar(Stream.Memory));
+    AlternativeWideChar := AlternativeWideChar and _UNICODE_STRING and CodePageOnlySupportsEnglish;
+
+    if AlternativeWideChar then
+    begin
+{$IFDEF UNICODE}
+      // Unicode 环境里在纯英文 OS 下不能按照后面的转 Ansi，以免丢字符。
+      // 需要转成 UTF16 的再硬替成 Ansi。
+      UniText := Utf8Decode(PAnsiChar(Stream.Memory));
+      Text := ConvertUtf16ToAlterAnsi(PWideChar(UniText));
+{$ELSE}
+      Text := CnUtf8ToAnsi(PAnsiChar(Stream.Memory));
+{$ENDIF}
+    end
+    else
+    begin
+      Text := CnUtf8ToAnsi(PAnsiChar(Stream.Memory));
+    end;
     Stream.Size := Length(Text) + 1;
     Stream.Position := 0;
     Stream.Write(PAnsiChar(Text)^, Length(Text) + 1);
@@ -5555,7 +5624,7 @@ end;
 // 保存编辑器文本到流中
 procedure CnOtaSaveEditorToStreamEx(Editor: IOTASourceEditor; Stream:
   TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
-  PreSize: Integer = 0; CheckUtf8: Boolean = True);
+  PreSize: Integer = 0; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False);
 begin
   if Editor = nil then
   begin
@@ -5564,12 +5633,12 @@ begin
       Exit;
   end;
 
-  CnOtaSaveReaderToStream(Editor.CreateReader, Stream, StartPos, EndPos, PreSize, CheckUtf8);
+  CnOtaSaveReaderToStream(Editor.CreateReader, Stream, StartPos, EndPos, PreSize, CheckUtf8, AlternativeWideChar);
 end;
 
 // 保存编辑器文本到流中
 function CnOtaSaveEditorToStream(Editor: IOTASourceEditor; Stream: TMemoryStream;
-  FromCurrPos: Boolean = False; CheckUtf8: Boolean = True): Boolean;
+  FromCurrPos: Boolean = False; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False): Boolean;
 var
   IPos: Integer;
   PreSize: Integer;
@@ -5602,16 +5671,16 @@ begin
     if PreSize < 0 then
       PreSize := 0;
 
-    CnOtaSaveEditorToStreamEx(Editor, Stream, IPos, 0, PreSize, CheckUtf8);
+    CnOtaSaveEditorToStreamEx(Editor, Stream, IPos, 0, PreSize, CheckUtf8, AlternativeWideChar);
     Result := True;
   end;
 end;
 
 // 保存当前编辑器文本到流中
 function CnOtaSaveCurrentEditorToStream(Stream: TMemoryStream; FromCurrPos:
-  Boolean; CheckUtf8: Boolean = True): Boolean;
+  Boolean; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False): Boolean;
 begin
-  Result := CnOtaSaveEditorToStream(nil, Stream, FromCurrPos, CheckUtf8);
+  Result := CnOtaSaveEditorToStream(nil, Stream, FromCurrPos, CheckUtf8, AlternativeWideChar);
 end;
 
 // 取得当前编辑器源代码

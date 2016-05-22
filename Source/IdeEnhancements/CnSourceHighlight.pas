@@ -38,7 +38,11 @@ unit CnSourceHighlight;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2016.02.05
+* 修改记录：2016.05.22
+*               修正纯英文环境下 Unicode IDE 内的宽字节字符转换成 Ansi 有误的问题
+*               全文解析时允许将普通宽字节字符替换成单个或两个空格，从而避免直接
+*               转换时被半角问号代替导致计算偏差。
+*           2016.02.05
 *               修正 Unicode IDE 下括号配对功能对于包含汉字的行可能出现位置偏差的问题
 *           2014.12.25
 *               增加高亮光标下配对的条件编译指令功能
@@ -853,6 +857,7 @@ begin
 end;
 
 {$IFDEF UNICODE}
+
 function StartWithIgnoreCase(Pattern: PAnsiChar; Content: PAnsiChar): Boolean; inline;
 var
   PP, PC: PAnsiChar;
@@ -883,6 +888,57 @@ begin
   end;
   Result := PP^ = #0;
 end;
+
+function ConvertUtf8PositionToAnsi(const Utf8Text: AnsiString; Utf8Col: Integer): Integer;
+var
+  ALine: AnsiString;
+  ULine: string;
+begin
+  Result := Utf8Col;
+  if Result < 0 then
+    Exit;
+
+  ALine := Copy(Utf8Text, 1, Utf8Col - 1);
+  if CodePageOnlySupportsEnglish then
+  begin
+    ULine := string(ALine);
+    Result := CalcAnsiLengthFromWideString(PWideChar(ULine)) + 1;
+  end
+  else
+  begin
+    Result := Length(CnUtf8ToAnsi(ALine)) + 1;
+  end;
+end;
+
+function ConvertAnsiPositionToUtf8OnUnicodeText(const Text: string;
+  AnsiCol: Integer): Integer;
+var
+  ULine: string;
+  UniCol: Integer;
+  ALine: AnsiString;
+begin
+  Result := AnsiCol;
+  if Result <= 0 then
+    Exit;
+
+  if CodePageOnlySupportsEnglish then
+  begin
+    UniCol := CalcWideStringLengthFromAnsiOffset(PWideChar(Text), AnsiCol);
+    ULine := Copy(Text, 1, UniCol - 1);
+    ALine := Utf8Encode(ULine);
+    Result := Length(ALine) + 1;
+  end
+  else
+  begin
+    ALine := AnsiString(Text);
+    ALine := Copy(ALine, 1, AnsiCol - 1);         // 按 Ansi 的 Col 截断
+    UniCol := Length(string(ALine)) + 1;          // 转回 Unicode 的 Col
+    ULine := Copy(Text, 1, UniCol - 1);           // 重新截断
+    ALine := CnAnsiToUtf8(AnsiString(ULine));     // 转成 Ansi-Utf8
+    Result := Length(ALine) + 1;                  // 取 UTF8 的长度
+  end;
+end;
+
 {$ENDIF}
 
 function CheckIsCompDirectiveToken(AToken: TCnPasToken; IsCpp: Boolean): Boolean;
@@ -1087,6 +1143,7 @@ var
   EditPos: TOTAEditPos;
   i: Integer;
   StartIndex, EndIndex: Integer;
+  UnicodeCanNotDirectlyToAnsi: Boolean;
 
   function IsHighlightKeywords(TokenID: TTokenKind): Boolean;
   var
@@ -1145,6 +1202,7 @@ begin
     Exit;
   end;
 
+  UnicodeCanNotDirectlyToAnsi := _UNICODE_STRING and CodePageOnlySupportsEnglish;
   if not IsDprOrPas(EditView.Buffer.FileName) and not IsInc(EditView.Buffer.FileName) then
   begin
 {$IFDEF DEBUG}
@@ -1163,7 +1221,7 @@ begin
   {$IFDEF DEBUG}
         CnDebugger.LogMsg('Parse Cpp Source file: ' + EditView.Buffer.FileName);
   {$ENDIF}
-        CnOtaSaveEditorToStream(EditView.Buffer, Stream);
+        CnOtaSaveEditorToStream(EditView.Buffer, Stream, False, True, UnicodeCanNotDirectlyToAnsi);
         // 解析当前显示的源文件
         CppParser.ParseSource(PAnsiChar(Stream.Memory), Stream.Size,
           EditView.CursorPos.Line, EditView.CursorPos.Col);
@@ -1252,7 +1310,7 @@ begin
   {$IFDEF DEBUG}
         CnDebugger.LogMsg('Parse Pascal Source file: ' + EditView.Buffer.FileName);
   {$ENDIF}
-        CnOtaSaveEditorToStream(EditView.Buffer, Stream);
+        CnOtaSaveEditorToStream(EditView.Buffer, Stream, False, True, UnicodeCanNotDirectlyToAnsi);
         // 解析当前显示的源文件，需要高亮当前标识符时不设置KeyOnly
 {$IFDEF BDS2009_UP}
         PasParser.TabWidth := FHighlight.FTabWidth;
@@ -2565,7 +2623,7 @@ function TCnSourceHighlight.EditorGetTextRect(Editor: TEditorObject;
 var
   I, TotalWidth, UCol: Integer;
   S: AnsiString;
-  UseTab, UnicodeCanNotDirectlyToAnsi: Boolean;
+  UseTab: Boolean;
 {$IFDEF UNICODE}
   U: string;
 {$ELSE}
@@ -2599,13 +2657,7 @@ begin
         EditCanvas := EditControlWrapper.GetEditControlCanvas(Editor.EditControl);
         TotalWidth := 0;
 
-{$IFDEF UNICODE}
-        UnicodeCanNotDirectlyToAnsi := CodePageOnlySupportsEnglish;
-{$ELSE}
-        UnicodeCanNotDirectlyToAnsi := True;
-{$ENDIF}
-
-        if UnicodeCanNotDirectlyToAnsi then
+        if _UNICODE_STRING and CodePageOnlySupportsEnglish then
         begin
           // 纯英文平台下 D2009 以上转 AnsiString 会丢字符导致计算错误，此处换一种方法
           UCol := CalcWideStringLengthFromAnsiOffset(PWideChar(LineText), APos.Col);
@@ -2766,60 +2818,6 @@ var
   BracketChars: PBracketArray;
   TmpPos: TOTAEditPos;
   TmpULine: string;
-
-{$IFDEF UNICODE}
-
-  function ConvertUtf8PositionToAnsi(const Utf8Text: AnsiString; Utf8Col: Integer): Integer;
-  var
-    ALine: AnsiString;
-    ULine: string;
-  begin
-    Result := Utf8Col;
-    if Result < 0 then
-      Exit;
-
-    ALine := Copy(Utf8Text, 1, Utf8Col - 1);
-    if CodePageOnlySupportsEnglish then
-    begin
-      ULine := string(ALine);
-      Result := CalcAnsiLengthFromWideString(PWideChar(ULine)) + 1;
-    end
-    else
-    begin
-      Result := Length(CnUtf8ToAnsi(ALine)) + 1;
-    end;
-  end;
-
-  function ConvertAnsiPositionToUtf8OnUnicodeText(const Text: string;
-    AnsiCol: Integer): Integer;
-  var
-    ULine: string;
-    UniCol: Integer;
-    ALine: AnsiString;
-  begin
-    Result := AnsiCol;
-    if Result <= 0 then
-      Exit;
-
-    if CodePageOnlySupportsEnglish then
-    begin
-      UniCol := CalcWideStringLengthFromAnsiOffset(PWideChar(Text), AnsiCol);
-      ULine := Copy(Text, 1, UniCol - 1);
-      ALine := Utf8Encode(ULine);
-      Result := Length(ALine) + 1;
-    end
-    else
-    begin
-      ALine := AnsiString(Text);
-      ALine := Copy(ALine, 1, AnsiCol - 1);         // 按 Ansi 的 Col 截断
-      UniCol := Length(string(ALine)) + 1;          // 转回 Unicode 的 Col
-      ULine := Copy(Text, 1, UniCol - 1);           // 重新截断
-      ALine := CnAnsiToUtf8(AnsiString(ULine));     // 转成 Ansi-Utf8
-      Result := Length(ALine) + 1;                  // 取 UTF8 的长度
-    end;
-  end;
-
-{$ENDIF}
 
   function InCommentOrString(APos: TOTAEditPos): Boolean;
   var
@@ -3742,14 +3740,22 @@ var
   begin
     // 因为关键字的 Token 中不会出现双字节字符，因此只需计算一次 EditPosColBase 即可
     Result := Token.EditCol;
-    {$IFDEF BDS}
-      // GetAttributeAtPos 需要的是 UTF8 的Pos，因此进行 Col 的 UTF8 转换
-      // 但实际上并非如此转换的简单，因为有部分双字节字符如 Accent Char
-      // 等自身只占一个字符的位置，并非如汉字字符一样占两个字符位置，因此
-      // 代码中有此等字符时会出现错位的情况，BDS 都有这个问题。
+{$IFDEF BDS}
+    // GetAttributeAtPos 需要的是 UTF8 的Pos，因此进行 Col 的 UTF8 转换
+    // 但实际上并非如此转换的简单，因为有部分双字节字符如 Accent Char
+    // 等自身只占一个字符的位置，并非如汉字字符一样占两个字符位置，因此
+    // 代码中有此等字符时会出现错位的情况，BDS 都有这个问题。
+    if _UNICODE_STRING and CodePageOnlySupportsEnglish then
+    begin
+      if FUniLineText <> '' then
+        Result := ConvertAnsiPositionToUtf8OnUnicodeText(FUniLineText, Token.EditCol);
+    end
+    else
+    begin
       if FAnsiLineText <> '' then
         Result := Length(CnAnsiToUtf8(Copy(FAnsiLineText, 1, Token.EditCol)));
-    {$ENDIF}
+    end;
+{$ENDIF}
   end;
 
 begin
@@ -3958,8 +3964,16 @@ begin
 
             // Token 前也就是初始 EditCol 需要 UTF8 转换
 {$IFDEF BDS}
-            if FAnsiLineText <> '' then
-              EditPos.Col := Length(CnAnsiToUtf8(Copy(FAnsiLineText, 1, Token.EditCol)));
+            if _UNICODE_STRING and CodePageOnlySupportsEnglish then
+            begin
+              if FUniLineText <> '' then
+                EditPos.Col := ConvertAnsiPositionToUtf8OnUnicodeText(FUniLineText, Token.EditCol);
+            end
+            else
+            begin
+              if FAnsiLineText <> '' then
+                EditPos.Col := Length(CnAnsiToUtf8(Copy(FAnsiLineText, 1, Token.EditCol)));
+            end;
 {$ENDIF}
             CanDrawToken := True;
             for J := 0 to TokenLen - 1 do
@@ -4048,8 +4062,16 @@ begin
 
             // Token 前也就是初始 EditCol 需要 UTF8 转换
 {$IFDEF BDS}
-            if FAnsiLineText <> '' then
-              EditPos.Col := Length(CnAnsiToUtf8(Copy(FAnsiLineText, 1, Token.EditCol)));
+            if _UNICODE_STRING and CodePageOnlySupportsEnglish then
+            begin
+              if FUniLineText <> '' then
+                EditPos.Col := ConvertAnsiPositionToUtf8OnUnicodeText(FUniLineText, Token.EditCol);
+            end
+            else
+            begin
+              if FAnsiLineText <> '' then
+                EditPos.Col := Length(CnAnsiToUtf8(Copy(FAnsiLineText, 1, Token.EditCol)));
+            end;
 {$ENDIF}
             CanDrawToken := True;
             for J := 0 to TokenLen - 1 do
