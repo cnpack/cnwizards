@@ -856,6 +856,36 @@ begin
   Result := False;
 end;
 
+// 此函数非 Unicode IDE 下不应该被调用
+function ConvertAnsiPositionToUtf8OnUnicodeText(const Text: string;
+  AnsiCol: Integer): Integer;
+var
+  ULine: string;
+  UniCol: Integer;
+  ALine: AnsiString;
+begin
+  Result := AnsiCol;
+  if Result <= 0 then
+    Exit;
+
+  if CodePageOnlySupportsEnglish then
+  begin
+    UniCol := CalcWideStringLengthFromAnsiOffset(PWideChar(Text), AnsiCol);
+    ULine := Copy(Text, 1, UniCol - 1);
+    ALine := Utf8Encode(ULine);
+    Result := Length(ALine) + 1;
+  end
+  else
+  begin
+    ALine := AnsiString(Text);
+    ALine := Copy(ALine, 1, AnsiCol - 1);         // 按 Ansi 的 Col 截断
+    UniCol := Length(string(ALine)) + 1;          // 转回 Unicode 的 Col
+    ULine := Copy(Text, 1, UniCol - 1);           // 重新截断
+    ALine := CnAnsiToUtf8(AnsiString(ULine));     // 转成 Ansi-Utf8
+    Result := Length(ALine) + 1;                  // 取 UTF8 的长度
+  end;
+end;
+
 {$IFDEF UNICODE}
 
 function StartWithIgnoreCase(Pattern: PAnsiChar; Content: PAnsiChar): Boolean; inline;
@@ -907,35 +937,6 @@ begin
   else
   begin
     Result := Length(CnUtf8ToAnsi(ALine)) + 1;
-  end;
-end;
-
-function ConvertAnsiPositionToUtf8OnUnicodeText(const Text: string;
-  AnsiCol: Integer): Integer;
-var
-  ULine: string;
-  UniCol: Integer;
-  ALine: AnsiString;
-begin
-  Result := AnsiCol;
-  if Result <= 0 then
-    Exit;
-
-  if CodePageOnlySupportsEnglish then
-  begin
-    UniCol := CalcWideStringLengthFromAnsiOffset(PWideChar(Text), AnsiCol);
-    ULine := Copy(Text, 1, UniCol - 1);
-    ALine := Utf8Encode(ULine);
-    Result := Length(ALine) + 1;
-  end
-  else
-  begin
-    ALine := AnsiString(Text);
-    ALine := Copy(ALine, 1, AnsiCol - 1);         // 按 Ansi 的 Col 截断
-    UniCol := Length(string(ALine)) + 1;          // 转回 Unicode 的 Col
-    ULine := Copy(Text, 1, UniCol - 1);           // 重新截断
-    ALine := CnAnsiToUtf8(AnsiString(ULine));     // 转成 Ansi-Utf8
-    Result := Length(ALine) + 1;                  // 取 UTF8 的长度
   end;
 end;
 
