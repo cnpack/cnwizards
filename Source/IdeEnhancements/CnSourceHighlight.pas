@@ -859,15 +859,18 @@ end;
 // 此函数非 Unicode IDE 下不应该被调用
 function ConvertAnsiPositionToUtf8OnUnicodeText(const Text: string;
   AnsiCol: Integer): Integer;
+{$IFDEF UNICODE}
 var
   ULine: string;
   UniCol: Integer;
   ALine: AnsiString;
+{$ENDIF}
 begin
   Result := AnsiCol;
   if Result <= 0 then
     Exit;
 
+{$IFDEF UNICODE}
   if CodePageOnlySupportsEnglish then
   begin
     UniCol := CalcWideStringLengthFromAnsiOffset(PWideChar(Text), AnsiCol);
@@ -884,6 +887,7 @@ begin
     ALine := CnAnsiToUtf8(AnsiString(ULine));     // 转成 Ansi-Utf8
     Result := Length(ALine) + 1;                  // 取 UTF8 的长度
   end;
+{$ENDIF}
 end;
 
 {$IFDEF UNICODE}
