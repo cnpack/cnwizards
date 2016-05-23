@@ -43,6 +43,9 @@ uses
   CnLangStorage, CnHashLangStorage, CnClasses, CnMsgClasses, CnTrayIcon,
   CnWizCfgUtils, CnUDP, CnDebugIntf, CnCRC32;
 
+const
+  WM_TAB_MAKE_VISIBLE = WM_USER + $108;
+
 type
   TCnFormSwitch = (fsAdd, fsUpdate, fsDelete, fsActiveChange);
   TCnRunningState = (rsStopped, rsRunning, rsPaused);
@@ -255,6 +258,7 @@ type
     procedure OnUpdateStore(var Msg: TMessage); message WM_USER_UPDATE_STORE;
     procedure OnNewChildForm(var Msg: TMessage); message WM_USER_NEW_FORM;
     procedure OnHotKey(var Message: TMessage); message WM_HOTKEY;
+    procedure OnTabMakeVisible(var Message: TMessage); message WM_TAB_MAKE_VISIBLE;
   protected
     procedure DoCreate; override;
   public
@@ -1211,7 +1215,10 @@ var
 begin
   P := tsSwitch.ScreenToClient(Mouse.CursorPos);
   if tsSwitch.ItemAtPos(P) >= 0 then
+  begin
     actSwtClose.Execute;
+    PostMessage(Handle, WM_TAB_MAKE_VISIBLE, 0, 0);
+  end;
 end;
 
 procedure TCnMainViewer.actAutoScrollExecute(Sender: TObject);
@@ -1269,6 +1276,11 @@ begin
     ADesc.Length := Len + SizeOf(TCnMsgAnnex) + SizeOf(Integer) + 1;
     AStore.AddMsgDesc(@ADesc);
   end;
+end;
+
+procedure TCnMainViewer.OnTabMakeVisible(var Message: TMessage);
+begin
+  tsSwitch.MakeTabVisible;
 end;
 
 end.
