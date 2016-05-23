@@ -5412,21 +5412,26 @@ var
         Exit;
       end;
   end;
+
 begin
   FCurrentPair := nil;
   FCurrentToken := nil;
-  Text := AnsiString(GetStrProp(FControl, 'LineText'));
+
+  if _UNICODE_STRING and CodePageOnlySupportsEnglish then // 纯英文 Unicode 环境下不能直接转 Ansi
+    Text := ConvertUtf16ToAlterAnsi(PWideChar(GetStrProp(FControl, 'LineText')), 'C')
+  else
+    Text := AnsiString(GetStrProp(FControl, 'LineText'));
+
   Col := View.CursorPos.Col;
 {$IFDEF BDS}
   // TODO: 用 TextWidth 获得光标位置精确对应的源码字符位置，但实现较难。
   // 当存在占据单字符位置的双字节字符时，以下算法会有偏差。
 
-  // 获得的是 UTF8 字符串与 Pos，需要转换成 Ansi 的，但 D2009 无需转换
+  // D2007 与以下版本获得的是 UTF8 字符串与 Pos，需要转换成 Ansi 的，
+  // 但 D2009 的 LineText 属性是 UnicodeString，上面已经 Ansi 化了，无需再次转换
   if Text <> '' then
   begin
-    {$IFDEF UNICODE}
-    //Col := Length(CnUtf8ToAnsi(Copy(CnAnsiToUtf8(Text), 1, Col)));
-    {$ELSE}
+    {$IFNDEF UNICODE}
     Col := Length(CnUtf8ToAnsi(Copy(Text, 1, Col)));
     Text := CnUtf8ToAnsi(Text);
     {$ENDIF}
@@ -5590,10 +5595,16 @@ var
         Exit;
       end;
   end;
+
 begin
   FCurrentPair := nil;
   FCurrentToken := nil;
-  Text := AnsiString(GetStrProp(FControl, 'LineText'));
+
+  if _UNICODE_STRING and CodePageOnlySupportsEnglish then // 纯英文 Unicode 环境下不能直接转 Ansi
+    Text := ConvertUtf16ToAlterAnsi(PWideChar(GetStrProp(FControl, 'LineText')), 'C')
+  else
+    Text := AnsiString(GetStrProp(FControl, 'LineText'));
+
   Col := View.CursorPos.Col;
 {$IFDEF BDS}
   // TODO: 用 TextWidth 获得光标位置精确对应的源码字符位置，但实现较难。

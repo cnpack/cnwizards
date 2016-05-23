@@ -71,7 +71,7 @@ uses
   DsgnIntf, LibIntf,
   {$ENDIF}
   {$IFDEF DELPHIXE3_UP}Actions,{$ENDIF}
-  Clipbrd, TypInfo, ComCtrls, StdCtrls, Imm, Contnrs, RegExpr,
+  Clipbrd, TypInfo, ComCtrls, StdCtrls, Imm, Contnrs, RegExpr, CnWizCompilerConst,
   CnWizConsts, CnCommon, CnConsts, CnWideStrings, CnWizClasses, CnWizIni;
 
 type
@@ -4188,7 +4188,11 @@ begin
     if CheckCursorOutOfLineEnd and CnOtaIsEditPosOutOfLine(EditView.CursorPos) then
       Exit;
 
-    AnsiText := AnsiString(LineText);
+    if _UNICODE_STRING and CodePageOnlySupportsEnglish then // 纯英文 Unicode 环境下不能直接转 Ansi
+      AnsiText := ConvertUtf16ToAlterAnsi(PWideChar(LineText), 'C')
+    else
+      AnsiText := AnsiString(LineText);
+
     i := CharIndex;
     CurrIndex := 0;
     // 查找起始字符
@@ -5503,51 +5507,6 @@ var
 
 {$IFDEF UNICODE}
   UniText: string;
-
-  // 在纯英文环境下将宽字符串转换成 Ansi，把其中的宽字符都替换成两个 AlterChar
-  function ConvertUtf16ToAlterAnsi(WideText: PWideChar; AlterChar: AnsiChar = ' '): AnsiString;
-  var
-    Len: Integer;
-  begin
-    if WideText = nil then
-    begin
-      Result := '';
-      Exit;
-    end;
-
-    Len := StrLen(WideText);
-    if Len = 0 then
-    begin
-      Result := '';
-      Exit;
-    end;
-
-    SetLength(Result, Len * SizeOf(WideChar));
-    CnDebugger.LogMsg('ConvertUtf16ToAlterAnsi Len is ' + IntToStr(Len));
-    Len := 0;
-    while WideText^ <> #0 do
-    begin
-      if WideCharIsWideLength(WideText^) then
-      begin
-        Inc(Len);
-        Result[Len] := AlterChar;
-        Inc(Len);
-        Result[Len] := AlterChar;
-      end
-      else
-      begin
-        Inc(Len);
-        if Ord(WideText^) < 255 then // Absolutely 'Single' Char
-          Result[Len] := AnsiChar(WideText^)
-        else                         // Extended 'Single' Char, Replace
-          Result[Len] := AlterChar;
-      end;
-      Inc(WideText);
-    end;
-    CnDebugger.LogMsg('ConvertUtf16ToAlterAnsi New Len is ' + IntToStr(Len));
-    SetLength(Result, Len);
-  end;
-
 {$ENDIF}
 
 begin
