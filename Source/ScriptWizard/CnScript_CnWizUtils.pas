@@ -374,6 +374,8 @@ begin
   CL.AddDelphiFunction('Function CnOtaGetFileEditorForModule( Module : IOTAModule; Index : Integer) : IOTAEditor');
   CL.AddDelphiFunction('Function CnOtaGetFormEditorFromModule( const Module : IOTAModule) : IOTAFormEditor');
   CL.AddDelphiFunction('Function CnOtaGetCurrentFormEditor : IOTAFormEditor');
+  CL.AddDelphiFunction('Function CnOtaGetDesignContainerFromEditor( FormEditor : IOTAFormEditor): TWinControl');
+  CL.AddDelphiFunction('Function CnOtaGetCurrentDesignContainer : TWinControl');
   CL.AddDelphiFunction('Function CnOtaGetSelectedControlFromCurrentForm( List: TList): Boolean');
   CL.AddDelphiFunction('Function CnOtaShowFormForModule( const Module : IOTAModule) : Boolean');
   CL.AddDelphiFunction('Procedure CnOtaShowDesignerForm');
@@ -629,6 +631,8 @@ begin
   S.RegisterDelphiFunction(@CnOtaGetFileEditorForModule, 'CnOtaGetFileEditorForModule', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetFormEditorFromModule, 'CnOtaGetFormEditorFromModule', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetCurrentFormEditor, 'CnOtaGetCurrentFormEditor', cdRegister);
+  S.RegisterDelphiFunction(@CnOtaGetDesignContainerFromEditor, 'CnOtaGetDesignContainerFromEditor', cdRegister);
+  S.RegisterDelphiFunction(@CnOtaGetCurrentDesignContainer, 'CnOtaGetCurrentDesignContainer', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetSelectedControlFromCurrentForm, 'CnOtaGetSelectedControlFromCurrentForm', cdRegister);
   S.RegisterDelphiFunction(@CnOtaShowFormForModule, 'CnOtaShowFormForModule', cdRegister);
   S.RegisterDelphiFunction(@CnOtaShowDesignerForm, 'CnOtaShowDesignerForm', cdRegister);
