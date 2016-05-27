@@ -1266,6 +1266,7 @@ begin
       for I := 0 to KeyCount - 1 do
       begin
         // 转换成 Col 与 Line
+{$IFNDEF BDS2009_UP}
         CharPos := OTACharPos(KeyTokens[I].CharIndex - 1, KeyTokens[I].LineNumber);
         try
           EditView.ConvertPos(False, EditPos, CharPos);
@@ -1274,8 +1275,8 @@ begin
         end;
         // 以上这句 ConvertPos 在 D2009 或以上中带汉字时的结果可能会有偏差，
         // 因此直接采用下面 CharIndex + 1 的方式，但对 Tab 键展开缺乏处理。
-{$IFDEF BDS2009_UP}
-        // if not FHighlight.FUseTabKey then
+{$ELSE}
+        EditPos.Line := KeyTokens[I].LineNumber;
         EditPos.Col := KeyTokens[I].CharIndex + 1;
 {$ENDIF}
         KeyTokens[I].EditCol := EditPos.Col;
@@ -1384,12 +1385,13 @@ begin
       for I := 0 to KeyCount - 1 do
       begin
         // 转换成 Col 与 Line
+{$IFNDEF BDS2009_UP}
         CharPos := OTACharPos(KeyTokens[I].CharIndex, KeyTokens[I].LineNumber + 1);
         EditView.ConvertPos(False, EditPos, CharPos);
         // TODO: 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，
         // 因此直接采用下面 CharIndex + 1 的方式，Parser 本身已对 Tab 键展开。
-{$IFDEF BDS2009_UP}
-        // if not FHighlight.FUseTabKey then
+{$ELSE}
+        EditPos.Line := KeyTokens[I].LineNumber + 1;
         EditPos.Col := KeyTokens[I].CharIndex + 1;
 {$ENDIF}
         KeyTokens[I].EditCol := EditPos.Col;
@@ -1842,11 +1844,12 @@ begin
         if not CheckIsCompDirectiveToken(PasParser.Tokens[I], FIsCppSource) then
           Continue;
 
+{$IFNDEF BDS2009_UP}
         CharPos := OTACharPos(PasParser.Tokens[I].CharIndex, PasParser.Tokens[I].LineNumber + 1);
         EditView.ConvertPos(False, EditPos, CharPos);
-        // TODO: 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
-{$IFDEF BDS2009_UP}
-        // if not FHighlight.FUseTabKey then
+        // 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
+{$ELSE}
+        EditPos.Line := PasParser.Tokens[I].LineNumber + 1;
         EditPos.Col := PasParser.Tokens[I].CharIndex + 1;
 {$ENDIF}
         PasParser.Tokens[I].EditCol := EditPos.Col;
@@ -3332,12 +3335,12 @@ begin
       if Info.IsMatch then
       begin
         if (LogicLineNum = Info.TokenPos.Line) and EditorGetTextRect(Editor,
-          OTAEditPos(Info.TokenPos.Col, LineNum), {$IFDEF BDS}FUniLineText, {$ENDIF} Info.TokenStr, R) then
+          OTAEditPos(Info.TokenPos.Col, LineNum), {$IFDEF BDS}FUniLineText, {$ENDIF} string(Info.TokenStr), R) then
           EditorPaintText(EditControl, R, Info.TokenStr, BracketColor,
             BracketColorBk, BracketColorBd, BracketBold, False, False);
 
         if (LogicLineNum = Info.TokenMatchPos.Line) and EditorGetTextRect(Editor,
-          OTAEditPos(Info.TokenMatchPos.Col, LineNum), {$IFDEF BDS}FUniLineText, {$ENDIF} Info.TokenMatchStr, R) then
+          OTAEditPos(Info.TokenMatchPos.Col, LineNum), {$IFDEF BDS}FUniLineText, {$ENDIF} string(Info.TokenMatchStr), R) then
           EditorPaintText(EditControl, R, Info.TokenMatchStr, BracketColor,
             BracketColorBk, BracketColorBd, BracketBold, False, False);
       end;
@@ -3905,7 +3908,7 @@ begin
               EditPos := OTAEditPos(Token.EditCol + J, LineNum);
               if not RectGot then
               begin
-                if EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FUniLineText, {$ENDIF} Token.Token[J], R) then
+                if EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FUniLineText, {$ENDIF} string(Token.Token[J]), R) then
                   RectGot := True
                 else
                   Continue;
@@ -3964,7 +3967,7 @@ begin
             TokenLen := Length(Token.Token);
 
             EditPos := OTAEditPos(Token.EditCol, LineNum);
-            if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FUniLineText, {$ENDIF} Token.Token, R) then
+            if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FUniLineText, {$ENDIF} string(Token.Token), R) then
               Continue;
 
             EditPos.Col := Token.EditCol;
@@ -4062,7 +4065,7 @@ begin
             TokenLen := Length(Token.Token);
 
             EditPos := OTAEditPos(Token.EditCol, LineNum);
-            if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FUniLineText, {$ENDIF} Token.Token, R) then
+            if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FUniLineText, {$ENDIF} string(Token.Token), R) then
               Continue;
 
             EditPos.Col := Token.EditCol;
@@ -4172,7 +4175,7 @@ begin
               (CompDirectivePair.IndexOfMiddleToken(Token) >= 0) then
             begin
               EditPos := OTAEditPos(Token.EditCol, LineNum);
-              if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FUniLineText, {$ENDIF} Token.Token, R) then
+              if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FUniLineText, {$ENDIF} string(Token.Token), R) then
                 Continue;
 
               EditPos.Col := Token.EditCol;

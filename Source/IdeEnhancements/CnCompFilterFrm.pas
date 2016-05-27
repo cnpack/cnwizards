@@ -59,7 +59,7 @@ type
 
   TCnIdeCompType = (ctVCL, ctCLX, ctBoth);
 
-  TCnIdeCompInfo = class(TObject)
+  TCnIdeCompInfo = class(TPersistent)
   private
     FCompName: string;
     FTabName: string;
@@ -467,7 +467,7 @@ begin
 
             AClass := GetClass(Info.InternalName);
             if (AClass <> nil) and (PTypeInfo(AClass.ClassInfo).Kind = tkClass) then
-              Info.CompUnitName := GetTypeData(PTypeInfo(AClass.ClassInfo)).UnitName;
+              Info.CompUnitName := string(GetTypeData(PTypeInfo(AClass.ClassInfo)).UnitName);
 
             FCompList.AddObject(Info.CompName, Info);
           end;
@@ -504,7 +504,7 @@ begin
 
             AClass := GetClass(Info.InternalName);
             if (AClass <> nil) and (PTypeInfo(AClass.ClassInfo).Kind = tkClass) then
-              Info.CompUnitName := GetTypeData(PTypeInfo(AClass.ClassInfo)).UnitName;
+              Info.CompUnitName := string(GetTypeData(PTypeInfo(AClass.ClassInfo)).UnitName);
 
             FCompList.AddObject(Info.CompName, Info);
           end;

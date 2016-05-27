@@ -4430,7 +4430,7 @@ begin
       Exit;
 
     // 使用 EditControlWrapper.GetTextAtLine 较快获取行文字，并且 Tab 已展开
-    S := TrimRight(AnsiString(EditControlWrapper.GetTextAtLine(EditControl, EditPos.Line)));
+    S := AnsiString(TrimRight(EditControlWrapper.GetTextAtLine(EditControl, EditPos.Line)));
     if S = '' then
       Exit;
 
