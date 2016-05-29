@@ -68,7 +68,7 @@ uses
   ComCtrls, ToolWin, StdCtrls, ExtCtrls, IniFiles, ToolsAPI, Math, Menus, ActnList,
   CnProjectViewBaseFrm, CnWizClasses, CnWizManager, CnIni, CnWizEditFiler, mPasLex,
   mwBCBTokenList, Contnrs, Clipbrd, CnEditControlWrapper, CnPasCodeParser,
-  {$IFDEF USE_CUSTOMIZED_SPLITTER} CnSplitter, {$ENDIF}
+  {$IFDEF USE_CUSTOMIZED_SPLITTER} CnSplitter, {$ENDIF} CnWidePasParser, CnWideCppParser,
   CnPopupMenu, CnWizIdeUtils, CnCppCodeParser, CnEdit, RegExpr;
 
 type
@@ -321,8 +321,13 @@ type
     FUseEditorToolBar: Boolean;
     FToolBarTimer: TTimer;
     FNeedReParse: Boolean;
+{$IFDEF UNICODE}
+    FCurrPasParser: TCnWidePasStructParser;
+    FCurrCppParser: TCnWideCppStructParser;
+{$ELSE}
     FCurrPasParser: TCnPasStructureParser;
     FCurrCppParser: TCnCppStructureParser;
+{$ENDIF}
     FCurrStream: TMemoryStream;
     FProcToolBarObjects: TList;
     FComboToSearch: TCnProcListComboBox;
@@ -352,9 +357,9 @@ type
 
     procedure EditorToolBarEnable(const Value: Boolean);
     procedure SetUseEditorToolBar(const Value: Boolean);
+
     procedure ParseCurrent;
     procedure ClearList;
-
     procedure CheckCurrentFile;
     function CheckReparse: Boolean;
 
@@ -1257,7 +1262,12 @@ begin
   else
     FCurrStream.Clear;
 
+{$IFDEF UNICODE}
+  CnOtaSaveEditorToStreamW(EditView.Buffer, FCurrStream);
+{$ELSE}
   CnOtaSaveEditorToStream(EditView.Buffer, FCurrStream);
+{$ENDIF}
+
   S := EditView.Buffer.FileName;
 
   FLanguage := ltUnknown;
@@ -1269,9 +1279,15 @@ begin
   if FLanguage = ltPas then
   begin
     if FCurrPasParser = nil then
+    begin
+{$IFDEF UNICODE}
+      FCurrPasParser := TCnWidePasStructParser.Create;
+{$ELSE}
       FCurrPasParser := TCnPasStructureParser.Create;
+{$ENDIF}
+    end;
 
-    FCurrPasParser.ParseSource(PAnsiChar(FCurrStream.Memory),
+    FCurrPasParser.ParseSource(PChar(FCurrStream.Memory),
       IsDpr(S) or IsInc(S), False);
 
     EditPos := EditView.CursorPos;
@@ -1302,12 +1318,18 @@ begin
   else if FLanguage = ltCpp then
   begin
     if FCurrCppParser = nil then
+    begin
+{$IFDEF UNICODE}
+      FCurrCppParser := TCnWideCppStructParser.Create;
+{$ELSE}
       FCurrCppParser := TCnCppStructureParser.Create;
+{$ENDIF}
+    end;
 
     EditPos := EditView.CursorPos;
     EditView.ConvertPos(True, EditPos, CharPos);
     // 是否需要转换？
-    FCurrCppParser.ParseSource(PAnsiChar(FCurrStream.Memory), FCurrStream.Size,
+    FCurrCppParser.ParseSource(PChar(FCurrStream.Memory), FCurrStream.Size,
       CharPos.Line, CharPos.CharIndex, True);
 
     // 记录并显示当前类与当前函数名
