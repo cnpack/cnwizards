@@ -88,6 +88,9 @@ type
     procedure GotoOffsetLine(L: Integer);
     procedure ShowSource;
     procedure ShowForm;
+{$IFDEF UNICODE}
+    procedure SaveToStreamW(Stream: TStream); // Used in Unicode Evn. Stream stores UTF16 and #0
+{$ENDIF}
     procedure SaveToStream(Stream: TStream; CheckUtf8: Boolean = False);
     procedure SaveToStreamFromPos(Stream: TStream);
     procedure SaveToStreamToPos(Stream: TStream);
@@ -500,6 +503,70 @@ begin
 {$ENDIF}
   end;
 end;
+
+{$IFDEF UNICODE}
+
+procedure TCnEditFiler.SaveToStreamW(Stream: TStream);
+var
+  Pos: Integer;
+  Size: Integer;
+  Text: string;
+const
+  TheEnd: AnsiChar = AnsiChar(#0); // Leave typed constant as is - needed for streaming code
+begin
+  Assert(Stream <> nil);
+
+  Reset;
+
+  AllocateFileData;
+
+  if Mode = mmFile then
+  begin
+    Assert(SFile <> nil);
+
+    SFile.Position := 0;
+    Stream.CopyFrom(SFile, SFile.Size);
+    Stream.Write(TheEnd, 1);
+  end
+  else
+  begin
+    Pos := 0;
+    if Buf = nil then
+      GetMem(Buf, BufSize + 1);
+    if FEditRead = nil then
+      raise Exception.Create(SNoEditReader);
+    // Delphi 5+ sometimes returns -1 here, for an unknown reason
+    Size := FEditRead.GetText(Pos, Buf, BufSize);
+    if Size = -1 then
+    begin
+      FreeFileData;
+      AllocateFileData;
+      Size := FEditRead.GetText(Pos, Buf, BufSize);
+    end;
+    if Size > 0 then
+    begin
+      Pos := Pos + Size;
+      while Size = BufSize do
+      begin
+        Stream.Write(Buf^, Size);
+        Size := FEditRead.GetText(Pos, Buf, BufSize);
+        Pos := Pos + Size;
+      end;
+      Stream.Write(Buf^, Size);
+    end;
+    Stream.Write(TheEnd, 1);
+
+    if Stream is TMemoryStream then
+    begin
+      Text := Utf8Decode(PAnsiChar((Stream as TMemoryStream).Memory));
+      Stream.Size := (Length(Text) + 1) * SizeOf(Char);
+      Stream.Position := 0;
+      Stream.Write(PChar(Text)^, (Length(Text) + 1) * SizeOf(Char));
+    end;
+  end;
+end;
+
+{$ENDIF}
 
 function TCnEditFiler.GetCurrentBufferPos: Integer;
 var

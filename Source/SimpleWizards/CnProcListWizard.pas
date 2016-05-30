@@ -418,7 +418,8 @@ implementation
 
 uses
   CnConsts, CnWizConsts, CnWizOptions, CnWizUtils, CnWizMacroUtils, CnCommon,
-  CnLangMgr, CnSrcEditorToolBar, CnWizNotifier, CnWizShareImages
+  CnLangMgr, CnSrcEditorToolBar, CnWizNotifier, CnWizShareImages, CnPasWideLex,
+  CnBCBWideTokenList
   {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 {$R *.DFM}
@@ -1507,8 +1508,13 @@ procedure TCnProcListWizard.LoadElements(aFileName: string; ToClear: Boolean);
 var
   I, BraceCountDelta, PreviousBraceCount, BeginIndex: Integer;
   MemStream: TMemoryStream;
-  Parser: TmwPasLex;
-  CParser: TBCBTokenList;
+{$IFDEF UNICODE}
+  PasParser: TCnPasWideLex;
+  CppParser: TCnBCBWideTokenList;
+{$ELSE}
+  PasParser: TmwPasLex;
+  CppParser: TBCBTokenList;
+{$ENDIF}
   BeginBracePosition, ClassNamePosition: Longint;
   BraceCount, NameSpaceCount: Integer;
   NameList: TStrings;
@@ -1516,6 +1522,15 @@ var
   UpperIsNameSpace: Boolean;
   BraceStack: TStack;
   ElementType: TCnElementType;
+
+  function GetPasParserLineNumber: Integer;
+  begin
+{$IFDEF UNICODE}
+    Result := PasParser.LineNumber;
+{$ELSE}
+    Result := PasParser.LineNumber + 1;
+{$ENDIF}
+  end;
 
   function MoveToImplementation: Boolean;
   begin
@@ -1525,11 +1540,11 @@ var
       Exit;
     end;
     Result := False;
-    while Parser.TokenID <> tkNull do
+    while PasParser.TokenID <> tkNull do
     begin
-      if Parser.TokenID = tkImplementation then
+      if PasParser.TokenID = tkImplementation then
         Result := True;
-      Parser.Next;
+      PasParser.Next;
       if Result then
         Break;
     end;
@@ -1587,16 +1602,16 @@ var
 
     repeat
       Prev2 := Prev1;
-      Prev1 := CParser.RunID;
+      Prev1 := CppParser.RunID;
 
-      CParser.NextNonJunk;
+      CppParser.NextNonJunk;
       if NeedDecBraceCount then // 如果上次循环记录了bracepair，则留到此时减
       begin
         Dec(BraceCount);
         NeedDecBraceCount := False;
       end;
 
-      case CParser.RunID of
+      case CppParser.RunID of
         ctkbraceopen, ctkbracepair:
           begin
             Inc(BraceCount);
@@ -1612,7 +1627,7 @@ var
             if CurIsNameSpace then
               Inc(NameSpaceCount);
 
-            if CParser.RunID = ctkbracepair then // 空函数体 {} 紧邻时的处理
+            if CppParser.RunID = ctkbracepair then // 空函数体 {} 紧邻时的处理
             begin
               // Dec(BraceCount);  // 留到下次循环时再减，免得下面until判断出错
               NeedDecBraceCount := True;
@@ -1633,10 +1648,10 @@ var
           end;
         ctknull: Exit;
       end;
-    until (CParser.RunID = ctknull) or
-      ((CParser.RunID in [ctkbraceopen, ctkbracepair]) and not CurIsNameSpace and ((BraceCount = 1) or UpperIsNameSpace));
+    until (CppParser.RunID = ctknull) or
+      ((CppParser.RunID in [ctkbraceopen, ctkbracepair]) and not CurIsNameSpace and ((BraceCount = 1) or UpperIsNameSpace));
 
-    if CParser.RunID = ctkbracepair then
+    if CppParser.RunID = ctkbracepair then
       Dec(BraceCount);
   end;
 
@@ -1648,27 +1663,27 @@ var
   begin
     BeginBracePosition := 0;
     ClassNamePosition := 0;
-    InitialPosition := CParser.RunPosition;
+    InitialPosition := CppParser.RunPosition;
     // Skip these: enum {a, b, c};  or  int a[] = {0, 3, 5};  and find  foo () {
     FindBeginningBrace;
-    if CParser.RunID = ctknull then
+    if CppParser.RunID = ctknull then
       Exit;
-    CParser.PreviousNonJunk;
+    CppParser.PreviousNonJunk;
     // 找到最外层的'{'后，回退开始检查是类还是名字空间
-    if CParser.RunID = ctkidentifier then  // 左大括号前是标识符，类似于 class TA { }
+    if CppParser.RunID = ctkidentifier then  // 左大括号前是标识符，类似于 class TA { }
     begin
-      Name := CParser.RunToken; // The name
+      Name := CppParser.RunToken; // The name
       // This might be a derived class so search backward
       // no further than InitialPosition to see
-      RestorePosition := CParser.RunPosition;
+      RestorePosition := CppParser.RunPosition;
       FoundClass := False;
-      while CParser.RunPosition >= InitialPosition do // 往回找关键字，看有无以下几个
+      while CppParser.RunPosition >= InitialPosition do // 往回找关键字，看有无以下几个
       begin
-        if CParser.RunID in [ctkclass, ctkstruct, ctknamespace] then
+        if CppParser.RunID in [ctkclass, ctkstruct, ctknamespace] then
         begin
           FoundClass := True;
-          ClassNamePosition := CParser.RunPosition;
-          case CParser.RunID of
+          ClassNamePosition := CppParser.RunPosition;
+          case CppParser.RunID of
             ctkclass: AEleType := etClass;
             ctkstruct: AEleType := etRecord;
             ctknamespace: AEleType := etNamespace;
@@ -1677,54 +1692,54 @@ var
           end;
           Break;
         end;
-        if CParser.RunPosition = InitialPosition then
+        if CppParser.RunPosition = InitialPosition then
           Break;
-        CParser.PreviousNonJunk;
+        CppParser.PreviousNonJunk;
       end;
 
       // 如果是类，那么类名是紧靠 : 或 { 前的东西，那么类、结构、名字空间的话就往前找名字
       if FoundClass then //
       begin
-        while not (CParser.RunID in [ctkcolon, ctkbraceopen, ctknull]) do
+        while not (CppParser.RunID in [ctkcolon, ctkbraceopen, ctknull]) do
         begin
-          Name := CParser.RunToken; // 找到类名或者名字空间名
-          CParser.NextNonJunk;
+          Name := CppParser.RunToken; // 找到类名或者名字空间名
+          CppParser.NextNonJunk;
         end;
         // Back up a bit if we are on a brace open so empty enums don't get treated as namespaces
-        if CParser.RunID = ctkbraceopen then
-          CParser.PreviousNonJunk;
+        if CppParser.RunID = ctkbraceopen then
+          CppParser.PreviousNonJunk;
       end;
       // Now get back to where you belong
-      while CParser.RunPosition < RestorePosition do
-        CParser.NextNonJunk;
-      CParser.NextNonJunk;
-      BeginBracePosition := CParser.RunPosition; // 回到最外层的 '{'
+      while CppParser.RunPosition < RestorePosition do
+        CppParser.NextNonJunk;
+      CppParser.NextNonJunk;
+      BeginBracePosition := CppParser.RunPosition; // 回到最外层的 '{'
     end
     else  // 左大括号前不是标识符，接着判断是否是函数标识
     begin
-      if CParser.RunID in [ctkroundclose, ctkroundpair, ctkconst, ctkvolatile,
+      if CppParser.RunID in [ctkroundclose, ctkroundpair, ctkconst, ctkvolatile,
         ctknull] then
       begin
         // 以上几个，表示找到函数了
         Name := '';
-        CParser.NextNonJunk;
-        BeginBracePosition := CParser.RunPosition;
+        CppParser.NextNonJunk;
+        BeginBracePosition := CppParser.RunPosition;
       end
       else
       begin
-        while not (CParser.RunID in [ctkroundclose, ctkroundpair, ctkconst,
+        while not (CppParser.RunID in [ctkroundclose, ctkroundpair, ctkconst,
           ctkvolatile, ctknull]) do
         begin
-          CParser.NextNonJunk;
-          if CParser.RunID = ctknull then
+          CppParser.NextNonJunk;
+          if CppParser.RunID = ctknull then
             Exit;
           // Recurse
           FindBeginningProcedureBrace(Name, ElementType);
-          CParser.PreviousNonJunk;
+          CppParser.PreviousNonJunk;
           if Name <> '' then
             Break;
         end;
-        CParser.NextNonJunk;
+        CppParser.NextNonJunk;
       end;
     end;
   end;
@@ -1745,20 +1760,20 @@ var
     ParenCount := 0;
     Result := '';
     repeat
-      CParser.Previous;
-      if CParser.RunID <> ctkcrlf then
-        if (CParser.RunID = ctkspace) and (CParser.RunToken = #9) then
+      CppParser.Previous;
+      if CppParser.RunID <> ctkcrlf then
+        if (CppParser.RunID = ctkspace) and (CppParser.RunToken = #9) then
           Result := #32 + Result
         else
-          Result := CParser.RunToken + Result;
-      case CParser.RunID of
+          Result := CppParser.RunToken + Result;
+      case CppParser.RunID of
         ctkroundclose: Inc(ParenCount);
         ctkroundopen: Dec(ParenCount);
         ctknull: Exit;
       end;
-    until ((ParenCount <= 0) and ((CParser.RunID = ctkroundopen) or
-      (CParser.RunID = ctkroundpair)));
-    CParser.PreviousNonJunk; // This is the procedure name
+    until ((ParenCount <= 0) and ((CppParser.RunID = ctkroundopen) or
+      (CppParser.RunID = ctkroundpair)));
+    CppParser.PreviousNonJunk; // This is the procedure name
   end;
 
   function InProcedureBlacklist(const Name: string): Boolean;
@@ -1781,25 +1796,25 @@ var
     AngleCount: Integer;
   begin
     Result := '';
-    if CParser.RunID <> ctkGreater then
+    if CppParser.RunID <> ctkGreater then
       Exit; // Only use if we are on a '>'
     AngleCount := 1;
-    Result := CParser.RunToken;
+    Result := CppParser.RunToken;
     repeat
-      CParser.Previous;
-      if CParser.RunID <> ctkcrlf then
-        if (CParser.RunID = ctkspace) and (CParser.RunToken = #9) then
+      CppParser.Previous;
+      if CppParser.RunID <> ctkcrlf then
+        if (CppParser.RunID = ctkspace) and (CppParser.RunToken = #9) then
           Result := #32 + Result
         else
-          Result := CParser.RunToken + Result;
-      case CParser.RunID of
+          Result := CppParser.RunToken + Result;
+      case CppParser.RunID of
         ctkGreater: Inc(AngleCount);
         ctklower: Dec(AngleCount);
         ctknull: Exit;
       end;
-    until (((AngleCount = 0) and (CParser.RunID = ctklower)) or
-      (CParser.RunIndex = 0));
-    CParser.PreviousNonJunk; // This is the token before the template args
+    until (((AngleCount = 0) and (CppParser.RunID = ctklower)) or
+      (CppParser.RunIndex = 0));
+    CppParser.PreviousNonJunk; // This is the token before the template args
   end;
 
   procedure FindEndingBrace(const BraceCountDelta: Integer;
@@ -1813,14 +1828,14 @@ var
       aBraceCount := 0;
 
     repeat
-      CParser.NextNonComment;
-      case CParser.RunID of
+      CppParser.NextNonComment;
+      case CppParser.RunID of
         ctkbraceopen: Inc(BraceCount);
         ctkbraceclose: Dec(BraceCount);
         ctknull: Exit;
       end;
     until ((BraceCount - aBraceCount) = NameSpaceCount) or
-      (CParser.RunID = ctknull);
+      (CppParser.RunID = ctknull);
   end;
 
   procedure FindElements(IsDprFile: Boolean);
@@ -1875,32 +1890,32 @@ var
             PrevTokenID := tkNull;
             NotKnownLineNo := -1;
 
-            while Parser.TokenID <> tkNull do
+            while PasParser.TokenID <> tkNull do
             begin
               // 记录下每个 Identifier
-              if Parser.TokenID = tkLower then
+              if PasParser.TokenID = tkLower then
               begin
                 IsInTemplate := True;
                 CurIdent := CurIdent + '<'
               end
-              else if Parser.TokenID = tkGreater then
+              else if PasParser.TokenID = tkGreater then
               begin
                 IsInTemplate := False;
                 CurIdent := CurIdent + '>';
               end
-              else if Parser.TokenID = tkIdentifier then
+              else if PasParser.TokenID = tkIdentifier then
               begin
                 if IsInTemplate then
-                  CurIdent := CurIdent + string(Parser.Token)
+                  CurIdent := CurIdent + string(PasParser.Token)
                 else
-                  CurIdent := string(Parser.Token);
+                  CurIdent := string(PasParser.Token);
               end
-              else if Parser.TokenID = tkComma then
+              else if PasParser.TokenID = tkComma then
               begin
                 if IsInTemplate then
-                  CurIdent := CurIdent + string(Parser.Token);
+                  CurIdent := CurIdent + string(PasParser.Token);
               end
-              else if Parser.TokenID = tkSemicolon then
+              else if PasParser.TokenID = tkSemicolon then
               begin
                 IsInTemplate := False;
                 if IsClassForForward and (PrevElementForForward <> nil) then
@@ -1909,36 +1924,36 @@ var
               IsClassForForward := False;
               PrevElementForForward := nil;
 
-              if ((Parser.TokenID = tkClass) and Parser.IsClass) or
-                (Parser.TokenID = tkRecord) then
+              if ((PasParser.TokenID = tkClass) and PasParser.IsClass) or
+                (PasParser.TokenID = tkRecord) then
                 CurClass := CurIdent
-              else if (Parser.TokenID = tkClass) and not Parser.IsClass then
+              else if (PasParser.TokenID = tkClass) and not PasParser.IsClass then
               begin
                 CurClassForNotKnown := CurIdent;
               end;
-              if Parser.TokenID = tkInterface then
+              if PasParser.TokenID = tkInterface then
               begin
-                if Parser.IsInterface then
+                if PasParser.IsInterface then
                   CurIntf := CurIdent
                 else if FIntfLine = 0 then
-                  FIntfLine := Parser.LineNumber + 1;
+                  FIntfLine := GetPasParserLineNumber;
               end
-              else if (Parser.TokenID = tkImplementation) and (FImplLine = 0) then
-                FImplLine := Parser.LineNumber + 1;
+              else if (PasParser.TokenID = tkImplementation) and (FImplLine = 0) then
+                FImplLine := GetPasParserLineNumber;
 
               if ((not InTypeDeclaration and InImplementation) or InIntfDeclaration) and
-                (Parser.TokenID in [tkFunction, tkProcedure, tkConstructor, tkDestructor]) then
+                (PasParser.TokenID in [tkFunction, tkProcedure, tkConstructor, tkDestructor]) then
               begin
                 IdentifierNeeded := PrevTokenID <> tkAssign;
 
-                ProcType := Parser.TokenID;
-                Line := Parser.LineNumber + 1;
+                ProcType := PasParser.TokenID;
+                Line := GetPasParserLineNumber;
                 ProcLine := '';
 
                 // 此循环获得整个 Proc 的声明
-                while not (Parser.TokenId in [tkNull]) do
+                while not (PasParser.TokenId in [tkNull]) do
                 begin
-                  case Parser.TokenID of
+                  case PasParser.TokenID of
                     tkIdentifier, tkRegister:
                       IdentifierNeeded := False;
 
@@ -1960,17 +1975,17 @@ var
                     // nothing
                   end; // case
 
-                  if (not InParenthesis) and (Parser.TokenID in [tkSemiColon,
+                  if (not InParenthesis) and (PasParser.TokenID in [tkSemiColon,
                     tkVar, tkBegin, tkType, tkConst]) then // 匿名方法声明后无分号，暂且以 begin 或 var 等来判断
                     Break;
 
-                  if not (Parser.TokenID in [tkCRLF, tkCRLFCo]) then
-                    ProcLine := ProcLine + string(Parser.Token);
-                  Parser.Next;
+                  if not (PasParser.TokenID in [tkCRLF, tkCRLFCo]) then
+                    ProcLine := ProcLine + string(PasParser.Token);
+                  PasParser.Next;
                 end; // while
 
                 // 得到整个 Proc 的声明，ProcLine
-                if Parser.TokenID = tkSemicolon then
+                if PasParser.TokenID = tkSemicolon then
                   ProcLine := ProcLine + ';';
                 if ClassLast then
                   ProcLine := 'class ' + ProcLine; // Do not localize.
@@ -2004,13 +2019,13 @@ var
                 end;
               end;
 
-              if not InIntfDeclaration and (Parser.TokenID = tkIdentifier) then
-                IntfName := string(Parser.Token);
+              if not InIntfDeclaration and (PasParser.TokenID = tkIdentifier) then
+                IntfName := string(PasParser.Token);
 
               if IsClassButNotKnown then
               begin
                 IsClassButNotKnown := False;
-                if Parser.TokenID in [tkSealed, tkAbstract] then
+                if PasParser.TokenID in [tkSealed, tkAbstract] then
                 begin
                   // 记录 sealed 或 abstract 类信息
                   ElementInfo := TCnElementInfo.Create;
@@ -2019,7 +2034,7 @@ var
                   ElementInfo.AllName := aFileName;
                   ElementInfo.ElementType := etClass;
 
-                  if Parser.TokenID = tkSealed then
+                  if PasParser.TokenID = tkSealed then
                     ElementInfo.ElementTypeStr := 'class sealed'
                   else
                     ElementInfo.ElementTypeStr := 'class abstract';
@@ -2033,7 +2048,7 @@ var
                 end;
               end;
 
-              if (Parser.TokenID = tkClass) and Parser.IsClass then
+              if (PasParser.TokenID = tkClass) and PasParser.IsClass then
               begin
                 InTypeDeclaration := True;
                 InIntfDeclaration := False;
@@ -2041,7 +2056,7 @@ var
 
                 // 记录类信息
                 ElementInfo := TCnElementInfo.Create;
-                ElementInfo.LineNo := Parser.LineNumber + 1;
+                ElementInfo.LineNo := GetPasParserLineNumber;
                 ElementInfo.FileName := _CnExtractFileName(aFileName);
                 ElementInfo.AllName := aFileName;
                 ElementInfo.ElementType := etClass;
@@ -2053,14 +2068,14 @@ var
                 IsClassForForward := True; // 以备后面判断是否是 class; 的前向声明
                 PrevElementForForward := ElementInfo;
               end
-              else if (Parser.TokenID = tkClass) and not Parser.IsClass then
+              else if (PasParser.TokenID = tkClass) and not PasParser.IsClass then
               begin
                 // Parser 遇到 class sealed/abstract 时，IsClass 判断有误，需要如此处理一下
                 IsClassButNotKnown := True;
-                NotKnownLineNo := Parser.LineNumber + 1;
+                NotKnownLineNo := GetPasParserLineNumber;
               end
-              else if ((Parser.TokenID = tkInterface) and Parser.IsInterface) or
-                (Parser.TokenID = tkDispInterface) then
+              else if ((PasParser.TokenID = tkInterface) and PasParser.IsInterface) or
+                (PasParser.TokenID = tkDispInterface) then
               begin
                 InTypeDeclaration := True;
                 InIntfDeclaration := True;
@@ -2068,7 +2083,7 @@ var
 
                 // 记录接口信息
                 ElementInfo := TCnElementInfo.Create;
-                ElementInfo.LineNo := Parser.LineNumber + 1;
+                ElementInfo.LineNo := GetPasParserLineNumber;
                 ElementInfo.FileName := _CnExtractFileName(aFileName);
                 ElementInfo.AllName := aFileName;
                 ElementInfo.ElementType := etInterface;
@@ -2077,7 +2092,7 @@ var
                 ElementInfo.OwnerClass := CurIntf;
                 AddElement(ElementInfo);
               end
-              else if Parser.TokenID = tkRecord then
+              else if PasParser.TokenID = tkRecord then
               begin
                 InTypeDeclaration := True;
                 InIntfDeclaration := False;
@@ -2085,7 +2100,7 @@ var
 
                 // 记录记录信息
                 ElementInfo := TCnElementInfo.Create;
-                ElementInfo.LineNo := Parser.LineNumber + 1;
+                ElementInfo.LineNo := GetPasParserLineNumber;
                 ElementInfo.FileName := _CnExtractFileName(aFileName);
                 ElementInfo.AllName := aFileName;
                 ElementInfo.ElementType := etRecord;
@@ -2095,70 +2110,70 @@ var
                 AddElement(ElementInfo);
               end
               else if InTypeDeclaration and
-                (Parser.TokenID in [tkProcedure, tkFunction, tkProperty,
+                (PasParser.TokenID in [tkProcedure, tkFunction, tkProperty,
                 tkPrivate, tkProtected, tkPublic, tkPublished]) then
               begin
                 FoundNonEmptyType := True;
 
                 // 记录属性信息
-                if Parser.TokenID = tkProperty then
+                if PasParser.TokenID = tkProperty then
                 begin
                   ElementInfo := TCnElementInfo.Create;
-                  ElementInfo.LineNo := Parser.LineNumber + 1;
+                  ElementInfo.LineNo := GetPasParserLineNumber;
                   ElementInfo.FileName := _CnExtractFileName(aFileName);
                   ElementInfo.AllName := aFileName;
 
-                  while Parser.TokenID <> tkIdentifier do
-                    Parser.Next;
+                  while PasParser.TokenID <> tkIdentifier do
+                    PasParser.Next;
 
                   if InIntfDeclaration then
                   begin
                     ElementInfo.ElementType := etIntfProperty;
                     ElementInfo.ElementTypeStr := 'interface property';
                     ElementInfo.OwnerClass := CurIntf;
-                    ElementInfo.DisplayName := CurIntf + '.' + string(Parser.Token);
+                    ElementInfo.DisplayName := CurIntf + '.' + string(PasParser.Token);
                   end
                   else
                   begin
                     ElementInfo.ElementType := etProperty;
                     ElementInfo.ElementTypeStr := 'property';
                     ElementInfo.OwnerClass := CurClass;
-                    ElementInfo.DisplayName := CurClass + '.' + string(Parser.Token);
+                    ElementInfo.DisplayName := CurClass + '.' + string(PasParser.Token);
                   end;
                   AddElement(ElementInfo);
                 end;
               end
               else if InTypeDeclaration and
-                ((Parser.TokenID = tkEnd) or
-                (((Parser.TokenID = tkSemiColon) and not InIntfDeclaration)
+                ((PasParser.TokenID = tkEnd) or
+                (((PasParser.TokenID = tkSemiColon) and not InIntfDeclaration)
                  and not FoundNonEmptyType)) then
               begin
                 InTypeDeclaration := False;
                 InIntfDeclaration := False;
                 IntfName := '';
               end
-              else if Parser.TokenID = tkImplementation then
+              else if PasParser.TokenID = tkImplementation then
               begin
                 InImplementation := True;
                 InTypeDeclaration := False;
               end
-              else if (Parser.TokenID = tkProgram) or (Parser.TokenID = tkLibrary) then
+              else if (PasParser.TokenID = tkProgram) or (PasParser.TokenID = tkLibrary) then
               begin
                 InImplementation := True; // DPR 和 Lib 等文件无 Interface 部分
               end;
 
-              ClassLast := (Parser.TokenID = tkClass);
-              IntfLast := (Parser.TokenID = tkInterface);
+              ClassLast := (PasParser.TokenID = tkClass);
+              IntfLast := (PasParser.TokenID = tkInterface);
 
-              if not (Parser.TokenID in [tkSpace, tkCRLF, tkCRLFCo]) then
-                PrevTokenID := Parser.TokenID;
+              if not (PasParser.TokenID in [tkSpace, tkCRLF, tkCRLFCo]) then
+                PrevTokenID := PasParser.TokenID;
 
               if ClassLast or IntfLast then
               begin
-                Parser.NextNoJunk;
+                PasParser.NextNoJunk;
               end
               else
-                Parser.Next;
+                PasParser.Next;
             end;
           end; //ltPas
 
@@ -2174,19 +2189,19 @@ var
 
             try
               // 记录最后的位置，避免从头查找时超过末尾
-              j := CParser.TokenPositionsList[CParser.TokenPositionsList.Count - 1];
+              j := CppParser.TokenPositionsList[CppParser.TokenPositionsList.Count - 1];
               FindBeginningProcedureBrace(NewName, ElementType);
               // 上面的函数会找到一个类声明或函数声明的开头，如果是类声明等，
               // 类名称会被塞入 NewName 这个变量
 
-              while (CParser.RunPosition <= j - 1) or (CParser.RunID <> ctknull) do
+              while (CppParser.RunPosition <= j - 1) or (CppParser.RunID <> ctknull) do
               begin
                 // NewName = '' 表示是个函数，做函数的处理
                 if NewName = '' then
                 begin
                   // If we found a brace pair then special handling is necessary
                   // for the bracecounting stuff (it is off by one)
-                  if CParser.RunID = ctkbracepair then
+                  if CppParser.RunID = ctkbracepair then
                     BraceCountDelta := 0
                   else
                     BraceCountDelta := 1;
@@ -2195,68 +2210,68 @@ var
                     EraseName(NameList, PreviousBraceCount);
                   // Back up a tiny bit so that we are "in front of" the
                   // ctkbraceopen or ctkbracepair we just found
-                  CParser.Previous;
+                  CppParser.Previous;
 
                   // 去找上一个分号，作为本函数的起始
                   // 这个 while 可跨过函数中的冒号，如 __fastcall TForm1::TForm1(TComponent* Owner) : TForm(Owner)
-                  while not ((CParser.RunID in [ctkSemiColon, ctkbraceclose,
+                  while not ((CppParser.RunID in [ctkSemiColon, ctkbraceclose,
                     ctkbraceopen, ctkbracepair]) or
-                      (CParser.RunID in IdentDirect) or
-                    (CParser.RunIndex = 0)) do
+                      (CppParser.RunID in IdentDirect) or
+                    (CppParser.RunIndex = 0)) do
                   begin
-                    CParser.PreviousNonJunk;
+                    CppParser.PreviousNonJunk;
                     // Handle the case where a colon is part of a valid procedure definition
-                    if CParser.RunID = ctkcolon then
+                    if CppParser.RunID = ctkcolon then
                     begin
                       // A colon is valid in a procedure definition only if it is immediately
                       // following a close parenthesis (possibly separated by "junk")
-                      CParser.PreviousNonJunk;
-                      if CParser.RunID in [ctkroundclose, ctkroundpair] then
-                        CParser.NextNonJunk
+                      CppParser.PreviousNonJunk;
+                      if CppParser.RunID in [ctkroundclose, ctkroundpair] then
+                        CppParser.NextNonJunk
                       else
                       begin
                         // Restore position and stop backtracking
-                        CParser.NextNonJunk;
+                        CppParser.NextNonJunk;
                         Break;
                       end;
                     end;
                   end;
 
                   // 找到了往前的一个分号或空白地方，往后一点即是函数开头
-                  if CParser.RunID in [ctkcolon, ctkSemiColon, ctkbraceclose,
+                  if CppParser.RunID in [ctkcolon, ctkSemiColon, ctkbraceclose,
                     ctkbraceopen, ctkbracepair] then
-                    CParser.NextNonComment
-                  else if CParser.RunIndex = 0 then
+                    CppParser.NextNonComment
+                  else if CppParser.RunIndex = 0 then
                   begin
-                    if CParser.IsJunk then
-                      CParser.NextNonJunk;
+                    if CppParser.IsJunk then
+                      CppParser.NextNonJunk;
                   end
                   else // IdentDirect
                   begin
-                    while CParser.RunID <> ctkcrlf do
+                    while CppParser.RunID <> ctkcrlf do
                     begin
-                      if (CParser.RunID = ctknull) then
+                      if (CppParser.RunID = ctknull) then
                         Exit;
-                      CParser.Next;
+                      CppParser.Next;
                     end;
-                    CParser.NextNonJunk;
+                    CppParser.NextNonJunk;
                   end;
 
                   // 所以到达了一个具体的函数开头
-                  BeginProcHeaderPosition := CParser.RunPosition;
+                  BeginProcHeaderPosition := CppParser.RunPosition;
 
                   ProcLine := '';
-                  while (CParser.RunPosition < BeginBracePosition) and
-                    (CParser.RunID <> ctkcolon) do
+                  while (CppParser.RunPosition < BeginBracePosition) and
+                    (CppParser.RunID <> ctkcolon) do
                   begin
-                    if (CParser.RunID = ctknull) then
+                    if (CppParser.RunID = ctknull) then
                       Exit
-                    else if (CParser.RunID <> ctkcrlf) then
-                      if (CParser.RunID = ctkspace) and (CParser.RunToken = #9) then
+                    else if (CppParser.RunID <> ctkcrlf) then
+                      if (CppParser.RunID = ctkspace) and (CppParser.RunToken = #9) then
                         ProcLine := ProcLine + #32
                       else
-                        ProcLine := ProcLine + CParser.RunToken;
-                    CParser.NextNonComment;
+                        ProcLine := ProcLine + CppParser.RunToken;
+                    CppParser.NextNonComment;
                   end;
                   // We are at the end of a procedure header
                   // Go back and skip parenthesis to find the procedure name
@@ -2267,11 +2282,11 @@ var
                   // We have to check for ctknull and exit since we moved the
                   // code to a nested procedure (if we exit SearchForProcedureName
                   // early due to RunID = ctknull we exit this procedure early as well)
-                  if CParser.RunID = ctknull then
+                  if CppParser.RunID = ctknull then
                     Exit;
-                  if CParser.RunID = ctkthrow then
+                  if CppParser.RunID = ctkthrow then
                   begin
-                    ProcArgs := CParser.RunToken + ProcArgs;
+                    ProcArgs := CppParser.RunToken + ProcArgs;
                     ProcArgs := SearchForProcedureName + ProcArgs;
                   end;
                   // Since we've enabled nested procedures it is now possible
@@ -2279,42 +2294,42 @@ var
                   // is a standard C or C++ construct (like if or for, etc...)
                   // To guard against this we require that our procedures be of type
                   // ctkidentifier.  If not, then skip this step.
-                  CParser.PreviousNonJunk;
-                  PrevIsOperator := CParser.RunID = ctkoperator;
-                  CParser.NextNonJunk;
+                  CppParser.PreviousNonJunk;
+                  PrevIsOperator := CppParser.RunID = ctkoperator;
+                  CppParser.NextNonJunk;
                   // 记录前一个是否是关键字 operator
-                  if ((CParser.RunID = ctkidentifier) or (PrevIsOperator)) and not
-                    InProcedureBlacklist(CParser.RunToken) then
+                  if ((CppParser.RunID = ctkidentifier) or (PrevIsOperator)) and not
+                    InProcedureBlacklist(CppParser.RunToken) then
                   begin
-                    BeginIndex := CParser.RunPosition;
+                    BeginIndex := CppParser.RunPosition;
                     if PrevIsOperator then
                       ProcName := 'operator ';
-                    ProcName := ProcName + CParser.RunToken;
-                    LineNo := CParser.PositionAtLine(CParser.RunPosition);
-                    CParser.PreviousNonJunk;
-                    if CParser.RunID = ctkcoloncolon then
+                    ProcName := ProcName + CppParser.RunToken;
+                    LineNo := CppParser.PositionAtLine(CppParser.RunPosition);
+                    CppParser.PreviousNonJunk;
+                    if CppParser.RunID = ctkcoloncolon then
                     // The object/method delimiter
                     begin
                       // There may be multiple name::name::name:: sets here
                       // so loop until no more are found
                       ClassName := '';
-                      while CParser.RunID = ctkcoloncolon do
+                      while CppParser.RunID = ctkcoloncolon do
                       begin
-                        CParser.PreviousNonJunk; // The object name?
+                        CppParser.PreviousNonJunk; // The object name?
                         // It is possible that we are looking at a templatized class and
                         // what we have in front of the :: is the end of a specialization:
                         // ClassName<x, y, z>::Function
-                        if CParser.RunID = ctkGreater then
+                        if CppParser.RunID = ctkGreater then
                           TemplateArgs := SearchForTemplateArgs;
-                        OwnerClass := CParser.RunToken + OwnerClass;
+                        OwnerClass := CppParser.RunToken + OwnerClass;
                         if ClassName = '' then
-                          ClassName := CParser.RunToken;
-                        CParser.PreviousNonJunk; // look for another ::
-                        if CParser.RunID = ctkcoloncolon then
-                          OwnerClass := CParser.RunToken + OwnerClass;
+                          ClassName := CppParser.RunToken;
+                        CppParser.PreviousNonJunk; // look for another ::
+                        if CppParser.RunID = ctkcoloncolon then
+                          OwnerClass := CppParser.RunToken + OwnerClass;
                       end;
                       // We went back one step too far so go ahead one
-                      CParser.NextNonJunk;
+                      CppParser.NextNonJunk;
                       ElementTypeStr := 'procedure';
                       ElementType := etClassFunc;  // Class
                       if ProcName = ClassName then
@@ -2335,24 +2350,24 @@ var
                       // If type is a procedure is 1 then we have backed up too far already
                       // so restore our previous position in order to correctly
                       // get the return type information for non-class methods
-                      CParser.NextNonJunk;
+                      CppParser.NextNonJunk;
                     end;
 
-                    while CParser.RunPosition > BeginProcHeaderPosition do
+                    while CppParser.RunPosition > BeginProcHeaderPosition do
                     begin // Find the return type of the procedure
-                      CParser.PreviousNonComment;
+                      CppParser.PreviousNonComment;
                       // Handle the possibility of template specifications and
                       // do not include them in the return type
-                      if CParser.RunID = ctkGreater then
+                      if CppParser.RunID = ctkGreater then
                         TemplateArgs := SearchForTemplateArgs;
-                      if CParser.RunID in [ctktemplate, ctkoperator] then
+                      if CppParser.RunID in [ctktemplate, ctkoperator] then
                         Continue;
-                      if CParser.RunID in [ctkcrlf, ctkspace] then
+                      if CppParser.RunID in [ctkcrlf, ctkspace] then
                         ProcReturnType := ' ' + ProcReturnType
                       else
                       begin
-                        ProcReturnType := CParser.RunToken + ProcReturnType;
-                        BeginIndex := CParser.RunPosition;
+                        ProcReturnType := CppParser.RunToken + ProcReturnType;
+                        BeginIndex := CppParser.RunPosition;
                       end;
                     end;
                     // If the return type is an empty string then it must be a constructor
@@ -2427,16 +2442,16 @@ var
                     ElementInfo.AllName := aFileName;
                     AddProcedure(ElementInfo, False); // TODO: BCB Interface
 
-                    while (CParser.RunPosition < BeginBracePosition) do
-                      CParser.Next;
+                    while (CppParser.RunPosition < BeginBracePosition) do
+                      CppParser.Next;
 
                     ElementInfo.BeginIndex := BeginIndex;
                     FindEndingBrace(BraceCountDelta, (BraceCount > 1));
-                    ElementInfo.EndIndex := CParser.RunPosition + 1;
+                    ElementInfo.EndIndex := CppParser.RunPosition + 1;
                   end
                   else
-                    while (CParser.RunPosition < BeginBracePosition) do
-                      CParser.Next;
+                    while (CppParser.RunPosition < BeginBracePosition) do
+                      CppParser.Next;
                 end
                 else
                 begin
@@ -2452,7 +2467,7 @@ var
                     
                     ElementInfo.ElementType := ElementType;
                     if ClassNamePosition > 0 then
-                      ElementInfo.LineNo := CParser.PositionAtLine(ClassNamePosition);
+                      ElementInfo.LineNo := CppParser.PositionAtLine(ClassNamePosition);
 
                     case ElementType of
                       etClass: ElementInfo.ElementTypeStr := 'class';
@@ -2483,8 +2498,13 @@ var
 
 begin
   case FLanguage of
-    ltPas: Parser := TmwPasLex.Create;
-    ltCpp: CParser := TBCBTokenList.Create;
+{$IFDEF UNICODE}
+    ltPas: PasParser := TCnPasWideLex.Create(True);
+    ltCpp: CppParser := TCnBCBWideTokenList.Create(True);
+{$ELSE}
+    ltPas: PasParser := TmwPasLex.Create;
+    ltCpp: CppParser := TBCBTokenList.Create;
+{$ENDIF}
   end;
 
   if FIsCurrentFile and (FLanguage = ltPas) then
@@ -2497,14 +2517,18 @@ begin
     try
       with TCnEditFiler.Create(aFileName) do
       try
+{$IFDEF UNICODE}
+        SaveToStreamW(MemStream);
+{$ELSE}
         SaveToStream(MemStream, True);
+{$ENDIF}
       finally
         Free;
       end;
 
       case FLanguage of
-        ltPas: Parser.Origin := MemStream.Memory;
-        ltCpp: CParser.SetOrigin(MemStream.Memory, MemStream.Size);
+        ltPas: PasParser.Origin := MemStream.Memory;
+        ltCpp: CppParser.SetOrigin(MemStream.Memory, MemStream.Size);
       end;
 
       if ToClear and (ProcListForm <> nil) then
@@ -2539,11 +2563,11 @@ begin
     end;
   finally
     case FLanguage of
-      ltPas: Parser.Free;
-      ltCpp: CParser.Free;
+      ltPas: PasParser.Free;
+      ltCpp: CppParser.Free;
     end;
-    Parser := nil;
-    CParser := nil;
+    PasParser := nil;
+    CppParser := nil;
   end;
 end;
 

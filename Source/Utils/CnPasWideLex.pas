@@ -335,11 +335,13 @@ type
     property ColumnNumber: Integer read FColumnNumber write FColumnNumber;
     {* 当前直观列号，从 1 开始，类似于 Ansi}
     property LineStartOffset: Integer read FLineStartOffset write FLineStartOffset;
-    {* 当前行行首所在的线性位置，相对 FOrigin 的偏移量}
+    {* 当前行行首所在的线性位置，相对 FOrigin 的线性偏移量，单位为字符数}
     property Origin: PWideChar read FOrigin write SetOrigin;
+    {* 待解析内容的起始地址}
     property RunPos: Integer read FRun write SetRunPos;
+    {* 当前处理位置相对于 FOrigin 的线性偏移量，单位为字符数}
     property TokenPos: Integer read FTokenPos;
-    {* 当前 Token 所在的线性位置，减去 LineStartOffset 即是当前原始列位置
+    {* 当前 Token 首相对于 FOrigin 的线性偏移量，单位为字符数，减去 LineStartOffset 即是当前原始列位置
     （原始列：每个双字节字符占一列，0 开始，不展开 Tab}
     property TokenID: TTokenKind read FTokenID;
     {* 当前 Token 类型}
@@ -2046,11 +2048,11 @@ end;
 function TCnPasWideLex.GetToken: CnWideString;
 var
   Len: LongInt;
-  OutStr: AnsiString;
+  OutStr: CnWideString;
 begin
-  Len := FRun - FTokenPos;
-  SetString(OutStr, (FOrigin + FTokenPos), Len);
-  Result := CnWideString(OutStr);
+  Len := FRun - FTokenPos;                         // 两个偏移量之差，单位为字符数
+  SetString(OutStr, (FOrigin + FTokenPos), Len);   // 以指定内存地址与长度构造字符串
+  Result := OutStr;
 end;
 
 procedure TCnPasWideLex.NextID(ID: TTokenKind);
