@@ -458,12 +458,14 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
   object dlgOpenIcon: TOpenDialog
     DefaultExt = 'ico'
     Filter = 'Icon File(*.ico)|*.ico'
+    Options = [ofHideReadOnly, ofFileMustExist, ofEnableSizing]
     Left = 47
     Top = 343
   end
   object dlgOpenFile: TOpenDialog
     DefaultExt = 'pas'
     Filter = 'Pascal Script(*.pas)|*.pas|All Files(*.*)|*.*'
+    Options = [ofHideReadOnly, ofFileMustExist, ofEnableSizing]
     Left = 79
     Top = 343
   end
