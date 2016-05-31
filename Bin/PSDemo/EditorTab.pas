@@ -17,6 +17,7 @@ var
   TabControl: TControl;
   Tab: TTabControl;
   TabControlClassName: string;
+  Tabs: TStrings;
 begin
   EditWindow := CnOtaGetCurrentEditWindow;
   if EditWindow = nil then
@@ -39,7 +40,7 @@ begin
     ErrorDlg('NO Tab Found');
     Exit;
   end;
-
+  cndebugger.evaluateobject(tabcontrol);
   // Change Multi Line Style in D7 or below.
   if (Compiler = cnDelphi5) or (Compiler = cnDelphi6) or (Compiler = cnDelphi7)
     or (Compiler = cnBCB5) or (Compiler = cnBCB6) then
@@ -48,7 +49,27 @@ begin
     begin
       Tab := TTabControl(TabControl);
       Tab.MultiLine := not Tab.MultiLine;
+      ShowMessage('TabControl Multi-Line Changed.');
+    end
+    else
+      ShowMessage('Not TabControl. Can NOT change Multi-Line.');
+  end
+  else
+  begin
+    if Compiler = cnDelphi9 then
+      Tabs := TStrings(GetObjectProp(TabControl, 'Tabs'))
+    else
+      Tabs := TStrings(GetObjectProp(TabControl, 'Items'));
+
+    if Tabs = nil then
+    begin
+      ErrorDlg('No Tabs Property');
+      Exit;
     end;
+
+    ShowMessage(Tabs.Text);
+    if Tabs.Count > 0 then
+      Tabs[0] := 'Test Caption from Script.';
   end;
 end.
 
