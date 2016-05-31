@@ -1713,13 +1713,31 @@ end;
 
 function TCnEditControlWrapper.GetEditViewFromTabs(TabControl: TXTabControl;
   Index: Integer): IOTAEditView;
+var
+  Tabs: TStrings;
 begin
+{$IFDEF EDITOR_TAB_ONLYFROM_WINCONTROL}
+  if Assigned(GetOTAEditView) and (TabControl <> nil) and (GetEditorTabTabIndex(TabControl) >= 0) then
+  begin
+    Tabs := GetEditorTabTabs(TabControl);
+    if (Tabs <> nil) and (Tabs.Objects[Index] <> nil) then
+    begin
+      if Tabs.Objects[Index].ClassNameIs(STEditViewClass) then
+      begin
+        Result := GetOTAEditView(Tabs.Objects[Index]);
+        Exit;
+      end;
+    end;
+  end;
+  Result := nil;
+{$ELSE}
   if Assigned(GetOTAEditView) and (TabControl <> nil) and
     (TabControl.TabIndex >= 0) and (TabControl.Tabs.Objects[Index] <> nil) and
     TabControl.Tabs.Objects[Index].ClassNameIs(STEditViewClass) then
     Result := GetOTAEditView(TabControl.Tabs.Objects[Index])
   else
     Result := nil;
+{$ENDIF}
 end;
 
 procedure TCnEditControlWrapper.GetAttributeAtPos(EditControl: TControl; const

@@ -42,9 +42,9 @@ interface
 
 {$IFDEF CNWIZARDS_CNSRCEDITORENHANCE}
 
-{$IFNDEF BDS}
+//{$IFNDEF BDS}
   {$DEFINE NEED_MODIFIED_TAB}
-{$ENDIF}
+//{$ENDIF}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Dialogs, ToolsAPI,
@@ -412,7 +412,7 @@ begin
     XPos := Msg.lParam and $FFFF;
     YPos := (Msg.lParam shr 16) and $FFFF;
     Control := FindControl(Msg.hwnd);
-    {$IFDEF DelphiXE2_UP}
+    {$IFDEF DELPHIXE2_UP}
     Method := TRttiContext.Create().GetType(Control.ClassType).GetMethod('ItemAtPos');
     if Assigned(Method) then
       Idx := Method.Invoke(Control, [TValue.From(Point(XPos, YPos))]).AsInteger
@@ -422,12 +422,13 @@ begin
     if (Control <> nil) and (Control is TXTabControl) then
     begin
       TabControl := Control as TXTabControl;
+{$IFNDEF EDITOR_TAB_ONLYFROM_WINCONTROL}
     {$IFDEF BDS}
       Idx := TabControl.ItemAtPos(Point(XPos, YPos));
     {$ELSE}
       Idx := TabControl.IndexOfTabAt(XPos, YPos);
     {$ENDIF}
-
+{$ENDIF}
       if Msg.message = WM_RBUTTONUP then
       begin
         if Idx >= 0 then
@@ -853,6 +854,7 @@ var
   TabControl: TXTabControl;
   EditView: IOTAEditView;
   NewCaption: string;
+  Tabs: TStrings;
 
   function IsModified(AView: IOTAEditView): Boolean;
   var
@@ -875,29 +877,32 @@ var
     else if not IsModified and (StrRight(Result, 1) = '*') then
       Delete(Result, Length(Result), 1);
   end;
+
 begin
   try
     for I := 0 to FTabControlList.Count - 1 do
       if FTabControlList[I] is TXTabControl then
       begin
         TabControl := TXTabControl(FTabControlList[I]);
-        for J := 0 to TabControl.Tabs.Count - 1 do
+        Tabs := GetEditorTabTabs(TabControl);
+
+        for J := 0 to Tabs.Count - 1 do
         begin
           if ClearFlag then
           begin
             // 如果不比较直接赋值，会导致CPU占用100%
-            NewCaption := GetNewCaption(TabControl.Tabs[J], False);
-            if not SameText(TabControl.Tabs[J], NewCaption) then
-              TabControl.Tabs[J] := NewCaption;
+            NewCaption := GetNewCaption(Tabs[J], False);
+            if not SameText(Tabs[J], NewCaption) then
+              Tabs[J] := NewCaption;
           end
-          else if TabControl.Tabs.Objects[J] <> nil then
+          else if Tabs.Objects[J] <> nil then
           begin
             EditView := EditControlWrapper.GetEditViewFromTabs(TabControl, J);
             if Assigned(EditView) then
             begin
-              NewCaption := GetNewCaption(TabControl.Tabs[J], IsModified(EditView));
-              if not SameText(TabControl.Tabs[J], NewCaption) then
-                TabControl.Tabs[J] := NewCaption;
+              NewCaption := GetNewCaption(Tabs[J], IsModified(EditView));
+              if not SameText(Tabs[J], NewCaption) then
+                Tabs[J] := NewCaption;
             end;
           end;
         end;

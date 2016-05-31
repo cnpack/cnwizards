@@ -93,9 +93,9 @@ const
   DisassemblyViewClassName = 'TDisassemblyView';
 {$IFDEF BDS}
   {$IFDEF BDS4_UP} // BDS 2006 RAD Studio 2007 的标签页类名
-  XTabControlClassName = 'TIDEGradientTabSet';
+  XTabControlClassName = 'TIDEGradientTabSet';   // TWinControl 子类
   {$ELSE} // BDS 2005 的标签页类名
-  XTabControlClassName = 'TCodeEditorTabControl';
+  XTabControlClassName = 'TCodeEditorTabControl'; // TTabSet 子类
   {$ENDIF}
 {$ELSE} // Delphi BCB 的标签页类名
   XTabControlClassName = 'TXTabControl';
@@ -164,7 +164,11 @@ const
 
 type
 {$IFDEF BDS}
+  {$IFDEF BDS2006_UP}
+  TXTabControl = TWinControl;
+  {$ELSE}
   TXTabControl = TTabSet;
+  {$ENDIF}
 {$ELSE}
   TXTabControl = TTabControl;
 {$ENDIF BDS}
@@ -343,6 +347,12 @@ function GetCurrentEditControl: TControl;
 function GetTabControlFromEditorForm(AForm: TCustomForm): TXTabControl;
 {* 返回编辑器窗口的 TabControl 控件 }
 
+function GetEditorTabTabs(ATab: TXTabControl): TStrings;
+{* 返回编辑器 TabControl 控件的 Tabs 属性}
+
+function GetEditorTabTabIndex(ATab: TXTabControl): Integer;
+{* 返回编辑器 TabControl 控件的 Index 属性}
+
 function GetStatusBarFromEditor(EditControl: TControl): TStatusBar;
 {* 从编辑器控件获得其所属的编辑器窗口的状态栏}
 
@@ -367,6 +377,7 @@ function ConvertIDETreeNodeToTreeNode(Node: TObject): TTreeNode;
 
 function ConvertIDETreeNodesToTreeNodes(Nodes: TObject): TTreeNodes;
 {* 将 IDE 内部使用的 TTreeControl的 Items 属性值的 TreeNodes 强行转换成公用的 TreeNodes}
+
 
 //==============================================================================
 // 扩展控件
@@ -1750,6 +1761,34 @@ function GetTabControlFromEditorForm(AForm: TCustomForm): TXTabControl;
 begin
   Result := TXTabControl(FindComponentByClassName(AForm, XTabControlClassName,
     XTabControlName));
+end;
+
+// 返回编辑器 TabControl 控件的 Tabs 属性
+function GetEditorTabTabs(ATab: TXTabControl): TStrings;
+begin
+  Result := nil;
+  if ATab <> nil then
+  begin
+{$IFDEF EDITOR_TAB_ONLYFROM_WINCONTROL}
+    Result := TStrings(GetObjectProp(ATab, 'Items'));
+{$ELSE}
+    Result := ATab.Tabs;
+{$ENDIF}
+  end;
+end;
+
+// 返回编辑器 TabControl 控件的 Index 属性
+function GetEditorTabTabIndex(ATab: TXTabControl): Integer;
+begin
+  Result := -1;
+  if ATab <> nil then
+  begin
+{$IFDEF EDITOR_TAB_ONLYFROM_WINCONTROL}
+    Result := GetOrdProp(ATab, 'TabIndex');
+{$ELSE}
+    Result := ATab.TabIndex;
+{$ENDIF}
+  end;
 end;
 
 // 枚举 IDE 中的代码编辑器窗口和 EditControl 控件，调用回调函数，返回总数
