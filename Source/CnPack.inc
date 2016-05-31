@@ -2354,6 +2354,11 @@
   {$DEFINE IDE_CONF_MANAGER}
 {$ENDIF}
 
+{$IFDEF BDS2006_UP}
+  {$DEFINE EDITOR_TAB_ONLYFROM_WINCONTROL}
+  // From BDS 2006 IDEGraident Editor Tab is Only From WinControl, not TabSet/TabControl 
+{$ENDIF}
+
 {$IFDEF BDS}
   {$DEFINE IDE_ACTION_UPDATE_DELAY} // IDE's Action Menu Update will Delay in 2005 or Up.
 {$ENDIF}
