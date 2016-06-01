@@ -570,7 +570,6 @@ begin
 
     chkDispModifiedInTab.Checked := FEditorMisc.DispModifiedInTab;
   {$IFDEF BDS}
-    chkDispModifiedInTab.Enabled := False;
     chkShowInDesign.Checked := FToolbarMgr.ShowDesignToolBar;
   {$ELSE}
     chkShowInDesign.Enabled := False;
