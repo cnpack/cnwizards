@@ -235,7 +235,8 @@ type
     // MultiCompound 控制可处理多个并列的 begin end，但易和 program/library 的主 begin end 混淆，
     // 并且容易和嵌套的过程函数混淆，所以目前暂时不用
 
-    procedure FormatProgramInnerBlock(PreSpaceCount: Byte = 0; IsInternal: Boolean = False);
+    procedure FormatProgramInnerBlock(PreSpaceCount: Byte = 0; IsInternal: Boolean = False;
+      IsLib: Boolean = False);
     // Program 中的主 begin end 之前的声明不同于嵌套 fucntion 这种声明，因此此处独立
 
     procedure FormatDeclSection(PreSpaceCount: Byte; IndentProcs: Boolean = True;
@@ -363,7 +364,7 @@ type
 
   TCnProgramBlockFormatter = class(TCnTypeSectionFormater)
   protected
-    procedure FormatProgramBlock(PreSpaceCount: Byte = 0);
+    procedure FormatProgramBlock(PreSpaceCount: Byte = 0; IsLib: Boolean = False);
     procedure FormatPackageBlock(PreSpaceCount: Byte = 0);
     procedure FormatUsesClause(PreSpaceCount: Byte = 0; const NeedCRLF: Boolean = False);
     procedure FormatUsesList(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = True;
@@ -4210,16 +4211,25 @@ begin
 end;
 
 procedure TCnBasePascalFormatter.FormatProgramInnerBlock(PreSpaceCount: Byte;
-  IsInternal: Boolean);
+  IsInternal: Boolean; IsLib: Boolean);
+var
+  HasDeclSection: Boolean;
 begin
+  HasDeclSection := False;
   while Scaner.Token in DeclSectionTokens do
   begin
     FormatDeclSection(PreSpaceCount, False, IsInternal);
     Writeln;
+    HasDeclSection := True;
   end;
 
-  Writeln;
-  FormatCompoundStmt(PreSpaceCount);
+  if HasDeclSection then // 有声明才多换行，避免多出连续空行
+    Writeln;
+
+  if IsLib and (Scaner.Token = tokKeywordEnd) then // Library 允许直接 end
+    Match(Scaner.Token)
+  else
+    FormatCompoundStmt(PreSpaceCount);
 end;
 
 {
@@ -4579,14 +4589,14 @@ end;
   ProgramBlock -> [UsesClause]
                   Block
 }
-procedure TCnProgramBlockFormatter.FormatProgramBlock(PreSpaceCount: Byte);
+procedure TCnProgramBlockFormatter.FormatProgramBlock(PreSpaceCount: Byte; IsLib: Boolean);
 begin
   if Scaner.Token = tokKeywordUses then
   begin
     FormatUsesClause(PreSpaceCount, True); // 带 IN 的，需要分行
     WriteLine;
   end;
-  FormatProgramInnerBlock(PreSpaceCount);
+  FormatProgramInnerBlock(PreSpaceCount, False, IsLib);
 end;
 
 procedure TCnProgramBlockFormatter.FormatPackageBlock(PreSpaceCount: Byte);
@@ -4950,7 +4960,7 @@ begin
   Match(tokSemicolon);
   WriteLine;
 
-  FormatProgramBlock(PreSpaceCount);
+  FormatProgramBlock(PreSpaceCount, True);
   Match(tokDot);
 end;
 
