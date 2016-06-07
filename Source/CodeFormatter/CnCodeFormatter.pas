@@ -210,7 +210,8 @@ type
 
     // 泛型支持
     procedure FormatFormalTypeParamList(PreSpaceCount: Byte = 0);
-    procedure FormatTypeParams(PreSpaceCount: Byte = 0);
+    function FormatTypeParams(PreSpaceCount: Byte = 0; AllowFixEndGreateEqual: Boolean = False): Boolean;
+    // AllowFixEndGreateEqual 用来处理泛型结尾 >= 的情况，返回 True 表示遇到了 >=
     procedure FormatTypeParamDeclList(PreSpaceCount: Byte = 0);
     procedure FormatTypeParamDecl(PreSpaceCount: Byte = 0);
     procedure FormatTypeParamList(PreSpaceCount: Byte = 0);
@@ -1436,11 +1437,19 @@ begin
 end;
 
 { TypeParams -> '<' TypeParamDeclList '>' }
-procedure TCnBasePascalFormatter.FormatTypeParams(PreSpaceCount: Byte);
+function TCnBasePascalFormatter.FormatTypeParams(PreSpaceCount: Byte;
+  AllowFixEndGreateEqual: Boolean): Boolean;
 begin
+  Result := False;
   Match(tokLess);
   FormatTypeParamDeclList(PreSpaceCount);
-  Match(tokGreat);
+  if AllowFixEndGreateEqual and (Scaner.Token = tokGreatOrEqu) then
+  begin
+    Match(tokGreatOrEqu, 0, 1); // TODO: 拆开 > 与 =
+    Result := True;
+  end
+  else
+    Match(tokGreat);
 end;
 
 procedure TCnBasePascalFormatter.FormatTypeParamIdent(PreSpaceCount: Byte);
@@ -4077,7 +4086,7 @@ end;
 }
 procedure TCnBasePascalFormatter.FormatTypeDecl(PreSpaceCount: Byte);
 var
-  Old: Boolean;
+  Old, GreatEqual: Boolean;
 begin
   while Scaner.Token = tokSLB do
   begin
@@ -4094,14 +4103,14 @@ begin
   end;
 
   // 加入对<>泛型的支持
+  GreatEqual := False;
   if Scaner.Token = tokLess then
   begin
-    FormatTypeParams;
-//    if Scaner.Token = tokDot then
-//      FormatIdent;
+    GreatEqual := FormatTypeParams(0, True);
   end;
 
-  MatchOperator(tokEQUAL);
+  if not GreatEqual then
+    MatchOperator(tokEQUAL);
 
   if Scaner.Token = tokKeywordType then // 处理 TInt = type Integer; 的情形
     Match(tokKeywordType);
