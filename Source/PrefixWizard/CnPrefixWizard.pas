@@ -707,7 +707,7 @@ function TCnPrefixWizard.GetFieldName(Component: TComponent): string;
 var
   DataBinding: TObject;
 begin
-  Result = '';
+  Result := '';
   DataBinding := nil;
   try
     Result := ExtractIdentName(GetStrProp(Component, csDataField));
