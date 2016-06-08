@@ -707,12 +707,30 @@ function TCnPrefixWizard.GetFieldName(Component: TComponent): string;
 var
   DataBinding: TObject;
 begin
-  Result := ExtractIdentName(GetStrProp(Component, csDataField));
+  Result = '';
+  DataBinding := nil;
+  try
+    Result := ExtractIdentName(GetStrProp(Component, csDataField));
+  except
+    ; // GetStrProp 等在高版本 Delphi 中找不到时会抛 Exception
+  end;
+
   if Result = '' then
   begin
-    DataBinding := GetObjectProp(Component, csDataBinding);
+    try
+      DataBinding := GetObjectProp(Component, csDataBinding);
+    except
+      ;
+    end;
+
     if DataBinding <> nil then
-      Result := ExtractIdentName(GetStrProp(DataBinding, csDataField));
+    begin
+      try
+        Result := ExtractIdentName(GetStrProp(DataBinding, csDataField));
+      except
+        ;
+      end;
+    end;
   end;
 end;
 
