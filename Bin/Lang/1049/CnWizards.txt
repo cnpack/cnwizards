@@ -377,6 +377,7 @@ TCnDelBlankForm.rbSel.Caption=Текущее выделение(&1).
 TCnEditorCodeCommentForm.btnCancel.Caption=Отмена
 TCnEditorCodeCommentForm.btnOK.Caption=&OK
 TCnEditorCodeCommentForm.Caption=Инвертирование комментариев
+TCnEditorCodeCommentForm.chkKeepIndent.Caption=Держите код Отступ после Тумблер
 TCnEditorCodeCommentForm.chkMoveToNextLine.Caption=Переходить на новую строку после перемещения
 TCnEditorCodeCommentForm.grp1.Caption=Настройки
 TCnMsdnConfigForm.Caption=Настройки мастера MSDN-справки

@@ -377,6 +377,7 @@ TCnDelBlankForm.rbSel.Caption=derzeitige Auswahl(&1).
 TCnEditorCodeCommentForm.btnCancel.Caption=&Abbruch
 TCnEditorCodeCommentForm.btnOK.Caption=&OK
 TCnEditorCodeCommentForm.Caption=Toggle Quelltext Comment
+TCnEditorCodeCommentForm.chkKeepIndent.Caption=Halten-Code einrücken nach Toggle
 TCnEditorCodeCommentForm.chkMoveToNextLine.Caption=nach Toggle gehe zur nächsten Zeile 
 TCnEditorCodeCommentForm.grp1.Caption=&Einstellungen
 TCnMsdnConfigForm.Caption=MSDN Werkzeug Einstellungen
