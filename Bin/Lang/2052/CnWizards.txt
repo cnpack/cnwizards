@@ -377,6 +377,7 @@ TCnDelBlankForm.rbSel.Caption=当前编辑的选择区(&1)。
 TCnEditorCodeCommentForm.btnCancel.Caption=取消(&C)
 TCnEditorCodeCommentForm.btnOK.Caption=确定(&O)
 TCnEditorCodeCommentForm.Caption=切换注释工具设置
+TCnEditorCodeCommentForm.chkKeepIndent.Caption=切换注释时保持代码原始缩进
 TCnEditorCodeCommentForm.chkMoveToNextLine.Caption=切换注释后光标自动移至下一行
 TCnEditorCodeCommentForm.grp1.Caption=设置(&S)
 TCnMsdnConfigForm.Caption=MSDN 专家设置

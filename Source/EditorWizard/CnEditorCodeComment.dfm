@@ -3,15 +3,17 @@ inherited CnEditorCodeCommentForm: TCnEditorCodeCommentForm
   Top = 266
   BorderStyle = bsDialog
   Caption = 'Toggle Code Comment'
-  ClientHeight = 93
+  ClientHeight = 116
   ClientWidth = 250
+  OldCreateOrder = True
   PixelsPerInch = 96
   TextHeight = 13
   object grp1: TGroupBox
     Left = 8
     Top = 8
     Width = 233
-    Height = 49
+    Height = 72
+    Anchors = [akLeft, akTop, akRight, akBottom]
     Caption = '&Settings'
     TabOrder = 0
     object chkMoveToNextLine: TCheckBox
@@ -22,12 +24,21 @@ inherited CnEditorCodeCommentForm: TCnEditorCodeCommentForm
       Caption = 'Move to Next Line after Toggle'
       TabOrder = 0
     end
+    object chkKeepIndent: TCheckBox
+      Left = 8
+      Top = 42
+      Width = 217
+      Height = 17
+      Caption = 'Keep Code Indent after Toggle'
+      TabOrder = 1
+    end
   end
   object btnOK: TButton
     Left = 86
-    Top = 64
+    Top = 87
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&OK'
     Default = True
     ModalResult = 1
@@ -35,9 +46,10 @@ inherited CnEditorCodeCommentForm: TCnEditorCodeCommentForm
   end
   object btnCancel: TButton
     Left = 166
-    Top = 64
+    Top = 87
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2

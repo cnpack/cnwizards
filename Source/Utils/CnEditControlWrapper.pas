@@ -1713,8 +1713,10 @@ end;
 
 function TCnEditControlWrapper.GetEditViewFromTabs(TabControl: TXTabControl;
   Index: Integer): IOTAEditView;
+{$IFDEF EDITOR_TAB_ONLYFROM_WINCONTROL}
 var
   Tabs: TStrings;
+{$ENDIF}
 begin
 {$IFDEF EDITOR_TAB_ONLYFROM_WINCONTROL}
   if Assigned(GetOTAEditView) and (TabControl <> nil) and (GetEditorTabTabIndex(TabControl) >= 0) then

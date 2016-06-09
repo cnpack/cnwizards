@@ -377,6 +377,7 @@ TCnDelBlankForm.rbSel.Caption=Current Selection(&1).
 TCnEditorCodeCommentForm.btnCancel.Caption=&Cancel
 TCnEditorCodeCommentForm.btnOK.Caption=&OK
 TCnEditorCodeCommentForm.Caption=Toggle Code Comment
+TCnEditorCodeCommentForm.chkKeepIndent.Caption=Keep Code Indent after Toggle
 TCnEditorCodeCommentForm.chkMoveToNextLine.Caption=Move to Next Line after Toggle
 TCnEditorCodeCommentForm.grp1.Caption=&Settings
 TCnMsdnConfigForm.Caption=MSDN Wizard Settings

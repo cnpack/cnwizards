@@ -29,7 +29,9 @@ unit CnEditorCodeComment;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2002.12.31 V1.0
+* 修改记录：2016.06.09 V1.1
+*               加入保持原始代码缩进的设置
+*           2002.12.31 V1.0
 *               创建单元，实现功能
 ================================================================================
 |</PRE>}
@@ -90,6 +92,8 @@ type
     Inited: Boolean;
     FirstIsCommented: Boolean;
     FMoveToNextLine: Boolean;
+    FKeepIndent: Boolean;
+    procedure SetKeepIndent(const Value: Boolean);
   protected
     function GetHasConfig: Boolean; override;
     function ProcessLine(const Str: string): string; override;
@@ -104,7 +108,9 @@ type
     procedure Execute; override;
     procedure Config; override;
   published
-    property MoveToNextLine: Boolean read FMoveToNextLine write FMoveToNextLine default True;    
+    property MoveToNextLine: Boolean read FMoveToNextLine write FMoveToNextLine default True;
+    property KeepIndent: Boolean read FKeepIndent write SetKeepIndent;
+    {* True 时类似于改写模式，用//替换代码前部的空格，保持代码内容的原始缩进}
   end;
 
   TCnEditorCodeCommentForm = class(TCnTranslateForm)
@@ -112,7 +118,7 @@ type
     chkMoveToNextLine: TCheckBox;
     btnOK: TButton;
     btnCancel: TButton;
-  private
+    chkKeepIndent: TCheckBox;private
     { Private declarations }
   public
     { Public declarations }
@@ -126,9 +132,15 @@ implementation
 
 {$IFDEF CNWIZARDS_CNEDITORWIZARD}
 
+var
+  InternalKeepIndent: Boolean = False;
+
 function GetCommentStr(const Str: string): string;
 begin
-  Result := '//' + Str;
+  if InternalKeepIndent and (Length(Str) > 2) and (Str[1] = ' ') and (Str[2] = ' ') then
+    Result := '//' + Copy(Str, 3, MaxInt)
+  else
+    Result := '//' + Str;
 end;
 
 function IsCommentStr(const Str: string): Boolean;
@@ -144,7 +156,12 @@ end;
 function GetUnCommentStr(const Str: string): string;
 begin
   if IsCommentStr(Str) then
-    Result := StringReplace(Str, '//', '', [])
+  begin
+    if InternalKeepIndent then
+      Result := StringReplace(Str, '//', '  ', [])
+    else
+      Result := StringReplace(Str, '//', '', []);
+  end
   else
     Result := Str;
 end;
@@ -288,14 +305,22 @@ begin
   with TCnEditorCodeCommentForm.Create(nil) do
   try
     chkMoveToNextLine.Checked := FMoveToNextLine;
+    chkKeepIndent.Checked := FKeepIndent;
 
     if ShowModal = mrOk then
     begin
-      FMoveToNextLine := chkMoveToNextLine.Checked;
+      MoveToNextLine := chkMoveToNextLine.Checked;
+      KeepIndent := chkKeepIndent.Checked;
     end;
   finally
     Free;
   end;
+end;
+
+procedure TCnEditorCodeToggleComment.SetKeepIndent(const Value: Boolean);
+begin
+  FKeepIndent := Value;
+  InternalKeepIndent := Value;
 end;
 
 initialization
