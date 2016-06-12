@@ -1539,12 +1539,10 @@ procedure TCnAlignSizeWizard.CheckMenuItemReady(Sender: TObject);
 begin
   if FIDELockControlsMenu = nil then
     FIDELockControlsMenu := TMenuItem(Application.MainForm.FindComponent(SIDELockControlsMenuName));
-  CnDebugger.LogObject(FIDELockControlsMenu);
+
   // Maybe nil under XE8 or below.
   if FIDEHideNonvisualsMenu = nil then
     FIDEHideNonvisualsMenu := TMenuItem(Application.MainForm.FindComponent(SIDEHideNonvisualsMenuName));
-  CnDebugger.LogObject(FIDEHideNonvisualsMenu);
-  //CnDebugger.EvaluateObject(Application.MainForm.FindComponent('MainMenu1'));
 end;
 
 {$ENDIF}
