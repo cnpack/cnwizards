@@ -134,6 +134,9 @@ type
     procedure Loaded; virtual;
     {* IDE 启动完成后调用该方法}
 
+    procedure LaterLoaded; virtual;
+    {* IDE 启动完成更迟一些后调用该方法，用于高版本 IDE 中处理 IDE 菜单项加载太迟的场合}
+
     class function IsInternalWizard: Boolean; virtual;
     {* 该专家是否属于内部专家，不显示、不可配置 }
     
@@ -777,6 +780,11 @@ begin
 end;
 
 procedure TCnBaseWizard.Loaded;
+begin
+  // do nothing
+end;
+
+procedure TCnBaseWizard.LaterLoaded;
 begin
   // do nothing
 end;

@@ -96,10 +96,15 @@ type
     FWizAbout: TCnMenuWizard;
     FOffSet: array[0..3] of Integer;
     FSettingsLoaded: Boolean;
+    FMainFormOnShow: TNotifyEvent;
   {$IFDEF BDS}
     FSplashBmp: TBitmap;
     FAboutBmp: TBitmap;
   {$ENDIF}
+    procedure InstallMainFormOnShowHook;
+    procedure OnMainFormOnShow(Sender: TObject);
+    procedure DoLaterLoad(Sender: TObject);
+
     procedure CreateIDEMenu;
     procedure InstallIDEMenu;
     procedure FreeMenu;
@@ -372,6 +377,39 @@ begin
 {$ENDIF}
 end;
 
+
+procedure TCnWizardMgr.InstallMainFormOnShowHook;
+begin
+  FMainFormOnShow := Application.MainForm.OnShow;
+  Application.MainForm.OnShow := OnMainFormOnShow;
+end;
+
+procedure TCnWizardMgr.OnMainFormOnShow(Sender: TObject);
+begin
+  Application.MainForm.OnShow := FMainFormOnShow;
+  CnWizNotifierServices.ExecuteOnApplicationIdle(DoLaterLoad);
+end;
+
+procedure TCnWizardMgr.DoLaterLoad(Sender: TObject);
+var
+  I: Integer;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogEnter('DoLaterLoad');
+{$ENDIF}
+
+  for I := 0 to WizardCount - 1 do
+  try
+    Wizards[I].LaterLoaded;
+  except
+    DoHandleException(Wizards[I].ClassName + '.OnLaterLoad');
+  end;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogLeave('DoLaterLoad');
+{$ENDIF}
+end;
+
 // ¿‡ππ‘Ï∆˜
 constructor TCnWizardMgr.Create;
 begin
@@ -399,6 +437,8 @@ begin
   CheckKeyMappingEnhModulesSequence;
 {$ENDIF}
 {$ENDIF}
+
+  InstallMainFormOnShowHook;
 
   WizShortCutMgr.BeginUpdate;
   CnListBeginUpdate;
