@@ -2615,7 +2615,6 @@ function CnOtaGetCurrentSourceEditor: IOTASourceEditor;
 var
   EditBuffer: IOTAEditBuffer;
 begin
-  Result := nil;
   EditBuffer := CnOtaGetEditBuffer;
   if Assigned(EditBuffer) and (EditBuffer.FileName <> '') then
     Result := CnOtaGetSourceEditorFromModule(CnOtaGetCurrentModule, EditBuffer.FileName);
@@ -3595,17 +3594,19 @@ end;
 // 返回指定模块指定文件名的单元编辑器
 function CnOtaGetSourceEditorFromModule(Module: IOTAModule; const FileName: string): IOTASourceEditor;
 var
-  i: Integer;
+  I: Integer;
   IEditor: IOTAEditor;
   ISourceEditor: IOTASourceEditor;
 begin
-  Result := nil;
   if not Assigned(Module) then
-    Exit;
-
-  for i := 0 to Module.GetModuleFileCount-1 do
   begin
-    IEditor := CnOtaGetFileEditorForModule(Module, i);
+    Result := nil;
+    Exit;
+  end;
+
+  for I := 0 to Module.GetModuleFileCount - 1 do
+  begin
+    IEditor := CnOtaGetFileEditorForModule(Module, I);
 
     if Supports(IEditor, IOTASourceEditor, ISourceEditor) then
     begin
@@ -3614,11 +3615,12 @@ begin
         if (FileName = '') or SameFileName(ISourceEditor.FileName, FileName) then
         begin
           Result := ISourceEditor;
-          Break;
+          Exit;
         end;
       end;
     end;
   end;
+  Result := nil;
 end;
 
 // 返回指定模块指定文件名的编辑器
@@ -3628,7 +3630,7 @@ var
   Editor: IOTAEditor;
 begin
   Assert(Assigned(Module));
-  for i := 0 to Module.GetModuleFileCount-1 do
+  for i := 0 to Module.GetModuleFileCount - 1 do
   begin
     Editor := CnOtaGetFileEditorForModule(Module, i);
     if SameFileName(Editor.FileName, FileName) then
