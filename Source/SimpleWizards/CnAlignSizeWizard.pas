@@ -90,7 +90,7 @@ type
     asMakeMinWidth, asMakeMaxWidth, asMakeSameWidth,
     asMakeMinHeight, asMakeMaxHeight, asMakeSameHeight, asMakeSameSize,
     asParentHCenter, asParentVCenter, asBringToFront, asSendToBack,
-    asSnapToGrid, {$IFDEF DELPHI10_UP} asUseGuidelines, {$ENDIF} asAlignToGrid,
+    asSnapToGrid, {$IFDEF IDE_HAS_GUIDE_LINE} asUseGuidelines, {$ENDIF} asAlignToGrid,
     asSizeToGrid, asLockControls, asSelectRoot, asCopyCompName,
     asHideComponent,
     asNonArrange, asListComp, asCompToCode, asCompRename, asShowFlatForm);
@@ -262,7 +262,7 @@ const
   // Action 生效需要选择的最小控件数
   csAlignNeedControls: array[TAlignSizeStyle] of Integer = (2, 2, 2, 2, 2, 2,
     3, 2, 2, 2, 2, 3, 2, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 0,
-    {$IFDEF DELPHI10_UP} 0, {$ENDIF} 1, 1, -1, -1, -1,
+    {$IFDEF IDE_HAS_GUIDE_LINE} 0, {$ENDIF} 1, 1, -1, -1, -1,
     0, 0, 0, 0, 1, -1);
 
   csAlignNeedSepMenu: set of TAlignSizeStyle =
@@ -277,7 +277,7 @@ const
     'CnMakeMinWidth', 'CnMakeMaxWidth', 'CnMakeSameWidth', 'CnMakeMinHeight',
     'CnMakeMaxHeight', 'CnMakeSameHeight', 'CnMakeSameSize', 'CnParentHCenter',
     'CnParentVCenter', 'CnBringToFront', 'CnSendToBack', 'CnSnapToGrid',
-    {$IFDEF DELPHI10_UP} 'CnUseGuidelines', {$ENDIF}
+    {$IFDEF IDE_HAS_GUIDE_LINE} 'CnUseGuidelines', {$ENDIF}
     'CnAlignToGrid', 'CnSizeToGrid', 'CnLockControls', 'CnSelectRoot',
     'CnCopyCompName', 'CnHideComponent',
     'CnNonArrange', 'CnListComp', 'CnCompToCode', 'CnCompRename', 'CnShowFlatForm');
@@ -292,7 +292,7 @@ const
     @SCnMakeMinHeightCaption, @SCnMakeMaxHeightCaption, @SCnMakeSameHeightCaption,
     @SCnMakeSameSizeCaption, @SCnParentHCenterCaption, @SCnParentVCenterCaption,
     @SCnBringToFrontCaption, @SCnSendToBackCaption, @SCnSnapToGridCaption,
-    {$IFDEF DELPHI10_UP} @SCnUseGuidelinesCaption, {$ENDIF}
+    {$IFDEF IDE_HAS_GUIDE_LINE} @SCnUseGuidelinesCaption, {$ENDIF}
     @SCnAlignToGridCaption, @SCnSizeToGridCaption, @SCnLockControlsCaption,
     @SCnSelectRootCaption, @SCnCopyCompNameCaption,
     @SCnHideComponentCaption,
@@ -309,7 +309,7 @@ const
     @SCnMakeMinHeightHint, @SCnMakeMaxHeightHint, @SCnMakeSameHeightHint,
     @SCnMakeSameSizeHint, @SCnParentHCenterHint, @SCnParentVCenterHint,
     @SCnBringToFrontHint, @SCnSendToBackHint, @SCnSnapToGridHint,
-    {$IFDEF DELPHI10_UP} @SCnUseGuidelinesHint, {$ENDIF}
+    {$IFDEF IDE_HAS_GUIDE_LINE} @SCnUseGuidelinesHint, {$ENDIF}
     @SCnAlignToGridHint, @SCnSizeToGridHint, @SCnLockControlsHint,
     @SCnSelectRootHint, @SCnCopyCompNameHint,
     @SCnHideComponentHint,
@@ -687,7 +687,7 @@ begin
             DoHandleException('SnapToGrid Error.');
           end;
         end;
-      {$IFDEF DELPHI10_UP}
+      {$IFDEF IDE_HAS_GUIDE_LINE}
       asUseGuidelines:
         begin
           EnvOptions := CnOtaGetEnvironmentOptions;
@@ -1382,7 +1382,7 @@ begin
 
   if Index = Indexes[asSnapToGrid] then
     Actn.Checked := CnOtaGetEnvironmentOptions.GetOptionValue(SOptionSnapToGrid)
-  {$IFDEF DELPHI10_UP}
+  {$IFDEF IDE_HAS_GUIDE_LINE}
   else if Index = Indexes[asUseGuidelines] then
     Actn.Checked := CnOtaGetEnvironmentOptions.GetOptionValue(SOptionUseGuidelines)
   {$ENDIF}   
