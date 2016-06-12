@@ -67,12 +67,9 @@ interface
 uses
   Windows, SysUtils, Messages, Classes, Forms, IniFiles, ToolsAPI, Controls,
   Dialogs, Math, ActnList,
-{$IFDEF COMPILER6_UP}
-  DesignIntf, DesignEditors,
-{$ELSE}
-  DsgnIntf,
-{$ENDIF}
-  Buttons, Menus, CnWizClasses, CnWizMenuAction, CnWizUtils, 
+{$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, {$ELSE} DsgnIntf, {$ENDIF}
+{$IFDEF IDE_ACTION_UPDATE_DELAY} ActnMenus, ActnMan, {$ENDIF}
+  Buttons, Menus, CnWizClasses, CnWizMenuAction, CnWizUtils,
   CnConsts, CnWizNotifier, CnWizConsts, CnWizManager,
   StdCtrls, CnSpin, CnWizIdeUtils, CnCommon, CnWizMultiLang;
 
@@ -95,7 +92,7 @@ type
     asParentHCenter, asParentVCenter, asBringToFront, asSendToBack,
     asSnapToGrid, {$IFDEF DELPHI10_UP} asUseGuidelines, {$ENDIF} asAlignToGrid,
     asSizeToGrid, asLockControls, asSelectRoot, asCopyCompName,
-    {$IFNDEF IDE_HAS_HIDE_NONVISUAL} asHideComponent, {$ENDIF}
+    asHideComponent,
     asNonArrange, asListComp, asCompToCode, asCompRename, asShowFlatForm);
 
   TNonArrangeStyle = (asRow, asCol);
@@ -104,9 +101,7 @@ type
   TCnAlignSizeWizard = class(TCnSubMenuWizard)
   private
     Indexes: array[TAlignSizeStyle] of Integer;
-{$IFNDEF IDE_HAS_HIDE_NONVISUAL}
     FHideNonVisual: Boolean;
-{$ENDIF}
     FNonArrangeStyle: TNonArrangeStyle;
     FNonMoveStyle: TNonMoveStyle;
     FRowSpace, FColSpace: Integer;
@@ -114,6 +109,12 @@ type
     FSortByClassName: Boolean;
     FSizeSpace: Integer;
     FIDELockControlsMenu: TMenuItem;
+    FIDEHideNonvisualsMenu: TMenuItem;
+
+{$IFDEF IDE_ACTION_UPDATE_DELAY}
+    FIDEMenuBar: TCustomActionMenuBar;
+    FEditMenuActionControl: TCustomActionControl;
+{$ENDIF}
 
     procedure ControlListSortByPos(List: TList; IsVert: Boolean;
       Desc: Boolean = False);
@@ -121,10 +122,15 @@ type
       Desc: Boolean = False);
     procedure DoAlignSize(AlignSizeStyle: TAlignSizeStyle);
 
-{$IFNDEF IDE_HAS_HIDE_NONVISUAL}
     function UpdateNonVisualComponent(FormEditor: IOTAFormEditor): Boolean;
     procedure HideNonVisualComponent;
+
+{$IFDEF IDE_ACTION_UPDATE_DELAY}
+    procedure CheckMenuBarReady;
+    procedure CheckMenuItemReady(Sender: TObject);
 {$ENDIF}
+    procedure RequestLockControlsMenuUpdate(Sender: TObject);
+    procedure RequestNonvisualsMenuUpdate(Sender: TObject);
 
     procedure ShowFlatForm;
     procedure NonVisualArrange;
@@ -147,6 +153,7 @@ type
     destructor Destroy; override;
     procedure AcquireSubActions; override;
     procedure Config; override;
+    procedure LaterLoaded; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
     function GetState: TWizardState; override;
@@ -226,6 +233,15 @@ resourcestring
   SOptionGridSizeX = 'GridSizeX';
   SOptionGridSizeY = 'GridSizeY';
   SIDELockControlsMenuName = 'EditLockControlsItem';
+  SIDELockControlsActionName = 'EditLockControlsCommand';
+  // 10 Seattle 后才自带以下俩功能
+  SIDEHideNonvisualsMenuName = 'ToggleNonVisualComponentVisibilityItem';
+  SIDEHideNonvisualsActionName = 'ToggleNonVisualComponentVisibilityCommand';
+
+{$IFDEF IDE_ACTION_UPDATE_DELAY}
+  SIDEMenuBar = 'MenuBar';
+  SEditMenuCaption = '&Edit';
+{$ENDIF}
 
 const
   csNonArrangeStyle = 'NonArrangeStyle';
@@ -247,7 +263,7 @@ const
   csAlignNeedControls: array[TAlignSizeStyle] of Integer = (2, 2, 2, 2, 2, 2,
     3, 2, 2, 2, 2, 3, 2, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 0,
     {$IFDEF DELPHI10_UP} 0, {$ENDIF} 1, 1, -1, -1, -1,
-    {$IFNDEF IDE_HAS_HIDE_NONVISUAL} 0, {$ENDIF}  0, 0, 0, 1, -1);
+    0, 0, 0, 0, 1, -1);
 
   csAlignNeedSepMenu: set of TAlignSizeStyle =
     [asAlignVCenter, asSpaceRemoveV, asMakeSameSize, asParentVCenter,
@@ -263,7 +279,7 @@ const
     'CnParentVCenter', 'CnBringToFront', 'CnSendToBack', 'CnSnapToGrid',
     {$IFDEF DELPHI10_UP} 'CnUseGuidelines', {$ENDIF}
     'CnAlignToGrid', 'CnSizeToGrid', 'CnLockControls', 'CnSelectRoot',
-    'CnCopyCompName', {$IFNDEF IDE_HAS_HIDE_NONVISUAL} 'CnHideComponent', {$ENDIF}
+    'CnCopyCompName', 'CnHideComponent',
     'CnNonArrange', 'CnListComp', 'CnCompToCode', 'CnCompRename', 'CnShowFlatForm');
 
   csAlignSizeCaptions: array[TAlignSizeStyle] of PString = (
@@ -279,7 +295,7 @@ const
     {$IFDEF DELPHI10_UP} @SCnUseGuidelinesCaption, {$ENDIF}
     @SCnAlignToGridCaption, @SCnSizeToGridCaption, @SCnLockControlsCaption,
     @SCnSelectRootCaption, @SCnCopyCompNameCaption,
-    {$IFNDEF IDE_HAS_HIDE_NONVISUAL} @SCnHideComponentCaption, {$ENDIF}
+    @SCnHideComponentCaption,
     @SCnNonArrangeCaption, @SCnListCompCaption, @SCnCompToCodeCaption,
     @SCnFloatPropBarRenameCaption, @SCnShowFlatFormCaption);
 
@@ -296,7 +312,7 @@ const
     {$IFDEF DELPHI10_UP} @SCnUseGuidelinesHint, {$ENDIF}
     @SCnAlignToGridHint, @SCnSizeToGridHint, @SCnLockControlsHint,
     @SCnSelectRootHint, @SCnCopyCompNameHint,
-    {$IFNDEF IDE_HAS_HIDE_NONVISUAL} @SCnHideComponentHint, {$ENDIF}
+    @SCnHideComponentHint,
     @SCnNonArrangeHint, @SCnListCompHint, @SCnCompToCodeHint,
     @SCnFloatPropBarRenameCaption, @SCnShowFlatFormHint);
 
@@ -310,7 +326,6 @@ constructor TCnAlignSizeWizard.Create;
 begin
   inherited;
   CnWizNotifierServices.AddFormEditorNotifier(FormEditorNotifier);
-  FIDELockControlsMenu := TMenuItem(Application.MainForm.FindComponent(SIDELockControlsMenuName));
 end;
 
 destructor TCnAlignSizeWizard.Destroy;
@@ -689,7 +704,10 @@ begin
       asLockControls:
         begin
           if Assigned(FIDELockControlsMenu) then
+          begin
             FIDELockControlsMenu.Click;
+            CnWizNotifierServices.ExecuteOnApplicationIdle(RequestLockControlsMenuUpdate);
+          end;
           IsModified := False;
         end;
       asSelectRoot:
@@ -704,7 +722,7 @@ begin
           GetKeyboardState(KeyState);
           if (KeyState[VK_SHIFT] and $80) = 0 then // 按 Shift 不跳
           begin
-            //Switch To Code
+            // Switch To Code
             if IsForm(CnOtaGetCurrentSourceFile) then
             begin
               EditAction := CnOtaGetEditActionsFromModule(CnOtaGetCurrentModule);
@@ -715,13 +733,11 @@ begin
           
           IsModified := False;
         end;
-{$IFNDEF IDE_HAS_HIDE_NONVISUAL}
       asHideComponent:
         begin
           HideNonvisualComponent;
           IsModified := False;
         end;
-{$ENDIF}
       asNonArrange:
         begin
           NonVisualArrange;
@@ -778,11 +794,14 @@ end;
 // 隐藏不可视组件
 //------------------------------------------------------------------------------
 
-{$IFNDEF IDE_HAS_HIDE_NONVISUAL}
-
 procedure TCnAlignSizeWizard.HideNonvisualComponent;
 begin
-  if UpdateNonVisualComponent(CnOtaGetCurrentFormEditor) then
+  if Assigned(FIDEHideNonvisualsMenu) then // 如果 IDE 有此功能
+  begin
+    FIDEHideNonvisualsMenu.Click;
+    CnWizNotifierServices.ExecuteOnApplicationIdle(RequestNonvisualsMenuUpdate);
+  end
+  else if UpdateNonVisualComponent(CnOtaGetCurrentFormEditor) then
   begin
     FHideNonVisual := not FHideNonvisual;
     SubActions[Indexes[asHideComponent]].Checked := FHideNonVisual;
@@ -814,7 +833,7 @@ var
     while H <> 0 do
     begin
       if HWndIsNonvisualComponent(H) then
-        if Active and HideNonVisual then
+        if Active and FHideNonVisual then
           ShowWindow(H, SW_HIDE)
         else
           ShowWindow(H, SW_SHOW);
@@ -822,6 +841,7 @@ var
       H := GetWindow(H, GW_HWNDPREV);
     end;
   end;
+
 begin
   Result := False;
   if Assigned(FormEditor) and IsVCLFormEditor(FormEditor) then
@@ -842,16 +862,13 @@ begin
   end;
 end;
 
-{$ENDIF}
-
 procedure TCnAlignSizeWizard.FormEditorNotifier(FormEditor: IOTAFormEditor;
   NotifyType: TCnWizFormEditorNotifyType; ComponentHandle: TOTAHandle;
   Component: TComponent; const OldName, NewName: string);
 begin
-{$IFNDEF IDE_HAS_HIDE_NONVISUAL}
-  if Active and (NotifyType = fetActivated) then
+  // IDE 自身没这功能时才需要手动更新新窗体上的状态
+  if Active and (NotifyType = fetActivated) and (FIDEHideNonvisualsMenu = nil) then
     UpdateNonVisualComponent(FormEditor);
-{$ENDIF}
 end;
 
 //------------------------------------------------------------------------------
@@ -1381,6 +1398,17 @@ begin
     else
       Actn.Enabled := False;
   end
+  else if Index = Indexes[asHideComponent] then
+  begin
+    Actn.Enabled := True;
+    if Assigned(FIDEHideNonvisualsMenu) then
+    begin
+      Actn.Checked := (Length(FIDEHideNonvisualsMenu.Caption) > 1) and (FIDEHideNonvisualsMenu.Caption[1] = 'S');
+      // 此菜单项无 Checked 状态，判断文字是 Show 还是 Hide。 
+    end
+    else
+      Actn.Checked := FHideNonVisual;
+  end
   else if Index = Indexes[asCopyCompName] then
   begin
     Actn.Enabled := not CnOtaIsCurrFormSelectionsEmpty;
@@ -1477,6 +1505,96 @@ begin
     + SCnPack_LiuXiaoEmail + ';' + SCnPack_LicwingEmail;
   Comment := SCnAlignSizeComment;
 end;
+
+{$IFDEF IDE_ACTION_UPDATE_DELAY}
+
+procedure TCnAlignSizeWizard.CheckMenuBarReady;
+var
+  Comp: TComponent;
+  I: Integer;
+begin
+  if (FIDEMenuBar <> nil) and (FEditMenuActionControl <> nil) then
+    Exit;
+
+  Comp := Application.MainForm.FindComponent(SIDEMenuBar);
+  if (Comp <> nil) and (Comp is TCustomActionMenuBar) then
+  begin
+    FIDEMenuBar := Comp as TCustomActionMenuBar;
+    for I := 0 to FIDEMenuBar.ComponentCount - 1 do
+    begin
+      Comp := FIDEMenuBar.Components[I];
+      if (Comp is TCustomActionControl) and ((Comp as TCustomActionControl).Caption = SEditMenuCaption) then
+      begin
+        FEditMenuActionControl := Comp as TCustomActionControl;
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('TCnAlignSizeWizard EditMenuActionControl Got.');
+{$ENDIF}
+        Break;
+      end;
+    end;
+  end;
+end;
+
+procedure TCnAlignSizeWizard.CheckMenuItemReady(Sender: TObject);
+begin
+  if FIDELockControlsMenu = nil then
+    FIDELockControlsMenu := TMenuItem(Application.MainForm.FindComponent(SIDELockControlsMenuName));
+  CnDebugger.LogObject(FIDELockControlsMenu);
+  // Maybe nil under XE8 or below.
+  if FIDEHideNonvisualsMenu = nil then
+    FIDEHideNonvisualsMenu := TMenuItem(Application.MainForm.FindComponent(SIDEHideNonvisualsMenuName));
+  CnDebugger.LogObject(FIDEHideNonvisualsMenu);
+  //CnDebugger.EvaluateObject(Application.MainForm.FindComponent('MainMenu1'));
+end;
+
+{$ENDIF}
+
+procedure TCnAlignSizeWizard.RequestLockControlsMenuUpdate(Sender: TObject);
+begin
+{$IFDEF IDE_ACTION_UPDATE_DELAY}
+  CheckMenuBarReady;
+
+  if (FIDEMenuBar <> nil) and (FEditMenuActionControl <> nil) then
+  begin
+    if Assigned(FIDEMenuBar.OnPopup) then
+    begin
+      FIDEMenuBar.OnPopup(FIDEMenuBar, FEditMenuActionControl);
+{$IFDEF DEBUG}
+      CnDebugger.LogBoolean(FIDELockControlsMenu.Checked,
+        'TCnAlignSizeWizard RequestLockControlsMenuUpdate Call MenuBar.OnPopup. IDELockControlsMenu.Checked');
+{$ENDIF}
+    end;
+  end;
+{$ENDIF}
+end;
+
+procedure TCnAlignSizeWizard.RequestNonvisualsMenuUpdate(Sender: TObject);
+begin
+{$IFDEF IDE_ACTION_UPDATE_DELAY}
+  CheckMenuBarReady;
+
+  if (FIDEMenuBar <> nil) and (FEditMenuActionControl <> nil) then
+  begin
+    if Assigned(FIDEMenuBar.OnPopup) then
+    begin
+      FIDEMenuBar.OnPopup(FIDEMenuBar, FEditMenuActionControl);
+{$IFDEF DEBUG}
+      CnDebugger.LogBoolean(FIDEHideNonvisualsMenu.Checked,
+        'TCnAlignSizeWizard RequestNonvisualsMenuUpdate Call MenuBar.OnPopup. IDEToggleNonvisualsMenu.Checked');
+{$ENDIF}
+    end;
+  end;
+{$ENDIF}
+end;
+
+procedure TCnAlignSizeWizard.LaterLoaded;
+begin
+  inherited;
+{$IFDEF IDE_ACTION_UPDATE_DELAY}
+  CnWizNotifierServices.ExecuteOnApplicationIdle(CheckMenuItemReady);
+{$ENDIF}
+end;
+
 
 //==============================================================================
 // 不可视组件排列窗体
