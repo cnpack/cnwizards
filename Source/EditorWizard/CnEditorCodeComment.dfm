@@ -1,9 +1,9 @@
 inherited CnEditorCodeCommentForm: TCnEditorCodeCommentForm
-  Left = 412
-  Top = 266
+  Left = 469
+  Top = 194
   BorderStyle = bsDialog
   Caption = 'Toggle Code Comment'
-  ClientHeight = 116
+  ClientHeight = 209
   ClientWidth = 250
   OldCreateOrder = True
   PixelsPerInch = 96
@@ -12,7 +12,7 @@ inherited CnEditorCodeCommentForm: TCnEditorCodeCommentForm
     Left = 8
     Top = 8
     Width = 233
-    Height = 72
+    Height = 52
     Anchors = [akLeft, akTop, akRight, akBottom]
     Caption = '&Settings'
     TabOrder = 0
@@ -24,18 +24,10 @@ inherited CnEditorCodeCommentForm: TCnEditorCodeCommentForm
       Caption = 'Move to Next Line after Toggle'
       TabOrder = 0
     end
-    object chkKeepIndent: TCheckBox
-      Left = 8
-      Top = 42
-      Width = 217
-      Height = 17
-      Caption = 'Keep Code Indent after Toggle'
-      TabOrder = 1
-    end
   end
   object btnOK: TButton
     Left = 86
-    Top = 87
+    Top = 180
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -46,7 +38,7 @@ inherited CnEditorCodeCommentForm: TCnEditorCodeCommentForm
   end
   object btnCancel: TButton
     Left = 166
-    Top = 87
+    Top = 180
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -54,5 +46,17 @@ inherited CnEditorCodeCommentForm: TCnEditorCodeCommentForm
     Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 2
+  end
+  object rgIndentMode: TRadioGroup
+    Left = 8
+    Top = 72
+    Width = 233
+    Height = 97
+    Caption = 'Comment &Mode'
+    Items.Strings = (
+      'Insert // to Line &Head'
+      'Insert // to &Non-Space Line Head'
+      '&Replace Space at Line Head using //')
+    TabOrder = 3
   end
 end

@@ -45,9 +45,12 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, IniFiles, ToolsAPI, CnWizClasses, CnWizUtils, CnConsts, CnCommon,
-  Menus, CnEditorWizard, CnWizConsts, CnEditorCodeTool, CnWizMultiLang;
+  Menus, CnEditorWizard, CnWizConsts, CnEditorCodeTool, CnWizMultiLang,
+  ExtCtrls;
 
 type
+  TCnIndentMode = (imInsertToHead, imInsertToNonSpace, imReplaceHeadSpace);
+  // 注释插入模式，行头、行非空格头、替换行头空格（如果有）
 
 //==============================================================================
 // 代码块注释工具类
@@ -92,8 +95,8 @@ type
     Inited: Boolean;
     FirstIsCommented: Boolean;
     FMoveToNextLine: Boolean;
-    FKeepIndent: Boolean;
-    procedure SetKeepIndent(const Value: Boolean);
+    FIndentMode: TCnIndentMode;
+    procedure SetIndentMode(const Value: TCnIndentMode);
   protected
     function GetHasConfig: Boolean; override;
     function ProcessLine(const Str: string): string; override;
@@ -109,8 +112,7 @@ type
     procedure Config; override;
   published
     property MoveToNextLine: Boolean read FMoveToNextLine write FMoveToNextLine default True;
-    property KeepIndent: Boolean read FKeepIndent write SetKeepIndent;
-    {* True 时类似于改写模式，用//替换代码前部的空格，保持代码内容的原始缩进}
+    property IndentMode: TCnIndentMode read FIndentMode write SetIndentMode;
   end;
 
   TCnEditorCodeCommentForm = class(TCnTranslateForm)
@@ -118,7 +120,7 @@ type
     chkMoveToNextLine: TCheckBox;
     btnOK: TButton;
     btnCancel: TButton;
-    chkKeepIndent: TCheckBox;private
+    rgIndentMode: TRadioGroup;private
     { Private declarations }
   public
     { Public declarations }
@@ -133,14 +135,42 @@ implementation
 {$IFDEF CNWIZARDS_CNEDITORWIZARD}
 
 var
-  InternalKeepIndent: Boolean = False;
+  InternalIndentMode: TCnIndentMode = imInsertToHead;
 
 function GetCommentStr(const Str: string): string;
+var
+  I, L: Integer;
 begin
-  if InternalKeepIndent and (Length(Str) > 2) and (Str[1] = ' ') and (Str[2] = ' ') then
-    Result := '//' + Copy(Str, 3, MaxInt)
-  else
-    Result := '//' + Str;
+  case InternalIndentMode of
+  imInsertToHead:
+    begin
+      Result := '//' + Str;
+    end;
+  imInsertToNonSpace:
+    begin
+      Result := Str;
+      L := Length(Result);
+      I := 1;
+      while (I <= L) and (Result[I] <= ' ') do
+        Inc(I);
+
+      if I > L then
+      begin
+        Result := '//' + Result; // 全空白
+      end
+      else
+      begin
+        Insert('//', Result, I);
+      end;
+    end;
+  imReplaceHeadSpace:
+    begin
+      if (Length(Str) > 2) and (Str[1] = ' ') and (Str[2] = ' ') then
+        Result := '//' + Copy(Str, 3, MaxInt)
+      else
+        Result := '//' + Str;
+    end;
+  end;
 end;
 
 function IsCommentStr(const Str: string): Boolean;
@@ -157,10 +187,16 @@ function GetUnCommentStr(const Str: string): string;
 begin
   if IsCommentStr(Str) then
   begin
-    if InternalKeepIndent then
-      Result := StringReplace(Str, '//', '  ', [])
-    else
-      Result := StringReplace(Str, '//', '', []);
+    case InternalIndentMode of
+    imInsertToHead, imInsertToNonSpace:
+      begin
+        Result := StringReplace(Str, '//', '', []);
+      end;
+    imReplaceHeadSpace:
+      begin
+        Result := StringReplace(Str, '//', '  ', [])
+      end;
+    end;
   end
   else
     Result := Str;
@@ -305,22 +341,22 @@ begin
   with TCnEditorCodeCommentForm.Create(nil) do
   try
     chkMoveToNextLine.Checked := FMoveToNextLine;
-    chkKeepIndent.Checked := FKeepIndent;
+    rgIndentMode.ItemIndex := Ord(FIndentMode);
 
     if ShowModal = mrOk then
     begin
       MoveToNextLine := chkMoveToNextLine.Checked;
-      KeepIndent := chkKeepIndent.Checked;
+      IndentMode := TCnIndentMode(rgIndentMode.ItemIndex);
     end;
   finally
     Free;
   end;
 end;
 
-procedure TCnEditorCodeToggleComment.SetKeepIndent(const Value: Boolean);
+procedure TCnEditorCodeToggleComment.SetIndentMode(const Value: TCnIndentMode);
 begin
-  FKeepIndent := Value;
-  InternalKeepIndent := Value;
+  FIndentMode := Value;
+  InternalIndentMode := Value;
 end;
 
 initialization
