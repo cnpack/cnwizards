@@ -1429,7 +1429,7 @@ end;
 
 procedure TmwPasLex.Next;
 var
-  C: Char;
+  C: AnsiChar;
 begin
   Case fTokenID of
     tkIdentifier:
