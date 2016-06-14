@@ -69,7 +69,7 @@ object CppParseForm: TCppParseForm
     OnClick = mmoCClick
   end
   object btnParse: TButton
-    Left = 360
+    Left = 256
     Top = 16
     Width = 75
     Height = 25
@@ -87,7 +87,7 @@ object CppParseForm: TCppParseForm
     TabOrder = 5
   end
   object btnTokenList: TButton
-    Left = 262
+    Left = 350
     Top = 16
     Width = 83
     Height = 25

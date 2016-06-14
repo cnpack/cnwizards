@@ -1,7 +1,7 @@
 object CnTestPasForm: TCnTestPasForm
   Left = 192
   Top = 107
-  Width = 665
+  Width = 747
   Height = 545
   Caption = 'Test Pascal Unit Token Parsing'
   Color = clBtnFace
@@ -21,7 +21,7 @@ object CnTestPasForm: TCnTestPasForm
     Height = 13
   end
   object bvl1: TBevel
-    Left = 376
+    Left = 456
     Top = 16
     Width = 17
     Height = 25
@@ -39,8 +39,9 @@ object CnTestPasForm: TCnTestPasForm
   object mmoC: TMemo
     Left = 16
     Top = 56
-    Width = 625
+    Width = 707
     Height = 201
+    Anchors = [akLeft, akTop, akRight]
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
     Font.Height = -12
@@ -58,7 +59,7 @@ object CnTestPasForm: TCnTestPasForm
     OnClick = mmoCClick
   end
   object btnParse: TButton
-    Left = 288
+    Left = 368
     Top = 16
     Width = 75
     Height = 25
@@ -69,12 +70,13 @@ object CnTestPasForm: TCnTestPasForm
   object mmoParse: TMemo
     Left = 16
     Top = 272
-    Width = 625
+    Width = 707
     Height = 225
+    Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 6
   end
   object btnUses: TButton
-    Left = 200
+    Left = 280
     Top = 16
     Width = 75
     Height = 25
@@ -83,7 +85,7 @@ object CnTestPasForm: TCnTestPasForm
     OnClick = btnUsesClick
   end
   object btnWideParse: TButton
-    Left = 480
+    Left = 560
     Top = 16
     Width = 75
     Height = 25
@@ -92,7 +94,7 @@ object CnTestPasForm: TCnTestPasForm
     OnClick = btnWideParseClick
   end
   object btnAnsiLex: TButton
-    Left = 392
+    Left = 472
     Top = 16
     Width = 75
     Height = 25
@@ -101,7 +103,7 @@ object CnTestPasForm: TCnTestPasForm
     OnClick = btnAnsiLexClick
   end
   object chkWideIdent: TCheckBox
-    Left = 564
+    Left = 644
     Top = 20
     Width = 77
     Height = 17

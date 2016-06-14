@@ -141,6 +141,7 @@ type
   TCnPasStructureParser = class(TObject)
   {* 利用 Lex 进行语法解析得到各个 Token 和位置信息}
   private
+    FSupportUnicodeIdent: Boolean;
     FBlockCloseToken: TCnPasToken;
     FBlockStartToken: TCnPasToken;
     FChildMethodCloseToken: TCnPasToken;
@@ -159,7 +160,7 @@ type
     function GetCount: Integer;
     function GetToken(Index: Integer): TCnPasToken; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
   public
-    constructor Create;
+    constructor Create(SupportUnicodeIdent: Boolean = False);
     destructor Destroy; override;
     procedure Clear;
     procedure ParseSource(ASource: PAnsiChar; AIsDpr, AKeyOnly: Boolean);
@@ -329,10 +330,11 @@ end;
 
 { TCnPasStructureParser }
 
-constructor TCnPasStructureParser.Create;
+constructor TCnPasStructureParser.Create(SupportUnicodeIdent: Boolean);
 begin
   FList := TCnList.Create;
   FTabWidth := 2;
+  FSupportUnicodeIdent := SupportUnicodeIdent;
 end;
 
 destructor TCnPasStructureParser.Destroy;
@@ -460,7 +462,7 @@ begin
     BlockStack := TObjectStack.Create;
     MidBlockStack := TObjectStack.Create;
 
-    Lex := TmwPasLex.Create;
+    Lex := TmwPasLex.Create(FSupportUnicodeIdent);
     Lex.Origin := PAnsiChar(ASource);
 
     DeclareWithEndLevel := 0; // 嵌套的需要end的定义层数
@@ -1102,6 +1104,7 @@ var
     else
       Lex.Next;
   end;
+
 begin
   if CurrPos <= 0 then
     CurrPos := MaxInt;

@@ -61,7 +61,7 @@ var
   Token: TCnPasToken;
 begin
   mmoParse.Lines.Clear;
-  Parser := TCnPasStructureParser.Create;
+  Parser := TCnPasStructureParser.Create(chkWideIdent.Checked);
   Stream := TMemoryStream.Create;
 
   try

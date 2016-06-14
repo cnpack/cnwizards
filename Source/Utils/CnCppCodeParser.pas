@@ -71,6 +71,7 @@ type
   TCnCppStructureParser = class(TObject)
   {* 利用 CParser 进行语法解析得到各个 Token 和位置信息}
   private
+    FSupportUnicodeIdent: Boolean;
     FBlockCloseToken: TCnCppToken;
     FBlockStartToken: TCnCppToken;
     FChildCloseToken: TCnCppToken;
@@ -88,7 +89,7 @@ type
     function GetCount: Integer;
     function GetToken(Index: Integer): TCnCppToken;
   public
-    constructor Create;
+    constructor Create(SupportUnicodeIdent: Boolean = False);
     destructor Destroy; override;
     procedure Clear;
     procedure ParseSource(ASource: PAnsiChar; Size: Integer; CurrLine: Integer = 0;
@@ -170,10 +171,10 @@ end;
 
 { TCnCppStructureParser }
 
-constructor TCnCppStructureParser.Create;
+constructor TCnCppStructureParser.Create(SupportUnicodeIdent: Boolean);
 begin
-  inherited;
   FList := TCnList.Create;
+  FSupportUnicodeIdent := SupportUnicodeIdent;
 end;
 
 destructor TCnCppStructureParser.Destroy;
@@ -339,7 +340,7 @@ begin
     Brace2Stack := TStack.Create;
     FSource := ASource;
 
-    CParser := TBCBTokenList.Create;
+    CParser := TBCBTokenList.Create(FSupportUnicodeIdent);
     CParser.DirectivesAsComments := False;
     CParser.SetOrigin(ASource, Size);
 
@@ -647,6 +648,7 @@ var
     // 当 Next 再也前进不了的时候，就是该撤了
     // 这样做的原因是，CParser 在结尾时，有时候不会进行到ctknull，而一直打转
   end;
+
 begin
   if CurrPos <= 0 then
     CurrPos := MaxInt;
