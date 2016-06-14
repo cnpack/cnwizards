@@ -558,7 +558,8 @@ function CnOtaGetCurrLineInfo(var LineNo, CharIndex, LineLen: Integer): Boolean;
 {* 返回 SourceEditor 当前行信息}
 function CnOtaGetCurrPosToken(var Token: string; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TAnsiCharSet = [];
-  CharSet: TAnsiCharSet = []; EditView: IOTAEditView = nil): Boolean;
+  CharSet: TAnsiCharSet = []; EditView: IOTAEditView = nil;
+  SupportUnicodeIdent: Boolean = False): Boolean;
 {* 取当前光标下的标识符及光标在标识符中的索引号，速度较快}
 
 {$IFDEF UNICODE}
@@ -4164,8 +4165,8 @@ end;
 
 // 取当前光标下的标识符及光标在标识符中的索引号，速度较快
 function CnOtaGetCurrPosToken(var Token: string; var CurrIndex: Integer;
-  CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TAnsiCharSet = [];
-  CharSet: TAnsiCharSet = []; EditView: IOTAEditView = nil): Boolean;
+  CheckCursorOutOfLineEnd: Boolean; FirstSet, CharSet: TAnsiCharSet;
+  EditView: IOTAEditView; SupportUnicodeIdent: Boolean): Boolean;
 var
   LineNo: Integer;
   CharIndex: Integer;
@@ -4176,7 +4177,12 @@ var
   function _IsValidIdentChar(C: AnsiChar; First: Boolean): Boolean;
   begin
     if (FirstSet = []) and (CharSet = []) then
-      Result := IsValidIdentChar(Char(C), First)
+    begin
+      if SupportUnicodeIdent then
+        Result := IsValidIdentChar(Char(C), First) or (Ord(C) > 127)
+      else
+        Result := IsValidIdentChar(Char(C), First);
+    end
     else
       Result := CharInSet(Char(C), FirstSet + CharSet);
   end;
