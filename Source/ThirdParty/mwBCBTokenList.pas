@@ -166,6 +166,7 @@ type
     FColNumber: Integer;
     FVisibility: TCTokenKind;
     FDirectivesAsComments: Boolean;
+    FSupportWideCharIdent: Boolean;
     procedure WriteTo(InsPos, DelPos: LongInt; const Item: AnsiString);
     function GetCount: Integer;
     procedure SetCount(value: Integer);
@@ -190,7 +191,7 @@ type
     procedure SetToken(Index: Integer; const Item: AnsiString);
   public
     Searcher: TmsSearcher;
-    constructor Create;
+    constructor Create(SupportWideCharIdent: Boolean = False);
     destructor Destroy; override;
     procedure SetOrigin(NewOrigin: PAnsiChar; NewSize: LongInt);
     function Add(const Item: AnsiString): Integer;
@@ -573,7 +574,7 @@ begin
   Result := FBCBTokenList.IndexAtLine(ImpIndex);
 end; { GetMethodImpLine }
 
-constructor TBCBTokenList.Create;
+constructor TBCBTokenList.Create(SupportWideCharIdent: Boolean);
 begin
   inherited Create;
   FTokenPositionsList := TLongIntList.Create;
@@ -587,6 +588,7 @@ begin
   Visibility := ctkUnknown;
   Searcher := TmsSearcher.Create(Self);
   FDirectivesAsComments := True;
+  FSupportWideCharIdent := SupportWideCharIdent;
 end; { Create }
 
 destructor TBCBTokenList.Destroy;
@@ -1117,7 +1119,8 @@ begin
       'A'..'Z', 'a'..'z', '_', '~':
         begin
           Inc(Run); Inc(ColNum);
-          while FOrigin[Run] in ['A'..'Z', 'a'..'z', '0'..'9', '_'] do
+          while (FOrigin[Run] in ['A'..'Z', 'a'..'z', '0'..'9', '_'])
+            or (FSupportWideCharIdent and (Ord(FOrigin[Run]) > 127)) do
           begin
             Inc(Run);
             Inc(ColNum); 
@@ -1688,6 +1691,14 @@ begin
            Result := ctkCharType
          else
            Result := ctkapostrophe;
+
+    #127..#255: // 双字节字符当标识符时
+      begin
+        if FSupportWideCharIdent then
+          Result := ctkIdentifier
+        else
+          Result := ctkUnknown;
+      end;
   else
     Result := ctkUnknown;
   end;

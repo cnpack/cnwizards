@@ -116,6 +116,7 @@ type
 
   TmwPasLex=class(TObject)
   private
+    FSupportWideCharIdent: Boolean;
     fComment: TCommentState;
     fOrigin: PAnsiChar;
     fProcTable: array[#0..#255]of procedure of Object;
@@ -253,7 +254,7 @@ type
     function GetTokenLength: Integer;
   protected
   public
-    constructor Create;
+    constructor Create(SupportWideCharIdent: Boolean = False);
     destructor Destroy; override;
     function CharAhead(Count: Integer): AnsiChar;
     procedure Next;
@@ -927,9 +928,10 @@ begin
     end;
 end;
 
-constructor TmwPasLex.Create;
+constructor TmwPasLex.Create(SupportWideCharIdent: Boolean);
 begin
   inherited Create;
+  FSupportWideCharIdent := SupportWideCharIdent;
   InitIdent;
   MakeMethodTables;
 end; { Create }
@@ -1130,7 +1132,9 @@ procedure TmwPasLex.IdentProc;
 begin
   fTokenID:=IdentKind((fOrigin+Run));
   inc(Run, fStringLen);
-  while Identifiers[fOrigin[Run]]do inc(Run);
+  while (Identifiers[fOrigin[Run]]) or
+    (FSupportWideCharIdent and (Ord(FOrigin[Run]) > 127)) do
+    inc(Run);
 end;
 
 procedure TmwPasLex.IntegerProc;
@@ -1424,6 +1428,8 @@ begin
 end;
 
 procedure TmwPasLex.Next;
+var
+  C: Char;
 begin
   Case fTokenID of
     tkIdentifier:
@@ -1441,7 +1447,14 @@ begin
   end;
   fTokenPos:=Run;
   Case fComment of
-    csNo: fProcTable[fOrigin[Run]];
+    csNo:
+    begin
+      C := FOrigin[Run];
+      if FSupportWideCharIdent and (Ord(C) > 127) then
+        IdentProc
+      else
+        FProcTable[C];
+    end;
   else
     Case fComment of
       csBor: BorProc;

@@ -1559,7 +1559,10 @@ begin
          else
            Result := ctkapostrophe;
   else
-     Result := ctkUnknown;
+    if FSupportUnicodeIdent and (Ord(FOrigin[Running]) > 127) then
+      Result := ctkidentifier
+    else
+      Result := ctkUnknown;
   end;
 end; { GetTokenID }
 

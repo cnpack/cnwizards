@@ -1,7 +1,7 @@
 object CppParseForm: TCppParseForm
-  Left = 192
-  Top = 107
-  Width = 665
+  Left = 203
+  Top = 70
+  Width = 754
   Height = 545
   Caption = 'Test C/C++ File Token Parsing'
   Color = clBtnFace
@@ -21,7 +21,7 @@ object CppParseForm: TCppParseForm
     Height = 13
   end
   object bvl1: TBevel
-    Left = 384
+    Left = 448
     Top = 16
     Width = 25
     Height = 25
@@ -39,8 +39,9 @@ object CppParseForm: TCppParseForm
   object mmoC: TMemo
     Left = 16
     Top = 56
-    Width = 625
+    Width = 713
     Height = 201
+    Anchors = [akLeft, akTop, akRight]
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
     Font.Height = -12
@@ -68,7 +69,7 @@ object CppParseForm: TCppParseForm
     OnClick = mmoCClick
   end
   object btnParse: TButton
-    Left = 296
+    Left = 360
     Top = 16
     Width = 75
     Height = 25
@@ -79,13 +80,14 @@ object CppParseForm: TCppParseForm
   object mmoParse: TMemo
     Left = 16
     Top = 272
-    Width = 625
+    Width = 713
     Height = 225
+    Anchors = [akLeft, akTop, akRight, akBottom]
     ScrollBars = ssVertical
     TabOrder = 5
   end
   object btnTokenList: TButton
-    Left = 198
+    Left = 262
     Top = 16
     Width = 83
     Height = 25
@@ -94,7 +96,7 @@ object CppParseForm: TCppParseForm
     OnClick = btnTokenListClick
   end
   object btnWideTokenize: TButton
-    Left = 398
+    Left = 462
     Top = 16
     Width = 83
     Height = 25
@@ -103,13 +105,21 @@ object CppParseForm: TCppParseForm
     OnClick = btnWideTokenizeClick
   end
   object btnInc: TButton
-    Left = 558
+    Left = 646
     Top = 16
     Width = 83
     Height = 25
     Caption = 'Get Includes'
     TabOrder = 6
     OnClick = btnIncClick
+  end
+  object chkWideIdent: TCheckBox
+    Left = 552
+    Top = 20
+    Width = 81
+    Height = 17
+    Caption = 'Wide Ident'
+    TabOrder = 7
   end
   object dlgOpen1: TOpenDialog
     Filter = 'C/C++ Files (*.c;*.cpp;*.h;*.hpp)|*.c;*.cpp;*.h;*.hpp'

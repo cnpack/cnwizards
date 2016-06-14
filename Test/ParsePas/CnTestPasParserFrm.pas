@@ -18,6 +18,7 @@ type
     btnWideParse: TButton;
     bvl1: TBevel;
     btnAnsiLex: TButton;
+    chkWideIdent: TCheckBox;
     procedure btnLoadClick(Sender: TObject);
     procedure btnParseClick(Sender: TObject);
     procedure mmoCClick(Sender: TObject);
@@ -138,7 +139,7 @@ var
 begin
   ShowMessage('Will show Parsing Pascal using WideString under Non-Unicode Compiler.');
 
-  P := TCnPasWideLex.Create;
+  P := TCnPasWideLex.Create(chkWideIdent.Checked);
   S := mmoC.Lines.Text;
   P.Origin := PWideChar(S);
 
@@ -163,7 +164,7 @@ var
 begin
   ShowMessage('Will show Parsing Pascal using string under Non-Unicode Compiler.');
 
-  P := TmwPasLex.Create;
+  P := TmwPasLex.Create(chkWideIdent.Checked);
   S := mmoC.Lines.Text;
   P.Origin := PChar(S);
 

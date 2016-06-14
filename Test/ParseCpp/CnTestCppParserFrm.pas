@@ -18,6 +18,7 @@ type
     bvl1: TBevel;
     btnWideTokenize: TButton;
     btnInc: TButton;
+    chkWideIdent: TCheckBox;
     procedure btnLoadClick(Sender: TObject);
     procedure btnParseClick(Sender: TObject);
     procedure mmoCClick(Sender: TObject);
@@ -137,7 +138,7 @@ var
   S: string;
   I: Integer;
 begin
-  CP := TBCBTokenList.Create;
+  CP := TBCBTokenList.Create(chkWideIdent.Checked);
   CP.DirectivesAsComments := False;
   S := mmoC.Lines.Text;
   CP.SetOrigin(PChar(S), Length(S));
@@ -160,7 +161,7 @@ var
   S: WideString;
   I: Integer;
 begin
-  P := TCnBCBWideTokenList.Create;
+  P := TCnBCBWideTokenList.Create(chkWideIdent.Checked);
   P.DirectivesAsComments := False;
   S := mmoC.Lines.Text;
   P.SetOrigin(PWideChar(S), Length(S));

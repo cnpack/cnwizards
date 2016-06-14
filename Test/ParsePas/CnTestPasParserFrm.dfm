@@ -21,7 +21,7 @@ object CnTestPasForm: TCnTestPasForm
     Height = 13
   end
   object bvl1: TBevel
-    Left = 432
+    Left = 376
     Top = 16
     Width = 17
     Height = 25
@@ -58,7 +58,7 @@ object CnTestPasForm: TCnTestPasForm
     OnClick = mmoCClick
   end
   object btnParse: TButton
-    Left = 336
+    Left = 288
     Top = 16
     Width = 75
     Height = 25
@@ -74,7 +74,7 @@ object CnTestPasForm: TCnTestPasForm
     TabOrder = 6
   end
   object btnUses: TButton
-    Left = 248
+    Left = 200
     Top = 16
     Width = 75
     Height = 25
@@ -83,7 +83,7 @@ object CnTestPasForm: TCnTestPasForm
     OnClick = btnUsesClick
   end
   object btnWideParse: TButton
-    Left = 544
+    Left = 480
     Top = 16
     Width = 75
     Height = 25
@@ -92,13 +92,21 @@ object CnTestPasForm: TCnTestPasForm
     OnClick = btnWideParseClick
   end
   object btnAnsiLex: TButton
-    Left = 448
+    Left = 392
     Top = 16
     Width = 75
     Height = 25
     Caption = 'Ansi Lex'
     TabOrder = 3
     OnClick = btnAnsiLexClick
+  end
+  object chkWideIdent: TCheckBox
+    Left = 564
+    Top = 20
+    Width = 77
+    Height = 17
+    Caption = 'Wide Ident'
+    TabOrder = 7
   end
   object dlgOpen1: TOpenDialog
     Filter = 'Pascal Files(*.pas)|*.pas'
