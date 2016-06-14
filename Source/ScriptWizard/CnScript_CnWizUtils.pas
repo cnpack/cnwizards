@@ -259,6 +259,7 @@ begin
   CL.AddConstantN('_SUPPORT_CROSS_PLATFORM', 'Boolean').SetUInt(Ord(_SUPPORT_CROSS_PLATFORM));
   CL.AddConstantN('_SUPPORT_FMX', 'Boolean').SetUInt(Ord(_SUPPORT_FMX));
   CL.AddConstantN('_SUPPORT_32_AND_64', 'Boolean').SetUInt(Ord(_SUPPORT_32_AND_64));
+  CL.AddConstantN('_SUPPORT_WIDECHAR_IDENTIFIER', 'Boolean').SetUInt(Ord(_SUPPORT_WIDECHAR_IDENTIFIER));
   CL.AddConstantN('_UNICODE_STRING', 'Boolean').SetUInt(Ord(_UNICODE_STRING));
 
   CL.AddTypeS('TFormType', '( ftBinary, ftText, ftUnknown )');
