@@ -3,7 +3,7 @@ object TestAnsiUniForm: TTestAnsiUniForm
   Top = 204
   BorderStyle = bsDialog
   Caption = 'Test Ansi / Unicode String Length Conversion'
-  ClientHeight = 230
+  ClientHeight = 287
   ClientWidth = 646
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -33,7 +33,7 @@ object TestAnsiUniForm: TTestAnsiUniForm
     Left = 24
     Top = 24
     Width = 345
-    Height = 177
+    Height = 225
     Lines.Strings = (
       '1234567890'
       '³Ô·¹Ë¯¾õ´ò¶¹¶¹'
@@ -85,5 +85,14 @@ object TestAnsiUniForm: TTestAnsiUniForm
     Caption = 'Calc Wide Offset from  Ansi'
     TabOrder = 5
     OnClick = btnCalcWideClick
+  end
+  object btnUtf8Convert: TButton
+    Left = 400
+    Top = 224
+    Width = 217
+    Height = 25
+    Caption = 'Convert To Utf8 To  Ansi'
+    TabOrder = 6
+    OnClick = btnUtf8ConvertClick
   end
 end

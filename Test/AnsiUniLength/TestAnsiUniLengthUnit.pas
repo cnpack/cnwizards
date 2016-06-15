@@ -16,9 +16,11 @@ type
     bvl1: TBevel;
     btnCalcAnsi: TButton;
     btnCalcWide: TButton;
+    btnUtf8Convert: TButton;
     procedure btnLengthClick(Sender: TObject);
     procedure btnCalcAnsiClick(Sender: TObject);
     procedure btnCalcWideClick(Sender: TObject);
+    procedure btnUtf8ConvertClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -71,6 +73,18 @@ begin
     WS := mmoStr.Lines[I];
     Offset := CalcWideStringLengthFromAnsiOffset(PWideChar(WS), udOffset.Position);
     ShowMessage(Format('Wide SubString Length of Memo Line %d is %d', [I, Offset]));
+  end;
+end;
+
+procedure TTestAnsiUniForm.btnUtf8ConvertClick(Sender: TObject);
+var
+  I: Integer;
+  S: AnsiString;
+begin
+  for I := 0 to mmoStr.Lines.Count - 1 do
+  begin
+    S := CnAnsiToUtf8(mmoStr.Lines[I]);
+    ShowMessage(ConvertUtf8ToAlterAnsi(PAnsiChar(S), '~'));
   end;
 end;
 

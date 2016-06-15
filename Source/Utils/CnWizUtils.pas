@@ -560,13 +560,22 @@ function CnOtaGetCurrPosToken(var Token: string; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TAnsiCharSet = [];
   CharSet: TAnsiCharSet = []; EditView: IOTAEditView = nil;
   SupportUnicodeIdent: Boolean = False): Boolean;
-{* 取当前光标下的标识符及光标在标识符中的索引号，速度较快}
+{* 取当前光标下的标识符及光标在标识符中的索引号，速度较快，允许 Unicode 标识符
+  Token 以 2009 为界返回 Ansi 或 Utf16，但对于 2005 ~ 2007，有 Utf8 转 Ansi 的可能丢字符的情形}
+function CnOtaGetCurrPosTokenUtf8(var Token: WideString; var CurrIndex: Integer;
+  CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TAnsiCharSet = [];
+  CharSet: TAnsiCharSet = []; EditView: IOTAEditView = nil;
+  SupportUnicodeIdent: Boolean = False): Boolean;
+{* 取当前光标下的标识符及光标在标识符中的索引号，允许 Unicode 标识符，用于 2005 ~ 2007，
+  输出用 WideString，避免 Utf8 转 Ansi 的丢字符情形}
 
 {$IFDEF UNICODE}
 function CnOtaGetCurrPosTokenW(var Token: string; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TCharSet = [];
-  CharSet: TCharSet = []; EditView: IOTAEditView = nil): Boolean;
-{* 取当前光标下的标识符及光标在标识符中的索引号的 Unicode 版本，允许 Unicode 标识符}
+  CharSet: TCharSet = []; EditView: IOTAEditView = nil;
+  SupportUnicodeIdent: Boolean = False): Boolean;
+{* 取当前光标下的标识符及光标在标识符中的索引号的 Unicode 版本，
+  允许 Unicode 标识符，用于 2009 或以上}
 {$ENDIF}
 
 function CnOtaGetCurrChar(OffsetX: Integer = 0; View: IOTAEditView = nil): Char;
@@ -632,6 +641,9 @@ procedure CnOtaGetCurrentBreakpoints(Results: TList);
 //==============================================================================
 // 源代码操作相关函数
 //==============================================================================
+
+function ConvertNtaEditorStringToAnsi(const LineText: string; UseAlterChar: Boolean = False): AnsiString;
+{* 将通过 Nta 方法获得的字符串 AnsiString/AnsiUtf8/Utf16 尽量转换为 AnsiString}
 
 function StrToSourceCode(const Str, ADelphiReturn, ACReturn: string;
   Wrap: Boolean; MaxLen: Integer = 0): string;
@@ -4172,7 +4184,7 @@ var
   CharIndex: Integer;
   LineText: string;
   AnsiText: AnsiString;
-  i: Integer;
+  I: Integer;
 
   function _IsValidIdentChar(C: AnsiChar; First: Boolean): Boolean;
   begin
@@ -4187,6 +4199,14 @@ var
       Result := CharInSet(Char(C), FirstSet + CharSet);
   end;
 
+  function _IsValidIdent(const Ident: string): Boolean;
+  begin
+    if SupportUnicodeIdent then
+      Result := IsValidIdentW(Ident)
+    else
+      Result := IsValidIdent(Ident);
+  end;
+
 begin
   Token := '';
   CurrIndex := 0;
@@ -4197,36 +4217,32 @@ begin
   if (EditView <> nil) and CnNtaGetCurrLineText(LineText, LineNo, CharIndex) and
     (LineText <> '') then
   begin
-    //CnDebugger.TraceFmt('CharIndex %d, LineText %s', [CharIndex, LineText]);
     if CheckCursorOutOfLineEnd and CnOtaIsEditPosOutOfLine(EditView.CursorPos) then
       Exit;
 
-    if _UNICODE_STRING and CodePageOnlySupportsEnglish then // 纯英文 Unicode 环境下不能直接转 Ansi
-      AnsiText := ConvertUtf16ToAlterAnsi(PWideChar(LineText), 'C')
-    else
-      AnsiText := AnsiString(LineText);
+    AnsiText := ConvertNtaEditorStringToAnsi(LineText);
 
-    i := CharIndex;
+    I := CharIndex;
     CurrIndex := 0;
     // 查找起始字符
-    while (i > 0) and _IsValidIdentChar(AnsiText[i], False) do
+    while (I > 0) and _IsValidIdentChar(AnsiText[I], False) do
     begin
-      Dec(i);
+      Dec(I);
       Inc(CurrIndex);
     end;
-    Delete(AnsiText, 1, i);
+    Delete(AnsiText, 1, I);
 
     // 查找结束字符
-    i := 1;
-    while (i <= Length(AnsiText)) and _IsValidIdentChar(AnsiText[i], False) do
-      Inc(i);
-    Delete(AnsiText, i, MaxInt);
+    I := 1;
+    while (I <= Length(AnsiText)) and _IsValidIdentChar(AnsiText[I], False) do
+      Inc(I);
+    Delete(AnsiText, I, MaxInt);
     Token := string(AnsiText);
   end;
 
   if Token <> '' then
   begin
-    if CharInSet(Token[1], FirstSet) or IsValidIdent(Token) then
+    if CharInSet(Token[1], FirstSet) or _IsValidIdent(Token) then
       Result := True;
   end;
 
@@ -4234,12 +4250,21 @@ begin
     Token := '';
 end;
 
+// 取当前光标下的标识符及光标在标识符中的索引号，允许 Unicode 标识符，用于 2005 ~ 2007，
+//  输出用 WideString，避免 Utf8 转 Ansi 的丢字符情形
+function CnOtaGetCurrPosTokenUtf8(var Token: WideString; var CurrIndex: Integer;
+  CheckCursorOutOfLineEnd: Boolean; FirstSet, CharSet: TAnsiCharSet;
+  EditView: IOTAEditView; SupportUnicodeIdent: Boolean): Boolean;
+begin
+  // TODO: NOT Implemented yet.
+end;
+
 {$IFDEF UNICODE}
 
 // 取当前光标下的标识符及光标在标识符中的索引号的 Unicode 版本，允许 Unicode 标识符
 function CnOtaGetCurrPosTokenW(var Token: string; var CurrIndex: Integer;
-  CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TCharSet = [];
-  CharSet: TCharSet = []; EditView: IOTAEditView = nil): Boolean;
+  CheckCursorOutOfLineEnd: Boolean; FirstSet, CharSet: TCharSet;
+  EditView: IOTAEditView; SupportUnicodeIdent: Boolean): Boolean;
 var
   LineNo: Integer;
   CharIndex: Integer;
@@ -4249,7 +4274,12 @@ var
   function _IsValidIdentChar(C: Char; First: Boolean): Boolean;
   begin
     if (FirstSet = []) and (CharSet = []) then
-      Result := IsValidIdentChar(C, First) or (Ord(C) > 127)
+    begin
+      if SupportUnicodeIdent then
+        Result := IsValidIdentChar(Char(C), First) or (Ord(C) > 127)
+      else
+        Result := IsValidIdentChar(Char(C), First);
+    end
     else
       Result := CharInSet(Char(C), FirstSet + CharSet);
   end;
@@ -4269,6 +4299,14 @@ var
         Exit;
       end;
     end;
+  end;
+
+  function _IsValidIdent(const Ident: string): Boolean;
+  begin
+    if SupportUnicodeIdent then
+      Result := IsValidIdentW(Ident);
+    else
+      Result := IsValidIdent(Ident);
   end;
 
 begin
@@ -4318,7 +4356,7 @@ begin
 
   if Token <> '' then
   begin
-    if CharInSet(Token[1], FirstSet) or IsValidIdentW(Token) then
+    if CharInSet(Token[1], FirstSet) or _IsValidIdent(Token) then
       Result := True;
   end;
 
@@ -4958,6 +4996,30 @@ end;
 //==============================================================================
 // 源代码操作相关函数
 //==============================================================================
+
+// 将通过 Nta 方法获得的字符串 AnsiString/AnsiUtf8/Utf16 尽量转换为 AnsiString
+function ConvertNtaEditorStringToAnsi(const LineText: string;
+  UseAlterChar: Boolean): AnsiString;
+begin
+{$IFDEF UNICODE}
+  // D 2009 或以上
+  if CodePageOnlySupportsEnglish and UseAlterChar then // 纯英文 Unicode 环境下不能直接转 Ansi
+    Result := ConvertUtf16ToAlterAnsi(PWideChar(LineText), 'C')
+  else
+    Result := AnsiString(LineText);
+{$ELSE}
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+     // D 2005 ~ 2007 Utf8 to Ansi
+     if CodePageOnlySupportsEnglish and UseAlterChar then // 纯英文环境下 Utf8 不能直接转 Ansi
+       Result := ConvertUtf8ToAlterAnsi(PAnsiChar(LineText), 'C')
+     else
+       Result := Utf8ToAnsi(LineText);
+  {$ELSE}
+     // D 5、6、7 等同于直接返回
+     Result := AnsiString(LineText);
+  {$ENDIF}
+{$ENDIF}
+end;
 
 // 字符串转为源代码串
 function StrToSourceCode(const Str, ADelphiReturn, ACReturn: string;
