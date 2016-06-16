@@ -542,15 +542,16 @@ function CnNtaGetCurrLineText(var Text: string; var LineNo: Integer;
 {* 使用 NTA 方法取当前行源代码。速度快，但取回的文本是将 Tab 扩展成空格的。
    如果使用 ConvertPos 来转换成 EditPos 可能会有问题。直接将 CharIndex + 1
    赋值给 EditPos.Col 即可。
-   D7以下取到的是AnsiString，BDS 非 Unicode 下取到的是 UTF8 格式的 AnsiString，
-   Unicode IDE 下取得的是 UTF16 字符串}
+   D567 取到的是AnsiString，CharIndex 是当前光标在 Text 中的 Ansi 位置，0 开始。
+   BDS 非 Unicode 下取到的是 UTF8 格式的 AnsiString，CharIndex 是当前光标在 Text 中的 Utf8 位置，0 开始。
+   Unicode IDE 下取得的是 UTF16 字符串。CharIndex 是当前光标在 Text 中的 Utf16 位置，0 开始。}
 
 {$IFDEF UNICODE}
 function CnNtaGetCurrLineTextW(var Text: string; var LineNo: Integer;
   var CharIndex: Integer): Boolean;
-{* 使用 NTA 方法取当前行源代码的Unicode版本。速度快，但取回的文本是将 Tab 扩展成空格的。
-   如果使用 ConvertPos 来转换成 EditPos 可能会有问题。直接将 CharIndex + 1
-   赋值给 EditPos.Col 即可。
+{* 使用 NTA 方法取当前行源代码的纯 Unicode 版本。速度快，但取回的文本是将 Tab 扩展成空格的。
+   不适用于 ConvertPos 转成 EditPos。只能将 CharIndex 转成 Ansi 后 + 1
+   赋值给 EditPos.Col。CharIndex 是当前光标在 Text 中的 Utf16 真实位置，0 开始。
    Unicode IDE 下取得的是 UTF16 字符串与 UTF16 的偏移量}
 {$ENDIF}
 
@@ -562,20 +563,23 @@ function CnOtaGetCurrPosToken(var Token: string; var CurrIndex: Integer;
   SupportUnicodeIdent: Boolean = False): Boolean;
 {* 取当前光标下的标识符及光标在标识符中的索引号，速度较快，允许 Unicode 标识符
   Token 以 2009 为界返回 Ansi 或 Utf16，但对于 2005 ~ 2007，有 Utf8 转 Ansi 的可能丢字符的情形}
+
+{$IFDEF IDE_STRING_ANSI_UTF8}
 function CnOtaGetCurrPosTokenUtf8(var Token: WideString; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TAnsiCharSet = [];
   CharSet: TAnsiCharSet = []; EditView: IOTAEditView = nil;
   SupportUnicodeIdent: Boolean = False): Boolean;
 {* 取当前光标下的标识符及光标在标识符中的索引号，允许 Unicode 标识符，用于 2005 ~ 2007，
-  输出用 WideString，避免 Utf8 转 Ansi 的丢字符情形}
+  输出用 WideString，避免 Utf8 转 Ansi 的丢字符情形。CurrIndex 是 Ansi 偏移}
+{$ENDIF}
 
 {$IFDEF UNICODE}
 function CnOtaGetCurrPosTokenW(var Token: string; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TCharSet = [];
   CharSet: TCharSet = []; EditView: IOTAEditView = nil;
   SupportUnicodeIdent: Boolean = False): Boolean;
-{* 取当前光标下的标识符及光标在标识符中的索引号的 Unicode 版本，
-  允许 Unicode 标识符，用于 2009 或以上}
+{* 取当前光标下的标识符及光标在标识符中的索引号的 Unicode 版本，允许 Unicode 标识符，
+  可用于 2009 或以上。CurrIndex 是 Unicode 偏移，与 IDE 中的 Ansi 偏移不一致}
 {$ENDIF}
 
 function CnOtaGetCurrChar(OffsetX: Integer = 0; View: IOTAEditView = nil): Char;
@@ -4120,13 +4124,15 @@ begin
   if (EditControl <> nil) and (View <> nil) then
   begin
     Text := GetStrProp(EditControl, 'LineText');
-    // LineText 在 D5~D7 下为 AnsiString，在 D2005~2007 下是包含 UTF8 字符的 AnsiString
-    // 在 D2009 以上直接是 UnicodeString
-
-    //CnDebugger.TraceFmt('Col %d, Len %d, Text %s', [View.CursorPos.Col - 1, Length(Text), Text]);
+    // LineText 在 D5~D7 下为 AnsiString，CharIndex 也是 Ansi 位置。
+    // 在 D2005~2007 下是包含 UTF8 字符的 AnsiString，CursorPos.Col 是 Utf8 位置，
+    // 所以 CharIndex 在 D2005~2007 下也是 Utf8 偏移。
+    // 在 D2009 以上直接是 UnicodeString。但 CursorPos.Col 在 Unicode IDE 中是 Ansi 位置，
+    // 所以比较需要将 LineText 转成 Ansi 后才能进行
 
 {$IFDEF UNICODE}
-    CharIndex := Min(View.CursorPos.Col - 1, Length(AnsiString(Text)));
+    // 转换成 Ansi 长度来计算，不直接转 AnsiString 以避免英文平台丢字符
+    CharIndex := Min(View.CursorPos.Col - 1, CalcAnsiLengthFromWideString(PWideChar(Text)));
 {$ELSE}
     CharIndex := Min(View.CursorPos.Col - 1, Length(Text));
 {$ENDIF}
@@ -4137,10 +4143,10 @@ end;
 
 {$IFDEF UNICODE}
 
-// 使用 NTA 方法取当前行源代码的Unicode版本。速度快，但取回的文本是将 Tab 扩展成空格的。
-// 如果使用 ConvertPos 来转换成 EditPos 可能会有问题。直接将 CharIndex + 1
-// 赋值给 EditPos.Col 即可。
-// Unicode IDE 下取得的是 UTF16 字符串与 UTF16 的偏移量}
+//  使用 NTA 方法取当前行源代码的纯 Unicode 版本。速度快，但取回的文本是将 Tab 扩展成空格的。
+//  不适用于 ConvertPos 转成 EditPos。只能将 CharIndex 转成 Ansi 后 + 1
+//  赋值给 EditPos.Col。CharIndex 是当前光标在 Text 中的 Utf16 真实位置，0 开始。
+//  Unicode IDE 下取得的是 UTF16 字符串与 UTF16 的偏移量
 function CnNtaGetCurrLineTextW(var Text: string; var LineNo: Integer;
   var CharIndex: Integer): Boolean;
 var
@@ -4156,7 +4162,8 @@ begin
 
     // CursorPos 反映的是 Ansi （非UTF8）方式的列，需要把 string 转成 Ansi 后才能
     // 得到光标对应到 Text 中的真实位置
-    CharIndex := Length(string(Copy(AnsiString(Text), 1, View.CursorPos.Col - 1)));
+    CharIndex := Length(string(Copy(ConvertNtaEditorStringToAnsi(Text, True),
+      1, View.CursorPos.Col - 1)));
 
     LineNo := View.CursorPos.Line;
     Result := True;
@@ -4173,6 +4180,14 @@ begin
   Result := CnNtaGetCurrLineText(LineText, LineNo, CharIndex);
   if Result then
     LineLen := Length(LineText);
+end;
+
+function _IsValidIdent(const Ident: string; SupportUnicodeIdent: Boolean): Boolean;
+begin
+  if SupportUnicodeIdent then
+    Result := IsValidIdentW(Ident)
+  else
+    Result := IsValidIdent(Ident);
 end;
 
 // 取当前光标下的标识符及光标在标识符中的索引号，速度较快
@@ -4197,14 +4212,6 @@ var
     end
     else
       Result := CharInSet(Char(C), FirstSet + CharSet);
-  end;
-
-  function _IsValidIdent(const Ident: string): Boolean;
-  begin
-    if SupportUnicodeIdent then
-      Result := IsValidIdentW(Ident)
-    else
-      Result := IsValidIdent(Ident);
   end;
 
 begin
@@ -4242,7 +4249,7 @@ begin
 
   if Token <> '' then
   begin
-    if CharInSet(Token[1], FirstSet) or _IsValidIdent(Token) then
+    if CharInSet(Token[1], FirstSet) or _IsValidIdent(Token, SupportUnicodeIdent) then
       Result := True;
   end;
 
@@ -4250,14 +4257,86 @@ begin
     Token := '';
 end;
 
+{$IFDEF IDE_STRING_ANSI_UTF8}
+
 // 取当前光标下的标识符及光标在标识符中的索引号，允许 Unicode 标识符，用于 2005 ~ 2007，
-//  输出用 WideString，避免 Utf8 转 Ansi 的丢字符情形
+// 输出用 WideString，避免 Utf8 转 Ansi 的丢字符情形。CurrIndex 是 Ansi 偏移。
 function CnOtaGetCurrPosTokenUtf8(var Token: WideString; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean; FirstSet, CharSet: TAnsiCharSet;
   EditView: IOTAEditView; SupportUnicodeIdent: Boolean): Boolean;
+var
+  LineNo: Integer;
+  CharIndex: Integer;
+  LineText: string;
+  Utf8Text: AnsiString;
+  WideText: WideString;
+  I: Integer;
+
+  function _IsValidIdentChar(C: WideChar; First: Boolean): Boolean;
+  begin
+    if (FirstSet = []) and (CharSet = []) then
+    begin
+      if SupportUnicodeIdent then
+        Result := IsValidIdentChar(Char(C), First) or (Ord(C) > 127)
+      else
+        Result := IsValidIdentChar(Char(C), First);
+    end
+    else
+      Result := CharInSet(Char(C), FirstSet + CharSet);
+  end;
+
 begin
-  // TODO: NOT Implemented yet.
+  Token := '';
+  CurrIndex := 0;
+  Result := False;
+
+  if not Assigned(EditView) then
+    EditView := CnOtaGetTopMostEditView;
+  if (EditView <> nil) and CnNtaGetCurrLineText(LineText, LineNo, CharIndex) and
+    (LineText <> '') then
+  begin
+    if CheckCursorOutOfLineEnd and CnOtaIsEditPosOutOfLine(EditView.CursorPos) then
+      Exit;
+
+    // CharIndex 是 Utf8 位置，LineText 这里也是 Utf8，不能把 Utf8 转 Ansi，怕丢字符
+    // 因此需要把 LineText 转 WideString，CharIndex 对应转 WideString 的 Index
+    Utf8Text := Copy(LineText, 1, CharIndex);
+    CharIndex := Length(Utf8Decode(Utf8Text));
+    WideText := Utf8Decode(LineText);
+
+    I := CharIndex;
+    CurrIndex := 0;
+    // 查找起始字符
+    while (I > 0) and _IsValidIdentChar(WideText[I], False) do
+    begin
+      Dec(I);
+      Inc(CurrIndex);
+    end;
+    Delete(WideText, 1, I);
+
+    // 查找结束字符
+    I := 1;
+    while (I <= Length(WideText)) and _IsValidIdentChar(WideText[I], False) do
+      Inc(I);
+    Delete(WideText, I, MaxInt);
+    Token := WideText;
+
+    // CurrIndex 是 WideString 的，需要转换回 Ansi 的
+    WideText := Copy(WideText, 1, CurrIndex);
+    CurrIndex := CalcAnsiLengthFromWideString(PWideChar(WideText));
+  end;
+
+  if Token <> '' then
+  begin
+    if CharInSet(Char(Token[1]), FirstSet) or _IsValidIdent(Token, SupportUnicodeIdent) then
+      Result := True;
+  end;
+
+  if not Result then
+    Token := '';
 end;
+
+{$ENDIF}
 
 {$IFDEF UNICODE}
 
@@ -4269,7 +4348,8 @@ var
   LineNo: Integer;
   CharIndex: Integer;
   LineText: string;
-  i: Integer;
+  AnsiText: AnsiString;
+  I: Integer;
 
   function _IsValidIdentChar(C: Char; First: Boolean): Boolean;
   begin
@@ -4301,14 +4381,6 @@ var
     end;
   end;
 
-  function _IsValidIdent(const Ident: string): Boolean;
-  begin
-    if SupportUnicodeIdent then
-      Result := IsValidIdentW(Ident);
-    else
-      Result := IsValidIdent(Ident);
-  end;
-
 begin
   Token := '';
   CurrIndex := 0;
@@ -4316,10 +4388,10 @@ begin
 
   if not Assigned(EditView) then
     EditView := CnOtaGetTopMostEditView;
+
   if (EditView <> nil) and CnNtaGetCurrLineTextW(LineText, LineNo, CharIndex) and
     (LineText <> '') then
   begin
-    // CnDebugger.TraceFmt('CharIndex %d, LineText %s', [CharIndex, LineText]);
     if CheckCursorOutOfLineEnd then
     begin
       if StrHasUnicodeChar(LineText) then
@@ -4336,27 +4408,32 @@ begin
       end;
     end;
 
-    i := CharIndex;
+    // CharIndex 是 Utf16 位置，可以直接计算
+    I := CharIndex;
     CurrIndex := 0;
     // 查找起始字符
-    while (i > 0) and _IsValidIdentChar(LineText[i], False) do
+    while (I > 0) and _IsValidIdentChar(LineText[I], False) do
     begin
-      Dec(i);
+      Dec(I);
       Inc(CurrIndex);
     end;
-    Delete(LineText, 1, i);
+    Delete(LineText, 1, I);
 
     // 查找结束字符
-    i := 1;
-    while (i <= Length(LineText)) and _IsValidIdentChar(LineText[i], False) do
-      Inc(i);
-    Delete(LineText, i, MaxInt);
+    I := 1;
+    while (I <= Length(LineText)) and _IsValidIdentChar(LineText[I], False) do
+      Inc(I);
+    Delete(LineText, I, MaxInt);
     Token := LineText;
+
+    // CurrIndex 是 Utf16 的，需要转换回 Ansi 的
+    AnsiText := ConvertNtaEditorStringToAnsi(Copy(Token, 1, CurrIndex));
+    CurrIndex := Length(AnsiText);
   end;
 
   if Token <> '' then
   begin
-    if CharInSet(Token[1], FirstSet) or _IsValidIdent(Token) then
+    if CharInSet(Token[1], FirstSet) or _IsValidIdent(Token, SupportUnicodeIdent) then
       Result := True;
   end;
 

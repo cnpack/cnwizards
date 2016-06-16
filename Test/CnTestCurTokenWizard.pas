@@ -87,13 +87,21 @@ end;
 procedure TCnTestCurTokenWizard.Execute;
 var
   Idx: Integer;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  W: WideString;
+{$ENDIF}
   S: string;
   Res: Boolean;
 begin
 {$IFDEF UNICODE}
-  Res := CnOtaGetCurrPosTokenW(S, Idx);
+  Res := CnOtaGetCurrPosTokenW(S, Idx, True, [], [], nil, True);
 {$ELSE}
-  Res := CnOtaGetCurrPosToken(S, Idx);
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+  Res := CnOtaGetCurrPosTokenUtf8(W, Idx, True, [], [], nil, True);
+  S := W;
+  {$ELSE}
+  Res := CnOtaGetCurrPosToken(S, Idx, True, [], [], nil, True);
+  {$ENDIF}
 {$ENDIF}
 
   if not Res then
@@ -107,7 +115,7 @@ end;
 
 function TCnTestCurTokenWizard.GetCaption: string;
 begin
-  Result := 'Test CnOtaGetCurrPosToken/W';
+  Result := 'Test CnOtaGetCurrPosToken/Utf8/W';
 end;
 
 function TCnTestCurTokenWizard.GetDefShortCut: TShortCut;
