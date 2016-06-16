@@ -786,6 +786,16 @@ var
   {$ENDIF}
 {$ENDIF}
 
+function HighlightSupportsWideCharIdent: Boolean;
+begin
+  // 纯英文环境下暂不支持 Unicode 标识符高亮，因为解析是 Ansi 的。
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+  Result := not CodePageOnlySupportsEnglish;
+{$ELSE}
+  Result := False;
+{$ENDIF}
+end;
+
 function CheckIsFlowToken(AToken: TCnPasToken; IsCpp: Boolean): Boolean;
 var
   I: Integer;
@@ -1529,11 +1539,13 @@ begin
       for I := 0 to PasParser.Count - 1 do
       begin
         CharPos := OTACharPos(PasParser.Tokens[I].CharIndex, PasParser.Tokens[I].LineNumber + 1);
-        EditView.ConvertPos(False, EditPos, CharPos);
-        // TODO: 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
+
+        // ConvertPos 在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
 {$IFDEF BDS2009_UP}
-        // if not FHighlight.FUseTabKey then
+        EditPos.Line := CharPos.Line;
         EditPos.Col := PasParser.Tokens[I].CharIndex + 1;
+{$ELSE}
+        EditView.ConvertPos(False, EditPos, CharPos);
 {$ENDIF}
         PasParser.Tokens[I].EditCol := EditPos.Col;
         PasParser.Tokens[I].EditLine := EditPos.Line;
@@ -1710,12 +1722,14 @@ begin
             CheckTokenMatch(AToken.Token, FCurrentTokenName, CaseSensitive) then
           begin
             CharPos := OTACharPos(AToken.CharIndex, AToken.LineNumber + 1);
-            EditView.ConvertPos(False, EditPos, CharPos);
-            // TODO: 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
-    {$IFDEF BDS2009_UP}
-            // if not FHighlight.FUseTabKey then
+
+            // ConvertPos 在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
+{$IFDEF BDS2009_UP}
+            EditPos.Line := CharPos.Line;
             EditPos.Col := AToken.CharIndex + 1;
-    {$ENDIF}
+{$ELSE}
+            EditView.ConvertPos(False, EditPos, CharPos);
+{$ENDIF}
             AToken.EditCol := EditPos.Col;
             AToken.EditLine := EditPos.Line;
 
