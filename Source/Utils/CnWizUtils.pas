@@ -71,8 +71,10 @@ uses
   DsgnIntf, LibIntf,
   {$ENDIF}
   {$IFDEF DELPHIXE3_UP}Actions,{$ENDIF}
+  mPasLex, mwBCBTokenList, CnPasWideLex, CnBCBWideTokenList,
   Clipbrd, TypInfo, ComCtrls, StdCtrls, Imm, Contnrs, RegExpr, CnWizCompilerConst,
-  CnWizConsts, CnCommon, CnConsts, CnWideStrings, CnWizClasses, CnWizIni;
+  CnWizConsts, CnCommon, CnConsts, CnWideStrings, CnWizClasses, CnWizIni,
+  CnPasCodeParser, CnCppCodeParser, CnWidePasParser, CnWideCppParser;
 
 type
   ECnWizardException = class(Exception);
@@ -84,6 +86,26 @@ type
 
 {$IFNDEF COMPILER6_UP}
   IDesigner = IFormDesigner;
+{$ENDIF}
+
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  TCnIdeTokenString = WideString; // WideString for Utf8 Conversion
+  PCnIdeTokenChar = PWideChar;
+{$ELSE}
+  TCnIdeTokenString = string;     // Ansi/Utf16
+  PCnIdeTokenChar = PChar;
+{$ENDIF}
+
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}  // 2005 以上
+  TCnGeneralPasToken = TCnWidePasToken;
+  TCnGeneralCppToken = TCnWideCppToken;
+  TCnGeneralPasStructParser = TCnWidePasStructParser;
+  TCnGeneralCppStructParser = TCnWideCppStructParser;
+{$ELSE}                               // 5 6 7
+  TCnGeneralPasToken = TCnPasToken;
+  TCnGeneralCppToken = TCnCppToken;
+  TCnGeneralPasStructParser = TCnPasStructureParser;
+  TCnGeneralCppStructParser = TCnCppStructureParser;
 {$ENDIF}
 
   TCnBookmarkObject = class
@@ -103,7 +125,7 @@ const
 
   InvalidNotifierIndex = -1;
   NonvisualClassNamePattern = 'TContainer';
-  
+
   // 最大源代码行长度
   csMaxLineLength = 1023;
 
@@ -224,7 +246,7 @@ function HandleEditShortCut(AControl: TWinControl; AShortCut: TShortCut): Boolea
 {* 使控件处理标准编辑快捷键 }
 
 //==============================================================================
-// 控件处理函数 
+// 控件处理函数
 //==============================================================================
 
 type
@@ -582,6 +604,12 @@ function CnOtaGetCurrPosTokenW(var Token: string; var CurrIndex: Integer;
   可用于 2009 或以上。CurrIndex 是 Unicode 偏移，与 IDE 中的 Ansi 偏移不一致}
 {$ENDIF}
 
+function CnOtaGeneralGetCurrPosToken(var Token: TCnIdeTokenString; var CurrIndex: Integer;
+  CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TAnsiCharSet = [];
+  CharSet: TAnsiCharSet = []; EditView: IOTAEditView = nil): Boolean;
+{* 封装的获取当前光标下的标识符以及索引号的函数，BDS 以上允许 Unicode 标识符，不存在 Unicode 转 Ansi 的丢字符的问题。
+  Token: D567 下返回 AnsiString，2005~2007 下返回 WideString，2009 或以上返回 UnicodeString }
+
 function CnOtaGetCurrChar(OffsetX: Integer = 0; View: IOTAEditView = nil): Char;
 {* 取当前光标下的字符，允许偏移量}
 function CnOtaDeleteCurrToken(FirstSet: TAnsiCharSet = [];
@@ -788,6 +816,32 @@ function CnOtaSaveCurrentEditorToStream(Stream: TMemoryStream; FromCurrPos:
 function CnOtaGetCurrentEditorSource(CheckUtf8: Boolean = True): string;
 {* 取得当前编辑器源代码}
 
+function CnGeneralSaveEditorToStream(Editor: IOTASourceEditor;
+  Stream: TMemoryStream; FromCurrPos: Boolean = False): Boolean;
+{* 封装的一通用方法保存编辑器文本到流中，BDS 以上均使用 WideChar，D567 使用 AnsiChar，均不带 UTF8}
+
+{$IFDEF IDE_STRING_ANSI_UTF8}
+
+procedure CnOtaSaveReaderToWideStream(EditReader: IOTAEditReader; Stream:
+  TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
+  PreSize: Integer = 0);
+{* 保存 EditReader 内容到流中，流中的内容为 WideString 格式，带末尾 #0 字符，2005 ~ 2007 中使用}
+
+procedure CnOtaSaveEditorToWideStreamEx(Editor: IOTASourceEditor; Stream:
+  TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
+  PreSize: Integer = 0);
+{* 保存编辑器文本到流中，Utf8 内容转为 WideString，2005 ~ 2007 中使用}
+
+function CnOtaSaveEditorToWideStream(Editor: IOTASourceEditor; Stream: TMemoryStream;
+  FromCurrPos: Boolean = False): Boolean;
+{* 保存编辑器文本到流中，Utf8 内容转为 WideString，2005 ~ 2007 中使用}
+
+function CnOtaSaveCurrentEditorToWideStream(Stream: TMemoryStream; FromCurrPos:
+  Boolean): Boolean;
+{* 保存当前编辑器文本到流中，Utf8 内容转为 WideString，2005 ~ 2007 中使用}
+
+{$ENDIF}
+
 {$IFDEF UNICODE}
 
 procedure CnOtaSaveReaderToStreamW(EditReader: IOTAEditReader; Stream:
@@ -885,7 +939,7 @@ procedure CnOtaCloseEditView(AModule: IOTAModule);
 // 窗体操作相关函数
 //==============================================================================
 
-function CnOtaGetCurrDesignedForm(var AForm: TCustomForm; Selections: TList; 
+function CnOtaGetCurrDesignedForm(var AForm: TCustomForm; Selections: TList;
   ExcludeForm: Boolean = True): Boolean;
 {* 取得当前设计的窗体及选择的组件列表，返回成功标志
  |<PRE>
@@ -971,7 +1025,7 @@ uses
   Math, CnWizOptions, CnGraphUtils
 {$IFNDEF CNWIZARDS_MINIMUM}
   , CnWizMultiLang, CnLangMgr, CnWizIdeUtils, CnWizDebuggerNotifier, CnEditControlWrapper,
-  CnPasCodeParser, CnCppCodeParser, CnLangStorage, CnHashLangStorage, CnWizHelp
+  CnLangStorage, CnHashLangStorage, CnWizHelp
 {$ENDIF}
   ;
 
@@ -1103,7 +1157,7 @@ var
   Handle: HICON;
 begin
   Result := False;
-  
+
   // 从文件中装载
   try
     if SameFileName(_CnExtractFileName(ResName), ResName) then
@@ -1141,7 +1195,7 @@ var
   FileName: string;
 begin
   Result := False;
-  
+
   // 从文件中装载
   try
     if SameFileName(_CnExtractFileName(ResName), ResName) then
@@ -1268,7 +1322,7 @@ begin
                 Break;
               end;
           end;
-          
+
           if IsEdge then
           begin
             R := @P^[x];
@@ -1535,7 +1589,7 @@ begin
   end;
   Result := nil;
 end;
-  
+
 // 取得 IDE 主 ActionList
 function GetIDEActionList: TCustomActionList;
 var
@@ -1560,8 +1614,8 @@ begin
         begin
           Result := TCustomAction(ActionList.Actions[I]);
           Exit;
-        end;  
-end;  
+        end;
+end;
 
 // 取得 IDE 根目录
 function GetIdeRootDirectory: string;
@@ -1626,8 +1680,8 @@ begin
     end;
   finally
     Vars.Free;
-  end;   
-end;  
+  end;
+end;
 {$ELSE}
 begin
   // Delphi5 下不支持环境变量
@@ -1685,7 +1739,7 @@ var
   ActionList: TCustomActionList;
   i: Integer;
 begin
-  if ActionName = '' then 
+  if ActionName = '' then
   begin
     Result := nil;
     Exit;
@@ -1757,7 +1811,7 @@ begin
   // 冒泡排序
   if List.Count = 1 then
     Exit;
-    
+
   for i := List.Count - 2 downto 0 do
     for j := 0 to i do
     begin
@@ -1830,7 +1884,7 @@ var
   i: Integer;
 begin
   for i := 0 to AWinControl.ComponentCount - 1 do
-    if AWinControl.Components[i].ClassNameIs(AClassName) and ((AComponentName = 
+    if AWinControl.Components[i].ClassNameIs(AClassName) and ((AComponentName =
       '') or (SameText(AComponentName, AWinControl.Components[i].Name))) then
     begin
       Result := AWinControl.Components[i];
@@ -1903,7 +1957,7 @@ type
 procedure TCnGetListClass.GetProc(const S: string);
 begin
   FList.Add(S);
-end;  
+end;
 
 // 取Cursor标识符列表
 procedure GetCursorList(List: TStrings);
@@ -2202,7 +2256,7 @@ begin
 {$ENDIF}
   end;
 end;
-  
+
 function ExtractUpperFileExt(const FileName: string): string;
 begin
   Result := UpperCase(_CnExtractFileExt(FileName));
@@ -2685,10 +2739,10 @@ var
 begin
   Module := CnOtaGetCurrentModule;
   if Assigned(Module) then
-  begin    
+  begin
     Result := CnOtaGetFormEditorFromModule(Module);
     Exit;
-  end;   
+  end;
   Result := nil;
 end;
 
@@ -2927,7 +2981,7 @@ var
   Component: IOTAComponent;
   NTAComponent: INTAComponent;
 begin
-  if Assigned(Editor) and IsVCLFormEditor(Editor) then 
+  if Assigned(Editor) and IsVCLFormEditor(Editor) then
   begin
     try
       Component := Editor.GetRootComponent;
@@ -2936,7 +2990,7 @@ begin
       Result := nil;
       Exit;
     end;
-      
+
     if Assigned(Component) and QuerySvcs(Component, INTAComponent,
       NTAComponent) then
     begin
@@ -3026,7 +3080,7 @@ begin
   Result := '';
   IModuleServices := BorlandIDEServices as IOTAModuleServices;
   if IModuleServices = nil then Exit;
-  
+
   IProjectGroup := nil;
   for i := 0 to IModuleServices.ModuleCount - 1 do
   begin
@@ -3174,7 +3228,7 @@ begin
     if BC <> nil then
     begin
 {$IFDEF SUPPORTS_CROSS_PLATFORM}
-      Proj := Project; 
+      Proj := Project;
       if Proj = nil then
         Proj := CnOtaGetCurrentProject;
 
@@ -3659,7 +3713,7 @@ begin
   Result := nil;
 end;
 
-// 返回指定模块的 EditActions 
+// 返回指定模块的 EditActions
 function CnOtaGetEditActionsFromModule(Module: IOTAModule): IOTAEditActions;
 var
   i: Integer;
@@ -3674,7 +3728,7 @@ begin
         Result := nil;
         Exit;
       end;
-      
+
       for i := 0 to SourceEditor.GetEditViewCount - 1 do
       begin
         EditView := SourceEditor.GetEditView(i);
@@ -4442,6 +4496,27 @@ begin
 end;
 
 {$ENDIF}
+
+// 封装的获取当前光标下的标识符以及索引号的函数，BDS 以上允许 Unicode 标识符，不存在 Unicode 转 Ansi 的丢字符的问题。
+// Token: D567 下返回 AnsiString，2005~2007 下返回 WideString，2009 或以上返回 UnicodeString
+function CnOtaGeneralGetCurrPosToken(var Token: TCnIdeTokenString; var CurrIndex: Integer;
+  CheckCursorOutOfLineEnd: Boolean; FirstSet, CharSet: TAnsiCharSet;
+  EditView: IOTAEditView): Boolean;
+begin
+{$IFDEF UNICODE}
+  Result := CnOtaGetCurrPosTokenW(Token, CurrIndex, CheckCursorOutOfLineEnd,
+    FirstSet, CharSet, EditView, _SUPPORT_WIDECHAR_IDENTIFIER);
+{$ELSE}
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+  Result := CnOtaGetCurrPosTokenUtf8(Token, CurrIndex, CheckCursorOutOfLineEnd,
+    FirstSet, CharSet, EditView, _SUPPORT_WIDECHAR_IDENTIFIER);
+  {$ELSE}
+  Result := CnOtaGetCurrPosToken(Token, CurrIndex, CheckCursorOutOfLineEnd,
+    FirstSet, CharSet, EditView, _SUPPORT_WIDECHAR_IDENTIFIER);
+  {$ENDIF}
+{$ENDIF}
+end;
+
 
 // 取当前光标下的字符，允许偏移量
 function CnOtaGetCurrChar(OffsetX: Integer = 0; View: IOTAEditView = nil): Char;
@@ -5808,6 +5883,21 @@ begin
   end;
 end;
 
+// 封装的一通用方法保存编辑器文本到流中，BDS 以上均使用 WideChar，D567 使用 AnsiChar，均不带 UTF8
+function CnGeneralSaveEditorToStream(Editor: IOTASourceEditor;
+  Stream: TMemoryStream; FromCurrPos: Boolean): Boolean;
+begin
+{$IFDEF UNICODE}
+  Result := CnOtaSaveEditorToStreamW(Editor, Stream, FromCurrPos);
+{$ELSE}
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+  Result := CnOtaSaveEditorToWideStream(Editor, Stream, FromCurrPos);
+  {$ELSE}
+  Result := CnOtaSaveEditorToStream(Editor, Stream, FromCurrPos, False);
+  {$ENDIF}
+{$ENDIF}
+end;
+
 {$IFDEF UNICODE}
 
 // 保存 EditReader 内容到流中，流中的内容默认为 Unicode 格式，2009 以上使用
@@ -5970,6 +6060,133 @@ end;
 {$ENDIF}
 
 {$IFDEF IDE_STRING_ANSI_UTF8}
+
+// 保存 EditReader 内容到流中，流中的内容为 WideString 格式，带末尾 #0 字符，2005 ~ 2007 中使用
+procedure CnOtaSaveReaderToWideStream(EditReader: IOTAEditReader; Stream:
+  TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
+  PreSize: Integer = 0);
+const
+  // Leave typed constant as is - needed for streaming code.
+  TerminatingNulChar: AnsiChar = #0;
+  BufferSize = 1024 * 24;
+var
+  Buffer: PAnsiChar;
+  EditReaderPos: Integer;
+  DataLen: Integer;
+  ReadDataSize: Integer;
+  Text: WideString;
+begin
+  Assert(EditReader <> nil);
+  Assert(Stream <> nil);
+
+{$IFDEF DEBUG}
+//  CnDebugger.LogFmt('CnOtaSaveReaderToStreamW. StartPos %d, EndPos %d, PreSize %d.',
+//    [StartPos, EndPos, PreSize]);
+{$ENDIF}
+
+  if EndPos > 0 then
+  begin
+    DataLen := EndPos - StartPos;
+    Stream.Size := DataLen + 1;
+  end
+  else
+  begin
+    // 分配预计的内存以提高性能
+    DataLen := MaxInt;
+    Stream.Size := PreSize;
+  end;
+  Stream.Position := 0;
+  GetMem(Buffer, BufferSize);
+  try
+    EditReaderPos := StartPos;
+    ReadDataSize := EditReader.GetText(EditReaderPos, Buffer, Min(BufferSize, DataLen));
+    Inc(EditReaderPos, ReadDataSize);
+    Dec(DataLen, ReadDataSize);
+    while (ReadDataSize = BufferSize) and (DataLen > 0) do
+    begin
+      Stream.Write(Buffer^, ReadDataSize);
+      ReadDataSize := EditReader.GetText(EditReaderPos, Buffer, Min(BufferSize, DataLen));
+      Inc(EditReaderPos, ReadDataSize);
+      Dec(DataLen, ReadDataSize);
+    end;
+    Stream.Write(Buffer^, ReadDataSize);
+    Stream.Write(TerminatingNulChar, SizeOf(TerminatingNulChar));
+    if Stream.Size > Stream.Position then
+      Stream.Size := Stream.Position;
+  finally
+    FreeMem(Buffer);
+  end;
+
+  // EditReader 读到的是 Utf8 的 AnsiString，在此转成 WideString
+  Text := UTF8Decode(PAnsiChar(Stream.Memory));
+  Stream.Size := (Length(Text) + 1) * SizeOf(WideChar);
+  Stream.Position := 0;
+  Stream.Write(PWideChar(Text)^, (Length(Text) + 1) * SizeOf(WideChar));
+
+  Stream.Position := 0;
+end;
+
+// 保存编辑器文本到流中，Utf8 内容转为 WideString，2005 ~ 2007 中使用
+procedure CnOtaSaveEditorToWideStreamEx(Editor: IOTASourceEditor; Stream:
+  TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
+  PreSize: Integer = 0);
+begin
+  if Editor = nil then
+  begin
+    Editor := CnOtaGetCurrentSourceEditor;
+    if Editor = nil then
+      Exit;
+  end;
+
+  CnOtaSaveReaderToWideStream(Editor.CreateReader, Stream, StartPos, EndPos, PreSize);
+end;
+
+// 保存编辑器文本到流中，Utf8 内容转为 WideString，2005 ~ 2007 中使用
+function CnOtaSaveEditorToWideStream(Editor: IOTASourceEditor; Stream: TMemoryStream;
+  FromCurrPos: Boolean = False): Boolean;
+var
+  IPos: Integer;
+  PreSize: Integer;
+begin
+  Assert(Stream <> nil);
+  Result := False;
+
+  if Editor = nil then
+  begin
+    Editor := CnOtaGetCurrentSourceEditor;
+    if Editor = nil then
+      Exit;
+  end;
+
+  if Editor.EditViewCount > 0 then
+  begin
+    if FromCurrPos then
+      IPos := CnOtaGetCurrPos(Editor)
+    else
+      IPos := 0;
+
+    // 如果此文件未保存，则会出现 FileSize 与其不一致的情况，
+    // 可能导致 PreSize 为负从而出现问题
+    if FileExists(Editor.FileName) then
+      PreSize := Round(GetFileSize(Editor.FileName) * 1.5) - IPos
+    else
+      PreSize := 0;
+
+    // 修补上述问题
+    if PreSize < 0 then
+      PreSize := 0;
+
+    CnOtaSaveEditorToWideStreamEx(Editor, Stream, IPos, 0, PreSize);
+    Result := True;
+  end;
+end;
+
+// 保存当前编辑器文本到流中，Utf8 内容转为 WideString，2005 ~ 2007 中使用
+function CnOtaSaveCurrentEditorToWideStream(Stream: TMemoryStream; FromCurrPos:
+  Boolean): Boolean;
+begin
+  Result := CnOtaSaveEditorToWideStream(nil, Stream, FromCurrPos);
+end;
 
 // 设置当前编辑器源代码，只在 D2005~2007 版本使用，参数为原始 UTF8 内容
 procedure CnOtaSetCurrentEditorSourceUtf8(const Text: string);

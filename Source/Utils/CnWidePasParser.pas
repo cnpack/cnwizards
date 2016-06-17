@@ -142,7 +142,7 @@ type
     function GetCount: Integer;
     function GetToken(Index: Integer): TCnWidePasToken;
   public
-    constructor Create(SupportUnicodeIdent: Boolean = False);
+    constructor Create(SupportUnicodeIdent: Boolean = True);
     destructor Destroy; override;
     procedure Clear;
     procedure ParseSource(ASource: PWideChar; AIsDpr, AKeyOnly: Boolean);
