@@ -123,6 +123,7 @@ type
     FTokenPositionsList: TLongIntList;
     FTokenLineNumberList: TLongIntList;
     FTokenColNumberList: TLongIntList;
+    FTokenRawColNumberList: TLongIntList;
     FOrigin: PWideChar;
     FPCharSize: Longint;
     FPCharCapacity: Longint;
@@ -155,6 +156,7 @@ type
     function GetRunToken: CnWideString;
     function GetTokenAddr: PWideChar;
     function GetTokenLength: Integer;
+    function GetRawColNumber: Integer;
   protected
     function GetToken(Index: Integer): CnWideString;
     procedure SetCapacity(NewCapacity: Integer);
@@ -217,7 +219,9 @@ type
     property LineNumber: Integer read GetLineNumber;
     {* 当前 Token 所在的行，1 开始}
     property ColumnNumber: Integer read GetColumnNumber;
-    {* 当前 Token 所在的列，1 开始}
+    {* 当前 Token 所在的直观列号，类似于 Ansi，1 开始}
+    property RawColNumber: Integer read GetRawColNumber;
+    {* 当前 Token 所在的原始列号，字符宽度，1 开始}
     property RunToken: CnWideString read GetRunToken;
     {* 当前 Token 的 Unicode 字符串}
     property TokenAddr: PWideChar read GetTokenAddr;
@@ -436,9 +440,11 @@ begin
   FTokenPositionsList := TLongIntList.Create;
   FTokenLineNumberList := TLongIntList.Create;
   FTokenColNumberList := TLongIntList.Create;
+  FTokenRawColNumberList := TLongIntList.Create;
   FTokenPositionsList.Add(0);
   FTokenLineNumberList.Add(0);
   FTokenColNumberList.Add(0);
+  FTokenRawColNumberList.Add(0);
   FComment := csNo;
   FEndCount := 0;
   Visibility := ctkUnknown;
@@ -452,6 +458,7 @@ begin
   FTokenPositionsList.Free;
   FTokenLineNumberList.Free;
   FTokenColNumberList.Free;
+  FTokenRawColNumberList.Free;
   Searcher.Free;
   inherited Destroy;
 end; { Destroy }
@@ -866,14 +873,15 @@ end; { IdentKind }
 
 procedure TCnBCBWideTokenList.Tokenize;
 var
-  BackSlashCount, LineNum, ColNum: Integer;
+  BackSlashCount, LineNum, ColNum, RawColNum: Integer;
 
   procedure StepRun;
   begin
     if Ord(FOrigin[FRun]) > $900 then // 判断宽字节字符宽度，大的占二列
-      Inc(ColNum, 2)
+      Inc(ColNum, SizeOf(WideChar))
     else // 小的部分只占一列
-      Inc(ColNum);
+      Inc(ColNum, SizeOf(AnsiChar));
+    Inc(RawColNum);
     Inc(FRun);
   end;
 
@@ -887,7 +895,7 @@ var
             case FOrigin[FRun] of
               '*': if FOrigin[FRun + 1] = '/' then
                 begin
-                  Inc(FRun); Inc(ColNum);
+                  Inc(FRun); Inc(ColNum); Inc(RawColNum);
                   FComment := csNo;
                   Break;
                 end;
@@ -897,6 +905,7 @@ var
                     Inc(FRun);
                   Inc(LineNum);
                   ColNum := 0; // 让后文的 Inc 将其变成 1
+                  RawColNum := 0;
                 end;
               #10:
                 begin
@@ -904,6 +913,7 @@ var
                     Inc(FRun);
                   Inc(LineNum);
                   ColNum := 0; // 让后文的 Inc 将其变成 1
+                  RawColNum := 0;
                 end;
             end;
             StepRun;
@@ -914,7 +924,7 @@ var
         begin
           while FOrigin[FRun] <> #0 do
           begin
-            Inc(FRun); Inc(ColNum);
+            Inc(FRun); Inc(ColNum); Inc(RawColNum);
             case FOrigin[FRun] of
               #0, #10, #13:
                 begin
@@ -922,6 +932,7 @@ var
                   if FOrigin[FRun] = #10 then
                   begin
                     ColNum := 0; // 让后文变成 1
+                    RawColNum := 0;
                     Inc(LineNum);
                     if FOrigin[FRun + 1] = #13 then
                       Inc(FRun);
@@ -931,6 +942,7 @@ var
                     if FOrigin[FRun + 1] = #10 then
                       Inc(FRun);
                     ColNum := 0; // 让后文变成 1
+                    RawColNum := 0;
                     Inc(LineNum);
                   end;
                   FComment := csNo;
@@ -947,6 +959,8 @@ begin
   Clear;
   LineNum := 1;
   ColNum := 1;
+  RawColNum := 1;
+
   while FOrigin[FRun] <> #0 do
   begin
     case FOrigin[FRun] of
@@ -958,6 +972,8 @@ begin
           FTokenLineNumberList.Add(LineNum);
           ColNum := 1;
           FTokenColNumberList.Add(ColNum);
+          RawColNum := 1;
+          FTokenRawColNumberList.Add(RawColNum);
         end;
 
       #13:
@@ -968,38 +984,44 @@ begin
           FTokenLineNumberList.Add(LineNum);
           ColNum := 1;
           FTokenColNumberList.Add(ColNum);
+          RawColNum := 1;
+          FTokenRawColNumberList.Add(RawColNum);
         end;
 
       #1..#9, #11, #12, #14..#32:
         begin
-          Inc(FRun); Inc(ColNum);
+          Inc(FRun); Inc(ColNum); Inc(RawColNum);
           while _WideCharInSet(FOrigin[FRun], [#1..#9, #11, #12, #14..#32]) do
           begin
             Inc(FRun);
             Inc(ColNum);
+            Inc(RawColNum);
           end;
           FTokenPositionsList.Add(FRun);
           FTokenLineNumberList.Add(LineNum);
           FTokenColNumberList.Add(ColNum);
+          FTokenRawColNumberList.Add(RawColNum);
         end;
 
       'A'..'Z', 'a'..'z', '_', '~':
         begin
-          Inc(FRun); Inc(ColNum);
+          Inc(FRun); Inc(ColNum); Inc(RawColNum);
           while _WideCharInSet(FOrigin[FRun], ['A'..'Z', 'a'..'z', '0'..'9', '_'])
             or (FSupportUnicodeIdent and (Ord(FOrigin[FRun]) > 127)) do
           begin
             Inc(FRun);
             Inc(ColNum);
+            Inc(RawColNum);
           end;
           FTokenPositionsList.Add(FRun);
           FTokenLineNumberList.Add(LineNum);
           FTokenColNumberList.Add(ColNum);
+          FTokenRawColNumberList.Add(RawColNum);
         end;
 
       '0'..'9':
         begin
-          Inc(FRun); Inc(ColNum);
+          Inc(FRun); Inc(ColNum); Inc(RawColNum);
           while _WideCharInSet(FOrigin[FRun], ['0'..'9', '.', 'e', 'E']) do
           begin
             case FOrigin[FRun] of
@@ -1008,10 +1030,12 @@ begin
             end;
             Inc(FRun);
             Inc(ColNum);
+            Inc(RawColNum);
           end;
           FTokenPositionsList.Add(FRun);
           FTokenLineNumberList.Add(LineNum);
           FTokenColNumberList.Add(ColNum);
+          FTokenRawColNumberList.Add(RawColNum);
         end;
 
       '!'..'#', '%', '&', '('..'/', ':'..'@', '['..'^', '`', '{'..'}':
@@ -1024,6 +1048,7 @@ begin
                   begin
                     Inc(FRun);
                     Inc(ColNum);
+                    Inc(RawColNum);
                   end;
               end;
 
@@ -1043,6 +1068,7 @@ begin
                           Inc(FRun);
                           Inc(LineNum);
                           ColNum := -1; // 让下文加 1 来抵消
+                          RawColNum := -1;
                         end;
                       end;
                     #10:
@@ -1053,6 +1079,7 @@ begin
                           Inc(FRun);
                           Inc(LineNum);
                           ColNum := -1; // 让下文加 1 来抵消
+                          RawColNum := -1;
                         end;
                       end;
                     #0: Break;
@@ -1063,21 +1090,24 @@ begin
 
             '#':
               case FOrigin[FRun + 1] of
-                '#': begin Inc(FRun); Inc(ColNum); end;
+                '#': begin Inc(FRun); Inc(ColNum); Inc(RawColNum); end;
                 'A'..'Z', 'a'..'z':
                   if FDirectivesAsComments then
                   begin
                     Inc(FRun);
                     Inc(ColNum);
+                    Inc(RawColNum);
                     repeat
                       Inc(FRun);
                       Inc(ColNum);
+                      Inc(RawColNum);
                       if (FOrigin[FRun] = '\') then
                       begin
                         while not _WideCharInSet(FOrigin[FRun + 1], [#10, #13, #0]) do
                         begin
                           Inc(FRun);
                           Inc(ColNum);
+                          Inc(RawColNum);
                         end;
                         if FOrigin[FRun + 1] = #13 then
                           Inc(FRun);
@@ -1085,9 +1115,11 @@ begin
                         begin
                           Inc(LineNum);
                           ColNum := -1; // 让后文加一来抵消
+                          RawColNum := -1;
                         end;
                         Inc(FRun);
                         Inc(ColNum);
+                        Inc(RawColNum);
                       end;
                     until _WideCharInSet(FOrigin[FRun + 1], [#10, #13, #0]);
 
@@ -1097,21 +1129,26 @@ begin
                     begin
                       Inc(LineNum);
                       ColNum := -1;
+                      RawColNum := -1;
                     end;
                     Inc(FRun);
-                    Inc(ColNum, 1);
+                    Inc(ColNum);
+                    Inc(RawColNum);
                   end
                   else
                   begin
                     Inc(FRun);
                     Inc(ColNum);
+                    Inc(RawColNum);
                     while _WideCharInSet(FOrigin[FRun], ['A'..'Z', 'a'..'z']) do
                     begin
                       Inc(FRun);
                       Inc(ColNum);
+                      Inc(RawColNum);
                     end;
                     Dec(FRun);
                     Dec(ColNum);
+                    Dec(RawColNum);
                   end;
               end;
 
@@ -1121,46 +1158,47 @@ begin
                   begin
                     Inc(FRun);
                     Inc(ColNum);
+                    Inc(RawColNum);
                   end;
               end;
 
             '&':
               case FOrigin[FRun + 1] of
-                '=', '&': begin Inc(FRun); Inc(ColNum); end;
+                '=', '&': begin Inc(FRun); Inc(ColNum); Inc(RawColNum); end;
               end;
 
             '(':
               case FOrigin[FRun + 1] of
-                ')': begin Inc(FRun); Inc(ColNum); end;
+                ')': begin Inc(FRun); Inc(ColNum); Inc(RawColNum); end;
               end;
 
             '*':
               case FOrigin[FRun + 1] of
-                '*', '/', '=': begin Inc(FRun); Inc(ColNum); end;
+                '*', '/', '=': begin Inc(FRun); Inc(ColNum); Inc(RawColNum); end;
               end;
 
             '+':
               case FOrigin[FRun + 1] of
-                '+', '=': begin Inc(FRun); Inc(ColNum); end;
+                '+', '=': begin Inc(FRun); Inc(ColNum); Inc(RawColNum); end;
               end;
 
             '-':
               case FOrigin[FRun + 1] of
-                '-', '=': begin Inc(FRun); Inc(ColNum); end;
+                '-', '=': begin Inc(FRun); Inc(ColNum); Inc(RawColNum); end;
                 '>':
                   case FOrigin[FRun + 2] of
                     '*': Inc(FRun, 2);
-                  else begin Inc(FRun); Inc(ColNum); end;
+                  else begin Inc(FRun); Inc(ColNum); Inc(RawColNum); end;
                   end;
               end;
 
             '.':
               case FOrigin[FRun + 1] of
-                '*': begin Inc(FRun); Inc(ColNum); end;
+                '*': begin Inc(FRun); Inc(ColNum); Inc(RawColNum); end;
                 '.':
                   case FOrigin[FRun + 2] of
-                    '.': begin Inc(FRun, 2); Inc(ColNum, 2); end;
-                  else begin Inc(FRun); Inc(ColNum); end;
+                    '.': begin Inc(FRun, 2); Inc(ColNum, 2); Inc(RawColNum, 2); end;
+                  else begin Inc(FRun); Inc(ColNum); Inc(RawColNum); end;
                   end;
               end;
 
@@ -1180,57 +1218,57 @@ begin
 
             ':':
               case FOrigin[FRun + 1] of
-                ':': begin Inc(FRun); Inc(ColNum); end;
+                ':': begin Inc(FRun); Inc(ColNum); Inc(RawColNum); end;
               end;
 
             '<':
               case FOrigin[FRun + 1] of
-                '=': begin Inc(FRun); Inc(ColNum); end;
+                '=': begin Inc(FRun); Inc(ColNum); Inc(RawColNum); end;
                 '<':
                   case FOrigin[FRun + 2] of
-                    '=': begin Inc(FRun, 2); Inc(ColNum, 2); end;
-                  else begin Inc(FRun); Inc(ColNum); end;
+                    '=': begin Inc(FRun, 2); Inc(ColNum, 2); Inc(RawColNum, 2); end;
+                  else begin Inc(FRun); Inc(ColNum); Inc(RawColNum); end;
                   end;
               end;
 
             '=':
               case FOrigin[FRun + 1] of
-                '=': begin Inc(FRun); Inc(ColNum); end;
+                '=': begin Inc(FRun); Inc(ColNum); Inc(RawColNum); end;
               end;
 
             '>':
               case FOrigin[FRun + 1] of
-                '=': begin Inc(FRun); Inc(ColNum); end;
+                '=': begin Inc(FRun); Inc(ColNum); Inc(RawColNum); end;
                 '>':
                   case FOrigin[FRun + 2] of
-                    '=': begin Inc(FRun, 2); Inc(ColNum, 2); end;
-                  else begin Inc(FRun); Inc(ColNum); end;
+                    '=': begin Inc(FRun, 2); Inc(ColNum, 2); Inc(RawColNum, 2); end;
+                  else begin Inc(FRun); Inc(ColNum); Inc(RawColNum); end;
                   end;
               end;
 
             '?':
               case FOrigin[FRun + 1] of
-                ':': begin Inc(FRun); Inc(ColNum); end;
+                ':': begin Inc(FRun); Inc(ColNum); Inc(RawColNum); end;
               end;
 
             '[':
               case FOrigin[FRun + 1] of
-                ']': begin Inc(FRun); Inc(ColNum); end;
+                ']': begin Inc(FRun); Inc(ColNum); Inc(RawColNum); end;
               end;
 
             '^':
               case FOrigin[FRun + 1] of
-                '=': begin Inc(FRun);  Inc(ColNum); end;
+                '=': begin Inc(FRun);  Inc(ColNum); Inc(RawColNum); end;
               end;
 
             '{':
               case FOrigin[FRun + 1] of
-                '}': begin Inc(FRun); Inc(ColNum); end;
+                '}': begin Inc(FRun); Inc(ColNum); Inc(RawColNum); end;
               end;
 
             '|':
               case FOrigin[FRun + 1] of
-                '=', '|': begin Inc(FRun); Inc(ColNum); end;
+                '=', '|': begin Inc(FRun); Inc(ColNum); Inc(RawColNum); end;
               end;
 
             '\':
@@ -1243,6 +1281,7 @@ begin
                       Inc(FRun);
                       Inc(LineNum);
                       ColNum := 0;
+                      RawColNum := 0;
                     end;
                   end;
 
@@ -1251,6 +1290,7 @@ begin
                     Inc(FRun);
                     Inc(LineNum);
                     ColNum := 0;
+                    RawColNum := 0;
                   end;
               end; // Continuation on the next line
 
@@ -1260,37 +1300,43 @@ begin
           begin
             Inc(FRun);
             Inc(ColNum);
+            Inc(RawColNum);
           end;
           FTokenPositionsList.Add(FRun);
           FTokenLineNumberList.Add(LineNum);
           FTokenColNumberList.Add(ColNum);
+          FTokenRawColNumberList.Add(RawColNum);
         end;
 
       #39:
         begin
           if (FOrigin[FRun + 2] = #39) and (FOrigin[FRun + 1] <> '\') then // this is char type ... 'a' but do not include '\''
           begin
-            Inc(FRun); Inc(ColNum); // 进开始单引号
+            Inc(FRun); Inc(ColNum); Inc(RawColNum); // 进开始单引号
             StepRun; // 根据单引号内字符进 ColNum
-            Inc(FRun); Inc(ColNum); // 进结束单引号
+            Inc(FRun); Inc(ColNum); Inc(RawColNum); // 进结束单引号
             FTokenPositionsList.Add(FRun);
             FTokenLineNumberList.Add(LineNum);
             FTokenColNumberList.Add(ColNum);
+            FTokenRawColNumberList.Add(RawColNum);
           end
           else if (FOrigin[FRun + 1] = '\') and (FOrigin[FRun + 3] = #39) then  // this is for example tab escape ... '\t'
           begin
             FRun := FRun + 4;
             Inc(ColNum, 4);
+            Inc(RawColNum, 4);
             FTokenPositionsList.Add(FRun);
             FTokenLineNumberList.Add(LineNum);
             FTokenColNumberList.Add(ColNum);
+            FTokenRawColNumberList.Add(RawColNum);
           end
           else
           begin
-            Inc(FRun); Inc(ColNum); //this is apostrophe ... #error Can't do something
+            Inc(FRun); Inc(ColNum); Inc(RawColNum); //this is apostrophe ... #error Can't do something
             FTokenPositionsList.Add(FRun);
             FTokenLineNumberList.Add(LineNum);
             FTokenColNumberList.Add(ColNum);
+            FTokenRawColNumberList.Add(RawColNum);
           end;
         end;
       #127..#255:
@@ -1299,10 +1345,11 @@ begin
         end;
     else
       begin
-        Inc(FRun); Inc(ColNum);
+        Inc(FRun); Inc(ColNum); Inc(RawColNum);
         FTokenPositionsList.Add(FRun);
         FTokenLineNumberList.Add(LineNum);
         FTokenColNumberList.Add(ColNum);
+        FTokenRawColNumberList.Add(RawColNum);
       end;
     end;
   end;
@@ -1704,6 +1751,11 @@ end;
 function TCnBCBWideTokenList.IndexAtLine(anIndex: LongInt): LongInt;
 begin
   Result := PositionAtLine(TokenPosition[anIndex]);
+end;
+
+function TCnBCBWideTokenList.GetRawColNumber: Integer;
+begin
+  Result := FTokenRawColNumberList[FRun];
 end;
 
 function TCnBCBWideTokenList.GetRunID: TCTokenKind;

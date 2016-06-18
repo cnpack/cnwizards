@@ -4158,13 +4158,13 @@ end;
 //   如果要根据 CharIndex 处理 Text，则需要将 Text 转换为 AnsiString
 {
   以如下表格为准：
-                      获取的 Text 格式   CharIndex(CursorPos.Col)  编辑器状态栏的真实列状况（Ansi）   TOTACharPos
+                      获取的 Text 格式   CharIndex(CursorPos.Col - 1) 编辑器状态栏的真实列状况（Ansi）   TOTACharPos
 
-  Delphi5/6/7         Ansi               同左、一致                同左、一致                         Ansi
+  Delphi5/6/7         Ansi               同左、一致                   同左、一致                         Ansi
 
-  Delphi 2005~2007    Ansi with UTF8     同左、与 UTF8 一致        Ansi、与 UTF8 不一致               Utf8
+  Delphi 2005~2007    Ansi with UTF8     同左、与 UTF8 一致           Ansi、与 UTF8 不一致               Utf8
 
-  Delphi 2009~        UTF16              Ansi、与 UTF16 不一致     同左 Ansi、与 UTF16 不一致         Utf8，为啥？
+  Delphi 2009~        UTF16              Ansi、与 UTF16 不一致        同左 Ansi、与 UTF16 不一致         Utf8，为啥？
 }
 function CnNtaGetCurrLineText(var Text: string; var LineNo: Integer;
   var CharIndex: Integer): Boolean;

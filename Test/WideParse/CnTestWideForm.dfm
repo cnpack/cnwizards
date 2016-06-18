@@ -1,9 +1,9 @@
 object CnTestUnicodeParseForm: TCnTestUnicodeParseForm
-  Left = 0
-  Top = 0
-  Caption = 'Unicode Parsing Text'
-  ClientHeight = 393
-  ClientWidth = 790
+  Left = 57
+  Top = 114
+  Width = 870
+  Height = 490
+  Caption = 'Unicode Parsing Text - For Unicode & Non-Unicode Compiler'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -16,9 +16,10 @@ object CnTestUnicodeParseForm: TCnTestUnicodeParseForm
   object pgc1: TPageControl
     Left = 16
     Top = 16
-    Width = 753
-    Height = 363
+    Width = 833
+    Height = 433
     ActivePage = tsPasLex
+    Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
     object tsPasLex: TTabSheet
       Caption = 'Pascal'
@@ -26,7 +27,7 @@ object CnTestUnicodeParseForm: TCnTestUnicodeParseForm
         Left = 16
         Top = 16
         Width = 241
-        Height = 305
+        Height = 369
         Lines.Strings = (
           'unit CnTestPasLexW;'
           ''
@@ -57,36 +58,47 @@ object CnTestUnicodeParseForm: TCnTestUnicodeParseForm
           'procedure TForm2.FormCreate(Sender: '
           'TObject);'
           'begin'
-          'Caption :=  '#39#21507#39277#39';'
-          ' {'#21512#36866'} Exit;'
+          'Caption :=  '#39'≥‘∑π'#39';'
+          ' {∫œ  } Exit;'
           'end;')
-        TabOrder = 0
+        TabOrder = 1
       end
-      object btnParsePas: TButton
+      object btnWideParsePas: TButton
         Left = 268
         Top = 14
         Width = 61
         Height = 25
-        Caption = 'Parse'
-        TabOrder = 1
-        OnClick = btnParsePasClick
+        Caption = 'Wide Parse'
+        TabOrder = 0
+        OnClick = btnWideParsePasClick
       end
       object mmoPasResult: TMemo
         Left = 344
         Top = 16
-        Width = 385
-        Height = 305
+        Width = 457
+        Height = 369
+        ScrollBars = ssBoth
         TabOrder = 2
+        WordWrap = False
       end
       object chkWideIdent: TCheckBox
         Left = 265
-        Top = 64
+        Top = 104
         Width = 73
         Height = 17
         Caption = 'Wide Ident'
         Checked = True
         State = cbChecked
+        TabOrder = 4
+      end
+      object btnAnsiParsePas: TButton
+        Left = 268
+        Top = 54
+        Width = 61
+        Height = 25
+        Caption = 'Ansi Parse'
         TabOrder = 3
+        OnClick = btnAnsiParsePasClick
       end
     end
     object tsBCB: TTabSheet
@@ -96,7 +108,7 @@ object CnTestUnicodeParseForm: TCnTestUnicodeParseForm
         Left = 16
         Top = 16
         Width = 241
-        Height = 305
+        Height = 369
         Lines.Strings = (
           '//-------------------------------------------------------'
           '#include <vcl.h>'
@@ -113,7 +125,7 @@ object CnTestUnicodeParseForm: TCnTestUnicodeParseForm
           '__fastcall TImageForm::TImageForm'
           '(TComponent *Owner)'
           '  : TForm(Owner)'
-          '{ "'#21507#39277'"; '#39#27700#39';'
+          '{ "≥‘∑π"; '#39'ÀÆ'#39';'
           '}'
           '//-------------------------------------------------------'
           'void __fastcall TImageForm::FormCreate'
@@ -123,33 +135,44 @@ object CnTestUnicodeParseForm: TCnTestUnicodeParseForm
           ''
           '//-------------------------------------------------------'
           '')
-        TabOrder = 0
+        TabOrder = 1
       end
-      object btnParseCpp: TButton
+      object btnWideParseCpp: TButton
         Left = 268
         Top = 14
         Width = 61
         Height = 25
-        Caption = 'Parse'
-        TabOrder = 1
-        OnClick = btnParseCppClick
+        Caption = 'Wide Parse'
+        TabOrder = 0
+        OnClick = btnWideParseCppClick
       end
       object mmoCppResult: TMemo
         Left = 344
         Top = 16
-        Width = 385
-        Height = 305
+        Width = 465
+        Height = 369
+        ScrollBars = ssBoth
         TabOrder = 2
+        WordWrap = False
       end
       object chkWideIdentC: TCheckBox
         Left = 265
-        Top = 64
+        Top = 96
         Width = 73
         Height = 17
         Caption = 'Wide Ident'
         Checked = True
         State = cbChecked
+        TabOrder = 4
+      end
+      object btnAnsiParseCpp: TButton
+        Left = 268
+        Top = 54
+        Width = 61
+        Height = 25
+        Caption = 'Ansi Parse'
         TabOrder = 3
+        OnClick = btnAnsiParseCppClick
       end
     end
   end

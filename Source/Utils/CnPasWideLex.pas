@@ -100,7 +100,7 @@ unit CnPasWideLex;
 * 单元作者：刘啸(LiuXiao) liuxiao@cnpack.org
 * 备    注：此单元自 mwPasLex 移植而来并改为 Unicode/WideString 实现，保留原始版权声明
 *           当 SupportUnicodeIdent 为 False 时，Unicode 字符挨个作为 tkUnknown 解析
-*           为 True 时整个作为 Identifier 解析
+*           为 True 时整个作为 Identifier 解析。支持 Unicode/非Unicode 编译器。
 * 开发平台：Windows 7 + Delphi XE
 * 兼容测试：PWin9X/2000/XP/7 + Delphi 2009 ~
 * 本 地 化：该单元中的字符串支持本地化处理方式
@@ -170,6 +170,7 @@ type
   end;
 
   TCnPasWideLex = class(TObject)
+  {* 支持宽字符串解析的 Pascal 语法解析器，支持 Unicode 与非 Unicode 编译器}
   private
     FSupportUnicodeIdent: Boolean;
     FRun: LongInt;       // 步进变量，解析过程中变化，从 0 开始，1 代表一字符长度
@@ -310,6 +311,7 @@ type
     function InSymbols(aChar: WideChar): Boolean;
     function GetTokenAddr: PWideChar;
     function GetTokenLength: Integer;
+    function GetWideColumnNumber: Integer;
   protected
     procedure StepRun(Count: Integer = 1; CalcColumn: Boolean = False);
   public
@@ -334,6 +336,8 @@ type
     {* 当前行号，从 1 开始}
     property ColumnNumber: Integer read FColumnNumber write FColumnNumber;
     {* 当前直观列号，从 1 开始，类似于 Ansi}
+    property WideColumnNumber: Integer read GetWideColumnNumber;
+    {* 当前原始列号，以字符为单位，从 1 开始，不展开 Tab。目前已知问题：针对行尾的回车换行，此属性不准}
     property LineStartOffset: Integer read FLineStartOffset write FLineStartOffset;
     {* 当前行行首所在的线性位置，相对 FOrigin 的线性偏移量，单位为字符数}
     property Origin: PWideChar read FOrigin write SetOrigin;
@@ -1936,9 +1940,9 @@ begin
     begin
       // 真正精确判断需要跟具体字体度量宽度有关，这里姑且认为值大的占两列
       if Ord(FOrigin[FRun + I]) > $900 then
-        Inc(FColumn, 2)
+        Inc(FColumn, SizeOf(WideChar))
       else // 小的部分只占一列
-        Inc(FColumn);
+        Inc(FColumn, SizeOf(AnsiChar));
     end;
   end;
   Inc(FRun, Count);
@@ -2097,6 +2101,11 @@ end;
 function TCnPasWideLex.GetTokenLength: Integer;
 begin
   Result := FRun - FTokenPos;
+end;
+
+function TCnPasWideLex.GetWideColumnNumber: Integer;
+begin
+  Result := FTokenPos - FLineStartOffset + 1;
 end;
 
 initialization
