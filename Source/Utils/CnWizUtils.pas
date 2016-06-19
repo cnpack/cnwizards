@@ -4164,7 +4164,7 @@ end;
 
   Delphi 2005~2007    Ansi with UTF8     同左、与 UTF8 一致           Ansi、与 UTF8 不一致               Utf8
 
-  Delphi 2009~        UTF16              Ansi、与 UTF16 不一致        同左 Ansi、与 UTF16 不一致         Utf8，为啥？
+  Delphi 2009~        UTF16              Ansi、与 UTF16 不一致        同左 Ansi、与 UTF16 不一致         Ansi？（混乱）
 }
 function CnNtaGetCurrLineText(var Text: string; var LineNo: Integer;
   var CharIndex: Integer): Boolean;
