@@ -86,6 +86,8 @@ type
     FCurrentClass: AnsiString;
     FSource: AnsiString;
     FBlockIsNamespace: Boolean;
+    FUseTabKey: Boolean;
+    FTabWidth: Integer;
     function GetCount: Integer;
     function GetToken(Index: Integer): TCnCppToken;
   public
@@ -120,6 +122,11 @@ type
     property CurrentMethod: AnsiString read FCurrentMethod;
     property CurrentClass: AnsiString read FCurrentClass;
     property CurrentChildMethod: AnsiString read FCurrentChildMethod;
+
+    property UseTabKey: Boolean read FUseTabKey write FUseTabKey;
+    {* 是否排版处理 Tab 键的宽度，如不处理，则将 Tab 键当作宽为 1 处理}
+    property TabWidth: Integer read FTabWidth write FTabWidth;
+    {* Tab 键的宽度}
 
     property Source: AnsiString read FSource;
   end;
@@ -242,7 +249,7 @@ var
     // Token.FToken := AnsiString(CParser.RunToken);
 
     Token.FLineNumber := CParser.RunLineNumber;
-    Token.FCharIndex := CParser.RunColNumber;
+    Token.FCharIndex := CParser.RunColNumber;  // 暂未做 Ansi 的 Tab 展开功能
     Token.FCppTokenKind := CParser.RunID;
     Token.FItemLayer := Layer;
     Token.FItemIndex := FList.Count;

@@ -85,6 +85,8 @@ type
     FCurrentClass: CnWideString;
     FSource: CnWideString;
     FBlockIsNamespace: Boolean;
+    FUseTabKey: Boolean;
+    FTabWidth: Integer;
     function GetCount: Integer;
     function GetToken(Index: Integer): TCnWideCppToken;
   public
@@ -119,6 +121,11 @@ type
     property CurrentClass: CnWideString read FCurrentClass;
     property CurrentChildMethod: CnWideString read FCurrentChildMethod;
 
+    property UseTabKey: Boolean read FUseTabKey write FUseTabKey;
+    {* 是否排版处理 Tab 键的宽度，如不处理，则将 Tab 键当作宽为 1 处理}
+    property TabWidth: Integer read FTabWidth write FTabWidth;
+    {* Tab 键的宽度}
+
     property Source: CnWideString read FSource;
   end;
 
@@ -127,7 +134,7 @@ implementation
 var
   TokenPool: TCnList;
 
-// 用池方式来管理 PasTokens 以提高性能
+// 用池方式来管理 CppTokens 以提高性能
 function CreateCppToken: TCnWideCppToken;
 begin
   if TokenPool.Count > 0 then
@@ -218,6 +225,44 @@ var
   FunctionName, OwnerClass: string;
   PrevIsOperator, RunReachedZero: Boolean;
 
+  procedure CalcCharIndexes(out ACharIndex: Integer; out AnAnsiIndex: Integer);
+  var
+    I, AnsiLen, WideLen: Integer;
+  begin
+    if FUseTabKey and (FTabWidth >= 2) then
+    begin
+      // 遍历当前行内容进行 Tab 键展开
+      I := CParser.LineStartOffset;
+      AnsiLen := 0;
+      WideLen := 0;
+      while (I < CParser.RunPosition) do
+      begin
+        if (ASource[I] = #09) then
+        begin
+          AnsiLen := ((AnsiLen div FTabWidth) + 1) * FTabWidth;
+          WideLen := ((WideLen div FTabWidth) + 1) * FTabWidth;
+          // TODO: Wide 字符串的 Tab 展开规则是否是这样？
+        end
+        else
+        begin
+          Inc(WideLen);
+          if Ord(ASource[I]) > $900 then
+            Inc(AnsiLen, SizeOf(WideChar))
+          else
+            Inc(AnsiLen, SizeOf(AnsiChar));
+        end;
+        Inc(I);
+      end;
+      ACharIndex := WideLen;
+      AnAnsiIndex := AnsiLen;
+    end
+    else
+    begin
+      ACharIndex := CParser.RawColNumber - 1;
+      AnAnsiIndex := CParser.ColumnNumber - 1;
+    end;
+  end;
+
   procedure NewToken;
   var
     Len: Integer;
@@ -232,7 +277,7 @@ var
     CopyMemory(@Token.FToken[0], CParser.TokenAddr, Len * SizeOf(WideChar));
 
     Token.FLineNumber := CParser.LineNumber - 1;    // 1 开始变成 0 开始
-    Token.FCharIndex := CParser.ColumnNumber - 1;   // 暂无 Tab 展开的机制，1 开始变成 0 开始
+    CalcCharIndexes(Token.FCharIndex, Token.FAnsiIndex);
     Token.FCppTokenKind := CParser.RunID;
     Token.FItemLayer := Layer;
     Token.FItemIndex := FList.Count;

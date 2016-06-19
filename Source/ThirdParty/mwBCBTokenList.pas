@@ -242,6 +242,7 @@ type
     property TokenPosition[Index: LongInt]: LongInt read GetTokenPosition;
     property RunID: TCTokenKind read GetRunID;
     property RunPosition: LongInt read GetRunPosition;
+    {* 当前 Token 在 FOrigin 中的字符偏移位置}
     property RunLineNumber: Integer read GetRunLineNumber;
     {* 当前行，以 1 开始}
     property RunColNumber: Integer read GetRunColNumber;

@@ -215,7 +215,7 @@ type
     property TokenPosition[Index: LongInt]: LongInt read GetTokenPosition;
 
     property RunPosition: LongInt read GetRunPosition;
-
+    {* 当前 Token 在 FOrigin 中的字符偏移位置}
     property RunID: TCTokenKind read GetRunID;
     {* 当前 Token 类型}
     property LineNumber: Integer read GetLineNumber;

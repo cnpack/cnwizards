@@ -59,6 +59,7 @@ type
     FCppTokenKind: TCTokenKind;
     FCompDirectiveType: TCnCompDirectiveType;
     FCharIndex: Integer;
+    FAnsiIndex: Integer;
     FEditCol: Integer;
     FEditLine: Integer;
     FItemIndex: Integer;
@@ -80,9 +81,10 @@ type
     {* 是否是 C 方式的解析，默认不是}
     property LineNumber: Integer read FLineNumber; // Start 0
     {* 所在行号，从零开始，由 ParseSource 计算而来 }
-    property CharIndex: Integer read FCharIndex; // Start 0
+    property CharIndex: Integer read FCharIndex;   // Start 0
     {* 从本行开始数的字符位置，从零开始，由 ParseSource 内据需展开 Tab 计算而来 }
-
+    property AnsiIndex: Integer read FAnsiIndex;   // Start 0
+    {* 从本行开始数的 Ansi 字符位置，从零开始，计算而来}
     property EditCol: Integer read FEditCol write FEditCol;
     {* 所在列，从一开始，由外界转换而来 }
     property EditLine: Integer read FEditLine write FEditLine;
@@ -147,7 +149,13 @@ type
     procedure Clear;
     procedure ParseSource(ASource: PWideChar; AIsDpr, AKeyOnly: Boolean);
     function FindCurrentDeclaration(LineNumber, CharIndex: Integer): CnWideString;
+    {* 查找指定光标位置所在的声明，LineNumber 1 开始，CharIndex 0 开始，类似于 CharPos，
+       但要求是 WideChar 偏移。如果调用者拿到的是 Ansi/Utf8 的 CursorPos.Col，需要转换
+       成 Utf16 的偏移才能塞进来}
     procedure FindCurrentBlock(LineNumber, CharIndex: Integer);
+    {* 查找指定光标位置所在的块，LineNumber 1 开始，CharIndex 0 开始，类似于 CharPos，
+       但要求是 WideChar 偏移。如果调用者拿到的是 Ansi/Utf8 的 CursorPos.Col，需要转换
+       成 Utf16 的偏移才能塞进来}
     function IndexOfToken(Token: TCnWidePasToken): Integer;
     property Count: Integer read GetCount;
     property Tokens[Index: Integer]: TCnWidePasToken read GetToken;
@@ -291,7 +299,7 @@ var
   PrevTokenID: TTokenKind;
   PrevTokenStr: CnWideString;
 
-  function CalcCharIndex(): Integer;
+  procedure CalcCharIndexes(out ACharIndex: Integer; out AnAnsiIndex: Integer);
   var
     I, Len: Integer;
   begin
@@ -305,13 +313,21 @@ var
         if (ASource[I] = #09) then
           Len := ((Len div FTabWidth) + 1) * FTabWidth
         else
-          Inc(Len);
+        begin
+          if Ord(ASource[I]) > $900 then
+            Inc(Len, SizeOf(WideChar))
+          else
+            Inc(Len, SizeOf(AnsiChar));
+        end;
         Inc(I);
       end;
-      Result := Len;
+      ACharIndex := Len;
     end
     else
-      Result := Lex.TokenPos - Lex.LineStartOffset;
+    begin
+      ACharIndex := Lex.TokenPos - Lex.LineStartOffset;
+      AnAnsiIndex := Lex.ColumnNumber - 1;
+    end;
   end;
 
   procedure NewToken;
@@ -327,8 +343,10 @@ var
     FillChar(Token.FToken[0], SizeOf(Token.FToken), 0);
     CopyMemory(@Token.FToken[0], Lex.TokenAddr, Len * SizeOf(WideChar));
 
-    Token.FLineNumber := Lex.LineNumber - 1; // 1 开始变成 0 开始
-    Token.FCharIndex := CalcCharIndex();     // 不使用 Col 属性，而是据需 Tab 展开，也会由 1 开始变成 0 开始
+    Token.FLineNumber := Lex.LineNumber - 1;              // 1 开始变成 0 开始
+    CalcCharIndexes(Token.FCharIndex, Token.FAnsiIndex);
+    // 不直接使用 Column 直观列号属性，而是据需 Tab 展开，俩也都会由 1 开始变成 0 开始
+
     Token.FTokenID := Lex.TokenID;
     Token.FItemIndex := FList.Count;
     if CurrBlock <> nil then
@@ -1027,6 +1045,7 @@ procedure TCnWidePasToken.Clear;
 begin
   FCppTokenKind := TCTokenKind(0);
   FCharIndex := 0;
+  FAnsiIndex := 0;
   FEditCol := 0;
   FEditLine := 0;
   FItemIndex := 0;
