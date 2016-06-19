@@ -124,12 +124,13 @@ type
     FTokenLineNumberList: TLongIntList;
     FTokenColNumberList: TLongIntList;
     FTokenRawColNumberList: TLongIntList;
+    FTokenLineStartPosList: TLongIntList;
     FOrigin: PWideChar;
     FPCharSize: Longint;
     FPCharCapacity: Longint;
     FComment: TCommentState;
     FEndCount: Integer;
-    FRun: LongInt;
+    FRun: LongInt;          // 步进变量，指向 FOrigin 内的偏移的字符
     FRoundCount: Integer;
     FSquareCount: Integer;
     FBraceCount: Integer;
@@ -157,6 +158,7 @@ type
     function GetTokenAddr: PWideChar;
     function GetTokenLength: Integer;
     function GetRawColNumber: Integer;
+    function GetLineStartOffset: Integer;
   protected
     function GetToken(Index: Integer): CnWideString;
     procedure SetCapacity(NewCapacity: Integer);
@@ -222,13 +224,16 @@ type
     {* 当前 Token 所在的直观列号，类似于 Ansi，1 开始}
     property RawColNumber: Integer read GetRawColNumber;
     {* 当前 Token 所在的原始列号，字符宽度，1 开始}
+    property LineStartOffset: Integer read GetLineStartOffset;
+    {* 当前 Token 所在行的行首第一个字符在 FOrigin 的字符偏移位置。
+       Origin[LineStartOffset] 即是本行行首的第一个字符}
     property RunToken: CnWideString read GetRunToken;
     {* 当前 Token 的 Unicode 字符串}
     property TokenAddr: PWideChar read GetTokenAddr;
     {* 当前 Token 的 Unicode 字符串地址}
     property TokenLength: Integer read GetTokenLength;
     {* 当前 Token 的 Unicode 字符长度}
-  end; { TCnBCBWideTokenList }
+  end;
 
 implementation
 
@@ -290,7 +295,7 @@ begin
   ImplementationsList := TLongIntList.Create;
   InterfaceList := TLongIntList.Create;
   MethodList := TLongIntList.Create;
-end; { Create }
+end;
 
 destructor TCnSearcher.Destroy;
 begin
@@ -300,7 +305,7 @@ begin
   InterfaceList.Free;
   MethodList.Free;
   inherited Destroy;
-end; { Destroy }
+end;
 
 function TCnSearcher.GetFinished: Boolean;
 begin
@@ -308,7 +313,7 @@ begin
   if FPos >= SearchLen - 1 then FFinished := True;
   if PatLen > SearchLen then FFinished := True;
   Result := FFinished;
-end; { GetFinished }
+end;
 
 procedure TCnSearcher.Init(const NewPattern: CnWideString);
 var
@@ -324,7 +329,7 @@ begin
   for I := 0 to 255 do Shift[I] := PatLenPlus;
   for I := 1 to PatLen do Shift[ord(Pat[I])] := PatLenPlus - I;
   FPos := -1;
-end; { Init }
+end;
 
 function TCnSearcher.Next: Integer;
 var
@@ -355,23 +360,23 @@ begin
       else Inc(FPos, Shift[ord(FSearchOrigin[J + 1])]);
     end;
   end;
-end; { Next }
+end;
 
 function TCnSearcher.GetItems(Index: integer): Integer;
 begin
   if (Index >= FFoundList.Count) or (Index < 0) then Result := -1 else
     Result := FFoundList[Index];
-end; { GetItems }
+end;
 
 function TCnSearcher.GetCount: Integer;
 begin
   Result := FFoundList.Count;
-end; { GetCount }
+end;
 
 procedure TCnSearcher.Add(aPosition: Integer);
 begin
   FFoundList.Add(aPosition);
-end; { Add }
+end;
 
 procedure TCnSearcher.FillClassList;
 //var
@@ -379,7 +384,7 @@ procedure TCnSearcher.FillClassList;
 //  RIndex: LongInt;
 begin
   Assert(False);
-end; { FillClassList }
+end;
 
 procedure TCnSearcher.FillInterfaceList;
 //var
@@ -387,7 +392,7 @@ procedure TCnSearcher.FillInterfaceList;
 //  RIndex: LongInt;
 begin
   Assert(False);
-end; { FillInterfaceList }
+end;
 
 procedure TCnSearcher.FillMethodList;
 //var
@@ -395,7 +400,7 @@ procedure TCnSearcher.FillMethodList;
 //  RIndex: LongInt;
 begin
   Assert(False);
-end; { FillMethodList }
+end;
 
 procedure TCnSearcher.Retrive(aToken: CnWideString);
 var
@@ -413,7 +418,7 @@ begin
         if _AnsiStrIComp(PWideChar(aToken), PWideChar(FBCBTokenList[RIndex])) = 0 then Add(RIndex);
     end;
   end;
-end; { Retrive }
+end;
 
 function TCnSearcher.GetMethodImplementation(const aClassName, aMethodIdentifier: CnWideString): LongInt;
 //var
@@ -424,7 +429,7 @@ function TCnSearcher.GetMethodImplementation(const aClassName, aMethodIdentifier
 begin
   Assert(False);
   Result := 0;
-end; { GetMethodImplementation }
+end;
 
 function TCnSearcher.GetMethodImpLine(const aClassName, aMethodIdentifier: CnWideString): LongInt;
 var
@@ -432,7 +437,7 @@ var
 begin
   ImpIndex := GetMethodImplementation(aClassName, aMethodIdentifier);
   Result := FBCBTokenList.IndexAtLine(ImpIndex);
-end; { GetMethodImpLine }
+end;
 
 constructor TCnBCBWideTokenList.Create(SupportUnicodeIdent: Boolean);
 begin
@@ -441,17 +446,19 @@ begin
   FTokenLineNumberList := TLongIntList.Create;
   FTokenColNumberList := TLongIntList.Create;
   FTokenRawColNumberList := TLongIntList.Create;
+  FTokenLineStartPosList := TLongIntList.Create;
   FTokenPositionsList.Add(0);
   FTokenLineNumberList.Add(0);
   FTokenColNumberList.Add(0);
   FTokenRawColNumberList.Add(0);
+  FTokenLineStartPosList.Add(0);
   FComment := csNo;
   FEndCount := 0;
   Visibility := ctkUnknown;
   Searcher := TCnSearcher.Create(Self);
   FDirectivesAsComments := True;
   FSupportUnicodeIdent := SupportUnicodeIdent;
-end; { Create }
+end;
 
 destructor TCnBCBWideTokenList.Destroy;
 begin
@@ -459,9 +466,10 @@ begin
   FTokenLineNumberList.Free;
   FTokenColNumberList.Free;
   FTokenRawColNumberList.Free;
+  FTokenLineStartPosList.Free;
   Searcher.Free;
   inherited Destroy;
-end; { Destroy }
+end;
 
 procedure TCnBCBWideTokenList.SetOrigin(NewOrigin: PWideChar; NewSize: LongInt);
 begin
@@ -476,7 +484,7 @@ begin
   //Searcher.FillClassList;
   FRoundCount := 0;
   FSquareCount := 0;
-end; { SetOrigin }
+end;
 
 procedure TCnBCBWideTokenList.WriteTo(InsPos, DelPos: LongInt;
   const Item: CnWideString);
@@ -506,22 +514,22 @@ begin
       aString := '';
     end;
   end;
-end; { WriteTo }
+end;
 
 function TCnBCBWideTokenList.GetCount: Integer;
 begin
   Result := FTokenPositionsList.Count - 1;
-end; { GetCount }
+end;
 
 procedure TCnBCBWideTokenList.SetCount(value: Integer);
 begin
   FTokenPositionsList.Count := Value + 1;
-end; { SetCount }
+end;
 
 function TCnBCBWideTokenList.GetCapacity: Integer;
 begin
   Result := FTokenPositionsList.Capacity;
-end; { GetCapacity }
+end;
 
 procedure TCnBCBWideTokenList.ResetPositionsFrom(Index, Value: LongInt);
 begin
@@ -530,7 +538,7 @@ begin
     FTokenPositionsList[Index] := FTokenPositionsList[Index] + Value;
     Inc(Index);
   end
-end; { ResetPositionsFrom }
+end;
 
 function TCnBCBWideTokenList.GetToken(Index: Integer): CnWideString;
 var
@@ -540,17 +548,17 @@ begin
   EndPos := FTokenPositionsList[Index + 1];
   StringLen := EndPos - StartPos;
   SetString(Result, (FOrigin + StartPos), StringLen);
-end; { GetToken }
+end;
 
 function TCnBCBWideTokenList.GetTokenPosition(Index: integer): Longint;
 begin
   Result := FTokenPositionsList[Index];
-end; { GetTokenPosition }
+end;
 
 procedure TCnBCBWideTokenList.SetCapacity(NewCapacity: Integer);
 begin
   FTokenPositionsList.Capacity := NewCapacity;
-end; { SetCapacity }
+end;
 
 procedure TCnBCBWideTokenList.SetToken(Index: Integer; const Item: CnWideString);
 var
@@ -563,7 +571,7 @@ begin
   Diff := NewLen - OldLen;
   WriteTo(StartPos, EndPos, Item);
   ResetPositionsFrom(Index + 1, Diff);
-end; { SetItems }
+end;
 
 function TCnBCBWideTokenList.Add(const Item: CnWideString): Integer;
 var
@@ -574,14 +582,14 @@ begin
   EndPos := StartPos + Length(Item);
   FTokenPositionsList.Add(EndPos);
   WriteTo(StartPos, StartPos, Item);
-end; { Add }
+end;
 
 procedure TCnBCBWideTokenList.Clear;
 begin
   SetCount(0);
   FTokenPositionsList.Capacity := 1;
   FRun := 0;
-end; { Clear }
+end;
 
 procedure TCnBCBWideTokenList.Delete(Index: Integer);
 var
@@ -593,7 +601,7 @@ begin
   WriteTo(StartPos, EndPos, '');
   FTokenPositionsList.Delete(Index);
   ResetPositionsFrom(Index, -OldLen);
-end; { Delete }
+end;
 
 procedure TCnBCBWideTokenList.Exchange(Index1, Index2: Integer);
 var
@@ -602,19 +610,19 @@ begin
   Item := GetToken(Index1);
   SetToken(Index1, GetToken(Index2));
   SetToken(Index2, Item);
-end; { Exchange }
+end;
 
 function TCnBCBWideTokenList.First: CnWideString;
 begin
   Result := GetToken(0);
-end; { First }
+end;
 
 function TCnBCBWideTokenList.IndexOf(const Item: CnWideString): Integer;
 begin
   Result := 0;
   while (Result < Count) and (GetToken(Result) <> Item) do Inc(Result);
   if Result = Count then Result := -1;
-end; { IndexOf }
+end;
 
 procedure TCnBCBWideTokenList.Insert(Index: Integer; const Item: CnWideString);
 var
@@ -626,12 +634,12 @@ begin
   WriteTo(StartPos, StartPos, Item);
   ResetPositionsFrom(Index + 1, ItemLen);
   FTokenPositionsList.Insert(Index + 1, EndPos);
-end; { Insert }
+end;
 
 function TCnBCBWideTokenList.Last: CnWideString;
 begin
   Result := GetToken(Count - 1);
-end; { Last }
+end;
 
 procedure TCnBCBWideTokenList.Move(CurIndex, NewIndex: Integer);
 var
@@ -643,13 +651,13 @@ begin
     Delete(CurIndex);
     Insert(NewIndex, Item);
   end;
-end; { Move }
+end;
 
 function TCnBCBWideTokenList.Remove(const Item: CnWideString): Integer;
 begin
   Result := IndexOf(Item);
   if Result <> -1 then Delete(Result);
-end; { Remove }
+end;
 
 function TCnBCBWideTokenList.GetSubString(StartPos, EndPos: LongInt): CnWideString;
 var
@@ -658,12 +666,12 @@ begin
   if FOrigin[EndPos] = #10 then Inc(EndPos);
   SubLen := EndPos - StartPos;
   SetString(Result, (FOrigin + StartPos), SubLen);
-end; { GetSubString }
+end;
 
 procedure TCnBCBWideTokenList.SetRunIndex(NewPos: LongInt);
 begin
   FRun := NewPos;
-end; { SetRunPos }
+end;
 
 function TCnBCBWideTokenList.IdentKind(Index: LongInt): TCTokenKind;
 var
@@ -678,7 +686,7 @@ var
     Result := 0;
     for I := 1 to StringLen do
       Result := Result + Ord(aToken[I]);
-  end; { KeyHash }
+  end;
 
 begin
   Result := ctkIdentifier;
@@ -833,7 +841,7 @@ begin
     1263: if aToken = 'dynamic_cast' then Result := ctkdynamic_cast;
     1726: if aToken = 'reinterpret_cast' then Result := ctkreinterpret_cast;
   end;
-end; { IdentKind }
+end;
 
 function TCnBCBWideTokenList.DirKind(StartPos, EndPos: LongInt): TCTokenKind;
 var
@@ -848,7 +856,7 @@ var
     Result := 0;
     for I := 1 to StringLen do
       Result := Result + Ord(aToken[I]);
-  end; { KeyHash }
+  end;
 
 begin
   Result := ctkunknown;
@@ -869,11 +877,12 @@ begin
     632: if aToken = 'pragma' then Result := ctkdirpragma;
     740: if aToken = 'include' then Result := ctkdirinclude;
   end;
-end; { IdentKind }
+end;
 
 procedure TCnBCBWideTokenList.Tokenize;
 var
-  BackSlashCount, LineNum, ColNum, RawColNum: Integer;
+  BackSlashCount, LineNum, ColNum, RawColNum, LineStartRun: Integer;
+  LineStepped: Boolean;
 
   procedure StepRun;
   begin
@@ -906,6 +915,7 @@ var
                   Inc(LineNum);
                   ColNum := 0; // 让后文的 Inc 将其变成 1
                   RawColNum := 0;
+                  LineStepped := True;
                 end;
               #10:
                 begin
@@ -914,6 +924,7 @@ var
                   Inc(LineNum);
                   ColNum := 0; // 让后文的 Inc 将其变成 1
                   RawColNum := 0;
+                  LineStepped := True;
                 end;
             end;
             StepRun;
@@ -936,6 +947,7 @@ var
                     Inc(LineNum);
                     if FOrigin[FRun + 1] = #13 then
                       Inc(FRun);
+                    LineStepped := True;
                   end
                   else if FOrigin[FRun] = #13 then   // #13, #10, #13#10, #10#13都会被认为是一个回车
                   begin
@@ -944,6 +956,7 @@ var
                     ColNum := 0; // 让后文变成 1
                     RawColNum := 0;
                     Inc(LineNum);
+                    LineStepped := True;
                   end;
                   FComment := csNo;
                   Break;
@@ -952,7 +965,7 @@ var
           end;
         end;
     end;
-  end; { HandleComments }
+  end;
 
 begin
   BackSlashCount := 0;
@@ -960,9 +973,13 @@ begin
   LineNum := 1;
   ColNum := 1;
   RawColNum := 1;
+  LineStartRun := FRun;
+  // 只有在 LineNum 加 1 且 ColNum 赋值为 1 时才需要 LineStartRun := Run;
+  // 其余场合用 LineStepped 控制
 
   while FOrigin[FRun] <> #0 do
   begin
+    LineStepped := False;
     case FOrigin[FRun] of
       #10:
         begin
@@ -974,6 +991,8 @@ begin
           FTokenColNumberList.Add(ColNum);
           RawColNum := 1;
           FTokenRawColNumberList.Add(RawColNum);
+          LineStartRun := FRun;
+          FTokenLineStartPosList.Add(LineStartRun);
         end;
 
       #13:
@@ -986,6 +1005,8 @@ begin
           FTokenColNumberList.Add(ColNum);
           RawColNum := 1;
           FTokenRawColNumberList.Add(RawColNum);
+          LineStartRun := FRun;
+          FTokenLineStartPosList.Add(LineStartRun);
         end;
 
       #1..#9, #11, #12, #14..#32:
@@ -1001,6 +1022,7 @@ begin
           FTokenLineNumberList.Add(LineNum);
           FTokenColNumberList.Add(ColNum);
           FTokenRawColNumberList.Add(RawColNum);
+          FTokenLineStartPosList.Add(LineStartRun);
         end;
 
       'A'..'Z', 'a'..'z', '_', '~':
@@ -1017,6 +1039,7 @@ begin
           FTokenLineNumberList.Add(LineNum);
           FTokenColNumberList.Add(ColNum);
           FTokenRawColNumberList.Add(RawColNum);
+          FTokenLineStartPosList.Add(LineStartRun);
         end;
 
       '0'..'9':
@@ -1036,6 +1059,7 @@ begin
           FTokenLineNumberList.Add(LineNum);
           FTokenColNumberList.Add(ColNum);
           FTokenRawColNumberList.Add(RawColNum);
+          FTokenLineStartPosList.Add(LineStartRun);
         end;
 
       '!'..'#', '%', '&', '('..'/', ':'..'@', '['..'^', '`', '{'..'}':
@@ -1069,6 +1093,7 @@ begin
                           Inc(LineNum);
                           ColNum := -1; // 让下文加 1 来抵消
                           RawColNum := -1;
+                          LineStepped := True;
                         end;
                       end;
                     #10:
@@ -1080,6 +1105,7 @@ begin
                           Inc(LineNum);
                           ColNum := -1; // 让下文加 1 来抵消
                           RawColNum := -1;
+                          LineStepped := True;
                         end;
                       end;
                     #0: Break;
@@ -1116,6 +1142,7 @@ begin
                           Inc(LineNum);
                           ColNum := -1; // 让后文加一来抵消
                           RawColNum := -1;
+                          LineStepped := True;
                         end;
                         Inc(FRun);
                         Inc(ColNum);
@@ -1130,6 +1157,7 @@ begin
                       Inc(LineNum);
                       ColNum := -1;
                       RawColNum := -1;
+                      LineStepped := True;
                     end;
                     Inc(FRun);
                     Inc(ColNum);
@@ -1282,6 +1310,7 @@ begin
                       Inc(LineNum);
                       ColNum := 0;
                       RawColNum := 0;
+                      LineStepped := True;
                     end;
                   end;
 
@@ -1291,6 +1320,7 @@ begin
                     Inc(LineNum);
                     ColNum := 0;
                     RawColNum := 0;
+                    LineStepped := True;
                   end;
               end; // Continuation on the next line
 
@@ -1301,11 +1331,15 @@ begin
             Inc(FRun);
             Inc(ColNum);
             Inc(RawColNum);
+
+            if LineStepped then
+              LineStartRun := FRun;
           end;
           FTokenPositionsList.Add(FRun);
           FTokenLineNumberList.Add(LineNum);
           FTokenColNumberList.Add(ColNum);
           FTokenRawColNumberList.Add(RawColNum);
+          FTokenLineStartPosList.Add(LineStartRun);
         end;
 
       #39:
@@ -1319,6 +1353,7 @@ begin
             FTokenLineNumberList.Add(LineNum);
             FTokenColNumberList.Add(ColNum);
             FTokenRawColNumberList.Add(RawColNum);
+            FTokenLineStartPosList.Add(LineStartRun);
           end
           else if (FOrigin[FRun + 1] = '\') and (FOrigin[FRun + 3] = #39) then  // this is for example tab escape ... '\t'
           begin
@@ -1329,6 +1364,7 @@ begin
             FTokenLineNumberList.Add(LineNum);
             FTokenColNumberList.Add(ColNum);
             FTokenRawColNumberList.Add(RawColNum);
+            FTokenLineStartPosList.Add(LineStartRun);
           end
           else
           begin
@@ -1337,6 +1373,7 @@ begin
             FTokenLineNumberList.Add(LineNum);
             FTokenColNumberList.Add(ColNum);
             FTokenRawColNumberList.Add(RawColNum);
+            FTokenLineStartPosList.Add(LineStartRun);
           end;
         end;
       #127..#255:
@@ -1350,10 +1387,11 @@ begin
         FTokenLineNumberList.Add(LineNum);
         FTokenColNumberList.Add(ColNum);
         FTokenRawColNumberList.Add(RawColNum);
+        FTokenLineStartPosList.Add(LineStartRun);
       end;
     end;
   end;
-end; {Tokenize}
+end;
 
 function TCnBCBWideTokenList.GetTokenID(Index: LongInt): TCTokenKind;
 var
@@ -1611,17 +1649,17 @@ begin
     else
       Result := ctkUnknown;
   end;
-end; { GetTokenID }
+end;
 
 procedure TCnBCBWideTokenList.Next;
 begin
   if FRun <= Count - 1 then Inc(FRun);
-end; { Next }
+end;
 
 procedure TCnBCBWideTokenList.Previous;
 begin
   if FRun > 0 then Dec(FRun);
-end; { Previous }
+end;
 
 procedure TCnBCBWideTokenList.NextID(ID: TCTokenKind);
 begin
@@ -1631,7 +1669,7 @@ begin
     else Inc(FRun);
     end;
   until TokenID[FRun] = ID;
-end; { NextID }
+end;
 
 function TCnBCBWideTokenList.GetIsJunk: Boolean;
 begin
@@ -1650,7 +1688,7 @@ begin
     else Inc(FRun);
     end;
   until not (TokenID[FRun] in [ctkansicomment, ctkslashescomment]);
-end; { NextNonComCRLF }
+end;
 
 procedure TCnBCBWideTokenList.NextNonJunk;
 begin
@@ -1661,7 +1699,7 @@ begin
     end;
   until not (TokenID[FRun] in [ctkansicomment, ctkcrlf,
     ctkslashescomment, ctkspace]);
-end; { NextNonJunk }
+end;
 
 procedure TCnBCBWideTokenList.NextNonSpace;
 begin
@@ -1671,7 +1709,7 @@ begin
     else Inc(FRun);
     end;
   until not (TokenID[FRun] = ctkspace);
-end; { NextNonSpace }
+end;
 
 procedure TCnBCBWideTokenList.ToLineStart;
 begin
@@ -1681,7 +1719,7 @@ begin
     Dec(FRun);
   end;
   Inc(FRun);
-end; { ToLineStart }
+end;
 
 procedure TCnBCBWideTokenList.PreviousID(ID: TCTokenKind);
 begin
@@ -1691,7 +1729,7 @@ begin
     else Dec(FRun);
     end;
   until TokenID[FRun] = ID;
-end; { PreviousID }
+end;
 
 procedure TCnBCBWideTokenList.PreviousNonComment;
 begin
@@ -1701,8 +1739,7 @@ begin
     else Dec(FRun);
     end;
   until not (TokenID[FRun] in [ctkansicomment, ctkslashescomment]);
-end; { PreviousNonComment }
-
+end;
 
 procedure TCnBCBWideTokenList.PreviousNonJunk;
 begin
@@ -1713,7 +1750,7 @@ begin
     end;
   until not (TokenID[FRun] in [ctkansicomment, ctkcrlf,
     ctkslashescomment, ctkspace]);
-end; { PreviousNonJunk }
+end;
 
 procedure TCnBCBWideTokenList.PreviousNonSpace;
 begin
@@ -1723,7 +1760,7 @@ begin
     else Dec(FRun);
     end;
   until not (TokenID[FRun] = ctkspace);
-end; { PreviousNonSpace }
+end;
 
 function TCnBCBWideTokenList.PositionAtLine(aPosition: LongInt): LongInt;
 var
@@ -1761,22 +1798,27 @@ end;
 function TCnBCBWideTokenList.GetRunID: TCTokenKind;
 begin
   Result := GetTokenID(FRun);
-end; { GetRunID }
+end;
 
 function TCnBCBWideTokenList.GetRunPosition: LongInt;
 begin
   Result := FTokenPositionsList[FRun];
-end; { GetRunPosition }
+end;
 
 function TCnBCBWideTokenList.GetLineNumber: LongInt;
 begin
   Result := FTokenLineNumberList[FRun];
-end; { GetRunLineNumber }
+end;
+
+function TCnBCBWideTokenList.GetLineStartOffset: Integer;
+begin
+  Result := FTokenLineStartPosList[FRun];
+end;
 
 function TCnBCBWideTokenList.GetColumnNumber: LongInt;
 begin
   Result := FTokenColNumberList[FRun];
-end; { GetRunColNumber }
+end;
 
 function TCnBCBWideTokenList.GetRunToken: CnWideString;
 var
@@ -1788,7 +1830,7 @@ begin
   StringLen := EndPos - StartPos;
   SetString(OutStr, (FOrigin + StartPos), StringLen);
   Result := OutStr;
-end; { GetRunToken }
+end;
 
 function TCnBCBWideTokenList.PositionToIndex(aPosition: LongInt): LongInt;
 var
@@ -1811,7 +1853,7 @@ begin
     end;
     Result := I;
   end;
-end; { PositionToIndex }
+end;
 
 function TCnBCBWideTokenList.GetTokenAddr: PWideChar;
 begin

@@ -53,8 +53,8 @@ begin
   mmoCppResult.Lines.Clear;
   while P.RunID <> ctknull do
   begin
-    mmoCppResult.Lines.Add(Format('%3.3d. Line: %d, Col(Ansi/Wide) %2.2d/%2.2d, WideChar Len %2.2d, Position %4.4d. %s, Token: %s',
-        [I, P.LineNumber, P.ColumnNumber, P.RawColNumber, P.TokenLength, P.RunPosition, GetEnumName(TypeInfo(TCTokenKind),
+    mmoCppResult.Lines.Add(Format('%3.3d. Line %d, Col(A/W) %2.2d/%2.2d, WLen %2.2d, Pos %4.4d. LineHead %d. %s, Token: %s',
+        [I, P.LineNumber, P.ColumnNumber, P.RawColNumber, P.TokenLength, P.RunPosition, P.LineStartOffset, GetEnumName(TypeInfo(TCTokenKind),
          Ord(P.RunID)), P.RunToken]));
     P.Next;
     Inc(I);
@@ -77,7 +77,7 @@ begin
   I := 1;
   while P.TokenID <> tkNull do
   begin
-    mmoPasResult.Lines.Add(Format('%3.3d. Line: %d, Col(Ansi/Wide) %2.2d/%2.2d, WideChar Len %2.2d, Position %4.4d. %s, Token: %s',
+    mmoPasResult.Lines.Add(Format('%3.3d. Line %d, Col(A/W) %2.2d/%2.2d, WLen %2.2d, Pos %4.4d. %s, Token: %s',
         [I, P.LineNumber, P.ColumnNumber, P.WideColumnNumber, P.TokenLength, P.RunPos, GetEnumName(TypeInfo(TTokenKind),
          Ord(P.TokenID)), P.Token]));
     P.Next;
@@ -100,8 +100,8 @@ begin
   I := 1;
   while P.TokenID <> tkNull do
   begin
-    mmoPasResult.Lines.Add(Format('%3.3d. Line: %d, Col %2.2d, Position %4.4d. %s, Token: %s',
-        [I, P.LineNumber, P.TokenPos - P.LinePos, P.RunPos, GetEnumName(TypeInfo(TTokenKind),
+    mmoPasResult.Lines.Add(Format('%3.3d. Line: %d, Col %2.2d, Pos %4.4d. LineStart %d. %s, Token: %s',
+        [I, P.LineNumber, P.TokenPos - P.LinePos, P.RunPos, P.LinePos, GetEnumName(TypeInfo(TTokenKind),
          Ord(P.TokenID)), P.Token]));
     P.Next;
     Inc(I);
@@ -123,8 +123,8 @@ begin
   mmoCppResult.Lines.Clear;
   while P.RunID <> ctknull do
   begin
-    mmoCppResult.Lines.Add(Format('%3.3d. Line: %d, Col %2.2d, WideChar Len %2.2d, Position %4.4d. %s, Token: %s',
-        [I, P.RunLineNumber, P.RunColNumber, P.TokenLength, P.RunPosition, GetEnumName(TypeInfo(TCTokenKind),
+    mmoCppResult.Lines.Add(Format('%3.3d. Line: %d, Col %2.2d, Len %2.2d, Pos %4.4d. LineStart %d. %s, Token: %s',
+        [I, P.RunLineNumber, P.RunColNumber, P.TokenLength, P.RunPosition, P.LineStartOffset, GetEnumName(TypeInfo(TCTokenKind),
          Ord(P.RunID)), P.RunToken]));
     P.Next;
     Inc(I);

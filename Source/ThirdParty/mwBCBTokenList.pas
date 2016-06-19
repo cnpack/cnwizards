@@ -153,6 +153,7 @@ type
     FTokenPositionsList: TLongIntList;
     FTokenLineNumberList: TLongIntList;
     FTokenColNumberList: TLongIntList;
+    FTokenLineStartPosList: TLongIntList;
     fOrigin: PAnsiChar;
     fPCharSize: Longint;
     fPCharCapacity: Longint;
@@ -185,6 +186,7 @@ type
     function GetRunToken: string;
     function GetTokenAddr: PAnsiChar;
     function GetTokenLength: Integer;
+    function GetLineStartOffset: Integer;
   protected
     function GetToken(Index: Integer): AnsiString;
     procedure SetCapacity(NewCapacity: Integer);
@@ -244,10 +246,14 @@ type
     {* 当前行，以 1 开始}
     property RunColNumber: Integer read GetRunColNumber;
     {* 当前列，以 1 开始}
+    property LineStartOffset: Integer read GetLineStartOffset;
+    {* 当前 Token 所在行的行首第一个字符在 FOrigin 的字符偏移位置。
+       Origin[LineStartOffset] 即是本行行首的第一个字符}
     property RunToken: string read GetRunToken;
-    {* 此俩属性为 PAnsiChar 方式使用，以避免 D2010 下性能问题}
+    {* 当前 Token 字符串}
     property TokenAddr: PAnsiChar read GetTokenAddr;
     property TokenLength: Integer read GetTokenLength;
+    {* 此俩属性为 PAnsiChar 方式使用，以避免 Unicode IDE 下的性能问题}
   end; { TBCBTokenList }
 
 const
@@ -580,9 +586,11 @@ begin
   FTokenPositionsList := TLongIntList.Create;
   FTokenLineNumberList := TLongIntList.Create;
   FTokenColNumberList := TLongIntList.Create;
+  FTokenLineStartPosList := TLongIntList.Create;
   FTokenPositionsList.Add(0);
   FTokenLineNumberList.Add(0);
   FTokenColNumberList.Add(0);
+  FTokenLineStartPosList.Add(0);
   FComment := csNo;
   FEndCount := 0;
   Visibility := ctkUnknown;
@@ -596,6 +604,7 @@ begin
   FTokenPositionsList.Free;
   FTokenLineNumberList.Free;
   FTokenColNumberList.Free;
+  FTokenLineStartPosList.Free;
   Searcher.Free;
   inherited Destroy;
 end; { Destroy }
@@ -1008,7 +1017,8 @@ end; { IdentKind }
 
 procedure TBCBTokenList.Tokenize;
 var
-  BackSlashCount, LineNum, ColNum: Integer;
+  BackSlashCount, LineNum, ColNum, LineStartRun: Integer;
+  LineStepped: Boolean;
 
   procedure HandleComments;
   begin
@@ -1030,6 +1040,7 @@ var
                     Inc(Run);
                   Inc(LineNum);
                   ColNum := 0; // 让后文的 Inc 将其变成 1
+                  LineStepped := True;
                 end;
               #10:
                 begin
@@ -1037,6 +1048,7 @@ var
                     Inc(Run);
                   Inc(LineNum);
                   ColNum := 0; // 让后文的 Inc 将其变成 1
+                  LineStepped := True;
                 end;
             end;
             Inc(Run); Inc(ColNum);
@@ -1058,6 +1070,7 @@ var
                     Inc(LineNum);
                     if FOrigin[Run + 1] = #13 then
                       Inc(Run);
+                    LineStepped := True;
                   end
                   else if FOrigin[Run] = #13 then   // #13, #10, #13#10, #10#13都会被认为是一个回车
                   begin
@@ -1065,6 +1078,7 @@ var
                       Inc(Run);
                     ColNum := 0; // 让后文变成 1
                     Inc(LineNum);
+                    LineStepped := True;
                   end;
                   FComment := csNo;
                   break;
@@ -1080,8 +1094,13 @@ begin
   Clear;
   LineNum := 1;
   ColNum := 1;
+  LineStartRun := Run;
+  // 只有在 LineNum 加 1 且 ColNum 赋值为 1 时才需要 LineStartRun := Run;
+  // 其余场合用 LineStepped 控制
+
   while FOrigin[Run] <> #0 do
   begin
+    LineStepped := False;
     case FOrigin[Run] of
       #10:
         begin
@@ -1091,6 +1110,8 @@ begin
           FTokenLineNumberList.Add(LineNum);
           ColNum := 1;
           FTokenColNumberList.Add(ColNum);
+          LineStartRun := Run;
+          FTokenLineStartPosList.Add(LineStartRun);
         end;
 
       #13:
@@ -1101,6 +1122,8 @@ begin
           FTokenLineNumberList.Add(LineNum);
           ColNum := 1;
           FTokenColNumberList.Add(ColNum);
+          LineStartRun := Run;
+          FTokenLineStartPosList.Add(LineStartRun);
         end;
 
       #1..#9, #11, #12, #14..#32:
@@ -1114,6 +1137,7 @@ begin
           FTokenPositionsList.Add(Run);
           FTokenLineNumberList.Add(LineNum);
           FTokenColNumberList.Add(ColNum);
+          FTokenLineStartPosList.Add(LineStartRun);
         end;
 
       'A'..'Z', 'a'..'z', '_', '~':
@@ -1123,11 +1147,12 @@ begin
             or (FSupportWideCharIdent and (Ord(FOrigin[Run]) > 127)) do
           begin
             Inc(Run);
-            Inc(ColNum); 
+            Inc(ColNum);
           end;
           FTokenPositionsList.Add(Run);
           FTokenLineNumberList.Add(LineNum);
           FTokenColNumberList.Add(ColNum);
+          FTokenLineStartPosList.Add(LineStartRun);
         end;
 
       '0'..'9':
@@ -1145,15 +1170,15 @@ begin
           FTokenPositionsList.Add(Run);
           FTokenLineNumberList.Add(LineNum);
           FTokenColNumberList.Add(ColNum);
+          FTokenLineStartPosList.Add(LineStartRun);
         end;
 
       '!'..'#', '%', '&', '('..'/', ':'..'@', '['..'^', '`', '{'..'}':
         begin
           case FOrigin[Run] of
-
             '!':
               case FOrigin[Run + 1] of
-                '=': 
+                '=':
                   begin
                     Inc(Run);
                     Inc(ColNum);
@@ -1176,6 +1201,7 @@ begin
                           Inc(Run);
                           Inc(LineNum);
                           ColNum := -1; // 让下文加 1 来抵消
+                          LineStepped := True;
                         end;
                       end;
                     #10:
@@ -1186,6 +1212,7 @@ begin
                           Inc(Run);
                           Inc(LineNum);
                           ColNum := -1; // 让下文加 1 来抵消
+                          LineStepped := True;
                         end;
                       end;
                     #0: Break;
@@ -1219,6 +1246,7 @@ begin
                         begin
                           Inc(LineNum);
                           ColNum := -1; // 让后文加一来抵消
+                          LineStepped := True;
                         end;
                         Inc(Run);
                         Inc(ColNum);
@@ -1231,6 +1259,7 @@ begin
                     begin
                       Inc(LineNum);
                       ColNum := -1;
+                      LineStepped := True;
                     end;
                     Inc(Run);
                     Inc(ColNum, 1);
@@ -1239,7 +1268,7 @@ begin
                   begin
                     Inc(Run);
                     Inc(ColNum);
-                    while FOrigin[Run] in ['A'..'Z', 'a'..'z'] do 
+                    while FOrigin[Run] in ['A'..'Z', 'a'..'z'] do
                     begin
                       Inc(Run);
                       Inc(ColNum);
@@ -1251,7 +1280,7 @@ begin
 
             '%':
               case FOrigin[Run + 1] of
-                '=': 
+                '=':
                   begin
                     Inc(Run);
                     Inc(ColNum);
@@ -1377,14 +1406,16 @@ begin
                       Inc(Run);
                       Inc(LineNum);
                       ColNum := 0;
-                    end;  
-                  end;  
+                      LineStepped := True;
+                    end;
+                  end;
 
-                #10: 
+                #10:
                   begin
                     Inc(Run);
                     Inc(LineNum);
                     ColNum := 0;
+                    LineStepped := True;
                   end;
               end; // Continuation on the next line
 
@@ -1394,10 +1425,14 @@ begin
           begin
             Inc(Run);
             Inc(ColNum);
+
+            if LineStepped then
+              LineStartRun := Run;
           end;
           FTokenPositionsList.Add(Run);
           FTokenLineNumberList.Add(LineNum);
           FTokenColNumberList.Add(ColNum);
+          FTokenLineStartPosList.Add(LineStartRun);
         end;
 
       #39:
@@ -1409,6 +1444,7 @@ begin
             FTokenPositionsList.Add(Run);
             FTokenLineNumberList.Add(LineNum);
             FTokenColNumberList.Add(ColNum);
+            FTokenLineStartPosList.Add(LineStartRun);
           end
           else if (FOrigin[Run + 1] = '\') and (FOrigin[Run + 3] = #39) then  // this is for example tab escape ... '\t'
           begin
@@ -1417,6 +1453,7 @@ begin
             FTokenPositionsList.Add(Run);
             FTokenLineNumberList.Add(LineNum);
             FTokenColNumberList.Add(ColNum);
+            FTokenLineStartPosList.Add(LineStartRun);
           end
           else
           begin
@@ -1424,6 +1461,7 @@ begin
             FTokenPositionsList.Add(Run);
             FTokenLineNumberList.Add(LineNum);
             FTokenColNumberList.Add(ColNum);
+            FTokenLineStartPosList.Add(LineStartRun);
           end;
         end;
       #127..#255:
@@ -1436,6 +1474,7 @@ begin
         FTokenPositionsList.Add(Run);
         FTokenLineNumberList.Add(LineNum);
         FTokenColNumberList.Add(ColNum);
+        FTokenLineStartPosList.Add(LineStartRun);
       end;
     end;
   end;
@@ -1907,6 +1946,11 @@ end;
 function TBCBTokenList.GetTokenLength: Integer;
 begin
   Result := FTokenPositionsList[Run + 1] - FTokenPositionsList[Run];
+end;
+
+function TBCBTokenList.GetLineStartOffset: Integer;
+begin
+  Result := FTokenLineStartPosList[Run];
 end;
 
 end.
