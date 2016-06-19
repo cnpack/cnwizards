@@ -41,7 +41,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ToolsAPI, IniFiles, CnCommon, CnWizClasses, CnWizUtils, CnWizConsts, CnWizManager,
-  StdCtrls, ExtCtrls;
+  StdCtrls, ExtCtrls, ComCtrls;
 
 type
   TTestEditorLineInfoForm = class(TForm)
@@ -162,8 +162,10 @@ var
   LineNo: Integer;
   CharIndex: Integer;
   EditControl: TControl;
+  StatusBar: TStatusBar;
 begin
   lstInfo.Clear;
+  lstInfo.Items.Add(SEP);
   // NtaGetCurrentLine(LineText Property)/GetTextAtLine CursorPos ConvertPos
 
   CnNtaGetCurrLineText(Text, LineNo, CharIndex);
@@ -192,6 +194,14 @@ begin
   lstInfo.Items.Add('CursorPos/EditPos(1/1) CharPos(1/0) Conversion.');
   lstInfo.Items.Add(Format('EditPos %d:%d, CharPos %d:%d.', [EditPos.Line,
     EditPos.Col, CharPos.Line, CharPos.CharIndex]));
+
+  StatusBar := GetEditWindowStatusBar;
+  if (StatusBar <> nil) and (StatusBar.Panels.Count > 0) then
+  begin
+    lstInfo.Items.Add(SEP);
+    lstInfo.Items.Add('Editor Position at StatusBar:');
+    lstInfo.Items.Add(StatusBar.Panels[0].Text);
+  end;
 end;
 
 initialization

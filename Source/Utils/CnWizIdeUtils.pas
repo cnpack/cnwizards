@@ -91,6 +91,8 @@ const
   DesignControlClassName = 'TEditorFormDesigner';
   WelcomePageClassName = 'TWelcomePageFrame';
   DisassemblyViewClassName = 'TDisassemblyView';
+  EditorStatusBarName = 'StatusBar';
+
 {$IFDEF BDS}
   {$IFDEF BDS4_UP} // BDS 2006 RAD Studio 2007 的标签页类名
   XTabControlClassName = 'TIDEGradientTabSet';   // TWinControl 子类
@@ -267,6 +269,9 @@ function GetNewComponentPaletteTabControl: TWinControl;
 
 function GetNewComponentPaletteComponentPanel: TWinControl;
 {* 返回 2010 或以上的新组件面板下半部分容纳组件列表的容器对象，可能为空}
+
+function GetEditWindowStatusBar(EditWindow: TCustomForm = nil): TStatusBar;
+{* 返回编辑器窗口下方的状态栏，只支持 D567，可能为空}
 
 function GetObjectInspectorForm: TCustomForm;
 {* 返回对象检查器窗体，可能为空}
@@ -1100,6 +1105,23 @@ begin
   if Result = nil then
     CnDebugger.LogMsgError('Unable to Find New ComponentPalette Panel!');
 {$ENDIF}
+end;
+
+// 返回编辑器窗口下方的状态栏，只支持 D567，可能为空
+function GetEditWindowStatusBar(EditWindow: TCustomForm = nil): TStatusBar;
+var
+  AComp: TComponent;
+begin
+  Result := nil;
+  if EditWindow = nil then
+    EditWindow := CnOtaGetCurrentEditWindow;
+
+  if EditWindow = nil then
+    Exit;
+
+  AComp := EditWindow.FindComponent(EditorStatusBarName);
+  if (AComp <> nil) and (AComp is TStatusBar) then
+    Result := AComp as TStatusBar;
 end;
 
 // 返回对象检查器窗体，可能为空

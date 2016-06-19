@@ -4150,21 +4150,22 @@ end;
 // 使用 NTA 方法取当前行源代码。速度快，但取回的文本是将 Tab 扩展成空格的。
 // 如果使用 ConvertPos 来转换成 EditPos 可能会有问题。直接将 CharIndex + 1
 // 赋值给 EditPos.Col 即可
-// D7 及以下取到的是AnsiString，CursorPos.Col 是编辑器中状态栏的 Col - 1，一致。
+// D7 及以下取到的是AnsiString，CharIndex 是 CursorPos.Col（编辑器中状态栏的 Col） - 1，一致。
 //   可以直接根据 CharIndex 处理 Text
-// BDS 非 Unicode 下取到的是 UTF8 格式的 AnsiString，CursorPos.Col 是 UTF8 格式的 Col - 1，和编辑器中状态栏显示的对不上号
+// BDS 非 Unicode 下取到的是 UTF8 格式的 AnsiString，CharIndex 是 CursorPos.Col（UTF8 格式的 Col） - 1，和编辑器中状态栏显示的 Ansi Col 对不上号
 //   也可以直接根据 CharIndex 处理 Text，但要注意双字节字符变成了仨字节
-// Unicode IDE 下取得的是 UTF16 字符串，CursorPos.Col 是 Ansi 格式的 Col - 1，和编辑器中状态栏显示的一致
+// Unicode IDE 下取得的是 UTF16 字符串，CharIndex 是 CursorPos.Col（编辑器中状态栏的 Col）- 1，和编辑器中状态栏显示的一致
 //   如果要根据 CharIndex 处理 Text，则需要将 Text 转换为 AnsiString
 {
   以如下表格为准：
                       获取的 Text 格式   CharIndex(CursorPos.Col - 1) 编辑器状态栏的真实列状况（Ansi）   TOTACharPos
 
-  Delphi5/6/7         Ansi               同左、一致                   同左、一致                         Ansi
+  Delphi5/6/7         Ansi               同左、一致                   同左、与 CursorPos 一致                         Ansi
 
   Delphi 2005~2007    Ansi with UTF8     同左、与 UTF8 一致           Ansi、与 UTF8 不一致               Utf8
 
-  Delphi 2009~        UTF16              Ansi、与 UTF16 不一致        同左 Ansi、与 UTF16 不一致         Ansi？（混乱）
+  Delphi 2009~        UTF16              Ansi、与 UTF16 不一致        同左 Ansi、与 CursorPos 一致       Ansi？（混乱）
+                                                                      与 UTF16 不一致
 }
 function CnNtaGetCurrLineText(var Text: string; var LineNo: Integer;
   var CharIndex: Integer): Boolean;
