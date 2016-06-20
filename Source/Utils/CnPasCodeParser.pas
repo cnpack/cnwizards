@@ -165,9 +165,11 @@ type
     procedure Clear;
     procedure ParseSource(ASource: PAnsiChar; AIsDpr, AKeyOnly: Boolean);
     function FindCurrentDeclaration(LineNumber, CharIndex: Integer): AnsiString;
-    {* 查找指定光标位置所在的声明，LineNumber 1 开始，CharIndex 0 开始，类似于 CharPos}
+    {* 查找指定光标位置所在的声明，LineNumber 1 开始，CharIndex 0 开始，类似于 CharPos
+       要求是 Ansi 的偏移量。D567 下可以用 ConvertPos 得到的 CharPos 传入}
     procedure FindCurrentBlock(LineNumber, CharIndex: Integer);
-    {* 根据当前光标位置查找当前块，LineNumber 1 开始，CharIndex 0 开始，类似于 CharPos}
+    {* 根据当前光标位置查找当前块，LineNumber 1 开始，CharIndex 0 开始，类似于 CharPos
+       要求是 Ansi 的偏移量。D567 下可以用 ConvertPos 得到的 CharPos 传入}
     function IndexOfToken(Token: TCnPasToken): Integer;
     property Count: Integer read GetCount;
     property Tokens[Index: Integer]: TCnPasToken read GetToken;

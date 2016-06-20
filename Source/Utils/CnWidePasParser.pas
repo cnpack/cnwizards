@@ -150,12 +150,16 @@ type
     procedure ParseSource(ASource: PWideChar; AIsDpr, AKeyOnly: Boolean);
     function FindCurrentDeclaration(LineNumber, CharIndex: Integer): CnWideString;
     {* 查找指定光标位置所在的声明，LineNumber 1 开始，CharIndex 0 开始，类似于 CharPos，
-       但要求是 WideChar 偏移。如果调用者拿到的是 Ansi/Utf8 的 CursorPos.Col，需要转换
-       成 Utf16 的偏移才能塞进来}
+       但要求是 WideChar 偏移。D2005~2007 下，CursorPos.Col 经 ConverPos 后得到的是
+       Utf8 的 CharPos 偏移，2009 或以上 ConverPos 得到混乱的 Ansi 偏移，都不能直接用。
+       前者需要转成 WideChar 偏移，后者只能把 CursorPos.Col - 1 当作 Ansi 的 CharIndex，
+       再转成 WideChar 的偏移}
     procedure FindCurrentBlock(LineNumber, CharIndex: Integer);
     {* 查找指定光标位置所在的块，LineNumber 1 开始，CharIndex 0 开始，类似于 CharPos，
-       但要求是 WideChar 偏移。如果调用者拿到的是 Ansi/Utf8 的 CursorPos.Col，需要转换
-       成 Utf16 的偏移才能塞进来}
+       但要求是 WideChar 偏移。D2005~2007 下，CursorPos.Col 经 ConverPos 后得到的是
+       Utf8 的 CharPos 偏移，2009 或以上 ConverPos 得到混乱的 Ansi 偏移，都不能直接用。
+       前者需要转成 WideChar 偏移，后者只能把 CursorPos.Col - 1 当作 Ansi 的 CharIndex，
+       再转成 WideChar 的偏移}
     function IndexOfToken(Token: TCnWidePasToken): Integer;
     property Count: Integer read GetCount;
     property Tokens[Index: Integer]: TCnWidePasToken read GetToken;
