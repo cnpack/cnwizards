@@ -679,12 +679,8 @@ begin
       for I := 0 to BlockMatchInfo.KeyCount - 1 do
       begin
         // 转换成 Col 与 Line
-        if CurIsPas then
-          CharPos := OTACharPos(BlockMatchInfo.KeyTokens[I].CharIndex,
-            BlockMatchInfo.KeyTokens[I].LineNumber + 1);
-        if CurIsCpp then
-          CharPos := OTACharPos(BlockMatchInfo.KeyTokens[I].CharIndex - 1,
-            BlockMatchInfo.KeyTokens[I].LineNumber);
+        CharPos := OTACharPos(BlockMatchInfo.KeyTokens[I].CharIndex,
+          BlockMatchInfo.KeyTokens[I].LineNumber + 1);
 
         EditView.ConvertPos(False, EditPos, CharPos);
         // 以上这句在 D2009 中的结果可能会有偏差，暂无办法
@@ -699,12 +695,8 @@ begin
       for I := 0 to BlockMatchInfo.CompDirectiveTokenCount - 1 do
       begin
         // 转换成 Col 与 Line
-        if CurIsPas then
-          CharPos := OTACharPos(BlockMatchInfo.CompDirectiveTokens[I].CharIndex,
-            BlockMatchInfo.CompDirectiveTokens[I].LineNumber + 1);
-        if CurIsCpp then
-          CharPos := OTACharPos(BlockMatchInfo.CompDirectiveTokens[I].CharIndex - 1,
-            BlockMatchInfo.CompDirectiveTokens[I].LineNumber);
+        CharPos := OTACharPos(BlockMatchInfo.CompDirectiveTokens[I].CharIndex,
+          BlockMatchInfo.CompDirectiveTokens[I].LineNumber + 1);
 
         EditView.ConvertPos(False, EditPos, CharPos);
         // 以上这句在 D2009 中的结果可能会有偏差，暂无办法
@@ -932,9 +924,8 @@ begin
 
       for I := 0 to CppParser.Count - 1 do
       begin
-        CharPos := OTACharPos(CppParser.Tokens[I].CharIndex - 1, CppParser.Tokens[I].LineNumber);
-        // 此处 LineNumber 无需加一了，因为 mwBCBTokenList 中的此属性是从 1 开始的
-        // 反倒 CharIndex 得减一
+        CharPos := OTACharPos(CppParser.Tokens[I].CharIndex, CppParser.Tokens[I].LineNumber + 1);
+
         EditView.ConvertPos(False, EditPos, CharPos);
         CppParser.Tokens[I].EditCol := EditPos.Col;
         CppParser.Tokens[I].EditLine := EditPos.Line;

@@ -66,7 +66,7 @@ type
     constructor Create;
   published
     // 注意父类 Pas 解析出来的 LineNumber 与 CharIndex 都是 0 开始的，
-    // 但 Cpp 解析器解析出来的 LineNumber 与 CharIndex 都是 1 开始的
+    // 现在 Cpp 解析器解析出来的 LineNumber 与 CharIndex 也是 0 开始的
   end;
 
   TCnCppStructureParser = class(TObject)
@@ -249,8 +249,8 @@ var
 
     // Token.FToken := AnsiString(CParser.RunToken);
 
-    Token.FLineNumber := CParser.RunLineNumber;
-    Token.FCharIndex := CParser.RunColNumber;  // 暂未做 Ansi 的 Tab 展开功能
+    Token.FLineNumber := CParser.RunLineNumber - 1; // 1 开始变成 0 开始
+    Token.FCharIndex := CParser.RunColNumber - 1;   // 暂未做 Ansi 的 Tab 展开功能
     Token.FCppTokenKind := CParser.RunID;
     Token.FItemLayer := Layer;
     Token.FItemIndex := FList.Count;

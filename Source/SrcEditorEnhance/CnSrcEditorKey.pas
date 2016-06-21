@@ -1379,7 +1379,7 @@ begin
       // 先转换并加入所有与光标下标识符相同的 Token，区分大小写
       for I := 0 to CParser.Count - 1 do
       begin
-        CharPos := OTACharPos(CParser.Tokens[I].CharIndex - 1, CParser.Tokens[I].LineNumber);
+        CharPos := OTACharPos(CParser.Tokens[I].CharIndex, CParser.Tokens[I].LineNumber + 1);
         try
           EditView.ConvertPos(False, EditPos, CharPos);
         except
@@ -1632,7 +1632,7 @@ begin
         // 先转换并加入所有与光标下标识符相同的 Token，区分大小写
         for I := 0 to CParser.Count - 1 do
         begin
-          CharPos := OTACharPos(CParser.Tokens[I].CharIndex - 1, CParser.Tokens[I].LineNumber);
+          CharPos := OTACharPos(CParser.Tokens[I].CharIndex, CParser.Tokens[I].LineNumber + 1);
           try
             EditView.ConvertPos(False, EditPos, CharPos);
           except
@@ -2063,7 +2063,7 @@ begin
       // 先转换并加入所有与光标下标识符相同的 Token，区分大小写
       for I := 0 to CParser.Count - 1 do
       begin
-        CharPos := OTACharPos(CParser.Tokens[I].CharIndex - 1, CParser.Tokens[I].LineNumber + 1);
+        CharPos := OTACharPos(CParser.Tokens[I].CharIndex, CParser.Tokens[I].LineNumber + 1);
         try
           EditView.ConvertPos(False, EditPos, CharPos);
         except
@@ -2334,7 +2334,7 @@ begin
         // 先转换并加入所有与光标下标识符相同的 Token，区分大小写
         for I := 0 to CParser.Count - 1 do
         begin
-          CharPos := OTACharPos(CParser.Tokens[I].CharIndex - 1, CParser.Tokens[I].LineNumber + 1);
+          CharPos := OTACharPos(CParser.Tokens[I].CharIndex, CParser.Tokens[I].LineNumber + 1);
           try
             EditView.ConvertPos(False, EditPos, CharPos);
           except

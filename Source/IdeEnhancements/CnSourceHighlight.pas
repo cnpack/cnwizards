@@ -1277,7 +1277,7 @@ begin
       begin
         // 转换成 Col 与 Line
 {$IFNDEF BDS2009_UP}
-        CharPos := OTACharPos(KeyTokens[I].CharIndex - 1, KeyTokens[I].LineNumber);
+        CharPos := OTACharPos(KeyTokens[I].CharIndex, KeyTokens[I].LineNumber + 1);
         try
           EditView.ConvertPos(False, EditPos, CharPos);
         except
@@ -1583,9 +1583,8 @@ begin
     // 将解析出的流程控制的Token 按范围规定加入 FFlowTokenList
     for I := 0 to CppParser.Count - 1 do
     begin
-      CharPos := OTACharPos(CppParser.Tokens[I].CharIndex - 1, CppParser.Tokens[I].LineNumber);
-      // 此处 LineNumber 无需加一了，因为 mwBCBTokenList 中的此属性是从 1 开始的
-      // 反倒 CharIndex 得减一
+      CharPos := OTACharPos(CppParser.Tokens[I].CharIndex, CppParser.Tokens[I].LineNumber + 1);
+
       EditView.ConvertPos(False, EditPos, CharPos);
       CppParser.Tokens[I].EditCol := EditPos.Col;
       CppParser.Tokens[I].EditLine := EditPos.Line;
@@ -1782,9 +1781,7 @@ begin
         if (AToken.CppTokenKind = ctkIdentifier) and
           CheckTokenMatch(AToken.Token, FCurrentTokenName, CaseSensitive) then
         begin
-          CharPos := OTACharPos(AToken.CharIndex - 1, AToken.LineNumber);
-          // 此处 LineNumber 无需加一了，因为 mwBCBTokenList 中的此属性是从 1 开始的
-          // 反倒 CharIndex 得减一
+          CharPos := OTACharPos(AToken.CharIndex, AToken.LineNumber + 1);
           EditView.ConvertPos(False, EditPos, CharPos);
 
           // DONE: 以上这句本应在 D2009 时按以下修复，
@@ -1879,15 +1876,14 @@ begin
     // TCnPasToken 来表示并加入 FCompDirectiveTokenList 中，但和 Pascal 语言相关的属性
     // 均无效，只有 Token 名和位置等有效。
 
-    // 将解析出的条件编译的Token 按范围规定加入 FCompDirectiveTokenList
+    // 将解析出的条件编译的 Token 按范围规定加入 FCompDirectiveTokenList
     for I := 0 to CppParser.Count - 1 do
     begin
       if not CheckIsCompDirectiveToken(CppParser.Tokens[I], FIsCppSource) then
         Continue;
 
-      CharPos := OTACharPos(CppParser.Tokens[I].CharIndex - 1, CppParser.Tokens[I].LineNumber);
-      // 此处 LineNumber 无需加一了，因为 mwBCBTokenList 中的此属性是从 1 开始的
-      // 反倒 CharIndex 得减一
+      CharPos := OTACharPos(CppParser.Tokens[I].CharIndex, CppParser.Tokens[I].LineNumber + 1);
+
       EditView.ConvertPos(False, EditPos, CharPos);
       CppParser.Tokens[I].EditCol := EditPos.Col;
       CppParser.Tokens[I].EditLine := EditPos.Line;
