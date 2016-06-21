@@ -65,7 +65,8 @@ type
   public
     constructor Create;
   published
-
+    // 注意父类 Pas 解析出来的 LineNumber 与 CharIndex 都是 0 开始的，
+    // 但 Cpp 解析器解析出来的 LineNumber 与 CharIndex 都是 1 开始的
   end;
 
   TCnCppStructureParser = class(TObject)

@@ -64,7 +64,8 @@ type
   public
     constructor Create;
   published
-
+    // 注意父类 WidePas 解析出来的 LineNumber 与 CharIndex 都是 0 开始的
+    // WideCpp 解析器解析出来的 LineNumber 与 CharIndex 也是 0 开始的
   end;
 
   TCnWideCppStructParser = class(TObject)

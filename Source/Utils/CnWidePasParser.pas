@@ -85,6 +85,7 @@ type
     {* 从本行开始数的字符位置，从零开始，由 ParseSource 内据需展开 Tab 计算而来 }
     property AnsiIndex: Integer read FAnsiIndex;   // Start 0
     {* 从本行开始数的 Ansi 字符位置，从零开始，计算而来}
+
     property EditCol: Integer read FEditCol write FEditCol;
     {* 所在列，从一开始，由外界转换而来 }
     property EditLine: Integer read FEditLine write FEditLine;

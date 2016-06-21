@@ -98,7 +98,7 @@ type
     {* 是否是 C 方式的解析，默认不是}
     property LineNumber: Integer read FLineNumber; // Start 0
     {* 所在行号，从零开始，由 ParseSource 计算而来 }
-    property CharIndex: Integer read FCharIndex; // Start 0
+    property CharIndex: Integer read FCharIndex;   // Start 0
     {* 从本行开始数的字符位置，从零开始，由 ParseSource 计算而来 }
 
     property EditCol: Integer read FEditCol write FEditCol;

@@ -935,6 +935,11 @@ procedure CnOtaClosePage(EditView: IOTAEditView);
 procedure CnOtaCloseEditView(AModule: IOTAModule);
 {* 仅关闭模块的视图，而不关闭模块}
 
+procedure CnOtaConvertEditViewCharPosToEditPos(EditViewPtr: Pointer;
+  CharPosLine, CharPosCharIndex: Integer; var EditPos: TOTAEditPos);
+{* 将 EditView 中的 CharPos 转为 EditPos，封装并处理了 2009 以上有偏差的问题
+  EditView 使用 Pointer 进行传递以提高效率，2009 以上的修复未处理 Tab 展开}
+
 //==============================================================================
 // 窗体操作相关函数
 //==============================================================================
@@ -6483,6 +6488,39 @@ begin
   if View = nil then Exit;
   Editor.Show;
   CnOtaClosePage(View);
+end;
+
+// 将 EditView 中的 CharPos 转为 EditPos，封装并处理了 2009 以上有偏差的问题
+// EditView 使用 Pointer 进行传递以提高效率，2009 以上的修复未处理 Tab 展开
+procedure CnOtaConvertEditViewCharPosToEditPos(EditViewPtr: Pointer;
+  CharPosLine, CharPosCharIndex: Integer; var EditPos: TOTAEditPos);
+{$IFNDEF BDS2009_UP}
+var
+  EditView: IOTAEditView;
+  CharPos: TOTACharPos;
+{$ENDIF}
+begin
+{$IFDEF BDS2009_UP}
+  EditPos.Line := CharPosLine;
+  EditPos.Col := CharPosCharIndex + 1;
+{$ELSE}
+  if EditViewPtr = nil then
+  begin
+    EditPos.Line := CharPosLine;
+    EditPos.Col := CharPosCharIndex + 1;
+    Exit;
+  end;
+
+  CharPos := OTACharPos(CharPosLine, CharPosCharIndex);
+  EditView := IOTAEditView(EditViewPtr);
+  try
+    EditView.ConvertPos(False, EditPos, CharPos);
+  except
+    // D5/6 下 ConvertPos 在只有一个大于号时会出错，只能屏蔽
+    EditPos.Line := CharPosLine;
+    EditPos.Col := CharPosCharIndex + 1;
+  end;
+{$ENDIF}
 end;
 
 //==============================================================================
