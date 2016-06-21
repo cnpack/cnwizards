@@ -940,6 +940,13 @@ procedure CnOtaConvertEditViewCharPosToEditPos(EditViewPtr: Pointer;
 {* 将 EditView 中的 CharPos 转为 EditPos，封装并处理了 2009 以上有偏差的问题
   EditView 使用 Pointer 进行传递以提高效率，2009 以上的修复未处理 Tab 展开}
 
+procedure CnOtaConvertEditPosToParserCharPos(EditViewPtr: Pointer; var EditPos:
+  TOTAEditPos; var CharPos: TOTACharPos);
+{* 将 EditPos 转换成为 StructureParser 所需的 CharPos}
+
+function CnOtaGetCurrentCharPosFromCursorPosForParser(out CharPos: TOTACharPos): Boolean;
+{* 获取当前光标位置并将其转换成为 StructureParser 所需的 CharPos}
+
 //==============================================================================
 // 窗体操作相关函数
 //==============================================================================
@@ -4163,7 +4170,7 @@ end;
 //   如果要根据 CharIndex 处理 Text，则需要将 Text 转换为 AnsiString
 {
   以如下表格为准：
-                      获取的 Text 格式   CharIndex(CursorPos.Col - 1) 编辑器状态栏的真实列状况（Ansi）   TOTACharPos
+                      获取的 Text 格式   CharIndex(CursorPos.Col - 1) 编辑器状态栏的真实列状况（Ansi）   ConvertPos 得到的 TOTACharPos
 
   Delphi5/6/7         Ansi               同左、一致                   同左、与 CursorPos 一致            Ansi
 
@@ -4220,8 +4227,8 @@ begin
   begin
     Text := GetStrProp(EditControl, 'LineText');
 
-    // CursorPos 反映的是 Ansi （非UTF8）方式的列，需要把 string 转成 Ansi 后才能
-    // 得到光标对应到 Text 中的真实位置
+    // CursorPos 在 Unicode IDE 下反映的是 Ansi （非UTF8）方式的列，
+    // 需要把 string 转成 Ansi 后才能得到光标对应到 Text 中的真实位置
     CharIndex := Length(string(Copy(ConvertNtaEditorStringToAnsi(Text, True),
       1, View.CursorPos.Col - 1)));
 
@@ -6521,6 +6528,82 @@ begin
     EditPos.Col := CharPosCharIndex + 1;
   end;
 {$ENDIF}
+end;
+
+// 将 EditPos 转换成为 StructureParser 所需的 CharPos
+procedure CnOtaConvertEditPosToParserCharPos(EditViewPtr: Pointer; var EditPos:
+  TOTAEditPos; var CharPos: TOTACharPos);
+var
+{$IFNDEF BDS2009_UP}
+  EditView: IOTAEditView;
+{$ENDIF}
+  EditControl: TControl;
+  Text: string;
+  LineNo: Integer;
+  CharIndex: Integer;
+begin
+  if EditViewPtr = nil then
+    EditViewPtr := Pointer(CnOtaGetTopMostEditView);
+  EditControl := EditControlWrapper.GetEditControl(IOTAEditView(EditViewPtr));
+  if EditControl = nil then
+    Exit;
+
+  Text := EditControlWrapper.GetTextAtLine(EditControl, EditPos.Line);
+  // 获得当前行内容，Ansi/Utf8/Utf16
+
+{$IFDEF BDS2009_UP}
+  CharPos.Line := EditPos.Line;
+  CharPos.CharIndex := EditPos.Col - 1;
+
+  // TODO: Convert AnsiCharIndex to WideCharIndex
+{$ELSE}
+  if EditViewPtr = nil then
+  begin
+    CharPos.Line := EditPos.Line;
+    CharPos.CharIndex := EditPos.Col - 1;
+
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+    // TODO: Convert Utf8 CharIndex to WideCharIndex
+  {$ENDIF}
+  end;
+
+  EditView := IOTAEditView(EditViewPtr);
+  try
+    EditView.ConvertPos(True, EditPos, CharPos);
+  except
+    // D5/6 下 ConvertPos 在只有一个大于号时会出错，只能屏蔽
+    CharPos.Line := EditPos.Line;
+    CharPos.CharIndex := EditPos.Col - 1;
+  end;
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+    // TODO: Convert Utf8 CharIndex to WideCharIndex
+  {$ENDIF}
+{$ENDIF}
+end;
+
+function CnOtaGetCurrentCharPosFromCursorPosForParser(out CharPos: TOTACharPos): Boolean;
+var
+  Text: string;
+  LineNo: Integer;
+  CharIndex: Integer;
+begin
+  Result := False;
+{$IFDEF UNICODE}
+  if not CnNtaGetCurrLineTextW(Text, LineNo, CharIndex) then
+    Exit;
+{$ELSE}
+  if not CnNtaGetCurrLineText(Text, LineNo, CharIndex) then
+    Exit;
+
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+    // CharIndex is Utf8, convert to Utf16
+    Delete(Text, CharIndex + 1, MaxInt);
+    CharIndex := Length(UTF8Decode(Text));
+  {$ENDIF}
+{$ENDIF}
+  CharPos.Line := LineNo;
+  CharPos.CharIndex := CharIndex;
+  Result := True;
 end;
 
 //==============================================================================

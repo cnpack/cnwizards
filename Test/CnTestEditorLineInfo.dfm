@@ -1,10 +1,10 @@
 object TestEditorLineInfoForm: TTestEditorLineInfoForm
-  Left = 281
-  Top = 165
+  Left = 200
+  Top = 280
   BorderStyle = bsDialog
   Caption = 'Test Editor Line Info'
-  ClientHeight = 336
-  ClientWidth = 523
+  ClientHeight = 309
+  ClientWidth = 484
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -16,10 +16,11 @@ object TestEditorLineInfoForm: TTestEditorLineInfoForm
   PixelsPerInch = 96
   TextHeight = 13
   object lstInfo: TListBox
-    Left = 16
-    Top = 16
-    Width = 489
-    Height = 297
+    Left = 0
+    Top = 0
+    Width = 484
+    Height = 309
+    Align = alClient
     ItemHeight = 13
     TabOrder = 0
   end

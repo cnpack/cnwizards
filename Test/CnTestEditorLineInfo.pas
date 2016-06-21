@@ -195,6 +195,15 @@ begin
   lstInfo.Items.Add(Format('EditPos %d:%d, CharPos %d:%d.', [EditPos.Line,
     EditPos.Col, CharPos.Line, CharPos.CharIndex]));
 
+
+  lstInfo.Items.Add(SEP);
+  lstInfo.Items.Add('CnOtaGetCurrentCharPosFromCursorPosForParser.');
+  if CnOtaGetCurrentCharPosFromCursorPosForParser(CharPos) then
+    lstInfo.Items.Add(Format('For Parser CharPos (Ansi/Wide) %d:%d.',
+      [CharPos.Line, CharPos.CharIndex]))
+  else
+    lstInfo.Items.Add('Get Current Position Failed.');
+
   StatusBar := GetEditWindowStatusBar;
   if (StatusBar <> nil) and (StatusBar.Panels.Count > 0) then
   begin

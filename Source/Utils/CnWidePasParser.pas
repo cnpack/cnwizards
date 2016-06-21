@@ -149,14 +149,14 @@ type
     destructor Destroy; override;
     procedure Clear;
     procedure ParseSource(ASource: PWideChar; AIsDpr, AKeyOnly: Boolean);
-    function FindCurrentDeclaration(LineNumber, CharIndex: Integer): CnWideString;
-    {* 查找指定光标位置所在的声明，LineNumber 1 开始，CharIndex 0 开始，类似于 CharPos，
+    function FindCurrentDeclaration(LineNumber, WideCharIndex: Integer): CnWideString;
+    {* 查找指定光标位置所在的声明，LineNumber 1 开始，WideCharIndex 0 开始，类似于 CharPos，
        但要求是 WideChar 偏移。D2005~2007 下，CursorPos.Col 经 ConverPos 后得到的是
        Utf8 的 CharPos 偏移，2009 或以上 ConverPos 得到混乱的 Ansi 偏移，都不能直接用。
        前者需要转成 WideChar 偏移，后者只能把 CursorPos.Col - 1 当作 Ansi 的 CharIndex，
        再转成 WideChar 的偏移}
-    procedure FindCurrentBlock(LineNumber, CharIndex: Integer);
-    {* 查找指定光标位置所在的块，LineNumber 1 开始，CharIndex 0 开始，类似于 CharPos，
+    procedure FindCurrentBlock(LineNumber, WideCharIndex: Integer);
+    {* 查找指定光标位置所在的块，LineNumber 1 开始，WideCharIndex 0 开始，类似于 CharPos，
        但要求是 WideChar 偏移。D2005~2007 下，CursorPos.Col 经 ConverPos 后得到的是
        Utf8 的 CharPos 偏移，2009 或以上 ConverPos 得到混乱的 Ansi 偏移，都不能直接用。
        前者需要转成 WideChar 偏移，后者只能把 CursorPos.Col - 1 当作 Ansi 的 CharIndex，
@@ -746,7 +746,7 @@ begin
   end;
 end;
 
-procedure TCnWidePasStructParser.FindCurrentBlock(LineNumber, CharIndex:
+procedure TCnWidePasStructParser.FindCurrentBlock(LineNumber, WideCharIndex:
   Integer);
 var
   Token: TCnWidePasToken;
@@ -938,10 +938,10 @@ begin
       if (Tokens[CurrIndex].TokenID in [tkBegin, tkAsm, tkTry, tkRepeat, tkIf,
         tkFor, tkWith, tkOn, tkWhile, tkCase, tkRecord, tkObject, tkClass,
         tkInterface, tkDispInterface]) and
-        (Tokens[CurrIndex].CharIndex > CharIndex ) then // 起始的这样判断
+        (Tokens[CurrIndex].CharIndex > WideCharIndex ) then // 起始的这样判断
         Break
       else if (Tokens[CurrIndex].TokenID in [tkEnd, tkUntil, tkThen, tkDo]) and
-        (Tokens[CurrIndex].CharIndex + Length(Tokens[CurrIndex].Token) > CharIndex ) then
+        (Tokens[CurrIndex].CharIndex + Length(Tokens[CurrIndex].Token) > WideCharIndex ) then
         Break;  //结束的这样判断
     end;
 
@@ -967,12 +967,13 @@ begin
   Result := FList.IndexOf(Token);
 end;
 
-function TCnWidePasStructParser.FindCurrentDeclaration(LineNumber, CharIndex: Integer): CnWideString;
+function TCnWidePasStructParser.FindCurrentDeclaration(LineNumber,
+  WideCharIndex: Integer): CnWideString;
 var
   Idx: Integer;
 begin
   Result := '';
-  FindCurrentBlock(LineNumber, CharIndex);
+  FindCurrentBlock(LineNumber, WideCharIndex);
 
   if InnerBlockStartToken <> nil then
   begin
