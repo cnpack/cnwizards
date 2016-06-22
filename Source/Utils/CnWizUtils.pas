@@ -911,6 +911,13 @@ procedure CnOtaInsertTextIntoEditorAtPosW(const Text: string; Position: Longint;
 {* 在指定位置处插入文本，如果 SourceEditor 为空使用当前值，D2009 以上使用。}
 {$ENDIF}
 
+procedure CnOtaEditGotoPosAndRepaint(EditView: IOTAEditView; Line: Integer; Col: Integer = -1);
+{* 移动光标到 EditView 的指定行列，行以 1 开始，列以 1 开始，表示光标移动到第 Col 个字符后
+   实现上使用 EditPosition.MoveBOL 再 MoveRelative。注意，D567 的 Col 需要是 Ansi 字符偏移。
+   D2005~2007 下的 Col 需要是 Utf8 字符偏移，也就是说如果 2005～2007 下一行都是汉字的话，
+   则 Col 为1、2、3时光标放第一个汉字后，4、5、6时第二个后、依此类推。
+   D2009 以上这个方法会产生混乱，暂无合适办法，或许可以 CursorPos 赋值？}
+
 procedure CnOtaGotoPosition(Position: Longint; EditView: IOTAEditView = nil;
   Middle: Boolean = True);
 {* 移动光标到指定位置，如果 EditView 为空使用当前值。}
@@ -946,6 +953,23 @@ procedure CnOtaConvertEditPosToParserCharPos(EditViewPtr: Pointer; var EditPos:
 
 function CnOtaGetCurrentCharPosFromCursorPosForParser(out CharPos: TOTACharPos): Boolean;
 {* 获取当前光标位置并将其转换成为 StructureParser 所需的 CharPos}
+
+procedure CnPasParserParseSource(Parser: TCnGeneralPasStructParser;
+  Stream: TMemoryStream; AIsDpr, AKeyOnly: Boolean);
+{* 封装的解析器解析 Pascal 代码的过程}
+
+procedure CnCppParserParseSource(Parser: TCnGeneralCppStructParser;
+  Stream: TMemoryStream; CurrLine: Integer = 0;
+  CurCol: Integer = 0; ParseCurrent: Boolean = False);
+{* 封装的解析器解析 Cpp 代码的过程}
+
+procedure CnConvertPasTokenPositionToCharPos(EditViewPtr: Pointer;
+  Token: TCnGeneralPasToken; out CharPos: TOTACharPos);
+{* 封装的把 Pascal Token 解析出来的位置参数转换成 IDE 所需的 CharPos 的过程}
+
+procedure CnConvertCppTokenPositionToCharPos(EditViewPtr: Pointer;
+  Token: TCnGeneralCppToken; out CharPos: TOTACharPos);
+{* 封装的把 Cpp Token 解析出来的位置参数转换成 IDE 所需的 CharPos 的过程}
 
 //==============================================================================
 // 窗体操作相关函数
@@ -6387,6 +6411,33 @@ end;
 
 {$ENDIF}
 
+procedure CnOtaEditGotoPosAndRepaint(EditView: IOTAEditView; Line: Integer; Col: Integer = -1);
+var
+  EditControl: TControl;
+begin
+  if EditView <> nil then
+  begin
+    if Line > 0 then
+    begin
+      EditView.Position.GotoLine(Line);
+      if Col >= 0 then
+      begin
+        EditView.Position.MoveBOL;
+        EditView.Position.MoveRelative(0, Col);
+      end
+      else
+        EditView.Center(Line, 1);
+
+      CnOtaMakeSourceVisible(EditView.Buffer.FileName);
+      EditView.Paint;
+
+      EditControl := GetCurrentEditControl;
+      if (EditControl <> nil) and (EditControl is TWinControl) then
+        (EditControl as TWinControl).SetFocus;
+    end;
+  end;
+end;
+
 // 移动光标到指定位置，如果 EditView 为空使用当前值。
 procedure CnOtaGotoPosition(Position: Longint; EditView: IOTAEditView; Middle: Boolean);
 var
@@ -6518,7 +6569,7 @@ begin
     Exit;
   end;
 
-  CharPos := OTACharPos(CharPosLine, CharPosCharIndex);
+  CharPos := OTACharPos(CharPosCharIndex, CharPosLine);
   EditView := IOTAEditView(EditViewPtr);
   try
     EditView.ConvertPos(False, EditPos, CharPos);
@@ -6527,6 +6578,11 @@ begin
     EditPos.Line := CharPosLine;
     EditPos.Col := CharPosCharIndex + 1;
   end;
+{$ENDIF}
+
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('CnOtaConvertEditViewCharPosToEditPos %d:%d to %d:%d',
+    [CharPosLine, CharPosCharIndex, EditPos.Line, EditPos.Col]);
 {$ENDIF}
 end;
 
@@ -6539,8 +6595,6 @@ var
 {$ENDIF}
   EditControl: TControl;
   Text: string;
-  LineNo: Integer;
-  CharIndex: Integer;
 begin
   if EditViewPtr = nil then
     EditViewPtr := Pointer(CnOtaGetTopMostEditView);
@@ -6604,6 +6658,67 @@ begin
   CharPos.Line := LineNo;
   CharPos.CharIndex := CharIndex;
   Result := True;
+end;
+
+// 封装的解析器解析 Pascal 代码的过程
+procedure CnPasParserParseSource(Parser: TCnGeneralPasStructParser;
+  Stream: TMemoryStream; AIsDpr, AKeyOnly: Boolean);
+begin
+  if (Parser = nil) or (Stream = nil) then
+    Exit;
+
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+  Parser.ParseSource(PWideChar(Stream.Memory), AIsDpr, AKeyOnly);
+{$ELSE}
+  Parser.ParseSource(PAnsiChar(Stream.Memory), AIsDpr, AKeyOnly);
+{$ENDIF}
+end;
+
+// 封装的解析器解析 Cpp 代码的过程
+procedure CnCppParserParseSource(Parser: TCnGeneralCppStructParser;
+  Stream: TMemoryStream; CurrLine: Integer = 0;
+  CurCol: Integer = 0; ParseCurrent: Boolean = False);
+begin
+  if (Parser = nil) or (Stream = nil) then
+    Exit;
+
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+  Parser.ParseSource(PWideChar(Stream.Memory), Stream.Size, CurrLine, CurCol, ParseCurrent);
+{$ELSE}
+  Parser.ParseSource(PAnsiChar(Stream.Memory), Stream.Size, CurrLine, CurCol, ParseCurrent);
+{$ENDIF}
+end;
+
+// 封装的把 Pascal Token 解析出来的位置参数转换成 IDE 所需的 CharPos 的过程
+procedure CnConvertPasTokenPositionToCharPos(EditViewPtr: Pointer;
+  Token: TCnGeneralPasToken; out CharPos: TOTACharPos);
+begin
+  if Token = nil then
+    Exit;
+
+  CharPos.Line := Token.LineNumber + 1; // 0 开始变成 1 开始
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+  // TODO: CharPos Need Utf8?
+  {$ELSE}
+  CharPos.CharIndex := Token.AnsiIndex; // 使用 WideToken 的 Ansi 偏移，都是 0 开始
+  {$ENDIF}
+{$ELSE}
+  CharPos.CharIndex := Token.CharIndex; // 均是 Ansi 偏移，都是 0 开始
+{$ENDIF}
+
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('CnConvertPasTokenPositionToCharPos %d:%d/(A)%d to %d:%d - %s.',
+    [Token.LineNumber, Token.CharIndex, {$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+     Token.AnsiIndex, {$ELSE} 0, {$ENDIF} CharPos.Line, CharPos.CharIndex, Token.Token])
+{$ENDIF}
+end;
+
+// 封装的把 Cpp Token 解析出来的位置参数转换成 IDE 所需的 CharPos 的过程
+procedure CnConvertCppTokenPositionToCharPos(EditViewPtr: Pointer;
+  Token: TCnGeneralCppToken; out CharPos: TOTACharPos);
+begin
+
 end;
 
 //==============================================================================

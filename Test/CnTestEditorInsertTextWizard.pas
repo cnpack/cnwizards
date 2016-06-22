@@ -55,6 +55,7 @@ type
     FIdInsertTextIntoEditor: Integer;
     FIdInsertLineIntoEditor: Integer;
     FIdReplaceCurrentSelection: Integer;
+    FIdEditPositionMove: Integer;
   protected
     function GetHasConfig: Boolean; override;
     procedure SubActionExecute(Index: Integer); override;
@@ -101,6 +102,9 @@ begin
   FIdReplaceCurrentSelection := RegisterASubAction('CnOtaReplaceCurrentSelection',
     'Test CnOtaReplaceCurrentSelection', 0, 'Test CnOtaReplaceCurrentSelection',
     'CnOtaReplaceCurrentSelection');
+  FIdEditPositionMove := RegisterASubAction('CnOtaEditPositionMove',
+    'Test EditPositionMove', 0, 'Test EditPositionMove',
+    'CnOtaEditPositionMove');
 end;
 
 function TCnTestEditorInsertTextWizard.GetCaption: string;
@@ -144,21 +148,37 @@ end;
 procedure TCnTestEditorInsertTextWizard.SubActionExecute(Index: Integer);
 var
   S: string;
+  Line, Col: Integer;
+  EditView: IOTAEditView;
 begin
   if not Active then Exit;
-  S := CnInputBox('Enter Text', 'Enter Text:', '{³Ô·¹Ë¯¾õ}');
 
   if Index = FIdInsertTextIntoEditor then
   begin
+    S := CnInputBox('Enter Text', 'Enter Text:', '{³Ô·¹Ë¯¾õ}');
     CnOtaInsertTextIntoEditor(S); // Using EditWriter.Insert
   end
   else if Index = FIdInsertLineIntoEditor then
   begin
+    S := CnInputBox('Enter Text', 'Enter Text:', '{³Ô·¹Ë¯¾õ}');
     CnOtaInsertLineIntoEditor(S); // Using EditPosition.Insert
   end
   else if Index = FIdReplaceCurrentSelection then
   begin
+    S := CnInputBox('Enter Text', 'Enter Text:', '{³Ô·¹Ë¯¾õ}');
     CnOtaReplaceCurrentSelection(S, True, True);
+  end
+  else if Index = FIdEditPositionMove then
+  begin
+    EditView := CnOtaGetTopMostEditView;
+    if EditView = nil then
+      Exit;
+
+    Line := EditView.CursorPos.Line;
+    S := CnInputBox('Enter Column', 'Enter Column Value:', '3');
+    Col := StrToIntDef(S, 3);
+
+    CnOtaEditGotoPosAndRepaint(EditView, Line, Col);
   end;
 end;
 

@@ -106,6 +106,7 @@ end;
 procedure TCnTestEditorLineInfoWizard.Execute;
 begin
   FTestEdiotrLineForm.Show;
+  FTestEdiotrLineForm.EditorTimer.Enabled := True;
 end;
 
 function TCnTestEditorLineInfoWizard.GetCaption: string;
@@ -163,6 +164,8 @@ var
   CharIndex: Integer;
   EditControl: TControl;
   StatusBar: TStatusBar;
+  PasParser: TCnGeneralPasStructParser;
+  Stream: TMemoryStream;
 begin
   lstInfo.Clear;
   lstInfo.Items.Add(SEP);
@@ -203,6 +206,62 @@ begin
       [CharPos.Line, CharPos.CharIndex]))
   else
     lstInfo.Items.Add('Get Current Position Failed.');
+
+  PasParser := TCnGeneralPasStructParser.Create;
+  Stream := TMemoryStream.Create;
+
+  try
+    CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
+    CnPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName)
+      or IsInc(EditView.Buffer.FileName), False);
+
+    CnOtaGetCurrentCharPosFromCursorPosForParser(CharPos);
+    PasParser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
+
+{$IFDEF BDS}
+    if PasParser.BlockStartToken <> nil then
+      lstInfo.Items.Add(Format('OuterStart: Line: %d, Col(W/A) %2.2d/%2.2d. Layer: %d. Token: %s',
+        [PasParser.BlockStartToken.LineNumber, PasParser.BlockStartToken.CharIndex,
+        PasParser.BlockStartToken.AnsiIndex, PasParser.BlockStartToken.ItemLayer,
+        PasParser.BlockStartToken.Token]));
+    if PasParser.BlockCloseToken <> nil then
+      lstInfo.Items.Add(Format('OuterClose: Line: %d, Col(W/A) %2.2d/%2.2d. Layer: %d. Token: %s',
+        [PasParser.BlockCloseToken.LineNumber, PasParser.BlockCloseToken.CharIndex,
+         PasParser.BlockCloseToken.AnsiIndex, PasParser.BlockCloseToken.ItemLayer,
+         PasParser.BlockCloseToken.Token]));
+    if PasParser.InnerBlockStartToken <> nil then
+      lstInfo.Items.Add(Format('InnerStart: Line: %d, Col(W/A) %2.2d/%2.2d. Layer: %d. Token: %s',
+        [PasParser.InnerBlockStartToken.LineNumber, PasParser.InnerBlockStartToken.CharIndex,
+         PasParser.InnerBlockStartToken.AnsiIndex, PasParser.InnerBlockStartToken.ItemLayer,
+         PasParser.InnerBlockStartToken.Token]));
+    if PasParser.InnerBlockCloseToken <> nil then
+      lstInfo.Items.Add(Format('InnerClose: Line: %d, Col(W/A) %2.2d/%2.2d. Layer: %d. Token: %s',
+        [PasParser.InnerBlockCloseToken.LineNumber, PasParser.InnerBlockCloseToken.CharIndex,
+         PasParser.InnerBlockCloseToken.AnsiIndex, PasParser.InnerBlockCloseToken.ItemLayer,
+         PasParser.InnerBlockCloseToken.Token]));
+
+{$ELSE}
+    if PasParser.BlockStartToken <> nil then
+      lstInfo.Items.Add(Format('OuterStart: Line: %d, Col %2.2d. Layer: %d. Token: %s',
+       [PasParser.BlockStartToken.LineNumber, PasParser.BlockStartToken.CharIndex,
+        PasParser.BlockStartToken.ItemLayer, PasParser.BlockStartToken.Token]));
+    if PasParser.BlockCloseToken <> nil then
+      lstInfo.Items.Add(Format('OuterClose: Line: %d, Col %2.2d. Layer: %d. Token: %s',
+       [PasParser.BlockCloseToken.LineNumber, PasParser.BlockCloseToken.CharIndex,
+        PasParser.BlockCloseToken.ItemLayer, PasParser.BlockCloseToken.Token]));
+    if PasParser.InnerBlockStartToken <> nil then
+      lstInfo.Items.Add(Format('InnerStart: Line: %d, Col %2.2d. Layer: %d. Token: %s',
+       [PasParser.InnerBlockStartToken.LineNumber, PasParser.InnerBlockStartToken.CharIndex,
+        PasParser.InnerBlockStartToken.ItemLayer, PasParser.InnerBlockStartToken.Token]));
+    if PasParser.InnerBlockCloseToken <> nil then
+      lstInfo.Items.Add(Format('InnerClose: Line: %d, Col %2.2d. Layer: %d. Token: %s',
+       [PasParser.InnerBlockCloseToken.LineNumber, PasParser.InnerBlockCloseToken.CharIndex,
+        PasParser.InnerBlockCloseToken.ItemLayer, PasParser.InnerBlockCloseToken.Token]));
+{$ENDIF}
+  finally
+    PasParser.Free;
+    Stream.Free;
+  end;
 
   StatusBar := GetEditWindowStatusBar;
   if (StatusBar <> nil) and (StatusBar.Panels.Count > 0) then

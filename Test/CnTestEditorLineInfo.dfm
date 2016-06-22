@@ -25,6 +25,7 @@ object TestEditorLineInfoForm: TTestEditorLineInfoForm
     TabOrder = 0
   end
   object EditorTimer: TTimer
+    Enabled = False
     Interval = 1500
     OnTimer = EditorTimerTimer
     Left = 152
