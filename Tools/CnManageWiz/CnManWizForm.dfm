@@ -367,11 +367,13 @@ object CnManageWizardForm: TCnManageWizardForm
           end>
         ColumnClick = False
         HideSelection = False
+        ReadOnly = True
         RowSelect = True
         PopupMenu = pm1
         TabOrder = 1
         ViewStyle = vsReport
         OnChange = lvWizardsChange
+        OnDblClick = lvWizardsDblClick
         OnEdited = lvWizardsEdited
       end
     end

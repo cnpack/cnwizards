@@ -238,6 +238,7 @@ type
     procedure actShellMenuExecute(Sender: TObject);
     procedure btnAboutClick(Sender: TObject);
     procedure actlst1Update(Action: TBasicAction; var Handled: Boolean);
+    procedure lvWizardsDblClick(Sender: TObject);
   private
     FSaved: Boolean;
     function GetWizardChanged: Boolean;
@@ -279,6 +280,8 @@ var
 
   SCnAboutCaption: string = 'About';
   SCnMessageHint: string = 'Hint';
+  SCnEditItemCaption: string = 'Change File';
+  SCnEditItemPrompt: string = 'Enter a New File:';
   SCnConfirmDeleteFmt: string = 'Sure to UnRegister %s in %s ?';
   SCnChangedRefreshFmt: string = '%s Wizard Registration Information Changed, Discard and Reload?';
   SCnWizardChangedFmt: string = 'Below IDE(s) Wizard Registration Information Changed. Save?' + #13#10#13#10;
@@ -964,11 +967,34 @@ procedure TCnManageWizardForm.TranslateStrings;
 begin
   TranslateStr(SCnAboutCaption, 'SCnAboutCaption');
   TranslateStr(SCnMessageHint, 'SCnMessageHint');
+  TranslateStr(SCnEditItemCaption, 'SCnEditItemCaption');
+  TranslateStr(SCnEditItemPrompt, 'SCnEditItemPrompt');
   TranslateStr(SCnConfirmDeleteFmt, 'SCnConfirmDeleteFmt');
   TranslateStr(SCnChangedRefreshFmt, 'SCnChangedRefreshFmt');
   TranslateStr(SCnWizardChangedFmt, 'SCnWizardChangedFmt');
   TranslateStr(SCnConfirmExit, 'SCnConfirmExit');
   TranslateStr(SCnManageWizAbout, 'SCnManageWizAbout');
+end;
+
+procedure TCnManageWizardForm.lvWizardsDblClick(Sender: TObject);
+var
+  Item: TListItem;
+  S: string;
+begin
+  Item := lvWizards.Selected;
+  if (Item <> nil) and (Item.Data <> nil) and (Item.SubItems.Count > 0) then
+  begin
+    S := Item.SubItems[0];
+    S := CnInputBox(SCnEditItemCaption, SCnEditItemPrompt, S);
+
+    if (S <> '') and (UpperCase(S) <> UpperCase(Item.SubItems[0])) then
+    begin
+      Item.SubItems[0] := S;
+      TCnWizardItem(Item.Data).WizardPath := S;
+      IDEWizardsChanged[TCnCompiler(lstIDEs.ItemIndex)] := True;
+      FSaved := False;
+    end;
+  end;
 end;
 
 end.
