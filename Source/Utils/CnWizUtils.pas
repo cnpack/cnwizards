@@ -911,27 +911,8 @@ procedure CnOtaInsertTextIntoEditorAtPosW(const Text: string; Position: Longint;
 {* 在指定位置处插入文本，如果 SourceEditor 为空使用当前值，D2009 以上使用。}
 {$ENDIF}
 
-//procedure CnOtaConvertParserEditPosToEditViewGotoOffset(ParserLine: Integer;
-//  ParserCol: Integer; out EditOffSet: TOTACharPos);
-//{* 将解析器 Token 的 Line/Col 的 EditPos 转换成}
-
 procedure CnOtaGotoEditPosAndRepaint(EditView: IOTAEditView; EditPosLine: Integer; EditPosCol: Integer = 0);
 {* 光标跳至指定的 EditPos 并重画}
-
-//procedure CnOtaEditGotoPosAndRepaint(EditView: IOTAEditView; Line: Integer; Col: Integer = -1);
-//{* 封装的移动光标到 EditView 的指定行列，行以 1 开始，列以 1 开始，表示光标移动到第 Col 个字符后。
-//  D567 下需要的是 Ansi 字符偏移，D2005~2007 下需要的是 Utf8 字符偏移，D2009 以上需要 Ansi 偏移。
-//  由 CnOtaConvertParserPosToEditViewGotoOffset 将解析器的 Token 的 Line 和 Col 转换而来}
-//
-//procedure CnOtaEditGotoPosAndRepaintA(EditView: IOTAEditView; Line: Integer; Col: Integer = -1);
-//{* 移动光标到 EditView 的指定行列，行以 1 开始，列以 1 开始，表示光标移动到第 Col 个字符后
-//   实现上使用 EditPosition.MoveBOL 再 MoveRelative。注意，D567 的 Col 需要是 Ansi 字符偏移。
-//   D2005~2007 下的 Col 需要是 Utf8 字符偏移，也就是说如果 2005～2007 下一行都是汉字的话，
-//   则 Col 为1、2、3时光标放第一个汉字后，4、5、6时第二个后、依此类推。
-//   D2009 以上这个方法会产生混乱，暂无合适办法，所以不支持 Unicode IDE}
-//
-//procedure CnOtaEditGotoPosAndRepaintW(EditView: IOTAEditView; Line: Integer; Col: Integer = -1);
-//{* Unicode IDE 下移动光标到 EditView 的指定行列，行以 1 开始，列以 1 开始，表示光标移动到第 Col 个字符后}
 
 procedure CnOtaGotoPosition(Position: Longint; EditView: IOTAEditView = nil;
   Middle: Boolean = True);
@@ -6429,43 +6410,6 @@ end;
 
 {$ENDIF}
 
-// 封装的移动光标到 EditView 的指定行列
-//procedure CnOtaEditGotoPosAndRepaint(EditView: IOTAEditView; Line: Integer; Col: Integer);
-//begin
-//{$IFDEF UNICODE}
-//  CnOtaEditGotoPosAndRepaintW(EditView, Line, Col);
-//{$ELSE}
-//  CnOtaEditGotoPosAndRepaintA(EditView, Line, Col);
-//{$ENDIF}
-//end;
-
-//procedure CnOtaEditGotoPosAndRepaintA(EditView: IOTAEditView; Line: Integer; Col: Integer = -1);
-//var
-//  EditControl: TControl;
-//begin
-//  if EditView <> nil then
-//  begin
-//    if Line > 0 then
-//    begin
-//      EditView.Position.GotoLine(Line);
-//      if Col >= 0 then
-//      begin
-//        EditView.Position.MoveBOL;
-//        EditView.Position.MoveRelative(0, Col);
-//      end
-//      else
-//        EditView.Center(Line, 1);
-//
-//      CnOtaMakeSourceVisible(EditView.Buffer.FileName);
-//      EditView.Paint;
-//
-//      EditControl := GetCurrentEditControl;
-//      if (EditControl <> nil) and (EditControl is TWinControl) then
-//        (EditControl as TWinControl).SetFocus;
-//    end;
-//  end;
-//end;
-
 procedure CnOtaGotoEditPosAndRepaint(EditView: IOTAEditView; EditPosLine: Integer; EditPosCol: Integer);
 var
   EditControl: TControl;
@@ -6486,6 +6430,7 @@ begin
         EditView.Center(EditPosLine, 1);
 
       CnOtaMakeSourceVisible(EditView.Buffer.FileName);
+      EditView.MoveViewToCursor;
       EditView.Paint;
 
       EditControl := GetCurrentEditControl;
@@ -6773,7 +6718,7 @@ begin
     Text := EditControlWrapper.GetTextAtLine(EditControl, CharPos.Line);
     // 得到 Utf8 的 Text，转成 WideString 并截取再转回来求长度
     W := Utf8Decode(Text);
-    W := Copy(W, 1, CharPos.CharIndex - 1);
+    W := Copy(W, 1, CharPos.CharIndex);
     CharPos.CharIndex := Length(Utf8Encode(W));
   end;
   {$ELSE}
