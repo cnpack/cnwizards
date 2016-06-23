@@ -102,9 +102,9 @@ type
     {* 从本行开始数的字符位置，从零开始，由 ParseSource 计算而来 }
 
     property EditCol: Integer read FEditCol write FEditCol;
-    {* 所在列，从一开始，由外界转换而来 }
+    {* 所在列，从一开始，由外界转换而来，一般对应 EditPos }
     property EditLine: Integer read FEditLine write FEditLine;
-    {* 所在行，从一开始，由外界转换而来 }
+    {* 所在行，从一开始，由外界转换而来，一般对应 EditPos }
 
     property ItemIndex: Integer read FItemIndex;
     {* 在整个 Parser 中的序号 }

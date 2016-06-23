@@ -911,12 +911,27 @@ procedure CnOtaInsertTextIntoEditorAtPosW(const Text: string; Position: Longint;
 {* 在指定位置处插入文本，如果 SourceEditor 为空使用当前值，D2009 以上使用。}
 {$ENDIF}
 
-procedure CnOtaEditGotoPosAndRepaint(EditView: IOTAEditView; Line: Integer; Col: Integer = -1);
-{* 移动光标到 EditView 的指定行列，行以 1 开始，列以 1 开始，表示光标移动到第 Col 个字符后
-   实现上使用 EditPosition.MoveBOL 再 MoveRelative。注意，D567 的 Col 需要是 Ansi 字符偏移。
-   D2005~2007 下的 Col 需要是 Utf8 字符偏移，也就是说如果 2005～2007 下一行都是汉字的话，
-   则 Col 为1、2、3时光标放第一个汉字后，4、5、6时第二个后、依此类推。
-   D2009 以上这个方法会产生混乱，暂无合适办法，或许可以 CursorPos 赋值？}
+//procedure CnOtaConvertParserEditPosToEditViewGotoOffset(ParserLine: Integer;
+//  ParserCol: Integer; out EditOffSet: TOTACharPos);
+//{* 将解析器 Token 的 Line/Col 的 EditPos 转换成}
+
+procedure CnOtaGotoEditPosAndRepaint(EditView: IOTAEditView; EditPosLine: Integer; EditPosCol: Integer = 0);
+{* 光标跳至指定的 EditPos 并重画}
+
+//procedure CnOtaEditGotoPosAndRepaint(EditView: IOTAEditView; Line: Integer; Col: Integer = -1);
+//{* 封装的移动光标到 EditView 的指定行列，行以 1 开始，列以 1 开始，表示光标移动到第 Col 个字符后。
+//  D567 下需要的是 Ansi 字符偏移，D2005~2007 下需要的是 Utf8 字符偏移，D2009 以上需要 Ansi 偏移。
+//  由 CnOtaConvertParserPosToEditViewGotoOffset 将解析器的 Token 的 Line 和 Col 转换而来}
+//
+//procedure CnOtaEditGotoPosAndRepaintA(EditView: IOTAEditView; Line: Integer; Col: Integer = -1);
+//{* 移动光标到 EditView 的指定行列，行以 1 开始，列以 1 开始，表示光标移动到第 Col 个字符后
+//   实现上使用 EditPosition.MoveBOL 再 MoveRelative。注意，D567 的 Col 需要是 Ansi 字符偏移。
+//   D2005~2007 下的 Col 需要是 Utf8 字符偏移，也就是说如果 2005～2007 下一行都是汉字的话，
+//   则 Col 为1、2、3时光标放第一个汉字后，4、5、6时第二个后、依此类推。
+//   D2009 以上这个方法会产生混乱，暂无合适办法，所以不支持 Unicode IDE}
+//
+//procedure CnOtaEditGotoPosAndRepaintW(EditView: IOTAEditView; Line: Integer; Col: Integer = -1);
+//{* Unicode IDE 下移动光标到 EditView 的指定行列，行以 1 开始，列以 1 开始，表示光标移动到第 Col 个字符后}
 
 procedure CnOtaGotoPosition(Position: Longint; EditView: IOTAEditView = nil;
   Middle: Boolean = True);
@@ -956,20 +971,23 @@ function CnOtaGetCurrentCharPosFromCursorPosForParser(out CharPos: TOTACharPos):
 
 procedure CnPasParserParseSource(Parser: TCnGeneralPasStructParser;
   Stream: TMemoryStream; AIsDpr, AKeyOnly: Boolean);
-{* 封装的解析器解析 Pascal 代码的过程}
+{* 封装的解析器解析 Pascal 代码的过程，不包括对当前光标的处理}
 
 procedure CnCppParserParseSource(Parser: TCnGeneralCppStructParser;
   Stream: TMemoryStream; CurrLine: Integer = 0;
   CurCol: Integer = 0; ParseCurrent: Boolean = False);
-{* 封装的解析器解析 Cpp 代码的过程}
+{* 封装的解析器解析 Cpp 代码的过程，包括了对当前光标的处理。
+   Line 和 Col 为 Cpp 解析器使用的 Ansi/Wide/Wide 偏移，1 开始}
 
 procedure CnConvertPasTokenPositionToCharPos(EditViewPtr: Pointer;
   Token: TCnGeneralPasToken; out CharPos: TOTACharPos);
-{* 封装的把 Pascal Token 解析出来的位置参数转换成 IDE 所需的 CharPos 的过程}
+{* 封装的把 Pascal Token 解析出来的 Ansi/Wide 位置参数转换成 IDE 所需的 CharPos 的过程
+  输出 CharPos，以备让 EditView 转换成 EditPos}
 
 procedure CnConvertCppTokenPositionToCharPos(EditViewPtr: Pointer;
   Token: TCnGeneralCppToken; out CharPos: TOTACharPos);
-{* 封装的把 Cpp Token 解析出来的位置参数转换成 IDE 所需的 CharPos 的过程}
+{* 封装的把 Cpp Token 解析出来的 Ansi/Wide 位置参数转换成 IDE 所需的 CharPos 的过程
+  输出 CharPos，以备让 EditView 转换成 EditPos}
 
 //==============================================================================
 // 窗体操作相关函数
@@ -6411,22 +6429,61 @@ end;
 
 {$ENDIF}
 
-procedure CnOtaEditGotoPosAndRepaint(EditView: IOTAEditView; Line: Integer; Col: Integer = -1);
+// 封装的移动光标到 EditView 的指定行列
+//procedure CnOtaEditGotoPosAndRepaint(EditView: IOTAEditView; Line: Integer; Col: Integer);
+//begin
+//{$IFDEF UNICODE}
+//  CnOtaEditGotoPosAndRepaintW(EditView, Line, Col);
+//{$ELSE}
+//  CnOtaEditGotoPosAndRepaintA(EditView, Line, Col);
+//{$ENDIF}
+//end;
+
+//procedure CnOtaEditGotoPosAndRepaintA(EditView: IOTAEditView; Line: Integer; Col: Integer = -1);
+//var
+//  EditControl: TControl;
+//begin
+//  if EditView <> nil then
+//  begin
+//    if Line > 0 then
+//    begin
+//      EditView.Position.GotoLine(Line);
+//      if Col >= 0 then
+//      begin
+//        EditView.Position.MoveBOL;
+//        EditView.Position.MoveRelative(0, Col);
+//      end
+//      else
+//        EditView.Center(Line, 1);
+//
+//      CnOtaMakeSourceVisible(EditView.Buffer.FileName);
+//      EditView.Paint;
+//
+//      EditControl := GetCurrentEditControl;
+//      if (EditControl <> nil) and (EditControl is TWinControl) then
+//        (EditControl as TWinControl).SetFocus;
+//    end;
+//  end;
+//end;
+
+procedure CnOtaGotoEditPosAndRepaint(EditView: IOTAEditView; EditPosLine: Integer; EditPosCol: Integer);
 var
   EditControl: TControl;
+  EditPos: TOTAEditPos; // 都是 1 开始
 begin
   if EditView <> nil then
   begin
-    if Line > 0 then
+    if EditPosLine > 0 then
     begin
-      EditView.Position.GotoLine(Line);
-      if Col >= 0 then
-      begin
-        EditView.Position.MoveBOL;
-        EditView.Position.MoveRelative(0, Col);
-      end
+      EditPos.Line := EditPosLine;
+      if EditPosCol <= 0 then
+        EditPos.Col := 1
       else
-        EditView.Center(Line, 1);
+        EditPos.Col := EditPosCol;
+
+      EditView.CursorPos := EditPos;
+      if EditPosCol <= 0 then
+        EditView.Center(EditPosLine, 1);
 
       CnOtaMakeSourceVisible(EditView.Buffer.FileName);
       EditView.Paint;
@@ -6689,17 +6746,36 @@ begin
 {$ENDIF}
 end;
 
-// 封装的把 Pascal Token 解析出来的位置参数转换成 IDE 所需的 CharPos 的过程
+// 封装的把 Pascal Token 解析出来的 Ansi/Wide 位置参数转换成 IDE 所需的 CharPos 的过程
+// 输出 CharPos，以备让 EditView 转换成 EditPos
 procedure CnConvertPasTokenPositionToCharPos(EditViewPtr: Pointer;
   Token: TCnGeneralPasToken; out CharPos: TOTACharPos);
+{$IFDEF IDE_STRING_ANSI_UTF8}
+var
+  Text: string;
+  W: WideString;
+  EditControl: TControl;
+{$ENDIF}
 begin
   if Token = nil then
     Exit;
 
   CharPos.Line := Token.LineNumber + 1; // 0 开始变成 1 开始
+
 {$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
   {$IFDEF IDE_STRING_ANSI_UTF8}
-  // TODO: CharPos Need Utf8?
+  CharPos.CharIndex := Token.CharIndex; // 先使用 0 开始的 WideChar 偏移
+
+  // CharPos 需要 Utf8，把基于 WideChar 的 CharIndex 转换过来
+  EditControl := EditControlWrapper.GetEditControl(IOTAEditView(EditViewPtr));
+  if EditControl <> nil then
+  begin
+    Text := EditControlWrapper.GetTextAtLine(EditControl, CharPos.Line);
+    // 得到 Utf8 的 Text，转成 WideString 并截取再转回来求长度
+    W := Utf8Decode(Text);
+    W := Copy(W, 1, CharPos.CharIndex - 1);
+    CharPos.CharIndex := Length(Utf8Encode(W));
+  end;
   {$ELSE}
   CharPos.CharIndex := Token.AnsiIndex; // 使用 WideToken 的 Ansi 偏移，都是 0 开始
   {$ENDIF}
@@ -6717,8 +6793,43 @@ end;
 // 封装的把 Cpp Token 解析出来的位置参数转换成 IDE 所需的 CharPos 的过程
 procedure CnConvertCppTokenPositionToCharPos(EditViewPtr: Pointer;
   Token: TCnGeneralCppToken; out CharPos: TOTACharPos);
+{$IFDEF IDE_STRING_ANSI_UTF8}
+var
+  Text: string;
+  W: WideString;
+  EditControl: TControl;
+{$ENDIF}
 begin
+  if Token = nil then
+    Exit;
 
+  CharPos.Line := Token.LineNumber + 1; // 0 开始变成 1 开始
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+  CharPos.CharIndex := Token.CharIndex; // 先使用 0 开始的 WideChar 偏移
+
+  // CharPos 需要 Utf8，把基于 WideChar 的 CharIndex 转换过来
+  EditControl := EditControlWrapper.GetEditControl(IOTAEditView(EditViewPtr));
+  if EditControl <> nil then
+  begin
+    Text := EditControlWrapper.GetTextAtLine(EditControl, CharPos.Line);
+    // 得到 Utf8 的 Text，转成 WideString 并截取再转回来求长度
+    W := Utf8Decode(Text);
+    W := Copy(W, 1, CharPos.CharIndex - 1);
+    CharPos.CharIndex := Length(Utf8Encode(W));
+  end;
+  {$ELSE}
+  CharPos.CharIndex := Token.AnsiIndex; // 使用 WideToken 的 Ansi 偏移，都是 0 开始
+  {$ENDIF}
+{$ELSE}
+  CharPos.CharIndex := Token.CharIndex; // 均是 Ansi 偏移，都是 0 开始
+{$ENDIF}
+
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('CnConvertCppTokenPositionToCharPos %d:%d/(A)%d to %d:%d - %s.',
+    [Token.LineNumber, Token.CharIndex, {$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+     Token.AnsiIndex, {$ELSE} 0, {$ENDIF} CharPos.Line, CharPos.CharIndex, Token.Token])
+{$ENDIF}
 end;
 
 //==============================================================================

@@ -55,7 +55,7 @@ uses
   StdCtrls, IniFiles, Menus, ToolsAPI, CnWizUtils, CnConsts, CnCommon,
   CnWizEditFiler, CnEditorWizard, CnWizConsts, CnEditorCodeTool, CnWizIdeUtils,
   CnSourceHighlight, CnPasCodeParser, CnEditControlWrapper, mPasLex,
-  CnCppCodeParser, mwBCBTokenList, CnFastList;
+  CnCppCodeParser, mwBCBTokenList, CnFastList {$IFDEF BDS}, CnWizMethodHook {$ENDIF};
 
 type
 
@@ -187,9 +187,9 @@ implementation
 
 {$IFDEF CNWIZARDS_CNEDITORWIZARD}
 
-{$IFDEF BDS}
+{$IFDEF DEBUG}
 uses
-  CnWizMethodHook;
+  CnDebug;
 {$ENDIF}
 
 {$IFDEF BDS}
@@ -198,32 +198,6 @@ begin
   Result := [];
 end;
 {$ENDIF}
-
-procedure EditGoPosAndRepaint(EditView: IOTAEditView; Line: Integer; Col: Integer = -1);
-var
-  EditControl: TControl;
-begin
-  if EditView <> nil then
-  begin
-    if Line > 0 then
-    begin
-      EditView.Position.GotoLine(Line);
-      if Col >= 0 then
-      begin
-        EditView.Position.MoveBOL;
-        EditView.Position.MoveRelative(0, Col);
-      end
-      else
-        EditView.Center(Line, 1);
-      CnOtaMakeSourceVisible(EditView.Buffer.FileName);
-      EditView.Paint;
-
-      EditControl := GetCurrentEditControl;
-      if (EditControl <> nil) and (EditControl is TWinControl) then
-        (EditControl as TWinControl).SetFocus;
-    end;
-  end;
-end;
 
 { TCnEditorJumpMessage }
 
@@ -343,7 +317,8 @@ begin
   Result := SCnEditorPrevMessageMenuHint;
 end;
 
-procedure ParseParseGotoLine(TokenKind: TTokenKind; const ErrorMsg: string);
+// 解析 Pascal 代码并跳至第一个 Token 所在的行。由于只处理行，因此无需 Unicode 处理
+procedure ParsePasAndGotoLine(TokenKind: TTokenKind; const ErrorMsg: string);
 var
   LineNum: Integer;
   View: IOTAEditView;
@@ -390,7 +365,7 @@ begin
     end;
 
     if LineNum > 0 then
-      EditGoPosAndRepaint(View, LineNum)
+      CnOtaGotoEditPosAndRepaint(View, LineNum)
     else
       ErrorDlg(ErrorMsg);
   finally
@@ -432,7 +407,7 @@ end;
 
 procedure TCnEditorJumpIntf.Execute;
 begin
-  ParseParseGotoLine(tkInterface, SCnProcListErrorNoIntf);
+  ParsePasAndGotoLine(tkInterface, SCnProcListErrorNoIntf);
 end;
 
 function TCnEditorJumpIntf.GetState: TWizardState;
@@ -495,7 +470,7 @@ end;
 
 procedure TCnEditorJumpImpl.Execute;
 begin
-  ParseParseGotoLine(tkImplementation, SCnProcListErrorNoImpl);
+  ParsePasAndGotoLine(tkImplementation, SCnProcListErrorNoImpl);
 end;
 
 function TCnEditorJumpImpl.GetState: TWizardState;
@@ -567,13 +542,13 @@ var
   CompDirectiveInfo: TCompDirectiveInfo;
   EditControl: TControl;
   EditView: IOTAEditView;
-  PasParser: TCnPasStructureParser;
-  CppParser: TCnCppStructureParser;
+  PasParser: TCnGeneralPasStructParser;
+  CppParser: TCnGeneralCppStructParser;
   Stream: TMemoryStream;
   CharPos: TOTACharPos;
   EditPos: TOTAEditPos;
   I: Integer;
-  DestToken: TCnPasToken;
+  DestToken: TCnGeneralPasToken;
   TokenIndex: Integer;
   CurIsPas, CurIsCpp: Boolean;
 begin
@@ -598,29 +573,28 @@ begin
   CppParser := nil;
 
   if CurIsPas then
-    PasParser := TCnPasStructureParser.Create;
+    PasParser := TCnGeneralPasStructParser.Create;
   if CurIsCpp then
-    CppParser := TCnCppStructureParser.Create;
+    CppParser := TCnGeneralCppStructParser.Create;
 
   Stream := TMemoryStream.Create;
   try
-    CnOtaSaveEditorToStream(EditView.Buffer, Stream);
+    CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
+
     // 解析当前显示的源文件
     if CurIsPas then
-      PasParser.ParseSource(PAnsiChar(Stream.Memory),
-        IsDpr(EditView.Buffer.FileName) or IsInc(EditView.Buffer.FileName), False);
+      CnPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName)
+        or IsInc(EditView.Buffer.FileName), False);
     if CurIsCpp then
-      CppParser.ParseSource(PAnsiChar(Stream.Memory), Stream.Size,
-        EditView.CursorPos.Line, EditView.CursorPos.Col);
+      CnCppParserParseSource(CppParser, Stream, EditView.CursorPos.Line, EditView.CursorPos.Col);
   finally
     Stream.Free;
   end;
 
   if CurIsPas then
   begin
-    // 解析后再查找当前光标所在的块
-    EditPos := EditView.CursorPos;
-    EditView.ConvertPos(True, EditPos, CharPos);
+    // 解析后再查找当前光标所在的块，不直接使用 CursorPos，因为 Parser 所需偏移可能不同
+    CnOtaGetCurrentCharPosFromCursorPosForParser(CharPos);
     PasParser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
   end;
 
@@ -678,12 +652,12 @@ begin
     begin
       for I := 0 to BlockMatchInfo.KeyCount - 1 do
       begin
-        // 转换成 Col 与 Line
-        CharPos := OTACharPos(BlockMatchInfo.KeyTokens[I].CharIndex,
-          BlockMatchInfo.KeyTokens[I].LineNumber + 1);
+        // 将解析器解析出来的字符偏移转换成 CharPos
+        CnConvertPasTokenPositionToCharPos(Pointer(EditView), BlockMatchInfo.KeyTokens[I], CharPos);
+        // 再把 CharPos 转换成 EditPos
+        CnOtaConvertEditViewCharPosToEditPos(Pointer(EditView),
+          CharPos.Line, CharPos.CharIndex, EditPos);
 
-        EditView.ConvertPos(False, EditPos, CharPos);
-        // 以上这句在 D2009 中的结果可能会有偏差，暂无办法
         BlockMatchInfo.KeyTokens[I].EditCol := EditPos.Col;
         BlockMatchInfo.KeyTokens[I].EditLine := EditPos.Line;
       end;
@@ -694,12 +668,13 @@ begin
     begin
       for I := 0 to BlockMatchInfo.CompDirectiveTokenCount - 1 do
       begin
-        // 转换成 Col 与 Line
-        CharPos := OTACharPos(BlockMatchInfo.CompDirectiveTokens[I].CharIndex,
-          BlockMatchInfo.CompDirectiveTokens[I].LineNumber + 1);
+        // 将解析器解析出来的字符偏移转换成 CharPos
+        CnConvertPasTokenPositionToCharPos(Pointer(EditView),
+          BlockMatchInfo.CompDirectiveTokens[I], CharPos);
+        // 再把 CharPos 转换成 EditPos
+        CnOtaConvertEditViewCharPosToEditPos(Pointer(EditView),
+          CharPos.Line, CharPos.CharIndex, EditPos);
 
-        EditView.ConvertPos(False, EditPos, CharPos);
-        // 以上这句在 D2009 中的结果可能会有偏差，暂无办法
         BlockMatchInfo.CompDirectiveTokens[I].EditCol := EditPos.Col;
         BlockMatchInfo.CompDirectiveTokens[I].EditLine := EditPos.Line;
       end;
@@ -714,6 +689,11 @@ begin
     DestToken := nil;
     if LineInfo.CurrentPair <> nil then
     begin
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('Jump Matching. Current Token %d:%d - %s.', [LineInfo.CurrentToken.EditLine,
+        LineInfo.CurrentToken.EditCol, LineInfo.CurrentToken.Token]);
+{$ENDIF}
+
       if LineInfo.CurrentToken = LineInfo.CurrentPair.StartToken then
       begin
         if LineInfo.CurrentPair.MiddleCount > 0 then
@@ -737,6 +717,11 @@ begin
     end
     else if CompDirectiveInfo.CurrentPair <> nil then
     begin
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('Jump Matching. Current CompDirective Token %d:%d - %s.', [CompDirectiveInfo.CurrentToken.EditLine,
+        CompDirectiveInfo.CurrentToken.EditCol, CompDirectiveInfo.CurrentToken.Token]);
+{$ENDIF}
+
       if CompDirectiveInfo.CurrentToken = CompDirectiveInfo.CurrentPair.StartToken then
       begin
         if CompDirectiveInfo.CurrentPair.MiddleCount > 0 then
@@ -760,7 +745,14 @@ begin
     end;
 
     if DestToken <> nil then
-      EditGoPosAndRepaint(EditView, DestToken.EditLine, DestToken.EditCol - 1);
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('Jump Matching. Destination Token %d:%d - %s.', [DestToken.EditLine,
+        DestToken.EditCol, DestToken.Token]);
+{$ENDIF}
+
+      CnOtaGotoEditPosAndRepaint(EditView, DestToken.EditLine, DestToken.EditCol);
+    end;
   finally
     FreeAndNil(BlockMatchInfo);
     FreeAndNil(LineInfo);
@@ -801,17 +793,17 @@ procedure JumpIdentifierNearby(Prev: Boolean);
 var
   EditControl: TControl;
   EditView: IOTAEditView;
-  Parser: TCnPasStructureParser;
-  CppParser: TCnCppStructureParser;
+  PasParser: TCnGeneralPasStructParser;
+  CppParser: TCnGeneralCppStructParser;
   Stream: TMemoryStream;
-  CharPos: TOTACharPos;
   EditPos: TOTAEditPos;
+  CharPos: TOTACharPos;
   I: Integer;
-  CurrentToken: TCnPasToken;
+  CurrentToken: TCnGeneralPasToken;
   CurrentTokenName: AnsiString;
   CurIsPas, CurIsCpp: Boolean;
   CurrentTokenIndex, StartIdx, EndIdx: Integer;
-  
+
   procedure SetParseRange(MaxCount: Integer);
   begin
     if Prev then
@@ -824,6 +816,16 @@ var
       StartIdx := CurrentTokenIndex + 1;
       EndIdx := MaxCount;
     end;
+  end;
+
+  function _IsCurrentToken(AView: Pointer; AControl: TControl;
+    Token: TCnGeneralPasToken): Boolean;
+  begin
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+    Result := IsCurrentTokenW(AView, AControl, Token);
+{$ELSE}
+    Result := IsCurrentToken(AView, AControl, Token);
+{$ENDIF}
   end;
 
 begin
@@ -844,40 +846,42 @@ begin
   if (not CurIsCpp) and (not CurIsPas) then
     Exit;
 
-  Parser := nil;
+  PasParser := nil;
   CppParser := nil;
 
   if CurIsPas then
-    Parser := TCnPasStructureParser.Create;
+    PasParser := TCnGeneralPasStructParser.Create;
   if CurIsCpp then
-    CppParser := TCnCppStructureParser.Create;
+    CppParser := TCnGeneralCppStructParser.Create;
 
   CurrentToken := nil;
   Stream := TMemoryStream.Create;
   try
-    CnOtaSaveEditorToStream(EditView.Buffer, Stream);
+    CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
+
     // 解析当前显示的源文件
     if CurIsPas then
     begin
-      Parser.ParseSource(PAnsiChar(Stream.Memory),
-        IsDpr(EditView.Buffer.FileName) or IsInc(EditView.Buffer.FileName), False);
+      CnPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName)
+        or IsInc(EditView.Buffer.FileName), False);
 
-      for I := 0 to Parser.Count - 1 do
+      for I := 0 to PasParser.Count - 1 do
       begin
-        CharPos := OTACharPos(Parser.Tokens[I].CharIndex, Parser.Tokens[I].LineNumber + 1);
-        EditView.ConvertPos(False, EditPos, CharPos);
-{$IFDEF BDS2009_UP}
-        EditPos.Col := Parser.Tokens[I].CharIndex + 1;
-{$ENDIF}
-        Parser.Tokens[I].EditCol := EditPos.Col;
-        Parser.Tokens[I].EditLine := EditPos.Line;
+        // 将解析器解析出来的字符偏移转换成 CharPos
+        CnConvertPasTokenPositionToCharPos(Pointer(EditView), PasParser.Tokens[I], CharPos);
+        // 再把 CharPos 转换成 EditPos
+        CnOtaConvertEditViewCharPosToEditPos(Pointer(EditView),
+          CharPos.Line, CharPos.CharIndex, EditPos);
 
-        if (Parser.Tokens[I].TokenID = tkIdentifier) and // 此处判断不支持双字节字符
-          IsCurrentToken(Pointer(EditView), EditControl, Parser.Tokens[I]) then
+        PasParser.Tokens[I].EditCol := EditPos.Col;
+        PasParser.Tokens[I].EditLine := EditPos.Line;
+
+        if (PasParser.Tokens[I].TokenID = tkIdentifier) and // 此处判断不支持双字节字符
+          _IsCurrentToken(Pointer(EditView), EditControl, PasParser.Tokens[I]) then
         begin
           if CurrentToken = nil then
           begin
-            CurrentToken := Parser.Tokens[I];
+            CurrentToken := PasParser.Tokens[I];
             CurrentTokenName := CurrentToken.Token;
             CurrentTokenIndex := I;
             // Can't Break for Parser Tokens Line/Col need to assigned.
@@ -885,18 +889,18 @@ begin
         end;
       end;
 
-      SetParseRange(Parser.Count);
+      SetParseRange(PasParser.Count);
       if CurrentTokenName <> '' then
       begin
         if StartIdx > EndIdx then
         begin
           for I := StartIdx downto EndIdx do // Search for previous
           begin
-            if (Parser.Tokens[I].TokenID = tkIdentifier) and
-              CheckTokenMatch(Parser.Tokens[I].Token, CurrentTokenName, False) then
+            if (PasParser.Tokens[I].TokenID = tkIdentifier) and
+              CheckTokenMatch(PasParser.Tokens[I].Token, CurrentTokenName, False) then
             begin
               // Found. Jump here and Exit;
-              EditGoPosAndRepaint(EditView, Parser.Tokens[I].EditLine, Parser.Tokens[I].EditCol - 1);
+              CnOtaGotoEditPosAndRepaint(EditView, PasParser.Tokens[I].EditLine, PasParser.Tokens[I].EditCol);
               Exit;
             end;
           end;
@@ -905,11 +909,11 @@ begin
         begin
           for I := StartIdx to EndIdx do // Search for Next
           begin
-            if (Parser.Tokens[I].TokenID = tkIdentifier) and
-              CheckTokenMatch(Parser.Tokens[I].Token, CurrentTokenName, False) then
+            if (PasParser.Tokens[I].TokenID = tkIdentifier) and
+              CheckTokenMatch(PasParser.Tokens[I].Token, CurrentTokenName, False) then
             begin
               // Found. Jump here and Exit;
-              EditGoPosAndRepaint(EditView, Parser.Tokens[I].EditLine, Parser.Tokens[I].EditCol - 1);
+              CnOtaGotoEditPosAndRepaint(EditView, PasParser.Tokens[I].EditLine, PasParser.Tokens[I].EditCol);
               Exit;
             end;
           end;
@@ -919,19 +923,24 @@ begin
 
     if CurIsCpp then
     begin
-      CppParser.ParseSource(PAnsiChar(Stream.Memory), Stream.Size,
-        EditView.CursorPos.Line, EditView.CursorPos.Col);
+      CnOtaGetCurrentCharPosFromCursorPosForParser(CharPos);
+      // 将当前光标位置转换成 Ansi/Utf16/Utf16 供 CppParser 使用
+      CnCppParserParseSource(CppParser, Stream, CharPos.Line, CharPos.CharIndex + 1);
+      // 转出来的 CharIndex 是 0 开始，但 CppParser 要求 1 开始，所以加一。
 
       for I := 0 to CppParser.Count - 1 do
       begin
-        CharPos := OTACharPos(CppParser.Tokens[I].CharIndex, CppParser.Tokens[I].LineNumber + 1);
+        // 将解析器解析出来的字符偏移转换成 CharPos
+        CnConvertPasTokenPositionToCharPos(Pointer(EditView), CppParser.Tokens[I], CharPos);
+        // 再把 CharPos 转换成 EditPos
+        CnOtaConvertEditViewCharPosToEditPos(Pointer(EditView),
+          CharPos.Line, CharPos.CharIndex, EditPos);
 
-        EditView.ConvertPos(False, EditPos, CharPos);
         CppParser.Tokens[I].EditCol := EditPos.Col;
         CppParser.Tokens[I].EditLine := EditPos.Line;
 
         if (CppParser.Tokens[I].CppTokenKind = ctkidentifier) and
-          IsCurrentToken(Pointer(EditView), EditControl, CppParser.Tokens[I]) then
+          _IsCurrentToken(Pointer(EditView), EditControl, CppParser.Tokens[I]) then
         begin
           if CurrentToken = nil then
           begin
@@ -954,7 +963,7 @@ begin
               CheckTokenMatch(CppParser.Tokens[I].Token, CurrentTokenName, True) then
             begin
               // Found. Jump here and Exit;
-              EditGoPosAndRepaint(EditView, CppParser.Tokens[I].EditLine, CppParser.Tokens[I].EditCol - 1);
+              CnOtaGotoEditPosAndRepaint(EditView, CppParser.Tokens[I].EditLine, CppParser.Tokens[I].EditCol);
               Exit;
             end;
           end;
@@ -967,7 +976,7 @@ begin
               CheckTokenMatch(CppParser.Tokens[I].Token, CurrentTokenName, True) then
             begin
               // Found. Jump here and Exit;
-              EditGoPosAndRepaint(EditView, CppParser.Tokens[I].EditLine, CppParser.Tokens[I].EditCol - 1);
+              CnOtaGotoEditPosAndRepaint(EditView, CppParser.Tokens[I].EditLine, CppParser.Tokens[I].EditCol);
               Exit;
             end;
           end;

@@ -178,7 +178,7 @@ begin
     S := CnInputBox('Enter Column', 'Enter Column Value:', '3');
     Col := StrToIntDef(S, 3);
 
-    CnOtaEditGotoPosAndRepaint(EditView, Line, Col);
+    CnOtaGotoEditPosAndRepaint(EditView, Line, Col);
   end;
 end;
 
