@@ -1239,15 +1239,7 @@ begin
   {$ENDIF}
 
         CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
-{$IFDEF BDS}
-        // 解析当前显示的源文件
-        CppParser.ParseSource(PWideChar(Stream.Memory), Stream.Size,
-          EditView.CursorPos.Line, EditView.CursorPos.Col);
-{$ELSE}
-        // 解析当前显示的源文件
-        CppParser.ParseSource(PAnsiChar(Stream.Memory), Stream.Size,
-          EditView.CursorPos.Line, EditView.CursorPos.Col);
-{$ENDIF}
+        CnCppParserParseSource(CppParser, Stream, EditView.CursorPos.Line, EditView.CursorPos.Col);
       finally
         Stream.Free;
       end;
@@ -1283,20 +1275,12 @@ begin
 
       for I := 0 to KeyCount - 1 do
       begin
-        // 转换成 Col 与 Line
-{$IFNDEF BDS2009_UP}
-        CharPos := OTACharPos(KeyTokens[I].CharIndex, KeyTokens[I].LineNumber + 1);
-        try
-          EditView.ConvertPos(False, EditPos, CharPos);
-        except
-          Continue; // D5/6下ConvertPos在只有一个大于号时会出错，只能屏蔽
-        end;
-        // 以上这句 ConvertPos 在 D2009 或以上中带汉字时的结果可能会有偏差，
-        // 因此直接采用下面 CharIndex + 1 的方式，但对 Tab 键展开缺乏处理。
-{$ELSE}
-        EditPos.Line := KeyTokens[I].LineNumber;
-        EditPos.Col := KeyTokens[I].CharIndex + 1;
-{$ENDIF}
+        // 将解析器解析出来的字符偏移转换成 CharPos
+        CnConvertPasTokenPositionToCharPos(Pointer(EditView), KeyTokens[I], CharPos);
+        // 再把 CharPos 转换成 EditPos
+        CnOtaConvertEditViewCharPosToEditPos(Pointer(EditView),
+          CharPos.Line, CharPos.CharIndex, EditPos);
+
         KeyTokens[I].EditCol := EditPos.Col;
         KeyTokens[I].EditLine := EditPos.Line;
       end;
@@ -1336,29 +1320,21 @@ begin
   {$ENDIF}
 
         CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
-{$IFDEF BDS}
+
         {$IFDEF BDS2009_UP}
         PasParser.TabWidth := FHighlight.FTabWidth;
         {$ENDIF}
-        // 解析当前显示的源文件，需要高亮当前标识符时不设置KeyOnly
-        PasParser.ParseSource(PWideChar(Stream.Memory),
-          IsDpr(EditView.Buffer.FileName),
-          not (FHighlight.CurrentTokenHighlight or FHighlight.HighlightFlowStatement));
 
-{$ELSE}
         // 解析当前显示的源文件，需要高亮当前标识符时不设置KeyOnly
-        PasParser.ParseSource(PAnsiChar(Stream.Memory),
-          IsDpr(EditView.Buffer.FileName),
+        CnPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName),
           not (FHighlight.CurrentTokenHighlight or FHighlight.HighlightFlowStatement));
-{$ENDIF}
       finally
         Stream.Free;
       end;
     end;
 
-    // 解析后再查找当前光标所在的块
-    EditPos := EditView.CursorPos;
-    EditView.ConvertPos(True, EditPos, CharPos);
+    // 解析后再查找当前光标所在的块，不直接使用 CursorPos，因为 Parser 所需偏移可能不同
+    CnOtaGetCurrentCharPosFromCursorPosForParser(CharPos);
     PasParser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
     FCurrentBlockSearched := True;
 
@@ -1411,16 +1387,12 @@ begin
     begin
       for I := 0 to KeyCount - 1 do
       begin
-        // 转换成 Col 与 Line
-{$IFNDEF BDS2009_UP}
-        CharPos := OTACharPos(KeyTokens[I].CharIndex, KeyTokens[I].LineNumber + 1);
-        EditView.ConvertPos(False, EditPos, CharPos);
-        // TODO: 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，
-        // 因此直接采用下面 CharIndex + 1 的方式，Parser 本身已对 Tab 键展开。
-{$ELSE}
-        EditPos.Line := KeyTokens[I].LineNumber + 1;
-        EditPos.Col := KeyTokens[I].CharIndex + 1;
-{$ENDIF}
+        // 将解析器解析出来的字符偏移转换成 CharPos
+        CnConvertPasTokenPositionToCharPos(Pointer(EditView), KeyTokens[I], CharPos);
+        // 再把 CharPos 转换成 EditPos
+        CnOtaConvertEditViewCharPosToEditPos(Pointer(EditView),
+          CharPos.Line, CharPos.CharIndex, EditPos);
+
         KeyTokens[I].EditCol := EditPos.Col;
         KeyTokens[I].EditLine := EditPos.Line;
       end;
@@ -1533,8 +1505,8 @@ begin
     begin
       if not FCurrentBlockSearched then   // 找当前块，供转换Token位置
       begin
-        EditPos := EditView.CursorPos;
-        EditView.ConvertPos(True, EditPos, CharPos);
+        // 解析后再查找当前光标所在的块，不直接使用 CursorPos，因为 Parser 所需偏移可能不同
+        CnOtaGetCurrentCharPosFromCursorPosForParser(CharPos);
         PasParser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
       end;
 
@@ -1555,15 +1527,12 @@ begin
       // 无当前过程或高亮所有内容时搜索当前所有标识符，避免只高亮光标出于当前过程内的问题
       for I := 0 to PasParser.Count - 1 do
       begin
-        CharPos := OTACharPos(PasParser.Tokens[I].CharIndex, PasParser.Tokens[I].LineNumber + 1);
+        // 将解析器解析出来的字符偏移转换成 CharPos
+        CnConvertPasTokenPositionToCharPos(Pointer(EditView), PasParser.Tokens[I], CharPos);
+        // 再把 CharPos 转换成 EditPos
+        CnOtaConvertEditViewCharPosToEditPos(Pointer(EditView),
+          CharPos.Line, CharPos.CharIndex, EditPos);
 
-        // ConvertPos 在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
-{$IFDEF BDS2009_UP}
-        EditPos.Line := CharPos.Line;
-        EditPos.Col := PasParser.Tokens[I].CharIndex + 1;
-{$ELSE}
-        EditView.ConvertPos(False, EditPos, CharPos);
-{$ENDIF}
         PasParser.Tokens[I].EditCol := EditPos.Col;
         PasParser.Tokens[I].EditLine := EditPos.Line;
       end;
@@ -1600,9 +1569,12 @@ begin
     // 将解析出的流程控制的Token 按范围规定加入 FFlowTokenList
     for I := 0 to CppParser.Count - 1 do
     begin
-      CharPos := OTACharPos(CppParser.Tokens[I].CharIndex, CppParser.Tokens[I].LineNumber + 1);
+      // 将解析器解析出来的字符偏移转换成 CharPos
+      CnConvertPasTokenPositionToCharPos(Pointer(EditView), CppParser.Tokens[I], CharPos);
+      // 再把 CharPos 转换成 EditPos
+      CnOtaConvertEditViewCharPosToEditPos(Pointer(EditView),
+        CharPos.Line, CharPos.CharIndex, EditPos);
 
-      EditView.ConvertPos(False, EditPos, CharPos);
       CppParser.Tokens[I].EditCol := EditPos.Col;
       CppParser.Tokens[I].EditLine := EditPos.Line;
     end;
@@ -1688,8 +1660,8 @@ begin
     begin
       if not FCurrentBlockSearched then
       begin
-        EditPos := EditView.CursorPos;
-        EditView.ConvertPos(True, EditPos, CharPos);
+        // 解析后再查找当前光标所在的块，不直接使用 CursorPos，因为 Parser 所需偏移可能不同
+        CnOtaGetCurrentCharPosFromCursorPosForParser(CharPos);
         PasParser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
       end;
 
@@ -1735,15 +1707,13 @@ begin
           if (AToken.TokenID = tkIdentifier) and // 此处判断支持双字节字符
             CheckTokenMatch(AToken.Token, FCurrentTokenName, CaseSensitive) then
           begin
-            CharPos := OTACharPos(AToken.CharIndex, AToken.LineNumber + 1);
 
-            // ConvertPos 在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
-{$IFDEF BDS2009_UP}
-            EditPos.Line := CharPos.Line;
-            EditPos.Col := AToken.CharIndex + 1;
-{$ELSE}
-            EditView.ConvertPos(False, EditPos, CharPos);
-{$ENDIF}
+            // 将解析器解析出来的字符偏移转换成 CharPos
+            CnConvertPasTokenPositionToCharPos(Pointer(EditView), AToken, CharPos);
+            // 再把 CharPos 转换成 EditPos
+            CnOtaConvertEditViewCharPosToEditPos(Pointer(EditView),
+              CharPos.Line, CharPos.CharIndex, EditPos);
+
             AToken.EditCol := EditPos.Col;
             AToken.EditLine := EditPos.Line;
 
@@ -1869,14 +1839,12 @@ begin
         if not CheckIsCompDirectiveToken(PasParser.Tokens[I], FIsCppSource) then
           Continue;
 
-{$IFNDEF BDS2009_UP}
-        CharPos := OTACharPos(PasParser.Tokens[I].CharIndex, PasParser.Tokens[I].LineNumber + 1);
-        EditView.ConvertPos(False, EditPos, CharPos);
-        // 以上这句在 D2009 中带汉字时结果会有偏差，暂无办法，只能按如下修饰
-{$ELSE}
-        EditPos.Line := PasParser.Tokens[I].LineNumber + 1;
-        EditPos.Col := PasParser.Tokens[I].CharIndex + 1;
-{$ENDIF}
+        // 将解析器解析出来的字符偏移转换成 CharPos
+        CnConvertPasTokenPositionToCharPos(Pointer(EditView), PasParser.Tokens[I], CharPos);
+        // 再把 CharPos 转换成 EditPos
+        CnOtaConvertEditViewCharPosToEditPos(Pointer(EditView),
+          CharPos.Line, CharPos.CharIndex, EditPos);
+
         PasParser.Tokens[I].EditCol := EditPos.Col;
         PasParser.Tokens[I].EditLine := EditPos.Line;
 
@@ -1896,9 +1864,12 @@ begin
       if not CheckIsCompDirectiveToken(CppParser.Tokens[I], FIsCppSource) then
         Continue;
 
-      CharPos := OTACharPos(CppParser.Tokens[I].CharIndex, CppParser.Tokens[I].LineNumber + 1);
+      // 将解析器解析出来的字符偏移转换成 CharPos
+      CnConvertPasTokenPositionToCharPos(Pointer(EditView), CppParser.Tokens[I], CharPos);
+      // 再把 CharPos 转换成 EditPos
+      CnOtaConvertEditViewCharPosToEditPos(Pointer(EditView),
+        CharPos.Line, CharPos.CharIndex, EditPos);
 
-      EditView.ConvertPos(False, EditPos, CharPos);
       CppParser.Tokens[I].EditCol := EditPos.Col;
       CppParser.Tokens[I].EditLine := EditPos.Line;
 
