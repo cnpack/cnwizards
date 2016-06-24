@@ -1938,6 +1938,10 @@ var
                 else if FIntfLine = 0 then
                   FIntfLine := GetPasParserLineNumber;
               end
+              else if PasParser.TokenId = tkDispInterface then
+              begin
+                CurIntf := CurIdent;
+              end
               else if (PasParser.TokenID = tkImplementation) and (FImplLine = 0) then
                 FImplLine := GetPasParserLineNumber;
 
