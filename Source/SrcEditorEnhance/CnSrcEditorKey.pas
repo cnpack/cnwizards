@@ -2757,7 +2757,7 @@ var
   Line: string;
   AnsiLine: AnsiString;
   EditView: IOTAEditView;
-  LineNo, CharIndex: Integer;
+  LineNo, CharIndex, Len: Integer;
 begin
   if not Active or not FCursorBeforeEOL then
     Exit;
@@ -2767,16 +2767,23 @@ begin
     // 获得当前编辑器光标位置，并判断是否超出行尾
     if CnNtaGetCurrLineText(Line, LineNo, CharIndex) then
     begin
-      if Trim(Line) = '' then // 空行不强迫到行首
-        Exit;
-      AnsiLine := AnsiString(Line);
+      // 空行也强迫到行首    
+//    if Trim(Line) = '' then
+//      Exit;
+
+      // Line 分别是 Ansi/Utf8/Utf16
+{$IFDEF UNICODE}
+      Len := CalcAnsiLengthFromWideString(PWideChar(Line));
+{$ELSE}
+      Len := Length(Line);
+{$ENDIF}
 
       EditView := CnOtaGetTopMostEditView;
-      CharIndex := EditView.CursorPos.Col - 1;
+      CharIndex := EditView.CursorPos.Col - 1;  // 分别是 Ansi/Utf8/Ansi
 {$IFDEF DEBUG}
       CnDebugger.LogFmt('Cursor Before EOL: Col %d, Len %d.', [CharIndex, Length(AnsiLine)]);
 {$ENDIF}
-      if CharIndex > Length(AnsiLine) then
+      if CharIndex > Len then
       begin
         try
           FCursorMoving := True;
