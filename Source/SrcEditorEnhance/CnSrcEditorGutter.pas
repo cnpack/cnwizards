@@ -421,6 +421,8 @@ begin
     if (FIdentLines.Count > 1) and (GetCurrentEditControl = EditControl) then // 行位置缩略图只在有多个并在最前时画
     begin
       MaxRow := FPosInfo.LineCount;
+      if MaxRow <= 0 then
+        Exit;
 
       OldColor := Canvas.Brush.Color;
 
@@ -452,6 +454,7 @@ begin
           MaxRow := FPosInfo.LineCount
         else
           MaxRow := EditorObj.ViewBottomLine;
+
         if (OldLineWidth <> Length(IntToStr(MaxRow))) then
         begin
           OldLineWidth := Length(IntToStr(MaxRow));
