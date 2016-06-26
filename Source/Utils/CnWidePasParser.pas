@@ -635,7 +635,7 @@ begin
                 Inc(DeclareWithEndLevel);
               end
               else // 硬修补，免得 unit 的 interface 以及 class procedure 等被高亮
-                DiscardToken(Token.TokenID in [tkClass, tkInterface]);
+                DiscardToken(Token.TokenID in [tkClass, tkInterface, tkDispInterface]);
             end;
           tkExcept, tkFinally:
             begin
