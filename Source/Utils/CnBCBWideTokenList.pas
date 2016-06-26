@@ -1031,9 +1031,7 @@ begin
           while _WideCharInSet(FOrigin[FRun], ['A'..'Z', 'a'..'z', '0'..'9', '_'])
             or (FSupportUnicodeIdent and (Ord(FOrigin[FRun]) > 127)) do
           begin
-            Inc(FRun);
-            Inc(ColNum);
-            Inc(RawColNum);
+            StepRun;
           end;
           FTokenPositionsList.Add(FRun);
           FTokenLineNumberList.Add(LineNum);

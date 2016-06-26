@@ -1605,7 +1605,7 @@ begin
   StepRun(FStringLen);
   while Identifiers[_IndexChar(FOrigin[FRun])] or
     (FSupportUnicodeIdent and (Ord(_IndexChar(FOrigin[FRun])) > 127)) do
-    StepRun;
+    StepRun(1, FSupportUnicodeIdent); // 支持宽字符标识符时需要计算步进
 end;
 
 procedure TCnPasWideLex.IntegerProc;
