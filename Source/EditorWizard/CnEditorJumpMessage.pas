@@ -683,7 +683,7 @@ begin
 
     BlockMatchInfo.IsCppSource := CurIsCpp;
     BlockMatchInfo.CheckLineMatch(EditView, False);
-    BlockMatchInfo.CheckCompDirectiveMatch(EditView, False);
+    BlockMatchInfo.CheckCompDirectiveMatch(EditView);
 
     // 解析完毕，准备定位
     DestToken := nil;

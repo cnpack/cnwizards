@@ -252,7 +252,7 @@ type
     procedure UpdateCompDirectiveList; // 找出编译指令
 
     procedure CheckLineMatch(View: IOTAEditView; IgnoreClass: Boolean);
-    procedure CheckCompDirectiveMatch(View: IOTAEditView; IgnoreClass: Boolean);
+    procedure CheckCompDirectiveMatch(View: IOTAEditView);
     procedure ConvertLineList;          // 将解析出的关键字与当前标识符转换成按行方式快速访问的
     procedure ConvertIdLineList;        // 将解析出的标识符转换成按行方式快速访问的
     procedure ConvertFlowLineList;      // 将解析出的流程控制标识符转换成按行方式快速访问的
@@ -387,7 +387,8 @@ type
     procedure Clear;
     procedure AddPair(Pair: TBlockLinePair);
     procedure FindCurrentPair(View: IOTAEditView; IsCppModule: Boolean = False); virtual;
-    {* 寻找其中一个标识符在光标下的一组关键字对，使用 Ansi 模式}
+    {* 寻找其中一个标识符在光标下的一组关键字对，使用 Ansi 模式，直接拿当前光标值
+       与当前行文字计算而来，不涉及到语法解析}
     property Control: TControl read FControl;
     property Count: Integer read GetCount;
     property Pairs[Index: Integer]: TBlockLinePair read GetPairs;
@@ -1300,7 +1301,7 @@ begin
       end;
       if CompDirectiveInfo <> nil then
       begin
-        CheckCompDirectiveMatch(EditView, GlobalIgnoreClass);
+        CheckCompDirectiveMatch(EditView);
     {$IFDEF DEBUG}
         CnDebugger.LogInteger(CompDirectiveInfo.Count, 'HighLight Cpp CompDirectivePairs Count.');
     {$ENDIF}
@@ -1417,7 +1418,7 @@ begin
 
     if CompDirectiveInfo <> nil then
     begin
-      CheckCompDirectiveMatch(EditView, GlobalIgnoreClass);
+      CheckCompDirectiveMatch(EditView);
     {$IFDEF DEBUG}
       CnDebugger.LogInteger(CompDirectiveInfo.Count, 'HighLight Pas CompDirectivePairs Count.');
     {$ENDIF}
@@ -2074,8 +2075,7 @@ begin
   end;
 end;
 
-procedure TBlockMatchInfo.CheckCompDirectiveMatch(View: IOTAEditView;
-  IgnoreClass: Boolean);
+procedure TBlockMatchInfo.CheckCompDirectiveMatch(View: IOTAEditView);
 var
   I: Integer;
   PToken: TCnGeneralPasToken;
