@@ -306,27 +306,34 @@ var
 
   procedure CalcCharIndexes(out ACharIndex: Integer; out AnAnsiIndex: Integer);
   var
-    I, Len: Integer;
+    I, AnsiLen, WideLen: Integer;
   begin
     if FUseTabKey and (FTabWidth >= 2) then
     begin
       // 遍历当前行内容进行 Tab 键展开
       I := Lex.LineStartOffset;
-      Len := 0;
-      while ( I < Lex.TokenPos ) do
+      AnsiLen := 0;
+      WideLen := 0;
+      while I < Lex.TokenPos do
       begin
         if (ASource[I] = #09) then
-          Len := ((Len div FTabWidth) + 1) * FTabWidth
+        begin
+          AnsiLen := ((AnsiLen div FTabWidth) + 1) * FTabWidth;
+          WideLen := ((WideLen div FTabWidth) + 1) * FTabWidth;
+          // TODO: Wide 字符串的 Tab 展开规则是否是这样
+        end
         else
         begin
+          Inc(WideLen);
           if Ord(ASource[I]) > $900 then
-            Inc(Len, SizeOf(WideChar))
+            Inc(AnsiLen, SizeOf(WideChar))
           else
-            Inc(Len, SizeOf(AnsiChar));
+            Inc(AnsiLen, SizeOf(AnsiChar));
         end;
         Inc(I);
       end;
-      ACharIndex := Len;
+      ACharIndex := WideLen;
+      AnAnsiIndex := AnsiLen;
     end
     else
     begin

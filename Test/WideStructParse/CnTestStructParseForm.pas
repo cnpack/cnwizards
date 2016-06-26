@@ -128,6 +128,8 @@ var
 begin
   mmoPasResult.Lines.Clear;
   Parser := TCnWidePasStructParser.Create(chkWidePas.Checked);
+  Parser.UseTabKey := True;
+  Parser.TabWidth := 2;
 
   S := mmoPasSrc.Lines.Text;
   try
@@ -137,8 +139,8 @@ begin
     for I := 0 to Parser.Count - 1 do
     begin
       Token := Parser.Tokens[I];
-      mmoPasResult.Lines.Add(Format('%3.3d Token. Line: %d, Col %2.2d, Position %4.4d. TokenKind %s, Token: %s',
-        [I, Token.LineNumber, Token.CharIndex, Token.TokenPos, GetEnumName(TypeInfo(TTokenKind), Ord(Token.TokenID)), Token.Token]
+      mmoPasResult.Lines.Add(Format('%3.3d Token. Line: %d, Col(A/W) %2.2d/%2.2d, Position %4.4d. TokenKind %s, Token: %s',
+        [I, Token.LineNumber, Token.AnsiIndex, Token.CharIndex, Token.TokenPos, GetEnumName(TypeInfo(TTokenKind), Ord(Token.TokenID)), Token.Token]
       ));
     end;
     mmoPasResult.Lines.Add('');
