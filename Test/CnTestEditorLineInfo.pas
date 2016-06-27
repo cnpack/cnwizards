@@ -166,6 +166,7 @@ var
   StatusBar: TStatusBar;
   PasParser: TCnGeneralPasStructParser;
   Stream: TMemoryStream;
+  Element, LineFlag: Integer;
 begin
   lstInfo.Clear;
   lstInfo.Items.Add(SEP);
@@ -206,6 +207,11 @@ begin
       [CharPos.Line, CharPos.CharIndex]))
   else
     lstInfo.Items.Add('Get Current Position Failed.');
+
+  lstInfo.Items.Add(SEP);
+  EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False, Element, LineFlag);
+  lstInfo.Items.Add(Format('GetAttributeAtPos EditPos %d:%d. Element %d, Flag %d.', [EditPos.Line,
+    EditPos.Col, Element, LineFlag]));
 
   PasParser := TCnGeneralPasStructParser.Create;
   Stream := TMemoryStream.Create;

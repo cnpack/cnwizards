@@ -3715,9 +3715,10 @@ var
   function CalcEditColBase(AToken: TCnGeneralPasToken): Integer;
   begin
     // 因为关键字的 Token 中不会出现双字节字符，因此只需计算一次 EditPosColBase 即可
+    // EditCol是EditPos的Col，D567与D2005~2007下分别是Ansi/Utf8，符合GetAttributeAtPos的要求
     Result := Token.EditCol;
-{$IFDEF BDS}
-    // GetAttributeAtPos 需要的是 UTF8 的Pos，因此进行 Col 的 UTF8 转换
+{$IFDEF UNICODE}
+    // D2009 或以上 GetAttributeAtPos 需要的是 UTF8 的Pos，因此进行 Col 的 UTF8 转换
     // 但实际上并非如此转换的简单，因为有部分双字节字符如 Accent Char
     // 等自身只占一个字符的位置，并非如汉字字符一样占两个字符位置，因此
     // 代码中有此等字符时会出现错位的情况，BDS 都有这个问题。
