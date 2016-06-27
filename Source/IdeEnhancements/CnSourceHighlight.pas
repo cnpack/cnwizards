@@ -500,6 +500,7 @@ type
     function GetColorFg(ALayer: Integer): TColor;
     function EditorGetTextRect(Editor: TEditorObject; APos: TOTAEditPos;
       const {$IFDEF BDS}LineText, {$ENDIF} AText: string; var ARect: TRect): Boolean;
+    {* 计算某EditPos位置的指定字符串在所在的行中的Rect}
     procedure EditorPaintText(EditControl: TControl; ARect: TRect; AText: AnsiString;
       AColor, AColorBk, AColorBd: TColor; ABold, AItalic, AUnderline: Boolean);
     function IndexOfBracket(EditControl: TControl): Integer;
@@ -795,6 +796,25 @@ begin
   Result := not CodePageOnlySupportsEnglish;
 {$ELSE}
   Result := False;
+{$ENDIF}
+end;
+
+procedure ConvertGneralTokenPos(EditView: Pointer; AToken: TCnGeneralPasToken);
+var
+  EditPos: TOTAEditPos;
+  CharPos: TOTACharPos;
+begin
+  // 将解析器解析出来的字符偏移转换成 CharPos
+  CnConvertPasTokenPositionToCharPos(EditView, AToken, CharPos);
+  // 再把 CharPos 转换成 EditPos
+  CnOtaConvertEditViewCharPosToEditPos(EditView,
+    CharPos.Line, CharPos.CharIndex, EditPos);
+
+  AToken.EditCol := EditPos.Col;
+  AToken.EditLine := EditPos.Line;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  // D2005~2007下EditPos的Col是Utf8的，但绘制需要Ansi的，所以额外开个属性使用其AnsiIndex
+  AToken.EditAnsiCol := AToken.AnsiIndex + 1;
 {$ENDIF}
 end;
 
@@ -1275,16 +1295,7 @@ begin
           FKeyTokenList.Add(CppParser.Tokens[I]);
 
       for I := 0 to KeyCount - 1 do
-      begin
-        // 将解析器解析出来的字符偏移转换成 CharPos
-        CnConvertPasTokenPositionToCharPos(Pointer(EditView), KeyTokens[I], CharPos);
-        // 再把 CharPos 转换成 EditPos
-        CnOtaConvertEditViewCharPosToEditPos(Pointer(EditView),
-          CharPos.Line, CharPos.CharIndex, EditPos);
-
-        KeyTokens[I].EditCol := EditPos.Col;
-        KeyTokens[I].EditLine := EditPos.Line;
-      end;
+        ConvertGneralTokenPos(Pointer(EditView), KeyTokens[I]);
 
       // 记录大括号的层次
       UpdateCurTokenList;
@@ -1387,16 +1398,8 @@ begin
     if Result then
     begin
       for I := 0 to KeyCount - 1 do
-      begin
-        // 将解析器解析出来的字符偏移转换成 CharPos
-        CnConvertPasTokenPositionToCharPos(Pointer(EditView), KeyTokens[I], CharPos);
-        // 再把 CharPos 转换成 EditPos
-        CnOtaConvertEditViewCharPosToEditPos(Pointer(EditView),
-          CharPos.Line, CharPos.CharIndex, EditPos);
+        ConvertGneralTokenPos(Pointer(EditView), KeyTokens[I]);
 
-        KeyTokens[I].EditCol := EditPos.Col;
-        KeyTokens[I].EditLine := EditPos.Line;
-      end;
       ConvertLineList;
     end;
 
@@ -1527,16 +1530,7 @@ begin
 
       // 无当前过程或高亮所有内容时搜索当前所有标识符，避免只高亮光标出于当前过程内的问题
       for I := 0 to PasParser.Count - 1 do
-      begin
-        // 将解析器解析出来的字符偏移转换成 CharPos
-        CnConvertPasTokenPositionToCharPos(Pointer(EditView), PasParser.Tokens[I], CharPos);
-        // 再把 CharPos 转换成 EditPos
-        CnOtaConvertEditViewCharPosToEditPos(Pointer(EditView),
-          CharPos.Line, CharPos.CharIndex, EditPos);
-
-        PasParser.Tokens[I].EditCol := EditPos.Col;
-        PasParser.Tokens[I].EditLine := EditPos.Line;
-      end;
+        ConvertGneralTokenPos(Pointer(EditView), PasParser.Tokens[I]);
 
       // 高亮整个单元时，或当前无块时，高亮整个单元
       if (FCurMethodStartToken = nil) or (FCurMethodCloseToken = nil) or
@@ -1569,16 +1563,7 @@ begin
 
     // 将解析出的流程控制的Token 按范围规定加入 FFlowTokenList
     for I := 0 to CppParser.Count - 1 do
-    begin
-      // 将解析器解析出来的字符偏移转换成 CharPos
-      CnConvertPasTokenPositionToCharPos(Pointer(EditView), CppParser.Tokens[I], CharPos);
-      // 再把 CharPos 转换成 EditPos
-      CnOtaConvertEditViewCharPosToEditPos(Pointer(EditView),
-        CharPos.Line, CharPos.CharIndex, EditPos);
-
-      CppParser.Tokens[I].EditCol := EditPos.Col;
-      CppParser.Tokens[I].EditLine := EditPos.Line;
-    end;
+      ConvertGneralTokenPos(Pointer(EditView), CppParser.Tokens[I]);
 
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('CppParser.Count: %d', [CppParser.Count]);
@@ -1708,15 +1693,7 @@ begin
           if (AToken.TokenID = tkIdentifier) and // 此处判断支持双字节字符
             CheckTokenMatch(AToken.Token, FCurrentTokenName, CaseSensitive) then
           begin
-
-            // 将解析器解析出来的字符偏移转换成 CharPos
-            CnConvertPasTokenPositionToCharPos(Pointer(EditView), AToken, CharPos);
-            // 再把 CharPos 转换成 EditPos
-            CnOtaConvertEditViewCharPosToEditPos(Pointer(EditView),
-              CharPos.Line, CharPos.CharIndex, EditPos);
-
-            AToken.EditCol := EditPos.Col;
-            AToken.EditLine := EditPos.Line;
+            ConvertGneralTokenPos(Pointer(EditView), AToken);
 
             FCurTokenList.Add(AToken);
             FCurTokenListEditLine.Add(Pointer(AToken.EditLine));
@@ -1840,15 +1817,7 @@ begin
         if not CheckIsCompDirectiveToken(PasParser.Tokens[I], FIsCppSource) then
           Continue;
 
-        // 将解析器解析出来的字符偏移转换成 CharPos
-        CnConvertPasTokenPositionToCharPos(Pointer(EditView), PasParser.Tokens[I], CharPos);
-        // 再把 CharPos 转换成 EditPos
-        CnOtaConvertEditViewCharPosToEditPos(Pointer(EditView),
-          CharPos.Line, CharPos.CharIndex, EditPos);
-
-        PasParser.Tokens[I].EditCol := EditPos.Col;
-        PasParser.Tokens[I].EditLine := EditPos.Line;
-
+        ConvertGneralTokenPos(Pointer(EditView), PasParser.Tokens[I]);
         FCompDirectiveTokenList.Add(PasParser.Tokens[I]);
       end;
     end;
@@ -1865,15 +1834,7 @@ begin
       if not CheckIsCompDirectiveToken(CppParser.Tokens[I], FIsCppSource) then
         Continue;
 
-      // 将解析器解析出来的字符偏移转换成 CharPos
-      CnConvertPasTokenPositionToCharPos(Pointer(EditView), CppParser.Tokens[I], CharPos);
-      // 再把 CharPos 转换成 EditPos
-      CnOtaConvertEditViewCharPosToEditPos(Pointer(EditView),
-        CharPos.Line, CharPos.CharIndex, EditPos);
-
-      CppParser.Tokens[I].EditCol := EditPos.Col;
-      CppParser.Tokens[I].EditLine := EditPos.Line;
-
+      ConvertGneralTokenPos(Pointer(EditView), CppParser.Tokens[I]);
       FCompDirectiveTokenList.Add(CppParser.Tokens[I]);
     end;
   end;
@@ -3742,6 +3703,15 @@ var
   RectGot: Boolean;
   CanvasSaved: Boolean;
 
+  function GetTokenPaintCol(APaintToken: TCnGeneralPasToken): Integer;
+  begin
+{$IFDEF IDE_STRING_ANSI_UTF8}
+    Result := APaintToken.EditAnsiCol;
+{$ELSE}
+    Result := APaintToken.EditCol;
+{$ENDIF}
+  end;
+
   function CalcEditColBase(AToken: TCnGeneralPasToken): Integer;
   begin
     // 因为关键字的 Token 中不会出现双字节字符，因此只需计算一次 EditPosColBase 即可
@@ -3900,7 +3870,7 @@ begin
             RectGot := False;
             for J := 0 to Length(Token.Token) - 1 do
             begin
-              EditPos := OTAEditPos(Token.EditCol + J, LineNum);
+              EditPos := OTAEditPos(GetTokenPaintCol(Token) + J, LineNum);
               if not RectGot then
               begin
                 if EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FUniLineText, {$ENDIF} string(Token.Token[J]), R) then
@@ -3961,7 +3931,7 @@ begin
             Token := TCnGeneralPasToken(Info.IdLines[LogicLineNum][I]);
             TokenLen := Length(Token.Token);
 
-            EditPos := OTAEditPos(Token.EditCol, LineNum);
+            EditPos := OTAEditPos(GetTokenPaintCol(Token), LineNum);
             if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FUniLineText, {$ENDIF} string(Token.Token), R) then
               Continue;
 

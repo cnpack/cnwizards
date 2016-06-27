@@ -54,6 +54,7 @@ type
   TCnWidePasToken = class(TPersistent)
   {* 描述一 Token 的结构高亮信息}
   private
+    FEditAnsiCol: Integer;
     function GetToken: PWideChar;
   protected
     FCppTokenKind: TCTokenKind;
@@ -90,6 +91,8 @@ type
     {* 所在列，从一开始，由外界转换而来，一般对应 EditPos}
     property EditLine: Integer read FEditLine write FEditLine;
     {* 所在行，从一开始，由外界转换而来，一般对应 EditPos}
+    property EditAnsiCol: Integer read FEditAnsiCol write FEditAnsiCol;
+    {* 所在 Ansi 列，从一开始，由外界转换而来，用于绘制的场合}
 
     property ItemIndex: Integer read FItemIndex;
     {* 在整个 Parser 中的序号 }
