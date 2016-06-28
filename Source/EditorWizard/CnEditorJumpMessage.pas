@@ -651,33 +651,16 @@ begin
     if BlockMatchInfo.KeyCount > 0 then
     begin
       for I := 0 to BlockMatchInfo.KeyCount - 1 do
-      begin
-        // 将解析器解析出来的字符偏移转换成 CharPos
-        CnConvertPasTokenPositionToCharPos(Pointer(EditView), BlockMatchInfo.KeyTokens[I], CharPos);
-        // 再把 CharPos 转换成 EditPos
-        CnOtaConvertEditViewCharPosToEditPos(Pointer(EditView),
-          CharPos.Line, CharPos.CharIndex, EditPos);
+        ConvertGneralTokenPos(Pointer(EditView), BlockMatchInfo.KeyTokens[I]);
 
-        BlockMatchInfo.KeyTokens[I].EditCol := EditPos.Col;
-        BlockMatchInfo.KeyTokens[I].EditLine := EditPos.Line;
-      end;
       BlockMatchInfo.ConvertLineList;
     end;
 
     if BlockMatchInfo.CompDirectiveTokenCount > 0 then
     begin
       for I := 0 to BlockMatchInfo.CompDirectiveTokenCount - 1 do
-      begin
-        // 将解析器解析出来的字符偏移转换成 CharPos
-        CnConvertPasTokenPositionToCharPos(Pointer(EditView),
-          BlockMatchInfo.CompDirectiveTokens[I], CharPos);
-        // 再把 CharPos 转换成 EditPos
-        CnOtaConvertEditViewCharPosToEditPos(Pointer(EditView),
-          CharPos.Line, CharPos.CharIndex, EditPos);
+        ConvertGneralTokenPos(Pointer(EditView), BlockMatchInfo.CompDirectiveTokens[I]);
 
-        BlockMatchInfo.CompDirectiveTokens[I].EditCol := EditPos.Col;
-        BlockMatchInfo.CompDirectiveTokens[I].EditLine := EditPos.Line;
-      end;
       BlockMatchInfo.ConvertCompDirectiveLineList;
     end;
 

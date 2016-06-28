@@ -498,9 +498,10 @@ type
     FHighlightCompDirective: Boolean;
     FCompDirectiveBackground: TColor;
     function GetColorFg(ALayer: Integer): TColor;
-    function EditorGetTextRect(Editor: TEditorObject; APos: TOTAEditPos;
+    function EditorGetTextRect(Editor: TEditorObject; AnsiPos: TOTAEditPos;
       const {$IFDEF BDS}LineText, {$ENDIF} AText: string; var ARect: TRect): Boolean;
-    {* 计算某EditPos位置的指定字符串在所在的行中的Rect}
+    {* 计算某 EditPos 位置的指定字符串在所在的行中的 Rect，注意绘制所用的 Rect
+      视觉上是 Ansi 效果，因此 D2005~2007 的 Utf8 的 EditPos 不能直接用}
     procedure EditorPaintText(EditControl: TControl; ARect: TRect; AText: AnsiString;
       AColor, AColorBk, AColorBd: TColor; ABold, AItalic, AUnderline: Boolean);
     function IndexOfBracket(EditControl: TControl): Integer;
@@ -796,25 +797,6 @@ begin
   Result := not CodePageOnlySupportsEnglish;
 {$ELSE}
   Result := False;
-{$ENDIF}
-end;
-
-procedure ConvertGneralTokenPos(EditView: Pointer; AToken: TCnGeneralPasToken);
-var
-  EditPos: TOTAEditPos;
-  CharPos: TOTACharPos;
-begin
-  // 将解析器解析出来的字符偏移转换成 CharPos
-  CnConvertPasTokenPositionToCharPos(EditView, AToken, CharPos);
-  // 再把 CharPos 转换成 EditPos
-  CnOtaConvertEditViewCharPosToEditPos(EditView,
-    CharPos.Line, CharPos.CharIndex, EditPos);
-
-  AToken.EditCol := EditPos.Col;
-  AToken.EditLine := EditPos.Line;
-{$IFDEF IDE_STRING_ANSI_UTF8}
-  // D2005~2007下EditPos的Col是Utf8的，但绘制需要Ansi的，所以额外开个属性使用其AnsiIndex
-  AToken.EditAnsiCol := AToken.AnsiIndex + 1;
 {$ENDIF}
 end;
 
@@ -2582,7 +2564,7 @@ begin
 end;
 
 function TCnSourceHighlight.EditorGetTextRect(Editor: TEditorObject;
-  APos: TOTAEditPos; const {$IFDEF BDS}LineText, {$ENDIF} AText: string; var ARect: TRect): Boolean;
+  AnsiPos: TOTAEditPos; const {$IFDEF BDS}LineText, {$ENDIF} AText: string; var ARect: TRect): Boolean;
 {$IFDEF BDS}
 var
   I, TotalWidth: Integer;
@@ -2610,8 +2592,8 @@ var
 begin
   with Editor do
   begin
-    if InBound(APos.Line, EditView.TopRow, EditView.BottomRow) and
-      InBound(APos.Col, EditView.LeftColumn, EditView.RightColumn) then
+    if InBound(AnsiPos.Line, EditView.TopRow, EditView.BottomRow) and
+      InBound(AnsiPos.Col, EditView.LeftColumn, EditView.RightColumn) then
     begin
 {$IFDEF BDS}
   {$IFDEF BDS2009_UP}
@@ -2627,7 +2609,7 @@ begin
         if _UNICODE_STRING and CodePageOnlySupportsEnglish then
         begin
           // 纯英文平台下 D2009 以上转 AnsiString 会丢字符导致计算错误，此处换一种方法
-          UCol := CalcWideStringLengthFromAnsiOffset(PWideChar(LineText), APos.Col);
+          UCol := CalcWideStringLengthFromAnsiOffset(PWideChar(LineText), AnsiPos.Col);
           if UCol > 1 then
           begin
 {$IFDEF UNICODE}
@@ -2641,9 +2623,9 @@ begin
         end
         else
         begin
-          if APos.Col > 1 then
+          if AnsiPos.Col > 1 then
           begin
-            S := Copy(AnsiString(LineText), 1, APos.Col - 1)
+            S := Copy(AnsiString(LineText), 1, AnsiPos.Col - 1)
           end
           else
             S := '';
@@ -2672,18 +2654,18 @@ begin
           end;
         end;
         ARect := Bounds(GutterWidth + TotalWidth,
-          (APos.Line - EditView.TopRow) * CharSize.cy, EditCanvas.TextWidth(AText),
+          (AnsiPos.Line - EditView.TopRow) * CharSize.cy, EditCanvas.TextWidth(AText),
           CharSize.cy);
       end
       else
       begin
-        ARect := Bounds(GutterWidth + (APos.Col - EditView.LeftColumn) * CharSize.cx,
-          (APos.Line - EditView.TopRow) * CharSize.cy, CharSize.cx * Length(AText),
+        ARect := Bounds(GutterWidth + (AnsiPos.Col - EditView.LeftColumn) * CharSize.cx,
+          (AnsiPos.Line - EditView.TopRow) * CharSize.cy, CharSize.cx * Length(AText),
           CharSize.cy);
       end;
 {$ELSE}
-      ARect := Bounds(GutterWidth + (APos.Col - EditView.LeftColumn) * CharSize.cx,
-        (APos.Line - EditView.TopRow) * CharSize.cy, CharSize.cx * Length(AText),
+      ARect := Bounds(GutterWidth + (AnsiPos.Col - EditView.LeftColumn) * CharSize.cx,
+        (AnsiPos.Line - EditView.TopRow) * CharSize.cy, CharSize.cx * Length(AText),
         CharSize.cy);
 {$ENDIF}
       Result := True;
@@ -3703,15 +3685,6 @@ var
   RectGot: Boolean;
   CanvasSaved: Boolean;
 
-  function GetTokenPaintCol(APaintToken: TCnGeneralPasToken): Integer;
-  begin
-{$IFDEF IDE_STRING_ANSI_UTF8}
-    Result := APaintToken.EditAnsiCol;
-{$ELSE}
-    Result := APaintToken.EditCol;
-{$ENDIF}
-  end;
-
   function CalcEditColBase(AToken: TCnGeneralPasToken): Integer;
   begin
     // 因为关键字的 Token 中不会出现双字节字符，因此只需计算一次 EditPosColBase 即可
@@ -3871,7 +3844,7 @@ begin
             RectGot := False;
             for J := 0 to Length(Token.Token) - 1 do
             begin
-              EditPos := OTAEditPos(GetTokenPaintCol(Token) + J, LineNum);
+              EditPos := OTAEditPos(GetTokenAnsiEditCol(Token) + J, LineNum);
               if not RectGot then
               begin
                 if EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FUniLineText, {$ENDIF} string(Token.Token[J]), R) then
@@ -3932,7 +3905,7 @@ begin
             Token := TCnGeneralPasToken(Info.IdLines[LogicLineNum][I]);
             TokenLen := Length(Token.Token);
 
-            EditPos := OTAEditPos(GetTokenPaintCol(Token), LineNum);
+            EditPos := OTAEditPos(GetTokenAnsiEditCol(Token), LineNum);
             if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FUniLineText, {$ENDIF} string(Token.Token), R) then
               Continue;
 
@@ -5383,10 +5356,13 @@ var
 
   // 判断标识符是否在光标下
   function InternalIsCurrentToken(Token: TCnGeneralPasToken): Boolean;
+  var
+    AnsiCol: Integer;
   begin
+    AnsiCol := GetTokenAnsiEditCol(Token);
     Result := (Token <> nil) and // (Token.IsBlockStart or Token.IsBlockClose) and
-      (Token.EditLine = LineNo) and (Token.EditCol <= EndIndex) and
-      (Token.EditCol >= StartIndex);
+      (Token.EditLine = LineNo) and (AnsiCol <= EndIndex) and
+      (AnsiCol >= StartIndex);
   end;
 
   // 判断一个 Pair 是否有 Middle 的 Token 在光标下

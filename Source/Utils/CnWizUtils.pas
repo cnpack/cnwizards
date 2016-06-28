@@ -970,6 +970,12 @@ procedure CnConvertCppTokenPositionToCharPos(EditViewPtr: Pointer;
 {* 封装的把 Cpp Token 解析出来的 Ansi/Wide 位置参数转换成 IDE 所需的 CharPos 的过程
   输出 CharPos，以备让 EditView 转换成 EditPos}
 
+procedure ConvertGneralTokenPos(EditView: Pointer; AToken: TCnGeneralPasToken);
+{* 将解析器解析出来的 Token 的行列转换成 IDE 所需的 EditPos}
+
+function GetTokenAnsiEditCol(AToken: TCnGeneralPasToken): Integer;
+{* 获取一个 GeneralPasToken 的 AnsiCol}
+
 //==============================================================================
 // 窗体操作相关函数
 //==============================================================================
@@ -6802,6 +6808,36 @@ begin
   CnDebugger.LogFmt('CnConvertCppTokenPositionToCharPos %d:%d/(A)%d to %d:%d - %s.',
     [Token.LineNumber, Token.CharIndex, {$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
      Token.AnsiIndex, {$ELSE} 0, {$ENDIF} CharPos.Line, CharPos.CharIndex, Token.Token])
+{$ENDIF}
+end;
+
+// 将解析器解析出来的 Token 的行列转换成 IDE 所需的 EditPos
+procedure ConvertGneralTokenPos(EditView: Pointer; AToken: TCnGeneralPasToken);
+var
+  EditPos: TOTAEditPos;
+  CharPos: TOTACharPos;
+begin
+  // 将解析器解析出来的字符偏移转换成 CharPos
+  CnConvertPasTokenPositionToCharPos(EditView, AToken, CharPos);
+  // 再把 CharPos 转换成 EditPos
+  CnOtaConvertEditViewCharPosToEditPos(EditView,
+    CharPos.Line, CharPos.CharIndex, EditPos);
+
+  AToken.EditCol := EditPos.Col;
+  AToken.EditLine := EditPos.Line;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  // D2005~2007下EditPos的Col是Utf8的，但绘制需要Ansi的，所以额外开个属性使用其AnsiIndex
+  AToken.EditAnsiCol := AToken.AnsiIndex + 1;
+{$ENDIF}
+end;
+
+// 获取一个 GeneralPasToken 的 AnsiCol
+function GetTokenAnsiEditCol(AToken: TCnGeneralPasToken): Integer;
+begin
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  Result := AToken.EditAnsiCol;
+{$ELSE}
+  Result := AToken.EditCol;
 {$ENDIF}
 end;
 
