@@ -1733,7 +1733,7 @@ end;
 function TCnSrcEditorKey.DoRenameW(View: IOTAEditView; Key, ScanCode: Word;
   Shift: TShiftState; var Handled: Boolean): Boolean;
 var
-  TmpCur: string;
+  TmpCur: TCnIdeTokenString;
   Cur, UpperCur, UpperHeadCur, NewName: WideString;
   CurIndex: Integer;
   EditControl: TControl;
@@ -1759,7 +1759,6 @@ var
   F: string;
   FEditor: IOTAEditor;
   FSrcEditor: IOTASourceEditor;
-  SupportUnicode: Boolean;
 begin
   Result := False;
   if (Key <> FRenameKey) or (Shift <> FRenameShift) then Exit;
@@ -1768,15 +1767,8 @@ begin
     GetIDEActionFromShortCut(ShortCut(VK_F2, [])).Visible then
     Exit; // 如果已经有了 F2 的快捷键的 Action，则不处理
 
-{$IFDEF UNICODE}
-  SupportUnicode := True;
-  if not CnOtaGetCurrPosTokenW(TmpCur, CurIndex) then
+  if not CnOtaGeneralGetCurrPosToken(TmpCur, CurIndex) then
     Exit;
-{$ELSE}
-  SupportUnicode := False;
-  if not CnOtaGetCurrPosToken(TmpCur, CurIndex) then
-    Exit;
-{$ENDIF}
 
   if TmpCur = '' then
     Exit;
@@ -1806,7 +1798,7 @@ begin
   // 处理 Pascal 文件
   if IsDprOrPas(EditView.Buffer.FileName) or IsInc(EditView.Buffer.FileName) then
   begin
-    Parser := TCnWidePasStructParser.Create(SupportUnicode);
+    Parser := TCnWidePasStructParser.Create;
     Stream := TMemoryStream.Create;
     try
 {$IFDEF UNICODE}
@@ -2039,7 +2031,7 @@ begin
   else if IsCppSourceModule(EditView.Buffer.FileName) then // C/C++ 文件
   begin
     // 判断位置，根据需要弹出改名窗体。
-    CParser := TCnWideCppStructParser.Create(SupportUnicode);
+    CParser := TCnWideCppStructParser.Create;
     Stream := TMemoryStream.Create;
     try
 {$IFDEF UNICODE}
