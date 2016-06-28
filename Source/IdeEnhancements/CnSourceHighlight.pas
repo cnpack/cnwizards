@@ -3912,8 +3912,8 @@ begin
             EditPos.Col := Token.EditCol;
             EditPos.Line := Token.EditLine;
 
-            // Token 前也就是初始 EditCol 需要 UTF8 转换
-{$IFDEF BDS}
+            // Token 前也就是初始 EditCol 在 Unicode 环境下是 Ansi，需要转换成 UTF8 供 GetAttributeAtPos 使用
+{$IFDEF UNICODE}
             if _UNICODE_STRING and CodePageOnlySupportsEnglish then
             begin
               if FUniLineText <> '' then
@@ -3925,6 +3925,7 @@ begin
                 EditPos.Col := Length(CnAnsiToUtf8(Copy(FAnsiLineText, 1, Token.EditCol)));
             end;
 {$ENDIF}
+
             CanDrawToken := True;
             for J := 0 to TokenLen - 1 do
             begin
@@ -4021,8 +4022,8 @@ begin
             EditPos.Col := Token.EditCol;
             EditPos.Line := Token.EditLine;
 
-            // Token 前也就是初始 EditCol 需要 UTF8 转换
-{$IFDEF BDS}
+            // Token 前也就是初始 EditCol 在 Unicode 环境下是 Ansi，需要转换成 UTF8 供 GetAttributeAtPos 使用
+{$IFDEF UNICODE}
             if _UNICODE_STRING and CodePageOnlySupportsEnglish then
             begin
               if FUniLineText <> '' then
@@ -4131,8 +4132,8 @@ begin
               EditPos.Col := Token.EditCol;
               EditPos.Line := Token.EditLine;
 
-              // Token 前也就是初始 EditCol 需要 UTF8 转换
-{$IFDEF BDS}
+              // Token 前也就是初始 EditCol 在 Unicode 环境下是 Ansi，需要转换成 UTF8 供 GetAttributeAtPos 使用
+{$IFDEF UNICODE}
               if FAnsiLineText <> '' then
                 EditPos.Col := Length(CnAnsiToUtf8(Copy(FAnsiLineText, 1, Token.EditCol)));
 {$ENDIF}

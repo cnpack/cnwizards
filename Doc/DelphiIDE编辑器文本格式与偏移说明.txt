@@ -3,7 +3,8 @@ DelphiIDE编辑器文本格式与偏移说明
 CnPack开发组
 2016.06.25
 
-Delphi IDE 分三种：Delphi 5 6 7 的 纯 Ansi 版，Delphi 2005 ~ 2007 的 Utf8 版，以及 Delphi 2009 及其以上的 Unicode 版本。这三种 IDE 的编辑器控件各不相同，所涉及的 OpenTools API 与其他原生接口有很大的不同。
+Delphi IDE 分三种：Delphi 5 6 7 的 纯 Ansi 版，Delphi 2005 ~ 2007 的 Utf8 版，以及 Delphi 2009 及其以上的 Unicode 版本。
+这三种 IDE 的编辑器控件各不相同，所涉及的 OpenTools API 与其他原生接口有很大的不同。
 
 整理了一个表：
 
@@ -52,3 +53,6 @@ EditLine/EditCol属性        EditCol为Ansi          EditCol为Utf8            Edit
 和当前光标有关的，需要使用 TOTAEditPos 类型的 Col。
 结构解析器解析出来的Token的行列是基于字符的Ansi/Wide值，需要转换成CharPos再转换成EditPos再存储到Token的EditLine/EditCol属性里。
 以后在要跳转到此Token时才能直接使用EditLine/EditCol。
+另外，代码高亮中需要根据Token进行重画时，计算重画区域的EditCol应该全部使用Ansi的（视觉要求），但D2005~2007的EditPos的Col是Utf8，
+所以D2005~2007下，不能直接用EditCol，另开了一个属性EditAnsiCol存储Ansi偏移，专门用来重画。
+
