@@ -154,7 +154,7 @@ function CnGetClassNameFromClass(AClass: Integer): string;
 function CnGetClassParentFromClass(AClass: Integer): Integer;
 {* 供 Pascal Script 使用的从整型的类信息获取父类信息的函数}
 
-function CnWizLoadIcon(AIcon: TIcon; const ResName: string): Boolean;
+function CnWizLoadIcon(AIcon: TIcon; const ResName: string; UseDefault: Boolean = False): Boolean;
 {* 从资源或文件中装载图标，执行时先从图标目录中查找，如果失败再从资源中查找，
    返回结果为图标装载成功标志。参数 ResName 请不要带 .ico 扩展名}
 function CnWizLoadBitmap(ABitmap: TBitmap; const ResName: string): Boolean;
@@ -1066,6 +1066,7 @@ uses
 
 const
   MAX_LINE_LENGTH = 2048;
+  CNWIZARDDEFAULT_ICO = 'CnWizardDefault';
 
 type
   TControlAccess = class(TControl);
@@ -1186,7 +1187,7 @@ begin
 end;
 
 // 从资源或文件中装载图标
-function CnWizLoadIcon(AIcon: TIcon; const ResName: string): Boolean;
+function CnWizLoadIcon(AIcon: TIcon; const ResName: string; UseDefault: Boolean): Boolean;
 var
   FileName: string;
   Handle: HICON;
@@ -1199,6 +1200,7 @@ begin
       FileName := WizOptions.IconPath + ResName + SCnIcoFileExt
     else
       FileName := ResName;
+
     if FileExists(FileName) then
     begin
       AIcon.LoadFromFile(FileName);
@@ -1220,6 +1222,32 @@ begin
     begin
       AIcon.Handle := Handle;
       Result := True;
+      Exit;
+    end;
+  end;
+
+  if UseDefault then
+  begin
+    FileName := WizOptions.IconPath + CNWIZARDDEFAULT_ICO + SCnIcoFileExt;
+    if FileExists(FileName) then
+    begin
+      AIcon.LoadFromFile(FileName);
+      if not AIcon.Empty then
+      begin
+        Result := True;
+        Exit;
+      end;
+    end;
+  end;
+
+  if UseDefault then
+  begin
+    Handle := LoadImage(HResModule, PChar(UpperCase(CNWIZARDDEFAULT_ICO)), IMAGE_ICON, 0, 0, 0);
+    if Handle <> 0 then
+    begin
+      AIcon.Handle := Handle;
+      Result := True;
+      Exit;
     end;
   end;
 end;

@@ -457,7 +457,7 @@ begin
   AWizAction.OnExecute := OnExecute;
   
   AWizAction.ActionList := Svcs40.ActionList;
-  if CnWizLoadIcon(AWizAction.FIcon, IcoName) then
+  if CnWizLoadIcon(AWizAction.FIcon, IcoName, True) then
     AWizAction.ImageIndex := AddIconToImageList(AWizAction.FIcon, Svcs40.ImageList)
   else
     AWizAction.ImageIndex := -1;

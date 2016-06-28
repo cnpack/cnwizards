@@ -863,7 +863,7 @@ end;
 procedure TCnIconWizard.InitIcon(AIcon: TIcon);
 begin
   if AIcon <> nil then
-    CnWizLoadIcon(FIcon, GetIconName);
+    CnWizLoadIcon(FIcon, GetIconName, True);
 end;
 
 //==============================================================================
