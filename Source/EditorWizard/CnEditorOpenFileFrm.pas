@@ -140,6 +140,7 @@ end;
 
 procedure TCnEditorOpenFileForm.OpenSelect;
 var
+  I: Integer;
   Item: TListItem;
 begin
   Item := lvList.Selected;
@@ -148,7 +149,16 @@ begin
     Exit;
 
   if lvList.SelCount <= 1 then
-    CnOtaOpenFile(FFileList[Item.Index]);
+    CnOtaOpenFile(FFileList[Item.Index])
+  else
+  begin
+    for I := 0 to lvList.Items.Count - 1 do
+    begin
+      Item := lvList.Items[I];
+      if Item.Selected then
+        CnOtaOpenFile(FFileList[Item.Index]);
+    end;
+  end;
 
   ModalResult := mrOK;
 end;
