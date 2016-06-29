@@ -4286,8 +4286,7 @@ begin
 
     // CursorPos 在 Unicode IDE 下反映的是 Ansi （非UTF8）方式的列，
     // 需要把 string 转成 Ansi 后才能得到光标对应到 Text 中的真实位置
-    CharIndex := Length(string(Copy(ConvertNtaEditorStringToAnsi(Text, True),
-      1, View.CursorPos.Col - 1)));
+    CharIndex := CalcWideStringLengthFromAnsiOffset(PWideChar(Text), View.CursorPos.Col - 1);
 
     LineNo := View.CursorPos.Line;
     Result := True;
@@ -4551,7 +4550,7 @@ begin
     Token := LineText;
 
     // CurrIndex 是 Utf16 的，需要转换回 Ansi 的
-    AnsiText := ConvertNtaEditorStringToAnsi(Copy(Token, 1, CurrIndex));
+    AnsiText := ConvertNtaEditorStringToAnsi(Copy(Token, 1, CurrIndex), True);
     CurrIndex := Length(AnsiText);
   end;
 
