@@ -1159,10 +1159,8 @@ var
   EditView: IOTAEditView;
   Stream: TMemoryStream;
   CharPos: TOTACharPos;
-  EditPos: TOTAEditPos;
   i: Integer;
   StartIndex, EndIndex: Integer;
-  UnicodeCanNotDirectlyToAnsi: Boolean;
 
   function IsHighlightKeywords(TokenID: TTokenKind): Boolean;
   var
@@ -1221,7 +1219,6 @@ begin
     Exit;
   end;
 
-  UnicodeCanNotDirectlyToAnsi := _UNICODE_STRING and CodePageOnlySupportsEnglish;
   if not IsDprOrPas(EditView.Buffer.FileName) and not IsInc(EditView.Buffer.FileName) then
   begin
 {$IFDEF DEBUG}
@@ -1464,7 +1461,6 @@ procedure TBlockMatchInfo.UpdateFlowTokenList;
 var
   EditView: IOTAEditView;
   CharPos: TOTACharPos;
-  EditPos: TOTAEditPos;
   I: Integer;
 begin
   FCurMethodStartToken := nil;
@@ -1768,8 +1764,6 @@ end;
 procedure TBlockMatchInfo.UpdateCompDirectiveList;
 var
   EditView: IOTAEditView;
-  CharPos: TOTACharPos;
-  EditPos: TOTAEditPos;
   I: Integer;
 begin
   if FControl = nil then Exit;
@@ -2625,7 +2619,10 @@ begin
         begin
           if AnsiPos.Col > 1 then
           begin
-            S := Copy(AnsiString(LineText), 1, AnsiPos.Col - 1)
+            if CodePageOnlySupportsEnglish then
+              S := Copy(ConvertNtaEditorStringToAnsi(LineText, True), 1, AnsiPos.Col - 1)
+            else
+              S := Copy(AnsiString(LineText), 1, AnsiPos.Col - 1);
           end
           else
             S := '';
@@ -3852,7 +3849,7 @@ begin
                 else
                   Continue;
               end
-              else
+              else // 关键字不包括双字节字符，因此此处无须根据宽字符选择步进宽度
               begin
                 Inc(R.Left, CharSize.cx);
                 Inc(R.Right, CharSize.cx);
@@ -3914,7 +3911,7 @@ begin
 
             // Token 前也就是初始 EditCol 在 Unicode 环境下是 Ansi，需要转换成 UTF8 供 GetAttributeAtPos 使用
 {$IFDEF UNICODE}
-            if _UNICODE_STRING and CodePageOnlySupportsEnglish then
+            if CodePageOnlySupportsEnglish then
             begin
               if FUniLineText <> '' then
                 EditPos.Col := ConvertAnsiPositionToUtf8OnUnicodeText(FUniLineText, Token.EditCol);
@@ -3929,15 +3926,18 @@ begin
             CanDrawToken := True;
             for J := 0 to TokenLen - 1 do
             begin
-              // 此处循环内本来需要一个 UTF8 的位置转换，但目前解析出来的 Token 不包含
-              // 双字节字符，因此 Token 内暂不需要转换。
               EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False,
                 Element, LineFlag);
               CanDrawToken := (LineFlag = 0) and (Element in [atIdentifier]);
 
               if not CanDrawToken then // 如果中间有选择区，则不画
                 Break;
+{$IFDEF BDS}
+              // 此处循环内 BDS 以上需要一个 UTF8 的位置转换。
+              Inc(EditPos.Col, CalcUtf8LengthFromWideChar(Token.Token[J]));
+{$ELSE}
               Inc(EditPos.Col);
+{$ENDIF}
             end;
 
             if CanDrawToken then
@@ -4024,7 +4024,7 @@ begin
 
             // Token 前也就是初始 EditCol 在 Unicode 环境下是 Ansi，需要转换成 UTF8 供 GetAttributeAtPos 使用
 {$IFDEF UNICODE}
-            if _UNICODE_STRING and CodePageOnlySupportsEnglish then
+            if CodePageOnlySupportsEnglish then
             begin
               if FUniLineText <> '' then
                 EditPos.Col := ConvertAnsiPositionToUtf8OnUnicodeText(FUniLineText, Token.EditCol);
@@ -4038,15 +4038,18 @@ begin
             CanDrawToken := True;
             for J := 0 to TokenLen - 1 do
             begin
-              // 此处循环内本来需要一个 UTF8 的位置转换，但目前解析出来的 Token 不包含
-              // 双字节字符，因此 Token 内暂不需要转换。
               EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False,
                 Element, LineFlag);
               CanDrawToken := (LineFlag = 0) and (Element in [atIdentifier, atReservedWord]);
 
               if not CanDrawToken then // 如果中间有选择区，则不画
                 Break;
+{$IFDEF BDS}
+              // 此处循环内 BDS 以上需要一个 UTF8 的位置转换。
+              Inc(EditPos.Col, CalcUtf8LengthFromWideChar(Token.Token[J]));
+{$ELSE}
               Inc(EditPos.Col);
+{$ENDIF}
             end;
 
             if CanDrawToken then
@@ -4100,8 +4103,17 @@ begin
                     // 在位置上画字，是否粗体已先设置好
                     TextOut(R.Left, R.Top, string(Token.Token[J]));
                   end;
-                  Inc(R.Left, CharSize.cx);
-                  Inc(R.Right, CharSize.cx);
+
+                  if WideCharIsWideLength(Token.Token[J]) then
+                  begin
+                    Inc(R.Left, CharSize.cx * SizeOf(WideChar));
+                    Inc(R.Right, CharSize.cx * SizeOf(WideChar));
+                  end
+                  else
+                  begin
+                    Inc(R.Left, CharSize.cx);
+                    Inc(R.Right, CharSize.cx);
+                  end;
                 end;
 {$ELSE}
                 // 低版本可直接绘制
@@ -4134,21 +4146,32 @@ begin
 
               // Token 前也就是初始 EditCol 在 Unicode 环境下是 Ansi，需要转换成 UTF8 供 GetAttributeAtPos 使用
 {$IFDEF UNICODE}
-              if FAnsiLineText <> '' then
-                EditPos.Col := Length(CnAnsiToUtf8(Copy(FAnsiLineText, 1, Token.EditCol)));
+              if CodePageOnlySupportsEnglish then
+              begin
+                if FUniLineText <> '' then
+                  EditPos.Col := ConvertAnsiPositionToUtf8OnUnicodeText(FUniLineText, Token.EditCol);
+              end
+              else
+              begin
+                if FAnsiLineText <> '' then
+                  EditPos.Col := Length(CnAnsiToUtf8(Copy(FAnsiLineText, 1, Token.EditCol)));
+              end;
 {$ENDIF}
               CanDrawToken := True;
               for J := 0 to TokenLen - 1 do
               begin
-                // 此处循环内本来需要一个 UTF8 的位置转换，但目前解析出来的 Token 不包含
-                // 双字节字符，因此 Token 内暂不需要转换。
                 EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False,
                   Element, LineFlag);
                 CanDrawToken := (LineFlag = 0) and (Element in [atPreproc, atComment]);
 
                 if not CanDrawToken then // 如果中间有选择区，则不画
                   Break;
+{$IFDEF BDS}
+                // 此处循环内 BDS 以上需要一个 UTF8 的位置转换。
+                Inc(EditPos.Col, CalcUtf8LengthFromWideChar(Token.Token[J]));
+{$ELSE}
                 Inc(EditPos.Col);
+{$ENDIF}
               end;
 
               if CanDrawToken then
@@ -4184,8 +4207,17 @@ begin
                       // 在位置上画字
                       TextOut(R.Left, R.Top, string(Token.Token[J]));
                     end;
-                    Inc(R.Left, CharSize.cx);
-                    Inc(R.Right, CharSize.cx);
+
+                    if WideCharIsWideLength(Token.Token[J]) then
+                    begin
+                      Inc(R.Left, CharSize.cx * SizeOf(WideChar));
+                      Inc(R.Right, CharSize.cx * SizeOf(WideChar));
+                    end
+                    else
+                    begin
+                      Inc(R.Left, CharSize.cx);
+                      Inc(R.Right, CharSize.cx);
+                    end;
                   end;
 {$ELSE}
                   // 低版本可直接绘制
@@ -4247,6 +4279,7 @@ var
         Result := False;
     end;
   end;
+
 begin
   with Editor do
   begin
@@ -5552,6 +5585,9 @@ var
   Text: AnsiString;
   LineNo, CharIndex: Integer;
   PairIndex: Integer;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  WideText: WideString;
+{$ENDIF}
 
   function _GeneralStrLen(const Text: PCnIdeTokenChar): Integer; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
   begin
@@ -5597,19 +5633,27 @@ begin
     Text := AnsiString(GetStrProp(FControl, 'LineText'));
 
   Col := View.CursorPos.Col;
-{$IFDEF BDS}
-  // TODO: 用 TextWidth 获得光标位置精确对应的源码字符位置，但实现较难。
-  // 当存在占据单字符位置的双字节字符时，以下算法会有偏差。
 
-  // 2005~2007 获得的是 UTF8 字符串与 Pos，需要转换成 Ansi 的
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  // D2005~2007 与以下版本获得的是 UTF8 字符串与 Pos，都需要转换成 Ansi 的
   if Text <> '' then
   begin
-    {$IFNDEF UNICODE}
-    Col := Length(CnUtf8ToAnsi(Copy(Text, 1, Col)));
-    Text := CnUtf8ToAnsi(Text);
-    {$ENDIF}
+    if CodePageOnlySupportsEnglish then
+    begin
+      WideText := Utf8Decode(Copy(Text, 1, Col));
+      Col := CalcAnsiLengthFromWideString(PWideChar(WideText));
+
+      WideText := Utf8Decode(Text);
+      Text := ConvertUtf16ToAlterAnsi(PWideChar(WideText), 'C');
+    end
+    else
+    begin
+      Col := Length(CnUtf8ToAnsi(Copy(Text, 1, Col)));
+      Text := CnUtf8ToAnsi(Text);
+    end;
   end;
 {$ENDIF}
+
   LineNo := View.CursorPos.Line;
 
   // 不知为何需如此处理但有效

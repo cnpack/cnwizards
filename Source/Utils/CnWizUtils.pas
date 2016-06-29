@@ -6616,8 +6616,8 @@ begin
 {$ENDIF}
 
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('CnOtaConvertEditViewCharPosToEditPos %d:%d to %d:%d',
-    [CharPosLine, CharPosCharIndex, EditPos.Line, EditPos.Col]);
+//  CnDebugger.LogFmt('CnOtaConvertEditViewCharPosToEditPos %d:%d to %d:%d',
+//    [CharPosLine, CharPosCharIndex, EditPos.Line, EditPos.Col]);
 {$ENDIF}
 end;
 
@@ -6762,9 +6762,9 @@ begin
 {$ENDIF}
 
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('CnConvertPasTokenPositionToCharPos %d:%d/(A)%d to %d:%d - %s.',
-    [Token.LineNumber, Token.CharIndex, {$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
-     Token.AnsiIndex, {$ELSE} 0, {$ENDIF} CharPos.Line, CharPos.CharIndex, Token.Token])
+//  CnDebugger.LogFmt('CnConvertPasTokenPositionToCharPos %d:%d/(A)%d to %d:%d - %s.',
+//    [Token.LineNumber, Token.CharIndex, {$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+//     Token.AnsiIndex, {$ELSE} 0, {$ENDIF} CharPos.Line, CharPos.CharIndex, Token.Token])
 {$ENDIF}
 end;
 
@@ -6804,9 +6804,9 @@ begin
 {$ENDIF}
 
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('CnConvertCppTokenPositionToCharPos %d:%d/(A)%d to %d:%d - %s.',
-    [Token.LineNumber, Token.CharIndex, {$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
-     Token.AnsiIndex, {$ELSE} 0, {$ENDIF} CharPos.Line, CharPos.CharIndex, Token.Token])
+//  CnDebugger.LogFmt('CnConvertCppTokenPositionToCharPos %d:%d/(A)%d to %d:%d - %s.',
+//    [Token.LineNumber, Token.CharIndex, {$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+//     Token.AnsiIndex, {$ELSE} 0, {$ENDIF} CharPos.Line, CharPos.CharIndex, Token.Token])
 {$ENDIF}
 end;
 

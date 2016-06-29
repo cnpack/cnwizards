@@ -546,7 +546,6 @@ var
   CppParser: TCnGeneralCppStructParser;
   Stream: TMemoryStream;
   CharPos: TOTACharPos;
-  EditPos: TOTAEditPos;
   I: Integer;
   DestToken: TCnGeneralPasToken;
   TokenIndex: Integer;
