@@ -478,8 +478,7 @@ type
     FViewFileNameIsPascalList: TList;
 {$IFDEF BDS}
     FAnsiLineText: AnsiString;
-    FUniLineText: string;
-    FUtf8LineText: AnsiString;
+    FUniLineText: string; // Ansi/Utf8/Utf16
   {$IFDEF BDS2009_UP}
     FUseTabKey: Boolean;
     FTabWidth: Integer;
@@ -4634,6 +4633,9 @@ procedure TCnSourceHighlight.PaintLine(Editor: TEditorObject;
   LineNum, LogicLineNum: Integer);
 var
   AElided: Boolean;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  Utf8LineText: AnsiString;
+{$ENDIF}
 begin
   if Active then
   begin
@@ -4644,11 +4646,13 @@ begin
       LogicLineNum);
     // Delphi 2009 下不用进行额外的 UTF8 转换
     FAnsiLineText := AnsiString(FUniLineText);
-    FUtf8LineText := '';
   {$ELSE}
-    FUtf8LineText := EditControlWrapper.GetTextAtLine(Editor.EditControl, LogicLineNum);
-    FAnsiLineText := Utf8ToAnsi(FUtf8LineText);
-    FUniLineText := FAnsiLineText;
+    Utf8LineText := EditControlWrapper.GetTextAtLine(Editor.EditControl, LogicLineNum);
+    if CodePageOnlySupportsEnglish then
+      FUniLineText := ConvertUtf8ToAlterAnsi(PAnsiChar(Utf8LineText), 'C')
+    else
+      FUniLineText := Utf8ToAnsi(Utf8LineText);
+    FAnsiLineText := FUniLineText;
   {$ENDIF}
 {$ELSE}
 
