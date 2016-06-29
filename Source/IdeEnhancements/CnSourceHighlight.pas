@@ -5354,6 +5354,9 @@ var
   LineNo, CharIndex, Len: Integer;
   StartIndex, EndIndex: Integer;
   PairIndex: Integer;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  WideText: WideString;
+{$ENDIF}
 
   // 判断标识符是否在光标下
   function InternalIsCurrentToken(Token: TCnGeneralPasToken): Boolean;
@@ -5390,20 +5393,27 @@ begin
     Text := AnsiString(GetStrProp(FControl, 'LineText'));
 
   Col := View.CursorPos.Col;
-{$IFDEF BDS}
-  // TODO: 用 TextWidth 获得光标位置精确对应的源码字符位置，但实现较难。
-  // 当存在占据单字符位置的双字节字符时，以下算法会有偏差。
 
-  // D2007 与以下版本获得的是 UTF8 字符串与 Pos，需要转换成 Ansi 的，
-  // 但 D2009 的 LineText 属性是 UnicodeString，上面已经 Ansi 化了，无需再次转换
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  // D2005~2007 与以下版本获得的是 UTF8 字符串与 Pos，都需要转换成 Ansi 的
   if Text <> '' then
   begin
-    {$IFNDEF UNICODE}
-    Col := Length(CnUtf8ToAnsi(Copy(Text, 1, Col)));
-    Text := CnUtf8ToAnsi(Text);
-    {$ENDIF}
+    if CodePageOnlySupportsEnglish then
+    begin
+      WideText := Utf8Decode(Copy(Text, 1, Col));
+      Col := CalcAnsiLengthFromWideString(PWideChar(WideText));
+
+      WideText := Utf8Decode(Text);
+      Text := ConvertUtf16ToAlterAnsi(PWideChar(WideText), 'C');
+    end
+    else
+    begin
+      Col := Length(CnUtf8ToAnsi(Copy(Text, 1, Col)));
+      Text := CnUtf8ToAnsi(Text);
+    end;
   end;
 {$ENDIF}
+
   LineNo := View.CursorPos.Line;
 
   // 不知为何需如此处理但有效
