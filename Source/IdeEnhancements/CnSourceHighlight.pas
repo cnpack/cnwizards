@@ -4015,7 +4015,7 @@ begin
             Token := TCnGeneralPasToken(Info.FlowLines[LogicLineNum][I]);
             TokenLen := Length(Token.Token);
 
-            EditPos := OTAEditPos(Token.EditCol, LineNum);
+            EditPos := OTAEditPos(GetTokenAnsiEditCol(Token), LineNum);
             if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FUniLineText, {$ENDIF} string(Token.Token), R) then
               Continue;
 
@@ -4125,7 +4125,7 @@ begin
             if (CompDirectivePair.StartToken = Token) or (CompDirectivePair.EndToken = Token) or
               (CompDirectivePair.IndexOfMiddleToken(Token) >= 0) then
             begin
-              EditPos := OTAEditPos(Token.EditCol, LineNum);
+              EditPos := OTAEditPos(GetTokenAnsiEditCol(Token), LineNum);
               if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FUniLineText, {$ENDIF} string(Token.Token), R) then
                 Continue;
 
@@ -5414,7 +5414,6 @@ begin
 
   // 拿到当前行 AnsiString 内容（可能有替换字符但没有丢字符），
   // LineNo 和 CharIndex 是对应的 Ansi 偏移
-
   Len := Length(Text);
 
   // 找到起始 StartIndex
@@ -5555,10 +5554,13 @@ var
 
   // 判断标识符两端是否在光标两端，和 BlockInfo 的搜索规则不同
   function InternalIsCurrentToken(Token: TCnGeneralPasToken): Boolean;
+  var
+    AnsiCol: Integer;
   begin
+    AnsiCol := GetTokenAnsiEditCol(Token);
     Result := (Token <> nil) and // (Token.IsBlockStart or Token.IsBlockClose) and
-      (Token.EditLine = LineNo) and (Token.EditCol <= CharIndex + 1) and
-      ((Token.EditCol + Integer(_GeneralStrLen(Token.Token)) >= CharIndex + 1));
+      (Token.EditLine = LineNo) and (AnsiCol <= CharIndex + 1) and
+      ((AnsiCol + Integer(_GeneralStrLen(Token.Token)) >= CharIndex + 1));
   end;
 
   // 判断一个 Pair 是否有 Middle 的 Token 在光标下
