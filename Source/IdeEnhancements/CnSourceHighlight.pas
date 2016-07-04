@@ -2599,38 +2599,26 @@ begin
         EditCanvas := EditControlWrapper.GetEditControlCanvas(Editor.EditControl);
         TotalWidth := 0;
 
-        if _UNICODE_STRING and CodePageOnlySupportsEnglish then
-        begin
-          // 纯英文平台下 D2009 以上转 AnsiString 会丢字符导致计算错误，此处换一种方法
-          UCol := CalcWideStringLengthFromAnsiOffset(PWideChar(LineText), AnsiPos.Col);
-          if UCol > 1 then
-          begin
 {$IFDEF UNICODE}
-            U := Copy(LineText, 1, UCol - 1);
+        // 遇到窄的双字节字符时转 AnsiString 会导致列计算错误，此处换一种方法
+        UCol := CalcWideStringLengthFromAnsiOffset(PWideChar(LineText), AnsiPos.Col);
+        if UCol > 1 then
+          U := Copy(LineText, 1, UCol - 1)
+        else
+          U := '';
 {$ELSE}
-            U := WideString(Copy(LineText, 1, UCol - 1));
-{$ENDIF}
-          end
+        if AnsiPos.Col > 1 then
+        begin
+          if CodePageOnlySupportsEnglish then
+            S := Copy(ConvertNtaEditorStringToAnsi(LineText, True), 1, AnsiPos.Col - 1)
           else
-            U := '';
+            S := Copy(AnsiString(LineText), 1, AnsiPos.Col - 1);
         end
         else
-        begin
-          if AnsiPos.Col > 1 then
-          begin
-            if CodePageOnlySupportsEnglish then
-              S := Copy(ConvertNtaEditorStringToAnsi(LineText, True), 1, AnsiPos.Col - 1)
-            else
-              S := Copy(AnsiString(LineText), 1, AnsiPos.Col - 1);
-          end
-          else
-            S := '';
-{$IFDEF UNICODE}
-          U := string(S);
-{$ELSE}
-          U := WideString(S);
+          S := '';
+
+        U := WideString(S);
 {$ENDIF}
-        end;
 
         if U <> '' then
         begin
