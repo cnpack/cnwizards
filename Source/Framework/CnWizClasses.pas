@@ -935,7 +935,7 @@ end;
 function TCnActionWizard.CreateAction: TCnWizAction;
 begin
   Result := WizActionMgr.AddAction(GetIDStr, GetCaption, GetDefShortCut, Click,
-    GetIconName, GetHint);
+    GetIconName, GetHint, True);
 end;
 
 // 取默认快捷键方法
@@ -997,7 +997,7 @@ end;
 function TCnMenuWizard.CreateAction: TCnWizAction;
 begin
   Result := WizActionMgr.AddMenuAction(GetIDStr, GetCaption, GetIDStr, GetDefShortCut, Click,
-    GetIconName, GetHint);
+    GetIconName, GetHint, True);
 end;
 
 // Action 属性读方法

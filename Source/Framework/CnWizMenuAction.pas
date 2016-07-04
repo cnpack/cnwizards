@@ -137,7 +137,8 @@ type
     procedure MoreActionExecute(Sender: TObject);
   protected
     procedure InitAction(AWizAction: TCnWizAction; const ACommand,
-      ACaption: string; OnExecute: TNotifyEvent; const IcoName, AHint: string);
+      ACaption: string; OnExecute: TNotifyEvent; const IcoName, AHint: string;
+      UseDefaultIcon: Boolean = False);
     procedure Notification(AComponent: TComponent;
       Operation: TOperation); override;
   public
@@ -148,7 +149,7 @@ type
     {* 类析构器。}
     function AddAction(const ACommand, ACaption: string; AShortCut: TShortCut;
       OnExecute: TNotifyEvent; const IcoName: string;
-      const AHint: string = ''): TCnWizAction;
+      const AHint: string = ''; UseDefaultIcon: Boolean = False): TCnWizAction;
     {* 创建并返回一个 CnWizards Action 对象，同时将其增加到列表中。
        使用 Add 创建的对象应调用 Delete 方法来释放。
      |<PRE>
@@ -158,11 +159,12 @@ type
        OnExecute: TNotifyEvent  - 执行通知事件
        IcoName: string          - Action 关联的图标的名字，创建时会自动从资源和文件中查找装载
        AHint: string            - Action 的提示信息
+       UseDefaultIcon: Boolean  - Action 找不到图标时是否使用默认图标
        Result: TCnWizAction     - 返回结果为一个 TCnWizAction 实例
      |</PRE>}
     function AddMenuAction(const ACommand, ACaption, AMenuName: string; AShortCut: TShortCut;
       OnExecute: TNotifyEvent; const IcoName: string;
-      const AHint: string = ''): TCnWizMenuAction; 
+      const AHint: string = ''; UseDefaultIcon: Boolean = False): TCnWizMenuAction;
     {* 创建并返回一个带菜单的 CnWizards Action 对象，同时将其增加到列表中。
        使用 Add 创建的对象应调用 Delete 方法来释放。
      |<PRE>
@@ -173,6 +175,7 @@ type
        OnExecute: TNotifyEvent  - 执行通知事件
        IcoName: string          - Action 关联的图标的名字，创建时会自动从资源和文件中查找装载
        AHint: string            - Action 的提示信息
+       UseDefaultIcon: Boolean  - Action 找不到图标时是否使用默认图标
        Result: TCnWizMenuAction - 返回结果为一个 TCnWizMenuAction 实例
      |</PRE>}
     procedure Delete(Index: Integer);
@@ -427,7 +430,7 @@ end;
 // 初始化 Action 对象
 procedure TCnWizActionMgr.InitAction(AWizAction: TCnWizAction;
   const ACommand, ACaption: string; OnExecute: TNotifyEvent;
-  const IcoName, AHint: string);
+  const IcoName, AHint: string; UseDefaultIcon: Boolean);
 var
   Svcs40: INTAServices40;
   NewName: string;
@@ -457,7 +460,7 @@ begin
   AWizAction.OnExecute := OnExecute;
   
   AWizAction.ActionList := Svcs40.ActionList;
-  if CnWizLoadIcon(AWizAction.FIcon, IcoName, True) then
+  if CnWizLoadIcon(AWizAction.FIcon, IcoName, UseDefaultIcon) then
     AWizAction.ImageIndex := AddIconToImageList(AWizAction.FIcon, Svcs40.ImageList)
   else
     AWizAction.ImageIndex := -1;
@@ -467,7 +470,7 @@ end;
 // 创建并返回一个带菜单的 CnWizards Action 对象，同时将其增加到列表中
 function TCnWizActionMgr.AddMenuAction(const ACommand, ACaption, AMenuName: string;
   AShortCut: TShortCut; OnExecute: TNotifyEvent; const IcoName,
-  AHint: string): TCnWizMenuAction;
+  AHint: string; UseDefaultIcon: Boolean): TCnWizMenuAction;
 var
   Svcs40: INTAServices40;
 begin
@@ -482,7 +485,7 @@ begin
   Result.FreeNotification(Self);
   Result.FUpdating := True;         // 开始更新
   try
-    InitAction(Result, ACommand, ACaption, OnExecute, IcoName, AHint);
+    InitAction(Result, ACommand, ACaption, OnExecute, IcoName, AHint, UseDefaultIcon);
     Result.FMenu := TMenuItem.Create(nil);
     Result.FMenu.FreeNotification(Self);
     Result.FMenu.Name := AMenuName;
@@ -503,7 +506,7 @@ end;
 // 创建并返回一个 CnWizards Action 对象，同时将其增加到列表中
 function TCnWizActionMgr.AddAction(const ACommand, ACaption: string;
   AShortCut: TShortCut; OnExecute: TNotifyEvent; const IcoName,
-  AHint: string): TCnWizAction;
+  AHint: string; UseDefaultIcon: Boolean): TCnWizAction;
 var
   Svcs40: INTAServices40;
 begin
@@ -518,7 +521,7 @@ begin
   Result.FreeNotification(Self);
   Result.FUpdating := True;         // 开始更新
   try
-    InitAction(Result, ACommand, ACaption, OnExecute, IcoName, AHint);
+    InitAction(Result, ACommand, ACaption, OnExecute, IcoName, AHint, UseDefaultIcon);
     Result.FWizShortCut := WizShortCutMgr.Add(ACommand, AShortCut, Result.OnShortCut);
     Result.SetInheritedShortCut;
     FWizActions.Add(Result);
