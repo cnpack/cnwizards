@@ -5404,10 +5404,12 @@ begin
   FCurrentPair := nil;
   FCurrentToken := nil;
 
-  if _UNICODE_STRING and CodePageOnlySupportsEnglish then // 纯英文 Unicode 环境下不能直接转 Ansi
-    Text := ConvertUtf16ToAlterAnsi(PWideChar(GetStrProp(FControl, 'LineText')), 'C')
-  else
-    Text := AnsiString(GetStrProp(FControl, 'LineText'));
+{$IFDEF UNICODE}
+  // Unicode 环境下转成替换过的字符串供搜索标识符用，不直接转 Ansi 以免无法处理宽字符的变宽度的情形
+  Text := ConvertUtf16ToAlterAnsi(PWideChar(GetStrProp(FControl, 'LineText')), 'C');
+{$ELSE}
+  Text := AnsiString(GetStrProp(FControl, 'LineText'));
+{$ENDIF}
 
   Col := View.CursorPos.Col;
 
@@ -5442,7 +5444,8 @@ begin
   // 拿到当前行 AnsiString 内容（可能有替换字符但没有丢字符），
   // LineNo 和 CharIndex 是对应的 Ansi 偏移
   Len := Length(Text);
-
+CnDebugger.LogInteger(CharIndex);
+CnDebugger.LogRawAnsiString(Text);
   // 找到起始 StartIndex
   StartIndex := CharIndex;
   if not IsCppModule then
@@ -5611,10 +5614,12 @@ begin
   FCurrentPair := nil;
   FCurrentToken := nil;
 
-  if _UNICODE_STRING and CodePageOnlySupportsEnglish then // 纯英文 Unicode 环境下不能直接转 Ansi
-    Text := ConvertUtf16ToAlterAnsi(PWideChar(GetStrProp(FControl, 'LineText')), 'C')
-  else
-    Text := AnsiString(GetStrProp(FControl, 'LineText'));
+{$IFDEF UNICODE}
+  // Unicode 环境下转成替换过的字符串供搜索标识符用，不直接转 Ansi 以免无法处理宽字符的变宽度的情形
+  Text := ConvertUtf16ToAlterAnsi(PWideChar(GetStrProp(FControl, 'LineText')), 'C');
+{$ELSE}
+  Text := AnsiString(GetStrProp(FControl, 'LineText'));
+{$ENDIF}
 
   Col := View.CursorPos.Col;
 
