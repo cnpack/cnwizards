@@ -6750,9 +6750,10 @@ begin
   begin
     Text := EditControlWrapper.GetTextAtLine(EditControl, CharPos.Line);
     // 得到 Utf8 的 Text，转成 WideString 并截取再转回来求长度
-    W := Utf8Decode(Text);
-    W := Copy(W, 1, CharPos.CharIndex);
-    CharPos.CharIndex := Length(Utf8Encode(W));
+    CharPos.CharIndex := CalcUtf8StringLengthFromWideOffset(PAnsiChar(Text), CharPos.CharIndex);
+//    W := Utf8Decode(Text);
+//    W := Copy(W, 1, CharPos.CharIndex);
+//    CharPos.CharIndex := Length(Utf8Encode(W));
   end;
   {$ELSE}
   CharPos.CharIndex := Token.AnsiIndex; // 使用 WideToken 的 Ansi 偏移，都是 0 开始
