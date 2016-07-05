@@ -872,7 +872,7 @@ end;
 
 // 此函数非 Unicode IDE 下不应该被调用
 function ConvertAnsiPositionToUtf8OnUnicodeText(const Text: string;
-  AnsiCol: Integer): Integer;
+  AnsiCol: Integer; AvoidAnsi: Boolean = False): Integer;
 {$IFDEF UNICODE}
 var
   ULine: string;
@@ -885,14 +885,13 @@ begin
     Exit;
 
 {$IFDEF UNICODE}
-  if CodePageOnlySupportsEnglish then
+  if AvoidAnsi or CodePageOnlySupportsEnglish then
   begin
     UniCol := CalcWideStringLengthFromAnsiOffset(PWideChar(Text), AnsiCol);
     ULine := Copy(Text, 1, UniCol - 1);
-    ALine := Utf8Encode(ULine);
-    Result := Length(ALine) + 1;
+    Result := CalcUtf8LengthFromWideString(PWideChar(ULine)) + 1;
   end
-  else
+  else // Ansi模式会出现 Accent Char 错位的问题
   begin
     ALine := AnsiString(Text);
     ALine := Copy(ALine, 1, AnsiCol - 1);         // 按 Ansi 的 Col 截断
@@ -3677,39 +3676,21 @@ var
   begin
     Result := ACol;
 {$IFDEF UNICODE}
-    if CodePageOnlySupportsEnglish then
-    begin
-      if FUniLineText <> '' then
-        Result := ConvertAnsiPositionToUtf8OnUnicodeText(FUniLineText, ACol);
-    end
-    else
-    begin
-      if FAnsiLineText <> '' then
-        Result := Length(CnAnsiToUtf8(Copy(FAnsiLineText, 1, ACol)));
-    end;
+    // EditCol是EditPos的Col，D567与D2005~2007下分别是Ansi/Utf8，符合GetAttributeAtPos的要求
+    // 只有 2009 上不符合，需要转换
+    if FUniLineText <> '' then
+      Result := ConvertAnsiPositionToUtf8OnUnicodeText(FUniLineText, ACol, True);
 {$ENDIF}
   end;
 
   function CalcEditColBase(AToken: TCnGeneralPasToken): Integer;
   begin
     // 因为关键字的 Token 中不会出现双字节字符，因此只需计算一次 EditPosColBase 即可
-    // EditCol是EditPos的Col，D567与D2005~2007下分别是Ansi/Utf8，符合GetAttributeAtPos的要求
     Result := Token.EditCol;
 {$IFDEF UNICODE}
     // D2009 或以上 GetAttributeAtPos 需要的是 UTF8 的Pos，因此进行 Col 的 UTF8 转换
-    // 但实际上并非如此转换的简单，因为有部分双字节字符如 Accent Char
-    // 等自身只占一个字符的位置，并非如汉字字符一样占两个字符位置，因此
-    // 代码中有此等字符时会出现错位的情况，BDS 都有这个问题。
-    if _UNICODE_STRING and CodePageOnlySupportsEnglish then
-    begin
-      if FUniLineText <> '' then
-        Result := ConvertAnsiPositionToUtf8OnUnicodeText(FUniLineText, Token.EditCol);
-    end
-    else
-    begin
-      if FAnsiLineText <> '' then
-        Result := Length(CnAnsiToUtf8(Copy(FAnsiLineText, 1, Token.EditCol)));
-    end;
+    if FUniLineText <> '' then
+      Result := ConvertAnsiPositionToUtf8OnUnicodeText(FUniLineText, Token.EditCol, True);
 {$ENDIF}
   end;
 
@@ -3863,6 +3844,7 @@ begin
                 Inc(R.Right, CharSize.cx);
               end;
 
+              // 关键字不含双字节字符，因此可以用 EditPosColBase + J 的方式去获取 Attribute
               EditPos.Col := EditPosColBase + J;
               EditPos.Line := Token.EditLine;
               EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False,
