@@ -388,7 +388,7 @@ type
     procedure AddPair(Pair: TBlockLinePair);
     procedure FindCurrentPair(View: IOTAEditView; IsCppModule: Boolean = False); virtual;
     {* 寻找其中一个标识符在光标下的一组关键字对，使用 Ansi 模式，直接拿当前光标值
-       与当前行文字计算而来，不涉及到语法解析}
+       与当前行文字计算而来，不涉及到语法解析，输出为 FCurrentPair 与 FCurrentToken}
     property Control: TControl read FControl;
     property Count: Integer read GetCount;
     property Pairs[Index: Integer]: TBlockLinePair read GetPairs;
@@ -5396,28 +5396,20 @@ begin
   // Unicode 环境下转成替换过的字符串供搜索标识符用，不直接转 Ansi 以免无法处理宽字符的变宽度的情形
   Text := ConvertUtf16ToAlterAnsi(PWideChar(GetStrProp(FControl, 'LineText')), 'C');
 {$ELSE}
-  Text := AnsiString(GetStrProp(FControl, 'LineText'));
+  Text := GetStrProp(FControl, 'LineText');
 {$ENDIF}
 
   Col := View.CursorPos.Col;
 
 {$IFDEF IDE_STRING_ANSI_UTF8}
   // D2005~2007 与以下版本获得的是 UTF8 字符串与 Pos，都需要转换成 Ansi 的
-  if Text <> '' then
+  if (Text <> '') and (Col > 1) then
   begin
-    if CodePageOnlySupportsEnglish then
-    begin
-      WideText := Utf8Decode(Copy(Text, 1, Col));
-      Col := CalcAnsiLengthFromWideString(PWideChar(WideText));
+    WideText := Utf8Decode(Copy(Text, 1, Col - 1));
+    Col := CalcAnsiLengthFromWideString(PWideChar(WideText));
 
-      WideText := Utf8Decode(Text);
-      Text := ConvertUtf16ToAlterAnsi(PWideChar(WideText), 'C');
-    end
-    else
-    begin
-      Col := Length(CnUtf8ToAnsi(Copy(Text, 1, Col)));
-      Text := CnUtf8ToAnsi(Text);
-    end;
+    WideText := Utf8Decode(Text);
+    Text := ConvertUtf16ToAlterAnsi(PWideChar(WideText), 'C');
   end;
 {$ENDIF}
 
@@ -5432,8 +5424,7 @@ begin
   // 拿到当前行 AnsiString 内容（可能有替换字符但没有丢字符），
   // LineNo 和 CharIndex 是对应的 Ansi 偏移
   Len := Length(Text);
-CnDebugger.LogInteger(CharIndex);
-CnDebugger.LogRawAnsiString(Text);
+
   // 找到起始 StartIndex
   StartIndex := CharIndex;
   if not IsCppModule then
