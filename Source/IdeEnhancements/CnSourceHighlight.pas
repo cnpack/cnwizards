@@ -3669,6 +3669,9 @@ var
   CanDrawToken: Boolean;
   RectGot: Boolean;
   CanvasSaved: Boolean;
+{$IFDEF BDS}
+  WidePaintBuf: array[0..1] of WideChar;
+{$ENDIF}
 
   function ConvertEditPosColToAttributeCol(ACol: Integer): Integer;
   begin
@@ -3965,6 +3968,7 @@ begin
                 EditPosColBase := CalcEditColBase(Token);
                 EditPos.Col := EditPosColBase;
                 EditPos.Line := Token.EditLine;
+                WidePaintBuf[1] := #0;
                 for J := 0 to Length(Token.Token) - 1 do
                 begin
                   EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False,
@@ -3973,7 +3977,13 @@ begin
                   if (Element = atIdentifier) and (LineFlag = 0) then
                   begin
                     // 在位置上画字，颜色已先设置好
+                    {$IFDEF UNICODE}
                     TextOut(R.Left, R.Top, string(Token.Token[J]));
+                    {$ELSE}
+                    // D2005~2007 下使用 Unicode API 来直接绘制，以避免 Ansi 转换而乱码
+                    WidePaintBuf[0] := Token.Token[J];
+                    Windows.ExtTextOutW(Handle, R.Left, R.Top, TextFlags, nil, PWideChar(@(WidePaintBuf[0])), 1, nil);
+                    {$ENDIF}
                   end;
 
                   if WideCharIsWideLength(Token.Token[J]) then
