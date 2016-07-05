@@ -2747,7 +2747,6 @@ procedure TCnSrcEditorKey.EditorChanged(Editor: TEditorObject;
   ChangeType: TEditorChangeTypes);
 var
   Line: string;
-  AnsiLine: AnsiString;
   EditView: IOTAEditView;
   LineNo, CharIndex, Len: Integer;
 begin
@@ -2773,7 +2772,7 @@ begin
       EditView := CnOtaGetTopMostEditView;
       CharIndex := EditView.CursorPos.Col - 1;  // ·Ö±ğÊÇ Ansi/Utf8/Ansi
 {$IFDEF DEBUG}
-      CnDebugger.LogFmt('Cursor Before EOL: Col %d, Len %d.', [CharIndex, Length(AnsiLine)]);
+      CnDebugger.LogFmt('Cursor Before EOL: Col %d, Len %d.', [CharIndex, Len]);
 {$ENDIF}
       if CharIndex > Len then
       begin
