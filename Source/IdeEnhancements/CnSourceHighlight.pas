@@ -388,7 +388,8 @@ type
     procedure AddPair(Pair: TBlockLinePair);
     procedure FindCurrentPair(View: IOTAEditView; IsCppModule: Boolean = False); virtual;
     {* 寻找其中一个标识符在光标下的一组关键字对，使用 Ansi 模式，直接拿当前光标值
-       与当前行文字计算而来，不涉及到语法解析，输出为 FCurrentPair 与 FCurrentToken}
+       与当前行文字计算而来，不涉及到语法解析，输出为 FCurrentPair 与 FCurrentToken。
+       注意对 Unicode 标识符可能有问题。}
     property Control: TControl read FControl;
     property Count: Integer read GetCount;
     property Pairs[Index: Integer]: TBlockLinePair read GetPairs;

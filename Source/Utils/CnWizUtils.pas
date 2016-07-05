@@ -4305,12 +4305,22 @@ begin
     LineLen := Length(LineText);
 end;
 
+// 判断一字符串是否是合法的标识符，SupportUnicodeIdent 为 True 时只在 Unicode 环境下调用
 function _IsValidIdent(const Ident: string; SupportUnicodeIdent: Boolean): Boolean;
 begin
   if SupportUnicodeIdent then
     Result := IsValidIdentW(Ident)
   else
     Result := IsValidIdent(Ident);
+end;
+
+// 判断一宽字符串是否是合法的标识符
+function _IsValidIdentWide(const Ident: WideString; SupportUnicodeIdent: Boolean): Boolean;
+begin
+  if SupportUnicodeIdent then
+    Result := IsValidIdentWide(Ident)
+  else
+    Result := IsValidIdent(string(Ident));
 end;
 
 // 取当前光标下的标识符及光标在标识符中的索引号，速度较快
@@ -4415,6 +4425,7 @@ begin
 
   if not Assigned(EditView) then
     EditView := CnOtaGetTopMostEditView;
+
   if (EditView <> nil) and CnNtaGetCurrLineText(LineText, LineNo, CharIndex) and
     (LineText <> '') then
   begin
@@ -4429,6 +4440,7 @@ begin
 
     I := CharIndex;
     CurrIndex := 0;
+
     // 查找起始字符
     while (I > 0) and _IsValidIdentChar(WideText[I], False) do
     begin
@@ -4451,7 +4463,8 @@ begin
 
   if Token <> '' then
   begin
-    if CharInSet(Char(Token[1]), FirstSet) or _IsValidIdent(Token, SupportUnicodeIdent) then
+    // 判断得到的 WideString 是否是合法的标识符
+    if CharInSet(Char(Token[1]), FirstSet) or _IsValidIdentWide(Token, SupportUnicodeIdent) then
       Result := True;
   end;
 
