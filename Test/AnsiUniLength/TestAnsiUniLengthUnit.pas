@@ -17,10 +17,12 @@ type
     btnCalcAnsi: TButton;
     btnCalcWide: TButton;
     btnUtf8Convert: TButton;
+    btnCalcUtf8Len: TButton;
     procedure btnLengthClick(Sender: TObject);
     procedure btnCalcAnsiClick(Sender: TObject);
     procedure btnCalcWideClick(Sender: TObject);
     procedure btnUtf8ConvertClick(Sender: TObject);
+    procedure btnCalcUtf8LenClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -85,6 +87,26 @@ begin
   begin
     S := CnAnsiToUtf8(mmoStr.Lines[I]);
     ShowMessage(ConvertUtf8ToAlterAnsi(PAnsiChar(S), '~'));
+  end;
+end;
+
+procedure TTestAnsiUniForm.btnCalcUtf8LenClick(Sender: TObject);
+var
+  I, Offset, Len: Integer;
+  S, S1: AnsiString;
+  W: WideString;
+begin
+  for I := 0 to mmoStr.Lines.Count - 1 do
+  begin
+    S := CnAnsiToUtf8(mmoStr.Lines[I]);
+    Offset := CalcUtf8StringLengthFromWideOffset(PAnsiChar(S), udOffset.Position);
+
+    W := Copy(WideString(mmoStr.Lines[I]), 1, udOffset.Position);
+    // WideString to Utf8 AnsiString
+    S1 := AnsiString(W);
+    Len := Length(CnAnsiToUtf8(S1));
+
+    ShowMessage('Utf8 is ' + S + #13#10#13#10 + 'Calc is ' + IntToStr(Offset) + ' Actual is ' + IntToStr(Len));
   end;
 end;
 
