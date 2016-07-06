@@ -2560,7 +2560,6 @@ function TCnSourceHighlight.EditorGetTextRect(Editor: TEditorObject;
 {$IFDEF BDS}
 var
   I, TotalWidth: Integer;
-  S: AnsiString;
   UseTab: Boolean;
 {$IFDEF UNICODE}
   UCol: Integer;
@@ -3826,9 +3825,10 @@ begin
                 Inc(R.Right, CharSize.cx);
               end;
 
-              // 关键字不含双字节字符，因此可以用 EditPosColBase + J 的方式去获取 Attribute
+              // 关键字不含双字节字符，因此可以直接用 EditPosColBase + J 的方式去获取 Attribute
               EditPos.Col := EditPosColBaseForAttribute + J;
               EditPos.Line := Token.EditLine;
+
               EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False,
                 Element, LineFlag);
 
@@ -5368,10 +5368,10 @@ begin
 
 {$IFDEF IDE_STRING_ANSI_UTF8}
   // D2005~2007 与以下版本获得的是 UTF8 字符串与 Pos，都需要转换成 Ansi 的
-  if (Text <> '') and (Col > 1) then
+  if (Text <> '') and (Col > 0) then
   begin
     WideText := Utf8Decode(Copy(Text, 1, Col - 1));
-    Col := CalcAnsiLengthFromWideString(PWideChar(WideText));
+    Col := CalcAnsiLengthFromWideString(PWideChar(WideText)) + 1;
 
     WideText := Utf8Decode(Text);
     Text := ConvertUtf16ToAlterAnsi(PWideChar(WideText), 'C');
@@ -5569,21 +5569,13 @@ begin
 
 {$IFDEF IDE_STRING_ANSI_UTF8}
   // D2005~2007 与以下版本获得的是 UTF8 字符串与 Pos，都需要转换成 Ansi 的
-  if Text <> '' then
+  if (Text <> '') and (Col > 0) then
   begin
-    if CodePageOnlySupportsEnglish then
-    begin
-      WideText := Utf8Decode(Copy(Text, 1, Col));
-      Col := CalcAnsiLengthFromWideString(PWideChar(WideText));
+    WideText := Utf8Decode(Copy(Text, 1, Col - 1));
+    Col := CalcAnsiLengthFromWideString(PWideChar(WideText)) + 1;
 
-      WideText := Utf8Decode(Text);
-      Text := ConvertUtf16ToAlterAnsi(PWideChar(WideText), 'C');
-    end
-    else
-    begin
-      Col := Length(CnUtf8ToAnsi(Copy(Text, 1, Col)));
-      Text := CnUtf8ToAnsi(Text);
-    end;
+    WideText := Utf8Decode(Text);
+    Text := ConvertUtf16ToAlterAnsi(PWideChar(WideText), 'C');
   end;
 {$ENDIF}
 
