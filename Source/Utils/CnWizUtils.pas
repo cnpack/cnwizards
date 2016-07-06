@@ -5237,14 +5237,14 @@ function ConvertNtaEditorStringToAnsi(const LineText: string;
 begin
 {$IFDEF UNICODE}
   // D 2009 或以上
-  if CodePageOnlySupportsEnglish and UseAlterChar then // 纯英文 Unicode 环境下不能直接转 Ansi
+  if UseAlterChar then // 纯英文 Unicode 环境下不能直接转 Ansi
     Result := ConvertUtf16ToAlterAnsi(PWideChar(LineText), 'C')
   else
     Result := AnsiString(LineText);
 {$ELSE}
   {$IFDEF IDE_STRING_ANSI_UTF8}
      // D 2005 ~ 2007 Utf8 to Ansi
-     if CodePageOnlySupportsEnglish and UseAlterChar then // 纯英文环境下 Utf8 不能直接转 Ansi
+     if UseAlterChar then // 纯英文环境下 Utf8 不能直接转 Ansi
        Result := ConvertUtf8ToAlterAnsi(PAnsiChar(LineText), 'C')
      else
        Result := Utf8ToAnsi(LineText);
@@ -6744,7 +6744,6 @@ procedure CnConvertPasTokenPositionToCharPos(EditViewPtr: Pointer;
 {$IFDEF IDE_STRING_ANSI_UTF8}
 var
   Text: string;
-  W: WideString;
   EditControl: TControl;
 {$ENDIF}
 begin
@@ -6764,9 +6763,6 @@ begin
     Text := EditControlWrapper.GetTextAtLine(EditControl, CharPos.Line);
     // 得到 Utf8 的 Text，转成 WideString 并截取再转回来求长度
     CharPos.CharIndex := CalcUtf8StringLengthFromWideOffset(PAnsiChar(Text), CharPos.CharIndex);
-//    W := Utf8Decode(Text);
-//    W := Copy(W, 1, CharPos.CharIndex);
-//    CharPos.CharIndex := Length(Utf8Encode(W));
   end;
   {$ELSE}
   CharPos.CharIndex := Token.AnsiIndex; // 使用 WideToken 的 Ansi 偏移，都是 0 开始
