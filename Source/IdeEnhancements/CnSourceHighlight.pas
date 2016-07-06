@@ -478,8 +478,7 @@ type
     FViewChangedList: TList;
     FViewFileNameIsPascalList: TList;
 {$IFDEF BDS}
-    FAnsiLineText: AnsiString;
-    FUniLineText: string; // Ansi/Utf8/Utf16
+    FRawLineText: string; // Ansi/Utf8/Utf16
   {$IFDEF BDS2009_UP}
     FUseTabKey: Boolean;
     FTabWidth: Integer;
@@ -2563,7 +2562,7 @@ var
   I, TotalWidth: Integer;
   S: AnsiString;
   UseTab: Boolean;
-{$IFDEF BDS}
+{$IFDEF UNICODE}
   UCol: Integer;
 {$ENDIF}
 {$IFDEF UNICODE}
@@ -2608,16 +2607,9 @@ begin
           U := '';
 {$ELSE}
         if AnsiPos.Col > 1 then
-        begin
-          if CodePageOnlySupportsEnglish then
-            S := Copy(ConvertNtaEditorStringToAnsi(LineText, True), 1, AnsiPos.Col - 1)
-          else
-            S := Copy(AnsiString(LineText), 1, AnsiPos.Col - 1);
-        end
+          U := WideString(Copy(ConvertNtaEditorStringToAnsi(LineText, True), 1, AnsiPos.Col - 1))
         else
-          S := '';
-
-        U := WideString(S);
+          U := '';
 {$ENDIF}
 
         if U <> '' then
@@ -3257,12 +3249,12 @@ begin
       if Info.IsMatch then
       begin
         if (LogicLineNum = Info.TokenPos.Line) and EditorGetTextRect(Editor,
-          OTAEditPos(Info.TokenPos.Col, LineNum), {$IFDEF BDS}FUniLineText, {$ENDIF} string(Info.TokenStr), R) then
+          OTAEditPos(Info.TokenPos.Col, LineNum), {$IFDEF BDS}FRawLineText, {$ENDIF} string(Info.TokenStr), R) then
           EditorPaintText(EditControl, R, Info.TokenStr, BracketColor,
             BracketColorBk, BracketColorBd, BracketBold, False, False);
 
         if (LogicLineNum = Info.TokenMatchPos.Line) and EditorGetTextRect(Editor,
-          OTAEditPos(Info.TokenMatchPos.Col, LineNum), {$IFDEF BDS}FUniLineText, {$ENDIF} string(Info.TokenMatchStr), R) then
+          OTAEditPos(Info.TokenMatchPos.Col, LineNum), {$IFDEF BDS}FRawLineText, {$ENDIF} string(Info.TokenMatchStr), R) then
           EditorPaintText(EditControl, R, Info.TokenMatchStr, BracketColor,
             BracketColorBk, BracketColorBd, BracketBold, False, False);
       end;
@@ -3654,7 +3646,7 @@ var
   CompDirectiveInfo: TCompDirectiveInfo;
   Token: TCnGeneralPasToken;
   EditPos: TOTAEditPos;
-  EditPosColBase: Integer;
+  EditPosColBaseForAttribute: Integer;
   ColorFg, ColorBk: TColor;
   Element, LineFlag: Integer;
   KeyPair: TBlockLinePair;
@@ -3672,25 +3664,15 @@ var
   WidePaintBuf: array[0..1] of WideChar;
 {$ENDIF}
 
-  function ConvertEditPosColToAttributeCol(ACol: Integer): Integer;
+  // 根据 Token 的 EditPos 的 Col（Ansi/Utf8/Ansi）返回给 GetAttributeAtPos 使用的 Col（Ansi/Utf8/Utf8）
+  function CalcTokenEditColForAttribute(AToken: TCnGeneralPasToken): Integer;
   begin
-    Result := ACol;
-{$IFDEF UNICODE}
-    // EditCol是EditPos的Col，D567与D2005~2007下分别是Ansi/Utf8，符合GetAttributeAtPos的要求
-    // 只有 2009 上不符合，需要转换
-    if FUniLineText <> '' then
-      Result := ConvertAnsiPositionToUtf8OnUnicodeText(FUniLineText, ACol, True);
-{$ENDIF}
-  end;
-
-  function CalcEditColBase(AToken: TCnGeneralPasToken): Integer;
-  begin
-    // 因为关键字的 Token 中不会出现双字节字符，因此只需计算一次 EditPosColBase 即可
     Result := Token.EditCol;
+    // D567与D2005~2007下分别是Ansi/Utf8，符合GetAttributeAtPos的要求
 {$IFDEF UNICODE}
     // D2009 或以上 GetAttributeAtPos 需要的是 UTF8 的Pos，因此进行 Col 的 UTF8 转换
-    if FUniLineText <> '' then
-      Result := ConvertAnsiPositionToUtf8OnUnicodeText(FUniLineText, Token.EditCol, True);
+    if FRawLineText <> '' then
+      Result := ConvertAnsiPositionToUtf8OnUnicodeText(FRawLineText, Token.EditCol, True);
 {$ENDIF}
   end;
 
@@ -3729,7 +3711,7 @@ begin
 
         // 先画上分隔线再说
         EditPos := OTAEditPos(Editor.EditView.LeftColumn, LineNum);
-        if EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FUniLineText, {$ENDIF} ' ', R) then
+        if EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FRawLineText, {$ENDIF} ' ', R) then
         begin
           EditCanvas.Pen.Color := FSeparateLineColor;
           EditCanvas.Pen.Width := FSeparateLineWidth;
@@ -3824,7 +3806,7 @@ begin
               Continue; // 不层次高亮时，如无当前背景高亮，则不画
 
             EditCanvas.Font.Color := ColorFg;
-            EditPosColBase := CalcEditColBase(Token);
+            EditPosColBaseForAttribute := CalcTokenEditColForAttribute(Token);
 
             // 挨个字符重画以免影响选择效果，如果是高亮，ColorBk已设置好
             RectGot := False;
@@ -3833,7 +3815,7 @@ begin
               EditPos := OTAEditPos(GetTokenAnsiEditCol(Token) + J, LineNum);
               if not RectGot then
               begin
-                if EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FUniLineText, {$ENDIF} string(Token.Token[J]), R) then
+                if EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FRawLineText, {$ENDIF} string(Token.Token[J]), R) then
                   RectGot := True
                 else
                   Continue;
@@ -3845,7 +3827,7 @@ begin
               end;
 
               // 关键字不含双字节字符，因此可以用 EditPosColBase + J 的方式去获取 Attribute
-              EditPos.Col := EditPosColBase + J;
+              EditPos.Col := EditPosColBaseForAttribute + J;
               EditPos.Line := Token.EditLine;
               EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False,
                 Element, LineFlag);
@@ -3893,11 +3875,11 @@ begin
             TokenLen := Length(Token.Token);
 
             EditPos := OTAEditPos(GetTokenAnsiEditCol(Token), LineNum);
-            if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FUniLineText, {$ENDIF} string(Token.Token), R) then
+            if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FRawLineText, {$ENDIF} string(Token.Token), R) then
               Continue;
 
             // Token 初始 EditCol 在 Unicode 环境下是 Ansi，需要转换成 UTF8 供 GetAttributeAtPos 使用
-            EditPos.Col := ConvertEditPosColToAttributeCol(Token.EditCol);
+            EditPos.Col := CalcTokenEditColForAttribute(Token);
             EditPos.Line := Token.EditLine;
 
             CanDrawToken := True;
@@ -3947,8 +3929,8 @@ begin
                 Font.Color := FCurrentTokenForeground;
 {$IFDEF BDS}
                 // BDS 下需要挨个绘制字符，因为 BDS 自身采用的是加粗的字符间距绘制
-                EditPosColBase := CalcEditColBase(Token);
-                EditPos.Col := EditPosColBase;
+                EditPosColBaseForAttribute := CalcTokenEditColForAttribute(Token);
+                EditPos.Col := EditPosColBaseForAttribute;
                 EditPos.Line := Token.EditLine;
                 WidePaintBuf[1] := #0;
                 for J := 0 to Length(Token.Token) - 1 do
@@ -4000,11 +3982,11 @@ begin
             TokenLen := Length(Token.Token);
 
             EditPos := OTAEditPos(GetTokenAnsiEditCol(Token), LineNum);
-            if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FUniLineText, {$ENDIF} string(Token.Token), R) then
+            if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FRawLineText, {$ENDIF} string(Token.Token), R) then
               Continue;
 
             // Token 初始 EditCol 在 Unicode 环境下是 Ansi，需要转换成 UTF8 供 GetAttributeAtPos 使用
-            EditPos.Col := ConvertEditPosColToAttributeCol(Token.EditCol);
+            EditPos.Col := CalcTokenEditColForAttribute(Token);
             EditPos.Line := Token.EditLine;
 
             CanDrawToken := True;
@@ -4062,10 +4044,10 @@ begin
                 Font.Color := FFlowStatementForeground;
 {$IFDEF BDS}
                 // BDS 下需要挨个绘制字符，因为 BDS 自身采用的是加粗的字符间距绘制
-                EditPosColBase := CalcEditColBase(Token);
+                EditPosColBaseForAttribute := CalcTokenEditColForAttribute(Token);
                 for J := 0 to Length(Token.Token) - 1 do
                 begin
-                  EditPos.Col := EditPosColBase + J;
+                  EditPos.Col := EditPosColBaseForAttribute + J;
                   EditPos.Line := Token.EditLine;
                   EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False,
                     Element, LineFlag);
@@ -4110,11 +4092,11 @@ begin
               (CompDirectivePair.IndexOfMiddleToken(Token) >= 0) then
             begin
               EditPos := OTAEditPos(GetTokenAnsiEditCol(Token), LineNum);
-              if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FUniLineText, {$ENDIF} string(Token.Token), R) then
+              if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FRawLineText, {$ENDIF} string(Token.Token), R) then
                 Continue;
 
               // Token 初始 EditCol 在 Unicode 环境下是 Ansi，需要转换成 UTF8 供 GetAttributeAtPos 使用
-              EditPos.Col := ConvertEditPosColToAttributeCol(Token.EditCol);
+              EditPos.Col := CalcTokenEditColForAttribute(Token);
               EditPos.Line := Token.EditLine;
 
               CanDrawToken := True;
@@ -4154,10 +4136,10 @@ begin
                     Font.Style := Font.Style + [fsUnderline];
 {$IFDEF BDS}
                   // BDS 下需要挨个绘制字符，因为 BDS 自身采用的是加粗的字符间距绘制
-                  EditPosColBase := CalcEditColBase(Token);
+                  EditPosColBaseForAttribute := CalcTokenEditColForAttribute(Token);
                   for J := 0 to Length(Token.Token) - 1 do
                   begin
-                    EditPos.Col := EditPosColBase + J;
+                    EditPos.Col := EditPosColBaseForAttribute + J;
                     EditPos.Line := Token.EditLine;
                     EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False,
                       Element, LineFlag);
@@ -4594,27 +4576,17 @@ procedure TCnSourceHighlight.PaintLine(Editor: TEditorObject;
   LineNum, LogicLineNum: Integer);
 var
   AElided: Boolean;
-{$IFDEF IDE_STRING_ANSI_UTF8}
-  Utf8LineText: AnsiString;
-{$ENDIF}
 begin
   if Active then
   begin
 {$IFDEF BDS}
     // 预先获得当前行，供重画时重新进行 UTF8 位置计算
   {$IFDEF UNICODE}
-    FUniLineText := EditControlWrapper.GetTextAtLine(Editor.EditControl,
+    FRawLineText := EditControlWrapper.GetTextAtLine(Editor.EditControl,
       LogicLineNum);
-    // Delphi 2009 下不用进行额外的 UTF8 转换
-    FAnsiLineText := AnsiString(FUniLineText);
   {$ELSE}
-    Utf8LineText := EditControlWrapper.GetTextAtLine(Editor.EditControl, LogicLineNum);
-    if CodePageOnlySupportsEnglish then
-      FUniLineText := ConvertUtf8ToAlterAnsi(PAnsiChar(Utf8LineText), 'C')
-    else
-      FUniLineText := Utf8ToAnsi(Utf8LineText);
-    FAnsiLineText := FUniLineText;
-  {$ENDIF}
+    FRawLineText := EditControlWrapper.GetTextAtLine(Editor.EditControl, LogicLineNum);
+   {$ENDIF}
 {$ELSE}
 
     CanDrawCurrentLine := False;
