@@ -267,7 +267,7 @@ const
     tokFalse, tokKeywordNOT, tokSLB]; //, tokTypeId
   
   ExprTokens = [tokPlus, tokMinus] + FactorTokens;
-  SimpStmtTokens = [tokSymbol, tokKeywordGoto, tokKeywordInherited, tokAtSign, tokLB];
+  SimpStmtTokens = [tokSymbol, tokAmpersand, tokKeywordGoto, tokKeywordInherited, tokAtSign, tokLB];
 
   StructStmtTokens = [tokKeywordAsm, tokKeywordBegin, tokKeywordIf,
     tokKeywordCase, tokKeywordFor, tokKeywordWhile, tokKeywordRepeat,

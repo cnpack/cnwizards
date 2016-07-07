@@ -192,6 +192,9 @@ type
     function IsTokenAfterAttributesInSet(InTokens: TPascalTokenSet): Boolean;
     procedure CheckWriteBeginln;
   protected
+    function FormatPossibleAmpersand(PreSpaceCount: Byte = 0): Boolean;
+    // 返回是否有&
+
     // IndentForAnonymous 参数用来控制内部可能出现的匿名函数的缩进
     procedure FormatExprList(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
     procedure FormatExpression(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
@@ -766,7 +769,7 @@ begin
       tokKeywordOf, tokKeywordTo, tokKeywordDownto]) then
       WriteOneSpace  // 强行分离右括号/指针符与关键字
     else if (Token in LeftBracket + [tokPlus, tokMinus, tokHat]) and
-      ((FLastToken in NeedSpaceAfterKeywordTokens)
+      ((FLastToken in NeedSpaceAfterKeywordTokens)  // TODO: if these keywords are marked by Previous &?
       or ((FLastToken = tokKeywordAt) and UpperContainElementType([pfetRaiseAt]))) then
       WriteOneSpace; // 强行分离左括号/前置运算符号，与关键字以及 raise 语句中的 at，注意 at 后的表达式盖掉了pfetRaiseAt，所以需要获取上一层
   end;
@@ -1454,14 +1457,16 @@ end;
 
 procedure TCnBasePascalFormatter.FormatTypeParamIdent(PreSpaceCount: Byte);
 begin
+  FormatPossibleAmpersand(CnPascalCodeForRule.SpaceBeforeOperator);
   if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
     Match(Scaner.Token, PreSpaceCount); // 标识符中允许使用部分关键字
 
   while Scaner.Token = tokDot do
   begin
     Match(tokDot);
+    FormatPossibleAmpersand;
     if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
-      Match(Scaner.Token); // 也继续允许使用部分关键字
+      Match(Scaner.Token); // 也继续允许使用部分关键字，且不和之前的点或&隔开
   end;
 
   if Scaner.Token = tokLess then
@@ -1795,7 +1800,7 @@ var
   end;
 begin
   case Scaner.Token of
-    tokSymbol, tokAtSign, tokKeywordFinal, tokKeywordIn, tokKeywordOut,
+    tokSymbol, tokAmpersand, tokAtSign, tokKeywordFinal, tokKeywordIn, tokKeywordOut,
     tokKeywordString, tokKeywordAlign, tokKeywordAt, tokInteger, tokFloat,
     tokDirective_BEGIN..tokDirective_END, // 允许语句以部分关键字以及数字开头
     tokComplex_BEGIN..tokComplex_END:
@@ -2686,20 +2691,30 @@ end;
 
 procedure TCnBasePascalFormatter.FormatClassVarIdent(PreSpaceCount: Byte;
   const CanHaveUnitQual: Boolean);
+var
+  HasAmpersand: Boolean;
 begin
   while Scaner.Token = tokSLB do // Attribute
   begin
     FormatSingleAttribute(PreSpaceCount);
     Writeln;
   end;
+
+  HasAmpersand := FormatPossibleAmpersand(PreSpaceCount);
   if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
-    Match(Scaner.Token, PreSpaceCount); // 标识符中允许使用部分关键字
+  begin
+    if HasAmpersand then
+      Match(Scaner.Token)                 // 前面有 & 时不能将自己缩进
+    else
+      Match(Scaner.Token, PreSpaceCount); // 标识符中允许使用部分关键字
+  end;
 
   while CanHaveUnitQual and (Scaner.Token = tokDot) do
   begin
     Match(tokDot);
+    FormatPossibleAmpersand;
     if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
-      Match(Scaner.Token); // 也继续允许使用部分关键字
+      Match(Scaner.Token); // 也继续允许使用部分关键字，且不和之前的点或&隔开
   end;
 end;
 
@@ -2959,6 +2974,7 @@ begin
   if Scaner.Token = tokSLB then
   begin
     Match(tokSLB);
+    FormatPossibleAmpersand(PreSpaceCount);
     if Scaner.Token in KeywordTokens + [tokSymbol] then
       Match(Scaner.Token);
     Match(tokSRB, 0, 1); // ] 后有个空格
@@ -2973,6 +2989,7 @@ begin
     if Scaner.Token = tokSLB then
     begin
       Match(tokSLB, 1, 0); // [ 前有个空格
+      FormatPossibleAmpersand;
       if Scaner.Token in KeywordTokens + [tokSymbol] then
         Match(Scaner.Token);
       Match(tokSRB, 0, 1); // ] 后有个空格
@@ -3012,7 +3029,7 @@ begin
   end;
   
   {!! Fixed. e.g. "const proc: procedure = nil;" }
-  if Scaner.Token in [tokSymbol] + ComplexTokens + DirectiveTokens
+  if Scaner.Token in [tokSymbol, tokAmpersand] + ComplexTokens + DirectiveTokens
     + KeywordTokens then // 函数名允许出现关键字
   begin
     // 处理 of，虽然无 function of object 的语法
@@ -5642,6 +5659,16 @@ function TCnAbstractCodeFormatter.CurrentContainElementType(
   ElementTypes: TCnPascalFormattingElementTypeSet): Boolean;
 begin
   Result := (FElementType in ElementTypes) or UpperContainElementType(ElementTypes);
+end;
+
+function TCnBasePascalFormatter.FormatPossibleAmpersand(PreSpaceCount: Byte): Boolean;
+begin
+  Result := False;
+  if Scaner.Token = tokAmpersand then
+  begin
+    Match(tokAmpersand, PreSpaceCount);
+    Result := True;
+  end;
 end;
 
 initialization
