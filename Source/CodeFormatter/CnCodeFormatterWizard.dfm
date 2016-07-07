@@ -101,7 +101,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           Width = 97
           Height = 22
           MaxValue = 32
-          MinValue = 1
+          MinValue = 0
           TabOrder = 2
           Value = 1
         end
@@ -122,7 +122,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           Width = 97
           Height = 22
           MaxValue = 32
-          MinValue = 1
+          MinValue = 0
           TabOrder = 3
           Value = 1
         end
@@ -132,7 +132,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           Width = 97
           Height = 22
           MaxValue = 32
-          MinValue = 1
+          MinValue = 0
           TabOrder = 4
           Value = 1
         end

@@ -796,7 +796,7 @@ begin
           // 1 也会导致行尾注释后退，现多出的空格已由 Generator 删除
       end;
     tokAssign:
-      CodeGen.Write(Scaner.TokenString, 1, 1, NeedPadding);
+      CodeGen.Write(Scaner.TokenString, BeforeSpaceCount, AfterSpaceCount, NeedPadding);
   else
     if (Token in KeywordTokens + ComplexTokens + DirectiveTokens) then // 关键字范围扩大
     begin
@@ -1054,7 +1054,7 @@ begin
 
   if Scaner.Token = tokAssign then // 匹配 OLE 调用的情形
   begin
-    Match(tokAssign);
+    MatchOperator(tokAssign);
     FormatExpression(0, IndentForAnonymous);
   end;
 
@@ -1069,7 +1069,7 @@ begin
 
       if Scaner.Token = tokAssign then // 匹配 OLE 调用的情形
       begin
-        Match(tokAssign);
+        MatchOperator(tokAssign);
         FormatExpression(0, IndentForAnonymous);
       end;
     end;
@@ -1626,7 +1626,7 @@ begin
   case Scaner.Token of
     tokAssign:
       begin
-        Match(tokAssign);
+        MatchOperator(tokAssign);
         FormatExpression;
 
         if Scaner.Token in [tokKeywordTo, tokKeywordDownTo] then
@@ -1766,7 +1766,7 @@ var
       case Scaner.Token of
         tokAssign:
           begin
-            Match(tokAssign);
+            MatchOperator(tokAssign);
             FormatExpression(0, PreSpaceCount);
           end;
 
@@ -3386,7 +3386,7 @@ begin
     end
     else if Scaner.Token = tokAssign then // 匹配 OLE 调用的情形
     begin
-      Match(tokAssign);
+      MatchOperator(tokAssign);
       FormatExpression;
     end;
   end;
