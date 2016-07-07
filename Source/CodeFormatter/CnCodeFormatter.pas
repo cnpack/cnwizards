@@ -1796,7 +1796,7 @@ var
 begin
   case Scaner.Token of
     tokSymbol, tokAtSign, tokKeywordFinal, tokKeywordIn, tokKeywordOut,
-    tokKeywordString, tokKeywordAlign, tokInteger, tokFloat,
+    tokKeywordString, tokKeywordAlign, tokKeywordAt, tokInteger, tokFloat,
     tokDirective_BEGIN..tokDirective_END, // 允许语句以部分关键字以及数字开头
     tokComplex_BEGIN..tokComplex_END:
       begin
