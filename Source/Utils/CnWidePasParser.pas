@@ -67,7 +67,7 @@ type
     FItemLayer: Integer;
     FLineNumber: Integer;
     FMethodLayer: Integer;
-    FToken: array[0..CN_TOKEN_MAX_SIZE] of Char;
+    FToken: array[0..CN_TOKEN_MAX_SIZE] of WideChar;
     FTokenID: TTokenKind;
     FTokenPos: Integer;
     FIsMethodStart: Boolean;
@@ -373,12 +373,13 @@ var
 
   procedure DiscardToken(Forced: Boolean = False);
   begin
-    if AKeyOnly or Forced then
+    if (AKeyOnly or Forced) and (FList.Count > 0) then
     begin
       FreePasToken(FList[FList.Count - 1]);
       FList.Delete(FList.Count - 1);
     end;
   end;
+
 begin
   Clear;
   Lex := nil;
