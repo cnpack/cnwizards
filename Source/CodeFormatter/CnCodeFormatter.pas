@@ -769,7 +769,7 @@ begin
       tokKeywordOf, tokKeywordTo, tokKeywordDownto]) then
       WriteOneSpace  // 强行分离右括号/指针符与关键字
     else if (Token in LeftBracket + [tokPlus, tokMinus, tokHat]) and
-      ((FLastToken in NeedSpaceAfterKeywordTokens)  // TODO: if these keywords are marked by Previous &?
+      ((FLastToken in NeedSpaceAfterKeywordTokens)
       or ((FLastToken = tokKeywordAt) and UpperContainElementType([pfetRaiseAt]))) then
       WriteOneSpace; // 强行分离左括号/前置运算符号，与关键字以及 raise 语句中的 at，注意 at 后的表达式盖掉了pfetRaiseAt，所以需要获取上一层
   end;
@@ -843,7 +843,11 @@ begin
     end;
   end;
 
-  FLastToken := Token;
+  // 关键字如果之前有&，则不算关键字
+  if (FLastToken = tokAmpersand) and (Token in KeywordTokens + ComplexTokens + DirectiveTokens) then
+    FLastToken := tokSymbol
+  else
+    FLastToken := Token;
 end;
 
 procedure TCnAbstractCodeFormatter.CheckHeadComments;
