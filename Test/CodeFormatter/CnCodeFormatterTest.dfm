@@ -1,6 +1,6 @@
 object MainForm: TMainForm
-  Left = 189
-  Top = 0
+  Left = -15
+  Top = 13
   Width = 1036
   Height = 729
   Caption = 'CnPack IDE 专家包 Object Pascal / Delphi 代码格式化测试程序'
@@ -18,8 +18,8 @@ object MainForm: TMainForm
   object PageControl1: TPageControl
     Left = 0
     Top = 0
-    Width = 1020
-    Height = 691
+    Width = 1028
+    Height = 702
     ActivePage = tsSingleTest
     Align = alClient
     TabOrder = 0
@@ -29,14 +29,14 @@ object MainForm: TMainForm
         Left = 505
         Top = 29
         Width = 3
-        Height = 635
+        Height = 646
         Cursor = crHSplit
       end
       object Panel1: TPanel
         Left = 0
         Top = 29
         Width = 505
-        Height = 635
+        Height = 646
         Align = alLeft
         BevelOuter = bvNone
         Caption = 'Panel1'
@@ -55,7 +55,7 @@ object MainForm: TMainForm
           Left = 0
           Top = 12
           Width = 505
-          Height = 623
+          Height = 634
           Align = alClient
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
@@ -140,8 +140,8 @@ object MainForm: TMainForm
       object Panel2: TPanel
         Left = 508
         Top = 29
-        Width = 504
-        Height = 635
+        Width = 512
+        Height = 646
         Align = alClient
         BevelOuter = bvNone
         Caption = 'Panel1'
@@ -149,7 +149,7 @@ object MainForm: TMainForm
         object Label2: TLabel
           Left = 0
           Top = 0
-          Width = 504
+          Width = 512
           Height = 12
           Align = alTop
           Alignment = taCenter
@@ -158,8 +158,8 @@ object MainForm: TMainForm
         end
         object spl1: TSplitter
           Left = 0
-          Top = 452
-          Width = 504
+          Top = 463
+          Width = 512
           Height = 3
           Cursor = crVSplit
           Align = alBottom
@@ -167,8 +167,8 @@ object MainForm: TMainForm
         object DesMemo: TMemo
           Left = 0
           Top = 12
-          Width = 504
-          Height = 440
+          Width = 512
+          Height = 451
           Align = alClient
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
@@ -182,8 +182,8 @@ object MainForm: TMainForm
         end
         object tvCompDirective: TTreeView
           Left = 0
-          Top = 455
-          Width = 504
+          Top = 466
+          Width = 512
           Height = 180
           Align = alBottom
           Indent = 19
@@ -194,7 +194,7 @@ object MainForm: TMainForm
       object ToolBar1: TToolBar
         Left = 0
         Top = 0
-        Width = 1012
+        Width = 1020
         Height = 29
         BorderWidth = 1
         ButtonHeight = 20
@@ -227,25 +227,33 @@ object MainForm: TMainForm
           Caption = '自动换行'
           Checked = True
           State = cbChecked
-          TabOrder = 4
+          TabOrder = 0
         end
-        object chkSliceMode: TCheckBox
+        object chkLF: TCheckBox
           Left = 145
           Top = 0
           Width = 70
           Height = 20
+          Caption = '换行#$A'
+          TabOrder = 1
+        end
+        object chkSliceMode: TCheckBox
+          Left = 215
+          Top = 0
+          Width = 70
+          Height = 20
           Caption = '片断模式'
-          TabOrder = 3
+          TabOrder = 2
         end
         object btnFormat: TToolButton
-          Left = 215
+          Left = 285
           Top = 0
           Caption = '格式化！'
           ImageIndex = 0
           OnClick = btnFormatClick
         end
         object btnSep1: TToolButton
-          Left = 282
+          Left = 352
           Top = 0
           Width = 8
           Caption = 'btnSep1'
@@ -253,13 +261,13 @@ object MainForm: TMainForm
           Style = tbsSeparator
         end
         object lbl1: TLabel
-          Left = 290
+          Left = 360
           Top = 0
           Width = 6
           Height = 20
         end
         object Label3: TLabel
-          Left = 296
+          Left = 366
           Top = 0
           Width = 60
           Height = 20
@@ -268,27 +276,26 @@ object MainForm: TMainForm
           Layout = tlCenter
         end
         object Edit1: TEdit
-          Left = 356
+          Left = 426
           Top = 0
           Width = 25
           Height = 20
-          TabOrder = 0
+          TabOrder = 3
           Text = '2'
         end
         object UpDown1: TUpDown
-          Left = 381
+          Left = 451
           Top = 0
           Width = 15
           Height = 20
           Associate = Edit1
           Min = 0
           Position = 2
-          TabOrder = 1
-          Visible = False
+          TabOrder = 4
           Wrap = False
         end
         object btnSep2: TToolButton
-          Left = 396
+          Left = 466
           Top = 0
           Width = 8
           Caption = 'btnSep2'
@@ -296,7 +303,7 @@ object MainForm: TMainForm
           Style = tbsSeparator
         end
         object Label4: TLabel
-          Left = 404
+          Left = 474
           Top = 0
           Width = 48
           Height = 20
@@ -306,20 +313,20 @@ object MainForm: TMainForm
           Layout = tlCenter
         end
         object ComboBox1: TComboBox
-          Left = 452
+          Left = 522
           Top = 0
           Width = 112
           Height = 20
           Style = csDropDownList
           ItemHeight = 12
-          TabOrder = 2
+          TabOrder = 5
           Items.Strings = (
             '小写'
             '大写'
             '首字母大写')
         end
         object btn1: TToolButton
-          Left = 564
+          Left = 634
           Top = 0
           Width = 8
           Caption = 'btn1'
@@ -327,14 +334,14 @@ object MainForm: TMainForm
           Style = tbsSeparator
         end
         object ToolButton1: TToolButton
-          Left = 572
+          Left = 642
           Top = 0
           Caption = '保存结果'
           ImageIndex = 2
           OnClick = ToolButton1Click
         end
         object btn2: TToolButton
-          Left = 639
+          Left = 709
           Top = 0
           Width = 8
           Caption = 'btn2'
@@ -342,7 +349,7 @@ object MainForm: TMainForm
           Style = tbsSeparator
         end
         object btnParseCompDirective: TToolButton
-          Left = 647
+          Left = 717
           Top = 0
           Caption = '编译指令树'
           ImageIndex = 3

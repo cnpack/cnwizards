@@ -99,6 +99,7 @@ type
     spl1: TSplitter;
     tvCompDirective: TTreeView;
     chkAutoWrap: TCheckBox;
+    chkLF: TCheckBox;
     procedure btnLoadFileClick(Sender: TObject);
     procedure btnFormatClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -147,6 +148,7 @@ const
 var
   FCodeFor: TCnPascalCodeFormatter;
   MemStr: TMemoryStream;
+  S: string;
   OutMarks: PDWORD;
   Marks: array[0..1] of DWORD;
 begin
@@ -165,7 +167,15 @@ begin
 {$IFDEF TSTRINGS_HAS_WRITEBOM}
     SrcMemo.Lines.WriteBOM := False;
 {$ENDIF}
-    SrcMemo.Lines.SaveToStream(MemStr {$IFDEF UNICODE}, TEncoding.Unicode {$ENDIF});
+    if chkLF.Checked then
+    begin
+      S := SrcMemo.Lines.Text;
+      S := StringReplace(S, #13#10, #10, [rfReplaceAll]);
+      MemStr.Write(S[1], Length(S) * SizeOf(Char));
+    end
+    else
+      SrcMemo.Lines.SaveToStream(MemStr {$IFDEF UNICODE}, TEncoding.Unicode {$ENDIF});
+
     FCodeFor := TCnPascalCodeFormatter.Create(MemStr);
     FCodeFor.SpecifyIdentifiers(@Names[0]);
 

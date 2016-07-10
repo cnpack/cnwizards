@@ -152,6 +152,7 @@ type
     constructor Create(AStream: TStream; AMatchedInStart: Integer = CN_MATCHED_INVALID;
       AMatchedInEnd: Integer = CN_MATCHED_INVALID;
       ACompDirectiveMode: TCompDirectiveMode = cdmAsComment);
+    {* 构造函数，Stream 内部不需要字符串末尾的#0，这点不同于代码高亮解析等}
     destructor Destroy; override;
 
     procedure SpecifyIdentifiers(Names: PLPSTR); overload;

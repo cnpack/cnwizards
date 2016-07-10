@@ -1395,6 +1395,12 @@ begin
           FCodeGen.Write(S);
           FCodeGen.WriteCommentEndln;
         end
+        else if (Length(S) >= 1) and (S[Length(S)] = #10) then
+        begin
+          Delete(S, Length(S), 1);
+          FCodeGen.Write(S);
+          FCodeGen.WriteCommentEndln;
+        end
         else
         begin
           FCodeGen.Write(S);
@@ -1477,6 +1483,12 @@ begin
         else if (Length(S) >= 2) and (S[Length(S) - 1] = #13) and (S[Length(S)] = #10) then
         begin
           Delete(S, Length(S) - 1, 2);
+          FCodeGen.Write(S);
+          FCodeGen.WriteCommentEndln;
+        end
+        else if (Length(S) >= 1) and (S[Length(S)] = #10) then
+        begin
+          Delete(S, Length(S), 1);
           FCodeGen.Write(S);
           FCodeGen.WriteCommentEndln;
         end
