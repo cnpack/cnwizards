@@ -871,7 +871,7 @@ end;
 
 // 此函数非 Unicode IDE 下不应该被调用
 function ConvertAnsiPositionToUtf8OnUnicodeText(const Text: string;
-  AnsiCol: Integer; AvoidAnsi: Boolean = False): Integer;
+  AnsiCol: Integer): Integer;
 {$IFDEF UNICODE}
 var
   ULine: string;
@@ -884,21 +884,20 @@ begin
     Exit;
 
 {$IFDEF UNICODE}
-  if AvoidAnsi or CodePageOnlySupportsEnglish then
-  begin
-    UniCol := CalcWideStringLengthFromAnsiOffset(PWideChar(Text), AnsiCol);
-    ULine := Copy(Text, 1, UniCol - 1);
-    Result := CalcUtf8LengthFromWideString(PWideChar(ULine)) + 1;
-  end
-  else // Ansi模式会出现 Accent Char 错位的问题
-  begin
-    ALine := AnsiString(Text);
-    ALine := Copy(ALine, 1, AnsiCol - 1);         // 按 Ansi 的 Col 截断
-    UniCol := Length(string(ALine)) + 1;          // 转回 Unicode 的 Col
-    ULine := Copy(Text, 1, UniCol - 1);           // 重新截断
-    ALine := CnAnsiToUtf8(AnsiString(ULine));     // 转成 Ansi-Utf8
-    Result := Length(ALine) + 1;                  // 取 UTF8 的长度
-  end;
+  UniCol := CalcWideStringLengthFromAnsiOffset(PWideChar(Text), AnsiCol);
+  ULine := Copy(Text, 1, UniCol - 1);
+  Result := CalcUtf8LengthFromWideString(PWideChar(ULine)) + 1;
+
+//  end
+//  else // Ansi模式会出现 Accent Char 错位的问题
+//  begin
+//    ALine := AnsiString(Text);
+//    ALine := Copy(ALine, 1, AnsiCol - 1);         // 按 Ansi 的 Col 截断
+//    UniCol := Length(string(ALine)) + 1;          // 转回 Unicode 的 Col
+//    ULine := Copy(Text, 1, UniCol - 1);           // 重新截断
+//    ALine := CnAnsiToUtf8(AnsiString(ULine));     // 转成 Ansi-Utf8
+//    Result := Length(ALine) + 1;                  // 取 UTF8 的长度
+//  end;
 {$ENDIF}
 end;
 
@@ -935,6 +934,7 @@ begin
   Result := PP^ = #0;
 end;
 
+// 此函数非 Unicode 环境下不应该被调用
 function ConvertUtf8PositionToAnsi(const Utf8Text: AnsiString; Utf8Col: Integer): Integer;
 var
   ALine: AnsiString;
@@ -945,15 +945,8 @@ begin
     Exit;
 
   ALine := Copy(Utf8Text, 1, Utf8Col - 1);
-  if CodePageOnlySupportsEnglish then
-  begin
-    ULine := string(ALine);
-    Result := CalcAnsiLengthFromWideString(PWideChar(ULine)) + 1;
-  end
-  else
-  begin
-    Result := Length(CnUtf8ToAnsi(ALine)) + 1;
-  end;
+  ULine := Utf8Encode(ALine);
+  Result := CalcAnsiLengthFromWideString(PWideChar(ULine)) + 1;
 end;
 
 {$ENDIF}
@@ -2740,8 +2733,8 @@ var
   CharPos: TOTACharPos;
   BracketCount: Integer;
   BracketChars: PBracketArray;
-  TmpPos: TOTAEditPos;
-  TmpULine: string;
+  AttributePos: TOTAEditPos;
+  RawLine: string;
 
   function InCommentOrString(APos: TOTAEditPos): Boolean;
   var
@@ -2754,6 +2747,7 @@ var
       (Element = atCharacter);
   end;
 
+  // 历史原因，BDS 以上均使用 UTF8 搜索
   function ForwardFindMatchToken(const FindToken, MatchToken: AnsiString;
     out ALine: AnsiString): TOTAEditPos;
   var
@@ -2825,6 +2819,7 @@ var
     end;
   end;
 
+  // 历史原因，BDS 以上均使用 UTF8 搜索
   function BackFindMatchToken(const FindToken, MatchToken: AnsiString;
     out ALine: AnsiString): TOTAEditPos;
   var
@@ -2896,6 +2891,7 @@ var
     end;
   end;
 
+  // 历史原因，BDS 以上均使用 UTF8 搜索
   function FindMatchTokenFromMiddle: Boolean;
   var
     I, J, K, L: Integer;
@@ -3091,20 +3087,25 @@ begin
 
     CharPos.CharIndex := EditView.CursorPos.Col - 1;
     CharPos.Line := EditView.CursorPos.Line;
-    TmpULine := EditControlWrapper.GetTextAtLine(EditControl, CharPos.Line);
-    LText := AnsiString(TmpULine);
-    // BDS 下 CursorPos 是 utf8 的位置，LText 在 BDS 下是 UTF8，一致。
+    RawLine := EditControlWrapper.GetTextAtLine(EditControl, CharPos.Line);
+{$IFDEF UNICODE}
     // 在 D2009 下是 UnicodeString，CursorPos 是 Ansi 位置，因此需要转成 Ansi。
+    LText := ConvertUtf16ToAlterAnsi(PWideChar(RawLine), 'C');
+{$ELSE}
+    LText := AnsiString(RawLine);
+    // BDS 下 CursorPos 是 utf8 的位置，LText 在 BDS 下是 UTF8，一致。
+{$ENDIF}
 
-    TmpPos := EditView.CursorPos;
+    AttributePos := EditView.CursorPos;
 {$IFDEF UNICODE}
     // 把 Ansi 的 TmpPos 的 Col 转成 UTF8 的
-    TmpPos.Col := ConvertAnsiPositionToUtf8OnUnicodeText(TmpULine, TmpPos.Col);
+    AttributePos.Col := ConvertAnsiPositionToUtf8OnUnicodeText(RawLine, AttributePos.Col);
 {$ENDIF}
 
     if not CnOtaIsEditPosOutOfLine(EditView.CursorPos, EditView) and
-      not InCommentOrString(TmpPos) then
+      not InCommentOrString(AttributePos) then
     begin
+      // 使用 CursorPos.Col 在 LText 里搜索，偏移量与字符串都要求对应为 Ansi/Utf8/Ansi    
       if LText <> '' then
       begin
         if CharPos.CharIndex > 0 then
@@ -3671,7 +3672,7 @@ var
 {$IFDEF UNICODE}
     // D2009 或以上 GetAttributeAtPos 需要的是 UTF8 的Pos，因此进行 Col 的 UTF8 转换
     if FRawLineText <> '' then
-      Result := ConvertAnsiPositionToUtf8OnUnicodeText(FRawLineText, Token.EditCol, True);
+      Result := ConvertAnsiPositionToUtf8OnUnicodeText(FRawLineText, Token.EditCol);
 {$ENDIF}
   end;
 
