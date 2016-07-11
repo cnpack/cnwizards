@@ -764,8 +764,9 @@ begin
     if not FCodeGen.NextOutputWillbeLineHead and
       ((FLastToken in IdentTokens) and (Token in IdentTokens + [tokAtSign])) then
       WriteOneSpace
-    else if ((BeforeSpaceCount = 0) and (FLastToken = tokGreat) and (Token in IdentTokens + [tokAtSign])) then
-      WriteOneSpace // 泛型 property 后面加 read 时，需要用这种方式加空格分开
+    else if ((BeforeSpaceCount = 0) and (FLastToken = tokGreat) and
+      CurrentContainElementType([pfetInGeneric]) and (Token in IdentTokens + [tokAtSign])) then
+      WriteOneSpace // 泛型 property 后面加 read 时，需要用这种方式加空格分开，不是泛型时比如碰到普通大于号时则无须这样做
     else if (FLastToken in RightBracket + [tokHat]) and (Token in [tokKeywordThen, tokKeywordDo,
       tokKeywordOf, tokKeywordTo, tokKeywordDownto]) then
       WriteOneSpace  // 强行分离右括号/指针符与关键字
@@ -1449,15 +1450,20 @@ function TCnBasePascalFormatter.FormatTypeParams(PreSpaceCount: Byte;
   AllowFixEndGreateEqual: Boolean): Boolean;
 begin
   Result := False;
-  Match(tokLess);
-  FormatTypeParamDeclList(PreSpaceCount);
-  if AllowFixEndGreateEqual and (Scaner.Token = tokGreatOrEqu) then
-  begin
-    Match(tokGreatOrEqu, 0, 1); // TODO: 拆开 > 与 =
-    Result := True;
-  end
-  else
-    Match(tokGreat);
+  SpecifyElementType(pfetInGeneric);
+  try
+    Match(tokLess);
+    FormatTypeParamDeclList(PreSpaceCount);
+    if AllowFixEndGreateEqual and (Scaner.Token = tokGreatOrEqu) then
+    begin
+      Match(tokGreatOrEqu, 0, 1); // TODO: 拆开 > 与 =
+      Result := True;
+    end
+    else
+      Match(tokGreat);
+  finally
+    RestoreElementType;
+  end;
 end;
 
 procedure TCnBasePascalFormatter.FormatTypeParamIdent(PreSpaceCount: Byte);
