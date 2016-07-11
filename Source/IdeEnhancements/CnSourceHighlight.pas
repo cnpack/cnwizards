@@ -2735,6 +2735,9 @@ var
   BracketChars: PBracketArray;
   AttributePos: TOTAEditPos;
   RawLine: string;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  W: WideString;
+{$ENDIF}
 
   function InCommentOrString(APos: TOTAEditPos): Boolean;
   var
@@ -3163,10 +3166,17 @@ begin
     // 此处转换为 AnsiString 位置。D2009 中 LineText 不是 Utf8，因此这儿不需要转回。
     if Result then
     begin
-      AInfo.FTokenPos.Col := Length(CnUtf8ToAnsi(AnsiString(Copy(AInfo.TokenLine, 1,
-        AInfo.TokenPos.Col))));
-      AInfo.FTokenMatchPos.Col := Length(CnUtf8ToAnsi(AnsiString(Copy(AInfo.TokenMatchLine, 1,
-        AInfo.TokenMatchPos.Col))));
+      // 不做 Ansi 转换，免得出错
+      W := Utf8Decode(Copy(AInfo.TokenLine, 1, AInfo.TokenPos.Col));
+      AInfo.FTokenPos.Col := CalcAnsiLengthFromWideString(PWideChar(W));
+
+      W := Utf8Decode(Copy(AInfo.TokenMatchLine, 1, AInfo.TokenMatchPos.Col));
+      AInfo.FTokenMatchPos.Col := CalcAnsiLengthFromWideString(PWideChar(W));
+
+//      AInfo.FTokenPos.Col := Length(CnUtf8ToAnsi(AnsiString(Copy(AInfo.TokenLine, 1,
+//        AInfo.TokenPos.Col))));
+//      AInfo.FTokenMatchPos.Col := Length(CnUtf8ToAnsi(AnsiString(Copy(AInfo.TokenMatchLine, 1,
+//        AInfo.TokenMatchPos.Col))));
     end;
 {$ENDIF}
 
