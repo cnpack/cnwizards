@@ -1380,7 +1380,11 @@ begin
         end;
     else
       begin
-        Inc(FRun); Inc(ColNum); Inc(RawColNum);
+        // Unicode Identifiers Start with Unicode Chars
+        while Ord(FOrigin[FRun]) > 127 do
+        begin
+          Inc(FRun); Inc(ColNum); Inc(RawColNum);
+        end;
         FTokenPositionsList.Add(FRun);
         FTokenLineNumberList.Add(LineNum);
         FTokenColNumberList.Add(ColNum);

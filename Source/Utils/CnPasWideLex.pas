@@ -105,7 +105,9 @@ unit CnPasWideLex;
 * 兼容测试：PWin9X/2000/XP/7 + Delphi 2009 ~
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2016.01.13 V1.2
+* 修改记录：2016.07.13 V1.23
+*               修正一处 Unicode 标识符解析错误的问题
+*           2016.01.13 V1.2
 *               增加 Unicode 标识符的实现，可控制是否支持 Unicode 标识符
 *           2015.04.25 V1.1
 *               增加 WideString 实现
@@ -564,7 +566,8 @@ end;
 function TCnPasWideLex.KeyHash(ToHash: PWideChar): Integer;
 begin
   Result := 0;
-  while _WideCharInSet(ToHash^, ['a'..'z', 'A'..'Z']) do
+  while (_WideCharInSet(ToHash^, ['a'..'z', 'A'..'Z'])) or
+    (FSupportUnicodeIdent and (Ord(ToHash^) > 127)) do
   begin
     Inc(Result, mHashTable[_IndexChar(ToHash^)]);
     Inc(ToHash);
@@ -1998,6 +2001,7 @@ end;
 
 procedure TCnPasWideLex.Next;
 var
+  W: WideChar;
   C: CnIndexChar;
 begin
   case FTokenID of
@@ -2021,10 +2025,11 @@ begin
   case FComment of
     csNo:
     begin
-      C := _IndexChar(FOrigin[FRun]);
+      W := FOrigin[FRun];
+      C := _IndexChar(W);
       if FSupportUnicodeIdent then
       begin
-        if Ord(C) > 127 then
+        if Ord(W) > 127 then
           IdentProc
         else
           FProcTable[C];
@@ -2032,7 +2037,7 @@ begin
       else
       begin
 {$IFDEF UNICODE}
-        if Ord(C) > 255 then
+        if Ord(W) > 255 then
           UnknownProc
         else
 {$ENDIF}
