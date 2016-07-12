@@ -650,7 +650,7 @@ begin
     if BlockMatchInfo.KeyCount > 0 then
     begin
       for I := 0 to BlockMatchInfo.KeyCount - 1 do
-        ConvertGneralTokenPos(Pointer(EditView), BlockMatchInfo.KeyTokens[I]);
+        ConvertGeneralTokenPos(Pointer(EditView), BlockMatchInfo.KeyTokens[I]);
 
       BlockMatchInfo.ConvertLineList;
     end;
@@ -658,7 +658,7 @@ begin
     if BlockMatchInfo.CompDirectiveTokenCount > 0 then
     begin
       for I := 0 to BlockMatchInfo.CompDirectiveTokenCount - 1 do
-        ConvertGneralTokenPos(Pointer(EditView), BlockMatchInfo.CompDirectiveTokens[I]);
+        ConvertGeneralTokenPos(Pointer(EditView), BlockMatchInfo.CompDirectiveTokens[I]);
 
       BlockMatchInfo.ConvertCompDirectiveLineList;
     end;

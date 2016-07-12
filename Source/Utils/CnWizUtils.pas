@@ -970,7 +970,7 @@ procedure CnConvertCppTokenPositionToCharPos(EditViewPtr: Pointer;
 {* 封装的把 Cpp Token 解析出来的 Ansi/Wide 位置参数转换成 IDE 所需的 CharPos 的过程
   输出 CharPos，以备让 EditView 转换成 EditPos}
 
-procedure ConvertGneralTokenPos(EditView: Pointer; AToken: TCnGeneralPasToken);
+procedure ConvertGeneralTokenPos(EditView: Pointer; AToken: TCnGeneralPasToken);
 {* 将解析器解析出来的 Token 的行列转换成 IDE 所需的 EditPos}
 
 function GetTokenAnsiEditCol(AToken: TCnGeneralPasToken): Integer;
@@ -6821,7 +6821,7 @@ begin
 end;
 
 // 将解析器解析出来的 Token 的行列转换成 IDE 所需的 EditPos
-procedure ConvertGneralTokenPos(EditView: Pointer; AToken: TCnGeneralPasToken);
+procedure ConvertGeneralTokenPos(EditView: Pointer; AToken: TCnGeneralPasToken);
 var
   EditPos: TOTAEditPos;
   CharPos: TOTACharPos;

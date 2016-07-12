@@ -789,16 +789,6 @@ var
   {$ENDIF}
 {$ENDIF}
 
-function HighlightSupportsWideCharIdent: Boolean;
-begin
-  // 纯英文环境下暂不支持 Unicode 标识符高亮，因为解析是 Ansi 的。
-{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
-  Result := not CodePageOnlySupportsEnglish;
-{$ELSE}
-  Result := False;
-{$ENDIF}
-end;
-
 function CheckIsFlowToken(AToken: TCnGeneralPasToken; IsCpp: Boolean): Boolean;
 var
   I: Integer;
@@ -1265,7 +1255,7 @@ begin
           FKeyTokenList.Add(CppParser.Tokens[I]);
 
       for I := 0 to KeyCount - 1 do
-        ConvertGneralTokenPos(Pointer(EditView), KeyTokens[I]);
+        ConvertGeneralTokenPos(Pointer(EditView), KeyTokens[I]);
 
       // 记录大括号的层次
       UpdateCurTokenList;
@@ -1368,7 +1358,7 @@ begin
     if Result then
     begin
       for I := 0 to KeyCount - 1 do
-        ConvertGneralTokenPos(Pointer(EditView), KeyTokens[I]);
+        ConvertGeneralTokenPos(Pointer(EditView), KeyTokens[I]);
 
       ConvertLineList;
     end;
@@ -1499,7 +1489,7 @@ begin
 
       // 无当前过程或高亮所有内容时搜索当前所有标识符，避免只高亮光标出于当前过程内的问题
       for I := 0 to PasParser.Count - 1 do
-        ConvertGneralTokenPos(Pointer(EditView), PasParser.Tokens[I]);
+        ConvertGeneralTokenPos(Pointer(EditView), PasParser.Tokens[I]);
 
       // 高亮整个单元时，或当前无块时，高亮整个单元
       if (FCurMethodStartToken = nil) or (FCurMethodCloseToken = nil) or
@@ -1532,7 +1522,7 @@ begin
 
     // 将解析出的流程控制的Token 按范围规定加入 FFlowTokenList
     for I := 0 to CppParser.Count - 1 do
-      ConvertGneralTokenPos(Pointer(EditView), CppParser.Tokens[I]);
+      ConvertGeneralTokenPos(Pointer(EditView), CppParser.Tokens[I]);
 
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('CppParser.Count: %d', [CppParser.Count]);
@@ -1662,7 +1652,7 @@ begin
           if (AToken.TokenID = tkIdentifier) and // 此处判断支持双字节字符
             CheckTokenMatch(AToken.Token, FCurrentTokenName, CaseSensitive) then
           begin
-            ConvertGneralTokenPos(Pointer(EditView), AToken);
+            ConvertGeneralTokenPos(Pointer(EditView), AToken);
 
             FCurTokenList.Add(AToken);
             FCurTokenListEditLine.Add(Pointer(AToken.EditLine));
@@ -1712,17 +1702,19 @@ begin
         if (AToken.CppTokenKind = ctkIdentifier) and
           CheckTokenMatch(AToken.Token, FCurrentTokenName, CaseSensitive) then
         begin
-          CharPos := OTACharPos(AToken.CharIndex, AToken.LineNumber + 1);
-          EditView.ConvertPos(False, EditPos, CharPos);
+          ConvertGeneralTokenPos(Pointer(EditView), AToken);
 
-          // DONE: 以上这句本应在 D2009 时按以下修复，
-          // 但对于C/C++文件有Tab键存在时会出错导致高亮无法显示，故此先禁用
-      {$IFDEF BDS2009_UP}
-          // if not FHighlight.FUseTabKey then
-          // EditPos.Col := AToken.CharIndex;
-      {$ENDIF}
-          AToken.EditCol := EditPos.Col;
-          AToken.EditLine := EditPos.Line;
+//          CharPos := OTACharPos(AToken.CharIndex, AToken.LineNumber + 1);
+//          EditView.ConvertPos(False, EditPos, CharPos);
+//
+//          // DONE: 以上这句本应在 D2009 时按以下修复，
+//          // 但对于C/C++文件有Tab键存在时会出错导致高亮无法显示，故此先禁用
+//      {$IFDEF BDS2009_UP}
+//          // if not FHighlight.FUseTabKey then
+//          // EditPos.Col := AToken.CharIndex;
+//      {$ENDIF}
+//          AToken.EditCol := EditPos.Col;
+//          AToken.EditLine := EditPos.Line;
 
           FCurTokenList.Add(AToken);
           FCurTokenListEditLine.Add(Pointer(AToken.EditLine));
@@ -1784,7 +1776,7 @@ begin
         if not CheckIsCompDirectiveToken(PasParser.Tokens[I], FIsCppSource) then
           Continue;
 
-        ConvertGneralTokenPos(Pointer(EditView), PasParser.Tokens[I]);
+        ConvertGeneralTokenPos(Pointer(EditView), PasParser.Tokens[I]);
         FCompDirectiveTokenList.Add(PasParser.Tokens[I]);
       end;
     end;
@@ -1801,7 +1793,7 @@ begin
       if not CheckIsCompDirectiveToken(CppParser.Tokens[I], FIsCppSource) then
         Continue;
 
-      ConvertGneralTokenPos(Pointer(EditView), CppParser.Tokens[I]);
+      ConvertGeneralTokenPos(Pointer(EditView), CppParser.Tokens[I]);
       FCompDirectiveTokenList.Add(CppParser.Tokens[I]);
     end;
   end;

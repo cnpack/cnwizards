@@ -210,8 +210,8 @@ begin
 
   lstInfo.Items.Add(SEP);
   EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False, Element, LineFlag);
-  lstInfo.Items.Add(Format('GetAttributeAtPos EditPos %d:%d. Element %d, Flag %d.', [EditPos.Line,
-    EditPos.Col, Element, LineFlag]));
+  lstInfo.Items.Add(Format('GetAttributeAtPos EditPos %d:%d. Element %d, Flag %d. (NOT Correct in Unicode)',
+   [EditPos.Line, EditPos.Col, Element, LineFlag]));
 
   PasParser := TCnGeneralPasStructParser.Create;
   Stream := TMemoryStream.Create;
