@@ -841,7 +841,7 @@ var
 
 begin
   Result := -1;
-  if (LinesList = nil) or (LinesList.Count = 0) then
+  if (LinesList = nil) or (LinesList.Count = 0) or (TotalLine = 0) then
     Exit;
 
   I := 0;
