@@ -814,6 +814,8 @@ end;
 
 procedure TCnCodeGenerator.WriteCommentEndln;
 begin
+  if FLock <> 0 then Exit;
+
   FWritingCommentEndLn := True;
   Writeln;
   FWritingCommentEndLn := False;
@@ -894,6 +896,8 @@ var
   S: string;
   Old: Boolean;
 begin
+  if FLock <> 0 then Exit;
+
   // 如果上一个是空格，则忽略
   if FCode.Count > 0 then
   begin
