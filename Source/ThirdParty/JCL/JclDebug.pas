@@ -3491,7 +3491,7 @@ begin
       Result := OffsetStr + Result;
     end;
     if IncludeModuleName then
-      Insert(Format('{%-12s}', [_CnExtractFileName(GetModulePath(Module))]), Result, 11);
+      Insert(Format('{%-12s | $%8.8x}', [_CnExtractFileName(GetModulePath(Module)), Module]), Result, 11);
   end;
 end;
 
