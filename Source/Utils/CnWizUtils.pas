@@ -941,7 +941,8 @@ procedure CnOtaCloseEditView(AModule: IOTAModule);
 procedure CnOtaConvertEditViewCharPosToEditPos(EditViewPtr: Pointer;
   CharPosLine, CharPosCharIndex: Integer; var EditPos: TOTAEditPos);
 {* 将 EditView 中的 CharPos 转为 EditPos，封装并处理了 2009 以上有偏差的问题
-  EditView 使用 Pointer 进行传递以提高效率，2009 以上的修复未处理 Tab 展开}
+  EditView 使用 Pointer 进行传递以提高效率。2005 以上不使用 ConvertPos，而
+  使用宽字符串结构语法解析器进行预先 Tab 展开}
 
 procedure CnOtaConvertEditPosToParserCharPos(EditViewPtr: Pointer; var EditPos:
   TOTAEditPos; var CharPos: TOTACharPos);
@@ -6597,7 +6598,8 @@ begin
 end;
 
 // 将 EditView 中的 CharPos 转为 EditPos，封装并处理了 2009 以上有偏差的问题
-// EditView 使用 Pointer 进行传递以提高效率，2009 以上的修复未处理 Tab 展开
+// EditView 使用 Pointer 进行传递以提高效率。2005 以上不使用 ConvertPos，而
+// 使用宽字符串结构语法解析器进行预先 Tab 展开
 procedure CnOtaConvertEditViewCharPosToEditPos(EditViewPtr: Pointer;
   CharPosLine, CharPosCharIndex: Integer; var EditPos: TOTAEditPos);
 {$IFNDEF BDS2009_UP}
@@ -6607,7 +6609,7 @@ var
 {$ENDIF}
 begin
 {$IFDEF BDS}
-  // 2005 以上，Pascal 语法结构解析器里已经做了 Tab 展开，无须 Convert 了
+  // 2005 以上，Pascal/Cpp 宽字符语法结构解析器里已经做了 Tab 展开，无须 Convert 了
   EditPos.Line := CharPosLine;
   EditPos.Col := CharPosCharIndex + 1;
 {$ELSE}
