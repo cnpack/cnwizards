@@ -1219,6 +1219,11 @@ begin
         CnDebugger.LogMsg('Parse Cpp Source file: ' + EditView.Buffer.FileName);
   {$ENDIF}
 
+        {$IFDEF BDS}
+        CppParser.UseTabKey := FHighlight.FUseTabKey;
+        CppParser.TabWidth := FHighlight.FTabWidth;
+        {$ENDIF}
+
         CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
         CnCppParserParseSource(CppParser, Stream, EditView.CursorPos.Line, EditView.CursorPos.Col);
       finally
@@ -1291,12 +1296,12 @@ begin
         CnDebugger.LogMsg('Parse Pascal Source file: ' + EditView.Buffer.FileName);
   {$ENDIF}
 
-        CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
-
         {$IFDEF BDS}
         PasParser.UseTabKey := FHighlight.FUseTabKey;
         PasParser.TabWidth := FHighlight.FTabWidth;
         {$ENDIF}
+
+        CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
 
         // 解析当前显示的源文件，需要高亮当前标识符时不设置KeyOnly
         CnPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName),
