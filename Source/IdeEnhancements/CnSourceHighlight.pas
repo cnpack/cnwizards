@@ -5321,8 +5321,16 @@ var
     AnsiCol: Integer;
   begin
     AnsiCol := GetTokenAnsiEditCol(Token);
+{
+    Error: Delphi 5 Compiler Bug Occur. Result will be true even if Token.EditLine 25 and LineNo is 26
+    ASM shows Token.EditLine = LineNo are ignored! So change a style.
+
     Result := (Token <> nil) and // (Token.IsBlockStart or Token.IsBlockClose) and
       (Token.EditLine = LineNo) and (AnsiCol <= EndIndex) and
+      (AnsiCol >= StartIndex);
+}
+
+    Result := (Token.EditLine = LineNo) and (AnsiCol <= EndIndex) and
       (AnsiCol >= StartIndex);
   end;
 
@@ -5522,8 +5530,7 @@ var
     AnsiCol: Integer;
   begin
     AnsiCol := GetTokenAnsiEditCol(Token);
-    Result := (Token <> nil) and // (Token.IsBlockStart or Token.IsBlockClose) and
-      (Token.EditLine = LineNo) and (AnsiCol <= CharIndex + 1) and
+    Result := (Token.EditLine = LineNo) and (AnsiCol <= CharIndex + 1) and
       ((AnsiCol + Integer(_GeneralStrLen(Token.Token)) >= CharIndex + 1));
   end;
 
