@@ -479,7 +479,7 @@ type
     FViewFileNameIsPascalList: TList;
 {$IFDEF BDS}
     FRawLineText: string; // Ansi/Utf8/Utf16
-  {$IFDEF BDS2009_UP}
+  {$IFDEF BDS}
     FUseTabKey: Boolean;
     FTabWidth: Integer;
   {$ENDIF}
@@ -514,7 +514,7 @@ type
 {$IFNDEF BDS}
     function IndexOfCurLine(EditControl: TControl): Integer;
 {$ENDIF}
-{$IFDEF BDS2009_UP}
+{$IFDEF BDS}
     procedure UpdateTabWidth;
 {$ENDIF}
     procedure OnHighlightTimer(Sender: TObject);
@@ -1293,7 +1293,8 @@ begin
 
         CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
 
-        {$IFDEF BDS2009_UP}
+        {$IFDEF BDS}
+        PasParser.UseTabKey := FHighlight.FUseTabKey;
         PasParser.TabWidth := FHighlight.FTabWidth;
         {$ENDIF}
 
@@ -2459,7 +2460,7 @@ begin
 {$IFNDEF BDS}
   FCurLineList := TObjectList.Create;
 {$ENDIF}
-{$IFDEF BDS2009_UP}
+{$IFDEF BDS}
   UpdateTabWidth;
 {$ENDIF}
   FBlockShortCut := WizShortCutMgr.Add(SCnSourceHighlightBlock, ShortCut(Ord('H'), [ssCtrl, ssShift]),
@@ -4526,7 +4527,7 @@ begin
           FHighLightLineColor := LoadIDEDefaultCurrentColor;
 {$ENDIF}
       end;
-{$IFDEF BDS2009_UP}
+{$IFDEF BDS}
       if ctOptionChanged in ChangeType then
       begin
         // 记录当前是否使用 Tab 键以及 TabWidth
@@ -5077,7 +5078,7 @@ end;
 
 {$ENDIF}
 
-{$IFDEF BDS2009_UP}
+{$IFDEF BDS}
 
 function GetAvrTabWidth(TabWidthStr: string): Integer;
 var

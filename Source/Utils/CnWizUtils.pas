@@ -945,7 +945,7 @@ procedure CnOtaConvertEditViewCharPosToEditPos(EditViewPtr: Pointer;
 
 procedure CnOtaConvertEditPosToParserCharPos(EditViewPtr: Pointer; var EditPos:
   TOTAEditPos; var CharPos: TOTACharPos);
-{* 将 EditPos 转换成为 StructureParser 所需的 CharPos}
+{* 将 EditPos 转换成为 StructureParser 所需的 CharPos，暂无用处}
 
 function CnOtaGetCurrentCharPosFromCursorPosForParser(out CharPos: TOTACharPos): Boolean;
 {* 获取当前光标位置并将其转换成为 StructureParser 所需的 CharPos}
@@ -6606,7 +6606,8 @@ var
   CharPos: TOTACharPos;
 {$ENDIF}
 begin
-{$IFDEF BDS2009_UP}
+{$IFDEF BDS}
+  // 2005 以上，Pascal 语法结构解析器里已经做了 Tab 展开，无须 Convert 了
   EditPos.Line := CharPosLine;
   EditPos.Col := CharPosCharIndex + 1;
 {$ELSE}
