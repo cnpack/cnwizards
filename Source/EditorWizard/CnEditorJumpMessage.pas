@@ -52,7 +52,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, IniFiles, Menus, ToolsAPI, CnWizUtils, CnConsts, CnCommon,
+  StdCtrls, IniFiles, Menus, ToolsAPI, CnWizUtils, CnConsts, CnCommon, CnWizManager,
   CnWizEditFiler, CnEditorWizard, CnWizConsts, CnEditorCodeTool, CnWizIdeUtils,
   CnSourceHighlight, CnPasCodeParser, CnEditControlWrapper, mPasLex,
   CnCppCodeParser, mwBCBTokenList, CnFastList {$IFDEF BDS}, CnWizMethodHook {$ENDIF};
@@ -550,6 +550,7 @@ var
   DestToken: TCnGeneralPasToken;
   TokenIndex: Integer;
   CurIsPas, CurIsCpp: Boolean;
+  HighlightWizard: TCnSourceHighlight;
 begin
   EditControl := CnOtaGetCurrentEditControl;
   if EditControl = nil then
@@ -563,6 +564,10 @@ begin
   if EditView = nil then
     Exit;
 
+  HighlightWizard := TCnSourceHighlight(CnWizardMgr.WizardByClass(TCnSourceHighlight));
+  if HighlightWizard = nil then
+    Exit;
+
   CurIsPas := IsDprOrPas(EditView.Buffer.FileName) or IsInc(EditView.Buffer.FileName);
   CurIsCpp := IsCppSourceModule(EditView.Buffer.FileName);
   if (not CurIsCpp) and (not CurIsPas) then
@@ -572,9 +577,21 @@ begin
   CppParser := nil;
 
   if CurIsPas then
+  begin
     PasParser := TCnGeneralPasStructParser.Create;
+    {$IFDEF BDS}
+    PasParser.UseTabKey := HighlightWizard.UseTabKey;
+    PasParser.TabWidth := HighlightWizard.TabWidth;
+    {$ENDIF}
+  end;
   if CurIsCpp then
+  begin
     CppParser := TCnGeneralCppStructParser.Create;
+    {$IFDEF BDS}
+    CppParser.UseTabKey := HighlightWizard.UseTabKey;
+    CppParser.TabWidth := HighlightWizard.TabWidth;
+    {$ENDIF}
+  end;
 
   Stream := TMemoryStream.Create;
   try

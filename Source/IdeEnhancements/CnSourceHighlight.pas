@@ -479,10 +479,8 @@ type
     FViewFileNameIsPascalList: TList;
 {$IFDEF BDS}
     FRawLineText: string; // Ansi/Utf8/Utf16
-  {$IFDEF BDS}
     FUseTabKey: Boolean;
     FTabWidth: Integer;
-  {$ENDIF}
 {$ELSE}
     FHighLightCurrentLine: Boolean;
     FHighLightLineColor: TColor;
@@ -575,6 +573,13 @@ type
 
     procedure RepaintEditors;
     {* 让设置窗口调用，强迫重画}
+{$IFDEF BDS}
+    property UseTabKey: Boolean read FUseTabKey;
+    {* 当前编辑器环境是否使用 Tab 键，从 IDE 选项获得，供外界使用}
+    property TabWidth: Integer read FTabWidth;
+    {* 当前编辑器环境的 Tab 宽度，从 IDE 选项获得，供外界使用}
+{$ENDIF}
+
     property MatchedBracket: Boolean read FMatchedBracket write FMatchedBracket;
     property BracketColor: TColor read FBracketColor write FBracketColor;
     property BracketBold: Boolean read FBracketBold write FBracketBold;
