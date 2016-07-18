@@ -29,7 +29,9 @@ unit CnEditControlWrapper;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2015.07.13 V1.4
+* 修改记录：2016.07.16 V1.5
+*               增加 Tab 键属性的封装
+*           2015.07.13 V1.4
 *               增加三个编辑器鼠标事件通知，采用延迟 Hook 的机制
 *           2009.05.30 V1.3
 *               增加两个 BDS 下的顶、底页面切换变化通知
@@ -48,7 +50,7 @@ interface
 
 uses
   Windows, Messages, Classes, Controls, SysUtils, Graphics, ToolsAPI, ExtCtrls,
-  ComCtrls, TypInfo, Forms, Tabs, Registry, Contnrs,
+  ComCtrls, TypInfo, Forms, Tabs, Registry, Contnrs, {$IFDEF COMPILER6_UP}Variants, {$ENDIF}
   CnCommon, CnWizMethodHook, CnWizUtils, CnWizCompilerConst, CnWizNotifier,
   CnWizIdeUtils, CnWizOptions;
   
@@ -373,6 +375,12 @@ type
 
     procedure RepaintEditControls;
     {* 挨个强行让编辑器控件们重画}
+
+    function GetUseTabKey: Boolean;
+    {* 获得编辑器选项是否使用 Tab 键}
+
+    function GetTabWidth: Integer;
+    {* 获得编辑器选项中的 Tab 键宽度}
 
     function ClickBreakpointAtActualLine(ActualLineNum: Integer; EditControl: TControl = nil): Boolean;
     {* 点击编辑器控件左侧指定行的断点栏以增加/删除断点}
@@ -2535,6 +2543,75 @@ begin
     Result := EditorObj.ViewLineNumber[Result]
   else if Result >= 0 then
     Result := EditView.TopRow + Result;
+end;
+
+function TCnEditControlWrapper.GetTabWidth: Integer;
+var
+  Options: IOTAEnvironmentOptions;
+
+{$IFDEF BDS}
+
+  function GetAvrTabWidth(TabWidthStr: string): Integer;
+  var
+    Sl: TStringList;
+    Prev: Integer;
+    I: Integer;
+  begin
+    Sl := TStringList.Create();
+    try
+      Sl.Delimiter := ' ';
+      // The tab-string might separeted by ';', too
+      if Pos(';', TabWidthStr) > 0 then
+      begin
+        // if so, use it
+        Sl.Delimiter := ';';
+      end;
+      Sl.DelimitedText := TabWidthStr;
+      Result := 0;
+      Prev := 0;
+      for I := 0 to Sl.Count - 1 do
+      begin
+        Inc(Result, StrToInt(Sl[I]) - Prev);
+        Prev := StrToInt(Sl[I]);
+      end;
+      Result := Result div Sl.Count;
+    finally
+      FreeAndNil(Sl);
+    end;
+  end;
+
+{$ENDIF}
+
+begin
+  Result := 2;
+  Options := CnOtaGetEnvironmentOptions;
+  if Options <> nil then
+  begin
+    try
+{$IFDEF BDS}
+      Result := GetAvrTabWidth(Options.GetOptionValue('TabStops'));
+{$ELSE}
+      Result := StrToIntDef(VarToStr(Options.GetOptionValue('TabStops')), 2);
+{$ENDIF}
+    except
+      ;
+    end;
+  end;
+end;
+
+function TCnEditControlWrapper.GetUseTabKey: Boolean;
+var
+  Options: IOTAEnvironmentOptions;
+  S: string;
+begin
+  Options := CnOtaGetEnvironmentOptions;
+  if Options <> nil then
+  begin
+    S := VarToStr(Options.GetOptionValue('UseTabCharacter'));
+    Result := (S = 'True') or (S = '-1'); // D567 is -1
+  end
+  else
+    Result := False;
 end;
 
 initialization
