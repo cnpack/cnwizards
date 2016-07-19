@@ -46,6 +46,9 @@ CnPack的Pascal结构          列 Ansi                列有 Ansi/Wide           同右
 CnPack的Cpp结构             列 Ansi                列有 Ansi/Wide           同右     
 解析器所使用的行列          行列均 0 开始          行列均 0 开始，可展开Tab          
 -----------------------------------------------------------------------------------------------------
+CnPack的Pas/Cpp结构         不展开Tab              根据IDE设置展开Tab       根据IDE设置展开Tab
+解析器是否自行展开Tab       Tab由ConvertPos处理      
+-----------------------------------------------------------------------------------------------------
 Pas/Cpp Token 的            1 开始的 TOTAEditPos   1 开始的 TOTAEditPos     1 开始的 TOTAEditPos
 EditLine/EditCol属性        EditCol为Ansi          EditCol为Utf8            EditCol为Ansi
 =====================================================================================================

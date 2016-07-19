@@ -42,7 +42,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, mPasLex, CnPasWideLex, mwBCBTokenList,
-  Contnrs, CnCommon, CnFastList, CnPasCodeParser;
+  Contnrs, CnFastList, CnPasCodeParser;
 
 type
 {$IFDEF UNICODE}
@@ -206,6 +206,26 @@ implementation
 var
   TokenPool: TCnList;
 
+function WideTrim(const S: CnWideString): CnWideString;
+{$IFNDEF UNICODE}
+var
+  I, L: Integer;
+{$ENDIF}
+begin
+{$IFDEF UNICODE}
+  Result := Trim(S);
+{$ELSE}
+  L := Length(S);
+  I := 1;
+  while (I <= L) and (S[I] <= ' ') do Inc(I);
+  if I > L then Result := '' else
+  begin
+    while S[L] <= ' ' do Dec(L);
+    Result := Copy(S, I, L - I + 1);
+  end;
+{$ENDIF}
+end;
+
 // 用池方式来管理 PasTokens 以提高性能
 function CreatePasToken: TCnWidePasToken;
 begin
@@ -323,7 +343,7 @@ var
         begin
           AnsiLen := ((AnsiLen div FTabWidth) + 1) * FTabWidth;
           WideLen := ((WideLen div FTabWidth) + 1) * FTabWidth;
-          // TODO: Wide 字符串的 Tab 展开规则是否是这样
+          // TODO: Wide 字符串的 Tab 展开规则是否是这样？
         end
         else
         begin
@@ -920,7 +940,7 @@ var
         Token := Tokens[I];
         if (Token.Token^ = '(') or (Token.Token^ = ':') or (Token.Token^ = ';') then
           Break;
-        Result := Result + Trim(Token.Token);
+        Result := Result + WideTrim(Token.Token);
       end;
   end;
 

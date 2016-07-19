@@ -45,12 +45,6 @@ uses
   mwBCBTokenList, CnBCBWideTokenList, CnCommon, CnFastList;
   
 type
-{$IFDEF UNICODE}
-  CnWideString = string;
-{$ELSE}
-  CnWideString = WideString;
-{$ENDIF}
-
 //==============================================================================
 // C/C++ 解析器封装类，目前只实现解析大括号层次与普通标识符位置的功能
 //==============================================================================

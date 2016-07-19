@@ -2173,7 +2173,6 @@ begin
   inherited Create;
   FControl := AControl;
   FPasParser := TCnGeneralPasStructParser.Create;
-  FPasParser.UseTabKey := True;
   FCppParser := TCnGeneralCppStructParser.Create;
 
   FKeyTokenList := TCnList.Create;

@@ -67,7 +67,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ComCtrls, ToolWin, StdCtrls, ExtCtrls, IniFiles, ToolsAPI, Math, Menus, ActnList,
   CnProjectViewBaseFrm, CnWizClasses, CnWizManager, CnIni, CnWizEditFiler, mPasLex,
-  mwBCBTokenList, Contnrs, Clipbrd, CnEditControlWrapper, CnPasCodeParser,
+  mwBCBTokenList, Contnrs, Clipbrd, CnEditControlWrapper, CnPasCodeParser, CnWizUtils,
   {$IFDEF USE_CUSTOMIZED_SPLITTER} CnSplitter, {$ENDIF} CnWidePasParser, CnWideCppParser,
   CnPopupMenu, CnWizIdeUtils, CnCppCodeParser, CnEdit, RegExpr;
 
@@ -266,7 +266,7 @@ type
     destructor Destroy; override;
     procedure SetBounds(ALeft, ATop, AWidth, AHeight: Integer); override;
     procedure ShowDropBox;
-    procedure SetTextWithoutChange(const AText: string);
+    procedure SetTextWithoutChange(const AText: TCnIdeTokenString);
 
     property DropDownList: TCnProcDropDownBox read FDropDownList;
     property OnKillFocus: TNotifyEvent read FOnKillFocus write FOnKillFocus;
@@ -321,13 +321,8 @@ type
     FUseEditorToolBar: Boolean;
     FToolBarTimer: TTimer;
     FNeedReParse: Boolean;
-{$IFDEF UNICODE}
-    FCurrPasParser: TCnWidePasStructParser;
-    FCurrCppParser: TCnWideCppStructParser;
-{$ELSE}
-    FCurrPasParser: TCnPasStructureParser;
-    FCurrCppParser: TCnCppStructureParser;
-{$ENDIF}
+    FCurrPasParser: TCnGeneralPasStructParser;
+    FCurrCppParser: TCnGeneralCppStructParser;
     FCurrStream: TMemoryStream;
     FProcToolBarObjects: TList;
     FComboToSearch: TCnProcListComboBox;
@@ -417,7 +412,7 @@ implementation
 {$IFDEF CNWIZARDS_CNPROCLISTWIZARD}
 
 uses
-  CnConsts, CnWizConsts, CnWizOptions, CnWizUtils, CnWizMacroUtils, CnCommon,
+  CnConsts, CnWizConsts, CnWizOptions, CnWizMacroUtils, CnCommon,
   CnLangMgr, CnSrcEditorToolBar, CnWizNotifier, CnWizShareImages, CnPasWideLex,
   CnBCBWideTokenList
   {$IFDEF DEBUG}, CnDebug {$ENDIF};
@@ -1263,12 +1258,7 @@ begin
   else
     FCurrStream.Clear;
 
-{$IFDEF UNICODE}
-  CnOtaSaveEditorToStreamW(EditView.Buffer, FCurrStream);
-{$ELSE}
-  CnOtaSaveEditorToStream(EditView.Buffer, FCurrStream);
-{$ENDIF}
-
+  CnGeneralSaveEditorToStream(EditView.Buffer, FCurrStream);
   S := EditView.Buffer.FileName;
 
   FLanguage := ltUnknown;
@@ -1280,29 +1270,22 @@ begin
   if FLanguage = ltPas then
   begin
     if FCurrPasParser = nil then
-    begin
-{$IFDEF UNICODE}
-      FCurrPasParser := TCnWidePasStructParser.Create;
-{$ELSE}
-      FCurrPasParser := TCnPasStructureParser.Create;
-{$ENDIF}
-    end;
+      FCurrPasParser := TCnGeneralPasStructParser.Create;
 
-    FCurrPasParser.ParseSource(PChar(FCurrStream.Memory),
-      IsDpr(S) or IsInc(S), False);
+    CnPasParserParseSource(FCurrPasParser, FCurrStream, IsDpr(S) or IsInc(S), False);
 
     EditPos := EditView.CursorPos;
     EditView.ConvertPos(True, EditPos, CharPos);
 
     if not Obj.ClassCombo.Focused then
-      Obj.ClassCombo.SetTextWithoutChange(string(FCurrPasParser.FindCurrentDeclaration(CharPos.Line, CharPos.CharIndex)));
+      Obj.ClassCombo.SetTextWithoutChange(TCnIdeTokenString(FCurrPasParser.FindCurrentDeclaration(CharPos.Line, CharPos.CharIndex)));
 
     if not Obj.ProcCombo.Focused then
     begin
       if FCurrPasParser.CurrentChildMethod <> '' then
-        Obj.ProcCombo.SetTextWithoutChange(string(FCurrPasParser.CurrentChildMethod))
+        Obj.ProcCombo.SetTextWithoutChange(TCnIdeTokenString(FCurrPasParser.CurrentChildMethod))
       else if FCurrPasParser.CurrentMethod <> '' then
-        Obj.ProcCombo.SetTextWithoutChange(string(FCurrPasParser.CurrentMethod))
+        Obj.ProcCombo.SetTextWithoutChange(TCnIdeTokenString(FCurrPasParser.CurrentMethod))
       else
         Obj.ProcCombo.SetTextWithoutChange(SCnProcListNoContent);
     end;
@@ -1319,25 +1302,20 @@ begin
   else if FLanguage = ltCpp then
   begin
     if FCurrCppParser = nil then
-    begin
-{$IFDEF UNICODE}
-      FCurrCppParser := TCnWideCppStructParser.Create;
-{$ELSE}
-      FCurrCppParser := TCnCppStructureParser.Create;
-{$ENDIF}
-    end;
+      FCurrCppParser := TCnGeneralCppStructParser.Create;
 
     EditPos := EditView.CursorPos;
     EditView.ConvertPos(True, EditPos, CharPos);
     // 是否需要转换？
-    FCurrCppParser.ParseSource(PChar(FCurrStream.Memory), FCurrStream.Size,
-      CharPos.Line, CharPos.CharIndex, True);
+
+    CnCppParserParseSource(FCurrCppParser, FCurrStream,
+      CharPos.Line, CharPos.CharIndex);
 
     // 记录并显示当前类与当前函数名
     if not Obj.ClassCombo.Focused then
     begin
       if FCurrCppParser.CurrentClass <> '' then
-        Obj.ClassCombo.SetTextWithoutChange(string(FCurrCppParser.CurrentClass))
+        Obj.ClassCombo.SetTextWithoutChange(TCnIdeTokenString(FCurrCppParser.CurrentClass))
       else
         Obj.ClassCombo.SetTextWithoutChange(SCnProcListNoContent);
     end;
@@ -1345,7 +1323,7 @@ begin
     if not Obj.ProcCombo.Focused then
     begin
       if FCurrCppParser.CurrentMethod <> '' then
-        Obj.ProcCombo.SetTextWithoutChange(string(FCurrCppParser.CurrentMethod))
+        Obj.ProcCombo.SetTextWithoutChange(TCnIdeTokenString(FCurrCppParser.CurrentMethod))
       else
         Obj.ProcCombo.SetTextWithoutChange(SCnProcListNoContent);
     end;
@@ -4319,10 +4297,17 @@ begin
   end;
 end;
 
-procedure TCnProcListComboBox.SetTextWithoutChange(const AText: string);
+procedure TCnProcListComboBox.SetTextWithoutChange(const AText: TCnIdeTokenString);
 begin
   FDisableChange := True;
   Text := AText;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  if HandleAllocated then // Unicode 支持，但似乎不起作用，还是有问号乱码
+  begin
+    SetWindowTextW(Handle, PWideChar(AText));
+    Perform(CM_TEXTCHANGED, 0, 0);
+  end;
+{$ENDIF}
   FDisableChange := False;
 end;
 
