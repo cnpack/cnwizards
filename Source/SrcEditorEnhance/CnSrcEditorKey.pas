@@ -494,7 +494,7 @@ end;
 function TCnSrcEditorKey.DoSmartCopy(View: IOTAEditView; Key, ScanCode: Word;
   Shift: TShiftState; var Handled: Boolean): Boolean;
 var
-  Token: string;
+  Token: TCnIdeTokenString;
   Idx: Integer;
 begin
   if (Key in [Ord('C'), Ord('V'), Ord('X')]) and (Shift = [ssCtrl]) then
@@ -503,17 +503,38 @@ begin
     begin
       if FSmartCopy and (Key in [Ord('C'), Ord('X')]) then
       begin
-        if CnOtaGetCurrPosToken(Token, Idx, True) then
+{$IFDEF IDE_STRING_ANSI_UTF8}
+        if not CnOtaGetCurrPosTokenUtf8(Token, Idx, True) then
         begin
-          Clipboard.AsText := Token;
-
-          if Key = Ord('X') then
-          begin
-            CnOtaDeleteCurrToken;
-            View.Paint;
-          end;
-          Handled := True;
+          Handled := False;
+          Result := Handled;
+          Exit;
         end;
+{$ELSE}
+        if not CnOtaGetCurrPosToken(Token, Idx, True) then
+        begin
+          Handled := False;
+          Result := Handled;
+          Exit;
+        end;
+{$ENDIF}
+
+{$IFDEF IDE_STRING_ANSI_UTF8}
+          // 把 WideString 内容设给剪贴板
+          if IsClipboardFormatAvailable(CF_UNICODETEXT) then
+            SetClipboardContent(CF_UNICODETEXT, PWideChar(Token)^, (Length(Token) * SizeOf(WideChar)) + 1)
+          else
+            Clipboard.AsText := Token;
+{$ELSE}
+          // D567/2009可以直接设置剪贴板字符串，Ansi/UnicodeString
+          Clipboard.AsText := Token;
+{$ENDIF}
+        if Key = Ord('X') then
+        begin
+          CnOtaDeleteCurrToken;
+          View.Paint;
+        end;
+        Handled := True;
       end
       else if FSmartPaste then
       begin
