@@ -1381,10 +1381,19 @@ begin
     else
       begin
         // Unicode Identifiers Start with Unicode Chars
-        while Ord(FOrigin[FRun]) > 127 do
+        if Ord(FOrigin[FRun]) > 127 then
         begin
-          Inc(FRun); Inc(ColNum); Inc(RawColNum);
+          while (Ord(FOrigin[FRun]) > 127) or (FSupportUnicodeIdent and
+            _WideCharInSet(FOrigin[FRun], ['A'..'Z', 'a'..'z', '0'..'9', '_'])) do
+          begin
+            StepRun;
+          end;
+        end
+        else // Other strage chars.
+        begin
+          StepRun;
         end;
+
         FTokenPositionsList.Add(FRun);
         FTokenLineNumberList.Add(LineNum);
         FTokenColNumberList.Add(ColNum);

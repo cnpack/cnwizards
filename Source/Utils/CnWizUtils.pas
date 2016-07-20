@@ -4634,7 +4634,7 @@ var
   EditPos: IOTAEditPosition;
 begin
   Result := False;
-  if CnOtaGetCurrPosToken(Token, CurrIndex, True, FirstSet, CharSet) then
+  if CnOtaGetCurrPosToken(Token, CurrIndex, True, FirstSet, CharSet, nil, _SUPPORT_WIDECHAR_IDENTIFIER) then
   begin
     EditPos := CnOtaGetEditPosition;
     if Assigned(EditPos) then
