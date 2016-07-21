@@ -496,9 +496,11 @@ type
     FCompDirectiveBackground: TColor;
     function GetColorFg(ALayer: Integer): TColor;
     function EditorGetTextRect(Editor: TEditorObject; AnsiPos: TOTAEditPos;
-      const {$IFDEF BDS}LineText, {$ENDIF} AText: string; var ARect: TRect): Boolean;
+      {$IFDEF BDS}const LineText: string; {$ENDIF} const AText: TCnIdeTokenString;
+      var ARect: TRect): Boolean;
     {* 计算某 EditPos 位置的指定字符串在所在的行中的 Rect，注意绘制所用的 Rect
-      视觉上是 Ansi 效果，因此 D2005~2007 的 Utf8 的 EditPos 不能直接用}
+      视觉上是 Ansi 效果，因此 D2005~2007 的 Utf8 的 EditPos 不能直接用。
+      LineText 是 Ansi/Utf8/Utf16，AText 是解析的 Token，是 Ansi/Utf16/Utf16}
     procedure EditorPaintText(EditControl: TControl; ARect: TRect; AText: AnsiString;
       AColor, AColorBk, AColorBd: TColor; ABold, AItalic, AUnderline: Boolean);
     function IndexOfBracket(EditControl: TControl): Integer;
@@ -2549,15 +2551,15 @@ begin
     FOnEnhConfig(Self);
 end;
 
-function TCnSourceHighlight.EditorGetTextRect(Editor: TEditorObject;
-  AnsiPos: TOTAEditPos; const {$IFDEF BDS}LineText, {$ENDIF} AText: string; var ARect: TRect): Boolean;
+function TCnSourceHighlight.EditorGetTextRect(Editor: TEditorObject; AnsiPos: TOTAEditPos;
+  {$IFDEF BDS}const LineText: string; {$ENDIF} const AText: TCnIdeTokenString;
+  var ARect: TRect): Boolean;
 {$IFDEF BDS}
 var
   I, TotalWidth: Integer;
+  Size: TSize;
 {$IFDEF UNICODE}
   UCol: Integer;
-{$ENDIF}
-{$IFDEF UNICODE}
   U: string;
 {$ELSE}
   U: WideString;
@@ -2583,19 +2585,19 @@ begin
       EditCanvas := EditControlWrapper.GetEditControlCanvas(Editor.EditControl);
       TotalWidth := 0;
 
-{$IFDEF UNICODE}
+  {$IFDEF UNICODE}
       // 遇到窄的双字节字符时转 AnsiString 会导致列计算错误，此处换一种方法
       UCol := CalcWideStringLengthFromAnsiOffset(PWideChar(LineText), AnsiPos.Col);
       if UCol > 1 then
         U := Copy(LineText, 1, UCol - 1)
       else
         U := '';
-{$ELSE}
+  {$ELSE}
       if AnsiPos.Col > 1 then
         U := WideString(Copy(ConvertNtaEditorStringToAnsi(LineText, True), 1, AnsiPos.Col - 1))
       else
         U := '';
-{$ENDIF}
+  {$ENDIF}
 
       if U <> '' then
       begin
@@ -2614,9 +2616,21 @@ begin
           end;
         end;
       end;
+
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+      // Canvas 在 2005～2007 下不能直接用 TextWidth 获得 WideString 宽度，得换 API
+      Size.cX := 0;
+      Size.cY := 0;
+
+      GetTextExtentPoint32W(EditCanvas.Handle, PWideChar(AText), Length(AText), Size);
+      ARect := Bounds(GutterWidth + TotalWidth,
+        (AnsiPos.Line - EditView.TopRow) * CharSize.cy, Size.cx,
+        CharSize.cy);
+  {$ELSE}
       ARect := Bounds(GutterWidth + TotalWidth,
         (AnsiPos.Line - EditView.TopRow) * CharSize.cy, EditCanvas.TextWidth(AText),
         CharSize.cy);
+  {$ENDIF}
 {$ELSE}
       ARect := Bounds(GutterWidth + (AnsiPos.Col - EditView.LeftColumn) * CharSize.cx,
         (AnsiPos.Line - EditView.TopRow) * CharSize.cy, CharSize.cx * Length(AText),
@@ -3245,12 +3259,12 @@ begin
       if Info.IsMatch then
       begin
         if (LogicLineNum = Info.TokenPos.Line) and EditorGetTextRect(Editor,
-          OTAEditPos(Info.TokenPos.Col, LineNum), {$IFDEF BDS}FRawLineText, {$ENDIF} string(Info.TokenStr), R) then
+          OTAEditPos(Info.TokenPos.Col, LineNum), {$IFDEF BDS}FRawLineText, {$ENDIF} TCnIdeTokenString(Info.TokenStr), R) then
           EditorPaintText(EditControl, R, Info.TokenStr, BracketColor,
             BracketColorBk, BracketColorBd, BracketBold, False, False);
 
         if (LogicLineNum = Info.TokenMatchPos.Line) and EditorGetTextRect(Editor,
-          OTAEditPos(Info.TokenMatchPos.Col, LineNum), {$IFDEF BDS}FRawLineText, {$ENDIF} string(Info.TokenMatchStr), R) then
+          OTAEditPos(Info.TokenMatchPos.Col, LineNum), {$IFDEF BDS}FRawLineText, {$ENDIF} TCnIdeTokenString(Info.TokenMatchStr), R) then
           EditorPaintText(EditControl, R, Info.TokenMatchStr, BracketColor,
             BracketColorBk, BracketColorBd, BracketBold, False, False);
       end;
@@ -3811,7 +3825,7 @@ begin
               EditPos := OTAEditPos(GetTokenAnsiEditCol(Token) + J, LineNum);
               if not RectGot then
               begin
-                if EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FRawLineText, {$ENDIF} string(Token.Token[J]), R) then
+                if EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FRawLineText, {$ENDIF} TCnIdeTokenString(Token.Token[J]), R) then
                   RectGot := True
                 else
                   Continue;
@@ -3872,7 +3886,7 @@ begin
             TokenLen := Length(Token.Token);
 
             EditPos := OTAEditPos(GetTokenAnsiEditCol(Token), LineNum);
-            if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FRawLineText, {$ENDIF} string(Token.Token), R) then
+            if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FRawLineText, {$ENDIF} TCnIdeTokenString(Token.Token), R) then
               Continue;
 
             // Token 初始 EditCol 在 Unicode 环境下是 Ansi，需要转换成 UTF8 供 GetAttributeAtPos 使用
@@ -3979,7 +3993,7 @@ begin
             TokenLen := Length(Token.Token);
 
             EditPos := OTAEditPos(GetTokenAnsiEditCol(Token), LineNum);
-            if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FRawLineText, {$ENDIF} string(Token.Token), R) then
+            if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FRawLineText, {$ENDIF} TCnIdeTokenString(Token.Token), R) then
               Continue;
 
             // Token 初始 EditCol 在 Unicode 环境下是 Ansi，需要转换成 UTF8 供 GetAttributeAtPos 使用
@@ -4089,7 +4103,7 @@ begin
               (CompDirectivePair.IndexOfMiddleToken(Token) >= 0) then
             begin
               EditPos := OTAEditPos(GetTokenAnsiEditCol(Token), LineNum);
-              if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FRawLineText, {$ENDIF} string(Token.Token), R) then
+              if not EditorGetTextRect(Editor, EditPos, {$IFDEF BDS}FRawLineText, {$ENDIF} TCnIdeTokenString(Token.Token), R) then
                 Continue;
 
               // Token 初始 EditCol 在 Unicode 环境下是 Ansi，需要转换成 UTF8 供 GetAttributeAtPos 使用
