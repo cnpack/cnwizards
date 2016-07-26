@@ -6602,7 +6602,7 @@ end;
 // 使用宽字符串结构语法解析器进行预先 Tab 展开
 procedure CnOtaConvertEditViewCharPosToEditPos(EditViewPtr: Pointer;
   CharPosLine, CharPosCharIndex: Integer; var EditPos: TOTAEditPos);
-{$IFNDEF BDS2009_UP}
+{$IFNDEF BDS}
 var
   EditView: IOTAEditView;
   CharPos: TOTACharPos;

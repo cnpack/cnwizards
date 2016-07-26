@@ -69,6 +69,8 @@ var
 begin
   mmoCppResult.Lines.Clear;
   Parser := TCnWideCppStructParser.Create(chkWideCpp.Checked);
+  Parser.UseTabKey := True;
+  Parser.TabWidth := 2;
 
   try
     S := mmoCppSrc.Lines.Text;
@@ -78,8 +80,8 @@ begin
     for I := 0 to Parser.Count - 1 do
     begin
       Token := Parser.Tokens[I];
-      mmoCppResult.Lines.Add(Format('%3.3d Token. Line: %d, Col %2.2d, Position %4.4d. TokenKind %s, Token: %s',
-        [I, Token.LineNumber, Token.CharIndex, Token.TokenPos, GetEnumName(TypeInfo(TCTokenKind),
+      mmoCppResult.Lines.Add(Format('%3.3d Token. Line: %d, Col(A/W) %2.2d/%2.2d, Position %4.4d. TokenKind %s, Token: %s',
+        [I, Token.LineNumber, Token.AnsiIndex, Token.CharIndex, Token.TokenPos, GetEnumName(TypeInfo(TCTokenKind),
          Ord(Token.CppTokenKind)), Token.Token]));
     end;
     mmoCppResult.Lines.Add('');

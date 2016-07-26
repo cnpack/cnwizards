@@ -3898,7 +3898,9 @@ begin
             begin
               EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False,
                 Element, LineFlag);
-              CanDrawToken := (LineFlag = 0) and (Element in [atIdentifier]);
+              CanDrawToken := (LineFlag = 0) and (Element in [atIdentifier
+                {$IFDEF IDE_STRING_ANSI_UTF8} , atIllegal {$ENDIF}]);
+              // 2005~2007 下 Cpp 文件的 Unicode 标识符是 atIllegal，据说 Pascal 中不会出现
 
               if not CanDrawToken then // 如果中间有选择区，则不画
                 Break;
@@ -3949,7 +3951,8 @@ begin
                   EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False,
                     Element, LineFlag);
 
-                  if (Element = atIdentifier) and (LineFlag = 0) then
+                  // 2005~2007 下 Cpp 文件的 Unicode 标识符是 atIllegal，据说 Pascal 中不会出现
+                  if (Element in [atIdentifier {$IFDEF IDE_STRING_ANSI_UTF8} , atIllegal {$ENDIF}]) and (LineFlag = 0) then
                   begin
                     // 在位置上画字，颜色已先设置好
                     {$IFDEF UNICODE}
