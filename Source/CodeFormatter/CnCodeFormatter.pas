@@ -572,7 +572,8 @@ end;
 
 function TCnAbstractCodeFormatter.CanBeSymbol(Token: TPascalToken): Boolean;
 begin
-  Result := Scaner.Token in ([tokSymbol] + ComplexTokens); //KeywordTokens + DirectiveTokens);
+  Result := Scaner.Token in ([tokSymbol, tokAmpersand, tokAtSign, tokKeywordFinal, tokKeywordIn, tokKeywordOut,
+    tokKeywordString, tokKeywordAlign, tokKeywordAt] + ComplexTokens + DirectiveTokens);
 end;
 
 procedure TCnAbstractCodeFormatter.Match(Token: TPascalToken; BeforeSpaceCount,
@@ -1813,7 +1814,7 @@ begin
   case Scaner.Token of
     tokSymbol, tokAmpersand, tokAtSign, tokKeywordFinal, tokKeywordIn, tokKeywordOut,
     tokKeywordString, tokKeywordAlign, tokKeywordAt, tokInteger, tokFloat,
-    tokDirective_BEGIN..tokDirective_END, // 允许语句以部分关键字以及数字开头
+    tokDirective_BEGIN..tokDirective_END, // 允许语句以部分关键字以及数字开头，其余和 CanBeSymbol 函数内部实现类似
     tokComplex_BEGIN..tokComplex_END:
       begin
         FormatDesignatorAndOthers(PreSpaceCount);
