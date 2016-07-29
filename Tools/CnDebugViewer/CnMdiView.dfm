@@ -59,6 +59,18 @@ object CnMsgChild: TCnMsgChild
         Width = 64
       end
       item
+        Caption = 'Ave(us)'
+        Width = 64
+      end
+      item
+        Caption = 'Max(us)'
+        Width = 64
+      end
+      item
+        Caption = 'Min(us)'
+        Width = 64
+      end
+      item
         Caption = 'Tag'
         Width = 40
       end>
