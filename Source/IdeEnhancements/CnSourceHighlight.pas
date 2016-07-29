@@ -492,6 +492,7 @@ type
     FHighlightFlowStatement: Boolean;
     FFlowStatementBackground: TColor;
     FFlowStatementForeground: TColor;
+    FCustomIdentifiers: TStrings;
     FHighlightCompDirective: Boolean;
     FCompDirectiveBackground: TColor;
     function GetColorFg(ALayer: Integer): TColor;
@@ -775,6 +776,7 @@ const
   csHighlightFlowStatement = 'HighlightFlowStatement';
   csFlowStatementBackground = 'FlowStatementBackground';
   csFlowStatementForeground = 'FlowStatementForeground';
+  csCustomIdentifiers = 'CustomIdentifiers';
   csHighlightCompDirective = 'HighlightCompDirective';
   csCompDirectiveBackground = 'CompDirectiveBackground';
 
@@ -830,6 +832,15 @@ begin
         end;
       end;
     end;
+
+    for I := 0 to FHighlight.FCustomIdentifiers.Count - 1 do
+    begin
+      if AToken.Token = FHighlight.FCustomIdentifiers[I] then
+      begin
+        Result := True;
+        Exit;
+      end;
+    end;
   end
   else // 不区分大小写
   begin
@@ -862,8 +873,21 @@ begin
         end;
       end;
     end;
+
+    T := AToken.Token;
+    for I := 0 to FHighlight.FCustomIdentifiers.Count - 1 do
+    begin
+      {$IFDEF UNICODE}
+      // Unicode 时直接调用 API 比较以避免生成临时字符串而影响性能
+      Result := lstrcmpiA(@T[1], @((FHighlight.FCustomIdentifiers[I])[1])) = 0;
+      {$ELSE}
+      Result := LowerCase(T) = LowerCase(FHighlight.FCustomIdentifiers[I]);
+     {$ENDIF}
+
+      if Result then
+        Exit;
+    end;
   end;
-  Result := False;
 end;
 
 // 此函数非 Unicode IDE 下不应该被调用
@@ -2456,6 +2480,7 @@ begin
   FHighlightFlowStatement := True; // 默认画流程语句背景
   FFlowStatementBackground := csDefFlowControlBg;
   FFlowStatementForeground := clBlack;
+  FCustomIdentifiers := TStringList.Create;
 
   FHighlightCompDirective := True;    // 默认打开光标下的编译指令背景高亮
   FCompDirectiveBackground := csDefaultHighlightBackgroundColor;
@@ -2521,6 +2546,7 @@ begin
   FIdentifierHighlight.Free;
   FCompDirectiveHighlight.Free;
   FDirtyList.Free;
+  FCustomIdentifiers.Free;
   FViewFileNameIsPascalList.Free;
   FViewChangedList.Free;
 {$IFNDEF BDS}
@@ -4691,6 +4717,8 @@ begin
     FHighlightFlowStatement := ReadBool('', csHighlightFlowStatement, FHighlightFlowStatement);
     FFlowStatementBackground := ReadColor('', csFlowStatementBackground, FFlowStatementBackground);
     FFlowStatementForeground := ReadColor('', csFlowStatementForeground, FFlowStatementForeground);
+    ReadStrings('', csCustomIdentifiers, FCustomIdentifiers);
+
     FHighlightCompDirective := ReadBool('', csHighlightCompDirective, FHighlightCompDirective);
     FCompDirectiveBackground := ReadColor('', csCompDirectiveBackground, FCompDirectiveBackground);
 
@@ -4752,6 +4780,7 @@ begin
     WriteBool('', csHighlightFlowStatement, FHighlightFlowStatement);
     WriteColor('', csFlowStatementBackground, FFlowStatementBackground);
     WriteColor('', csFlowStatementForeground, FFlowStatementForeground);
+    WriteStrings('', csCustomIdentifiers, FCustomIdentifiers);
     WriteBool('', csHighlightCompDirective, FHighlightCompDirective);
     WriteColor('', csCompDirectiveBackground, FCompDirectiveBackground);
 
