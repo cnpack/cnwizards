@@ -289,6 +289,10 @@ begin
   Item.Caption := IntToStr(Item.Index + 1);
   Item.SubItems.Add(IntToStr(ATimeItem.PassCount));
   Item.SubItems.Add(Format('%f', [ATimeItem.CPUPeriod / CPUClock]));
+  Item.SubItems.Add(Format('%f', [ATimeItem.AvePeriod / CPUClock]));
+  Item.SubItems.Add(Format('%f', [ATimeItem.MaxPeriod / CPUClock]));
+  Item.SubItems.Add(Format('%f', [ATimeItem.MinPeriod / CPUClock]));
+
   Item.SubItems.Add(ATimeItem.Tag);
 end;
 
@@ -668,7 +672,7 @@ function TCnMsgChild.DescriptionOfMsg(Index: Integer;
 begin
   Result := Format(SCnMsgDescriptionFmt, [Index + 1, AMsgItem.Indent,
     AMsgItem.Level, AMsgItem.ThreadId, AMsgItem.ProcessId, AMsgItem.Tag,
-    GetLongTimeDesc(AMsgItem), AMsgItem.Msg]);
+    {AMsgItem.MsgCPInterval, } GetLongTimeDesc(AMsgItem), AMsgItem.Msg]);
 end;
 
 procedure TCnMsgChild.lvTimeClick(Sender: TObject);

@@ -79,7 +79,7 @@ type
     ThreadId:  DWORD;                              // 调用者的线程 ID
     Tag: array[0..CnMaxTagLength - 1] of AnsiChar; // 自定义 Tag 值，供用户过滤用
     MsgType:   DWORD;                              // 消息类型
-    MsgCPInterval: DWORD;                          // 计时结束时的 CPU 周期数
+    MsgCPInterval: Int64;                          // 计时结束时的 CPU 周期数
     TimeStampType: DWORD;                          // 消息输出的时间戳类型
     case Integer of
       1: (MsgDateTime:   TDateTime);               // 消息输出的时间戳值 DateTime

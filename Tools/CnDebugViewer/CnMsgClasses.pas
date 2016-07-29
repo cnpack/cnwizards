@@ -91,10 +91,16 @@ type
     FTag: string;
     FMsg: string;
     FPassCount: Integer;
+    FMinPeriod: Int64;
+    FMaxPeriod: Int64;
+    FAvePeriod: Int64;
   published
     property Tag: string read FTag write FTag;
     property Msg: string read FMsg write FMsg;
     property CPUPeriod: Int64 read FCPUPeriod write FCPUPeriod;
+    property MaxPeriod: Int64 read FMaxPeriod write FMaxPeriod;
+    property MinPeriod: Int64 read FMinPeriod write FMinPeriod;
+    property AvePeriod: Int64 read FAvePeriod write FAvePeriod;
     property PassCount: Integer read FPassCount write FPassCount;
   end;
 
@@ -462,6 +468,7 @@ procedure TCnMsgStore.AddMsgDesc(ADesc: PCnMsgDesc);
 var
   AMsgItem: TCnMsgItem;
   ATimeItem: TCnTimeItem;
+  ThisInterval: Int64;
 begin
   if ADesc <> nil then
   begin
@@ -487,7 +494,19 @@ begin
       end;
 
       ATimeItem.PassCount := ATimeItem.PassCount + 1;
-      ATimeItem.CPUPeriod := ATimeItem.CPUPeriod + AMsgItem.MsgCPInterval;
+      ThisInterval := AMsgItem.MsgCPInterval - ATimeItem.CPUPeriod;
+      // MsgCPInterval 表示的是本 Tag 的所有计时之和，减去上次的和才是本次计时长度
+
+      ATimeItem.CPUPeriod := AMsgItem.MsgCPInterval;
+      if (ATimeItem.MinPeriod = 0) or (ThisInterval < ATimeItem.MinPeriod) then
+        ATimeItem.MinPeriod := ThisInterval;
+      if ThisInterval > ATimeItem.MaxPeriod then
+        ATimeItem.MaxPeriod := ThisInterval;
+      if ATimeItem.PassCount > 0 then
+        ATimeItem.AvePeriod := ATimeItem.CPUPeriod div ATimeItem.PassCount
+      else
+        ATimeItem.AvePeriod := 0;
+
       ATimeItem.Msg := AMsgItem.Msg;
       DoChanged(ctTimeChanged);
     end;
