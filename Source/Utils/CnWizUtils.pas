@@ -876,7 +876,8 @@ procedure CnOtaSetCurrentEditorSourceUtf8(const Text: string);
 {$ENDIF}
 
 procedure CnOtaSetCurrentEditorSource(const Text: string);
-{* 设置当前编辑器源代码，可在各版本使用，但有多余的转换可能导致丢内容}
+{* 设置当前编辑器源代码，可在各版本使用，但有多余的转换可能导致丢内容
+   另外注意内容中如果一行太长譬如超过 1024，可能会被 IDE 截断，以下同}
 
 procedure CnOtaInsertLineIntoEditor(const Text: string);
 {* 插入一个字符串到当前 IOTASourceEditor，仅在 Text 为单行文本时有用
@@ -6296,6 +6297,7 @@ var
 begin
   if Text = '' then
     Exit;
+
   EditWriter := CnOtaGetEditWriterForSourceEditor(nil);
   try
     EditWriter.DeleteTo(MaxInt);

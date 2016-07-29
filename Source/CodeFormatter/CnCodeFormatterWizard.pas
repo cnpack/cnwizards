@@ -654,8 +654,8 @@ begin
     cwmNone:
       begin
         AWrapMode := CN_RULE_CODE_WRAP_MODE_ADVANCED; // 不换行时，暗地里使用长换行，免得编译不过
-        ALineWrapWidth := 960;
-        ANewLineWrapWidth := 1000;
+        ALineWrapWidth := 512;
+        ANewLineWrapWidth := 768;
       end;
     cwmSimple: AWrapMode := CN_RULE_CODE_WRAP_MODE_SIMPLE;
     cwmAdvanced: AWrapMode := CN_RULE_CODE_WRAP_MODE_ADVANCED;
