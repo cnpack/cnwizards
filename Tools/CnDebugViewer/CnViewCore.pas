@@ -219,7 +219,8 @@ var
     'No: %-5d    Indent: %-3d    Level: %-1d    ThreadID: $%-8x    ProcessID: $%-8x   Tag: %-8s   TimeStamp: %s' +
     #13#10 + '%s';
   SCnTimeDescriptionFmt: string =
-    'No: %-5d    Count: %8d    Tag: %-8s    Summary: %f us';
+    'No: %-5d    Count: %8d    Tag: %-8s    Summary: %f us / (%s)' + #13#10 +
+    'Average: %f us / (%s)    Max: %f us / (%s)   Min: %f us / (%s)';
 
   SCnThreadRunning: string = 'Running...';
   SCnThreadPaused: string = 'Paused';
@@ -258,7 +259,7 @@ var
     '</tr>';
   SCnDebugViewerAboutCaption: string = 'About';
   SCnDebugViewerAbout: string =
-    'CnDebugViewer 1.4' + #13#10#13#10 +
+    'CnDebugViewer 1.5' + #13#10#13#10 +
     'This Tool is Used to Show the Debugging Output Information from CnDebug.' + #13#10#13#10 +
     'Author: Liu Xiao (liuxiao@cnpack.org)' + #13#10 +
     'Copyright (C) 2001-2016 CnPack Team';

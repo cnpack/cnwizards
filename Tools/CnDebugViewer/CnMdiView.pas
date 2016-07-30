@@ -687,16 +687,22 @@ end;
 
 function TCnMsgChild.DescriptionOfTime(Index: Integer): string;
 var
-  dTime: Double;
+  dTime, aTime, MaxTime, MinTime: Double;
 begin
   Result := '';
   if FStore = nil then Exit;
   //Add Sesame 2008-1-22 增加时分秒方式显示时间
   dTime := FStore.Times[Index].CPUPeriod / CPUClock;
+  aTime := FStore.Times[Index].AvePeriod / CPUClock;
+  MaxTime := FStore.Times[Index].MaxPeriod / CPUClock;
+  MinTime := FStore.Times[Index].MinPeriod / CPUClock;
+
   if (Index >= 0) and (Index < FStore.TimeCount) then
     Result := Format(SCnTimeDescriptionFmt, [Index + 1, FStore.Times[Index].PassCount,
       //FStore.Times[Index].Tag, FStore.Times[Index].CPUPeriod / CPUClock]);
-      FStore.Times[Index].Tag, dTime, FStore.UsToTime(dTime)]);
+      FStore.Times[Index].Tag, dTime, FStore.UsToTime(dTime),
+      aTime, FStore.UsToTime(aTime), MaxTime, FStore.UsToTime(MaxTime),
+      MinTime, FStore.UsToTime(MinTime)]);
 end;
 
 procedure TCnMsgChild.ClearTimes;
