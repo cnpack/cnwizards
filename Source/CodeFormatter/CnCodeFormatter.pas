@@ -5000,6 +5000,7 @@ begin
 
   FormatProgramBlock(PreSpaceCount, True);
   Match(tokDot);
+  Writeln;
 end;
 
 {
@@ -5018,6 +5019,7 @@ begin
   FormatPackageBlock(PreSpaceCount);
   Match(tokKeywordEnd);
   Match(tokDot);
+  Writeln;
 end;
 
 procedure TCnGoalCodeFormatter.FormatProgram(PreSpaceCount: Byte);
@@ -5038,6 +5040,7 @@ begin
   WriteLine;
   FormatProgramBlock(PreSpaceCount);
   Match(tokDot);
+  Writeln;
 end;
 
 {
@@ -5074,6 +5077,7 @@ begin
 
   Match(tokKeywordEnd, PreSpaceCount);
   Match(tokDot);
+  Writeln;
 end;
 
 { ClassBody -> [ClassHeritage] [ClassMemberList END] }

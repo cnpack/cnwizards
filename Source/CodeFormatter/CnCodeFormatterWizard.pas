@@ -933,6 +933,9 @@ begin
             StartPos := CnOtaEditPosToLinePos(OTAEditPos(StartRec.CharIndex, StartRec.Line), View);
             EndPos := CnOtaEditPosToLinePos(OTAEditPos(EndRec.CharIndex, EndRec.Line), View);
 
+{$IFDEF DEBUG}
+            CnDebugger.LogRawString('Format Selection To Process: ' + Src);
+{$ENDIF}
             // 此时 StartPos 和 EndPos 标记了当前选择区内要处理的文本
 {$IFDEF UNICODE}
             // Src/Res Utf16，俩 LinearPos 是 Utf8 的偏移量，需要转换
@@ -961,6 +964,10 @@ begin
             // IDE 内的线性 Pos 是 0 开始的，使用 Src 来 Copy 时的下标以 1 开始，因此需要加 1
             Res := Formatter.FormatPascalBlock(PAnsiChar(Src), Length(Src), StartPosIn, EndPosIn);
   {$ENDIF}
+{$ENDIF}
+
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('Format StartPos %d, EndPos %d.', [StartPosIn, EndPosIn]);
 {$ENDIF}
 
             if Res <> nil then
