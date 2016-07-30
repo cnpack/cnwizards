@@ -1179,11 +1179,16 @@ var
     AToken: TCnGeneralPasToken;
   begin
     Result := TokenID in csKeyTokens;
-    if Result and (TokenID = tkOf) and (FKeyTokenList.Count > 0) then // 对于 of 前一个关键字必须是 case 才配对
+    if Result and (TokenID = tkOf) then // 对于 of 前一个关键字必须是 case 才配对
     begin
-      AToken := TCnGeneralPasToken(FKeyTokenList[FKeyTokenList.Count - 1]);
-      if (AToken = nil) or (AToken.TokenID <> tkCase) then
-        Result := False;
+      if FKeyTokenList.Count > 0 then
+      begin
+        AToken := TCnGeneralPasToken(FKeyTokenList[FKeyTokenList.Count - 1]);
+        if (AToken = nil) or (AToken.TokenID <> tkCase) then
+          Result := False;
+      end
+      else
+        Result := False; // 第一个 of 也不算配对
     end;
   end;
 
