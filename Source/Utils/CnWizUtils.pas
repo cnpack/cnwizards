@@ -646,10 +646,16 @@ function CnOtaGetBlockOffsetForLineMode(var StartPos: TOTACharPos; var EndPos: T
 {* 返回当前选择的块扩展成行模式后的起始位置，不实际扩展选择区}
 function CnOtaOpenFile(const FileName: string): Boolean;
 {* 打开文件}
+function CnOtaCloseFileByAction(const FileName: string): Boolean;
+{* 用 ActionService 来关闭文件}
 function CnOtaOpenUnSaveForm(const FormName: string): Boolean;
 {* 打开未保存的窗体}
 function CnOtaIsFileOpen(const FileName: string): Boolean;
 {* 判断文件是否打开}
+procedure CnOtaSaveFile(const FileName: string; ForcedSave: Boolean = False);
+{* 保存文件}
+function CnOtaSaveFileByAction(const FileName: string): Boolean;
+{* 用 ActionService 来保存文件，居然会弹出保存对话框？}
 procedure CnOtaCloseFile(const FileName: string; ForceClosed: Boolean = False);
 {* 关闭文件}
 function CnOtaIsFormOpen(const FormName: string): Boolean;
@@ -3028,20 +3034,25 @@ end;
 function CnOtaGetEditor(const FileName: string): IOTAEditor;
 var
   ModuleServices: IOTAModuleServices;
-  i, j: Integer;
+  I, J: Integer;
   Module: IOTAModule;
 begin
   QuerySvcs(BorlandIDEServices, IOTAModuleServices, ModuleServices);
   if ModuleServices <> nil then
-    for i := 0 to ModuleServices.ModuleCount - 1 do
+    for I := 0 to ModuleServices.ModuleCount - 1 do
     begin
-      Module := ModuleServices.Modules[i];
-      for j := 0 to Module.GetModuleFileCount - 1 do
-        if SameFileName(FileName, Module.GetModuleFileEditor(j).FileName) then
+      Module := ModuleServices.Modules[I];
+      for J := 0 to Module.GetModuleFileCount - 1 do
+      begin
+        if Module.GetModuleFileEditor(J) <> nil then
         begin
-          Result := Module.GetModuleFileEditor(j);
-          Exit;
+          if SameFileName(FileName, Module.GetModuleFileEditor(J).FileName) then
+          begin
+            Result := Module.GetModuleFileEditor(J);
+            Exit;
+          end;
         end;
+      end;
     end;
   Result := nil;
 end;
@@ -4973,7 +4984,37 @@ begin
       Result := ActionServices.OpenFile(FileName);
   except
     ;
-  end;            
+  end;
+end;
+
+// 用 ActionService 来关闭文件
+function CnOtaCloseFileByAction(const FileName: string): Boolean;
+var
+  ActionServices: IOTAActionServices;
+begin
+  Result := False;
+  try
+    ActionServices := BorlandIDEServices as IOTAActionServices;
+    if ActionServices <> nil then
+      Result := ActionServices.CloseFile(FileName);
+  except
+    ;
+  end;
+end;
+
+// 用 ActionService 来保存文件
+function CnOtaSaveFileByAction(const FileName: string): Boolean;
+var
+  ActionServices: IOTAActionServices;
+begin
+  Result := False;
+  try
+    ActionServices := BorlandIDEServices as IOTAActionServices;
+    if ActionServices <> nil then
+      Result := ActionServices.SaveFile(FileName);
+  except
+    ;
+  end;
 end;
 
 // 打开未保存的窗体
@@ -5013,6 +5054,20 @@ begin
         Exit;
     end;
   end;
+end;
+
+// 保存文件
+procedure CnOtaSaveFile(const FileName: string; ForcedSave: Boolean);
+var
+  ModuleServices: IOTAModuleServices;
+  Module: IOTAModule;
+begin
+  ModuleServices := BorlandIDEServices as IOTAModuleServices;
+  if ModuleServices = nil then Exit;
+
+  Module := ModuleServices.FindModule(FileName);
+  if Assigned(Module) then
+    Module.Save(False, ForcedSave);
 end;
 
 // 关闭文件

@@ -97,6 +97,7 @@ type
     FIgnoreCompRef: Boolean;
     FProcessDependencies: Boolean;
     FUseBuildAction: Boolean;  // 是否使用 IDE 的 Build 菜单项点击来编译而不是使用 OTA 接口
+    FSaveAndClose: Boolean;    // 对于未打开的文件，Clean 后是否保存并关闭，避免大项目的文件全打开导致耗尽资源
     FIgnoreList: TStringList;
     FCleanList: TStringList;
     FRegExpr: TRegExpr;
@@ -165,6 +166,7 @@ begin
   FIgnoreCompRef := True;
   FProcessDependencies := False;
   FUseBuildAction := False; // 默认使用 OTA 接口，True 时未完整测试，选项不对外开放
+  FSaveAndClose := False;   // 默认使用打开后改内存的方式，避免自动存盘，但大项目可能耗尽资源
   FIgnoreList := TStringList.Create;
   FCleanList := TStringList.Create;
 
@@ -1218,6 +1220,7 @@ var
   FileName: string;
   Buffer: IOTAEditBuffer;
   UsesInfo: TCnEmptyUsesInfo;
+  Opened: Boolean;
 begin
   Intf := nil;
   Impl := nil;
@@ -1244,20 +1247,33 @@ begin
 
         if (Intf.Count > 0) or (Impl.Count > 0) then
         begin
-          if GetEditBuffer(UsesInfo, Buffer) and
-            DoCleanUnit(Buffer, Intf, Impl) then
-          begin
-            Inc(UCnt);
-            Inc(Cnt, Intf.Count + Impl.Count);
-            Logs.Add(UsesInfo.SourceFileName);
-            if Intf.Count > 0 then
-              Logs.Add('  Interface Uses: ' + Intf.CommaText);
-            if Impl.Count > 0 then
-              Logs.Add('  Implementation Uses: ' + Impl.CommaText);
-          end
-          else if not QueryDlg(Format(SCnUsesCleanerProcessError,
-            [_CnExtractFileName(UsesInfo.SourceFileName)])) then
-            Exit;
+          Opened := CnOtaIsFileOpen(UsesInfo.SourceFileName);
+          try
+            if GetEditBuffer(UsesInfo, Buffer) and
+              DoCleanUnit(Buffer, Intf, Impl) then
+            begin
+              Inc(UCnt);
+              Inc(Cnt, Intf.Count + Impl.Count);
+              Logs.Add(UsesInfo.SourceFileName);
+              if Intf.Count > 0 then
+                Logs.Add('  Interface Uses: ' + Intf.CommaText);
+              if Impl.Count > 0 then
+                Logs.Add('  Implementation Uses: ' + Impl.CommaText);
+            end
+            else if not QueryDlg(Format(SCnUsesCleanerProcessError,
+              [_CnExtractFileName(UsesInfo.SourceFileName)])) then
+              Exit;
+          finally
+            if not Opened and FSaveAndClose and FileExists(UsesInfo.SourceFileName) then
+            begin
+{$IFDEF DEBUG}
+              CnDebugger.LogMsg('Clean Result. Auto Save and Close ' + UsesInfo.SourceFileName);
+{$ENDIF}
+              CnOtaSaveFile(UsesInfo.SourceFileName, True);
+              Sleep(0);
+              CnOtaCloseFileByAction(UsesInfo.SourceFileName);
+            end;
+          end;
         end;
       end;
     end;
