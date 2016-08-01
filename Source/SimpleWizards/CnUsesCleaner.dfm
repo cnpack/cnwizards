@@ -1,9 +1,9 @@
 inherited CnUsesCleanerForm: TCnUsesCleanerForm
-  Left = 562
-  Top = 145
+  Left = 295
+  Top = 131
   BorderStyle = bsDialog
   Caption = 'Uses Units Cleaner'
-  ClientHeight = 384
+  ClientHeight = 406
   ClientWidth = 392
   OldCreateOrder = True
   PixelsPerInch = 96
@@ -68,7 +68,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
   end
   object btnOK: TButton
     Left = 150
-    Top = 356
+    Top = 378
     Width = 75
     Height = 21
     Caption = '&Process'
@@ -78,7 +78,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
   end
   object btnCancel: TButton
     Left = 230
-    Top = 356
+    Top = 378
     Width = 75
     Height = 21
     Cancel = True
@@ -88,7 +88,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
   end
   object btnHelp: TButton
     Left = 310
-    Top = 356
+    Top = 378
     Width = 75
     Height = 21
     Caption = '&Help'
@@ -99,19 +99,19 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
     Left = 8
     Top = 132
     Width = 377
-    Height = 217
+    Height = 239
     Caption = 'Clean &Settings'
     TabOrder = 1
     object lblIgnore: TLabel
       Left = 8
-      Top = 104
+      Top = 126
       Width = 97
       Height = 13
       Caption = 'Clean Units Directly:'
     end
     object lbl1: TLabel
       Left = 192
-      Top = 104
+      Top = 126
       Width = 89
       Height = 13
       Caption = 'Skip Units Directly:'
@@ -134,20 +134,20 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
     end
     object mmoClean: TMemo
       Left = 8
-      Top = 120
-      Width = 177
-      Height = 89
-      ScrollBars = ssBoth
-      TabOrder = 4
-      WordWrap = False
-    end
-    object mmoIgnore: TMemo
-      Left = 192
-      Top = 120
+      Top = 144
       Width = 177
       Height = 89
       ScrollBars = ssBoth
       TabOrder = 5
+      WordWrap = False
+    end
+    object mmoIgnore: TMemo
+      Left = 192
+      Top = 144
+      Width = 177
+      Height = 89
+      ScrollBars = ssBoth
+      TabOrder = 6
       WordWrap = False
     end
     object chkIgnoreNoSrc: TCheckBox
@@ -165,6 +165,14 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
       Height = 17
       Caption = 'Skip Used Units Referred by Component Indirectly.'
       TabOrder = 2
+    end
+    object chkSaveAndClose: TCheckBox
+      Left = 8
+      Top = 104
+      Width = 361
+      Height = 17
+      Caption = 'Auto Save/Close Unopened Files(For Huge Project but Can'#39't Undo).'
+      TabOrder = 4
     end
   end
 end

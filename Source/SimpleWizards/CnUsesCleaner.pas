@@ -29,7 +29,9 @@ unit CnUsesCleaner;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2011.11.05 V1.1
+* 修改记录：2016.08.02 V1.2
+*               加入自动保存并关闭处理结果的选项以应对大项目
+*           2011.11.05 V1.1
 *               完善对XE2风格的带点的单元名的支持
 *           2005.08.11 V1.0
 *               创建单元
@@ -75,6 +77,7 @@ type
     chkIgnoreNoSrc: TCheckBox;
     chkIgnoreCompRef: TCheckBox;
     chkProcessDependencies: TCheckBox;
+    chkSaveAndClose: TCheckBox;
     procedure btnHelpClick(Sender: TObject);
     procedure rbCurrUnitClick(Sender: TObject);
   private
@@ -150,6 +153,7 @@ const
   csIgnoreCompRef = 'IgnoreCompRef';
   csProcessDependencies = 'ProcessDependencies';
   csUseBuildAction = 'UseBuildAction';
+  csSaveAndClose = 'SaveAndClose';'
   csDcuExt = '.dcu';
 
   csProjectBuildCommand = 'ProjectBuildCommand';
@@ -240,6 +244,7 @@ begin
     chkIgnoreNoSrc.Checked := FIgnoreNoSrc;
     chkIgnoreCompRef.Checked := FIgnoreCompRef;
     chkProcessDependencies.Checked := FProcessDependencies;
+    chkSaveAndClose.Checked := FSaveAndClose;
     mmoIgnore.Lines.Assign(FIgnoreList);
     mmoClean.Lines.Assign(FCleanList);
     Module := CnOtaGetCurrentModule;
@@ -259,6 +264,7 @@ begin
       FIgnoreList.Assign(mmoIgnore.Lines);
       FIgnoreCompRef := chkIgnoreCompRef.Checked;
       FProcessDependencies := chkProcessDependencies.Checked;
+      FSaveAndClose := chkSaveAndClose.Checked;
       FCleanList.Assign(mmoClean.Lines);
       if rbCurrUnit.Checked then
         AKind := ukCurrUnit
@@ -1302,6 +1308,7 @@ begin
   FIgnoreCompRef := Ini.ReadBool('', csIgnoreCompRef, FIgnoreCompRef);
   FProcessDependencies := Ini.ReadBool('', csProcessDependencies, FProcessDependencies);
   FUseBuildAction := Ini.ReadBool('', csUseBuildAction, FUseBuildAction);
+  FSaveAndClose := Ini.ReadBool('', csSaveAndClose, FSaveAndClose);
   WizOptions.LoadUserFile(FIgnoreList, csIgnoreList);
   WizOptions.LoadUserFile(FCleanList, csCleanList);
 end;
@@ -1315,6 +1322,7 @@ begin
   Ini.WriteBool('', csIgnoreCompRef, FIgnoreCompRef);
   Ini.WriteBool('', csProcessDependencies, FProcessDependencies);
   Ini.WriteBool('', csUseBuildAction, FUseBuildAction);
+  Ini.WriteBool('', csSaveAndClose, FSaveAndClose);
   WizOptions.SaveUserFile(FIgnoreList, csIgnoreList);
   WizOptions.SaveUserFile(FCleanList, csCleanList);
 end;
