@@ -18,7 +18,7 @@
 {                                                                              }
 {******************************************************************************}
 
-unit CnTestEditorInsertTextWizard;
+unit CnTestEditPosMoveWizard;
 { |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包
@@ -45,16 +45,19 @@ uses
 type
 
 //==============================================================================
-// 测试编辑器插入文本用子菜单专家
+// 测试编辑器EditPosition移动的子菜单专家
 //==============================================================================
 
-{ TCnTestEditorInsertTextWizard }
+{ TCnTestEditPosMoveWizard }
 
-  TCnTestEditorInsertTextWizard = class(TCnSubMenuWizard)
+  TCnTestEditPosMoveWizard = class(TCnSubMenuWizard)
   private
-    FIdInsertTextIntoEditor: Integer;
-    FIdInsertLineIntoEditor: Integer;
-    FIdReplaceCurrentSelection: Integer;
+    FIdCnOtaGotoEditPosAndRepaint: Integer;
+    FIdMove: Integer;
+    FIdMoveReal: Integer;
+    FIdMoveRelative: Integer;
+    FIdDelete: Integer;
+    FIdBackspaceDelete: Integer;
   protected
     function GetHasConfig: Boolean; override;
     procedure SubActionExecute(Index: Integer); override;
@@ -74,104 +77,130 @@ type
 implementation
 
 //==============================================================================
-// 测试编辑器插入文本用菜单专家
+// 测试编辑器EditPosition移动的子菜单专家
 //==============================================================================
 
-{ TCnTestEditorInsertTextWizard }
+{ TCnTestEditPosMoveWizard }
 
-procedure TCnTestEditorInsertTextWizard.Config;
+procedure TCnTestEditPosMoveWizard.Config;
 begin
   ShowMessage('Test Option.');
 end;
 
-constructor TCnTestEditorInsertTextWizard.Create;
+constructor TCnTestEditPosMoveWizard.Create;
 begin
   inherited;
 
 end;
 
-procedure TCnTestEditorInsertTextWizard.AcquireSubActions;
+procedure TCnTestEditPosMoveWizard.AcquireSubActions;
 begin
-  FIdInsertTextIntoEditor := RegisterASubAction('CnOtaInsertTextIntoEditor',
-    'Test CnOtaInsertTextIntoEditor', 0, 'Test CnOtaInsertTextIntoEditor',
-    'CnOtaInsertTextIntoEditor');
-  FIdInsertLineIntoEditor := RegisterASubAction('CnOtaInsertLineIntoEditor',
-    'Test CnOtaInsertLineIntoEditor', 0, 'Test CnOtaInsertLineIntoEditor',
-    'CnOtaInsertLineIntoEditor');
-  FIdReplaceCurrentSelection := RegisterASubAction('CnOtaReplaceCurrentSelection',
-    'Test CnOtaReplaceCurrentSelection', 0, 'Test CnOtaReplaceCurrentSelection',
-    'CnOtaReplaceCurrentSelection');
+  FIdCnOtaGotoEditPosAndRepaint := RegisterASubAction('CnOtaGotoEditPosAndRepaint',
+    'Test CnOtaGotoEditPosAndRepaint', 0, 'Test CnOtaGotoEditPosAndRepaint',
+    'CnOtaGotoEditPosAndRepaint');
+  FIdMove := RegisterASubAction('CnTestEditPositionMove',
+    'Test EditPosition Move', 0, 'Test EditPosition Move',
+    'CnTestEditPositionMove');
+  FIdMoveReal := RegisterASubAction('CnTestEditPositionMoveReal',
+    'Test EditPosition MoveReal', 0, 'Test EditPosition MoveReal',
+    'CnTestEditPositionMoveReal');
+  FIdMoveRelative := RegisterASubAction('CnTestEditPositionMoveRelative',
+    'Test EditPosition MoveRelative', 0, 'Test EditPosition MoveRelative',
+    'CnTestEditPositionMoveRelative');
+  FIdDelete := RegisterASubAction('CnTestEditPositionDelete',
+    'Test EditPosition Delete', 0, 'Test EditPosition Delete',
+    'CnTestEditPositionDelete');
+  FIdBackspaceDelete := RegisterASubAction('CnTestEditPositionBackspaceDelete',
+    'Test EditPosition BackspaceDelete', 0, 'Test EditPosition BackspaceDelete',
+    'CnTestEditPositionBackspaceDelete');
 end;
 
-function TCnTestEditorInsertTextWizard.GetCaption: string;
+function TCnTestEditPosMoveWizard.GetCaption: string;
 begin
-  Result := 'Test Editor Insert Text';
+  Result := 'Test EditPosition Move';
 end;
 
-function TCnTestEditorInsertTextWizard.GetHasConfig: Boolean;
+function TCnTestEditPosMoveWizard.GetHasConfig: Boolean;
 begin
   Result := False;
 end;
 
-function TCnTestEditorInsertTextWizard.GetHint: string;
+function TCnTestEditPosMoveWizard.GetHint: string;
 begin
-  Result := 'Test Editor InsertText';
+  Result := 'Test EditPosition Move';
 end;
 
-function TCnTestEditorInsertTextWizard.GetState: TWizardState;
+function TCnTestEditPosMoveWizard.GetState: TWizardState;
 begin
   Result := [wsEnabled];
 end;
 
-class procedure TCnTestEditorInsertTextWizard.GetWizardInfo(var Name, Author, Email, Comment: string);
+class procedure TCnTestEditPosMoveWizard.GetWizardInfo(var Name, Author, Email, Comment: string);
 begin
-  Name := 'Test Editor Insert Text Wizard';
+  Name := 'Test EditPosition Move Wizard';
   Author := 'CnPack Team';
   Email := 'master@cnpack.org';
-  Comment := 'Test Editor Insert Text Wizard';
+  Comment := 'Test EditPosition Move Wizard';
 end;
 
-procedure TCnTestEditorInsertTextWizard.LoadSettings(Ini: TCustomIniFile);
+procedure TCnTestEditPosMoveWizard.LoadSettings(Ini: TCustomIniFile);
 begin
 
 end;
 
-procedure TCnTestEditorInsertTextWizard.SaveSettings(Ini: TCustomIniFile);
+procedure TCnTestEditPosMoveWizard.SaveSettings(Ini: TCustomIniFile);
 begin
 
 end;
 
-procedure TCnTestEditorInsertTextWizard.SubActionExecute(Index: Integer);
+procedure TCnTestEditPosMoveWizard.SubActionExecute(Index: Integer);
 var
   S: string;
   Line, Col: Integer;
   EditView: IOTAEditView;
+  EditPosition: IOTAEditPosition;
 begin
   if not Active then Exit;
 
-  if Index = FIdInsertTextIntoEditor then
+  EditView := CnOtaGetTopMostEditView;
+  if EditView = nil then
+    Exit;
+
+  Line := EditView.CursorPos.Line;
+  S := CnInputBox('Enter Column', 'Enter Column Value:', '3');
+  Col := StrToIntDef(S, 3);
+
+  if Index = FIdCnOtaGotoEditPosAndRepaint then
   begin
-    S := CnInputBox('Enter Text', 'Enter Text:', '{吃饭睡觉}');
-    CnOtaInsertTextIntoEditor(S); // Using EditWriter.Insert
+    CnOtaGotoEditPosAndRepaint(EditView, Line, Col);
   end
-  else if Index = FIdInsertLineIntoEditor then
+  else
   begin
-    S := CnInputBox('Enter Text', 'Enter Text:', '{吃饭睡觉}');
-    CnOtaInsertLineIntoEditor(S); // Using EditPosition.Insert
-  end
-  else if Index = FIdReplaceCurrentSelection then
-  begin
-    S := CnInputBox('Enter Text', 'Enter Text:', '{吃饭睡觉}');
-    CnOtaReplaceCurrentSelection(S, True, True);
+    EditPosition := CnOtaGetEditPosition;
+    if Assigned(EditPosition) then
+    begin
+      if Index = FIdMove then
+        EditPosition.Move(Line, Col)
+      else if Index = FIdMoveReal then
+        EditPosition.MoveReal(Line, Col)
+      else if Index = FIdMoveRelative then
+        EditPosition.MoveRelative(0, Col)
+      else if Index = FIdDelete then
+        EditPosition.Delete(Col)
+      else if Index = FIdBackspaceDelete then
+        EditPosition.BackspaceDelete(Col);
+
+      EditView.Paint;
+    end;
   end;
 end;
 
-procedure TCnTestEditorInsertTextWizard.SubActionUpdate(Index: Integer);
+procedure TCnTestEditPosMoveWizard.SubActionUpdate(Index: Integer);
 begin 
 
 end;
 
 initialization
-  RegisterCnWizard(TCnTestEditorInsertTextWizard); // 注册专家
+  RegisterCnWizard(TCnTestEditPosMoveWizard); // 注册专家
 
 end.
