@@ -1,9 +1,10 @@
 object GenerateForm: TGenerateForm
   Left = 301
   Top = 239
-  Width = 545
-  Height = 125
+  BorderStyle = bsDialog
   Caption = 'Generate a Huge Project with Units/Forms for Testing UsesCleaner'
+  ClientHeight = 98
+  ClientWidth = 537
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
