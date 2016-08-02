@@ -153,7 +153,7 @@ const
   csIgnoreCompRef = 'IgnoreCompRef';
   csProcessDependencies = 'ProcessDependencies';
   csUseBuildAction = 'UseBuildAction';
-  csSaveAndClose = 'SaveAndClose';'
+  csSaveAndClose = 'SaveAndClose';
   csDcuExt = '.dcu';
 
   csProjectBuildCommand = 'ProjectBuildCommand';
