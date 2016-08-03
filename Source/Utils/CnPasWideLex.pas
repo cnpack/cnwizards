@@ -1605,7 +1605,7 @@ end;
 procedure TCnPasWideLex.IdentProc;
 begin
   FTokenID := IdentKind((FOrigin + FRun));
-  StepRun(FStringLen);
+  StepRun(FStringLen, True);
   while Identifiers[_IndexChar(FOrigin[FRun])] or
     (FSupportUnicodeIdent and (Ord(_IndexChar(FOrigin[FRun])) > 127)) do
     StepRun(1, FSupportUnicodeIdent); // 支持宽字符标识符时需要计算步进
