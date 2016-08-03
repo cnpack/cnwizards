@@ -603,9 +603,20 @@ begin
 end;
 
 procedure TCnAbstractCodeFormatter.MatchOperator(Token: TPascalToken);
+var
+  Before: Integer;
+  After: Integer;
 begin
-  Match(Token, CnPascalCodeForRule.SpaceBeforeOperator,
-        CnPascalCodeForRule.SpaceAfterOperator);
+  Before := CnPascalCodeForRule.SpaceBeforeOperator;
+  After := CnPascalCodeForRule.SpaceAfterOperator;
+  if Token in KeywordsOpTokens then // and xor 等双目运算符，前后必须至少空一格
+  begin
+    if Before <= 0 then
+      Before := 1;
+    if After <= 0 then
+      After := 1;
+  end;
+  Match(Token, Before, After);
 end;
 
 procedure TCnAbstractCodeFormatter.SaveToFile(FileName: string);

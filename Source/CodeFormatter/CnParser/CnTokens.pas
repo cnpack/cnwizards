@@ -261,6 +261,9 @@ const
   AddOPTokens = [tokPlus, tokMinus, tokKeywordOR, tokKeywordXOR];
   MulOpTokens = [tokStar, tokKeywordDIV, tokDiv, tokKeywordMod, tokKeywordAnd];
   ShiftOpTokens = [tokKeywordShl, tokKeywordShr];
+  KeywordsOpTokens = [tokKeywordIn, tokKeywordAs, tokKeywordIs, tokKeywordOR,
+    tokKeywordXOR, tokKeywordDIV, tokKeywordMod, tokKeywordAnd, tokKeywordShl,
+    tokKeywordShr];
 
   ConstTokens = [tokInteger, tokFloat, tokChar, tokString, tokWString, tokTrue,
     tokFalse, tokKeywordNIL, tokSymbol];
