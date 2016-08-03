@@ -2299,6 +2299,7 @@ TCnUsesCleanerForm.chkIgnoreNoSrc.Caption=Игнорировать модули 
 TCnUsesCleanerForm.chkIgnoreReg.Caption=Игнорировать модули с процедурой Register
 TCnUsesCleanerForm.chkIgnoreCompRef.Caption=Игнорировать модули, на которые неявно ссылается компонент
 TCnUsesCleanerForm.chkProcessDependencies.Caption=Включая неявно используемые модули
+TCnUsesCleanerForm.chkSaveAndClose.Caption=Автосохранение/Закрывать неоткрытые файлы(Для больших проектов, без отмены)
 TCnUsesCleanerForm.grpKind.Caption=Выберите содержимое для очистки
 TCnUsesCleanerForm.grpSettings.Caption=Настройки очистки
 TCnUsesCleanerForm.lbl1.Caption=Обязат. игнорировать модули:
