@@ -590,25 +590,27 @@ function CnOtaGetCurrPosToken(var Token: string; var CurrIndex: Integer;
 function CnOtaGetCurrPosTokenUtf8(var Token: WideString; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TAnsiCharSet = [];
   CharSet: TAnsiCharSet = []; EditView: IOTAEditView = nil;
-  SupportUnicodeIdent: Boolean = False): Boolean;
+  SupportUnicodeIdent: Boolean = False; IndexUsingWide: Boolean = False): Boolean;
 {* 取当前光标下的标识符及光标在标识符中的索引号，允许 Unicode 标识符，用于 2005 ~ 2007，
-  输出用 WideString，避免 Utf8 转 Ansi 的丢字符情形。CurrIndex 是 Ansi 偏移}
+  输出用 WideString，避免 Utf8 转 Ansi 的丢字符情形。
+  CurrIndex 0 开始，根据 IndexUsingWide 参数返回 Ansi 或 Wide 偏移}
 {$ENDIF}
 
 {$IFDEF UNICODE}
 function CnOtaGetCurrPosTokenW(var Token: string; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TCharSet = [];
   CharSet: TCharSet = []; EditView: IOTAEditView = nil;
-  SupportUnicodeIdent: Boolean = False): Boolean;
+  SupportUnicodeIdent: Boolean = False; IndexUsingWide: Boolean = False): Boolean;
 {* 取当前光标下的标识符及光标在标识符中的索引号的 Unicode 版本，允许 Unicode 标识符，
-  可用于 2009 或以上。CurrIndex 是 Unicode 偏移，与 IDE 中的 Ansi 偏移不一致}
+  可用于 2009 或以上。CurrIndex 0 开始，根据 IndexUsingWide 参数返回 Ansi 或 Wide 偏移}
 {$ENDIF}
 
 function CnOtaGeneralGetCurrPosToken(var Token: TCnIdeTokenString; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TAnsiCharSet = [];
   CharSet: TAnsiCharSet = []; EditView: IOTAEditView = nil): Boolean;
 {* 封装的获取当前光标下的标识符以及索引号的函数，BDS 以上允许 Unicode 标识符，不存在 Unicode 转 Ansi 的丢字符的问题。
-  Token: D567 下返回 AnsiString，2005~2007 下返回 WideString，2009 或以上返回 UnicodeString }
+  Token: D567 下返回 AnsiString，2005~2007 下返回 WideString，2009 或以上返回 UnicodeString
+  CurrIndex: 0 开始，D567 下返回当前光标在 Token 内的 Ansi 偏移，2007 或以上返回 WideChar 偏移}
 
 function CnOtaGetCurrChar(OffsetX: Integer = 0; View: IOTAEditView = nil): Char;
 {* 取当前光标下的字符，允许偏移量}
@@ -4406,10 +4408,11 @@ end;
 {$IFDEF IDE_STRING_ANSI_UTF8}
 
 // 取当前光标下的标识符及光标在标识符中的索引号，允许 Unicode 标识符，用于 2005 ~ 2007，
-// 输出用 WideString，避免 Utf8 转 Ansi 的丢字符情形。CurrIndex 是 Ansi 偏移。
+// 输出用 WideString，避免 Utf8 转 Ansi 的丢字符情形。
+// CurrIndex 根据 IndexUsingWide 参数返回 Ansi 或 Wide 偏移
 function CnOtaGetCurrPosTokenUtf8(var Token: WideString; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean; FirstSet, CharSet: TAnsiCharSet;
-  EditView: IOTAEditView; SupportUnicodeIdent: Boolean): Boolean;
+  EditView: IOTAEditView; SupportUnicodeIdent: Boolean; IndexUsingWide: Boolean): Boolean;
 var
   LineNo: Integer;
   CharIndex: Integer;
@@ -4469,9 +4472,12 @@ begin
     Delete(WideText, I, MaxInt);
     Token := WideText;
 
-    // CurrIndex 是 WideString 的，需要转换回 Ansi 的
-    WideText := Copy(WideText, 1, CurrIndex);
-    CurrIndex := CalcAnsiLengthFromWideString(PWideChar(WideText));
+    if not IndexUsingWide then
+    begin
+      // CurrIndex 是 WideString 的，需要转换回 Ansi 的
+      WideText := Copy(WideText, 1, CurrIndex);
+      CurrIndex := CalcAnsiLengthFromWideString(PWideChar(WideText));
+    end;
   end;
 
   if Token <> '' then
@@ -4492,7 +4498,7 @@ end;
 // 取当前光标下的标识符及光标在标识符中的索引号的 Unicode 版本，允许 Unicode 标识符
 function CnOtaGetCurrPosTokenW(var Token: string; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean; FirstSet, CharSet: TCharSet;
-  EditView: IOTAEditView; SupportUnicodeIdent: Boolean): Boolean;
+  EditView: IOTAEditView; SupportUnicodeIdent: Boolean; IndexUsingWide: Boolean): Boolean;
 var
   LineNo: Integer;
   CharIndex: Integer;
@@ -4575,9 +4581,12 @@ begin
     Delete(LineText, I, MaxInt);
     Token := LineText;
 
-    // CurrIndex 是 Utf16 的，需要转换回 Ansi 的
-    AnsiText := ConvertNtaEditorStringToAnsi(Copy(Token, 1, CurrIndex), True);
-    CurrIndex := Length(AnsiText);
+    if not IndexUsingWide then
+    begin
+      // CurrIndex 是 Utf16 的，需要转换回 Ansi 的
+      AnsiText := ConvertNtaEditorStringToAnsi(Copy(Token, 1, CurrIndex), True);
+      CurrIndex := Length(AnsiText);
+    end;
   end;
 
   if Token <> '' then
@@ -4594,17 +4603,18 @@ end;
 
 // 封装的获取当前光标下的标识符以及索引号的函数，BDS 以上允许 Unicode 标识符，不存在 Unicode 转 Ansi 的丢字符的问题。
 // Token: D567 下返回 AnsiString，2005~2007 下返回 WideString，2009 或以上返回 UnicodeString
+// CurrIndex: 0 开始，D567 下返回当前光标在 Token 内的 Ansi 偏移，2007 或以上返回 WideChar 偏移
 function CnOtaGeneralGetCurrPosToken(var Token: TCnIdeTokenString; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean; FirstSet, CharSet: TAnsiCharSet;
   EditView: IOTAEditView): Boolean;
 begin
 {$IFDEF UNICODE}
   Result := CnOtaGetCurrPosTokenW(Token, CurrIndex, CheckCursorOutOfLineEnd,
-    FirstSet, CharSet, EditView, _SUPPORT_WIDECHAR_IDENTIFIER);
+    FirstSet, CharSet, EditView, _SUPPORT_WIDECHAR_IDENTIFIER, True);
 {$ELSE}
   {$IFDEF IDE_STRING_ANSI_UTF8}
   Result := CnOtaGetCurrPosTokenUtf8(Token, CurrIndex, CheckCursorOutOfLineEnd,
-    FirstSet, CharSet, EditView, _SUPPORT_WIDECHAR_IDENTIFIER);
+    FirstSet, CharSet, EditView, _SUPPORT_WIDECHAR_IDENTIFIER, True);
   {$ELSE}
   Result := CnOtaGetCurrPosToken(Token, CurrIndex, CheckCursorOutOfLineEnd,
     FirstSet, CharSet, EditView, _SUPPORT_WIDECHAR_IDENTIFIER);
@@ -4641,30 +4651,44 @@ end;
 function _DeleteCurrToken(DelLeft, DelRight: Boolean; FirstSet: TAnsiCharSet;
   CharSet: TAnsiCharSet): Boolean;
 var
-  Token: string;
-  CurrIndex: Integer;
+  Token: TCnIdeTokenString; // Ansi/Wide/Wide
+  CurrIndex: Integer;       // Ansi/Wide/Wide
   EditPos: IOTAEditPosition;
+  MoveToRightCount: Integer;    // 从光标处移至右端所需的 Col，不用移到左
+  BkspDelLeftCount, BkspDelRightCount: Integer;  // 从光标退格删到左与从右退格删到光标所需的字符数
 begin
   Result := False;
-  if CnOtaGetCurrPosToken(Token, CurrIndex, True, FirstSet, CharSet, nil, _SUPPORT_WIDECHAR_IDENTIFIER) then
+  if CnOtaGeneralGetCurrPosToken(Token, CurrIndex, True, FirstSet, CharSet, nil) then
   begin
     EditPos := CnOtaGetEditPosition;
-    if Assigned(EditPos) then
+    if not Assigned(EditPos) then
+      Exit;
+
+    // MoveRelative: 0  Ansi/Utf8/Utf8
+    // BackspaceDelete: Wide/Wide/Wide
+{$IFDEF BDS}
+    // 2005 以上的，包括 2009，移动光标都要求 UTF8 偏移量，删除字符都要求 WideChar 偏移量
+    MoveToRightCount := CalcUtf8LengthFromWideString(PWideChar(Copy(Token, CurrIndex + 1, MaxInt)));
+{$ELSE}
+    // D567下标识符无双字节字符，直接运算就行
+    MoveToRightCount := Length(Token) - CurrIndex;
+{$ENDIF}
+    BkspDelLeftCount := CurrIndex;
+    BkspDelRightCount := Length(Token) - CurrIndex;
+
+    if DelLeft and DelRight then
     begin
-      if DelLeft and DelRight then
-      begin
-        EditPos.MoveRelative(0, Length(Token) - CurrIndex);
-        EditPos.BackspaceDelete(Length(Token));
-      end
-      else if DelLeft and (CurrIndex > 0) then
-        EditPos.BackspaceDelete(CurrIndex)
-      else if DelRight and (CurrIndex < Length(Token) - 1) then
-      begin
-        EditPos.MoveRelative(0, Length(Token) - CurrIndex);
-        EditPos.BackspaceDelete(Length(Token) - CurrIndex);
-      end;
-      Result := True;
+      EditPos.MoveRelative(0, MoveToRightCount);
+      EditPos.BackspaceDelete(BkspDelLeftCount + BkspDelRightCount);
+    end
+    else if DelLeft and (CurrIndex > 0) then
+      EditPos.BackspaceDelete(BkspDelLeftCount)
+    else if DelRight and (CurrIndex < Length(Token) - 1) then
+    begin
+      EditPos.MoveRelative(0, MoveToRightCount);
+      EditPos.BackspaceDelete(BkspDelRightCount);
     end;
+    Result := True;
   end;
 end;
 

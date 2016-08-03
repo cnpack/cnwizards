@@ -503,32 +503,24 @@ begin
     begin
       if FSmartCopy and (Key in [Ord('C'), Ord('X')]) then
       begin
-{$IFDEF IDE_STRING_ANSI_UTF8}
-        if not CnOtaGetCurrPosTokenUtf8(Token, Idx, True) then
+        if not CnOtaGeneralGetCurrPosToken(Token, Idx, True) then
         begin
           Handled := False;
           Result := Handled;
           Exit;
         end;
-{$ELSE}
-        if not CnOtaGetCurrPosToken(Token, Idx, True) then
-        begin
-          Handled := False;
-          Result := Handled;
-          Exit;
-        end;
-{$ENDIF}
 
 {$IFDEF IDE_STRING_ANSI_UTF8}
-          // 把 WideString 内容设给剪贴板
-          if IsClipboardFormatAvailable(CF_UNICODETEXT) then
-            SetClipboardContent(CF_UNICODETEXT, PWideChar(Token)^, (Length(Token) * SizeOf(WideChar)) + 1)
-          else
-            Clipboard.AsText := Token;
-{$ELSE}
-          // D567/2009可以直接设置剪贴板字符串，Ansi/UnicodeString
+        // 把 WideString 内容设给剪贴板
+        if IsClipboardFormatAvailable(CF_UNICODETEXT) then
+          SetClipboardContent(CF_UNICODETEXT, PWideChar(Token)^, (Length(Token) * SizeOf(WideChar)) + 1)
+        else
           Clipboard.AsText := Token;
+{$ELSE}
+        // D567/2009可以直接设置剪贴板字符串，Ansi/UnicodeString
+        Clipboard.AsText := Token;
 {$ENDIF}
+
         if Key = Ord('X') then
         begin
           CnOtaDeleteCurrToken;
