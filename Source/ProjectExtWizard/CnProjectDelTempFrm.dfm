@@ -1,8 +1,8 @@
 inherited CnProjectDelTempForm: TCnProjectDelTempForm
   Left = 289
   Top = 169
-  Width = 469
-  Height = 409
+  Width = 478
+  Height = 418
   BorderIcons = [biSystemMenu]
   Caption = 'Clean Project Temporary Files'
   Constraints.MinHeight = 376
@@ -135,7 +135,7 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
             OnKeyPress = chklstDirsKeyPress
           end
           object btnAdd: TButton
-            Left = 362
+            Left = 360
             Top = 40
             Width = 75
             Height = 21
@@ -145,7 +145,7 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
             OnClick = btnAddClick
           end
           object btnRemove: TButton
-            Left = 362
+            Left = 360
             Top = 65
             Width = 75
             Height = 21
@@ -196,7 +196,7 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
             OnKeyPress = chklstExtensionsKeyPress
           end
           object btnAddExt: TButton
-            Left = 362
+            Left = 360
             Top = 16
             Width = 75
             Height = 21
@@ -206,7 +206,7 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
             OnClick = btnAddExtClick
           end
           object btnRemoveExt: TButton
-            Left = 362
+            Left = 360
             Top = 40
             Width = 75
             Height = 21
@@ -217,7 +217,7 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
             OnClick = btnRemoveExtClick
           end
           object btnDefault: TButton
-            Left = 362
+            Left = 360
             Top = 116
             Width = 75
             Height = 21
@@ -273,7 +273,7 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
   end
   object btnFinish: TButton
     Left = 378
-    Top = 351
+    Top = 354
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -284,7 +284,7 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
   end
   object btnNext: TButton
     Left = 298
-    Top = 351
+    Top = 354
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -294,7 +294,7 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
   end
   object btnPrio: TButton
     Left = 218
-    Top = 351
+    Top = 354
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -304,7 +304,7 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
   end
   object btnCancel: TButton
     Left = 8
-    Top = 351
+    Top = 354
     Width = 75
     Height = 21
     Anchors = [akLeft, akBottom]
@@ -315,7 +315,7 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
   end
   object btnHelp: TButton
     Left = 88
-    Top = 351
+    Top = 354
     Width = 75
     Height = 21
     Anchors = [akLeft, akBottom]
