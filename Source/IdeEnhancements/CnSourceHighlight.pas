@@ -644,7 +644,9 @@ type
     property SeparateLineWidth: Integer read FSeparateLineWidth write FSeparateLineWidth;
     {* 空行分隔线的线宽，默认为 1}
     property BlockMatchLineLimit: Boolean read FBlockMatchLineLimit write FBlockMatchLineLimit;
+    {* 是否单元超出指定行数后禁用高亮功能，为性能考虑而设置}
     property BlockMatchMaxLines: Integer read FBlockMatchMaxLines write FBlockMatchMaxLines;
+    {* 达到禁用高亮功能的行数阈值}
     property HighlightFlowStatement: Boolean read FHighlightFlowStatement write SetHighlightFlowStatement;
     {* 是否高亮流程控制语句}
     property FlowStatementBackground: TColor read FFlowStatementBackground write SetFlowStatementBackground;
@@ -2491,7 +2493,7 @@ begin
   FCompDirectiveBackground := csDefaultHighlightBackgroundColor;
 
   FBlockMatchLineLimit := True;
-  FBlockMatchMaxLines := 40000; // 大于此行数的 unit，不解析
+  FBlockMatchMaxLines := 60000; // 大于此行数的 unit，不解析
   FBlockMatchList := TObjectList.Create;
   FBlockLineList := TObjectList.Create;
   FCompDirectiveList := TObjectList.Create;
@@ -3498,8 +3500,7 @@ begin
 
       if (EditView <> nil) then
       begin
-        if not FBlockMatchLineLimit or
-          (EditView.Buffer.GetLinesInBuffer <= FBlockMatchMaxLines) then
+        if not FBlockMatchLineLimit or (EditView.Buffer.GetLinesInBuffer <= FBlockMatchMaxLines) then
         begin
           // 正常情况下，延时一段时间再解析以避免重复
           case BlockHighlightStyle of
@@ -3522,7 +3523,15 @@ begin
       begin
         if FCurrentTokenHighlight and not CurTokenRefreshed then
         begin
-          Info.UpdateCurTokenList;
+          if FBlockMatchLineLimit and (EditView.Buffer.GetLinesInBuffer > FBlockMatchMaxLines) then
+          begin
+            Info.Clear;
+            if FShowTokenPosAtGutter then
+              EventBus.PostEvent(EVENT_HIGHLIGHT_IDENT_POSITION);
+          end
+          else
+            Info.UpdateCurTokenList;
+
           CurTokenRefreshed := True;
         end;
 
