@@ -1,9 +1,9 @@
 inherited CnCodeFormatterForm: TCnCodeFormatterForm
-  Left = 375
-  Top = 152
+  Left = 359
+  Top = 77
   BorderStyle = bsDialog
   Caption = 'Code Formatter Settings'
-  ClientHeight = 462
+  ClientHeight = 490
   ClientWidth = 451
   Font.Charset = ANSI_CHARSET
   OldCreateOrder = True
@@ -15,7 +15,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
     Left = 8
     Top = 8
     Width = 433
-    Height = 413
+    Height = 441
     ActivePage = tsPascal
     TabOrder = 0
     object tsPascal: TTabSheet
@@ -24,7 +24,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         Left = 8
         Top = 8
         Width = 409
-        Height = 249
+        Height = 277
         Caption = 'Common Settings'
         TabOrder = 0
         object lblKeyword: TLabel
@@ -68,6 +68,13 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           Width = 68
           Height = 13
           Caption = 'when Exceed:'
+        end
+        object lblDirectiveMode: TLabel
+          Left = 16
+          Top = 244
+          Width = 90
+          Height = 13
+          Caption = 'Compiler Directive:'
         end
         object cbbKeywordStyle: TComboBox
           Left = 136
@@ -171,10 +178,22 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           Caption = 'Use IDE Internal Symbols to Correct Identifiers.'
           TabOrder = 9
         end
+        object cbbDirectiveMode: TComboBox
+          Left = 136
+          Top = 242
+          Width = 257
+          Height = 21
+          Style = csDropDownList
+          ItemHeight = 13
+          TabOrder = 10
+          Items.Strings = (
+            'Treat as Comment'
+            'Only Processing First Branch')
+        end
       end
       object grpAsm: TGroupBox
         Left = 8
-        Top = 264
+        Top = 292
         Width = 409
         Height = 83
         Caption = 'ASM Settings'
@@ -216,7 +235,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
       end
       object chkIgnoreArea: TCheckBox
         Left = 8
-        Top = 358
+        Top = 386
         Width = 281
         Height = 17
         Caption = 'Do NOT Format Contents between {(*} and {*)}'
@@ -226,7 +245,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
   end
   object btnOK: TButton
     Left = 206
-    Top = 431
+    Top = 459
     Width = 75
     Height = 21
     Caption = '&OK'
@@ -236,7 +255,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
   end
   object btnCancel: TButton
     Left = 286
-    Top = 431
+    Top = 459
     Width = 75
     Height = 21
     Cancel = True
@@ -246,7 +265,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
   end
   object btnHelp: TButton
     Left = 366
-    Top = 431
+    Top = 459
     Width = 75
     Height = 21
     Caption = '&Help'
@@ -255,7 +274,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
   end
   object btnShortCut: TButton
     Left = 8
-    Top = 431
+    Top = 459
     Width = 75
     Height = 21
     Caption = '&Shortcut'

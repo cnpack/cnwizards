@@ -60,6 +60,7 @@ type
     FGetProvider: TCnGetFormatterProvider;
 
     // Pascal Format Settings
+    FDirectiveMode: TCompDirectiveMode;
     FUsesUnitSingleLine: Boolean;
     FUseIgnoreArea: Boolean;
     FSpaceAfterOperator: Byte;
@@ -114,6 +115,7 @@ type
     procedure SaveSettings(Ini: TCustomIniFile); override;
     procedure AcquireSubActions; override;
 
+    property DirectiveMode: TCompDirectiveMode read FDirectiveMode write FDirectiveMode;
     property KeywordStyle: TKeywordStyle read FKeywordStyle write FKeywordStyle;
     property BeginStyle: TBeginStyle read FBeginStyle write FBeginStyle;
     property WrapMode: TCodeWrapMode read FWrapMode write FWrapMode;
@@ -159,6 +161,8 @@ type
     lblNewLine: TLabel;
     seNewLine: TCnSpinEdit;
     chkUseIDESymbols: TCheckBox;
+    cbbDirectiveMode: TComboBox;
+    lblDirectiveMode: TLabel;
     procedure chkAutoWrapClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure btnShortCutClick(Sender: TObject);
@@ -209,6 +213,7 @@ const
   csWrapMode = 'WrapMode';
   csBeginStyle = 'BeginStyle';
   csKeywordStyle = 'KeywordStyle';
+  csDirectiveMode = 'DirectiveMode';
 
   csUseIDESymbols = 'UseIDESymbols';
 
@@ -326,6 +331,7 @@ begin
     seSpaceBefore.Value := FSpaceBeforeOperator;
     seSpaceAfter.Value := FSpaceAfterOperator;
     chkUsesSinglieLine.Checked := FUsesUnitSingleLine;
+    cbbDirectiveMode.ItemIndex := Ord(FDirectiveMode);
 
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
     chkUseIDESymbols.Checked := FUseIDESymbols;
@@ -358,6 +364,7 @@ begin
       FSpaceBeforeASM := seASMHeadIndent.Value;
       FSpaceTabASMKeyword := seAsmTab.Value;
       FUseIgnoreArea := chkIgnoreArea.Checked;
+      FDirectiveMode := TCompDirectiveMode(cbbDirectiveMode.ItemIndex);
     end;
     
     Free;
@@ -495,6 +502,7 @@ begin
   FWrapMode := TCodeWrapMode(Ini.ReadInteger('', csWrapMode, Ord(CnPascalCodeForVCLRule.CodeWrapMode)));
   FBeginStyle := TBeginStyle(Ini.ReadInteger('', csBeginStyle, Ord(CnPascalCodeForVCLRule.BeginStyle)));
   FKeywordStyle := TKeywordStyle(Ini.ReadInteger('', csKeywordStyle, Ord(CnPascalCodeForVCLRule.KeywordStyle)));
+  FDirectiveMode := TCompDirectiveMode(Ini.ReadInteger('', csDirectiveMode, Ord(CnPascalCodeForVCLRule.CompDirectiveMode)));
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
   FUseIDESymbols := Ini.ReadBool('', csUseIDESymbols, False);
 {$ENDIF}
@@ -625,6 +633,13 @@ begin
   AKeywordStyle := CN_RULE_KEYWORD_STYLE_DEFAULT;
   AWrapMode := CN_RULE_CODE_WRAP_MODE_DEFAULT;
 
+  case FDirectiveMode of
+    cdmAsComment:
+      ADirectiveMode := CN_RULE_DIRECTIVE_MODE_ASCOMMENT;
+    cdmOnlyFirst:
+      ADirectiveMode := CN_RULE_DIRECTIVE_MODE_ONLYFIRST;
+  end;
+
   case FKeywordStyle of
     ksLowerCaseKeyword:
       AKeywordStyle := CN_RULE_KEYWORD_STYLE_LOWER;
@@ -684,6 +699,7 @@ begin
   Ini.WriteInteger('', csWrapMode, Ord(FWrapMode));
   Ini.WriteInteger('', csBeginStyle, Ord(FBeginStyle));
   Ini.WriteInteger('', csKeywordStyle, Ord(FKeywordStyle));
+  Ini.WriteInteger('', csDirectiveMode, Ord(FDirectiveMode));
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
   Ini.WriteBool('', csUseIDESymbols, FUseIDESymbols);
 {$ENDIF}

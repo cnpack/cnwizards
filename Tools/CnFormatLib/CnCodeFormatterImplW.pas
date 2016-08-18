@@ -193,7 +193,8 @@ begin
   OutStream := TMemoryStream.Create;
 
   InStream.Write((PChar(UInput))^, Len * SizeOf(Char));
-  CodeFor := TCnPascalCodeFormatter.Create(InStream, StartOffset, EndOffset);
+  CodeFor := TCnPascalCodeFormatter.Create(InStream, StartOffset, EndOffset,
+    CnPascalCodeForRule.CompDirectiveMode);
   CodeFor.SpecifyIdentifiers(FPreNameList);
   CodeFor.SpecifyLineMarks(FInputLineMarks);
   CodeFor.SliceMode := True;
@@ -268,7 +269,8 @@ begin
 
   InStream.Write(Input^, Len * SizeOf(Char));
   // Formatter 内部的偏移量以 0 开始，传入的 Offset 也以 0 开始
-  CodeFor := TCnPascalCodeFormatter.Create(InStream, StartOffset, EndOffset);
+  CodeFor := TCnPascalCodeFormatter.Create(InStream, StartOffset, EndOffset,
+    CnPascalCodeForRule.CompDirectiveMode);
   CodeFor.SpecifyIdentifiers(FPreNameList);
   CodeFor.SpecifyLineMarks(FInputLineMarks);
   CodeFor.SliceMode := True;
@@ -447,7 +449,8 @@ begin
   OutStream := TMemoryStream.Create;
 
   InStream.Write((PChar(UInput))^, Len * SizeOf(Char));
-  CodeFor := TCnPascalCodeFormatter.Create(InStream);
+  CodeFor := TCnPascalCodeFormatter.Create(InStream, CN_MATCHED_INVALID, CN_MATCHED_INVALID,
+    CnPascalCodeForRule.CompDirectiveMode);
   CodeFor.SpecifyIdentifiers(FPreNameList);
   CodeFor.SpecifyLineMarks(FInputLineMarks);
 
@@ -507,7 +510,8 @@ begin
   OutStream := TMemoryStream.Create;
 
   InStream.Write(Input^, Len * SizeOf(Char));
-  CodeFor := TCnPascalCodeFormatter.Create(InStream);
+  CodeFor := TCnPascalCodeFormatter.Create(InStream, CN_MATCHED_INVALID, CN_MATCHED_INVALID,
+    CnPascalCodeForRule.CompDirectiveMode);
   CodeFor.SpecifyIdentifiers(FPreNameList);
   CodeFor.SpecifyLineMarks(FInputLineMarks);
 

@@ -152,6 +152,7 @@ var
   OutMarks: PDWORD;
   Marks: array[0..1] of DWORD;
 begin
+  CnPascalCodeForRule.CompDirectiveMode := cdmOnlyFirst;
   CnPascalCodeForRule.TabSpaceCount := UpDown1.Position;
   CnPascalCodeForRule.KeywordStyle := TKeywordStyle(ComboBox1.ItemIndex);
 
@@ -176,7 +177,8 @@ begin
     else
       SrcMemo.Lines.SaveToStream(MemStr {$IFDEF UNICODE}, TEncoding.Unicode {$ENDIF});
 
-    FCodeFor := TCnPascalCodeFormatter.Create(MemStr);
+    FCodeFor := TCnPascalCodeFormatter.Create(MemStr, CN_MATCHED_INVALID, CN_MATCHED_INVALID,
+      CnPascalCodeForRule.CompDirectiveMode);
     FCodeFor.SpecifyIdentifiers(@Names[0]);
 
     Marks[0] := SrcMemo.CaretPos.y;
