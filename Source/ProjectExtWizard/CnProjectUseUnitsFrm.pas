@@ -381,27 +381,45 @@ var
   SrcEditor: IOTASourceEditor;
   HasUses: Boolean;
   LinearPos: LongInt;
-  S, F: string;
+  Sl: TStrings;
+  F: string;
+  J: Integer;
 
   // 根据源码类型得到插入的 uses 或 include 字符串，FileHasUses 只对 Pascal 代码
   // 有效、IsHFromSystem 只对 Cpp 文件有效
   function JoinUsesOrInclude(FileHasUses: Boolean; IsHFromSystem: Boolean;
-    const IncFile: string): string;
+    const IncFiles: TStrings): string;
+  var
+    I: Integer;
   begin
+    Result := '';
+    if (IncFiles = nil) or (IncFiles.Count = 0) then
+      Exit;
+
     if FIsCppMode then
     begin
-      if IsHFromSystem then
-        Result := Format('#include <%s>' + #13#10, [IncFile])
-      else
-        Result := Format('#include "%s"' + #13#10, [IncFile]);
+      for I := 0 to IncFiles.Count - 1 do
+      begin
+        if IsHFromSystem then
+          Result := Result + Format('#include <%s>' + #13#10, [IncFiles[I]])
+        else
+          Result := Result + Format('#include "%s"' + #13#10, [IncFiles[I]]);
+      end;
     end
     else
     begin
       if FileHasUses then
-        Result := Format(', %s', [IncFile])
+      begin
+        for I := 0 to IncFiles.Count - 1 do
+          Result := Result + ', ' + IncFiles[I];
+      end
       else
-        Result := Format(#13#10#13#10 + 'uses' + #13#10 + '%s%s;',
-          [Spc(CnOtaGetBlockIndent), IncFile]);
+      begin
+        Result := #13#10#13#10 + 'uses' + #13#10 + Spc(CnOtaGetBlockIndent) + IncFiles[0];
+        for I := 1 to IncFiles.Count - 1 do
+          Result := Result + ', ' + IncFiles[I];
+        Result := Result + ';';
+      end;
     end;
   end;
 
@@ -409,9 +427,12 @@ begin
   if lvList.SelCount > 0 then
   begin
     ModalResult := mrOk;
-    S := lvList.Selected.Caption;
-    IsIntfOrH := rbIntf.Checked;
+    Sl := TStringList.Create;
+    for J := 0 to lvList.Items.Count - 1 do
+      if lvList.Items[J].Selected then
+        Sl.Add(lvList.Items[J].Caption);
 
+    IsIntfOrH := rbIntf.Checked;
     EditView := CnOtaGetTopMostEditView;
     if EditView = nil then
       Exit;
@@ -463,7 +484,7 @@ begin
 
       // 已经得到行 1 列 0 开始的 CharPos，用 EditView.CharPosToPos(CharPos) 转换为线性;
       LinearPos := EditView.CharPosToPos(CharPos);
-      CnOtaInsertTextIntoEditorAtPos(JoinUsesOrInclude(HasUses, IsFromSystem, S),
+      CnOtaInsertTextIntoEditorAtPos(JoinUsesOrInclude(HasUses, IsFromSystem, Sl),
         LinearPos, SrcEditor);
     end
     else
@@ -477,7 +498,7 @@ begin
 
       // 已经得到行 1 列 0 开始的 CharPos，用 EditView.CharPosToPos(CharPos) 转换为线性;
       LinearPos := EditView.CharPosToPos(CharPos);
-      CnOtaInsertTextIntoEditorAtPos(JoinUsesOrInclude(HasUses, False, S), LinearPos);
+      CnOtaInsertTextIntoEditorAtPos(JoinUsesOrInclude(HasUses, False, Sl), LinearPos);
     end;
   end;
 end;

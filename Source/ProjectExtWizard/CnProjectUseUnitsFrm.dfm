@@ -61,7 +61,6 @@ inherited CnProjectUseUnitsForm: TCnProjectUseUnitsForm
         Caption = 'File State'
         Width = 66
       end>
-    MultiSelect = False
     OwnerData = True
     OnData = lvListData
   end
