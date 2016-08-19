@@ -305,7 +305,7 @@ var
 }
   function HexDumpMemory(AMem: Pointer; Size: Integer): string;
   var
-    I, J, DestP, PrevLineStart: Integer;
+    I, J, DestP, PrevLineStart, Remain: Integer;
     AChar: Char;
   begin
     if (Size <= 0) or (AMem = nil) then
@@ -360,9 +360,22 @@ var
       end;
     end;
 
-    if (Size mod 16) > 0 then
+    Remain := Size mod 16;
+    if Remain > 0 then
     begin
       // DONE: 处理末行未完的情形
+      Remain := 16 - Remain; // 补充空格以对齐
+
+      for I := 1 to Remain do
+      begin
+        Result[DestP] := ' '; // 加空格分隔
+        Inc(DestP);
+        Result[DestP] := ' '; // 加高位空格充当十六进制低位
+        Inc(DestP);
+        Result[DestP] := ' '; // 加低位空格充当十六进制低位
+        Inc(DestP);
+      end;
+
       Result[DestP] := ' '; // 加空格分隔
       Inc(DestP);
       Result[DestP] := ';'; // 加分号分隔
