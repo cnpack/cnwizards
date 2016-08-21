@@ -737,8 +737,7 @@ begin
                 (CurrMidBlock.TokenID = tkExcept) and
                 (PrevTokenID in [tkSemiColon, tkExcept]) then
                 Token.FItemLayer := CurrBlock.FItemLayer + 1
-              else if not ((CurrBlock.TokenID = tkCase)
-                and (PrevTokenID = tkSemiColon)) then
+              else if not (CurrBlock.TokenID = tkCase) then // case of 中的 else 前面可以不是分号
                 Token.FItemLayer := Token.FItemLayer + 1;
             end;
           tkEnd, tkUntil, tkThen, tkDo:
