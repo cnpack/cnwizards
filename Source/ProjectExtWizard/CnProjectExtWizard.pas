@@ -199,6 +199,8 @@ begin
       end;
     end;
   end;
+  FPasUnitNameList := TUnitNameList.Create(True, False);
+  FCppUnitNameList := TUnitNameList.Create(True, True);
 end;
 
 destructor TCnProjectExtWizard.Destroy;
