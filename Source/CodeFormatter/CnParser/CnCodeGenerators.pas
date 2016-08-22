@@ -519,7 +519,7 @@ procedure TCnCodeGenerator.Write(const Text: string; BeforeSpaceCount,
 var
   Str, WrapStr, Tmp, S: string;
   ThisCanBeHead, PrevCanBeTail, IsCRLFSpace, IsAfterCommentAuto: Boolean;
-  Len, Blanks, LastSpaces, CRLFPos, I: Integer;
+  Len, Blanks, LastSpaces, CRLFPos, I, TmpWrapWidth: Integer;
 
   function ExceedLineWrap(Width: Integer): Boolean;
   begin
@@ -652,8 +652,13 @@ begin
   else if (FCodeWrapMode = cwmSimple) or ( (FCodeWrapMode = cwmAdvanced) and
     (CnPascalCodeForRule.WrapWidth >= CnPascalCodeForRule.WrapNewLineWidth) ) then
   begin
+    if FCodeWrapMode = cwmSimple then // 简单模式下，是 uses 区，使用单独的宽度设置
+      TmpWrapWidth := CnPascalCodeForRule.UsesLineWrapWidth
+    else
+      TmpWrapWidth := CnPascalCodeForRule.WrapWidth;
+
     // 简单换行，或复杂换行但行值设置不对，就简单判断是否超出宽度
-    if (FPrevStr <> '.') and ExceedLineWrap(CnPascalCodeForRule.WrapWidth)
+    if (FPrevStr <> '.') and ExceedLineWrap(TmpWrapWidth)
       and ThisCanBeHead and PrevCanBeTail then // Dot in unitname should not new line.
     begin
       // “上次输出的字符串能做尾并且本次输出的字符串能做头”才换行

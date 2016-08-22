@@ -620,6 +620,7 @@ var
   AWrapMode: DWORD;
   AUsesSingleLine: LongBool;
   AUseIgnoreArea: LongBool;
+  AUsesLineWrapWidth: DWORD;
 begin
   Result := False;
   if FGetProvider = nil then
@@ -664,6 +665,7 @@ begin
   ASpaceTabAsm := FSpaceTabASMKeyword;
   ALineWrapWidth := FWrapWidth;
   ANewLineWrapWidth := FWrapNewLineWidth;
+  AUsesLineWrapWidth := FWrapWidth;
 
   case FWrapMode of
     cwmNone:
@@ -681,7 +683,8 @@ begin
 
   Intf.SetPascalFormatRule(ADirectiveMode, AKeywordStyle, ABeginStyle, AWrapMode,
     ATabSpace, ASpaceBeforeOperator, ASpaceAfterOperator, ASpaceBeforeAsm,
-    ASpaceTabAsm, ALineWrapWidth, ANewLineWrapWidth, AUsesSingleLine, AUseIgnoreArea);
+    ASpaceTabAsm, ALineWrapWidth, ANewLineWrapWidth, AUsesSingleLine, AUseIgnoreArea,
+    AUsesLineWrapWidth);
   Result := True;
 end;
 

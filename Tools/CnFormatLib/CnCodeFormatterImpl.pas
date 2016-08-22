@@ -64,7 +64,7 @@ type
       BeginStyle: DWORD; WrapMode: DWORD; TabSpace: DWORD; SpaceBeforeOperator: DWORD;
       SpaceAfterOperator: DWORD; SpaceBeforeAsm: DWORD; SpaceTabAsm: DWORD;
       LineWrapWidth: DWORD; NewLineWrapWidth: DWORD; UsesSingleLine: LongBool;
-      UseIgnoreArea: LongBool);
+      UseIgnoreArea: LongBool; UsesLineWrapWidth: DWORD);
     procedure SetPreIdentifierNames(Names: PLPSTR);
     procedure SetInputLineMarks(Marks: PDWORD);
 
@@ -196,7 +196,8 @@ end;
 
 procedure TCnCodeFormatProvider.SetPascalFormatRule(DirectiveMode, KeywordStyle,
   BeginStyle, WrapMode, TabSpace, SpaceBeforeOperator, SpaceAfterOperator, SpaceBeforeAsm,
-  SpaceTabAsm, LineWrapWidth, NewLineWrapWidth: DWORD; UsesSingleLine, UseIgnoreArea: LongBool);
+  SpaceTabAsm, LineWrapWidth, NewLineWrapWidth: DWORD; UsesSingleLine, UseIgnoreArea: LongBool;
+  UsesLineWrapWidth: DWORD);
 begin
   case DirectiveMode of
     CN_RULE_DIRECTIVE_MODE_ASCOMMENT:
@@ -241,6 +242,7 @@ begin
   CnPascalCodeForRule.WrapNewLineWidth := NewLineWrapWidth;
   CnPascalCodeForRule.UsesUnitSingleLine := UsesSingleLine;
   CnPascalCodeForRule.UseIgnoreArea := UseIgnoreArea;
+  CnPascalCodeForRule.UsesLineWrapWidth := UsesLineWrapWidth;
 end;
 
 function TCnCodeFormatProvider.RetrievePascalLastError(out SourceLine, SourceCol,

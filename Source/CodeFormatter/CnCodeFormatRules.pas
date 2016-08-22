@@ -73,6 +73,7 @@ type
     WrapNewLineWidth: Integer;
     UsesUnitSingleLine: Boolean;
     UseIgnoreArea: Boolean;
+    UsesLineWrapWidth: Integer;
   end;
 
 const
@@ -95,6 +96,7 @@ const
     WrapNewLineWidth: 90;
     UsesUnitSingleLine: False;
     UseIgnoreArea: True;
+    UsesLineWrapWidth: 90;
   );
 
 var
