@@ -55,6 +55,15 @@ type
     function Contains(ElementTypes: TCnPascalFormattingElementTypeSet): Boolean;
   end;
 
+  TCnIdentBackupObj = class(TObject)
+  private
+    FOldUpperIdent: string;
+    FOldRealIdent: string;
+  public
+    property OldUpperIdent: string read FOldUpperIdent write FOldUpperIdent;
+    property OldRealIdent: string read FOldRealIdent write FOldRealIdent;
+  end;
+
   TCnAbstractCodeFormatter = class
   private
     FScaner: TAbstractScaner;
@@ -190,6 +199,10 @@ type
     FGoalType: TCnGoalType;
     FNextBeginShouldIndent: Boolean; // 控制是否本 begin 必须换行即使设置为 SameLine
     FStructStmtEmptyEnd: Boolean;    // 标记结构语句的结束语句是否是空语句，用来控制后面单个分号的位置
+    FStoreIdent: Boolean;            // 控制是否把标识符存入大小写控制的 HashMap 中供后文使用
+    FIdentBackupListRef: TObjectList; // 指向当前用来存储备份 HashMap 中的内容的 ObjectList，元素是 TCnIdentBackupObj
+    procedure CheckAddIdentBackup(List: TObjectList; const Ident: string);
+    procedure RestoreIdentBackup(List: TObjectList);
     function IsTokenAfterAttributesInSet(InTokens: TPascalTokenSet): Boolean;
     procedure CheckWriteBeginln;
   protected
@@ -1216,7 +1229,10 @@ begin
       Match(Scaner.Token); // & 后的标识符中允许使用部分关键字，但不允许新语法的数字等
   end
   else if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens + CanBeNewIdentifierTokens) then
+  begin
+    CheckAddIdentBackup(FIdentBackupListRef, Scaner.TokenString);
     Match(Scaner.Token, PreSpaceCount); // 标识符中允许使用部分关键字，在此缩进
+  end;
 
   while CanHaveUnitQual and (Scaner.Token = tokDot) do
   begin
@@ -4485,6 +4501,8 @@ procedure TCnBasePascalFormatter.FormatFunctionDecl(PreSpaceCount: Byte;
 var
   IsExternal: Boolean;
   IsForward: Boolean;
+  OldIdentBackupListRef: TObjectList;
+  IdentBackupList: TObjectList;
 begin
   FormatFunctionHeading(PreSpaceCount);
 
@@ -4519,7 +4537,19 @@ begin
   if ((not IsExternal)  and (not IsForward))and
      (Scaner.Token in BlockStmtTokens + DeclSectionTokens) then
   begin
-    FormatBlock(PreSpaceCount, True);
+    OldIdentBackupListRef := FIdentBackupListRef;
+    IdentBackupList := TObjectList.Create(True);
+    FIdentBackupListRef := IdentBackupList;
+
+    try
+      FormatBlock(PreSpaceCount, True);
+    finally
+      // Remove IdentBackupList from NamesMap
+      RestoreIdentBackup(IdentBackupList);
+      IdentBackupList.Free;
+      FIdentBackupListRef := OldIdentBackupListRef;
+    end;
+
     if not IsAnonymous and (Scaner.Token = tokSemicolon) then // 匿名函数不包括 end 后的分号
       Match(tokSemicolon);
   end;
@@ -4557,6 +4587,8 @@ procedure TCnBasePascalFormatter.FormatProcedureDecl(PreSpaceCount: Byte;
 var
   IsExternal: Boolean;
   IsForward: Boolean;
+  OldIdentBackupListRef: TObjectList;
+  IdentBackupList: TObjectList;
 begin
   FormatProcedureHeading(PreSpaceCount);
 
@@ -4592,7 +4624,19 @@ begin
   if ((not IsExternal) and (not IsForward)) and
     (Scaner.Token in BlockStmtTokens + DeclSectionTokens) then // Local procedure also supports Attribute
   begin
-    FormatBlock(PreSpaceCount, True);
+    OldIdentBackupListRef := FIdentBackupListRef;
+    IdentBackupList := TObjectList.Create(True);
+    FIdentBackupListRef := IdentBackupList;
+
+    try
+      FormatBlock(PreSpaceCount, True);
+    finally
+      // Remove IdentBackupList from NamesMap
+      RestoreIdentBackup(IdentBackupList);
+      IdentBackupList.Free;
+      FIdentBackupListRef := OldIdentBackupListRef;
+    end;
+
     if not IsAnonymous and (Scaner.Token = tokSemicolon) then // 匿名函数不包括 end 后的分号
       Match(tokSemicolon);
   end;
@@ -4740,8 +4784,18 @@ end;
 
 { VarDecl -> IdentList ':' Type [(ABSOLUTE (Ident | ConstExpr)) | '=' TypedConstant] }
 procedure TCnBasePascalFormatter.FormatVarDecl(PreSpaceCount: Byte);
+var
+  OldStoreIdent: Boolean;
 begin
-  FormatIdentList(PreSpaceCount);
+  OldStoreIdent := FStoreIdent;
+  try
+    // 把 var 区的内容存入标识符 Map 用来纠正大小写
+    FStoreIdent := True;
+    FormatIdentList(PreSpaceCount);
+  finally
+    FStoreIdent := OldStoreIdent;
+  end;
+
   if Scaner.Token = tokColon then // 放宽语法限制
   begin
     Match(tokColon);
@@ -5695,6 +5749,46 @@ begin
   begin
     Match(tokAmpersand, PreSpaceCount);
     Result := True;
+  end;
+end;
+
+procedure TCnBasePascalFormatter.CheckAddIdentBackup(List: TObjectList;
+  const Ident: string);
+var
+  S, U: string;
+  Obj: TCnIdentBackupObj;
+begin
+  if FStoreIdent and (List <> nil) and (FNamesMap <> nil) and (Ident <> '') then
+  begin
+    U := UpperCase(Ident);
+    if FNamesMap.Find(U, S) then
+    begin
+      Obj := TCnIdentBackupObj.Create;
+      Obj.OldUpperIdent := U;
+      Obj.OldRealIdent := S;
+      List.Add(Obj);
+
+      FNamesMap.Delete(U);
+    end;
+    FNamesMap.Add(U, Ident);
+  end;
+end;
+
+procedure TCnBasePascalFormatter.RestoreIdentBackup(List: TObjectList);
+var
+  I: Integer;
+  Obj: TCnIdentBackupObj;
+  S: string;
+begin
+  if (List <> nil) and (FNamesMap <> nil) then
+  begin
+    for I := List.Count - 1 downto 0 do
+    begin
+      Obj := TCnIdentBackupObj(List[I]);
+      FNamesMap.Delete(Obj.OldUpperIdent);
+      FNamesMap.Add(Obj.OldUpperIdent, Obj.OldRealIdent);
+    end;
+    List.Clear;
   end;
 end;
 
