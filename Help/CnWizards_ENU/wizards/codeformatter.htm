@@ -47,6 +47,8 @@
 <p class="text"><b>Single Line Mode for Every Uses Unit</b>: If Checked, Every Unit Name in Uses Area will Occupy One Line, Otherwise Use a Simple auto Wrap Mode with the above Break Line Width.</p></li>
   <li>
 <p class="text"><b>Use IDE Internal Symbols to Correct Identifiers</b>: If Checked, Code Formatter will Compile Current Unit and Use IDE Internal Symbols to Correct the Identifiers in Source. This Feature Depends on Input Helper.</p></li>
+  <li>
+<p class="text"><b>Compiler Directive</b>: For some Compiler Directives such as {$IFDEF} {$ELSE} {$ENDIF}, Our Wizard can't Process them Perfectly, and Treat them as Comments Defaultly. But usually Causes Syntax Error for "Duplicated Elements". This Option allow to Only Format the First Branch of Conditional Defines({$IFDEF} {$ELSE} of {$IFDEF} {$ELSE} {$ENDIF}), and Keep Others Unchanged.</p></li>
 </ul>
 	<li>
 <p class="text"><b>ASM Settings</b></p></li>
