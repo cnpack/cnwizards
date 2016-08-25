@@ -65,7 +65,7 @@ type
     ctkstatic_cast, ctkstring, ctkstruct, ctkswitch, ctksymbol, ctktemplate,
     ctkthis, ctkthreepoint, ctkthrow, ctktrue, ctktry, ctktypedef, ctktypeid,
     ctktypename, ctkunion, ctkUnknown, ctkunsigned, ctkusing, ctkvirtual,
-    ctkvoid, ctkvolatile, ctkwchar_t, ctkwhile, ctknextline);
+    ctkvoid, ctkvolatile, ctkwchar_t, ctkwhile, ctknextline, ctktilde);
 
   TIdentDirect = set of TCTokenKind;
 
@@ -1141,7 +1141,7 @@ begin
           FTokenLineStartPosList.Add(LineStartRun);
         end;
 
-      'A'..'Z', 'a'..'z', '_', '~':
+      'A'..'Z', 'a'..'z', '_':
         begin
           Inc(Run); Inc(ColNum);
           while (FOrigin[Run] in ['A'..'Z', 'a'..'z', '0'..'9', '_'])
@@ -1150,6 +1150,15 @@ begin
             Inc(Run);
             Inc(ColNum);
           end;
+          FTokenPositionsList.Add(Run);
+          FTokenLineNumberList.Add(LineNum);
+          FTokenColNumberList.Add(ColNum);
+          FTokenLineStartPosList.Add(LineStartRun);
+        end;
+
+      '~':
+        begin
+          Inc(Run); Inc(ColNum);
           FTokenPositionsList.Add(Run);
           FTokenLineNumberList.Add(LineNum);
           FTokenColNumberList.Add(ColNum);
@@ -1496,7 +1505,9 @@ begin
 
     #1..#9, #11, #12, #14..#32: Result := ctkspace;
 
-    'A'..'Z', 'a'..'z', '_', '~': Result := IdentKind(Index);
+    'A'..'Z', 'a'..'z', '_': Result := IdentKind(Index);
+
+    '~': Result := ctktilde;
 
     '0'..'9':
       begin

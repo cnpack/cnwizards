@@ -1025,7 +1025,7 @@ begin
           FTokenLineStartPosList.Add(LineStartRun);
         end;
 
-      'A'..'Z', 'a'..'z', '_', '~':
+      'A'..'Z', 'a'..'z', '_':
         begin
           Inc(FRun); Inc(ColNum); Inc(RawColNum);
           while _WideCharInSet(FOrigin[FRun], ['A'..'Z', 'a'..'z', '0'..'9', '_'])
@@ -1033,6 +1033,16 @@ begin
           begin
             StepRun;
           end;
+          FTokenPositionsList.Add(FRun);
+          FTokenLineNumberList.Add(LineNum);
+          FTokenColNumberList.Add(ColNum);
+          FTokenRawColNumberList.Add(RawColNum);
+          FTokenLineStartPosList.Add(LineStartRun);
+        end;
+
+      '~':
+        begin
+          Inc(FRun); Inc(ColNum); Inc(RawColNum);
           FTokenPositionsList.Add(FRun);
           FTokenLineNumberList.Add(LineNum);
           FTokenColNumberList.Add(ColNum);
@@ -1419,7 +1429,9 @@ begin
 
     #1..#9, #11, #12, #14..#32: Result := ctkspace;
 
-    'A'..'Z', 'a'..'z', '_', '~': Result := IdentKind(Index);
+    'A'..'Z', 'a'..'z', '_': Result := IdentKind(Index);
+
+    '~': Result := ctktilde;
 
     '0'..'9':
       begin
