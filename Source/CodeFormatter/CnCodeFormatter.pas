@@ -4972,7 +4972,9 @@ begin
   begin
     Writeln;
     Match(Scaner.Token);
-    Writeln;
+
+    if Scaner.Token <> tokKeywordEnd then // Do not New a Line when Empty finalization
+      Writeln;
     FormatStmtList(Tab);
     Exit;
   end
@@ -4983,7 +4985,9 @@ begin
   begin
     WriteBlankLineByPrevCondition;
     Match(Scaner.Token);
-    Writeln;
+
+    if Scaner.Token <> tokKeywordEnd then // Do not New a Line when Empty finalization
+      Writeln;
     FormatStmtList(Tab);
   end;
 end;
@@ -5778,7 +5782,6 @@ procedure TCnBasePascalFormatter.RestoreIdentBackup(List: TObjectList);
 var
   I: Integer;
   Obj: TCnIdentBackupObj;
-  S: string;
 begin
   if (List <> nil) and (FNamesMap <> nil) then
   begin
