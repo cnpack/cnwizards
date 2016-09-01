@@ -96,34 +96,38 @@ implementation
 
 procedure TCnPalEnhanceForm.FormCreate(Sender: TObject);
 begin
-  {$IFDEF COMPILER5}
+{$IFDEF COMPILER5}
   chkAddTabs.Enabled := True;
-  {$ELSE}
+{$ELSE}
   chkAddTabs.Enabled := False;
-  {$ENDIF}
+{$ENDIF}
 
-  {$IFDEF DELPHI7} // 只在 D7 下有效
+{$IFDEF DELPHI7} // 只在 D7 下有效
   chkMenuLine.Enabled := True;
-  {$ELSE}
+{$ELSE}
   chkMenuLine.Enabled := False;
-  {$ENDIF}
+{$ENDIF}
 
-  {$IFDEF COMPILER8_UP}
+{$IFDEF COMPILER8_UP}
   // 8 以及以上版本无此设置
   chkMultiLine.Enabled := False;
   chkButtonStyle.Enabled := False;
   chkDivTabMenu.Enabled := False;
-  chkCompFilter.Enabled := False;
-  lblShortcut.Enabled := False;
-  hkCompFilter.Enabled := False;
-  {$ELSE}
+{$ELSE}
   chkMultiLine.Enabled := True;
   chkButtonStyle.Enabled := True;
   chkDivTabMenu.Enabled := True;
+{$ENDIF}
+
+{$IFDEF SUPPORTS_PALETTE_ENHANCE}
   chkCompFilter.Enabled := True;
   lblShortcut.Enabled := True;
   hkCompFilter.Enabled := True;
-  {$ENDIF}
+{$ELSE}
+  chkCompFilter.Enabled := False;
+  lblShortcut.Enabled := False;
+  hkCompFilter.Enabled := False;
+{$ENDIF}
 end;
 
 procedure TCnPalEnhanceForm.FormShow(Sender: TObject);
