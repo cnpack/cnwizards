@@ -420,10 +420,12 @@ type
   {$ENDIF}
 {$ENDIF}
 {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
-    function ParseNameFromHint(const Hint: string): string;
+    function ParseCompNameFromHint(const Hint: string): string;
+    function ParseUnitNameFromHint(const Hint: string): string;
 {$ENDIF}
     function GetSelectedIndex: Integer;
     function GetSelectedToolName: string;
+    function GetSelectedUnitName: string;
     function GetSelector: TSpeedButton;
     function GetPalToolCount: Integer;
     function GetActiveTab: string;
@@ -461,6 +463,8 @@ type
     {* 按下的控件在本页的序号，0 开头，支持高版本的新控件板 }
     property SelectedToolName: string read GetSelectedToolName;
     {* 按下的控件的类名，未按下则为空，支持高版本的新控件板 }
+    property SelectedUnitName: string read GetSelectedUnitName;
+    {* 按下的控件的单元名，未按下为空，支持高版本的新控件版，可解析 Hint 而来}
     property Selector: TSpeedButton read GetSelector;
     {* 获得用来切换到鼠标光标的 SpeedButton，低版本在组件区内，高版本在 Tab 头中 }
     property PalToolCount: Integer read GetPalToolCount;
@@ -2085,7 +2089,7 @@ begin
         if (FPalette.Controls[J] is TSpeedButton) and
           FPalette.Controls[J].ClassNameIs(SCnNewPaletteButtonClassName) then
         begin
-          S := ParseNameFromHint((FPalette.Controls[J] as TSpeedButton).Hint);
+          S := ParseCompNameFromHint((FPalette.Controls[J] as TSpeedButton).Hint);
           if S = AComponentClassName then
           begin
             GetControlBitmap(FPalette.Controls[J], Bmp);
@@ -2252,7 +2256,7 @@ begin
         begin
           if (FPalette.Controls[I] as TSpeedButton).Down then
           begin
-            Result := ParseNameFromHint((FPalette.Controls[I] as TSpeedButton).Hint);
+            Result := ParseCompNameFromHint((FPalette.Controls[I] as TSpeedButton).Hint);
             Exit;
           end;
         end;
@@ -2263,6 +2267,44 @@ begin
     end;
   except
     ;
+  end;
+end;
+
+function TCnPaletteWrapper.GetSelectedUnitName: string;
+var
+  S: string;
+  AClass: TPersistentClass;
+{$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
+  I: Integer;
+{$ENDIF}
+begin
+  Result := '';
+  S := SelectedToolName;
+
+  if S <> '' then
+  begin
+    AClass := GetClass(S);
+    if (AClass <> nil) and (PTypeInfo(AClass.ClassInfo).Kind = tkClass) then
+      Result := string(GetTypeData(PTypeInfo(AClass.ClassInfo)).UnitName);
+
+    // 新型组件板下由于 FMX 等无法获得 Class 的，只能通过选择来实现
+{$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
+    if Result = '' then
+    begin
+      for I := 0 to FPalette.ControlCount - 1 do
+      begin
+        if (FPalette.Controls[I] is TSpeedButton) and
+          FPalette.Controls[I].ClassNameIs(SCnNewPaletteButtonClassName) then
+        begin
+          if (FPalette.Controls[I] as TSpeedButton).Down then
+          begin
+            Result := ParseUnitNameFromHint((FPalette.Controls[I] as TSpeedButton).Hint);
+            Exit;
+          end;
+        end;
+      end;
+    end;
+{$ENDIF}
   end;
 end;
 
@@ -2345,9 +2387,9 @@ end;
 
 {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
 
-function TCnPaletteWrapper.ParseNameFromHint(const Hint: string): string;
+function TCnPaletteWrapper.ParseCompNameFromHint(const Hint: string): string;
 const
-  NamePrefix = 'Name: ';
+  CompNamePrefix = 'Name: ';
   CRLF = #13#10;
 var
   CRLFPos: Integer;
@@ -2360,11 +2402,34 @@ begin
     Package: PackageName
   }
   Result := Hint;
-  if Pos(NamePrefix, Result) = 1 then
-    Delete(Result, 1, Length(NamePrefix));
+  if Pos(CompNamePrefix, Result) = 1 then
+    Delete(Result, 1, Length(CompNamePrefix));
   CRLFPos := Pos(CRLF, Result);
   if CRLFPos > 0 then
     Result := Copy(Result, 1, CRLFPos - 1);
+end;
+
+function TCnPaletteWrapper.ParseUnitNameFromHint(const Hint: string): string;
+const
+  UnitNamePrefix = 'Unit: ';
+  CRLF = #13#10;
+var
+  APos: Integer;
+begin
+  // 把控件板组件上某组件 SpeedButton 按钮的 Hint 里头的单元名字解析出来
+  {
+    Hint 形如：
+    Name: ComponentName
+    Unit: UnitName
+    Package: PackageName
+  }
+  Result := Hint;
+  APos := Pos(UnitNamePrefix, Result);
+  if APos > 0 then
+    Delete(Result, 1, APos - 1 + Length(UnitNamePrefix));
+  APos := Pos(CRLF, Result);
+  if APos > 0 then
+    Result := Copy(Result, 1, APos - 1);
 end;
 
 {$ENDIF}
@@ -2389,7 +2454,7 @@ var
       if (FPalette.Controls[K] is TSpeedButton) and
         FPalette.Controls[K].ClassNameIs(SCnNewPaletteButtonClassName) then
       begin
-        S := ParseNameFromHint((FPalette.Controls[K] as TSpeedButton).Hint);
+        S := ParseCompNameFromHint((FPalette.Controls[K] as TSpeedButton).Hint);
         if S = AComponent then
         begin
           if not (FPalette.Controls[K] as TSpeedButton).Down then

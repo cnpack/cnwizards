@@ -464,10 +464,7 @@ begin
 
             Info.TabName := CnPaletteWrapper.ActiveTab;
             Info.CompType := ctBoth; // 这种情况下无 VCL/CLX 的处理，所以赋值 both
-
-            AClass := GetClass(Info.InternalName);
-            if (AClass <> nil) and (PTypeInfo(AClass.ClassInfo).Kind = tkClass) then
-              Info.CompUnitName := string(GetTypeData(PTypeInfo(AClass.ClassInfo)).UnitName);
+            Info.CompUnitName := CnPaletteWrapper.SelectedUnitName;
 
             FCompList.AddObject(Info.CompName, Info);
           end;
@@ -478,35 +475,40 @@ begin
         if ComponentTabListMap <> nil then
         begin
           ComponentTabListMap.Sort;
-          for I := 0 to ComponentTabListMap.Count - 1 do
-          begin
-            Info := TCnIdeCompInfo.Create;
+          CnPaletteWrapper.BeginUpdate;
+          try
+            for I := 0 to ComponentTabListMap.Count - 1 do
+            begin
+              Info := TCnIdeCompInfo.Create;
 
-            S := ComponentTabListMap[I];
-            EquPos := Pos('=', S);
-            if EquPos > 0 then
-            begin
-              Info.InternalName := Copy(S, 1, EquPos - 1);
-              Info.TabName := Copy(S, EquPos + 1, MaxInt);
-            end
-            else
-            begin
-              Info.InternalName := S;
-              Info.TabName := 'Unknown';
+              S := ComponentTabListMap[I];
+              EquPos := Pos('=', S);
+              if EquPos > 0 then
+              begin
+                Info.InternalName := Copy(S, 1, EquPos - 1);
+                Info.TabName := Copy(S, EquPos + 1, MaxInt);
+              end
+              else
+              begin
+                Info.InternalName := S;
+                Info.TabName := 'Unknown';
+              end;
+
+              Info.ImgIndex := CnImgIndexUnset;
+              Info.CompType := TCnIdeCompType(ComponentTabListMap.Objects[I]);
+              if not FShowPrefix and (Info.InternalName[1] = 'T') then
+                Info.CompName := Copy(Info.InternalName, 2, MaxInt)
+              else
+                Info.CompName := Info.InternalName;
+
+              // FMX 等单元如果获取不到 Class，则需要用选择的方式再解析 Hint 来获取单元名等信息
+              if GetClass(Info.InternalName) = nil then
+                CnPaletteWrapper.SelectComponent(Info.InternalName, Info.TabName);
+              Info.CompUnitName := CnPaletteWrapper.SelectedUnitName;
+              FCompList.AddObject(Info.CompName, Info);
             end;
-
-            Info.ImgIndex := CnImgIndexUnset;
-            Info.CompType := TCnIdeCompType(ComponentTabListMap.Objects[I]);
-            if not FShowPrefix and (Info.InternalName[1] = 'T') then
-              Info.CompName := Copy(Info.InternalName, 2, MaxInt)
-            else
-              Info.CompName := Info.InternalName;
-
-            AClass := GetClass(Info.InternalName);
-            if (AClass <> nil) and (PTypeInfo(AClass.ClassInfo).Kind = tkClass) then
-              Info.CompUnitName := string(GetTypeData(PTypeInfo(AClass.ClassInfo)).UnitName);
-
-            FCompList.AddObject(Info.CompName, Info);
+          finally
+            CnPaletteWrapper.EndUpdate;
           end;
         end;
       end;
