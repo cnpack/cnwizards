@@ -3273,6 +3273,7 @@ var
 begin
   if (FCurElement <> '') and (FCurElement <> SCnUnknownNameResult) then
   begin
+    lvList.Selected := nil;
     for I := 0 to FElementList.Count - 1 do
     begin
       ProcInfo := TCnElementInfo(FElementList.Objects[I]); // lvList.Items[I].Data);
@@ -3289,7 +3290,7 @@ begin
         for J := 0 to lvList.Items.Count - 1 do
         begin
           // TODO: 没考虑嵌套的情况
-          if lvList.Items[J].Data =  FElementList.Objects[I - 1] then
+          if lvList.Items[J].Data = FElementList.Objects[I - 1] then
           begin
             lvList.Selected := lvList.Items[J];
             lvList.ItemFocused := lvList.Selected;
