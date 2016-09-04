@@ -320,7 +320,7 @@ var
   Lex: TCnPasWideLex;
   MethodStack, BlockStack, MidBlockStack: TObjectStack;
   Token, CurrMethod, CurrBlock, CurrMidBlock: TCnWidePasToken;
-  SavePos, SaveLineNumber, SaveLinePos: Integer;
+  Bookmark: TCnPasWideBookmark;
   IsClassOpen, IsClassDef, IsImpl, IsHelper: Boolean;
   IsRecordHelper, IsSealed, IsAbstract, IsRecord, IsForFunc: Boolean;
   DeclareWithEndLevel: Integer;
@@ -520,9 +520,7 @@ begin
                 // 处理 record helper for 的情形，但在implementation部分其end会被
                 // record内部的function/procedure给干掉，暂无解决方案。
                 IsRecordHelper := False;
-                SavePos := Lex.RunPos;
-                SaveLineNumber := Lex.LineNumber;
-                SaveLinePos := Lex.LineStartOffset;
+                Lex.SaveToBookMark(Bookmark);
 
                 LexNextNoJunkWithoutCompDirect(Lex);
                 if Lex.TokenID in [tkSymbol, tkIdentifier] then
@@ -531,9 +529,7 @@ begin
                     IsRecordHelper := True;
                 end;
 
-                Lex.LineNumber := SaveLineNumber;
-                Lex.LineStartOffset := SaveLinePos;
-                Lex.RunPos := SavePos;
+                Lex.LoadFromBookMark(Bookmark);
               end;
 
               // 不处理 of object 的字样；不处理前面是 @@ 型的label的情形
@@ -588,9 +584,7 @@ begin
               // 处理不是 classdef 但是 class helper for TObject 的情形
               if not IsClassDef and (Lex.TokenID = tkClass) and not Lex.IsClass then
               begin
-                SavePos := Lex.RunPos;
-                SaveLineNumber := Lex.LineNumber;
-                SaveLinePos := Lex.LineStartOffset;
+                Lex.SaveToBookMark(Bookmark);
 
                 LexNextNoJunkWithoutCompDirect(Lex);
                 if Lex.TokenID in [tkSymbol, tkIdentifier, tkSealed, tkAbstract] then
@@ -611,18 +605,15 @@ begin
                     IsAbstract := True;
                   end;
                 end;
-                Lex.LineNumber := SaveLineNumber;
-                Lex.LineStartOffset := SaveLinePos;
-                Lex.RunPos := SavePos;
+
+                Lex.LoadFromBookMark(Bookmark);
               end;
 
               IsClassOpen := False;
               if IsClassDef then
               begin
                 IsClassOpen := True;
-                SavePos := Lex.RunPos;
-                SaveLineNumber := Lex.LineNumber;
-                SaveLinePos := Lex.LineStartOffset;
+                Lex.SaveToBookMark(Bookmark);
 
                 LexNextNoJunkWithoutCompDirect(Lex);
                 if Lex.TokenID = tkSemiColon then // 是个 class; 不需要 end;
@@ -643,11 +634,7 @@ begin
                 else if Lex.TokenID = tkFor then
                   IsClassOpen := True;
 
-                // RunPos 重新赋值不会导致已经下移的 LineNumber 回归，是个 Bug
-                // 如果给 Lex 的 LineNumber 以及 LinePos 直接赋值，又不知道会有啥问题
-                Lex.LineNumber := SaveLineNumber;
-                Lex.LineStartOffset := SaveLinePos;
-                Lex.RunPos := SavePos;
+                Lex.LoadFromBookMark(Bookmark);
               end;
 
               if IsClassOpen then // 有后续内容，需要一个 end
