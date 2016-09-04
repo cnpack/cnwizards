@@ -372,6 +372,7 @@ var
   NeedAutoMatch: Boolean;
   EditControl: TControl;
   Element, LineFlag: Integer;
+  KeyIsLeft: Boolean;
 begin
   if CnNtaGetCurrLineText(Line, LineNo, CharIndex) then
   begin
@@ -380,7 +381,27 @@ begin
     // UNICODE 环境下 CharIndex 和 string 不一致，需要转换成 AnsiString 来处理
     AnsiLine := AnsiString(Line);
 
-    if CharInSet(AChar, ['(', '[', '{', '''', '"']) then
+    // 引号无法直接区分是否当前输入字符是左括号一类，需要根据光标当前附近内容判断
+    KeyIsLeft := False;
+    if CharInSet(AChar, ['(', '[', '{']) then
+      KeyIsLeft := True
+    else if CharInSet(AChar, ['''', '"']) then
+    begin
+      if (AnsiLine <> '') and (CharIndex <= Length(AnsiLine)) then
+      begin
+        // 如果光标前一字符不是引号，就算左
+        Char1 := Char(AnsiLine[CharIndex]);
+        if ((AChar = '''') and (Char1 = '''')) or
+          ((AChar = '"') and (Char1 = '"')) then
+          KeyIsLeft := False
+        else
+          KeyIsLeft := True;
+      end
+      else
+        KeyIsLeft := True;
+    end;
+
+    if KeyIsLeft then
     begin
       if CanIgnoreFromIME then
       begin
@@ -391,9 +412,9 @@ begin
       NeedAutoMatch := False;
       if Length(AnsiLine) > CharIndex then
       begin
-        // 当前位置后是标识符以及左括号引号时不自动输入括号
+        // 当前位置后是标识符以及左右括号引号时不自动输入括号
         NeedAutoMatch := not CharInSet(Char(AnsiLine[CharIndex + 1]), ['_', 'A'..'Z',
-          'a'..'z', '0'..'9', '(', '''', '[']);
+          'a'..'z', '0'..'9', '(', ')', '''', '[', ']']);
       end
       else if Length(AnsiLine) = CharIndex then
         NeedAutoMatch := True; // 行尾
