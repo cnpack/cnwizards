@@ -399,7 +399,6 @@ var
   I, J, EquPos: Integer;
   OldTabIdx, OldPalIdx: Integer;
   Info: TCnIdeCompInfo;
-  AClass: TPersistentClass;
   S: string;
 
   procedure InitCompImages;
