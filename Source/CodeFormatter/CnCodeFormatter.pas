@@ -3387,14 +3387,22 @@ end;
         // Ident ':=' Expression 是为了支持 OLE 的格式的调用
 }
 procedure TCnBasePascalFormatter.FormatParameter(PreSpaceCount: Byte);
+var
+  OldStoreIdent: Boolean;
 begin
   if Scaner.Token = tokKeywordConst then
     Match(Scaner.Token);
   
   if Scaner.ForwardToken = tokComma then //IdentList
   begin
-    FormatIdentList(PreSpaceCount);
-    
+    OldStoreIdent := FStoreIdent;
+    try
+      FStoreIdent := True;
+      FormatIdentList(PreSpaceCount);
+    finally
+      FStoreIdent := OldStoreIdent;
+    end;
+
     if Scaner.Token = tokColon then
     begin
       Match(Scaner.Token);
@@ -3413,7 +3421,13 @@ begin
   end
   else // Ident
   begin
-    FormatIdent(PreSpaceCount);
+    OldStoreIdent := FStoreIdent;
+    try
+      FStoreIdent := True;
+      FormatIdent(PreSpaceCount);
+    finally
+      FStoreIdent := OldStoreIdent;
+    end;
 
     if Scaner.Token = tokColon then
     begin
@@ -4504,54 +4518,53 @@ var
   OldIdentBackupListRef: TObjectList;
   IdentBackupList: TObjectList;
 begin
-  FormatFunctionHeading(PreSpaceCount);
+  OldIdentBackupListRef := FIdentBackupListRef;
+  IdentBackupList := TObjectList.Create(True);
+  FIdentBackupListRef := IdentBackupList;
 
-  if Scaner.Token = tokSemicolon then // 可能有省略分号的情况
-    Match(tokSemicolon, 0, 0, True); // 不让分号后写空格，免得影响 Directive 的空格
+  try
+    FormatFunctionHeading(PreSpaceCount);
 
-  IsExternal := False;
-  IsForward := False;
-  while Scaner.Token in DirectiveTokens + ComplexTokens do
-  begin
-    if Scaner.Token = tokDirectiveExternal then
-      IsExternal := True;
-    if Scaner.Token = tokDirectiveForward then
-      IsForward := True;
-    FormatDirective;
-    {
-     FIX A BUG: semicolon can missing after directive like this:
-     
-     procedure Foo; external 'foo.dll' name '__foo'
-     procedure Bar; external 'bar.dll' name '__bar'
-    }
-    if Scaner.Token = tokSemicolon then
-      Match(tokSemicolon, 0, 0, True);
-  end;
+    if Scaner.Token = tokSemicolon then // 可能有省略分号的情况
+      Match(tokSemicolon, 0, 0, True); // 不让分号后写空格，免得影响 Directive 的空格
 
-  if (not IsExternal) and (not IsForward) then
-  begin
-    FNextBeginShouldIndent := True; // 过程声明后 begin 必须换行
-    Writeln;
-  end;
+    IsExternal := False;
+    IsForward := False;
+    while Scaner.Token in DirectiveTokens + ComplexTokens do
+    begin
+      if Scaner.Token = tokDirectiveExternal then
+        IsExternal := True;
+      if Scaner.Token = tokDirectiveForward then
+        IsForward := True;
+      FormatDirective;
+      {
+       FIX A BUG: semicolon can missing after directive like this:
 
-  if ((not IsExternal)  and (not IsForward))and
-     (Scaner.Token in BlockStmtTokens + DeclSectionTokens) then
-  begin
-    OldIdentBackupListRef := FIdentBackupListRef;
-    IdentBackupList := TObjectList.Create(True);
-    FIdentBackupListRef := IdentBackupList;
-
-    try
-      FormatBlock(PreSpaceCount, True);
-    finally
-      // Remove IdentBackupList from NamesMap
-      RestoreIdentBackup(IdentBackupList);
-      IdentBackupList.Free;
-      FIdentBackupListRef := OldIdentBackupListRef;
+       procedure Foo; external 'foo.dll' name '__foo'
+       procedure Bar; external 'bar.dll' name '__bar'
+      }
+      if Scaner.Token = tokSemicolon then
+        Match(tokSemicolon, 0, 0, True);
     end;
 
-    if not IsAnonymous and (Scaner.Token = tokSemicolon) then // 匿名函数不包括 end 后的分号
-      Match(tokSemicolon);
+    if (not IsExternal) and (not IsForward) then
+    begin
+      FNextBeginShouldIndent := True; // 过程声明后 begin 必须换行
+      Writeln;
+    end;
+
+    if ((not IsExternal)  and (not IsForward))and
+       (Scaner.Token in BlockStmtTokens + DeclSectionTokens) then
+    begin
+      FormatBlock(PreSpaceCount, True);
+      if not IsAnonymous and (Scaner.Token = tokSemicolon) then // 匿名函数不包括 end 后的分号
+        Match(tokSemicolon);
+    end;
+  finally
+    // Remove IdentBackupList from NamesMap
+    RestoreIdentBackup(IdentBackupList);
+    IdentBackupList.Free;
+    FIdentBackupListRef := OldIdentBackupListRef;
   end;
 end;
 
@@ -4590,55 +4603,54 @@ var
   OldIdentBackupListRef: TObjectList;
   IdentBackupList: TObjectList;
 begin
-  FormatProcedureHeading(PreSpaceCount);
+  OldIdentBackupListRef := FIdentBackupListRef;
+  IdentBackupList := TObjectList.Create(True);
+  FIdentBackupListRef := IdentBackupList;
 
-  if Scaner.Token = tokSemicolon then // 可能有省略分号的情况
-    Match(tokSemicolon, 0, 0, True); // 不让分号后写空格，免得影响 Directive 的空格
+  try
+    FormatProcedureHeading(PreSpaceCount);
 
-  IsExternal := False;
-  IsForward := False;
-  while Scaner.Token in DirectiveTokens + ComplexTokens do  // Use ComplexTokens for "local;"
-  begin
-    if Scaner.Token = tokDirectiveExternal then
-      IsExternal := True;
-    if Scaner.Token = tokDirectiveForward then
-      IsForward := True;
+    if Scaner.Token = tokSemicolon then // 可能有省略分号的情况
+      Match(tokSemicolon, 0, 0, True); // 不让分号后写空格，免得影响 Directive 的空格
 
-    FormatDirective;
-    {
-      FIX A BUG: semicolon can missing after directive like this:
+    IsExternal := False;
+    IsForward := False;
+    while Scaner.Token in DirectiveTokens + ComplexTokens do  // Use ComplexTokens for "local;"
+    begin
+      if Scaner.Token = tokDirectiveExternal then
+        IsExternal := True;
+      if Scaner.Token = tokDirectiveForward then
+        IsForward := True;
 
-       procedure Foo; external 'foo.dll' name '__foo'
-       procedure Bar; external 'bar.dll' name '__bar'
-    }
-    if Scaner.Token = tokSemicolon then
-      Match(tokSemicolon, 0, 0, True);
-  end;
+      FormatDirective;
+      {
+        FIX A BUG: semicolon can missing after directive like this:
 
-  if (not IsExternal) and (not IsForward) then
-  begin
-    FNextBeginShouldIndent := True; // 函数声明后 begin 必须换行
-    Writeln;
-  end;
-
-  if ((not IsExternal) and (not IsForward)) and
-    (Scaner.Token in BlockStmtTokens + DeclSectionTokens) then // Local procedure also supports Attribute
-  begin
-    OldIdentBackupListRef := FIdentBackupListRef;
-    IdentBackupList := TObjectList.Create(True);
-    FIdentBackupListRef := IdentBackupList;
-
-    try
-      FormatBlock(PreSpaceCount, True);
-    finally
-      // Remove IdentBackupList from NamesMap
-      RestoreIdentBackup(IdentBackupList);
-      IdentBackupList.Free;
-      FIdentBackupListRef := OldIdentBackupListRef;
+         procedure Foo; external 'foo.dll' name '__foo'
+         procedure Bar; external 'bar.dll' name '__bar'
+      }
+      if Scaner.Token = tokSemicolon then
+        Match(tokSemicolon, 0, 0, True);
     end;
 
-    if not IsAnonymous and (Scaner.Token = tokSemicolon) then // 匿名函数不包括 end 后的分号
-      Match(tokSemicolon);
+    if (not IsExternal) and (not IsForward) then
+    begin
+      FNextBeginShouldIndent := True; // 函数声明后 begin 必须换行
+      Writeln;
+    end;
+
+    if ((not IsExternal) and (not IsForward)) and
+      (Scaner.Token in BlockStmtTokens + DeclSectionTokens) then // Local procedure also supports Attribute
+    begin
+      FormatBlock(PreSpaceCount, True);
+      if not IsAnonymous and (Scaner.Token = tokSemicolon) then // 匿名函数不包括 end 后的分号
+        Match(tokSemicolon);
+    end;
+  finally
+    // Remove IdentBackupList from NamesMap
+    RestoreIdentBackup(IdentBackupList);
+    IdentBackupList.Free;
+    FIdentBackupListRef := OldIdentBackupListRef;
   end;
 end;
 
