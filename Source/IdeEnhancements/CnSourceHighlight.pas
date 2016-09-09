@@ -907,7 +907,9 @@ begin
     Exit;
 
 {$IFDEF UNICODE}
-  UniCol := CalcWideStringLengthFromAnsiOffset(PWideChar(Text), AnsiCol);
+  // 括号匹配时，光标可能在行尾之外，也就是说 AnsiCol 超出字符串长度，所以必须指定
+  // AllowExceedEnd 为 True 才能获得正确的匹配位置，否则就会被截断，产生匹配查找错误的问题
+  UniCol := CalcWideStringLengthFromAnsiOffset(PWideChar(Text), AnsiCol, True, True);
   ULine := Copy(Text, 1, UniCol - 1);
   Result := CalcUtf8LengthFromWideString(PWideChar(ULine)) + 1;
 
