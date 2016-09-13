@@ -739,12 +739,13 @@ function TCnPrefixWizard.GetRuleComponentName(Component: TComponent;
   UserMode: Boolean; FromObjectInspector: Boolean): Boolean;
 var
   OldName: string;
-  OldClassName, ClassName: string;
+  OldClassName, AClassName, RootName: string;
   Action: TBasicAction;
   Prefix: string;
   Ignore: Boolean;
   Succ: Boolean;
   DoRename: Boolean;
+  IsRoot: Boolean;
   OutStr: string;
   OutNum: Integer;
 
@@ -767,32 +768,46 @@ begin
   if not (Component is TComponent) then Exit;
 
   OldName := Component.Name;
-  ClassName := Component.ClassName;
+  AClassName := Component.ClassName;
   Action := CnGetComponentAction(Component);
 
   // 取控件前缀。对于 Form/DataModule，应该特殊处理，不应该根据变化的类名来
-  OldClassName := ClassName;
+  OldClassName := AClassName;
+  IsRoot := False;
+  RootName := '';
   if Component is TCustomForm then
-    ClassName := 'TForm'
+  begin
+    IsRoot := True;
+    AClassName := 'TForm';
+  end
   else if Component is TDataModule then
-    ClassName := 'TDataModule'
+  begin
+    IsRoot := True;
+    AClassName := 'TDataModule'
+  end
   else if (Component is TCustomFrame) and ((Component as TControl).Parent = nil) then
-    ClassName := 'TFrame'; // 是一个在设计期的独立 Frame
+  begin
+    IsRoot := True;
+    AClassName := 'TFrame'; // 是一个在设计期的独立 Frame
+  end;
 
-  Prefix := PrefixList.Prefixs[ClassName];
+  if IsRoot then
+    RootName := AClassName;
+
+  Prefix := PrefixList.Prefixs[AClassName];
   if (Prefix = '') and (PopPrefixDefine or UserMode) then
   begin
     DisableDesignerDrag; // 弥补设计期可能会吞吃WM_LBUTTONUP消息从而产生拖动状态的缺陷
     // 如果未定义弹出定义前缀的界面
 
     if Prefix = '' then
-      Prefix := GenDefPrefix(ClassName);
-    Succ := GetNewComponentPrefix(ClassName, Prefix, False, Ignore, FPopPrefixDefine);
-    PrefixList.Ignore[ClassName] := Ignore;
+      Prefix := GenDefPrefix(AClassName);
+    Succ := GetNewComponentPrefix(AClassName, Prefix, False, Ignore, FPopPrefixDefine);
+    PrefixList.Ignore[AClassName] := Ignore;
 
     if Succ then
     begin
-      PrefixList.Prefixs[ClassName] := Prefix;
+      PrefixList.Prefixs[AClassName] := Prefix;
       DoSaveSettings;
     end;
 
@@ -800,7 +815,7 @@ begin
       Exit;
   end;
 
-  ClassName := OldClassName; // 恢复
+  AClassName := OldClassName; // 恢复
 
   if Prefix <> '' then
   begin
@@ -814,7 +829,7 @@ begin
     end;
 
     // 组件名等于类名
-    if AllowClassName and (RemoveClassPrefix(ClassName) = OldName) then
+    if AllowClassName and (RemoveClassPrefix(AClassName) = OldName) then
     begin
       DoRename := False;
 
@@ -831,7 +846,7 @@ begin
         OldName := '';
 
       // 取新的名称
-      NewName := GetNewName(ClassName, Prefix, OldName);
+      NewName := GetNewName(AClassName, Prefix, OldName);
 
       if NeedFieldRename(Component) then
       begin
@@ -888,11 +903,20 @@ begin
       begin
         DisableDesignerDrag; // 弥补设计期可能会吞吃WM_LBUTTONUP消息从而产生拖动状态的缺陷
 
+        // 注意此处并未处理 TForm 等的情形，也就是说如果用户点击了修改前缀，
+        // 修改的是 TForm1 这种类型的前缀，需要修复，
         Succ := GetNewComponentName(_CnExtractFileName(FormEditor.GetFileName),
-          ClassName, CompText, OldName, Prefix, NewName, UserMode, Ignore,
+          AClassName, CompText, OldName, Prefix, NewName, UserMode, Ignore,
           FAutoPopSuggestDlg, FUseUnderLine);
-        PrefixList.Prefixs[ClassName] := Prefix;
-        PrefixList.Ignore[ClassName] := Ignore;
+        if IsRoot then
+        begin
+          PrefixList.Prefixs[RootName] := Prefix;
+          PrefixList.Ignore[RootName] := Ignore;
+        end
+        else
+          PrefixList.Prefixs[AClassName] := Prefix;
+          PrefixList.Ignore[AClassName] := Ignore;
+        end;
 
         if Succ then
           DoSaveSettings;
@@ -931,6 +955,7 @@ var
     else
       Result := '';
   end;
+
 begin
   FormEditor := CnOtaGetCurrentFormEditor;
   if Assigned(FormEditor) then
