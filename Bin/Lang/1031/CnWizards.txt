@@ -2584,6 +2584,7 @@ TCnCodeFormatterForm.grpCommon.Caption=allgemeine Einstellungen
 TCnCodeFormatterForm.lblAsmHeadIndent.Caption=Zeilenkopf Einzug:
 TCnCodeFormatterForm.lblASMTab.Caption=Tab Breite:
 TCnCodeFormatterForm.lblBegin.Caption=Begin Style:
+TCnCodeFormatterForm.lblDirectiveMode.Caption=Compiler Direktive:
 TCnCodeFormatterForm.lblKeyword.Caption=Schlüsselwort:
 TCnCodeFormatterForm.lblNewLine.Caption=wenn überschritten:
 TCnCodeFormatterForm.lblSpaceAfter.Caption=Leerzeichen nach Operator:

@@ -2583,6 +2583,7 @@ TCnCodeFormatterForm.grpCommon.Caption=Основные настройки
 TCnCodeFormatterForm.lblAsmHeadIndent.Caption=Первый отступ в строке:
 TCnCodeFormatterForm.lblASMTab.Caption=Ширина табуляции:
 TCnCodeFormatterForm.lblBegin.Caption=Стиль Begin:
+TCnCodeFormatterForm.lblDirectiveMode.Caption=директивы компилятора:
 TCnCodeFormatterForm.lblKeyword.Caption=Ключевое слово:
 TCnCodeFormatterForm.lblNewLine.Caption=если свыше:
 TCnCodeFormatterForm.lblSpaceAfter.Caption=Пробелов после оператора:
