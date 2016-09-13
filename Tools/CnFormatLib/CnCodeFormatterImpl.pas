@@ -149,8 +149,9 @@ end;
 function TCnCodeFormatProvider.FormatOnePascalUnit(Input: PAnsiChar;
   Len: DWORD): PAnsiChar;
 var
-  InStream, OutStream: TStream;
+  InStream, OutStream: TMemoryStream;
   CodeFor: TCnPascalCodeFormatter;
+  ResPtr: PAnsiChar;
 begin
   AdjustResultLength(0);
   ClearPascalError;
@@ -175,6 +176,14 @@ begin
       CodeFor.SaveToStream(OutStream);
     except
       ; // 出错了，返回 nil 的结果
+    end;
+
+    // GetTextStr 会导致在输出 Strings 最后一行是回车换行时又多出个回车换行，移除
+    if OutStream.Size >= 4 * SizeOf(Char) then
+    begin
+      ResPtr := PAnsiChar(Integer(OutStream.Memory) + OutStream.Size - 4);
+      if (ResPtr[0] = #13) and (ResPtr[1] = #10) and (ResPtr[2] = #13) and (ResPtr[3] = #10) then
+        OutStream.Size := OutStream.Size - 2 * SizeOf(Char); 
     end;
 
     if OutStream.Size > 0 then
