@@ -2574,6 +2574,7 @@ TCnCodeFormatterForm.btnOK.Caption=&OK
 TCnCodeFormatterForm.btnShortCut.Caption=&Kürzel
 TCnCodeFormatterForm.Caption=Code Formatierer Einstellungen
 TCnCodeFormatterForm.cbbBeginStyle.Items.Text=Nächste Zeile<BR>diese Zeile<BR>
+TCnCodeFormatterForm.cbbDirectiveMode.Items.Text=Behandeln als Kommentar<BR>Nur erstes Vorkommen behandeln<BR>
 TCnCodeFormatterForm.cbbKeywordStyle.Items.Text=klein<BR>groß<BR>erster Buchstabe groß<BR>kein Wechsel<BR>
 TCnCodeFormatterForm.chkAutoWrap.Caption=automatischer Umbruch bei:
 TCnCodeFormatterForm.chkIgnoreArea.Caption=Formatiere keinen Inhalt zwischen {(*} and {*)}

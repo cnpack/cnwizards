@@ -2304,21 +2304,17 @@
 {$IFDEF BDS}
   {$DEFINE SUPPORTS_PASCAL}
   {$DEFINE SUPPORTS_CSHARP}
+  {$DEFINE SUPPORTS_INLINE}
   {$DEFINE IDE_WIDECONTROL}
-  {$DEFINE OTA_NEW_BREAKPOINT_NOBUG}  // 2005 以上的 NewBreakpoint 才能工作
+  {$DEFINE IDE_EDITOR_SUPPORTS_FOLDING} // 2005 以上的编辑器支持区域折叠
+  {$DEFINE OTA_NEW_BREAKPOINT_NOBUG}    // 2005 以上的 NewBreakpoint 才能工作
+  {$DEFINE IDE_ACTION_UPDATE_DELAY}     // IDE's Action Menu Update will Delay in 2005 or Up.
+  {$DEFINE SUPPORT_WIDECHAR_IDENTIFIER}
 
   {$IFNDEF COMPILER12_UP}
     // 2005~2007 Compiler is Ansi but Editor String is Utf8
     {$DEFINE IDE_STRING_ANSI_UTF8}
   {$ENDIF}
-{$ENDIF}
-
-{$IFDEF BDS}
-  {$DEFINE SUPPORTS_INLINE}
-{$ENDIF}
-
-{$IFDEF BDS2006_UP}
-  {$DEFINE IDE_HAS_GUIDE_LINE}    // 2006 and above has Designer Guide Line
 {$ENDIF}
 
 {$IFDEF DELPHIXE2_UP}
@@ -2359,13 +2355,9 @@
 {$ENDIF}
 
 {$IFDEF BDS2006_UP}
+  {$DEFINE IDE_HAS_GUIDE_LINE}    // 2006 and above has Designer Guide Line
   {$DEFINE EDITOR_TAB_ONLYFROM_WINCONTROL}
   // From BDS 2006 IDEGraident Editor Tab is Only From WinControl, not TabSet/TabControl 
-{$ENDIF}
-
-{$IFDEF BDS}
-  {$DEFINE IDE_ACTION_UPDATE_DELAY} // IDE's Action Menu Update will Delay in 2005 or Up.
-  {$DEFINE SUPPORT_WIDECHAR_IDENTIFIER}
 {$ENDIF}
 
 {$IFDEF COMPILER21_UP}

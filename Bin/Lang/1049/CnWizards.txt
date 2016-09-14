@@ -2573,6 +2573,7 @@ TCnCodeFormatterForm.btnOK.Caption=&OK
 TCnCodeFormatterForm.btnShortCut.Caption=Гор. кл
 TCnCodeFormatterForm.Caption=Настройки форматирования кода
 TCnCodeFormatterForm.cbbBeginStyle.Items.Text=Следующая строка<BR>Текущая строка<BR>
+TCnCodeFormatterForm.cbbDirectiveMode.Items.Text=Считать комментарием<BR>Обработать только первую ветвь<BR>
 TCnCodeFormatterForm.cbbKeywordStyle.Items.Text=Нижний регистр<BR>Верхний регистр<BR>Заглавная первая буква<BR>Без изменений<BR>
 TCnCodeFormatterForm.chkAutoWrap.Caption=Перенос строки на:
 TCnCodeFormatterForm.chkIgnoreArea.Caption=НЕ форматировать содержимое между {(*} и {*)}
