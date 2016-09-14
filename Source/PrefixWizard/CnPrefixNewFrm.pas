@@ -71,9 +71,9 @@ type
     { Public declarations }
   end;
 
-// 取得新的组件前缀名
+// 取得新的组件前缀名。RootName 不为空表示是 Form 的情形，修改的是 TForm 对应的前缀
 function GetNewComponentPrefix(const ComponentClass: string; var NewPrefix: string;
-  UserMode: Boolean; var Ignore, PopPrefixDefine: Boolean): Boolean;
+  UserMode: Boolean; var Ignore, PopPrefixDefine: Boolean; const RootName: string = ''): Boolean;
 
 {$ENDIF CNWIZARDS_CNPREFIXWIZARD}
 
@@ -86,11 +86,14 @@ implementation
 { TCnPrefixNewForm }
 
 function GetNewComponentPrefix(const ComponentClass: string; var NewPrefix: string;
-  UserMode: Boolean; var Ignore, PopPrefixDefine: Boolean): Boolean;
+  UserMode: Boolean; var Ignore, PopPrefixDefine: Boolean; const RootName: string): Boolean;
 begin
   with TCnPrefixNewForm.Create(nil) do
   try
-    edtComponent.Text := ComponentClass;
+    if RootName <> '' then
+      edtComponent.Text := RootName
+    else
+      edtComponent.Text := ComponentClass;
     edtPrefix.Text := NewPrefix;
     cbIgnore.Visible := not UserMode;
     cbNeverDisp.Visible := not UserMode;

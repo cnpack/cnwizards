@@ -79,6 +79,7 @@ type
   private
     { Private declarations }
     FPrefix: string;
+    FRootName: string;
     FUseUnderLine: Boolean;
     FComponentClass: string;
   protected
@@ -88,10 +89,11 @@ type
     procedure SetEditSel(Sender: TObject);
   end;
 
-// 显示对话框，取得新的组件名称
+// 显示对话框，取得新的组件名称。RootName 不为空时表示是 Form 的情形
 function GetNewComponentName(const FormName, ComponentClass, ComponentText,
   OldName: string; var Prefix, NewName: string; HideMode: Boolean;
-  var IgnoreComp, AutoPopSuggestDlg: Boolean; UseUnderLine: Boolean): Boolean;
+  var IgnoreComp, AutoPopSuggestDlg: Boolean; UseUnderLine: Boolean;
+  const RootName: string = ''): Boolean;
 
 {$ENDIF CNWIZARDS_CNPREFIXWIZARD}
 
@@ -109,7 +111,8 @@ uses
 // 取得新的组件名称
 function GetNewComponentName(const FormName, ComponentClass, ComponentText,
   OldName: string; var Prefix, NewName: string; HideMode: Boolean;
-  var IgnoreComp, AutoPopSuggestDlg: Boolean; UseUnderLine: Boolean): Boolean;
+  var IgnoreComp, AutoPopSuggestDlg: Boolean; UseUnderLine: Boolean;
+  const RootName: string): Boolean;
 begin
   with TCnPrefixEditForm.Create(nil) do
   try
@@ -118,6 +121,7 @@ begin
     lblText.Caption := ComponentText;
     FUseUnderLine := UseUnderLine;
     FPrefix := Prefix;
+    FRootName := RootName;
     FComponentClass := ComponentClass;
     edtOldName.Text := OldName;
     edtName.Text := NewName;
@@ -159,7 +163,7 @@ var
   OldPrefix: string;
 begin
   OldPrefix := FPrefix;
-  if GetNewComponentPrefix(FComponentClass, FPrefix, True, B1, B2) then
+  if GetNewComponentPrefix(FComponentClass, FPrefix, True, B1, B2, FRootName) then
     if Pos(OldPrefix, edtName.Text) = 1 then
       edtName.Text := StringReplace(edtName.Text, OldPrefix, FPrefix, []);
 

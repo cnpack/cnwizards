@@ -907,13 +907,15 @@ begin
         // 修改的是 TForm1 这种类型的前缀，需要修复，
         Succ := GetNewComponentName(_CnExtractFileName(FormEditor.GetFileName),
           AClassName, CompText, OldName, Prefix, NewName, UserMode, Ignore,
-          FAutoPopSuggestDlg, FUseUnderLine);
+          FAutoPopSuggestDlg, FUseUnderLine, RootName);
+
         if IsRoot then
         begin
           PrefixList.Prefixs[RootName] := Prefix;
           PrefixList.Ignore[RootName] := Ignore;
         end
         else
+        begin
           PrefixList.Prefixs[AClassName] := Prefix;
           PrefixList.Ignore[AClassName] := Ignore;
         end;
