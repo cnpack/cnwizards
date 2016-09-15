@@ -86,6 +86,7 @@ type
     FEnsureOneEmptyLine: Boolean;
 
     FNamesMap: TCnStrToStrHashMap;
+    FDisableCorrectName: Boolean;
     FInputLineMarks: TList;         // 源与结果的行映射关系中的源行
     FOutputLineMarks: TList;        // 源与结果的行映射关系中的结果行
     function ErrorTokenString: string;
@@ -463,7 +464,7 @@ end;
 function TCnAbstractCodeFormatter.CheckIdentifierName(const S: string): string;
 begin
   { Check the S with pre-specified names e.g. ShowMessage }
-  if (FNamesMap = nil) or not FNamesMap.Find(UpperCase(S), Result) then
+  if FDisableCorrectName or (FNamesMap = nil) or not FNamesMap.Find(UpperCase(S), Result) then
     Result := S;
 end;
 
@@ -1237,14 +1238,19 @@ begin
   while CanHaveUnitQual and (Scaner.Token = tokDot) do
   begin
     Match(tokDot);
-    if Scaner.Token = tokAmpersand then // & 表示后面的声明使用的关键字是转义的
-    begin
-      Match(Scaner.Token); // 点号后无需缩进
-      if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
-        Match(Scaner.Token); // & 后的标识符中允许使用部分关键字，但不允许新语法的数字等
-    end
-    else if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens + CanBeNewIdentifierTokens) then
-      Match(Scaner.Token); // 也继续允许使用部分关键字
+    FDisableCorrectName := True;        // 点号后的标识符暂时无法与同名的独立变量区分，只能先禁用大小写纠正
+    try
+      if Scaner.Token = tokAmpersand then // & 表示后面的声明使用的关键字是转义的
+      begin
+        Match(Scaner.Token); // 点号后无需缩进
+        if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
+          Match(Scaner.Token); // & 后的标识符中允许使用部分关键字，但不允许新语法的数字等
+      end
+      else if Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens + CanBeNewIdentifierTokens) then
+        Match(Scaner.Token); // 也继续允许使用部分关键字
+    finally
+      FDisableCorrectName := False;
+    end;
   end;
 end;
 
