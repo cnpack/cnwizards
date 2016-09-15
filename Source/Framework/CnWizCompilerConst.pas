@@ -372,7 +372,7 @@ const
                                           CompilerName = 'C++BUILDER 6';
                                           CompilerShortName = 'CB6';
                                         {$ELSE}
-                                          Unknow Compiler;
+                                          {$MESSAGE ERROR 'Unknow Compiler!'}
                                         {$ENDIF}
                                       {$ENDIF}
                                     {$ENDIF}

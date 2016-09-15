@@ -725,8 +725,10 @@ var
 
   // 将解析器中返回的出错列转换成 IDE 里内部使用的列供定位，BDS 以上是 Utf8
   function ConvertToEditorCol(const Line: string; Col: Integer): Integer;
+{$IFDEF BDS}
   var
     S: WideString;
+{$ENDIF}
   begin
 {$IFDEF IDE_STRING_ANSI_UTF8}
     // Col 返回的是 Unicode 的列，Line 是 Ansi 的，需要转成 Utf8 的列
@@ -746,8 +748,10 @@ var
 
   // 将解析器中返回的出错列转换成 IDE 里显示的列供显示，均是 Ansi
   function ConvertToVisibleCol(const Line: string; Col: Integer): Integer;
+{$IFDEF BDS}
   var
     S: WideString;
+{$ENDIF}
   begin
 {$IFDEF IDE_STRING_ANSI_UTF8}
     // Col 返回的是 Unicode 的列，Line 是 Ansi 的，需要转成 Ansi 的列
