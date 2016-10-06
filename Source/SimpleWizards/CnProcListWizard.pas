@@ -1441,7 +1441,7 @@ begin
     if EditorCanvas.Font.Name <> mmoContent.Font.Name then
       mmoContent.Font.Name := EditorCanvas.Font.Name;
     mmoContent.Font.Size := EditorCanvas.Font.Size;
-    mmoContent.Font.Style := EditorCanvas.Font.Style - [fsUnderline, fsStrikeOut];
+    mmoContent.Font.Style := EditorCanvas.Font.Style - [fsUnderline, fsStrikeOut, fsItalic];
   end;
   
   {$IFDEF COMPILER6_UP}
@@ -2736,7 +2736,9 @@ begin
     if not btnShowPreview.Down then
       Exit;
 
-    AfterLine := Wizard.PreviewLineCount;
+    AfterLine := mmoContent.Height div (mmoContent.Font.Size + 2);
+    if AfterLine < Wizard.PreviewLineCount then
+      AfterLine := Wizard.PreviewLineCount;
     if AfterLine <= 0 then
       AfterLine := 4;
 
@@ -3696,6 +3698,7 @@ end;
 procedure TCnProcListForm.SplitterMoved(Sender: TObject);
 begin
   FPreviewHeight := mmoContent.Height;
+  UpdateStatusBar;
 end;
 
 procedure TCnProcListForm.UpdateMemoHeight(Sender: TObject);
