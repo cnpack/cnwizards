@@ -91,6 +91,7 @@ type
     FCustomUserDir: string;
     FUseCustomUserDir: Boolean;
     FUseOneCPUCore: Boolean;
+    FUseLargeIcon: Boolean;
     procedure SetCurrentLangID(const Value: Cardinal);
     function GetUpgradeCheckDate: TDateTime;
     procedure SetUpgradeCheckDate(const Value: TDateTime);
@@ -102,6 +103,7 @@ type
     procedure SetCustomUserDir(const Value: string);
     procedure SetUseCustomUserDir(const Value: Boolean);
     procedure SetUseOneCPUCore(const Value: Boolean);
+    procedure SetUseLargeIcon(const Value: Boolean);
   public
     constructor Create;
     destructor Destroy; override;
@@ -230,6 +232,8 @@ type
     {* 使用 SetThreadLocale 修正 Vista / Win7 下中文乱码问题}
     property UseOneCPUCore: Boolean read FUseOneCPUCore write SetUseOneCPUCore;
     {* 在多CPU中只使用一个CPU内核，以解决兼容性问题}
+    property UseLargeIcon: Boolean read FUseLargeIcon write SetUseLargeIcon;
+    {* 是否在工具栏等处使用大尺寸图标}
 
     property UseCustomUserDir: Boolean read FUseCustomUserDir write SetUseCustomUserDir;
     property CustomUserDir: string read FCustomUserDir write SetCustomUserDir;
@@ -265,6 +269,7 @@ const
   csUseToolsMenu = 'UseToolsMenu';
   csFixThreadLocale = 'FixThreadLocale';
   csUseOneCPUCore = 'UseOneCPUCore';
+  csUseLargeIcon = 'UseLargeIcon';
 {$IFDEF BDS}
   csUseOneCPUDefault = False;
 {$ELSE}
@@ -378,6 +383,7 @@ begin
     if FCExt = '' then FCExt := csCExtDefault;
     FUseToolsMenu := ReadBool(SCnOptionSection, csUseToolsMenu, False);
     FixThreadLocale := ReadBool(SCnOptionSection, csFixThreadLocale, False);
+    FUseLargeIcon := ReadBool(SCnOptionSection, csUseLargeIcon, False);
 
     FUseCustomUserDir := ReadBool(SCnOptionSection, csUseCustomUserDir, CheckWinVista);
     SHGetFolderPath(0, CSIDL_PERSONAL or CSIDL_FLAG_CREATE, 0, 0, SHUserDir);
@@ -441,6 +447,7 @@ begin
     WriteString(SCnOptionSection, csCExt, FCExt);
     WriteBool(SCnOptionSection, csUseToolsMenu, FUseToolsMenu);
     WriteBool(SCnOptionSection, csFixThreadLocale, FFixThreadLocale);
+    WriteBool(SCnOptionSection, csUseLargeIcon, FUseLargeIcon);
     WriteBool(SCnOptionSection, csUseCustomUserDir, FUseCustomUserDir);
     WriteString(SCnOptionSection, csCustomUserDir, FCustomUserDir);
 
@@ -763,6 +770,14 @@ procedure TCnWizOptions.DoFixThreadLocale;
 begin
   if FFixThreadLocale then
     SetThreadLocale(LOCALE_SYSTEM_DEFAULT);
+end;
+
+procedure TCnWizOptions.SetUseLargeIcon(const Value: Boolean);
+begin
+  if FUseLargeIcon <> Value then
+  begin
+    FUseLargeIcon := Value;
+  end;
 end;
 
 end.

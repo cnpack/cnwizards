@@ -450,6 +450,8 @@ uses
 const
   csButtonWidth = 20;
   csButtonHeight = 20;
+  csButtonBigWidth = 32;
+  csButtonBigHeight = 32;
   csTitleWidth = 12;
   csUpdateInterval = 100;
 
@@ -1068,7 +1070,7 @@ end;
 procedure TCnFormFloatToolBar.RecreateButtons;
 var
   i: Integer;
-  Col, Row: Integer;
+  Col, Row, ButtonWidth, ButtonHeight: Integer;
   Names: TStrings;
   Actn: TContainedAction;
 
@@ -1087,11 +1089,11 @@ var
         GroupIndex := Idx;
         AllowAllUp := True;
         if IsVertical then
-          SetBounds(y * csButtonWidth + 1, x * csButtonHeight + 1,
-            csButtonWidth, csButtonHeight)
+          SetBounds(y * ButtonWidth + 1, x * ButtonHeight + 1,
+            ButtonWidth, ButtonHeight)
         else
-          SetBounds(x * csButtonWidth + 1, y * csButtonHeight + 1,
-            csButtonWidth, csButtonHeight);
+          SetBounds(x * ButtonWidth + 1, y * ButtonHeight + 1,
+            ButtonWidth, ButtonHeight);
         Action := Actn;
         dmCnSharedImages.GetSpeedButtonGlyph(Btn, dmCnSharedImages.Images,
           dmCnSharedImages.IdxUnknown);
@@ -1105,7 +1107,19 @@ var
       end;
     end;
   end;
+
 begin
+  if WizOptions.UseLargeIcon then
+  begin
+    ButtonWidth := csButtonBigWidth;
+    ButtonHeight := csButtonBigHeight;
+  end
+  else
+  begin
+    ButtonWidth := csButtonWidth;
+    ButtonHeight := csButtonHeight;
+  end;
+
   Names := TStringList.Create;
   try
     // 使用临时列表以清除不存在的 Action 但仍保留原有的列表
@@ -1129,13 +1143,13 @@ begin
       Col := (Names.Count - 1) div LineCount + 1;
       if IsVertical then
       begin
-        Panel.Width := csButtonWidth * Row + 1;
-        Panel.Height := csButtonHeight * Col + 1;
+        Panel.Width := ButtonWidth * Row + 1;
+        Panel.Height := ButtonHeight * Col + 1;
       end
       else
       begin
-        Panel.Width := csButtonWidth * Col + 1;
-        Panel.Height := csButtonHeight * Row + 1;
+        Panel.Width := ButtonWidth * Col + 1;
+        Panel.Height := ButtonHeight * Row + 1;
       end;
 
       for i := 0 to Names.Count - 1 do
