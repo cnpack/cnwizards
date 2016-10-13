@@ -198,10 +198,12 @@ type
   {* IDE 带图标属性的基础类 }
   private
     FIcon: TIcon;
+    FSmallIcon: TIcon;
   protected
     function GetIcon: TIcon; override;
-    {* 返回该类专家的图标，子类可重载此过程返回其它的 Icon 对象 }
-    procedure InitIcon(AIcon: TIcon); virtual;
+    {* 返回该类专家的图标，子类可重载此过程返回其它的 Icon 对象
+       FIcon 使用系统默认尺寸，一般是 32 * 32 的}
+    procedure InitIcon(AIcon, ASmallIcon: TIcon); virtual;
     {* 根据类名初始化图标，对象创建时调用，子类可重载此过程重新处理 FIcon }
     class function GetIconName: string; virtual;
     {* 返回图标文件名 }
@@ -837,14 +839,15 @@ begin
   inherited;
   FActive := True;
   FIcon := TIcon.Create;
-  InitIcon(FIcon);
+  FSmallIcon := TIcon.Create;
+  InitIcon(FIcon, FSmallIcon);
 end;
 
 destructor TCnIconWizard.Destroy;
 begin
   inherited;
-  if FIcon <> nil then
-    FIcon.Free;
+  FSmallIcon.Free;
+  FIcon.Free;
 end;
 
 // 返回 Icon 属性，如使用其他图标，可重载。
@@ -860,10 +863,10 @@ begin
 end;
 
 // 根据类名初始化图标，可重载。
-procedure TCnIconWizard.InitIcon(AIcon: TIcon);
+procedure TCnIconWizard.InitIcon(AIcon, ASmallIcon: TIcon);
 begin
   if AIcon <> nil then
-    CnWizLoadIcon(FIcon, GetIconName, True);
+    CnWizLoadIcon(AIcon, ASmallIcon, GetIconName, True);
 end;
 
 //==============================================================================

@@ -65,6 +65,7 @@ type
     FCommand: string;
     FWizShortCut: TCnWizShortCut;
     FIcon: TIcon;
+    FSmallIcon: TIcon;
     FUpdating: Boolean;
     FLastUpdateTick: Cardinal;
     procedure SetInheritedShortCut;
@@ -88,6 +89,8 @@ type
     {* Action 命令字符串，用来唯一标识一个 Action，同时也是快捷键对象的名字}
     property Icon: TIcon read FIcon;
     {* Action 关联的图标，可在其它地方使用，但请不要更改图标内容}
+    property SmallIcon: TIcon read FIcon;
+    {* Action 关联的小尺寸图标 16*16，可能为空。可在其它地方使用，但请不要更改图标内容}
     property ShortCut: TShortCut read GetShortCut write {$IFDEF DelphiXE3_UP}_CnSetShortCut{$ELSE}SetShortCut{$ENDIF};
     {* Action 关联的快捷键}
   end;
@@ -242,6 +245,7 @@ begin
   inherited Create(AOwner);
   FCommand := '';
   FIcon := TIcon.Create;
+  FSmallIcon := TIcon.Create;
   FWizShortCut := nil;
   FUpdating := False;
 end;
@@ -251,6 +255,7 @@ destructor TCnWizAction.Destroy;
 begin
   if Assigned(FWizShortCut) then
     WizShortCutMgr.DeleteShortCut(FWizShortCut);
+  FSmallIcon.Free;
   FIcon.Free;
   inherited Destroy;
 end;
@@ -460,8 +465,13 @@ begin
   AWizAction.OnExecute := OnExecute;
   
   AWizAction.ActionList := Svcs40.ActionList;
-  if CnWizLoadIcon(AWizAction.FIcon, IcoName, UseDefaultIcon) then
-    AWizAction.ImageIndex := AddIconToImageList(AWizAction.FIcon, Svcs40.ImageList)
+  if CnWizLoadIcon(AWizAction.FIcon, AWizAction.FSmallIcon, IcoName, UseDefaultIcon) then
+  begin
+    if AWizAction.FSmallIcon.Empty then // IDE 主 ImageList 尽量使用 16*16 的图标
+      AWizAction.ImageIndex := AddIconToImageList(AWizAction.FIcon, Svcs40.ImageList)
+    else
+      AWizAction.ImageIndex := AddIconToImageList(AWizAction.FSmallIcon, Svcs40.ImageList, False);
+  end
   else
     AWizAction.ImageIndex := -1;
   AWizAction.FCommand := ACommand;

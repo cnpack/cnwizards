@@ -154,14 +154,17 @@ function CnGetClassNameFromClass(AClass: Integer): string;
 function CnGetClassParentFromClass(AClass: Integer): Integer;
 {* 供 Pascal Script 使用的从整型的类信息获取父类信息的函数}
 
-function CnWizLoadIcon(AIcon: TIcon; const ResName: string; UseDefault: Boolean = False): Boolean;
+function CnWizLoadIcon(AIcon: TIcon; ASmallIcon: TIcon; const ResName: string;
+  UseDefault: Boolean = False): Boolean;
 {* 从资源或文件中装载图标，执行时先从图标目录中查找，如果失败再从资源中查找，
-   返回结果为图标装载成功标志。参数 ResName 请不要带 .ico 扩展名}
+   返回结果为 AIcon 图标装载成功标志。参数 ResName 请不要带 .ico 扩展名。
+   AIcon 加载系统默认尺寸一般是32*32，ASmallIcon 加载 16*16 如果有的话，否则为空}
 function CnWizLoadBitmap(ABitmap: TBitmap; const ResName: string): Boolean;
 {* 从资源或文件中装载位图，执行时先从图标目录中查找，如果失败再从资源中查找，
    返回结果为位图装载成功标志。参数 ResName 请不要带 .bmp 扩展名}
-function AddIconToImageList(AIcon: TIcon; ImageList: TCustomImageList): Integer;
-{* 增加图标到 ImageList 中，使用平滑处理}
+function AddIconToImageList(AIcon: TIcon; ImageList: TCustomImageList;
+  Stretch: Boolean = True): Integer;
+{* 增加图标到 ImageList 中，可使用平滑处理}
 function CreateDisabledBitmap(Glyph: TBitmap): TBitmap;
 {* 创建一个 Disabled 的位图，返回对象需要调用方释放}
 procedure AdjustButtonGlyph(Glyph: TBitmap);
@@ -1203,7 +1206,8 @@ begin
 end;
 
 // 从资源或文件中装载图标
-function CnWizLoadIcon(AIcon: TIcon; const ResName: string; UseDefault: Boolean): Boolean;
+function CnWizLoadIcon(AIcon: TIcon; ASmallIcon: TIcon; const ResName: string;
+  UseDefault: Boolean): Boolean;
 var
   FileName: string;
   Handle: HICON;
@@ -1219,10 +1223,17 @@ begin
 
     if FileExists(FileName) then
     begin
-      AIcon.LoadFromFile(FileName);
+      AIcon.LoadFromFile(FileName); // AIcon 使用正常的 32 * 32 尺寸
       if not AIcon.Empty then
       begin
         Result := True;
+        // 指定小尺寸再加载图标
+        if ASmallIcon <> nil then
+        begin
+          ASmallIcon.Height := 16;
+          ASmallIcon.Width := 16;
+          ASmallIcon.LoadFromFile(FileName);
+        end;
         Exit;
       end;
     end;
@@ -1233,11 +1244,19 @@ begin
   // 从资源中装载
   if LoadResDll then
   begin
+    // 先装载最匹配尺寸 32 * 32
     Handle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 0, 0, 0);
     if Handle <> 0 then
     begin
       AIcon.Handle := Handle;
       Result := True;
+      // 再指定小尺寸加载
+      if ASmallIcon <> nil then
+      begin
+        Handle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 16, 16, 0);
+        if Handle <> 0 then
+          ASmallIcon.Handle := Handle;
+      end;
       Exit;
     end;
   end;
@@ -1251,6 +1270,13 @@ begin
       if not AIcon.Empty then
       begin
         Result := True;
+        // 指定小尺寸再加载图标
+        if ASmallIcon <> nil then
+        begin
+          ASmallIcon.Height := 16;
+          ASmallIcon.Width := 16;
+          ASmallIcon.LoadFromFile(FileName);
+        end;
         Exit;
       end;
     end;
@@ -1263,6 +1289,13 @@ begin
     begin
       AIcon.Handle := Handle;
       Result := True;
+      // 再指定小尺寸加载
+      if ASmallIcon <> nil then
+      begin
+        Handle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 16, 16, 0);
+        if Handle <> 0 then
+          ASmallIcon.Handle := Handle;
+      end;
       Exit;
     end;
   end;
@@ -1302,8 +1335,9 @@ begin
   end;
 end;
 
-// 增加图标到 ImageList 中，使用平滑处理
-function AddIconToImageList(AIcon: TIcon; ImageList: TCustomImageList): Integer;
+// 增加图标到 ImageList 中，可使用平滑拉伸处理
+function AddIconToImageList(AIcon: TIcon; ImageList: TCustomImageList;
+  Stretch: Boolean): Integer;
 const
   MaskColor = clBtnFace;
 var
@@ -1316,31 +1350,46 @@ begin
   if (ImageList.Width = 16) and (ImageList.Height = 16) and not AIcon.Empty and
     (AIcon.Width = 32) and (AIcon.Height = 32) then
   begin
-    SrcBmp := nil;
-    DstBmp := nil;
-    try
-      SrcBmp := CreateEmptyBmp24(32, 32, MaskColor);
-      DstBmp := CreateEmptyBmp24(16, 16, MaskColor);
-      SrcBmp.Canvas.Draw(0, 0, AIcon);
-      for y := 0 to DstBmp.Height - 1 do
-      begin
-        PSrc1 := SrcBmp.ScanLine[y * 2];
-        PSrc2 := SrcBmp.ScanLine[y * 2 + 1];
-        PDst := DstBmp.ScanLine[y];
-        for x := 0 to DstBmp.Width - 1 do
+    if Stretch then // 指定拉伸的情况下，使用平滑处理
+    begin
+      SrcBmp := nil;
+      DstBmp := nil;
+      try
+        SrcBmp := CreateEmptyBmp24(32, 32, MaskColor);
+        DstBmp := CreateEmptyBmp24(16, 16, MaskColor);
+        SrcBmp.Canvas.Draw(0, 0, AIcon);
+        for y := 0 to DstBmp.Height - 1 do
         begin
-          PDst^[x].b := (PSrc1^[x * 2].b + PSrc1^[x * 2 + 1].b + PSrc2^[x * 2].b
-            + PSrc2^[x * 2 + 1].b) shr 2;
-          PDst^[x].g := (PSrc1^[x * 2].g + PSrc1^[x * 2 + 1].g + PSrc2^[x * 2].g
-            + PSrc2^[x * 2 + 1].g) shr 2;
-          PDst^[x].r := (PSrc1^[x * 2].r + PSrc1^[x * 2 + 1].r + PSrc2^[x * 2].r
-            + PSrc2^[x * 2 + 1].r) shr 2;
+          PSrc1 := SrcBmp.ScanLine[y * 2];
+          PSrc2 := SrcBmp.ScanLine[y * 2 + 1];
+          PDst := DstBmp.ScanLine[y];
+          for x := 0 to DstBmp.Width - 1 do
+          begin
+            PDst^[x].b := (PSrc1^[x * 2].b + PSrc1^[x * 2 + 1].b + PSrc2^[x * 2].b
+              + PSrc2^[x * 2 + 1].b) shr 2;
+            PDst^[x].g := (PSrc1^[x * 2].g + PSrc1^[x * 2 + 1].g + PSrc2^[x * 2].g
+              + PSrc2^[x * 2 + 1].g) shr 2;
+            PDst^[x].r := (PSrc1^[x * 2].r + PSrc1^[x * 2 + 1].r + PSrc2^[x * 2].r
+              + PSrc2^[x * 2 + 1].r) shr 2;
+          end;
         end;
+        Result := ImageList.AddMasked(DstBmp, MaskColor);
+      finally
+        if Assigned(SrcBmp) then FreeAndNil(SrcBmp);
+        if Assigned(DstBmp) then FreeAndNil(DstBmp);
       end;
-      Result := ImageList.AddMasked(DstBmp, MaskColor);
-    finally
-      if Assigned(SrcBmp) then FreeAndNil(SrcBmp);
-      if Assigned(DstBmp) then FreeAndNil(DstBmp);
+    end
+    else
+    begin
+      // 指定不拉伸的情况下，把 32*32 图标的左上角 16*16 部分绘制来加入
+      DstBmp := nil;
+      try
+        DstBmp := CreateEmptyBmp24(16, 16, MaskColor);
+        DstBmp.Canvas.Draw(0, 0, AIcon);
+        Result := ImageList.AddMasked(DstBmp, MaskColor);
+      finally
+        DstBmp.Free;
+      end;
     end;
   end
   else if not AIcon.Empty then

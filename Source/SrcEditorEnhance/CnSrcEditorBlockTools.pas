@@ -155,7 +155,7 @@ begin
   FActive := True;
   FShowBlockTools := True;
   FIcon := TIcon.Create;
-  CnWizLoadIcon(FIcon, 'CnSrcEditorBlockTools');
+  CnWizLoadIcon(FIcon, nil, 'CnSrcEditorBlockTools');
 
   FCodeWrap := TCnSrcEditorCodeWrapTool.Create;
   FGroupReplace := TCnSrcEditorGroupReplaceTool.Create;
