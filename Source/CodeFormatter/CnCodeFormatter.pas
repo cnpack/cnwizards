@@ -82,6 +82,7 @@ type
     // 用来粗略记录当前正在格式化的点，以备输出时根据场景判断是否使用关键字规则
     FOldElementTypes: TCnElementStack;
     FElementType: TCnPascalFormattingElementType;
+    FLastElementType: TCnPascalFormattingElementType;
     FPrefixSpaces: Integer;
     FEnsureOneEmptyLine: Boolean;
 
@@ -158,6 +159,8 @@ type
     {* 词法扫描器}
     property ElementType: TCnPascalFormattingElementType read FElementType;
     {* 标识当前区域的一个辅助变量}
+    property LastElementType: TCnPascalFormattingElementType read FLastElementType;
+    {* 标识前一个当前区域的一个辅助变量}
   public
     constructor Create(AStream: TStream; AMatchedInStart: Integer = CN_MATCHED_INVALID;
       AMatchedInEnd: Integer = CN_MATCHED_INVALID;
@@ -791,7 +794,8 @@ begin
       ((FLastToken in IdentTokens) and (Token in IdentTokens + [tokAtSign])) then
       WriteOneSpace
     else if ((BeforeSpaceCount = 0) and (FLastToken = tokGreat) and
-      CurrentContainElementType([pfetInGeneric]) and (Token in IdentTokens + [tokAtSign])) then
+      (CurrentContainElementType([pfetInGeneric]) or (FLastElementType = pfetInGeneric))
+      and (Token in IdentTokens + [tokAtSign])) then
       WriteOneSpace // 泛型 property 后面加 read 时，需要用这种方式加空格分开，不是泛型时比如碰到普通大于号时则无须这样做
     else if (FLastToken in RightBracket + [tokHat]) and (Token in [tokKeywordThen, tokKeywordDo,
       tokKeywordOf, tokKeywordTo, tokKeywordDownto]) then
@@ -5604,6 +5608,7 @@ end;
 
 procedure TCnAbstractCodeFormatter.RestoreElementType;
 begin
+  FLastElementType := FElementType;
   if FOldElementTypes <> nil then
     FElementType := TCnPascalFormattingElementType(FOldElementTypes.Pop)
   else
@@ -5624,6 +5629,7 @@ begin
   FOldElementTypes := TCnElementStack.Create;
 
   FElementType := pfetUnknown;
+  FLastElementType := pfetUnknown;
 end;
 
 procedure TCnAbstractCodeFormatter.SpecifyIdentifiers(Names: PLPSTR);
