@@ -1078,6 +1078,7 @@ var
   var
     Actn: TContainedAction;
     Btn: TCnWizFloatButton;
+    BigImg: TCustomImageList;
   begin
     Actn := FindIDEAction(ActionName);
     if Assigned(Actn) then
@@ -1095,6 +1096,18 @@ var
           SetBounds(x * ButtonWidth + 1, y * ButtonHeight + 1,
             ButtonWidth, ButtonHeight);
         Action := Actn;
+
+        // 如果大图模式，则手工复制大图
+        if WizOptions.UseLargeIcon and (Actn is TCustomAction) then
+        begin
+          BigImg := GetIDEBigImageList;
+          Btn.Glyph.Width := BigImg.Width;
+          Btn.Glyph.Height := BigImg.Height;
+          Btn.Glyph.Canvas.Brush.Color := clFuchsia;
+          Btn.Glyph.Canvas.FillRect(Rect(0, 0, Btn.Glyph.Width, Btn.Glyph.Height));
+          BigImg.Draw(Btn.Glyph.Canvas, 0, 0, (Actn as TCustomAction).ImageIndex);
+        end;
+
         dmCnSharedImages.GetSpeedButtonGlyph(Btn, dmCnSharedImages.Images,
           dmCnSharedImages.IdxUnknown);
         ShowHint := True;

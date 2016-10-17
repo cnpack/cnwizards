@@ -778,7 +778,7 @@ var
   Dir: string;
 begin
   if GetDirectory(SCnSelectDir, Dir) then
-    SaveIDEImageListToPath(MakePath(Dir));
+    SaveIDEImageListToPath(GetIDEImageList, MakePath(Dir));
 end;
 
 procedure TCnWizConfigForm.btnExportActionListClick(Sender: TObject);

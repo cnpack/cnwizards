@@ -185,7 +185,7 @@ function GetCaptionOrgStr(const Caption: string): string;
 {* 删除标题中热键信息}
 function GetIDEImageList: TCustomImageList;
 {* 取得 IDE 主 ImageList}
-procedure SaveIDEImageListToPath(const Path: string);
+procedure SaveIDEImageListToPath(ImgList: TCustomImageList; const Path: string);
 {* 保存 IDE ImageList 中的图像到指定目录下}
 procedure SaveMenuNamesToFile(AMenu: TMenuItem; const FileName: string);
 {* 保存菜单名称列表到文件}
@@ -1648,26 +1648,25 @@ begin
 end;
 
 // 保存 IDE ImageList 中的图像到指定目录下}
-procedure SaveIDEImageListToPath(const Path: string);
+procedure SaveIDEImageListToPath(ImgList: TCustomImageList; const Path: string);
 var
-  ImgList: TCustomImageList;
   Bmp: TBitmap;
-  i: Integer;
+  I: Integer;
 begin
-  if not DirectoryExists(Path) then
+  if (ImgList = nil) or not DirectoryExists(Path) then
     Exit;
-  ImgList := GetIDEImageList;
+
   Bmp := TBitmap.Create;
   Bmp.PixelFormat := pf24bit;
   Bmp.Width := ImgList.Width;
   Bmp.Height := ImgList.Height;
   try
-    for i := 0 to ImgList.Count - 1 do
+    for I := 0 to ImgList.Count - 1 do
     begin
       Bmp.Canvas.Brush.Color := clFuchsia;
       Bmp.Canvas.FillRect(Rect(0, 0, Bmp.Width, Bmp.Height));
-      ImgList.GetBitmap(i, Bmp);
-      Bmp.SaveToFile(MakePath(Path) + IntToStrEx(i, 3) + '.bmp');
+      ImgList.GetBitmap(I, Bmp);
+      Bmp.SaveToFile(MakePath(Path) + IntToStrEx(I, 3) + '.bmp');
     end;
   finally
     Bmp.Free;

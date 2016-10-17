@@ -61,7 +61,7 @@ interface
 
 uses
   Windows, Messages, Classes, Controls, SysUtils, Graphics, Forms, Tabs,
-  Menus, Buttons, ComCtrls, StdCtrls, ExtCtrls, TypInfo, ToolsAPI, 
+  Menus, Buttons, ComCtrls, StdCtrls, ExtCtrls, TypInfo, ToolsAPI, ImgList,
   {$IFDEF COMPILER6_UP}
   DesignIntf, DesignEditors, ComponentDesigner,
   {$ELSE}
@@ -333,6 +333,9 @@ function GetIDERegistryFont(const RegItem: string; AFont: TFont): Boolean;
     'Identifier', 'Reserved word', 'Number', 'Whitespace', 'String', 'Symbol'
     等注册表里头已经定义了的键值}
 
+function GetIDEBigImageList: TImageList;
+{* 获取一个大尺寸的 IDE 的 ImageList 引用，从 IDE 的 ImageList 拉扯而来}
+
 type
   TEnumEditControlProc = procedure (EditWindow: TCustomForm; EditControl:
     TControl; Context: Pointer) of object;
@@ -549,7 +552,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  Registry;
+  Registry, CnGraphUtils;
 
 {$IFDEF BDS4_UP}
 const
@@ -560,6 +563,9 @@ var
   BeginBatchOpenCloseProc: TProcedure = nil;
   EndBatchOpenCloseProc: TProcedure = nil;
 {$ENDIF}
+
+var
+  FIDEBigImageList: TImageList = nil;
 
 type
   TCustomControlHack = class(TCustomControl);
@@ -1738,6 +1744,56 @@ begin
   end;
 end;
 
+function GetIDEBigImageList: TImageList;
+const
+  MaskColor = clBtnFace;
+var
+  I: Integer;
+  Img: TCustomImageList;
+  SrcBmp, DstBmp: TBitmap;
+  Rs, Rd: TRect;
+begin
+  if FIDEBigImageList = nil then
+  begin
+    Img := GetIDEImageList;
+    if Img <> nil then
+    begin
+      FIDEBigImageList := TImageList.Create(nil);
+      FIDEBigImageList.Height := 24;
+      FIDEBigImageList.Width := 24;
+
+      // 从 IDE 的 ImageList 中拉扯绘制，把 16*16 扩展到 24* 24
+      SrcBmp := nil;
+      DstBmp := nil;
+      try
+        SrcBmp := CreateEmptyBmp24(16, 16, MaskColor);
+        DstBmp := CreateEmptyBmp24(24, 24, MaskColor);
+
+        Rs := Rect(0, 0, SrcBmp.Width, SrcBmp.Height);
+        Rd := Rect(0, 0, DstBmp.Width, DstBmp.Height);
+
+        SrcBmp.Canvas.Brush.Color := MaskColor;
+        SrcBmp.Canvas.Brush.Style := bsSolid;
+        DstBmp.Canvas.Brush.Color := clFuchsia;
+        DstBmp.Canvas.Brush.Style := bsSolid;
+
+        for I := 0 to Img.Count - 1 do
+        begin
+          SrcBmp.Canvas.FillRect(Rs);
+          Img.GetBitmap(I, SrcBmp);
+          DstBmp.Canvas.FillRect(Rd);
+          DstBmp.Canvas.StretchDraw(Rd, SrcBmp);
+          FIDEBigImageList.AddMasked(DstBmp, MaskColor);
+        end;
+      finally
+        SrcBmp.Free;
+        DstBmp.Free;
+      end;
+    end;
+  end;
+  Result := FIDEBigImageList;
+end;
+
 // 判断指定控件是否代码编辑器控件
 function IsEditControl(AControl: TComponent): Boolean;
 begin
@@ -2723,6 +2779,7 @@ finalization
   if FCnMessageViewWrapper <> nil then
     FreeAndNil(FCnMessageViewWrapper);
 
+  FreeAndNil(FIDEBigImageList);
   FinalIdeAPIs;
 
 {$IFDEF DEBUG}
