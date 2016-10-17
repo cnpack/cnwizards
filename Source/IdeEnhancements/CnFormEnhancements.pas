@@ -476,6 +476,7 @@ const
   csCaption = 'Caption';
   csCount = 'Count';
   csPropBarHeight = 20;
+  csPropBarBigHeight = 32;
   csNameComboWidth = 'NameComboWidth';
   csValueComboWidth = 'ValueComboWidth';
   csIsFilter = 'IsFilter';
@@ -541,6 +542,7 @@ end;
 
 destructor TCnFloatSnapPanel.Destroy;
 begin
+
   inherited;
 end;
 
@@ -834,6 +836,7 @@ var
     end;
     Result := False;
   end;
+
 begin
   if FAllowShow and (SnapForm <> nil) and CanShow and
     not (csDestroying in SnapForm.ComponentState) and
@@ -1507,6 +1510,12 @@ begin
   FRenameButton.Hint := SCnFloatPropBarRenameCaption;
   dmCnSharedImages.GetSpeedButtonGlyph(FRenameButton, dmCnSharedImages.Images,
     IdxRename);
+
+  if WizOptions.UseLargeIcon then
+  begin
+    FNameCombo.Font.Size := 14;
+    FValueCombo.Font.Size := 14;
+  end;
 end;
 
 destructor TCnFormFloatPropBar.Destroy;
@@ -1526,28 +1535,35 @@ begin
 end;
 
 procedure TCnFormFloatPropBar.AlignSubControls;
+var
+  BarHeight: Integer;
 begin
   inherited;
   if Panel <> nil then
   begin
-    FNameCombo.SetBounds(-1, -1, FNameComboWidth, csPropBarHeight);
+    if WizOptions.UseLargeIcon then
+      BarHeight := csPropBarBigHeight
+    else
+      BarHeight := csPropBarHeight;
+
+    FNameCombo.SetBounds(-1, -1, FNameComboWidth, BarHeight);
     FValueCombo.SetBounds(FNameCombo.Left + FNameCombo.Width, -1,
-      FValueComboWidth, csPropBarHeight);
+      FValueComboWidth, BarHeight);
     if FStringButton.Visible then
     begin
       FStringButton.SetBounds(FValueCombo.Left + FValueCombo.Width, 0,
-        csPropBarHeight, csPropBarHeight);
+        BarHeight, BarHeight);
       FFreqButton.SetBounds(FStringButton.Left + FStringButton.Width, 0,
-        csPropBarHeight, csPropBarHeight);
+        BarHeight, BarHeight);
     end
     else
     begin
       FFreqButton.SetBounds(FValueCombo.Left + FValueCombo.Width, 0,
-        csPropBarHeight, csPropBarHeight);
+        BarHeight, BarHeight);
     end;
     FRenameButton.SetBounds(FFreqButton.Left + FFreqButton.Width, 0,
-      csPropBarHeight, csPropBarHeight);
-    Panel.ClientHeight := csPropBarHeight;
+      BarHeight, BarHeight);
+    Panel.ClientHeight := BarHeight;
     Panel.ClientWidth := FRenameButton.Left + FRenameButton.Width;
     
     if PaintBox.Visible then
@@ -1771,7 +1787,8 @@ var
       Inc(ALevel);
     until Cls.ClassParent = nil;
     Result := False;
-  end;  
+  end;
+
 begin
   if FUpdating then Exit;
   FUpdating := True;
