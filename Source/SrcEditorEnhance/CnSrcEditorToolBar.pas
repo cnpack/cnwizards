@@ -406,7 +406,16 @@ begin
   AutoSize := True;
   Top := -1;
   Align := alTop;
-  Images := GetIDEImageList;
+  if WizOptions.UseLargeIcon then
+  begin
+    Images := GetIDEBigImageList;
+    Height := 33;
+    ButtonWidth := 31;
+    ButtonHeight := 30;
+  end
+  else
+    Images := GetIDEImageList;
+
   InitPopupMenu;
   Wrapable := FToolBarMgr.Wrapable;
   PopupMenu := FMenu;

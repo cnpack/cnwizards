@@ -47,7 +47,7 @@ uses
   CnDebug,
 {$ENDIF Debug}
   Windows, Classes, SysUtils, Controls, ImgList, ActnList, CnWizMethodHook,
-  CnWizUtils;
+  CnWizUtils, CnWizIdeUtils;
 
 // 开始更新 ImageList 和 ActionList
 procedure CnListBeginUpdate;
@@ -91,6 +91,9 @@ begin
   begin
     Self.FreeNotification(FCnListComponent);
     FImageLists.Add(Self);
+
+    if Self = GetIDEImageList then
+      ClearIDEBigImageList;
   end;
 end;
 

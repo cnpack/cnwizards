@@ -336,6 +336,9 @@ function GetIDERegistryFont(const RegItem: string; AFont: TFont): Boolean;
 function GetIDEBigImageList: TImageList;
 {* 获取一个大尺寸的 IDE 的 ImageList 引用，从 IDE 的 ImageList 拉扯而来}
 
+procedure ClearIDEBigImageList;
+{* 清空大尺寸的 IDE 的 ImageList，供通知重建而使用}
+
 type
   TEnumEditControlProc = procedure (EditWindow: TCustomForm; EditControl:
     TControl; Context: Pointer) of object;
@@ -1753,14 +1756,17 @@ var
   SrcBmp, DstBmp: TBitmap;
   Rs, Rd: TRect;
 begin
-  if FIDEBigImageList = nil then
+  if (FIDEBigImageList = nil) or (FIDEBigImageList.Count = 0) then
   begin
     Img := GetIDEImageList;
     if Img <> nil then
     begin
-      FIDEBigImageList := TImageList.Create(nil);
-      FIDEBigImageList.Height := 24;
-      FIDEBigImageList.Width := 24;
+      if FIDEBigImageList = nil then
+      begin
+        FIDEBigImageList := TImageList.Create(nil);
+        FIDEBigImageList.Height := 24;
+        FIDEBigImageList.Width := 24;
+      end;
 
       // 从 IDE 的 ImageList 中拉扯绘制，把 16*16 扩展到 24* 24
       SrcBmp := nil;
@@ -1792,6 +1798,20 @@ begin
     end;
   end;
   Result := FIDEBigImageList;
+end;
+
+procedure ClearIDEBigImageList;
+begin
+  if FIDEBigImageList <> nil then
+  begin
+    FIDEBigImageList.Clear;
+    GetIDEBigImageList;
+  end;
+end;
+
+procedure FreeIDEBigImageList;
+begin
+  FreeAndNil(FIDEBigImageList);
 end;
 
 // 判断指定控件是否代码编辑器控件
@@ -2779,7 +2799,7 @@ finalization
   if FCnMessageViewWrapper <> nil then
     FreeAndNil(FCnMessageViewWrapper);
 
-  FreeAndNil(FIDEBigImageList);
+  FreeIDEBigImageList;
   FinalIdeAPIs;
 
 {$IFDEF DEBUG}
