@@ -117,6 +117,7 @@ TCnWizConfigForm.grpOthers.Caption=Othe&rs
 TCnWizConfigForm.chkUseToolsMenu.Caption=Integrate CnPack Menu into Tools Menu.
 TCnWizConfigForm.chkUseOneCPUCore.Caption=Set IDE to run in CPU 0 single core.
 TCnWizConfigForm.chkFixThreadLocale.Caption=Use SetThreadLocale to fix encode problem under Vista / Win7.
+TCnWizConfigForm.chkUseLargeIcon.Caption=Use Large Icons(Need Restart).
 TCnWizConfigForm.chkUserDir.Caption=Customize User Data Folder(Need Restart):
 TCnWizConfigForm.btnHelp.Caption=&Help
 TCnWizConfigForm.btnOK.Caption=&OK

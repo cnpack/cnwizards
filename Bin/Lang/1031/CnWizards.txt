@@ -117,6 +117,7 @@ TCnWizConfigForm.grpOthers.Caption=weite&re
 TCnWizConfigForm.chkUseToolsMenu.Caption=Platziere CnPack Menu unter Tools Menu.
 TCnWizConfigForm.chkUseOneCPUCore.Caption=Veranlasse IDE-Start in CPU 0 Single core.
 TCnWizConfigForm.chkFixThreadLocale.Caption=Benutze SetThreadLocale um Verschlüsselungsproblem unter Vista / Win7 zu vermeiden.
+TCnWizConfigForm.chkUseLargeIcon.Caption=Verwenden Sie große Symbole(benötigt Neustart).
 TCnWizConfigForm.chkUserDir.Caption=benutzerdef. Daten Verzeichnis (benötigt Neustart):
 TCnWizConfigForm.btnHelp.Caption=&Hilfe
 TCnWizConfigForm.btnOK.Caption=&OK

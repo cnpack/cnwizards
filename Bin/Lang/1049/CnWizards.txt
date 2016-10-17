@@ -117,6 +117,7 @@ TCnWizConfigForm.grpOthers.Caption=Другое
 TCnWizConfigForm.chkUseToolsMenu.Caption=Интегрировать меню CnPack в меню Tools
 TCnWizConfigForm.chkUseOneCPUCore.Caption=Запускать IDE в пределах 1 ядра (CPU 0)
 TCnWizConfigForm.chkFixThreadLocale.Caption=Исп. SetThreadLocale для исправления ошибки кодировки в Vista / Win7
+TCnWizConfigForm.chkUseLargeIcon.Caption=Используйте Крупные значки(необх. перезагр.).
 TCnWizConfigForm.chkUserDir.Caption=Изменить папку пользователя (необх. перезагр.):
 TCnWizConfigForm.btnHelp.Caption=Справка
 TCnWizConfigForm.btnOK.Caption=&OK
