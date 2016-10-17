@@ -137,6 +137,7 @@ type
     lblSearchEditor: TLabel;
     btnSort: TButton;
     btnRestoreSetting: TButton;
+    chkUseLargeIcon: TCheckBox;
     procedure lbWizardsDrawItem(Control: TWinControl; Index: Integer;
       Rect: TRect; State: TOwnerDrawState);
     procedure FormCreate(Sender: TObject);
@@ -269,6 +270,7 @@ begin
   cbShowWizComment.Checked := WizOptions.ShowWizComment;
   chkUseOneCPUCore.Checked := WizOptions.UseOneCPUCore;
   chkFixThreadLocale.Checked := WizOptions.FixThreadLocale;
+  chkUseLargeIcon.Checked := WizOptions.UseLargeIcon;
 
   // 升级设置
   if WizOptions.UpgradeStyle = usDisabled then
@@ -331,6 +333,7 @@ begin
     WizOptions.ShowWizComment := cbShowWizComment.Checked;
     WizOptions.UseOneCPUCore := chkUseOneCPUCore.Checked;
     WizOptions.FixThreadLocale := chkFixThreadLocale.Checked;
+    WizOptions.UseLargeIcon := chkUseLargeIcon.Checked;
 
     // 升级设置
     if rbUpgradeDisabled.Checked then

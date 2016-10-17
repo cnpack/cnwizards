@@ -1,8 +1,8 @@
 inherited CnWizConfigForm: TCnWizConfigForm
-  Left = 237
-  Top = 119
+  Left = 310
+  Top = 72
   Width = 528
-  Height = 485
+  Height = 505
   BorderIcons = [biSystemMenu]
   BorderWidth = 6
   Caption = 'CnPack IDE Wizards Settings'
@@ -18,7 +18,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
     Left = 0
     Top = 0
     Width = 500
-    Height = 406
+    Height = 426
     ActivePage = tsWizards
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
@@ -30,7 +30,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         Left = 309
         Top = 0
         Width = 181
-        Height = 376
+        Height = 396
         Align = alRight
         BevelOuter = bvNone
         TabOrder = 0
@@ -171,7 +171,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         end
         object btnConfig: TButton
           Left = 7
-          Top = 346
+          Top = 366
           Width = 75
           Height = 21
           Anchors = [akRight, akBottom]
@@ -181,7 +181,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         end
         object btnRestoreSetting: TButton
           Left = 99
-          Top = 346
+          Top = 366
           Width = 75
           Height = 21
           Anchors = [akRight, akBottom]
@@ -194,7 +194,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         Left = 0
         Top = 0
         Width = 309
-        Height = 376
+        Height = 396
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 1
@@ -202,7 +202,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
           Left = 0
           Top = 33
           Width = 309
-          Height = 343
+          Height = 363
           Align = alClient
           ItemHeight = 45
           Style = lbOwnerDrawFixed
@@ -246,7 +246,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         Left = 309
         Top = 0
         Width = 181
-        Height = 376
+        Height = 396
         Align = alRight
         BevelOuter = bvNone
         TabOrder = 0
@@ -393,18 +393,20 @@ inherited CnWizConfigForm: TCnWizConfigForm
         end
         object btnDesignEditorConfig: TButton
           Left = 7
-          Top = 346
+          Top = 366
           Width = 75
           Height = 21
+          Anchors = [akRight, akBottom]
           Caption = '&Settings'
           TabOrder = 1
           OnClick = btnDesignEditorConfigClick
         end
         object btnDesignEditorCustomize: TButton
           Left = 99
-          Top = 346
+          Top = 366
           Width = 75
           Height = 21
+          Anchors = [akRight, akBottom]
           Caption = 'Custo&mize'
           TabOrder = 2
           OnClick = btnDesignEditorCustomizeClick
@@ -414,7 +416,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         Left = 0
         Top = 0
         Width = 309
-        Height = 376
+        Height = 396
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 1
@@ -422,7 +424,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
           Left = 0
           Top = 33
           Width = 309
-          Height = 343
+          Height = 363
           Align = alClient
           ItemHeight = 32
           Style = lbOwnerDrawFixed
@@ -465,7 +467,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         Left = 8
         Top = 230
         Width = 479
-        Height = 139
+        Height = 160
         Caption = 'Othe&rs'
         TabOrder = 3
         object Label2: TLabel
@@ -527,19 +529,19 @@ inherited CnWizConfigForm: TCnWizConfigForm
         end
         object chkUserDir: TCheckBox
           Left = 8
-          Top = 79
+          Top = 100
           Width = 273
           Height = 17
-          Caption = 'Customize User Data Folder(Need Restart):'
-          TabOrder = 3
+          Caption = 'Customize User Data Folder (Need Restart):'
+          TabOrder = 4
           OnClick = UpdateControls
         end
         object edtUserDir: TEdit
           Left = 24
-          Top = 102
+          Top = 123
           Width = 422
           Height = 21
-          TabOrder = 4
+          TabOrder = 5
         end
         object chkFixThreadLocale: TCheckBox
           Left = 8
@@ -556,6 +558,14 @@ inherited CnWizConfigForm: TCnWizConfigForm
           Height = 17
           Caption = 'Set IDE to run in CPU 0 single core.'
           TabOrder = 1
+        end
+        object chkUseLargeIcon: TCheckBox
+          Left = 8
+          Top = 79
+          Width = 457
+          Height = 17
+          Caption = 'Use Large Icons (Need Restart).'
+          TabOrder = 3
         end
       end
       object gbHintWnd: TGroupBox
@@ -681,7 +691,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
   end
   object btnOK: TButton
     Left = 265
-    Top = 414
+    Top = 434
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -692,7 +702,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
   end
   object btnCancel: TButton
     Left = 345
-    Top = 414
+    Top = 434
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -703,7 +713,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
   end
   object btnHelp: TButton
     Left = 425
-    Top = 414
+    Top = 434
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -713,7 +723,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
   end
   object btnSort: TButton
     Left = 3
-    Top = 414
+    Top = 434
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -724,7 +734,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
   object dlgSaveActionList: TSaveDialog
     DefaultExt = 'txt'
     Filter = 'Text Files(*.txt)|*.txt|Any File(*.*)|*.*'
-    Left = 8
+    Left = 16
     Top = 403
   end
   object ilEnable: TImageList
