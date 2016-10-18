@@ -1084,6 +1084,7 @@ TCnWizFeedbackForm.cbPackages.Caption=已安装的包。
 TCnWizFeedbackForm.cbLocaleKeyboard.Caption=本地化/键盘信息。
 TCnWizFeedbackForm.cbCpu.Caption=CPU 信息。
 TCnWizFeedbackForm.chkKeyMapping.Caption=IDE 快捷键增强模块设置。
+TCnWizFeedbackForm.chkEditorInfo.Caption=编辑器设置。
 TCnWizFeedbackForm.cbCnPackSettings.Caption=CnPack IDE 专家包设置。
 TCnWizFeedbackForm.btnSave.Caption=保存(&S)...
 TCnWizFeedbackForm.btnCopy.Caption=复制(&O)

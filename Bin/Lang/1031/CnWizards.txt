@@ -1084,6 +1084,7 @@ TCnWizFeedbackForm.cbPackages.Caption=installierte Packages.
 TCnWizFeedbackForm.cbLocaleKeyboard.Caption=Ländereinstellung/Keyboard Information.
 TCnWizFeedbackForm.cbCpu.Caption=CPU Information.
 TCnWizFeedbackForm.chkKeyMapping.Caption=Key Mapping Enhancement Module.
+TCnWizFeedbackForm.chkEditorInfo.Caption=Editor Einstellungen.
 TCnWizFeedbackForm.cbCnPackSettings.Caption=CnPack IDE Wizards Einstellungen.
 TCnWizFeedbackForm.btnSave.Caption=&speichern...
 TCnWizFeedbackForm.btnCopy.Caption=kopieren
