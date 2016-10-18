@@ -56,7 +56,7 @@ uses
   ExtCtrls, CnWizardImage, StdCtrls, ComCtrls, ToolsAPI, CnConsts, CnWizConsts,
   CnWizOptions, CnWizUtils, CnWizCompilerConst, Clipbrd, ActnList, ShellAPI,
   Registry, Math, TypInfo, CnCommon, GetIdeVersion, CnWizIdeUtils, CnLangMgr,
-  CnWizMultiLang, CnWizManager;
+  CnWizMultiLang, CnWizManager, CnEditControlWrapper;
 
 type
   TFeedbackType = (fbBug, fbFeature);
@@ -110,6 +110,7 @@ type
     actNext: TAction;
     dlgSaveReport: TSaveDialog;
     chkKeyMapping: TCheckBox;
+    chkEditorInfo: TCheckBox;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure actPrevUpdate(Sender: TObject);
     procedure actNextUpdate(Sender: TObject);
@@ -783,6 +784,14 @@ begin
   finally
     List.Free;
   end;
+  Result := Result + SCRLF;
+end;
+
+function GetEditorSettingString: string;
+begin
+  Result := SOutEditorSettings + SCRLF;
+  Result := Result + '  Use Tab: ' + IntToStr(Integer(EditControlWrapper.GetUseTabKey)) + SCRLF;
+  Result := Result + '  Tab Width: ' + IntToStr(EditControlWrapper.GetTabWidth) + SCRLF;
 end;
 
 function TCnWizFeedbackForm.GetSystemConfigurationString: string;
@@ -807,6 +816,8 @@ begin
     Result := Result + GetLocaleKeyboardString;
   if chkKeyMapping.Checked then
     Result := Result + GetKeyMappingString;
+  if chkEditorInfo.Checked then
+    Result := Result + GetEditorSettingString;
 end;
 
 procedure TCnWizFeedbackForm.DoLanguageChanged(Sender: TObject);

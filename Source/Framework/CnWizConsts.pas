@@ -463,6 +463,7 @@ var
   SOutCnWizardsActive: string = 'CnPack IDE Wizards Enabled State:';
   SOutCnWizardsCreated: string = 'CnPack IDE Wizards Created State:';
   SOutConfig: string = 'Settings:';
+  SOutEditorSettings: string = 'Editor Settings:';
 
   // Key Mapping Conflicts
   SCnKeyMappingConflictsHint: string =

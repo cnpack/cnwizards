@@ -1,6 +1,6 @@
 inherited CnWizFeedbackForm: TCnWizFeedbackForm
   Left = 349
-  Top = 248
+  Top = 156
   Width = 590
   Height = 398
   BorderIcons = [biSystemMenu]
@@ -480,7 +480,7 @@ inherited CnWizFeedbackForm: TCnWizFeedbackForm
           Left = 0
           Top = 8
           Width = 281
-          Height = 201
+          Height = 217
           Caption = 'Other Feedback &Data'
           TabOrder = 0
           object cbCnPackVer: TCheckBox
@@ -575,6 +575,16 @@ inherited CnWizFeedbackForm: TCnWizFeedbackForm
             Checked = True
             State = cbChecked
             TabOrder = 8
+          end
+          object chkEditorInfo: TCheckBox
+            Left = 8
+            Top = 190
+            Width = 264
+            Height = 17
+            Caption = 'Editor Settings.'
+            Checked = True
+            State = cbChecked
+            TabOrder = 9
           end
         end
       end
