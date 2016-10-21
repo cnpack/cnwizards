@@ -788,8 +788,18 @@ begin
 end;
 
 function GetEditorSettingString: string;
+var
+  Option: IOTAEditOptions;
 begin
   Result := SOutEditorSettings + SCRLF;
+  Option := CnOtaGetEditOptions;
+  if Option <> nil then
+  begin
+    Result := Result + '  Editor Font: ' + Option.FontName + SCRLF;
+    Result := Result + '  Font Size: ' + IntToStr(Option.FontSize) + SCRLF;
+  end;
+  Result := Result + '  Char Height: ' + IntToStr(Integer(EditControlWrapper.GetCharHeight)) + SCRLF;
+  Result := Result + '  Char Width: ' + IntToStr(Integer(EditControlWrapper.GetCharWidth)) + SCRLF;
   Result := Result + '  Use Tab: ' + IntToStr(Integer(EditControlWrapper.GetUseTabKey)) + SCRLF;
   Result := Result + '  Tab Width: ' + IntToStr(EditControlWrapper.GetTabWidth) + SCRLF;
 end;
