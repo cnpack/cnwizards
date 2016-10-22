@@ -232,7 +232,7 @@ var
       AWizardName := FWizardConstMap.Values[AWizardName];
 
     AName := 'S' + AWizardName + ASubfix;
-    Result := Langs.Values[AName];
+    Result := CnUtf8ToAnsi(Langs.Values[AName]);
     if Result = '' then  // 原名不存在就去掉Wizard看看
     begin
       if StrRight(AWizardName, Length('Wizard')) = 'Wizard' then
@@ -240,7 +240,7 @@ var
         Result := AWizardName;
         Delete(Result, Length(Result) - Length('Wizard') + 1, Length('Wizard'));
         AName := 'S' + Result + ASubfix;
-        Result := Langs.Values[AName];
+        Result := CnUtf8ToAnsi(Langs.Values[AName]);
       end;
     end;
   end;
@@ -409,6 +409,7 @@ end;
 procedure TCnCustBuildForm.DoCreate;
 begin
   hfs := TCnHashLangFileStorage.Create(Self);
+  hfs.LanguagePath := '.';
   hfs.AutoDetect := True;
   lm := TCnLangManager.Create(Self);
   lm.LanguageStorage := hfs;
