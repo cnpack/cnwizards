@@ -1546,9 +1546,9 @@ var
   SCnScriptMenuDemoCaption: string = '&Demos';
   SCnScriptMenuDemoHint: string = 'Script Demos';
 
-  // CnFeedWizard
-  SCnFeedWizardName: string = 'FeedReader Wizard';
-  SCnFeedWizardComment: string = 'Display Feed Content in Status Bar';
+  // CnFeedReaderWizard
+  SCnFeedReaderWizardName: string = 'FeedReader Wizard';
+  SCnFeedReaderWizardComment: string = 'Display Feed Content in Status Bar';
   SCnFeedPrevFeedCaption: string = '&Previous Item';
   SCnFeedNextFeedCaption: string = '&Next Item';
   SCnFeedForceUpdateCaption: string = '&Update All';

@@ -1274,10 +1274,10 @@ end;
 class procedure TCnFeedReaderWizard.GetWizardInfo(var Name, Author, Email,
   Comment: string);
 begin
-  Name := SCnFeedWizardName;
+  Name := SCnFeedReaderWizardName;
   Author := SCnPack_Zjy;
   Email := SCnPack_ZjyEmail;
-  Comment := SCnFeedWizardComment;
+  Comment := SCnFeedReaderWizardComment;
 end;
 
 procedure TCnFeedReaderWizard.LanguageChanged(Sender: TObject);

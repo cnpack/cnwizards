@@ -1317,9 +1317,9 @@ begin
   TranslateStr(SCnScriptMenuDemoCaption, 'SCnScriptMenuDemoCaption');
   TranslateStr(SCnScriptMenuDemoHint, 'SCnScriptMenuDemoHint');
 
-  // CnFeedWizard
-  TranslateStr(SCnFeedWizardName, 'SCnFeedWizardName');
-  TranslateStr(SCnFeedWizardComment, 'SCnFeedWizardComment');
+  // CnFeedReaderWizard
+  TranslateStr(SCnFeedReaderWizardName, 'SCnFeedReaderWizardName');
+  TranslateStr(SCnFeedReaderWizardComment, 'SCnFeedReaderWizardComment');
   TranslateStr(SCnFeedPrevFeedCaption, 'SCnFeedPrevFeedCaption');
   TranslateStr(SCnFeedNextFeedCaption, 'SCnFeedNextFeedCaption');
   TranslateStr(SCnFeedForceUpdateCaption, 'SCnFeedForceUpdateCaption');
