@@ -207,6 +207,9 @@ var
   CreateEditorToolBarServiceProc: TProcedure = nil;
   {* 创建编辑器工具栏服务的入口}
 
+procedure InitSizeIfLargeIcon(Toolbar: TToolBar; LargeImageList: TImageList);
+{* 根据是否大尺寸而设置工具栏尺寸}
+
 implementation
 
 {$IFDEF CNWIZARDS_CNSRCEDITORENHANCE}
@@ -290,6 +293,18 @@ type
 var
   ExternalEditorToolBarMgr: TCnExternalEditorToolBarMgr;
   CnSrcEditorToolBarMgr: TCnSrcEditorToolBarMgr;
+
+procedure InitSizeIfLargeIcon(Toolbar: TToolBar; LargeImageList: TImageList);
+begin
+  if (Toolbar <> nil) and WizOptions.UseLargeIcon then
+  begin
+    Toolbar.Height := csLargeToolbarHeight;
+    Toolbar.ButtonWidth := csLargeToolbarButtonWidth;
+    Toolbar.ButtonHeight := csLargeToolbarButtonHeight;
+    if LargeImageList <> nil then
+      Toolbar.Images := LargeImageList;
+  end;
+end;
 
 //==============================================================================
 // 代码编辑器工具栏
@@ -406,15 +421,8 @@ begin
   AutoSize := True;
   Top := -1;
   Align := alTop;
-  if WizOptions.UseLargeIcon then
-  begin
-    Images := GetIDEBigImageList;
-    Height := 33;
-    ButtonWidth := 31;
-    ButtonHeight := 30;
-  end
-  else
-    Images := GetIDEImageList;
+  Images := GetIDEImageList;
+  InitSizeIfLargeIcon(Self, GetIDEBigImageList);
 
   InitPopupMenu;
   Wrapable := FToolBarMgr.Wrapable;

@@ -42,6 +42,14 @@ uses
   Windows, Messages, Classes, Graphics, Controls, SysUtils, ToolsAPI, IniFiles,
   FileCtrl, Forms, Registry{$IFDEF COMPILER6_UP}, SHFolder{$ENDIF};
 
+const
+  csLargeButtonWidth = 32;
+  csLargeButtonHeight = 32;
+  csLargeComboFontSize = 14;
+  csLargeToolbarHeight = 33;
+  csLargeToolbarButtonWidth = 31;
+  csLargeToolbarButtonHeight = 30;
+
 type
 
 //==============================================================================

@@ -39,7 +39,8 @@ interface
 {$I CnWizards.inc}
 
 uses
-  SysUtils, Classes, Graphics, Forms, ImgList, Buttons, Controls, CnWizUtils;
+  SysUtils, Windows, Classes, Graphics, Forms, ImgList, Buttons, Controls,
+  CnWizUtils, CnGraphUtils, CnWizOptions;
 
 type
   TdmCnSharedImages = class(TDataModule)
@@ -50,6 +51,7 @@ type
     ilInputHelper: TImageList;
     ilProcToolBar: TImageList;
     ilBackForwardBDS: TImageList;
+    ilProcToolbarLarge: TImageList;
     procedure DataModuleCreate(Sender: TObject);
   private
     { Private declarations }
@@ -71,10 +73,14 @@ implementation
 {$R *.dfm}
 
 procedure TdmCnSharedImages.DataModuleCreate(Sender: TObject);
+const
+  MaskColor = clBtnFace;
 var
   ImgLst: TCustomImageList;
-  Bmp: TBitmap;
+  Bmp, Src, Dst: TBitmap;
   Save: TColor;
+  Rs, Rd: TRect;
+  I: Integer;
 begin
   FIdxUnknown := 66;
   ImgLst := GetIDEImageList;
@@ -88,6 +94,37 @@ begin
     Images.BkColor := Save;
   finally
     Bmp.Free;
+  end;
+
+  if WizOptions.UseLargeIcon then
+  begin
+    // 从小的 ImageList 中拉扯绘制，把 16*16 扩展到 24* 24
+    Src := nil;
+    Dst := nil;
+    try
+      Src := CreateEmptyBmp24(16, 16, MaskColor);
+      Dst := CreateEmptyBmp24(24, 24, MaskColor);
+
+      Rs := Rect(0, 0, Src.Width, Src.Height);
+      Rd := Rect(0, 0, Dst.Width, Dst.Height);
+
+      Src.Canvas.Brush.Color := MaskColor;
+      Src.Canvas.Brush.Style := bsSolid;
+      Dst.Canvas.Brush.Color := clFuchsia;
+      Dst.Canvas.Brush.Style := bsSolid;
+
+      for I := 0 to ilProcToolbar.Count - 1 do
+      begin
+        Src.Canvas.FillRect(Rs);
+        ilProcToolbar.GetBitmap(I, Src);
+        Dst.Canvas.FillRect(Rd);
+        Dst.Canvas.StretchDraw(Rd, Src);
+        ilProcToolbarLarge.AddMasked(Dst, MaskColor);
+      end;
+    finally
+      Src.Free;
+      Dst.Free;
+    end;
   end;
 end;
 

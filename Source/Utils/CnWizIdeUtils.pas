@@ -1756,6 +1756,10 @@ var
   SrcBmp, DstBmp: TBitmap;
   Rs, Rd: TRect;
 begin
+  Result := nil;
+  if not WizOptions.UseLargeIcon then
+    Exit;
+
   if (FIDEBigImageList = nil) or (FIDEBigImageList.Count = 0) then
   begin
     Img := GetIDEImageList;

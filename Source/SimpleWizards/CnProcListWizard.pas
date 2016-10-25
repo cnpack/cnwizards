@@ -866,6 +866,7 @@ begin
     ShowHint := True;
     Transparent := False;
     Images := dmCnSharedImages.ilProcToolBar;
+    InitSizeIfLargeIcon(Obj.InternalToolBar2, dmCnSharedImages.ilProcToolbarLarge);
     PopupMenu := Obj.PopupMenu;
   end;
 
@@ -906,6 +907,7 @@ begin
     ShowHint := True;
     Transparent := False;
     Images := GetIDEImageList;
+    InitSizeIfLargeIcon(Obj.InternalToolBar1, GetIDEBigImageList);
     PopupMenu := Obj.PopupMenu;
   end;
 
@@ -1156,6 +1158,13 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('ProcList: Obj found from EditControl %8.8x', [Integer(Obj)]);
 {$ENDIF}
+
+  InitSizeIfLargeIcon(ToolBar, dmCnSharedImages.ilProcToolbarLarge);
+  if WizOptions.UseLargeIcon then
+  begin
+    Obj.ClassCombo.Font.Size := csLargeComboFontSize;
+    Obj.ProcCombo.Font.Size := csLargeComboFontSize;
+  end;
 
   Obj.ToolBtnProcList.Action := FindIDEAction('act' + Copy(ClassName, 2, MaxInt)); // ȥ T
   Obj.ToolBtnProcList.Visible := Action <> nil;

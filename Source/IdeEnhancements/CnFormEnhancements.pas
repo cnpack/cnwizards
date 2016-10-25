@@ -450,8 +450,6 @@ uses
 const
   csButtonWidth = 20;
   csButtonHeight = 20;
-  csButtonBigWidth = 32;
-  csButtonBigHeight = 32;
   csTitleWidth = 12;
   csUpdateInterval = 100;
 
@@ -1127,8 +1125,8 @@ var
 begin
   if WizOptions.UseLargeIcon then
   begin
-    ButtonWidth := csButtonBigWidth;
-    ButtonHeight := csButtonBigHeight;
+    ButtonWidth := csLargeButtonWidth;
+    ButtonHeight := csLargeButtonHeight;
   end
   else
   begin
@@ -1513,8 +1511,8 @@ begin
 
   if WizOptions.UseLargeIcon then
   begin
-    FNameCombo.Font.Size := 14;
-    FValueCombo.Font.Size := 14;
+    FNameCombo.Font.Size := csLargeComboFontSize;
+    FValueCombo.Font.Size := csLargeComboFontSize;
   end;
 end;
 
