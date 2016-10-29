@@ -83,6 +83,7 @@ type
     procedure edtMatchSearchKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure rbIntfDblClick(Sender: TObject);
+    procedure cbbProjectListChange(Sender: TObject);
   private
     FIsCppMode: Boolean;
     FUsesList: TObjectList; // 存储所有的 UseUnitInfo
@@ -99,6 +100,7 @@ type
     procedure OpenSelect; override;
     function GetHelpTopic: string; override;
     procedure CreateList; override;
+
     procedure UpdateComboBox; override;
     procedure DoUpdateListView; override;
     procedure DoSortListView; override;
@@ -107,6 +109,7 @@ type
     constructor Create(AOwner: TComponent; CppMode: Boolean;
       UnitNameList: TUnitNameList); reintroduce;
 
+    procedure InternalCreateList;
     property IsCppMode: Boolean read FIsCppMode write FIsCppMode;
     property UnitNameListRef: TUnitNameList read FUnitNameListRef write FUnitNameListRef;
   end;
@@ -189,6 +192,7 @@ begin
     try
       ShowHint := WizOptions.ShowHint;
       LoadSettings(Ini, csUseUnits);
+      InternalCreateList;
 
       Result := ShowModal = mrOk;
       Hooked := actHookIDE.Checked;
@@ -199,7 +203,6 @@ begin
     end;
   end;
 end;
-
 
 // 此过程还可能会被插入 Frame 时调用，因此过程内部根据 HelpContext 分别处理了这俩情况
 function ShowProjectInsertFrame(ASelf: TCustomForm): Boolean;
@@ -521,7 +524,7 @@ begin
   end;
 end;
 
-procedure TCnProjectUseUnitsForm.CreateList;
+procedure TCnProjectUseUnitsForm.InternalCreateList;
 var
   I, Idx: Integer;
   Stream: TMemoryStream;
@@ -557,7 +560,8 @@ begin
     UsesList := TStringList.Create;
     Stream := TMemoryStream.Create;
 
-    FUnitNameListRef.DoInternalLoad;
+    // 如果未选择全部，则不搜索路径
+    FUnitNameListRef.DoInternalLoad(cbbProjectList.ItemIndex = 0);
     FUnitNameListRef.ExportToStringList(Names, Paths);
 
     // 此时得到了所有可引用的单元列表
@@ -606,7 +610,12 @@ end;
 
 procedure TCnProjectUseUnitsForm.UpdateComboBox;
 begin
-  // Do nothing about combobox because hidden.
+  with cbbProjectList do
+  begin
+    Clear;
+    Items.Add(SCnProjExtProjectAll);
+    Items.Add(SCnProjExtCurrentProject);
+  end;
 end;
 
 procedure TCnProjectUseUnitsForm.DoUpdateListView;
@@ -632,6 +641,10 @@ begin
     for I := 0 to FUsesList.Count - 1 do
     begin
       UnitInfo := TCnUseUnitInfo(FUsesList[I]);
+      // 只显示工程时，跳过不在工程中的
+      if not UnitInfo.IsInProject and (cbbProjectList.ItemIndex = 1) then
+        Continue;
+
       if (MatchSearchText = '') or
         RegExpContainsText(FRegExpr, UnitInfo.Name, MatchSearchText, not IsMatchAny) then
       begin
@@ -1039,6 +1052,25 @@ end;
 procedure TCnProjectUseUnitsForm.rbIntfDblClick(Sender: TObject);
 begin
   OpenSelect;
+end;
+
+procedure TCnProjectUseUnitsForm.CreateList;
+begin
+  // 不在 CreateList 里处理，改在迟来的 InternalCreateList 里处理
+end;
+
+procedure TCnProjectUseUnitsForm.cbbProjectListChange(Sender: TObject);
+var
+  Old: TCursor;
+begin
+  Old := Screen.Cursor;
+  Screen.Cursor := crHourGlass;
+  try
+    InternalCreateList;
+  finally
+    Screen.Cursor := Old;
+  end;
+  inherited;
 end;
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}

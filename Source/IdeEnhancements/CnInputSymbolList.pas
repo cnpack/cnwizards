@@ -339,7 +339,7 @@ type
     class function GetListName: string; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
       TCodePosInfo): Boolean; override;
-    procedure DoInternalLoad;
+    procedure DoInternalLoad(IncludePath: Boolean = True);
     procedure ExportToStringList(Names, Paths: TStringList);
     // 将不包括扩展名的文件名以及带完整路径的文件名输出至外部列表
   end;
@@ -1598,14 +1598,17 @@ begin
   end;
 end;
 
-procedure TUnitNameList.DoInternalLoad;
+procedure TUnitNameList.DoInternalLoad(IncludePath: Boolean);
 begin
   FUnitNames.Clear;
   FUnitPaths.Clear;
   Clear;
   LoadFromCurrProject;
-  LoadFromSysPath;
-  LoadFromProjectPath;
+  if IncludePath then
+  begin
+    LoadFromSysPath;
+    LoadFromProjectPath;
+  end;
 end;
 
 procedure TUnitNameList.ExportToStringList(Names, Paths: TStringList);

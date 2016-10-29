@@ -1,27 +1,28 @@
 inherited CnProjectUseUnitsForm: TCnProjectUseUnitsForm
-  Left = 282
-  Top = 87
+  Left = 266
+  Top = 79
   Caption = 'Use Unit'
-  ClientHeight = 446
-  ClientWidth = 651
+  ClientHeight = 453
+  ClientWidth = 732
+  Constraints.MinHeight = 480
+  Constraints.MinWidth = 740
   PixelsPerInch = 96
   TextHeight = 13
   inherited pnlHeader: TPanel
-    Width = 651
+    Width = 732
     inherited lblProject: TLabel
-      Left = 319
+      Left = 289
       Width = 36
       Caption = '&Add to:'
       FocusControl = nil
     end
-    inherited cbbProjectList: TComboBox
-      Left = 591
-      Visible = False
+    inherited edtMatchSearch: TEdit
+      Width = 202
     end
-    object rbIntf: TRadioButton
-      Left = 388
+    object rbIntf: TRadioButton [3]
+      Left = 348
       Top = 12
-      Width = 97
+      Width = 85
       Height = 17
       Caption = 'Interface'
       Checked = True
@@ -30,28 +31,32 @@ inherited CnProjectUseUnitsForm: TCnProjectUseUnitsForm
       OnDblClick = rbIntfDblClick
       OnKeyDown = rbIntfKeyDown
     end
-    object rbImpl: TRadioButton
-      Left = 476
+    object rbImpl: TRadioButton [4]
+      Left = 436
       Top = 11
-      Width = 97
+      Width = 109
       Height = 17
       Caption = 'Implementation'
       TabOrder = 3
       OnDblClick = rbIntfDblClick
       OnKeyDown = rbImplKeyDown
     end
+    inherited cbbProjectList: TComboBox
+      Left = 544
+      Width = 171
+    end
   end
   inherited lvList: TListView
-    Width = 651
-    Height = 361
+    Width = 732
+    Height = 368
     Columns = <
       item
         Caption = 'Unit'
-        Width = 200
+        Width = 240
       end
       item
         Caption = 'Location'
-        Width = 300
+        Width = 340
       end
       item
         Caption = 'Project'
@@ -65,12 +70,25 @@ inherited CnProjectUseUnitsForm: TCnProjectUseUnitsForm
     OnData = lvListData
   end
   inherited StatusBar: TStatusBar
-    Top = 427
-    Width = 651
+    Top = 434
+    Width = 732
+    Panels = <
+      item
+        Style = psOwnerDraw
+        Width = 400
+      end
+      item
+        Text = 'Project Count: 1'
+        Width = 110
+      end
+      item
+        Text = 'Form Count: 1'
+        Width = 110
+      end>
     OnDrawPanel = StatusBarDrawPanel
   end
   inherited ToolBar: TToolBar
-    Width = 651
+    Width = 732
   end
   inherited ActionList: TActionList
     inherited actOpen: TAction
