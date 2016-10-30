@@ -119,6 +119,7 @@ inherited CnProjectUseUnitsForm: TCnProjectUseUnitsForm
     inherited actQuery: TAction
       Enabled = False
       Hint = '&Prompt when Open More than ONE Unit'
+      Visible = False
     end
   end
 end

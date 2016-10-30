@@ -84,7 +84,9 @@ inherited CnImportDirForm: TCnImportDirForm
       ItemHeight = 13
       TabOrder = 3
       Items.Strings = (
-        'CVS')
+        'CVS'
+        '.svn'
+        '.git')
     end
     object chkNameIsDesc: TCheckBox
       Left = 16
