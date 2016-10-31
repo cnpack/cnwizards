@@ -75,7 +75,9 @@ type
      |</PRE>}
     destructor Destroy; override;
     {* 类析构器，取消挂接}
-    
+
+    property Hooked: Boolean read FHooked;
+    {* 是否已挂接}
     procedure HookMethod; virtual;
     {* 重新挂接，如果需要执行原过程，并使用了 UnhookMethod，请在执行完成后重新挂接}
     procedure UnhookMethod; virtual;

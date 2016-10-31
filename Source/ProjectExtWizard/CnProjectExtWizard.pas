@@ -80,7 +80,7 @@ uses
   CnCommon, CnWizClasses, CnWizUtils, CnConsts, CnWizConsts, CnProjectViewUnitsFrm,
   CnProjectViewFormsFrm, CnProjectListUsedFrm, CnProjectDelTempFrm, CnIni,
   CnWizCompilerConst, CnProjectBackupFrm, CnProjectDirBuilderFrm, CnWizMethodHook,
-  CnInputSymbolList;
+  CnProjectFramesFrm, CnInputSymbolList;
                                            
 type
 
@@ -142,6 +142,8 @@ type
   public
     procedure UpdateActionHook(HookUnitsList, HookFormsList, HookUseUnit: Boolean);
     procedure UpdateMethodHook(HookUseUnit: Boolean);
+    procedure DebugComand(Cmds: TStrings; Results: TStrings); override;
+
     constructor Create; override;
     destructor Destroy; override;
     function GetState: TWizardState; override;
@@ -160,6 +162,7 @@ var
   UnitsListHookBtnChecked: Boolean;
   FormsListHookBtnChecked: Boolean;
   UseUnitsHookBtnChecked: Boolean;
+  FrameInsertHookBtnChecked: Boolean;
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}
 
@@ -554,24 +557,13 @@ begin
         ShowProjectUseUnits(Ini, UseUnitsHookBtnChecked, FPasUnitNameList);
 
       UpdateActionHook(UnitsListHookBtnChecked, FormsListHookBtnChecked, UseUnitsHookBtnChecked);
+
+      // 一并处理 Frame 插入的 Hook
+      if Active and FrameInsertHookBtnChecked and (FMethodHook <> nil) then
+        FMethodHook.HookMethod;
     finally
       Ini.Free;
     end;
-
-//    CnProjectUseUnitsFrm.Ini := CreateIniFile;
-//    try
-//      if FUseUnitAction <> nil then
-//      begin
-//        NeedUpdateMethodHook := False;
-//        UpdateMethodHook(True);
-//        FUseUnitAction.Execute;
-//        UpdateMethodHook(UseUnitsHookBtnChecked);
-//        NeedUpdateMethodHook := True;
-//      end;
-//    finally
-//      CnProjectUseUnitsFrm.Ini.Free;
-//      CnProjectUseUnitsFrm.Ini := nil;
-//    end;
   end
 {$ENDIF}
   else if Index = IdListUsed then
@@ -878,6 +870,18 @@ begin
     SCnPack_LeeonEmail + #13#10 +
     SCnPack_BetaEmail;
   Comment := SCnProjExtWizardComment;
+end;
+
+procedure TCnProjectExtWizard.DebugComand(Cmds, Results: TStrings);
+begin
+  if Results <> nil then
+  begin
+    Results.Add('UnitsListHookBtnChecked: ' + IntToStr(Integer(UnitsListHookBtnChecked)));
+    Results.Add('FormsListHookBtnChecked: ' + IntToStr(Integer(FormsListHookBtnChecked)));
+    Results.Add('UseUnitsHookBtnChecked: ' + IntToStr(Integer(UseUnitsHookBtnChecked)));
+    Results.Add('FrameInsertHookBtnChecked: ' + IntToStr(Integer(FrameInsertHookBtnChecked)));
+    Results.Add('ViewDialogExecute Hooked: ' + IntToStr(Integer(FMethodHook.Hooked)));
+  end;
 end;
 
 initialization

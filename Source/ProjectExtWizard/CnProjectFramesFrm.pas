@@ -69,6 +69,8 @@ type
     { Public declarations }
   end;
 
+function ShowProjectInsertFrame(ASelf: TCustomForm): Boolean;
+
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}
 
 implementation
@@ -77,17 +79,148 @@ implementation
 
 {$R *.DFM}
 
-{$IFDEF DEBUG}
 uses
-  CnDebug;
-{$ENDIF}
+  CnProjectExtWizard, CnWizManager, CnWizIdeUtils {$IFDEF DEBUG}, CnDebug{$ENDIF};
 
 const
+  csFrameInsert = 'FrameInsert';
   SFrameOfForm = 'TFrame';
   SDataMoudleOfForm = 'TDataModule';
 
+  SelectFrameHelpContext = 6030;
+  // ViewDialog 在 Select Frame 被调用时的 HelpContext
+
 type
   TControlAccess = class(TControl);
+
+var
+  Ini: TCustomIniFile = nil;
+  // 用来传递保存参数，因为Hook的部分只能传Self，无法传其他参数
+  OriginalList: TStrings = nil;
+
+  // 供ProjectExtWizard控制本窗口是否需要重复UpdteMethod的参数
+  NeedUpdateMethodHook: Boolean = True;
+
+// 此过程还可能会被插入 Frame 时调用，因此过程内部根据 HelpContext 分别处理了这俩情况
+function ShowProjectInsertFrame(ASelf: TCustomForm): Boolean;
+var
+  I, Idx: Integer;
+  AListBox: TListBox;
+  AName: string;
+  AWizard: TCnProjectExtWizard;
+  ErrList: TStrings;
+  HasError: Boolean;
+  AForm: TCnProjectViewBaseForm;
+begin
+  Result := False;
+  AListBox := nil;
+  if ASelf <> nil then
+  begin
+    OriginalList := TStringList.Create;
+    for I := 0 to ASelf.ComponentCount - 1 do
+    begin
+      if ASelf.Components[I] is TListBox then
+      begin
+        AListBox := TListBox(ASelf.Components[I]);
+        OriginalList.Assign(AListBox.Items);
+        Break;
+      end;
+    end;
+  end;
+
+  if AListBox = nil then
+  begin
+    FrameInsertHookBtnChecked := False;
+    Result := False;
+    Exit;
+  end;
+  
+{$IFDEF DEBUG}
+  CnDebugger.LogInteger(ASelf.HelpContext, 'ViewDialog HelpContext ');
+{$ENDIF}
+
+//  IsUseUnit := ASelf.HelpContext = UseUnitHelpContext;
+  if ASelf.HelpContext <> SelectFrameHelpContext then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('ProjectExt: ViewDialog HelpContext Both Error. Exit.');
+{$ENDIF}
+    Exit;
+  end;
+
+  ErrList := nil;
+  HasError := False;
+  AWizard := TCnProjectExtWizard(CnWizardMgr.WizardByClass(TCnProjectExtWizard));
+  Ini := AWizard.CreateIniFile;
+
+  AForm := TCnProjectFramesForm.Create(nil);
+  with AForm do
+  begin
+    try
+      btnQuery.Visible := False; // 无需此提示
+      ShowHint := WizOptions.ShowHint;
+      LoadSettings(Ini, csFrameInsert);
+
+      // 默认先打开当前工程
+      cbbProjectList.ItemIndex := cbbProjectList.Items.IndexOf(SCnProjExtCurrentProject);
+      if Assigned(cbbProjectList.OnChange) then
+        cbbProjectList.OnChange(cbbProjectList);
+
+      Result := ShowModal = mrOk;
+
+      FrameInsertHookBtnChecked := actHookIDE.Checked;
+      SaveSettings(Ini, csFrameInsert);
+      if NeedUpdateMethodHook then
+        AWizard.UpdateMethodHook(FrameInsertHookBtnChecked);
+
+      if Result then
+      begin
+        try
+          for I := 0 to AListBox.Items.Count - 1 do
+            AListBox.Selected[I] := False;
+        except
+          ;
+        end;
+        AListBox.ItemIndex := -1; // Select Nothing
+
+        for I := 0 to lvList.Items.Count - 1 do
+        begin
+          if lvList.Items[I].Selected then
+          begin
+            AName := _CnChangeFileExt(TCnFormInfo(lvList.Items[I].Data).Name, '');
+            AName := _CnExtractFileName(AName);
+
+            Idx := OriginalList.IndexOf(AName);
+            if Idx >= 0 then
+            begin
+              try
+                AListBox.Selected[Idx] := True;
+              except
+                AListBox.ItemIndex := Idx;
+              end;
+            end
+            else
+            begin
+              HasError := True;
+              if ErrList = nil then
+                ErrList := TStringList.Create;
+              ErrList.Add(AName);
+            end;
+          end;
+        end;
+
+        if HasError then
+          ErrorDlg(SCnProjExtErrorInUse + #13#10#13#10 + ErrList.Text);
+        BringIdeEditorFormToFront;
+      end;
+    finally
+      Free;
+      FreeAndNil(Ini);
+      FreeAndNil(ErrList);
+      FreeAndNil(OriginalList);
+    end;
+  end;
+end;
 
 //==============================================================================
 // 工程组添加 Frame 列表窗体
