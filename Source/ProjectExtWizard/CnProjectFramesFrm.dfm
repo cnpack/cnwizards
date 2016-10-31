@@ -1,4 +1,6 @@
 inherited CnProjectFramesForm: TCnProjectFramesForm
+  Left = 336
+  Top = 119
   Caption = 'Select Frame to Insert'
   ClientWidth = 606
   Icon.Data = {
@@ -48,22 +50,7 @@ inherited CnProjectFramesForm: TCnProjectFramesForm
   end
   inherited ToolBar: TToolBar
     Width = 606
-    inherited btnSelectAll: TToolButton
-      Visible = False
-    end
-    inherited btnSelectNone: TToolButton
-      Visible = False
-    end
-    inherited btnSelectInvert: TToolButton
-      Visible = False
-    end
     inherited btnSep5: TToolButton
-      Visible = False
-    end
-    inherited btnHookIDE: TToolButton
-      Visible = False
-    end
-    inherited btnQuery: TToolButton
       Visible = False
     end
     inherited tbnSep2: TToolButton
@@ -89,6 +76,13 @@ inherited CnProjectFramesForm: TCnProjectFramesForm
     inherited actSelectAll: TAction
       Caption = ''
       Hint = 'Select All Units'
+      Visible = False
+    end
+    inherited actSelectNone: TAction
+      Visible = False
+    end
+    inherited actSelectInvert: TAction
+      Visible = False
     end
     inherited actMatchStart: TAction
       Caption = 'Match Frame Name &Start'
@@ -96,6 +90,12 @@ inherited CnProjectFramesForm: TCnProjectFramesForm
     end
     inherited actMatchAny: TAction
       Hint = 'Match All Parts of Frame Name'
+    end
+    inherited actHookIDE: TAction
+      Visible = False
+    end
+    inherited actQuery: TAction
+      Visible = False
     end
     inherited actClose: TAction
       Caption = '&Exit'

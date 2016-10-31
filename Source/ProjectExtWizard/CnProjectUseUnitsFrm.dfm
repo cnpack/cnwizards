@@ -117,7 +117,9 @@ inherited CnProjectUseUnitsForm: TCnProjectUseUnitsForm
       Hint = 'Hook Project Unit List to IDE'
     end
     inherited actQuery: TAction
+      Enabled = False
       Hint = '&Prompt when Open More than ONE Unit'
+      Visible = False
     end
   end
 end

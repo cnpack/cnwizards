@@ -790,7 +790,24 @@ begin
 end;
 
 procedure TCnProjectViewBaseForm.FirstUpdate(Sender: TObject);
+var
+  I: Integer;
 begin
+  // Toolbar 的按钮在对应 Action 有隐藏的情况下可能会出现混乱，需要用这种办法修复一下
+  for I := 0 to ActionList.ActionCount - 1 do
+  begin
+    if ActionList.Actions[I] is TAction then
+    begin
+      if not (ActionList.Actions[I] as TAction).Visible then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('TCnProjectViewBaseForm Idle Fix Toolbar Button Mixed Problem: ' + IntToStr(I));
+{$ENDIF}
+        (ActionList.Actions[I] as TAction).Visible := True;
+        (ActionList.Actions[I] as TAction).Visible := False;
+      end;
+    end;
+  end;
   lvList.Update;
 end;
 
