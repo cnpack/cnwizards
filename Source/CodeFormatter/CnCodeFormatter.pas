@@ -1556,12 +1556,17 @@ end;
 { CaseSelector -> CaseLabel/','... ':' Statement }
 procedure TCnBasePascalFormatter.FormatCaseSelector(PreSpaceCount: Byte);
 begin
-  FormatCaseLabel(PreSpaceCount);
+  SpecifyElementType(pfetCaseLabelList);
+  try
+    FormatCaseLabel(PreSpaceCount);
 
-  while Scaner.Token = tokComma do
-  begin
-    Match(tokComma);
-    FormatCaseLabel; 
+    while Scaner.Token = tokComma do
+    begin
+      Match(tokComma);
+      FormatCaseLabel;
+    end;
+  finally
+    RestoreElementType;
   end;
 
   Match(tokColon);
@@ -5715,7 +5720,7 @@ begin
     pfetSetConstructor, pfetFormalParameters, pfetUsesList, pfetFieldDecl, pfetClassField,
     pfetThen, pfetDo, pfetExprListRightBracket, pfetFormalParametersRightBracket])
     or ((FElementType in [pfetConstExpr]) and not UpperContainElementType([pfetCaseLabel])) // Case Label 的无需跟随上面一行注释缩进
-    or UpperContainElementType([pfetFormalParameters, pfetArrayConstant]);
+    or UpperContainElementType([pfetFormalParameters, pfetArrayConstant, pfetCaseLabelList]);
   // 暂且表达式内部与枚举定义内部等一系列元素内部，或者在参数列表、uses 中
   // 碰到注释导致的换行时，才要求自动和上一行对齐
   // 还要求在本来不换行的组合语句里，比如 if then ，while do 里，for do 里
@@ -5724,8 +5729,8 @@ end;
 
 function TCnAbstractCodeFormatter.CalcNeedPaddingAndUnIndent: Boolean;
 begin
-  Result := FElementType in [pfetExprListRightBracket, pfetFormalParametersRightBracket,
-    pfetFieldDecl, pfetClassField];
+  Result := (FElementType in [pfetExprListRightBracket, pfetFormalParametersRightBracket,
+    pfetFieldDecl, pfetClassField]) or UpperContainElementType([pfetCaseLabelList]);
   // 在 CalcNeedPadding 为 True 的前提下，以上要反缩进
 end;
 
