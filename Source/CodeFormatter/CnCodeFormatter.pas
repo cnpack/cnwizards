@@ -2372,7 +2372,7 @@ begin
           begin
             if Scaner.Token = tokColon then
               Match(Scaner.Token, 0, 0, True)
-            else if Scaner.Token in (AddOPTokens + MulOPTokens) then
+            else if Scaner.Token in (AddOPTokens + MulOPTokens + [tokKeywordNot]) then
               Match(Scaner.Token, 1, 1) // 二元运算符前后各空一格
             else if (FLastToken in CanBeNewIdentifierTokens) and
               (UpperCase(Scaner.TokenString) = 'H') then
