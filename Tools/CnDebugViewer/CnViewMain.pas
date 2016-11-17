@@ -1241,7 +1241,7 @@ var
   AStore: TCnMsgStore;
   ADesc: TCnMsgDesc;
 begin
-  if FRunningState = rsPaused then
+  if (FRunningState = rsPaused) or not CnViewerOptions.EnableUDPMsg then
     Exit;
     
   ProcName := Format('%s:%d', [FromIP, Port]);
