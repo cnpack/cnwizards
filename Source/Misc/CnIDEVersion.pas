@@ -314,9 +314,9 @@ begin
 end;
 
 function IsDelphi101BIdeVersionLatest: Boolean;
-const           //24.0.22858.6822
+const
   CoreIdeLatest: TVersionNumber =
-    (Major: 24; Minor: 0; Release: 22858; Build: 6822);
+    (Major: 24; Minor: 0; Release: 24468; Build: 8770); // Update 1
 var
   ReadFileVersion: TVersionNumber;
 begin
