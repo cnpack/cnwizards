@@ -2060,6 +2060,8 @@ end;
          -> EXCEPT [ StmtList | (ExceptionHandler/;... [ELSE Statement]) ] [';'] END
 }
 procedure TCnBasePascalFormatter.FormatTryEnd(PreSpaceCount: Byte);
+var
+  HasOn: Boolean;
 begin
   case Scaner.Token of
     tokKeywordFinally:
@@ -2079,25 +2081,36 @@ begin
         Match(Scaner.Token, PreSpaceCount);
         if Scaner.Token <> tokKeywordEnd then // 避免紧跟时多出空行
         begin
-          if Scaner.Token <> tokKeywordOn then
+          if not (Scaner.Token in [tokKeywordOn, tokKeywordElse]) then
           begin
             Writeln;
             FormatStmtList(Tab(PreSpaceCount, False))
           end
           else
           begin
+            HasOn := False;
             while Scaner.Token = tokKeywordOn do
             begin
+              HasOn := True;
               Writeln;
               FormatExceptionHandler(Tab(PreSpaceCount, False));
             end;
 
+            // Else 是属于 try except end 块的，这里做了个小处理，
+            // 无 on 时和 except 对齐，有 on 时和缩进的 on 对齐
             if Scaner.Token = tokKeywordElse then
             begin
               Writeln;
-              Match(tokKeywordElse, Tab(PreSpaceCount), 1);
+              if HasOn then
+                Match(tokKeywordElse, Tab(PreSpaceCount), 1)
+              else
+                Match(tokKeywordElse, PreSpaceCount, 1);
+
               Writeln;
-              FormatStmtList(Tab(Tab(PreSpaceCount, False), False));
+              if HasOn then
+                FormatStmtList(Tab(Tab(PreSpaceCount, False), False))
+              else
+                FormatStmtList(Tab(PreSpaceCount, False));
             end;
 
             if Scaner.Token = tokSemicolon then
