@@ -104,7 +104,7 @@ uses
 
 const
   HighLightDefColors: array[-1..5] of TColor = ($00000099, $000000FF, $000099FF,
-    $0033CC00, $0099CC00, $00FF6600, $00CC00CC);
+    $0033CC00, $00CCCC00, $00FF6600, $00CC00CC);
   csDefCurTokenColorBg = $0080DDFF;
   csDefCurTokenColorFg = clBlack;
   csDefCurTokenColorBd = $00226DA8;
@@ -3840,7 +3840,7 @@ begin
           begin
             Token := TCnGeneralPasToken(Info.Lines[LogicLineNum][I]);
 
-            Layer := Token.MethodLayer + Token.ItemLayer - 2;
+            Layer := Token.ItemLayer - 1;
             if FStructureHighlight then
               ColorFg := GetColorFg(Layer)
             else
