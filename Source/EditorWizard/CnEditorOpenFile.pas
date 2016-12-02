@@ -141,6 +141,7 @@ begin
   end;
   
   if F <> '' then
+  begin
     if not SearchAndOpenFile(F) then
     begin
       // For Vcl.Forms like
@@ -159,14 +160,16 @@ begin
 
         if SearchFileList(F) and (FFileList.Count > 0) then
         begin
-          // 搜到则弹列表
-          ShowOpenFileResultList(FFileList);
+          if FFileList.Count = 1 then // 只搜到一个就直接打开
+            DoOpenFile(FFileList[0])
+          else  // 搜到不止一个则弹列表
+            ShowOpenFileResultList(FFileList);
         end
         else
           ErrorDlg(SCnEditorOpenFileNotFind);
       end;
-
     end;
+  end;
 end;
 
 function TCnEditorOpenFile.GetCaption: string;
