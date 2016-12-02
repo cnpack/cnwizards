@@ -796,7 +796,7 @@ begin
               else if (CurrBlock.TokenID = tkTry) and (CurrMidBlock <> nil) and
                 (CurrMidBlock.TokenID = tkExcept) and
                 (PrevTokenID in [tkSemiColon, tkExcept]) then
-                Token.FItemLayer := CurrBlock.FItemLayer + 1
+                Token.FItemLayer := CurrBlock.FItemLayer    // try except else end 是一块的
               else if not (CurrBlock.TokenID = tkCase) then // case of 中的 else 前面可以不是分号
                 Token.FItemLayer := Token.FItemLayer + 1;
             end;

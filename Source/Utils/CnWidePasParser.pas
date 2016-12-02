@@ -42,7 +42,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, mPasLex, CnPasWideLex, mwBCBTokenList,
-  Contnrs, CnFastList, CnPasCodeParser;
+  Contnrs, CnFastList, CnPasCodeParser, CnQueue;
 
 type
 {$IFDEF UNICODE}
@@ -55,6 +55,7 @@ type
   {* 描述一 Token 的结构高亮信息}
   private
     FEditAnsiCol: Integer;
+    FTag: Integer;
     function GetToken: PWideChar;
   protected
     FCppTokenKind: TCTokenKind;
@@ -97,9 +98,9 @@ type
     property ItemIndex: Integer read FItemIndex;
     {* 在整个 Parser 中的序号 }
     property ItemLayer: Integer read FItemLayer;
-    {* 所在高亮的层次 }
+    {* 所在高亮的层次，包括过程、函数以及代码块，可直接用来绘制高亮层次，不在任何块内时（最外层）为 0 }
     property MethodLayer: Integer read FMethodLayer;
-    {* 所在函数的嵌套层次，最外层为一 }
+    {* 所在函数的嵌套层次，最外层的函数内为 1，包括匿名函数 }
     property Token: PWideChar read GetToken;
     {* 该 Token 的字符串内容 }
     property TokenID: TTokenKind read FTokenID;
@@ -118,6 +119,8 @@ type
     {* 是否是函数过程的结束 }
     property CompDirectivtType: TCnCompDirectiveType read FCompDirectiveType write FCompDirectiveType;
     {* 当其类型是 Pascal 编译指令时，此域代表其详细类型，但不解析，由外部按需解析}
+    property Tag: Integer read FTag write FTag;
+    {* Tag 标记，供外界特殊场合使用}
   end;
 
 //==============================================================================
@@ -145,6 +148,7 @@ type
     FInnerBlockStartToken: TCnWidePasToken;
     FUseTabKey: Boolean;
     FTabWidth: Integer;
+    FMethodStack, FBlockStack, FMidBlockStack, FProcStack: TCnObjectStack;
     function GetCount: Integer;
     function GetToken(Index: Integer): TCnWidePasToken;
   public
@@ -202,6 +206,18 @@ procedure ParseUnitUsesW(const Source: CnWideString; UsesList: TStrings;
 {* 分析源代码中引用的单元}
 
 implementation
+
+type
+  TProcObj = class
+  private
+    FLayer: Integer;
+    FToken: TCnWidePasToken;
+    FMatched: Boolean;
+  public
+    property Token: TCnWidePasToken read FToken write FToken;
+    property Layer: Integer read FLayer write FLayer;
+    property Matched: Boolean read FMatched write FMatched;
+  end;
 
 var
   TokenPool: TCnList;
@@ -276,11 +292,20 @@ begin
   FList := TCnList.Create;
   FTabWidth := 2;
   FSupportUnicodeIdent := SupportUnicodeIdent;
+
+  FMethodStack := TCnObjectStack.Create;
+  FBlockStack := TCnObjectStack.Create;
+  FMidBlockStack := TCnObjectStack.Create;
+  FProcStack := TCnObjectStack.Create;
 end;
 
 destructor TCnWidePasStructParser.Destroy;
 begin
   Clear;
+  FMethodStack.Free;
+  FBlockStack.Free;
+  FMidBlockStack.Free;
+  FProcStack.Free;
   FList.Free;
   inherited;
 end;
@@ -318,7 +343,7 @@ procedure TCnWidePasStructParser.ParseSource(ASource: PWideChar; AIsDpr, AKeyOnl
   Boolean);
 var
   Lex: TCnPasWideLex;
-  MethodStack, BlockStack, MidBlockStack: TObjectStack;
+  ProcNestCount: Integer;
   Token, CurrMethod, CurrBlock, CurrMidBlock: TCnWidePasToken;
   Bookmark: TCnPasWideBookmark;
   IsClassOpen, IsClassDef, IsImpl, IsHelper: Boolean;
@@ -326,6 +351,7 @@ var
   DeclareWithEndLevel: Integer;
   PrevTokenID: TTokenKind;
   PrevTokenStr: CnWideString;
+  AProcObj: TProcObj;
 
   procedure CalcCharIndexes(out ACharIndex: Integer; out AnAnsiIndex: Integer);
   var
@@ -403,18 +429,17 @@ var
 begin
   Clear;
   Lex := nil;
-  MethodStack := nil;
-  BlockStack := nil;
-  MidBlockStack := nil;
   PrevTokenID := tkProgram;
 
   try
     FSource := ASource;
     FKeyOnly := AKeyOnly;
 
-    MethodStack := TObjectStack.Create;
-    BlockStack := TObjectStack.Create;
-    MidBlockStack := TObjectStack.Create;
+    FMethodStack.Clear;
+    FBlockStack.Clear;
+    FMidBlockStack.Clear;
+    FProcStack.Clear;  // 存储 procedure/function 实现的关键字以及其嵌套层次
+    ProcNestCount := 0;
 
     Lex := TCnPasWideLex.Create(FSupportUnicodeIdent);
     Lex.Origin := PWideChar(ASource);
@@ -453,44 +478,73 @@ begin
                 and (DeclareWithEndLevel <= 0) then
               begin
                 // DeclareWithEndLevel <= 0 表示只处理 class/record 外的声明，内部不管
-                while BlockStack.Count > 0 do
-                  BlockStack.Pop;
-                CurrBlock := nil;
-                Token.FItemLayer := 0;
+//                while BlockStack.Count > 0 do
+//                  BlockStack.Pop;
+//                CurrBlock := nil;
+                if CurrBlock = nil then
+                  Token.FItemLayer := 0
+                else
+                  Token.FItemLayer := CurrBlock.ItemLayer;
                 Token.FIsMethodStart := True;
 
                 if CurrMethod <> nil then
                 begin
                   Token.FMethodLayer := CurrMethod.FMethodLayer + 1;
-                  MethodStack.Push(CurrMethod);
+                  FMethodStack.Push(CurrMethod);
                 end
                 else
-                  Token.FMethodLayer := 1;
+                  Token.FMethodLayer := 0;
                 CurrMethod := Token;
+
+                // 碰到 procedure/function 实现时，推入堆栈并记录其层次，暂无 Layer 可记录。
+                AProcObj := TProcObj.Create;
+                AProcObj.Token := Token;
+                FProcStack.Push(AProcObj);
+                Inc(ProcNestCount);
               end;
             end;
           tkInitialization, tkFinalization:
             begin
-              while BlockStack.Count > 0 do
-                BlockStack.Pop;
+              while FBlockStack.Count > 0 do
+                FBlockStack.Pop;
               CurrBlock := nil;
-              while MethodStack.Count > 0 do
-                MethodStack.Pop;
+              while FMethodStack.Count > 0 do
+                FMethodStack.Pop;
               CurrMethod := nil;
             end;
           tkBegin, tkAsm:
             begin
               Token.FIsBlockStart := True;
-              if (CurrBlock = nil) and (CurrMethod <> nil) then
+              if CurrMethod <> nil then
                 Token.FIsMethodStart := True;
               if CurrBlock <> nil then
               begin
                 Token.FItemLayer := CurrBlock.FItemLayer + 1;
-                BlockStack.Push(CurrBlock);
+                FBlockStack.Push(CurrBlock);
               end
               else
-                Token.FItemLayer := 1;
+                Token.FItemLayer := 0;
               CurrBlock := Token;
+
+              // 处理本 begin/asm 和 procedure/function 同级时的进层
+              if FProcStack.Count > 0 then
+              begin
+                AProcObj := TProcObj(FProcStack.Peek);
+                if not AProcObj.Matched then
+                begin
+                  // 碰到最外层的 procedure/function，begin/asm 进一层以符合常识
+                  if FProcStack.Count = 1 then
+                    Inc(Token.FItemLayer, 1)
+                  else
+                    Inc(Token.FItemLayer, ProcNestCount - 1);
+                  // 其余情况，begin 要进 procedure/function 的未匹配的嵌套层数 - 1，
+                  // 也即当前 procedure/function 的直接嵌套层数
+
+                  AProcObj.Layer := Token.ItemLayer;    // Layer 记录 begin/asm 的层次
+                  AProcObj.Matched := True;
+                  Dec(ProcNestCount);
+                end;
+              end;
             end;
           tkCase:
             begin
@@ -500,10 +554,10 @@ begin
                 if CurrBlock <> nil then
                 begin
                   Token.FItemLayer := CurrBlock.FItemLayer + 1;
-                  BlockStack.Push(CurrBlock);
+                  FBlockStack.Push(CurrBlock);
                 end
                 else
-                  Token.FItemLayer := 1;
+                  Token.FItemLayer := 0;
                 CurrBlock := Token;
               end
               else
@@ -544,16 +598,16 @@ begin
                 if CurrBlock <> nil then
                 begin
                   Token.FItemLayer := CurrBlock.FItemLayer + 1;
-                  BlockStack.Push(CurrBlock);
+                  FBlockStack.Push(CurrBlock);
                   if (CurrBlock.TokenID = tkTry) and (Token.TokenID = tkTry)
                     and (CurrMidBlock <> nil) then
                   begin
-                    MidBlockStack.Push(CurrMidBlock);
+                    FMidBlockStack.Push(CurrMidBlock);
                     CurrMidBlock := nil;
                   end;
                 end
                 else
-                  Token.FItemLayer := 1;
+                  Token.FItemLayer := 0;
                 CurrBlock := Token;
 
                 if IsRecord then
@@ -643,10 +697,10 @@ begin
                 if CurrBlock <> nil then
                 begin
                   Token.FItemLayer := CurrBlock.FItemLayer + 1;
-                  BlockStack.Push(CurrBlock);
+                  FBlockStack.Push(CurrBlock);
                 end
                 else
-                  Token.FItemLayer := 1;
+                  Token.FItemLayer := 0;
                 CurrBlock := Token;
                 // 局部声明，需要 end 来结尾
                 // IsInDeclareWithEnd := True;
@@ -673,7 +727,7 @@ begin
               else if (CurrBlock.TokenID = tkTry) and (CurrMidBlock <> nil) and
                 (CurrMidBlock.TokenID = tkExcept) and
                 (PrevTokenID in [tkSemiColon, tkExcept]) then
-                Token.FItemLayer := CurrBlock.FItemLayer
+                Token.FItemLayer := CurrBlock.FItemLayer    // try except else end 是一块的
               else if not (CurrBlock.TokenID = tkCase) then // case of 中的 else 前面可以不是分号
                 Token.FItemLayer := Token.FItemLayer + 1;
             end;
@@ -695,14 +749,14 @@ begin
                   Token.FIsBlockClose := True;
                   if (CurrBlock.TokenID = tkTry) and (CurrMidBlock <> nil) then
                   begin
-                    if MidBlockStack.Count > 0 then
-                      CurrMidBlock := TCnWidePasToken(MidBlockStack.Pop)
+                    if FMidBlockStack.Count > 0 then
+                      CurrMidBlock := TCnWidePasToken(FMidBlockStack.Pop)
                     else
                       CurrMidBlock := nil;
                   end;
-                  if BlockStack.Count > 0 then
+                  if FBlockStack.Count > 0 then
                   begin
-                    CurrBlock := TCnWidePasToken(BlockStack.Pop);
+                    CurrBlock := TCnWidePasToken(FBlockStack.Pop);
                   end
                   else
                   begin
@@ -710,8 +764,8 @@ begin
                     if (CurrMethod <> nil) and (Lex.TokenID = tkEnd) and (DeclareWithEndLevel <= 0) then
                     begin
                       Token.FIsMethodClose := True;
-                      if MethodStack.Count > 0 then
-                        CurrMethod := TCnWidePasToken(MethodStack.Pop)
+                      if FMethodStack.Count > 0 then
+                        CurrMethod := TCnWidePasToken(FMethodStack.Pop)
                       else
                         CurrMethod := nil;
                     end;
@@ -723,6 +777,17 @@ begin
 
               if (DeclareWithEndLevel > 0) and (Lex.TokenID = tkEnd) then // 跳出了局部声明
                 Dec(DeclareWithEndLevel);
+
+              // 如果 end 与 procedure/function 最新元素同级
+              if (Lex.TokenID = tkEnd) and (FProcStack.Count > 0) then
+              begin
+                AProcObj := TProcObj(FProcStack.Peek);
+                if AProcObj.Matched and (AProcObj.Layer = Token.ItemLayer) then
+                begin
+                  AProcObj := TProcObj(FProcStack.Pop);
+                  AProcObj.Free;
+                end;
+              end;
             end;
         end;
       end
@@ -740,13 +805,22 @@ begin
             FreePasToken(FList[FList.Count - 1]);
             FList.Delete(FList.Count - 1);
           end;
-          if MethodStack.Count > 0 then
-            CurrMethod := TCnWidePasToken(MethodStack.Pop)
+          if FMethodStack.Count > 0 then
+            CurrMethod := TCnWidePasToken(FMethodStack.Pop)
           else
             CurrMethod := nil;
+
+          if FProcStack.Count > 0 then
+          begin
+            AProcObj := TProcObj(FProcStack.Pop);
+            AProcObj.Free;
+            if ProcNestCount > 0 then
+              Dec(ProcNestCount);
+          end;
         end;
 
-        if not AKeyOnly then
+        // 需要时，普通标识符加，& 后的标识符也加
+        if not AKeyOnly and ((PrevTokenID <> tkAmpersand) or (Lex.TokenID = tkIdentifier)) then
           NewToken;
       end;
 
@@ -757,9 +831,15 @@ begin
     end;
   finally
     Lex.Free;
-    MethodStack.Free;
-    BlockStack.Free;
-    MidBlockStack.Free;
+    FMethodStack.Clear;
+    FBlockStack.Clear;
+    FMidBlockStack.Clear;
+    while FProcStack.Count > 0 do
+    begin
+      AProcObj := TProcObj(FProcStack.Pop);
+      AProcObj.Free;
+    end;
+    FProcStack.Clear;
   end;
 end;
 
