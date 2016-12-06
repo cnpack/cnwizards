@@ -769,18 +769,19 @@ begin
                     else
                       CurrMidBlock := nil;
                   end;
+
                   if FBlockStack.Count > 0 then
-                    CurrBlock := TCnWidePasToken(FBlockStack.Pop);
+                    CurrBlock := TCnWidePasToken(FBlockStack.Pop)
                   else
                     CurrBlock := nil;
-                    if (CurrMethod <> nil) and (Lex.TokenID = tkEnd) and (DeclareWithEndLevel <= 0) then
-                    begin
-                      Token.FIsMethodClose := True;
-                      if FMethodStack.Count > 0 then
-                        CurrMethod := TCnWidePasToken(FMethodStack.Pop)
-                      else
-                        CurrMethod := nil;
-                    end;
+
+                  if (CurrMethod <> nil) and (Lex.TokenID = tkEnd) and (DeclareWithEndLevel <= 0) then
+                  begin
+                    Token.FIsMethodClose := True;
+                    if FMethodStack.Count > 0 then
+                      CurrMethod := TCnWidePasToken(FMethodStack.Pop)
+                    else
+                      CurrMethod := nil;
                   end;
                 end;
               end
