@@ -344,9 +344,9 @@ procedure TCnWidePasStructParser.ParseSource(ASource: PWideChar; AIsDpr, AKeyOnl
 var
   Lex: TCnPasWideLex;
   ProcNestCount: Integer;
-  Token, CurrMethod, CurrBlock, CurrMidBlock: TCnWidePasToken;
+  Token, CurrMethod, CurrBlock, CurrMidBlock, CurrIfBlock: TCnWidePasToken;
   Bookmark: TCnPasWideBookmark;
-  IsClassOpen, IsClassDef, IsImpl, IsHelper: Boolean;
+  IsClassOpen, IsClassDef, IsImpl, IsHelper, CurrIfHasElse: Boolean;
   IsRecordHelper, IsSealed, IsAbstract, IsRecord, IsForFunc: Boolean;
   DeclareWithEndLevel: Integer;
   PrevTokenID: TTokenKind;
@@ -448,10 +448,12 @@ begin
     Token := nil;
     CurrMethod := nil;
     CurrBlock := nil;
+    CurrIfBlock := nil;       // 当前 Token 所在的 if 块，需要特殊对待
     CurrMidBlock := nil;
     IsImpl := AIsDpr;
     IsHelper := False;
     IsRecordHelper := False;
+    CurrIfHasElse := False;
 
     while Lex.TokenID <> tkNull do
     begin
@@ -472,9 +474,9 @@ begin
               // 不处理 procedure/function 类型定义，前面是 = 号
               // 也不处理 procedure/function 变量声明，前面是 : 号
               // 也不处理匿名方法声明，前面是 to
-              // 也不处理匿名方法实现，前面是 := 赋值或 ( , 做参数，但可能不完全
+              // 但一定要处理匿名方法实现！前面是 := 赋值或 ( , 做参数，但可能不完全
               if IsImpl and ((not (Lex.TokenID in [tkProcedure, tkFunction]))
-                or (not (PrevTokenID in [tkEqual, tkColon, tkTo, tkAssign, tkRoundOpen, tkComma])))
+                or (not (PrevTokenID in [tkEqual, tkColon, tkTo{, tkAssign, tkRoundOpen, tkComma}])))
                 and (DeclareWithEndLevel <= 0) then
               begin
                 // DeclareWithEndLevel <= 0 表示只处理 class/record 外的声明，内部不管
@@ -625,6 +627,13 @@ begin
                 if IsRecordHelper then
                   IsRecordHelper := False;
               end;
+
+              // 记录 if 块的起始位置
+              if Lex.TokenID = tkIf then
+              begin
+                CurrIfBlock := Token;
+                CurrIfHasElse := False;
+              end;
             end;
           tkClass, tkInterface, tkDispInterface:
             begin
@@ -724,6 +733,12 @@ begin
             begin
               if (CurrBlock = nil) or (PrevTokenID in [tkAt, tkDoubleAddressOp]) then
                 DiscardToken
+              else if (CurrIfBlock <> nil) and (CurrBlock <> nil) and // if 块比当前块更近并且 if 块没 else 时，else 配给 if，而非外头可能的 case 块
+                (CurrIfBlock.ItemIndex > CurrBlock.ItemIndex) and not CurrIfHasElse then
+              begin
+                Token.FItemLayer := CurrIfBlock.FItemLayer;
+                CurrIfHasElse := True;
+              end
               else if (CurrBlock.TokenID = tkTry) and (CurrMidBlock <> nil) and
                 (CurrMidBlock.TokenID = tkExcept) and
                 (PrevTokenID in [tkSemiColon, tkExcept]) then
@@ -755,11 +770,8 @@ begin
                       CurrMidBlock := nil;
                   end;
                   if FBlockStack.Count > 0 then
-                  begin
                     CurrBlock := TCnWidePasToken(FBlockStack.Pop);
-                  end
                   else
-                  begin
                     CurrBlock := nil;
                     if (CurrMethod <> nil) and (Lex.TokenID = tkEnd) and (DeclareWithEndLevel <= 0) then
                     begin
@@ -795,6 +807,16 @@ begin
       begin
         if not IsImpl and (Lex.TokenID = tkImplementation) then
           IsImpl := True;
+
+        if (Lex.TokenID = tkSemicolon) and (CurrIfBlock <> nil) then // 碰到和 if 同级的分号算 if 结束
+        begin
+          // 如果有当前块，要判断当前块比 if 块是近是远，远（在 if 外头）的话分号才针对 if
+          if (CurrBlock = nil) or (CurrBlock.ItemIndex < CurrIfBlock.ItemIndex) then
+          begin
+            CurrIfBlock := nil;
+            CurrIfHasElse := False;
+          end;
+        end;
 
         if (CurrMethod <> nil) and // forward, external 无实现部分，前面必须是分号
           (Lex.TokenID in [tkForward, tkExternal]) and (PrevTokenID = tkSemicolon) then
