@@ -148,7 +148,11 @@ type
     FInnerBlockStartToken: TCnWidePasToken;
     FUseTabKey: Boolean;
     FTabWidth: Integer;
-    FMethodStack, FBlockStack, FMidBlockStack, FProcStack: TCnObjectStack;
+    FMethodStack: TCnObjectStack;
+    FBlockStack: TCnObjectStack;
+    FMidBlockStack: TCnObjectStack;
+    FProcStack: TCnObjectStack;
+    FIfStack: TCnObjectStack;
     function GetCount: Integer;
     function GetToken(Index: Integer): TCnWidePasToken;
   public
@@ -217,6 +221,15 @@ type
     property Token: TCnWidePasToken read FToken write FToken;
     property Layer: Integer read FLayer write FLayer;
     property Matched: Boolean read FMatched write FMatched;
+  end;
+
+  TIfObj = class
+  private
+    FHasElse: Boolean;
+    FToken: TCnWidePasToken;
+  public
+    property Token: TCnWidePasToken read FToken write FToken;
+    property HasElse: Boolean read FHasElse write FHasElse;
   end;
 
 var
@@ -297,6 +310,7 @@ begin
   FBlockStack := TCnObjectStack.Create;
   FMidBlockStack := TCnObjectStack.Create;
   FProcStack := TCnObjectStack.Create;
+  FIfStack := TCnObjectStack.Create;
 end;
 
 destructor TCnWidePasStructParser.Destroy;
@@ -306,6 +320,7 @@ begin
   FBlockStack.Free;
   FMidBlockStack.Free;
   FProcStack.Free;
+  FIfStack.Free;
   FList.Free;
   inherited;
 end;
@@ -352,6 +367,7 @@ var
   PrevTokenID: TTokenKind;
   PrevTokenStr: CnWideString;
   AProcObj: TProcObj;
+  AIfObj: TIfObj; // 一直指向栈顶
 
   procedure CalcCharIndexes(out ACharIndex: Integer; out AnAnsiIndex: Integer);
   var
@@ -426,6 +442,15 @@ var
     end;
   end;
 
+  procedure ClearStackAndFreeObject(AStack: TCnObjectStack);
+  begin
+    if AStack = nil then
+      Exit;
+
+    while AStack.Count > 0 do
+      AStack.Pop.Free;
+  end;
+
 begin
   Clear;
   Lex := nil;
@@ -439,6 +464,7 @@ begin
     FBlockStack.Clear;
     FMidBlockStack.Clear;
     FProcStack.Clear;  // 存储 procedure/function 实现的关键字以及其嵌套层次
+    FIfStack.Clear;    // 存储 if 的嵌套信息
     ProcNestCount := 0;
 
     Lex := TCnPasWideLex.Create(FSupportUnicodeIdent);
@@ -446,8 +472,8 @@ begin
 
     DeclareWithEndLevel := 0; // 嵌套的需要end的定义层数
     Token := nil;
-    CurrMethod := nil;
-    CurrBlock := nil;
+    CurrMethod := nil;        // 当前 Token 所在的方法，包括匿名函数的 procedure/function
+    CurrBlock := nil;         // 当前 Token 所在的块。
     CurrIfBlock := nil;       // 当前 Token 所在的 if 块，需要特殊对待
     CurrMidBlock := nil;
     IsImpl := AIsDpr;
@@ -519,12 +545,13 @@ begin
               Token.FIsBlockStart := True;
               if CurrMethod <> nil then
                 Token.FIsMethodStart := True;
+
               if CurrBlock <> nil then
               begin
                 Token.FItemLayer := CurrBlock.FItemLayer + 1;
                 FBlockStack.Push(CurrBlock);
               end
-              else
+              else // 下面会根据是否在函数过程内来进层
                 Token.FItemLayer := 0;
               CurrBlock := Token;
 
@@ -538,7 +565,7 @@ begin
                   if FProcStack.Count = 1 then
                     Inc(Token.FItemLayer, 1)
                   else
-                    Inc(Token.FItemLayer, ProcNestCount - 1);
+                    Inc(Token.FItemLayer, ProcNestCount);
                   // 其余情况，begin 要进 procedure/function 的未匹配的嵌套层数 - 1，
                   // 也即当前 procedure/function 的直接嵌套层数
 
@@ -628,11 +655,15 @@ begin
                   IsRecordHelper := False;
               end;
 
-              // 记录 if 块的起始位置
+              // 记录 if 块的起始位置并推入堆栈
               if Lex.TokenID = tkIf then
               begin
                 CurrIfBlock := Token;
                 CurrIfHasElse := False;
+                AIfObj := TIfObj.Create;
+                AIfObj.Token := Token;
+                AIfObj.HasElse := False;
+                FIfStack.Push(AIfObj);
               end;
             end;
           tkClass, tkInterface, tkDispInterface:
@@ -738,6 +769,12 @@ begin
               begin
                 Token.FItemLayer := CurrIfBlock.FItemLayer;
                 CurrIfHasElse := True;
+                if FIfStack.Count > 0 then
+                begin
+                  AIfObj := TIfObj(FIfStack.Peek);
+                  if AIfObj <> nil then
+                    AIfObj.HasElse := True;
+                end;
               end
               else if (CurrBlock.TokenID = tkTry) and (CurrMidBlock <> nil) and
                 (CurrMidBlock.TokenID = tkExcept) and
@@ -796,10 +833,7 @@ begin
               begin
                 AProcObj := TProcObj(FProcStack.Peek);
                 if AProcObj.Matched and (AProcObj.Layer = Token.ItemLayer) then
-                begin
-                  AProcObj := TProcObj(FProcStack.Pop);
-                  AProcObj.Free;
-                end;
+                  FProcStack.Pop.Free;
               end;
             end;
         end;
@@ -814,8 +848,20 @@ begin
           // 如果有当前块，要判断当前块比 if 块是近是远，远（在 if 外头）的话分号才针对 if
           if (CurrBlock = nil) or (CurrBlock.ItemIndex < CurrIfBlock.ItemIndex) then
           begin
-            CurrIfBlock := nil;
-            CurrIfHasElse := False;
+            if FIfStack.Count > 0 then // 弹出一个 if 并释放
+              FIfStack.Pop.Free;
+
+            if FIfStack.Count > 0 then
+            begin
+              AIfObj := TIfObj(FIfStack.Peek);
+              CurrIfBlock := AIfObj.Token;
+              CurrIfHasElse := AIfObj.HasElse;
+            end
+            else
+            begin
+              CurrIfBlock := nil;
+              CurrIfHasElse := False;
+            end;
           end;
         end;
 
@@ -857,12 +903,8 @@ begin
     FMethodStack.Clear;
     FBlockStack.Clear;
     FMidBlockStack.Clear;
-    while FProcStack.Count > 0 do
-    begin
-      AProcObj := TProcObj(FProcStack.Pop);
-      AProcObj.Free;
-    end;
-    FProcStack.Clear;
+    ClearStackAndFreeObject(FProcStack);
+    ClearStackAndFreeObject(FIfStack);
   end;
 end;
 

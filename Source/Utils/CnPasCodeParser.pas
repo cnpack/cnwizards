@@ -428,7 +428,7 @@ var
   PrevTokenID: TTokenKind;
   PrevTokenStr: AnsiString;
   AProcObj: TProcObj;
-  AIfObj: TIfObj; // 一直指向栈顶
+  AIfObj: TIfObj;
 
   function CalcCharIndex(): Integer;
 {$IFDEF BDS2009_UP}
@@ -492,18 +492,12 @@ var
   end;
 
   procedure ClearStackAndFreeObject(AStack: TCnObjectStack);
-  var
-    Obj: TObject;
   begin
     if AStack = nil then
       Exit;
 
     while AStack.Count > 0 do
-    begin
-      Obj := AStack.Pop;
-      Obj.Free;
-    end;
-    AStack.Clear;
+      AStack.Pop.Free;
   end;
 
 begin
@@ -844,8 +838,12 @@ begin
               begin
                 Token.FItemLayer := CurrIfBlock.FItemLayer;
                 CurrIfHasElse := True;
-                if AIfObj <> nil then
-                  AIfObj.HasElse := True;
+                if FIfStack.Count > 0 then
+                begin
+                  AIfObj := TIfObj(FIfStack.Peek);
+                  if AIfObj <> nil then
+                    AIfObj.HasElse := True;
+                end;
               end
               else if (CurrBlock.TokenID = tkTry) and (CurrMidBlock <> nil) and
                 (CurrMidBlock.TokenID = tkExcept) and
@@ -904,10 +902,7 @@ begin
               begin
                 AProcObj := TProcObj(FProcStack.Peek);
                 if AProcObj.Matched and (AProcObj.Layer = Token.ItemLayer) then
-                begin
-                  AProcObj := TProcObj(FProcStack.Pop);
-                  AProcObj.Free;
-                end;
+                  FProcStack.Pop.Free;
               end;
             end;
         end;
@@ -922,15 +917,14 @@ begin
           // 如果有当前块，要判断当前块比 if 块是近是远，远（在 if 外头）的话分号才针对 if
           if (CurrBlock = nil) or (CurrBlock.ItemIndex < CurrIfBlock.ItemIndex) then
           begin
-            if FIfStack.Count > 0 then // 先弹出 AIfObj 本身
-              FIfStack.Pop;
+            if FIfStack.Count > 0 then // 弹出一个 if 并释放
+              FIfStack.Pop.Free;
 
             if FIfStack.Count > 0 then
             begin
-              AIfObj := TIfObj(FIfStack.Pop);
+              AIfObj := TIfObj(FIfStack.Peek);
               CurrIfBlock := AIfObj.Token;
               CurrIfHasElse := AIfObj.HasElse;
-              FreeAndNil(AIfObj);
             end
             else
             begin
