@@ -1919,7 +1919,7 @@ begin
             Pair.Top := Token.EditLine;
             Pair.StartLeft := Token.EditCol;
             Pair.Left := Token.EditCol;
-            Pair.Layer := Token.MethodLayer + Token.ItemLayer - 2;
+            Pair.Layer := Token.ItemLayer - 1;
 
             FStack.Push(Pair);
           end
@@ -1981,7 +1981,7 @@ begin
                 Pair := TBlockLinePair(FStack.Peek);
                 if Pair <> nil then
                 begin
-                  if Pair.Layer = Token.MethodLayer + Token.ItemLayer - 2 then
+                  if Pair.Layer = Token.ItemLayer - 1 then
                   begin
                     // 同一层次的，加入 MidToken
                     Pair.AddMidToken(Token, Token.EditCol);
@@ -1996,12 +1996,12 @@ begin
               // 有 Else 并且上面没处理掉的话，找最近的一个同层的 if then 并重新配对，无需更高层的
               Pair := TBlockLinePair(FIfThenStack.Pop);
               while (FIfThenStack.Count > 0) and (Pair <> nil) and
-                (Pair.Layer > Token.MethodLayer + Token.ItemLayer - 2) do
+                (Pair.Layer > Token.ItemLayer - 1) do
               begin
                 Pair := TBlockLinePair(FIfThenStack.Pop);
               end;
 
-              if (Pair <> nil) and (Pair.Layer = Token.MethodLayer + Token.ItemLayer - 2) then
+              if (Pair <> nil) and (Pair.Layer = Token.ItemLayer - 1) then
               begin
                 IfThenSameLine := Pair.StartToken.EditLine = Pair.EndToken.EditLine;
                 Pair.AddMidToken(Pair.EndToken, Pair.EndToken.EditCol);
