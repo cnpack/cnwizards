@@ -551,7 +551,7 @@ begin
     if FUseOneCPUCore then
       SetProcessAffinityMask(GetCurrentProcess, $0001)
     else
-      SetProcessAffinityMask(GetCurrentProcess, SysMask);
+      SetProcessAffinityMask(GetCurrentProcess, AMask);
   end;
 end;
 
