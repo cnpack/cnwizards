@@ -835,7 +835,7 @@ begin
   else
     if (Token in KeywordTokens + ComplexTokens + DirectiveTokens) then // 关键字范围扩大
     begin
-      if FLastToken = tokAmpersand then // 关键字前是 & 表示非关键字
+      if FLastToken = tokAmpersand then // 关键字前是 & 表示非关键字，并且挨着，无须 Padding
       begin
         CodeGen.Write(CheckIdentifierName(Scaner.TokenString), BeforeSpaceCount, AfterSpaceCount);
       end
@@ -845,22 +845,11 @@ begin
         CodeGen.Write(CheckIdentifierName(Scaner.TokenString),
           BeforeSpaceCount, AfterSpaceCount, NeedPadding);
       end
-      else
+      else // 真正的关键字场合
       begin
-        if (Token <> tokKeywordEnd) and (Token <> tokKeywordString) then
-        begin
-            CodeGen.Write(
-              FormatString(CheckIdentifierName(Scaner.TokenString),
-                CnPascalCodeForRule.KeywordStyle),
-              BeforeSpaceCount, AfterSpaceCount, NeedPadding);
-        end
-        else
-        begin
-          CodeGen.Write(
-            FormatString(CheckIdentifierName(Scaner.TokenString),
-            CnPascalCodeForRule.KeywordStyle), BeforeSpaceCount,
-            AfterSpaceCount, NeedPadding);
-        end;
+        CodeGen.Write(FormatString(Scaner.TokenString,
+          CnPascalCodeForRule.KeywordStyle), BeforeSpaceCount,
+          AfterSpaceCount, NeedPadding);
       end;
     end
     else if FIsTypeID then // 如果是类型名，则按规则处理 Scaner.TokenString
