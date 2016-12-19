@@ -140,8 +140,8 @@ type
     procedure MoreActionExecute(Sender: TObject);
   protected
     procedure InitAction(AWizAction: TCnWizAction; const ACommand,
-      ACaption: string; OnExecute: TNotifyEvent; const IcoName, AHint: string;
-      UseDefaultIcon: Boolean = False);
+      ACaption: string; OnExecute: TNotifyEvent; OnUpdate: TNotifyEvent;
+      const IcoName, AHint: string; UseDefaultIcon: Boolean = False);
     procedure Notification(AComponent: TComponent;
       Operation: TOperation); override;
   public
@@ -434,7 +434,7 @@ end;
 
 // 初始化 Action 对象
 procedure TCnWizActionMgr.InitAction(AWizAction: TCnWizAction;
-  const ACommand, ACaption: string; OnExecute: TNotifyEvent;
+  const ACommand, ACaption: string; OnExecute: TNotifyEvent; OnUpdate: TNotifyEvent;
   const IcoName, AHint: string; UseDefaultIcon: Boolean);
 var
   Svcs40: INTAServices40;
@@ -463,6 +463,7 @@ begin
   AWizAction.Hint := AHint;
   AWizAction.Category := SCnWizardsActionCategory;
   AWizAction.OnExecute := OnExecute;
+  AWizAction.OnUpdate := OnUpdate;
   
   AWizAction.ActionList := Svcs40.ActionList;
   if CnWizLoadIcon(AWizAction.FIcon, AWizAction.FSmallIcon, IcoName, UseDefaultIcon) then
@@ -495,7 +496,7 @@ begin
   Result.FreeNotification(Self);
   Result.FUpdating := True;         // 开始更新
   try
-    InitAction(Result, ACommand, ACaption, OnExecute, IcoName, AHint, UseDefaultIcon);
+    InitAction(Result, ACommand, ACaption, OnExecute, nil, IcoName, AHint, UseDefaultIcon);
     Result.FMenu := TMenuItem.Create(nil);
     Result.FMenu.FreeNotification(Self);
     Result.FMenu.Name := AMenuName;
@@ -531,7 +532,7 @@ begin
   Result.FreeNotification(Self);
   Result.FUpdating := True;         // 开始更新
   try
-    InitAction(Result, ACommand, ACaption, OnExecute, IcoName, AHint, UseDefaultIcon);
+    InitAction(Result, ACommand, ACaption, OnExecute, nil, IcoName, AHint, UseDefaultIcon);
     Result.FWizShortCut := WizShortCutMgr.Add(ACommand, AShortCut, Result.OnShortCut);
     Result.SetInheritedShortCut;
     FWizActions.Add(Result);

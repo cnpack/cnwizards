@@ -140,6 +140,7 @@ type
     procedure SetCompFilterShortCut(const Value: TShortCut);
     procedure UpdateCompFilterButton(Sender: TObject);
     procedure OnCompFilterActionExecute(Sender: TObject);
+    procedure OnCompFilterActionUpdate(Sender: TObject);
     procedure OnCompFilterStyleChanged(Sender: TObject);
     procedure OnSettingChanged(Sender: TObject);
     procedure OnSearchCompItemClick(Sender: TObject);
@@ -353,6 +354,8 @@ begin
   FCompFilterAction := WizActionMgr.AddAction('CnCompFilter',
     SCnSearchComponent, 0, OnCompFilterActionExecute,
     'CnCompFilter', SCnSearchComponent);
+  if FCompFilterAction <> nil then
+    FCompFilterAction.OnUpdate := OnCompFilterActionUpdate;
 {$ENDIF}
 
 {$IFNDEF COMPILER8_UP}
@@ -1286,6 +1289,11 @@ begin
     if FCompFilterBtn <> nil then
       FCompFilterBtn.Visible := False;
   end;
+end;
+
+procedure TCnPaletteEnhanceWizard.OnCompFilterActionUpdate(Sender: TObject);
+begin
+  (Sender as TCnWizAction).Enabled := FCompFilter;
 end;
 
 procedure TCnPaletteEnhanceWizard.OnCompFilterActionExecute(Sender: TObject);
