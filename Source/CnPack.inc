@@ -2375,6 +2375,11 @@
   {$DEFINE IDE_HAS_HIDE_NONVISUAL} // 10S has "Hide Nonvisual" Feature.
 {$ENDIF}
 
+{$IFDEF DELPHI101_BERLIN_UP}
+  {$DEFINE IDE_NEW_EMBEDDED_DESIGNER}
+  // 101B Re-opens "Embedded Designer" Option and Gives a New Container.
+{$ENDIF}
+
 //==============================================================================
 // µ˜ ‘…Ë÷√
 //==============================================================================
