@@ -212,7 +212,7 @@ procedure ParseUnitUsesW(const Source: CnWideString; UsesList: TStrings;
 implementation
 
 type
-  TProcObj = class
+  TCnProcObj = class
   private
     FLayer: Integer;
     FToken: TCnWidePasToken;
@@ -223,13 +223,74 @@ type
     property Matched: Boolean read FMatched write FMatched;
   end;
 
-  TIfObj = class
+  TCnIfStatement = class
+  {* 描述一个完整的 If 语句，可能带多个 else if 以及一个或 0 个 else，各块内还可能有 begin end}
   private
-    FHasElse: Boolean;
-    FToken: TCnWidePasToken;
+    FLevel: Integer;
+    FIfStart: TCnWidePasToken;     // 存储主 if 引用
+    FIfBegin: TCnWidePasToken;     // 存储 if 对应的同级 begin
+    FIfEnded: Boolean;             // 该 if 主块是否结束（不是整个 if 语句）
+    FElseToken: TCnWidePasToken;   // 存储 else 引用
+    FElseBegin: TCnWidePasToken;   // 存储 else 对应的同级 begin
+    FElseEnded: Boolean;           // 该 else 块是否结束
+    FElseList: TObjectList;        // 存储多个 else if 中的 else 引用
+    FIfList: TObjectList;          // 存储多个 else if 中的 if 引用
+    FElseIfBeginList: TObjectList; // 存储多个 else if 的对应 begin，可能为空
+    FElseIfEnded: TList;           // 存储多个 else if 是否结束的标记，1 或 0
+    FIfAllEnded: Boolean;          // 整个 if 是否结束
+    function GetElseIfCount: Integer;
+    function GetElseIfElse(Index: Integer): TCnWidePasToken;
+    function GetElseIfIf(Index: Integer): TCnWidePasToken;
+    function GetLastElseIfElse: TCnWidePasToken;
+    function GetLastElseIfIf: TCnWidePasToken;
+    procedure SetIfStart(const Value: TCnWidePasToken);
+    function GetLastElseIfBegin: TCnWidePasToken;
+    procedure SetFIfBegin(const Value: TCnWidePasToken);
+    procedure SetElseBegin(const Value: TCnWidePasToken);
   public
-    property Token: TCnWidePasToken read FToken write FToken;
-    property HasElse: Boolean read FHasElse write FHasElse;
+    constructor Create; virtual;
+    destructor Destroy; override;
+
+    function HasElse: Boolean;
+    {* 该 if 块是否有单独的 else}
+
+    procedure ChangeElseToElseIf(AIf: TCnWidePasToken);
+    {* 将最后一个 else 改为一个 else if，用于 else 后接受到 if 时}
+    procedure AddBegin(ABegin: TCnWidePasToken);
+    {* 外界判断后，将 begin 挂入此 If，根据实际情况挂 else if 下或 if 头下}
+    procedure EndLastElseIfBlock;
+    {* 令最后一个 else if 块结束}
+    procedure EndElseBlock;
+    {* 令 else 块结束}
+    procedure EndIfBlock;
+    {* 令 if 块结束（不是整个 if 语句）}
+    procedure EndIfAll;
+    {* 令整个 if 语句结束}
+
+    property Level: Integer read FLevel write FLevel;
+    {* if 语句的层次，主要是 if 的层次}
+    property IfStart: TCnWidePasToken read FIfStart write SetIfStart;
+    {* 获取 if 起始 Token 以及将一个 Token 设为 if 起始 Token}
+    property IfBegin: TCnWidePasToken read FIfBegin write SetFIfBegin;
+    {* 获取 if 自身对应的 begin 的 Token 以及将一个 begin 设为 if 对应的 begin}
+    property ElseToken: TCnWidePasToken read FElseToken write FElseToken;
+    {* 获取 if 里的 else 的 Token 以及将一个 Token 设为 if 里的 else 的 Token}
+    property ElseBegin: TCnWidePasToken read FElseBegin write SetElseBegin;
+    {* 获取 if 里的 else 所对应的 begin 以及将一个 Token 设为此 else 对应的 begin 的 Token}
+    property ElseIfCount: Integer read GetElseIfCount;
+    {* 返回该 if 块的 else if 数量}
+    property ElseIfElse[Index: Integer]: TCnWidePasToken read GetElseIfElse;
+    {* 返回该 if 块的 else if 的 else 的 Token，索引从 0 到 ElseIfCount - 1}
+    property ElseIfIf[Index: Integer]: TCnWidePasToken read GetElseIfIf;
+    {* 返回该 if 块的 else if 的  的 Token，索引从 0 到 ElseIfCount - 1}
+    property LastElseIfElse: TCnWidePasToken read GetLastElseIfElse;
+    {* 返回该 if 块的最后一个 else if 的 else}
+    property LastElseIfIf: TCnWidePasToken read GetLastElseIfIf;
+    {* 返回该 if 块的最后一个 else if 的 if}
+    property LastElseIfBegin: TCnWidePasToken read GetLastElseIfBegin;
+    {* 返回该 if 块的最后一个 else if 的 begin，如果有的话}
+    property IfAllEnded: Boolean read FIfAllEnded;
+    {* 返回该 if 语句是否全部结束，供判断并从堆栈中弹出}
   end;
 
 var
@@ -359,15 +420,15 @@ procedure TCnWidePasStructParser.ParseSource(ASource: PWideChar; AIsDpr, AKeyOnl
 var
   Lex: TCnPasWideLex;
   ProcNestCount: Integer;
-  Token, CurrMethod, CurrBlock, CurrMidBlock, CurrIfBlock: TCnWidePasToken;
+  Token, CurrMethod, CurrBlock, CurrMidBlock: TCnWidePasToken;
   Bookmark: TCnPasWideBookmark;
-  IsClassOpen, IsClassDef, IsImpl, IsHelper, CurrIfHasElse: Boolean;
+  IsClassOpen, IsClassDef, IsImpl, IsHelper, IsElseIf, ExpectElse: Boolean;
   IsRecordHelper, IsSealed, IsAbstract, IsRecord, IsForFunc: Boolean;
   DeclareWithEndLevel: Integer;
   PrevTokenID: TTokenKind;
   PrevTokenStr: CnWideString;
-  AProcObj: TProcObj;
-  AIfObj: TIfObj; // 一直指向栈顶
+  AProcObj: TCnProcObj;
+  AIfObj: TCnIfStatement;
 
   procedure CalcCharIndexes(out ACharIndex: Integer; out AnAnsiIndex: Integer);
   var
@@ -474,15 +535,19 @@ begin
     Token := nil;
     CurrMethod := nil;        // 当前 Token 所在的方法，包括匿名函数的 procedure/function
     CurrBlock := nil;         // 当前 Token 所在的块。
-    CurrIfBlock := nil;       // 当前 Token 所在的 if 块，需要特殊对待
     CurrMidBlock := nil;
     IsImpl := AIsDpr;
     IsHelper := False;
     IsRecordHelper := False;
-    CurrIfHasElse := False;
+    ExpectElse := False;
 
     while Lex.TokenID <> tkNull do
     begin
+      // 根据上一轮的结束条件判断是否能结束整个 if 语句
+      if ExpectElse and (Lex.TokenID <> tkElse) and not FIfStack.IsEmpty then
+        FIfStack.Pop.Free;
+      ExpectElse := False;
+
       if {IsImpl and } (Lex.TokenID in [tkCompDirect, // Allow CompDirect
         tkProcedure, tkFunction, tkConstructor, tkDestructor,
         tkInitialization, tkFinalization,
@@ -525,7 +590,7 @@ begin
                 CurrMethod := Token;
 
                 // 碰到 procedure/function 实现时，推入堆栈并记录其层次，暂无 Layer 可记录。
-                AProcObj := TProcObj.Create;
+                AProcObj := TCnProcObj.Create;
                 AProcObj.Token := Token;
                 FProcStack.Push(AProcObj);
                 Inc(ProcNestCount);
@@ -558,7 +623,7 @@ begin
               // 处理本 begin/asm 和 procedure/function 同级时的进层
               if FProcStack.Count > 0 then
               begin
-                AProcObj := TProcObj(FProcStack.Peek);
+                AProcObj := TCnProcObj(FProcStack.Peek);
                 if not AProcObj.Matched then
                 begin
                   // 碰到最外层的 procedure/function，begin/asm 进一层以符合常识
@@ -573,6 +638,14 @@ begin
                   AProcObj.Matched := True;
                   Dec(ProcNestCount);
                 end;
+              end;
+
+              // 判断 begin 是否属于之前的 if 或 else if
+              if (Lex.TokenID = tkBegin) and (PrevTokenID = tkThen) and not FIfStack.IsEmpty then
+              begin
+                AIfObj := TCnIfStatement(FIfStack.Peek);
+                if AIfObj.Level = Token.ItemLayer then
+                  AIfObj.AddBegin(Token);
               end;
             end;
           tkCase:
@@ -655,15 +728,31 @@ begin
                   IsRecordHelper := False;
               end;
 
-              // 记录 if 块的起始位置并推入堆栈
+              // 处理 if 或 else if 的情形
               if Lex.TokenID = tkIf then
               begin
-                CurrIfBlock := Token;
-                CurrIfHasElse := False;
-                AIfObj := TIfObj.Create;
-                AIfObj.Token := Token;
-                AIfObj.HasElse := False;
-                FIfStack.Push(AIfObj);
+                IsElseIf := False;
+                if PrevTokenID = tkElse then
+                begin
+                  // 是 else if，找到最近的 AIfObj，把 else 改成 else if
+                  if not FIfStack.IsEmpty then
+                  begin
+                    AIfObj := TCnIfStatement(FIfStack.Peek);
+                    // 这个 if 和所在 if 块必须同级，以预防类似于 case else if then end 的情况
+                    if AIfObj.Level = Token.ItemLayer then
+                    begin
+                      AIfObj.ChangeElseToElseIf(Token);
+                      IsElseIf := True;
+                    end;
+                  end;
+                end;
+
+                if not IsElseIf then // 是单纯的 if，记录 if 块与其起始位置并推入堆栈
+                begin
+                  AIfObj := TCnIfStatement.Create;
+                  AIfObj.IfStart := Token;
+                  FIfStack.Push(AIfObj);
+                end;
               end;
             end;
           tkClass, tkInterface, tkDispInterface:
@@ -764,24 +853,19 @@ begin
             begin
               if (CurrBlock = nil) or (PrevTokenID in [tkAt, tkDoubleAddressOp]) then
                 DiscardToken
-              else if (CurrIfBlock <> nil) and (CurrBlock <> nil) and // if 块比当前块更近并且 if 块没 else 时，else 配给 if，而非外头可能的 case 块
-                (CurrIfBlock.ItemIndex > CurrBlock.ItemIndex) and not CurrIfHasElse then
-              begin
-                Token.FItemLayer := CurrIfBlock.FItemLayer;
-                CurrIfHasElse := True;
-                if FIfStack.Count > 0 then
-                begin
-                  AIfObj := TIfObj(FIfStack.Peek);
-                  if AIfObj <> nil then
-                    AIfObj.HasElse := True;
-                end;
-              end
               else if (CurrBlock.TokenID = tkTry) and (CurrMidBlock <> nil) and
                 (CurrMidBlock.TokenID = tkExcept) and
                 (PrevTokenID in [tkSemiColon, tkExcept]) then
                 Token.FItemLayer := CurrBlock.FItemLayer    // try except else end 是一块的
               else if not (CurrBlock.TokenID = tkCase) then // case of 中的 else 前面可以不是分号
-                Token.FItemLayer := Token.FItemLayer + 1;
+                Token.FItemLayer := Token.FItemLayer + 1
+              else if not FIfStack.IsEmpty then // 以上情况均不对，则 else 应该属于当前 if 块
+              begin
+                AIfObj := TCnIfStatement(FIfStack.Peek);
+                Token.FItemLayer := AIfObj.Level;
+                if not AIfObj.HasElse then
+                  AIfObj.ElseToken := Token;
+              end;
             end;
           tkEnd, tkUntil, tkThen, tkDo:
             begin
@@ -828,12 +912,45 @@ begin
               if (DeclareWithEndLevel > 0) and (Lex.TokenID = tkEnd) then // 跳出了局部声明
                 Dec(DeclareWithEndLevel);
 
-              // 如果 end 与 procedure/function 最新元素同级
-              if (Lex.TokenID = tkEnd) and (FProcStack.Count > 0) then
+              if Lex.TokenID = tkEnd then
               begin
-                AProcObj := TProcObj(FProcStack.Peek);
-                if AProcObj.Matched and (AProcObj.Layer = Token.ItemLayer) then
-                  FProcStack.Pop.Free;
+                // 如果 end 与 procedure/function 最新元素同级
+                if FProcStack.Count > 0 then
+                begin
+                  AProcObj := TCnProcObj(FProcStack.Peek);
+                  if AProcObj.Matched and (AProcObj.Layer = Token.ItemLayer) then
+                    FProcStack.Pop.Free;
+                end;
+
+                // 处理 if 对应的系列 begin end 的关系
+                if not FIfStack.IsEmpty then
+                begin
+                  AIfObj := TCnIfStatement(FIfStack.Peek);
+                  if (AIfObj.LastElseIfBegin <> nil) and
+                    (AIfObj.LastElseIfBegin.ItemLayer = Token.ItemLayer) then
+                  begin
+                    // 此 end 与最近的 if 块中最后一个 else if 里的 begin 配对，表示此 else if 块结束
+                    AIfObj.EndLastElseIfBlock;
+                    ExpectElse := True;
+                    // 下一个如果不是 else，则整个 if 结束
+                  end
+                  else if (AIfObj.ElseBegin <> nil) and (AIfObj.ElseBegin.ItemLayer = Token.ItemLayer) then
+                  begin
+                    // 此 end 与最近的 if 块中的独立 else 中的 begin 配对，表示此 else 块结束，同时整个 if 语句结束
+                    AIfObj.EndElseBlock;
+                    AIfObj.EndIfAll;
+                  end
+                  else if (AIfObj.IfBegin <> nil) and (AIfObj.IfBegin.ItemLayer = Token.ItemLayer) then
+                  begin
+                    // 此 end 与最近的 if 块中的 begin 配对，表示此 if 块结束（不是整个 if 语句）
+                    AIfObj.EndIfBlock;
+                    ExpectElse := True;
+                    // 下一个如果不是 else，则整个 if 结束
+                  end;
+
+                  if AIfObj.FIfAllEnded then
+                    FIfStack.Pop.Free;
+                end;
               end;
             end;
         end;
@@ -843,25 +960,30 @@ begin
         if not IsImpl and (Lex.TokenID = tkImplementation) then
           IsImpl := True;
 
-        if (Lex.TokenID = tkSemicolon) and (CurrIfBlock <> nil) then // 碰到和 if 同级的分号算 if 结束
+        if (Lex.TokenID = tkSemicolon) and not FIfStack.IsEmpty then
         begin
-          // 如果有当前块，要判断当前块比 if 块是近是远，远（在 if 外头）的话分号才针对 if
-          if (CurrBlock = nil) or (CurrBlock.ItemIndex < CurrIfBlock.ItemIndex) then
+          AIfObj := TCnIfStatement(FIfStack.Peek);
+          if AIfObj.Level = Token.ItemLayer then // 碰到和 if 同级的分号，查查它结束了谁
           begin
-            if FIfStack.Count > 0 then // 弹出一个 if 并释放
-              FIfStack.Pop.Free;
-
-            if FIfStack.Count > 0 then
+            if AIfObj.HasElse and (AIfObj.ElseBegin = nil) then
             begin
-              AIfObj := TIfObj(FIfStack.Peek);
-              CurrIfBlock := AIfObj.Token;
-              CurrIfHasElse := AIfObj.HasElse;
+              AIfObj.EndElseBlock;
+              AIfObj.EndIfAll;
             end
-            else
+            else if (AIfObj.ElseIfCount > 0) and (AIfObj.LastElseIfBegin = nil) then
             begin
-              CurrIfBlock := nil;
-              CurrIfHasElse := False;
+              AIfObj.EndLastElseIfBlock;
+              AIfObj.EndIfAll;
+            end
+            else if AIfObj.IfBegin = nil then
+            begin
+              AIfObj.EndIfBlock;
+              AIfObj.EndIfAll;
             end;
+
+            // 分号结束了整个 if 语句，可以从堆栈中弹出了
+            if AIfObj.IfAllEnded then
+              FIfStack.Pop.Free;
           end;
         end;
 
@@ -881,7 +1003,7 @@ begin
 
           if FProcStack.Count > 0 then
           begin
-            AProcObj := TProcObj(FProcStack.Pop);
+            AProcObj := TCnProcObj(FProcStack.Pop);
             AProcObj.Free;
             if ProcNestCount > 0 then
               Dec(ProcNestCount);
@@ -1232,6 +1354,136 @@ end;
 function TCnWidePasToken.GetToken: PWideChar;
 begin
   Result := @FToken[0];
+end;
+
+{ TCnIfStatement }
+
+procedure TCnIfStatement.AddBegin(ABegin: TCnWidePasToken);
+begin
+  if ABegin = nil then
+    Exit;
+
+  if HasElse then                         // 有 else 说明是 else 对应的 begin
+    FElseBegin := ABegin
+  else if FElseIfBeginList.Count > 0 then // 有 else if 说明是最后一个 else if 对应的 begin
+    FElseIfBeginList[FElseIfBeginList.Count - 1] := ABegin
+  else
+    FIfBegin := ABegin;                   // 否则是 if 对应的 begin
+end;
+
+procedure TCnIfStatement.ChangeElseToElseIf(AIf: TCnWidePasToken);
+begin
+  if (FElseToken = nil) or (AIf = nil) then
+    Exit;
+
+  FElseList.Add(FElseToken);
+  FIfList.Add(AIf);
+  FElseIfBeginList.Add(nil);
+  FElseIfEnded.Add(nil);
+  FElseToken := nil;
+end;
+
+constructor TCnIfStatement.Create;
+begin
+  inherited;
+  FLevel := -1;
+  FElseList := TObjectList.Create(False);
+  FIfList := TObjectList.Create(False);
+  FElseIfBeginList := TObjectList.Create(False);
+  FElseIfEnded := TList.Create;
+end;
+
+destructor TCnIfStatement.Destroy;
+begin
+  FElseIfEnded.Free;
+  FElseIfBeginList.Free;
+  FIfList.Free;
+  FElseList.Free;
+  inherited;
+end;
+
+procedure TCnIfStatement.EndElseBlock;
+begin
+  if FElseToken <> nil then
+    FElseEnded := True;
+end;
+
+procedure TCnIfStatement.EndIfAll;
+begin
+  if FIfStart <> nil then
+    FIfAllEnded := True;
+end;
+
+procedure TCnIfStatement.EndIfBlock;
+begin
+  if FIfStart <> nil then
+    FIfEnded := True;
+end;
+
+procedure TCnIfStatement.EndLastElseIfBlock;
+begin
+  if ElseIfCount > 0 then
+    FElseIfEnded[FElseIfEnded.Count - 1] := Pointer(Ord(True));
+end;
+
+function TCnIfStatement.GetElseIfCount: Integer;
+begin
+  Result := FElseList.Count;
+end;
+
+function TCnIfStatement.GetElseIfElse(Index: Integer): TCnWidePasToken;
+begin
+  Result := TCnWidePasToken(FElseList[Index]);
+end;
+
+function TCnIfStatement.GetElseIfIf(Index: Integer): TCnWidePasToken;
+begin
+  Result := TCnWidePasToken(FIfList[Index]);
+end;
+
+function TCnIfStatement.GetLastElseIfBegin: TCnWidePasToken;
+begin
+  Result := nil;
+  if FElseIfBeginList.Count > 0 then
+    Result := TCnWidePasToken(FElseIfBeginList[FElseIfBeginList.Count - 1]);
+end;
+
+function TCnIfStatement.GetLastElseIfElse: TCnWidePasToken;
+begin
+  Result := nil;
+  if FElseList.Count > 0 then
+    Result := TCnWidePasToken(FElseList[FElseList.Count - 1]);
+end;
+
+function TCnIfStatement.GetLastElseIfIf: TCnWidePasToken;
+begin
+  Result := nil;
+  if FIfList.Count > 0 then
+    Result := TCnWidePasToken(FIfList[FIfList.Count - 1]);
+end;
+
+function TCnIfStatement.HasElse: Boolean;
+begin
+  Result := FElseToken <> nil;
+end;
+
+procedure TCnIfStatement.SetElseBegin(const Value: TCnWidePasToken);
+begin
+  FElseBegin := Value;
+end;
+
+procedure TCnIfStatement.SetFIfBegin(const Value: TCnWidePasToken);
+begin
+  FIfBegin := Value;
+end;
+
+procedure TCnIfStatement.SetIfStart(const Value: TCnWidePasToken);
+begin
+  FIfStart := Value;
+  if Value <> nil then
+    FLevel := Value.ItemLayer
+  else
+    FLevel := -1;
 end;
 
 initialization
