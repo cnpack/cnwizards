@@ -2294,7 +2294,10 @@ begin
     UpdateFlatPanelsPosition;
   end
   else if ((Msg.Msg = WM_WINDOWPOSCHANGED) or (Msg.Msg = WM_SHOWWINDOW)) and
-    (Control <> nil) and (csDesigning in Control.ComponentState) and
+    (Control <> nil) and
+{$IFNDEF IDE_NEW_EMBEDDED_DESIGNER} // 101B has a TUndockedDesignerForm Container without csDesigning
+    (csDesigning in Control.ComponentState) and
+{$ENDIF}
     (Control.Parent = nil) and (Control = CnOtaGetCurrentDesignContainer) then
   begin
     if Msg.Msg = WM_WINDOWPOSCHANGED then
