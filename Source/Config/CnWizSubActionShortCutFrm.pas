@@ -160,6 +160,9 @@ begin
     GetShortCutsFromHolders;
     Caption := Format(SCnWizSubActionShortCutFormCaption, [FWizardName]);
   end;
+
+  if ListView.Items.Count > 0 then
+    ListView.Items[0].Selected := True;
 end;
 
 procedure TCnWizSubActionShortCutForm.FormDestroy(Sender: TObject);
