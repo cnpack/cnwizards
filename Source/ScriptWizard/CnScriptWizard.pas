@@ -175,6 +175,8 @@ type
     procedure FormCreate(Sender: TObject);
     procedure chktvModeStateChange(Sender: TObject; Node: TTreeNode;
       OldState, NewState: TCheckBoxState);
+    procedure FormKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
   private
     { Private declarations }
     FUpdating: Boolean;
@@ -1082,6 +1084,16 @@ begin
   finally
     Event.Free;
   end;          
+end;
+
+procedure TCnScriptWizardForm.FormKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if (Ord(Key) = VK_ESCAPE) and (Shift = []) then
+  begin
+    UpdateControls;
+    Close;
+  end;
 end;
 
 initialization
