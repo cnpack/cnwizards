@@ -537,14 +537,14 @@ procedure CnOtaDeleteCurrentSelection;
 function CnOtaReplaceCurrentSelection(const Text: string; NoSelectionInsert: Boolean = True;
   KeepSelecting: Boolean = False; LineMode: Boolean = False): Boolean;
 {* 用文本替换选中的文本。
-  Text：插入的内容，2007 下 Text 是 AnsiString，2009 以上是 UnicodeString。
+  Text：插入的内容，2007 下 Text 是 AnsiString（可能丢字符），2009 以上是 UnicodeString。
   NoSelectionInsert：控制无选择区时是否在当前位置插入。
   KeepSelecting：控制插入后是否选中插入内容。
   LineMode 是否先将选区扩展到整行。
   返回是否成功。已知问题：D5下似乎选择无效}
 function CnOtaReplaceCurrentSelectionUtf8(const Utf8Text: AnsiString; NoSelectionInsert: Boolean = True;
   KeepSelecting: Boolean = False; LineMode: Boolean = False): Boolean;
-{* 用文本替换选中的文本，参数是 Utf8 的 Ansi 字符串，可在 D2005~2007 下使用}
+{* 用文本替换选中的文本，参数是 Utf8 的 Ansi 字符串，可在 D2005~2007 下使用，不丢字符}
 procedure CnOtaEditBackspace(Many: Integer);
 {* 在编辑器中退格}
 procedure CnOtaEditDelete(Many: Integer);

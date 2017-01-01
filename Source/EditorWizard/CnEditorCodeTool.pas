@@ -78,7 +78,9 @@ type
        此时可不重载 ProcessText 方法}
     function ProcessText(const Text: string): string; virtual;
     {* 子类如果选择 Style 为 csSelText/csAllText 全文本方式，或者希望自己处理文
-       本，应重载该方法，此时不用重载 ProcessLine 方法}
+       本，应重载该方法，此时不用重载 ProcessLine 方法。
+       D5~D2007下 Text 与返回结果是 AnsiString（2005～2007 的 Text 由UTF8转换而来，可能丢字符），
+       D2009 以上 Text 与返回结果都是 UnicodeString}
     function GetStyle: TCnCodeToolStyle; virtual; abstract;
     {* 处理方式，如果为 csLine，ProcessText 处理 Text 将会把用户选择
        内容扩充为整行。如果为 csSelText，Text 则只包含用户实际选择的文本，
@@ -142,10 +144,12 @@ const
 var
   View: IOTAEditView;
   Block: IOTAEditBlock;
+  BlockText: string;
   OrigText: AnsiString;
+  HasTab: Boolean;
   Text: string;
   Buf: PAnsiChar;
-  BlockStartLine, BlockEndLine: Integer;
+  I, BlockStartLine, BlockEndLine: Integer;
   StartPos, EndPos, ReadStart: Integer;
   Reader: IOTAEditReader;
   Writer: IOTAEditWriter;
@@ -209,7 +213,8 @@ begin
     else if GetStyle = csSelText then
     begin
       if (Block <> nil) and (Block.IsValid) then
-      begin                           // 仅处理选择的文本
+      begin
+        // 仅处理选择的文本。但这个机制在代码中包含 Tab 字符时有差错需要绕过
         StartPos := CnOtaEditPosToLinePos(OTAEditPos(Block.StartingColumn,
           Block.StartingRow), View);
         EndPos := CnOtaEditPosToLinePos(OTAEditPos(Block.EndingColumn,
@@ -226,46 +231,87 @@ begin
       Stream.Free;
     end;
 
-    Len := EndPos - StartPos;
-    Assert(Len >= 0);
-    SetLength(OrigText, Len);
-    Buf := Pointer(OrigText);
-    ReadStart := StartPos;
-
-    Reader := View.Buffer.CreateReader;
-    try
-      while Len > SCnOtaBatchSize do // 逐次读取
+    HasTab := False;
+    if (GetStyle = csSelText) and (Block <> nil) and (Block.IsValid) then
+    begin
+      BlockText := Block.Text;
+      if Length(BlockText) > 0 then
       begin
-        ASize := Reader.GetText(ReadStart, Buf, SCnOtaBatchSize);
-        Inc(Buf, ASize);
-        Inc(ReadStart, ASize);
-        Dec(Len, ASize);
+        for I := 0 to Length(BlockText) - 1 do
+        begin
+          if BlockText[I] = #09 then
+          begin
+            HasTab := True;
+            Break;
+          end;
+        end;
       end;
-      if Len > 0 then // 读最后剩余的
-        Reader.GetText(ReadStart, Buf, Len);
-    finally
-      Reader := nil;
+    end;
+
+    if HasTab then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('TCnEditorCodeTool.Execute has Tab Chars for Selection. Using Block Text.');
+{$ENDIF}
+      // 直接得到 Ansi/Utf8/UnicodeString
+      OrigText := BlockText;
+    end
+    else
+    begin
+      // Reader 读出的是 Ansi/Utf8/Utf8
+      Len := EndPos - StartPos;
+      Assert(Len >= 0);
+      SetLength(OrigText, Len);
+      Buf := Pointer(OrigText);
+      ReadStart := StartPos;
+      Reader := View.Buffer.CreateReader;
+      try
+        while Len > SCnOtaBatchSize do // 逐次读取
+        begin
+          ASize := Reader.GetText(ReadStart, Buf, SCnOtaBatchSize);
+          Inc(Buf, ASize);
+          Inc(ReadStart, ASize);
+          Dec(Len, ASize);
+        end;
+        if Len > 0 then // 读最后剩余的
+          Reader.GetText(ReadStart, Buf, Len);
+      finally
+        Reader := nil;
+      end;
     end;
 
     if OrigText <> '' then
     begin
-    {$IFDEF UNICODE_STRING}
-      Text := ProcessText((ConvertEditorTextToTextW(OrigText))); // 处理文本
+    {$IFDEF UNICODE}
+      if HasTab then
+        Text := ProcessText(OrigText)  // 处理 UnicodeString 文本
+      else
+        Text := ProcessText((ConvertEditorTextToTextW(OrigText))); // 处理 Utf8 转成 UnicodeString 的文本
     {$ELSE}
-      Text := ProcessText(ConvertEditorTextToText(OrigText)); // 处理文本
+      Text := ProcessText(ConvertEditorTextToText(OrigText)); // 处理 Ansi / Utf8转成的Ansi 文本
     {$ENDIF}
-      Writer := View.Buffer.CreateUndoableWriter;
-      try
-        Writer.CopyTo(StartPos);
-        {$IFDEF UNICODE_STRING}
-        Writer.Insert(PAnsiChar(ConvertTextToEditorTextW(Text)));
-        {$ELSE}
-        Writer.Insert(PAnsiChar(ConvertTextToEditorText(Text)));
-        {$ENDIF}
-        Writer.DeleteTo(EndPos);
-      finally
-        Writer := nil;
-      end;                      
+
+      if not HasTab then
+      begin
+        Writer := View.Buffer.CreateUndoableWriter;
+        try
+          Writer.CopyTo(StartPos);
+          // 把 Ansi/Ansi/UnicodeString 转换成 Ansi/Utf8/Utf8 再用 Writer 写入
+          {$IFDEF UNICODE}
+          Writer.Insert(PAnsiChar(ConvertTextToEditorTextW(Text)));
+          {$ELSE}
+          Writer.Insert(PAnsiChar(ConvertTextToEditorText(Text)));
+          {$ENDIF}
+          Writer.DeleteTo(EndPos);
+        finally
+          Writer := nil;
+        end;
+      end
+      else
+      begin
+        // 有 Tab 键时上面这样按位置插入会有偏差，各个 IDE 下都有，换成替换当前选区
+        CnOtaReplaceCurrentSelection(Text, True, False, False);
+      end;
     end;
 
     if (NewRow > 0) and (NewCol > 0) then
