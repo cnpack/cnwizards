@@ -78,6 +78,12 @@ begin
         [I, Token.LineNumber, Token.CharIndex, Token.TokenPos, Token.MethodLayer, Token.ItemLayer,
         GetEnumName(TypeInfo(TTokenKind), Ord(Token.TokenID)), Token.Token]
       ));
+      if Token.IsMethodStart then
+        mmoParse.Lines[mmoParse.Lines.Count - 1] := mmoParse.Lines[mmoParse.Lines.Count - 1] +
+        ' *** MethodStart';
+      if Token.IsMethodClose then
+        mmoParse.Lines[mmoParse.Lines.Count - 1] := mmoParse.Lines[mmoParse.Lines.Count - 1] +
+        ' *** MethodClose';
     end;
     mmoParse.Lines.Add('');
 

@@ -116,7 +116,7 @@ type
     property IsMethodStart: Boolean read FIsMethodStart;
     {* 是否是函数过程的开始，包括 function 和 begin/asm 的情况 }
     property IsMethodClose: Boolean read FIsMethodClose;
-    {* 是否是函数过程的结束 }
+    {* 是否是函数过程的结束，只包括 end 的情况，因此和 MethodStart 数量不等 }
     property CompDirectivtType: TCnCompDirectiveType read FCompDirectiveType write FCompDirectiveType;
     {* 当其类型是 Pascal 编译指令时，此域代表其详细类型，但不解析，由外部按需解析}
     property Tag: Integer read FTag write FTag;
@@ -420,7 +420,7 @@ procedure TCnWidePasStructParser.ParseSource(ASource: PWideChar; AIsDpr, AKeyOnl
 var
   Lex: TCnPasWideLex;
   ProcNestCount: Integer;
-  Token, CurrMethod, CurrBlock, CurrMidBlock: TCnWidePasToken;
+  Token, CurrMethod, CurrBlock, CurrUnclosedBlock, CurrMidBlock, CurrIfStart: TCnWidePasToken;
   Bookmark: TCnPasWideBookmark;
   IsClassOpen, IsClassDef, IsImpl, IsHelper, IsElseIf, ExpectElse: Boolean;
   IsRecordHelper, IsSealed, IsAbstract, IsRecord, IsForFunc: Boolean;
@@ -535,6 +535,7 @@ begin
     Token := nil;
     CurrMethod := nil;        // 当前 Token 所在的方法，包括匿名函数的 procedure/function
     CurrBlock := nil;         // 当前 Token 所在的块。
+    CurrUnclosedBlock := nil;
     CurrMidBlock := nil;
     IsImpl := AIsDpr;
     IsHelper := False;
@@ -601,6 +602,7 @@ begin
               while FBlockStack.Count > 0 do
                 FBlockStack.Pop;
               CurrBlock := nil;
+              CurrUnclosedBlock := nil;
               while FMethodStack.Count > 0 do
                 FMethodStack.Pop;
               CurrMethod := nil;
@@ -618,7 +620,9 @@ begin
               end
               else // 下面会根据是否在函数过程内来进层
                 Token.FItemLayer := 0;
+
               CurrBlock := Token;
+              CurrUnclosedBlock := Token;
 
               // 处理本 begin/asm 和 procedure/function 同级时的进层
               if FProcStack.Count > 0 then
@@ -641,7 +645,7 @@ begin
               end;
 
               // 判断 begin 是否属于之前的 if 或 else if
-              if (Lex.TokenID = tkBegin) and (PrevTokenID = tkThen) and not FIfStack.IsEmpty then
+              if (Lex.TokenID = tkBegin) and (PrevTokenID in [tkThen, tkElse]) and not FIfStack.IsEmpty then
               begin
                 AIfObj := TCnIfStatement(FIfStack.Peek);
                 if AIfObj.Level = Token.ItemLayer then
@@ -661,6 +665,7 @@ begin
                 else
                   Token.FItemLayer := 0;
                 CurrBlock := Token;
+                CurrUnclosedBlock := Token;
               end
               else
                 DiscardToken(True);
@@ -711,6 +716,7 @@ begin
                 else
                   Token.FItemLayer := 0;
                 CurrBlock := Token;
+                CurrUnclosedBlock := Token;
 
                 if IsRecord then
                 begin
@@ -830,7 +836,9 @@ begin
                 end
                 else
                   Token.FItemLayer := 0;
+
                 CurrBlock := Token;
+                CurrUnclosedBlock := Token;
                 // 局部声明，需要 end 来结尾
                 // IsInDeclareWithEnd := True;
                 Inc(DeclareWithEndLevel);
@@ -851,14 +859,26 @@ begin
             end;
           tkElse:
             begin
+              // 判断 else 是属于较近的 if 块还是较外层的 case 等块是个难题。
+              // 遇到 else 时 if then 块已经结束，CurrBlock不会等于 if，所以得额外整一个 CurrIfStart
+              CurrIfStart := nil;
+              if not FIfStack.IsEmpty then
+              begin
+                AIfObj := TCnIfStatement(FIfStack.Peek);
+                if AIfObj.IfStart <> nil then
+                  CurrIfStart := AIfObj.IfStart;
+              end;
+
+              // else 前面可以不是分号，无须判断 PrevToken 是否分号
               if (CurrBlock = nil) or (PrevTokenID in [tkAt, tkDoubleAddressOp]) then
                 DiscardToken
               else if (CurrBlock.TokenID = tkTry) and (CurrMidBlock <> nil) and
                 (CurrMidBlock.TokenID = tkExcept) and
-                (PrevTokenID in [tkSemiColon, tkExcept]) then
-                Token.FItemLayer := CurrBlock.FItemLayer    // try except else end 是一块的
-              else if not (CurrBlock.TokenID = tkCase) then // case of 中的 else 前面可以不是分号
-                Token.FItemLayer := Token.FItemLayer + 1
+                ((CurrIfStart = nil) or (CurrIfStart.ItemIndex <= CurrBlock.ItemIndex)) then
+                Token.FItemLayer := CurrBlock.FItemLayer    // try except else end 比最近的 if 块近，是一块的
+              else if (CurrBlock.TokenID = tkCase) and
+                ((CurrIfStart = nil) or (CurrIfStart.ItemIndex <= CurrBlock.ItemIndex))then
+                Token.FItemLayer := CurrBlock.FItemLayer    // case of 中的 else 比最近的 if 块近，是一块的
               else if not FIfStack.IsEmpty then // 以上情况均不对，则 else 应该属于当前 if 块
               begin
                 AIfObj := TCnIfStatement(FIfStack.Peek);
@@ -892,10 +912,17 @@ begin
                   end;
 
                   if FBlockStack.Count > 0 then
-                    CurrBlock := TCnWidePasToken(FBlockStack.Pop)
+                  begin
+                    CurrBlock := TCnWidePasToken(FBlockStack.Pop);
+                    if Lex.TokenID <> tkThen then
+                      CurrUnclosedBlock := CurrBlock;
+                  end
                   else
                   begin
                     CurrBlock := nil;
+                    if Lex.TokenID <> tkThen then
+                      CurrUnclosedBlock := nil;
+
                     if (CurrMethod <> nil) and (Lex.TokenID = tkEnd) and (DeclareWithEndLevel <= 0) then
                     begin
                       Token.FIsMethodClose := True;
@@ -964,7 +991,12 @@ begin
         if (Lex.TokenID = tkSemicolon) and not FIfStack.IsEmpty then
         begin
           AIfObj := TCnIfStatement(FIfStack.Peek);
-          if AIfObj.Level = Token.ItemLayer then // 碰到和 if 同级的分号，查查它结束了谁
+          // 碰到和 if 同级的分号，查查它结束了谁，注意不能用 Token，因为没针对分号创建 Token
+          // 分号的 Level 应该等于当前块也就是 CurrBlock 的 Level，
+          // 但当前的 if then 但 then 已经结束了这个 CurrBlock，CurrBlock 改指向外层块了，
+          // 这种情况下分号的 Level 就会低于 if 但事实上是属于这个 if 的，会引发错乱。
+          // 所以另开了个 CurrUnclosedBlock 模仿 CurrBlock 的行为，但在碰到 then 时不结束
+          if (CurrUnclosedBlock <> nil) and (AIfObj.Level = CurrUnclosedBlock.ItemLayer) then
           begin
             if AIfObj.HasElse and (AIfObj.ElseBegin = nil) then
             begin
