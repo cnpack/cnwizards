@@ -258,6 +258,11 @@ type
     {* 将最后一个 else 改为一个 else if，用于 else 后接受到 if 时}
     procedure AddBegin(ABegin: TCnWidePasToken);
     {* 外界判断后，将 begin 挂入此 If，根据实际情况挂 else if 下或 if 头下}
+
+    // 以下三个结束当前子块的条件是：
+    // 1. 该子块有紧接的 begin，且有对应层次的 end，或者
+    // 2. 该子块无紧接的 begin，有同层次的分号（层次判断不易，改用当前块的前后判断规则），或
+    // 3. 该子块无紧接的 begin，但有上一层次的 end（前面无分号）；如 if then begin if then Close end; 中的 Close 语句
     procedure EndLastElseIfBlock;
     {* 令最后一个 else if 块结束}
     procedure EndElseBlock;
@@ -420,7 +425,7 @@ procedure TCnWidePasStructParser.ParseSource(ASource: PWideChar; AIsDpr, AKeyOnl
 var
   Lex: TCnPasWideLex;
   ProcNestCount: Integer;
-  Token, CurrMethod, CurrBlock, CurrUnclosedBlock, CurrMidBlock, CurrIfStart: TCnWidePasToken;
+  Token, CurrMethod, CurrBlock, CurrMidBlock, CurrIfStart: TCnWidePasToken;
   Bookmark: TCnPasWideBookmark;
   IsClassOpen, IsClassDef, IsImpl, IsHelper, IsElseIf, ExpectElse: Boolean;
   IsRecordHelper, IsSealed, IsAbstract, IsRecord, IsForFunc: Boolean;
@@ -535,7 +540,6 @@ begin
     Token := nil;
     CurrMethod := nil;        // 当前 Token 所在的方法，包括匿名函数的 procedure/function
     CurrBlock := nil;         // 当前 Token 所在的块。
-    CurrUnclosedBlock := nil;
     CurrMidBlock := nil;
     IsImpl := AIsDpr;
     IsHelper := False;
@@ -602,7 +606,6 @@ begin
               while FBlockStack.Count > 0 do
                 FBlockStack.Pop;
               CurrBlock := nil;
-              CurrUnclosedBlock := nil;
               while FMethodStack.Count > 0 do
                 FMethodStack.Pop;
               CurrMethod := nil;
@@ -622,7 +625,6 @@ begin
                 Token.FItemLayer := 0;
 
               CurrBlock := Token;
-              CurrUnclosedBlock := Token;
 
               // 处理本 begin/asm 和 procedure/function 同级时的进层
               if FProcStack.Count > 0 then
@@ -665,7 +667,6 @@ begin
                 else
                   Token.FItemLayer := 0;
                 CurrBlock := Token;
-                CurrUnclosedBlock := Token;
               end
               else
                 DiscardToken(True);
@@ -716,7 +717,6 @@ begin
                 else
                   Token.FItemLayer := 0;
                 CurrBlock := Token;
-                CurrUnclosedBlock := Token;
 
                 if IsRecord then
                 begin
@@ -838,7 +838,6 @@ begin
                   Token.FItemLayer := 0;
 
                 CurrBlock := Token;
-                CurrUnclosedBlock := Token;
                 // 局部声明，需要 end 来结尾
                 // IsInDeclareWithEnd := True;
                 Inc(DeclareWithEndLevel);
@@ -914,14 +913,10 @@ begin
                   if FBlockStack.Count > 0 then
                   begin
                     CurrBlock := TCnWidePasToken(FBlockStack.Pop);
-                    if Lex.TokenID <> tkThen then
-                      CurrUnclosedBlock := CurrBlock;
                   end
                   else
                   begin
                     CurrBlock := nil;
-                    if Lex.TokenID <> tkThen then
-                      CurrUnclosedBlock := nil;
 
                     if (CurrMethod <> nil) and (Lex.TokenID = tkEnd) and (DeclareWithEndLevel <= 0) then
                     begin
@@ -974,6 +969,26 @@ begin
                     AIfObj.EndIfBlock;
                     ExpectElse := True;
                     // 下一个如果不是 else，则整个 if 结束
+                  end
+                  else if (AIfObj.LastElseIfBegin = nil) and (AIfObj.LastElseIfIf <> nil) and
+                    (AIfObj.LastElseIfIf.ItemLayer > Token.ItemLayer) then
+                  begin
+                    // 此 end 结束掉最近的 if 块中最后一个无 begin 的 else if （end之前允许无分号），同时结束整个 if
+                    AIfObj.EndLastElseIfBlock;
+                    AIfObj.EndIfAll;
+                  end
+                  else if (AIfObj.ElseBegin = nil) and (AIfObj.ElseToken <> nil) and
+                    (AIfObj.ElseToken.ItemLayer > Token.ItemLayer) then
+                  begin
+                    // 此 end 结束掉最近的 if 块中无 begin 的 else （end之前允许无分号），同时结束整个 if
+                    AIfObj.EndElseBlock;
+                    AIfObj.EndIfAll;
+                  end
+                  else if (AIfObj.IfBegin = nil) and (AIfObj.IfStart.ItemLayer > Token.ItemLayer) then
+                  begin
+                    // 此 end 结束掉最近的 if 块中无 begin 的 if （end之前允许无分号），同时结束整个 if
+                    AIfObj.EndIfBlock;
+                    AIfObj.EndIfAll;
                   end;
 
                   if AIfObj.FIfAllEnded then
@@ -991,24 +1006,29 @@ begin
         if (Lex.TokenID = tkSemicolon) and not FIfStack.IsEmpty then
         begin
           AIfObj := TCnIfStatement(FIfStack.Peek);
-          // 碰到和 if 同级的分号，查查它结束了谁，注意不能用 Token，因为没针对分号创建 Token
-          // 分号的 Level 应该等于当前块也就是 CurrBlock 的 Level，
-          // 但当前的 if then 但 then 已经结束了这个 CurrBlock，CurrBlock 改指向外层块了，
-          // 这种情况下分号的 Level 就会低于 if 但事实上是属于这个 if 的，会引发错乱。
-          // 所以另开了个 CurrUnclosedBlock 模仿 CurrBlock 的行为，但在碰到 then 时不结束
-          if (CurrUnclosedBlock <> nil) and (AIfObj.Level = CurrUnclosedBlock.ItemLayer) then
+          // 碰到分号，查查它结束了谁，注意不能用 Token，因为没针对分号创建 Token
+          // 分号的 ItemLayer 目前没有靠谱值，因此不能依赖 ItemLayer 和 if 的 Level 比较。
+          // FList.Count 为分号假想的 ItemIndex
+          // 情况一，如果 CurrBlock 存在，且没有后于 if 的 else 且 else 无 begin，说明分号紧接 else 同级
+          // 情况二，如果 CurrBlock 存在，且没有后于最后一个 else if 的 if，且无 begin，说明分号紧接最后一个 else if 同级
+          // 情况三，如果 CurrBlock 存在，且没有后于 if，且 if 没 begin，说明分号紧接 if 同级
+          if CurrBlock <> nil then
           begin
-            if AIfObj.HasElse and (AIfObj.ElseBegin = nil) then
+            if AIfObj.HasElse and (AIfObj.ElseBegin = nil) and
+              (CurrBlock.ItemIndex <= AIfObj.ElseToken.ItemIndex) then  // 分号结束不带 begin 的 else
             begin
               AIfObj.EndElseBlock;
               AIfObj.EndIfAll;
             end
-            else if (AIfObj.ElseIfCount > 0) and (AIfObj.LastElseIfBegin = nil) then
+            else if (AIfObj.ElseIfCount > 0) and (AIfObj.LastElseIfBegin = nil)
+              and (AIfObj.LastElseIfIf <> nil) and
+              (CurrBlock.ItemIndex <= AIfObj.LastElseIfIf.ItemIndex) then
             begin
-              AIfObj.EndLastElseIfBlock;
+              AIfObj.EndLastElseIfBlock;       // 分号结束不带 begin 的最后一个 else if
               AIfObj.EndIfAll;
             end
-            else if AIfObj.IfBegin = nil then
+            else if (AIfObj.IfBegin = nil) and
+              (CurrBlock.ItemIndex <= AIfObj.IfStart.ItemIndex) then  // 分号结束不带 begin 的 if 本身
             begin
               AIfObj.EndIfBlock;
               AIfObj.EndIfAll;
