@@ -41,7 +41,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Registry,
   Dialogs, ExtCtrls, StdCtrls, Buttons, CnAppBuilderInfo, ComCtrls, CheckLst,
   ImgList, ShellApi, CleanClass, CnCommon, CnWizCompilerConst, CnWizMultiLang, 
-  CnBHConst, CnLangMgr, CnLangStorage, CnHashLangStorage, CnClasses;
+  CnBHConst, CnLangMgr, CnLangStorage, CnHashLangStorage, CnClasses, CnWizLangID;
 
 type
   TCnIdeBRMainForm = class(TCnTranslateForm)
@@ -1166,11 +1166,26 @@ end;
 procedure TCnIdeBRMainForm.DoCreate;
 const
   csLangDir = 'Lang\';
+var
+  I: Integer;
+  LangID: DWORD;
 begin
   if CnLanguageManager <> nil then
   begin
     CnHashLangFileStorage.LanguagePath := _CnExtractFilePath(ParamStr(0)) + csLangDir;
     CnLanguageManager.LanguageStorage := CnHashLangFileStorage;
+
+    LangID := GetWizardsLanguageID;
+    for I := 0 to CnLanguageManager.LanguageStorage.LanguageCount - 1 do
+    begin
+      if CnLanguageManager.LanguageStorage.Languages[I].LanguageID = LangID then
+      begin
+        CnLanguageManager.CurrentLanguageIndex := I;
+        TranslateStrings;
+        CnLanguageManager.TranslateForm(Self);
+        Break;
+      end;
+    end;
   end;
 
   inherited;
