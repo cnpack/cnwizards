@@ -937,7 +937,13 @@ begin
             else
               Result := 'bds.dci'; // 代码模板
           end;
-        aoObjRep: Result := 'RADStudioRepository.xml';   // 对象库
+        aoObjRep:
+          begin
+            if m_AbiType > atDelphiXE7 then
+              Result := 'Repository.xml'   // 对象库
+            else
+              Result := 'RADStudioRepository.xml';
+          end;
         aoRegInfo: Result := '';        // 注册表信息
         aoMenuTemp: Result := 'bds.dmt'; // 菜单模板
       end;
