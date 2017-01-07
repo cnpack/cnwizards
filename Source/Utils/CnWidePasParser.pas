@@ -213,14 +213,28 @@ implementation
 
 type
   TCnProcObj = class
+  {* 描述一个完整的 procedure/function 定义，包括匿名函数}
   private
-    FLayer: Integer;
     FToken: TCnWidePasToken;
-    FMatched: Boolean;
+    FBeginToken: TCnWidePasToken;
+    FNestCount: Integer;
+    function GetIsNested: Boolean;
+    function GetBeginMatched: Boolean;
+    function GetLayer: Integer;
   public
     property Token: TCnWidePasToken read FToken write FToken;
-    property Layer: Integer read FLayer write FLayer;
-    property Matched: Boolean read FMatched write FMatched;
+    {* procedure/function 所在的 Token}
+    property Layer: Integer read GetLayer;
+    {* procedure/function 所在的 Token 的层次数}
+    property BeginMatched: Boolean read GetBeginMatched;
+    {* 该 procedure/function 是否已与找到了实现体的 begin}
+    property BeginToken: TCnWidePasToken read FBeginToken write FBeginToken;
+    {* 该 procedure/function 实现体的 begin}
+    property IsNested: Boolean read GetIsNested;
+    {* 该 procedure/function 是否是被嵌套定义的，也即是否在外一层
+       procedure/function 的声明部分（实现体 begin 之前}
+    property NestCount: Integer read FNestCount write FNestCount;
+    {* 该 procedure/function 的嵌套定义层数，也即离最近一个非嵌套 procedure/function 的层距离}
   end;
 
   TCnIfStatement = class
@@ -264,13 +278,13 @@ type
     // 2. 该子块无紧接的 begin，有同层次的分号（层次判断不易，改用当前块的前后判断规则），或
     // 3. 该子块无紧接的 begin，但有上一层次的 end（前面无分号）；如 if then begin if then Close end; 中的 Close 语句
     procedure EndLastElseIfBlock;
-    {* 令最后一个 else if 块结束}
+    {* 令最后一个 else if 块结束，来源是 end 或分号}
     procedure EndElseBlock;
-    {* 令 else 块结束}
+    {* 令 else 块结束，来源是 end 或分号}
     procedure EndIfBlock;
-    {* 令 if 块结束（不是整个 if 语句）}
+    {* 令 if 块结束（不是整个 if 语句），来源是 end 或分号}
     procedure EndIfAll;
-    {* 令整个 if 语句结束}
+    {* 令整个 if 语句结束，来源是 end 或分号}
 
     property Level: Integer read FLevel write FLevel;
     {* if 语句的层次，主要是 if 的层次}
@@ -424,15 +438,15 @@ procedure TCnWidePasStructParser.ParseSource(ASource: PWideChar; AIsDpr, AKeyOnl
   Boolean);
 var
   Lex: TCnPasWideLex;
-  ProcNestCount: Integer;
   Token, CurrMethod, CurrBlock, CurrMidBlock, CurrIfStart: TCnWidePasToken;
   Bookmark: TCnPasWideBookmark;
   IsClassOpen, IsClassDef, IsImpl, IsHelper, IsElseIf, ExpectElse: Boolean;
   IsRecordHelper, IsSealed, IsAbstract, IsRecord, IsForFunc: Boolean;
+  SameBlockMethod, CanEndBlock, CanEndMethod: Boolean;
   DeclareWithEndLevel: Integer;
   PrevTokenID: TTokenKind;
   PrevTokenStr: CnWideString;
-  AProcObj: TCnProcObj;
+  AProcObj, PrevProcObj: TCnProcObj;
   AIfObj: TCnIfStatement;
 
   procedure CalcCharIndexes(out ACharIndex: Integer; out AnAnsiIndex: Integer);
@@ -494,8 +508,15 @@ var
     Token.FItemIndex := FList.Count;
     if CurrBlock <> nil then
       Token.FItemLayer := CurrBlock.FItemLayer;
+
+    // CurrBlock 的 ItemLayer 包含了 MethodLayer，但如果没有 CurrBlock，
+    // 就得考虑用 CurrMethod 的 MethodLayer 来初始化 Token 的 ItemLayer。
     if CurrMethod <> nil then
+    begin
       Token.FMethodLayer := CurrMethod.FMethodLayer;
+      if CurrBlock = nil then
+        Token.FItemLayer := CurrMethod.FMethodLayer;
+    end;
     FList.Add(Token);
   end;
 
@@ -531,7 +552,6 @@ begin
     FMidBlockStack.Clear;
     FProcStack.Clear;  // 存储 procedure/function 实现的关键字以及其嵌套层次
     FIfStack.Clear;    // 存储 if 的嵌套信息
-    ProcNestCount := 0;
 
     Lex := TCnPasWideLex.Create(FSupportUnicodeIdent);
     Lex.Origin := PWideChar(ASource);
@@ -559,7 +579,7 @@ begin
         tkBegin, tkAsm,
         tkCase, tkTry, tkRepeat, tkIf, tkFor, tkWith, tkOn, tkWhile,
         tkRecord, tkObject, tkOf, tkEqual,
-        tkClass, tkInterface, tkDispInterface,
+        tkClass, tkInterface, tkDispinterface,
         tkExcept, tkFinally, tkElse,
         tkEnd, tkUntil, tkThen, tkDo]) then
       begin
@@ -591,14 +611,23 @@ begin
                   FMethodStack.Push(CurrMethod);
                 end
                 else
-                  Token.FMethodLayer := 0;
+                  Token.FMethodLayer := 1;
                 CurrMethod := Token;
 
                 // 碰到 procedure/function 实现时，推入堆栈并记录其层次，暂无 Layer 可记录。
+                if FProcStack.IsEmpty then
+                  PrevProcObj := nil
+                else
+                  PrevProcObj := TCnProcObj(FProcStack.Peek);
+
                 AProcObj := TCnProcObj.Create;
                 AProcObj.Token := Token;
                 FProcStack.Push(AProcObj);
-                Inc(ProcNestCount);
+
+                // 如果当前 procedure 在外面的 procedure 的 begin 后，则算匿名函数，不加嵌套数
+                // 如果外面没有 procedure，则更不算嵌套，默认是 0
+                if (PrevProcObj <> nil) and not PrevProcObj.BeginMatched then
+                  AProcObj.NestCount := PrevProcObj.NestCount + 1;
               end;
             end;
           tkInitialization, tkFinalization:
@@ -613,36 +642,36 @@ begin
           tkBegin, tkAsm:
             begin
               Token.FIsBlockStart := True;
-              if CurrMethod <> nil then
+              // 匿名函数会导致 CurrBlock 与 CurrMethod 都存在且内外关系不确定，
+              // 因此如 CurrBlock 存在，需要确定其远于 CurrMethod，这个 begin 才是 MethodStart。
+              if (CurrMethod <> nil) and ((CurrBlock = nil) or
+                (CurrBlock.ItemIndex < CurrMethod.ItemIndex)) then
                 Token.FIsMethodStart := True;
 
-              if CurrBlock <> nil then
-              begin
-                Token.FItemLayer := CurrBlock.FItemLayer + 1;
-                FBlockStack.Push(CurrBlock);
-              end
+              // 而且得 CurrBlock 比 CurrMethod 近，才能根据 CurrBlock 进一
+              // 否则要根据下面的 Method 来进一
+              if (CurrBlock <> nil) and ((CurrMethod = nil) or (CurrMethod.ItemIndex < CurrBlock.ItemIndex)) then
+                Token.FItemLayer := CurrBlock.FItemLayer + 1
+              else if CurrMethod <> nil then // 无 Block 或 Block 在 Method 外，是匿名函数，先进一层
+                Token.FItemLayer := CurrMethod.FItemLayer + 1
               else // 下面会根据是否在函数过程内来进层
                 Token.FItemLayer := 0;
 
-              CurrBlock := Token;
+              FBlockStack.Push(CurrBlock);
+              CurrBlock := Token; // begin/asm 既可以是 CurrBlock，也可以是 CurrMethod 的对应 begin/asm
 
               // 处理本 begin/asm 和 procedure/function 同级时的进层
               if FProcStack.Count > 0 then
               begin
                 AProcObj := TCnProcObj(FProcStack.Peek);
-                if not AProcObj.Matched then
+                if not AProcObj.BeginMatched then
                 begin
-                  // 碰到最外层的 procedure/function，begin/asm 进一层以符合常识
-                  if FProcStack.Count = 1 then
-                    Inc(Token.FItemLayer, 1)
-                  else
-                    Inc(Token.FItemLayer, ProcNestCount);
-                  // 其余情况，begin 要进 procedure/function 的未匹配的嵌套层数 - 1，
-                  // 也即当前 procedure/function 的直接嵌套层数
+                  // 当前 Proc 是嵌套函数时，begin 要进 procedure/function 的直接嵌套层数
+                  if AProcObj.IsNested then
+                    Inc(Token.FItemLayer, AProcObj.NestCount);
 
-                  AProcObj.Layer := Token.ItemLayer;    // Layer 记录 begin/asm 的层次
-                  AProcObj.Matched := True;
-                  Dec(ProcNestCount);
+                  // 记录配套的 begin/asm 及其层次
+                  AProcObj.BeginToken := Token;
                 end;
               end;
 
@@ -843,7 +872,7 @@ begin
                 Inc(DeclareWithEndLevel);
               end
               else // 硬修补，免得 unit 的 interface 以及 class procedure 等被高亮
-                DiscardToken(Token.TokenID in [tkClass, tkInterface, tkDispInterface]);
+                DiscardToken(Token.TokenID in [tkClass, tkInterface, tkDispinterface]);
             end;
           tkExcept, tkFinally:
             begin
@@ -910,6 +939,50 @@ begin
                       CurrMidBlock := nil;
                   end;
 
+                  // End 既可以结束 Block 也可以结束 procedure，没有必然的先后顺序，要看哪个近
+                  // 而且，倘若 CurrBlock 是 CurrMethod 的 begin/asm，则 End 要同时结束俩
+                  CanEndBlock := False;
+                  CanEndMethod := False;
+                  if (CurrBlock = nil) and (CurrMethod = nil) then
+                  begin
+                    CanEndBlock := False;
+                    CanEndMethod := False;
+                  end
+                  else if (CurrBlock = nil) and (CurrMethod <> nil) then
+                  begin
+                    CanEndBlock := False;
+                    CanEndMethod := True;
+                  end
+                  else if (CurrBlock <> nil) and (CurrMethod = nil) then
+                  begin
+                    CanEndBlock := True;
+                    CanEndMethod := False;
+                  end
+                  else if (CurrBlock <> nil) and (CurrMethod <> nil) then
+                  begin
+                    // 判断 CurrBlock 是不是 CurrMethod 对应的 begin，是则都能结束
+                    SameBlockMethod := False;
+                    if not FProcStack.IsEmpty then
+                    begin
+                      AProcObj := TCnProcObj(FProcStack.Peek);
+                      if (AProcObj.Token = CurrMethod) and (AProcObj.BeginToken = CurrBlock) then
+                        SameBlockMethod := True;
+                    end;
+
+                    if SameBlockMethod then
+                    begin
+                      CanEndMethod := True;
+                      CanEndBlock := True;
+                    end
+                    else
+                    begin
+                      CanEndBlock := CurrBlock.ItemIndex >= CurrMethod.ItemIndex;
+                      CanEndMethod := CurrMethod.ItemIndex >= CurrBlock.ItemIndex;
+                    end;
+                  end;
+
+                  if CanEndBlock or (Lex.TokenID <> tkEnd) then // 其他直接结束 CurrBlock，End 要结束的也是 CurrBlock
+                  begin
                   if FBlockStack.Count > 0 then
                   begin
                     CurrBlock := TCnWidePasToken(FBlockStack.Pop);
@@ -917,8 +990,12 @@ begin
                   else
                   begin
                     CurrBlock := nil;
+                    end;
+                  end;
 
-                    if (CurrMethod <> nil) and (Lex.TokenID = tkEnd) and (DeclareWithEndLevel <= 0) then
+                  if CanEndMethod and (Lex.TokenID = tkEnd) then  // 是 End 且要结束的是 CurrMethod
+                  begin
+                    if (CurrMethod <> nil) and (DeclareWithEndLevel <= 0) then
                     begin
                       Token.FIsMethodClose := True;
                       if FMethodStack.Count > 0 then
@@ -941,7 +1018,7 @@ begin
                 if FProcStack.Count > 0 then
                 begin
                   AProcObj := TCnProcObj(FProcStack.Peek);
-                  if AProcObj.Matched and (AProcObj.Layer = Token.ItemLayer) then
+                  if AProcObj.BeginMatched and (AProcObj.Layer = Token.ItemLayer) then
                     FProcStack.Pop.Free;
                 end;
 
@@ -1058,8 +1135,6 @@ begin
           begin
             AProcObj := TCnProcObj(FProcStack.Pop);
             AProcObj.Free;
-            if ProcNestCount > 0 then
-              Dec(ProcNestCount);
           end;
         end;
 
@@ -1537,6 +1612,26 @@ begin
     FLevel := Value.ItemLayer
   else
     FLevel := -1;
+end;
+
+{ TCnProcObj }
+
+function TCnProcObj.GetIsNested: Boolean;
+begin
+  Result := FNestCount > 0;
+end;
+
+function TCnProcObj.GetBeginMatched: Boolean;
+begin
+  Result := FBeginToken <> nil;
+end;
+
+function TCnProcObj.GetLayer: Integer;
+begin
+  if FBeginToken <> nil then
+    Result := FBeginToken.ItemLayer
+  else
+    Result := -1;
 end;
 
 initialization

@@ -1,8 +1,8 @@
 object CnTestPasForm: TCnTestPasForm
-  Left = 192
-  Top = 107
-  Width = 747
-  Height = 545
+  Left = 98
+  Top = 34
+  Width = 889
+  Height = 572
   Caption = 'Test Pascal Unit Token Parsing'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -39,8 +39,8 @@ object CnTestPasForm: TCnTestPasForm
   object mmoC: TMemo
     Left = 16
     Top = 56
-    Width = 707
-    Height = 201
+    Width = 849
+    Height = 161
     Anchors = [akLeft, akTop, akRight]
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
@@ -48,10 +48,39 @@ object CnTestPasForm: TCnTestPasForm
     Font.Name = 'Courier New'
     Font.Style = []
     Lines.Strings = (
-      'type'
-      '  TGuidHelper = record helper for TGUID'
-      '    function ToString: string;'
-      '  end;')
+      'unit a;'
+      'interface'
+      'implementation'
+      ''
+      'procedure TForm2;'
+      'begin'
+      '  AddEvent('
+      '    procedure'
+      '    begin'
+      '      CreateAnonymousThreadX('
+      '        procedure(aData: Pointer)'
+      '        begin'
+      '          aSysOptionArr := TSystemInfoArr.Create;'
+      '          try'
+      '            aThread.SetSyncPro('
+      '              procedure()'
+      ''
+      '                procedure'
+      '                begin'
+      ''
+      '                end;'
+      ''
+      ''
+      '              begin'
+      ''
+      '              end);'
+      '          finally'
+      '            aSysOptionArr.Free;'
+      '          end;'
+      '        end);'
+      '    end);'
+      'end;'
+      'end.')
     ParentFont = False
     ScrollBars = ssVertical
     TabOrder = 5
@@ -69,10 +98,17 @@ object CnTestPasForm: TCnTestPasForm
   end
   object mmoParse: TMemo
     Left = 16
-    Top = 272
-    Width = 707
-    Height = 225
+    Top = 232
+    Width = 849
+    Height = 292
     Anchors = [akLeft, akTop, akRight, akBottom]
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Courier New'
+    Font.Style = []
+    ParentFont = False
+    ScrollBars = ssVertical
     TabOrder = 6
   end
   object btnUses: TButton

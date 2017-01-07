@@ -74,13 +74,18 @@ begin
     for I := 0 to Parser.Count - 1 do
     begin
       Token := Parser.Tokens[I];
-      mmoParse.Lines.Add(Format('%3.3d Token. Line: %d, Col %2.2d, Position %4.4d. M/I Layer %d,%d. TokenKind %s, Token: %s',
+      mmoParse.Lines.Add(Format('#%3.3d. Line: %2.2d, Col %2.2d, Pos %4.4d. M/I Layer %d,%d. Kind: %-18s, Token: %-14s',
         [I, Token.LineNumber, Token.CharIndex, Token.TokenPos, Token.MethodLayer, Token.ItemLayer,
         GetEnumName(TypeInfo(TTokenKind), Ord(Token.TokenID)), Token.Token]
       ));
       if Token.IsMethodStart then
-        mmoParse.Lines[mmoParse.Lines.Count - 1] := mmoParse.Lines[mmoParse.Lines.Count - 1] +
-        ' *** MethodStart';
+        if Token.TokenID = tkBegin then
+          mmoParse.Lines[mmoParse.Lines.Count - 1] := mmoParse.Lines[mmoParse.Lines.Count - 1] +
+            ' *** MethodStart'
+        else
+          mmoParse.Lines[mmoParse.Lines.Count - 1] := mmoParse.Lines[mmoParse.Lines.Count - 1] +
+            ' --- MethodStart';
+
       if Token.IsMethodClose then
         mmoParse.Lines[mmoParse.Lines.Count - 1] := mmoParse.Lines[mmoParse.Lines.Count - 1] +
         ' *** MethodClose';
@@ -88,21 +93,38 @@ begin
     mmoParse.Lines.Add('');
 
     if Parser.BlockStartToken <> nil then
-      mmoParse.Lines.Add(Format('OuterStart: Line: %d, Col %2.2d. Layer: %d. Token: %s',
+      mmoParse.Lines.Add(Format('OuterStart: Line: %2.2d, Col %2.2d. Layer: %d. Token: %s',
        [Parser.BlockStartToken.LineNumber, Parser.BlockStartToken.CharIndex,
         Parser.BlockStartToken.ItemLayer, Parser.BlockStartToken.Token]));
     if Parser.BlockCloseToken <> nil then
-      mmoParse.Lines.Add(Format('OuterClose: Line: %d, Col %2.2d. Layer: %d. Token: %s',
+      mmoParse.Lines.Add(Format('OuterClose: Line: %2.2d, Col %2.2d. Layer: %d. Token: %s',
        [Parser.BlockCloseToken.LineNumber, Parser.BlockCloseToken.CharIndex,
         Parser.BlockCloseToken.ItemLayer, Parser.BlockCloseToken.Token]));
     if Parser.InnerBlockStartToken <> nil then
-      mmoParse.Lines.Add(Format('InnerStart: Line: %d, Col %2.2d. Layer: %d. Token: %s',
+      mmoParse.Lines.Add(Format('InnerStart: Line: %2.2d, Col %2.2d. Layer: %d. Token: %s',
        [Parser.InnerBlockStartToken.LineNumber, Parser.InnerBlockStartToken.CharIndex,
         Parser.InnerBlockStartToken.ItemLayer, Parser.InnerBlockStartToken.Token]));
     if Parser.InnerBlockCloseToken <> nil then
-      mmoParse.Lines.Add(Format('InnerClose: Line: %d, Col %2.2d. Layer: %d. Token: %s',
+      mmoParse.Lines.Add(Format('InnerClose: Line: %2.2d, Col %2.2d. Layer: %d. Token: %s',
        [Parser.InnerBlockCloseToken.LineNumber, Parser.InnerBlockCloseToken.CharIndex,
         Parser.InnerBlockCloseToken.ItemLayer, Parser.InnerBlockCloseToken.Token]));
+
+    if Parser.MethodStartToken <> nil then
+      mmoParse.Lines.Add(Format('MethodStartToken: Line: %2.2d, Col %2.2d. M/I Layer: %d,%d. Token: %s',
+       [Parser.MethodStartToken.LineNumber, Parser.MethodStartToken.CharIndex,
+        Parser.MethodStartToken.MethodLayer, Parser.MethodStartToken.ItemLayer, Parser.MethodStartToken.Token]));
+    if Parser.MethodCloseToken <> nil then
+      mmoParse.Lines.Add(Format('MethodCloseToken: Line: %2.2d, Col %2.2d. M/I Layer: %d,%d. Token: %s',
+       [Parser.MethodCloseToken.LineNumber, Parser.MethodCloseToken.CharIndex,
+        Parser.MethodCloseToken.MethodLayer, Parser.MethodCloseToken.ItemLayer, Parser.MethodCloseToken.Token]));
+    if Parser.ChildMethodStartToken <> nil then
+      mmoParse.Lines.Add(Format('ChildMethodStartToken: Line: %2.2d, Col %2.2d. M/I Layer: %d,%d. Token: %s',
+       [Parser.ChildMethodStartToken.LineNumber, Parser.ChildMethodStartToken.CharIndex,
+        Parser.ChildMethodStartToken.MethodLayer, Parser.ChildMethodStartToken.ItemLayer, Parser.ChildMethodStartToken.Token]));
+    if Parser.ChildMethodCloseToken <> nil then
+      mmoParse.Lines.Add(Format('ChildMethodCloseToken: Line: %2.2d, Col %2.2d. M/I Layer: %d,%d. Token: %s',
+       [Parser.ChildMethodCloseToken.LineNumber, Parser.ChildMethodCloseToken.CharIndex,
+        Parser.ChildMethodCloseToken.MethodLayer, Parser.ChildMethodCloseToken.ItemLayer, Parser.ChildMethodCloseToken.Token]));
   finally
     Parser.Free;
     Stream.Free;
