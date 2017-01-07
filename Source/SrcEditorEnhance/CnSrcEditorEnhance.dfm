@@ -6,7 +6,6 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
   ClientHeight = 473
   ClientWidth = 401
   KeyPreview = True
-  OldCreateOrder = True
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
   PixelsPerInch = 96

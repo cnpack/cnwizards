@@ -123,6 +123,16 @@ begin
       NextRadioButton := rbCppHPair;
 
     Key := 0;
+  end
+  else if (Key = VK_UP) and (Shift = [ssAlt]) then
+  begin
+    // Change Case to Upper
+    edtRename.Text := UpperCase(edtRename.Text);
+  end
+  else if (Key = VK_DOWN) and (Shift = [ssAlt]) then
+  begin
+    // Change Case to Lower
+    edtRename.Text := LowerCase(edtRename.Text);
   end;
 
   if NextRadioButton <> nil then

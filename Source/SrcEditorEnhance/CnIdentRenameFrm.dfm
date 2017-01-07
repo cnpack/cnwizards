@@ -1,11 +1,9 @@
 inherited CnIdentRenameForm: TCnIdentRenameForm
   Left = 352
   Top = 202
-  BorderStyle = bsDialog
+  Width = 251
+  Height = 262
   Caption = 'Rename Identifier'
-  ClientHeight = 235
-  ClientWidth = 242
-  OldCreateOrder = True
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
@@ -20,6 +18,7 @@ inherited CnIdentRenameForm: TCnIdentRenameForm
     Top = 72
     Width = 225
     Height = 121
+    Anchors = [akLeft, akTop, akRight]
     Caption = 'Replace &Range'
     TabOrder = 1
     object rbCurrentProc: TRadioButton
@@ -60,6 +59,7 @@ inherited CnIdentRenameForm: TCnIdentRenameForm
     Top = 40
     Width = 225
     Height = 21
+    Anchors = [akLeft, akTop, akRight]
     TabOrder = 0
     OnKeyDown = edtRenameKeyDown
   end
@@ -68,6 +68,7 @@ inherited CnIdentRenameForm: TCnIdentRenameForm
     Top = 204
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&OK'
     Default = True
     ModalResult = 1
@@ -78,6 +79,7 @@ inherited CnIdentRenameForm: TCnIdentRenameForm
     Top = 204
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
