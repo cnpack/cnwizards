@@ -29,7 +29,9 @@ unit CnFastList;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2015.06.29 V1.1
+* 修改记录：2017.01.11 V1.2
+*               增加作为队列和栈使用的 Push/Pop/Peek 方法
+*           2015.06.29 V1.1
 *               去除几处边界检查操作以增加性能，略危险
 *           2008.06.20 V1.0
 *               创建单元
@@ -78,7 +80,17 @@ type
     procedure Delete(Index: Integer);
     function First: Pointer;
     function IndexOf(Item: Pointer): Integer;
+    procedure Insert(Index: Integer; Item: Pointer);
     function Last: Pointer;
+
+    procedure StackPush(Item: Pointer);
+    function StackPop: Pointer;
+    function StackPeek: Pointer;
+
+    procedure QueuePush(Item: Pointer);
+    function QueuePop: Pointer;
+    function QueuePeek: Pointer;
+
     property Capacity: Integer read FCapacity write SetCapacity;
     property Count: Integer read FCount write SetCount;
     property Items[Index: Integer]: Pointer read Get write Put; default;
@@ -251,16 +263,61 @@ begin
   end;
 end;
 
+function TCnBaseList.QueuePeek: Pointer;
+begin
+  if FCount <= 0  then
+    Error(SListIndexError, FCount);
+  Result := Last;
+end;
+
+function TCnBaseList.QueuePop: Pointer;
+begin
+  Result := QueuePeek;
+  Delete(FCount - 1);
+end;
+
+procedure TCnBaseList.QueuePush(Item: Pointer);
+begin
+  Insert(0, Item);
+end;
+
+function TCnBaseList.StackPeek: Pointer;
+begin
+  if FCount <= 0  then
+    Error(SListIndexError, FCount);
+  Result := Last;
+end;
+
+function TCnBaseList.StackPop: Pointer;
+begin
+  Result := StackPeek;
+  Delete(FCount - 1);
+end;
+
+procedure TCnBaseList.StackPush(Item: Pointer);
+begin
+  Add(Item);
+end;
+
+procedure TCnBaseList.Insert(Index: Integer; Item: Pointer);
+begin
+  if (Index < 0) or (Index > FCount) then
+    Error(SListIndexError, Index);
+  if FCount = FCapacity then
+    Grow;
+  if Index < FCount then
+    System.Move(FList^[Index], FList^[Index + 1],
+      (FCount - Index) * SizeOf(Pointer));
+  FList^[Index] := Item;
+  Inc(FCount);
+end;
+
 { TCnList }
 
 procedure TCnList.Assign(Source: TCnList);
 begin
   if Source <> nil then
   begin
-//    Clear;
-//    for I := 0 to Source.Count - 1 do
-//      Add(Source[I]);
-
     DirectSetCapacity(Source.Capacity);
     FCount := Source.Count;
     if Source.FList <> nil then
