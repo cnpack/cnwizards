@@ -6,6 +6,7 @@ inherited CnBookmarkForm: TCnBookmarkForm
   Caption = 'Browse Bookmarks'
   KeyPreview = True
   Position = poScreenCenter
+  OnDeactivate = FormDeactivate
   OnHide = FormHide
   OnKeyPress = FormKeyPress
   OnShow = FormShow
@@ -134,6 +135,7 @@ inherited CnBookmarkForm: TCnBookmarkForm
       Align = alBottom
       AutoSnap = False
       ResizeStyle = rsUpdate
+      OnMoved = SplitterMoved
     end
     object ListView: TListView
       Left = 0

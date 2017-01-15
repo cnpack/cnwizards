@@ -108,6 +108,8 @@ type
     procedure btnDeleteClick(Sender: TObject);
     procedure FormHide(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure SplitterMoved(Sender: TObject);
+    procedure FormDeactivate(Sender: TObject);
   private
     { Private declarations }
     List: TObjectList;
@@ -123,6 +125,7 @@ type
     procedure UpdateListView;
     procedure UpdateStatusBar;
     procedure UpdatePreview;
+    procedure SyncSettings;
   protected
     Editor: IOTASourceEditor;
     APos: TOTACharPos;
@@ -151,6 +154,8 @@ type
     FHighlightFont: TFont;
     FAutoRefresh: Boolean;
     FRefreshInterval: Integer;
+    FRichEditHeight: Integer;
+    FWidthString: string;
     procedure SourceEditorNotifier(SourceEditor: IOTASourceEditor;
       NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
     procedure LoadBookmark(SourceEditor: IOTASourceEditor);
@@ -454,6 +459,8 @@ begin
     FHighlightFont := ReadFont('', csHighlightFont, FHighlightFont);
     FAutoRefresh := ReadBool('', csAutoRefresh, FAutoRefresh);
     FRefreshInterval := ReadInteger('', csRefreshInterval, FRefreshInterval);
+    FRichEditHeight := ReadInteger('', csEditHeight, 100);
+    FWidthString := ReadString('', csColumnWidth, '');
   finally
     Free;
   end;
@@ -470,6 +477,8 @@ begin
     WriteFont('', csHighlightFont, FHighlightFont);
     WriteBool('', csAutoRefresh, FAutoRefresh);
     WriteInteger('', csRefreshInterval, FRefreshInterval);
+    WriteInteger('', csEditHeight, FRichEditHeight);
+    WriteString('', csColumnWidth, FWidthString);
     ClearInvalidBookmarks(Ini);
   finally
     Free;
@@ -584,6 +593,8 @@ begin
   Wizard := TCnBookmarkWizard(CnWizardMgr.WizardByClass(TCnBookmarkWizard));
   Icon := Wizard.Icon;
   ShowHint := WizOptions.ShowHint;
+  RichEdit.Height := Wizard.FRichEditHeight;
+  SetListViewWidthString(ListView, Wizard.FWidthString);
 end;
 
 destructor TCnBookmarkForm.Destroy;
@@ -1045,6 +1056,22 @@ end;
 function TCnBookmarkForm.GetHelpTopic: string;
 begin
   Result := 'CnBookmarkWizard';
+end;
+
+procedure TCnBookmarkForm.SplitterMoved(Sender: TObject);
+begin
+  SyncSettings;
+end;
+
+procedure TCnBookmarkForm.SyncSettings;
+begin
+  Wizard.FRichEditHeight := RichEdit.Height;
+  Wizard.FWidthString := GetListViewWidthString(ListView);
+end;
+
+procedure TCnBookmarkForm.FormDeactivate(Sender: TObject);
+begin
+  SyncSettings;
 end;
 
 initialization
