@@ -196,4 +196,15 @@ inherited CnBookmarkForm: TCnBookmarkForm
     Left = 16
     Top = 326
   end
+  object dlgFont: TFontDialog
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    MinFontSize = 0
+    MaxFontSize = 0
+    Left = 56
+    Top = 326
+  end
 end

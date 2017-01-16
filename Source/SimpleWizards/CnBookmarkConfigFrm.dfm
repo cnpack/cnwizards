@@ -1,15 +1,15 @@
 inherited CnBookmarkConfigForm: TCnBookmarkConfigForm
-  Left = 405
-  Top = 296
+  Left = 408
+  Top = 204
   BorderStyle = bsDialog
   Caption = 'Bookmark Manager Settings'
-  ClientHeight = 221
+  ClientHeight = 278
   ClientWidth = 264
   PixelsPerInch = 96
   TextHeight = 13
   object btnOK: TButton
     Left = 102
-    Top = 192
+    Top = 248
     Width = 75
     Height = 21
     Caption = '&OK'
@@ -19,7 +19,7 @@ inherited CnBookmarkConfigForm: TCnBookmarkConfigForm
   end
   object btnCancel: TButton
     Left = 182
-    Top = 192
+    Top = 248
     Width = 75
     Height = 21
     Cancel = True
@@ -31,22 +31,22 @@ inherited CnBookmarkConfigForm: TCnBookmarkConfigForm
     Left = 8
     Top = 8
     Width = 249
-    Height = 129
+    Height = 185
     Caption = '&Browsing Settings'
     TabOrder = 0
     object Label1: TLabel
       Left = 8
       Top = 24
-      Width = 67
+      Width = 68
       Height = 13
-      Caption = 'Show nearby:'
+      Caption = 'Show Nearby:'
     end
     object Label2: TLabel
       Left = 200
       Top = 24
-      Width = 25
+      Width = 28
       Height = 13
-      Caption = 'lines.'
+      Caption = 'Lines.'
     end
     object lbl1: TLabel
       Left = 26
@@ -65,16 +65,16 @@ inherited CnBookmarkConfigForm: TCnBookmarkConfigForm
     object btnSourceFont: TButton
       Left = 8
       Top = 96
-      Width = 113
+      Width = 230
       Height = 21
       Caption = 'Source Code &Font'
       TabOrder = 3
       OnClick = btnSourceFontClick
     end
     object btnHighlightFont: TButton
-      Left = 128
-      Top = 96
-      Width = 105
+      Left = 8
+      Top = 124
+      Width = 230
       Height = 21
       Caption = 'High&light Font'
       TabOrder = 4
@@ -110,10 +110,19 @@ inherited CnBookmarkConfigForm: TCnBookmarkConfigForm
       TabOrder = 2
       Value = 0
     end
+    object btnListFont: TButton
+      Left = 8
+      Top = 152
+      Width = 230
+      Height = 21
+      Caption = 'L&ist Font'
+      TabOrder = 5
+      OnClick = btnListFontClick
+    end
   end
   object gwBookmark: TGroupBox
     Left = 8
-    Top = 144
+    Top = 200
     Width = 249
     Height = 41
     Caption = 'Bookm&ark Settings'
@@ -136,7 +145,7 @@ inherited CnBookmarkConfigForm: TCnBookmarkConfigForm
     MinFontSize = 0
     MaxFontSize = 0
     Left = 8
-    Top = 184
+    Top = 240
   end
   object HighlightFontDialog: TFontDialog
     Font.Charset = DEFAULT_CHARSET
@@ -147,6 +156,17 @@ inherited CnBookmarkConfigForm: TCnBookmarkConfigForm
     MinFontSize = 0
     MaxFontSize = 0
     Left = 40
-    Top = 184
+    Top = 240
+  end
+  object ListFontDialog: TFontDialog
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    MinFontSize = 0
+    MaxFontSize = 0
+    Left = 72
+    Top = 240
   end
 end

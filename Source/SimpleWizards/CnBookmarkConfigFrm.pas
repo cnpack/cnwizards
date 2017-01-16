@@ -62,9 +62,12 @@ type
     lbl1: TLabel;
     seInterval: TCnSpinEdit;
     lbl2: TLabel;
+    ListFontDialog: TFontDialog;
+    btnListFont: TButton;
     procedure btnSourceFontClick(Sender: TObject);
     procedure btnHighlightFontClick(Sender: TObject);
     procedure seDispLinesKeyPress(Sender: TObject; var Key: Char);
+    procedure btnListFontClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -72,7 +75,7 @@ type
   end;
 
 function ShowBookmarkConfigForm(var DispLines: Integer; var SaveBookmark,
-  AutoRefresh: Boolean; var Interval: Integer; SourceFont, HighlightFont:
+  AutoRefresh: Boolean; var Interval: Integer; SourceFont, HighlightFont, ListFont:
   TFont): Boolean;
 
 {$ENDIF CNWIZARDS_CNBOOKMARKWIZARD}
@@ -84,8 +87,8 @@ implementation
 {$R *.DFM}
 
 function ShowBookmarkConfigForm(var DispLines: Integer; var SaveBookmark,
-  AutoRefresh: Boolean; var Interval: Integer; SourceFont, HighlightFont:
-  TFont): Boolean;
+  AutoRefresh: Boolean; var Interval: Integer; SourceFont, HighlightFont,
+  ListFont: TFont): Boolean;
 begin
   with TCnBookmarkConfigForm.Create(nil) do
   try
@@ -96,6 +99,7 @@ begin
     seInterval.Value := Interval;
     SourceFontDialog.Font.Assign(SourceFont);
     HighlightFontDialog.Font.Assign(HighlightFont);
+    ListFontDialog.Font.Assign(ListFont);
     Result := ShowModal = mrOk;
     if Result then
     begin
@@ -105,6 +109,7 @@ begin
       Interval := seInterval.Value;
       SourceFont.Assign(SourceFontDialog.Font);
       HighlightFont.Assign(HighlightFontDialog.Font);
+      ListFont.Assign(ListFontDialog.Font);
     end;
   finally
     Free;
@@ -135,6 +140,12 @@ begin
     ModalResult := mrOk;
     Key := #0;
   end
+end;
+
+
+procedure TCnBookmarkConfigForm.btnListFontClick(Sender: TObject);
+begin
+  ListFontDialog.Execute;
 end;
 
 {$ENDIF CNWIZARDS_CNBOOKMARKWIZARD}

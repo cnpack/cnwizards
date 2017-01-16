@@ -96,6 +96,7 @@ type
     ToolButton4: TToolButton;
     btnDelete: TToolButton;
     tmrRefresh: TTimer;
+    dlgFont: TFontDialog;
     procedure cbbUnitChange(Sender: TObject);
     procedure ListViewChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -151,6 +152,7 @@ type
     FDispLines: Integer;
     FSaveBookmark: Boolean;
     FSourceFont: TFont;
+    FListFont: TFont;
     FHighlightFont: TFont;
     FAutoRefresh: Boolean;
     FRefreshInterval: Integer;
@@ -208,6 +210,7 @@ const
   csFileName = 'FileName';
   csSourceFont = 'Font.Source';
   csHighlightFont = 'Font.Highlight';
+  csListFont = 'Font.List';
   csAutoRefresh = 'AutoRefresh';
   csRefreshInterval = 'RefreshInterval';
   csItem = 'Item';
@@ -235,6 +238,7 @@ begin
   FHighlightFont := TFont.Create;
   FHighlightFont.Assign(FSourceFont);
   FHighlightFont.Color := clTeal;
+  FListFont := TFont.Create;
   FAutoRefresh := True;
   FRefreshInterval := 1000;
   CnWizNotifierServices.AddSourceEditorNotifier(SourceEditorNotifier);
@@ -253,6 +257,7 @@ begin
   CnWizNotifierServices.RemoveSourceEditorNotifier(SourceEditorNotifier);
   FHighlightFont.Free;
   FSourceFont.Free;
+  FListFont.Free;
   inherited;
 end;
 
@@ -457,6 +462,7 @@ begin
     FSaveBookmark := ReadBool('', csSaveBookmark, True);
     FSourceFont := ReadFont('', csSourceFont, FSourceFont);
     FHighlightFont := ReadFont('', csHighlightFont, FHighlightFont);
+    FListFont := ReadFont('', csListFont, FListFont);
     FAutoRefresh := ReadBool('', csAutoRefresh, FAutoRefresh);
     FRefreshInterval := ReadInteger('', csRefreshInterval, FRefreshInterval);
     FRichEditHeight := ReadInteger('', csEditHeight, 100);
@@ -475,6 +481,7 @@ begin
     WriteBool('', csSaveBookmark, FSaveBookmark);
     WriteFont('', csSourceFont, FSourceFont);
     WriteFont('', csHighlightFont, FHighlightFont);
+    WriteFont('', csListFont, FListFont);
     WriteBool('', csAutoRefresh, FAutoRefresh);
     WriteInteger('', csRefreshInterval, FRefreshInterval);
     WriteInteger('', csEditHeight, FRichEditHeight);
@@ -488,7 +495,7 @@ end;
 function TCnBookmarkWizard.DoConfig: Boolean;
 begin
   Result := ShowBookmarkConfigForm(FDispLines, FSaveBookmark, FAutoRefresh,
-    FRefreshInterval, FSourceFont, FHighlightFont);
+    FRefreshInterval, FSourceFont, FHighlightFont, FListFont);
   if Result then
   begin
     DoSaveSettings;
@@ -594,6 +601,8 @@ begin
   Icon := Wizard.Icon;
   ShowHint := WizOptions.ShowHint;
   RichEdit.Height := Wizard.FRichEditHeight;
+  if Wizard.FListFont.Name <> '' then
+    ListView.Font := Wizard.FListFont;
   SetListViewWidthString(ListView, Wizard.FWidthString);
 end;
 
@@ -915,6 +924,8 @@ end;
 procedure TCnBookmarkForm.UpdateConfig;
 begin
   UpdatePreview;
+  if Wizard.FListFont.Name <> '' then
+    ListView.Font := Wizard.FListFont;
   tmrRefresh.Enabled := Wizard.FAutoRefresh;
   tmrRefresh.Interval := Wizard.FRefreshInterval;
 end;
