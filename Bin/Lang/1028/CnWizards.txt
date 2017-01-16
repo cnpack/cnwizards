@@ -284,6 +284,7 @@ TCnBookmarkConfigForm.Label1.Caption=源代碼顯示前後各：
 TCnBookmarkConfigForm.Label2.Caption=行。
 TCnBookmarkConfigForm.btnSourceFont.Caption=源代碼顯示字體(&F)
 TCnBookmarkConfigForm.btnHighlightFont.Caption=高亮顯示字體(&L)
+TCnBookmarkConfigForm.btnListFont.Caption=列表字體(&I)
 TCnBookmarkConfigForm.gwBookmark.Caption=書籤設置(&A)
 TCnBookmarkConfigForm.cbSaveBookmark.Caption=自動保存和裝載書籤。
 TCnBookmarkConfigForm.chkAutoRefresh.Caption=自動刷新書籤列表。

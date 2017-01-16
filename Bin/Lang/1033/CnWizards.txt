@@ -284,6 +284,7 @@ TCnBookmarkConfigForm.Label1.Caption=Show Nearby:
 TCnBookmarkConfigForm.Label2.Caption=Lines.
 TCnBookmarkConfigForm.btnSourceFont.Caption=Source Code &Font
 TCnBookmarkConfigForm.btnHighlightFont.Caption=High&light Font
+TCnBookmarkConfigForm.btnListFont.Caption=L&ist Font
 TCnBookmarkConfigForm.gwBookmark.Caption=Bookm&ark Settings
 TCnBookmarkConfigForm.cbSaveBookmark.Caption=Auto Save/Load Bookmarks.
 TCnBookmarkConfigForm.chkAutoRefresh.Caption=Auto Refresh Bookmark List.

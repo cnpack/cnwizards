@@ -284,6 +284,7 @@ TCnBookmarkConfigForm.Label1.Caption=源代码显示前后各：
 TCnBookmarkConfigForm.Label2.Caption=行。
 TCnBookmarkConfigForm.btnSourceFont.Caption=源代码显示字体(&F)
 TCnBookmarkConfigForm.btnHighlightFont.Caption=高亮显示字体(&L)
+TCnBookmarkConfigForm.btnListFont.Caption=列表字体(&I)
 TCnBookmarkConfigForm.gwBookmark.Caption=书签设置(&A)
 TCnBookmarkConfigForm.cbSaveBookmark.Caption=自动保存和装载书签。
 TCnBookmarkConfigForm.chkAutoRefresh.Caption=自动刷新书签列表。
