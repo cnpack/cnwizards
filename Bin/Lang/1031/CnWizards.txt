@@ -284,6 +284,7 @@ TCnBookmarkConfigForm.Label1.Caption=zeige in der Nähe:
 TCnBookmarkConfigForm.Label2.Caption=Linien.
 TCnBookmarkConfigForm.btnSourceFont.Caption=Quelltext &Schriftart
 TCnBookmarkConfigForm.btnHighlightFont.Caption=High&light Schriftart
+TCnBookmarkConfigForm.btnListFont.Caption=L&iste Schriftart
 TCnBookmarkConfigForm.gwBookmark.Caption=Positionsmarken Einstellungen
 TCnBookmarkConfigForm.cbSaveBookmark.Caption=Auto speichern / Laden der Pos.Marken.
 TCnBookmarkConfigForm.chkAutoRefresh.Caption=Auto Refresh Positionsmarken Liste.

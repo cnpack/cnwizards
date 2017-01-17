@@ -284,6 +284,7 @@ TCnBookmarkConfigForm.Label1.Caption=Показывать код:
 TCnBookmarkConfigForm.Label2.Caption=строки.
 TCnBookmarkConfigForm.btnSourceFont.Caption=Шрифт кода
 TCnBookmarkConfigForm.btnHighlightFont.Caption=Шрифт закладки
+TCnBookmarkConfigForm.btnListFont.Caption=шрифт Список
 TCnBookmarkConfigForm.gwBookmark.Caption=Настройки закладок
 TCnBookmarkConfigForm.cbSaveBookmark.Caption=Авто загрузка/сохранение закладок
 TCnBookmarkConfigForm.chkAutoRefresh.Caption=Автообновление списка закладок
