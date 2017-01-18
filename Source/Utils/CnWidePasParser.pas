@@ -42,7 +42,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, mPasLex, CnPasWideLex, mwBCBTokenList,
-  Contnrs, CnFastList, CnPasCodeParser, CnQueue;
+  Contnrs, CnFastList, CnPasCodeParser, CnContainers;
 
 type
 {$IFDEF UNICODE}

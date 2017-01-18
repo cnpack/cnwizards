@@ -48,7 +48,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, mPasLex, mwBCBTokenList,
-  Contnrs, CnCommon, CnFastList, CnQueue;
+  Contnrs, CnCommon, CnFastList, CnContainers;
 
 const
   CN_TOKEN_MAX_SIZE = 63;
