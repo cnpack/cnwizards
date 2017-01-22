@@ -573,15 +573,16 @@ begin
         FIfStack.Pop.Free;
       ExpectElse := False;
 
-      if {IsImpl and } (Lex.TokenID in [tkCompDirect, // Allow CompDirect
-        tkProcedure, tkFunction, tkConstructor, tkDestructor,
+      if {IsImpl and } (Lex.TokenID in [tkCompDirect]) or // Allow CompDirect
+        ((PrevTokenID <> tkAmpersand) and (Lex.TokenID in
+        [tkProcedure, tkFunction, tkConstructor, tkDestructor,
         tkInitialization, tkFinalization,
         tkBegin, tkAsm,
         tkCase, tkTry, tkRepeat, tkIf, tkFor, tkWith, tkOn, tkWhile,
         tkRecord, tkObject, tkOf, tkEqual,
         tkClass, tkInterface, tkDispinterface,
         tkExcept, tkFinally, tkElse,
-        tkEnd, tkUntil, tkThen, tkDo]) then
+        tkEnd, tkUntil, tkThen, tkDo])) then
       begin
         NewToken;
         case Lex.TokenID of
