@@ -20,9 +20,9 @@
 </table>
 <p class="title">Code Input Helper</p>
 <p class="text">Code Input Helper provides a way to fast inputting code. When user inputs characters in Code Editor, the List Window will popup automatically and the matched symbols will be listed in it. Now the tool only supports Delphi. About C++Builder, it can only popup IDE's code insight instead.</p>
-<p class="text">List Window and its context menu show as below:</p>  
+<p class="text">List Window and its context menu show as below:</p>
 <p class="text" align="center">
-<img src="inputhelper.png"> 
+<img src="inputhelper.png">
 </p>
 <p class="text">Now, if you input character continue, the mismatched item will be discarded. You can use Up, Down, PageUp, PageDown, Shift+Home, Shift+End and Left Button to select current item. Left and Right key can select the matched position of identifier. BackSpace and Delete key can update the list also. When press Enter, Space, Tab, Double-Click or one of the special characters in settings, the content of selected item will send to the editor. Esc, Ctrl and other function keys can close the list.</p>
 <p class="text">Code Input Helper can also input following special contents except normal identifiers:</p>
@@ -35,7 +35,7 @@
 	<li>
 	<p class="text">Comments in XML Style. When input '///', all comment templates in XML Style will be listed.</p></li>
 	<li>
-	<p class="text">Comments in JavaDoc Style. When input '{*', all comment templates in 
+	<p class="text">Comments in JavaDoc Style. When input '{*', all comment templates in
 	JavaDoc Style will be listed.</p></li>
 	<li>
 	<p class="text">Code Templates defined in IDE. Such as trycf, forb and etc.</p></li>
@@ -45,8 +45,8 @@
 	<p class="text">Macros are supported in code template.</p></li>
 </ul>
 <p class="text"><b>Tip</b>: If you feel Code Input Helper is better then IDE's Code Completion, you can disable IDE's Code Completion, then Input Helper will be used when input dot. This is useful in Delphi 5 specially.</p>
-<p class="text">&nbsp;</p>  
-<p class="text"><b>Context Menu</b></p> 
+<p class="text">&nbsp;</p>
+<p class="text"><b>Context Menu</b></p>
 <div align="center">
 </div>
 <ul>
@@ -56,7 +56,7 @@
 	<li>
     <p class="text"><b>Display Speed Buttons</b>: Display speed buttons on the right of List Window or not.</p>
   </li>
-  <li> 
+  <li>
     <p class="text"><b>Sort Style</b>: Automatic style uses scope value of items to sort. By Text, Length and Kind styles sort items by their contents.</p>
   </li>
   <li>
@@ -105,29 +105,29 @@
 <li><p class="text"><b>Output Settings</b></p></li>
 <ul>
 	<li>
-	<p class="text"><b>Input Current Item when Press</b>: 
+	<p class="text"><b>Input Current Item when Press</b>:
 	When the list showing, if press one of these characters, then send the content of current item to editor.</p></li>
 	<li>
-	<p class="text"><b>DO NOT popup after these characters</b>: 
+	<p class="text"><b>DO NOT popup after these characters</b>:
 	If you want't to display list window after pressing some characters, you can add them to these list(Use comma to seperate).</p></li>
-  <li> 
-    <p class="text"><b>Symbol Output Style</b>: 
+  <li>
+    <p class="text"><b>Symbol Output Style</b>:
 	When the cursor is in the middle of current identifier, the output is affected by this setting. Automatic style will replace the left side or whole identifier by match degree.</p>
   </li>
-	<li> 
+	<li>
     <p class="text"><b>Allow Inputting Current Item by Pressing Space</b>: When the list showing, whether send content of current item to editor by pressing Space key.</p>
   </li>
-  <li> 
+  <li>
     <p class="text"><b>Ignore Space Char after Inputting Current Item.</b>: Whether Ignore the Space Char itself after sending content of current item to editor by pressing Space key. If not, there will be a space char after entered current item in Editor.</p>
   </li>
-	<li> 
+	<li>
     <p class="text"><b>Select and Input Middle-Matched Symbol Only when Pressing Enter</b>: If current item is Middle-Matched for the input identifier, whether send it to editor only by pressing Enter.</p>
   </li>
 	<li>
 	<p class="text"><b>Auto Line Feed after Keyword when Pressing Enter</b>: When press Enter after inputting full keyword, whether auto inserts a new line.</p></li>
 	<li>
-	<p class="text"><b>Auto Insert Brackets for Function Having Parameters</b>: 
-	If current item is a function or procedure having parameters, whether auto 
+	<p class="text"><b>Auto Insert Brackets for Function Having Parameters</b>:
+	If current item is a function or procedure having parameters, whether auto
 	insert brackets and call parameter hint.</p></li>
 </ul>
 </ul>
@@ -140,42 +140,42 @@
 	<p class="text"><b>List Settings</b></p></li>
 	<ul>
 	<li>
-	<p class="text"><b>List sorted by</b>:  
+	<p class="text"><b>List sorted by</b>:
 	Automatic style uses scope value of items to sort. By Text, Length and Kind styles sort items by their contents.</p></li>
-  <li> 
+  <li>
     <p class="text"><b>List Font</b>: Set the font name and size used in symbol list.</p>
   </li>
-  <li> 
+  <li>
     <p class="text"><b>Min Length of Symbol</b>: Symbols can displayed in list only when their length is great than or equal to this number.</p>
   </li>
-	<li> 
-    <p class="text"><b>Reserved Words</b>: Set the capitalization style for 
+	<li>
+    <p class="text"><b>Reserved Words</b>: Set the capitalization style for
 	reserved words.</p>
   </li>
-  <li> 
-    <p class="text"><b>Display Middle-Matched Symbols</b>:  
-	Whether keep the symbols which Middle-Matched to current symbol. If enable, the matched part will be highlighted, else only First-Matched symbols will be kept.</p>
+  <li>
+    <p class="text"><b>Symbol Match Mode</b>:
+	This Option can control the Match Mode of Symbol in List. Modes are "From Beginning", "In Middle" and "Fuzzy".</p>
   </li>
-	<li> 
-    <p class="text"><b>Remove Duplicate Symbols</b>: Whether remove other 
+	<li>
+    <p class="text"><b>Remove Duplicate Symbols</b>: Whether remove other
 	duplicate symbols and keep one only. It will lose a little performance.</p>
   </li>
 	<li>
     <p class="text"><b>Adjust Priority Automatically according to the Frequency</b>: If enable, the symbols which user input frequency will displayed in the top of list.</p>
   </li>
-  <li> 
+  <li>
     <p class="text"><b>Use the Compatible Way to Obtain Symbols</b>: If Input Helper causes IDE or compiler unstable in some versions, you may try to enable this switch. It will be a little slower.</p>
   </li>
-  <li> 
+  <li>
     <p class="text"><b>Prefetch Symbols List When Opening Project</b>：This option allows Input Helper to prefetch symbols list in background thread when opening project to make Input Helper popup faster in the first usage.</p>
   </li>
 </ul>
 </ul>
 <ul>
-  <li> 
+  <li>
     <p class="text"><b>Content Settings</b></p>
   </li>
-  <ul>  
+  <ul>
   <li><b>Symbol Provider List</b>: Select the symbol providers which you want to used.</li>
 	<li><b>Symbol Types</b>: Select the symbol types which you want to used.</li>
   </ul>
@@ -183,20 +183,20 @@
   <p class="text" align="center">
 	<img src="inputhelperconf2.png"></p>
 <ul>
-  <li> 
+  <li>
     <p class="text"><b>Symbol List</b>: Display all User-defined symbols.</p>
   </li>
   <ul>
-  
+
   <li><b>List</b>: Select current list to modify.</li>
-  
+
   <li><b>Add</b>: Add a new symbol, may be normal identifier, compiler directive, comment, template, etc.</li>
 	<li><b>Duplicate</b>: Copy current item to a new item.</li>
 	<li><b>Delete</b>: Delete current item.</li>
 	<li><b>Default</b>: Restore current list&#39;s context to default.</li>
 	<li><b>Edit</b>: Modify current item.</li>
 	<li><b>Import</b>: Import symbols from data file. Can select replace or append mode.</li>
-	<li><b>Export</b>: Export all symbols to data file.</li>  
+	<li><b>Export</b>: Export all symbols to data file.</li>
   </ul>
   </ul>
   <ul>
@@ -204,11 +204,11 @@
     <p class="text"><b>Code Template</b>: Edit current code template, only used in "Comment" and "Template" type.</p>
   </li>
   <ul>
-  
+
   <li><b>Insert Macro</b>: Insert a pre-defined macro in current position. When click this button, a macro list menu will displayed.</li>
 	<li><b>User Macro</b>: Insert a user-defined macro in current position. When a template include User-defined macro execute, user may input the value in macro dialog.</li>
 	<li><b>Cursor</b>: Insert a cursor flag in current position, namely "|". If more than one flag exist, only the first one is valid.</li>
-	<li><b>Clear</b>: Clear the template.</li>  
+	<li><b>Clear</b>: Clear the template.</li>
   </ul>
   </ul>
 <ul>
@@ -218,7 +218,7 @@
 	<p class="text"><b>Cancel</b>: Cancel the dialog.</p></li>
   </ul>
 <ul>
-  <li> 
+  <li>
     <p class="text"><b>Help</b>: Show this help.</p>
   </li>
 </ul>
@@ -240,7 +240,7 @@
 	<p class="text" align="left"><b>Auto Indent when Multi-Line</b>: If a template is Multi-Line and this switch is on, then every line will indent automatically when output.</p>
 	</li>
 	<li>
-	<p class="text" align="left"><b>Always Popup Even Inputting Text is Full 
+	<p class="text" align="left"><b>Always Popup Even Inputting Text is Full
 	Match</b>: Whether ignore &quot;<b>Intelligent Popup</b>&quot; switch for this symbol.</p>
 	</li>
 	<li>
