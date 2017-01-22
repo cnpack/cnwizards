@@ -58,7 +58,7 @@ uses
   CnConsts, CnCommon, CnWizClasses, CnWizConsts, CnWizUtils, CnWizIdeUtils,
   CnInputSymbolList, CnInputIdeSymbolList, CnIni, CnWizMultiLang, CnWizNotifier,
   CnPasCodeParser, CnWizShareImages, CnWizShortCut, CnWizOptions, CnFloatWindow,
-  CnEditControlWrapper, CnWizMethodHook, CnCppCodeParser, CnPopupMenu;
+  CnEditControlWrapper, CnWizMethodHook, CnCppCodeParser, CnPopupMenu, CnStrings;
 
 const
   csMinDispDelay = 50;
@@ -166,10 +166,12 @@ type
 
 { TCnInputHelper }
 
-  // 列表排序方式
+  // 列表排序方式：自动、文本顺序、长度、类型
   TCnSortKind = (skByScope, skByText, skByLength, skByKind);
   // 输出标识符时如果光标在中间位置的处理方法
   TCnOutputStyle = (osAuto, osReplaceLeft, osReplaceAll, osEnterAll);
+  // 标识符匹配模式，开头匹配，中间匹配，全范围模糊匹配
+  TCnMatchMode = (mmStart, mmAnywhere, mmFuzzy);
 
   TCnInputHelper = class(TCnActionWizard)
   private
@@ -188,10 +190,10 @@ type
 
     FAutoPopup: Boolean;
     FToken: string;
-    FMatchStr: string;
-    FLastStr: string;
-    FSymbols: TStringList;
-    FItems: TStringList;
+    FMatchStr: string;     // 当前拿来匹配的 Pattern，从编辑器光标下获取而来
+    FLastStr: string;      // 上一次匹配的 FMatchStr
+    FSymbols: TStringList; // 当前弹出时所有符合条件的条目名与 Symbol
+    FItems: TStringList;   // 当前弹出框里显示的条目与 Symbol
     FKeyCount: Integer;
     FKeyQueue: string;
     FCurrLineText: string;
@@ -210,7 +212,7 @@ type
     FDispOnlyAtLeastKey: Integer;
     FSortKind: TCnSortKind;
     FDispDelay: Cardinal;
-    FMatchAnyWhere: Boolean;
+    FMatchMode: TCnMatchMode;
     FCompleteChars: string;
     FFilterSymbols: TStrings;
     FAutoSymbols: TStrings;
@@ -256,9 +258,9 @@ type
     function HandleKeyPress(Key: AnsiChar): Boolean;
     procedure SortSymbolList;
     procedure SortCurrSymbolList;
-    function UpdateCurrList(ForcePopup: Boolean): Boolean;
+    function UpdateCurrList(ForcePopup: Boolean): Boolean; // 更新所有匹配的符号列表塞给 FItems
     function UpdateListBox(ForcePopup, InitPopup: Boolean): Boolean;
-    procedure UpdateSymbolList;
+    procedure UpdateSymbolList;  // 取出所有需要的符号列表塞给 FSymbols
     procedure ListDblClick(Sender: TObject);
     procedure ListDrawItem(Control: TWinControl; Index: Integer; Rect: TRect;
       State: TOwnerDrawState);
@@ -330,9 +332,8 @@ type
     {* 允许显示的符号类型}
     property SortKind: TCnSortKind read FSortKind write FSortKind default skByScope;
     {* 列表排序类型}
-    property MatchAnyWhere: Boolean read FMatchAnyWhere write FMatchAnyWhere
-      default True;
-    {* 匹配标识符中间部分}
+    property MatchMode: TCnMatchMode read FMatchMode write FMatchMode;
+    {* 标识符匹配模式}
     property DispDelay: Cardinal read FDispDelay write FDispDelay default csDefDispDelay;
     {* 列表弹出延时ms数}
     property DispOnIDECompDisabled: Boolean read FDispOnIDECompDisabled write
@@ -429,7 +430,7 @@ const
   csDispKindSet = 'DispKindSet';
   csDispDelay = 'DispDelay';
   csSortKind = 'SortKind';
-  csMatchAnyWhere = 'MatchAnyWhere';
+  csMatchMode = 'MatchMode';
   csCompleteChars = 'CompleteCharSet';
   csFilterSymbols = 'FilterSymbols';
   csEnableAutoSymbols = 'EnableAutoSymbols';
@@ -1553,6 +1554,7 @@ function TCnInputHelper.HandleKeyPress(Key: AnsiChar): Boolean;
 var
   Item: TSymbolItem;
   Idx: Integer;
+  NewMatchStr: string;
 begin
   Result := False;
 {$IFDEF DEBUG}
@@ -1562,9 +1564,15 @@ begin
   FNeedUpdate := False;
   if (Key >= #32) and (Key < #127) and IsShowing then
   begin
+    // 已经弹出，根据按键判断是否需要更新列表内容，是则设置 FNeedUpdate，供 KeyUp 事件使用
     Item := TSymbolItem(FItems.Objects[List.ItemIndex]);
-    Idx := Pos(UpperCase(FMatchStr + Char(Key)), UpperCase(Item.Name));
-    if (Idx = 1) or MatchAnyWhere and (Idx > 1) and not Item.MatchFirstOnly then
+    NewMatchStr := UpperCase(FMatchStr + Char(Key));
+    Idx := Pos(NewMatchStr, UpperCase(Item.Name));
+
+    // 不同模式下有匹配的
+    if ((FMatchMode = mmStart) and (Idx = 1)) or
+      ((FMatchMode = mmAnywhere) and (Idx > 1) and not Item.MatchFirstOnly) or
+      ((FMatchMode = mmFuzzy) and not Item.MatchFirstOnly and FuzzyMatchStr(NewMatchStr, Item.Name)) then
     begin
       FNeedUpdate := True;
     end
@@ -1639,6 +1647,7 @@ begin
     FNeedUpdate := False;
     if (Key = VK_LEFT) or (Key = VK_RIGHT) then
     begin
+      // 如果方向键导致光标下的标识符改变，则隐藏
       CnOtaGetCurrPosToken(NewToken, CurrPos, True, CalcFirstSet(FPosInfo.IsPascal), CharSet);
       if not SameText(NewToken, FToken) then
       begin
@@ -1646,6 +1655,7 @@ begin
         Exit;
       end;
     end;
+    // 更新已经弹出的代码输入助手框里的内容
     UpdateListBox(False, False);
   end;
   
@@ -2029,6 +2039,39 @@ begin
     Result := 0;
 end;
 
+function SymbolSortByFuzzyScope(List: TStringList; Index1, Index2: Integer): Integer;
+var
+  N1, N2, L1, L2: Integer;
+begin
+  // FuzzyScope Compare，注意和 Pos 的不同。Pos 是 Index 小排前面，模糊匹配是 Score 高排前面
+  with TSymbolItem(List.Objects[Index1]) do
+  begin
+    N1 := Tag;
+    L1 := ScopeAdjust;
+  end;
+
+  with TSymbolItem(List.Objects[Index2]) do
+  begin
+    N2 := Tag;
+    L2 := ScopeAdjust;
+  end;
+
+  // N2 = N1 出现的几率高，放前面
+  if N2 = N1 then
+  begin
+    if L2 < L1 then
+      Result := 1
+    else if L2 > L1 then
+      Result := -1
+    else
+      Result := 0;
+  end
+  else if N2 < N1 then
+    Result := -1
+  else
+    Result := 1;
+end;
+
 function SymbolSortByScopePos(List: TStringList; Index1, Index2: Integer): Integer;
 var
   N1, N2, L1, L2: Integer;
@@ -2137,13 +2180,18 @@ end;
 
 procedure TCnInputHelper.SortCurrSymbolList;
 begin
-  if (SortKind = skByScope) and FMatchAnyWhere then
-    FItems.CustomSort(SymbolSortByScopePos);
+  if SortKind = skByScope then
+  begin
+    if FMatchMode = mmAnywhere then
+      FItems.CustomSort(SymbolSortByScopePos)
+    else if FMatchMode = mmFuzzy then
+      FItems.CustomSort(SymbolSortByFuzzyScope)
+  end;
 end;
 
 procedure TCnInputHelper.UpdateSymbolList;
 var
-  i, j: Integer;
+  I, J: Integer;
   S: string;
   Kinds: TSymbolKindSet;
   Item: TSymbolItem;
@@ -2159,9 +2207,9 @@ begin
     if FRemoveSame then
       HashList := TCnSymbolHashList.Create(csHashListCount);
     
-    for i := 0 to SymbolListMgr.Count - 1 do
+    for I := 0 to SymbolListMgr.Count - 1 do
     begin
-      SymbolList := SymbolListMgr.List[i];
+      SymbolList := SymbolListMgr.List[I];
 {$IFDEF DEBUG}
 //    CnDebugger.LogFmt('Input Helper To Reload %s. PosKind %s', [SymbolList.ClassName,
 //      GetEnumName(TypeInfo(TCodePosKind), Ord(FPosInfo.PosKind))]);
@@ -2177,9 +2225,9 @@ begin
         else
           Kinds := csCppSymbolKindTable[FPosInfo.PosKind] * DispKindSet;
 
-        for j := 0 to SymbolList.Count - 1 do
+        for J := 0 to SymbolList.Count - 1 do
         begin
-          Item := SymbolList.Items[j];
+          Item := SymbolList.Items[J];
           if FPosInfo.IsPascal and not Item.ForPascal then  // Pascal 中，跳过非 Pascal的
             Continue;
           if not FPosInfo.IsPascal and not Item.ForCpp then // C/C++ 中，跳过非 C/C++的
@@ -2211,6 +2259,8 @@ begin
 {$IFDEF DEBUG}
 //            CnDebugger.LogFmt('Input Helper Add %s with Kind %s', [S, GetEnumName(TypeInfo(TSymbolKind), Ord(Item.Kind))]);
 {$ENDIF}
+              if Item.FuzzyMatchIndexes.Count > 0 then
+                Item.FuzzyMatchIndexes.Clear;
               FSymbols.AddObject(S, Item);
             end;
           end;
@@ -2225,7 +2275,7 @@ end;
 
 function TCnInputHelper.UpdateCurrList(ForcePopup: Boolean): Boolean;
 var
-  i, Idx: Integer;
+  I, Idx: Integer;
   Symbol: string;
 begin
 {$IFDEF ADJUST_CodeParamWindow}
@@ -2238,33 +2288,109 @@ begin
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('FMatchStr %s. Symbol %s. FLastStr %s.', [FMatchStr, Symbol, FLastStr]);
 {$ENDIF}
+
     if (Length(Symbol) > 1) and (Length(Symbol) - Length(FLastStr) = 1) and
       (Pos(UpperCase(FLastStr), Symbol) = 1) then
     begin
-      for i := FItems.Count - 1 downto 0 do
+      // 如果这次匹配的内容只比上次匹配的内容尾巴上多了个字符，照理只要在上次匹配的结果里删东西就行了
+      if FMatchMode = mmStart then
       begin
-        Idx := Pos(Symbol, UpperCase(FItems[i]));
-        if (Idx <= 0) or not MatchAnyWhere and (Idx <> 1) then
-          FItems.Delete(i)
-        else
-          TSymbolItem(FItems.Objects[i]).Tag := Idx;
+        for I := FItems.Count - 1 downto 0 do
+        begin
+          Idx := Pos(Symbol, UpperCase(FItems[I]));
+          if Idx <> 1 then
+            FItems.Delete(I)
+          else
+            TSymbolItem(FItems.Objects[I]).Tag := Idx;
+        end;
+      end
+      else if FMatchMode = mmAnywhere then
+      begin
+        for I := FItems.Count - 1 downto 0 do
+        begin
+          Idx := Pos(Symbol, UpperCase(FItems[I]));
+          if Idx <= 0 then
+            FItems.Delete(I)
+          else
+            TSymbolItem(FItems.Objects[I]).Tag := Idx;
+        end;
+      end
+      else if FMatchMode = mmFuzzy then
+      begin
+        for I := FItems.Count - 1 downto 0 do
+        begin
+          if not FuzzyMatchStrWithScore(Symbol, FItems[I], Idx,
+            TSymbolItem(FItems.Objects[I]).FuzzyMatchIndexes) then
+            FItems.Delete(I)
+          else
+            TSymbolItem(FItems.Objects[I]).Tag := Idx;
+        end;
       end;
     end
-    else
+    else  // 不是，则需要重新从总的 FSymbols 里匹配并塞给 FItems
     begin
       FItems.Clear;
-      for i := 0 to FSymbols.Count - 1 do
-      begin
-        if Symbol <> '' then
-          Idx := Pos(Symbol, UpperCase(FSymbols[i]))
-        else
-          Idx := 1;
-        if (Idx = 1) or MatchAnyWhere and (Idx > 0) and
-          not TSymbolItem(FSymbols.Objects[i]).MatchFirstOnly then
-        begin
-          TSymbolItem(FSymbols.Objects[i]).Tag := Idx;
-          FItems.AddObject(FSymbols[i], FSymbols.Objects[i]);
-        end;
+      case FMatchMode of
+        mmStart:
+          begin
+            for I := 0 to FSymbols.Count - 1 do
+            begin
+              if Symbol <> '' then
+                Idx := Pos(Symbol, UpperCase(FSymbols[I]))
+              else
+                Idx := 1;
+
+              if Idx = 1 then
+              begin
+                TSymbolItem(FSymbols.Objects[I]).Tag := Idx;
+                FItems.AddObject(FSymbols[I], FSymbols.Objects[I]);
+              end;
+            end;
+          end;
+        mmAnywhere:
+          begin
+            for I := 0 to FSymbols.Count - 1 do
+            begin
+              if Symbol <> '' then
+                Idx := Pos(Symbol, UpperCase(FSymbols[I]))
+              else
+                Idx := 1;
+
+              // 头匹配的，匹配为 1，或非头匹配的，任意匹配
+              if ((Idx > 0) and not TSymbolItem(FSymbols.Objects[I]).MatchFirstOnly)
+                or ((Idx = 1) and TSymbolItem(FSymbols.Objects[I]).MatchFirstOnly) then
+              begin
+                TSymbolItem(FSymbols.Objects[I]).Tag := Idx;
+                FItems.AddObject(FSymbols[I], FSymbols.Objects[I]);
+              end;
+            end;
+          end;
+        mmFuzzy:
+          begin
+            for I := 0 to FSymbols.Count - 1 do
+            begin
+              if Symbol = '' then
+              begin
+                TSymbolItem(FSymbols.Objects[I]).Tag := 1;
+                FItems.AddObject(FSymbols[I], FSymbols.Objects[I]);
+              end
+              else if TSymbolItem(FSymbols.Objects[I]).MatchFirstOnly then
+              begin
+                Idx := Pos(Symbol, UpperCase(FSymbols[I]));
+                if Idx = 1 then
+                begin
+                  TSymbolItem(FSymbols.Objects[I]).Tag := Idx;
+                  FItems.AddObject(FSymbols[I], FSymbols.Objects[I]);
+                end;
+              end
+              else if FuzzyMatchStrWithScore(Symbol, FSymbols[I], Idx,
+                TSymbolItem(FSymbols.Objects[I]).FuzzyMatchIndexes) then
+              begin
+                TSymbolItem(FSymbols.Objects[I]).Tag := Idx;
+                FItems.AddObject(FSymbols[I], FSymbols.Objects[I]);
+              end;
+            end;
+          end;
       end;
     end;
     
@@ -2275,6 +2401,7 @@ begin
     if Result then
     begin
       Idx := FItems.IndexOf(FToken);
+      // 全匹配的优先选择
       if (Idx < 0) and (FMatchStr <> '') then
         Idx := FItems.IndexOf(FMatchStr);
       if Idx >= 0 then
@@ -2523,14 +2650,21 @@ end;
 
 procedure TCnInputHelper.ListDrawItem(Control: TWinControl; Index: Integer;
   Rect: TRect; State: TOwnerDrawState);
+const
+  LEFT_ICON = 22;
+  DESC_INTERVAL = 28;
 var
   AText: string;
+  PaintStr: string;
   SymbolItem: TSymbolItem;
   TextWith: Integer;
   Kind: Integer;
-  Idx, X: Integer;
+  Idx, X, I, L, W: Integer;
+  C: Char;
+  ASize: TSize;
   S: string;
   SaveColor: TColor;
+  MatchedIndexes: TList;
 
   function GetHighlightColor(Kind: TSymbolKind): TColor;
   begin
@@ -2541,6 +2675,7 @@ var
       Result := clWindowText;
     end;
   end;
+
 begin
   // 自画ListBox中的SymbolList
   with List do
@@ -2569,14 +2704,15 @@ begin
     Canvas.Font.Style := [fsBold];
 
     AText := SymbolItem.GetKeywordText(KeywordStyle);
-    if MatchAnyWhere and (FMatchStr <> '') then
+    MatchedIndexes := SymbolItem.FuzzyMatchIndexes;
+    if (FMatchMode in [mmStart, mmAnywhere]) and (FMatchStr <> '') then
     begin
       // 高亮显示匹配的内容
       Idx := Pos(UpperCase(FMatchStr), UpperCase(AText));
       if Idx > 0 then
       begin
         SaveColor := Canvas.Font.Color;
-        X := Rect.Left + 22;
+        X := Rect.Left + LEFT_ICON;
         S := Copy(AText, 1, Idx - 1);
         Canvas.TextOut(X, Rect.Top, S);
         Inc(X, Canvas.TextWidth(S));
@@ -2589,13 +2725,50 @@ begin
         Canvas.TextOut(X, Rect.Top, S);
       end
       else
-        Canvas.TextOut(Rect.Left + 22, Rect.Top, AText);
+        Canvas.TextOut(Rect.Left + LEFT_ICON, Rect.Top, AText);
+    end
+    else if (FMatchMode = mmFuzzy) and (MatchedIndexes <> nil) then
+    begin
+      // 根据匹配结果挨个高亮绘制匹配的内容
+      Canvas.TextOut(Rect.Left + LEFT_ICON, Rect.Top, AText);
+
+      SetLength(PaintStr, Length(AText));
+      StrCopy(PChar(PaintStr), PChar(AText));
+      SaveColor := Canvas.Font.Color;
+      Canvas.Font.Color := csMatchColor;
+
+      for I := MatchedIndexes.Count - 1 downto 0 do
+      begin
+        L := Integer(MatchedIndexes[I]);
+        if (L <= 0) or (L > Length(PaintStr)) then
+          Continue;
+
+        if L < Length(PaintStr) then
+          PaintStr[L + 1] := #0;
+        C := PaintStr[L];
+        PaintStr[L] := #0;
+
+        ASize.cx := 0;
+        ASize.cy := 0;
+        if L = 1 then
+          W := 0
+        else
+        begin
+          Windows.GetTextExtentPoint32(Canvas.Handle, PChar(@(PaintStr[1])), L - 1, ASize);
+          W := ASize.cx; // 计算需绘制字符前的宽度
+        end;
+        PaintStr[L] := C;
+        Windows.TextOut(Canvas.Handle, Rect.Left + LEFT_ICON + W, Rect.Top, PChar(@(PaintStr[L])), 1);
+      end;
+      SetLength(PaintStr, 0);
+      Canvas.Font.Color := SaveColor;
     end
     else
-      Canvas.TextOut(Rect.Left + 22, Rect.Top, AText);
+      Canvas.TextOut(Rect.Left + LEFT_ICON, Rect.Top, AText);
+
     TextWith := Canvas.TextWidth(AText);
     Canvas.Font.Style := [];
-    Canvas.TextOut(Rect.Left + 28 + TextWith, Rect.Top, SymbolItem.Description);
+    Canvas.TextOut(Rect.Left + DESC_INTERVAL + TextWith, Rect.Top, SymbolItem.Description);
   end;
 end;
 
@@ -2856,7 +3029,7 @@ begin
     FDispOnlyAtLeastKey := ReadInteger('', csDispOnlyAtLeastKey, 2);
     FDispKindSet := TSymbolKindSet(ReadInteger('', csDispKindSet, Integer(FDispKindSet)));
     FSortKind := TCnSortKind(ReadInteger('', csSortKind, 0));
-    FMatchAnyWhere := ReadBool('', csMatchAnyWhere, True);
+    FMatchMode := TCnMatchMode(ReadInteger('', csMatchMode, Ord(mmFuzzy)));
     FAutoAdjustScope := ReadBool('', csAutoAdjustScope, True);
     FRemoveSame := ReadBool('', csRemoveSame, True);
     FDispDelay := ReadInteger('', csDispDelay, csDefDispDelay);
@@ -2911,7 +3084,7 @@ begin
     WriteInteger('', csDispOnlyAtLeastKey, FDispOnlyAtLeastKey);
     WriteInteger('', csDispKindSet, Integer(FDispKindSet));
     WriteInteger('', csSortKind, Ord(FSortKind));
-    WriteBool('', csMatchAnyWhere, FMatchAnyWhere);
+    WriteInteger('', csMatchMode, Ord(FMatchMode));
     WriteBool('', csAutoAdjustScope, FAutoAdjustScope);
     WriteBool('', csRemoveSame, FRemoveSame);
     WriteInteger('', csDispDelay, FDispDelay);

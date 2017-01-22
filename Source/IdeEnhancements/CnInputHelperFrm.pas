@@ -128,6 +128,8 @@ type
     edtAutoSymbols: TEdit;
     chkKeySeq: TCheckBox;
     btnDisableCompletion: TButton;
+    cbbMatchMode: TComboBox;
+    lblMatchMode: TLabel;
     procedure FormShow(Sender: TObject);
     procedure PaintBoxPaint(Sender: TObject);
     procedure btnFontClick(Sender: TObject);
@@ -213,7 +215,7 @@ begin
     begin
       ts2.TabVisible := False;
       ts3.TabVisible := False;
-    end;  
+    end;
     Result := ShowModal = mrOK;
   finally
     Free;
@@ -281,7 +283,8 @@ begin
     seDispOnlyAtLeastKey.Value := DispOnlyAtLeastKey;
     tbDispDelay.Position := DispDelay;
     seListOnlyAtLeastLetter.Value := ListOnlyAtLeastLetter;
-    chkMatchAnyWhere.Checked := MatchAnyWhere;
+    //chkMatchAnyWhere.Checked := MatchAnyWhere;
+    cbbMatchMode.ItemIndex := Ord(MatchMode);
     chkAutoAdjustScope.Checked := AutoAdjustScope;
     chkRemoveSame.Checked := RemoveSame;
     chkSmartDisp.Checked := SmartDisplay;
@@ -394,7 +397,8 @@ begin
     DispOnlyAtLeastKey := seDispOnlyAtLeastKey.Value;
     DispDelay := tbDispDelay.Position;
     ListOnlyAtLeastLetter := seListOnlyAtLeastLetter.Value;
-    MatchAnyWhere := chkMatchAnyWhere.Checked;
+    //MatchAnyWhere := chkMatchAnyWhere.Checked;
+    MatchMode := TCnMatchMode(cbbMatchMode.ItemIndex);
     AutoAdjustScope := chkAutoAdjustScope.Checked;
     RemoveSame := chkRemoveSame.Checked;
     SmartDisplay := chkSmartDisp.Checked;

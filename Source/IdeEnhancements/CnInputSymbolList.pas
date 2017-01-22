@@ -86,6 +86,7 @@ type
     FTag: Integer;
     FHashCode: Cardinal;
     FMatchFirstOnly: Boolean;
+    FFuzzyMatchIndexes: TList;
     FAutoIndent: Boolean;
     FAlwaysDisp: Boolean;
     FForPascal: Boolean;
@@ -101,6 +102,8 @@ type
     procedure OutputTemplate(Editor: IOTAEditBuffer; Icon: TIcon);
   public
     constructor Create; virtual;
+    destructor Destroy; override;
+
     procedure Assign(Source: TPersistent); override;
     procedure Output(Editor: IOTAEditBuffer; Icon: TIcon; KeywordStyle:
       TCnKeywordStyle); virtual;
@@ -111,7 +114,7 @@ type
     property HashCode: Cardinal read FHashCode write FHashCode;
     {* 标识符及类型的 HashCode 信息 }
     property Tag: Integer read FTag write FTag;
-    {* 供其它程序使用的数据，如排序时用来临时保存数据 }
+    {* 供其它程序使用的数据，如排序时用来临时保存数据，包括模糊匹配的匹配度数据 }
     property ScopeHit: Integer read FScopeHit write FScopeHit;
     {* 使用频度优先级，由输入助手设置 }
     property ScopeAdjust: Integer read FScopeAdjust write FScopeAdjust;
@@ -123,6 +126,8 @@ type
     {* 是否要求从头开始匹配 }
     property AllowMultiLine: Boolean read GetAllowMultiLine;
     {* 允许多行文本 }
+    property FuzzyMatchIndexes: TList read FFuzzyMatchIndexes;
+    {* 模糊匹配时用来存储匹配下标的列表 }
   published
     property Name: string read FName write FName;
     {* 符号的名称，即用户键入的字符串 }
@@ -530,6 +535,7 @@ begin
   FAutoIndent := True;
   FAlwaysDisp := False;
   FForPascal := True;
+  FFuzzyMatchIndexes := TList.Create;
 end;
 
 procedure TSymbolItem.Assign(Source: TPersistent);
@@ -728,6 +734,12 @@ end;
 //==============================================================================
 // 符号列表基类
 //==============================================================================
+
+destructor TSymbolItem.Destroy;
+begin
+  FFuzzyMatchIndexes.Free;
+  inherited;
+end;
 
 { TSymbolList }
 

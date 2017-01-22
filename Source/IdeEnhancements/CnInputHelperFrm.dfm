@@ -320,12 +320,12 @@ inherited CnInputHelperForm: TCnInputHelperForm
         Left = 8
         Top = 8
         Width = 553
-        Height = 193
+        Height = 198
         Caption = '&Display Settings'
         TabOrder = 0
         object lbl7: TLabel
           Left = 8
-          Top = 47
+          Top = 46
           Width = 106
           Height = 13
           Caption = 'Min Length of Symbol:'
@@ -346,14 +346,21 @@ inherited CnInputHelperForm: TCnInputHelperForm
         end
         object lbl15: TLabel
           Left = 8
-          Top = 76
+          Top = 72
           Width = 84
           Height = 13
           Caption = 'Reserved Words:'
         end
+        object lblMatchMode: TLabel
+          Left = 8
+          Top = 98
+          Width = 62
+          Height = 13
+          Caption = 'Match Mode:'
+        end
         object seListOnlyAtLeastLetter: TCnSpinEdit
           Left = 120
-          Top = 43
+          Top = 42
           Width = 249
           Height = 22
           MaxValue = 5
@@ -362,12 +369,12 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Value = 1
         end
         object chkMatchAnyWhere: TCheckBox
-          Left = 8
+          Left = 384
           Top = 98
-          Width = 505
+          Width = 129
           Height = 17
           Caption = 'Display Middle-Matched Symbols.'
-          TabOrder = 4
+          TabOrder = 5
         end
         object cbbSortKind: TComboBox
           Left = 120
@@ -389,31 +396,31 @@ inherited CnInputHelperForm: TCnInputHelperForm
         end
         object chkAutoAdjustScope: TCheckBox
           Left = 8
-          Top = 116
+          Top = 120
           Width = 505
           Height = 17
           Caption = 'Adjust Priority Automatically according to the Frequency.'
-          TabOrder = 5
+          TabOrder = 6
         end
         object chkUseCodeInsightMgr: TCheckBox
           Left = 8
-          Top = 152
+          Top = 156
           Width = 505
           Height = 17
           Caption = 'Use the Compatible Way to Obtain Symbols.(slower)'
-          TabOrder = 7
+          TabOrder = 8
         end
         object chkRemoveSame: TCheckBox
           Left = 8
-          Top = 134
+          Top = 138
           Width = 505
           Height = 17
           Caption = 'Remove Duplicate Symbols.'
-          TabOrder = 6
+          TabOrder = 7
         end
         object cbbKeyword: TComboBox
           Left = 120
-          Top = 72
+          Top = 68
           Width = 249
           Height = 21
           Style = csDropDownList
@@ -422,18 +429,31 @@ inherited CnInputHelperForm: TCnInputHelperForm
         end
         object chkUseKibitzCompileThread: TCheckBox
           Left = 8
-          Top = 170
+          Top = 174
           Width = 505
           Height = 17
           Caption = 'Prefetch Symbols List when Opening Project.'
-          TabOrder = 8
+          TabOrder = 9
+        end
+        object cbbMatchMode: TComboBox
+          Left = 120
+          Top = 94
+          Width = 249
+          Height = 21
+          Style = csDropDownList
+          ItemHeight = 13
+          TabOrder = 4
+          Items.Strings = (
+            'Match From Beginning'
+            'Middle Match'
+            'Fuzzy Match')
         end
       end
       object grp4: TGroupBox
         Left = 8
-        Top = 210
+        Top = 214
         Width = 553
-        Height = 228
+        Height = 224
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Conten&t Settings'
         TabOrder = 1
@@ -455,7 +475,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Left = 8
           Top = 40
           Width = 369
-          Height = 177
+          Height = 173
           Anchors = [akLeft, akTop, akBottom]
           ItemHeight = 13
           TabOrder = 0
@@ -464,7 +484,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Left = 384
           Top = 40
           Width = 161
-          Height = 177
+          Height = 173
           Anchors = [akLeft, akTop, akBottom]
           ItemHeight = 13
           TabOrder = 1
@@ -651,7 +671,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 401
           Height = 21
           Style = csDropDownList
-          ItemHeight = 13
+          ItemHeight = 0
           TabOrder = 0
           OnChange = cbbListChange
         end
