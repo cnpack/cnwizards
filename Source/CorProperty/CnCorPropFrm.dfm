@@ -1,10 +1,11 @@
 inherited CnCorPropForm: TCnCorPropForm
-  Left = 371
-  Top = 151
-  BorderStyle = bsDialog
+  Left = 316
+  Top = 52
+  Width = 554
+  Height = 488
   Caption = 'Property Corrector'
-  ClientHeight = 461
-  ClientWidth = 546
+  Constraints.MinHeight = 488
+  Constraints.MinWidth = 554
   OnActivate = FormActivate
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -15,6 +16,7 @@ inherited CnCorPropForm: TCnCorPropForm
     Top = 5
     Width = 528
     Height = 68
+    Anchors = [akLeft, akTop, akRight]
     Caption = 'Search &Range'
     TabOrder = 0
     object rbProject: TRadioButton
@@ -112,6 +114,7 @@ inherited CnCorPropForm: TCnCorPropForm
     Top = 112
     Width = 529
     Height = 339
+    Anchors = [akLeft, akTop, akRight, akBottom]
     Caption = 'Search Result'
     TabOrder = 7
     object lvResult: TListView
@@ -119,6 +122,7 @@ inherited CnCorPropForm: TCnCorPropForm
       Top = 16
       Width = 512
       Height = 313
+      Anchors = [akLeft, akTop, akRight, akBottom]
       Columns = <
         item
           Caption = 'Status'
