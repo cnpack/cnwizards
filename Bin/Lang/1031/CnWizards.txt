@@ -2040,7 +2040,6 @@ TCnInputHelperForm.chkAutoCompParam.Caption=automatisches Einfügen von Klammern
 TCnInputHelperForm.chkAutoPopup.Caption=Autom. Popup für Eingabe Helfer.
 TCnInputHelperForm.chkCheckImmRun.Caption=Deaktiviere Eingabe Helfer wenn IME geöffnet.
 TCnInputHelperForm.chkDispOnIDECompDisabled.Caption=ersetze Code Completion (in IDE Optionen sparat zu deaktivieren)
-TCnInputHelperForm.chkMatchAnyWhere.Caption=Zeige Middle-Matched Symbole.
 TCnInputHelperForm.chkRemoveSame.Caption=lösche doppelte Symbole.
 TCnInputHelperForm.chkSelMidMatchByEnterOnly.Caption=wähle Middle-Matched Symbole nur bei Betätigen von Enter.
 TCnInputHelperForm.chkSmartDisp.Caption=Intelligentes Popup.

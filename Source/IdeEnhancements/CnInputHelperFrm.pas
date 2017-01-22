@@ -87,7 +87,6 @@ type
     lbl8: TLabel;
     PaintBox: TPaintBox;
     seListOnlyAtLeastLetter: TCnSpinEdit;
-    chkMatchAnyWhere: TCheckBox;
     cbbSortKind: TComboBox;
     btnFont: TButton;
     chkAutoAdjustScope: TCheckBox;
@@ -283,7 +282,6 @@ begin
     seDispOnlyAtLeastKey.Value := DispOnlyAtLeastKey;
     tbDispDelay.Position := DispDelay;
     seListOnlyAtLeastLetter.Value := ListOnlyAtLeastLetter;
-    //chkMatchAnyWhere.Checked := MatchAnyWhere;
     cbbMatchMode.ItemIndex := Ord(MatchMode);
     chkAutoAdjustScope.Checked := AutoAdjustScope;
     chkRemoveSame.Checked := RemoveSame;
@@ -397,7 +395,6 @@ begin
     DispOnlyAtLeastKey := seDispOnlyAtLeastKey.Value;
     DispDelay := tbDispDelay.Position;
     ListOnlyAtLeastLetter := seListOnlyAtLeastLetter.Value;
-    //MatchAnyWhere := chkMatchAnyWhere.Checked;
     MatchMode := TCnMatchMode(cbbMatchMode.ItemIndex);
     AutoAdjustScope := chkAutoAdjustScope.Checked;
     RemoveSame := chkRemoveSame.Checked;

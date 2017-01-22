@@ -356,7 +356,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Top = 98
           Width = 62
           Height = 13
-          Caption = 'Match Mode:'
+          Caption = 'Symbol Match Mode:'
         end
         object seListOnlyAtLeastLetter: TCnSpinEdit
           Left = 120
@@ -367,14 +367,6 @@ inherited CnInputHelperForm: TCnInputHelperForm
           MinValue = 1
           TabOrder = 2
           Value = 1
-        end
-        object chkMatchAnyWhere: TCheckBox
-          Left = 384
-          Top = 98
-          Width = 129
-          Height = 17
-          Caption = 'Display Middle-Matched Symbols.'
-          TabOrder = 5
         end
         object cbbSortKind: TComboBox
           Left = 120
@@ -400,7 +392,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 505
           Height = 17
           Caption = 'Adjust Priority Automatically according to the Frequency.'
-          TabOrder = 6
+          TabOrder = 5
         end
         object chkUseCodeInsightMgr: TCheckBox
           Left = 8
@@ -408,7 +400,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 505
           Height = 17
           Caption = 'Use the Compatible Way to Obtain Symbols.(slower)'
-          TabOrder = 8
+          TabOrder = 7
         end
         object chkRemoveSame: TCheckBox
           Left = 8
@@ -416,7 +408,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 505
           Height = 17
           Caption = 'Remove Duplicate Symbols.'
-          TabOrder = 7
+          TabOrder = 6
         end
         object cbbKeyword: TComboBox
           Left = 120
@@ -433,7 +425,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 505
           Height = 17
           Caption = 'Prefetch Symbols List when Opening Project.'
-          TabOrder = 9
+          TabOrder = 8
         end
         object cbbMatchMode: TComboBox
           Left = 120

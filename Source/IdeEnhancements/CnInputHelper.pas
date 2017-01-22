@@ -3069,7 +3069,7 @@ end;
 
 procedure TCnInputHelper.SaveSettings(Ini: TCustomIniFile);
 var
-  i: Integer;
+  I: Integer;
 begin
   inherited;
   with TCnIniFile.Create(Ini) do
@@ -3113,9 +3113,9 @@ begin
     WriteBool('', csCheckImmRun, FCheckImmRun);
     WriteBool('', csDispOnIDECompDisabled, FDispOnIDECompDisabled);
 
-    for i := 0 to SymbolListMgr.Count - 1 do
-      WriteBool(csListActive, SymbolListMgr.List[i].ClassName,
-        SymbolListMgr.List[i].Active);
+    for I := 0 to SymbolListMgr.Count - 1 do
+      WriteBool(csListActive, SymbolListMgr.List[I].ClassName,
+        SymbolListMgr.List[I].Active);
   finally
     Free;
   end;
