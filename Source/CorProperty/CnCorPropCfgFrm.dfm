@@ -4,7 +4,9 @@ inherited CnCorPropCfgForm: TCnCorPropCfgForm
   BorderStyle = bsDialog
   Caption = 'Property Corrector Rules Settings'
   ClientHeight = 393
-  ClientWidth = 535
+  ClientWidth = 563
+  Constraints.MinHeight = 420
+  Constraints.MinWidth = 571
   OnDestroy = FormDestroy
   OnShow = FormShow
   PixelsPerInch = 96
@@ -16,19 +18,21 @@ inherited CnCorPropCfgForm: TCnCorPropCfgForm
     Height = 13
   end
   object btnOK: TButton
-    Left = 283
+    Left = 307
     Top = 363
     Width = 75
     Height = 21
     Action = ActionConfirm
+    Anchors = [akRight, akBottom]
     Default = True
     TabOrder = 1
   end
   object btnCancel: TButton
-    Left = 369
+    Left = 393
     Top = 363
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
@@ -37,15 +41,17 @@ inherited CnCorPropCfgForm: TCnCorPropCfgForm
   object GroupBox1: TGroupBox
     Left = 8
     Top = 8
-    Width = 521
+    Width = 545
     Height = 345
+    Anchors = [akLeft, akTop, akRight, akBottom]
     Caption = 'Property Corrector &Rules'
     TabOrder = 0
     object ListView: TListView
-      Left = 8
+      Left = 12
       Top = 56
-      Width = 505
+      Width = 521
       Height = 241
+      Anchors = [akLeft, akTop, akRight, akBottom]
       Checkboxes = True
       Columns = <
         item
@@ -86,7 +92,7 @@ inherited CnCorPropCfgForm: TCnCorPropCfgForm
       OnKeyDown = ListViewKeyDown
     end
     object btnAdd: TButton
-      Left = 9
+      Left = 13
       Top = 24
       Width = 75
       Height = 21
@@ -94,7 +100,7 @@ inherited CnCorPropCfgForm: TCnCorPropCfgForm
       TabOrder = 0
     end
     object btnDel: TButton
-      Left = 223
+      Left = 235
       Top = 24
       Width = 75
       Height = 21
@@ -102,7 +108,7 @@ inherited CnCorPropCfgForm: TCnCorPropCfgForm
       TabOrder = 2
     end
     object btnLoad: TButton
-      Left = 330
+      Left = 346
       Top = 24
       Width = 75
       Height = 21
@@ -110,7 +116,7 @@ inherited CnCorPropCfgForm: TCnCorPropCfgForm
       TabOrder = 3
     end
     object btnSave: TButton
-      Left = 437
+      Left = 457
       Top = 24
       Width = 75
       Height = 21
@@ -118,7 +124,7 @@ inherited CnCorPropCfgForm: TCnCorPropCfgForm
       TabOrder = 4
     end
     object btnEdit: TButton
-      Left = 116
+      Left = 124
       Top = 24
       Width = 75
       Height = 21
@@ -126,38 +132,42 @@ inherited CnCorPropCfgForm: TCnCorPropCfgForm
       TabOrder = 1
     end
     object ckbOpenFile: TCheckBox
-      Left = 8
+      Left = 12
       Top = 304
       Width = 233
       Height = 17
+      Anchors = [akLeft, akBottom]
       Caption = 'Check When Open File'
       TabOrder = 6
       Visible = False
     end
     object ckbCloseFile: TCheckBox
-      Left = 256
+      Left = 274
       Top = 304
       Width = 257
       Height = 17
+      Anchors = [akLeft, akBottom]
       Caption = 'Check When Close File'
       TabOrder = 7
       Visible = False
     end
     object ckbNewComp: TCheckBox
-      Left = 8
+      Left = 12
       Top = 322
       Width = 233
       Height = 17
+      Anchors = [akLeft, akBottom]
       Caption = 'Check When Add Component'
       TabOrder = 8
       Visible = False
     end
   end
   object btnHelp: TButton
-    Left = 454
+    Left = 478
     Top = 363
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
