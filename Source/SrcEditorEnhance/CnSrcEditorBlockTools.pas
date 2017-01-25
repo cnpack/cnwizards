@@ -75,6 +75,9 @@ type
     FGroupReplace: TCnSrcEditorGroupReplaceTool;
     FWebSearch: TCnSrcEditorWebSearchTool;
     FDupShortCut: TCnWizShortCut;
+    FLowerCaseShortCut: TCnWizShortCut;
+    FUpperCaseShortCut: TCnWizShortCut;
+    FToggleCaseShortCut: TCnWizShortCut;
     FBlockMoveUpShortCut: TCnWizShortCut;
     FBlockMoveDownShortCut: TCnWizShortCut;
     FBlockDelLinesShortCut: TCnWizShortCut;
@@ -96,6 +99,9 @@ type
     procedure OnPopup(Sender: TObject);
     procedure OnItemClick(Sender: TObject);
     procedure OnEditDuplicate(Sender: TObject);
+    procedure OnEditLowerCase(Sender: TObject);
+    procedure OnEditUpperCase(Sender: TObject);
+    procedure OnEditToggleCase(Sender: TObject);
     procedure OnEditBlockMoveUp(Sender: TObject);
     procedure OnEditBlockMoveDown(Sender: TObject);
     procedure OnEditBlockDelLines(Sender: TObject);
@@ -163,6 +169,10 @@ begin
 
   FDupShortCut := WizShortCutMgr.Add('CnEditDuplicate',
     ShortCut(Word('D'), [ssCtrl, ssAlt]), OnEditDuplicate);
+  FLowerCaseShortCut := WizShortCutMgr.Add('CnEditLowerCase', 0, OnEditLowerCase);
+  FUpperCaseShortCut := WizShortCutMgr.Add('CnEditUpperCase', 0, OnEditUpperCase);
+  FToggleCaseShortCut := WizShortCutMgr.Add('CnEditToggleCase', 0, OnEditToggleCase);
+
   FBlockMoveUpShortCut := WizShortCutMgr.Add('CnEditBlockMoveUp',
     ShortCut(Word('U'), [ssCtrl, ssAlt, ssShift]), OnEditBlockMoveUp);
   FBlockMoveDownShortCut := WizShortCutMgr.Add('CnEditBlockMoveDown',
@@ -196,6 +206,9 @@ begin
   WizShortCutMgr.DeleteShortCut(FBlockDelLinesShortCut);
   WizShortCutMgr.DeleteShortCut(FBlockMoveDownShortCut);
   WizShortCutMgr.DeleteShortCut(FBlockMoveUpShortCut);
+  WizShortCutMgr.DeleteShortCut(FToggleCaseShortCut);
+  WizShortCutMgr.DeleteShortCut(FUpperCaseShortCut);
+  WizShortCutMgr.DeleteShortCut(FLowerCaseShortCut);
   WizShortCutMgr.DeleteShortCut(FDupShortCut);
   FPopupMenu.Free;
   FIcon.Free;
@@ -469,6 +482,42 @@ begin
   end;
 end;
 
+procedure TCnSrcEditorBlockTools.OnEditLowerCase(Sender: TObject);
+var
+  EditView: IOTAEditView;
+begin
+  EditView := CnOtaGetTopMostEditView;
+  if Assigned(EditView) then
+  begin
+    EditView.Block.LowerCase;
+    EditView.Paint;
+  end;
+end;
+
+procedure TCnSrcEditorBlockTools.OnEditUpperCase(Sender: TObject);
+var
+  EditView: IOTAEditView;
+begin
+  EditView := CnOtaGetTopMostEditView;
+  if Assigned(EditView) then
+  begin
+    EditView.Block.UpperCase;
+    EditView.Paint;
+  end;
+end;
+
+procedure TCnSrcEditorBlockTools.OnEditToggleCase(Sender: TObject);
+var
+  EditView: IOTAEditView;
+begin
+  EditView := CnOtaGetTopMostEditView;
+  if Assigned(EditView) then
+  begin
+    EditView.Block.ToggleCase;
+    EditView.Paint;
+  end;
+end;
+
 procedure TCnSrcEditorBlockTools.DoBlockExecute(Kind: TBlockToolKind);
 begin
   case Kind of
@@ -531,7 +580,7 @@ end;
 
 procedure TCnSrcEditorBlockTools.DoBlockCase(Kind: TBlockToolKind);
 var
-  EditView: IOTAEditView; 
+  EditView: IOTAEditView;
 begin
   EditView := CnOtaGetTopMostEditView;
   if Assigned(EditView) then
@@ -695,9 +744,9 @@ begin
 
   // 大小写转换菜单
   FCaseMenu := AddMenuItem(Items, SCnSrcBlockCase, nil);
-  DoAddMenuItem(FCaseMenu, SCnSrcBlockLowerCase, btLowerCase);
-  DoAddMenuItem(FCaseMenu, SCnSrcBlockUpperCase, btUpperCase);
-  DoAddMenuItem(FCaseMenu, SCnSrcBlockToggleCase, btToggleCase);
+  DoAddMenuItem(FCaseMenu, SCnSrcBlockLowerCase, btLowerCase, FLowerCaseShortCut.ShortCut);
+  DoAddMenuItem(FCaseMenu, SCnSrcBlockUpperCase, btUpperCase, FUpperCaseShortCut.ShortCut);
+  DoAddMenuItem(FCaseMenu, SCnSrcBlockToggleCase, btToggleCase, FToggleCaseShortCut.ShortCut);
 
   // 格式菜单
   FFormatMenu := AddMenuItem(Items, SCnSrcBlockFormat, nil);
@@ -993,6 +1042,12 @@ begin
   List := TList.Create;
   try
     Holder := TCnShortCutHolder.Create(SCnSrcBlockDuplicate, FDupShortCut);
+    List.Add(Holder);
+    Holder := TCnShortCutHolder.Create(SCnSrcBlockLowerCase, FLowerCaseShortCut);
+    List.Add(Holder);
+    Holder := TCnShortCutHolder.Create(SCnSrcBlockUpperCase, FUpperCaseShortCut);
+    List.Add(Holder);
+    Holder := TCnShortCutHolder.Create(SCnSrcBlockToggleCase, FToggleCaseShortCut);
     List.Add(Holder);
 
 {$IFDEF BDS}
