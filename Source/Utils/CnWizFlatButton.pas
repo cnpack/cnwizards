@@ -89,11 +89,6 @@ type
 
 implementation
 
-{$IFDEF Debug}
-uses
-  CnDebug;
-{$ENDIF}
-
 const
   csImageWidth = 16;
   csImageHeight = 16;

@@ -371,6 +371,12 @@ function EnumEditControl(Proc: TEnumEditControlProc; Context: Pointer;
   EditorMustExists: Boolean = True): Integer;
 {* 枚举 IDE 中的代码编辑器窗口和 EditControl 控件，调用回调函数，返回总数 }
 
+function GetCurrentSyncButton: TControl;
+{* 获取当前最前端编辑器的语法编辑按钮，注意语法编辑按钮存在不等于可见}
+
+function GetCurrentSyncButtonVisible: Boolean;
+{* 获取当前最前端编辑器的语法编辑按钮是否可见，无按钮或不可见均返回 False}
+
 type
   TCnSrcEditorPage = (epCode, epDesign, epCPU, epWelcome, epOthers);
 
@@ -556,6 +562,9 @@ uses
   CnDebug,
 {$ENDIF}
   Registry, CnGraphUtils;
+
+const
+  SSyncButtonName = 'SyncButton';
 
 {$IFDEF BDS4_UP}
 const
@@ -1920,6 +1929,28 @@ begin
           Proc(EditWindow, EditControl, Context);
       end;
     end;
+end;
+
+// 获取当前最前端编辑器的语法编辑按钮，注意语法编辑按钮存在不等于可见
+function GetCurrentSyncButton: TControl;
+var
+  EditControl: TControl;
+begin
+  Result := nil;
+  EditControl := GetCurrentEditControl;
+  if EditControl <> nil then
+    Result := TControl(EditControl.FindComponent(SSyncButtonName));
+end;
+
+// 获取当前最前端编辑器的语法编辑按钮是否可见，无按钮或不可见均返回 False
+function GetCurrentSyncButtonVisible: Boolean;
+var
+  Button: TControl;
+begin
+  Result := False;
+  Button := GetCurrentSyncButton;
+  if Button <> nil then
+    Result := Button.Visible;
 end;
 
 // 取当前编辑窗口顶层页面类型，传入编辑器父控件

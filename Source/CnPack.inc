@@ -2359,6 +2359,7 @@
 
 {$IFDEF BDS2006_UP}
   {$DEFINE IDE_HAS_GUIDE_LINE}    // 2006 and above has Designer Guide Line
+  {$DEFINE IDE_SYNC_EDIT_BLOCK}   // 2006 and above Editor Supports Sync Block Edit
   {$DEFINE EDITOR_TAB_ONLYFROM_WINCONTROL}
   // From BDS 2006 IDEGraident Editor Tab is Only From WinControl, not TabSet/TabControl 
 {$ENDIF}

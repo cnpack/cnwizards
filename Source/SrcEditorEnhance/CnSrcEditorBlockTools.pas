@@ -773,6 +773,9 @@ var
 {$IFDEF BDS}
   ElidedStartingRows, ElidedEndingRows, I, RowEnd: Integer;
 {$ENDIF}
+{$IFDEF IDE_SYNC_EDIT_BLOCK}
+  SyncBtn: TControl;
+{$ENDIF}
 begin
   Button := TCnWizFlatButton(FindComponentByClass(EditWindow, TCnWizFlatButton,
     SCnSrcEditorBlockButton));
@@ -833,6 +836,21 @@ begin
       EditView.TopRow) * EditControlWrapper.GetCharHeight;
     Y := TrimInt(Y, 0, EditControl.ClientHeight - Button.Height);
     X := csLeftKeep;
+
+  {$IFDEF IDE_SYNC_EDIT_BLOCK}
+    // 如果有语法编辑按钮并且位置冲突，则调整本按钮位置
+    SyncBtn := GetCurrentSyncButton;
+    if (SyncBtn <> nil) and SyncBtn.Visible then
+    begin
+      if Abs(SyncBtn.Top - Y) < Button.Height then
+      begin
+        if Y > Button.Height + 2 then
+          Dec(Y, Button.Height + 2)
+        else
+          Inc(Y, SyncBtn.Height + 2);
+      end;
+    end;
+  {$ENDIF}
 {$ELSE}
     Y := ((StartingRow + EndingRow) div 2 -
       EditView.TopRow) * EditControlWrapper.GetCharHeight + EditControl.Top;
