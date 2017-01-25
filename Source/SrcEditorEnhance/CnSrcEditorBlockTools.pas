@@ -842,12 +842,17 @@ begin
     SyncBtn := GetCurrentSyncButton;
     if (SyncBtn <> nil) and SyncBtn.Visible then
     begin
-      if Abs(SyncBtn.Top - Y) < Button.Height then
+      if (Y >= SyncBtn.Top) and (Y - SyncBtn.Top < Button.Height + 2) then
       begin
-        if Y > Button.Height + 2 then
-          Dec(Y, Button.Height + 2)
-        else
-          Inc(Y, SyncBtn.Height + 2);
+        // 浮动按钮在语法按钮之下且距离较近，往下移动足够长度
+        Y := SyncBtn.Top + SyncBtn.Height + 2;
+      end
+      else if (Y <= SyncBtn.Top) and (SyncBtn.Top - Y < Button.Height + 2) then
+      begin
+        // 浮动按钮在语法按钮之上且距离较近，往上移动足够长度
+        Y := SyncBtn.Top - Button.Height - 2;
+        if Y < 1 then  // 如果太往上了，则换成另一种调整办法
+          Y := SyncBtn.Top + SyncBtn.Height + 2;
       end;
     end;
   {$ENDIF}
