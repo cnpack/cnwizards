@@ -189,6 +189,7 @@ begin
     RegisterMethod('Procedure TraceClass( const AClass : TClass; const AMsg: string)');
     RegisterMethod('Procedure TraceInterface( const AIntf : IUnknown; const AMsg : string)');
     RegisterMethod('Procedure EvaluateObject( AObject : TObject);');
+    RegisterMethod('Procedure EvaluateControlUnderPos( const ScreenPos: TPoint);');
     RegisterProperty('Channel', 'TCnDebugChannel', iptr);
     RegisterProperty('Filter', 'TCnDebugFilter', iptr);
     RegisterProperty('Active', 'Boolean', iptrw);
@@ -331,6 +332,11 @@ end;
 procedure TCnDebuggerEvaluateObject_P(Self: TCnDebugger; AObject: TObject);
 begin
   Self.EvaluateObject(AObject);
+end;
+
+procedure TCnDebuggerEvaluateControlUnderPos_P(Self: TCnDebugger; const ScreenPos: TPoint);
+begin
+  Self.EvaluateControlUnderPos(ScreenPos);
 end;
 
 procedure TCnDebuggerStopTimeMark_P(Self: TCnDebugger; const ATag: Integer; const AMsg: string);
@@ -506,6 +512,7 @@ begin
     RegisterMethod(@TCnDebugger.TraceClass, 'TraceClass');
     RegisterMethod(@TCnDebugger.TraceInterface, 'TraceInterface');
     RegisterMethod(@TCnDebuggerEvaluateObject_P, 'EvaluateObject');
+    RegisterMethod(@TCnDebuggerEvaluateControlUnderPos_P, 'EvaluateControlUnderPos');
     RegisterPropertyHelper(@TCnDebuggerChannel_R, nil, 'Channel');
     RegisterPropertyHelper(@TCnDebuggerFilter_R, nil, 'Filter');
     RegisterPropertyHelper(@TCnDebuggerActive_R, @TCnDebuggerActive_W, 'Active');
