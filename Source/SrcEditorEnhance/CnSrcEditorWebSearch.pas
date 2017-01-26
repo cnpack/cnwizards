@@ -451,7 +451,7 @@ end;
 
 procedure TCnSrcEditorWebSearchForm.btnAddClick(Sender: TObject);
 begin
-  ListViewSelectItems(ListView, smNone);
+  ListViewSelectItems(ListView, smNothing);
   List.Add;
   UpdateListView;
   ListView.Selected := ListView.Items[ListView.Items.Count - 1];
@@ -469,7 +469,7 @@ begin
       if ListView.Items[i].Selected then
         List.Delete(i);
     UpdateListView;
-    ListViewSelectItems(ListView, smNone);
+    ListViewSelectItems(ListView, smNothing);
   end;
 end;
 

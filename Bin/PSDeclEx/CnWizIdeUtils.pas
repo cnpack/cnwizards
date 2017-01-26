@@ -200,6 +200,9 @@ function GetCodeTemplateListBox: TControl;
 function GetCodeTemplateListBoxVisible: Boolean;
 {* 返回编辑器中的代码模板自动输入框是否可见，无或不可见均返回 False}
 
+function IsCurrentEditorInSyncMode: Boolean;
+{* 当前编辑器是否在语法块编辑模式下，不支持或不在块模式下返回 False}
+
 //==============================================================================
 // 组件面板封装类
 //==============================================================================
@@ -496,6 +499,10 @@ begin
 end;
 
 function GetCodeTemplateListBoxVisible: Boolean;
+begin
+end;
+
+function IsCurrentEditorInSyncMode: Boolean;
 begin
 end;
 

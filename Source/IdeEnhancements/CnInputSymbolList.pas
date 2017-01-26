@@ -49,9 +49,14 @@ interface
 
 uses
   Windows, SysUtils, Classes, Controls, IniFiles, ToolsApi, Psapi, Math,
-  Forms, Graphics, Contnrs, TypInfo, CnCommon, CnWizConsts, CnWizOptions,
+  Forms, Graphics, Contnrs, TypInfo,
+  {$IFDEF OTA_CODE_TEMPLATE_API} CodeTemplateAPI, {$ENDIF}
+  CnCommon, CnWizConsts, CnWizOptions,
   CnWizUtils, CnWizIdeUtils, CnPasCodeParser, OmniXML, OmniXMLPersistent,
   OmniXMLUtils, CnWizMacroUtils, CnWizIni;
+
+const
+  CODE_TEMPLATE_INDEX_INVALID = -1;
 
 type
 
@@ -91,6 +96,7 @@ type
     FAlwaysDisp: Boolean;
     FForPascal: Boolean;
     FForCpp: Boolean;
+    FCodeTemplateIndex: Integer;
     function GetScopeRate: Integer;
     function GetText: string;
     procedure SetScopeRate(const Value: Integer);
@@ -147,6 +153,8 @@ type
     {* 是否在 Pascal 中有效}
     property ForCpp: Boolean read FForCpp write FForCpp;
     {* 是否在 C/C++ 中有效}
+    property CodeTemplateIndex: Integer read FCodeTemplateIndex write FCodeTemplateIndex;
+    {* 当本条目指向一 IDE 的代码模板时，存储其索引号，无则 -1}
   end;
 
 //==============================================================================
@@ -394,20 +402,15 @@ type
     class function GetListName: string; override;
   end;
 
-{$IFDEF DELPHIXE_UP}
-//==============================================================================
-// XE/XE2 IDE 自带的 XML 格式的代码模板列表
-//==============================================================================
+{$IFDEF OTA_CODE_TEMPLATE_API}
 
-  TXECodeTemplateList = class(TCodeTemplateList)
-  private
-    function GetLanguageDirectoryName: string;
-  protected
-    function GetReadFileName: string; override;
-    function GetScanDirectory: string; virtual;
+  TIDEModernCodeTemplateList = class(TSymbolList)
   public
-    procedure Load; override;
+    class function GetListName: string; override;
+    function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
+      TCodePosInfo): Boolean; override;
   end;
+
 {$ENDIF}
 
 //==============================================================================
@@ -492,6 +495,7 @@ const
   csCompDXE7 = 'DXE7';
   csCompDXE8 = 'DXE8';
   csCompD10S = 'D10S';
+  csCompD101B = 'D101B';
 
   csCompBCB = 'BCB';
   csCompUser = 'User';
@@ -535,6 +539,7 @@ begin
   FAutoIndent := True;
   FAlwaysDisp := False;
   FForPascal := True;
+  FCodeTemplateIndex := CODE_TEMPLATE_INDEX_INVALID;
   FFuzzyMatchIndexes := TList.Create;
 end;
 
@@ -1127,6 +1132,7 @@ begin
   {$IFDEF DELPHIXE7_UP} AddSection(Ini, csCompDXE7); {$ENDIF}
   {$IFDEF DELPHIXE8_UP} AddSection(Ini, csCompDXE8); {$ENDIF}
   {$IFDEF DELPHI10_SEATTLE_UP} AddSection(Ini, csCompD10S); {$ENDIF}
+  {$IFDEF DELPHI101_BERLIN_UP} AddSection(Ini, csCompD101B); {$ENDIF}
 
    AddSection(Ini, csCompBCB); // 加进来并设为C/C++专用的再说
   finally
@@ -1843,196 +1849,6 @@ begin
 {$ENDIF}
 end;
 
-{$IFDEF DELPHIXE_UP}
-function TXECodeTemplateList.GetReadFileName: string;
-begin
-  Result := ''; // NOT Used for directory mode.
-end;
-
-function TXECodeTemplateList.GetLanguageDirectoryName: string;
-begin
-  Result := 'en'; // Temporary only support English directory
-end;
-
-function TXECodeTemplateList.GetScanDirectory: string;
-begin
-  // Support Delphi/C Templates, so returns the parent directory
-  Result := _CnExtractFilePath(_CnExtractFileDir(Application.ExeName))
-    + 'ObjRepos\' + GetLanguageDirectoryName() + '\Code_Templates\';
-end;
-
-const
-  XeCodeTemplateTag_codetemplate = 'codetemplate';
-  XeCodeTemplateTag_template = 'template';
-  XeCodeTemplateAttrib_name = 'name';
-  XeCodeTemplateTag_description = 'description';
-  XeCodeTemplateTag_code = 'code';
-  XeCodeTemplateAttrib_language = 'language';
-  XeCodeTemplate_cdata = '<![CDATA[';
-  XeCodeTemplate_cdataend = ']]>';
-
-procedure TXECodeTemplateList.Load;
-var
-  Dir, FileName: string;
-  Sch: TSearchRec;
-  Doc: IXMLDocument;
-  Root, TemplateNode, CodeNode: IXmlElement;
-  CDataEndPos: Integer;
-  Text: string;
-  Name: string;
-  Desc: string;
-{$IFDEF DEBUG}
-  C: Integer;
-{$ENDIF}
-
-  procedure ScanAndParseDir(const ADir: string);
-  var
-    Lang: string;
-    I, Idx: Integer;
-  begin
-    if FindFirst(ADir + '*.xml', faAnyfile, Sch) = 0 then
-    begin
-      repeat
-        if ((Sch.Name = '.') or (Sch.Name = '..')) then Continue;
-        if DirectoryExists(ADir + Sch.Name) then
-        begin
-          // XML Dir? do nothing.
-        end
-        else
-        begin
-          try
-            FileName := ADir + Sch.Name;
-            // Load this XML and read Name/Descripttion/Text
-            Doc := CreateXMLDoc();
-            Doc.Load(FileName);
-            Root := Doc.DocumentElement;
-            if not Assigned(Root) or not
-              SameText(Root.NodeName, XeCodeTemplateTag_codetemplate) then
-              Continue;
-
-            TemplateNode := nil;
-            for I := 0 to Root.ChildNodes.Length - 1 do
-            begin
-              if SameText(Root.ChildNodes.Item[I].NodeName, XeCodeTemplateTag_template) then
-              begin
-                TemplateNode := Root.ChildNodes.Item[I] as IXMLElement;
-                Break;
-              end;
-            end;
-
-            if TemplateNode <> nil then
-            begin
-              Name := Trim(TemplateNode.GetAttribute(XeCodeTemplateAttrib_name));
-              Desc := ''; Text := ''; Lang := '';
-              for I := 0 to TemplateNode.ChildNodes.Length - 1 do
-              begin
-                if SameText(TemplateNode.ChildNodes.Item[I].NodeName, XeCodeTemplateTag_description) then
-                begin
-                  // Read Description
-                  Desc := Trim(TemplateNode.ChildNodes.Item[I].Text);
-                end
-                else if SameText(TemplateNode.ChildNodes.Item[I].NodeName, XeCodeTemplateTag_code) then
-                begin
-                  // Language is Delphi? read the CDATA part
-                  CodeNode := TemplateNode.ChildNodes.Item[I] as IXMLElement;
-                  Lang := CodeNode.GetAttribute(XeCodeTemplateAttrib_language);
-                  if (Lang = 'Delphi') or (Lang = 'C') then
-                  begin
-                    Text := Trim(CodeNode.Text);
-                    if Pos(XeCodeTemplate_cdata, Text) = 1 then
-                      Text := Copy(Text, Length(XeCodeTemplate_cdata), MaxInt);
-                    CDataEndPos := Length(Text) - Length(XeCodeTemplate_cdataend) + 1;
-                    if Pos(XeCodeTemplate_cdataend, Text) = CDataEndPos then
-                      Text := Copy(Text, 1, CDataEndPos - 1);
-
-                    // Just replace these fields to empty
-                    if Lang = 'Delphi' then
-                    begin
-                      Text := StringReplace(Text, '|variable|', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '|classtype|', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '|selected|', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '|expr|', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '|createparms|', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '|enumname|', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '|name|', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '|ident|', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '|collection|', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '|ancestor|', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '|end|', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '|type|', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '|last|', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '|collection|', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '|low|', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '|high|', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '|var|', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '|init|', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '|expression|', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '|cases|', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '|errormessage|', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '|exception|', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '|*|', '', [rfReplaceAll]);
-                    end
-                    else // Replace C fields
-                    begin
-                      Text := StringReplace(Text, '$*$', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '$expr$', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '$expr1$', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '$expr2$', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '$expr3$', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '$selected$', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '$end$', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '$name$', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '$ancestor$', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '$cases$', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '$typename$', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '$exception$', '', [rfReplaceAll]);
-                      Text := StringReplace(Text, '$except$', '', [rfReplaceAll]);
-                    end;
-                  end;
-                end;
-              end;
-
-  {$IFDEF DEBUG}
-              Inc(C);
-  {$ENDIF}
-              if (Name <> '') and (Text <> '') then
-              begin
-                Idx := Add(Name, skTemplate, csTemplateScope, Desc, Text, True);
-                Items[Idx].ForCpp := Lang = 'C';
-                Items[Idx].ForPascal := Lang <> 'C';
-              end;
-            end;
-          except
-            ;
-          end;
-        end;
-      until FindNext(Sch) <> 0;
-      FindClose(Sch);
-    end;
-  end;
-begin
-  // 扫描指定目录下的 XML 文件，每个文件是一项输入列表
-  Dir := GetScanDirectory() + 'Delphi\';
-  
-{$IFDEF DEBUG}
-  C := 0;
-  CnDebugger.LogMsg('XECodeTemplateList Scan directory: ' + Dir);
-{$ENDIF}
-
-  ScanAndParseDir(Dir);
-  Dir := GetScanDirectory() + 'c\';
-
-{$IFDEF DEBUG}
-  CnDebugger.LogMsg('XECodeTemplateList Scan directory: ' + Dir);
-{$ENDIF}
-
-  ScanAndParseDir(Dir);
-{$IFDEF DEBUG}
-  CnDebugger.LogMsg('XECodeTemplateList Load Tempates: ' + IntToStr(C));
-{$ENDIF}
-end;
-{$ENDIF}
-
 //==============================================================================
 // 符号列表管理器
 //==============================================================================
@@ -2152,6 +1968,53 @@ begin
     List[I].Reset;
 end;
 
+{$IFDEF OTA_CODE_TEMPLATE_API}
+
+{ TIDEModernCodeTemplateList }
+
+class function TIDEModernCodeTemplateList.GetListName: string;
+begin
+  Result := SCnInputHelperIDECodeTemplateList;
+end;
+
+function TIDEModernCodeTemplateList.Reload(Editor: IOTAEditBuffer;
+  const InputText: string; PosInfo: TCodePosInfo): Boolean;
+var
+  I, Idx: Integer;
+  CT: IOTACodeTemplate;
+  CTS: IOTACodeTemplateServices;
+begin
+  if PosInfo.IsPascal then
+    Result := PosInfo.PosKind in csNormalPosKinds
+  else
+    Result := PosInfo.PosKind in [pkField, pkComment];
+
+  if not Result then
+    Exit;
+
+  CTS := BorlandIDEServices as IOTACodeTemplateServices;
+  if CTS <> nil then
+  begin
+    Clear;
+    for I := 0 to CTS.CodeObjectCount - 1 do
+    begin
+      CT := CTS.CodeObjects[I];
+      if (PosInfo.IsPascal and (CT.Language = 'Delphi')) or
+        (not PosInfo.IsPascal and (CT.Language = 'C++')) then
+      begin
+        Idx := Add(CT.Shortcut, skTemplate, csTemplateScope, CT.Description,
+          CT.Code);
+
+        Items[Idx].FForPascal := PosInfo.IsPascal;
+        Items[Idx].FForCpp := not PosInfo.IsPascal;
+        Items[Idx].CodeTemplateIndex := I;
+      end;
+    end;
+  end;
+end;
+
+{$ENDIF}
+
 initialization
   RegisterSymbolList(TPreDefSymbolList);
   RegisterSymbolList(TUserTemplateList);
@@ -2160,8 +2023,8 @@ initialization
   RegisterSymbolList(TJavaDocSymbolList);
   RegisterSymbolList(TUnitNameList);
   RegisterSymbolList(TUnitUsesList);
-{$IFDEF DELPHIXE_UP}
-  RegisterSymbolList(TXECodeTemplateList);
+{$IFDEF OTA_CODE_TEMPLATE_API}
+  RegisterSymbolList(TIDEModernCodeTemplateList);
 {$ELSE}
   RegisterSymbolList(TIDECodeTemplateList);
 {$ENDIF}

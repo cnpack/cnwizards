@@ -55,6 +55,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ComCtrls, ExtCtrls, ImgList, Menus, ToolsApi, IniFiles, Math,
   Buttons, TypInfo, mPasLex, AppEvnts,
+  {$IFDEF OTA_CODE_TEMPLATE_API} CodeTemplateAPI, {$ENDIF}
   CnConsts, CnCommon, CnWizClasses, CnWizConsts, CnWizUtils, CnWizIdeUtils,
   CnInputSymbolList, CnInputIdeSymbolList, CnIni, CnWizMultiLang, CnWizNotifier,
   CnPasCodeParser, CnWizShareImages, CnWizShortCut, CnWizOptions, CnFloatWindow,
@@ -1431,7 +1432,10 @@ var
   ScanCode: Word;
   Key: Word;
   KeyDownChar: AnsiChar;
-  ShouldIgnoreDot: Boolean;
+  ShouldIgnore: Boolean;
+{$IFDEF IDE_SYNC_EDIT_BLOCK}
+  View: IOTAEditView;
+{$ENDIF}
 begin
   Result := False;
 
@@ -1474,7 +1478,14 @@ begin
         end;
       VK_TAB, VK_DECIMAL, 190: // '.'
         begin
-          ShouldIgnoreDot := False;
+          ShouldIgnore := False;
+
+{$IFDEF IDE_SYNC_EDIT_BLOCK}
+          // 块编辑模式时，Tab 用来在块内跳转，不能用于输入
+          if (Key = VK_TAB) and IsCurrentEditorInSyncMode then
+            ShouldIgnore := True;
+{$ENDIF}
+
 {$IFDEF SUPPORT_UNITNAME_DOT}
           if (Key = 190) and CurrentIsDelphiSource then
           begin
@@ -1482,14 +1493,14 @@ begin
             // 支持 Unit 名的 IDE 下，uses 区的点号应该忽略，而不是之前查找固定前缀
             if FPosInfo.PosKind in [pkIntfUses, pkImplUses] then
             begin
-              ShouldIgnoreDot := True;
+              ShouldIgnore := True;
 {$IFDEF DEBUG}
               CnDebugger.LogMsg('Dot Got. In Uses Area. Ignore ' + FToken);
 {$ENDIF}
             end;
           end;
 {$ENDIF}
-          if not ShouldIgnoreDot then
+          if not ShouldIgnore then
           begin
             SendSymbolToIDE(SelMidMatchByEnterOnly, False, False, #0, Result);
             if IsValidDotKey(Key) or IsValidCppArrowKey(Key, ScanCode) then
@@ -2489,6 +2500,10 @@ var
   Buffer: IOTAEditBuffer;
   C: Char;
   EditPos: IOTAEditPosition;
+{$IFDEF OTA_CODE_TEMPLATE_API}
+  View: IOTAEditView;
+  CTS: IOTACodeTemplateServices;
+{$ENDIF}
 
   function ItemHasParam(AItem: TSymbolItem): Boolean;
   var
@@ -2535,6 +2550,29 @@ begin
   if List.ItemIndex >= 0 then
   begin
     Item := TSymbolItem(FItems.Objects[List.ItemIndex]);
+
+{$IFDEF OTA_CODE_TEMPLATE_API}
+    if Item.CodeTemplateIndex > CODE_TEMPLATE_INDEX_INVALID then
+    begin
+      CTS := BorlandIDEServices as IOTACodeTemplateServices;
+      if CTS <> nil then
+      begin
+        View := CnOtaGetTopMostEditView;
+        if (View <> nil) and (Item.CodeTemplateIndex < CTS.CodeObjectCount) then
+        begin
+          // 模板输入时必然要求替换之前曾经输入过的匹配内容
+          CnOtaDeleteCurrTokenLeft(CalcFirstSet(FPosInfo.IsPascal), CalcCharSet(@FPosInfo));
+          CTS.InsertCode(Item.CodeTemplateIndex, View, False);
+        end;
+
+        // 增加点击数
+        if FAutoAdjustScope and (Item.HashCode <> 0) then
+          HitCountMgr.IncHitCount(Item.HashCode);
+        Exit;
+      end;
+    end;
+{$ENDIF}
+
     S := Item.Name;
     if not MatchFirstOnly or (FMatchStr = '') or (Pos(UpperCase(FMatchStr),
       UpperCase(S)) = 1) then

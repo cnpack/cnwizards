@@ -400,7 +400,7 @@ end;
 
 procedure TCnSrcEditorGroupReplaceForm.btnAddClick(Sender: TObject);
 begin
-  ListViewSelectItems(ListView, smNone);
+  ListViewSelectItems(ListView, smNothing);
   List.Add;
   UpdateListView;
   ListView.Selected := ListView.Items[ListView.Items.Count - 1];
@@ -418,7 +418,7 @@ begin
       if ListView.Items[i].Selected then
         List.Delete(i);
     UpdateListView;
-    ListViewSelectItems(ListView, smNone);
+    ListViewSelectItems(ListView, smNothing);
   end;
 end;
 
@@ -616,7 +616,7 @@ procedure TCnSrcEditorGroupReplaceForm.btnItemAddClick(Sender: TObject);
 begin
   if ListView.Selected <> nil then
   begin
-    ListViewSelectItems(lvItems, smNone);
+    ListViewSelectItems(lvItems, smNothing);
     List.Items[ListView.Selected.Index].Items.Add;
     UpdateItemListView;
     lvItems.Selected := lvItems.Items[lvItems.Items.Count - 1];
@@ -636,7 +636,7 @@ begin
       if lvItems.Items[i].Selected then
         List.Items[ListView.Selected.Index].Items.Delete(i);
     UpdateItemListView;
-    ListViewSelectItems(lvItems, smNone);
+    ListViewSelectItems(lvItems, smNothing);
   end;
 end;
 

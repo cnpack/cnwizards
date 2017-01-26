@@ -383,6 +383,9 @@ function GetCodeTemplateListBox: TControl;
 function GetCodeTemplateListBoxVisible: Boolean;
 {* 返回编辑器中的代码模板自动输入框是否可见，无或不可见均返回 False}
 
+function IsCurrentEditorInSyncMode: Boolean;
+{* 当前编辑器是否在语法块编辑模式下，不支持或不在块模式下返回 False}
+
 type
   TCnSrcEditorPage = (epCode, epDesign, epCPU, epWelcome, epOthers);
 
@@ -1975,6 +1978,21 @@ begin
   Control := GetCodeTemplateListBox;
   if Control <> nil then
     Result := Control.Visible;
+end;
+
+// 当前编辑器是否在语法块编辑模式下，不支持或不在块模式下返回 False
+function IsCurrentEditorInSyncMode: Boolean;
+{$IFDEF IDE_SYNC_EDIT_BLOCK}
+var
+  View: IOTAEditView;
+{$ENDIF}
+begin
+  Result := False;
+{$IFDEF IDE_SYNC_EDIT_BLOCK}
+  View := CnOtaGetTopMostEditView;
+  if (View <> nil) and (View.Block <> nil) then
+    Result := View.Block.SyncMode <> smNone;
+{$ENDIF}
 end;
 
 // 取当前编辑窗口顶层页面类型，传入编辑器父控件

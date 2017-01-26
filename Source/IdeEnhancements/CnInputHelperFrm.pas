@@ -600,7 +600,7 @@ begin
     LVItem := lvList.Items.Add;
     LVItem.Data := CurrList.Items[CurrList.Count - 1];
     UpdateListItem(LVItem);
-    ListViewSelectItems(lvList, smNone);
+    ListViewSelectItems(lvList, smNothing);
     lvList.Selected := LVItem;
     lvList.AlphaSort;
     Result := True;

@@ -253,7 +253,7 @@ function HandleEditShortCut(AControl: TWinControl; AShortCut: TShortCut): Boolea
 //==============================================================================
 
 type
-  TCnSelectMode = (smAll, smNone, smInvert);
+  TCnSelectMode = (smAll, smNothing, smInvert);
 
 function CnGetComponentText(Component: TComponent): string;
 {* 返回组件的标题}
@@ -2312,7 +2312,7 @@ begin
   for i := 0 to AListView.Items.Count - 1 do
     if Mode = smAll then
       AListView.Items[i].Selected := True
-    else if Mode = smNone then
+    else if Mode = smNothing then
       AListView.Items[i].Selected := False
     else
       AListView.Items[i].Selected := not AListView.Items[i].Selected;
