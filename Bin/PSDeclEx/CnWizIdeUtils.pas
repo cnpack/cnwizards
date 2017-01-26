@@ -188,6 +188,18 @@ function GetCurrentEditControl: TControl;
 function GetStatusBarFromEditor(EditControl: TControl): TStatusBar;
 {* 从编辑器控件获得其所属的编辑器窗口的状态栏}
 
+function GetCurrentSyncButton: TControl;
+{* 获取当前最前端编辑器的语法编辑按钮，注意语法编辑按钮存在不等于可见}
+
+function GetCurrentSyncButtonVisible: Boolean;
+{* 获取当前最前端编辑器的语法编辑按钮是否可见，无按钮或不可见均返回 False}
+
+function GetCodeTemplateListBox: TControl;
+{* 返回编辑器中的代码模板自动输入框}
+
+function GetCodeTemplateListBoxVisible: Boolean;
+{* 返回编辑器中的代码模板自动输入框是否可见，无或不可见均返回 False}
+
 //==============================================================================
 // 组件面板封装类
 //==============================================================================
@@ -468,6 +480,22 @@ begin
 end;
 
 function GetStatusBarFromEditor(EditControl: TControl): TStatusBar;
+begin
+end;
+
+function GetCurrentSyncButton: TControl;
+begin
+end;
+
+function GetCurrentSyncButtonVisible: Boolean;
+begin
+end;
+
+function GetCodeTemplateListBox: TControl;
+begin
+end;
+
+function GetCodeTemplateListBoxVisible: Boolean;
 begin
 end;
 

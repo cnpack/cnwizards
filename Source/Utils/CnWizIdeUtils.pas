@@ -377,6 +377,12 @@ function GetCurrentSyncButton: TControl;
 function GetCurrentSyncButtonVisible: Boolean;
 {* 获取当前最前端编辑器的语法编辑按钮是否可见，无按钮或不可见均返回 False}
 
+function GetCodeTemplateListBox: TControl;
+{* 返回编辑器中的代码模板自动输入框}
+
+function GetCodeTemplateListBoxVisible: Boolean;
+{* 返回编辑器中的代码模板自动输入框是否可见，无或不可见均返回 False}
+
 type
   TCnSrcEditorPage = (epCode, epDesign, epCPU, epWelcome, epOthers);
 
@@ -565,6 +571,7 @@ uses
 
 const
   SSyncButtonName = 'SyncButton';
+  SCodeTemplateListBoxName = 'CodeTemplateListBox';
 
 {$IFDEF BDS4_UP}
 const
@@ -1951,6 +1958,23 @@ begin
   Button := GetCurrentSyncButton;
   if Button <> nil then
     Result := Button.Visible;
+end;
+
+// 返回编辑器中的代码模板自动输入框
+function GetCodeTemplateListBox: TControl;
+begin
+  Result := TControl(Application.FindComponent(SCodeTemplateListBoxName));
+end;
+
+// 返回编辑器中的代码模板自动输入框是否可见，无或不可见均返回 False
+function GetCodeTemplateListBoxVisible: Boolean;
+var
+  Control: TControl;
+begin
+  Result := False;
+  Control := GetCodeTemplateListBox;
+  if Control <> nil then
+    Result := Control.Visible;
 end;
 
 // 取当前编辑窗口顶层页面类型，传入编辑器父控件

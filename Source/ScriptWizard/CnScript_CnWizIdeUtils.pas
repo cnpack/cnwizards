@@ -154,6 +154,8 @@ begin
   CL.AddDelphiFunction('Function GetStatusBarFromEditor(EditControl: TControl) : TStatusBar');
   CL.AddDelphiFunction('Function GetCurrentSyncButton : TControl');
   CL.AddDelphiFunction('Function GetCurrentSyncButtonVisible : Boolean');
+  CL.AddDelphiFunction('Function GetCodeTemplateListBox : TControl');
+  CL.AddDelphiFunction('Function GetCodeTemplateListBoxVisible : Boolean');
   CL.AddDelphiFunction('Function ConvertIDETreeNodeToTreeNode(Node: TObject) : TTreeNode');
   CL.AddDelphiFunction('Function ConvertIDETreeNodesToTreeNodes(Nodes: TObject) : TTreeNodes');
   SIRegister_TCnPaletteWrapper(CL);
@@ -400,6 +402,8 @@ begin
   S.RegisterDelphiFunction(@GetStatusBarFromEditor, 'GetStatusBarFromEditor', cdRegister);
   S.RegisterDelphiFunction(@GetCurrentSyncButton, 'GetCurrentSyncButton', cdRegister);
   S.RegisterDelphiFunction(@GetCurrentSyncButtonVisible, 'GetCurrentSyncButtonVisible', cdRegister);
+  S.RegisterDelphiFunction(@GetCodeTemplateListBox, 'GetCodeTemplateListBox', cdRegister);
+  S.RegisterDelphiFunction(@GetCodeTemplateListBoxVisible, 'GetCodeTemplateListBoxVisible', cdRegister);
   S.RegisterDelphiFunction(@ConvertIDETreeNodeToTreeNode, 'ConvertIDETreeNodeToTreeNode', cdRegister);
   S.RegisterDelphiFunction(@ConvertIDETreeNodesToTreeNodes, 'ConvertIDETreeNodesToTreeNodes', cdRegister);
   S.RegisterDelphiFunction(@CnPaletteWrapper, 'CnPaletteWrapper', cdRegister);

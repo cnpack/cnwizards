@@ -1268,11 +1268,12 @@ function TCnInputHelper.AcceptDisplay: Boolean;
     Result := CurrentIsSource;
     {$ENDIF}
   end;
+
 begin
   Result := Active and IsEditControl(Screen.ActiveControl) and
     (not CheckImmRun or not IMMIsActive) and CanPopupInCurrentSourceType and
     not IsAutoCompleteActive and not IsReadOnly and not CnOtaIsDebugging and
-    not IsInIncreSearch and not IsInMacroOp;
+    not IsInIncreSearch and not IsInMacroOp and not GetCodeTemplateListBoxVisible;
 end;
 
 procedure TCnInputHelper.ApplicationMessage(var Msg: TMsg;
