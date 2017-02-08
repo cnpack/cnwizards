@@ -1435,6 +1435,7 @@ var
   ShouldIgnore: Boolean;
 {$IFDEF IDE_SYNC_EDIT_BLOCK}
   View: IOTAEditView;
+  ShouldEatTab: Boolean;
 {$ENDIF}
 begin
   Result := False;
@@ -1479,11 +1480,9 @@ begin
       VK_TAB, VK_DECIMAL, 190: // '.'
         begin
           ShouldIgnore := False;
-
 {$IFDEF IDE_SYNC_EDIT_BLOCK}
-          // 块编辑模式时，Tab 用来在块内跳转，不能用于输入
-          if (Key = VK_TAB) and IsCurrentEditorInSyncMode then
-            ShouldIgnore := True;
+          // 块编辑模式时，Tab 用于输入后应该吃掉，免得造成额外跳转
+          ShouldEatTab := (Key = VK_TAB) and IsCurrentEditorInSyncMode;
 {$ENDIF}
 
 {$IFDEF SUPPORT_UNITNAME_DOT}
@@ -1509,6 +1508,16 @@ begin
               Timer.Enabled := True;
             end;
           end;
+
+{$IFDEF IDE_SYNC_EDIT_BLOCK}
+          if ShouldEatTab then
+          begin
+{$IFDEF DEBUG}
+            CnDebugger.LogMsg('Tab To Enter when in Sync Mode. Eat it to Avoid Jump.');
+{$ENDIF}
+            Result := True;
+          end;
+{$ENDIF}
         end;
       VK_ESCAPE:
         begin
