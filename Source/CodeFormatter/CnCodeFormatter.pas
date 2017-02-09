@@ -214,7 +214,7 @@ type
     // 返回是否有&
 
     // IndentForAnonymous 参数用来控制内部可能出现的匿名函数的缩进
-    procedure FormatExprList(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
+    procedure FormatExprList(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0; SupportColon: Boolean = False);
     procedure FormatExpression(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
     procedure FormatSimpleExpression(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
     procedure FormatTerm(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
@@ -969,7 +969,7 @@ end;
 procedure TCnBasePascalFormatter.FormatDesignator(PreSpaceCount: Byte;
   IndentForAnonymous: Byte);
 var
-  IsRB: Boolean;
+  IsB: Boolean;
 begin
   if Scaner.Token = tokAtSign then // 如果是 @ Designator 的形式则再次递归
   begin
@@ -993,16 +993,18 @@ begin
       tokLB, tokSLB: // [ ] ()
         begin
           { DONE: deal with index visit and function/procedure call}
+          IsB := (Scaner.Token = tokLB);
           Match(Scaner.Token);
-          FormatExprList(PreSpaceCount, IndentForAnonymous);
+          // Str 这种函数调用，参数列表要支持冒号分割，不知道副作用是否大不大
+          FormatExprList(PreSpaceCount, IndentForAnonymous, IsB);
 
-          IsRB := Scaner.Token = tokRB;
-          if IsRB then
+          IsB := Scaner.Token = tokRB;
+          if IsB then
             SpecifyElementType(pfetExprListRightBracket);
           try
             Match(Scaner.Token);
           finally
-            if IsRB then
+            if IsB then
               RestoreElementType;
           end;
         end;
@@ -1076,7 +1078,9 @@ end;
 
 { ExprList -> Expression/','... }
 procedure TCnBasePascalFormatter.FormatExprList(PreSpaceCount: Byte;
-  IndentForAnonymous: Byte);
+  IndentForAnonymous: Byte; SupportColon: Boolean);
+var
+  Sep: TPascalTokenSet;
 begin
   FormatExpression(0, IndentForAnonymous);
 
@@ -1086,9 +1090,13 @@ begin
     FormatExpression(0, IndentForAnonymous);
   end;
 
-  while Scaner.Token = tokComma do
+  Sep := [tokComma];
+  if SupportColon then
+    Include(Sep, tokColon);
+
+  while Scaner.Token in Sep do
   begin
-    Match(tokComma, 0, 1);
+    Match(Scaner.Token, 0, 1);
 
     if Scaner.Token in ([tokAtSign, tokLB] + ExprTokens + KeywordTokens +
       DirectiveTokens + ComplexTokens) then // 有关键字做变量名的情况也得考虑到
