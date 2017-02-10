@@ -2523,7 +2523,12 @@ begin
   else // 有单行块时查选中的块内容
     SearchString := Block.Text;
 
+{$IFDEF UNICODE}
+  // Unicode 环境下，位移是 Utf8 的长度
+  Len := CalcUtf8LengthFromWideString(PChar(SearchString));
+{$ELSE}
   Len := Length(SearchString);
+{$ENDIF}
   if Len = 0 then Exit;
 
   ARow := Position.GetRow;

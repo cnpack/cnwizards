@@ -49,13 +49,13 @@ CnPack的 Pascal 语法        列 Ansi                列有 Ansi/Wide           同右
 CnPack的 Cpp 语法           列 Ansi                列有 Ansi/Wide           同右
 解析器所使用的行列          行列均 1 开始          行列均 1 开始            
 -----------------------------------------------------------------------------------------------------
-CnPack的Pascal结构          列 Ansi                列有 Ansi/Wide           同右
+CnPack的 Pascal 结构        列 Ansi                列有 Ansi/Wide           同右
 解析器所使用的行列          行列均 0 开始          行列均 0 开始，可展开Tab
 -----------------------------------------------------------------------------------------------------
-CnPack的Cpp结构             列 Ansi                列有 Ansi/Wide           同右     
+CnPack的 Cpp 结构           列 Ansi                列有 Ansi/Wide           同右     
 解析器所使用的行列          行列均 0 开始          行列均 0 开始，可展开Tab          
 -----------------------------------------------------------------------------------------------------
-CnPack的Pas/Cpp结构         不展开Tab              根据IDE设置展开Tab       根据IDE设置展开Tab
+CnPack的 Pas/Cpp 结构       不展开Tab              根据IDE设置展开Tab       根据IDE设置展开Tab
 解析器是否自行展开Tab       Tab由ConvertPos处理      
 -----------------------------------------------------------------------------------------------------
 Pas/Cpp Token 的            1 开始的 TOTAEditPos   1 开始的 TOTAEditPos     1 开始的 TOTAEditPos
@@ -63,8 +63,8 @@ EditLine/EditCol属性        EditCol为Ansi          EditCol为Utf8            Edit
 =====================================================================================================
 
 和当前光标有关的，需要使用 TOTAEditPos 类型的 Col。
-结构解析器解析出来的Token的行列是基于字符的Ansi/Wide值，需要转换成CharPos再转换成EditPos再存储到Token的EditLine/EditCol属性里。
-以后在要跳转到此Token时才能直接使用EditLine/EditCol。
-另外，代码高亮中需要根据Token进行重画时，计算重画区域的EditCol应该全部使用Ansi的（视觉要求），但D2005~2007的EditPos的Col是Utf8，
-所以D2005~2007下，不能直接用EditCol，另开了一个属性EditAnsiCol存储Ansi偏移，专门用来重画。
+结构解析器解析出来的 Token 的行列是基于字符的 Ansi/Wide 值，需要转换成 CharPos 再转换成 EditPos 再存储到 Token 的 EditLine/EditCol 属性里。
+以后在要跳转到此 Token 时才能直接使用 EditLine/EditCol。
+另外，代码高亮中需要根据 Token 进行重画时，计算重画区域的 EditCol 应该全部使用 Ansi 的（视觉要求），但 D2005~2007 的 EditPos 的 Col 是 Utf8，
+所以 D2005~2007 下，不能直接用 EditCol，另开了一个属性 EditAnsiCol 存储 Ansi 偏移，专门用来重画。
 
