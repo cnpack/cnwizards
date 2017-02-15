@@ -2591,7 +2591,10 @@ function TCnSourceHighlight.EditorGetTextRect(Editor: TEditorObject; AnsiPos: TO
   var ARect: TRect): Boolean;
 {$IFDEF BDS}
 var
-  I, TotalWidth: Integer;
+  I, TotalLeftWidth: Integer;
+{$IFNDEF IDE_STRING_ANSI_UTF8}
+  TotalLen: Integer;
+{$ENDIF}
   Size: TSize;
 {$IFDEF UNICODE}
   UCol: Integer;
@@ -2618,7 +2621,7 @@ begin
     begin
 {$IFDEF BDS}
       EditCanvas := EditControlWrapper.GetEditControlCanvas(Editor.EditControl);
-      TotalWidth := 0;
+      TotalLeftWidth := 0;
 
   {$IFDEF UNICODE}
       // 遇到窄的双字节字符时转 AnsiString 会导致列计算错误，此处换一种方法
@@ -2634,17 +2637,18 @@ begin
         U := '';
   {$ENDIF}
 
+      // U 是 AText 左边的字符串，累计 U 的宽度用来计算左边的偏移
       if U <> '' then
       begin
         // 挨个记录每个字符（双字节）的宽度并累加
         for I := 1 to Length(U) do
-          Inc(TotalWidth, GetWideCharWidth(U[I]));
+          Inc(TotalLeftWidth, GetWideCharWidth(U[I]));
 
         // 然后减去横向滚动时左边隐藏的宽度
         if EditView.LeftColumn > 1 then
         begin
-          TotalWidth := TotalWidth - (EditView.LeftColumn - 1) * CharSize.cx;
-          if TotalWidth < 0 then // 如果左边隐藏太多，则不显示
+          TotalLeftWidth := TotalLeftWidth - (EditView.LeftColumn - 1) * CharSize.cx;
+          if TotalLeftWidth < 0 then // 如果左边隐藏太多，则不显示
           begin
             Result := False;
             Exit;
@@ -2658,13 +2662,18 @@ begin
       Size.cY := 0;
 
       GetTextExtentPoint32W(EditCanvas.Handle, PWideChar(AText), Length(AText), Size);
-      ARect := Bounds(GutterWidth + TotalWidth,
+      ARect := Bounds(GutterWidth + TotalLeftWidth,
         (AnsiPos.Line - EditView.TopRow) * CharSize.cy, Size.cx,
         CharSize.cy);
   {$ELSE}
-      ARect := Bounds(GutterWidth + TotalWidth,
-        (AnsiPos.Line - EditView.TopRow) * CharSize.cy, EditCanvas.TextWidth(AText),
-        CharSize.cy);
+      // Unicode 环境下 EditCanvas.TextWidth(AText) 在 AText 中有汉字等场合有偏差，
+      // 必须挨个计算字符宽度后累加，D2005 ~2007 暂不详
+      TotalLen := 0;
+      for I := 1 to Length(AText) do
+        Inc(TotalLen, GetWideCharWidth(AText[I]));
+
+      ARect := Bounds(GutterWidth + TotalLeftWidth,
+        (AnsiPos.Line - EditView.TopRow) * CharSize.cy, TotalLen, CharSize.cy);
   {$ENDIF}
 {$ELSE}
       ARect := Bounds(GutterWidth + (AnsiPos.Col - EditView.LeftColumn) * CharSize.cx,
