@@ -1260,7 +1260,7 @@ begin
   {$ENDIF}
 
         {$IFDEF BDS}
-        CppParser.UseTabKey := FHighlight.FUseTabKey;
+        CppParser.UseTabKey := True; // FHighlight.FUseTabKey;
         CppParser.TabWidth := FHighlight.FTabWidth;
         {$ENDIF}
 
@@ -1337,7 +1337,7 @@ begin
   {$ENDIF}
 
         {$IFDEF BDS}
-        PasParser.UseTabKey := FHighlight.FUseTabKey;
+        PasParser.UseTabKey := True; // FHighlight.FUseTabKey;
         PasParser.TabWidth := FHighlight.FTabWidth;
         {$ENDIF}
 

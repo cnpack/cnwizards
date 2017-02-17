@@ -580,7 +580,7 @@ begin
   begin
     PasParser := TCnGeneralPasStructParser.Create;
     {$IFDEF BDS}
-    PasParser.UseTabKey := HighlightWizard.UseTabKey;
+    PasParser.UseTabKey := True; // HighlightWizard.UseTabKey;
     PasParser.TabWidth := HighlightWizard.TabWidth;
     {$ENDIF}
   end;
@@ -588,7 +588,7 @@ begin
   begin
     CppParser := TCnGeneralCppStructParser.Create;
     {$IFDEF BDS}
-    CppParser.UseTabKey := HighlightWizard.UseTabKey;
+    CppParser.UseTabKey := True; // HighlightWizard.UseTabKey;
     CppParser.TabWidth := HighlightWizard.TabWidth;
     {$ENDIF}
   end;

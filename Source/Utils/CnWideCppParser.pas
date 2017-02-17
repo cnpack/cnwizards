@@ -117,7 +117,9 @@ type
     property CurrentChildMethod: CnWideString read FCurrentChildMethod;
 
     property UseTabKey: Boolean read FUseTabKey write FUseTabKey;
-    {* 是否排版处理 Tab 键的宽度，如不处理，则将 Tab 键当作宽为 1 处理}
+    {* 是否排版处理 Tab 键的宽度，如不处理，则将 Tab 键当作宽为 1 处理。
+      注意不能把 IDE 编辑器设置里的 "Use Tab Character" 的值赋值过来。
+      IDE 设置只控制代码中是否在按 Tab 时出现 Tab 字符还是用空格补全。}
     property TabWidth: Integer read FTabWidth write FTabWidth;
     {* Tab 键的宽度}
 
