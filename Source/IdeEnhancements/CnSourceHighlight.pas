@@ -1446,7 +1446,8 @@ end;
 
 procedure TBlockMatchInfo.UpdateSeparateLineList;
 var
-  MaxLine, I, J, LastSepLine: Integer;
+  MaxLine, I, J, LastSepLine, LastMethodCloseIdx: Integer;
+  StateInMethodCloseStart: Boolean;
   Line: string;
 begin
   MaxLine := 0;
@@ -1458,6 +1459,7 @@ begin
   FSeparateLineList.Count := MaxLine + 1;
 
   LastSepLine := 1;
+  LastMethodCloseIdx := 0;
   for I := 0 to FKeyTokenList.Count - 1 do
   begin
     if KeyTokens[I].IsMethodStart then
@@ -1465,6 +1467,24 @@ begin
       // 从 LastSepLine 到此 Token 前一个，找第一个空行标记
       if LastSepLine > 1 then
       begin
+        // 但如果在这之间先碰到了其他 KeyTokens，表示是语句，要忽略
+        StateInMethodCloseStart := False;
+        if LastMethodCloseIdx > 0 then
+        begin
+          for J := LastMethodCloseIdx + 1 to I - 1 do
+          begin
+            if KeyTokens[J].TokenID in csKeyTokens then
+            begin
+              StateInMethodCloseStart := True;
+              Break;
+            end;
+          end;
+        end;
+
+        if StateInMethodCloseStart then
+           Continue;
+
+        // 本 MethodClose 与上面的 MethodStart 之间没有其他语句，判断空行
         for J := LastSepLine to KeyTokens[I].EditLine do
         begin
           Line := Trim(EditControlWrapper.GetTextAtLine(Control, J));
@@ -1478,8 +1498,9 @@ begin
     end
     else if KeyTokens[I].IsMethodClose then
     begin
-      // 从 LastLine 到此 Token 前一个，均不标记
+      // 从 LastLine 到此 Token 前一个，均不是分隔线所在区域。记录其行号与 Token 索引
       LastSepLine := KeyTokens[I].EditLine + 1;
+      LastMethodCloseIdx := I;
     end;
   end;
 end;

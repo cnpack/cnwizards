@@ -36,7 +36,7 @@ object CnTestPasForm: TCnTestPasForm
     TabOrder = 0
     OnClick = btnLoadClick
   end
-  object mmoC: TMemo
+  object mmoPas: TMemo
     Left = 16
     Top = 56
     Width = 849
@@ -84,8 +84,8 @@ object CnTestPasForm: TCnTestPasForm
     ParentFont = False
     ScrollBars = ssVertical
     TabOrder = 5
-    OnChange = mmoCChange
-    OnClick = mmoCClick
+    OnChange = mmoPasChange
+    OnClick = mmoPasClick
   end
   object btnParse: TButton
     Left = 368

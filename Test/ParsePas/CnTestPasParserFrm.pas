@@ -4,12 +4,12 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, TypInfo, ExtCtrls;
+  StdCtrls, TypInfo, ExtCtrls, CnPasCodeParser, mPasLex, CnPasWideLex;
 
 type
   TCnTestPasForm = class(TForm)
     btnLoad: TButton;
-    mmoC: TMemo;
+    mmoPas: TMemo;
     dlgOpen1: TOpenDialog;
     btnParse: TButton;
     mmoParse: TMemo;
@@ -21,14 +21,15 @@ type
     chkWideIdent: TCheckBox;
     procedure btnLoadClick(Sender: TObject);
     procedure btnParseClick(Sender: TObject);
-    procedure mmoCClick(Sender: TObject);
+    procedure mmoPasClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure mmoCChange(Sender: TObject);
+    procedure mmoPasChange(Sender: TObject);
     procedure btnUsesClick(Sender: TObject);
     procedure btnWideParseClick(Sender: TObject);
     procedure btnAnsiLexClick(Sender: TObject);
   private
     { Private declarations }
+    procedure FindSeparateLineList(Parser: TCnPasStructureParser; SeparateLineList: TList);
   public
     { Public declarations }
   end;
@@ -38,17 +39,85 @@ var
 
 implementation
 
-uses
-  CnPasCodeParser, mPasLex, CnPasWideLex;
-
 {$R *.DFM}
 
 procedure TCnTestPasForm.btnLoadClick(Sender: TObject);
 begin
   if dlgOpen1.Execute then
   begin
-    mmoC.Lines.Clear;
-    mmoC.Lines.LoadFromFile(dlgOpen1.FileName);
+    mmoPas.Lines.Clear;
+    mmoPas.Lines.LoadFromFile(dlgOpen1.FileName);
+  end;
+end;
+
+// 本过程逻辑上等同于 CnSourceHighlight.pas 中的 procedure TBlockMatchInfo.UpdateSeparateLineList;
+procedure TCnTestPasForm.FindSeparateLineList(Parser: TCnPasStructureParser; SeparateLineList: TList);
+const
+  csKeyTokens: set of TTokenKind = [
+  tkIf, tkThen, tkElse,
+  tkRecord, tkClass, tkInterface, tkDispInterface,
+  tkFor, tkWith, tkOn, tkWhile, tkDo,
+  tkAsm, tkBegin, tkEnd,
+  tkTry, tkExcept, tkFinally,
+  tkCase, tkOf,
+  tkRepeat, tkUntil];
+var
+  MaxLine, I, J, LastSepLine, LastMethodCloseIdx: Integer;
+  StateInMethodCloseStart: Boolean;
+  Line: string;
+begin
+  MaxLine := 0;
+  for I := 0 to Parser.Count - 1 do
+  begin
+    if Parser.Tokens[I].LineNumber > MaxLine then
+      MaxLine := Parser.Tokens[I].LineNumber;
+  end;
+  SeparateLineList.Count := MaxLine + 1;
+
+  // 内部 LineNumber 均以 0 开始，和 Memo.Lines 的 0 开始对应
+  LastSepLine := 1;
+  LastMethodCloseIdx := 0;
+  for I := 0 to Parser.Count - 1 do
+  begin
+    if (Parser.Tokens[I].TokenID in csKeyTokens) and Parser.Tokens[I].IsMethodStart then
+    begin
+      // 从 LastSepLine 到此 Token 前一个，找第一个空行标记。
+      // 但如果在这之间先碰到了其他 KeyTokens，表示是语句，要忽略
+      if LastSepLine > 1 then
+      begin
+        StateInMethodCloseStart := False;
+        if LastMethodCloseIdx > 0 then
+        begin
+          for J := LastMethodCloseIdx + 1 to I - 1 do
+          begin
+            if Parser.Tokens[J].TokenID in csKeyTokens then
+            begin
+              StateInMethodCloseStart := True;
+              Break;
+            end;
+          end;
+        end;
+
+        if StateInMethodCloseStart then
+           Continue;
+
+        for J := LastSepLine to Parser.Tokens[I].LineNumber do
+        begin
+          Line := Trim(mmoPas.Lines[J]);
+          if Line = '' then
+          begin
+            SeparateLineList[J] := Pointer(1);
+            Break;
+          end;
+        end;
+      end;
+    end
+    else if (Parser.Tokens[I].TokenID in csKeyTokens) and Parser.Tokens[I].IsMethodClose then
+    begin
+      // 从 LastLine 到此 Token 前一个，均不标记
+      LastSepLine := Parser.Tokens[I].LineNumber + 1;
+      LastMethodCloseIdx := I;
+    end;
   end;
 end;
 
@@ -59,17 +128,18 @@ var
   NilChar: Byte;
   I: Integer;
   Token: TCnPasToken;
+  SepList: TList;
 begin
   mmoParse.Lines.Clear;
   Parser := TCnPasStructureParser.Create(chkWideIdent.Checked);
   Stream := TMemoryStream.Create;
 
   try
-    mmoC.Lines.SaveToStream(Stream);
+    mmoPas.Lines.SaveToStream(Stream);
     NilChar := 0;
     Stream.Write(NilChar, SizeOf(NilChar));
     Parser.ParseSource(Stream.Memory, False, False);
-    Parser.FindCurrentBlock(mmoC.CaretPos.Y + 1, mmoC.CaretPos.X + 1);
+    Parser.FindCurrentBlock(mmoPas.CaretPos.Y + 1, mmoPas.CaretPos.X + 1);
 
     for I := 0 to Parser.Count - 1 do
     begin
@@ -125,25 +195,34 @@ begin
       mmoParse.Lines.Add(Format('ChildMethodCloseToken: Line: %2.2d, Col %2.2d. M/I Layer: %d,%d. Token: %s',
        [Parser.ChildMethodCloseToken.LineNumber, Parser.ChildMethodCloseToken.CharIndex,
         Parser.ChildMethodCloseToken.MethodLayer, Parser.ChildMethodCloseToken.ItemLayer, Parser.ChildMethodCloseToken.Token]));
+
+    mmoParse.Lines.Add('');
+    mmoParse.Lines.Add('Seperate Lines:');
+    SepList := TList.Create;
+    FindSeparateLineList(Parser, SepList);
+    for I := 0 to SepList.Count - 1 do
+      if SepList[I] <> nil then
+        mmoParse.Lines.Add(IntToStr(I + 1)); // 界面上，行以 1 开始。
+    SepList.Free;
   finally
     Parser.Free;
     Stream.Free;
   end;
 end;
 
-procedure TCnTestPasForm.mmoCClick(Sender: TObject);
+procedure TCnTestPasForm.mmoPasClick(Sender: TObject);
 begin
-  Self.Label1.Caption := Format('Line: %d, Col %d.', [mmoC.CaretPos.Y + 1, mmoC.CaretPos.X + 1]);
+  Self.Label1.Caption := Format('Line: %d, Col %d.', [mmoPas.CaretPos.Y + 1, mmoPas.CaretPos.X + 1]);
 end;
 
 procedure TCnTestPasForm.FormCreate(Sender: TObject);
 begin
-  Self.Label1.Caption := Format('Line: %d, Col %d.', [mmoC.CaretPos.Y + 1, mmoC.CaretPos.X + 1]);
+  Self.Label1.Caption := Format('Line: %d, Col %d.', [mmoPas.CaretPos.Y + 1, mmoPas.CaretPos.X + 1]);
 end;
 
-procedure TCnTestPasForm.mmoCChange(Sender: TObject);
+procedure TCnTestPasForm.mmoPasChange(Sender: TObject);
 begin
-  Self.Label1.Caption := Format('Line: %d, Col %d.', [mmoC.CaretPos.Y + 1, mmoC.CaretPos.X + 1]);
+  Self.Label1.Caption := Format('Line: %d, Col %d.', [mmoPas.CaretPos.Y + 1, mmoPas.CaretPos.X + 1]);
 end;
 
 procedure TCnTestPasForm.btnUsesClick(Sender: TObject);
@@ -153,7 +232,7 @@ begin
   List := TStringList.Create;
 
   try
-    ParseUnitUses(mmoC.Lines.Text, List);
+    ParseUnitUses(mmoPas.Lines.Text, List);
     ShowMessage(List.Text);
   finally
     List.Free;
@@ -169,7 +248,7 @@ begin
   ShowMessage('Will show Parsing Pascal using WideString under Non-Unicode Compiler.');
 
   P := TCnPasWideLex.Create(chkWideIdent.Checked);
-  S := mmoC.Lines.Text;
+  S := mmoPas.Lines.Text;
   P.Origin := PWideChar(S);
 
   mmoParse.Clear;
@@ -194,7 +273,7 @@ begin
   ShowMessage('Will show Parsing Pascal using string under Non-Unicode Compiler.');
 
   P := TmwPasLex.Create(chkWideIdent.Checked);
-  S := mmoC.Lines.Text;
+  S := mmoPas.Lines.Text;
   P.Origin := PChar(S);
 
   mmoParse.Clear;
