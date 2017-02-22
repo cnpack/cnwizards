@@ -91,7 +91,7 @@ type
 {$IFDEF UNICODE}
     procedure SaveToStreamW(Stream: TStream); // Used in Unicode Evn. Stream stores UTF16 and #0
 {$ENDIF}
-    procedure SaveToStream(Stream: TStream; CheckUtf8: Boolean = False);
+    procedure SaveToStream(Stream: TStream; CheckUtf8: Boolean = False); // 读出均为 Ansi 格式，BDS 上有 Utf8 可转换成 Ansi
     procedure SaveToStreamFromPos(Stream: TStream);
     procedure SaveToStreamToPos(Stream: TStream);
     // LiuXiao 添加三个读入流函数。

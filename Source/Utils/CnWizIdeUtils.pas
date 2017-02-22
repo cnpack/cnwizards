@@ -215,7 +215,7 @@ function IdeEditorGotoEditPos(Col, Line: Integer; Middle: Boolean): Boolean;
 function IdeGetBlockIndent: Integer;
 {* 获得当前编辑器块缩进宽度 }
 
-function IdeGetSourceByFileName(const FileName: string): AnsiString;
+function IdeGetSourceByFileName(const FileName: string): string;
 {* 根据文件名取得内容。如果文件在 IDE 中打开，返回编辑器中的内容，否则返回文件内容。}
 
 function IdeSetSourceByFileName(const FileName: string; Source: TStrings;
@@ -855,14 +855,15 @@ begin
   Result := CnOtaGetBlockIndent;
 end;  
 
-function IdeGetSourceByFileName(const FileName: string): AnsiString;
+function IdeGetSourceByFileName(const FileName: string): string;
 var
   Strm: TMemoryStream;
 begin
   Strm := TMemoryStream.Create;
   try
     EditFilerSaveFileToStream(FileName, Strm, True);
-    Result := PAnsiChar(Strm.Memory);
+    // 得到 AnsiString 内容，转成 string
+    Result := string(PAnsiChar(Strm.Memory));
   finally
     Strm.Free;
   end;
