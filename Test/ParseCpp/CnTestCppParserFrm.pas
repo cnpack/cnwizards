@@ -111,6 +111,10 @@ begin
       mmoParse.Lines.Add(Format('InnerClose: Line: %d, Col %2.2d. Layer: %d. Token: %s',
        [Parser.InnerBlockCloseToken.LineNumber, Parser.InnerBlockCloseToken.CharIndex,
         Parser.InnerBlockCloseToken.ItemLayer, Parser.InnerBlockCloseToken.Token]));
+
+    mmoParse.Lines.Add('');
+    mmoParse.Lines.Add('Current Class: ' + Parser.CurrentClass);
+    mmoParse.Lines.Add('Current Method: ' + Parser.CurrentMethod);
   finally
     Parser.Free;
     Stream.Free;

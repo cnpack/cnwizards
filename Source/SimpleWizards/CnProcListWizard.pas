@@ -1318,7 +1318,7 @@ begin
     // 是否需要转换？
 
     CnCppParserParseSource(FCurrCppParser, FCurrStream,
-      CharPos.Line, CharPos.CharIndex);
+      CharPos.Line, CharPos.CharIndex, True);
 
     // 记录并显示当前类与当前函数名
     if not Obj.ClassCombo.Focused then
@@ -1335,6 +1335,15 @@ begin
         Obj.ProcCombo.SetTextWithoutChange(TCnIdeTokenString(FCurrCppParser.CurrentMethod))
       else
         Obj.ProcCombo.SetTextWithoutChange(SCnProcListNoContent);
+    end;
+
+    if not Obj.ClassCombo.Focused and (Obj.ClassCombo.Text = '') then
+    begin
+      DotPos := Pos('::', Obj.ProcCombo.Text);
+      if DotPos > 1 then
+        Obj.ClassCombo.SetTextWithoutChange(Copy(Obj.ProcCombo.Text, 1, DotPos - 1))
+      else
+        Obj.ClassCombo.SetTextWithoutChange(SCnProcListNoContent);
     end;
   end;
 end;
