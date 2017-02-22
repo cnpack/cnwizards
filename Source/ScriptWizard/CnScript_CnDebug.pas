@@ -130,6 +130,9 @@ begin
     RegisterMethod('Procedure LogPointer( Value : Pointer; const AMsg : string)');
     RegisterMethod('Procedure LogPoint( Point : TPoint; const AMsg : string)');
     RegisterMethod('Procedure LogRect( Rect : TRect; const AMsg : string)');
+    RegisterMethod('Procedure LogRawString( const Value : string)');
+    RegisterMethod('Procedure LogRawAnsiString( const Value : AnsiString)');
+    RegisterMethod('Procedure LogRawWideString( const Value : WideString)');
     RegisterMethod('Procedure LogStrings( Strings : TStrings; const AMsg : string)');
     RegisterMethod('Procedure LogMemDump( AMem : Pointer; Size : Integer)');
     RegisterMethod('Procedure LogVirtualKey( AKey : Word)');
@@ -174,6 +177,9 @@ begin
     RegisterMethod('Procedure TracePointer( Value : Pointer; const AMsg : string)');
     RegisterMethod('Procedure TracePoint( Point : TPoint; const AMsg : string)');
     RegisterMethod('Procedure TraceRect( Rect : TRect; const AMsg : string)');
+    RegisterMethod('Procedure TraceRawString( const Value : string)');
+    RegisterMethod('Procedure TraceRawAnsiString( const Value : AnsiString)');
+    RegisterMethod('Procedure TraceRawWideString( const Value : WideString)');
     RegisterMethod('Procedure TraceStrings( Strings : TStrings; const AMsg : string)');
     RegisterMethod('Procedure TraceMemDump( AMem : Pointer; Size : Integer)');
     RegisterMethod('Procedure TraceVirtualKey( AKey : Word)');
@@ -453,6 +459,9 @@ begin
     RegisterMethod(@TCnDebugger.LogPointer, 'LogPointer');
     RegisterMethod(@TCnDebugger.LogPoint, 'LogPoint');
     RegisterMethod(@TCnDebugger.LogRect, 'LogRect');
+    RegisterMethod(@TCnDebugger.LogRawString, 'LogRawString');
+    RegisterMethod(@TCnDebugger.LogRawAnsiString, 'LogRawAnsiString');
+    RegisterMethod(@TCnDebugger.LogRawWideString, 'LogRawWideString');
     RegisterMethod(@TCnDebugger.LogStrings, 'LogStrings');
     RegisterMethod(@TCnDebugger.LogMemDump, 'LogMemDump');
     RegisterMethod(@TCnDebugger.LogVirtualKey, 'LogVirtualKey');
@@ -497,6 +506,9 @@ begin
     RegisterMethod(@TCnDebugger.TracePointer, 'TracePointer');
     RegisterMethod(@TCnDebugger.TracePoint, 'TracePoint');
     RegisterMethod(@TCnDebugger.TraceRect, 'TraceRect');
+    RegisterMethod(@TCnDebugger.TraceRawString, 'TraceRawString');
+    RegisterMethod(@TCnDebugger.TraceRawAnsiString, 'TraceRawAnsiString');
+    RegisterMethod(@TCnDebugger.TraceRawWideString, 'TraceRawWideString');
     RegisterMethod(@TCnDebugger.TraceStrings, 'TraceStrings');
     RegisterMethod(@TCnDebugger.TraceMemDump, 'TraceMemDump');
     RegisterMethod(@TCnDebugger.TraceVirtualKey, 'TraceVirtualKey');
