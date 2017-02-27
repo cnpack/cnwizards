@@ -308,7 +308,7 @@ type
     procedure FormatStructType(PreSpaceCount: Byte = 0);
     procedure FormatArrayType(PreSpaceCount: Byte = 0);
     procedure FormatRecType(PreSpaceCount: Byte = 0);
-    procedure FormatFieldList(PreSpaceCount: Byte = 0; IgnoreFirst: Boolean = False);
+    function FormatFieldList(PreSpaceCount: Byte = 0; IgnoreFirst: Boolean = False): Boolean; // 返回结构的内部是否包含 case 变体
     procedure FormatTypeSection(PreSpaceCount: Byte = 0);
     procedure FormatTypeDecl(PreSpaceCount: Byte = 0);
     procedure FormatTypedConstant(PreSpaceCount: Byte = 0);
@@ -2912,8 +2912,8 @@ begin
 end;
 
 { FieldList ->  FieldDecl/';'... [VariantSection] [';'] }
-procedure TCnBasePascalFormatter.FormatFieldList(PreSpaceCount: Byte;
-  IgnoreFirst: Boolean);
+function TCnBasePascalFormatter.FormatFieldList(PreSpaceCount: Byte;
+  IgnoreFirst: Boolean): Boolean;
 var
   First, AfterIsRB: Boolean;
 begin
@@ -2965,13 +2965,9 @@ begin
       if Scaner.Token = tokSemicolon then
       begin
         AfterIsRB := Scaner.ForwardToken in [tokRB];
-        if not AfterIsRB then // 后面还有才写分号和换行
-        begin
-          Match(Scaner.Token);
+        Match(Scaner.Token);
+        if not AfterIsRB then // 后面还有才写换行并准备再开一个 Field
           Writeln;
-        end
-        else
-          Scaner.NextToken;
       end
       else if Scaner.Token = tokKeywordEnd then // 最后一项无分号时也可以
       begin
@@ -2984,10 +2980,12 @@ begin
   if First and not (Scaner.Token = tokKeywordCase) then // 没有声明则先换行，case 除外
     Writeln;
 
+  Result := False;
   if Scaner.Token = tokKeywordCase then
   begin
     FormatVariantSection(PreSpaceCount);
     Writeln;
+    Result := True;
   end;
 
   if Scaner.Token = tokSemicolon then
@@ -3824,6 +3822,8 @@ end;
 { RecVariant -> ConstExpr/','...  ':' '(' [FieldList] ')' }
 procedure TCnBasePascalFormatter.FormatRecVariant(PreSpaceCount: Byte;
   IgnoreFirst: Boolean);
+var
+  NestedCase: Boolean;
 begin
   FormatConstExpr(PreSpaceCount);
 
@@ -3836,12 +3836,15 @@ begin
   Match(tokColon); // case 后换行写分类标志，分类标志后换行缩进写()
   Writeln;
   Match(tokLB, Tab(PreSpaceCount));
-  if Scaner.Token <> tokRB then
-    FormatFieldList(Tab(PreSpaceCount), IgnoreFirst);
 
-  // 如果嵌套了记录，此括号必须缩进。没好办法，姑且判断上一个是不是分号和左括号
-  if FLastToken in [tokSemicolon, tokLB, tokBlank] then
-    Match(tokRB, PreSpaceCount)
+  NestedCase := False;
+  if Scaner.Token <> tokRB then
+    NestedCase := FormatFieldList(Tab(PreSpaceCount), IgnoreFirst);
+
+  // 如果嵌套了记录，此括号必须缩进。没好办法，姑且判断上一个是不是左括号或空白，
+  // 或者 FormatFieldList 返回 True，表示遇到了 case
+  if (FLastToken in [tokLB, tokBlank]) or NestedCase then
+    Match(tokRB, Tab(PreSpaceCount))
   else
     Match(tokRB);
 end;
