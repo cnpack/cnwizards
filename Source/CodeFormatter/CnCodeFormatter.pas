@@ -3851,10 +3851,15 @@ begin
 
   // 如果嵌套了记录，此括号必须缩进。没好办法，姑且判断上一个是不是左括号或空白，
   // 或者 FormatFieldList 返回 True，表示遇到了 case
-  if (FLastToken in [tokLB, tokBlank]) or NestedCase then
-    Match(tokRB, Tab(PreSpaceCount))
-  else
-    Match(tokRB);
+  SpecifyElementType(pfetRecVarFieldListRightBracket);
+  try
+    if (FLastToken in [tokLB, tokBlank]) or NestedCase then
+      Match(tokRB, Tab(PreSpaceCount))
+    else
+      Match(tokRB);
+  finally
+    RestoreElementType;
+  end;
 end;
 
 { RequiresClause -> REQUIRES IdentList... ';' }
@@ -5740,7 +5745,8 @@ function TCnAbstractCodeFormatter.CalcNeedPadding: Boolean;
 begin
   Result := (FElementType in [pfetExpression, pfetEnumList,pfetArrayConstant,
     pfetSetConstructor, pfetFormalParameters, pfetUsesList, pfetFieldDecl, pfetClassField,
-    pfetThen, pfetDo, pfetExprListRightBracket, pfetFormalParametersRightBracket])
+    pfetThen, pfetDo, pfetExprListRightBracket, pfetFormalParametersRightBracket,
+    pfetRecVarFieldListRightBracket])
     or ((FElementType in [pfetConstExpr]) and not UpperContainElementType([pfetCaseLabel])) // Case Label 的无需跟随上面一行注释缩进
     or UpperContainElementType([pfetFormalParameters, pfetArrayConstant, pfetCaseLabelList]);
   // 暂且表达式内部与枚举定义内部等一系列元素内部，或者在参数列表、uses 中
@@ -5752,7 +5758,8 @@ end;
 function TCnAbstractCodeFormatter.CalcNeedPaddingAndUnIndent: Boolean;
 begin
   Result := (FElementType in [pfetExprListRightBracket, pfetFormalParametersRightBracket,
-    pfetFieldDecl, pfetClassField]) or UpperContainElementType([pfetCaseLabelList]);
+    pfetFieldDecl, pfetClassField, pfetRecVarFieldListRightBracket])
+    or UpperContainElementType([pfetCaseLabelList]);
   // 在 CalcNeedPadding 为 True 的前提下，以上要反缩进
 end;
 
