@@ -85,7 +85,7 @@ type
     FLastElementType: TCnPascalFormattingElementType;
     FPrefixSpaces: Integer;
     FEnsureOneEmptyLine: Boolean;
-
+    FTrimAfterSemicolon: Boolean;   // 用来控制本行分号后仍有其他内容的情形
     FNamesMap: TCnStrToStrHashMap;
     FDisableCorrectName: Boolean;
     FInputLineMarks: TList;         // 源与结果的行映射关系中的源行
@@ -827,8 +827,14 @@ begin
         else if SemicolonIsLineStart then
           CodeGen.Write(Scaner.TokenString, BeforeSpaceCount, 0, NeedPadding)
         else
-          CodeGen.Write(Scaner.TokenString, 0, 1, NeedPadding);
-          // 1 也会导致行尾注释后退，现多出的空格已由 Generator 删除
+        begin
+          if FTrimAfterSemicolon then
+            CodeGen.Write(Scaner.TokenString, 0, 0, NeedPadding)
+          else
+            CodeGen.Write(Scaner.TokenString, 0, 1, NeedPadding);
+        end;
+          // 1 也会导致行尾注释后退，现多出的空格已由 Generator 删除，
+          // 但分号后如果本行又有其他内容则会出现多一个空格的问题，如 record 的可变部分
       end;
     tokAssign:
       CodeGen.Write(Scaner.TokenString, BeforeSpaceCount, AfterSpaceCount, NeedPadding);
@@ -2965,8 +2971,10 @@ begin
       if Scaner.Token = tokSemicolon then
       begin
         AfterIsRB := Scaner.ForwardToken in [tokRB];
+        FTrimAfterSemicolon := AfterIsRB; // 后面没内容了，本分号后面不需要输出空格
         Match(Scaner.Token);
-        if not AfterIsRB then // 后面还有才写换行并准备再开一个 Field
+        FTrimAfterSemicolon := False;
+        if not AfterIsRB then // 后面还有别的内容才写换行并准备再开一个 Field
           Writeln;
       end
       else if Scaner.Token = tokKeywordEnd then // 最后一项无分号时也可以
