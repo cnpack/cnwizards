@@ -1124,7 +1124,7 @@ end;
          -> Number
          -> String
          -> NIL
-         -> '(' Expression ')'
+         -> '(' Expression ')'['^'...]
          -> NOT Factor
          -> SetConstructor
          -> TypeId '(' Expression ')'
@@ -1209,6 +1209,10 @@ begin
         Match(tokLB, PreSpaceCount);
         FormatExpression;
         Match(tokRB);
+
+        // 修补处理 (Expression)^^ 这种语法
+        while Scaner.Token = tokHat do
+          Match(Scaner.Token);
       end;
 
     tokSLB: // [
@@ -1341,17 +1345,17 @@ procedure TCnBasePascalFormatter.FormatQualID(PreSpaceCount: Byte);
   end;
 
 begin
-  if(Scaner.Token = tokLB) then
+  if Scaner.Token = tokLB then
   begin
     Match(tokLB, PreSpaceCount);
     FormatDesignator;
 
-    if(Scaner.Token = tokKeywordAs) then
+    if Scaner.Token = tokKeywordAs then
     begin
       Match(tokKeywordAs, 1, 1);
       FormatIdentWithBracket(0);
     end;
-    Match(tokRB);    
+    Match(tokRB);
   end
   else
   begin

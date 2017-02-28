@@ -182,7 +182,7 @@ unit CnPascalGrammar;
          -> Number
          -> String
          -> NIL
-         -> '(' Expression ')'
+         -> '(' Expression ')' ['^'...]
          -> NOT Factor
          -> SetConstructor
          -> TypeId '(' Expression ')'
@@ -218,7 +218,7 @@ unit CnPascalGrammar;
   StmtList -> Statement/';'...
   SimpleStatement -> Designator ['(' ExprList ')']
                   -> Designator ':=' Expression
-                  -> INHERITED
+                  -> INHERITED [Expression]
                   -> GOTO LabelId
 
   StructStmt -> CompoundStmt
