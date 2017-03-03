@@ -2351,6 +2351,9 @@
   {$IFNDEF DELPHIXE2_UP}  // 2009/2010/XE has a Project Version Number Bug.
     {$DEFINE PROJECT_VERSION_NUMBER_BUG}
   {$ENDIF}
+  {$DEFINE OTA_DPKOPTION_SETVALUE_CORRUPT_BUG}
+  // A OpenTools API Bug IOTAProjectOptions.SetOptionValue under 2009 or above:
+  // Set an Option Value to DPK Project Options maybe cause DPK Source Corrupt.
 {$ENDIF}
 
 {$IFDEF BDS2007_UP}
