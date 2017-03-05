@@ -65,7 +65,7 @@ type
 
   TCnVerEnhanceWizard = class(TCnIDEEnhanceWizard)
   private
-    FCurrentProject:IOTAProject;
+    FCurrentProject: IOTAProject;
     FLastCompiled: Boolean;
     FIncBuild: Boolean;
     FBeforeBuildNo: Integer;
@@ -76,6 +76,9 @@ type
     function GetCompileNotifyEnabled: Boolean;
     procedure SetIncBuild(const Value: Boolean);
     procedure SetLastCompiled(const Value: Boolean);
+{$IFDEF COMPILER6_UP}
+    function CanSetValueWithoutBug(Project: IOTAProject): Boolean;
+{$ENDIF}
 {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
     procedure UpdateConfigurationFileVersionAndTime(IncB: Boolean; LastComp: Boolean);
 {$ENDIF}
@@ -229,7 +232,9 @@ begin
   begin
     // 编译失败，版本号改回去
 {$IFDEF COMPILER6_UP} // 只 D6 及以上改回版本号，D5 由于 Bug 而无效
-    CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [FBeforeBuildNo]));
+    if CanSetValueWithoutBug(FCurrentProject) then
+      CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [FBeforeBuildNo]));
+    // TODO: 以上一句在 2009 或以上可能导致 dpk 源文件被破坏，原因未知，只能禁用
   {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
     CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, 'VerInfo_Build', IntToStr(FBeforeBuildNo));
     UpdateConfigurationFileVersionAndTime(FIncBuild, False);
@@ -244,8 +249,9 @@ begin
   begin
     // 不改版本号时如果需要插入时间，则需要这样重写一下让插入时间有效
 {$IFDEF COMPILER6_UP} // 只 D6 及以上增加版本号，D5 由于 Bug 而无效
-    CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [FAfterBuildNo]));
-    // 以上一句在 XE 下可能导致 dpk 源文件被破坏，原因未知
+    if CanSetValueWithoutBug(FCurrentProject) then
+      CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [FAfterBuildNo]));
+    // TODO: 以上一句在 2009 或以上可能导致 dpk 源文件被破坏，原因未知，只能禁用
   {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
     UpdateConfigurationFileVersionAndTime(FIncBuild, FLastCompiled);
   {$ENDIF}
@@ -277,6 +283,7 @@ begin
   Options := CnOtaGetActiveProjectOptions(Project);
   if not Assigned(Options) then
     Exit;
+
   FCurrentProject := Project;
   // -1 为包含，高版本 True 为包含
   FIncludeVer := (Options.GetOptionValue('IncludeVersionInfo') = '-1')
@@ -310,7 +317,9 @@ begin
   if FIncBuild then
   begin
 {$IFDEF COMPILER6_UP} // 只 D6 及以上增加版本号，D5 由于 Bug 而无效
-    CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [FBeforeBuildNo + 1]));
+    if CanSetValueWithoutBug(FCurrentProject) then
+      CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [FBeforeBuildNo + 1]));
+    // TODO: 以上一句在 2009 或以上可能导致 dpk 源文件被破坏，原因未知，只能禁用
 {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
     CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject,'VerInfo_Build', IntToStr(FBeforeBuildNo + 1));
 {$ENDIF}
@@ -521,6 +530,19 @@ begin
     FCompileNotifierAdded := False;
   end;
 end;
+
+{$IFDEF COMPILER6_UP}
+
+function TCnVerEnhanceWizard.CanSetValueWithoutBug(Project: IOTAProject): Boolean;
+begin
+  Result := True;
+{$IFDEF OTA_DPKOPTION_SETVALUE_CORRUPT_BUG}
+  if (Project <> nil) and (IsDpk(Project.FileName) or (sPackage = Project.ProjectType)) then
+    Result := False;
+{$ENDIF}
+end;
+
+{$ENDIF}
 
 initialization
 {$IFDEF COMPILER6_UP} // D5/BCB5/BCB6 由于 OTA Bug 而无效，故不注册
