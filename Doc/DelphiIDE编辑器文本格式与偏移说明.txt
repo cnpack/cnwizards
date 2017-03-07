@@ -17,6 +17,9 @@ EditControl的LineText属性   AnsiString             AnsiString + Utf8        Unic
 EditControl的               AnsiString             AnsiString + Utf8        UnicodeString（Utf16）
 GetTextAtLine方法 
 -----------------------------------------------------------------------------------------------------
+IOTAEditReader接口的        AnsiString             AnsiString + Utf8        AnsiString + Utf8
+GetText方法
+-----------------------------------------------------------------------------------------------------
 EditControl的               Ansi、1 开始           Utf8、1 开始             Utf8、1 开始
 GetAttributeAtPos所需偏移
 -----------------------------------------------------------------------------------------------------
