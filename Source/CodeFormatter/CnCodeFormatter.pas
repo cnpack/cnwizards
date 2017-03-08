@@ -1161,7 +1161,9 @@ begin
     tokKeywordInherited:
       begin
         Match(tokKeywordInherited);
-        FormatExpression;
+        // 处理 if True then Result := inherited else Result := False; 这种
+        if Scaner.Token <> tokKeywordElse then
+          FormatExpression;
       end;
 
     tokChar, tokWString, tokString, tokInteger, tokFloat, tokTrue, tokFalse:
