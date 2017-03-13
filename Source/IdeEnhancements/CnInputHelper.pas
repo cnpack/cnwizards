@@ -2224,6 +2224,9 @@ begin
   FSymbols.Clear;
   FItems.Clear;
   Editor := CnOtaGetEditBuffer;
+  if Editor = nil then
+    Exit;
+
   try
     if FRemoveSame then
       HashList := TCnSymbolHashList.Create(csHashListCount);
