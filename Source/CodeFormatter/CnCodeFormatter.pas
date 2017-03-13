@@ -3293,15 +3293,14 @@ begin
 
   Writeln;
 
-  // 用 class 的处理方式应该兼容
-  while Scaner.Token in ClassVisibilityTokens + ClassMemberSymbolTokens
-    - [tokKeywordPublished, tokKeywordConstructor, tokKeywordDestructor] do
+  // 用 class 的处理方式应该兼容，无须限制 object 里的声明不能出现
+  // published 以及 constructor 或 destructor
+  while Scaner.Token in ClassVisibilityTokens + ClassMemberSymbolTokens do
   begin
-    if Scaner.Token in ClassVisibilityTokens - [tokKeywordPublished] then
+    if Scaner.Token in ClassVisibilityTokens then
       FormatClassVisibility(PreSpaceCount);
 
-    if Scaner.Token in ClassMemberSymbolTokens
-      - [tokKeywordConstructor, tokKeywordDestructor] then
+    if Scaner.Token in ClassMemberSymbolTokens then
       FormatClassMember(Tab(PreSpaceCount));
   end;
 
