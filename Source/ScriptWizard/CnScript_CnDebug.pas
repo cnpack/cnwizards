@@ -129,6 +129,7 @@ begin
     RegisterMethod('Procedure LogDateTimeFmt( Value : TDateTime; const AFmt : string; const AMsg : string)');
     RegisterMethod('Procedure LogPointer( Value : Pointer; const AMsg : string)');
     RegisterMethod('Procedure LogPoint( Point : TPoint; const AMsg : string)');
+    RegisterMethod('Procedure LogSize( Size : TSize; const AMsg : string)');
     RegisterMethod('Procedure LogRect( Rect : TRect; const AMsg : string)');
     RegisterMethod('Procedure LogRawString( const Value : string)');
     RegisterMethod('Procedure LogRawAnsiString( const Value : AnsiString)');
@@ -176,6 +177,7 @@ begin
     RegisterMethod('Procedure TraceDateTimeFmt( Value : TDateTime; const AFmt : string; const AMsg : string)');
     RegisterMethod('Procedure TracePointer( Value : Pointer; const AMsg : string)');
     RegisterMethod('Procedure TracePoint( Point : TPoint; const AMsg : string)');
+    RegisterMethod('Procedure TraceSize( Size : TSize; const AMsg : string)');
     RegisterMethod('Procedure TraceRect( Rect : TRect; const AMsg : string)');
     RegisterMethod('Procedure TraceRawString( const Value : string)');
     RegisterMethod('Procedure TraceRawAnsiString( const Value : AnsiString)');
@@ -458,6 +460,7 @@ begin
     RegisterMethod(@TCnDebugger.LogDateTimeFmt, 'LogDateTimeFmt');
     RegisterMethod(@TCnDebugger.LogPointer, 'LogPointer');
     RegisterMethod(@TCnDebugger.LogPoint, 'LogPoint');
+    RegisterMethod(@TCnDebugger.LogSize, 'LogSize');
     RegisterMethod(@TCnDebugger.LogRect, 'LogRect');
     RegisterMethod(@TCnDebugger.LogRawString, 'LogRawString');
     RegisterMethod(@TCnDebugger.LogRawAnsiString, 'LogRawAnsiString');
@@ -505,6 +508,7 @@ begin
     RegisterMethod(@TCnDebugger.TraceDateTimeFmt, 'TraceDateTimeFmt');
     RegisterMethod(@TCnDebugger.TracePointer, 'TracePointer');
     RegisterMethod(@TCnDebugger.TracePoint, 'TracePoint');
+    RegisterMethod(@TCnDebugger.TraceSize, 'TraceSize');
     RegisterMethod(@TCnDebugger.TraceRect, 'TraceRect');
     RegisterMethod(@TCnDebugger.TraceRawString, 'TraceRawString');
     RegisterMethod(@TCnDebugger.TraceRawAnsiString, 'TraceRawAnsiString');
