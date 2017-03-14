@@ -373,6 +373,7 @@ var
   EditControl: TControl;
   Element, LineFlag: Integer;
   KeyIsLeft: Boolean;
+  ACharSet: TAnsiCharSet;
 begin
   if CnNtaGetCurrLineText(Line, LineNo, CharIndex) then
   begin
@@ -413,8 +414,11 @@ begin
       if Length(AnsiLine) > CharIndex then
       begin
         // 当前位置后是标识符以及左右括号引号时不自动输入括号
-        NeedAutoMatch := not CharInSet(Char(AnsiLine[CharIndex + 1]), ['_', 'A'..'Z',
-          'a'..'z', '0'..'9', '(', ')', '''', '[', ']']);
+        ACharSet := ['_', 'A'..'Z', 'a'..'z', '0'..'9', '(', ')', '''', '[', ']'];
+        if CharInSet(AChar, ['''', '"']) then // 但引号在右括号前，是需要自动输入的
+          ACharSet := ACharSet - [')', ']'];
+
+        NeedAutoMatch := not CharInSet(Char(AnsiLine[CharIndex + 1]), ACharSet);
       end
       else if Length(AnsiLine) = CharIndex then
         NeedAutoMatch := True; // 行尾
