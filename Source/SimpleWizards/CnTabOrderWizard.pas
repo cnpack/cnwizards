@@ -420,7 +420,7 @@ begin
 
   FCanvas := TCanvas.Create;
   FCanvas.Font.Color := clBlack;
-  FCanvas.Font.Name := 'MS Sans Serif';
+  FCanvas.Font.Name := 'Tahoma';
   FCanvas.Font.Size := 8;
   FCanvas.Pen.Style := psSolid;
   FCanvas.Pen.Color := clBlack;
