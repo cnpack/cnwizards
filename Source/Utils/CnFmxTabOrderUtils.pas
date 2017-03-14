@@ -171,7 +171,7 @@ begin
 {$ENDIF}
   SaveState := Canvas.SaveState;
   try
-    // TODO: Calc Rect and Draw Rectagle and Text.
+    // Calc Rect and Draw Rectagle and Text.
     Canvas.BeginScene;
 
     Canvas.Font.Family := TabOrderWizard.DispFont.Name;
@@ -180,6 +180,13 @@ begin
 
     TW := Canvas.TextWidth(OrderStr) + csDrawBorder * 2;
     TH := Canvas.TextHeight(OrderStr) + csDrawBorder * 2;
+
+    // FIXME: FMX Canvas TextHeight/TextWidth Sometimes Return Huge Value,
+    // No way to fix it. just Limit it.
+    if TW > 10 * Canvas.Font.Size then
+      TW := 5 * Canvas.Font.Size + csDrawBorder * 2;
+    if TH > 6 * Canvas.Font.Size then
+      TH := 2 * Canvas.Font.Size + csDrawBorder * 2;
 
     case TabOrderWizard.DispPos of
       dpLeftTop:
