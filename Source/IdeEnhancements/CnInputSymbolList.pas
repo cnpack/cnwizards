@@ -1992,7 +1992,9 @@ begin
   if not Result then
     Exit;
 
-  CTS := BorlandIDEServices as IOTACodeTemplateServices;
+  if not QuerySvcs(BorlandIDEServices, IOTACodeTemplateServices, CTS) then
+    Exit;
+
   if CTS <> nil then
   begin
     Clear;
