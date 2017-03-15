@@ -31,7 +31,9 @@ unit CnPngUtils;
 * 兼容测试：
 * 本 地 化：该单元和窗体中的字符串已经本地化处理方式
 * 单元标识：$Id: CnPngUtils.pas 763 2011-02-07 14:18:23Z liuxiao@cnpack.org $
-* 修改记录：2011.07.05 V1.0
+* 修改记录：2017.03.15 V1.1
+*               用绘制的方式取代 Assign 以避免部分 PNG8 图片全黑的问题
+*           2011.07.05 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -44,6 +46,7 @@ uses
   Windows, SysUtils, Graphics, pngimage;
 
 function CnConvertPngToBmp(PngFile, BmpFile: PAnsiChar): LongBool; stdcall;
+
 function CnConvertBmpToPng(BmpFile, PngFile: PAnsiChar): LongBool; stdcall;
 
 exports
@@ -54,54 +57,57 @@ implementation
 
 function CnConvertPngToBmp(PngFile, BmpFile: PAnsiChar): LongBool;
 var
-  png: TPngImage;
-  bmp: TBitmap;
+  Png: TPngImage;
+  Bmp: TBitmap;
 begin
   Result := False;
   if not FileExists(string(PngFile)) then
     Exit;
-  png := nil;
-  bmp := nil;
+  Png := nil;
+  Bmp := nil;
   try
-    png := TPngImage.Create;
-    bmp := TBitmap.Create;
-    png.LoadFromFile(string(PngFile));
-    bmp.Assign(png);
-    if not bmp.Empty then
+    Png := TPngImage.Create;
+    Bmp := TBitmap.Create;
+    Png.LoadFromFile(string(PngFile));
+    Bmp.Height := Png.Height;
+    Bmp.Width := Png.Width;
+    Png.Draw(Bmp.Canvas, Bmp.Canvas.ClipRect);
+    // bmp.Assign(png);  // 某些 png8 图会出错导致全黑，换成绘制的方式
+    if not Bmp.Empty then
     begin
-      bmp.SaveToFile(string(BmpFile));
+      Bmp.SaveToFile(string(BmpFile));
       Result := True;
     end;
   finally
-    png.Free;
-    bmp.Free;
+    Png.Free;
+    Bmp.Free;
   end;
 end;
 
 function CnConvertBmpToPng(BmpFile, PngFile: PAnsiChar): LongBool;
 var
-  png: TPngImage;
-  bmp: TBitmap;
+  Png: TPngImage;
+  Bmp: TBitmap;
   i, j: Integer;
   p, p1, p2: PByteArray;
 begin
   Result := False;
   if not FileExists(string(BmpFile)) then
     Exit;
-  png := nil;
-  bmp := nil;
+  Png := nil;
+  Bmp := nil;
   try
-    bmp := TBitmap.Create;
-    bmp.LoadFromFile(string(BmpFile));
-    if bmp.PixelFormat = pf32bit then
+    Bmp := TBitmap.Create;
+    Bmp.LoadFromFile(string(BmpFile));
+    if Bmp.PixelFormat = pf32bit then
     begin
-      png := TPngImage.CreateBlank(COLOR_RGBALPHA, 8, bmp.Width, bmp.Height);
-      for i := 0 to bmp.Height - 1 do
+      Png := TPngImage.CreateBlank(COLOR_RGBALPHA, 8, Bmp.Width, Bmp.Height);
+      for i := 0 to Bmp.Height - 1 do
       begin
-        p := bmp.ScanLine[i];
-        p1 := png.Scanline[i];
-        p2 := png.AlphaScanline[i];
-        for j := 0 to bmp.Width - 1 do
+        p := Bmp.ScanLine[i];
+        p1 := Png.Scanline[i];
+        p2 := Png.AlphaScanline[i];
+        for j := 0 to Bmp.Width - 1 do
         begin
           p1[j * 3] := p[j * 4];
           p1[j * 3 + 1] := p[j * 4 + 1];
@@ -112,17 +118,17 @@ begin
     end
     else
     begin
-      png := TPngImage.Create;
-      png.Assign(bmp);
+      Png := TPngImage.Create;
+      Png.Assign(Bmp);
     end;
-    if not png.Empty then
+    if not Png.Empty then
     begin
-      png.SaveToFile(string(PngFile));
+      Png.SaveToFile(string(PngFile));
       Result := True;
     end;
   finally
-    png.Free;
-    bmp.Free;
+    Png.Free;
+    Bmp.Free;
   end;
 end;
 
