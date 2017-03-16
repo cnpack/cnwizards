@@ -1262,9 +1262,9 @@ end;
 
 function TCnIdeBRMainForm.GetRegIDEBase(IDE: TCnCompiler): string;
 begin
-  if (Integer(IDE) >= Integer(cnDelphi12)) and not (IDE in [cnBCB5, cnBCB6]) then
+  if (Integer(IDE) >= Integer(cnDelphi2009)) and not (IDE in [cnBCB5, cnBCB6]) then
   begin
-    if (Integer(IDE) >= Integer(cnDelphi15)) then
+    if (Integer(IDE) >= Integer(cnDelphiXE)) then
       Result := SCnRegIDEBase15
     else
       Result := SCnRegIDEBase12;
