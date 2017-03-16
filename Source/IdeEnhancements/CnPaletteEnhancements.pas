@@ -278,6 +278,7 @@ const
   csDivTabMenu = 'DivTabMenu';
   csLockToolbar = 'LockToolbar';
 
+  // D7 及以下版本，D2010 及以上版本，设置分开，因为怕两边行为不一致，高版本的默认关闭
 {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
   csCompFilter = 'CompFilterInNewStyle';
 {$ELSE}

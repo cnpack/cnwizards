@@ -46,9 +46,9 @@ interface
 
 type
   TCnCompilerKind = (ckDelphi, ckBCB);
-  TCnCompiler = (cnDelphi5, cnDelphi6, cnDelphi7, cnDelphi8, cnDelphi9,
-    cnDelphi10, cnDelphi11, cnDelphi12, cnDelphi14, cnDelphi15, cnDelphi16,
-    cnDelphi17, cnDelphiXE4, cnDelphiXE5, cnDelphiXE6, cnDelphiXE7, cnDelphiXE8,
+  TCnCompiler = (cnDelphi5, cnDelphi6, cnDelphi7, cnDelphi8, cnDelphi2005,
+    cnDelphi2006, cnDelphi2007, cnDelphi2009, cnDelphi2010, cnDelphiXE, cnDelphiXE2,
+    cnDelphiXE3, cnDelphiXE4, cnDelphiXE5, cnDelphiXE6, cnDelphiXE7, cnDelphiXE8,
     cnDelphi10S, cnDelphi101B, cnBCB5, cnBCB6);
   TCnCompilers = set of TCnCompiler;
 
@@ -65,14 +65,14 @@ const
   _DELPHI6 = {$IFDEF DELPHI6}True{$ELSE}False{$ENDIF};
   _DELPHI7 = {$IFDEF DELPHI7}True{$ELSE}False{$ENDIF};
   _DELPHI8 = {$IFDEF DELPHI8}True{$ELSE}False{$ENDIF};
-  _DELPHI9 = {$IFDEF DELPHI9}True{$ELSE}False{$ENDIF};
-  _DELPHI10 = {$IFDEF DELPHI10}True{$ELSE}False{$ENDIF};
-  _DELPHI11 = {$IFDEF DELPHI11}True{$ELSE}False{$ENDIF};
-  _DELPHI12 = {$IFDEF DELPHI12}True{$ELSE}False{$ENDIF};
-  _DELPHI14 = {$IFDEF DELPHI14}True{$ELSE}False{$ENDIF};
-  _DELPHI15 = {$IFDEF DELPHI15}True{$ELSE}False{$ENDIF};
-  _DELPHI16 = {$IFDEF DELPHI16}True{$ELSE}False{$ENDIF};
-  _DELPHI17 = {$IFDEF DELPHI17}True{$ELSE}False{$ENDIF};
+  _DELPHI2005 = {$IFDEF DELPHI2005}True{$ELSE}False{$ENDIF};
+  _DELPHI2006 = {$IFDEF DELPHI2006}True{$ELSE}False{$ENDIF};
+  _DELPHI2007 = {$IFDEF DELPHI2007}True{$ELSE}False{$ENDIF};
+  _DELPHI2009 = {$IFDEF DELPHI2009}True{$ELSE}False{$ENDIF};
+  _DELPHI2010 = {$IFDEF DELPHI2010}True{$ELSE}False{$ENDIF};
+  _DELPHIXE = {$IFDEF DELPHIXE}True{$ELSE}False{$ENDIF};
+  _DELPHIXE2 = {$IFDEF DELPHIXE2}True{$ELSE}False{$ENDIF};
+  _DELPHIXE3 = {$IFDEF DELPHIXE3}True{$ELSE}False{$ENDIF};
   _DELPHIXE4 = {$IFDEF DELPHIXE4}True{$ELSE}False{$ENDIF};
   _DELPHIXE5 = {$IFDEF DELPHIXE5}True{$ELSE}False{$ENDIF};
   _DELPHIXE6 = {$IFDEF DELPHIXE6}True{$ELSE}False{$ENDIF};
@@ -89,14 +89,14 @@ const
   _DELPHI6_UP = {$IFDEF DELPHI6_UP}True{$ELSE}False{$ENDIF};
   _DELPHI7_UP = {$IFDEF DELPHI7_UP}True{$ELSE}False{$ENDIF};
   _DELPHI8_UP = {$IFDEF DELPHI8_UP}True{$ELSE}False{$ENDIF};
-  _DELPHI9_UP = {$IFDEF DELPHI9_UP}True{$ELSE}False{$ENDIF};
-  _DELPHI10_UP = {$IFDEF DELPHI10_UP}True{$ELSE}False{$ENDIF};
-  _DELPHI11_UP = {$IFDEF DELPHI11_UP}True{$ELSE}False{$ENDIF};
-  _DELPHI12_UP = {$IFDEF DELPHI12_UP}True{$ELSE}False{$ENDIF};
-  _DELPHI14_UP = {$IFDEF DELPHI14_UP}True{$ELSE}False{$ENDIF};
-  _DELPHI15_UP = {$IFDEF DELPHI15_UP}True{$ELSE}False{$ENDIF};
-  _DELPHI16_UP = {$IFDEF DELPHI16_UP}True{$ELSE}False{$ENDIF};
-  _DELPHI17_UP = {$IFDEF DELPHI17_UP}True{$ELSE}False{$ENDIF};
+  _DELPHI2005_UP = {$IFDEF DELPHI2005_UP}True{$ELSE}False{$ENDIF};
+  _DELPHI2006_UP = {$IFDEF DELPHI2006_UP}True{$ELSE}False{$ENDIF};
+  _DELPHI2007_UP = {$IFDEF DELPHI2007_UP}True{$ELSE}False{$ENDIF};
+  _DELPHI2009_UP = {$IFDEF DELPHI2009_UP}True{$ELSE}False{$ENDIF};
+  _DELPHI2010_UP = {$IFDEF DELPHI2010_UP}True{$ELSE}False{$ENDIF};
+  _DELPHIXE_UP = {$IFDEF DELPHIXE_UP}True{$ELSE}False{$ENDIF};
+  _DELPHIXE2_UP = {$IFDEF DELPHIXE2_UP}True{$ELSE}False{$ENDIF};
+  _DELPHIXE3_UP = {$IFDEF DELPHIXE3_UP}True{$ELSE}False{$ENDIF};
   _DELPHIXE4_UP = {$IFDEF DELPHIXE4_UP}True{$ELSE}False{$ENDIF};
   _DELPHIXE5_UP = {$IFDEF DELPHIXE5_UP}True{$ELSE}False{$ENDIF};
   _DELPHIXE6_UP = {$IFDEF DELPHIXE6_UP}True{$ELSE}False{$ENDIF};
@@ -110,14 +110,14 @@ const
   _BCB4 = {$IFDEF BCB4}True{$ELSE}False{$ENDIF};
   _BCB5 = {$IFDEF BCB5}True{$ELSE}False{$ENDIF};
   _BCB6 = {$IFDEF BCB6}True{$ELSE}False{$ENDIF};
-  _BCB7 = {$IFDEF BCB7}True{$ELSE}False{$ENDIF};
-  _BCB10 = {$IFDEF BCB10}True{$ELSE}False{$ENDIF};
-  _BCB11 = {$IFDEF BCB11}True{$ELSE}False{$ENDIF};
-  _BCB12 = {$IFDEF BCB12}True{$ELSE}False{$ENDIF};
-  _BCB14 = {$IFDEF BCB14}True{$ELSE}False{$ENDIF};
-  _BCB15 = {$IFDEF BCB15}True{$ELSE}False{$ENDIF};
-  _BCB16 = {$IFDEF BCB16}True{$ELSE}False{$ENDIF};
-  _BCB17 = {$IFDEF BCB17}True{$ELSE}False{$ENDIF};
+  _BCB2005 = {$IFDEF BCB2005}True{$ELSE}False{$ENDIF};
+  _BCB2006 = {$IFDEF BCB2006}True{$ELSE}False{$ENDIF};
+  _BCB2007 = {$IFDEF BCB2007}True{$ELSE}False{$ENDIF};
+  _BCB2009 = {$IFDEF BCB2009}True{$ELSE}False{$ENDIF};
+  _BCB2010 = {$IFDEF BCB2010}True{$ELSE}False{$ENDIF};
+  _BCBXE = {$IFDEF BCBXE}True{$ELSE}False{$ENDIF};
+  _BCBXE2 = {$IFDEF BCBXE2}True{$ELSE}False{$ENDIF};
+  _BCBXE3 = {$IFDEF BCBXE3}True{$ELSE}False{$ENDIF};
   _BCBXE4 = {$IFDEF BCBXE4}True{$ELSE}False{$ENDIF};
   _BCBXE5 = {$IFDEF BCBXE5}True{$ELSE}False{$ENDIF};
   _BCBXE6 = {$IFDEF BCBXE6}True{$ELSE}False{$ENDIF};
@@ -131,14 +131,14 @@ const
   _BCB4_UP = {$IFDEF BCB4_UP}True{$ELSE}False{$ENDIF};
   _BCB5_UP = {$IFDEF BCB5_UP}True{$ELSE}False{$ENDIF};
   _BCB6_UP = {$IFDEF BCB6_UP}True{$ELSE}False{$ENDIF};
-  _BCB7_UP = {$IFDEF BCB7_UP}True{$ELSE}False{$ENDIF};
-  _BCB10_UP = {$IFDEF BCB10_UP}True{$ELSE}False{$ENDIF};
-  _BCB11_UP = {$IFDEF BCB11_UP}True{$ELSE}False{$ENDIF};
-  _BCB12_UP = {$IFDEF BCB12_UP}True{$ELSE}False{$ENDIF};
-  _BCB14_UP = {$IFDEF BCB14_UP}True{$ELSE}False{$ENDIF};
-  _BCB15_UP = {$IFDEF BCB15_UP}True{$ELSE}False{$ENDIF};
-  _BCB16_UP = {$IFDEF BCB16_UP}True{$ELSE}False{$ENDIF};
-  _BCB17_UP = {$IFDEF BCB17_UP}True{$ELSE}False{$ENDIF};
+  _BCB2005_UP = {$IFDEF BCB2005_UP}True{$ELSE}False{$ENDIF};
+  _BCB2006_UP = {$IFDEF BCB2006_UP}True{$ELSE}False{$ENDIF};
+  _BCB2007_UP = {$IFDEF BCB2007_UP}True{$ELSE}False{$ENDIF};
+  _BCB2009_UP = {$IFDEF BCB2009_UP}True{$ELSE}False{$ENDIF};
+  _BCB2010_UP = {$IFDEF BCB2010_UP}True{$ELSE}False{$ENDIF};
+  _BCBXE_UP = {$IFDEF BCBXE_UP}True{$ELSE}False{$ENDIF};
+  _BCBXE2_UP = {$IFDEF BCBXE2_UP}True{$ELSE}False{$ENDIF};
+  _BCBXE3_UP = {$IFDEF BCBXE3_UP}True{$ELSE}False{$ENDIF};
   _BCBXE4_UP = {$IFDEF BCBXE4_UP}True{$ELSE}False{$ENDIF};
   _BCBXE5_UP = {$IFDEF BCBXE5_UP}True{$ELSE}False{$ENDIF};
   _BCBXE6_UP = {$IFDEF BCBXE6_UP}True{$ELSE}False{$ENDIF};
@@ -270,53 +270,53 @@ const
         CompilerName = 'Delphi 8';
         CompilerShortName = 'D8';
       {$ELSE}
-        {$IFDEF DELPHI9}
-          Compiler: TCnCompiler = cnDelphi9;
+        {$IFDEF DELPHI2005}
+          Compiler: TCnCompiler = cnDelphi2005;
           CompilerKind: TCnCompilerKind = ckDelphi;
           CompilerName = 'BDS 2005';
-          CompilerShortName = 'D9';
+          CompilerShortName = 'D2005';
         {$ELSE}
-          {$IFDEF DELPHI10}
-            Compiler: TCnCompiler = cnDelphi10;
+          {$IFDEF DELPHI2006}
+            Compiler: TCnCompiler = cnDelphi2006;
             CompilerKind: TCnCompilerKind = ckDelphi;
             CompilerName = 'BDS 2006';
-            CompilerShortName = 'D10';
+            CompilerShortName = 'D2006';
           {$ELSE}
-            {$IFDEF DELPHI11}
-              Compiler: TCnCompiler = cnDelphi11;
+            {$IFDEF DELPHI2007}
+              Compiler: TCnCompiler = cnDelphi2007;
               CompilerKind: TCnCompilerKind = ckDelphi;
               CompilerName = 'RAD Studio 2007';
-              CompilerShortName = 'D11';
+              CompilerShortName = 'D2007';
             {$ELSE}
-              {$IFDEF DELPHI12}
-                Compiler: TCnCompiler = cnDelphi12;
+              {$IFDEF DELPHI2009}
+                Compiler: TCnCompiler = cnDelphi2009;
                 CompilerKind: TCnCompilerKind = ckDelphi;
                 CompilerName = 'RAD Studio 2009';
-                CompilerShortName = 'D12';
+                CompilerShortName = 'D2009';
               {$ELSE}
-                {$IFDEF DELPHI14}
-                  Compiler: TCnCompiler = cnDelphi14;
+                {$IFDEF DELPHI2010}
+                  Compiler: TCnCompiler = cnDelphi2010;
                   CompilerKind: TCnCompilerKind = ckDelphi;
                   CompilerName = 'RAD Studio 2010';
-                  CompilerShortName = 'D14';
+                  CompilerShortName = 'D2010';
                 {$ELSE}
-                  {$IFDEF DELPHI15}
-                    Compiler: TCnCompiler = cnDelphi15;
+                  {$IFDEF DELPHIXE}
+                    Compiler: TCnCompiler = cnDelphiXE;
                     CompilerKind: TCnCompilerKind = ckDelphi;
                     CompilerName = 'RAD Studio XE';
-                    CompilerShortName = 'D15';
+                    CompilerShortName = 'DXE';
                   {$ELSE}
-                    {$IFDEF DELPHI16}
-                      Compiler: TCnCompiler = cnDelphi16;
+                    {$IFDEF DELPHIXE2}
+                      Compiler: TCnCompiler = cnDelphiXE2;
                       CompilerKind: TCnCompilerKind = ckDelphi;
                       CompilerName = 'RAD Studio XE2';
-                      CompilerShortName = 'D16';
+                      CompilerShortName = 'DXE2';
                     {$ELSE}
-                      {$IFDEF DELPHI17}
-                        Compiler: TCnCompiler = cnDelphi17;
+                      {$IFDEF DELPHIXE3}
+                        Compiler: TCnCompiler = cnDelphiXE3;
                         CompilerKind: TCnCompilerKind = ckDelphi;
                         CompilerName = 'RAD Studio XE3';
-                        CompilerShortName = 'D17';
+                        CompilerShortName = 'DXE3';
                       {$ELSE}
                         {$IFDEF DELPHIXE4}
                           Compiler: TCnCompiler = cnDelphiXE4;
