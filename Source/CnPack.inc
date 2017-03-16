@@ -2365,7 +2365,11 @@
   {$DEFINE IDE_SYNC_EDIT_BLOCK}   // 2006 and above Editor Supports Sync Block Edit
   {$DEFINE OTA_CODE_TEMPLATE_API} // 2006 and above Provides CodeTemplateAPI.
   {$DEFINE EDITOR_TAB_ONLYFROM_WINCONTROL}
-  // From BDS 2006 IDEGraident Editor Tab is Only From WinControl, not TabSet/TabControl 
+  // From BDS 2006 IDEGraident Editor Tab is Only From WinControl, not TabSet/TabControl
+{$ENDIF}
+
+{$IFDEF BDS2005_UP}
+  {$DEFINE OTA_PALETTE_API} // 2005 and above Provides PaletteAPI.
 {$ENDIF}
 
 {$IFDEF COMPILER21_UP}

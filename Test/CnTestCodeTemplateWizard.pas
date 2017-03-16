@@ -122,7 +122,10 @@ var
   end;
 
 begin
-  CTS := BorlandIDEServices as IOTACodeTemplateServices;
+  // CTS := BorlandIDEServices as IOTACodeTemplateServices;
+  if not Supports(BorlandIDEServices, IOTACodeTemplateServices, CTS) then
+    Exit;
+
   if CTS = nil then
   begin
     ShowMessage('No IOTACodeTemplateServices');
