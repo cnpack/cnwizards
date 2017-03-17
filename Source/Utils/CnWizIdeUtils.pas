@@ -62,6 +62,7 @@ interface
 uses
   Windows, Messages, Classes, Controls, SysUtils, Graphics, Forms, Tabs,
   Menus, Buttons, ComCtrls, StdCtrls, ExtCtrls, TypInfo, ToolsAPI, ImgList,
+  {$IFDEF OTA_PALETTE_API} PaletteAPI, {$ENDIF}
   {$IFDEF COMPILER6_UP}
   DesignIntf, DesignEditors, ComponentDesigner,
   {$ELSE}
@@ -460,6 +461,7 @@ type
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
     function GetTabs(Index: Integer): string;
+
 {$IFDEF SUPPORTS_PALETTE_ENHANCE}
   {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
     procedure GetComponentImageFromNewPalette(Bmp: TBitmap; const AComponentClassName: string);
@@ -478,6 +480,9 @@ type
     {* 根据类名选中控件板中的某控件，返回是否成功 }
     function FindTab(const ATab: string): Integer;
     {* 查找某页面的索引 }
+    function GetUnitNameFromComponentClassName(const AClassName: string;
+      const ATabName: string = ''): string;
+    {* 从组件类名获得其单元名}
     procedure GetComponentImage(Bmp: TBitmap; const AComponentClassName: string);
     {* 将控件板上指定的组件名的图标绘制到 Bmp 中，Bmp 推荐尺寸为 26 * 26}
     property SelectedIndex: Integer read GetSelectedIndex write SetSelectedIndex;
@@ -504,6 +509,7 @@ type
     {* 控件板是否可见，支持高版本的新控件板 }
     property Enabled: Boolean read GetEnabled write SetEnabled;
     {* 控件板是否使能，支持高版本的新控件板 }
+
   end;
 
 {TCnMessageViewWrapper}
@@ -2430,6 +2436,11 @@ var
   AClass: TPersistentClass;
 {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
   I: Integer;
+  {$IFDEF OTA_PALETTE_API}
+  SelTool: IOTABasePaletteItem;
+  CI: IOTAComponentPaletteItem;
+  PAS: IOTAPaletteServices;
+  {$ENDIF}
 {$ENDIF}
 begin
   Result := '';
@@ -2441,8 +2452,23 @@ begin
     if (AClass <> nil) and (PTypeInfo(AClass.ClassInfo).Kind = tkClass) then
       Result := string(GetTypeData(PTypeInfo(AClass.ClassInfo)).UnitName);
 
-    // 新型组件板下由于 FMX 等无法获得 Class 的，只能通过选择来实现
+    // 新型组件板下由于 FMX 等无法获得 Class 的，得另外想办法
 {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
+  {$IFDEF OTA_PALETTE_API}
+    // 支持 PaletteAPI 的话直接获取
+    if (Result = '') and Supports(BorlandIDEServices, IOTAPaletteServices, PAS) then
+    begin
+      if PAS <> nil then
+      begin
+        SelTool := PAS.SelectedTool;
+        if (SelTool <> nil) and Supports(SelTool, IOTAComponentPaletteItem, CI) then
+        begin
+          if CI <> nil then
+            Result := CI.UnitName;
+        end;
+      end;
+    end;
+  {$ELSE} // 如果不支持 PaletteAPI，则只能通过选择来实现，相当慢
     if Result = '' then
     begin
       for I := 0 to FPalette.ControlCount - 1 do
@@ -2458,6 +2484,7 @@ begin
         end;
       end;
     end;
+  {$ENDIF}
 {$ENDIF}
   end;
 end;
@@ -2529,6 +2556,62 @@ begin
   end
   else
     Result := '';
+end;
+
+function TCnPaletteWrapper.GetUnitNameFromComponentClassName(
+  const AClassName: string; const ATabName: string): string;
+var
+  AClass: TPersistentClass;
+{$IFDEF OTA_PALETTE_API}
+  Group, SubGroup: IOTAPaletteGroup;
+  Item: IOTABasePaletteItem;
+  CI: IOTAComponentPaletteItem;
+  PAS: IOTAPaletteServices;
+{$ENDIF}
+begin
+  Result := '';
+  AClass := GetClass(AClassName);
+  if (AClass <> nil) and (PTypeInfo(AClass.ClassInfo).Kind = tkClass) then
+    Result := string(GetTypeData(PTypeInfo(AClass.ClassInfo)).UnitName);
+
+{$IFDEF DEBUG}
+  if Result = '' then
+    Cndebugger.LogMsg('GetUnitNameFromComponentClassName ' + AClassName + ' NOT Found.');
+{$ENDIF}
+
+{$IFDEF OTA_PALETTE_API}
+  if (Result = '') and Supports(BorlandIDEServices, IOTAPaletteServices, PAS) then
+  begin
+    if PAS <> nil then
+    begin
+      Group := PAS.BaseGroup;
+      if Group <> nil then
+      begin
+        if ATabName <> '' then
+        begin
+          // 如果有 Tab 名就找到 Tab 名的 Group 并找其符合名字的子 Item
+          SubGroup := Group.FindItemGroupByName(ATabName);
+          if SubGroup <> nil then
+          begin
+            Item := SubGroup.FindItemByName(AClassName, True);
+            if (Item <> nil) and Supports(Item, IOTAComponentPaletteItem, CI) then
+              Result := CI.UnitName;
+          end;
+        end
+        else
+        begin
+          // 没有 Tab 名就遍历子 Group 找其符合名字的子 Item
+          Item := SubGroup.FindItemByName(AClassName, True);
+          if (Item <> nil) and Supports(Item, IOTAComponentPaletteItem, CI) then
+              Result := CI.UnitName;
+        end;
+      end;
+    end;
+  end;
+{$ELSE}
+  if (Result = '') and SelectComponent(AClassName, ATabName) then
+    Result := SelectedUnitName;
+{$ENDIF}
 end;
 
 function TCnPaletteWrapper.GetVisible: Boolean;

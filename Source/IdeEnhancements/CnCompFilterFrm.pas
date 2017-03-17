@@ -501,19 +501,26 @@ begin
                 Info.CompName := Info.InternalName;
 
 {$IFDEF SUPPORTS_FMX}
-              // FMX 等单元如果获取不到 Class，则需要用选择的方式再解析 Hint 来获取单元名等信息
-              // 但可能出现屏幕闪动。注意低版本 Delphi 也有 TTextViewer 等没注册到组件版上的控件
-              // 那些无需获取，如果也调用 SelectComponent，则会出现选择性闪烁
+              // FMX 等单元即使获取不到 Class，也需要用 PaletteAPI 的方式（之前是选择再解析 Hint）来获取单元名等信息
+              // 选择再解析可能出现屏幕闪动因此弃用了。
+              // 注意低版本 Delphi 也有 TTextViewer 等没注册到组件版上的控件，那些无需获取
               if GetClass(Info.InternalName) = nil then
               begin
 {$IFDEF DEBUG}
                 CnDebugger.LogMsg('Get Class ' + Info.InternalName + ' is nil. Using Select.');
 {$ENDIF}
-                CnPaletteWrapper.SelectComponent(Info.InternalName, Info.TabName);
+                Info.CompUnitName := CnPaletteWrapper.GetUnitNameFromComponentClassName(Info.InternalName, Info.TabName);
+                FCompList.AddObject(Info.CompName, Info);
               end;
+{$ELSE}
+
 {$ENDIF}
-              Info.CompUnitName := CnPaletteWrapper.SelectedUnitName;
-              FCompList.AddObject(Info.CompName, Info);
+              // 非 FMX 下，Get 不到 Class 就可以不添加，反正没这组件（CLX 的情况呢？）
+              if GetClass(Info.InternalName) <> nil then
+              begin
+                Info.CompUnitName := CnPaletteWrapper.GetUnitNameFromComponentClassName(Info.InternalName, Info.TabName);
+                FCompList.AddObject(Info.CompName, Info);
+              end;
             end;
           finally
             CnPaletteWrapper.EndUpdate;
