@@ -30,7 +30,7 @@
       ..\Dcu\CnSourceDiffWizard.obj ..\Dcu\CnDesignEditor.obj 
       ..\Dcu\CnDesignEditorConsts.obj ..\Dcu\CnDesignEditorUtils.obj 
       ..\Dcu\CnHintEditorFrm.obj ..\Dcu\CnMultiLineEditorFrm.obj 
-      ..\Dcu\CnSetPropEditor.obj ..\Dcu\CnShenPropEditors.obj 
+      ..\Dcu\CnSetPropEditor.obj ..\Dcu\CnDesignPropEditors.obj 
       ..\Dcu\CnSizeConstraintsEditorFrm.obj ..\Dcu\CnEditorCodeToString.obj 
       ..\Dcu\CnEditorCodeDelBlank.obj ..\Dcu\CnEditorCodeTool.obj 
       ..\Dcu\CnLineParser.obj ..\Dcu\CnEditorCodeComment.obj 
@@ -267,7 +267,7 @@
       <FILE FILENAME="DesignEditors\CnHintEditorFrm.pas" FORMNAME="CnHintEditorForm" UNITNAME="Cnhinteditorfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="DesignEditors\CnMultiLineEditorFrm.pas" FORMNAME="CnMultiLineEditorForm" UNITNAME="Cnmultilineeditorfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="DesignEditors\CnSetPropEditor.pas" FORMNAME="" UNITNAME="CnSetPropEditor" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="DesignEditors\CnShenPropEditors.pas" FORMNAME="" UNITNAME="CnShenPropEditors" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="DesignEditors\CnDesignPropEditors.pas" FORMNAME="" UNITNAME="CnDesignPropEditors" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="DesignEditors\CnSizeConstraintsEditorFrm.pas" FORMNAME="CnSizeConstraintsEditorForm" UNITNAME="Cnsizeconstraintseditorfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="EditorWizard\CnEditorCodeToString.pas" FORMNAME="CnEditorCodeToStringForm" UNITNAME="Cneditorcodetostring" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="EditorWizard\CnEditorCodeDelBlank.pas" FORMNAME="CnDelBlankFrm" UNITNAME="Cneditorcodedelblank" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>

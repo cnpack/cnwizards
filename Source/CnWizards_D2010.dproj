@@ -192,8 +192,8 @@
 				<Form>CnMultiLineEditorForm</Form>
 			</DCCReference>
 			<DCCReference Include="DesignEditors\CnSetPropEditor.pas"/>
-			<DCCReference Include="DesignEditors\CnShenPropEditors.pas"/>
-			<DCCReference Include="DesignEditors\CnShenStringModule.pas"/>
+			<DCCReference Include="DesignEditors\CnDesignPropEditors.pas"/>
+			<DCCReference Include="DesignEditors\CnDesignStringModule.pas"/>
 			<DCCReference Include="DesignEditors\CnSizeConstraintsEditorFrm.pas">
 				<Form>CnSizeConstraintsEditorForm</Form>
 			</DCCReference>

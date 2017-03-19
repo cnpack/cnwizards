@@ -56,7 +56,7 @@ USEUNIT("DesignEditors\CnDesignEditorUtils.pas");
 USEFORMNS("DesignEditors\CnHintEditorFrm.pas", Cnhinteditorfrm, CnHintEditorForm);
 USEFORMNS("DesignEditors\CnMultiLineEditorFrm.pas", Cnmultilineeditorfrm, CnMultiLineEditorForm);
 USEUNIT("DesignEditors\CnSetPropEditor.pas");
-USEUNIT("DesignEditors\CnShenPropEditors.pas");
+USEUNIT("DesignEditors\CnDesignPropEditors.pas");
 USEFORMNS("DesignEditors\CnSizeConstraintsEditorFrm.pas", Cnsizeconstraintseditorfrm, CnSizeConstraintsEditorForm);
 USEFORMNS("EditorWizard\CnEditorCodeToString.pas", Cneditorcodetostring, CnEditorCodeToStringForm);
 USEFORMNS("EditorWizard\CnEditorCodeDelBlank.pas", Cneditorcodedelblank, CnDelBlankFrm);

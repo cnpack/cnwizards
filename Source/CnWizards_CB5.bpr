@@ -31,7 +31,7 @@
       ..\Dcu\CnDesignEditor.obj ..\Dcu\CnDesignEditorConsts.obj 
       ..\Dcu\CnDesignEditorUtils.obj ..\Dcu\CnHintEditorFrm.obj 
       ..\Dcu\CnMultiLineEditorFrm.obj ..\Dcu\CnSetPropEditor.obj 
-      ..\Dcu\CnShenPropEditors.obj ..\Dcu\CnSizeConstraintsEditorFrm.obj 
+      ..\Dcu\CnDesignPropEditors.obj ..\Dcu\CnSizeConstraintsEditorFrm.obj 
       ..\Dcu\CnEditorCodeToString.obj ..\Dcu\CnEditorCodeDelBlank.obj 
       ..\Dcu\CnEditorCodeTool.obj ..\Dcu\CnLineParser.obj 
       ..\Dcu\CnEditorCodeComment.obj ..\Dcu\CnEditorCodeIndent.obj 

@@ -18,7 +18,7 @@
 {                                                                              }
 {******************************************************************************}
 
-unit CnShenPropEditors;
+unit CnDesignPropEditors;
 {* |<PRE>
 ================================================================================
 * 软件名称：开发包属性、组件编辑器库
@@ -143,7 +143,7 @@ implementation
 
 {$IFDEF DELPHI}
 uses
-  StFilSys, CnShenStringModule;
+  StFilSys, CnDesignStringModule;
 {$ENDIF DELPHI}
 
 { TCnStringPropEditor }
