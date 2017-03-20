@@ -2236,9 +2236,34 @@ procedure TCnPaletteWrapper.GetComponentImageFromNewPalette(Bmp: TBitmap;
 var
   I, J: Integer;
   S: string;
+{$IFDEF OTA_PALETTE_API}
+  Item: IOTABasePaletteItem;
+  Group: IOTAPaletteGroup;
+  CI: IOTAComponentPaletteItem;
+  Painter: INTAPalettePaintIcon;
+  PAS: IOTAPaletteServices;
+{$ENDIF}
 begin
   if (Bmp = nil) or (AComponentClassName = '') then
     Exit;
+
+{$IFDEF OTA_PALETTE_API}
+  // 注意有 PALETTE_API 时还不一定有新的控件板，但至少新控件板能用这 API
+  if Supports(BorlandIDEServices, IOTAPaletteServices, PAS) then
+  begin
+    if PAS <> nil then
+    begin
+      Group := PAS.BaseGroup;
+      if Group <> nil then
+      begin
+        Item := Group.FindItemByName(AComponentClassName, True);
+        if (Item <> nil) and Supports(Item, IOTAComponentPaletteItem, CI)
+          and Supports(Item, INTAPalettePaintIcon, Painter) then
+          Painter.Paint(Bmp.Canvas, 1, 1, pi24x24);
+      end;
+    end;
+  end;
+{$ELSE}
   try
     BeginUpdate;
     for I := 0 to TabCount - 1 do
@@ -2261,6 +2286,7 @@ begin
   finally
     EndUpdate;
   end;
+{$ENDIF}
 end;
 
 {$ELSE}

@@ -58,8 +58,9 @@ type
   TCnTestPaletteAPIWizard = class(TCnMenuWizard)
   private
     FGroupLevel: Integer;
+    FImageList: TImageList;
     procedure DumpGroup(Group: IOTAPaletteGroup);
-    procedure DumpPaletteItem(Tool: IOTABasePaletteItem);
+    procedure DumpPaletteItem(Item: IOTABasePaletteItem);
   protected
     function GetHasConfig: Boolean; override;
   public
@@ -124,28 +125,46 @@ begin
   end;
 end;
 
-procedure TCnTestPaletteAPIWizard.DumpPaletteItem(Tool: IOTABasePaletteItem);
+procedure TCnTestPaletteAPIWizard.DumpPaletteItem(Item: IOTABasePaletteItem);
 var
   CI: IOTAComponentPaletteItem;
+  Painter: INTAPalettePaintIcon;
+  Bmp: TBitmap;
 begin
   CnDebugger.LogEnter(Spc(FGroupLevel * 4) + 'Dump a PaletteItem:');
-  CnDebugger.LogInterface(Tool, Spc(FGroupLevel * 4));
-  with Tool do
+  CnDebugger.LogInterface(Item, Spc(FGroupLevel * 4));
+  with Item do
   begin
-    CnDebugger.LogFmt(Spc(FGroupLevel * 4) + 'Name %s', [Tool.Name]);
-    CnDebugger.LogFmt(Spc(FGroupLevel * 4) + 'IDString %s', [Tool.IDString]);
-    CnDebugger.LogFmt(Spc(FGroupLevel * 4) + 'HelpName %s', [Tool.HelpName]);
-    CnDebugger.LogFmt(Spc(FGroupLevel * 4) + 'HintText %s', [Tool.HintText]);
-    CnDebugger.LogFmt(Spc(FGroupLevel * 4) + 'Visible %d', [Integer(Tool.Visible)]);
-    CnDebugger.LogFmt(Spc(FGroupLevel * 4) + 'CanDelete %d', [Integer(Tool.CanDelete)]);
+    CnDebugger.LogFmt(Spc(FGroupLevel * 4) + 'Name %s', [Item.Name]);
+    CnDebugger.LogFmt(Spc(FGroupLevel * 4) + 'IDString %s', [Item.IDString]);
+    CnDebugger.LogFmt(Spc(FGroupLevel * 4) + 'HelpName %s', [Item.HelpName]);
+    CnDebugger.LogFmt(Spc(FGroupLevel * 4) + 'HintText %s', [Item.HintText]);
+    CnDebugger.LogFmt(Spc(FGroupLevel * 4) + 'Visible %d', [Integer(Item.Visible)]);
+    CnDebugger.LogFmt(Spc(FGroupLevel * 4) + 'CanDelete %d', [Integer(Item.CanDelete)]);
 
-    if Supports(Tool, IOTAComponentPaletteItem, CI) then
+    if Supports(Item, IOTAComponentPaletteItem, CI) then
     begin
       CnDebugger.LogFmt(Spc(FGroupLevel * 4) + 'Component ClassName %s', [CI.ClassName]);
       CnDebugger.LogFmt(Spc(FGroupLevel * 4) + 'Component UnitName %s', [CI.UnitName]);
       CnDebugger.LogFmt(Spc(FGroupLevel * 4) + 'Component PackageName %s', [CI.PackageName]);
     end;
 
+    if Supports(Item, INTAPalettePaintIcon, Painter) then
+    begin
+      Bmp := TBitmap.Create;
+      Bmp.PixelFormat := pf24bit;
+      Bmp.Height := 26;
+      Bmp.Width := 26;
+      Bmp.Canvas.Brush.Color := clBtnFace;
+
+      try
+        Bmp.Canvas.FillRect(Rect(0, 0, Bmp.Width, Bmp.Height));
+        Painter.Paint(Bmp.Canvas, 1, 1, pi24x24);
+        FImageList.Add(Bmp, nil);
+      finally
+        FreeAndNil(Bmp);
+      end;
+    end;
   end;
   CnDebugger.LogLeave('Dump a PaletteItem.');
 end;
@@ -166,6 +185,15 @@ begin
     Exit;
   end;
 
+  if FImageList = nil then
+  begin
+    FImageList := TImageList.Create(Application);
+    FImageList.Width := 26;
+    FImageList.Height := 26;
+  end
+  else
+    FImageList.Clear;
+
   Group := PAS.BaseGroup;
   SelTool := PAS.SelectedTool;
   if SelTool <> nil then
@@ -177,6 +205,8 @@ begin
     CnDebugger.LogSeparator;
     FGroupLevel := 0;
     DumpGroup(Group);
+
+    CnDebugger.EvaluateObject(FImageList);
   end;
 end;
 
