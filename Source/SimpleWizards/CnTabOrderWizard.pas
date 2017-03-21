@@ -514,7 +514,7 @@ const
   csAutoReset = 'AutoReset';
   csInvert = 'Invert';
   csGroup = 'Group';
-  csDispFont = 'DispFont';
+  csDispFont = 'DispTabFont';
   csBkColor = 'BkColor';
 
 // 装载专家设置
