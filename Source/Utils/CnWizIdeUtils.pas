@@ -1279,7 +1279,7 @@ begin
 end;
 
 {$IFDEF BDS}
-// 取得 BDS (Delphi8/9) 的用户数据目录
+// 取得 BDS (Delphi8/9及以上) 的用户数据目录
 function GetBDSUserDataDir: string;
 const
   CSIDL_LOCAL_APPDATA = $001c;
@@ -1333,7 +1333,11 @@ begin
 {$IFDEF DELPHI101_BERLIN}
   Result := Result + 'Embarcadero\BDS\18.0';
 {$ELSE}
+{$IFDEF DELPHI102_TOKYO}
+  Result := Result + 'Embarcadero\BDS\19.0';
+{$ELSE}
   Error: Unknown Compiler
+{$ENDIF}
 {$ENDIF}
 {$ENDIF}
 {$ENDIF}

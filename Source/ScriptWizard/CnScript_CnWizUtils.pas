@@ -98,6 +98,7 @@ begin
   CL.AddConstantN('_DELPHIXE8', 'Boolean').SetUInt(Ord(_DELPHIXE8));
   CL.AddConstantN('_DELPHI10_SEATTLE', 'Boolean').SetUInt(Ord(_DELPHI10_SEATTLE));
   CL.AddConstantN('_DELPHI101_BERLIN', 'Boolean').SetUInt(Ord(_DELPHI101_BERLIN));
+  CL.AddConstantN('_DELPHI102_TOKYO', 'Boolean').SetUInt(Ord(_DELPHI102_TOKYO));
 
   CL.AddConstantN('_DELPHI1_UP', 'Boolean').SetUInt(Ord(_DELPHI1_UP));
   CL.AddConstantN('_DELPHI2_UP', 'Boolean').SetUInt(Ord(_DELPHI2_UP));
@@ -122,6 +123,7 @@ begin
   CL.AddConstantN('_DELPHIXE8_UP', 'Boolean').SetUInt(Ord(_DELPHIXE8_UP));
   CL.AddConstantN('_DELPHI10_SEATTLE_UP', 'Boolean').SetUInt(Ord(_DELPHI10_SEATTLE_UP));
   CL.AddConstantN('_DELPHI101_BERLIN_UP', 'Boolean').SetUInt(Ord(_DELPHI101_BERLIN_UP));
+  CL.AddConstantN('_DELPHI102_TOKYO_UP', 'Boolean').SetUInt(Ord(_DELPHI102_TOKYO_UP));
 
   CL.AddConstantN('_BCB1', 'Boolean').SetUInt(Ord(_BCB1));
   CL.AddConstantN('_BCB3', 'Boolean').SetUInt(Ord(_BCB3));
@@ -143,6 +145,7 @@ begin
   CL.AddConstantN('_BCBXE8', 'Boolean').SetUInt(Ord(_BCBXE8));
   CL.AddConstantN('_BCB10_SEATTLE', 'Boolean').SetUInt(Ord(_BCB10_SEATTLE));
   CL.AddConstantN('_BCB101_BERLIN', 'Boolean').SetUInt(Ord(_BCB101_BERLIN));
+  CL.AddConstantN('_BCB102_TOKYO', 'Boolean').SetUInt(Ord(_BCB102_TOKYO));
 
   CL.AddConstantN('_BCB1_UP', 'Boolean').SetUInt(Ord(_BCB1_UP));
   CL.AddConstantN('_BCB3_UP', 'Boolean').SetUInt(Ord(_BCB3_UP));
@@ -164,6 +167,7 @@ begin
   CL.AddConstantN('_BCBXE8_UP', 'Boolean').SetUInt(Ord(_BCBXE8_UP));
   CL.AddConstantN('_BCB10_SEATTLE_UP', 'Boolean').SetUInt(Ord(_BCB10_SEATTLE_UP));
   CL.AddConstantN('_BCB101_BERLIN_UP', 'Boolean').SetUInt(Ord(_BCB101_BERLIN_UP));
+  CL.AddConstantN('_BCB102_TOKYO_UP', 'Boolean').SetUInt(Ord(_BCB101_TOKYO_UP));
 
   CL.AddConstantN('_KYLIX1', 'Boolean').SetUInt(Ord(_KYLIX1));
   CL.AddConstantN('_KYLIX2', 'Boolean').SetUInt(Ord(_KYLIX2));
@@ -187,6 +191,7 @@ begin
   CL.AddConstantN('_BDS16', 'Boolean').SetUInt(Ord(_BDS16));
   CL.AddConstantN('_BDS17', 'Boolean').SetUInt(Ord(_BDS17));
   CL.AddConstantN('_BDS18', 'Boolean').SetUInt(Ord(_BDS18));
+  CL.AddConstantN('_BDS19', 'Boolean').SetUInt(Ord(_BDS19));
 
   CL.AddConstantN('_BDS2_UP', 'Boolean').SetUInt(Ord(_BDS2_UP));
   CL.AddConstantN('_BDS3_UP', 'Boolean').SetUInt(Ord(_BDS3_UP));
@@ -204,6 +209,7 @@ begin
   CL.AddConstantN('_BDS16_UP', 'Boolean').SetUInt(Ord(_BDS16_UP));
   CL.AddConstantN('_BDS17_UP', 'Boolean').SetUInt(Ord(_BDS17_UP));
   CL.AddConstantN('_BDS18_UP', 'Boolean').SetUInt(Ord(_BDS18_UP));
+  CL.AddConstantN('_BDS19_UP', 'Boolean').SetUInt(Ord(_BDS19_UP));
 
   CL.AddConstantN('_COMPILER1', 'Boolean').SetUInt(Ord(_COMPILER1));
   CL.AddConstantN('_COMPILER2', 'Boolean').SetUInt(Ord(_COMPILER2));
@@ -229,6 +235,7 @@ begin
   CL.AddConstantN('_COMPILER22', 'Boolean').SetUInt(Ord(_COMPILER22));
   CL.AddConstantN('_COMPILER23', 'Boolean').SetUInt(Ord(_COMPILER23));
   CL.AddConstantN('_COMPILER24', 'Boolean').SetUInt(Ord(_COMPILER24));
+  CL.AddConstantN('_COMPILER25', 'Boolean').SetUInt(Ord(_COMPILER25));
 
   CL.AddConstantN('_COMPILER1_UP', 'Boolean').SetUInt(Ord(_COMPILER1_UP));
   CL.AddConstantN('_COMPILER2_UP', 'Boolean').SetUInt(Ord(_COMPILER2_UP));
@@ -254,6 +261,7 @@ begin
   CL.AddConstantN('_COMPILER22_UP', 'Boolean').SetUInt(Ord(_COMPILER22_UP));
   CL.AddConstantN('_COMPILER23_UP', 'Boolean').SetUInt(Ord(_COMPILER23_UP));
   CL.AddConstantN('_COMPILER24_UP', 'Boolean').SetUInt(Ord(_COMPILER24_UP));
+  CL.AddConstantN('_COMPILER25_UP', 'Boolean').SetUInt(Ord(_COMPILER25_UP));
 
   CL.AddConstantN('_SUPPORT_OTA_PROJECT_CONFIGURATION', 'Boolean').SetUInt(Ord(_SUPPORT_OTA_PROJECT_CONFIGURATION));
   CL.AddConstantN('_SUPPORT_CROSS_PLATFORM', 'Boolean').SetUInt(Ord(_SUPPORT_CROSS_PLATFORM));

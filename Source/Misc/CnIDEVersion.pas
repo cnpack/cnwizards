@@ -324,6 +324,17 @@ begin
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
 end;
 
+function IsDelphi102TIdeVersionLatest: Boolean;
+const
+  CoreIdeLatest: TVersionNumber =
+    (Major: 25; Minor: 0; Release: 0; Build: 0);
+var
+  ReadFileVersion: TVersionNumber;
+begin
+  ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide250.bpl');
+  Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+end;
+
 function IsIdeVersionLatest: Boolean;
 begin
   if CnIdeVersionDetected then
@@ -416,6 +427,10 @@ begin
 
 {$IFDEF DELPHI101_BERLIN}
   CnIdeVersionIsLatest := IsDelphi101BIdeVersionLatest;
+{$ENDIF}
+
+{$IFDEF DELPHI101_BERLIN}
+  CnIdeVersionIsLatest := IsDelphi102TIdeVersionLatest;
 {$ENDIF}
 
   Result := CnIdeVersionIsLatest;
