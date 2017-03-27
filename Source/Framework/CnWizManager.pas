@@ -1480,12 +1480,14 @@ begin
         end;
       end;
 
+{$IFNDEF CNWIZARDS_MINIMUM}
       if not Contain then // 没 CnPack 的值，可能是第一次运行，只能提示
       begin
         ShowSimpleCommentForm('', Format(SCnKeyMappingConflictsHint, [WizOptions.CompilerRegPath + KEY_MAPPING_REG]),
           SCnCheckKeyMappingEnhModulesSequence + CompilerShortName, False);
         Exit;
       end;
+{$ENDIF}
 
       // Both exist, check the priority of CnPack
       // MinIdx := 0;
@@ -1510,8 +1512,10 @@ begin
       if MaxIdx = CnPackIdx then // CnPack 键盘映射顺序已在最下面。
         Exit;
 
+{$IFNDEF CNWIZARDS_MINIMUM}
       ShowSimpleCommentForm('', Format(SCnKeyMappingConflictsHint, [WizOptions.CompilerRegPath + KEY_MAPPING_REG]),
         SCnCheckKeyMappingEnhModulesSequence + CompilerShortName, False);
+{$ENDIF}
 
       // 交换最大的值和 CnPack 的值。但未必有效，先不这么整。
 //      Reg := TRegistry.Create(KEY_WRITE);

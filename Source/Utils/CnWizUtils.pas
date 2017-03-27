@@ -628,6 +628,9 @@ function CnOtaDeleteCurrTokenRight(FirstSet: TAnsiCharSet = [];
 {* 删除当前光标下的标识符右半部分}
 function CnOtaIsEditPosOutOfLine(EditPos: TOTAEditPos; View: IOTAEditView = nil): Boolean;
 {* 判断位置是否超出行尾了。此机制在 Unicode 环境下当前行含有超过一个宽字符时可能会不准，慎用 }
+procedure CnOtaGetCurrentBreakpoints(Results: TList);
+{* 使用 CnWizDebuggerNotifierServices 获取当前源文件内的断点，
+   List 中返回 TCnBreakpointDescriptor 实例}
 
 {$ENDIF}
 
@@ -677,9 +680,6 @@ function CnOtaGetBaseModuleFileName(const FileName: string): string;
 {* 取模块的单元文件名}
 function CnOtaIsPersistentBlocks: Boolean;
 {* 当前 PersistentBlocks 是否为 True}
-procedure CnOtaGetCurrentBreakpoints(Results: TList);
-{* 使用 CnWizDebuggerNotifierServices 获取当前源文件内的断点，
-   List 中返回 TCnBreakpointDescriptor 实例}
 
 //==============================================================================
 // 源代码操作相关函数
@@ -923,8 +923,12 @@ procedure CnOtaInsertTextIntoEditorAtPosW(const Text: string; Position: Longint;
 {* 在指定位置处插入文本，如果 SourceEditor 为空使用当前值，D2009 以上使用。}
 {$ENDIF}
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+
 procedure CnOtaGotoEditPosAndRepaint(EditView: IOTAEditView; EditPosLine: Integer; EditPosCol: Integer = 0);
 {* 光标跳至指定的 EditPos 并重画}
+
+{$ENDIF}
 
 procedure CnOtaGotoPosition(Position: Longint; EditView: IOTAEditView = nil;
   Middle: Boolean = True);
@@ -956,12 +960,16 @@ procedure CnOtaConvertEditViewCharPosToEditPos(EditViewPtr: Pointer;
   EditView 使用 Pointer 进行传递以提高效率。2005 以上不使用 ConvertPos，而
   使用宽字符串结构语法解析器进行预先 Tab 展开}
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+
 procedure CnOtaConvertEditPosToParserCharPos(EditViewPtr: Pointer; var EditPos:
   TOTAEditPos; var CharPos: TOTACharPos);
 {* 将 EditPos 转换成为 StructureParser 所需的 CharPos，暂无用处}
 
 function CnOtaGetCurrentCharPosFromCursorPosForParser(out CharPos: TOTACharPos): Boolean;
 {* 获取当前光标位置并将其转换成为 StructureParser 所需的 CharPos}
+
+{$ENDIF}
 
 procedure CnPasParserParseSource(Parser: TCnGeneralPasStructParser;
   Stream: TMemoryStream; AIsDpr, AKeyOnly: Boolean);
@@ -4097,6 +4105,7 @@ begin
 end;
 
 {$IFNDEF CNWIZARDS_MINIMUM}
+
 // 获取当前光标所在的过程或函数名
 function CnOtaGetCurrentProcedure: string;
 var
@@ -4824,6 +4833,14 @@ begin
 {$ENDIF}
   end;  
 end;
+
+// 使用 CnWizDebuggerNotifierServices 获取当前源文件内的断点，List 中返回 TCnBreakpointDescriptor 实例
+procedure CnOtaGetCurrentBreakpoints(Results: TList);
+begin
+  if Results <> nil then
+    CnWizDebuggerNotifierServices.RetrieveBreakpoints(Results, CnOtaGetCurrentSourceFileName);
+end;
+
 {$ENDIF}
 
 // 选择一个代码块
@@ -5347,13 +5364,6 @@ begin
   except
     ;
   end;
-end;
-
-// 使用 CnWizDebuggerNotifierServices 获取当前源文件内的断点，List 中返回 TCnBreakpointDescriptor 实例
-procedure CnOtaGetCurrentBreakpoints(Results: TList);
-begin
-  if Results <> nil then
-    CnWizDebuggerNotifierServices.RetrieveBreakpoints(Results, CnOtaGetCurrentSourceFileName);
 end;
 
 //==============================================================================
@@ -6586,6 +6596,8 @@ end;
 
 {$ENDIF}
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+
 procedure CnOtaGotoEditPosAndRepaint(EditView: IOTAEditView; EditPosLine: Integer; EditPosCol: Integer);
 var
   EditControl: TControl;
@@ -6615,6 +6627,8 @@ begin
     end;
   end;
 end;
+
+{$ENDIF}
 
 // 移动光标到指定位置，如果 EditView 为空使用当前值。
 procedure CnOtaGotoPosition(Position: Longint; EditView: IOTAEditView; Middle: Boolean);
@@ -6766,6 +6780,8 @@ begin
 {$ENDIF}
 end;
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+
 // 将 EditPos 转换成为 StructureParser 所需的 CharPos
 procedure CnOtaConvertEditPosToParserCharPos(EditViewPtr: Pointer; var EditPos:
   TOTAEditPos; var CharPos: TOTACharPos);
@@ -6839,6 +6855,8 @@ begin
   CharPos.CharIndex := CharIndex;
   Result := True;
 end;
+
+{$ENDIF}
 
 // 封装的解析器解析 Pascal 代码的过程
 procedure CnPasParserParseSource(Parser: TCnGeneralPasStructParser;
