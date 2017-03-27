@@ -283,11 +283,8 @@ begin
     for I := 0 to lbxBackupOptions.Items.Count - 1 do
       lbxBackupOptions.Checked[I] := True;
 
-    // BDS 2005, 2006, 2007, 2009 以上的菜单模板和对象库不分开了。
-    if lbxSelectApp.ItemIndex in [Ord(atBDS2005), Ord(atBDS2006), Ord(atDelphi2007),
-      Ord(atDelphi2009), Ord(atDelphi2010), Ord(atDelphiXE), Ord(atDelphiXE2),
-      Ord(atDelphiXE3), Ord(atDelphiXE4), Ord(atDelphiXE5), Ord(atDelphiXE6),
-      Ord(atDelphiXE7), Ord(atDelphiXE8), Ord(atDelphi10S), Ord(atDelphi101B)] then
+    // BDS 2005 以上的菜单模板和对象库不分开了。
+    if lbxSelectApp.ItemIndex >= Ord(atBDS2005) then
     begin
       lbxBackupOptions.Checked[0] := True;
       lbxBackupOptions.ItemEnabled[0] := False;
