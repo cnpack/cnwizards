@@ -4073,8 +4073,13 @@ initialization
                 InternalDecimalSeparator := FormatSettings.DecimalSeparator;
                 InternalThousandSeparator := FormatSettings.ThousandSeparator;
               {$ELSE}
-                InternalDecimalSeparator := DecimalSeparator;
-                InternalThousandSeparator := ThousandSeparator;
+                {$IFDEF VER320}
+                  InternalDecimalSeparator := FormatSettings.DecimalSeparator;
+                  InternalThousandSeparator := FormatSettings.ThousandSeparator;
+                {$ELSE}
+                  InternalDecimalSeparator := DecimalSeparator;
+                  InternalThousandSeparator := ThousandSeparator;
+                {$ENDIF}
               {$ENDIF}
             {$ENDIF}
           {$ENDIF}
