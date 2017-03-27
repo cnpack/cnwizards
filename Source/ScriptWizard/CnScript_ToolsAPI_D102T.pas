@@ -218,6 +218,7 @@ procedure SIRegister_IOTAProjectWizard(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAFormWizard100(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAFormWizard(CL: TPSPascalCompiler);
 procedure SIRegister_IOTARepositoryWizard160(CL: TPSPascalCompiler);
+procedure SIRegister_IOTARepositoryWizard190(CL: TPSPascalCompiler);
 procedure SIRegister_IOTARepositoryWizard80(CL: TPSPascalCompiler);
 procedure SIRegister_IOTARepositoryWizard60(CL: TPSPascalCompiler);
 procedure SIRegister_IOTARepositoryWizard(CL: TPSPascalCompiler);
@@ -278,6 +279,7 @@ procedure SIRegister_IOTAModuleServices(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAModuleServices70(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAProjectGroupCreator(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAProjectCreator160(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAProjectCreator190(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAProjectCreator80(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAProjectCreator50(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAProjectCreator(CL: TPSPascalCompiler);
@@ -2654,6 +2656,16 @@ begin
 end;
 
 (*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTARepositoryWizard190(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTARepositoryWizard160', 'IOTARepositoryWizard190') do
+  with CL.AddInterface(CL.FindInterface('IOTARepositoryWizard160'),IOTARepositoryWizard190, 'IOTARepositoryWizard190') do
+  begin
+    RegisterMethod('Function GetSupportedPlatforms: TObject', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
 procedure SIRegister_IOTARepositoryWizard80(CL: TPSPascalCompiler);
 begin
   //with RegInterfaceS(CL,'IOTARepositoryWizard60', 'IOTARepositoryWizard80') do
@@ -3455,6 +3467,16 @@ begin
     RegisterMethod('Function GetPlatforms : TObject', cdRegister);
     RegisterMethod('Function GetPreferredPlatform : string', cdRegister);
     RegisterMethod('Procedure SetInitialOptions( const NewProject : IOTAProject)', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAProjectCreator190(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTAProjectCreator160', 'IOTAProjectCreator190') do
+  with CL.AddInterface(CL.FindInterface('IOTAProjectCreator160'),IOTAProjectCreator190, 'IOTAProjectCreator190') do
+  begin
+    RegisterMethod('Function GetSupportedPlatforms: TObject', cdRegister);
   end;
 end;
 
@@ -5641,6 +5663,7 @@ begin
   SIRegister_IOTAProjectCreator50(CL);
   SIRegister_IOTAProjectCreator80(CL);
   SIRegister_IOTAProjectCreator160(CL);
+  SIRegister_IOTAProjectCreator190(CL);
   SIRegister_IOTAProjectGroupCreator(CL);
   SIRegister_IOTAModuleServices70(CL);
   SIRegister_IOTAModuleServices(CL);
@@ -5736,6 +5759,7 @@ begin
   SIRegister_IOTARepositoryWizard60(CL);
   SIRegister_IOTARepositoryWizard80(CL);
   SIRegister_IOTARepositoryWizard160(CL);
+  SIRegister_IOTARepositoryWizard190(CL);
   SIRegister_IOTAFormWizard(CL);
   SIRegister_IOTAFormWizard100(CL);
   SIRegister_IOTAProjectWizard(CL);
