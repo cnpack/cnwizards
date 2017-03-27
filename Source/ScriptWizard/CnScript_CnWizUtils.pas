@@ -167,7 +167,7 @@ begin
   CL.AddConstantN('_BCBXE8_UP', 'Boolean').SetUInt(Ord(_BCBXE8_UP));
   CL.AddConstantN('_BCB10_SEATTLE_UP', 'Boolean').SetUInt(Ord(_BCB10_SEATTLE_UP));
   CL.AddConstantN('_BCB101_BERLIN_UP', 'Boolean').SetUInt(Ord(_BCB101_BERLIN_UP));
-  CL.AddConstantN('_BCB102_TOKYO_UP', 'Boolean').SetUInt(Ord(_BCB101_TOKYO_UP));
+  CL.AddConstantN('_BCB102_TOKYO_UP', 'Boolean').SetUInt(Ord(_BCB102_TOKYO_UP));
 
   CL.AddConstantN('_KYLIX1', 'Boolean').SetUInt(Ord(_KYLIX1));
   CL.AddConstantN('_KYLIX2', 'Boolean').SetUInt(Ord(_KYLIX2));
