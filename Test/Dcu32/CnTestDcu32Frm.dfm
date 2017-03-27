@@ -25,11 +25,11 @@ object Form1: TForm1
   object lblNote: TLabel
     Left = 24
     Top = 64
-    Width = 443
+    Width = 467
     Height = 13
     Caption = 
-      'Note: This Test Should Run OK from Delphi 5 ~ 10.1B. Parse OK' +
-      ' for Delphi 5 ~ 10.1B Units.'
+      'Note: This Test Should Run OK from Delphi 5 ~ Above all. Parse O' +
+      'K for Delphi 5 ~ Above all Units.'
   end
   object Edit1: TEdit
     Left = 80
