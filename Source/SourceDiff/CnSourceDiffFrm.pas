@@ -716,7 +716,7 @@ end;
 procedure TCnSourceDiffForm.actOpen2Execute(Sender: TObject);
 begin
   OpenDialog2.Filter := OpenDialog1.Filter;
-  OpenDialog2.FilterIndex := OpenDialog2.FilterIndex;
+  OpenDialog2.FilterIndex := OpenDialog1.FilterIndex;
 
   if FileName2 <> '' then
     OpenDialog2.InitialDir := _CnExtractFileDir(FileName2);
