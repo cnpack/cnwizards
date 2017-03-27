@@ -21,7 +21,7 @@
 
     CnWizards 產品主要面對使用 Delphi 5 6 7、C++Builder 5 6 以及 BDS
 2005 2006、RAD Studio 2007 2009 2010、XE、XE2、XE3、XE4、XE5、XE6、XE7
-、XE8、10 Seattle、10.1 Berlin 進行開發的程式師。
+、XE8、10 Seattle、10.1 Berlin、10.2 Tokyo 進行開發的程式師。
 
     CnWizards 目前包括以下幾種語言的發佈版本：簡體中文、繁體中文、英語、
 俄語、德語。
@@ -84,7 +84,7 @@
 6. 編譯及自動構建
 ======================================================================
 
-    編譯 CnWizards 源碼需要從 cnpack 網站或 SVN 中取得 cnpack 組件包的
+    編譯 CnWizards 源碼需要從 cnpack 網站或 Git 中取得 cnpack 組件包的
 源代碼，放在 cnwizards 源碼的同級目錄下。打開 Source 目錄下的相應工程文
 件進行編譯即可。Tools 目錄下為附加工具源碼。
 
