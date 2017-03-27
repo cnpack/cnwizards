@@ -123,20 +123,13 @@ const
   csCnPackDisabledExperts = 'DisabledExperts\';
 
 var
-  IDEInstalled: array[TCnCompiler] of Boolean =
-    (False, False, False, False, False, False, False, False, False, False, False,
-     False, False, False, False, False, False, False, False, False, False, False);
+  IDEInstalled: array[TCnCompiler] of Boolean;
 
-  IDEWizardsList: array[TCnCompiler] of TObjectList =
-    (nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-     nil, nil, nil, nil, nil, nil, nil);
+  IDEWizardsList: array[TCnCompiler] of TObjectList;
 
-  IDEWizardsChanged: array[TCnCompiler] of Boolean =
-    (False, False, False, False, False, False, False, False, False, False, False,
-     False, False, False, False, False, False, False, False, False, False, False);
+  IDEWizardsChanged: array[TCnCompiler] of Boolean;
 
 type
-
   TCnWizardItem = class(TPersistent)
   {* 描述一专家条目}
   private
@@ -999,5 +992,20 @@ begin
     end;
   end;
 end;
+
+procedure InitVars;
+var
+  C: TCnCompiler;
+begin
+  for C := Low(TCnCompiler) to High(TCnCompiler) do
+  begin
+    IDEInstalled[C] := False;
+    IDEWizardsList[C] := nil;
+    IDEWizardsChanged[C] := False;
+  end;
+end;
+
+initialization
+  InitVars;
 
 end.
