@@ -745,6 +745,9 @@ begin
   CL.AddDelphiFunction('Procedure BinToHex( Buffer, Text : PChar; BufSize : Integer)');
   CL.AddDelphiFunction('Function HexToBin( Text, Buffer : PChar; BufSize : Integer) : Integer');
   CL.AddDelphiFunction('Function FindRootDesigner( Obj : TPersistent) : IDesignerNotify');
+{$IFDEF BDS2012_UP}
+  CL.AddDelphiFunction('Procedure ReportClassGroups( Report : TStrings);');
+{$ENDIF}
 end;
 
 (* === run-time registration functions === *)
@@ -1410,6 +1413,9 @@ begin
   S.RegisterDelphiFunction(@BinToHex, 'BinToHex', cdRegister);
   S.RegisterDelphiFunction(@HexToBin, 'HexToBin', cdRegister);
   S.RegisterDelphiFunction(@FindRootDesigner, 'FindRootDesigner', cdRegister);
+{$IFDEF BDS2012_UP}
+  S.RegisterDelphiFunction(@ReportClassGroups, 'ReportClassGroups', cdRegister);
+{$ENDIF}
 end;
 
 procedure RIRegister_TBasicAction(CL: TPSRuntimeClassImporter);
