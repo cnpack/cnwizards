@@ -3212,6 +3212,7 @@ SCnPaletteMoreCaption=更多(&M)...
 SCnSearchComponent=查找組件
 SCnPalSettingsCaption=擴展配置(&C)...
 SCnComponentDetailFmt=組件類：%s<BR>單元名：%s<BR>標籤頁：%s<BR><BR>繼承關係：<BR><BR>
+SCnComponentWithPackageDetailFmt=組件類：%s<BR>單元名：%s<BR>所在包：%s<BR>標籤頁：%s<BR><BR>繼承關係：<BR><BR>
 SCnVerEnhanceWizardName=版本信息擴展
 SCnVerEnhanceWizardComment=版本信息內容擴展專家
 SCnCorrectPropertyName=屬性修改器

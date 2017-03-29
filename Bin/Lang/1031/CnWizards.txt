@@ -3212,6 +3212,7 @@ SCnPaletteMoreCaption=&Mehr...
 SCnSearchComponent=Suche Komponente
 SCnPalSettingsCaption=Einstellungen...
 SCnComponentDetailFmt=ClassName: %s<BR>Unit: %s<BR>Tab: %s<BR><BR>Inheritance List: <BR><BR>
+SCnComponentWithPackageDetailFmt=ClassName: %s<BR>Unit: %s<BR>Paket: %s<BR>Tab: %s<BR><BR>Inheritance List: <BR><BR>
 SCnVerEnhanceWizardName=Versions-Erweiterungen
 SCnVerEnhanceWizardComment=Version-Erweiterungen Werkzeug
 SCnCorrectPropertyName=Eigenschaften Korrektur Werkzeug
