@@ -444,6 +444,7 @@ type
 {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
     function ParseCompNameFromHint(const Hint: string): string;
     function ParseUnitNameFromHint(const Hint: string): string;
+    function ParsePackageNameFromHint(const Hint: string): string;
 {$ENDIF}
     function GetSelectedIndex: Integer;
     function GetSelectedToolName: string;
@@ -483,6 +484,11 @@ type
     function GetUnitNameFromComponentClassName(const AClassName: string;
       const ATabName: string = ''): string;
     {* 从组件类名获得其单元名}
+{$IFDEF OTA_PALETTE_API}
+    function GetUnitPackageNameFromComponentClassName(out UnitName: string; out PackageName: string;
+      const AClassName: string; const ATabName: string = ''): Boolean;
+    {* 用 Palette API 的接口从组件类名获得单元名与包名，返回获取是否成功}
+{$ENDIF}
     procedure GetComponentImage(Bmp: TBitmap; const AComponentClassName: string);
     {* 将控件板上指定的组件名的图标绘制到 Bmp 中，Bmp 推荐尺寸为 26 * 26}
     property SelectedIndex: Integer read GetSelectedIndex write SetSelectedIndex;
@@ -2644,6 +2650,58 @@ begin
 {$ENDIF}
 end;
 
+{$IFDEF OTA_PALETTE_API}
+
+function TCnPaletteWrapper.GetUnitPackageNameFromComponentClassName(
+  out UnitName: string; out PackageName: string; const AClassName: string;
+  const ATabName: string): Boolean;
+var
+  Group, SubGroup: IOTAPaletteGroup;
+  Item: IOTABasePaletteItem;
+  CI: IOTAComponentPaletteItem;
+  PAS: IOTAPaletteServices;
+begin
+  Result := False;
+  if Supports(BorlandIDEServices, IOTAPaletteServices, PAS) then
+  begin
+    if PAS <> nil then
+    begin
+      Group := PAS.BaseGroup;
+      if Group <> nil then
+      begin
+        if ATabName <> '' then
+        begin
+          // 如果有 Tab 名就找到 Tab 名的 Group 并找其符合名字的子 Item
+          SubGroup := Group.FindItemGroupByName(ATabName);
+          if SubGroup <> nil then
+          begin
+            Item := SubGroup.FindItemByName(AClassName, True);
+            if (Item <> nil) and Supports(Item, IOTAComponentPaletteItem, CI) then
+            begin
+              UnitName := CI.UnitName;
+              PackageName := CI.PackageName;
+              Result := True;
+            end;
+          end;
+        end
+        else
+        begin
+          // 没有 Tab 名就遍历子 Group 找其符合名字的子 Item
+          Item := SubGroup.FindItemByName(AClassName, True);
+          if (Item <> nil) and Supports(Item, IOTAComponentPaletteItem, CI) then
+          begin
+            UnitName := CI.UnitName;
+            PackageName := CI.PackageName;
+            Result := True;
+          end;
+        end;
+      end;
+    end;
+  end;
+end;
+
+{$ENDIF}
+
 function TCnPaletteWrapper.GetVisible: Boolean;
 begin
   if FPalTab <> nil then
@@ -2654,36 +2712,17 @@ end;
 
 {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
 
-function TCnPaletteWrapper.ParseCompNameFromHint(const Hint: string): string;
 const
-  CompNamePrefix = 'Name: ';
+  COMP_NAME_PREFIX = 'Name: ';
+  UNIT_NAME_PREFIX = 'Unit: ';
+  PACKAGE_NAME_PREFIX = 'Package: ';
   CRLF = #13#10;
-var
-  CRLFPos: Integer;
-begin
-  // 把控件板组件上某组件 SpeedButton 按钮的 Hint 里头的名字解析出来
-  {
-    Hint 形如：
-    Name: ComponentName
-    Unit: UnitName
-    Package: PackageName
-  }
-  Result := Hint;
-  if Pos(CompNamePrefix, Result) = 1 then
-    Delete(Result, 1, Length(CompNamePrefix));
-  CRLFPos := Pos(CRLF, Result);
-  if CRLFPos > 0 then
-    Result := Copy(Result, 1, CRLFPos - 1);
-end;
 
-function TCnPaletteWrapper.ParseUnitNameFromHint(const Hint: string): string;
-const
-  UnitNamePrefix = 'Unit: ';
-  CRLF = #13#10;
+function InternalParseContentFromHint(const Hint: string; const Pat: string): string;
 var
   APos: Integer;
 begin
-  // 把控件板组件上某组件 SpeedButton 按钮的 Hint 里头的单元名字解析出来
+  // 把控件板组件上某组件 SpeedButton 按钮的 Hint 里头的字段值解析出来
   {
     Hint 形如：
     Name: ComponentName
@@ -2691,12 +2730,30 @@ begin
     Package: PackageName
   }
   Result := Hint;
-  APos := Pos(UnitNamePrefix, Result);
+  if Pat = '' then
+    Exit;
+
+  APos := Pos(Pat, Result);
   if APos > 0 then
-    Delete(Result, 1, APos - 1 + Length(UnitNamePrefix));
+    Delete(Result, 1, APos - 1 + Length(Pat));
   APos := Pos(CRLF, Result);
   if APos > 0 then
     Result := Copy(Result, 1, APos - 1);
+end;
+
+function TCnPaletteWrapper.ParseCompNameFromHint(const Hint: string): string;
+begin
+  Result := InternalParseContentFromHint(Hint, COMP_NAME_PREFIX);
+end;
+
+function TCnPaletteWrapper.ParseUnitNameFromHint(const Hint: string): string;
+begin
+  Result := InternalParseContentFromHint(Hint, UNIT_NAME_PREFIX);
+end;
+
+function TCnPaletteWrapper.ParsePackageNameFromHint(const Hint: string): string;
+begin
+  Result := InternalParseContentFromHint(Hint, PACKAGE_NAME_PREFIX);
 end;
 
 {$ENDIF}

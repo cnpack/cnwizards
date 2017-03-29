@@ -1197,6 +1197,7 @@ var
   SCnSearchComponent: string = 'Search Component';
   SCnPalSettingsCaption: string = 'Setti&ngs...';
   SCnComponentDetailFmt: string = 'ClassName: %s' + #13#10 + 'Unit: %s' + #13#10 + 'Tab: %s' + #13#10#13#10 + 'Inheritance List: ' + #13#10#13#10;
+  SCnComponentWithPackageDetailFmt: string = 'ClassName: %s' + #13#10 + 'Unit: %s' + #13#10 + 'Package: %s' + #13#10 + 'Tab: %s' + #13#10#13#10 + 'Inheritance List: ' + #13#10#13#10;
 
   // CnVerEnhanceWizard
   SCnVerEnhanceWizardName: string = 'Version Enhancements';

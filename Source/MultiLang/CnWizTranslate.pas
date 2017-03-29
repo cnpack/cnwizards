@@ -892,6 +892,7 @@ begin
   TranslateStr(SCnSearchComponent, 'SCnSearchComponent');
   TranslateStr(SCnPalSettingsCaption, 'SCnPalSettingsCaption');
   TranslateStr(SCnComponentDetailFmt, 'SCnComponentDetailFmt');
+  TranslateStr(SCnComponentWithPackageDetailFmt, 'SCnComponentWithPackageDetailFmt');
 
   // CnVerEnhanceWizard
   TranslateStr(SCnVerEnhanceWizardName, 'SCnVerEnhanceWizardName');

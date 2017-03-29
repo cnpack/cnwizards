@@ -67,6 +67,7 @@ type
     FImgIndex: Integer;
     FInternalName: string;
     FCompType: TCnIdeCompType;
+    FPackageName: string;
   published
     property InternalName: string read FInternalName write FInternalName;
     {* 带 T 的真正类名}
@@ -75,6 +76,7 @@ type
     property TabName: string read FTabName write FTabName;
     property CompUnitName: string read FCompUnitName write FCompUnitName;
     property ImgIndex: Integer read FImgIndex write FImgIndex;
+    property PackageName: string read FPackageName write FPackageName;
     property CompType: TCnIdeCompType read FCompType write FCompType;
   end;
 
@@ -509,7 +511,12 @@ begin
 {$IFDEF DEBUG}
                 CnDebugger.LogMsg('Get Class ' + Info.InternalName + ' is nil. Using Select.');
 {$ENDIF}
+
+{$IFDEF OTA_PALETTE_API}
+                CnPaletteWrapper.GetUnitPackageNameFromComponentClassName(Info.FCompUnitName, Info.FPackageName, Info.InternalName, Info.TabName);
+{$ELSE}
                 Info.CompUnitName := CnPaletteWrapper.GetUnitNameFromComponentClassName(Info.InternalName, Info.TabName);
+{$ENDIF}
                 FCompList.AddObject(Info.CompName, Info);
               end;
 {$ELSE}
@@ -1202,9 +1209,15 @@ begin
     if lvComps.Selected.Data <> nil then
     begin
       Info := TCnIdeCompInfo(lvComps.Selected.Data);
-      FDetailStr := Format(SCnComponentDetailFmt, [Info.InternalName, Info.CompUnitName, Info.TabName]);
+      if Info.PackageName = '' then
+        FDetailStr := Format(SCnComponentDetailFmt, [Info.InternalName, Info.CompUnitName, Info.TabName])
+      else
+        FDetailStr := Format(SCnComponentWithPackageDetailFmt, [Info.InternalName, Info.CompUnitName,
+          Info.PackageName, Info.TabName]);
 
       FClassNameList.Clear;
+
+      // TODO: FMX 框架或其他非 Active 的 Group 内拿不到 Class 导致无法获得父类
       AClass := GetClass(Info.InternalName);
       while AClass <> nil do
       begin
