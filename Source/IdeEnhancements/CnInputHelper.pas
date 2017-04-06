@@ -282,7 +282,7 @@ type
     function IsValidCharKey(VKey: Word; ScanCode: Word): Boolean;
     function IsValidDelelteKey(Key: Word): Boolean;
     function IsValidDotKey(Key: Word): Boolean;
-    function IsValidCppArrowKey(VKey: Word; Code: Word): Boolean;
+    function IsValidCppPopupKey(VKey: Word; Code: Word): Boolean;
     function IsValidKeyQueue: Boolean;
     function CalcFirstSet(IsPascal: Boolean): TAnsiCharSet;
     function CalcCharSet(PosInfo: PCodePosInfo): TAnsiCharSet;
@@ -1367,8 +1367,8 @@ begin
 {$ENDIF}
   if FPosInfo.IsPascal then
     Result := C in ( FirstSet + CharSet)
-  else // C/C++ 允许 -> 号
-    Result := C in ( FirstSet + ['>'] + CharSet);
+  else // C/C++ 允许 -> 号与 # 号
+    Result := C in ( FirstSet + ['>', '#''] + CharSet);
 end;
 
 function TCnInputHelper.CurrBlockIsEmpty: Boolean;
@@ -1502,7 +1502,7 @@ begin
           if not ShouldIgnore then
           begin
             SendSymbolToIDE(SelMidMatchByEnterOnly, False, False, #0, Result);
-            if IsValidDotKey(Key) or IsValidCppArrowKey(Key, ScanCode) then
+            if IsValidDotKey(Key) or IsValidCppPopupKey(Key, ScanCode) then
             begin
               Timer.Interval := Max(csDefDispDelay, FDispDelay);
               Timer.Enabled := True;
@@ -1555,7 +1555,7 @@ begin
     FKeyDownValid := False;
     if AutoPopup and ((FKeyCount < DispOnlyAtLeastKey - 1) or CurrBlockIsEmpty) and
       (IsValidCharKey(Key, ScanCode) or IsValidDelelteKey(Key) or IsValidDotKey(Key)
-       or IsValidCppArrowKey(Key, ScanCode)) then
+       or IsValidCppPopupKey(Key, ScanCode)) then
     begin
       // 为了解决增量查找及其它兼容问题，此处保存当前行文本与信息
       CnNtaGetCurrLineText(FCurrLineText, FCurrLineNo, FCurrIndex);
@@ -1647,7 +1647,7 @@ begin
 {$IFDEF DEBUG}
       CnDebugger.LogMsg('Input Helper. Inc FKeyCount to ' + IntToStr(FKeyCount));
 {$ENDIF}
-      if IsValidDotKey(Key) or IsValidCppArrowKey(Key, ScanCode) or (FKeyCount >= DispOnlyAtLeastKey) or
+      if IsValidDotKey(Key) or IsValidCppPopupKey(Key, ScanCode) or (FKeyCount >= DispOnlyAtLeastKey) or
         IsValidKeyQueue then
       begin
         if FDispDelay > GetTickCount - FKeyDownTick then
@@ -3209,7 +3209,7 @@ begin
     Result := FirstSet + ['#']; // C/C++的标识符需要把#也算上
 end;
 
-function TCnInputHelper.IsValidCppArrowKey(VKey: Word; Code: Word): Boolean;
+function TCnInputHelper.IsValidCppPopupKey(VKey: Word; Code: Word): Boolean;
 var
   C: AnsiChar;
   AToken: string;
@@ -3221,14 +3221,14 @@ begin
   begin
     C := VK_ScanCodeToAscii(VKey, Code);
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('IsValidCppArrowKey VK_ScanCodeToAscii: %d %d => %d ("%s")', [VKey, Code, Ord(C), C]);
+    CnDebugger.LogFmt('IsValidCppPopupKey VK_ScanCodeToAscii: %d %d => %d ("%s")', [VKey, Code, Ord(C), C]);
 {$ENDIF}
     if C = '>' then
     begin
       // 是>，if 光标下的前一个标识符的最后一位是-
       CnOtaGetCurrPosToken(AToken, CurrPos, True, CalcFirstSet(FPosInfo.IsPascal), CharSet);
 {$IFDEF DEBUG}
-      CnDebugger.LogMsg('Is Valid Cpp Arrow Key: Token: ' + AToken);
+      CnDebugger.LogMsg('Is Valid Cpp Popup Key: Token: ' + AToken);
 {$ENDIF}
       if (Length(AToken) >= 1) and (AToken[Length(AToken)] = '-') then
       begin
@@ -3236,9 +3236,10 @@ begin
         if not Option.GetOptionValue(csKeyCodeCompletion) then
           Result := True;
       end;
-    end;
+    end
+    else if C = '#' then
+      Result := True;
   end;
-
 end;
 
 procedure TCnInputHelper.DebugComand(Cmds, Results: TStrings);
