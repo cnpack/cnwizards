@@ -829,13 +829,23 @@ begin
 
       // Hide Invisible ToolBars
       for J := InvisibleList.Count - 1 downto 0 do
-        TToolBar(InvisibleList[J]).Visible := False;
+      begin
+        try
+          TToolBar(InvisibleList[J]).Visible := False;
+        except
+          ; // Some times cause AV when Editor Resizing.
+        end;
+      end;
 
       // Show Visible ToolBars
       ATop := -1;
       for J := 0 to VisibleList.Count - 1 do
       begin
-        TToolBar(VisibleList[J]).Visible := True;
+        try
+          TToolBar(VisibleList[J]).Visible := True;
+        except
+          ; // Some times cause AV when Editor Resizing.
+        end;
         TToolBar(VisibleList[J]).Top := ATop;
         ATop := ATop + TToolBar(VisibleList[J]).Height;
       end;  
