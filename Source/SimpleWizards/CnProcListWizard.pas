@@ -491,11 +491,15 @@ var
   Obj: TCnProcToolBarObj;
 begin
   Obj := GetCurrentToolBarObj;
-  if Obj <> nil then
+  if (Obj <> nil) and (Obj.EditorToolBar <> nil) then
   begin
     S := CnOtaGetCurrentSourceFileName;
-    Obj.EditorToolBar.Visible := Active and FUseEditorToolBar and
-      IsDelphiSourceModule(S) or IsInc(S) or IsCppSourceModule(S);
+    try
+      Obj.EditorToolBar.Visible := Active and FUseEditorToolBar and
+        IsDelphiSourceModule(S) or IsInc(S) or IsCppSourceModule(S);
+    except
+      ; // Maybe cause AV when Editor Resizing.
+    end;
 
     if IsPas(S) or IsInc(S) then
     begin
