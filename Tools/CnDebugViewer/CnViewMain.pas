@@ -373,8 +373,12 @@ begin
   else
     LoadOptions(_CnExtractFilePath(Application.ExeName) + SCnOptionFileName);
 
-  if CnViewerOptions.LocalSession then
+  // 命令行里有 -local 时使用本地模式
+  if CnViewerOptions.LocalSession or FindCmdLineSwitch('local', ['-', '/'], True) then
+  begin
     ReInitLocalConsts;
+    Caption := Caption + '- (Local)';
+  end;
 
   Res := InitializeCore;
   if Res <> ciOK then
@@ -938,6 +942,9 @@ begin
       end;
     end;
   end;
+
+//  if CnViewerOptions.LocalSession or FindCmdLineSwitch('local', ['-', '/'], True) then
+//    Caption := Caption + '- (Local)';
 end;
 
 procedure TCnMainViewer.UpdateStatusBar;
