@@ -1368,7 +1368,7 @@ begin
   if FPosInfo.IsPascal then
     Result := C in ( FirstSet + CharSet)
   else // C/C++ ÔÊÐí -> ºÅÓë # ºÅ
-    Result := C in ( FirstSet + ['>', '#''] + CharSet);
+    Result := C in ( FirstSet + ['>', '#'] + CharSet);
 end;
 
 function TCnInputHelper.CurrBlockIsEmpty: Boolean;
