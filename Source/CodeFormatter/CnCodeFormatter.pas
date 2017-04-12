@@ -291,7 +291,7 @@ type
     procedure FormatVarSection(PreSpaceCount: Byte = 0);
     procedure FormatVarDecl(PreSpaceCount: Byte = 0);
     procedure FormatProcedureDeclSection(PreSpaceCount: Byte = 0);
-    procedure FormatSingleAttribute(PreSpaceCount: Byte = 0);
+    procedure FormatSingleAttribute(PreSpaceCount: Byte = 0; LineEndSpaceCount: Byte = 0);
     procedure FormatType(PreSpaceCount: Byte = 0; IgnoreDirective: Boolean = False);
     procedure FormatSetType(PreSpaceCount: Byte = 0);
     procedure FormatFileType(PreSpaceCount: Byte = 0);
@@ -3044,17 +3044,11 @@ begin
   end;
 end;
 
-{ FormalParm -> [Ref] [VAR | CONST | OUT] [Ref] Parameter }
+{ FormalParm -> [Attribute] [VAR | CONST | OUT] [Attribute] Parameter }
 procedure TCnBasePascalFormatter.FormatFormalParm(PreSpaceCount: Byte);
 begin
   if Scaner.Token = tokSLB then
-  begin
-    Match(tokSLB);
-    FormatPossibleAmpersand(PreSpaceCount);
-    if Scaner.Token in KeywordTokens + [tokSymbol] then
-      Match(Scaner.Token);
-    Match(tokSRB, 0, 1); // ] 后有个空格
-  end;
+    FormatSingleAttribute(0, 1);
 
   if (Scaner.Token in [tokKeywordVar, tokKeywordConst, tokKeywordOut]) and
      not (Scaner.ForwardToken in [tokColon, tokComma])
@@ -3063,13 +3057,7 @@ begin
     Match(Scaner.Token);
 
     if Scaner.Token = tokSLB then
-    begin
-      Match(tokSLB, 1, 0); // [ 前有个空格
-      FormatPossibleAmpersand;
-      if Scaner.Token in KeywordTokens + [tokSymbol] then
-        Match(Scaner.Token);
-      Match(tokSRB, 0, 1); // ] 后有个空格
-    end;
+      FormatSingleAttribute(1, 1);
   end;
 
   FormatParameter;
@@ -5440,11 +5428,13 @@ begin
 end;
 
 procedure TCnBasePascalFormatter.FormatSingleAttribute(
-  PreSpaceCount: Byte);
+  PreSpaceCount: Byte; LineEndSpaceCount: Byte);
 var
   IsFirst, JustLn: Boolean;
 begin
   Match(tokSLB, PreSpaceCount);
+  FormatPossibleAmpersand(PreSpaceCount);
+
   IsFirst := True;
   repeat
     JustLn := False;
@@ -5483,7 +5473,7 @@ begin
     end;
 
   until Scaner.Token in [tokSRB, tokUnknown, tokEOF];
-  Match(tokSRB);
+  Match(tokSRB, 0, LineEndSpaceCount);
 end;
 
 function TCnBasePascalFormatter.IsTokenAfterAttributesInSet(
