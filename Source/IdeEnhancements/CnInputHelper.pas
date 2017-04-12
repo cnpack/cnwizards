@@ -90,6 +90,9 @@ type
     FHintCnt: Integer;
     FHintTimer: TTimer;
     FDispButtons: Boolean;
+{$IFDEF IDE_MAINFORM_EAT_MOUSEWHEEL}
+    FMethodHook: TCnMethodHook;
+{$ENDIF}
     procedure CNDrawItem(var Message: TWMDrawItem); message CN_DRAWITEM;
     procedure CNMeasureItem(var Message: TWMMeasureItem); message CN_MEASUREITEM;
     procedure CNCancelMode(var Message: TMessage); message CM_CANCELMODE;
@@ -115,6 +118,9 @@ type
     procedure SetPos(X, Y: Integer);
     procedure CloseUp;
     procedure Popup;
+{$IFDEF IDE_MAINFORM_EAT_MOUSEWHEEL}
+    procedure MouseWheelHandler(var Message: TMessage); override;
+{$ENDIF}
     property DispButtons: Boolean read FDispButtons write FDispButtons;
     property BtnForm: TCnFloatWindow read FBtnForm;
     property HintForm: TCnFloatWindow read FHintForm;
@@ -552,6 +558,15 @@ end;
 
 {$ENDIF}
 
+{$IFDEF IDE_MAINFORM_EAT_MOUSEWHEEL}
+
+function MyGetParentForm(Control: TControl; TopForm: Boolean): TCustomForm;
+begin
+  Result := nil;
+end;
+
+{$ENDIF}
+
 //==============================================================================
 // ÊäÈëÁÐ±í¿ò
 //==============================================================================
@@ -656,6 +671,10 @@ begin
   Font.Size := 8;
   FLastItem := -1;
   CreateExtraForm;
+{$IFDEF IDE_MAINFORM_EAT_MOUSEWHEEL}
+  FMethodHook := TCnMethodHook.Create(GetBplMethodAddress(@GetParentForm), @MyGetParentForm);
+  FMethodHook.UnhookMethod;
+{$ENDIF}
 end;
 
 procedure TCnInputListBox.CreateExtraForm;
@@ -715,6 +734,9 @@ end;
 
 destructor TCnInputListBox.Destroy;
 begin
+{$IFDEF IDE_MAINFORM_EAT_MOUSEWHEEL}
+  FMethodHook.Free;
+{$ENDIF}
   inherited;
 end;
 
@@ -735,6 +757,17 @@ begin
     end;
   end;
 end;
+
+{$IFDEF IDE_MAINFORM_EAT_MOUSEWHEEL}
+
+procedure TCnInputListBox.MouseWheelHandler(var Message: TMessage);
+begin
+  FMethodHook.HookMethod;
+  inherited;
+  FMethodHook.UnHookMethod;
+end;
+
+{$ENDIF}
 
 procedure TCnInputListBox.OnBtnClick(Sender: TObject);
 begin
@@ -1280,8 +1313,8 @@ end;
 procedure TCnInputHelper.ApplicationMessage(var Msg: TMsg;
   var Handled: Boolean);
 begin
-  if ((Msg.message >= WM_KEYFIRST) and (Msg.message <= WM_KEYLAST) or
-    (Msg.message = WM_MOUSEWHEEL)) then
+  if ((Msg.message >= WM_KEYFIRST) and (Msg.message <= WM_KEYLAST)) or
+    (Msg.message = WM_MOUSEWHEEL) then
   begin
     if AcceptDisplay then
     begin
@@ -1293,7 +1326,7 @@ begin
         WM_MOUSEWHEEL:
           if IsShowing then
           begin
-            SendMessage(List.Handle, WM_MOUSEWHEEL, Msg.wParam, Msg.lParam);
+            SendMessage(List.Handle, Msg.message, Msg.wParam, Msg.lParam);
             Handled := True;
           end;
       end;
@@ -1307,7 +1340,7 @@ begin
     else
     begin
       HideAndClearList;
-    end;  
+    end;
   end
   else
   begin
