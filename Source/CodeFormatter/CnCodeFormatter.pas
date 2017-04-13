@@ -69,6 +69,7 @@ type
     FScaner: TAbstractScaner;
     FCodeGen: TCnCodeGenerator;
     FLastToken: TPascalToken;
+    FLastNonBlankToken: TPascalToken;
     FInternalRaiseException: Boolean;
     FSliceMode: Boolean;
     FMatchedInStart: Integer;
@@ -666,7 +667,9 @@ begin
   if CareBeginBlock then
   begin
     // 处理了连续俩 begin 而需要缩进的情况，以及with do try 这种的 try 无需再次缩进
-    if not (Scaner.Token in [tokKeywordBegin, tokKeywordTry]) then
+    // 但 repeat until 里的 begin 和 try 又得再次缩进
+    if (not (Scaner.Token in [tokKeywordBegin, tokKeywordTry]))
+      or (FLastNonBlankToken in [tokKeywordRepeat]) then
       Result := PreSpaceCount + CnPascalCodeForRule.TabSpaceCount
     else
       Result := PreSpaceCount;
@@ -784,6 +787,8 @@ begin
     // 在忽略块内部，将非注释非空白内容原始输出，其中空白与注释由 Scaner 内部处理
     CodeGen.Write(Scaner.TokenString);
     FLastToken := Token;
+    if FLastToken <> tokBlank then
+      FLastNonBlankToken := FLastToken;
     Exit;
   end;
 
@@ -875,6 +880,9 @@ begin
     FLastToken := tokSymbol
   else
     FLastToken := Token;
+
+  if FLastToken <> tokBlank then
+    FLastNonBlankToken := FLastToken;
 end;
 
 procedure TCnAbstractCodeFormatter.CheckHeadComments;
@@ -1193,6 +1201,8 @@ begin
         end;
 
         FLastToken := Scaner.Token;
+        if FLastToken <> tokBlank then
+          FLastNonBlankToken := FLastToken;
         Scaner.NextToken;
       end;
 
@@ -1608,7 +1618,7 @@ begin
 
     Writeln;
     if Scaner.Token in [tokKeywordElse, tokKeywordEnd] then
-      Break;   
+      Break;
     FormatCaseSelector(Tab(PreSpaceCount));
   end;
 
@@ -1928,6 +1938,8 @@ begin
         finally
           Scaner.LoadBookmark(Bookmark);
           FLastToken := OldLastToken;
+          if FLastToken <> tokBlank then
+            FLastNonBlankToken := FLastToken;
           CodeGen.UnLockOutput;
           FInternalRaiseException := OldInternalRaiseException;
         end;
@@ -2355,6 +2367,8 @@ begin
         begin
           Scaner.LoadBookmark(Bookmark);
           FLastToken := OldLastToken;
+          if FLastToken <> tokBlank then
+            FLastNonBlankToken := FLastToken;
           CodeGen.UnLockOutput;
           
           Match(Scaner.Token, CnPascalCodeForRule.SpaceBeforeASM);
@@ -2379,6 +2393,8 @@ begin
           begin
             CodeGen.Write(Scaner.TokenString);
             FLastToken := Scaner.Token;
+            if FLastToken <> tokBlank then
+              FLastNonBlankToken := FLastToken;
             Scaner.NextToken;
             AfterKeyword := False;
           end
@@ -2386,6 +2402,8 @@ begin
           begin
             CodeGen.Write(Scaner.TokenString);
             FLastToken := Scaner.Token;
+            if FLastToken <> tokBlank then
+              FLastNonBlankToken := FLastToken;
             Scaner.NextToken;
             IsLabel := False;
             AfterKeyword := True;
@@ -4029,6 +4047,8 @@ begin
       AToken := Scaner.Token;
       Scaner.LoadBookmark(Bookmark);
       FLastToken := OldLastToken;
+      if FLastToken <> tokBlank then
+        FLastNonBlankToken := FLastToken;
 
       { TypeId }
       if AToken = tokDot then
@@ -4124,6 +4144,8 @@ begin
 
           Scaner.LoadBookmark(Bookmark);
           FLastToken := OldLastToken;
+          if FLastToken <> tokBlank then
+            FLastNonBlankToken := FLastToken;
 
           if TypedConstantType = tcArray then
             FormatArrayConstant(PreSpaceCount)
@@ -4167,6 +4189,8 @@ begin
 
           Scaner.LoadBookmark(Bookmark);
           FLastToken := OldLastToken;
+          if FLastToken <> tokBlank then
+            FLastNonBlankToken := FLastToken;
 
           if TypedConstantType = tcArray then
             FormatArrayConstant(PreSpaceCount)
