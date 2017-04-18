@@ -875,7 +875,7 @@ begin
   if ((Key = VK_LEFT) or (Key = VK_RIGHT)) and not (ssCtrl in Shift)
     and not View.Block.IsValid and CurrentIsSource then
   begin
-    if CnNtaGetCurrLineText(Text, LineNo, CharIdx) then
+    if CnNtaGetCurrLineText(Text, LineNo, CharIdx, True) then
     begin
       if (CharIdx = 0) and (Key = VK_LEFT) then // 行首左移至上一行尾
       begin

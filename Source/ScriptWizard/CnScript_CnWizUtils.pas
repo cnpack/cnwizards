@@ -447,7 +447,7 @@ begin
   CL.AddDelphiFunction('Function CnOtaGetCurrentOuterBlock: string;');
   CL.AddDelphiFunction('Function CnOtaGetLineText( LineNum : Integer; EditBuffer : IOTAEditBuffer; Count : Integer) : string');
   CL.AddDelphiFunction('Function CnOtaGetCurrLineText( var Text : string; var LineNo : Integer; var CharIndex : Integer; View : IOTAEditView) : Boolean');
-  CL.AddDelphiFunction('Function CnNtaGetCurrLineText( var Text : string; var LineNo : Integer; var CharIndex : Integer) : Boolean');
+  CL.AddDelphiFunction('Function CnNtaGetCurrLineText( var Text : string; var LineNo : Integer; var CharIndex : Integer; ActualPosWhenEmpty: Boolean) : Boolean');
   CL.AddDelphiFunction('Function CnOtaGetCurrLineInfo( var LineNo, CharIndex, LineLen : Integer) : Boolean');
   CL.AddDelphiFunction('Function CnOtaGetCurrPosToken( var Token : string; var CurrIndex : Integer; CheckCursorOutOfLineEnd : Boolean; FirstSet : TCnCharSet; CharSet : TCnCharSet) : Boolean');
   CL.AddDelphiFunction('Function CnOtaGetCurrChar( OffsetX : Integer; View : IOTAEditView) : Char');

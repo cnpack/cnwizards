@@ -71,3 +71,5 @@ EditLine/EditCol属性        EditCol为Ansi          EditCol为Utf8            Edit
 另外，代码高亮中需要根据 Token 进行重画时，计算重画区域的 EditCol 应该全部使用 Ansi 的（视觉要求），但 D2005~2007 的 EditPos 的 Col 是 Utf8，
 所以 D2005~2007 下，不能直接用 EditCol，另开了一个属性 EditAnsiCol 存储 Ansi 偏移，专门用来重画。
 
+另外，EditControl 的 LineText 属性表示光标所在的当前行的内容，但当本行为空时，无论光标在哪儿，LineText 均返回空，而不是一串空格。
+

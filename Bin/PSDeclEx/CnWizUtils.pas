@@ -648,7 +648,7 @@ function CnOtaGetCurrLineText(var Text: string; var LineNo: Integer;
   var CharIndex: Integer; View: IOTAEditView = nil): Boolean;
 {* 取当前行源代码}
 function CnNtaGetCurrLineText(var Text: string; var LineNo: Integer;
-  var CharIndex: Integer): Boolean;
+  var CharIndex: Integer; ActualPosWhenEmpty: Boolean): Boolean;
 {* 使用 NTA 方法取当前行源代码。速度快，但取回的文本是将 Tab 扩展成空格的。
    如果使用 ConvertPos 来转换成 EditPos 可能会有问题。直接将 CharIndex + 1 
    赋值给 EditPos.Col 即可。}

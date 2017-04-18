@@ -563,10 +563,11 @@ function CnOtaGetCurrLineText(var Text: string; var LineNo: Integer;
   var CharIndex: Integer; View: IOTAEditView = nil): Boolean;
 {* 取当前行源代码}
 function CnNtaGetCurrLineText(var Text: string; var LineNo: Integer;
-  var CharIndex: Integer): Boolean;
+  var CharIndex: Integer; ActualPosWhenEmpty: Boolean = False): Boolean;
 {* 使用 NTA 方法取当前行源代码。速度快，但取回的文本是将 Tab 扩展成空格的。
    如果使用 ConvertPos 来转换成 EditPos 可能会有问题。直接将 CharIndex + 1
    赋值给 EditPos.Col 即可。
+   ActualPosWhenEmpty 控制当前文本为空时，CharIndex 使用 0 还是光标的真实位置
    D567 取到的是AnsiString，CharIndex 是当前光标在 Text 中的 Ansi 位置，0 开始。
    BDS 非 Unicode 下取到的是 UTF8 格式的 AnsiString，CharIndex 是当前光标在 Text 中的 Utf8 位置，0 开始。
    Unicode IDE 下取得的是 UTF16 字符串。CharIndex 是当前光标在 Text 中的 Utf16 位置，0 开始。}
@@ -4309,7 +4310,7 @@ end;
                                                                       与 UTF16 不一致
 }
 function CnNtaGetCurrLineText(var Text: string; var LineNo: Integer;
-  var CharIndex: Integer): Boolean;
+  var CharIndex: Integer; ActualPosWhenEmpty: Boolean): Boolean;
 var
   EditControl: TControl;
   View: IOTAEditView;
@@ -4326,12 +4327,21 @@ begin
     // 在 D2009 以上直接是 UnicodeString。但 CursorPos.Col 在 Unicode IDE 中是 Ansi 位置，
     // 所以比较需要将 LineText 转成 Ansi 后才能进行
 
+    if ActualPosWhenEmpty and (Text = '') then
+    begin
+      CharIndex := View.CursorPos.Col - 1;
+      // 无文字时本来 CharIndex 为 0，但根据参数决定是否使用真实的光标位置
+    end
+    else
+    begin
 {$IFDEF UNICODE}
-    // 转换成 Ansi 长度来计算，不直接转 AnsiString 以避免英文平台丢字符
-    CharIndex := Min(View.CursorPos.Col - 1, CalcAnsiLengthFromWideString(PWideChar(Text)));
+      // 转换成 Ansi 长度来计算，不直接转 AnsiString 以避免英文平台丢字符
+      CharIndex := Min(View.CursorPos.Col - 1, CalcAnsiLengthFromWideString(PWideChar(Text)));
 {$ELSE}
-    CharIndex := Min(View.CursorPos.Col - 1, Length(Text));
+      CharIndex := Min(View.CursorPos.Col - 1, Length(Text));
 {$ENDIF}
+    end;
+
     LineNo := View.CursorPos.Line;
     Result := True;
   end;
