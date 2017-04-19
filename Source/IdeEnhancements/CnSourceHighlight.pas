@@ -2460,6 +2460,7 @@ begin
   inherited;
   FHighlight := Self;
 
+  // 以下初始化均无多大意义，会被 LoadSettings 里的默认值覆盖。
   FMatchedBracket := True;
   FBracketColor := clBlack;
   FBracketColorBk := clAqua;
@@ -2473,14 +2474,14 @@ begin
   FBlockMatchBackground := clYellow;
 {$IFNDEF BDS}
   FHighLightCurrentLine := True;     // 默认打开当前行高亮
-  FHighLightLineColor := LoadIDEDefaultCurrentColor; // 根据当前不同的色彩设置来设置不同色彩
+  // FHighLightLineColor := LoadIDEDefaultCurrentColor; // 根据当前不同的色彩设置来设置不同色彩
 
   FDefaultHighLightLineColor := FHighLightLineColor; // 用来判断与保存
 {$ENDIF}
   FCurrentTokenHighlight := True;    // 默认打开标识符高亮
   FCurrentTokenDelay := 500;
   FCurrentTokenBackground := csDefCurTokenColorBg;
-  FCurrentTokenForeground := csDEfCurTokenColorFg;
+  FCurrentTokenForeground := csDefCurTokenColorFg;
   FCurrentTokenBorderColor := csDefCurTokenColorBd;
 
   FShowTokenPosAtGutter := False; // 默认把标识符的位置显示在行号栏上
@@ -4736,53 +4737,53 @@ var
 begin
   with TCnIniFile.Create(Ini) do
   try
-    FMatchedBracket := ReadBool('', csMatchedBracket, FMatchedBracket);
-    FBracketColor := ReadColor('', csBracketColor, FBracketColor);
-    FBracketColorBk := ReadColor('', csBracketColorBk, FBracketColorBk);
-    FBracketColorBd := ReadColor('', csBracketColorBd, FBracketColorBd);
-    FBracketBold := ReadBool('', csBracketBold, FBracketBold);
-    FBracketMiddle := ReadBool('', csBracketMiddle, FBracketMiddle);
+    FMatchedBracket := ReadBool('', csMatchedBracket, True);
+    FBracketColor := ReadColor('', csBracketColor, clBlack);
+    FBracketColorBk := ReadColor('', csBracketColorBk, clAqua);
+    FBracketColorBd := ReadColor('', csBracketColorBd, $CCCCD6);
+    FBracketBold := ReadBool('', csBracketBold, False);
+    FBracketMiddle := ReadBool('', csBracketMiddle, True);
 
-    FStructureHighlight := ReadBool('', csStructureHighlight, FStructureHighlight);
-    FBlockMatchHighlight := ReadBool('', csBlockMatchHighlight, FBlockMatchHighlight);
-    FBlockMatchBackground := ReadColor('', csBlockMatchBackground, FBlockMatchBackground);
-    FCurrentTokenHighlight := ReadBool('', csCurrentTokenHighlight, FCurrentTokenHighlight);
-    FCurrentTokenForeground := ReadColor('', csCurrentTokenColor, FCurrentTokenForeground);
-    FCurrentTokenBackground := ReadColor('', csCurrentTokenColorBk, FCurrentTokenBackground);
-    FCurrentTokenBorderColor := ReadColor('', csCurrentTokenColorBd, FCurrentTokenBorderColor);
-    FShowTokenPosAtGutter := ReadBool('', csShowTokenPosAtGutter, FShowTokenPosAtGutter);
+    FStructureHighlight := ReadBool('', csStructureHighlight, True);
+    FBlockMatchHighlight := ReadBool('', csBlockMatchHighlight, True);
+    FBlockMatchBackground := ReadColor('', csBlockMatchBackground, clYellow);
+    FCurrentTokenHighlight := ReadBool('', csCurrentTokenHighlight, True);
+    FCurrentTokenForeground := ReadColor('', csCurrentTokenColor, csDefCurTokenColorFg);
+    FCurrentTokenBackground := ReadColor('', csCurrentTokenColorBk, csDefCurTokenColorBg);
+    FCurrentTokenBorderColor := ReadColor('', csCurrentTokenColorBd, csDefCurTokenColorBd);
+    FShowTokenPosAtGutter := ReadBool('', csShowTokenPosAtGutter, False);
 
-    FHilightSeparateLine := ReadBool('', csHilightSeparateLine, FHilightSeparateLine);
-    FSeparateLineColor := ReadColor('', csSeparateLineColor, FSeparateLineColor);
-    FSeparateLineStyle := TCnLineStyle(ReadInteger('', csSeparateLineStyle, Ord(FSeparateLineStyle)));
-    FSeparateLineWidth := ReadInteger('', csSeparateLineWidth, FSeparateLineWidth);
+    FHilightSeparateLine := ReadBool('', csHilightSeparateLine, True);
+    FSeparateLineColor := ReadColor('', csSeparateLineColor, clGray);
+    FSeparateLineStyle := TCnLineStyle(ReadInteger('', csSeparateLineStyle, Ord(lsSmallDot)));
+    FSeparateLineWidth := ReadInteger('', csSeparateLineWidth, 1);
 {$IFNDEF BDS}
-    FHighLightLineColor := ReadColor('', csHighLightLineColor, FHighLightLineColor);
-    FHighLightCurrentLine := ReadBool('', csHighLightCurrentLine, FHighLightCurrentLine);
+    FHighLightLineColor := ReadColor('', csHighLightLineColor, LoadIDEDefaultCurrentColor);
+    FHighLightCurrentLine := ReadBool('', csHighLightCurrentLine, True);
 {$ENDIF}
-    FHighlightFlowStatement := ReadBool('', csHighlightFlowStatement, FHighlightFlowStatement);
-    FFlowStatementBackground := ReadColor('', csFlowStatementBackground, FFlowStatementBackground);
-    FFlowStatementForeground := ReadColor('', csFlowStatementForeground, FFlowStatementForeground);
+    FHighlightFlowStatement := ReadBool('', csHighlightFlowStatement, True);
+    FFlowStatementBackground := ReadColor('', csFlowStatementBackground, csDefFlowControlBg);
+    FFlowStatementForeground := ReadColor('', csFlowStatementForeground, clBlack);
     ReadStrings('', csCustomIdentifiers, FCustomIdentifiers);
 
-    FHighlightCompDirective := ReadBool('', csHighlightCompDirective, FHighlightCompDirective);
-    FCompDirectiveBackground := ReadColor('', csCompDirectiveBackground, FCompDirectiveBackground);
+    FHighlightCompDirective := ReadBool('', csHighlightCompDirective, True);
+    FCompDirectiveBackground := ReadColor('', csCompDirectiveBackground, csDefaultHighlightBackgroundColor);
 
     FBlockHighlightRange := TBlockHighlightRange(ReadInteger('', csBlockHighlightRange,
-      Ord(FBlockHighlightRange)));
-    FBlockMatchDelay := ReadInteger('', csBlockMatchDelay, FBlockMatchDelay);
-    FBlockMatchLineLimit := ReadBool('', csBlockMatchLineLimit, FBlockMatchLineLimit);
-    FBlockMatchMaxLines := ReadInteger('', csBlockMatchMaxLines, FBlockMatchMaxLines);
+      Ord(brAll)));
+    FBlockMatchDelay := ReadInteger('', csBlockMatchDelay, 600);
+    FBlockMatchLineLimit := ReadBool('', csBlockMatchLineLimit, True);
+    FBlockMatchMaxLines := ReadInteger('', csBlockMatchMaxLines, 60000);
     FBlockHighlightStyle := TBlockHighlightStyle(ReadInteger('', csBlockHighlightStyle,
-      Ord(FBlockHighlightStyle)));
-    FBlockMatchDrawLine := ReadBool('', csBlockMatchDrawLine, FBlockMatchDrawLine);
-    FBlockMatchLineClass := ReadBool('', csBlockMatchLineClass, FBlockMatchLineClass);
+      Ord(bsNow)));
+    FBlockMatchDrawLine := ReadBool('', csBlockMatchDrawLine, True);
+    FBlockMatchLineClass := ReadBool('', csBlockMatchLineClass, False);
     FBlockMatchLineStyle := TCnLineStyle(ReadInteger('', csBlockMatchLineStyle,
-      Ord(FBlockMatchLineStyle)));
-    FBlockMatchLineEnd := ReadBool('', csBlockMatchLineEnd, FBlockMatchLineEnd);
-    FBlockMatchLineWidth := ReadInteger('', csBlockMatchLineWidth, FBlockMatchLineWidth);
-    FBlockMatchLineHori := ReadBool('', csBlockMatchLineHori, FBlockMatchLineHori);
-    FBlockMatchLineHoriDot := ReadBool('', csBlockMatchLineHoriDot, FBlockMatchLineHoriDot);
+      Ord(lsSolid)));
+    FBlockMatchLineEnd := ReadBool('', csBlockMatchLineEnd, False);
+    FBlockMatchLineWidth := ReadInteger('', csBlockMatchLineWidth, 1);
+    FBlockMatchLineHori := ReadBool('', csBlockMatchLineHori, True);
+    FBlockMatchLineHoriDot := ReadBool('', csBlockMatchLineHoriDot, True);
 
     for I := Low(FHighLightColors) to High(FHighLightColors) do
       FHighLightColors[I] := ReadColor('', csBlockMatchHighlightColor + IntToStr(I),
