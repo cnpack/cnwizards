@@ -871,9 +871,9 @@ end;
 
 procedure TCnSrcEditorToolBarMgr.LoadSettings(Ini: TCustomIniFile);
 begin
-  ShowToolBar := Ini.ReadBool(csToolBar, csShowToolBar, FShowToolBar);
-  ShowDesignToolBar := Ini.ReadBool(csToolBar, csShowDesignToolBar, FShowDesignToolBar);
-  Wrapable := Ini.ReadBool(csToolBar, csWrapable, FWrapable);
+  ShowToolBar := Ini.ReadBool(csToolBar, csShowToolBar, True);
+  ShowDesignToolBar := Ini.ReadBool(csToolBar, csShowDesignToolBar, True);
+  Wrapable := Ini.ReadBool(csToolBar, csWrapable, True);
   LoadToolBarActions(FToolBarActions, WizOptions.GetUserFileName(SCnEditorToolBarDataName, True));
   LoadToolBarActions(FDesignToolBarActions, WizOptions.GetUserFileName(SCnEditorDesignToolBarDataName, True));
 end;

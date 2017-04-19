@@ -2713,7 +2713,7 @@ begin
   FAutoIndent := Ini.ReadBool(csEditorKey, csAutoIndent, True);
   FF3Search := Ini.ReadBool(csEditorKey, csF3Search, True);
   FF2Rename := Ini.ReadBool(csEditorKey, csF2Rename, True);
-  RenameShortCut := Ini.ReadInteger(csEditorKey, csRenameShortCut, FRenameShortCut);
+  RenameShortCut := Ini.ReadInteger(csEditorKey, csRenameShortCut, TextToShortCut('F2'));
   KeepSearch := Ini.ReadBool(csEditorKey, csKeepSearch, True);
   SearchWrap := Ini.ReadBool(csEditorKey, csSearchWrap, True);
   FHomeExt := Ini.ReadBool(csEditorKey, csHomeExt, True);

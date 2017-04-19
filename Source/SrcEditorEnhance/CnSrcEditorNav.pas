@@ -184,6 +184,9 @@ const
   SCnForwardActionName = 'CnForwardAction';
   csUpdateInterval = 100;
 
+  csDefMinLineDiff = 5;
+  csDefMaxItems = 20;
+
 { TCnSrcEditorNav }
 
 constructor TCnSrcEditorNav.Create(AOwner: TComponent);
@@ -709,8 +712,8 @@ end;
 constructor TCnSrcEditorNavMgr.Create;
 begin
   inherited;
-  FMinLineDiff := 5;
-  FMaxItems := 20;
+  FMinLineDiff := csDefMinLineDiff;
+  FMaxItems := csDefMaxItems;
   FExtendForwardBack := True;
   FActive := True;
   FList := TList.Create;
@@ -871,8 +874,8 @@ const
 procedure TCnSrcEditorNavMgr.LoadSettings(Ini: TCustomIniFile);
 begin
   FExtendForwardBack := Ini.ReadBool(csEditorNav, csExtendForwardBack, True);
-  FMinLineDiff := Ini.ReadInteger(csEditorNav, csMinLineDiff, FMinLineDiff);
-  FMaxItems := Ini.ReadInteger(csEditorNav, csMaxItems, FMaxItems);
+  FMinLineDiff := Ini.ReadInteger(csEditorNav, csMinLineDiff, csDefMinLineDiff);
+  FMaxItems := Ini.ReadInteger(csEditorNav, csMaxItems, csDefMaxItems);
 end;
 
 procedure TCnSrcEditorNavMgr.SaveSettings(Ini: TCustomIniFile);
