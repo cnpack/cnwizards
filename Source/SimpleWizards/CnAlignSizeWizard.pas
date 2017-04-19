@@ -259,6 +259,11 @@ const
 
   csSpaceIncStep = 1;
 
+  csDefRowColSpace = 4;
+  csDefPerRowCount = 5;
+  csDefPerColCount = 3;
+  csDefSizeSpace = 16;
+
   // Action 生效需要选择的最小控件数
   csAlignNeedControls: array[TAlignSizeStyle] of Integer = (2, 2, 2, 2, 2, 2,
     3, 2, 2, 2, 2, 3, 2, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 0,
@@ -1425,7 +1430,6 @@ end;
 //------------------------------------------------------------------------------
 
 // 显示配置窗口
-
 procedure TCnAlignSizeWizard.Config;
 begin
   if ShowShortCutDialog('CnAlignSizeConfig') then
@@ -1433,22 +1437,20 @@ begin
 end;
 
 // 装载专家设置
-
 procedure TCnAlignSizeWizard.LoadSettings(Ini: TCustomIniFile);
 begin
   inherited;
-  FNonArrangeStyle := TNonArrangeStyle(Ini.ReadInteger('', csNonArrangeStyle, 0));
-  FNonMoveStyle := TNonMoveStyle(Ini.ReadInteger('', csNonMoveStyle, 0));
-  FRowSpace := Ini.ReadInteger('', csRowSpace, 4);
-  FColSpace := Ini.ReadInteger('', csColSpace, 4);
-  FPerRowCount := Ini.ReadInteger('', csPerRowCount, 5);
-  FPerColCount := Ini.ReadInteger('', csPerColCount, 3);
+  FNonArrangeStyle := TNonArrangeStyle(Ini.ReadInteger('', csNonArrangeStyle, Ord(asRow)));
+  FNonMoveStyle := TNonMoveStyle(Ini.ReadInteger('', csNonMoveStyle, Ord(msLeftTop)));
+  FRowSpace := Ini.ReadInteger('', csRowSpace, csDefRowColSpace);
+  FColSpace := Ini.ReadInteger('', csColSpace, csDefRowColSpace);
+  FPerRowCount := Ini.ReadInteger('', csPerRowCount, csDefPerRowCount);
+  FPerColCount := Ini.ReadInteger('', csPerColCount, csDefPerColCount);
   FSortByClassName := Ini.ReadBool('', csSortByClassName, True);
-  FSizeSpace := Ini.ReadInteger('', csSizeSpace, 16);
+  FSizeSpace := Ini.ReadInteger('', csSizeSpace, csDefSizeSpace);
 end;
 
 // 保存专家设置
-
 procedure TCnAlignSizeWizard.SaveSettings(Ini: TCustomIniFile);
 begin
   inherited;
@@ -1463,28 +1465,24 @@ begin
 end;
 
 // 取专家菜单标题
-
 function TCnAlignSizeWizard.GetCaption: string;
 begin
   Result := SCnAlignSizeMenuCaption;
 end;
 
 // 取专家是否有设置窗口
-
 function TCnAlignSizeWizard.GetHasConfig: Boolean;
 begin
   Result := True;
 end;
 
 // 取专家按钮提示
-
 function TCnAlignSizeWizard.GetHint: string;
 begin
   Result := SCnAlignSizeMenuHint;
 end;
 
 // 返回专家状态
-
 function TCnAlignSizeWizard.GetState: TWizardState;
 begin
   if Active and CurrentIsForm then
@@ -1494,7 +1492,6 @@ begin
 end;
 
 // 返回专家信息
-
 class procedure TCnAlignSizeWizard.GetWizardInfo(var Name, Author, Email,
   Comment: string);
 begin

@@ -191,6 +191,7 @@ type
     procedure OnTimer(Sender: TObject);
     procedure DrawControlTabOrder(WinControl: TWinControl);
     procedure UpdateDraw;
+    procedure InitCanvas;
     procedure UpdateDrawDesignForm(DesignForm: TWinControl);
     procedure DoSetTabOrder(WinControl: TWinControl; AInludeChildren: Boolean);
 
@@ -217,6 +218,7 @@ type
     procedure Config; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
+    procedure ResetSettings(Ini: TCustomIniFile); override;
     function GetState: TWizardState; override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
     function GetCaption: string; override;
@@ -419,11 +421,7 @@ begin
   inherited;
 
   FCanvas := TCanvas.Create;
-  FCanvas.Font.Color := clBlack;
-  FCanvas.Font.Name := 'Tahoma';
-  FCanvas.Font.Size := 8;
-  FCanvas.Pen.Style := psSolid;
-  FCanvas.Pen.Color := clBlack;
+  InitCanvas;
   FBkColor := HSLToRGB(0, 0.7, 0.7);
 
   CnWizNotifierServices.AddCallWndProcRetNotifier(OnCallWndProcRet,
@@ -1180,6 +1178,15 @@ begin
   end;
 end;
 
+procedure TCnTabOrderWizard.InitCanvas;
+begin
+  FCanvas.Font.Color := clBlack;
+  FCanvas.Font.Name := 'Tahoma';
+  FCanvas.Font.Size := 8;
+  FCanvas.Pen.Style := psSolid;
+  FCanvas.Pen.Color := clBlack;
+end;
+
 // È«²¿ÖØ»æ Tab Order
 procedure TCnTabOrderWizard.UpdateDraw;
 var
@@ -1452,6 +1459,12 @@ begin
 
   IdConfig := RegisterASubAction(SCnTabOrderConfig,
     SCnTabOrderConfigCaption, 0, SCnTabOrderConfigHint);
+end;
+
+procedure TCnTabOrderWizard.ResetSettings(Ini: TCustomIniFile);
+begin
+  inherited;
+  InitCanvas;
 end;
 
 initialization

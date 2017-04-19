@@ -373,6 +373,10 @@ const
   csUseHandle = 'UseHandle';
   csWideVer = 'WideVer';
 
+  csDefDelphiIndent = 2;
+  csDefCIndent = 4;
+  csDefWrap = 80;
+
 //==============================================================================
 // к╫сп╧ЩЁл
 //==============================================================================
@@ -662,13 +666,13 @@ procedure TCnMessageBoxForm.LoadSettings(Ini: TCustomIniFile;
   const Section: string);
 begin
   DelphiReturn := Ini.ReadString(Section, csDelphiReturn, '#13#10');
-  DelphiIndent := Ini.ReadInteger(Section, csDelphiIndent, 2);
-  DelphiWrap := Ini.ReadInteger(Section, csDelphiWrap, 80);
+  DelphiIndent := Ini.ReadInteger(Section, csDelphiIndent, csDefDelphiIndent);
+  DelphiWrap := Ini.ReadInteger(Section, csDelphiWrap, csDefWrap);
   UsePChar := Ini.ReadBool(Section, csUsePChar, False);
   CheckFormat := Ini.ReadBool(Section, csCheckFormat, True);
   CReturn := Ini.ReadString(Section, csCReturn, '\n');
-  CIndent := Ini.ReadInteger(Section, csCIndent, 4);
-  CWrap := Ini.ReadInteger(Section, csCWrap, 80);
+  CIndent := Ini.ReadInteger(Section, csCIndent, csDefCIndent);
+  CWrap := Ini.ReadInteger(Section, csCWrap, csDefWrap);
   AutoWrap := Ini.ReadBool(Section, csAutoWrap, True);
   LineEndBrace := Ini.ReadBool(Section, csLineEndBrace, True);
   LoadLast := Ini.ReadBool(Section, csLoadLast, True);

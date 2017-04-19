@@ -434,6 +434,8 @@ const
   csClassComboName = 'ClassCombo';
 
   CN_SPLITTER_WIDTH = 3;
+  csDefHistoryCount = 8;
+  csDefPreviewLineCount = 4;
 
 type
   TCnFileInfo = class(TObject)
@@ -1228,8 +1230,8 @@ end;
 procedure TCnProcListWizard.LoadSettings(Ini: TCustomIniFile);
 begin
   UseEditorToolBar := Ini.ReadBool('', csUseEditorToolbar, True);
-  PreviewLineCount := Ini.ReadInteger('', csPreviewLineCount, 4);
-  HistoryCount := Ini.ReadInteger('', csHistoryCount, 8);
+  PreviewLineCount := Ini.ReadInteger('', csPreviewLineCount, csDefPreviewLineCount);
+  HistoryCount := Ini.ReadInteger('', csHistoryCount, csDefHistoryCount);
 
   ProcComboHeight := Ini.ReadInteger('', csProcHeight, 0);
   ProcComboWidth := Ini.ReadInteger('', csProcWidth, 0);
