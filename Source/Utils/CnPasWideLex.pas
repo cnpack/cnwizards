@@ -370,6 +370,7 @@ var
 
   mHashTable: array[#0..#255] of Integer;
   // 用来存储大小写比较的，大写字母和对应小写字母的位置存储的值相同
+  // 注意下标虽然是 Char，Unicode 环境下仍只能限于 #255 内，否则超界
 
 function _WideCharInSet(C: WideChar; CharSet: TAnsiCharSet): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
 begin
@@ -410,6 +411,15 @@ begin
       mHashTable[AnsiChar(I)] := 0;
     end;
   end;
+end;
+
+// 封装的取 mHashTable 值的函数，防止 WideChar 超界
+function GetHashTableValue(C: WideChar): Integer;  {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+begin
+  if Ord(C) > Ord(High(mHashTable)) then
+    Result := 0
+  else
+    Result := mHashTable[_IndexChar(C)];
 end;
 
 procedure TCnPasWideLex.InitIdent;
@@ -569,7 +579,7 @@ begin
   while (_WideCharInSet(ToHash^, ['a'..'z', 'A'..'Z'])) or
     (FSupportUnicodeIdent and (Ord(ToHash^) > 127)) do
   begin
-    Inc(Result, mHashTable[_IndexChar(ToHash^)]);
+    Inc(Result, GetHashTableValue(ToHash^));
     Inc(ToHash);
   end;
   if _WideCharInSet(ToHash^, ['_', '0'..'9']) then
@@ -588,7 +598,7 @@ begin
     Result := True;
     for I := 1 to FStringLen do
     begin
-      if mHashTable[_IndexChar(P^)] <> mHashTable[_IndexChar(aKey[I])] then
+      if GetHashTableValue(P^) <> GetHashTableValue(aKey[I]) then
       begin
         Result := False;
         Break;
