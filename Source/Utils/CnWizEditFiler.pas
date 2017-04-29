@@ -39,7 +39,9 @@ unit CnWizEditFiler;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2003.06.17 V1.1
+* 修改记录：2017.04.29 V1.2
+*               修正 Unicode 环境下读文件时未转换为 UTF16 的问题
+*           2003.06.17 V1.1
 *               修改文件名，加入写功能（LiuXiao）
 *           2003.03.02 V1.0
 *               创建单元，移植而来（By 周劲羽）
@@ -511,6 +513,9 @@ var
   Pos: Integer;
   Size: Integer;
   Text: string;
+{$IFDEF UNICODE}
+  List: TStringList;
+{$ENDIF}
 const
   TheEnd: AnsiChar = AnsiChar(#0); // Leave typed constant as is - needed for streaming code
 begin
@@ -524,9 +529,23 @@ begin
   begin
     Assert(SFile <> nil);
 
+    {$IFDEF UNICODE}
+    // Unicode 环境下，要根据文件的 BOM 转换成 UTF16，不能直接复制文件流
+    List := TStringList.Create;
+    try
+      List.LoadFromStream(SFile);
+      Text := List.Text;
+      Stream.Write(Text[1], Length(Text) * SizeOf(Char));
+      Stream.Write(TheEnd, 1);  // Write UTF16 #$0000
+      Stream.Write(TheEnd, 1);
+    finally
+      List.Free;
+    end;
+    {$ELSE}
     SFile.Position := 0;
     Stream.CopyFrom(SFile, SFile.Size);
     Stream.Write(TheEnd, 1);
+    {$ENDIF}
   end
   else
   begin
