@@ -377,7 +377,6 @@ begin
 {$ENDIF}
 end;
 
-
 procedure TCnWizardMgr.InstallMainFormOnShowHook;
 begin
   FMainFormOnShow := Application.MainForm.OnShow;
@@ -387,7 +386,13 @@ end;
 procedure TCnWizardMgr.OnMainFormOnShow(Sender: TObject);
 begin
   Application.MainForm.OnShow := FMainFormOnShow;
+  if Assigned(FMainFormOnShow) then
+    FMainFormOnShow(Application.MainForm);
+
   CnWizNotifierServices.ExecuteOnApplicationIdle(DoLaterLoad);
+{$IFDEF DEBUG}
+  CnDebugger.StopTimeMark('CWS'); // CnWizards Start-up Timing Stop
+{$ENDIF}
 end;
 
 procedure TCnWizardMgr.DoLaterLoad(Sender: TObject);

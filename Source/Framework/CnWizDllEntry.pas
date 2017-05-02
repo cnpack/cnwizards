@@ -95,9 +95,10 @@ begin
     Exit;
   end;
 
-{$IFDEF Debug}
+{$IFDEF DEBUG}
+  CnDebugger.StartTimeMark('CWS');  // CnWizards Start-Up Timing Start
   CnDebugger.LogMsg('Wizard dll entry');
-{$ENDIF Debug}
+{$ENDIF}
 
   Result := BorlandIDEServices <> nil;
   if Result then
