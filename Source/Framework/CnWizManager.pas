@@ -90,20 +90,19 @@ type
     FIDEEnhanceWizards: TList;
     FRepositoryWizards: TList;
     FTipTimer: TTimer;
+    FLaterLoadTimer: TTimer;
     FSepMenu: TMenuItem;
     FConfigAction: TCnWizMenuAction;
     FWizMultiLang: TCnMenuWizard;
     FWizAbout: TCnMenuWizard;
     FOffSet: array[0..3] of Integer;
     FSettingsLoaded: Boolean;
-    FMainFormOnShow: TNotifyEvent;
   {$IFDEF BDS}
     FSplashBmp: TBitmap;
     FAboutBmp: TBitmap;
   {$ENDIF}
-    procedure InstallMainFormOnShowHook;
-    procedure OnMainFormOnShow(Sender: TObject);
     procedure DoLaterLoad(Sender: TObject);
+    procedure DoFreeLaterLoadTimer(Sender: TObject);
 
     procedure CreateIDEMenu;
     procedure InstallIDEMenu;
@@ -132,7 +131,7 @@ type
     function GetRepositoryWizardCount: Integer;
     function GetRepositoryWizards(Index: Integer): TCnRepositoryWizard;
     procedure OnConfig(Sender: TObject);
-    procedure OnIdeLoaded(Sender: TObject);
+    procedure OnIdleLoaded(Sender: TObject);
     procedure OnFileNotify(NotifyCode: TOTAFileNotification; const FileName: string);
     function GetIDEEnhanceWizardCount: Integer;
     function GetIDEEnhanceWizards(Index: Integer): TCnIDEEnhanceWizard;
@@ -353,7 +352,7 @@ begin
   CnWizNotifierServices.AddFileNotifier(OnFileNotify);
 
   // IDE 启动完成后调用 Loaded
-  CnWizNotifierServices.ExecuteOnApplicationIdle(OnIdeLoaded);
+  CnWizNotifierServices.ExecuteOnApplicationIdle(OnIdleLoaded);
 end;
 
 // BDS 下注册插件产品信息
@@ -377,22 +376,9 @@ begin
 {$ENDIF}
 end;
 
-procedure TCnWizardMgr.InstallMainFormOnShowHook;
+procedure TCnWizardMgr.DoFreeLaterLoadTimer(Sender: TObject);
 begin
-  FMainFormOnShow := Application.MainForm.OnShow;
-  Application.MainForm.OnShow := OnMainFormOnShow;
-end;
-
-procedure TCnWizardMgr.OnMainFormOnShow(Sender: TObject);
-begin
-  Application.MainForm.OnShow := FMainFormOnShow;
-  if Assigned(FMainFormOnShow) then
-    FMainFormOnShow(Application.MainForm);
-
-  CnWizNotifierServices.ExecuteOnApplicationIdle(DoLaterLoad);
-{$IFDEF DEBUG}
-  CnDebugger.StopTimeMark('CWS'); // CnWizards Start-up Timing Stop
-{$ENDIF}
+  FreeAndNil(FLaterLoadTimer);
 end;
 
 procedure TCnWizardMgr.DoLaterLoad(Sender: TObject);
@@ -402,7 +388,7 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('DoLaterLoad');
 {$ENDIF}
-
+  FLaterLoadTimer.Enabled := False;
   for I := 0 to WizardCount - 1 do
   try
     Wizards[I].LaterLoaded;
@@ -410,6 +396,7 @@ begin
     DoHandleException(Wizards[I].ClassName + '.OnLaterLoad');
   end;
 
+  CnWizNotifierServices.ExecuteOnApplicationIdle(DoFreeLaterLoadTimer);
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('DoLaterLoad');
 {$ENDIF}
@@ -443,8 +430,6 @@ begin
 {$ENDIF}
 {$ENDIF}
 
-  InstallMainFormOnShowHook;
-
   WizShortCutMgr.BeginUpdate;
   CnListBeginUpdate;
   try
@@ -458,6 +443,11 @@ begin
 
   FRestoreSysMenu := TCnRestoreSystemMenu.Create(nil);
 
+  // Create LaterLoaded Timer
+  FLaterLoadTimer := TTimer.Create(nil);
+  FLaterLoadTimer.Enabled := False;
+  FLaterLoadTimer.Interval := 2000;
+  FLaterLoadTimer.OnTimer := DoLaterLoad;
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('TCnWizardMgr.Create');
   CnDebugger.LogSeparator;
@@ -513,6 +503,7 @@ begin
     FreeWizActionMgr;
     FreeWizShortCutMgr;
     FreeAndNil(WizOptions);
+    FreeAndNil(FLaterLoadTimer);
     FreeAndNil(FTipTimer);
     FreeAndNil(FRestoreSysMenu);
     inherited Destroy;
@@ -1172,12 +1163,12 @@ begin
 end;
 
 // IDE 已启动事件
-procedure TCnWizardMgr.OnIdeLoaded(Sender: TObject);
+procedure TCnWizardMgr.OnIdleLoaded(Sender: TObject);
 var
   i: Integer;
 begin
 {$IFDEF DEBUG}
-  CnDebugger.LogEnter('OnIdeLoaded');
+  CnDebugger.LogEnter('OnIdleLoaded');
 {$ENDIF}
 
   WizShortCutMgr.BeginUpdate;
@@ -1232,8 +1223,10 @@ begin
   SetTipShowing;
 {$ENDIF}
 
+  FLaterLoadTimer.Enabled := True;
 {$IFDEF DEBUG}
-  CnDebugger.LogLeave('OnIdeLoaded');
+  CnDebugger.LogLeave('OnIdleLoaded');
+  CnDebugger.StopTimeMark('CWS'); // CnWizards Start-up Timing Stop
   CnDebugger.LogSeparator;
 {$ENDIF}
 end;
