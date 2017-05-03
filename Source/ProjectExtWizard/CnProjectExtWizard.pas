@@ -202,8 +202,10 @@ begin
       end;
     end;
   end;
-  FPasUnitNameList := TUnitNameList.Create(True, False);
-  FCppUnitNameList := TUnitNameList.Create(True, True);
+
+  // Lazy to Let UI Create them to Optimize Starting-Up Speed.
+  // FPasUnitNameList := TUnitNameList.Create(True, False);
+  // FCppUnitNameList := TUnitNameList.Create(True, True);
 end;
 
 destructor TCnProjectExtWizard.Destroy;

@@ -153,7 +153,7 @@ begin
       OldCursor := Screen.Cursor;
       Screen.Cursor := crHourGlass;
       try
-        UnitNameList := TUnitNameList.Create(True, True);
+        UnitNameList := TUnitNameList.Create(True, True, False);
       finally
         Screen.Cursor := OldCursor;
       end;
@@ -167,7 +167,7 @@ begin
       OldCursor := Screen.Cursor;
       Screen.Cursor := crHourGlass;
       try
-        UnitNameList := TUnitNameList.Create(True, False);
+        UnitNameList := TUnitNameList.Create(True, False, False);
       finally
         Screen.Cursor := OldCursor;
       end;

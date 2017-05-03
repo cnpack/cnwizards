@@ -326,6 +326,7 @@ type
   private
     FUseFullPath: Boolean;
     FCppMode: Boolean;
+    FLoadAfterCreate: Boolean;
     FSysPath: string;
     FSysUnitsName: TStringList;
     FSysUnitsPath: TStringList;
@@ -347,7 +348,8 @@ type
     procedure UpdatePathsSequence(Names, Paths: TStringList);
   public
     constructor Create; overload; override;
-    constructor Create(UseFullPath: Boolean; IsCppMode: Boolean); reintroduce; overload;
+    constructor Create(UseFullPath: Boolean; IsCppMode: Boolean;
+      LoadAfterCreate: Boolean); reintroduce; overload;
     destructor Destroy; override;
     class function GetListName: string; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
@@ -1256,10 +1258,12 @@ end;
 
 { TUnitNameList }
 
-constructor TUnitNameList.Create(UseFullPath: Boolean; IsCppMode: Boolean);
+constructor TUnitNameList.Create(UseFullPath: Boolean; IsCppMode: Boolean;
+  LoadAfterCreate: Boolean);
 begin
   FUseFullPath := UseFullPath;
   FCppMode := IsCppMode;
+  FLoadAfterCreate := LoadAfterCreate;
   Create;
 end;
 
@@ -1277,7 +1281,9 @@ begin
   FSysUnitsName.Sorted := not FUseFullPath;
   FProjectUnitsName.Sorted := not FUseFullPath;
   FUnitNames.Sorted := not FUseFullPath;
-  LoadFromSysPath;
+
+  if FLoadAfterCreate then
+    LoadFromSysPath;
 end;
 
 destructor TUnitNameList.Destroy;
