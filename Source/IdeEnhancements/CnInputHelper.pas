@@ -210,6 +210,7 @@ type
     FKeyDownTick: Cardinal;
     FKeyDownValid: Boolean;
     FNeedUpdate: Boolean;
+    FKeyBackSpaceADot: Boolean;
     FPosInfo: TCodePosInfo;
     FSavePos: TOTAEditPos;
     FBracketText: string;
@@ -251,9 +252,9 @@ type
     procedure OnAppDeactivate(Sender: TObject);
     function GetIsShowing: Boolean;
     function ParsePosInfo: Boolean;
-    procedure ShowList(ForcePopup: Boolean);
-    procedure HideList;
-    procedure ClearList;
+    procedure ShowList(ForcePopup: Boolean);  // 弹出列表
+    procedure HideList;                       // 隐藏列表
+    procedure ClearList;                      // 清除列表内容
     procedure HideAndClearList;
 {$IFDEF ADJUST_CodeParamWindow}
     procedure CodeParamWndProc(var Message: TMessage);
@@ -265,8 +266,10 @@ type
     function HandleKeyPress(Key: AnsiChar): Boolean;
     procedure SortSymbolList;
     procedure SortCurrSymbolList;
-    function UpdateCurrList(ForcePopup: Boolean): Boolean; // 更新所有匹配的符号列表塞给 FItems
+    function UpdateCurrList(ForcePopup: Boolean): Boolean;
+    // 从 FSymbols 更新所有匹配的符号列表塞给 FItems，FSymbols不重新获取
     function UpdateListBox(ForcePopup, InitPopup: Boolean): Boolean;
+    // 更新已经弹出的代码输入助手框里的内容，会调用上面的 UpdateCurrList
     procedure UpdateSymbolList;  // 取出所有需要的符号列表塞给 FSymbols
     procedure ListDblClick(Sender: TObject);
     procedure ListDrawItem(Control: TWinControl; Index: Integer; Rect: TRect;
@@ -1476,6 +1479,7 @@ begin
   Key := Msg.wParam;
   Shift := KeyDataToShiftState(Msg.lParam);
   ScanCode := (Msg.lParam and $00FF0000) shr 16;
+  FKeyBackSpaceADot := False;
 
   // 如果允许输入法开启时也输入，则使用扫描码获得虚拟键码
   if not CheckImmRun and (Key = VK_PROCESSKEY) then
@@ -1604,11 +1608,12 @@ begin
   end;
 end;
 
+// 由 KeyDown 转换的 Char 来调用，不是拦截的系统 KeyPress 事件
 function TCnInputHelper.HandleKeyPress(Key: AnsiChar): Boolean;
 var
   Item: TSymbolItem;
-  Idx: Integer;
-  NewMatchStr: string;
+  Idx, LineNo, CharIdx: Integer;
+  NewMatchStr, Text: string;
 begin
   Result := False;
 {$IFDEF DEBUG}
@@ -1616,15 +1621,32 @@ begin
 {$ENDIF}
 
   FNeedUpdate := False;
-  if (Key >= #32) and (Key < #127) and IsShowing then
+  if (((Key >= #32) and (Key < #127)) or (Key = #8)) and IsShowing then
   begin
     // 已经弹出，根据按键判断是否需要更新列表内容，是则设置 FNeedUpdate，供 KeyUp 事件使用
     Item := TSymbolItem(FItems.Objects[List.ItemIndex]);
+
+    // 这一句对于退格键是不对的，但退格时 NewMatchStr 并不用于判断
     NewMatchStr := UpperCase(FMatchStr + Char(Key));
+
     Idx := Pos(NewMatchStr, UpperCase(Item.Name));
 
-    // 不同模式下有匹配的
-    if ((FMatchMode = mmStart) and (Idx = 1)) or
+    if Key = #8 then  // 退格需要更新，而不是隐藏列表，如果退格删掉的是点，在此处判断，在 KeyUp 里隐藏
+    begin
+      CnNtaGetCurrLineText(Text, LineNo, CharIdx); // 拿到 Ansi/Utf8/Utf16，CharIdx 也对应
+      if (CharIdx > 0) and (Text <> '') then
+      begin
+        if Length(Text) >= CharIdx then
+          CharIdx := Length(Text);
+
+        if Text[CharIdx] = '.' then
+          FKeyBackSpaceADot := True;
+      end;
+
+      if not FKeyBackSpaceADot then
+        FNeedUpdate := True;
+    end
+    else if ((FMatchMode = mmStart) and (Idx = 1)) or // 不同模式下有匹配的
       ((FMatchMode = mmAnywhere) and (Idx > 1) and not Item.MatchFirstOnly) or
       ((FMatchMode = mmFuzzy) and not Item.MatchFirstOnly and FuzzyMatchStr(NewMatchStr, Item.Name)) then
     begin
@@ -1705,6 +1727,16 @@ begin
       CnOtaGetCurrPosToken(NewToken, CurrPos, True, CalcFirstSet(FPosInfo.IsPascal), CharSet);
       if not SameText(NewToken, FToken) then
       begin
+        HideAndClearList;
+        Exit;
+      end;
+    end
+    else if Key = VK_BACK then
+    begin
+      // 如果退格删了个点，则隐藏
+      if FKeyBackSpaceADot then
+      begin
+        FKeyBackSpaceADot := False;
         HideAndClearList;
         Exit;
       end;
@@ -2324,6 +2356,9 @@ begin
         end;
       end;
     end;
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('UpdateSymbolList. Get Symbols %d.', [FSymbols.Count]);
+{$ENDIF}
   finally
     if HashList <> nil then
       HashList.Free;
@@ -2349,6 +2384,10 @@ begin
     if (Length(Symbol) > 1) and (Length(Symbol) - Length(FLastStr) = 1) and
       (Pos(UpperCase(FLastStr), Symbol) = 1) then
     begin
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('UpdateCurrList Only Delete from Item List Count %d with Mode %d',
+        [FItems.Count, Ord(FMatchMode)]);
+{$ENDIF}
       // 如果这次匹配的内容只比上次匹配的内容尾巴上多了个字符，照理只要在上次匹配的结果里删东西就行了
       if FMatchMode = mmStart then
       begin
@@ -2386,6 +2425,10 @@ begin
     end
     else  // 不是，则需要重新从总的 FSymbols 里匹配并塞给 FItems
     begin
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('UpdateCurrList Clear and Match from Symbol List Count %d with Mode %d',
+        [FSymbols.Count, Ord(FMatchMode)]);
+{$ENDIF}
       FItems.Clear;
       case FMatchMode of
         mmStart:
