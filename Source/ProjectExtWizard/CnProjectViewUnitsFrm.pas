@@ -363,6 +363,10 @@ begin
 
           if SameText(_CnExtractFileExt(UnitFileName), '.RES') then
             Continue;
+          if SameText(_CnExtractFileExt(UnitFileName), '.DCR') then
+            Continue;
+          if SameText(_CnExtractFileExt(UnitFileName), '.DCP') then
+            Continue;
 
           UnitInfo := TCnUnitInfo.Create;
           with UnitInfo do
