@@ -361,11 +361,11 @@ begin
           if UnitFileName = '' then
             Continue;
 
-          if SameText(_CnExtractFileExt(UnitFileName), '.RES') then
+          if SameText(UpperCase(_CnExtractFileExt(UnitFileName)), '.RES') then
             Continue;
-          if SameText(_CnExtractFileExt(UnitFileName), '.DCR') then
+          if SameText(UpperCase(_CnExtractFileExt(UnitFileName)), '.DCR') then
             Continue;
-          if SameText(_CnExtractFileExt(UnitFileName), '.DCP') then
+          if SameText(UpperCase(_CnExtractFileExt(UnitFileName)), '.DCP') then
             Continue;
 
           UnitInfo := TCnUnitInfo.Create;
