@@ -78,6 +78,10 @@ uses
   {$DEFINE SYMBOL_LOCKHOOK}
 {$ENDIF}
 
+{$IFDEF BDS}
+  {$DEFINE IDE_SYMBOL_HAS_SYSTEM} // 2005 或以上，符号列表中有 System 单元
+{$ENDIF}
+
 type
 
 //==============================================================================
@@ -835,6 +839,10 @@ begin
         CompGetSymbolText(Symbols^[i], Text, 1);
         AddItem(Text, i);
       end;
+
+{$IFNDEF IDE_SYMBOL_HAS_SYSTEM}
+      Add('System', skUnit, 0, '');
+{$ENDIF}
 
       Result := Count > 0;
     {$IFDEF Debug}
