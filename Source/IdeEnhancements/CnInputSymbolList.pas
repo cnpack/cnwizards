@@ -538,6 +538,7 @@ end;
 
 constructor TSymbolItem.Create;
 begin
+  inherited;
   FScope := csDefScope;
   FAutoIndent := True;
   FAlwaysDisp := False;

@@ -123,13 +123,14 @@ end;
 
 constructor TCnTreeXMLFiler.Create;
 begin
-
+  inherited;
 end;
 
 destructor TCnTreeXMLFiler.Destroy;
 begin
   FXMLDoc := nil;
   FRoot := nil;
+  inherited;
 end;
 
 function TCnTreeXMLFiler.FindElement(const Root: IXMLElement;
