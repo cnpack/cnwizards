@@ -621,17 +621,25 @@ end;
 
 procedure TCnSrcEditorMisc.OnExplore(Sender: TObject);
 var
-  strExecute: AnsiString;
+  strExecute: string;
 begin
   if FileExists(CnOtaGetCurrentSourceFile) then
   begin
-    strExecute := AnsiString(Format(ExploreCmdLine, [CnOtaGetCurrentSourceFile]));
+    strExecute := Format(ExploreCmdLine, [CnOtaGetCurrentSourceFile]);
+{$IFDEF UNICODE}
+    WinExecute(strExecute, SW_SHOWNORMAL);
+{$ELSE}
     WinExec(PAnsiChar(strExecute), SW_SHOWNORMAL);
+{$ENDIF}
   end
   else if DirectoryExists(_CnExtractFileDir(CnOtaGetCurrentSourceFile)) then
   begin
-    strExecute := AnsiString(Format(ExploreCmdLine, [_CnExtractFileDir(CnOtaGetCurrentSourceFile)]));
+    strExecute := Format(ExploreCmdLine, [_CnExtractFileDir(CnOtaGetCurrentSourceFile)]);
+{$IFDEF UNICODE}
+    WinExecute(strExecute, SW_SHOWNORMAL);
+{$ELSE}
     WinExec(PAnsiChar(strExecute), SW_SHOWNORMAL);
+{$ENDIF}
   end;
 end;
 
