@@ -115,12 +115,14 @@ implementation
 
 constructor TCnBaseList.Create(AObjectList: Boolean);
 begin
+  inherited Create;
   FObjectList := AObjectList;
 end;
 
 destructor TCnBaseList.Destroy;
 begin
   Clear;
+  inherited;
 end;
 
 function TCnBaseList.Add(Item: Pointer): Integer;

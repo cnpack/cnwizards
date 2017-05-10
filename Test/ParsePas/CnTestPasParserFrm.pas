@@ -59,7 +59,7 @@ const
   tkFor, tkWith, tkOn, tkWhile, tkDo,
   tkAsm, tkBegin, tkEnd,
   tkTry, tkExcept, tkFinally,
-  tkCase, tkOf,
+  tkCase, tkOf, tkProcedure, tkFunction,
   tkRepeat, tkUntil];
 var
   MaxLine, I, J, LastSepLine, LastMethodCloseIdx: Integer;
@@ -81,10 +81,11 @@ begin
   begin
     if (Parser.Tokens[I].TokenID in csKeyTokens) and Parser.Tokens[I].IsMethodStart then
     begin
-      // 从 LastSepLine 到此 Token 前一个，找第一个空行标记。
-      // 但如果在这之间先碰到了其他 KeyTokens，表示是语句，要忽略
+      // 遇到函数起始部分时，从上次的 LastSepLine 往后搜索到这个起始部分，找第一个空行标记
+      // 即使这函数是匿名函数（实现在 begin 内的），也得参与此次搜索
       if LastSepLine > 1 then
       begin
+        // 但如果在这之间先碰到了其他 KeyTokens，表示是语句，要忽略
         StateInMethodCloseStart := False;
         if LastMethodCloseIdx > 0 then
         begin
@@ -112,8 +113,10 @@ begin
         end;
       end;
     end
-    else if (Parser.Tokens[I].TokenID in csKeyTokens) and Parser.Tokens[I].IsMethodClose then
+    else if (Parser.Tokens[I].TokenID in csKeyTokens) and Parser.Tokens[I].IsMethodClose
+      and not Parser.Tokens[I].MethodStartAfterParentBegin then
     begin
+      // 只有正式定义的函数（可嵌套，但非匿名），它后面才需要出现分割线
       // 从 LastLine 到此 Token 前一个，均不标记
       LastSepLine := Parser.Tokens[I].LineNumber + 1;
       LastMethodCloseIdx := I;
@@ -150,15 +153,31 @@ begin
       ));
       if Token.IsMethodStart then
         if Token.TokenID = tkBegin then
-          mmoParse.Lines[mmoParse.Lines.Count - 1] := mmoParse.Lines[mmoParse.Lines.Count - 1] +
-            ' *** MethodStart'
+        begin
+          if Token.MethodStartAfterParentBegin then
+            mmoParse.Lines[mmoParse.Lines.Count - 1] := mmoParse.Lines[mmoParse.Lines.Count - 1] +
+              ' *** MethodStart (Anonymous)'
+          else
+            mmoParse.Lines[mmoParse.Lines.Count - 1] := mmoParse.Lines[mmoParse.Lines.Count - 1] +
+              ' *** MethodStart';
+        end
         else
-          mmoParse.Lines[mmoParse.Lines.Count - 1] := mmoParse.Lines[mmoParse.Lines.Count - 1] +
-            ' --- MethodStart';
+        begin
+          if Token.MethodStartAfterParentBegin then
+            mmoParse.Lines[mmoParse.Lines.Count - 1] := mmoParse.Lines[mmoParse.Lines.Count - 1] +
+            ' --- MethodStart (Anonymous)'
+          else
+            mmoParse.Lines[mmoParse.Lines.Count - 1] := mmoParse.Lines[mmoParse.Lines.Count - 1] +
+              ' --- MethodStart';
+        end;
 
       if Token.IsMethodClose then
-        mmoParse.Lines[mmoParse.Lines.Count - 1] := mmoParse.Lines[mmoParse.Lines.Count - 1] +
-        ' *** MethodClose';
+        if Token.MethodStartAfterParentBegin then
+          mmoParse.Lines[mmoParse.Lines.Count - 1] := mmoParse.Lines[mmoParse.Lines.Count - 1] +
+            ' *** MethodClose (Anonymous)'
+        else
+          mmoParse.Lines[mmoParse.Lines.Count - 1] := mmoParse.Lines[mmoParse.Lines.Count - 1] +
+            ' *** MethodClose';
     end;
     mmoParse.Lines.Add('');
 

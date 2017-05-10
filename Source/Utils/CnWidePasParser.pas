@@ -73,6 +73,7 @@ type
     FTokenPos: Integer;
     FIsMethodStart: Boolean;
     FIsMethodClose: Boolean;
+    FMethodStartAfterParentBegin: Boolean;
     FIsBlockStart: Boolean;
     FIsBlockClose: Boolean;
     FUseAsC: Boolean;
@@ -117,6 +118,11 @@ type
     {* 是否是函数过程的开始，包括 function 和 begin/asm 的情况 }
     property IsMethodClose: Boolean read FIsMethodClose;
     {* 是否是函数过程的结束，只包括 end 的情况，因此和 MethodStart 数量不等 }
+    property MethodStartAfterParentBegin: Boolean read FMethodStartAfterParentBegin;
+    {* 当 IsMethodStart 是 True 且是 function/procedure 或 begin/asm 时，
+       是否位于上一层 function/procedure 的 begin 后的实现部分。
+       无上一层，或在上一层的 begin 之前时为 False，表示是定义，
+       而不是语句部分中的匿名函数。所以此属性为 True 可以代表是匿名函数。}
     property CompDirectivtType: TCnCompDirectiveType read FCompDirectiveType write FCompDirectiveType;
     {* 当其类型是 Pascal 编译指令时，此域代表其详细类型，但不解析，由外部按需解析}
     property Tag: Integer read FTag write FTag;
@@ -560,7 +566,7 @@ begin
 
     DeclareWithEndLevel := 0; // 嵌套的需要end的定义层数
     Token := nil;
-    CurrMethod := nil;        // 当前 Token 所在的方法，包括匿名函数的 procedure/function
+    CurrMethod := nil;        // 当前 Token 所在的方法 procedure/function，包括匿名函数的情形 
     CurrBlock := nil;         // 当前 Token 所在的块。
     CurrMidBlock := nil;
     IsImpl := AIsDpr;
@@ -629,8 +635,13 @@ begin
 
                 // 如果当前 procedure 在外面的 procedure 的 begin 后，则算匿名函数，不加嵌套数
                 // 如果外面没有 procedure，则更不算嵌套，默认是 0
-                if (PrevProcObj <> nil) and not PrevProcObj.BeginMatched then
-                  AProcObj.NestCount := PrevProcObj.NestCount + 1;
+                if PrevProcObj <> nil then
+                begin
+                  if PrevProcObj.BeginMatched then
+                    Token.FMethodStartAfterParentBegin := True
+                  else
+                    AProcObj.NestCount := PrevProcObj.NestCount + 1;
+                end;
               end;
             end;
           tkInitialization, tkFinalization:
@@ -667,6 +678,12 @@ begin
               if FProcStack.Count > 0 then
               begin
                 AProcObj := TCnProcObj(FProcStack.Peek);
+                if (AProcObj.Token <> nil) and Token.FIsMethodStart then
+                begin
+                  // 如果本 Proc 是匿名（出现在外层的 begin 后），则 begin 也要记录
+                  Token.FMethodStartAfterParentBegin := AProcObj.Token.FMethodStartAfterParentBegin;
+                end;
+
                 if not AProcObj.BeginMatched then
                 begin
                   // 当前 Proc 是嵌套函数时，begin 要进 procedure/function 的直接嵌套层数
@@ -748,6 +765,7 @@ begin
                 end
                 else
                   Token.FItemLayer := 0;
+
                 CurrBlock := Token;
 
                 if IsRecord then
@@ -1001,6 +1019,7 @@ begin
                     if (CurrMethod <> nil) and (DeclareWithEndLevel <= 0) then
                     begin
                       Token.FIsMethodClose := True;
+                      Token.FMethodStartAfterParentBegin := CurrMethod.MethodStartAfterParentBegin;
                       if FMethodStack.Count > 0 then
                         CurrMethod := TCnWidePasToken(FMethodStack.Pop)
                       else

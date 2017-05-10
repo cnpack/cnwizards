@@ -1464,7 +1464,8 @@ begin
   begin
     if KeyTokens[I].IsMethodStart then
     begin
-      // 从 LastSepLine 到此 Token 前一个，找第一个空行标记
+      // 遇到函数起始部分时，从上次的 LastSepLine 往后搜索到这个起始部分，找第一个空行标记
+      // 即使这函数是匿名函数（实现在 begin 内的），也得参与此次搜索
       if LastSepLine > 1 then
       begin
         // 但如果在这之间先碰到了其他 KeyTokens，表示是语句，要忽略
@@ -1496,8 +1497,9 @@ begin
         end;
       end;
     end
-    else if KeyTokens[I].IsMethodClose then
+    else if KeyTokens[I].IsMethodClose and not KeyTokens[I].MethodStartAfterParentBegin then
     begin
+      // 只有正式定义的函数（可嵌套，但非匿名），它后面才需要出现分割线
       // 从 LastLine 到此 Token 前一个，均不是分隔线所在区域。记录其行号与 Token 索引
       LastSepLine := KeyTokens[I].EditLine + 1;
       LastMethodCloseIdx := I;

@@ -54,6 +54,21 @@ object CnTestPasForm: TCnTestPasForm
       ''
       'procedure TForm2;'
       'begin'
+      '  try'
+      '    C := procedure(const aStr : string)'
+      '         begin'
+      '           ;'
+      '         end;'
+      ''
+      '    Conditions.ForEach(procedure(const C: ICondition)'
+      '                       begin'
+      ''
+      '                       end);'
+      '    Result := 0;'
+      '  finally'
+      '    Free;'
+      '  end;'
+      ''
       '  AddEvent('
       '    procedure'
       '    begin'
@@ -110,6 +125,7 @@ object CnTestPasForm: TCnTestPasForm
     ParentFont = False
     ScrollBars = ssVertical
     TabOrder = 6
+    WordWrap = False
   end
   object btnUses: TButton
     Left = 280
