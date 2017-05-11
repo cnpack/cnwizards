@@ -60,6 +60,9 @@ type
     FComment: string;
     FURL: string;
     FBetaVersion: Boolean;
+{$IFNDEF UNICODE}
+    FWideComment: WideString;
+{$ENDIF}
   public
     procedure Assign(Source: TPersistent); override;
   published
@@ -69,6 +72,9 @@ type
     property BigBugFixed: Boolean read FBigBugFixed write FBigBugFixed;
     property BetaVersion: Boolean read FBetaVersion write FBetaVersion;
     property Comment: string read FComment write FComment;
+{$IFNDEF UNICODE}
+    property WideComment: WideString read FWideComment write FWideComment;
+{$ENDIF}
     property URL: string read FURL write FURL;
   end;
 
@@ -91,7 +97,8 @@ type
     FUserCheck: Boolean;
     FUpgradeCollection: TCnWizUpgradeCollection;
     FHTTP: TCnHTTP;
-    function GetUpgradeCollection(const Content: string): Boolean;
+    function GetUpgradeCollection(const Content: string
+      {$IFNDEF UNICODE}; WideCon: WideString {$ENDIF}): Boolean;
     procedure CheckUpgrade;
     procedure FindLinks(S: string; Strings: TStrings);
     function GetUpgrade(const AURL: string; Level: Integer): Boolean;
@@ -195,6 +202,9 @@ begin
     FComment := TCnWizUpgradeItem(Source).FComment;
     FURL := TCnWizUpgradeItem(Source).FURL;
     FBetaVersion := TCnWizUpgradeItem(Source).FBetaVersion;
+{$IFNDEF UNICODE}
+    FWideComment := TCnWizUpgradeItem(Source).FWideComment;
+{$ENDIF}
   end
   else
     inherited;
@@ -312,6 +322,9 @@ end;
 function TCnWizUpgradeThread.GetUpgrade(const AURL: string; Level: Integer): Boolean;
 var
   Content: string;
+{$IFNDEF UNICODE}
+  WideCon: WideString;
+{$ENDIF}
   Res: AnsiString;
   Strings: TStrings;
   i: Integer;
@@ -321,9 +334,10 @@ begin
   // 新的升级文件里，内容都是 UTF8 的了
   Res := TrimBom(FHTTP.GetString(AURL));
 {$IFDEF UNICODE}
-  Content := UTF8ToString();
+  Content := UTF8ToString(Res);
 {$ELSE}
-  Content := CnUtf8ToAnsi(FHTTP.GetString(AURL));
+  Content := CnUtf8ToAnsi(Res);
+  WideCon := CnUtf8DecodeToWideString(Res);
 {$ENDIF}
 
 {$IFDEF DEBUG}
@@ -334,7 +348,7 @@ begin
     Exit;
 
   // 从返回结果取更新内容
-  if GetUpgradeCollection(Content) then
+  if GetUpgradeCollection(Content{$IFNDEF UNICODE}, WideCon {$ENDIF}) then
   begin
     Result := True;
     Exit;
@@ -359,11 +373,16 @@ begin
   end;
 end;
 
-function TCnWizUpgradeThread.GetUpgradeCollection(const Content: string): Boolean;
+function TCnWizUpgradeThread.GetUpgradeCollection(const Content: string
+  {$IFNDEF UNICODE}; WideCon: WideString {$ENDIF}): Boolean;
 var
   Strings: TStrings;
   Ini: TMemIniFile;
   i: Integer;
+{$IFNDEF UNICODE}
+  ADateStr: WideString;
+  Idx: Integer;
+{$ENDIF}
   ADate: TDateTime;
   Item: TCnWizUpgradeItem;
 begin
@@ -381,6 +400,9 @@ begin
       for i := 0 to Strings.Count - 1 do
       begin
         try
+{$IFNDEF UNICODE}
+          ADateStr := WideString(Strings[i]);
+{$ENDIF}
           ADate := CnStrToDate(Strings[i]);
           Item := FUpgradeCollection.Add;
           with Item do
@@ -390,6 +412,27 @@ begin
             NewFeature := Ini.ReadBool(Strings[i], csNewFeature, False);
             BigBugFixed := Ini.ReadBool(Strings[i], csBigBugFixed, False);
             Comment := StrToLines(Ini.ReadString(Strings[i], SCnWizUpgradeCommentName, ''));
+{$IFNDEF UNICODE}
+            Idx := Pos(ADateStr, WideCon);
+            if Idx > 0 then
+            begin
+              Delete(WideCon, 1, Idx - 1);
+              Idx := Pos(SCnWizUpgradeCommentName + '=', WideCon);
+              if Idx > 0 then
+              begin
+                Delete(WideCon, 1, Idx - 1);
+                Idx := Pos(#13#10, WideCon);
+                if Idx > 0 then
+                begin
+                  // From 1 to Idx - 1 is Comment
+                  WideComment := Copy(WideCon, Length(SCnWizUpgradeCommentName) + 2,
+                    Idx - 1 - (Length(SCnWizUpgradeCommentName) + 1));
+                  WideComment := WideStrToLines(WideComment);
+                end;
+              end;
+            end;
+            // Find ADate in WideComment and delete before, Find SCnWizUpgradeCommentName and CRLF to Comment
+{$ENDIF}
             URL := Ini.ReadString(Strings[i], csURL, '');
             BetaVersion := Ini.ReadBool(Strings[i], csBetaVersion, False);
           end;
@@ -519,7 +562,11 @@ begin
         CnDateToStr(FCollection.Items[i].Date)]);
       Add(s);
       Add(GetLine('-', Length(s)));
+{$IFNDEF UNICODE}
+      Add(FCollection.Items[i].WideComment);
+{$ELSE}
       Add(FCollection.Items[i].Comment);
+{$ENDIF}
       Add('');
       Add('URL: ' + FCollection.Items[i].URL);
       if i < FCollection.Count - 1 then
