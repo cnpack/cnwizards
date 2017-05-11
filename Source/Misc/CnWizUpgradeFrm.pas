@@ -312,15 +312,24 @@ end;
 function TCnWizUpgradeThread.GetUpgrade(const AURL: string; Level: Integer): Boolean;
 var
   Content: string;
+  Res: AnsiString;
   Strings: TStrings;
   i: Integer;
 begin
   Result := False;
-  Content := string(FHTTP.GetString(AURL));
-{$IFDEF Debug}
+
+  // 新的升级文件里，内容都是 UTF8 的了
+  Res := TrimBom(FHTTP.GetString(AURL));
+{$IFDEF UNICODE}
+  Content := UTF8ToString();
+{$ELSE}
+  Content := CnUtf8ToAnsi(FHTTP.GetString(AURL));
+{$ENDIF}
+
+{$IFDEF DEBUG}
   CnDebugger.LogMsg('Upgrade: ' + AURL);
   CnDebugger.LogMsg(Content);
-{$ENDIF Debug}
+{$ENDIF}
   if FHTTP.GetDataFail or FHTTP.Aborted then
     Exit;
 

@@ -162,7 +162,7 @@ resourcestring
   SCnWizOnlineHelpUrl = 'http://help.cnpack.org/cnwizards/';
 
   // CnWizUpgrade
-  SCnWizDefUpgradeURL = 'http://upgrade.cnpack.org/cnwizards/';
+  SCnWizDefUpgradeURL = 'http://upgrade.cnpack.org/cnwizards/upgrade.php';
   SCnWizDefNightlyBuildUrl = 'http://upgrade.cnpack.org/cnwizards/latest/';
   SCnWizUpgradeVersion = 'Ver %s Build %s';
 
