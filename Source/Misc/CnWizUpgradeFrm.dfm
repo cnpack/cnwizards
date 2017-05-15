@@ -84,18 +84,6 @@ inherited CnWizUpgradeForm: TCnWizUpgradeForm
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
-  object Memo: TMemo
-    Left = 48
-    Top = 24
-    Width = 391
-    Height = 208
-    Align = alClient
-    Color = clInfoBk
-    ReadOnly = True
-    ScrollBars = ssVertical
-    TabOrder = 2
-    WordWrap = False
-  end
   object pnlTop: TPanel
     Left = 0
     Top = 0
@@ -133,7 +121,7 @@ inherited CnWizUpgradeForm: TCnWizUpgradeForm
     Height = 106
     Align = alBottom
     BevelOuter = bvNone
-    TabOrder = 4
+    TabOrder = 3
     object Bevel1: TBevel
       Left = 8
       Top = 63
@@ -292,6 +280,6 @@ inherited CnWizUpgradeForm: TCnWizUpgradeForm
     Height = 208
     Align = alRight
     BevelOuter = bvNone
-    TabOrder = 3
+    TabOrder = 2
   end
 end

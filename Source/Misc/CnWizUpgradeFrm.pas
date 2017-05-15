@@ -113,7 +113,6 @@ type
 { TCnWizUpgradeForm }
 
   TCnWizUpgradeForm = class(TCnTranslateForm)
-    Memo: TMemo;
     pnlTop: TPanel;
     Label1: TLabel;
     Bevel2: TBevel;
@@ -138,6 +137,7 @@ type
   private
     { Private declarations }
     FCollection: TCnWizUpgradeCollection;
+    FMemo: TMemo;
   protected
     function GetHelpTopic: string; override;
   public
@@ -545,6 +545,23 @@ procedure TCnWizUpgradeForm.FormCreate(Sender: TObject);
 begin
   FCollection := TCnWizUpgradeCollection.Create;
   ShowHint := WizOptions.ShowHint;
+
+  FMemo := TMemo.Create(Self);
+
+  //Memo
+  FMemo.Name := 'Memo';
+  FMemo.Parent := Self;
+  FMemo.Left := 48;
+  FMemo.Top := 24;
+  FMemo.Width := 391;
+  FMemo.Height := 208;
+  FMemo.Align := alClient;
+  FMemo.Color := clInfoBk;
+  FMemo.ReadOnly := True;
+  FMemo.ScrollBars := ssBoth;
+  FMemo.TabOrder := 2;
+  FMemo.WordWrap := False;
+  FMemo.Lines.Clear;
 end;
 
 const
@@ -552,29 +569,31 @@ const
 
 procedure TCnWizUpgradeForm.FormShow(Sender: TObject);
 var
-  i: Integer;
-  s: string;
+  I: Integer;
+  S: string;
 begin
-  for i := 0 to FCollection.Count - 1 do
-    with Memo.Lines do
+  for I := 0 to FCollection.Count - 1 do
+  begin
+    with FMemo.Lines do
     begin
-      s := Format(SCnWizUpgradeVersion, [FCollection.Items[i].Version,
-        CnDateToStr(FCollection.Items[i].Date)]);
-      Add(s);
-      Add(GetLine('-', Length(s)));
+      S := Format(SCnWizUpgradeVersion, [FCollection.Items[I].Version,
+        CnDateToStr(FCollection.Items[I].Date)]);
+      Add(S);
+      Add(GetLine('-', Length(S)));
 {$IFNDEF UNICODE}
-      Add(FCollection.Items[i].WideComment);
+      Add(FCollection.Items[I].WideComment);
 {$ELSE}
-      Add(FCollection.Items[i].Comment);
+      Add(FCollection.Items[I].Comment);
 {$ENDIF}
       Add('');
-      Add('URL: ' + FCollection.Items[i].URL);
-      if i < FCollection.Count - 1 then
+      Add('URL: ' + FCollection.Items[I].URL);
+      if I < FCollection.Count - 1 then
       begin
         Add('');
         Add('');
       end;
     end;
+  end;
   cbNoHint.Checked := WizOptions.ReadBool(SCnUpgradeSection, csNoHint, True);
 end;
 
