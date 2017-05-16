@@ -429,7 +429,7 @@ begin
   CnIdeVersionIsLatest := IsDelphi101BIdeVersionLatest;
 {$ENDIF}
 
-{$IFDEF DELPHI101_BERLIN}
+{$IFDEF DELPHI102_TOKYO}
   CnIdeVersionIsLatest := IsDelphi102TIdeVersionLatest;
 {$ENDIF}
 
