@@ -45,7 +45,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   WinInet, IniFiles, CnWizConsts, CnWizOptions, CnCommon, StdCtrls, ExtCtrls,
-  CnWizUtils, CnInetUtils, CnWizMultiLang, CnWizCompilerConst;
+  CnWizUtils, CnInetUtils, CnWizMultiLang, CnWizCompilerConst, CnWideLabel;
 
 type
 
@@ -138,6 +138,9 @@ type
     { Private declarations }
     FCollection: TCnWizUpgradeCollection;
     FMemo: TMemo;
+    FPanel: TPanel;
+    FLabelContent: TCnWideLabel;
+    function NeedManuallyUnicode: Boolean;
   protected
     function GetHelpTopic: string; override;
   public
@@ -546,22 +549,52 @@ begin
   FCollection := TCnWizUpgradeCollection.Create;
   ShowHint := WizOptions.ShowHint;
 
-  FMemo := TMemo.Create(Self);
+  if not NeedManuallyUnicode then
+  begin
+    FMemo := TMemo.Create(Self);
 
-  //Memo
-  FMemo.Name := 'Memo';
-  FMemo.Parent := Self;
-  FMemo.Left := 48;
-  FMemo.Top := 24;
-  FMemo.Width := 391;
-  FMemo.Height := 208;
-  FMemo.Align := alClient;
-  FMemo.Color := clInfoBk;
-  FMemo.ReadOnly := True;
-  FMemo.ScrollBars := ssBoth;
-  FMemo.TabOrder := 2;
-  FMemo.WordWrap := False;
-  FMemo.Lines.Clear;
+    //Memo
+    FMemo.Name := 'Memo';
+    FMemo.Parent := Self;
+    FMemo.Left := 48;
+    FMemo.Top := 24;
+    FMemo.Width := 391;
+    FMemo.Height := 208;
+    FMemo.Align := alClient;
+    FMemo.Color := clInfoBk;
+    FMemo.ReadOnly := True;
+    FMemo.ScrollBars := ssBoth;
+    FMemo.TabOrder := 2;
+    FMemo.WordWrap := False;
+    FMemo.Lines.Clear;
+  end
+  else
+  begin
+    FPanel := TPanel.Create(Self);
+    FLabelContent := TCnWideLabel.Create(Self);
+
+    //FPanel
+    FPanel.Name := 'FPanel';
+    FPanel.Parent := Self;
+    FPanel.Left := 48;
+    FPanel.Top := 24;
+    FPanel.Width := 391;
+    FPanel.Height := 208;
+    FPanel.BevelOuter := bvLowered;
+    FPanel.Color := clInfoBk;
+    FPanel.TabOrder := 4;
+    FPanel.Caption := '';
+
+    //FLabelContent
+    FLabelContent.Name := 'FLabelContent';
+    FLabelContent.Parent := FPanel;
+    FLabelContent.Left := 3;
+    FLabelContent.Top := 3;
+    FLabelContent.Width := 387;
+    FLabelContent.Height := 204;
+    FLabelContent.Align := alClient;
+    FLabelContent.Caption := '';
+  end;
 end;
 
 const
@@ -571,27 +604,54 @@ procedure TCnWizUpgradeForm.FormShow(Sender: TObject);
 var
   I: Integer;
   S: string;
+  W, T: WideString;
+
+  function AddLineCRLF(const Src: Widestring; const Subfix: WideString): WideString;
+  begin
+    if Subfix = '' then
+      Result := Src + #13#10
+    else
+      Result := Src + Subfix + #13#10;
+  end;
+
 begin
   for I := 0 to FCollection.Count - 1 do
   begin
-    with FMemo.Lines do
+    if not NeedManuallyUnicode then
     begin
-      S := Format(SCnWizUpgradeVersion, [FCollection.Items[I].Version,
-        CnDateToStr(FCollection.Items[I].Date)]);
-      Add(S);
-      Add(GetLine('-', Length(S)));
-{$IFNDEF UNICODE}
-      Add(FCollection.Items[I].WideComment);
-{$ELSE}
-      Add(FCollection.Items[I].Comment);
-{$ENDIF}
-      Add('');
-      Add('URL: ' + FCollection.Items[I].URL);
+      with FMemo.Lines do
+      begin
+        S := Format(SCnWizUpgradeVersion, [FCollection.Items[I].Version,
+          CnDateToStr(FCollection.Items[I].Date)]);
+        Add(S);
+        Add(GetLine('-', Length(S)));
+        Add(FCollection.Items[I].Comment);
+        Add('');
+        Add('URL: ' + FCollection.Items[I].URL);
+        if I < FCollection.Count - 1 then
+        begin
+          Add('');
+          Add('');
+        end;
+      end;
+    end
+    else
+    begin
+      T := '';
+      W := Format(SCnWizUpgradeVersion, [FCollection.Items[I].Version,
+          CnDateToStr(FCollection.Items[I].Date)]);
+      T := AddLineCRLF(T, W);
+      T := AddLineCRLF(T, GetLine('-', Length(W)));
+      T := AddLineCRLF(T, FCollection.Items[I].WideComment);
+      T := AddLineCRLF(T, '');
+      T := AddLineCRLF(T, 'URL: ' + FCollection.Items[I].URL);
       if I < FCollection.Count - 1 then
       begin
-        Add('');
-        Add('');
+        T := AddLineCRLF(T, '');
+        T := AddLineCRLF(T, '');
       end;
+
+      FLabelContent.Caption := FLabelContent.Caption + T;
     end;
   end;
   cbNoHint.Checked := WizOptions.ReadBool(SCnUpgradeSection, csNoHint, True);
@@ -635,6 +695,17 @@ end;
 procedure TCnWizUpgradeForm.cbNoHintClick(Sender: TObject);
 begin
   WizOptions.WriteBool(SCnUpgradeSection, csNoHint, cbNoHint.Checked);
+end;
+
+function TCnWizUpgradeForm.NeedManuallyUnicode: Boolean;
+begin
+  Result := False;
+{$IFNDEF UNICODE}
+  // 非 UNICODE 编译器下，当前语言是英语、且当前 CnWizards 语言是CHS/CHT 时
+  if CodePageOnlySupportsEnglish and ((WizOptions.CurrentLangID = 2052)
+    or (WizOptions.CurrentLangID = 1028)) then
+    Result := True;
+{$ENDIF}
 end;
 
 initialization
