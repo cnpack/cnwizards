@@ -69,10 +69,22 @@ begin
     Png := TPngImage.Create;
     Bmp := TBitmap.Create;
     Png.LoadFromFile(string(PngFile));
-    Bmp.Height := Png.Height;
-    Bmp.Width := Png.Width;
-    Png.Draw(Bmp.Canvas, Bmp.Canvas.ClipRect);
-    // bmp.Assign(png);  // 某些 png8 图会出错导致全黑，换成绘制的方式
+
+    // PNG24 以及不透明的 PNG8 对应 ptmNone
+    // PNG8 透明对应 ptmBit
+    // PNG32 对应 ptmPartial
+    if Png.TransparencyMode = ptmPartial then
+    begin
+      Bmp.Assign(Png);
+    end
+    else
+    begin
+      // 某些 png8 图会出错导致全黑，换成绘制的方式
+      Bmp.Height := Png.Height;
+      Bmp.Width := Png.Width;
+      Png.Draw(Bmp.Canvas, Bmp.Canvas.ClipRect);
+    end;
+
     if not Bmp.Empty then
     begin
       Bmp.SaveToFile(string(BmpFile));

@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls;
+  Dialogs, StdCtrls, pngimage;
 
 type
   TFormTestPng = class(TForm)
@@ -19,11 +19,22 @@ type
     btnToPng: TButton;
     dlgOpen: TOpenDialog;
     dlgSave: TSaveDialog;
+    grpPng: TGroupBox;
+    lblPng1: TLabel;
+    edtPng1: TEdit;
+    btnBrowsePng1: TButton;
+    btnToBmp1: TButton;
+    btnToBmp2: TButton;
+    lblPngInfo: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure btnBrowsePngClick(Sender: TObject);
     procedure btnBrowseBmpClick(Sender: TObject);
     procedure btnToBmpClick(Sender: TObject);
     procedure btnToPngClick(Sender: TObject);
+    procedure btnBrowsePng1Click(Sender: TObject);
+    procedure btnToBmp2Click(Sender: TObject);
+    procedure edtPng1Change(Sender: TObject);
+    procedure btnToBmp1Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -47,11 +58,80 @@ begin
     edtBmp.Text := dlgOpen.FileName;
 end;
 
+procedure TFormTestPng.btnBrowsePng1Click(Sender: TObject);
+begin
+  dlgOpen.Title := 'Select a PNG File';
+  if dlgOpen.Execute then
+    edtPng1.Text := dlgOpen.FileName;
+end;
+
 procedure TFormTestPng.btnBrowsePngClick(Sender: TObject);
 begin
   dlgOpen.Title := 'Select a PNG File';
   if dlgOpen.Execute then
     edtPng.Text := dlgOpen.FileName;
+end;
+
+procedure TFormTestPng.btnToBmp1Click(Sender: TObject);
+var
+  Png: TPngImage;
+  Bmp: TBitmap;
+begin
+  if not FileExists(edtPng1.Text) then
+    Exit;
+
+  Png := nil;
+  Bmp := nil;
+  try
+    Png := TPngImage.Create;
+    Bmp := TBitmap.Create;
+    Png.LoadFromFile(string(edtPng1.Text));
+    Bmp.Assign(Png);
+
+    if not Bmp.Empty then
+    begin
+      if dlgSave.Execute then
+      begin
+        Bmp.SaveToFile(string(dlgSave.FileName));
+        ShowMessage('Assign to Bmp OK.');
+      end;
+    end;
+  finally
+    Png.Free;
+    Bmp.Free;
+  end;
+end;
+
+procedure TFormTestPng.btnToBmp2Click(Sender: TObject);
+var
+  Png: TPngImage;
+  Bmp: TBitmap;
+begin
+  if not FileExists(edtPng1.Text) then
+    Exit;
+
+  Png := nil;
+  Bmp := nil;
+  try
+    Png := TPngImage.Create;
+    Bmp := TBitmap.Create;
+    Png.LoadFromFile(string(edtPng1.Text));
+    Bmp.Height := Png.Height;
+    Bmp.Width := Png.Width;
+    Png.Draw(Bmp.Canvas, Bmp.Canvas.ClipRect);
+
+    if not Bmp.Empty then
+    begin
+      if dlgSave.Execute then
+      begin
+        Bmp.SaveToFile(string(dlgSave.FileName));
+        ShowMessage('Draw to Bmp OK.');
+      end;
+    end;
+  finally
+    Png.Free;
+    Bmp.Free;
+  end;
 end;
 
 procedure TFormTestPng.btnToBmpClick(Sender: TObject);
@@ -84,6 +164,25 @@ begin
       else
         ShowMessage('BMP Convert Fail.');
     end;
+end;
+
+procedure TFormTestPng.edtPng1Change(Sender: TObject);
+var
+  P: TPngImage;
+begin
+  if FileExists(edtPng1.Text) then
+  begin
+    P := TPngImage.Create;
+    P.LoadFromFile(edtPng1.Text);
+    // PNG8 不透明以及 PNG24 对应 ptmNone
+    // PNG8 透明对应 ptmBit
+    // PNG32 对应 ptmPartial
+    lblPngInfo.Caption := Format('TransparentMod %d.', [Ord(P.TransparencyMode)]);
+
+    P.Free;
+  end
+  else
+    lblPngInfo.Caption := '';
 end;
 
 procedure TFormTestPng.FormCreate(Sender: TObject);
