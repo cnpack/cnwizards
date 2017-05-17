@@ -60,9 +60,7 @@ type
     FComment: string;
     FURL: string;
     FBetaVersion: Boolean;
-{$IFNDEF UNICODE}
     FWideComment: WideString;
-{$ENDIF}
   public
     procedure Assign(Source: TPersistent); override;
   published
@@ -72,9 +70,7 @@ type
     property BigBugFixed: Boolean read FBigBugFixed write FBigBugFixed;
     property BetaVersion: Boolean read FBetaVersion write FBetaVersion;
     property Comment: string read FComment write FComment;
-{$IFNDEF UNICODE}
     property WideComment: WideString read FWideComment write FWideComment;
-{$ENDIF}
     property URL: string read FURL write FURL;
   end;
 
@@ -205,9 +201,7 @@ begin
     FComment := TCnWizUpgradeItem(Source).FComment;
     FURL := TCnWizUpgradeItem(Source).FURL;
     FBetaVersion := TCnWizUpgradeItem(Source).FBetaVersion;
-{$IFNDEF UNICODE}
     FWideComment := TCnWizUpgradeItem(Source).FWideComment;
-{$ENDIF}
   end
   else
     inherited;
