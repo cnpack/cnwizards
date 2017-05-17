@@ -33,11 +33,20 @@ uses
   VirtualTrees in 'VirtualTree\VirtualTrees.pas',
   CnMsgXMLFiler in 'CnMsgXMLFiler.pas',
   CnFilterFrm in 'CnFilterFrm.pas' {CnSenderFilterFrm},
-  CnViewOption in 'CnViewOption.pas' {CnViewerOptionsFrm};
+  CnViewOption in 'CnViewOption.pas' {CnViewerOptionsFrm},
+  CnWizCfgUtils in '..\..\Source\Utils\CnWizCfgUtils.pas';
 
 {$R *.RES}
 
 begin
+  if GetCWUseCustomUserDir then
+    LoadOptions(GetCWUserPath + SCnOptionFileName)
+  else
+    LoadOptions(ExtractFilePath(Application.ExeName) + SCnOptionFileName);
+
+  if CnViewerOptions.LocalSession or FindCmdLineSwitch('local', ['-', '/'], True) then
+    ReInitLocalConsts;
+
   if CheckRunning then Exit;
   Application.Initialize;
   Application.CreateForm(TCnMainViewer, CnMainViewer);

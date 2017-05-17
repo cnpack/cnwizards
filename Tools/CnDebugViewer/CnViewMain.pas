@@ -368,17 +368,9 @@ var
   Res: TCnCoreInitResults;
   S: string;
 begin
-  if GetCWUseCustomUserDir then
-    LoadOptions(GetCWUserPath + SCnOptionFileName)
-  else
-    LoadOptions(_CnExtractFilePath(Application.ExeName) + SCnOptionFileName);
-
   // 命令行里有 -local 时使用本地模式
   if CnViewerOptions.LocalSession or FindCmdLineSwitch('local', ['-', '/'], True) then
-  begin
-    ReInitLocalConsts;
     Caption := Caption + '- (Local)';
-  end;
 
   Res := InitializeCore;
   if Res <> ciOK then
