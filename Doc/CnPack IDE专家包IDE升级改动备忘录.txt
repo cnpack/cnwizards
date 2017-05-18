@@ -57,3 +57,7 @@
   一、cnwizards\Readme*.txt，关于所支持的 IDE 的列表，各种语言都得改。
 
   二、cnwizards\Help\*\cnpack\index.htm，关于所支持的 IDE 的列表，各种语言都得加。
+
+  三、文档“CnWizards简介”中增加新的中英文 IDE 名称。
+
+  四、网站上发布时，中英文介绍中也需要增加新的 IDE 名称。
