@@ -196,8 +196,9 @@ begin
     RegisterMethod('Procedure TraceConstArray( const Arr : array of const; const AMsg : string)');
     RegisterMethod('Procedure TraceClass( const AClass : TClass; const AMsg: string)');
     RegisterMethod('Procedure TraceInterface( const AIntf : IUnknown; const AMsg : string)');
-    RegisterMethod('Procedure EvaluateObject( AObject : TObject);');
-    RegisterMethod('Procedure EvaluateControlUnderPos( const ScreenPos: TPoint);');
+    RegisterMethod('Procedure EvaluateObject( AObject : TObject)');
+    RegisterMethod('Procedure EvaluateControlUnderPos( const ScreenPos : TPoint)');
+    RegisterMethod('Function ObjectFromInterface(const AIntf : IUnknown): TObject');
     RegisterProperty('Channel', 'TCnDebugChannel', iptr);
     RegisterProperty('Filter', 'TCnDebugFilter', iptr);
     RegisterProperty('Active', 'Boolean', iptrw);
@@ -529,6 +530,7 @@ begin
     RegisterMethod(@TCnDebugger.TraceInterface, 'TraceInterface');
     RegisterMethod(@TCnDebuggerEvaluateObject_P, 'EvaluateObject');
     RegisterMethod(@TCnDebuggerEvaluateControlUnderPos_P, 'EvaluateControlUnderPos');
+    RegisterMethod(@TCnDebugger.ObjectFromInterface, 'ObjectFromInterface');
     RegisterPropertyHelper(@TCnDebuggerChannel_R, nil, 'Channel');
     RegisterPropertyHelper(@TCnDebuggerFilter_R, nil, 'Filter');
     RegisterPropertyHelper(@TCnDebuggerActive_R, @TCnDebuggerActive_W, 'Active');
