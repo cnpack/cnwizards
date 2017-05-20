@@ -331,7 +331,7 @@ type
 
     procedure UpdateFlatPanelsPosition;
     procedure OnAppMessage(var Msg: TMsg; var Handled: Boolean);
-    procedure OnCallWndProcRet(hwnd: HWND; Control: TWinControl; Msg: TMessage);
+    procedure OnCallWndProcRet(Handle: HWND; Control: TWinControl; Msg: TMessage);
     procedure FormEditorNotify(FormEditor: IOTAFormEditor;
       NotifyType: TCnWizFormEditorNotifyType; ComponentHandle: TOTAHandle;
       Component: TComponent; const OldName, NewName: string);
@@ -2283,7 +2283,7 @@ begin
   end;
 end;
 
-procedure TCnFormEnhanceWizard.OnCallWndProcRet(hwnd: HWND; Control: TWinControl;
+procedure TCnFormEnhanceWizard.OnCallWndProcRet(Handle: HWND; Control: TWinControl;
   Msg: TMessage);
 begin
   if not Active or FIsEmbeddedDesigner or FUpdating then

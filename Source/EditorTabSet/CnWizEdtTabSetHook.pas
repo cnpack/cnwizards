@@ -106,7 +106,7 @@ type
     FTabControl: TTabControl;
     FEditControl: TWinControl;
     procedure DoUpdateTabSet(Sender: TObject);
-    procedure OnCallWndProcRet(hwnd: HWND; Control: TWinControl; Msg: TMessage);
+    procedure OnCallWndProcRet(Handle: HWND; Control: TWinControl; Msg: TMessage);
     procedure OnTabSetChange(Sender: TObject; NewTab: Integer;
       var AllowChange: Boolean);
     procedure OnStatusBarResize(Sender: TObject);
@@ -361,7 +361,7 @@ begin
   UpdateTabSet;
 end;
 
-procedure TCnWizEdtTabSetHookComp.OnCallWndProcRet(hwnd: HWND;
+procedure TCnWizEdtTabSetHookComp.OnCallWndProcRet(Handle: HWND;
   Control: TWinControl; Msg: TMessage);
 begin
   if (Control = FTabControl) and ((Msg.Msg = TCM_INSERTITEM) or

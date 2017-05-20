@@ -340,6 +340,12 @@ function GetIDEBigImageList: TImageList;
 procedure ClearIDEBigImageList;
 {* 清空大尺寸的 IDE 的 ImageList，供通知重建而使用}
 
+function IsDesignControl(AControl: TControl): Boolean;
+{* 判断一 Control 是否是设计期 WinControl}
+
+function IsDesignWinControl(AControl: TWinControl): Boolean;
+{* 判断一 WinControl 是否是设计期 WinControl}
+
 type
   TEnumEditControlProc = procedure (EditWindow: TCustomForm; EditControl:
     TControl; Context: Pointer) of object;
@@ -1852,6 +1858,26 @@ end;
 procedure FreeIDEBigImageList;
 begin
   FreeAndNil(FIDEBigImageList);
+end;
+
+// 判断一 Control 是否是设计期 Control
+function IsDesignControl(AControl: TControl): Boolean;
+begin
+  Result := (AControl <> nil) and (AControl is TControl) and
+    (csDesigning in AControl.ComponentState) and (AControl.Parent <> nil) and
+    not (AControl is TCustomForm) and not (AControl is TCustomFrame) and
+    ((AControl.Owner is TCustomForm) or (AControl.Owner is TCustomFrame)) and
+    (csDesigning in AControl.Owner.ComponentState);
+end;
+
+// 判断一 WinControl 是否是设计期 Control
+function IsDesignWinControl(AControl: TWinControl): Boolean;
+begin
+  Result := (AControl <> nil) and (AControl is TWinControl) and
+    (csDesigning in AControl.ComponentState) and (AControl.Parent <> nil) and
+    not (AControl is TCustomForm) and not (AControl is TCustomFrame) and
+    ((AControl.Owner is TCustomForm) or (AControl.Owner is TCustomFrame)) and
+    (csDesigning in AControl.Owner.ComponentState);
 end;
 
 // 判断指定控件是否代码编辑器控件

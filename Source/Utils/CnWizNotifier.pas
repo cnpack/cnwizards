@@ -429,10 +429,10 @@ type
 
     procedure DoApplicationIdle(Sender: TObject; var Done: Boolean);
     procedure DoApplicationMessage(var Msg: TMsg; var Handled: Boolean);
-    procedure DoMsgHook(AList, MsgList: TList; hwnd: HWND; Msg: TMessage);
-    procedure DoCallWndProc(hwnd: HWND; Msg: TMessage);
-    procedure DoCallWndProcRet(hwnd: HWND; Msg: TMessage);
-    procedure DoGetMsg(hwnd: HWND; Msg: TMessage);
+    procedure DoMsgHook(AList, MsgList: TList; Handle: HWND; Msg: TMessage);
+    procedure DoCallWndProc(Handle: HWND; Msg: TMessage);
+    procedure DoCallWndProcRet(Handle: HWND; Msg: TMessage);
+    procedure DoGetMsg(Handle: HWND; Msg: TMessage);
     procedure DoActiveFormChange;
     procedure DoApplicationActivate(Sender: TObject);
     procedure DoApplicationDeactivate(Sender: TObject);
@@ -1772,7 +1772,7 @@ end;
 // HOOK ֪ͨ
 //------------------------------------------------------------------------------
 
-procedure TCnWizNotifierServices.DoMsgHook(AList, MsgList: TList; hwnd: HWND;
+procedure TCnWizNotifierServices.DoMsgHook(AList, MsgList: TList; Handle: HWND;
   Msg: TMessage);
 var
   I: Integer;
@@ -1793,11 +1793,11 @@ var
 begin
   if not IdeClosing and (AList <> nil) and IsMsgRegistered then
   begin
-    Control := FindControl(hwnd);
+    Control := FindControl(Handle);
     for I := AList.Count - 1 downto 0 do
     try
       with PCnWizNotifierRecord(AList[I])^ do
-        TCnWizMsgHookNotifier(Notifier)(hwnd, Control, Msg);
+        TCnWizMsgHookNotifier(Notifier)(Handle, Control, Msg);
     except
       DoHandleException('TCnWizNotifierServices.DoMsgHook[' + IntToStr(I) + ']');
     end;
@@ -1816,9 +1816,9 @@ begin
   RemoveNotifier(FCallWndProcNotifiers, TMethod(Notifier));
 end;
 
-procedure TCnWizNotifierServices.DoCallWndProc(hwnd: HWND; Msg: TMessage);
+procedure TCnWizNotifierServices.DoCallWndProc(Handle: HWND; Msg: TMessage);
 begin
-  DoMsgHook(FCallWndProcNotifiers, FCallWndProcMsgList, hwnd, Msg);
+  DoMsgHook(FCallWndProcNotifiers, FCallWndProcMsgList, Handle, Msg);
 end;
 
 procedure TCnWizNotifierServices.AddCallWndProcRetNotifier(
@@ -1833,10 +1833,10 @@ begin
   RemoveNotifier(FCallWndProcRetNotifiers, TMethod(Notifier));
 end;
 
-procedure TCnWizNotifierServices.DoCallWndProcRet(hwnd: HWND;
+procedure TCnWizNotifierServices.DoCallWndProcRet(Handle: HWND;
   Msg: TMessage);
 begin
-  DoMsgHook(FCallWndProcRetNotifiers, FCallWndProcRetMsgList, hwnd, Msg);
+  DoMsgHook(FCallWndProcRetNotifiers, FCallWndProcRetMsgList, Handle, Msg);
 end;
 
 procedure TCnWizNotifierServices.AddGetMsgNotifier(
@@ -1851,9 +1851,9 @@ begin
   RemoveNotifier(FGetMsgNotifiers, TMethod(Notifier));
 end;
 
-procedure TCnWizNotifierServices.DoGetMsg(hwnd: HWND; Msg: TMessage);
+procedure TCnWizNotifierServices.DoGetMsg(Handle: HWND; Msg: TMessage);
 begin
-  DoMsgHook(FGetMsgNotifiers, FGetMsgMsgList, hwnd, Msg);
+  DoMsgHook(FGetMsgNotifiers, FGetMsgMsgList, Handle, Msg);
 end;
 
 procedure TCnWizNotifierServices.BreakpointAdded(

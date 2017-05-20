@@ -195,7 +195,6 @@ type
     procedure UpdateDrawDesignForm(DesignForm: TWinControl);
     procedure DoSetTabOrder(WinControl: TWinControl; AInludeChildren: Boolean);
 
-    function IsDesignControl(AControl: TWinControl): Boolean;
     procedure DoDrawControls(Sender: TObject);
     function GetDispFont: TFont;
     procedure SetDispTabOrder(const Value: Boolean);
@@ -206,8 +205,8 @@ type
     procedure SubActionExecute(Index: Integer); override;
     procedure SubActionUpdate(Index: Integer); override;
     procedure SetActive(Value: Boolean); override;
-    procedure OnCallWndProcRet(hwnd: HWND; Control: TWinControl; Msg: TMessage);
-    procedure OnGetMsg(hwnd: HWND; Control: TWinControl; Msg: TMessage);
+    procedure OnCallWndProcRet(Handle: HWND; Control: TWinControl; Msg: TMessage);
+    procedure OnGetMsg(Handle: HWND; Control: TWinControl; Msg: TMessage);
     procedure FormNotify(FormEditor: IOTAFormEditor;
       NotifyType: TCnWizFormEditorNotifyType; ComponentHandle: TOTAHandle;
       Component: TComponent; const OldName, NewName: string);
@@ -246,7 +245,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnWizCommentFrm, CnIni, CnGraphUtils, CnWizOptions, Math;
+  CnWizCommentFrm, CnIni, CnGraphUtils, CnWizOptions, CnWizIdeUtils, Math;
 
 {$R *.DFM}
 
@@ -1085,22 +1084,13 @@ begin
   end;
 end;
 
-function TCnTabOrderWizard.IsDesignControl(AControl: TWinControl): Boolean;
-begin
-  Result := (AControl <> nil) and (AControl is TWinControl) and
-    (csDesigning in AControl.ComponentState) and (AControl.Parent <> nil) and
-    not (AControl is TCustomForm) and not (AControl is TCustomFrame) and
-    ((AControl.Owner is TCustomForm) or (AControl.Owner is TCustomFrame)) and
-    (csDesigning in AControl.Owner.ComponentState);
-end;
-
 procedure TCnTabOrderWizard.DoDrawControls(Sender: TObject);
 begin
   while FDrawControls.Count > 0 do
     DrawControlTabOrder(TWinControl(FDrawControls.Extract(FDrawControls.First)));
 end;
 
-procedure TCnTabOrderWizard.OnGetMsg(hwnd: HWND; Control: TWinControl;
+procedure TCnTabOrderWizard.OnGetMsg(Handle: HWND; Control: TWinControl;
   Msg: TMessage);
 var
   IsPaint: Boolean;
@@ -1111,7 +1101,7 @@ begin
   DoDrawControls(nil);
 
   IsPaint := FDispTabOrder and (Msg.Msg = WM_PAINT);
-  if IsPaint and IsDesignControl(Control) then
+  if IsPaint and IsDesignWinControl(Control) then
   begin
     // GetMsg 发生在处理消息之前，此处将控件加到列表，在下次收到消息或 Idle 时再绘制
     FDrawControls.Add(Control);
@@ -1120,7 +1110,7 @@ begin
 end;
 
 // 消息处理后
-procedure TCnTabOrderWizard.OnCallWndProcRet(hwnd: HWND; Control: TWinControl;
+procedure TCnTabOrderWizard.OnCallWndProcRet(Handle: HWND; Control: TWinControl;
   Msg: TMessage);
 var
   IsPaint: Boolean;
@@ -1130,7 +1120,7 @@ begin
 
   IsPaint := FDispTabOrder and (Msg.Msg = WM_PAINT);
   IsReset := FAutoReset and (Msg.Msg = WM_WINDOWPOSCHANGED);
-  if (IsPaint or IsReset) and IsDesignControl(Control) then
+  if (IsPaint or IsReset) and IsDesignWinControl(Control) then
   begin
     if IsPaint then // 重绘消息
     begin
