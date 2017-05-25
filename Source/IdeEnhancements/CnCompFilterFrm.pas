@@ -40,7 +40,7 @@ interface
 
 {$IFDEF CNWIZARDS_CNPALETTEENHANCEWIZARD}
 
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+{$IFDEF SUPPORT_PALETTE_ENHANCE}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics,
@@ -263,7 +263,7 @@ implementation
 
 {$IFDEF CNWIZARDS_CNPALETTEENHANCEWIZARD}
 
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+{$IFDEF SUPPORT_PALETTE_ENHANCE}
 
 {$R *.DFM}
 
@@ -502,7 +502,7 @@ begin
               else
                 Info.CompName := Info.InternalName;
 
-{$IFDEF SUPPORTS_FMX}
+{$IFDEF SUPPORT_FMX}
               // FMX 等单元即使获取不到 Class，也需要用 PaletteAPI 的方式（之前是选择再解析 Hint）来获取单元名等信息
               // 选择再解析可能出现屏幕闪动因此弃用了。
               // 注意低版本 Delphi 也有 TTextViewer 等没注册到组件版上的控件，那些无需获取

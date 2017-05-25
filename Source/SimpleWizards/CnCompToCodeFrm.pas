@@ -46,7 +46,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, ComCtrls, ToolWin, ActnList, Clipbrd, ToolsAPI, Contnrs,
   TypInfo, CnWizConsts, CnWizMultiLang, CnCommon,
-{$IFDEF SUPPORTS_FMX}
+{$IFDEF SUPPORT_FMX}
   CnFmxUtils,
 {$ENDIF}
   CnWizUtils;
@@ -400,7 +400,7 @@ begin
   end
   else
   begin
-{$IFDEF SUPPORTS_FMX}
+{$IFDEF SUPPORT_FMX}
     if CnFmxIsInheritedFromControl(AComp) then
     begin
       for I := 0 to CnFmxGetControlsCount(AComp) - 1 do
@@ -464,7 +464,7 @@ var
   PName, PValue, PItemClass, PItemName, PItemValue: string;
   ColonPos, EquPos, DotPos, I: Integer;
   AChildComp: TComponent;
-{$IFDEF SUPPORTS_FMX}
+{$IFDEF SUPPORT_FMX}
   TmpComp: TComponent;
 {$ENDIF}
   NeedRefreshPropNames: Boolean;
@@ -584,7 +584,7 @@ begin
       end;
     end;
 
-{$IFDEF SUPPORTS_FMX}
+{$IFDEF SUPPORT_FMX}
     AParent := '';
     if CnFmxIsInheritedFromControl(AComp) then
     begin
@@ -672,7 +672,7 @@ begin
           end
           else
           begin
-{$IFDEF SUPPORTS_FMX}
+{$IFDEF SUPPORT_FMX}
             // 处理FMX的子组件
             if CnFmxIsInheritedFromControl(AComp) then
             begin
@@ -975,7 +975,7 @@ begin
               // Set 属性赋值在DXE后语法规则变了，枚举常量必须加入类名了，
               // 但它为了兼容又定义了许多和以前一样的const，导致无法判断[]中的
               // 量究竟是枚举常量还是正常的const。不好办，只能先硬补几个。
-{$IFDEF SUPPORTS_FMX}
+{$IFDEF SUPPORT_FMX}
               // 先只处理 FMX 中的一些特定名字。
               PValue := CnFmxFixSetValue(FPropNames.Values[PName], PValue);
 {$ENDIF}

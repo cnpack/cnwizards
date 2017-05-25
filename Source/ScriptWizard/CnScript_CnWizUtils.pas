@@ -410,7 +410,7 @@ begin
   CL.AddDelphiFunction('Function CnOtaGetProjectFromGroupByIndex( Index : Integer) : IOTAProject');
   CL.AddDelphiFunction('Procedure CnOtaGetOptionsNames( Options : IOTAOptions; List : TStrings; IncludeType : Boolean)');
   CL.AddDelphiFunction('Procedure CnOtaSetProjectOptionValue( Options : IOTAProjectOptions; const AOption, AValue : string)');
-{$IFDEF SUPPORTS_CROSS_PLATFORM}
+{$IFDEF SUPPORT_CROSS_PLATFORM}
   CL.AddDelphiFunction('Function CnOtaGetProjectPlatform( Project : IOTAProject) : string;');
   CL.AddDelphiFunction('Function CnOtaGetProjectFrameworkType( Project : IOTAProject) : string;');
   CL.AddDelphiFunction('Procedure CnOtaGetPlatformsFromBuildConfiguration( BuildConfig : IOTABuildConfiguration; Platforms : TStrings)');
@@ -667,7 +667,7 @@ begin
   S.RegisterDelphiFunction(@CnOtaGetProjectFromGroupByIndex, 'CnOtaGetProjectFromGroupByIndex', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetOptionsNames_P, 'CnOtaGetOptionsNames', cdRegister);
   S.RegisterDelphiFunction(@CnOtaSetProjectOptionValue, 'CnOtaSetProjectOptionValue', cdRegister);
-{$IFDEF SUPPORTS_CROSS_PLATFORM}
+{$IFDEF SUPPORT_CROSS_PLATFORM}
   S.RegisterDelphiFunction(@CnOtaGetProjectPlatform, 'CnOtaGetProjectPlatform', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetProjectFrameworkType, 'CnOtaGetProjectFrameworkType', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetPlatformsFromBuildConfiguration, 'CnOtaGetPlatformsFromBuildConfiguration', cdRegister);

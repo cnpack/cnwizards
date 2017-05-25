@@ -172,7 +172,7 @@ type
     FProcStack: TCnObjectStack;
     FIfStack: TCnObjectStack;
     function GetCount: Integer;
-    function GetToken(Index: Integer): TCnPasToken; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+    function GetToken(Index: Integer): TCnPasToken; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
   public
     constructor Create(SupportUnicodeIdent: Boolean = False);
     destructor Destroy; override;

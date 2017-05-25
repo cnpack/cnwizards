@@ -65,7 +65,7 @@ RequestExecutionLevel admin
 
 ;!define DEBUG "1"
 
-!define SUPPORTS_BDS "1"
+!define SUPPORT_BDS "1"
 
 ; Èí¼þÖ÷°æ±¾ºÅ
 !ifndef VER_MAJOR
@@ -420,7 +420,7 @@ FileLoop:
   FileClose $0
 !endif
 
-!ifdef SUPPORTS_BDS
+!ifdef SUPPORT_BDS
 !ifdef IDE_VERSION_D2005
   IfFileExists "$INSTDIR\CnWizards_D2005.dll" 0 +4
   FileOpen $0 "$INSTDIR\CnWizards_D2005.dll" a
@@ -686,7 +686,7 @@ Section "Delphi 7" SecD7
 SectionEnd
 !endif
 
-!ifdef SUPPORTS_BDS
+!ifdef SUPPORT_BDS
 !ifdef IDE_VERSION_D2005
 Section "BDS 2005" SecD2005
   SectionIn 1 2
@@ -957,7 +957,7 @@ Function .onMouseOverSection
     ${WordReplace} "$(DESDLL)" "#DLL#" "Delphi 7" "+" $R0
     !insertmacro MUI_DESCRIPTION_TEXT ${SecD7} $R0
   !endif
-!ifdef SUPPORTS_BDS
+!ifdef SUPPORT_BDS
   !ifdef IDE_VERSION_D2005
     ${WordReplace} "$(DESDLL)" "#DLL#" "BDS 2005" "+" $R0
     !insertmacro MUI_DESCRIPTION_TEXT ${SecD2005} $R0
@@ -1073,7 +1073,7 @@ Function SetCheckBoxes
 !ifdef IDE_VERSION_D7
   !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Borland\Delphi\7.0" "App" ${SecD7}
 !endif
-!ifdef SUPPORTS_BDS
+!ifdef SUPPORT_BDS
 !ifdef IDE_VERSION_D2005
   !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Borland\BDS\3.0" "App" ${SecD2005}
 !endif

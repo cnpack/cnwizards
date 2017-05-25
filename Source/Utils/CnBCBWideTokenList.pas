@@ -240,7 +240,7 @@ implementation
 type
   TAnsiCharSet = set of AnsiChar;
 
-function _WideCharInSet(C: WideChar; CharSet: TAnsiCharSet): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+function _WideCharInSet(C: WideChar; CharSet: TAnsiCharSet): Boolean; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
 begin
   if Ord(C) <= $FF then
     Result := AnsiChar(C) in CharSet
@@ -248,13 +248,13 @@ begin
     Result := False;
 end;
 
-function _AnsiStrIComp(S1, S2: PWideChar): Integer; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+function _AnsiStrIComp(S1, S2: PWideChar): Integer; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
 begin
   Result := CompareStringW(LOCALE_USER_DEFAULT, NORM_IGNORECASE, S1, -1,
     S2, -1) - 2;
 end;
 
-function _IndexChar(C: WideChar): CnIndexChar; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+function _IndexChar(C: WideChar): CnIndexChar; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
 begin
 {$IFDEF UNICODE}
   Result := C;

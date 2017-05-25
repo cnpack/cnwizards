@@ -364,7 +364,7 @@ begin
   AddFile(_CnChangeFileExt(FileName, '.todo'));
   AddFile(_CnChangeFileExt(FileName, '.tlb'));
 
-{$IFDEF SUPPORTS_FMX}
+{$IFDEF SUPPORT_FMX}
   // 加入 fmx 的支持
   AddFile(_CnChangeFileExt(FileName, '.fmx'));
 {$ENDIF}

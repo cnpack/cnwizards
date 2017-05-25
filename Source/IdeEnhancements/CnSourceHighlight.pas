@@ -5579,7 +5579,7 @@ var
   WideText: WideString;
 {$ENDIF}
 
-  function _GeneralStrLen(const Text: PCnIdeTokenChar): Integer; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+  function _GeneralStrLen(const Text: PCnIdeTokenChar): Integer; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
   begin
 {$IFDEF IDE_STRING_ANSI_UTF8}
     Result := lstrlenW(Text);

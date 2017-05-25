@@ -372,7 +372,7 @@ var
   // 用来存储大小写比较的，大写字母和对应小写字母的位置存储的值相同
   // 注意下标虽然是 Char，Unicode 环境下仍只能限于 #255 内，否则超界
 
-function _WideCharInSet(C: WideChar; CharSet: TAnsiCharSet): Boolean; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+function _WideCharInSet(C: WideChar; CharSet: TAnsiCharSet): Boolean; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
 begin
   if Ord(C) <= $FF then
     Result := AnsiChar(C) in CharSet
@@ -380,7 +380,7 @@ begin
     Result := False;
 end;
 
-function _IndexChar(C: WideChar): CnIndexChar; {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+function _IndexChar(C: WideChar): CnIndexChar; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
 begin
 {$IFDEF UNICODE}
   Result := C;
@@ -414,7 +414,7 @@ begin
 end;
 
 // 封装的取 mHashTable 值的函数，防止 WideChar 超界
-function GetHashTableValue(C: WideChar): Integer;  {$IFDEF SUPPORTS_INLINE} inline; {$ENDIF}
+function GetHashTableValue(C: WideChar): Integer;  {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
 begin
   if Ord(C) > Ord(High(mHashTable)) then
     Result := 0

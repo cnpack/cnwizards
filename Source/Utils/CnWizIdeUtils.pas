@@ -469,7 +469,7 @@ type
     procedure SetEnabled(const Value: Boolean);
     function GetTabs(Index: Integer): string;
 
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+{$IFDEF SUPPORT_PALETTE_ENHANCE}
   {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
     procedure GetComponentImageFromNewPalette(Bmp: TBitmap; const AComponentClassName: string);
   {$ELSE}
@@ -2159,7 +2159,7 @@ var
 
 function CnPaletteWrapper: TCnPaletteWrapper;
 begin
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+{$IFDEF SUPPORT_PALETTE_ENHANCE}
   if FCnPaletteWrapper = nil then
     FCnPaletteWrapper := TCnPaletteWrapper.Create;
   Result := FCnPaletteWrapper;
@@ -2254,7 +2254,7 @@ end;
 procedure TCnPaletteWrapper.GetComponentImage(Bmp: TBitmap;
   const AComponentClassName: string);
 begin
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+{$IFDEF SUPPORT_PALETTE_ENHANCE}
   {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
   GetComponentImageFromNewPalette(Bmp, AComponentClassName);
   {$ELSE}
@@ -2263,7 +2263,7 @@ begin
 {$ENDIF}
 end;
 
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+{$IFDEF SUPPORT_PALETTE_ENHANCE}
 
 {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
 

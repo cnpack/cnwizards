@@ -63,7 +63,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, Dialogs, Contnrs,
   {$IFDEF COMPILER6_UP} StrUtils, {$ENDIF}
-  {$IFDEF SUPPORTS_FMX} CnFmxUtils, {$ENDIF}
+  {$IFDEF SUPPORT_FMX} CnFmxUtils, {$ENDIF}
   ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles, ToolsAPI,
   Graphics, CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnWizUtils, CnIni,
   CnWizMultiLang, CnProjectViewBaseFrm, CnWizDfmParser, ImgList, ActnList,
@@ -238,7 +238,7 @@ var
 {$IFDEF BDS}
   ProjectGroup: IOTAProjectGroup;
 {$ENDIF}
-{$IFDEF SUPPORTS_FMX}
+{$IFDEF SUPPORT_FMX}
   ARect: TRect;
 {$ENDIF}
 
@@ -271,7 +271,7 @@ var
         Result := True;
       end;
 
-{$IFDEF SUPPORTS_FMX}
+{$IFDEF SUPPORT_FMX}
       if Assigned(Comp) and CnFmxIsInheritedFromCommonCustomForm(Comp) then
       begin
         AInfo.FormClass := Comp.ClassName;
@@ -326,7 +326,7 @@ begin
           FormFileName := _CnChangeFileExt(IModuleInfo.FileName, '.dfm');
           Exists := FileExists(FormFileName);
 
-{$IFDEF SUPPORTS_FMX}
+{$IFDEF SUPPORT_FMX}
           if not Exists then
           begin
             FormFileName := _CnChangeFileExt(IModuleInfo.FileName, '.fmx'); // FMX

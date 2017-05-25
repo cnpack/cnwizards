@@ -484,7 +484,7 @@ procedure CnOtaSetProjectCurrentBuildConfigurationValue(Project:IOTAProject; con
   AValue: string);
 {* 设置项目的当前BuildConfiguration中的属性值，如不支持此特性则什么都不做}
 
-{$IFDEF SUPPORTS_CROSS_PLATFORM}
+{$IFDEF SUPPORT_CROSS_PLATFORM}
 procedure CnOtaGetPlatformsFromBuildConfiguration(BuildConfig: IOTABuildConfiguration; Platforms: TStrings);
 {* 获取 BuildConfiguration 的 Platforms 至 TStrings 中，以避免低版本与脚本不支持泛型的问题}
 {$ENDIF}
@@ -1082,7 +1082,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-{$IFDEF SUPPORTS_FMX}
+{$IFDEF SUPPORT_FMX}
   CnFmxUtils,
 {$ENDIF}
   Math, CnWizOptions, CnGraphUtils
@@ -2544,7 +2544,7 @@ var
 begin
   FileExt := ExtractUpperFileExt(FileName);
   Result := (FileExt = '.DFM') or (FileExt = '.XFM');
-{$IFDEF SUPPORTS_FMX}
+{$IFDEF SUPPORT_FMX}
   if not Result then
     Result := (FileExt = '.FMX');
 {$ENDIF}
@@ -2939,7 +2939,7 @@ begin
       begin
         if (Component is TControl) and Assigned(TControl(Component).Parent) then
           List.Add(Component);
-{$IFDEF SUPPORTS_FMX}
+{$IFDEF SUPPORT_FMX}
         if CnFmxIsInheritedFromControl(Component) then
         begin
           if Assigned(CnFmxGetControlParent(Component)) then
@@ -3312,7 +3312,7 @@ end;
 function CnOtaGetProjectPlatform(Project: IOTAProject): string;
 begin
   Result := '';
-{$IFDEF SUPPORTS_CROSS_PLATFORM}
+{$IFDEF SUPPORT_CROSS_PLATFORM}
   if Project = nil then
     Project := CnOtaGetCurrentProject;
   if Project = nil then
@@ -3325,7 +3325,7 @@ end;
 function CnOtaGetProjectFrameworkType(Project: IOTAProject): string;
 begin
   Result := '';
-{$IFDEF SUPPORTS_CROSS_PLATFORM}
+{$IFDEF SUPPORT_CROSS_PLATFORM}
   if Project = nil then
     Project := CnOtaGetCurrentProject;
   if Project = nil then
@@ -3343,7 +3343,7 @@ var
   POCS: IOTAProjectOptionsConfigurations;
   BC: IOTABuildConfiguration;
   I: Integer;
-{$IFDEF SUPPORTS_CROSS_PLATFORM}
+{$IFDEF SUPPORT_CROSS_PLATFORM}
   PS: string;
   PlatformConfig: IOTABuildConfiguration;
   Proj: IOTAProject;
@@ -3368,7 +3368,7 @@ begin
 
     if BC <> nil then
     begin
-{$IFDEF SUPPORTS_CROSS_PLATFORM}
+{$IFDEF SUPPORT_CROSS_PLATFORM}
       Proj := Project;
       if Proj = nil then
         Proj := CnOtaGetCurrentProject;
@@ -3407,7 +3407,7 @@ var
   POCS: IOTAProjectOptionsConfigurations;
   BC: IOTABuildConfiguration;
   I: Integer;
-{$IFDEF SUPPORTS_CROSS_PLATFORM}
+{$IFDEF SUPPORT_CROSS_PLATFORM}
   PS: string;
   PlatformConfig: IOTABuildConfiguration;
   Proj: IOTAProject;
@@ -3432,7 +3432,7 @@ begin
 
     if BC <> nil then
     begin
-{$IFDEF SUPPORTS_CROSS_PLATFORM}
+{$IFDEF SUPPORT_CROSS_PLATFORM}
       Proj := Project;
       if Proj = nil then
         Proj := CnOtaGetCurrentProject;
@@ -3463,7 +3463,7 @@ begin
 {$ENDIF}
 end;
 
-{$IFDEF SUPPORTS_CROSS_PLATFORM}
+{$IFDEF SUPPORT_CROSS_PLATFORM}
 // 获取 BuildConfiguration 的 Platforms 至 TStrings 中，以避免低版本与脚本不支持泛型的问题}
 procedure CnOtaGetPlatformsFromBuildConfiguration(BuildConfig: IOTABuildConfiguration;
   Platforms: TStrings);

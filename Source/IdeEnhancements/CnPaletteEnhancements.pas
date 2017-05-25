@@ -100,7 +100,7 @@ type
     FFixEditorLineEndsBug: Boolean;
   {$ENDIF}
 
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+{$IFDEF SUPPORT_PALETTE_ENHANCE}
     FCompFilter: Boolean;
     FCompFilterShortCut: TShortCut;
     FCompFilterPnl: TPanel;
@@ -199,7 +199,7 @@ type
   protected
     procedure SetActive(Value: Boolean); override;
     function GetHasConfig: Boolean; override;
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+{$IFDEF SUPPORT_PALETTE_ENHANCE}
   {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
     property NewComponentPalette: TWinControl read GetNewComponentPalette;
   {$ELSE}
@@ -219,7 +219,7 @@ type
     procedure Config; override;
     procedure UpdateCompPalette;
 
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+{$IFDEF SUPPORT_PALETTE_ENHANCE}
 
   {$IFNDEF IDE_HAS_NEW_COMPONENT_PALETTE}
     property TabsMenu: Boolean read FTabsMenu write SetTabsMenu;
@@ -258,7 +258,7 @@ uses
   CnDebug,
 {$ENDIF}
   CnPaletteEnhanceFrm
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+{$IFDEF SUPPORT_PALETTE_ENHANCE}
   , CnCompFilterFrm
 {$ENDIF}
   ;
@@ -351,7 +351,7 @@ begin
   InitWizMenus;
   InitControlBarMenu;
 
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+{$IFDEF SUPPORT_PALETTE_ENHANCE}
   FCompFilterAction := WizActionMgr.AddAction('CnCompFilter',
     SCnSearchComponent, 0, OnCompFilterActionExecute,
     'CnCompFilter', SCnSearchComponent);
@@ -385,7 +385,7 @@ begin
   FMenuHook.Free;
 {$ENDIF COMPILER8_UP}
 
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+{$IFDEF SUPPORT_PALETTE_ENHANCE}
   if FCompFilterAction <> nil then
     WizActionMgr.DeleteAction(FCompFilterAction);
 {$ENDIF}
@@ -394,7 +394,7 @@ begin
   inherited;
 end;
 
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+{$IFDEF SUPPORT_PALETTE_ENHANCE}
 {$IFNDEF IDE_HAS_NEW_COMPONENT_PALETTE}
 
 function TCnPaletteEnhanceWizard.GetComponentPalette: TTabControl;
@@ -425,7 +425,7 @@ end;
 // 组件面板多行切换
 //------------------------------------------------------------------------------
 
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+{$IFDEF SUPPORT_PALETTE_ENHANCE}
 
 {$IFNDEF IDE_HAS_NEW_COMPONENT_PALETTE}
 
@@ -578,7 +578,7 @@ begin
   FMultiLineMenuItem.OnCreated := OnMultiLineMenuCreated;
   FMenuHook.AddMenuItemDef(FMultiLineMenuItem);
 
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+{$IFDEF SUPPORT_PALETTE_ENHANCE}
   FSearchCompMenuItem := TCnMenuItemDef.Create(SCnPaletteSearchCompMenuName,
     SCnSearchComponent, OnSearchCompItemClick, ipAfter, SCnPaletteMutiLineMenuName);
 
@@ -809,7 +809,7 @@ begin
   end;
 {$ENDIF COMPILER7_UP}
 
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+{$IFDEF SUPPORT_PALETTE_ENHANCE}
   if Active and FCompFilter and (FCompFilterBtn <> nil)
     and (CnCompFilterForm <> nil) then
     FCompFilterBtn.Down := not (CnCompFilterForm.FilterFormStyle = fsHidden);
@@ -1010,7 +1010,7 @@ begin
   FDivTab := Ini.ReadBool('', csDivTabMenu, True);
 {$ENDIF COMPILER8_UP}
 
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+{$IFDEF SUPPORT_PALETTE_ENHANCE}
   FCompFilter := Ini.ReadBool('', csCompFilter, CompFilterDef);
   FCompFilterShortCut := Ini.ReadInteger('', csCompFilterShortCut, 0);
   FShowPrefix := Ini.ReadBool('', csShowPrefix, False);
@@ -1039,7 +1039,7 @@ begin
   Ini.WriteBool('', csDivTabMenu, FDivTab);
 {$ENDIF COMPILER8_UP}
 
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+{$IFDEF SUPPORT_PALETTE_ENHANCE}
   Ini.WriteBool('', csCompFilter, FCompFilter);
   Ini.WriteInteger('', csCompFilterShortCut, FCompFilterShortCut);
   Ini.WriteBool('', csShowPrefix, FShowPrefix);
@@ -1096,7 +1096,7 @@ begin
     chkDivTabMenu.Checked := DivTab;
   {$ENDIF COMPILER8_UP}
 
-  {$IFDEF SUPPORTS_PALETTE_ENHANCE}
+  {$IFDEF SUPPORT_PALETTE_ENHANCE}
     chkCompFilter.Checked := CompFilter;
     hkCompFilter.HotKey := CompFilterShortCut;
   {$ELSE}
@@ -1120,7 +1120,7 @@ begin
       DivTab := chkDivTabMenu.Checked;
     {$ENDIF COMPILER8_UP}
 
-    {$IFDEF SUPPORTS_PALETTE_ENHANCE}
+    {$IFDEF SUPPORT_PALETTE_ENHANCE}
       CompFilter := chkCompFilter.Checked;
       CompFilterShortCut := hkCompFilter.HotKey;
     {$ENDIF}
@@ -1147,7 +1147,7 @@ begin
   inherited;
   UpdateCompPalette;
   UpdateWizMenus;
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+{$IFDEF SUPPORT_PALETTE_ENHANCE}
   {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
   CnWizNotifierServices.ExecuteOnApplicationIdle(UpdateCompFilterButton);
   {$ELSE}
@@ -1159,7 +1159,7 @@ end;
 procedure TCnPaletteEnhanceWizard.LanguageChanged(Sender: TObject);
 begin
   FWizOptionMenu.Caption := SCnWizConfigCaption;
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+{$IFDEF SUPPORT_PALETTE_ENHANCE}
   {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
   CnWizNotifierServices.ExecuteOnApplicationIdle(UpdateCompFilterButton);
   {$ELSE}
@@ -1187,7 +1187,7 @@ begin
   RegisterUserMenuItems;
 {$ENDIF COMPILER8_UP}
 
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+{$IFDEF SUPPORT_PALETTE_ENHANCE}
   {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
   CnWizNotifierServices.ExecuteOnApplicationIdle(UpdateCompFilterButton);
   {$ELSE}
@@ -1202,7 +1202,7 @@ begin
   UpdateWizMenus;
 end;
 
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+{$IFDEF SUPPORT_PALETTE_ENHANCE}
 
 procedure TCnPaletteEnhanceWizard.SetCompFilter(const Value: Boolean);
 begin

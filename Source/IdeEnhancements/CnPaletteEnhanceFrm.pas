@@ -119,7 +119,7 @@ begin
   chkDivTabMenu.Enabled := True;
 {$ENDIF}
 
-{$IFDEF SUPPORTS_PALETTE_ENHANCE}
+{$IFDEF SUPPORT_PALETTE_ENHANCE}
   chkCompFilter.Enabled := True;
   lblShortcut.Enabled := True;
   hkCompFilter.Enabled := True;
