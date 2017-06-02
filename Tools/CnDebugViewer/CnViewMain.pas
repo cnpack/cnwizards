@@ -368,9 +368,12 @@ var
   Res: TCnCoreInitResults;
   S: string;
 begin
-  // 命令行里有 -local 时使用本地模式
-  if CnViewerOptions.LocalSession or FindCmdLineSwitch('local', ['-', '/'], True) then
-    Caption := Caption + '- (Local)';
+  if FindCmdLineSwitch('global', ['-', '/'], True) then
+  begin
+    Caption := Caption + '- (Global)'; // 命令行里有 -global 时使用全局模式
+  end
+  else if CnViewerOptions.LocalSession or FindCmdLineSwitch('local', ['-', '/'], True) then
+    Caption := Caption + '- (Local)'; // 命令行里有 -local 时使用本地模式
 
   Res := InitializeCore;
   if Res <> ciOK then

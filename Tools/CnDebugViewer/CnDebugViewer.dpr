@@ -44,8 +44,12 @@ begin
   else
     LoadOptions(ExtractFilePath(Application.ExeName) + SCnOptionFileName);
 
-  if CnViewerOptions.LocalSession or FindCmdLineSwitch('local', ['-', '/'], True) then
-    ReInitLocalConsts;
+  if FindCmdLineSwitch('global', ['-', '/'], True) then
+  begin
+    // Global Switch first, using Global Mode
+  end
+  else if CnViewerOptions.LocalSession or FindCmdLineSwitch('local', ['-', '/'], True) then
+    ReInitLocalConsts; // If Local Switch or Settings, using Local Mode
 
   if CheckRunning then Exit;
   Application.Initialize;
