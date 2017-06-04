@@ -449,7 +449,7 @@ var
   Token, CurrMethod, CurrBlock, CurrMidBlock, CurrIfStart: TCnWidePasToken;
   Bookmark: TCnPasWideBookmark;
   IsClassOpen, IsClassDef, IsImpl, IsHelper, IsElseIf, ExpectElse: Boolean;
-  IsRecordHelper, IsSealed, IsAbstract, IsRecord, IsForFunc: Boolean;
+  IsRecordHelper, IsSealed, IsAbstract, IsRecord, IsObjectRecord, IsForFunc: Boolean;
   SameBlockMethod, CanEndBlock, CanEndMethod: Boolean;
   DeclareWithEndLevel: Integer;
   PrevTokenID: TTokenKind;
@@ -724,6 +724,7 @@ begin
           tkRecord, tkObject:
             begin
               IsRecord := Lex.TokenID = tkRecord;
+              IsObjectRecord := Lex.TokenID = tkObject;
               IsForFunc := (PrevTokenID in [tkPoint]) or
                 ((PrevTokenID = tkSymbol) and (PrevTokenStr = '&'));
               if IsRecord then
@@ -742,6 +743,8 @@ begin
 
                 Lex.LoadFromBookMark(Bookmark);
               end;
+
+              // of object 的 object 不应该高亮，但不在此处剔除
 
               // 不处理 of object 的字样；不处理前面是 @@ 型的label的情形
               // 额外用 IsRecord 变量因为 Lex.RunPos 恢复后，TokenID 可能会变
@@ -768,7 +771,7 @@ begin
 
                 CurrBlock := Token;
 
-                if IsRecord then
+                if IsRecord or IsObjectRecord then
                 begin
                   // 独立记录 record，因为 record 可以在函数体的 begin end 之外配 end
                   // IsInDeclareWithEnd := True;
@@ -1412,7 +1415,7 @@ begin
   if InnerBlockStartToken <> nil then
   begin
     if InnerBlockStartToken.TokenID in [tkClass, tkInterface, tkRecord,
-      tkDispInterface] then
+      tkDispInterface, tkObject] then
     begin
       // 往前找等号以前的标识符
       Idx := IndexOfToken(InnerBlockStartToken);

@@ -120,7 +120,7 @@ const
 
   csKeyTokens: set of TTokenKind = [
     tkIf, tkThen, tkElse,
-    tkRecord, tkClass, tkInterface, tkDispInterface,
+    tkRecord, tkObject, tkClass, tkInterface, tkDispInterface,
     tkFor, tkWith, tkOn, tkWhile, tkDo,
     tkAsm, tkBegin, tkEnd,
     tkTry, tkExcept, tkFinally,
@@ -1178,21 +1178,38 @@ var
   i: Integer;
   StartIndex, EndIndex: Integer;
 
-  function IsHighlightKeywords(TokenID: TTokenKind): Boolean;
+  function IsHighlightKeywords(Parser: TCnGeneralPasStructParser; Idx: Integer): Boolean;
   var
-    AToken: TCnGeneralPasToken;
+    AToken, Prev: TCnGeneralPasToken;
   begin
-    Result := TokenID in csKeyTokens;
-    if Result and (TokenID = tkOf) then // 对于 of 前一个关键字必须是 case 才配对
+    AToken := Parser.Tokens[Idx];
+    Result := AToken.TokenID in csKeyTokens;
+    if not Result then
+      Exit;
+
+    if AToken.TokenID = tkOf then
     begin
+      // 对于 of 前一个关键字必须是 case 才配对
+      // 注意不能用 Parser.Tokens，因为 case 和 of 间可能有其他标识符
       if FKeyTokenList.Count > 0 then
       begin
-        AToken := TCnGeneralPasToken(FKeyTokenList[FKeyTokenList.Count - 1]);
-        if (AToken = nil) or (AToken.TokenID <> tkCase) then
+        Prev := TCnGeneralPasToken(FKeyTokenList[FKeyTokenList.Count - 1]);
+        if (Prev = nil) or (Prev.TokenID <> tkCase) then
           Result := False;
       end
       else
         Result := False; // 第一个 of 也不算配对
+    end
+    else if AToken.TokenID = tkObject then
+    begin
+      // 对于 object，如果原始列表前面是 of，则不配对
+      // 注意不能用 FKeyTokenList，因为 of 因为上面的原因可能没加进来
+      if Idx > 0 then
+      begin
+        Prev := Parser.Tokens[Idx - 1];
+        if (Prev <> nil) and (Prev.TokenID = tkOf) then
+          Result := False;
+      end;
     end;
   end;
 
@@ -1361,7 +1378,7 @@ begin
       // 处理本单元中的所有需要的匹配
       for I := 0 to PasParser.Count - 1 do
       begin
-        if IsHighlightKeywords(PasParser.Tokens[I].TokenID) then
+        if IsHighlightKeywords(PasParser, I) then
           FKeyTokenList.Add(PasParser.Tokens[I]);
       end;
     end
@@ -1371,7 +1388,7 @@ begin
       // 只把本过程中需要的 Token 加进来
       for I := PasParser.MethodStartToken.ItemIndex to
         PasParser.MethodCloseToken.ItemIndex do
-        if IsHighlightKeywords(PasParser.Tokens[I].TokenID) then
+        if IsHighlightKeywords(PasParser, I) then
           FKeyTokenList.Add(PasParser.Tokens[I]);
     end
     else if (BlockHighlightRange = brWholeBlock) and Assigned(PasParser.BlockStartToken)
@@ -1379,7 +1396,7 @@ begin
     begin
       for I := PasParser.BlockStartToken.ItemIndex to
         PasParser.BlockCloseToken.ItemIndex do
-        if IsHighlightKeywords(PasParser.Tokens[I].TokenID) then
+        if IsHighlightKeywords(PasParser, I) then
           FKeyTokenList.Add(PasParser.Tokens[I]);
     end
     else if (BlockHighlightRange = brInnerBlock) and Assigned(PasParser.InnerBlockStartToken)
@@ -1387,7 +1404,7 @@ begin
     begin
       for I := PasParser.InnerBlockStartToken.ItemIndex to
         PasParser.InnerBlockCloseToken.ItemIndex do
-        if IsHighlightKeywords(PasParser.Tokens[I].TokenID) then
+        if IsHighlightKeywords(PasParser, I) then
           FKeyTokenList.Add(PasParser.Tokens[I]);
     end;
 
@@ -1965,7 +1982,8 @@ begin
   //             Ord(Pair.EndToken.TokenID), Pair.EndToken.Token, Integer(IgnoreClass)]);
   {$ENDIF}
 
-            if Pair.StartToken.TokenID in [tkClass, tkRecord, tkInterface, tkDispInterface] then
+            if Pair.StartToken.TokenID in [tkClass, tkObject, tkRecord,
+              tkInterface, tkDispInterface] then
             begin
               if not IgnoreClass then // 碰到 class record interface 时，需要画才添加进去
                 LineInfo.AddPair(Pair)
