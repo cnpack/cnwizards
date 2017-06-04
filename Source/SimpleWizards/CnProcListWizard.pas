@@ -1927,7 +1927,8 @@ var
               PrevElementForForward := nil;
 
               if ((PasParser.TokenID = tkClass) and PasParser.IsClass) or
-                (PasParser.TokenID = tkRecord) then
+                (PasParser.TokenID = tkRecord) or
+                ((PasParser.TokenID = tkObject) and (PrevTokenID <> tkOf)) then
                 CurClass := CurIdent
               else if (PasParser.TokenID = tkClass) and not PasParser.IsClass then
               begin
@@ -2098,7 +2099,8 @@ var
                 ElementInfo.OwnerClass := CurIntf;
                 AddElement(ElementInfo);
               end
-              else if PasParser.TokenID = tkRecord then
+              else if (PasParser.TokenID = tkRecord) or
+                ((PasParser.TokenID = tkObject) and (PrevTokenID <> tkOf)) then
               begin
                 InTypeDeclaration := True;
                 InIntfDeclaration := False;
@@ -2110,7 +2112,10 @@ var
                 ElementInfo.FileName := _CnExtractFileName(aFileName);
                 ElementInfo.AllName := aFileName;
                 ElementInfo.ElementType := etRecord;
-                ElementInfo.ElementTypeStr := 'record';
+                if PasParser.TokenID = tkRecord then
+                  ElementInfo.ElementTypeStr := 'record'
+                else
+                  ElementInfo.ElementTypeStr := 'record object';
                 ElementInfo.DisplayName := CurIdent;
                 // ElementInfo.OwnerClass := CurIntf;
                 AddElement(ElementInfo);
