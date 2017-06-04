@@ -1470,7 +1470,6 @@ var
   KeyDownChar: AnsiChar;
   ShouldIgnore: Boolean;
 {$IFDEF IDE_SYNC_EDIT_BLOCK}
-  View: IOTAEditView;
   ShouldEatTab: Boolean;
 {$ENDIF}
 begin
