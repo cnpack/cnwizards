@@ -182,6 +182,8 @@ var
   CPUClock: Extended; // 计算而得的 CPU 主频，以 MHZ 为单位
   CnViewerOptions: TCnViewerOptions = nil;
 
+  IsLocalMode: Boolean = False;
+
 // ==== Start of 'Constant' String for Translation
 
   SCnNoneProcName: string = '[Unknown]';

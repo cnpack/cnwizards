@@ -47,9 +47,13 @@ begin
   if FindCmdLineSwitch('global', ['-', '/'], True) then
   begin
     // Global Switch first, using Global Mode
+    IsLocalMode := False;
   end
   else if CnViewerOptions.LocalSession or FindCmdLineSwitch('local', ['-', '/'], True) then
+  begin
     ReInitLocalConsts; // If Local Switch or Settings, using Local Mode
+    IsLocalMode := True;
+  end;
 
   if CheckRunning then Exit;
   Application.Initialize;
