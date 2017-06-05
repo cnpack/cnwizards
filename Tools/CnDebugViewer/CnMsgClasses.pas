@@ -43,6 +43,7 @@ uses
 const
   WM_USER_UPDATE_STORE = WM_USER + $C;
   WM_USER_NEW_FORM     = WM_USER + $D;
+  WM_USER_SET_CAPTION  = WM_USER + $E;
 
 type
 

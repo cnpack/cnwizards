@@ -259,6 +259,7 @@ type
     procedure OnNewChildForm(var Msg: TMessage); message WM_USER_NEW_FORM;
     procedure OnHotKey(var Message: TMessage); message WM_HOTKEY;
     procedure OnTabMakeVisible(var Message: TMessage); message WM_TAB_MAKE_VISIBLE;
+    procedure OnSetCaptionGlobalLocal(var Message: TMessage); message WM_USER_SET_CAPTION;
   protected
     procedure DoCreate; override;
   public
@@ -369,9 +370,9 @@ var
   S: string;
 begin
   if not IsLocalMode then
-    Caption := Caption + '- (Global)' // 命令行里有 -global 时使用全局模式
+    Caption := Caption + '- (Global)' // 显示为全局模式
   else
-    Caption := Caption + '- (Local)'; // 命令行里有 -local 时使用本地模式
+    Caption := Caption + '- (Local)'; // 显示为本地模式
 
   Res := InitializeCore;
   if Res <> ciOK then
@@ -936,8 +937,7 @@ begin
     end;
   end;
 
-//  if CnViewerOptions.LocalSession or FindCmdLineSwitch('local', ['-', '/'], True) then
-//    Caption := Caption + '- (Local)';
+  PostMessage(Handle, WM_USER_SET_CAPTION, 0, 0);
 end;
 
 procedure TCnMainViewer.UpdateStatusBar;
@@ -1281,6 +1281,14 @@ end;
 procedure TCnMainViewer.OnTabMakeVisible(var Message: TMessage);
 begin
   tsSwitch.MakeTabVisible;
+end;
+
+procedure TCnMainViewer.OnSetCaptionGlobalLocal(var Message: TMessage);
+begin
+  if not IsLocalMode then
+    Caption := Caption + '- (Global)' // 显示为全局模式
+  else
+    Caption := Caption + '- (Local)'; // 显示为本地模式
 end;
 
 end.
