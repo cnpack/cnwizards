@@ -2976,7 +2976,7 @@ end;
 procedure TCnProcListWizard.AddProcedure(ElementInfo: TCnElementInfo; IsIntf: Boolean);
 var
   TempStr: string;
-  i: Integer;
+  i, j: Integer;
 begin
   ElementInfo.Name := CompressWhiteSpace(ElementInfo.Name);
   case FLanguage of
@@ -2989,7 +2989,8 @@ begin
           Delete(TempStr, 1, Length('CLASS ')); // Do not localize.
         // Remove 'function' or 'procedure'
         i := Pos(' ', TempStr);
-        if i > 0 then
+        j := Pos('(', TempStr);
+        if (i > 0) and (i < j) then // 匿名函数没有函数名
           TempStr := Copy(TempStr, i + 1, Length(TempStr));
 
         // 为 Interfac 的成员声明加上 Interface 名
