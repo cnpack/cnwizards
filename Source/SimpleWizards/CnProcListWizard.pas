@@ -1951,7 +1951,8 @@ var
               if ((not InTypeDeclaration and InImplementation) or InIntfDeclaration) and
                 (PasParser.TokenID in [tkFunction, tkProcedure, tkConstructor, tkDestructor]) then
               begin
-                IdentifierNeeded := PrevTokenID <> tkAssign;
+                IdentifierNeeded := not (PrevTokenID in [tkAssign, tkRoundOpen, tkComma]);
+                // 暂时认为 procedure 前面是 := ( 以及 , 的是匿名函数
 
                 ProcType := PasParser.TokenID;
                 Line := GetPasParserLineNumber;
