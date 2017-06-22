@@ -570,7 +570,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 36
           Width = 350
           Height = 17
-          Caption = 'Replace Token under Cursor when Pasting.'
+          Caption = 'Smart Paste.'
           TabOrder = 1
         end
       end

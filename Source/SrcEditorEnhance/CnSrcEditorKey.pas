@@ -113,6 +113,7 @@ type
     procedure IdleDoAutoIndent(Sender: TObject);
     procedure IdleDoCBracketIndent(Sender: TObject);
 {$ENDIF}
+    function ProcessSmartPaste(View: IOTAEditView): Boolean;
     procedure SetKeepSearch(const Value: Boolean);
     procedure SetRenameShortCut(const Value: TShortCut);
   protected
@@ -516,6 +517,163 @@ begin
   Result := Handled;
 end;
 
+function TCnSrcEditorKey.ProcessSmartPaste(View: IOTAEditView): Boolean;
+var
+  Text, Tmp, Prev: string;
+  EditControl: TControl;
+  I, Idx, LineNo, CharIndex, PasteCol: Integer;
+  List: TStrings;
+  EndIsCRLF, OneLine: Boolean;
+  FirstLineSpaceCount, LineSpaceCount, MinLineSpaceCount: Integer;
+  EditPos: TOTAEditPos;
+  CharPos: TOTACharPos;
+  LinePos: LongInt;
+
+  function GetHeadSpaceCount(const S: string): Integer;
+  var
+    I: Integer;
+  begin
+    Result := 0;
+    if S <> '' then
+      for I := 1 to Length(S) do
+        if S[I] = ' ' then
+          Inc(Result)
+        else
+          Break;
+  end;
+
+begin
+  Result := False;
+  if View.Block.IsValid then  // 有选择区则不处理，交给 IDE 处理
+    Exit;
+
+  // 剪贴板无文本不处理
+  if not Clipboard.HasFormat(CF_TEXT) or not Clipboard.HasFormat(CF_UNICODETEXT) then
+    Exit;
+  Text := Clipboard.AsText;
+  if Trim(Text) = '' then
+    Exit;
+
+  // CnOtaDeleteCurrToken;
+  // 如果当前行不是空，则退出
+  if not CnNtaGetCurrLineText(Text, LineNo, CharIndex, True) then
+    Exit;
+  if Trim(Text) <> '' then
+    Exit;
+
+  EndIsCRLF := False;
+  if (Length(Text) > 2) and (Text[Length(Text)] = #10) and (Text[Length(Text) - 1] = #13) then
+    EndIsCRLF := False;
+
+  EditControl := EditControlWrapper.GetEditControl(View);
+  if EditControl = nil then
+    Exit;
+
+  List := TStringList.Create;
+  try
+    List.Text := Clipboard.AsText;
+    if List.Count = 0 then
+      Exit;
+
+    // 剪贴板文本先判断是否其他行的行首空格数比首行少，如果少则不处理。
+    // 另外除首行外其他行的空格在都比首行多的情况下，找出最少的，也都删
+    FirstLineSpaceCount := GetHeadSpaceCount(List[0]);
+    MinLineSpaceCount := MaxInt;
+
+    if List.Count > 1 then
+    begin
+      for I := 1 to List.Count - 1 do
+      begin
+        LineSpaceCount := GetHeadSpaceCount(List[I]);
+        if LineSpaceCount < FirstLineSpaceCount then
+          Exit;
+        if MinLineSpaceCount > LineSpaceCount then
+          MinLineSpaceCount := LineSpaceCount;
+      end;
+    end;
+
+    // 如果多，则每行都删去前首行空格数个空格
+    for I := 0 to List.Count - 1 do
+    begin
+      Tmp := List[I];
+      if I = 0 then
+        Delete(Tmp, 1, FirstLineSpaceCount)
+      else
+        Delete(Tmp, 1, MinLineSpaceCount);
+      List[I] := Tmp;
+    end;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('Clipboard Delete %d Spaces in 1st Every Line and %d Spaces in Other Lines.',
+      [FirstLineSpaceCount, MinLineSpaceCount]);
+{$ENDIF}
+
+    // 判断当前空行的上一行是啥，是否会影响本次缩进
+    PasteCol := View.CursorPos.Col;
+    if LineNo > 1 then
+    begin
+      Dec(LineNo);
+      Prev := EditControlWrapper.GetTextAtLine(EditControl, LineNo);
+
+      if Trim(Prev) <> '' then
+      begin
+        PasteCol := GetHeadSpaceCount(Prev);  // 粘贴的起始列默认和上一行的非空字符对齐
+
+        Prev := Trim(Prev);
+        for I := Length(Prev) downto 1 do
+        begin
+          if not IsValidIdentChar(Prev[I]) then
+          begin
+            Idx := I;
+            Break;
+          end;
+        end;
+
+        Text := Copy(Prev, Idx + 1, MaxInt);
+
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('ProcessSmartPaste. Previous Line is %s with Space %d.', [Text, PasteCol]);
+{$ENDIF}
+
+        if FAutoIndentList.IndexOf(Text) >= 0 then // 如果属于自动缩进列表则再进一层
+          Inc(PasteCol, CnOtaGetBlockIndent);
+      end;
+    end;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('ProcessSmartPaste. To Add %d Spaces to Every Line.', [PasteCol]);
+{$ENDIF}
+
+    // 将每行都增加缩进空格
+    for I := 0 to List.Count - 1 do
+      List[I] := Spc(PasteCol) + List[I];
+
+    // 如果多行，要记录之前的文本是否是换行结尾，避免 List.Text 转换后多出个换行
+    Text := List.Text;
+    if not EndIsCRLF and (Length(Text) > 2) and (Text[Length(Text)] = #10)
+      and (Text[Length(Text) - 1] = #13)then
+      Delete(Text, Length(Text) - 1, 2);
+
+    // 然后在行首进行插入
+    View.Buffer.EditPosition.MoveBOL;
+    EditPos := View.CursorPos;
+    View.ConvertPos(True, EditPos, CharPos);
+    LinePos := View.CharPosToPos(CharPos);
+
+    // EditPosition 插入会产生莫名其妙的缩进，得改用 Writer 来写入
+{$IFDEF UNICODE}
+    CnOtaInsertTextIntoEditorAtPosW(Text, LinePos);
+{$ELSE}
+    CnOtaInsertTextIntoEditorAtPos(Text, LinePos);
+{$ENDIF}
+    View.MoveViewToCursor;
+    View.Paint;
+    Result := True;
+  finally
+    List.Free;
+  end;
+end;
+
 function TCnSrcEditorKey.DoSmartCopy(View: IOTAEditView; Key, ScanCode: Word;
   Shift: TShiftState; var Handled: Boolean): Boolean;
 var
@@ -555,8 +713,7 @@ begin
       end
       else if FSmartPaste then
       begin
-        CnOtaDeleteCurrToken;
-        Handled := False;
+        Handled := ProcessSmartPaste(View);
       end;
     end;
   end;
@@ -2708,7 +2865,7 @@ const
 procedure TCnSrcEditorKey.LoadSettings(Ini: TCustomIniFile);
 begin
   FSmartCopy := Ini.ReadBool(csEditorKey, csSmartCopy, True);
-  FSmartPaste := Ini.ReadBool(csEditorKey, csSmartPaste, False);
+  FSmartPaste := Ini.ReadBool(csEditorKey, csSmartPaste, True);
   FShiftEnter := Ini.ReadBool(csEditorKey, csShiftEnter, True);
   FAutoIndent := Ini.ReadBool(csEditorKey, csAutoIndent, True);
   FF3Search := Ini.ReadBool(csEditorKey, csF3Search, True);
