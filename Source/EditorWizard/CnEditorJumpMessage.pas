@@ -983,6 +983,8 @@ begin
       end;
     end;
   finally
+    PasParser.Free;
+    CppParser.Free;
     Stream.Free;
   end;
 end;
