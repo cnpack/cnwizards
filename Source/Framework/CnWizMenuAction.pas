@@ -89,7 +89,7 @@ type
     {* Action 命令字符串，用来唯一标识一个 Action，同时也是快捷键对象的名字}
     property Icon: TIcon read FIcon;
     {* Action 关联的图标，可在其它地方使用，但请不要更改图标内容}
-    property SmallIcon: TIcon read FIcon;
+    property SmallIcon: TIcon read FSmallIcon;
     {* Action 关联的小尺寸图标 16*16，可能为空。可在其它地方使用，但请不要更改图标内容}
     property ShortCut: TShortCut read GetShortCut write {$IFDEF DelphiXE3_UP}_CnSetShortCut{$ELSE}SetShortCut{$ENDIF};
     {* Action 关联的快捷键}

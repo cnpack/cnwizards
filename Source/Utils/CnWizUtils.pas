@@ -1254,7 +1254,7 @@ begin
   if LoadResDll then
   begin
     // ÏÈ×°ÔØ×îÆ¥Åä³ß´ç 32 * 32
-    Handle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 0, 0, 0);
+    Handle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 32, 32, 0);
     if Handle <> 0 then
     begin
       AIcon.Handle := Handle;
