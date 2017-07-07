@@ -1220,6 +1220,23 @@ function CnWizLoadIcon(AIcon: TIcon; ASmallIcon: TIcon; const ResName: string;
 var
   FileName: string;
   Handle: HICON;
+
+  procedure LoadAndCheckSmallIcon;
+  begin
+    // 指定小尺寸再加载图标
+    if ASmallIcon <> nil then
+    begin
+      ASmallIcon.Height := 16;
+      ASmallIcon.Width := 16;
+      ASmallIcon.LoadFromFile(FileName);
+
+      // 如果加载到的图标尺寸不是 16x16 则清除
+      if ASmallIcon.Handle <> 0 then
+        if (ASmallIcon.Height <> 16) or (ASmallIcon.Width <> 16) then
+          ASmallIcon.Handle := 0;
+    end;
+  end;
+
 begin
   Result := False;
 
@@ -1238,22 +1255,14 @@ begin
         if not AIcon.Empty then
         begin
           Result := True;
-          // 指定小尺寸再加载图标
-          if ASmallIcon <> nil then
-          begin
-            ASmallIcon.Height := 16;
-            ASmallIcon.Width := 16;
-            ASmallIcon.LoadFromFile(FileName);
-          end;
+          LoadAndCheckSmallIcon;
           Exit;
         end;
       end
-      else if ASmallIcon <> nil then
+      else
       begin
-        ASmallIcon.Height := 16;
-        ASmallIcon.Width := 16;
-        ASmallIcon.LoadFromFile(FileName);
         Result := True;
+        LoadAndCheckSmallIcon;
         Exit;
       end;
     end;
