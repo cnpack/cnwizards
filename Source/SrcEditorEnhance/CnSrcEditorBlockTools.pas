@@ -161,7 +161,7 @@ begin
   FActive := True;
   FShowBlockTools := True;
   FIcon := TIcon.Create;
-  CnWizLoadIcon(FIcon, nil, 'CnSrcEditorBlockTools');
+  CnWizLoadIcon(nil, FIcon, 'CnSrcEditorBlockTools'); // 强制加载成小图标
 
   FCodeWrap := TCnSrcEditorCodeWrapTool.Create;
   FGroupReplace := TCnSrcEditorGroupReplaceTool.Create;

@@ -1232,17 +1232,28 @@ begin
 
     if FileExists(FileName) then
     begin
-      AIcon.LoadFromFile(FileName); // AIcon 使用正常的 32 * 32 尺寸
-      if not AIcon.Empty then
+      if AIcon <> nil then
       begin
-        Result := True;
-        // 指定小尺寸再加载图标
-        if ASmallIcon <> nil then
+        AIcon.LoadFromFile(FileName); // AIcon 使用正常的 32 * 32 尺寸
+        if not AIcon.Empty then
         begin
-          ASmallIcon.Height := 16;
-          ASmallIcon.Width := 16;
-          ASmallIcon.LoadFromFile(FileName);
+          Result := True;
+          // 指定小尺寸再加载图标
+          if ASmallIcon <> nil then
+          begin
+            ASmallIcon.Height := 16;
+            ASmallIcon.Width := 16;
+            ASmallIcon.LoadFromFile(FileName);
+          end;
+          Exit;
         end;
+      end
+      else if ASmallIcon <> nil then
+      begin
+        ASmallIcon.Height := 16;
+        ASmallIcon.Width := 16;
+        ASmallIcon.LoadFromFile(FileName);
+        Result := True;
         Exit;
       end;
     end;
@@ -1253,20 +1264,33 @@ begin
   // 从资源中装载
   if LoadResDll then
   begin
-    // 先装载最匹配尺寸 32 * 32
-    Handle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 32, 32, 0);
-    if Handle <> 0 then
+    if AIcon <> nil then
     begin
-      AIcon.Handle := Handle;
-      Result := True;
-      // 再指定小尺寸加载
-      if ASmallIcon <> nil then
+      // 先装载最匹配尺寸 32 * 32
+      Handle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 32, 32, 0);
+      if Handle <> 0 then
       begin
-        Handle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 16, 16, 0);
-        if Handle <> 0 then
-          ASmallIcon.Handle := Handle;
+        AIcon.Handle := Handle;
+        Result := True;
+        // 再指定小尺寸加载
+        if ASmallIcon <> nil then
+        begin
+          Handle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 16, 16, 0);
+          if Handle <> 0 then
+            ASmallIcon.Handle := Handle;
+        end;
+        Exit;
       end;
-      Exit;
+    end
+    else if ASmallIcon <> nil then
+    begin
+      Handle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 16, 16, 0);
+      if Handle <> 0 then
+      begin
+        ASmallIcon.Handle := Handle;
+        Result := True;
+        Exit;
+      end;
     end;
   end;
 
@@ -1275,6 +1299,8 @@ begin
     FileName := WizOptions.IconPath + CNWIZARDDEFAULT_ICO + SCnIcoFileExt;
     if FileExists(FileName) then
     begin
+      if AIcon <> nil then
+      begin
       AIcon.LoadFromFile(FileName);
       if not AIcon.Empty then
       begin
@@ -1288,11 +1314,22 @@ begin
         end;
         Exit;
       end;
+      end
+      else if ASmallIcon <> nil then
+      begin
+        ASmallIcon.Height := 16;
+        ASmallIcon.Width := 16;
+        ASmallIcon.LoadFromFile(FileName);
+        Result := True;
+        Exit;
+      end;
     end;
   end;
 
   if UseDefault then
   begin
+    if AIcon <> nil then
+    begin
     Handle := LoadImage(HResModule, PChar(UpperCase(CNWIZARDDEFAULT_ICO)), IMAGE_ICON, 0, 0, 0);
     if Handle <> 0 then
     begin
@@ -1306,6 +1343,17 @@ begin
           ASmallIcon.Handle := Handle;
       end;
       Exit;
+    end;
+    end
+    else if ASmallIcon <> nil then
+    begin
+      Handle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 16, 16, 0);
+      if Handle <> 0 then
+      begin
+        ASmallIcon.Handle := Handle;
+        Result := True;
+        Exit;
+      end;
     end;
   end;
 end;
