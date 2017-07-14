@@ -94,7 +94,7 @@ type
     function GetHasConfig: Boolean; override;
     function NeedAutoHide: Boolean;
   public
-    constructor Create(AOwner: TCnEditorWizard); override;
+    constructor Create(AOwner: TCnEditorToolsetWizard); override;
     destructor Destroy; override;
     function GetState: TWizardState; override;
     function GetCaption: string; override;
@@ -135,7 +135,7 @@ const
   csZoomFullScreen = 'ZoomFullScreen';
   csBarWidth = 4;
 
-constructor TCnEditorZoomFullScreen.Create(AOwner: TCnEditorWizard);
+constructor TCnEditorZoomFullScreen.Create(AOwner: TCnEditorToolsetWizard);
 begin
   inherited;
   FAutoZoom := False;

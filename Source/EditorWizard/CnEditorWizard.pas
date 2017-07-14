@@ -50,7 +50,7 @@ type
 
 { TCnEditorForm }
 
-  TCnEditorWizard = class;
+  TCnEditorToolsetWizard = class;
 
   TCnEditorToolsForm = class(TCnTranslateForm)
     btnHelp: TButton;
@@ -78,7 +78,7 @@ type
       Change: TItemChange);
   private
     { Private declarations }
-    FWizard: TCnEditorWizard;
+    FWizard: TCnEditorToolsetWizard;
     procedure InitTools;
     procedure UpdateToolItem(Index: Integer);
   protected
@@ -94,7 +94,7 @@ type
   TCnBaseEditorTool = class(TObject)
   private
     FActive: Boolean;
-    FOwner: TCnEditorWizard;
+    FOwner: TCnEditorToolsetWizard;
     FAction: TCnWizMenuAction;
     FDefaultsMap: TCnStrToVariantHashMap;
   protected
@@ -112,9 +112,9 @@ type
        只需要返回默认的就行了。}
     function CreateIniFile: TCustomIniFile;
     {* 返回一个用于存取工具设置参数的 INI 对象，用户使用后须自己释放}
-    property Owner: TCnEditorWizard read FOwner;
+    property Owner: TCnEditorToolsetWizard read FOwner;
   public
-    constructor Create(AOwner: TCnEditorWizard); virtual;
+    constructor Create(AOwner: TCnEditorToolsetWizard); virtual;
     destructor Destroy; override;
     function GetEditorName: string;
     procedure LoadSettings(Ini: TCustomIniFile); virtual;
@@ -150,9 +150,9 @@ type
 
   TCnEditorToolClass = class of TCnBaseEditorTool;
 
-{ TCnEditorWizard }
+{ TCnEditorToolsetWizard }
 
-  TCnEditorWizard = class(TCnSubMenuWizard)
+  TCnEditorToolsetWizard = class(TCnSubMenuWizard)
   private
     FConfigIndex: Integer;
     FEditorIndex: Integer;
@@ -256,7 +256,7 @@ begin
 
 end;
 
-constructor TCnBaseEditorTool.Create(AOwner: TCnEditorWizard);
+constructor TCnBaseEditorTool.Create(AOwner: TCnEditorToolsetWizard);
 begin
   inherited Create;
   Assert(Assigned(AOwner));
@@ -363,7 +363,7 @@ end;
 
 { TCnEditorWizard }
 
-procedure TCnEditorWizard.Config;
+procedure TCnEditorToolsetWizard.Config;
 begin
   inherited;
   with TCnEditorToolsForm.Create(nil) do
@@ -376,7 +376,7 @@ begin
   UpdateActions;
 end;
 
-constructor TCnEditorWizard.Create;
+constructor TCnEditorToolsetWizard.Create;
 var
   i: Integer;
   Editor: TCnBaseEditorTool;
@@ -413,7 +413,7 @@ begin
   end;
 end;
 
-destructor TCnEditorWizard.Destroy;
+destructor TCnEditorToolsetWizard.Destroy;
 var
   i: Integer;
   ActiveIni: TCustomIniFile;
@@ -434,12 +434,12 @@ begin
 end;
 
 // APos返回宏在当前行中的位置。
-procedure TCnEditorWizard.Execute;
+procedure TCnEditorToolsetWizard.Execute;
 begin
 
 end;
 
-procedure TCnEditorWizard.Loaded;
+procedure TCnEditorToolsetWizard.Loaded;
 var
   i: Integer;
 begin
@@ -448,22 +448,22 @@ begin
     EditorTools[i].Loaded;
 end;
 
-function TCnEditorWizard.GetCaption: string;
+function TCnEditorToolsetWizard.GetCaption: string;
 begin
   Result := SCnEditorWizardMenuCaption;
 end;
 
-function TCnEditorWizard.GetHasConfig: Boolean;
+function TCnEditorToolsetWizard.GetHasConfig: Boolean;
 begin
   Result := True;
 end;
 
-function TCnEditorWizard.GetHint: string;
+function TCnEditorToolsetWizard.GetHint: string;
 begin
   Result := SCnEditorWizardMenuHint;
 end;
 
-function TCnEditorWizard.GetState: TWizardState;
+function TCnEditorToolsetWizard.GetState: TWizardState;
 begin
   if Active then 
     Result := [wsEnabled]
@@ -471,7 +471,7 @@ begin
     Result := [];
 end;
 
-class procedure TCnEditorWizard.GetWizardInfo(var Name, Author, Email,
+class procedure TCnEditorToolsetWizard.GetWizardInfo(var Name, Author, Email,
   Comment: string);
 begin
   Name := SCnEditorWizardName;
@@ -480,17 +480,17 @@ begin
   Comment := SCnEditorWizardComment;
 end;
 
-function TCnEditorWizard.GetEditorTools(Index: Integer): TCnBaseEditorTool;
+function TCnEditorToolsetWizard.GetEditorTools(Index: Integer): TCnBaseEditorTool;
 begin
   Result := TCnBaseEditorTool(FEditorTools[Index]);
 end;
 
-function TCnEditorWizard.GetEditorToolCount: Integer;
+function TCnEditorToolsetWizard.GetEditorToolCount: Integer;
 begin
   Result := FEditorTools.Count;
 end;
 
-procedure TCnEditorWizard.LoadSettings(Ini: TCustomIniFile);
+procedure TCnEditorToolsetWizard.LoadSettings(Ini: TCustomIniFile);
 var
   i: Integer;
   AIni: TCustomIniFile;
@@ -508,7 +508,7 @@ begin
   end;
 end;
 
-procedure TCnEditorWizard.SaveSettings(Ini: TCustomIniFile);
+procedure TCnEditorToolsetWizard.SaveSettings(Ini: TCustomIniFile);
 var
   i: Integer;
   AIni: TCustomIniFile;
@@ -526,7 +526,7 @@ begin
   end;
 end;
 
-procedure TCnEditorWizard.SubActionExecute(Index: Integer);
+procedure TCnEditorToolsetWizard.SubActionExecute(Index: Integer);
 var
   i: Integer;
 begin
@@ -547,7 +547,7 @@ begin
   end;
 end;
 
-procedure TCnEditorWizard.SubActionUpdate(Index: Integer);
+procedure TCnEditorToolsetWizard.SubActionUpdate(Index: Integer);
 var
   i: Integer;
   State: TWizardState;
@@ -566,7 +566,7 @@ begin
   inherited;
 end;
 
-procedure TCnEditorWizard.AcquireSubActions;
+procedure TCnEditorToolsetWizard.AcquireSubActions;
 var
   i: Integer;
 begin
@@ -590,7 +590,7 @@ begin
   UpdateActions;
 end;
 
-procedure TCnEditorWizard.RefreshSubActions;
+procedure TCnEditorToolsetWizard.RefreshSubActions;
 var
   i: Integer;
 begin // 处理方法有稍许不同，因此不能 inherited 来用 AcquireSubActions。
@@ -601,7 +601,7 @@ begin // 处理方法有稍许不同，因此不能 inherited 来用 AcquireSubActions。
   UpdateActions;
 end;
 
-procedure TCnEditorWizard.UpdateActions;
+procedure TCnEditorToolsetWizard.UpdateActions;
 var
   i: Integer;
 begin
@@ -609,7 +609,7 @@ begin
     EditorTools[i].FAction.Visible := Active and EditorTools[i].Active;
 end;
 
-procedure TCnEditorWizard.SetActive(Value: Boolean);
+procedure TCnEditorToolsetWizard.SetActive(Value: Boolean);
 var
   I: Integer;
 begin
@@ -625,7 +625,7 @@ end;
 
 procedure TCnEditorToolsForm.FormCreate(Sender: TObject);
 begin
-  FWizard := TCnEditorWizard(CnWizardMgr.WizardByClass(TCnEditorWizard));
+  FWizard := TCnEditorToolsetWizard(CnWizardMgr.WizardByClass(TCnEditorToolsetWizard));
   Assert(Assigned(FWizard));
   InitTools;
 end;
@@ -729,7 +729,7 @@ end;
 
 initialization
   CnEditorClassList := TList.Create;
-  RegisterCnWizard(TCnEditorWizard); // 注册专家
+  RegisterCnWizard(TCnEditorToolsetWizard); // 注册专家
 
 finalization
 {$IFDEF DEBUG}

@@ -71,7 +71,7 @@ type
   protected
     function GetDefShortCut: TShortCut; override;
   public
-    constructor Create(AOwner: TCnEditorWizard); override;
+    constructor Create(AOwner: TCnEditorToolsetWizard); override;
     destructor Destroy; override;
     function GetCaption: string; override;
     function GetHint: string; override;
@@ -87,7 +87,7 @@ type
   protected
     function GetDefShortCut: TShortCut; override;
   public
-    constructor Create(AOwner: TCnEditorWizard); override;
+    constructor Create(AOwner: TCnEditorToolsetWizard); override;
     destructor Destroy; override;
     function GetCaption: string; override;
     function GetHint: string; override;
@@ -99,7 +99,7 @@ type
   private
 
   public
-    constructor Create(AOwner: TCnEditorWizard); override;
+    constructor Create(AOwner: TCnEditorToolsetWizard); override;
     destructor Destroy; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
@@ -115,7 +115,7 @@ type
   private
 
   public
-    constructor Create(AOwner: TCnEditorWizard); override;
+    constructor Create(AOwner: TCnEditorToolsetWizard); override;
     destructor Destroy; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
@@ -135,7 +135,7 @@ type
   private
 
   public
-    constructor Create(AOwner: TCnEditorWizard); override;
+    constructor Create(AOwner: TCnEditorToolsetWizard); override;
     destructor Destroy; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
@@ -151,7 +151,7 @@ type
   private
 
   public
-    constructor Create(AOwner: TCnEditorWizard); override;
+    constructor Create(AOwner: TCnEditorToolsetWizard); override;
     destructor Destroy; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
@@ -167,7 +167,7 @@ type
   private
 
   public
-    constructor Create(AOwner: TCnEditorWizard); override;
+    constructor Create(AOwner: TCnEditorToolsetWizard); override;
     destructor Destroy; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
@@ -201,7 +201,7 @@ end;
 
 { TCnEditorJumpMessage }
 
-constructor TCnEditorNextMessage.Create(AOwner: TCnEditorWizard);
+constructor TCnEditorNextMessage.Create(AOwner: TCnEditorToolsetWizard);
 begin
   inherited;
 
@@ -260,7 +260,7 @@ end;
 
 { TCnEditorPrevMessage }
 
-constructor TCnEditorPrevMessage.Create(AOwner: TCnEditorWizard);
+constructor TCnEditorPrevMessage.Create(AOwner: TCnEditorToolsetWizard);
 begin
   inherited;
 
@@ -393,7 +393,7 @@ begin
   Email := SCnPack_LiuXiaoEmail;
 end;
 
-constructor TCnEditorJumpIntf.Create(AOwner: TCnEditorWizard);
+constructor TCnEditorJumpIntf.Create(AOwner: TCnEditorToolsetWizard);
 begin
   inherited;
 
@@ -456,7 +456,7 @@ begin
   Email := SCnPack_LiuXiaoEmail;
 end;
 
-constructor TCnEditorJumpImpl.Create(AOwner: TCnEditorWizard);
+constructor TCnEditorJumpImpl.Create(AOwner: TCnEditorToolsetWizard);
 begin
   inherited;
 
@@ -523,7 +523,7 @@ begin
   Email := SCnPack_LiuXiaoEmail;
 end;
 
-constructor TCnEditorJumpMatchedKeyword.Create(AOwner: TCnEditorWizard);
+constructor TCnEditorJumpMatchedKeyword.Create(AOwner: TCnEditorToolsetWizard);
 begin
   inherited;
 
@@ -991,7 +991,7 @@ end;
 
 { TCnEditorJumpPrevIdent }
 
-constructor TCnEditorJumpPrevIdent.Create(AOwner: TCnEditorWizard);
+constructor TCnEditorJumpPrevIdent.Create(AOwner: TCnEditorToolsetWizard);
 begin
   inherited;
 
@@ -1055,7 +1055,7 @@ end;
 
 { TCnEditorJumpNextIdent }
 
-constructor TCnEditorJumpNextIdent.Create(AOwner: TCnEditorWizard);
+constructor TCnEditorJumpNextIdent.Create(AOwner: TCnEditorToolsetWizard);
 begin
   inherited;
 

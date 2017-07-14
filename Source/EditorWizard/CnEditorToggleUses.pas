@@ -70,7 +70,7 @@ type
   protected
     procedure EditorKeyDown(Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
   public
-    constructor Create(AOwner: TCnEditorWizard); override;
+    constructor Create(AOwner: TCnEditorToolsetWizard); override;
     destructor Destroy; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
@@ -116,7 +116,7 @@ begin
   Email := SCnPack_LiuXiaoEmail;
 end;
 
-constructor TCnEditorToggleUses.Create(AOwner: TCnEditorWizard);
+constructor TCnEditorToggleUses.Create(AOwner: TCnEditorToolsetWizard);
 begin
   inherited;
   EditControlWrapper.AddKeyDownNotifier(EditorKeyDown);

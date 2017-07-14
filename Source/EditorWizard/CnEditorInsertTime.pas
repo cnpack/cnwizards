@@ -57,7 +57,7 @@ type
   private
     FDateTimeFmt: string;
   public
-    constructor Create(AOwner: TCnEditorWizard); override;
+    constructor Create(AOwner: TCnEditorToolsetWizard); override;
     destructor Destroy; override;
     function GetCaption: string; override;
     function GetHint: string; override;
@@ -93,7 +93,7 @@ implementation
 
 { TCnEditorInsertTime }
 
-constructor TCnEditorInsertTime.Create(AOwner: TCnEditorWizard);
+constructor TCnEditorInsertTime.Create(AOwner: TCnEditorToolsetWizard);
 begin
   inherited;
 

@@ -65,7 +65,7 @@ type
     function GetHint: string; override;
     procedure SetActive(Value: Boolean); override;
   public
-    constructor Create(AOwner: TCnEditorWizard); override;
+    constructor Create(AOwner: TCnEditorToolsetWizard); override;
     destructor Destroy; override;
 
     procedure Execute; override;
@@ -174,7 +174,7 @@ const
 
 { TCnAsciiChart }
 
-constructor TCnAsciiChart.Create(AOwner: TCnEditorWizard);
+constructor TCnAsciiChart.Create(AOwner: TCnEditorToolsetWizard);
 begin
   inherited;
   IdeDockManager.RegisterDockableForm(TCnAsciiForm, CnAsciiForm,

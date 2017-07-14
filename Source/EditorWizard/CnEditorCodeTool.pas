@@ -88,7 +88,7 @@ type
     procedure GetNewPos(var ARow: Integer; var ACol: Integer); virtual;
     {* 执行完毕后，子类可通过重载此函数来确定光标所在的位置}
   public
-    constructor Create(AOwner: TCnEditorWizard); override;
+    constructor Create(AOwner: TCnEditorToolsetWizard); override;
     procedure Execute; override;
     function GetState: TWizardState; override;
   end;
@@ -110,7 +110,7 @@ uses
 
 { TCnEditorCodeTool }
 
-constructor TCnEditorCodeTool.Create(AOwner: TCnEditorWizard);
+constructor TCnEditorCodeTool.Create(AOwner: TCnEditorToolsetWizard);
 begin
   inherited;
   ValidInSource := True;

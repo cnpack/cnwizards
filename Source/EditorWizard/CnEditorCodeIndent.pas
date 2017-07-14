@@ -55,7 +55,7 @@ type
 
   TCnEditorCodeIndent = class(TCnEditorCodeTool)
   public
-    constructor Create(AOwner: TCnEditorWizard); override;
+    constructor Create(AOwner: TCnEditorToolsetWizard); override;
     function GetCaption: string; override;
     function GetHint: string; override;
     procedure GetEditorInfo(var Name, Author, Email: string); override;
@@ -70,7 +70,7 @@ type
 
   TCnEditorCodeUnIndent = class(TCnEditorCodeTool)
   public
-    constructor Create(AOwner: TCnEditorWizard); override;
+    constructor Create(AOwner: TCnEditorToolsetWizard); override;
     function GetCaption: string; override;
     function GetHint: string; override;
     procedure GetEditorInfo(var Name, Author, Email: string); override;
@@ -85,7 +85,7 @@ implementation
 
 { TCnEditorCodeIndent }
 
-constructor TCnEditorCodeIndent.Create(AOwner: TCnEditorWizard);
+constructor TCnEditorCodeIndent.Create(AOwner: TCnEditorToolsetWizard);
 begin
   inherited;
   ValidInSource := True;
@@ -123,7 +123,7 @@ end;
 
 { TCnEditorCodeUnIndent }
 
-constructor TCnEditorCodeUnIndent.Create(AOwner: TCnEditorWizard);
+constructor TCnEditorCodeUnIndent.Create(AOwner: TCnEditorToolsetWizard);
 begin
   inherited;
   ValidInSource := True;

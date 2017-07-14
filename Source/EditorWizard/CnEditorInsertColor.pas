@@ -57,7 +57,7 @@ type
   private
     dlgColor: TColorDialog;
   public
-    constructor Create(AOwner: TCnEditorWizard); override;
+    constructor Create(AOwner: TCnEditorToolsetWizard); override;
     destructor Destroy; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
@@ -80,7 +80,7 @@ const
 
 { TCnEditorInsertColor }
 
-constructor TCnEditorInsertColor.Create(AOwner: TCnEditorWizard);
+constructor TCnEditorInsertColor.Create(AOwner: TCnEditorToolsetWizard);
 begin
   inherited;
   dlgColor := TColorDialog.Create(nil);

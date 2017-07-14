@@ -55,7 +55,7 @@ type
 
   TCnEditorFontInc = class(TCnEditorCodeTool)
   public
-    constructor Create(AOwner: TCnEditorWizard); override;
+    constructor Create(AOwner: TCnEditorToolsetWizard); override;
     function GetCaption: string; override;
     function GetHint: string; override;
     procedure GetEditorInfo(var Name, Author, Email: string); override;
@@ -70,7 +70,7 @@ type
 
   TCnEditorFontDec = class(TCnEditorCodeTool)
   public
-    constructor Create(AOwner: TCnEditorWizard); override;
+    constructor Create(AOwner: TCnEditorToolsetWizard); override;
     function GetCaption: string; override;
     function GetHint: string; override;
     procedure GetEditorInfo(var Name, Author, Email: string); override;
@@ -85,7 +85,7 @@ implementation
 
 { TCnEditorFontInc }
 
-constructor TCnEditorFontInc.Create(AOwner: TCnEditorWizard);
+constructor TCnEditorFontInc.Create(AOwner: TCnEditorToolsetWizard);
 begin
   inherited;
   ValidInSource := True;
@@ -120,7 +120,7 @@ end;
 
 { TCnEditorFontDec }
 
-constructor TCnEditorFontDec.Create(AOwner: TCnEditorWizard);
+constructor TCnEditorFontDec.Create(AOwner: TCnEditorToolsetWizard);
 begin
   inherited;
   ValidInSource := True;

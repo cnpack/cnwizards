@@ -56,7 +56,7 @@ type
     function GetHint: string; override;
     procedure SetActive(Value: Boolean); override;
   public
-    constructor Create(AOwner: TCnEditorWizard); override;
+    constructor Create(AOwner: TCnEditorToolsetWizard); override;
     destructor Destroy; override;
 
     procedure Execute; override;
@@ -188,7 +188,7 @@ var
 
 { TCnEditorCollector }
 
-constructor TCnEditorCollector.Create(AOwner: TCnEditorWizard);
+constructor TCnEditorCollector.Create(AOwner: TCnEditorToolsetWizard);
 begin
   inherited;
   Collector := Self;

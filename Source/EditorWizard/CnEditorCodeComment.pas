@@ -104,7 +104,7 @@ type
     function GetDefShortCut: TShortCut; override;
     procedure GetNewPos(var ARow: Integer; var ACol: Integer); override;
   public
-    constructor Create(AOwner: TCnEditorWizard); override;
+    constructor Create(AOwner: TCnEditorToolsetWizard); override;
     function GetCaption: string; override;
     function GetHint: string; override;
     procedure GetEditorInfo(var Name, Author, Email: string); override;
@@ -262,7 +262,7 @@ end;
 
 { TCnEditorCodeToggleComment }
 
-constructor TCnEditorCodeToggleComment.Create(AOwner: TCnEditorWizard);
+constructor TCnEditorCodeToggleComment.Create(AOwner: TCnEditorToolsetWizard);
 begin
   inherited;
   FMoveToNextLine := True;

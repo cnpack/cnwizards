@@ -77,7 +77,7 @@ type
     function ProcessText(const Text: string): string; override;
     function GetStyle: TCnCodeToolStyle; override;
   public
-    constructor Create(AOwner: TCnEditorWizard); override;
+    constructor Create(AOwner: TCnEditorToolsetWizard); override;
     function GetCaption: string; override;
     function GetHint: string; override;
     procedure GetEditorInfo(var Name, Author, Email: string); override;
@@ -105,7 +105,7 @@ const
 
 { TCnEditorCodeToString }
 
-constructor TCnEditorCodeToString.Create(AOwner: TCnEditorWizard);
+constructor TCnEditorCodeToString.Create(AOwner: TCnEditorToolsetWizard);
 begin
   inherited;
   FDelphiReturn := '#13#10';
