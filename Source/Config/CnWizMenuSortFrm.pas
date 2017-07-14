@@ -121,66 +121,67 @@ uses CnWizManager, CnWizConsts, CnWizClasses;
 // 应该按照当前菜单的顺序来加入
 procedure TCnMenuSortForm.InitMenusFromList(Sorted: TList);
 var
-  i: Integer;
+  I: Integer;
 begin
   if Sorted = nil then
     Exit;
 
-  Self.lvMenuWizards.Items.BeginUpdate;
+  lvMenuWizards.Items.BeginUpdate;
   try
-    Self.lvMenuWizards.Items.Clear;
-    for i := 0 to Sorted.Count - 1 do
+    lvMenuWizards.Items.Clear;
+    for I := 0 to Sorted.Count - 1 do
     begin
-      with Self.lvMenuWizards.Items.Add do
+      with lvMenuWizards.Items.Add do
       begin
-        Caption := StripHotKey(TCnMenuWizard(Sorted[i]).Menu.Caption);
-        SubItems.Add(TCnMenuWizard(Sorted[i]).WizardName);
-        SubItems.Add(TCnMenuWizard(Sorted[i]).GetIDStr);
-        if TCnMenuWizard(Sorted[i]) is TCnSubMenuWizard then
+        ImageIndex := TCnMenuWizard(Sorted[I]).Action.ImageIndex;
+        Caption := StripHotKey(TCnMenuWizard(Sorted[I]).Menu.Caption);
+        SubItems.Add(TCnMenuWizard(Sorted[I]).WizardName);
+        SubItems.Add(TCnMenuWizard(Sorted[I]).GetIDStr);
+        if TCnMenuWizard(Sorted[I]) is TCnSubMenuWizard then
           SubItems.Add(SCnSubMenuWizardName)
         else
           SubItems.Add(SCnMenuWizardName);
-        Data := TCnMenuWizard(Sorted[i]);
+        Data := TCnMenuWizard(Sorted[I]);
       end;
     end;
-    if Self.lvMenuWizards.Items.Count > 0 then
-      Self.lvMenuWizards.Selected := Self.lvMenuWizards.TopItem;
+    if lvMenuWizards.Items.Count > 0 then
+      lvMenuWizards.Selected := lvMenuWizards.TopItem;
   finally
-    Self.lvMenuWizards.Items.EndUpdate;
+    lvMenuWizards.Items.EndUpdate;
   end;
 end;
 
 procedure TCnMenuSortForm.ReSortMenuWizards;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to Self.lvMenuWizards.Items.Count - 1 do
-    TCnMenuWizard(Self.lvMenuWizards.Items[i].Data).MenuOrder := i;
+  for I := 0 to lvMenuWizards.Items.Count - 1 do
+    TCnMenuWizard(lvMenuWizards.Items[I].Data).MenuOrder := I;
 end;
 
 procedure TCnMenuSortForm.ResetActionExecute(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
   // 恢复 FMWizards 中的原始顺序
-  Self.FMWizards.Clear;
-  for i := 0 to CnWizardMgr.MenuWizardCount - 1 do
+  FMWizards.Clear;
+  for I := 0 to CnWizardMgr.MenuWizardCount - 1 do
   begin
-    Self.FMWizards.Add(CnWizardMgr.MenuWizards[i]);
-    TCnMenuWizard(FMWizards[i]).MenuOrder := i;
+    FMWizards.Add(CnWizardMgr.MenuWizards[I]);
+    TCnMenuWizard(FMWizards[I]).MenuOrder := I;
   end;
 
-  Self.InitMenusFromList(Self.FMWizards);
+  InitMenusFromList(FMWizards);
 end;
 
 procedure TCnMenuSortForm.ActionListUpdate(Action: TBasicAction;
   var Handled: Boolean);
 begin
-  Self.UpAction.Enabled := (Self.lvMenuWizards.SelCount = 1)
-    and (Self.lvMenuWizards.Selected.Index > 0);
-  Self.DownAction.Enabled := (Self.lvMenuWizards.SelCount = 1)
-    and (Self.lvMenuWizards.Selected.Index < Self.lvMenuWizards.Items.Count - 1);
-  Self.ResetAction.Enabled := True;
+  UpAction.Enabled := (lvMenuWizards.SelCount = 1)
+    and (lvMenuWizards.Selected.Index > 0);
+  DownAction.Enabled := (lvMenuWizards.SelCount = 1)
+    and (lvMenuWizards.Selected.Index < lvMenuWizards.Items.Count - 1);
+  ResetAction.Enabled := True;
   Handled := True;
 end;
 
@@ -200,7 +201,7 @@ var
 begin
   // 选中的上移
   if UpAction.Enabled then
-    with Self.lvMenuWizards do
+    with lvMenuWizards do
     begin
       Idx := Selected.Index;
       ExchangeTwoListItems(Selected, Items[Selected.Index - 1]);
@@ -216,7 +217,7 @@ var
 begin
   // 选中的下移
   if DownAction.Enabled then
-    with Self.lvMenuWizards do
+    with lvMenuWizards do
     begin
       Idx := Selected.Index;
       ExchangeTwoListItems(Selected, Items[Selected.Index + 1]);
@@ -228,7 +229,7 @@ end;
 
 procedure TCnMenuSortForm.ExchangeTwoListItems(A, B: TListItem);
 var
-  i: Integer;
+  I: Integer;
   S: String;
   P: Pointer;
 begin
@@ -243,38 +244,40 @@ begin
   A.Data := B.Data;
   B.Data := P;
 
-  for i := 0 to A.SubItems.Count - 1 do
+  for I := 0 to A.SubItems.Count - 1 do
   begin
-    S := A.SubItems[i];
-    A.SubItems[i] := B.SubItems[i];
-    B.SubItems[i] := S;
+    S := A.SubItems[I];
+    A.SubItems[I] := B.SubItems[I];
+    B.SubItems[I] := S;
   end;
 end;
 
 procedure TCnMenuSortForm.FormCreate(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
-  Self.PageControl.ActivePageIndex := 0;
-  Self.FMWizards := TList.Create;
-  for i := 0 to CnWizardMgr.MenuWizardCount - 1 do
-    FMWizards.Add(CnWizardMgr.MenuWizards[i]);
-  Self.lvWizardCreate.Items.Clear;
-  for i := 0 to GetCnWizardClassCount - 1 do
+  PageControl.ActivePageIndex := 0;
+  FMWizards := TList.Create;
+  for I := 0 to CnWizardMgr.MenuWizardCount - 1 do
+    FMWizards.Add(CnWizardMgr.MenuWizards[I]);
+  lvWizardCreate.Items.Clear;
+  lvMenuWizards.SmallImages := GetIDEImageList;
+
+  for I := 0 to GetCnWizardClassCount - 1 do
   begin
-    with Self.lvWizardCreate.Items.Add do
+    with lvWizardCreate.Items.Add do
     begin
-      Caption := TCnWizardClass(GetCnWizardClassByIndex(i)).WizardName;
-      SubItems.Add(TCnWizardClass(GetCnWizardClassByIndex(i)).GetIDStr);
-      SubItems.Add(GetCnWizardTypeNameFromClass(TCnWizardClass(GetCnWizardClassByIndex(i))));
-      Checked := CnWizardMgr.WizardCanCreate[TCnWizardClass(GetCnWizardClassByIndex(i)).ClassName];
+      Caption := TCnWizardClass(GetCnWizardClassByIndex(I)).WizardName;
+      SubItems.Add(TCnWizardClass(GetCnWizardClassByIndex(I)).GetIDStr);
+      SubItems.Add(GetCnWizardTypeNameFromClass(TCnWizardClass(GetCnWizardClassByIndex(I))));
+      Checked := CnWizardMgr.WizardCanCreate[TCnWizardClass(GetCnWizardClassByIndex(I)).ClassName];
     end;
   end;
 end;
 
 procedure TCnMenuSortForm.FormDestroy(Sender: TObject);
 begin
-  Self.FMWizards.Free;
+  FMWizards.Free;
 end;
 
 procedure TCnMenuSortForm.InitWizardMenus;
@@ -287,7 +290,7 @@ end;
 procedure TCnMenuSortForm.lvMenuWizardsStartDrag(Sender: TObject;
   var DragObject: TDragObject);
 begin
-  Self.FDragIndex := Self.lvMenuWizards.Selected.Index;
+  FDragIndex := lvMenuWizards.Selected.Index;
 end;
 
 procedure TCnMenuSortForm.lvMenuWizardsDragOver(Sender, Source: TObject; X,
@@ -310,22 +313,22 @@ var
 begin
   if Sender = Source then
   begin
-    if (Self.FDragIndex > 0) and (Self.lvMenuWizards.GetItemAt(X, Y) <> nil) then
+    if (FDragIndex > 0) and (lvMenuWizards.GetItemAt(X, Y) <> nil) then
     begin
       // 插入到松开的 Item 之上
-      L := Self.lvMenuWizards.Items[FDragIndex];
-      (Self.lvMenuWizards.Items.Insert(Self.lvMenuWizards.GetItemAt(X, Y).Index)).Assign(L);
-      Self.lvMenuWizards.Items.Delete(L.Index);
+      L := lvMenuWizards.Items[FDragIndex];
+      (lvMenuWizards.Items.Insert(lvMenuWizards.GetItemAt(X, Y).Index)).Assign(L);
+      lvMenuWizards.Items.Delete(L.Index);
 
-      Self.lvMenuWizards.Selected := Self.lvMenuWizards.GetItemAt(X, Y);
-      Self.lvMenuWizards.ItemFocused := Self.lvMenuWizards.Selected;
+      lvMenuWizards.Selected := lvMenuWizards.GetItemAt(X, Y);
+      lvMenuWizards.ItemFocused := lvMenuWizards.Selected;
 
       // 人性化设计，相邻上拖下本来不改变，现在交换此两个。拖到最后一个上也交换。
-      if (Self.lvMenuWizards.Selected.Index = Self.lvMenuWizards.Items.Count - 1)
-        or (Self.lvMenuWizards.Selected.Index - FDragIndex = 1) then
-        if Self.lvMenuWizards.Items.Count > 1 then
-          Self.ExchangeTwoListItems(Self.lvMenuWizards.Selected,
-            Self.lvMenuWizards.Items[Self.lvMenuWizards.Selected.Index - 1]);
+      if (lvMenuWizards.Selected.Index = lvMenuWizards.Items.Count - 1)
+        or (lvMenuWizards.Selected.Index - FDragIndex = 1) then
+        if lvMenuWizards.Items.Count > 1 then
+          ExchangeTwoListItems(lvMenuWizards.Selected,
+            lvMenuWizards.Items[lvMenuWizards.Selected.Index - 1]);
     end;
   end;
 end;
@@ -357,35 +360,35 @@ end;
 
 procedure TCnMenuSortForm.SaveWizardCreateInfo;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to Self.lvWizardCreate.Items.Count - 1 do
-    CnWizardMgr.WizardCanCreate[TCnWizardClass(GetCnWizardClassByIndex(i)).ClassName]
-      := Self.lvWizardCreate.Items[i].Checked;
+  for I := 0 to lvWizardCreate.Items.Count - 1 do
+    CnWizardMgr.WizardCanCreate[TCnWizardClass(GetCnWizardClassByIndex(I)).ClassName]
+      := lvWizardCreate.Items[I].Checked;
 end;
 
 procedure TCnMenuSortForm.actSelAllExecute(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to lvWizardCreate.Items.Count - 1 do
-    lvWizardCreate.Items[i].Checked := True;
+  for I := 0 to lvWizardCreate.Items.Count - 1 do
+    lvWizardCreate.Items[I].Checked := True;
 end;
 
 procedure TCnMenuSortForm.actSelNoneExecute(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to lvWizardCreate.Items.Count - 1 do
-    lvWizardCreate.Items[i].Checked := False;
+  for I := 0 to lvWizardCreate.Items.Count - 1 do
+    lvWizardCreate.Items[I].Checked := False;
 end;
 
 procedure TCnMenuSortForm.actSelReverseExecute(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to lvWizardCreate.Items.Count - 1 do
-    lvWizardCreate.Items[i].Checked := not lvWizardCreate.Items[i].Checked;
+  for I := 0 to lvWizardCreate.Items.Count - 1 do
+    lvWizardCreate.Items[I].Checked := not lvWizardCreate.Items[I].Checked;
 end;
 
 procedure TCnMenuSortForm.lvMenuWizardsKeyDown(Sender: TObject;
