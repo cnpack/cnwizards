@@ -721,6 +721,8 @@ procedure TCnMainViewer.GotoNode(Tree: TVirtualStringTree;
 begin
   if (Tree <> nil) and (Node <> nil) and (Tree.TotalCount > 0) then
   begin
+    if Tree.FocusedNode <> nil then
+      Tree.Selected[Tree.FocusedNode] := False;
     Tree.Selected[Node] := True;
     Tree.FocusedNode := Node;
   end;
