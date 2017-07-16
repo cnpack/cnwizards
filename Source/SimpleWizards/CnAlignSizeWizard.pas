@@ -127,8 +127,9 @@ type
 
 {$IFDEF IDE_ACTION_UPDATE_DELAY}
     procedure CheckMenuBarReady;
-    procedure CheckMenuItemReady(Sender: TObject);
 {$ENDIF}
+    procedure CheckMenuItemReady(Sender: TObject);
+
     procedure RequestLockControlsMenuUpdate(Sender: TObject);
     procedure RequestNonvisualsMenuUpdate(Sender: TObject);
 
@@ -153,6 +154,7 @@ type
     destructor Destroy; override;
     procedure AcquireSubActions; override;
     procedure Config; override;
+    procedure Loaded; override;
     procedure LaterLoaded; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
@@ -1532,6 +1534,8 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 procedure TCnAlignSizeWizard.CheckMenuItemReady(Sender: TObject);
 begin
   if FIDELockControlsMenu = nil then
@@ -1542,7 +1546,7 @@ begin
     FIDEHideNonvisualsMenu := TMenuItem(Application.MainForm.FindComponent(SIDEHideNonvisualsMenuName));
 end;
 
-{$ENDIF}
+
 
 procedure TCnAlignSizeWizard.RequestLockControlsMenuUpdate(Sender: TObject);
 begin
@@ -1582,11 +1586,17 @@ begin
 {$ENDIF}
 end;
 
+procedure TCnAlignSizeWizard.Loaded;
+begin
+  inherited;
+  CnWizNotifierServices.ExecuteOnApplicationIdle(CheckMenuItemReady);
+end;
+
 procedure TCnAlignSizeWizard.LaterLoaded;
 begin
   inherited;
 {$IFDEF IDE_ACTION_UPDATE_DELAY}
-  CnWizNotifierServices.ExecuteOnApplicationIdle(CheckMenuItemReady);
+  CnWizNotifierServices.ExecuteOnApplicationIdle(CheckMenuBarReady);
 {$ENDIF}
 end;
 
