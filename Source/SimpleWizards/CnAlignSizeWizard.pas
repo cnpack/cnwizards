@@ -126,7 +126,7 @@ type
     procedure HideNonVisualComponent;
 
 {$IFDEF IDE_ACTION_UPDATE_DELAY}
-    procedure CheckMenuBarReady;
+    procedure CheckMenuBarReady(Sender: TObject);
 {$ENDIF}
     procedure CheckMenuItemReady(Sender: TObject);
 
@@ -1507,7 +1507,7 @@ end;
 
 {$IFDEF IDE_ACTION_UPDATE_DELAY}
 
-procedure TCnAlignSizeWizard.CheckMenuBarReady;
+procedure TCnAlignSizeWizard.CheckMenuBarReady(Sender: TObject);
 var
   Comp: TComponent;
   I: Integer;
@@ -1551,7 +1551,7 @@ end;
 procedure TCnAlignSizeWizard.RequestLockControlsMenuUpdate(Sender: TObject);
 begin
 {$IFDEF IDE_ACTION_UPDATE_DELAY}
-  CheckMenuBarReady;
+  CheckMenuBarReady(nil);
 
   if (FIDEMenuBar <> nil) and (FEditMenuActionControl <> nil) then
   begin
@@ -1570,7 +1570,7 @@ end;
 procedure TCnAlignSizeWizard.RequestNonvisualsMenuUpdate(Sender: TObject);
 begin
 {$IFDEF IDE_ACTION_UPDATE_DELAY}
-  CheckMenuBarReady;
+  CheckMenuBarReady(nil);
 
   if (FIDEMenuBar <> nil) and (FEditMenuActionControl <> nil) then
   begin
