@@ -355,7 +355,7 @@ type
 
     procedure ParseCurrent;
     procedure ClearList;
-    procedure CheckCurrentFile;
+    procedure CheckCurrentFile(Sender: TObject);
     function CheckReparse: Boolean;
 
     procedure CurrentGotoLineAndFocusEditControl(Info: TCnElementInfo); overload;
@@ -487,7 +487,7 @@ var
 
 { TCnProcListWizard }
 
-procedure TCnProcListWizard.CheckCurrentFile;
+procedure TCnProcListWizard.CheckCurrentFile(Sender: TObject);
 var
   S: string;
   Obj: TCnProcToolBarObj;
@@ -496,6 +496,9 @@ begin
   if (Obj <> nil) and (Obj.EditorToolBar <> nil) then
   begin
     S := CnOtaGetCurrentSourceFileName;
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('TCnProcListWizard.CheckCurrentFile ' + S);
+{$ENDIF}
     try
       Obj.EditorToolBar.Visible := Active and FUseEditorToolBar and
         IsDelphiSourceModule(S) or IsInc(S) or IsCppSourceModule(S);
@@ -1016,7 +1019,12 @@ begin
   begin
     if ChangeType * [ctView] <> [] then
     begin
-      CheckCurrentFile;
+      // D5/6 下 Alt+F12 切换 Form 与 Text 时，收到通知时得到的可能是旧的文件，需要延迟处理
+{$IFDEF COMPILER7_UP}
+      CheckCurrentFile(nil);
+{$ELSE}
+      CnWizNotifierServices.ExecuteOnApplicationIdle(CheckCurrentFile);
+{$ENDIF}
     end;
 
     if ChangeType * [ctView, ctWindow, ctModified, ctBlock] <> [] then
