@@ -6,7 +6,6 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
   Caption = 'CnWizards ImageList Editor'
   ClientHeight = 398
   ClientWidth = 807
-  OldCreateOrder = True
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow

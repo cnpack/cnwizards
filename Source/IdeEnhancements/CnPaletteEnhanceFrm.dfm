@@ -5,7 +5,6 @@ inherited CnPalEnhanceForm: TCnPalEnhanceForm
   Caption = 'IDE Main Form Enhancements Wizard Settings'
   ClientHeight = 463
   ClientWidth = 488
-  OldCreateOrder = True
   OnCreate = FormCreate
   OnShow = FormShow
   PixelsPerInch = 96

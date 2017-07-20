@@ -6,7 +6,6 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
   ClientHeight = 490
   ClientWidth = 451
   Font.Charset = ANSI_CHARSET
-  OldCreateOrder = True
   OnCloseQuery = FormCloseQuery
   OnShow = FormShow
   PixelsPerInch = 96

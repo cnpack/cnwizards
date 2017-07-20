@@ -6,7 +6,6 @@ inherited CnWizCommentForm: TCnWizCommentForm
   Caption = 'CnPack IDE Wizards Hint'
   ClientHeight = 292
   ClientWidth = 438
-  OldCreateOrder = True
   PixelsPerInch = 96
   TextHeight = 13
   object imgIcon: TImage

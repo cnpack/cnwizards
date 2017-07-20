@@ -8,7 +8,6 @@ inherited CnWizConfigForm: TCnWizConfigForm
   Caption = 'CnPack IDE Wizards Settings'
   Constraints.MinHeight = 471
   Constraints.MinWidth = 528
-  OldCreateOrder = True
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnResize = FormResize

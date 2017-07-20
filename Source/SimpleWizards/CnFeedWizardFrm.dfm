@@ -5,7 +5,6 @@ inherited CnFeedWizardForm: TCnFeedWizardForm
   Caption = 'FeedReader Wizard Settings'
   ClientHeight = 412
   ClientWidth = 480
-  OldCreateOrder = True
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow

@@ -5,7 +5,6 @@ inherited CnTabOrderForm: TCnTabOrderForm
   Caption = 'Tab Order Wizard Settings'
   ClientHeight = 262
   ClientWidth = 417
-  OldCreateOrder = True
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13

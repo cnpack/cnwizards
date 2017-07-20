@@ -11,7 +11,6 @@ object CnLocalHistoryForm: TCnLocalHistoryForm
   Font.Height = -12
   Font.Name = 'ËÎÌו'
   Font.Style = []
-  OldCreateOrder = True
   Position = poScreenCenter
   Scaled = False
   OnCreate = FormCreate

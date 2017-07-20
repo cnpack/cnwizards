@@ -5,7 +5,6 @@ inherited CnHighlightSeparateLineForm: TCnHighlightSeparateLineForm
   Caption = 'Separate Line Settings'
   ClientHeight = 151
   ClientWidth = 362
-  OldCreateOrder = True
   PixelsPerInch = 96
   TextHeight = 13
   object GroupBox1: TGroupBox
