@@ -164,6 +164,7 @@ type
     chkGutterClickSelectLine: TCheckBox;
     chkGutterDblClickToggleBookmark: TCheckBox;
     chkGutterDragSelectLines: TCheckBox;
+    chkPasteReplace: TCheckBox;
     procedure btnHelpClick(Sender: TObject);
     procedure UpdateContent(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word;
@@ -277,7 +278,7 @@ begin
   btnDesignToolBar.Enabled := chkShowInDesign.Checked;
 {$IFDEF BDS}
   chkEditorMultiLine.Enabled := False;
-  chkEditorFlatButtons.Enabled := False;  
+  chkEditorFlatButtons.Enabled := False;
 {$ELSE}
   chkShowInDesign.Enabled := False;
 {$ENDIF}
@@ -298,7 +299,7 @@ begin
   lblSaveInterval.Enabled := chkAutoSave.Checked;
   lblMinutes.Enabled := chkAutoSave.Checked;
   seSaveInterval.Enabled := chkAutoSave.Checked;
-  
+
   seNavMinLineDiff.Enabled := chkExtendForwardBack.Checked;
   seNavMaxItems.Enabled := chkExtendForwardBack.Checked;
 
@@ -306,6 +307,7 @@ begin
   chkKeepSearch.Enabled := chkSearchAgain.Checked;
 
   mmoAutoIndent.Enabled := chkAutoIndent.Checked;
+  chkPasteReplace.Enabled := chkSmartPaste.Checked;
 end;
 
 procedure TCnSrcEditorEnhanceForm.FormKeyDown(Sender: TObject;
@@ -618,6 +620,7 @@ begin
 
     chkSmartCopy.Checked := FEditorKey.SmartCopy;
     chkSmartPaste.Checked := FEditorKey.SmartPaste;
+    chkPasteReplace.Checked := FEditorKey.PasteReplace;
     chkTabIndent.Checked := FBlockTools.TabIndent;
     chkAutoBracket.Checked := FEditorKey.AutoBracket;
     chkShiftEnter.Checked := FEditorKey.ShiftEnter;
@@ -711,6 +714,7 @@ begin
       FBlockTools.ShowBlockTools := chkShowFlatButton.Checked;
       FEditorKey.SmartCopy := chkSmartCopy.Checked;
       FEditorKey.SmartPaste := chkSmartPaste.Checked;
+      FEditorKey.PasteReplace := chkPasteReplace.Checked;
       FBlockTools.TabIndent := chkTabIndent.Checked;
       FEditorKey.AutoBracket := chkAutoBracket.Checked;
       FEditorKey.ShiftEnter := chkShiftEnter.Checked;

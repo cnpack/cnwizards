@@ -511,21 +511,21 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
       end
       object grpAutoSave: TGroupBox
         Left = 8
-        Top = 281
+        Top = 301
         Width = 361
-        Height = 72
+        Height = 64
         Caption = 'Auto &Save'
         TabOrder = 3
         object lblSaveInterval: TLabel
           Left = 26
-          Top = 40
+          Top = 36
           Width = 69
           Height = 13
           Caption = 'Save All Every'
         end
         object lblMinutes: TLabel
           Left = 200
-          Top = 40
+          Top = 36
           Width = 41
           Height = 13
           Caption = 'Minutes.'
@@ -541,7 +541,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         end
         object seSaveInterval: TCnSpinEdit
           Left = 136
-          Top = 38
+          Top = 34
           Width = 49
           Height = 22
           MaxValue = 30
@@ -554,7 +554,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         Left = 8
         Top = 211
         Width = 361
-        Height = 62
+        Height = 82
         Caption = 'Cli&pboard Operations'
         TabOrder = 2
         object chkSmartCopy: TCheckBox
@@ -573,10 +573,18 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Caption = 'Smart Paste.'
           TabOrder = 1
         end
+        object chkPasteReplace: TCheckBox
+          Left = 24
+          Top = 56
+          Width = 321
+          Height = 17
+          Caption = 'Replace Token under Cursor when Pasting.'
+          TabOrder = 2
+        end
       end
       object chkShowThumbnail: TCheckBox
         Left = 16
-        Top = 360
+        Top = 372
         Width = 350
         Height = 17
         Caption = 'Show Preview Hint Window when Cursor on Vertical ScrollBar.'

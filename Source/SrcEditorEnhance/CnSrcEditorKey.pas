@@ -84,6 +84,7 @@ type
 
     FSmartCopy: Boolean;
     FSmartPaste: Boolean;
+    FPasteReplace: Boolean;
     FShiftEnter: Boolean;
     FAutoIndent: Boolean;
     FAutoIndentList: TStringList;
@@ -165,6 +166,7 @@ type
     property Active: Boolean read FActive write SetActive;
     property SmartCopy: Boolean read FSmartCopy write FSmartCopy;
     property SmartPaste: Boolean read FSmartPaste write FSmartPaste;
+    property PasteReplace: Boolean read FPasteReplace write FPasteReplace;
     property ShiftEnter: Boolean read FShiftEnter write FShiftEnter;
     property F3Search: Boolean read FF3Search write FF3Search;
     property F2Rename: Boolean read FF2Rename write FF2Rename;
@@ -523,7 +525,7 @@ var
   EditControl: TControl;
   I, Idx, LineNo, CharIndex, PasteCol: Integer;
   List: TStrings;
-  EndIsCRLF, OneLine: Boolean;
+  EndIsCRLF, IsSingleLine: Boolean;
   FirstLineSpaceCount, LineSpaceCount, MinLineSpaceCount: Integer;
   EditPos: TOTAEditPos;
   CharPos: TOTACharPos;
@@ -554,7 +556,6 @@ begin
   if Trim(Text) = '' then
     Exit;
 
-  // CnOtaDeleteCurrToken;
   // 如果当前行不是空，则退出
   if not CnNtaGetCurrLineText(Text, LineNo, CharIndex, True) then
     Exit;
@@ -580,6 +581,7 @@ begin
     FirstLineSpaceCount := GetHeadSpaceCount(List[0]);
     MinLineSpaceCount := MaxInt;
 
+    IsSingleLine := List.Count = 1;
     if List.Count > 1 then
     begin
       for I := 1 to List.Count - 1 do
@@ -636,7 +638,14 @@ begin
 {$ENDIF}
 
         if FAutoIndentList.IndexOf(Text) >= 0 then // 如果属于自动缩进列表则再进一层
-          Inc(PasteCol, CnOtaGetBlockIndent);
+          Inc(PasteCol, CnOtaGetBlockIndent)
+        else
+        begin
+          // 如果待粘贴内容只有一行[]且不是 begin 开头](暂不做)，且 Text 是 then/do 等，也需要缩进
+          Text := LowerCase(Text);
+          if IsSingleLine and (Text = 'then') or (Text = 'do') then
+            Inc(PasteCol, CnOtaGetBlockIndent);
+        end;
       end;
     end;
 
@@ -713,6 +722,8 @@ begin
       end
       else if FSmartPaste then
       begin
+        if FPasteReplace then
+          CnOtaDeleteCurrToken;
         Handled := ProcessSmartPaste(View);
       end;
     end;
@@ -2847,6 +2858,7 @@ const
   csEditorKey = 'EditorKey';
   csSmartCopy = 'SmartCopy';
   csSmartPaste = 'SmartPaste';
+  csPasteReplace = 'PasteReplace';
   csShiftEnter = 'ShiftEnter';
   csF3Search = 'F3Search';
   csF2Rename = 'F2Rename';
@@ -2866,6 +2878,7 @@ procedure TCnSrcEditorKey.LoadSettings(Ini: TCustomIniFile);
 begin
   FSmartCopy := Ini.ReadBool(csEditorKey, csSmartCopy, True);
   FSmartPaste := Ini.ReadBool(csEditorKey, csSmartPaste, True);
+  FPasteReplace := Ini.ReadBool(csEditorKey, csPasteReplace, False);
   FShiftEnter := Ini.ReadBool(csEditorKey, csShiftEnter, True);
   FAutoIndent := Ini.ReadBool(csEditorKey, csAutoIndent, True);
   FF3Search := Ini.ReadBool(csEditorKey, csF3Search, True);
@@ -2887,6 +2900,7 @@ procedure TCnSrcEditorKey.SaveSettings(Ini: TCustomIniFile);
 begin
   Ini.WriteBool(csEditorKey, csSmartCopy, FSmartCopy);
   Ini.WriteBool(csEditorKey, csSmartPaste, FSmartPaste);
+  Ini.WriteBool(csEditorKey, csPasteReplace, FPasteReplace);
   Ini.WriteBool(csEditorKey, csShiftEnter, FShiftEnter);
   Ini.WriteBool(csEditorKey, csF3Search, FF3Search);
   Ini.WriteBool(csEditorKey, csF2Rename, FF2Rename);
