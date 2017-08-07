@@ -2190,6 +2190,7 @@ TCnSrcEditorEnhanceForm.ts3.Caption=&Tabset / Button
 TCnSrcEditorEnhanceForm.grpSmart.Caption=Cli&pboard Operations
 TCnSrcEditorEnhanceForm.chkSmartCopy.Caption=Cut / Copy Token under Cursor when NO Selection.
 TCnSrcEditorEnhanceForm.chkSmartPaste.Caption=Smart Paste.
+TCnSrcEditorEnhanceForm.chkPasteReplace.Caption=Replace Token under Cursor when Pasting.
 TCnSrcEditorEnhanceForm.lbl3.Caption=Delphi Keyword List for Auto Indent:
 TCnSrcEditorEnhanceForm.ts4.Caption=Oth&ers
 TCnSrcEditorEnhanceForm.grpKeyExtend.Caption=&Keyboard Extend

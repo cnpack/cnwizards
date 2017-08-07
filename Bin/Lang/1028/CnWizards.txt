@@ -2190,6 +2190,7 @@ TCnSrcEditorEnhanceForm.ts3.Caption=標籤及浮動按鈕(&T)
 TCnSrcEditorEnhanceForm.grpSmart.Caption=剪貼板操作(&P)
 TCnSrcEditorEnhanceForm.chkSmartCopy.Caption=未選擇時剪切複製當前游標下的識別字。
 TCnSrcEditorEnhanceForm.chkSmartPaste.Caption=粘貼時智能對齊。
+TCnSrcEditorEnhanceForm.chkPasteReplace.Caption=粘貼時自動替換當前游標下的識別字。
 TCnSrcEditorEnhanceForm.lbl3.Caption=需要縮進的 Delphi 關鍵字列表：
 TCnSrcEditorEnhanceForm.ts4.Caption=其他(&R)
 TCnSrcEditorEnhanceForm.grpKeyExtend.Caption=功能鍵擴展(&K)

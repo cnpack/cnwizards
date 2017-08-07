@@ -2190,6 +2190,7 @@ TCnSrcEditorEnhanceForm.ts3.Caption=Вкладки / Редактировани�
 TCnSrcEditorEnhanceForm.grpSmart.Caption=Буфер обмена
 TCnSrcEditorEnhanceForm.chkSmartCopy.Caption=Вырезать/копировать символ под курсором без выделения
 TCnSrcEditorEnhanceForm.chkSmartPaste.Caption=Умная паста
+TCnSrcEditorEnhanceForm.chkPasteReplace.Caption=При вставке заменить символ под курсором без выделения
 TCnSrcEditorEnhanceForm.lbl3.Caption=Список идентификаторов Delphi для авто-отступа:
 TCnSrcEditorEnhanceForm.ts4.Caption=Другие
 TCnSrcEditorEnhanceForm.grpKeyExtend.Caption=Расширения клавиатуры

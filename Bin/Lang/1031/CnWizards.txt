@@ -2190,6 +2190,7 @@ TCnSrcEditorEnhanceForm.ts3.Caption=&Tabset / Button
 TCnSrcEditorEnhanceForm.grpSmart.Caption=Zwischenablage Operationen
 TCnSrcEditorEnhanceForm.chkSmartCopy.Caption=ausschneiden/kopiere Zeichen unter Cursor wenn keine Auswahl.
 TCnSrcEditorEnhanceForm.chkSmartPaste.Caption=Smart Paste.
+TCnSrcEditorEnhanceForm.chkPasteReplace.Caption=ersetze Zeichen beim Einfügen.
 TCnSrcEditorEnhanceForm.lbl3.Caption=Delphi Schlüsselwortliste Liste für Auto Einzug:
 TCnSrcEditorEnhanceForm.ts4.Caption=weitere
 TCnSrcEditorEnhanceForm.grpKeyExtend.Caption=&Tastatur Kürzel
