@@ -572,6 +572,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Height = 17
           Caption = 'Smart Paste.'
           TabOrder = 1
+          OnClick = UpdateContent
         end
         object chkPasteReplace: TCheckBox
           Left = 24
