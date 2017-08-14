@@ -169,6 +169,8 @@ type
     procedure edtSearchEditorChange(Sender: TObject);
     procedure PageControlChange(Sender: TObject);
     procedure btnRestoreSettingClick(Sender: TObject);
+    procedure lbWizardsKeyPress(Sender: TObject; var Key: Char);
+    procedure lbDesignEditorsKeyPress(Sender: TObject; var Key: Char);
   private
     { Private declarations }
     FShortCuts: array of TShortCut;
@@ -177,6 +179,8 @@ type
     FDrawTextHeight: Integer;
     function CalcSelectedWizardIndex(Wizard: TCnBaseWizard = nil): Integer;
     function CalcSelectedEditorIndex(Editor: TCnDesignEditorInfo = nil): Integer;
+    procedure ToggleWizardActive;
+    procedure TogglePropertyEditorActive;
   protected
     function GetHelpTopic: string; override;
   public
@@ -525,6 +529,39 @@ begin
   end
   else
     btnConfig.Enabled := False;
+end;
+
+procedure TCnWizConfigForm.ToggleWizardActive;
+var
+  Idx: Integer;
+begin
+  Idx := CalcSelectedWizardIndex();
+  if Idx >= 0 then
+  begin
+    FActives[Idx] := not FActives[Idx];
+    cbWizardActive.Checked := FActives[Idx];
+    btnConfig.Enabled := FActives[Idx] and
+      TCnBaseWizard(lbWizards.Items.Objects[lbWizards.ItemIndex]).HasConfig;
+    lbWizards.Refresh;
+  end
+  else
+    btnConfig.Enabled := False;
+end;
+
+procedure TCnWizConfigForm.TogglePropertyEditorActive;
+var
+  Idx: Integer;
+begin
+  Idx := CalcSelectedEditorIndex();
+  if Idx >= 0 then
+  begin
+    FEditorActives[Idx] := not FEditorActives[Idx];
+    cbDesignEditorActive.Checked := FEditorActives[Idx];
+    btnDesignEditorConfig.Enabled := cbDesignEditorActive.Checked;
+    lbDesignEditors.Refresh;
+  end
+  else
+    btnDesignEditorConfig.Enabled := False;
 end;
 
 // …Ë÷√◊®º“
@@ -973,6 +1010,20 @@ end;
 procedure TCnWizConfigForm.PageControlChange(Sender: TObject);
 begin
   btnSort.Visible := (PageControl.ActivePageIndex = 0);
+end;
+
+procedure TCnWizConfigForm.lbWizardsKeyPress(Sender: TObject;
+  var Key: Char);
+begin
+  if Key = ' ' then
+    ToggleWizardActive;
+end;
+
+procedure TCnWizConfigForm.lbDesignEditorsKeyPress(Sender: TObject;
+  var Key: Char);
+begin
+  if Key = ' ' then
+    TogglePropertyEditorActive;
 end;
 
 end.

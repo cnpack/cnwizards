@@ -209,6 +209,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
           OnClick = lbWizardsClick
           OnDblClick = lbWizardsDblClick
           OnDrawItem = lbWizardsDrawItem
+          OnKeyPress = lbWizardsKeyPress
         end
         object pnlListTop: TPanel
           Left = 0
@@ -431,6 +432,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
           OnClick = lbDesignEditorsClick
           OnDblClick = lbDesignEditorsDblClick
           OnDrawItem = lbDesignEditorsDrawItem
+          OnKeyPress = lbDesignEditorsKeyPress
         end
         object pnlEditorTop: TPanel
           Left = 0
