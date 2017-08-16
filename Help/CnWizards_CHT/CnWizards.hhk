@@ -309,6 +309,11 @@
 		<param name="Local" value="wizards\scriptwizard.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="捐助我們">
+		<param name="Name" value="捐助我們">
+		<param name="Local" value="other\donation.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="歷史更新記錄">
 		<param name="Name" value="歷史更新記錄">
 		<param name="Local" value="other\history.htm">

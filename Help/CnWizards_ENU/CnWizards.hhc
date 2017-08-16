@@ -498,6 +498,10 @@
 			<param name="Name" value="Contact Us">
 			<param name="Local" value="other/contact.htm">
 			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Donate to Us">
+			<param name="Local" value="other/donation.htm.htm">
+			</OBJECT>
 	</UL>
 </UL>
 </BODY></HTML>
