@@ -670,6 +670,7 @@ begin
   TranslateStr(SCnWizAboutUrlCaption, 'SCnWizAboutUrlCaption');
   TranslateStr(SCnWizAboutBbsCaption, 'SCnWizAboutBbsCaption');
   TranslateStr(SCnWizAboutMailCaption, 'SCnWizAboutMailCaption');
+  TranslateStr(SCnWizAboutDonateCaption, 'SCnWizAboutDonateCaption');
   TranslateStr(SCnWizAboutAboutCaption, 'SCnWizAboutAboutCaption');
   TranslateStr(SCnWizAboutHint, 'SCnWizAboutHint');
   TranslateStr(SCnWizAboutHelpHint, 'SCnWizAboutHelpHint');
@@ -681,6 +682,7 @@ begin
   TranslateStr(SCnWizAboutUrlHint, 'SCnWizAboutUrlHint');
   TranslateStr(SCnWizAboutBbsHint, 'SCnWizAboutBbsHint');
   TranslateStr(SCnWizAboutMailHint, 'SCnWizAboutMailHint');
+  TranslateStr(SCnWizAboutDonateHint, 'SCnWizAboutDonateHint');
   TranslateStr(SCnWizAboutAboutHint, 'SCnWizAboutAboutHint');
   TranslateStr(SCnWizMailSubject, 'SCnWizMailSubject');
   

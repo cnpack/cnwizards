@@ -253,6 +253,7 @@ resourcestring
   SCnWizAboutUrl = 'CnWizAboutUrl';
   SCnWizAboutBbs = 'CnWizAboutBbs';
   SCnWizAboutMail = 'CnWizAboutMail';
+  SCnWizAboutDonate = 'CnWizAboutDonate';
   SCnWizAboutTipOfDay = 'CnWizAboutTipOfDay';
   SCnWizAboutAbout = 'CnWizAboutAbout';
 
@@ -979,6 +980,7 @@ var
   SCnWizAboutUrlCaption: string = 'CnPack &WebSite';
   SCnWizAboutBbsCaption: string = 'CnPac&k Forum';
   SCnWizAboutMailCaption: string = 'E&mail';
+  SCnWizAboutDonateCaption: string = '&Donate Us';
   SCnWizAboutAboutCaption: string = '&About...';
   SCnWizAboutHint: string = 'About CnPack IDE Wizards';
   SCnWizAboutHelpHint: string = 'CnPack IDE Wizards Help';
@@ -990,6 +992,7 @@ var
   SCnWizAboutUrlHint: string = 'Access the CnPack WebSite';
   SCnWizAboutBbsHint: string = 'Access CnPack Forum';
   SCnWizAboutMailHint: string = 'Write Mail to CnPack';
+  SCnWizAboutDonateHint: string = 'Make a Donation to CnPack';
   SCnWizAboutAboutHint: string = 'About CnPack IDE Wizards';
   SCnWizMailSubject: string = 'About CnPack IDE Wizards';
 

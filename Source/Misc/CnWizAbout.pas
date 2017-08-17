@@ -59,6 +59,7 @@ type
     FIdUrl: Integer;
     FIdBbs: Integer;
     FIdMail: Integer;
+    FIdDonate: Integer;
     FIdAbout: Integer;
   protected
     procedure ConfigIO;
@@ -111,6 +112,7 @@ begin
   FIdUrl := RegisterASubAction(SCnWizAboutUrl, SCnWizAboutUrlCaption, 0, SCnWizAboutUrlHint);
   FIdBbs := RegisterASubAction(SCnWizAboutBbs, SCnWizAboutBbsCaption, 0, SCnWizAboutBbsHint);
   FIdMail := RegisterASubAction(SCnWizAboutMail, SCnWizAboutMailCaption, 0, SCnWizAboutMailHint);
+  FIdDonate := RegisterASubAction(SCnWizAboutDonate, SCnWizAboutDonateCaption, 0, SCnWizAboutDonateHint);
   AddSepMenu;
   FIdAbout := RegisterASubAction(SCnWizAboutAbout, SCnWizAboutAboutCaption, 0, SCnWizAboutAboutHint, ClassName);
 end;
@@ -156,6 +158,8 @@ begin
     OpenUrl(SCnPackBbsUrl)
   else if Index = FIdMail then
     MailTo(SCnPackEmail, SCnWizMailSubject)
+  else if Index = FIdDonate then
+    ShowHelp('Donation')
   else if Index = FIdAbout then
     ShowCnWizAboutForm;
 end;
