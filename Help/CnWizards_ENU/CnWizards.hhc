@@ -499,8 +499,8 @@
 			<param name="Local" value="other/contact.htm">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
-			<param name="Name" value="Donate to Us">
-			<param name="Local" value="other/donation.htm.htm">
+			<param name="Name" value="Donate to CnPack">
+			<param name="Local" value="other/donation.htm">
 			</OBJECT>
 	</UL>
 </UL>
