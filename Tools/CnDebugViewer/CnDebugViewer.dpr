@@ -20,6 +20,10 @@
 
 program CnDebugViewer;
 
+{$IFNDEF VER150}
+  {$MESSAGE ERROR 'CnDebugViewer Compiled Only by Delphi 7.'}
+{$ENDIF}
+
 uses
   Sysutils,
   Forms,
