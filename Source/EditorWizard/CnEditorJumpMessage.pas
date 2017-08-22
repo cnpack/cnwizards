@@ -849,9 +849,22 @@ begin
   CppParser := nil;
 
   if CurIsPas then
+  begin
     PasParser := TCnGeneralPasStructParser.Create;
+{$IFDEF BDS}
+    PasParser.UseTabKey := True;
+    PasParser.TabWidth := EditControlWrapper.GetTabWidth;
+{$ENDIF}
+  end;
+
   if CurIsCpp then
+  begin
     CppParser := TCnGeneralCppStructParser.Create;
+{$IFDEF BDS}
+    CppParser.UseTabKey := True;
+    CppParser.TabWidth := EditControlWrapper.GetTabWidth;
+{$ENDIF}
+  end;
 
   CurrentToken := nil;
   Stream := TMemoryStream.Create;

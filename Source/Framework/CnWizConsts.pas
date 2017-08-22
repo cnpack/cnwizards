@@ -980,7 +980,7 @@ var
   SCnWizAboutUrlCaption: string = 'CnPack &WebSite';
   SCnWizAboutBbsCaption: string = 'CnPac&k Forum';
   SCnWizAboutMailCaption: string = 'E&mail';
-  SCnWizAboutDonateCaption: string = '&Donate Us';
+  SCnWizAboutDonateCaption: string = '&Donate to CnPack...';
   SCnWizAboutAboutCaption: string = '&About...';
   SCnWizAboutHint: string = 'About CnPack IDE Wizards';
   SCnWizAboutHelpHint: string = 'CnPack IDE Wizards Help';
