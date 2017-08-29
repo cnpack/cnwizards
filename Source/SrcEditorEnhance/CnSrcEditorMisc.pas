@@ -658,6 +658,16 @@ end;
 procedure TCnSrcEditorMisc.OnBlockToolsMenuCreated(Sender: TObject; MenuItem: TMenuItem);
 var
   Wizard: TCnSrcEditorEnhance;
+
+  procedure ClearMenuItemImageIndex(AMenuItem: TMenuItem);
+  var
+    I: Integer;
+  begin
+    AMenuItem.ImageIndex := -1;
+    for I := 0 to AMenuItem.Count - 1 do
+      ClearMenuItemImageIndex(AMenuItem.Items[I]);
+  end;
+
 begin
   // 加入 BlockTools 的子菜单
   FBlockToolMenuItem := MenuItem;
@@ -669,7 +679,11 @@ begin
       // 此处不能调用UpdateMenu来实行初始化，必须手工复制所有菜单项。
       // Wizard.BlockTools.UpdateMenu(MenuItem, False);
       CloneMenuItem(Wizard.BlockTools.PopupMenu.Items, MenuItem);
-      
+
+{$IFDEF COMPILER6_UP}
+      ClearMenuItemImageIndex(MenuItem);
+{$ENDIF}
+
       // 不用 ImageIndex 因为 ImageList 不对头
       MenuItem.Visible := FAddMenuBlockTools;
 
