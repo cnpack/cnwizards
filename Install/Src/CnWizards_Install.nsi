@@ -311,7 +311,6 @@ OutFile "..\Output\${INSTALLER_NAME}"
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_BITMAP "cnpack.bmp"
 !define MUI_WELCOMEFINISHPAGE_BITMAP "welcome.bmp"
-!define MUI_UNWELCOMEFINISHPAGE_BITMAP "donate.bmp"
 
 ; 安装程序页面
 !insertmacro MUI_PAGE_WELCOME
