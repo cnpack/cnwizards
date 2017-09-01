@@ -586,9 +586,18 @@ begin
     begin
       for I := 1 to List.Count - 1 do
       begin
+        if Trim(List[I]) = '' then // 空行不参与行首空格计算
+          Continue;
+
         LineSpaceCount := GetHeadSpaceCount(List[I]);
         if LineSpaceCount < FirstLineSpaceCount then
+        begin
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('Do NOT Smart Paste for FirstLine Space %d > Line Space %d at Line %d.',
+            [FirstLineSpaceCount, LineSpaceCount, I]);
+{$ENDIF}
           Exit;
+        end;
         if MinLineSpaceCount > LineSpaceCount then
           MinLineSpaceCount := LineSpaceCount;
       end;
@@ -647,9 +656,11 @@ begin
           Inc(PasteCol, Indent)
         else
         begin
-          // 如果待粘贴内容只有一行[]且不是 begin 开头](暂不做)，且 Text 是 then/do 等，也需要缩进
+          // 如果待粘贴内容只有一行[]且不是 begin 开头](暂不做)，且 Text 是 then/do 等，或是冒号结尾，也需要缩进
           Text := LowerCase(Text);
           if IsSingleLine and (Text = 'then') or (Text = 'do') then
+            Inc(PasteCol, Indent)
+          else if (Length(Text) >= 1) and (Text[Length(Text)] = ':') then
             Inc(PasteCol, Indent);
         end;
       end;

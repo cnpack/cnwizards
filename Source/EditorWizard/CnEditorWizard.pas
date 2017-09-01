@@ -87,7 +87,7 @@ type
     { Public declarations }
   end;
 
-{ TCnEditorWizard }
+{ TCnBaseEditorTool }
 
 {$M+}
 
@@ -361,7 +361,7 @@ begin
 
 end;
 
-{ TCnEditorWizard }
+{ TCnEditorToolsetWizard }
 
 procedure TCnEditorToolsetWizard.Config;
 begin
