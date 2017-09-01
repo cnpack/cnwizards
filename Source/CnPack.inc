@@ -2515,6 +2515,7 @@
 
 {$IFDEF BDS2010_UP}
   {$DEFINE SUPPORT_INTERFACE_AS_OBJECT}
+  {$DEFINE SUPPORT_ENHANCED_RTTI}          // New enhanced RTTI.
   {$DEFINE IDE_HAS_NEW_COMPONENT_PALETTE}  // IDE has a new style Component Palette.
 {$ENDIF}
 
@@ -2523,6 +2524,7 @@
   {$DEFINE OBJECT_HAS_TOSTRING}  // TObject.ToString Function
   {$DEFINE OBJECT_HAS_EQUAL}     // TObject.Equal Function
   {$DEFINE SUPPORT_OTA_PROJECT_CONFIGURATION}
+  {$DEFINE SUPPORT_GENERIC}      // Ö§³Ö·ºÐÍ
   {$DEFINE IDE_MAINFORM_EAT_MOUSEWHEEL}
   // MainForm of 2009 or Above will eat Message in MouseWheelHandler
 

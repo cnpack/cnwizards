@@ -523,7 +523,7 @@ function TCnSrcEditorKey.ProcessSmartPaste(View: IOTAEditView): Boolean;
 var
   Text, Tmp, Prev: string;
   EditControl: TControl;
-  I, Idx, LineNo, CharIndex, PasteCol: Integer;
+  I, Idx, LineNo, CharIndex, PasteCol, Indent: Integer;
   List: TStrings;
   EndIsCRLF, IsSingleLine: Boolean;
   FirstLineSpaceCount, LineSpaceCount, MinLineSpaceCount: Integer;
@@ -610,8 +610,14 @@ begin
       [FirstLineSpaceCount, MinLineSpaceCount]);
 {$ENDIF}
 
+    Indent := CnOtaGetBlockIndent;
+    PasteCol := View.CursorPos.Col - 1;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('Indent %d. Origin Col (0 Based) %d.', [Indent, PasteCol]);
+{$ENDIF}
+
     // 判断当前空行的上一行是啥，是否会影响本次缩进
-    PasteCol := View.CursorPos.Col;
     if LineNo > 1 then
     begin
       Dec(LineNo);
@@ -638,13 +644,13 @@ begin
 {$ENDIF}
 
         if FAutoIndentList.IndexOf(Text) >= 0 then // 如果属于自动缩进列表则再进一层
-          Inc(PasteCol, CnOtaGetBlockIndent)
+          Inc(PasteCol, Indent)
         else
         begin
           // 如果待粘贴内容只有一行[]且不是 begin 开头](暂不做)，且 Text 是 then/do 等，也需要缩进
           Text := LowerCase(Text);
           if IsSingleLine and (Text = 'then') or (Text = 'do') then
-            Inc(PasteCol, CnOtaGetBlockIndent);
+            Inc(PasteCol, Indent);
         end;
       end;
     end;
