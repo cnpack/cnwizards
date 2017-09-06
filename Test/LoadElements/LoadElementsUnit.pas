@@ -73,11 +73,8 @@ type
 
 var
   FElementList: TStringList;
-  FDisplayList: TStringList;
   FObjStrings: TStringList;
   FLanguage: TCnSourceLanguageType = ltPas;
-  FIsCurrentFile: Boolean;
-  FOldCaption: string;
   FIntfLine: Integer = 0;
   FImplLine: Integer = 0;
 
@@ -115,7 +112,13 @@ begin
         i := Pos(' ', TempStr);
         j := Pos('(', TempStr);
         if (i > 0) and (i < j) then // 匿名函数没有函数名
-          TempStr := Copy(TempStr, i + 1, Length(TempStr));
+          TempStr := Copy(TempStr, i + 1, Length(TempStr))
+        else if (i > 0) and (j = 0) then
+        begin
+          j := Pos(';', TempStr); // 没有括号的函数，有分号也可以
+          if j > i then
+            TempStr := Copy(TempStr, i + 1, Length(TempStr));
+        end;
 
         // 为 Interfac 的成员声明加上 Interface 名
         if IsIntf and (ElementInfo.OwnerClass <> '') then
@@ -1221,8 +1224,6 @@ begin
 end;
 
 procedure TCnLoadElementForm.btnLoadElementsClick(Sender: TObject);
-var
-  I: Integer;
 begin
   ClearElements;
   FObjStrings.Clear;
