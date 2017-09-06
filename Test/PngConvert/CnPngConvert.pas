@@ -47,15 +47,25 @@ var
 implementation
 
 uses
-  CnPngUtils;
+  CnPngUtils, CnDebug;
 
 {$R *.dfm}
 
 procedure TFormTestPng.btnBrowseBmpClick(Sender: TObject);
+var
+  Bmp: TBitmap;
 begin
   dlgOpen.Title := 'Select a BMP File';
   if dlgOpen.Execute then
     edtBmp.Text := dlgOpen.FileName;
+
+  if FileExists(edtBmp.Text) then
+  begin
+    Bmp := TBitmap.Create;
+    Bmp.LoadFromFile(edtBmp.Text);
+    CnDebugger.EvaluateObject(Bmp, True);
+    Bmp.Free;
+  end;
 end;
 
 procedure TFormTestPng.btnBrowsePng1Click(Sender: TObject);
@@ -76,6 +86,9 @@ procedure TFormTestPng.btnToBmp1Click(Sender: TObject);
 var
   Png: TPngImage;
   Bmp: TBitmap;
+  I: Integer;
+  P, Ptr: PRGBQuad;
+  J: Integer;
 begin
   if not FileExists(edtPng1.Text) then
     Exit;
@@ -86,10 +99,26 @@ begin
     Png := TPngImage.Create;
     Bmp := TBitmap.Create;
     Png.LoadFromFile(string(edtPng1.Text));
+    CnDebugger.EvaluateObject(Bmp, True);
     Bmp.Assign(Png);
 
+    CnDebugger.EvaluateObject(Bmp, True);
     if not Bmp.Empty then
     begin
+      if (Bmp.PixelFormat = pf32bit) and (Bmp.Width <= 64) and (Bmp.Height <= 64) then
+      begin
+        for I := 0 to Bmp.Height - 1 do
+        begin
+          P := Bmp.ScanLine[I];
+          for J := 0 to Bmp.Width - 1 do
+          begin
+            Ptr := PRGBQuad(Integer(P) + J * SizeOf(TRGBQuad));
+            CnDebugger.LogFmt('Row %d Col %d. RGBA: %d,%d,%d,%d.',
+              [I, J, Ptr^.rgbRed, Ptr^.rgbGreen, Ptr^.rgbBlue, Ptr^.rgbReserved]);
+          end;
+        end;
+      end;
+
       if dlgSave.Execute then
       begin
         Bmp.SaveToFile(string(dlgSave.FileName));
@@ -118,8 +147,13 @@ begin
     Png.LoadFromFile(string(edtPng1.Text));
     Bmp.Height := Png.Height;
     Bmp.Width := Png.Width;
+    Bmp.PixelFormat := pf32bit;
+    Bmp.Transparent := True;
+    CnDebugger.EvaluateObject(Bmp, True);
+
     Png.Draw(Bmp.Canvas, Bmp.Canvas.ClipRect);
 
+    CnDebugger.EvaluateObject(Bmp, True);
     if not Bmp.Empty then
     begin
       if dlgSave.Execute then
@@ -143,7 +177,7 @@ begin
     begin
       S := AnsiString(edtPng.Text);
       D := AnsiString(dlgSave.FileName);
-      if CnConvertPngToBmp(PAnsiChar(S), PAnsiChar(D)) then
+      if CnConvertPngToBmp(PAnsiChar(S), PAnsiChar(D), CN_PNG_BMP_MODE_AUTO) then
         ShowMessage('PNG Convert OK.')
       else
         ShowMessage('PNG Convert Fail.');
@@ -169,15 +203,30 @@ end;
 procedure TFormTestPng.edtPng1Change(Sender: TObject);
 var
   P: TPngImage;
+
+  function GetTransparencyModeStr(Mode: TPNGTransparencyMode): string;
+  begin
+    Result := '';
+    case Mode of
+      ptmNone: Result := 'None';
+      ptmBit:  Result := 'Bit';
+      ptmPartial: Result := 'Partial';
+    end;
+  end;
+
 begin
   if FileExists(edtPng1.Text) then
   begin
     P := TPngImage.Create;
     P.LoadFromFile(edtPng1.Text);
+
+    CnDebugger.EvaluateObject(P, True);
+
     // PNG8 不透明以及 PNG24 对应 ptmNone
     // PNG8 透明对应 ptmBit
     // PNG32 对应 ptmPartial
-    lblPngInfo.Caption := Format('TransparentMod %d.', [Ord(P.TransparencyMode)]);
+    lblPngInfo.Caption := Format('TransparentMode %d %s.', [Ord(P.TransparencyMode),
+      GetTransparencyModeStr(P.TransparencyMode)]);
 
     P.Free;
   end
