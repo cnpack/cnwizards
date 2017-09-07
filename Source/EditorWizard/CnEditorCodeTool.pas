@@ -254,7 +254,7 @@ begin
       CnDebugger.LogMsg('TCnEditorCodeTool.Execute has Tab Chars for Selection. Using Block Text.');
 {$ENDIF}
       // 直接得到 Ansi/Utf8/UnicodeString
-      OrigText := BlockText;
+      OrigText := AnsiString(BlockText);
     end
     else
     begin
@@ -284,7 +284,7 @@ begin
     begin
     {$IFDEF UNICODE}
       if HasTab then
-        Text := ProcessText(OrigText)  // 处理 UnicodeString 文本
+        Text := ProcessText(string(OrigText))  // 处理 UnicodeString 文本
       else
         Text := ProcessText((ConvertEditorTextToTextW(OrigText))); // 处理 Utf8 转成 UnicodeString 的文本
     {$ELSE}

@@ -3008,7 +3008,7 @@ begin
             TempStr := Copy(TempStr, i + 1, Length(TempStr));
         end;
 
-        // 为 Interfac 的成员声明加上 Interface 名
+        // 为 Interface 的成员声明加上 Interface 名
         if IsIntf and (ElementInfo.OwnerClass <> '') then
           TempStr := ElementInfo.OwnerClass + '.' + TempStr;
 

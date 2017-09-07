@@ -2270,14 +2270,15 @@ end;
 procedure TCnPaletteWrapper.GetComponentImageFromNewPalette(Bmp: TBitmap;
   const AComponentClassName: string);
 var
-  I, J: Integer;
-  S: string;
 {$IFDEF OTA_PALETTE_API}
   Item: IOTABasePaletteItem;
   Group: IOTAPaletteGroup;
   CI: IOTAComponentPaletteItem;
   Painter: INTAPalettePaintIcon;
   PAS: IOTAPaletteServices;
+{$ELSE}
+  I, J: Integer;
+  S: string;
 {$ENDIF}
 begin
   if (Bmp = nil) or (AComponentClassName = '') then
@@ -2497,11 +2498,12 @@ var
   S: string;
   AClass: TPersistentClass;
 {$IFDEF IDE_HAS_NEW_COMPONENT_PALETTE}
-  I: Integer;
   {$IFDEF OTA_PALETTE_API}
   SelTool: IOTABasePaletteItem;
   CI: IOTAComponentPaletteItem;
   PAS: IOTAPaletteServices;
+  {$ELSE}
+  I: Integer;
   {$ENDIF}
 {$ENDIF}
 begin

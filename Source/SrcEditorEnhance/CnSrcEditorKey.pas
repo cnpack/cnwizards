@@ -637,6 +637,7 @@ begin
         PasteCol := GetHeadSpaceCount(Prev);  // 粘贴的起始列默认和上一行的非空字符对齐
 
         Prev := Trim(Prev);
+        Idx := 1;
         for I := Length(Prev) downto 1 do
         begin
           if not IsValidIdentChar(Prev[I]) then
