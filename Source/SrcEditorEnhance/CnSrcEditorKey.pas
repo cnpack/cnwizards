@@ -520,16 +520,34 @@ begin
 end;
 
 function TCnSrcEditorKey.ProcessSmartPaste(View: IOTAEditView): Boolean;
+const
+  CppNoIndentTokens: array[0..3] of string = ('private:', 'protected:', 'public:',
+    '__published:');
 var
-  Text, Tmp, Prev: string;
+  Text, Tmp, Prev, FirstLine: string;
   EditControl: TControl;
   I, Idx, LineNo, CharIndex, PasteCol, Indent: Integer;
   List: TStrings;
-  EndIsCRLF, IsSingleLine: Boolean;
+  EndIsCRLF, IsSingleLine, IsCppFile: Boolean;
   FirstLineSpaceCount, LineSpaceCount, MinLineSpaceCount: Integer;
   EditPos: TOTAEditPos;
   CharPos: TOTACharPos;
   LinePos: LongInt;
+
+  function FirstLineInCppNoIndentList(const FirstLine: string): Boolean;
+  var
+    I: Integer;
+  begin
+    Result := False;
+    for I := Low(CppNoIndentTokens) to High(CppNoIndentTokens) do
+    begin
+      if Pos(CppNoIndentTokens[I], FirstLine) = 1 then
+      begin
+        Result := True;
+        Exit;
+      end;
+    end;
+  end;
 
   function GetHeadSpaceCount(const S: string): Integer;
   var
@@ -570,6 +588,7 @@ begin
   if EditControl = nil then
     Exit;
 
+  IsCppFile := IsCppSourceModule(View.Buffer.FileName);
   List := TStringList.Create;
   try
     List.Text := Clipboard.AsText;
@@ -580,10 +599,12 @@ begin
     // 另外除首行外其他行的空格在都比首行多的情况下，找出最少的，也都删
     FirstLineSpaceCount := GetHeadSpaceCount(List[0]);
     MinLineSpaceCount := MaxInt;
+    FirstLine := '';
 
     IsSingleLine := List.Count = 1;
     if List.Count > 1 then
     begin
+      FirstLine := Trim(List[0]);
       for I := 1 to List.Count - 1 do
       begin
         if Trim(List[I]) = '' then // 空行不参与行首空格计算
@@ -653,8 +674,14 @@ begin
         CnDebugger.LogFmt('ProcessSmartPaste. Previous Line is %s with Space %d.', [Text, PasteCol]);
 {$ENDIF}
 
-        if FAutoIndentList.IndexOf(Text) >= 0 then // 如果属于自动缩进列表则再进一层
-          Inc(PasteCol, Indent)
+        if IsCppFile and FirstLineInCppNoIndentList(FirstLine) then
+        begin
+          // C/C++ 文件中，private 等无需缩进
+        end
+        else if FAutoIndentList.IndexOf(Text) >= 0 then // 如果属于自动缩进列表则再进一层
+        begin
+          Inc(PasteCol, Indent);
+        end
         else
         begin
           // 如果待粘贴内容只有一行[]且不是 begin 开头](暂不做)，且 Text 是 then/do 等，或是冒号结尾，也需要缩进
