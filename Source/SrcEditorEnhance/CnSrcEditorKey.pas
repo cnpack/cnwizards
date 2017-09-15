@@ -658,10 +658,10 @@ begin
         PasteCol := GetHeadSpaceCount(Prev);  // 粘贴的起始列默认和上一行的非空字符对齐
 
         Prev := Trim(Prev);
-        Idx := 1;
+        Idx := 0;
         for I := Length(Prev) downto 1 do
         begin
-          if not IsValidIdentChar(Prev[I]) then
+          if not IsValidIdentChar(Prev[I]) and (not IsCppFile or (Prev[I] <> '{')) then // C/C++ 文件上一行要判断大括号
           begin
             Idx := I;
             Break;
@@ -674,11 +674,13 @@ begin
         CnDebugger.LogFmt('ProcessSmartPaste. Previous Line is %s with Space %d.', [Text, PasteCol]);
 {$ENDIF}
 
-        if IsCppFile and FirstLineInCppNoIndentList(FirstLine) then
+        if IsCppFile then
         begin
-          // C/C++ 文件中，private 等无需缩进
+          // C/C++ 文件中，private 等无需缩进，其余在 { 下一行需要缩进
+          if (Text = '{') and not FirstLineInCppNoIndentList(FirstLine) then
+            Inc(PasteCol, Indent);
         end
-        else if FAutoIndentList.IndexOf(Text) >= 0 then // 如果属于自动缩进列表则再进一层
+        else if FAutoIndentList.IndexOf(Text) >= 0 then // Pascal 文件如果属于自动缩进列表则再进一层
         begin
           Inc(PasteCol, Indent);
         end
