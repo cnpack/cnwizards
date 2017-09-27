@@ -233,6 +233,7 @@ type
     FOutputStyle: TCnOutputStyle;
     FDispOnIDECompDisabled: Boolean;
     FSpcComplete: Boolean;
+    FTabComplete: Boolean;
     FIgnoreSpc: Boolean;
     FAutoAdjustScope: Boolean;
     FDispKindSet: TSymbolKindSet;
@@ -363,6 +364,8 @@ type
     {* 自动弹出列表的符号 }
     property SpcComplete: Boolean read FSpcComplete write FSpcComplete default True;
     {* 空格是否可用来完成选择 }
+    property TabComplete: Boolean read FTabComplete write FTabComplete default True;
+    {* Tab 是否可用来完成选择 }
     property IgnoreSpc: Boolean read FIgnoreSpc write FIgnoreSpc default False;
     {* 空格完成选择时，空格自身是否忽略，默认不忽略}
     property AutoInsertEnter: Boolean read FAutoInsertEnter write FAutoInsertEnter
@@ -446,6 +449,7 @@ const
   csEnableAutoSymbols = 'EnableAutoSymbols';
   csAutoSymbols = 'AutoSymbols';
   csSpcComplete = 'SpcComplete';
+  csTabComplete = 'TabComplete';
   csIgnoreSpc = 'IgnoreSpc';
   csAutoInsertEnter = 'AutoInsertEnter';
   csAutoCompParam = 'AutoCompParam';
@@ -1515,7 +1519,7 @@ begin
         end;
       VK_TAB, VK_DECIMAL, 190: // '.'
         begin
-          ShouldIgnore := False;
+          ShouldIgnore := (Key = VK_TAB) and not FTabComplete;
 {$IFDEF IDE_SYNC_EDIT_BLOCK}
           // 块编辑模式时，Tab 用于输入后应该吃掉，免得造成额外跳转
           ShouldEatTab := (Key = VK_TAB) and IsCurrentEditorInSyncMode;
@@ -1543,10 +1547,17 @@ begin
               Timer.Interval := Max(csDefDispDelay, FDispDelay);
               Timer.Enabled := True;
             end;
+          end
+          else if (Key = VK_TAB) and not FTabComplete then
+          begin
+{$IFDEF DEBUG}
+            CnDebugger.LogMsg('Ignore Tab Key Input Item But Hide List.');
+{$ENDIF}
+            HideAndClearList;
           end;
 
 {$IFDEF IDE_SYNC_EDIT_BLOCK}
-          if ShouldEatTab then
+          if not ShouldIgnore and ShouldEatTab then
           begin
 {$IFDEF DEBUG}
             CnDebugger.LogMsg('Tab To Enter when in Sync Mode. Eat it to Avoid Jump.');
@@ -3167,6 +3178,7 @@ begin
     CnDebugger.LogStrings(FAutoSymbols, 'FAutoSymbols');
   {$ENDIF}
     FSpcComplete := ReadBool('', csSpcComplete, True);
+    FTabComplete := ReadBool('', csTabComplete, True);
     FIgnoreSpc := ReadBool('', csIgnoreSpc, False);
     FAutoInsertEnter := ReadBool('', csAutoInsertEnter, True);
     FAutoCompParam := ReadBool('', csAutoCompParam, True);
@@ -3228,6 +3240,7 @@ begin
     else
       WriteString('', csAutoSymbols, FAutoSymbols.CommaText);
     WriteBool('', csSpcComplete, FSpcComplete);
+    WriteBool('', csTabComplete, FTabComplete);
     WriteBool('', csIgnoreSpc, FIgnoreSpc);
     WriteBool('', csAutoInsertEnter, FAutoInsertEnter);
     WriteBool('', csAutoCompParam, FAutoCompParam);

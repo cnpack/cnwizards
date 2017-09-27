@@ -129,6 +129,7 @@ type
     btnDisableCompletion: TButton;
     cbbMatchMode: TComboBox;
     lblMatchMode: TLabel;
+    chkTabComplete: TCheckBox;
     procedure FormShow(Sender: TObject);
     procedure PaintBoxPaint(Sender: TObject);
     procedure btnFontClick(Sender: TObject);
@@ -299,6 +300,7 @@ begin
     edtFilterSymbols.Text := FilterSymbols.CommaText;
     edtAutoSymbols.Text := AutoSymbols.CommaText;
     chkSpcComplete.Checked := SpcComplete;
+    chkTabComplete.Checked := TabComplete;
     chkIgnoreSpace.Checked:= IgnoreSpc;
     chkIgnoreSpace.Enabled := chkSpcComplete.Checked;
     cbbOutputStyle.ItemIndex := Ord(OutputStyle);
@@ -408,6 +410,7 @@ begin
     FilterSymbols.CommaText := edtFilterSymbols.Text;
     AutoSymbols.CommaText := edtAutoSymbols.Text;
     SpcComplete := chkSpcComplete.Checked;
+    TabComplete := chkTabComplete.Checked;
     IgnoreSpc := chkIgnoreSpace.Checked;
     OutputStyle := TCnOutputStyle(cbbOutputStyle.ItemIndex);
     SelMidMatchByEnterOnly := chkSelMidMatchByEnterOnly.Checked;

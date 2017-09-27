@@ -1,6 +1,6 @@
 inherited CnInputHelperForm: TCnInputHelperForm
-  Left = 233
-  Top = 101
+  Left = 260
+  Top = 82
   BorderStyle = bsDialog
   Caption = 'Input Helper Settings'
   ClientHeight = 522
@@ -269,7 +269,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 529
           Height = 17
           Caption = 'Select and Input Middle-Matched Symbol Only when Pressing Enter.'
-          TabOrder = 5
+          TabOrder = 6
         end
         object chkAutoInsertEnter: TCheckBox
           Left = 8
@@ -277,12 +277,12 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 529
           Height = 17
           Caption = 'Auto Line Feed after Keyword when Pressing Enter.'
-          TabOrder = 6
+          TabOrder = 7
         end
         object chkSpcComplete: TCheckBox
           Left = 8
           Top = 96
-          Width = 529
+          Width = 265
           Height = 17
           Caption = 'Allow Inputting Current Item by Pressing Space.'
           TabOrder = 3
@@ -294,7 +294,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 529
           Height = 17
           Caption = 'Auto Insert Brackets for Function Having Parameters.'
-          TabOrder = 7
+          TabOrder = 8
         end
         object edtFilterSymbols: TEdit
           Left = 248
@@ -309,7 +309,16 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 521
           Height = 17
           Caption = 'Ignore Space Char after Inputting Current Item.'
+          TabOrder = 5
+        end
+        object chkTabComplete: TCheckBox
+          Left = 280
+          Top = 96
+          Width = 265
+          Height = 17
+          Caption = 'Allow Inputting Current Item by Pressing Tab.'
           TabOrder = 4
+          OnClick = chkSpcCompleteClick
         end
       end
     end
@@ -354,7 +363,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
         object lblMatchMode: TLabel
           Left = 8
           Top = 98
-          Width = 62
+          Width = 99
           Height = 13
           Caption = 'Symbol Match Mode:'
         end
@@ -374,7 +383,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 249
           Height = 21
           Style = csDropDownList
-          ItemHeight = 13
+          ItemHeight = 0
           TabOrder = 0
         end
         object btnFont: TButton
@@ -416,7 +425,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 249
           Height = 21
           Style = csDropDownList
-          ItemHeight = 13
+          ItemHeight = 0
           TabOrder = 3
         end
         object chkUseKibitzCompileThread: TCheckBox
