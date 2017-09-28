@@ -2045,6 +2045,7 @@ TCnInputHelperForm.chkRemoveSame.Caption=過濾重複的列表項。
 TCnInputHelperForm.chkSelMidMatchByEnterOnly.Caption=只使用回車鍵來選擇中間匹配的識別字。
 TCnInputHelperForm.chkSmartDisp.Caption=智慧判斷是否需要彈出助手。
 TCnInputHelperForm.chkSpcComplete.Caption=允許使用空白鍵來選擇當前項。
+TCnInputHelperForm.chkTabComplete.Caption=允許使用 Tab 鍵來選擇當前項。
 TCnInputHelperForm.chkIgnoreSpace.Caption=使用空格鍵選擇當前項後忽略空格本身。
 TCnInputHelperForm.chkUseCodeInsightMgr.Caption=使用相容方式取得當前識別字列表（較慢）。
 TCnInputHelperForm.chkUseKibitzCompileThread.Caption=打開工程時後台預獲取標識符列表。

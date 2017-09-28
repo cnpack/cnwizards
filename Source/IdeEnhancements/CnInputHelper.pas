@@ -2673,7 +2673,7 @@ begin
 
     S := Item.Name;
     if not MatchFirstOnly or (FMatchStr = '') or (Pos(UpperCase(FMatchStr),
-      UpperCase(S)) = 1) then
+      UpperCase(S)) = 1) or (FuzzyMatchStr(FMatchStr, S)) then // 无需匹配或从头匹配或模糊匹配
     begin
       DelLeft := True;
       if (FItems.IndexOf(FToken) >= 0) or RepFullToken then

@@ -2045,6 +2045,7 @@ TCnInputHelperForm.chkRemoveSame.Caption=lösche doppelte Symbole.
 TCnInputHelperForm.chkSelMidMatchByEnterOnly.Caption=wähle Middle-Matched Symbole nur bei Betätigen von Enter.
 TCnInputHelperForm.chkSmartDisp.Caption=Intelligentes Popup.
 TCnInputHelperForm.chkSpcComplete.Caption=erlaube das Einfügen des ausgewählten mit der Leertaste.
+TCnInputHelperForm.chkTabComplete.Caption=erlaube das Einfügen des ausgewählten mit der Tab.
 TCnInputHelperForm.chkIgnoreSpace.Caption=Ignoriere Leertaste nach Einfügen des aktiven Items.
 TCnInputHelperForm.chkUseCodeInsightMgr.Caption=Benutze den kompatiblen Weg um die Symbole zu beschaffen.(langsamer)
 TCnInputHelperForm.chkUseKibitzCompileThread.Caption=Fülle Symbol Liste wenn Projekt geladen wird.

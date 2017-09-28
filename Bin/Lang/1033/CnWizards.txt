@@ -2045,6 +2045,7 @@ TCnInputHelperForm.chkRemoveSame.Caption=Remove Duplicate Symbols.
 TCnInputHelperForm.chkSelMidMatchByEnterOnly.Caption=Select and Input Middle-Matched Symbol Only when Pressing Enter.
 TCnInputHelperForm.chkSmartDisp.Caption=Intelligent Popup.
 TCnInputHelperForm.chkSpcComplete.Caption=Allow Inputting Current Item by Pressing Space.
+TCnInputHelperForm.chkTabComplete.Caption=Allow Inputting Current Item by Pressing Tab.
 TCnInputHelperForm.chkIgnoreSpace.Caption=Ignore Space Char after Inputting Current Item.
 TCnInputHelperForm.chkUseCodeInsightMgr.Caption=Use the Compatible Way to Obtain Symbols.(slower)
 TCnInputHelperForm.chkUseKibitzCompileThread.Caption=Prefetch Symbols List when Opening Project.

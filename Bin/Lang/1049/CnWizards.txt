@@ -2045,6 +2045,7 @@ TCnInputHelperForm.chkRemoveSame.Caption=Удалять повторяющиес
 TCnInputHelperForm.chkSelMidMatchByEnterOnly.Caption=Выбирать и вводить символ в середине слова только при нажатии Enter
 TCnInputHelperForm.chkSmartDisp.Caption=Интеллектуальное отображение
 TCnInputHelperForm.chkSpcComplete.Caption=Ввод текущего идентификатора нажатием пробела
+TCnInputHelperForm.chkTabComplete.Caption=Ввод текущего идентификатора нажатием Tab
 TCnInputHelperForm.chkIgnoreSpace.Caption=Игнорировать пробел после ввода элемента
 TCnInputHelperForm.chkUseCodeInsightMgr.Caption=Использовать старый способ получения символов (медл.)
 TCnInputHelperForm.chkUseKibitzCompileThread.Caption=Обрабатывать идентификаторы при открытии проекта
