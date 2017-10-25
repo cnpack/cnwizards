@@ -91,7 +91,8 @@ type
     FHomeExt: Boolean;
     FHomeFirstChar: Boolean;
     FCursorBeforeEOL: Boolean;
-    FLeftRightLineWrap: Boolean;
+    FLeftLineWrap: Boolean;
+    FRightLineWrap: Boolean;
     FF3Search: Boolean;
     FAutoBracket: Boolean;
     FF2Rename: Boolean;
@@ -178,7 +179,8 @@ type
     property HomeExt: Boolean read FHomeExt write FHomeExt;
     property HomeFirstChar: Boolean read FHomeFirstChar write FHomeFirstChar;
     property CursorBeforeEOL: Boolean read FCursorBeforeEOL write FCursorBeforeEOL;
-    property LeftRightLineWrap: Boolean read FLeftRightLineWrap write FLeftRightLineWrap;
+    property LeftLineWrap: Boolean read FLeftLineWrap write FLeftLineWrap;
+    property RightLineWrap: Boolean read FRightLineWrap write FRightLineWrap;
     property AutoBracket: Boolean read FAutoBracket write FAutoBracket;
     property SemicolonLastChar: Boolean read FSemicolonLastChar write FSemicolonLastChar;
     property AutoEnterEnd: Boolean read FAutoEnterEnd write FAutoEnterEnd;
@@ -1092,13 +1094,13 @@ begin
   begin
     if CnNtaGetCurrLineText(Text, LineNo, CharIdx, True) then
     begin
-      if (CharIdx = 0) and (Key = VK_LEFT) then // 行首左移至上一行尾
+      if FLeftLineWrap and (CharIdx = 0) and (Key = VK_LEFT) then // 行首左移至上一行尾
       begin
         Result := View.Buffer.EditPosition.MoveRelative(-1, 0)
           and View.Buffer.EditPosition.MoveEOL;
         Handled := Result;
       end
-      else if Key = VK_RIGHT then  // 行尾右移至下一行头
+      else if FRightLineWrap and (Key = VK_RIGHT) then  // 行尾右移至下一行头
       begin
 {$IFDEF UNICODE}
         CharIdx := View.CursorPos.Col - 1;
@@ -2863,7 +2865,7 @@ begin
     if FHomeExt and DoHomeExtend(View, Key, ScanCode, Shift, Handled) then
       Exit;
 
-    if FLeftRightLineWrap and DoLeftRightLineWrap(View, Key, ScanCode, Shift, Handled) then
+    if (FLeftLineWrap or FRightLineWrap) and DoLeftRightLineWrap(View, Key, ScanCode, Shift, Handled) then
       Exit;
 
     if FSemicolonLastChar and DoSemicolonLastChar(View, Key, ScanCode, Shift, Handled) then
@@ -2916,7 +2918,8 @@ const
   csHomeExt = 'HomeExt';
   csHomeFirstChar = 'HomeFirstChar';
   csCursorBeforeEOL = 'CursorBeforeEOL';
-  csLeftRightLineWrap = 'LeftRightLineWrap';
+  csLeftLineWrap = 'LeftLineWrap';
+  csRightLineWrap = 'RightLineWrap';
   csAutoBracket = 'AutoBracket';
   csSemicolonLastChar = 'SemicolonLastChar';
   csAutoEnterEnd = 'AutoEnterEnd';
@@ -2936,7 +2939,8 @@ begin
   FHomeExt := Ini.ReadBool(csEditorKey, csHomeExt, True);
   FHomeFirstChar := Ini.ReadBool(csEditorKey, csHomeFirstChar, False);
   FCursorBeforeEOL := Ini.ReadBool(csEditorKey, csCursorBeforeEOL, False);
-  FLeftRightLineWrap := Ini.ReadBool(csEditorKey, csLeftRightLineWrap, False);
+  FLeftLineWrap := Ini.ReadBool(csEditorKey, csLeftLineWrap, False);
+  FRightLineWrap := Ini.ReadBool(csEditorKey, csRightLineWrap, False);
   FAutoBracket := Ini.ReadBool(csEditorKey, csAutoBracket, False);
   FSemicolonLastChar := Ini.ReadBool(csEditorKey, csSemicolonLastChar, False);
   FAutoEnterEnd := Ini.ReadBool(csEditorKey, csAutoEnterEnd, True);
@@ -2958,7 +2962,8 @@ begin
   Ini.WriteBool(csEditorKey, csHomeExt, FHomeExt);
   Ini.WriteBool(csEditorKey, csHomeFirstChar, FHomeFirstChar);
   Ini.WriteBool(csEditorKey, csCursorBeforeEOL, FCursorBeforeEOL);
-  Ini.WriteBool(csEditorKey, csLeftRightLineWrap, FLeftRightLineWrap);
+  Ini.WriteBool(csEditorKey, csLeftLineWrap, FLeftLineWrap);
+  Ini.WriteBool(csEditorKey, csRightLineWrap, FRightLineWrap);
   Ini.WriteBool(csEditorKey, csAutoBracket, FAutoBracket);
   Ini.WriteBool(csEditorKey, csSemicolonLastChar, FSemicolonLastChar);
   Ini.WriteBool(csEditorKey, csAutoEnterEnd, FAutoEnterEnd);

@@ -158,7 +158,8 @@ type
     chkSemicolon: TCheckBox;
     chkAutoEnterEnd: TCheckBox;
     btnDesignToolBar: TButton;
-    chkLeftRightWrapLine: TCheckBox;
+    chkLeftWrapLine: TCheckBox;
+    chkRightWrapLine: TCheckBox;
     chkCursorBeforeEOL: TCheckBox;
     chkShowThumbnail: TCheckBox;
     chkGutterClickSelectLine: TCheckBox;
@@ -626,7 +627,8 @@ begin
     chkShiftEnter.Checked := FEditorKey.ShiftEnter;
     chkHomeExtend.Checked := FEditorKey.HomeExt;
     chkCursorBeforeEOL.Checked := FEditorKey.CursorBeforeEOL;
-    chkLeftRightWrapLine.Checked := FEditorKey.LeftRightLineWrap;
+    chkLeftWrapLine.Checked := FEditorKey.LeftLineWrap;
+    chkRightWrapLine.Checked := FEditorKey.RightLineWrap;
     chkSearchAgain.Checked := FEditorKey.F3Search;
     chkF2Rename.Checked := FEditorKey.F2Rename;
     hkRename.HotKey := FEditorKey.RenameShortCut;
@@ -720,7 +722,8 @@ begin
       FEditorKey.ShiftEnter := chkShiftEnter.Checked;
       FEditorKey.HomeExt := chkHomeExtend.Checked;
       FEditorKey.CursorBeforeEOL := chkCursorBeforeEOL.Checked;
-      FEditorKey.LeftRightLineWrap := chkLeftRightWrapLine.Checked;
+      FEditorKey.LeftLineWrap := chkLeftWrapLine.Checked;
+      FEditorKey.RightLineWrap := chkRightWrapLine.Checked;
       FEditorKey.F3Search := chkSearchAgain.Checked;
       FEditorKey.F2Rename := chkF2Rename.Checked;
       FEditorKey.RenameShortCut := hkRename.HotKey;
