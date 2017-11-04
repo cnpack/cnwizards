@@ -31,7 +31,7 @@ unit CnSrcEditorGutter;
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
 * 修改记录：2017.11.04
-*               BDS 下也模拟自身侧边栏的拖动选择的功能
+*               BDS 下也模拟自身侧边栏的拖动选择的功能，并加入十行绘制模式
 *           2016.06.17
 *               加入侧边改动栏的绘制，然而暂无法获取改动的行号，只能屏蔽
 *           2004.12.25
@@ -157,6 +157,7 @@ type
     FDblClickToggleBookmark: Boolean;
     FClickSelectLine: Boolean;
     FDragSelectLines: Boolean;
+    FTenMode: Boolean;
     procedure SetFont(const Value: TFont);
     procedure SetShowLineNumber(const Value: Boolean);
     procedure SetActive(const Value: Boolean);
@@ -168,6 +169,7 @@ type
     procedure SetFixedWidth(const Value: TCnGutterWidth);
     procedure SetMinWidth(const Value: TCnGutterWidth);
     procedure SetShowModifier(const Value: Boolean);
+    procedure SetTenMode(const Value: Boolean);
   protected
     procedure DoUpdateGutters(EditWindow: TCustomForm; EditControl: TControl; Context: 
       Pointer);
@@ -201,6 +203,8 @@ type
     {* 是否拖动选择多行，BDS 下已经有此功能了但也做上}
     property DblClickToggleBookmark: Boolean read FDblClickToggleBookmark write FDblClickToggleBookmark;
     {* 是否双击切换书签}
+    property TenMode: Boolean read FTenMode write SetTenMode;
+    {* 是否使用缩略模式，只显示整十的行}
 
     property Active: Boolean read FActive write SetActive;
     property ShowModifier: Boolean read FShowModifier write SetShowModifier;
@@ -257,6 +261,7 @@ const
 
   csClickSelectLine = 'ClickSelectLine';
   csDragSelectLines = 'DragSelectLines';
+  csTenMode = 'TenMode';
   csDblClickToggleBookmark = 'csDblClickToggleBookmark';
 
   CN_GUTTER_LINE_MODIFIER_CHANGED = 1;
@@ -468,14 +473,32 @@ begin
         else
           Canvas.Font := FGutterMgr.CurrFont;
 
-        StrNum := IntToStr(Idx);
+        Canvas.Brush.Style := bsClear;
         R := Rect(1, I * TextHeight, Width - csBevelWidth, (I + 1) * TextHeight);
         if FGutterMgr.ShowModifier then
           R.Right := R.Right - csModifierWidth;
 
-        Canvas.Brush.Style := bsClear;
-        DrawText(Canvas.Handle, PChar(StrNum), Length(StrNum), R, DT_VCENTER or
-          DT_RIGHT);
+        if not FGutterMgr.TenMode or (Idx mod 10 = 0) or (Idx = FPosInfo.CaretY) then
+        begin
+          StrNum := IntToStr(Idx);
+          DrawText(Canvas.Handle, PChar(StrNum), Length(StrNum), R, DT_VCENTER or
+            DT_RIGHT);
+        end
+        else // 整十模式下，绘制普通短点和五整除长点
+        begin
+          if Idx mod 5 = 0 then
+          begin
+            StrNum := '-';
+            DrawText(Canvas.Handle, PChar(StrNum), Length(StrNum), R, DT_VCENTER or
+              DT_RIGHT);
+          end
+          else
+          begin
+            StrNum := '.';
+            DrawText(Canvas.Handle, PChar(StrNum), Length(StrNum), R, DT_VCENTER or
+              DT_RIGHT);
+          end;
+        end;
 
         if FGutterMgr.ShowModifier then
         begin
@@ -1053,11 +1076,11 @@ begin
   FList := TList.Create;
   FFont := TFont.Create;
   FCurrFont := TFont.Create;
-  FFont.Name := 'Courier New';
-  FFont.Size := 8;
+  FFont.Name := 'Verdana';
+  FFont.Size := 9;
   FFont.Color := clNavy;
-  FCurrFont.Name := 'Courier New';
-  FCurrFont.Size := 8;
+  FCurrFont.Name := 'Verdana';
+  FCurrFont.Size := 9;
   FCurrFont.Color := clRed;
   
   FActive := True;
@@ -1184,6 +1207,7 @@ begin
 
     FClickSelectLine := ReadBool(csGutter, csClickSelectLine, FClickSelectLine);
     FDragSelectLines := ReadBool(csGutter, csDragSelectLines, FDragSelectLines);
+    FTenMode := ReadBool(csGutter, csTenMode, FTenMode);
     FDblClickToggleBookmark := ReadBool(csGutter, csDblClickToggleBookmark, FDblClickToggleBookmark);
     UpdateGutters;
   finally
@@ -1205,6 +1229,7 @@ begin
     WriteInteger(csGutter, csFixedWidth, FFixedWidth);
     WriteBool(csGutter, csClickSelectLine, FClickSelectLine);
     WriteBool(csGutter, csDragSelectLines, FDragSelectLines);
+    WriteBool(csGutter, csTenMode, FTenMode);
     WriteBool(csGutter, csDblClickToggleBookmark, FDblClickToggleBookmark);
   finally
     Free;
@@ -1275,6 +1300,15 @@ begin
   if FShowModifier <> Value then
   begin
     FShowModifier := Value;
+    UpdateGutters;
+  end;
+end;
+
+procedure TCnSrcEditorGutterMgr.SetTenMode(const Value: Boolean);
+begin
+  if FTenMode <> Value then
+  begin
+    FTenMode := Value;
     UpdateGutters;
   end;
 end;
