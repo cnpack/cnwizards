@@ -328,7 +328,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 168
           Width = 321
           Height = 17
-          Caption = 'Drag to Select Multi-Lines in Editor(N.A. for BDS).'
+          Caption = 'Drag to Select Multi-Lines in Editor.'
           TabOrder = 10
         end
       end

@@ -595,12 +595,7 @@ begin
 
     chkGutterClickSelectLine.Checked := FGutterMgr.ClickSelectLine;
     chkGutterDblClickToggleBookmark.Checked := FGutterMgr.DblClickToggleBookmark;
-{$IFDEF BDS}
-    chkGutterDragSelectLines.Checked := False;
-    chkGutterDragSelectLines.Enabled := False;
-{$ELSE}
     chkGutterDragSelectLines.Checked := FGutterMgr.DragSelectLines;
-{$ENDIF}
 
     chkEditorMultiLine.Checked := FEditorMisc.EditorTabMultiLine;
     chkEditorFlatButtons.Checked := FEditorMisc.EditorTabFlatButton;  
@@ -700,9 +695,8 @@ begin
       FGutterMgr.FixedWidth := seLinePanelFixWidth.Value;
       FGutterMgr.ClickSelectLine := chkGutterClickSelectLine.Checked;
       FGutterMgr.DblClickToggleBookmark := chkGutterDblClickToggleBookmark.Checked;
-{$IFNDEF BDS}
       FGutterMgr.DragSelectLines := chkGutterDragSelectLines.Checked;
-{$ENDIF}
+
       FGutterMgr.UpdateGutters;
 
       FNavMgr.MinLineDiff := seNavMinLineDiff.Value;

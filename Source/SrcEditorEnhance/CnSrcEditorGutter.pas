@@ -30,7 +30,9 @@ unit CnSrcEditorGutter;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2016.06.17
+* 修改记录：2017.11.04
+*               BDS 下也模拟自身侧边栏的拖动选择的功能
+*           2016.06.17
 *               加入侧边改动栏的绘制，然而暂无法获取改动的行号，只能屏蔽
 *           2004.12.25
 *               创建单元，从原 CnSrcEditorEnhancements 移出
@@ -42,11 +44,6 @@ interface
 {$I CnWizards.inc}
 
 {$IFDEF CNWIZARDS_CNSRCEDITORENHANCE}
-
-{$IFDEF BDS}
-  // BDS 下自身侧边栏已经有了拖动选择的功能
-  {$DEFINE IDE_CAN_DRAG_SELECT}
-{$ENDIF}
 
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms, ToolsAPI,
@@ -201,7 +198,7 @@ type
     property ClickSelectLine: Boolean read FClickSelectLine write FClickSelectLine;
     {* 是否单击选中整行}
     property DragSelectLines: Boolean read FDragSelectLines write FDragSelectLines;
-    {* 是否拖动选择多行，BDS 下已经有此功能了因而禁用}
+    {* 是否拖动选择多行，BDS 下已经有此功能了但也做上}
     property DblClickToggleBookmark: Boolean read FDblClickToggleBookmark write FDblClickToggleBookmark;
     {* 是否双击切换书签}
 
@@ -873,13 +870,11 @@ end;
 procedure TCnSrcEditorGutter.MouseMove(Shift: TShiftState; X, Y: Integer);
 var
   Idx: Integer;
-{$IFNDEF IDE_CAN_DRAG_SELECT}
   Line: Integer;
   FirstDrag: Boolean;
   View: IOTAEditView;
   Block: IOTAEditBlock;
   Position: IOTAEditPosition;
-{$ENDIF}
 begin
   inherited;
 {$IFDEF DEBUG}
@@ -888,14 +883,10 @@ begin
 
   if FMouseDown then
   begin
-{$IFNDEF IDE_CAN_DRAG_SELECT}
     FirstDrag := not FDragging;
-{$ENDIF}
-
     FDragging := True;
 
-{$IFNDEF IDE_CAN_DRAG_SELECT}
-    if FGutterMgr.DragSelectLines then // BDS 下禁用拖动选择
+    if FGutterMgr.DragSelectLines then // BDS 下也启用拖动选择
     begin
       // 选择区域
       Line := MapYToLine(Y);
@@ -936,11 +927,13 @@ begin
               Block.Extend(FEndLine, 1);
               //View.MoveViewToCursor;
             end;
+{$IFDEF BDS}
+            View.Paint;
+{$ENDIF}
           end;
         end;
       end;
     end;
-{$ENDIF}
 
     Exit;
   end;
@@ -1077,7 +1070,7 @@ begin
 
   FDblClickToggleBookmark := True; // 默认启用双击切换书签
   FClickSelectLine := False;       // 默认不启用单击选行
-  FDragSelectLines := False;       // 默认不启用拖动选择行，并且 BDS 下无效
+  FDragSelectLines := True;        // 默认启用拖动选择行
 
   EditControlWrapper.AddEditControlNotifier(EditControlNotify);
   UpdateGutters;
@@ -1190,11 +1183,7 @@ begin
     FixedWidth := ReadInteger(csGutter, csFixedWidth, FFixedWidth);
 
     FClickSelectLine := ReadBool(csGutter, csClickSelectLine, FClickSelectLine);
-{$IFNDEF IDE_CAN_DRAG_SELECT}
     FDragSelectLines := ReadBool(csGutter, csDragSelectLines, FDragSelectLines);
-{$ELSE}
-    FDragSelectLines := False;
-{$ENDIF}
     FDblClickToggleBookmark := ReadBool(csGutter, csDblClickToggleBookmark, FDblClickToggleBookmark);
     UpdateGutters;
   finally
