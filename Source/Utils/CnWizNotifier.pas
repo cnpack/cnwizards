@@ -1114,7 +1114,9 @@ begin
       DoHandleException('TCnWizNotifierServices.AfterCompile[' + IntToStr(i) + ']');
     end;
   end;
-  FCurrentCompilingProject := nil;
+
+  if not IsCodeInsight then
+    FCurrentCompilingProject := nil;
 end;
 
 procedure TCnWizNotifierServices.BeforeCompile(const Project: IOTAProject;
@@ -1130,7 +1132,8 @@ begin
     CnDebugger.LogFmt('BeforeCompile: %s IsCodeInsight: %d',
       [Project.FileName, Integer(IsCodeInsight)]);
 {$ENDIF}
-  FCurrentCompilingProject := Project;
+  if not IsCodeInsight then
+    FCurrentCompilingProject := Project;
 
   if GetCurrentThreadId <> MainThreadID then
     Exit;
