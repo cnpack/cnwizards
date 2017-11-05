@@ -394,6 +394,7 @@ begin
   if not Active then
     Exit;
 
+  Idx := -1;
   if RClickShellMenu and (Msg.message = WM_RBUTTONUP) and (IsShiftDown or
     IsCtrlDown) or DblClickClosePage and (Msg.message = WM_LBUTTONDBLCLK) then
   begin

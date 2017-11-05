@@ -899,7 +899,7 @@ function ConvertAnsiPositionToUtf8OnUnicodeText(const Text: string;
 var
   ULine: string;
   UniCol: Integer;
-  ALine: AnsiString;
+//  ALine: AnsiString;
 {$ENDIF}
 begin
   Result := AnsiCol;

@@ -1045,7 +1045,10 @@ var
   Idx: Integer;
 begin
   Result := False;
-  if (Key = VK_HOME) and (Shift = []) then
+
+  // 录制回放键盘宏时不启用此选项避免引发副作用，
+  // 注意回放键盘宏时不是真正的键盘消息，不会到这儿来
+  if (Key = VK_HOME) and (Shift = []) and not IsKeyMacroRunning then
   begin
     if CnNtaGetCurrLineText(Text, LineNo, CharIdx) and (Trim(Text) <> '') then
     begin
