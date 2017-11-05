@@ -393,6 +393,12 @@ function GetCodeTemplateListBoxVisible: Boolean;
 function IsCurrentEditorInSyncMode: Boolean;
 {* 当前编辑器是否在语法块编辑模式下，不支持或不在块模式下返回 False}
 
+function IsKeyMacroRunning: Boolean;
+{* 当前是否在键盘宏的录制或回放，不支持或不在返回 False}
+
+function GetCurrentCompilingProject: IOTAProject;
+{* 返回当前正在编译的工程，注意不一定是当前工程}
+
 type
   TCnSrcEditorPage = (epCode, epDesign, epCPU, epWelcome, epOthers);
 
@@ -588,7 +594,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  Registry, CnGraphUtils;
+  Registry, CnGraphUtils, CnWizNotifier;
 
 const
   SSyncButtonName = 'SyncButton';
@@ -2036,6 +2042,27 @@ begin
   if (View <> nil) and (View.Block <> nil) then
     Result := View.Block.SyncMode <> smNone;
 {$ENDIF}
+end;
+
+// 当前是否在键盘宏的录制或D回放，不支持或不在返回 False
+function IsKeyMacroRunning: Boolean;
+var
+  Key: IOTAKeyboardServices;
+  Rec: IOTARecord;
+begin
+  Result := False;
+  if Supports(BorlandIDEServices, IOTAKeyboardServices, Key) then
+  begin
+    Rec := Key.CurrentPlayback;
+    if Rec <> nil then
+      Result := Rec.IsPlaying or Rec.IsRecording;
+  end;
+end;
+
+// 返回当前正在编译的工程，注意不一定是当前工程
+function GetCurrentCompilingProject: IOTAProject;
+begin
+  Result := CnWizNotifierServices.GetCurrentCompilingProject;
 end;
 
 // 取当前编辑窗口顶层页面类型，传入编辑器父控件

@@ -185,6 +185,9 @@ type
     {* 将一个方法在应用程序空闲时执行}
     procedure StopExecuteOnApplicationIdle(Method: TNotifyEvent);
     {* 将一个已经设置为空闲时执行的方法在它执行前通知停止执行，如已执行则此调用无效}
+
+    function GetCurrentCompilingProject: IOTAProject;
+    {* 获取当前正在编译的工程、不是当前工程，使用通知内记录而来}
   end;
 
 function CnWizNotifierServices: ICnWizNotifierServices;
@@ -352,6 +355,7 @@ type
     FCompNotifyList: TComponentList;
     FLastIdleTick: Cardinal;
     FIdleExecuting: Boolean;
+    FCurrentCompilingProject: IOTAProject;
     procedure ClearAndFreeList(var List: TList);
     function IndexOf(List: TList; Notifier: TMethod): Integer;
     procedure AddNotifier(List: TList; Notifier: TMethod);
@@ -397,6 +401,7 @@ type
     procedure RemoveBreakpointDeletedNotifier(Notifier: TCnWizBreakpointNotifier);
     procedure ExecuteOnApplicationIdle(Method: TNotifyEvent);
     procedure StopExecuteOnApplicationIdle(Method: TNotifyEvent);
+    function GetCurrentCompilingProject: IOTAProject;
 
     procedure FileNotification(NotifyCode: TOTAFileNotification;
       const FileName: string);
@@ -478,9 +483,9 @@ constructor TCnWizIdeNotifier.Create(ANotifierServices: TCnWizNotifierServices);
 begin
   inherited Create;
   FNotifierServices := ANotifierServices;
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogMsg('TCnWizIdeNotifier.Create succeed');
-{$ENDIF Debug}
+{$ENDIF}
 end;
 
 procedure TCnWizIdeNotifier.AfterCompile(Succeeded,
@@ -1098,6 +1103,7 @@ begin
 {$ENDIF}
   if GetCurrentThreadId <> MainThreadID then
     Exit;
+
   if FAfterCompileNotifiers <> nil then
   begin
     for i := FAfterCompileNotifiers.Count - 1 downto 0 do
@@ -1108,6 +1114,7 @@ begin
       DoHandleException('TCnWizNotifierServices.AfterCompile[' + IntToStr(i) + ']');
     end;
   end;
+  FCurrentCompilingProject := nil;
 end;
 
 procedure TCnWizNotifierServices.BeforeCompile(const Project: IOTAProject;
@@ -1123,8 +1130,11 @@ begin
     CnDebugger.LogFmt('BeforeCompile: %s IsCodeInsight: %d',
       [Project.FileName, Integer(IsCodeInsight)]);
 {$ENDIF}
+  FCurrentCompilingProject := Project;
+
   if GetCurrentThreadId <> MainThreadID then
     Exit;
+
   if FBeforeCompileNotifiers <> nil then
   begin
     for i := FBeforeCompileNotifiers.Count - 1 downto 0 do
@@ -1748,6 +1758,11 @@ end;
 procedure TCnWizNotifierServices.StopExecuteOnApplicationIdle(Method: TNotifyEvent);
 begin
   RemoveNotifier(FIdleMethods, TMethod(Method));
+end;
+
+function TCnWizNotifierServices.GetCurrentCompilingProject: IOTAProject;
+begin
+  Result := FCurrentCompilingProject;
 end;
 
 procedure TCnWizNotifierServices.DoIdleExecute;

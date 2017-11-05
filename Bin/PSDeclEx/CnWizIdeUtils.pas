@@ -203,6 +203,12 @@ function GetCodeTemplateListBoxVisible: Boolean;
 function IsCurrentEditorInSyncMode: Boolean;
 {* 当前编辑器是否在语法块编辑模式下，不支持或不在块模式下返回 False}
 
+function IsKeyMacroRunning: Boolean;
+{* 当前是否在键盘宏的录制或回放，不支持或不在返回 False}
+
+function GetCurrentCompilingProject: IOTAProject;
+{* 返回当前正在编译的工程，注意不一定是当前工程}
+
 //==============================================================================
 // 组件面板封装类
 //==============================================================================
@@ -503,6 +509,14 @@ begin
 end;
 
 function IsCurrentEditorInSyncMode: Boolean;
+begin
+end;
+
+function IsKeyMacroRunning: Boolean;
+begin
+end;
+
+function GetCurrentCompilingProject: IOTAProject;
 begin
 end;
 
