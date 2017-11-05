@@ -262,7 +262,7 @@ const
   csClickSelectLine = 'ClickSelectLine';
   csDragSelectLines = 'DragSelectLines';
   csTenMode = 'TenMode';
-  csDblClickToggleBookmark = 'csDblClickToggleBookmark';
+  csDblClickToggleBookmark = 'DblClickToggleBookmark';
 
   CN_GUTTER_LINE_MODIFIER_CHANGED = 1;
   CN_GUTTER_LINE_MODIFIER_SAVED = 2;
@@ -411,7 +411,7 @@ procedure TCnSrcEditorGutter.Paint;
 var
   R: TRect;
   StrNum: string;
-  I, Y, Idx, TextHeight, MaxRow: Integer;
+  I, X, Y, Idx, TextHeight, MaxRow: Integer;
   EditorObj: TEditorObject;
   OldColor: TColor;
 begin
@@ -478,7 +478,8 @@ begin
         if FGutterMgr.ShowModifier then
           R.Right := R.Right - csModifierWidth;
 
-        if not FGutterMgr.TenMode or (Idx mod 10 = 0) or (Idx = FPosInfo.CaretY) then
+        if not FGutterMgr.TenMode or (Idx mod 10 = 0)
+          or (Idx = FPosInfo.CaretY) or (Idx = 1) then // 第一行也画
         begin
           StrNum := IntToStr(Idx);
           DrawText(Canvas.Handle, PChar(StrNum), Length(StrNum), R, DT_VCENTER or
@@ -486,17 +487,21 @@ begin
         end
         else // 整十模式下，绘制普通短点和五整除长点
         begin
+          Canvas.Pen.Width := 1;
+          Canvas.Pen.Style := psSolid;
+          Canvas.Pen.Color := FGutterMgr.Font.Color;
+
+          Y := (R.Top + R.Bottom) div 2;
           if Idx mod 5 = 0 then
           begin
-            StrNum := '-';
-            DrawText(Canvas.Handle, PChar(StrNum), Length(StrNum), R, DT_VCENTER or
-              DT_RIGHT);
+            X := R.Right - 8;
+            Canvas.MoveTo(X, Y);
+            Canvas.LineTo(X + 6, Y);
           end
           else
           begin
-            StrNum := '.';
-            DrawText(Canvas.Handle, PChar(StrNum), Length(StrNum), R, DT_VCENTER or
-              DT_RIGHT);
+            X := R.Right - 4;
+            Ellipse(Canvas.Handle, X - 1, Y - 1, X + 1, Y + 1);
           end;
         end;
 
