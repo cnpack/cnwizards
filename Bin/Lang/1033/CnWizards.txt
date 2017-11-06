@@ -2166,6 +2166,7 @@ TCnSrcEditorEnhanceForm.chkShowFlatButton.Caption=Show Selection Button when A B
 TCnSrcEditorEnhanceForm.chkAddMenuBlockTools.Caption=Show Selection Button Menu Items in Editor Context Menu.
 TCnSrcEditorEnhanceForm.chkShowLineCount.Caption=Show Total Line Count.
 TCnSrcEditorEnhanceForm.chkShowLineNumber.Caption=Show Line Number in Editor.
+TCnSrcEditorEnhanceForm.chkTenMode.Caption=Only Show 10th Numbers.
 TCnSrcEditorEnhanceForm.chkShowToolBar.Caption=Show Toolbar in Editor.
 TCnSrcEditorEnhanceForm.chkToolBarWrap.Caption=Wrap Buttons
 TCnSrcEditorEnhanceForm.chkGutterClickSelectLine.Caption=Single Click to Select One Line in Editor.

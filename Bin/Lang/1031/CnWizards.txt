@@ -2166,6 +2166,7 @@ TCnSrcEditorEnhanceForm.chkShowFlatButton.Caption=zeige Auswahl wenn Block selek
 TCnSrcEditorEnhanceForm.chkAddMenuBlockTools.Caption=zeige Auswahl Button Menu Items in Editor Kontext Menu.
 TCnSrcEditorEnhanceForm.chkShowLineCount.Caption=zeige Gesamt Zeilenzähler.
 TCnSrcEditorEnhanceForm.chkShowLineNumber.Caption=zeige Zeilenzähler in Editor.
+TCnSrcEditorEnhanceForm.chkTenMode.Caption=Zeige nur 10te Zahlen.
 TCnSrcEditorEnhanceForm.chkShowToolBar.Caption=Zeige Toolbar in Editor.
 TCnSrcEditorEnhanceForm.chkToolBarWrap.Caption=Wrap Buttons
 TCnSrcEditorEnhanceForm.chkGutterClickSelectLine.Caption=Klick, zum selektieren einer Zeile.

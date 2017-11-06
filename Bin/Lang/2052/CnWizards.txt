@@ -2166,6 +2166,7 @@ TCnSrcEditorEnhanceForm.chkShowFlatButton.Caption=块选择时显示浮动工具
 TCnSrcEditorEnhanceForm.chkAddMenuBlockTools.Caption=在编辑器右键菜单中显示浮动工具按钮下拉菜单。
 TCnSrcEditorEnhanceForm.chkShowLineCount.Caption=显示文件总行数。
 TCnSrcEditorEnhanceForm.chkShowLineNumber.Caption=在编辑器中增加显示行号的功能。
+TCnSrcEditorEnhanceForm.chkTenMode.Caption=缩略标尺模式。
 TCnSrcEditorEnhanceForm.chkShowToolBar.Caption=在编辑器中增加工具栏。
 TCnSrcEditorEnhanceForm.chkToolBarWrap.Caption=按钮自动换行。
 TCnSrcEditorEnhanceForm.chkGutterClickSelectLine.Caption=单击行号选定对应行。

@@ -166,6 +166,7 @@ type
     chkGutterDblClickToggleBookmark: TCheckBox;
     chkGutterDragSelectLines: TCheckBox;
     chkPasteReplace: TCheckBox;
+    chkTenMode: TCheckBox;
     procedure btnHelpClick(Sender: TObject);
     procedure UpdateContent(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word;
@@ -287,6 +288,7 @@ begin
     chkShowInDesign.Enabled and chkShowInDesign.Checked;
 
   chkShowLineCount.Enabled := chkShowLineNumber.Checked;
+  chkTenMode.Enabled := chkShowLineNumber.Checked;
   rbLinePanelAutoWidth.Enabled := chkShowLineNumber.Checked;
   btnLineFont.Enabled := chkShowLineNumber.Checked;
   btnCurrLineFont.Enabled := chkShowLineNumber.Checked;
@@ -586,6 +588,7 @@ begin
 
     chkShowLineNumber.Checked := FGutterMgr.ShowLineNumber;
     chkShowLineCount.Checked := FGutterMgr.ShowLineCount;
+    chkTenMode.Checked := FGutterMgr.TenMode;
     rbLinePanelAutoWidth.Checked := FGutterMgr.AutoWidth;
     rbLinePanelFixedWidth.Checked := not FGutterMgr.AutoWidth;
     dlgFontLine.Font := FGutterMgr.Font;
@@ -687,6 +690,7 @@ begin
 
       FGutterMgr.ShowLineNumber := chkShowLineNumber.Checked;
       FGutterMgr.ShowLineCount := chkShowLineCount.Checked;
+      FGutterMgr.TenMode := chkTenMode.Checked;
       FGutterMgr.AutoWidth := rbLinePanelAutoWidth.Checked;
       FGutterMgr.AutoWidth := not rbLinePanelFixedWidth.Checked;
       FGutterMgr.Font := dlgFontLine.Font;

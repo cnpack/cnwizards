@@ -2166,6 +2166,7 @@ TCnSrcEditorEnhanceForm.chkShowFlatButton.Caption=Отображать кноп�
 TCnSrcEditorEnhanceForm.chkAddMenuBlockTools.Caption=Отображать меню кнопки редактиров. в меню редактора
 TCnSrcEditorEnhanceForm.chkShowLineCount.Caption=Показ. общее кол-во строк кода
 TCnSrcEditorEnhanceForm.chkShowLineNumber.Caption=Показ. номер строки в редакторе
+TCnSrcEditorEnhanceForm.chkTenMode.Caption=Покажите только 10-е числа
 TCnSrcEditorEnhanceForm.chkShowToolBar.Caption=Отобр. панель инструм. в редакторе
 TCnSrcEditorEnhanceForm.chkToolBarWrap.Caption=Сворачивать кнопки
 TCnSrcEditorEnhanceForm.chkGutterClickSelectLine.Caption=Один щелчок для выбора строки в редакторе
