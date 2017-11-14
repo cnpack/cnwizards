@@ -30,7 +30,9 @@ unit CnWizCmdSend;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2008.04.29 V1.0
+* 修改记录：2017.11.14 V1.1
+*               适配 Unicode 编译器
+*           2008.04.29 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -43,13 +45,13 @@ uses
   Messages, Windows, Classes, SysUtils, CnWizCompilerConst;
 
 function CnWizSendCommand(Command: Cardinal; DestIDESet: TCnCompilers = [];
-  const DestID: string = ''; const SourceID: string = '';
+  const DestID: AnsiString = ''; const SourceID: AnsiString = '';
   const Params: TStrings = nil): Boolean;
 {* 根据传入的参数发送命令
    参数:      Command: Cardinal;             命令号
               DestIDESet: TCnCompilers = []; 目的 IDE 版本要求
-              const DestID: string = '';     目的 ID
-              const SourceID: string = '';   发送者的源 ID
+              const DestID: AnsiString = '';     目的 ID
+              const SourceID: AnsiString = '';   发送者的源 ID
               const Params: TStrings = nil;  待发送的额外数据，
                 为字符串列表的形式，由多行 param=value 形式的字符串组成
 
@@ -63,11 +65,11 @@ function CnWizSendCommand(Command: Cardinal; DestIDESet: TCnCompilers = [];
               情况下，发送的消息被对方 Reply 时程序才能收到对方的回应。}
 
 function CnWizSendCommandFromScript(Command: Cardinal; DestIDESet: TCnCompilers;
-  const DestID: string; const Params: TStrings): Boolean;
+  const DestID: AnsiString; const Params: TStrings): Boolean;
 {* 供脚本专家调用的、简易的发送命令的函数
    参数:      Command: Cardinal;             命令号
               DestIDESet: TCnCompilers = []; 目的 IDE 版本要求
-              const DestID: string = '';     目的 ID
+              const DestID: AnsiString = '';     目的 ID
               const Params: TStrings = nil;  待发送的额外数据，
                 为字符串列表的形式，由多行 param=value 形式的字符串组成
 
@@ -77,11 +79,11 @@ function CnWizSendCommandFromScript(Command: Cardinal; DestIDESet: TCnCompilers;
 }
 
 function CnWizReplyCommand(Command: Cardinal; DestIDESet: TCnCompilers = [];
-  const SourceID: string = ''; const Params: TStrings = nil): Boolean;
+  const SourceID: AnsiString = ''; const Params: TStrings = nil): Boolean;
 {* 在收到命令的处理过程中回复命令，无需再次指明目的端
    参数:      Command: Cardinal;             命令号
               DestIDESet: TCnCompilers = [];     目的 IDE 版本要求
-              const SourceID: string = '';   发送者的源 ID
+              const SourceID: AnsiString = '';   发送者的源 ID
               const Params: TStrings = nil;  待发送的额外数据，
                 为字符串列表的形式，由多行 param=value 形式的字符串组成
 
@@ -103,13 +105,13 @@ uses
 
 // 根据传入的参数发送命令，返回是否发送成功
 function CnWizSendCommand(Command: Cardinal; DestIDESet: TCnCompilers;
-  const DestID: string; const SourceID: string; const Params: TStrings): Boolean;
+  const DestID: AnsiString; const SourceID: AnsiString; const Params: TStrings): Boolean;
 var
   ASet: TCnCompilers;
   Cds: TCopyDataStruct;
   Cmd: PCnWizMessage;
   HWnd: Cardinal;
-  S: string;
+  S: AnsiString;
   DataLength: Integer;
 begin
   Result := False;
@@ -125,7 +127,7 @@ begin
   // 无参数则置为空
   if Params <> nil then
   begin
-    S := Params.Text;
+    S := AnsiString(Params.Text);
     DataLength := Length(S);
   end
   else
@@ -145,8 +147,9 @@ begin
   ASet := DestIDESet;
   Cmd^.IDESets := Cardinal(PInteger(@ASet)^);
 
-  StrCopy(Cmd^.DestID, PChar(DestID));
-  StrCopy(Cmd^.SourceID, PChar(SourceID));
+  // Unicode 编译器中 StrCopy 有 Ansi 版本号
+  StrCopy(Cmd^.DestID, PAnsiChar(DestID));
+  StrCopy(Cmd^.SourceID, PAnsiChar(SourceID));
 
   Cmd^.DataLength := DataLength;
   CopyMemory(@(Cmd^.Data[0]), @S[1], DataLength);
@@ -168,14 +171,14 @@ end;
 
 // 供脚本专家调用的、简易的发送命令的函数
 function CnWizSendCommandFromScript(Command: Cardinal; DestIDESet: TCnCompilers;
-  const DestID: string; const Params: TStrings): Boolean;
+  const DestID: AnsiString; const Params: TStrings): Boolean;
 begin
-  Result := CnWizSendCommand(Command, DestIDESet, DestID, '', nil);
+  Result := CnWizSendCommand(Command, DestIDESet, DestID, '', Params);
 end;  
 
 // 在收到命令的处理过程中回复命令，无需再次指明目的端，返回是否回复成功
 function CnWizReplyCommand(Command: Cardinal; DestIDESet: TCnCompilers;
-  const SourceID: string; const Params: TStrings): Boolean;
+  const SourceID: AnsiString; const Params: TStrings): Boolean;
 begin
   Result := False;
   if CnWizCmdNotifier.GetCurrentSourceId <> '' then // 只回复给署名的客户

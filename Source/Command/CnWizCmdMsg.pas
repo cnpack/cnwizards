@@ -30,7 +30,9 @@ unit CnWizCmdMsg;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2008.04.29 V1.0
+* 修改记录：2017.11.14 V1.1
+*               适配 Unicode 编译器
+*           2008.04.29 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -95,9 +97,9 @@ type
     {* 命令 ID}
     IDESets:  Cardinal;
     {* 接收端的 IDE 版本 Set 集合，set of TCnCompiler，空为不限制}
-    SourceID: array[0..CN_WIZ_MAX_ID] of Char;
+    SourceID: array[0..CN_WIZ_MAX_ID] of AnsiChar;
     {* 发送端的 ID，字符串形式。专家实例以自己的专家 ID 注册。空为匿名。}
-    DestID:   array[0..CN_WIZ_MAX_ID] of Char;
+    DestID:   array[0..CN_WIZ_MAX_ID] of AnsiChar;
     {* 接收端的 ID，字符串形式。专家实例以自己的专家 ID 注册。空为所有目标。}
     DataLength: Cardinal;
     {* 命令的其他数据长度，字节为单位，不包括 DataLength 以及前面的内容}

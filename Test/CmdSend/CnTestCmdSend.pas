@@ -19,8 +19,8 @@ type
     procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
-    procedure OnCmdRecv(const Command: Cardinal; const SourceID: PChar;
-      const DestID: PChar; const IDESets: TCnCompilers; const Params: TStrings);
+    procedure OnCmdRecv(const Command: Cardinal; const SourceID: PAnsiChar;
+      const DestID: PAnsiChar; const IDESets: TCnCompilers; const Params: TStrings);
   public
     { Public declarations }
   end;
@@ -58,7 +58,7 @@ begin
 end;
 
 procedure TCnCmdSendForm.OnCmdRecv(const Command: Cardinal; const SourceID,
-  DestID: PChar; const IDESets: TCnCompilers; const Params: TStrings);
+  DestID: PAnsiChar; const IDESets: TCnCompilers; const Params: TStrings);
 begin
   pnl2.Caption := Format('收到回应！消息号 $%s' + #13#10 + '来源：%s',
     [InttoHex(Command, 2), SourceID]);

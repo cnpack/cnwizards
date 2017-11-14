@@ -30,7 +30,9 @@ unit CnWizCmdNotify;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2008.04.29 V1.0
+* 修改记录：2017.11.14 V1.1
+*               适配 Unicode 编译器
+*           2008.04.29 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -43,27 +45,27 @@ uses
   SysUtils, Classes, Windows, Messages, Forms, CnWizCompilerConst, CnWizCmdMsg;
 
 type
-  TCnWizCmdNotifyEvent = procedure (const Command: Cardinal; const SourceID: PChar;
-    const DestID: PChar; const IDESets: TCnCompilers; const Params: TStrings) of object;
+  TCnWizCmdNotifyEvent = procedure (const Command: Cardinal; const SourceID: PAnsiChar;
+    const DestID: PAnsiChar; const IDESets: TCnCompilers; const Params: TStrings) of object;
   {* 命令通知的函数原型}
 
   ICnWizCmdNotifier = interface
     ['{E14E47D9-2D3A-4F5B-A036-400CB43C30E3}']
 
     procedure AddCmdNotifier(CmdNotifier: TCnWizCmdNotifyEvent; IDESet: TCnCompilers = [];
-      const MyID: string = ''; const Command: Cardinal = 0);
+      const MyID: AnsiString = ''; const Command: Cardinal = 0);
     {* 增加一通知器，可声明通知的附件条件}
     procedure RemoveCmdNotifier(CmdNotifier: TCnWizCmdNotifyEvent);
     {* 移除一通知器}
 
-    function GetCurrentSourceId: string;
+    function GetCurrentSourceId: AnsiString;
     {* 当前刚收到正在处理的命令的发送者，用于 Reply 回调}
   end;
 
   TCnWizCmdObj = class(TObject)
   {* 记录一个需要通知的客户信息，客户注册时生成}
   private
-    FID: string;
+    FID: AnsiString;
     FIDESets: TCnCompilers;
     FMethod: TCnWizCmdNotifyEvent;
     FCommand: Cardinal;
@@ -71,7 +73,7 @@ type
   public
     property From: HWND read FFrom write FFrom;
     {* 发送时发送端的 Handle，供内部 Reply 用}
-    property ID: string read FID write FID;
+    property ID: AnsiString read FID write FID;
     {* 客户的 ID，消息目标 ID 与此相同时才通知，空为通配}
     property IDESets: TCnCompilers read FIDESets write FIDESets;
     {* 客户要求的 IDE 版本号，消息目标版本号与此相同时才通知，空为通配}
@@ -108,17 +110,17 @@ type
 
     // ICnWizCmdNotifier
     procedure AddCmdNotifier(CmdNotifier: TCnWizCmdNotifyEvent; IDESets: TCnCompilers = [];
-      const MyID: string = ''; const Command: Cardinal = 0);
+      const MyID: AnsiString = ''; const Command: Cardinal = 0);
     {* 增加一通知器，可声明通知的附件条件}
     procedure RemoveCmdNotifier(CmdNotifier: TCnWizCmdNotifyEvent);
     {* 移除一通知器}
-    function GetCurrentSourceId: string;
+    function GetCurrentSourceId: AnsiString;
     {* 当前刚收到正在处理的命令的发送者，用于 Reply 回调}
 
     // property CurrentCmd: PCnWizMessage read FCurrentCmd;
     {* 当前刚收到正在处理的消息结构，用于 Reply 回调，当前可不公开}
 
-    property CurrentSourceId: string read GetCurrentSourceId;
+    property CurrentSourceId: AnsiString read GetCurrentSourceId;
     {* 当前刚收到正在处理的命令的发送者，用于 Reply 回调}
   end;
 
@@ -156,7 +158,7 @@ end;
 
 procedure TCnWizCmdNotifier.AddCmdNotifier(
   CmdNotifier: TCnWizCmdNotifyEvent; IDESets: TCnCompilers;
-  const MyID: string; const Command: Cardinal);
+  const MyID: AnsiString; const Command: Cardinal);
 var
   Obj: TCnWizCmdObj;
 begin
@@ -236,7 +238,7 @@ begin
     FreeObjectInstance(FObjectInstance);
 end;
 
-function TCnWizCmdNotifier.GetCurrentSourceId: string;
+function TCnWizCmdNotifier.GetCurrentSourceId: AnsiString;
 begin
   Result := '';
   if FCurrentCmd <> nil then
@@ -248,7 +250,7 @@ function TCnWizCmdNotifier.Notify(Obj: TCnWizCmdObj; Cmd: PCnWizMessage;
 var
   IDESets: TCnCompilers;
   Params: TStrings;
-  S: string;
+  S: AnsiString;
 begin
   Result := False;
   if (Obj = nil) or (Cmd = nil) then
@@ -264,7 +266,7 @@ begin
     Exit;
 
   // 过滤目标地址
-  if (Obj.ID <> '') and (StrComp(PChar(Obj.ID), Cmd^.DestID) <> 0) then
+  if (Obj.ID <> '') and (StrComp(PAnsiChar(Obj.ID), Cmd^.DestID) <> 0) then
     Exit;
 
   Params := TStringList.Create;
@@ -274,7 +276,7 @@ begin
     begin
       SetLength(S, Cmd^.DataLength);
       CopyMemory(@S[1], @(Cmd^.Data[0]), Cmd^.DataLength);
-      Params.Text := S;
+      Params.Text := string(S);
     end;
     Obj.Method(Cmd^.Command, Cmd^.SourceID, Cmd^.DestID, IDESets, Params);
   finally
