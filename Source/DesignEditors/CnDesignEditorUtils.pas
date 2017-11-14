@@ -72,6 +72,16 @@ function CheckBoxWidth: Integer;
 
 implementation
 
+{$R CnDesignCheckBox.res}
+
+{$IFDEF DEBUG}
+uses
+  CnDebug;
+{$ENDIF}
+
+const
+  DESIGN_CHECKBOX_RES = 'DESIGNCHECKBOX';
+
 var
   Checked: TBitmap;
   Unchecked: TBitmap;
@@ -122,28 +132,60 @@ begin
   try
     Bitmap.Handle := LoadImage(0, PChar(Obm_CheckBoxes), Image_Bitmap, 0, 0,
       Lr_DefaultSize or Lr_CreateDibSection or Lr_Shared or Lr_LoadMap3DColors);
-    if Bitmap.Handle = 0 then
-   {$IFDEF COMPILER6_UP}
-      RaiseLastOSError;
-   {$ELSE}
-      RaiseLastWin32Error;
-   {$ENDIF COMPILER6_UP}
-    Src.Left := 0;
-    Src.Top := 0;
-    Src.Right := Bitmap.Width div 4;
-    Src.Bottom := Bitmap.Height div 3;
-    Unchecked.Height := Src.Bottom - Src.Top - 1;
-    Unchecked.Width := Src.Right - Src.Left - 1;
-    Dst := Src;
-    Unchecked.Canvas.CopyRect(Dst, Bitmap.Canvas, Src);
 
-    Checked.Height := Unchecked.Height;
-    Checked.Width := Unchecked.Width;
-    FCheckBoxHeight := Checked.Height;
-    FCheckBoxWidth := Checked.Width;
-    Src.Left := Src.Right;
-    Src.Right := Src.Left + Bitmap.Width div 4;
-    Checked.Canvas.CopyRect(Dst, Bitmap.Canvas, Src);
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('LoadImage for Obm_CheckBoxes. Handle %d. Width %d, Height %d.',
+      [Bitmap.Handle, Bitmap.Width, Bitmap.Height]);
+{$ENDIF}
+
+    if (Bitmap.Handle = 0) or (Bitmap.Width < 24) or (Bitmap.Height < 18) then
+    begin
+      // 52/39 是 XP 下的标准尺寸，如果实在太小，则另外从资源中加载绘制
+      Bitmap.Handle := LoadBitmap(HInstance, PChar(DESIGN_CHECKBOX_RES));
+
+      Checked.Height := 16;
+      Checked.Width := 16;
+      Unchecked.Height := 16;
+      Unchecked.Width := 16;
+
+      Dst.Left := 0;
+      Dst.Top := 0;
+      Dst.Right := 16;
+      Dst.Bottom := 16;
+      Src := Dst;
+
+      Unchecked.Canvas.CopyRect(Dst, Bitmap.Canvas, Src);
+      Unchecked.TransparentColor := clFuchsia;
+      Unchecked.Transparent := True;
+
+      Src.Left := Src.Right;
+      Src.Right := Src.Left + 16;
+      Checked.Canvas.CopyRect(Dst, Bitmap.Canvas, Src);
+      Checked.TransparentColor := clFuchsia;
+      Checked.Transparent := True;
+
+      FCheckBoxHeight := Checked.Height;
+      FCheckBoxWidth := Checked.Width;
+    end
+    else
+    begin
+      Src.Left := 0;
+      Src.Top := 0;
+      Src.Right := Bitmap.Width div 4;
+      Src.Bottom := Bitmap.Height div 3;
+      Unchecked.Height := Src.Bottom - Src.Top - 1;
+      Unchecked.Width := Src.Right - Src.Left - 1;
+      Dst := Src;
+      Unchecked.Canvas.CopyRect(Dst, Bitmap.Canvas, Src);
+
+      Checked.Height := Unchecked.Height;
+      Checked.Width := Unchecked.Width;
+      FCheckBoxHeight := Checked.Height;
+      FCheckBoxWidth := Checked.Width;
+      Src.Left := Src.Right;
+      Src.Right := Src.Left + Bitmap.Width div 4;
+      Checked.Canvas.CopyRect(Dst, Bitmap.Canvas, Src);
+    end;
   finally
     Bitmap.Free;
   end;
