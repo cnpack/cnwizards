@@ -1530,6 +1530,10 @@ end;
 initialization
   CnWizardClassList := TList.Create;
 
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Initialization Done: CnWizClasses.');
+{$ENDIF}
+
 finalization
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('CnBaseWizard finalization.');

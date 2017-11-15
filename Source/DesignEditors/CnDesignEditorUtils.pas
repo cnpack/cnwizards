@@ -246,6 +246,10 @@ initialization
   //×°ÔØcheckboxÍ¼Ïñ
   Initialize;
 
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Initialization Done: CnDesignEditorUtils.');
+{$ENDIF}
+
 finalization
   FreeAndNil(Checked);
   FreeAndNil(Unchecked);

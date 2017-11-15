@@ -127,5 +127,9 @@ initialization
   CnDesignEditorMgr.RegisterPropEditor(TCnNamePropEditor,
     TCnNamePropEditor.GetInfo, TCnNamePropEditor.Register);
 
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Initialization Done: CnNamePropEditor.');
+{$ENDIF}
+
 {$ENDIF CNWIZARDS_CNPREFIXWIZARD}
 end.

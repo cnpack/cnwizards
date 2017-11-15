@@ -1650,6 +1650,10 @@ initialization
     Classes.RegisterComponentsProc := CnCompRegisterComponents;
   end;
 
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Initialization Done: CnCompFilterFrm.');
+{$ENDIF}
+
 finalization
   if ComponentTabListMap <> nil then
     FreeAndNil(ComponentTabListMap);

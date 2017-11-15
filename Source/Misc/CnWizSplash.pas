@@ -110,5 +110,9 @@ initialization
   @InitSplashProc := @CnWizInitSplash;
 {$ENDIF}
 
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Initialization Done: CnWizSplash.');
+{$ENDIF}
+
 end.
  

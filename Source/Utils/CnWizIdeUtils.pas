@@ -3088,8 +3088,11 @@ end;
 initialization
   // 使用此全局变量可以避免频繁调用 IdeGetIsEmbeddedDesigner 函数
   IdeIsEmbeddedDesigner := IdeGetIsEmbeddedDesigner;
-  
   InitIdeAPIs;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Initialization Done: CnWizIdeUtils.');
+{$ENDIF}
 
 finalization
 {$IFDEF DEBUG}

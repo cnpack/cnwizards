@@ -1237,6 +1237,9 @@ end;
 
 initialization
   CreateEditorToolBarServiceProc := CreateEditorToolBarService;
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Initialization Done: CnSrcEditorToolBar.');
+{$ENDIF}
 
 finalization
   CnEditorToolBarService := nil;

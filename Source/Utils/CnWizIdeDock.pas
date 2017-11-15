@@ -541,6 +541,9 @@ end;
 
 initialization
   PrivateIdeDockManager := TIdeDockManager.Create;
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Initialization Done: CnWizIdeDock.');
+{$ENDIF}
 
 finalization
   FreeAndNil(PrivateIdeDockManager);

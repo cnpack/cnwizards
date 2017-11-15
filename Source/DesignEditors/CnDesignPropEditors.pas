@@ -786,4 +786,7 @@ initialization
   CnDesignEditorMgr.RegisterPropEditor(TCnFontPropEditor,
     TCnFontPropEditor.GetInfo, TCnFontPropEditor.Register);
 
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Initialization Done: CnDesignPropEditor.');
+{$ENDIF}
 end.

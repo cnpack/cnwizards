@@ -246,4 +246,8 @@ initialization
     TCnAlignProperty.GetInfo, TCnAlignProperty.Register);
 {$ENDIF}
 
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Initialization Done: CnAlignPropEditor.');
+{$ENDIF}
+
 end.

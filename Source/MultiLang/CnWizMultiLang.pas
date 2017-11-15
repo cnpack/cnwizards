@@ -610,6 +610,10 @@ initialization
   InitLangManager;
 {$ENDIF}
 
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Initialization Done: CnWizMultiLang.');
+{$ENDIF}
+
 finalization
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('CnWizMultiLang finalization.');

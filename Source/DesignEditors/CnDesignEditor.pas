@@ -833,9 +833,9 @@ end;
 initialization
 
 finalization
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogEnter('CnDesignEditor finalization.');
-{$ENDIF Debug}
+{$ENDIF}
 
   if FCnDesignEditorMgr <> nil then
   begin
@@ -845,8 +845,8 @@ finalization
     FreeAndNil(FCnDesignEditorMgr);
   end;
 
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogLeave('CnDesignEditor finalization.');
-{$ENDIF Debug}
+{$ENDIF}
 end.
 

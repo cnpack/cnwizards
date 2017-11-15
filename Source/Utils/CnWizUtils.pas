@@ -7538,6 +7538,10 @@ initialization
   OldRegisterNoIconProc := RegisterNoIconProc;
   RegisterNoIconProc := CnRegisterNoIconProc;
 
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Initialization Done: CnWizUtils.');
+{$ENDIF}
+
 finalization
 {$IFDEF Debug}
   CnDebugger.LogEnter('CnWizUtils finalization.');

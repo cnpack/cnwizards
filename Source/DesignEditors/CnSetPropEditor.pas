@@ -453,5 +453,8 @@ initialization
     TCnBooleanPropEditor.GetInfo, TCnBooleanPropEditor.Register);
 {$ENDIF}
 
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Initialization Done: CnSetPropEditor.');
+{$ENDIF}
 end.
 

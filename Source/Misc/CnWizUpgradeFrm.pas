@@ -705,9 +705,9 @@ end;
 initialization
 
 finalization
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogEnter('CnWizUpgradeFrm finalization.');
-{$ENDIF Debug}
+{$ENDIF}
   if Assigned(FThread) then
     try
       // 如果当前正在执行 HTTP 操作，可能不能正常退出，此处强行退出线程

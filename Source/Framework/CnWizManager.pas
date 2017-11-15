@@ -1596,6 +1596,10 @@ initialization
   RegisterSelectionEditor(TComponent, TCnDesignSelectionManager);
 {$ENDIF}
 
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Initialization Done: CnWizManager.');
+{$ENDIF}
+
 finalization
   FreeAndNil(CnDesignExecutorList);
   FreeAndNil(CnEditorExecutorList);
