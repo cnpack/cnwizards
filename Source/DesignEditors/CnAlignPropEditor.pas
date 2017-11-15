@@ -92,6 +92,11 @@ type
 
 implementation
 
+{$IFDEF DEBUG}
+uses
+  CnDebug;
+{$ENDIF}
+
 {$R CnAlignPropEditor.res}
 
 const
@@ -126,7 +131,6 @@ const
 {$ELSE}
   csItemBorder = 2;
 {$ENDIF}
-
 
 class procedure TCnAlignProperty.GetInfo(var Name, Author, Email,
   Comment: string);

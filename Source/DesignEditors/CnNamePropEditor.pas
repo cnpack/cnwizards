@@ -67,7 +67,7 @@ implementation
 {$IFDEF CNWIZARDS_CNPREFIXWIZARD}
 
 uses
-  CnWizManager, CnPrefixWizard;
+  CnWizManager, CnPrefixWizard {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 procedure TCnNamePropEditor.Edit;
 var

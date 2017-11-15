@@ -145,7 +145,7 @@ type
 implementation
 
 uses
-  Grids, Menus, Forms, CnDesignEditorUtils;
+  Grids, Menus, Forms, CnDesignEditorUtils {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 { TCnSetElementPropEditor }
 

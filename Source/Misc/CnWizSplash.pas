@@ -45,6 +45,11 @@ procedure CnWizInitSplash;
 
 implementation
 
+{$IFDEF DEBUG}
+uses
+  CnDebug;
+{$ENDIF}
+
 const
   CnSplashScreenFormName = 'SplashScreen';
 

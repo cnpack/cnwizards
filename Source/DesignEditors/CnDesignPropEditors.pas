@@ -54,7 +54,7 @@ uses
 {$ELSE}
   DsgnIntf,
 {$ENDIF}
-  CnConsts, CnDesignEditor, CnDesignEditorConsts;
+  CnConsts, CnDesignEditor, CnDesignEditorConsts {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 type
   { TCnStringPropEditor }
