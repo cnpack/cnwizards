@@ -3953,7 +3953,7 @@ begin
   if Assigned(EditBlock) then
     Result := EditBlock.Text;
 
-{$IFDEF IDE_WIDECONTROL}
+{$IFDEF IDE_STRING_ANSI_UTF8}
   Result := CnUtf8ToAnsi2(Result);
 {$ENDIF}
 end;

@@ -20,6 +20,9 @@ GetTextAtLine方法
 IOTAEditReader接口的        AnsiString             AnsiString + Utf8        AnsiString + Utf8
 GetText方法
 -----------------------------------------------------------------------------------------------------
+IOTAEditBlock接口的         AnsiString             AnsiString + Utf8        UnicodeString（Utf16）
+Text属性/GetText方法
+-----------------------------------------------------------------------------------------------------
 EditControl的               Ansi、1 开始           Utf8、1 开始             Utf8、1 开始
 GetAttributeAtPos所需偏移
 -----------------------------------------------------------------------------------------------------
