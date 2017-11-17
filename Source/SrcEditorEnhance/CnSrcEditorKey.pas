@@ -1093,7 +1093,7 @@ begin
   Result := False;
   Handled := False;
   if ((Key = VK_LEFT) or (Key = VK_RIGHT)) and not (ssCtrl in Shift)
-    and not View.Block.IsValid and CurrentIsSource then
+    and not View.Block.IsValid then
   begin
     if CnNtaGetCurrLineText(Text, LineNo, CharIdx, True) then
     begin
