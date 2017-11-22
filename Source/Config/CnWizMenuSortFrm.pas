@@ -309,18 +309,19 @@ end;
 procedure TCnMenuSortForm.lvMenuWizardsDragDrop(Sender, Source: TObject; X,
   Y: Integer);
 var
-  L: TListItem;
+  L, D: TListItem;
 begin
   if Sender = Source then
   begin
-    if (FDragIndex > 0) and (lvMenuWizards.GetItemAt(X, Y) <> nil) then
+    D := lvMenuWizards.GetItemAt(X, Y);
+    if (FDragIndex >= 0) and (D <> nil) then
     begin
       // 插入到松开的 Item 之上
       L := lvMenuWizards.Items[FDragIndex];
-      (lvMenuWizards.Items.Insert(lvMenuWizards.GetItemAt(X, Y).Index)).Assign(L);
+      (lvMenuWizards.Items.Insert(D.Index)).Assign(L);
       lvMenuWizards.Items.Delete(L.Index);
 
-      lvMenuWizards.Selected := lvMenuWizards.GetItemAt(X, Y);
+      lvMenuWizards.Selected := D;
       lvMenuWizards.ItemFocused := lvMenuWizards.Selected;
 
       // 人性化设计，相邻上拖下本来不改变，现在交换此两个。拖到最后一个上也交换。
