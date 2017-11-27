@@ -81,6 +81,7 @@ type
     FGutterMgr: TCnSrcEditorGutterMgr;
     FEditControl: TControl;
     FEditWindow: TCustomForm;
+    FLineHeight: Integer;
     FMenu: TPopupMenu;
     FLinesReceiver: ICnEventBusReceiver;
     FIdentLines: TCnList;
@@ -111,6 +112,7 @@ type
     function MatchPointToLineArea(LinesList: TCnList; const Delta, Y, AreaHeight,
       TotalLine: Integer): Integer;
     procedure ToggleBookmark;
+    procedure SetEditControl(const Value: TControl);
   protected
 {$IFDEF BDS}
     procedure SetEnabled(Value: Boolean); override;
@@ -133,7 +135,7 @@ type
     procedure UpdateStatus;
     procedure UpdateStatusOnIdle(Sender: TObject);
     procedure LanguageChanged(Sender: TObject);
-    property EditControl: TControl read FEditControl write FEditControl;
+    property EditControl: TControl read FEditControl write SetEditControl;
     property EditWindow: TCustomForm read FEditWindow write FEditWindow;
     property OldLineWidth: Integer read FOldLineWidth write FOldLineWidth;
     property Menu: TPopupMenu read FMenu;
@@ -327,13 +329,21 @@ end;
 procedure TCnSrcEditorGutter.EditorChanged(Editor: TEditorObject;
   ChangeType: TEditorChangeTypes);
 begin
-  if FGutterMgr.CanShowGutter and (Editor.EditControl = EditControl) then
+  if FGutterMgr.CanShowGutter and (Editor.EditControl = FEditControl) then
   begin
     if ChangeType * [ctView, ctTopEditorChanged] <> [] then
       CnWizNotifierServices.ExecuteOnApplicationIdle(UpdateStatusOnIdle)
     else if ChangeType * [ctWindow, ctCurrLine, ctFont, ctVScroll,
       ctElided, ctUnElided] <> [] then
       Repaint;
+
+    if ChangeType * [ctView, ctWindow, ctFont, ctOptionChanged] <> [] then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('SrcEditorGutter.EditorChanged for View/Window/Font/Option. Update Line Height');
+{$ENDIF}
+      FLineHeight := EditControlWrapper.GetEditControlCharHeight(FEditControl);
+    end;
   end;
 end;
 
@@ -411,7 +421,7 @@ procedure TCnSrcEditorGutter.Paint;
 var
   R: TRect;
   StrNum: string;
-  I, X, Y, Idx, TextHeight, MaxRow: Integer;
+  I, X, Y, Idx, MaxRow: Integer;
   EditorObj: TEditorObject;
   OldColor: TColor;
 begin
@@ -443,8 +453,7 @@ begin
       Canvas.Brush.Color := OldColor;
     end;
 
-    TextHeight := EditControlWrapper.GetCharHeight;
-    if TextHeight > 0 then
+    if FLineHeight > 0 then
     begin
       EditorObj := EditControlWrapper.GetEditorObject(EditControl);
       if EditorObj = nil then Exit;
@@ -474,7 +483,7 @@ begin
           Canvas.Font := FGutterMgr.CurrFont;
 
         Canvas.Brush.Style := bsClear;
-        R := Rect(1, I * TextHeight, Width - csBevelWidth, (I + 1) * TextHeight);
+        R := Rect(1, I * FLineHeight, Width - csBevelWidth, (I + 1) * FLineHeight);
         if FGutterMgr.ShowModifier then
           R.Right := R.Right - csModifierWidth;
 
@@ -1071,6 +1080,15 @@ begin
   if FGutterMgr.ClickSelectLine and (FStartLine > -1) then
     CnOtaMoveAndSelectLine(FStartLine);
   FSelectLineTimer.Enabled := False;
+end;
+
+procedure TCnSrcEditorGutter.SetEditControl(const Value: TControl);
+begin
+  if FEditControl <> Value then
+  begin
+    FEditControl := Value;
+    FLineHeight := EditControlWrapper.GetEditControlCharHeight(FEditControl);
+  end;
 end;
 
 { TCnSrcEditorGutterMgr }

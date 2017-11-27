@@ -51,6 +51,7 @@ interface
 uses
   Windows, Messages, Classes, Controls, SysUtils, Graphics, ToolsAPI, ExtCtrls,
   ComCtrls, TypInfo, Forms, Tabs, Registry, Contnrs, {$IFDEF COMPILER6_UP}Variants, {$ENDIF}
+  {$IFDEF SUPPORT_ENHANCED_RTTI} Rtti, {$ENDIF}
   CnCommon, CnWizMethodHook, CnWizUtils, CnWizCompilerConst, CnWizNotifier,
   CnWizIdeUtils, CnWizOptions;
   
@@ -329,6 +330,10 @@ type
     {* 返回编辑器行高和字宽 }
     function GetEditControlInfo(EditControl: TControl): TEditControlInfo;
     {* 返回编辑器当前信息 }
+    function GetEditControlCharHeight(EditControl: TControl): Integer;
+    {* 返回编辑器内的字符高度也就是行高}
+    function GetEditControlSupportsSyntaxHighlight(EditControl: TControl): Boolean;
+    {* 返回编辑器是否支持语法高亮 }
     function GetEditControlCanvas(EditControl: TControl): TCanvas;
     {* 返回编辑器的画布属性}
     function GetEditView(EditControl: TControl): IOTAEditView;
@@ -1386,11 +1391,25 @@ var
 
     GetTextMetrics(DC, TM);
     GetTextExtentPoint(DC, csAlphaText, Length(csAlphaText), Size);
+
     // 取文本高度
     if TM.tmHeight + TM.tmExternalLeading > FCharSize.cy then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('TextMetrics tmHeight %d + ExternalLeading %d > Cy %d. Increase.',
+        [TM.tmHeight, TM.tmExternalLeading, FCharSize.cy]);
+{$ENDIF}
       FCharSize.cy := TM.tmHeight + TM.tmExternalLeading;
+    end;
+
     if Size.cy > FCharSize.cy then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('TextExtentPoint Size.cy %d > FCharSize.cy %d. Increase.',
+        [Size.cy, FCharSize.cy]);
+{$ENDIF}
       FCharSize.cy := Size.cy;
+    end;
 
     // 取文本宽度
     if TM.tmAveCharWidth > FCharSize.cx then
@@ -1517,6 +1536,120 @@ begin
     on E: Exception do
       DoHandleException(E.Message);
   end;
+end;
+
+function TCnEditControlWrapper.GetEditControlCharHeight(
+  EditControl: TControl): Integer;
+const
+  csAlphaText = 'abcdefghijklmnopqrstuvwxyz';
+var
+{$IFDEF SUPPORT_ENHANCED_RTTI}
+  RttiContext: TRttiContext;
+  RttiType: TRttiType;
+  RttiProperty: TRttiProperty;
+  H: Integer;
+{$ELSE}
+  Options: IOTAEditOptions;
+  Control: TControlHack;
+  FontName: string;
+  FontHeight: Integer;
+  DC: HDC;
+  ASize: TSize;
+  LgFont: TLogFont;
+  FontHandle: THandle;
+  TM: TEXTMETRIC;
+{$ENDIF}
+begin
+  if EditControl = nil then
+    EditControl := GetTopMostEditControl;
+
+  // TODO: D2010或以上，直接用新 RTTI 带的 CharHeight 属性，以下则判断是否高亮，
+{$IFDEF SUPPORT_ENHANCED_RTTI}
+  RttiContext := TRttiContext.Create;
+  try
+    RttiType := RttiContext.GetType(EditControl.ClassInfo);
+    if RttiType <> nil then
+    begin
+      RttiProperty := RttiType.GetProperty('CharHeight');
+      if RttiProperty <> nil then
+      begin
+        H := RttiProperty.GetValue(EditControl).AsInteger;
+        if H > 0 then
+        begin
+          Result := H;
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('GetEditControlCharHeight: Get CharHeight Property %d.', [H]);
+{$ENDIF}
+          Exit;
+        end;
+      end;
+    end;
+  finally
+    RttiContext.Free;
+  end;
+  Result := GetCharHeight;
+{$ELSE}
+  if GetEditControlSupportsSyntaxHighlight(EditControl) then
+  begin
+    // 支持语法高亮，直接用之前计算过的 CharHeight
+    Result := GetCharHeight;
+  end
+  else
+  begin
+    // 不支持语法高亮，用默认字体绘制的办法获取
+    Control := TControlHack(EditControl);
+    Options := CnOtaGetEditOptions;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('GetEditControlCharHeight: NO Syntax Highlight. Re-calc.');
+{$ENDIF}
+    if (Options <> nil) and (GetObject(Control.Font.Handle, SizeOf(LgFont), @LgFont) <> 0) then
+    begin
+      FontName := Options.FontName;
+      FontHeight := -MulDiv(Options.FontSize, Screen.PixelsPerInch, 72);
+      if not SameText(FontName, LgFont.lfFaceName) or (FontHeight <> LgFont.lfHeight) then
+      begin
+        StrCopy(LgFont.lfFaceName, PChar(FontName));
+        LgFont.lfHeight := FontHeight;
+      end;
+
+      DC := CreateCompatibleDC(0);
+      try
+        FontHandle := CreateFontIndirect(LgFont);
+        SelectObject(DC, FontHandle);
+
+        GetTextMetrics(DC, TM);
+        GetTextExtentPoint(DC, csAlphaText, Length(csAlphaText), ASize);
+
+        Result := TM.tmHeight + TM.tmExternalLeading;
+        if ASize.cy > Result then
+          Result := ASize.cy;
+
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('GetEditControlCharHeight: TextMetrics Height %d Ext %d, Size.cy %d.',
+          [TM.tmHeight, TM.tmExternalLeading, ASize.cy]);
+{$ENDIF}
+        DeleteObject(FontHandle);
+        Exit;
+      finally
+        DeleteDC(DC);
+      end;
+    end;
+    Result := GetCharHeight;
+  end;
+{$ENDIF}
+end;
+
+function TCnEditControlWrapper.GetEditControlSupportsSyntaxHighlight(
+  EditControl: TControl): Boolean;
+var
+  Idx: Integer;
+begin
+  Idx := IndexOfEditor(EditControl);
+  if Idx >= 0 then
+    Result := CnOtaEditViewSupportsSyntaxHighlight(Editors[Idx].EditView)
+  else
+    Result := False;
 end;
 
 function TCnEditControlWrapper.GetEditControlCanvas(

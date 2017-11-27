@@ -403,6 +403,8 @@ function CnOtaGetTopMostEditView: IOTAEditView; overload;
 {* 取当前最前端的IOTAEditView接口}
 function CnOtaGetTopMostEditView(SourceEditor: IOTASourceEditor): IOTAEditView; overload;
 {* 取指定编辑器最前端的IOTAEditView接口}
+function CnOtaEditViewSupportsSyntaxHighlight(EditView: IOTAEditView = nil): Boolean;
+{* 取指定 IOTAEditView 是否使用语法高亮}
 function CnOtaGetTopMostEditActions: IOTAEditActions;
 {* 取当前最前端的 IOTAEditActions 接口}
 function CnOtaGetCurrentModule: IOTAModule;
@@ -2844,6 +2846,28 @@ begin
     end;
   end;
   Result := nil;
+end;
+
+// 取指定 IOTAEditView 是否使用语法高亮
+function CnOtaEditViewSupportsSyntaxHighlight(EditView: IOTAEditView): Boolean;
+var
+  Buffer: IOTAEditBuffer;
+  Options: IOTABufferOptions;
+begin
+  Result := False;
+  if EditView = nil then
+    EditView := CnOtaGetTopMostEditView;
+
+  if EditView <> nil then
+  begin
+    Buffer := EditView.GetBuffer;
+    if Buffer <> nil then
+    begin
+      Options := Buffer.GetBufferOptions;
+      if Options <> nil then
+        Result := Options.GetSyntaxHighlight;
+    end;
+  end;
 end;
 
 // 取当前最前端的 IOTAEditActions 接口
