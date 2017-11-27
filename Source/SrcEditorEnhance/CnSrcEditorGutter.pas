@@ -337,10 +337,10 @@ begin
       ctElided, ctUnElided] <> [] then
       Repaint;
 
-    if ChangeType * [ctView, ctWindow, ctFont, ctOptionChanged] <> [] then
+    if ChangeType * [ctView, ctFont, ctOptionChanged] <> [] then
     begin
 {$IFDEF DEBUG}
-      CnDebugger.LogMsg('SrcEditorGutter.EditorChanged for View/Window/Font/Option. Update Line Height');
+      CnDebugger.LogMsg('SrcEditorGutter.EditorChanged for View/Font/Option. Update Line Height');
 {$ENDIF}
       FLineHeight := EditControlWrapper.GetEditControlCharHeight(FEditControl);
     end;
