@@ -328,6 +328,8 @@ end;
 
 procedure TCnSrcEditorGutter.EditorChanged(Editor: TEditorObject;
   ChangeType: TEditorChangeTypes);
+var
+  OldHeight: Integer;
 begin
   if FGutterMgr.CanShowGutter and (Editor.EditControl = FEditControl) then
   begin
@@ -342,7 +344,10 @@ begin
 {$IFDEF DEBUG}
       CnDebugger.LogMsg('SrcEditorGutter.EditorChanged for View/Font/Option. Update Line Height');
 {$ENDIF}
+      OldHeight := FLineHeight;
       FLineHeight := EditControlWrapper.GetEditControlCharHeight(FEditControl);
+      if OldHeight <> FLineHeight then
+        Repaint;
     end;
   end;
 end;

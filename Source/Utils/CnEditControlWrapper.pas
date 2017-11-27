@@ -1791,7 +1791,7 @@ begin
     FOptionDlgVisible := False;
     FOptionChanged := True;
   {$IFDEF DEBUG}
-    CnDebugger.LogMsg('Editor Option Changed');
+    CnDebugger.LogMsg('Option Dialog Closed. Editor Option Changed');
   {$ENDIF}
   end;
 end;
