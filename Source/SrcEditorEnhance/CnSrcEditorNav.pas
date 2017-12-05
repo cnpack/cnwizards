@@ -49,7 +49,8 @@ uses
   ActnMan,
   {$ENDIF}
   CnWizUtils, CnConsts, CnWizIdeUtils, CnWizConsts, CnMenuHook, CnWizNotifier,
-  CnEditControlWrapper, CnWizShareImages, CnPopupMenu, CnWizClasses, CnWizManager;
+  CnEditControlWrapper, CnWizShareImages, CnPopupMenu, CnWizClasses, CnWizManager,
+  CnWizMenuAction;
 
 type
 
@@ -383,8 +384,13 @@ procedure TCnSrcEditorNav.DoMenuPopup(AMenu: Menus.TPopupMenu; AList: TStringLis
   AOnItem, AOnIDE: TNotifyEvent; const AIDECaption, AIDEListCaption: string; 
   AOldAction: TBasicAction; AOldMenu: Menus.TPopupMenu);
 var
-  i: Integer;
+  I: Integer;
   Item: TMenuItem;
+{$IFDEF COMPILER7_UP}
+  MaxItems: Integer;
+  ScreenRect: TRect;
+  ScreenHeight: Integer;
+{$ENDIF}
 begin
   AMenu.Items.Clear;
 
@@ -392,22 +398,30 @@ begin
   begin
     AddMenuItem(AMenu.Items, AIDECaption, AOnIDE);
     Item := AddMenuItem(AMenu.Items, AIDEListCaption, nil);
-    for i := 0 to AOldMenu.Items.Count - 1 do
-      with AOldMenu.Items[i] do
+    for I := 0 to AOldMenu.Items.Count - 1 do
+      with AOldMenu.Items[I] do
       begin
         AddMenuItem(Item, Caption, OnIDEListClick, nil, ShortCut, Hint,
-          Integer(AOldMenu.Items[i]));
+          Integer(AOldMenu.Items[I]));
       end;
     AddSepMenuItem(AMenu.Items);
   end;
 
-  for i := AList.Count - 1 downto 0 do
-    AddMenuItem(AMenu.Items, Format('%s %d', [AList[i],
-      Integer(AList.Objects[i])]), AOnItem, nil, 0, '', i);
+  for I := AList.Count - 1 downto 0 do
+    AddMenuItem(AMenu.Items, Format('%s %d', [AList[I],
+      Integer(AList.Objects[I])]), AOnItem, nil, 0, '', I);
 
   AddSepMenuItem(AMenu.Items);
   AddMenuItem(AMenu.Items, SCnSrcEditorNavPause, OnPauseClick).Checked := FPause;
   AddMenuItem(AMenu.Items, SCnEditorEnhanceConfig, OnEnhConfig);
+
+{$IFDEF COMPILER7_UP}
+  ScreenRect := GetWorkRect(GetIdeMainForm);
+  ScreenHeight := ScreenRect.Bottom - ScreenRect.Top - 200; // 去除 IDE 主窗体高度
+  MaxItems := ScreenHeight div GetMainMenuItemHeight;
+  if MaxItems < 8 then MaxItems := 8;
+  WizActionMgr.ArrangeMenuItems(AMenu.Items, MaxItems);
+{$ENDIF}
 end;
 
 procedure TCnSrcEditorNav.BackMenuPopup(Sender: TObject);

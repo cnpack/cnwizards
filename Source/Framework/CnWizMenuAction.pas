@@ -195,7 +195,7 @@ type
     {* 根据 Action 命令名查找索引号，返回的索引号只能在 WizActions 数组对象中使用。}
     function IndexOfShortCut(AShortCut: TShortCut): Integer; 
     {* 根据快捷键键值查找索引号，返回的索引号只能在 WizActions 数组对象中使用。}
-    procedure ArrangeMenuItems(AItem: TMenuItem);
+    procedure ArrangeMenuItems(RootItem: TMenuItem; MaxItems: Integer = 0);
     {* 为过长的菜单增加分隔菜单项 }
 
     property IdeActionCount: Integer read GetIdeActionCount;
@@ -646,19 +646,19 @@ begin
   // do nothing
 end;
 
-procedure TCnWizActionMgr.ArrangeMenuItems(AItem: TMenuItem);
+procedure TCnWizActionMgr.ArrangeMenuItems(RootItem: TMenuItem;
+  MaxItems: Integer);
 {$IFDEF COMPILER7_UP}
   function NewMoreItem: TMenuItem;
   begin
-    Result := TMenuItem.Create(AItem);
+    Result := TMenuItem.Create(RootItem);
     Result.Action := MoreAction;
   end;
 
 var
-  i: Integer;
+  I: Integer;
   ScreenRect: TRect;
   ScreenHeight: Integer;
-  MaxMenuItems: Integer;
   MoreMenuItem: TMenuItem;
   ParentItem: TMenuItem;
   Item: TMenuItem;
@@ -667,29 +667,36 @@ var
 {$ENDIF}
 begin
 {$IFDEF COMPILER7_UP}
-{$IFDEF Debug}
-  CnDebugger.LogMsg('ArrangeMenuItems');
-{$ENDIF Debug}
-  ScreenRect := GetWorkRect(GetIdeMainForm);
-  ScreenHeight := ScreenRect.Bottom - ScreenRect.Top - 75;
-  MaxMenuItems := ScreenHeight div GetMainMenuItemHeight;
-  if MaxMenuItems < 8 then MaxMenuItems := 8;
+  if MaxItems < 8 then
+  begin
+    ScreenRect := GetWorkRect(GetIdeMainForm);
+    ScreenHeight := ScreenRect.Bottom - ScreenRect.Top - 75;
+    MaxItems := ScreenHeight div GetMainMenuItemHeight;
+    if MaxItems < 8 then MaxItems := 8;
+  end;
 
-  SetLength(MenuItems, AItem.Count);
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('CnWizActionMgr.ArrangeMenuItems with Max ' + IntToStr(MaxItems));
+{$ENDIF}
+
+  SetLength(MenuItems, RootItem.Count);
   try
-    for i := AItem.Count - 1 downto 0 do
-      MenuItems[i] := AItem.Items[i];
+    for I := RootItem.Count - 1 downto 0 do
+      MenuItems[I] := RootItem.Items[I];
 
-    ParentItem := AItem;
+    ParentItem := RootItem;
     CurrentIndex := 0;
 
-    for i := 0 to Length(MenuItems) - 1 do
+    for I := 0 to Length(MenuItems) - 1 do
     begin
-      Item := MenuItems[i];
-      if (CurrentIndex = MaxMenuItems - 1) and (i < (Length(MenuItems) - 1)) then
+      Item := MenuItems[I];
+      if (CurrentIndex = MaxItems - 1) and (I < (Length(MenuItems) - 1)) then
       begin
         MoreMenuItem := NewMoreItem;
         ParentItem.Add(MoreMenuItem);
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('CnWizActionMgr.ArrangeMenuItems. Add MoreItem at ' + IntToStr(CurrentIndex));
+{$ENDIF}
         ParentItem := MoreMenuItem;
         CurrentIndex := 0;
       end;
