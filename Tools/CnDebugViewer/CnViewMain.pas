@@ -255,6 +255,7 @@ type
     procedure LanguageClick(Sender: TObject);
     procedure LanguageChanged(Sender: TObject);
     procedure ActiveFormChanged(Sender: TObject);
+    procedure SwitchTabHint(Sender: TObject; Index: Integer; var HintStr: string);
     procedure OnUpdateStore(var Msg: TMessage); message WM_USER_UPDATE_STORE;
     procedure OnNewChildForm(var Msg: TMessage); message WM_USER_NEW_FORM;
     procedure OnHotKey(var Message: TMessage); message WM_HOTKEY;
@@ -318,7 +319,7 @@ begin
             if (AForm as TCnMsgChild).ProcName = '' then
               SwitchName := SCnNoneProcName
             else
-              SwitchName := (AForm as TCnMsgChild).ProcName;
+              SwitchName := ExtractFileName((AForm as TCnMsgChild).ProcName);
 
             if (AForm as TCnMsgChild).ProcessID <> 0 then
               tsSwitch.Tabs.AddObject(' ' + SwitchName + ' $' +
@@ -334,7 +335,7 @@ begin
             if (AForm as TCnMsgChild).ProcName = '' then
               SwitchName := SCnNoneProcName
             else
-              SwitchName := (AForm as TCnMsgChild).ProcName;
+              SwitchName := ExtractFileName((AForm as TCnMsgChild).ProcName);
 
             if (AForm as TCnMsgChild).ProcessID <> CnInvalidFileProcId then
               ProcIdStr := IntToHex((AForm as TCnMsgChild).ProcessID, 2)
@@ -404,6 +405,9 @@ begin
   if SysDebugExists then
     statMain.Panels[3].Text := SCnDebuggerExists;
 
+  tsSwitch.ShowTabHint := True;
+  tsSwitch.OnTabHint := SwitchTabHint;
+
   // 创建托盘栏图标
   tryIcon.Hint := Caption;
   tryicon.Active := CnViewerOptions.ShowTrayIcon;
@@ -426,7 +430,7 @@ begin
       2: PostMessage(Self.Handle, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
     end;
   end
-  else//默认位置及大小
+  else // 默认位置及大小
   begin
     Left := 0; Width := Screen.Width;
     Top := 0; Height := Screen.Height - 25;
@@ -1291,6 +1295,15 @@ begin
     Caption := Caption + '- (Global)' // 显示为全局模式
   else
     Caption := Caption + '- (Local)'; // 显示为本地模式
+end;
+
+procedure TCnMainViewer.SwitchTabHint(Sender: TObject; Index: Integer;
+  var HintStr: string);
+begin
+  if tsSwitch.Tabs.Objects[Index] <> nil then
+  begin
+    HintStr := TCnMsgChild(tsSwitch.Tabs.Objects[Index]).ProcName;
+  end;
 end;
 
 end.

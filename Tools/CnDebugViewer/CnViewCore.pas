@@ -39,7 +39,7 @@ unit CnViewCore;
 interface
 
 uses
-  SysUtils, Classes, Windows, Forms, Graphics, TLHelp32,
+  SysUtils, Classes, Windows, Forms, Graphics, TLHelp32, PsAPI,
   OmniXML, OmniXMLPersistent, CnLangMgr, CnIniStrUtils, CnDebugIntf;
 
 const
@@ -548,24 +548,37 @@ end;
 
 function GetProcNameFromProcessID(ProcessID: DWORD): string;
 var
-  HSnap: THandle;
+  HSnap, Hp: THandle;
   Pe: TProcessEntry32;
   Next: BOOL;
+  HM: HModule;
+  N: DWORD;
+  ModName: array[0..MAX_PATH - 1] of Char;
 begin
   Result := '';
-  HSnap := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-  Pe.dwSize := SizeOf(Pe);
-  Next := Process32First(HSnap, Pe);
-  while (Next) do
+  Hp := OpenProcess(PROCESS_QUERY_INFORMATION or PROCESS_VM_READ, False, ProcessID);
+  if Hp <> 0 then
   begin
-    if Pe.th32ProcessID = ProcessID then
+    ENumProcessModules(Hp, @HM, Sizeof(HM), N);
+    if GetModuleFileNameEx(Hp, HM, ModName, Sizeof(ModName)) > 0 then
+      Result := ModName;
+  end
+  else
+  begin
+    HSnap := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    Pe.dwSize := SizeOf(Pe);
+    Next := Process32First(HSnap, Pe);
+    while (Next) do
     begin
-      Result := Pe.szExeFile;
-      Break;
+      if Pe.th32ProcessID = ProcessID then
+      begin
+        Result := Pe.szExeFile;
+        Break;
+      end;
+      Next := Process32Next(HSnap, Pe);
     end;
-    Next := Process32Next(HSnap, Pe);
+    CloseHandle(HSnap);
   end;
-  CloseHandle(HSnap);
 end;
 
 procedure LoadOptions(const FileName: string);
