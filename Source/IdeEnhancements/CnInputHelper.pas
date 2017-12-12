@@ -192,9 +192,8 @@ type
     IconMenuItem: TMenuItem;
     FHitCountMgr: TCnSymbolHitCountMgr;
     FSymbolListMgr: TSymbolListMgr;
-    FirstSet: TAnsiCharSet;
-    CharSet: TAnsiCharSet;
-
+    FirstSet: TAnsiCharSet;  // 所有 Symbol 的起始字符的合法 CharSet 的并集
+    CharSet: TAnsiCharSet;   // 所有 Symbol 的合法 CharSet 的并集
     FAutoPopup: Boolean;
     FToken: string;
     FMatchStr: string;     // 当前拿来匹配的 Pattern，从编辑器光标下获取而来
@@ -294,8 +293,8 @@ type
     function IsValidDotKey(Key: Word): Boolean;
     function IsValidCppPopupKey(VKey: Word; Code: Word): Boolean;
     function IsValidKeyQueue: Boolean;
-    function CalcFirstSet(IsPascal: Boolean): TAnsiCharSet;
-    function CalcCharSet(PosInfo: PCodePosInfo): TAnsiCharSet;
+    function CalcFirstSet(Orig: TAnsiCharSet; IsPascal: Boolean): TAnsiCharSet;
+    function CalcCharSet(Orig: TAnsiCharSet; PosInfo: PCodePosInfo): TAnsiCharSet;
     procedure AutoCompFunc(Sender: TObject);
     function GetListFont: TFont;
     procedure ConfigChanged;
@@ -1378,7 +1377,7 @@ function TCnInputHelper.IsValidSymbolChar(C: Char;
   First: Boolean): Boolean;
 begin
   if First then  // C/C++ 需要编译指令也算标识符
-    Result := CharInSet(C, CalcFirstSet(FPosInfo.IsPascal))
+    Result := CharInSet(C, CalcFirstSet(FirstSet, FPosInfo.IsPascal))
   else
     Result := CharInSet(C, CharSet);
 end;
@@ -1734,7 +1733,7 @@ begin
     if (Key = VK_LEFT) or (Key = VK_RIGHT) then
     begin
       // 如果方向键导致光标下的标识符改变，则隐藏
-      CnOtaGetCurrPosToken(NewToken, CurrPos, True, CalcFirstSet(FPosInfo.IsPascal), CharSet);
+      CnOtaGetCurrPosToken(NewToken, CurrPos, True, CalcFirstSet(FirstSet, FPosInfo.IsPascal), CharSet);
       if not SameText(NewToken, FToken) then
       begin
         HideAndClearList;
@@ -1935,8 +1934,8 @@ begin
   if AcceptDisplay and GetCaretPosition(Pt) then
   begin
     // 取得当前标识符及光标左边的部分，C/C++情况下，允许编译指令的#也作为标识符开头
-    CnOtaGetCurrPosToken(FToken, CurrPos, True, CalcFirstSet(FPosInfo.IsPascal),
-      CalcCharSet(@FPosInfo));
+    CnOtaGetCurrPosToken(FToken, CurrPos, True, CalcFirstSet(FirstSet, FPosInfo.IsPascal),
+      CalcCharSet(CharSet, @FPosInfo));
     FMatchStr := Copy(FToken, 1, CurrPos);
 {$IFDEF DEBUG}
     CnDebugger.TraceFmt('Token %s, Match %s', [FToken, FMatchStr]);
@@ -2002,7 +2001,7 @@ begin
             ShowIDECodeCompletion
           else
           begin
-            CnOtaGetCurrPosToken(AToken, CurrPos, True, CalcFirstSet(FPosInfo.IsPascal), CharSet);
+            CnOtaGetCurrPosToken(AToken, CurrPos, True, CalcFirstSet(FirstSet, FPosInfo.IsPascal), CharSet);
             if (AToken <> '') and (CurrPos > 0) and  not (AToken[CurrPos] in ['+', '-', '*', '/']) then
               ShowIDECodeCompletion;
           end;
@@ -2533,8 +2532,8 @@ var
   AToken: string;
 {$ENDIF}
 begin
-  if CnOtaGetCurrPosToken(FToken, CurrPos, True, CalcFirstSet(FPosInfo.IsPascal),
-    CalcCharSet(@FPosInfo)) or ForcePopup
+  if CnOtaGetCurrPosToken(FToken, CurrPos, True, CalcFirstSet(FirstSet, FPosInfo.IsPascal),
+    CalcCharSet(CharSet, @FPosInfo)) or ForcePopup
     or ParsePosInfo and (FPosInfo.PosKind in [pkFieldDot, pkField]) then
   begin
   {$IFDEF DEBUG}
@@ -2574,7 +2573,7 @@ begin
           ShowIDECodeCompletion
         else
         begin
-          CnOtaGetCurrPosToken(AToken, CurrPos, True, CalcFirstSet(FPosInfo.IsPascal), CharSet);
+          CnOtaGetCurrPosToken(AToken, CurrPos, True, CalcFirstSet(FirstSet, FPosInfo.IsPascal), CharSet);
           if (AToken <> '') and (CurrPos > 0) and  not (AToken[CurrPos] in ['+', '-', '*', '/']) then
             ShowIDECodeCompletion;
         end;
@@ -2659,7 +2658,7 @@ begin
         if (View <> nil) and (Item.CodeTemplateIndex < CTS.CodeObjectCount) then
         begin
           // 模板输入时必然要求替换之前曾经输入过的匹配内容
-          CnOtaDeleteCurrTokenLeft(CalcFirstSet(FPosInfo.IsPascal), CalcCharSet(@FPosInfo));
+          CnOtaDeleteCurrTokenLeft(CalcFirstSet(FirstSet, FPosInfo.IsPascal), CalcCharSet(CharSet, @FPosInfo));
           CTS.InsertCode(Item.CodeTemplateIndex, View, False);
         end;
 
@@ -2699,12 +2698,25 @@ begin
         end;
       end;
 
-      if DelLeft then
-        CnOtaDeleteCurrTokenLeft(CalcFirstSet(FPosInfo.IsPascal), CalcCharSet(@FPosInfo))
+      // 当输入是普通标识符时，不能根据并集的 CharSet 来删除已有内容，
+      // 否则会多删除某些特殊标识符如编译指令等声称的合法字符如加号等，
+      // 现在只能根据类型写死为字母数字下划线等（已处理了C/C++包括#、单元名带点的情形）
+      if Item.Kind in [skConstant..skClass] then
+      begin
+        if DelLeft then
+          CnOtaDeleteCurrTokenLeft(CalcFirstSet(Alpha, FPosInfo.IsPascal), CalcCharSet(AlphaNumeric, @FPosInfo))
+        else
+          CnOtaDeleteCurrToken(CalcFirstSet(Alpha, FPosInfo.IsPascal), CalcCharSet(AlphaNumeric, @FPosInfo));
+      end
       else
-        CnOtaDeleteCurrToken(CalcFirstSet(FPosInfo.IsPascal), CalcCharSet(@FPosInfo));
+      begin
+        if DelLeft then
+          CnOtaDeleteCurrTokenLeft(CalcFirstSet(FirstSet, FPosInfo.IsPascal), CalcCharSet(CharSet, @FPosInfo))
+        else
+          CnOtaDeleteCurrToken(CalcFirstSet(FirstSet, FPosInfo.IsPascal), CalcCharSet(CharSet, @FPosInfo));
+      end;
 
-      // DONE: 如果是Pascal编译指令并且光标后有个}则要把}删掉
+      // 如果是Pascal编译指令并且光标后有个}则要把}删掉
       // 不能简单地在上面的Charset中加}，因为还会有其他判断
       if FPosInfo.IsPascal and (Item.Kind = skCompDirect) then
       begin
@@ -3289,12 +3301,12 @@ begin
 {$ENDIF}
 end;
 
-function TCnInputHelper.CalcFirstSet(IsPascal: Boolean): TAnsiCharSet;
+function TCnInputHelper.CalcFirstSet(Orig: TAnsiCharSet; IsPascal: Boolean): TAnsiCharSet;
 begin
   if IsPascal then
-    Result := FirstSet
+    Result := Orig
   else
-    Result := FirstSet + ['#']; // C/C++的标识符需要把#也算上
+    Result := Orig + ['#']; // C/C++的标识符需要把#也算上
 end;
 
 function TCnInputHelper.IsValidCppPopupKey(VKey: Word; Code: Word): Boolean;
@@ -3314,7 +3326,7 @@ begin
     if C = '>' then
     begin
       // 是>，if 光标下的前一个标识符的最后一位是-
-      CnOtaGetCurrPosToken(AToken, CurrPos, True, CalcFirstSet(FPosInfo.IsPascal), CharSet);
+      CnOtaGetCurrPosToken(AToken, CurrPos, True, CalcFirstSet(FirstSet, FPosInfo.IsPascal), CharSet);
 {$IFDEF DEBUG}
       CnDebugger.LogMsg('Is Valid Cpp Popup Key: Token: ' + AToken);
 {$ENDIF}
@@ -3349,14 +3361,14 @@ begin
   end;
 end;
 
-function TCnInputHelper.CalcCharSet(PosInfo: PCodePosInfo): TAnsiCharSet;
+function TCnInputHelper.CalcCharSet(Orig: TAnsiCharSet; PosInfo: PCodePosInfo): TAnsiCharSet;
 begin
-  Result := CharSet;
+  Result := Orig;
 {$IFDEF SUPPORT_UNITNAME_DOT}
   // 支持点号的引用里头，允许点号是标识符的一部分
   if PosInfo^.IsPascal and (PosInfo^.AreaKind in [akIntfUses, akImplUses]) and
     (PosInfo^.PosKind in [pkIntfUses, pkImplUses]) then
-    Result := CharSet + ['.'];
+    Result := Orig + ['.'];
 {$ENDIF}
 end;
 

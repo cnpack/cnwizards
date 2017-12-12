@@ -4546,7 +4546,15 @@ begin
   if Token <> '' then
   begin
     if CharInSet(Token[1], FirstSet) or _IsValidIdent(Token, SupportUnicodeIdent) then
-      Result := True;
+      Result := True
+    else
+    begin
+      // 如果又不是合法标识符，首字符也不对，那么删掉首字符试一试
+      Delete(Token, 1, 1);
+      if Token <> '' then
+        if CharInSet(Token[1], FirstSet) or _IsValidIdent(Token, SupportUnicodeIdent) then
+          Result := True
+    end;
   end;
 
   if not Result then
