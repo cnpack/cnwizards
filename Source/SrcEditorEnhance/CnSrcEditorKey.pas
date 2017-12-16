@@ -564,6 +564,25 @@ var
           Break;
   end;
 
+  function GetLastTokenFromLine(const ALine: string): string;
+  var
+    Idx, J: Integer;
+    Str: string;
+  begin
+    Idx := 0;
+    Str := Trim(ALine);
+    for J := Length(Str) downto 1 do
+    begin
+      if not IsValidIdentChar(Str[J]) and (not IsCppFile or (Str[J] <> '{')) then // C/C++ 文件上一行要判断大括号
+      begin
+        Idx := J;
+        Break;
+      end;
+    end;
+
+    Result := Copy(Str, Idx + 1, MaxInt);
+  end;
+
 begin
   Result := False;
   if View.Block.IsValid then  // 有选择区则不处理，交给 IDE 处理
@@ -599,14 +618,22 @@ begin
 
     // 剪贴板文本先判断是否其他行的行首空格数比首行少，如果少则不处理。
     // 另外除首行外其他行的空格在都比首行多的情况下，找出最少的，也都删
-    FirstLineSpaceCount := GetHeadSpaceCount(List[0]);
+
+    FirstLineSpaceCount := 0;
     MinLineSpaceCount := MaxInt;
     FirstLine := '';
 
     IsSingleLine := List.Count = 1;
     if List.Count > 1 then
     begin
-      FirstLine := Trim(List[0]);
+      // 找出第一非空行作为首行并计算其头部空格数
+      if FirstLine = '' then
+      begin
+        FirstLine := List[I];
+        if FirstLine <> '' then
+          FirstLineSpaceCount := GetHeadSpaceCount(FirstLine);
+      end;
+
       for I := 1 to List.Count - 1 do
       begin
         if Trim(List[I]) = '' then // 空行不参与行首空格计算
@@ -626,7 +653,47 @@ begin
       end;
     end;
 
-    // 如果多，则每行都删去前首行空格数个空格
+    // 以上逻辑将首行与其他行分开删头部空格，用于处理选择时首行未完整选择的情况
+    // 目的是将首行头部全删，其余的按其余的最少空格删头部，但带来的副作用就是
+    // var
+    //   I: Integer; 这种会将 I 的缩进错误地去掉，所以加个逻辑：
+    // 首行尾是该缩进标识符时（var/then/do）等，包括是编译指令的时候
+    // 且其他行要缩进的字符已经计算出来的是大于等于IDE缩进时，将 MinLineSpaceCount 减掉一次缩进
+    Indent := CnOtaGetBlockIndent;
+    if FirstLine <> '' then
+    begin
+      Text := GetLastTokenFromLine(FirstLine);
+      if MinLineSpaceCount >= Indent then
+      begin
+        if IsCppFile and (Text = '{') then
+        begin
+          Dec(MinLineSpaceCount, Indent);  // Cpp 的大括号后有缩进
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('SmartPaste: Clipboard Content Contains Indent for {');
+{$ENDIF}
+        end
+        else if FAutoIndentList.IndexOf(Text) >= 0 then
+        begin
+          Dec(MinLineSpaceCount, Indent);  // Delphi 部分关键字后有缩进
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('SmartPaste: Clipboard Content Contains Indent for some Pascal Keywords.');
+{$ENDIF}
+        end
+        else if not IsCppFile and (Length(FirstLine) > 3) then
+        begin
+          if (FirstLine[1] = '{') and (FirstLine[2] = '$')
+            and (FirstLine[Length(FirstLine)] = '}') then
+          begin
+            Dec(MinLineSpaceCount, Indent); // Delphi 编译指令后有缩进
+{$IFDEF DEBUG}
+            CnDebugger.LogMsg('SmartPaste: Clipboard Content Contains Indent for Compiler Directives.');
+{$ENDIF}
+          end;
+        end;
+      end;
+    end;
+
+    // 如果非首行内容们的最小行首空格比行首空格多，则每行左边都删去"首行空格数"个空格
     for I := 0 to List.Count - 1 do
     begin
       Tmp := List[I];
@@ -638,15 +705,15 @@ begin
     end;
 
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('Clipboard Delete %d Spaces in 1st Every Line and %d Spaces in Other Lines.',
+    CnDebugger.LogFmt('SmartPaste: Clipboard Delete %d Spaces in 1st Every Line and %d Spaces in Other Lines.',
       [FirstLineSpaceCount, MinLineSpaceCount]);
 {$ENDIF}
 
-    Indent := CnOtaGetBlockIndent;
+
     PasteCol := View.CursorPos.Col - 1;
 
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('Indent %d. Origin Col (0 Based) %d.', [Indent, PasteCol]);
+    CnDebugger.LogFmt('SmartPaste: Indent %d. Origin Col (0 Based) %d.', [Indent, PasteCol]);
 {$ENDIF}
 
     // 判断当前空行的上一行是啥，是否会影响本次缩进
@@ -658,28 +725,16 @@ begin
       if Trim(Prev) <> '' then
       begin
         PasteCol := GetHeadSpaceCount(Prev);  // 粘贴的起始列默认和上一行的非空字符对齐
-
-        Prev := Trim(Prev);
-        Idx := 0;
-        for I := Length(Prev) downto 1 do
-        begin
-          if not IsValidIdentChar(Prev[I]) and (not IsCppFile or (Prev[I] <> '{')) then // C/C++ 文件上一行要判断大括号
-          begin
-            Idx := I;
-            Break;
-          end;
-        end;
-
-        Text := Copy(Prev, Idx + 1, MaxInt);
+        Text := GetLastTokenFromLine(Prev);
 
 {$IFDEF DEBUG}
-        CnDebugger.LogFmt('ProcessSmartPaste. Previous Line is %s with Space %d.', [Text, PasteCol]);
+        CnDebugger.LogFmt('SmartPaste: Previous Line is %s with Space %d.', [Text, PasteCol]);
 {$ENDIF}
 
         if IsCppFile then
         begin
           // C/C++ 文件中，private 等无需缩进，其余在 { 下一行需要缩进
-          if (Text = '{') and not FirstLineInCppNoIndentList(FirstLine) then
+          if (Text = '{') and not FirstLineInCppNoIndentList(Trim(FirstLine)) then
             Inc(PasteCol, Indent);
         end
         else if FAutoIndentList.IndexOf(Text) >= 0 then // Pascal 文件如果属于自动缩进列表则再进一层
@@ -699,7 +754,7 @@ begin
     end;
 
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('ProcessSmartPaste. To Add %d Spaces to Every Line.', [PasteCol]);
+    CnDebugger.LogFmt('SmartPaste: To Add %d Spaces to Every Line.', [PasteCol]);
 {$ENDIF}
 
     // 将每行都增加缩进空格

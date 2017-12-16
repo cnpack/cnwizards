@@ -226,6 +226,7 @@ const
   SCnSrcEditorDesignToolBar = 'CnSrcEditorDesignToolBar';
 
   csToolBar = 'ToolBar';
+  csButton = 'Button';
   csShowToolBar = 'ShowToolBar';
   csShowDesignToolBar = 'ShowDesignToolBar';
   csWrapable = 'Wrapable';
