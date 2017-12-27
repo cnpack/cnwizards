@@ -52,9 +52,9 @@ type
   ICnWizCmdNotifier = interface
     ['{E14E47D9-2D3A-4F5B-A036-400CB43C30E3}']
 
-    procedure AddCmdNotifier(CmdNotifier: TCnWizCmdNotifyEvent; IDESet: TCnCompilers = [];
-      const MyID: AnsiString = ''; const Command: Cardinal = 0);
-    {* 增加一通知器，可声明通知的附件条件}
+    procedure AddCmdNotifier(CmdNotifier: TCnWizCmdNotifyEvent; const MyID: AnsiString = '';
+      AllowCommand: Cardinal = 0; AllowIDESet: TCnCompilers = []);
+    {* 增加一通知器，可声明通知的附件条件，包括自身 ID，只接受的命令号，只接受的 IDE 版本}
     procedure RemoveCmdNotifier(CmdNotifier: TCnWizCmdNotifyEvent);
     {* 移除一通知器}
 
@@ -100,17 +100,13 @@ type
     {* 销毁此隐藏窗口}
 
     function Notify(Obj: TCnWizCmdObj; Cmd: PCnWizMessage; From: HWND): Boolean;
-
-  protected
-    function _AddRef: Integer; stdcall;
-    function _Release: Integer; stdcall;
   public
     constructor Create;
     destructor Destroy; override;
 
     // ICnWizCmdNotifier
-    procedure AddCmdNotifier(CmdNotifier: TCnWizCmdNotifyEvent; IDESets: TCnCompilers = [];
-      const MyID: AnsiString = ''; const Command: Cardinal = 0);
+    procedure AddCmdNotifier(CmdNotifier: TCnWizCmdNotifyEvent; const MyID: AnsiString = '';
+      AllowCommand: Cardinal = 0; AllowIDESet: TCnCompilers = []);
     {* 增加一通知器，可声明通知的附件条件}
     procedure RemoveCmdNotifier(CmdNotifier: TCnWizCmdNotifyEvent);
     {* 移除一通知器}
@@ -129,7 +125,7 @@ function CnWizCmdNotifier: ICnWizCmdNotifier;
 implementation
 
 uses
-  Consts;
+  Consts {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 var
   FCnWizCmdNotifier: ICnWizCmdNotifier = nil;
@@ -156,9 +152,8 @@ end;
 
 { TCnWizCmdNotifier }
 
-procedure TCnWizCmdNotifier.AddCmdNotifier(
-  CmdNotifier: TCnWizCmdNotifyEvent; IDESets: TCnCompilers;
-  const MyID: AnsiString; const Command: Cardinal);
+procedure TCnWizCmdNotifier.AddCmdNotifier(CmdNotifier: TCnWizCmdNotifyEvent;
+  const MyID: AnsiString; AllowCommand: Cardinal; AllowIDESet: TCnCompilers);
 var
   Obj: TCnWizCmdObj;
 begin
@@ -166,8 +161,8 @@ begin
     Exit;
 
   Obj := TCnWizCmdObj.Create;
-  Obj.Command := Command;
-  Obj.IDESets := IDESets;
+  Obj.Command := AllowCommand;
+  Obj.IDESets := AllowIDESet;
   Obj.ID := MyID;
   Obj.Method := CmdNotifier;
 
@@ -183,6 +178,9 @@ begin
     WM_COPYDATA:
       begin
         FCurrentCmd := TWmCopyData(Message).CopyDataStruct^.lpData;
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('WizCmdNotifier: Got Broadcast Message. Send to %d Clients.', [FClients.Count]);
+{$ENDIF}
         for I := 0 to FClients.Count - 1 do
         begin
           Message.Result := Integer(Notify(TCnWizCmdObj(FClients[I]),
@@ -221,11 +219,19 @@ begin
     0, 0, 0, 0, HInstance, nil);
 
   SetWindowLong(FHandle, GWL_WNDPROC, Longint(FObjectInstance));
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('WizCmdNotifier: Create Window %8.8x', [FHandle]);
+{$ENDIF}
 end;
 
 destructor TCnWizCmdNotifier.Destroy;
+var
+  I: Integer;
 begin
   DestroyCmdWindow;
+  for I := FClients.Count - 1 downto 0 do
+    TObject(FClients[I]).Free;
+
   FClients.Free;
   inherited;
 end;
@@ -265,9 +271,14 @@ begin
   if (Obj.IDESets <> []) and ((Obj.IDESets * IDESets) <> []) then
     Exit;
 
-  // 过滤目标地址
-  if (Obj.ID <> '') and (StrComp(PAnsiChar(Obj.ID), Cmd^.DestID) <> 0) then
+  // 过滤目标地址，两地址都不为空时才需要对比过滤，只要有一个为空，就表示通配
+  if (Obj.ID <> '') and (Cmd^.DestID <> '') and (StrComp(PAnsiChar(Obj.ID), Cmd^.DestID) <> 0) then
     Exit;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('WizCmdNotifier: Got Effective Notify. Cmd %d, DestID %s. IDESets %d.',
+    [Cmd^.Command, Cmd^.DestID, Cmd^.IDESets]);
+{$ENDIF}
 
   Params := TStringList.Create;
   try
@@ -280,8 +291,9 @@ begin
     end;
     Obj.Method(Cmd^.Command, Cmd^.SourceID, Cmd^.DestID, IDESets, Params);
   finally
-    Result := True;
+    Params.Free;
   end;
+  Result := True;
 end;
 
 procedure TCnWizCmdNotifier.RemoveCmdNotifier(
@@ -303,16 +315,6 @@ begin
       Exit;
     end;
   end;
-end;
-
-function TCnWizCmdNotifier._AddRef: Integer;
-begin
-  Result := 1;
-end;
-
-function TCnWizCmdNotifier._Release: Integer;
-begin
-  Result := 1;
 end;
 
 initialization

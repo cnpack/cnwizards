@@ -101,7 +101,7 @@ function CnWizReplyCommand(Command: Cardinal; DestIDESet: TCnCompilers = [];
 implementation
 
 uses
-  CnWizCmdMsg, CnWizCmdNotify;
+  CnWizCmdMsg, CnWizCmdNotify {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 // 根据传入的参数发送命令，返回是否发送成功
 function CnWizSendCommand(Command: Cardinal; DestIDESet: TCnCompilers;
@@ -112,7 +112,7 @@ var
   Cmd: PCnWizMessage;
   HWnd: Cardinal;
   S: AnsiString;
-  DataLength: Integer;
+  DataLength, Cnt: Integer;
 begin
   Result := False;
 
@@ -122,7 +122,12 @@ begin
 
   HWnd := FindWindowEx(0, 0, PChar(SCN_WIZ_CMD_WINDOW_NAME), nil);
   if HWnd = 0 then // 无目的窗口则退出
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsgError('SendCommand: No Target Found.');
+{$ENDIF}
     Exit;
+  end;
 
   // 无参数则置为空
   if Params <> nil then
@@ -155,12 +160,20 @@ begin
   CopyMemory(@(Cmd^.Data[0]), @S[1], DataLength);
 
   try
+    Cnt := 0;
     while HWnd <> 0 do
     begin
+      Inc(Cnt);
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('SendCommand: Found %d Target %8.8x', [Cnt, HWnd]);
+{$ENDIF}
       if GetCurrentThreadId <> GetWindowThreadProcessId(HWnd, nil) then
       begin
         // 只发给调用者线程之外的窗口
         Result := Boolean(SendMessage(HWnd, WM_COPYDATA, 0, LPARAM(@Cds)));
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('SendCommand: %d Target %8.8x Sent. Result: %d', [Cnt, HWnd, Integer(Result)]);
+{$ENDIF}
       end;
       HWnd := FindWindowEx(0, HWnd, PChar(SCN_WIZ_CMD_WINDOW_NAME), nil);
     end;

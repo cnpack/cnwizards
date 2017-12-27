@@ -51,7 +51,7 @@ procedure TCnCmdSendForm.btnRegRecvClick(Sender: TObject);
 begin
   if Tag = 0 then // 用 Tag 表示是否注册
   begin
-    CnWizCmdNotifier.AddCmdNotifier(OnCmdRecv, [], SCnCmdTestSendID);
+    CnWizCmdNotifier.AddCmdNotifier(OnCmdRecv, SCnCmdTestSendID);
     Tag := 1;
     pnlDisp.Caption := '注册通知器成功！';
   end;

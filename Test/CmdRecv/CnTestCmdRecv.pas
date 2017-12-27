@@ -30,10 +30,14 @@ uses
 
 {$R *.DFM}
 
+const
+  SCnCmdTestSendID = 'CnCmdTestSend';
+  SCnCmdTestRecvID = 'CnCmdTestRecv';
+
 procedure TCnCmdRecvForm.FormCreate(Sender: TObject);
 begin
   Application.Title := Caption;
-  CnWizCmdNotifier.AddCmdNotifier(OnCmdRecv);
+  CnWizCmdNotifier.AddCmdNotifier(OnCmdRecv, SCnCmdTestRecvID); // 声明自身 ID，只收发给此 ID 的。
 end;
 
 procedure TCnCmdRecvForm.OnCmdRecv(const Command: Cardinal; const SourceID,
