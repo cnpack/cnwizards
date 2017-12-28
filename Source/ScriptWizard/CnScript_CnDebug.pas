@@ -147,6 +147,7 @@ begin
     RegisterMethod('Procedure LogCurrentStack( const AMsg : string)');
     RegisterMethod('Procedure LogConstArray( const Arr : array of const; const AMsg : string)');
     RegisterMethod('Procedure LogClass( const AClass : TClass; const AMsg: string)');
+    RegisterMethod('Procedure LogClassByName( const AClassName : string; const AMsg: string)');
     RegisterMethod('Procedure LogInterface( const AIntf : IUnknown; const AMsg : string)');
     RegisterMethod('Procedure TraceMsg( const AMsg : string)');
     RegisterMethod('Procedure TraceMsgWithTag( const AMsg : string; const ATag : string)');
@@ -195,6 +196,7 @@ begin
     RegisterMethod('Procedure TraceCurrentStack( const AMsg : string)');
     RegisterMethod('Procedure TraceConstArray( const Arr : array of const; const AMsg : string)');
     RegisterMethod('Procedure TraceClass( const AClass : TClass; const AMsg: string)');
+    RegisterMethod('Procedure TraceClassByName( const AClassName : string; const AMsg: string)');
     RegisterMethod('Procedure TraceInterface( const AIntf : IUnknown; const AMsg : string)');
     RegisterMethod('Procedure EvaluateObject( AObject : TObject)');
     RegisterMethod('Procedure EvaluateControlUnderPos( const ScreenPos : TPoint)');
@@ -479,6 +481,7 @@ begin
     RegisterMethod(@TCnDebugger.LogCurrentStack, 'LogCurrentStack');
     RegisterMethod(@TCnDebugger.LogConstArray, 'LogConstArray');
     RegisterMethod(@TCnDebugger.LogClass, 'LogClass');
+    RegisterMethod(@TCnDebugger.LogClassByName, 'LogClassByName');
     RegisterMethod(@TCnDebugger.LogInterface, 'LogInterface');
     RegisterMethod(@TCnDebugger.TraceMsg, 'TraceMsg');
     RegisterMethod(@TCnDebugger.TraceMsgWithTag, 'TraceMsgWithTag');
@@ -527,6 +530,7 @@ begin
     RegisterMethod(@TCnDebugger.TraceCurrentStack, 'TraceCurrentStack');
     RegisterMethod(@TCnDebugger.TraceConstArray, 'TraceConstArray');
     RegisterMethod(@TCnDebugger.TraceClass, 'TraceClass');
+    RegisterMethod(@TCnDebugger.TraceClassByName, 'TraceClassByName');
     RegisterMethod(@TCnDebugger.TraceInterface, 'TraceInterface');
     RegisterMethod(@TCnDebuggerEvaluateObject_P, 'EvaluateObject');
     RegisterMethod(@TCnDebuggerEvaluateControlUnderPos_P, 'EvaluateControlUnderPos');
