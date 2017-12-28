@@ -1547,7 +1547,6 @@ begin
 end;
 
 
-
 procedure TCnAlignSizeWizard.RequestLockControlsMenuUpdate(Sender: TObject);
 begin
 {$IFDEF IDE_ACTION_UPDATE_DELAY}
@@ -1595,6 +1594,7 @@ end;
 procedure TCnAlignSizeWizard.LaterLoaded;
 begin
   inherited;
+  CnWizNotifierServices.ExecuteOnApplicationIdle(CheckMenuItemReady); // 如果开始没找到，这儿再找一次
 {$IFDEF IDE_ACTION_UPDATE_DELAY}
   CnWizNotifierServices.ExecuteOnApplicationIdle(CheckMenuBarReady);
 {$ENDIF}
