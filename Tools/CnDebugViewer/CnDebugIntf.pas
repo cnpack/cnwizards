@@ -64,7 +64,8 @@ type
   // 输出的信息类型
   TCnMsgType = (cmtInformation, cmtWarning, cmtError, cmtSeparator, cmtEnterProc,
     cmtLeaveProc, cmtTimeMarkStart, cmtTimeMarkStop, cmtMemoryDump, cmtException,
-    cmtObject, cmtComponent, cmtCustom, cmtSystem, cmtUDPMsg);
+    cmtObject, cmtComponent, cmtCustom, cmtSystem, cmtUDPMsg, cmtWatch,
+    cmtClearWatch);
   TCnMsgTypes = set of TCnMsgType;
 
   // 时间戳格式类型

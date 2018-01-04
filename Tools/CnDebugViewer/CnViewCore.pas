@@ -214,6 +214,8 @@ var
   SCnMsgTypeCustom:        string = 'Custom';
   SCnMsgTypeSystem:        string = 'System';
   SCnMsgTypeUDPMsg:        string = 'UDPMsg';
+  SCnMsgTypeWatch:         string = 'Watch';
+  SCnMsgTypeClearWatch:    string = 'ClearWatch';
 
   SCnMsgTypeEnterLeaveProc:     string = 'Enter/Leave';
 
@@ -320,7 +322,8 @@ const
     @SCnMsgTypeSeparator, @SCnMsgTypeEnterProc, @SCnMsgTypeLeaveProc,
     @SCnMsgTypeTimeMarkStart, @SCnMsgTypeTimeMarkStop, @SCnMsgTypeMemoryDump,
     @SCnMsgTypeException, @SCnMsgTypeObject, @SCnMsgTypeComponent,
-    @SCnMsgTypeCustom, @SCnMsgTypeSystem, @SCnMsgTypeUDPMsg);
+    @SCnMsgTypeCustom, @SCnMsgTypeSystem, @SCnMsgTypeUDPMsg, @SCnMsgTypeWatch,
+    @SCnMsgTypeClearWatch);
 
   SCnHotKeyId = 1;
   
