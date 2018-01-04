@@ -64,7 +64,8 @@ type
     FTrampoline: Pointer;
     FSaveData: TLongJump;
   public
-    constructor Create(const AOldMethod, ANewMethod: Pointer; UseDDteoursHook: Boolean = False);
+    constructor Create(const AOldMethod, ANewMethod: Pointer; UseDDteoursHook: Boolean = False;
+      DefaultHook: Boolean = True);
     {* 构造器，参数为原方法地址和新方法地址。注意如果在专家包中使用，原方法地址
        请用 GetBplMethodAddress 转换成真实地址。构造器调用后会自动挂接传入的方法。
      |<PRE>
@@ -127,7 +128,7 @@ end;
 { TCnMethodHook }
 
 constructor TCnMethodHook.Create(const AOldMethod, ANewMethod: Pointer;
-  UseDDteoursHook: Boolean);
+  UseDDteoursHook, DefaultHook: Boolean);
 begin
   inherited Create;
 {$IFNDEF USE_DDETOURS_HOOK}
@@ -139,7 +140,9 @@ begin
   FOldMethod := AOldMethod;
   FNewMethod := ANewMethod;
   FTrampoline := nil;
-  HookMethod;
+
+  if DefaultHook then
+    HookMethod;
 end;
 
 destructor TCnMethodHook.Destroy;
