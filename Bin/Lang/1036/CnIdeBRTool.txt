@@ -83,4 +83,4 @@ SCnIDERunning=EDI est en cours d'exécution, Veuillez Quitter l'EDI et exécutez
 SCnCleaned=Historique de l'EDI Nettoyé avec Succès!
 SCnHelpOpenError=Erreur lors de l'Ouverture du fichier d'Aide!
 SCnAboutCaption=À Propos
-SCnIDEAbout=Outil de Sauvegarde/Restauration de Configuration EDI<BR><BR>Auteur:<BR>ccrun (info@ccrun.com)<BR>LiuXiao (liuxiao@cnpack.org)<BR><BR>Tous Droits Réservés 2001-2017 Équipe CnPack
+SCnIDEAbout=Outil de Sauvegarde/Restauration de Configuration EDI<BR><BR>Auteur:<BR>ccrun (info@ccrun.com)<BR>LiuXiao (liuxiao@cnpack.org)<BR><BR>Tous Droits Réservés 2001-2018 Équipe CnPack
