@@ -38,7 +38,7 @@ unit CnMsgClasses;
 interface
 
 uses
-  SysUtils, Classes, Windows, Messages, Contnrs, CnDebugIntf;
+  SysUtils, Classes, Windows, Messages, Contnrs, CnHashMap, CnDebugIntf;
 
 const
   WM_USER_UPDATE_STORE = WM_USER + $C;
@@ -105,11 +105,23 @@ type
     property PassCount: Integer read FPassCount write FPassCount;
   end;
 
+//  TCnWatchItem = class(TPersistent)
+//  private
+//    FVarName: string;
+//    FValue: string;
+//  published
+//    property VarName: string read FVarName write FVarName;
+//    property Value: string read FValue write FValue;
+//  end;
+
   TCnStoreChangeType = (ctAdd, ctModify, ctDelete, ctProcess, ctTimeChanged);
   TCnMsgStoreChangeNotify = procedure (Sender: TObject;
     Operation: TCnStoreChangeType; StartIndex, EndIndex: Integer) of object;
 
+  TCnWatchChangedEvent = procedure (Sender: TObject);
+
   TCnMsgStore = class(TPersistent)
+  {* 属于一个进程的消息集合}
   private
     FProcessID: DWORD;
     FProcName: string;
@@ -171,10 +183,14 @@ type
   end;
 
   TCnMsgManager = class(TObject)
+  {* 单实例，管理所有的消息条目}
   private
-    FStores: TObjectList;
+    FStores: TObjectList; // 按进程号存储的多个消息集合
+    FWatches: TCnStrToStrHashMap; // 不分进程存储的所有监视点
+    FOnWatchChanged: TCnWatchChangedEvent;
     function GetStore(Index: Integer): TCnMsgStore;
     function GetCount: Integer;
+    function GetWatchCount: Integer;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -184,9 +200,17 @@ type
     procedure RemoveStore(AStore: TCnMsgStore);
     function FindByProcName(AProcName: string): TCnMsgStore;
 
+    procedure PutWatch(const VarName: string; const Value: string);
+    procedure ClearWatch(const VarName: string);
+    procedure DoWatchChanged; virtual;
+
     procedure ClearStores;
     property Store[Index: Integer]: TCnMsgStore read GetStore;
     property Count: Integer read GetCount;
+    property WatchCount: Integer read GetWatchCount;
+
+    property OnWatchChanged: TCnWatchChangedEvent read FOnWatchChanged
+      write FOnWatchChanged;
   end;
 
   TCnFilterConditions = class;
@@ -738,15 +762,31 @@ begin
   FStores.Clear;
 end;
 
+procedure TCnMsgManager.ClearWatch(const VarName: string);
+begin
+  if VarName <> '' then
+  begin
+    FWatches.Delete(VarName);
+  end;
+end;
+
 constructor TCnMsgManager.Create;
 begin
   FStores := TObjectList.Create(True);
+  FWatches := TCnStrToStrHashMap.Create();
 end;
 
 destructor TCnMsgManager.Destroy;
 begin
+  FWatches.Free;
   FStores.Free;
   inherited;
+end;
+
+procedure TCnMsgManager.DoWatchChanged;
+begin
+  if Assigned(FOnWatchChanged) then
+    FOnWatchChanged(Self);
 end;
 
 function TCnMsgManager.FindByProcName(AProcName: string): TCnMsgStore;
@@ -774,6 +814,11 @@ begin
     Result := TCnMsgStore(FStores[Index]);
 end;
 
+function TCnMsgManager.GetWatchCount: Integer;
+begin
+  Result := FWatches.Size;
+end;
+
 function TCnMsgManager.IndexOf(AProcessID: DWORD): TCnMsgStore;
 var
   I: Integer;
@@ -799,6 +844,14 @@ begin
         Result := I;
         Exit;
       end;
+end;
+
+procedure TCnMsgManager.PutWatch(const VarName, Value: string);
+begin
+  if VarName <> '' then
+  begin
+    FWatches.Add(VarName, Value);
+  end;
 end;
 
 procedure TCnMsgManager.RemoveStore(AStore: TCnMsgStore);

@@ -74,7 +74,33 @@ procedure TGetDebugThread.AddADescToStore(var ADesc: TCnMsgDesc);
 var
   AStore: TCnMsgStore;
   StoreInited: Boolean;
+  VarName, VarValue: string;
+  AMsg: array [0..CnMaxMsgLength] of Char;
+  Size, SplitterIdx: Integer;
 begin
+  if ADesc.Annex.MsgType in [Ord(cmtWatch), Ord(cmtClearWatch)] then
+  begin
+    FillChar(AMsg, SizeOf(AMsg), 0);
+    Size := ADesc.Length - SizeOf(ADesc.Annex) - SizeOf(DWord);
+    CopyMemory(@AMsg, @(ADesc.Msg), Size);
+    SplitterIdx := Pos('|', AMsg);
+
+    if SplitterIdx > 1 then // VarName ²»ÄÜÎª¿Õ
+    begin
+      VarName := Copy(AMsg, 1, SplitterIdx - 1);
+      if ADesc.Annex.MsgType = Ord(cmtWatch) then
+      begin
+        VarValue := Copy(AMsg, SplitterIdx + 1, MaxInt);
+        CnMsgManager.PutWatch(VarName, VarValue);
+      end
+      else
+        CnMsgManager.ClearWatch(VarName);
+
+      CnMsgManager.DoWatchChanged;
+    end;
+    Exit;
+  end;
+
   AStore := CnMsgManager.IndexOf(ADesc.Annex.ProcessId);
   StoreInited := False;
   if AStore = nil then
