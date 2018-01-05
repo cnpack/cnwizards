@@ -38,6 +38,7 @@ uses
   CnMsgXMLFiler in 'CnMsgXMLFiler.pas',
   CnFilterFrm in 'CnFilterFrm.pas' {CnSenderFilterFrm},
   CnViewOption in 'CnViewOption.pas' {CnViewerOptionsFrm},
+  CnWatchFrm in 'CnWatchFrm.pas' {CnWatchForm},
   CnWizCfgUtils in '..\..\Source\Utils\CnWizCfgUtils.pas';
 
 {$R *.RES}
