@@ -24,13 +24,18 @@ object CnWatchForm: TCnWatchForm
     Columns = <
       item
         Caption = 'Watch'
+        Width = 100
       end
       item
         Caption = 'Value'
+        Width = 250
       end>
+    GridLines = True
+    OwnerData = True
     ReadOnly = True
     RowSelect = True
     TabOrder = 0
     ViewStyle = vsReport
+    OnData = lvWatchData
   end
 end

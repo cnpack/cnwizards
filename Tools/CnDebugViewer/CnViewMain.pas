@@ -192,6 +192,8 @@ type
     actAutoScroll: TAction;
     CnUDP: TCnUDP;
     btnClear: TToolButton;
+    actViewWatch: TAction;
+    Watch1: TMenuItem;
     procedure actNewExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure actExitExecute(Sender: TObject);
@@ -239,6 +241,7 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure CnUDPDataReceived(Sender: TComponent; Buffer: Pointer;
       Len: Integer; FromIP: String; Port: Integer);
+    procedure actViewWatchExecute(Sender: TObject);
   private
     FUpdatingSwitch: Boolean;
     FClickingSwitch: Boolean;
@@ -281,7 +284,7 @@ var
 implementation
 
 uses
-  CnCommon, CnViewCore, CnGetThread, CnFilterFrm, CnViewOption, CnWizHelp;
+  CnCommon, CnViewCore, CnGetThread, CnFilterFrm, CnViewOption, CnWizHelp, CnWatchFrm;
 
 {$R *.DFM}
 
@@ -1304,6 +1307,16 @@ begin
   begin
     HintStr := TCnMsgChild(tsSwitch.Tabs.Objects[Index]).ProcName;
   end;
+end;
+
+procedure TCnMainViewer.actViewWatchExecute(Sender: TObject);
+begin
+  if CnWatchForm = nil then
+    CnWatchForm := TCnWatchForm.Create(Application);
+
+  if not CnWatchForm.Visible then
+    CnWatchForm.Show;
+  CnWatchForm.BringToFront;
 end;
 
 end.

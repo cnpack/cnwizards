@@ -118,7 +118,10 @@ type
   TCnMsgStoreChangeNotify = procedure (Sender: TObject;
     Operation: TCnStoreChangeType; StartIndex, EndIndex: Integer) of object;
 
-  TCnWatchChangedEvent = procedure (Sender: TObject);
+  TCnWatchItemChangedEvent = procedure (Sender: TObject; const VarName: string;
+    const NewValue: string) of object;
+  TCnWatchItemClearedEvent = procedure (Sender: TObject; const VarName: string)
+    of object;
 
   TCnMsgStore = class(TPersistent)
   {* 属于一个进程的消息集合}
@@ -187,10 +190,15 @@ type
   private
     FStores: TObjectList; // 按进程号存储的多个消息集合
     FWatches: TCnStrToStrHashMap; // 不分进程存储的所有监视点
-    FOnWatchChanged: TCnWatchChangedEvent;
+    FOnWatchChanged: TNotifyEvent;
+    FOnWatchItemChanged: TCnWatchItemChangedEvent;
+    FOnWatchItemCleared: TCnWatchItemClearedEvent;
     function GetStore(Index: Integer): TCnMsgStore;
     function GetCount: Integer;
     function GetWatchCount: Integer;
+  protected
+    procedure DoWatchItemChanged(const VarName, NewValue: string); virtual;
+    procedure DoWatchItemCleared(const VarName: string); virtual;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -209,8 +217,12 @@ type
     property Count: Integer read GetCount;
     property WatchCount: Integer read GetWatchCount;
 
-    property OnWatchChanged: TCnWatchChangedEvent read FOnWatchChanged
+    property OnWatchChanged: TNotifyEvent read FOnWatchChanged
       write FOnWatchChanged;
+    property OnWatchItemChanged: TCnWatchItemChangedEvent read FOnWatchItemChanged
+      write FOnWatchItemChanged;
+    property OnWatchItemCleared: TCnWatchItemClearedEvent read FOnWatchItemCleared
+      write FOnWatchItemCleared;
   end;
 
   TCnFilterConditions = class;
@@ -767,6 +779,7 @@ begin
   if VarName <> '' then
   begin
     FWatches.Delete(VarName);
+    DoWatchItemCleared(VarName);
   end;
 end;
 
@@ -787,6 +800,19 @@ procedure TCnMsgManager.DoWatchChanged;
 begin
   if Assigned(FOnWatchChanged) then
     FOnWatchChanged(Self);
+end;
+
+procedure TCnMsgManager.DoWatchItemChanged(const VarName,
+  NewValue: string);
+begin
+  if Assigned(FOnWatchItemChanged) then
+    FOnWatchItemChanged(Self, VarName, NewValue);
+end;
+
+procedure TCnMsgManager.DoWatchItemCleared(const VarName: string);
+begin
+  if Assigned(FOnWatchItemCleared) then
+    FOnWatchItemCleared(Self, VarName);
 end;
 
 function TCnMsgManager.FindByProcName(AProcName: string): TCnMsgStore;
@@ -851,6 +877,7 @@ begin
   if VarName <> '' then
   begin
     FWatches.Add(VarName, Value);
+    DoWatchItemChanged(VarName, Value);
   end;
 end;
 

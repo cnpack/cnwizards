@@ -21,8 +21,8 @@ object CnMainViewer: TCnMainViewer
   TextHeight = 13
   object statMain: TStatusBar
     Left = 0
-    Top = 392
-    Width = 635
+    Top = 404
+    Width = 643
     Height = 19
     AutoHint = True
     Panels = <
@@ -38,12 +38,11 @@ object CnMainViewer: TCnMainViewer
       item
         Width = 50
       end>
-    SimplePanel = False
   end
   object tlbMain: TToolBar
     Left = 0
     Top = 0
-    Width = 635
+    Width = 643
     Height = 29
     BorderWidth = 1
     Caption = 'tlbMain'
@@ -226,8 +225,8 @@ object CnMainViewer: TCnMainViewer
   end
   object pnlSwitch: TPanel
     Left = 0
-    Top = 372
-    Width = 635
+    Top = 384
+    Width = 643
     Height = 20
     Align = alBottom
     BevelOuter = bvNone
@@ -235,7 +234,7 @@ object CnMainViewer: TCnMainViewer
     object tsSwitch: TCnTabSet
       Left = 0
       Top = 0
-      Width = 635
+      Width = 643
       Height = 20
       Align = alClient
       DitherBackground = False
@@ -334,6 +333,9 @@ object CnMainViewer: TCnMainViewer
       end
       object D3: TMenuItem
         Action = actViewDetail
+      end
+      object Watch1: TMenuItem
+        Action = actViewWatch
       end
       object N8: TMenuItem
         Caption = '-'
@@ -656,6 +658,11 @@ object CnMainViewer: TCnMainViewer
       Hint = 'Auto Scroll to Last Message'
       ImageIndex = 90
       OnExecute = actAutoScrollExecute
+    end
+    object actViewWatch: TAction
+      Category = 'View'
+      Caption = '&Watch'
+      OnExecute = actViewWatchExecute
     end
   end
   object pmSwitch: TPopupMenu
