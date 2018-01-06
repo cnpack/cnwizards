@@ -141,6 +141,7 @@ var
   ADesc: TCnMsgDesc;
   Front, Tail: Integer;
   Res: DWORD;
+  QueueAlreadyEmpty: Boolean;
 
   procedure CheckExit;
   var
@@ -176,14 +177,17 @@ begin
       Continue;
     end;
 
-    if PHeader^.QueueFront = PHeader^.QueueTail then
+    if not QueueAlreadyEmpty and (PHeader^.QueueFront = PHeader^.QueueTail) then
     begin
-      // 队列空，可开始更新界面
+      // 队列刚空，可开始更新界面
+      QueueAlreadyEmpty := True;
       if (Application.MainForm <> nil) and not (csDestroying in Application.MainForm.ComponentState) then
         PostMessage(Application.MainForm.Handle, WM_USER_UPDATE_STORE, 0, 0);
       Sleep(0);
       Continue;
-    end;
+    end
+    else
+      QueueAlreadyEmpty := False;
 
     Res := WaitForSingleObject(HMutex, CnWaitMutexTime);
     if (Res = WAIT_FAILED) or (Res = WAIT_TIMEOUT) then
