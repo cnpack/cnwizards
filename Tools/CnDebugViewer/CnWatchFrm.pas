@@ -34,21 +34,41 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure lvWatchData(Sender: TObject; Item: TListItem);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     FWatchList: TCnWatchList;
+    FManualClose: Boolean;
     procedure WatchItemChanged(Sender: TObject; const VarName: string;
       const NewValue: string);
     procedure WatchItemCleared(Sender: TObject; const VarName: string);
+  protected
+    procedure CreateParams(var Params: TCreateParams); override;
   public
-    { Public declarations }
+    procedure AdjustPosition;
+    property ManualClose: Boolean read FManualClose write FManualClose;
+    // 如果用户没控制过关闭，则自动显示出来
   end;
 
 var
   CnWatchForm: TCnWatchForm = nil;
 
+procedure CreateWatchForm;
+
 implementation
 
 {$R *.dfm}
+
+procedure CreateWatchForm;
+begin
+  if CnWatchForm = nil then
+  begin
+    CnWatchForm := TCnWatchForm.Create(Application);
+    CnWatchForm.AdjustPosition;
+
+    SetWindowPos(CnWatchForm.Handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE or
+      SWP_NOACTIVATE or SWP_NOSIZE or SWP_NOOWNERZORDER); // 窗体显示在最前面
+  end;
+end;
 
 { TCnWatchForm }
 
@@ -88,6 +108,7 @@ begin
       Item.RecentChanged := True;
       FWatchList.Add(Item);
     end;
+
     lvWatch.Items.Count := FWatchList.Count;
     lvWatch.Invalidate;
   end;
@@ -102,6 +123,22 @@ begin
     lvWatch.Items.Count := FWatchList.Count;
     lvWatch.Invalidate;
   end;
+end;
+
+procedure TCnWatchForm.AdjustPosition;
+var
+  WorkRect: TRect;
+begin
+  SystemParametersInfo(SPI_GETWORKAREA, 0, @WorkRect, 0);
+  Top := WorkRect.Bottom - Height;
+  Left := WorkRect.Right - Width;
+end;
+
+procedure TCnWatchForm.CreateParams(var Params: TCreateParams);
+begin
+  inherited;
+  Params.WndParent := GetDesktopWindow;
+  Params.ExStyle := Params.ExStyle or WS_EX_TOPMOST or WS_EX_TOOLWINDOW;
 end;
 
 { TCnWatchList }
@@ -170,6 +207,12 @@ begin
       Item.SubItems.Add(Watch.VarValue);
     end;
   end;
+end;
+
+procedure TCnWatchForm.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+  FManualClose := True;
 end;
 
 end.

@@ -418,7 +418,7 @@ begin
 
   CnUDP.LocalPort := CnViewerOptions.UDPPort;
 
-  //Add Sesame 2008-1-18 还原窗口位置
+  // Add Sesame 2008-1-18 还原窗口位置
   if CnViewerOptions.SaveFormPosition then
   begin
     case CnViewerOptions.WinState of
@@ -1155,7 +1155,6 @@ begin
         ErrorDlg(SCnRegisterHotKeyError);
 
       CnUDP.LocalPort := CnViewerOptions.UDPPort;
-
       if FontChanged then
       begin
         for I := 0 to Self.MDIChildCount - 1 do
@@ -1312,10 +1311,11 @@ end;
 procedure TCnMainViewer.actViewWatchExecute(Sender: TObject);
 begin
   if CnWatchForm = nil then
-    CnWatchForm := TCnWatchForm.Create(Application);
+    CreateWatchForm;
 
   if not CnWatchForm.Visible then
     CnWatchForm.Show;
+
   CnWatchForm.BringToFront;
 end;
 
