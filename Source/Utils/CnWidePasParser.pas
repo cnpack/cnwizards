@@ -56,6 +56,7 @@ type
   private
     FEditAnsiCol: Integer;
     FTag: Integer;
+    FBracketLayer: Integer;
     function GetToken: PWideChar;
   protected
     FCppTokenKind: TCTokenKind;
@@ -102,6 +103,8 @@ type
     {* 所在高亮的层次，包括过程、函数以及代码块，可直接用来绘制高亮层次，不在任何块内时（最外层）为 0 }
     property MethodLayer: Integer read FMethodLayer;
     {* 所在函数的嵌套层次，最外层的函数内为 1，包括匿名函数 }
+    property BracketLayer: Integer read FBracketLayer;
+    {* 所在的圆括号的层次，最外层的为 0。圆括号本身应该算高一层（暂未实现）}
     property Token: PWideChar read GetToken;
     {* 该 Token 的字符串内容 }
     property TokenID: TTokenKind read FTokenID;
@@ -451,7 +454,7 @@ var
   IsClassOpen, IsClassDef, IsImpl, IsHelper, IsElseIf, ExpectElse: Boolean;
   IsRecordHelper, IsSealed, IsAbstract, IsRecord, IsObjectRecord, IsForFunc: Boolean;
   SameBlockMethod, CanEndBlock, CanEndMethod: Boolean;
-  DeclareWithEndLevel: Integer;
+  DeclareWithEndLevel, CurrBracketLevel: Integer;
   PrevTokenID: TTokenKind;
   PrevTokenStr: CnWideString;
   AProcObj, PrevProcObj: TCnProcObj;
@@ -526,6 +529,7 @@ var
       if CurrBlock = nil then
         Token.FItemLayer := CurrMethod.FMethodLayer;
     end;
+    Token.FBracketLayer := CurrBracketLevel;
     FList.Add(Token);
   end;
 
@@ -570,6 +574,7 @@ begin
     CurrMethod := nil;        // 当前 Token 所在的方法 procedure/function，包括匿名函数的情形 
     CurrBlock := nil;         // 当前 Token 所在的块。
     CurrMidBlock := nil;
+    CurrBracketLevel := 0;
     IsImpl := AIsDpr;
     IsHelper := False;
     IsRecordHelper := False;
@@ -1111,6 +1116,7 @@ begin
           AIfObj := TCnIfStatement(FIfStack.Peek);
           // 碰到分号，查查它结束了谁，注意不能用 Token，因为没针对分号创建 Token
           // 分号的 ItemLayer 目前没有靠谱值，因此不能依赖 ItemLayer 和 if 的 Level 比较。
+          // 分号如果在额外的圆括号里头，说明不能作为结束用，因此加入了 CurrBracketLevel 的判断
           // FList.Count 为分号假想的 ItemIndex
           // 情况一，如果 CurrBlock 存在，且没有后于 if 的 else 且 else 无 begin，说明分号紧接 else 同级
           // 情况二，如果 CurrBlock 存在，且没有后于最后一个 else if 的 if，且无 begin，说明分号紧接最后一个 else if 同级
@@ -1118,20 +1124,23 @@ begin
           if CurrBlock <> nil then
           begin
             if AIfObj.HasElse and (AIfObj.ElseBegin = nil) and
-              (CurrBlock.ItemIndex <= AIfObj.ElseToken.ItemIndex) then  // 分号结束不带 begin 的 else
+              (CurrBlock.ItemIndex <= AIfObj.ElseToken.ItemIndex) and
+              (CurrBracketLevel = AIfObj.ElseToken.BracketLayer) then  // 分号结束不带 begin 的 else
             begin
               AIfObj.EndElseBlock;
               AIfObj.EndIfAll;
             end
             else if (AIfObj.ElseIfCount > 0) and (AIfObj.LastElseIfBegin = nil)
               and (AIfObj.LastElseIfIf <> nil) and
-              (CurrBlock.ItemIndex <= AIfObj.LastElseIfIf.ItemIndex) then
+              (CurrBlock.ItemIndex <= AIfObj.LastElseIfIf.ItemIndex) and
+              (CurrBracketLevel = AIfObj.LastElseIfIf.BracketLayer) then
             begin
               AIfObj.EndLastElseIfBlock;       // 分号结束不带 begin 的最后一个 else if
               AIfObj.EndIfAll;
             end
             else if (AIfObj.IfBegin = nil) and
-              (CurrBlock.ItemIndex <= AIfObj.IfStart.ItemIndex) then  // 分号结束不带 begin 的 if 本身
+              (CurrBlock.ItemIndex <= AIfObj.IfStart.ItemIndex) and
+              (CurrBracketLevel = AIfObj.IfStart.BracketLayer) then  // 分号结束不带 begin 的 if 本身
             begin
               AIfObj.EndIfBlock;
               AIfObj.EndIfAll;
@@ -1168,6 +1177,11 @@ begin
         if not AKeyOnly and ((PrevTokenID <> tkAmpersand) or (Lex.TokenID = tkIdentifier)) then
           NewToken;
       end;
+
+      if Lex.TokenID = tkRoundOpen then
+        Inc(CurrBracketLevel)
+      else if Lex.TokenID = tkRoundClose then
+        Dec(CurrBracketLevel);
 
       PrevTokenID := Lex.TokenID;
       PrevTokenStr := Lex.Token;
