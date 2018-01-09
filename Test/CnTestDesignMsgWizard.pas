@@ -24,7 +24,12 @@ unit CnTestDesignMsgWizard;
 * 软件名称：CnPack IDE 专家包测试用例
 * 单元名称：CnTestDesignMsgWizard
 * 单元作者：CnPack 开发组
-* 备    注：测试拦截设计器消息的用例
+* 备    注：测试拦截设计器消息与方法的用例，确定结论：
+*           DoDragCreate：选中控件板上的控件并在窗体上拖动来创建控件时松开鼠标后调用。
+*           DoDragMove：拖动被选中控件时松开鼠标左键后调用。
+*           DoDragSelect：拖动框来选中控件时松开鼠标左键后调用，不拖动时单纯点击也会调用（似乎用于取消选择）。
+*           DoDragSize：拖动控件边缘改变控件大小时松开鼠标左键后调用。
+*           DragTo是会在拖动过程中被调用。
 * 开发平台：Windows 7 + Delphi 6/7
 * 兼容测试：XP/7 + Delphi 5/6/7
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式
@@ -54,6 +59,8 @@ type
   TCnTestDesignMsgWizard = class(TCnMenuWizard)
   private
     FHook: TCnMethodHook;
+    FDesignIdeModule: HMODULE;
+    procedure InitRoutines;
   protected
     function GetHasConfig: Boolean; override;
   public
@@ -76,8 +83,190 @@ implementation
 uses
   CnDebug;
 
+const
+  STDesignerDoDragCreate = '@Designer@TDesigner@DoDragCreate$qqrv';
+  STDesignerDoDragMove = '@Designer@TDesigner@DoDragMove$qqrv';
+  STDesignerDoDragSelect = '@Designer@TDesigner@DoDragSelect$qqrv';
+  STDesignerDoDragSize = '@Designer@TDesigner@DoDragSize$qqrv';
+
+  STDesignerDragBoxesMoveTo = '@Designer@TDesigner@DragBoxesMoveTo$qqrrx11Types@TRect';
+
+  STDesignerDragBegin = '@Designer@TDesigner@DragBegin$qqrii';
+  STDesignerDragEnd = '@Designer@TDesigner@DragEnd$qqriio';
+  STDesignerDragBoxesOn = '@Designer@TDesigner@DragBoxesOn$qqrv';
+  STDesignerDragBoxesOff = '@Designer@TDesigner@DragBoxesOff$qqrv';
+  STDesignerDragTo = '@Designer@TDesigner@DragTo$qqrii';
+
 type
   TControlHack = class(TControl);
+
+  TDesignerDoDragCreate = procedure(Self: TObject);
+  TDesignerDoDragMove = procedure(Self: TObject);
+  TDesignerDoDragSelect = procedure(Self: TObject);
+  TDesignerDoDragSize = procedure(Self: TObject);
+  TDesignerDragBoxesMoveTo = procedure(Self: TObject; ARect: PRect);
+
+  TDesignerDragBegin = procedure(Self: TObject; X, Y: Integer);
+  TDesignerDragEnd = procedure(Self: TObject; X, Y: Integer; Arg: Boolean);
+  TDesignerDragBoxesOn = procedure(Self: TObject);
+  TDesignerDragBoxesOff = procedure(Self: TObject);
+  TDesignerDragTo = procedure(Self: TObject; X, Y: Integer);
+
+var
+  DesignerDoDragCreate: TDesignerDoDragCreate = nil;
+  DesignerDoDragMove: TDesignerDoDragMove = nil;
+  DesignerDoDragSelect: TDesignerDoDragSelect = nil;
+  DesignerDoDragSize: TDesignerDoDragSize = nil;
+  DesignerDragBoxesMoveTo: TDesignerDragBoxesMoveTo = nil;
+
+  DesignerDragBegin: TDesignerDragBegin = nil;
+  DesignerDragEnd: TDesignerDragEnd = nil;
+  DesignerDragBoxesOn: TDesignerDragBoxesOn = nil;
+  DesignerDragBoxesOff: TDesignerDragBoxesOff = nil;
+  DesignerDragTo: TDesignerDragTo = nil;
+
+  // =========================================================================//
+
+  HookDesignerDoDragCreate: TCnMethodHook = nil;
+  HookDesignerDoDragMove: TCnMethodHook = nil;
+  HookDesignerDoDragSelect: TCnMethodHook = nil;
+  HookDesignerDoDragSize: TCnMethodHook = nil;
+  HookDesignerDragBoxesMoveTo: TCnMethodHook = nil;
+
+  HookDesignerDragBegin: TCnMethodHook = nil;
+  HookDesignerDragEnd: TCnMethodHook = nil;
+  HookDesignerDragBoxesOn: TCnMethodHook = nil;
+  HookDesignerDragBoxesOff: TCnMethodHook = nil;
+  HookDesignerDragTo: TCnMethodHook = nil;
+
+  AddressPrinted: Boolean = False;
+  PrevIsMouseMove: Boolean = False;
+
+procedure MyDesignerDoDragCreate(Self: TObject);
+begin
+  CnDebugger.LogMsg('DesignerDoDragCreate Called.');
+
+  HookDesignerDoDragCreate.UnhookMethod;
+  try
+    DesignerDoDragCreate(Self);
+  finally
+    HookDesignerDoDragCreate.HookMethod;
+  end;
+end;
+
+procedure MyDesignerDoDragMove(Self: TObject);
+begin
+  CnDebugger.LogMsg('DesignerDoDragMove Called.');
+
+  HookDesignerDoDragMove.UnhookMethod;
+  try
+    DesignerDoDragMove(Self);
+  finally
+    HookDesignerDoDragMove.HookMethod;
+  end;
+end;
+
+procedure MyDesignerDoDragSelect(Self: TObject);
+begin
+  CnDebugger.LogMsg('DesignerDoDragSelect Called.');
+
+  HookDesignerDoDragSelect.UnhookMethod;
+  try
+    DesignerDoDragSelect(Self);
+  finally
+    HookDesignerDoDragSelect.HookMethod;
+  end;
+end;
+
+procedure MyDesignerDoDragSize(Self: TObject);
+begin
+  CnDebugger.LogMsg('DesignerDoDragSize Called.');
+
+  HookDesignerDoDragSize.UnhookMethod;
+  try
+    DesignerDoDragSize(Self);
+  finally
+    HookDesignerDoDragSize.HookMethod;
+  end;
+end;
+
+procedure MyDesignerDragBoxesMoveTo(Self: TObject; ARect: PRect);
+begin
+  CnDebugger.LogFmt('DragBoxesMoveTo Left %d, Top %d - Right %d, Bottom %d',
+    [ARect^.Left, ARect^.Top, ARect^.Right, ARect^.Bottom]);
+  CnDebugger.WatchFmt('DragBoxesMoveTo', 'Left %d, Top %d - Right %d, Bottom %d',
+    [ARect^.Left, ARect^.Top, ARect^.Right, ARect^.Bottom]);
+
+  HookDesignerDragBoxesMoveTo.UnhookMethod;
+  try
+    DesignerDragBoxesMoveTo(Self, ARect);
+  finally
+    HookDesignerDragBoxesMoveTo.HookMethod;
+  end;
+end;
+
+procedure MyDesignerDragBegin(Self: TObject; X, Y: Integer);
+begin
+  CnDebugger.LogFmt('DesignerDragBegin Called. X %d, Y %d. ', [X, Y]);
+
+  HookDesignerDragBegin.UnhookMethod;
+  try
+    DesignerDragBegin(Self, X, Y);
+  finally
+    HookDesignerDragBegin.HookMethod;
+  end;
+end;
+
+procedure MyDesignerDragEnd(Self: TObject; X, Y: Integer; Arg: Boolean);
+begin
+  CnDebugger.LogFmt('DesignerDragEnd Called. X %d, Y %d. Arg %d.',
+    [X, Y, Integer(Arg)]);
+
+  HookDesignerDragEnd.UnhookMethod;
+  try
+    DesignerDragEnd(Self, X, Y, Arg);
+  finally
+    HookDesignerDragEnd.HookMethod;
+  end;
+end;
+
+procedure MyDesignerDragBoxesOn(Self: TObject);
+begin
+  CnDebugger.LogMsg('DesignerDragBoxesOn Called.');
+
+  HookDesignerDragBoxesOn.UnhookMethod;
+  try
+    DesignerDragBoxesOn(Self);
+  finally
+    HookDesignerDragBoxesOn.HookMethod;
+  end;
+end;
+
+procedure MyDesignerDragBoxesOff(Self: TObject);
+begin
+  CnDebugger.LogMsg('DesignerDragBoxesOff Called.');
+  CnDebugger.WatchClear('DragTo');
+
+  HookDesignerDragBoxesOff.UnhookMethod;
+  try
+    DesignerDragBoxesOff(Self);
+  finally
+    HookDesignerDragBoxesOff.HookMethod;
+  end;
+end;
+
+procedure MyDesignerDragTo(Self: TObject; X, Y: Integer);
+begin
+//  CnDebugger.LogFmt('DesignerDragTo Called. X %d, Y %d. ', [X, Y]);
+  CnDebugger.WatchFmt('DragTo', 'X %d, Y %d.', [X, Y]);
+
+  HookDesignerDragTo.UnhookMethod;
+  try
+    DesignerDragTo(Self, X, Y);
+  finally
+    HookDesignerDragTo.HookMethod;
+  end;
+end;
 
 procedure MyControlWndProc(Self: TControlHack; var Message: TMessage);
 var
@@ -91,21 +280,29 @@ begin
     if (Form <> nil) and (Form.Designer <> nil) and
       Form.Designer.IsDesignMsg(Self, Message) then
       begin
-        CnDebugger.LogInterface(Form.Designer);
-        
-        CnDebugger.LogPointer(PPointer(PPointer(Form.Designer)^)^);               // QueryInterface
-        CnDebugger.LogPointer(PPointer(Integer(PPointer(Form.Designer)^) + 4)^);  // _AddRef
-        CnDebugger.LogPointer(PPointer(Integer(PPointer(Form.Designer)^) + 8)^);  // _Release
-        CnDebugger.LogPointer(PPointer(Integer(PPointer(Form.Designer)^) + 12)^); // Modified
-        CnDebugger.LogPointer(PPointer(Integer(PPointer(Form.Designer)^) + 16)^); // Notification
-        CnDebugger.LogPointer(PPointer(Integer(PPointer(Form.Designer)^) + 20)^); // GetCustomForm
-        CnDebugger.LogPointer(PPointer(Integer(PPointer(Form.Designer)^) + 24)^); // SetCustomForm
-        CnDebugger.LogPointer(PPointer(Integer(PPointer(Form.Designer)^) + 28)^); // GetIsControl
-        CnDebugger.LogPointer(PPointer(Integer(PPointer(Form.Designer)^) + 32)^); // SetIsControl
-        CnDebugger.LogPointer(PPointer(Integer(PPointer(Form.Designer)^) + 36)^); // IsDesignMsg
-        CnDebugger.LogPointer(PPointer(Integer(PPointer(Form.Designer)^) + 40)^); // PaintGrid
+        if not AddressPrinted then
+        begin
+          CnDebugger.LogInterface(Form.Designer);
 
-        CnDebugger.LogFmt('IsDesignMsg, Ignored: %8.8x.', [Message.Msg]);
+          CnDebugger.LogPointer(PPointer(PPointer(Form.Designer)^)^);               // QueryInterface
+          CnDebugger.LogPointer(PPointer(Integer(PPointer(Form.Designer)^) + 4)^);  // _AddRef
+          CnDebugger.LogPointer(PPointer(Integer(PPointer(Form.Designer)^) + 8)^);  // _Release
+          CnDebugger.LogPointer(PPointer(Integer(PPointer(Form.Designer)^) + 12)^); // Modified
+          CnDebugger.LogPointer(PPointer(Integer(PPointer(Form.Designer)^) + 16)^); // Notification
+          CnDebugger.LogPointer(PPointer(Integer(PPointer(Form.Designer)^) + 20)^); // GetCustomForm
+          CnDebugger.LogPointer(PPointer(Integer(PPointer(Form.Designer)^) + 24)^); // SetCustomForm
+          CnDebugger.LogPointer(PPointer(Integer(PPointer(Form.Designer)^) + 28)^); // GetIsControl
+          CnDebugger.LogPointer(PPointer(Integer(PPointer(Form.Designer)^) + 32)^); // SetIsControl
+          CnDebugger.LogPointer(PPointer(Integer(PPointer(Form.Designer)^) + 36)^); // IsDesignMsg
+          CnDebugger.LogPointer(PPointer(Integer(PPointer(Form.Designer)^) + 40)^); // PaintGrid
+
+          AddressPrinted := True;
+        end;
+
+        if (Message.Msg <> WM_MOUSEMOVE) or not PrevIsMouseMove then
+          CnDebugger.LogFmt('IsDesignMsg, Ignored: %8.8x.', [Message.Msg]);
+
+        PrevIsMouseMove := Message.Msg = WM_MOUSEMOVE;
         Exit;
       end;
   end;
@@ -172,12 +369,37 @@ end;
 constructor TCnTestDesignMsgWizard.Create;
 begin
   inherited;
+  InitRoutines;
+
   FHook := TCnMethodHook.Create(GetBplMethodAddress(@TControlHack.WndProc),
     @MyControlWndProc, False, False);
+
+  HookDesignerDoDragCreate := TCnMethodHook.Create(@DesignerDoDragCreate, @MyDesignerDoDragCreate, False, False);
+  HookDesignerDoDragMove := TCnMethodHook.Create(@DesignerDoDragMove, @MyDesignerDoDragMove, False, False);
+  HookDesignerDoDragSelect := TCnMethodHook.Create(@DesignerDoDragSelect, @MyDesignerDoDragSelect, False, False);
+  HookDesignerDoDragSize := TCnMethodHook.Create(@DesignerDoDragSize, @MyDesignerDoDragSize, False, False);
+  HookDesignerDragBoxesMoveTo := TCnMethodHook.Create(@DesignerDragBoxesMoveTo, @MyDesignerDragBoxesMoveTo, False, False);
+
+  HookDesignerDragBegin := TCnMethodHook.Create(@DesignerDragBegin, @MyDesignerDragBegin, False, False);
+  HookDesignerDragEnd := TCnMethodHook.Create(@DesignerDragEnd, @MyDesignerDragEnd, False, False);
+  HookDesignerDragBoxesOn := TCnMethodHook.Create(@DesignerDragBoxesOn, @MyDesignerDragBoxesOn, False, False);
+  HookDesignerDragBoxesOff := TCnMethodHook.Create(@DesignerDragBoxesOff, @MyDesignerDragBoxesOff, False, False);
+  HookDesignerDragTo := TCnMethodHook.Create(@DesignerDragTo, @MyDesignerDragTo, False, False);
 end;
 
 destructor TCnTestDesignMsgWizard.Destroy;
 begin
+  HookDesignerDragBegin.Free;
+  HookDesignerDragEnd.Free;
+  HookDesignerDragBoxesOn.Free;
+  HookDesignerDragBoxesOff.Free;
+  HookDesignerDragTo.Free;
+
+  HookDesignerDoDragMove.Free;
+  HookDesignerDoDragCreate.Free;
+  HookDesignerDoDragSelect.Free;
+  HookDesignerDoDragSize.Free;
+
   FHook.Free;
   inherited;
 end;
@@ -193,12 +415,35 @@ begin
   if not FHook.Hooked then
   begin
     FHook.HookMethod;
-    ShowMessage('Design Message Hooked.');
+    HookDesignerDoDragCreate.HookMethod;
+    HookDesignerDoDragMove.HookMethod;
+    HookDesignerDoDragSelect.HookMethod;
+    HookDesignerDoDragSize.HookMethod;
+
+    HookDesignerDragBegin.HookMethod;
+    HookDesignerDragEnd.HookMethod;
+    HookDesignerDragBoxesOn.HookMethod;
+    HookDesignerDragBoxesOff.HookMethod;
+    HookDesignerDragTo.HookMethod;
+
+    ShowMessage('Design Message & Routine Hooked.');
   end
   else
   begin
     FHook.UnhookMethod;
-    ShowMessage('Design Message Unhooked.');
+    
+    HookDesignerDoDragCreate.UnhookMethod;
+    HookDesignerDoDragMove.UnhookMethod;
+    HookDesignerDoDragSelect.UnhookMethod;
+    HookDesignerDoDragSize.UnhookMethod;
+
+    HookDesignerDragBegin.UnhookMethod;
+    HookDesignerDragEnd.UnhookMethod;
+    HookDesignerDragBoxesOn.UnhookMethod;
+    HookDesignerDragBoxesOff.UnhookMethod;
+    HookDesignerDragTo.UnhookMethod;
+
+    ShowMessage('Design Message & Routine Unhooked.');
   end;
 end;
 
@@ -233,6 +478,42 @@ begin
   Author := 'CnPack IDE Wizards';
   Email := 'master@cnpack.org';
   Comment := 'Design Message';
+end;
+
+procedure TCnTestDesignMsgWizard.InitRoutines;
+begin
+  FDesignIdeModule := LoadLibrary(DesignIdeLibName);
+  Assert(FDesignIdeModule <> 0, 'Failed to load DesignIdeModule');
+
+  DesignerDoDragCreate := GetProcAddress(FDesignIdeModule, STDesignerDoDragCreate);
+  Assert(Assigned(DesignerDoDragCreate), 'Failed to Get DesignerDoDragCreate');
+
+  DesignerDoDragMove := GetProcAddress(FDesignIdeModule, STDesignerDoDragMove);
+  Assert(Assigned(DesignerDoDragMove), 'Failed to Get DesignerDoDragMove');
+
+  DesignerDoDragSelect := GetProcAddress(FDesignIdeModule, STDesignerDoDragSelect);
+  Assert(Assigned(DesignerDoDragSelect), 'Failed to Get DesignerDoDragSelect');
+
+  DesignerDoDragSize := GetProcAddress(FDesignIdeModule, STDesignerDoDragSize);
+  Assert(Assigned(DesignerDoDragSize), 'Failed to Get DesignerDoDragSize');
+
+  DesignerDragBoxesMoveTo := GetProcAddress(FDesignIdeModule, STDesignerDragBoxesMoveTo);
+  Assert(Assigned(DesignerDragBoxesMoveTo), 'Failed to Get DesignerDragBoxesMoveTo');
+
+  DesignerDragBegin := GetProcAddress(FDesignIdeModule, STDesignerDragBegin);
+  Assert(Assigned(DesignerDragBegin), 'Failed to Get DesignerDragBegin');
+
+  DesignerDragEnd := GetProcAddress(FDesignIdeModule, STDesignerDragEnd);
+  Assert(Assigned(DesignerDragEnd), 'Failed to Get DesignerDragEnd');
+
+  DesignerDragBoxesOn := GetProcAddress(FDesignIdeModule, STDesignerDragBoxesOn);
+  Assert(Assigned(DesignerDragBoxesOn), 'Failed to Get DesignerDragBoxesOn');
+
+  DesignerDragBoxesOff := GetProcAddress(FDesignIdeModule, STDesignerDragBoxesOff);
+  Assert(Assigned(DesignerDragBoxesOff), 'Failed to Get DesignerDragBoxesOff');
+
+  DesignerDragTo := GetProcAddress(FDesignIdeModule, STDesignerDragTo);
+  Assert(Assigned(DesignerDragTo), 'Failed to Get DesignerDragTo');
 end;
 
 procedure TCnTestDesignMsgWizard.LoadSettings(Ini: TCustomIniFile);

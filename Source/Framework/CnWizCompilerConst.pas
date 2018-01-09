@@ -412,6 +412,7 @@ const
 
 {$IFDEF COMPILER5}
   CorIdeLibName = 'coride50.bpl';
+  DesignIdeLibName = 'dsnide50.bpl';
   {$IFDEF BCB}
   DphIdeLibName = 'bcbide50.bpl';
   {$ELSE not BCB}
@@ -424,6 +425,7 @@ const
 {$IFDEF COMPILER6}
   {$IFDEF MSWINDOWS}
   CorIdeLibName = 'coreide60.bpl';
+  DesignIdeLibName = 'designide60.bpl';
   {$IFDEF BCB}
   DphIdeLibName = 'bcbide60.bpl';
   {$ELSE not BCB}
@@ -437,6 +439,7 @@ const
 {$IFDEF COMPILER7}
   {$IFDEF MSWINDOWS}
   CorIdeLibName = 'coreide70.bpl';
+  DesignIdeLibName = 'designide70.bpl';
   {$IFDEF BCB}
   DphIdeLibName = 'bcbide70.bpl';
   {$ELSE not BCB}
@@ -449,6 +452,7 @@ const
 
 {$IFDEF COMPILER8}
   CorIdeLibName = 'coreide71.bpl';
+  DesignIdeLibName = 'designide71.bpl';
   DphIdeLibName = 'delphicoreide71.bpl';
   dccLibName = 'dcc71il.dll';
   {$DEFINE LibNamesDefined}
@@ -456,6 +460,7 @@ const
 
 {$IFDEF COMPILER9}
   CorIdeLibName = 'coreide90.bpl';
+  DesignIdeLibName = 'designide90.bpl';
   DphIdeLibName = 'delphicoreide90.bpl';
   dccLibName = 'dcc90.dll';
   {$DEFINE LibNamesDefined}
@@ -463,27 +468,31 @@ const
 
 {$IFDEF COMPILER10}
   CorIdeLibName = 'coreide100.bpl';
+  DesignIdeLibName = 'designide100.bpl';
   DphIdeLibName = 'delphicoreide100.bpl';
   dccLibName = 'dcc100.dll';
   {$DEFINE LibNamesDefined}
 {$ENDIF COMPILER10}
 
-{$IFDEF COMPILER11}
+{$IFDEF COMPILER11}     // 2007 Still use 100, NOT 110 !
   CorIdeLibName = 'coreide100.bpl';
+  DesignIdeLibName = 'designide100.bpl';
   DphIdeLibName = 'delphicoreide100.bpl';
   dccLibName = 'dcc100.dll';
   {$DEFINE LibNamesDefined}
 {$ENDIF COMPILER11}
 
 {$IFDEF COMPILER12}
-  CorIdeLibName: PWideChar = 'coreide120.bpl';
-  DphIdeLibName: PWideChar = 'delphicoreide120.bpl';
-  dccLibName: PWideChar = 'dcc120.dll';
+  CorIdeLibName: = 'coreide120.bpl';
+  DesignIdeLibName = 'designide120.bpl';
+  DphIdeLibName: = 'delphicoreide120.bpl';
+  dccLibName: = 'dcc120.dll';
   {$DEFINE LibNamesDefined}
 {$ENDIF COMPILER12}
 
 {$IFDEF COMPILER14}
   CorIdeLibName = 'coreide140.bpl';
+  DesignIdeLibName = 'designide140.bpl';
   DphIdeLibName = 'delphicoreide140.bpl';
   dccLibName = 'dcc140.dll';
   {$DEFINE LibNamesDefined}
@@ -491,6 +500,7 @@ const
 
 {$IFDEF COMPILER15}
   CorIdeLibName = 'coreide150.bpl';
+  DesignIdeLibName = 'designide150.bpl';
   DphIdeLibName = 'delphicoreide150.bpl';
   dccLibName = 'dcc150.dll';
   {$DEFINE LibNamesDefined}
@@ -498,6 +508,7 @@ const
 
 {$IFDEF COMPILER16}
   CorIdeLibName = 'coreide160.bpl';
+  DesignIdeLibName = 'designide160.bpl';
   DphIdeLibName = 'delphicoreide160.bpl';
   dccLibName = 'dcc32160.dll';
   {$DEFINE LibNamesDefined}
@@ -505,6 +516,7 @@ const
 
 {$IFDEF COMPILER17}
   CorIdeLibName = 'coreide170.bpl';
+  DesignIdeLibName = 'designide170.bpl';
   DphIdeLibName = 'delphicoreide170.bpl';
   dccLibName = 'dcc32170.dll';
   {$DEFINE LibNamesDefined}
@@ -512,6 +524,7 @@ const
 
 {$IFDEF COMPILER18}
   CorIdeLibName = 'coreide180.bpl';
+  DesignIdeLibName = 'designide180.bpl';
   DphIdeLibName = 'delphicoreide180.bpl';
   dccLibName = 'dcc32180.dll';
   {$DEFINE LibNamesDefined}
@@ -519,6 +532,7 @@ const
 
 {$IFDEF COMPILER19}
   CorIdeLibName = 'coreide190.bpl';
+  DesignIdeLibName = 'designide190.bpl';
   DphIdeLibName = 'delphicoreide190.bpl';
   dccLibName = 'dcc32190.dll';
   {$DEFINE LibNamesDefined}
@@ -526,6 +540,7 @@ const
 
 {$IFDEF COMPILER20}
   CorIdeLibName = 'coreide200.bpl';
+  DesignIdeLibName = 'designide200.bpl';
   DphIdeLibName = 'delphicoreide200.bpl';
   dccLibName = 'dcc32200.dll';
   {$DEFINE LibNamesDefined}
@@ -533,6 +548,7 @@ const
 
 {$IFDEF COMPILER21}
   CorIdeLibName = 'coreide210.bpl';
+  DesignIdeLibName = 'designide210.bpl';
   DphIdeLibName = 'delphicoreide210.bpl';
   dccLibName = 'dcc32210.dll';
   {$DEFINE LibNamesDefined}
@@ -540,6 +556,7 @@ const
 
 {$IFDEF COMPILER22}
   CorIdeLibName = 'coreide220.bpl';
+  DesignIdeLibName = 'designide220.bpl';
   DphIdeLibName = 'delphicoreide220.bpl';
   dccLibName = 'dcc32220.dll';
   {$DEFINE LibNamesDefined}
@@ -547,6 +564,7 @@ const
 
 {$IFDEF COMPILER23}
   CorIdeLibName = 'coreide230.bpl';
+  DesignIdeLibName = 'designide230.bpl';
   DphIdeLibName = 'delphicoreide230.bpl';
   dccLibName = 'dcc32230.dll';
   {$DEFINE LibNamesDefined}
@@ -554,6 +572,7 @@ const
 
 {$IFDEF COMPILER24}
   CorIdeLibName = 'coreide240.bpl';
+  DesignIdeLibName = 'designide240.bpl';
   DphIdeLibName = 'delphicoreide240.bpl';
   dccLibName = 'dcc32240.dll';
   {$DEFINE LibNamesDefined}
@@ -561,6 +580,7 @@ const
 
 {$IFDEF COMPILER25}
   CorIdeLibName = 'coreide250.bpl';
+  DesignIdeLibName = 'designide250.bpl';
   DphIdeLibName = 'delphicoreide250.bpl';
   dccLibName = 'dcc32250.dll';
   {$DEFINE LibNamesDefined}
