@@ -85,10 +85,14 @@ begin
     CopyMemory(@AMsg, @(ADesc.Msg), Size);
     SplitterIdx := Pos('|', AMsg);
 
-    if SplitterIdx > 1 then // VarName 不能为空
+    if SplitterIdx > 1 then // Clear 时没竖线
+      VarName := Copy(AMsg, 1, SplitterIdx - 1)
+    else
+      VarName := AMsg;
+
+    if VarName <> '' then
     begin
-      VarName := Copy(AMsg, 1, SplitterIdx - 1);
-      if ADesc.Annex.MsgType = Ord(cmtWatch) then
+      if (ADesc.Annex.MsgType = Ord(cmtWatch)) and (SplitterIdx > 1) then
       begin
         VarValue := Copy(AMsg, SplitterIdx + 1, MaxInt);
         CnMsgManager.PutWatch(VarName, VarValue);
@@ -97,8 +101,8 @@ begin
         CnMsgManager.ClearWatch(VarName);
 
       CnMsgManager.DoWatchChanged;
+      Exit;
     end;
-    Exit;
   end;
 
   AStore := CnMsgManager.IndexOf(ADesc.Annex.ProcessId);
