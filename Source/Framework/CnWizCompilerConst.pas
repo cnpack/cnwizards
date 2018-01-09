@@ -483,10 +483,10 @@ const
 {$ENDIF COMPILER11}
 
 {$IFDEF COMPILER12}
-  CorIdeLibName: = 'coreide120.bpl';
+  CorIdeLibName = 'coreide120.bpl';
   DesignIdeLibName = 'designide120.bpl';
-  DphIdeLibName: = 'delphicoreide120.bpl';
-  dccLibName: = 'dcc120.dll';
+  DphIdeLibName = 'delphicoreide120.bpl';
+  dccLibName = 'dcc120.dll';
   {$DEFINE LibNamesDefined}
 {$ENDIF COMPILER12}
 
