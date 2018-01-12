@@ -77,6 +77,8 @@ TCnMainViewer.actViewDetail.Caption=&D. 详细信息显示
 TCnMainViewer.actViewDetail.Hint=显示/隐藏条目详细内容
 TCnMainViewer.actViewTime.Caption=&T. 计时显示
 TCnMainViewer.actViewTime.Hint=显示/隐藏计时面板
+TCnMainViewer.actViewWatch.Caption=&W. 显示监视窗口
+TCnMainViewer.actViewWatch.Hint=显示监视窗口
 TCnMainViewer.Caption=CnDebugViewer 调试信息查看器
 TCnMainViewer.dlgOpen.Filter=XML 文件(*.xml)|*.xml|CnDebug Dump 文件(*.cdd)|*.cdd|所有文件(*.*)|*.*
 TCnMainViewer.dlgSave.Filter=XML 文件(*.xml)|*.xml|所有文件(*.*)|*.*
@@ -131,6 +133,8 @@ TCnSenderFilterFrm.grpSender.Caption=发送端过滤条件(&S)
 TCnSenderFilterFrm.lblLevel.Caption=&Level <=
 TCnSenderFilterFrm.lblTag.Caption=&Tag =
 TCnSenderFilterFrm.lblTypes.Caption=允许输出的信息类型(&M)：
+TCnWatchForm.lvWatch.Columns.Item0.Caption=变量名
+TCnWatchForm.lvWatch.Columns.Item1.Caption=值
 SCnNoneProcName=[未知程序]
 SCnHintMsgTree=调试信息显示区
 SCnCPUSpeedFmt=CPU 估算频率：%f MHz

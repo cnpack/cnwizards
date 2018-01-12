@@ -77,6 +77,8 @@ TCnMainViewer.actViewDetail.Caption=&Details
 TCnMainViewer.actViewDetail.Hint=Show/Hide Details
 TCnMainViewer.actViewTime.Caption=&Time
 TCnMainViewer.actViewTime.Hint=Show/Hide Timing
+TCnMainViewer.actViewWatch.Caption=&Watch
+TCnMainViewer.actViewWatch.Hint=Show Watch Window
 TCnMainViewer.Caption=CnDebugViewer
 TCnMainViewer.dlgOpen.Filter=XML File (*.xml)|*.xml|CnDebug Dump File(*.cdd)|*.cdd|All Files (*.*)|*.*
 TCnMainViewer.dlgSave.Filter=XML File (*.xml)|*.xml|All Files (*.*)|*.*
@@ -131,6 +133,8 @@ TCnSenderFilterFrm.grpSender.Caption=Filter Conditions at &Sender
 TCnSenderFilterFrm.lblLevel.Caption=&Level <=
 TCnSenderFilterFrm.lblTag.Caption=&Tag =
 TCnSenderFilterFrm.lblTypes.Caption=Allowed &Message Type:
+TCnWatchForm.lvWatch.Columns.Item0.Caption=Watch
+TCnWatchForm.lvWatch.Columns.Item1.Caption=Value
 SCnNoneProcName=[Unknown]
 SCnHintMsgTree=Debugging Information Display
 SCnCPUSpeedFmt=CPU Speed: %f MHz
