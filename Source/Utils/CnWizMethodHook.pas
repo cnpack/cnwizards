@@ -29,7 +29,9 @@ unit CnWizMethodHook;
 * 兼容测试：
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2014.10.01
+* 修改记录：2018.01.12
+*               加入初始化时不自动挂接的控制，加入接口函数的真实地址获取
+*           2014.10.01
 *               将 DDetours 调用改为动态
 *           2014.08.28
 *               改用DDetours实现调用
@@ -94,31 +96,95 @@ function GetBplMethodAddress(Method: Pointer): Pointer;
 {* 返回在 BPL 中实际的方法地址。如专家包中用 @TPersistent.Assign 返回的其实是
    一个 Jmp 跳转地址，该函数可以返回在 BPL 中方法的真实地址。}
 
+function GetInterfaceMethodAddress(const AIntf: IUnknown;
+  MethodIndex: Integer): Pointer;
+{* 由于 Delphi 不支持 @AIntf.Proc 的方式返回接口的函数入口地址，并且 Self 指针也
+   有偏移问题。本函数用于返回 AIntf 的第 MethodIndex 个函数的入口地址，并修正了
+   Self 指针的偏移问题。
+   MethodIndex 从 0 开始，0、1、2 分别代表 QueryInterface、_AddRef、_Release。
+   注意 MethodIndex 不做边界检查，超过了该 Interface 的方法数会出错}
+
 implementation
+
+type
+  TIntfMethodEntry = packed record
+    case Integer of
+      0: (ByteOpCode: Byte);        // $05 加四字节
+      1: (WordOpCode: Word);        // $C083 加一字节
+      2: (DWordOpCode: DWORD);      // $04244483 加一字节或 $04244481 加四字节
+  end;
+  PIntfMethodEntry = ^TIntfMethodEntry;
+
+  // 长短跳转的组合声明，实际上等同于 TJmpCode 与 TLongJmp 俩结构的组合
+  TIntfJumpEntry = packed record
+    case Integer of
+      0: (ByteOpCode: Byte; Offset: LongInt);         // $E9 加四字节
+      1: (WordOpCode: Word; Addr: ^Pointer);        // $25FF 加四字节
+  end;
+  PIntfJumpEntry = ^TIntfJumpEntry;
+
+  TJmpCode = packed record
+    Code: Word;                 // 间接跳转指定，为 $25FF
+    Addr: ^Pointer;             // 跳转指针地址，指向保存目标地址的指针
+  end;
+  PJmpCode = ^TJmpCode;
 
 resourcestring
   SMemoryWriteError = 'Error writing method memory (%s).';
 
 const
   csJmpCode = $E9;              // 相对跳转指令机器码
+  csJmp32Code = $25FF;
 
 // 返回在 BPL 中实际的方法地址
 function GetBplMethodAddress(Method: Pointer): Pointer;
-type
-  PJmpCode = ^TJmpCode;
-  TJmpCode = packed record
-    Code: Word;                 // 间接跳转指定，为 $25FF
-    Addr: ^Pointer;             // 跳转指针地址，指向保存目标地址的指针
-  end;
-const
-  csJmp32Code = $25FF;
 begin
-//  Result := Method;
   if PJmpCode(Method)^.Code = csJmp32Code then
     Result := PJmpCode(Method)^.Addr^
   else
     Result := Method;
+end;
 
+// 返回 Interface 的某序号方法的实际地址，并修正 Self 偏移
+function GetInterfaceMethodAddress(const AIntf: IUnknown;
+  MethodIndex: Integer): Pointer;
+var
+  OffsetStubPtr: Pointer;
+  IntfPtr: PIntfMethodEntry;
+  JmpPtr: PIntfJumpEntry;
+begin
+  Result := nil;
+  if (AIntf = nil) or (MethodIndex < 0) then
+    Exit;
+
+  OffsetStubPtr := PPointer(Integer(PPointer(AIntf)^) + SizeOf(Pointer) * MethodIndex)^;
+
+  // 得到该 interface 成员函数跳转入口，该入口会修正 Self 指针后跳至真正入口
+  // IUnknown 的仨标准函数入口均是 add dword ptr [esp+$04],-$xx （xx 为 ShortInt 或 LongInt），因为是 stdcall
+  // stdcall/safecall/cdecl 的代码为 $04244483 加一字节的 ShortInt，或 $04244481 加四字节的 LongInt
+  // 但其他函数看调用方式，有可能是默认 register 的 add eax -$xx （xx 为 ShortInt 或 LongInt）
+  // stdcall/safecall/cdecl 的代码为 $C083 加一字节的 ShortInt，或 $05 加四字节的 LongInt
+  // pascal 照理换了入栈方式，但似乎仍和 stdcall 等一样
+  IntfPtr := PIntfMethodEntry(OffsetStubPtr);
+
+  JmpPtr := nil;
+  if (IntfPtr^.ByteOpCode = $05) or (IntfPtr^.DWordOpCode = $04244481) then
+    JmpPtr := PIntfJumpEntry(Integer(IntfPtr) + 4)
+  else if (IntfPtr^.WordOpCode = $C083) or (IntfPtr^.DWordOpCode = $04244483) then
+    JmpPtr := PIntfJumpEntry(Integer(IntfPtr) + 1);
+
+  if JmpPtr <> nil then
+  begin
+    // 要区分各种不同的跳转，至少有 E9 加四字节相对偏移，以及 25FF 加四字节绝对地址的地址
+    if JmpPtr^.ByteOpCode = csJmpCode then
+    begin
+      Result := Pointer(Integer(JmpPtr) + JmpPtr^.Offset + 5); // 5 表示 Jmp 指令的长度
+    end
+    else if JmpPtr^.WordOpCode = csJmp32Code then
+    begin
+      Result := JmpPtr^.Addr^;
+    end;
+  end;
 end;
 
 //==============================================================================
