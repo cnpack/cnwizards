@@ -107,22 +107,6 @@ function GetInterfaceMethodAddress(const AIntf: IUnknown;
 implementation
 
 type
-  TIntfMethodEntry = packed record
-    case Integer of
-      0: (ByteOpCode: Byte);        // $05 加四字节
-      1: (WordOpCode: Word);        // $C083 加一字节
-      2: (DWordOpCode: DWORD);      // $04244483 加一字节或 $04244481 加四字节
-  end;
-  PIntfMethodEntry = ^TIntfMethodEntry;
-
-  // 长短跳转的组合声明，实际上等同于 TJmpCode 与 TLongJmp 俩结构的组合
-  TIntfJumpEntry = packed record
-    case Integer of
-      0: (ByteOpCode: Byte; Offset: LongInt);         // $E9 加四字节
-      1: (WordOpCode: Word; Addr: ^Pointer);        // $25FF 加四字节
-  end;
-  PIntfJumpEntry = ^TIntfJumpEntry;
-
   TJmpCode = packed record
     Code: Word;                 // 间接跳转指定，为 $25FF
     Addr: ^Pointer;             // 跳转指针地址，指向保存目标地址的指针
@@ -148,6 +132,23 @@ end;
 // 返回 Interface 的某序号方法的实际地址，并修正 Self 偏移
 function GetInterfaceMethodAddress(const AIntf: IUnknown;
   MethodIndex: Integer): Pointer;
+type
+  TIntfMethodEntry = packed record
+    case Integer of
+      0: (ByteOpCode: Byte);        // $05 加四字节
+      1: (WordOpCode: Word);        // $C083 加一字节
+      2: (DWordOpCode: DWORD);      // $04244483 加一字节或 $04244481 加四字节
+  end;
+  PIntfMethodEntry = ^TIntfMethodEntry;
+
+  // 长短跳转的组合声明，实际上等同于 TJmpCode 与 TLongJmp 俩结构的组合
+  TIntfJumpEntry = packed record
+    case Integer of
+      0: (ByteOpCode: Byte; Offset: LongInt);         // $E9 加四字节
+      1: (WordOpCode: Word; Addr: ^Pointer);        // $25FF 加四字节
+  end;
+  PIntfJumpEntry = ^TIntfJumpEntry;
+
 var
   OffsetStubPtr: Pointer;
   IntfPtr: PIntfMethodEntry;
@@ -168,10 +169,14 @@ begin
   IntfPtr := PIntfMethodEntry(OffsetStubPtr);
 
   JmpPtr := nil;
-  if (IntfPtr^.ByteOpCode = $05) or (IntfPtr^.DWordOpCode = $04244481) then
-    JmpPtr := PIntfJumpEntry(Integer(IntfPtr) + 4)
-  else if (IntfPtr^.WordOpCode = $C083) or (IntfPtr^.DWordOpCode = $04244483) then
-    JmpPtr := PIntfJumpEntry(Integer(IntfPtr) + 1);
+  if IntfPtr^.ByteOpCode = $05 then
+    JmpPtr := PIntfJumpEntry(Integer(IntfPtr) + 1 + 4)
+  else if IntfPtr^.DWordOpCode = $04244481 then
+    JmpPtr := PIntfJumpEntry(Integer(IntfPtr) + 4 + 4)
+  else if IntfPtr^.WordOpCode = $C083 then
+    JmpPtr := PIntfJumpEntry(Integer(IntfPtr) + 2 + 1)
+  else if IntfPtr^.DWordOpCode = $04244483 then
+    JmpPtr := PIntfJumpEntry(Integer(IntfPtr) + 4 + 1);
 
   if JmpPtr <> nil then
   begin

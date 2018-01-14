@@ -46,7 +46,8 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ToolsAPI, IniFiles, CnWizClasses, CnWizUtils, CnWizConsts, CnWizMethodHook,
-  CnWizCompilerConst;
+  CnWizCompilerConst, CnWizNotifier {$IFDEF COMPILER6_UP}, DesignIntf,
+  DesignEditors, ComponentDesigner {$ENDIF};
 
 type
 
@@ -61,6 +62,7 @@ type
     FHook: TCnMethodHook;
     FDesignIdeModule: HMODULE;
     procedure InitRoutines;
+    procedure ActiveFormChanged(Sender: TObject);
   protected
     function GetHasConfig: Boolean; override;
   public
@@ -112,6 +114,8 @@ type
   TDesignerDragBoxesOff = procedure(Self: TObject);
   TDesignerDragTo = procedure(Self: TObject; X, Y: Integer);
 
+  TPaintGrid = procedure(Self: TObject);
+
 var
   DesignerDoDragCreate: TDesignerDoDragCreate = nil;
   DesignerDoDragMove: TDesignerDoDragMove = nil;
@@ -138,6 +142,11 @@ var
   HookDesignerDragBoxesOn: TCnMethodHook = nil;
   HookDesignerDragBoxesOff: TCnMethodHook = nil;
   HookDesignerDragTo: TCnMethodHook = nil;
+
+  HookPaintGrid: TCnMethodHook = nil;
+
+var
+  PaintGridProc: Pointer = nil;
 
   AddressPrinted: Boolean = False;
   PrevIsMouseMove: Boolean = False;
@@ -268,6 +277,19 @@ begin
   end;
 end;
 
+procedure MyPaintGrid(Self: TObject);
+begin
+  CnDebugger.LogMsg('MyPaintGrid Called.');
+
+  // If Original not called, grid will disappear.
+  HookPaintGrid.UnhookMethod;
+  try
+    TPaintGrid(PaintGridProc)(Self);
+  finally
+    HookPaintGrid.HookMethod;
+  end;
+end;
+
 procedure MyControlWndProc(Self: TControlHack; var Message: TMessage);
 var
   Form: TCustomForm;
@@ -361,6 +383,32 @@ end;
 
 { TCnTestDesignMsgWizard }
 
+procedure TCnTestDesignMsgWizard.ActiveFormChanged(Sender: TObject);
+var
+  FormDesigner: IDesigner;
+  AForm: TCustomForm;
+begin
+  if PaintGridProc = nil then
+  begin
+    FormDesigner := CnOtaGetFormDesigner;
+    if FormDesigner = nil then
+      Exit;
+
+    if FormDesigner.Root is TCustomForm then
+    begin
+      AForm := TCustomForm(FormDesigner.Root);
+      if (AForm <> nil) and (AForm.Designer <> nil) then
+      begin
+        PaintGridProc := GetInterfaceMethodAddress(AForm.Designer, 10);
+        CnDebugger.LogPointer(PaintGridProc, 'PaintGrid Method of Designer.');
+
+        if PaintGridProc <> nil then
+          HookPaintGrid := TCnMethodHook.Create(PaintGridProc, @MyPaintGrid, False, False);
+      end;
+    end;
+  end;
+end;
+
 procedure TCnTestDesignMsgWizard.Config;
 begin
   ShowMessage('No Option for this Test Case.');
@@ -385,10 +433,16 @@ begin
   HookDesignerDragBoxesOn := TCnMethodHook.Create(@DesignerDragBoxesOn, @MyDesignerDragBoxesOn, False, False);
   HookDesignerDragBoxesOff := TCnMethodHook.Create(@DesignerDragBoxesOff, @MyDesignerDragBoxesOff, False, False);
   HookDesignerDragTo := TCnMethodHook.Create(@DesignerDragTo, @MyDesignerDragTo, False, False);
+
+  CnWizNotifierServices.AddActiveFormNotifier(ActiveFormChanged);
 end;
 
 destructor TCnTestDesignMsgWizard.Destroy;
 begin
+  CnWizNotifierServices.RemoveActiveFormNotifier(ActiveFormChanged);
+
+  HookPaintGrid.Free;
+
   HookDesignerDragBegin.Free;
   HookDesignerDragEnd.Free;
   HookDesignerDragBoxesOn.Free;
@@ -426,6 +480,8 @@ begin
     HookDesignerDragBoxesOff.HookMethod;
     HookDesignerDragTo.HookMethod;
 
+    HookPaintGrid.HookMethod;
+
     ShowMessage('Design Message & Routine Hooked.');
   end
   else
@@ -442,6 +498,8 @@ begin
     HookDesignerDragBoxesOn.UnhookMethod;
     HookDesignerDragBoxesOff.UnhookMethod;
     HookDesignerDragTo.UnhookMethod;
+
+    HookPaintGrid.UnhookMethod;
 
     ShowMessage('Design Message & Routine Unhooked.');
   end;
