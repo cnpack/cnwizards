@@ -455,6 +455,8 @@ begin
   HookDesignerDoDragSize.Free;
 
   FHook.Free;
+
+  FreeLibrary(FDesignIdeModule);
   inherited;
 end;
 

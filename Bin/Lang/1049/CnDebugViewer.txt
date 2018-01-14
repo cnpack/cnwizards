@@ -77,6 +77,8 @@ TCnMainViewer.actViewDetail.Caption=Описание
 TCnMainViewer.actViewDetail.Hint=Показать/скрыть описание
 TCnMainViewer.actViewTime.Caption=Время
 TCnMainViewer.actViewTime.Hint=Показать/скрыть время
+TCnMainViewer.actViewWatch.Caption=Контрольные значения
+TCnMainViewer.actViewWatch.Hint=Показать окно контрольных значений
 TCnMainViewer.Caption=CnDebugViewer
 TCnMainViewer.dlgOpen.Filter=XML-файл (*.xml)|*.xml|Файл дампа CnDebug (*.cdd)|*.cdd|Все файлы (*.*)|*.*
 TCnMainViewer.dlgSave.Filter=XML-файл (*.xml)|*.xml|Все файлы (*.*)|*.*
@@ -131,6 +133,8 @@ TCnSenderFilterFrm.grpSender.Caption=Настройки фильтра
 TCnSenderFilterFrm.lblLevel.Caption=Уровень <=
 TCnSenderFilterFrm.lblTag.Caption=&Tag =
 TCnSenderFilterFrm.lblTypes.Caption=Обрабатываемая информация:
+TCnWatchForm.lvWatch.Columns.Item0.Caption=Контрольный элемент
+TCnWatchForm.lvWatch.Columns.Item1.Caption=Значение
 SCnNoneProcName=[Неизвестно]
 SCnHintMsgTree=Отладочная инфомация
 SCnCPUSpeedFmt=Скорость CPU: %f МГц
