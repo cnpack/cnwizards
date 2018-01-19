@@ -148,6 +148,7 @@ type
       1: (WordOpCode: Word; Addr: ^Pointer);        // $25FF ¼ÓËÄ×Ö½Ú
   end;
   PIntfJumpEntry = ^TIntfJumpEntry;
+  PPointer = ^Pointer;
 
 var
   OffsetStubPtr: Pointer;

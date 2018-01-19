@@ -1876,15 +1876,26 @@ begin
 end;
 
 procedure TCnInputHelper.OnTimer(Sender: TObject);
+var
+  AControl: TControl;
+  AForm: TCustomForm;
 begin
   Timer.Enabled := False;
   FKeyCount := 0;
   if AcceptDisplay and ParsePosInfo then
   begin
-    ShowList(IsValidKeyQueue);
-  end
-  else
-    HideAndClearList;
+    AControl := CnOtaGetCurrentEditControl;
+    if AControl <> nil then
+    begin
+      AForm := GetParentForm(AControl);
+      if (AForm <> nil) and (GetForegroundWindow = AForm.Handle) then
+      begin
+        ShowList(IsValidKeyQueue);
+        Exit;
+      end;
+    end;
+  end;
+  HideAndClearList;
 end;
 
 //------------------------------------------------------------------------------
