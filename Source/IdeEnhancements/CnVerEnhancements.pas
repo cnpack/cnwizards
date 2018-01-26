@@ -185,12 +185,19 @@ begin
         Sl.Delete(Idx);
     end;
 
-    Sl.Delimiter := ';';
-    Sl.StrictDelimiter := True;
+    S := '';
+    for Idx := 0 to Sl.Count - 1 do
+    begin
+      if S = '' then
+        S := Sl[Idx]
+      else
+        S := S + ';' + Sl[Idx];
+    end;
+
 {$IFDEF DEBUG}
-    CnDebugger.LogMsg('VerEnhance Set VerInfo_Keys: ' + Sl.DelimitedText);
+    CnDebugger.LogMsg('VerEnhance Set VerInfo_Keys: ' + S);
 {$ENDIF}
-    CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csVerInfoKeys, Sl.DelimitedText);
+    CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csVerInfoKeys, S);
   finally
     Sl.Free;
   end;
