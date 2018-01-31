@@ -2112,6 +2112,10 @@ begin
   if IsDprOrPas(EditView.Buffer.FileName) or IsInc(EditView.Buffer.FileName) then
   begin
     Parser := TCnWidePasStructParser.Create;
+{$IFDEF BDS}
+    Parser.UseTabKey := True;
+    Parser.TabWidth := EditControlWrapper.GetTabWidth;
+{$ENDIF}
     Stream := TMemoryStream.Create;
     try
 {$IFDEF UNICODE}
@@ -2345,6 +2349,10 @@ begin
   begin
     // 判断位置，根据需要弹出改名窗体。
     CParser := TCnWideCppStructParser.Create;
+{$IFDEF BDS}
+    CParser.UseTabKey := True;
+    CParser.TabWidth := EditControlWrapper.GetTabWidth;
+{$ENDIF}
     Stream := TMemoryStream.Create;
     try
 {$IFDEF UNICODE}
@@ -2487,6 +2495,7 @@ begin
 
         StartToken := nil;
         EndToken := nil;
+
         if Rit in [ritUnit, ritCppHPair] then
         begin
           // 替换范围为整个 C 时，起始和终结 Token 为列表中头尾俩
@@ -2539,8 +2548,8 @@ begin
             begin
               // 从上一 Token 的尾巴，到现任 Token 的头，再加替换后的文字，都用 AnsiString 来计算
               LastTokenPos := LastToken.TokenPos + Length(LastToken.Token);
-              NewCode := NewCode + string(Copy(AnsiString(CParser.Source), LastTokenPos + 1,
-                TCnWideCppToken(CurTokens[I]).TokenPos - LastTokenPos)) + NewName;
+              NewCode := NewCode + Copy(CParser.Source, LastTokenPos + 1,
+                TCnWideCppToken(CurTokens[I]).TokenPos - LastTokenPos) + NewName;
             end;
 {$IFDEF DEBUG}
             CnDebugger.LogMsg('Cpp NewCode: ' + NewCode);
