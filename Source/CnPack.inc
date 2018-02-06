@@ -2536,8 +2536,18 @@
   // Set an Option Value to DPK Project Options maybe cause DPK Source Corrupt.
 {$ENDIF}
 
+{$IFDEF COMPILER12}
+  // RAD Studio 2009 下 CreateParams 中可能导致死循环
+  {$DEFINE CREATE_PARAMS_BUG}
+{$ENDIF}
+
 {$IFDEF BDS2007_UP}
   {$DEFINE IDE_CONF_MANAGER}
+{$ENDIF}
+
+{$IFDEF BDS2007}
+  // RAD Studio 2007 下开启 AutoComplete 会导致输入中文后退格乱码
+  {$DEFINE COMBOBOX_CHS_BUG}
 {$ENDIF}
 
 {$IFDEF BDS2006_UP}
