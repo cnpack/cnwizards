@@ -1,23 +1,23 @@
 inherited CnWizConfigForm: TCnWizConfigForm
-  Left = 310
-  Top = 72
-  Width = 528
-  Height = 505
+  Left = 351
+  Top = 66
+  Width = 529
+  Height = 528
   BorderIcons = [biSystemMenu]
-  BorderWidth = 6
   Caption = 'CnPack IDE Wizards Settings'
-  Constraints.MinHeight = 471
+  Constraints.MinHeight = 510
   Constraints.MinWidth = 528
+  OldCreateOrder = True
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnResize = FormResize
   PixelsPerInch = 96
   TextHeight = 13
   object PageControl: TPageControl
-    Left = 0
-    Top = 0
-    Width = 500
-    Height = 426
+    Left = 8
+    Top = 8
+    Width = 504
+    Height = 449
     ActivePage = tsWizards
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
@@ -26,10 +26,10 @@ inherited CnWizConfigForm: TCnWizConfigForm
       BorderWidth = 1
       Caption = '&Wizard Settings'
       object pnlWizard: TPanel
-        Left = 309
+        Left = 313
         Top = 0
         Width = 181
-        Height = 396
+        Height = 419
         Align = alRight
         BevelOuter = bvNone
         TabOrder = 0
@@ -170,7 +170,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         end
         object btnConfig: TButton
           Left = 7
-          Top = 366
+          Top = 389
           Width = 75
           Height = 21
           Anchors = [akRight, akBottom]
@@ -180,7 +180,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         end
         object btnRestoreSetting: TButton
           Left = 99
-          Top = 366
+          Top = 389
           Width = 75
           Height = 21
           Anchors = [akRight, akBottom]
@@ -192,16 +192,16 @@ inherited CnWizConfigForm: TCnWizConfigForm
       object pnlListBox: TPanel
         Left = 0
         Top = 0
-        Width = 309
-        Height = 396
+        Width = 313
+        Height = 419
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 1
         object lbWizards: TListBox
           Left = 0
           Top = 33
-          Width = 309
-          Height = 363
+          Width = 313
+          Height = 386
           Align = alClient
           ItemHeight = 45
           Style = lbOwnerDrawFixed
@@ -214,7 +214,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         object pnlListTop: TPanel
           Left = 0
           Top = 0
-          Width = 309
+          Width = 313
           Height = 33
           Align = alTop
           BevelOuter = bvNone
@@ -243,10 +243,10 @@ inherited CnWizConfigForm: TCnWizConfigForm
       Caption = 'Property E&ditor'
       ImageIndex = 2
       object Panel1: TPanel
-        Left = 309
+        Left = 313
         Top = 0
         Width = 181
-        Height = 396
+        Height = 419
         Align = alRight
         BevelOuter = bvNone
         TabOrder = 0
@@ -393,7 +393,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         end
         object btnDesignEditorConfig: TButton
           Left = 7
-          Top = 366
+          Top = 389
           Width = 75
           Height = 21
           Anchors = [akRight, akBottom]
@@ -403,7 +403,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         end
         object btnDesignEditorCustomize: TButton
           Left = 99
-          Top = 366
+          Top = 389
           Width = 75
           Height = 21
           Anchors = [akRight, akBottom]
@@ -415,16 +415,16 @@ inherited CnWizConfigForm: TCnWizConfigForm
       object pnlEditors: TPanel
         Left = 0
         Top = 0
-        Width = 309
-        Height = 396
+        Width = 313
+        Height = 419
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 1
         object lbDesignEditors: TListBox
           Left = 0
           Top = 33
-          Width = 309
-          Height = 363
+          Width = 313
+          Height = 386
           Align = alClient
           ItemHeight = 32
           Style = lbOwnerDrawFixed
@@ -437,7 +437,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         object pnlEditorTop: TPanel
           Left = 0
           Top = 0
-          Width = 309
+          Width = 313
           Height = 33
           Align = alTop
           BevelOuter = bvNone
@@ -691,8 +691,8 @@ inherited CnWizConfigForm: TCnWizConfigForm
     end
   end
   object btnOK: TButton
-    Left = 265
-    Top = 434
+    Left = 277
+    Top = 470
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -702,8 +702,8 @@ inherited CnWizConfigForm: TCnWizConfigForm
     TabOrder = 1
   end
   object btnCancel: TButton
-    Left = 345
-    Top = 434
+    Left = 357
+    Top = 470
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -713,8 +713,8 @@ inherited CnWizConfigForm: TCnWizConfigForm
     TabOrder = 2
   end
   object btnHelp: TButton
-    Left = 425
-    Top = 434
+    Left = 437
+    Top = 470
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -723,8 +723,8 @@ inherited CnWizConfigForm: TCnWizConfigForm
     OnClick = btnHelpClick
   end
   object btnSort: TButton
-    Left = 3
-    Top = 434
+    Left = 8
+    Top = 470
     Width = 75
     Height = 21
     Anchors = [akLeft, akBottom]
