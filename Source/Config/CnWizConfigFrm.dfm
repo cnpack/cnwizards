@@ -727,7 +727,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
     Top = 434
     Width = 75
     Height = 21
-    Anchors = [akRight, akBottom]
+    Anchors = [akLeft, akBottom]
     Caption = '&Advanced'
     TabOrder = 4
     OnClick = btnSortClick
