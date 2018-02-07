@@ -29,7 +29,9 @@ unit CnWizMultiLang;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2012.11.30
+* 修改记录：2018.02.07
+*               调整因主题不同导致客户区尺寸变化导致右下角控件显示不完全的问题。
+*           2012.11.30
 *               不使用CnFormScaler来处理字体，改用固定的96/72进行字体尺寸计算。
 *           2009.01.07
 *               加入位置保存功能
@@ -55,7 +57,7 @@ interface
 {$ENDIF}
 
 uses
-  Windows, Messages, SysUtils, Classes, Forms, ActnList, Controls, Menus,
+  Windows, Messages, SysUtils, Classes, Forms, ActnList, Controls, Menus, Contnrs,
 {$IFNDEF TEST_APP}
 {$IFNDEF STAND_ALONE}
   CnConsts, CnWizClasses, CnWizManager, CnWizUtils, CnWizOptions, CnDesignEditor,
@@ -101,7 +103,10 @@ type
     FHelpAction: TAction;
     procedure OnLanguageChanged(Sender: TObject);
     procedure OnHelp(Sender: TObject);
-    procedure CheckDefaultFontSize();
+    procedure CheckDefaultFontSize;
+    // 部分 Win7 主题会出现右下角超出窗体的现象，原因是 ClientHeight/ClientWidth
+    // 会因为主题而缩小，遍历修复
+    procedure AdjustRightBottomMargin;
 {$ENDIF TEST_APP}
   protected
 {$IFNDEF TEST_APP}
@@ -156,6 +161,7 @@ const
 
   csFixPPI = 96;
   csFixPerInch = 72;
+  csRightBottomMargin = 8;
 
 {$IFDEF STAND_ALONE}
   csLangDir = 'Lang\';
@@ -358,6 +364,7 @@ begin
   end;
   DoLanguageChanged(CnLanguageManager);
   inherited;
+  AdjustRightBottomMargin;
 end;
 
 procedure TCnTranslateForm.DoDestroy;
@@ -476,6 +483,87 @@ begin
 {$ELSE}
     CnWizUtils.ShowHelp(Topic);
 {$ENDIF}
+  end;
+end;
+
+procedure TCnTranslateForm.AdjustRightBottomMargin;
+var
+  I, V, MinH, MinW: Integer;
+  Beyond: Boolean;
+  AControl: TControl;
+  List: TObjectList;
+  AnchorsArray: array of TAnchors;
+begin
+  Beyond := False;
+  MinH := csRightBottomMargin;
+  MinW := csRightBottomMargin;
+
+  List := TObjectList.Create(False);
+  try
+    for I := ControlCount - 1 downto 0 do
+    begin
+      V := ClientWidth - BorderWidth - Controls[I].Left - Controls[I].Width;
+      if V < csRightBottomMargin then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('AdjustRightBottomMargin. Found Width Beyond Controls: %s, %d.',
+          [Controls[I].Name, V]);
+{$ENDIF}
+        List.Add(Controls[I]);
+        if V < MinW then
+          MinW := V;
+      end;
+
+      V := ClientHeight - BorderWidth - Controls[I].Top - Controls[I].Height;
+      if V < csRightBottomMargin then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('AdjustRightBottomMargin. Found Height Beyond Controls: %s, %d',
+          [Controls[I].Name, V]);
+{$ENDIF}
+        List.Add(Controls[I]);
+        if V < MinH then
+          MinH := V;
+      end;
+    end;
+
+    if List.Count > 0 then
+    begin
+      // List 中的控件，需要保存其 Anchors，然后设置 Left/Top
+      // 然后根据 MinW/MinH 重设窗体宽高，然后将 Anchors 设置回来
+      SetLength(AnchorsArray, List.Count);
+      for I := 0 to List.Count - 1 do
+      begin
+        AControl := TControl(List[I]);
+        AnchorsArray[I] := AControl.Anchors;
+        if AControl.Anchors <> [akTop, akLeft] then
+          AControl.Anchors := [akTop, akLeft];
+      end;
+
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('AdjustRightBottomMargin Before Change Form Width %d, Height %d.',
+        [Width, Height]);
+{$ENDIF}
+
+      if MinW < csRightBottomMargin then
+        Width := Width + (csRightBottomMargin - MinW);
+      if MinH < csRightBottomMargin then
+        Height := Height + (csRightBottomMargin - MinH);
+
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('AdjustRightBottomMargin Changed Form to Width %d, Height %d.',
+        [Width, Height]);
+{$ENDIF}
+
+      for I := 0 to List.Count - 1 do
+      begin
+        AControl := TControl(List[I]);
+        if AControl.Anchors <> AnchorsArray[I] then
+          AControl.Anchors := AnchorsArray[I];
+      end;
+    end;
+  finally
+    List.Free;
   end;
 end;
 
