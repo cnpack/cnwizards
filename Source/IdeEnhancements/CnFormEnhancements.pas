@@ -819,22 +819,6 @@ end;
 procedure TCnFloatSnapPanel.UpdatePosition;
 var
   X, Y: Integer;
-
-  function ModalFormExists: Boolean;
-  var
-    i: Integer;
-  begin
-    for i := 0 to Screen.CustomFormCount - 1 do
-    begin
-      if fsModal in Screen.CustomForms[i].FormState then
-      begin
-        Result := True;
-        Exit;
-      end
-    end;
-    Result := False;
-  end;
-
 begin
   if FAllowShow and (SnapForm <> nil) and CanShow and
     not (csDestroying in SnapForm.ComponentState) and

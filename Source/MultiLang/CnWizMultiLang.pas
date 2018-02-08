@@ -443,7 +443,7 @@ end;
 
 procedure TCnTranslateForm.CreateParams(var Params: TCreateParams);
 var
-  OldLong: Longint;
+  OldLong: LongInt;
   AHandle: THandle;
   NeedChange: Boolean;
 begin
@@ -489,12 +489,10 @@ end;
 procedure TCnTranslateForm.AdjustRightBottomMargin;
 var
   I, V, MinH, MinW: Integer;
-  Beyond: Boolean;
   AControl: TControl;
   List: TObjectList;
   AnchorsArray: array of TAnchors;
 begin
-  Beyond := False;
   MinH := csRightBottomMargin;
   MinW := csRightBottomMargin;
 
