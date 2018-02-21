@@ -2994,7 +2994,7 @@ const
 procedure TCnSrcEditorKey.LoadSettings(Ini: TCustomIniFile);
 begin
   FSmartCopy := Ini.ReadBool(csEditorKey, csSmartCopy, True);
-  FSmartPaste := Ini.ReadBool(csEditorKey, csSmartPaste, True);
+  FSmartPaste := Ini.ReadBool(csEditorKey, csSmartPaste, False); // 粘贴时自动对齐默认不启用
   FPasteReplace := Ini.ReadBool(csEditorKey, csPasteReplace, False);
   FShiftEnter := Ini.ReadBool(csEditorKey, csShiftEnter, True);
   FAutoIndent := Ini.ReadBool(csEditorKey, csAutoIndent, True);

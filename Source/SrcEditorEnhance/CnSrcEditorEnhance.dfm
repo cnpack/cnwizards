@@ -47,7 +47,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
     Top = 8
     Width = 385
     Height = 444
-    ActivePage = ts2
+    ActivePage = ts1
     TabOrder = 0
     object ts1: TTabSheet
       Caption = 'Code &Editor'
