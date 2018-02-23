@@ -51,10 +51,10 @@ uses
   CnCheckTreeView;
 
 type
-
   TOTAFileNotificationSet = set of TOTAFileNotification;
   TCnWizSourceEditorNotifyTypeSet = set of TCnWizSourceEditorNotifyType;
   TCnWizFormEditorNotifyTypeSet = set of TCnWizFormEditorNotifyType;
+  TCnWizAppEventTypeSet = set of TCnWizAppEventType;
 
   TCnScriptItem = class(TCnAssignableCollectionItem)
   private
@@ -70,6 +70,7 @@ type
     FFormEditorNotifyType: TCnWizFormEditorNotifyTypeSet;
     FSourceEditorNotifyType: TCnWizSourceEditorNotifyTypeSet;
     FFileNotifyCode: TOTAFileNotificationSet;
+    FAppEventType: TCnWizAppEventTypeSet;
     function GetRelFileName: string;
     procedure SetRelFileName(const Value: string);
   public
@@ -86,6 +87,8 @@ type
       read FSourceEditorNotifyType write FSourceEditorNotifyType default [];
     property FormEditorNotifyType: TCnWizFormEditorNotifyTypeSet
       read FFormEditorNotifyType write FFormEditorNotifyType default [];
+    property AppEventType: TCnWizAppEventTypeSet read FAppEventType
+      write FAppEventType default [];
     property Enabled: Boolean read FEnabled write FEnabled default True;
     property Confirm: Boolean read FConfirm write FConfirm default True;
     property ShortCut: TShortCut read FShortCut write FShortCut default 0;
@@ -216,6 +219,8 @@ type
     procedure OnBeforeCompile(const Project: IOTAProject;
       IsCodeInsight: Boolean; var Cancel: Boolean);
     procedure OnAfterCompile(Succeeded: Boolean; IsCodeInsight: Boolean);
+    procedure OnAppEventNotify(EventType: TCnWizAppEventType);
+    procedure OnActiveFormNotify(Sender: TObject);
   protected
     function GetHasConfig: Boolean; override;
     procedure SubActionExecute(Index: Integer); override;
@@ -302,7 +307,7 @@ function TCnScriptCollection.LoadFromFile(const FileName: string;
   Append: Boolean): Boolean;
 var
   Col: TCnScriptCollection;
-  i: Integer;
+  I: Integer;
 begin
   Result := False;
   try
@@ -312,7 +317,7 @@ begin
     Col := TCnScriptCollection.Create;
     try
       TOmniXMLReader.LoadFromFile(Col, FileName);
-      for i := 0 to Col.Count - 1 do
+      for I := 0 to Col.Count - 1 do
         Add.Assign(Col.Items[I]);
       Result := True;
     finally
@@ -336,12 +341,12 @@ end;
 
 function TCnScriptCollection.IndexOfName(const AName: string): Integer;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to Count - 1 do
-    if SameText(Items[i].Name, AName) then
+  for I := 0 to Count - 1 do
+    if SameText(Items[I].Name, AName) then
     begin
-      Result := i;
+      Result := I;
       Exit;
     end;
   Result := -1;
@@ -378,6 +383,7 @@ var
   FileNotifyCode: TOTAFileNotification;
   SourceEditorNotifyType: TCnWizSourceEditorNotifyType;
   FormEditorNotifyType: TCnWizFormEditorNotifyType;
+  AppEventType: TCnWizAppEventType;
 begin
   inherited;
 
@@ -406,6 +412,12 @@ begin
             for FormEditorNotifyType := Low(FormEditorNotifyType) to High(FormEditorNotifyType) do
               chktvMode.Items.AddChild(Node, GetEnumName(TypeInfo(TCnWizFormEditorNotifyType),
                 Ord(FormEditorNotifyType)));
+          end;
+        smApplicationEvent:
+          begin
+            for AppEventType := Low(TCnWizAppEventType) to High(TCnWizAppEventType) do
+              chktvMode.Items.AddChild(Node, GetEnumName(TypeInfo(TCnWizAppEventType),
+                Ord(AppEventType)));
           end;
       end;
     end;
@@ -569,6 +581,8 @@ var
   SourceEditorNotifyTypeSet: TCnWizSourceEditorNotifyTypeSet;
   FormEditorNotifyType: TCnWizFormEditorNotifyType;
   FormEditorNotifyTypeSet: TCnWizFormEditorNotifyTypeSet;
+  AppEventType: TCnWizAppEventType;
+  AppEventTypeSet: TCnWizAppEventTypeSet;
 begin
   Item.Name := edtName.Text;
   Item.Comment := edtComment.Text;
@@ -582,6 +596,7 @@ begin
   FileNotifyCodeSet := [];
   SourceEditorNotifyTypeSet := [];
   FormEditorNotifyTypeSet := [];
+  AppEventTypeSet := [];
   Node := chktvMode.Items.GetFirstNode;
   for Mode := Low(Mode) to High(Mode) do
   begin
@@ -610,6 +625,14 @@ begin
           if FormEditorNotifyTypeSet <> [] then
             Include(ModeSet, Mode);
         end;
+      smApplicationEvent:
+        begin
+          for AppEventType := Low(TCnWizAppEventType) to High(TCnWizAppEventType) do
+            if chktvMode.Checked[Node[Ord(AppEventType)]] then
+              Include(AppEventTypeSet, AppEventType);
+          if AppEventTypeSet <> [] then
+            Include(ModeSet, Mode);
+        end;
       else
         begin
           if chktvMode.Checked[Node] then
@@ -623,6 +646,7 @@ begin
   Item.FileNotifyCode := FileNotifyCodeSet;
   Item.SourceEditorNotifyType := SourceEditorNotifyTypeSet;
   Item.FormEditorNotifyType := FormEditorNotifyTypeSet;
+  Item.AppEventType := AppEventTypeSet;
   lvList.UpdateItems(Item.Index, Item.Index);
 end;
 
@@ -633,6 +657,7 @@ var
   FileNotifyCode: TOTAFileNotification;
   SourceEditorNotifyType: TCnWizSourceEditorNotifyType;
   FormEditorNotifyType: TCnWizFormEditorNotifyType;
+  AppEventType: TCnWizAppEventType;
 begin
   edtName.Text := Item.Name;
   edtComment.Text := Item.Comment;
@@ -665,6 +690,12 @@ begin
             for FormEditorNotifyType := Low(FormEditorNotifyType) to High(FormEditorNotifyType) do
               chktvMode.Checked[Node[Ord(FormEditorNotifyType)]] :=
                 FormEditorNotifyType in Item.FormEditorNotifyType;
+          end;
+        smApplicationEvent:
+          begin
+            for AppEventType := Low(TCnWizAppEventType) to High(TCnWizAppEventType) do
+              chktvMode.Checked[Node[Ord(AppEventType)]] :=
+                AppEventType in Item.AppEventType;
           end;
         else
           chktvMode.Checked[Node] := True;
@@ -771,6 +802,8 @@ begin
   CnWizNotifierServices.AddAfterCompileNotifier(OnAfterCompile);
   CnWizNotifierServices.AddSourceEditorNotifier(OnSourceEditorNotify);
   CnWizNotifierServices.AddFormEditorNotifier(OnFormEditorNotify);
+  CnWizNotifierServices.AddAppEventNotifier(OnAppEventNotify);
+  CnWizNotifierServices.AddActiveFormNotifier(OnActiveFormNotify);
 end;
 
 destructor TCnScriptWizard.Destroy;
@@ -780,6 +813,8 @@ begin
   CnWizNotifierServices.RemoveAfterCompileNotifier(OnAfterCompile);
   CnWizNotifierServices.RemoveSourceEditorNotifier(OnSourceEditorNotify);
   CnWizNotifierServices.RemoveFormEditorNotifier(OnFormEditorNotify);
+  CnWizNotifierServices.RemoveAppEventNotifier(OnAppEventNotify);
+  CnWizNotifierServices.RemoveActiveFormNotifier(OnActiveFormNotify);
   FMgr.Free;
   FScripts.Free;
   FSearchPath.Free;
@@ -800,17 +835,17 @@ end;
 
 procedure TCnScriptWizard.UpdateScriptActions;
 var
-  i: Integer;
+  I: Integer;
 begin
   WizShortCutMgr.BeginUpdate;
   try
     while SubActionCount > IdBrowseDemo + 1 do
       DeleteSubAction(IdBrowseDemo + 1);
-    for i := 0 to FScripts.Count - 1 do
-      with FScripts[i] do
+    for I := 0 to FScripts.Count - 1 do
+      with FScripts[I] do
         if Enabled and (smManual in Mode) then
         begin
-          ActionIndex := RegisterASubAction(SCnScriptItem + IntToStr(i),
+          ActionIndex := RegisterASubAction(SCnScriptItem + IntToStr(I),
             Name, ShortCut, Comment, IconName);
           SubActions[ActionIndex].ShortCut := ShortCut;
         end
@@ -838,7 +873,7 @@ end;
 
 procedure TCnScriptWizard.SubActionExecute(Index: Integer);
 var
-  i: Integer;
+  I: Integer;
   Event: TCnScriptEvent;
 begin
   if not Active then Exit;
@@ -857,15 +892,15 @@ begin
   end
   else
   begin
-    for i := 0 to FScripts.Count - 1 do
-      if FScripts[i].Enabled and (FScripts[i].ActionIndex = Index) then
+    for I := 0 to FScripts.Count - 1 do
+      if FScripts[I].Enabled and (FScripts[I].ActionIndex = Index) then
       begin
-        if not FScripts[i].Confirm or QueryDlg(Format(SCnScriptExecConfirm,
-          [FScripts[i].Name])) then
+        if not FScripts[I].Confirm or QueryDlg(Format(SCnScriptExecConfirm,
+          [FScripts[I].Name])) then
         begin
           Event := TCnScriptEvent.Create(smManual);
           try
-            DoExecute(FScripts[i], Event);
+            DoExecute(FScripts[I], Event);
           finally
             Event.Free;
           end;                                  
@@ -900,13 +935,13 @@ end;
 
 procedure TCnScriptWizard.DoExecute(AEvent: TCnScriptEvent);
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to FScripts.Count - 1 do
-    if FScripts[i].Enabled and (AEvent.Mode in FScripts[i].Mode) and
-      FileExists(FScripts[i].FileName) then
+  for I := 0 to FScripts.Count - 1 do
+    if FScripts[I].Enabled and (AEvent.Mode in FScripts[I].Mode) and
+      FileExists(FScripts[I].FileName) then
     begin
-      FMgr.ExecuteScript(FScripts[i].FileName, AEvent);
+      FMgr.ExecuteScript(FScripts[I].FileName, AEvent);
     end;  
 end;
 
@@ -1020,23 +1055,53 @@ begin
     finally
       Event.Free;
     end;
-  end;    
+  end;
+end;
+
+procedure TCnScriptWizard.OnAppEventNotify(EventType: TCnWizAppEventType);
+var
+  I: Integer;
+  Event: TCnScriptApplicationEventNotify;
+begin
+  Event := TCnScriptApplicationEventNotify.Create(EventType);
+  try
+    for I := 0 to FScripts.Count - 1 do
+      if FScripts[I].Enabled and (Event.Mode in FScripts[I].Mode) and
+        (EventType in FScripts[I].AppEventType) then
+      begin
+        FMgr.ExecuteScript(FScripts[I].FileName, Event);
+      end;
+  finally
+    Event.Free;
+  end;
+end;
+
+procedure TCnScriptWizard.OnActiveFormNotify(Sender: TObject);
+var
+  Event: TCnScriptActiveFormChanged;
+begin
+  Event := TCnScriptActiveFormChanged.Create;
+  try
+    DoExecute(Event);
+  finally
+    Event.Free;
+  end;
 end;
 
 procedure TCnScriptWizard.OnFileNotify(NotifyCode: TOTAFileNotification;
   const FileName: string);
 var
   Event: TCnScriptFileNotify;
-  i: Integer;
+  I: Integer;
 begin
   Event := TCnScriptFileNotify.Create(NotifyCode, FileName);
   try
-    for i := 0 to FScripts.Count - 1 do
-      if FScripts[i].Enabled and (Event.Mode in FScripts[i].Mode) and
-        (NotifyCode in FScripts[i].FileNotifyCode) and
-        FileExists(FScripts[i].FileName) then
+    for I := 0 to FScripts.Count - 1 do
+      if FScripts[I].Enabled and (Event.Mode in FScripts[I].Mode) and
+        (NotifyCode in FScripts[I].FileNotifyCode) and
+        FileExists(FScripts[I].FileName) then
       begin
-        FMgr.ExecuteScript(FScripts[i].FileName, Event);
+        FMgr.ExecuteScript(FScripts[I].FileName, Event);
       end;
   finally
     Event.Free;
@@ -1048,16 +1113,16 @@ procedure TCnScriptWizard.OnSourceEditorNotify(
   EditView: IOTAEditView);
 var
   Event: TCnScriptSourceEditorNotify;
-  i: Integer;
+  I: Integer;
 begin
   Event := TCnScriptSourceEditorNotify.Create(SourceEditor, NotifyType, EditView);
   try
-    for i := 0 to FScripts.Count - 1 do
-      if FScripts[i].Enabled and (Event.Mode in FScripts[i].Mode) and
-        (NotifyType in FScripts[i].SourceEditorNotifyType) and
-        FileExists(FScripts[i].FileName) then
+    for I := 0 to FScripts.Count - 1 do
+      if FScripts[I].Enabled and (Event.Mode in FScripts[I].Mode) and
+        (NotifyType in FScripts[I].SourceEditorNotifyType) and
+        FileExists(FScripts[I].FileName) then
       begin
-        FMgr.ExecuteScript(FScripts[i].FileName, Event);
+        FMgr.ExecuteScript(FScripts[I].FileName, Event);
       end;
   finally
     Event.Free;
@@ -1069,17 +1134,17 @@ procedure TCnScriptWizard.OnFormEditorNotify(FormEditor: IOTAFormEditor;
   Component: TComponent; const OldName, NewName: string);
 var
   Event: TCnScriptFormEditorNotify;
-  i: Integer;
+  I: Integer;
 begin
   Event := TCnScriptFormEditorNotify.Create(FormEditor, NotifyType, Component,
     OldName, NewName);
   try
-    for i := 0 to FScripts.Count - 1 do
-      if FScripts[i].Enabled and (Event.Mode in FScripts[i].Mode) and
-        (NotifyType in FScripts[i].FormEditorNotifyType) and
-        FileExists(FScripts[i].FileName) then
+    for I := 0 to FScripts.Count - 1 do
+      if FScripts[I].Enabled and (Event.Mode in FScripts[I].Mode) and
+        (NotifyType in FScripts[I].FormEditorNotifyType) and
+        FileExists(FScripts[I].FileName) then
       begin
-        FMgr.ExecuteScript(FScripts[i].FileName, Event);
+        FMgr.ExecuteScript(FScripts[I].FileName, Event);
       end;
   finally
     Event.Free;

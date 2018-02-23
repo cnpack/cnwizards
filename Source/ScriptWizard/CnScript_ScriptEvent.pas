@@ -103,6 +103,24 @@ begin
   end;
 end;
 
+procedure SIRegister_TCnScriptApplicationEventNotify(CL: TPSPascalCompiler);
+begin
+  //with RegClassS(CL,'TCnScriptEvent', 'TCnScriptApplicationEventNotify') do
+  with CL.AddClass(CL.FindClass('TCnScriptEvent'), TCnScriptApplicationEventNotify) do
+  begin
+    RegisterPublishedProperties;
+  end;
+end;
+
+procedure SIRegister_TCnScriptActiveFormChanged(CL: TPSPascalCompiler);
+begin
+  //with RegClassS(CL,'TCnScriptEvent', 'TCnScriptActiveFormChanged') do
+  with CL.AddClass(CL.FindClass('TCnScriptEvent'), TCnScriptActiveFormChanged) do
+  begin
+    RegisterPublishedProperties;
+  end;
+end;
+
 procedure SIRegister_TCnScriptBeforeCompile(CL: TPSPascalCompiler);
 begin
   //with RegClassS(CL,'TCnScriptEvent', 'TCnScriptBeforeCompile') do
@@ -151,7 +169,8 @@ end;
 procedure SIRegister_ScriptEvent(CL: TPSPascalCompiler);
 begin
   CL.AddTypeS('TCnScriptMode', '( smManual, smIDELoaded, smFileNotify, smBefore'
-    + 'Compile, smAfterCompile, smSourceEditorNotify, smFormEditorNotify )');
+    + 'Compile, smAfterCompile, smSourceEditorNotify, smFormEditorNotify, '
+    + 'smApplicationEvent, smActiveFormChanged)');
   CL.AddTypeS('TCnScriptModeSet', 'set of TCnScriptMode');
   SIRegister_TCnScriptEvent(CL);
   SIRegister_TCnScriptManual(CL);
@@ -159,6 +178,10 @@ begin
   SIRegister_TCnScriptFileNotify(CL);
   SIRegister_TCnScriptBeforeCompile(CL);
   SIRegister_TCnScriptAfterCompile(CL);
+  CL.AddTypeS('TCnWizAppEventType', '( aeActivate, aeDeactivate, aeMinimize,'
+    + ' aeRestore, aeHint )');
+  SIRegister_TCnScriptApplicationEventNotify(CL);
+  SIRegister_TCnScriptActiveFormChanged(CL);
   CL.AddTypeS('TCnWizSourceEditorNotifyType', '( setOpened, setClosing, setModi'
     + 'fied, setEditViewInsert, setEditViewRemove, setEditViewActivated )');
   SIRegister_TCnScriptSourceEditorNotify(CL);
@@ -179,6 +202,20 @@ end;
 procedure RIRegister_ScriptEvent_Routines(S: TPSExec);
 begin
   S.RegisterDelphiFunction(@Event_P, 'Event', cdRegister);
+end;
+
+procedure RIRegister_TCnScriptApplicationEventNotify(CL: TPSRuntimeClassImporter);
+begin
+  with CL.Add(TCnScriptApplicationEventNotify) do
+  begin
+  end;
+end;
+
+procedure RIRegister_TCnScriptActiveFormChanged(CL: TPSRuntimeClassImporter);
+begin
+  with CL.Add(TCnScriptActiveFormChanged) do
+  begin
+  end;
 end;
 
 procedure RIRegister_TCnScriptFormEditorNotify(CL: TPSRuntimeClassImporter);
@@ -247,6 +284,8 @@ begin
   RIRegister_TCnScriptAfterCompile(CL);
   RIRegister_TCnScriptSourceEditorNotify(CL);
   RIRegister_TCnScriptFormEditorNotify(CL);
+  RIRegister_TCnScriptApplicationEventNotify(CL);
+  RIRegister_TCnScriptActiveFormChanged(CL);
 end;
 
 { TPSImport_ScriptEvent }

@@ -13,13 +13,64 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ScriptEvent;
 
-{$I TypInfo.inc}
+{******************************************************************************}
+{                                                                              }
+{    Note:                                                                     }
+{        There's a Global Var Named "Event" that Specified How this            }
+{        Script is Triggered and Run. Event can be Directly Accessed           }
+{        in Script.                                                            }
+{                                                                              }
+{    You can add it to Script Library and Check the Events to Trigger          }
+{    to see the Event Output in CnDebugViewer.                                 }
+{                                                                              }
+{******************************************************************************}
 
-// Event is a Global var that specified how this script is triggered and run.
-
+var
+  S: string;
+  BeforeCompile: TCnScriptBeforeCompile;
+  AfterCompile: TCnScriptAfterCompile;
+  FileNotify: TCnScriptFileNotify;
+  FormEditorNotify: TCnScriptFormEditorNotify;
+  AppEventNotify: TCnScriptApplicationEventNotify;
 begin
-  Writeln('Event: ' + Event.ClassName);
-  LogObject(1, '', Event);
+  CnDebugger.LogMsg('-- Event: ' + Event.ClassName);
+  
+  if Event is TCnScriptManual then
+    CnDebugger.LogMsg('-- Manual Executed.')
+  else if Event is TCnScriptIDELoaded then
+    CnDebugger.LogMsg('-- Auto Executed after IDE Loaded.')
+  else if Event is TCnScriptBeforeCompile then
+  begin
+    BeforeCompile := TCnScriptBeforeCompile(Event);
+    CnDebugger.LogMsg('-- Executed Before Compiling.');
+//    if BeforeCompile.Project <> nil then
+//      CnDebugger.LogFmt('-- Executed Before Compiling %s', [BeforeCompile.Project.GetFileName]);
+  end
+  else if Event is TCnScriptAfterCompile then
+  begin
+    AfterCompile := TCnScriptAfterCompile(Event);
+    CnDebugger.LogFmt('-- Executed After Compiling. Succeeded: %d', [Integer(AfterCompile.Succeeded)])
+  end
+  else if Event is TCnScriptFileNotify then
+  begin
+    FileNotify := TCnScriptFileNotify(Event);
+    CnDebugger.LogFmt('-- Executed by File Notification: Type %d. File: %s.',
+      [Ord(FileNotify.FileNotifyCode), FileNotify.FileName]);
+  end
+  else if Event is TCnScriptFormEditorNotify then
+  begin
+    FormEditorNotify := TCnScriptFormEditorNotify(Event);
+    S := '<None>';
+    if FormEditorNotify.Component <> nil then
+      S := FormEditorNotify.Component.Name;
+
+    CnDebugger.LogFmt('-- Executed by Form Notification: Type %d. Component: %s. Old Name %s, New Name %s.',
+      [Ord(FormEditorNotify.NotifyType), S, FormEditorNotify.OldName, FormEditorNotify.NewName]);
+  end
+  else if Event is TCnScriptApplicationEventNotify then
+  begin
+    AppEventNotify := TCnScriptApplicationEventNotify(Event);
+    CnDebugger.LogFmt('-- Executed by AppEvents. Type %d', [Ord(AppEventNotify.AppEventType)]);
+  end;
 end.
 
- 

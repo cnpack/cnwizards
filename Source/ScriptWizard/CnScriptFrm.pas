@@ -51,7 +51,8 @@ uses
 
 type
   TCnScriptMode = (smManual, smIDELoaded, smFileNotify, smBeforeCompile,
-    smAfterCompile, smSourceEditorNotify, smFormEditorNotify);
+    smAfterCompile, smSourceEditorNotify, smFormEditorNotify, smApplicationEvent,
+    smActiveFormChanged);
   TCnScriptModeSet = set of TCnScriptMode;
 
 {$M+} // Generate RTTI
@@ -137,6 +138,20 @@ type
     property Component: TComponent read FComponent;
     property OldName: string read FOldName;
     property NewName: string read FNewName;
+  end;
+
+  TCnScriptApplicationEventNotify = class(TCnScriptEvent)
+  private
+    FAppEventType: TCnWizAppEventType;
+  public
+    constructor Create(EventType: TCnWizAppEventType);
+  published
+    property AppEventType: TCnWizAppEventType read FAppEventType;
+  end;
+
+  TCnScriptActiveFormChanged = class(TCnScriptEvent)
+  public
+    constructor Create;
   end;
 
   TCnScriptCreator = class(TCnTemplateModuleCreator)
@@ -339,6 +354,22 @@ begin
   FComponent := AComponent;
   FOldName := AOldName;
   FNewName := ANewName; 
+end;
+
+{ TCnScriptApplicationEventNotify }
+
+constructor TCnScriptApplicationEventNotify.Create(
+  EventType: TCnWizAppEventType);
+begin
+  inherited Create(smApplicationEvent);
+  FAppEventType := EventType;
+end;
+
+{ TCnScriptActiveFormChanged }
+
+constructor TCnScriptActiveFormChanged.Create;
+begin
+  inherited Create(smActiveFormChanged);
 end;
 
 { TCnScriptCreator }
