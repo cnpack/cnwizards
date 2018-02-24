@@ -492,6 +492,7 @@ var
   AControl: TControl;
   List: TObjectList;
   AnchorsArray: array of TAnchors;
+  Added: Boolean;
 begin
   MinH := csRightBottomMargin;
   MinW := csRightBottomMargin;
@@ -500,6 +501,7 @@ begin
   try
     for I := ControlCount - 1 downto 0 do
     begin
+      Added := False;
       V := ClientWidth - BorderWidth - Controls[I].Left - Controls[I].Width;
       if V < csRightBottomMargin then
       begin
@@ -507,7 +509,10 @@ begin
         CnDebugger.LogFmt('AdjustRightBottomMargin. Found Width Beyond Controls: %s, %d.',
           [Controls[I].Name, V]);
 {$ENDIF}
+
         List.Add(Controls[I]);
+        Added := True;
+
         if V < MinW then
           MinW := V;
       end;
@@ -519,7 +524,9 @@ begin
         CnDebugger.LogFmt('AdjustRightBottomMargin. Found Height Beyond Controls: %s, %d',
           [Controls[I].Name, V]);
 {$ENDIF}
-        List.Add(Controls[I]);
+        if not Added then
+          List.Add(Controls[I]);
+
         if V < MinH then
           MinH := V;
       end;
