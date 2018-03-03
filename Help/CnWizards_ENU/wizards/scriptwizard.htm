@@ -117,7 +117,6 @@
   <li><p class="text" align="left"><b>smAfterCompile</b>: Event after compiling.</p>
   </li>
   <li><p class="text" align="left"><b>smFileNotify</b>: Event of File operations, include below: </p>
-  </li>
   <ul>
   	<li><p class="text" align="left"><b>ofnFileOpening</b>: Event of opening a file.</p></li>
   	<li><p class="text" align="left"><b>ofnFileOpened</b>: Event after opening a file.</p></li>
@@ -128,7 +127,8 @@
   	<li><p class="text" align="left"><b>ofnProjectDesktopSave</b>: Event of current project desktop settings save.</p></li>
   	<li><p class="text" align="left"><b>ofnPackageInstalled</b>: Event after a package installed.</p></li>
   	<li><p class="text" align="left"><b>ofnPackageUninstalled</b>: Event after a package uninstalled.</p></li>
-  </ul>	
+  </ul>
+  </li>
   <li><p class="text" align="left"><b>smSourceEditorNotify</b>: Event of Source Editor operations, include below:</p>
   <ul>
   	<li><p class="text" align="left"><b>setOpened</b>: Event after a source editor open a file.</p></li>
@@ -151,6 +151,17 @@
   <li><p class="text" align="left"><b>fetComponentDestorying</b>: Event when delete a component in form editor.</p></li>
   <li><p class="text" align="left"><b>fetComponentRenamed</b>: Event when renaming a component in form editor.</p></li>
   </ul>
+  </li>
+  <li><p class="text" align="left"><b>smApplicationEvent</b>: Event of Application Object's Events, include below:</p>
+  <ul>
+  <li><p class="text" align="left"><b>aeActivate</b>: Event when IDE Activated.</p></li>
+  <li><p class="text" align="left"><b>aeDeactivate</b>: Event when IDE Deactivated.</p></li>
+  <li><p class="text" align="left"><b>aeMinimize</b>: Event when IDE Minimized.</p></li>
+  <li><p class="text" align="left"><b>aeRestore</b>: Event when IDE Restored from Minimized State.</p></li>
+  <li><p class="text" align="left"><b>aeHint</b>: Event when showing Hint.</p></li>
+  </ul>
+  </li>
+  <li><p class="text" align="left"><b>smActiveFormChanged</b>: Event when acitve Form changed in IDE.</p>
   </li>
 </ul>
   </li>
@@ -193,7 +204,7 @@
 <p class="text" align="left">You can use your favorite editor to write PascalScript code. Certainly, IDE's Code Editor is a good choice. You can write a script just like write Object Pascal code, and use the Code Input Helper of CnWizards to help your writing in IDE's Code Editor. Note: To use Code Input Helper or IDE's Code Insight, you need to add all needed path to your IDE Search Path. For example, if ToolsApi was used, "Source\ToolsAPI" directory need to be added. And if CnWizUtils.pas was used, "PSDeclEx" directory should also be added.</p>
 <p class="text" align="left">&nbsp;</p>
 <p class="title">How to Play with Event?</p>
-<p class="text" align="left">A Pascal Script can be called manually or by event(s). You can use the global object "Event" to obtain the event type or parameters. Event is an instance of TCnScriptEvent. Its Mode property represents the event type, corresponding to smManual, smIDELoaded, smBeforeCompile, smAfterCompile, smFileNotify, smSourceEditorNotify, smFormEditorNotify. So we can know the event type if we check Event.Mode value in script. Some events contains not only the event type, but also some other information, e.g. filename, source editor, etc. In this situation, Event is an instance of TCnScriptEvent's sub class. We can use a typecast to convert Event to TCnScriptEvent's sub class to get more parameters.</p>
+<p class="text" align="left">A Pascal Script can be called manually or by event(s). You can use the global object "Event" to obtain the event type or parameters. Event is an instance of TCnScriptEvent. Its Mode property represents the event type, corresponding to smManual, smIDELoaded, smBeforeCompile, smAfterCompile, smFileNotify, smSourceEditorNotify, smFormEditorNotify, smApplicationEvent, smActiveFormChanged. So we can know the event type if we check Event.Mode value in script. Some events contains not only the event type, but also some other information, e.g. filename, source editor, etc. In this situation, Event is an instance of TCnScriptEvent's sub class. We can use a typecast to convert Event to TCnScriptEvent's sub class to get more parameters.</p>
 <p class="text" align="left">More information, please refer to PSDeclEx\ScriptEvent.pas and other Event demos in PSDemo directory.</p>
 <p class="text" align="left">&nbsp;</p>
 <p class="title">Links</p>

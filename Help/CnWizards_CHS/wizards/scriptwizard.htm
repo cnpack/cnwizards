@@ -117,7 +117,6 @@
   <li><p class="text" align="left"><b>smAfterCompile</b>：编译后调用。</p>
   </li>
   <li><p class="text" align="left"><b>smFileNotify</b>：文件事件触发时调用，包括以下事件：</p>
-  </li>
   <ul>
   	<li><p class="text" align="left"><b>ofnFileOpening</b>：某文件即将打开时触发的事件。</p></li>
   	<li><p class="text" align="left"><b>ofnFileOpened</b>：某文件打开后触发的事件。</p></li>
@@ -128,7 +127,8 @@
   	<li><p class="text" align="left"><b>ofnProjectDesktopSave</b>：当前工程的桌面设置保存时触发的事件。</p></li>
   	<li><p class="text" align="left"><b>ofnPackageInstalled</b>：包文件加载后触发的事件。</p></li>
   	<li><p class="text" align="left"><b>ofnPackageUninstalled</b>：包文件卸载后触发的事件。</p></li>
-  </ul>	
+  </ul>
+  </li>
   <li><p class="text" align="left"><b>smSourceEditorNotify</b>：源码编辑器事件触发时调用，包括以下事件：</p>
   <ul>
   	<li><p class="text" align="left"><b>setOpened</b>：源码编辑器打开一文件时触发的事件。</p></li>
@@ -151,6 +151,17 @@
   <li><p class="text" align="left"><b>fetComponentDestorying</b>：窗体编辑器上删除组件前触发的事件。</p></li>
   <li><p class="text" align="left"><b>fetComponentRenamed</b>：窗体编辑器上组件改名时触发的事件。</p></li>
   </ul>
+  </li>
+  <li><p class="text" align="left"><b>smApplicationEvent</b>：Application对象的指定事件触发时调用，包括以下事件：</p>
+  <ul>
+  <li><p class="text" align="left"><b>aeActivate</b>：IDE 切换至前台时触发的事件。</p></li>
+  <li><p class="text" align="left"><b>aeDeactivate</b>：IDE 切换至后台时触发的事件。</p></li>
+  <li><p class="text" align="left"><b>aeMinimize</b>：IDE 最小化时触发的事件。</p></li>
+  <li><p class="text" align="left"><b>aeRestore</b>：IDE 从最小化恢复正常时触发的事件。</p></li>
+  <li><p class="text" align="left"><b>aeHint</b>：显示Hint时触发的事件。</p></li>
+  </ul>
+  </li>
+  <li><p class="text" align="left"><b>smActiveFormChanged</b>：IDE 内窗体切换时触发的事件。</p>
   </li>
 </ul>
   </li>
@@ -196,7 +207,7 @@ Open Tools API 和 IDE 功能的访问封装。这些文件也不参与编译，不过它们都带有空实现
 目录。</p>
 <p class="text" align="left">　</p>
 <p class="title">怎样处理脚本事件与参数？</p>
-<p class="text" align="left">一个脚本可被手工调用，也可设置为在触发某事件时调用。脚本文件内部可以使用预设置的全局对象 Event 来获得此脚本被调用时的事件类型和参数。Event 是一 TCnScriptEvent 类型的对象，其属性 Mode 值是 TCnScriptMode，对应于上文的 smManual, smIDELoaded, smBeforeCompile, smAfterCompile, smFileNotify, smSourceEditorNotify, smFormEditorNotify，因此在脚本开头检查 Event 对象的 Mode 值便可确定此脚本是被何种事件触发的。对于某些类型的事件，它们被触发时脚本可能需要更多的信息，比如编译成功与否、当前文件名、当前编辑器等，对于此等事件，Event 对象在脚本运行前被初始化成了 TCnScriptEvent 类的子类如 TCnScriptSourceEditorNotify 等，用户在脚本中可通过类型强制转换将 Event 转换成需要的子类来获取参数。</p>
+<p class="text" align="left">一个脚本可被手工调用，也可设置为在触发某事件时调用。脚本文件内部可以使用预设置的全局对象 Event 来获得此脚本被调用时的事件类型和参数。Event 是一 TCnScriptEvent 类型的对象，其属性 Mode 值是 TCnScriptMode，对应于上文的 smManual, smIDELoaded, smBeforeCompile, smAfterCompile, smFileNotify, smSourceEditorNotify, smFormEditorNotify，smApplicationEvents，smActiveFormChanged，因此在脚本开头检查 Event 对象的 Mode 值便可确定此脚本是被何种事件触发的。对于某些类型的事件，它们被触发时脚本可能需要更多的信息，比如编译成功与否、当前文件名、当前编辑器等，对于此等事件，Event 对象在脚本运行前被初始化成了 TCnScriptEvent 类的子类如 TCnScriptSourceEditorNotify 等，用户在脚本中可通过类型强制转换将 Event 转换成需要的子类来获取参数。</p>
 <p class="text" align="left">更详细的说明，请参考 PSDeclEx 目录下的 ScriptEvent 文件以及例子中的 FormEventDemo.pas 等文件。</p>
 <p class="title" align="left">　<p class="title" align="left">相关主题<p class="text" align="left">
 <a href="wizards.htm">IDE 专家基本操作</a><p class="text" align="left">

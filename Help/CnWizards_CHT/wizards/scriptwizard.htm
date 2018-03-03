@@ -117,7 +117,6 @@
   <li><p class="text" align="left"><b>smAfterCompile</b>：編譯後調用。</p>
   </li>
   <li><p class="text" align="left"><b>smFileNotify</b>：文件事件觸發時調用，包括以下事件：</p>
-  </li>
   <ul>
   	<li><p class="text" align="left"><b>ofnFileOpening</b>：某文件即將打開時觸發的事件。</p></li>
   	<li><p class="text" align="left"><b>ofnFileOpened</b>：某文件打開後觸發的事件。</p></li>
@@ -128,7 +127,8 @@
   	<li><p class="text" align="left"><b>ofnProjectDesktopSave</b>：當前工程的桌面設置保存時觸發的事件。</p></li>
   	<li><p class="text" align="left"><b>ofnPackageInstalled</b>：包文件加載後觸發的事件。</p></li>
   	<li><p class="text" align="left"><b>ofnPackageUninstalled</b>：包文件卸載後觸發的事件。</p></li>
-  </ul>	
+  </ul>
+  </li>
   <li><p class="text" align="left"><b>smSourceEditorNotify</b>：源碼編輯器事件觸發時調用，包括以下事件：</p>
   <ul>
   	<li><p class="text" align="left"><b>setOpened</b>：源碼編輯器打開一文件時觸發的事件。</p></li>
@@ -151,6 +151,17 @@
   <li><p class="text" align="left"><b>fetComponentDestorying</b>：窗體編輯器上刪除組件前觸發的事件。</p></li>
   <li><p class="text" align="left"><b>fetComponentRenamed</b>：窗體編輯器上組件改名時觸發的事件。</p></li>
   </ul>
+  </li>
+  <li><p class="text" align="left"><b>smApplicationEvent</b>：Application對象的指定事件觸發時調用，包括以下事件：</p>
+  <ul>
+  <li><p class="text" align="left"><b>aeActivate</b>：IDE 切換至前台時觸發的事件。</p></li>
+  <li><p class="text" align="left"><b>aeDeactivate</b>：IDE 切換至後台時觸發的事件。</p></li>
+  <li><p class="text" align="left"><b>aeMinimize</b>：IDE 最小化時觸發的事件。</p></li>
+  <li><p class="text" align="left"><b>aeRestore</b>：IDE 從最小化恢復正常時觸發的事件。</p></li>
+  <li><p class="text" align="left"><b>aeHint</b>：顯示Hint時觸發的事件。</p></li>
+  </ul>
+  </li>
+  <li><p class="text" align="left"><b>smActiveFormChanged</b>：IDE 內窗體切換時觸發的事件。</p>
   </li>
 </ul>
   </li>
@@ -196,7 +207,7 @@ Open Tools API 和 IDE 功能的訪問封裝。這些文件也不參與編譯，不過它們都帶有空實現
 目錄。</p>
 <p class="text" align="left">　</p>
 <p class="title">怎樣處理腳本事件與參數？</p>
-<p class="text" align="left">一個腳本可被手工調用，也可設置為在觸發某事件時調用。腳本文件內部可以使用預設置的全局對像 Event 來獲得此腳本被調用時的事件類型和參數。Event 是一 TCnScriptEvent 類型的對象，其屬性 Mode 值是 TCnScriptMode，對應於上文的 smManual, smIDELoaded, smBeforeCompile, smAfterCompile, smFileNotify, smSourceEditorNotify, smFormEditorNotify，因此在腳本開頭檢查 Event 對象的 Mode 值便可確定此腳本是被何種事件觸發的。對於某些類型的事件，它們被觸發時腳本可能需要更多的信息，比如編譯成功與否、當前文件名、當前編輯器等，對於此等事件，Event 對像在腳本運行前被初始化成了 TCnScriptEvent 類的子類如 TCnScriptSourceEditorNotify 等，用戶在腳本中可通過類型強制轉換將 Event 轉換成需要的子類來獲取參數。</p>
+<p class="text" align="left">一個腳本可被手工調用，也可設置為在觸發某事件時調用。腳本文件內部可以使用預設置的全局對像 Event 來獲得此腳本被調用時的事件類型和參數。Event 是一 TCnScriptEvent 類型的對象，其屬性 Mode 值是 TCnScriptMode，對應於上文的 smManual, smIDELoaded, smBeforeCompile, smAfterCompile, smFileNotify, smSourceEditorNotify, smFormEditorNotify，smApplicationEvents，smActiveFormChanged，因此在腳本開頭檢查 Event 對象的 Mode 值便可確定此腳本是被何種事件觸發的。對於某些類型的事件，它們被觸發時腳本可能需要更多的信息，比如編譯成功與否、當前文件名、當前編輯器等，對於此等事件，Event 對像在腳本運行前被初始化成了 TCnScriptEvent 類的子類如 TCnScriptSourceEditorNotify 等，用戶在腳本中可通過類型強制轉換將 Event 轉換成需要的子類來獲取參數。</p>
 <p class="text" align="left">更詳細的說明，請參考 PSDeclEx 目錄下的 ScriptEvent 文件以及例子中的 FormEventDemo.pas 等文件。</p>
 <p class="title" align="left">　<p class="title" align="left">相關主題<p class="text" align="left">
 <a href="wizards.htm">IDE 專家基本操作</a><p class="text" align="left">
