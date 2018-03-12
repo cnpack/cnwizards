@@ -2551,6 +2551,7 @@
 {$ENDIF}
 
 {$IFDEF BDS2006_UP}
+  {$DEFINE TCONTROL_HAS_EXPLICIT_BOUNDS} // 2006 and above TControl has Explicit Bounds
   {$DEFINE IDE_HAS_GUIDE_LINE}    // 2006 and above has Designer Guide Line
   {$DEFINE IDE_SYNC_EDIT_BLOCK}   // 2006 and above Editor Supports Sync Block Edit
   {$DEFINE OTA_CODE_TEMPLATE_API} // 2006 and above Provides CodeTemplateAPI.

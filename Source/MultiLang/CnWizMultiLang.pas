@@ -105,7 +105,8 @@ type
     procedure OnHelp(Sender: TObject);
     procedure CheckDefaultFontSize;
     // 部分 Win7 主题会出现右下角超出窗体的现象，原因是 ClientHeight/ClientWidth
-    // 会因为主题而缩小，遍历修复
+    // 会因为主题而缩小，遍历修复。注意重设 Anchors 时如果 FormCreate 事件里修改
+    // 了尺寸，则会因为组件的 Explicit Bounds 导致尺寸复原，需要特殊处理
     procedure AdjustRightBottomMargin;
 {$ENDIF TEST_APP}
   protected
@@ -154,6 +155,9 @@ implementation
 uses
   CnDebug;
 {$ENDIF DEBUG}
+
+type
+  TControlHack = class(TControl);
 
 const
   csLanguage = 'Language';
@@ -364,6 +368,7 @@ begin
   end;
   DoLanguageChanged(CnLanguageManager);
   inherited;
+  // inherited 中会调用 FormCreate 事件，有可能改变了 Width/Height
   AdjustRightBottomMargin;
 end;
 
@@ -489,13 +494,21 @@ end;
 procedure TCnTranslateForm.AdjustRightBottomMargin;
 var
   I, V, MinH, MinW: Integer;
-  AControl: TControl;
+  AControl: TControlHack;
   List: TObjectList;
   AnchorsArray: array of TAnchors;
   Added: Boolean;
+{$IFDEF DEBUG}
+  C1, C2: Integer;
+{$ENDIF}
 begin
   MinH := csRightBottomMargin;
   MinW := csRightBottomMargin;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('AdjustRightBottomMargin. Original ClientWidth %d, ClientHeight %d, BorderWidth %d.',
+    [ClientWidth, ClientHeight, BorderWidth]);
+{$ENDIF}
 
   List := TObjectList.Create(False);
   try
@@ -506,8 +519,8 @@ begin
       if V < csRightBottomMargin then
       begin
 {$IFDEF DEBUG}
-        CnDebugger.LogFmt('AdjustRightBottomMargin. Found Width Beyond Controls: %s, %d.',
-          [Controls[I].Name, V]);
+        CnDebugger.LogFmt('AdjustRightBottomMargin. Found Width Beyond Controls: %s, %d. Left %d, Width %d.',
+          [Controls[I].Name, V, Controls[I].Left, Controls[I].Width]);
 {$ENDIF}
 
         List.Add(Controls[I]);
@@ -521,8 +534,8 @@ begin
       if V < csRightBottomMargin then
       begin
 {$IFDEF DEBUG}
-        CnDebugger.LogFmt('AdjustRightBottomMargin. Found Height Beyond Controls: %s, %d',
-          [Controls[I].Name, V]);
+        CnDebugger.LogFmt('AdjustRightBottomMargin. Found Height Beyond Controls: %s, %d. Top %d, Height %d.',
+          [Controls[I].Name, V, Controls[I].Top, Controls[I].Height]);
 {$ENDIF}
         if not Added then
           List.Add(Controls[I]);
@@ -532,6 +545,11 @@ begin
       end;
     end;
 
+{$IFDEF DEBUG}
+    C1 := 0;
+    C2 := 0;
+{$ENDIF}
+
     if List.Count > 0 then
     begin
       // List 中的控件，需要保存其 Anchors，然后设置 Left/Top
@@ -539,15 +557,23 @@ begin
       SetLength(AnchorsArray, List.Count);
       for I := 0 to List.Count - 1 do
       begin
-        AControl := TControl(List[I]);
+        AControl := TControlHack(List[I]);
         AnchorsArray[I] := AControl.Anchors;
         if AControl.Anchors <> [akTop, akLeft] then
+        begin
+{$IFDEF TCONTROL_HAS_EXPLICIT_BOUNDS}
+          AControl.UpdateExplicitBounds;
+{$ENDIF}
           AControl.Anchors := [akTop, akLeft];
+{$IFDEF DEBUG}
+          Inc(C1);
+{$ENDIF}
+        end;
       end;
 
 {$IFDEF DEBUG}
-      CnDebugger.LogFmt('AdjustRightBottomMargin Before Change Form Width %d, Height %d.',
-        [Width, Height]);
+      CnDebugger.LogFmt('AdjustRightBottomMargin Before Change Form Width %d, Height %d. %d Controls to Adjust.',
+        [Width, Height, C1]);
 {$ENDIF}
 
       if MinW < csRightBottomMargin then
@@ -562,10 +588,19 @@ begin
 
       for I := 0 to List.Count - 1 do
       begin
-        AControl := TControl(List[I]);
+        AControl := TControlHack(List[I]);
         if AControl.Anchors <> AnchorsArray[I] then
+        begin
           AControl.Anchors := AnchorsArray[I];
+{$IFDEF DEBUG}
+          Inc(C2);
+{$ENDIF}
+        end;
       end;
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('AdjustRightBottomMargin %d Controls Restored after Changing Form Size.',
+        [C2]);
+{$ENDIF}
     end;
   finally
     List.Free;
