@@ -29,7 +29,9 @@ unit CnWizNotifier;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2008.05.05
+* 修改记录：2018.03.20
+*               刘啸增加 IDE 主题切换通知机制
+*           2008.05.05
 *               刘啸增加 StopExecuteOnApplicationIdle 机制
 *           2006.10.06
 *               刘啸增加 Debug 进程和断点的事件通知服务
@@ -287,7 +289,7 @@ type
     destructor Destroy; override;
   end;
 
-{$IFDEF DELPHI102_TOKYO_UP}
+{$IFDEF IDE_SUPPORT_THEMING}
 
 //==============================================================================
 // IDE Theming Notifier 通知器类（私有类）
@@ -2147,7 +2149,7 @@ begin
   FNotifierServices.ProcessDestroyed(Process);
 end;
 
-{$IFDEF DELPHI102_TOKYO_UP}
+{$IFDEF IDE_SUPPORT_THEMING}
 
 { TCnIDEThemingServicesNotifier }
 

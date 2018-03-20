@@ -7277,13 +7277,13 @@ end;
 
 // 获得 IDE 是否支持主题切换
 function CnOtaIDESupportsTheming: Boolean;
-{$IFDEF DELPHI102_TOKYO_UP}
+{$IFDEF IDE_SUPPORT_THEMING}
 var
   Theming: IOTAIDEThemingServices;
 {$ENDIF}
 begin
   Result := False;
-{$IFDEF DELPHI102_TOKYO_UP}
+{$IFDEF IDE_SUPPORT_THEMING}
   if Supports(BorlandIDEServices, IOTAIDEThemingServices, Theming) then
     Result := True;
 {$ENDIF}
@@ -7291,13 +7291,13 @@ end;
 
 // 获得 IDE 是否启用了主题切换
 function CnOtaGetIDEThemingEnabled: Boolean;
-{$IFDEF DELPHI102_TOKYO_UP}
+{$IFDEF IDE_SUPPORT_THEMING}
 var
   Theming: IOTAIDEThemingServices;
 {$ENDIF}
 begin
   Result := False;
-{$IFDEF DELPHI102_TOKYO_UP}
+{$IFDEF IDE_SUPPORT_THEMING}
   if Supports(BorlandIDEServices, IOTAIDEThemingServices, Theming) then
     Result := Theming.IDEThemingEnabled;
 {$ENDIF}
@@ -7305,13 +7305,13 @@ end;
 
 // 获得 IDE 当前主题名称
 function CnOtaGetActiveThemeName: string;
-{$IFDEF DELPHI102_TOKYO_UP}
+{$IFDEF IDE_SUPPORT_THEMING}
 var
   Theming: IOTAIDEThemingServices;
 {$ENDIF}
 begin
   Result := '';
-{$IFDEF DELPHI102_TOKYO_UP}
+{$IFDEF IDE_SUPPORT_THEMING}
   if Supports(BorlandIDEServices, IOTAIDEThemingServices, Theming) then
     Result := Theming.ActiveTheme;
 {$ENDIF}
