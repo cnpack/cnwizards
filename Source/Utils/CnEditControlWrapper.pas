@@ -29,7 +29,9 @@ unit CnEditControlWrapper;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2016.07.16 V1.5
+* 修改记录：2018.03.20 V1.6
+*               增加主题改变时的通知与字体重算
+*           2016.07.16 V1.5
 *               增加 Tab 键属性的封装
 *           2015.07.13 V1.4
 *               增加三个编辑器鼠标事件通知，采用延迟 Hook 的机制
@@ -272,6 +274,7 @@ type
     function CheckViewLines(Editor: TEditorObject; Context: TEditorContext): Boolean;
     function CheckEditorChanges(Editor: TEditorObject): TEditorChangeTypes;
     procedure OnActiveFormChange(Sender: TObject);
+    procedure AfterThemeChange(Sender: TObject);
     procedure OnSourceEditorNotify(SourceEditor: IOTASourceEditor;
       NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
     procedure ApplicationMessage(var Msg: TMsg; var Handled: Boolean);
@@ -820,6 +823,7 @@ begin
 
   CnWizNotifierServices.AddSourceEditorNotifier(OnSourceEditorNotify);
   CnWizNotifierServices.AddActiveFormNotifier(OnActiveFormChange);
+  CnWizNotifierServices.AddAfterThemeChangeNotifier(AfterThemeChange);
   CnWizNotifierServices.AddGetMsgNotifier(OnGetMsgProc, [WM_MOUSEMOVE, WM_NCMOUSEMOVE,
     WM_LBUTTONDOWN, WM_LBUTTONUP, WM_RBUTTONDOWN, WM_RBUTTONUP,
     WM_MBUTTONDOWN, WM_MBUTTONUP, WM_NCLBUTTONDOWN, WM_NCLBUTTONUP, WM_NCRBUTTONDOWN,
@@ -1794,6 +1798,14 @@ begin
     CnDebugger.LogMsg('Option Dialog Closed. Editor Option Changed');
   {$ENDIF}
   end;
+end;
+
+procedure TCnEditControlWrapper.AfterThemeChange(Sender: TObject);
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('EditControlWrapper AfterThemeChange. Option Changed.');
+{$ENDIF}
+  FOptionChanged := True;
 end;
 
 procedure TCnEditControlWrapper.OnActiveFormChange(Sender: TObject);

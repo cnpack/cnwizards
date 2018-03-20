@@ -390,7 +390,9 @@ type
     FThemingNotifierIndex: Integer;
     FCnWizIdeNotifier: TCnWizIdeNotifier;
     FCnWizDebuggerNotifier: TCnWizDebuggerNotifier;
+{$IFDEF IDE_SUPPORT_THEMING}
     FCnIDEThemingServicesNotifier: TCnIDEThemingServicesNotifier;
+{$ENDIF}
     FLastControl: TWinControl;
     FLastForm: TForm;
     FCompNotifyList: TComponentList;
