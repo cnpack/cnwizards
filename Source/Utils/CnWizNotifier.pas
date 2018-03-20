@@ -163,6 +163,15 @@ type
     procedure RemoveGetMsgNotifier(Notifier: TCnWizMsgHookNotifier);
     {* 删除一个 GetMessage HOOK 通知事件}
 
+    procedure AddBeforeThemeChangeNotifier(Notifier: TNotifyEvent);
+    {* 增加一个 IDE 主题变化前的通知事件}
+    procedure RemoveBeforeThemeChangeNotifier(Notifier: TNotifyEvent);
+    {* 删除一个 IDE 主题变化前的通知事件}
+    procedure AddAfterThemeChangeNotifier(Notifier: TNotifyEvent);
+    {* 增加一个 IDE 主题变化后的通知事件}
+    procedure RemoveAfterThemeChangeNotifier(Notifier: TNotifyEvent);
+    {* 删除一个 IDE 主题变化后的通知事件}
+
     procedure AddProcessCreatedNotifier(Notifier: TCnWizProcessNotifier);
     {* 增加一个被调试进程启动的通知事件}
     procedure RemoveProcessCreatedNotifier(Notifier: TCnWizProcessNotifier);
@@ -278,6 +287,32 @@ type
     destructor Destroy; override;
   end;
 
+{$IFDEF DELPHI102_TOKYO_UP}
+
+//==============================================================================
+// IDE Theming Notifier 通知器类（私有类）
+//==============================================================================
+
+{ TCnIDEThemingServicesNotifier }
+
+  TCnIDEThemingServicesNotifier = class(TNotifierObject, IOTANotifier, INTAIDEThemingServicesNotifier)
+  private
+    FNotifierServices: TCnWizNotifierServices;
+  protected
+    procedure AfterSave;
+    procedure BeforeSave;
+    procedure Destroyed;
+    procedure Modified;
+
+    procedure ChangingTheme;
+    procedure ChangedTheme;
+  public
+    constructor Create(ANotifierServices: TCnWizNotifierServices);
+    destructor Destroy; override;
+  end;
+
+{$ENDIF}
+
 //==============================================================================
 // DebuggerNotifier 通知器类（私有类）
 //==============================================================================
@@ -344,6 +379,8 @@ type
     FCallWndProcRetMsgList: TList;
     FGetMsgNotifiers: TList;
     FGetMsgMsgList: TList;
+    FBeforeThemeChangeNotifiers: TList;
+    FAfterThemeChangeNotifiers: TList;
     FIdleMethods: TList;
     FEvents: TApplicationEvents;
     FIdeNotifierIndex: Integer;
@@ -391,6 +428,10 @@ type
     procedure RemoveCallWndProcRetNotifier(Notifier: TCnWizMsgHookNotifier);
     procedure AddGetMsgNotifier(Notifier: TCnWizMsgHookNotifier; MsgIDs: array of Cardinal);
     procedure RemoveGetMsgNotifier(Notifier: TCnWizMsgHookNotifier);
+    procedure AddBeforeThemeChangeNotifier(Notifier: TNotifyEvent);
+    procedure RemoveBeforeThemeChangeNotifier(Notifier: TNotifyEvent);
+    procedure AddAfterThemeChangeNotifier(Notifier: TNotifyEvent);
+    procedure RemoveAfterThemeChangeNotifier(Notifier: TNotifyEvent);
     procedure AddProcessCreatedNotifier(Notifier: TCnWizProcessNotifier);
     procedure RemoveProcessCreatedNotifier(Notifier: TCnWizProcessNotifier);
     procedure AddProcessDestroyedNotifier(Notifier: TCnWizProcessNotifier);
@@ -431,6 +472,9 @@ type
     procedure FormEditorFileNotification(NotifyCode: TOTAFileNotification;
       const FileName: string);
     procedure AppEventNotify(EventType: TCnWizAppEventType);
+
+    procedure DoBeforeThemeChange;
+    procedure DoAfterThemeChange;
 
     procedure DoApplicationIdle(Sender: TObject; var Done: Boolean);
     procedure DoApplicationMessage(var Msg: TMsg; var Handled: Boolean);
@@ -830,6 +874,8 @@ begin
   FCallWndProcRetMsgList := TList.Create;
   FGetMsgNotifiers := TList.Create;
   FGetMsgMsgList := TList.Create;
+  FBeforeThemeChangeNotifiers := TList.Create;
+  FAfterThemeChangeNotifiers := TList.Create;
   FIdleMethods := TList.Create;
   FCompNotifyList := TComponentList.Create(True);
   FCnWizIdeNotifier := TCnWizIdeNotifier.Create(Self);
@@ -892,6 +938,8 @@ begin
   FreeAndNil(FCallWndProcRetMsgList);
   ClearAndFreeList(FGetMsgNotifiers);
   FreeAndNil(FGetMsgMsgList);
+  ClearAndFreeList(FBeforeThemeChangeNotifiers);
+  ClearAndFreeList(FAfterThemeChangeNotifiers);
   ClearAndFreeList(FIdleMethods);
 
 {$IFDEF Debug}
@@ -1074,10 +1122,22 @@ begin
   AddNotifier(FAfterCompileNotifiers, TMethod(Notifier));
 end;
 
+procedure TCnWizNotifierServices.AddAfterThemeChangeNotifier(
+  Notifier: TNotifyEvent);
+begin
+  AddNotifier(FAfterThemeChangeNotifiers, TMethod(Notifier));
+end;
+
 procedure TCnWizNotifierServices.AddBeforeCompileNotifier(
   Notifier: TCnWizBeforeCompileNotifier);
 begin
   AddNotifier(FBeforeCompileNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnWizNotifierServices.AddBeforeThemeChangeNotifier(
+  Notifier: TNotifyEvent);
+begin
+  AddNotifier(FBeforeThemeChangeNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.RemoveAfterCompileNotifier(
@@ -1086,10 +1146,22 @@ begin
   RemoveNotifier(FAfterCompileNotifiers, TMethod(Notifier));
 end;
 
+procedure TCnWizNotifierServices.RemoveAfterThemeChangeNotifier(
+  Notifier: TNotifyEvent);
+begin
+  RemoveNotifier(FAfterThemeChangeNotifiers, TMethod(Notifier));
+end;
+
 procedure TCnWizNotifierServices.RemoveBeforeCompileNotifier(
   Notifier: TCnWizBeforeCompileNotifier);
 begin
   RemoveNotifier(FBeforeCompileNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnWizNotifierServices.RemoveBeforeThemeChangeNotifier(
+  Notifier: TNotifyEvent);
+begin
+  RemoveNotifier(FBeforeThemeChangeNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.AfterCompile(Succeeded,
@@ -2000,6 +2072,44 @@ begin
   RemoveNotifier(FProcessDestroyedNotifiers, TMethod(Notifier));
 end;
 
+procedure TCnWizNotifierServices.DoAfterThemeChange;
+var
+  I: Integer;
+begin
+  if FAfterThemeChangeNotifiers <> nil then
+  begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnWizNotifierServices.DoAfterThemeChange');
+{$ENDIF}
+    for I := FAfterThemeChangeNotifiers.Count - 1 downto 0 do
+    try
+      with PCnWizNotifierRecord(FAfterThemeChangeNotifiers[I])^ do
+        TNotifyEvent(Notifier)(Self);
+    except
+      DoHandleException('TCnWizNotifierServices.DAfterThemeChange[' + IntToStr(I) + ']');
+    end;
+  end;
+end;
+
+procedure TCnWizNotifierServices.DoBeforeThemeChange;
+var
+  I: Integer;
+begin
+  if FBeforeThemeChangeNotifiers <> nil then
+  begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnWizNotifierServices.DoBeforeThemeChange');
+{$ENDIF}
+    for I := FBeforeThemeChangeNotifiers.Count - 1 downto 0 do
+    try
+      with PCnWizNotifierRecord(FBeforeThemeChangeNotifiers[I])^ do
+        TNotifyEvent(Notifier)(Self);
+    except
+      DoHandleException('TCnWizNotifierServices.DoBeforeThemeChange[' + IntToStr(I) + ']');
+    end;
+  end;
+end;
+
 { TCnWizDebuggerNotifier }
 
 constructor TCnWizDebuggerNotifier.Create(ANotifierServices: TCnWizNotifierServices);
@@ -2037,17 +2147,66 @@ begin
   FNotifierServices.ProcessDestroyed(Process);
 end;
 
+{$IFDEF DELPHI102_TOKYO_UP}
+
+{ TCnIDEThemingServicesNotifier }
+
+procedure TCnIDEThemingServicesNotifier.AfterSave;
+begin
+
+end;
+
+procedure TCnIDEThemingServicesNotifier.BeforeSave;
+begin
+
+end;
+
+procedure TCnIDEThemingServicesNotifier.ChangedTheme;
+begin
+  FNotifierServices.DoAfterThemeChange;
+end;
+
+procedure TCnIDEThemingServicesNotifier.ChangingTheme;
+begin
+  FNotifierServices.DoBeforeThemeChange;
+end;
+
+constructor TCnIDEThemingServicesNotifier.Create(
+  ANotifierServices: TCnWizNotifierServices);
+begin
+  inherited Create;
+  FNotifierServices := ANotifierServices;
+end;
+
+destructor TCnIDEThemingServicesNotifier.Destroy;
+begin
+
+  inherited;
+end;
+
+procedure TCnIDEThemingServicesNotifier.Destroyed;
+begin
+
+end;
+
+procedure TCnIDEThemingServicesNotifier.Modified;
+begin
+
+end;
+
+{$ENDIF}
+
 initialization
 
 finalization
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogEnter('CnWizNotifier finalization.');
-{$ENDIF Debug}
+{$ENDIF}
 
   FreeCnWizNotifierServices;
 
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogLeave('CnWizNotifier finalization.');
-{$ENDIF Debug}
+{$ENDIF}
 end.
 
