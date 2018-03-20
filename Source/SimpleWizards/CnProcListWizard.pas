@@ -343,6 +343,7 @@ type
     procedure RemoveProcToolBar(ToolBarType: string; EditControl: TControl; ToolBar: TToolBar);
     procedure EditorChange(Editor: TEditorObject; ChangeType:
       TEditorChangeTypes);
+    procedure AfterThemeChange(Sender: TObject);
     procedure OnToolBarTimer(Sender: TObject);
     procedure PopupCloseItemClick(Sender: TObject);
     procedure PopupSubItemSortByClick(Sender: TObject);
@@ -681,6 +682,7 @@ begin
   FObjStrings.Duplicates := dupIgnore;
 
   EditControlWrapper.AddEditorChangeNotifier(EditorChange);
+  CnWizNotifierServices.AddAfterThemeChangeNotifier(AfterThemeChange);
   FWizard := Self;
 end;
 
@@ -989,6 +991,7 @@ var
   I: Integer;
 begin
   FWizard := nil;
+  CnWizNotifierServices.RemoveAfterThemeChangeNotifier(AfterThemeChange);
   EditControlWrapper.RemoveEditorChangeNotifier(EditorChange);
   for I := 0 to FProcToolBarObjects.Count - 1 do
     TObject(FProcToolBarObjects).Free;
@@ -4078,6 +4081,39 @@ begin
   Wizard := TCnIDEEnhanceWizard(CnWizardMgr.WizardByClassName('TCnSrcEditorEnhance'));
   if Wizard <> nil then
     Wizard.Config;
+end;
+
+procedure TCnProcListWizard.AfterThemeChange(Sender: TObject);
+{$IFDEF IDE_SUPPORT_THEMING}
+var
+  I: Integer;
+  Obj: TCnProcToolBarObj;
+  Theming: IOTAIDEThemingServices;
+{$ENDIF}
+begin
+{$IFDEF IDE_SUPPORT_THEMING}
+  if Supports(BorlandIDEServices, IOTAIDEThemingServices, Theming) then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('Procedure Toolbar Got Theme Changed Notification.');
+{$ENDIF}
+    for I := FProcToolBarObjects.Count - 1 downto 0 do
+    begin
+      Obj := TCnProcToolBarObj(FProcToolBarObjects[I]);
+      if (Obj <> nil) and (Obj.EditorToolBar <> nil) then
+      begin
+        try
+          Theming.ApplyTheme(Obj.EditorToolBar);
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('Procedure Toolbar Apply Theme for ' + IntToStr(I));
+{$ENDIF}
+        except
+          ;
+        end;
+      end;
+    end;
+  end;
+{$ENDIF}
 end;
 
 { TCnProcListComboBox }

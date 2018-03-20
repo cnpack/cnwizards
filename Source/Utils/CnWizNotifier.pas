@@ -387,8 +387,10 @@ type
     FEvents: TApplicationEvents;
     FIdeNotifierIndex: Integer;
     FDebuggerNotifierIndex: Integer;
+    FThemingNotifierIndex: Integer;
     FCnWizIdeNotifier: TCnWizIdeNotifier;
     FCnWizDebuggerNotifier: TCnWizDebuggerNotifier;
+    FCnIDEThemingServicesNotifier: TCnIDEThemingServicesNotifier;
     FLastControl: TWinControl;
     FLastForm: TForm;
     FCompNotifyList: TComponentList;
@@ -839,6 +841,9 @@ constructor TCnWizNotifierServices.Create;
 var
   IServices: IOTAServices;
   IDebuggerService: IOTADebuggerServices;
+{$IFDEF IDE_SUPPORT_THEMING}
+  ThemingService: IOTAIDEThemingServices;
+{$ENDIF}
 begin
   inherited;
   IServices := BorlandIDEServices as IOTAServices;
@@ -884,6 +889,13 @@ begin
   FIdeNotifierIndex := IServices.AddNotifier(FCnWizIdeNotifier as IOTAIDENotifier);
   FCnWizDebuggerNotifier := TCnWizDebuggerNotifier.Create(Self);
   FDebuggerNotifierIndex := IDebuggerService.AddNotifier(FCnWizDebuggerNotifier as IOTADebuggerNotifier);
+{$IFDEF IDE_SUPPORT_THEMING}
+  if Supports(BorlandIDEServices, IOTAIDEThemingServices, ThemingService) then
+  begin
+    FCnIDEThemingServicesNotifier := TCnIDEThemingServicesNotifier.Create(Self);
+    FThemingNotifierIndex := ThemingService.AddNotifier(FCnIDEThemingServicesNotifier as INTAIDEThemingServicesNotifier);
+  end;
+{$ENDIF}
   CallWndProcHook := SetWindowsHookEx(WH_CALLWNDPROC, CallWndProc, 0, GetCurrentThreadId);
   CallWndProcRetHook := SetWindowsHookEx(WH_CALLWNDPROCRET, CallWndProcRet, 0, GetCurrentThreadId);
   GetMsgHook := SetWindowsHookEx(WH_GETMESSAGE, GetMsgProc, 0, GetCurrentThreadId);
@@ -898,7 +910,10 @@ destructor TCnWizNotifierServices.Destroy;
 var
   IServices: IOTAServices;
   IDebuggerService: IOTADebuggerServices;
-  i: Integer;
+  I: Integer;
+{$IFDEF IDE_SUPPORT_THEMING}
+  ThemingService: IOTAIDEThemingServices;
+{$ENDIF}
 begin
 {$IFDEF Debug}
   CnDebugger.LogEnter('TCnWizNotifierServices.Destroy');
@@ -916,6 +931,14 @@ begin
   IDebuggerService := BorlandIDEServices as IOTADebuggerServices;
   if Assigned(IDebuggerService) then
     IDebuggerService.RemoveNotifier(FDebuggerNotifierIndex);
+
+  if FThemingNotifierIndex <> 0 then
+  begin
+{$IFDEF IDE_SUPPORT_THEMING}
+    if Supports(BorlandIDEServices, IOTAIDEThemingServices, ThemingService) then
+      ThemingService.RemoveNotifier(FThemingNotifierIndex);
+{$ENDIF}
+  end;
 
   FreeAndNil(FCompNotifyList);
   FreeAndNil(FEvents);
