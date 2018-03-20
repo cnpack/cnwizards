@@ -883,6 +883,15 @@ procedure CnOtaGetCurrFormSelectionsName(List: TStrings);
 procedure CnOtaCopyCurrFormSelectionsName;
 {* 复制当前选择的控件的名称列表到剪贴板}
 
+function CnOtaIDESupportsTheming: Boolean;
+{* 获得 IDE 是否支持主题切换}
+
+function CnOtaGetIDEThemingEnabled: Boolean;
+{* 获得 IDE 是否启用了主题切换}
+
+function CnOtaGetActiveThemeName: string;
+{* 获得 IDE 当前主题名称}
+
 function OTACharPos(CharIndex: SmallInt; Line: Longint): TOTACharPos;
 {* 返回一个位置值}
 
@@ -1843,6 +1852,18 @@ begin
 end;
 
 procedure CnOtaCopyCurrFormSelectionsName;
+begin
+end;
+
+function CnOtaIDESupportsTheming: Boolean;
+begin
+end;
+
+function CnOtaGetIDEThemingEnabled: Boolean;
+begin
+end;
+
+function CnOtaGetActiveThemeName: string;
 begin
 end;
 

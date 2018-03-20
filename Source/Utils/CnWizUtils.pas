@@ -1038,6 +1038,15 @@ procedure CnOtaGetCurrFormSelectionsName(List: TStrings);
 procedure CnOtaCopyCurrFormSelectionsName;
 {* 复制当前选择的控件的名称列表到剪贴板}
 
+function CnOtaIDESupportsTheming: Boolean;
+{* 获得 IDE 是否支持主题切换}
+
+function CnOtaGetIDEThemingEnabled: Boolean;
+{* 获得 IDE 是否启用了主题切换}
+
+function CnOtaGetActiveThemeName: string;
+{* 获得 IDE 当前主题名称}
+
 function OTACharPos(CharIndex: SmallInt; Line: Longint): TOTACharPos;
 {* 返回一个位置值}
 
@@ -7264,6 +7273,48 @@ begin
   finally
     List.Free;
   end;
+end;
+
+// 获得 IDE 是否支持主题切换
+function CnOtaIDESupportsTheming: Boolean;
+{$IFDEF DELPHI102_TOKYO_UP}
+var
+  Theming: IOTAIDEThemingServices;
+{$ENDIF}
+begin
+  Result := False;
+{$IFDEF DELPHI102_TOKYO_UP}
+  if Supports(BorlandIDEServices, IOTAIDEThemingServices, Theming) then
+    Result := True;
+{$ENDIF}
+end;
+
+// 获得 IDE 是否启用了主题切换
+function CnOtaGetIDEThemingEnabled: Boolean;
+{$IFDEF DELPHI102_TOKYO_UP}
+var
+  Theming: IOTAIDEThemingServices;
+{$ENDIF}
+begin
+  Result := False;
+{$IFDEF DELPHI102_TOKYO_UP}
+  if Supports(BorlandIDEServices, IOTAIDEThemingServices, Theming) then
+    Result := Theming.IDEThemingEnabled;
+{$ENDIF}
+end;
+
+// 获得 IDE 当前主题名称
+function CnOtaGetActiveThemeName: string;
+{$IFDEF DELPHI102_TOKYO_UP}
+var
+  Theming: IOTAIDEThemingServices;
+{$ENDIF}
+begin
+  Result := '';
+{$IFDEF DELPHI102_TOKYO_UP}
+  if Supports(BorlandIDEServices, IOTAIDEThemingServices, Theming) then
+    Result := Theming.ActiveTheme;
+{$ENDIF}
 end;
 
 // 返回一个位置值

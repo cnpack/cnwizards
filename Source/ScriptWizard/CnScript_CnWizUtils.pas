@@ -511,6 +511,9 @@ begin
   CL.AddDelphiFunction('Procedure CnOtaSetCurrFormSelectRoot');
   CL.AddDelphiFunction('Procedure CnOtaGetCurrFormSelectionsName( List : TStrings)');
   CL.AddDelphiFunction('Procedure CnOtaCopyCurrFormSelectionsName');
+  CL.AddDelphiFunction('Function CnOtaIDESupportsTheming : Boolean');
+  CL.AddDelphiFunction('Function CnOtaGetIDEThemingEnabled : Boolean');
+  CL.AddDelphiFunction('Function CnOtaGetActiveThemeName : string');
   CL.AddDelphiFunction('Function OTACharPos( CharIndex : SmallInt; Line : Longint) : TOTACharPos');
   CL.AddDelphiFunction('Function OTAEditPos( Col : SmallInt; Line : Longint) : TOTAEditPos');
   CL.AddDelphiFunction('Function SameEditPos( Pos1, Pos2 : TOTAEditPos) : Boolean');
@@ -766,6 +769,9 @@ begin
   S.RegisterDelphiFunction(@CnOtaSetCurrFormSelectRoot, 'CnOtaSetCurrFormSelectRoot', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetCurrFormSelectionsName, 'CnOtaGetCurrFormSelectionsName', cdRegister);
   S.RegisterDelphiFunction(@CnOtaCopyCurrFormSelectionsName, 'CnOtaCopyCurrFormSelectionsName', cdRegister);
+  S.RegisterDelphiFunction(@CnOtaIDESupportsTheming, 'CnOtaIDESupportsTheming', cdRegister);
+  S.RegisterDelphiFunction(@CnOtaGetIDEThemingEnabled, 'CnOtaGetIDEThemingEnabled', cdRegister);
+  S.RegisterDelphiFunction(@CnOtaGetActiveThemeName, 'CnOtaGetActiveThemeName', cdRegister);
   S.RegisterDelphiFunction(@OTACharPos, 'OTACharPos', cdRegister);
   S.RegisterDelphiFunction(@OTAEditPos, 'OTAEditPos', cdRegister);
   S.RegisterDelphiFunction(@SameEditPos, 'SameEditPos', cdRegister);
