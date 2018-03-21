@@ -344,6 +344,9 @@ type
     procedure EditorChange(Editor: TEditorObject; ChangeType:
       TEditorChangeTypes);
     procedure AfterThemeChange(Sender: TObject);
+{$IFDEF IDE_SUPPORT_THEMING}
+    procedure DoThemeChange(Sender: TObject);
+{$ENDIF}
     procedure OnToolBarTimer(Sender: TObject);
     procedure PopupCloseItemClick(Sender: TObject);
     procedure PopupSubItemSortByClick(Sender: TObject);
@@ -4084,14 +4087,20 @@ begin
 end;
 
 procedure TCnProcListWizard.AfterThemeChange(Sender: TObject);
+begin
 {$IFDEF IDE_SUPPORT_THEMING}
+  CnWizNotifierServices.ExecuteOnApplicationIdle(DoThemeChange);
+{$ENDIF}
+end;
+
+{$IFDEF IDE_SUPPORT_THEMING}
+
+procedure TCnProcListWizard.DoThemeChange(Sender: TObject);
 var
   I: Integer;
   Obj: TCnProcToolBarObj;
   Theming: IOTAIDEThemingServices;
-{$ENDIF}
 begin
-{$IFDEF IDE_SUPPORT_THEMING}
   if Supports(BorlandIDEServices, IOTAIDEThemingServices, Theming) then
   begin
 {$IFDEF DEBUG}
@@ -4113,8 +4122,9 @@ begin
       end;
     end;
   end;
-{$ENDIF}
 end;
+
+{$ENDIF}
 
 { TCnProcListComboBox }
 

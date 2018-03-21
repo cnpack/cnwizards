@@ -154,7 +154,7 @@ implementation
 {$IFDEF DEBUG}
 uses
   CnDebug;
-{$ENDIF DEBUG}
+{$ENDIF}
 
 type
   TControlHack = class(TControl);

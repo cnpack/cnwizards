@@ -294,6 +294,23 @@ begin
   Result := TCnContextMenuExecutor(CnEditorExecutorList[Index]);
 end;
 
+procedure RegisterThemeClass;
+{$IFDEF IDE_SUPPORT_THEMING}
+var
+  Theming: IOTAIDEThemingServices250;
+{$ENDIF}
+begin
+{$IFDEF IDE_SUPPORT_THEMING}
+  if Supports(BorlandIDEServices, IOTAIDEThemingServices250, Theming) then
+  begin
+    Theming.RegisterFormClass(TCnTranslateForm);
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('RegisterThemeClass to TCnTranslateForm.');
+{$ENDIF}
+  end;
+{$ENDIF}
+end;
+
 //==============================================================================
 // TCnWizardMgr 主专家类
 //==============================================================================
@@ -405,13 +422,14 @@ end;
 // 类构造器
 constructor TCnWizardMgr.Create;
 begin
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnWizardMgr.Create');
 {$ENDIF}
   inherited Create;
   
   // 让专家可以在 Create 和其他过程中能够访问 CnWizardMgr 中的其他属性。
   CnWizardMgr := Self;
+  RegisterThemeClass;
   WizOptions := TCnWizOptions.Create;
   // 处理封面窗口
   if @InitSplashProc <> nil then
