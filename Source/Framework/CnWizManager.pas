@@ -294,23 +294,6 @@ begin
   Result := TCnContextMenuExecutor(CnEditorExecutorList[Index]);
 end;
 
-procedure RegisterThemeClass;
-{$IFDEF IDE_SUPPORT_THEMING}
-var
-  Theming: IOTAIDEThemingServices250;
-{$ENDIF}
-begin
-{$IFDEF IDE_SUPPORT_THEMING}
-  if Supports(BorlandIDEServices, IOTAIDEThemingServices250, Theming) then
-  begin
-    Theming.RegisterFormClass(TCnTranslateForm);
-{$IFDEF DEBUG}
-    CnDebugger.LogMsg('RegisterThemeClass to TCnTranslateForm.');
-{$ENDIF}
-  end;
-{$ENDIF}
-end;
-
 //==============================================================================
 // TCnWizardMgr 主专家类
 //==============================================================================

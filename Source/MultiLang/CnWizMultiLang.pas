@@ -68,7 +68,7 @@ uses
   CnWizConsts, CnCommon, CnLangMgr, CnHashLangStorage, CnLangStorage, CnWizHelp,
   CnFormScaler, CnWizIni, CnLangCollection,
 {$ENDIF}
-  StdCtrls, IniFiles;
+  StdCtrls, IniFiles {$IFDEF IDE_SUPPORT_THEMING}, ToolsAPI {$ENDIF};
 
 type
 
@@ -147,6 +147,8 @@ procedure InitLangManager;
 function GetFileFromLang(const FileName: string): string;
 {$ENDIF}
 
+procedure RegisterThemeClass;
+
 implementation
 
 {$R *.DFM}
@@ -176,6 +178,23 @@ const
 var
   FStorage: TCnHashLangFileStorage;
   FDefaultFontSize: Integer = 8;
+
+procedure RegisterThemeClass;
+{$IFDEF IDE_SUPPORT_THEMING}
+var
+  Theming: IOTAIDEThemingServices250;
+{$ENDIF}
+begin
+{$IFDEF IDE_SUPPORT_THEMING}
+  if Supports(BorlandIDEServices, IOTAIDEThemingServices250, Theming) then
+  begin
+    Theming.RegisterFormClass(TCnTranslateForm);
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('RegisterThemeClass to TCnTranslateForm.');
+{$ENDIF}
+  end;
+{$ENDIF}
+end;
 
 procedure InitLangManager;
 var
@@ -349,6 +368,10 @@ end;
 { TCnTranslateForm }
 
 procedure TCnTranslateForm.DoCreate;
+{$IFDEF IDE_SUPPORT_THEMING}
+var
+  Theming: IOTAIDEThemingServices;
+{$ENDIF}
 begin
   FActionList := TActionList.Create(Self);
   FHelpAction := TAction.Create(Self);
@@ -368,6 +391,12 @@ begin
   end;
   DoLanguageChanged(CnLanguageManager);
   inherited;
+
+{$IFDEF IDE_SUPPORT_THEMING}
+  if Supports(BorlandIDEServices, IOTAIDEThemingServices, Theming) then
+    Theming.ApplyTheme(Self);
+{$ENDIF}
+
   // inherited 中会调用 FormCreate 事件，有可能改变了 Width/Height
   AdjustRightBottomMargin;
 end;
