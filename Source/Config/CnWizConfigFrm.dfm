@@ -479,9 +479,10 @@ inherited CnWizConfigForm: TCnWizConfigForm
         end
         object btnUserDir: TSpeedButton
           Left = 450
-          Top = 101
+          Top = 123
           Width = 23
           Height = 22
+          Anchors = [akRight, akBottom]
           Flat = True
           Glyph.Data = {
             36040000424D3604000000000000360000002800000010000000100000000100
@@ -542,6 +543,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
           Top = 123
           Width = 422
           Height = 21
+          Anchors = [akLeft, akTop, akRight]
           TabOrder = 5
         end
         object chkFixThreadLocale: TCheckBox
@@ -740,7 +742,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
   end
   object ilEnable: TImageList
     Left = 456
-    Top = 367
+    Top = 343
     Bitmap = {
       494C010102000400040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
