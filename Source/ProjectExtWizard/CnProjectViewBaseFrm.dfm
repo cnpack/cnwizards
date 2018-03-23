@@ -1,6 +1,6 @@
 inherited CnProjectViewBaseForm: TCnProjectViewBaseForm
-  Left = 300
-  Top = 150
+  Left = 277
+  Top = 144
   AutoScroll = False
   BorderIcons = [biSystemMenu]
   Caption = 'BaseForm'
@@ -18,6 +18,7 @@ inherited CnProjectViewBaseForm: TCnProjectViewBaseForm
     0000FFFF0000E0070000E0070000E0070000E0070000E0070000E0070000E007
     0000E0070000E0070000E0070000E0070000E0070000FFFF0000FFFF0000}
   KeyPreview = True
+  OldCreateOrder = True
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
@@ -223,51 +224,58 @@ inherited CnProjectViewBaseForm: TCnProjectViewBaseForm
       Grouped = True
       Style = tbsCheck
     end
-    object btnSep6: TToolButton
+    object btnMatchFuzzy: TToolButton
       Left = 216
+      Top = 0
+      Action = actMatchFuzzy
+      Grouped = True
+      Style = tbsCheck
+    end
+    object btnSep6: TToolButton
+      Left = 239
       Top = 0
       Width = 8
       ImageIndex = 1
       Style = tbsSeparator
     end
     object btnHookIDE: TToolButton
-      Left = 224
+      Left = 247
       Top = 0
       Action = actHookIDE
       Style = tbsCheck
     end
     object btnQuery: TToolButton
-      Left = 247
+      Left = 270
       Top = 0
       Action = actQuery
       Style = tbsCheck
     end
     object btnFont: TToolButton
-      Left = 270
+      Left = 293
       Top = 0
       Action = actFont
     end
     object btnSep7: TToolButton
-      Left = 293
+      Left = 316
       Top = 0
       Width = 8
       ImageIndex = 1
       Style = tbsSeparator
     end
     object btnHelp: TToolButton
-      Left = 301
+      Left = 324
       Top = 0
       Action = actHelp
     end
     object btnSep8: TToolButton
-      Left = 324
+      Left = 347
       Top = 0
       Width = 8
       ImageIndex = 1
       Style = tbsSeparator
     end
     object btnClose: TToolButton
-      Left = 332
+      Left = 355
       Top = 0
       Action = actClose
     end
@@ -324,6 +332,13 @@ inherited CnProjectViewBaseForm: TCnProjectViewBaseForm
       Hint = 'Match All Parts of Form Name'
       ImageIndex = 28
       OnExecute = actMatchAnyExecute
+    end
+    object actMatchFuzzy: TAction
+      Caption = '&Fuzzy Match'
+      Hint = 'Fuzzy Match of Form Name'
+      ImageIndex = 94
+      Visible = False
+      OnExecute = actMatchFuzzyExecute
     end
     object actHookIDE: TAction
       Caption = 'Hook &IDE'

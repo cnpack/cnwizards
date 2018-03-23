@@ -20,7 +20,6 @@ inherited CnProjectListUsedForm: TCnProjectListUsedForm
   inherited pnlHeader: TPanel
     Width = 424
     inherited lblProject: TLabel
-      Width = 42
       Visible = False
     end
     inherited edtMatchSearch: TEdit

@@ -177,8 +177,6 @@ type
   TCnSortKind = (skByScope, skByText, skByLength, skByKind);
   // 输出标识符时如果光标在中间位置的处理方法
   TCnOutputStyle = (osAuto, osReplaceLeft, osReplaceAll, osEnterAll);
-  // 标识符匹配模式，开头匹配，中间匹配，全范围模糊匹配
-  TCnMatchMode = (mmStart, mmAnywhere, mmFuzzy);
 
   TCnInputHelper = class(TCnActionWizard)
   private

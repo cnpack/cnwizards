@@ -116,6 +116,8 @@ type
     actFont: TAction;
     btnFont: TToolButton;
     dlgFont: TFontDialog;
+    btnMatchFuzzy: TToolButton;
+    actMatchFuzzy: TAction;
     procedure lvListDblClick(Sender: TObject);
     procedure edtMatchSearchKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
@@ -149,6 +151,7 @@ type
     procedure lvListKeyPress(Sender: TObject; var Key: Char);
     procedure lvListKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
+    procedure actMatchFuzzyExecute(Sender: TObject);
   private
     FSortIndex: Integer;
     FSortDown: Boolean;
@@ -158,6 +161,8 @@ type
     procedure SetMatchAny(const Value: Boolean);
 
     procedure FirstUpdate(Sender: TObject);
+    function GetMatchMode: TCnMatchMode;
+    procedure SetMatchMode(const Value: TCnMatchMode);
   protected
     FRegExpr: TRegExpr;
     NeedInitProjectControls: Boolean;
@@ -189,6 +194,7 @@ type
     procedure SaveSettings(Ini: TCustomIniFile; aSection: string); virtual;
     property SortIndex: Integer read FSortIndex write FSortIndex;
     property SortDown: Boolean read FSortDown write FSortDown;
+    property MatchMode: TCnMatchMode read GetMatchMode write SetMatchMode;
     property MatchAny: Boolean read GetMatchAny write SetMatchAny;
   end;
 
@@ -199,7 +205,20 @@ implementation
 {$IFDEF DEBUG}
 uses
   CnDebug;
-{$ENDIF DEBUG}
+{$ENDIF}
+
+const
+  csMatchAny = 'MatchAny';
+  csMatchMode = 'MatchMode';
+  csFont = 'Font';
+  csSortIndex = 'SortIndex';
+  csSortDown = 'SortDown';
+  csCurrentPrj = 'SelectCurrentProject';
+  csHookIDE = 'HookIDE';
+  csOpenMultiUnitQuery = 'Query';
+  csWidth = 'Width';
+  csHeight = 'Height';
+  csListViewWidth = 'ListViewWidth';
 
 //==============================================================================
 // 工程信息类
@@ -368,12 +387,14 @@ end;
 procedure TCnProjectViewBaseForm.actMatchStartExecute(Sender: TObject);
 begin
   MatchAny := False;
+  MatchMode := mmStart;
   UpdateListView;
 end;
 
 procedure TCnProjectViewBaseForm.actMatchAnyExecute(Sender: TObject);
 begin
   MatchAny := True;
+  MatchMode := mmAnywhere;
   UpdateListView;
 end;
 
@@ -472,18 +493,6 @@ begin
   end;
 end;
 
-const
-  csMatchAny = 'MatchAny';
-  csFont = 'Font';
-  csSortIndex = 'SortIndex';
-  csSortDown = 'SortDown';
-  csCurrentPrj = 'SelectCurrentProject';
-  csHookIDE = 'HookIDE';
-  csOpenMultiUnitQuery = 'Query';
-  csWidth = 'Width';
-  csHeight = 'Height';
-  csListViewWidth = 'ListViewWidth';
-
 procedure TCnProjectViewBaseForm.LoadProjectSettings(Ini: TCustomIniFile;
   aSection: string);
 begin
@@ -525,6 +534,8 @@ begin
   with TCnIniFile.Create(Ini) do
   try
     MatchAny := ReadBool(aSection, csMatchAny, True);
+    MatchMode := TCnMatchMode(ReadInteger(aSection, csMatchMode, Ord(mmFuzzyMatch));
+
     sFont := ReadString(aSection, csFont, '');
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('ReadFont: ' + sFont);
@@ -562,6 +573,7 @@ begin
   with TCnIniFile.Create(Ini) do
   try
     WriteBool(aSection, csMatchAny, MatchAny);
+    WriteInteger(aSection, csMatchMode, Ord(MatchMode));
     WriteInteger(aSection, csSortIndex, FSortIndex);
     WriteBool(aSection, csSortDown, FSortDown);
 
@@ -809,6 +821,31 @@ begin
     end;
   end;
   lvList.Update;
+end;
+
+function TCnProjectViewBaseForm.GetMatchMode: TCnMatchMode;
+begin
+  Result := mmAnywhere;
+
+  if actMatchStart.Checked then
+    Result := mmStart
+  else if actMatchAny.Checked then
+    Result := mmAnywhere
+  else if actMatchFuzzy.Checked then
+    Result := mmFuzzy;
+end;
+
+procedure TCnProjectViewBaseForm.SetMatchMode(const Value: TCnMatchMode);
+begin
+  actMatchStart.Checked := Value = mmStart;
+  actMatchAny.Checked := Value = mmAnywhere;
+  actMatchFuzzy.Checked := Value = mmFuzzy;
+end;
+
+procedure TCnProjectViewBaseForm.actMatchFuzzyExecute(Sender: TObject);
+begin
+  MatchMode := mmFuzzy;
+  UpdateListView;
 end;
 
 end.
