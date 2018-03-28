@@ -492,7 +492,7 @@ begin
   ToSelUnitInfos := TList.Create;
 
   try
-    CurrList.Clear;
+    DisplayList.Clear;
     MatchSearchText := edtMatchSearch.Text;
     IsMatchAny := MatchAny;
 
@@ -506,7 +506,7 @@ begin
       if (MatchSearchText = '') or
         RegExpContainsText(FRegExpr, UnitInfo.Name, MatchSearchText, not IsMatchAny) then
       begin
-        CurrList.Add(UnitInfo);
+        DisplayList.AddObject(UnitInfo.Name, UnitInfo);
         // 全匹配时，提高首匹配的优先级，记下第一个该首匹配的项以备选中
         if IsMatchAny and AnsiStartsText(MatchSearchText, UnitInfo.Name) then
           ToSelUnitInfos.Add(Pointer(UnitInfo));
@@ -515,17 +515,17 @@ begin
 
     DoSortListView;
 
-    lvList.Items.Count := CurrList.Count;
+    lvList.Items.Count := DisplayList.Count;
     lvList.Invalidate;
 
     UpdateStatusBar;
 
     // 如有需要选中的首匹配的项则选中，无则选 0，第一项
-    if (ToSelUnitInfos.Count > 0) and (CurrList.Count > 0) then
+    if (ToSelUnitInfos.Count > 0) and (DisplayList.Count > 0) then
     begin
-      for I := 0 to CurrList.Count - 1 do
+      for I := 0 to DisplayList.Count - 1 do
       begin
-        if ToSelUnitInfos.IndexOf(CurrList.Items[I]) >= 0 then
+        if ToSelUnitInfos.IndexOf(DisplayList.Objects[I]) >= 0 then
         begin
           // CurrList 中的第一个在 SelUnitInfos 里头的项
           ToSelIndex := I;
@@ -563,9 +563,9 @@ procedure TCnProjectUseUnitsForm.lvListData(Sender: TObject;
 var
   Info: TCnUseUnitInfo;
 begin
-  if (Item.Index >= 0) and (Item.Index < CurrList.Count) then
+  if (Item.Index >= 0) and (Item.Index < DisplayList.Count) then
   begin
-    Info := TCnUseUnitInfo(CurrList[Item.Index]);
+    Info := TCnUseUnitInfo(DisplayList[Item.Index]);
     Item.Caption := Info.Name;
     Item.ImageIndex := Info.ImageIndex;
     Item.Data := Info;
@@ -592,12 +592,12 @@ var
   _SortDown: Boolean;
   _MatchStr: string;
 
-function DoListSort(Item1, Item2: Pointer): Integer;
+function DoListSort(List: TStringList; Index1, Index2: Integer): Integer;
 var
   Info1, Info2: TCnUseUnitInfo;
 begin
-  Info1 := TCnUseUnitInfo(Item1);
-  Info2 := TCnUseUnitInfo(Item2);
+  Info1 := TCnUseUnitInfo(List.Objects[Index1]);
+  Info2 := TCnUseUnitInfo(List.Objects[Index2]);
   
   case _SortIndex of
     0: Result := CompareTextPos(_MatchStr, Info1.Name, Info2.Name);
@@ -627,11 +627,11 @@ begin
     _MatchStr := edtMatchSearch.Text
   else
     _MatchStr := '';
-  CurrList.Sort(DoListSort);
+  DisplayList.CustomSort(DoListSort);
   lvList.Invalidate;
 
   if Sel <> nil then
-    SelectItemByIndex(CurrList.IndexOf(Sel));
+    SelectItemByIndex(DisplayList.IndexOfObject(Sel));
 end;
 
 procedure TCnProjectUseUnitsForm.FormCreate(Sender: TObject);

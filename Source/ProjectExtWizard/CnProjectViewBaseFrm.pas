@@ -48,7 +48,8 @@ uses
 {$ENDIF COMPILER6_UP}
   ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles, ToolsAPI,
   CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnWizUtils, CnIni, CnWizIdeUtils,
-  CnWizMultiLang, CnWizShareImages, CnWizNotifier, CnIniStrUtils, RegExpr;
+  CnWizMultiLang, CnWizShareImages, CnWizNotifier, CnIniStrUtils, RegExpr,
+  CnStrings;
 
 type
 
@@ -64,6 +65,28 @@ type
     InfoList: TObjectList;
     constructor Create;
     destructor Destroy; override;
+  end;
+
+//==============================================================================
+// 列表信息基类
+//==============================================================================
+
+  TCnBaseElementInfo = class
+  private
+    FText: string;
+    FMatchIndexes: TList;
+    FParentProject: TCnProjectInfo;
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    property MatchIndexes: TList read FMatchIndexes;
+    {* 模糊匹配 Text 的下标}
+    property ParentProject: TCnProjectInfo read FParentProject write FParentProject;
+    {* 该元素从属的 Project，无则为 nil}
+  published
+    property Text: string read FText write FText;
+    {* Text 表示第一列显示的文字}
   end;
 
 //==============================================================================
@@ -163,19 +186,47 @@ type
     procedure FirstUpdate(Sender: TObject);
     function GetMatchMode: TCnMatchMode;
     procedure SetMatchMode(const Value: TCnMatchMode);
+    procedure PrepareProjectRange;
   protected
     FRegExpr: TRegExpr;
     NeedInitProjectControls: Boolean;
-    ProjectList: TObjectList;
-    CurrList: TList;
+    ProjectList: TObjectList;     // 存储 ProjectInfo 的列表
+    ProjectInfo: TCnProjectInfo;  // 标记待限定的 Project 搜索范围
+    DataList: TStringList;        // 供子类存储原始需要搜索的列表名字以及 Object
+    DisplayList: TStringList;     // 供子类容纳过滤后需要显示的列表名字以及 Object（引用）
+    // CurrList: TList;
     function DoSelectOpenedItem: string; virtual; abstract;
     procedure DoSelectItemChanged(Sender: TObject); virtual;
-    procedure DoUpdateListView; virtual; abstract;
+    procedure DoUpdateListView; virtual;
+
+    // === New Routines for refactor ===
+    // 实现根据匹配规则从 DataList 更新至 DisplayList的功能，一般无须重载
+    procedure CommonUpdateListView; virtual;
+    // 子类重载以返回在指定匹配字符、指定匹配模式下，DataList 中的指定项是否匹配
+    // 调用此方法前 ProjectInfo 指定了下拉框所标识的工程范围
+    function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
+      DataListIndex: Integer): Boolean; virtual;
+    // 子类重载以返回此项是否可以作为优先选中的项，一般无须重载
+    function CanSelectDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
+      DataListIndex: Integer): Boolean; virtual;
+    // 排序比较器，子类重载以实现根据 Object 比较的功能
+    function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
+      const S1, S2: string; Obj1, Obj2: TObject): Integer; virtual;
+
+    // 默认匹配的实现，只匹配 DataList 中的字符串，不处理其 Object 所代表的内容
+    function DefaultMatchHandler(const AMatchStr: string; AMatchMode: TCnMatchMode;
+      DataListIndex: Integer): Boolean;
+    // 默认允许优先选择最头上匹配的项
+    function DefaultSelectHandler(const AMatchStr: string; AMatchMode: TCnMatchMode;
+      DataListIndex: Integer): Boolean;
+    // === New Routines for refactor ===
+
     procedure DoSortListView; virtual;
     {* 供子类重载用，被 UpdateListView 调用}
     function GetSelectedFileName: string; virtual; abstract;
     procedure CreateList; virtual;
-    {* 窗体 OnCreate 时被第一个调用，用来初始化数据 }
+    {* 窗体 OnCreate 时被第一个调用，用来初始化数据，一般把内容加载进 DataList 中，
+       如果待加载内容太多，也可在 UpdateListView 时做 }
     procedure UpdateComboBox; virtual;
     {* 窗体 OnCreate 时被第二个调用，用来初始化 ComboBox 中的内容}
     procedure UpdateListView; virtual;
@@ -220,6 +271,34 @@ const
   csHeight = 'Height';
   csListViewWidth = 'ListViewWidth';
 
+type
+  TSortCompareEvent = function(ASortIndex: Integer; const AMatchStr: string;
+    const S1, S2: string; Obj1, Obj2: TObject): Integer of object;
+
+var
+  GlobalSortIndex: Integer;
+  GlobalSortDown: Boolean;
+  GlobalSortMatchStr: string;
+  GlobalSortCompareEvent: TSortCompareEvent = nil;
+
+function DoListSort(List: TStringList; Index1, Index2: Integer): Integer;
+var
+  Obj1, Obj2: TObject;
+begin
+  Obj1 := List.Objects[Index1];
+  Obj2 := List.Objects[Index2];
+
+  if Assigned(GlobalSortCompareEvent) then
+  begin
+    Result := GlobalSortCompareEvent(GlobalSortIndex, GlobalSortMatchStr,
+      List[Index1], List[Index2], Obj1, Obj2);
+    if GlobalSortDown then
+      Result := -Result;
+  end
+  else
+    Result := AnsiCompareStr(List[Index1], List[Index2]);
+end;
+
 //==============================================================================
 // 工程信息类
 //==============================================================================
@@ -252,8 +331,13 @@ begin
 
     lvList.DoubleBuffered := True;
     ProjectList := TObjectList.Create;
-    CurrList := TList.Create;
+    //CurrList := TList.Create;
     NeedInitProjectControls := True;
+
+    DataList := TStringList.Create;
+    DisplayList := TStringList.Create;
+    GlobalSortCompareEvent := SortItemCompare;
+
     CreateList;
     UpdateComboBox;
   finally
@@ -272,10 +356,17 @@ begin
 end;
 
 procedure TCnProjectViewBaseForm.FormDestroy(Sender: TObject);
+var
+  I: Integer;
 begin
   CnWizNotifierServices.StopExecuteOnApplicationIdle(DoSelectItemChanged);
   ProjectList.Free;
-  CurrList.Free;
+  GlobalSortCompareEvent := nil;
+  for I := 0 to DataList.Count - 1 do
+    DataList.Objects[I].Free;
+  FreeAndNil(DataList);
+  FreeAndNil(DisplayList);
+  //CurrList.Free;
   FRegExpr.Free;
 end;
 
@@ -454,8 +545,23 @@ begin
 end;
 
 procedure TCnProjectViewBaseForm.DoSortListView;
+var
+  Sel: Pointer;
 begin
-  lvList.CustomSort(nil, 0);
+  if lvList.Selected <> nil then
+    Sel := lvList.Selected.Data
+  else
+    Sel := nil;
+
+  GlobalSortIndex := SortIndex;
+  GlobalSortDown := SortDown;
+  GlobalSortMatchStr := edtMatchSearch.Text;
+
+  QuickSortStringList(DisplayList, 0, DisplayList.Count - 1, DoListSort);
+  lvList.Invalidate;
+
+  if Sel <> nil then
+    SelectItemByIndex(DisplayList.IndexOfObject(Sel));
 end;
 
 procedure TCnProjectViewBaseForm.lvListColumnClick(Sender: TObject;
@@ -534,7 +640,7 @@ begin
   with TCnIniFile.Create(Ini) do
   try
     MatchAny := ReadBool(aSection, csMatchAny, True);
-    MatchMode := TCnMatchMode(ReadInteger(aSection, csMatchMode, Ord(mmFuzzyMatch));
+    MatchMode := TCnMatchMode(ReadInteger(aSection, csMatchMode, Ord(mmFuzzy)));
 
     sFont := ReadString(aSection, csFont, '');
 {$IFDEF DEBUG}
@@ -649,6 +755,8 @@ end;
 
 procedure TCnProjectViewBaseForm.UpdateListView;
 begin
+  PrepareProjectRange;
+  CommonUpdateListView;
   DoUpdateListView;
   // RemoveListViewSubImages(lvList);
 end;
@@ -846,6 +954,158 @@ procedure TCnProjectViewBaseForm.actMatchFuzzyExecute(Sender: TObject);
 begin
   MatchMode := mmFuzzy;
   UpdateListView;
+end;
+
+procedure TCnProjectViewBaseForm.CommonUpdateListView;
+var
+  MatchSearchText: string;
+  I, ToSelIndex: Integer;
+  ToSels: TStringList;
+begin
+  MatchSearchText := edtMatchSearch.Text;
+  ToSelIndex := 0;
+  ToSels := TStringList.Create;
+
+  DisplayList.Clear;
+  try
+    for I := 0 to DataList.Count - 1 do
+    begin
+      if (MatchSearchText = '') or CanMatchDataByIndex(MatchSearchText, MatchMode, I) then
+      begin
+        DisplayList.AddObject(DataList[I], DataList.Objects[I]);
+        if CanSelectDataByIndex(MatchSearchText, MatchMode, I) then
+          ToSels.Add(DataList[I]);
+      end;
+    end;
+
+    DoSortListView;
+    lvList.Items.Count := DisplayList.Count;
+    lvList.Invalidate;
+    UpdateStatusBar;
+
+    // 如有需要选中的首匹配的项则选中，无则选 0，第一项
+    if (ToSels.Count > 0) and (DisplayList.Count > 0) then
+    begin
+      for I := 0 to DisplayList.Count - 1 do
+      begin
+        if ToSels.IndexOf(DisplayList[I]) >= 0 then
+        begin
+          // DisplayList 中的第一个在 ToSelCompInfos 里头的项
+          ToSelIndex := I;
+          Break;
+        end;
+      end;
+    end;
+    SelectItemByIndex(ToSelIndex);
+  finally
+    ToSels.Free;
+  end;
+end;
+
+function TCnProjectViewBaseForm.CanMatchDataByIndex(const AMatchStr: string;
+  AMatchMode: TCnMatchMode; DataListIndex: Integer): Boolean;
+begin
+  Result := DefaultMatchHandler(AMatchStr, AMatchMode, DataListIndex);
+end;
+
+function TCnProjectViewBaseForm.CanSelectDataByIndex(
+  const AMatchStr: string; AMatchMode: TCnMatchMode;
+  DataListIndex: Integer): Boolean;
+begin
+  Result := DefaultSelectHandler(AMatchStr, AMatchMode, DataListIndex);
+end;
+
+function TCnProjectViewBaseForm.DefaultMatchHandler(
+  const AMatchStr: string; AMatchMode: TCnMatchMode;
+  DataListIndex: Integer): Boolean;
+var
+  S: string;
+begin
+  // 默认根据匹配模式匹配 DataList 的第 I 个字符串，
+  Result := True;
+  if AMatchStr = '' then
+    Exit;
+
+  S := DataList[DataListIndex];
+  case AMatchMode of
+    mmStart: Result := Pos(AMatchStr, S) = 1;
+    mmAnywhere: Result := Pos(AMatchStr, S) > 0;
+    mmFuzzy: Result := FuzzyMatchStr(AMatchStr, S);
+  end;
+end;
+
+function TCnProjectViewBaseForm.DefaultSelectHandler(
+  const AMatchStr: string; AMatchMode: TCnMatchMode;
+  DataListIndex: Integer): Boolean;
+begin
+  // 默认以头匹配的优先级最高最优先选中
+  Result := Pos(AMatchStr, DataList[DataListIndex]) = 1;
+end;
+
+function TCnProjectViewBaseForm.SortItemCompare(ASortIndex: Integer;
+  const AMatchStr: string; const S1, S2: string;
+  Obj1, Obj2: TObject): Integer;
+begin
+  Result := CompareStr(S1, S2);
+end;
+
+procedure TCnProjectViewBaseForm.PrepareProjectRange;
+var
+  I: Integer;
+  AProjectInfo: TCnProjectInfo;
+begin
+  ProjectInfo := nil;
+
+  if not cbbProjectList.Visible or (cbbProjectList.ItemIndex <= 0) then  // nil means All Project
+  begin
+    Exit;
+  end
+  else if cbbProjectList.ItemIndex = 1 then // 1 means Current Project
+  begin
+    for I := 0 to ProjectList.Count - 1 do
+    begin
+      AProjectInfo := TCnProjectInfo(ProjectList[I]);
+      if _CnChangeFileExt(AProjectInfo.FileName, '') = CnOtaGetCurrentProjectFileNameEx then
+      begin
+        ProjectInfo := AProjectInfo;
+        Exit;
+      end;
+    end;
+  end
+  else  // Specified Project
+  begin
+    for I := 0 to ProjectList.Count - 1 do
+    begin
+      AProjectInfo := TCnProjectInfo(ProjectList[I]);
+      if cbbProjectList.Items.Objects[cbbProjectList.ItemIndex] <> nil then
+      begin
+        if TCnProjectInfo(cbbProjectList.Items.Objects[cbbProjectList.ItemIndex]).FileName
+          = AProjectInfo.FileName then
+        begin
+          ProjectInfo := AProjectInfo;
+          Exit;
+        end;
+      end;
+    end;
+  end;
+end;
+
+procedure TCnProjectViewBaseForm.DoUpdateListView;
+begin
+  // Do Nothing in Base Class, to remove after refactoring.
+end;
+
+{ TCnBaseElementInfo }
+
+constructor TCnBaseElementInfo.Create;
+begin
+  FMatchIndexes := TList.Create;
+end;
+
+destructor TCnBaseElementInfo.Destroy;
+begin
+  FMatchIndexes.Free;
+  inherited;
 end;
 
 end.

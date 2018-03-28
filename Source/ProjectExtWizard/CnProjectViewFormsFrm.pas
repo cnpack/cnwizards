@@ -553,7 +553,7 @@ var
         RegExpContainsText(FRegExpr, FormInfo.Name, MatchSearchText, not IsMatchAny) or
         RegExpContainsText(FRegExpr, FormInfo.Caption, MatchSearchText, not IsMatchAny) then
       begin
-        CurrList.Add(FormInfo);
+        DisplayList.AddObject(FormInfo.Name, FormInfo);
         // 全匹配时，提高首匹配的优先级，记下第一个该首匹配的项以备选中
         if IsMatchAny and (AnsiStartsText(MatchSearchText, FormInfo.Name)
           or AnsiStartsText(MatchSearchText, FormInfo.Caption)) then
@@ -571,7 +571,7 @@ begin
   ToSelFormInfos := TList.Create;
 
   try
-    CurrList.Clear;
+    DisplayList.Clear;
     MatchSearchText := edtMatchSearch.Text;
     IsMatchAny := MatchAny;
 
@@ -606,17 +606,17 @@ begin
 
     DoSortListView;
 
-    lvList.Items.Count := CurrList.Count;
+    lvList.Items.Count := DisplayList.Count;
     lvList.Invalidate;
 
     UpdateStatusBar;
 
     // 如有需要选中的首匹配的项则选中，无则选 0，第一项
-    if (ToSelFormInfos.Count > 0) and (CurrList.Count > 0) then
+    if (ToSelFormInfos.Count > 0) and (DisplayList.Count > 0) then
     begin
-      for I := 0 to CurrList.Count - 1 do
+      for I := 0 to DisplayList.Count - 1 do
       begin
-        if ToSelFormInfos.IndexOf(CurrList.Items[I]) >= 0 then
+        if ToSelFormInfos.IndexOf(DisplayList.Objects[I]) >= 0 then
         begin
           // CurrList 中的第一个在 SelUnitInfos 里头的项
           ToSelIndex := I;
@@ -756,9 +756,9 @@ procedure TCnProjectViewFormsForm.lvListData(Sender: TObject;
 var
   Info: TCnFormInfo;
 begin
-  if (Item.Index >= 0) and (Item.Index < CurrList.Count) then
+  if (Item.Index >= 0) and (Item.Index < DisplayList.Count) then
   begin
-    Info := TCnFormInfo(CurrList[Item.Index]);
+    Info := TCnFormInfo(DisplayList[Item.Index]);
     Item.Caption := Info.Name;
     Item.ImageIndex := Info.ImageIndex;
     Item.Data := Info;
@@ -780,12 +780,12 @@ var
   _SortDown: Boolean;
   _MatchStr: string;
 
-function DoListSort(Item1, Item2: Pointer): Integer;
+function DoListSort(List: TStringList; Index1, Index2: Integer): Integer;
 var
   Info1, Info2: TCnFormInfo;
 begin
-  Info1 := TCnFormInfo(Item1);
-  Info2 := TCnFormInfo(Item2);
+  Info1 := TCnFormInfo(List.Objects[Index1]);
+  Info2 := TCnFormInfo(List.Objects[Index2]);
   
   case _SortIndex of
     0: Result := CompareTextPos(_MatchStr, Info1.Name, Info2.Name);
@@ -817,11 +817,11 @@ begin
     _MatchStr := edtMatchSearch.Text
   else
     _MatchStr := '';
-  CurrList.Sort(DoListSort);
+  DisplayList.CustomSort(DoListSort);
   lvList.Invalidate;
 
   if Sel <> nil then
-    SelectItemByIndex(CurrList.IndexOf(Sel));  
+    SelectItemByIndex(DisplayList.IndexOfObject(Sel));
 end;
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}

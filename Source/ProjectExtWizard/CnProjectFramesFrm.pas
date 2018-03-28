@@ -401,9 +401,9 @@ procedure TCnProjectFramesForm.lvListData(Sender: TObject;
 var
   Info: TCnFormInfo;
 begin
-  if (Item.Index >= 0) and (Item.Index < CurrList.Count) then
+  if (Item.Index >= 0) and (Item.Index < DisplayList.Count) then
   begin
-    Info := TCnFormInfo(CurrList[Item.Index]);
+    Info := TCnFormInfo(DisplayList[Item.Index]);
     Item.Caption := Info.Name;
     Item.ImageIndex := Info.ImageIndex;
     Item.Data := Info;

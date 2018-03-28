@@ -29,7 +29,9 @@ unit CnListCompFrm;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2008.03.17 V1.0
+* 修改记录：2018.03.24 V1.1
+*               跟随基类重构
+*           2008.03.17 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -51,7 +53,7 @@ uses
   Graphics, ImgList, ActnList, Menus,
   CnPasCodeParser, CnWizIdeUtils, CnWizUtils, CnIni,
   CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnWizMultiLang, CnWizManager,
-  CnProjectViewBaseFrm, CnProjectViewUnitsFrm, CnLangMgr;
+  CnProjectViewBaseFrm, CnProjectViewUnitsFrm, CnLangMgr, CnStrings;
 
 type
 
@@ -63,14 +65,11 @@ type
 
   TCnListCompForm = class(TCnProjectViewBaseForm)
     procedure lvListData(Sender: TObject; Item: TListItem);
-    procedure FormDestroy(Sender: TObject);
     procedure actHookIDEExecute(Sender: TObject);
     procedure FormShow(Sender: TObject);
   private
-    FCompList: TStringList;
-    FDisplayList: TStringList;
+
   protected
-    procedure DoUpdateListView; override;
     function DoSelectOpenedItem: string; override;
     procedure OpenSelect; override;
     function GetSelectedFileName: string; override;
@@ -80,7 +79,12 @@ type
     procedure UpdateStatusBar; override;
     procedure DrawListItem(ListView: TCustomListView; Item: TListItem); override;
     procedure DoLanguageChanged(Sender: TObject); override;
-    procedure DoSortListView; override;
+
+    function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
+      const S1, S2: string; Obj1, Obj2: TObject): Integer; override;
+
+    function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
+      DataListIndex: Integer): Boolean; override;
   public
     { Public declarations }
   end;
@@ -104,16 +108,16 @@ const
   csListComp = 'ListComp';
 
 type
-  TCnCompInfo = class(TObject)
+  TCnCompInfo = class(TCnBaseElementInfo)
   private
     FCompClass: string;
-    FCompName: string;
+    // FCompName: string;
     FCaptionText: string;
     FComponent: TComponent;
     FIsControl: Boolean;
     FIsMenuItem: Boolean;
   public
-    property CompName: string read FCompName write FCompName;
+    // property CompName: string read FCompName write FCompName;
     property CompClass: string read FCompClass write FCompClass;
     property CaptionText: string read FCaptionText write FCaptionText;
     property IsControl: Boolean read FIsControl write FIsControl;
@@ -126,28 +130,6 @@ type
 var
   FDestList: IDesignerSelections;
   FSourceList: IDesignerSelections;
-  _SortIndex: Integer;
-  _SortDown: Boolean;
-  _MatchStr: string;
-
-function DoListSort(List: TStringList; Index1, Index2: Integer): Integer;
-var
-  Info1, Info2: TCnCompInfo;
-begin
-  Info1 := TCnCompInfo(List.Objects[Index1]);
-  Info2 := TCnCompInfo(List.Objects[Index2]);
-
-  case _SortIndex of
-    0: Result := CompareTextPos(_MatchStr, Info1.CompName, Info2.CompName);
-    1: Result := CompareText(Info1.CompClass, Info2.CompClass);
-    2: Result := CompareText(Info1.CaptionText, Info2.CaptionText);
-  else
-    Result := 0;
-  end;
-
-  if _SortDown then
-    Result := -Result;
-end;
 
 function CnListComponent(Ini: TCustomIniFile): Boolean;
 var
@@ -200,9 +182,9 @@ var
     Info: TCnCompInfo;
   begin
     Result := -1;
-    for I := 0 to FCompList.Count - 1 do
+    for I := 0 to DataList.Count - 1 do
     begin
-      Info := TCnCompInfo(FCompList.Objects[I]);
+      Info := TCnCompInfo(DataList.Objects[I]);
       if Info <> nil then
       begin
         if Info.Component = AComponent then
@@ -212,7 +194,8 @@ var
         end;  
       end;  
     end;  
-  end;  
+  end;
+
   // 增加一项条目
   procedure AddItem(AComponent: TComponent; IncludeChildren: Boolean = False);
   var
@@ -222,7 +205,7 @@ var
     if CompListIndexOf(AComponent) < 0 then
     begin
       Info := TCnCompInfo.Create;
-      Info.CompName := AComponent.Name;
+      Info.Text := AComponent.Name;
       Info.CompClass := AComponent.ClassName;
       Info.Component := AComponent;
       Info.IsControl := AComponent is TControl;
@@ -233,7 +216,7 @@ var
       else if Info.IsMenuItem then
         Info.CaptionText := TMenuItem(AComponent).Caption;
 
-      FCompList.AddObject(AComponent.Name, Info);
+      DataList.AddObject(AComponent.Name, Info);
 
       // 递归增加子控件
       if IncludeChildren and (AComponent is TWinControl) then
@@ -246,9 +229,6 @@ begin
   // 检查 ComponentSelector
   if CnWizardMgr.WizardByClassName('TCnComponentSelector') = nil then
     btnHookIDE.Visible := False;
-
-  FCompList := TStringList.Create;
-  FDisplayList := TStringList.Create;
 
   DesignContainer := CnOtaGetRootComponentFromEditor(CnOtaGetCurrentFormEditor);
   if DesignContainer <> nil then
@@ -288,7 +268,7 @@ end;
 
 procedure TCnListCompForm.UpdateStatusBar;
 begin
-  StatusBar.Panels[1].Text := Format(SCnListComponentCount, [FDisplayList.Count]);
+  StatusBar.Panels[1].Text := Format(SCnListComponentCount, [DisplayList.Count]);
 end;
 
 procedure TCnListCompForm.lvListData(Sender: TObject;
@@ -296,11 +276,11 @@ procedure TCnListCompForm.lvListData(Sender: TObject;
 var
   Info: TCnCompInfo;
 begin
-  if (FDisplayList <> nil) and (Item.Index >= 0) and
-    (Item.Index < FDisplayList.Count) then
+  if (Item.Index >= 0) and
+    (Item.Index < DisplayList.Count) then
   begin
-    Info := TCnCompInfo(FDisplayList.Objects[Item.Index]);
-    Item.Caption := Info.CompName;
+    Info := TCnCompInfo(DisplayList.Objects[Item.Index]);
+    Item.Caption := Info.Text;
     if Info.IsControl then
       Item.ImageIndex := 67
     else if Info.IsMenuItem then
@@ -315,92 +295,9 @@ begin
   end;
 end;
 
-procedure TCnListCompForm.DoUpdateListView;
-var
-  MatchSearchText: string;
-  IsMatchAny: Boolean;
-  I, ToSelIndex: Integer;
-  ToSelCompInfos: TStringList;
-  Info: TCnCompInfo;
-begin
-  MatchSearchText := edtMatchSearch.Text;
-  IsMatchAny := MatchAny;
-  ToSelIndex := 0;
-  ToSelCompInfos := TStringList.Create;
-
-  FDisplayList.Clear;
-
-  try
-    for I := 0 to FCompList.Count - 1 do
-    begin
-      Info := TCnCompInfo(FCompList.Objects[I]);
-      if Info = nil then
-        Continue;
-
-      if (MatchSearchText = '') or (AnsiStartsText(MatchSearchText, FCompList[I])) or
-        (IsMatchAny and AnsiContainsText(FCompList[I], MatchSearchText)) then
-      begin
-        FDisplayList.AddObject(FCompList[I], FCompList.Objects[I]);
-        // 全匹配时，提高首匹配的优先级，记下第一个该首匹配的项以备选中
-        if IsMatchAny and AnsiStartsText(MatchSearchText, FCompList[I]) then
-          ToSelCompInfos.Add(FCompList[I]);
-      end
-      else if (AnsiStartsText(MatchSearchText, Info.CompClass)) or
-        (IsMatchAny and AnsiContainsText(Info.CompClass, MatchSearchText)) then
-      begin
-        FDisplayList.AddObject(FCompList[I], FCompList.Objects[I]);
-        // 全匹配时，提高首匹配的优先级，记下第一个该首匹配的项以备选中
-        if IsMatchAny and AnsiStartsText(MatchSearchText, Info.CompClass) then
-          ToSelCompInfos.Add(FCompList[I]);
-      end
-      else if (AnsiStartsText(MatchSearchText, Info.CaptionText)) or
-        (IsMatchAny and AnsiContainsText(Info.CaptionText, MatchSearchText)) then
-      begin
-        FDisplayList.AddObject(FCompList[I], FCompList.Objects[I]);
-        // 全匹配时，提高首匹配的优先级，记下第一个该首匹配的项以备选中
-        if IsMatchAny and AnsiStartsText(MatchSearchText, Info.CaptionText) then
-          ToSelCompInfos.Add(FCompList[I]);
-      end
-    end;
-
-    DoSortListView;
-    lvList.Items.Count := FDisplayList.Count;
-    lvList.Invalidate;
-    UpdateStatusBar;
-
-    // 如有需要选中的首匹配的项则选中，无则选 0，第一项
-    if (ToSelCompInfos.Count > 0) and (FDisplayList.Count > 0) then
-    begin
-      for I := 0 to FDisplayList.Count - 1 do
-      begin
-        if ToSelCompInfos.IndexOf(FDisplayList[I]) >= 0 then
-        begin
-          // CurrList 中的第一个在 ToSelCompInfos 里头的项
-          ToSelIndex := I;
-          Break;
-        end;
-      end;
-    end;
-    SelectItemByIndex(ToSelIndex);
-  finally
-    ToSelCompInfos.Free;
-  end;
-end;
-
 procedure TCnListCompForm.UpdateComboBox;
 begin
 // Do nothing for Combo Hidden.
-end;
-
-procedure TCnListCompForm.FormDestroy(Sender: TObject);
-var
-  I: Integer;
-begin
-  for I := 0 to FCompList.Count - 1 do
-    FCompList.Objects[I].Free;
-  FreeAndNil(FCompList);
-  FreeAndNil(FDisplayList);
-  inherited;
 end;
 
 procedure TCnListCompForm.DrawListItem(ListView: TCustomListView;
@@ -450,27 +347,72 @@ begin
   actHookIDE.Checked := False;
 end;
 
-procedure TCnListCompForm.DoSortListView;
+function TCnListCompForm.CanMatchDataByIndex(const AMatchStr: string;
+  AMatchMode: TCnMatchMode; DataListIndex: Integer): Boolean;
 var
-  Sel: Pointer;
+  Info: TCnCompInfo;
+  UpperMatch: string;
 begin
-  if lvList.Selected <> nil then
-    Sel := lvList.Selected.Data
+  Result := False;
+  Info := TCnCompInfo(DataList.Objects[DataListIndex]);
+  if Info = nil then
+    Exit;
+
+  if AMatchMode in [mmStart, mmAnywhere] then
+    UpperMatch := UpperCase(AMatchStr);
+
+  case AMatchMode of // 搜索时三列都参与匹配
+    mmStart:
+      begin
+        Result := (Pos(UpperMatch, UpperCase(DataList[DataListIndex])) = 1)
+          or (Pos(UpperMatch, UpperCase(Info.CompClass)) = 1)
+          or (Pos(UpperMatch, UpperCase(Info.CompClass)) = 1);
+      end;
+    mmAnywhere:
+      begin
+        Result := (Pos(UpperMatch, UpperCase(DataList[DataListIndex])) > 0)
+          or (Pos(UpperMatch, UpperCase(Info.CompClass)) > 0)
+          or (Pos(UpperMatch, UpperCase(Info.CaptionText)) > 0);
+      end;
+    mmFuzzy:
+      begin
+        Result := FuzzyMatchStr(AMatchStr, DataList[DataListIndex])
+          or FuzzyMatchStr(AMatchStr, Info.CompClass)
+          or FuzzyMatchStr(AMatchStr, Info.CaptionText);
+      end;
+  end;
+end;
+
+function TCnListCompForm.SortItemCompare(ASortIndex: Integer;
+  const AMatchStr, S1, S2: string; Obj1, Obj2: TObject): Integer;
+var
+  Info1, Info2: TCnCompInfo;
+begin
+  Info1 := TCnCompInfo(Obj1);
+  Info2 := TCnCompInfo(Obj2);
+
+  case ASortIndex of // 因为搜索时三列都参与匹配，因此排序时也要考虑到把全匹配提前
+    0:
+      begin
+        Result := CompareTextPos(AMatchStr, Info1.Text, Info2.Text);
+        if Result = 0 then
+          Result := CompareText(Info1.Text, Info2.Text);
+      end;
+    1:
+      begin
+        Result := CompareTextPos(AMatchStr, Info1.CompClass, Info2.CompClass);
+        if Result = 0 then
+          Result := CompareText(Info1.CompClass, Info2.CompClass);
+      end;
+    2:
+      begin
+        Result := CompareTextPos(AMatchStr, Info1.CaptionText, Info2.CaptionText);
+        if Result = 0 then
+          Result := CompareText(Info1.CaptionText, Info2.CaptionText);
+      end;
   else
-    Sel := nil;
-
-  _SortIndex := SortIndex;
-  _SortDown := SortDown;
-  if MatchAny then
-    _MatchStr := edtMatchSearch.Text
-  else
-    _MatchStr := '';
-
-  QuickSortStringList(FDisplayList, 0, FDisplayList.Count - 1, DoListSort);
-  lvList.Invalidate;
-
-  if Sel <> nil then
-    SelectItemByIndex(CurrList.IndexOf(Sel));
+    Result := 0;
+  end;
 end;
 
 {$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}

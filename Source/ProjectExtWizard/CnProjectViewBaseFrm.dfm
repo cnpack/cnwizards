@@ -337,7 +337,6 @@ inherited CnProjectViewBaseForm: TCnProjectViewBaseForm
       Caption = '&Fuzzy Match'
       Hint = 'Fuzzy Match of Form Name'
       ImageIndex = 94
-      Visible = False
       OnExecute = actMatchFuzzyExecute
     end
     object actHookIDE: TAction
