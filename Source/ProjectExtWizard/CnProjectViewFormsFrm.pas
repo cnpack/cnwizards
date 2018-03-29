@@ -483,15 +483,15 @@ var
 
   procedure OpenItems;
   var
-    i: Integer;
+    I: Integer;
     FormInfo: TCnFormInfo;
   begin
     BeginBatchOpenClose;
     try
-      for i := 0 to lvList.Items.Count - 1 do
-        if lvList.Items.Item[i].Selected then
+      for I := 0 to lvList.Items.Count - 1 do
+        if lvList.Items.Item[I].Selected then
         begin
-          FormInfo := TCnFormInfo(lvList.Items.Item[i].Data);
+          FormInfo := TCnFormInfo(lvList.Items.Item[I].Data);
           if FormInfo.Format = dfUnknown then
             OpenItem(FormInfo.FileName, FormInfo.Name)
           else
@@ -605,32 +605,32 @@ end;
 procedure TCnProjectViewFormsForm.ConvertSelectedForm(Format: TDfmFormat);
 var
   Item: TListItem;
-  i: Integer;
+  I: Integer;
   FileName: string;
 begin
   Item := lvList.Selected;
   if Assigned(Item) then
   begin
-    for i := 0 to lvList.Items.Count - 1 do
+    for I := 0 to lvList.Items.Count - 1 do
     begin
-      if lvList.Items.Item[i].Selected then
+      if lvList.Items.Item[I].Selected then
       begin
-        FileName := TCnFormInfo(lvList.Items.Item[i].Data).FileName;
+        FileName := TCnFormInfo(lvList.Items.Item[I].Data).FileName;
         if FileExists(FileName) then
         begin
           case Format of
             dfBinary:
               begin
                 ChangeType(FileName, Format);
-                TCnFormInfo(lvList.Items.Item[i].Data).Format := dfBinary;
+                TCnFormInfo(lvList.Items.Item[I].Data).Format := dfBinary;
               end;
             dfText:
               begin
                 ChangeType(FileName, Format);
-                TCnFormInfo(lvList.Items.Item[i].Data).Format := dfText;
+                TCnFormInfo(lvList.Items.Item[I].Data).Format := dfText;
               end;
           end;
-          FillFormInfo(TCnFormInfo(lvList.Items.Item[i].Data));
+          FillFormInfo(TCnFormInfo(lvList.Items.Item[I].Data));
         end
         else
         begin
@@ -668,7 +668,7 @@ var
 begin
   if (Item.Index >= 0) and (Item.Index < DisplayList.Count) then
   begin
-    Info := TCnFormInfo(DisplayList[Item.Index]);
+    Info := TCnFormInfo(DisplayList.Objects[Item.Index]);
     Item.Caption := Info.Name;
     Item.ImageIndex := Info.ImageIndex;
     Item.Data := Info;

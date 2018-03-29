@@ -29,7 +29,9 @@ unit CnProjectUseUnitsFrm;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2007.04.01 V1.0
+* 修改记录：2018.03.29 V1.1
+*               重构以支持模糊匹配
+*           2007.04.01 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -46,15 +48,14 @@ uses
   StrUtils,
 {$ENDIF}
   ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles, ToolsAPI,
-  Graphics, CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnWizUtils, CnIni,
-  CnWizIdeUtils, CnWizMultiLang, CnProjectViewBaseFrm, CnProjectViewUnitsFrm,
-  CnWizEditFiler, CnProjectExtWizard, CnWizClasses, CnWizManager, ActnList,
-  ImgList, CnProjectViewFormsFrm, CnInputSymbolList;
+  Graphics,  ActnList, ImgList, CnCommon, CnConsts, CnWizConsts, CnWizOptions,
+  CnWizUtils, CnIni, CnWizIdeUtils, CnWizMultiLang, CnProjectViewBaseFrm,
+  CnProjectViewUnitsFrm, CnWizEditFiler, CnProjectExtWizard, CnWizClasses,
+  CnWizManager,CnProjectViewFormsFrm, CnInputSymbolList, CnStrings;
 
 type
-  TCnUseUnitInfo = class
+  TCnUseUnitInfo = class(TCnBaseElementInfo)
   public
-    Name: string;
     FullNameWithPath: string; // 带路径的完整文件名
     IsInProject: Boolean;
     IsOpened: Boolean;
@@ -74,8 +75,6 @@ type
     procedure StatusBarDrawPanel(StatusBar: TStatusBar;
       Panel: TStatusPanel; const Rect: TRect);
     procedure lvListData(Sender: TObject; Item: TListItem);
-    procedure FormCreate(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
     procedure rbIntfKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure rbImplKeyDown(Sender: TObject; var Key: Word;
@@ -86,12 +85,12 @@ type
     procedure cbbProjectListChange(Sender: TObject);
   private
     FIsCppMode: Boolean;
-    FUsesList: TObjectList; // 存储所有的 UseUnitInfo
     FUnitNameListRef: TUnitNameList;
     procedure FillUnitInfo(AInfo: TCnUseUnitInfo);
     function SearchPasInsertPos(IsIntf: Boolean; out HasUses: Boolean;
       out CharPos: TOTACharPos): Boolean;
-    function SearchCppInsertPos(IsH: Boolean; out CharPos: TOTACharPos; SourceEditor: IOTASourceEditor = nil): Boolean;
+    function SearchCppInsertPos(IsH: Boolean; out CharPos: TOTACharPos;
+      SourceEditor: IOTASourceEditor = nil): Boolean;
   protected
     function DoSelectOpenedItem: string; override;
     procedure DoSelectItemChanged(Sender: TObject); override;
@@ -102,9 +101,12 @@ type
     procedure CreateList; override;
 
     procedure UpdateComboBox; override;
-    procedure DoUpdateListView; override;
-    procedure DoSortListView; override;
     procedure DrawListItem(ListView: TCustomListView; Item: TListItem); override;
+    
+    function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
+      DataListIndex: Integer): Boolean; override;
+    function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
+      const S1, S2: string; Obj1, Obj2: TObject): Integer; override;
   public
     constructor Create(AOwner: TComponent; CppMode: Boolean;
       UnitNameList: TUnitNameList); reintroduce;
@@ -408,10 +410,7 @@ begin
   end;
 
   try
-    if FUsesList = nil then
-      FUsesList := TObjectList.Create(True)
-    else
-      FUsesList.Clear;
+    ClearDataList;
 
     Names := TStringList.Create;
     Paths := TStringList.Create;
@@ -452,11 +451,11 @@ begin
     for I := 0 to Names.Count - 1 do
     begin
       Info := TCnUseUnitInfo.Create;
-      Info.Name := Names[I];
+      Info.Text := Names[I];
       Info.FullNameWithPath := Paths[I];
       Info.IsInProject := Integer(Names.Objects[I]) <> 0;
       FillUnitInfo(Info);
-      FUsesList.Add(Info);
+      DataList.AddObject(Info.Text, Info);
     end;
   finally
     UsesList.Free;
@@ -468,78 +467,12 @@ end;
 
 procedure TCnProjectUseUnitsForm.UpdateComboBox;
 begin
-  with cbbProjectList do
+  with cbbProjectList do // 前两项与基类相同，因此搜索时可利用基类的 ProjectInfo
   begin
     Clear;
     Items.Add(SCnProjExtProjectAll);
     Items.Add(SCnProjExtCurrentProject);
   end;
-end;
-
-procedure TCnProjectUseUnitsForm.DoUpdateListView;
-var
-  I, ToSelIndex: Integer;
-  MatchSearchText: string;
-  IsMatchAny: Boolean;
-  ToSelUnitInfos: TList;
-  UnitInfo: TCnUseUnitInfo;
-begin
-{$IFDEF DEBUG}
-  CnDebugger.LogEnter('TCnProjectUseUnitsForm DoUpdateListView');
-{$ENDIF DEBUG}
-
-  ToSelIndex := 0;
-  ToSelUnitInfos := TList.Create;
-
-  try
-    DisplayList.Clear;
-    MatchSearchText := edtMatchSearch.Text;
-    IsMatchAny := MatchAny;
-
-    for I := 0 to FUsesList.Count - 1 do
-    begin
-      UnitInfo := TCnUseUnitInfo(FUsesList[I]);
-      // 只显示工程时，跳过不在工程中的
-      if not UnitInfo.IsInProject and (cbbProjectList.ItemIndex = 1) then
-        Continue;
-
-      if (MatchSearchText = '') or
-        RegExpContainsText(FRegExpr, UnitInfo.Name, MatchSearchText, not IsMatchAny) then
-      begin
-        DisplayList.AddObject(UnitInfo.Name, UnitInfo);
-        // 全匹配时，提高首匹配的优先级，记下第一个该首匹配的项以备选中
-        if IsMatchAny and AnsiStartsText(MatchSearchText, UnitInfo.Name) then
-          ToSelUnitInfos.Add(Pointer(UnitInfo));
-      end;
-    end;
-
-    DoSortListView;
-
-    lvList.Items.Count := DisplayList.Count;
-    lvList.Invalidate;
-
-    UpdateStatusBar;
-
-    // 如有需要选中的首匹配的项则选中，无则选 0，第一项
-    if (ToSelUnitInfos.Count > 0) and (DisplayList.Count > 0) then
-    begin
-      for I := 0 to DisplayList.Count - 1 do
-      begin
-        if ToSelUnitInfos.IndexOf(DisplayList.Objects[I]) >= 0 then
-        begin
-          // CurrList 中的第一个在 SelUnitInfos 里头的项
-          ToSelIndex := I;
-          Break;
-        end;
-      end;
-    end;
-    SelectItemByIndex(ToSelIndex);
-  finally
-    ToSelUnitInfos.Free;
-  end;
-{$IFDEF DEBUG}
-  CnDebugger.LogLeave('TCnProjectUseUnitsForm DoUpdateListView');
-{$ENDIF DEBUG}
 end;
 
 procedure TCnProjectUseUnitsForm.UpdateStatusBar;
@@ -565,8 +498,8 @@ var
 begin
   if (Item.Index >= 0) and (Item.Index < DisplayList.Count) then
   begin
-    Info := TCnUseUnitInfo(DisplayList[Item.Index]);
-    Item.Caption := Info.Name;
+    Info := TCnUseUnitInfo(DisplayList.Objects[Item.Index]);
+    Item.Caption := Info.Text;
     Item.ImageIndex := Info.ImageIndex;
     Item.Data := Info;
 
@@ -585,65 +518,6 @@ begin
     end;
     RemoveListViewSubImages(Item);
   end;
-end;
-
-var
-  _SortIndex: Integer;
-  _SortDown: Boolean;
-  _MatchStr: string;
-
-function DoListSort(List: TStringList; Index1, Index2: Integer): Integer;
-var
-  Info1, Info2: TCnUseUnitInfo;
-begin
-  Info1 := TCnUseUnitInfo(List.Objects[Index1]);
-  Info2 := TCnUseUnitInfo(List.Objects[Index2]);
-  
-  case _SortIndex of
-    0: Result := CompareTextPos(_MatchStr, Info1.Name, Info2.Name);
-    1: Result := CompareTextPos(_MatchStr, Info1.FullNameWithPath, Info2.FullNameWithPath);
-    2: Result := CompareInt(Ord(Info1.IsInProject), Ord(Info2.IsInProject));
-    3: Result := CompareInt(Ord(Info1.IsSaved), Ord(Info2.IsSaved));
-  else
-    Result := 0;
-  end;
-
-  if _SortDown then
-    Result := -Result;
-end;
-
-procedure TCnProjectUseUnitsForm.DoSortListView;
-var
-  Sel: Pointer;
-begin
-  if lvList.Selected <> nil then
-    Sel := lvList.Selected.Data
-  else
-    Sel := nil;
-
-  _SortIndex := SortIndex;
-  _SortDown := SortDown;
-  if MatchAny then
-    _MatchStr := edtMatchSearch.Text
-  else
-    _MatchStr := '';
-  DisplayList.CustomSort(DoListSort);
-  lvList.Invalidate;
-
-  if Sel <> nil then
-    SelectItemByIndex(DisplayList.IndexOfObject(Sel));
-end;
-
-procedure TCnProjectUseUnitsForm.FormCreate(Sender: TObject);
-begin
-  FUsesList := TObjectList.Create(True);
-  inherited;
-end;
-
-procedure TCnProjectUseUnitsForm.FormDestroy(Sender: TObject);
-begin
-  inherited;
-  FUsesList.Free;
 end;
 
 function TCnProjectUseUnitsForm.SearchCppInsertPos(IsH: Boolean;
@@ -929,6 +803,56 @@ begin
     Screen.Cursor := Old;
   end;
   inherited;
+end;
+
+function TCnProjectUseUnitsForm.CanMatchDataByIndex(
+  const AMatchStr: string; AMatchMode: TCnMatchMode;
+  DataListIndex: Integer): Boolean;
+var
+  Info: TCnUseUnitInfo;
+begin
+  Result := False;
+  Info := TCnUseUnitInfo(DataList.Objects[DataListIndex]);
+  if (ProjectInfo <> nil) and not Info.IsInProject then
+    Exit;
+
+  case AMatchMode of // 搜索时单元名参与匹配，不区分大小写
+    mmStart:
+      begin
+        Result := (Pos(UpperCase(AMatchStr), UpperCase(DataList[DataListIndex])) = 1);
+      end;
+    mmAnywhere:
+      begin
+        Result := (Pos(UpperCase(AMatchStr), UpperCase(DataList[DataListIndex])) > 0);
+      end;
+    mmFuzzy:
+      begin
+        Result := FuzzyMatchStr(AMatchStr, DataList[DataListIndex]);
+      end;
+  end;
+end;
+
+function TCnProjectUseUnitsForm.SortItemCompare(ASortIndex: Integer;
+  const AMatchStr, S1, S2: string; Obj1, Obj2: TObject): Integer;
+var
+  Info1, Info2: TCnUseUnitInfo;
+begin
+  Info1 := TCnUseUnitInfo(Obj1);
+  Info2 := TCnUseUnitInfo(Obj2);
+
+  case ASortIndex of // 因为搜索时只有名称一列参与匹配，因此排序时要考虑到把名称匹配时的全匹配提前
+    0:
+      begin
+        Result := CompareTextPos(AMatchStr, Info1.Text, Info2.Text);
+        if Result = 0 then
+          Result := CompareText(Info1.Text, Info2.Text);
+      end;
+    1: Result := CompareText(Info1.FullNameWithPath, Info2.FullNameWithPath);
+    2: Result := CompareInt(Ord(Info1.IsInProject), Ord(Info2.IsInProject));
+    3: Result := CompareInt(Ord(Info1.IsSaved), Ord(Info2.IsSaved));
+  else
+    Result := 0;
+  end;
 end;
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}

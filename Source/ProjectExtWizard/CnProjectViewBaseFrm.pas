@@ -62,9 +62,6 @@ type
   TCnProjectInfo = class
     Name: string;
     FileName: string;
-    InfoList: TObjectList;
-    constructor Create;
-    destructor Destroy; override;
   end;
 
 //==============================================================================
@@ -219,6 +216,8 @@ type
     // 默认允许优先选择最头上匹配的项
     function DefaultSelectHandler(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer): Boolean;
+    // 释放 DataList 供重新初始化的场合
+    procedure ClearDataList;
     // === New Routines for refactor ===
 
     procedure DoSortListView; virtual;
@@ -300,23 +299,6 @@ begin
 end;
 
 //==============================================================================
-// 工程信息类
-//==============================================================================
-
-{ TCnProjectInfo }
-
-constructor TCnProjectInfo.Create;
-begin
-  InfoList := TObjectList.Create;
-end;
-
-destructor TCnProjectInfo.Destroy;
-begin
-  FreeAndNil(InfoList);
-  inherited Destroy;
-end;
-
-//==============================================================================
 // 工程组单元窗体列表基类窗体
 //==============================================================================
 
@@ -356,14 +338,11 @@ begin
 end;
 
 procedure TCnProjectViewBaseForm.FormDestroy(Sender: TObject);
-var
-  I: Integer;
 begin
   CnWizNotifierServices.StopExecuteOnApplicationIdle(DoSelectItemChanged);
   ProjectList.Free;
   GlobalSortCompareEvent := nil;
-  for I := 0 to DataList.Count - 1 do
-    DataList.Objects[I].Free;
+  ClearDataList;
   FreeAndNil(DataList);
   FreeAndNil(DisplayList);
   //CurrList.Free;
@@ -1090,6 +1069,15 @@ end;
 procedure TCnProjectViewBaseForm.DoUpdateListView;
 begin
   // Do Nothing in Base Class, to remove after refactoring.
+end;
+
+procedure TCnProjectViewBaseForm.ClearDataList;
+var
+  I: Integer;
+begin
+  for I := 0 to DataList.Count - 1 do
+    DataList.Objects[I].Free;
+  DataList.Clear;
 end;
 
 { TCnBaseElementInfo }

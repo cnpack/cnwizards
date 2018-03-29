@@ -29,7 +29,9 @@ unit CnProjectFramesFrm;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2007.04.27 V1.0
+* 修改记录：2018.03.29 V1.1
+*               重构以支持模糊匹配
+*           2007.04.27 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -232,7 +234,7 @@ procedure TCnProjectFramesForm.CreateList;
 var
   ProjectInfo: TCnProjectInfo;
   FormInfo: TCnFormInfo;
-  i, j: Integer;
+  I, J: Integer;
   FormFileName: string;
   IProject: IOTAProject;
   IModuleInfo: IOTAModuleInfo;
@@ -280,9 +282,9 @@ begin
     CnOtaGetProjectList(ProjectInterfaceList);
 
     try
-      for i := 0 to ProjectInterfaceList.Count - 1 do
+      for I := 0 to ProjectInterfaceList.Count - 1 do
       begin
-        IProject := IOTAProject(ProjectInterfaceList[i]);
+        IProject := IOTAProject(ProjectInterfaceList[I]);
 
         if IProject.FileName = '' then
           Continue;
@@ -298,9 +300,9 @@ begin
         ProjectInfo.FileName := IProject.FileName;
 
         // 添加窗体信息到 FormInfo
-        for j := 0 to IProject.GetModuleCount - 1 do
+        for J := 0 to IProject.GetModuleCount - 1 do
         begin
-          IModuleInfo := IProject.GetModule(j);
+          IModuleInfo := IProject.GetModule(J);
           if IModuleInfo.FormName = '' then
             Continue;
           if UpperCase(_CnExtractFileExt(IModuleInfo.FormName)) = '.RES' then
@@ -363,10 +365,11 @@ begin
 
           GetDfmInfoFromIDE(IModuleInfo.FileName, FormInfo);
           FillFormInfo(FormInfo);
-          ProjectInfo.InfoList.Add(FormInfo);  // 添加窗体信息到 ProjectRecord
+          FormInfo.ParentProject := ProjectInfo;
+          DataList.AddObject(FormInfo.Name, FormInfo);
         end;
 
-        ProjectList.Add(ProjectInfo);  // PProjectRecord 中包含模块信息
+        ProjectList.Add(ProjectInfo);  // ProjectList 中包含模块信息
       end;
     except
       raise Exception.Create(SCnProjExtCreatePrjListError);
@@ -403,7 +406,7 @@ var
 begin
   if (Item.Index >= 0) and (Item.Index < DisplayList.Count) then
   begin
-    Info := TCnFormInfo(DisplayList[Item.Index]);
+    Info := TCnFormInfo(DisplayList.Objects[Item.Index]);
     Item.Caption := Info.Name;
     Item.ImageIndex := Info.ImageIndex;
     Item.Data := Info;
