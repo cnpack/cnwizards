@@ -236,7 +236,7 @@ type
     procedure FontChanged(AFont: TFont); virtual;
     procedure DrawListItem(ListView: TCustomListView; Item: TListItem); virtual; abstract;
     procedure SelectFirstItem;
-    procedure SelectItemByIndex(Index: Integer);
+    procedure SelectItemByIndex(AIndex: Integer);
     procedure LoadProjectSettings(Ini: TCustomIniFile; aSection: string);
     procedure SaveProjectSettings(Ini: TCustomIniFile; aSection: string);
   public
@@ -785,16 +785,13 @@ begin
   CnWizNotifierServices.ExecuteOnApplicationIdle(DoSelectItemChanged);
 end;
 
-procedure TCnProjectViewBaseForm.SelectItemByIndex(Index: Integer);
+procedure TCnProjectViewBaseForm.SelectItemByIndex(AIndex: Integer);
 begin
-  with lvList do
+  if (AIndex >= 0) and (AIndex < lvList.Items.Count) then
   begin
-    if (Index >= 0) and (Index < Items.Count) then
-    begin
-      Selected := nil;
-      Selected := Items[Index];
-      ItemFocused := Selected;
-    end;
+    lvList.Selected := nil;
+    lvList.Selected := lvList.Items[AIndex];
+    lvList.ItemFocused := lvList.Selected;
   end;
 end;
 

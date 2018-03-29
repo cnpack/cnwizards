@@ -29,7 +29,9 @@ unit CnProjectViewFormsFrm;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2004.2.22 V2.0
+* 修改记录：2018.03.29 V2.1
+*               重构以支持模糊匹配
+*           2004.2.22 V2.0
 *               重写所有代码
 *           2004.2.18 V1.9 by Leeon
 *               更改两个列表框架
@@ -67,10 +69,11 @@ uses
   ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles, ToolsAPI,
   Graphics, CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnWizUtils, CnIni,
   CnWizMultiLang, CnProjectViewBaseFrm, CnWizDfmParser, ImgList, ActnList,
-  CnWizIdeUtils;
+  CnWizIdeUtils, CnStrings;
 
 type
   TCnFormInfo = class(TDfmInfo)
+  {* 需要解析 DFM，暂无法继承自 TCnBaseElementInfo，只能先整几个同名属性过来}
   private
     FDesignClass: string;
     FFileName: string;
@@ -78,7 +81,11 @@ type
     FSize: Integer;
     FImageIndex: Integer;
     FIsOpened: Boolean;
+    FParentProject: TCnProjectInfo;
     function GetDesignClassText: string;
+  public
+    property ParentProject: TCnProjectInfo read FParentProject write FParentProject;
+    {* 该元素从属的 Project，无则为 nil}
   published
     property DesignClass: string read FDesignClass write FDesignClass;
     property FileName: string read FFileName write FFileName;
@@ -110,16 +117,19 @@ type
   protected
     procedure FillFormInfo(AInfo: TCnFormInfo);
     function DoSelectOpenedItem: string; override;
-    procedure DoSortListView; override;
     function GetSelectedFileName: string; override;
     procedure OpenSelect; override;
     function GetHelpTopic: string; override;
     procedure CreateList; override;
     procedure UpdateStatusBar; override;
     procedure UpdateComboBox; override;
-    procedure DoUpdateListView; override;
     procedure DoSelectItemChanged(Sender: TObject); override;
     procedure DrawListItem(ListView: TCustomListView; Item: TListItem); override;
+
+    function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
+      DataListIndex: Integer): Boolean; override;
+    function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
+      const S1, S2: string; Obj1, Obj2: TObject): Integer; override;
   public
     { Public declarations }
   end;
@@ -229,7 +239,7 @@ procedure TCnProjectViewFormsForm.CreateList;
 var
   ProjectInfo: TCnProjectInfo;
   FormInfo: TCnFormInfo;
-  i, j: Integer;
+  I, J: Integer;
   FormFileName: string;
   IProject: IOTAProject;
   IModuleInfo: IOTAModuleInfo;
@@ -297,9 +307,9 @@ begin
     CnOtaGetProjectList(ProjectInterfaceList);
 
     try
-      for i := 0 to ProjectInterfaceList.Count - 1 do
+      for I := 0 to ProjectInterfaceList.Count - 1 do
       begin
-        IProject := IOTAProject(ProjectInterfaceList[i]);
+        IProject := IOTAProject(ProjectInterfaceList[I]);
 
         if IProject.FileName = '' then
           Continue;
@@ -315,9 +325,9 @@ begin
         ProjectInfo.FileName := IProject.FileName;
 
         // 添加窗体信息到 FormInfo
-        for j := 0 to IProject.GetModuleCount - 1 do
+        for J := 0 to IProject.GetModuleCount - 1 do
         begin
-          IModuleInfo := IProject.GetModule(j);
+          IModuleInfo := IProject.GetModule(J);
           if IModuleInfo.FormName = '' then
             Continue;
           if UpperCase(_CnExtractFileExt(IModuleInfo.FormName)) = '.RES' then
@@ -374,10 +384,11 @@ begin
 
           GetDfmInfoFromIDE(IModuleInfo.FileName, FormInfo);
           FillFormInfo(FormInfo);
-          ProjectInfo.InfoList.Add(FormInfo);  // 添加窗体信息到 ProjectRecord
+          FormInfo.ParentProject := ProjectInfo;
+          DataList.AddObject(FormInfo.Name, FormInfo);
         end;
 
-        ProjectList.Add(ProjectInfo);  // PProjectRecord 中包含模块信息
+        ProjectList.Add(ProjectInfo);  // ProjectList 中包含模块信息
       end;
     except
       raise Exception.Create(SCnProjExtCreatePrjListError);
@@ -533,107 +544,6 @@ begin
   end;
 end;
 
-procedure TCnProjectViewFormsForm.DoUpdateListView;
-var
-  i, ToSelIndex: Integer;
-  ProjectInfo: TCnProjectInfo;
-  MatchSearchText: string;
-  IsMatchAny: Boolean;
-  ToSelFormInfos: TList;
-
-  procedure DoAddProject(AProject: TCnProjectInfo);
-  var
-    i: Integer;
-    FormInfo: TCnFormInfo;
-  begin
-    for i := 0 to ProjectInfo.InfoList.Count - 1 do
-    begin
-      FormInfo := TCnFormInfo(ProjectInfo.InfoList[i]);
-      if (MatchSearchText = '') or
-        RegExpContainsText(FRegExpr, FormInfo.Name, MatchSearchText, not IsMatchAny) or
-        RegExpContainsText(FRegExpr, FormInfo.Caption, MatchSearchText, not IsMatchAny) then
-      begin
-        DisplayList.AddObject(FormInfo.Name, FormInfo);
-        // 全匹配时，提高首匹配的优先级，记下第一个该首匹配的项以备选中
-        if IsMatchAny and (AnsiStartsText(MatchSearchText, FormInfo.Name)
-          or AnsiStartsText(MatchSearchText, FormInfo.Caption)) then
-          ToSelFormInfos.Add(FormInfo);
-      end;
-    end;
-  end;
-
-begin
-{$IFDEF DEBUG}
-  CnDebugger.LogEnter('DoUpdateListView');
-{$ENDIF DEBUG}
-
-  ToSelIndex := 0;
-  ToSelFormInfos := TList.Create;
-
-  try
-    DisplayList.Clear;
-    MatchSearchText := edtMatchSearch.Text;
-    IsMatchAny := MatchAny;
-
-    if cbbProjectList.ItemIndex <= 0 then
-    begin
-      for i := 0 to ProjectList.Count - 1 do
-      begin
-        ProjectInfo := TCnProjectInfo(ProjectList[i]);
-        DoAddProject(ProjectInfo);
-      end;
-    end
-    else if cbbProjectList.ItemIndex = 1 then
-    begin
-      for i := 0 to ProjectList.Count - 1 do
-      begin
-        ProjectInfo := TCnProjectInfo(ProjectList[i]);
-        if _CnChangeFileExt(ProjectInfo.FileName, '') = CnOtaGetCurrentProjectFileNameEx then
-          DoAddProject(ProjectInfo);
-      end;
-    end
-    else
-    begin
-      for i := 0 to ProjectList.Count - 1 do
-      begin
-        ProjectInfo := TCnProjectInfo(ProjectList[i]);
-        if cbbProjectList.Items.Objects[cbbProjectList.ItemIndex] <> nil then
-          if TCnProjectInfo(cbbProjectList.Items.Objects[cbbProjectList.ItemIndex]).FileName
-            = ProjectInfo.FileName then
-            DoAddProject(ProjectInfo);
-      end;
-    end;
-
-    DoSortListView;
-
-    lvList.Items.Count := DisplayList.Count;
-    lvList.Invalidate;
-
-    UpdateStatusBar;
-
-    // 如有需要选中的首匹配的项则选中，无则选 0，第一项
-    if (ToSelFormInfos.Count > 0) and (DisplayList.Count > 0) then
-    begin
-      for I := 0 to DisplayList.Count - 1 do
-      begin
-        if ToSelFormInfos.IndexOf(DisplayList.Objects[I]) >= 0 then
-        begin
-          // CurrList 中的第一个在 SelUnitInfos 里头的项
-          ToSelIndex := I;
-          Break;
-        end;
-      end;
-    end;
-    SelectItemByIndex(ToSelIndex);
-  finally
-    ToSelFormInfos.Free;
-  end;
-
-{$IFDEF DEBUG}
-  CnDebugger.LogLeave('DoUpdateListView');
-{$ENDIF DEBUG}
-end;
-
 procedure TCnProjectViewFormsForm.UpdateStatusBar;
 begin
   with StatusBar do
@@ -775,53 +685,68 @@ begin
   end;
 end;
 
+function TCnProjectViewFormsForm.CanMatchDataByIndex(
+  const AMatchStr: string; AMatchMode: TCnMatchMode;
+  DataListIndex: Integer): Boolean;
 var
-  _SortIndex: Integer;
-  _SortDown: Boolean;
-  _MatchStr: string;
+  Info: TCnFormInfo;
+  UpperMatch: string;
+begin
+  Result := False;
+  Info := TCnFormInfo(DataList.Objects[DataListIndex]);
+  if (ProjectInfo <> nil) and (ProjectInfo <> Info.ParentProject) then
+    Exit;
 
-function DoListSort(List: TStringList; Index1, Index2: Integer): Integer;
+  if AMatchMode in [mmStart, mmAnywhere] then
+    UpperMatch := UpperCase(AMatchStr);
+
+  case AMatchMode of // 搜索时窗体名、标题参与匹配，不区分大小写
+    mmStart:
+      begin
+        Result := (Pos(UpperMatch, UpperCase(DataList[DataListIndex])) = 1)
+          or (Pos(UpperMatch, UpperCase(Info.Caption)) = 1);
+      end;
+    mmAnywhere:
+      begin
+        Result := (Pos(UpperMatch, UpperCase(DataList[DataListIndex])) > 0)
+         or (Pos(UpperMatch, UpperCase(Info.Caption)) > 0);
+      end;
+    mmFuzzy:
+      begin
+        Result := FuzzyMatchStr(AMatchStr, DataList[DataListIndex])
+          or FuzzyMatchStr(AMatchStr, Info.Caption) ;
+      end;
+  end;
+end;
+
+function TCnProjectViewFormsForm.SortItemCompare(ASortIndex: Integer;
+  const AMatchStr, S1, S2: string; Obj1, Obj2: TObject): Integer;
 var
   Info1, Info2: TCnFormInfo;
 begin
-  Info1 := TCnFormInfo(List.Objects[Index1]);
-  Info2 := TCnFormInfo(List.Objects[Index2]);
-  
-  case _SortIndex of
-    0: Result := CompareTextPos(_MatchStr, Info1.Name, Info2.Name);
-    1: Result := CompareTextPos(_MatchStr, Info1.Caption, Info2.Caption);
+  Info1 := TCnFormInfo(Obj1);
+  Info2 := TCnFormInfo(Obj2);
+
+  case ASortIndex of // 因为搜索时名称、标题两列参与匹配，因此这两列排序时要考虑到把名称匹配时的全匹配提前
+    0:
+      begin
+        Result := CompareTextPos(AMatchStr, Info1.Name, Info2.Name);
+        if Result = 0 then
+          Result := CompareText(Info1.Name, Info2.Name);
+      end;
+    1:
+      begin
+        Result := CompareTextPos(AMatchStr, Info1.Caption, Info2.Caption);
+        if Result = 0 then
+          Result := CompareText(Info1.Caption, Info2.Caption);
+      end;
     2: Result := CompareText(Info1.DesignClassText, Info2.DesignClassText);
     3: Result := CompareText(Info1.Project, Info2.Project);
     4: Result := CompareValue(Info1.Size, Info2.Size);
-    5: Result := CompareText(SDfmFormats[Info1.Format], SDfmFormats[Info2.Format])
+    5: Result := CompareText(SDfmFormats[Info1.Format], SDfmFormats[Info2.Format]);
   else
     Result := 0;
   end;
-
-  if _SortDown then
-    Result := -Result;
-end;
-
-procedure TCnProjectViewFormsForm.DoSortListView;
-var
-  Sel: Pointer;
-begin
-  if lvList.Selected <> nil then
-    Sel := lvList.Selected.Data
-  else
-    Sel := nil;
-
-  _SortIndex := SortIndex;
-  _SortDown := SortDown;
-  if MatchAny then
-    _MatchStr := edtMatchSearch.Text
-  else
-    _MatchStr := '';
-  DisplayList.CustomSort(DoListSort);
-  lvList.Invalidate;
-
-  if Sel <> nil then
-    SelectItemByIndex(DisplayList.IndexOfObject(Sel));
 end;
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}

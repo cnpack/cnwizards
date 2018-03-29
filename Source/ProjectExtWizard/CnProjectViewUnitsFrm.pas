@@ -186,7 +186,7 @@ begin
   Info1 := TCnUnitInfo(Obj1);
   Info2 := TCnUnitInfo(Obj2);
 
-  case ASortIndex of // 因为搜索时只有名称一列参与匹配，因此排序时也要考虑到把全匹配提前
+  case ASortIndex of // 因为搜索时只有名称一列参与匹配，因此排序时要考虑到把名称匹配时的全匹配提前
     0:
       begin
         Result := CompareTextPos(AMatchStr, Info1.Text, Info2.Text);
@@ -221,7 +221,7 @@ begin
   if (ProjectInfo <> nil) and (ProjectInfo <> Info.ParentProject) then
     Exit;
 
-  case AMatchMode of // 搜索时三列都参与匹配，不区分大小写
+  case AMatchMode of // 搜索时单元名参与匹配，不区分大小写
     mmStart:
       begin
         Result := (Pos(UpperCase(AMatchStr), UpperCase(DataList[DataListIndex])) = 1);

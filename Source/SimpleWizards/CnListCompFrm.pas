@@ -361,7 +361,7 @@ begin
   if AMatchMode in [mmStart, mmAnywhere] then
     UpperMatch := UpperCase(AMatchStr);
 
-  case AMatchMode of // 搜索时三列都参与匹配
+  case AMatchMode of // 搜索时三列都参与匹配，不区分大小写
     mmStart:
       begin
         Result := (Pos(UpperMatch, UpperCase(DataList[DataListIndex])) = 1)
