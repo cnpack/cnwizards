@@ -52,6 +52,7 @@ type
     ilProcToolBar: TImageList;
     ilBackForwardBDS: TImageList;
     ilProcToolbarLarge: TImageList;
+    ilColumnHeader: TImageList;
     procedure DataModuleCreate(Sender: TObject);
   private
     { Private declarations }

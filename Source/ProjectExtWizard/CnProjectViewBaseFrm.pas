@@ -42,7 +42,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, 
-  ImgList, Contnrs, ActnList, 
+  ImgList, Contnrs, ActnList, CommCtrl,
 {$IFDEF COMPILER6_UP}
   StrUtils,
 {$ENDIF COMPILER6_UP}
@@ -177,6 +177,9 @@ type
     FSortDown: Boolean;
     FListViewWidthStr: string;
     FProjectListSelectedAllProject: Boolean;
+    FUpArrow: TBitmap;
+    FDownArrow: TBitmap;
+    FNoArrow: TBitmap;
     function GetMatchAny: Boolean;
     procedure SetMatchAny(const Value: Boolean);
 
@@ -184,6 +187,9 @@ type
     function GetMatchMode: TCnMatchMode;
     procedure SetMatchMode(const Value: TCnMatchMode);
     procedure PrepareProjectRange;
+    procedure InitArrowBitmaps;
+    procedure ClearColumnArrow;
+    procedure ChangeColumnArrow;
   protected
     FRegExpr: TRegExpr;
     NeedInitProjectControls: Boolean;
@@ -270,6 +276,10 @@ const
   csHeight = 'Height';
   csListViewWidth = 'ListViewWidth';
 
+  {CommCtrl Constants For Windows >= XP }
+  HDF_SORTUP              = $0400;
+  HDF_SORTDOWN            = $0200;
+
 type
   TSortCompareEvent = function(ASortIndex: Integer; const AMatchStr: string;
     const S1, S2: string; Obj1, Obj2: TObject): Integer of object;
@@ -310,6 +320,10 @@ begin
   try
     FRegExpr := TRegExpr.Create;
     FRegExpr.ModifierI := True;
+    FUpArrow := TBitmap.Create;
+    FDownArrow := TBitmap.Create;
+    FNoArrow := TBitmap.Create;
+    InitArrowBitmaps;
 
     lvList.DoubleBuffered := True;
     ProjectList := TObjectList.Create;
@@ -343,6 +357,9 @@ begin
   ProjectList.Free;
   GlobalSortCompareEvent := nil;
   ClearDataList;
+  FUpArrow.Free;
+  FDownArrow.Free;
+  FNoArrow.Free;
   FreeAndNil(DataList);
   FreeAndNil(DisplayList);
   //CurrList.Free;
@@ -546,11 +563,13 @@ end;
 procedure TCnProjectViewBaseForm.lvListColumnClick(Sender: TObject;
   Column: TListColumn);
 begin
+  ClearColumnArrow;
   if FSortIndex = Column.Index then
     FSortDown := not FSortDown
   else
     FSortIndex := Column.Index;
   DoSortListView;
+  ChangeColumnArrow;
 end;
 
 procedure TCnProjectViewBaseForm.lvListDblClick(Sender: TObject);
@@ -638,6 +657,7 @@ begin
     FSortIndex := ReadInteger(aSection, csSortIndex, 0);
     FSortDown := ReadBool(aSection, csSortDown, False);
     lvList.CustomSort(nil, 0); // 按保存的设置排序
+    ChangeColumnArrow;
 
     Width := ReadInteger(aSection, csWidth, Width);
     Height := ReadInteger(aSection, csHeight, Height);
@@ -1078,6 +1098,87 @@ begin
   for I := 0 to DataList.Count - 1 do
     DataList.Objects[I].Free;
   DataList.Clear;
+end;
+
+procedure TCnProjectViewBaseForm.ChangeColumnArrow;
+var
+  Header: HWND;
+  Item: THDItem;
+begin
+  if (FSortIndex >= 0) and (FSortIndex < lvList.Columns.Count) then
+  begin
+    Header := ListView_GetHeader(lvList.Handle);
+    ZeroMemory(@Item, SizeOf(Item));
+    Item.Mask := HDI_FORMAT or HDI_BITMAP;
+
+    Header_GetItem(Header, FSortIndex, Item);
+
+{$IFDEF BDS}
+    Item.fmt := Item.fmt and not (HDF_SORTUP or HDF_SORTDOWN);
+    if FSortDown then
+      Item.fmt := Item.fmt or HDF_SORTUP
+    else
+      Item.fmt := Item.fmt or HDF_SORTDOWN;
+{$ELSE}
+    Item.fmt := Item.fmt or HDF_BITMAP_ON_RIGHT or HDF_BITMAP;
+    if FSortDown then
+      Item.hbm := FUpArrow.Handle
+    else
+      Item.hbm := FDownArrow.Handle;
+{$ENDIF}
+
+    Header_SetItem(Header, FSortIndex, Item);
+
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('ChangeColumnArrow for Column ' + IntToStr(FSortIndex));
+{$ENDIF}
+  end;
+end;
+
+procedure TCnProjectViewBaseForm.ClearColumnArrow;
+var
+  Header: HWND;
+  Item: THDItem;
+begin
+  if (FSortIndex >= 0) and (FSortIndex < lvList.Columns.Count) then
+  begin
+    Header := ListView_GetHeader(lvList.Handle);
+    ZeroMemory(@Item, SizeOf(Item));
+    Item.Mask := HDI_FORMAT or HDI_BITMAP;
+
+    Header_GetItem(Header, FSortIndex, Item);
+    Item.fmt := Item.fmt and not (HDF_SORTUP or HDF_SORTDOWN);
+{$IFNDEF BDS}
+    Item.fmt := Item.fmt or HDF_BITMAP_ON_RIGHT or HDF_BITMAP;
+    Item.hbm := FNoArrow.Handle;
+{$ENDIF}
+
+    Header_SetItem(Header, FSortIndex, Item);
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('ClearColumnArrow for Column ' + IntToStr(FSortIndex));
+{$ENDIF}
+  end;
+end;
+
+procedure TCnProjectViewBaseForm.InitArrowBitmaps;
+
+  procedure MakeBitmap(Bmp: TBitmap; Idx: Integer);
+  begin
+    Bmp.Width := dmCnSharedImages.ilColumnHeader.Width;
+    Bmp.Height := dmCnSharedImages.ilColumnHeader.Height;
+    with Bmp.Canvas do
+    begin
+      Brush.COlor := clBtnface;
+      Brush.Style := bsSolid;
+      FillRect(ClipRect);
+    end;
+    dmCnSharedImages.ilColumnHeader.Draw(Bmp.Canvas, 0, 0, Idx);
+  end;
+
+begin
+  MakeBitmap(FUpArrow, 0);
+  MakeBitmap(FDownArrow, 1);
+  MakeBitmap(FNoArrow, 2);
 end;
 
 { TCnBaseElementInfo }
