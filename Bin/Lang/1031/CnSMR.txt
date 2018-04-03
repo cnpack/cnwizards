@@ -133,7 +133,6 @@ TCnDirListForm.CollaspeAll1.Caption=Collapse alle Verzeichnisse
 TCnDirListForm.Deleteemptydirectoriesfromtree1.Caption=lösche leere Verzeichnisse vom Baum
 TCnDirListForm.ExpandAll1.Caption=expandiere alle Verzeichnisse
 TCnDirListForm.Label1.Caption=Verzeichnis:
-TCnDirListForm.Label2.Caption=generiere
 TCnDirListForm.Label3.Caption=&Datei Masken  (z. B. *.dfm;*.pas) :
 TCnDirListForm.miDelByMasks.Caption=lösche Verzeichnisse/Dateien vom Baum nach Maske:
 TCnDirListForm.miDeleteSelected.Caption=lösche ausgewähltes Verzeichnis/Datei vom Baum

@@ -133,7 +133,6 @@ TCnDirListForm.CollaspeAll1.Caption=Свернуть все папки
 TCnDirListForm.Deleteemptydirectoriesfromtree1.Caption=Удалить пустые папки из дерева
 TCnDirListForm.ExpandAll1.Caption=Развернуть все папки
 TCnDirListForm.Label1.Caption=Папка:
-TCnDirListForm.Label2.Caption=Создать
 TCnDirListForm.Label3.Caption=Маска (напр.: *.dfm;*.pas) :
 TCnDirListForm.miDelByMasks.Caption=Удалить папки/файлы из дерева по маске...
 TCnDirListForm.miDeleteSelected.Caption=Удалить выбранную папку/файл из дерева

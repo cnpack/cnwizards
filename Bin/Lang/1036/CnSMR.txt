@@ -133,7 +133,6 @@ TCnDirListForm.CollaspeAll1.Caption=Réduire Tous les Répertoires
 TCnDirListForm.Deleteemptydirectoriesfromtree1.Caption=Supprimer répertoires vide de l'arborescence
 TCnDirListForm.ExpandAll1.Caption=Développer Tous les répertoires
 TCnDirListForm.Label1.Caption=&Répertoire:
-TCnDirListForm.Label2.Caption=Générer
 TCnDirListForm.Label3.Caption=&Masques de fichiers (such as *.dfm;*.pas) :
 TCnDirListForm.miDelByMasks.Caption=Supprimer Répertoires/Fichiers de l'arborescence par un masque...
 TCnDirListForm.miDeleteSelected.Caption=Supprimer Répertoire/Fichier Sélectionné de l'arborescence

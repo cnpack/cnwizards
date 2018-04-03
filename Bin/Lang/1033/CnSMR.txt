@@ -133,7 +133,6 @@ TCnDirListForm.CollaspeAll1.Caption=Collapse All Directories
 TCnDirListForm.Deleteemptydirectoriesfromtree1.Caption=Delete Empty Directories from Tree
 TCnDirListForm.ExpandAll1.Caption=Expand All Directories
 TCnDirListForm.Label1.Caption=&Directory:
-TCnDirListForm.Label2.Caption=Generate
 TCnDirListForm.Label3.Caption=&File Masks (such as *.dfm;*.pas) :
 TCnDirListForm.miDelByMasks.Caption=Delete Directories/Files from Tree by mask...
 TCnDirListForm.miDeleteSelected.Caption=Delete Selected Directory/File from Tree
