@@ -1113,7 +1113,7 @@ begin
 
     Header_GetItem(Header, FSortIndex, Item);
 
-{$IFDEF BDS}
+{$IFDEF BDS2007_UP}  // D2007 CommCtrl 才支持 SORTUP/DOWN 标记
     Item.fmt := Item.fmt and not (HDF_SORTUP or HDF_SORTDOWN);
     if FSortDown then
       Item.fmt := Item.fmt or HDF_SORTUP
@@ -1148,7 +1148,8 @@ begin
 
     Header_GetItem(Header, FSortIndex, Item);
     Item.fmt := Item.fmt and not (HDF_SORTUP or HDF_SORTDOWN);
-{$IFNDEF BDS}
+
+{$IFNDEF BDS2007_UP} // D2007 CommCtrl 才支持 SORTUP/DOWN 标记
     Item.fmt := Item.fmt or HDF_BITMAP_ON_RIGHT or HDF_BITMAP;
     Item.hbm := FNoArrow.Handle;
 {$ENDIF}
