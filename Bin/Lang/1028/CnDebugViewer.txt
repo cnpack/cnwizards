@@ -124,7 +124,6 @@ TCnViewerOptionsFrm.lblCapOD.Caption=（需要重新啟動 CnDebugViewer）
 TCnViewerOptionsFrm.lblRestart.Caption=（需要重新啟動 CnDebugViewer）
 TCnViewerOptionsFrm.lblHotKey.Caption=主窗口顯示熱鍵(&H)：
 TCnViewerOptionsFrm.lblPort.Caption=UDP 埠:
-TCnSenderFilterFrm.!Font=細明體,9,,0,clWindowText,CHINESEBIG5_CHARSET
 TCnSenderFilterFrm.btnCancel.Caption=取消(&C)
 TCnSenderFilterFrm.btnOK.Caption=確定(&O)
 TCnSenderFilterFrm.Caption=發送端過濾設置

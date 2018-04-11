@@ -1474,7 +1474,6 @@ TCnProjectFramesForm.actFont.Caption=&Schriftart
 TCnProjectFramesForm.actFont.Hint=List Schriftart wechseln
 TCnProjectFramesForm.actHelp.Caption=&Hilfe
 TCnProjectFramesForm.actHelp.Hint=Hilfe anzeigen
-TCnProjectFramesForm.actSelectAll.Hint=Selektiere alle Units
 TCnProjectFramesForm.actMatchAny.Hint=Match alle Teile des Frame Namens
 TCnProjectFramesForm.actMatchStart.Caption=Match Frame Namen &Start
 TCnProjectFramesForm.actMatchStart.Hint=Match Frame Namen &Start

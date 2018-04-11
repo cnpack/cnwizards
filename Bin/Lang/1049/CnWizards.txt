@@ -1474,7 +1474,6 @@ TCnProjectFramesForm.actFont.Caption=Шрифт
 TCnProjectFramesForm.actFont.Hint=Шрифт
 TCnProjectFramesForm.actHelp.Caption=Справка
 TCnProjectFramesForm.actHelp.Hint=Справка
-TCnProjectFramesForm.actSelectAll.Hint=Выбрать все модули
 TCnProjectFramesForm.actMatchAny.Hint=Фильтр по всему имени
 TCnProjectFramesForm.actMatchStart.Caption=Фильтр по началу имени
 TCnProjectFramesForm.actMatchStart.Hint=Фильтр по началу имени
