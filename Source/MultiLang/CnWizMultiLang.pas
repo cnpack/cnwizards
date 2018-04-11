@@ -145,9 +145,9 @@ function CnLangMgr: TCnCustomLangManager;
 procedure InitLangManager;
 
 function GetFileFromLang(const FileName: string): string;
-{$ENDIF}
 
 procedure RegisterThemeClass;
+{$ENDIF}
 
 implementation
 
