@@ -3,7 +3,7 @@ object ImgListEdtTestForm: TImgListEdtTestForm
   Top = 270
   Width = 423
   Height = 223
-  Caption = 'ImageList Editor Test - Delphi 7'
+  Caption = 'ImageList Editor Test - Delphi 7 ~ XE'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
