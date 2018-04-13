@@ -228,7 +228,8 @@ implementation
 
 type
   TImageListAccess = class(TImageList);
-  
+  TBitmapAccess = class(TBitmap);
+
   PRGB = ^TRGB;
   TRGB = packed record
     r, g, b: Byte;
@@ -722,27 +723,32 @@ end;
 procedure TCnImageListEditorForm.DoAddBmp(ARow, ACol: Integer; ABmp: TBitmap;
   AOption: TCnImageOption; NewBmp: Boolean; DefMask: TColor);
 var
-  info: TCnImageInfo;
+  Info: TCnImageInfo;
   Bmp, Dst: TBitmap;
-  mask: TColor;
+  Mask: TColor;
 begin
   Bmp := nil;
   Dst := nil;
   try
     Bmp := CreateDstBmp(ABmp, ARow, ACol, AOption);
     Dst := TBitmap.Create;
-    mask := DefMask;
-    ConvertBmp(chkXPStyle.Checked, Bmp, Dst, mask);
-    if ilList.AddMasked(Dst, mask) >= 0 then
+    Mask := DefMask;
+    ConvertBmp(chkXPStyle.Checked, Bmp, Dst, Mask);
+{$IFDEF DELPHI2009_UP}
+    // D2009 以上版本似乎需要先读一下 MaskHandle 让其准备好
+    // Mask 才能正确显示透明度，否则变成白底。
+    TBitmapAccess(Dst).MaskHandleNeeded;
+{$ENDIF}
+    if ilList.AddMasked(Dst, Mask) >= 0 then
     begin
-      info := TCnImageInfo.Create;
+      Info := TCnImageInfo.Create;
       if NewBmp then
-        info.Image := Bmp
+        Info.Image := Bmp
       else
-        info.Image := ABmp;
-      info.Mask := mask;
-      info.Option := AOption;
-      FList.Add(info);
+        Info.Image := ABmp;
+      Info.Mask := Mask;
+      Info.Option := AOption;
+      FList.Add(Info);
       with lvList.Items.Add do
       begin
         ImageIndex := ilList.Count - 1;
