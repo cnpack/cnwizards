@@ -36,6 +36,7 @@ unit CnProcListWizard;
 * 备    注：该单元部分内容移植自 GExperts 的相应单元
 *           其原始内容受 GExperts License 的保护
 *           ——有待增加设置窗口控制其设置
+*           原则上窗体列表里不使用全局的 List，后者只在工具栏中使用
 * 开发平台：PWin2000 + Delphi 5
 * 兼容测试：暂无（PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6）
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
@@ -77,7 +78,7 @@ type
   TCnElementType = (etUnknown, etClassFunc, etSingleFunction, etConstructor, etDestructor,
     etIntfMember, etRecord, etClass, etInterface, etProperty, etIntfProperty, etNamespace);
 
-  TCnElementInfo = class(TObject)
+  TCnElementInfo = class(TCnBaseElementInfo)
   {* 一元素包含的信息，从过程扩展而来 }
   private
     FElementType: TCnElementType;
@@ -360,7 +361,7 @@ type
     procedure ParseCurrent;
     procedure ClearList;
     procedure CheckCurrentFile(Sender: TObject);
-    function CheckReparse: Boolean;
+    function CheckReparse(ElementList: TStringList): Boolean;
 
     procedure CurrentGotoLineAndFocusEditControl(Info: TCnElementInfo); overload;
     procedure CurrentGotoLineAndFocusEditControl(Line: Integer); overload;
@@ -385,9 +386,12 @@ type
     function GetDefShortCut: TShortCut; override;
     procedure Execute; override;
 
-    procedure LoadElements(aFileName: string; ToClear: Boolean = True);
-    procedure AddProcedure(ElementInfo: TCnElementInfo; IsIntf: Boolean);
-    procedure AddElement(ElementInfo: TCnElementInfo);
+    procedure LoadElements(ElementList: TStringList; aFileName: string;
+      ToClear: Boolean = True);
+    procedure AddProcedure(ElementList: TStringList;
+      ElementInfo: TCnElementInfo; IsIntf: Boolean);
+    procedure AddElement(ElementList: TStringList;
+      ElementInfo: TCnElementInfo);
     function GetCurrentToolBarObj: TCnProcToolBarObj;
 
     // 注：有其他的设置在 Form 的属性中，不完全在此地
@@ -547,7 +551,7 @@ begin
     Result := -Result;
 end;
 
-function TCnProcListWizard.CheckReparse: Boolean;
+function TCnProcListWizard.CheckReparse(ElementList: TStringList): Boolean;
 
   procedure RemoveForward;
   var
@@ -555,14 +559,14 @@ function TCnProcListWizard.CheckReparse: Boolean;
     Info1, Info2: TCnElementInfo;
   begin
     I := 0;
-    while I < FElementList.Count do
+    while I < ElementList.Count do
     begin
       // 如果本条目和后续条目相同，则删除本条与后续条目中是前向的，I不变，继续循环
-      if I < FElementList.Count - 1 then
+      if I < ElementList.Count - 1 then
       begin
         // 同名，判断谁是前向声明的 Info
-        Info1 := TCnElementInfo(FElementList.Objects[I]);
-        Info2 := TCnElementInfo(FElementList.Objects[I + 1]);
+        Info1 := TCnElementInfo(ElementList.Objects[I]);
+        Info2 := TCnElementInfo(ElementList.Objects[I + 1]);
 
         if (Info1 <> nil) and (Info2 <> nil) and
           (Info1.DisplayName = Info2.DisplayName) then
@@ -570,12 +574,12 @@ function TCnProcListWizard.CheckReparse: Boolean;
           // 谁是前向就删谁，但只删一个，如果有多个前向（虽然不太可能），则在下次循环中删
           if Info1.IsForward then
           begin
-            FElementList.Delete(I);
+            ElementList.Delete(I);
             Info1.Free;
           end
           else if Info2.IsForward then
           begin
-            FElementList.Delete(I + 1);
+            ElementList.Delete(I + 1);
             Info2.Free;
           end;
         end;
@@ -589,14 +593,14 @@ begin
   if FNeedReParse then
   begin
     ClearList;
-    LoadElements(CnOtaGetCurrentSourceFileName);
+    LoadElements(ElementList, CnOtaGetCurrentSourceFileName);
 
-    FElementList.Sort;
+    ElementList.Sort;
     RemoveForward; // 去除重复的前向声明
 
     // 再按需要排序
     if GListSortReverse or (GListSortIndex <> 0) then
-      FElementList.CustomSort(InfoCompare);
+      ElementList.CustomSort(InfoCompare);
 
     FNeedReParse := False;
     Result := True;
@@ -611,7 +615,7 @@ var
   Obj: TCnProcToolBarObj;
   AText: string;
 begin
-  CheckReparse;
+  CheckReparse(FElementList);
   ClassCombo := Sender as TCnProcListComboBox;
   ClassCombo.DropDownList.InfoItems.Clear;
 
@@ -1083,7 +1087,7 @@ begin
       FIsCurrentFile := True;
 
       LoadSettings(Ini, '');
-      LoadElements(FFileName);
+      LoadElements(FElementList, FFileName); // TODO: Use DataList in BaseClass.
       UpdateListView;
 
       actHookIDE.Enabled := IsSourceModule(FFileName) or IsInc(FFileName);
@@ -1223,7 +1227,7 @@ end;
 
 procedure TCnProcListWizard.JumpImplOnClick(Sender: TObject);
 begin
-  CheckReparse;
+  CheckReparse(FElementList);
   // 跳到 impl 行数处
   if FImplLine > 0 then
     CurrentGotoLineAndFocusEditControl(FImplLine)
@@ -1233,7 +1237,7 @@ end;
 
 procedure TCnProcListWizard.JumpIntfOnClick(Sender: TObject);
 begin
-  CheckReparse;
+  CheckReparse(FElementList);
   // 跳到 intf 行数处
   if FIntfLine > 0 then
     CurrentGotoLineAndFocusEditControl(FIntfLine)
@@ -1376,7 +1380,7 @@ var
   Obj: TCnProcToolBarObj;
   AText: string;
 begin
-  CheckReparse;
+  CheckReparse(FElementList);
   ProcCombo := Sender as TCnProcListComboBox;
   ProcCombo.DropDownList.InfoItems.Clear;
 
@@ -1520,7 +1524,8 @@ begin
   Result := 'CnProcListWizard';
 end;
 
-procedure TCnProcListWizard.LoadElements(aFileName: string; ToClear: Boolean);
+procedure TCnProcListWizard.LoadElements(ElementList: TStringList;
+  aFileName: string; ToClear: Boolean);
 var
   I, BraceCountDelta, PreviousBraceCount, BeginIndex: Integer;
   MemStream: TMemoryStream;
@@ -1883,7 +1888,7 @@ var
     CurClassForNotKnown: string;
     NotKnownLineNo: Integer;
   begin
-    FElementList.BeginUpdate;
+    ElementList.BeginUpdate;
     try
       case FLanguage of
         ltPas:
@@ -2037,7 +2042,7 @@ var
                   ElementInfo.LineNo := Line;
                   ElementInfo.FileName := _CnExtractFileName(aFileName);
                   ElementInfo.AllName := aFileName;
-                  AddProcedure(ElementInfo, InIntfDeclaration);
+                  AddProcedure(ElementList, ElementInfo, InIntfDeclaration);
                 end;
               end;
 
@@ -2063,7 +2068,7 @@ var
 
                   ElementInfo.DisplayName := CurClassForNotKnown;
                   ElementInfo.OwnerClass := CurClassForNotKnown;
-                  AddElement(ElementInfo);
+                  AddElement(ElementList, ElementInfo);
 
                   IsClassForForward := True; // 以备后面判断是否是 class; 的前向声明
                   PrevElementForForward := ElementInfo;
@@ -2085,7 +2090,7 @@ var
                 ElementInfo.ElementTypeStr := 'class';
                 ElementInfo.DisplayName := CurClass;
                 ElementInfo.OwnerClass := CurClass;
-                AddElement(ElementInfo);
+                AddElement(ElementList, ElementInfo);
 
                 IsClassForForward := True; // 以备后面判断是否是 class; 的前向声明
                 PrevElementForForward := ElementInfo;
@@ -2112,7 +2117,7 @@ var
                 ElementInfo.ElementTypeStr := 'interface';
                 ElementInfo.DisplayName := CurIntf;
                 ElementInfo.OwnerClass := CurIntf;
-                AddElement(ElementInfo);
+                AddElement(ElementList, ElementInfo);
               end
               else if (PasParser.TokenID = tkRecord) or
                 ((PasParser.TokenID = tkObject) and (PrevTokenID <> tkOf)) then
@@ -2133,7 +2138,7 @@ var
                   ElementInfo.ElementTypeStr := 'record object';
                 ElementInfo.DisplayName := CurIdent;
                 // ElementInfo.OwnerClass := CurIntf;
-                AddElement(ElementInfo);
+                AddElement(ElementList, ElementInfo);
               end
               else if InTypeDeclaration and
                 (PasParser.TokenID in [tkProcedure, tkFunction, tkProperty,
@@ -2166,7 +2171,7 @@ var
                     ElementInfo.OwnerClass := CurClass;
                     ElementInfo.DisplayName := CurClass + '.' + string(PasParser.Token);
                   end;
-                  AddElement(ElementInfo);
+                  AddElement(ElementList, ElementInfo);
                 end;
               end
               else if InTypeDeclaration and
@@ -2466,7 +2471,7 @@ var
                     ElementInfo.ProcName := ProcName;
                     ElementInfo.FileName := _CnExtractFileName(aFileName);
                     ElementInfo.AllName := aFileName;
-                    AddProcedure(ElementInfo, False); // TODO: BCB Interface
+                    AddProcedure(ElementList, ElementInfo, False); // TODO: BCB Interface
 
                     while (CppParser.RunPosition < BeginBracePosition) do
                       CppParser.Next;
@@ -2502,7 +2507,7 @@ var
                     end;
                     ElementInfo.FileName := _CnExtractFileName(aFileName);
                     ElementInfo.AllName := aFileName;
-                    AddProcedure(ElementInfo, False);
+                    AddProcedure(ElementList, ElementInfo, False);
                   end;
 
                   EraseName(NameList, BraceCount);
@@ -2518,7 +2523,7 @@ var
           end; //Cpp
       end; //case Language
     finally
-      FElementList.EndUpdate;
+      ElementList.EndUpdate;
     end;
   end;
 
@@ -2567,11 +2572,11 @@ begin
         try
           if ToClear then
           begin
-            for I := FElementList.Count - 1 downto 0 do
-              if FElementList.Objects[I] <> nil then
-                TCnElementInfo(FElementList.Objects[I]).Free;
+            for I := ElementList.Count - 1 downto 0 do
+              if ElementList.Objects[I] <> nil then
+                TCnElementInfo(ElementList.Objects[I]).Free;
 
-            FElementList.Clear;
+            ElementList.Clear;
           end;
 
           FindElements(IsDpr(aFileName) or IsInc(aFileName));
@@ -2983,12 +2988,13 @@ begin
   UpdateStatusBar;
 end;
 
-procedure TCnProcListWizard.AddElement(ElementInfo: TCnElementInfo);
+procedure TCnProcListWizard.AddElement(ElementList: TStringList; ElementInfo: TCnElementInfo);
 begin
-  FElementList.AddObject(#9 + ElementInfo.DisplayName + #9 + ElementInfo.ElementTypeStr + #9 + IntToStr(ElementInfo.LineNo), ElementInfo);
+  ElementList.AddObject(#9 + ElementInfo.DisplayName + #9 + ElementInfo.ElementTypeStr + #9 + IntToStr(ElementInfo.LineNo), ElementInfo);
 end;
 
-procedure TCnProcListWizard.AddProcedure(ElementInfo: TCnElementInfo; IsIntf: Boolean);
+procedure TCnProcListWizard.AddProcedure(ElementList: TStringList;
+  ElementInfo: TCnElementInfo; IsIntf: Boolean);
 var
   TempStr: string;
   i, j: Integer;
@@ -3051,7 +3057,7 @@ begin
           ElementInfo.OwnerClass := Copy(TempStr, 1, Pos('.', TempStr) - 1);
           FObjStrings.Add(ElementInfo.OwnerClass);
         end;
-        FElementList.AddObject(#9 + TempStr + #9 + ElementInfo.ElementTypeStr + #9 + IntToStr(ElementInfo.LineNo), ElementInfo);
+        ElementList.AddObject(#9 + TempStr + #9 + ElementInfo.ElementTypeStr + #9 + IntToStr(ElementInfo.LineNo), ElementInfo);
       end; //ltPas
 
     ltCpp:
@@ -3065,7 +3071,7 @@ begin
           ElementInfo.DisplayName := ElementInfo.DisplayName + ElementInfo.ProcName;
         end;
 
-        FElementList.AddObject(#9 + ElementInfo.DisplayName + #9 + ElementInfo.ElementTypeStr + #9 + IntToStr(ElementInfo.LineNo), ElementInfo);
+        ElementList.AddObject(#9 + ElementInfo.DisplayName + #9 + ElementInfo.ElementTypeStr + #9 + IntToStr(ElementInfo.LineNo), ElementInfo);
         if Length(ElementInfo.OwnerClass) = 0 then
           FObjStrings.Add(SCnProcListObjsNone)
         else
@@ -3445,7 +3451,7 @@ begin
   begin
     FIsCurrentFile := TCnFileInfo(cbbFiles.Items.Objects[cbbFiles.ItemIndex]).AllName = CurrentFile;
     aFile := TCnFileInfo(cbbFiles.Items.Objects[cbbFiles.ItemIndex]).AllName;
-    Wizard.LoadElements(aFile);
+    Wizard.LoadElements(FElementList, aFile);
   end
   else
   begin
@@ -3453,7 +3459,7 @@ begin
     0: // 当前文件
       begin
         FIsCurrentFile := True;
-        Wizard.LoadElements(CnOtaGetCurrentSourceFileName);
+        Wizard.LoadElements(FElementList, CnOtaGetCurrentSourceFileName);
       end;
     1: // 当前工程
       begin
@@ -3470,7 +3476,7 @@ begin
               if IsDpr(aFile) or IsPas(aFile) or IsCpp(aFile) or IsC(aFile)
                 or IsTypeLibrary(aFile) or IsInc(aFile) then
               begin
-                Wizard.LoadElements(aFile, FirstFile);
+                Wizard.LoadElements(FElementList, aFile, FirstFile);
                 FirstFile := False;
               end;
             end;
@@ -3497,7 +3503,7 @@ begin
                   if IsDpr(aFile) or IsPas(aFile) or IsCpp(aFile) or IsC(aFile)
                     or IsTypeLibrary(aFile) or IsInc(aFile) then
                   begin
-                    Wizard.LoadElements(aFile, FirstFile);
+                    Wizard.LoadElements(FElementList, aFile, FirstFile);
                     FirstFile := False;
                   end;
                 end;
@@ -3516,7 +3522,7 @@ begin
           if IsDpr(aFile) or IsPas(aFile) or IsCpp(aFile) or IsC(aFile)
             or IsTypeLibrary(aFile) or IsInc(aFile) then
           begin
-            Wizard.LoadElements(aFile, FirstFile);
+            Wizard.LoadElements(FElementList, aFile, FirstFile);
             FirstFile := False;
           end;
         end;
@@ -3669,7 +3675,7 @@ var
   I: Integer;
   Info: TCnElementInfo;
 begin
-  CheckReparse;
+  CheckReparse(FElementList);
 
   Dlg := nil;
   List := nil;
