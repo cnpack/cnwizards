@@ -276,8 +276,7 @@ procedure TCnListCompForm.lvListData(Sender: TObject;
 var
   Info: TCnCompInfo;
 begin
-  if (Item.Index >= 0) and
-    (Item.Index < DisplayList.Count) then
+  if (Item.Index >= 0) and (Item.Index < DisplayList.Count) then
   begin
     Info := TCnCompInfo(DisplayList.Objects[Item.Index]);
     Item.Caption := Info.Text;

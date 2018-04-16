@@ -70,7 +70,7 @@ uses
   CnProjectViewBaseFrm, CnWizClasses, CnWizManager, CnIni, CnWizEditFiler, mPasLex,
   mwBCBTokenList, Contnrs, Clipbrd, CnEditControlWrapper, CnPasCodeParser, CnWizUtils,
   {$IFDEF USE_CUSTOMIZED_SPLITTER} CnSplitter, {$ENDIF} CnWidePasParser, CnWideCppParser,
-  CnPopupMenu, CnWizIdeUtils, CnCppCodeParser, CnEdit, RegExpr;
+  CnPopupMenu, CnWizIdeUtils, CnCppCodeParser, CnStrings, CnEdit, RegExpr;
 
 type
   TCnSourceLanguageType = (ltUnknown, ltPas, ltCpp);
@@ -131,7 +131,7 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure lvListData(Sender: TObject; Item: TListItem);
     procedure btnShowPreviewClick(Sender: TObject);
-    procedure lvListColumnClick(Sender: TObject; Column: TListColumn);
+    //procedure lvListColumnClick(Sender: TObject; Column: TListColumn);
     procedure FormCreate(Sender: TObject);
     procedure cbbMatchSearchChange(Sender: TObject);
     procedure cbbMatchSearchKeyDown(Sender: TObject; var Key: Word;
@@ -151,22 +151,21 @@ type
     FFilesGot: Boolean;
     FCurrentFile: string;
     FSelIsCurFile: Boolean;
-    FSelInfo: TCnElementInfo;
     FWizard: TCnProcListWizard;
     FPreviewHeight: Integer;
+    FObjName: string;
+    FIsObjAll: Boolean;
+    FIsObjNone: Boolean;
     procedure SetFileName(const Value: string);
-
     procedure ClearObjectStrings;
     procedure LoadObjectCombobox;
     procedure InitFileComboBox;
     procedure LoadFileComboBox;
     function SelectImageIndex(ProcInfo: TCnElementInfo): Integer;
     function GetMethodName(const ProcName: string): string;
-    procedure SortDisplayList;
   protected
     procedure DoLanguageChanged(Sender: TObject); override;
     function DoSelectOpenedItem: string; override;
-    procedure DoUpdateListView; override;
     function GetSelectedFileName: string; override;
     procedure OpenSelect; override;
     function GetHelpTopic: string; override;
@@ -177,6 +176,12 @@ type
     procedure UpdateItemPosition;
     procedure DrawListItem(ListView: TCustomListView; Item: TListItem); override;
     procedure FontChanged(AFont: TFont); override;
+
+    procedure PrepareSearchRange; override;
+    function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
+      DataListIndex: Integer): Boolean; override;
+    function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
+      const S1, S2: string; Obj1, Obj2: TObject): Integer; override;
   public
     { Public declarations }
     procedure LoadSettings(Ini: TCustomIniFile; aSection: string); override;
@@ -1087,7 +1092,7 @@ begin
       FIsCurrentFile := True;
 
       LoadSettings(Ini, '');
-      LoadElements(FElementList, FFileName); // TODO: Use DataList in BaseClass.
+      LoadElements(DataList, FFileName); // TODO: Use DataList in BaseClass.
       UpdateListView;
 
       actHookIDE.Enabled := IsSourceModule(FFileName) or IsInc(FFileName);
@@ -2720,10 +2725,8 @@ end;
 
 procedure TCnProcListForm.UpdateListView;
 begin
-  inherited;
   edtMatchSearch.Text := cbbMatchSearch.Text;
-  lvList.Items.Count := FDisplayList.Count;
-  lvList.Invalidate;
+  inherited;
   if FDisplayList.Count = 0 then
     mmoContent.Clear;
 end;
@@ -2874,118 +2877,6 @@ procedure TCnProcListForm.LoadObjectComboBox;
 begin
   cbbProjectList.Items.Assign(FObjStrings);
   cbbProjectList.ItemIndex := cbbProjectList.Items.IndexOf(SCnProcListObjsAll);
-end;
-
-procedure TCnProcListForm.DoUpdateListView;
-var
-  I: Integer;
-  ProcName: string;
-  ObjName: string;
-  MatchStr: string;
-  IsObject: Boolean;
-  ProcInfo: TCnElementInfo;
-  IsObjAll: Boolean;
-  IsObjNone: Boolean;
-  IsMatchAny: Boolean;
-  ToSelInfos: TList;
-  ToSelIndex: Integer;
-
-begin
-  ObjName := cbbProjectList.Text;
-  IsObjAll := SameText(ObjName, SCnProcListObjsAll);
-  IsObjNone := SameText(ObjName, SCnProcListObjsNone);
-  MatchStr := UpperCase(edtMatchSearch.Text);
-  IsMatchAny := MatchAny;
-
-  ToSelIndex := 0;
-  ToSelInfos := TList.Create;
-
-  try
-    if (MatchStr = '') and IsObjAll then
-    begin
-      // 此处更新整个 List
-      FDisplayList.Clear;
-      for I := 0 to FElementList.Count - 1 do
-        FDisplayList.AddObject(FElementList[I], FElementList.Objects[I]);
-    end
-    else
-    begin
-      FDisplayList.Clear;
-      FDisplayList.BeginUpdate;
-      try
-        for I := 0 to FElementList.Count - 1 do
-        begin
-          ProcInfo := TCnElementInfo(FElementList.Objects[I]);
-          case FLanguage of
-            ltPas: ProcName := ProcInfo.DisplayName;
-            // 此处 GE 用 Name 参与搜索，会造成多余条目的显示，这儿改正
-            ltCpp: ProcName := ProcInfo.OwnerClass;
-          end;
-          IsObject := Length(ProcInfo.OwnerClass) > 0;
-
-          // Is it the object we want?
-          if not IsObjAll then
-          begin
-            if IsObjNone then
-            begin
-              if IsObject then // Does it have an object?
-                Continue;
-              if MatchStr = '' then // If no filter is active, add
-              begin
-                FDisplayList.AddObject(FElementList[I], FElementList.Objects[I]);
-                Continue;
-              end;
-            end // if/then
-            else if not SameText(ObjName, ProcInfo.OwnerClass) then
-              Continue;
-          end;
-
-          case FLanguage of
-            ltPas: ProcName := GetMethodName(ProcName);
-            ltCpp: ProcName := ProcInfo.ProcName;
-          end;
-
-          if MatchStr = '' then
-            FDisplayList.AddObject(FElementList[I], FElementList.Objects[I])
-          else
-          begin
-            if RegExpContainsText(FRegExpr, ProcName, MatchStr, not IsMatchAny) then
-            begin
-              FDisplayList.AddObject(FElementList[I], FElementList.Objects[I]);
-              // 全匹配时，提高首匹配的优先级，记下第一个该首匹配的项以备选中
-              if IsMatchAny and (Pos(MatchStr, ProcName) = 1) then
-                ToSelInfos.Add(FElementList.Objects[I]);
-            end;
-          end;
-        end;
-      finally
-        FDisplayList.EndUpdate;
-      end;
-    end;
-
-    SortDisplayList;
-    lvList.Items.Count := FDisplayList.Count;
-    lvList.Invalidate;
-
-    // 如有需要选中的首匹配的项则选中，无则选 0，第一项
-    if (ToSelInfos.Count > 0) and (FDisplayList.Count > 0) then
-    begin
-      for I := 0 to FDisplayList.Count - 1 do
-      begin
-        if ToSelInfos.IndexOf(FDisplayList.Objects[I]) >= 0 then
-        begin
-          // FDisplayList 中的第一个在 SelUnitInfos 里头的项
-          ToSelIndex := I;
-          Break;
-        end;
-      end;
-    end;
-
-    SelectItemByIndex(ToSelIndex);
-  finally
-    ToSelInfos.Free;
-  end;
-  UpdateStatusBar;
 end;
 
 procedure TCnProcListWizard.AddElement(ElementList: TStringList; ElementInfo: TCnElementInfo);
@@ -3161,18 +3052,19 @@ procedure TCnProcListForm.lvListData(Sender: TObject; Item: TListItem);
 var
   ElementInfo: TCnElementInfo;
 begin
-  if (Item.Index > FDisplayList.Count) then Exit;
-
-  ElementInfo := TCnElementInfo(FDisplayList.Objects[Item.Index]);
-  if ElementInfo <> nil then
+  if (Item.Index >= 0) and (Item.Index < DisplayList.Count) then
   begin
-    Item.Caption := ElementInfo.DisplayName;
-    Item.ImageIndex := SelectImageIndex(ElementInfo);
-    Item.SubItems.Add(ElementInfo.ElementTypeStr);
-    Item.SubItems.Add(IntToStr(ElementInfo.LineNo));
-    Item.SubItems.Add(ElementInfo.FileName);
-    RemoveListViewSubImages(Item);
-    Item.Data := ElementInfo;
+    ElementInfo := TCnElementInfo(DisplayList.Objects[Item.Index]);
+    if ElementInfo <> nil then
+    begin
+      Item.Caption := ElementInfo.DisplayName;
+      Item.ImageIndex := SelectImageIndex(ElementInfo);
+      Item.SubItems.Add(ElementInfo.ElementTypeStr);
+      Item.SubItems.Add(IntToStr(ElementInfo.LineNo));
+      Item.SubItems.Add(ElementInfo.FileName);
+      RemoveListViewSubImages(Item);
+      Item.Data := ElementInfo;
+    end;
   end;
 end;
 
@@ -3187,37 +3079,6 @@ procedure TCnProcListForm.DoLanguageChanged(Sender: TObject);
 begin
   ToolBar.ShowCaptions := True;
   ToolBar.ShowCaptions := False;
-end;
-
-procedure TCnProcListForm.lvListColumnClick(Sender: TObject;
-  Column: TListColumn);
-var
-  I: Integer;
-begin
-  inherited;
-  // 记录已选择的位置
-  if lvList.Selected <> nil then
-    FSelInfo := TCnElementInfo(lvList.Selected.Data)
-  else
-    FSelInfo := nil;
-
-  // 将 FList 按 ColumnIndex 和 Down 排序
-  SortDisplayList;
-  lvList.Invalidate;
-
-  if FSelInfo = nil then
-    Exit;
-  // 恢复选择的位置  
-  for I := 0 to lvList.Items.Count - 1 do
-  begin
-    if lvList.Items[I].Data = FSelInfo then
-    begin
-      lvList.Selected := lvList.Items[I];
-      lvList.ItemFocused := lvList.Selected;
-      lvList.Selected.MakeVisible(True);
-      Exit;
-    end;
-  end;
 end;
 
 function CompareProcs(List: TStringList; Index1, Index2: Integer): Integer;
@@ -3258,18 +3119,6 @@ begin
 
   if GSortDown then
     Result := -Result;
-end;
-
-procedure TCnProcListForm.SortDisplayList;
-begin
-  GSortIndex := SortIndex;
-  GSortDown := SortDown;
-  if MatchAny then
-    GMatchStr := cbbMatchSearch.Text
-  else
-    GMatchStr := '';
-  if (FDisplayList <> nil) and (GSortIndex >= 0) then
-    FDisplayList.CustomSort(CompareProcs);
 end;
 
 procedure TCnProcListForm.FontChanged(AFont: TFont);
@@ -3564,6 +3413,93 @@ begin
     Key := #0;
   end;
 end;
+
+procedure TCnProcListForm.PrepareSearchRange;
+begin
+  inherited;
+  FObjName := cbbProjectList.Text;
+  FIsObjAll := SameText(FObjName, SCnProcListObjsAll);
+  FIsObjNone := SameText(FObjName, SCnProcListObjsNone);
+end;
+
+function TCnProcListForm.CanMatchDataByIndex(const AMatchStr: string;
+  AMatchMode: TCnMatchMode; DataListIndex: Integer): Boolean;
+var
+  Info: TCnElementInfo;
+  ProcName: string;
+  IsObject: Boolean;
+begin
+  Result := False;
+  if (AMatchStr = '') and FIsObjAll then
+  begin
+    Result := True;
+    Exit;
+  end;
+
+  Info := TCnElementInfo(DataList.Objects[DataListIndex]);
+  if Info = nil then
+    Exit;
+
+  case FLanguage of
+    ltPas: ProcName := GetMethodName(Info.DisplayName);
+    // 只搜函数名，不搜包括类名在内的函数名
+    ltCpp: ProcName := Info.OwnerClass;
+  end;
+  IsObject := Length(Info.OwnerClass) > 0;
+
+  // 查独立东西时是 Object 的则不加
+  if FIsObjNone and IsObject then
+    Exit;
+
+  // 查指定 Class 时，如非 Class 则不加
+  if not FIsObjAll and not FIsObjNone and not SameText(FObjName, Info.OwnerClass) then
+    Exit;
+
+  if AMatchStr = '' then
+  begin
+    Result := True;
+    Exit;
+  end;
+
+  if AMatchMode in [mmStart, mmAnywhere] then
+    Result := RegExpContainsText(FRegExpr, ProcName, AMatchStr, AMatchMode = mmStart)
+  else
+    Result := FuzzyMatchStr(AMatchStr, ProcName);
+end;
+
+function TCnProcListForm.SortItemCompare(ASortIndex: Integer;
+  const AMatchStr, S1, S2: string; Obj1, Obj2: TObject): Integer;
+var
+  Info1, Info2: TCnElementInfo;
+begin
+  Info1 := TCnElementInfo(Obj1);
+  Info2 := TCnElementInfo(Obj2);
+
+  case ASortIndex of
+  0:
+    begin
+      Result := CompareTextPos(AMatchStr, Info1.DisplayName, Info2.DisplayName);
+      if Result = 0 then
+        Result := CompareText(Info1.DisplayName, Info2.DisplayName);
+    end;
+  1:
+    begin
+      Result := CompareText(Info1.ElementTypeStr, Info2.ElementTypeStr);
+    end;
+  2:
+    begin
+      Result := CompareValue(Info1.LineNo, Info2.LineNo);
+    end;
+  3:
+    begin
+      Result := CompareText(Info1.FileName, Info2.FileName);
+    end;
+  else
+    Result := 0;
+  end;
+end;
+
+{ TCnProcListWizard }
 
 procedure TCnProcListWizard.SetUseEditorToolBar(const Value: Boolean);
 begin
