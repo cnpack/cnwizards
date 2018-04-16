@@ -217,6 +217,12 @@ var
   Info: TCnUnitInfo;
 begin
   Result := False;
+  if AMatchStr = '' then
+  begin
+    Result := True;
+    Exit;
+  end;
+
   Info := TCnUnitInfo(DataList.Objects[DataListIndex]);
   if (ProjectInfo <> nil) and (ProjectInfo <> Info.ParentProject) then
     Exit;

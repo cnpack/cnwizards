@@ -812,6 +812,12 @@ var
   Info: TCnUseUnitInfo;
 begin
   Result := False;
+  if AMatchStr = '' then
+  begin
+    Result := True;
+    Exit;
+  end;
+
   Info := TCnUseUnitInfo(DataList.Objects[DataListIndex]);
   if (ProjectInfo <> nil) and not Info.IsInProject then
     Exit;

@@ -307,6 +307,12 @@ function TCnProjectListUsedForm.CanMatchDataByIndex(
   DataListIndex: Integer): Boolean;
 begin
   Result := False;
+  if AMatchStr = '' then
+  begin
+    Result := True;
+    Exit;
+  end;
+
   case AMatchMode of // 搜索时只有名称参与匹配，不区分大小写
     mmStart:
       begin

@@ -693,6 +693,12 @@ var
   UpperMatch: string;
 begin
   Result := False;
+  if AMatchStr = '' then
+  begin
+    Result := True;
+    Exit;
+  end;
+
   Info := TCnFormInfo(DataList.Objects[DataListIndex]);
   if (ProjectInfo <> nil) and (ProjectInfo <> Info.ParentProject) then
     Exit;

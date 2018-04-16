@@ -354,6 +354,12 @@ var
   UpperMatch: string;
 begin
   Result := False;
+  if AMatchStr = '' then
+  begin
+    Result := True;
+    Exit;
+  end;
+
   Info := TCnCompInfo(DataList.Objects[DataListIndex]);
   if Info = nil then
     Exit;

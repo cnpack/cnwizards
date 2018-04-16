@@ -186,7 +186,6 @@ type
     procedure FirstUpdate(Sender: TObject);
     function GetMatchMode: TCnMatchMode;
     procedure SetMatchMode(const Value: TCnMatchMode);
-    procedure PrepareProjectRange;
     procedure InitArrowBitmaps;
     procedure ClearColumnArrow;
     procedure ChangeColumnArrow;
@@ -203,6 +202,8 @@ type
     procedure DoUpdateListView; virtual;
 
     // === New Routines for refactor ===
+    // 提前准备调用参数
+    procedure PrepareSearchRange; virtual;
     // 实现根据匹配规则从 DataList 更新至 DisplayList的功能，一般无须重载
     procedure CommonUpdateListView; virtual;
     // 子类重载以返回在指定匹配字符、指定匹配模式下，DataList 中的指定项是否匹配
@@ -754,7 +755,7 @@ end;
 
 procedure TCnProjectViewBaseForm.UpdateListView;
 begin
-  PrepareProjectRange;
+  PrepareSearchRange;
   CommonUpdateListView;
   DoUpdateListView;
   // RemoveListViewSubImages(lvList);
@@ -966,7 +967,8 @@ begin
   try
     for I := 0 to DataList.Count - 1 do
     begin
-      if (MatchSearchText = '') or CanMatchDataByIndex(MatchSearchText, MatchMode, I) then
+      // 不能因为 MatchSearchText = '' 就直接通过匹配，因为子类可能还有其它搜索条件
+      if CanMatchDataByIndex(MatchSearchText, MatchMode, I) then
       begin
         DisplayList.AddObject(DataList[I], DataList.Objects[I]);
         if CanSelectDataByIndex(MatchSearchText, MatchMode, I) then
@@ -1045,7 +1047,7 @@ begin
   Result := CompareStr(S1, S2);
 end;
 
-procedure TCnProjectViewBaseForm.PrepareProjectRange;
+procedure TCnProjectViewBaseForm.PrepareSearchRange;
 var
   I: Integer;
   AProjectInfo: TCnProjectInfo;
