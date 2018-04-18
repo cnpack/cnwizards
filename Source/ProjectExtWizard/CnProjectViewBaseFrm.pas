@@ -196,7 +196,6 @@ type
     ProjectInfo: TCnProjectInfo;  // 标记待限定的 Project 搜索范围
     DataList: TStringList;        // 供子类存储原始需要搜索的列表名字以及 Object
     DisplayList: TStringList;     // 供子类容纳过滤后需要显示的列表名字以及 Object（引用）
-    // CurrList: TList;
     function DoSelectOpenedItem: string; virtual; abstract;
     procedure DoSelectItemChanged(Sender: TObject); virtual;
     procedure DoUpdateListView; virtual;
@@ -328,7 +327,6 @@ begin
 
     lvList.DoubleBuffered := True;
     ProjectList := TObjectList.Create;
-    //CurrList := TList.Create;
     NeedInitProjectControls := True;
 
     DataList := TStringList.Create;
@@ -363,7 +361,6 @@ begin
   FNoArrow.Free;
   FreeAndNil(DataList);
   FreeAndNil(DisplayList);
-  //CurrList.Free;
   FRegExpr.Free;
 end;
 

@@ -156,9 +156,9 @@ type
     FObjName: string;
     FIsObjAll: Boolean;
     FIsObjNone: Boolean;
+    FObjectList: TStringList; // 和 DataList 类似，存储本窗体打开时解析出的类名
     procedure SetFileName(const Value: string);
-    procedure ClearObjectStrings;
-    procedure LoadObjectCombobox;
+    procedure LoadObjectCombobox(ObjectList: TStringList);
     procedure InitFileComboBox;
     procedure LoadFileComboBox;
     function SelectImageIndex(ProcInfo: TCnElementInfo): Integer;
@@ -198,6 +198,8 @@ type
 
     property PreviewHeight: Integer read FPreviewHeight;
     {* 预览窗口的高度}
+    property ObjectList: TStringList read FObjectList;
+    {* 存储类名的字符串列表，供外界使用}
     property Wizard: TCnProcListWizard read FWizard write FWizard;
   end;
 
@@ -334,6 +336,8 @@ type
     FComboToSearch: TCnProcListComboBox;
     FPreviewLineCount: Integer;
     FHistoryCount: Integer;
+    FElementList: TStringList; // 存储当前 ProcToolbar 的原始元素列表
+    FObjStrings: TStringList;  // 存储当前 ProcToolbar 的类元素列表
     FProcComboHeight: Integer;
     FClassComboHeight: Integer;
     FProcComboWidth: Integer;
@@ -366,7 +370,8 @@ type
     procedure ParseCurrent;
     procedure ClearList;
     procedure CheckCurrentFile(Sender: TObject);
-    function CheckReparse(ElementList: TStringList): Boolean;
+    function CheckReparse: Boolean;
+    procedure ClearObjectStrings(ObjectList: TStringList);
 
     procedure CurrentGotoLineAndFocusEditControl(Info: TCnElementInfo); overload;
     procedure CurrentGotoLineAndFocusEditControl(Line: Integer); overload;
@@ -391,9 +396,9 @@ type
     function GetDefShortCut: TShortCut; override;
     procedure Execute; override;
 
-    procedure LoadElements(ElementList: TStringList; aFileName: string;
+    procedure LoadElements(ElementList, ObjectList: TStringList; aFileName: string;
       ToClear: Boolean = True);
-    procedure AddProcedure(ElementList: TStringList;
+    procedure AddProcedure(ElementList, ObjectList: TStringList;
       ElementInfo: TCnElementInfo; IsIntf: Boolean);
     procedure AddElement(ElementList: TStringList;
       ElementInfo: TCnElementInfo);
@@ -477,13 +482,6 @@ const
   ProcBlacklist: array[0..2] of string = ('CATCH_ALL', 'CATCH', 'AND_CATCH_ALL');
 
 var
-  GSortIndex: Integer = -1;
-  GSortDown: Boolean = False;
-  GMatchStr: string = '';
-
-  FElementList: TStringList;
-  FDisplayList: TStringList;
-  FObjStrings: TStringList;
   FLanguage: TCnSourceLanguageType;
   FCurElement: string;
   FIsCurrentFile: Boolean;
@@ -491,7 +489,7 @@ var
   FIntfLine: Integer = 0;
   FImplLine: Integer = 0;
 
-  ProcListForm: TCnProcListForm = nil;
+  //ProcListForm: TCnProcListForm = nil;
 
   GListSortIndex: Integer = 0;
   GListSortReverse: Boolean = False;
@@ -556,7 +554,7 @@ begin
     Result := -Result;
 end;
 
-function TCnProcListWizard.CheckReparse(ElementList: TStringList): Boolean;
+function TCnProcListWizard.CheckReparse: Boolean;
 
   procedure RemoveForward;
   var
@@ -564,14 +562,14 @@ function TCnProcListWizard.CheckReparse(ElementList: TStringList): Boolean;
     Info1, Info2: TCnElementInfo;
   begin
     I := 0;
-    while I < ElementList.Count do
+    while I < FElementList.Count do
     begin
       // 如果本条目和后续条目相同，则删除本条与后续条目中是前向的，I不变，继续循环
-      if I < ElementList.Count - 1 then
+      if I < FElementList.Count - 1 then
       begin
         // 同名，判断谁是前向声明的 Info
-        Info1 := TCnElementInfo(ElementList.Objects[I]);
-        Info2 := TCnElementInfo(ElementList.Objects[I + 1]);
+        Info1 := TCnElementInfo(FElementList.Objects[I]);
+        Info2 := TCnElementInfo(FElementList.Objects[I + 1]);
 
         if (Info1 <> nil) and (Info2 <> nil) and
           (Info1.DisplayName = Info2.DisplayName) then
@@ -579,12 +577,12 @@ function TCnProcListWizard.CheckReparse(ElementList: TStringList): Boolean;
           // 谁是前向就删谁，但只删一个，如果有多个前向（虽然不太可能），则在下次循环中删
           if Info1.IsForward then
           begin
-            ElementList.Delete(I);
+            FElementList.Delete(I);
             Info1.Free;
           end
           else if Info2.IsForward then
           begin
-            ElementList.Delete(I + 1);
+            FElementList.Delete(I + 1);
             Info2.Free;
           end;
         end;
@@ -598,18 +596,24 @@ begin
   if FNeedReParse then
   begin
     ClearList;
-    LoadElements(ElementList, CnOtaGetCurrentSourceFileName);
+    LoadElements(FElementList, FObjStrings, CnOtaGetCurrentSourceFileName);
 
-    ElementList.Sort;
+    FElementList.Sort;
     RemoveForward; // 去除重复的前向声明
 
     // 再按需要排序
     if GListSortReverse or (GListSortIndex <> 0) then
-      ElementList.CustomSort(InfoCompare);
+      FElementList.CustomSort(InfoCompare);
 
     FNeedReParse := False;
     Result := True;
   end;
+end;
+
+procedure TCnProcListWizard.ClearObjectStrings(ObjectList: TStringList);
+begin
+  ObjectList.Clear;
+  ObjectList.Add(SCnProcListObjsAll);
 end;
 
 procedure TCnProcListWizard.ClassComboDropDown(Sender: TObject);
@@ -620,7 +624,7 @@ var
   Obj: TCnProcToolBarObj;
   AText: string;
 begin
-  CheckReparse(FElementList);
+  CheckReparse;
   ClassCombo := Sender as TCnProcListComboBox;
   ClassCombo.DropDownList.InfoItems.Clear;
 
@@ -666,7 +670,6 @@ var
   I: Integer;
 begin
   FObjStrings.Clear;
-  FDisplayList.Clear;
   for I := 0 to FElementList.Count - 1 do
     if FElementList.Objects[I] <> nil then
       FElementList.Objects[I].Free;
@@ -688,7 +691,6 @@ begin
   FProcToolBarObjects := TList.Create;
 
   FElementList := TStringList.Create;
-  FDisplayList := TStringList.Create;
   FObjStrings := TStringList.Create;
   FObjStrings.Sorted := True;
   FObjStrings.Duplicates := dupIgnore;
@@ -1012,7 +1014,6 @@ begin
   FreeAndNil(FToolBarTimer);
 
   FObjStrings.Free;
-  FDisplayList.Free;
   for I := 0 to FElementList.Count - 1 do
     if FElementList.Objects[I] <> nil then
       FElementList.Objects[I].Free;
@@ -1080,7 +1081,7 @@ begin
 
   Ini := CreateIniFile;
   try
-    ClearList;
+    // ClearList;
     with TCnProcListForm.Create(nil) do
     try
       Wizard := Self;
@@ -1092,8 +1093,12 @@ begin
       FIsCurrentFile := True;
 
       LoadSettings(Ini, '');
-      LoadElements(DataList, FFileName); // TODO: Use DataList in BaseClass.
+      LoadElements(DataList, ObjectList, FFileName);
       UpdateListView;
+
+      LoadObjectComboBox(ObjectList);
+      Caption := Caption + ' - ' + _CnExtractFileName(FFileName);
+      StatusBar.Panels[1].Text := Trim(IntToStr(lvList.Items.Count));
 
       actHookIDE.Enabled := IsSourceModule(FFileName) or IsInc(FFileName);
       if actHookIDE.Enabled then
@@ -1232,7 +1237,7 @@ end;
 
 procedure TCnProcListWizard.JumpImplOnClick(Sender: TObject);
 begin
-  CheckReparse(FElementList);
+  CheckReparse;
   // 跳到 impl 行数处
   if FImplLine > 0 then
     CurrentGotoLineAndFocusEditControl(FImplLine)
@@ -1242,7 +1247,7 @@ end;
 
 procedure TCnProcListWizard.JumpIntfOnClick(Sender: TObject);
 begin
-  CheckReparse(FElementList);
+  CheckReparse;
   // 跳到 intf 行数处
   if FIntfLine > 0 then
     CurrentGotoLineAndFocusEditControl(FIntfLine)
@@ -1385,7 +1390,7 @@ var
   Obj: TCnProcToolBarObj;
   AText: string;
 begin
-  CheckReparse(FElementList);
+  CheckReparse;
   ProcCombo := Sender as TCnProcListComboBox;
   ProcCombo.DropDownList.InfoItems.Clear;
 
@@ -1479,8 +1484,11 @@ begin
   InitFileComboBox;
   FOldCaption := Caption;
   actHookIDE.Visible := CnEditorToolBarService <> nil;
+  FObjectList := TStringList.Create;
+  FObjectList.Sorted := True;
+  FObjectList.Duplicates := dupIgnore;
 
-  ProcListForm := Self;
+  //ProcListForm := Self;
 
   EditorCanvas := EditControlWrapper.GetEditControlCanvas(CnOtaGetCurrentEditControl);
   if EditorCanvas <> nil then
@@ -1529,7 +1537,7 @@ begin
   Result := 'CnProcListWizard';
 end;
 
-procedure TCnProcListWizard.LoadElements(ElementList: TStringList;
+procedure TCnProcListWizard.LoadElements(ElementList, ObjectList: TStringList;
   aFileName: string; ToClear: Boolean);
 var
   I, BraceCountDelta, PreviousBraceCount, BeginIndex: Integer;
@@ -2047,7 +2055,7 @@ var
                   ElementInfo.LineNo := Line;
                   ElementInfo.FileName := _CnExtractFileName(aFileName);
                   ElementInfo.AllName := aFileName;
-                  AddProcedure(ElementList, ElementInfo, InIntfDeclaration);
+                  AddProcedure(ElementList, ObjectList, ElementInfo, InIntfDeclaration);
                 end;
               end;
 
@@ -2476,7 +2484,7 @@ var
                     ElementInfo.ProcName := ProcName;
                     ElementInfo.FileName := _CnExtractFileName(aFileName);
                     ElementInfo.AllName := aFileName;
-                    AddProcedure(ElementList, ElementInfo, False); // TODO: BCB Interface
+                    AddProcedure(ElementList, ObjectList, ElementInfo, False); // TODO: BCB Interface
 
                     while (CppParser.RunPosition < BeginBracePosition) do
                       CppParser.Next;
@@ -2512,7 +2520,7 @@ var
                     end;
                     ElementInfo.FileName := _CnExtractFileName(aFileName);
                     ElementInfo.AllName := aFileName;
-                    AddProcedure(ElementList, ElementInfo, False);
+                    AddProcedure(ElementList, ObjectList, ElementInfo, False);
                   end;
 
                   EraseName(NameList, BraceCount);
@@ -2567,33 +2575,23 @@ begin
         ltCpp: CppParser.SetOrigin(MemStream.Memory, MemStream.Size);
       end;
 
-      if ToClear and (ProcListForm <> nil) then
-        ProcListForm.Caption := FOldCaption + ' - ' + _CnExtractFileName(aFileName);
-
       Screen.Cursor := crHourGlass;
       try
-        if ProcListForm <> nil then
-          ProcListForm.ClearObjectStrings;
-        try
-          if ToClear then
-          begin
-            for I := ElementList.Count - 1 downto 0 do
-              if ElementList.Objects[I] <> nil then
-                TCnElementInfo(ElementList.Objects[I]).Free;
+        ClearObjectStrings(ObjectList);
 
-            ElementList.Clear;
-          end;
+        if ToClear then
+        begin
+          for I := ElementList.Count - 1 downto 0 do
+            if ElementList.Objects[I] <> nil then
+              TCnElementInfo(ElementList.Objects[I]).Free;
 
-          FindElements(IsDpr(aFileName) or IsInc(aFileName));
-        finally
-          if ProcListForm <> nil then
-           ProcListForm.LoadObjectComboBox;
+          ElementList.Clear;
         end;
+
+        FindElements(IsDpr(aFileName) or IsInc(aFileName));
       finally
         Screen.Cursor := crDefault;
       end;
-      if ProcListForm <> nil then
-        ProcListForm.StatusBar.Panels[1].Text := Trim(IntToStr(ProcListForm.lvList.Items.Count));
     finally
       MemStream.Free;
     end;
@@ -2727,7 +2725,7 @@ procedure TCnProcListForm.UpdateListView;
 begin
   edtMatchSearch.Text := cbbMatchSearch.Text;
   inherited;
-  if FDisplayList.Count = 0 then
+  if DisplayList.Count = 0 then
     mmoContent.Clear;
 end;
 
@@ -2847,7 +2845,7 @@ begin
   inherited;
 
   FFiler.Free;
-  ProcListForm := nil;
+  FObjectList.Free;
 
   for I := 0 to cbbFiles.Items.Count - 1 do
     if cbbFiles.Items.Objects[I] <> nil then
@@ -2867,15 +2865,9 @@ begin
     FLanguage := ltCpp;
 end;
 
-procedure TCnProcListForm.ClearObjectStrings;
+procedure TCnProcListForm.LoadObjectComboBox(ObjectList: TStringList);
 begin
-  FObjStrings.Clear;
-  FObjStrings.Add(SCnProcListObjsAll);
-end;
-
-procedure TCnProcListForm.LoadObjectComboBox;
-begin
-  cbbProjectList.Items.Assign(FObjStrings);
+  cbbProjectList.Items.Assign(ObjectList);
   cbbProjectList.ItemIndex := cbbProjectList.Items.IndexOf(SCnProcListObjsAll);
 end;
 
@@ -2884,7 +2876,7 @@ begin
   ElementList.AddObject(#9 + ElementInfo.DisplayName + #9 + ElementInfo.ElementTypeStr + #9 + IntToStr(ElementInfo.LineNo), ElementInfo);
 end;
 
-procedure TCnProcListWizard.AddProcedure(ElementList: TStringList;
+procedure TCnProcListWizard.AddProcedure(ElementList, ObjectList: TStringList;
   ElementInfo: TCnElementInfo; IsIntf: Boolean);
 var
   TempStr: string;
@@ -2939,14 +2931,14 @@ begin
         // Add to the object comboBox and set the object name in ElementInfo
         if Pos('.', TempStr) = 0 then
         begin
-          FObjStrings.Add(SCnProcListObjsNone);
+          ObjectList.Add(SCnProcListObjsNone);
           if IsIntf and (ElementInfo.OwnerClass <> '') then
-            FObjStrings.Add(ElementInfo.OwnerClass);
+            ObjectList.Add(ElementInfo.OwnerClass);
         end
         else
         begin
           ElementInfo.OwnerClass := Copy(TempStr, 1, Pos('.', TempStr) - 1);
-          FObjStrings.Add(ElementInfo.OwnerClass);
+          ObjectList.Add(ElementInfo.OwnerClass);
         end;
         ElementList.AddObject(#9 + TempStr + #9 + ElementInfo.ElementTypeStr + #9 + IntToStr(ElementInfo.LineNo), ElementInfo);
       end; //ltPas
@@ -2964,9 +2956,9 @@ begin
 
         ElementList.AddObject(#9 + ElementInfo.DisplayName + #9 + ElementInfo.ElementTypeStr + #9 + IntToStr(ElementInfo.LineNo), ElementInfo);
         if Length(ElementInfo.OwnerClass) = 0 then
-          FObjStrings.Add(SCnProcListObjsNone)
+          ObjectList.Add(SCnProcListObjsNone)
         else
-          FObjStrings.Add(ElementInfo.OwnerClass);
+          ObjectList.Add(ElementInfo.OwnerClass);
       end; //ltCpp
   end; //case Language
 end;
@@ -3081,46 +3073,6 @@ begin
   ToolBar.ShowCaptions := False;
 end;
 
-function CompareProcs(List: TStringList; Index1, Index2: Integer): Integer;
-begin
-  Result := 0;
-  case GSortIndex of
-  0:
-    begin
-      Result := CompareTextPos(GMatchStr, List[Index1], List[Index2]);
-    end;
-  1:
-    begin
-      if (List.Objects[Index1] <> nil) and (List.Objects[Index2] <> nil) then
-      begin
-        Result := CompareText(TCnElementInfo(List.Objects[Index1]).ElementTypeStr,
-          TCnElementInfo(List.Objects[Index2]).ElementTypeStr);
-      end;
-    end;
-  2:
-    begin
-      if (List.Objects[Index1] <> nil) and (List.Objects[Index2] <> nil) then
-      begin
-        Result := CompareValue(TCnElementInfo(List.Objects[Index1]).LineNo,
-          TCnElementInfo(List.Objects[Index2]).LineNo);
-      end;
-    end;
-  3:
-    begin
-      if (List.Objects[Index1] <> nil) and (List.Objects[Index2] <> nil) then
-      begin
-        Result := CompareText(TCnElementInfo(List.Objects[Index1]).FileName,
-          TCnElementInfo(List.Objects[Index2]).FileName);
-      end;
-    end;
-  else
-    Result := CompareValue(Index1, Index2);
-  end;
-
-  if GSortDown then
-    Result := -Result;
-end;
-
 procedure TCnProcListForm.FontChanged(AFont: TFont);
 begin
   inherited;
@@ -3182,9 +3134,9 @@ begin
   if (FCurElement <> '') and (FCurElement <> SCnUnknownNameResult) then
   begin
     lvList.Selected := nil;
-    for I := 0 to FElementList.Count - 1 do
+    for I := 0 to DataList.Count - 1 do
     begin
-      ProcInfo := TCnElementInfo(FElementList.Objects[I]); // lvList.Items[I].Data);
+      ProcInfo := TCnElementInfo(DataList.Objects[I]);
       if ProcInfo = nil then
         Continue;
 
@@ -3198,7 +3150,7 @@ begin
         for J := 0 to lvList.Items.Count - 1 do
         begin
           // TODO: 没考虑嵌套的情况
-          if lvList.Items[J].Data = FElementList.Objects[I - 1] then
+          if lvList.Items[J].Data = DataList.Objects[I - 1] then
           begin
             lvList.Selected := lvList.Items[J];
             lvList.ItemFocused := lvList.Selected;
@@ -3300,7 +3252,7 @@ begin
   begin
     FIsCurrentFile := TCnFileInfo(cbbFiles.Items.Objects[cbbFiles.ItemIndex]).AllName = CurrentFile;
     aFile := TCnFileInfo(cbbFiles.Items.Objects[cbbFiles.ItemIndex]).AllName;
-    Wizard.LoadElements(FElementList, aFile);
+    Wizard.LoadElements(DataList, FObjectList, aFile);
   end
   else
   begin
@@ -3308,7 +3260,7 @@ begin
     0: // 当前文件
       begin
         FIsCurrentFile := True;
-        Wizard.LoadElements(FElementList, CnOtaGetCurrentSourceFileName);
+        Wizard.LoadElements(DataList, FObjectList, CnOtaGetCurrentSourceFileName);
       end;
     1: // 当前工程
       begin
@@ -3325,7 +3277,7 @@ begin
               if IsDpr(aFile) or IsPas(aFile) or IsCpp(aFile) or IsC(aFile)
                 or IsTypeLibrary(aFile) or IsInc(aFile) then
               begin
-                Wizard.LoadElements(FElementList, aFile, FirstFile);
+                Wizard.LoadElements(DataList, FObjectList, aFile, FirstFile);
                 FirstFile := False;
               end;
             end;
@@ -3352,7 +3304,7 @@ begin
                   if IsDpr(aFile) or IsPas(aFile) or IsCpp(aFile) or IsC(aFile)
                     or IsTypeLibrary(aFile) or IsInc(aFile) then
                   begin
-                    Wizard.LoadElements(FElementList, aFile, FirstFile);
+                    Wizard.LoadElements(DataList, FObjectList, aFile, FirstFile);
                     FirstFile := False;
                   end;
                 end;
@@ -3371,7 +3323,7 @@ begin
           if IsDpr(aFile) or IsPas(aFile) or IsCpp(aFile) or IsC(aFile)
             or IsTypeLibrary(aFile) or IsInc(aFile) then
           begin
-            Wizard.LoadElements(FElementList, aFile, FirstFile);
+            Wizard.LoadElements(DataList, FObjectList, aFile, FirstFile);
             FirstFile := False;
           end;
         end;
@@ -3380,7 +3332,7 @@ begin
   end;
 
   UpdateListView;
-  LoadObjectCombobox;
+  LoadObjectCombobox(FObjectList);
   UpdateItemPosition;
   UpdateStatusBar;
   cbbMatchSearch.SetFocus;
@@ -3611,7 +3563,7 @@ var
   I: Integer;
   Info: TCnElementInfo;
 begin
-  CheckReparse(FElementList);
+  CheckReparse;
 
   Dlg := nil;
   List := nil;
