@@ -1229,8 +1229,11 @@ begin
 
     Y := (Bmp.Height - Bmp.Canvas.TextHeight(Item.Caption)) div 2;
 
-    // TODO: 绘制匹配文字
-    Bmp.Canvas.TextOut(X, Y, Item.Caption);
+    // 绘制匹配文字
+    if MatchMode in [mmStart, mmAnywhere] then
+      DrawMatchText(Bmp.Canvas, edtMatchSearch.Text, Item.Caption, X, Y, clRed)
+    else
+      Bmp.Canvas.TextOut(X, Y, Item.Caption);
 
     // 绘制 SubItem 其它列
     for I := 0 to Item.SubItems.Count - 1 do

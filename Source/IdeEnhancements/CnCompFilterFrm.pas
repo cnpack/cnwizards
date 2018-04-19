@@ -226,6 +226,8 @@ type
     procedure DoStyleChanged; virtual;
     procedure DoSettingChanged; virtual;
     procedure DoLanguageChanged(Sender: TObject); override;
+    procedure CustomDrawItem(Sender: TListView; Item: TListItem;
+      State: TCustomDrawState; var DefaultDraw: Boolean);
     function GetHelpTopic: string; override;
   public
     { Public declarations }
@@ -993,78 +995,8 @@ end;
 
 procedure TCnCompFilterForm.lvCompsCustomDrawItem(Sender: TCustomListView;
   Item: TListItem; State: TCustomDrawState; var DefaultDraw: Boolean);
-var
-  R: TRect;
-  Bmp: TBitmap;
-  ImgIdx, MatchIdx, x, y: Integer;
-  HdrStr, MatchStr, TailStr : string;
-  OldColor: TColor;
 begin
-  DefaultDraw := False;
-
-  R := Item.DisplayRect(drSelectBounds);
-  if Item.Data <> nil then
-  begin
-    // 需要时，如未取，则取
-    if TCnIdeCompInfo(Item.Data).ImgIndex = CnImgIndexUnset then
-      TCnIdeCompInfo(Item.Data).ImgIndex := AddCompImage(TCnIdeCompInfo(Item.Data).InternalName);
-    ImgIdx := TCnIdeCompInfo(Item.Data).ImgIndex;
-  end
-  else
-    ImgIdx := CnImgIndexInvalid;
-
-  // 创建临时位图以消除闪烁
-  Bmp := TBitmap.Create;
-  try
-    Bmp.PixelFormat := pf24bit;
-    Bmp.Width := R.Right - R.Left;
-    Bmp.Height := R.Bottom - R.Top;
-
-    Bmp.Canvas.Font.Assign(lvComps.Font);
-    Bmp.Canvas.Font.Style := [fsBold];
-    Bmp.Canvas.Brush.Style := bsSolid;
-
-    if Item.Selected then
-    begin
-      Bmp.Canvas.Brush.Color := $FFB0B0;
-      Bmp.Canvas.Font.Color := clBlue;
-    end;
-    Bmp.Canvas.FillRect(Bounds(1, (Bmp.Height - ilComps.Height) div 2,
-      Bmp.Width, ilComps.Height));
-
-    if ImgIdx >= 0 then
-      ilComps.Draw(Bmp.Canvas, 1, (Bmp.Height - ilComps.Height) div 2, ImgIdx);
-
-    if edtSearch.Text = '' then
-      MatchIdx := 0
-    else
-      MatchIdx := Pos(UpperCase(Trim(edtSearch.Text)), UpperCase(Item.Caption));
-
-    x := ilComps.Width + 2;
-    y := (Bmp.Height - Bmp.Canvas.TextHeight(Item.Caption)) div 2;
-    if MatchIdx > 0 then
-    begin
-      HdrStr := Copy(Item.Caption, 1, MatchIdx - 1);
-      MatchStr := Copy(Item.Caption, MatchIdx, Length(Trim(edtSearch.Text)));
-      TailStr := Copy(Item.Caption, MatchIdx + Length(Trim(edtSearch.Text)), MaxInt);
-
-      Bmp.Canvas.TextOut(x, y, HdrStr);
-      Inc(x, Bmp.Canvas.TextWidth(HdrStr));
-      OldColor := Bmp.Canvas.Font.Color;
-      Bmp.Canvas.Font.Color := clRed;
-      Bmp.Canvas.TextOut(x, y, MatchStr);
-      Bmp.Canvas.Font.Color := OldColor;
-      Inc(x, Bmp.Canvas.TextWidth(MatchStr));
-      Bmp.Canvas.TextOut(x, y, TailStr);
-    end
-    else
-      Bmp.Canvas.TextOut(x, y, Item.Caption);
-
-    BitBlt(lvComps.Canvas.Handle, R.Left, R.Top, Bmp.Width, Bmp.Height,
-      Bmp.Canvas.Handle, 0, 0, SRCCOPY);
-  finally
-    Bmp.Free;
-  end;
+  CustomDrawItem(Sender as TListView, Item, State, DefaultDraw);
 end;
 
 procedure TCnCompFilterForm.lvCompsKeyPress(Sender: TObject;
@@ -1536,69 +1468,8 @@ end;
 
 procedure TCnCompFilterForm.lvTabsCustomDrawItem(Sender: TCustomListView;
   Item: TListItem; State: TCustomDrawState; var DefaultDraw: Boolean);
-var
-  R, ARect: TRect;
-  Bmp: TBitmap;
-  MatchIdx, x, y: Integer;
-  HdrStr, MatchStr, TailStr : string;
-  OldColor: TColor;
 begin
-  DefaultDraw := False;
-
-  R := Item.DisplayRect(drSelectBounds);
-
-  // 创建临时位图以消除闪烁
-  Bmp := TBitmap.Create;
-  try
-    Bmp.PixelFormat := pf24bit;
-    Bmp.Width := R.Right - R.Left;
-    Bmp.Height := R.Bottom - R.Top;
-    ARect := Bounds(0, 0, Bmp.Width, Bmp.Height);
-
-    Bmp.Canvas.Font.Assign(lvComps.Font);
-    Bmp.Canvas.Font.Style := [fsBold];
-    Bmp.Canvas.Brush.Style := bsSolid;
-
-    if Item.Selected then
-    begin
-      Bmp.Canvas.Brush.Color := $FFB0B0;
-      Bmp.Canvas.Font.Color := clBlue;
-    end;
-    Bmp.Canvas.FillRect(Bounds(1, (Bmp.Height - ilTabs.Height) div 2,
-      Bmp.Width - 1, ilTabs.Height));
-
-    ilTabs.Draw(Bmp.Canvas, 1, (Bmp.Height - ilTabs.Height) div 2, 0);
-
-    if edtSearch.Text = '' then
-      MatchIdx := 0
-    else
-      MatchIdx := Pos(UpperCase(Trim(edtSearch.Text)), UpperCase(Item.Caption));
-
-    x := ilTabs.Width + 2;
-    y := (Bmp.Height - Bmp.Canvas.TextHeight(Item.Caption)) div 2;
-    if MatchIdx > 0 then
-    begin
-      HdrStr := Copy(Item.Caption, 1, MatchIdx - 1);
-      MatchStr := Copy(Item.Caption, MatchIdx, Length(Trim(edtSearch.Text)));
-      TailStr := Copy(Item.Caption, MatchIdx + Length(Trim(edtSearch.Text)), MaxInt);
-
-      Bmp.Canvas.TextOut(x, y, HdrStr);
-      Inc(x, Bmp.Canvas.TextWidth(HdrStr));
-      OldColor := Bmp.Canvas.Font.Color;
-      Bmp.Canvas.Font.Color := clRed;
-      Bmp.Canvas.TextOut(x, y, MatchStr);
-      Bmp.Canvas.Font.Color := OldColor;
-      Inc(x, Bmp.Canvas.TextWidth(MatchStr));
-      Bmp.Canvas.TextOut(x, y, TailStr);
-    end
-    else
-      Bmp.Canvas.TextOut(x, y, Item.Caption);
-
-    BitBlt(lvTabs.Canvas.Handle, R.Left, R.Top, Bmp.Width, Bmp.Height,
-      Bmp.Canvas.Handle, 0, 0, SRCCOPY);
-  finally
-    Bmp.Free;
-  end;
+  CustomDrawItem(Sender as TListView, Item, State, DefaultDraw);
 end;
 
 procedure TCnCompFilterForm.lvTabsChange(Sender: TObject; Item: TListItem;
@@ -1638,6 +1509,65 @@ begin
     Result := FRegExpr.Exec(AText);
   except
     Result := False;
+  end;
+end;
+
+procedure TCnCompFilterForm.CustomDrawItem(Sender: TListView;
+  Item: TListItem; State: TCustomDrawState; var DefaultDraw: Boolean);
+var
+  R: TRect;
+  Bmp: TBitmap;
+  X, Y, ImgIdx: Integer;
+  ImgList: TCustomImageList;
+begin
+  DefaultDraw := False;
+  R := Item.DisplayRect(drSelectBounds);
+
+  ImgIdx := 0;
+  if Sender = lvComps then // 单独处理组件部分
+  begin
+    if Item.Data <> nil then
+    begin
+      // 需要时，如未取，则取
+      if TCnIdeCompInfo(Item.Data).ImgIndex = CnImgIndexUnset then
+        TCnIdeCompInfo(Item.Data).ImgIndex := AddCompImage(TCnIdeCompInfo(Item.Data).InternalName);
+      ImgIdx := TCnIdeCompInfo(Item.Data).ImgIndex;
+    end
+    else
+      ImgIdx := CnImgIndexInvalid;
+  end;
+
+  // 创建临时位图以消除闪烁
+  Bmp := TBitmap.Create;
+  try
+    Bmp.PixelFormat := pf24bit;
+    Bmp.Width := R.Right - R.Left;
+    Bmp.Height := R.Bottom - R.Top;
+
+    Bmp.Canvas.Font.Assign(Sender.Font);
+    Bmp.Canvas.Font.Style := [fsBold];
+    Bmp.Canvas.Brush.Style := bsSolid;
+
+    ImgList := Sender.SmallImages;
+    if Item.Selected then
+    begin
+      Bmp.Canvas.Brush.Color := $FFB0B0;
+      Bmp.Canvas.Font.Color := clBlue;
+    end;
+    Bmp.Canvas.FillRect(Bounds(1, (Bmp.Height - ImgList.Height) div 2,
+      Bmp.Width - 1, ImgList.Height));
+
+    if ImgIdx >= 0 then
+      ImgList.Draw(Bmp.Canvas, 1, (Bmp.Height - ImgList.Height) div 2, ImgIdx);
+
+    X := ImgList.Width + 2;
+    Y := (Bmp.Height - Bmp.Canvas.TextHeight(Item.Caption)) div 2;
+    DrawMatchText(Bmp.Canvas, edtSearch.Text, Item.Caption, X, Y, clRed);
+
+    BitBlt(Sender.Canvas.Handle, R.Left, R.Top, Bmp.Width, Bmp.Height,
+      Bmp.Canvas.Handle, 0, 0, SRCCOPY);
+  finally
+    Bmp.Free;
   end;
 end;
 
