@@ -224,6 +224,8 @@ type
       DataListIndex: Integer): Boolean;
     // 释放 DataList 供重新初始化的场合
     procedure ClearDataList;
+    // 供子类决定绘制 Item 时可以修改部分绘制参数如颜色等
+    procedure DrawListPreParam(Item: TListItem; ListCanvas: TCanvas); virtual;
     // === New Routines for refactor ===
 
     procedure DoSortListView; virtual;
@@ -239,7 +241,8 @@ type
     procedure UpdateStatusBar; virtual;
     procedure OpenSelect; virtual; abstract;
     procedure FontChanged(AFont: TFont); virtual;
-    procedure DrawListItem(ListView: TCustomListView; Item: TListItem); virtual; abstract;
+    procedure DrawListItem(ListView: TCustomListView; Item: TListItem;
+      State: TCustomDrawState; var DefaultDraw: Boolean); virtual;
     procedure SelectFirstItem;
     procedure SelectItemByIndex(AIndex: Integer);
     procedure LoadProjectSettings(Ini: TCustomIniFile; aSection: string);
@@ -773,7 +776,7 @@ procedure TCnProjectViewBaseForm.lvListCustomDrawItem(
   Sender: TCustomListView; Item: TListItem; State: TCustomDrawState;
   var DefaultDraw: Boolean);
 begin
-  DrawListItem(Sender, Item);
+  DrawListItem(Sender, Item, State, DefaultDraw);
 end;
 
 procedure TCnProjectViewBaseForm.lvListSelectItem(Sender: TObject;
@@ -1179,6 +1182,78 @@ begin
   MakeBitmap(FUpArrow, 0);
   MakeBitmap(FDownArrow, 1);
   MakeBitmap(FNoArrow, 2);
+end;
+
+procedure TCnProjectViewBaseForm.DrawListItem(ListView: TCustomListView;
+  Item: TListItem; State: TCustomDrawState; var DefaultDraw: Boolean);
+var
+  R, SR: TRect;
+  Bmp: TBitmap;
+  LV: TListView;
+  I, X, Y: Integer;
+  S: string;
+begin
+  DefaultDraw := False;
+  LV := ListView as TListView;
+
+  // 根据匹配结果统一绘制图标与 Caption，选择区使用灰底，未选择区使用白底
+  R := Item.DisplayRect(drSelectBounds);
+  Bmp := TBitmap.Create;
+  try
+    Bmp.PixelFormat := pf24bit;
+    Bmp.Width := R.Right - R.Left;
+    Bmp.Height := R.Bottom - R.Top;
+
+    Bmp.Canvas.Font.Assign(LV.Font);
+    Bmp.Canvas.Brush.Style := bsSolid;
+
+    if Item.Selected then
+      Bmp.Canvas.Brush.Color := clSilver
+    else
+      Bmp.Canvas.Brush.Color := clWindow;
+
+    // 给子类一个机会重定义 Font 的颜色与 Canvas 背景
+    DrawListPreParam(Item, Bmp.Canvas);
+
+    // 填充底色
+    Bmp.Canvas.FillRect(Bounds(1, (Bmp.Height - LV.Height) div 2,
+      Bmp.Width, LV.Height));
+
+    if (Item.ImageIndex >= 0) and (LV.SmallImages <> nil) then
+      LV.SmallImages.Draw(Bmp.Canvas, 1, (Bmp.Height - LV.SmallImages.Height) div 2, Item.ImageIndex);
+
+    if LV.SmallImages <> nil then
+      X := LV.SmallImages.Width + 2
+    else
+      X := Bmp.Height + 2;
+
+    Y := (Bmp.Height - Bmp.Canvas.TextHeight(Item.Caption)) div 2;
+
+    // TODO: 绘制匹配文字
+    Bmp.Canvas.TextOut(X, Y, Item.Caption);
+
+    // 绘制 SubItem 其它列
+    for I := 0 to Item.SubItems.Count - 1 do
+    begin
+      S := Item.SubItems[I];
+      if S <> '' then
+      begin
+        ListView_GetSubItemRect(LV.Handle, Item.Index, I + 1, LVIR_BOUNDS, @SR);
+        Bmp.Canvas.TextOut(SR.Left + 2, Y, S);
+      end;
+    end;
+
+    BitBlt(LV.Canvas.Handle, R.Left, R.Top, Bmp.Width, Bmp.Height,
+      Bmp.Canvas.Handle, 0, 0, SRCCOPY);
+  finally
+    Bmp.Free;
+  end;
+end;
+
+procedure TCnProjectViewBaseForm.DrawListPreParam(Item: TListItem;
+  ListCanvas: TCanvas);
+begin
+  // 基类啥都不改，按默认绘制
 end;
 
 { TCnBaseElementInfo }

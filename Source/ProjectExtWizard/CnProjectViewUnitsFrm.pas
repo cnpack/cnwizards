@@ -117,7 +117,7 @@ type
     function GetHelpTopic: string; override;
     procedure CreateList; override;
     procedure UpdateComboBox; override;
-    procedure DrawListItem(ListView: TCustomListView; Item: TListItem); override;
+    procedure DrawListPreParam(Item: TListItem; ListCanvas: TCanvas); override;
 
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer): Boolean; override;
@@ -520,11 +520,11 @@ begin
   end;
 end;
 
-procedure TCnProjectViewUnitsForm.DrawListItem(ListView: TCustomListView;
-  Item: TListItem);
+procedure TCnProjectViewUnitsForm.DrawListPreParam(Item: TListItem;
+  ListCanvas: TCanvas);
 begin
   if Assigned(Item) and TCnUnitInfo(Item.Data).IsOpened then
-    ListView.Canvas.Font.Color := clRed;
+    ListCanvas.Font.Color := clGreen;
 end;
 
 procedure TCnProjectViewUnitsForm.lvListData(Sender: TObject;

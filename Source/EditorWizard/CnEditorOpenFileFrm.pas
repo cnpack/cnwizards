@@ -74,7 +74,6 @@ type
     procedure UpdateComboBox; override;
     procedure DoUpdateListView; override;
     procedure DoSortListView; override;
-    procedure DrawListItem(ListView: TCustomListView; Item: TListItem); override;
   public
     { Public declarations }
     constructor Create(Owner: TComponent; List: TStrings); reintroduce;
@@ -205,12 +204,6 @@ begin
   begin
     Panels[1].Text := IntToStr(lvList.Items.Count);
   end;
-end;
-
-procedure TCnEditorOpenFileForm.DrawListItem(ListView: TCustomListView;
-  Item: TListItem);
-begin
-
 end;
 
 procedure TCnEditorOpenFileForm.lvListData(Sender: TObject;

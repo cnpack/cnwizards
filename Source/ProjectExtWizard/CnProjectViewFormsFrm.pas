@@ -124,7 +124,7 @@ type
     procedure UpdateStatusBar; override;
     procedure UpdateComboBox; override;
     procedure DoSelectItemChanged(Sender: TObject); override;
-    procedure DrawListItem(ListView: TCustomListView; Item: TListItem); override;
+    procedure DrawListPreParam(Item: TListItem; ListCanvas: TCanvas); override;
 
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer): Boolean; override;
@@ -654,11 +654,11 @@ begin
   ConvertSelectedForm(dfBinary);
 end;
 
-procedure TCnProjectViewFormsForm.DrawListItem(ListView: TCustomListView;
-  Item: TListItem);
+procedure TCnProjectViewFormsForm.DrawListPreParam(Item: TListItem;
+  ListCanvas: TCanvas);
 begin
   if Assigned(Item) and TCnFormInfo(Item.Data).IsOpened then
-    ListView.Canvas.Font.Color := clRed;
+    ListCanvas.Font.Color := clGreen;
 end;
 
 procedure TCnProjectViewFormsForm.lvListData(Sender: TObject;

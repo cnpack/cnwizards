@@ -77,7 +77,6 @@ type
     procedure CreateList; override;
     procedure UpdateComboBox; override;
     procedure UpdateStatusBar; override;
-    procedure DrawListItem(ListView: TCustomListView; Item: TListItem); override;
     procedure DoLanguageChanged(Sender: TObject); override;
 
     function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
@@ -297,12 +296,6 @@ end;
 procedure TCnListCompForm.UpdateComboBox;
 begin
 // Do nothing for Combo Hidden.
-end;
-
-procedure TCnListCompForm.DrawListItem(ListView: TCustomListView;
-  Item: TListItem);
-begin
-// DO nothing. Not draw here.
 end;
 
 function TCnListCompForm.DoSelectOpenedItem: string;

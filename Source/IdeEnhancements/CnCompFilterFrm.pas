@@ -994,7 +994,7 @@ end;
 procedure TCnCompFilterForm.lvCompsCustomDrawItem(Sender: TCustomListView;
   Item: TListItem; State: TCustomDrawState; var DefaultDraw: Boolean);
 var
-  R, ARect: TRect;
+  R: TRect;
   Bmp: TBitmap;
   ImgIdx, MatchIdx, x, y: Integer;
   HdrStr, MatchStr, TailStr : string;
@@ -1019,7 +1019,6 @@ begin
     Bmp.PixelFormat := pf24bit;
     Bmp.Width := R.Right - R.Left;
     Bmp.Height := R.Bottom - R.Top;
-    ARect := Bounds(0, 0, Bmp.Width, Bmp.Height);
 
     Bmp.Canvas.Font.Assign(lvComps.Font);
     Bmp.Canvas.Font.Style := [fsBold];

@@ -89,14 +89,12 @@ type
     FName: string;
     FProcArgs: string;
     FOwnerClass: string;
-    FDisplayName: string;
     FAllName: string;
     FFileName: string;
     FBeginIndex: Integer;
     FEndIndex: Integer;
     FIsForward: Boolean;
   public
-    property DisplayName: string read FDisplayName write FDisplayName;
     property LineNo: Integer read FLineNo write FLineNo;
     property Name: string read FName write FName;
     property ElementTypeStr: string read FElementTypeStr write FElementTypeStr;
@@ -174,7 +172,6 @@ type
     procedure UpdateComboBox; override;
     procedure UpdateListView; override;
     procedure UpdateItemPosition;
-    procedure DrawListItem(ListView: TCustomListView; Item: TListItem); override;
     procedure FontChanged(AFont: TFont); override;
 
     procedure PrepareSearchRange; override;
@@ -572,7 +569,7 @@ function TCnProcListWizard.CheckReparse: Boolean;
         Info2 := TCnElementInfo(FElementList.Objects[I + 1]);
 
         if (Info1 <> nil) and (Info2 <> nil) and
-          (Info1.DisplayName = Info2.DisplayName) then
+          (Info1.Text = Info2.Text) then
         begin
           // 谁是前向就删谁，但只删一个，如果有多个前向（虽然不太可能），则在下次循环中删
           if Info1.IsForward then
@@ -635,7 +632,7 @@ begin
   begin
     Info := TCnElementInfo(FElementList.Objects[I]);
     if (Info <> nil) and (Info.ElementType in [etRecord, etClass, etInterface]) then
-      ClassCombo.DropDownList.InfoItems.AddObject(Info.DisplayName, Info);
+      ClassCombo.DropDownList.InfoItems.AddObject(Info.Text, Info);
   end;
 
   if not ClassCombo.ChangeDown then
@@ -1402,7 +1399,7 @@ begin
     Info := TCnElementInfo(FElementList.Objects[I]);
     if (Info <> nil) and (Info.ElementType in [etClassFunc, etSingleFunction,
       etConstructor, etDestructor]) then
-      ProcCombo.DropDownList.InfoItems.AddObject(Info.DisplayName, Info);
+      ProcCombo.DropDownList.InfoItems.AddObject(Info.Text, Info);
   end;
 
   if not ProcCombo.ChangeDown then
@@ -1519,12 +1516,6 @@ end;
 function TCnProcListForm.DoSelectOpenedItem: string;
 begin
   Result := '';
-end;
-
-procedure TCnProcListForm.DrawListItem(ListView: TCustomListView;
-  Item: TListItem);
-begin
-
 end;
 
 function TCnProcListForm.GetSelectedFileName: string;
@@ -2079,7 +2070,7 @@ var
                   else
                     ElementInfo.ElementTypeStr := 'class abstract';
 
-                  ElementInfo.DisplayName := CurClassForNotKnown;
+                  ElementInfo.Text := CurClassForNotKnown;
                   ElementInfo.OwnerClass := CurClassForNotKnown;
                   AddElement(ElementList, ElementInfo);
 
@@ -2101,7 +2092,7 @@ var
                 ElementInfo.AllName := aFileName;
                 ElementInfo.ElementType := etClass;
                 ElementInfo.ElementTypeStr := 'class';
-                ElementInfo.DisplayName := CurClass;
+                ElementInfo.Text := CurClass;
                 ElementInfo.OwnerClass := CurClass;
                 AddElement(ElementList, ElementInfo);
 
@@ -2128,7 +2119,7 @@ var
                 ElementInfo.AllName := aFileName;
                 ElementInfo.ElementType := etInterface;
                 ElementInfo.ElementTypeStr := 'interface';
-                ElementInfo.DisplayName := CurIntf;
+                ElementInfo.Text := CurIntf;
                 ElementInfo.OwnerClass := CurIntf;
                 AddElement(ElementList, ElementInfo);
               end
@@ -2149,7 +2140,7 @@ var
                   ElementInfo.ElementTypeStr := 'record'
                 else
                   ElementInfo.ElementTypeStr := 'record object';
-                ElementInfo.DisplayName := CurIdent;
+                ElementInfo.Text := CurIdent;
                 // ElementInfo.OwnerClass := CurIntf;
                 AddElement(ElementList, ElementInfo);
               end
@@ -2175,14 +2166,14 @@ var
                     ElementInfo.ElementType := etIntfProperty;
                     ElementInfo.ElementTypeStr := 'interface property';
                     ElementInfo.OwnerClass := CurIntf;
-                    ElementInfo.DisplayName := CurIntf + '.' + string(PasParser.Token);
+                    ElementInfo.Text := CurIntf + '.' + string(PasParser.Token);
                   end
                   else
                   begin
                     ElementInfo.ElementType := etProperty;
                     ElementInfo.ElementTypeStr := 'property';
                     ElementInfo.OwnerClass := CurClass;
-                    ElementInfo.DisplayName := CurClass + '.' + string(PasParser.Token);
+                    ElementInfo.Text := CurClass + '.' + string(PasParser.Token);
                   end;
                   AddElement(ElementList, ElementInfo);
                 end;
@@ -2504,7 +2495,7 @@ var
                   begin
                     ElementInfo := TCnElementInfo.Create;
                     ElementInfo.Name := NewName;
-                    ElementInfo.DisplayName := NewName; // 显示用的
+                    ElementInfo.Text := NewName; // 显示用的
                     ElementInfo.ProcName := NewName; // ProcName 是搜索用的
                     if ElementType = etClass then
                       ElementInfo.OwnerClass := NewName;
@@ -2873,7 +2864,7 @@ end;
 
 procedure TCnProcListWizard.AddElement(ElementList: TStringList; ElementInfo: TCnElementInfo);
 begin
-  ElementList.AddObject(#9 + ElementInfo.DisplayName + #9 + ElementInfo.ElementTypeStr + #9 + IntToStr(ElementInfo.LineNo), ElementInfo);
+  ElementList.AddObject(#9 + ElementInfo.Text + #9 + ElementInfo.ElementTypeStr + #9 + IntToStr(ElementInfo.LineNo), ElementInfo);
 end;
 
 procedure TCnProcListWizard.AddProcedure(ElementList, ObjectList: TStringList;
@@ -2927,7 +2918,7 @@ begin
         if (LowerCase(TempStr) = 'procedure') or (LowerCase(TempStr) = 'function') then
           TempStr := '<anonymous>';
 
-        ElementInfo.DisplayName := TempStr;
+        ElementInfo.Text := TempStr;
         // Add to the object comboBox and set the object name in ElementInfo
         if Pos('.', TempStr) = 0 then
         begin
@@ -2949,12 +2940,12 @@ begin
         begin
           // 只对函数类型的才如此处理
           if Length(ElementInfo.OwnerClass) > 0 then
-            ElementInfo.DisplayName := ElementInfo.OwnerClass + '::';
+            ElementInfo.Text := ElementInfo.OwnerClass + '::';
 
-          ElementInfo.DisplayName := ElementInfo.DisplayName + ElementInfo.ProcName;
+          ElementInfo.Text := ElementInfo.Text + ElementInfo.ProcName;
         end;
 
-        ElementList.AddObject(#9 + ElementInfo.DisplayName + #9 + ElementInfo.ElementTypeStr + #9 + IntToStr(ElementInfo.LineNo), ElementInfo);
+        ElementList.AddObject(#9 + ElementInfo.Text + #9 + ElementInfo.ElementTypeStr + #9 + IntToStr(ElementInfo.LineNo), ElementInfo);
         if Length(ElementInfo.OwnerClass) = 0 then
           ObjectList.Add(SCnProcListObjsNone)
         else
@@ -3049,7 +3040,7 @@ begin
     ElementInfo := TCnElementInfo(DisplayList.Objects[Item.Index]);
     if ElementInfo <> nil then
     begin
-      Item.Caption := ElementInfo.DisplayName;
+      Item.Caption := ElementInfo.Text;
       Item.ImageIndex := SelectImageIndex(ElementInfo);
       Item.SubItems.Add(ElementInfo.ElementTypeStr);
       Item.SubItems.Add(IntToStr(ElementInfo.LineNo));
@@ -3141,7 +3132,7 @@ begin
         Continue;
 
       case FLanguage of
-        ltPas: ProcName := ProcInfo.DisplayName;
+        ltPas: ProcName := ProcInfo.Text;
         ltCpp: ProcName := ProcInfo.ProcName;
       end;
 
@@ -3393,7 +3384,7 @@ begin
     Exit;
 
   case FLanguage of
-    ltPas: ProcName := GetMethodName(Info.DisplayName);
+    ltPas: ProcName := GetMethodName(Info.Text);
     // 只搜函数名，不搜包括类名在内的函数名
     ltCpp: ProcName := Info.OwnerClass;
   end;
@@ -3430,9 +3421,9 @@ begin
   case ASortIndex of
   0:
     begin
-      Result := CompareTextPos(AMatchStr, Info1.DisplayName, Info2.DisplayName);
+      Result := CompareTextPos(AMatchStr, Info1.Text, Info2.Text);
       if Result = 0 then
-        Result := CompareText(Info1.DisplayName, Info2.DisplayName);
+        Result := CompareText(Info1.Text, Info2.Text);
     end;
   1:
     begin
@@ -3580,7 +3571,7 @@ begin
       begin
         Info := TCnElementInfo(FElementList.Objects[I]);
         if (Info <> nil) and (Info.ElementType in [etRecord, etClass, etInterface]) then
-          List.Add(Info.DisplayName);
+          List.Add(Info.Text);
       end;
 
       List.Add('');
@@ -3590,7 +3581,7 @@ begin
         Info := TCnElementInfo(FElementList.Objects[I]);
         if (Info <> nil) and (Info.ElementType in [etClassFunc, etSingleFunction,
           etConstructor, etDestructor]) then
-          List.Add(Info.DisplayName);
+          List.Add(Info.Text);
       end;
       List.Add('');
 
