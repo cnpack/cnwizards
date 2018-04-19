@@ -176,7 +176,7 @@ type
 
     procedure PrepareSearchRange; override;
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
-      DataListIndex: Integer): Boolean; override;
+      DataListIndex: Integer; MatchedIndexes: TList): Boolean; override;
     function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
       const S1, S2: string; Obj1, Obj2: TObject): Integer; override;
   public
@@ -3366,7 +3366,7 @@ begin
 end;
 
 function TCnProcListForm.CanMatchDataByIndex(const AMatchStr: string;
-  AMatchMode: TCnMatchMode; DataListIndex: Integer): Boolean;
+  AMatchMode: TCnMatchMode; DataListIndex: Integer; MatchedIndexes: TList): Boolean;
 var
   Info: TCnElementInfo;
   ProcName: string;
@@ -3407,7 +3407,7 @@ begin
   if AMatchMode in [mmStart, mmAnywhere] then
     Result := RegExpContainsText(FRegExpr, ProcName, AMatchStr, AMatchMode = mmStart)
   else
-    Result := FuzzyMatchStr(AMatchStr, ProcName);
+    Result := FuzzyMatchStr(AMatchStr, ProcName, MatchedIndexes);
 end;
 
 function TCnProcListForm.SortItemCompare(ASortIndex: Integer;

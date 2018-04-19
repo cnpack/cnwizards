@@ -83,7 +83,7 @@ type
       const S1, S2: string; Obj1, Obj2: TObject): Integer; override;
 
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
-      DataListIndex: Integer): Boolean; override;
+      DataListIndex: Integer; MatchedIndexes: TList): Boolean; override;
   public
     { Public declarations }
   end;
@@ -340,7 +340,7 @@ begin
 end;
 
 function TCnListCompForm.CanMatchDataByIndex(const AMatchStr: string;
-  AMatchMode: TCnMatchMode; DataListIndex: Integer): Boolean;
+  AMatchMode: TCnMatchMode; DataListIndex: Integer; MatchedIndexes: TList): Boolean;
 var
   Info: TCnCompInfo;
   UpperMatch: string;
@@ -374,7 +374,7 @@ begin
       end;
     mmFuzzy:
       begin
-        Result := FuzzyMatchStr(AMatchStr, DataList[DataListIndex])
+        Result := FuzzyMatchStr(AMatchStr, DataList[DataListIndex], MatchedIndexes)
           or FuzzyMatchStr(AMatchStr, Info.CompClass)
           or FuzzyMatchStr(AMatchStr, Info.CaptionText);
       end;

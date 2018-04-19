@@ -120,7 +120,7 @@ type
     procedure DrawListPreParam(Item: TListItem; ListCanvas: TCanvas); override;
 
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
-      DataListIndex: Integer): Boolean; override;
+      DataListIndex: Integer; MatchedIndexes: TList): Boolean; override;
     function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
       const S1, S2: string; Obj1, Obj2: TObject): Integer; override;
   public
@@ -212,7 +212,7 @@ end;
 
 function TCnProjectViewUnitsForm.CanMatchDataByIndex(
   const AMatchStr: string; AMatchMode: TCnMatchMode;
-  DataListIndex: Integer): Boolean;
+  DataListIndex: Integer; MatchedIndexes: TList): Boolean;
 var
   Info: TCnUnitInfo;
 begin
@@ -238,7 +238,7 @@ begin
       end;
     mmFuzzy:
       begin
-        Result := FuzzyMatchStr(AMatchStr, DataList[DataListIndex]);
+        Result := FuzzyMatchStr(AMatchStr, DataList[DataListIndex], MatchedIndexes);
       end;
   end;
 end;
@@ -523,7 +523,7 @@ end;
 procedure TCnProjectViewUnitsForm.DrawListPreParam(Item: TListItem;
   ListCanvas: TCanvas);
 begin
-  if Assigned(Item) and TCnUnitInfo(Item.Data).IsOpened then
+  if Assigned(Item) and (Item.Data <> nil) and TCnUnitInfo(Item.Data).IsOpened then
     ListCanvas.Font.Color := clGreen;
 end;
 

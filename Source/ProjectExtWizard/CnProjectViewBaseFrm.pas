@@ -41,7 +41,7 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, 
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ImgList, Contnrs, ActnList, CommCtrl,
 {$IFDEF COMPILER6_UP}
   StrUtils,
@@ -208,7 +208,7 @@ type
     // 子类重载以返回在指定匹配字符、指定匹配模式下，DataList 中的指定项是否匹配
     // 调用此方法前 ProjectInfo 指定了下拉框所标识的工程范围
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
-      DataListIndex: Integer): Boolean; virtual;
+      DataListIndex: Integer; MatchedIndexes: TList): Boolean; virtual;
     // 子类重载以返回此项是否可以作为优先选中的项，一般无须重载
     function CanSelectDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer): Boolean; virtual;
@@ -218,7 +218,7 @@ type
 
     // 默认匹配的实现，只匹配 DataList 中的字符串，不处理其 Object 所代表的内容
     function DefaultMatchHandler(const AMatchStr: string; AMatchMode: TCnMatchMode;
-      DataListIndex: Integer): Boolean;
+      DataListIndex: Integer; MatchedIndexes: TList): Boolean;
     // 默认允许优先选择最头上匹配的项
     function DefaultSelectHandler(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer): Boolean;
@@ -493,7 +493,7 @@ end;
 
 procedure TCnProjectViewBaseForm.actFontExecute(Sender: TObject);
 begin
-  dlgFont.Font := lvList.Font; 
+  dlgFont.Font := lvList.Font;
   if dlgFont.Execute then
   begin
     lvList.ParentFont := False;
@@ -663,7 +663,7 @@ begin
     Width := ReadInteger(aSection, csWidth, Width);
     Height := ReadInteger(aSection, csHeight, Height);
     CenterForm(Self);
-    
+
     FListViewWidthStr := ReadString(aSection, csListViewWidth, '');
     SetListViewWidthString(lvList, FListViewWidthStr);
   finally
@@ -958,20 +958,31 @@ var
   MatchSearchText: string;
   I, ToSelIndex: Integer;
   ToSels: TStringList;
+  Indexes: TList;
+  AMatchMode: TCnMatchMode;
 begin
+  if DataList.Count = 0 then
+    Exit;
+
   MatchSearchText := edtMatchSearch.Text;
   ToSelIndex := 0;
   ToSels := TStringList.Create;
 
   DisplayList.Clear;
+  AMatchMode := MatchMode;
   try
     for I := 0 to DataList.Count - 1 do
     begin
+      Indexes := nil;
+      if (AMatchMode = mmFuzzy) and (DataList.Objects[I] <> nil) and
+        (DataList.Objects[I] is TCnBaseElementInfo) then
+        Indexes := TCnBaseElementInfo(DataList.Objects[I]).MatchIndexes;
+
       // 不能因为 MatchSearchText = '' 就直接通过匹配，因为子类可能还有其它搜索条件
-      if CanMatchDataByIndex(MatchSearchText, MatchMode, I) then
+      if CanMatchDataByIndex(MatchSearchText, AMatchMode, I, Indexes) then
       begin
         DisplayList.AddObject(DataList[I], DataList.Objects[I]);
-        if CanSelectDataByIndex(MatchSearchText, MatchMode, I) then
+        if CanSelectDataByIndex(MatchSearchText, AMatchMode, I) then
           ToSels.Add(DataList[I]);
       end;
     end;
@@ -1001,9 +1012,9 @@ begin
 end;
 
 function TCnProjectViewBaseForm.CanMatchDataByIndex(const AMatchStr: string;
-  AMatchMode: TCnMatchMode; DataListIndex: Integer): Boolean;
+  AMatchMode: TCnMatchMode; DataListIndex: Integer; MatchedIndexes: TList): Boolean;
 begin
-  Result := DefaultMatchHandler(AMatchStr, AMatchMode, DataListIndex);
+  Result := DefaultMatchHandler(AMatchStr, AMatchMode, DataListIndex, MatchedIndexes);
 end;
 
 function TCnProjectViewBaseForm.CanSelectDataByIndex(
@@ -1015,7 +1026,7 @@ end;
 
 function TCnProjectViewBaseForm.DefaultMatchHandler(
   const AMatchStr: string; AMatchMode: TCnMatchMode;
-  DataListIndex: Integer): Boolean;
+  DataListIndex: Integer; MatchedIndexes: TList): Boolean;
 var
   S: string;
 begin
@@ -1026,9 +1037,9 @@ begin
 
   S := DataList[DataListIndex];
   case AMatchMode of
-    mmStart: Result := Pos(AMatchStr, S) = 1;
+    mmStart:    Result := Pos(AMatchStr, S) = 1;
     mmAnywhere: Result := Pos(AMatchStr, S) > 0;
-    mmFuzzy: Result := FuzzyMatchStr(AMatchStr, S);
+    mmFuzzy:    Result := FuzzyMatchStr(AMatchStr, S, MatchedIndexes);
   end;
 end;
 
@@ -1192,6 +1203,8 @@ var
   LV: TListView;
   I, X, Y: Integer;
   S: string;
+  Info: TCnBaseElementInfo;
+  MatchedIndexesRef: TList;
 begin
   DefaultDraw := False;
   LV := ListView as TListView;
@@ -1229,9 +1242,19 @@ begin
 
     Y := (Bmp.Height - Bmp.Canvas.TextHeight(Item.Caption)) div 2;
 
+    MatchedIndexesRef := nil;
+    if (Item.Data <> nil) and (TObject(Item.Data) is TCnBaseElementInfo) then
+    begin
+      Info := TCnBaseElementInfo(Item.Data);
+      if (Info.MatchIndexes <> nil) and (Info.MatchIndexes.Count > 0) then
+        MatchedIndexesRef := Info.MatchIndexes;
+    end;
+
     // 绘制匹配文字
     if MatchMode in [mmStart, mmAnywhere] then
       DrawMatchText(Bmp.Canvas, edtMatchSearch.Text, Item.Caption, X, Y, clRed)
+    else if MatchedIndexesRef <> nil then
+      DrawMatchText(Bmp.Canvas, edtMatchSearch.Text, Item.Caption, X, Y, clRed, MatchedIndexesRef)
     else
       Bmp.Canvas.TextOut(X, Y, Item.Caption);
 

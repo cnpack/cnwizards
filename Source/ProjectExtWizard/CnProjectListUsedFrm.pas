@@ -81,7 +81,7 @@ type
     function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
       const S1, S2: string; Obj1, Obj2: TObject): Integer; override;
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
-      DataListIndex: Integer): Boolean; override;
+      DataListIndex: Integer; MatchedIndexes: TList): Boolean; override;
   public
     { Public declarations }
     class procedure ParseUnitInclude(const Source: string; UsesList: TStrings);
@@ -297,7 +297,7 @@ end;
 
 function TCnProjectListUsedForm.CanMatchDataByIndex(
   const AMatchStr: string; AMatchMode: TCnMatchMode;
-  DataListIndex: Integer): Boolean;
+  DataListIndex: Integer; MatchedIndexes: TList): Boolean;
 begin
   Result := False;
   if AMatchStr = '' then
@@ -317,7 +317,7 @@ begin
       end;
     mmFuzzy:
       begin
-        Result := FuzzyMatchStr(AMatchStr, DataList[DataListIndex]);
+        Result := FuzzyMatchStr(AMatchStr, DataList[DataListIndex], MatchedIndexes);
       end;
   end;
 end;
