@@ -63,7 +63,7 @@ type
       Panel: TStatusPanel; const Rect: TRect);
     procedure lvListData(Sender: TObject; Item: TListItem);
   private
-    FFileList: TStrings;
+    FListRef: TStrings;
   protected
     function DoSelectOpenedItem: string; override;
     function GetSelectedFileName: string; override;
@@ -75,8 +75,6 @@ type
     procedure DoUpdateListView; override;
     procedure DoSortListView; override;
     procedure DrawListItem(ListView: TCustomListView; Item: TListItem); override;
-
-    property FileList: TStrings read FFileList write FFileList;
   public
     { Public declarations }
     constructor Create(Owner: TComponent; List: TStrings); reintroduce;
@@ -130,7 +128,7 @@ end;
 function TCnEditorOpenFileForm.GetSelectedFileName: string;
 begin
   if Assigned(lvList.ItemFocused) then
-    Result := Trim(FFileList[lvList.ItemFocused.Index]);
+    Result := Trim(DataList[lvList.ItemFocused.Index]);
 end;
 
 function TCnEditorOpenFileForm.GetHelpTopic: string;
@@ -149,14 +147,14 @@ begin
     Exit;
 
   if lvList.SelCount <= 1 then
-    CnOtaOpenFile(FFileList[Item.Index])
+    CnOtaOpenFile(DataList[Item.Index])
   else
   begin
     for I := 0 to lvList.Items.Count - 1 do
     begin
       Item := lvList.Items[I];
       if Item.Selected then
-        CnOtaOpenFile(FFileList[Item.Index]);
+        CnOtaOpenFile(DataList[Item.Index]);
     end;
   end;
 
@@ -171,16 +169,16 @@ begin
   Item := lvList.ItemFocused;
   if Assigned(Item) then
   begin
-    if FileExists(FFileList[Item.Index]) then
-      DrawCompactPath(StatusBar.Canvas.Handle, Rect, FFileList[Item.Index]);
+    if FileExists(DataList[Item.Index]) then
+      DrawCompactPath(StatusBar.Canvas.Handle, Rect, DataList[Item.Index]);
 
-    StatusBar.Hint := FFileList[Item.Index];
+    StatusBar.Hint := DataList[Item.Index];
   end;
 end;
 
 procedure TCnEditorOpenFileForm.CreateList;
 begin
-  // Do nothing about list because list comes from outside
+  DataList.Assign(FListRef);
   ToolBar.Visible := False;
   pnlHeader.Visible := False;
 end;
@@ -193,11 +191,11 @@ end;
 
 procedure TCnEditorOpenFileForm.DoUpdateListView;
 begin
-  lvList.Items.Count := FFileList.Count;
+  lvList.Items.Count := DataList.Count;
   lvList.Invalidate;
 
   UpdateStatusBar;
-  if FFileList.Count > 0 then
+  if DataList.Count > 0 then
     SelectItemByIndex(0);
 end;
 
@@ -218,14 +216,14 @@ end;
 procedure TCnEditorOpenFileForm.lvListData(Sender: TObject;
   Item: TListItem);
 begin
-  if (Item.Index >= 0) and (Item.Index < FFileList.Count) then
+  if (Item.Index >= 0) and (Item.Index < DataList.Count) then
   begin
-    Item.Caption := _CnExtractFileName(FFileList[Item.Index]);
+    Item.Caption := _CnExtractFileName(DataList[Item.Index]);
     Item.ImageIndex := 78;
 
     with Item.SubItems do
     begin
-      Add(_CnExtractFilePath(FFileList[Item.Index]));
+      Add(_CnExtractFilePath(DataList[Item.Index]));
     end;
     RemoveListViewSubImages(Item);
   end;
@@ -240,7 +238,7 @@ constructor TCnEditorOpenFileForm.Create(Owner: TComponent;
   List: TStrings);
 begin
   inherited Create(Owner);
-  FileList := List;
+  FListRef := List;
 end;
 
 {$ENDIF CNWIZARDS_CNEDITORWIZARD}
