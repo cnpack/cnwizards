@@ -976,7 +976,11 @@ begin
       Indexes := nil;
       if (AMatchMode = mmFuzzy) and (DataList.Objects[I] <> nil) and
         (DataList.Objects[I] is TCnBaseElementInfo) then
+      begin
         Indexes := TCnBaseElementInfo(DataList.Objects[I]).MatchIndexes;
+        if Indexes <> nil then
+          Indexes.Clear;
+      end;
 
       // 不能因为 MatchSearchText = '' 就直接通过匹配，因为子类可能还有其它搜索条件
       if CanMatchDataByIndex(MatchSearchText, AMatchMode, I, Indexes) then

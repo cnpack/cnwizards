@@ -694,6 +694,7 @@ begin
 
   EditControlWrapper.AddEditorChangeNotifier(EditorChange);
   CnWizNotifierServices.AddAfterThemeChangeNotifier(AfterThemeChange);
+  FNeedReParse := True;
   FWizard := Self;
 end;
 
@@ -3371,6 +3372,7 @@ var
   Info: TCnElementInfo;
   ProcName: string;
   IsObject: Boolean;
+  Offset, I: Integer;
 begin
   Result := False;
   if (AMatchStr = '') and FIsObjAll then
@@ -3383,9 +3385,15 @@ begin
   if Info = nil then
     Exit;
 
+  Offset := 0;
   case FLanguage of
-    ltPas: ProcName := GetMethodName(Info.Text);
-    // 只搜函数名，不搜包括类名在内的函数名
+    ltPas:
+      begin
+        // 只搜函数名，不搜包括类名在内的函数名
+        ProcName := GetMethodName(Info.Text);
+        Offset := Pos(ProcName, Info.Text);
+      end;
+
     ltCpp: ProcName := Info.OwnerClass;
   end;
   IsObject := Length(Info.OwnerClass) > 0;
@@ -3407,7 +3415,16 @@ begin
   if AMatchMode in [mmStart, mmAnywhere] then
     Result := RegExpContainsText(FRegExpr, ProcName, AMatchStr, AMatchMode = mmStart)
   else
+  begin
     Result := FuzzyMatchStr(AMatchStr, ProcName, MatchedIndexes);
+    // 因为不搜类名，所以查找到的 MatchedIndexes 要加上偏移
+    if Result and (Offset > 0) then
+    begin
+      Dec(Offset);
+      for I := 0 to MatchedIndexes.Count - 1 do
+        MatchedIndexes[I] := Pointer(Integer(MatchedIndexes[I]) + Offset);
+    end;
+  end;
 end;
 
 function TCnProcListForm.SortItemCompare(ASortIndex: Integer;
