@@ -189,7 +189,7 @@ begin
         begin
           if lvList.Items[I].Selected then
           begin
-            AName := _CnChangeFileExt(TCnFormInfo(lvList.Items[I].Data).Name, '');
+            AName := _CnChangeFileExt(TCnFormInfo(lvList.Items[I].Data).DfmInfo.Name, '');
             AName := _CnExtractFileName(AName);
 
             Idx := OriginalList.IndexOf(AName);
@@ -263,13 +263,13 @@ var
       Comp := CnOtaGetRootComponentFromEditor(IFormEditor);
       if Assigned(Comp) and (Comp is TControl) then
       begin
-        AInfo.FormClass := Comp.ClassName;
-        AInfo.Name := Comp.Name;
-        AInfo.Caption := TControlAccess(Comp).Caption;
-        AInfo.Left := TControl(Comp).Left;
-        AInfo.Top := TControl(Comp).Top;
-        AInfo.Width := TControl(Comp).Width;
-        AInfo.Height := TControl(Comp).Height;
+        AInfo.DfmInfo.FormClass := Comp.ClassName;
+        AInfo.DfmInfo.Name := Comp.Name;
+        AInfo.DfmInfo.Caption := TControlAccess(Comp).Caption;
+        AInfo.DfmInfo.Left := TControl(Comp).Left;
+        AInfo.DfmInfo.Top := TControl(Comp).Top;
+        AInfo.DfmInfo.Width := TControl(Comp).Width;
+        AInfo.DfmInfo.Height := TControl(Comp).Height;
         Result := True;
       end;
     except
@@ -354,19 +354,19 @@ begin
             if Exists then
             begin
               Size := GetFileSize(FormFileName);
-              ParseDfmFile(FormFileName, FormInfo);
+              ParseDfmFile(FormFileName, FormInfo.DfmInfo);
             end
             else
             begin
               Size := 0;
-              Format := dfUnknown;
+              DfmInfo.Format := dfUnknown;
             end;
           end;
 
           GetDfmInfoFromIDE(IModuleInfo.FileName, FormInfo);
           FillFormInfo(FormInfo);
           FormInfo.ParentProject := ProjectInfo;
-          DataList.AddObject(FormInfo.Name, FormInfo);
+          DataList.AddObject(FormInfo.DfmInfo.Name, FormInfo);
         end;
 
         ProjectList.Add(ProjectInfo);  // ProjectList 中包含模块信息
@@ -407,7 +407,7 @@ begin
   if (Item.Index >= 0) and (Item.Index < DisplayList.Count) then
   begin
     Info := TCnFormInfo(DisplayList.Objects[Item.Index]);
-    Item.Caption := Info.Name;
+    Item.Caption := Info.DfmInfo.Name;
     Item.ImageIndex := Info.ImageIndex;
     Item.Data := Info;
 
@@ -416,7 +416,7 @@ begin
       Add(Info.DesignClassText);
       Add(Info.Project);
       Add(IntToStrSp(Info.Size));
-      Add(SDfmFormats[Info.Format]);
+      Add(SDfmFormats[Info.DfmInfo.Format]);
     end;
   end;
 end;

@@ -74,7 +74,7 @@ type
     FMatchIndexes: TList;
     FParentProject: TCnProjectInfo;
   public
-    constructor Create;
+    constructor Create; virtual;
     destructor Destroy; override;
 
     property MatchIndexes: TList read FMatchIndexes;
@@ -1221,7 +1221,7 @@ begin
     Bmp.Canvas.Brush.Style := bsSolid;
 
     if Item.Selected then
-      Bmp.Canvas.Brush.Color := clSilver
+      Bmp.Canvas.Brush.Color := $E0E0E0
     else
       Bmp.Canvas.Brush.Color := clWindow;
 

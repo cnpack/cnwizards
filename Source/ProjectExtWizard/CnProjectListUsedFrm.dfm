@@ -43,7 +43,6 @@ inherited CnProjectListUsedForm: TCnProjectListUsedForm
         Width = 150
       end>
     OwnerData = True
-    OnCustomDrawItem = nil
     OnData = lvListData
   end
   inherited StatusBar: TStatusBar

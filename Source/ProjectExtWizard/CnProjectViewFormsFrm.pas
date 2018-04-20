@@ -72,7 +72,7 @@ uses
   CnWizIdeUtils, CnStrings;
 
 type
-  TCnFormInfo = class(TDfmInfo)
+  TCnFormInfo = class(TCnBaseElementInfo)
   {* 需要解析 DFM，暂无法继承自 TCnBaseElementInfo，只能先整几个同名属性过来}
   private
     FDesignClass: string;
@@ -81,11 +81,13 @@ type
     FSize: Integer;
     FImageIndex: Integer;
     FIsOpened: Boolean;
-    FParentProject: TCnProjectInfo;
+    FDfmInfo: TDfmInfo;
     function GetDesignClassText: string;
   public
-    property ParentProject: TCnProjectInfo read FParentProject write FParentProject;
-    {* 该元素从属的 Project，无则为 nil}
+    constructor Create; override;
+    destructor Destroy; override;
+
+    property DfmInfo: TDfmInfo read FDfmInfo write FDfmInfo;
   published
     property DesignClass: string read FDesignClass write FDesignClass;
     property FileName: string read FFileName write FFileName;
@@ -179,10 +181,22 @@ end;
 
 { TCnFormInfo }
 
+constructor TCnFormInfo.Create;
+begin
+  inherited;
+  FDfmInfo := TDfmInfo.Create;
+end;
+
+destructor TCnFormInfo.Destroy;
+begin
+  FDfmInfo.Free;
+  inherited;
+end;
+
 function TCnFormInfo.GetDesignClassText: string;
 begin
-  if Kind <> dkObject then
-    Result := DesignClass + '(' + SDfmKinds[Kind] + ')'
+  if FDfmInfo.Kind <> dkObject then
+    Result := DesignClass + '(' + SDfmKinds[FDfmInfo.Kind] + ')'
   else
     Result := DesignClass;
 end;
@@ -271,28 +285,28 @@ var
       Comp := CnOtaGetRootComponentFromEditor(IFormEditor);
       if Assigned(Comp) and (Comp is TControl) then
       begin
-        AInfo.FormClass := Comp.ClassName;
-        AInfo.Name := Comp.Name;
-        AInfo.Caption := TControlAccess(Comp).Caption;
-        AInfo.Left := TControl(Comp).Left;
-        AInfo.Top := TControl(Comp).Top;
-        AInfo.Width := TControl(Comp).Width;
-        AInfo.Height := TControl(Comp).Height;
+        AInfo.DfmInfo.FormClass := Comp.ClassName;
+        AInfo.DfmInfo.Name := Comp.Name;
+        AInfo.DfmInfo.Caption := TControlAccess(Comp).Caption;
+        AInfo.DfmInfo.Left := TControl(Comp).Left;
+        AInfo.DfmInfo.Top := TControl(Comp).Top;
+        AInfo.DfmInfo.Width := TControl(Comp).Width;
+        AInfo.DfmInfo.Height := TControl(Comp).Height;
         Result := True;
       end;
 
 {$IFDEF SUPPORT_FMX}
       if Assigned(Comp) and CnFmxIsInheritedFromCommonCustomForm(Comp) then
       begin
-        AInfo.FormClass := Comp.ClassName;
-        AInfo.Name := Comp.Name;
-        AInfo.Caption := CnFmxGetCommonCustomFormCaption(Comp);
+        AInfo.DfmInfo.FormClass := Comp.ClassName;
+        AInfo.DfmInfo.Name := Comp.Name;
+        AInfo.DfmInfo.Caption := CnFmxGetCommonCustomFormCaption(Comp);
         ARect := CnFmxGetControlRect(Comp);
 
-        AInfo.Left := ARect.Left;
-        AInfo.Top := ARect.Top;
-        AInfo.Width := ARect.Width;
-        AInfo.Height := ARect.Height;
+        AInfo.DfmInfo.Left := ARect.Left;
+        AInfo.DfmInfo.Top := ARect.Top;
+        AInfo.DfmInfo.Width := ARect.Width;
+        AInfo.DfmInfo.Height := ARect.Height;
         Result := True;
       end;
 {$ENDIF}
@@ -373,19 +387,19 @@ begin
             if Exists then
             begin
               Size := GetFileSize(FormFileName);
-              ParseDfmFile(FormFileName, FormInfo);
+              ParseDfmFile(FormFileName, FormInfo.DfmInfo);
             end
             else
             begin
               Size := 0;
-              Format := dfUnknown;
+              FDfmInfo.Format := dfUnknown;
             end;
           end;
 
           GetDfmInfoFromIDE(IModuleInfo.FileName, FormInfo);
           FillFormInfo(FormInfo);
           FormInfo.ParentProject := ProjectInfo;
-          DataList.AddObject(FormInfo.Name, FormInfo);
+          DataList.AddObject(FormInfo.DfmInfo.Name, FormInfo);
         end;
 
         ProjectList.Add(ProjectInfo);  // ProjectList 中包含模块信息
@@ -418,17 +432,17 @@ procedure TCnProjectViewFormsForm.FillFormInfo(AInfo: TCnFormInfo);
 begin
   with AInfo do
   begin
-    if (Format = dfText) and (DesignClass = SFrameOfForm) then
+    if (DfmInfo.Format = dfText) and (DesignClass = SFrameOfForm) then
       ImageIndex := 71
-    else if (Format = dfBinary) and (DesignClass = SFrameOfForm) then
+    else if (DfmInfo.Format = dfBinary) and (DesignClass = SFrameOfForm) then
       ImageIndex := 72
-    else if (Format = dfText) and (DesignClass = SDataMoudleOfForm) then
+    else if (DfmInfo.Format = dfText) and (DesignClass = SDataMoudleOfForm) then
       ImageIndex := 74
-    else if (Format = dfBinary) and (DesignClass = SDataMoudleOfForm) then
+    else if (DfmInfo.Format = dfBinary) and (DesignClass = SDataMoudleOfForm) then
       ImageIndex := 75
-    else if Format = dfText then
+    else if DfmInfo.Format = dfText then
       ImageIndex := 68
-    else if Format = dfBinary then
+    else if DfmInfo.Format = dfBinary then
       ImageIndex := 69
     else
       case CnOtaGetNewFormTypeOption of
@@ -492,8 +506,8 @@ var
         if lvList.Items.Item[I].Selected then
         begin
           FormInfo := TCnFormInfo(lvList.Items.Item[I].Data);
-          if FormInfo.Format = dfUnknown then
-            OpenItem(FormInfo.FileName, FormInfo.Name)
+          if FormInfo.DfmInfo.Format = dfUnknown then
+            OpenItem(FormInfo.FileName, FormInfo.DfmInfo.Name)
           else
             OpenItem(FormInfo.FileName);
         end;
@@ -509,8 +523,8 @@ begin
     Exit;
 
   if lvList.SelCount <= 1 then
-    if TCnFormInfo(Item.Data).Format = dfUnknown then
-      OpenItem(TCnFormInfo(Item.Data).FileName, TCnFormInfo(Item.Data).Name)
+    if TCnFormInfo(Item.Data).DfmInfo.Format = dfUnknown then
+      OpenItem(TCnFormInfo(Item.Data).FileName, TCnFormInfo(Item.Data).DfmInfo.Name)
     else
       OpenItem(TCnFormInfo(Item.Data).FileName)
   else
@@ -574,7 +588,7 @@ begin
 
     for i := 0 to Items.Count - 1 do
       if lvList.Items[i].Selected then
-        if TCnFormInfo(Items[i].Data).Format = dfBinary then
+        if TCnFormInfo(Items[i].Data).DfmInfo.Format = dfBinary then
           Inc(BinForm)
         else
           Inc(TxtForm);
@@ -622,12 +636,12 @@ begin
             dfBinary:
               begin
                 ChangeType(FileName, Format);
-                TCnFormInfo(lvList.Items.Item[I].Data).Format := dfBinary;
+                TCnFormInfo(lvList.Items.Item[I].Data).DfmInfo.Format := dfBinary;
               end;
             dfText:
               begin
                 ChangeType(FileName, Format);
-                TCnFormInfo(lvList.Items.Item[I].Data).Format := dfText;
+                TCnFormInfo(lvList.Items.Item[I].Data).DfmInfo.Format := dfText;
               end;
           end;
           FillFormInfo(TCnFormInfo(lvList.Items.Item[I].Data));
@@ -669,17 +683,17 @@ begin
   if (Item.Index >= 0) and (Item.Index < DisplayList.Count) then
   begin
     Info := TCnFormInfo(DisplayList.Objects[Item.Index]);
-    Item.Caption := Info.Name;
+    Item.Caption := Info.DfmInfo.Name;
     Item.ImageIndex := Info.ImageIndex;
     Item.Data := Info;
     
     with Item.SubItems do
     begin
-      Add(Info.Caption);
+      Add(Info.DfmInfo.Caption);
       Add(Info.DesignClassText);
       Add(Info.Project);
       Add(IntToStrSp(Info.Size));
-      Add(SDfmFormats[Info.Format]);
+      Add(SDfmFormats[Info.DfmInfo.Format]);
     end;
     RemoveListViewSubImages(Item);
   end;
@@ -710,17 +724,17 @@ begin
     mmStart:
       begin
         Result := (Pos(UpperMatch, UpperCase(DataList[DataListIndex])) = 1)
-          or (Pos(UpperMatch, UpperCase(Info.Caption)) = 1);
+          or (Pos(UpperMatch, UpperCase(Info.DfmInfo.Caption)) = 1);
       end;
     mmAnywhere:
       begin
         Result := (Pos(UpperMatch, UpperCase(DataList[DataListIndex])) > 0)
-         or (Pos(UpperMatch, UpperCase(Info.Caption)) > 0);
+         or (Pos(UpperMatch, UpperCase(Info.DfmInfo.Caption)) > 0);
       end;
     mmFuzzy:
       begin
         Result := FuzzyMatchStr(AMatchStr, DataList[DataListIndex], MatchedIndexes)
-          or FuzzyMatchStr(AMatchStr, Info.Caption) ;
+          or FuzzyMatchStr(AMatchStr, Info.DfmInfo.Caption) ;
       end;
   end;
 end;
@@ -736,20 +750,20 @@ begin
   case ASortIndex of // 因为搜索时名称、标题两列参与匹配，因此这两列排序时要考虑到把名称匹配时的全匹配提前
     0:
       begin
-        Result := CompareTextPos(AMatchStr, Info1.Name, Info2.Name);
+        Result := CompareTextPos(AMatchStr, Info1.DfmInfo.Name, Info2.DfmInfo.Name);
         if Result = 0 then
-          Result := CompareText(Info1.Name, Info2.Name);
+          Result := CompareText(Info1.DfmInfo.Name, Info2.DfmInfo.Name);
       end;
     1:
       begin
-        Result := CompareTextPos(AMatchStr, Info1.Caption, Info2.Caption);
+        Result := CompareTextPos(AMatchStr, Info1.DfmInfo.Caption, Info2.DfmInfo.Caption);
         if Result = 0 then
-          Result := CompareText(Info1.Caption, Info2.Caption);
+          Result := CompareText(Info1.DfmInfo.Caption, Info2.DfmInfo.Caption);
       end;
     2: Result := CompareText(Info1.DesignClassText, Info2.DesignClassText);
     3: Result := CompareText(Info1.Project, Info2.Project);
     4: Result := CompareValue(Info1.Size, Info2.Size);
-    5: Result := CompareText(SDfmFormats[Info1.Format], SDfmFormats[Info2.Format]);
+    5: Result := CompareText(SDfmFormats[Info1.DfmInfo.Format], SDfmFormats[Info2.DfmInfo.Format]);
   else
     Result := 0;
   end;
