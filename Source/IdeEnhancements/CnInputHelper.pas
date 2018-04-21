@@ -30,7 +30,9 @@ unit CnInputHelper;
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2004.11.05
+* 修改记录：2018.04.21
+*                之前支持模糊匹配，现在将模糊匹配绘制过程抽取为公共过程
+*           2004.11.05
 *               移植而来
 ================================================================================
 |</PRE>}
@@ -2813,16 +2815,9 @@ const
   DESC_INTERVAL = 28;
 var
   AText: string;
-  PaintStr: string;
   SymbolItem: TSymbolItem;
   TextWith: Integer;
   Kind: Integer;
-  Idx, X, I, L, W: Integer;
-  C: Char;
-  ASize: TSize;
-  S: string;
-  SaveColor: TColor;
-  MatchedIndexes: TList;
 
   function GetHighlightColor(Kind: TSymbolKind): TColor;
   begin
@@ -2862,67 +2857,11 @@ begin
     Canvas.Font.Style := [fsBold];
 
     AText := SymbolItem.GetKeywordText(KeywordStyle);
-    MatchedIndexes := SymbolItem.FuzzyMatchIndexes;
-    if (FMatchMode in [mmStart, mmAnywhere]) and (FMatchStr <> '') then
-    begin
-      // 高亮显示匹配的内容
-      Idx := Pos(UpperCase(FMatchStr), UpperCase(AText));
-      if Idx > 0 then
-      begin
-        SaveColor := Canvas.Font.Color;
-        X := Rect.Left + LEFT_ICON;
-        S := Copy(AText, 1, Idx - 1);
-        Canvas.TextOut(X, Rect.Top, S);
-        Inc(X, Canvas.TextWidth(S));
-        Canvas.Font.Color := csMatchColor;
-        S := Copy(AText, Idx, Length(FMatchStr));
-        Canvas.TextOut(X, Rect.Top, S);
-        Inc(X, Canvas.TextWidth(S));
-        Canvas.Font.Color := SaveColor;
-        S := Copy(AText, Idx + Length(FMatchStr), MaxInt);
-        Canvas.TextOut(X, Rect.Top, S);
-      end
-      else
-        Canvas.TextOut(Rect.Left + LEFT_ICON, Rect.Top, AText);
-    end
-    else if (FMatchMode = mmFuzzy) and (MatchedIndexes <> nil) then
-    begin
-      // 根据匹配结果挨个高亮绘制匹配的内容
-      Canvas.TextOut(Rect.Left + LEFT_ICON, Rect.Top, AText);
-
-      SetLength(PaintStr, Length(AText));
-      StrCopy(PChar(PaintStr), PChar(AText));
-      SaveColor := Canvas.Font.Color;
-      Canvas.Font.Color := csMatchColor;
-
-      for I := MatchedIndexes.Count - 1 downto 0 do
-      begin
-        L := Integer(MatchedIndexes[I]);
-        if (L <= 0) or (L > Length(PaintStr)) then
-          Continue;
-
-        if L < Length(PaintStr) then
-          PaintStr[L + 1] := #0;
-        C := PaintStr[L];
-        PaintStr[L] := #0;
-
-        ASize.cx := 0;
-        ASize.cy := 0;
-        if L = 1 then
-          W := 0
-        else
-        begin
-          Windows.GetTextExtentPoint32(Canvas.Handle, PChar(@(PaintStr[1])), L - 1, ASize);
-          W := ASize.cx; // 计算需绘制字符前的宽度
-        end;
-        PaintStr[L] := C;
-        Windows.TextOut(Canvas.Handle, Rect.Left + LEFT_ICON + W, Rect.Top, PChar(@(PaintStr[L])), 1);
-      end;
-      SetLength(PaintStr, 0);
-      Canvas.Font.Color := SaveColor;
-    end
+    if FMatchMode in [mmStart, mmAnywhere] then
+      DrawMatchText(Canvas, FMatchStr, AText, Rect.Left + LEFT_ICON, Rect.Top, csMatchColor)
     else
-      Canvas.TextOut(Rect.Left + LEFT_ICON, Rect.Top, AText);
+      DrawMatchText(Canvas, FMatchStr, AText, Rect.Left + LEFT_ICON, Rect.Top,
+        csMatchColor, SymbolItem.FuzzyMatchIndexes);
 
     TextWith := Canvas.TextWidth(AText);
     Canvas.Font.Style := [];
