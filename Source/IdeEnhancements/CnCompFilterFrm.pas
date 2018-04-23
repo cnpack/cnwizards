@@ -29,7 +29,9 @@ unit CnCompFilterFrm;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2006.09.08 V1.0
+* 修改记录：2018.04.23 V1.1
+*               加入模糊匹配的功能
+*           2006.09.08 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -52,7 +54,7 @@ uses
   LibIntf,
   {$ENDIF}
   CnWizUtils, CnWizMultiLang, CnWizShareImages, CnWizConsts, CnWizIdeUtils,
-  CnWizNotifier, CnCommon, CnPopupMenu, RegExpr;
+  CnWizNotifier, CnCommon, CnPopupMenu, RegExpr, CnStrings;
 
 type
   TCnFilterFormStyle = (fsHidden, fsDropped, fsFloat);
@@ -68,6 +70,10 @@ type
     FInternalName: string;
     FCompType: TCnIdeCompType;
     FPackageName: string;
+    FMatchedIndexes: TList;
+  public
+    constructor Create;
+    destructor Destroy; override;
   published
     property InternalName: string read FInternalName write FInternalName;
     {* 带 T 的真正类名}
@@ -78,6 +84,8 @@ type
     property ImgIndex: Integer read FImgIndex write FImgIndex;
     property PackageName: string read FPackageName write FPackageName;
     property CompType: TCnIdeCompType read FCompType write FCompType;
+
+    property MatchedIndexes: TList read FMatchedIndexes write FMatchedIndexes;
   end;
 
   TCnCompFilterForm = class(TCnTranslateForm)
@@ -114,6 +122,7 @@ type
     pnlTab: TPanel;
     lvTabs: TListView;
     ilTabs: TImageList;
+    btnMatchFuzzy: TToolButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word;
@@ -163,10 +172,10 @@ type
   private
     FFilterFormStyle: TCnFilterFormStyle;
     FCaptionHeight: Integer;
-    FCompList: TStringList;
-    FDisplayList: TStringList;
-    FTabsList: TStringList;
-    FTabsDisplayList: TStringList;
+    FCompList: TStringList;      // 容纳原始组件列表，其 Objects 为 TCnIdeCompInfo
+    FDisplayList: TStringList;   // 容纳过滤显示的组件列表
+    FTabsList: TStringList;         // 容纳原始的 Tab 列表
+    FTabsDisplayList: TStringList;  // 容纳过滤显示的 Tab 列表，其 Objects 为 MatchedIndexes
     FBasePoint: TPoint;
     FOnStyleChanged: TNotifyEvent;
     FOnSettingChanged: TNotifyEvent;
@@ -237,7 +246,7 @@ type
     procedure UpdateToDisplayList;
     function RegExpContainsText(AText, APattern: string; IsMatchStart: Boolean = False): Boolean;
     function CanDisplayAComp(AComp: TCnIdeCompInfo): Boolean;
-    function CanDisplayATab(ATab: string): Boolean;
+    function CanDisplayATab(ATab: string; MatchedIndexes: TList): Boolean;
     procedure AdjustLayout;
 
     property FilterFormStyle: TCnFilterFormStyle read FFilterFormStyle write SetFilterFormStyle;
@@ -542,7 +551,7 @@ begin
 
     // 装载组件面板的 Tabs 列表
     for I := 0 to CnPaletteWrapper.TabCount - 1 do
-      FTabsList.Add(CnPaletteWrapper.Tabs[I]);
+      FTabsList.AddObject(CnPaletteWrapper.Tabs[I], TList.Create); // 塞个模糊匹配列表供使用
 
     // 提前恢复
     if FPackageChanged then
@@ -722,12 +731,15 @@ end;
 procedure TCnCompFilterForm.UpdateToDisplayList;
 var
   I: Integer;
+  Comp: TCnIdeCompInfo;
 begin
   FDisplayList.Clear;
   for I := 0 to FCompList.Count - 1 do
   begin
-    if CanDisplayAComp(TCnIdeCompInfo(FCompList.Objects[I])) then
-      FDisplayList.AddObject(TCnIdeCompInfo(FCompList.Objects[I]).CompName, FCompList.Objects[I]);
+    Comp := TCnIdeCompInfo(FCompList.Objects[I]);
+    Comp.MatchedIndexes.Clear;
+    if CanDisplayAComp(Comp) then
+      FDisplayList.AddObject(Comp.CompName, Comp);
   end;
   lvComps.Items.Count := FDisplayList.Count;
   lvComps.Invalidate;
@@ -740,8 +752,9 @@ begin
   FTabsDisplayList.Clear;
   for I := 0 to FTabsList.Count - 1 do
   begin
-    if CanDisplayATab(FTabsList[I]) then
-      FTabsDisplayList.Add(FTabsList[I]);
+    TList(FTabsList.Objects[I]).Clear;
+    if CanDisplayATab(FTabsList[I], TList(FTabsList.Objects[I])) then
+      FTabsDisplayList.AddObject(FTabsList[I], FTabsList.Objects[I]);
   end;
   lvTabs.Items.Count := FTabsDisplayList.Count;
   lvTabs.Invalidate;
@@ -753,7 +766,10 @@ begin
   Result := AComp <> nil;
   if Result then
   begin
-    Result := RegExpContainsText(AComp.CompName, Trim(edtSearch.Text), btnMatchStart.Down);
+    if btnMatchFuzzy.Down then
+      Result := FuzzyMatchStr(Trim(edtSearch.Text), AComp.CompName, AComp.MatchedIndexes)
+    else
+      Result := RegExpContainsText(AComp.CompName, Trim(edtSearch.Text), btnMatchStart.Down);
 
     if Result and (FFilterTab <> '') then
       Result := AComp.TabName = FFilterTab;
@@ -768,21 +784,26 @@ begin
   end;
 end;
 
-function TCnCompFilterForm.CanDisplayATab(ATab: string): Boolean;
+function TCnCompFilterForm.CanDisplayATab(ATab: string; MatchedIndexes: TList): Boolean;
 begin
   Result := ATab <> '';
   if Result then
   begin
     Result := edtSearch.Text = '';
+    if Result then
+      Exit;
+
     if btnMatchAny.Down then
     begin
-      if not Result then
-        Result := Pos(UpperCase(Trim(edtSearch.Text)), UpperCase(ATab)) > 0;
+      Result := Pos(UpperCase(Trim(edtSearch.Text)), UpperCase(ATab)) > 0;
+    end
+    else if btnMatchStart.Down then
+    begin
+      Result := Pos(UpperCase(Trim(edtSearch.Text)), UpperCase(ATab)) = 1;
     end
     else
     begin
-      if not Result then
-        Result := Pos(UpperCase(Trim(edtSearch.Text)), UpperCase(ATab)) = 1;
+      Result := FuzzyMatchStr(Trim(edtSearch.Text), ATab, MatchedIndexes);
     end;
   end;
 end;
@@ -1456,14 +1477,22 @@ begin
 end;
 
 procedure TCnCompFilterForm.ClearTabList;
+var
+  I: Integer;
 begin
+  for I := 0 to FTabsList.Count - 1 do
+    if FTabsList.Objects[I] <> nil then
+      FTabsList.Objects[I].Free;
   FTabsList.Clear;
 end;
 
 procedure TCnCompFilterForm.lvTabsData(Sender: TObject; Item: TListItem);
 begin
   if Item.Index < FTabsDisplayList.Count then
+  begin
     Item.Caption := FTabsDisplayList[Item.Index];
+    Item.Data := FTabsDisplayList.Objects[Item.Index];
+  end;
 end;
 
 procedure TCnCompFilterForm.lvTabsCustomDrawItem(Sender: TCustomListView;
@@ -1519,11 +1548,13 @@ var
   Bmp: TBitmap;
   X, Y, ImgIdx: Integer;
   ImgList: TCustomImageList;
+  MatchedIndexes: TList;
 begin
   DefaultDraw := False;
   R := Item.DisplayRect(drSelectBounds);
 
   ImgIdx := 0;
+  MatchedIndexes := nil;
   if Sender = lvComps then // 单独处理组件部分
   begin
     if Item.Data <> nil then
@@ -1532,10 +1563,13 @@ begin
       if TCnIdeCompInfo(Item.Data).ImgIndex = CnImgIndexUnset then
         TCnIdeCompInfo(Item.Data).ImgIndex := AddCompImage(TCnIdeCompInfo(Item.Data).InternalName);
       ImgIdx := TCnIdeCompInfo(Item.Data).ImgIndex;
+      MatchedIndexes := TCnIdeCompInfo(Item.Data).MatchedIndexes;
     end
     else
       ImgIdx := CnImgIndexInvalid;
-  end;
+  end
+  else if Sender = lvTabs then
+    MatchedIndexes := TList(Item.Data);
 
   // 创建临时位图以消除闪烁
   Bmp := TBitmap.Create;
@@ -1562,13 +1596,26 @@ begin
 
     X := ImgList.Width + 2;
     Y := (Bmp.Height - Bmp.Canvas.TextHeight(Item.Caption)) div 2;
-    DrawMatchText(Bmp.Canvas, edtSearch.Text, Item.Caption, X, Y, clRed);
+    DrawMatchText(Bmp.Canvas, edtSearch.Text, Item.Caption, X, Y, clRed, MatchedIndexes);
 
     BitBlt(Sender.Canvas.Handle, R.Left, R.Top, Bmp.Width, Bmp.Height,
       Bmp.Canvas.Handle, 0, 0, SRCCOPY);
   finally
     Bmp.Free;
   end;
+end;
+
+{ TCnIdeCompInfo }
+
+constructor TCnIdeCompInfo.Create;
+begin
+  FMatchedIndexes := TList.Create;
+end;
+
+destructor TCnIdeCompInfo.Destroy;
+begin
+  FMatchedIndexes.Free;
+  inherited;
 end;
 
 initialization

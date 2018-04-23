@@ -1,7 +1,7 @@
 inherited CnCompFilterForm: TCnCompFilterForm
   Left = 525
   Top = 206
-  Width = 218
+  Width = 239
   Height = 364
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSizeToolWin
@@ -18,8 +18,8 @@ inherited CnCompFilterForm: TCnCompFilterForm
   object Panel1: TPanel
     Left = 0
     Top = 0
-    Width = 208
-    Height = 314
+    Width = 229
+    Height = 307
     Align = alClient
     BevelOuter = bvNone
     ParentShowHint = False
@@ -28,7 +28,7 @@ inherited CnCompFilterForm: TCnCompFilterForm
     object pnlHdr: TPanel
       Left = 0
       Top = 0
-      Width = 208
+      Width = 229
       Height = 25
       Align = alTop
       BevelOuter = bvNone
@@ -69,7 +69,7 @@ inherited CnCompFilterForm: TCnCompFilterForm
       object tlb1: TToolBar
         Left = 9
         Top = 0
-        Width = 56
+        Width = 70
         Height = 25
         Align = alNone
         EdgeBorders = []
@@ -95,11 +95,21 @@ inherited CnCompFilterForm: TCnCompFilterForm
           Style = tbsCheck
           OnClick = btnMatchStartClick
         end
+        object btnMatchFuzzy: TToolButton
+          Left = 46
+          Top = 0
+          Hint = 'Fuzzy Match'
+          Caption = 'btnMatchFuzzy'
+          Grouped = True
+          ImageIndex = 94
+          Style = tbsCheck
+          OnClick = btnMatchStartClick
+        end
       end
       object edtSearch: TEdit
-        Left = 58
+        Left = 80
         Top = 1
-        Width = 100
+        Width = 98
         Height = 21
         TabOrder = 1
         OnChange = edtSearchChange
@@ -107,9 +117,9 @@ inherited CnCompFilterForm: TCnCompFilterForm
         OnKeyPress = edtSearchKeyPress
       end
       object ToolBar1: TToolBar
-        Left = 162
+        Left = 180
         Top = 0
-        Width = 57
+        Width = 47
         Height = 25
         Align = alNone
         Caption = 'tlb1'
@@ -221,8 +231,8 @@ inherited CnCompFilterForm: TCnCompFilterForm
   end
   object tbst1: TTabSet
     Left = 0
-    Top = 314
-    Width = 208
+    Top = 307
+    Width = 229
     Height = 21
     Align = alBottom
     Font.Charset = DEFAULT_CHARSET
