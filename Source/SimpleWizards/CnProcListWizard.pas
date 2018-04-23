@@ -211,8 +211,8 @@ type
     FOnItemHint: TCnItemHintEvent;
     FDisplayItems: TStrings;
     FMatchStr: string;
-    FMatchStart: Boolean;
-    FInfoItems: TStrings;
+    FMatchMode: TCnMatchMode;
+    FInfoItems: TStrings; // 存储原始列表内容
     FDisableClickFlag: Boolean;
     procedure CNDrawItem(var Message: TWMDrawItem); message CN_DRAWITEM;
     procedure CNMeasureItem(var Message: TWMMeasureItem); message CN_MEASUREITEM;
@@ -221,7 +221,6 @@ type
     function AdjustHeight(AHeight: Integer): Integer;
     procedure ListDrawItem(Control: TWinControl; Index: Integer;
       Rect: TRect; State: TOwnerDrawState);
-    procedure SetMatchStart(const Value: Boolean);
     procedure SetMatchStr(const Value: string);
   protected
     procedure CreateParams(var Params: TCreateParams); override;
@@ -242,7 +241,7 @@ type
     property DisplayItems: TStrings read FDisplayItems;
     property InfoItems: TStrings read FInfoItems;
     property MatchStr: string read FMatchStr write SetMatchStr;
-    property MatchStart: Boolean read FMatchStart write SetMatchStart;
+    property MatchMode: TCnMatchMode read FMatchMode write FMatchMode;
   end;
 
 //==============================================================================
@@ -295,6 +294,7 @@ type
     FProcCombo: TCnProcListComboBox;
     FToolBtnMatchStart: TCnProcToolButton;
     FToolBtnMatchAny: TCnProcToolButton;
+    FToolBtnMatchFuzzy: TCnProcToolButton;
     FPopupMenu: TPopupMenu;
     FEditControl: TControl;
     FEditorToolBar: TControl;
@@ -317,6 +317,7 @@ type
     property ProcCombo: TCnProcListComboBox read FProcCombo write FProcCombo;
     property ToolBtnMatchStart: TCnProcToolButton read FToolBtnMatchStart write FToolBtnMatchStart;
     property ToolBtnMatchAny: TCnProcToolButton read FToolBtnMatchAny write FToolBtnMatchAny;
+    property ToolBtnMatchFuzzy: TCnProcToolButton read FToolBtnMatchFuzzy write FToolBtnMatchFuzzy;
     property PopupMenu: TPopupMenu read FPopupMenu write FPopupMenu;
   end;
 
@@ -493,6 +494,23 @@ var
 
   FWizard: TCnProcListWizard = nil;
 
+function GetMatchMode(Obj: TCnProcToolBarObj): TCnMatchMode;
+begin
+  Result := mmFuzzy;
+  if Obj <> nil then
+  begin
+    if Obj.ToolBtnMatchFuzzy.Down then
+      Exit
+    else if Obj.ToolBtnMatchAny.Down then
+    begin
+      Result := mmAnywhere;
+      Exit;
+    end
+    else if Obj.ToolBtnMatchStart.Down then
+      Result := mmStart;
+  end;
+end;
+
 { TCnProcListWizard }
 
 procedure TCnProcListWizard.CheckCurrentFile(Sender: TObject);
@@ -640,7 +658,7 @@ begin
     AText := ClassCombo.Text;
     ClassCombo.SetTextWithoutChange('');
     ClassCombo.DropDownList.MatchStr := '';
-    ClassCombo.DropDownList.MatchStart := Obj.ToolBtnMatchStart.Down;
+    ClassCombo.DropDownList.MatchMode := GetMatchMode(Obj);
     ClassCombo.DropDownList.UpdateDisplay;
     if ClassCombo.DropDownList.DisplayItems.Count > 0 then
     begin
@@ -988,10 +1006,22 @@ begin
     ImageIndex := 3;
     Grouped := True;
     Style := tbsCheck;
-    Down := True;
+    Down := False;
     SetToolBar(ToolBar);
   end;
 
+  Obj.ToolBtnMatchFuzzy := TCnProcToolButton.Create(ToolBar);
+  with Obj.ToolBtnMatchFuzzy do
+  begin
+    Left := Obj.ToolBtnMatchAny.Left + Obj.ToolBtnMatchAny.Width + 2;
+    Top := 0;
+    Caption := '';
+    ImageIndex := 4;
+    Grouped := True;
+    Style := tbsCheck;
+    Down := True;
+    SetToolBar(ToolBar);
+  end;
   FProcToolBarObjects.Add(Obj);
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('ProcList: Proc ToolBar Obj Added.');
@@ -1215,6 +1245,7 @@ begin
   
   Obj.ToolBtnMatchStart.Hint := SCnProcListMatchStartHint;
   Obj.ToolBtnMatchAny.Hint := SCnProcListMatchAnyHint;
+  Obj.ToolBtnMatchFuzzy.Hint := SCnProcListMatchFuzzyHint;
 
   Obj.PopupMenu.Items[0].Caption := SCnProcListSortMenuCaption;
 
@@ -1408,7 +1439,7 @@ begin
     AText := ProcCombo.Text;
     ProcCombo.SetTextWithoutChange('');
     ProcCombo.DropDownList.MatchStr := '';
-    ProcCombo.DropDownList.MatchStart := Obj.ToolBtnMatchStart.Down;
+    ProcCombo.DropDownList.MatchMode := GetMatchMode(Obj);
     ProcCombo.DropDownList.UpdateDisplay;
     if ProcCombo.DropDownList.DisplayItems.Count > 0 then
     begin
@@ -4058,10 +4089,7 @@ begin
 
   FDropDownList.MatchStr := Text;
   Obj := FWizard.GetCurrentToolBarObj;
-  if (Obj <> nil) and (Obj.EditorToolBar <> nil) then
-    FDropDownList.MatchStart := Obj.ToolBtnMatchStart.Down
-  else
-    FDropDownList.MatchStart := False;
+  FDropDownList.MatchMode := GetMatchMode(Obj);
 
   FDropDownList.UpdateDisplay;
   if not FDropDownList.Visible then
@@ -4185,11 +4213,25 @@ procedure TCnProcDropDownBox.UpdateDisplay;
 var
   I, HeightCount, AHeight: Integer;
   HeightSet: Boolean;
+  Info: TCnElementInfo;
 begin
   FDisplayItems.Clear;
-  for I := 0 to FInfoItems.Count - 1 do
-    if RegExpContainsText(FRegExpr, FInfoItems[I], FMatchStr, FMatchStart) then
-      FDisplayItems.AddObject(FInfoItems[I], FInfoItems.Objects[I]);
+  if MatchMode in [mmStart, mmAnywhere] then
+  begin
+    for I := 0 to FInfoItems.Count - 1 do
+      if RegExpContainsText(FRegExpr, FInfoItems[I], FMatchStr, MatchMode = mmStart) then
+        FDisplayItems.AddObject(FInfoItems[I], FInfoItems.Objects[I]);
+  end
+  else
+  begin
+    for I := 0 to FInfoItems.Count - 1 do
+    begin
+      Info := TCnElementInfo(FInfoItems.Objects[I]);
+      Info.MatchIndexes.Clear;
+      if (FMatchStr = '') or FuzzyMatchStr(FMatchStr, FInfoItems[I], Info.MatchIndexes) then
+        FDisplayItems.AddObject(FInfoItems[I], Info);
+    end;
+  end;
 
   SetCount(FDisplayItems.Count);
   if FDisplayItems.Count > 12 then
@@ -4234,11 +4276,6 @@ begin
     FDisableClickFlag := True;
     PostMessage(Handle, WM_KEYDOWN, VK_DOWN, 0); // 选中首条
   end;
-end;
-
-procedure TCnProcDropDownBox.SetMatchStart(const Value: Boolean);
-begin
-  FMatchStart := Value;
 end;
 
 procedure TCnProcListComboBox.ShowDropBox;

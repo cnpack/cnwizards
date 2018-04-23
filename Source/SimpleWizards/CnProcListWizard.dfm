@@ -116,14 +116,14 @@ inherited CnProcListForm: TCnProcListForm
       Visible = False
     end
     object btnSep9: TToolButton
-      Left = 355
+      Left = 378
       Top = 0
       Width = 8
       ImageIndex = 31
       Style = tbsSeparator
     end
     object btnShowPreview: TToolButton
-      Left = 363
+      Left = 386
       Top = 0
       Hint = 'Show / Hide Preview'
       ImageIndex = 30
