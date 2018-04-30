@@ -960,6 +960,16 @@ var
   ToSels: TStringList;
   Indexes: TList;
   AMatchMode: TCnMatchMode;
+
+  function ObjectIsBaseElementInfo(Obj: TObject): Boolean;
+  begin
+    try
+      Result := Obj is TCnBaseElementInfo;
+    except
+      Result := False;
+    end;
+  end;
+
 begin
   if DataList.Count = 0 then
     Exit;
@@ -975,7 +985,7 @@ begin
     begin
       Indexes := nil;
       if (AMatchMode = mmFuzzy) and (DataList.Objects[I] <> nil) and
-        (DataList.Objects[I] is TCnBaseElementInfo) then
+        ObjectIsBaseElementInfo(DataList.Objects[I]) then
       begin
         Indexes := TCnBaseElementInfo(DataList.Objects[I]).MatchIndexes;
         if Indexes <> nil then

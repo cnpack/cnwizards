@@ -82,6 +82,7 @@ type
       const S1, S2: string; Obj1, Obj2: TObject): Integer; override;
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer; MatchedIndexes: TList): Boolean; override;
+    procedure DrawListPreParam(Item: TListItem; ListCanvas: TCanvas); override;
   public
     { Public declarations }
     class procedure ParseUnitInclude(const Source: string; UsesList: TStrings);
@@ -107,6 +108,13 @@ const
 
 type
   TControlAccess = class(TControl);
+
+  TCnUsedUnitInfo = class(TCnBaseElementInfo)
+  private
+    FInImpl: Boolean;
+  public
+    property InImpl: Boolean read FInImpl write FInImpl;
+  end;
 
 function ShowProjectListUsed(Ini: TCustomIniFile): Boolean;
 begin
@@ -135,6 +143,8 @@ procedure TCnProjectListUsedForm.CreateList;
 var
   Stream: TMemoryStream;
   TmpName: string;
+  I: Integer;
+  Info: TCnUsedUnitInfo;
 begin
   FCurFile := CnOtaGetCurrentSourceFile;
 
@@ -162,12 +172,31 @@ begin
         FIsPas := True;
         FIsDpr := IsDpr(FCurFile);
         ParseUnitUses(PAnsiChar(Stream.Memory), DataList);
+
+        // ParseUnitUses 解析出的是否在 Implementation 部分的是个 Boolean，转成对象
+        for I := 0 to DataList.Count - 1 do
+        begin
+          Info := TCnUsedUnitInfo.Create;
+          Info.Text := DataList[I];
+
+          if DataList.Objects[I] <> nil then
+            Info.InImpl := True;
+
+          DataList.Objects[I] := Info;
+        end;
       end
       else if IsCppSourceModule(FCurFile) then
       begin
         // 解析 C 的 include
         FIsC := True;
         ParseUnitInclude(PChar(Stream.Memory), DataList);
+        // 同样转成对象
+        for I := 0 to DataList.Count - 1 do
+        begin
+          Info := TCnUsedUnitInfo.Create;
+          Info.Text := DataList[I];
+          DataList.Objects[I] := Info;
+        end;
       end;
     finally
       Stream.Free;
@@ -233,6 +262,7 @@ begin
       else
         Item.SubItems.Add('implementation');
     end;
+    Item.Data := DisplayList.Objects[Item.Index];
     RemoveListViewSubImages(Item);
   end;
 end;
@@ -339,6 +369,12 @@ begin
   else
     Result := 0;
   end;
+end;
+
+procedure TCnProjectListUsedForm.DrawListPreParam(Item: TListItem;
+  ListCanvas: TCanvas);
+begin
+
 end;
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}
