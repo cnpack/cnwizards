@@ -1597,6 +1597,14 @@ var
   SCnCodeFormatterErrPascalErrorInterface: string = 'Interface Error.';
   SCnCodeFormatterErrPascalInvalidStatement: string = 'Invalid Statement.';
 
+  // CnMatchButtonFrame
+  SCnMatchButtonFrameMenuStartCaption: string = 'Match From &Start';
+  SCnMatchButtonFrameMenuStartHint: string = 'Match From Start';
+  SCnMatchButtonFrameMenuAnyCaption: string = 'Match &All Parts';
+  SCnMatchButtonFrameMenuAnyHint: string = 'Match All Parts';
+  SCnMatchButtonFrameMenuFuzzyCaption: string = '&Fuzzy Match';
+  SCnMatchButtonFrameMenuFuzzyHint: string = 'Fuzzy Match';
+
 implementation
 
 end.

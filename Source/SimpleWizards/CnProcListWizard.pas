@@ -1209,6 +1209,14 @@ begin
   Obj.PopupMenu.Items[2].Caption := '-';
   Obj.PopupMenu.Items[3].Caption := SCnEditorEnhanceConfig;
   Obj.PopupMenu.Items[4].Caption := SCnProcListCloseMenuCaption;
+
+  Obj.MatchFrame.mniMatchStart.Caption := SCnMatchButtonFrameMenuStartCaption;
+  Obj.MatchFrame.mniMatchStart.Hint := SCnMatchButtonFrameMenuStartHint;
+  Obj.MatchFrame.mniMatchAny.Caption := SCnMatchButtonFrameMenuAnyCaption;
+  Obj.MatchFrame.mniMatchAny.Hint := SCnMatchButtonFrameMenuAnyHint;
+  Obj.MatchFrame.mniMatchFuzzy.Caption := SCnMatchButtonFrameMenuFuzzyCaption;
+  Obj.MatchFrame.mniMatchFuzzy.Hint := SCnMatchButtonFrameMenuFuzzyHint;
+  Obj.MatchFrame.SyncButtonHint;
   
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('ProcList: Init Proc ToolBar Complete.');

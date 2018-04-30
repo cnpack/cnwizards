@@ -1365,6 +1365,13 @@ begin
   TranslateStr(SCnCodeFormatterErrPascalErrorInterface, 'SCnCodeFormatterErrPascalErrorInterface');
   TranslateStr(SCnCodeFormatterErrPascalInvalidStatement, 'SCnCodeFormatterErrPascalInvalidStatement');
 
+  // CnMatchButtonFrame
+  TranslateStr(SCnMatchButtonFrameMenuStartCaption, 'SCnMatchButtonFrameMenuStartCaption');
+  TranslateStr(SCnMatchButtonFrameMenuStartHint, 'SCnMatchButtonFrameMenuStartHint');
+  TranslateStr(SCnMatchButtonFrameMenuAnyCaption, 'SCnMatchButtonFrameMenuAnyCaption');
+  TranslateStr(SCnMatchButtonFrameMenuAnyHint, 'SCnMatchButtonFrameMenuAnyHint');
+  TranslateStr(SCnMatchButtonFrameMenuFuzzyCaption, 'SCnMatchButtonFrameMenuFuzzyCaption');
+  TranslateStr(SCnMatchButtonFrameMenuFuzzyHint, 'SCnMatchButtonFrameMenuFuzzyHint');
 end;
 
 end.

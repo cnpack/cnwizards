@@ -32,15 +32,15 @@ object CnMatchButtonFrame: TCnMatchButtonFrame
     Left = 40
     Top = 2
     object mniMatchStart: TMenuItem
-      Caption = 'Match &Start'
-      Hint = 'Match Start'
+      Caption = 'Match From &Start'
+      Hint = 'Match From Start'
       ImageIndex = 27
       OnClick = mniMatchClick
     end
     object mniMatchAny: TMenuItem
-      Caption = 'Match &Middle'
+      Caption = 'Match &All Parts'
       Checked = True
-      Hint = 'Match Middle'
+      Hint = 'Match All Parts'
       ImageIndex = 28
       OnClick = mniMatchClick
     end

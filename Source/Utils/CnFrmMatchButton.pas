@@ -59,6 +59,8 @@ type
   protected
     procedure DoModeChange; virtual;
   public
+    procedure SyncButtonHint;
+
     property MatchMode: TCnMatchMode read GetMatchMode write SetMatchMode;
     property OnModeChange: TNotifyEvent read FOnModeChange write FOnModeChange;
   end;
@@ -105,7 +107,7 @@ begin
 
     pmMatchMode.Items.Items[Idx].Checked := True;
     btnMatchMode.ImageIndex := pmMatchMode.Items.Items[Idx].ImageIndex;
-    btnMatchMode.Hint := pmMatchMode.Items.Items[Idx].Hint;
+    SyncButtonHint;
 
     DoModeChange;
   end;
@@ -135,6 +137,15 @@ begin
     Inc(Idx);
 
   MatchMode := TCnMatchMode(Idx);
+end;
+
+procedure TCnMatchButtonFrame.SyncButtonHint;
+var
+  Idx: Integer;
+begin
+  Idx := Ord(MatchMode);
+  if (Idx >= 0) and (Idx < pmMatchMode.Items.Count) then
+    btnMatchMode.Hint := pmMatchMode.Items.Items[Idx].Hint;
 end;
 
 end.

@@ -1440,6 +1440,14 @@ end;
 procedure TCnCompFilterForm.DoLanguageChanged(Sender: TObject);
 begin
   Caption := SCnSearchComponent;
+  MatchButtonFrame.mniMatchStart.Caption := SCnMatchButtonFrameMenuStartCaption;
+  MatchButtonFrame.mniMatchStart.Hint := SCnMatchButtonFrameMenuStartHint;
+  MatchButtonFrame.mniMatchAny.Caption := SCnMatchButtonFrameMenuAnyCaption;
+  MatchButtonFrame.mniMatchAny.Hint := SCnMatchButtonFrameMenuAnyHint;
+  MatchButtonFrame.mniMatchFuzzy.Caption := SCnMatchButtonFrameMenuFuzzyCaption;
+  MatchButtonFrame.mniMatchFuzzy.Hint := SCnMatchButtonFrameMenuFuzzyHint;
+  MatchButtonFrame.SyncButtonHint;
+
   if (tbst1 <> nil) and (tbst1.Tabs.Count > 0) then
     tbst1.TabIndex := 0;
   if FDetailHint <> nil then
