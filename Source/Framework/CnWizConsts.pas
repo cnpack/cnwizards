@@ -1473,8 +1473,6 @@ var
   SCnProcListJumpImplHint: string = 'Jump to Implementation';
   SCnProcListClassComboHint: string = 'Class List';
   SCnProcListProcComboHint: string = 'Procedure/Function List';
-  SCnProcListMatchStartHint: string = 'Match Name Start';
-  SCnProcListMatchAnyHint: string = 'Match All Parts';
   SCnProcListSortMenuCaption: string = '&Sort';
   SCnProcListSortSubMenuByName: string = 'By &Name';
   SCnProcListSortSubMenuByLocation: string = 'By &Location';

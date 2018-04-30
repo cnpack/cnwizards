@@ -1,7 +1,7 @@
 inherited CnCompFilterForm: TCnCompFilterForm
   Left = 525
   Top = 206
-  Width = 239
+  Width = 220
   Height = 364
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSizeToolWin
@@ -18,8 +18,8 @@ inherited CnCompFilterForm: TCnCompFilterForm
   object Panel1: TPanel
     Left = 0
     Top = 0
-    Width = 229
-    Height = 307
+    Width = 210
+    Height = 314
     Align = alClient
     BevelOuter = bvNone
     ParentShowHint = False
@@ -28,7 +28,7 @@ inherited CnCompFilterForm: TCnCompFilterForm
     object pnlHdr: TPanel
       Left = 0
       Top = 0
-      Width = 229
+      Width = 210
       Height = 25
       Align = alTop
       BevelOuter = bvNone
@@ -66,67 +66,27 @@ inherited CnCompFilterForm: TCnCompFilterForm
         OnMouseMove = imgHdrMouseMove
         OnMouseUp = imgHdrMouseUp
       end
-      object tlb1: TToolBar
-        Left = 9
-        Top = 0
-        Width = 70
-        Height = 25
-        Align = alNone
-        EdgeBorders = []
-        Flat = True
-        Images = dmCnSharedImages.Images
-        TabOrder = 0
-        object btnMatchStart: TToolButton
-          Left = 0
-          Top = 0
-          Hint = 'Match Component/Tab Name Start'
-          Grouped = True
-          ImageIndex = 27
-          Style = tbsCheck
-          OnClick = btnMatchStartClick
-        end
-        object btnMatchAny: TToolButton
-          Left = 23
-          Top = 0
-          Hint = 'Match All Parts of Component/Tab Name'
-          Down = True
-          Grouped = True
-          ImageIndex = 28
-          Style = tbsCheck
-          OnClick = btnMatchStartClick
-        end
-        object btnMatchFuzzy: TToolButton
-          Left = 46
-          Top = 0
-          Hint = 'Fuzzy Match'
-          Caption = 'btnMatchFuzzy'
-          Grouped = True
-          ImageIndex = 94
-          Style = tbsCheck
-          OnClick = btnMatchStartClick
-        end
-      end
       object edtSearch: TEdit
-        Left = 80
+        Left = 50
         Top = 1
-        Width = 98
+        Width = 111
         Height = 21
-        TabOrder = 1
+        TabOrder = 0
         OnChange = edtSearchChange
         OnKeyDown = edtSearchKeyDown
         OnKeyPress = edtSearchKeyPress
       end
       object ToolBar1: TToolBar
-        Left = 180
+        Left = 163
         Top = 0
-        Width = 47
+        Width = 49
         Height = 25
         Align = alNone
         Caption = 'tlb1'
         EdgeBorders = []
         Flat = True
         Images = dmCnSharedImages.Images
-        TabOrder = 2
+        TabOrder = 1
         object btnCreateComp: TToolButton
           Left = 0
           Top = 0
@@ -141,6 +101,10 @@ inherited CnCompFilterForm: TCnCompFilterForm
           ImageIndex = 1
           OnClick = btnHelpClick
         end
+      end
+      inline MatchButtonFrame: TCnMatchButtonFrame
+        Left = 8
+        TabOrder = 2
       end
     end
     object pnlComp: TPanel
@@ -231,8 +195,8 @@ inherited CnCompFilterForm: TCnCompFilterForm
   end
   object tbst1: TTabSet
     Left = 0
-    Top = 307
-    Width = 229
+    Top = 314
+    Width = 210
     Height = 21
     Align = alBottom
     Font.Charset = DEFAULT_CHARSET

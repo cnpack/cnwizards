@@ -54,7 +54,8 @@ uses
   LibIntf,
   {$ENDIF}
   CnWizUtils, CnWizMultiLang, CnWizShareImages, CnWizConsts, CnWizIdeUtils,
-  CnWizNotifier, CnCommon, CnPopupMenu, RegExpr, CnStrings;
+  CnWizNotifier, CnCommon, CnPopupMenu, RegExpr, CnStrings,
+  CnFrmMatchButton;
 
 type
   TCnFilterFormStyle = (fsHidden, fsDropped, fsFloat);
@@ -91,9 +92,6 @@ type
   TCnCompFilterForm = class(TCnTranslateForm)
     Panel1: TPanel;
     pnlHdr: TPanel;
-    tlb1: TToolBar;
-    btnMatchStart: TToolButton;
-    btnMatchAny: TToolButton;
     imgHdr: TImage;
     edtSearch: TEdit;
     ToolBar1: TToolBar;
@@ -122,7 +120,7 @@ type
     pnlTab: TPanel;
     lvTabs: TListView;
     ilTabs: TImageList;
-    btnMatchFuzzy: TToolButton;
+    MatchButtonFrame: TCnMatchButtonFrame;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word;
@@ -140,7 +138,7 @@ type
     procedure lvCompsCustomDrawItem(Sender: TCustomListView;
       Item: TListItem; State: TCustomDrawState; var DefaultDraw: Boolean);
     procedure lvCompsKeyPress(Sender: TObject; var Key: Char);
-    procedure btnMatchStartClick(Sender: TObject);
+    procedure btnMatchModeClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure imgHdrMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -232,6 +230,7 @@ type
     procedure SetFilterTab(const Value: string);
     procedure SetShowDetails(const Value: Boolean);
   protected
+    procedure MatchModeChange(Sender: TObject);
     procedure DoStyleChanged; virtual;
     procedure DoSettingChanged; virtual;
     procedure DoLanguageChanged(Sender: TObject); override;
@@ -662,6 +661,7 @@ begin
 
   FRegExpr := TRegExpr.Create;
   FRegExpr.ModifierI := True;
+  MatchButtonFrame.OnModeChange := MatchModeChange;
 
   CnWizNotifierServices.AddFileNotifier(FileNotify);
   CnWizNotifierServices.AddFormEditorNotifier(FormEditorNotify);
@@ -766,10 +766,15 @@ begin
   Result := AComp <> nil;
   if Result then
   begin
-    if btnMatchFuzzy.Down then
-      Result := FuzzyMatchStr(Trim(edtSearch.Text), AComp.CompName, AComp.MatchedIndexes)
+    if MatchButtonFrame.MatchMode = mmFuzzy then
+    begin
+      if Trim(edtSearch.Text) = '' then
+        Result := True
+      else
+        Result := FuzzyMatchStr(Trim(edtSearch.Text), AComp.CompName, AComp.MatchedIndexes);
+    end
     else
-      Result := RegExpContainsText(AComp.CompName, Trim(edtSearch.Text), btnMatchStart.Down);
+      Result := RegExpContainsText(AComp.CompName, Trim(edtSearch.Text), MatchButtonFrame.MatchMode = mmStart);
 
     if Result and (FFilterTab <> '') then
       Result := AComp.TabName = FFilterTab;
@@ -793,17 +798,18 @@ begin
     if Result then
       Exit;
 
-    if btnMatchAny.Down then
-    begin
-      Result := Pos(UpperCase(Trim(edtSearch.Text)), UpperCase(ATab)) > 0;
-    end
-    else if btnMatchStart.Down then
-    begin
-      Result := Pos(UpperCase(Trim(edtSearch.Text)), UpperCase(ATab)) = 1;
-    end
-    else
-    begin
-      Result := FuzzyMatchStr(Trim(edtSearch.Text), ATab, MatchedIndexes);
+    case MatchButtonFrame.MatchMode of
+      mmStart:
+        Result := Pos(UpperCase(Trim(edtSearch.Text)), UpperCase(ATab)) > 0;
+      mmAnywhere:
+        Result := Pos(UpperCase(Trim(edtSearch.Text)), UpperCase(ATab)) = 1;
+      mmFuzzy:
+        begin
+          if Trim(edtSearch.Text) = '' then
+            Result := True
+          else
+            Result := FuzzyMatchStr(Trim(edtSearch.Text), ATab, MatchedIndexes);
+        end;
     end;
   end;
 end;
@@ -1042,7 +1048,7 @@ begin
   end;
 end;
 
-procedure TCnCompFilterForm.btnMatchStartClick(Sender: TObject);
+procedure TCnCompFilterForm.btnMatchModeClick(Sender: TObject);
 begin
   UpdateToDisplayList;
   lvComps.Items.Count := FDisplayList.Count;
@@ -1616,6 +1622,15 @@ destructor TCnIdeCompInfo.Destroy;
 begin
   FMatchedIndexes.Free;
   inherited;
+end;
+
+procedure TCnCompFilterForm.MatchModeChange(Sender: TObject);
+begin
+  UpdateToDisplayList;
+  lvComps.Items.Count := FDisplayList.Count;
+  lvComps.Invalidate;
+  lvTabs.Items.Count := FTabsDisplayList.Count;
+  lvTabs.Invalidate;
 end;
 
 initialization

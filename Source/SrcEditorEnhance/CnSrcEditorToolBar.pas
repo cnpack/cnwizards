@@ -189,7 +189,8 @@ type
       CreateEvent: TCnEditorToolBarEvent;
       InitEvent: TCnEditorToolBarEvent;
       RemoveEvent: TCnEditorToolBarEvent);
-    {* 允许外部模块注册一工具栏类型并提供回调函数供创建、初始化与删除}
+    {* 允许外部模块注册一工具栏类型并提供回调函数供创建、
+       初始化（包括多语切换时，因此可能重复调用）与删除}
     procedure RemoveToolBarType(const ToolBarType: string);
     {* 移除工具栏类型注册}
     procedure SetVisible(const ToolBarType: string; Visible: Boolean);

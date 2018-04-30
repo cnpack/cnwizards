@@ -1243,8 +1243,6 @@ begin
   TranslateStr(SCnProcListJumpImplHint, 'SCnProcListJumpImplHint');
   TranslateStr(SCnProcListClassComboHint, 'SCnProcListClassComboHint');
   TranslateStr(SCnProcListProcComboHint, 'SCnProcListProcComboHint');
-  TranslateStr(SCnProcListMatchStartHint, 'SCnProcListMatchStartHint');
-  TranslateStr(SCnProcListMatchAnyHint, 'SCnProcListMatchAnyHint');
 
   TranslateStr(SCnProcListSortMenuCaption, 'SCnProcListSortMenuCaption');
   TranslateStr(SCnProcListSortSubMenuByName, 'SCnProcListSortSubMenuByName');

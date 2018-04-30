@@ -70,7 +70,7 @@ uses
   CnProjectViewBaseFrm, CnWizClasses, CnWizManager, CnIni, CnWizEditFiler, mPasLex,
   mwBCBTokenList, Contnrs, Clipbrd, CnEditControlWrapper, CnPasCodeParser, CnWizUtils,
   {$IFDEF USE_CUSTOMIZED_SPLITTER} CnSplitter, {$ENDIF} CnWidePasParser, CnWideCppParser,
-  CnPopupMenu, CnWizIdeUtils, CnCppCodeParser, CnStrings, CnEdit, RegExpr;
+  CnPopupMenu, CnWizIdeUtils, CnCppCodeParser, CnStrings, CnEdit, RegExpr, CnFrmMatchButton;
 
 type
   TCnSourceLanguageType = (ltUnknown, ltPas, ltCpp);
@@ -292,14 +292,15 @@ type
     FToolBtnJumpImpl: TCnProcToolButton;
     FClassCombo: TCnProcListComboBox;
     FProcCombo: TCnProcListComboBox;
-    FToolBtnMatchStart: TCnProcToolButton;
-    FToolBtnMatchAny: TCnProcToolButton;
-    FToolBtnMatchFuzzy: TCnProcToolButton;
     FPopupMenu: TPopupMenu;
     FEditControl: TControl;
     FEditorToolBar: TControl;
     FSplitter1: TCnCustomizedSplitter;
     FSplitter2: TCnCustomizedSplitter;
+    FMatchFrame: TCnMatchButtonFrame;
+  protected
+    procedure MatchChange(Sender: TObject);
+    procedure CloseUpList;
   public
     property EditControl: TControl read FEditControl write FEditControl;
     property EditorToolBar: TControl read FEditorToolBar write FEditorToolBar;
@@ -315,9 +316,7 @@ type
     property Splitter1: TCnCustomizedSplitter read FSplitter1 write FSplitter1;
     property Splitter2: TCnCustomizedSplitter read FSplitter2 write FSplitter2;
     property ProcCombo: TCnProcListComboBox read FProcCombo write FProcCombo;
-    property ToolBtnMatchStart: TCnProcToolButton read FToolBtnMatchStart write FToolBtnMatchStart;
-    property ToolBtnMatchAny: TCnProcToolButton read FToolBtnMatchAny write FToolBtnMatchAny;
-    property ToolBtnMatchFuzzy: TCnProcToolButton read FToolBtnMatchFuzzy write FToolBtnMatchFuzzy;
+    property MatchFrame: TCnMatchButtonFrame read FMatchFrame write FMatchFrame;
     property PopupMenu: TPopupMenu read FPopupMenu write FPopupMenu;
   end;
 
@@ -487,8 +486,6 @@ var
   FIntfLine: Integer = 0;
   FImplLine: Integer = 0;
 
-  //ProcListForm: TCnProcListForm = nil;
-
   GListSortIndex: Integer = 0;
   GListSortReverse: Boolean = False;
 
@@ -496,19 +493,10 @@ var
 
 function GetMatchMode(Obj: TCnProcToolBarObj): TCnMatchMode;
 begin
-  Result := mmFuzzy;
   if Obj <> nil then
-  begin
-    if Obj.ToolBtnMatchFuzzy.Down then
-      Exit
-    else if Obj.ToolBtnMatchAny.Down then
-    begin
-      Result := mmAnywhere;
-      Exit;
-    end
-    else if Obj.ToolBtnMatchStart.Down then
-      Result := mmStart;
-  end;
+    Result := Obj.MatchFrame.MatchMode
+  else
+    Result := mmFuzzy;
 end;
 
 { TCnProcListWizard }
@@ -985,43 +973,15 @@ begin
   end;
   Obj.InternalToolBar1.Visible := Obj.ToolBtnSep1.Visible;
 
-  Obj.ToolBtnMatchStart := TCnProcToolButton.Create(ToolBar);
-  with Obj.ToolBtnMatchStart do
+  Obj.MatchFrame := TCnMatchButtonFrame.Create(ToolBar);
+  with Obj.MatchFrame do
   begin
+    Parent := ToolBar;
+    Top := 0;
     Left := Obj.ProcCombo.Left + Obj.ProcCombo.Width + Obj.FSplitter1.Width + 2;
-    Top := 0;
-    Caption := '';
-    ImageIndex := 2;
-    Grouped := True;
-    Style := tbsCheck;
-    SetToolBar(ToolBar);
+    OnModeChange := Obj.MatchChange;
   end;
 
-  Obj.ToolBtnMatchAny := TCnProcToolButton.Create(ToolBar);
-  with Obj.ToolBtnMatchAny do
-  begin
-    Left := Obj.ToolBtnMatchStart.Left + Obj.ToolBtnMatchStart.Width + 2;
-    Top := 0;
-    Caption := '';
-    ImageIndex := 3;
-    Grouped := True;
-    Style := tbsCheck;
-    Down := False;
-    SetToolBar(ToolBar);
-  end;
-
-  Obj.ToolBtnMatchFuzzy := TCnProcToolButton.Create(ToolBar);
-  with Obj.ToolBtnMatchFuzzy do
-  begin
-    Left := Obj.ToolBtnMatchAny.Left + Obj.ToolBtnMatchAny.Width + 2;
-    Top := 0;
-    Caption := '';
-    ImageIndex := 4;
-    Grouped := True;
-    Style := tbsCheck;
-    Down := True;
-    SetToolBar(ToolBar);
-  end;
   FProcToolBarObjects.Add(Obj);
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('ProcList: Proc ToolBar Obj Added.');
@@ -1085,12 +1045,7 @@ begin
     begin
       Obj := GetCurrentToolBarObj;
       if Obj <> nil then
-      begin
-        if Obj.ProcCombo <> nil then
-          Obj.ProcCombo.DropDownList.CloseUp;
-        if Obj.ClassCombo <> nil then
-          Obj.ClassCombo.DropDownList.CloseUp;
-      end;
+        Obj.CloseUpList;
     end;    
   end;  
 end;
@@ -1243,10 +1198,6 @@ begin
   Obj.ClassCombo.Hint := SCnProcListClassComboHint;
   Obj.ProcCombo.Hint := SCnProcListProcComboHint;
   
-  Obj.ToolBtnMatchStart.Hint := SCnProcListMatchStartHint;
-  Obj.ToolBtnMatchAny.Hint := SCnProcListMatchAnyHint;
-  Obj.ToolBtnMatchFuzzy.Hint := SCnProcListMatchFuzzyHint;
-
   Obj.PopupMenu.Items[0].Caption := SCnProcListSortMenuCaption;
 
     Obj.PopupMenu.Items[0].Items[0].Caption := SCnProcListSortSubMenuByName;
@@ -3708,10 +3659,8 @@ procedure TCnProcDropDownBox.ListDrawItem(Control: TWinControl;
   Index: Integer; Rect: TRect; State: TOwnerDrawState);
 var
   AText: string;
-  Idx, X: Integer;
-  S: string;
-  SaveColor: TColor;
   Info: TCnElementInfo;
+  MatchedIndexesRef: TList;
 
   function GetListImageIndex(Info: TCnElementInfo): Integer;
   begin
@@ -3728,6 +3677,7 @@ var
       Result := 20;
     end;
   end;
+
 begin
   if Index >= FDisplayItems.Count then
     Exit;
@@ -3755,33 +3705,16 @@ begin
     Canvas.Font.Style := [fsBold];
 
     AText := FDisplayItems[Index];
-    if MatchStr <> '' then
+    MatchedIndexesRef := nil;
+    if FDisplayItems.Objects[Index] <> nil then
     begin
-      // 高亮显示匹配的内容
-      Idx := Pos(UpperCase(MatchStr), UpperCase(AText));
-      if Idx > 0 then
-      begin
-        SaveColor := Canvas.Font.Color;
-        X := Rect.Left + 22;
-        if Idx > 1 then
-        begin
-          S := Copy(AText, 1, Idx - 1);
-          Canvas.TextOut(X, Rect.Top, S);
-          Inc(X, Canvas.TextWidth(S));
-        end;
-        Canvas.Font.Color := clRed;
-        S := Copy(AText, Idx, Length(MatchStr));
-        Canvas.TextOut(X, Rect.Top, S);
-        Inc(X, Canvas.TextWidth(S));
-        Canvas.Font.Color := SaveColor;
-        S := Copy(AText, Idx + Length(MatchStr), MaxInt);
-        Canvas.TextOut(X, Rect.Top, S);
-      end
-      else
-        Canvas.TextOut(Rect.Left + 22, Rect.Top, AText);
-    end
-    else
-      Canvas.TextOut(Rect.Left + 22, Rect.Top, AText);
+      Info := TCnElementInfo(FDisplayItems.Objects[Index]);
+      if (Info.MatchIndexes <> nil) and (Info.MatchIndexes.Count > 0) then
+        MatchedIndexesRef := Info.MatchIndexes;
+    end;
+
+    DrawMatchText(Canvas, MatchStr, FDisplayItems[Index], Rect.Left + 22, Rect.Top,
+      clRed, MatchedIndexesRef);
   end;
 end;
 
@@ -4343,6 +4276,25 @@ begin
   end;
 {$ENDIF}
   FDisableChange := False;
+end;
+
+{ TCnProcToolBarObj }
+
+procedure TCnProcToolBarObj.CloseUpList;
+begin
+  if FProcCombo <> nil then
+    FProcCombo.DropDownList.CloseUp;
+  if FClassCombo <> nil then
+    FClassCombo.DropDownList.CloseUp;
+end;
+
+procedure TCnProcToolBarObj.MatchChange(Sender: TObject);
+begin
+  CloseUpList;
+  if FProcCombo <> nil then
+    FProcCombo.Text := '';
+  if FClassCombo <> nil then
+    FClassCombo.Text := '';
 end;
 
 initialization
