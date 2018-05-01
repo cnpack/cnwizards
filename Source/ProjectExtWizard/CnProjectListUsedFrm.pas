@@ -245,6 +245,8 @@ end;
 
 procedure TCnProjectListUsedForm.lvListData(Sender: TObject;
   Item: TListItem);
+var
+  Info: TCnUsedUnitInfo;
 begin
   if (DisplayList <> nil) and (Item.Index >= 0) and
     (Item.Index < DisplayList.Count) then
@@ -257,7 +259,8 @@ begin
       Item.SubItems.Add('include')
     else
     begin
-      if DisplayList.Objects[Item.Index] = nil then
+      Info := TCnUsedUnitInfo(DisplayList.Objects[Item.Index]);
+      if (Info = nil) or not Info.InImpl then
         Item.SubItems.Add('interface')
       else
         Item.SubItems.Add('implementation');
