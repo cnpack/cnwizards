@@ -182,6 +182,9 @@ inherited CnListCompForm: TCnListCompForm
     inherited btnMatchAny: TToolButton
       Hint = 'Match All Parts'
     end
+    inherited btnMatchFuzzy: TToolButton
+      Hint = 'Fuzzy Match'
+    end
     inherited btnHookIDE: TToolButton
       Hint = 'Run Component Selector'
     end
