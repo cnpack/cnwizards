@@ -120,7 +120,6 @@ begin
   if Sender is TMenuItem then
   begin
     Idx := (Sender as TMenuItem).MenuIndex;
-    CnDebugger.LogInteger(Idx);
     if TCnMatchMode(Idx) in [Low(TCnMatchMode)..High(TCnMatchMode)] then
       MatchMode := TCnMatchMode(Idx);
   end;
