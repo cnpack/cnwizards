@@ -294,7 +294,7 @@ class procedure TCnProjectListUsedForm.ParseUnitInclude(
 const
   SCnInclude = '#include';
 var
-  I, Len: Integer;
+  I, J, QS, QE, BS, BE, Len: Integer;
 begin
   Len := Length(SCnInclude);
   if (UsesList <> nil) and (Source <> '') then
@@ -305,9 +305,28 @@ begin
       if AnsiStartsText(SCnInclude, Trim(UsesList[I])) then
       begin
         UsesList[I] := Trim(Copy(Trim(UsesList[I]), Len + 1, MaxInt));
-        UsesList[I] := StringReplace(UsesList[I], '"', '', [rfReplaceAll, rfIgnoreCase]);
-        UsesList[I] := StringReplace(UsesList[I], '<', '', [rfReplaceAll, rfIgnoreCase]);
-        UsesList[I] := StringReplace(UsesList[I], '>', '', [rfReplaceAll, rfIgnoreCase]);
+        QS := 0; QE := 0; BS := 0; BE := 0;
+        for J := 1 to Length(UsesList[I]) do
+        begin
+          case UsesList[I][J] of
+          '"':
+            begin
+              if QS = 0 then
+                QS := J
+              else
+                QE := J;
+            end;
+          '<':
+            BS := J;
+          '>':
+            BE := J;
+          end;
+        end;
+
+        if (BE > 0) and (BS > 0) and (BE > BS) then
+          UsesList[I] := Copy(UsesList[I], BS + 1, BE - BS - 1)
+        else if (QE > 0) and (QS > 0) and (QE > QS) then
+          UsesList[I] := Copy(UsesList[I], QS + 1, QE - QS - 1);
 
         if Length(UsesList[I]) = 0 then
           UsesList.Delete(I);

@@ -626,16 +626,17 @@ begin
     IsSingleLine := List.Count = 1;
     if List.Count > 1 then
     begin
-      // 找出第一非空行作为首行并计算其头部空格数
-      if FirstLine = '' then
-      begin
-        FirstLine := List[I];
-        if FirstLine <> '' then
-          FirstLineSpaceCount := GetHeadSpaceCount(FirstLine);
-      end;
 
       for I := 1 to List.Count - 1 do
       begin
+        // 找出第一非空行作为首行并计算其头部空格数
+        if FirstLine = '' then
+        begin
+          FirstLine := List[I];
+          if FirstLine <> '' then
+            FirstLineSpaceCount := GetHeadSpaceCount(FirstLine);
+        end;
+
         if Trim(List[I]) = '' then // 空行不参与行首空格计算
           Continue;
 
