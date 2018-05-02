@@ -120,7 +120,6 @@ type
     pnlTab: TPanel;
     lvTabs: TListView;
     ilTabs: TImageList;
-    MatchButtonFrame: TCnMatchButtonFrame;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word;
@@ -205,6 +204,7 @@ type
     FDetailHint: THintWindow;
     FPackageChanged: Boolean;
     FRegExpr: TRegExpr;
+    FMatchButtonFrame: TCnMatchButtonFrame;
 
     procedure SetFilterFormStyle(const Value: TCnFilterFormStyle);
     procedure FileNotify(NotifyCode: TOTAFileNotification; const FileName: string);
@@ -230,6 +230,7 @@ type
     procedure SetFilterTab(const Value: string);
     procedure SetShowDetails(const Value: Boolean);
   protected
+    procedure InitButtonFrame;
     procedure MatchModeChange(Sender: TObject);
     procedure DoStyleChanged; virtual;
     procedure DoSettingChanged; virtual;
@@ -661,7 +662,11 @@ begin
 
   FRegExpr := TRegExpr.Create;
   FRegExpr.ModifierI := True;
-  MatchButtonFrame.OnModeChange := MatchModeChange;
+  FMatchButtonFrame := TCnMatchButtonFrame.Create(Self);
+  FMatchButtonFrame.Parent := pnlHdr;
+  FMatchButtonFrame.Left := 8;
+  InitButtonFrame;
+  FMatchButtonFrame.OnModeChange := MatchModeChange;
 
   CnWizNotifierServices.AddFileNotifier(FileNotify);
   CnWizNotifierServices.AddFormEditorNotifier(FormEditorNotify);
@@ -766,7 +771,7 @@ begin
   Result := AComp <> nil;
   if Result then
   begin
-    if MatchButtonFrame.MatchMode = mmFuzzy then
+    if FMatchButtonFrame.MatchMode = mmFuzzy then
     begin
       if Trim(edtSearch.Text) = '' then
         Result := True
@@ -774,7 +779,7 @@ begin
         Result := FuzzyMatchStr(Trim(edtSearch.Text), AComp.CompName, AComp.MatchedIndexes);
     end
     else
-      Result := RegExpContainsText(AComp.CompName, Trim(edtSearch.Text), MatchButtonFrame.MatchMode = mmStart);
+      Result := RegExpContainsText(AComp.CompName, Trim(edtSearch.Text), FMatchButtonFrame.MatchMode = mmStart);
 
     if Result and (FFilterTab <> '') then
       Result := AComp.TabName = FFilterTab;
@@ -798,7 +803,7 @@ begin
     if Result then
       Exit;
 
-    case MatchButtonFrame.MatchMode of
+    case FMatchButtonFrame.MatchMode of
       mmStart:
         Result := Pos(UpperCase(Trim(edtSearch.Text)), UpperCase(ATab)) > 0;
       mmAnywhere:
@@ -1440,13 +1445,7 @@ end;
 procedure TCnCompFilterForm.DoLanguageChanged(Sender: TObject);
 begin
   Caption := SCnSearchComponent;
-  MatchButtonFrame.mniMatchStart.Caption := SCnMatchButtonFrameMenuStartCaption;
-  MatchButtonFrame.mniMatchStart.Hint := SCnMatchButtonFrameMenuStartHint;
-  MatchButtonFrame.mniMatchAny.Caption := SCnMatchButtonFrameMenuAnyCaption;
-  MatchButtonFrame.mniMatchAny.Hint := SCnMatchButtonFrameMenuAnyHint;
-  MatchButtonFrame.mniMatchFuzzy.Caption := SCnMatchButtonFrameMenuFuzzyCaption;
-  MatchButtonFrame.mniMatchFuzzy.Hint := SCnMatchButtonFrameMenuFuzzyHint;
-  MatchButtonFrame.SyncButtonHint;
+  InitButtonFrame;
 
   if (tbst1 <> nil) and (tbst1.Tabs.Count > 0) then
     tbst1.TabIndex := 0;
@@ -1639,6 +1638,20 @@ begin
   lvComps.Invalidate;
   lvTabs.Items.Count := FTabsDisplayList.Count;
   lvTabs.Invalidate;
+end;
+
+procedure TCnCompFilterForm.InitButtonFrame;
+begin
+  if FMatchButtonFrame <> nil then
+  begin
+    FMatchButtonFrame.mniMatchStart.Caption := SCnMatchButtonFrameMenuStartCaption;
+    FMatchButtonFrame.mniMatchStart.Hint := SCnMatchButtonFrameMenuStartHint;
+    FMatchButtonFrame.mniMatchAny.Caption := SCnMatchButtonFrameMenuAnyCaption;
+    FMatchButtonFrame.mniMatchAny.Hint := SCnMatchButtonFrameMenuAnyHint;
+    FMatchButtonFrame.mniMatchFuzzy.Caption := SCnMatchButtonFrameMenuFuzzyCaption;
+    FMatchButtonFrame.mniMatchFuzzy.Hint := SCnMatchButtonFrameMenuFuzzyHint;
+    FMatchButtonFrame.SyncButtonHint;
+  end;
 end;
 
 initialization

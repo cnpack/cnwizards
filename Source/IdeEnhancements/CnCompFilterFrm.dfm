@@ -102,10 +102,6 @@ inherited CnCompFilterForm: TCnCompFilterForm
           OnClick = btnHelpClick
         end
       end
-      inline MatchButtonFrame: TCnMatchButtonFrame
-        Left = 8
-        TabOrder = 2
-      end
     end
     object pnlComp: TPanel
       Left = 0
