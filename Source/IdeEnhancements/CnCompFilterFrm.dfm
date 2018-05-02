@@ -1005,4 +1005,11 @@ inherited CnCompFilterForm: TCnCompFilterForm
       FFFFFFC000000000000000000000000000000000000000000000000000000000
       000000000000}
   end
+  object tmrShowHint: TTimer
+    Enabled = False
+    Interval = 200
+    OnTimer = tmrShowHintTimer
+    Left = 168
+    Top = 56
+  end
 end

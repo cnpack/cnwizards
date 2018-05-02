@@ -120,6 +120,7 @@ type
     pnlTab: TPanel;
     lvTabs: TListView;
     ilTabs: TImageList;
+    tmrShowHint: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word;
@@ -166,6 +167,7 @@ type
     procedure lvTabsDblClick(Sender: TObject);
     procedure lvCompsKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
+    procedure tmrShowHintTimer(Sender: TObject);
   private
     FFilterFormStyle: TCnFilterFormStyle;
     FCaptionHeight: Integer;
@@ -223,6 +225,7 @@ type
       TComponent; const OldName, NewName: string);
     procedure CheckEnvAndUpdateCompList;
     procedure DoUpdateCompList(Sender: TObject);
+    procedure SelectItemByIndex(ListView: TListView; AIndex: Integer);
 
     procedure SetShowPrefix(const Value: Boolean);
     procedure SetUseSmallImg(const Value: Boolean);
@@ -820,12 +823,47 @@ begin
 end;
 
 procedure TCnCompFilterForm.edtSearchChange(Sender: TObject);
+var
+  OldComp: string;
 begin
+  OldComp := '';
+  if lvComps.Selected <> nil then
+    OldComp := lvComps.Selected.Caption;
+
   UpdateToDisplayList;
   lvComps.Items.Count := FDisplayList.Count;
   lvComps.Invalidate;
   lvTabs.Items.Count := FTabsDisplayList.Count;
   lvTabs.Invalidate;
+
+  if tbst1.TabIndex = 0 then
+  begin
+    if lvComps.Selected = nil then
+    begin
+      DeactivateDetailHint;
+      SelectItemByIndex(lvComps, 0);
+    end
+    else if lvComps.Selected.Caption <> OldComp then
+    begin
+      DeactivateDetailHint;
+      lvCompsChange(lvComps, lvComps.Selected, ctState) // 选择位置没变但对应 Item 变了，手工触发 Hint
+    end
+    else  // 选择点没变
+    begin
+      if tmrHint.Enabled then  // 如已经显示则延长 Hint 显示的时间
+      begin
+        tmrHint.Enabled := False;
+        tmrHint.Enabled := True;
+      end
+      else  // 否则显示 Hint
+      begin
+        tmrShowHint.Enabled := False;
+        tmrShowHint.Enabled := True;
+      end;
+    end;
+  end
+  else if (tbst1.TabIndex = 1) and (lvTabs.Selected = nil) then
+    SelectItemByIndex(lvTabs, 0);
 end;
 
 procedure TCnCompFilterForm.lvCompsData(Sender: TObject; Item: TListItem);
@@ -858,6 +896,8 @@ begin
         and (edtSearch.SelStart = Length(edtSearch.Text)) then
       begin
         tbst1.TabIndex := 1;
+        if lvTabs.Selected = nil then
+          SelectItemByIndex(lvTabs, 0);
       end;
     end
     else
@@ -866,6 +906,8 @@ begin
         and (edtSearch.SelStart = 0) then
       begin
         tbst1.TabIndex := 0;
+        if lvComps.Selected = nil then
+          SelectItemByIndex(lvComps, 0);
       end;
     end;
   end;
@@ -1190,7 +1232,10 @@ begin
       FDetailStr := FDetailStr + FClassNameList.Text;
 
       if FShowDetails then
-        ActivateDetailHint;
+      begin
+        tmrShowHint.Enabled := False;
+        tmrShowHint.Enabled := True;
+      end;
 
       CnPaletteWrapper.SelectComponent(Info.InternalName, Info.TabName);
     end;
@@ -1430,6 +1475,7 @@ procedure TCnCompFilterForm.DeactivateDetailHint;
 begin
   if FDetailHint <> nil then
     FDetailHint.ReleaseHandle;
+  tmrHint.Enabled := False;
 end;
 
 procedure TCnCompFilterForm.tmrLoadTimer(Sender: TObject);
@@ -1652,6 +1698,23 @@ begin
     FMatchButtonFrame.mniMatchFuzzy.Hint := SCnMatchButtonFrameMenuFuzzyHint;
     FMatchButtonFrame.SyncButtonHint;
   end;
+end;
+
+procedure TCnCompFilterForm.SelectItemByIndex(ListView: TListView;
+  AIndex: Integer);
+begin
+  if (AIndex >= 0) and (AIndex < ListView.Items.Count) then
+  begin
+    ListView.Selected := nil;
+    ListView.Selected := ListView.Items[AIndex];
+    ListView.ItemFocused := ListView.Selected;
+  end;
+end;
+
+procedure TCnCompFilterForm.tmrShowHintTimer(Sender: TObject);
+begin
+  tmrShowHint.Enabled := False;
+  ActivateDetailHint;
 end;
 
 initialization
