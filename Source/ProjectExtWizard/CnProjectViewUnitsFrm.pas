@@ -122,7 +122,7 @@ type
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer; MatchedIndexes: TList): Boolean; override;
     function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
-      const S1, S2: string; Obj1, Obj2: TObject): Integer; override;
+      const S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer; override;
   public
     { Public declarations }
   end;
@@ -179,7 +179,7 @@ end;
 { TCnProjectViewUnitsForm }
 
 function TCnProjectViewUnitsForm.SortItemCompare(ASortIndex: Integer;
-  const AMatchStr, S1, S2: string; Obj1, Obj2: TObject): Integer;
+  const AMatchStr, S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer;
 var
   Info1, Info2: TCnUnitInfo;
 begin
@@ -189,21 +189,25 @@ begin
   case ASortIndex of // 因为搜索时只有名称一列参与匹配，因此排序时要考虑到把名称匹配时的全匹配提前
     0:
       begin
-        Result := CompareTextPos(AMatchStr, Info1.Text, Info2.Text);
-        if Result = 0 then
-          Result := CompareText(Info1.Text, Info2.Text);
+        Result := CompareTextWithPos(AMatchStr, Info1.Text, Info2.Text, SortDown);
       end;
     1:
       begin
         Result := CompareText(SUnitTypes[Info1.UnitType], SUnitTypes[Info2.UnitType]);
+        if SortDown then
+          Result := -Result;
       end;
     2:
       begin
         Result := CompareText(Info1.Project, Info2.Project);
+        if SortDown then
+          Result := -Result;
       end;
     3, 4:
       begin
         Result := CompareValue(Info1.Size, Info2.Size);
+        if SortDown then
+          Result := -Result;
       end;
   else
     Result := 0;

@@ -73,10 +73,13 @@ type
     FText: string;
     FMatchIndexes: TList;
     FParentProject: TCnProjectInfo;
+    FFuzzyScore: Integer;
   public
     constructor Create; virtual;
     destructor Destroy; override;
 
+    property FuzzyScore: Integer read FFuzzyScore write FFuzzyScore;
+    {* 模糊匹配的匹配度，暂未使用}
     property MatchIndexes: TList read FMatchIndexes;
     {* 模糊匹配 Text 的下标}
     property ParentProject: TCnProjectInfo read FParentProject write FParentProject;
@@ -214,7 +217,7 @@ type
       DataListIndex: Integer): Boolean; virtual;
     // 排序比较器，子类重载以实现根据 Object 比较的功能
     function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
-      const S1, S2: string; Obj1, Obj2: TObject): Integer; virtual;
+      const S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer; virtual;
 
     // 默认匹配的实现，只匹配 DataList 中的字符串，不处理其 Object 所代表的内容
     function DefaultMatchHandler(const AMatchStr: string; AMatchMode: TCnMatchMode;
@@ -285,7 +288,7 @@ const
 
 type
   TSortCompareEvent = function(ASortIndex: Integer; const AMatchStr: string;
-    const S1, S2: string; Obj1, Obj2: TObject): Integer of object;
+    const S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer of object;
 
 var
   GlobalSortIndex: Integer;
@@ -303,9 +306,7 @@ begin
   if Assigned(GlobalSortCompareEvent) then
   begin
     Result := GlobalSortCompareEvent(GlobalSortIndex, GlobalSortMatchStr,
-      List[Index1], List[Index2], Obj1, Obj2);
-    if GlobalSortDown then
-      Result := -Result;
+      List[Index1], List[Index2], Obj1, Obj2, GlobalSortDown);
   end
   else
     Result := AnsiCompareStr(List[Index1], List[Index2]);
@@ -987,6 +988,7 @@ begin
       if (AMatchMode = mmFuzzy) and (DataList.Objects[I] <> nil) and
         ObjectIsBaseElementInfo(DataList.Objects[I]) then
       begin
+        TCnBaseElementInfo(DataList.Objects[I]).FuzzyScore := 0;
         Indexes := TCnBaseElementInfo(DataList.Objects[I]).MatchIndexes;
         if Indexes <> nil then
           Indexes.Clear;
@@ -1067,9 +1069,9 @@ end;
 
 function TCnProjectViewBaseForm.SortItemCompare(ASortIndex: Integer;
   const AMatchStr: string; const S1, S2: string;
-  Obj1, Obj2: TObject): Integer;
+  Obj1, Obj2: TObject; SortDown: Boolean): Integer;
 begin
-  Result := CompareStr(S1, S2);
+  Result := CompareTextWithPos(AMatchStr, S1, S2, SortDown);
 end;
 
 procedure TCnProjectViewBaseForm.PrepareSearchRange;

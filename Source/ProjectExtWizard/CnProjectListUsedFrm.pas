@@ -79,7 +79,7 @@ type
     procedure DoLanguageChanged(Sender: TObject); override;
 
     function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
-      const S1, S2: string; Obj1, Obj2: TObject): Integer; override;
+      const S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer; override;
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer; MatchedIndexes: TList): Boolean; override;
     procedure DrawListPreParam(Item: TListItem; ListCanvas: TCanvas); override;
@@ -375,18 +375,18 @@ begin
 end;
 
 function TCnProjectListUsedForm.SortItemCompare(ASortIndex: Integer;
-  const AMatchStr, S1, S2: string; Obj1, Obj2: TObject): Integer;
+  const AMatchStr, S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer;
 begin
   case ASortIndex of // 因为搜索时名称参与匹配，因此排序时也要考虑到把名称的全匹配提前
     0:
       begin
-        Result := CompareTextPos(AMatchStr, S1, S2);
-        if Result = 0 then
-          Result := CompareText(S1, S2);
+        Result := CompareTextWithPos(AMatchStr, S1, S2, SortDown);
       end;
     1:
       begin
         Result := Integer(Obj1) - Integer(Obj2);
+        if SortDown then
+          Result := -Result;
       end;
   else
     Result := 0;

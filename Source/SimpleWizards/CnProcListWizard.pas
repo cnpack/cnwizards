@@ -178,7 +178,7 @@ type
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer; MatchedIndexes: TList): Boolean; override;
     function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
-      const S1, S2: string; Obj1, Obj2: TObject): Integer; override;
+      const S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer; override;
   public
     { Public declarations }
     procedure LoadSettings(Ini: TCustomIniFile; aSection: string); override;
@@ -3418,7 +3418,7 @@ begin
 end;
 
 function TCnProcListForm.SortItemCompare(ASortIndex: Integer;
-  const AMatchStr, S1, S2: string; Obj1, Obj2: TObject): Integer;
+  const AMatchStr, S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer;
 var
   Info1, Info2: TCnElementInfo;
 begin
@@ -3428,9 +3428,7 @@ begin
   case ASortIndex of
   0:
     begin
-      Result := CompareTextPos(AMatchStr, Info1.Text, Info2.Text);
-      if Result = 0 then
-        Result := CompareText(Info1.Text, Info2.Text);
+      Result := CompareTextWithPos(AMatchStr, Info1.Text, Info2.Text, SortDown);
     end;
   1:
     begin
@@ -3447,6 +3445,9 @@ begin
   else
     Result := 0;
   end;
+
+  if SortDown and (ASortIndex in [1..3]) then
+    Result := -Result;
 end;
 
 { TCnProcListWizard }

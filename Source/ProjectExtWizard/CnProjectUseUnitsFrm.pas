@@ -106,7 +106,7 @@ type
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer; MatchedIndexes: TList): Boolean; override;
     function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
-      const S1, S2: string; Obj1, Obj2: TObject): Integer; override;
+      const S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer; override;
   public
     constructor Create(AOwner: TComponent; CppMode: Boolean;
       UnitNameList: TUnitNameList); reintroduce;
@@ -838,7 +838,7 @@ begin
 end;
 
 function TCnProjectUseUnitsForm.SortItemCompare(ASortIndex: Integer;
-  const AMatchStr, S1, S2: string; Obj1, Obj2: TObject): Integer;
+  const AMatchStr, S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer;
 var
   Info1, Info2: TCnUseUnitInfo;
 begin
@@ -848,9 +848,7 @@ begin
   case ASortIndex of // 因为搜索时只有名称一列参与匹配，因此排序时要考虑到把名称匹配时的全匹配提前
     0:
       begin
-        Result := CompareTextPos(AMatchStr, Info1.Text, Info2.Text);
-        if Result = 0 then
-          Result := CompareText(Info1.Text, Info2.Text);
+        Result := CompareTextWithPos(AMatchStr, Info1.Text, Info2.Text, SortDown);
       end;
     1: Result := CompareText(Info1.FullNameWithPath, Info2.FullNameWithPath);
     2: Result := CompareInt(Ord(Info1.IsInProject), Ord(Info2.IsInProject));
@@ -858,6 +856,9 @@ begin
   else
     Result := 0;
   end;
+
+  if SortDown and (ASortIndex in [1..3]) then
+    Result := -Result;
 end;
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}

@@ -131,7 +131,7 @@ type
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer; MatchedIndexes: TList): Boolean; override;
     function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
-      const S1, S2: string; Obj1, Obj2: TObject): Integer; override;
+      const S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer; override;
   public
     { Public declarations }
   end;
@@ -740,7 +740,7 @@ begin
 end;
 
 function TCnProjectViewFormsForm.SortItemCompare(ASortIndex: Integer;
-  const AMatchStr, S1, S2: string; Obj1, Obj2: TObject): Integer;
+  const AMatchStr, S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer;
 var
   Info1, Info2: TCnFormInfo;
 begin
@@ -750,15 +750,11 @@ begin
   case ASortIndex of // 因为搜索时名称、标题两列参与匹配，因此这两列排序时要考虑到把名称匹配时的全匹配提前
     0:
       begin
-        Result := CompareTextPos(AMatchStr, Info1.DfmInfo.Name, Info2.DfmInfo.Name);
-        if Result = 0 then
-          Result := CompareText(Info1.DfmInfo.Name, Info2.DfmInfo.Name);
+        Result := CompareTextWithPos(AMatchStr, Info1.DfmInfo.Name, Info2.DfmInfo.Name, SortDown);
       end;
     1:
       begin
-        Result := CompareTextPos(AMatchStr, Info1.DfmInfo.Caption, Info2.DfmInfo.Caption);
-        if Result = 0 then
-          Result := CompareText(Info1.DfmInfo.Caption, Info2.DfmInfo.Caption);
+        Result := CompareTextWithPos(AMatchStr, Info1.DfmInfo.Caption, Info2.DfmInfo.Caption, SortDown);
       end;
     2: Result := CompareText(Info1.DesignClassText, Info2.DesignClassText);
     3: Result := CompareText(Info1.Project, Info2.Project);
@@ -767,6 +763,9 @@ begin
   else
     Result := 0;
   end;
+
+  if SortDown and (ASortIndex in [2..5]) then
+    Result := -Result;
 end;
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}
