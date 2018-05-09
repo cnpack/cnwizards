@@ -47,7 +47,7 @@ interface
 
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms, ToolsAPI,
-  IniFiles, ExtCtrls,
+  IniFiles, ExtCtrls, CnWizShareImages,
   CnEditControlWrapper, CnWizNotifier, CnIni, CnPopupMenu, CnFastList, CnEventBus;
 
 type
@@ -281,6 +281,7 @@ begin
   DoubleBuffered := True;
 
   FMenu := TPopupMenu.Create(Self);
+  FMenu.Images := dmCnSharedImages.Images;
   FMenu.OnPopup := MenuPopup;
   InitPopupMenu;
   PopupMenu := FMenu;
@@ -699,8 +700,10 @@ begin
     Item := TMenuItem.Create(Menu);
     Menu.Items.Add(Item);
     Item.Action := TCnMenuWizard(Wizard).Action;
+    Item.ImageIndex := -1;
   end;
-  AddMenuItem(Menu.Items, SCnLineNumberClearBookMarks, OnClearBookMarks);
+  Item := AddMenuItem(Menu.Items, SCnLineNumberClearBookMarks, OnClearBookMarks);
+  Item.ImageIndex := 31;
   AddMenuItem(Menu.Items, SCnLineNumberGotoLine, OnGotoLine);
   AddSepMenuItem(Menu.Items);
   AddMenuItem(Menu.Items, SCnEditorEnhanceConfig, OnEnhConfig);
@@ -708,7 +711,8 @@ begin
 {$IFDEF BDS}
   FIDELineNumMenu := AddMenuItem(Menu.Items, SCnLineNumberShowIDELineNum, OnShowIDELineNum);
 {$ENDIF}
-  AddMenuItem(Menu.Items, SCnLineNumberClose, OnLineClose);
+  Item := AddMenuItem(Menu.Items, SCnLineNumberClose, OnLineClose);
+  Item.ImageIndex := 13;
 end;
 
 procedure TCnSrcEditorGutter.MenuPopup(Sender: TObject);

@@ -216,7 +216,8 @@ function ExecuteIDEAction(const ActionName: string): Boolean;
 {* 根据 IDE Action 名，执行它}
 function AddMenuItem(Menu: TMenuItem; const Caption: string;
   OnClick: TNotifyEvent = nil; Action: TContainedAction = nil;
-  ShortCut: TShortCut = 0; const Hint: string = ''; Tag: Integer = 0): TMenuItem;
+  ShortCut: TShortCut = 0; const Hint: string = ''; Tag: Integer = 0;
+  ImgIndex: Integer = -1): TMenuItem;
 {* 创建一个子菜单项}
 function AddSepMenuItem(Menu: TMenuItem): TMenuItem;
 {* 创建一个分隔菜单项}
@@ -1993,7 +1994,8 @@ end;
 // 创建一个子菜单项
 function AddMenuItem(Menu: TMenuItem; const Caption: string;
   OnClick: TNotifyEvent = nil; Action: TContainedAction = nil;
-  ShortCut: TShortCut = 0; const Hint: string = ''; Tag: Integer = 0): TMenuItem;
+  ShortCut: TShortCut = 0; const Hint: string = ''; Tag: Integer = 0;
+  ImgIndex: Integer = -1): TMenuItem;
 begin
   Result := TMenuItem.Create(Menu);
   Result.Caption := Caption;
@@ -2004,6 +2006,7 @@ begin
   else
     Result.Hint := Hint;
   Result.Tag := Tag;
+  Result.ImageIndex := ImgIndex;
   Result.Action := Action;
   Menu.Add(Result);
 end;

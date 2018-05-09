@@ -405,6 +405,7 @@ constructor TCnSrcEditorToolBar.Create(AOwner: TComponent);
 begin
   inherited;
   FMenu := TPopupMenu.Create(Self);
+  FMenu.Images := dmCnSharedImages.Images;
 end;
 
 destructor TCnSrcEditorToolBar.Destroy;
@@ -434,12 +435,16 @@ begin
 end;
 
 procedure TCnSrcEditorToolBar.InitPopupMenu;
+var
+  AItem: TMenuItem;
 begin
   FMenu.Items.Clear;
-  AddMenuItem(FMenu.Items, SCnMenuFlatFormCustomizeCaption, OnConfig);
+  AItem := AddMenuItem(FMenu.Items, SCnMenuFlatFormCustomizeCaption, OnConfig);
+  AItem.ImageIndex := 92;
   AddSepMenuItem(Menu.Items);
   AddMenuItem(FMenu.Items, SCnEditorEnhanceConfig, OnEnhConfig);
-  AddMenuItem(FMenu.Items, SCnToolBarClose, OnClose);
+  AItem := AddMenuItem(FMenu.Items, SCnToolBarClose, OnClose);
+  AItem.ImageIndex := 13;
 end;
 
 function TCnSrcEditorToolBar.CanShow(APage: TCnSrcEditorPage): Boolean;
