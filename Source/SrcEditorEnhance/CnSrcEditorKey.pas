@@ -626,25 +626,30 @@ begin
     IsSingleLine := List.Count = 1;
     if List.Count > 1 then
     begin
-
-      for I := 1 to List.Count - 1 do
+      for I := 0 to List.Count - 1 do
       begin
-        // 找出第一非空行作为首行并计算其头部空格数
+        // 找出第一非空行作为首行并计算其头部空格数，要算首行
         if FirstLine = '' then
         begin
           FirstLine := List[I];
           if FirstLine <> '' then
+          begin
             FirstLineSpaceCount := GetHeadSpaceCount(FirstLine);
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('SmartPaste: Got Non-Empty FirstLine %s at %d Line. Space %d',
+              [FirstLine, I, FirstLineSpaceCount]);
+{$ENDIF}
+          end;
         end;
 
-        if Trim(List[I]) = '' then // 空行不参与行首空格计算
+        if (I = 0) or (Trim(List[I]) = '') then // 空行不参与行首空格计算
           Continue;
 
         LineSpaceCount := GetHeadSpaceCount(List[I]);
         if LineSpaceCount < FirstLineSpaceCount then
         begin
 {$IFDEF DEBUG}
-          CnDebugger.LogFmt('Do NOT Smart Paste for FirstLine Space %d > Line Space %d at Line %d.',
+          CnDebugger.LogFmt('SmartPaste: Do NOT Smart Paste for FirstLine Space %d > Line Space %d at Line %d.',
             [FirstLineSpaceCount, LineSpaceCount, I]);
 {$ENDIF}
           Exit;
@@ -654,16 +659,25 @@ begin
       end;
     end;
 
+    Indent := CnOtaGetBlockIndent;
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('SmartPaste: All Clipbard Lines Checked. MinLineSpaceCount(without 1st) %d. IDE Indent %d',
+      [MinLineSpaceCount, Indent]);
+{$ENDIF}
+
     // 以上逻辑将首行与其他行分开删头部空格，用于处理选择时首行未完整选择的情况
     // 目的是将首行头部全删，其余的按其余的最少空格删头部，但带来的副作用就是
     // var
     //   I: Integer; 这种会将 I 的缩进错误地去掉，所以加个逻辑：
     // 首行尾是该缩进标识符时（var/then/do）等，包括是编译指令的时候
     // 且其他行要缩进的字符已经计算出来的是大于等于IDE缩进时，将 MinLineSpaceCount 减掉一次缩进
-    Indent := CnOtaGetBlockIndent;
     if FirstLine <> '' then
     begin
       Text := GetLastTokenFromLine(FirstLine);
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('SmartPaste: First Line Last Token is %s', [Text]);
+{$ENDIF}
+
       if MinLineSpaceCount >= Indent then
       begin
         if IsCppFile and (Text = '{') then
@@ -706,10 +720,9 @@ begin
     end;
 
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('SmartPaste: Clipboard Delete %d Spaces in 1st Every Line and %d Spaces in Other Lines.',
+    CnDebugger.LogFmt('SmartPaste: Clipboard Delete %d Spaces in 1st Line and %d Spaces in Other Lines.',
       [FirstLineSpaceCount, MinLineSpaceCount]);
 {$ENDIF}
-
 
     PasteCol := View.CursorPos.Col - 1;
 
