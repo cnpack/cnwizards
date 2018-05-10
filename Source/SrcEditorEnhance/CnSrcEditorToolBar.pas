@@ -405,7 +405,7 @@ constructor TCnSrcEditorToolBar.Create(AOwner: TComponent);
 begin
   inherited;
   FMenu := TPopupMenu.Create(Self);
-  FMenu.Images := GetIDEImageList;
+  FMenu.Images := dmCnSharedImages.GetMixedImageList;
 end;
 
 destructor TCnSrcEditorToolBar.Destroy;
@@ -440,7 +440,7 @@ var
 begin
   FMenu.Items.Clear;
   AItem := AddMenuItem(FMenu.Items, SCnMenuFlatFormCustomizeCaption, OnConfig);
-  AItem.ImageIndex := 92 + dmCnSharedImages.IDEOffset;
+  AItem.ImageIndex := dmCnSharedImages.CalcMixedImageIndex(92);
   AddSepMenuItem(Menu.Items);
   AItem := AddMenuItem(FMenu.Items, SCnEditorEnhanceConfig, OnEnhConfig);
 
@@ -448,7 +448,7 @@ begin
     'TCnIdeEnhanceMenuWizard', SCnIdeEnhanceMenuCommand + 'TCnSrcEditorEnhance');
 
   AItem := AddMenuItem(FMenu.Items, SCnToolBarClose, OnClose);
-  AItem.ImageIndex := 13 + dmCnSharedImages.IDEOffset;
+  AItem.ImageIndex := dmCnSharedImages.CalcMixedImageIndex(13);
 end;
 
 function TCnSrcEditorToolBar.CanShow(APage: TCnSrcEditorPage): Boolean;

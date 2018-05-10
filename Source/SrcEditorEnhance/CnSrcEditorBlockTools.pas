@@ -57,7 +57,7 @@ uses
   CnCommon, CnWizUtils, CnWizIdeUtils, CnWizConsts, CnEditControlWrapper,
   CnWizFlatButton, CnConsts, CnWizNotifier, CnWizShortCut, CnPopupMenu,
   CnSrcEditorCodeWrap, CnSrcEditorGroupReplace, CnSrcEditorWebSearch,
-  CnWizManager, CnWizMenuAction;
+  CnWizManager, CnWizMenuAction, CnWizShareImages;
 
 type
   TBlockToolKind = (
@@ -184,7 +184,7 @@ begin
   FPopupMenu := TPopupMenu.Create(nil);
   FPopupMenu.AutoPopup := False;
   FPopupMenu.OnPopup := OnPopup;
-  FPopupMenu.Images := GetIDEImageList;
+  FPopupMenu.Images := dmCnSharedImages.GetMixedImageList;
   UpdateMenu(FPopupMenu.Items);
 
   EditControlWrapper.AddKeyDownNotifier(EditControlKeyDown);
@@ -726,6 +726,7 @@ var
     else
       Result := nil;
   end;
+
 begin
   Items.Clear;
 
@@ -753,9 +754,9 @@ begin
 
   // 格式菜单
   FFormatMenu := AddMenuItem(Items, SCnSrcBlockFormat, nil);
-  DoAddMenuItem(FFormatMenu, SCnSrcBlockIndent, btIndent, ShortCut(VK_TAB, []));
+  DoAddMenuItem(FFormatMenu, SCnSrcBlockIndent, btIndent, ShortCut(VK_TAB, []), 'actCnEditorCodeIndent');
   DoAddMenuItem(FFormatMenu, SCnSrcBlockIndentEx, btIndentEx);
-  DoAddMenuItem(FFormatMenu, SCnSrcBlockUnindent, btUnindent, ShortCut(VK_TAB, [ssShift]));
+  DoAddMenuItem(FFormatMenu, SCnSrcBlockUnindent, btUnindent, ShortCut(VK_TAB, [ssShift]), 'actCnEditorCodeUnIndent');
   DoAddMenuItem(FFormatMenu, SCnSrcBlockUnindentEx, btUnindentEx);
 
   // 注释菜单

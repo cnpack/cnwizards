@@ -345,6 +345,8 @@ type
     {* 类构造器 }
     destructor Destroy; override;
     {* 类析构器 }
+    procedure DebugComand(Cmds: TStrings; Results: TStrings); override;
+    {* 调试时打印子菜单以及 Action 等的信息}
     procedure Execute; override;
     {* 执行体什么都不做 }
     procedure AcquireSubActions; virtual;
@@ -1057,6 +1059,18 @@ begin
   FPopupMenu.Free;
   FList.Free;
   inherited;
+end;
+
+procedure TCnSubMenuWizard.DebugComand(Cmds: TStrings; Results: TStrings);
+var
+  I: Integer;
+  Act: TCnWizAction;
+begin
+  for I := 0 to SubActionCount - 1 do
+  begin
+    Act := SubActions[I];
+    Results.Add(IntToStr(I) + '. ' + Act.Command + ': ' + Act.Caption);
+  end;
 end;
 
 procedure TCnSubMenuWizard.AcquireSubActions;

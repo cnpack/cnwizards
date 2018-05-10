@@ -281,7 +281,7 @@ begin
   DoubleBuffered := True;
 
   FMenu := TPopupMenu.Create(Self);
-  FMenu.Images := GetIDEImageList;
+  FMenu.Images := dmCnSharedImages.GetMixedImageList;
   FMenu.OnPopup := MenuPopup;
   InitPopupMenu;
   PopupMenu := FMenu;
@@ -702,7 +702,7 @@ begin
     Item.Action := TCnMenuWizard(Wizard).Action;
   end;
   Item := AddMenuItem(Menu.Items, SCnLineNumberClearBookMarks, OnClearBookMarks);
-  Item.ImageIndex := 31 + dmCnSharedImages.IDEOffset;
+  Item.ImageIndex := dmCnSharedImages.CalcMixedImageIndex(31);
   AddMenuItem(Menu.Items, SCnLineNumberGotoLine, OnGotoLine);
   AddSepMenuItem(Menu.Items);
 
@@ -715,7 +715,7 @@ begin
   FIDELineNumMenu := AddMenuItem(Menu.Items, SCnLineNumberShowIDELineNum, OnShowIDELineNum);
 {$ENDIF}
   Item := AddMenuItem(Menu.Items, SCnLineNumberClose, OnLineClose);
-  Item.ImageIndex := 13 + dmCnSharedImages.IDEOffset;
+  Item.ImageIndex := dmCnSharedImages.CalcMixedImageIndex(13);
 end;
 
 procedure TCnSrcEditorGutter.MenuPopup(Sender: TObject);

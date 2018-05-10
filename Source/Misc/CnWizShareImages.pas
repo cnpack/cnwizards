@@ -40,7 +40,7 @@ interface
 
 uses
   SysUtils, Windows, Classes, Graphics, Forms, ImgList, Buttons, Controls,
-  CnWizUtils, CnGraphUtils, CnWizOptions;
+  CnWizUtils, CnGraphUtils, CnWizOptions, CnWizIdeUtils;
 
 type
   TdmCnSharedImages = class(TDataModule)
@@ -69,7 +69,9 @@ type
 
     procedure CopyToIDEMainImageList;
     // Images 会被复制进 IDE 的 ImageList 供统一处理，FIDEOffset 表示偏移量
-    property IDEOffset: Integer read FIDEOffset;
+
+    function GetMixedImageList: TCustomImageList;
+    function CalcMixedImageIndex(ImageIndex: Integer): Integer;
   end;
 
 var
@@ -83,6 +85,15 @@ uses
 {$ENDIF}
 
 {$R *.dfm}
+
+function TdmCnSharedImages.CalcMixedImageIndex(
+  ImageIndex: Integer): Integer;
+begin
+  if FCopied then
+    Result := ImageIndex + FIDEOffset
+  else
+    Result := ImageIndex;
+end;
 
 procedure TdmCnSharedImages.CopyToIDEMainImageList;
 var
@@ -98,6 +109,7 @@ begin
     Cnt := IDEs.Count;
     IDEs.AddImages(Images);
     FIDEOffset := Cnt;
+    FCopied := True;
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('Add %d Images to IDE Main ImageList. Offset %d.', [Images.Count, FIDEOffset]);
 {$ENDIF}
@@ -158,6 +170,14 @@ begin
       Dst.Free;
     end;
   end;
+end;
+
+function TdmCnSharedImages.GetMixedImageList: TCustomImageList;
+begin
+  if FCopied then
+    Result := GetIDEImageList
+  else
+    Result := Images;
 end;
 
 procedure TdmCnSharedImages.GetSpeedButtonGlyph(Button: TSpeedButton;
