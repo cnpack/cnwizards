@@ -76,7 +76,7 @@ type
     procedure Notification(AComponent: TComponent;
       Operation: TOperation); override;
     procedure Paint; override;
-    procedure SetAutoSize(Value: Boolean);{$IFDEF COMPILER7_UP} override {$ELSE} virtual {$ENDIF};
+    procedure SetAutoSize(Value: Boolean);{$IFDEF COMPILER6_UP} override {$ELSE} virtual {$ENDIF};
   public
     constructor Create(AOwner: TComponent); override;
     property Canvas;
