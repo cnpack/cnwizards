@@ -759,6 +759,7 @@ begin
 
   // 手工创建弹出菜单
   Obj.PopupMenu := TPopupMenu.Create(ToolBar);
+  Obj.PopupMenu.Images := dmCnSharedImages.Images;
 
   // 排序
   Item := TMenuItem.Create(Obj.PopupMenu);
@@ -797,6 +798,7 @@ begin
   Item := TMenuItem.Create(Obj.PopupMenu);
   Item.Caption := SCnProcListExportMenuCaption;
   Item.OnClick := PopupExportItemClick;
+  Item.ImageIndex := 46;
   Obj.PopupMenu.Items.Add(Item);
 
   // 分割线
@@ -814,6 +816,7 @@ begin
   Item := TMenuItem.Create(Obj.PopupMenu);
   Item.Caption := SCnProcListCloseMenuCaption;
   Item.OnClick := PopupCloseItemClick;
+  Item.ImageIndex := 13;
   Obj.PopupMenu.Items.Add(Item);
 
   ToolBar.PopupMenu := Obj.PopupMenu;
