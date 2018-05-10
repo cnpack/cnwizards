@@ -43,7 +43,7 @@ interface
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms, CnIni,
   ComCtrls, ToolWin, ToolsAPI, IniFiles, CnEditControlWrapper, CnWizNotifier,
-  CnWizIni, CnWizIdeUtils, CnPopupMenu;
+  CnWizManager, CnWizMenuAction, CnWizClasses, CnWizIni, CnWizIdeUtils, CnPopupMenu;
 
 type
 
@@ -405,7 +405,7 @@ constructor TCnSrcEditorToolBar.Create(AOwner: TComponent);
 begin
   inherited;
   FMenu := TPopupMenu.Create(Self);
-  FMenu.Images := dmCnSharedImages.Images;
+  FMenu.Images := GetIDEImageList;
 end;
 
 destructor TCnSrcEditorToolBar.Destroy;
@@ -440,11 +440,15 @@ var
 begin
   FMenu.Items.Clear;
   AItem := AddMenuItem(FMenu.Items, SCnMenuFlatFormCustomizeCaption, OnConfig);
-  AItem.ImageIndex := 92;
+  AItem.ImageIndex := 92 + dmCnSharedImages.IDEOffset;
   AddSepMenuItem(Menu.Items);
-  AddMenuItem(FMenu.Items, SCnEditorEnhanceConfig, OnEnhConfig);
+  AItem := AddMenuItem(FMenu.Items, SCnEditorEnhanceConfig, OnEnhConfig);
+
+  AItem.ImageIndex := CnWizardMgr.ImageIndexByWizardClassNameAndCommand(
+    'TCnIdeEnhanceMenuWizard', SCnIdeEnhanceMenuCommand + 'TCnSrcEditorEnhance');
+
   AItem := AddMenuItem(FMenu.Items, SCnToolBarClose, OnClose);
-  AItem.ImageIndex := 13;
+  AItem.ImageIndex := 13 + dmCnSharedImages.IDEOffset;
 end;
 
 function TCnSrcEditorToolBar.CanShow(APage: TCnSrcEditorPage): Boolean;

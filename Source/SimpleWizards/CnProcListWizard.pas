@@ -70,7 +70,8 @@ uses
   CnProjectViewBaseFrm, CnWizClasses, CnWizManager, CnIni, CnWizEditFiler, mPasLex,
   mwBCBTokenList, Contnrs, Clipbrd, CnEditControlWrapper, CnPasCodeParser, CnWizUtils,
   {$IFDEF USE_CUSTOMIZED_SPLITTER} CnSplitter, {$ENDIF} CnWidePasParser, CnWideCppParser,
-  CnPopupMenu, CnWizIdeUtils, CnCppCodeParser, CnStrings, CnEdit, RegExpr, CnFrmMatchButton;
+  CnPopupMenu, CnWizIdeUtils, CnCppCodeParser, CnStrings, CnEdit, RegExpr,
+  CnFrmMatchButton, CnWizMenuAction;
 
 type
   TCnSourceLanguageType = (ltUnknown, ltPas, ltCpp);
@@ -759,7 +760,7 @@ begin
 
   // 手工创建弹出菜单
   Obj.PopupMenu := TPopupMenu.Create(ToolBar);
-  Obj.PopupMenu.Images := dmCnSharedImages.Images;
+  Obj.PopupMenu.Images := GetIDEImageList;
 
   // 排序
   Item := TMenuItem.Create(Obj.PopupMenu);
@@ -798,7 +799,7 @@ begin
   Item := TMenuItem.Create(Obj.PopupMenu);
   Item.Caption := SCnProcListExportMenuCaption;
   Item.OnClick := PopupExportItemClick;
-  Item.ImageIndex := 46;
+  Item.ImageIndex := 46 + dmCnSharedImages.IDEOffset;
   Obj.PopupMenu.Items.Add(Item);
 
   // 分割线
@@ -810,13 +811,15 @@ begin
   Item := TMenuItem.Create(Obj.PopupMenu);
   Item.Caption := SCnEditorEnhanceConfig;
   Item.OnClick := PopupEditorEnhanceConfigItemClick;
+  Item.ImageIndex := CnWizardMgr.ImageIndexByWizardClassNameAndCommand('TCnIdeEnhanceMenuWizard',
+    SCnIdeEnhanceMenuCommand + 'TCnSrcEditorEnhance');
   Obj.PopupMenu.Items.Add(Item);
 
   // 关闭
   Item := TMenuItem.Create(Obj.PopupMenu);
   Item.Caption := SCnProcListCloseMenuCaption;
   Item.OnClick := PopupCloseItemClick;
-  Item.ImageIndex := 13;
+  Item.ImageIndex := 13 + dmCnSharedImages.IDEOffset;
   Obj.PopupMenu.Items.Add(Item);
 
   ToolBar.PopupMenu := Obj.PopupMenu;

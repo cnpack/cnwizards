@@ -89,15 +89,20 @@ begin
   begin
     SetLength(Indexes, CnWizardMgr.IdeEnhanceWizardCount);
     for I := Low(Indexes) to High(Indexes) do
+    begin
       if CnWizardMgr.IdeEnhanceWizards[I].HasConfig then
-        Indexes[I] := RegisterASubAction(SCnIdeEnhanceMenuCommand + InttoStr(I) +
-          CnWizardMgr.IdeEnhanceWizards[I].GetIDStr,
+      begin
+        // 修改子菜单的 Command 命名方式，以便外界找到
+        Indexes[I] := RegisterASubAction(SCnIdeEnhanceMenuCommand +
+          CnWizardMgr.IdeEnhanceWizards[I].ClassName,
           StringReplace(CnWizardMgr.IdeEnhanceWizards[I].WizardName, '&', '&&',
           [rfReplaceAll]), 0,
           CnWizardMgr.IdeEnhanceWizards[I].GetComment,
-          CnWizardMgr.IdeEnhanceWizards[I].ClassName)
-        else
-          Indexes[I] := -1;
+          CnWizardMgr.IdeEnhanceWizards[I].ClassName);
+      end
+      else
+        Indexes[I] := -1;
+    end;
   end;
 end;
 

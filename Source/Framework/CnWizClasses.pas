@@ -362,6 +362,8 @@ type
     {* 专家的子菜单数组属性 }
     property SubActions[Index: Integer]: TCnWizMenuAction read GetSubActions;
     {* 专家的子 Action 数组属性 }
+    function ActionByCommand(const ACommand: string): TCnWizAction;
+    {* 根据指定命令字查找子 Action，无则返回 nil}
   end;
 
 //==============================================================================
@@ -1227,6 +1229,21 @@ begin
       Result := i;
       Exit;
     end;
+end;
+
+function TCnSubMenuWizard.ActionByCommand(const ACommand: string): TCnWizAction;
+var
+  I: Integer;
+begin
+  Result := nil;
+  for I := 0 to FList.Count - 1 do
+  begin
+    if SubActions[I].Command = ACommand then
+    begin
+      Result := SubActions[I];
+      Exit;
+    end;
+  end;
 end;
 
 // 专家调用方法

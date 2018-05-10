@@ -58,12 +58,18 @@ type
     { Private declarations }
     FIdxUnknownInIDE: Integer;
     FIdxUnknown: Integer;
+    FIDEOffset: Integer;
+    FCopied: Boolean;
   public
     { Public declarations }
     property IdxUnknown: Integer read FIdxUnknown;
     property IdxUnknownInIDE: Integer read FIdxUnknownInIDE;
     procedure GetSpeedButtonGlyph(Button: TSpeedButton; ImageList: TImageList; 
       EmptyIdx: Integer);
+
+    procedure CopyToIDEMainImageList;
+    // Images 会被复制进 IDE 的 ImageList 供统一处理，FIDEOffset 表示偏移量
+    property IDEOffset: Integer read FIDEOffset;
   end;
 
 var
@@ -71,7 +77,32 @@ var
 
 implementation
 
+{$IFDEF DEBUG}
+uses
+  CnDebug;
+{$ENDIF}
+
 {$R *.dfm}
+
+procedure TdmCnSharedImages.CopyToIDEMainImageList;
+var
+  IDEs: TCustomImageList;
+  Cnt: Integer;
+begin
+  if FCopied then
+    Exit;
+
+  IDEs := GetIDEImageList;
+  if (IDEs <> nil) and (IDEs.Width = Images.Width) and (IDEs.Height = Images.Height) then
+  begin
+    Cnt := IDEs.Count;
+    IDEs.AddImages(Images);
+    FIDEOffset := Cnt;
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('Add %d Images to IDE Main ImageList. Offset %d.', [Images.Count, FIDEOffset]);
+{$ENDIF}
+  end;
+end;
 
 procedure TdmCnSharedImages.DataModuleCreate(Sender: TObject);
 const

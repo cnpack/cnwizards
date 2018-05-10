@@ -56,7 +56,8 @@ uses
   {$IFDEF DelphiXE3_UP}Actions,{$ENDIF}
   CnCommon, CnWizUtils, CnWizIdeUtils, CnWizConsts, CnEditControlWrapper,
   CnWizFlatButton, CnConsts, CnWizNotifier, CnWizShortCut, CnPopupMenu,
-  CnSrcEditorCodeWrap, CnSrcEditorGroupReplace, CnSrcEditorWebSearch;
+  CnSrcEditorCodeWrap, CnSrcEditorGroupReplace, CnSrcEditorWebSearch,
+  CnWizManager, CnWizMenuAction;
 
 type
   TBlockToolKind = (
@@ -688,6 +689,8 @@ end;
 //------------------------------------------------------------------------------
 
 procedure TCnSrcEditorBlockTools.UpdateMenu(Items: TMenuItem; NeedImage: Boolean);
+var
+  Item: TMenuItem;
 
   function DoAddMenuItem(AItem: TMenuItem; const ACaption: string;
     Kind: TBlockToolKind; const ShortCut: TShortCut = 0;
@@ -798,7 +801,9 @@ begin
 
   // …Ë÷√≤Àµ•
   AddSepMenuItem(Items);
-  AddMenuItem(Items, SCnEditorEnhanceConfig, OnEnhConfig);
+  Item := AddMenuItem(Items, SCnEditorEnhanceConfig, OnEnhConfig);
+  Item.ImageIndex := CnWizardMgr.ImageIndexByWizardClassNameAndCommand('TCnIdeEnhanceMenuWizard',
+    SCnIdeEnhanceMenuCommand + 'TCnSrcEditorEnhance');
 end;
 
 procedure TCnSrcEditorBlockTools.OnPopup(Sender: TObject);

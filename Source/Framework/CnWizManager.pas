@@ -167,8 +167,16 @@ type
     {* 根据专家名称返回专家实例，如果找不到专家，返回为 nil}
     function WizardByClass(AClass: TCnWizardClass): TCnBaseWizard;
     {* 根据专家类名返回专家实例，如果找不到专家，返回为 nil}
-    function WizardByClassName(AClassName: string): TCnBaseWizard;
+    function WizardByClassName(const AClassName: string): TCnBaseWizard;
     {* 根据专家类名字符串返回专家实例，如果找不到专家，返回为 nil}
+    function ImageIndexByClassName(const AClassName: string): Integer;
+    {* 根据专家类名字符串返回专家的图标索引，如果找不到专家或无图标索引，返回为 -1}
+    function ActionByWizardClassNameAndCommand(const AClassName: string;
+      const ACommand: string): TCnWizAction;
+    {* 根据专家类名字符串与命令字返回该子菜单专家的指定子 Action，无则返回 nil}
+    function ImageIndexByWizardClassNameAndCommand(const AClassName: string;
+      const ACommand: string): Integer;
+    {* 根据专家类名字符串与命令字返回该子菜单专家的指定子 Action 的 ImageIndex，无则返回 -1}
     function IndexOf(Wizard: TCnBaseWizard): Integer;
     {* 根据专家实例查找其在专家列表中的索引号}
     procedure DispatchDebugComand(Cmd: string; Results: TStrings);
@@ -308,6 +316,7 @@ begin
   FRepositoryWizards := TList.Create;
 {$IFNDEF CNWIZARDS_MINIMUM}
   dmCnSharedImages := TdmCnSharedImages.Create(nil);
+  dmCnSharedImages.CopyToIDEMainImageList;
 {$ENDIF}
 
 {$IFDEF BDS}
@@ -688,7 +697,8 @@ begin
   Result := nil;
 end;
 
-function TCnWizardMgr.WizardByClassName(AClassName: string): TCnBaseWizard;
+// 根据专家类名字符串返回专家实例，如果找不到专家，返回为 nil
+function TCnWizardMgr.WizardByClassName(const AClassName: string): TCnBaseWizard;
 var
   i: Integer;
 begin
@@ -699,6 +709,44 @@ begin
       Exit;
     end;
   Result := nil;
+end;
+
+function TCnWizardMgr.ImageIndexByClassName(const AClassName: string): Integer;
+var
+  I: Integer;
+begin
+  Result := -1;
+  for I := 0 to WizardCount - 1 do
+  begin
+    if Wizards[I].ClassNameIs(AClassName) then
+    begin
+      if Wizards[I] is TCnActionWizard then
+        Result := (Wizards[I] as TCnActionWizard).ImageIndex;
+      Exit;
+    end;
+  end;
+end;
+
+function TCnWizardMgr.ActionByWizardClassNameAndCommand(const AClassName: string;
+  const ACommand: string): TCnWizAction;
+var
+  ABase: TCnBaseWizard;
+begin
+  Result := nil;
+  ABase := WizardByClassName(AClassName);
+  if (ABase <> nil) and (ABase is TCnSubMenuWizard) then
+    Result := (ABase as TCnSubMenuWizard).ActionByCommand(ACommand);
+end;
+
+function TCnWizardMgr.ImageIndexByWizardClassNameAndCommand(const AClassName: string;
+  const ACommand: string): Integer;
+var
+  AnAction: TCnWizAction;
+begin
+  Result := -1;
+  AnAction := ActionByWizardClassNameAndCommand(AClassName, ACommand);
+  if AnAction <> nil then
+    Result := AnAction.ImageIndex;
 end;
 
 // 根据专家实例查找其在专家列表中的索引号

@@ -47,7 +47,7 @@ interface
 
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms, ToolsAPI,
-  IniFiles, ExtCtrls, CnWizShareImages,
+  IniFiles, ExtCtrls, CnWizShareImages, CnWizMenuAction,
   CnEditControlWrapper, CnWizNotifier, CnIni, CnPopupMenu, CnFastList, CnEventBus;
 
 type
@@ -281,7 +281,7 @@ begin
   DoubleBuffered := True;
 
   FMenu := TPopupMenu.Create(Self);
-  FMenu.Images := dmCnSharedImages.Images;
+  FMenu.Images := GetIDEImageList;
   FMenu.OnPopup := MenuPopup;
   InitPopupMenu;
   PopupMenu := FMenu;
@@ -700,19 +700,22 @@ begin
     Item := TMenuItem.Create(Menu);
     Menu.Items.Add(Item);
     Item.Action := TCnMenuWizard(Wizard).Action;
-    Item.ImageIndex := -1;
   end;
   Item := AddMenuItem(Menu.Items, SCnLineNumberClearBookMarks, OnClearBookMarks);
-  Item.ImageIndex := 31;
+  Item.ImageIndex := 31 + dmCnSharedImages.IDEOffset;
   AddMenuItem(Menu.Items, SCnLineNumberGotoLine, OnGotoLine);
   AddSepMenuItem(Menu.Items);
-  AddMenuItem(Menu.Items, SCnEditorEnhanceConfig, OnEnhConfig);
+
+  Item := AddMenuItem(Menu.Items, SCnEditorEnhanceConfig, OnEnhConfig);
+  Item.ImageIndex := CnWizardMgr.ImageIndexByWizardClassNameAndCommand('TCnIdeEnhanceMenuWizard',
+    SCnIdeEnhanceMenuCommand + 'TCnSrcEditorEnhance');
+
   AddSepMenuItem(Menu.Items);
 {$IFDEF BDS}
   FIDELineNumMenu := AddMenuItem(Menu.Items, SCnLineNumberShowIDELineNum, OnShowIDELineNum);
 {$ENDIF}
   Item := AddMenuItem(Menu.Items, SCnLineNumberClose, OnLineClose);
-  Item.ImageIndex := 13;
+  Item.ImageIndex := 13 + dmCnSharedImages.IDEOffset;
 end;
 
 procedure TCnSrcEditorGutter.MenuPopup(Sender: TObject);
