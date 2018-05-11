@@ -58,6 +58,7 @@ type
 
   TCnSrcEditorMisc = class(TObject)
   private
+    FEditorMenuImageListIsMain: Boolean;
     FTabControlList: TComponentList;
     FMenuHook: TCnMenuHook;
   {$IFDEF COMPILER6_UP}
@@ -287,8 +288,17 @@ begin
   if not FMenuHook.IsHooked(PopupMenu) then
   begin
     FMenuHook.HookMenu(PopupMenu);
+    if PopupMenu.Images = nil then
+    begin
+      PopupMenu.Images := GetIDEImageList;
+      FEditorMenuImageListIsMain := True;
+    end
+    else
+      FEditorMenuImageListIsMain := (PopupMenu.Images = GetIDEImageList);
+
   {$IFDEF DEBUG}
-    CnDebugger.LogMsg('Hooked a EditControl''s PopupMenu.');
+    CnDebugger.LogFmt('Hooked a EditControl''s PopupMenu. ImageList is IDE? %d',
+      [Integer(FEditorMenuImageListIsMain)]);
   {$ENDIF}
   end;
 
@@ -685,19 +695,12 @@ begin
       CloneMenuItem(Wizard.BlockTools.PopupMenu.Items, MenuItem);
 
 {$IFDEF COMPILER6_UP}
-      ClearMenuItemImageIndex(MenuItem);
+      // 如果 ImageList 不对头则不用 ImageIndex，毕竟后者是使用的 IDE 主 ImageList
+      if not FEditorMenuImageListIsMain then
+        ClearMenuItemImageIndex(MenuItem);
 {$ENDIF}
 
-      // 不用 ImageIndex 因为 ImageList 不对头
       MenuItem.Visible := FAddMenuBlockTools;
-
-      // 不能设置菜单的 ImageList，否则会影响其他菜单项
-{     if (MenuItem.Owner <> nil) and (MenuItem.Owner is TMenu) then
-      begin
-        if (MenuItem.Owner as TMenu).Images = nil then
-          (MenuItem.Owner as TMenu).Images := GetIDEImageList;
-      end;  }
-      
       Exit;
     end;
   end;
