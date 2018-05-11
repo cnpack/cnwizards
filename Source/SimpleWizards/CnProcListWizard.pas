@@ -799,7 +799,7 @@ begin
   Item := TMenuItem.Create(Obj.PopupMenu);
   Item.Caption := SCnProcListExportMenuCaption;
   Item.OnClick := PopupExportItemClick;
-  Item.ImageIndex := 46 + dmCnSharedImages.IDEOffset;
+  Item.ImageIndex := dmCnSharedImages.CalcMixedImageIndex(46);
   Obj.PopupMenu.Items.Add(Item);
 
   // ·Ö¸îÏß
@@ -819,7 +819,7 @@ begin
   Item := TMenuItem.Create(Obj.PopupMenu);
   Item.Caption := SCnProcListCloseMenuCaption;
   Item.OnClick := PopupCloseItemClick;
-  Item.ImageIndex := 13 + dmCnSharedImages.IDEOffset;
+  Item.ImageIndex := dmCnSharedImages.CalcMixedImageIndex(13);
   Obj.PopupMenu.Items.Add(Item);
 
   ToolBar.PopupMenu := Obj.PopupMenu;

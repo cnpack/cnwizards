@@ -61,7 +61,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, ToolsAPI, IniFiles,
   Forms, ExtCtrls, Menus, ComCtrls, Contnrs, StdCtrls, Buttons,
   CnCommon, CnWizUtils, CnWizNotifier, CnWizIdeUtils, CnWizConsts, CnMenuHook,
-  CnConsts, CnCompUtils, CnWizClasses, CnWizMenuAction,
+  CnConsts, CnCompUtils, CnWizClasses, CnWizMenuAction, CnWizManager,
   {$IFDEF COMPILER7_UP}
   ActnMenus,
   {$ENDIF}
@@ -442,6 +442,8 @@ begin
   if not FMenuHook.IsHooked(PopupMenu) then
   begin
     FMenuHook.HookMenu(PopupMenu);
+    if PopupMenu.Images = nil then
+      PopupMenu.Images := GetIDEImageList;
   {$IFDEF DEBUG}
     CnDebugger.LogMsg('Hooked ComponentPalette''s PopupMenu.');
   {$ENDIF DEBUG}
@@ -588,6 +590,8 @@ begin
 
   FSettingsMenuItem := TCnMenuItemDef.Create(SCnPaletteSettingsMenuName,
     SCnPalSettingsCaption, OnSettingsItemClick, ipAfter, SCnPaletteSearchCompMenuName);
+  FSettingsMenuItem.SetImageIndex(CnWizardMgr.ImageIndexByWizardClassNameAndCommand(
+    'TCnIdeEnhanceMenuWizard', SCnIdeEnhanceMenuCommand + 'TCnPaletteEnhanceWizard'));
 
   FMenuHook.AddMenuItemDef(FSettingsMenuItem);
 {$IFDEF COMPILER5}
