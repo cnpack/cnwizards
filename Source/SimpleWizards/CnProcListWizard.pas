@@ -760,7 +760,7 @@ begin
 
   // 手工创建弹出菜单
   Obj.PopupMenu := TPopupMenu.Create(ToolBar);
-  Obj.PopupMenu.Images := GetIDEImageList;
+  Obj.PopupMenu.Images := dmCnSharedImages.GetMixedImageList;
 
   // 排序
   Item := TMenuItem.Create(Obj.PopupMenu);
