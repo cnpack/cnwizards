@@ -1317,7 +1317,8 @@ begin
   end;
   for I := 0 to ToolBar.ButtonCount - 1 do
   begin
-    if ToolBar.Buttons[I].Action = nil then
+    if not (ToolBar.Buttons[I].Style in [tbsSeparator, tbsDivider]) and
+      (ToolBar.Buttons[I].Action = nil) then
       ToolBar.Buttons[I].ImageIndex := dmCnSharedImages.CalcMixedImageIndex(ToolBar.Buttons[I].ImageIndex);
   end;
 end;
