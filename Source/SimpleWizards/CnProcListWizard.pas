@@ -1482,8 +1482,6 @@ begin
   FObjectList.Sorted := True;
   FObjectList.Duplicates := dupIgnore;
 
-  //ProcListForm := Self;
-
   EditorCanvas := EditControlWrapper.GetEditControlCanvas(CnOtaGetCurrentEditControl);
   if EditorCanvas <> nil then
   begin

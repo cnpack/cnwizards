@@ -192,6 +192,7 @@ type
     procedure InitArrowBitmaps;
     procedure ClearColumnArrow;
     procedure ChangeColumnArrow;
+    procedure ChangeIconToIDEImageList;
   protected
     FRegExpr: TRegExpr;
     NeedInitProjectControls: Boolean;
@@ -328,6 +329,7 @@ begin
     FDownArrow := TBitmap.Create;
     FNoArrow := TBitmap.Create;
     InitArrowBitmaps;
+    ChangeIconToIDEImageList;
 
     lvList.DoubleBuffered := True;
     ProjectList := TObjectList.Create;
@@ -1296,6 +1298,28 @@ procedure TCnProjectViewBaseForm.DrawListPreParam(Item: TListItem;
   ListCanvas: TCanvas);
 begin
   // 基类啥都不改，按默认绘制
+end;
+
+procedure TCnProjectViewBaseForm.ChangeIconToIDEImageList;
+var
+  I: Integer;
+  Act: TCustomAction;
+begin
+  ActionList.Images := dmCnSharedImages.GetMixedImageList;
+  ToolBar.Images := dmCnSharedImages.GetMixedImageList;
+  for I := 0 to ActionList.ActionCount - 1 do
+  begin
+    if ActionList.Actions[I] is TCustomAction then
+    begin
+      Act := ActionList.Actions[I] as TCustomAction;
+      Act.ImageIndex := dmCnSharedImages.CalcMixedImageIndex(Act.ImageIndex);
+    end;
+  end;
+  for I := 0 to ToolBar.ButtonCount - 1 do
+  begin
+    if ToolBar.Buttons[I].Action = nil then
+      ToolBar.Buttons[I].ImageIndex := dmCnSharedImages.CalcMixedImageIndex(ToolBar.Buttons[I].ImageIndex);
+  end;
 end;
 
 { TCnBaseElementInfo }

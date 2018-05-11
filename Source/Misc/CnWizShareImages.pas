@@ -89,7 +89,7 @@ uses
 function TdmCnSharedImages.CalcMixedImageIndex(
   ImageIndex: Integer): Integer;
 begin
-  if FCopied then
+  if FCopied and (ImageIndex >= 0) then
     Result := ImageIndex + FIDEOffset
   else
     Result := ImageIndex;

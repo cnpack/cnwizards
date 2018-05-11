@@ -227,7 +227,9 @@ var
 begin
   // ¼ì²é ComponentSelector
   if CnWizardMgr.WizardByClassName('TCnComponentSelector') = nil then
-    btnHookIDE.Visible := False;
+    btnHookIDE.Visible := False
+  else
+    actHookIDE.ImageIndex := CnWizardMgr.ImageIndexByClassName('TCnComponentSelector');
 
   DesignContainer := CnOtaGetRootComponentFromEditor(CnOtaGetCurrentFormEditor);
   if DesignContainer <> nil then
