@@ -922,6 +922,7 @@ begin
     if not Assigned(MenuBar) then
       Exit;
 
+    // 把菜单栏同样高度的右边的控件靠左挤过去，避免出现空隙
     List := TList.Create;
     try
       for i := 0 to ControlBar.ControlCount - 1 do
@@ -984,9 +985,9 @@ begin
       DoInsertMenu(FWizMenu, FWizMenuNames[i]);
     end;
     MainMenu.Items.Insert(GetMenuInsertIndex + 1, FWizMenu);
-  end;
 
-  AdjustMainMenuBar;
+    AdjustMainMenuBar; // 菜单调整后会露空，要把菜单栏同样高度的右边控件往左挤
+  end;
 end;
 
 //------------------------------------------------------------------------------
