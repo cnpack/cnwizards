@@ -646,8 +646,8 @@ begin
 
     sFont := ReadString(aSection, csFont, '');
 {$IFDEF DEBUG}
-    CnDebugger.LogMsg('ReadFont: ' + sFont);
-    CnDebugger.LogMsg('SelfFont: ' + FontToString(Self.Font));
+    CnDebugger.LogMsg('TCnProjectViewBaseForm ReadFont: ' + sFont);
+    CnDebugger.LogMsg('TCnProjectViewBaseForm SelfFont: ' + FontToString(Self.Font));
 {$ENDIF DEBUG}
     if (sFont <> '') and (sFont <> FontToString(Self.Font)) then
     begin

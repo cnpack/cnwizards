@@ -284,7 +284,7 @@ inherited CnProjectViewBaseForm: TCnProjectViewBaseForm
     Images = dmCnSharedImages.Images
     OnUpdate = ActionListUpdate
     Left = 15
-    Top = 390
+    Top = 94
     object actOpen: TAction
       Caption = '&Open'
       Hint = 'Open Selected Form'
@@ -378,7 +378,7 @@ inherited CnProjectViewBaseForm: TCnProjectViewBaseForm
     Font.Style = []
     MinFontSize = 0
     MaxFontSize = 0
-    Left = 47
-    Top = 390
+    Left = 55
+    Top = 94
   end
 end
