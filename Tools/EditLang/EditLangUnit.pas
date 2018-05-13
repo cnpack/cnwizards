@@ -2,6 +2,8 @@ unit EditLangUnit;
 
 interface
 
+{$I CnPack.inc}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   FileCtrl, CnCommon, ExtCtrls, StdCtrls, ComCtrls, Grids, ToolWin, ImgList,
@@ -87,6 +89,11 @@ begin
   ShowMessage('Must Run under Unicode Environment.');
   Application.Terminate;
 {$ENDIF}
+
+{$IFNDEF TSTRINGS_HAS_WRITEBOM}
+  ShowMessage('NO BOM Support. Be Careful when Saving.');
+{$ENDIF}
+
   FLangRoot := IncludeTrailingPathDelimiter(ExtractFileDir(Application.ExeName)) + LANG_DIR;
   FLangDirs := TStringList.Create;
 
@@ -140,15 +147,18 @@ begin
   if (FileName <> '') and (Lines.Count > 0) then
   begin
     Sl := TStringList.Create;
+    Sl.DefaultEncoding := TEncoding.UTF8;
+    Sl.WriteBOM := True;
     try
-      Sl.Assign(Lines);
+      for I := 0 to Lines.Count - 1 do
+        Sl.Add(Lines[I]);
+
       for I := Sl.Count - 1 downto 0 do
         if Sl[I] = '' then
           Sl.Delete(I);
 
       if Sl.Count > 0 then
       begin
-        Sl.WriteBOM := True;
         Sl.SaveToFile(FileName);
         Result := True;
       end;
