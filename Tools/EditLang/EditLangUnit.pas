@@ -33,6 +33,11 @@ type
     btn1: TToolButton;
     btnSaveLeft: TToolButton;
     btnSaveRight: TToolButton;
+    btn2: TToolButton;
+    actTSortLeft: TAction;
+    actTSortRight: TAction;
+    btnTSortLeft: TToolButton;
+    btnTSortRight: TToolButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormResize(Sender: TObject);
@@ -47,6 +52,8 @@ type
     procedure actSaveRightExecute(Sender: TObject);
     procedure StringGridSelectCell(Sender: TObject; ACol, ARow: Integer;
       var CanSelect: Boolean);
+    procedure actTSortLeftExecute(Sender: TObject);
+    procedure actTSortRightExecute(Sender: TObject);
   private
     FLangRoot: string;
     FLangDirs: TStrings;
@@ -65,7 +72,9 @@ type
     function LineEqual(const S1: string; const S2: string): Boolean;
     procedure SearchLangFiles(const Dir: string; List: TStrings; IsDir: Boolean);
     procedure RearrangeDisplays;
+    // 根据 LeftContent/RightContent实施对比，把对齐结果放到 LeftDisplay/RightDisplay中
     procedure UpdateToGrid;
+    procedure StringsTSort(Lines: TStrings);
   public
     { Public declarations }
   end;
@@ -82,6 +91,55 @@ const
 
   LEFT_EDITING_COL = 1;
   RIGHT_EDITING_COL = 4;
+
+procedure QuickSortStrings(Lines: TStrings; L, R: Integer);
+var
+  I, J, P: Integer;
+
+  function CompareStrBeforeEqual(const S1, S2: string): Integer;
+  var
+    P: Integer;
+    P1, P2: string;
+  begin
+    P := Pos('=', S1);
+    if P > 0 then
+      P1 := Copy(S1, 1, P - 1)
+    else
+      P1 := S1;
+
+    P := Pos('=', S2);
+    if P > 0 then
+      P2 := Copy(S2, 1, P - 1)
+    else
+      P2 := S1;
+
+    Result := CompareStr(P1, P2);
+  end;
+
+begin
+  repeat
+    I := L;
+    J := R;
+    P := (L + R) shr 1;
+    repeat
+      while CompareStrBeforeEqual(Lines[I], Lines[P]) < 0 do Inc(I);
+      while CompareStrBeforeEqual(Lines[J], Lines[P]) > 0 do Dec(J);
+      if I <= J then
+      begin
+        if I <> J then
+          Lines.Exchange(I, J);
+        if P = I then
+          P := J
+        else if P = J then
+          P := I;
+        Inc(I);
+        Dec(J);
+      end;
+    until I > J;
+    if L < J then QuickSortStrings(Lines, L, J);
+    L := I;
+  until I >= R;
+end;
 
 procedure TEditLangForm.FormCreate(Sender: TObject);
 begin
@@ -201,6 +259,73 @@ begin
     StringGrid.Options := StringGrid.Options + [goEditing]
   else
     StringGrid.Options := StringGrid.Options - [goEditing];
+end;
+
+procedure TEditLangForm.StringsTSort(Lines: TStrings);
+var
+  I, L, R, P: Integer;
+  S, OldPre, Pre: string;
+begin
+  if Lines.Count < 2 then
+    Exit;
+
+  I := 0;
+  L := 0;
+  R := 0;
+  OldPre := '';
+  while I < Lines.Count do
+  begin
+    S := Lines[I];
+    if S = '' then
+    begin
+      Inc(I);
+      Continue;
+    end;
+
+    if S[1] <> 'T' then
+    begin
+      Inc(I);
+      Continue;
+    end;
+
+    P := Pos('=', S);
+    if P <= 0 then
+    begin
+      Inc(I);
+      Continue;
+    end;
+
+    P := Pos('.', S);
+    if P <= 0 then
+    begin
+      Inc(I);
+      Continue;
+    end;
+
+    Pre := Copy(S, 1, P - 1);
+    if OldPre = '' then
+    begin
+      OldPre := Pre;
+      L := I;
+      R := I;
+      Continue;
+    end
+    else if OldPre = Pre then
+    begin
+      Inc(R);
+      Inc(I);
+      Continue;
+    end
+    else if OldPre <> Pre then
+    begin
+      QuickSortStrings(Lines, L, R);
+      OldPre := Pre;
+      L := I;
+      R := I;
+      Inc(I);
+      Continue;
+    end;
+  end;
 end;
 
 procedure TEditLangForm.SyncLeftGridToDisplay;
@@ -433,14 +558,28 @@ end;
 
 procedure TEditLangForm.actSaveLeftExecute(Sender: TObject);
 begin
-  if SaveLinesToFile(StringGrid.Cols[1], FLeftFileName) then
+  if SaveLinesToFile(StringGrid.Cols[LEFT_EDITING_COL], FLeftFileName) then
     InfoDlg('Save Success. ' + FLeftFileName);
 end;
 
 procedure TEditLangForm.actSaveRightExecute(Sender: TObject);
 begin
-  if SaveLinesToFile(StringGrid.Cols[4], FRightFileName) then
+  if SaveLinesToFile(StringGrid.Cols[RIGHT_EDITING_COL], FRightFileName) then
     InfoDlg('Save Success. ' + FRightFileName);
+end;
+
+procedure TEditLangForm.actTSortLeftExecute(Sender: TObject);
+begin
+  StringsTSort(FLeftContent); // StringGrid.Cols[LEFT_EDITING_COL]);
+  RearrangeDisplays;
+  UpdateToGrid;
+end;
+
+procedure TEditLangForm.actTSortRightExecute(Sender: TObject);
+begin
+  StringsTSort(FRightContent); //StringGrid.Cols[RIGHT_EDITING_COL]);
+  RearrangeDisplays;
+  UpdateToGrid;
 end;
 
 procedure TEditLangForm.cbbLeftDirChange(Sender: TObject);
