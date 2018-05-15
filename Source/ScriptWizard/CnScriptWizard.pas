@@ -283,7 +283,7 @@ end;
 
 function TCnScriptItem.GetRelFileName: string;
 begin
-  Result := GetRelativePath(FFileName, WizOptions.UserPath);
+  Result := ExtractRelativePath(WizOptions.UserPath, FFileName);
 end;
 
 procedure TCnScriptItem.SetRelFileName(const Value: string);
