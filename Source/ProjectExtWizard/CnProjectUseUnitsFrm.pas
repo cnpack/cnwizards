@@ -811,15 +811,17 @@ var
   Info: TCnUseUnitInfo;
 begin
   Result := False;
+
+  // 先限定工程，工程不符合条件的先剔除
+  Info := TCnUseUnitInfo(DataList.Objects[DataListIndex]);
+  if (ProjectInfoSearch <> nil) and not Info.IsInProject then
+    Exit;
+
   if AMatchStr = '' then
   begin
     Result := True;
     Exit;
   end;
-
-  Info := TCnUseUnitInfo(DataList.Objects[DataListIndex]);
-  if (ProjectInfo <> nil) and not Info.IsInProject then
-    Exit;
 
   case AMatchMode of // 搜索时单元名参与匹配，不区分大小写
     mmStart:

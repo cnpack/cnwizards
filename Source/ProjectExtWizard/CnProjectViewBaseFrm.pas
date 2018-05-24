@@ -179,7 +179,6 @@ type
     FSortIndex: Integer;
     FSortDown: Boolean;
     FListViewWidthStr: string;
-    FProjectListSelectedAllProject: Boolean;
     FUpArrow: TBitmap;
     FDownArrow: TBitmap;
     FNoArrow: TBitmap;
@@ -196,8 +195,9 @@ type
   protected
     FRegExpr: TRegExpr;
     NeedInitProjectControls: Boolean;
+    FProjectListSelectedAllProject: Boolean;
     ProjectList: TObjectList;     // 存储 ProjectInfo 的列表
-    ProjectInfo: TCnProjectInfo;  // 标记待限定的 Project 搜索范围
+    ProjectInfoSearch: TCnProjectInfo;  // 标记待限定的 Project 搜索范围
     DataList: TStringList;        // 供子类存储原始需要搜索的列表名字以及 Object
     DisplayList: TStringList;     // 供子类容纳过滤后需要显示的列表名字以及 Object（引用）
     function DoSelectOpenedItem: string; virtual; abstract;
@@ -583,17 +583,6 @@ end;
 
 procedure TCnProjectViewBaseForm.cbbProjectListChange(Sender: TObject);
 begin
-  if Sender is TComboBox then
-  begin
-    if TComboBox(Sender).ItemIndex = cbbProjectList.Items.IndexOf(SCnProjExtCurrentProject) then
-    begin
-      FProjectListSelectedAllProject := False;
-    end
-    else if TComboBox(Sender).ItemIndex = cbbProjectList.Items.IndexOf(SCnProjExtProjectAll) then
-    begin
-      FProjectListSelectedAllProject := True;
-    end;
-  end;
   if Visible then
   begin
     UpdateListView;
@@ -761,7 +750,6 @@ begin
   PrepareSearchRange;
   CommonUpdateListView;
   DoUpdateListView;
-  // RemoveListViewSubImages(lvList);
 end;
 
 procedure TCnProjectViewBaseForm.DoSelectItemChanged(Sender: TObject);
@@ -1081,10 +1069,15 @@ var
   I: Integer;
   AProjectInfo: TCnProjectInfo;
 begin
-  ProjectInfo := nil;
+  ProjectInfoSearch := nil;
+  FProjectListSelectedAllProject := False;
 
   if not cbbProjectList.Visible or (cbbProjectList.ItemIndex <= 0) then  // nil means All Project
   begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('PrepareSearchRange, Search All Projects');
+{$ENDIF}
+    FProjectListSelectedAllProject := True;
     Exit;
   end
   else if cbbProjectList.ItemIndex = 1 then // 1 means Current Project
@@ -1094,7 +1087,10 @@ begin
       AProjectInfo := TCnProjectInfo(ProjectList[I]);
       if _CnChangeFileExt(AProjectInfo.FileName, '') = CnOtaGetCurrentProjectFileNameEx then
       begin
-        ProjectInfo := AProjectInfo;
+        ProjectInfoSearch := AProjectInfo;
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('PrepareSearchRange, Search Current Project: ' + ProjectInfoSearch.FileName);
+{$ENDIF}
         Exit;
       end;
     end;
@@ -1109,12 +1105,16 @@ begin
         if TCnProjectInfo(cbbProjectList.Items.Objects[cbbProjectList.ItemIndex]).FileName
           = AProjectInfo.FileName then
         begin
-          ProjectInfo := AProjectInfo;
+          ProjectInfoSearch := AProjectInfo;
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('PrepareSearchRange, Search Project: ' + ProjectInfoSearch.FileName);
+{$ENDIF}
           Exit;
         end;
       end;
     end;
   end;
+
 end;
 
 procedure TCnProjectViewBaseForm.DoUpdateListView;

@@ -221,15 +221,17 @@ var
   Info: TCnUnitInfo;
 begin
   Result := False;
+
+  // 先限定工程，工程不符合条件的先剔除
+  Info := TCnUnitInfo(DataList.Objects[DataListIndex]);
+  if (ProjectInfoSearch <> nil) and (ProjectInfoSearch <> Info.ParentProject) then
+    Exit;
+
   if AMatchStr = '' then
   begin
     Result := True;
     Exit;
   end;
-
-  Info := TCnUnitInfo(DataList.Objects[DataListIndex]);
-  if (ProjectInfo <> nil) and (ProjectInfo <> Info.ParentProject) then
-    Exit;
 
   case AMatchMode of // 搜索时单元名参与匹配，不区分大小写
     mmStart:

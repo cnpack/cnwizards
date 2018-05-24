@@ -707,15 +707,17 @@ var
   UpperMatch: string;
 begin
   Result := False;
+
+  // 先限定工程，工程不符合条件的先剔除
+  Info := TCnFormInfo(DataList.Objects[DataListIndex]);
+  if (ProjectInfoSearch <> nil) and (ProjectInfoSearch <> Info.ParentProject) then
+    Exit;
+
   if AMatchStr = '' then
   begin
     Result := True;
     Exit;
   end;
-
-  Info := TCnFormInfo(DataList.Objects[DataListIndex]);
-  if (ProjectInfo <> nil) and (ProjectInfo <> Info.ParentProject) then
-    Exit;
 
   if AMatchMode in [mmStart, mmAnywhere] then
     UpperMatch := UpperCase(AMatchStr);
