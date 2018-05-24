@@ -479,7 +479,7 @@ begin
 
             // 未知类型文件不隐藏扩展名
             if UnitType = utUnknown then
-              Name := _CnExtractFileName(UnitFileName);
+              Text := _CnExtractFileName(UnitFileName);
           end;
           
           FillUnitInfo(UnitInfo);

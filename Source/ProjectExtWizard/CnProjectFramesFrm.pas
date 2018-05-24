@@ -345,11 +345,11 @@ begin
           FormInfo := TCnFormInfo.Create;
           with FormInfo do
           begin
-            Name := IModuleInfo.FormName;
+            Text := IModuleInfo.FormName;
             FileName := FormFileName;
             Project := _CnExtractFileName(IProject.FileName);
             DesignClass := IModuleInfo.DesignClass;
-            IsOpened := CnOtaIsFormOpen(Name);
+            IsOpened := CnOtaIsFormOpen(IModuleInfo.FormName);
             
             if Exists then
             begin
