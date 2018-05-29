@@ -189,7 +189,7 @@ begin
         begin
           if lvList.Items[I].Selected then
           begin
-            AName := _CnChangeFileExt(TCnFormInfo(lvList.Items[I].Data).DfmInfo.Name, '');
+            AName := _CnChangeFileExt(TCnFormInfo(lvList.Items[I].Data).Text, '');
             AName := _CnExtractFileName(AName);
 
             Idx := OriginalList.IndexOf(AName);
