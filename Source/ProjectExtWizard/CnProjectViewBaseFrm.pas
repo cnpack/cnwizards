@@ -340,6 +340,9 @@ begin
     GlobalSortCompareEvent := SortItemCompare;
 
     CreateList;
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg(ClassName + ': DataList Count: ' + IntToStr(DataList.Count));
+{$ENDIF}
     UpdateComboBox;
   finally
     Screen.Cursor := crDefault;

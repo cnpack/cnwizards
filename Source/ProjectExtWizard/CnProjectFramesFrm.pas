@@ -333,6 +333,11 @@ begin
             begin
               FormFileName := _CnChangeFileExt(IModuleInfo.FileName, '.xfm'); // CLX, Kylix
               Exists := FileExists(FormFileName);
+              if not Exists then
+              begin
+                FormFileName := _CnChangeFileExt(IModuleInfo.FileName, '.fmx'); // FMX
+                Exists := FileExists(FormFileName);
+              end;
             end;
           end;
 
@@ -350,7 +355,7 @@ begin
             Project := _CnExtractFileName(IProject.FileName);
             DesignClass := IModuleInfo.DesignClass;
             IsOpened := CnOtaIsFormOpen(IModuleInfo.FormName);
-            
+
             if Exists then
             begin
               Size := GetFileSize(FormFileName);
@@ -407,7 +412,7 @@ begin
   if (Item.Index >= 0) and (Item.Index < DisplayList.Count) then
   begin
     Info := TCnFormInfo(DisplayList.Objects[Item.Index]);
-    Item.Caption := Info.DfmInfo.Name;
+    Item.Caption := Info.Text; // DfmInfo.Name;
     Item.ImageIndex := Info.ImageIndex;
     Item.Data := Info;
 
