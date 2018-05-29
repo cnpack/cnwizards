@@ -1,8 +1,8 @@
 inherited CnPrefixEditForm: TCnPrefixEditForm
   Left = 412
   Top = 232
-  Width = 350
-  Height = 264
+  Width = 344
+  Height = 258
   ActiveControl = edtName
   BorderIcons = [biSystemMenu]
   Caption = 'Edit Component'#39's Name'
@@ -53,6 +53,7 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
     0000E3E2000000EE0000000000000000000000000000000000000000000083E0
     000083E000008000000083E0000083E00000FFFB0000F7FB0000F7FB0000E7FB
     0000E3E00000C1E00000C0E000008060000080200000003F000033FF0000}
+  OldCreateOrder = True
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
@@ -220,7 +221,7 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
     end
   end
   object btnOK: TButton
-    Left = 90
+    Left = 91
     Top = 198
     Width = 75
     Height = 21
@@ -231,7 +232,7 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
     OnClick = btnOKClick
   end
   object btnCancel: TButton
-    Left = 170
+    Left = 171
     Top = 198
     Width = 75
     Height = 21
@@ -242,7 +243,7 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
     TabOrder = 2
   end
   object btnHelp: TButton
-    Left = 250
+    Left = 251
     Top = 198
     Width = 75
     Height = 21

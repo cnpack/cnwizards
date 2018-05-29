@@ -535,14 +535,17 @@ begin
   MinW := csRightBottomMargin;
 
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('AdjustRightBottomMargin. Original ClientWidth %d, ClientHeight %d, BorderWidth %d.',
-    [ClientWidth, ClientHeight, BorderWidth]);
+  CnDebugger.LogFmt('AdjustRightBottomMargin. Original Width %d, Height %d. ClientWidth %d, ClientHeight %d, BorderWidth %d.',
+    [Width, Height, ClientWidth, ClientHeight, BorderWidth]);
 {$ENDIF}
 
   List := TObjectList.Create(False);
   try
     for I := ControlCount - 1 downto 0 do
     begin
+      if Controls[I].Align <> alNone then
+        Continue;
+
       Added := False;
       V := ClientWidth - BorderWidth - Controls[I].Left - Controls[I].Width;
       if V < csRightBottomMargin then
@@ -558,6 +561,7 @@ begin
         if V < MinW then
           MinW := V;
       end;
+
 
       V := ClientHeight - BorderWidth - Controls[I].Top - Controls[I].Height;
       if V < csRightBottomMargin then
