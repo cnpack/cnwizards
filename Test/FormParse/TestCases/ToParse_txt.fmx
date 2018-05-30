@@ -1,0 +1,34 @@
+object Form1: TForm1
+  Left = 0
+  Top = 0
+  Caption = 'Form1'
+  ClientHeight = 480
+  ClientWidth = 640
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  DesignerMasterStyle = 0
+  object CornerButton1: TCornerButton
+    Position.X = 128.000000000000000000
+    Position.Y = 104.000000000000000000
+    Sides = [Top, Left, Bottom, Right]
+    TabOrder = 1
+    Text = 'CornerButton1'
+    XRadius = 3.000000000000000000
+    YRadius = 3.000000000000000000
+  end
+  object MediaPlayerControl1: TMediaPlayerControl
+    Position.X = 56.000000000000000000
+    Position.Y = 280.000000000000000000
+  end
+  object Button1: TButton
+    Position.X = 384.000000000000000000
+    Position.Y = 288.000000000000000000
+    TabOrder = 4
+    Text = 'Button1'
+  end
+  object PopupMenu1: TPopupMenu
+    Left = 384
+    Top = 136
+  end
+end

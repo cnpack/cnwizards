@@ -1,0 +1,45 @@
+object Form1: TForm1
+  Left = 192
+  Top = 107
+  Width = 928
+  Height = 413
+  VertScrollBar.Range = 353
+  HorzScrollBar.Range = 697
+  Caption = 'Form1'
+  Color = clBackground
+  PixelsPerInch = 96
+  TextHeight = 12
+  TextWidth = 6
+  object Label1: TLabel
+    Left = 64
+    Top = 48
+    Width = 36
+    Height = 12
+    Caption = 'Label1'
+  end
+  object Button1: TButton
+    Left = 96
+    Top = 232
+    Width = 75
+    Height = 25
+    Caption = 'Button1'
+    TabOrder = 1
+  end
+  object Memo1: TMemo
+    Left = 264
+    Top = 80
+    Width = 337
+    Height = 105
+    Lines.Strings = (
+      'Memo1')
+    TabOrder = 2
+  end
+  object Panel1: TPanel
+    Left = 376
+    Top = 272
+    Width = 321
+    Height = 81
+    Caption = 'Panel1'
+    TabOrder = 3
+  end
+end
