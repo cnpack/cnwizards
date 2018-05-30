@@ -272,6 +272,22 @@ var
         AInfo.DfmInfo.Height := TControl(Comp).Height;
         Result := True;
       end;
+
+{$IFDEF SUPPORT_FMX}
+      if Assigned(Comp) and CnFmxIsInheritedFromFrame(Comp) then
+      begin
+        AInfo.DfmInfo.FormClass := Comp.ClassName;
+        AInfo.DfmInfo.Name := Comp.Name;
+        ARect := CnFmxGetControlRect(Comp);
+
+        // FMX Frame нч Caption 
+        AInfo.DfmInfo.Left := ARect.Left;
+        AInfo.DfmInfo.Top := ARect.Top;
+        AInfo.DfmInfo.Width := ARect.Width;
+        AInfo.DfmInfo.Height := ARect.Height;
+        Result := True;
+      end;
+{$ENDIF}
     except
       ;
     end;
@@ -325,6 +341,14 @@ begin
 
           FormFileName := _CnChangeFileExt(IModuleInfo.FileName, '.dfm');
           Exists := FileExists(FormFileName);
+
+{$IFDEF SUPPORT_FMX}
+          if not Exists then
+          begin
+            FormFileName := _CnChangeFileExt(IModuleInfo.FileName, '.fmx'); // FMX
+            Exists := FileExists(FormFileName);
+          end;
+{$ENDIF}
           if not Exists then
           begin
             FormFileName := _CnChangeFileExt(IModuleInfo.FileName, '.nfm'); // VCL.NET
@@ -333,11 +357,6 @@ begin
             begin
               FormFileName := _CnChangeFileExt(IModuleInfo.FileName, '.xfm'); // CLX, Kylix
               Exists := FileExists(FormFileName);
-              if not Exists then
-              begin
-                FormFileName := _CnChangeFileExt(IModuleInfo.FileName, '.fmx'); // FMX
-                Exists := FileExists(FormFileName);
-              end;
             end;
           end;
 

@@ -296,10 +296,13 @@ var
       end;
 
 {$IFDEF SUPPORT_FMX}
-      if Assigned(Comp) and CnFmxIsInheritedFromCommonCustomForm(Comp) then
+      if Assigned(Comp) and (CnFmxIsInheritedFromCommonCustomForm(Comp)
+        or CnFmxIsInheritedFromFrame(Comp)) then
       begin
         AInfo.DfmInfo.FormClass := Comp.ClassName;
         AInfo.DfmInfo.Name := Comp.Name;
+
+        // Frame Ê±·µ»Ø¿Õ
         AInfo.DfmInfo.Caption := CnFmxGetCommonCustomFormCaption(Comp);
         ARect := CnFmxGetControlRect(Comp);
 
@@ -683,7 +686,7 @@ begin
   if (Item.Index >= 0) and (Item.Index < DisplayList.Count) then
   begin
     Info := TCnFormInfo(DisplayList.Objects[Item.Index]);
-    Item.Caption := Info.DfmInfo.Name;
+    Item.Caption := Info.Text; // DfmInfo.Name;
     Item.ImageIndex := Info.ImageIndex;
     Item.Data := Info;
     
