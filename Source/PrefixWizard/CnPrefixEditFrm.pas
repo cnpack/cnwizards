@@ -77,16 +77,15 @@ type
     procedure edtNameKeyPress(Sender: TObject; var Key: Char);
     procedure btnClassNameClick(Sender: TObject);
   private
-    { Private declarations }
     FPrefix: string;
     FRootName: string;
     FUseUnderLine: Boolean;
     FComponentClass: string;
+    procedure SetEditSel(Sender: TObject);
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
-    procedure SetEditSel(Sender: TObject);
+
   end;
 
 // 显示对话框，取得新的组件名称。RootName 不为空时表示是 Form 的情形
@@ -170,7 +169,7 @@ begin
   SetEditSel(nil);
 end;
 
-procedure TCnPrefixEditForm.SetEditSel;
+procedure TCnPrefixEditForm.SetEditSel(Sender: TObject);
 begin
   edtName.SetFocus;
   if Self.FUseUnderLine then

@@ -44,11 +44,10 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, Dialogs, Contnrs,
-{$IFDEF COMPILER6_UP}
-  StrUtils,
-{$ENDIF}
+{$IFDEF COMPILER6_UP} StrUtils, {$ENDIF}
   ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles, ToolsAPI,
   Graphics, ImgList, ActnList,
+{$IFDEF SUPPORT_FMX} CnFmxUtils, {$ENDIF}
   CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnWizUtils, CnIni,
   CnWizMultiLang, CnProjectViewBaseFrm, CnWizDfmParser, CnProjectViewFormsFrm;
 
@@ -242,6 +241,9 @@ var
   Exists: Boolean;
 {$IFDEF BDS}
   ProjectGroup: IOTAProjectGroup;
+{$ENDIF}
+{$IFDEF SUPPORT_FMX}
+  ARect: TRect;
 {$ENDIF}
 
   function GetDfmInfoFromIDE(const AFileName: string; AInfo: TCnFormInfo): Boolean;
