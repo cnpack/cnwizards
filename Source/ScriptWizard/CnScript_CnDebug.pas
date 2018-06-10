@@ -124,6 +124,10 @@ begin
     RegisterMethod('Procedure LogColor( Color : TColor; const AMsg : string)');
     RegisterMethod('Procedure LogFloat( Value : Extended; const AMsg : string)');
     RegisterMethod('Procedure LogInteger( Value : Integer; const AMsg : string)');
+    RegisterMethod('Procedure LogInt64( Value : Int64; const AMsg: string)');
+{$IFDEF SUPPORT_UINT64}
+    RegisterMethod('Procedure LogUInt64( Value : UInt64; const AMsg: string)');
+{$ENDIF}
     RegisterMethod('Procedure LogChar( Value : Char; const AMsg : string)');
     RegisterMethod('Procedure LogDateTime( Value : TDateTime; const AMsg : string)');
     RegisterMethod('Procedure LogDateTimeFmt( Value : TDateTime; const AFmt : string; const AMsg : string)');
@@ -173,6 +177,10 @@ begin
     RegisterMethod('Procedure TraceColor( Color : TColor; const AMsg : string)');
     RegisterMethod('Procedure TraceFloat( Value : Extended; const AMsg : string)');
     RegisterMethod('Procedure TraceInteger( Value : Integer; const AMsg : string)');
+    RegisterMethod('Procedure TraceInt64( Value : Int64; const AMsg: string)');
+{$IFDEF SUPPORT_UINT64}
+    RegisterMethod('Procedure TraceUInt64( Value : UInt64; const AMsg: string)');
+{$ENDIF}
     RegisterMethod('Procedure TraceChar( Value : Char; const AMsg : string)');
     RegisterMethod('Procedure TraceDateTime( Value : TDateTime; const AMsg : string)');
     RegisterMethod('Procedure TraceDateTimeFmt( Value : TDateTime; const AFmt : string; const AMsg : string)');
@@ -458,6 +466,10 @@ begin
     RegisterMethod(@TCnDebugger.LogColor, 'LogColor');
     RegisterMethod(@TCnDebugger.LogFloat, 'LogFloat');
     RegisterMethod(@TCnDebugger.LogInteger, 'LogInteger');
+    RegisterMethod(@TCnDebugger.LogInt64, 'LogInt64');
+{$IFDEF SUPPORT_UINT64}
+    RegisterMethod(@TCnDebugger.LogUInt64, 'LogUInt64');
+{$ENDIF}
     RegisterMethod(@TCnDebugger.LogChar, 'LogChar');
     RegisterMethod(@TCnDebugger.LogDateTime, 'LogDateTime');
     RegisterMethod(@TCnDebugger.LogDateTimeFmt, 'LogDateTimeFmt');
@@ -507,6 +519,10 @@ begin
     RegisterMethod(@TCnDebugger.TraceColor, 'TraceColor');
     RegisterMethod(@TCnDebugger.TraceFloat, 'TraceFloat');
     RegisterMethod(@TCnDebugger.TraceInteger, 'TraceInteger');
+    RegisterMethod(@TCnDebugger.TraceInt64, 'TraceInt64');
+{$IFDEF SUPPORT_UINT64}
+    RegisterMethod(@TCnDebugger.TraceUInt64, 'TraceUInt64');
+{$ENDIF}
     RegisterMethod(@TCnDebugger.TraceChar, 'TraceChar');
     RegisterMethod(@TCnDebugger.TraceDateTime, 'TraceDateTime');
     RegisterMethod(@TCnDebugger.TraceDateTimeFmt, 'TraceDateTimeFmt');
