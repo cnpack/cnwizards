@@ -68,7 +68,7 @@ uses
   CnWizConsts, CnCommon, CnLangMgr, CnHashLangStorage, CnLangStorage, CnWizHelp,
   CnFormScaler, CnWizIni, CnLangCollection,
 {$ENDIF}
-  StdCtrls, IniFiles {$IFDEF IDE_SUPPORT_THEMING}, ToolsAPI {$ENDIF};
+  StdCtrls, IniFiles {$IFDEF IDE_SUPPORT_THEMING}, ToolsAPI, CnIDEMirrorIntf {$ENDIF};
 
 type
 
@@ -182,11 +182,11 @@ var
 procedure RegisterThemeClass;
 {$IFDEF IDE_SUPPORT_THEMING}
 var
-  Theming: IOTAIDEThemingServices250;
+  Theming: ICnOTAIDEThemingServices250;
 {$ENDIF}
 begin
 {$IFDEF IDE_SUPPORT_THEMING}
-  if Supports(BorlandIDEServices, IOTAIDEThemingServices250, Theming) then
+  if Supports(BorlandIDEServices, StringToGUID(GUID_IOTAIDETHEMINGSERVICES250), Theming) then
   begin
     Theming.RegisterFormClass(TCnTranslateForm);
 {$IFDEF DEBUG}

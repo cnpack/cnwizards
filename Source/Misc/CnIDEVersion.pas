@@ -54,6 +54,10 @@ uses
   CnCommon, CnWizUtils;
 
 function IsIdeVersionLatest: Boolean;
+{* 返回当前是否最新 IDE 版本}
+
+function IsDelphi10Dot2Dot3: Boolean;
+{* 返回是否 Delphi 10.2.3，用于主题判断}
 
 var
   CnIdeVersionDetected: Boolean = False;
@@ -333,6 +337,23 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide250.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+end;
+
+function IsDelphi10Dot2Dot3: Boolean;
+{$IFDEF DELPHI102_TOKYO}
+const
+  CoreIdeLatest: TVersionNumber =
+    (Major: 25; Minor: 0; Release: 29899; Build: 2631); // 10.2.3
+var
+  ReadFileVersion: TVersionNumber;
+{$ENDIF}
+begin
+{$IFDEF DELPHI102_TOKYO}
+  ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide250.bpl');
+  Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+{$ELSE}
+  Result := False;
+{$ENDIF}
 end;
 
 function IsIdeVersionLatest: Boolean;

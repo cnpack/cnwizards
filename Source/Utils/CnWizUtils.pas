@@ -70,7 +70,8 @@ uses
   {$ELSE}
   DsgnIntf, LibIntf,
   {$ENDIF}
-  {$IFDEF DELPHIXE3_UP}Actions,{$ENDIF}
+  {$IFDEF DELPHIXE3_UP} Actions,{$ENDIF}
+  {$IFDEF IDE_SUPPORT_THEMING} CnIDEMirrorIntf, {$ENDIF}
   mPasLex, mwBCBTokenList, CnPasWideLex, CnBCBWideTokenList,
   Clipbrd, TypInfo, ComCtrls, StdCtrls, Imm, Contnrs, RegExpr, CnWizCompilerConst,
   CnWizConsts, CnCommon, CnConsts, CnWideStrings, CnWizClasses, CnWizIni,
@@ -7290,12 +7291,12 @@ end;
 function CnOtaIDESupportsTheming: Boolean;
 {$IFDEF IDE_SUPPORT_THEMING}
 var
-  Theming: IOTAIDEThemingServices;
+  Theming: ICnOTAIDEThemingServices;
 {$ENDIF}
 begin
   Result := False;
 {$IFDEF IDE_SUPPORT_THEMING}
-  if Supports(BorlandIDEServices, IOTAIDEThemingServices, Theming) then
+  if Supports(BorlandIDEServices, StringToGUID(GUID_IOTAIDETHEMINGSERVICES), Theming) then
     Result := True;
 {$ENDIF}
 end;
@@ -7304,12 +7305,12 @@ end;
 function CnOtaGetIDEThemingEnabled: Boolean;
 {$IFDEF IDE_SUPPORT_THEMING}
 var
-  Theming: IOTAIDEThemingServices;
+  Theming: ICnOTAIDEThemingServices;
 {$ENDIF}
 begin
   Result := False;
 {$IFDEF IDE_SUPPORT_THEMING}
-  if Supports(BorlandIDEServices, IOTAIDEThemingServices, Theming) then
+  if Supports(BorlandIDEServices, StringToGUID(GUID_IOTAIDETHEMINGSERVICES), Theming) then
     Result := Theming.IDEThemingEnabled;
 {$ENDIF}
 end;
@@ -7318,12 +7319,12 @@ end;
 function CnOtaGetActiveThemeName: string;
 {$IFDEF IDE_SUPPORT_THEMING}
 var
-  Theming: IOTAIDEThemingServices;
+  Theming: ICnOTAIDEThemingServices;
 {$ENDIF}
 begin
   Result := '';
 {$IFDEF IDE_SUPPORT_THEMING}
-  if Supports(BorlandIDEServices, IOTAIDEThemingServices, Theming) then
+  if Supports(BorlandIDEServices, StringToGUID(GUID_IOTAIDETHEMINGSERVICES), Theming) then
     Result := Theming.ActiveTheme;
 {$ENDIF}
 end;
