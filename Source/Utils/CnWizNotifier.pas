@@ -387,10 +387,10 @@ type
     FEvents: TApplicationEvents;
     FIdeNotifierIndex: Integer;
     FDebuggerNotifierIndex: Integer;
-    FThemingNotifierIndex: Integer;
     FCnWizIdeNotifier: TCnWizIdeNotifier;
     FCnWizDebuggerNotifier: TCnWizDebuggerNotifier;
 {$IFDEF IDE_SUPPORT_THEMING}
+    FThemingNotifierIndex: Integer;
     FCnIDEThemingServicesNotifier: ICnNTAIDEThemingServicesNotifier;
 {$ENDIF}
     FLastControl: TWinControl;

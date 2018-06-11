@@ -2865,6 +2865,11 @@ begin
 
     TextWith := Canvas.TextWidth(AText);
     Canvas.Font.Style := [];
+    if odSelected in State then
+    begin
+      Canvas.Font.Color := clHighlightText;
+      Canvas.Brush.Color := clHighlight;
+    end;
     Canvas.TextOut(Rect.Left + DESC_INTERVAL + TextWith, Rect.Top, SymbolItem.Description);
   end;
 end;
