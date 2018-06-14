@@ -33,9 +33,7 @@ object CnMsgChild: TCnMsgChild
   object splTime: TSplitter
     Left = 611
     Top = 0
-    Width = 3
     Height = 306
-    Cursor = crHSplit
     Align = alRight
   end
   object lvTime: TListView
@@ -103,25 +101,19 @@ object CnMsgChild: TCnMsgChild
       object Splitter3: TSplitter
         Left = 318
         Top = 0
-        Width = 3
         Height = 23
-        Cursor = crHSplit
         Visible = False
       end
       object Splitter4: TSplitter
         Left = 374
         Top = 0
-        Width = 3
         Height = 23
-        Cursor = crHSplit
         Visible = False
       end
       object Splitter5: TSplitter
         Left = 457
         Top = 0
-        Width = 3
         Height = 23
-        Cursor = crHSplit
         Visible = False
       end
       object pnlLevel: TPanel
@@ -178,6 +170,9 @@ object CnMsgChild: TCnMsgChild
         Align = alLeft
         BevelOuter = bvNone
         TabOrder = 1
+        DesignSize = (
+          208
+          23)
         object btnSearch: TSpeedButton
           Left = 178
           Top = 0
@@ -338,6 +333,12 @@ object CnMsgChild: TCnMsgChild
       Height = 84
       Hint = 'Detailed Display'
       Align = alClient
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -12
+      Font.Name = 'Courier New'
+      Font.Style = []
+      ParentFont = False
       ParentShowHint = False
       ReadOnly = True
       ScrollBars = ssVertical
