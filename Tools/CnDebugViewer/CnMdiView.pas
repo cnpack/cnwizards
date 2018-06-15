@@ -90,6 +90,7 @@ type
     N2: TMenuItem;
     MenuDropBookmark: TMenuItem;
     M1: TMenuItem;
+    SaveMemDump1: TMenuItem;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -150,6 +151,7 @@ type
     procedure pnlTreeOnResize(Sender: TObject);
     procedure SetStore(const Value: TCnMsgStore);
     function GetSelectedContent: string;
+    function GetSelectedItem: TCnMsgItem;
   protected
     procedure DoCreate; override;
     procedure LanguageChanged(Sender: TObject);
@@ -181,6 +183,7 @@ type
     property HasBookmarks: Boolean read FHasBookmarks;
     property IsResizing: Boolean read FIsResizing write FIsResizing;
     property SelectedContent: string read GetSelectedContent;
+    property SelectedItem: TCnMsgItem read GetSelectedItem;
   end;
 
 var
@@ -309,11 +312,11 @@ begin
   // 后经修改VirtualTree源码解决，但只支持顺序增加的节点
 
   case Column of
-    0: CellText := IntToStr(Index + 1);                           // 序号
-    1: CellText := FViewStore.Msgs[Index].Msg;                        // 正文
-    2: CellText := SCnMsgTypeDescArray[FViewStore.Msgs[Index].MsgType]^;// 类型
-    3: CellText := IntToStr(FViewStore.Msgs[Index].Level);            // 层次
-    4: CellText := '$' + IntToHex(FViewStore.Msgs[Index].ThreadId, 2); // 线程 ID
+    0: CellText := IntToStr(Index + 1);                                  // 序号
+    1: CellText := FViewStore.Msgs[Index].Msg;                           // 正文
+    2: CellText := SCnMsgTypeDescArray[FViewStore.Msgs[Index].MsgType]^; // 类型
+    3: CellText := IntToStr(FViewStore.Msgs[Index].Level);               // 层次
+    4: CellText := '$' + IntToHex(FViewStore.Msgs[Index].ThreadId, 2);   // 线程 ID
     5: CellText := FViewStore.Msgs[Index].Tag;
     6: CellText := GetTimeDesc(FViewStore.Msgs[Index]);
   else
@@ -1265,7 +1268,12 @@ var
   Node: PVirtualNode;
 begin
   if FMsgTree.SelectedCount = 1 then
-    Result := mmoDetail.Lines.Text
+  begin
+    if mmoDetail.SelLength > 0 then
+      Result := mmoDetail.SelText
+    else
+      Result := mmoDetail.Lines.Text;
+  end
   else
   begin
     List := TList.Create;
@@ -1285,6 +1293,14 @@ end;
 procedure TCnMsgChild.RequireRefreshTime;
 begin
   RefreshTime(FStore);
+end;
+
+function TCnMsgChild.GetSelectedItem: TCnMsgItem;
+begin
+  Result := nil;
+  if FMsgTree.SelectedCount = 1 then
+    if (FSelectedIndex >= 0) and (FSelectedIndex < FViewStore.MsgCount) then
+      Result := FViewStore.Msgs[FSelectedIndex];
 end;
 
 end.

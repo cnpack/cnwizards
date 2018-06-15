@@ -194,6 +194,9 @@ type
     btnClear: TToolButton;
     actViewWatch: TAction;
     Watch1: TMenuItem;
+    actSaveMemDump: TAction;
+    SaveMemDump1: TMenuItem;
+    dlgSaveMemDump: TSaveDialog;
     procedure actNewExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure actExitExecute(Sender: TObject);
@@ -242,6 +245,7 @@ type
     procedure CnUDPDataReceived(Sender: TComponent; Buffer: Pointer;
       Len: Integer; FromIP: String; Port: Integer);
     procedure actViewWatchExecute(Sender: TObject);
+    procedure actSaveMemDumpExecute(Sender: TObject);
   private
     FUpdatingSwitch: Boolean;
     FClickingSwitch: Boolean;
@@ -597,6 +601,11 @@ begin
   end
   else if (Action = actCopy) then
     (Action as TCustomAction).Enabled := (CurrentChild <> nil) and (CurrentChild.mmoDetail.Text <> '')
+  else if (Action = actSaveMemDump) then
+  begin
+    (Action as TCustomAction).Enabled := (CurrentChild <> nil) and (CurrentChild.MsgTree.SelectedCount = 1)
+      and (CurrentChild.SelectedItem <> nil) and (CurrentChild.SelectedItem.MsgType = cmtMemoryDump);
+  end
   else if (Action = actBookmark) then
   begin
     (Action as TCustomAction).Enabled := (CurrentChild <> nil) and (CurrentChild.MsgTree.SelectedCount = 1);
@@ -1317,6 +1326,35 @@ begin
     CnWatchForm.Show;
 
   CnWatchForm.BringToFront;
+end;
+
+procedure TCnMainViewer.actSaveMemDumpExecute(Sender: TObject);
+var
+  Item: TCnMsgItem;
+  Stream: TMemoryStream;
+  S: string;
+begin
+  if CurrentChild <> nil then
+  begin
+    Item := CurrentChild.SelectedItem;
+    if (Item <> nil) and (Item.MsgType = cmtMemoryDump) and
+      (Item.MemDumpAddr <> nil) and (Item.MemDumpLength > 0) then
+    begin
+      if dlgSaveMemDump.Execute then
+      begin
+        Stream := TMemoryStream.Create;
+        try
+          Stream.Write(Item.MemDumpAddr^, Item.MemDumpLength);
+          S := dlgSaveMemDump.FileName;
+          if dlgSaveMemDump.FilterIndex = 1 then
+            S := _CnChangeFileExt(S, '.bin');
+          Stream.SaveToFile(S);
+        finally
+          Stream.Free;
+        end;
+      end;
+    end
+  end;
 end;
 
 end.

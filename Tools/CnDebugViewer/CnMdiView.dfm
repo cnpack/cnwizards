@@ -354,6 +354,9 @@ object CnMsgChild: TCnMsgChild
     object C1: TMenuItem
       Action = CnMainViewer.actCopy
     end
+    object SaveMemDump1: TMenuItem
+      Action = CnMainViewer.actSaveMemDump
+    end
     object A1: TMenuItem
       Action = CnMainViewer.actSelAll
     end

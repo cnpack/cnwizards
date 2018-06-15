@@ -69,6 +69,12 @@ type
     FTimeStampType: TCnTimeStampType;
     FMsgDateTime: TDateTime;
     FBookmarked: Boolean;
+    FMemDumpLength: Integer;
+    FMemDumpAddr: Pointer;
+  public
+    destructor Destroy; override;
+    property MemDumpAddr: Pointer read FMemDumpAddr write FMemDumpAddr;
+    property MemDumpLength: Integer read FMemDumpLength write FMemDumpLength;
   published
     property Level: Integer read FLevel write FLevel;
     property Indent: Integer read FIndent write FIndent;
@@ -78,6 +84,7 @@ type
     property Msg: string read FMsg write FMsg;
     property Tag: string read FTag write FTag;
     property MsgType: TCnMsgType read FMsgType write FMsgType;
+
     property TimeStampType: TCnTimeStampType read FTimeStampType write FTimeStampType;
     property MsgDateTime: TDateTime read FMsgDateTime write FMsgDateTime;
     property MsgTickCount: DWORD read FMsgTickCount write FMsgTickCount;
@@ -470,7 +477,15 @@ begin
     Size := ADesc^.Length - SizeOf(ADesc^.Annex) - SizeOf(DWord);
     CopyMemory(@AMsg, @(ADesc^.Msg), Size);
     if AItem.MsgType = cmtMemoryDump then
-      AItem.Msg := HexDumpMemory(@AMsg, Size)
+    begin
+      AItem.Msg := HexDumpMemory(@AMsg, Size);
+      AItem.MemDumpLength := Size;
+      if Size > 0 then
+      begin
+        AItem.MemDumpAddr := GetMemory(Size);
+        CopyMemory(AItem.MemDumpAddr, @AMsg, Size);
+      end;
+    end
     else
       AItem.Msg := AMsg;
   end;
@@ -1004,6 +1019,15 @@ end;
 function TCnFilterConditions.IndexOfThreadID(AID: DWORD): Integer;
 begin
   Result := FThreadIDs.IndexOf(Pointer(AID));
+end;
+
+{ TCnMsgItem }
+
+destructor TCnMsgItem.Destroy;
+begin
+  if FMemDumpAddr <> nil then
+    FreeMemory(FMemDumpAddr);
+  inherited;
 end;
 
 initialization

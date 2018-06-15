@@ -274,6 +274,9 @@ object CnMainViewer: TCnMainViewer
       object E2: TMenuItem
         Action = actExport
       end
+      object SaveMemDump1: TMenuItem
+        Action = actSaveMemDump
+      end
       object N5: TMenuItem
         Caption = '-'
       end
@@ -424,6 +427,14 @@ object CnMainViewer: TCnMainViewer
       ImageIndex = 3
       ShortCut = 16463
       OnExecute = actOpenExecute
+    end
+    object actExport: TAction
+      Category = 'File'
+      Caption = '&Export...'
+      Hint = 'Export to File'
+      ImageIndex = 47
+      ShortCut = 16453
+      OnExecute = actExportExecute
     end
     object actSave: TAction
       Category = 'File'
@@ -639,13 +650,6 @@ object CnMainViewer: TCnMainViewer
       Hint = 'Clear All Bookmarks'
       OnExecute = actClearBookmarksExecute
     end
-    object actExport: TAction
-      Category = 'File'
-      Caption = '&Export...'
-      Hint = 'Export to File'
-      ShortCut = 16453
-      OnExecute = actExportExecute
-    end
     object actShowMainForm: TAction
       Caption = 'Show CnDebug&Viewer'
       Hint = 'Show CnDebugViewer'
@@ -663,6 +667,14 @@ object CnMainViewer: TCnMainViewer
       Category = 'View'
       Caption = '&Watch'
       OnExecute = actViewWatchExecute
+    end
+    object actSaveMemDump: TAction
+      Category = 'File'
+      Caption = 'Save &MemDump...'
+      Hint = 'Save Memory Dump to File'
+      ImageIndex = 72
+      ShortCut = 16461
+      OnExecute = actSaveMemDumpExecute
     end
   end
   object pmSwitch: TPopupMenu
@@ -3904,7 +3916,7 @@ object CnMainViewer: TCnMainViewer
       'Text File(*.txt)|*.txt|Comma Seperated File(*.csv)|*.csv|HTML Fi' +
       'le(*.htm)|*.htm'
     Left = 544
-    Top = 80
+    Top = 88
   end
   object tryIcon: TCnTrayIcon
     Active = False
@@ -3993,5 +4005,10 @@ object CnMainViewer: TCnMainViewer
     OnDataReceived = CnUDPDataReceived
     Left = 424
     Top = 160
+  end
+  object dlgSaveMemDump: TSaveDialog
+    Filter = 'Bin File (*.bin)|*.bin|All Files (*.*)|*.*'
+    Left = 464
+    Top = 88
   end
 end
