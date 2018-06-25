@@ -59,9 +59,15 @@ type
 { TCnWizOptions }
 
   TCnWizUpgradeStyle = (usDisabled, usAllUpgrade, usUserDefine);
-  TCnWizUpgradeContent = set of (ucNewFeature, ucBigBugFixed);
+  {* 更新检查设置}
 
-  TCnWizOptions = class (TObject)
+  TCnWizUpgradeContent = set of (ucNewFeature, ucBigBugFixed);
+  {* 更新类型}
+
+  TCnWizSizeEnlarge = (fseOrigin, fseAddHalf, fseDouble, fseTriple);
+  {* 屏幕字体放大倍数，1、1.5、2、3}
+
+  TCnWizOptions = class(TObject)
   {* 专家环境参数类}
   private
     FDataPath: string;
@@ -100,6 +106,7 @@ type
     FUseCustomUserDir: Boolean;
     FUseOneCPUCore: Boolean;
     FUseLargeIcon: Boolean;
+    FSizeEnlarge: TCnWizSizeEnlarge;
     procedure SetCurrentLangID(const Value: Cardinal);
     function GetUpgradeCheckDate: TDateTime;
     procedure SetUpgradeCheckDate(const Value: TDateTime);
@@ -242,6 +249,8 @@ type
     {* 在多CPU中只使用一个CPU内核，以解决兼容性问题}
     property UseLargeIcon: Boolean read FUseLargeIcon write SetUseLargeIcon;
     {* 是否在工具栏等处使用大尺寸图标}
+    property SizeEnlarge: TCnWizSizeEnlarge read FSizeEnlarge write FSizeEnlarge;
+    {* 窗体的字号放大倍数}
 
     property UseCustomUserDir: Boolean read FUseCustomUserDir write SetUseCustomUserDir;
     property CustomUserDir: string read FCustomUserDir write SetCustomUserDir;
@@ -278,6 +287,7 @@ const
   csFixThreadLocale = 'FixThreadLocale';
   csUseOneCPUCore = 'UseOneCPUCore';
   csUseLargeIcon = 'UseLargeIcon';
+  csSizeEnlarge = 'SizeEnlarge';
 {$IFDEF BDS}
   csUseOneCPUDefault = False;
 {$ELSE}
@@ -392,6 +402,7 @@ begin
     FUseToolsMenu := ReadBool(SCnOptionSection, csUseToolsMenu, False);
     FixThreadLocale := ReadBool(SCnOptionSection, csFixThreadLocale, False);
     FUseLargeIcon := ReadBool(SCnOptionSection, csUseLargeIcon, False);
+    FSizeEnlarge := TCnWizSizeEnlarge(ReadInteger(SCnOptionSection, csSizeEnlarge, Ord(FSizeEnlarge)));
 
     FUseCustomUserDir := ReadBool(SCnOptionSection, csUseCustomUserDir, CheckWinVista);
     SHGetFolderPath(0, CSIDL_PERSONAL or CSIDL_FLAG_CREATE, 0, 0, SHUserDir);
@@ -456,6 +467,7 @@ begin
     WriteBool(SCnOptionSection, csUseToolsMenu, FUseToolsMenu);
     WriteBool(SCnOptionSection, csFixThreadLocale, FFixThreadLocale);
     WriteBool(SCnOptionSection, csUseLargeIcon, FUseLargeIcon);
+    WriteInteger(SCnOptionSection, csSizeEnlarge, Ord(FSizeEnlarge));
     WriteBool(SCnOptionSection, csUseCustomUserDir, FUseCustomUserDir);
     WriteString(SCnOptionSection, csCustomUserDir, FCustomUserDir);
 

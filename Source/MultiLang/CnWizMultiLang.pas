@@ -108,6 +108,8 @@ type
     // 会因为主题而缩小，遍历修复。注意重设 Anchors 时如果 FormCreate 事件里修改
     // 了尺寸，则会因为组件的 Explicit Bounds 导致尺寸复原，需要特殊处理
     procedure AdjustRightBottomMargin;
+
+    procedure ProcessSizeEnlarge;
 {$ENDIF TEST_APP}
   protected
 {$IFNDEF TEST_APP}
@@ -399,6 +401,7 @@ begin
 
   // inherited 中会调用 FormCreate 事件，有可能改变了 Width/Height
   AdjustRightBottomMargin;
+  ProcessSizeEnlarge;
 end;
 
 procedure TCnTranslateForm.DoDestroy;
@@ -754,6 +757,42 @@ begin
 end;
 
 {$IFNDEF TEST_APP}
+
+procedure TCnTranslateForm.ProcessSizeEnlarge;
+var
+  Enlarge: TCnWizSizeEnlarge;
+
+  function CalcFontSize(AOrigin: Integer): Integer;
+  begin
+    Result := AOrigin;
+    case Enlarge of
+      fseAddHalf: Result := (AOrigin shr 1) + AOrigin;
+      fseDouble: Result := AOrigin shl 1;
+      fseTriple: Result := (AOrigin shl 1) + AOrigin;
+    end;
+  end;
+
+  procedure ProcessControl(AControl: TControl);
+  var
+    I: Integer;
+  begin
+    if AControl <> nil then
+    begin
+      if not TControlHack(AControl).ParentFont then
+        TControlHack(AControl).Font.Size := CalcFontSize(TControlHack(AControl).Font.Size);
+
+      if (AControl is TWinControl) and ((AControl as TWinControl).ControlCount > 0) then
+      begin
+        for I := 0 to (AControl as TWinControl).ControlCount - 1 do
+          ProcessControl((AControl as TWinControl).Controls[I]);
+      end;
+    end;
+  end;
+begin
+  Enlarge := WizOptions.SizeEnlarge;
+  if Enlarge <> fseOrigin then
+    ProcessControl(Self);
+end;
 
 initialization
 {$IFDEF STAND_ALONE}
