@@ -30,6 +30,7 @@ var
   BeforeCompile: TCnScriptBeforeCompile;
   AfterCompile: TCnScriptAfterCompile;
   FileNotify: TCnScriptFileNotify;
+  SourceNotify: TCnScriptSourceEditorNotify;
   FormEditorNotify: TCnScriptFormEditorNotify;
   AppEventNotify: TCnScriptApplicationEventNotify;
 begin
@@ -56,6 +57,12 @@ begin
     FileNotify := TCnScriptFileNotify(Event);
     CnDebugger.LogFmt('-- Executed by File Notification: Type %d. File: %s.',
       [Ord(FileNotify.FileNotifyCode), FileNotify.FileName]);
+  end
+  else if Event is TCnScriptSourceEditorNotify then
+  begin
+    SourceNotify := TCnScriptSourceEditorNotify(Event);
+    CnDebugger.LogFmt('-- Excuted by SourcEditor Notification: Type %d.',
+      [Ord(SourceNotify.NotifyType)]);
   end
   else if Event is TCnScriptFormEditorNotify then
   begin
