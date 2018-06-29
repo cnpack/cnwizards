@@ -59,8 +59,8 @@ uses
   {$ELSE}
   DsgnIntf,
   {$ENDIF}
-  CnRestoreSystemMenu,
-  CnWizClasses, CnWizConsts, CnWizMenuAction, CnLangMgr, CnWizIdeHooks;
+  CnWizClasses, CnWizConsts, CnWizMenuAction
+  {$IFNDEF CNWIZARDS_MINIMUM}, CnLangMgr, CnRestoreSystemMenu, CnWizIdeHooks {$ENDIF};
 
 const
   BootShortCutKey = VK_LSHIFT; // 快捷键为 左 Shift，用户可以在启动 Delphi 时
@@ -82,7 +82,9 @@ type
      请不要直接创建该类的实例，该类的实例在专家 DLL 注册时自动创建，请使用全局
      变量 CnWizardMgr 来访问管理器实例。}
   private
+{$IFNDEF CNWIZARDS_MINIMUM}
     FRestoreSysMenu: TCnRestoreSystemMenu;
+{$ENDIF}
     FMenu: TMenuItem;
     FToolsMenu: TMenuItem;
     FWizards: TList;
@@ -121,8 +123,10 @@ type
     procedure SetTipShowing;
     procedure ShowTipofDay(Sender: TObject);
     procedure CheckIDEVersion;
+{$IFNDEF CNWIZARDS_MINIMUM}
 {$IFDEF CASTALIA_KEYMAPPING_CONFLICT_BUG}
     procedure CheckKeyMappingEnhModulesSequence;
+{$ENDIF}
 {$ENDIF}
     function GetWizards(Index: Integer): TCnBaseWizard;
     function GetWizardCount: Integer;
@@ -421,7 +425,9 @@ begin
   
   // 让专家可以在 Create 和其他过程中能够访问 CnWizardMgr 中的其他属性。
   CnWizardMgr := Self;
+{$IFNDEF CNWIZARDS_MINIMUM}
   RegisterThemeClass;
+{$ENDIF}
   WizOptions := TCnWizOptions.Create;
   // 处理封面窗口
   if @InitSplashProc <> nil then
@@ -441,17 +447,22 @@ begin
 {$ENDIF}
 
   WizShortCutMgr.BeginUpdate;
+{$IFNDEF CNWIZARDS_MINIMUM}
   CnListBeginUpdate;
+{$ENDIF}
   try
     InternalCreate;
   finally
+{$IFNDEF CNWIZARDS_MINIMUM}
     CnListEndUpdate;
+{$ENDIF}
     WizShortCutMgr.EndUpdate;
   end;
   
   ConstructSortedMenu;
-
+{$IFNDEF CNWIZARDS_MINIMUM}
   FRestoreSysMenu := TCnRestoreSystemMenu.Create(nil);
+{$ENDIF}
 
   // Create LaterLoaded Timer
   FLaterLoadTimer := TTimer.Create(nil);
@@ -515,7 +526,9 @@ begin
     FreeAndNil(WizOptions);
     FreeAndNil(FLaterLoadTimer);
     FreeAndNil(FTipTimer);
+{$IFNDEF CNWIZARDS_MINIMUM}
     FreeAndNil(FRestoreSysMenu);
+{$ENDIF}
     inherited Destroy;
   finally
     if hMutex <> 0 then
@@ -583,11 +596,15 @@ end;
 
 // 调用专家的语言改变事件，由专家自己处理语言变化
 procedure TCnWizardMgr.ChangeWizardLanguage;
+{$IFNDEF CNWIZARDS_MINIMUM}
 var
-  i: Integer;
+  I: Integer;
+{$ENDIF}
 begin
-  for i := 0 to WizardCount - 1 do
+{$IFNDEF CNWIZARDS_MINIMUM}
+  for I := 0 to WizardCount - 1 do
     Wizards[i].LanguageChanged(CnLanguageManager);
+{$ENDIF}
 end;
 
 // 创建其他菜单项
@@ -1221,7 +1238,9 @@ begin
 {$ENDIF}
 
   WizShortCutMgr.BeginUpdate;
+{$IFNDEF CNWIZARDS_MINIMUM}
   CnListBeginUpdate;
+{$ENDIF}
   try
     for i := 0 to WizardCount - 1 do
     try
@@ -1249,7 +1268,9 @@ begin
 {$ENDIF}
 
   finally
+{$IFNDEF CNWIZARDS_MINIMUM}
     CnListEndUpdate;
+{$ENDIF}
     WizShortCutMgr.UpdateBinding;   // IDE 启动后强制重新绑定一次
     WizShortCutMgr.EndUpdate;
   end;
@@ -1458,6 +1479,7 @@ begin
   Result := [wsEnabled];
 end;
 
+{$IFNDEF CNWIZARDS_MINIMUM}
 {$IFDEF CASTALIA_KEYMAPPING_CONFLICT_BUG}
 
 procedure TCnWizardMgr.CheckKeyMappingEnhModulesSequence;
@@ -1591,6 +1613,7 @@ begin
   end;
 end;
 
+{$ENDIF}
 {$ENDIF}
 
 {$IFDEF COMPILER6_UP}

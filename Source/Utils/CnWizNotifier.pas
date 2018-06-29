@@ -56,7 +56,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, ToolsAPI, AppEvnts,
-  Consts, ExtCtrls, Contnrs, CnWizUtils, CnClasses, CnIDEVersion, CnIDEMirrorIntf;
+  Consts, ExtCtrls, Contnrs, CnWizUtils, CnClasses
+  {$IFNDEF CNWIZARDS_MINIMUM}, CnIDEVersion, CnIDEMirrorIntf {$ENDIF};
   
 type
   PCnWizNotifierRecord = ^TCnWizNotifierRecord;

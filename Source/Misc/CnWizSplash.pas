@@ -39,7 +39,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls, CnWizManager, CnWizUtils, CnWizConsts;
+  StdCtrls, ExtCtrls, CnWizManager, {$IFNDEF CNWIZARDS_MINIMUM} CnWizUtils, {$ENDIF}
+  CnWizConsts;
 
 procedure CnWizInitSplash;
 
@@ -95,7 +96,11 @@ begin
     imgCnWiz.Parent := pnlCnWiz;
     imgCnWiz.Align := alClient;
 
+{$IFDEF CNWIZARDS_MINIMUM}
+    // Draw Pure Color or Text to avoid Load Icon
+{$ELSE}
     CnWizLoadBitmap(imgCnWiz.Picture.Bitmap, SCnAboutBmp);
+{$ENDIF}
     if not imgCnWiz.Picture.Bitmap.Empty then
     begin
 //      √ª…∂”√¥¶    
