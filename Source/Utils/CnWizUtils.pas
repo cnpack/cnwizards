@@ -535,7 +535,7 @@ function CnOtaGetSourceEditorFromModule(Module: IOTAModule; const FileName: stri
 {* 返回指定模块指定文件名的单元编辑器}
 function CnOtaGetEditorFromModule(Module: IOTAModule; const FileName: string): IOTAEditor;
 {* 返回指定模块指定文件名的编辑器}
-function CnOtaGetEditActionsFromModule(Module: IOTAModule): IOTAEditActions;
+function CnOtaGetEditActionsFromModule(Module: IOTAModule = nil): IOTAEditActions;
 {* 返回指定模块的 EditActions }
 function CnOtaGetCurrentSelection: string;
 {* 取当前选择的文本}
@@ -2411,19 +2411,19 @@ end;
 // 文件名判断处理函数 (来自 GExperts Src 1.12)
 //==============================================================================
 
-// 当前编辑的文件是Delphi源文件
+// 当前编辑的文件是 Delphi 源文件
 function CurrentIsDelphiSource: Boolean;
 begin
   Result := WizOptions.IsDelphiSource(CnOtaGetCurrentSourceFile);
 end;
 
-// 当前编辑的文件是C源文件
+// 当前编辑的文件是 C 源文件
 function CurrentIsCSource: Boolean;
 begin
   Result := WizOptions.IsCSource(CnOtaGetCurrentSourceFile);
 end;
 
-// 当前编辑的文件是Delphi或C源文件
+// 当前编辑的文件是 Delphi 或 C 源文件
 function CurrentIsSource: Boolean;
 begin
 {$IFDEF BDS}
@@ -2434,19 +2434,19 @@ begin
 {$ENDIF}
 end;
 
-// 当前编辑的源文件（非窗体）是Delphi源文件
+// 当前编辑的源文件（非窗体）是 Delphi 源文件
 function CurrentSourceIsDelphi: Boolean;
 begin
   Result := WizOptions.IsDelphiSource(CnOtaGetCurrentSourceFileName);
 end;
 
-// 当前编辑的源文件（非窗体）是C源文件
+// 当前编辑的源文件（非窗体）是 C 源文件
 function CurrentSourceIsC: Boolean;
 begin
   Result := WizOptions.IsCSource(CnOtaGetCurrentSourceFileName);
 end;
 
-// 当前编辑的源文件（非窗体）是Delphi或C源文件
+// 当前编辑的源文件（非窗体）是 Delphi 或 C 源文件
 function CurrentSourceIsDelphiOrCSource: Boolean;
 begin
   Result := CurrentSourceIsDelphi or CurrentSourceIsC;
@@ -3109,12 +3109,26 @@ end;
 
 // 显示当前设计窗体
 procedure CnOtaShowDesignerForm;
+{$IFDEF COMPILER6_UP}
+var
+  EditActions: IOTAEditActions;
+{$ENDIF}
 begin
   try
   {$IFDEF COMPILER6_UP}
     if (ComponentDesigner.ActiveRoot <> nil)
       and Assigned(ComponentDesigner.ActiveRoot.GetFormEditor) then
-      ComponentDesigner.ActiveRoot.GetFormEditor.Show;
+      ComponentDesigner.ActiveRoot.GetFormEditor.Show
+    else
+    begin
+      if CurrentIsSource then
+      begin
+        // BDS 下 ComponentDesigner.ActiveRoot 为 nil，只能不顾后果地手工执行 IOTAEditActions.ToggleFormUnit
+        EditActions := CnOtaGetEditActionsFromModule(nil);
+        if EditActions <> nil then
+          EditActions.ToggleFormUnit;
+      end;
+    end;
   {$ELSE}
     if Assigned(CompLib) and Assigned(CompLib.GetActiveForm)
       and (CompLib.GetActiveForm.GetFormEditor <> nil) then
@@ -3959,25 +3973,28 @@ end;
 // 返回指定模块的 EditActions
 function CnOtaGetEditActionsFromModule(Module: IOTAModule): IOTAEditActions;
 var
-  i: Integer;
+  I: Integer;
   EditView: IOTAEditView;
   SourceEditor: IOTASourceEditor;
 begin
+  if Module = nil then
+    Module := CnOtaGetCurrentModule;
+
   if Module <> nil then
   begin
-      SourceEditor := CnOtaGetSourceEditorFromModule(Module);
-      if SourceEditor = nil then
-      begin
-        Result := nil;
-        Exit;
-      end;
+    SourceEditor := CnOtaGetSourceEditorFromModule(Module);
+    if SourceEditor = nil then
+    begin
+      Result := nil;
+      Exit;
+    end;
 
-      for i := 0 to SourceEditor.GetEditViewCount - 1 do
-      begin
-        EditView := SourceEditor.GetEditView(i);
-        if Supports(EditView, IOTAEditActions, Result) then
-          Exit;
-      end;
+    for I := 0 to SourceEditor.GetEditViewCount - 1 do
+    begin
+      EditView := SourceEditor.GetEditView(I);
+      if Supports(EditView, IOTAEditActions, Result) then
+        Exit;
+    end;
   end;
   Result := nil;
 end;
