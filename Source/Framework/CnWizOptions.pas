@@ -29,7 +29,9 @@ unit CnWizOptions;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2002.11.07 V1.0
+* 修改记录：2018.06.30 V1.1
+*               加入对命令行中指定用户存储目录的支持
+*           2002.11.07 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -104,6 +106,7 @@ type
     FFixThreadLocale: Boolean;
     FCustomUserDir: string;
     FUseCustomUserDir: Boolean;
+    FUseCmdUserDir: Boolean;
     FUseOneCPUCore: Boolean;
     FUseLargeIcon: Boolean;
     FSizeEnlarge: TCnWizSizeEnlarge;
@@ -264,9 +267,9 @@ var
 implementation
 
 uses
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebug,
-{$ENDIF Debug}
+{$ENDIF}
   CnWizUtils, CnWizConsts, CnCommon, CnWizManager, CnConsts, CnWizCompilerConst,
   CnNativeDecl;
 
@@ -341,8 +344,8 @@ var
   ModuleName, SHUserDir: array[0..MAX_Path - 1] of Char;
   DefDir: string;
   Svcs: IOTAServices;
-  i: Integer;
-  s: string;
+  I: Integer;
+  S: string;
 begin
   inherited;
   Svcs := BorlandIDEServices as IOTAServices;
@@ -360,20 +363,29 @@ begin
   FHelpPath := MakePath(FDllPath + SCnWizHelpPath);
 
   FRegBase := SCnPackRegPath;
-  for i := 1 to ParamCount do
+  for I := 1 to ParamCount do
   begin
-    s := ParamStr(i);
-    if (Length(s) > Length(SCnUserRegSwitch) + 1) and CharInSet(s[1], ['-', '/']) and
-      SameText(Copy(s, 2, Length(SCnUserRegSwitch)), SCnUserRegSwitch) then
+    S := ParamStr(I);
+    if (Length(S) > Length(SCnUserRegSwitch) + 1) and CharInSet(S[1], ['-', '/']) and
+      SameText(Copy(S, 2, Length(SCnUserRegSwitch)), SCnUserRegSwitch) then
     begin
       FRegBase := MakePath(SCnSoftwareRegPath +
-        Copy(s, Length(SCnUserRegSwitch) + 2, MaxInt));
-      Break;
-    end;
+        Copy(S, Length(SCnUserRegSwitch) + 2, MaxInt));
+    end
+    else if (Length(S) > Length(SCnUserDirSwitch) + 1) and CharInSet(S[1], ['-', '/']) and
+      SameText(Copy(S, 2, Length(SCnUserDirSwitch)), SCnUserDirSwitch) then
+    begin
+      FUseCmdUserDir := True;
+      FCustomUserDir := Copy(S, Length(SCnUserDirSwitch) + 2, MaxInt);
+    end
   end;
-{$IFDEF Debug}
+
+{$IFDEF DEBUG}
   CnDebugger.LogMsg('Registry Base Path: ' + FRegBase);
-{$ENDIF Debug}
+  if FUseCmdUserDir then
+    CnDebugger.LogMsg('Command Line Set User Path: ' + FCustomUserDir);
+{$ENDIF}
+
   FRegPath := MakePath(MakePath(FRegBase) + SCnWizardRegPath);
   FPropEditorRegPath := MakePath(MakePath(FRegBase) + SCnPropEditorRegPath);
   FCompEditorRegPath := MakePath(MakePath(FRegBase) + SCnCompEditorRegPath);
@@ -382,12 +394,12 @@ begin
   FCompilerID := CompilerShortName;
   FBuildDate := CnStrToDate(SCnWizardBuildDate);
   
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogMsg('CompilerPath: ' + FCompilerPath);
   CnDebugger.LogMsg('CompilerRegPath: ' + FCompilerRegPath);
   CnDebugger.LogMsg('WizardDllName: ' + FDllName);
   CnDebugger.LogMsg('WizardRegPath: ' + FRegPath);
-{$ENDIF Debug}
+{$ENDIF}
 
   with CreateRegIniFile do
   try
@@ -407,8 +419,11 @@ begin
     FUseCustomUserDir := ReadBool(SCnOptionSection, csUseCustomUserDir, CheckWinVista);
     SHGetFolderPath(0, CSIDL_PERSONAL or CSIDL_FLAG_CREATE, 0, 0, SHUserDir);
     DefDir := MakePath(SHUserDir) + SCnWizCustomUserPath;
-    FCustomUserDir := ReadString(SCnOptionSection, csCustomUserDir, DefDir);
-    if FUseCustomUserDir then // 使用指定用户目录时需要保证该目录有效
+
+    if not FUseCmdUserDir then
+      FCustomUserDir := ReadString(SCnOptionSection, csCustomUserDir, DefDir);
+
+    if FUseCustomUserDir or FUseCmdUserDir then // 使用指定用户目录时需要保证该目录有效
     begin
       if (FCustomUserDir <> '') and not DirectoryExists(FCustomUserDir) then
         CreateDirectory(PChar(FCustomUserDir), nil);
@@ -436,14 +451,15 @@ begin
     Free;
   end;
 
-  if FUseCustomUserDir then
+  if FUseCustomUserDir or FUseCmdUserDir then
     FUserPath := MakePath(FCustomUserDir)
   else
     FUserPath := MakePath(FDllPath + SCnWizUserPath);
   CreateDirectory(PChar(FUserPath), nil);
-{$IFDEF Debug}
+
+{$IFDEF DEBUG}
   CnDebugger.LogMsg('User Path: ' + FUserPath);
-{$ENDIF Debug}
+{$ENDIF}
 
   with TMemIniFile.Create(FDataPath + SCnWizUpgradeIniFile) do
   try
@@ -469,7 +485,8 @@ begin
     WriteBool(SCnOptionSection, csUseLargeIcon, FUseLargeIcon);
     WriteInteger(SCnOptionSection, csSizeEnlarge, Ord(FSizeEnlarge));
     WriteBool(SCnOptionSection, csUseCustomUserDir, FUseCustomUserDir);
-    WriteString(SCnOptionSection, csCustomUserDir, FCustomUserDir);
+    if not FUseCmdUserDir then // 不是命令行中指定目录时才保存目录名，避免命令行指定的目录覆盖掉设置目录
+      WriteString(SCnOptionSection, csCustomUserDir, FCustomUserDir);
 
     WriteBool(SCnUpgradeSection, csUpgradeReleaseOnly, FUpgradeReleaseOnly);
     WriteBool(SCnUpgradeSection, csNewFeature, ucNewFeature in FUpgradeContent);
