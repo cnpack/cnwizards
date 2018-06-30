@@ -56,6 +56,9 @@ interface
   {$DEFINE STAND_ALONE}
 {$ENDIF}
 
+// TEST_APP    表示编译成独立应用的测试程序
+// STAND_ALONE 表示编译成独立应用
+
 uses
   Windows, Messages, SysUtils, Classes, Forms, ActnList, Controls, Menus, Contnrs,
 {$IFNDEF TEST_APP}
@@ -759,6 +762,7 @@ end;
 {$IFNDEF TEST_APP}
 
 procedure TCnTranslateForm.ProcessSizeEnlarge;
+{$IFNDEF STAND_ALONE}
 var
   Enlarge: TCnWizSizeEnlarge;
 
@@ -788,10 +792,13 @@ var
       end;
     end;
   end;
+{$ENDIF}
 begin
+{$IFNDEF STAND_ALONE}
   Enlarge := WizOptions.SizeEnlarge;
   if Enlarge <> fseOrigin then
     ProcessControl(Self);
+{$ENDIF}
 end;
 
 initialization
