@@ -554,7 +554,7 @@ begin
   if cbMultipleMachines.Checked then
     Result := Result + '  ' + cbMultipleMachines.Caption + SCRLF; // Do not localize.
   if cbProjectSpecific.Checked then
-    Result := Result + '  ' + cbProjectSpecific.Caption + SCRLF; // Do not localize.
+    Result := Result + '  ' + cbProjectSpecific.Caption + SCRLF;  // Do not localize.
   Result := Result + SCRLF;
 end;
 
@@ -562,6 +562,7 @@ function GetCnPackVersionString: string;
 begin
   Result := Format('%s Ver: %s.%s Build %s' + SCRLF, [_CnExtractFileName(WizOptions.DllName),
     SCnWizardMajorVersion, SCnWizardMinorVersion, SCnWizardBuildDate]);
+  Result := Result + '  CnWizards Language Index: ' + IntToStr(CnLanguageManager.CurrentLanguageIndex)  + SCRLF;
 end;
 
 // 请不要本地化
