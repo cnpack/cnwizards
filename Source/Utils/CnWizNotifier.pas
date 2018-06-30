@@ -292,6 +292,8 @@ type
 
 {$IFDEF IDE_SUPPORT_THEMING}
 
+{$IFNDEF CNWIZARDS_MINIMUM} // Minimum 条件下不支持，也就是说针对 10.2，只能在 10.2.3 下加载
+
 //==============================================================================
 // IDE Theming Notifier 通知器类（私有类）
 //==============================================================================
@@ -313,6 +315,8 @@ type
     constructor Create(ANotifierServices: TCnWizNotifierServices);
     destructor Destroy; override;
   end;
+
+{$ENDIF}
 
 {$ENDIF}
 
@@ -391,8 +395,10 @@ type
     FCnWizIdeNotifier: TCnWizIdeNotifier;
     FCnWizDebuggerNotifier: TCnWizDebuggerNotifier;
 {$IFDEF IDE_SUPPORT_THEMING}
+{$IFNDEF CNWIZARDS_MINIMUM}
     FThemingNotifierIndex: Integer;
     FCnIDEThemingServicesNotifier: ICnNTAIDEThemingServicesNotifier;
+{$ENDIF}
 {$ENDIF}
     FLastControl: TWinControl;
     FLastForm: TForm;
@@ -845,7 +851,9 @@ var
   IServices: IOTAServices;
   IDebuggerService: IOTADebuggerServices;
 {$IFDEF IDE_SUPPORT_THEMING}
+{$IFNDEF CNWIZARDS_MINIMUM}
   ThemingService: ICnOTAIDEThemingServices;
+{$ENDIF}
 {$ENDIF}
 begin
   inherited;
@@ -893,11 +901,13 @@ begin
   FCnWizDebuggerNotifier := TCnWizDebuggerNotifier.Create(Self);
   FDebuggerNotifierIndex := IDebuggerService.AddNotifier(FCnWizDebuggerNotifier as IOTADebuggerNotifier);
 {$IFDEF IDE_SUPPORT_THEMING}
+{$IFNDEF CNWIZARDS_MINIMUM}
   if Supports(BorlandIDEServices, StringToGUID(GUID_IOTAIDETHEMINGSERVICES), ThemingService) then
   begin
     FCnIDEThemingServicesNotifier := TCnIDEThemingServicesNotifier.Create(Self);
     FThemingNotifierIndex := ThemingService.AddNotifier(FCnIDEThemingServicesNotifier);
   end;
+{$ENDIF}
 {$ENDIF}
   CallWndProcHook := SetWindowsHookEx(WH_CALLWNDPROC, CallWndProc, 0, GetCurrentThreadId);
   CallWndProcRetHook := SetWindowsHookEx(WH_CALLWNDPROCRET, CallWndProcRet, 0, GetCurrentThreadId);
@@ -915,12 +925,14 @@ var
   IDebuggerService: IOTADebuggerServices;
   I: Integer;
 {$IFDEF IDE_SUPPORT_THEMING}
+{$IFNDEF CNWIZARDS_MINIMUM}
   ThemingService: ICnOTAIDEThemingServices;
 {$ENDIF}
+{$ENDIF}
 begin
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnWizNotifierServices.Destroy');
-{$ENDIF Debug}
+{$ENDIF}
   UnhookWindowsHookEx(CallWndProcHook);
   CallWndProcHook := 0;
   UnhookWindowsHookEx(CallWndProcRetHook);
@@ -936,12 +948,14 @@ begin
     IDebuggerService.RemoveNotifier(FDebuggerNotifierIndex);
 
 {$IFDEF IDE_SUPPORT_THEMING}
+{$IFNDEF CNWIZARDS_MINIMUM}
   if FThemingNotifierIndex <> 0 then
   begin
     if Supports(BorlandIDEServices, StringToGUID(GUID_IOTAIDETHEMINGSERVICES), ThemingService) then
       ThemingService.RemoveNotifier(FThemingNotifierIndex);
   end;
   FCnIDEThemingServicesNotifier := nil;
+{$ENDIF}
 {$ENDIF}
 
   FreeAndNil(FCompNotifyList);
@@ -2177,6 +2191,7 @@ begin
 end;
 
 {$IFDEF IDE_SUPPORT_THEMING}
+{$IFNDEF CNWIZARDS_MINIMUM}
 
 { TCnIDEThemingServicesNotifier }
 
@@ -2224,12 +2239,15 @@ begin
 end;
 
 {$ENDIF}
+{$ENDIF}
 
 initialization
 {$IFDEF DELPHI102_TOKYO}
+{$IFNDEF CNWIZARDS_MINIMUM}
   if IsDelphi10Dot2Dot3 then
     ChangeIntfGUID(TCnIDEThemingServicesNotifier, ICnNTAIDEThemingServicesNotifier,
       StringToGUID(GUID_INTAIDETHEMINGSERVICESNOTIFIER));
+{$ENDIF}
 {$ENDIF}
 
 finalization
