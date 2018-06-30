@@ -20,6 +20,8 @@
 
 library CnWizards_Minimum;
 
+// dcc32 CnWizards_Minimum.dpr < CnWizards_Minimum.cfg
+
 uses
   CnWizDllEntry in '..\Source\Framework\CnWizDllEntry.pas',
   CnWizConsts in '..\Source\Framework\CnWizConsts.pas',
