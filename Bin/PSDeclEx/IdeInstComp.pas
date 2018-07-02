@@ -37,7 +37,8 @@ unit IdeInstComp;
 {$R-,H+,X+}
 
 // 当脚本在 uses 列表中指定了 IdeInstComp 时，脚本可以使用在 IDE 中安装的所有组件。
-// 对于没有在 PSDecl 目录下的声明文件中列出的组件，只能访问其 published 的属性。
+// 但对于没有在 PSDecl 目录下的声明文件中列出的组件，即使 uses 了 IdeInstComp，
+// 也只能访问其 published 的属性。
 
 // 其它没有特别声明的单元如 Windows, Classes，不需要 uses 即可使用其声明的内容，
 // 不过如果 uses 他们，在 IDE 代码编辑器中编辑脚本时，可以使用 IDE 的代码自动完成。
