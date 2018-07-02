@@ -47,7 +47,7 @@ interface
 
 uses
   Windows, Messages, Classes, SysUtils, Graphics, Menus, Forms, ActnList, ToolsAPI, 
-  {$IFDEF DelphiXE3_UP}Actions,{$ENDIF} CnCommon, CnWizConsts, CnWizShortCut;
+  {$IFDEF DELPHIXE3_UP} Actions,{$ENDIF} CnCommon, CnWizConsts, CnWizShortCut;
 
 type
 //==============================================================================
@@ -225,9 +225,9 @@ procedure FreeWizActionMgr;
 implementation
 
 uses
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebug,
-{$ENDIF Debug}
+{$ENDIF}
   CnWizUtils, CnWizIdeUtils;
 
 const
@@ -295,7 +295,8 @@ end;
 // 快捷键调用过程
 procedure TCnWizAction.OnShortCut(Sender: TObject);
 begin
-  if Assigned(OnExecute) then OnExecute(Self);
+  if Assigned(OnExecute) then
+    OnExecute(Self);
 end;
 
 // 设置从 TAction 继承来的 ShortCut 属性
@@ -358,9 +359,9 @@ end;
 // 类构造器
 constructor TCnWizActionMgr.Create(AOwner: TComponent);
 begin
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnWizActionMgr.Create');
-{$ENDIF Debug}
+{$ENDIF}
   inherited Create(AOwner);
   FWizActions := TList.Create;
   FWizMenuActions := TList.Create;
@@ -368,25 +369,25 @@ begin
   FMoreAction.Caption := SCnMoreMenu;
   FMoreAction.Hint := StripHotkey(SCnMoreMenu);
   FMoreAction.OnExecute := MoreActionExecute;
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogLeave('TCnWizActionMgr.Create');
-{$ENDIF Debug}
+{$ENDIF}
 end;
 
 // 类析构器
 destructor TCnWizActionMgr.Destroy;
 begin
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnWizActionMgr.Destroy');
-{$ENDIF Debug}
+{$ENDIF}
   Clear;
   FMoreAction.Free;
   FWizActions.Free;
   FWizMenuActions.Free;
   inherited Destroy;
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogLeave('TCnWizActionMgr.Destroy');
-{$ENDIF Debug}
+{$ENDIF}
 end;
 
 // 子对象释放通知
@@ -398,17 +399,17 @@ begin
   inherited;
   if FDeleting then Exit;
   
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogFmt('TCnWizActionMgr.Notification: (%s: %s)',
     [AComponent.Name, AComponent.ClassName]);
-{$ENDIF Debug}
+{$ENDIF}
   for i := 0 to FWizActions.Count - 1 do
     if FWizActions[i] = AComponent then
     begin
       FWizActions.Delete(i);
-      {$IFDEF Debug}
+      {$IFDEF DEBUG}
         CnDebugger.LogMsg('TCnWizActionMgr FWizActions.Delete.');
-      {$ENDIF Debug}
+      {$ENDIF}
       Exit;
     end;
 
@@ -416,9 +417,9 @@ begin
     if FWizMenuActions[i] = AComponent then
     begin
       FWizMenuActions.Delete(i);
-      {$IFDEF Debug}
+      {$IFDEF DEBUG}
         CnDebugger.LogMsg('TCnWizActionMgr FWizMenuActions.Delete.');
-      {$ENDIF Debug}
+      {$ENDIF}
       Exit;
     end
     else if TCnWizMenuAction(FWizMenuActions[i]).FMenu = AComponent then
@@ -449,15 +450,15 @@ begin
       try
         AWizAction.Name := NewName;
       except
-      {$IFDEF Debug}
+      {$IFDEF DEBUG}
         CnDebugger.LogMsgWithType('Rename action error: ' + NewName, cmtError);
-      {$ENDIF Debug}
+      {$ENDIF}
       end;
     end
     else
-    {$IFDEF Debug}
+    {$IFDEF DEBUG}
       CnDebugger.LogMsgWithType('Component is already exists: ' + NewName, cmtError);
-    {$ENDIF Debug}
+    {$ENDIF}
   end;
   AWizAction.Caption := ACaption;
   AWizAction.Hint := AHint;
@@ -485,9 +486,9 @@ function TCnWizActionMgr.AddMenuAction(const ACommand, ACaption, AMenuName: stri
 var
   Svcs40: INTAServices40;
 begin
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogFmt('TCnWizActionMgr.Add WizMenuAction: %s', [ACommand]);
-{$ENDIF Debug}
+{$ENDIF}
   if IndexOfCommand(ACommand) >= 0 then
     raise ECnDuplicateCommand.CreateFmt(SCnDuplicateCommand, [ACommand]);
     
@@ -509,9 +510,9 @@ begin
   finally
     Result.FUpdating := False;
   end;
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogFmt('TCnWizActionMgr.Add WizMenuAction: %s Complete.', [ACommand]);
-{$ENDIF Debug}
+{$ENDIF}
 end;
 
 // 创建并返回一个 CnWizards Action 对象，同时将其增加到列表中
@@ -521,9 +522,9 @@ function TCnWizActionMgr.AddAction(const ACommand, ACaption: string;
 var
   Svcs40: INTAServices40;
 begin
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogFmt('TCnWizActionMgr.Add WizAction: %s', [ACommand]);
-{$ENDIF Debug}
+{$ENDIF}
   if IndexOfCommand(ACommand) >= 0 then
     raise ECnDuplicateCommand.CreateFmt(SCnDuplicateCommand, [ACommand]);
     
@@ -544,9 +545,9 @@ end;
 // 清空列表
 procedure TCnWizActionMgr.Clear;
 begin
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnWizActionMgr.Clear');
-{$ENDIF Debug}
+{$ENDIF}
   WizShortCutMgr.BeginUpdate;       // 开始更新
   try
     while WizActionCount > 0 do
@@ -554,9 +555,9 @@ begin
   finally
     WizShortCutMgr.EndUpdate;       // 结束更新，重新绑定快捷键
   end;
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogLeave('TCnWizActionMgr.Clear');
-{$ENDIF Debug}
+{$ENDIF}
 end;
 
 // 删除指定索引号的 Action 对象
@@ -566,20 +567,20 @@ begin
   try
     if (Index >= 0) and (Index < FWizActions.Count) then
     begin
-    {$IFDEF Debug}
+    {$IFDEF DEBUG}
       CnDebugger.LogFmt('TCnWizActionMgr.Delete(%d Action): %s', [Index,
         TCnWizAction(FWizActions[Index]).Command]);
-    {$ENDIF Debug}
+    {$ENDIF}
       TCnWizAction(FWizActions[Index]).Free;
       FWizActions.Delete(Index);
     end
     else if (Index >= FWizActions.Count) and (Index < FWizActions.Count +
       FWizMenuActions.Count) then
     begin
-    {$IFDEF Debug}
+    {$IFDEF DEBUG}
       CnDebugger.LogFmt('TCnWizActionMgr.Delete(%d MenuAction): %s', [Index,
         TCnWizAction(FWizMenuActions[Index - FWizActions.Count]).Command]);
-    {$ENDIF Debug}
+    {$ENDIF}
       TCnWizMenuAction(FWizMenuActions[Index - FWizActions.Count]).Free;
       FWizMenuActions.Delete(Index - FWizActions.Count);
     end;
@@ -598,14 +599,14 @@ end;
 // 返回指定的 Action 对象在列表中的索引号
 function TCnWizActionMgr.IndexOfAction(AWizAction: TCnWizAction): Integer;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := -1;
-  for i := 0 to WizActionCount - 1 do
+  for I := 0 to WizActionCount - 1 do
   begin
-    if AWizAction = WizActions[i] then
+    if AWizAction = WizActions[I] then
     begin
-      Result := i;
+      Result := I;
       Exit;
     end;
   end;
@@ -614,14 +615,14 @@ end;
 // 根据 Action 命令名查找索引号
 function TCnWizActionMgr.IndexOfCommand(const ACommand: string): Integer;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := -1;
   if ACommand = '' then Exit;
-  for i := 0 to WizActionCount - 1 do
-    if WizActions[i].FCommand = ACommand then
+  for I := 0 to WizActionCount - 1 do
+    if WizActions[I].FCommand = ACommand then
     begin
-      Result := i;
+      Result := I;
       Exit;
     end;
 end;
@@ -629,14 +630,14 @@ end;
 // 根据快捷键键值查找索引号
 function TCnWizActionMgr.IndexOfShortCut(AShortCut: TShortCut): Integer;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := -1;
   if AShortCut = 0 then Exit;
-  for i := 0 to WizActionCount - 1 do
-    if WizActions[i].ShortCut = AShortCut then
+  for I := 0 to WizActionCount - 1 do
+    if WizActions[I].ShortCut = AShortCut then
     begin
-      Result := i;
+      Result := I;
       Exit;
     end;
 end;

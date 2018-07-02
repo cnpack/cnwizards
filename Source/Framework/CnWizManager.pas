@@ -361,11 +361,13 @@ begin
   end;
 {$ENDIF}
 
+{$IFNDEF CNWIZARDS_MINIMUM}
   // 文件通知
   CnWizNotifierServices.AddFileNotifier(OnFileNotify);
 
   // IDE 启动完成后调用 Loaded
   CnWizNotifierServices.ExecuteOnApplicationIdle(OnIdleLoaded);
+{$ENDIF}
 end;
 
 // BDS 下注册插件产品信息
@@ -409,7 +411,10 @@ begin
     DoHandleException(Wizards[I].ClassName + '.OnLaterLoad');
   end;
 
+{$IFNDEF CNWIZARDS_MINIMUM}
   CnWizNotifierServices.ExecuteOnApplicationIdle(DoFreeLaterLoadTimer);
+{$ENDIF}
+
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('DoLaterLoad');
 {$ENDIF}
@@ -498,7 +503,9 @@ begin
     if FSettingsLoaded then
       SaveSettings;
 
+{$IFNDEF CNWIZARDS_MINIMUM}
     CnWizNotifierServices.RemoveFileNotifier(OnFileNotify);
+{$ENDIF}
 
     WizShortCutMgr.BeginUpdate;
     try
@@ -991,7 +998,7 @@ end;
 // 装载专家设置
 procedure TCnWizardMgr.LoadSettings;
 var
-  i: Integer;
+  I: Integer;
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnWizardMgr.LoadSettings');
@@ -999,25 +1006,25 @@ begin
   with WizOptions.CreateRegIniFile do
   try
     // 载入 MenuOrder
-    for i := 0 to MenuWizardCount - 1 do
+    for I := 0 to MenuWizardCount - 1 do
     begin
-      MenuWizards[i].MenuOrder := ReadInteger(SCnMenuOrderSection,
-        MenuWizards[i].GetIDStr, i);
+      MenuWizards[I].MenuOrder := ReadInteger(SCnMenuOrderSection,
+        MenuWizards[I].GetIDStr, I);
 
       // 此处调用 AcquireSubActions, 让 TCnSubMenuWizard 在 Create 时有空初始化
-      if MenuWizards[i] is TCnSubMenuWizard then
+      if MenuWizards[I] is TCnSubMenuWizard then
       begin
-        (MenuWizards[i] as TCnSubMenuWizard).ClearSubActions;
-        (MenuWizards[i] as TCnSubMenuWizard).AcquireSubActions;
+        (MenuWizards[I] as TCnSubMenuWizard).ClearSubActions;
+        (MenuWizards[I] as TCnSubMenuWizard).AcquireSubActions;
       end;
     end;
 
     // 装载专家设置
-    for i := 0 to WizardCount - 1 do
+    for I := 0 to WizardCount - 1 do
     begin
-      Wizards[i].DoLoadSettings;
-      Wizards[i].Active := ReadBool(SCnActiveSection,
-        Wizards[i].GetIDStr, Wizards[i].Active);
+      Wizards[I].DoLoadSettings;
+      Wizards[I].Active := ReadBool(SCnActiveSection,
+        Wizards[I].GetIDStr, Wizards[I].Active);
     end;
   finally
     Free;
@@ -1031,7 +1038,7 @@ end;
 // 保存专家设置
 procedure TCnWizardMgr.SaveSettings;
 var
-  i: Integer;
+  I: Integer;
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnWizardMgr.SaveSettings');
@@ -1039,17 +1046,17 @@ begin
 
   with WizOptions.CreateRegIniFile do
   try
-    for i := 0 to WizardCount - 1 do
+    for I := 0 to WizardCount - 1 do
     begin
-      Wizards[i].DoSaveSettings;
+      Wizards[I].DoSaveSettings;
       // 保存 Active
-      WriteBool(SCnActiveSection, Wizards[i].GetIDStr, Wizards[i].Active);
+      WriteBool(SCnActiveSection, Wizards[I].GetIDStr, Wizards[I].Active);
     end;
-    
+
     // 保存 MenuOrder
-    for i := 0 to MenuWizardCount - 1 do
-      WriteInteger(SCnMenuOrderSection, MenuWizards[i].GetIDStr,
-        MenuWizards[i].MenuOrder);
+    for I := 0 to MenuWizardCount - 1 do
+      WriteInteger(SCnMenuOrderSection, MenuWizards[I].GetIDStr,
+        MenuWizards[I].MenuOrder);
   finally
     Free;
   end;
@@ -1057,10 +1064,10 @@ begin
 {$IFNDEF CNWIZARDS_MINIMUM}
   with WizOptions.CreateRegIniFile(WizOptions.CompEditorRegPath) do
   try
-    for i := 0 to CnDesignEditorMgr.CompEditorCount - 1 do
+    for I := 0 to CnDesignEditorMgr.CompEditorCount - 1 do
     begin
-      CnDesignEditorMgr.CompEditors[i].DoSaveSettings;
-      with CnDesignEditorMgr.CompEditors[i] do
+      CnDesignEditorMgr.CompEditors[I].DoSaveSettings;
+      with CnDesignEditorMgr.CompEditors[I] do
         WriteBool(SCnActiveSection, IDStr, Active);
     end;
   finally
@@ -1069,10 +1076,10 @@ begin
 
   with WizOptions.CreateRegIniFile(WizOptions.PropEditorRegPath) do
   try
-    for i := 0 to CnDesignEditorMgr.PropEditorCount - 1 do
+    for I := 0 to CnDesignEditorMgr.PropEditorCount - 1 do
     begin
-      CnDesignEditorMgr.PropEditors[i].DoSaveSettings;
-      with CnDesignEditorMgr.PropEditors[i] do
+      CnDesignEditorMgr.PropEditors[I].DoSaveSettings;
+      with CnDesignEditorMgr.PropEditors[I] do
         WriteBool(SCnActiveSection, IDStr, Active);
     end;
   finally
@@ -1133,7 +1140,7 @@ end;
 procedure TCnWizardMgr.InstallCompEditors;
 {$IFNDEF CNWIZARDS_MINIMUM}
 var
-  i: Integer;
+  I: Integer;
 {$ENDIF}
 begin
 {$IFDEF DEBUG}
@@ -1142,8 +1149,8 @@ begin
 {$IFNDEF CNWIZARDS_MINIMUM}
   with WizOptions.CreateRegIniFile(WizOptions.CompEditorRegPath) do
   try
-    for i := 0 to CnDesignEditorMgr.CompEditorCount - 1 do
-      with CnDesignEditorMgr.CompEditors[i] do
+    for I := 0 to CnDesignEditorMgr.CompEditorCount - 1 do
+      with CnDesignEditorMgr.CompEditors[I] do
       begin
         Active := ReadBool(SCnActiveSection, IDStr, True);
       {$IFDEF DEBUG}
@@ -1165,7 +1172,7 @@ end;
 procedure TCnWizardMgr.InstallPropEditors;
 {$IFNDEF CNWIZARDS_MINIMUM}
 var
-  i: Integer;
+  I: Integer;
 {$ENDIF}
 begin
 {$IFDEF DEBUG}
@@ -1174,8 +1181,8 @@ begin
 {$IFNDEF CNWIZARDS_MINIMUM}
   with WizOptions.CreateRegIniFile(WizOptions.PropEditorRegPath) do
   try
-    for i := 0 to CnDesignEditorMgr.PropEditorCount - 1 do
-      with CnDesignEditorMgr.PropEditors[i] do
+    for I := 0 to CnDesignEditorMgr.PropEditorCount - 1 do
+      with CnDesignEditorMgr.PropEditors[I] do
       begin
         Active := ReadBool(SCnActiveSection, IDStr, True);
       {$IFDEF DEBUG}
@@ -1231,7 +1238,7 @@ end;
 // IDE 已启动事件
 procedure TCnWizardMgr.OnIdleLoaded(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('OnIdleLoaded');
@@ -1242,28 +1249,28 @@ begin
   CnListBeginUpdate;
 {$ENDIF}
   try
-    for i := 0 to WizardCount - 1 do
+    for I := 0 to WizardCount - 1 do
     try
-      Wizards[i].Loaded;
+      Wizards[I].Loaded;
     except
-      DoHandleException(Wizards[i].ClassName + '.Loaded');
+      DoHandleException(Wizards[I].ClassName + '.Loaded');
     end;
 
 {$IFNDEF CNWIZARDS_MINIMUM}
     // 装载组件编辑器设置
-    for i := 0 to CnDesignEditorMgr.CompEditorCount - 1 do
+    for I := 0 to CnDesignEditorMgr.CompEditorCount - 1 do
     try
-      CnDesignEditorMgr.CompEditors[i].Loaded;
+      CnDesignEditorMgr.CompEditors[I].Loaded;
     except
-      DoHandleException(CnDesignEditorMgr.CompEditors[i].IDStr + '.Loaded');
+      DoHandleException(CnDesignEditorMgr.CompEditors[I].IDStr + '.Loaded');
     end;
 
     // 装载属性编辑器设置
-    for i := 0 to CnDesignEditorMgr.PropEditorCount - 1 do
+    for I := 0 to CnDesignEditorMgr.PropEditorCount - 1 do
     try
-      CnDesignEditorMgr.PropEditors[i].Loaded;
+      CnDesignEditorMgr.PropEditors[I].Loaded;
     except
-      DoHandleException(CnDesignEditorMgr.PropEditors[i].IDStr + '.Loaded');
+      DoHandleException(CnDesignEditorMgr.PropEditors[I].IDStr + '.Loaded');
     end;
 {$ENDIF}
 

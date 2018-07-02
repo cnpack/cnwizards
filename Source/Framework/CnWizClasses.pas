@@ -687,9 +687,9 @@ var
 begin
   Ini := CreateIniFile;
   try
-  {$IFDEF Debug}
+  {$IFDEF DEBUG}
     CnDebugger.LogMsg('Loading settings: ' + ClassName);
-  {$ENDIF Debug}
+  {$ENDIF}
     LoadSettings(Ini);
   finally
     Ini.Free;
