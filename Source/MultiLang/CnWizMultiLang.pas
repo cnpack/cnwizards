@@ -64,7 +64,7 @@ uses
 {$IFNDEF TEST_APP}
 {$IFNDEF STAND_ALONE}
   CnConsts, CnWizClasses, CnWizManager, CnWizUtils, CnWizOptions, CnDesignEditor,
-  CnWizTranslate, CnLangUtils,
+  CnWizTranslate, CnLangUtils, CnWizScaler,
 {$ELSE}
   CnWizLangID,
 {$ENDIF}
@@ -102,6 +102,7 @@ type
   TCnTranslateForm = class(TForm)
 {$IFNDEF TEST_APP}
   private
+    FEnlarge: TCnWizSizeEnlarge;
     FActionList: TActionList;
     FHelpAction: TAction;
     procedure OnLanguageChanged(Sender: TObject);
@@ -138,6 +139,9 @@ type
     function GetNeedPersistentPosition: Boolean; virtual;
     {* 子类窗体重载此方法返回是否需要保存窗体大小和位置供下次重启后恢复，默认不需要}
     procedure ShowFormHelp;
+
+    property Enlarge: TCnWizSizeEnlarge read FEnlarge;
+    {* 供子类使用的缩放比例}
   public
     procedure Translate; virtual;
     {* 进行全窗体翻译}
@@ -378,6 +382,7 @@ var
   Theming: IOTAIDEThemingServices;
 {$ENDIF}
 begin
+  FEnlarge := WizOptions.SizeEnlarge;
   FActionList := TActionList.Create(Self);
   FHelpAction := TAction.Create(Self);
   FHelpAction.ShortCut := ShortCut(VK_F1, []);
@@ -762,42 +767,10 @@ end;
 {$IFNDEF TEST_APP}
 
 procedure TCnTranslateForm.ProcessSizeEnlarge;
-{$IFNDEF STAND_ALONE}
-var
-  Enlarge: TCnWizSizeEnlarge;
-
-  function CalcFontSize(AOrigin: Integer): Integer;
-  begin
-    Result := AOrigin;
-    case Enlarge of
-      fseAddHalf: Result := (AOrigin shr 1) + AOrigin;
-      fseDouble: Result := AOrigin shl 1;
-      fseTriple: Result := (AOrigin shl 1) + AOrigin;
-    end;
-  end;
-
-  procedure ProcessControl(AControl: TControl);
-  var
-    I: Integer;
-  begin
-    if AControl <> nil then
-    begin
-      if not TControlHack(AControl).ParentFont then
-        TControlHack(AControl).Font.Size := CalcFontSize(TControlHack(AControl).Font.Size);
-
-      if (AControl is TWinControl) and ((AControl as TWinControl).ControlCount > 0) then
-      begin
-        for I := 0 to (AControl as TWinControl).ControlCount - 1 do
-          ProcessControl((AControl as TWinControl).Controls[I]);
-      end;
-    end;
-  end;
-{$ENDIF}
 begin
 {$IFNDEF STAND_ALONE}
-  Enlarge := WizOptions.SizeEnlarge;
   if Enlarge <> fseOrigin then
-    ProcessControl(Self);
+    ScaleForm(Self, GetFactorFromSizeEnlarge(Enlarge));
 {$ENDIF}
 end;
 

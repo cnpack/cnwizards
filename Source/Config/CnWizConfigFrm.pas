@@ -231,19 +231,19 @@ end;
 // 窗体初始化
 procedure TCnWizConfigForm.FormCreate(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
   // 专家设置页面
   SetLength(FShortCuts, CnWizardMgr.WizardCount);
   SetLength(FActives, CnWizardMgr.WizardCount);
-  for i := 0 to CnWizardMgr.WizardCount - 1 do
+  for I := 0 to CnWizardMgr.WizardCount - 1 do
   begin
-    FActives[i] := CnWizardMgr[i].Active;
-    if CnWizardMgr[i] is TCnActionWizard then
-      FShortCuts[i] := TCnActionWizard(CnWizardMgr[i]).Action.ShortCut
+    FActives[I] := CnWizardMgr[I].Active;
+    if CnWizardMgr[I] is TCnActionWizard then
+      FShortCuts[I] := TCnActionWizard(CnWizardMgr[I]).Action.ShortCut
     else
-      FShortCuts[i] := 0;
-    lbWizards.Items.AddObject(CnWizardMgr[i].WizardName, CnWizardMgr[i]);
+      FShortCuts[I] := 0;
+    lbWizards.Items.AddObject(CnWizardMgr[I].WizardName, CnWizardMgr[I]);
   end;
   lbWizards.ItemIndex := WizOptions.ReadInteger(SCnOptionSection, csLastSelectedItem, 0);
   lbWizardsClick(lbWizards);
@@ -252,18 +252,18 @@ begin
   // 属性编辑器页面
   SetLength(FEditorActives, CnDesignEditorMgr.PropEditorCount +
     CnDesignEditorMgr.CompEditorCount);
-  for i := 0 to CnDesignEditorMgr.PropEditorCount - 1 do
+  for I := 0 to CnDesignEditorMgr.PropEditorCount - 1 do
   begin
-    FEditorActives[i] := CnDesignEditorMgr.PropEditors[i].Active;
-    lbDesignEditors.Items.AddObject(CnDesignEditorMgr.PropEditors[i].Name,
-      CnDesignEditorMgr.PropEditors[i]);
+    FEditorActives[I] := CnDesignEditorMgr.PropEditors[I].Active;
+    lbDesignEditors.Items.AddObject(CnDesignEditorMgr.PropEditors[I].Name,
+      CnDesignEditorMgr.PropEditors[I]);
   end;
 
-  for i := 0 to CnDesignEditorMgr.CompEditorCount - 1 do
+  for I := 0 to CnDesignEditorMgr.CompEditorCount - 1 do
   begin
-    FEditorActives[CnDesignEditorMgr.PropEditorCount + i] :=
-      CnDesignEditorMgr.CompEditors[i].Active;
-    lbDesignEditors.Items.AddObject(CnDesignEditorMgr.CompEditors[i].Name, CnDesignEditorMgr.CompEditors[i]);
+    FEditorActives[CnDesignEditorMgr.PropEditorCount + I] :=
+      CnDesignEditorMgr.CompEditors[I].Active;
+    lbDesignEditors.Items.AddObject(CnDesignEditorMgr.CompEditors[I].Name, CnDesignEditorMgr.CompEditors[I]);
   end;
   lbDesignEditors.ItemIndex := 0;
   lbDesignEditorsClick(lbDesignEditors);
@@ -285,6 +285,13 @@ begin
 
   //自画高度调整
   FDrawTextHeight := 12;
+  if Enlarge <> fseOrigin then
+  begin
+    FDrawTextHeight := Round(FDrawTextHeight * GetFactorFromSizeEnlarge(Enlarge));
+    lbWizards.ItemHeight := Round(lbWizards.ItemHeight * GetFactorFromSizeEnlarge(Enlarge));
+    lbDesignEditors.ItemHeight := Round(lbDesignEditors.ItemHeight * GetFactorFromSizeEnlarge(Enlarge));
+  end;
+
 //  if Scaled then
 //  begin
 //    FDrawTextHeight := FScaler.MultiPPI(FDrawTextHeight, Self);

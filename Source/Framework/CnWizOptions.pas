@@ -66,8 +66,8 @@ type
   TCnWizUpgradeContent = set of (ucNewFeature, ucBigBugFixed);
   {* 更新类型}
 
-  TCnWizSizeEnlarge = (fseOrigin, fseAddHalf, fseDouble, fseTriple);
-  {* 屏幕字体放大倍数，1、1.5、2、3}
+  TCnWizSizeEnlarge = (fseOrigin, fsOneQuarter, fseAddHalf, fseDouble, fseDoubleHalf, fseTriple);
+  {* 屏幕字体放大倍数，1、1.25、1.5、2、2.5、3}
 
   TCnWizOptions = class(TObject)
   {* 专家环境参数类}
@@ -253,9 +253,10 @@ type
     property UseLargeIcon: Boolean read FUseLargeIcon write SetUseLargeIcon;
     {* 是否在工具栏等处使用大尺寸图标}
     property SizeEnlarge: TCnWizSizeEnlarge read FSizeEnlarge write FSizeEnlarge;
-    {* 窗体的字号放大倍数}
+    {* 窗体的字号与尺寸放大倍数枚举}
 
     property UseCustomUserDir: Boolean read FUseCustomUserDir write SetUseCustomUserDir;
+    {* 是否使用指定的 User 目录}
     property CustomUserDir: string read FCustomUserDir write SetCustomUserDir;
     {* Vista / Win7 下使用指定的 User 目录来避免权限问题 }
   end;
@@ -263,7 +264,9 @@ type
 var
   WizOptions: TCnWizOptions;
   {* 专家环境参数对象}
-  
+
+function GetFactorFromSizeEnlarge(Enlarge: TCnWizSizeEnlarge): Single;
+
 implementation
 
 uses
@@ -273,6 +276,18 @@ uses
   CnWizUtils, CnWizConsts, CnCommon, CnWizManager, CnConsts, CnWizCompilerConst,
   CnNativeDecl;
 
+function GetFactorFromSizeEnlarge(Enlarge: TCnWizSizeEnlarge): Single;
+begin
+  Result := 1.0;
+  case Enlarge of
+    fseOrigin:      Result := 1.0;
+    fsOneQuarter:   Result := 1.25;
+    fseAddHalf:     Result := 1.5;
+    fseDouble:      Result := 2.0;
+    fseDoubleHalf:  Result := 2.5;
+    fseTriple:      Result := 3.0;
+  end;
+end;
 //==============================================================================
 // 专家公共参数类
 //==============================================================================
