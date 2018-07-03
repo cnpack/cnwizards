@@ -102,7 +102,9 @@ type
   TCnTranslateForm = class(TForm)
 {$IFNDEF TEST_APP}
   private
+{$IFNDEF STAND_ALONE}
     FEnlarge: TCnWizSizeEnlarge;
+{$ENDIF}
     FActionList: TActionList;
     FHelpAction: TAction;
     procedure OnLanguageChanged(Sender: TObject);
@@ -139,9 +141,12 @@ type
     function GetNeedPersistentPosition: Boolean; virtual;
     {* 子类窗体重载此方法返回是否需要保存窗体大小和位置供下次重启后恢复，默认不需要}
     procedure ShowFormHelp;
+    {* 显示帮助内容}
 
+{$IFNDEF STAND_ALONE}
     property Enlarge: TCnWizSizeEnlarge read FEnlarge;
-    {* 供子类使用的缩放比例}
+    {* 供专家包子类窗口使用的缩放比例}
+{$ENDIF}
   public
     procedure Translate; virtual;
     {* 进行全窗体翻译}
@@ -382,7 +387,9 @@ var
   Theming: IOTAIDEThemingServices;
 {$ENDIF}
 begin
+{$IFNDEF STAND_ALONE}
   FEnlarge := WizOptions.SizeEnlarge;
+{$ENDIF}
   FActionList := TActionList.Create(Self);
   FHelpAction := TAction.Create(Self);
   FHelpAction.ShortCut := ShortCut(VK_F1, []);
