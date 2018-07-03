@@ -7328,7 +7328,8 @@ begin
   Result := False;
 {$IFDEF IDE_SUPPORT_THEMING}
   if Supports(BorlandIDEServices, StringToGUID(GUID_IOTAIDETHEMINGSERVICES), Theming) then
-    Result := Theming.IDEThemingEnabled;
+    if Theming <> nil then
+      Result := Theming.IDEThemingEnabled;
 {$ENDIF}
 end;
 
@@ -7342,7 +7343,8 @@ begin
   Result := '';
 {$IFDEF IDE_SUPPORT_THEMING}
   if Supports(BorlandIDEServices, StringToGUID(GUID_IOTAIDETHEMINGSERVICES), Theming) then
-    Result := Theming.ActiveTheme;
+    if Theming <> nil then
+      Result := Theming.ActiveTheme;
 {$ENDIF}
 end;
 
