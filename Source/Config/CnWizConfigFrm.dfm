@@ -551,7 +551,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
           Top = 58
           Width = 457
           Height = 17
-          Caption = 'Use SetThreadLocale to fix encode problem under Vista / Win7.'
+          Caption = 'Use SetThreadLocale to Fix Encoding Problem under Vista / Win7.'
           TabOrder = 2
         end
         object chkUseOneCPUCore: TCheckBox
@@ -559,7 +559,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
           Top = 37
           Width = 273
           Height = 17
-          Caption = 'Set IDE to run in CPU 0 single core.'
+          Caption = 'Set IDE to Run in CPU 0 Single Core.'
           TabOrder = 1
         end
         object chkUseLargeIcon: TCheckBox
