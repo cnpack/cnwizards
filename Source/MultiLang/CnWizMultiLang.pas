@@ -403,9 +403,13 @@ begin
   inherited;
 
 {$IFDEF IDE_SUPPORT_THEMING}
+  try
   if Supports(BorlandIDEServices, IOTAIDEThemingServices, Theming) then
     if (Theming <> nil) and Theming.IDEThemingEnabled then
       Theming.ApplyTheme(Self);
+  except
+    ; // Maybe cause NullPointer Exception in IDEServices.TIDEServices.ApplyTheme, Only catch it
+  end;
 {$ENDIF}
 
   // inherited 中会调用 FormCreate 事件，有可能改变了 Width/Height
