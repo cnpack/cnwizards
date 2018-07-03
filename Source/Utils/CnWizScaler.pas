@@ -92,14 +92,14 @@ begin
 
 {$IFDEF TCONTROL_HAS_MARGINS}
   // Scale Margins
-  if Margins.Left > 0 then
-    Margins.Left := Round(Margins.Left * Factor);
-  if Margins.Top > 0 then
-    Margins.Top := Round(Margins.Top * Factor);
-  if Margins.Right > 0 then
-    Margins.Right := Round(Margins.Right * Factor);
-  if Margins.Bottom > 0 then
-    Margins.Bottom := Round(Margins.Bottom * Factor);
+  if Control.Margins.Left > 0 then
+    Control.Margins.Left := Round(Control.Margins.Left * Factor);
+  if Control.Margins.Top > 0 then
+    Control.Margins.Top := Round(Control.Margins.Top * Factor);
+  if Control.Margins.Right > 0 then
+    Control.Margins.Right := Round(Control.Margins.Right * Factor);
+  if Control.Margins.Bottom > 0 then
+    Control.Margins.Bottom := Round(Control.Margins.Bottom * Factor);
 {$ENDIF}
 
   if UseClient then
