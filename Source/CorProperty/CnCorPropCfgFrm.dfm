@@ -13,8 +13,8 @@ inherited CnCorPropCfgForm: TCnCorPropCfgForm
   TextHeight = 13
   object lblCount: TLabel
     Left = 16
-    Top = 352
-    Width = 3
+    Top = 364
+    Width = 17
     Height = 13
   end
   object btnOK: TButton
