@@ -72,6 +72,7 @@ type
       Shift: TShiftState);
     procedure ListViewSelectItem(Sender: TObject; Item: TListItem;
       Selected: Boolean);
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
     FList: TCompList;
@@ -359,6 +360,10 @@ begin
   end;
 end;
 
-{$ENDIF CNWIZARDS_CNPREFIXWIZARD}
+procedure TCnPrefixCompForm.FormCreate(Sender: TObject);
+begin
+  EnlargeListViewColumns(ListView);
+end;
 
+{$ENDIF CNWIZARDS_CNPREFIXWIZARD}
 end.

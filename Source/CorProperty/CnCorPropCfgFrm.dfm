@@ -7,6 +7,7 @@ inherited CnCorPropCfgForm: TCnCorPropCfgForm
   ClientWidth = 563
   Constraints.MinHeight = 420
   Constraints.MinWidth = 571
+  OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
   PixelsPerInch = 96
@@ -14,7 +15,7 @@ inherited CnCorPropCfgForm: TCnCorPropCfgForm
   object lblCount: TLabel
     Left = 16
     Top = 364
-    Width = 17
+    Width = 3
     Height = 13
   end
   object btnOK: TButton

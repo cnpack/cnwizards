@@ -655,6 +655,7 @@ end;
 procedure TCnCorPropForm.FormCreate(Sender: TObject);
 begin
   FCorrectItemList := TObjectList.Create;
+  EnlargeListViewColumns(lvResult);
 end;
 
 procedure TCnCorPropForm.FormDestroy(Sender: TObject);

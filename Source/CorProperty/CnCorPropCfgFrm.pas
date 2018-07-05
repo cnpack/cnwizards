@@ -89,6 +89,7 @@ type
     procedure ListViewColumnClick(Sender: TObject; Column: TListColumn);
     procedure ListViewCompare(Sender: TObject; Item1, Item2: TListItem;
       Data: Integer; var Compare: Integer);
+    procedure FormCreate(Sender: TObject);
   private
     FPropDefList: TObjectList;
     FInitialing: Boolean;
@@ -442,6 +443,11 @@ begin
     FSortIndex := Column.Index;
   ListView.CustomSort(nil, 0);
   UpdateDefines;
+end;
+
+procedure TCnCorPropCfgForm.FormCreate(Sender: TObject);
+begin
+  EnlargeListViewColumns(ListView);
 end;
 
 procedure TCnCorPropCfgForm.ListViewCompare(Sender: TObject; Item1,
