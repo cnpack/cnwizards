@@ -2513,6 +2513,7 @@ begin
   Wizard := TCnFormEnhanceWizard(CnWizardMgr.WizardByClass(TCnFormEnhanceWizard));
   Assert(Wizard <> nil);
   InitControls;
+  EnlargeListViewColumns(ListView);
   UpdateListView;
   UpdateControls(nil);
 end;

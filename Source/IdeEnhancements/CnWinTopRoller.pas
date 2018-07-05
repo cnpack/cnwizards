@@ -171,6 +171,7 @@ type
       Shift: TShiftState);
     procedure cbbCommentChange(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
   protected
@@ -900,6 +901,11 @@ end;
 function TCnTopRollerForm.GetHelpTopic: string;
 begin
   Result := 'CnWinTopRoller';
+end;
+
+procedure TCnTopRollerForm.FormCreate(Sender: TObject);
+begin
+  EnlargeListViewColumns(ListView);
 end;
 
 initialization

@@ -52,8 +52,8 @@ procedure ScaleForm(AForm: TCustomForm; Factor: Single);
 implementation
 
 const
-  SCALE_TOOLBAR: Boolean = False;
-  // 工具栏似乎无需缩放
+  SCALE_ALIGNED_TOOLBAR: Boolean = False;
+  // 靠边的工具栏似乎无需缩放
 
 type
   TControlHack = class(TControl);
@@ -141,7 +141,9 @@ begin
   if (WinControl = nil) or (WinControl.Tag = CN_WIZ_SCALE_TAG_IGNORE_CHILD) then
     Exit;
 
-  if (WinControl is TToolbar) and not SCALE_TOOLBAR then
+  // 靠边的 Toolbar 理论上无需缩放
+  if (WinControl is TToolbar) and ((WinControl as TToolbar).Align <> alNone)
+    and not SCALE_ALIGNED_TOOLBAR then
     Exit;
 
   WinControl.DisableAlign;

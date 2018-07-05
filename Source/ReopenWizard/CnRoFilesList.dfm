@@ -98,8 +98,14 @@ inherited CnFilesListForm: TCnFilesListForm
       EdgeBorders = []
       EdgeOuter = esNone
       Flat = True
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
       Images = dmCnSharedImages.Images
       List = True
+      ParentFont = False
       ParentShowHint = False
       ShowCaptions = True
       ShowHint = True
@@ -207,6 +213,7 @@ inherited CnFilesListForm: TCnFilesListForm
         Height = 515
       end
       inherited ImageList1: TImageList
+        Top = 81
         Bitmap = {
           494C010103000400040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
           0000000000003600000028000000400000001000000001002000000000000010

@@ -543,6 +543,7 @@ begin
   inherited;
   FWizard := TCnSrcTemplate(CnWizardMgr.WizardByClass(TCnSrcTemplate));
   Assert(Assigned(FWizard));
+  EnlargeListViewColumns(ListView);
   UpdateListView;
 end;
 

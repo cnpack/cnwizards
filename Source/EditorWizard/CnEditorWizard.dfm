@@ -38,7 +38,7 @@ inherited CnEditorToolsForm: TCnEditorToolsForm
     object lbl1: TLabel
       Left = 312
       Top = 132
-      Width = 53
+      Width = 52
       Height = 13
       Caption = 'Shortcut:'
       Font.Charset = DEFAULT_CHARSET

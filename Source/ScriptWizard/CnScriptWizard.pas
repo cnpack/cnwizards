@@ -386,6 +386,7 @@ var
   AppEventType: TCnWizAppEventType;
 begin
   inherited;
+  EnlargeListViewColumns(lvList);
 
   chktvMode.BeginUpdate;
   try

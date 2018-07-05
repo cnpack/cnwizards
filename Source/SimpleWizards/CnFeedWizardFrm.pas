@@ -122,6 +122,7 @@ end;
 procedure TCnFeedWizardForm.FormCreate(Sender: TObject);
 begin
   FFeedCfg := TCnFeedCfg.Create;
+  EnlargeListViewColumns(lvList);
 end;
 
 procedure TCnFeedWizardForm.FormDestroy(Sender: TObject);

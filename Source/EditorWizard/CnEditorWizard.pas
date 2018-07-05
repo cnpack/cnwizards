@@ -627,6 +627,7 @@ procedure TCnEditorToolsForm.FormCreate(Sender: TObject);
 begin
   FWizard := TCnEditorToolsetWizard(CnWizardMgr.WizardByClass(TCnEditorToolsetWizard));
   Assert(Assigned(FWizard));
+  EnlargeListViewColumns(lvTools);
   InitTools;
 end;
 

@@ -91,6 +91,7 @@ type
     procedure cbAutoPrefixClick(Sender: TObject);
     procedure ListViewChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
     FList: TPrefixList;
@@ -350,6 +351,11 @@ end;
 function TCnPrefixConfigForm.GetHelpTopic: string;
 begin
   Result := 'CnPrefixConfigForm';
+end;
+
+procedure TCnPrefixConfigForm.FormCreate(Sender: TObject);
+begin
+  EnlargeListViewColumns(ListView);
 end;
 
 {$ENDIF CNWIZARDS_CNPREFIXWIZARD}

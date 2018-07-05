@@ -162,6 +162,7 @@ type
     procedure chkSpcCompleteClick(Sender: TObject);
     procedure chkDispOnIDECompDisabledClick(Sender: TObject);
     procedure btnDisableCompletionClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     InputHelper: TCnInputHelper;
     NewSymbol: string;
@@ -845,6 +846,11 @@ begin
 
   Options.SetOptionValue(SCnCodeCompletionKey, 0);
   InfoDlg(SCnInputHelperDisableCodeCompletionSucc);
+end;
+
+procedure TCnInputHelperForm.FormCreate(Sender: TObject);
+begin
+  EnlargeListViewColumns(lvList);
 end;
 
 {$ENDIF CNWIZARDS_CNINPUTHELPER}

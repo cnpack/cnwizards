@@ -4,6 +4,7 @@ inherited CnTopRollerForm: TCnTopRollerForm
   BorderStyle = bsDialog
   Caption = 'Caption Button Enhancements Settings'
   ClientWidth = 344
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object grpMain: TGroupBox

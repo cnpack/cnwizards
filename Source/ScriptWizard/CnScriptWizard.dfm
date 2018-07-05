@@ -210,7 +210,7 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
       end
       item
         Caption = 'Enabled'
-        Width = 60
+        Width = 52
       end>
     HideSelection = False
     OwnerData = True

@@ -5,6 +5,7 @@ inherited CnPrefixConfigForm: TCnPrefixConfigForm
   Caption = 'Component Prefix Wizard Settings'
   ClientHeight = 485
   ClientWidth = 416
+  OnCreate = FormCreate
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13

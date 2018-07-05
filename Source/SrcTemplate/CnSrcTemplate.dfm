@@ -23,7 +23,7 @@ inherited CnSrcTemplateForm: TCnSrcTemplateForm
       Columns = <
         item
           Caption = 'Menu Title'
-          Width = 140
+          Width = 148
         end
         item
           Caption = 'Status'

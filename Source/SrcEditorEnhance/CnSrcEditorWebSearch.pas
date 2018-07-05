@@ -399,6 +399,7 @@ procedure TCnSrcEditorWebSearchForm.FormCreate(Sender: TObject);
 begin
   inherited;
   List := TCnWebSearchCollection.Create;
+  EnlargeListViewColumns(ListView);
 end;
 
 procedure TCnSrcEditorWebSearchForm.FormShow(Sender: TObject);

@@ -7,6 +7,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
   ClientWidth = 592
   KeyPreview = True
   OnActivate = FormActivate
+  OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
   OnShow = FormShow
@@ -383,7 +384,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 249
           Height = 21
           Style = csDropDownList
-          ItemHeight = 0
+          ItemHeight = 13
           TabOrder = 0
         end
         object btnFont: TButton
@@ -425,7 +426,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 249
           Height = 21
           Style = csDropDownList
-          ItemHeight = 0
+          ItemHeight = 13
           TabOrder = 3
         end
         object chkUseKibitzCompileThread: TCheckBox
@@ -672,7 +673,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 401
           Height = 21
           Style = csDropDownList
-          ItemHeight = 0
+          ItemHeight = 13
           TabOrder = 0
           OnChange = cbbListChange
         end

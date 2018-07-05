@@ -71,7 +71,7 @@ uses
   CnWizConsts, CnCommon, CnLangMgr, CnHashLangStorage, CnLangStorage, CnWizHelp,
   CnFormScaler, CnWizIni, CnLangCollection,
 {$ENDIF}
-  StdCtrls, IniFiles {$IFDEF IDE_SUPPORT_THEMING}, ToolsAPI, CnIDEMirrorIntf {$ENDIF};
+  StdCtrls, ComCtrls, IniFiles {$IFDEF IDE_SUPPORT_THEMING}, ToolsAPI, CnIDEMirrorIntf {$ENDIF};
 
 type
 
@@ -144,6 +144,8 @@ type
     {* 显示帮助内容}
 
 {$IFNDEF STAND_ALONE}
+    procedure EnlargeListViewColumns(ListView: TListView);
+    {* 如果子类中有 ListView，可以用此方法来放大 ListView 的列宽}
     property Enlarge: TCnWizSizeEnlarge read FEnlarge;
     {* 供专家包子类窗口使用的缩放比例}
 {$ENDIF}
@@ -785,6 +787,20 @@ begin
     ScaleForm(Self, GetFactorFromSizeEnlarge(Enlarge));
 {$ENDIF}
 end;
+
+{$IFNDEF STAND_ALONE}
+procedure TCnTranslateForm.EnlargeListViewColumns(ListView: TListView);
+var
+  I: Integer;
+begin
+  if (FEnlarge = wseOrigin) or (ListView = nil) or (ListView.ViewStyle <> vsReport) then
+    Exit;
+
+  for I := 0 to ListView.Columns.Count - 1 do
+    if ListView.Columns[I].Width > 0 then
+      ListView.Columns[I].Width := Round(ListView.Columns[I].Width * GetFactorFromSizeEnlarge(FEnlarge));
+end;
+{$ENDIF}
 
 initialization
 {$IFDEF STAND_ALONE}
