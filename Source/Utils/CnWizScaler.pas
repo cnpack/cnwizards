@@ -24,12 +24,12 @@ unit CnWizScaler;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：针对专家包窗体的运行期比例缩放实现单元，与屏幕 DPI 无关
 * 单元作者：刘啸 liuxiao@cnpack.org
-* 备    注：
+* 备    注：初步实现窗体简单缩放，暂时不处理 ListView 的列宽缩放，也不处理工具栏
 * 开发平台：PWinXP SP3 + Delphi 7
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2018.07.16 V1.0
+* 修改记录：2018.07.5 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -39,11 +39,21 @@ interface
 {$I CnWizards.inc}
 
 uses
-  SysUtils, Windows, Controls, Forms;
+  SysUtils, Windows, Controls, Forms, ComCtrls;
+
+const
+  CN_WIZ_SCALE_TAG_IGNORE_ME               = $CE01;
+  CN_WIZ_SCALE_TAG_IGNORE_CHILD            = $CE02;
+//  CN_WIZ_SCALE_TAG_IGNORE_LISTVIEW_COLUMN  = $CE03;
+  // TAG 为以上值的 Control，将忽略自身、自身以及所有子控件、ListView 忽略 Column 宽度放大
 
 procedure ScaleForm(AForm: TCustomForm; Factor: Single);
 
 implementation
+
+const
+  SCALE_TOOLBAR: Boolean = False;
+  // 工具栏似乎无需缩放
 
 type
   TControlHack = class(TControl);
@@ -52,6 +62,9 @@ procedure ScaleControl(Control: TControl; Factor: Single; UseClient: Boolean = F
 var
   X, Y, W, H: Integer;
 begin
+  if (Control = nil) or (Control.Tag = CN_WIZ_SCALE_TAG_IGNORE_ME) then
+    Exit;
+
   X := Round(Control.Left * Factor);
   Y := Round(Control.Top * Factor);
 
@@ -122,8 +135,15 @@ procedure ScaleWinControl(WinControl: TWinControl; Factor: Single;
 var
   I: Integer;
   AControl: TControlHack;
+//  ListView: TListView;
   BackupAnchors: array of TAnchors;
 begin
+  if (WinControl = nil) or (WinControl.Tag = CN_WIZ_SCALE_TAG_IGNORE_CHILD) then
+    Exit;
+
+  if (WinControl is TToolbar) and not SCALE_TOOLBAR then
+    Exit;
+
   WinControl.DisableAlign;
   SetLength(BackupAnchors, WinControl.ControlCount);
   try
@@ -159,6 +179,20 @@ begin
         AControl.Anchors := BackupAnchors[I];
       end;
     end;
+
+//    if (WinControl.Tag <> CN_WIZ_SCALE_TAG_IGNORE_LISTVIEW_COLUMN)
+//      and (WinControl is TListView) then
+//    begin
+//      ListView := WinControl as TListView;
+//      if ListView.ViewStyle = vsReport then
+//      begin
+//        for I := 0 to ListView.Columns.Count - 1 do
+//        begin
+//          if ListView.Columns[I].Width > 0 then
+//            ListView.Columns[I].Width := Round(ListView.Columns[I].Width * Factor);
+//        end;
+//      end;
+//    end;
   finally
     SetLength(BackupAnchors, 0);
     WinControl.EnableAlign;
