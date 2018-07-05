@@ -783,8 +783,8 @@ end;
 procedure TCnTranslateForm.ProcessSizeEnlarge;
 begin
 {$IFNDEF STAND_ALONE}
-  if Enlarge <> wseOrigin then
-    ScaleForm(Self, GetFactorFromSizeEnlarge(Enlarge));
+  if FEnlarge <> wseOrigin then
+    ScaleForm(Self, GetFactorFromSizeEnlarge(FEnlarge));
 {$ENDIF}
 end;
 

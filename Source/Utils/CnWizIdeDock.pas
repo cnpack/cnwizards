@@ -56,8 +56,8 @@ interface
 
 uses
   Windows, SysUtils, Classes, IniFiles, Forms, Controls, Menus, Messages,
-  MenuBar, ActnList, CnWizUtils, CnClasses, CnLangMgr, CnFormScaler,
-  CnLangCollection, CnLangStorage,
+  MenuBar, ActnList, ComCtrls, CnWizUtils, CnClasses, CnLangMgr, CnFormScaler,
+  CnLangCollection, CnLangStorage, CnWizOptions, CnWizScaler,
   // 该单元编译在 DsnIdeXX/DesignIde 包中，专家必须与它相连接
   DockForm;
 
@@ -81,6 +81,8 @@ type
 {$ENDIF}
 
   TCnIdeDockForm = class(TDockableForm)
+  private
+    FEnlarge: TCnWizSizeEnlarge;
   protected
     FMenuBar: TMenuBar;
     FNeedRestore: Boolean;
@@ -131,6 +133,11 @@ type
     procedure LoadWindowState(Desktop: TDesktopIniFile); override;
     procedure SaveWindowState(Desktop: TDesktopIniFile; IsProject: Boolean); override;
 
+    procedure EnlargeListViewColumns(ListView: TListView);
+    {* 如果子类中有 ListView，可以用此方法来放大 ListView 的列宽}
+    property Enlarge: TCnWizSizeEnlarge read FEnlarge;
+    {* 供专家包子类窗口使用的缩放比例}
+
     // 以下复制自 TCnTranslateForm 以实现多语
     procedure Translate; virtual;
   end;
@@ -160,7 +167,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnCommon, CnWizConsts, CnWizOptions, CnWizNotifier,
+  CnCommon, CnWizConsts, CnWizNotifier,
   // 以下单元编译在 DsnIdeXX/DesignIde 包中，专家必须与它相连接
   DeskForm, DeskUtil;
 
@@ -289,6 +296,7 @@ end;
 
 procedure TCnIdeDockForm.DoCreate;
 begin
+  FEnlarge := WizOptions.SizeEnlarge;
   DisableAlign;
   try
     Translate;
@@ -303,6 +311,8 @@ begin
   DoLanguageChanged(CnLanguageManager);
 
   inherited;
+  if FEnlarge <> wseOrigin then
+    ScaleForm(Self, GetFactorFromSizeEnlarge(FEnlarge));
 end;
 
 procedure TCnIdeDockForm.DoDestroy;
@@ -522,6 +532,18 @@ procedure TCnIdeDockForm.RestorePosition;
 begin
   SetBounds(FRestoreRect.Left, FRestoreRect.Top,
     FRestoreRect.Right - FRestoreRect.Left, FRestoreRect.Bottom - FRestoreRect.Top);
+end;
+
+procedure TCnIdeDockForm.EnlargeListViewColumns(ListView: TListView);
+var
+  I: Integer;
+begin
+  if (FEnlarge = wseOrigin) or (ListView = nil) or (ListView.ViewStyle <> vsReport) then
+    Exit;
+
+  for I := 0 to ListView.Columns.Count - 1 do
+    if ListView.Columns[I].Width > 0 then
+      ListView.Columns[I].Width := Round(ListView.Columns[I].Width * GetFactorFromSizeEnlarge(FEnlarge));
 end;
 
 { TDummyPopupMenu }

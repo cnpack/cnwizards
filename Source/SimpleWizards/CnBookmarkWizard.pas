@@ -111,6 +111,7 @@ type
     procedure FormShow(Sender: TObject);
     procedure SplitterMoved(Sender: TObject);
     procedure FormDeactivate(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
     List: TObjectList;
@@ -1083,6 +1084,11 @@ end;
 procedure TCnBookmarkForm.FormDeactivate(Sender: TObject);
 begin
   SyncSettings;
+end;
+
+procedure TCnBookmarkForm.FormCreate(Sender: TObject);
+begin
+  EnlargeListViewColumns(ListView);
 end;
 
 initialization

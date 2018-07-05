@@ -6,6 +6,7 @@ inherited CnBookmarkForm: TCnBookmarkForm
   Caption = 'Browse Bookmarks'
   KeyPreview = True
   Position = poScreenCenter
+  OnCreate = FormCreate
   OnDeactivate = FormDeactivate
   OnHide = FormHide
   OnKeyPress = FormKeyPress
