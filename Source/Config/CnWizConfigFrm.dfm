@@ -580,7 +580,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
           OnClick = UpdateControls
         end
         object cbbEnlarge: TComboBox
-          Left = 200
+          Left = 344
           Top = 76
           Width = 97
           Height = 21

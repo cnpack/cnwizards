@@ -99,6 +99,7 @@ TCnWizConfigForm.cbShowHint.Caption=允許顯示工具提示資訊。
 TCnWizConfigForm.cbShowWizComment.Caption=允許專家第一次執行時顯示功能提示視窗。
 TCnWizConfigForm.cbUpgradeReleaseOnly.Caption=檢測時忽略測試版的程式。
 TCnWizConfigForm.cbWizardActive.Caption=允許該專家為活動狀態。
+TCnWizConfigForm.chkEnlarge.Caption=按此倍數放大專家包窗體：
 TCnWizConfigForm.chkFixThreadLocale.Caption=使用 SetThreadLocale 修正 Vista / Win7 下亂碼問題。
 TCnWizConfigForm.chkUseLargeIcon.Caption=使用大尺寸圖標（需要重啟 IDE）。
 TCnWizConfigForm.chkUseOneCPUCore.Caption=設置 IDE 只在 CPU 0 單核中運行。

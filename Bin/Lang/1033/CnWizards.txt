@@ -99,6 +99,7 @@ TCnWizConfigForm.cbShowHint.Caption=Show ToolTips
 TCnWizConfigForm.cbShowWizComment.Caption=Show Hint Form for the First Time
 TCnWizConfigForm.cbUpgradeReleaseOnly.Caption=Ignore Beta Version
 TCnWizConfigForm.cbWizardActive.Caption=Enabled
+TCnWizConfigForm.chkEnlarge.Caption=Scale All CnWizards Forms by:
 TCnWizConfigForm.chkFixThreadLocale.Caption=Use SetThreadLocale to Fix Encoding Problem under Vista / Win7.
 TCnWizConfigForm.chkUseLargeIcon.Caption=Use Large Icons(Need Restart).
 TCnWizConfigForm.chkUseOneCPUCore.Caption=Set IDE to Run in CPU 0 Single Core.

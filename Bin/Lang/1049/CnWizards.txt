@@ -99,6 +99,7 @@ TCnWizConfigForm.cbShowHint.Caption=Показывать подсказки
 TCnWizConfigForm.cbShowWizComment.Caption=Показывать подсказку мастера
 TCnWizConfigForm.cbUpgradeReleaseOnly.Caption=Игнорировать бета-версии
 TCnWizConfigForm.cbWizardActive.Caption=Включен
+TCnWizConfigForm.chkEnlarge.Caption=Масштабировать все формы CnWizards на:
 TCnWizConfigForm.chkFixThreadLocale.Caption=Исп. SetThreadLocale для исправления ошибки кодировки в Vista / Win7
 TCnWizConfigForm.chkUseLargeIcon.Caption=Используйте Крупные значки(необх. перезагр.).
 TCnWizConfigForm.chkUseOneCPUCore.Caption=Запускать IDE в пределах 1 ядра (CPU 0)
