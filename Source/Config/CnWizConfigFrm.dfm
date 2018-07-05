@@ -468,7 +468,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         Left = 8
         Top = 230
         Width = 479
-        Height = 160
+        Height = 181
         Caption = 'Othe&rs'
         TabOrder = 3
         object Label2: TLabel
@@ -479,7 +479,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         end
         object btnUserDir: TSpeedButton
           Left = 450
-          Top = 123
+          Top = 144
           Width = 23
           Height = 22
           Anchors = [akRight, akBottom]
@@ -531,20 +531,20 @@ inherited CnWizConfigForm: TCnWizConfigForm
         end
         object chkUserDir: TCheckBox
           Left = 8
-          Top = 100
+          Top = 121
           Width = 273
           Height = 17
           Caption = 'Customize User Data Folder (Need Restart):'
-          TabOrder = 4
+          TabOrder = 6
           OnClick = UpdateControls
         end
         object edtUserDir: TEdit
           Left = 24
-          Top = 123
+          Top = 144
           Width = 422
           Height = 21
           Anchors = [akLeft, akTop, akRight]
-          TabOrder = 5
+          TabOrder = 7
         end
         object chkFixThreadLocale: TCheckBox
           Left = 8
@@ -564,11 +564,35 @@ inherited CnWizConfigForm: TCnWizConfigForm
         end
         object chkUseLargeIcon: TCheckBox
           Left = 8
-          Top = 79
+          Top = 100
           Width = 457
           Height = 17
           Caption = 'Use Large Icons (Need Restart).'
+          TabOrder = 5
+        end
+        object chkEnlarge: TCheckBox
+          Left = 8
+          Top = 79
+          Width = 185
+          Height = 17
+          Caption = 'Scale All CnWizards Forms by:'
           TabOrder = 3
+          OnClick = UpdateControls
+        end
+        object cbbEnlarge: TComboBox
+          Left = 200
+          Top = 76
+          Width = 97
+          Height = 21
+          Style = csDropDownList
+          ItemHeight = 13
+          TabOrder = 4
+          Items.Strings = (
+            'x 1.25'
+            'x 1.5'
+            'x 2'
+            'x 2.5'
+            'x 3')
         end
       end
       object gbHintWnd: TGroupBox

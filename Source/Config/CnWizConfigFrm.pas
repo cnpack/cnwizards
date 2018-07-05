@@ -138,6 +138,8 @@ type
     btnSort: TButton;
     btnRestoreSetting: TButton;
     chkUseLargeIcon: TCheckBox;
+    chkEnlarge: TCheckBox;
+    cbbEnlarge: TComboBox;
     procedure lbWizardsDrawItem(Control: TWinControl; Index: Integer;
       Rect: TRect; State: TOwnerDrawState);
     procedure FormCreate(Sender: TObject);
@@ -233,6 +235,7 @@ procedure TCnWizConfigForm.FormCreate(Sender: TObject);
 var
   I: Integer;
 begin
+  PageControl.ActivePageIndex := 0;
   // 专家设置页面
   SetLength(FShortCuts, CnWizardMgr.WizardCount);
   SetLength(FActives, CnWizardMgr.WizardCount);
@@ -285,7 +288,7 @@ begin
 
   //自画高度调整
   FDrawTextHeight := 12;
-  if Enlarge <> fseOrigin then
+  if Enlarge <> wseOrigin then
   begin
     FDrawTextHeight := Round(FDrawTextHeight * GetFactorFromSizeEnlarge(Enlarge));
     lbWizards.ItemHeight := Round(lbWizards.ItemHeight * GetFactorFromSizeEnlarge(Enlarge));
@@ -301,6 +304,11 @@ begin
 
   chkUserDir.Checked := WizOptions.UseCustomUserDir;
   edtUserDir.Text := WizOptions.CustomUserDir;
+  chkEnlarge.Checked := WizOptions.SizeEnlarge <> wseOrigin;
+  if chkEnlarge.Checked then
+    cbbEnlarge.ItemIndex := Ord(WizOptions.SizeEnlarge) - 1
+  else
+    cbbEnlarge.ItemIndex := 0;
 
   UpdateControls(nil);
 
@@ -355,6 +363,10 @@ begin
 
     WizOptions.UseCustomUserDir := chkUserDir.Checked;
     WizOptions.CustomUserDir := edtUserDir.Text;
+    if chkEnlarge.Checked and (cbbEnlarge.ItemIndex >= 0) then
+      WizOptions.SizeEnlarge := TCnWizSizeEnlarge(cbbEnlarge.ItemIndex + 1)
+    else
+      WizOptions.SizeEnlarge := wseOrigin;
     
     WizOptions.WriteInteger(SCnOptionSection, csLastSelectedItem, lbWizards.ItemIndex);
 
@@ -818,6 +830,7 @@ begin
   cbUpgradeReleaseOnly.Enabled := rbUpgradeAll.Checked;
   edtUserDir.Enabled := chkUserDir.Checked;
   btnUserDir.Enabled := chkUserDir.Checked;
+  cbbEnlarge.Enabled := chkEnlarge.Checked;
 end;
 
 procedure TCnWizConfigForm.btnExportImagelistClick(Sender: TObject);

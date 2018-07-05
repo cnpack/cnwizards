@@ -66,7 +66,7 @@ type
   TCnWizUpgradeContent = set of (ucNewFeature, ucBigBugFixed);
   {* 更新类型}
 
-  TCnWizSizeEnlarge = (fseOrigin, fsOneQuarter, fseAddHalf, fseDouble, fseDoubleHalf, fseTriple);
+  TCnWizSizeEnlarge = (wseOrigin, wsOneQuarter, wseAddHalf, wseDouble, wseDoubleHalf, wseTriple);
   {* 屏幕字体放大倍数，1、1.25、1.5、2、2.5、3}
 
   TCnWizOptions = class(TObject)
@@ -280,12 +280,12 @@ function GetFactorFromSizeEnlarge(Enlarge: TCnWizSizeEnlarge): Single;
 begin
   Result := 1.0;
   case Enlarge of
-    fseOrigin:      Result := 1.0;
-    fsOneQuarter:   Result := 1.25;
-    fseAddHalf:     Result := 1.5;
-    fseDouble:      Result := 2.0;
-    fseDoubleHalf:  Result := 2.5;
-    fseTriple:      Result := 3.0;
+    wseOrigin:      Result := 1.0;
+    wsOneQuarter:   Result := 1.25;
+    wseAddHalf:     Result := 1.5;
+    wseDouble:      Result := 2.0;
+    wseDoubleHalf:  Result := 2.5;
+    wseTriple:      Result := 3.0;
   end;
 end;
 //==============================================================================
