@@ -486,7 +486,7 @@ begin
   CenterForm(Self);
 
   FListViewWidthStr := Ini.ReadString(csBackupSection, csListViewWidth, '');
-  SetListViewWidthString(lvFileView, FListViewWidthStr);
+  SetListViewWidthString(lvFileView, FListViewWidthStr, GetFactorFromSizeEnlarge(Enlarge));
 end;
 
 procedure TCnProjectBackupForm.SaveSettings(Ini: TCustomIniFile);
@@ -517,7 +517,8 @@ begin
 
   Ini.WriteInteger(csBackupSection, csWidth, Width);
   Ini.WriteInteger(csBackupSection, csHeight, Height);
-  Ini.WriteString(csBackupSection, csListViewWidth, GetListViewWidthString(lvFileView));
+  Ini.WriteString(csBackupSection, csListViewWidth,
+    GetListViewWidthString(lvFileView, GetFactorFromSizeEnlarge(Enlarge)));
 end;
 
 function TCnProjectBackupForm.GetHelpTopic: string;
@@ -1142,7 +1143,7 @@ end;
 procedure TCnProjectBackupForm.FormShow(Sender: TObject);
 begin
 {$IFDEF BDS}
-  SetListViewWidthString(lvFileView, FListViewWidthStr);
+  SetListViewWidthString(lvFileView, FListViewWidthStr, GetFactorFromSizeEnlarge(Enlarge));
 {$ENDIF}
 end;
 

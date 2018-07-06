@@ -268,10 +268,10 @@ procedure RemoveListViewSubImages(ListView: TListView); overload;
 {* 更新 ListView 控件，去除子项的 SubItemImages }
 procedure RemoveListViewSubImages(ListItem: TListItem); overload;
 {* 更新 ListItem，去除子项的 SubItemImages }
-function GetListViewWidthString(AListView: TListView): string;
-{* 转换 ListView 子项宽度为字符串 }
-procedure SetListViewWidthString(AListView: TListView; const Text: string);
-{* 转换字符串为 ListView 子项宽度 }
+function GetListViewWidthString(AListView: TListView; DivFactor: Single = 1.0): string;
+{* 转换 ListView 子项宽度为字符串，允许设缩小倍数 }
+procedure SetListViewWidthString(AListView: TListView; const Text: string; MulFactor: Single = 1.0);
+{* 转换字符串为 ListView 子项宽度，允许设放大倍数 }
 function ListViewSelectedItemsCanUp(AListView: TListView): Boolean;
 {* ListView 当前选择项是否允许上移 }
 function ListViewSelectedItemsCanDown(AListView: TListView): Boolean;
@@ -2334,15 +2334,20 @@ begin
 end;
 
 {* 转换 ListView 子项宽度为字符串 }
-function GetListViewWidthString(AListView: TListView): string;
+function GetListViewWidthString(AListView: TListView; DivFactor: Single): string;
 var
-  i: Integer;
+  I: Integer;
   Lines: TStringList;
 begin
   Lines := TStringList.Create;
   try
-    for i := 0 to AListView.Columns.Count - 1 do
-      Lines.Add(IntToStr(AListView.Columns[i].Width));
+    if Abs(DivFactor - 1.0) < 0.001 then
+      for I := 0 to AListView.Columns.Count - 1 do
+        Lines.Add(IntToStr(AListView.Columns[I].Width))
+    else
+      for I := 0 to AListView.Columns.Count - 1 do
+        Lines.Add(IntToStr(Round(AListView.Columns[I].Width / DivFactor)));
+
     Result := Lines.CommaText;
   finally
     Lines.Free;
@@ -2350,16 +2355,26 @@ begin
 end;
 
 {* 转换字符串为 ListView 子项宽度 }
-procedure SetListViewWidthString(AListView: TListView; const Text: string);
+procedure SetListViewWidthString(AListView: TListView; const Text: string;
+  MulFactor: Single);
 var
-  i: Integer;
+  I: Integer;
   Lines: TStringList;
 begin
   Lines := TStringList.Create;
   try
     Lines.CommaText := Text;
-    for i := 0 to Min(AListView.Columns.Count - 1, Lines.Count - 1) do
-      AListView.Columns[i].Width := StrToIntDef(Lines[i], AListView.Columns[i].Width);
+    if Abs(MulFactor - 1.0) < 0.001 then
+      for I := 0 to Min(AListView.Columns.Count - 1, Lines.Count - 1) do
+        AListView.Columns[I].Width := StrToIntDef(Lines[I], AListView.Columns[I].Width)
+    else
+      for I := 0 to AListView.Columns.Count - 1 do
+      begin
+        if I < Lines.Count then
+          AListView.Columns[I].Width := Round(StrToIntDef(Lines[I], AListView.Columns[I].Width) * MulFactor)
+        else // 无设置，则按原始情况放大
+          AListView.Columns[I].Width := Round(AListView.Columns[I].Width * MulFactor);
+      end;
   finally
     Lines.Free;
   end;

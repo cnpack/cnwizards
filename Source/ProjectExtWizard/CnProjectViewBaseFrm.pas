@@ -354,7 +354,7 @@ begin
   UpdateListView;
   SelectOpenedItem;
 {$IFDEF BDS}
-  SetListViewWidthString(lvList, FListViewWidthStr);
+  SetListViewWidthString(lvList, FListViewWidthStr, GetFactorFromSizeEnlarge(Enlarge));
 {$ENDIF}
   CnWizNotifierServices.ExecuteOnApplicationIdle(FirstUpdate);
 end;
@@ -660,7 +660,7 @@ begin
     CenterForm(Self);
 
     FListViewWidthStr := ReadString(aSection, csListViewWidth, '');
-    SetListViewWidthString(lvList, FListViewWidthStr);
+    SetListViewWidthString(lvList, FListViewWidthStr, GetFactorFromSizeEnlarge(Enlarge));
   finally
     Free;
   end;
@@ -686,7 +686,8 @@ begin
 
     WriteInteger(aSection, csWidth, Width);
     WriteInteger(aSection, csHeight, Height);
-    WriteString(aSection, csListViewWidth, GetListViewWidthString(lvList));
+    WriteString(aSection, csListViewWidth,
+      GetListViewWidthString(lvList, GetFactorFromSizeEnlarge(Enlarge)));
   finally
     Free;
   end;

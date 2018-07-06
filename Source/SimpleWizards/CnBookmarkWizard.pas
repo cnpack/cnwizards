@@ -604,7 +604,7 @@ begin
   RichEdit.Height := Wizard.FRichEditHeight;
   if Wizard.FListFont.Name <> '' then
     ListView.Font := Wizard.FListFont;
-  SetListViewWidthString(ListView, Wizard.FWidthString);
+  SetListViewWidthString(ListView, Wizard.FWidthString, GetFactorFromSizeEnlarge(Enlarge));
 end;
 
 destructor TCnBookmarkForm.Destroy;
@@ -1035,7 +1035,8 @@ procedure TCnBookmarkForm.DoLoadWindowState(Desktop: TCustomIniFile);
 begin
   inherited;
   RichEdit.Height := Desktop.ReadInteger(csBrowseForm, csEditHeight, RichEdit.Height);
-  SetListViewWidthString(ListView, Desktop.ReadString(csBrowseForm, csColumnWidth, ''));
+  SetListViewWidthString(ListView, Desktop.ReadString(csBrowseForm, csColumnWidth, ''),
+    GetFactorFromSizeEnlarge(Enlarge));
 end;
 
 procedure TCnBookmarkForm.DoSaveWindowState(Desktop: TCustomIniFile;
@@ -1043,7 +1044,7 @@ procedure TCnBookmarkForm.DoSaveWindowState(Desktop: TCustomIniFile;
 begin
   inherited;
   Desktop.WriteInteger(csBrowseForm, csEditHeight, RichEdit.Height);
-  Desktop.WriteString(csBrowseForm, csColumnWidth, GetListViewWidthString(ListView));
+  Desktop.WriteString(csBrowseForm, csColumnWidth, GetListViewWidthString(ListView, GetFactorFromSizeEnlarge(Enlarge)));
 end;
 
 procedure TCnBookmarkForm.DoLanguageChanged(Sender: TObject);
@@ -1078,7 +1079,7 @@ end;
 procedure TCnBookmarkForm.SyncSettings;
 begin
   Wizard.FRichEditHeight := RichEdit.Height;
-  Wizard.FWidthString := GetListViewWidthString(ListView);
+  Wizard.FWidthString := GetListViewWidthString(ListView, GetFactorFromSizeEnlarge(Enlarge));
 end;
 
 procedure TCnBookmarkForm.FormDeactivate(Sender: TObject);
@@ -1088,7 +1089,7 @@ end;
 
 procedure TCnBookmarkForm.FormCreate(Sender: TObject);
 begin
-  EnlargeListViewColumns(ListView);
+//  EnlargeListViewColumns(ListView);
 end;
 
 initialization

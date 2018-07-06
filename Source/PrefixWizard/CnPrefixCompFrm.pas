@@ -100,7 +100,7 @@ implementation
 {$R *.DFM}
 
 uses
-  CnWizManager, CnPrefixWizard;
+  CnWizManager, CnPrefixWizard, CnWizOptions;
 
 const
   aSection = 'CnPrefixCompForm';
@@ -120,13 +120,15 @@ begin
     Width := ReadInteger(aSection, csWidth, Width);
     Height := ReadInteger(aSection, csHeight, Height);
     CenterForm(Frm);
-    SetListViewWidthString(ListView, ReadString(aSection, csListViewWidth, ''));
+    SetListViewWidthString(ListView, ReadString(aSection, csListViewWidth, ''),
+      GetFactorFromSizeEnlarge(Enlarge));
     UpdateTrigger := UpdateListToListView;
     Result := ShowModal = mrOk;
     
     WriteInteger(aSection, csWidth, Width);
     WriteInteger(aSection, csHeight, Height);
-    WriteString(aSection, csListViewWidth, GetListViewWidthString(ListView));
+    WriteString(aSection, csListViewWidth,
+      GetListViewWidthString(ListView, GetFactorFromSizeEnlarge(Enlarge)));
   finally
     Frm.Free;
   end;
@@ -362,7 +364,7 @@ end;
 
 procedure TCnPrefixCompForm.FormCreate(Sender: TObject);
 begin
-  EnlargeListViewColumns(ListView);
+//  EnlargeListViewColumns(ListView);
 end;
 
 {$ENDIF CNWIZARDS_CNPREFIXWIZARD}
