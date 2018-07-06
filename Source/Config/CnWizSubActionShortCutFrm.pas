@@ -146,6 +146,7 @@ procedure TCnWizSubActionShortCutForm.FormCreate(Sender: TObject);
 begin
   FHelpStr := 'CnWizSubActionShortCutForm';
   ListView.SmallImages := GetIDEImageList;
+  EnlargeListViewColumns(ListView);
 end;
 
 procedure TCnWizSubActionShortCutForm.FormShow(Sender: TObject);

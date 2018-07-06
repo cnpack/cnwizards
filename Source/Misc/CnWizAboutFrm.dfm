@@ -5,15 +5,16 @@ inherited CnWizAboutForm: TCnWizAboutForm
   BorderStyle = bsDialog
   Caption = 'About CnPack IDE Wizards'
   ClientHeight = 276
-  ClientWidth = 384
+  ClientWidth = 393
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object Bevel1: TBevel
     Left = 8
     Top = 240
-    Width = 369
+    Width = 378
     Height = 2
+    Anchors = [akLeft, akRight, akBottom]
     Shape = bsBottomLine
   end
   object Label2: TLabel
@@ -93,8 +94,9 @@ inherited CnWizAboutForm: TCnWizAboutForm
   object Bevel2: TBevel
     Left = 96
     Top = 20
-    Width = 281
+    Width = 290
     Height = 13
+    Anchors = [akLeft, akTop, akRight]
     Shape = bsBottomLine
   end
   object Label3: TLabel
@@ -109,12 +111,13 @@ inherited CnWizAboutForm: TCnWizAboutForm
       'on please see the license file.'
   end
   object imgDonation: TImage
-    Left = 328
+    Left = 337
     Top = 184
     Width = 48
     Height = 48
     Cursor = crHandPoint
     Hint = 'Donate to CnPack Foundation'
+    Anchors = [akRight, akBottom]
     ParentShowHint = False
     Picture.Data = {
       07544269746D6170361B0000424D361B00000000000036000000280000003000
@@ -355,10 +358,11 @@ inherited CnWizAboutForm: TCnWizAboutForm
     OnClick = lblSourceClick
   end
   object btnOK: TButton
-    Left = 303
+    Left = 312
     Top = 248
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Cancel = True
     Caption = '&Close'
     Default = True
@@ -366,10 +370,11 @@ inherited CnWizAboutForm: TCnWizAboutForm
     TabOrder = 3
   end
   object btnReport: TButton
-    Left = 135
+    Left = 144
     Top = 248
     Width = 163
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = 'Bug &Report and Suggestion'
     TabOrder = 2
     OnClick = btnReportClick
@@ -388,7 +393,6 @@ inherited CnWizAboutForm: TCnWizAboutForm
       Top = 2
       Width = 70
       Height = 220
-      AutoSize = True
       ClickBlob = 150
       Radius = 0
       Picture.Data = {
@@ -931,6 +935,7 @@ inherited CnWizAboutForm: TCnWizAboutForm
     Top = 248
     Width = 75
     Height = 21
+    Anchors = [akLeft, akBottom]
     Caption = '&License'
     TabOrder = 1
     OnClick = btnLicenseClick
