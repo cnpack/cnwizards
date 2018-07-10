@@ -40,7 +40,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, Menus,
-  StdCtrls, ComCtrls, IniFiles, ToolsAPI, Registry, ExtCtrls;
+  StdCtrls, ComCtrls, IniFiles, Registry, ExtCtrls;
 
 type
 

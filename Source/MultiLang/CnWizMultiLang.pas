@@ -29,16 +29,18 @@ unit CnWizMultiLang;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2018.02.07
+* 修改记录：2018.07.10
+*               增加手动缩放的机制，不缩放时才应用 CnFormScaler。
+*           2018.02.07
 *               调整因主题不同导致客户区尺寸变化导致右下角控件显示不完全的问题。
 *           2012.11.30
-*               不使用CnFormScaler来处理字体，改用固定的96/72进行字体尺寸计算。
+*               不使用 CnFormScaler 来处理字体，改用固定的96/72进行字体尺寸计算。
 *           2009.01.07
 *               加入位置保存功能
 *           2004.11.19 V1.4
-*               修正因多语切换引起的Scaled=False时字体还是会Scaled的BUG (shenloqi)
+*               修正因多语切换引起的 Scaled=False 时字体还是会 Scaled 的 BUG (shenloqi)
 *           2004.11.18 V1.3
-*               将TCnTranslateForm.FScaler由Private变为Protected (shenloqi)
+*               将 TCnTranslateForm.FScaler 由 Private 变为 Protected (shenloqi)
 *           2003.10.30 V1.2
 *               增加返回 F1 显示帮助主题的虚拟方法 GetHelpTopic
 *           2003.10.20 V1.1
@@ -150,6 +152,8 @@ type
     {* 供专家包子类窗口使用的缩放比例}
 {$ENDIF}
   public
+    constructor Create(AOwner: TComponent); override;
+
     procedure Translate; virtual;
     {* 进行全窗体翻译}
   end;
@@ -358,23 +362,23 @@ end;
 
 procedure TCnWizMultiLang.SubActionExecute(Index: Integer);
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := Low(Indexes) to High(Indexes) do
-    if Indexes[i] = Index then
+  for I := Low(Indexes) to High(Indexes) do
+    if Indexes[I] = Index then
     begin
-      CnLanguageManager.CurrentLanguageIndex := i;
-      WizOptions.CurrentLangID := FStorage.Languages[i].LanguageID;
+      CnLanguageManager.CurrentLanguageIndex := I;
+      WizOptions.CurrentLangID := FStorage.Languages[I].LanguageID;
     end;
 end;
 
 procedure TCnWizMultiLang.SubActionUpdate(Index: Integer);
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := Low(Indexes) to High(Indexes) do
-    SubActions[i].Checked := WizOptions.CurrentLangID =
-      FStorage.Languages[i].LanguageID;
+  for I := Low(Indexes) to High(Indexes) do
+    SubActions[I].Checked := WizOptions.CurrentLangID =
+      FStorage.Languages[I].LanguageID;
 end;
 
 {$ENDIF}
@@ -389,9 +393,6 @@ var
   Theming: IOTAIDEThemingServices;
 {$ENDIF}
 begin
-{$IFNDEF STAND_ALONE}
-  FEnlarge := WizOptions.SizeEnlarge;
-{$ENDIF}
   FActionList := TActionList.Create(Self);
   FHelpAction := TAction.Create(Self);
   FHelpAction.ShortCut := ShortCut(VK_F1, []);
@@ -421,9 +422,8 @@ begin
   end;
 {$ENDIF}
 
-  // inherited 中会调用 FormCreate 事件，有可能改变了 Width/Height
-  AdjustRightBottomMargin;
   ProcessSizeEnlarge;
+  AdjustRightBottomMargin;   // inherited 中会调用 FormCreate 事件，有可能改变了 Width/Height
 end;
 
 procedure TCnTranslateForm.DoDestroy;
@@ -466,7 +466,8 @@ var
 begin
   inherited;
   FScaler := TCnFormScaler.Create(Self);
-  FScaler.DoEffects;
+  if FEnlarge = wseOrigin then // 不放大时才处理
+    FScaler.DoEffects;
   InitFormControls;
 
 {$IFNDEF STAND_ALONE}
@@ -547,7 +548,7 @@ end;
 
 procedure TCnTranslateForm.AdjustRightBottomMargin;
 var
-  I, V, MinH, MinW: Integer;
+  I, V, MinH, MinW, RightBottomMargin: Integer;
   AControl: TControlHack;
   List: TObjectList;
   AnchorsArray: array of TAnchors;
@@ -556,8 +557,9 @@ var
   C1, C2: Integer;
 {$ENDIF}
 begin
-  MinH := csRightBottomMargin;
-  MinW := csRightBottomMargin;
+  RightBottomMargin := Round(csRightBottomMargin * GetFactorFromSizeEnlarge(FEnlarge));
+  MinH := RightBottomMargin;
+  MinW := RightBottomMargin;
 
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('AdjustRightBottomMargin. Original Width %d, Height %d. ClientWidth %d, ClientHeight %d, BorderWidth %d.',
@@ -573,7 +575,7 @@ begin
 
       Added := False;
       V := ClientWidth - BorderWidth - Controls[I].Left - Controls[I].Width;
-      if V < csRightBottomMargin then
+      if V < RightBottomMargin then
       begin
 {$IFDEF DEBUG}
         CnDebugger.LogFmt('AdjustRightBottomMargin. Found Width Beyond Controls: %s, %d. Left %d, Width %d.',
@@ -587,9 +589,8 @@ begin
           MinW := V;
       end;
 
-
       V := ClientHeight - BorderWidth - Controls[I].Top - Controls[I].Height;
-      if V < csRightBottomMargin then
+      if V < RightBottomMargin then
       begin
 {$IFDEF DEBUG}
         CnDebugger.LogFmt('AdjustRightBottomMargin. Found Height Beyond Controls: %s, %d. Top %d, Height %d.',
@@ -634,10 +635,10 @@ begin
         [Width, Height, C1]);
 {$ENDIF}
 
-      if MinW < csRightBottomMargin then
-        Width := Width + (csRightBottomMargin - MinW);
-      if MinH < csRightBottomMargin then
-        Height := Height + (csRightBottomMargin - MinH);
+      if MinW < RightBottomMargin then
+        Width := Width + (RightBottomMargin - MinW);
+      if MinH < RightBottomMargin then
+        Height := Height + (RightBottomMargin - MinH);
 
 {$IFDEF DEBUG}
       CnDebugger.LogFmt('AdjustRightBottomMargin Changed Form to Width %d, Height %d.',
@@ -708,13 +709,13 @@ end;
 procedure TCnTranslateForm.InitFormControls;
 {$IFDEF COMBOBOX_CHS_BUG}
 var
-  i: Integer;
+  I: Integer;
 {$ENDIF}
 begin
 {$IFDEF COMBOBOX_CHS_BUG}
-  for i := 0 to ComponentCount - 1 do
-    if Components[i] is TCustomComboBox then
-      TComboBox(Components[i]).AutoComplete := False;
+  for I := 0 to ComponentCount - 1 do
+    if Components[I] is TCustomComboBox then
+      TComboBox(Components[I]).AutoComplete := False;
 {$ENDIF}
 end;
 
@@ -802,6 +803,15 @@ begin
 end;
 {$ENDIF}
 
+constructor TCnTranslateForm.Create(AOwner: TComponent);
+begin
+{$IFNDEF STAND_ALONE}
+  FEnlarge := WizOptions.SizeEnlarge;
+{$ENDIF}
+  inherited;
+  // 避免 Loaded 时还未获得 FEnlarge 值
+end;
+
 initialization
 {$IFDEF STAND_ALONE}
   CreateLanguageManager;
@@ -825,5 +835,4 @@ finalization
 {$ENDIF DEBUG}
 
 {$ENDIF TEST_APP}
-
 end.
