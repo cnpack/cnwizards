@@ -61,5 +61,6 @@ object FormRuntimeTest: TFormRuntimeTest
     Height = 25
     Caption = 'Show Form3'
     TabOrder = 3
+    OnClick = btn3Click
   end
 end

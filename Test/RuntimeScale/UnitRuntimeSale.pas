@@ -17,6 +17,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure btn1Click(Sender: TObject);
     procedure btn2Click(Sender: TObject);
+    procedure btn3Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -31,7 +32,7 @@ var
 implementation
 
 uses
-  TestEditorCodeToString, TestEditorCodeComment;
+  TestEditorCodeToString, TestEditorCodeComment, TestEditorWizard;
 
 {$R *.DFM}
 
@@ -60,6 +61,14 @@ end;
 procedure TFormRuntimeTest.btn2Click(Sender: TObject);
 begin
   with TEditorCodeCommentForm.Create(Application) do
+  begin
+    Show;
+  end;
+end;
+
+procedure TFormRuntimeTest.btn3Click(Sender: TObject);
+begin
+  with TEditorToolsForm.Create(Application) do
   begin
     Show;
   end;
