@@ -466,8 +466,12 @@ var
 begin
   inherited;
   FScaler := TCnFormScaler.Create(Self);
+{$IFNDEF STAND_ALONE}
   if FEnlarge = wseOrigin then // 不放大时才处理
     FScaler.DoEffects;
+{$ELSE}
+  FScaler.DoEffects;
+{$ENDIF}
   InitFormControls;
 
 {$IFNDEF STAND_ALONE}
@@ -557,7 +561,11 @@ var
   C1, C2: Integer;
 {$ENDIF}
 begin
+{$IFNDEF STAND_ALONE}
   RightBottomMargin := Round(csRightBottomMargin * GetFactorFromSizeEnlarge(FEnlarge));
+{$ELSE}
+  RightBottomMargin := csRightBottomMargin;
+{$ENDIF}
   MinH := RightBottomMargin;
   MinW := RightBottomMargin;
 
