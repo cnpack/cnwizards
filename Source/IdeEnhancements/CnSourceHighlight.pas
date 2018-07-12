@@ -217,7 +217,7 @@ type
     FLineInfo: TBlockLineInfo;              // 容纳解析出来的 Tokens 配对信息
     FCompDirectiveInfo: TCompDirectiveInfo; // 容纳解析出来的编译指令配对信息
 
-    FStack: TStack;  // 解析关键字配对时以及解析C括号配对时以及C编译指令配对时以及Pascal编译指令配对时使用
+    FStack: TStack;  // 解析关键字配对时以及解析 C 括号配对时以及 C 编译指令配对时以及 Pascal 编译指令配对时使用
     FIfThenStack: TStack;
     FCurrentToken: TCnGeneralPasToken;
     FCurMethodStartToken, FCurMethodCloseToken: TCnGeneralPasToken;

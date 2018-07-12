@@ -56,7 +56,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, IniFiles, Forms, Controls, Menus, Messages,
-  MenuBar, ActnList, ComCtrls, CnWizUtils, CnClasses, CnLangMgr, CnFormScaler,
+  ActnList, ComCtrls, CnWizUtils, CnClasses, CnLangMgr, CnFormScaler,
   CnLangCollection, CnLangStorage, CnWizOptions, CnWizScaler,
   // 该单元编译在 DsnIdeXX/DesignIde 包中，专家必须与它相连接
   DockForm;
@@ -84,7 +84,6 @@ type
   private
     FEnlarge: TCnWizSizeEnlarge;
   protected
-    FMenuBar: TMenuBar;
     FNeedRestore: Boolean;
     FRestoreRect: TRect;
     // 以下复制自 TCnTranslateForm 以实现多语
@@ -244,14 +243,6 @@ begin
     TDummyPopupMenu(PopupMenu).OwnerMenu := Menu;
   end;
 
-  if Menu <> nil then
-  begin
-    FMenuBar := TMenuBar.Create(Self);
-    FMenuBar.Parent := Self;
-    FMenuBar.Menu := Menu;
-    FMenuBar.Height := GetSystemMetrics(SM_CYMENU) + 2;
-    Menu := nil;
-  end;
   DeskSection := Name;
   AutoSave := True;
   SaveStateNecessary := True;
