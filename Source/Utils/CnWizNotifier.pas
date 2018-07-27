@@ -2244,7 +2244,7 @@ end;
 initialization
 {$IFDEF DELPHI102_TOKYO}
 {$IFNDEF CNWIZARDS_MINIMUM}
-  if IsDelphi10Dot2Dot3 then
+  if IsDelphi10Dot2GEDot3 then
     ChangeIntfGUID(TCnIDEThemingServicesNotifier, ICnNTAIDEThemingServicesNotifier,
       StringToGUID(GUID_INTAIDETHEMINGSERVICESNOTIFIER));
 {$ENDIF}
