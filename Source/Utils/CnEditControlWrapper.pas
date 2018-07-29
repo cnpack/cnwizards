@@ -226,7 +226,7 @@ type
 
   TCnEditControlWrapper = class(TComponent)
   private
-    CorIdeModule: HMODULE;
+    FCorIdeModule: HMODULE;
     FAfterPaintLineNotifiers: TList;
     FBeforePaintLineNotifiers: TList;
     FEditControlNotifiers: TList;
@@ -850,8 +850,8 @@ begin
     TObject(FBpClickQueue.Pop).Free;
   FBpClickQueue.Free;
 
-  if CorIdeModule <> 0 then
-    FreeLibrary(CorIdeModule);
+  if FCorIdeModule <> 0 then
+    FreeLibrary(FCorIdeModule);
   if FPaintLineHook <> nil then
     FPaintLineHook.Free;
   if FSetEditViewHook <> nil then
@@ -881,46 +881,46 @@ end;
 procedure TCnEditControlWrapper.InitEditControlHook;
 begin
   try
-    CorIdeModule := LoadLibrary(CorIdeLibName);
-    CnWizAssert(CorIdeModule <> 0, 'Failed to load CorIdeModule');
+    FCorIdeModule := LoadLibrary(CorIdeLibName);
+    CnWizAssert(FCorIdeModule <> 0, 'Failed to load FCorIdeModule');
 
-    GetOTAEditView := GetBplMethodAddress(GetProcAddress(CorIdeModule, SGetOTAEditViewName));
-    CnWizAssert(Assigned(GetOTAEditView), 'Failed to load GetOTAEditView from CorIdeModule');
+    GetOTAEditView := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SGetOTAEditViewName));
+    CnWizAssert(Assigned(GetOTAEditView), 'Failed to load GetOTAEditView from FCorIdeModule');
 
-    DoGetAttributeAtPos := GetBplMethodAddress(GetProcAddress(CorIdeModule, SGetAttributeAtPosName));
-    CnWizAssert(Assigned(DoGetAttributeAtPos), 'Failed to load GetAttributeAtPos from CorIdeModule');
+    DoGetAttributeAtPos := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SGetAttributeAtPosName));
+    CnWizAssert(Assigned(DoGetAttributeAtPos), 'Failed to load GetAttributeAtPos from FCorIdeModule');
 
-    PaintLine := GetBplMethodAddress(GetProcAddress(CorIdeModule, SPaintLineName));
-    CnWizAssert(Assigned(PaintLine), 'Failed to load PaintLine from CorIdeModule');
+    PaintLine := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SPaintLineName));
+    CnWizAssert(Assigned(PaintLine), 'Failed to load PaintLine from FCorIdeModule');
 
 {$IFDEF DELPHI10_SEATTLE_UP}
-    GetCanvas := GetBplMethodAddress(GetProcAddress(CorIdeModule, SGetCanvas));
-    CnWizAssert(Assigned(GetCanvas), 'Failed to load GetCanvas from CorIdeModule');
+    GetCanvas := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SGetCanvas));
+    CnWizAssert(Assigned(GetCanvas), 'Failed to load GetCanvas from FCorIdeModule');
 {$ENDIF}
 
-    DoMarkLinesDirty := GetBplMethodAddress(GetProcAddress(CorIdeModule, SMarkLinesDirtyName));
-    CnWizAssert(Assigned(DoMarkLinesDirty), 'Failed to load MarkLinesDirty from CorIdeModule');
+    DoMarkLinesDirty := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SMarkLinesDirtyName));
+    CnWizAssert(Assigned(DoMarkLinesDirty), 'Failed to load MarkLinesDirty from FCorIdeModule');
 
-    EdRefresh := GetBplMethodAddress(GetProcAddress(CorIdeModule, SEdRefreshName));
-    CnWizAssert(Assigned(EdRefresh), 'Failed to load EdRefresh from CorIdeModule');
+    EdRefresh := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SEdRefreshName));
+    CnWizAssert(Assigned(EdRefresh), 'Failed to load EdRefresh from FCorIdeModule');
 
-    DoGetTextAtLine := GetBplMethodAddress(GetProcAddress(CorIdeModule, SGetTextAtLineName));
-    CnWizAssert(Assigned(DoGetTextAtLine), 'Failed to load GetTextAtLine from CorIdeModule');
+    DoGetTextAtLine := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SGetTextAtLineName));
+    CnWizAssert(Assigned(DoGetTextAtLine), 'Failed to load GetTextAtLine from FCorIdeModule');
 
   {$IFDEF BDS}
     // BDS 下才有效
-    LineIsElided := GetBplMethodAddress(GetProcAddress(CorIdeModule, SLineIsElidedName));
-    CnWizAssert(Assigned(LineIsElided), 'Failed to load LineIsElided from CorIdeModule');
+    LineIsElided := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SLineIsElidedName));
+    CnWizAssert(Assigned(LineIsElided), 'Failed to load LineIsElided from FCorIdeModule');
 
-    PointFromEdPos := GetBplMethodAddress(GetProcAddress(CorIdeModule, SPointFromEdPosName));
-    CnWizAssert(Assigned(PointFromEdPos), 'Failed to load PointFromEdPos from CorIdeModule');
+    PointFromEdPos := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SPointFromEdPosName));
+    CnWizAssert(Assigned(PointFromEdPos), 'Failed to load PointFromEdPos from FCorIdeModule');
 
-    IndexPosToCurPosProc := GetBplMethodAddress(GetProcAddress(CorIdeModule, SIndexPosToCurPosName));
-    CnWizAssert(Assigned(IndexPosToCurPosProc), 'Failed to load IndexPosToCurPos from CorIdeModule');
+    IndexPosToCurPosProc := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SIndexPosToCurPosName));
+    CnWizAssert(Assigned(IndexPosToCurPosProc), 'Failed to load IndexPosToCurPos from FCorIdeModule');
   {$ENDIF}
 
-    SetEditView := GetBplMethodAddress(GetProcAddress(CorIdeModule, SSetEditViewName));
-    CnWizAssert(Assigned(SetEditView), 'Failed to load SetEditView from CorIdeModule');
+    SetEditView := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SSetEditViewName));
+    CnWizAssert(Assigned(SetEditView), 'Failed to load SetEditView from FCorIdeModule');
 
     FPaintLineHook := TCnMethodHook.Create(@PaintLine, @MyPaintLine);
 
