@@ -93,6 +93,7 @@ begin
 
     Result := THintWindow(Self).CalcHintRect(MaxWidth, AHint, AData);
     Result.Right := Result.Right + Result.Bottom - Result.Top;
+    CnDebugger.LogMsg('MyHintWindowCalcHintRect: Add Width ' + IntToStr(Result.Bottom - Result.Top));
   finally
     FCalcHintRectHook.HookMethod;
   end;
@@ -124,6 +125,7 @@ begin
 
     H.Canvas.Brush.Color := OldColor;
     H.Canvas.Brush.Style := OldStyle;
+    CnDebugger.LogMsg('MyHintWindowPaint');
   finally
     FPaintHook.HookMethod;
   end;
@@ -184,6 +186,7 @@ begin
     FCalcHintRectHook := TCnMethodHook.Create(GetBplMethodAddress(@THintWindow.CalcHintRect), @MyHintWindowCalcHintRect);
     FPaintHook := TCnMethodHook.Create(GetBplMethodAddress(@THintWindowAccess.Paint), @MyHintWindowPaint);
   end;
+  ShowMessage(HintWindowClass.ClassName);
 end;
 
 function TCnTestAppHintWizard.GetCaption: string;
