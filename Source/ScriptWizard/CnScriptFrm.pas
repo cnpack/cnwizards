@@ -143,10 +143,12 @@ type
   TCnScriptApplicationEventNotify = class(TCnScriptEvent)
   private
     FAppEventType: TCnWizAppEventType;
+    FData: TObject;
   public
-    constructor Create(EventType: TCnWizAppEventType);
+    constructor Create(EventType: TCnWizAppEventType; AData: TObject);
   published
     property AppEventType: TCnWizAppEventType read FAppEventType;
+    property Data: TObject read FData;
   end;
 
   TCnScriptActiveFormChanged = class(TCnScriptEvent)
@@ -359,10 +361,11 @@ end;
 { TCnScriptApplicationEventNotify }
 
 constructor TCnScriptApplicationEventNotify.Create(
-  EventType: TCnWizAppEventType);
+  EventType: TCnWizAppEventType; AData: TObject);
 begin
   inherited Create(smApplicationEvent);
   FAppEventType := EventType;
+  FData := AData;
 end;
 
 { TCnScriptActiveFormChanged }

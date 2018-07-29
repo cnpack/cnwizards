@@ -219,7 +219,7 @@ type
     procedure OnBeforeCompile(const Project: IOTAProject;
       IsCodeInsight: Boolean; var Cancel: Boolean);
     procedure OnAfterCompile(Succeeded: Boolean; IsCodeInsight: Boolean);
-    procedure OnAppEventNotify(EventType: TCnWizAppEventType);
+    procedure OnAppEventNotify(EventType: TCnWizAppEventType; Data: Pointer);
     procedure OnActiveFormNotify(Sender: TObject);
   protected
     function GetHasConfig: Boolean; override;
@@ -1059,12 +1059,12 @@ begin
   end;
 end;
 
-procedure TCnScriptWizard.OnAppEventNotify(EventType: TCnWizAppEventType);
+procedure TCnScriptWizard.OnAppEventNotify(EventType: TCnWizAppEventType; Data: Pointer);
 var
   I: Integer;
   Event: TCnScriptApplicationEventNotify;
 begin
-  Event := TCnScriptApplicationEventNotify.Create(EventType);
+  Event := TCnScriptApplicationEventNotify.Create(EventType, TObject(Data));
   try
     for I := 0 to FScripts.Count - 1 do
       if FScripts[I].Enabled and (Event.Mode in FScripts[I].Mode) and

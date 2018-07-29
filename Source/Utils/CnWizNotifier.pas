@@ -84,8 +84,8 @@ type
     NotifyType: TCnWizFormEditorNotifyType; ComponentHandle: TOTAHandle;
     Component: TComponent; const OldName, NewName: string) of object;
 
-  TCnWizAppEventType = (aeActivate, aeDeactivate, aeMinimize, aeRestore, aeHint);
-  TCnWizAppEventNotifier = procedure (EventType: TCnWizAppEventType) of object;
+  TCnWizAppEventType = (aeActivate, aeDeactivate, aeMinimize, aeRestore, aeHint, aeShowHint);
+  TCnWizAppEventNotifier = procedure (EventType: TCnWizAppEventType; Data: Pointer) of object;
 
   TCnWizMsgHookNotifier = procedure (hwnd: HWND; Control: TWinControl;
     Msg: TMessage) of object;
@@ -484,7 +484,7 @@ type
     procedure CheckCompNotifyObj;
     procedure FormEditorFileNotification(NotifyCode: TOTAFileNotification;
       const FileName: string);
-    procedure AppEventNotify(EventType: TCnWizAppEventType);
+    procedure AppEventNotify(EventType: TCnWizAppEventType; Data: Pointer = nil);
 
     procedure DoBeforeThemeChange;
     procedure DoAfterThemeChange;
@@ -501,6 +501,8 @@ type
     procedure DoApplicationMinimize(Sender: TObject);
     procedure DoApplicationRestore(Sender: TObject);
     procedure DoApplicationHint(Sender: TObject);
+    procedure DoApplicationShowHint(var HintStr: string; var CanShow: Boolean;
+      var HintInfo: THintInfo);
     procedure DoActiveControlChange;
     procedure DoIdleExecute;
   public
@@ -877,6 +879,7 @@ begin
   FEvents.OnMinimize := DoApplicationMinimize;
   FEvents.OnRestore := DoApplicationRestore;
   FEvents.OnHint := DoApplicationHint;
+  FEvents.OnShowHint := DoApplicationShowHint;
   FSourceEditorNotifiers := TList.Create;
   FSourceEditorIntfs := TList.Create;
   FFormEditorNotifiers := TList.Create;
@@ -1817,12 +1820,12 @@ begin
 end;
 
 procedure TCnWizNotifierServices.AppEventNotify(
-  EventType: TCnWizAppEventType);
+  EventType: TCnWizAppEventType; Data: Pointer);
 var
   I: Integer;
 begin
 {$IFDEF DEBUG}
-  if EventType <> aeHint then
+  if (EventType <> aeHint) and (EventType <> aeShowHint) then // ±‹√‚¥Ú”°Ã´∂‡
     CnDebugger.LogFmt('AppEventNotify: %s',
       [GetEnumName(TypeInfo(TCnWizAppEventType), Ord(EventType))]);
 {$ENDIF}
@@ -1831,7 +1834,7 @@ begin
     for I := FAppEventNotifiers.Count - 1 downto 0 do
     try
       with PCnWizNotifierRecord(FAppEventNotifiers[I])^ do
-        TCnWizAppEventNotifier(Notifier)(EventType);
+        TCnWizAppEventNotifier(Notifier)(EventType, Data);
     except
       DoHandleException('TCnWizNotifierServices.AppEventNotify[' + IntToStr(I) + ']');
     end;
@@ -1851,6 +1854,12 @@ end;
 procedure TCnWizNotifierServices.DoApplicationHint(Sender: TObject);
 begin
   AppEventNotify(aeHint);
+end;
+
+procedure TCnWizNotifierServices.DoApplicationShowHint(var HintStr: string;
+  var CanShow: Boolean; var HintInfo: THintInfo);
+begin
+  AppEventNotify(aeShowHint, @HintInfo);
 end;
 
 procedure TCnWizNotifierServices.DoApplicationMinimize(Sender: TObject);
