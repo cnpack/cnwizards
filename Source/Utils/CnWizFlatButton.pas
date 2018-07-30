@@ -29,7 +29,9 @@ unit CnWizFlatButton;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2005.01.06 V1.0
+* 修改记录：2018.07.30 V1.1
+*               增加显示色块的功能
+*           2005.01.06 V1.0
 *               创建单元，实现功能
 ================================================================================
 |</PRE>}
@@ -53,11 +55,15 @@ type
     FIsDropdown: Boolean;
     FTimer: TTimer;
     FAutoDropdown: Boolean;
+    FShowColor: Boolean;
+    FDisplayColor: TColor;
     procedure SetImage(Value: TGraphic);
     procedure ImageChange(Sender: TObject);
     procedure OnTimer(Sender: TObject);
     procedure SetIsDropdown(const Value: Boolean);
     procedure SetIsMouseEnter(const Value: Boolean);
+    procedure SetDisplayColor(const Value: TColor);
+    procedure SetShowColor(const Value: Boolean);
   protected
     procedure CreateParams(var Params: TCreateParams); override;
     procedure CMMouseEnter(var Message: TMessage); message CM_MOUSEENTER;
@@ -83,6 +89,11 @@ type
     {* 按钮图标，需要由用户自己创建及设置 }
     property AutoDropdown: Boolean read FAutoDropdown write FAutoDropdown;
     {* 是否鼠标移入后自动下拉}
+    property ShowColor: Boolean read FShowColor write SetShowColor;
+    {* 是否显示颜色区域}
+    property DisplayColor: TColor read FDisplayColor write SetDisplayColor;
+    {* 颜色区域的显示颜色}
+
     property IsDropdown: Boolean read FIsDropdown write SetIsDropdown;
     property IsMouseEnter: Boolean read FIsMouseEnter write SetIsMouseEnter;
   end;
@@ -99,6 +110,7 @@ const
   csBorderColors: array[TFlatButtonState] of TColor =
     ($006A240A, $006A240A, $006A240A, $666666);
   csArrowColor = clBlack;
+  csColorWidth = 10;
 
 { TCnWizFlatButton }
 
@@ -111,6 +123,7 @@ begin
   FTimer.Enabled := False;
   FTimer.Interval := 500;
   FTimer.OnTimer := OnTimer;
+
   UpdateSize;
 end;
 
@@ -166,6 +179,8 @@ end;
 
 procedure TCnWizFlatButton.Paint;
 var
+  R: TRect;
+  OldColor: TColor;
   X, Y: Integer;
   State: TFlatButtonState;
 begin
@@ -179,7 +194,20 @@ begin
     if (FImage <> nil) and not FImage.Empty then
       Draw(csBorderWidths[State], csBorderWidths[State], FImage);
 
-    if csArrowWidths[State] > 0 then
+    if FShowColor and (State in [bsHide, bsNormal]) then
+    begin
+      R.Left := Width - csBorderWidths[State] - (csArrowWidths[State] div 2) - csColorWidth + 2;
+      R.Top := 5;
+      R.Bottom := ClientRect.Bottom - 5;
+      R.Right := R.Left + csColorWidth - 4;
+
+      OldColor := Brush.Color;
+      Brush.Color := FDisplayColor;
+      FillRect(R);
+      Brush.Color := OldColor;
+    end;
+
+    if csArrowWidths[State] > 0 then  // 画箭头
     begin
       Pen.Color := csArrowColor;
       X := Width - csBorderWidths[State] - csArrowWidths[State] div 2;
@@ -220,6 +248,8 @@ var
 begin
   State := GetState;
   Width := csBorderWidths[State] * 2 + csArrowWidths[State] + csImageWidth;
+  if FShowColor and (State in [bsHide, bsNormal]) then
+    Width := Width + csColorWidth;
   Height := csBorderWidths[State] * 2 + csImageHeight;
   if Visible then
     Repaint;
@@ -285,6 +315,28 @@ begin
     Dec(TCMHintShow(Message).HintInfo^.HintPos.y, Height * 2 + 10);
 
   Message.Result := 0; // 不处理
+end;
+
+procedure TCnWizFlatButton.SetDisplayColor(const Value: TColor);
+begin
+  if FDisplayColor <> Value then
+  begin
+    FDisplayColor := Value;
+    UpdateSize;
+    if Visible then
+      Repaint;
+  end;
+end;
+
+procedure TCnWizFlatButton.SetShowColor(const Value: Boolean);
+begin
+  if FShowColor <> Value then
+  begin
+    FShowColor := Value;
+    UpdateSize;
+    if Visible then
+      Repaint;
+  end;
 end;
 
 end.
