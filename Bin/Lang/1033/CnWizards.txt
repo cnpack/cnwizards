@@ -2188,6 +2188,7 @@ TCnSrcEditorEnhanceForm.chkRightWrapLine.Caption=Wrap Cursor when Press Right at
 TCnSrcEditorEnhanceForm.chkSearchAgain.Caption=F3/Shift+F3 to Search Selected Text.
 TCnSrcEditorEnhanceForm.chkSemicolon.Caption=Put to Line End when Enter ";" in Source Code.
 TCnSrcEditorEnhanceForm.chkShiftEnter.Caption=Use Shift+Enter to Move to Line End and Enter.
+TCnSrcEditorEnhanceForm.chkShowColor.Caption=Show Color Preview when Color String Selected.
 TCnSrcEditorEnhanceForm.chkShowFlatButton.Caption=Show Selection Button when A Block Selected.
 TCnSrcEditorEnhanceForm.chkShowInDesign.Caption=Show Toolbar in BDS Embedded Designer.
 TCnSrcEditorEnhanceForm.chkShowLineCount.Caption=Show Total Line Count.

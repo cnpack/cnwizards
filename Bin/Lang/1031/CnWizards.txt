@@ -2188,6 +2188,7 @@ TCnSrcEditorEnhanceForm.chkRightWrapLine.Caption=Umbreche den Cursor, wenn Recht
 TCnSrcEditorEnhanceForm.chkSearchAgain.Caption=[F3]/[Shift]+[F3 ]um selektierten Text zu suchen.
 TCnSrcEditorEnhanceForm.chkSemicolon.Caption=gehe zu Zeilenende wenn ";" eingegeben wird.
 TCnSrcEditorEnhanceForm.chkShiftEnter.Caption=benutze [Shift]+[Enter] Leerzeile nach aktiver Zeile einzufügen.
+TCnSrcEditorEnhanceForm.chkShowColor.Caption=Farbvorschau anzeigen, wenn Farbzeichen ausgewählt ist.
 TCnSrcEditorEnhanceForm.chkShowFlatButton.Caption=zeige Auswahl wenn Block selektiert.
 TCnSrcEditorEnhanceForm.chkShowInDesign.Caption=zeige Toolbar in BDS Embedded Designer.
 TCnSrcEditorEnhanceForm.chkShowLineCount.Caption=zeige Gesamt Zeilenzähler.

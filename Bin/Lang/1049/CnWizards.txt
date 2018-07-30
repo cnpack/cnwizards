@@ -2188,6 +2188,7 @@ TCnSrcEditorEnhanceForm.chkRightWrapLine.Caption=Перен. курсор при
 TCnSrcEditorEnhanceForm.chkSearchAgain.Caption=F3/Shift+F3 для поиска выделенного текста
 TCnSrcEditorEnhanceForm.chkSemicolon.Caption=Перемещение в конец строки при вводе ";" в коде
 TCnSrcEditorEnhanceForm.chkShiftEnter.Caption=Исп. Shift+Enter для перемещ. и ввода в конец строки
+TCnSrcEditorEnhanceForm.chkShowColor.Caption=Показывать цветовой режим, когда выбрана цветная строка.
 TCnSrcEditorEnhanceForm.chkShowFlatButton.Caption=Отображать кнопку редактирования, если выделен блок кода
 TCnSrcEditorEnhanceForm.chkShowInDesign.Caption=Показ. в станд. VCL-дизайнере
 TCnSrcEditorEnhanceForm.chkShowLineCount.Caption=Показ. общее кол-во строк кода

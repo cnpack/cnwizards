@@ -2188,6 +2188,7 @@ TCnSrcEditorEnhanceForm.chkRightWrapLine.Caption=光标在行尾时按右方向�
 TCnSrcEditorEnhanceForm.chkSearchAgain.Caption=F3/Shift+F3 查找选中的文字。
 TCnSrcEditorEnhanceForm.chkSemicolon.Caption=有效代码语句中输入分号时自动移动到行尾。
 TCnSrcEditorEnhanceForm.chkShiftEnter.Caption=Shift+Enter 键移到行尾再换行。
+TCnSrcEditorEnhanceForm.chkShowColor.Caption=选中颜色字符串时预览颜色。
 TCnSrcEditorEnhanceForm.chkShowFlatButton.Caption=块选择时显示浮动工具按钮。
 TCnSrcEditorEnhanceForm.chkShowInDesign.Caption=在 BDS 窗体设计界面显示工具栏。
 TCnSrcEditorEnhanceForm.chkShowLineCount.Caption=显示文件总行数。
