@@ -167,6 +167,7 @@ type
     chkGutterDragSelectLines: TCheckBox;
     chkPasteReplace: TCheckBox;
     chkTenMode: TCheckBox;
+    chkShowColor: TCheckBox;
     procedure btnHelpClick(Sender: TObject);
     procedure UpdateContent(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word;
@@ -311,6 +312,7 @@ begin
 
   mmoAutoIndent.Enabled := chkAutoIndent.Checked;
   chkPasteReplace.Enabled := chkSmartPaste.Checked;
+  chkShowColor.Enabled := chkShowFlatButton.Checked;
 end;
 
 procedure TCnSrcEditorEnhanceForm.FormKeyDown(Sender: TObject;
@@ -612,6 +614,7 @@ begin
 {$ENDIF}
 
     chkShowFlatButton.Checked := FBlockTools.ShowBlockTools;
+    chkShowColor.Checked := FBlockTools.ShowColor;
     chkAddMenuBlockTools.Checked := FEditorMisc.AddMenuBlockTools;
 
     chkAutoSave.Checked := FEditorMisc.AutoSave;
@@ -712,6 +715,7 @@ begin
 {$ENDIF}
 
       FBlockTools.ShowBlockTools := chkShowFlatButton.Checked;
+      FBlockTools.ShowColor := chkShowColor.Checked;
       FEditorKey.SmartCopy := chkSmartCopy.Checked;
       FEditorKey.SmartPaste := chkSmartPaste.Checked;
       FEditorKey.PasteReplace := chkPasteReplace.Checked;

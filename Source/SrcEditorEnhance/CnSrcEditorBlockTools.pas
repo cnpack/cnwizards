@@ -827,10 +827,12 @@ end;
 procedure TCnSrcEditorBlockTools.ShowFlatButton(EditWindow: TCustomForm; 
   EditControl: TControl; EditView: IOTAEditView);
 var
+  IsColor: Boolean;
   AColor: TColor;
   Button: TCnWizFlatButton;
-  X, Y: Integer;
+  X, Y, E: Integer;
   StartingRow, EndingRow: Integer;
+  S: string;
 {$IFDEF BDS}
   ElidedStartingRows, ElidedEndingRows, I, RowEnd: Integer;
 {$ENDIF}
@@ -930,13 +932,34 @@ begin
       Button.Left := X;
 
     // 判断选择区是否有颜色，有则设置预览
-    try
-      AColor := StringToColor(Trim(EditView.Block.Text));
-      Button.DisplayColor := AColor;
-      Button.ShowColor := True;
-    except
+    if FShowColor then
+    begin
+      IsColor := False;
+      S := Trim(EditView.Block.Text);
+      if IdentToColor(S, Longint(AColor)) then
+        IsColor := True
+      else
+      begin
+        if (Length(S) = 6) or (Length(S) = 8) then
+        begin
+          Val('$' + S, Integer(AColor), E);
+          if E = 0 then
+            IsColor := True;
+        end
+        else if (Length(S) = 7) or (Length(S) = 9) and (S[1] = '$') then
+        begin
+          Val(S, Integer(AColor), E);
+          if E = 0 then
+            IsColor := True;
+        end;
+      end;
+
+      if IsColor then
+        Button.DisplayColor := AColor;
+      Button.ShowColor := IsColor;
+    end
+    else
       Button.ShowColor := False;
-    end;
 
     if not Button.Visible then
     begin
@@ -1008,17 +1031,20 @@ end;
 const
   csBlockTools = 'BlockTools';
   csShowBlockTools = 'ShowBlockTools';
+  csShowColor = 'ShowColor';
   csTabIndent = 'TabIndent';
 
 procedure TCnSrcEditorBlockTools.LoadSettings(Ini: TCustomIniFile);
 begin
   FShowBlockTools := Ini.ReadBool(csBlockTools, csShowBlockTools, FShowBlockTools);
+  FShowColor := Ini.ReadBool(csBlockTools, csShowColor, FShowColor);
   FTabIndent := Ini.ReadBool(csBlockTools, csTabIndent, True);
 end;
 
 procedure TCnSrcEditorBlockTools.SaveSettings(Ini: TCustomIniFile);
 begin
   Ini.WriteBool(csBlockTools, csShowBlockTools, FShowBlockTools);
+  Ini.WriteBool(csBlockTools, csShowColor, FShowColor);
   Ini.WriteBool(csBlockTools, csTabIndent, FTabIndent);  
 end;
 

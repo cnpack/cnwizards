@@ -500,7 +500,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         Left = 8
         Top = 139
         Width = 361
-        Height = 64
+        Height = 84
         Caption = '&Selection Button'
         TabOrder = 1
         object chkShowFlatButton: TCheckBox
@@ -510,19 +510,28 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Height = 17
           Caption = 'Show Selection Button when A Block Selected.'
           TabOrder = 0
+          OnClick = UpdateContent
         end
         object chkAddMenuBlockTools: TCheckBox
           Left = 8
-          Top = 38
+          Top = 56
           Width = 326
           Height = 17
           Caption = 'Show Selection Button Menu Items in Editor Context Menu.'
+          TabOrder = 2
+        end
+        object chkShowColor: TCheckBox
+          Left = 24
+          Top = 36
+          Width = 321
+          Height = 17
+          Caption = 'Show Color Preview when Color String Selected.'
           TabOrder = 1
         end
       end
       object grpAutoSave: TGroupBox
         Left = 8
-        Top = 301
+        Top = 321
         Width = 361
         Height = 64
         Caption = 'Auto &Save'
@@ -563,7 +572,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
       end
       object grpSmart: TGroupBox
         Left = 8
-        Top = 211
+        Top = 231
         Width = 361
         Height = 82
         Caption = 'Cli&pboard Operations'
@@ -596,7 +605,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
       end
       object chkShowThumbnail: TCheckBox
         Left = 16
-        Top = 372
+        Top = 392
         Width = 350
         Height = 17
         Caption = 'Show Preview Hint Window when Cursor on Vertical ScrollBar.'
