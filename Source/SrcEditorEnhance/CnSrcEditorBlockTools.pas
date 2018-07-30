@@ -29,14 +29,16 @@ unit CnSrcEditorBlockTools;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2012.11.02 by liuxiao
-*               因OTA的Bug，屏蔽D7下的三项新增功能
+* 修改记录：2018.07.30
+*               增加显示色块的功能
+*           2012.11.02 by liuxiao
+*               因 OTA 的 Bug，屏蔽 D7 下的三项新增功能
 *           2012.10.08 by shenloqi
-*               增加Ctrl+Shift+D删除当前行或选中行的功能
+*               增加 Ctrl+Shift+D 删除当前行或选中行的功能
 *           2012.10.01 by shenloqi
 *               增加了将当前代码/行上下移动的功能，完善了复制当前代码/行的功能
 *           2012.09.19 by shenloqi
-*               移植到Delphi XE3
+*               移植到 Delphi XE3
 *           2005.06.05
 *               LiuXiao 加入复制粘贴当前标识符的功能
 *           2004.12.25
@@ -95,6 +97,7 @@ type
     FWebSearchMenu: TMenuItem;
     FMiscMenu: TMenuItem;
     FTabIndent: Boolean;
+    FShowColor: Boolean;
     procedure SetActive(const Value: Boolean);
     function ExecuteMenu(MenuItem: TMenuItem; Kind: TBlockToolKind): Boolean;
     procedure OnPopup(Sender: TObject);
@@ -116,6 +119,7 @@ type
     procedure ShowFlatButton(EditWindow: TCustomForm; EditControl: TControl;
       EditView: IOTAEditView);
     procedure SetShowBlockTools(Value: Boolean);
+    procedure SetShowColor(const Value: Boolean);
   protected
     function CanShowButton: Boolean;
     procedure DoEnhConfig;
@@ -134,6 +138,7 @@ type
 
     property Active: Boolean read FActive write SetActive;
     property ShowBlockTools: Boolean read FShowBlockTools write SetShowBlockTools;
+    property ShowColor: Boolean read FShowColor write SetShowColor;
     property TabIndent: Boolean read FTabIndent write FTabIndent;
     property PopupMenu: TPopupMenu read FPopupMenu;
     property OnEnhConfig: TNotifyEvent read FOnEnhConfig write FOnEnhConfig;
@@ -145,10 +150,8 @@ implementation
 
 {$IFDEF CNWIZARDS_CNSRCEDITORENHANCE}
 
-
 uses
   CnWizSubActionShortCutFrm {$IFDEF DEBUG}, CnDebug{$ENDIF};
-
 
 const
   csLeftKeep = 2;
@@ -161,6 +164,8 @@ begin
   inherited;
   FActive := True;
   FShowBlockTools := True;
+  FShowColor := True;
+
   FIcon := TIcon.Create;
   CnWizLoadIcon(nil, FIcon, 'CnSrcEditorBlockTools'); // 强制加载成小图标
 
@@ -822,6 +827,7 @@ end;
 procedure TCnSrcEditorBlockTools.ShowFlatButton(EditWindow: TCustomForm; 
   EditControl: TControl; EditView: IOTAEditView);
 var
+  AColor: TColor;
   Button: TCnWizFlatButton;
   X, Y: Integer;
   StartingRow, EndingRow: Integer;
@@ -922,6 +928,15 @@ begin
       Button.Top := Y;
     if X <> Button.Left then
       Button.Left := X;
+
+    // 判断选择区是否有颜色，有则设置预览
+    try
+      AColor := StringToColor(Trim(EditView.Block.Text));
+      Button.DisplayColor := AColor;
+      Button.ShowColor := True;
+    except
+      Button.ShowColor := False;
+    end;
 
     if not Button.Visible then
     begin
@@ -1071,6 +1086,15 @@ begin
     for I := List.Count - 1 downto 0 do
       TCnShortCutHolder(List[I]).Free;
     List.Free;
+  end;
+end;
+
+procedure TCnSrcEditorBlockTools.SetShowColor(const Value: Boolean);
+begin
+  if FShowColor <> Value then
+  begin
+    FShowColor := Value;
+    UpdateFlatButtons;
   end;
 end;
 
