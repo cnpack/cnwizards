@@ -569,6 +569,7 @@ InitOk:
   File "..\..\Bin\CnFormatLibW.dll"
 !ifndef LITE_VERSION
   File "..\..\Bin\CnWizHelper.dll"
+  File "..\..\Bin\CnZipUtils.dll"
 !endif
   File "..\..\License.*.txt"
 
