@@ -41,8 +41,11 @@ uses
 
 const
   SCnWizHelperDllName = 'CnWizHelper.Dll';
+  SCnWizZipDllName = 'CnZipUtils.Dll';
 
 function CnWizHelperLoaded: Boolean;
+
+function CnWizZipUtilsLoaded: Boolean;
 
 //------------------------------------------------------------------------------
 // ZIP 处理
@@ -50,17 +53,17 @@ function CnWizHelperLoaded: Boolean;
 
 function CnWizHelperZipValid: Boolean;
 
-procedure CnWiz_StartZip(const SaveFileName: PAnsiChar; const Password: PAnsiChar;
+procedure CnWizStartZip(const SaveFileName: PAnsiChar; const Password: PAnsiChar;
   RemovePath: Boolean); stdcall;
 {* 开始一个 Zip，创建内部对象，指明文件名、密码等}
 
-procedure CnWiz_ZipAddFile(FileName: PAnsiChar); stdcall;
+procedure CnWizZipAddFile(FileName: PAnsiChar); stdcall;
 {* 添加文件到 Zip}
 
-procedure CnWiz_ZipSetComment(Comment: PAnsiChar); stdcall;
+procedure CnWizZipSetComment(Comment: PAnsiChar); stdcall;
 {* 设置 Zip 文件注释}
 
-function CnWiz_ZipSaveAndClose: Boolean; stdcall;
+function CnWizZipSaveAndClose: Boolean; stdcall;
 {* 压缩保存 Zip 文件并释放内部对象}
 
 //------------------------------------------------------------------------------
@@ -79,50 +82,62 @@ uses
 {$ENDIF}
 
 type
-  TProcCnWiz_StartZip = procedure (const SaveFileName: PAnsiChar; const Password: PAnsiChar;
+  TProcCnWizStartZip = procedure(const SaveFileName: PAnsiChar; const Password: PAnsiChar;
     RemovePath: Boolean); stdcall;
   {* 开始一个 Zip，创建内部对象，指明文件名、密码等}
 
-  TProcCnWiz_ZipAddFile = procedure (FileName: PAnsiChar); stdcall;
+  TProcCnWizZipAddFile = procedure(FileName: PAnsiChar); stdcall;
   {* 添加文件到 Zip}
 
-  TProcCnWiz_ZipSetComment = procedure (Comment: PAnsiChar); stdcall;
+  TProcCnWizZipSetComment = procedure(Comment: PAnsiChar); stdcall;
   {* 设置 Zip 文件注释}
 
-  TFuncCnWiz_ZipSaveAndClose = function : Boolean; stdcall;
+  TFuncCnWizZipSaveAndClose = function: Boolean; stdcall;
   {* 压缩保存 Zip 文件并释放内部对象}
 
-  TFuncCnWiz_Inet_GetFile = function (AURL, FileName: PAnsiChar): Boolean; stdcall;
+  TFuncCnWizInetGetFile = function(AURL, FileName: PAnsiChar): Boolean; stdcall;
 
 var
-  hHelperDll: HMODULE;
+  HelperDllHandle: HMODULE = 0;
+  ZipDllHandle: HMODULE = 0;
 
-  fnCnWiz_StartZip: TProcCnWiz_StartZip;
-  fnCnWiz_ZipAddFile: TProcCnWiz_ZipAddFile;
-  fnCnWiz_ZipSetComment: TProcCnWiz_ZipSetComment;
-  fnCnWiz_ZipSaveAndClose: TFuncCnWiz_ZipSaveAndClose;
-  fnCnWiz_Inet_GetFile: TFuncCnWiz_Inet_GetFile;
+  FCnWizStartZip: TProcCnWizStartZip;
+  FCnWizZipAddFile: TProcCnWizZipAddFile;
+  FCnWizZipSetComment: TProcCnWizZipSetComment;
+  FCnWizZipSaveAndClose: TFuncCnWizZipSaveAndClose;
+  FCnWizInetGetFile: TFuncCnWizInetGetFile;
 
 procedure LoadWizHelperDll;
 var
   ModuleName: array[0..MAX_Path - 1] of Char;
 begin
   GetModuleFileName(hInstance, ModuleName, MAX_PATH);
-  hHelperDll := LoadLibrary(PChar(_CnExtractFilePath(ModuleName) + SCnWizHelperDllName));
+  HelperDllHandle := LoadLibrary(PChar(_CnExtractFilePath(ModuleName) + SCnWizHelperDllName));
+  ZipDllHandle := LoadLibrary(PChar(_CnExtractFilePath(ModuleName) + SCnWizZipDllName));
   
-  if hHelperDll <> 0 then
+  if HelperDllHandle <> 0 then
   begin
-    fnCnWiz_StartZip := TProcCnWiz_StartZip(GetProcAddress(hHelperDll, 'CnWiz_StartZip'));
-    fnCnWiz_ZipAddFile := TProcCnWiz_ZipAddFile(GetProcAddress(hHelperDll, 'CnWiz_ZipAddFile'));
-    fnCnWiz_ZipSetComment := TProcCnWiz_ZipSetComment(GetProcAddress(hHelperDll, 'CnWiz_ZipSetComment'));
-    fnCnWiz_ZipSaveAndClose := TFuncCnWiz_ZipSaveAndClose(GetProcAddress(hHelperDll, 'CnWiz_ZipSaveAndClose'));
-    fnCnWiz_Inet_GetFile := TFuncCnWiz_Inet_GetFile(GetProcAddress(hHelperDll, 'CnWiz_Inet_GetFile'));
+    FCnWizInetGetFile := TFuncCnWizInetGetFile(GetProcAddress(HelperDllHandle, 'CnWiz_Inet_GetFile'));
   end
   else
   begin
-  {$IFDEF DEBUG}
+{$IFDEF DEBUG}
     CnDebugger.LogMsg('Load CnWizHelper.dll failed.');
-  {$ENDIF}
+{$ENDIF}
+  end;
+
+  if ZipDllHandle <> 0 then
+  begin
+    FCnWizStartZip := TProcCnWizStartZip(GetProcAddress(ZipDllHandle, 'CnWizStartZip'));
+    FCnWizZipAddFile := TProcCnWizZipAddFile(GetProcAddress(ZipDllHandle, 'CnWizZipAddFile'));
+    FCnWizZipSetComment := TProcCnWizZipSetComment(GetProcAddress(ZipDllHandle, 'CnWizZipSetComment'));
+    FCnWizZipSaveAndClose := TFuncCnWizZipSaveAndClose(GetProcAddress(ZipDllHandle, 'CnWizZipSaveAndClose'));
+  end
+  else
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('Load CnZipUtils.dll failed.');
+{$ENDIF}
   end;
 
 {$IFDEF DEBUG}
@@ -133,17 +148,28 @@ end;
 
 procedure FreeWizHelperDll;
 begin
-  if hHelperDll <> 0 then
+  if HelperDllHandle <> 0 then
   begin
-    FreeLibrary(hHelperDll);
-    hHelperDll := 0;
+    FreeLibrary(HelperDllHandle);
+    HelperDllHandle := 0;
+  end;
+
+  if ZipDllHandle <> 0 then
+  begin
+    FreeLibrary(ZipDllHandle);
+    ZipDllHandle := 0;
   end;
 end;  
 
 function CnWizHelperLoaded: Boolean;
 begin
-  Result := hHelperDll <> 0;
-end;  
+  Result := HelperDllHandle <> 0;
+end;
+
+function CnWizZipUtilsLoaded: Boolean;
+begin
+  Result := ZipDllHandle <> 0;
+end;
 
 //------------------------------------------------------------------------------
 // ZIP 处理
@@ -151,34 +177,34 @@ end;
 
 function CnWizHelperZipValid: Boolean;
 begin
-  Result := CnWizHelperLoaded and Assigned(fnCnWiz_StartZip) and
-    Assigned(fnCnWiz_ZipAddFile) and Assigned(fnCnWiz_ZipSetComment)
-    and Assigned(fnCnWiz_ZipSaveAndClose);
+  Result := CnWizZipUtilsLoaded and Assigned(FCnWizStartZip) and
+    Assigned(FCnWizZipAddFile) and Assigned(FCnWizZipSetComment)
+    and Assigned(FCnWizZipSaveAndClose);
 end;  
 
-procedure CnWiz_StartZip(const SaveFileName: PAnsiChar; const Password: PAnsiChar;
+procedure CnWizStartZip(const SaveFileName: PAnsiChar; const Password: PAnsiChar;
   RemovePath: Boolean); stdcall;
 begin
   if CnWizHelperZipValid then
-    fnCnWiz_StartZip(SaveFileName, Password, RemovePath);
+    FCnWizStartZip(SaveFileName, Password, RemovePath);
 end;  
 
-procedure CnWiz_ZipAddFile(FileName: PAnsiChar); stdcall;
+procedure CnWizZipAddFile(FileName: PAnsiChar); stdcall;
 begin
   if CnWizHelperZipValid then
-    fnCnWiz_ZipAddFile(FileName);
+    FCnWizZipAddFile(FileName);
 end;
 
-procedure CnWiz_ZipSetComment(Comment: PAnsiChar); stdcall;
+procedure CnWizZipSetComment(Comment: PAnsiChar); stdcall;
 begin
   if CnWizHelperZipValid then
-    fnCnWiz_ZipSetComment(Comment);
+    FCnWizZipSetComment(Comment);
 end;
 
-function CnWiz_ZipSaveAndClose: Boolean; stdcall;
+function CnWizZipSaveAndClose: Boolean; stdcall;
 begin
   if CnWizHelperZipValid then
-    Result := fnCnWiz_ZipSaveAndClose
+    Result := FCnWizZipSaveAndClose
   else
     Result := False;
 end;
@@ -189,13 +215,13 @@ end;
 
 function CnWizHelperInetValid: Boolean;
 begin
-  Result := CnWizHelperLoaded and Assigned(fnCnWiz_Inet_GetFile);
+  Result := CnWizHelperLoaded and Assigned(FCnWizInetGetFile);
 end;
 
 function CnWiz_Inet_GetFile(AURL, FileName: PAnsiChar): Boolean; stdcall;
 begin
   if CnWizHelperInetValid then
-    Result := fnCnWiz_Inet_GetFile(AURL, FileName)
+    Result := FCnWizInetGetFile(AURL, FileName)
   else
     Result := False;
 end;  

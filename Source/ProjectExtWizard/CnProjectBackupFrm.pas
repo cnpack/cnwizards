@@ -54,7 +54,7 @@ uses
   Windows, SysUtils, Messages, Classes, Graphics, Forms, Controls, StdCtrls,
   Buttons, ExtCtrls, CheckLst, IniFiles, Menus, ActnList, FileCtrl, CnCommon,
   CnWizConsts, CnWizMultiLang, ComCtrls, ToolWin, ToolsAPI, ShellAPI, CommCtrl,
-  contnrs, Dialogs, CnLangTranslator, CnLangMgr, CnLangStorage, CnHashLangStorage;
+  Contnrs, Dialogs, CnLangTranslator, CnLangMgr, CnLangStorage, CnHashLangStorage;
 
 type
 
@@ -955,19 +955,19 @@ begin
         try
           DeleteFile(SaveFileName);
           try
-            CnWiz_StartZip(_CnPChar(SaveFileName), _CnPChar(Password), RemovePath);
+            CnWizStartZip(_CnPChar(SaveFileName), _CnPChar(Password), RemovePath);
 
             for I := 0 to Self.lvFileView.Items.Count - 1 do
               if Self.lvFileView.Items[I].Data <> nil then
-                CnWiz_ZipAddFile(_CnPChar(TCnBackupFileInfo(Self.lvFileView.Items[I].Data).FullFileName));
+                CnWizZipAddFile(_CnPChar(TCnBackupFileInfo(Self.lvFileView.Items[I].Data).FullFileName));
 
             if mmoComments.Lines.Text <> '' then
             begin
               Comment := AnsiString(mmoComments.Lines.Text);
-              CnWiz_ZipSetComment(PAnsiChar(Comment));
+              CnWizZipSetComment(PAnsiChar(Comment));
             end;
 
-            if CnWiz_ZipSaveAndClose then
+            if CnWizZipSaveAndClose then
               InfoDlg(Format(SCnProjExtBackupSuccFmt, [SaveFileName]));
           except
             ErrorDlg(SCnProjExtBackupFail);
