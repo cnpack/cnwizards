@@ -78,7 +78,7 @@ See http://www.suigeneris.org/want/ for details.
   <property name="cnwizards_list" value="-d6,-d7,-d2006,-d2007,-cb6" if="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cndfm6to5,cnascii,cnidebr,cnmanagewiz,cnselectlang,cnsmr,cnwizsetup" unless="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cnwizsetup" if="lite" />
-  <property name="all_list"       value="cnwizards,resdll,cnwizhelperdll,cnpnglib,cnformatlib,cnformatlibw,tools,makehelp,makeinst" unless="lite" />
+  <property name="all_list"       value="cnwizards,resdll,cnwizhelperdll,cnziputilsdll,cnpnglib,cnformatlib,cnformatlibw,tools,makehelp,makeinst" unless="lite" />
   <property name="all_list"       value="cnwizards,resdll,cnpnglib,cnformatlib,cnformatlibw,tools,makeinst" if="lite" />
 
   <property name="install_lite"   value=""          unless="lite"/>
@@ -205,6 +205,7 @@ Usage: want [target-name] [-Dname=value]
     cnwizards  - Compile all CnWizards DLLs (D5, D6, etc.).
     resdll     - Compile CnWizards Resource DLL.
     cnwizhelperdll - Compile CnWizards Helper DLL.
+    cnziputilsdll  - Compile CnWizards Zip DLL.
     cnpnglib   - Compile CnPngLib DLL.
     cnformatlib - Compile CnFormatLib DLL.
     cnformatlibw - Compile CnFormatLibW DLL for Unicode.
@@ -234,14 +235,14 @@ Usage: want [target-name] [-Dname=value]
     debug=true    - Make debug version.
     preview=true  - Make preview version.
     release=true  - Make release version.
-    
+
     helpfile=true - Include help files (default when not unstable)." />
   </target>
 
   <!-- 准备构建 -->
   <target name="-prepare" >
-    <echo  message="Run as master." if="ismaster" />
-    <echo  message="version=${Ver.Str.Major}.${Ver.Str.Minor}" />
+    <echo message="Run as master." if="ismaster" />
+    <echo message="version=${Ver.Str.Major}.${Ver.Str.Minor}" />
   </target>
 
   <!-- 清理目录 -->
@@ -575,7 +576,7 @@ Usage: want [target-name] [-Dname=value]
        <include name="${src}/CnWizards_DXE.res.old" />
     </move>
   </target>
-  
+
   <target name="-dxe2" depends="-cw_prepare" >
     <property name="Ver.FileDescription"  value="CnWizards For RAD Studio XE2" />
     <property name="Ver.InternalName"     value="CnWizards_DXE2" />
@@ -923,7 +924,7 @@ Usage: want [target-name] [-Dname=value]
     </move>
   </target>
 
-  <!-- 编译 ZIP DLL -->
+  <!-- 编译 Helper DLL -->
   <target name="cnwizhelperdll" depends="-prepare" description="Compile CnWizards Helper DLL." >
     <property name="Ver.FileDescription"  value="CnWizards Helper DLL" />
     <property name="Ver.InternalName"     value="CnWizHelper" />
@@ -941,6 +942,27 @@ Usage: want [target-name] [-Dname=value]
     </delete>
     <move tofile="${tools}/CnWizHelper/CnWizHelper.res" >
        <include name="${tools}/CnWizHelper/CnWizHelper.res.old" />
+    </move>
+  </target>
+
+  <!-- 编译 Zip DLL -->
+  <target name="cnziputilsdll" depends="-prepare" description="Compile CnWizards Zip DLL." >
+    <property name="Ver.FileDescription"  value="CnWizards Zip DLL" />
+    <property name="Ver.InternalName"     value="CnZipUtils" />
+    <property name="Ver.OriginalFilename" value="CnZipUtils.DLL" />
+    <copy tofile="${tools}/CnZipUtils/CnZipUtils.res.old" >
+       <include name="${tools}/CnZipUtils/CnZipUtils.res" />
+    </copy>
+    <echo input="${tools}/CnDll.template.rc" file="${tools}/CnZipUtils/CnZipUtils.rc" />
+    <brcc file="${tools}/CnZipUtils/CnZipUtils.rc" output="${tools}/CnZipUtils/CnZipUtils.res" />
+    <dcc basedir="${tools}/CnZipUtils" source="CnZipUtils.dpr" exename="${exe.DXE2}" usecfg="true" />
+    <delete dir="${tools}/CnZipUtils">
+       <include name="CnZipUtils.res" />
+       <include name="CnZipUtils.rc" />
+       <include name="CnZipUtils.drc" />
+    </delete>
+    <move tofile="${tools}/CnZipUtils/CnZipUtils.res" >
+       <include name="${tools}/CnZipUtils/CnZipUtils.res.old" />
     </move>
   </target>
 
@@ -1115,7 +1137,7 @@ Usage: want [target-name] [-Dname=value]
        <include name="${tools}/CnIdeBRTool/CnIdeBRTool.res.old" />
     </move>
   </target>
-  
+
   <target name="cnmanagewiz" depends="-prepare" description="Compile CnManageWiz." >
     <property name="Ver.FileDescription"  value="External Wizard Management" />
     <property name="Ver.InternalName"     value="cnmanagewiz" />
@@ -1135,7 +1157,7 @@ Usage: want [target-name] [-Dname=value]
        <include name="${tools}/CnManageWiz/CnManageWiz.res.old" />
     </move>
   </target>
-  
+
   <target name="cnselectlang" depends="-prepare" description="Compile CnSelectLang." >
     <property name="Ver.FileDescription"  value="Select CnWizards Language" />
     <property name="Ver.InternalName"     value="CnSelectLang" />
@@ -1155,7 +1177,7 @@ Usage: want [target-name] [-Dname=value]
        <include name="${tools}/CnSelectLang/CnSelectLang.res.old" />
     </move>
   </target>
-  
+
   <target name="cnsmr" depends="-prepare" description="Compile Relation Analyzer." >
     <property name="Ver.FileDescription"  value="Relation Analyzer" />
     <property name="Ver.InternalName"     value="CnSMR" />
@@ -1288,7 +1310,7 @@ Usage: want [target-name] [-Dname=value]
   </target>
 
   <target name="upload" depends="-prepare,upload_ftp,upload_google" if="ismaster" description="Upload Installer to FTP and Google Code Servers (Master only)." />
-  
+
   <!-- 更新 build 号及提交文件 -->
   <target name="incbuild" depends="-prepare" if="ismaster" description="Increase build and commit (Master only)." >
     <ini file="${ini}" >
