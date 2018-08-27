@@ -490,7 +490,7 @@ begin
   CnDebugger.LogEnter('TCnWizardMgr.Destroy');
 {$ENDIF}
 
-  // 防止多个IDE实例同时释放时保存设置冲突
+  // 防止多个 IDE 实例同时释放时保存设置冲突
   hMutex := CreateMutex(nil, False, csCnWizFreeMutex);
 {$IFDEF DEBUG}
   if GetLastError = ERROR_ALREADY_EXISTS then

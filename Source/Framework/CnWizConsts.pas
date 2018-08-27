@@ -101,6 +101,7 @@ resourcestring
 
   // IDE CmdLine Switch
   SCnNoCnWizardsSwitch = 'nocn';
+  SCnNoServiceCnWizardsSwitch = 'nosrvcn';
   SCnShowBootFormSwitch = 'swcn';
   SCnUserRegSwitch = 'cnreg';
   SCnUserDirSwitch = 'cnuserdir';
