@@ -89,8 +89,8 @@ Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlSearchPath]
 Count=3
 Item0=..\..\Source
-Item1=$(DELPHI)\Source\Toolsapi;..\..\cnpack\Source\Common;..\..\cnpack\Source\NonVisual;..\..\cnpack\Source\MultiLang;..\..\cnpack\Source\Graphics;..\..\cnpack\Source\NetComm;..\..\cnpack\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript;Utils;ScriptWizard
-Item2=$(DELPHI)\Source\Toolsapi;..\..\cnpack\Source\Common;..\..\cnpack\Source\NonVisual;..\..\cnpack\Source\MultiLang;..\..\cnpack\Source\Graphics;..\..\cnpack\Source\NetComm;..\..\cnpack\Source\ObjRep;ThirdParty;ThirdParty\TPAbbrevia;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript;Utils
+Item1=$(DELPHI)\Source\Toolsapi;..\..\cnpack\Source\Common;..\..\cnpack\Source\NonVisual;..\..\cnpack\Source\MultiLang;..\..\cnpack\Source\Graphics;..\..\cnpack\Source\NetComm;..\..\cnpack\Source\ObjRep;ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript;Utils;ScriptWizard
+Item2=$(DELPHI)\Source\Toolsapi;..\..\cnpack\Source\Common;..\..\cnpack\Source\NonVisual;..\..\cnpack\Source\MultiLang;..\..\cnpack\Source\Graphics;..\..\cnpack\Source\NetComm;..\..\cnpack\Source\ObjRep;ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript;Utils
 [HistoryLists\hlUnitOutputDirectory]
 Count=1
 Item0=..\Dcu
