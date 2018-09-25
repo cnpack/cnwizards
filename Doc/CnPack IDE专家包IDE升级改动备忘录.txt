@@ -5,9 +5,9 @@
 **********************************************************************
 
                     CnPack IDE专家包IDE升级改动备忘录
-                           Revision 1.0.0.1
+                           Revision 1.0.0.2
                        =========================
-                         作者：刘啸 2015.03.31
+                         作者：刘啸 2018.09.25
 
 
 
@@ -19,6 +19,7 @@
       CnPack.inc，加入新的编译指令。
 
   二、cnwizards\Source\Framework\CnWizCompilerConst.pas，加入新的枚举常量定义以及库文件名称定义。
+      cnwizards\Source\ScriptWizard\CnScript_CnWizUtils.pas 里同步加入新的枚举常量注册到脚本。
       cnwizards\Source\Utils\CnWizIdeUtils.pas 的 GetBDSUserDataDir 中，加入新的定义。
       cnwizards\Misc\CnIDEVersion.pas 加入新的版本判断。
       cnwizards\ThirdParty\GetIdeVersion.pas 加入新的版本判断。
