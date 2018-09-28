@@ -27,6 +27,13 @@ object CnLoadElementForm: TCnLoadElementForm
       'interface'
       'implementation'
       ''
+        'class function TCollections.CreateDictionary<TKey, TValue>: IDic' +
+        'tionary<TKey, TValue>;'
+      'begin'
+        '  Result := TCollections.CreateDictionary<TKey,TValue>(0, TEqual' +
+        'ityComparer<TKey>.Default);'
+      'end;'
+      ''
       'procedure TForm2;'
       'begin'
       '  try'

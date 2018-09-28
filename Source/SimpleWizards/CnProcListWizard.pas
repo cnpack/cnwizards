@@ -2997,7 +2997,7 @@ end;
 
 function TCnProcListForm.GetMethodName(const ProcName: string): string;
 var
-  CharPos: Integer;
+  CharPos, LTPos: Integer;
   TempStr: string;
 begin
   Result := ProcName;
@@ -3008,8 +3008,11 @@ begin
   if CharPos <> 0 then
     Delete(Result, CharPos, Length(Result));
 
+  TempStr := Result;
+  LTPos := Pos('<', Result);
   CharPos := Pos(' ', Result);
-  TempStr := Copy(Result, CharPos + 1, Length(Result));
+  if CharPos < LTPos then     // 避免从 Test<TKey, TValue> 这种中间截断
+    TempStr := Copy(Result, CharPos + 1, Length(Result));
 
   CharPos := Pos('.', TempStr);
   if CharPos = 0 then

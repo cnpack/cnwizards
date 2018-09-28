@@ -78,6 +78,40 @@ var
   FIntfLine: Integer = 0;
   FImplLine: Integer = 0;
 
+function GetMethodName(const ProcName: string): string;
+var
+  CharPos, LTPos: Integer;
+  TempStr: string;
+begin
+  Result := ProcName;
+  if Pos('.', Result) = 1 then
+    Delete(Result, 1, 1);
+
+  CharPos := Pos(#9, Result);
+  if CharPos <> 0 then
+    Delete(Result, CharPos, Length(Result));
+
+  TempStr := Result;
+  LTPos := Pos('<', Result);
+  CharPos := Pos(' ', Result);
+  if CharPos < LTPos then     // 避免从 Test<TKey, TValue> 这种中间截断
+    TempStr := Copy(Result, CharPos + 1, Length(Result));
+
+  CharPos := Pos('.', TempStr);
+  if CharPos = 0 then
+    Result := TempStr
+  else
+    TempStr := Copy(TempStr, CharPos + 1, Length(TempStr));
+
+  CharPos := Pos('(', TempStr);
+  if CharPos = 0 then
+    Result := TempStr
+  else
+    Result := Copy(TempStr, 1, CharPos - 1);
+
+  Result := Trim(Result);
+end;
+
 procedure ClearElements;
 var
   I: Integer;
@@ -1224,12 +1258,21 @@ begin
 end;
 
 procedure TCnLoadElementForm.btnLoadElementsClick(Sender: TObject);
+var
+  I: Integer;
+  Info: TCnElementInfo;
 begin
   ClearElements;
   FObjStrings.Clear;
   LoadElements;
 
-  ShowMessage(FElementList.Text);
+  for I := 0 to FElementList.Count - 1 do
+  begin
+    Info := TCnElementInfo(FElementList.Objects[I]);
+    ShowMessage(GetMethodName(Info.DisplayName));
+  end;
+
+  MessageBox(Handle, PChar(FElementList.Text), 'LoadElements', MB_OK);
 end;
 
 procedure TCnLoadElementForm.FormCreate(Sender: TObject);
