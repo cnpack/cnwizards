@@ -242,13 +242,13 @@ end;
 
 procedure RIRegister_Windows_Routines(S: TPSExec);
 begin
-  S.RegisterDelphiFunction(@MessageBox, 'MessageBox', CdStdCall);
+  S.RegisterDelphiFunction(@MessageBoxA, 'MessageBox', CdStdCall);
   S.RegisterDelphiFunction(@GetCurrentProcess, 'GetCurrentProcess', CdStdCall);
   S.RegisterDelphiFunction(@GetCurrentProcessId, 'GetCurrentProcessId', CdStdCall);
   S.RegisterDelphiFunction(@ExitProcess, 'ExitProcess', CdStdCall);
   S.RegisterDelphiFunction(@TerminateProcess, 'TerminateProcess', CdStdCall);
   S.RegisterDelphiFunction(@GetExitCodeProcess, 'GetExitCodeProcess', CdStdCall);
-  S.RegisterDelphiFunction(@GetEnvironmentStrings, 'GetEnvironmentStrings', CdStdCall);
+  S.RegisterDelphiFunction(@GetEnvironmentStringsA, 'GetEnvironmentStrings', CdStdCall);
   S.RegisterDelphiFunction(@GetCurrentThread, 'GetCurrentThread', CdStdCall);
   S.RegisterDelphiFunction(@GetCurrentThreadId, 'GetCurrentThreadId', CdStdCall);
   S.RegisterDelphiFunction(@SetThreadPriority, 'SetThreadPriority', CdStdCall);
@@ -270,15 +270,15 @@ begin
   S.RegisterDelphiFunction(@FileTimeToDosDateTime, 'FileTimeToDosDateTime', CdStdCall);
   S.RegisterDelphiFunction(@DosDateTimeToFileTime, 'DosDateTimeToFileTime', CdStdCall);
   S.RegisterDelphiFunction(@GetTickCount, 'GetTickCount', CdStdCall);
-  S.RegisterDelphiFunction(@GetModuleFileName, 'GetModuleFileName', CdStdCall);
-  S.RegisterDelphiFunction(@GetModuleHandle, 'GetModuleHandle', CdStdCall);
-  S.RegisterDelphiFunction(@LoadLibrary, 'LoadLibrary', CdStdCall);
+  S.RegisterDelphiFunction(@GetModuleFileNameA, 'GetModuleFileName', CdStdCall);
+  S.RegisterDelphiFunction(@GetModuleHandleA, 'GetModuleHandle', CdStdCall);
+  S.RegisterDelphiFunction(@LoadLibraryA, 'LoadLibrary', CdStdCall);
   S.RegisterDelphiFunction(@FreeLibrary, 'FreeLibrary', CdStdCall);
   S.RegisterDelphiFunction(@GetProcAddress, 'GetProcAddress', CdStdCall);
-  S.RegisterDelphiFunction(@GetCommandLine, 'GetCommandLine', CdStdCall);
-  S.RegisterDelphiFunction(@OutputDebugString, 'OutputDebugString', CdStdCall);
-  S.RegisterDelphiFunction(@CopyFile, 'CopyFile', CdStdCall);
-  S.RegisterDelphiFunction(@MoveFile, 'MoveFile', CdStdCall);
+  S.RegisterDelphiFunction(@GetCommandLineA, 'GetCommandLine', CdStdCall);
+  S.RegisterDelphiFunction(@OutputDebugStringA, 'OutputDebugString', CdStdCall);
+  S.RegisterDelphiFunction(@CopyFileA, 'CopyFile', CdStdCall);
+  S.RegisterDelphiFunction(@MoveFileA, 'MoveFile', CdStdCall);
   S.RegisterDelphiFunction(@MoveMemory, 'MoveMemory', cdRegister);
   S.RegisterDelphiFunction(@CopyMemory, 'CopyMemory', cdRegister);
   S.RegisterDelphiFunction(@FillMemory, 'FillMemory', cdRegister);
