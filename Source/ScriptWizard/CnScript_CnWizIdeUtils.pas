@@ -146,6 +146,7 @@ begin
 {$ENDIF}
   CL.AddDelphiFunction('Procedure GetProjectLibPath( Paths : TStrings)');
   CL.AddDelphiFunction('Function GetFileNameFromModuleName( AName : string; AProject : IOTAProject) : string');
+  CL.AddDelphiFunction('Function CnOtaGetVersionInfoKeys(Project: IOTAProject) : TStrings');
   CL.AddDelphiFunction('Procedure GetLibraryPath( Paths : TStrings; IncludeProjectPath : Boolean)');
   CL.AddDelphiFunction('Function GetComponentUnitName( const ComponentName : string) : string');
   CL.AddDelphiFunction('Procedure GetInstalledComponents( Packages, Components : TStrings)');
@@ -397,6 +398,7 @@ begin
 {$ENDIF}
   S.RegisterDelphiFunction(@GetProjectLibPath, 'GetProjectLibPath', cdRegister);
   S.RegisterDelphiFunction(@GetFileNameFromModuleName, 'GetFileNameFromModuleName', cdRegister);
+  S.RegisterDelphiFunction(@CnOtaGetVersionInfoKeys, 'CnOtaGetVersionInfoKeys', cdRegister);
   S.RegisterDelphiFunction(@GetLibraryPath, 'GetLibraryPath', cdRegister);
   S.RegisterDelphiFunction(@GetComponentUnitName, 'GetComponentUnitName', cdRegister);
   S.RegisterDelphiFunction(@GetInstalledComponents, 'GetInstalledComponents', cdRegister);

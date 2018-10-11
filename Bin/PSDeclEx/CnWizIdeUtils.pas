@@ -170,6 +170,9 @@ procedure GetProjectLibPath(Paths: TStrings);
 function GetFileNameFromModuleName(AName: string; AProject: IOTAProject = nil): string;
 {* 根据模块名获得完整文件名}
 
+function CnOtaGetVersionInfoKeys(Project: IOTAProject = nil): TStrings;
+{* 获取当前项目中的版本信息键值}
+
 procedure GetLibraryPath(Paths: TStrings; IncludeProjectPath: Boolean = True);
 {* 取环境设置中的 LibraryPath 内容}
 
@@ -465,6 +468,10 @@ begin
 end;
 
 function GetFileNameFromModuleName(AName: string; AProject: IOTAProject = nil): string;
+begin
+end;
+
+function CnOtaGetVersionInfoKeys(Project: IOTAProject = nil): TStrings;
 begin
 end;
 
