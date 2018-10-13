@@ -482,14 +482,14 @@ procedure CnOtaSetProjectOptionValue(Options: IOTAProjectOptions; const AOption,
 {* 设置当前项目的属性值}
 
 function CnOtaGetProjectPlatform(Project: IOTAProject): string;
-{* 获得项目的当前Platform值，返回字符串，如不支持此特性则返回空字符串}
+{* 获得项目的当前 Platform 值，返回字符串，如不支持此特性则返回空字符串}
 function CnOtaGetProjectFrameworkType(Project: IOTAProject): string;
-{* 获得项目的当前FrameworkType值，返回字符串，如不支持此特性则返回空字符串}
+{* 获得项目的当前 FrameworkType 值，返回字符串，如不支持此特性则返回空字符串}
 function CnOtaGetProjectCurrentBuildConfigurationValue(Project:IOTAProject; const APropName: string): string;
-{* 获得项目的当前BuildConfiguration中的属性值，返回字符串，如不支持此特性则返回空字符串}
+{* 获得项目的当前 BuildConfiguration 中的属性值，返回字符串，如不支持此特性则返回空字符串}
 procedure CnOtaSetProjectCurrentBuildConfigurationValue(Project:IOTAProject; const APropName,
   AValue: string);
-{* 设置项目的当前BuildConfiguration中的属性值，如不支持此特性则什么都不做}
+{* 设置项目的当前 BuildConfiguration 中的属性值，如不支持此特性则什么都不做}
 
 {$IFDEF SUPPORT_CROSS_PLATFORM}
 procedure CnOtaGetPlatformsFromBuildConfiguration(BuildConfig: IOTABuildConfiguration; Platforms: TStrings);
@@ -3439,7 +3439,7 @@ begin
   Options.Values[AOption] := AValue;
 end;
 
-// 获得项目的当前Platform值，返回字符串，如不支持此特性则返回空字符串
+// 获得项目的当前 Platform 值，返回字符串，如不支持此特性则返回空字符串
 function CnOtaGetProjectPlatform(Project: IOTAProject): string;
 begin
   Result := '';
@@ -3452,7 +3452,7 @@ begin
 {$ENDIF}
 end;
 
-// 获得项目的当前FrameworkType值，返回字符串，如不支持此特性则返回空字符串
+// 获得项目的当前 FrameworkType 值，返回字符串，如不支持此特性则返回空字符串
 function CnOtaGetProjectFrameworkType(Project: IOTAProject): string;
 begin
   Result := '';
@@ -3465,8 +3465,7 @@ begin
 {$ENDIF}
 end;
 
-
-// 获得当前项目的当前BuildConfiguration中的属性值，返回字符串，如不支持此特性则返回空字符串
+// 获得当前项目的当前 BuildConfiguration 中的属性值，返回字符串，如不支持此特性则返回空字符串
 function CnOtaGetProjectCurrentBuildConfigurationValue(Project:IOTAProject;
   const APropName: string): string;
 {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
@@ -3530,7 +3529,7 @@ begin
 {$ENDIF}
 end;
 
-// 设置当前项目的当前BuildConfiguration中的属性值
+// 设置当前项目的当前 BuildConfiguration 中的属性值
 procedure CnOtaSetProjectCurrentBuildConfigurationValue(Project:IOTAProject;const APropName,
   AValue: string);
 {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}

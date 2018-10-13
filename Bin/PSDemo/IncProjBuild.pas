@@ -17,7 +17,6 @@ var
   Options: IOTAProjectOptions;
   Project: IOTAProject;
   MajorVer, MinorVer, ReleaseNo, BuildNo: Integer;
-
 begin
   Options := CnOtaGetActiveProjectOptions(nil);
   if Options = nil then Exit;
@@ -31,28 +30,55 @@ begin
       Exit;
   end;
 
-  // Get the Versions
-  MajorVer := Options.GetOptionValue('MajorVersion');
-  MinorVer := Options.GetOptionValue('MinorVersion');
-  ReleaseNo  := Options.GetOptionValue('Release');
-  BuildNo := Options.GetOptionValue('Build');
-
-  if QueryDlg(Format('Current Project Version is %d.%d.%d.%d. Inc the Build Number?',
-    [MajorVer, MinorVer, ReleaseNo, BuildNo]), False) then
+  if not _VERSIONINFO_PER_CONFIGURATION then // Delphi6 to XE
   begin
-    BuildNo := BuildNo + 1;
-    CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [BuildNo]));
-
-    // Re-Get the Versions.
+    // Version info in Project Option. Get the Versions
     MajorVer := Options.GetOptionValue('MajorVersion');
     MinorVer := Options.GetOptionValue('MinorVersion');
-    ReleaseNo  := Options.GetOptionValue('Release');
+    ReleaseNo := Options.GetOptionValue('Release');
     BuildNo := Options.GetOptionValue('Build');
 
-    // Note: In Delphi 5/C++Builder 5, there's a BUG.
-    // Nubers are correct here, but maybe unchanged in Project Options Dialog.
-    InfoDlg(Format('Current Project Version is %d.%d.%d.%d.',
-      [MajorVer, MinorVer, ReleaseNo, BuildNo]));
+    if QueryDlg(Format('Current Project Version is %d.%d.%d.%d. Inc the Build Number?',
+      [MajorVer, MinorVer, ReleaseNo, BuildNo]), False) then
+    begin
+      BuildNo := BuildNo + 1;
+      CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [BuildNo]));
+
+      // Re-Get the Versions.
+      MajorVer := Options.GetOptionValue('MajorVersion');
+      MinorVer := Options.GetOptionValue('MinorVersion');
+      ReleaseNo := Options.GetOptionValue('Release');
+      BuildNo := Options.GetOptionValue('Build');
+
+      // Note: In Delphi 5/C++Builder 5, there's a BUG.
+      // Nubers are correct here, but maybe unchanged in Project Options Dialog.
+      InfoDlg(Format('Current Project Version is %d.%d.%d.%d.',
+        [MajorVer, MinorVer, ReleaseNo, BuildNo]));
+    end;
+  end
+  else  // Version Info in Project Configuration, XE2 or above
+  begin
+    MajorVer := StrToInt(CnOtaGetProjectCurrentBuildConfigurationValue(nil, 'VerInfo_MajorVer'));
+    MinorVer := StrToInt(CnOtaGetProjectCurrentBuildConfigurationValue(nil, 'VerInfo_MinorVer'));
+    ReleaseNo := StrToInt(CnOtaGetProjectCurrentBuildConfigurationValue(nil, 'VerInfo_Release'));
+    BuildNo := StrToInt(CnOtaGetProjectCurrentBuildConfigurationValue(nil, 'VerInfo_Build'));
+
+    if QueryDlg(Format('Current Project Version in Current Build Configuration is %d.%d.%d.%d. Inc the Build Number?',
+      [MajorVer, MinorVer, ReleaseNo, BuildNo]), False) then
+    begin
+      BuildNo := BuildNo + 1;
+      CnOtaSetProjectCurrentBuildConfigurationValue(nil, 'VerInfo_Build', Format('%d', [BuildNo]));
+
+      // Re-Get the Versions.
+      MajorVer := StrToInt(CnOtaGetProjectCurrentBuildConfigurationValue(nil, 'VerInfo_MajorVer'));
+      MinorVer := StrToInt(CnOtaGetProjectCurrentBuildConfigurationValue(nil, 'VerInfo_MinorVer'));
+      ReleaseNo := StrToInt(CnOtaGetProjectCurrentBuildConfigurationValue(nil, 'VerInfo_Release'));
+      BuildNo := StrToInt(CnOtaGetProjectCurrentBuildConfigurationValue(nil, 'VerInfo_Build'));
+
+      // Nubers are correct here, but maybe unchanged in Project Options Dialog.
+      InfoDlg(Format('Current Project Version in Current Build Configuration is %d.%d.%d.%d.',
+        [MajorVer, MinorVer, ReleaseNo, BuildNo]));
+    end;
   end;
 end.
  

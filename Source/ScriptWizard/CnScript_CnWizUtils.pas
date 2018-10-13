@@ -65,8 +65,8 @@ implementation
 procedure SIRegister_CnWizUtils(CL: TPSPascalCompiler);
 begin
   CL.AddTypeS('TCnCompilerKind', '( ckDelphi, ckBCB )');
-  CL.AddTypeS('TCnCompiler', '( cnDelphi5, cnDelphi6, cnDelphi7, cnDelphi8, cnDelphi9, '
-    + 'cnDelphi10, cnDelphi11, cnDelphi12, cnDelphi14, cnDelphi15, cnDelphi16, cnDelphi17, '
+  CL.AddTypeS('TCnCompiler', '( cnDelphi5, cnDelphi6, cnDelphi7, cnDelphi8, cnDelphi2005, '
+    + 'cnDelphi2006, cnDelphi2007, cnDelphi2009, cnDelphi2010, cnDelphiXE, cnDelphiXE2, cnDelphiXE3, '
     + 'cnDelphiXE4, cnDelphiXE5, cnDelphiXE6, cnDelphiXE7, cnDelphiXE8, cnDelphi10S, '
     + 'cnDelphi101B, cnDelphi102T, cnBCB5, cnBCB6 )');
   CL.AddConstantN('Compiler', 'TCnCompiler').SetInt(Ord(Compiler));
@@ -270,6 +270,7 @@ begin
   CL.AddConstantN('_SUPPORT_32_AND_64', 'Boolean').SetUInt(Ord(_SUPPORT_32_AND_64));
   CL.AddConstantN('_SUPPORT_WIDECHAR_IDENTIFIER', 'Boolean').SetUInt(Ord(_SUPPORT_WIDECHAR_IDENTIFIER));
   CL.AddConstantN('_UNICODE_STRING', 'Boolean').SetUInt(Ord(_UNICODE_STRING));
+  CL.AddConstantN('_VERSIONINFO_PER_CONFIGURATION', 'Boolean').SetUInt(Ord(_VERSIONINFO_PER_CONFIGURATION));
 
   CL.AddTypeS('TFormType', '( ftBinary, ftText, ftUnknown )');
   CL.AddTypeS('TCnCharSet', 'set of Char');
