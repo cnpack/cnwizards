@@ -190,6 +190,9 @@
 <p class="text" align="left">PascalScript 不支持使用 as 关键字或 QueryInterface 函数或 Supports 函数来针对接口实例进行类型转换，但可以用强制类型转换如 IDispatch(Intf) 来代替实现。</p>
   </li>
   <li>
+<p class="text" align="left">PascalScript 的内置 PChar 类型始终是 PAnsiChar，因此在 Delphi 2009 或以上版本中，无法使用参数声明成 PChar 实质上是 PWideChar 的函数，只有部分带 PChar 参数的 Windows API 我们注册成了 Ansi 版本还继续可用。</p>
+  </li>
+  <li>
 <p class="text" align="left">Readln 函数经过了重新实现，以弹出输入框的方式接受用户输入；Writeln 则重定向到了脚本窗口的输出。</p>
   </li>
 </ul>
