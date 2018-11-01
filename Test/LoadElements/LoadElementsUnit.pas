@@ -16,10 +16,13 @@ type
 
   TCnLoadElementForm = class(TForm)
     mmoPas: TMemo;
-    btnLoadElements: TButton;
-    procedure btnLoadElementsClick(Sender: TObject);
+    btnLoadPasElements: TButton;
+    mmoCpp: TMemo;
+    btnLoadCppElement: TButton;
+    procedure btnLoadPasElementsClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure btnLoadCppElementClick(Sender: TObject);
   private
     procedure LoadElements;
   public
@@ -34,6 +37,7 @@ implementation
 {$R *.DFM}
 
 const
+  EOF: Char = #0;
   ProcBlacklist: array[0..2] of string = ('CATCH_ALL', 'CATCH', 'AND_CATCH_ALL');
 
 type
@@ -74,7 +78,7 @@ type
 var
   FElementList: TStringList;
   FObjStrings: TStringList;
-  FLanguage: TCnSourceLanguageType = ltPas;
+  FLanguage: TCnSourceLanguageType = ltCpp;
   FIntfLine: Integer = 0;
   FImplLine: Integer = 0;
 
@@ -568,7 +572,7 @@ var
     ElementTypeStr, OwnerClass, ProcArgs: string;
 
     CurIdent, CurClass, CurIntf: string;
-    PrevIsOperator: Boolean;
+    PrevIsOperator, PrevIsTilde: Boolean;
     PrevElementForForward: TCnElementInfo;
     IsClassForForward, IsInTemplate: Boolean;
 
@@ -1016,17 +1020,24 @@ var
                   // ctkidentifier.  If not, then skip this step.
                   CppParser.PreviousNonJunk;
                   PrevIsOperator := CppParser.RunID = ctkoperator;
+                  PrevIsTilde := CppParser.RunID = ctktilde;
                   CppParser.NextNonJunk;
                   // 记录前一个是否是关键字 operator
-                  if ((CppParser.RunID = ctkidentifier) or (PrevIsOperator)) and not
+                  if ((CppParser.RunID = ctkidentifier) or PrevIsOperator or PrevIsTilde) and not
                     InProcedureBlacklist(CppParser.RunToken) then
                   begin
                     BeginIndex := CppParser.RunPosition;
                     if PrevIsOperator then
                       ProcName := 'operator ';
+                    if PrevIsTilde then
+                      ProcName := '~';
+
                     ProcName := ProcName + CppParser.RunToken;
                     LineNo := CppParser.PositionAtLine(CppParser.RunPosition);
                     CppParser.PreviousNonJunk;
+
+                    if CppParser.RunID = ctktilde then
+                      CppParser.PreviousNonJunk;
                     if CppParser.RunID = ctkcoloncolon then
                     // The object/method delimiter
                     begin
@@ -1230,8 +1241,13 @@ begin
   try
     MemStream := TMemoryStream.Create;
     try
-      S := mmoPas.Lines.Text;
+      if FLanguage = ltPas then
+        S := mmoPas.Lines.Text
+      else
+        S := mmoCpp.Lines.Text;
+
       MemStream.Write(S[1], Length(S) * SizeOf(Char));
+      MemStream.Write(EOF, SizeOf(Char));
 
       case FLanguage of
         ltPas: PasParser.Origin := MemStream.Memory;
@@ -1257,13 +1273,14 @@ begin
   end;
 end;
 
-procedure TCnLoadElementForm.btnLoadElementsClick(Sender: TObject);
+procedure TCnLoadElementForm.btnLoadPasElementsClick(Sender: TObject);
 var
   I: Integer;
   Info: TCnElementInfo;
 begin
   ClearElements;
   FObjStrings.Clear;
+  FLanguage := ltPas;
   LoadElements;
 
   for I := 0 to FElementList.Count - 1 do
@@ -1286,6 +1303,25 @@ begin
   FObjStrings.Free;
   ClearElements;
   FElementList.Free;
+end;
+
+procedure TCnLoadElementForm.btnLoadCppElementClick(Sender: TObject);
+var
+  I: Integer;
+  Info: TCnElementInfo;
+begin
+  ClearElements;
+  FObjStrings.Clear;
+  FLanguage := ltCpp;
+  LoadElements;
+
+  for I := 0 to FElementList.Count - 1 do
+  begin
+    Info := TCnElementInfo(FElementList.Objects[I]);
+    ShowMessage(GetMethodName(Info.DisplayName));
+  end;
+
+  MessageBox(Handle, PChar(FElementList.Text), 'LoadElements', MB_OK);
 end;
 
 end.

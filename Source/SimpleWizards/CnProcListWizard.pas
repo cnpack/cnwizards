@@ -1878,7 +1878,7 @@ var
     ElementTypeStr, OwnerClass, ProcArgs: string;
 
     CurIdent, CurClass, CurIntf: string;
-    PrevIsOperator: Boolean;
+    PrevIsOperator, PrevIsTilde: Boolean;
     PrevElementForForward: TCnElementInfo;
     IsClassForForward, IsInTemplate: Boolean;
 
@@ -2326,17 +2326,24 @@ var
                   // ctkidentifier.  If not, then skip this step.
                   CppParser.PreviousNonJunk;
                   PrevIsOperator := CppParser.RunID = ctkoperator;
+                  PrevIsTilde := CppParser.RunID = ctktilde;
                   CppParser.NextNonJunk;
                   // 记录前一个是否是关键字 operator
-                  if ((CppParser.RunID = ctkidentifier) or (PrevIsOperator)) and not
+                  if ((CppParser.RunID = ctkidentifier) or PrevIsOperator or PrevIsTilde) and not
                     InProcedureBlacklist(CppParser.RunToken) then
                   begin
                     BeginIndex := CppParser.RunPosition;
                     if PrevIsOperator then
                       ProcName := 'operator ';
+                    if PrevIsTilde then
+                      ProcName := '~';
+
                     ProcName := ProcName + CppParser.RunToken;
                     LineNo := CppParser.PositionAtLine(CppParser.RunPosition);
                     CppParser.PreviousNonJunk;
+
+                    if CppParser.RunID = ctktilde then
+                      CppParser.PreviousNonJunk;
                     if CppParser.RunID = ctkcoloncolon then
                     // The object/method delimiter
                     begin

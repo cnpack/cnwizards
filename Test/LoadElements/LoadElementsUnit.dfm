@@ -1,8 +1,8 @@
 object CnLoadElementForm: TCnLoadElementForm
   Left = 192
   Top = 107
-  Width = 775
-  Height = 403
+  Width = 844
+  Height = 474
   Caption = 
     'Load Elements Test for Procedure List in Unicode/NonUnicode Comp' +
     'iler'
@@ -20,16 +20,18 @@ object CnLoadElementForm: TCnLoadElementForm
   object mmoPas: TMemo
     Left = 24
     Top = 24
-    Width = 601
-    Height = 321
+    Width = 657
+    Height = 185
     Lines.Strings = (
       'unit a;'
       'interface'
       'implementation'
       ''
+      
         'class function TCollections.CreateDictionary<TKey, TValue>: IDic' +
         'tionary<TKey, TValue>;'
       'begin'
+      
         '  Result := TCollections.CreateDictionary<TKey,TValue>(0, TEqual' +
         'ityComparer<TKey>.Default);'
       'end;'
@@ -79,13 +81,59 @@ object CnLoadElementForm: TCnLoadElementForm
       'end.')
     TabOrder = 0
   end
-  object btnLoadElements: TButton
-    Left = 640
+  object btnLoadPasElements: TButton
+    Left = 696
     Top = 24
-    Width = 113
+    Width = 129
     Height = 25
-    Caption = 'Load Elements'
+    Caption = 'Load Pascal Elements'
     TabOrder = 1
-    OnClick = btnLoadElementsClick
+    OnClick = btnLoadPasElementsClick
+  end
+  object mmoCpp: TMemo
+    Left = 24
+    Top = 232
+    Width = 657
+    Height = 185
+    Lines.Strings = (
+      
+        '//--------------------------------------------------------------' +
+        '-------------'
+      ''
+      '#include <vcl.h>'
+      '#pragma hdrstop'
+      ''
+      '#include "Unit1.h"'
+      
+        '//--------------------------------------------------------------' +
+        '-------------'
+      '#pragma package(smart_init)'
+      '#pragma resource "*.dfm"'
+      'TForm1 *Form1;'
+      
+        '//--------------------------------------------------------------' +
+        '-------------'
+      '__fastcall TForm1::TForm1(TComponent* Owner)'
+      '        : TForm(Owner)'
+      '{'
+      '}'
+      ''
+      '__fastcall TForm1::~TForm1()'
+      '{'
+      '}'
+      
+        '//--------------------------------------------------------------' +
+        '-------------'
+      '')
+    TabOrder = 2
+  end
+  object btnLoadCppElement: TButton
+    Left = 696
+    Top = 232
+    Width = 129
+    Height = 25
+    Caption = 'Load C/C++ Elements'
+    TabOrder = 3
+    OnClick = btnLoadCppElementClick
   end
 end
