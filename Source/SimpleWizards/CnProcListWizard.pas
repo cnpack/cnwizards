@@ -3398,7 +3398,11 @@ begin
         Offset := Pos(ProcName, Info.Text);
       end;
 
-    ltCpp: ProcName := Info.OwnerClass;
+    ltCpp:
+      begin
+        ProcName := Info.ProcName;
+        Offset := Pos(ProcName, Info.Text);
+      end;
   end;
   IsObject := Length(Info.OwnerClass) > 0;
 
