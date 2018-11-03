@@ -29,7 +29,8 @@ begin
 
   for var I: Integer := 1 to 10 do
   begin
-
+  for var I := 1 to 10 do begin end;
+  for var Item in Collection do begin end;
   end;
 
   for var Item: TItemType in Collection do

@@ -1694,13 +1694,26 @@ begin
   end;
 end;
 
-{ ForStmt -> FOR QualId ':=' Expression (TO | DOWNTO) Expression DO Statement }
-{ ForStmt -> FOR QualId in Expression DO Statement }
-
+{ ForStmt -> FOR QualId               ':=' Expression (TO | DOWNTO) Expression DO Statement }
+{                var Ident [':' Type] }
+{ ForStmt -> FOR QualId               in Expression DO Statement }
+{                var Ident [':' Type] }
 procedure TCnBasePascalFormatter.FormatForStmt(PreSpaceCount: Byte);
 begin
   Match(tokKeywordFor, PreSpaceCount);
-  FormatQualId;
+  if Scaner.Token = tokKeywordVar then
+  begin
+    Match(tokKeywordVar);
+    FormatIdent;
+
+    if Scaner.Token = tokColon then
+    begin
+      Match(tokColon);
+      FormatType;
+    end;
+  end
+  else
+    FormatQualId;
 
   case Scaner.Token of
     tokAssign:
@@ -1958,7 +1971,7 @@ begin
             ErrorToken(tokRB);
 
           //Match(tokRB);
-          end
+        end
         else
         begin
           FormatDesignatorAndOthers(PreSpaceCount);
