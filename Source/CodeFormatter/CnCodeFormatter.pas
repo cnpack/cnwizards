@@ -291,6 +291,7 @@ type
     procedure FormatConstantDecl(PreSpaceCount: Byte = 0);
     procedure FormatVarSection(PreSpaceCount: Byte = 0);
     procedure FormatVarDecl(PreSpaceCount: Byte = 0);
+    procedure FormatInlineVarDecl(PreSpaceCount: Byte = 0);
     procedure FormatProcedureDeclSection(PreSpaceCount: Byte = 0);
     procedure FormatSingleAttribute(PreSpaceCount: Byte = 0; LineEndSpaceCount: Byte = 0);
     procedure FormatType(PreSpaceCount: Byte = 0; IgnoreDirective: Boolean = False);
@@ -1962,6 +1963,16 @@ begin
         begin
           FormatDesignatorAndOthers(PreSpaceCount);
         end;
+      end;
+    tokKeywordVar:
+      begin
+        Match(Scaner.Token, PreSpaceCount);
+        FormatInlineVarDecl;
+      end;
+    tokKeywordConst:
+      begin
+        Match(Scaner.Token, PreSpaceCount);
+        FormatConstantDecl;
       end;
   else
     Error(CN_ERRCODE_PASCAL_INVALID_STATEMENT);
@@ -4874,6 +4885,41 @@ begin
   end;
 
   if Scaner.Token = tokEQUAL then
+  begin
+    Match(Scaner.Token, 1, 1);
+    FormatTypedConstant;
+  end
+  else if Scaner.TokenSymbolIs('ABSOLUTE') then
+  begin
+    Match(Scaner.Token);
+    FormatConstExpr; // include indent
+  end;
+
+  while Scaner.Token in DirectiveTokens do
+    FormatDirective;
+end;
+
+{ InlineVarDecl -> IdentList ':' Type [(ABSOLUTE (Ident | ConstExpr)) | ':=' TypedConstant] }
+procedure TCnBasePascalFormatter.FormatInlineVarDecl(PreSpaceCount: Byte);
+var
+  OldStoreIdent: Boolean;
+begin
+  OldStoreIdent := FStoreIdent;
+  try
+    // 把 var 区的内容存入标识符 Map 用来纠正大小写
+    FStoreIdent := True;
+    FormatIdentList(PreSpaceCount);
+  finally
+    FStoreIdent := OldStoreIdent;
+  end;
+
+  if Scaner.Token = tokColon then // 放宽语法限制
+  begin
+    Match(tokColon);
+    FormatType(PreSpaceCount); // 长 Type 可能换行，必须传入
+  end;
+
+  if Scaner.Token = tokAssign then  // 注意 InlineVar 此处与 var 不同
   begin
     Match(Scaner.Token, 1, 1);
     FormatTypedConstant;
