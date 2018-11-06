@@ -742,7 +742,7 @@ var
   OldClassName, AClassName, RootName: string;
   Action: TBasicAction;
   Prefix: string;
-  Ignore: Boolean;
+  Ignore, WizardActive: Boolean;
   Succ: Boolean;
   DoRename: Boolean;
   IsRoot: Boolean;
@@ -901,13 +901,18 @@ begin
     begin
       while True do
       begin
-        DisableDesignerDrag; // 弥补设计期可能会吞吃WM_LBUTTONUP消息从而产生拖动状态的缺陷
+        DisableDesignerDrag; // 弥补设计期可能会吞吃 WM_LBUTTONUP 消息从而产生拖动状态的缺陷
+        WizardActive := Active;
 
         // 注意此处并未处理 TForm 等的情形，也就是说如果用户点击了修改前缀，
         // 修改的是 TForm1 这种类型的前缀，需要修复，
         Succ := GetNewComponentName(_CnExtractFileName(FormEditor.GetFileName),
           AClassName, CompText, OldName, Prefix, NewName, UserMode, Ignore,
-          FAutoPopSuggestDlg, FUseUnderLine, RootName);
+          FAutoPopSuggestDlg, WizardActive, FUseUnderLine, RootName);
+
+        // 允许用户禁用专家
+        if WizardActive <> Active then
+          Active := WizardActive;
 
         if IsRoot then
         begin
@@ -1013,7 +1018,7 @@ procedure TCnPrefixWizard.RenameList(AList: TCompList);
 var
   IniFile: TCustomIniFile;
   APrefix, ANewName: string;
-  AIgnore, AAutoDlg: Boolean;
+  AIgnore, AAutoDlg, WizardActive: Boolean;
 begin
   // 显示组件更名列表
   IniFile := CreateIniFile;
@@ -1044,10 +1049,11 @@ begin
               APrefix := Prefix;
               ANewName := NewName;
 
+              WizardActive := True;
               // 弹出对话框要求输入新组件名
               if GetNewComponentName(_CnExtractFileName(FormEditor.GetFileName),
                 Component.ClassName, CnGetComponentText(Component),
-                OldName, APrefix, ANewName, True, AIgnore, AAutoDlg,
+                OldName, APrefix, ANewName, True, AIgnore, AAutoDlg, WizardActive
                 FUseUnderLine) then
               begin
                 Prefix := APrefix;

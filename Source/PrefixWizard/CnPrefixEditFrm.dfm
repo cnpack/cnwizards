@@ -1,8 +1,8 @@
 inherited CnPrefixEditForm: TCnPrefixEditForm
   Left = 412
   Top = 232
-  Width = 344
-  Height = 258
+  Width = 348
+  Height = 278
   ActiveControl = edtName
   BorderIcons = [biSystemMenu]
   Caption = 'Edit Component'#39's Name'
@@ -60,8 +60,8 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
   object gbEdit: TGroupBox
     Left = 8
     Top = 8
-    Width = 318
-    Height = 182
+    Width = 322
+    Height = 202
     Anchors = [akLeft, akTop, akRight, akBottom]
     Caption = '&Edit Component Name'
     TabOrder = 0
@@ -187,7 +187,7 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
       Width = 217
       Height = 17
       Anchors = [akLeft, akBottom]
-      Caption = 'Never Ask Again.'
+      Caption = 'Auto Rename and Never Ask Again.'
       TabOrder = 4
     end
     object cbIgnoreComp: TCheckBox
@@ -219,10 +219,19 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
       TabOrder = 0
       OnKeyPress = edtNameKeyPress
     end
+    object chkDisablePrefix: TCheckBox
+      Left = 8
+      Top = 177
+      Width = 217
+      Height = 17
+      Anchors = [akLeft, akBottom]
+      Caption = 'Disable Prefix Wizard.'
+      TabOrder = 5
+    end
   end
   object btnOK: TButton
-    Left = 91
-    Top = 198
+    Left = 95
+    Top = 220
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -232,8 +241,8 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
     OnClick = btnOKClick
   end
   object btnCancel: TButton
-    Left = 171
-    Top = 198
+    Left = 175
+    Top = 220
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -243,8 +252,8 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
     TabOrder = 2
   end
   object btnHelp: TButton
-    Left = 251
-    Top = 198
+    Left = 255
+    Top = 220
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]

@@ -70,6 +70,7 @@ type
     lbl5: TLabel;
     lblText: TLabel;
     btnClassName: TSpeedButton;
+    chkDisablePrefix: TCheckBox;
     procedure btnOKClick(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure btnPrefixClick(Sender: TObject);
@@ -91,7 +92,7 @@ type
 // 显示对话框，取得新的组件名称。RootName 不为空时表示是 Form 的情形
 function GetNewComponentName(const FormName, ComponentClass, ComponentText,
   OldName: string; var Prefix, NewName: string; HideMode: Boolean;
-  var IgnoreComp, AutoPopSuggestDlg: Boolean; UseUnderLine: Boolean;
+  var IgnoreComp, AutoPopSuggestDlg, WizardActive: Boolean; UseUnderLine: Boolean;
   const RootName: string = ''): Boolean;
 
 {$ENDIF CNWIZARDS_CNPREFIXWIZARD}
@@ -110,7 +111,7 @@ uses
 // 取得新的组件名称
 function GetNewComponentName(const FormName, ComponentClass, ComponentText,
   OldName: string; var Prefix, NewName: string; HideMode: Boolean;
-  var IgnoreComp, AutoPopSuggestDlg: Boolean; UseUnderLine: Boolean;
+  var IgnoreComp, AutoPopSuggestDlg, WizardActive: Boolean; UseUnderLine: Boolean;
   const RootName: string): Boolean;
 begin
   with TCnPrefixEditForm.Create(nil) do
@@ -125,11 +126,12 @@ begin
     edtOldName.Text := OldName;
     edtName.Text := NewName;
     cbNeverDisp.Checked := not AutoPopSuggestDlg;
+    chkDisablePrefix.Checked := not WizardActive;
     if HideMode then
     begin
       cbIgnoreComp.Visible := False;
       cbNeverDisp.Visible := False;
-      // btnPrefix.Visible := False;
+      chkDisablePrefix.Visible := False;
     end;
 
     Result := ShowModal = mrOk;
@@ -138,6 +140,10 @@ begin
     NewName := edtName.Text;
     IgnoreComp := cbIgnoreComp.Checked;
     AutoPopSuggestDlg := not cbNeverDisp.Checked;
+    WizardActive := not chkDisablePrefix.Checked;
+
+    if not WizardActive then
+      Result := False;
   finally
     Free;
   end;
