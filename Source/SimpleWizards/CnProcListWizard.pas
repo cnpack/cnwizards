@@ -177,7 +177,7 @@ type
 
     procedure PrepareSearchRange; override;
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
-      DataListIndex: Integer; MatchedIndexes: TList): Boolean; override;
+      DataListIndex: Integer; var StartOffset: Integer; MatchedIndexes: TList): Boolean; override;
     function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
       const S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer; override;
   public
@@ -1490,7 +1490,7 @@ begin
     mmoContent.Font.Size := EditorCanvas.Font.Size;
     mmoContent.Font.Style := EditorCanvas.Font.Style - [fsUnderline, fsStrikeOut, fsItalic];
   end;
-  
+
   {$IFDEF COMPILER6_UP}
   cbbMatchSearch.AutoComplete := False;
   {$ENDIF}
@@ -3371,7 +3371,8 @@ begin
 end;
 
 function TCnProcListForm.CanMatchDataByIndex(const AMatchStr: string;
-  AMatchMode: TCnMatchMode; DataListIndex: Integer; MatchedIndexes: TList): Boolean;
+  AMatchMode: TCnMatchMode; DataListIndex: Integer; var StartOffset: Integer;
+  MatchedIndexes: TList): Boolean;
 var
   Info: TCnElementInfo;
   ProcName: string;
@@ -3401,7 +3402,15 @@ begin
     ltCpp:
       begin
         ProcName := Info.ProcName;
-        Offset := Pos(ProcName, Info.Text);
+        Offset := Pos(ProcName, Info.Text);  // 如果是构造函数就会出现重复，导致 Offset 为 1，下面额外处理一下
+        if Offset = 1 then
+        begin
+          Offset := Pos(':' + ProcName, Info.Text);
+          if Offset > 0 then
+            Inc(Offset)
+          else
+            Offset := 1;
+        end;
       end;
   end;
   IsObject := Length(Info.OwnerClass) > 0;
@@ -3421,7 +3430,11 @@ begin
   end;
 
   if AMatchMode in [mmStart, mmAnywhere] then
-    Result := RegExpContainsText(FRegExpr, ProcName, AMatchStr, AMatchMode = mmStart)
+  begin
+    // 因为不搜类名，所以要将偏移传出去
+    Result := RegExpContainsText(FRegExpr, ProcName, AMatchStr, AMatchMode = mmStart);
+    StartOffset := Offset;
+  end
   else
   begin
     Result := FuzzyMatchStr(AMatchStr, ProcName, MatchedIndexes);

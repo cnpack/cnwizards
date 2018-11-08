@@ -81,7 +81,7 @@ type
     function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
       const S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer; override;
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
-      DataListIndex: Integer; MatchedIndexes: TList): Boolean; override;
+      DataListIndex: Integer; var StartOffset: Integer; MatchedIndexes: TList): Boolean; override;
     procedure DrawListPreParam(Item: TListItem; ListCanvas: TCanvas); override;
   public
     { Public declarations }
@@ -349,7 +349,7 @@ end;
 
 function TCnProjectListUsedForm.CanMatchDataByIndex(
   const AMatchStr: string; AMatchMode: TCnMatchMode;
-  DataListIndex: Integer; MatchedIndexes: TList): Boolean;
+  DataListIndex: Integer; var StartOffset: Integer; MatchedIndexes: TList): Boolean;
 begin
   Result := False;
   if AMatchStr = '' then

@@ -129,7 +129,7 @@ type
     procedure DrawListPreParam(Item: TListItem; ListCanvas: TCanvas); override;
 
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
-      DataListIndex: Integer; MatchedIndexes: TList): Boolean; override;
+      DataListIndex: Integer; var StartOffset: Integer; MatchedIndexes: TList): Boolean; override;
     function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
       const S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer; override;
   public
@@ -704,7 +704,7 @@ end;
 
 function TCnProjectViewFormsForm.CanMatchDataByIndex(
   const AMatchStr: string; AMatchMode: TCnMatchMode;
-  DataListIndex: Integer; MatchedIndexes: TList): Boolean;
+  DataListIndex: Integer; var StartOffset: Integer; MatchedIndexes: TList): Boolean;
 var
   Info: TCnFormInfo;
   UpperMatch: string;

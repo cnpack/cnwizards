@@ -83,7 +83,7 @@ type
       const S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer; override;
 
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
-      DataListIndex: Integer; MatchedIndexes: TList): Boolean; override;
+      DataListIndex: Integer; var StartOffset: Integer; MatchedIndexes: TList): Boolean; override;
   public
     { Public declarations }
   end;
@@ -342,7 +342,8 @@ begin
 end;
 
 function TCnListCompForm.CanMatchDataByIndex(const AMatchStr: string;
-  AMatchMode: TCnMatchMode; DataListIndex: Integer; MatchedIndexes: TList): Boolean;
+  AMatchMode: TCnMatchMode; DataListIndex: Integer; var StartOffset: Integer;
+  MatchedIndexes: TList): Boolean;
 var
   Info: TCnCompInfo;
   UpperMatch: string;

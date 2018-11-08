@@ -74,10 +74,13 @@ type
     FMatchIndexes: TList;
     FParentProject: TCnProjectInfo;
     FFuzzyScore: Integer;
+    FStartOffset: Integer;
   public
     constructor Create; virtual;
     destructor Destroy; override;
 
+    property StartOffset: Integer read FStartOffset write FStartOffset;
+    {* 匹配的起始位置，默认为 0}
     property FuzzyScore: Integer read FFuzzyScore write FFuzzyScore;
     {* 模糊匹配的匹配度，暂未使用}
     property MatchIndexes: TList read FMatchIndexes;
@@ -88,6 +91,9 @@ type
     property Text: string read FText write FText;
     {* Text 表示第一列显示的文字}
   end;
+
+  TCnDrawMatchTextEvent = procedure (Canvas: TCanvas; const MatchStr, Text: string;
+    X, Y: Integer; HighlightColor: TColor) of object;
 
 //==============================================================================
 // 工程组单元窗体列表基类窗体
@@ -212,7 +218,7 @@ type
     // 子类重载以返回在指定匹配字符、指定匹配模式下，DataList 中的指定项是否匹配
     // 调用此方法前 ProjectInfo 指定了下拉框所标识的工程范围
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
-      DataListIndex: Integer; MatchedIndexes: TList): Boolean; virtual;
+      DataListIndex: Integer; var StartOffset: Integer; MatchedIndexes: TList): Boolean; virtual;
     // 子类重载以返回此项是否可以作为优先选中的项，一般无须重载
     function CanSelectDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer): Boolean; virtual;
@@ -222,7 +228,7 @@ type
 
     // 默认匹配的实现，只匹配 DataList 中的字符串，不处理其 Object 所代表的内容
     function DefaultMatchHandler(const AMatchStr: string; AMatchMode: TCnMatchMode;
-      DataListIndex: Integer; MatchedIndexes: TList): Boolean;
+      DataListIndex: Integer; var StartOffset: Integer; MatchedIndexes: TList): Boolean;
     // 默认允许优先选择最头上匹配的项
     function DefaultSelectHandler(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer): Boolean;
@@ -951,7 +957,7 @@ end;
 procedure TCnProjectViewBaseForm.CommonUpdateListView;
 var
   MatchSearchText: string;
-  I, ToSelIndex: Integer;
+  I, ToSelIndex, AStartOffset: Integer;
   ToSels: TStringList;
   Indexes: TList;
   AMatchMode: TCnMatchMode;
@@ -987,10 +993,12 @@ begin
         if Indexes <> nil then
           Indexes.Clear;
       end;
+      AStartOffset := 0;
 
       // 不能因为 MatchSearchText = '' 就直接通过匹配，因为子类可能还有其它搜索条件
-      if CanMatchDataByIndex(MatchSearchText, AMatchMode, I, Indexes) then
+      if CanMatchDataByIndex(MatchSearchText, AMatchMode, I, AStartOffset, Indexes) then
       begin
+        TCnBaseElementInfo(DataList.Objects[I]).StartOffset := AStartOffset;
         DisplayList.AddObject(DataList[I], DataList.Objects[I]);
         if CanSelectDataByIndex(MatchSearchText, AMatchMode, I) then
           ToSels.Add(DataList[I]);
@@ -1022,9 +1030,10 @@ begin
 end;
 
 function TCnProjectViewBaseForm.CanMatchDataByIndex(const AMatchStr: string;
-  AMatchMode: TCnMatchMode; DataListIndex: Integer; MatchedIndexes: TList): Boolean;
+  AMatchMode: TCnMatchMode; DataListIndex: Integer; var StartOffset: Integer;
+  MatchedIndexes: TList): Boolean;
 begin
-  Result := DefaultMatchHandler(AMatchStr, AMatchMode, DataListIndex, MatchedIndexes);
+  Result := DefaultMatchHandler(AMatchStr, AMatchMode, DataListIndex, StartOffset, MatchedIndexes);
 end;
 
 function TCnProjectViewBaseForm.CanSelectDataByIndex(
@@ -1034,9 +1043,9 @@ begin
   Result := DefaultSelectHandler(AMatchStr, AMatchMode, DataListIndex);
 end;
 
-function TCnProjectViewBaseForm.DefaultMatchHandler(
-  const AMatchStr: string; AMatchMode: TCnMatchMode;
-  DataListIndex: Integer; MatchedIndexes: TList): Boolean;
+function TCnProjectViewBaseForm.DefaultMatchHandler(const AMatchStr: string;
+  AMatchMode: TCnMatchMode; DataListIndex: Integer; var StartOffset: Integer;
+  MatchedIndexes: TList): Boolean;
 var
   S: string;
 begin
@@ -1046,6 +1055,7 @@ begin
     Exit;
 
   S := DataList[DataListIndex];
+  StartOffset := 0;
   case AMatchMode of
     mmStart:    Result := Pos(AMatchStr, S) = 1;
     mmAnywhere: Result := Pos(AMatchStr, S) > 0;
@@ -1223,7 +1233,7 @@ var
   R, SR: TRect;
   Bmp: TBitmap;
   LV: TListView;
-  I, X, Y: Integer;
+  I, X, Y, AStartOffset: Integer;
   S: string;
   Info: TCnBaseElementInfo;
   MatchedIndexesRef: TList;
@@ -1264,17 +1274,24 @@ begin
 
     Y := (Bmp.Height - Bmp.Canvas.TextHeight(Item.Caption)) div 2;
 
+    AStartOffset := 0;
     MatchedIndexesRef := nil;
     if (Item.Data <> nil) and (TObject(Item.Data) is TCnBaseElementInfo) then
     begin
       Info := TCnBaseElementInfo(Item.Data);
+      AStartOffset := Info.StartOffset;
       if (Info.MatchIndexes <> nil) and (Info.MatchIndexes.Count > 0) then
         MatchedIndexesRef := Info.MatchIndexes;
     end;
 
     // 绘制匹配文字
     if MatchMode in [mmStart, mmAnywhere] then
-      DrawMatchText(Bmp.Canvas, edtMatchSearch.Text, Item.Caption, X, Y, clRed)
+    begin
+      if AStartOffset > 1 then
+        DrawMatchText(Bmp.Canvas, edtMatchSearch.Text, Item.Caption, X, Y, clRed, nil, AStartOffset)
+      else
+        DrawMatchText(Bmp.Canvas, edtMatchSearch.Text, Item.Caption, X, Y, clRed);
+    end
     else if MatchedIndexesRef <> nil then
       DrawMatchText(Bmp.Canvas, edtMatchSearch.Text, Item.Caption, X, Y, clRed, MatchedIndexesRef)
     else
