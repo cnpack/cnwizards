@@ -33,7 +33,7 @@ unit CnInputSymbolList;
 * 修改记录：2016.03.15 by liuxiao
 *               TUnitNameList 增加路径机制与 h/hpp 支持供外部使用
 *           2012.09.19 by shenloqi
-*               移植到Delphi XE3
+*               移植到 Delphi XE3
 *           2012.03.26
 *               增加对XE/XE2独有的XML格式的模板的支持，有部分内容兼容问题
 *           2004.11.05
@@ -499,6 +499,7 @@ const
   csCompD10S = 'D10S';
   csCompD101B = 'D101B';
   csCompD102T = 'D102T';
+  csCompD103R = 'D103R';
 
   csCompBCB = 'BCB';
   csCompUser = 'User';
@@ -1138,6 +1139,7 @@ begin
   {$IFDEF DELPHI10_SEATTLE_UP} AddSection(Ini, csCompD10S); {$ENDIF}
   {$IFDEF DELPHI101_BERLIN_UP} AddSection(Ini, csCompD101B); {$ENDIF}
   {$IFDEF DELPHI102_TOKYO_UP} AddSection(Ini, csCompD102T); {$ENDIF}
+  {$IFDEF DELPHI103_RIO_UP} AddSection(Ini, csCompD103R); {$ENDIF}
 
    AddSection(Ini, csCompBCB); // 加进来并设为C/C++专用的再说
   finally

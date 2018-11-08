@@ -32,15 +32,17 @@ unit CnIDEVersion;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：IDE 版本检查单元
-* 单元作者：刘啸 (zjy@cnpack.org)
+* 单元作者：刘啸 (liuxiao@cnpack.org)
 * 备    注：该单元部分内容移植自 GExperts
 *           其原始内容受 GExperts License 的保护
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2012.09.19 by shenloqi
-*               移植到Delphi XE3
+* 修改记录：2018.11.07 by liuxiao
+*               持续移植，到 Delphi 10.3 RIO
+*           2012.09.19 by shenloqi
+*               移植到 Delphi XE3
 *           2003.04.29 V1.0
 *               创建单元
 ================================================================================
@@ -356,6 +358,17 @@ begin
 {$ENDIF}
 end;
 
+function IsDelphi103RIdeVersionLatest: Boolean;
+const
+  CoreIdeLatest: TVersionNumber =
+    (Major: 26; Minor: 0; Release: 0; Build: 0); // 10.3
+var
+  ReadFileVersion: TVersionNumber;
+begin
+  ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide260.bpl');
+  Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+end;
+
 function IsIdeVersionLatest: Boolean;
 begin
   if CnIdeVersionDetected then
@@ -452,6 +465,10 @@ begin
 
 {$IFDEF DELPHI102_TOKYO}
   CnIdeVersionIsLatest := IsDelphi102TIdeVersionLatest;
+{$ENDIF}
+
+{$IFDEF DELPHI103_RIO}
+  CnIdeVersionIsLatest := IsDelphi103RIdeVersionLatest;
 {$ENDIF}
 
   Result := CnIdeVersionIsLatest;

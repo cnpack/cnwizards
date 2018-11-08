@@ -7,11 +7,11 @@
                     CnPack IDE专家包IDE升级改动备忘录
                            Revision 1.0.0.2
                        =========================
-                         作者：刘啸 2018.09.25
+                         作者：刘啸 2018.11.08
 
 
 
-每次 Borland/CodeGear 推出新版的 Delphi 系列 IDE 后，CnPack IDE 专家包都要为了支持新版而做大量工作。在这儿将需要做的基本工作列出来，以免日后在改动中遗漏。
+每次 Borland/CodeGear/Embarcadero 推出新版的 Delphi 系列 IDE 后，CnPack IDE 专家包都要为了支持新版而做大量工作。在这儿将需要做的基本工作列出来，以免日后在改动中遗漏。
 
 代码方面：
 
@@ -19,14 +19,13 @@
       CnPack.inc，加入新的编译指令。
 
   二、cnwizards\Source\Framework\CnWizCompilerConst.pas，加入新的枚举常量定义以及库文件名称定义。
-      cnwizards\Source\ScriptWizard\CnScript_CnWizUtils.pas 里同步加入新的枚举常量注册到脚本。
       cnwizards\Source\Utils\CnWizIdeUtils.pas 的 GetBDSUserDataDir 中，加入新的定义。
       cnwizards\Misc\CnIDEVersion.pas 加入新的版本判断。
       cnwizards\ThirdParty\GetIdeVersion.pas 加入新的版本判断。
       cnwizards\Source\ThirdParty\DCU32\DCURecs.pas 2720行左右增加新版定义判断
 
-  三、cnwizards\Source\ScriptWizard\CnScript_CnWizUtils.pas 以及 
-      cnwizards\Bin\PSDeclEx\CnWizUtils.pas中照着 CnCompilerConst.pas 进行同样的改动。
+  三、cnwizards\Source\ScriptWizard\CnScript_CnWizUtils.pas 同步加入新的枚举常量注册到脚本以及 
+      cnwizards\Bin\PSDeclEx\CnWizUtils.pas中照着 CnWizCompilerConst.pas 进行同样的改动。
 
   四、专家包安装工具。cnwizards\Tools\CnWizSetup\Setup.dpr 中加入新的 IDE 的定义。
 

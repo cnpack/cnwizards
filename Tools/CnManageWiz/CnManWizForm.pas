@@ -67,6 +67,7 @@ const
     'RAD Studio 10 Seattle',
     'RAD Studio 10.1 Berlin',
     'RAD Studio 10.2 Tokyo',
+    'RAD Studio 10.3 Rio',
     'C++Builder 5',
     'C++Builder 6');
 
@@ -91,6 +92,7 @@ const
     'RADStudio10S',
     'RADStudio101B',
     'RADStudio102T',
+    'RADStudio103R',
     'BCB5',
     'BCB6');
 
@@ -115,6 +117,7 @@ const
     '\Software\Embarcadero\BDS\17.0',
     '\Software\Embarcadero\BDS\18.0',
     '\Software\Embarcadero\BDS\19.0',
+    '\Software\Embarcadero\BDS\20.0',
     '\Software\Borland\C++Builder\5.0',
     '\Software\Borland\C++Builder\6.0');
 
