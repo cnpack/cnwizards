@@ -202,7 +202,11 @@ var
 procedure RegisterThemeClass;
 {$IFDEF IDE_SUPPORT_THEMING}
 var
+  {$IFDEF DELPHI102_TOKYO}
   Theming: ICnOTAIDEThemingServices250;
+  {$ELSE}
+  Theming: IOTAIDEThemingServices250;
+  {$ENDIF}
 {$ENDIF}
 begin
 {$IFDEF IDE_SUPPORT_THEMING}

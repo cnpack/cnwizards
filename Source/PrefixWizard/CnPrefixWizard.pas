@@ -1053,7 +1053,7 @@ begin
               // 弹出对话框要求输入新组件名
               if GetNewComponentName(_CnExtractFileName(FormEditor.GetFileName),
                 Component.ClassName, CnGetComponentText(Component),
-                OldName, APrefix, ANewName, True, AIgnore, AAutoDlg, WizardActive
+                OldName, APrefix, ANewName, True, AIgnore, AAutoDlg, WizardActive,
                 FUseUnderLine) then
               begin
                 Prefix := APrefix;

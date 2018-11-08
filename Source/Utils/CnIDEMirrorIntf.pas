@@ -41,8 +41,6 @@ interface
 uses
   SysUtils, Classes, Windows, Forms, ToolsAPI {$IFDEF DELPHI102_TOKYO}, Themes {$ENDIF};
 
-{$IFDEF DELPHI102_TOKYO}
-
 {
   Delphi 10.2.2 的 IDE 开始支持主题，但 10.2.3 中才在 ToolsAPI 中提供主题接口，
   并且令人费解的是 10.2.2 与 10.2.3 编译器并不提供区分，如果专家包要支持主题、
@@ -66,14 +64,18 @@ const
   GUID_IOTAIDETHEMINGSERVICES = '{DEAD2647-9B2C-4084-A61E-1E69A9179637}';
   GUID_IOTAIDETHEMINGSERVICES250 = '{DEAD2648-9B21-4084-771E-1E69A9176637}';
 
+{$IFDEF DELPHI102_TOKYO}
+
 type
   ICnNTAIDEThemingServicesNotifier = interface(IOTANotifier)
+  {* 对应 INTAIDEThemingServicesNotifier}
   ['{46949416-FD06-4B49-A43F-1C7A4A760B32}']
     procedure ChangingTheme();
     procedure ChangedTheme();
   end;
 
   ICnOTAIDEThemingServices = interface(IInterface)
+  {* 对应 IOTAIDEThemingServices}
     function AddNotifier(const ANotifier: ICnNTAIDEThemingServicesNotifier): Integer;
     procedure RemoveNotifier(Index: Integer);
     function GetActiveThemeName: string;
@@ -88,6 +90,7 @@ type
   end;
 
   ICnOTAIDEThemingServices250 = interface(ICnOTAIDEThemingServices)
+  {* 对应 IOTAIDEThemingServices250}
     procedure RegisterFormClass(AFormClass : TCustomFormClass);
   end;
 

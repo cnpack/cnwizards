@@ -300,7 +300,8 @@ type
 
 { TCnIDEThemingServicesNotifier }
 
-  TCnIDEThemingServicesNotifier = class(TNotifierObject, IOTANotifier, ICnNTAIDEThemingServicesNotifier)
+  TCnIDEThemingServicesNotifier = class(TNotifierObject, IOTANotifier,
+    {$IFDEF DELPHI102_TOKYO}ICnNTAIDEThemingServicesNotifier {$ELSE} INTAIDEThemingServicesNotifier{$ENDIF})
   private
     FNotifierServices: TCnWizNotifierServices;
   protected
@@ -397,7 +398,11 @@ type
 {$IFDEF IDE_SUPPORT_THEMING}
 {$IFNDEF CNWIZARDS_MINIMUM}
     FThemingNotifierIndex: Integer;
-    FCnIDEThemingServicesNotifier: ICnNTAIDEThemingServicesNotifier;
+    {$IFDEF DELPHI102_TOKYO}
+    FCnIDEThemingServicesNotifier:ICnNTAIDEThemingServicesNotifier;
+    {$ELSE}
+    FCnIDEThemingServicesNotifier: INTAIDEThemingServicesNotifier;
+    {$ENDIF}
 {$ENDIF}
 {$ENDIF}
     FLastControl: TWinControl;
@@ -854,7 +859,11 @@ var
   IDebuggerService: IOTADebuggerServices;
 {$IFDEF IDE_SUPPORT_THEMING}
 {$IFNDEF CNWIZARDS_MINIMUM}
+  {$IFDEF DELPHI102_TOKYO}
   ThemingService: ICnOTAIDEThemingServices;
+  {$ELSE}
+  ThemingService: IOTAIDEThemingServices;
+  {$ENDIF}
 {$ENDIF}
 {$ENDIF}
 begin
@@ -929,7 +938,11 @@ var
   I: Integer;
 {$IFDEF IDE_SUPPORT_THEMING}
 {$IFNDEF CNWIZARDS_MINIMUM}
+  {$IFDEF DELPHI102_TOKYO}
   ThemingService: ICnOTAIDEThemingServices;
+  {$ELSE}
+  ThemingService: IOTAIDEThemingServices;
+  {$ENDIF}
 {$ENDIF}
 {$ENDIF}
 begin

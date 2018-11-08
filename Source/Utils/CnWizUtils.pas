@@ -7322,7 +7322,11 @@ end;
 function CnOtaIDESupportsTheming: Boolean;
 {$IFDEF IDE_SUPPORT_THEMING}
 var
-  Theming: ICnOTAIDEThemingServices;
+  {$IFDEF DELPHI102_TOKYO}
+  Theming: ICnOTAIDEThemingServices250;
+  {$ELSE}
+  Theming: IOTAIDEThemingServices250;
+  {$ENDIF}
 {$ENDIF}
 begin
   Result := False;
@@ -7336,7 +7340,11 @@ end;
 function CnOtaGetIDEThemingEnabled: Boolean;
 {$IFDEF IDE_SUPPORT_THEMING}
 var
+  {$IFDEF DELPHI102_TOKYO}
   Theming: ICnOTAIDEThemingServices;
+  {$ELSE}
+  Theming: IOTAIDEThemingServices;
+  {$ENDIF}
 {$ENDIF}
 begin
   Result := False;
@@ -7351,7 +7359,11 @@ end;
 function CnOtaGetActiveThemeName: string;
 {$IFDEF IDE_SUPPORT_THEMING}
 var
+  {$IFDEF DELPHI102_TOKYO}
   Theming: ICnOTAIDEThemingServices;
+  {$ELSE}
+  Theming: IOTAIDEThemingServices;
+  {$ENDIF}
 {$ENDIF}
 begin
   Result := '';
