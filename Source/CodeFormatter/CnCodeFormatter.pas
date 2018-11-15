@@ -3119,9 +3119,14 @@ end;
 }
 
 { FunctionHeading -> FUNCTION Ident [FormalParameters] ':' (SimpleType | STRING) }
+{ FunctionHeading -> OPERATOR Ident [FormalParameters] [':' (SimpleType | STRING)] }
 procedure TCnBasePascalFormatter.FormatFunctionHeading(PreSpaceCount: Byte;
   AllowEqual: Boolean);
+var
+  IsOperator: Boolean;
 begin
+  IsOperator := Scaner.Token = tokKeywordOperator;
+
   if Scaner.Token = tokKeywordClass then
   begin
     Match(tokKeywordClass, PreSpaceCount); // class 后无需再手工加空格
@@ -3156,12 +3161,27 @@ begin
   if Scaner.Token = tokLB then
     FormatFormalParameters;
 
-  Match(tokColon);
+  if IsOperator then // Operator 未必有返回值
+  begin
+    if Scaner.Token = tokColon then // 有冒号时才处理返回值
+    begin
+      Match(tokColon);
 
-  if Scaner.Token = tokKeywordString then
-    Match(Scaner.Token)
+      if Scaner.Token = tokKeywordString then
+        Match(Scaner.Token)
+      else
+        FormatSimpleType;
+    end;
+  end
   else
-    FormatSimpleType;
+  begin
+    Match(tokColon);
+
+    if Scaner.Token = tokKeywordString then
+      Match(Scaner.Token)
+    else
+      FormatSimpleType;
+  end;
 end;
 
 { InterfaceHeritage -> '(' IdentList ')' }
