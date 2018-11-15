@@ -18,7 +18,6 @@ inherited CnProjectViewBaseForm: TCnProjectViewBaseForm
     0000FFFF0000E0070000E0070000E0070000E0070000E0070000E0070000E007
     0000E0070000E0070000E0070000E0070000E0070000FFFF0000FFFF0000}
   KeyPreview = True
-  OldCreateOrder = True
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown

@@ -5,7 +5,6 @@ inherited CnEditorCodeCommentForm: TCnEditorCodeCommentForm
   Caption = 'Toggle Code Comment'
   ClientHeight = 209
   ClientWidth = 250
-  OldCreateOrder = True
   PixelsPerInch = 96
   TextHeight = 13
   object grp1: TGroupBox
