@@ -846,6 +846,10 @@ begin
 {$ENDIF}
         if Res <> nil then
         begin
+          // hq200306 补充，未发生变化时不进行改动
+          if TrimRight(Src) = TrimRight(string(Res)) then
+            Exit;
+
 {$IFDEF UNICODE}
           // Utf16 内部转 Utf8 写入
           CnOtaSetCurrentEditorSourceW(string(Res));
