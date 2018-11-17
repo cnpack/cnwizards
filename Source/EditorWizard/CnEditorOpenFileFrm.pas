@@ -38,7 +38,7 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNEDITORWIZARD}
+{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, Dialogs, Contnrs,
@@ -81,11 +81,11 @@ type
 
 function ShowOpenFileResultList(List: TStrings): Boolean;
 
-{$ENDIF CNWIZARDS_CNEDITORWIZARD}
+{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNEDITORWIZARD}
+{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 
 {$R *.DFM}
 
@@ -234,6 +234,6 @@ begin
   FListRef := List;
 end;
 
-{$ENDIF CNWIZARDS_CNEDITORWIZARD}
+{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 end.
 

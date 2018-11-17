@@ -38,7 +38,7 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNEDITORWIZARD}
+{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, Menus,
@@ -197,11 +197,11 @@ function GetCnEditorToolClassCount: Integer;
 function GetCnEditorToolClassByIndex(const Index: Integer): TCnEditorToolClass;
 {* 根据索引号取指定的编辑器工具类引用}
 
-{$ENDIF CNWIZARDS_CNEDITORWIZARD}
+{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNEDITORWIZARD}
+{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 
 uses
 {$IFDEF DEBUG}
@@ -743,5 +743,5 @@ finalization
   CnDebugger.LogLeave('CnEditorWizard finalization.');
 {$ENDIF}
 
-{$ENDIF CNWIZARDS_CNEDITORWIZARD}
+{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 end.

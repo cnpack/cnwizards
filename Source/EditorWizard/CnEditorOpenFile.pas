@@ -42,7 +42,7 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNEDITORWIZARD}
+{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, Menus,
@@ -79,11 +79,11 @@ type
     function SearchFileList(FileName: string): Boolean;
   end;
 
-{$ENDIF CNWIZARDS_CNEDITORWIZARD}
+{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNEDITORWIZARD}
+{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 
 uses
   CnWizIdeUtils;
@@ -293,5 +293,5 @@ end;
 initialization
   RegisterCnEditor(TCnEditorOpenFile); // ×¢²á×¨¼Ò
 
-{$ENDIF CNWIZARDS_CNEDITORWIZARD}
+{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 end.

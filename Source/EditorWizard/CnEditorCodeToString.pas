@@ -38,7 +38,7 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNEDITORWIZARD}
+{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
@@ -88,11 +88,11 @@ type
     property SkipSpace: Boolean read FSkipSpace write FSkipSpace default True;
   end;
 
-{$ENDIF CNWIZARDS_CNEDITORWIZARD}
+{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNEDITORWIZARD}
+{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 
 {$R *.DFM}
 
@@ -210,6 +210,6 @@ end;
 initialization
   RegisterCnEditor(TCnEditorCodeToString); // ×¢²á×¨¼Ò
 
-{$ENDIF CNWIZARDS_CNEDITORWIZARD}
+{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 end.
 

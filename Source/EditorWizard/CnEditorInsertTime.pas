@@ -38,7 +38,7 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNEDITORWIZARD}
+{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
@@ -83,11 +83,11 @@ type
     { Public declarations }
   end;
 
-{$ENDIF CNWIZARDS_CNEDITORWIZARD}
+{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNEDITORWIZARD}
+{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 
 {$R *.dfm}
 
@@ -167,5 +167,5 @@ end;
 initialization
   RegisterCnEditor(TCnEditorInsertTime);
   
-{$ENDIF CNWIZARDS_CNEDITORWIZARD}
+{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 end.

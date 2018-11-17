@@ -38,7 +38,7 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNEDITORWIZARD}
+{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
@@ -77,11 +77,11 @@ type
     procedure Execute; override;
   end;
 
-{$ENDIF CNWIZARDS_CNEDITORWIZARD}
+{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNEDITORWIZARD}
+{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 
 { TCnEditorFontInc }
 
@@ -157,5 +157,5 @@ initialization
   RegisterCnEditor(TCnEditorFontInc);
   RegisterCnEditor(TCnEditorFontDec);
 
-{$ENDIF CNWIZARDS_CNEDITORWIZARD}  
+{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 end.
