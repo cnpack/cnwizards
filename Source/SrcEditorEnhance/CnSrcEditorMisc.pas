@@ -672,6 +672,7 @@ end;
 procedure TCnSrcEditorMisc.OnBlockToolsMenuCreated(Sender: TObject; MenuItem: TMenuItem);
 var
   Wizard: TCnSrcEditorEnhance;
+  Item: TMenuItem;
 
   procedure ClearMenuItemImageIndex(AMenuItem: TMenuItem);
   var
@@ -690,9 +691,26 @@ begin
   begin
     if Wizard.BlockTools <> nil then
     begin
-      // 此处不能调用UpdateMenu来实行初始化，必须手工复制所有菜单项。
+      // 此处不能调用 UpdateMenu 来实行初始化，必须手工复制所有菜单项。
       // Wizard.BlockTools.UpdateMenu(MenuItem, False);
       CloneMenuItem(Wizard.BlockTools.PopupMenu.Items, MenuItem);
+
+      if not Wizard.BlockTools.Active or not Wizard.BlockTools.ShowBlockTools then
+      begin
+        // 不显示浮动按钮的情况下，不显示设置项，因为快捷键已禁用了
+        if MenuItem.Count > 3 then
+        begin
+          Item := MenuItem.Items[MenuItem.Count - 3]; // 其它项
+          if Item.Count > 3 then
+          begin
+            Item := Item.Items[Item.Count - 1];       // 其它项内的最后一项
+            Item.Visible := False;
+{$IFDEF DEBUG}
+            CnDebugger.LogMsg('Hide Setting Item when FlatButton Disabled: ' + Item.Caption);
+{$ENDIF}
+          end;
+        end;
+      end;
 
 {$IFDEF COMPILER6_UP}
       // 如果 ImageList 不对头则不用 ImageIndex，毕竟后者是使用的 IDE 主 ImageList

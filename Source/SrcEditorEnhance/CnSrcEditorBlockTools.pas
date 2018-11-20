@@ -55,7 +55,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Dialogs, ToolsAPI,
   IniFiles, Forms, Menus, ActnList, Math,
-  {$IFDEF DelphiXE3_UP}Actions,{$ENDIF}
+  {$IFDEF DELPHIXE3_UP}Actions,{$ENDIF}
   CnCommon, CnWizUtils, CnWizIdeUtils, CnWizConsts, CnEditControlWrapper,
   CnWizFlatButton, CnConsts, CnWizNotifier, CnWizShortCut, CnPopupMenu,
   CnSrcEditorCodeWrap, CnSrcEditorGroupReplace, CnSrcEditorWebSearch,
@@ -120,10 +120,13 @@ type
       EditView: IOTAEditView);
     procedure SetShowBlockTools(Value: Boolean);
     procedure SetShowColor(const Value: Boolean);
+    procedure CreateShortCuts;   // 创建快捷键对象，可重复调用
+    procedure DestroyShortCuts;  // 销毁快捷键对象，可重复调用
   protected
     function CanShowButton: Boolean;
     procedure DoEnhConfig;
-    procedure UpdateFlatButtons;
+    procedure UpdateFlatButtons;   // 更新每个编辑器窗口内的浮动按钮
+    procedure ReInitShortCuts;
     procedure EditControlKeyDown(Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean);
     procedure EditorChanged(Editor: TEditorObject; ChangeType: TEditorChangeTypes);
@@ -134,7 +137,7 @@ type
     procedure LoadSettings(Ini: TCustomIniFile);
     procedure SaveSettings(Ini: TCustomIniFile);
     procedure ResetSettings(Ini: TCustomIniFile);
-    procedure UpdateMenu(Items: TMenuItem; NeedImage: Boolean = True);
+    procedure UpdateMenu(Items: TMenuItem; NeedImage: Boolean = True); // 更新浮动按钮的下拉菜单
 
     property Active: Boolean read FActive write SetActive;
     property ShowBlockTools: Boolean read FShowBlockTools write SetShowBlockTools;
@@ -156,8 +159,45 @@ uses
 const
   csLeftKeep = 2;
   SCnSrcEditorBlockButton = 'CnSrcEditorBlockButton';
+  csBlockTools = 'BlockTools';
+  csShowBlockTools = 'ShowBlockTools';
+  csShowColor = 'ShowColor';
+  csTabIndent = 'TabIndent';
 
 { TCnSrcEditorBlockTools }
+
+procedure TCnSrcEditorBlockTools.CreateShortCuts;
+begin
+  if FDupShortCut = nil then
+    FDupShortCut := WizShortCutMgr.Add('CnEditDuplicate',
+      ShortCut(Word('D'), [ssCtrl, ssAlt]), OnEditDuplicate);
+  if FLowerCaseShortCut = nil then
+    FLowerCaseShortCut := WizShortCutMgr.Add('CnEditLowerCase', 0, OnEditLowerCase);
+  if FUpperCaseShortCut = nil then
+    FUpperCaseShortCut := WizShortCutMgr.Add('CnEditUpperCase', 0, OnEditUpperCase);
+  if FToggleCaseShortCut = nil then
+    FToggleCaseShortCut := WizShortCutMgr.Add('CnEditToggleCase', 0, OnEditToggleCase);
+  if FBlockMoveUpShortCut = nil then
+    FBlockMoveUpShortCut := WizShortCutMgr.Add('CnEditBlockMoveUp',
+      ShortCut(Word('U'), [ssCtrl, ssAlt, ssShift]), OnEditBlockMoveUp);
+  if FBlockMoveDownShortCut = nil then
+    FBlockMoveDownShortCut := WizShortCutMgr.Add('CnEditBlockMoveDown',
+      ShortCut(Word('D'), [ssCtrl, ssAlt, ssShift]), OnEditBlockMoveDown);
+  if FBlockDelLinesShortCut = nil then
+    FBlockDelLinesShortCut := WizShortCutMgr.Add('CnEditBlockDeleteLines',
+      ShortCut(Word('D'), [ssCtrl, ssShift]), OnEditBlockDelLines);
+end;
+
+procedure TCnSrcEditorBlockTools.DestroyShortCuts;
+begin
+  WizShortCutMgr.DeleteShortCut(FBlockDelLinesShortCut);
+  WizShortCutMgr.DeleteShortCut(FBlockMoveDownShortCut);
+  WizShortCutMgr.DeleteShortCut(FBlockMoveUpShortCut);
+  WizShortCutMgr.DeleteShortCut(FToggleCaseShortCut);
+  WizShortCutMgr.DeleteShortCut(FUpperCaseShortCut);
+  WizShortCutMgr.DeleteShortCut(FLowerCaseShortCut);
+  WizShortCutMgr.DeleteShortCut(FDupShortCut);
+end;
 
 constructor TCnSrcEditorBlockTools.Create;
 begin
@@ -173,18 +213,7 @@ begin
   FGroupReplace := TCnSrcEditorGroupReplaceTool.Create;
   FWebSearch := TCnSrcEditorWebSearchTool.Create;
 
-  FDupShortCut := WizShortCutMgr.Add('CnEditDuplicate',
-    ShortCut(Word('D'), [ssCtrl, ssAlt]), OnEditDuplicate);
-  FLowerCaseShortCut := WizShortCutMgr.Add('CnEditLowerCase', 0, OnEditLowerCase);
-  FUpperCaseShortCut := WizShortCutMgr.Add('CnEditUpperCase', 0, OnEditUpperCase);
-  FToggleCaseShortCut := WizShortCutMgr.Add('CnEditToggleCase', 0, OnEditToggleCase);
-
-  FBlockMoveUpShortCut := WizShortCutMgr.Add('CnEditBlockMoveUp',
-    ShortCut(Word('U'), [ssCtrl, ssAlt, ssShift]), OnEditBlockMoveUp);
-  FBlockMoveDownShortCut := WizShortCutMgr.Add('CnEditBlockMoveDown',
-    ShortCut(Word('D'), [ssCtrl, ssAlt, ssShift]), OnEditBlockMoveDown);
-  FBlockDelLinesShortCut := WizShortCutMgr.Add('CnEditBlockDeleteLines',
-    ShortCut(Word('D'), [ssCtrl, ssShift]), OnEditBlockDelLines);
+  CreateShortCuts;
 
   FPopupMenu := TPopupMenu.Create(nil);
   FPopupMenu.AutoPopup := False;
@@ -209,13 +238,8 @@ begin
   FGroupReplace.Free;
   FWebSearch.Free;
 
-  WizShortCutMgr.DeleteShortCut(FBlockDelLinesShortCut);
-  WizShortCutMgr.DeleteShortCut(FBlockMoveDownShortCut);
-  WizShortCutMgr.DeleteShortCut(FBlockMoveUpShortCut);
-  WizShortCutMgr.DeleteShortCut(FToggleCaseShortCut);
-  WizShortCutMgr.DeleteShortCut(FUpperCaseShortCut);
-  WizShortCutMgr.DeleteShortCut(FLowerCaseShortCut);
-  WizShortCutMgr.DeleteShortCut(FDupShortCut);
+  DestroyShortCuts;
+
   FPopupMenu.Free;
   FIcon.Free;
   inherited;
@@ -732,6 +756,14 @@ var
       Result := nil;
   end;
 
+  function GetShortCut(AWizShortCut: TCnWizShortCut): TShortCut;
+  begin
+    if AWizShortCut <> nil then
+      Result := AWizShortCut.ShortCut
+    else
+      Result := 0;
+  end;
+
 begin
   Items.Clear;
 
@@ -744,7 +776,7 @@ begin
     ShortCut(Word('X'), [ssCtrl]), 'EditCutCommand');
   DoAddMenuItem(FEditMenu, SCnSrcBlockCutAppend, btCutAppend);
   AddSepMenuItem(FEditMenu);
-  DoAddMenuItem(FEditMenu, SCnSrcBlockDuplicate, btDuplicate, FDupShortCut.ShortCut);
+  DoAddMenuItem(FEditMenu, SCnSrcBlockDuplicate, btDuplicate, GetShortCut(FDupShortCut));
   DoAddMenuItem(FEditMenu, SCnSrcBlockDelete, btDelete,
     ShortCut(VK_DELETE, []), 'EditDeleteCommand');
   AddSepMenuItem(FEditMenu);
@@ -753,9 +785,9 @@ begin
 
   // 大小写转换菜单
   FCaseMenu := AddMenuItem(Items, SCnSrcBlockCase, nil);
-  DoAddMenuItem(FCaseMenu, SCnSrcBlockLowerCase, btLowerCase, FLowerCaseShortCut.ShortCut);
-  DoAddMenuItem(FCaseMenu, SCnSrcBlockUpperCase, btUpperCase, FUpperCaseShortCut.ShortCut);
-  DoAddMenuItem(FCaseMenu, SCnSrcBlockToggleCase, btToggleCase, FToggleCaseShortCut.ShortCut);
+  DoAddMenuItem(FCaseMenu, SCnSrcBlockLowerCase, btLowerCase, GetShortCut(FLowerCaseShortCut));
+  DoAddMenuItem(FCaseMenu, SCnSrcBlockUpperCase, btUpperCase, GetShortCut(FUpperCaseShortCut));
+  DoAddMenuItem(FCaseMenu, SCnSrcBlockToggleCase, btToggleCase, GetShortCut(FToggleCaseShortCut));
 
   // 格式菜单
   FFormatMenu := AddMenuItem(Items, SCnSrcBlockFormat, nil);
@@ -797,9 +829,9 @@ begin
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorSortLines', btSortLines);
   
 {$IFDEF BDS} // Only for BDS because of bug. ;-(
-  DoAddMenuItem(FMiscMenu, SCnSrcBlockMoveUp, btBlockMoveUp, FBlockMoveUpShortCut.ShortCut);
-  DoAddMenuItem(FMiscMenu, SCnSrcBlockMoveDown, btBlockMoveDown, FBlockMoveDownShortCut.ShortCut);
-  DoAddMenuItem(FMiscMenu, SCnSrcBlockDeleteLines, btBlockDelLines, FBlockDelLinesShortCut.ShortCut);
+  DoAddMenuItem(FMiscMenu, SCnSrcBlockMoveUp, btBlockMoveUp, GetShortCut(FBlockMoveUpShortCut));
+  DoAddMenuItem(FMiscMenu, SCnSrcBlockMoveDown, btBlockMoveDown, GetShortCut(FBlockMoveDownShortCut));
+  DoAddMenuItem(FMiscMenu, SCnSrcBlockDeleteLines, btBlockDelLines, GetShortCut(FBlockDelLinesShortCut));
 {$ENDIF}
 
   AddSepMenuItem(FMiscMenu);
@@ -1028,12 +1060,6 @@ begin
   FWebSearch.LanguageChanged(Sender);
 end;
 
-const
-  csBlockTools = 'BlockTools';
-  csShowBlockTools = 'ShowBlockTools';
-  csShowColor = 'ShowColor';
-  csTabIndent = 'TabIndent';
-
 procedure TCnSrcEditorBlockTools.LoadSettings(Ini: TCustomIniFile);
 begin
   FShowBlockTools := Ini.ReadBool(csBlockTools, csShowBlockTools, FShowBlockTools);
@@ -1062,12 +1088,25 @@ begin
   Result := Active and ShowBlockTools;
 end;
 
+procedure TCnSrcEditorBlockTools.ReInitShortCuts;
+begin
+  if CanShowButton then
+  begin
+    DestroyShortCuts;
+    CreateShortCuts;
+  end
+  else
+    DestroyShortCuts;
+end;
+
 procedure TCnSrcEditorBlockTools.SetActive(const Value: Boolean);
 begin
   if FActive <> Value then
   begin
     FActive := Value;
     UpdateFlatButtons;
+    ReInitShortCuts;
+    UpdateMenu(FPopupMenu.Items);
   end;
 end;
 
@@ -1077,6 +1116,8 @@ begin
   begin
     FShowBlockTools := Value;
     UpdateFlatButtons;
+    ReInitShortCuts;
+    UpdateMenu(FPopupMenu.Items);
   end;
 end;
 

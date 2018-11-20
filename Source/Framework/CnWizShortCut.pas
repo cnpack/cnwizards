@@ -549,8 +549,11 @@ end;
 // 删除指定的快捷键对象
 procedure TCnWizShortCutMgr.DeleteShortCut(var AWizShortCut: TCnWizShortCut);
 begin
-  Delete(IndexOfShortCut(AWizShortCut));
-  AWizShortCut := nil;
+  if AWizShortCut <> nil then
+  begin
+    Delete(IndexOfShortCut(AWizShortCut));
+    AWizShortCut := nil;
+  end;
 end;
 
 // 清空快捷键对象列表
