@@ -75,7 +75,7 @@ See http://www.suigeneris.org/want/ for details.
   <property name="release.pro"    value=""          if="full" />
   <property name="release.pro"    value="_Lite"     if="lite" />
 
-  <property name="cnwizards_list" value="-d5,-d6,-d7,-d2005,-d2006,-d2007,-d2009,-d2010,-dxe,-dxe2,-dxe3,-dxe4,-dxe5,-dxe6,-dxe7,-dxe8,-d10s,-d101b,-d102t,-cb5,-cb6" unless="lite" />
+  <property name="cnwizards_list" value="-d5,-d6,-d7,-d2005,-d2006,-d2007,-d2009,-d2010,-dxe,-dxe2,-dxe3,-dxe4,-dxe5,-dxe6,-dxe7,-dxe8,-d10s,-d101b,-d102t,-d103r,-cb5,-cb6" unless="lite" />
   <property name="cnwizards_list" value="-d6,-d7,-d2006,-d2007,-cb6" if="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cndfm6to5,cnascii,cnidebr,cnmanagewiz,cnselectlang,cnsmr,cnwizsetup" unless="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cnwizsetup" if="lite" />
@@ -202,7 +202,7 @@ Usage: want [target-name] [-Dname=value]
     clean      - Clean output and temp files.
     gitpull    - Update all files.
     d5         - Compile CnWizards for Delphi 5.
-                 (d6, d7, d2005, d2006, d2007, d2009, d2010, dxe, dxe2, dxe3, dxe4, dxe5, dxe6, dxe7, dxe8, d10s, d101b, d102t, cb5, cb6 also)
+                 (d6, d7, d2005, d2006, d2007, d2009, d2010, dxe, dxe2, dxe3, dxe4, dxe5, dxe6, dxe7, dxe8, d10s, d101b, d102t, 103r, cb5, cb6 also)
     cnwizards  - Compile all CnWizards DLLs (D5, D6, etc.).
     resdll     - Compile CnWizards Resource DLL.
     cnwizhelperdll - Compile CnWizards Helper DLL.
