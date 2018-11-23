@@ -75,6 +75,7 @@ uses
   {$IFDEF DELPHI10_SEATTLE} CnScript_ToolsAPI_D10S, {$ENDIF}
   {$IFDEF DELPHI101_BERLIN} CnScript_ToolsAPI_D101B, {$ENDIF}
   {$IFDEF DELPHI102_TOKYO} CnScript_ToolsAPI_D102T, {$ENDIF}
+  {$IFDEF DELPHI103_RIO} CnScript_ToolsAPI_D103R, {$ENDIF}
   {$IFDEF BCB5} CnScript_ToolsAPI_D5, {$ENDIF}
   {$IFDEF BCB6} CnScript_ToolsAPI_D6, {$ENDIF}
   CnScript_IdeInstComp, CnScript_CnCommon, CnScript_CnDebug, CnScript_CnWizUtils,
