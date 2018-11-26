@@ -781,16 +781,31 @@ begin
   if Control = nil then
     Exit;
 
-  Parent := Control.Parent;
+  Parent := Control.Parent;  // EditorPanel
   if Parent = nil then
     Exit;
 
-  Parent := Parent.Parent;
+  Parent := Parent.Parent;   // CodePanel
   if Parent = nil then
     Exit;
+
+{$IFDEF DELPHI103_RIO_UP}
+    // 10.3 里 EditorNavigationToolbar 外面还有个没名字的 Panel
+    for I := 0 to Parent.ControlCount - 1 do
+    begin
+      if (Parent.Controls[I].ClassNameIs('TPanel')) and (Parent.Controls[I].Name = '') then
+      begin
+        Parent := TWinControl(Parent.Controls[I]);
+        Break;
+      end;
+    end;
+{$ENDIF}
 
   if FHideOrigToolbar then
   begin
+{$IFDEF DELPHI103_RIO_UP}
+    Parent.Visible := False;
+{$ELSE}
     for I := 0 to Parent.ControlCount - 1 do
     begin
       if Parent.Controls[I].ClassNameIs('TEditorNavigationToolbar') then
@@ -804,6 +819,7 @@ begin
         Exit;
       end;
     end;
+{$ENDIF}
   end
   else
   begin
@@ -843,12 +859,18 @@ begin
 {$ENDIF}
 
   Toolbar := TControl((Sender as TComponent).Tag);
+{$IFDEF DELPHI103_RIO_UP}
+  Toolbar := TControl(Toolbar.Parent); // Panel
+  if ToolBar <> nil then
+    Toolbar.Visible := False;
+{$ELSE}
   if Toolbar.Height > 0 then
   begin
     (Toolbar as TToolbar).AutoSize := False;
     Toolbar.Height := 0;
     Toolbar.Visible := False;
   end;
+{$ENDIF}
 end;
 
 {$ENDIF}
