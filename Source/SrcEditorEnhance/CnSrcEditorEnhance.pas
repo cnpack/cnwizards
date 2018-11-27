@@ -752,12 +752,20 @@ procedure TCnSrcEditorEnhance.EditorChanged(Editor: TEditorObject;
   ChangeType: TEditorChangeTypes);
 begin
   if Active and (ChangeType * [ctTopEditorChanged] <> []) then
+  begin
     FToolbarMgr.CheckToolBarEnable;
+{$IFDEF DELPHI103_RIO_UP}
+    FEditorMisc.CheckAndHideOrigToolbar(nil);
+{$ENDIF}
+  end;
 end;
 
 procedure TCnSrcEditorEnhance.CheckToolBarEnableOnIdle(Sender: TObject);
 begin
   FToolbarMgr.CheckToolBarEnable;
+{$IFDEF DELPHI103_RIO_UP}
+  FEditorMisc.CheckAndHideOrigToolbar(nil);
+{$ENDIF}
 end;
 
 procedure TCnSrcEditorEnhance.EditControlNotify(EditControl: TControl;

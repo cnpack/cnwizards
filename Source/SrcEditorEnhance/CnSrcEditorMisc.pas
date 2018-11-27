@@ -101,10 +101,6 @@ type
     FHideOrigToolbar: Boolean;
     function GetBoolean(const Index: Integer): Boolean;
     procedure SetBoolean(const Index: Integer; const Value: Boolean);
-{$IFDEF DELPHI10_SEATTLE_UP}
-    procedure CheckAndHideOrigToolbar(Sender: TObject);
-    procedure OrigToolbarClose(Sender: TObject);
-{$ENDIF}
     procedure RegisterUserMenuItems;
     procedure RegisterMenuExecutor(Sender: TObject);
     procedure OnSourceEditorNotify(SourceEditor: IOTASourceEditor;
@@ -158,7 +154,12 @@ type
     procedure SaveSettings(Ini: TCustomIniFile);
     procedure ResetSettings(Ini: TCustomIniFile);
     procedure LanguageChanged(Sender: TObject);
-    
+
+{$IFDEF DELPHI10_SEATTLE_UP}
+    procedure CheckAndHideOrigToolbar(Sender: TObject);
+    procedure OrigToolbarClose(Sender: TObject);
+{$ENDIF}
+
     property DblClickClosePage: Boolean read FDblClickClosePage write FDblClickClosePage;
     property RClickShellMenu: Boolean read FRClickShellMenu write FRClickShellMenu;
     property EditorTabMultiLine: Boolean read FEditorTabMultiLine write FEditorTabMultiLine;
@@ -801,10 +802,17 @@ begin
     end;
 {$ENDIF}
 
+{$IFDEF DEBUG}
+   CnDebugger.LogFmt('CheckAndHideOrigToolbar Hide: %d. Get a Parent: %s', [Integer(FHideOrigToolbar), Parent.ClassName]);
+{$ENDIF}
+
   if FHideOrigToolbar then
   begin
 {$IFDEF DELPHI103_RIO_UP}
     Parent.Visible := False;
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('CheckAndHideOrigToolbar Hide Toolbar Panel.');
+  {$ENDIF}
 {$ELSE}
     for I := 0 to Parent.ControlCount - 1 do
     begin
@@ -815,6 +823,9 @@ begin
           (Parent.Controls[I] as TToolbar).AutoSize := False;
           Parent.Controls[I].Height := 0;
           Parent.Controls[I].Visible := False;
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('CheckAndHideOrigToolbar Hide Toolbar.');
+{$ENDIF}
         end;
         Exit;
       end;
@@ -839,7 +850,7 @@ begin
           TControlHack(Parent.Controls[I]).PopupMenu := Popup;
 
 {$IFDEF DEBUG}
-          CnDebugger.LogMsg('Set a PopupMenu to Toolbar.');
+          CnDebugger.LogMsg('CheckAndHideOrigToolbar Set a PopupMenu to Toolbar.');
 {$ENDIF}
         end;
         Exit;
@@ -852,7 +863,7 @@ procedure TCnSrcEditorMisc.OrigToolbarClose(Sender: TObject);
 var
   Toolbar: TControl;
 begin
-  HideOrigToolbar := False;
+  HideOrigToolbar := True;
 
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('Hide Toolbar Menu Item Clicked.');
