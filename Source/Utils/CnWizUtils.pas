@@ -515,6 +515,10 @@ function CnOtaGetFileNameOfCurrentModule(GetSourceEditorFileName: Boolean = Fals
 {* 取当前模块文件名}
 function CnOtaGetEnvironmentOptions: IOTAEnvironmentOptions;
 {* 取当前环境设置}
+function CnOtaGetEnvironmentOptionValue(const OptionName: string): Variant;
+{* 取当前环境的指定设置值}
+procedure CnOtaSetEnvironmentOptionValue(const OptionName: string; OptionValue: Variant);
+{* 设置当前环境的指定设置值}
 function CnOtaGetEditOptions: IOTAEditOptions;
 {* 取当前编辑器设置}
 function CnOtaGetActiveProjectOptions(Project: IOTAProject = nil): IOTAProjectOptions;
@@ -3841,6 +3845,28 @@ begin
     Result := Svcs.GetEnvironmentOptions
   else
     Result := nil;
+end;
+
+// 取当前环境的指定设置值
+function CnOtaGetEnvironmentOptionValue(const OptionName: string): Variant;
+var
+  Svcs: IOTAServices;
+begin
+  QuerySvcs(BorlandIDEServices, IOTAServices, Svcs);
+  if Assigned(Svcs) then
+    Result := Svcs.GetEnvironmentOptions.GetOptionValue(OptionName)
+  else
+    Result := Null;
+end;
+
+// 设置当前环境的指定设置值
+procedure CnOtaSetEnvironmentOptionValue(const OptionName: string; OptionValue: Variant);
+var
+  Svcs: IOTAServices;
+begin
+  QuerySvcs(BorlandIDEServices, IOTAServices, Svcs);
+  if Assigned(Svcs) then
+    Svcs.GetEnvironmentOptions.SetOptionValue(OptionName, OptionValue);
 end;
 
 // 取当前编辑器设置
