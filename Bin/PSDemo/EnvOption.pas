@@ -30,5 +30,10 @@ begin
   for I := 0 to Strs.Count - 1 do
     Writeln(Strs[I] + ': ' + string(Options.GetOptionValue(Strs[I])));
 
+  if Strs.IndexOf('EnabledProp') >= 0 then
+  begin
+    InfoDlg('Will Disable IDE Structural Highlight.');
+    Options.SetOptionValue('EnabledProp', False);
+  end;
   Strs.Free;
 end.
