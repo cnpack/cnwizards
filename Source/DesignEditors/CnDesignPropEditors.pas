@@ -167,6 +167,7 @@ begin
   FEditor := TCnMultiLineEditorForm.Create(nil);
   with FEditor do
   try
+    LoadFormSize;
     if Ident <> '' then
       Caption := Ident;
     memEdit.Lines.Assign(TStrings(aList));
@@ -243,6 +244,7 @@ begin
   else
     with TCnMultiLineEditorForm.Create(nil) do
     try
+      LoadFormSize;
       Caption := S;
       memEdit.Text := GetStrValue();
       memEdit.Modified := False;

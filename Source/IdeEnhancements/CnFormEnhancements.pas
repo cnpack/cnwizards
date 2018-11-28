@@ -2042,6 +2042,7 @@ begin
   // µ¯³ö×Ö·û´®ÊôÐÔ±à¼­¿ò
   with TCnMultiLineEditorForm.Create(nil) do
   try
+    LoadFormSize;
     Caption := FStrCaption;
     memEdit.Text := FValueCombo.Text;
     memEdit.Modified := False;

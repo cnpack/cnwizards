@@ -64,7 +64,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdActns, ActnList, ImgList, StdCtrls, ToolWin, ComCtrls, CnCommon, CnConsts,
   CnDesignEditorConsts, CnDesignEditorUtils, CnWizUtils, CnIni, ExtCtrls,
-  CnWizMultiLang, Menus, Buttons, CnPopupMenu;
+  CnWizMultiLang, Menus, Buttons, CnPopupMenu, CnWizOptions;
 
 type
   TStringConvert = (scUpper, scLower, scCaptain, scIgnore);
@@ -221,7 +221,8 @@ type
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+    procedure LoadFormSize;
+
     property ToolsOption: TToolsOpt read FToolsOption write FToolsOption;
     property HasSelText: Boolean read GetHasSelText;
   end;
@@ -441,10 +442,6 @@ begin
 
   with TCnIniFile.Create(CreateEditorIniFile, True) do
   try
-    Height := ReadInteger(csMLEditor, csHeight, Height);
-    Width := ReadInteger(csMLEditor, csWidth, Width);
-    memEdit.Font := ReadFont(csMLEditor, csFont, memEdit.Font);
-
     FToolsOption.QuotedChar := ReadString(csMLEditor, csQuotedChar, #39)[1];
     FToolsOption.UnQuotedSep := ReadString(csMLEditor, csUnQuotedSep, ' ');
     FToolsOption.LineMoveSpaces := ReadInteger(csMLEditor, csLineMoveSpaces, 2);
@@ -1256,6 +1253,18 @@ procedure TCnMultiLineEditorForm.FormShow(Sender: TObject);
 begin
   inherited;
   OldValue := memEdit.Text;
+end;
+
+procedure TCnMultiLineEditorForm.LoadFormSize;
+begin
+  with TCnIniFile.Create(CreateEditorIniFile, True) do
+  try
+    Height := ReadInteger(csMLEditor, csHeight, Height);
+    Width := ReadInteger(csMLEditor, csWidth, Width);
+    memEdit.Font := ReadFont(csMLEditor, csFont, memEdit.Font);
+  finally
+    Free;
+  end;
 end;
 
 end.
