@@ -2761,10 +2761,11 @@
 {$ENDIF}
 
 {$IFDEF DELPHIXE8_UP}
-  {$DEFINE IDE_INTEGRATE_CASTALIA} // XE8 and 10S integrate Castalia.
+  {$DEFINE IDE_INTEGRATE_CASTALIA} // XE8/10S and above integrate Castalia.
 {$ENDIF}
 
 {$IFDEF DELPHI10_SEATTLE_UP}
+  {$DEFINE IDE_HAS_OWN_STRUCTUAL_HIGHLIGHT}  // 10S has own Structual Highlight
   {$DEFINE IDE_HAS_HIDE_NONVISUAL} // 10S has "Hide Nonvisual" Feature.
 {$ENDIF}
 

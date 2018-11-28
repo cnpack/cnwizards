@@ -1060,6 +1060,7 @@ var
   SCnSrcBlockMoveUp: string = 'Move &Up';
   SCnSrcBlockMoveDown: string = 'Move &Down';
   SCnSrcBlockDeleteLines: string = 'Delete &Lines';
+  SCnSrcBlockDisableStructualHighlight: string = 'Disable IDE &Structual Highlight';
 
   // CnSrcEditorKey
   SCnRenameVarCaption: string = 'Rename Identifier';

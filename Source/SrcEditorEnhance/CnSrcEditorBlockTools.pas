@@ -69,7 +69,8 @@ type
     btIndent, btIndentEx, btUnindent, btUnindentEx,
     btCommentCode, btUnCommentCode, btToggleComment, btCommentCropper,
     btFormatCode, btCodeSwap, btCodeToString, btInsertColor, btInsertDateTime,
-    btSortLines, btBlockMoveUp, btBlockMoveDown, btBlockDelLines, btShortCutConfig);
+    btSortLines, btBlockMoveUp, btBlockMoveDown, btBlockDelLines, btDisableHighlight,
+    btShortCutConfig);
 
   TCnSrcEditorBlockTools = class(TObject)
   private
@@ -116,6 +117,7 @@ type
     procedure DoBlockComment(Kind: TBlockToolKind);
     procedure DoBlockMisc(Kind: TBlockToolKind);
     procedure DoShortCutConfig;
+    procedure DoDisableHighlight;
     procedure ShowFlatButton(EditWindow: TCustomForm; EditControl: TControl;
       EditView: IOTAEditView);
     procedure SetShowBlockTools(Value: Boolean);
@@ -124,6 +126,7 @@ type
     procedure DestroyShortCuts;  // 销毁快捷键对象，可重复调用
   protected
     function CanShowButton: Boolean;
+    function CanShowDisableStructuralHighlight: Boolean;
     procedure DoEnhConfig;
     procedure UpdateFlatButtons;   // 更新每个编辑器窗口内的浮动按钮
     procedure ReInitShortCuts;
@@ -556,6 +559,7 @@ begin
     btIndent..btUnindentEx: DoBlockFormat(Kind);
     btCommentCode..btCommentCropper: DoBlockComment(Kind);
     btFormatCode..btBlockDelLines: DoBlockMisc(Kind);
+    btDisableHighlight: DoDisableHighlight;
     btShortCutConfig: DoShortCutConfig;
   end;
 end;
@@ -833,6 +837,9 @@ begin
   DoAddMenuItem(FMiscMenu, SCnSrcBlockMoveDown, btBlockMoveDown, GetShortCut(FBlockMoveDownShortCut));
   DoAddMenuItem(FMiscMenu, SCnSrcBlockDeleteLines, btBlockDelLines, GetShortCut(FBlockDelLinesShortCut));
 {$ENDIF}
+
+  if CanShowDisableStructuralHighlight then
+    DoAddMenuItem(FMiscMenu, SCnSrcBlockDisableStructualHighlight, btDisableHighlight);
 
   AddSepMenuItem(FMiscMenu);
   DoAddMenuItem(FMiscMenu, SCnWizConfigCaption, btShortCutConfig);
@@ -1163,6 +1170,26 @@ begin
     FShowColor := Value;
     UpdateFlatButtons;
   end;
+end;
+
+function TCnSrcEditorBlockTools.CanShowDisableStructuralHighlight: Boolean;
+begin
+  Result := False;
+{$IFDEF IDE_HAS_OWN_STRUCTUAL_HIGHLIGHT}
+  // IDE 该选项打开才允许显示
+  if not CnOtaGetEnvironmentOptionValue('EnabledProp') then
+    Exit;
+
+  Result := True;
+{$ENDIF}
+end;
+
+procedure TCnSrcEditorBlockTools.DoDisableHighlight;
+begin
+{$IFDEF IDE_HAS_OWN_STRUCTUAL_HIGHLIGHT}
+  CnOtaSetEnvironmentOptionValue('EnabledProp', False);
+  EditControlWrapper.RepaintEditControls;
+{$ENDIF}
 end;
 
 {$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}
