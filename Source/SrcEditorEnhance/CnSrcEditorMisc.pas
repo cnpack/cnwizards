@@ -1039,7 +1039,7 @@ begin
   
   FAutoSave := Ini.ReadBool(csMisc, csAutoSave, False);
   FSaveInterval := Ini.ReadInteger(csMisc, csSaveInterval, 2);
-  FHideOrigToolbar := Ini.ReadBool(csMisc, csHideOrigToolbar, FHideOrigToolbar);
+  FHideOrigToolbar := Ini.ReadBool(csMisc, csHideOrigToolbar, False);
   UpdateAutoSaveTimer;
 
   UpdateCodeCompletionHotKey;

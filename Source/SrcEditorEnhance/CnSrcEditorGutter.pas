@@ -1231,8 +1231,6 @@ begin
     FShowLineCount := ReadBool(csGutter, csShowLineCount, True);
 {$IFNDEF BDS}
     FShowModifier := ReadBool(csGutter, csShowModifier, csShowModifierDef);
-{$ELSE}
-    FShowModifier := False;
 {$ENDIF}
     FFont := ReadFont(csGutter, csFont, FFont);
     FCurrFont := ReadFont(csGutter, csCurrFont, FCurrFont);
@@ -1256,7 +1254,9 @@ begin
   try
     WriteBool(csGutter, csShowLineNumber, FShowLineNumber);
     WriteBool(csGutter, csShowLineCount, FShowLineCount);
+{$IFNDEF BDS}
     WriteBool(csGutter, csShowModifier, FShowModifier);
+{$ENDIF}
     WriteFont(csGutter, csFont, FFont);
     WriteFont(csGutter, csCurrFont, FCurrFont);
     WriteBool(csGutter, csAutoWidth, FAutoWidth);
