@@ -984,7 +984,9 @@ end;
 procedure TCnBasePascalFormatter.FormatDesignator(PreSpaceCount: Byte;
   IndentForAnonymous: Byte);
 var
-  IsB: Boolean;
+  IsB, IsGeneric: Boolean;
+  GenericBookmark: TScannerBookmark;
+  LessCount: Integer;
 begin
   if Scaner.Token = tokAtSign then // 如果是 @ Designator 的形式则再次递归
   begin
@@ -1002,7 +1004,41 @@ begin
       tokDot:
         begin
           Match(tokDot);
-          FormatIdent;
+          FormatIdent;  // 点号后的调用不能简单地 FormatIdent，之后还要处理泛型
+
+          // 这段泛型的判断等同于 FormatIdentWithBracket 里的
+          IsGeneric := False;
+          if Scaner.Token = tokLess then
+          begin
+            // 判断泛型，如果不是，恢复书签往下走；如果是，就恢复书签处理泛型
+            Scaner.SaveBookmark(GenericBookmark);
+            CodeGen.LockOutput;
+
+            // 往后找，一直找到非类型的关键字或者分号或者文件尾。
+            // 如果出现小于号和大于号一直不配对，则认为不是泛型。
+            // TODO: 判断还是不太严密，待继续验证。
+            Scaner.NextToken;
+            LessCount := 1;
+            while not (Scaner.Token in KeywordTokens + [tokSemicolon, tokEOF] - CanBeTypeKeywordTokens) do
+            begin
+              if Scaner.Token = tokLess then
+                Inc(LessCount)
+              else if Scaner.Token = tokGreat then
+                Dec(LessCount);
+
+              if LessCount = 0 then // Test<TObject><1 的情况，需要为 0 配对时就提前跳出
+                Break;
+
+              Scaner.NextToken;
+            end;
+            IsGeneric := (LessCount = 0);
+
+            Scaner.LoadBookmark(GenericBookmark);
+            CodeGen.UnLockOutput;
+          end;
+
+          if IsGeneric then
+            FormatTypeParams;
         end;
 
       tokLB, tokSLB: // [ ] ()
@@ -1352,7 +1388,7 @@ procedure TCnBasePascalFormatter.FormatQualID(PreSpaceCount: Byte);
 
     if IsGeneric then
       FormatTypeParams;
-      
+
     for I := 1 to BracketCount do
       Match(tokRB);
   end;
