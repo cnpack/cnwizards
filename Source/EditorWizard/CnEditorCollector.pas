@@ -296,7 +296,7 @@ begin
   inherited;
   Assert(Collector <> nil);
   Ini := Collector.CreateIniFile;
-  FPath := MakePath(WizOptions.UserPath + SCnEditorCollectorDir);
+  FPath := MakePath(WizOptions.UserPath + SCnEditorToolsetCollectorDir);
   ForceDirectories(FPath);
   TabSet.Font := Font;
   LoadSettings;
@@ -326,8 +326,8 @@ begin
   with TCnIniFile.Create(Ini) do
   try
     TabSet.Tabs.Clear;
-    if FileExists(WizOptions.UserPath + SCnEditorCollectorData) then
-      TabSet.Tabs.LoadFromFile(WizOptions.UserPath + SCnEditorCollectorData);
+    if FileExists(WizOptions.UserPath + SCnEditorToolsetCollectorData) then
+      TabSet.Tabs.LoadFromFile(WizOptions.UserPath + SCnEditorToolsetCollectorData);
     FindFile(FPath, '*.*', OnFindFile, nil, False, False);
     if TabSet.Tabs.Count = 0 then
       TabSet.Tabs.Add(csDefLabel);
@@ -359,7 +359,7 @@ begin
   SavePage;
   with TCnIniFile.Create(Ini) do
   try
-    TabSet.Tabs.SaveToFile(WizOptions.UserPath + SCnEditorCollectorData);
+    TabSet.Tabs.SaveToFile(WizOptions.UserPath + SCnEditorToolsetCollectorData);
     if (TabSet.TabIndex >= 0) then
       WriteString('', csTabLabel, TabSet.Tabs[TabSet.TabIndex])
     else

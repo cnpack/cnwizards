@@ -450,7 +450,7 @@ end;
 
 function TCnEditorToolsetWizard.GetCaption: string;
 begin
-  Result := SCnEditorWizardMenuCaption;
+  Result := SCnEditorToolsetWizardMenuCaption;
 end;
 
 function TCnEditorToolsetWizard.GetHasConfig: Boolean;
@@ -460,7 +460,7 @@ end;
 
 function TCnEditorToolsetWizard.GetHint: string;
 begin
-  Result := SCnEditorWizardMenuHint;
+  Result := SCnEditorToolsetWizardMenuHint;
 end;
 
 function TCnEditorToolsetWizard.GetState: TWizardState;
@@ -474,10 +474,10 @@ end;
 class procedure TCnEditorToolsetWizard.GetWizardInfo(var Name, Author, Email,
   Comment: string);
 begin
-  Name := SCnEditorWizardName;
+  Name := SCnEditorToolsetWizardName;
   Author := SCnPack_Zjy;
   Email := SCnPack_ZjyEmail;
-  Comment := SCnEditorWizardComment;
+  Comment := SCnEditorToolsetWizardComment;
 end;
 
 function TCnEditorToolsetWizard.GetEditorTools(Index: Integer): TCnBaseEditorTool;
@@ -572,9 +572,9 @@ var
 begin
   WizShortCutMgr.BeginUpdate;
   try
-    FConfigIndex := RegisterASubAction(SCnEditorWizardConfigName,
-      SCnEditorWizardConfigCaption, 0, SCnEditorWizardConfigHint,
-      SCnEditorWizardConfigName);
+    FConfigIndex := RegisterASubAction(SCnEditorToolsetWizardConfigName,
+      SCnEditorToolsetWizardConfigCaption, 0, SCnEditorToolsetWizardConfigHint,
+      SCnEditorToolsetWizardConfigName);
     if EditorToolCount > 0 then
       AddSepMenu;
     FEditorIndex := FConfigIndex + 1;
