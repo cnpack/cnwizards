@@ -97,6 +97,7 @@ type
     FReplaceMenu: TMenuItem;
     FWebSearchMenu: TMenuItem;
     FMiscMenu: TMenuItem;
+    FHideStructMenu: TMenuItem;
     FTabIndent: Boolean;
     FShowColor: Boolean;
     procedure SetActive(const Value: Boolean);
@@ -838,8 +839,9 @@ begin
   DoAddMenuItem(FMiscMenu, SCnSrcBlockDeleteLines, btBlockDelLines, GetShortCut(FBlockDelLinesShortCut));
 {$ENDIF}
 
-  if CanShowDisableStructuralHighlight then
-    DoAddMenuItem(FMiscMenu, SCnSrcBlockDisableStructualHighlight, btDisableHighlight);
+{$IFDEF IDE_HAS_OWN_STRUCTUAL_HIGHLIGHT}
+  FHideStructMenu := DoAddMenuItem(FMiscMenu, SCnSrcBlockDisableStructualHighlight, btDisableHighlight);
+{$ENDIF}
 
   AddSepMenuItem(FMiscMenu);
   DoAddMenuItem(FMiscMenu, SCnWizConfigCaption, btShortCutConfig);
@@ -861,6 +863,8 @@ begin
     FReplaceMenu.Visible := FReplaceMenu.Count > 0;
   if FMiscMenu <> nil then
     FMiscMenu.Visible := FMiscMenu.Count > 0;
+  if FHideStructMenu <> nil then
+    FHideStructMenu.Visible := CanShowDisableStructuralHighlight;
 end;
 
 procedure TCnSrcEditorBlockTools.ShowFlatButton(EditWindow: TCustomForm; 
