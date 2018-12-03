@@ -45,6 +45,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdActns, ActnList, ImgList, StdCtrls, ToolWin, ComCtrls, CnCommon, CnConsts,
@@ -136,7 +138,11 @@ type
     function PageNo: Integer;
   end;
 
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
+
 implementation
+
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
 
 uses
   Registry, Dlgs, CnWizShareImages;
@@ -601,4 +607,5 @@ begin
   RD.Left := Screen.Width div 3;
 end;
 
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
 end.

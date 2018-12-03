@@ -42,6 +42,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
+
 uses
   Windows, SysUtils, Classes, Graphics, IniFiles, Registry, TypInfo, Contnrs,
   {$IFDEF COMPILER6_UP}
@@ -249,10 +251,14 @@ type
 function CnDesignEditorMgr: TCnDesignEditorMgr;
 {* 返回编辑器管理器对象 }
 
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
+
 implementation
 
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
+
 uses
-  {$IFDEF Debug}CnDebug,{$ENDIF}
+  {$IFDEF DEBUG}CnDebug, {$ENDIF}
   CnPropEditorCustomizeFrm;
 
 const
@@ -848,5 +854,7 @@ finalization
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('CnDesignEditor finalization.');
 {$ENDIF}
+
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
 end.
 

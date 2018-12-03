@@ -60,6 +60,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdActns, ActnList, ImgList, StdCtrls, ToolWin, ComCtrls, CnCommon, CnConsts,
@@ -258,7 +260,11 @@ function StringMoveRight(const sin: string; const i: Integer): string;
 //------------------------------------------------------------------------------
 function DelRightSpaces(const sin: string): string;
 
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
+
 implementation
+
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
 
 uses
   Registry,
@@ -1267,4 +1273,5 @@ begin
   end;
 end;
 
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
 end.

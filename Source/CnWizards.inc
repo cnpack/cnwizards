@@ -26,6 +26,9 @@
 
 {$ELSE}
 
+// Editor: All Design Editors
+{$DEFINE CNWIZARDS_DESIGNEDITOR}
+
 // Wizard: CnFastCodeWizard
 {$DEFINE CNWIZARDS_CNFASTCODEWIZARD}
 

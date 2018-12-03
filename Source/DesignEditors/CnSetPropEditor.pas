@@ -45,6 +45,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
+
 uses
   Windows, SysUtils, Classes, Graphics, TypInfo, Controls, Dialogs,
 {$IFDEF COMPILER6_UP}
@@ -142,7 +144,11 @@ type
 
 {$ENDIF}
 
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
+
 implementation
+
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
 
 uses
   Grids, Menus, Forms, CnDesignEditorUtils {$IFDEF DEBUG}, CnDebug {$ENDIF};
@@ -456,5 +462,7 @@ initialization
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('Initialization Done: CnSetPropEditor.');
 {$ENDIF}
+
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
 end.
 

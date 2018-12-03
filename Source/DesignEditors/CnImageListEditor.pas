@@ -37,6 +37,8 @@ unit CnImageListEditor;
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
+
 interface
 
 uses
@@ -67,7 +69,11 @@ type
     class procedure Register;
   end;
 
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
+
 implementation
+
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
 
 { TCnImageListEditor }
 
@@ -127,4 +133,5 @@ initialization
   CnDesignEditorMgr.RegisterCompEditor(TCnImageListEditor, TCnImageListEditor.GetInfo,
     TCnImageListEditor.Register);
 
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
 end.

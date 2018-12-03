@@ -40,6 +40,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
+
 uses
   Windows, SysUtils, Classes, Graphics, IniFiles, Registry, TypInfo,
   {$IFDEF COMPILER6_UP}
@@ -70,7 +72,11 @@ function CheckBoxHeight: Integer;
 function CheckBoxWidth: Integer;
 {* CheckBoxµÄWidth }
 
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
+
 implementation
+
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
 
 {$R CnDesignCheckBox.res}
 
@@ -243,7 +249,7 @@ begin
 end;
 
 initialization
-  //×°ÔØcheckboxÍ¼Ïñ
+  //×°ÔØCheckboxÍ¼Ïñ
   Initialize;
 
 {$IFDEF DEBUG}
@@ -254,5 +260,6 @@ finalization
   FreeAndNil(Checked);
   FreeAndNil(Unchecked);
 
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
 end.
 

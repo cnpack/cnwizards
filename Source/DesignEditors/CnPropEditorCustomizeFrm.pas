@@ -38,6 +38,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, CnDesignEditorConsts, CnWizMultiLang;
@@ -63,7 +65,11 @@ type
 
 function ShowPropEditorCustomizeForm(List: TStrings; IsComp: Boolean): Boolean;
 
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
+
 implementation
+
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
 
 {$R *.DFM}
 
@@ -103,5 +109,6 @@ begin
     btnOK.Click;
 end;
 
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
 end.
  

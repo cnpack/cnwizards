@@ -41,6 +41,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   CnWizMultiLang, ComCtrls, StdCtrls, ExtCtrls, CnMultiLineEditorFrm,
@@ -88,7 +90,11 @@ type
     property ToolsOption: TToolsOpt read FToolsOption write FToolsOption;
   end;
 
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
+
 implementation
+
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
 
 {$R *.DFM}
 
@@ -140,4 +146,5 @@ begin
     edtQuotedChar.Text := #39;
 end;
 
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
 end.

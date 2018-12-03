@@ -38,6 +38,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, Buttons, CnCommon, CnConsts, CnDesignEditorConsts,
@@ -112,7 +114,11 @@ type
 var
   CnSizeConstraintsEditorForm: TCnSizeConstraintsEditorForm;
 
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
+
 implementation
+
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
 
 {$R *.DFM}
 
@@ -333,5 +339,6 @@ begin
   end;
 end;
 
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
 end.
 

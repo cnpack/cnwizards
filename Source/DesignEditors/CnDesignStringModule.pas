@@ -38,6 +38,7 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
 {$IFDEF DELPHI}
 
 uses
@@ -77,9 +78,11 @@ type
   end;
 
 {$ENDIF DELPHI}
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
 
 implementation
 
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
 {$IFDEF DELPHI}
 
 uses
@@ -185,6 +188,6 @@ begin
 end;
 
 {$ENDIF DELPHI}
-
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
 end.
 

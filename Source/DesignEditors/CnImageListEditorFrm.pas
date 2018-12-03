@@ -19,8 +19,6 @@
 {******************************************************************************}
 
 unit CnImageListEditorFrm;
-
-interface
 {* |<PRE>
 ================================================================================
 * 软件名称：开发包属性、组件编辑器库
@@ -31,13 +29,16 @@ interface
 * 兼容测试：
 * 本 地 化：该单元和窗体中的字符串已经本地化处理方式
 * 单元标识：$Id: $
-* 修改记录：
-*           2011.07.04 V1.0
+* 修改记录：2011.07.04 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
 
+interface
+
 {$I CnWizards.inc}
+
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
@@ -222,7 +223,11 @@ type
 procedure ShowCnImageListEditorForm(AComponent: TCustomImageList;
   AIni: TCustomIniFile; AOnApply: TNotifyEvent);
 
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
+
 implementation
+
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
 
 {$R *.dfm}
 
@@ -1838,4 +1843,5 @@ begin
     Handled := True;
 end;
 
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
 end.

@@ -45,6 +45,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
+
 uses
   Windows, SysUtils, Classes, ToolsAPI, StdCtrls, Graphics, Controls, Buttons,
   Menus, Forms, Grids, Dialogs, TypInfo, CnCommon,
@@ -139,7 +141,11 @@ function CnPropertyGetStrings(aList: TStrings;
   Component: TComponent;
   Name: string): Boolean; overload;
 
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
+
 implementation
+
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
 
 {$IFDEF DELPHI}
 uses
@@ -791,4 +797,6 @@ initialization
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('Initialization Done: CnDesignPropEditor.');
 {$ENDIF}
+
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
 end.

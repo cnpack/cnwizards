@@ -40,6 +40,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
+
 uses
   Windows, SysUtils, Classes,
   Graphics, TypInfo, Controls,
@@ -90,7 +92,11 @@ type
     class procedure Register;
   end;
 
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
+
 implementation
+
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
 
 {$IFDEF DEBUG}
 uses
@@ -254,4 +260,5 @@ initialization
   CnDebugger.LogMsg('Initialization Done: CnAlignPropEditor.');
 {$ENDIF}
 
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
 end.

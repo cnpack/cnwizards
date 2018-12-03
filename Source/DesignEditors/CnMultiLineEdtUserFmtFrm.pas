@@ -19,7 +19,6 @@
 {******************************************************************************}
 
 unit CnMultiLineEdtUserFmtFrm;
-
 {* |<PRE>
 ================================================================================
 * 软件名称：开发包属性、组件编辑器库
@@ -39,6 +38,8 @@ unit CnMultiLineEdtUserFmtFrm;
 interface
 
 {$I CnWizards.inc}
+
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
@@ -71,7 +72,11 @@ type
     property chk1Enabled: Boolean read Getchk1Enabled write Setchk1Enabled;
   end;
 
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
+
 implementation
+
+{$IFDEF CNWIZARDS_DESIGNEDITOR}
 
 uses
   CnCommon;
@@ -107,4 +112,5 @@ begin
   chk1.Enabled := Value;
 end;
 
+{$ENDIF CNWIZARDS_DESIGNEDITOR}
 end.
