@@ -227,7 +227,7 @@ type
 {$ENDIF}
 
 var
-  CnWizardMgr: TCnWizardMgr;
+  CnWizardMgr: TCnWizardMgr = nil;
   {* TCnWizardMgr 主专家实例}
 
   InitSplashProc: TProcedure = nil;

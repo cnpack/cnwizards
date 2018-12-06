@@ -805,7 +805,10 @@ function TCnSrcEditorKey.DoSmartCopy(View: IOTAEditView; Key, ScanCode: Word;
   Shift: TShiftState; var Handled: Boolean): Boolean;
 var
   Token: TCnIdeTokenString;
-  Idx: Integer;
+  Text: string;
+  Idx, LineNo, CharIdx: Integer;
+  IsToken: Boolean;
+  IsTextLine: Boolean;
 begin
   if (Key in [Ord('C'), Ord('V'), Ord('X')]) and (Shift = [ssCtrl]) then
   begin
@@ -813,12 +816,19 @@ begin
     begin
       if FSmartCopy and (Key in [Ord('C'), Ord('X')]) then
       begin
-        if not CnOtaGeneralGetCurrPosToken(Token, Idx, True) then
+        LineNo := 0;
+        IsToken := CnOtaGeneralGetCurrPosToken(Token, Idx, True);
+        CnNtaGetCurrLineText(Text, LineNo, CharIdx);
+        IsTextLine := Trim(Text) <> '';
+        if not IsToken and not IsTextLine then
         begin
           Handled := False;
           Result := Handled;
           Exit;
         end;
+
+        if not IsToken and IsTextLine then
+          Token := Text;  // 只复制时复制整行
 
 {$IFDEF IDE_STRING_ANSI_UTF8}
         // 把 WideString 内容设给剪贴板
@@ -833,7 +843,19 @@ begin
 
         if Key = Ord('X') then
         begin
-          CnOtaDeleteCurrToken;
+          if IsToken then
+            CnOtaDeleteCurrToken
+          else if IsTextLine and (LineNo > 0) then
+          begin
+            View.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
+              OTAEditPos(1, LineNo), View));
+            View.Block.BeginBlock;
+            View.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
+              OTAEditPos(1, LineNo + 1), View));
+            View.Block.EndBlock;
+            CnOtaDeleteCurrentSelection;
+            View.MoveViewToCursor;
+          end;
           View.Paint;
         end;
         Handled := True;

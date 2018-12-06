@@ -275,10 +275,10 @@ begin
       StartRow := EditView.Block.StartingRow;
       EndRow := EditView.Block.EndingRow;
       EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
-          OTAEditPos(1, StartRow), EditView));
+        OTAEditPos(1, StartRow), EditView));
       EditView.Block.BeginBlock;
       EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
-          OTAEditPos(1, EndRow + 1), EditView));
+        OTAEditPos(1, EndRow + 1), EditView));
       EditView.Block.EndBlock;
       CnOtaDeleteCurrentSelection();
       EditView.Position.Move(StartRow, 1);
@@ -287,10 +287,10 @@ begin
     else if CnOtaGetCurrLineText(LineText, StartRow, CharIndex) then
     begin
       EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
-          OTAEditPos(1, StartRow), EditView));
+        OTAEditPos(1, StartRow), EditView));
       EditView.Block.BeginBlock;
       EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
-          OTAEditPos(1, StartRow + 1), EditView));
+        OTAEditPos(1, StartRow + 1), EditView));
       EditView.Block.EndBlock;
       CnOtaDeleteCurrentSelection();
       EditView.Position.Move(StartRow, 1);
@@ -324,19 +324,19 @@ begin
       if EndRow + 1 < TotalLine then
       begin
         EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
-            OTAEditPos(1, StartRow), EditView));
+          OTAEditPos(1, StartRow), EditView));
         EditView.Block.BeginBlock;
         EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
-            OTAEditPos(1, EndRow + 1), EditView));
+          OTAEditPos(1, EndRow + 1), EditView));
       end
       else
       begin
         EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
-            OTAEditPos(1, StartRow - 1), EditView));
+          OTAEditPos(1, StartRow - 1), EditView));
         EditView.Position.MoveEOL;
         EditView.Block.BeginBlock;
         EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
-            OTAEditPos(1, EndRow), EditView));
+          OTAEditPos(1, EndRow), EditView));
         EditView.Position.MoveEOL;
       end;
       EditView.Block.EndBlock;
@@ -351,6 +351,7 @@ begin
         EditView.Position.Move(StartRow, 1);
         EditView.Position.MoveEOL;
       end;
+
       {$IFDEF UNICODE}
       CnOtaInsertTextIntoEditorAtPosW(InsertingText,
         CnOtaEditPosToLinePos(EditView.CursorPos, EditView) , EditView.Buffer);
@@ -358,11 +359,12 @@ begin
       CnOtaInsertTextIntoEditorAtPos(ConvertEditorTextToText(InsertingText),
         CnOtaEditPosToLinePos(EditView.CursorPos, EditView) , EditView.Buffer);
       {$ENDIF}
+
       EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
-          OTAEditPos(StartCol, StartRow + 1), EditView));
+        OTAEditPos(StartCol, StartRow + 1), EditView));
       EditView.Block.BeginBlock;
       EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
-          OTAEditPos(EndCol, EndRow + 1), EditView));
+        OTAEditPos(EndCol, EndRow + 1), EditView));
       EditView.Block.EndBlock;
 
       //EditView.MoveViewToCursor();
@@ -372,10 +374,10 @@ begin
       if StartRow >= TotalLine then Exit;
 
       EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
-          OTAEditPos(1, StartRow), EditView));
+        OTAEditPos(1, StartRow), EditView));
       EditView.Block.BeginBlock;
       EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
-          OTAEditPos(1, StartRow + 1), EditView));
+        OTAEditPos(1, StartRow + 1), EditView));
       EditView.Block.EndBlock;
       CnOtaDeleteCurrentSelection();
       Inc(StartRow);
@@ -409,7 +411,7 @@ begin
       if (EndRow >= TotalLine) then
       begin
         EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
-            OTAEditPos(1, StartRow - 1), EditView));
+          OTAEditPos(1, StartRow - 1), EditView));
         EditView.Position.MoveEOL;
         EditView.Block.BeginBlock;
         EditView.Position.MoveEOF;
@@ -420,7 +422,7 @@ begin
       else
       begin
         EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
-            OTAEditPos(1, StartRow), EditView));
+          OTAEditPos(1, StartRow), EditView));
         EditView.Block.BeginBlock;
         EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
           OTAEditPos(1, EndRow + 1), EditView));
@@ -438,10 +440,10 @@ begin
         EditView.Buffer);
       {$ENDIF}
       EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
-          OTAEditPos(StartCol, StartRow - 1), EditView));
+        OTAEditPos(StartCol, StartRow - 1), EditView));
       EditView.Block.BeginBlock;
       EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
-          OTAEditPos(EndCol, EndRow - 1), EditView));
+        OTAEditPos(EndCol, EndRow - 1), EditView));
       EditView.Block.EndBlock;
 
       EditView.MoveViewToCursor();
@@ -453,7 +455,7 @@ begin
       if (StartRow >= TotalLine) then
       begin
         EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
-            OTAEditPos(1, StartRow - 1), EditView));
+          OTAEditPos(1, StartRow - 1), EditView));
         EditView.Position.MoveEOL;
         EditView.Block.BeginBlock;
         EditView.Position.MoveEOF;
@@ -461,7 +463,7 @@ begin
       else
       begin
         EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
-            OTAEditPos(1, StartRow), EditView));
+          OTAEditPos(1, StartRow), EditView));
         EditView.Block.BeginBlock;
         EditView.CursorPos := CnOtaLinePosToEditPos(CnOtaEditPosToLinePos(
           OTAEditPos(1, StartRow + 1), EditView));
