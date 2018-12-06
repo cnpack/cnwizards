@@ -3103,6 +3103,7 @@ SCnSrcBlockMisc=Другое
 SCnSrcBlockMoveUp=Вверх
 SCnSrcBlockMoveDown=Вниз
 SCnSrcBlockDeleteLines=Удалить строки
+SCnSrcBlockDisableStructualHighlight=Отключить структурную подсветку IDE
 SCnRenameVarCaption=Переименовать идентификатор
 SCnRenameVarHintFmt=Заменить %s на:
 SCnRenameErrorValid=Неверный идентификатор, замена произведена не будет

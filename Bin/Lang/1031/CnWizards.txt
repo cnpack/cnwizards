@@ -3103,6 +3103,7 @@ SCnSrcBlockMisc=&weitere
 SCnSrcBlockMoveUp=verschiebe hoch
 SCnSrcBlockMoveDown=verschiebe runter
 SCnSrcBlockDeleteLines=lösche Zeilen
+SCnSrcBlockDisableStructualHighlight=Deaktivieren Sie IDE &Structual Highlight
 SCnRenameVarCaption=Umbenennen Identifier
 SCnRenameVarHintFmt=Umbenennen %s zu:
 SCnRenameErrorValid=ungültiger Identifier. Ersetzen wird abgebrochen.
