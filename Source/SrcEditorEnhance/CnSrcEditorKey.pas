@@ -204,6 +204,9 @@ uses
 type
   TControlHack = class(TControl);
   TClickEventProc = procedure(Self: TObject; Sender: TObject);
+{$IFDEF IDE_HAS_EDITOR_SEARCHPANEL}
+  TDoSearchProc = procedure(Self: TObject; const Text: string);
+{$ENDIF}
 
 const
   SCnAutoIndentFile = 'AutoIndent.dat';
@@ -216,11 +219,19 @@ const
   SCnRegExpCheckBoxName = 'RegExp';
   SCnPropCheckBoxClassName = 'TPropCheckBox';
 
+{$IFDEF IDE_HAS_EDITOR_SEARCHPANEL}
+  SCnEditWindowDoSearch = '@Editorform@TEditWindow@DoSearch$qqr20System@UnicodeString';
+{$ENDIF}
+
 var
   FOldSearchText: string = '';
 
   FOldSrchDialogOKButtonClick: Pointer = nil;
-  FMethodHook: TCnMethodHook;
+  FSearchDialogMethodHook: TCnMethodHook = nil;
+{$IFDEF IDE_HAS_EDITOR_SEARCHPANEL}
+  FOldEditWindowDoSearch: Pointer = nil;
+  FEditWindowDoSearchMethodHook: TCnMethodHook = nil;
+{$ENDIF}
 
   // 记录当前的搜索选项
   FCaseSense: Boolean;
@@ -284,18 +295,42 @@ begin
 
   if FOldSrchDialogOKButtonClick <> nil then
   begin
-    if FMethodHook.UseDDteours then
-      TClickEventProc(FMethodHook.Trampoline)(ASelf, Sender)
+    if FSearchDialogMethodHook.UseDDteours then
+      TClickEventProc(FSearchDialogMethodHook.Trampoline)(ASelf, Sender)
     else
     begin
-      FMethodHook.UnhookMethod;
+      FSearchDialogMethodHook.UnhookMethod;
       TMethod(ANotify).Code := FOldSrchDialogOKButtonClick;
       TMethod(ANotify).Data := ASelf;
       ANotify(Sender);
-      FMethodHook.HookMethod;
+      FSearchDialogMethodHook.HookMethod;
     end;
   end;
 end;
+
+{$IFDEF IDE_HAS_EDITOR_SEARCHPANEL}
+
+procedure CnEditWindowDoSearch(ASelf: Pointer; const Text: string);
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Hooked EditWindowDoSearch: Got Search Text ' + Text);
+{$ENDIF}
+
+  FOldSearchText := Text;
+  if FOldEditWindowDoSearch <> nil then
+  begin
+    if FEditWindowDoSearchMethodHook.UseDDteours then
+      TDoSearchProc(FEditWindowDoSearchMethodHook.Trampoline)(ASelf, Text)
+    else
+    begin
+      FEditWindowDoSearchMethodHook.UnhookMethod;
+      TDoSearchProc(FOldEditWindowDoSearch)(ASelf, Text);
+      FEditWindowDoSearchMethodHook.HookMethod;
+    end;
+  end;
+end;
+
+{$ENDIF}
 
 constructor TCnSrcEditorKey.Create;
 begin
@@ -312,10 +347,17 @@ begin
     begin
       FOldSrchDialogOKButtonClick := GetBplMethodAddress(FOldSrchDialogOKButtonClick);
       if FOldSrchDialogOKButtonClick <> nil then
-      begin
-        FMethodHook := TCnMethodHook.Create(FOldSrchDialogOKButtonClick, @CnSrchDialogOKButtonClick);
-      end;
+        FSearchDialogMethodHook := TCnMethodHook.Create(FOldSrchDialogOKButtonClick, @CnSrchDialogOKButtonClick);
     end;
+{$IFDEF IDE_HAS_EDITOR_SEARCHPANEL}
+    FOldEditWindowDoSearch := GetProcAddress(FCorIdeModule, SCnEditWindowDoSearch);
+    if FOldEditWindowDoSearch <> nil then
+    begin
+      FOldEditWindowDoSearch := GetBplMethodAddress(FOldEditWindowDoSearch);
+      if FOldEditWindowDoSearch <> nil then
+        FEditWindowDoSearchMethodHook := TCnMethodHook.Create(FOldEditWindowDoSearch, @CnEditWindowDoSearch);
+    end;
+{$ENDIF}
   end;
 
   EditControlWrapper.AddKeyDownNotifier(EditControlKeyDown);
@@ -329,7 +371,7 @@ begin
   EditControlWrapper.RemoveKeyDownNotifier(EditControlKeyDown);
   EditControlWrapper.RemoveKeyUpNotifier(EditControlKeyUp);
 
-  FMethodHook.Free;
+  FSearchDialogMethodHook.Free;
   if FCorIdeModule <> 0 then
     FreeLibrary(FCorIdeModule);
 
