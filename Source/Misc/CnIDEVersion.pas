@@ -165,7 +165,7 @@ begin
   end;
 end;
 
-function IsDelphi9IdeVersionLatest: Boolean;
+function IsDelphi2005IdeVersionLatest: Boolean;
 const
   CoreIdeLatest: TVersionNumber = // Update 2
     (Major: 9; Minor: 0; Release: 1935; Build: 22056);
@@ -176,7 +176,7 @@ begin
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
 end;
 
-function IsDelphi10IdeVersionLatest: Boolean;
+function IsDelphi2006IdeVersionLatest: Boolean;
 const
   CoreIdeLatest: TVersionNumber = // Update 2
     (Major: 10; Minor: 0; Release: 2329; Build: 20030);
@@ -187,7 +187,7 @@ begin
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
 end;
 
-function IsDelphi11IdeVersionLatest: Boolean;
+function IsDelphi2007IdeVersionLatest: Boolean;
 const
   CoreIdeLatest: TVersionNumber = // Update 3, Dec 2007
     (Major: 11; Minor: 0; Release: 2902; Build: 10471);
@@ -198,7 +198,7 @@ begin
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
 end;
 
-function IsDelphi12IdeVersionLatest: Boolean;
+function IsDelphi2009IdeVersionLatest: Boolean;
 const
   CoreIdeLatest: TVersionNumber = // Update 4?
     (Major: 12; Minor: 0; Release: 3420; Build: 21218);
@@ -209,7 +209,7 @@ begin
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
 end;
 
-function IsDelphi14IdeVersionLatest: Boolean;
+function IsDelphi2010IdeVersionLatest: Boolean;
 const
   CoreIdeLatest: TVersionNumber = // Update 4
     (Major: 14; Minor: 0; Release: 3593; Build: 25826);
@@ -403,35 +403,35 @@ begin
   CnIdeVersionIsLatest := IsDelphi8IdeVersionLatest;
 {$ENDIF}
 
-{$IFDEF DELPHI9}
-  CnIdeVersionIsLatest := IsDelphi9IdeVersionLatest;
+{$IFDEF DELPHI2005}
+  CnIdeVersionIsLatest := IsDelphi2005IdeVersionLatest;
 {$ENDIF}
 
-{$IFDEF DELPHI10}
-  CnIdeVersionIsLatest := IsDelphi10IdeVersionLatest;
+{$IFDEF DELPHI2006}
+  CnIdeVersionIsLatest := IsDelphi2006IdeVersionLatest;
 {$ENDIF}
 
-{$IFDEF DELPHI11}
-  CnIdeVersionIsLatest := IsDelphi11IdeVersionLatest;
+{$IFDEF DELPHI2007}
+  CnIdeVersionIsLatest := IsDelphi2007IdeVersionLatest;
 {$ENDIF}
 
-{$IFDEF DELPHI12}
-  CnIdeVersionIsLatest := IsDelphi12IdeVersionLatest;
+{$IFDEF DELPHI2009}
+  CnIdeVersionIsLatest := IsDelphi2009IdeVersionLatest;
 {$ENDIF}
 
-{$IFDEF DELPHI14}
-  CnIdeVersionIsLatest := IsDelphi14IdeVersionLatest;
+{$IFDEF DELPHI2010}
+  CnIdeVersionIsLatest := IsDelphi2010IdeVersionLatest;
 {$ENDIF}
 
-{$IFDEF DELPHI15}
+{$IFDEF DELPHIXE}
   CnIdeVersionIsLatest := IsDelphiXEIdeVersionLatest;
 {$ENDIF}
 
-{$IFDEF DELPHI16}
+{$IFDEF DELPHIXE2}
   CnIdeVersionIsLatest := IsDelphiXE2IdeVersionLatest;
 {$ENDIF}
 
-{$IFDEF DELPHI17}
+{$IFDEF DELPHIXE3}
   CnIdeVersionIsLatest := IsDelphiXE3IdeVersionLatest;
 {$ENDIF}
 
