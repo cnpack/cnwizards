@@ -510,6 +510,9 @@ end;
 procedure TCnMultiLineEditorForm.FormCloseQuery(Sender: TObject;
   var CanClose: Boolean);
 begin
+  memEdit.ScrollBars := ssBoth;
+  memEdit.WordWrap := False;
+
   if (ModalResult <> mrOk) and (ModalResult <> mrYes) and (memEdit.Text <> OldValue) then
   begin
     // mrYes 时是用编辑器编辑，不需要改成 mrOK
