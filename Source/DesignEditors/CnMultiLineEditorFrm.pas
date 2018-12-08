@@ -902,9 +902,15 @@ end;
 procedure TCnMultiLineEditorForm.EditToggleHorizontalExecute(Sender: TObject);
 begin
   if memEdit.ScrollBars = ssBoth then
-    memEdit.ScrollBars := ssVertical
+  begin
+    memEdit.ScrollBars := ssVertical;
+    memEdit.WordWrap := True;
+  end
   else
+  begin
     memEdit.ScrollBars := ssBoth;
+    memEdit.WordWrap := False;
+  end;
   UpdatePos;
 end;
 
