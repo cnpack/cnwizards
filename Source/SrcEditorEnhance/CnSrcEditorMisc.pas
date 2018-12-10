@@ -365,7 +365,8 @@ begin
   begin
     UpdateInstall;
 {$IFDEF DELPHI10_SEATTLE_UP}
-    CheckAndHideOrigToolbar(nil);
+    if FActive then
+      CheckAndHideOrigToolbar(nil);
 {$ENDIF}
   end;
 end;
@@ -791,19 +792,19 @@ begin
     Exit;
 
 {$IFDEF DELPHI103_RIO_UP}
-    // 10.3 里 EditorNavigationToolbar 外面还有个没名字的 Panel
-    for I := 0 to Parent.ControlCount - 1 do
+  // 10.3 里 EditorNavigationToolbar 外面还有个没名字的 Panel
+  for I := 0 to Parent.ControlCount - 1 do
+  begin
+    if (Parent.Controls[I].ClassNameIs('TPanel')) and (Parent.Controls[I].Name = '') then
     begin
-      if (Parent.Controls[I].ClassNameIs('TPanel')) and (Parent.Controls[I].Name = '') then
-      begin
-        Parent := TWinControl(Parent.Controls[I]);
-        Break;
-      end;
+      Parent := TWinControl(Parent.Controls[I]);
+      Break;
     end;
+  end;
 {$ENDIF}
 
 {$IFDEF DEBUG}
-   CnDebugger.LogFmt('CheckAndHideOrigToolbar Hide: %d. Get a Parent: %s', [Integer(FHideOrigToolbar), Parent.ClassName]);
+  CnDebugger.LogFmt('CheckAndHideOrigToolbar Hide: %d. Get a Parent: %s', [Integer(FHideOrigToolbar), Parent.ClassName]);
 {$ENDIF}
 
   if FHideOrigToolbar then
