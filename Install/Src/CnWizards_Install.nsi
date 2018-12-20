@@ -945,6 +945,7 @@ Section "$(OTHERTOOLS)" SecTools
   File "..\..\..\cnvcl\Source\Common\CnDebug.pas"
   File "..\..\..\cnvcl\Source\Common\CnPropSheetFrm.pas"
   File "..\..\..\cnvcl\Source\Common\CnPropSheetFrm.dfm"
+  File "..\..\..\cnvcl\Source\Common\CnTree.pas"
   File "..\..\..\cnvcl\Source\Common\CnMemProf.pas"
 SectionEnd
 
