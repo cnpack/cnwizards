@@ -143,7 +143,7 @@ type
       BeginStyle: DWORD; WrapMode: DWORD; TabSpace: DWORD; SpaceBeforeOperator: DWORD;
       SpaceAfterOperator: DWORD; SpaceBeforeAsm: DWORD; SpaceTabAsm: DWORD;
       LineWrapWidth: DWORD; NewLineWrapWidth: DWORD; UsesSingleLine: LongBool;
-      UseIgnoreArea: LongBool; UsesLineWrapWidth: DWORD);
+      UseIgnoreArea: LongBool; UsesLineWrapWidth: DWORD; KeepUserLineBreak: LongBool);
     {* 设置格式化选项}
 
     procedure SetPreIdentifierNames(Names: PLPSTR);

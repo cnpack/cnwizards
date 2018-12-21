@@ -63,6 +63,7 @@ type
     FDirectiveMode: TCompDirectiveMode;
     FUsesUnitSingleLine: Boolean;
     FUseIgnoreArea: Boolean;
+    FKeepUserLineBreak: Boolean;
     FSpaceAfterOperator: Byte;
     FSpaceBeforeOperator: Byte;
     FSpaceBeforeASM: Byte;
@@ -128,6 +129,7 @@ type
     property WrapNewLineWidth: Integer read FWrapNewLineWidth write FWrapNewLineWidth;
     property UsesUnitSingleLine: Boolean read FUsesUnitSingleLine write FUsesUnitSingleLine;
     property UseIgnoreArea: Boolean read FUseIgnoreArea write FUseIgnoreArea;
+    property KeepUserLineBreak: Boolean read FKeepUserLineBreak write FKeepUserLineBreak;
     property UseIDESymbols: Boolean read FUseIDESymbols write FUseIDESymbols;
   end;
 
@@ -214,7 +216,7 @@ const
   csBeginStyle = 'BeginStyle';
   csKeywordStyle = 'KeywordStyle';
   csDirectiveMode = 'DirectiveMode';
-
+  csKeepUserLineBreak = 'KeepUserLineBreak';
   csUseIDESymbols = 'UseIDESymbols';
 
 { TCnCodeFormatterWizard }
@@ -503,6 +505,7 @@ begin
   FBeginStyle := TBeginStyle(Ini.ReadInteger('', csBeginStyle, Ord(CnPascalCodeForVCLRule.BeginStyle)));
   FKeywordStyle := TKeywordStyle(Ini.ReadInteger('', csKeywordStyle, Ord(CnPascalCodeForVCLRule.KeywordStyle)));
   FDirectiveMode := TCompDirectiveMode(Ini.ReadInteger('', csDirectiveMode, Ord(CnPascalCodeForVCLRule.CompDirectiveMode)));
+  FKeepUserLineBreak := Ini.ReadBool('', csKeepUserLineBreak, CnPascalCodeForVCLRule.KeepUserLineBreak);
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
   FUseIDESymbols := Ini.ReadBool('', csUseIDESymbols, False);
 {$ENDIF}
@@ -621,6 +624,7 @@ var
   AUsesSingleLine: LongBool;
   AUseIgnoreArea: LongBool;
   AUsesLineWrapWidth: DWORD;
+  AKeepUserLineBreak: LongBool;
 begin
   Result := False;
   if FGetProvider = nil then
@@ -680,11 +684,12 @@ begin
 
   AUsesSingleLine := LongBool(FUsesUnitSingleLine);
   AUseIgnoreArea := LongBool(FUseIgnoreArea);
+  AKeepUserLineBreak := LongBool(FKeepUserLineBreak);
 
   Intf.SetPascalFormatRule(ADirectiveMode, AKeywordStyle, ABeginStyle, AWrapMode,
     ATabSpace, ASpaceBeforeOperator, ASpaceAfterOperator, ASpaceBeforeAsm,
     ASpaceTabAsm, ALineWrapWidth, ANewLineWrapWidth, AUsesSingleLine, AUseIgnoreArea,
-    AUsesLineWrapWidth);
+    AUsesLineWrapWidth, AKeepUserLineBreak);
   Result := True;
 end;
 
@@ -703,6 +708,8 @@ begin
   Ini.WriteInteger('', csBeginStyle, Ord(FBeginStyle));
   Ini.WriteInteger('', csKeywordStyle, Ord(FKeywordStyle));
   Ini.WriteInteger('', csDirectiveMode, Ord(FDirectiveMode));
+  Ini.WriteBool('', csKeepUserLineBreak, FKeepUserLineBreak);
+
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
   Ini.WriteBool('', csUseIDESymbols, FUseIDESymbols);
 {$ENDIF}
