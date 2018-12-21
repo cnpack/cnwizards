@@ -122,6 +122,7 @@ type
     FNewSourceCol: Integer; // 用于步进，指向下一个 Token 的列
     FSourceCol: Integer;
     FInIgnoreArea: Boolean;
+    FOnLineBreak: TNotifyEvent;
     procedure ReadBuffer;
     procedure SetOrigin(AOrigin: Longint);
     procedure SkipBlanks; // 越过空白和回车换行
@@ -135,6 +136,7 @@ type
 {$ENDIF}
   protected
     procedure OnMoreBlankLinesWhenSkip; virtual; abstract;
+    procedure DoLineBreak; virtual;
   public
     constructor Create(Stream: TStream); virtual;
     destructor Destroy; override;
@@ -205,6 +207,9 @@ type
 
     property InIgnoreArea: Boolean read FInIgnoreArea write FInIgnoreArea;
     {* 由内部前进 Token 时解析设置当前是否忽略格式化标记，供外界使用}
+
+    property OnLineBreak: TNotifyEvent read FOnLineBreak write FOnLineBreak;
+    {* 遇到源文件换行时的事件}
   end;
 
   TScaner = class(TAbstractScaner)
@@ -765,6 +770,12 @@ begin
   end;
 end;
 
+procedure TAbstractScaner.DoLineBreak;
+begin
+  if Assigned(FOnLineBreak) then
+    FOnLineBreak(Self);
+end;
+
 function TAbstractScaner.TrimBlank(const Str: string): string;
 begin
   Result := Str;
@@ -781,6 +792,7 @@ procedure TAbstractScaner.NewLine;
 begin
   Inc(FSourceLine);
   FNewSourceCol := 1;
+  DoLineBreak;
 end;
 
 function TAbstractScaner.TokenStringLength: Integer;

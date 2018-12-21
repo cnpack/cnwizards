@@ -74,6 +74,7 @@ type
     UsesUnitSingleLine: Boolean;
     UseIgnoreArea: Boolean;
     UsesLineWrapWidth: Integer;
+    KeepUserLineBreak: Boolean;
   end;
 
 const
@@ -97,6 +98,7 @@ const
     UsesUnitSingleLine: False;
     UseIgnoreArea: True;
     UsesLineWrapWidth: 90;
+    KeepUserLineBreak: False;
   );
 
 var

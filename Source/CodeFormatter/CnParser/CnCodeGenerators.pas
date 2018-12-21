@@ -72,6 +72,8 @@ type
     FWritingBlank: Boolean;
     FWritingCommentEndLn: Boolean;
     FJustWrittenCommentEndLn: Boolean;
+    FKeepLineBreak: Boolean;
+    FKeepLineBreakIndentWritten: Boolean;
     function GetCurIndentSpace: Integer;
     function GetLockedCount: Word;
     function GetPrevColumn: Integer;
@@ -139,7 +141,10 @@ type
     {* 上一个非自动换以及非注释的行的最前面的空格数}
     property CodeWrapMode: TCodeWrapMode read FCodeWrapMode write FCodeWrapMode;
     {* 代码换行的设置}
-
+    property KeepLineBreak: Boolean read FKeepLineBreak write FKeepLineBreak;
+    {* 由外界设置的保留换行标记，为 True 时无需处理自动换行}
+    property KeepLineBreakIndentWritten: Boolean read FKeepLineBreakIndentWritten write FKeepLineBreakIndentWritten;
+    {* 由外界设置的、保留换行后写过行前导空格的标记，由自己清除}
     property PrevRow: Integer read GetPrevRow;
     {* 一次 Write 成功后，写之前的光标行号，0 开始。
       可能与实际情况不符，因为 Write 可能自行写回车换行符}
@@ -635,6 +640,13 @@ begin
   ThisCanBeHead := StrCanBeHead(Text);
   PrevCanBeTail := StrCanBeTail(FPrevStr);
 
+  // 外部保留换行时，行头如果是空格缩进，本次不写多余的缩进（暂且只忽略空格为 1 的情况）
+  if FKeepLineBreak and FKeepLineBreakIndentWritten and (BeforeSpaceCount = 1) then
+  begin
+    BeforeSpaceCount := 0;
+    FKeepLineBreakIndentWritten := False;
+  end;
+
   Str := Format('%s%s%s', [StringOfChar(' ', BeforeSpaceCount), Text,
     StringOfChar(' ', AfterSpaceCount)]);
 
@@ -645,9 +657,9 @@ begin
 {$ENDIF}
 
   FPrevRow := FCode.Count - 1;
-  if FCodeWrapMode = cwmNone then
+  if (FCodeWrapMode = cwmNone) or FKeepLineBreak then
   begin
-    // 不自动换行时，无需处理
+    // 不自动换行时无需处理，
   end
   else if (FCodeWrapMode = cwmSimple) or ( (FCodeWrapMode = cwmAdvanced) and
     (CnPascalCodeForRule.WrapWidth >= CnPascalCodeForRule.WrapNewLineWidth) ) then
