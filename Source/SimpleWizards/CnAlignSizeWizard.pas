@@ -70,7 +70,7 @@ uses
 {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, {$ELSE} DsgnIntf, {$ENDIF}
 {$IFDEF IDE_ACTION_UPDATE_DELAY} ActnMenus, ActnMan, {$ENDIF}
   Buttons, Menus, CnWizClasses, CnWizMenuAction, CnWizUtils,
-  CnConsts, CnWizNotifier, CnWizConsts, CnWizManager,
+  CnConsts, CnWizNotifier, CnWizConsts, CnWizManager, CnVclFmxMixed,
   StdCtrls, CnSpin, CnWizIdeUtils, CnCommon, CnWizMultiLang;
 
 type

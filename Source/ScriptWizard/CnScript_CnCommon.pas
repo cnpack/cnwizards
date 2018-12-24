@@ -39,7 +39,8 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, SysUtils, Classes, CnCommon, uPSComponent, uPSRuntime, uPSCompiler;
+  Windows, SysUtils, Classes, CnCommon, CnVclFmxMixed,
+  uPSComponent, uPSRuntime, uPSCompiler;
 
 type
 
