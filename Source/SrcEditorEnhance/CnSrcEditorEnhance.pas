@@ -28,7 +28,6 @@ unit CnSrcEditorEnhance;
 * 开发平台：PWin98SE + Delphi 6
 * 兼容测试：暂无（PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6）
 * 本 地 化：该窗体中的字符串符合本地化处理方式
-* 单元标识：$Id$
 * 修改记录：2015.02.03
 *               LiuXiao 加入光标不超过行尾的选项
 *           2011.06.14

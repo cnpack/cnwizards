@@ -48,7 +48,6 @@ unit CnBCBWideTokenList;
 * 开发平台：Windows 7 + Delphi XE
 * 兼容测试：PWin9X/2000/XP/7 + Delphi 2009 ~
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 单元标识：$Id$
 * 修改记录：2015.04.25 V1.1
 *               增加 WideString 实现
 *           2015.04.09 V1.0

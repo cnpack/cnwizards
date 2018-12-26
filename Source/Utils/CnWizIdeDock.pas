@@ -38,7 +38,6 @@ unit CnWizIdeDock;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 单元标识：$Id$
 * 修改记录：2012.11.30
 *               不使用CnFormScaler来处理字体，改用固定的96/72进行字体尺寸计算。
 *           2009.01.07

@@ -28,7 +28,6 @@ unit CnWizConfigFrm;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 单元标识：$Id$
 * 修改记录：2012.11.30 V1.7
 *               去除使用FormScaler重新调整文字的机制
 *           2012.09.19 by shenloqi

@@ -28,7 +28,6 @@ unit CnParseConsts;
 * 开发平台：Win2003 + Delphi 5.0
 * 兼容测试：not test yet
 * 本 地 化：should be work
-* 单元标识：$Id$
 * 修改记录：
 *   2003-12-16 V0.1
         建立。

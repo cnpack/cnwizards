@@ -28,7 +28,6 @@ unit CnCompFilterFrm;
 * 开发平台：PWinXP + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 单元标识：$Id$
 * 修改记录：2018.04.23 V1.1
 *               加入模糊匹配的功能
 *           2006.09.08 V1.0

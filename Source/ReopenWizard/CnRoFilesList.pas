@@ -28,7 +28,6 @@ unit CnRoFilesList;
 * 开发平台：PWin2000Pro + Delphi 5.02
 * 兼容测试：PWin2000 + Delphi 5/6/7
 * 本 地 化：该窗体中的字符串支持本地化处理方式
-* 单元标识：$Id$
 * 修改记录：2004-12-12 V1.1
 *               去除TIniContainer处理，改为用IRoOptions接口处理。
 *           2004-03-02 V1.0

@@ -28,7 +28,6 @@ unit TestEditorCodeComment;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 单元标识：$Id$
 * 修改记录：2016.06.09 V1.1
 *               加入保持原始代码缩进的设置
 *           2002.12.31 V1.0

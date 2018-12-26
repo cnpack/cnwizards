@@ -28,7 +28,6 @@ unit CnCodeGenerators;
 * 开发平台：Win2003 + Delphi 5.0
 * 兼容测试：not test yet
 * 本 地 化：not test hell
-* 单元标识：$Id$
 * 修改记录：2015.10.12 V1.1
 *               由于注释后的换行已由外部写入，此处不再分析写入内容是否注释与换行结尾。
 *           2007.10.13 V1.0

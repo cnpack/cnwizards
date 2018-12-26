@@ -28,7 +28,6 @@ unit CnPas2HtmlWizard;
 * 开发平台：PWin98SE + Delphi 6
 * 兼容测试：暂无（PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6）
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 单元标识：$Id$
 * 修改记录：2003.04.15 V1.3
 *               修改 Action 更新部分代码（by yygw）
 *           2003.03.09 V1.2

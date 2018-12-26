@@ -29,7 +29,6 @@ unit CnInputSymbolList;
 * 开发平台：PWin2000Pro + Delphi 7.1
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 单元标识：$Id$
 * 修改记录：2016.03.15 by liuxiao
 *               TUnitNameList 增加路径机制与 h/hpp 支持供外部使用
 *           2012.09.19 by shenloqi

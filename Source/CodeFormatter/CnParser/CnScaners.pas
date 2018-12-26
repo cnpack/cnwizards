@@ -35,7 +35,6 @@ unit CnScaners;
 * 开发平台：Win2003 + Delphi 5.0
 * 兼容测试：not test yet
 * 本 地 化：not test hell
-* 单元标识：$Id$
 * 修改记录：2007-10-13 V1.0
 *               完善一些功能
 *           2004-1-14 V0.5

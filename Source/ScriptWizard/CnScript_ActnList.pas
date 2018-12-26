@@ -28,7 +28,6 @@ unit CnScript_ActnList;
 * 开发平台：PWinXP SP2 + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7
 * 本 地 化：该窗体中的字符串支持本地化处理方式
-* 单元标识：$Id$
 * 修改记录：2006.12.29 V1.0
 *               XE3 下的 Action 换单元了，适应性更改。
 *           2006.12.29 V1.0

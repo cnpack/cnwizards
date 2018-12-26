@@ -28,7 +28,6 @@ unit CnVerEnhancements;
 * 开发平台：JWinXPPro + Delphi 7.01
 * 兼容测试：JWinXPPro ＋Delphi7.０１
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 单元标识：$Id$
 * 修改记录：2015.01.05 V1.4 by liuxiao
 *               加入自定义日期时间格式的设置
 *           2013.05.23 V1.3 by liuxiao

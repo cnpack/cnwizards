@@ -28,7 +28,6 @@ unit CnPaletteEnhancements;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 单元标识：$Id$
 * 修改记录：2014.10.07 V1.5 by LiuXiao
 *               增加退出时延迟改名 %TEMP%\EditorLineEnds.ttr 的功能以躲过 IDE 的
 *               和某些 Windows Update 包冲突从而无法启动问题。

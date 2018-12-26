@@ -28,7 +28,6 @@ unit CnMdiView;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 单元标识：$Id$
 * 修改记录：2014.10.05
 *               显示统一使用 FViewStore 以修正和 FStore 可能不一致的问题。
 *           2008.01.18

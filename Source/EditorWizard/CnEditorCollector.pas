@@ -28,7 +28,6 @@ unit CnEditorCollector;
 * 开发平台：PWinXP SP2 + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 单元标识：$Id$
 * 修改记录：2012.08.22 V1.1
 *               补上自动粘贴状态未保存的功能
 *           2005.08.01 V1.0

@@ -31,7 +31,6 @@ unit CnAlignSizeWizard;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin2000 + Delphi 5
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 单元标识：$Id$
 * 修改记录：2011.10.03 by LiuXiao
 *               使用一批封装 Control 操作的函数以支持 FMX 框架
 *           2004.12.04 by 周劲羽
