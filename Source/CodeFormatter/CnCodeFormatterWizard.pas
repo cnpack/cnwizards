@@ -164,6 +164,7 @@ type
     chkUseIDESymbols: TCheckBox;
     cbbDirectiveMode: TComboBox;
     lblDirectiveMode: TLabel;
+    chkKeepUserLineBreak: TCheckBox;
     procedure chkAutoWrapClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure btnShortCutClick(Sender: TObject);
@@ -343,6 +344,7 @@ begin
     seASMHeadIndent.Value := FSpaceBeforeASM;
     seAsmTab.Value := FSpaceTabASMKeyword;
     chkIgnoreArea.Checked := FUseIgnoreArea;
+    chkKeepUserLineBreak.Checked := FKeepUserLineBreak;
 
     if ShowModal = mrOK then
     begin
@@ -366,6 +368,7 @@ begin
       FSpaceTabASMKeyword := seAsmTab.Value;
       FUseIgnoreArea := chkIgnoreArea.Checked;
       FDirectiveMode := TCompDirectiveMode(cbbDirectiveMode.ItemIndex);
+      FKeepUserLineBreak := chkKeepUserLineBreak.Checked;
     end;
     
     Free;

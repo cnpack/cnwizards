@@ -99,6 +99,7 @@ type
     tvCompDirective: TTreeView;
     chkAutoWrap: TCheckBox;
     chkLF: TCheckBox;
+    chkKeepUserBreakLine: TCheckBox;
     procedure btnLoadFileClick(Sender: TObject);
     procedure btnFormatClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -154,6 +155,7 @@ begin
   CnPascalCodeForRule.CompDirectiveMode := cdmOnlyFirst;
   CnPascalCodeForRule.TabSpaceCount := UpDown1.Position;
   CnPascalCodeForRule.KeywordStyle := TKeywordStyle(ComboBox1.ItemIndex);
+  CnPascalCodeForRule.KeepUserLineBreak := chkKeepUserBreakLine.Checked;
 
   if chkAutoWrap.Checked then
     CnPascalCodeForRule.CodeWrapMode := cwmAdvanced
@@ -355,8 +357,6 @@ var
   FCodeFor: TCnPascalCodeFormatter;
   FileStr: TFileStream;
 begin
-  FileStr := nil;
-
   for I := 0 to lvTestFiles.Items.Count - 1 do
   begin
     try

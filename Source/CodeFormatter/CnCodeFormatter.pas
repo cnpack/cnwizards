@@ -937,11 +937,20 @@ end;
 
 { ConstExpr -> <constant-expression> }
 procedure TCnBasePascalFormatter.FormatConstExpr(PreSpaceCount: Byte);
+var
+  OldCanKeepLineBreak: Boolean;
 begin
   SpecifyElementType(pfetConstExpr);
   try
-    // 从 FormatExpression 复制而来，为了区分来源
-    FormatSimpleExpression(PreSpaceCount, PreSpaceCount);
+    // 常量表达式允许保持内部换行
+    OldCanKeepLineBreak := FNeedKeepLineBreak;
+    FNeedKeepLineBreak := True;
+    try
+      // 从 FormatExpression 复制而来，为了区分来源
+      FormatSimpleExpression(PreSpaceCount, PreSpaceCount);
+    finally
+      FNeedKeepLineBreak := OldCanKeepLineBreak;
+    end;
 
     while Scaner.Token in RelOpTokens + [tokHat, tokSLB, tokDot] do
     begin
@@ -1814,15 +1823,26 @@ end;
 { IfStmt -> IF Expression THEN Statement [ELSE Statement] }
 procedure TCnBasePascalFormatter.FormatIfStmt(PreSpaceCount: Byte; IgnorePreSpace: Boolean);
 var
-  OldKeepOneBlankLine, ElseAfterThen: Boolean;
+  OldKeepOneBlankLine, ElseAfterThen, OldCanKeepLineBreak: Boolean;
 begin
   if IgnorePreSpace then
     Match(tokKeywordIF)
   else
+  begin
     Match(tokKeywordIF, PreSpaceCount);
+    FCurrentTab := PreSpaceCount;
+  end;
 
-  { TODO: Apply more if stmt rule }
-  FormatExpression(0, PreSpaceCount);
+  OldCanKeepLineBreak := FNeedKeepLineBreak;
+  FNeedKeepLineBreak := True;
+
+  try
+    { TODO: Apply more if stmt rule }
+    FormatExpression(0, PreSpaceCount);
+  finally
+    FNeedKeepLineBreak := OldCanKeepLineBreak;
+  end;
+
   SpecifyElementType(pfetThen);
   try
     OldKeepOneBlankLine := Scaner.KeepOneBlankLine;
@@ -1832,8 +1852,8 @@ begin
   finally
     RestoreElementType;
   end;
-  CheckWriteBeginln; // 检查 if then begin 是否同行
 
+  CheckWriteBeginln; // 检查 if then begin 是否同行
   if Scaner.Token = tokSemicolon then
     FStructStmtEmptyEnd := True;
 
@@ -1849,6 +1869,7 @@ begin
     Match(tokKeywordElse, PreSpaceCount);
     if Scaner.Token = tokKeywordIf then // 处理 else if
     begin
+      FCurrentTab := PreSpaceCount;
       FormatIfStmt(PreSpaceCount, True);
       FormatStatement(Tab(PreSpaceCount));
     end
@@ -4494,6 +4515,7 @@ begin
     tokEQUAL:
       begin
         Match(Scaner.Token, 1); // 等号前空一格
+        FCurrentTab := PreSpaceCount; // 记录当前缩进供常量表达式内部保留换行处理
         FormatConstExpr(1); // 等号后只空一格
       end;
 

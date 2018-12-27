@@ -6,6 +6,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
   ClientHeight = 490
   ClientWidth = 451
   Font.Charset = ANSI_CHARSET
+  OldCreateOrder = True
   OnCloseQuery = FormCloseQuery
   OnShow = FormShow
   PixelsPerInch = 96
@@ -188,6 +189,14 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           Items.Strings = (
             'Treat as Comment'
             'Only Processing First Branch')
+        end
+        object chkKeepUserLineBreak: TCheckBox
+          Left = 264
+          Top = 192
+          Width = 129
+          Height = 17
+          Caption = 'Keep User Line Break'
+          TabOrder = 11
         end
       end
       object grpAsm: TGroupBox
