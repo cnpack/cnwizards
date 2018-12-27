@@ -28,7 +28,9 @@ unit CnGetThread;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 修改记录：2006.10.15
+* 修改记录：2018.12.17
+*               加入进程过滤功能 (by zjy@cnpack.org)
+*           2006.10.15
 *               加入读取 OutputDebugString 内容的功能
 *           2005.01.01
 *               创建单元，实现功能
@@ -42,14 +44,30 @@ uses
   CnViewCore, CnDebugIntf, CnMsgClasses;
 
 type
+  TProcessFilter = class
+  private
+    FWhiteList: TList;
+    FBlackList: TList;
+    FWhiteCache: string;
+    FBlackCache: string;
+    FChangeCountCache: Integer;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    function FilterProcessId(ProcId: Integer): Boolean;
+  end;
+
   TGetDebugThread = class(TThread)
   {* 读取 CnDebugger 内容的线程}
   private
     FPaused: Boolean;
+    FFilter: TProcessFilter;
   protected
     procedure AddADescToStore(var ADesc: TCnMsgDesc);
     procedure Execute; override;
   public
+    constructor Create(CreateSuspended: Boolean);
+    destructor Destroy; override;
     property Paused: Boolean read FPaused write FPaused;
   end;
 
@@ -67,6 +85,81 @@ uses
 const
   MAX_WAIT_COUNT = 10;
 
+{ TProcessFilter }
+
+constructor TProcessFilter.Create;
+begin
+  FWhiteList := TList.Create;
+  FBlackList := TList.Create;
+  FChangeCountCache := -1;
+end;
+
+destructor TProcessFilter.Destroy;
+begin
+  FWhiteList.Free;
+  FBlackList.Free;
+  inherited;
+end;
+
+function TProcessFilter.FilterProcessId(ProcId: Integer): Boolean;
+var
+  ProcName: string;
+
+  function ListToStr(Lines: string): string;
+  var
+    i: Integer;
+    AList: TStringList;
+    S: string;
+  begin
+    AList := TStringList.Create;
+    try
+      AList.CommaText := Lines;
+      if AList.Count > 0 then
+      begin
+        Result := '\';
+        for i := 0 to AList.Count - 1 do
+        begin
+          S := LowerCase(AList[i]);
+          if ExtractFileExt(S) = '' then
+            S := S + '.exe';
+          Result := Result + S + '\';
+        end;
+      end
+      else
+        Result := '';
+    finally
+      AList.Free;
+    end;
+  end;
+begin
+  if (CnViewerOptions <> nil) and (CnViewerOptions.ChangeCount <> FChangeCountCache) then
+  begin
+    FWhiteList.Clear;
+    FBlackList.Clear;
+    FWhiteCache := ListToStr(CnViewerOptions.WhiteList);
+    FBlackCache := ListToStr(CnViewerOptions.BlackList);
+    FChangeCountCache := CnViewerOptions.ChangeCount;
+  end;
+  if FWhiteList.IndexOf(Pointer(ProcId)) >= 0 then
+    Result := True
+  else if FBlackList.IndexOf(Pointer(ProcId)) >= 0 then
+    Result := False
+  else if (FWhiteCache <> '') or (FBlackCache <> '') then
+  begin
+    ProcName := '\' + LowerCase(ExtractFileName(GetProcNameFromProcessID(ProcId))) + '\';
+    if FWhiteCache <> '' then
+      Result := Pos(ProcName, FWhiteCache) > 0
+    else
+      Result := Pos(ProcName, FBlackCache) = 0;
+    if Result then
+      FWhiteList.Add(Pointer(ProcId))
+    else
+      FBlackList.Add(Pointer(ProcId));
+  end
+  else
+    Result := True;
+end;
+
 { GetDebug }
 
 procedure TGetDebugThread.AddADescToStore(var ADesc: TCnMsgDesc);
@@ -77,6 +170,9 @@ var
   AMsg: array [0..CnMaxMsgLength] of Char;
   Size, SplitterIdx: Integer;
 begin
+  if not FFilter.FilterProcessId(ADesc.Annex.ProcessId) then
+    Exit;
+  
   if ADesc.Annex.MsgType in [Ord(cmtWatch), Ord(cmtClearWatch)] then
   begin
     FillChar(AMsg, SizeOf(AMsg), 0);
@@ -137,6 +233,18 @@ begin
   end;
 end;
 
+constructor TGetDebugThread.Create(CreateSuspended: Boolean);
+begin
+  FFilter := TProcessFilter.Create;
+  inherited Create(CreateSuspended);
+end;
+
+destructor TGetDebugThread.Destroy;
+begin
+  FFilter.Free;
+  inherited;
+end;
+
 procedure TGetDebugThread.Execute;
 var
   Len, RestLen, QueueSize: Integer;
@@ -144,6 +252,7 @@ var
   ADesc: TCnMsgDesc;
   Front, Tail: Integer;
   Res: DWORD;
+  Filter: TProcessFilter;
   QueueAlreadyEmpty: Boolean;
 
   procedure CheckExit;

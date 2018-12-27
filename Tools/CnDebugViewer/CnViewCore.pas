@@ -97,12 +97,17 @@ type
     FLocalSession: Boolean;
     FDisplayFont: TFont;
     FDisplayFontStr: string;
+    FWhiteList: string;
+    FBlackList: string;
+    FChangeCount: Integer;
     procedure SetTop(const Value: Integer);
     procedure SetLeft(const Value: Integer);
     procedure SetWidth(const Value: Integer);
     procedure SetHeight(const Value: Integer);
     procedure SetDisplayFontStr(const Value: string);
     procedure SetDisplayFont(const Value: TFont);
+    procedure SetBlackList(const Value: string);
+    procedure SetWhiteList(const Value: string);
   public
     constructor Create;
     destructor Destroy; override;
@@ -111,6 +116,7 @@ type
 
     property DisplayFont: TFont read FDisplayFont write SetDisplayFont;
     {* 显示的字体，默认为 nil 也即使用系统字体}
+    property ChangeCount: Integer read FChangeCount write FChangeCount;
   published
     property IgnoreODString: Boolean read FIgnoreODString write FIgnoreODString;
     property EnableFilter: Boolean read FEnableFilter write FEnableFilter;
@@ -155,6 +161,11 @@ type
     {* 是否使用本地模式}
     property DisplayFontStr: string read FDisplayFontStr write SetDisplayFontStr;
     {* 代表字体的字符串，用于存储}
+
+    property WhiteList: string read FWhiteList write SetWhiteList;
+    {* 进程白名单}
+    property BlackList: string read FBlackList write SetBlackList;
+    {* 进程黑名单}
   end;
 
 var
@@ -734,6 +745,11 @@ begin
   FLeft := Value;
 end;
 
+procedure TCnViewerOptions.SetWhiteList(const Value: string);
+begin
+  FWhiteList := Value;
+end;
+
 procedure TCnViewerOptions.SetWidth(const Value: Integer);
 begin
   if (Value > 0) and (Value <> FWidth) then
@@ -762,6 +778,11 @@ begin
     FontNeeded;
     StringToFont(Value, FDisplayFont);
   end;
+end;
+
+procedure TCnViewerOptions.SetBlackList(const Value: string);
+begin
+  FBlackList := Value;
 end;
 
 procedure TCnViewerOptions.SetDisplayFont(const Value: TFont);

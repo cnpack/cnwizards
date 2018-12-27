@@ -136,6 +136,9 @@ TCnSenderFilterFrm.grpSender.Caption=發送端過濾條件(&S)
 TCnSenderFilterFrm.lblLevel.Caption=&Level <=
 TCnSenderFilterFrm.lblTag.Caption=&Tag =
 TCnSenderFilterFrm.lblTypes.Caption=允許輸出的資訊類型(&M)：
+TCnViewerOptionsFrm.grp1.Caption=進程過濾清單
+TCnViewerOptionsFrm.lbl1.Caption=白名單:
+TCnViewerOptionsFrm.lbl2.Caption=黑名單:
 TCnWatchForm.lvWatch.Columns.Item0.Caption=變量名
 TCnWatchForm.lvWatch.Columns.Item1.Caption=值
 SCnNoneProcName=[未知程式]

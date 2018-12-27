@@ -63,6 +63,11 @@ type
     btnFont: TButton;
     lblRestart: TLabel;
     chkLocalSession: TCheckBox;
+    grp1: TGroupBox;
+    lbl1: TLabel;
+    mmoWhiteList: TMemo;
+    lbl2: TLabel;
+    mmoBlackList: TMemo;
     procedure chkShowTrayIconClick(Sender: TObject);
     procedure chkUDPMsgClick(Sender: TObject);
     procedure btnFontClick(Sender: TObject);
@@ -107,6 +112,8 @@ begin
     chkLocalSession.Checked := LocalSession;
     chkUDPMsg.Checked := EnableUDPMsg;
     seUDPPort.Value := UDPPort;
+    mmoWhiteList.Lines.CommaText := WhiteList;
+    mmoBlackList.Lines.CommaText := BlackList;
     SwitchTrayIconControls(ShowTrayIcon);
     chkUDPMsgClick(nil);
 
@@ -132,6 +139,9 @@ begin
     LocalSession := chkLocalSession.Checked;
     EnableUDPMsg := chkUDPMsg.Checked;
     UDPPort := seUDPPort.Value;
+    WhiteList := mmoWhiteList.Lines.CommaText;
+    BlackList := mmoBlackList.Lines.CommaText;
+    ChangeCount := ChangeCount + 1;
 
     if FFontChanged then
       DisplayFont := dlgFont.Font;

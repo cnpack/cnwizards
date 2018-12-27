@@ -3,8 +3,8 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
   Top = 170
   BorderStyle = bsDialog
   Caption = 'General Settings'
-  ClientHeight = 409
-  ClientWidth = 251
+  ClientHeight = 405
+  ClientWidth = 512
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -16,20 +16,20 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
   PixelsPerInch = 96
   TextHeight = 13
   object btnOK: TButton
-    Left = 86
-    Top = 374
+    Left = 349
+    Top = 370
     Width = 75
-    Height = 21
+    Height = 25
     Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 2
   end
   object btnCancel: TButton
-    Left = 166
-    Top = 374
+    Left = 429
+    Top = 370
     Width = 75
-    Height = 21
+    Height = 25
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
@@ -176,6 +176,44 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
       Caption = '&Font'
       TabOrder = 6
       OnClick = btnFontClick
+    end
+  end
+  object grp1: TGroupBox
+    Left = 247
+    Top = 8
+    Width = 257
+    Height = 355
+    Caption = 'Process Filter List'
+    TabOrder = 4
+    object lbl1: TLabel
+      Left = 16
+      Top = 26
+      Width = 51
+      Height = 13
+      Caption = 'White List:'
+    end
+    object lbl2: TLabel
+      Left = 16
+      Top = 185
+      Width = 47
+      Height = 13
+      Caption = 'Black List:'
+    end
+    object mmoWhiteList: TMemo
+      Left = 16
+      Top = 45
+      Width = 225
+      Height = 134
+      ScrollBars = ssBoth
+      TabOrder = 0
+    end
+    object mmoBlackList: TMemo
+      Left = 16
+      Top = 204
+      Width = 225
+      Height = 134
+      ScrollBars = ssBoth
+      TabOrder = 1
     end
   end
   object dlgFont: TFontDialog
