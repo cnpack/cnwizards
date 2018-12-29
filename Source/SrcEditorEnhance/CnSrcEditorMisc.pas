@@ -808,16 +808,18 @@ begin
 
   if FHideOrigToolbar then
   begin
-{$IFDEF DELPHI103_RIO_UP}
-    Parent.Visible := False;
-  {$IFDEF DEBUG}
-    CnDebugger.LogMsg('CheckAndHideOrigToolbar Hide Toolbar Panel.');
-  {$ENDIF}
-{$ELSE}
     for I := 0 to Parent.ControlCount - 1 do
     begin
       if Parent.Controls[I].ClassNameIs('TEditorNavigationToolbar') then
       begin
+{$IFDEF DELPHI103_RIO_UP}
+        // 10.3 里 IDE 选项不显示导航工具栏时，找到的 Panel 可能不是我们所需的，
+        // 必须内部有 NativagtorToolbar 才是。
+        Parent.Visible := False;
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('CheckAndHideOrigToolbar Hide Toolbar Panel.');
+{$ENDIF}
+{$ELSE}
         if Parent.Controls[I].Height > 0 then
         begin
           (Parent.Controls[I] as TToolbar).AutoSize := False;
@@ -827,10 +829,10 @@ begin
           CnDebugger.LogMsg('CheckAndHideOrigToolbar Hide Toolbar.');
 {$ENDIF}
         end;
+{$ENDIF}
         Exit;
       end;
     end;
-{$ENDIF}
   end
   else
   begin
