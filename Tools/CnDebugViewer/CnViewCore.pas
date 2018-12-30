@@ -100,6 +100,7 @@ type
     FWhiteList: string;
     FBlackList: string;
     FChangeCount: Integer;
+    FUseBlackList: Boolean;
     procedure SetTop(const Value: Integer);
     procedure SetLeft(const Value: Integer);
     procedure SetWidth(const Value: Integer);
@@ -162,6 +163,8 @@ type
     property DisplayFontStr: string read FDisplayFontStr write SetDisplayFontStr;
     {* 代表字体的字符串，用于存储}
 
+    property UseBlackList: Boolean read FUseBlackList write FUseBlackList;
+    {* 是显示黑名单以外的所有进程（True），还是只显示白名单内的进程（False）}
     property WhiteList: string read FWhiteList write SetWhiteList;
     {* 进程白名单}
     property BlackList: string read FBlackList write SetBlackList;

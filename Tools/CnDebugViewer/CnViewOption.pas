@@ -64,10 +64,10 @@ type
     lblRestart: TLabel;
     chkLocalSession: TCheckBox;
     grp1: TGroupBox;
-    lbl1: TLabel;
     mmoWhiteList: TMemo;
-    lbl2: TLabel;
     mmoBlackList: TMemo;
+    rbWhitList: TRadioButton;
+    rbBlackList: TRadioButton;
     procedure chkShowTrayIconClick(Sender: TObject);
     procedure chkUDPMsgClick(Sender: TObject);
     procedure btnFontClick(Sender: TObject);
@@ -77,7 +77,6 @@ type
   protected
     procedure DoCreate; override;    
   public
-    { Public declarations }
     procedure LoadFromOptions;
     procedure SaveToOptions;
 
@@ -112,6 +111,7 @@ begin
     chkLocalSession.Checked := LocalSession;
     chkUDPMsg.Checked := EnableUDPMsg;
     seUDPPort.Value := UDPPort;
+    rbBlackList.Checked := UseBlackList;
     mmoWhiteList.Lines.CommaText := WhiteList;
     mmoBlackList.Lines.CommaText := BlackList;
     SwitchTrayIconControls(ShowTrayIcon);
@@ -139,6 +139,7 @@ begin
     LocalSession := chkLocalSession.Checked;
     EnableUDPMsg := chkUDPMsg.Checked;
     UDPPort := seUDPPort.Value;
+    UseBlackList := rbBlackList.Checked;
     WhiteList := mmoWhiteList.Lines.CommaText;
     BlackList := mmoBlackList.Lines.CommaText;
     ChangeCount := ChangeCount + 1;
@@ -167,9 +168,7 @@ end;
 procedure TCnViewerOptionsFrm.btnFontClick(Sender: TObject);
 begin
   if dlgFont.Execute then
-  begin
     FFontChanged := True;
-  end;
 end;
 
 end.

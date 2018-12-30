@@ -4,7 +4,7 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
   BorderStyle = bsDialog
   Caption = 'General Settings'
   ClientHeight = 405
-  ClientWidth = 512
+  ClientWidth = 520
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -16,7 +16,7 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
   PixelsPerInch = 96
   TextHeight = 13
   object btnOK: TButton
-    Left = 349
+    Left = 353
     Top = 370
     Width = 75
     Height = 25
@@ -26,7 +26,7 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
     TabOrder = 2
   end
   object btnCancel: TButton
-    Left = 429
+    Left = 433
     Top = 370
     Width = 75
     Height = 25
@@ -138,6 +138,7 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
       Width = 91
       Height = 19
       HotKey = 0
+      InvalidKeys = [hcNone, hcShift]
       Modifiers = []
       TabOrder = 0
     end
@@ -179,41 +180,45 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
     end
   end
   object grp1: TGroupBox
-    Left = 247
+    Left = 252
     Top = 8
-    Width = 257
+    Width = 256
     Height = 355
-    Caption = 'Process Filter List'
+    Caption = 'Process Fi&lter Settings'
     TabOrder = 4
-    object lbl1: TLabel
-      Left = 16
-      Top = 26
-      Width = 51
-      Height = 13
-      Caption = 'White List:'
-    end
-    object lbl2: TLabel
-      Left = 16
-      Top = 185
-      Width = 47
-      Height = 13
-      Caption = 'Black List:'
-    end
     object mmoWhiteList: TMemo
-      Left = 16
-      Top = 45
-      Width = 225
-      Height = 134
+      Left = 32
+      Top = 216
+      Width = 209
+      Height = 122
       ScrollBars = ssBoth
       TabOrder = 0
     end
     object mmoBlackList: TMemo
-      Left = 16
-      Top = 204
-      Width = 225
-      Height = 134
+      Left = 32
+      Top = 52
+      Width = 209
+      Height = 122
       ScrollBars = ssBoth
       TabOrder = 1
+    end
+    object rbWhitList: TRadioButton
+      Left = 16
+      Top = 186
+      Width = 233
+      Height = 17
+      Caption = 'Only Show Processes in White List:'
+      TabOrder = 2
+    end
+    object rbBlackList: TRadioButton
+      Left = 16
+      Top = 24
+      Width = 233
+      Height = 17
+      Caption = 'Show All Processes Except in Black List:'
+      Checked = True
+      TabOrder = 3
+      TabStop = True
     end
   end
   object dlgFont: TFontDialog
@@ -222,6 +227,8 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
     Font.Height = -11
     Font.Name = 'MS Sans Serif'
     Font.Style = []
+    MinFontSize = 0
+    MaxFontSize = 0
     Left = 112
     Top = 96
   end

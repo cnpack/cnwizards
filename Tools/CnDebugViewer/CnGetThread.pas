@@ -140,24 +140,30 @@ begin
     FBlackCache := ListToStr(CnViewerOptions.BlackList);
     FChangeCountCache := CnViewerOptions.ChangeCount;
   end;
-  if FWhiteList.IndexOf(Pointer(ProcId)) >= 0 then
-    Result := True
-  else if FBlackList.IndexOf(Pointer(ProcId)) >= 0 then
-    Result := False
-  else if (FWhiteCache <> '') or (FBlackCache <> '') then
+
+  if CnViewOptions.UseBlackList then // 显示黑名单以外的所有进程
   begin
-    ProcName := '\' + LowerCase(ExtractFileName(GetProcNameFromProcessID(ProcId))) + '\';
-    if FWhiteCache <> '' then
-      Result := Pos(ProcName, FWhiteCache) > 0
-    else
+    if FBlackList.IndexOf(Pointer(ProcId)) >= 0 then
+      Result := True
+    else if FBlackCache <> '' then
+    begin
+      ProcName := '\' + LowerCase(ExtractFileName(GetProcNameFromProcessID(ProcId))) + '\';
       Result := Pos(ProcName, FBlackCache) = 0;
-    if Result then
-      FWhiteList.Add(Pointer(ProcId))
-    else
-      FBlackList.Add(Pointer(ProcId));
+      if Result then
+        FBlackList.Add(Pointer(ProcId));
+    end;
   end
-  else
-    Result := True;
+  else // 只显示白名单以内的进程
+  begin
+    if FWhiteList.IndexOf(Pointer(ProcId)) >= 0 then
+      Result := True
+    else if FWhiteCache <> '' then
+    begin
+      ProcName := '\' + LowerCase(ExtractFileName(GetProcNameFromProcessID(ProcId))) + '\';
+      Result := Pos(ProcName, FWhiteCache) > 0;
+      if Result then
+        FWhiteList.Add(Pointer(ProcId));
+  end;
 end;
 
 { GetDebug }
