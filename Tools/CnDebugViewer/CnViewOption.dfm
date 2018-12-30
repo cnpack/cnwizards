@@ -184,7 +184,7 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
     Top = 8
     Width = 256
     Height = 355
-    Caption = 'Process Fi&lter Settings'
+    Caption = 'Process Filte&r Settings'
     TabOrder = 4
     object mmoWhiteList: TMemo
       Left = 32
@@ -207,7 +207,7 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
       Top = 186
       Width = 233
       Height = 17
-      Caption = 'Only Show Processes in White List:'
+      Caption = 'Only Show Processes in &White List:'
       TabOrder = 2
     end
     object rbBlackList: TRadioButton
@@ -215,7 +215,7 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
       Top = 24
       Width = 233
       Height = 17
-      Caption = 'Show All Processes Except in Black List:'
+      Caption = 'Show All Processes Except in &Black List:'
       Checked = True
       TabOrder = 3
       TabStop = True
