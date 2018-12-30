@@ -141,7 +141,7 @@ begin
     FChangeCountCache := CnViewerOptions.ChangeCount;
   end;
 
-  if CnViewOptions.UseBlackList then // 显示黑名单以外的所有进程
+  if CnViewerOptions.UseBlackList then // 显示黑名单以外的所有进程
   begin
     if FBlackList.IndexOf(Pointer(ProcId)) >= 0 then
       Result := True
@@ -163,6 +163,7 @@ begin
       Result := Pos(ProcName, FWhiteCache) > 0;
       if Result then
         FWhiteList.Add(Pointer(ProcId));
+    end;
   end;
 end;
 
