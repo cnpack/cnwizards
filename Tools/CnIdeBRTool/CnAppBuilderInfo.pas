@@ -896,50 +896,56 @@ end;
 
 function TAppBuilderInfo.GetAbiOptionFile(ao: TAbiOption): string;
 begin
-  case m_AbiType of
-    atBCB5, atBCB6:
-      case ao of
-        aoCodeTemp: Result := 'bcb.dci'; // 代码模板
-        aoObjRep: Result := 'bcb.dro';   // 对象库
-        aoRegInfo: Result := '';     // 注册表信息
-        aoMenuTemp: Result := 'bcb.dmt'; // 菜单模板
-      end;
-    atDelphi5, atDelphi6, atDelphi7, atDelphi8:
-      case ao of
-        aoCodeTemp: Result := 'delphi32.dci'; // 代码模板
-        aoObjRep: Result := 'delphi32.dro';   // 对象库
-        aoRegInfo: Result := '';        // 注册表信息
-        aoMenuTemp: Result := 'delphi32.dmt'; // 菜单模板
-      end;
-    atBDS2005, atBDS2006, atDelphi2007, atDelphi2009:
-      case ao of
-        aoCodeTemp: Result := 'bds.dci'; // 代码模板
-        aoObjRep: Result := 'BorlandStudioRepository.xml';   // 对象库
-        aoRegInfo: Result := '';        // 注册表信息
-        aoMenuTemp: Result := 'bds.dmt'; // 菜单模板
-      end;
-    atDelphi2010..atDelphi102T:
-      case ao of
-        aoCodeTemp:
-          begin
-            if m_AbiType > atDelphi2010 then
-              Result := 'CodeSnippets.xml'
-            else
-              Result := 'bds.dci'; // 代码模板
-          end;
-        aoObjRep:
-          begin
-            if m_AbiType > atDelphiXE7 then
-              Result := 'Repository.xml'   // 对象库
-            else
-              Result := 'RADStudioRepository.xml';
-          end;
-        aoRegInfo: Result := '';        // 注册表信息
-        aoMenuTemp: Result := 'bds.dmt'; // 菜单模板
-      end;
-    else
-      Result := '';
-  end;
+  if m_AbiType in [atBCB5, atBCB6] then
+  begin
+    case ao of
+      aoCodeTemp: Result := 'bcb.dci'; // 代码模板
+      aoObjRep: Result := 'bcb.dro';   // 对象库
+      aoRegInfo: Result := '';     // 注册表信息
+      aoMenuTemp: Result := 'bcb.dmt'; // 菜单模板
+    end;
+  end
+  else if m_AbiType in [atDelphi5, atDelphi6, atDelphi7, atDelphi8] then
+  begin
+    case ao of
+      aoCodeTemp: Result := 'delphi32.dci'; // 代码模板
+      aoObjRep: Result := 'delphi32.dro';   // 对象库
+      aoRegInfo: Result := '';        // 注册表信息
+      aoMenuTemp: Result := 'delphi32.dmt'; // 菜单模板
+    end;
+  end
+  else if m_AbiType in [atBDS2005, atBDS2006, atDelphi2007, atDelphi2009] then
+  begin
+    case ao of
+      aoCodeTemp: Result := 'bds.dci'; // 代码模板
+      aoObjRep: Result := 'BorlandStudioRepository.xml';   // 对象库
+      aoRegInfo: Result := '';        // 注册表信息
+      aoMenuTemp: Result := 'bds.dmt'; // 菜单模板
+    end;
+  end
+  else if m_AbiType >= atDelphi2010 then
+  begin
+    case ao of
+      aoCodeTemp:
+        begin
+          if m_AbiType > atDelphi2010 then
+            Result := 'CodeSnippets.xml'
+          else
+            Result := 'bds.dci'; // 代码模板
+        end;
+      aoObjRep:
+        begin
+          if m_AbiType > atDelphiXE7 then
+            Result := 'Repository.xml'   // 对象库
+          else
+            Result := 'RADStudioRepository.xml';
+        end;
+      aoRegInfo: Result := '';        // 注册表信息
+      aoMenuTemp: Result := 'bds.dmt'; // 菜单模板
+    end;
+  end
+  else
+    Result := '';
 end;
 
 // 输出日志

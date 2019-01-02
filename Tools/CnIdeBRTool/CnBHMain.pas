@@ -306,7 +306,7 @@ begin
   begin
     with lbxBackupOptions do
     begin
-      if Not MyValidLbxItemChecked(lbxBackupOptions) then
+      if not MyValidLbxItemChecked(lbxBackupOptions) then
       begin
         ErrorDlg(g_strErrorSelectBackup, SCnErrorCaption);
         SetFocus;
@@ -520,7 +520,7 @@ begin
   InfoDlg(SCnIDEAbout, SCnAboutCaption);
 end;
 
-// 验证CheckListBox中是否有选择Item
+// 验证 CheckListBox 中是否有选择 Item
 function TCnIdeBRMainForm.MyValidLbxItemChecked(lbx: TCheckListBox): boolean;
 var
   i: integer;
@@ -689,7 +689,7 @@ var
   ao: TAbiOptions;
   i: integer;
 begin
-  if not FileExists(strBakFile) then exit;
+  if not FileExists(strBakFile) then Exit;
 
   edtRestoreFile.Text := strBakFile;
   mmoBakFileInfo.Lines.Clear;
