@@ -728,6 +728,7 @@ begin
   FEnableUDPMsg := False;
   FUDPPort := 9099;
   FLocalSession := True;
+  FUseBlackList := True;
 end;
 
 destructor TCnViewerOptions.Destroy;

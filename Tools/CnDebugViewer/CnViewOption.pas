@@ -66,7 +66,7 @@ type
     grp1: TGroupBox;
     mmoWhiteList: TMemo;
     mmoBlackList: TMemo;
-    rbWhitList: TRadioButton;
+    rbWhiteList: TRadioButton;
     rbBlackList: TRadioButton;
     procedure chkShowTrayIconClick(Sender: TObject);
     procedure chkUDPMsgClick(Sender: TObject);
@@ -112,6 +112,7 @@ begin
     chkUDPMsg.Checked := EnableUDPMsg;
     seUDPPort.Value := UDPPort;
     rbBlackList.Checked := UseBlackList;
+    rbWhiteList.Checked := not UseBlackList;
     mmoWhiteList.Lines.CommaText := WhiteList;
     mmoBlackList.Lines.CommaText := BlackList;
     SwitchTrayIconControls(ShowTrayIcon);

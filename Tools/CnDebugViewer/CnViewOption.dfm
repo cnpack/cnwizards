@@ -138,7 +138,6 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
       Width = 91
       Height = 19
       HotKey = 0
-      InvalidKeys = [hcNone, hcShift]
       Modifiers = []
       TabOrder = 0
     end
@@ -202,7 +201,7 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
       ScrollBars = ssBoth
       TabOrder = 1
     end
-    object rbWhitList: TRadioButton
+    object rbWhiteList: TRadioButton
       Left = 16
       Top = 186
       Width = 233
@@ -227,8 +226,6 @@ object CnViewerOptionsFrm: TCnViewerOptionsFrm
     Font.Height = -11
     Font.Name = 'MS Sans Serif'
     Font.Style = []
-    MinFontSize = 0
-    MaxFontSize = 0
     Left = 112
     Top = 96
   end
