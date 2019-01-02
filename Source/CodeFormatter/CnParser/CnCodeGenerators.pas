@@ -641,10 +641,8 @@ begin
 
   // 外部保留换行时，行头如果是空格缩进，本次不写多余的缩进（暂且只忽略空格为 1 的情况）
   if FKeepLineBreak and FKeepLineBreakIndentWritten and (BeforeSpaceCount = 1) then
-  begin
     BeforeSpaceCount := 0;
-    FKeepLineBreakIndentWritten := False;
-  end;
+  FKeepLineBreakIndentWritten := False;
 
   Str := Format('%s%s%s', [StringOfChar(' ', BeforeSpaceCount), Text,
     StringOfChar(' ', AfterSpaceCount)]);
