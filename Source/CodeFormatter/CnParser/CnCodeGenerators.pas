@@ -122,6 +122,8 @@ type
     {* 把最后一行的行尾空格删掉一个，避免因为已经输出了带空格的内容，导致行尾注释后移的问题}
     procedure TrimLastEmptyLine;
     {* 如果最后一行是全空格，则清除此行的所有空格，用于保留换行的场合}
+    function IsLastLineEmpty: Boolean;
+    {* 最后一行是否就一个回车}
 
     procedure LockOutput;
     procedure UnLockOutput;
@@ -215,11 +217,19 @@ begin
     Len := Length(S);
     if Len > 0 then
       for I := 1 to Len do
-        if S[Len] <> ' ' then
+        if S[I] <> ' ' then
           Exit;
 
     FCode[FCode.Count - 1] := '';
   end;
+end;
+
+function TCnCodeGenerator.IsLastLineEmpty: Boolean;
+begin
+  if FCode.Count > 0 then
+    Result := FCode[FCode.Count - 1] = ''
+  else
+    Result := False
 end;
 
 procedure TCnCodeGenerator.CheckAndWriteOneEmptyLine;
@@ -828,7 +838,7 @@ begin
     FJustWrittenCommentEndLn := False;
 
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('GodeGen: String Wrote from %d %d to %d %d: %s', [FPrevRow, FPrevColumn,
+  CnDebugger.LogFmt('GodeGen: String Wrote from %5.5d %5.5d to %5.5d %5.5d: %s', [FPrevRow, FPrevColumn,
     GetCurrRow, GetCurrColumn, Str]);
 {$ENDIF}
 

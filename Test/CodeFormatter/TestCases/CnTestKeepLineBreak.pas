@@ -52,7 +52,22 @@ if (A = 0) and (B = 0)
 and (C=0)and (D=0) and
 (E=0) and(F=0)then
 begin end;
+
+if Item.Crypted = cvCrypt then
+    Value := 0 else if Item.Crypted= cvCompressAndCrypt then
+  begin  end;
 end;
 
+function TValidator.Number: TRule;
+begin
+  Result.Func :=
+procedure(Rule: TRule)
+    begin      if Field.AsString <> '' then
+      begin
+        if not True then    begin
+          Error := TError.Create('Error.', Field.AsString);        end
+      end;
+    end;
+end;
 end.
 

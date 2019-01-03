@@ -92,7 +92,8 @@ type
     FOutputLineMarks: TList;        // 源与结果的行映射关系中的结果行
     FNeedKeepLineBreak: Boolean;    // 控制当前区域是否保留换行
     FCurrentTab: Integer;           // 保留换行时记录当前语句应该的缩进
-    FOldNeedKeep: Boolean;          // 旧的是否保留换行的标记
+    FLineBreakKeepStack: TStack;    // 保留换行标记的栈
+    FLineBreakTabStack: TStack;     // 保留换行标记对应的当前缩进的栈
     function ErrorTokenString: string;
     procedure CodeGenAfterWrite(Sender: TObject; IsWriteBlank: Boolean;
       IsWriteln: Boolean; PrefixSpaces: Integer);
@@ -146,6 +147,8 @@ type
     {* 返回指定数目空格的字符串 }
     procedure Writeln;
     {* 格式结果换行 }
+    procedure EnsureWriteln;
+    {* 格式结果保证换且只换一行}
     procedure WriteLine;
     {* 格式结果加一空行 }
     procedure EnsureOneEmptyLine;
@@ -502,11 +505,15 @@ begin
   FScaner := TScaner.Create(AStream, FCodeGen, ACompDirectiveMode);
 
   FOldElementTypes := TCnElementStack.Create;
+  FLineBreakKeepStack := TStack.Create;
+  FLineBreakTabStack := TStack.Create;
   FScaner.NextToken;
 end;
 
 destructor TCnAbstractCodeFormatter.Destroy;
 begin
+  FLineBreakTabStack.Free;
+  FLineBreakKeepStack.Free;
   FOldElementTypes.Free;
   FScaner.Free;
   FCodeGen.Free;
@@ -747,6 +754,12 @@ begin
   FLastToken := tokBlank; // prevent 'Symbol'#13#10#13#10' Symbol'
 end;
 
+procedure TCnAbstractCodeFormatter.EnsureWriteln;
+begin
+  if not FCodeGen.IsLastLineEmpty then
+    FCodeGen.Writeln;
+end;
+
 procedure TCnAbstractCodeFormatter.Writeln;
 begin
   if CanKeepLineBreak then
@@ -937,19 +950,17 @@ end;
 
 { ConstExpr -> <constant-expression> }
 procedure TCnBasePascalFormatter.FormatConstExpr(PreSpaceCount: Byte);
-var
-  OldCanKeepLineBreak: Boolean;
 begin
   SpecifyElementType(pfetConstExpr);
   try
     // 常量表达式允许保持内部换行
-    OldCanKeepLineBreak := FNeedKeepLineBreak;
+    FLineBreakKeepStack.Push(Pointer(FNeedKeepLineBreak));
     FNeedKeepLineBreak := True;
     try
       // 从 FormatExpression 复制而来，为了区分来源
       FormatSimpleExpression(PreSpaceCount, PreSpaceCount);
     finally
-      FNeedKeepLineBreak := OldCanKeepLineBreak;
+      FNeedKeepLineBreak := Boolean(FLineBreakKeepStack.Pop);
     end;
 
     while Scaner.Token in RelOpTokens + [tokHat, tokSLB, tokDot] do
@@ -1492,12 +1503,23 @@ begin
   end
   else if Scaner.Token in [tokKeywordFunction, tokKeywordProcedure] then
   begin
-    // Anonymous function/procedure. 匿名函数的缩进使用 IndentForAnonymous 参数
-    Writeln;
-    if Scaner.Token = tokKeywordProcedure then
-      FormatProcedureDecl(Tab(IndentForAnonymous), True)
-    else
-      FormatFunctionDecl(Tab(IndentForAnonymous), True);
+    if CnPascalCodeForRule.KeepUserLineBreak then
+      FCodeGen.TrimLastEmptyLine;  // 保留换行时，前面的内容可能多输出了空格，要删除
+
+    EnsureWriteln; // 保留换行时前面可能有回车，不能直接 Writeln 以避免出现俩回车
+
+    // 匿名函数内部改为不保留换行
+    FLineBreakKeepStack.Push(Pointer(FNeedKeepLineBreak));
+    FNeedKeepLineBreak := False;
+    try
+      // Anonymous function/procedure. 匿名函数的缩进使用 IndentForAnonymous 参数
+      if Scaner.Token = tokKeywordProcedure then
+        FormatProcedureDecl(Tab(IndentForAnonymous), True)
+      else
+        FormatFunctionDecl(Tab(IndentForAnonymous), True);
+    finally
+      FNeedKeepLineBreak := Boolean(FLineBreakKeepStack.Pop);   // 恢复不保留换行的选项
+    end;
   end
   else
     FormatTerm(PreSpaceCount, IndentForAnonymous);
@@ -1823,7 +1845,7 @@ end;
 { IfStmt -> IF Expression THEN Statement [ELSE Statement] }
 procedure TCnBasePascalFormatter.FormatIfStmt(PreSpaceCount: Byte; IgnorePreSpace: Boolean);
 var
-  OldKeepOneBlankLine, ElseAfterThen, OldCanKeepLineBreak: Boolean;
+  OldKeepOneBlankLine, ElseAfterThen: Boolean;
 begin
   if IgnorePreSpace then
     Match(tokKeywordIF)
@@ -1833,14 +1855,14 @@ begin
     FCurrentTab := PreSpaceCount;
   end;
 
-  OldCanKeepLineBreak := FNeedKeepLineBreak;
+  FLineBreakKeepStack.Push(Pointer(FNeedKeepLineBreak));
   FNeedKeepLineBreak := True;
 
   try
     { TODO: Apply more if stmt rule }
     FormatExpression(0, PreSpaceCount);
   finally
-    FNeedKeepLineBreak := OldCanKeepLineBreak;
+    FNeedKeepLineBreak := Boolean(FLineBreakKeepStack.Pop);
   end;
 
   SpecifyElementType(pfetThen);
@@ -1864,9 +1886,10 @@ begin
   begin
     if ElseAfterThen then // 如果 then 后紧跟 else，则 then 和 else 间空一行。
       EnsureOneEmptyLine
-    else if not CnPascalCodeForRule.KeepUserLineBreak then
-      Writeln;
-    // 如果保留换行，则 then 后的语句因为无分号，会多生成一个回车，此处不能再写回车
+    else
+      EnsureWriteln;
+    // 如果保留换行，则 then 后的语句因为无分号，可能会因为原始语句的 else 换行了从而多生成一个回车
+    // 此处不能直接 Writeln，得保证有且只有一个回车
 
     Match(tokKeywordElse, PreSpaceCount);
 
@@ -1929,7 +1952,6 @@ var
   Bookmark: TScannerBookmark;
   OldLastToken: TPascalToken;
   IsDesignator, OldInternalRaiseException: Boolean;
-  OldCanKeepLineBreak: Boolean;
 
   procedure FormatDesignatorAndOthers(PreSpaceCount: Byte);
   begin
@@ -1968,7 +1990,7 @@ var
     end;
   end;
 begin
-  OldCanKeepLineBreak := FNeedKeepLineBreak;
+  FLineBreakKeepStack.Push(Pointer(FNeedKeepLineBreak));
   FNeedKeepLineBreak := True;
   FCurrentTab := PreSpaceCount;
 
@@ -2078,7 +2100,7 @@ begin
       Error(CN_ERRCODE_PASCAL_INVALID_STATEMENT);
     end;
   finally
-    FNeedKeepLineBreak := OldCanKeepLineBreak;
+    FNeedKeepLineBreak := Boolean(FLineBreakKeepStack.Pop);
   end;
 
   // 单个语句结束后可能没有分号，导致保留换行选项时，没有分号的行末换行也会被写出，需要砍掉
@@ -6070,8 +6092,6 @@ begin
       FCodeGen.KeepLineBreakIndentWritten := True;
     end;
   end;
-
-  FOldNeedKeep := LineBreak;
 end;
 
 initialization
