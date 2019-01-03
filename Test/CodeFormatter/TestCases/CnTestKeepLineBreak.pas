@@ -60,14 +60,15 @@ end;
 
 function TValidator.Number: TRule;
 begin
-  Result.Func :=
+  Result.Func :=Done  (
 procedure(Rule: TRule)
     begin      if Field.AsString <> '' then
       begin
         if not True then    begin
           Error := TError.Create('Error.', Field.AsString);        end
       end;
-    end;
+    end, testme,1+3+5+
+6+84/5);
 end;
 end.
 

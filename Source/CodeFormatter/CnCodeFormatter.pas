@@ -93,7 +93,6 @@ type
     FNeedKeepLineBreak: Boolean;    // 控制当前区域是否保留换行
     FCurrentTab: Integer;           // 保留换行时记录当前语句应该的缩进
     FLineBreakKeepStack: TStack;    // 保留换行标记的栈
-    FLineBreakTabStack: TStack;     // 保留换行标记对应的当前缩进的栈
     function ErrorTokenString: string;
     procedure CodeGenAfterWrite(Sender: TObject; IsWriteBlank: Boolean;
       IsWriteln: Boolean; PrefixSpaces: Integer);
@@ -506,13 +505,11 @@ begin
 
   FOldElementTypes := TCnElementStack.Create;
   FLineBreakKeepStack := TStack.Create;
-  FLineBreakTabStack := TStack.Create;
   FScaner.NextToken;
 end;
 
 destructor TCnAbstractCodeFormatter.Destroy;
 begin
-  FLineBreakTabStack.Free;
   FLineBreakKeepStack.Free;
   FOldElementTypes.Free;
   FScaner.Free;
@@ -1495,6 +1492,8 @@ end;
 { SimpleExpression -> ['+' | '-' | '^'] Term [AddOp Term]... }
 procedure TCnBasePascalFormatter.FormatSimpleExpression(
   PreSpaceCount: Byte; IndentForAnonymous: Byte);
+var
+  OldTab: Integer;
 begin
   if Scaner.Token in [tokPlus, tokMinus, tokHat] then // ^H also support
   begin
@@ -1510,6 +1509,7 @@ begin
 
     // 匿名函数内部改为不保留换行
     FLineBreakKeepStack.Push(Pointer(FNeedKeepLineBreak));
+    OldTab := FCurrentTab;
     FNeedKeepLineBreak := False;
     try
       // Anonymous function/procedure. 匿名函数的缩进使用 IndentForAnonymous 参数
@@ -1519,6 +1519,7 @@ begin
         FormatFunctionDecl(Tab(IndentForAnonymous), True);
     finally
       FNeedKeepLineBreak := Boolean(FLineBreakKeepStack.Pop);   // 恢复不保留换行的选项
+      FCurrentTab := OldTab;
     end;
   end
   else

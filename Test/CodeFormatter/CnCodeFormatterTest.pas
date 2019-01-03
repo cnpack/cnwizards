@@ -357,6 +357,7 @@ var
   FCodeFor: TCnPascalCodeFormatter;
   FileStr: TFileStream;
 begin
+  FileStr := nil;
   for I := 0 to lvTestFiles.Items.Count - 1 do
   begin
     try
