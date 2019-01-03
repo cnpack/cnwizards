@@ -120,6 +120,8 @@ type
 
     procedure BackSpaceLastSpaces;
     {* 把最后一行的行尾空格删掉一个，避免因为已经输出了带空格的内容，导致行尾注释后移的问题}
+    procedure TrimLastEmptyLine;
+    {* 如果最后一行是全空格，则清除此行的所有空格，用于保留换行的场合}
 
     procedure LockOutput;
     procedure UnLockOutput;
@@ -199,6 +201,24 @@ begin
     Len := Length(S);
     if (Len > 0) and (S[Len] = ' ') then
       FCode[FCode.Count - 1] := TrimRight(S);
+  end;
+end;
+
+procedure TCnCodeGenerator.TrimLastEmptyLine;
+var
+  S: string;
+  I, Len: Integer;
+begin
+  if FCode.Count > 0 then
+  begin
+    S := FCode[FCode.Count - 1];
+    Len := Length(S);
+    if Len > 0 then
+      for I := 1 to Len do
+        if S[Len] <> ' ' then
+          Exit;
+
+    FCode[FCode.Count - 1] := '';
   end;
 end;
 

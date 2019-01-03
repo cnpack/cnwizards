@@ -1864,9 +1864,12 @@ begin
   begin
     if ElseAfterThen then // 如果 then 后紧跟 else，则 then 和 else 间空一行。
       EnsureOneEmptyLine
-    else
+    else if not CnPascalCodeForRule.KeepUserLineBreak then
       Writeln;
+    // 如果保留换行，则 then 后的语句因为无分号，会多生成一个回车，此处不能再写回车
+
     Match(tokKeywordElse, PreSpaceCount);
+
     if Scaner.Token = tokKeywordIf then // 处理 else if
     begin
       FCurrentTab := PreSpaceCount;
@@ -2077,6 +2080,10 @@ begin
   finally
     FNeedKeepLineBreak := OldCanKeepLineBreak;
   end;
+
+  // 单个语句结束后可能没有分号，导致保留换行选项时，没有分号的行末换行也会被写出，需要砍掉
+  if CnPascalCodeForRule.KeepUserLineBreak then
+    FCodeGen.TrimLastEmptyLine;
 end;
 
 procedure TCnBasePascalFormatter.FormatLabel(PreSpaceCount: Byte);
