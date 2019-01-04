@@ -835,7 +835,7 @@ begin
       and (Token in IdentTokens + [tokAtSign])) then
       WriteOneSpace // 泛型 property 后面加 read 时，需要用这种方式加空格分开，不是泛型时比如碰到普通大于号时则无须这样做
     else if (FLastToken in RightBracket + [tokHat]) and (Token in [tokKeywordThen, tokKeywordDo,
-      tokKeywordOf, tokKeywordTo, tokKeywordDownto]) then
+      tokKeywordOf, tokKeywordTo, tokKeywordDownto, tokKeywordAt]) then
       WriteOneSpace  // 强行分离右括号/指针符与关键字
     else if (Token in LeftBracket + [tokPlus, tokMinus, tokHat]) and
       ((FLastToken in NeedSpaceAfterKeywordTokens)
