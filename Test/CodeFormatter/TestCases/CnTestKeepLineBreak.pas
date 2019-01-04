@@ -70,5 +70,13 @@ procedure(Rule: TRule)
     end, testme,1+3+5+
 6+84/5);
 end;
+
+function FireDate(): string;
+begin
+  if True then
+  begin
+    c.AddRange(b)
+  end;
+end;
 end.
 

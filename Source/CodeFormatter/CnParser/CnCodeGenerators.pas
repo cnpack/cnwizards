@@ -216,11 +216,16 @@ begin
     S := FCode[FCode.Count - 1];
     Len := Length(S);
     if Len > 0 then
+    begin
       for I := 1 to Len do
         if S[I] <> ' ' then
           Exit;
 
-    FCode[FCode.Count - 1] := '';
+      FCode[FCode.Count - 1] := '';
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('GodeGen: TrimLastEmptyLine %d Spaces.', [Len]);
+{$ENDIF}
+    end;
   end;
 end;
 

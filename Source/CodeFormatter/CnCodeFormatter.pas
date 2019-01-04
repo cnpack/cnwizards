@@ -1766,7 +1766,10 @@ begin
           if Scaner.Token <> tokKeywordEnd then
           begin
             FormatStmtList(Tab(PreSpaceCount, False));
-            Writeln;
+            if CnPascalCodeForRule.KeepUserLineBreak then // 语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
+              EnsureWriteln
+            else
+              Writeln;
           end;
           Match(tokKeywordEnd, PreSpaceCount);
         end;

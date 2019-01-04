@@ -1633,7 +1633,8 @@ end;
 procedure TScaner.OnMoreBlankLinesWhenSkip;
 begin
   if FCodeGen <> nil then
-    FCodeGen.Writeln;
+    if not FCodeGen.KeepLineBreak then // 保留换行时，这里调整空行的机制不起作用
+      FCodeGen.Writeln;
 end;
 
 end.
