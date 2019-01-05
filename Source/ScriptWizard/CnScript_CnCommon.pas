@@ -242,7 +242,11 @@ begin
   CL.AddDelphiFunction('Procedure Delay( const uDelay : DWORD)');
   CL.AddDelphiFunction('Function GetLastErrorMsg( IncludeErrorCode : Boolean) : string');
   CL.AddDelphiFunction('Procedure ShowLastError');
+{$IFDEF UNICODE}
+  CL.AddDelphiFunction('Function GetHzPyW( const AHzStr : string) : string');
+{$ELSE}
   CL.AddDelphiFunction('Function GetHzPy( const AHzStr : string) : string');
+{$ENDIF}
   CL.AddDelphiFunction('Function GetSelText( edt : TCustomEdit) : string');
   CL.AddDelphiFunction('Function SoundCardExist : Boolean');
   CL.AddDelphiFunction('Function InheritsFromClassName( AObject : TObject; const AClass : string) : Boolean;');
@@ -481,7 +485,11 @@ begin
   S.RegisterDelphiFunction(@Delay, 'Delay', cdRegister);
   S.RegisterDelphiFunction(@GetLastErrorMsg, 'GetLastErrorMsg', cdRegister);
   S.RegisterDelphiFunction(@ShowLastError, 'ShowLastError', cdRegister);
+{$IFDEF UNICODE}
+  S.RegisterDelphiFunction(@GetHzPyW, 'GetHzPyW', cdRegister);
+{$ELSE}
   S.RegisterDelphiFunction(@GetHzPy, 'GetHzPy', cdRegister);
+{$ENDIF}
   S.RegisterDelphiFunction(@GetSelText, 'GetSelText', cdRegister);
   S.RegisterDelphiFunction(@SoundCardExist, 'SoundCardExist', cdRegister);
   S.RegisterDelphiFunction(@InheritsFromClassName_P, 'InheritsFromClassName', cdRegister);
