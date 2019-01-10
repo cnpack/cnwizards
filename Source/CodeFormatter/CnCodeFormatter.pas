@@ -1505,7 +1505,7 @@ begin
     if CnPascalCodeForRule.KeepUserLineBreak then
       FCodeGen.TrimLastEmptyLine;  // 保留换行时，前面的内容可能多输出了空格，要删除
 
-    EnsureWriteln; // 保留换行时前面可能有回车，不能直接 Writeln 以避免出现俩回车
+    EnsureWriteln; // 保留换行时，匿名函数前面可能有回车，不能直接 Writeln 以避免出现俩回车
 
     // 匿名函数内部改为不保留换行
     FLineBreakKeepStack.Push(Pointer(FNeedKeepLineBreak));
@@ -1706,7 +1706,8 @@ begin
     if Scaner.Token = tokSemicolon then
       Match(tokSemicolon);
 
-    if CnPascalCodeForRule.KeepUserLineBreak then // 语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
+    // else 之前的语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
+    if CnPascalCodeForRule.KeepUserLineBreak then
       EnsureWriteln
     else
       Writeln;
@@ -1735,7 +1736,8 @@ begin
 
   if HasElse then
   begin
-    if CnPascalCodeForRule.KeepUserLineBreak then // 语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
+    // end 之前的语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
+    if CnPascalCodeForRule.KeepUserLineBreak then
       EnsureWriteln
     else
       Writeln;
@@ -1775,7 +1777,8 @@ begin
           if Scaner.Token <> tokKeywordEnd then
           begin
             FormatStmtList(Tab(PreSpaceCount, False));
-            if CnPascalCodeForRule.KeepUserLineBreak then // 语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
+            // end 之前的语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
+            if CnPascalCodeForRule.KeepUserLineBreak then
               EnsureWriteln
             else
               Writeln;
@@ -2294,7 +2297,8 @@ begin
           end;
         end;
 
-        if CnPascalCodeForRule.KeepUserLineBreak then // 语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
+        // except 的 end 之前的语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
+        if CnPascalCodeForRule.KeepUserLineBreak then
           EnsureWriteln
         else
           Writeln;

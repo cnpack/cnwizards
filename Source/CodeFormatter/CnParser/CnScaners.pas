@@ -128,7 +128,7 @@ type
     procedure DoBlankLinesWhenSkip(BlankLines: Integer); virtual;
     {* SkipBlanks 时遇到连续换行时被调用}
     function ErrorTokenString: string;
-    procedure NewLine;
+    procedure NewLine(ImmediatelyDoBreak: Boolean = True);
 
 {$IFDEF UNICODE}
     procedure FixStreamBom;
@@ -787,11 +787,12 @@ begin
   end;
 end;
 
-procedure TAbstractScaner.NewLine;
+procedure TAbstractScaner.NewLine(ImmediatelyDoBreak: Boolean);
 begin
   Inc(FSourceLine);
   FNewSourceCol := 1;
-  DoLineBreak;
+  if ImmediatelyDoBreak then
+    DoLineBreak;
 end;
 
 function TAbstractScaner.TokenStringLength: Integer;
@@ -1103,7 +1104,7 @@ begin
             // ASM 模式下，换行作为语句结束符，不在注释内处理，所以这也不加
             if not FASMMode then
             begin
-              NewLine;
+              NewLine(False);  // 行注释结尾的换行暂不参与保留换行选项的处理
               Inc(FBlankLinesAfterComment);
               Inc(P);
               FOldSourceColPtr := P;
