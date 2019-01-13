@@ -6,7 +6,6 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
   ClientHeight = 490
   ClientWidth = 451
   Font.Charset = ANSI_CHARSET
-  OldCreateOrder = True
   OnCloseQuery = FormCloseQuery
   OnShow = FormShow
   PixelsPerInch = 96
@@ -197,6 +196,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           Height = 17
           Caption = 'Keep User Line Break'
           TabOrder = 11
+          Visible = False
         end
       end
       object grpAsm: TGroupBox
