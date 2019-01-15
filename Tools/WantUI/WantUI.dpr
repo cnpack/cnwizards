@@ -25,6 +25,7 @@ uses
   MainUnit in 'MainUnit.pas' {MainForm};
 
 {$R *.res}
+{$R ..\WindowsXP.RES}
 
 begin
   Application.Initialize;

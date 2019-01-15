@@ -27,6 +27,7 @@ uses
   CnWizLangID in '..\..\Source\MultiLang\CnWizLangID.pas';
 
 {$R *.RES}
+{$R ..\WindowsXP.RES}
 
 var
   Param : Boolean;

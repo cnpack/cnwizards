@@ -49,6 +49,7 @@ uses
   ConfigIO in 'ConfigIO.pas' {FrmConfigIO};
 
 {$R *.RES}
+{$R ..\WindowsXP.RES}
 
 begin
   Application.Initialize;

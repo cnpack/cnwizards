@@ -42,6 +42,7 @@ uses
   CnWizCfgUtils in '..\..\Source\Utils\CnWizCfgUtils.pas';
 
 {$R *.RES}
+{$R ..\WindowsXP.RES}
 
 begin
   if GetCWUseCustomUserDir then

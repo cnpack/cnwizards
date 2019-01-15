@@ -25,6 +25,7 @@ uses
   CnAsciiChart in '..\..\Source\EditorWizard\CnAsciiChart.pas' {CnAsciiForm};
 
 {$R *.RES}
+{$R ..\WindowsXP.RES}
 
 begin
   Application.Initialize;

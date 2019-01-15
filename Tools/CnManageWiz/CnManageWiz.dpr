@@ -25,6 +25,7 @@ uses
   CnManWizForm in 'CnManWizForm.pas' {CnManageWizardForm};
 
 {$R *.RES}
+{$R ..\WindowsXP.RES}
 
 begin
   Application.Initialize;

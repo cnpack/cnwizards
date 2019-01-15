@@ -37,6 +37,7 @@ uses
   CnDirListFrm in 'CnDirListFrm.pas' {CnDirListForm};
 
 {$R *.res}
+{$R ..\WindowsXP.RES}
 
 begin
   Application.Initialize;

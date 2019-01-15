@@ -5,6 +5,7 @@ uses
   EditLangUnit in 'EditLangUnit.pas' {EditLangForm};
 
 {$R *.RES}
+{$R ..\WindowsXP.RES}
 
 begin
   Application.Initialize;

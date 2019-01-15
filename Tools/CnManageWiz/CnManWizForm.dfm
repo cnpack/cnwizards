@@ -2,7 +2,7 @@ object CnManageWizardForm: TCnManageWizardForm
   Left = 191
   Top = 117
   Width = 660
-  Height = 485
+  Height = 481
   Caption = 'CnPack IDE External Wizard Management'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -20,14 +20,14 @@ object CnManageWizardForm: TCnManageWizardForm
   object bvl1: TBevel
     Left = 0
     Top = 73
-    Width = 652
+    Width = 644
     Height = 4
     Align = alTop
     Shape = bsTopLine
   end
   object bvlLine: TBevel
     Left = -10
-    Top = 405
+    Top = 395
     Width = 661
     Height = 10
     Anchors = [akLeft, akRight, akBottom]
@@ -36,7 +36,7 @@ object CnManageWizardForm: TCnManageWizardForm
   object pnl1: TPanel
     Left = 0
     Top = 0
-    Width = 652
+    Width = 644
     Height = 73
     Align = alTop
     BevelOuter = bvNone
@@ -172,7 +172,7 @@ object CnManageWizardForm: TCnManageWizardForm
   end
   object btnAbout: TButton
     Left = 16
-    Top = 426
+    Top = 412
     Width = 75
     Height = 21
     Anchors = [akLeft, akBottom]
@@ -182,7 +182,7 @@ object CnManageWizardForm: TCnManageWizardForm
   end
   object btnHelp: TButton
     Left = 104
-    Top = 426
+    Top = 412
     Width = 75
     Height = 21
     Action = actHelp
@@ -191,7 +191,7 @@ object CnManageWizardForm: TCnManageWizardForm
   end
   object btnClose: TButton
     Left = 562
-    Top = 426
+    Top = 412
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -205,7 +205,7 @@ object CnManageWizardForm: TCnManageWizardForm
     Left = 0
     Top = 78
     Width = 652
-    Height = 331
+    Height = 321
     Anchors = [akLeft, akTop, akRight, akBottom]
     BevelOuter = bvNone
     TabOrder = 1
@@ -213,7 +213,7 @@ object CnManageWizardForm: TCnManageWizardForm
       Left = 161
       Top = 0
       Width = 3
-      Height = 331
+      Height = 321
       Cursor = crHSplit
       AutoSnap = False
       MinSize = 70
@@ -222,7 +222,7 @@ object CnManageWizardForm: TCnManageWizardForm
       Left = 0
       Top = 0
       Width = 161
-      Height = 331
+      Height = 321
       Align = alLeft
       BevelOuter = bvNone
       TabOrder = 0
@@ -230,7 +230,7 @@ object CnManageWizardForm: TCnManageWizardForm
         Left = 16
         Top = 16
         Width = 145
-        Height = 302
+        Height = 292
         Anchors = [akLeft, akTop, akRight, akBottom]
         ItemHeight = 24
         Style = lbOwnerDrawFixed
@@ -243,7 +243,7 @@ object CnManageWizardForm: TCnManageWizardForm
       Left = 164
       Top = 0
       Width = 488
-      Height = 331
+      Height = 321
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 1
@@ -353,7 +353,7 @@ object CnManageWizardForm: TCnManageWizardForm
         Left = 16
         Top = 46
         Width = 456
-        Height = 273
+        Height = 263
         Anchors = [akLeft, akTop, akRight, akBottom]
         Checkboxes = True
         Columns = <
@@ -1857,7 +1857,7 @@ object CnManageWizardForm: TCnManageWizardForm
     TranslationMode = tmByComponents
     AutoTransOptions = [atApplication, atForms, atDataModules]
     Left = 256
-    Top = 424
+    Top = 414
   end
   object hfs1: TCnHashLangFileStorage
     StorageMode = smByDirectory
@@ -1865,6 +1865,6 @@ object CnManageWizardForm: TCnManageWizardForm
     ListLength = 1024
     IncSize = 2
     Left = 296
-    Top = 424
+    Top = 414
   end
 end

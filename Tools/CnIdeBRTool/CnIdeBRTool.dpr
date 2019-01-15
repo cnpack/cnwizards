@@ -43,6 +43,7 @@ uses
   CleanClass in 'CleanClass.pas';
 
 {$R *.res}
+{$R ..\WindowsXP.RES}
 
 begin
   Application.Initialize;

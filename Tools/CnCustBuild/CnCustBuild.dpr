@@ -25,6 +25,7 @@ uses
   CnBuildFrm in 'CnBuildFrm.pas' {CnCustBuildForm};
 
 {$R *.RES}
+{$R ..\WindowsXP.RES}
 
 begin
   Application.Initialize;
