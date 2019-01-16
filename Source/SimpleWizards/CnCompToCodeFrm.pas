@@ -44,7 +44,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, ComCtrls, ToolWin, ActnList, Clipbrd, ToolsAPI, Contnrs,
-  TypInfo, CnWizConsts, CnWizMultiLang, CnCommon,
+  TypInfo, Menus, CnWizConsts, CnWizMultiLang, CnCommon,
 {$IFDEF SUPPORT_FMX}
   CnFmxUtils,
 {$ENDIF}
@@ -109,7 +109,8 @@ type
     procedure ReadOneLine(CompStrs: TStrings);
     function GetReadEof(CompStrs: TStrings): Boolean;
     function GetCppValue(PropNames: TStrings; const PName, PValue: string): string;
-    procedure ParseCompText(AComp: TComponent; CompStrs: TStrings);
+    procedure ParseCompText(AComp: TComponent; CompStrs: TStrings;
+      const MenuStr: string = '');
     {* 处理一 object 字符串后带的内容}
     procedure UpdateStatusBar;
     procedure GetPropNames(AComp: TObject; PropNames: TStrings);
@@ -457,7 +458,8 @@ begin
   Result := (FCurLineNo >= CompStrs.Count);
 end;
 
-procedure TCnCompToCodeForm.ParseCompText(AComp: TComponent; CompStrs: TStrings);
+procedure TCnCompToCodeForm.ParseCompText(AComp: TComponent; CompStrs: TStrings;
+  const MenuStr: string);
 var
   S, Suffix, CreateStr, AName, AClass, AParent, AChild, AOwner: string;
   PName, PValue, PItemClass, PItemName, PItemValue: string;
@@ -581,6 +583,13 @@ begin
         else
           mmoImpl.Lines.Add(Spc(FIndentWidth) + AName + '->PageControl = ' + AParent + ';');
       end;
+    end
+    else if AComp is TMenuItem then // 处理菜单项的插入
+    begin
+      if FIsPas then
+        mmoImpl.Lines.Add(Spc(FIndentWidth) + MenuStr + '.Add(' + AName + ');')
+      else
+        mmoImpl.Lines.Add(Spc(FIndentWidth) + MenuStr + '->Add(' + AName + ');')
     end;
 
 {$IFDEF SUPPORT_FMX}
@@ -669,10 +678,58 @@ begin
               ParseCompText(AChildComp, CompStrs);
             end;
           end
+          else if (AComp is TMenu) or (AComp is TMenuItem) then
+          begin
+            // 处理菜单的 MenuItem
+{$IFDEF DEBUG}
+            CnDebugger.LogMsg('Meet MenuItems.');
+{$ENDIF}
+            // 寻找是否有 AChildComp 也就是子菜单项
+            AChildComp := nil;
+            if AComp is TMenu then
+            begin
+              for I := 0 to (AComp as TMenu).Items.Count - 1 do
+              begin
+                if (AComp as TMenu).Items[I].Name = AChild then
+                begin
+                  AChildComp := (AComp as TMenu).Items[I];
+                  Break;
+                end;
+              end;
+              if AChildComp <> nil then
+              begin
+                // 有子组件，FPropNames 会被更新成子组件的属性列表，因此设个标志
+                NeedRefreshPropNames := True;
+                FCurIsForm := False;
+                if FIsPas then
+                  ParseCompText(AChildComp, CompStrs, AComp.Name + '.Items')
+                else
+                  ParseCompText(AChildComp, CompStrs, AComp.Name + '->Items');
+              end;
+            end
+            else
+            begin
+              for I := 0 to (AComp as TMenuItem).Count - 1 do
+              begin
+                if (AComp as TMenuItem).Items[I].Name = AChild then
+                begin
+                  AChildComp := (AComp as TMenuItem).Items[I];
+                  Break;
+                end;
+              end;
+              if AChildComp <> nil then
+              begin
+                // 有子组件，FPropNames 会被更新成子组件的属性列表，因此设个标志
+                NeedRefreshPropNames := True;
+                FCurIsForm := False;
+                ParseCompText(AChildComp, CompStrs, AComp.Name);
+              end;
+            end;
+          end
           else
           begin
 {$IFDEF SUPPORT_FMX}
-            // 处理FMX的子组件
+            // 处理 FMX 的子组件
             if CnFmxIsInheritedFromControl(AComp) then
             begin
               AChildComp := nil;
@@ -692,7 +749,7 @@ begin
                 end;
               end;
 
-              if AChildComp <> nil then // 如果实际存在FMX的 Child 组件，则递归处理 Child 组件
+              if AChildComp <> nil then // 如果实际存在 FMX 的 Child 组件，则递归处理 Child 组件
               begin
                 // 有子组件，FPropNames 会被更新成子组件的属性列表，因此设个标志
                 NeedRefreshPropNames := True;
