@@ -101,22 +101,22 @@
       Misc\CnWizUpgradeFrm.dfm Misc\CnWizShareImages.dfm 
       MultiLang\CnWizMultiLang.dfm Config\CnWizConfigFrm.dfm 
       Config\CnWizSubActionShortCutFrm.dfm Config\CnWizMenuSortFrm.dfm 
-      SimpleWizards\CnAlignSizeWizard.dfm EditorWizard\CnEditorWizard.dfm 
+      SimpleWizards\CnAlignSizeWizard.dfm CodingToolset\CnEditorWizard.dfm 
       SimpleWizards\CnListCompFrm.dfm SimpleWizards\CnCompToCodeFrm.dfm 
       SimpleWizards\CnMessageBoxWizard.dfm SimpleWizards\CnComponentSelector.dfm 
       SimpleWizards\CnTabOrderWizard.dfm SimpleWizards\CnBookmarkWizard.dfm 
       SimpleWizards\CnBookmarkConfigFrm.dfm SrcTemplate\CnSrcTemplate.dfm 
-      SrcTemplate\CnSrcTemplateEditFrm.dfm EditorWizard\CnEditorOpenFileFrm.dfm 
+      SrcTemplate\CnSrcTemplateEditFrm.dfm CodingToolset\CnEditorOpenFileFrm.dfm 
       SimpleWizards\CnMsdnWizard.dfm SimpleWizards\CnPas2HtmlWizard.dfm 
       SimpleWizards\CnPasConvertTypeFrm.dfm 
-      SimpleWizards\CnPas2HtmlConfigFrm.dfm EditorWizard\CnEditorZoomFullScreen.dfm 
+      SimpleWizards\CnPas2HtmlConfigFrm.dfm CodingToolset\CnEditorZoomFullScreen.dfm 
       SimpleWizards\CnReplaceWizard.dfm SourceDiff\CnDiffEditorFrm.dfm 
       SourceDiff\CnSourceDiffFrm.dfm DesignEditors\CnHintEditorFrm.dfm 
       DesignEditors\CnMultiLineEditorFrm.dfm 
       DesignEditors\CnSizeConstraintsEditorFrm.dfm 
-      EditorWizard\CnEditorCodeToString.dfm 
-      EditorWizard\CnEditorCodeDelBlank.dfm EditorWizard\CnEditorCodeComment.dfm 
-      EditorWizard\CnAsciiChart.dfm SourceStat\CnStatFrm.dfm 
+      CodingToolset\CnEditorCodeToString.dfm 
+      CodingToolset\CnEditorCodeDelBlank.dfm CodingToolset\CnEditorCodeComment.dfm 
+      CodingToolset\CnAsciiChart.dfm SourceStat\CnStatFrm.dfm 
       SourceStat\CnStatResultFrm.dfm PrefixWizard\CnPrefixCompFrm.dfm 
       PrefixWizard\CnPrefixConfigFrm.dfm PrefixWizard\CnPrefixEditFrm.dfm 
       PrefixWizard\CnPrefixExecuteFrm.dfm PrefixWizard\CnPrefixNewFrm.dfm 
@@ -145,7 +145,7 @@
       SimpleWizards\CnProcListWizard.dfm IdeEnhancements\CnVerEnhanceFrm.dfm 
       ProjectExtWizard\CnProjectDirImportFrm.dfm Utils\CnWizMacroFrm.dfm 
       SrcEditorEnhance\CnSrcEditorGroupReplace.dfm 
-      EditorWizard\CnEditorInsertTime.dfm EditorWizard\CnEditorCollector.dfm 
+      CodingToolset\CnEditorInsertTime.dfm CodingToolset\CnEditorCollector.dfm 
       SrcEditorEnhance\CnIdentRenameFrm.dfm 
       IdeEnhancements\CnSourceHighlightFrm.dfm 
       IdeEnhancements\CnHighlightLineFrm.dfm 

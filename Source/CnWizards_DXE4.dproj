@@ -170,7 +170,7 @@
         <DCCReference Include="SimpleWizards\CnAlignSizeWizard.pas">
             <Form>CnNonArrangeForm</Form>
         </DCCReference>
-        <DCCReference Include="EditorWizard\CnEditorWizard.pas">
+        <DCCReference Include="CodingToolset\CnEditorWizard.pas">
             <Form>CnEditorToolsForm</Form>
         </DCCReference>
         <DCCReference Include="SimpleWizards\CnListCompFrm.pas">
@@ -206,40 +206,40 @@
         <DCCReference Include="SrcTemplate\CnSrcTemplateEditFrm.pas">
             <Form>CnSrcTemplateEditForm</Form>
         </DCCReference>
-        <DCCReference Include="EditorWizard\CnEditorOpenFile.pas"/>
-        <DCCReference Include="EditorWizard\CnEditorOpenFileFrm.pas">
+        <DCCReference Include="CodingToolset\CnEditorOpenFile.pas"/>
+        <DCCReference Include="CodingToolset\CnEditorOpenFileFrm.pas">
             <Form>CnEditorOpenFileForm</Form>
         </DCCReference>
-        <DCCReference Include="EditorWizard\CnEditorCodeSwap.pas"/>
-        <DCCReference Include="EditorWizard\CnEditorZoomFullScreen.pas">
+        <DCCReference Include="CodingToolset\CnEditorCodeSwap.pas"/>
+        <DCCReference Include="CodingToolset\CnEditorZoomFullScreen.pas">
             <Form>CnEditorZoomFullScreenForm</Form>
         </DCCReference>
-        <DCCReference Include="EditorWizard\CnEditorCodeTool.pas"/>
-        <DCCReference Include="EditorWizard\CnEditorCodeToString.pas">
+        <DCCReference Include="CodingToolset\CnEditorCodeTool.pas"/>
+        <DCCReference Include="CodingToolset\CnEditorCodeToString.pas">
             <Form>CnEditorCodeToStringForm</Form>
         </DCCReference>
-        <DCCReference Include="EditorWizard\CnEditorCodeDelBlank.pas">
+        <DCCReference Include="CodingToolset\CnEditorCodeDelBlank.pas">
             <Form>CnDelBlankForm</Form>
         </DCCReference>
-        <DCCReference Include="EditorWizard\CnEditorCodeComment.pas">
+        <DCCReference Include="CodingToolset\CnEditorCodeComment.pas">
             <Form>CnEditorCodeCommentForm</Form>
         </DCCReference>
-        <DCCReference Include="EditorWizard\CnEditorCodeIndent.pas"/>
-        <DCCReference Include="EditorWizard\CnAsciiChart.pas">
+        <DCCReference Include="CodingToolset\CnEditorCodeIndent.pas"/>
+        <DCCReference Include="CodingToolset\CnAsciiChart.pas">
             <Form>CnAsciiForm</Form>
         </DCCReference>
-        <DCCReference Include="EditorWizard\CnEditorInsertColor.pas"/>
-        <DCCReference Include="EditorWizard\CnEditorInsertTime.pas">
+        <DCCReference Include="CodingToolset\CnEditorInsertColor.pas"/>
+        <DCCReference Include="CodingToolset\CnEditorInsertTime.pas">
             <Form>CnEditorInsertTimeForm</Form>
         </DCCReference>
-        <DCCReference Include="EditorWizard\CnEditorCollector.pas">
+        <DCCReference Include="CodingToolset\CnEditorCollector.pas">
             <Form>CnEditorCollectorForm</Form>
         </DCCReference>
-        <DCCReference Include="EditorWizard\CnEditorSortLines.pas"/>
-        <DCCReference Include="EditorWizard\CnEditorToggleUses.pas"/>
-        <DCCReference Include="EditorWizard\CnEditorToggleVar.pas"/>
-        <DCCReference Include="EditorWizard\CnEditorJumpMessage.pas"/>
-        <DCCReference Include="EditorWizard\CnEditorFontZoom.pas"/>
+        <DCCReference Include="CodingToolset\CnEditorSortLines.pas"/>
+        <DCCReference Include="CodingToolset\CnEditorToggleUses.pas"/>
+        <DCCReference Include="CodingToolset\CnEditorToggleVar.pas"/>
+        <DCCReference Include="CodingToolset\CnEditorJumpMessage.pas"/>
+        <DCCReference Include="CodingToolset\CnEditorFontZoom.pas"/>
         <DCCReference Include="SimpleWizards\CnMsdnWizard.pas">
             <Form>CnMsdnConfigForm</Form>
         </DCCReference>
