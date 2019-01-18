@@ -39,25 +39,29 @@ interface
 
 uses 
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  Menus, ComCtrls, ToolWin, CnWizUtils;
+  Menus, ComCtrls, ToolWin, ExtCtrls, CnWizUtils, CnWizShareImages;
 
 type
-  TCnMatchButtonFrame = class(TFrame)
+  TCnMatchButtonFrame = class(TPanel)
+  private
     tlb1: TToolBar;
     btnMatchMode: TToolButton;
     pmMatchMode: TPopupMenu;
-    mniMatchStart: TMenuItem;
-    mniMatchAny: TMenuItem;
-    mniMatchFuzzy: TMenuItem;
-    procedure mniMatchClick(Sender: TObject);
-    procedure btnMatchModeClick(Sender: TObject);
-  private
     FOnModeChange: TNotifyEvent;
     function GetMatchMode: TCnMatchMode;
     procedure SetMatchMode(const Value: TCnMatchMode);
+    procedure btnMatchModeClick(Sender: TObject);
+    procedure mniMatchClick(Sender: TObject);
+
   protected
     procedure DoModeChange; virtual;
   public
+    mniMatchStart: TMenuItem;
+    mniMatchAny: TMenuItem;
+    mniMatchFuzzy: TMenuItem;
+
+    constructor Create(AOwner: TComponent); override;
+    procedure CreateComponents;
     procedure SyncButtonHint;
 
     property MatchMode: TCnMatchMode read GetMatchMode write SetMatchMode;
@@ -66,14 +70,88 @@ type
 
 implementation
 
-{$R *.DFM}
-
 {$IFDEF DEBUG}
 uses
   CnDebug;
 {$ENDIF}
 
 { TCnMatchButtonFrame }
+
+procedure TCnMatchButtonFrame.CreateComponents;
+begin
+  //tlb1
+  tlb1 := TToolBar.Create(Self);
+
+  //btnMatchMode
+  btnMatchMode := TToolButton.Create(Self);
+
+  //tlb1
+  tlb1.Name := 'tlb1';
+  tlb1.Parent := Self;
+  tlb1.Left := 0;
+  tlb1.Top := 0;
+  tlb1.Width := 40;
+  tlb1.Height := 25;
+  tlb1.Align := alNone;
+  tlb1.EdgeBorders := [];
+  tlb1.Flat := True;
+  tlb1.Images := dmCnSharedImages.Images;
+  tlb1.TabOrder := 0;
+
+  //btnMatchMode
+  btnMatchMode.Name := 'btnMatchMode';
+  btnMatchMode.Parent := tlb1;
+  btnMatchMode.Left := 0;
+  btnMatchMode.Top := 0;
+  btnMatchMode.DropdownMenu := pmMatchMode;
+  btnMatchMode.Grouped := True;
+  btnMatchMode.ImageIndex := 28;
+  btnMatchMode.Style := tbsDropDown;
+  btnMatchMode.OnClick := btnMatchModeClick;
+
+  //pmMatchMode
+  pmMatchMode := TPopupMenu.Create(Self);
+
+  //mniMatchStart
+  mniMatchStart := TMenuItem.Create(Self);
+
+  //mniMatchAny
+  mniMatchAny := TMenuItem.Create(Self);
+
+  //mniMatchFuzzy
+  mniMatchFuzzy := TMenuItem.Create(Self);
+
+  //pmMatchMode
+  pmMatchMode.Name := 'pmMatchMode';
+  pmMatchMode.Images := dmCnSharedImages.Images;
+
+  //mniMatchStart
+  mniMatchStart.Name := 'mniMatchStart';
+  pmMatchMode.Items.Add(mniMatchStart);
+  mniMatchStart.Caption := 'Match From &Start';
+  mniMatchStart.Hint := 'Match From Start';
+  mniMatchStart.ImageIndex := 27;
+  mniMatchStart.OnClick := mniMatchClick;
+
+  //mniMatchAny
+  mniMatchAny.Name := 'mniMatchAny';
+  pmMatchMode.Items.Add(mniMatchAny);
+  mniMatchAny.Caption := 'Match &All Parts';
+  mniMatchAny.Checked := True;
+  mniMatchAny.Hint := 'Match All Parts';
+  mniMatchAny.ImageIndex := 28;
+  mniMatchAny.OnClick := mniMatchClick;
+
+  //mniMatchFuzzy
+  mniMatchFuzzy.Name := 'mniMatchFuzzy';
+  pmMatchMode.Items.Add(mniMatchFuzzy);
+  mniMatchFuzzy.Caption := '&Fuzzy Match';
+  mniMatchFuzzy.Hint := 'Fuzzy Match';
+  mniMatchFuzzy.ImageIndex := 94;
+  mniMatchFuzzy.OnClick := mniMatchClick;
+
+  btnMatchMode.DropdownMenu := pmMatchMode;
+end;
 
 procedure TCnMatchButtonFrame.DoModeChange;
 begin
@@ -144,6 +222,16 @@ begin
   Idx := Ord(MatchMode);
   if (Idx >= 0) and (Idx < pmMatchMode.Items.Count) then
     btnMatchMode.Hint := pmMatchMode.Items.Items[Idx].Hint;
+end;
+
+constructor TCnMatchButtonFrame.Create(AOwner: TComponent);
+begin
+  inherited;
+  Height := 25;
+  Width := 50;
+  BevelInner := bvNone;
+  BevelOuter := bvNone;
+  BevelWidth := 1;
 end;
 
 end.
