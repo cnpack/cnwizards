@@ -997,7 +997,11 @@ begin
       // 不能因为 MatchSearchText = '' 就直接通过匹配，因为子类可能还有其它搜索条件
       if CanMatchDataByIndex(MatchSearchText, AMatchMode, I, AStartOffset, Indexes) then
       begin
-        TCnBaseElementInfo(DataList.Objects[I]).StartOffset := AStartOffset;
+        // DataList.Objects 有可能为 nil
+        if (DataList.Objects[I] <> nil) and
+          ObjectIsBaseElementInfo(DataList.Objects[I]) then
+          TCnBaseElementInfo(DataList.Objects[I]).StartOffset := AStartOffset;
+
         DisplayList.AddObject(DataList[I], DataList.Objects[I]);
         if CanSelectDataByIndex(MatchSearchText, AMatchMode, I) then
           ToSels.Add(DataList[I]);
