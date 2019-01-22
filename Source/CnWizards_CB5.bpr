@@ -161,7 +161,7 @@
     <PACKAGES value="vcl50.bpi vclx50.bpi vcldb50.bpi vcldbx50.bpi vclbde50.bpi dsnide50.bpi 
       vclmid50.bpi"/>
     <PATHCPP value=".;"/>
-    <PATHPAS value=".;Framework;Misc;MultiLang;Config;Utils;SimpleWizards;EditorWizard;SrcTemplate;SourceDiff;DesignEditors;SourceStat;PrefixWizard;IdeEnhancements;ScriptWizard;CorProperty;ProjectExtWizard;RepositoryWiz;ExplorerWizard;ReopenWizard;SrcEditorEnhance;CodeFormatter"/>
+    <PATHPAS value=".;Framework;Misc;MultiLang;Config;Utils;SimpleWizards;CodingToolset;SrcTemplate;SourceDiff;DesignEditors;SourceStat;PrefixWizard;IdeEnhancements;ScriptWizard;CorProperty;ProjectExtWizard;RepositoryWiz;ExplorerWizard;ReopenWizard;SrcEditorEnhance;CodeFormatter"/>
     <PATHRC value=".;"/>
     <PATHASM value=".;"/>
     <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
@@ -170,8 +170,8 @@
     <USERDEFINES value="${define.add}"/>
     <SYSDEFINES value="NO_STRICT;USEPACKAGES"/>
     <MAINSOURCE value="CnWizards_CB5.bpf"/>
-    <INCLUDEPATH value="CodeFormatter;ScriptWizard;SrcTemplate;ReopenWizard;SimpleWizards;Config;MultiLang;Misc;SrcEditorEnhance;ExplorerWizard;RepositoryWiz;ProjectExtWizard;CorProperty;IdeEnhancements;PrefixWizard;SourceStat;DesignEditors;SourceDiff;EditorWizard;Utils;Framework;$(BCB)\include;$(BCB)\include\vcl;$(BCB)\source\toolsapi;thirdparty;thirdparty\tpabbrevia;thirdparty\ddetours;thirdparty\pascalscript;thirdparty\jcl;..\dcu;..\..\cnvcl\source\common;..\..\cnvcl\source\nonvisual;..\..\cnvcl\source\graphics;..\..\cnvcl\source\netcomm;..\..\cnvcl\source\multilang;..\..\cnvcl\source\objrep"/>
-    <LIBPATH value="CodeFormatter;ScriptWizard;SrcTemplate;SrcEditorEnhance;ReopenWizard;SimpleWizards;Config;MultiLang;Misc;ExplorerWizard;RepositoryWiz;ProjectExtWizard;CorProperty;IdeEnhancements;PrefixWizard;SourceStat;DesignEditors;SourceDiff;EditorWizard;Utils;Framework;$(BCB)\lib;$(BCB)\lib\obj;$(BCB)\source\toolsapi;thirdparty;thirdparty\tpabbrevia;thirdparty\ddetours;thirdparty\pascalscript;thirdparty\jcl;..\dcu;..\..\cnvcl\source\common;..\..\cnvcl\source\nonvisual;..\..\cnvcl\source\graphics;..\..\cnvcl\source\netcomm;..\..\cnvcl\source\multilang;..\..\cnvcl\source\objrep"/>
+    <INCLUDEPATH value="CodeFormatter;ScriptWizard;SrcTemplate;ReopenWizard;SimpleWizards;Config;MultiLang;Misc;SrcEditorEnhance;ExplorerWizard;RepositoryWiz;ProjectExtWizard;CorProperty;IdeEnhancements;PrefixWizard;SourceStat;DesignEditors;SourceDiff;CodingToolset;Utils;Framework;$(BCB)\include;$(BCB)\include\vcl;$(BCB)\source\toolsapi;thirdparty;thirdparty\tpabbrevia;thirdparty\ddetours;thirdparty\pascalscript;thirdparty\jcl;..\dcu;..\..\cnvcl\source\common;..\..\cnvcl\source\nonvisual;..\..\cnvcl\source\graphics;..\..\cnvcl\source\netcomm;..\..\cnvcl\source\multilang;..\..\cnvcl\source\objrep"/>
+    <LIBPATH value="CodeFormatter;ScriptWizard;SrcTemplate;SrcEditorEnhance;ReopenWizard;SimpleWizards;Config;MultiLang;Misc;ExplorerWizard;RepositoryWiz;ProjectExtWizard;CorProperty;IdeEnhancements;PrefixWizard;SourceStat;DesignEditors;SourceDiff;CodingToolset;Utils;Framework;$(BCB)\lib;$(BCB)\lib\obj;$(BCB)\source\toolsapi;thirdparty;thirdparty\tpabbrevia;thirdparty\ddetours;thirdparty\pascalscript;thirdparty\jcl;..\dcu;..\..\cnvcl\source\common;..\..\cnvcl\source\nonvisual;..\..\cnvcl\source\graphics;..\..\cnvcl\source\netcomm;..\..\cnvcl\source\multilang;..\..\cnvcl\source\objrep"/>
     <WARNINGS value="-w-par"/>
   </MACROS>
   <OPTIONS>
@@ -179,7 +179,7 @@
       -ISimpleWizards -IConfig -IMultiLang -IMisc -ISrcEditorEnhance 
       -IExplorerWizard -IRepositoryWiz -IProjectExtWizard -ICorProperty 
       -IIdeEnhancements -IPrefixWizard -ISourceStat -IDesignEditors -ISourceDiff 
-      -IEditorWizard -IUtils -IFramework -I$(BCB)\include -I$(BCB)\include\vcl 
+      -ICodingToolset -IUtils -IFramework -I$(BCB)\include -I$(BCB)\include\vcl 
       -I$(BCB)\source\toolsapi -Ithirdparty -Ithirdparty\tpabbrevia 
       -Ithirdparty\ddetours -Ithirdparty\pascalscript -Ithirdparty\jcl -I..\dcu 
       -I..\..\cnvcl\source\common -I..\..\cnvcl\source\nonvisual 
