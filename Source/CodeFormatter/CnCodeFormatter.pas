@@ -1931,7 +1931,10 @@ begin
   Match(tokKeywordRepeat, PreSpaceCount, 1);
   Writeln;
   FormatStmtList(Tab(PreSpaceCount));
-  Writeln;
+  if CnPascalCodeForRule.KeepUserLineBreak then // until 之前的语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
+    EnsureWriteln
+  else
+    Writeln;
   
   Match(tokKeywordUntil, PreSpaceCount);
   FormatExpression(0, PreSpaceCount);
@@ -2248,7 +2251,7 @@ begin
         if Scaner.Token <> tokKeywordEnd then
         begin
           FormatStmtList(Tab(PreSpaceCount, False));
-          if CnPascalCodeForRule.KeepUserLineBreak then // 语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
+          if CnPascalCodeForRule.KeepUserLineBreak then // end 语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
             EnsureWriteln
           else
             Writeln;
@@ -2369,7 +2372,10 @@ begin
   if not (Scaner.Token in [tokKeywordExcept, tokKeywordFinally]) then // 避免空行
   begin
     FormatStmtList(Tab(PreSpaceCount, False));
-    Writeln;
+    if CnPascalCodeForRule.KeepUserLineBreak then // Except/Finally 之前的语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
+      EnsureWriteln
+    else
+      Writeln;
   end;
   FormatTryEnd(PreSpaceCount);
 end;
