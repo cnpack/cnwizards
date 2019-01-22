@@ -22,7 +22,7 @@ program AsciiChart;
 
 uses
   Forms,
-  CnAsciiChart in '..\..\Source\EditorWizard\CnAsciiChart.pas' {CnAsciiForm};
+  CnAsciiChart in '..\..\Source\CodingToolset\CnAsciiChart.pas' {CnAsciiForm};
 
 {$R *.RES}
 {$R ..\WindowsXP.RES}
