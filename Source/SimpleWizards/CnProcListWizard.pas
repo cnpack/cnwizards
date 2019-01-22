@@ -984,7 +984,6 @@ begin
     Parent := ToolBar;
     Top := 0;
     Left := Obj.ProcCombo.Left + Obj.ProcCombo.Width + Obj.FSplitter1.Width + 2;
-    CreateComponents;
     OnModeChange := Obj.MatchChange;
   end;
 

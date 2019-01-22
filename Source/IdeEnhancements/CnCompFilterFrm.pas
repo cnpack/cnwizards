@@ -666,7 +666,6 @@ begin
   FRegExpr.ModifierI := True;
   FMatchButtonFrame := TCnMatchButtonFrame.Create(Self);
   FMatchButtonFrame.Parent := pnlHdr;
-  FMatchButtonFrame.CreateComponents;
   FMatchButtonFrame.Left := 8;
   InitButtonFrame;
   FMatchButtonFrame.OnModeChange := MatchModeChange;
