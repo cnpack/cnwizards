@@ -196,7 +196,6 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           Height = 17
           Caption = 'Keep User Line Break'
           TabOrder = 11
-          Visible = False
         end
       end
       object grpAsm: TGroupBox
