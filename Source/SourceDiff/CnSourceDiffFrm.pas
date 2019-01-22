@@ -29,7 +29,9 @@ unit CnSourceDiffFrm;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 修改记录：2003.03.21 V1.1
+* 修改记录：2019.01.22 V1.2
+*               加入粘贴功能的支持
+*           2003.03.21 V1.1
 *               修正右边差异图底色可能不正确的 Bug
 *               修正点击按钮定义到源码可能会出错的 Bug
 *           2003.03.11 V1.0
@@ -45,7 +47,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, DiffUnit, ExtCtrls, DiffControl, Menus, ComCtrls, ShellAPI,
+  StdCtrls, DiffUnit, ExtCtrls, DiffControl, Menus, ComCtrls, ShellAPI, Clipbrd,
   IniFiles, CnDiffEditorFrm, CnCRC32, CnWizUtils, Buttons, ToolWin, CnIni,
   ActnList, ImgList, CnWizConsts, ToolsAPI, CnWizEditFiler, CnCommon,
   CnConsts, CnWizMultiLang, CnPopupMenu;
@@ -174,6 +176,10 @@ type
     tbGoto: TToolButton;
     mnuGoto: TMenuItem;
     OpenDialog2: TOpenDialog;
+    btnPaste1: TBitBtn;
+    btnPaste2: TBitBtn;
+    actPaste1: TAction;
+    actPaste2: TAction;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormResize(Sender: TObject);
@@ -222,6 +228,8 @@ type
     procedure tbMergeClick(Sender: TObject);
     procedure actCompareExExecute(Sender: TObject);
     procedure actGotoExecute(Sender: TObject);
+    procedure actPaste1Execute(Sender: TObject);
+    procedure actPaste2Execute(Sender: TObject);
   private
     Ini: TCustomIniFile;
     FFilesCompared: Boolean;
@@ -322,7 +330,6 @@ begin
     CnSourceDiffForm.Free;
 end;
 
-//---------------------------------------------------------------------
 function HashLine(const Line: string; IgnoreCase, IgnoreBlanks: Boolean): Pointer;
 var
   i, j, Len: Integer;
@@ -349,7 +356,6 @@ begin
   //return result as a pointer to save typecasting later...
   Result := Pointer(CRC32Calc(0, PChar(s)^, Length(s) * SizeOf(Char)));
 end;
-//---------------------------------------------------------------------
 
 //==============================================================================
 // 源代码比较窗体
@@ -361,7 +367,6 @@ begin
   Create(AOwner);
   Ini := AIni;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.FormCreate(Sender: TObject);
 begin
@@ -420,14 +425,12 @@ begin
   
   LoadOptions;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   SaveOptions;
   Action := caHide;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.FormDestroy(Sender: TObject);
 begin
@@ -442,7 +445,6 @@ begin
   DiffControl1.Free;
   DiffControlMerge.Free;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.FormResize(Sender: TObject);
 begin
@@ -450,7 +452,7 @@ begin
     pnlLeft.Height := pnlMain.ClientHeight div 2 - 1 else
     pnlLeft.Width := pnlMain.ClientWidth div 2 - 1;
 end;
-//---------------------------------------------------------------------
+
 const
   csBoundsLeft = 'Left';
   csBoundsTop = 'Top';
@@ -519,7 +521,6 @@ begin
     (l + w > 0) and (t + h > 0) then
     SetBounds(l, t, w, h);
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.SaveOptions;
 begin
@@ -551,7 +552,6 @@ begin
     Free;
   end;
 end;
-//---------------------------------------------------------------------
 
 //Syncronise scrolling of both DiffControls...
 procedure TCnSourceDiffForm.SyncScroll(Sender: TObject);
@@ -595,7 +595,6 @@ begin
 
   pbPosPaint(Self);
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.DoOpenFile(OpenFile1: Boolean);
 var
@@ -691,7 +690,6 @@ begin
   DiffControl.TopVisibleLine := 0;
   DiffControl.HorzScroll := 0;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.actOpen1Execute(Sender: TObject);
 begin
@@ -710,7 +708,6 @@ begin
     DoOpenFile(True);
   end;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.actOpen2Execute(Sender: TObject);
 begin
@@ -732,7 +729,6 @@ begin
     DoOpenFile(False);
   end;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.FileDrop(Sender: TObject; dropHandle: Integer; var DropHandled:
   Boolean);
@@ -749,7 +745,6 @@ begin
   DoOpenFile(Sender = DiffControl1);
   SetForegroundWindow(Application.Handle);
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.DiffCtrlDblClick(Sender: TObject);
 begin
@@ -771,7 +766,6 @@ begin
     end;
   end;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.DiffCtrlMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
@@ -788,13 +782,11 @@ begin
       FocusStart := ClickedLine;
   end;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.actCloseExecute(Sender: TObject);
 begin
   Close;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.actCompareExecute(Sender: TObject);
 var
@@ -846,7 +838,6 @@ begin
     HashList2.Free;
   end;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.actCompareExExecute(Sender: TObject);
 begin
@@ -855,13 +846,12 @@ begin
   actCompare.Execute;
 end;
 
-//---------------------------------------------------------------------
+
 procedure TCnSourceDiffForm.DiffProgress(Sender: TObject; percent: Integer);
 begin
   Statusbar1.Panels[3].Text := Format(SCnSourceDiffApprox, [percent]);
   Statusbar1.Refresh;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.DisplayDiffs;
 var
@@ -875,7 +865,6 @@ begin
     DiffControl1.MaxLineNum := Lines1.Count;
     DiffControl2.MaxLineNum := Lines2.Count;
 
-    ////////////////////////////////////////////////////////////////////////
     j := 0;
     k := 0;
     with Diff do
@@ -940,7 +929,6 @@ begin
     pbPos.Repaint;
   end;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.actIgnoreBlanksExecute(Sender: TObject);
 begin
@@ -948,7 +936,6 @@ begin
   if FilesCompared then
     actCompare.Execute;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.actIgnoreCaseExecute(Sender: TObject);
 begin
@@ -956,7 +943,6 @@ begin
   if FilesCompared then
     actCompare.Execute;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.actShowDiffOnlyExecute(Sender: TObject);
 begin
@@ -966,7 +952,6 @@ begin
   if FilesCompared and not IsMerging then
     DisplayDiffs;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.actFontExecute(Sender: TObject);
 begin
@@ -976,7 +961,6 @@ begin
   DiffControl2.Font := FontDialog.Font;
   DiffControlMerge.Font := FontDialog.Font;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.SetSplitHorizontally(SplitHorizontally: Boolean);
 begin
@@ -1001,7 +985,6 @@ begin
   actSplitHorizontally.Checked := not actSplitHorizontally.Checked;
   SetSplitHorizontally(actSplitHorizontally.Checked);
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.UpdateFileBmp;
 var
@@ -1040,7 +1023,6 @@ begin
   end;
   pbFile.Invalidate;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.pbFileMouseDown(Sender: TObject;
   Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -1053,14 +1035,12 @@ begin
     SyncScroll(DiffControl1);
   end;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.pbFilePaint(Sender: TObject);
 begin
   with pbFile do
     Canvas.StretchDraw(Rect(0, 0, Width, Height), FileBmp);
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.pbPosPaint(Sender: TObject);
 var
@@ -1077,7 +1057,6 @@ begin
     Canvas.LineTo(ClientWidth, yPos);
   end;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.RepaintControls;
 begin
@@ -1088,7 +1067,6 @@ begin
   //pbPos.Repaint;
   StatusBar1.Repaint;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.actAddColorExecute(Sender: TObject);
 begin
@@ -1102,7 +1080,6 @@ begin
   end;
   RepaintControls;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.actModColorExecute(Sender: TObject);
 begin
@@ -1116,7 +1093,6 @@ begin
   end;
   RepaintControls;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.actDelColorExecute(Sender: TObject);
 begin
@@ -1130,7 +1106,6 @@ begin
   end;
   RepaintControls;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.StatusBar1DrawPanel(StatusBar: TStatusBar;
   Panel: TStatusPanel; const Rect: TRect);
@@ -1144,13 +1119,11 @@ begin
   StatusBar1.Canvas.FillRect(Rect);
   StatusBar1.Canvas.TextOut(Rect.Left + 4, Rect.Top, Panel.Text);
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.actCancelExecute(Sender: TObject);
 begin
   Diff.Cancel;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.actMergeFromExecute(Sender: TObject);
 var
@@ -1193,7 +1166,6 @@ begin
   DiffControlMerge.OnScroll := SyncScroll;
   SyncScroll(DiffControl1);
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.actMergeFocusedTextExecute(Sender: TObject);
 var
@@ -1213,15 +1185,15 @@ begin
     end;
   end;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.ActionListUpdate(Action: TBasicAction;
   var Handled: Boolean);
 var
   DiffControl: TDiffControl;
 begin
-  actCompare.Enabled := (FileName1 <> '') and (FileName2 <> '');
-  actCompareEx.Enabled := actCompare.Enabled;
+  actCompare.Enabled := ((FileName1 <> '') and (FileName2 <> '')) or
+    ((DiffControl1.Lines.Text <> '') and (DiffControl2.Lines.Text <> ''));
+  actCompareEx.Enabled := (FileName1 <> '') and (FileName2 <> '');
   actSaveMerged.Enabled := IsMerging;
   actNextDiff.Enabled := FilesCompared;
   actPrioDiff.Enabled := FilesCompared;
@@ -1256,8 +1228,9 @@ begin
 
   actEditFocusedText.Enabled := DiffControl = DiffControlMerge;
   actMergeFocusedText.Enabled := DiffControl <> DiffControlMerge;
+  actPaste1.Enabled := Clipboard.AsText <> '';
+  actPaste2.Enabled := actPaste1.Enabled;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.actSaveMergedExecute(Sender: TObject);
 var
@@ -1278,7 +1251,6 @@ begin
     Free;
   end;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.actEditFocusedTextExecute(Sender: TObject);
 var
@@ -1322,23 +1294,22 @@ begin
     Free;
   end;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.pnlCaptionLeftResize(Sender: TObject);
 begin
   btnHistory1.Left := pnlCaptionLeft.Width - btnHistory1.Width - 1;
   btnFileKind1.Left := btnHistory1.Left - btnFileKind1.Width;
   btnOpenFile1.Left := btnFileKind1.Left - btnOpenFile1.Width;
+  btnPaste1.Left := btnOpenFile1.Left - btnPaste1.Width;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.pnlCaptionRightResize(Sender: TObject);
 begin
   btnHistory2.Left := pnlCaptionRight.Width - btnHistory2.Width - 1;
   btnFileKind2.Left := btnHistory2.Left - btnFileKind2.Width;
   btnOpenFile2.Left := btnFileKind2.Left - btnOpenFile2.Width;
+  btnPaste2.Left := btnOpenFile2.Left - btnPaste2.Width;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.StatusBar1MouseUp(Sender: TObject;
   Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -1357,13 +1328,11 @@ begin
       actDelColor.Execute;
   end;
 end;
-//---------------------------------------------------------------------
 
 procedure TCnSourceDiffForm.actHelpExecute(Sender: TObject);
 begin
   ShowFormHelp;
 end;
-//---------------------------------------------------------------------
 
 function TCnSourceDiffForm.GetHelpTopic: string;
 begin
@@ -1659,7 +1628,7 @@ end;
 
 function TCnSourceDiffForm.GetIsMerging: Boolean;
 begin
-  Result := pnlMerge. Visible;
+  Result := pnlMerge.Visible;
 end;
 
 procedure TCnSourceDiffForm.SetFilesCompared(const Value: Boolean);
@@ -1754,6 +1723,30 @@ begin
   // 用尺寸的变化来修补工具栏按钮可能消失的问题
   Self.Width := Self.Width + 1;
   Self.Width := Self.Width - 1;
+end;
+
+procedure TCnSourceDiffForm.actPaste1Execute(Sender: TObject);
+var
+  S: string;
+begin
+  S := Clipboard.AsText;
+  if S <> '' then
+  begin
+    Lines1.Text := S;
+    DiffControl1.Lines.Assign(Lines1);
+  end;
+end;
+
+procedure TCnSourceDiffForm.actPaste2Execute(Sender: TObject);
+var
+  S: string;
+begin
+  S := Clipboard.AsText;
+  if S <> '' then
+  begin
+    Lines2.Text := S;
+    DiffControl2.Lines.Assign(Lines2);
+  end;
 end;
 
 {$ENDIF CNWIZARDS_CNSOURCEDIFFWIZARD}

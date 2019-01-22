@@ -1,8 +1,8 @@
 inherited CnSourceDiffForm: TCnSourceDiffForm
-  Left = 272
-  Top = 153
-  Width = 661
-  Height = 485
+  Left = 244
+  Top = 100
+  Width = 768
+  Height = 539
   Caption = 'Source Code Compare'
   Menu = MainMenu
   OnClose = FormClose
@@ -12,10 +12,10 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
   PixelsPerInch = 96
   TextHeight = 13
   object pnlDisplay: TPanel
-    Left = 634
+    Left = 733
     Top = 30
     Width = 19
-    Height = 390
+    Height = 432
     Align = alRight
     BevelInner = bvRaised
     BevelOuter = bvLowered
@@ -25,7 +25,7 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
       Left = 8
       Top = 2
       Width = 9
-      Height = 386
+      Height = 428
       Align = alClient
       Color = clBtnFace
       ParentColor = False
@@ -36,7 +36,7 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
       Left = 2
       Top = 2
       Width = 6
-      Height = 386
+      Height = 428
       Align = alLeft
       Color = clBtnFace
       ParentColor = False
@@ -46,16 +46,16 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
   object Panel1: TPanel
     Left = 0
     Top = 30
-    Width = 634
-    Height = 390
+    Width = 733
+    Height = 432
     Align = alClient
     BevelOuter = bvNone
     Caption = 'Panel1'
     TabOrder = 1
     object Splitter2: TSplitter
       Left = 0
-      Top = 308
-      Width = 634
+      Top = 350
+      Width = 733
       Height = 3
       Cursor = crVSplit
       Align = alBottom
@@ -63,24 +63,24 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
     object pnlMain: TPanel
       Left = 0
       Top = 0
-      Width = 634
-      Height = 308
+      Width = 733
+      Height = 350
       Align = alClient
       BevelOuter = bvNone
       Caption = 'pnlMain'
       TabOrder = 0
       object Splitter1: TSplitter
-        Left = 315
+        Left = 361
         Top = 0
         Width = 3
-        Height = 308
+        Height = 350
         Cursor = crHSplit
       end
       object pnlLeft: TPanel
         Left = 0
         Top = 0
-        Width = 315
-        Height = 308
+        Width = 361
+        Height = 350
         Align = alLeft
         BevelOuter = bvNone
         Caption = 'pnlLeft'
@@ -88,18 +88,18 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
         object pnlCaptionLeft: TPanel
           Left = 0
           Top = 0
-          Width = 315
-          Height = 20
+          Width = 361
+          Height = 22
           Align = alTop
           Alignment = taLeftJustify
           BevelOuter = bvLowered
           TabOrder = 0
           OnResize = pnlCaptionLeftResize
           object btnFileKind1: TBitBtn
-            Left = 258
+            Left = 300
             Top = 1
-            Width = 42
-            Height = 18
+            Width = 44
+            Height = 20
             Hint = 'Set File 1 Content'
             Anchors = [akTop, akRight]
             Caption = 'File'
@@ -122,10 +122,10 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
             Spacing = 0
           end
           object btnHistory1: TBitBtn
-            Left = 300
+            Left = 344
             Top = 1
-            Width = 14
-            Height = 18
+            Width = 16
+            Height = 20
             Hint = 'Opened File History'
             Anchors = [akTop, akRight]
             TabOrder = 2
@@ -145,10 +145,10 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
               FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000}
           end
           object btnOpenFile1: TBitBtn
-            Left = 240
+            Left = 280
             Top = 1
-            Width = 18
-            Height = 18
+            Width = 20
+            Height = 20
             Action = actOpen1
             Anchors = [akTop, akRight]
             Caption = '...'
@@ -160,13 +160,50 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
             ParentFont = False
             TabOrder = 0
           end
+          object btnPaste1: TBitBtn
+            Left = 260
+            Top = 1
+            Width = 20
+            Height = 20
+            Action = actPaste1
+            Anchors = [akTop, akRight]
+            TabOrder = 3
+            Glyph.Data = {
+              36030000424D3603000000000000360000002800000010000000100000000100
+              1800000000000003000000000000000000000000000000000000FF00FFFF00FF
+              FF00FF299CDE299CDEA57B73A57B73A57B73A57B73A57B73A57B73A57B73A57B
+              73A57B73A57B73FF00FFFF00FFFF00FF299CDE8CD6EF84D6F7CEC6BDFFEFDEF7
+              EFE7F7EFDEF7EFDEF7EFDEF7EFDEF7EFDEF7EFDEA57B73FF00FFFF00FF299CDE
+              A5E7FF94EFFF8CF7FFCEC6BDF7E7D6F7E7D6F7DEC6F7DEC6F7DEC6F7DEBDF7DE
+              C6F7E7D6A57B73FF00FFFF00FF299CDEA5E7FF94EFFF84EFFFCEC6BDF7E7DEFF
+              E7CEF7DEBDF7DEBDF7DEBDF7DEBDF7DEC6F7E7D6A57B73FF00FFFF00FF299CDE
+              ADEFFFA5EFFF94EFFFCEC6BDF7E7E7F7E7D6F7DEC6F7DEC6F7DEBDF7DEBDF7DE
+              C6F7E7D6A57B73FF00FFFF00FF299CDEB5EFFFADEFFFA5EFFFCEC6BDF7EFE7F7
+              EFDEFFE7CEFFE7CEFFE7CEF7DEC6F7E7D6EFE7DEA57B73FF00FFFF00FF299CDE
+              BDEFFFBDF7FFADF7FFCEC6BDFFF7EFFFE7CEFFDEBDF7DEBDF7DEBDFFDEB5F7DE
+              C6F7EFE7A57B73FF00FFFF00FF299CDEC6EFFFCEF7FFBDF7FFCEC6BDFFF7F7FF
+              F7EFF7EFE7F7EFE7F7EFDEF7EFDEF7EFE7EFE7DEA57B73FF00FFFF00FF299CDE
+              CEEFFFDEF7FFCEF7FFCEC6BDFFF7F7FFFFFFFFFFFFFFF7F7F7F7F7EFE7DED6BD
+              B5C6ADA5A57B73FF00FFFF00FF299CDECEEFFFE7FFFFDEF7FFCEC6BDFFF7F7FF
+              FFFFFFFFFFFFFFFFFFFFFFDECEC6E7AD73C6AD8CFF00FFFF00FFFF00FF299CDE
+              D6F7FFF7FFFFE7FFFFCEC6BDFFEFE7FFF7EFFFF7EFFFEFEFFFF7EFE7C6BDC6AD
+              8C299CDEFF00FFFF00FFFF00FF299CDEDEF7FFFFFFFFF7FFFFCEC6BDCEC6BDCE
+              C6BDCEC6BDCEC6BDCEC6BDCEC6BD84C6DE299CDEFF00FFFF00FFFF00FF299CDE
+              DEF7FFF7F7F7ADC6CEA5C6CEA5C6CEA5C6CEA5C6CEA5C6CEB5D6D6DEFFFF84D6
+              F7299CDEFF00FFFF00FFFF00FF299CDEDEF7FFDECEC6BDA59CA57B73A57B73A5
+              7B73A57B73A57B73BD9C94E7EFE794DEF7299CDEFF00FFFF00FFFF00FFFF00FF
+              299CDEB5D6E7949C9CE7DED6F7E7D6F7E7D6F7E7D6CEC6BD849CA58CCEE7299C
+              DEFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF299CDE299CDE9C948C9C948C9C
+              948C9C948C9C948C299CDE299CDEFF00FFFF00FFFF00FFFF00FF}
+            Layout = blGlyphRight
+          end
         end
       end
       object pnlRight: TPanel
-        Left = 318
+        Left = 364
         Top = 0
-        Width = 316
-        Height = 308
+        Width = 369
+        Height = 350
         Align = alClient
         BevelOuter = bvNone
         Caption = 'pnlRight'
@@ -174,18 +211,18 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
         object pnlCaptionRight: TPanel
           Left = 0
           Top = 0
-          Width = 316
-          Height = 20
+          Width = 369
+          Height = 22
           Align = alTop
           Alignment = taLeftJustify
           BevelOuter = bvLowered
           TabOrder = 0
           OnResize = pnlCaptionRightResize
           object btnFileKind2: TBitBtn
-            Left = 258
+            Left = 315
             Top = 1
-            Width = 42
-            Height = 18
+            Width = 44
+            Height = 20
             Hint = 'Set File 2 Content'
             Anchors = [akTop, akRight]
             Caption = 'File'
@@ -208,10 +245,10 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
             Spacing = 0
           end
           object btnHistory2: TBitBtn
-            Left = 300
+            Left = 359
             Top = 1
-            Width = 14
-            Height = 18
+            Width = 16
+            Height = 20
             Hint = 'Opened File History'
             Anchors = [akTop, akRight]
             TabOrder = 2
@@ -231,10 +268,10 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
               FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000}
           end
           object btnOpenFile2: TBitBtn
-            Left = 240
+            Left = 295
             Top = 1
-            Width = 18
-            Height = 18
+            Width = 20
+            Height = 20
             Action = actOpen2
             Anchors = [akTop, akRight]
             Caption = '...'
@@ -246,13 +283,50 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
             ParentFont = False
             TabOrder = 0
           end
+          object btnPaste2: TBitBtn
+            Left = 275
+            Top = 1
+            Width = 20
+            Height = 20
+            Action = actPaste2
+            Anchors = [akTop, akRight]
+            TabOrder = 3
+            Glyph.Data = {
+              36030000424D3603000000000000360000002800000010000000100000000100
+              1800000000000003000000000000000000000000000000000000FF00FFFF00FF
+              FF00FF299CDE299CDEA57B73A57B73A57B73A57B73A57B73A57B73A57B73A57B
+              73A57B73A57B73FF00FFFF00FFFF00FF299CDE8CD6EF84D6F7CEC6BDFFEFDEF7
+              EFE7F7EFDEF7EFDEF7EFDEF7EFDEF7EFDEF7EFDEA57B73FF00FFFF00FF299CDE
+              A5E7FF94EFFF8CF7FFCEC6BDF7E7D6F7E7D6F7DEC6F7DEC6F7DEC6F7DEBDF7DE
+              C6F7E7D6A57B73FF00FFFF00FF299CDEA5E7FF94EFFF84EFFFCEC6BDF7E7DEFF
+              E7CEF7DEBDF7DEBDF7DEBDF7DEBDF7DEC6F7E7D6A57B73FF00FFFF00FF299CDE
+              ADEFFFA5EFFF94EFFFCEC6BDF7E7E7F7E7D6F7DEC6F7DEC6F7DEBDF7DEBDF7DE
+              C6F7E7D6A57B73FF00FFFF00FF299CDEB5EFFFADEFFFA5EFFFCEC6BDF7EFE7F7
+              EFDEFFE7CEFFE7CEFFE7CEF7DEC6F7E7D6EFE7DEA57B73FF00FFFF00FF299CDE
+              BDEFFFBDF7FFADF7FFCEC6BDFFF7EFFFE7CEFFDEBDF7DEBDF7DEBDFFDEB5F7DE
+              C6F7EFE7A57B73FF00FFFF00FF299CDEC6EFFFCEF7FFBDF7FFCEC6BDFFF7F7FF
+              F7EFF7EFE7F7EFE7F7EFDEF7EFDEF7EFE7EFE7DEA57B73FF00FFFF00FF299CDE
+              CEEFFFDEF7FFCEF7FFCEC6BDFFF7F7FFFFFFFFFFFFFFF7F7F7F7F7EFE7DED6BD
+              B5C6ADA5A57B73FF00FFFF00FF299CDECEEFFFE7FFFFDEF7FFCEC6BDFFF7F7FF
+              FFFFFFFFFFFFFFFFFFFFFFDECEC6E7AD73C6AD8CFF00FFFF00FFFF00FF299CDE
+              D6F7FFF7FFFFE7FFFFCEC6BDFFEFE7FFF7EFFFF7EFFFEFEFFFF7EFE7C6BDC6AD
+              8C299CDEFF00FFFF00FFFF00FF299CDEDEF7FFFFFFFFF7FFFFCEC6BDCEC6BDCE
+              C6BDCEC6BDCEC6BDCEC6BDCEC6BD84C6DE299CDEFF00FFFF00FFFF00FF299CDE
+              DEF7FFF7F7F7ADC6CEA5C6CEA5C6CEA5C6CEA5C6CEA5C6CEB5D6D6DEFFFF84D6
+              F7299CDEFF00FFFF00FFFF00FF299CDEDEF7FFDECEC6BDA59CA57B73A57B73A5
+              7B73A57B73A57B73BD9C94E7EFE794DEF7299CDEFF00FFFF00FFFF00FFFF00FF
+              299CDEB5D6E7949C9CE7DED6F7E7D6F7E7D6F7E7D6CEC6BD849CA58CCEE7299C
+              DEFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF299CDE299CDE9C948C9C948C9C
+              948C9C948C9C948C299CDE299CDEFF00FFFF00FFFF00FFFF00FF}
+            Layout = blGlyphRight
+          end
         end
       end
     end
     object pnlMerge: TPanel
       Left = 0
-      Top = 311
-      Width = 634
+      Top = 353
+      Width = 733
       Height = 79
       Align = alBottom
       BevelOuter = bvNone
@@ -263,8 +337,8 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Top = 420
-    Width = 653
+    Top = 462
+    Width = 752
     Height = 19
     Panels = <
       item
@@ -297,7 +371,7 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
   object ToolBar: TToolBar
     Left = 0
     Top = 0
-    Width = 653
+    Width = 752
     Height = 30
     BorderWidth = 1
     Caption = 'ToolBar'
@@ -386,19 +460,19 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
       OnClick = tbMergeClick
     end
     object tbMergeFocusedText: TToolButton
-      Left = 223
+      Left = 227
       Top = 0
       Action = actMergeFocusedText
       AutoSize = True
     end
     object tbEditFocusedText: TToolButton
-      Left = 246
+      Left = 250
       Top = 0
       Action = actEditFocusedText
       AutoSize = True
     end
     object ToolButton9: TToolButton
-      Left = 269
+      Left = 273
       Top = 0
       Width = 8
       Caption = 'ToolButton9'
@@ -406,19 +480,19 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
       Style = tbsSeparator
     end
     object tbSplitHorizontally: TToolButton
-      Left = 277
+      Left = 281
       Top = 0
       Action = actSplitHorizontally
       AutoSize = True
     end
     object tbFont: TToolButton
-      Left = 300
+      Left = 304
       Top = 0
       Action = actFont
       AutoSize = True
     end
     object ToolButton1: TToolButton
-      Left = 323
+      Left = 327
       Top = 0
       Width = 8
       Caption = 'ToolButton1'
@@ -426,13 +500,13 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
       Style = tbsSeparator
     end
     object tbHelp: TToolButton
-      Left = 331
+      Left = 335
       Top = 0
       Action = actHelp
       AutoSize = True
     end
     object ToolButton13: TToolButton
-      Left = 354
+      Left = 358
       Top = 0
       Width = 8
       Caption = 'ToolButton13'
@@ -440,7 +514,7 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
       Style = tbsSeparator
     end
     object tbClose: TToolButton
-      Left = 362
+      Left = 366
       Top = 0
       Action = actClose
       AutoSize = True
@@ -779,6 +853,16 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
       ImageIndex = 44
       ShortCut = 16422
       OnExecute = actPrioDiffExecute
+    end
+    object actPaste1: TAction
+      Category = 'File'
+      Hint = 'Paste'
+      OnExecute = actPaste1Execute
+    end
+    object actPaste2: TAction
+      Category = 'File'
+      Hint = 'Paste'
+      OnExecute = actPaste2Execute
     end
   end
   object pmFileKind1: TPopupMenu
