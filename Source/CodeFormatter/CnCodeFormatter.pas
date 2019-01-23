@@ -90,7 +90,7 @@ type
     FDisableCorrectName: Boolean;
     FInputLineMarks: TList;         // 源与结果的行映射关系中的源行
     FOutputLineMarks: TList;        // 源与结果的行映射关系中的结果行
-    FNeedKeepLineBreak: Boolean;    // 控制当前区域是否保留换行
+    FNeedKeepLineBreak: Boolean;    // 控制当前区域是否属于可保留换行的区域
     FCurrentTab: Integer;           // 保留换行时记录当前语句应该的缩进
     FLineBreakKeepStack: TStack;    // 保留换行标记的栈
     function ErrorTokenString: string;
@@ -148,6 +148,8 @@ type
     {* 格式结果换行 }
     procedure EnsureWriteln;
     {* 格式结果保证换且只换一行}
+    procedure CheckKeepLineBreakWriteln;
+    {* 根据是否保留换行的选项决定是硬换一行还是保证换且只换一行}
     procedure WriteLine;
     {* 格式结果加一空行 }
     procedure EnsureOneEmptyLine;
@@ -749,6 +751,14 @@ begin
     end;  
   end;
   FLastToken := tokBlank; // prevent 'Symbol'#13#10#13#10' Symbol'
+end;
+
+procedure TCnAbstractCodeFormatter.CheckKeepLineBreakWriteln;
+begin
+  if CnPascalCodeForRule.KeepUserLineBreak then
+    EnsureWriteln
+  else
+    Writeln;
 end;
 
 procedure TCnAbstractCodeFormatter.EnsureWriteln;
@@ -1707,11 +1717,7 @@ begin
       Match(tokSemicolon);
 
     // else 之前的语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
-    if CnPascalCodeForRule.KeepUserLineBreak then
-      EnsureWriteln
-    else
-      Writeln;
-
+    CheckKeepLineBreakWriteln;
     if Scaner.Token in [tokKeywordElse, tokKeywordEnd] then
       Break;
     FormatCaseSelector(Tab(PreSpaceCount));
@@ -1737,10 +1743,7 @@ begin
   if HasElse then
   begin
     // end 之前的语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
-    if CnPascalCodeForRule.KeepUserLineBreak then
-      EnsureWriteln
-    else
-      Writeln;
+    CheckKeepLineBreakWriteln;
   end;
   Match(tokKeywordEnd, PreSpaceCount);
 end;
@@ -1778,10 +1781,7 @@ begin
           begin
             FormatStmtList(Tab(PreSpaceCount, False));
             // end 之前的语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
-            if CnPascalCodeForRule.KeepUserLineBreak then
-              EnsureWriteln
-            else
-              Writeln;
+            CheckKeepLineBreakWriteln;
           end;
           Match(tokKeywordEnd, PreSpaceCount);
         end;
@@ -1931,10 +1931,8 @@ begin
   Match(tokKeywordRepeat, PreSpaceCount, 1);
   Writeln;
   FormatStmtList(Tab(PreSpaceCount));
-  if CnPascalCodeForRule.KeepUserLineBreak then // until 之前的语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
-    EnsureWriteln
-  else
-    Writeln;
+  // until 之前的语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
+  CheckKeepLineBreakWriteln;
   
   Match(tokKeywordUntil, PreSpaceCount);
   FormatExpression(0, PreSpaceCount);
@@ -2251,10 +2249,8 @@ begin
         if Scaner.Token <> tokKeywordEnd then
         begin
           FormatStmtList(Tab(PreSpaceCount, False));
-          if CnPascalCodeForRule.KeepUserLineBreak then // end 语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
-            EnsureWriteln
-          else
-            Writeln;
+          // end 语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
+          CheckKeepLineBreakWriteln;
         end;
         Match(tokKeywordEnd, PreSpaceCount);
       end;
@@ -2301,10 +2297,7 @@ begin
         end;
 
         // except 的 end 之前的语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
-        if CnPascalCodeForRule.KeepUserLineBreak then
-          EnsureWriteln
-        else
-          Writeln;
+        CheckKeepLineBreakWriteln;
 
         Match(tokKeywordEnd, PreSpaceCount);
       end;
@@ -2372,10 +2365,8 @@ begin
   if not (Scaner.Token in [tokKeywordExcept, tokKeywordFinally]) then // 避免空行
   begin
     FormatStmtList(Tab(PreSpaceCount, False));
-    if CnPascalCodeForRule.KeepUserLineBreak then // Except/Finally 之前的语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
-      EnsureWriteln
-    else
-      Writeln;
+    // Except/Finally 之前的语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
+    CheckKeepLineBreakWriteln; 
   end;
   FormatTryEnd(PreSpaceCount);
 end;
@@ -3982,7 +3973,8 @@ begin
     if Scaner.Token = tokSemicolon then Match(Scaner.Token);
   end;
 
-  Writeln;
+  // 右括号前如果有回车符，保留换行时会同样输出，此处无需多换一行
+  CheckKeepLineBreakWriteln;
   Match(tokRB, PreSpaceCount);
 end;
 
@@ -4384,7 +4376,7 @@ begin
           if TypedConstantType = tcArray then
             FormatArrayConstant(PreSpaceCount)
           else if TypedConstantType = tcRecord then
-            FormatRecordConstant(PreSpaceCount + CnPascalCodeForRule.TabSpaceCount)
+            FormatRecordConstant(Tab(PreSpaceCount))
           else if Scaner.Token in ConstTokens
             + [tokAtSign, tokPlus, tokMinus, tokLB, tokRB] then // 有可能初始化的值以这些开头
             FormatConstExpr(PreSpaceCount)
