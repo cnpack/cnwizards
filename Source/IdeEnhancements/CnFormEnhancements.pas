@@ -29,7 +29,7 @@ unit CnFormEnhancements;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 修改记录：2012.09.19 by shenloqi
-*               移植到Delphi XE3
+*               移植到 Delphi XE3
 *           2007.01.11 by 周劲羽
 *               不再使用 CnWizControlHook 单元，改用 CallWndProcRet Hook
 *               重新实现浮动面板的 Visible 属性，解决某些情况下错误显示的问题
@@ -40,9 +40,9 @@ unit CnFormEnhancements;
 *           2003.10.04 by 何清(QSoft)
 *               修正当浮动工具条显示时"Edit"中大部分菜单不可使用问题
 *           2003.09.29 by 何清(QSoft)
-*               改用CnWizNotifier新增的 Application OnIdle 通知服务修正以下BUG
+*               改用 CnWizNotifier 新增的 Application OnIdle 通知服务修正以下 BUG
 *           2003.09.28 by 何清(QSoft)
-*               修正D7下调用Close All无法隐藏浮动工具条的问题，通过挂接
+*               修正 D7 下调用 Close All 无法隐藏浮动工具条的问题，通过挂接
 *               Application 的 OnIdle 事件来处理该问题，D5下该问题已经被
 *               周劲羽兄解决了
 *           2003.09.25
@@ -68,11 +68,11 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, ToolsAPI, IniFiles,
   Forms, ExtCtrls, Menus, ComCtrls, StdCtrls, Contnrs, ActnList, Buttons, Math,
   ImgList, Dialogs,
-  {$IFDEF DelphiXE3_UP}Actions,{$ENDIF}
+  {$IFDEF DELPHIXE3_UP} Actions, {$ENDIF}
   CnCommon, CnWizUtils, CnWizNotifier, CnWizIdeUtils,
   CnWizConsts, CnConsts, CnWizClasses, CnWizOptions, CnFlatToolbarConfigFrm,
   CnWizManager, CnWizMultiLang, CnSpin, TypInfo, CnPopupMenu, CnDesignEditorUtils,
-  CnWizIni;
+  CnWizIni, CnEventBus;
 
 const
   WM_PROPBARMODIFIED = WM_USER + $382;
@@ -308,6 +308,16 @@ type
     property IsSetProp: Boolean read FIsSetProp write SetIsSetProp;
   end;
 
+  TCnSettingChangedReceiver = class(TInterfacedObject, ICnEventBusReceiver)
+  private
+    FWizard: TCnFormEnhanceWizard;
+  public
+    constructor Create(AWizard: TCnFormEnhanceWizard);
+    destructor Destroy; override;
+
+    procedure OnEvent(Event: TCnEvent);
+  end;
+
 //==============================================================================
 // 窗体设计器扩展类
 //==============================================================================
@@ -322,6 +332,7 @@ type
     FDefCount: Integer;
     FIsEmbeddedDesigner: Boolean;
     FLastUpdateTick: Cardinal;
+    FSettingChangedReceiver: ICnEventBusReceiver;
     function GetFlatToolBar(Index: Integer): TCnFormFloatToolBar;
     function GetFlatToolBarCount: Integer;
   protected
@@ -2189,10 +2200,16 @@ begin
   CnWizNotifierServices.AddFormEditorNotifier(FormEditorNotify);
   CnWizNotifierServices.AddApplicationIdleNotifier(ApplicationIdle);
   CnWizNotifierServices.AddActiveFormNotifier(ActiveFormChanged);
+
+  FSettingChangedReceiver := TCnSettingChangedReceiver.Create(Self);
+  EventBus.RegisterReceiver(FSettingChangedReceiver);
 end;
 
 destructor TCnFormEnhanceWizard.Destroy;
 begin
+  EventBus.UnRegisterReceiver(FSettingChangedReceiver);
+  FSettingChangedReceiver := nil;
+
   CnWizNotifierServices.RemoveApplicationMessageNotifier(OnAppMessage);
   CnWizNotifierServices.RemoveCallWndProcRetNotifier(OnCallWndProcRet);
   CnWizNotifierServices.RemoveFormEditorNotifier(FormEditorNotify);
@@ -2737,6 +2754,37 @@ begin
   begin
     Wizard.RestoreDefault;
     UpdateListView;
+  end;
+end;
+
+{ TCnSettingChangedReceiver }
+
+constructor TCnSettingChangedReceiver.Create(
+  AWizard: TCnFormEnhanceWizard);
+begin
+  inherited Create;
+  FWizard := AWizard;
+end;
+
+destructor TCnSettingChangedReceiver.Destroy;
+begin
+
+  inherited;
+end;
+
+procedure TCnSettingChangedReceiver.OnEvent(Event: TCnEvent);
+var
+  I: Integer;
+begin
+  if FWizard <> nil then
+  begin
+    // FWizard.FPropBar.RecreateControls 暂时不用
+    for I := 0 to FWizard.FlatToolBarCount - 1 do
+    try
+      FWizard.FlatToolBars[I].RecreateButtons;
+    except
+      ;
+    end;
   end;
 end;
 

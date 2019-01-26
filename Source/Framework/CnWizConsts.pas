@@ -360,6 +360,8 @@ resourcestring
 
   // Source Highlight Event used to show Identifiers Positions
   EVENT_HIGHLIGHT_IDENT_POSITION = 'HighlightIdentPosition';
+  // CnWizards Setting Changed Event used to Update float buttons
+  EVENT_CNWIZARDS_SETTING_CHANGED = 'CnWizardsSettingChanged';
 
 //==============================================================================
 // Need to Localize

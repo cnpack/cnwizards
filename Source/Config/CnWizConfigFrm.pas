@@ -194,7 +194,7 @@ procedure ShowCnWizConfigForm(AIcon: TIcon = nil);
 implementation
 
 uses
-  CnWizManager, CnCommon, CnWizConsts, CnWizShortCut, CnWizOptions,
+  CnWizManager, CnCommon, CnWizConsts, CnWizShortCut, CnWizOptions, CnEventBus,
   CnWizCommentFrm, CnWizUtils, CnWizUpgradeFrm, CnWizIdeUtils, CnWizMenuSortFrm;
 
 const
@@ -371,6 +371,9 @@ begin
 
     WizOptions.SaveSettings;
     CnWizardMgr.SaveSettings;
+
+    // 通知外界专家包的设置对话框关闭并且设置改变了
+    EventBus.PostEvent(EVENT_CNWIZARDS_SETTING_CHANGED);
   end;
   FShortCuts := nil;
   FActives := nil;
