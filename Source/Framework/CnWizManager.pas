@@ -65,6 +65,13 @@ const
   BootShortCutKey = VK_LSHIFT; // 快捷键为 左 Shift，用户可以在启动 Delphi 时
                                // 按下该键来开启专家引导工具
 
+  // 设置改变时通知出去，通知里放置的粗略的改变内容，
+  // 包括专家使能、属性/组件编辑器使能、其他等
+  CNWIZARDS_SETTING_WIZARDS_CHANGED            = 1;
+  CNWIZARDS_SETTING_PROPERTY_EDITORS_CHANGED   = 2;
+  CNWIZARDS_SETTING_COMPONENT_EDITORS_CHANGED  = 4;
+  CNWIZARDS_SETTING_OTHERS_CHANGED             = 8;
+
 const
   KEY_MAPPING_REG = '\Editor\Options\Known Editor Enhancements';
 

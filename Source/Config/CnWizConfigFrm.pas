@@ -173,7 +173,7 @@ type
     procedure lbWizardsKeyPress(Sender: TObject; var Key: Char);
     procedure lbDesignEditorsKeyPress(Sender: TObject; var Key: Char);
   private
-    { Private declarations }
+    FWizardsActiveChanged: Boolean;
     FShortCuts: array of TShortCut;
     FActives: array of Boolean;
     FEditorActives: array of Boolean;
@@ -317,30 +317,45 @@ end;
 // 窗体释放
 procedure TCnWizConfigForm.FormDestroy(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
+  Changes: DWORD;
 begin
   if ModalResult = mrOK then
   begin
+    if FWizardsActiveChanged then
+      Changes := CNWIZARDS_SETTING_WIZARDS_CHANGED
+    else
+      Changes := 0;
+
     // 专家设置页面
     WizShortCutMgr.BeginUpdate;
     try
-      for i := 0 to CnWizardMgr.WizardCount - 1 do
+      for I := 0 to CnWizardMgr.WizardCount - 1 do
       begin
-        CnWizardMgr[i].Active := FActives[i];
-        if CnWizardMgr[i] is TCnActionWizard then
-          TCnActionWizard(CnWizardMgr[i]).Action.ShortCut := FShortCuts[i];
+        CnWizardMgr[I].Active := FActives[I];
+        if CnWizardMgr[I] is TCnActionWizard then
+          TCnActionWizard(CnWizardMgr[I]).Action.ShortCut := FShortCuts[I];
       end;
     finally
       WizShortCutMgr.EndUpdate;
     end;
 
     // 属性编辑器页面
-    for i := 0 to CnDesignEditorMgr.PropEditorCount - 1 do
-      CnDesignEditorMgr.PropEditors[i].Active := FEditorActives[i];
+    for I := 0 to CnDesignEditorMgr.PropEditorCount - 1 do
+    begin
+      if CnDesignEditorMgr.PropEditors[I].Active <> FEditorActives[I] then
+        Changes := Changes or CNWIZARDS_SETTING_PROPERTY_EDITORS_CHANGED;
+      CnDesignEditorMgr.PropEditors[I].Active := FEditorActives[I];
+    end;
 
-    for i := 0 to CnDesignEditorMgr.CompEditorCount - 1 do
-      CnDesignEditorMgr.CompEditors[i].Active :=
-        FEditorActives[CnDesignEditorMgr.PropEditorCount + i];
+    for I := 0 to CnDesignEditorMgr.CompEditorCount - 1 do
+    begin
+      if CnDesignEditorMgr.CompEditors[I].Active <>
+        FEditorActives[CnDesignEditorMgr.PropEditorCount + I] then
+        Changes := Changes or CNWIZARDS_SETTING_COMPONENT_EDITORS_CHANGED;
+      CnDesignEditorMgr.CompEditors[I].Active :=
+        FEditorActives[CnDesignEditorMgr.PropEditorCount + I];
+    end;
 
     CnDesignEditorMgr.UnRegister;
     CnDesignEditorMgr.Register;
@@ -373,7 +388,7 @@ begin
     CnWizardMgr.SaveSettings;
 
     // 通知外界专家包的设置对话框关闭并且设置改变了
-    EventBus.PostEvent(EVENT_CNWIZARDS_SETTING_CHANGED);
+    EventBus.PostEvent(EVENT_CNWIZARDS_SETTING_CHANGED, Pointer(Changes));
   end;
   FShortCuts := nil;
   FActives := nil;
@@ -543,6 +558,7 @@ begin
   Idx := CalcSelectedWizardIndex();
   if Idx >= 0 then
   begin
+    FWizardsActiveChanged := True;
     FActives[Idx] := cbWizardActive.Checked;
     btnConfig.Enabled := cbWizardActive.Checked and
       TCnBaseWizard(lbWizards.Items.Objects[lbWizards.ItemIndex]).HasConfig;
@@ -559,6 +575,7 @@ begin
   Idx := CalcSelectedWizardIndex();
   if Idx >= 0 then
   begin
+    FWizardsActiveChanged := True;
     FActives[Idx] := not FActives[Idx];
     cbWizardActive.Checked := FActives[Idx];
     btnConfig.Enabled := FActives[Idx] and
