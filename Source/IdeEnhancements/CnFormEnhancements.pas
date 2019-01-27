@@ -2776,7 +2776,8 @@ procedure TCnSettingChangedReceiver.OnEvent(Event: TCnEvent);
 var
   I: Integer;
 begin
-  if FWizard <> nil then
+  if (FWizard <> nil) and
+    ((DWORD(Event.EventData) and CNWIZARDS_SETTING_WIZARDS_CHANGED) <> 0) then
   begin
     // FWizard.FPropBar.RecreateControls ‘› ±≤ª”√
     for I := 0 to FWizard.FlatToolBarCount - 1 do
