@@ -793,10 +793,39 @@ end;
 {$IFNDEF TEST_APP}
 
 procedure TCnTranslateForm.ProcessSizeEnlarge;
+{$IFNDEF STAND_ALONE}
+var
+  Factor: Single;
+  AEnlarge: TCnWizSizeEnlarge;
+{$ENDIF}
 begin
 {$IFNDEF STAND_ALONE}
   if FEnlarge <> wseOrigin then
-    ScaleForm(Self, GetFactorFromSizeEnlarge(FEnlarge));
+  begin
+    // 判断单显示器情况下，当前的放大倍数是否会超出 Screen 的尺寸，超则降档
+    Factor := GetFactorFromSizeEnlarge(FEnlarge);
+    if Screen.MonitorCount = 1 then
+    begin
+      AEnlarge := FEnlarge;
+      while (Width * Factor >= Screen.Width - 30) or
+        (Height * Factor >= Screen.Height - 30) do
+      begin
+        AEnlarge := TCnWizSizeEnlarge(Ord(AEnlarge) - 1);
+        Factor := GetFactorFromSizeEnlarge(AEnlarge);
+
+        if AEnlarge = wseOrigin then
+          Exit;
+
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('Form %s Width %d Height %d Bigger Than Screen if Enlarged. Shrink it.',
+          [ClassName, Width, Height]);
+{$ENDIF}
+      end;
+      FEnlarge := AEnlarge; // 保存修剪过的放大倍数
+    end;
+
+    ScaleForm(Self, Factor);
+  end;
 {$ENDIF}
 end;
 
