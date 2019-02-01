@@ -978,7 +978,12 @@ begin
   end;
   Obj.InternalToolBar1.Visible := Obj.ToolBtnSep1.Visible;
 
-  Obj.MatchFrame := TCnMatchButtonFrame.Create(ToolBar);
+  // 有下拉菜单的 Frame，在主题存在的情况下，如果菜单的 Owner 不是 Frame，
+  // 或 Frame 的 Owner 不是 Form，那么 TSysPopupStyleHook 会无法根据菜单 Handle
+  // 找到 MenuItem，导致主题状态下菜单绘制失败。
+  // 即使 GetVCLParentMenuItem 函数里从只找 Menu/Frame 改为全递归，也仍然存在
+  // Owner 为 nil 的 PopupMenu 无法被找到的问题。
+  Obj.MatchFrame := TCnMatchButtonFrame.Create(GetIdeMainForm);
   with Obj.MatchFrame do
   begin
     Parent := ToolBar;
