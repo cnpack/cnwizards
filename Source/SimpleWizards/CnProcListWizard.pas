@@ -983,7 +983,11 @@ begin
   // 找到 MenuItem，导致主题状态下菜单绘制失败。
   // 即使 GetVCLParentMenuItem 函数里从只找 Menu/Frame 改为全递归，也仍然存在
   // Owner 为 nil 的 PopupMenu 无法被找到的问题。
+{$IFDEF DELPHI103_RIO_UP}
   Obj.MatchFrame := TCnMatchButtonFrame.Create(GetIdeMainForm);
+{$ELSE}
+  Obj.MatchFrame := TCnMatchButtonFrame.Create(ToolBar);
+{$ENDIF}
   with Obj.MatchFrame do
   begin
     Parent := ToolBar;
