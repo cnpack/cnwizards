@@ -3,7 +3,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
   Top = 77
   BorderStyle = bsDialog
   Caption = 'Code Formatter Settings'
-  ClientHeight = 490
+  ClientHeight = 520
   ClientWidth = 451
   Font.Charset = ANSI_CHARSET
   OnCloseQuery = FormCloseQuery
@@ -14,8 +14,9 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
     Left = 8
     Top = 8
     Width = 433
-    Height = 441
+    Height = 471
     ActivePage = tsPascal
+    Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
     object tsPascal: TTabSheet
       Caption = 'Pascal'
@@ -23,7 +24,8 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         Left = 8
         Top = 8
         Width = 409
-        Height = 277
+        Height = 307
+        Anchors = [akLeft, akTop, akBottom]
         Caption = 'Common Settings'
         TabOrder = 0
         object lblKeyword: TLabel
@@ -70,7 +72,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         end
         object lblDirectiveMode: TLabel
           Left = 16
-          Top = 244
+          Top = 274
           Width = 90
           Height = 13
           Caption = 'Compiler Directive:'
@@ -118,7 +120,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           Height = 22
           MaxValue = 256
           MinValue = 16
-          TabOrder = 6
+          TabOrder = 5
           Value = 16
           OnChange = seWrapLineChange
         end
@@ -145,7 +147,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         object chkUsesSinglieLine: TCheckBox
           Left = 16
           Top = 192
-          Width = 249
+          Width = 377
           Height = 17
           Caption = 'Single Line Mode for Every Uses Unit.'
           TabOrder = 8
@@ -156,7 +158,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           Width = 121
           Height = 17
           Caption = 'Auto Wrap Line at:'
-          TabOrder = 5
+          TabOrder = 7
           OnClick = chkAutoWrapClick
         end
         object seNewLine: TCnSpinEdit
@@ -166,43 +168,44 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           Height = 22
           MaxValue = 256
           MinValue = 16
-          TabOrder = 7
+          TabOrder = 6
           Value = 16
         end
         object chkUseIDESymbols: TCheckBox
           Left = 16
-          Top = 216
-          Width = 361
+          Top = 244
+          Width = 377
           Height = 17
           Caption = 'Use IDE Internal Symbols to Correct Identifiers.'
-          TabOrder = 9
+          TabOrder = 10
         end
         object cbbDirectiveMode: TComboBox
           Left = 136
-          Top = 242
+          Top = 272
           Width = 257
           Height = 21
           Style = csDropDownList
           ItemHeight = 13
-          TabOrder = 10
+          TabOrder = 11
           Items.Strings = (
             'Treat as Comment'
             'Only Processing First Branch')
         end
         object chkKeepUserLineBreak: TCheckBox
-          Left = 264
-          Top = 192
-          Width = 129
+          Left = 16
+          Top = 218
+          Width = 377
           Height = 17
-          Caption = 'Keep User Line Break'
-          TabOrder = 11
+          Caption = 'Keep User Line Break in Statement.'
+          TabOrder = 9
         end
       end
       object grpAsm: TGroupBox
         Left = 8
-        Top = 292
+        Top = 322
         Width = 409
         Height = 83
+        Anchors = [akLeft, akBottom]
         Caption = 'ASM Settings'
         TabOrder = 1
         object lblAsmHeadIndent: TLabel
@@ -242,9 +245,10 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
       end
       object chkIgnoreArea: TCheckBox
         Left = 8
-        Top = 386
+        Top = 416
         Width = 281
         Height = 17
+        Anchors = [akLeft, akBottom]
         Caption = 'Do NOT Format Contents between {(*} and {*)}'
         TabOrder = 2
       end
@@ -252,9 +256,10 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
   end
   object btnOK: TButton
     Left = 206
-    Top = 459
+    Top = 489
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&OK'
     Default = True
     ModalResult = 1
@@ -262,9 +267,10 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
   end
   object btnCancel: TButton
     Left = 286
-    Top = 459
+    Top = 489
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
@@ -272,18 +278,20 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
   end
   object btnHelp: TButton
     Left = 366
-    Top = 459
+    Top = 489
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&Help'
     TabOrder = 4
     OnClick = btnHelpClick
   end
   object btnShortCut: TButton
     Left = 8
-    Top = 459
+    Top = 489
     Width = 75
     Height = 21
+    Anchors = [akLeft, akBottom]
     Caption = '&Shortcut'
     TabOrder = 1
     OnClick = btnShortCutClick
