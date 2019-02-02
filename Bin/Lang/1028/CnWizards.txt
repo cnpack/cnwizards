@@ -2607,6 +2607,7 @@ TCnCodeFormatterForm.cbbDirectiveMode.Items.Text=當作註釋<BR>只處理第一
 TCnCodeFormatterForm.cbbKeywordStyle.Items.Text=小寫<BR>大寫<BR>首字母大寫<BR>不變<BR>
 TCnCodeFormatterForm.chkAutoWrap.Caption=自動換行於：
 TCnCodeFormatterForm.chkIgnoreArea.Caption=不格式化 {(*} 與 {*)} 之間的內容
+TCnCodeFormatterForm.chkKeepUserLineBreak.Caption=保留語句中的換行
 TCnCodeFormatterForm.chkUseIDESymbols.Caption=根據 IDE 內部符號表來糾正標識符的大小寫
 TCnCodeFormatterForm.chkUsesSinglieLine.Caption=Uses 區的每個單元名獨佔一行
 TCnCodeFormatterForm.grpAsm.Caption=彙編選項

@@ -2607,6 +2607,7 @@ TCnCodeFormatterForm.cbbDirectiveMode.Items.Text=Считать коммента
 TCnCodeFormatterForm.cbbKeywordStyle.Items.Text=Нижний регистр<BR>Верхний регистр<BR>Заглавная первая буква<BR>Без изменений<BR>
 TCnCodeFormatterForm.chkAutoWrap.Caption=Перенос строки на:
 TCnCodeFormatterForm.chkIgnoreArea.Caption=НЕ форматировать содержимое между {(*} и {*)}
+TCnCodeFormatterForm.chkKeepUserLineBreak.Caption=Сохранить разрыв строки в выписке
 TCnCodeFormatterForm.chkUseIDESymbols.Caption=Использовать внутренние символы среды для коррекции идентификаторов.
 TCnCodeFormatterForm.chkUsesSinglieLine.Caption=По одному модулю на строку в разделе Uses.
 TCnCodeFormatterForm.grpAsm.Caption=Настройки ASM

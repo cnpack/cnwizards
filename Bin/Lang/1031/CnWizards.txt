@@ -2607,6 +2607,7 @@ TCnCodeFormatterForm.cbbDirectiveMode.Items.Text=Behandeln als Kommentar<BR>Nur 
 TCnCodeFormatterForm.cbbKeywordStyle.Items.Text=klein<BR>groß<BR>erster Buchstabe groß<BR>kein Wechsel<BR>
 TCnCodeFormatterForm.chkAutoWrap.Caption=automatischer Umbruch bei:
 TCnCodeFormatterForm.chkIgnoreArea.Caption=Formatiere keinen Inhalt zwischen {(*} and {*)}
+TCnCodeFormatterForm.chkKeepUserLineBreak.Caption=Behalten Sie den Zeilenumbruch in der Anweisung bei
 TCnCodeFormatterForm.chkUseIDESymbols.Caption=nutze IDE interne Symbole, um die Identifier auszutauschen.
 TCnCodeFormatterForm.chkUsesSinglieLine.Caption=Einzel Zeilen Modus für jede Uses Unit.
 TCnCodeFormatterForm.grpAsm.Caption=ASM Einstellungen
