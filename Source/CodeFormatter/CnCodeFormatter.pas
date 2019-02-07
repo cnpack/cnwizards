@@ -4287,7 +4287,7 @@ var
   OldLastToken: TPascalToken;
 begin
   // DONE: 碰到括号就该判断一下，后面的大类是 symbol: 还是常量，
-  // 然后分别调用FormatArrayConstant和FormatRecordConstant
+  // 然后分别调用 FormatArrayConstant 和 FormatRecordConstant
   TypedConstantType := tcConst;
   case Scaner.Token of
     // tokKeywordArray: FormatArrayConstant(PreSpaceCount); // 没这种语法
@@ -4383,7 +4383,16 @@ begin
             FLastNonBlankToken := FLastToken;
 
           if TypedConstantType = tcArray then
-            FormatArrayConstant(PreSpaceCount)
+          begin
+            // 数组常量表达式允许保持内部换行
+            FLineBreakKeepStack.Push(Pointer(FNeedKeepLineBreak));
+            FNeedKeepLineBreak := True;
+            try
+              FormatArrayConstant(PreSpaceCount);
+            finally
+              FNeedKeepLineBreak := Boolean(FLineBreakKeepStack.Pop);
+            end;
+          end
           else if TypedConstantType = tcRecord then
             FormatRecordConstant(Tab(PreSpaceCount))
           else if Scaner.Token in ConstTokens
