@@ -4299,7 +4299,7 @@ begin
           MatchOperator(Scaner.Token);
           FormatSetConstructor;
         end;
-      end;  
+      end;
     tokLB:
       begin // 是括号的，表示是组合的Type
         if Scaner.ForwardToken = tokLB then // 如果后面还是括号，则说明本大类是常量或array
@@ -4329,7 +4329,16 @@ begin
             FLastNonBlankToken := FLastToken;
 
           if TypedConstantType = tcArray then
-            FormatArrayConstant(PreSpaceCount)
+          begin
+            // 数组常量表达式允许保持内部换行
+            FLineBreakKeepStack.Push(Pointer(FNeedKeepLineBreak));
+            FNeedKeepLineBreak := True;
+            try
+              FormatArrayConstant(PreSpaceCount);
+            finally
+              FNeedKeepLineBreak := Boolean(FLineBreakKeepStack.Pop);
+            end;
+          end
           else if Scaner.Token in ConstTokens
             + [tokAtSign, tokPlus, tokMinus, tokLB, tokRB] then // 有可能初始化的值以这些开头
             FormatConstExpr(PreSpaceCount)
