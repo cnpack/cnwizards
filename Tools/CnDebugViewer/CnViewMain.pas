@@ -758,32 +758,20 @@ begin
 end;
 
 procedure TCnMainViewer.actOpenExecute(Sender: TObject);
+var
+  Child: TCnMsgChild;
 begin
-  if FThread <> nil then
-  begin
-    if QueryDlg(SCnStopFirst) then
-    begin
-      actStop.Execute;
-      Application.ProcessMessages;
-    end
-    else
-      Exit;
-  end;
-
   if dlgOpen.Execute then
   begin
-    if CurrentChild = nil then
-      actNew.Execute;
+    Child := TCnMsgChild.Create(Application);
+    Child.Show;
 
-    if (CurrentChild <> nil) and (FThread = nil) then
-    begin
-      CurrentChild.LoadFromFile(dlgOpen.FileName);
-      CurrentChild.Store.ProcessID := CnInvalidFileProcId;
-      CurrentChild.ProcessID := CnInvalidFileProcId;
-      CurrentChild.ProcName := _CnExtractFileName(dlgOpen.FileName);
+    Child.LoadFromFile(dlgOpen.FileName);
+    Child.Store.ProcessID := CnInvalidFileProcId;
+    Child.ProcessID := CnInvalidFileProcId;
+    Child.ProcName := _CnExtractFileName(dlgOpen.FileName);
 
-      UpdateFormInSwitch(CurrentChild, fsUpdate);
-    end;
+    UpdateFormInSwitch(Child, fsUpdate);
   end;
 end;
 
