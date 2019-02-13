@@ -2831,7 +2831,7 @@ begin
   if Bar <> nil then
   begin
 {$IFDEF DEBUG}
-    CnDebugger.LogBoolean(Bar.SimplePanel, 'F3 Search: Fould Editor StatusBar. Check its SimplePanel.');
+    CnDebugger.LogBoolean(Bar.SimplePanel, 'F3 Search: Found Editor StatusBar. Check its SimplePanel.');
 {$ENDIF}
     // 状态栏的 SimplePanel 为 True 时表明在进行 Ctrl + E 操作，应该回避
     if Bar.SimplePanel then
@@ -2855,13 +2855,21 @@ begin
 
     // 如果是 IDE 在查找中（已匹配），则退出让 IDE 自行处理
     if Element = SearchMatch then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('Do NOT Search for Element already in SearchMatch');
+{$ENDIF}
       Exit;
+    end;
 
     // 开始进行未选择时的查找处理。
     // 当 KeepSearch 为 True 时，需要进行查找上一次 F3 查找的内容，而不是 IDE 中查找的内容
 
     // 无块时，如不记忆 IDE 的查找，则退出，让 IDE 去执行查找下一个
     if not FKeepSearch then
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('Do NOT Search for not KeepSearch');
+{$ENDIF}
       Exit;
 
     // 无选择块并且在 KeepSearch 情况下，使用上次 F3 查找的内容。

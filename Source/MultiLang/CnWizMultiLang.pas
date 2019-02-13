@@ -419,9 +419,17 @@ begin
   try
   if Supports(BorlandIDEServices, IOTAIDEThemingServices, Theming) then
     if (Theming <> nil) and Theming.IDEThemingEnabled then
+    begin
       Theming.ApplyTheme(Self);
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg(ClassName + ' Apply Theme.');
+{$ENDIF}
+    end;
   except
     ; // Maybe cause NullPointer Exception in IDEServices.TIDEServices.ApplyTheme, Only catch it
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg(ClassName + ' Apply Theme Error!');
+{$ENDIF}
   end;
 {$ENDIF}
 
