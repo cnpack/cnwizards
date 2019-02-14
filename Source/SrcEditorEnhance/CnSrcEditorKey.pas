@@ -202,9 +202,9 @@ uses
 
 type
   TControlHack = class(TControl);
-  TClickEventProc = procedure(Self: TObject; Sender: TObject);
+  TClickEventProc = procedure(ASelf: TObject; Sender: TObject);
 {$IFDEF IDE_HAS_EDITOR_SEARCHPANEL}
-  TDoSearchProc = procedure(Self: TObject; const Text: string);
+  TDoSearchProc = procedure(ASelf: TObject; const Text: string);
 {$ENDIF}
 
 const
@@ -219,7 +219,13 @@ const
   SCnPropCheckBoxClassName = 'TPropCheckBox';
 
 {$IFDEF IDE_HAS_EDITOR_SEARCHPANEL}
+  SCnSearchPanelCaseSenseBoxName = 'CaseSenseBox';
+  SCnSearchPanelWholeWordBoxName = 'WholeWordBox';
+  SCnSearchPanelRegExBoxName = 'RegExBox';
+
   SCnEditWindowDoSearch = '@Editorform@TEditWindow@DoSearch$qqr20System@UnicodeString';
+  SCnEditWindowSearchUpClick = '@Editorform@TEditWindow@SearchUpClick$qqrp14System@TObject';
+  SCnEditWindowSearchDnClick = '@Editorform@TEditWindow@SearchDnClick$qqrp14System@TObject';
 {$ENDIF}
 
 var
@@ -229,10 +235,15 @@ var
   FSearchDialogMethodHook: TCnMethodHook = nil;
 {$IFDEF IDE_HAS_EDITOR_SEARCHPANEL}
   FOldEditWindowDoSearch: Pointer = nil;
+  FOldEditWindowSearchUpClick: Pointer = nil;
+  FOldEditWindowSearchDnClick: Pointer = nil;
+
   FEditWindowDoSearchMethodHook: TCnMethodHook = nil;
+  FEditWindowSearchUpClickMethodHook: TCnMethodHook = nil;
+  FEditWindowSearchDnClickMethodHook: TCnMethodHook = nil;
 {$ENDIF}
 
-  // 记录当前的搜索选项
+  // 记录当前的搜索选项，有 IDE 搜索框以及编辑器下部的搜索条
   FCaseSense: Boolean;
   FWholeWords: Boolean;
   FRegExp: Boolean;
@@ -259,7 +270,7 @@ begin
         if TControlHack(AComp).Text <> '' then // 记录 IDE 中的查找历史
           FOldSearchText := TControlHack(AComp).Text;
 {$ELSE}
-        // BDS 下 AComp 不是普通Control而是 WideControl，其 Text 属性是 WideString
+        // BDS 下 AComp 不是普通 Control 而是 WideControl，其 Text 属性是 WideString
         // 不能直接获得，需要获取地址再转换
         Len := TControl(AComp).Perform(WM_GETTEXTLENGTH, 0, 0);
         if Len > 0 then
@@ -272,7 +283,7 @@ begin
 {$ENDIF}
       end;
 
-      // 记录其他搜索选项备F3Search功能使用
+      // 记录其他搜索选项备 F3Search 功能使用
       AComp := AForm.FindComponent(SCnCaseSenseCheckBoxName);
       if (AComp <> nil) and (AComp.ClassNameIs(SCnPropCheckBoxClassName)) then
         FCaseSense := TCheckBox(AComp).Checked; // 记录 IDE 中的查找选项之大小写
@@ -309,6 +320,55 @@ end;
 
 {$IFDEF IDE_HAS_EDITOR_SEARCHPANEL}
 
+procedure GetherSearchPanelOptions(AOwner: TComponent);
+var
+  Comp: TComponent;
+  Box: TCustomCheckBox;
+  I: Integer;
+  F1, F2, F3: Boolean;
+begin
+  if (AOwner = nil) or not AOwner.ClassNameIs(EditorFormClassName) then
+    Exit;
+
+  F1 := False;
+  F2 := False;
+  F3 := False;
+  for I := 0 to AOwner.ComponentCount - 1 do
+  begin
+    Comp := AOwner.Components[I];
+    if (Comp is TCustomCheckBox) and Comp.ClassNameIs(SCnPropCheckBoxClassName) then
+    begin
+      if Comp.Name = SCnSearchPanelCaseSenseBoxName then
+      begin
+        FCaseSense := TCheckBox(Comp).Checked;
+{$IFDEF DEBUG}
+        CnDebugger.LogBoolean(FCaseSense, 'GetherSearchPanelOptions CaseSense');
+{$ENDIF}
+        F1 := True;
+      end
+      else if Comp.Name = SCnSearchPanelWholeWordBoxName then
+      begin
+        FWholeWords := TCheckBox(Comp).Checked;
+{$IFDEF DEBUG}
+        CnDebugger.LogBoolean(FWholeWords, 'GetherSearchPanelOptions WholeWords');
+{$ENDIF}
+        F2 := True;
+      end
+      else if Comp.Name = SCnSearchPanelRegExBoxName then
+      begin
+        FRegExp := TCheckBox(Comp).Checked;
+{$IFDEF DEBUG}
+        CnDebugger.LogBoolean(FWholeWords, 'GetherSearchPanelOptions RegExp');
+{$ENDIF}
+        F3 := True;
+      end;
+    end;
+
+    if F1 and F2 and F3 then
+      Exit;
+  end;
+end;
+
 procedure CnEditWindowDoSearch(ASelf: Pointer; const Text: string);
 begin
 {$IFDEF DEBUG}
@@ -325,6 +385,48 @@ begin
       FEditWindowDoSearchMethodHook.UnhookMethod;
       TDoSearchProc(FOldEditWindowDoSearch)(ASelf, Text);
       FEditWindowDoSearchMethodHook.HookMethod;
+    end;
+  end;
+end;
+
+procedure CnEditWindowSearchUpClick(ASelf, Sender: TObject);
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Hooked EditWindowSearchUpClick.');
+{$ENDIF}
+  if ASelf is TComponent then
+    GetherSearchPanelOptions(ASelf as TComponent);
+
+  if FOldEditWindowSearchUpClick <> nil then
+  begin
+    if FEditWindowSearchUpClickMethodHook.UseDDteours then
+      TClickEventProc(FEditWindowSearchUpClickMethodHook.Trampoline)(ASelf, Sender)
+    else
+    begin
+      FEditWindowSearchUpClickMethodHook.UnhookMethod;
+      TClickEventProc(FOldEditWindowSearchUpClick)(ASelf, Sender);
+      FEditWindowSearchUpClickMethodHook.HookMethod;
+    end;
+  end;
+end;
+
+procedure CnEditWindowSearchDnClick(ASelf, Sender: TObject);
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Hooked EditWindowSearchDnClick.');
+{$ENDIF}
+  if ASelf is TComponent then
+    GetherSearchPanelOptions(ASelf as TComponent);
+
+  if FOldEditWindowSearchDnClick <> nil then
+  begin
+    if FEditWindowSearchDnClickMethodHook.UseDDteours then
+      TClickEventProc(FEditWindowSearchDnClickMethodHook.Trampoline)(ASelf, Sender)
+    else
+    begin
+      FEditWindowSearchDnClickMethodHook.UnhookMethod;
+      TClickEventProc(FOldEditWindowSearchDnClick)(ASelf, Sender);
+      FEditWindowSearchDnClickMethodHook.HookMethod;
     end;
   end;
 end;
@@ -356,6 +458,22 @@ begin
       if FOldEditWindowDoSearch <> nil then
         FEditWindowDoSearchMethodHook := TCnMethodHook.Create(FOldEditWindowDoSearch, @CnEditWindowDoSearch);
     end;
+
+    FOldEditWindowSearchUpClick := GetProcAddress(FCorIdeModule, SCnEditWindowSearchUpClick);
+    if FOldEditWindowSearchUpClick <> nil then
+    begin
+      FOldEditWindowSearchUpClick := GetBplMethodAddress(FOldEditWindowSearchUpClick);
+      if FOldEditWindowSearchUpClick <> nil then
+        FEditWindowSearchUpClickMethodHook := TCnMethodHook.Create(FOldEditWindowSearchUpClick, @CnEditWindowSearchUpClick);
+    end;
+
+    FOldEditWindowSearchDnClick := GetProcAddress(FCorIdeModule, SCnEditWindowSearchDnClick);
+    if FOldEditWindowSearchDnClick <> nil then
+    begin
+      FOldEditWindowSearchDnClick := GetBplMethodAddress(FOldEditWindowSearchDnClick);
+      if FOldEditWindowSearchDnClick <> nil then
+        FEditWindowSearchDnClickMethodHook := TCnMethodHook.Create(FOldEditWindowSearchDnClick, @CnEditWindowSearchDnClick);
+    end;
 {$ENDIF}
   end;
 
@@ -369,6 +487,12 @@ begin
   EditControlWrapper.RemoveEditorChangeNotifier(EditorChanged);
   EditControlWrapper.RemoveKeyDownNotifier(EditControlKeyDown);
   EditControlWrapper.RemoveKeyUpNotifier(EditControlKeyUp);
+
+{$IFDEF IDE_HAS_EDITOR_SEARCHPANEL}
+  FEditWindowSearchDnClickMethodHook.Free;
+  FEditWindowSearchUpClickMethodHook.Free;
+  FEditWindowDoSearchMethodHook.Free;
+{$ENDIF}
 
   FSearchDialogMethodHook.Free;
   if FCorIdeModule <> 0 then
@@ -2912,12 +3036,12 @@ begin
   Position.SearchOptions.WordBoundary := FWholeWords;
   Position.SearchOptions.RegularExpression := FRegExp;
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('F3 Search: Set Options: Case %d, Word %d, Reg %d. ',
+  CnDebugger.LogFmt('F3 Search: Set Options: Case %d, Word %d, Reg %d.',
     [Integer(FCaseSense), Integer(FWholeWords), Integer(FRegExp)]);
 {$ENDIF}
 
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('F3 Search: '+ SearchString);
+  CnDebugger.LogMsg('F3 Search: ' + SearchString);
 {$ENDIF}
   Found := False;
   FOldSearchText := Position.SearchOptions.SearchText;
@@ -2927,7 +3051,15 @@ begin
     Found := Position.SearchAgain;
     if not Found and FSearchWrap then // 是否回绕查找
     begin
-      Position.Move(1, 1);
+      Found := Position.Move(1, 1);
+      if not Found then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogBoolean(Found, 'F3 Search Move to BOF.');
+{$ENDIF}
+        Exit;
+      end;
+
       Found := Position.SearchAgain;
 {$IFDEF DEBUG}
       CnDebugger.LogBoolean(Found, 'F3 Search Found Value after Move to BOF.');
@@ -2942,7 +3074,15 @@ begin
     Found := Position.SearchAgain;
     if not Found and FSearchWrap then // 是否回绕查找
     begin
-      Position.MoveEOF;
+      Found := Position.MoveEOF;
+      if not Found then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogBoolean(Found, 'F3 Search Move to EOF.');
+{$ENDIF}
+        Exit;
+      end;
+
       Found := Position.SearchAgain;
 {$IFDEF DEBUG}
       CnDebugger.LogBoolean(Found, 'F3 Search Found Value after Move to EOF.');
