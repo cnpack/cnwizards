@@ -360,7 +360,7 @@ end;
 function IsDelphi103RIdeVersionLatest: Boolean;
 const
   CoreIdeLatest: TVersionNumber =
-    (Major: 26; Minor: 0; Release: 32429; Build: 4364); // 10.3
+    (Major: 26; Minor: 0; Release: 33219; Build: 4899); // 10.3.1
 var
   ReadFileVersion: TVersionNumber;
 begin
