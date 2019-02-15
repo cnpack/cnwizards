@@ -90,7 +90,7 @@ type
 
 {$M+}
 
-  TCnBaseEditorTool = class(TObject)
+  TCnBaseCodingToolset = class(TObject)
   private
     FActive: Boolean;
     FOwner: TCnEditorToolsetWizard;
@@ -147,7 +147,7 @@ type
 
 {$M-}
 
-  TCnEditorToolClass = class of TCnBaseEditorTool;
+  TCnCodingToolsetClass = class of TCnBaseCodingToolset;
 
 { TCnEditorToolsetWizard }
 
@@ -156,9 +156,8 @@ type
     FConfigIndex: Integer;
     FEditorIndex: Integer;
     FEditorTools: TList;
-
     procedure UpdateActions;
-    function GetEditorTools(Index: Integer): TCnBaseEditorTool;
+    function GetEditorTools(Index: Integer): TCnBaseCodingToolset;
     function GetEditorToolCount: Integer;
   protected
     function GetHasConfig: Boolean; override;
@@ -179,21 +178,21 @@ type
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
     function GetCaption: string; override;
     function GetHint: string; override;
-    property EditorTools[Index: Integer]: TCnBaseEditorTool read GetEditorTools;
+    property EditorTools[Index: Integer]: TCnBaseCodingToolset read GetEditorTools;
     property EditorToolCount: Integer read GetEditorToolCount;
   end;
 
-procedure RegisterCnEditor(const AClass: TCnEditorToolClass);
-{* 注册一个 CnEditorTool 编辑器工具类引用，每个编辑器工具类实现单元
+procedure RegisterCnCodingToolset(const AClass: TCnCodingToolsetClass);
+{* 注册一个 CnEditorToolset 编辑器工具类引用，每个编辑器工具类实现单元
    应在该单元的 initialization 节调用该过程注册编辑器工具类}
 
-function GetCnEditorToolClass(const ClassName: string): TCnEditorToolClass;
+function GetCnEditorToolClass(const ClassName: string): TCnCodingToolsetClass;
 {* 根据编辑器工具类名取指定的编辑器工具类引用}
 
 function GetCnEditorToolClassCount: Integer;
 {* 返回已注册的编辑器工具类总数}
 
-function GetCnEditorToolClassByIndex(const Index: Integer): TCnEditorToolClass;
+function GetCnEditorToolClassByIndex(const Index: Integer): TCnCodingToolsetClass;
 {* 根据索引号取指定的编辑器工具类引用}
 
 {$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
@@ -213,8 +212,8 @@ uses
 var
   CnEditorClassList: TList = nil; // 编辑器工具类引用列表
 
-// 注册一个 CnEditorTool 编辑器工具类引用
-procedure RegisterCnEditor(const AClass: TCnEditorToolClass);
+// 注册一个 CnCodingToolset 编辑器工具类引用
+procedure RegisterCnCodingToolset(const AClass: TCnCodingToolsetClass);
 begin
   Assert(CnEditorClassList <> nil, 'CnEditorClassList is nil!');
   if CnEditorClassList.IndexOf(AClass) < 0 then
@@ -222,7 +221,7 @@ begin
 end;
 
 // 根据编辑器工具类名取指定的编辑器工具类引用
-function GetCnEditorToolClass(const ClassName: string): TCnEditorToolClass;
+function GetCnEditorToolClass(const ClassName: string): TCnCodingToolsetClass;
 var
   i: Integer;
 begin
@@ -241,7 +240,7 @@ begin
 end;
 
 // 根据索引号取指定的编辑器工具类引用
-function GetCnEditorToolClassByIndex(const Index: Integer): TCnEditorToolClass;
+function GetCnEditorToolClassByIndex(const Index: Integer): TCnCodingToolsetClass;
 begin
   Result := nil;
   if (Index >= 0) and (Index <= CnEditorClassList.Count - 1) then
@@ -250,12 +249,12 @@ end;
 
 { TCnBaseEditorTool }
 
-procedure TCnBaseEditorTool.Config;
+procedure TCnBaseCodingToolset.Config;
 begin
 
 end;
 
-constructor TCnBaseEditorTool.Create(AOwner: TCnEditorToolsetWizard);
+constructor TCnBaseCodingToolset.Create(AOwner: TCnEditorToolsetWizard);
 begin
   inherited Create;
   Assert(Assigned(AOwner));
@@ -264,7 +263,7 @@ begin
   FAction := nil;
 end;
 
-function TCnBaseEditorTool.CreateIniFile: TCustomIniFile;
+function TCnBaseCodingToolset.CreateIniFile: TCustomIniFile;
 begin
   if FDefaultsMap = nil then
     FDefaultsMap := TCnStrToVariantHashMap.Create;
@@ -273,18 +272,18 @@ begin
     '\' + GetIDStr, KEY_ALL_ACCESS, FDefaultsMap);
 end;
 
-destructor TCnBaseEditorTool.Destroy;
+destructor TCnBaseCodingToolset.Destroy;
 begin
   FDefaultsMap.Free;
   inherited;
 end;
 
-procedure TCnBaseEditorTool.Loaded;
+procedure TCnBaseCodingToolset.Loaded;
 begin
 
 end;
 
-procedure TCnBaseEditorTool.LoadSettings(Ini: TCustomIniFile);
+procedure TCnBaseCodingToolset.LoadSettings(Ini: TCustomIniFile);
 begin
   with TCnIniFile.Create(Ini) do
   try
@@ -294,7 +293,7 @@ begin
   end;   
 end;
 
-procedure TCnBaseEditorTool.SaveSettings(Ini: TCustomIniFile);
+procedure TCnBaseCodingToolset.SaveSettings(Ini: TCustomIniFile);
 begin
   with TCnIniFile.Create(Ini) do
   try
@@ -304,36 +303,36 @@ begin
   end;   
 end;
 
-function TCnBaseEditorTool.GetDefShortCut: TShortCut;
+function TCnBaseCodingToolset.GetDefShortCut: TShortCut;
 begin
   Result := 0;
 end;
 
-function TCnBaseEditorTool.GetIDStr: string;
+function TCnBaseCodingToolset.GetIDStr: string;
 begin
   Result := ClassName;
   if UpperCase(Result[1]) = 'T' then
     Delete(Result, 1, 1);
 end;
 
-function TCnBaseEditorTool.GetHasConfig: Boolean;
+function TCnBaseCodingToolset.GetHasConfig: Boolean;
 begin
   Result := False;
 end;
 
-function TCnBaseEditorTool.GetHint: string;
+function TCnBaseCodingToolset.GetHint: string;
 begin
   Result := '';
 end;
 
-function TCnBaseEditorTool.GetEditorName: string;
+function TCnBaseCodingToolset.GetEditorName: string;
 var
   Author, Email: string;
 begin
   GetEditorInfo(Result, Author, Email);
 end;
 
-function TCnBaseEditorTool.GetState: TWizardState;
+function TCnBaseCodingToolset.GetState: TWizardState;
 begin
   if Owner.Active and Active then
     Result := [wsEnabled]
@@ -341,12 +340,12 @@ begin
     Result := [];
 end;
 
-procedure TCnBaseEditorTool.SetActive(Value: Boolean);
+procedure TCnBaseCodingToolset.SetActive(Value: Boolean);
 begin
   FActive := Value;
 end;
 
-procedure TCnBaseEditorTool.RefreshAction;
+procedure TCnBaseCodingToolset.RefreshAction;
 begin
   if FAction <> nil then
   begin
@@ -355,7 +354,7 @@ begin
   end;
 end;
 
-procedure TCnBaseEditorTool.ParentActiveChanged(ParentActive: Boolean);
+procedure TCnBaseCodingToolset.ParentActiveChanged(ParentActive: Boolean);
 begin
 
 end;
@@ -378,7 +377,7 @@ end;
 constructor TCnEditorToolsetWizard.Create;
 var
   i: Integer;
-  Editor: TCnBaseEditorTool;
+  Editor: TCnBaseCodingToolset;
   ActiveIni: TCustomIniFile;
 begin
   inherited;
@@ -432,7 +431,6 @@ begin
   inherited;
 end;
 
-// APos返回宏在当前行中的位置。
 procedure TCnEditorToolsetWizard.Execute;
 begin
 
@@ -479,9 +477,9 @@ begin
   Comment := SCnEditorToolsetWizardComment;
 end;
 
-function TCnEditorToolsetWizard.GetEditorTools(Index: Integer): TCnBaseEditorTool;
+function TCnEditorToolsetWizard.GetEditorTools(Index: Integer): TCnBaseCodingToolset;
 begin
-  Result := TCnBaseEditorTool(FEditorTools[Index]);
+  Result := TCnBaseCodingToolset(FEditorTools[Index]);
 end;
 
 function TCnEditorToolsetWizard.GetEditorToolCount: Integer;

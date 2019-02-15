@@ -59,7 +59,7 @@ type
   TCnCodeToolStyle = (csLine, csSelText, csAllText);
   {* 处理文本的方式，csLine 为选择行方式，csSelText/csAllText为选择/全部文本方式}
 
-  TCnEditorCodeTool = class(TCnBaseEditorTool)
+  TCnEditorCodeTool = class(TCnBaseCodingToolset)
   {* 选择代码处理工具基类。
      该基类用来处理用户选择的文本，当用户选择了代码后，执行该编辑器工具，对已
      选择的代码进行转换处理。}

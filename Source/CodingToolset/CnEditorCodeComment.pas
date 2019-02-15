@@ -359,10 +359,10 @@ begin
 end;
 
 initialization
-  RegisterCnEditor(TCnEditorCodeComment);
-  RegisterCnEditor(TCnEditorCodeUnComment);
+  RegisterCnCodingToolset(TCnEditorCodeComment);
+  RegisterCnCodingToolset(TCnEditorCodeUnComment);
 //{$IFNDEF COMPILER9_UP}
-  RegisterCnEditor(TCnEditorCodeToggleComment);
+  RegisterCnCodingToolset(TCnEditorCodeToggleComment);
 //{$ENDIF}
 
 {$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}

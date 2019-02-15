@@ -58,7 +58,7 @@ type
 
 {$IFNDEF STAND_ALONE}
 
-  TCnAsciiChart = class(TCnBaseEditorTool)
+  TCnAsciiChart = class(TCnBaseCodingToolset)
   protected
     function GetCaption: string; override;
     function GetHint: string; override;
@@ -558,7 +558,7 @@ end;
 
 {$IFNDEF STAND_ALONE}
 initialization
-  RegisterCnEditor(TCnAsciiChart); // 注册专家
+  RegisterCnCodingToolset(TCnAsciiChart); // 注册专家
 {$ENDIF}
 
 {$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}

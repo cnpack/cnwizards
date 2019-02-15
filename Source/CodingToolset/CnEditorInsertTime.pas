@@ -52,7 +52,7 @@ type
 
 { TCnEditorInsertTime }
 
-  TCnEditorInsertTime = class(TCnBaseEditorTool)
+  TCnEditorInsertTime = class(TCnBaseCodingToolset)
   private
     FDateTimeFmt: string;
   public
@@ -164,7 +164,7 @@ begin
 end;
 
 initialization
-  RegisterCnEditor(TCnEditorInsertTime);
+  RegisterCnCodingToolset(TCnEditorInsertTime);
   
 {$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 end.

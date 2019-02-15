@@ -49,7 +49,7 @@ uses
   CnWizOptions;
 
 type
-  TCnEditorCollector = class(TCnBaseEditorTool)
+  TCnEditorCollector = class(TCnBaseCodingToolset)
   protected
     function GetCaption: string; override;
     function GetHint: string; override;
@@ -734,7 +734,7 @@ begin
 end;
 
 initialization
-  RegisterCnEditor(TCnEditorCollector); // 注册专家
+  RegisterCnCodingToolset(TCnEditorCollector); // 注册专家
 
 {$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 end.

@@ -120,7 +120,7 @@ begin
 end;
 
 initialization
-  RegisterCnEditor(TCnEditorSortLines);
+  RegisterCnCodingToolset(TCnEditorSortLines);
 
 {$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 end.

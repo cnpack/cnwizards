@@ -56,7 +56,7 @@ type
 
 { TCnEditorOpenFile }
 
-  TCnEditorOpenFile = class(TCnBaseEditorTool)
+  TCnEditorOpenFile = class(TCnBaseCodingToolset)
   private
     FFileList: TStrings;
     class procedure DoFindFile(const FileName: string; const Info: TSearchRec;
@@ -290,7 +290,7 @@ begin
 end;
 
 initialization
-  RegisterCnEditor(TCnEditorOpenFile); // 注册专家
+  RegisterCnCodingToolset(TCnEditorOpenFile); // 注册专家
 
 {$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 end.

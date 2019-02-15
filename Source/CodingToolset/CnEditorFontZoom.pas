@@ -154,8 +154,8 @@ begin
 end;
 
 initialization
-  RegisterCnEditor(TCnEditorFontInc);
-  RegisterCnEditor(TCnEditorFontDec);
+  RegisterCnCodingToolset(TCnEditorFontInc);
+  RegisterCnCodingToolset(TCnEditorFontDec);
 
 {$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 end.

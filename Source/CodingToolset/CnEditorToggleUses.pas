@@ -57,7 +57,7 @@ type
 
 { TCnEditorToggleUses }
 
-  TCnEditorToggleUses = class(TCnBaseEditorTool)
+  TCnEditorToggleUses = class(TCnBaseCodingToolset)
   private
     FUsesPosition: TCnUsesPosition;
     FJumpTime: DWORD;
@@ -398,7 +398,7 @@ begin
 end;
 
 initialization
-  RegisterCnEditor(TCnEditorToggleUses);
+  RegisterCnCodingToolset(TCnEditorToggleUses);
 
 {$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 end.

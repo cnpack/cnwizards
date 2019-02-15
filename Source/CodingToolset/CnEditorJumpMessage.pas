@@ -64,7 +64,7 @@ type
 
 { TCnEditorPrevMessage }
 
-  TCnEditorPrevMessage = class(TCnBaseEditorTool)
+  TCnEditorPrevMessage = class(TCnBaseCodingToolset)
   private
 
   protected
@@ -80,7 +80,7 @@ type
 
 { TCnEditorNextMessage }
 
-  TCnEditorNextMessage = class(TCnBaseEditorTool)
+  TCnEditorNextMessage = class(TCnBaseCodingToolset)
   private
 
   protected
@@ -94,7 +94,7 @@ type
     procedure Execute; override;
   end;
 
-  TCnEditorJumpIntf = class(TCnBaseEditorTool)
+  TCnEditorJumpIntf = class(TCnBaseCodingToolset)
   private
 
   public
@@ -110,7 +110,7 @@ type
     procedure Execute; override;
   end;
 
-  TCnEditorJumpImpl = class(TCnBaseEditorTool)
+  TCnEditorJumpImpl = class(TCnBaseCodingToolset)
   private
 
   public
@@ -130,7 +130,7 @@ type
 
 // 此仨功能依赖于高亮解析因此此处需要也这样 IFDEF
 
-  TCnEditorJumpMatchedKeyword = class(TCnBaseEditorTool)
+  TCnEditorJumpMatchedKeyword = class(TCnBaseCodingToolset)
   private
 
   public
@@ -146,7 +146,7 @@ type
     procedure Execute; override;
   end;
 
-  TCnEditorJumpPrevIdent = class(TCnBaseEditorTool)
+  TCnEditorJumpPrevIdent = class(TCnBaseCodingToolset)
   private
 
   public
@@ -162,7 +162,7 @@ type
     procedure Execute; override;
   end;
 
-  TCnEditorJumpNextIdent = class(TCnBaseEditorTool)
+  TCnEditorJumpNextIdent = class(TCnBaseCodingToolset)
   private
 
   public
@@ -1132,16 +1132,16 @@ end;
 {$ENDIF CNWIZARDS_CNSOURCEHIGHLIGHT}
 
 initialization
-  RegisterCnEditor(TCnEditorPrevMessage);
-  RegisterCnEditor(TCnEditorNextMessage);
+  RegisterCnCodingToolset(TCnEditorPrevMessage);
+  RegisterCnCodingToolset(TCnEditorNextMessage);
 
-  RegisterCnEditor(TCnEditorJumpIntf);
-  RegisterCnEditor(TCnEditorJumpImpl);
+  RegisterCnCodingToolset(TCnEditorJumpIntf);
+  RegisterCnCodingToolset(TCnEditorJumpImpl);
 
 {$IFDEF CNWIZARDS_CNSOURCEHIGHLIGHT}
-  RegisterCnEditor(TCnEditorJumpMatchedKeyword);
-  RegisterCnEditor(TCnEditorJumpPrevIdent);
-  RegisterCnEditor(TCnEditorJumpNextIdent);
+  RegisterCnCodingToolset(TCnEditorJumpMatchedKeyword);
+  RegisterCnCodingToolset(TCnEditorJumpPrevIdent);
+  RegisterCnCodingToolset(TCnEditorJumpNextIdent);
 {$ENDIF CNWIZARDS_CNSOURCEHIGHLIGHT}
 
 {$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}

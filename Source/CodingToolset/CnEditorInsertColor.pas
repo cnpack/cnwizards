@@ -52,7 +52,7 @@ type
 
 { TCnEditorInsertColor }
 
-  TCnEditorInsertColor = class(TCnBaseEditorTool)
+  TCnEditorInsertColor = class(TCnBaseCodingToolset)
   private
     dlgColor: TColorDialog;
   public
@@ -159,7 +159,7 @@ begin
 end;
 
 initialization
-  RegisterCnEditor(TCnEditorInsertColor);
+  RegisterCnCodingToolset(TCnEditorInsertColor);
 
 {$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 end.

@@ -159,8 +159,8 @@ begin
 end;
 
 initialization
-  RegisterCnEditor(TCnEditorCodeIndent);
-  RegisterCnEditor(TCnEditorCodeUnIndent);
+  RegisterCnCodingToolset(TCnEditorCodeIndent);
+  RegisterCnCodingToolset(TCnEditorCodeUnIndent);
 
 {$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 end.

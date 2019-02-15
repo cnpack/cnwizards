@@ -70,7 +70,7 @@ type
 
 { TCnEditorZoomFullScreen }
 
-  TCnEditorZoomFullScreen = class(TCnBaseEditorTool)
+  TCnEditorZoomFullScreen = class(TCnBaseCodingToolset)
   private
     // Save main IDE top
     MainIDETop: Integer;
@@ -485,7 +485,7 @@ begin
 end;
 
 initialization
-  RegisterCnEditor(TCnEditorZoomFullScreen); // 注册专家
+  RegisterCnCodingToolset(TCnEditorZoomFullScreen); // 注册专家
 
 {$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 end.

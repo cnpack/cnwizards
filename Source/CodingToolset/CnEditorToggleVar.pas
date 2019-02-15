@@ -53,7 +53,7 @@ type
 
 { TCnEditorToggleVar }
 
-  TCnEditorToggleVar = class(TCnBaseEditorTool)
+  TCnEditorToggleVar = class(TCnBaseCodingToolset)
   private
     FIsVar: Boolean;
     FParser: TmwPasLex;
@@ -492,7 +492,7 @@ begin
 end;
 
 initialization
-  RegisterCnEditor(TCnEditorToggleVar);
+  RegisterCnCodingToolset(TCnEditorToggleVar);
 
 {$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 end.
