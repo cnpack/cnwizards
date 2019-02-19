@@ -65,7 +65,7 @@ interface
 
 uses
   Windows, SysUtils, Messages, Classes, Forms, IniFiles, ToolsAPI, Controls,
-  Dialogs, Math, ActnList,
+  Dialogs, Math, ActnList, Graphics,
 {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, {$ELSE} DsgnIntf, {$ENDIF}
 {$IFDEF IDE_ACTION_UPDATE_DELAY} ActnMenus, ActnMan, {$ENDIF}
   Buttons, Menus, CnWizClasses, CnWizMenuAction, CnWizUtils,
@@ -222,7 +222,7 @@ uses
   CnDebug,
 {$ENDIF}
   TypInfo, CnFormEnhancements, CnListCompFrm, CnCompToCodeFrm,
-  CnDesignEditorConsts, CnPrefixExecuteFrm;
+  CnDesignEditorConsts, CnPrefixExecuteFrm, CnGraphUtils;
 
 {$R *.dfm}
 
@@ -1642,9 +1642,95 @@ begin
   Result := 'CnAlignSizeConfig';
 end;
 
+{$IFDEF IDE_SUPPORT_THEMING}
+
+procedure CnAfterLoadIcon(ABigIcon: TIcon; ASmallIcon: TIcon; const IconName: string);
+var
+  AStyle: TAlignSizeStyle;
+  BigBmp, SmallBmp: TBitmap;
+  X, Y: Integer;
+  P: PRGBArray;
+  Rep: Boolean;
+
+  function CheckAndReplaceColor(Pixel: PRGBColor): Boolean;
+  begin
+    Result := False;
+    if Pixel <> nil then
+    begin
+      if (Pixel^.r = 8) and (Pixel^.g in [65, 66]) and (Pixel^.b = 82) then
+      begin
+        Pixel^.r := 222;
+        Pixel^.g := 233;
+        Pixel^.b := 0;
+        Result := True;
+      end
+      else if (Pixel^.r = 0) and (Pixel^.g = 0) and (Pixel^.b = 128) then
+      begin
+        Pixel^.r := 0;
+        Pixel^.g := 233;
+        Pixel^.b := 60;
+        Result := True;
+      end
+      else if (Pixel^.r = 74) and (Pixel^.g = 73) and (Pixel^.b = 74) then
+      begin
+        Pixel^.r := 192;
+        Pixel^.g := 192;
+        Pixel^.b := 192;
+        Result := True;
+      end;
+    end;
+  end;
+
+begin
+  for AStyle := Low(TAlignSizeStyle) to High(TAlignSizeStyle) do
+  begin
+    if csAlignSizeNames[AStyle] = IconName then
+    begin
+      if (ASmallIcon <> nil) and not ASmallIcon.Empty then
+      begin
+        SmallBmp := CreateEmptyBmp24(ASmallIcon.Width, ASmallIcon.Height, clBtnFace);
+        try
+          SmallBmp.Canvas.Draw(0, 0, ASmallIcon);
+          Rep := False;
+          for Y := 0 to SmallBmp.Height - 1 do
+          begin
+            P := SmallBmp.ScanLine[Y];
+            for X := 0 to SmallBmp.Width - 1 do
+            begin
+              // 把指定暗色替换成亮色
+              if CheckAndReplaceColor(@(P^[X])) then
+                Rep := True;
+            end;
+          end;
+
+          // 替换完毕后写回 Icon 去
+          if Rep then
+            DrawBmpToIcon(SmallBmp, ASmallIcon);
+{$IFDEF DEBUG}
+          CnDebugger.LogBoolean(Rep, 'CnAfterLoadIcon Small Icon');
+{$ENDIF}
+        finally
+          SmallBmp.Free;
+        end;
+      end;
+    end;
+  end;
+end;
+
+{$ENDIF}
+
 initialization
   RegisterCnWizard(TCnAlignSizeWizard); // 注册专家
 
+{$IFDEF IDE_SUPPORT_THEMING}
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('CnLoadIconProc get Active Theme: ' + CnOtaGetActiveThemeName);
+{$ENDIF}
+  if CnOtaGetActiveThemeName = 'Dark' then // 暗黑主题下注册图标处理事件，不支持动态切换主题
+    CnLoadIconProc := CnAfterLoadIcon;
+{$ENDIF}
+
 {$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}
 end.
+
 

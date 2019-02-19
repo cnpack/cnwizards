@@ -122,6 +122,8 @@ type
     property Col: Integer read FCol write FCol;
   end;
 
+  TCnLoadIconProc = procedure(ABigIcon: TIcon; ASmallIcon: TIcon; const IconName: string);
+
 const
   CRLF = #13#10;
   SAllAlphaNumericChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
@@ -135,6 +137,7 @@ const
 var
   CnNoIconList: TStrings;
   IdeClosing: Boolean;
+  CnLoadIconProc: TCnLoadIconProc = nil;
 
 //==============================================================================
 // 公共信息函数
@@ -1245,6 +1248,12 @@ var
   FileName: string;
   Handle: HICON;
 
+  procedure AfterIconLoad;
+  begin
+    if Assigned(CnLoadIconProc) then
+      CnLoadIconProc(AIcon, ASmallIcon, ResName);
+  end;
+
   procedure LoadAndCheckSmallIcon;
   begin
     // 指定小尺寸再加载图标
@@ -1280,6 +1289,7 @@ begin
         begin
           Result := True;
           LoadAndCheckSmallIcon;
+          AfterIconLoad;
           Exit;
         end;
       end
@@ -1287,6 +1297,7 @@ begin
       begin
         Result := True;
         LoadAndCheckSmallIcon;
+        AfterIconLoad;
         Exit;
       end;
     end;
@@ -1312,6 +1323,7 @@ begin
           if Handle <> 0 then
             ASmallIcon.Handle := Handle;
         end;
+        AfterIconLoad;
         Exit;
       end;
     end
@@ -1322,6 +1334,7 @@ begin
       begin
         ASmallIcon.Handle := Handle;
         Result := True;
+        AfterIconLoad;
         Exit;
       end;
     end;
