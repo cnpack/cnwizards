@@ -199,6 +199,8 @@ begin
   lstInfo.Items.Add(Format('EditPos %d:%d, CharPos %d:%d.', [EditPos.Line,
     EditPos.Col, CharPos.Line, CharPos.CharIndex]));
 
+  lstInfo.Items.Add(SEP);
+  lstInfo.Items.Add(Format('CnOtaGetCurrPos Linear %d.', [CnOtaGetCurrPos]));
 
   lstInfo.Items.Add(SEP);
   lstInfo.Items.Add('CnOtaGetCurrentCharPosFromCursorPosForParser.');
