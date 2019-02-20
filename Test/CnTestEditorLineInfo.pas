@@ -276,7 +276,11 @@ begin
   begin
     lstInfo.Items.Add(SEP);
     lstInfo.Items.Add('Editor Position at StatusBar:');
+{$IFDEF BDS}
+    lstInfo.Items.Add(StatusBar.Panels[1].Text);
+{$ELSE}
     lstInfo.Items.Add(StatusBar.Panels[0].Text);
+{$ENDIF}
   end;
 end;
 
