@@ -806,7 +806,7 @@ function CnOtaMovePosInCurSource(Pos: TInsertPos; OffsetRow, OffsetCol: Integer)
  |</PRE>}
 
 function CnOtaGetCurrPos(SourceEditor: IOTASourceEditor = nil): Integer;
-{* 返回 SourceEditor 当前光标位置的线性地址}
+{* 返回 SourceEditor 当前光标位置的线性地址，均为 0 开始的 Ansi/Utf8/Ansi}
 
 function CnOtaGetCurrCharPos(SourceEditor: IOTASourceEditor = nil): TOTACharPos;
 {* 返回 SourceEditor 当前光标位置}
@@ -6046,7 +6046,7 @@ begin
   end;
 end;
 
-// 返回 SourceEditor 当前光标位置的线性地址
+// 返回 SourceEditor 当前光标位置的线性地址，均为 0 开始的 Ansi/Utf8/Ansi
 function CnOtaGetCurrPos(SourceEditor: IOTASourceEditor): Integer;
 var
   CharPos: TOTACharPos;
@@ -6125,7 +6125,7 @@ begin
   end;
 end;
 
-// 保存EditReader内容到流中，流中的内容默认为 Ansi 格式
+// 保存 EditReader 内容到流中，流中的内容默认为 Ansi 格式
 procedure CnOtaSaveReaderToStream(EditReader: IOTAEditReader; Stream:
   TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
   PreSize: Integer = 0; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False);

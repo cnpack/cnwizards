@@ -134,8 +134,9 @@ type
   end;
 
 function ParseCppCodePosInfo(const Source: AnsiString; CurrPos: Integer;
-  FullSource: Boolean = True; IsUtf8: Boolean = False): TCodePosInfo;
-{* 分析源代码中当前位置的信息}
+  FullSource: Boolean = True; SourceIsUtf8: Boolean = False): TCodePosInfo;
+{* 分析源代码中当前位置的信息，如果 SourceIsUtf8 为 True，内部会转为 Ansi
+  CurrPos 应当是文件的线性位置（Ansi/Utf8/Ansi）}
 
 procedure ParseUnitIncludes(const Source: AnsiString; IncludeList: TStrings);
 {* 分析源代码中引用的头文件}
@@ -634,7 +635,7 @@ end;
 
 // 分析源代码中当前位置的信息
 function ParseCppCodePosInfo(const Source: AnsiString; CurrPos: Integer;
-  FullSource: Boolean = True; IsUtf8: Boolean = False): TCodePosInfo;
+  FullSource: Boolean = True; SourceIsUtf8: Boolean = False): TCodePosInfo;
 var
   CanExit: Boolean;
   CParser: TBCBTokenList;
@@ -664,18 +665,19 @@ begin
   CParser := nil;
   Result.IsPascal := False;
 
+  // CurrPos 与 Text 都必须转成 Ansi 才能比较
   try
     CParser := TBCBTokenList.Create;
     CParser.DirectivesAsComments := False;
 {$IFDEF BDS}
-    if IsUtf8 then
+    if SourceIsUtf8 then
     begin
       Text := CnUtf8ToAnsi(PAnsiChar(Source));
-//{$IFNDEF BDS2009_UP}
-      // XE/XE2 下的CurrPos 已经是 UTF8 的位置，无需再次转换，否则出错。2009 未知。
+      // Unicode 环境下的线性 CurrPos 是 Ansi 的位置，无需转换。
+{$IFDEF IDE_STRING_ANSI_UTF8}
       CurrPos := Length(CnUtf8ToAnsi(Copy(Source, 1, CurrPos)));
-      // 不转换会导致其他问题如字符串里弹出代码助手，还是得转。
-//{$ENDIF}
+      // 2005~2007 下，线性 CurrPos 是 Utf8，需要转为 Ansi
+{$ENDIF}
     end
     else
       Text := Source;

@@ -271,7 +271,7 @@ function GetNewComponentPaletteComponentPanel: TWinControl;
 {* 返回 2010 或以上的新组件面板下半部分容纳组件列表的容器对象，可能为空}
 
 function GetEditWindowStatusBar(EditWindow: TCustomForm = nil): TStatusBar;
-{* 返回编辑器窗口下方的状态栏，只支持 D567，可能为空}
+{* 返回编辑器窗口下方的状态栏，可能为空}
 
 function GetObjectInspectorForm: TCustomForm;
 {* 返回对象检查器窗体，可能为空}
@@ -280,7 +280,7 @@ function GetComponentPalettePopupMenu: TPopupMenu;
 {* 返回组件面板右键菜单，可能为空}
 
 function GetComponentPaletteControlBar: TControlBar;
-{* 返回组件面板所在的ControlBar，可能为空}
+{* 返回组件面板所在的 ControlBar，可能为空}
 
 function GetMainMenuItemHeight: Integer;
 {* 返回主菜单项高度 }
@@ -1163,7 +1163,7 @@ begin
 {$ENDIF}
 end;
 
-// 返回编辑器窗口下方的状态栏，只支持 D567，可能为空
+// 返回编辑器窗口下方的状态栏，可能为空
 function GetEditWindowStatusBar(EditWindow: TCustomForm = nil): TStatusBar;
 var
   AComp: TComponent;

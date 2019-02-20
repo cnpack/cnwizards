@@ -6,7 +6,7 @@ CnPack开发组
 Delphi IDE 分三种：Delphi 5 6 7 的 纯 Ansi 版，Delphi 2005 ~ 2007 的 Utf8 版，以及 Delphi 2009 及其以上的 Unicode 版本。
 这三种 IDE 的编辑器控件各不相同，所涉及的 OpenTools API 与其他原生接口有很大的不同。
 
-整理了一个表：
+整理了一个表（获得的 Text 的 Tab 键展开情况还待补充）：
 
 =====================================================================================================
                             Delphi 5/6/7           Delphi 2005~2007         Delphi 2009 以上
@@ -42,7 +42,8 @@ TOTACharPos的CharIndex      Ansi、0 开始           Utf8、0 开始             Ansi
 （Tab键算一个字符）                                                        （有宽字符时由ConvertPos转换而来的结果有混乱）
 -----------------------------------------------------------------------------------------------------
 EditView的CharPosToPos      Ansi、0开始            Utf8、0 开始             Ansi、0 开始
-转换而来的文件内的线性Pos                                                  （有宽字符时由CharPosToPos转换而来的结果有混乱）
+转换而来的文件内的线性Pos                                                  （有宽字符时如果CharPos混乱，
+                                                                             则CharPosToPos转换来的线性结果也混乱）
 -----------------------------------------------------------------------------------------------------
 编辑器状态栏上的行列显示    三类 IDE 统一，为 1 开始的 Ansi，单字节字符占一列，一汉字占两列
 =====================================================================================================
@@ -74,8 +75,7 @@ EditLine/EditCol属性        EditCol为Ansi          EditCol为Utf8            Edit
 和当前光标有关的，需要使用 TOTAEditPos 类型的 Col。
 结构解析器解析出来的 Token 的行列是基于字符的 Ansi/Wide 值，需要转换成 CharPos 再转换成 EditPos 再存储到 Token 的 EditLine/EditCol 属性里。
 以后在要跳转到此 Token 时才能直接使用 EditLine/EditCol。
-另外，代码高亮中需要根据 Token 进行重画时，计算重画区域的 EditCol 应该全部使用 Ansi 的（视觉要求），但 D2005~2007 的 EditPos 的 Col 是 Utf8，
-所以 D2005~2007 下，不能直接用 EditCol，另开了一个属性 EditAnsiCol 存储 Ansi 偏移，专门用来重画。
+另外，代码高亮中需要根据 Token 进行重画时，计算重画区域的 EditCol 应该全部使用 Ansi 的（视觉要求），但 D2005~2007 的 EditPos 的 Col 是 Utf8，所以 D2005~2007 下不能直接用 EditCol，另开了一个属性 EditAnsiCol 存储 Ansi 偏移，专门用来重画。
 
 另外，EditControl 的 LineText 属性表示光标所在的当前行的内容，但当本行为空时，无论光标在哪儿，LineText 均返回空，而不是一串空格。
 
