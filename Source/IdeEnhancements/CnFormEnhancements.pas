@@ -327,6 +327,7 @@ type
   TCnFormEnhanceWizard = class(TCnIDEEnhanceWizard)
   private
     FUpdating: Boolean;
+    FAppBackground: Boolean;
     FList: TObjectList;
     FPropBar: TCnFormFloatPropBar;
     FDefCount: Integer;
@@ -341,6 +342,7 @@ type
 
     procedure UpdateFlatPanelsPosition;
     procedure OnAppMessage(var Msg: TMsg; var Handled: Boolean);
+    procedure OnAppEvent(EventType: TCnWizAppEventType; Data: Pointer);
     procedure OnCallWndProcRet(Handle: HWND; Control: TWinControl; Msg: TMessage);
     procedure FormEditorNotify(FormEditor: IOTAFormEditor;
       NotifyType: TCnWizFormEditorNotifyType; ComponentHandle: TOTAHandle;
@@ -2195,6 +2197,7 @@ begin
     Inc(FDefCount);
 
   CnWizNotifierServices.AddApplicationMessageNotifier(OnAppMessage);
+  CnWizNotifierServices.AddAppEventNotifier(OnAppEvent);
   CnWizNotifierServices.AddCallWndProcRetNotifier(OnCallWndProcRet,
     [WM_ACTIVATE, WM_NCACTIVATE, WM_WINDOWPOSCHANGED, WM_SHOWWINDOW]);
   CnWizNotifierServices.AddFormEditorNotifier(FormEditorNotify);
@@ -2214,6 +2217,7 @@ begin
   CnWizNotifierServices.RemoveCallWndProcRetNotifier(OnCallWndProcRet);
   CnWizNotifierServices.RemoveFormEditorNotifier(FormEditorNotify);
   CnWizNotifierServices.RemoveApplicationIdleNotifier(ApplicationIdle);
+  CnWizNotifierServices.RemoveAppEventNotifier(OnAppEvent);
   CnWizNotifierServices.RemoveActiveFormNotifier(ActiveFormChanged);
   FPropBar.Free;
   FList.Free;
@@ -2244,7 +2248,7 @@ begin
   FUpdating := True;
   try
     Container := CnOtaGetCurrentDesignContainer;
-    if Assigned(Container) and CurrentIsForm and
+    if not FAppBackground and Assigned(Container) and CurrentIsForm and
       not (csDestroying in Container.ComponentState) and
       not (csDestroyingHandle in Container.ControlState) and
       IsWindowVisible(Container.Handle) and
@@ -2281,6 +2285,19 @@ begin
       Windows.SetFocus(FPropBar.FValueCombo.Handle);
       Handled := True;
     end;      
+  end;
+end;
+
+procedure TCnFormEnhanceWizard.OnAppEvent(EventType: TCnWizAppEventType;
+  Data: Pointer);
+begin
+  if not Active or FIsEmbeddedDesigner or FUpdating then
+    Exit;
+
+  if EventType in [aeActivate, aeDeactivate] then
+  begin
+    FAppBackground := (EventType = aeDeactivate);
+    UpdateFlatPanelsPosition;
   end;
 end;
 
