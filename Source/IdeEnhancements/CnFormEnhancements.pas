@@ -866,7 +866,7 @@ begin
         X := Screen.DesktopWidth - Width;
       if Y + Height > Screen.DesktopHeight then
         Y := Screen.DesktopHeight - Height;
-      
+
       if GetForegroundWindow = SnapForm.Handle then
         SetPos(X, Y, HWND_TOPMOST)
       else
@@ -2248,6 +2248,15 @@ begin
   FUpdating := True;
   try
     Container := CnOtaGetCurrentDesignContainer;
+
+    // 10.2 或以上版本 DataModule 嵌套很深，
+    // TUndockedDesignerForm 里头套一个 TEditorFormDesigner 里头套一个
+    // TFormContainerForm 里头套一个 TDataModuleForm 里头套一个
+    // TComponentContainer（ScrollBox）和 DataModule
+    if (Container <> nil) and Container.ClassNameIs('TDataModuleForm') then
+      while Container.Parent <> nil do
+        Container := Container.Parent;
+
     if not FAppBackground and Assigned(Container) and CurrentIsForm and
       not (csDestroying in Container.ComponentState) and
       not (csDestroyingHandle in Container.ControlState) and
