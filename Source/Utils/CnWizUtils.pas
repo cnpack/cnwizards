@@ -425,9 +425,9 @@ function CnOtaGetFormEditorFromModule(const Module: IOTAModule): IOTAFormEditor;
 function CnOtaGetCurrentFormEditor: IOTAFormEditor;
 {* 取当前窗体编辑器}
 function CnOtaGetDesignContainerFromEditor(FormEditor: IOTAFormEditor): TWinControl;
-{* 取得窗体编辑器的容器控件或 DataModule 的容器}
+{* 取得窗体编辑器的容器控件或 DataModule 的容器，注意 DataModule 容器不一定是顶层窗口}
 function CnOtaGetCurrentDesignContainer: TWinControl;
-{* 取得当前窗体编辑器的容器控件或 DataModule 的容器}
+{* 取得当前窗体编辑器的容器控件或 DataModule 的容器，注意 DataModule 容器不一定是顶层窗口}
 function CnOtaGetSelectedControlFromCurrentForm(List: TList): Boolean;
 {* 取得当前窗体编辑器的已选择的控件}
 function CnOtaShowFormForModule(const Module: IOTAModule): Boolean;
@@ -3015,7 +3015,7 @@ begin
   Result := nil;
 end;
 
-// 取得窗体编辑器的容器控件或 DataModule 的容器
+// 取得窗体编辑器的容器控件或 DataModule 的容器，注意 DataModule 容器不一定是顶层窗口
 function CnOtaGetDesignContainerFromEditor(FormEditor: IOTAFormEditor): TWinControl;
 var
   Root: TComponent;
@@ -3031,12 +3031,12 @@ begin
   end
   else if (Root is TDataModule) and (Root.Owner <> nil) and (Root.Owner is TWinControl) then
   begin
-    // DataModule 实例的 Owner 是设计器容器 TDataModuleDesigner
+    // DataModule 实例的 Owner 是设计器容器 TDataModuleDesigner/TDataModuleForm
     Result := TWinControl(Root.Owner);
   end;
 end;
 
-// 取得当前窗体编辑器的容器控件或 DataModule 的容器
+// 取得当前窗体编辑器的容器控件或 DataModule 的容器，注意 DataModule 容器不一定是顶层窗口
 function CnOtaGetCurrentDesignContainer: TWinControl;
 begin
   if CurrentIsForm then
