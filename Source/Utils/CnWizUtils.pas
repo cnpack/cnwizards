@@ -806,21 +806,22 @@ function CnOtaMovePosInCurSource(Pos: TInsertPos; OffsetRow, OffsetCol: Integer)
  |</PRE>}
 
 function CnOtaGetCurrPos(SourceEditor: IOTASourceEditor = nil): Integer;
-{* 返回 SourceEditor 当前光标位置的线性地址，均为 0 开始的 Ansi/Utf8/Ansi}
+{* 返回 SourceEditor 当前光标位置的线性地址，均为 0 开始的 Ansi/Utf8/Ansi混合Utf8，
+  在 Unicode 环境下有宽字符时其值不靠谱}
 
 function CnOtaGetCurrCharPos(SourceEditor: IOTASourceEditor = nil): TOTACharPos;
 {* 返回 SourceEditor 当前光标位置}
 
 function CnOtaEditPosToLinePos(EditPos: TOTAEditPos; EditView: IOTAEditView = nil): Integer;
-{* 编辑位置转换为线性位置 }
+{* 编辑位置转换为线性位置，在 Unicode 环境下有宽字符时其值不靠谱}
 
 function CnOtaLinePosToEditPos(LinePos: Integer; EditView: IOTAEditView = nil): TOTAEditPos;
-{* 线性位置转换为编辑位置 }
+{* 线性位置转换为编辑位置，在 Unicode 环境下有宽字符时其值不靠谱}
 
 procedure CnOtaSaveReaderToStream(EditReader: IOTAEditReader; Stream:
   TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
   PreSize: Integer = 0; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False);
-{* 保存EditReader内容到流中，流中的内容默认为 Ansi 格式，带末尾 #0 字符，
+{* 保存 EditReader 内容到流中，流中的内容默认为 Ansi 格式，带末尾 #0 字符，
    AlternativeWideChar 表示 CheckUtf8 为 True 时，在纯英文 OS 的 Unicode 环境下，
    是否将转换成的 Ansi 中的每个宽字符手动替换成两个空格。此选项用于躲过纯英文 OS
    的 Unicode 环境下 UnicodeString 直接转 Ansi 时的丢字符问题}

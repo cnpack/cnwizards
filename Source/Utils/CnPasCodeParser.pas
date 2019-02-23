@@ -300,7 +300,8 @@ const
 function ParsePasCodePosInfo(const Source: AnsiString; CurrPos: Integer;
   FullSource: Boolean = True; SourceIsUtf8: Boolean = False): TCodePosInfo;
 {* 分析源代码中当前位置的信息，如果 SourceIsUtf8 为 True，内部会转为 Ansi
-  CurrPos 应当是文件的线性位置（Ansi/Utf8/Ansi）}
+  CurrPos 应当是文件的线性位置（Ansi/Utf8/Ansi），但 Unicode 环境下线性
+  位置当有宽字符时有偏差，使用时要注意}
 
 procedure ParseUnitUses(const Source: AnsiString; UsesList: TStrings);
 {* 分析源代码中引用的单元}

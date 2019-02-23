@@ -171,6 +171,25 @@ var
   Lex: TmwPasLex;
   CurrPos, ATokenPos, ALineNum, ACol: Integer;
   AToken: AnsiString;
+  HasTab: Boolean;
+
+  function HasTabChar(const ALine: AnsiString): Boolean;
+  var
+    I: Integer;
+  begin
+    Result := False;
+    if ALine <> '' then
+    begin
+      for I := 1 to Length(ALine) do
+      begin
+        if ALine[I] = #9 then
+        begin
+          Result := True;
+          Exit;
+        end;
+      end;
+    end;
+  end;
 begin
   lstInfo.Clear;
   lstInfo.Items.Add(SEP);
@@ -178,7 +197,10 @@ begin
 
   CnNtaGetCurrLineText(Text, LineNo, CharIndex);
 
-  lstInfo.Items.Add('CnNtaGetCurrLineText using LineText property:');
+  if HasTabChar(Text) then
+    lstInfo.Items.Add('CnNtaGetCurrLineText using LineText property: (Has Tab Char)')
+  else
+    lstInfo.Items.Add('CnNtaGetCurrLineText using LineText property:');
   lstInfo.Items.Add(Text);
   lstInfo.Items.Add(Format('LineNo %d, CharIndex %d.', [LineNo, CharIndex]));
 
@@ -188,12 +210,26 @@ begin
 
   Text := EditControlWrapper.GetTextAtLine(EditControl, LineNo);
   lstInfo.Items.Add(SEP);
-  lstInfo.Items.Add(Format('EditControlWrapper.GetTextAtLine %d', [LineNo]));
+  if HasTabChar(Text) then
+    lstInfo.Items.Add(Format('EditControlWrapper.GetTextAtLine %d (Has Tab Char)', [LineNo]))
+  else
+    lstInfo.Items.Add(Format('EditControlWrapper.GetTextAtLine %d', [LineNo]));
   lstInfo.Items.Add(Text);
 
   EditView := CnOtaGetTopMostEditView;
   if EditView = nil then
     Exit;
+
+  if (EditView.Block <> nil) and EditView.Block.IsValid then
+  begin
+    Text := EditView.Block.Text;
+    lstInfo.Items.Add(SEP);
+    if HasTabChar(Text) then
+      lstInfo.Items.Add('EditView.Block.Text Has Tab Char:')
+    else
+      lstInfo.Items.Add('EditView.Block.Text:');
+    lstInfo.Items.Add(Text);
+  end;
 
   EditPos := EditView.CursorPos;
   EditView.ConvertPos(True, EditPos, CharPos);
@@ -212,6 +248,12 @@ begin
   try
     // 模拟读出 IDE 内部编辑器的 Ansi/Utf8/Utf8 的内容
     CnOtaSaveCurrentEditorToStream(Stream, False, False);
+    HasTab := HasTabChar(PAnsiChar(Stream.Memory));
+    if HasTab then
+      lstInfo.Items.Add('All Editor Content from Reader has Tab Char')
+    else
+      lstInfo.Items.Add('All Editor Content from Reader has NO Tab Char');
+
 {$IFDEF BDS}
   {$IFDEF IDE_STRING_ANSI_UTF8}
     // D2005~2007 下，CurrPos 是纯 UTF8，要转换为 Ansi

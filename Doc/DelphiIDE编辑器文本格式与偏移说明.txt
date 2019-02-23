@@ -6,22 +6,22 @@ CnPack开发组
 Delphi IDE 分三种：Delphi 5 6 7 的 纯 Ansi 版，Delphi 2005 ~ 2007 的 Utf8 版，以及 Delphi 2009 及其以上的 Unicode 版本。
 这三种 IDE 的编辑器控件各不相同，所涉及的 OpenTools API 与其他原生接口有很大的不同。
 
-整理了一个表（获得的 Text 的 Tab 键展开情况还待补充）：
+整理了一个表：
 
 =====================================================================================================
                             Delphi 5/6/7           Delphi 2005~2007         Delphi 2009 以上
 -----------------------------------------------------------------------------------------------------
 EditControl的LineText属性   AnsiString             AnsiString + Utf8        UnicodeString（Utf16）
-代表当前光标所在的行文字 
+代表当前光标所在的行文字    Tab 已展开             Tab 已展开               Tab 已展开
 -----------------------------------------------------------------------------------------------------
 EditControl的               AnsiString             AnsiString + Utf8        UnicodeString（Utf16）
-GetTextAtLine方法 
+GetTextAtLine方法           Tab 已展开             Tab 已展开               Tab 已展开
 -----------------------------------------------------------------------------------------------------
 IOTAEditReader接口的        AnsiString             AnsiString + Utf8        AnsiString + Utf8
-GetText方法
+GetText方法                 Tab 未展开             Tab 未展开               Tab 未展开
 -----------------------------------------------------------------------------------------------------
 IOTAEditBlock接口的         AnsiString             AnsiString + Utf8        UnicodeString（Utf16）
-Text属性/GetText方法
+Text属性/GetText方法        Tab 未展开             Tab 未展开               Tab 未展开
 -----------------------------------------------------------------------------------------------------
 EditControl的               Ansi、1 开始           Utf8、1 开始             Utf8、1 开始
 GetAttributeAtPos所需偏移
@@ -64,7 +64,7 @@ CnPack的 Pascal 结构        列 Ansi                列有 Ansi/Wide           同右
 CnPack的 Cpp 结构           列 Ansi                列有 Ansi/Wide           同右     
 解析器所使用的行列          行列均 0 开始          行列均 0 开始，可展开Tab          
 -----------------------------------------------------------------------------------------------------
-CnPack的 Pas/Cpp 结构       不展开Tab              根据IDE设置展开Tab       根据IDE设置展开Tab
+CnPack的 Pas/Cpp 结构       不展开Tab              根据IDE设置宽度展开Tab   根据IDE设置宽度展开Tab
 解析器是否自行展开Tab       Tab由ConvertPos处理      
 -----------------------------------------------------------------------------------------------------
 Pas/Cpp Token 的            1 开始的 TOTAEditPos   1 开始的 TOTAEditPos     1 开始的 TOTAEditPos
