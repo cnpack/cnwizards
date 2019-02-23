@@ -28,7 +28,7 @@ unit CnTestEditorLineInfo;
 * 开发平台：WinXP + Delphi 5
 * 兼容测试：PWin9X/2000/XP + Delphi 7 以上
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式
-* 单元标识：$Id:  CnTestPaletteWizard 1146 2012-10-24 06:25:41Z liuxiaoshanzhashu@gmail.com $
+* 单元标识：$Id:  CnTestEditorLineInfo 1146 2012-10-24 06:25:41Z liuxiaoshanzhashu@gmail.com $
 * 修改记录：2016.04.07 V1.0
 *               创建单元
 ================================================================================
@@ -41,7 +41,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ToolsAPI, IniFiles, CnCommon, CnWizClasses, CnWizUtils, CnWizConsts, CnWizManager,
-  StdCtrls, ExtCtrls, ComCtrls;
+  StdCtrls, ExtCtrls, ComCtrls, mPasLex;
 
 type
   TTestEditorLineInfoForm = class(TForm)
@@ -160,6 +160,7 @@ var
   EditPos: TOTAEditPos;
   CharPos: TOTACharPos;
   Text: string;
+  AnsiText: AnsiString;
   LineNo: Integer;
   CharIndex: Integer;
   EditControl: TControl;
@@ -167,6 +168,9 @@ var
   PasParser: TCnGeneralPasStructParser;
   Stream: TMemoryStream;
   Element, LineFlag: Integer;
+  Lex: TmwPasLex;
+  CurrPos, ATokenPos, ALineNum, ACol: Integer;
+  AToken: AnsiString;
 begin
   lstInfo.Clear;
   lstInfo.Items.Add(SEP);
@@ -200,7 +204,44 @@ begin
     EditPos.Col, CharPos.Line, CharPos.CharIndex]));
 
   lstInfo.Items.Add(SEP);
-  lstInfo.Items.Add(Format('CnOtaGetCurrPos Linear %d.', [CnOtaGetCurrPos]));
+  CurrPos := CnOtaGetCurrPos;
+  lstInfo.Items.Add(Format('CnOtaGetCurrPos Linear %d.', [CurrPos]));
+
+  Stream := TMemoryStream.Create;
+  Lex := TmwPasLex.Create;
+  try
+    // 模拟读出 IDE 内部编辑器的 Ansi/Utf8/Utf8 的内容
+    CnOtaSaveCurrentEditorToStream(Stream, False, False);
+{$IFDEF BDS}
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+    // D2005~2007 下，CurrPos 是纯 UTF8，要转换为 Ansi
+    CurrPos := Length(CnUtf8ToAnsi(Copy(PAnsiChar(Stream.Memory), 1, CurrPos)));
+  {$ENDIF}
+    // Utf8/Utf8 全部转成 Ansi
+    AnsiText := CnUtf8ToAnsi(PAnsiChar(Stream.Memory));
+{$ELSE}
+    AnsiText := PAnsiChar(Stream.Memory);
+{$ENDIF}
+    // 得到 Ansi/Ansi/Ansi，但 CurrPos 似乎是 Ansi/Utf8/Ansi混合Utf8
+    Lex.Origin := PAnsiChar(AnsiText);
+    ATokenPos := Lex.TokenPos;
+    ALineNum := Lex.LineNumber;
+    ACol := Lex.TokenPos - Lex.LinePos;
+    AToken := Lex.Token;
+    while (Lex.TokenPos < CurrPos) and (Lex.TokenID <> tkNull) do
+    begin
+      ATokenPos := Lex.TokenPos;
+      ALineNum := Lex.LineNumber;
+      ACol := Lex.TokenPos - Lex.LinePos;
+      AToken := Lex.Token;
+      Lex.NextNoJunk;
+    end;
+    lstInfo.Items.Add(Format('PasLex TokenPos %d, LineNumber %d, Col %d. %s',
+      [ATokenPos, ALineNum, ACol, AToken]));
+  finally
+    Stream.Free;
+    Lex.Free;
+  end;
 
   lstInfo.Items.Add(SEP);
   lstInfo.Items.Add('CnOtaGetCurrentCharPosFromCursorPosForParser.');
