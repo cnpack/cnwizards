@@ -11,38 +11,38 @@ Delphi IDE 分三种：Delphi 5 6 7 的 纯 Ansi 版，Delphi 2005 ~ 2007 的 Utf8 版，以
 =====================================================================================================
                             Delphi 5/6/7           Delphi 2005~2007         Delphi 2009 以上
 -----------------------------------------------------------------------------------------------------
-EditControl的LineText属性   AnsiString             AnsiString + Utf8        UnicodeString（Utf16）
+EditControl.LineText 属性   AnsiString             AnsiString + Utf8        UnicodeString（Utf16）
 代表当前光标所在的行文字    Tab 已展开             Tab 已展开               Tab 已展开
 -----------------------------------------------------------------------------------------------------
-EditControl的               AnsiString             AnsiString + Utf8        UnicodeString（Utf16）
-GetTextAtLine方法           Tab 已展开             Tab 已展开               Tab 已展开
+EditControl 的              AnsiString             AnsiString + Utf8        UnicodeString（Utf16）
+GetTextAtLine 方法          Tab 已展开             Tab 已展开               Tab 已展开
 -----------------------------------------------------------------------------------------------------
-IOTAEditReader接口的        AnsiString             AnsiString + Utf8        AnsiString + Utf8
-GetText方法                 Tab 未展开             Tab 未展开               Tab 未展开
+IOTAEditReader 接口的       AnsiString             AnsiString + Utf8        AnsiString + Utf8
+GetText 方法                Tab 未展开             Tab 未展开               Tab 未展开
 -----------------------------------------------------------------------------------------------------
-IOTAEditBlock接口的         AnsiString             AnsiString + Utf8        UnicodeString（Utf16）
-Text属性/GetText方法        Tab 未展开             Tab 未展开               Tab 未展开
+IOTAEditBlock 接口的        AnsiString             AnsiString + Utf8        UnicodeString（Utf16）
+Text 属性/GetText 方法      Tab 未展开             Tab 未展开               Tab 未展开
 -----------------------------------------------------------------------------------------------------
-EditControl的               Ansi、1 开始           Utf8、1 开始             Utf8、1 开始
-GetAttributeAtPos所需偏移
+EditControl 的              Ansi、1 开始           Utf8、1 开始             Utf8、1 开始
+GetAttributeAtPos 所需偏移
 -----------------------------------------------------------------------------------------------------
- TOTAEditPos的Col           Ansi、1 开始           Utf8、1 开始             Ansi、1 开始
-（EditView的CursorPos）
+ TOTAEditPos 的 Col         Ansi、1 开始           Utf8、1 开始             Ansi、1 开始
+（EditView 的 CursorPos）
 -----------------------------------------------------------------------------------------------------
-IOTAEditPosition的相对      Ansi、0 开始           Utf8、0 开始             Utf8、0 开始
-Move方法所使用的Col                                （为 1 时也均可移动一个汉字字符，其余不对位的情况光标往左靠）
+IOTAEditPosition 的相对     Ansi、0 开始           Utf8、0 开始             Utf8、0 开始
+Move 方法所使用的 Col                              （为 1 时也均可移动一个汉字字符，其余不对位的情况光标往左靠）
 -----------------------------------------------------------------------------------------------------
-IOTAEditPosition的绝对      Ansi、1 开始           Utf8、1 开始             Utf8、1 开始
-Move/Real方法所使用的Col    （三类 IDE 中，Col 在不对位的情况下光标均会往左靠）
+IOTAEditPosition 的绝对     Ansi、1 开始           Utf8、1 开始             Utf8、1 开始
+Move/Real 方法所使用的 Col  （三类 IDE 中，Col 在不对位的情况下光标均会往左靠）
 -----------------------------------------------------------------------------------------------------
-IOTAEditPosition的          字符、1 开始           字符、1 开始             字符、1 开始
-BackspaceDelete的Num        （三类 IDE 中均删整字符，可以理解为 Utf16）
+IOTAEditPosition 的         字符、1 开始           字符、1 开始             字符、1 开始
+BackspaceDelete 的 Num      （三类 IDE 中均删整字符，可以理解为 Utf16）
 -----------------------------------------------------------------------------------------------------
-TOTACharPos的CharIndex      Ansi、0 开始           Utf8、0 开始             Ansi、0 开始
-（Tab键算一个字符）                                                        （有宽字符时由ConvertPos转换而来的结果有混乱）
+TOTACharPos 的 CharIndex    Ansi、0 开始           Utf8、0 开始             Ansi、0 开始
+（Tab 键算一个字符）                                                        （有宽字符时由 ConvertPos 转换而来的结果有混乱）
 -----------------------------------------------------------------------------------------------------
-EditView的CharPosToPos      Ansi、0开始            Utf8、0 开始             当前行之前Utf8、当前行内Ansi，0 开始
-转换而来的文件内的线性Pos                                                  （有宽字符时线性结果必然混乱）
+EditView 的 CharPosToPos    Ansi、0开始            Utf8、0 开始             当前行之前 Utf8、当前行内 Ansi，0 开始
+转换而来的文件内的线性 Pos                                                  （有宽字符时线性结果必然混乱）
 -----------------------------------------------------------------------------------------------------
 编辑器状态栏上的行列显示    三类 IDE 统一，为 1 开始的 Ansi，单字节字符占一列，一汉字占两列
 =====================================================================================================
@@ -59,21 +59,21 @@ CnPack的 Cpp 语法           列 Ansi                列有 Ansi/Wide           同右
 解析器所使用的行列          行列均 1 开始          行列均 1 开始            
 -----------------------------------------------------------------------------------------------------
 CnPack的 Pascal 结构        列 Ansi                列有 Ansi/Wide           同右
-解析器所使用的行列          行列均 0 开始          行列均 0 开始，可展开Tab
+解析器所使用的行列          行列均 0 开始          行列均 0 开始，可展开 Tab
 -----------------------------------------------------------------------------------------------------
 CnPack的 Cpp 结构           列 Ansi                列有 Ansi/Wide           同右     
-解析器所使用的行列          行列均 0 开始          行列均 0 开始，可展开Tab          
+解析器所使用的行列          行列均 0 开始          行列均 0 开始，可展开 Tab          
 -----------------------------------------------------------------------------------------------------
-CnPack的 Pas/Cpp 结构       不展开Tab              根据IDE设置宽度展开Tab   根据IDE设置宽度展开Tab
-解析器是否自行展开Tab       Tab由ConvertPos处理      
+CnPack的 Pas/Cpp 结构       不展开 ab              根据设置宽度展开 Tab     根据设置宽度展开 Tab
+解析器是否自行展开 Tab      Tab 由 ConvertPos 处理      
 -----------------------------------------------------------------------------------------------------
 Pas/Cpp Token 的            1 开始的 TOTAEditPos   1 开始的 TOTAEditPos     1 开始的 TOTAEditPos
-EditLine/EditCol属性        EditCol为Ansi          EditCol为Utf8            EditCol为Ansi
+EditLine/EditCol 属性       EditCol 为 Ansi        EditCol 为 Utf8          EditCol 为 Ansi
 =====================================================================================================
 
 和当前光标有关的，需要使用 TOTAEditPos 类型的 Col。
-结构解析器解析出来的 Token 的行列是基于字符的 Ansi/Wide 值，需要转换成 CharPos 再转换成 EditPos 再存储到 Token 的 EditLine/EditCol 属性里。
-以后在要跳转到此 Token 时才能直接使用 EditLine/EditCol。
+结构解析器解析出来的 Token 的行列是基于字符的 Ansi/Wide 值，需要转换成 CharPos 再转换成 EditPos 再存储到 Token 的 EditLine/EditCol 属性里。以后在要跳转到此 Token 时才能直接使用 EditLine/EditCol。
+CharPos 到 EditPos 的转换实际上是起始 0/1 的变换以及 Tab 键展开（D2005~2007 下还有 Utf8 展开），可以由 EditView 的 ConvertPos 做，Unicode 环境下也可以自己根据 Tab 键的宽度做（因为 Unicode 环境下 ConvertPos 不准）
 另外，代码高亮中需要根据 Token 进行重画时，计算重画区域的 EditCol 应该全部使用 Ansi 的（视觉要求），但 D2005~2007 的 EditPos 的 Col 是 Utf8，所以 D2005~2007 下不能直接用 EditCol，另开了一个属性 EditAnsiCol 存储 Ansi 偏移，专门用来重画。
 
 另外，EditControl 的 LineText 属性表示光标所在的当前行的内容，但当本行为空时，无论光标在哪儿，LineText 均返回空，而不是一串空格。

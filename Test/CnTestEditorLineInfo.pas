@@ -41,7 +41,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ToolsAPI, IniFiles, CnCommon, CnWizClasses, CnWizUtils, CnWizConsts, CnWizManager,
-  StdCtrls, ExtCtrls, ComCtrls, mPasLex;
+  StdCtrls, ExtCtrls, ComCtrls, TypInfo, mPasLex, CnPasCodeParser, CnWidePasParser;
 
 type
   TTestEditorLineInfoForm = class(TForm)
@@ -172,6 +172,7 @@ var
   CurrPos, ATokenPos, ALineNum, ACol: Integer;
   AToken: AnsiString;
   HasTab: Boolean;
+  PosInfo: TCodePosInfo;
 
   function HasTabChar(const ALine: AnsiString): Boolean;
   var
@@ -258,6 +259,7 @@ begin
   {$IFDEF IDE_STRING_ANSI_UTF8}
     // D2005~2007 下，CurrPos 是纯 UTF8，要转换为 Ansi
     CurrPos := Length(CnUtf8ToAnsi(Copy(PAnsiChar(Stream.Memory), 1, CurrPos)));
+    lstInfo.Items.Add('Linear Pos in Utf8 Convert to Ansi: ' + IntToStr(CurrPos));
   {$ENDIF}
     // Utf8/Utf8 全部转成 Ansi
     AnsiText := CnUtf8ToAnsi(PAnsiChar(Stream.Memory));
@@ -296,7 +298,33 @@ begin
   lstInfo.Items.Add(SEP);
   EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False, Element, LineFlag);
   lstInfo.Items.Add(Format('GetAttributeAtPos EditPos %d:%d. Element %d, Flag %d. (NOT Correct in Unicode)',
-   [EditPos.Line, EditPos.Col, Element, LineFlag]));
+    [EditPos.Line, EditPos.Col, Element, LineFlag]));
+
+  Stream := TMemoryStream.Create;
+  try
+{$IFDEF UNICODE}
+    CnOtaSaveCurrentEditorToStreamW(Stream, False);
+    ParsePasCodePosInfoW(PChar(Stream.Memory), EditView.CursorPos.Line,
+      EditView.CursorPos.Col, PosInfo, EditControlWrapper.GetTabWidth, True);
+{$ELSE}
+    CnOtaSaveCurrentEditorToStream(Stream, False, False);
+    PosInfo := ParsePasCodePosInfo(PAnsiChar(Stream.Memory), CurrPos, True, True);
+{$ENDIF}
+
+    lstInfo.Items.Add(SEP);
+    with PosInfo do
+    begin
+      lstInfo.Items.Add('Current TokenID: ' + GetEnumName(TypeInfo(TTokenKind), Ord(TokenID)));
+      lstInfo.Items.Add('AreaKind: ' + GetEnumName(TypeInfo(TCodeAreaKind), Ord(AreaKind)));
+      lstInfo.Items.Add('PosKind: ' + GetEnumName(TypeInfo(TCodePosKind), Ord(PosKind)));
+      lstInfo.Items.Add('Current LineNumber: ' + IntToStr(LineNumber));
+      lstInfo.Items.Add('Current ColumnNumber: ' + IntToStr(TokenPos - LinePos));
+      lstInfo.Items.Add('Previous Token: ' + GetEnumName(TypeInfo(TTokenKind), Ord(LastNoSpace)));
+      lstInfo.Items.Add('Current Token: ' + string(Token));
+    end;
+  finally
+    Stream.Free;
+  end;
 
   PasParser := TCnGeneralPasStructParser.Create;
   Stream := TMemoryStream.Create;

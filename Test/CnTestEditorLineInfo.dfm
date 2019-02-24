@@ -1,10 +1,10 @@
 object TestEditorLineInfoForm: TTestEditorLineInfoForm
   Left = 200
   Top = 280
-  BorderStyle = bsDialog
+  BorderIcons = [biSystemMenu]
   Caption = 'Test Editor Line Info'
-  ClientHeight = 329
-  ClientWidth = 484
+  ClientHeight = 422
+  ClientWidth = 482
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,8 +18,8 @@ object TestEditorLineInfoForm: TTestEditorLineInfoForm
   object lstInfo: TListBox
     Left = 0
     Top = 0
-    Width = 484
-    Height = 329
+    Width = 482
+    Height = 422
     Align = alClient
     ItemHeight = 13
     TabOrder = 0
