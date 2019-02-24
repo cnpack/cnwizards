@@ -216,6 +216,11 @@ type
     {* Tab 键的宽度}
   end;
 
+procedure ParsePasCodePosInfoW(const Source: string; Line, Col: Integer;
+  var PosInfo: TCodePosInfo; TabWidth: Integer = 2; FullSource: Boolean = True);
+{* UNICODE 环境下的解析光标所在代码的位置，只用于 D2009 或以上
+  Line/Col 对应 View 的 CursorPos，均为 1 开始}
+
 procedure ParseUnitUsesW(const Source: CnWideString; UsesList: TStrings;
   SupportUnicodeIdent: Boolean = False);
 {* 分析源代码中引用的单元}
@@ -1445,6 +1450,328 @@ begin
           Result := Tokens[Idx - 1].Token;
       end;
     end;
+  end;
+end;
+
+procedure ParsePasCodePosInfoW(const Source: string; Line, Col: Integer;
+  var PosInfo: TCodePosInfo; TabWidth: Integer; FullSource: Boolean);
+var
+  IsProgram: Boolean;
+  InClass: Boolean;
+  ProcStack: TStack;
+  ProcIndent: Integer;
+  SavePos: TCodePosKind;
+  Lex: TCnPasWideLex;
+  ExpandCol: Integer;
+
+  function LexStillBeforeCursor: Boolean;
+  begin
+    if Lex.LineNumber < Line then
+      Result := True
+    else if Lex.LineNumber > Line then
+      Result := False
+    else if Lex.LineNumber = Line then
+      Result := ExpandCol < Col
+    else
+      Result := False;
+  end;
+
+  procedure DoNext(NoJunk: Boolean = False);
+  begin
+    PosInfo.LastIdentPos := Lex.LastIdentPos;
+    PosInfo.LastNoSpace := Lex.LastNoSpace;
+    PosInfo.LastNoSpacePos := Lex.LastNoSpacePos;
+    PosInfo.LineNumber := Lex.LineNumber;
+    PosInfo.LinePos := Lex.LineStartOffset;
+    PosInfo.TokenPos := Lex.TokenPos;
+    PosInfo.Token := AnsiString(Lex.Token);
+    PosInfo.TokenID := Lex.TokenID;
+    if NoJunk then
+      Lex.NextNoJunk
+    else
+      Lex.Next;
+
+    if Lex.LineNumber = Line then
+    begin
+      if Lex.TokenID = tkCRLF then
+        ExpandCol := 1  // Lex 的 ColumnNumber 在换行时不靠谱
+      else
+      begin
+        // TODO: 如果是当前行，则展开 Tab
+        // 并把当前 Token 的展开 Col 给 ExpandCol
+
+        ExpandCol := Lex.ColumnNumber;
+      end;
+    end
+    else
+    begin
+      if Lex.TokenID = tkCRLF then // Lex 的 ColumnNumber 在换行时不靠谱
+        ExpandCol := 1
+      else
+        ExpandCol := Lex.ColumnNumber;
+    end;
+  end;
+
+begin
+  Lex := nil;
+  ProcStack := nil;
+  PosInfo.IsPascal := True;
+
+  try
+    Lex := TCnPasWideLex.Create;
+    ProcStack := TStack.Create;
+    Lex.Origin := PWideChar(Source);
+
+    if FullSource then
+    begin
+      PosInfo.AreaKind := akHead;
+      PosInfo.PosKind := pkUnknown;
+    end
+    else
+    begin
+      PosInfo.AreaKind := akImplementation;
+      PosInfo.PosKind := pkUnknown;
+    end;
+    SavePos := pkUnknown;
+    IsProgram := False;
+    InClass := False;
+    ProcIndent := 0;
+    ExpandCol := Lex.ColumnNumber;
+
+    // 编辑器光标所在的 Line/Col 参数从 1 开始，
+    // 可和 Lex 解析出的 1 开始的 LineNumber/ColumnNumber 比较
+    // 但行相同时，Lex 需要先对这一行进行 Tab 展开
+    while (Lex.TokenID <> tkNull) and LexStillBeforeCursor do
+    begin
+      case Lex.TokenID of
+        tkUnit:
+          begin
+            IsProgram := False;
+            PosInfo.AreaKind := akUnit;
+            PosInfo.PosKind := pkFlat;
+          end;
+        tkProgram, tkLibrary:
+          begin
+            IsProgram := True;
+            PosInfo.AreaKind := akProgram;
+            PosInfo.PosKind := pkFlat;
+          end;
+        tkInterface:
+          begin
+            if (PosInfo.AreaKind in [akUnit, akProgram]) and not IsProgram then
+            begin
+              PosInfo.AreaKind := akInterface;
+              PosInfo.PosKind := pkFlat;
+            end
+            else if Lex.IsInterface then
+            begin
+              PosInfo.PosKind := pkInterface;
+              DoNext(True);
+              if LexStillBeforeCursor and (Lex.TokenID = tkSemiColon) then
+                PosInfo.PosKind := pkType
+              else if LexStillBeforeCursor and (Lex.TokenID = tkRoundOpen) then
+              begin
+                while LexStillBeforeCursor and not (Lex.TokenID in
+                  [tkNull, tkRoundClose]) do
+                  DoNext;
+                if LexStillBeforeCursor and (Lex.TokenID = tkRoundClose) then
+                begin
+                  DoNext(True);
+                  if LexStillBeforeCursor and (Lex.TokenID = tkSemiColon) then
+                    PosInfo.PosKind := pkType;
+                end;
+              end;
+              if PosInfo.PosKind = pkInterface then
+                InClass := True;
+            end;
+          end;
+        tkUses:
+          begin
+            if PosInfo.AreaKind in [akProgram, akInterface] then
+            begin
+              PosInfo.AreaKind := akIntfUses;
+              PosInfo.PosKind := pkIntfUses;
+            end
+            else if PosInfo.AreaKind = akImplementation then
+            begin
+              PosInfo.AreaKind := akImplUses;
+              PosInfo.PosKind := pkIntfUses;
+            end;
+            if PosInfo.AreaKind in [akIntfUses, akImplUses] then
+            begin
+              while LexStillBeforeCursor and not (Lex.TokenID in [tkNull, tkSemiColon]) do
+                DoNext;
+              if LexStillBeforeCursor and (Lex.TokenID = tkSemiColon) then
+              begin
+                if PosInfo.AreaKind = akIntfUses then
+                  PosInfo.AreaKind := akInterface
+                else
+                  PosInfo.AreaKind := akImplementation;
+                PosInfo.PosKind := pkFlat;
+              end;
+            end;
+          end;
+        tkImplementation:
+          if not IsProgram then
+          begin
+            PosInfo.AreaKind := akImplementation;
+            PosInfo.PosKind := pkFlat;
+          end;
+        tkInitialization:
+          begin
+            PosInfo.AreaKind := akInitialization;
+            PosInfo.PosKind := pkFlat;
+          end;
+        tkFinalization:
+          begin
+            PosInfo.AreaKind := akFinalization;
+            PosInfo.PosKind := pkFlat;
+          end;
+        tkSquareClose:
+          if (Lex.Token = '.)') and (Lex.LastNoSpace in [tkIdentifier,
+            tkPointerSymbol, tkSquareClose, tkRoundClose]) then
+          begin
+            if not (PosInfo.PosKind in [pkFieldDot, pkField]) then
+              SavePos := PosInfo.PosKind;
+            PosInfo.PosKind := pkFieldDot;
+          end;
+        tkPoint:
+          if Lex.LastNoSpace = tkEnd then
+          begin
+            PosInfo.AreaKind := akEnd;
+            PosInfo.PosKind := pkUnknown;
+          end
+          else if Lex.LastNoSpace in [tkIdentifier, tkPointerSymbol, {$IFDEF DelphiXE3_UP} tkString, {$ENDIF} // Delphi XE3 Supports function invoke on string
+            tkSquareClose, tkRoundClose] then
+          begin
+            if not (PosInfo.PosKind in [pkFieldDot, pkField]) then
+              SavePos := PosInfo.PosKind;
+            PosInfo.PosKind := pkFieldDot;
+          end;
+        tkAnsiComment, tkBorComment, tkSlashesComment:
+          begin
+            if PosInfo.PosKind <> pkComment then
+            begin
+              SavePos := PosInfo.PosKind;
+              PosInfo.PosKind := pkComment;
+            end;
+          end;
+        tkClass:
+          begin
+            if Lex.IsClass then
+            begin
+              PosInfo.PosKind := pkClass;
+              DoNext(True);
+              if LexStillBeforeCursor and (Lex.TokenID = tkSemiColon) then
+                PosInfo.PosKind := pkType
+              else if LexStillBeforeCursor and (Lex.TokenID = tkRoundOpen) then
+              begin
+                while LexStillBeforeCursor and not (Lex.TokenID in
+                  [tkNull, tkRoundClose]) do
+                  DoNext;
+                if LexStillBeforeCursor and (Lex.TokenID = tkRoundClose) then
+                begin
+                  DoNext(True);
+                  if LexStillBeforeCursor and (Lex.TokenID = tkSemiColon) then
+                    PosInfo.PosKind := pkType
+                  else
+                  begin
+                    InClass := True;
+                    Continue;
+                  end;
+                end;
+              end
+              else
+              begin
+                InClass := True;
+                Continue;
+              end;
+            end;
+          end;
+        tkType:
+          PosInfo.PosKind := pkType;
+        tkConst:
+          if not InClass then
+            PosInfo.PosKind := pkConst;
+        tkResourceString:
+          PosInfo.PosKind := pkResourceString;
+        tkVar:
+          if not InClass then
+            PosInfo.PosKind := pkVar;
+        tkCompDirect:
+          begin
+            if PosInfo.PosKind <> pkCompDirect then
+            begin
+              SavePos := PosInfo.PosKind;
+              PosInfo.PosKind := pkCompDirect;
+            end;
+          end;
+        tkString:
+          begin
+            if not SameText(string(Lex.Token), 'String') and (PosInfo.PosKind <> pkString) then
+            begin
+              SavePos := PosInfo.PosKind;
+              PosInfo.PosKind := pkString;
+            end;
+          end;
+        tkIdentifier, tkMessage, tkRead, tkWrite, tkDefault, tkIndex:
+          if (Lex.LastNoSpace = tkPoint) and (PosInfo.PosKind = pkFieldDot) then
+          begin
+            PosInfo.PosKind := pkField;
+          end;
+        tkProcedure, tkFunction, tkConstructor, tkDestructor:
+          begin
+            if not InClass and (PosInfo.AreaKind in [akProgram, akImplementation]) then
+            begin
+              ProcIndent := 0;
+              if Lex.TokenID = tkProcedure then
+                PosInfo.PosKind := pkProcedure
+              else if Lex.TokenID = tkFunction then
+                PosInfo.PosKind := pkFunction
+              else if Lex.TokenID = tkConstructor then
+                PosInfo.PosKind := pkConstructor
+              else
+                PosInfo.PosKind := pkDestructor;
+              ProcStack.Push(Pointer(PosInfo.PosKind));
+            end;
+            // todo: 处理单独声明的函数
+          end;
+        tkBegin, tkTry, tkCase, tkAsm, tkRecord:
+          begin
+            if ProcStack.Count > 0 then
+            begin
+              Inc(ProcIndent);
+              PosInfo.PosKind := TCodePosKind(ProcStack.Peek);
+            end;
+          end;
+        tkEnd:
+          begin
+            if InClass then
+            begin
+              PosInfo.PosKind := pkType;
+              InClass := False;
+            end
+            else if ProcStack.Count > 0 then
+            begin
+              Dec(ProcIndent);
+              if ProcIndent <= 0 then
+              begin
+                ProcStack.Pop;
+                PosInfo.PosKind := pkFlat;
+              end;
+            end;
+          end;
+      else
+        if PosInfo.PosKind in [pkCompDirect, pkComment, pkString, pkField,
+          pkFieldDot] then
+          PosInfo.PosKind := SavePos;
+      end;
+
+      DoNext;
+    end;
+  finally
+    Lex.Free;
+    ProcStack.Free;
   end;
 end;
 

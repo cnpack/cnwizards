@@ -59,8 +59,10 @@ uses
   {$IFDEF OTA_CODE_TEMPLATE_API} CodeTemplateAPI, {$ENDIF}
   CnConsts, CnCommon, CnWizClasses, CnWizConsts, CnWizUtils, CnWizIdeUtils,
   CnInputSymbolList, CnInputIdeSymbolList, CnIni, CnWizMultiLang, CnWizNotifier,
-  CnPasCodeParser, CnWizShareImages, CnWizShortCut, CnWizOptions, CnFloatWindow,
-  CnEditControlWrapper, CnWizMethodHook, CnCppCodeParser, CnPopupMenu, CnStrings;
+  CnPasCodeParser, CnCppCodeParser,
+  {$IFDEF UNICODE} CnWidePasParser, CnWideCppParser, {$ENDIF}
+  CnWizShareImages, CnWizShortCut, CnWizOptions, CnFloatWindow,
+  CnEditControlWrapper, CnWizMethodHook, CnPopupMenu, CnStrings;
 
 const
   csMinDispDelay = 50;
@@ -1828,17 +1830,22 @@ begin
     end
     else
     begin
-      CnOtaSaveCurrentEditorToStream(Stream, False, False);
-      // BDS 下内容已经是 UTF8 了，必须做Ansi转换以避免注释判断错误
-      if IsPascalFile then
-      begin
-        FPosInfo := ParsePasCodePosInfo(PAnsiChar(Stream.Memory), CurrPos, True, True)
-      end
-      else if IsCppFile then
-      begin
-        // 解析 C++ 文件，判断光标所属的位置类型
+{$IFDEF UNICODE}
+      CnOtaSaveCurrentEditorToStreamW(Stream, False);
+      if IsPascalFile then  // Stream 内容是 Utf16
+        ParsePasCodePosInfoW(PChar(Stream.Memory), View.CursorPos.Line,
+          View.CursorPos.Col, FPosInfo, EditControlWrapper.GetTabWidth, True)
+      else if IsCppFile then // 解析 C++ 文件，判断光标所属的位置类型
         FPosInfo := ParseCppCodePosInfo(PAnsiChar(Stream.Memory), CurrPos, True, True);
-      end;
+        // ParseCppCodePosInfoW(PChar(Stream.Memory), View.CursorPos.Line,
+        // View.CursorPos.Col, FPosInfo, EditControlWrapper.GetTabWidth, True);
+{$ELSE}
+      CnOtaSaveCurrentEditorToStream(Stream, False, False);
+      if IsPascalFile then
+        FPosInfo := ParsePasCodePosInfo(PAnsiChar(Stream.Memory), CurrPos, True, True)
+      else if IsCppFile then // 解析 C++ 文件，判断光标所属的位置类型
+        FPosInfo := ParseCppCodePosInfo(PAnsiChar(Stream.Memory), CurrPos, True, True);
+{$ENDIF}
     end;
   finally
     Stream.Free;

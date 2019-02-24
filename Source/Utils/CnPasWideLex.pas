@@ -336,15 +336,15 @@ type
     property LineNumber: Integer read FLineNumber write FLineNumber;
     {* 当前行号，从 1 开始}
     property ColumnNumber: Integer read FColumnNumber write FColumnNumber;
-    {* 当前直观列号，从 1 开始，类似于 Ansi}
+    {* 当前直观列号，从 1 开始，类似于 Ansi，不展开 Tab}
     property WideColumnNumber: Integer read GetWideColumnNumber;
     {* 当前原始列号，以字符为单位，从 1 开始，不展开 Tab。目前已知问题：针对行尾的回车换行，此属性不准}
     property LineStartOffset: Integer read FLineStartOffset write FLineStartOffset;
-    {* 当前行行首所在的线性位置，相对 FOrigin 的线性偏移量，单位为字符数}
+    {* 当前行行首所在的线性位置，相对 FOrigin 的线性偏移量，单位为字符数，0 开始}
     property Origin: PWideChar read FOrigin write SetOrigin;
     {* 待解析内容的起始地址}
     property RunPos: Integer read FRun write SetRunPos;
-    {* 当前处理位置相对于 FOrigin 的线性偏移量，单位为字符数}
+    {* 当前处理位置相对于 FOrigin 的线性偏移量，单位为字符数，0 开始}
     property TokenPos: Integer read FTokenPos;
     {* 当前 Token 首相对于 FOrigin 的线性偏移量，单位为字符数，减去 LineStartOffset 即是当前原始列位置
     （原始列：每个双字节字符占一列，0 开始，不展开 Tab}

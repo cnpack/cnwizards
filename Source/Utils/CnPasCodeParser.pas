@@ -276,12 +276,12 @@ type
     LastIdentPos: Integer;     // 上一处标识符位置
     LastNoSpace: TTokenKind;   // 上一处非空记号类型
     LastNoSpacePos: Integer;   // 上一次非空记号位置
-    LineNumber: Integer;       // 行号
-    LinePos: Integer;          // 行位置
-    TokenPos: Integer;         // 当前记号位置
+    LineNumber: Integer;       // 行号，0 开始
+    LinePos: Integer;          // 所在行的行首的线性位置，0 开始
+    TokenPos: Integer;         // 当前记号的线性位置，0 开始
     Token: AnsiString;         // 当前记号内容
-    TokenID: TTokenKind;       // 当前Pascal记号类型
-    CTokenID: TCTokenKind;     // 当前C记号类型
+    TokenID: TTokenKind;       // 当前 Pascal 记号类型
+    CTokenID: TCTokenKind;     // 当前 C 记号类型
     AreaKind: TCodeAreaKind;   // 当前区域类型
     PosKind: TCodePosKind;     // 当前位置类型
   end;
@@ -301,7 +301,7 @@ function ParsePasCodePosInfo(const Source: AnsiString; CurrPos: Integer;
   FullSource: Boolean = True; SourceIsUtf8: Boolean = False): TCodePosInfo;
 {* 分析源代码中当前位置的信息，如果 SourceIsUtf8 为 True，内部会转为 Ansi
   CurrPos 应当是文件的线性位置（Ansi/Utf8/Ansi），但 Unicode 环境下线性
-  位置当有宽字符时有偏差，使用时要注意}
+  位置当有宽字符时有偏差，需要使用 ParsePasCodePosInfoW}
 
 procedure ParseUnitUses(const Source: AnsiString; UsesList: TStrings);
 {* 分析源代码中引用的单元}
