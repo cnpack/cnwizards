@@ -718,7 +718,7 @@ function CodeAutoWrap(Code: string; Width, Indent: Integer;
 
 {$IFDEF COMPILER6_UP}
 function FastUtf8ToAnsi(const Text: AnsiString): AnsiString;
-{* 快速转换Utf8到Ansi字符串，适用于长度短且主要是Ansi字符的字符串 }
+{* 快速转换 Utf8 到 Ansi 字符串，适用于长度短且主要是 Ansi 字符的字符串 }
 {$ENDIF}
 
 {$IFDEF UNICODE}
@@ -4587,6 +4587,10 @@ var
   LineText: string;
   AnsiText: AnsiString;
   I: Integer;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  Utf8Text: AnsiString;
+  WideText: WideString;
+{$ENDIF}
 
   function _IsValidIdentChar(C: AnsiChar; First: Boolean): Boolean;
   begin
@@ -4615,6 +4619,12 @@ begin
       Exit;
 
     AnsiText := ConvertNtaEditorStringToAnsi(LineText);
+{$IFDEF IDE_STRING_ANSI_UTF8}
+    // 注意上面拿到的 CharIndex 在 D2005~2007 下是 Utf8 的，需要转换成 Ansi 的
+    // TODO: 直接 Utf8 转 Ansi，暂不考虑代码页未设置导致丢字符的问题
+    Utf8Text := Copy(LineText, 1, CharIndex);
+    CharIndex := Length(CnUtf8ToAnsi(Utf8Text));
+{$ENDIF}
 
     I := CharIndex;
     CurrIndex := 0;
@@ -5565,20 +5575,20 @@ function ConvertNtaEditorStringToAnsi(const LineText: string;
   UseAlterChar: Boolean): AnsiString;
 begin
 {$IFDEF UNICODE}
-  // D 2009 或以上
+  // D2009 或以上
   if UseAlterChar then // 纯英文 Unicode 环境下不能直接转 Ansi
     Result := ConvertUtf16ToAlterAnsi(PWideChar(LineText), 'C')
   else
     Result := AnsiString(LineText);
 {$ELSE}
   {$IFDEF IDE_STRING_ANSI_UTF8}
-     // D 2005 ~ 2007 Utf8 to Ansi
+     // D2005 ~ 2007 Utf8 to Ansi
      if UseAlterChar then // 纯英文环境下 Utf8 不能直接转 Ansi
        Result := ConvertUtf8ToAlterAnsi(PAnsiChar(LineText), 'C')
      else
        Result := Utf8ToAnsi(LineText);
   {$ELSE}
-     // D 5、6、7 等同于直接返回
+     // D5、6、7 等同于直接返回
      Result := AnsiString(LineText);
   {$ENDIF}
 {$ENDIF}
