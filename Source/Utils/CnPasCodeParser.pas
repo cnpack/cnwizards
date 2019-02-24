@@ -275,10 +275,10 @@ type
     IsPascal: Boolean;         // 是否是 Pascal 文件
     LastIdentPos: Integer;     // 上一处标识符位置
     LastNoSpace: TTokenKind;   // 上一处非空记号类型
-    LastNoSpacePos: Integer;   // 上一次非空记号位置
-    LineNumber: Integer;       // 行号，0 开始
-    LinePos: Integer;          // 所在行的行首的线性位置，0 开始
-    TokenPos: Integer;         // 当前记号的线性位置，0 开始
+    LastNoSpacePos: Integer;   // 上一次非空记号的线性位置，0 开始，暂时没派上用场
+    LineNumber: Integer;       // 行号，0 开始，暂时没派上用场
+    LinePos: Integer;          // 所在行的行首的线性位置，0 开始，暂时没派上用场
+    TokenPos: Integer;         // 当前记号的线性位置，0 开始，暂时没派上用场
     Token: AnsiString;         // 当前记号内容
     TokenID: TTokenKind;       // 当前 Pascal 记号类型
     CTokenID: TCTokenKind;     // 当前 C 记号类型
@@ -410,7 +410,7 @@ type
   end;
 
 var
-  TokenPool: TCnList;
+  TokenPool: TCnList = nil;
 
 // 用池方式来管理 PasTokens 以提高性能
 function CreatePasToken: TCnPasToken;

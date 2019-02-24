@@ -125,10 +125,15 @@ type
     property Source: CnWideString read FSource;
   end;
 
+procedure ParseCppCodePosInfoW(const Source: string; Line, Col: Integer;
+  var PosInfo: TCodePosInfo; TabWidth: Integer = 2; FullSource: Boolean = True);
+{* UNICODE 环境下的解析光标所在代码的位置，只用于 D2009 或以上
+  Line/Col 对应 View 的 CursorPos，均为 1 开始}
+
 implementation
 
 var
-  TokenPool: TCnList;
+  TokenPool: TCnList = nil;
 
 // 用池方式来管理 CppTokens 以提高性能
 function CreateCppToken: TCnWideCppToken;
@@ -644,6 +649,136 @@ end;
 function TCnWideCppStructParser.IndexOfToken(Token: TCnWideCppToken): Integer;
 begin
   Result := FList.IndexOf(Token);
+end;
+
+procedure ParseCppCodePosInfoW(const Source: string; Line, Col: Integer;
+  var PosInfo: TCodePosInfo; TabWidth: Integer; FullSource: Boolean);
+var
+  CanExit: Boolean;
+  CParser: TCnBCBWideTokenList;
+  ExpandCol: Integer;
+
+  function CParserStillBeforeCursor: Boolean; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
+  begin
+    if CParser.LineNumber < Line then
+      Result := True
+    else if CParser.LineNumber > Line then
+      Result := False
+    else if CParser.LineNumber = Line then
+      Result := ExpandCol < Col
+    else
+      Result := False;
+  end;
+
+  procedure DoNext; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
+  var
+    OldPosition: Integer;
+  begin
+    PosInfo.LineNumber := CParser.LineNumber - 1; // 从 1 开始变成从 0 开始
+    PosInfo.LinePos := CParser.LineStartOffset;
+    PosInfo.TokenPos := CParser.RunPosition;
+    PosInfo.Token := AnsiString(CParser.RunToken);
+    PosInfo.CTokenID := CParser.RunID;
+
+    OldPosition := CParser.RunPosition;
+    CParser.Next;
+
+    CanExit := CParser.RunPosition = OldPosition;
+    // 当 Next 再也前进不了的时候，就是该撤了
+    // 这样做的原因是，CParser 在结尾时，有时候不会进行到ctknull，而一直打转
+
+    if CParser.LineNumber = Line then
+    begin
+      // TODO: 如果是当前行，则展开 Tab
+      // 并把当前 Token 的展开 Col 给 ExpandCol
+
+      ExpandCol := CParser.ColumnNumber;
+    end
+    else
+      ExpandCol := CParser.ColumnNumber;
+  end;
+
+begin
+  CParser := nil;
+  PosInfo.IsPascal := False;
+
+  try
+    CParser := TCnBCBWideTokenList.Create;
+    CParser.DirectivesAsComments := False;
+
+    CParser.SetOrigin(PWideChar(Source), Length(Source));
+    if FullSource then
+    begin
+      PosInfo.AreaKind := akHead; // 未使用
+      PosInfo.PosKind := pkField; // 常规空白区，以pkField
+    end
+    else
+    begin
+
+    end;
+
+    while CParserStillBeforeCursor and (CParser.RunID <> ctknull) do
+    begin
+      // 至少要区分出字符（串）、注释、->或.后、标识符、编译指令等
+      case CParser.RunID of
+        ctkansicomment, ctkslashescomment:
+          begin
+            PosInfo.PosKind := pkComment;
+          end;
+        ctkstring:
+          begin
+            PosInfo.PosKind := pkString;
+          end;
+        ctkcrlf:
+          begin
+            // 行注释与#编译指令，以回车结尾
+            if (PosInfo.PosKind = pkCompDirect) or (PosInfo.CTokenID = ctkslashescomment) then
+              PosInfo.PosKind := pkField;
+          end;
+//        ctksemicolon, ctkbraceopen, ctkbraceclose, ctkbracepair,
+//        ctkint, ctkfloat, ctkdouble, ctkchar,
+//        ctkidentifier, ctkcoloncolon,
+//        ctkroundopen, ctkroundpair, ctksquareopen, ctksquarepair,
+//        ctkcomma, ctkequal, ctknumber:
+//          begin
+//            Result.PosKind := pkField;
+//          end;
+        ctkselectelement:
+          begin
+            PosInfo.PosKind := pkFieldDot; // -> 视作 . 处理
+          end;
+        ctkpoint:
+          begin
+            if PosInfo.CTokenID = ctkidentifier then
+              PosInfo.PosKind := pkFieldDot; // 上一个标识符后的点才算
+          end;
+        ctkdirdefine, ctkdirelif, ctkdirelse, ctkdirendif, ctkdirerror, ctkdirif,
+        ctkdirifdef, ctkdirifndef, ctkdirinclude, ctkdirline, ctkdirnull,
+        ctkdirpragma, ctkdirundef:
+          begin
+            PosInfo.PosKind := pkCompDirect;
+          end;
+        ctkUnknown:
+          begin
+            // #后的编译指令未完成时
+            if (Length(CParser.RunToken) >= 1 ) and (CParser.RunToken[1] = '#') then
+            begin
+              PosInfo.PosKind := pkCompDirect;
+            end
+            else
+              PosInfo.PosKind := pkField;
+          end;
+      else
+        PosInfo.PosKind := pkField;
+      end;
+
+      DoNext;
+      if CanExit then
+        Break;
+    end;
+  finally
+    CParser.Free;
+  end;
 end;
 
 { TCnWideCppToken }

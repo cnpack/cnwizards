@@ -1836,9 +1836,8 @@ begin
         ParsePasCodePosInfoW(PChar(Stream.Memory), View.CursorPos.Line,
           View.CursorPos.Col, FPosInfo, EditControlWrapper.GetTabWidth, True)
       else if IsCppFile then // 解析 C++ 文件，判断光标所属的位置类型
-        FPosInfo := ParseCppCodePosInfo(PAnsiChar(Stream.Memory), CurrPos, True, True);
-        // ParseCppCodePosInfoW(PChar(Stream.Memory), View.CursorPos.Line,
-        // View.CursorPos.Col, FPosInfo, EditControlWrapper.GetTabWidth, True);
+        ParseCppCodePosInfoW(PChar(Stream.Memory), View.CursorPos.Line,
+          View.CursorPos.Col, FPosInfo, EditControlWrapper.GetTabWidth, True);
 {$ELSE}
       CnOtaSaveCurrentEditorToStream(Stream, False, False);
       if IsPascalFile then

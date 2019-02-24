@@ -136,7 +136,8 @@ type
 function ParseCppCodePosInfo(const Source: AnsiString; CurrPos: Integer;
   FullSource: Boolean = True; SourceIsUtf8: Boolean = False): TCodePosInfo;
 {* 分析源代码中当前位置的信息，如果 SourceIsUtf8 为 True，内部会转为 Ansi
-  CurrPos 应当是文件的线性位置（Ansi/Utf8/Ansi）}
+  CurrPos 应当是文件的线性位置（Ansi/Utf8/Ansi）。但 Unicode 环境下线性
+  位置当有宽字符时有偏差，需要使用 ParseCppCodePosInfoW}
 
 procedure ParseUnitIncludes(const Source: AnsiString; IncludeList: TStrings);
 {* 分析源代码中引用的头文件}
@@ -144,7 +145,7 @@ procedure ParseUnitIncludes(const Source: AnsiString; IncludeList: TStrings);
 implementation
 
 var
-  TokenPool: TCnList;
+  TokenPool: TCnList = nil;
 
 // 用池方式来管理 PasTokens 以提高性能
 function CreateCppToken: TCnCppToken;
@@ -641,12 +642,12 @@ var
   CParser: TBCBTokenList;
   Text: AnsiString;
 
-  procedure DoNext;
+  procedure DoNext; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
   var
     OldPosition: Integer;
   begin
     Result.LineNumber := CParser.RunLineNumber - 1;
-    Result.LinePos := CParser.RunColNumber;
+    Result.LinePos := CParser.LineStartOffset;
     Result.TokenPos := CParser.RunPosition;
     Result.Token := AnsiString(CParser.RunToken);
     Result.CTokenID := CParser.RunID;

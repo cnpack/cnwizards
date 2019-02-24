@@ -329,7 +329,7 @@ type
   end;
 
 var
-  TokenPool: TCnList;
+  TokenPool: TCnList = nil;
 
 function WideTrim(const S: CnWideString): CnWideString;
 {$IFNDEF UNICODE}
@@ -1464,7 +1464,7 @@ var
   Lex: TCnPasWideLex;
   ExpandCol: Integer;
 
-  function LexStillBeforeCursor: Boolean;
+  function LexStillBeforeCursor: Boolean; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
   begin
     if Lex.LineNumber < Line then
       Result := True
@@ -1476,12 +1476,12 @@ var
       Result := False;
   end;
 
-  procedure DoNext(NoJunk: Boolean = False);
+  procedure DoNext(NoJunk: Boolean = False); {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
   begin
     PosInfo.LastIdentPos := Lex.LastIdentPos;
     PosInfo.LastNoSpace := Lex.LastNoSpace;
     PosInfo.LastNoSpacePos := Lex.LastNoSpacePos;
-    PosInfo.LineNumber := Lex.LineNumber;
+    PosInfo.LineNumber := Lex.LineNumber - 1; // 从 1 开始变成从 0 开始
     PosInfo.LinePos := Lex.LineStartOffset;
     PosInfo.TokenPos := Lex.TokenPos;
     PosInfo.Token := AnsiString(Lex.Token);
