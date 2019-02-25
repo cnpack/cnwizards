@@ -125,10 +125,14 @@ type
     property Source: CnWideString read FSource;
   end;
 
+{$IFDEF UNICODE}
+
 procedure ParseCppCodePosInfoW(const Source: string; Line, Col: Integer;
   var PosInfo: TCodePosInfo; TabWidth: Integer = 2; FullSource: Boolean = True);
 {* UNICODE 环境下的解析光标所在代码的位置，只用于 D2009 或以上
   Line/Col 对应 View 的 CursorPos，均为 1 开始}
+
+{$ENDIF}
 
 implementation
 
@@ -651,6 +655,8 @@ begin
   Result := FList.IndexOf(Token);
 end;
 
+{$IFDEF UNICODE}
+
 procedure ParseCppCodePosInfoW(const Source: string; Line, Col: Integer;
   var PosInfo: TCodePosInfo; TabWidth: Integer; FullSource: Boolean);
 var
@@ -658,7 +664,7 @@ var
   CParser: TCnBCBWideTokenList;
   ExpandCol: Integer;
 
-  function CParserStillBeforeCursor: Boolean; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
+  function CParserStillBeforeCursor: Boolean;
   begin
     if CParser.LineNumber < Line then
       Result := True
@@ -670,7 +676,7 @@ var
       Result := False;
   end;
 
-  procedure DoNext; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
+  procedure DoNext;
   var
     OldPosition: Integer;
   begin
@@ -780,6 +786,8 @@ begin
     CParser.Free;
   end;
 end;
+
+{$ENDIF}
 
 { TCnWideCppToken }
 

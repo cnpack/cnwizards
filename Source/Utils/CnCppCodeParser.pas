@@ -642,7 +642,7 @@ var
   CParser: TBCBTokenList;
   Text: AnsiString;
 
-  procedure DoNext; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
+  procedure DoNext;
   var
     OldPosition: Integer;
   begin

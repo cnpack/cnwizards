@@ -216,10 +216,14 @@ type
     {* Tab 键的宽度}
   end;
 
+{$IFDEF UNICODE}
+
 procedure ParsePasCodePosInfoW(const Source: string; Line, Col: Integer;
   var PosInfo: TCodePosInfo; TabWidth: Integer = 2; FullSource: Boolean = True);
 {* UNICODE 环境下的解析光标所在代码的位置，只用于 D2009 或以上
   Line/Col 对应 View 的 CursorPos，均为 1 开始}
+
+{$ENDIF}
 
 procedure ParseUnitUsesW(const Source: CnWideString; UsesList: TStrings;
   SupportUnicodeIdent: Boolean = False);
@@ -1453,6 +1457,8 @@ begin
   end;
 end;
 
+{$IFDEF UNICODE}
+
 procedure ParsePasCodePosInfoW(const Source: string; Line, Col: Integer;
   var PosInfo: TCodePosInfo; TabWidth: Integer; FullSource: Boolean);
 var
@@ -1464,7 +1470,7 @@ var
   Lex: TCnPasWideLex;
   ExpandCol: Integer;
 
-  function LexStillBeforeCursor: Boolean; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
+  function LexStillBeforeCursor: Boolean;
   begin
     if Lex.LineNumber < Line then
       Result := True
@@ -1476,7 +1482,7 @@ var
       Result := False;
   end;
 
-  procedure DoNext(NoJunk: Boolean = False); {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
+  procedure DoNext(NoJunk: Boolean = False);
   begin
     PosInfo.LastIdentPos := Lex.LastIdentPos;
     PosInfo.LastNoSpace := Lex.LastNoSpace;
@@ -1774,6 +1780,8 @@ begin
     ProcStack.Free;
   end;
 end;
+
+{$ENDIF}
 
 // 分析源代码中引用的单元
 procedure ParseUnitUsesW(const Source: CnWideString; UsesList: TStrings;
