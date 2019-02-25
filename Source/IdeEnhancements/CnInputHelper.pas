@@ -1874,7 +1874,7 @@ begin
   if IsPascalFile then
     Result := not (FPosInfo.AreaKind in [akUnknown, akEnd]) and
       not (FPosInfo.PosKind in [pkUnknown, pkString]) and
-      not (FPosInfo.TokenID in [tkFloat])
+      not (FPosInfo.TokenID in [tkFloat, tkInteger]) // $ef 这种属于 tkInteger 也不能弹
   else if IsCppFile then
     Result := not (FPosInfo.PosKind in [pkUnknown, pkString, pkDeclaration]) and
       not (FPosInfo.CTokenID in [ctknumber, ctkfloat]); // 这些情况下使能看看
