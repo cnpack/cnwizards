@@ -28,7 +28,6 @@ unit CnWidePasParser;
 * 开发平台：Win7 + Delphi 2009
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnPasCodeParser.pas 1385 2013-12-31 15:39:02Z liuxiaoshanzhashu@gmail.com $
 * 修改记录：2015.04.25 V1.1
 *               增加 WideString 实现
 *           2015.04.10

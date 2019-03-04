@@ -28,7 +28,6 @@ unit CnPasCodeParser;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 单元标识：$Id: CnPasCodeParser.pas 1385 2013-12-31 15:39:02Z liuxiaoshanzhashu@gmail.com $
 * 修改记录：2012.02.07
 *               UTF8的位置转换去除后仍有问题，恢复之
 *           2011.11.29
