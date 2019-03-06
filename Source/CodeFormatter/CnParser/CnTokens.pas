@@ -239,7 +239,7 @@ type
     pfetArrayConstant, pfetSetConstructor, pfetFormalParameters, pfetConstExpr,
     pfetUsesList, pfetThen, pfetDo, pfetRecordEnd, pfetCaseLabel, pfetCaseLabelList,
     pfetExprListRightBracket, pfetFormalParametersRightBracket, pfetFieldDecl,
-    pfetClassField, pfetInGeneric, pfetRecVarFieldListRightBracket);
+    pfetClassField, pfetInGeneric, pfetRecVarFieldListRightBracket, pfetPackageBlock);
 
   TCnPascalFormattingElementTypeSet = set of TCnPascalFormattingElementType;
 

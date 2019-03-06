@@ -466,6 +466,10 @@ begin
   FKeywordsValidArray[tokComplexName] := [pfetDirective];
   FKeywordsValidArray[tokKeywordAlign] := [pfetRecordEnd];
 
+  // Requires/Contains 只在 dpk 里算关键字
+  FKeywordsValidArray[tokKeywordRequires] := [pfetPackageBlock];
+  FKeywordsValidArray[tokKeywordContains] := [pfetPackageBlock];
+
   // 未列出的关键字，表示在哪都是关键字
 end;
 
@@ -4965,16 +4969,21 @@ end;
 
 procedure TCnProgramBlockFormatter.FormatPackageBlock(PreSpaceCount: Byte);
 begin
-  if Scaner.Token = tokKeywordRequires then
-  begin
-    FormatUsesClause(PreSpaceCount, True); // 不带 IN 的 requires，需要分行
-    WriteLine;
-  end;
+  SpecifyElementType(pfetPackageBlock);
+  try
+    if Scaner.Token = tokKeywordRequires then
+    begin
+      FormatUsesClause(PreSpaceCount, True); // 不带 IN 的 requires，需要分行
+      WriteLine;
+    end;
 
-  if Scaner.Token = tokKeywordContains then
-  begin
-    FormatUsesClause(PreSpaceCount, True); // 带 IN 的，需要分行
-    WriteLine;
+    if Scaner.Token = tokKeywordContains then
+    begin
+      FormatUsesClause(PreSpaceCount, True); // 带 IN 的，需要分行
+      WriteLine;
+    end;
+  finally
+    RestoreElementType;
   end;
 end;
 
