@@ -796,7 +796,8 @@ begin
   if Parent = nil then
   begin
     Parent := StatusBar;
-    StatusBar.OnResize := OnStatusBarResize;
+    if not Assigned(StatusBar.OnResize) then
+      StatusBar.OnResize := OnStatusBarResize;
     if TabSet <> nil then
       TTabList(TabSet.Tabs).OnChange := OnTabSetChange;
   end;
