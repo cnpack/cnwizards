@@ -141,6 +141,7 @@ begin
     FChangeCountCache := CnViewerOptions.ChangeCount;
   end;
 
+  Result := True;
   if CnViewerOptions.UseBlackList then // 显示黑名单以外的所有进程
   begin
     if FBlackList.IndexOf(Pointer(ProcId)) >= 0 then
@@ -259,7 +260,6 @@ var
   ADesc: TCnMsgDesc;
   Front, Tail: Integer;
   Res: DWORD;
-  Filter: TProcessFilter;
   QueueAlreadyEmpty: Boolean;
 
   procedure CheckExit;
@@ -284,6 +284,8 @@ var
 begin
   PostStartEvent;
   QueueSize := CnMapSize - CnHeadSize;
+  QueueAlreadyEmpty := False;
+
   if HMutex = 0 then
     HMutex := CreateMutex(nil, False, PChar(SCnDebugQueueMutexName));
 
