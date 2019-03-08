@@ -10,7 +10,6 @@ object CnMainViewer: TCnMainViewer
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  FormStyle = fsMDIForm
   Menu = mmMain
   OldCreateOrder = False
   OnClose = FormClose
@@ -21,8 +20,8 @@ object CnMainViewer: TCnMainViewer
   TextHeight = 13
   object statMain: TStatusBar
     Left = 0
-    Top = 404
-    Width = 643
+    Top = 392
+    Width = 635
     Height = 19
     AutoHint = True
     Panels = <
@@ -42,11 +41,12 @@ object CnMainViewer: TCnMainViewer
   object tlbMain: TToolBar
     Left = 0
     Top = 0
-    Width = 643
+    Width = 635
     Height = 29
     BorderWidth = 1
     Caption = 'tlbMain'
     Color = clBtnFace
+    EdgeBorders = []
     Flat = True
     Images = ilMain
     ParentColor = False
@@ -225,8 +225,8 @@ object CnMainViewer: TCnMainViewer
   end
   object pnlSwitch: TPanel
     Left = 0
-    Top = 384
-    Width = 643
+    Top = 372
+    Width = 635
     Height = 20
     Align = alBottom
     BevelOuter = bvNone
@@ -234,7 +234,7 @@ object CnMainViewer: TCnMainViewer
     object tsSwitch: TCnTabSet
       Left = 0
       Top = 0
-      Width = 643
+      Width = 635
       Height = 20
       Align = alClient
       DitherBackground = False
@@ -249,8 +249,19 @@ object CnMainViewer: TCnMainViewer
       TabHeight = 25
       OnChange = tsSwitchChange
       DblClickClose = False
+      ShowTabHint = False
       OnDblClick = tsSwitchDblClick
     end
+  end
+  object pnlChildContainer: TPanel
+    Left = 0
+    Top = 29
+    Width = 635
+    Height = 343
+    Align = alClient
+    BevelOuter = bvNone
+    Color = clAppWorkSpace
+    TabOrder = 3
   end
   object mmMain: TMainMenu
     AutoHotkeys = maManual

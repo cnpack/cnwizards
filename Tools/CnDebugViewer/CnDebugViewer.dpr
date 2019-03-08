@@ -64,7 +64,6 @@ begin
   if CheckRunning then Exit;
   Application.Initialize;
   Application.CreateForm(TCnMainViewer, CnMainViewer);
-  Application.CreateForm(TCnMsgChild, CnMsgChild);
   CnMainViewer.LaunchThread;
   Application.Run;
 end.

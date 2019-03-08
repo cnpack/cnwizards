@@ -196,6 +196,7 @@ type
     actSaveMemDump: TAction;
     SaveMemDump1: TMenuItem;
     dlgSaveMemDump: TSaveDialog;
+    pnlChildContainer: TPanel;
     procedure actNewExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure actExitExecute(Sender: TObject);
@@ -251,6 +252,7 @@ type
     FRunningState: TCnRunningState;
     FThread, FDbgThread: TThread;
     FCloseFromMenu: Boolean;
+    FActiveChild: TCnMsgChild;
     function GetCurrentChild: TCnMsgChild;
     function RegisterViewerHotKey: Boolean;
 
@@ -302,9 +304,14 @@ type
   TCnToolBarHack = class(TToolBar);
 
 procedure TCnMainViewer.actNewExecute(Sender: TObject);
+var
+  Child: TCnMsgChild;
 begin
-  if MDIChildCount >= CnMaxProcessCount then Exit;
-  TCnMsgChild.Create(Application).Show;
+  if MDIChildCount >= CnMaxProcessCount then
+    Exit;
+  Child := TCnMsgChild.Create(Application);
+  Child.Parent := pnlChildContainer;
+  Child.Show;
 end;
 
 procedure TCnMainViewer.UpdateFormInSwitch(AForm: TCustomForm;
@@ -564,9 +571,16 @@ begin
 end;
 
 procedure TCnMainViewer.actSwtCloseExecute(Sender: TObject);
+var
+  Idx: Integer;
 begin
+  Idx := tsSwitch.TabIndex;
   if tsSwitch.Tabs.Objects[tsSwitch.TabIndex] <> nil then
+  begin
     TCustomForm(tsSwitch.Tabs.Objects[tsSwitch.TabIndex]).Close;
+    // 关闭窗口后更新 FActiveChild
+
+  end;
 end;
 
 procedure TCnMainViewer.actlstMainUpdate(Action: TBasicAction;
@@ -619,14 +633,29 @@ end;
 
 procedure TCnMainViewer.tsSwitchChange(Sender: TObject; NewTab: Integer;
   var AllowChange: Boolean);
+var
+  I: Integer;
 begin
   if (Sender as TTabSet).Tabs.Objects[NewTab] <> nil then
-    (((Sender as TTabSet).Tabs.Objects[NewTab]) as TForm).BringToFront;
+  begin
+    FActiveChild := ((Sender as TTabSet).Tabs.Objects[NewTab]) as TCnMsgChild;
+    FActiveChild.Visible := True;
+    FActiveChild.BringToFront;
+
+    for I := 0 to pnlChildContainer.ControlCount - 1 do
+    begin
+      if pnlChildContainer.Controls[I] <> FActiveChild then
+      begin
+        pnlChildContainer.Controls[I].SendToBack;
+        pnlChildContainer.Controls[I].Visible := False;
+      end;
+    end;
+  end;
 end;
 
 function TCnMainViewer.GetCurrentChild: TCnMsgChild;
 begin
-  Result := TCnMsgChild(ActiveMDIChild);
+  Result := TCnMsgChild(FActiveChild);
 end;
 
 procedure TCnMainViewer.actExpandAllExecute(Sender: TObject);
@@ -660,6 +689,8 @@ begin
   for I := tsSwitch.Tabs.Count - 1 downto 0 do
     if tsSwitch.Tabs.Objects[I] <> nil then
       TCustomForm(tsSwitch.Tabs.Objects[I]).Close;
+
+  FActiveChild := nil;
 end;
 
 procedure TCnMainViewer.actSwtCloseOtherExecute(Sender: TObject);
@@ -764,6 +795,7 @@ begin
   if dlgOpen.Execute then
   begin
     Child := TCnMsgChild.Create(Application);
+    Child.Parent := pnlChildContainer;
     Child.Show;
 
     Child.LoadFromFile(dlgOpen.FileName);
@@ -771,7 +803,7 @@ begin
     Child.ProcessID := CnInvalidFileProcId;
     Child.ProcName := _CnExtractFileName(dlgOpen.FileName);
 
-    UpdateFormInSwitch(Child, fsUpdate);
+    UpdateFormInSwitch(Child, fsAdd);
   end;
 end;
 
@@ -1006,6 +1038,7 @@ begin
   if not (csDestroying in ComponentState) then
   begin
     AChild := TCnMsgChild.Create(Application);
+    AChild.Parent := pnlChildContainer;
     AChild.Show;
     AChild.Store := TCnMsgStore(Msg.WParam);
     UpdateFormInSwitch(AChild, fsUpdate);

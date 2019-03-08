@@ -1,21 +1,21 @@
 object CnMsgChild: TCnMsgChild
   Left = 408
   Top = 206
-  Width = 797
-  Height = 420
   ActiveControl = cbbSearch
+  Align = alClient
   BorderIcons = [biSystemMenu, biMaximize]
+  BorderStyle = bsNone
+  ClientHeight = 382
+  ClientWidth = 781
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  FormStyle = fsMDIChild
   OldCreateOrder = False
   Position = poDefault
   Visible = True
-  WindowState = wsMaximized
   OnActivate = FormActivate
   OnClose = FormClose
   OnCreate = FormCreate
@@ -24,23 +24,23 @@ object CnMsgChild: TCnMsgChild
   TextHeight = 13
   object splDetail: TSplitter
     Left = 0
-    Top = 306
-    Width = 789
+    Top = 295
+    Width = 781
     Height = 3
     Cursor = crVSplit
     Align = alBottom
   end
   object splTime: TSplitter
-    Left = 611
+    Left = 603
     Top = 0
-    Height = 306
+    Height = 295
     Align = alRight
   end
   object lvTime: TListView
-    Left = 614
+    Left = 606
     Top = 0
     Width = 175
-    Height = 306
+    Height = 295
     Hint = 'Timing Display'
     Align = alRight
     Columns = <
@@ -85,15 +85,15 @@ object CnMsgChild: TCnMsgChild
   object pnlTree: TPanel
     Left = 0
     Top = 0
-    Width = 611
-    Height = 306
+    Width = 603
+    Height = 295
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
     object pnlFilter: TPanel
       Left = 0
       Top = 0
-      Width = 611
+      Width = 603
       Height = 23
       Align = alTop
       BevelOuter = bvNone
@@ -296,7 +296,7 @@ object CnMsgChild: TCnMsgChild
         end
       end
       object tlbBookmark: TToolBar
-        Left = 575
+        Left = 567
         Top = 0
         Width = 36
         Height = 23
@@ -320,8 +320,8 @@ object CnMsgChild: TCnMsgChild
   end
   object pnlDetail: TPanel
     Left = 0
-    Top = 309
-    Width = 789
+    Top = 298
+    Width = 781
     Height = 84
     Align = alBottom
     BevelOuter = bvNone
@@ -329,7 +329,7 @@ object CnMsgChild: TCnMsgChild
     object mmoDetail: TMemo
       Left = 0
       Top = 0
-      Width = 789
+      Width = 781
       Height = 84
       Hint = 'Detailed Display'
       Align = alClient
