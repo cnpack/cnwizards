@@ -260,6 +260,7 @@ type
     procedure InitializeLang;
     procedure UpdateStatusBar;
     procedure LogSelfPath;
+    procedure ChooseAChildToDisplay(OldTabIndex: Integer);
     procedure LanguageClick(Sender: TObject);
     procedure LanguageChanged(Sender: TObject);
     procedure ActiveFormChanged(Sender: TObject);
@@ -572,14 +573,14 @@ end;
 
 procedure TCnMainViewer.actSwtCloseExecute(Sender: TObject);
 var
-  Idx: Integer;
+  Idx, I: Integer;
+  Child: TCnMsgChild;
 begin
   Idx := tsSwitch.TabIndex;
   if tsSwitch.Tabs.Objects[tsSwitch.TabIndex] <> nil then
   begin
     TCustomForm(tsSwitch.Tabs.Objects[tsSwitch.TabIndex]).Close;
-    // 关闭窗口后更新 FActiveChild
-
+    ChooseAChildToDisplay(Idx);
   end;
 end;
 
@@ -665,9 +666,16 @@ begin
 end;
 
 procedure TCnMainViewer.actCloseExecute(Sender: TObject);
+var
+  Idx: Integer;
 begin
   if CurrentChild <> nil then
+  begin
+    Idx := tsSwitch.TabIndex;
     CurrentChild.Close;
+    // 更新 FActiveChild 与 Tab
+    ChooseAChildToDisplay(Idx);
+  end;
 end;
 
 procedure TCnMainViewer.actClearExecute(Sender: TObject);
@@ -1374,6 +1382,34 @@ begin
         end;
       end;
     end
+  end;
+end;
+
+procedure TCnMainViewer.ChooseAChildToDisplay(OldTabIndex: Integer);
+var
+  I: Integer;
+begin
+  // 关闭窗口后更新 FActiveChild 与 Tab。注意此时 Tabs.Count 已经减少
+  // 拿当前 Tab 的前一个作为显示内容，如果当前 Tab 是首个（0），则用 0
+  if OldTabIndex > 0 then
+    Dec(OldTabIndex)
+  else if (OldTabIndex < 0) or (tsSwitch.Tabs.Count = 0) then
+  begin
+    FActiveChild := nil;
+    Exit;
+  end;
+
+  FActiveChild := TCnMsgChild(tsSwitch.Tabs.Objects[OldTabIndex]);
+  FActiveChild.Visible := True;
+  FActiveChild.BringToFront;
+
+  for I := 0 to pnlChildContainer.ControlCount - 1 do
+  begin
+    if pnlChildContainer.Controls[I] <> FActiveChild then
+    begin
+      pnlChildContainer.Controls[I].SendToBack;
+      pnlChildContainer.Controls[I].Visible := False;
+    end;
   end;
 end;
 

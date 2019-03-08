@@ -196,6 +196,7 @@ uses CnCommon, CnViewMain, CnViewCore, CnDebugIntf, CnMsgXMLFiler;
 
 procedure TCnMsgChild.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  CnMainViewer.UpdateFormInSwitch(Self, fsDelete);
   Action := caFree;
 end;
 
@@ -218,7 +219,7 @@ procedure TCnMsgChild.FormDestroy(Sender: TObject);
 begin
   CnLanguageManager.RemoveChangeNotifier(LanguageChanged);
   CnViewerOptions.MsgColumnWidth := MsgTree.Header.Columns[1].Width;
-  CnMainViewer.UpdateFormInSwitch(Self, fsDelete);
+
   FFilter.Free;
   FViewStore.Free;
   if FStore <> nil then
