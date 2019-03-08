@@ -712,6 +712,8 @@ begin
   for I := tsSwitch.TabIndex - 1 downto 0 do
     if tsSwitch.Tabs.Objects[I] <> nil then
       TCustomForm(tsSwitch.Tabs.Objects[I]).Close;
+
+  ChooseAChildToDisplay(0);
 end;
 
 procedure TCnMainViewer.actViewTimeExecute(Sender: TObject);
