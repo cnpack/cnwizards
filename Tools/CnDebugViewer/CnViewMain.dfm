@@ -20,8 +20,8 @@ object CnMainViewer: TCnMainViewer
   TextHeight = 13
   object statMain: TStatusBar
     Left = 0
-    Top = 392
-    Width = 635
+    Top = 404
+    Width = 643
     Height = 19
     AutoHint = True
     Panels = <
@@ -41,7 +41,7 @@ object CnMainViewer: TCnMainViewer
   object tlbMain: TToolBar
     Left = 0
     Top = 0
-    Width = 635
+    Width = 643
     Height = 29
     BorderWidth = 1
     Caption = 'tlbMain'
@@ -225,8 +225,8 @@ object CnMainViewer: TCnMainViewer
   end
   object pnlSwitch: TPanel
     Left = 0
-    Top = 372
-    Width = 635
+    Top = 384
+    Width = 643
     Height = 20
     Align = alBottom
     BevelOuter = bvNone
@@ -234,7 +234,7 @@ object CnMainViewer: TCnMainViewer
     object tsSwitch: TCnTabSet
       Left = 0
       Top = 0
-      Width = 635
+      Width = 643
       Height = 20
       Align = alClient
       DitherBackground = False
@@ -249,15 +249,14 @@ object CnMainViewer: TCnMainViewer
       TabHeight = 25
       OnChange = tsSwitchChange
       DblClickClose = False
-      ShowTabHint = False
       OnDblClick = tsSwitchDblClick
     end
   end
   object pnlChildContainer: TPanel
     Left = 0
     Top = 29
-    Width = 635
-    Height = 343
+    Width = 643
+    Height = 355
     Align = alClient
     BevelOuter = bvNone
     Color = clAppWorkSpace
@@ -492,6 +491,12 @@ object CnMainViewer: TCnMainViewer
       ShortCut = 16451
       OnExecute = actCopyExecute
     end
+    object actCopyText: TAction
+      Category = 'Edit'
+      Caption = 'Copy &Text'
+      Hint = 'Copy Text to Clipboard'
+      OnExecute = actCopyTextExecute
+    end
     object actViewTime: TAction
       Category = 'View'
       Caption = '&Time'
@@ -687,6 +692,20 @@ object CnMainViewer: TCnMainViewer
       ShortCut = 16461
       OnExecute = actSaveMemDumpExecute
     end
+    object actSwtAddToBlack: TAction
+      Category = 'Switch'
+      Caption = 'Add To &Black List'
+      Hint = 'Add Process to Black List'
+      ImageIndex = 15
+      OnExecute = actSwtAddToBlackExecute
+    end
+    object actSwtAddToWhite: TAction
+      Category = 'Switch'
+      Caption = 'Add to &White List'
+      Hint = 'Add Process to White List'
+      ImageIndex = 14
+      OnExecute = actSwtAddToWhiteExecute
+    end
   end
   object pmSwitch: TPopupMenu
     Left = 280
@@ -695,6 +714,15 @@ object CnMainViewer: TCnMainViewer
       Action = actSave
     end
     object N11: TMenuItem
+      Caption = '-'
+    end
+    object AddToBlackList1: TMenuItem
+      Action = actSwtAddToBlack
+    end
+    object AddtoWhiteList1: TMenuItem
+      Action = actSwtAddToWhite
+    end
+    object N15: TMenuItem
       Caption = '-'
     end
     object A2: TMenuItem

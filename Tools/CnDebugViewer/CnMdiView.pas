@@ -90,6 +90,7 @@ type
     MenuDropBookmark: TMenuItem;
     M1: TMenuItem;
     SaveMemDump1: TMenuItem;
+    CopyText1: TMenuItem;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -148,8 +149,10 @@ type
     procedure ClearBookMarks;
     procedure BookmarkMenuClick(Sender: TObject);
     procedure pnlTreeOnResize(Sender: TObject);
+    procedure DoTreeResize;
     procedure SetStore(const Value: TCnMsgStore);
     function GetSelectedContent: string;
+    function GetSelectedText: string;
     function GetSelectedItem: TCnMsgItem;
   protected
     procedure DoCreate; override;
@@ -182,6 +185,7 @@ type
     property HasBookmarks: Boolean read FHasBookmarks;
     property IsResizing: Boolean read FIsResizing write FIsResizing;
     property SelectedContent: string read GetSelectedContent;
+    property SelectedText: string read GetSelectedText;
     property SelectedItem: TCnMsgItem read GetSelectedItem;
   end;
 
@@ -337,7 +341,7 @@ end;
 
 procedure TCnMsgChild.InitTree;
 const
-  CnColumnsWidth: array[0..6] of Integer = (36, 240, 55, 41, 77, 60, 84);
+  CnColumnsWidth: array[0..6] of Integer = (36, 230, 55, 41, 77, 60, 84);
 var
   I: Integer;
 begin
@@ -379,6 +383,8 @@ begin
   FMsgTree.Header.Options := FMsgTree.Header.Options - [hoDrag];
   for I := 0 to FMsgTree.Header.Columns.Count - 1 do
     FMsgTree.OnColumnResize(FMsgTree.Header, I);
+
+  DoTreeResize;
 end;
 
 procedure TCnMsgChild.HeadPanelResize(Sender: TObject);
@@ -1246,19 +1252,7 @@ begin
   if (not Showing) or IsResizing then
     Exit;
 
-  with FMsgTree do
-  begin
-    Visible := False;
-    try
-      Header.Columns[1].Width := Width - Header.Columns[0].Width - 20;
-      if not VertScrollBar.Visible then
-        Header.Columns[1].Width := Header.Columns[1].Width - VertScrollBar.Size;
-      for i := Header.Columns.Count - 1 downto 2 do
-        Header.Columns[1].Width := Header.Columns[1].Width - Header.Columns[i].Width;
-    finally
-      Visible := True;
-    end;
-  end;
+  DoTreeResize;
 end;
 
 function TCnMsgChild.GetSelectedContent: string;
@@ -1277,16 +1271,18 @@ begin
   else
   begin
     List := TList.Create;
-    FMsgTree.ObtainSelections(List);
+    try
+      FMsgTree.ObtainSelections(List);
 
-    for I := 0 to List.Count - 1 do
-    begin
-      Node := PVirtualNode(List[I]);
-      Index := Node^.AbsoluteIndex - 1;
-      Result := Result + DescriptionOfMsg(Index, FViewStore.Msgs[Index]) + #13#10#13#10;
+      for I := 0 to List.Count - 1 do
+      begin
+        Node := PVirtualNode(List[I]);
+        Index := Node^.AbsoluteIndex - 1;
+        Result := Result + DescriptionOfMsg(Index, FViewStore.Msgs[Index]) + #13#10#13#10;
+      end;
+    finally
+      List.Free;
     end;
-
-    List.Free;
   end;
 end;
 
@@ -1301,6 +1297,46 @@ begin
   if FMsgTree.SelectedCount = 1 then
     if (FSelectedIndex >= 0) and (FSelectedIndex < FViewStore.MsgCount) then
       Result := FViewStore.Msgs[FSelectedIndex];
+end;
+
+function TCnMsgChild.GetSelectedText: string;
+var
+  I, Index: Integer;
+  List: TList;
+  Node: PVirtualNode;
+begin
+  List := TList.Create;
+  try
+    FMsgTree.ObtainSelections(List);
+
+    for I := 0 to List.Count - 1 do
+    begin
+      Node := PVirtualNode(List[I]);
+      Index := Node^.AbsoluteIndex - 1;
+      Result := Result + FViewStore.Msgs[Index].Msg + #13#10;
+    end;
+  finally
+    List.Free;
+  end;
+end;
+
+procedure TCnMsgChild.DoTreeResize;
+var
+  I: Integer;
+begin
+  with FMsgTree do
+  begin
+    Visible := False;
+    try
+      Header.Columns[1].Width := Width - Header.Columns[0].Width - 20;
+      if not VertScrollBar.Visible then
+        Header.Columns[1].Width := Header.Columns[1].Width - VertScrollBar.Size;
+      for I := Header.Columns.Count - 1 downto 2 do
+        Header.Columns[1].Width := Header.Columns[1].Width - Header.Columns[I].Width;
+    finally
+      Visible := True;
+    end;
+  end;
 end;
 
 end.

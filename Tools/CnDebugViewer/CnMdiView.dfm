@@ -1,12 +1,12 @@
 object CnMsgChild: TCnMsgChild
-  Left = 408
-  Top = 206
+  Left = 102
+  Top = 203
   ActiveControl = cbbSearch
   Align = alClient
   BorderIcons = [biSystemMenu, biMaximize]
   BorderStyle = bsNone
   ClientHeight = 382
-  ClientWidth = 781
+  ClientWidth = 768
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -25,19 +25,19 @@ object CnMsgChild: TCnMsgChild
   object splDetail: TSplitter
     Left = 0
     Top = 295
-    Width = 781
+    Width = 768
     Height = 3
     Cursor = crVSplit
     Align = alBottom
   end
   object splTime: TSplitter
-    Left = 603
+    Left = 590
     Top = 0
     Height = 295
     Align = alRight
   end
   object lvTime: TListView
-    Left = 606
+    Left = 593
     Top = 0
     Width = 175
     Height = 295
@@ -85,7 +85,7 @@ object CnMsgChild: TCnMsgChild
   object pnlTree: TPanel
     Left = 0
     Top = 0
-    Width = 603
+    Width = 590
     Height = 295
     Align = alClient
     BevelOuter = bvNone
@@ -93,7 +93,7 @@ object CnMsgChild: TCnMsgChild
     object pnlFilter: TPanel
       Left = 0
       Top = 0
-      Width = 603
+      Width = 590
       Height = 23
       Align = alTop
       BevelOuter = bvNone
@@ -296,7 +296,7 @@ object CnMsgChild: TCnMsgChild
         end
       end
       object tlbBookmark: TToolBar
-        Left = 567
+        Left = 554
         Top = 0
         Width = 36
         Height = 23
@@ -321,7 +321,7 @@ object CnMsgChild: TCnMsgChild
   object pnlDetail: TPanel
     Left = 0
     Top = 298
-    Width = 781
+    Width = 768
     Height = 84
     Align = alBottom
     BevelOuter = bvNone
@@ -329,7 +329,7 @@ object CnMsgChild: TCnMsgChild
     object mmoDetail: TMemo
       Left = 0
       Top = 0
-      Width = 781
+      Width = 768
       Height = 84
       Hint = 'Detailed Display'
       Align = alClient
@@ -353,6 +353,9 @@ object CnMsgChild: TCnMsgChild
     Top = 136
     object C1: TMenuItem
       Action = CnMainViewer.actCopy
+    end
+    object CopyText1: TMenuItem
+      Action = CnMainViewer.actCopyText
     end
     object SaveMemDump1: TMenuItem
       Action = CnMainViewer.actSaveMemDump

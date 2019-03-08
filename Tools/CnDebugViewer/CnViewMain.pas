@@ -197,6 +197,12 @@ type
     SaveMemDump1: TMenuItem;
     dlgSaveMemDump: TSaveDialog;
     pnlChildContainer: TPanel;
+    actCopyText: TAction;
+    actSwtAddToBlack: TAction;
+    actSwtAddToWhite: TAction;
+    N15: TMenuItem;
+    AddToBlackList1: TMenuItem;
+    AddtoWhiteList1: TMenuItem;
     procedure actNewExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure actExitExecute(Sender: TObject);
@@ -246,6 +252,9 @@ type
       Len: Integer; FromIP: String; Port: Integer);
     procedure actViewWatchExecute(Sender: TObject);
     procedure actSaveMemDumpExecute(Sender: TObject);
+    procedure actCopyTextExecute(Sender: TObject);
+    procedure actSwtAddToBlackExecute(Sender: TObject);
+    procedure actSwtAddToWhiteExecute(Sender: TObject);
   private
     FUpdatingSwitch: Boolean;
     FClickingSwitch: Boolean;
@@ -260,6 +269,7 @@ type
     procedure InitializeLang;
     procedure UpdateStatusBar;
     procedure LogSelfPath;
+    function AddToCommaText(const CommaText, ProcessName: string): string;
     procedure ChooseAChildToDisplay(OldTabIndex: Integer);
     procedure LanguageClick(Sender: TObject);
     procedure LanguageChanged(Sender: TObject);
@@ -573,8 +583,7 @@ end;
 
 procedure TCnMainViewer.actSwtCloseExecute(Sender: TObject);
 var
-  Idx, I: Integer;
-  Child: TCnMsgChild;
+  Idx: Integer;
 begin
   Idx := tsSwitch.TabIndex;
   if tsSwitch.Tabs.Objects[tsSwitch.TabIndex] <> nil then
@@ -593,7 +602,8 @@ begin
     (Action as TCustomAction).Enabled := (FThread <> nil) and not (FThread as TGetDebugThread).Paused
   else if (Action = actStop) then
     (Action as TCustomAction).Enabled := (FThread <> nil)
-  else if (Action = actSwtClose) or (Action = actSwtCloseOther) or (Action = actSwtCloseAll) then
+  else if (Action = actSwtClose) or (Action = actSwtCloseOther) or (Action = actSwtCloseAll) or
+    (Action = actSwtAddToBlack) or (Action = actSwtAddToWhite) then
     (Action as TCustomAction).Enabled := tsSwitch.Tabs.Count > 0
   else if (Action = actViewTime) then
   begin
@@ -613,7 +623,7 @@ begin
   begin
     (Action as TCustomAction).Enabled := (CurrentChild <> nil) and (CurrentChild.MsgTree.TotalCount > 0);
   end
-  else if (Action = actCopy) then
+  else if (Action = actCopy) or (Action = actCopyText) then
     (Action as TCustomAction).Enabled := (CurrentChild <> nil) and (CurrentChild.mmoDetail.Text <> '')
   else if (Action = actSaveMemDump) then
   begin
@@ -1413,6 +1423,43 @@ begin
       pnlChildContainer.Controls[I].Visible := False;
     end;
   end;
+end;
+
+procedure TCnMainViewer.actCopyTextExecute(Sender: TObject);
+begin
+  if CurrentChild <> nil then
+    Clipboard.AsText := CurrentChild.SelectedText;
+end;
+
+procedure TCnMainViewer.actSwtAddToBlackExecute(Sender: TObject);
+begin
+  if (CurrentChild <> nil) and (CurrentChild.ProcName <> '') then
+    CnViewerOptions.BlackList := AddToCommaText(CnViewerOptions.BlackList, CurrentChild.ProcName);
+end;
+
+function TCnMainViewer.AddToCommaText(const CommaText,
+  ProcessName: string): string;
+var
+  List: TStrings;
+begin
+  Result := CommaText;
+  List := TStringList.Create;
+  try
+    List.CommaText := CommaText;
+    if List.IndexOf(ProcessName) >= 0 then
+      Exit;
+
+    List.Add(ProcessName);
+    Result := List.CommaText;
+  finally
+    List.Free;
+  end;
+end;
+
+procedure TCnMainViewer.actSwtAddToWhiteExecute(Sender: TObject);
+begin
+  if (CurrentChild <> nil) and (CurrentChild.ProcName <> '') then
+    CnViewerOptions.WhiteList := AddToCommaText(CnViewerOptions.WhiteList, CurrentChild.ProcName);
 end;
 
 end.
