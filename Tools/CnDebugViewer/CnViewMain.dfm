@@ -249,6 +249,7 @@ object CnMainViewer: TCnMainViewer
       TabHeight = 25
       OnChange = tsSwitchChange
       DblClickClose = False
+      ShowTabHint = True
       OnDblClick = tsSwitchDblClick
     end
   end

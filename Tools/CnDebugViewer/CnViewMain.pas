@@ -285,7 +285,8 @@ type
   public
     { Public declarations }
     procedure LaunchThread;
-    procedure PauseThread;  
+    procedure PauseThread;
+    procedure TerminateThread;  
     procedure DestroyThread;
 
     procedure UpdateFormInSwitch(AForm: TCustomForm; Switch: TCnFormSwitch);
@@ -1287,6 +1288,8 @@ end;
 procedure TCnMainViewer.FormClose(Sender: TObject;
   var Action: TCloseAction);
 begin
+  TerminateThread;
+  actClose.Execute;
   DestroyThread;
 end;
 
@@ -1460,6 +1463,15 @@ procedure TCnMainViewer.actSwtAddToWhiteExecute(Sender: TObject);
 begin
   if (CurrentChild <> nil) and (CurrentChild.ProcName <> '') then
     CnViewerOptions.WhiteList := AddToCommaText(CnViewerOptions.WhiteList, CurrentChild.ProcName);
+end;
+
+procedure TCnMainViewer.TerminateThread;
+begin
+  if FThread <> nil then
+    FThread.Terminate;
+
+  if FDbgThread <> nil then
+    FDbgThread.Terminate;
 end;
 
 end.
