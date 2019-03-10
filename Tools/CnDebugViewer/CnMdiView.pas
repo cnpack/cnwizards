@@ -103,6 +103,7 @@ type
     procedure lvTimeEnter(Sender: TObject);
     procedure btnSearchClick(Sender: TObject);
     procedure pmTreePopup(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     FStore: TCnMsgStore;     // 交由外部线程用来读写并通知本界面更新
     FViewStore: TCnMsgStore; // 用来显示的，其内部Item只是引用，由FStore内容同步更新
@@ -1322,21 +1323,29 @@ end;
 
 procedure TCnMsgChild.DoTreeResize;
 var
-  I: Integer;
+  I, Width1: Integer;
 begin
   with FMsgTree do
   begin
     Visible := False;
     try
-      Header.Columns[1].Width := Width - Header.Columns[0].Width - 20;
+      Width1 := Width - Header.Columns[0].Width - 20;
       if not VertScrollBar.Visible then
-        Header.Columns[1].Width := Header.Columns[1].Width - VertScrollBar.Size;
+        Width1 := Width1 - VertScrollBar.Size;
       for I := Header.Columns.Count - 1 downto 2 do
-        Header.Columns[1].Width := Header.Columns[1].Width - Header.Columns[I].Width;
+        Width1 := Width1 - Header.Columns[I].Width;
+
+      Header.Columns[1].Width := Width1;
     finally
       Visible := True;
     end;
   end;
+end;
+
+procedure TCnMsgChild.FormShow(Sender: TObject);
+begin
+  if Assigned(pnlTree.OnResize) then
+    pnlTree.OnResize(pnlTree);
 end;
 
 end.
