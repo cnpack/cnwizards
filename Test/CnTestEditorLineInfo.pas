@@ -280,7 +280,7 @@ begin
       AToken := Lex.Token;
       Lex.NextNoJunk;
     end;
-    lstInfo.Items.Add(Format('PasLex TokenPos %d, LineNumber %d, Col %d. %s',
+    lstInfo.Items.Add(Format('PasLex Last TokenPos %d, LineNumber(0) %d, Col(0) %d. %s',
       [ATokenPos, ALineNum, ACol, AToken]));
   finally
     Stream.Free;
