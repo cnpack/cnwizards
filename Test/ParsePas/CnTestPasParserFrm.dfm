@@ -1,9 +1,9 @@
-object CnTestPasForm: TCnTestPasForm
+object CnTestStructureForm: TCnTestStructureForm
   Left = 98
   Top = 34
-  Width = 889
-  Height = 572
-  Caption = 'Test Pascal Unit Token Parsing'
+  Width = 973
+  Height = 648
+  Caption = 'Test Pascal/C++ Unit Structure and Token Parsing'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -14,156 +14,279 @@ object CnTestPasForm: TCnTestPasForm
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
-  object Label1: TLabel
-    Left = 136
-    Top = 24
-    Width = 3
-    Height = 13
-  end
-  object bvl1: TBevel
-    Left = 456
-    Top = 16
-    Width = 17
-    Height = 25
-    Shape = bsLeftLine
-  end
-  object btnLoad: TButton
+  object pgc1: TPageControl
     Left = 16
     Top = 16
-    Width = 97
-    Height = 25
-    Caption = 'Load Pascal Unit'
+    Width = 929
+    Height = 585
+    ActivePage = tsPascal
     TabOrder = 0
-    OnClick = btnLoadClick
-  end
-  object mmoPas: TMemo
-    Left = 16
-    Top = 56
-    Width = 849
-    Height = 161
-    Anchors = [akLeft, akTop, akRight]
-    Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -12
-    Font.Name = 'Courier New'
-    Font.Style = []
-    Lines.Strings = (
-      'unit a;'
-      'interface'
-      'implementation'
-      ''
-      'procedure TForm2;'
-      'begin'
-      '  try'
-      '    C := procedure(const aStr : string)'
-      '         begin'
-      '           ;'
-      '         end;'
-      ''
-      '    Conditions.ForEach(procedure(const C: ICondition)'
-      '                       begin'
-      ''
-      '                       end);'
-      '    Result := 0;'
-      '  finally'
-      '    Free;'
-      '  end;'
-      ''
-      '  AddEvent('
-      '    procedure'
-      '    begin'
-      '      CreateAnonymousThreadX('
-      '        procedure(aData: Pointer)'
-      '        begin'
-      '          aSysOptionArr := TSystemInfoArr.Create;'
-      '          try'
-      '            aThread.SetSyncPro('
-      '              procedure()'
-      ''
-      '                procedure'
-      '                begin'
-      ''
-      '                end;'
-      ''
-      ''
-      '              begin'
-      ''
-      '              end);'
-      '          finally'
-      '            aSysOptionArr.Free;'
-      '          end;'
-      '        end);'
-      '    end);'
-      'end;'
-      'end.')
-    ParentFont = False
-    ScrollBars = ssVertical
-    TabOrder = 5
-    OnChange = mmoPasChange
-    OnClick = mmoPasClick
-  end
-  object btnParse: TButton
-    Left = 368
-    Top = 16
-    Width = 75
-    Height = 25
-    Caption = 'Ansi Parse'
-    TabOrder = 2
-    OnClick = btnParseClick
-  end
-  object mmoParse: TMemo
-    Left = 16
-    Top = 232
-    Width = 849
-    Height = 292
-    Anchors = [akLeft, akTop, akRight, akBottom]
-    Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Courier New'
-    Font.Style = []
-    ParentFont = False
-    ScrollBars = ssVertical
-    TabOrder = 6
-    WordWrap = False
-  end
-  object btnUses: TButton
-    Left = 280
-    Top = 16
-    Width = 75
-    Height = 25
-    Caption = 'Get Uses'
-    TabOrder = 1
-    OnClick = btnUsesClick
-  end
-  object btnWideParse: TButton
-    Left = 560
-    Top = 16
-    Width = 75
-    Height = 25
-    Caption = 'Wide Lex'
-    TabOrder = 4
-    OnClick = btnWideParseClick
-  end
-  object btnAnsiLex: TButton
-    Left = 472
-    Top = 16
-    Width = 75
-    Height = 25
-    Caption = 'Ansi Lex'
-    TabOrder = 3
-    OnClick = btnAnsiLexClick
-  end
-  object chkWideIdent: TCheckBox
-    Left = 644
-    Top = 20
-    Width = 77
-    Height = 17
-    Caption = 'Wide Ident'
-    TabOrder = 7
+    object tsPascal: TTabSheet
+      Caption = 'Pascal'
+      object lblPasPos: TLabel
+        Left = 136
+        Top = 24
+        Width = 3
+        Height = 13
+      end
+      object bvl1: TBevel
+        Left = 456
+        Top = 16
+        Width = 17
+        Height = 25
+        Shape = bsLeftLine
+      end
+      object btnLoadPas: TButton
+        Left = 16
+        Top = 16
+        Width = 97
+        Height = 25
+        Caption = 'Load Pascal Unit'
+        TabOrder = 0
+        OnClick = btnLoadPasClick
+      end
+      object mmoPas: TMemo
+        Left = 16
+        Top = 56
+        Width = 881
+        Height = 201
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Courier New'
+        Font.Style = []
+        Lines.Strings = (
+          'unit a;'
+          'interface'
+          'implementation'
+          ''
+          'procedure TForm2;'
+          'begin'
+          '  try'
+          '    C := procedure(const aStr : string)'
+          '         begin'
+          '           ;'
+          '         end;'
+          ''
+          '    Conditions.ForEach(procedure(const C: ICondition)'
+          '                       begin'
+          ''
+          '                       end);'
+          '    Result := 0;'
+          '  finally'
+          '    Free;'
+          '  end;'
+          ''
+          '  AddEvent('
+          '    procedure'
+          '    begin'
+          '      CreateAnonymousThreadX('
+          '        procedure(aData: Pointer)'
+          '        begin'
+          '          aSysOptionArr := TSystemInfoArr.Create;'
+          '          try'
+          '            aThread.SetSyncPro('
+          '              procedure()'
+          ''
+          '                procedure'
+          '                begin'
+          ''
+          '                end;'
+          ''
+          ''
+          '              begin'
+          ''
+          '              end);'
+          '          finally'
+          '            aSysOptionArr.Free;'
+          '          end;'
+          '        end);'
+          '    end);'
+          'end;'
+          'end.')
+        ParentFont = False
+        ScrollBars = ssVertical
+        TabOrder = 1
+        OnChange = mmoPasChange
+        OnClick = mmoPasClick
+      end
+      object btnParsePas: TButton
+        Left = 368
+        Top = 16
+        Width = 75
+        Height = 25
+        Caption = 'Ansi Parse'
+        TabOrder = 2
+        OnClick = btnParsePasClick
+      end
+      object mmoParsePas: TMemo
+        Left = 16
+        Top = 272
+        Width = 881
+        Height = 268
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Courier New'
+        Font.Style = []
+        ParentFont = False
+        ScrollBars = ssVertical
+        TabOrder = 3
+        WordWrap = False
+      end
+      object btnUses: TButton
+        Left = 280
+        Top = 16
+        Width = 75
+        Height = 25
+        Caption = 'Get Uses'
+        TabOrder = 4
+        OnClick = btnUsesClick
+      end
+      object btnWideParse: TButton
+        Left = 560
+        Top = 16
+        Width = 75
+        Height = 25
+        Caption = 'Wide Lex'
+        TabOrder = 5
+        OnClick = btnWideParseClick
+      end
+      object btnAnsiLex: TButton
+        Left = 472
+        Top = 16
+        Width = 75
+        Height = 25
+        Caption = 'Ansi Lex'
+        TabOrder = 6
+        OnClick = btnAnsiLexClick
+      end
+      object chkWideIdentPas: TCheckBox
+        Left = 644
+        Top = 20
+        Width = 77
+        Height = 17
+        Caption = 'Wide Ident'
+        TabOrder = 7
+      end
+    end
+    object tsCpp: TTabSheet
+      Caption = 'C/C++'
+      ImageIndex = 1
+      object lblCppPos: TLabel
+        Left = 124
+        Top = 24
+        Width = 3
+        Height = 13
+      end
+      object Bevel1: TBevel
+        Left = 448
+        Top = 16
+        Width = 25
+        Height = 25
+        Shape = bsLeftLine
+      end
+      object btnLoadCpp: TButton
+        Left = 16
+        Top = 16
+        Width = 97
+        Height = 25
+        Caption = 'Load C/C++ File'
+        TabOrder = 0
+        OnClick = btnLoadCppClick
+      end
+      object mmoC: TMemo
+        Left = 16
+        Top = 56
+        Width = 881
+        Height = 201
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Courier New'
+        Font.Style = []
+        Lines.Strings = (
+          '#include <stdio.h>'
+          '#include "io.h"'
+          ''
+          'void do_some(int a)'
+          '{'
+          '    printf("Test.\n"); // Test'
+          '#define XXXX \'
+          '    yyyy'
+          '        Move(); {   ;  \'
+          '    }'
+          '/*'
+          'Test Comment'
+          '*/ Test();'
+          '}')
+        ParentFont = False
+        ScrollBars = ssVertical
+        TabOrder = 1
+        OnChange = mmoPasChange
+        OnClick = mmoPasClick
+      end
+      object btnParseCpp: TButton
+        Left = 256
+        Top = 16
+        Width = 75
+        Height = 25
+        Caption = 'Ansi Parse'
+        TabOrder = 2
+        OnClick = btnParseCppClick
+      end
+      object mmoParseCpp: TMemo
+        Left = 16
+        Top = 272
+        Width = 881
+        Height = 265
+        ScrollBars = ssVertical
+        TabOrder = 3
+      end
+      object btnTokenList: TButton
+        Left = 350
+        Top = 16
+        Width = 83
+        Height = 25
+        Caption = 'Ansi Tokenize'
+        TabOrder = 4
+        OnClick = btnTokenListClick
+      end
+      object btnWideTokenize: TButton
+        Left = 462
+        Top = 16
+        Width = 83
+        Height = 25
+        Caption = 'Wide Tokenize'
+        TabOrder = 5
+        OnClick = btnWideTokenizeClick
+      end
+      object btnInc: TButton
+        Left = 646
+        Top = 16
+        Width = 83
+        Height = 25
+        Caption = 'Get Includes'
+        TabOrder = 6
+        OnClick = btnIncClick
+      end
+      object chkWideIdentCpp: TCheckBox
+        Left = 552
+        Top = 20
+        Width = 81
+        Height = 17
+        Caption = 'Wide Ident'
+        TabOrder = 7
+      end
+    end
   end
   object dlgOpen1: TOpenDialog
     Filter = 'Pascal Files(*.pas)|*.pas'
+    Left = 144
+    Top = 16
+  end
+  object OpenDialog1: TOpenDialog
+    Filter = 'C/C++ Files (*.c;*.cpp;*.h;*.hpp)|*.c;*.cpp;*.h;*.hpp'
     Left = 144
     Top = 16
   end

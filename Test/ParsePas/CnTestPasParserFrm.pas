@@ -4,29 +4,49 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, TypInfo, ExtCtrls, CnPasCodeParser, mPasLex, CnPasWideLex;
+  StdCtrls, TypInfo, ExtCtrls, CnPasCodeParser, mPasLex, CnPasWideLex,
+  ComCtrls;
 
 type
-  TCnTestPasForm = class(TForm)
-    btnLoad: TButton;
+  TCnTestStructureForm = class(TForm)
+    pgc1: TPageControl;
+    tsPascal: TTabSheet;
+    lblPasPos: TLabel;
+    bvl1: TBevel;
+    btnLoadPas: TButton;
     mmoPas: TMemo;
-    dlgOpen1: TOpenDialog;
-    btnParse: TButton;
-    mmoParse: TMemo;
-    Label1: TLabel;
+    btnParsePas: TButton;
+    mmoParsePas: TMemo;
     btnUses: TButton;
     btnWideParse: TButton;
-    bvl1: TBevel;
     btnAnsiLex: TButton;
-    chkWideIdent: TCheckBox;
-    procedure btnLoadClick(Sender: TObject);
-    procedure btnParseClick(Sender: TObject);
+    chkWideIdentPas: TCheckBox;
+    dlgOpen1: TOpenDialog;
+    tsCpp: TTabSheet;
+    lblCppPos: TLabel;
+    Bevel1: TBevel;
+    btnLoadCpp: TButton;
+    mmoC: TMemo;
+    btnParseCpp: TButton;
+    mmoParseCpp: TMemo;
+    btnTokenList: TButton;
+    btnWideTokenize: TButton;
+    btnInc: TButton;
+    chkWideIdentCpp: TCheckBox;
+    OpenDialog1: TOpenDialog;
+    procedure btnLoadPasClick(Sender: TObject);
+    procedure btnParsePasClick(Sender: TObject);
     procedure mmoPasClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure mmoPasChange(Sender: TObject);
     procedure btnUsesClick(Sender: TObject);
     procedure btnWideParseClick(Sender: TObject);
     procedure btnAnsiLexClick(Sender: TObject);
+    procedure btnLoadCppClick(Sender: TObject);
+    procedure btnParseCppClick(Sender: TObject);
+    procedure btnTokenListClick(Sender: TObject);
+    procedure btnWideTokenizeClick(Sender: TObject);
+    procedure btnIncClick(Sender: TObject);
   private
     { Private declarations }
     procedure FindSeparateLineList(Parser: TCnPasStructureParser; SeparateLineList: TList);
@@ -35,13 +55,16 @@ type
   end;
 
 var
-  CnTestPasForm: TCnTestPasForm;
+  CnTestStructureForm: TCnTestStructureForm;
 
 implementation
 
+uses
+  CnCppCodeParser, mwBCBTokenList, CnBCBWideTokenList;
+
 {$R *.DFM}
 
-procedure TCnTestPasForm.btnLoadClick(Sender: TObject);
+procedure TCnTestStructureForm.btnLoadPasClick(Sender: TObject);
 begin
   if dlgOpen1.Execute then
   begin
@@ -51,7 +74,7 @@ begin
 end;
 
 // 本过程逻辑上等同于 CnSourceHighlight.pas 中的 procedure TBlockMatchInfo.UpdateSeparateLineList;
-procedure TCnTestPasForm.FindSeparateLineList(Parser: TCnPasStructureParser; SeparateLineList: TList);
+procedure TCnTestStructureForm.FindSeparateLineList(Parser: TCnPasStructureParser; SeparateLineList: TList);
 const
   csKeyTokens: set of TTokenKind = [
   tkIf, tkThen, tkElse,
@@ -124,7 +147,7 @@ begin
   end;
 end;
 
-procedure TCnTestPasForm.btnParseClick(Sender: TObject);
+procedure TCnTestStructureForm.btnParsePasClick(Sender: TObject);
 var
   Parser: TCnPasStructureParser;
   Stream: TMemoryStream;
@@ -133,8 +156,8 @@ var
   Token: TCnPasToken;
   SepList: TList;
 begin
-  mmoParse.Lines.Clear;
-  Parser := TCnPasStructureParser.Create(chkWideIdent.Checked);
+  mmoParsePas.Lines.Clear;
+  Parser := TCnPasStructureParser.Create(chkWideIdentPas.Checked);
   Stream := TMemoryStream.Create;
 
   try
@@ -147,7 +170,7 @@ begin
     for I := 0 to Parser.Count - 1 do
     begin
       Token := Parser.Tokens[I];
-      mmoParse.Lines.Add(Format('#%3.3d. Line: %2.2d, Col %2.2d, Pos %4.4d. M/I Layer %d,%d. Kind: %-18s, Token: %-14s',
+      mmoParsePas.Lines.Add(Format('#%3.3d. Line: %2.2d, Col %2.2d, Pos %4.4d. M/I Layer %d,%d. Kind: %-18s, Token: %-14s',
         [I, Token.LineNumber, Token.CharIndex, Token.TokenPos, Token.MethodLayer, Token.ItemLayer,
         GetEnumName(TypeInfo(TTokenKind), Ord(Token.TokenID)), Token.Token]
       ));
@@ -155,73 +178,73 @@ begin
         if Token.TokenID = tkBegin then
         begin
           if Token.MethodStartAfterParentBegin then
-            mmoParse.Lines[mmoParse.Lines.Count - 1] := mmoParse.Lines[mmoParse.Lines.Count - 1] +
+            mmoParsePas.Lines[mmoParsePas.Lines.Count - 1] := mmoParsePas.Lines[mmoParsePas.Lines.Count - 1] +
               ' *** MethodStart (Anonymous)'
           else
-            mmoParse.Lines[mmoParse.Lines.Count - 1] := mmoParse.Lines[mmoParse.Lines.Count - 1] +
+            mmoParsePas.Lines[mmoParsePas.Lines.Count - 1] := mmoParsePas.Lines[mmoParsePas.Lines.Count - 1] +
               ' *** MethodStart';
         end
         else
         begin
           if Token.MethodStartAfterParentBegin then
-            mmoParse.Lines[mmoParse.Lines.Count - 1] := mmoParse.Lines[mmoParse.Lines.Count - 1] +
+            mmoParsePas.Lines[mmoParsePas.Lines.Count - 1] := mmoParsePas.Lines[mmoParsePas.Lines.Count - 1] +
             ' --- MethodStart (Anonymous)'
           else
-            mmoParse.Lines[mmoParse.Lines.Count - 1] := mmoParse.Lines[mmoParse.Lines.Count - 1] +
+            mmoParsePas.Lines[mmoParsePas.Lines.Count - 1] := mmoParsePas.Lines[mmoParsePas.Lines.Count - 1] +
               ' --- MethodStart';
         end;
 
       if Token.IsMethodClose then
         if Token.MethodStartAfterParentBegin then
-          mmoParse.Lines[mmoParse.Lines.Count - 1] := mmoParse.Lines[mmoParse.Lines.Count - 1] +
+          mmoParsePas.Lines[mmoParsePas.Lines.Count - 1] := mmoParsePas.Lines[mmoParsePas.Lines.Count - 1] +
             ' *** MethodClose (Anonymous)'
         else
-          mmoParse.Lines[mmoParse.Lines.Count - 1] := mmoParse.Lines[mmoParse.Lines.Count - 1] +
+          mmoParsePas.Lines[mmoParsePas.Lines.Count - 1] := mmoParsePas.Lines[mmoParsePas.Lines.Count - 1] +
             ' *** MethodClose';
     end;
-    mmoParse.Lines.Add('');
+    mmoParsePas.Lines.Add('');
 
     if Parser.BlockStartToken <> nil then
-      mmoParse.Lines.Add(Format('OuterStart: Line: %2.2d, Col %2.2d. Layer: %d. Token: %s',
+      mmoParsePas.Lines.Add(Format('OuterStart: Line: %2.2d, Col %2.2d. Layer: %d. Token: %s',
        [Parser.BlockStartToken.LineNumber, Parser.BlockStartToken.CharIndex,
         Parser.BlockStartToken.ItemLayer, Parser.BlockStartToken.Token]));
     if Parser.BlockCloseToken <> nil then
-      mmoParse.Lines.Add(Format('OuterClose: Line: %2.2d, Col %2.2d. Layer: %d. Token: %s',
+      mmoParsePas.Lines.Add(Format('OuterClose: Line: %2.2d, Col %2.2d. Layer: %d. Token: %s',
        [Parser.BlockCloseToken.LineNumber, Parser.BlockCloseToken.CharIndex,
         Parser.BlockCloseToken.ItemLayer, Parser.BlockCloseToken.Token]));
     if Parser.InnerBlockStartToken <> nil then
-      mmoParse.Lines.Add(Format('InnerStart: Line: %2.2d, Col %2.2d. Layer: %d. Token: %s',
+      mmoParsePas.Lines.Add(Format('InnerStart: Line: %2.2d, Col %2.2d. Layer: %d. Token: %s',
        [Parser.InnerBlockStartToken.LineNumber, Parser.InnerBlockStartToken.CharIndex,
         Parser.InnerBlockStartToken.ItemLayer, Parser.InnerBlockStartToken.Token]));
     if Parser.InnerBlockCloseToken <> nil then
-      mmoParse.Lines.Add(Format('InnerClose: Line: %2.2d, Col %2.2d. Layer: %d. Token: %s',
+      mmoParsePas.Lines.Add(Format('InnerClose: Line: %2.2d, Col %2.2d. Layer: %d. Token: %s',
        [Parser.InnerBlockCloseToken.LineNumber, Parser.InnerBlockCloseToken.CharIndex,
         Parser.InnerBlockCloseToken.ItemLayer, Parser.InnerBlockCloseToken.Token]));
 
     if Parser.MethodStartToken <> nil then
-      mmoParse.Lines.Add(Format('MethodStartToken: Line: %2.2d, Col %2.2d. M/I Layer: %d,%d. Token: %s',
+      mmoParsePas.Lines.Add(Format('MethodStartToken: Line: %2.2d, Col %2.2d. M/I Layer: %d,%d. Token: %s',
        [Parser.MethodStartToken.LineNumber, Parser.MethodStartToken.CharIndex,
         Parser.MethodStartToken.MethodLayer, Parser.MethodStartToken.ItemLayer, Parser.MethodStartToken.Token]));
     if Parser.MethodCloseToken <> nil then
-      mmoParse.Lines.Add(Format('MethodCloseToken: Line: %2.2d, Col %2.2d. M/I Layer: %d,%d. Token: %s',
+      mmoParsePas.Lines.Add(Format('MethodCloseToken: Line: %2.2d, Col %2.2d. M/I Layer: %d,%d. Token: %s',
        [Parser.MethodCloseToken.LineNumber, Parser.MethodCloseToken.CharIndex,
         Parser.MethodCloseToken.MethodLayer, Parser.MethodCloseToken.ItemLayer, Parser.MethodCloseToken.Token]));
     if Parser.ChildMethodStartToken <> nil then
-      mmoParse.Lines.Add(Format('ChildMethodStartToken: Line: %2.2d, Col %2.2d. M/I Layer: %d,%d. Token: %s',
+      mmoParsePas.Lines.Add(Format('ChildMethodStartToken: Line: %2.2d, Col %2.2d. M/I Layer: %d,%d. Token: %s',
        [Parser.ChildMethodStartToken.LineNumber, Parser.ChildMethodStartToken.CharIndex,
         Parser.ChildMethodStartToken.MethodLayer, Parser.ChildMethodStartToken.ItemLayer, Parser.ChildMethodStartToken.Token]));
     if Parser.ChildMethodCloseToken <> nil then
-      mmoParse.Lines.Add(Format('ChildMethodCloseToken: Line: %2.2d, Col %2.2d. M/I Layer: %d,%d. Token: %s',
+      mmoParsePas.Lines.Add(Format('ChildMethodCloseToken: Line: %2.2d, Col %2.2d. M/I Layer: %d,%d. Token: %s',
        [Parser.ChildMethodCloseToken.LineNumber, Parser.ChildMethodCloseToken.CharIndex,
         Parser.ChildMethodCloseToken.MethodLayer, Parser.ChildMethodCloseToken.ItemLayer, Parser.ChildMethodCloseToken.Token]));
 
-    mmoParse.Lines.Add('');
-    mmoParse.Lines.Add('Seperate Lines:');
+    mmoParsePas.Lines.Add('');
+    mmoParsePas.Lines.Add('Seperate Lines:');
     SepList := TList.Create;
     FindSeparateLineList(Parser, SepList);
     for I := 0 to SepList.Count - 1 do
       if SepList[I] <> nil then
-        mmoParse.Lines.Add(IntToStr(I + 1)); // 界面上，行以 1 开始。
+        mmoParsePas.Lines.Add(IntToStr(I + 1)); // 界面上，行以 1 开始。
     SepList.Free;
   finally
     Parser.Free;
@@ -229,22 +252,25 @@ begin
   end;
 end;
 
-procedure TCnTestPasForm.mmoPasClick(Sender: TObject);
+procedure TCnTestStructureForm.mmoPasClick(Sender: TObject);
 begin
-  Self.Label1.Caption := Format('Line: %d, Col %d.', [mmoPas.CaretPos.Y + 1, mmoPas.CaretPos.X + 1]);
+  Self.lblPasPos.Caption := Format('Line: %d, Col %d.', [mmoPas.CaretPos.Y + 1, mmoPas.CaretPos.X + 1]);
+  Self.lblCppPos.Caption := Format('Line: %d, Col %d.', [mmoC.CaretPos.Y + 1, mmoC.CaretPos.X + 1]);
 end;
 
-procedure TCnTestPasForm.FormCreate(Sender: TObject);
+procedure TCnTestStructureForm.FormCreate(Sender: TObject);
 begin
-  Self.Label1.Caption := Format('Line: %d, Col %d.', [mmoPas.CaretPos.Y + 1, mmoPas.CaretPos.X + 1]);
+  Self.lblPasPos.Caption := Format('Line: %d, Col %d.', [mmoPas.CaretPos.Y + 1, mmoPas.CaretPos.X + 1]);
+  Self.lblCppPos.Caption := Format('Line: %d, Col %d.', [mmoC.CaretPos.Y + 1, mmoC.CaretPos.X + 1]);
 end;
 
-procedure TCnTestPasForm.mmoPasChange(Sender: TObject);
+procedure TCnTestStructureForm.mmoPasChange(Sender: TObject);
 begin
-  Self.Label1.Caption := Format('Line: %d, Col %d.', [mmoPas.CaretPos.Y + 1, mmoPas.CaretPos.X + 1]);
+  Self.lblPasPos.Caption := Format('Line: %d, Col %d.', [mmoPas.CaretPos.Y + 1, mmoPas.CaretPos.X + 1]);
+  Self.lblCppPos.Caption := Format('Line: %d, Col %d.', [mmoC.CaretPos.Y + 1, mmoC.CaretPos.X + 1]);
 end;
 
-procedure TCnTestPasForm.btnUsesClick(Sender: TObject);
+procedure TCnTestStructureForm.btnUsesClick(Sender: TObject);
 var
   List: TStrings;
 begin
@@ -258,7 +284,7 @@ begin
   end;
 end;
 
-procedure TCnTestPasForm.btnWideParseClick(Sender: TObject);
+procedure TCnTestStructureForm.btnWideParseClick(Sender: TObject);
 var
   P: TCnPasWideLex;
   S: WideString;
@@ -266,15 +292,15 @@ var
 begin
   ShowMessage('Will show Parsing Pascal using WideString under Non-Unicode Compiler.');
 
-  P := TCnPasWideLex.Create(chkWideIdent.Checked);
+  P := TCnPasWideLex.Create(chkWideIdentPas.Checked);
   S := mmoPas.Lines.Text;
   P.Origin := PWideChar(S);
 
-  mmoParse.Clear;
+  mmoParsePas.Clear;
   I := 1;
   while P.TokenID <> tkNull do
   begin
-    mmoParse.Lines.Add(Format('%3.3d. Line: %d, Col %2.2d, Len %2.2d, Position %4.4d. %s, Token: %s',
+    mmoParsePas.Lines.Add(Format('%3.3d. Line: %d, Col %2.2d, Len %2.2d, Position %4.4d. %s, Token: %s',
         [I, P.LineNumber, P.ColumnNumber, P.TokenLength, P.RunPos, GetEnumName(TypeInfo(TTokenKind),
          Ord(P.TokenID)), P.Token]));
     P.Next;
@@ -283,7 +309,7 @@ begin
   P.Free;
 end;
 
-procedure TCnTestPasForm.btnAnsiLexClick(Sender: TObject);
+procedure TCnTestStructureForm.btnAnsiLexClick(Sender: TObject);
 var
   P: TmwPasLex;
   S: string;
@@ -291,21 +317,160 @@ var
 begin
   ShowMessage('Will show Parsing Pascal using string under Non-Unicode Compiler.');
 
-  P := TmwPasLex.Create(chkWideIdent.Checked);
+  P := TmwPasLex.Create(chkWideIdentPas.Checked);
   S := mmoPas.Lines.Text;
   P.Origin := PChar(S);
 
-  mmoParse.Clear;
+  mmoParsePas.Clear;
   I := 1;
   while P.TokenID <> tkNull do
   begin
-    mmoParse.Lines.Add(Format('%3.3d. Line: %d, Col %2.2d, Len %2.2d, Position %4.4d. %s, Token: %s',
+    mmoParsePas.Lines.Add(Format('%3.3d. Line: %d, Col %2.2d, Len %2.2d, Position %4.4d. %s, Token: %s',
         [I, P.LineNumber + 1, P.TokenPos - P.LinePos + 1, P.TokenLength, P.RunPos, GetEnumName(TypeInfo(TTokenKind),
          Ord(P.TokenID)), P.Token]));
     P.Next;
     Inc(I);
   end;
   P.Free;
+end;
+
+procedure TCnTestStructureForm.btnLoadCppClick(Sender: TObject);
+begin
+  if dlgOpen1.Execute then
+  begin
+    mmoC.Lines.Clear;
+    mmoC.Lines.LoadFromFile(dlgOpen1.FileName);
+  end;
+end;
+
+procedure TCnTestStructureForm.btnParseCppClick(Sender: TObject);
+var
+  Parser: TCnCppStructureParser;
+  Stream: TMemoryStream;
+  NilChar: Byte;
+  I: Integer;
+  Token: TCnCppToken;
+begin
+  mmoParseCpp.Lines.Clear;
+  Parser := TCnCppStructureParser.Create;
+  Stream := TMemoryStream.Create;
+
+  try
+    mmoC.Lines.SaveToStream(Stream);
+    NilChar := 0;
+    Stream.Write(NilChar, SizeOf(NilChar));
+    Parser.ParseSource(Stream.Memory, Stream.Size, mmoC.CaretPos.Y + 1,
+      mmoC.CaretPos.X + 1, True);
+
+    for I := 0 to Parser.Count - 1 do
+    begin
+      Token := Parser.Tokens[I];
+      mmoParseCpp.Lines.Add(Format('%3.3d Token. Line: %d, Col %2.2d, Position %4.4d. TokenKind %s, Token: %s',
+        [I, Token.LineNumber, Token.CharIndex, Token.TokenPos, GetEnumName(TypeInfo(TCTokenKind),
+         Ord(Token.CppTokenKind)), Token.Token]
+      ));
+    end;
+    mmoParseCpp.Lines.Add('');
+
+    if Parser.BlockStartToken <> nil then
+      mmoParseCpp.Lines.Add(Format('OuterStart: Line: %d, Col %2.2d. Layer: %d. Token: %s',
+       [Parser.BlockStartToken.LineNumber, Parser.BlockStartToken.CharIndex,
+        Parser.BlockStartToken.ItemLayer, Parser.BlockStartToken.Token]));
+    if Parser.BlockCloseToken <> nil then
+      mmoParseCpp.Lines.Add(Format('OuterClose: Line: %d, Col %2.2d. Layer: %d. Token: %s',
+       [Parser.BlockCloseToken.LineNumber, Parser.BlockCloseToken.CharIndex,
+        Parser.BlockCloseToken.ItemLayer, Parser.BlockCloseToken.Token]));
+    if Parser.BlockIsNamespace then
+      mmoParseCpp.Lines.Add('Outer is namespace.')
+    else
+      mmoParseCpp.Lines.Add('Outer is NOT namespace.');
+
+    if Parser.ChildStartToken <> nil then
+      mmoParseCpp.Lines.Add(Format('ChildStart: Line: %d, Col %2.2d. Layer: %d. Token: %s',
+       [Parser.ChildStartToken.LineNumber, Parser.ChildStartToken.CharIndex,
+        Parser.ChildStartToken.ItemLayer, Parser.ChildStartToken.Token]));
+    if Parser.ChildCloseToken <> nil then
+      mmoParseCpp.Lines.Add(Format('ChildClose: Line: %d, Col %2.2d. Layer: %d. Token: %s',
+       [Parser.ChildCloseToken.LineNumber, Parser.ChildCloseToken.CharIndex,
+        Parser.ChildCloseToken.ItemLayer, Parser.ChildCloseToken.Token]));
+
+    if Parser.InnerBlockStartToken <> nil then
+      mmoParseCpp.Lines.Add(Format('InnerStart: Line: %d, Col %2.2d. Layer: %d. Token: %s',
+       [Parser.InnerBlockStartToken.LineNumber, Parser.InnerBlockStartToken.CharIndex,
+        Parser.InnerBlockStartToken.ItemLayer, Parser.InnerBlockStartToken.Token]));
+    if Parser.InnerBlockCloseToken <> nil then
+      mmoParseCpp.Lines.Add(Format('InnerClose: Line: %d, Col %2.2d. Layer: %d. Token: %s',
+       [Parser.InnerBlockCloseToken.LineNumber, Parser.InnerBlockCloseToken.CharIndex,
+        Parser.InnerBlockCloseToken.ItemLayer, Parser.InnerBlockCloseToken.Token]));
+
+    mmoParseCpp.Lines.Add('');
+    mmoParseCpp.Lines.Add('Current Class: ' + Parser.CurrentClass);
+    mmoParseCpp.Lines.Add('Current Method: ' + Parser.CurrentMethod);
+  finally
+    Parser.Free;
+    Stream.Free;
+  end;
+end;
+
+procedure TCnTestStructureForm.btnTokenListClick(Sender: TObject);
+var
+  CP: TBCBTokenList;
+  S: string;
+  I: Integer;
+begin
+  CP := TBCBTokenList.Create(chkWideIdentCpp.Checked);
+  CP.DirectivesAsComments := False;
+  S := mmoC.Lines.Text;
+  CP.SetOrigin(PChar(S), Length(S));
+
+  mmoParseCpp.Lines.Clear;
+  I := 1;
+  while CP.RunID <> ctknull do
+  begin
+    mmoParseCpp.Lines.Add(Format('%3.3d. Line: %d, Col %2.2d, Len %2.2d, Position %4.4d. %s, Token: %s',
+        [I, CP.RunLineNumber, CP.RunColNumber, CP.TokenLength, CP.RunPosition, GetEnumName(TypeInfo(TCTokenKind),
+         Ord(CP.RunID)), CP.RunToken]));
+    CP.Next;
+    Inc(I);
+  end;
+end;
+
+procedure TCnTestStructureForm.btnWideTokenizeClick(Sender: TObject);
+var
+  P: TCnBCBWideTokenList;
+  S: WideString;
+  I: Integer;
+begin
+  P := TCnBCBWideTokenList.Create(chkWideIdentCpp.Checked);
+  P.DirectivesAsComments := False;
+  S := mmoC.Lines.Text;
+  P.SetOrigin(PWideChar(S), Length(S));
+  I := 1;
+  mmoParseCpp.Lines.Clear;
+  while P.RunID <> ctknull do
+  begin
+    mmoParseCpp.Lines.Add(Format('%3.3d. Line: %d, Col %2.2d, Len %2.2d, Position %4.4d. %s, Token: %s',
+        [I, P.LineNumber, P.ColumnNumber, P.TokenLength, P.RunPosition, GetEnumName(TypeInfo(TCTokenKind),
+         Ord(P.RunID)), P.RunToken]));
+    P.Next;
+    Inc(I);
+  end;
+
+  P.Free;
+end;
+
+procedure TCnTestStructureForm.btnIncClick(Sender: TObject);
+var
+  List: TStrings;
+begin
+  List := TStringList.Create;
+
+  try
+    ParseUnitIncludes(mmoC.Lines.Text, List);
+    ShowMessage(List.Text);
+  finally
+    List.Free;
+  end;
 end;
 
 end.
