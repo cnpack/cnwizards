@@ -1,8 +1,8 @@
-program CnTestPasParser;
+program CnTestStructureParser;
 
 uses
   Forms,
-  CnTestPasParserFrm in 'CnTestPasParserFrm.pas' {CnTestStructureForm},
+  CnTestStructureParserFrm in 'CnTestStructureParserFrm.pas' {CnTestStructureForm},
   CnFastList in '..\..\Source\Utils\CnFastList.pas',
   CnPasCodeParser in '..\..\Source\Utils\CnPasCodeParser.pas',
   CnCppCodeParser in '..\..\Source\Utils\CnCppCodeParser.pas',

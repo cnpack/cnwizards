@@ -1,4 +1,4 @@
-unit CnTestPasParserFrm;
+unit CnTestStructureParserFrm;
 
 interface
 
