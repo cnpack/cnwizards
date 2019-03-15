@@ -34,9 +34,9 @@ type
     btnInc: TButton;
     chkWideIdentCpp: TCheckBox;
     OpenDialog1: TOpenDialog;
+    btnPasPosInfo: TButton;
     procedure btnLoadPasClick(Sender: TObject);
     procedure btnParsePasClick(Sender: TObject);
-    procedure mmoPasClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure mmoPasChange(Sender: TObject);
     procedure btnUsesClick(Sender: TObject);
@@ -47,9 +47,11 @@ type
     procedure btnTokenListClick(Sender: TObject);
     procedure btnWideTokenizeClick(Sender: TObject);
     procedure btnIncClick(Sender: TObject);
+    procedure btnPasPosInfoClick(Sender: TObject);
   private
     { Private declarations }
     procedure FindSeparateLineList(Parser: TCnPasStructureParser; SeparateLineList: TList);
+    function GetMemoCursorLinearPos(Memo: TMemo): Integer;
   public
     { Public declarations }
   end;
@@ -252,22 +254,17 @@ begin
   end;
 end;
 
-procedure TCnTestStructureForm.mmoPasClick(Sender: TObject);
-begin
-  Self.lblPasPos.Caption := Format('Line: %d, Col %d.', [mmoPas.CaretPos.Y + 1, mmoPas.CaretPos.X + 1]);
-  Self.lblCppPos.Caption := Format('Line: %d, Col %d.', [mmoC.CaretPos.Y + 1, mmoC.CaretPos.X + 1]);
-end;
-
 procedure TCnTestStructureForm.FormCreate(Sender: TObject);
 begin
-  Self.lblPasPos.Caption := Format('Line: %d, Col %d.', [mmoPas.CaretPos.Y + 1, mmoPas.CaretPos.X + 1]);
-  Self.lblCppPos.Caption := Format('Line: %d, Col %d.', [mmoC.CaretPos.Y + 1, mmoC.CaretPos.X + 1]);
+  mmoPas.OnChange(mmoPas);
 end;
 
 procedure TCnTestStructureForm.mmoPasChange(Sender: TObject);
 begin
-  Self.lblPasPos.Caption := Format('Line: %d, Col %d.', [mmoPas.CaretPos.Y + 1, mmoPas.CaretPos.X + 1]);
-  Self.lblCppPos.Caption := Format('Line: %d, Col %d.', [mmoC.CaretPos.Y + 1, mmoC.CaretPos.X + 1]);
+  lblPasPos.Caption := Format('Line(1): %d, Col(1) %d. Ansi LinePos(0): %d',
+    [mmoPas.CaretPos.Y + 1, mmoPas.CaretPos.X + 1, GetMemoCursorLinearPos(mmoPas)]);
+  lblCppPos.Caption := Format('Line(1): %d, Col(1) %d. Ansi LinePos(0): %d',
+    [mmoC.CaretPos.Y + 1, mmoC.CaretPos.X + 1, GetMemoCursorLinearPos(mmoC)]);
 end;
 
 procedure TCnTestStructureForm.btnUsesClick(Sender: TObject);
@@ -470,6 +467,46 @@ begin
     ShowMessage(List.Text);
   finally
     List.Free;
+  end;
+end;
+
+function TCnTestStructureForm.GetMemoCursorLinearPos(Memo: TMemo): Integer;
+var
+  I: Integer;
+begin
+  Result := 0;
+  for I := 0 to Memo.Lines.Count - 1 do
+  begin
+    if I < Memo.CaretPos.y then
+    begin
+      Inc(Result, Length(Memo.Lines[I]));
+      Inc(Result, 2);
+    end
+    else if I = Memo.CaretPos.y then
+    begin
+      Inc(Result, Memo.CaretPos.x);
+    end
+    else
+      Exit;
+  end;
+end;
+
+procedure TCnTestStructureForm.btnPasPosInfoClick(Sender: TObject);
+var
+  PosInfo: TCodePosInfo;
+begin
+  PosInfo := ParsePasCodePosInfo(mmoPas.Lines.Text, GetMemoCursorLinearPos(mmoPas));
+  ShowMessage(PosInfo.Token);
+  with PosInfo do
+  begin
+    mmoParsePas.Lines.Clear;
+    mmoParsePas.Lines.Add('Current TokenID: ' + GetEnumName(TypeInfo(TTokenKind), Ord(TokenID)));
+    mmoParsePas.Lines.Add('AreaKind: ' + GetEnumName(TypeInfo(TCodeAreaKind), Ord(AreaKind)));
+    mmoParsePas.Lines.Add('PosKind: ' + GetEnumName(TypeInfo(TCodePosKind), Ord(PosKind)));
+    mmoParsePas.Lines.Add('Current LineNumber: ' + IntToStr(LineNumber));
+    mmoParsePas.Lines.Add('Current ColumnNumber: ' + IntToStr(TokenPos - LinePos));
+    mmoParsePas.Lines.Add('Previous Token: ' + GetEnumName(TypeInfo(TTokenKind), Ord(LastNoSpace)));
+    mmoParsePas.Lines.Add('Current Token: ' + string(Token));
   end;
 end;
 

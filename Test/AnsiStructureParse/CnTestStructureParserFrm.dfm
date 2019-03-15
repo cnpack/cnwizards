@@ -1,6 +1,6 @@
 object CnTestStructureForm: TCnTestStructureForm
-  Left = 98
-  Top = 34
+  Left = 35
+  Top = 29
   Width = 973
   Height = 648
   Caption = 'Test Pascal/C++ Unit Structure and Token Parsing'
@@ -30,7 +30,7 @@ object CnTestStructureForm: TCnTestStructureForm
         Height = 13
       end
       object bvl1: TBevel
-        Left = 456
+        Left = 552
         Top = 16
         Width = 17
         Height = 25
@@ -108,12 +108,12 @@ object CnTestStructureForm: TCnTestStructureForm
         ScrollBars = ssVertical
         TabOrder = 1
         OnChange = mmoPasChange
-        OnClick = mmoPasClick
+        OnClick = mmoPasChange
       end
       object btnParsePas: TButton
-        Left = 368
+        Left = 480
         Top = 16
-        Width = 75
+        Width = 67
         Height = 25
         Caption = 'Ansi Parse'
         TabOrder = 2
@@ -135,39 +135,48 @@ object CnTestStructureForm: TCnTestStructureForm
         WordWrap = False
       end
       object btnUses: TButton
-        Left = 280
+        Left = 408
         Top = 16
-        Width = 75
+        Width = 67
         Height = 25
         Caption = 'Get Uses'
         TabOrder = 4
         OnClick = btnUsesClick
       end
       object btnWideParse: TButton
-        Left = 560
+        Left = 632
         Top = 16
-        Width = 75
+        Width = 67
         Height = 25
         Caption = 'Wide Lex'
         TabOrder = 5
         OnClick = btnWideParseClick
       end
       object btnAnsiLex: TButton
-        Left = 472
+        Left = 560
         Top = 16
-        Width = 75
+        Width = 67
         Height = 25
         Caption = 'Ansi Lex'
         TabOrder = 6
         OnClick = btnAnsiLexClick
       end
       object chkWideIdentPas: TCheckBox
-        Left = 644
+        Left = 708
         Top = 20
         Width = 77
         Height = 17
         Caption = 'Wide Ident'
         TabOrder = 7
+      end
+      object btnPasPosInfo: TButton
+        Left = 832
+        Top = 16
+        Width = 65
+        Height = 25
+        Caption = 'PosInfo'
+        TabOrder = 8
+        OnClick = btnPasPosInfoClick
       end
     end
     object tsCpp: TTabSheet
@@ -180,7 +189,7 @@ object CnTestStructureForm: TCnTestStructureForm
         Height = 13
       end
       object Bevel1: TBevel
-        Left = 448
+        Left = 616
         Top = 16
         Width = 25
         Height = 25
@@ -224,10 +233,10 @@ object CnTestStructureForm: TCnTestStructureForm
         ScrollBars = ssVertical
         TabOrder = 1
         OnChange = mmoPasChange
-        OnClick = mmoPasClick
+        OnClick = mmoPasChange
       end
       object btnParseCpp: TButton
-        Left = 256
+        Left = 440
         Top = 16
         Width = 75
         Height = 25
@@ -244,7 +253,7 @@ object CnTestStructureForm: TCnTestStructureForm
         TabOrder = 3
       end
       object btnTokenList: TButton
-        Left = 350
+        Left = 526
         Top = 16
         Width = 83
         Height = 25
@@ -253,7 +262,7 @@ object CnTestStructureForm: TCnTestStructureForm
         OnClick = btnTokenListClick
       end
       object btnWideTokenize: TButton
-        Left = 462
+        Left = 622
         Top = 16
         Width = 83
         Height = 25
@@ -262,7 +271,7 @@ object CnTestStructureForm: TCnTestStructureForm
         OnClick = btnWideTokenizeClick
       end
       object btnInc: TButton
-        Left = 646
+        Left = 806
         Top = 16
         Width = 83
         Height = 25
@@ -271,7 +280,7 @@ object CnTestStructureForm: TCnTestStructureForm
         OnClick = btnIncClick
       end
       object chkWideIdentCpp: TCheckBox
-        Left = 552
+        Left = 712
         Top = 20
         Width = 81
         Height = 17
