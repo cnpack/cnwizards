@@ -147,7 +147,7 @@ type
     property AutoIndent: Boolean read FAutoIndent write FAutoIndent;
     {* 如果是多行文本时，是否自动缩进对齐 }
     property AlwaysDisp: Boolean read FAlwaysDisp write FAlwaysDisp;
-    {* 允许文本全匹配时不弹出助手允许多行文本 }
+    {* 允许文本全匹配时不弹出助手 }
     property ForPascal: Boolean read FForPascal write FForPascal;
     {* 是否在 Pascal 中有效}
     property ForCpp: Boolean read FForCpp write FForCpp;

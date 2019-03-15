@@ -55,7 +55,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ComCtrls, ExtCtrls, ImgList, Menus, ToolsApi, IniFiles, Math,
-  Buttons, TypInfo, mPasLex, AppEvnts,
+  Buttons, TypInfo, mPasLex, AppEvnts, Contnrs,
   {$IFDEF OTA_CODE_TEMPLATE_API} CodeTemplateAPI, {$ENDIF}
   CnConsts, CnCommon, CnWizClasses, CnWizConsts, CnWizUtils, CnWizIdeUtils,
   CnInputSymbolList, CnInputIdeSymbolList, CnIni, CnWizMultiLang, CnWizNotifier,
@@ -208,7 +208,7 @@ type
     FCurrIndex: Integer;
     FCurrLineLen: Integer;
     FKeyDownTick: Cardinal;
-    FKeyDownValid: Boolean;
+    FKeyDownValidStack: TStack;
     FNeedUpdate: Boolean;
     FKeyBackSpaceADot: Boolean;
     FPosInfo: TCodePosInfo;
@@ -287,7 +287,7 @@ type
     procedure OnIconMenu(Sender: TObject);
     procedure OnBtnClick(Sender: TObject; Button: TCnInputButton);
     function CurrBlockIsEmpty: Boolean;
-    function IsValidSymbolChar(C: Char; First: Boolean): Boolean; 
+    function IsValidSymbolChar(C: Char; First: Boolean): Boolean;
     function IsValidSymbol(Symbol: string): Boolean;
     function IsValidCharKey(VKey: Word; ScanCode: Word): Boolean;
     function IsValidDelelteKey(Key: Word): Boolean;
@@ -299,6 +299,11 @@ type
     procedure AutoCompFunc(Sender: TObject);
     function GetListFont: TFont;
     procedure ConfigChanged;
+    // 以下函数用堆栈来重新实现 FKeyDownValid 的机制以避免用户敲快了导致
+    // 连来俩 KeyDown 再来俩 Up 从而第二个 Up 不起作用的问题
+    function GetKeyDownValid: Boolean;
+    procedure SetKeyDownValid(Value: Boolean);
+
     function GetPopupKey: TShortCut;
     procedure SetPopupKey(const Value: TShortCut);
   protected
@@ -1184,6 +1189,7 @@ begin
   AppEvents.OnDeactivate := OnAppDeactivate;
   FHitCountMgr := TCnSymbolHitCountMgr.Create;
   FSymbolListMgr := TSymbolListMgr.Create;
+  FKeyDownValidStack := TStack.Create;
 
   FSymbols := TStringList.Create;
   FItems := TStringList.Create;
@@ -1218,6 +1224,7 @@ begin
 {$ENDIF}
 
   WizShortCutMgr.DeleteShortCut(FPopupShortCut);
+  FKeyDownValidStack.Free;
   FItems.Free;
   FSymbols.Free;
   SymbolListMgr.Free;
@@ -1463,7 +1470,7 @@ begin
         Exit;
       end;
     end;
-  end;    
+  end;
 end;
 
 function TCnInputHelper.HandleKeyDown(var Msg: TMsg): Boolean;
@@ -1599,7 +1606,7 @@ begin
   else
   begin
     Timer.Enabled := False;
-    FKeyDownValid := False;
+    SetKeyDownValid(False);
     if AutoPopup and ((FKeyCount < DispOnlyAtLeastKey - 1) or CurrBlockIsEmpty) and
       (IsValidCharKey(Key, ScanCode) or IsValidDelelteKey(Key) or IsValidDotKey(Key)
        or IsValidCppPopupKey(Key, ScanCode)) then
@@ -1611,7 +1618,7 @@ begin
 //    CnDebugger.LogMsg('Handle Key Down. Got Line Len: ' + IntToStr(FCurrLineLen));
 {$ENDIF}
       FKeyDownTick := GetTickCount;
-      FKeyDownValid := True;
+      SetKeyDownValid(True);
     end
     else
       FKeyCount := 0;
@@ -1694,15 +1701,16 @@ begin
   ScanCode := (Msg.lParam and $00FF0000) shr 16;
   
 {$IFDEF DEBUG}
-  CnDebugger.LogInteger(Msg.wParam, 'TCnInputHelper.HandleKeyUp');
+  CnDebugger.LogFmt('TCnInputHelper.HandleKeyUp %d when KeyDownValid %d, ValidKeyQueue %d, IsShowing %d',
+    [Msg.wParam, Integer(GetKeyDownValid), Integer(IsValidKeyQueue), Integer(IsShowing)]);
 {$ENDIF}
 
-  if (FKeyDownValid or IsValidKeyQueue) and not IsShowing then
+  if (GetKeyDownValid or IsValidKeyQueue) and not IsShowing then
   begin
     CnNtaGetCurrLineText(LineText, LineNo, Index);
     Len := Length(LineText);
 {$IFDEF DEBUG}
-//  CnDebugger.LogFmt('Input Helper. Line: %d, Len %d. CurLine %d, CurLen %d', [LineNo, Len, FCurrLineNo, FCurrLineLen]);
+//    CnDebugger.LogFmt('Input Helper. Line: %d, Len %d. CurLine %d, CurLen %d', [LineNo, Len, FCurrLineNo, FCurrLineLen]);
 {$ENDIF}
     // 如果此次按键对当前行作了修改才认为是有效按键，以处理增量查找等问题
     // XE4的BCB环境中，空行默认长度都是4，后以空格填充，因此不能简单比较长度，得比内容
@@ -1754,8 +1762,8 @@ begin
     // 更新已经弹出的代码输入助手框里的内容
     UpdateListBox(False, False);
   end;
-  
-  FKeyDownValid := False;
+
+  SetKeyDownValid(False);
 end;
 
 function TCnInputHelper.ParsePosInfo: Boolean;
@@ -1980,6 +1988,9 @@ begin
               (Kind <> skKeyword) and (CompareStr(Name, Text) = 0) and
               (CompareStr(FToken, Name) = 0)) then
             begin
+{$IFDEF DEBUG}
+              CnDebugger.LogFmt('Do NOT ShowList for Full Match: ' + Name);
+{$ENDIF}
               FKeyCount := DispOnlyAtLeastKey - 1;
               Exit;
             end;
@@ -2568,7 +2579,7 @@ begin
     begin
       if AnsiPos(UpperCase(FMatchStr), UpperCase(FItems[List.ItemIndex])) <> 1 then
         Result := False;
-    end;      
+    end;
   {$ENDIF}
   end
   else
@@ -3328,6 +3339,26 @@ begin
     (PosInfo^.PosKind in [pkIntfUses, pkImplUses]) then
     Result := Orig + ['.'];
 {$ENDIF}
+end;
+
+function TCnInputHelper.GetKeyDownValid: Boolean;
+begin
+  Result := False;
+  if FKeyDownValidStack.Count > 0 then
+    Result := Boolean(FKeyDownValidStack.Peek);
+end;
+
+procedure TCnInputHelper.SetKeyDownValid(Value: Boolean);
+begin
+  if Value then
+  begin
+    if FKeyDownValidStack.Count > 0 then
+      FKeyDownValidStack.Pop;
+  end
+  else
+  begin
+    FKeyDownValidStack.Push(Pointer(True));
+  end;
 end;
 
 initialization
