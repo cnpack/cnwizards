@@ -1677,14 +1677,15 @@ begin
             Result.AreaKind := akFinalization;
             Result.PosKind := pkFlat;
           end;
-        tkSquareClose:
-          if (Lex.Token = '.)') and (Lex.LastNoSpace in [tkIdentifier,
-            tkPointerSymbol, tkSquareClose, tkRoundClose]) then
-          begin
-            if not (Result.PosKind in [pkFieldDot, pkField]) then
-              SavePos := Result.PosKind;
-            Result.PosKind := pkFieldDot;
-          end;
+// 以下代码会造成 F[''].All; 这种语句分号后位置错误地变成 pkString，因此注释掉，副作用未知
+//        tkSquareClose:
+//          if (Lex.Token = '.)') and (Lex.LastNoSpace in [tkIdentifier,
+//            tkPointerSymbol, tkSquareClose, tkRoundClose]) then
+//          begin
+//            if not (Result.PosKind in [pkFieldDot, pkField, pkString]) then
+//              SavePos := Result.PosKind;
+//            Result.PosKind := pkFieldDot;
+//          end;
         tkPoint:
           if Lex.LastNoSpace = tkEnd then
           begin

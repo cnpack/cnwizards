@@ -495,11 +495,12 @@ procedure TCnTestStructureForm.btnPasPosInfoClick(Sender: TObject);
 var
   PosInfo: TCodePosInfo;
 begin
+  mmoParsePas.Lines.Clear;
   PosInfo := ParsePasCodePosInfo(mmoPas.Lines.Text, GetMemoCursorLinearPos(mmoPas));
   ShowMessage(PosInfo.Token);
+
   with PosInfo do
   begin
-    mmoParsePas.Lines.Clear;
     mmoParsePas.Lines.Add('Current TokenID: ' + GetEnumName(TypeInfo(TTokenKind), Ord(TokenID)));
     mmoParsePas.Lines.Add('AreaKind: ' + GetEnumName(TypeInfo(TCodeAreaKind), Ord(AreaKind)));
     mmoParsePas.Lines.Add('PosKind: ' + GetEnumName(TypeInfo(TCodePosKind), Ord(PosKind)));
