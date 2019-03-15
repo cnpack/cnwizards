@@ -4,7 +4,7 @@ object CnMainViewer: TCnMainViewer
   Width = 651
   Height = 469
   Caption = 'CnDebugViewer'
-  Color = clAppWorkSpace
+  Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -20,8 +20,8 @@ object CnMainViewer: TCnMainViewer
   TextHeight = 13
   object statMain: TStatusBar
     Left = 0
-    Top = 404
-    Width = 643
+    Top = 392
+    Width = 635
     Height = 19
     AutoHint = True
     Panels = <
@@ -41,7 +41,7 @@ object CnMainViewer: TCnMainViewer
   object tlbMain: TToolBar
     Left = 0
     Top = 0
-    Width = 643
+    Width = 635
     Height = 29
     BorderWidth = 1
     Caption = 'tlbMain'
@@ -225,8 +225,8 @@ object CnMainViewer: TCnMainViewer
   end
   object pnlSwitch: TPanel
     Left = 0
-    Top = 384
-    Width = 643
+    Top = 372
+    Width = 635
     Height = 20
     Align = alBottom
     BevelOuter = bvNone
@@ -234,7 +234,7 @@ object CnMainViewer: TCnMainViewer
     object tsSwitch: TCnTabSet
       Left = 0
       Top = 0
-      Width = 643
+      Width = 635
       Height = 20
       Align = alClient
       DitherBackground = False
@@ -256,8 +256,8 @@ object CnMainViewer: TCnMainViewer
   object pnlChildContainer: TPanel
     Left = 0
     Top = 29
-    Width = 643
-    Height = 355
+    Width = 635
+    Height = 343
     Align = alClient
     BevelOuter = bvNone
     Color = clAppWorkSpace

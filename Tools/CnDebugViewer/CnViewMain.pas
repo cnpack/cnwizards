@@ -1437,7 +1437,7 @@ end;
 procedure TCnMainViewer.actSwtAddToBlackExecute(Sender: TObject);
 begin
   if (CurrentChild <> nil) and (CurrentChild.ProcName <> '') then
-    CnViewerOptions.BlackList := AddToCommaText(CnViewerOptions.BlackList, CurrentChild.ProcName);
+    CnViewerOptions.BlackList := AddToCommaText(CnViewerOptions.BlackList, ExtractFileName(CurrentChild.ProcName));
 end;
 
 function TCnMainViewer.AddToCommaText(const CommaText,
@@ -1462,7 +1462,7 @@ end;
 procedure TCnMainViewer.actSwtAddToWhiteExecute(Sender: TObject);
 begin
   if (CurrentChild <> nil) and (CurrentChild.ProcName <> '') then
-    CnViewerOptions.WhiteList := AddToCommaText(CnViewerOptions.WhiteList, CurrentChild.ProcName);
+    CnViewerOptions.WhiteList := AddToCommaText(CnViewerOptions.WhiteList, ExtractFileName(CurrentChild.ProcName));
 end;
 
 procedure TCnMainViewer.TerminateThread;
