@@ -122,6 +122,7 @@ type
     FSourceCol: Integer;
     FInIgnoreArea: Boolean;
     FOnLineBreak: TNotifyEvent;
+    FIdentContainsDot: Boolean;
     procedure ReadBuffer;
     procedure SetOrigin(AOrigin: Longint);
     procedure SkipBlanks; // 越过空白和回车换行
@@ -203,6 +204,9 @@ type
 
     property KeepOneBlankLine: Boolean read FKeepOneBlankLine write FKeepOneBlankLine;
     {* 由外界设置是否在格式化的过程中保持空行，无须用 Bookmark 保存}
+
+    property IdentContainsDot: Boolean read FIdentContainsDot write FIdentContainsDot;
+    {* 由外界设置是否允许标识符里含有点号，用于单元名，无须用 Bookmark 保存}
 
     property InIgnoreArea: Boolean read FInIgnoreArea write FInIgnoreArea;
     {* 由内部前进 Token 时解析设置当前是否忽略格式化标记，供外界使用}
@@ -887,9 +891,18 @@ begin
     'A'..'Z', 'a'..'z', '_' {$IFDEF UNICODE}, #$0100..#$FFFF {$ENDIF}:
       begin
         Inc(P);
-        while (P^ in ['A'..'Z', 'a'..'z', '0'..'9', '_'])
-          {$IFDEF UNICODE} or (P^ >= #$0100) {$ENDIF} do
-          Inc(P);
+        if FIdentContainsDot then // 如果外部要求标识符包括点号如单元名等
+        begin
+          while (P^ in ['A'..'Z', 'a'..'z', '0'..'9', '_', '.'])
+            {$IFDEF UNICODE} or (P^ >= #$0100) {$ENDIF} do
+            Inc(P);
+        end
+        else
+        begin
+          while (P^ in ['A'..'Z', 'a'..'z', '0'..'9', '_'])
+            {$IFDEF UNICODE} or (P^ >= #$0100) {$ENDIF} do
+            Inc(P);
+        end;
         Result := tokSymbol;
       end;
 

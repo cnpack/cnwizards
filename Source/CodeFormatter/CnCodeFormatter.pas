@@ -4996,10 +4996,12 @@ begin
 
   Writeln;
   SpecifyElementType(pfetUsesList);
+  Scaner.IdentContainsDot := True;
   try
     FormatUsesList(Tab(PreSpaceCount), True, NeedCRLF);
   finally
     RestoreElementType;
+    Scaner.IdentContainsDot := False;
   end;
 
   Match(tokSemicolon);
