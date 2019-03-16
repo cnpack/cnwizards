@@ -3352,12 +3352,12 @@ procedure TCnInputHelper.SetKeyDownValid(Value: Boolean);
 begin
   if Value then
   begin
-    if FKeyDownValidStack.Count > 0 then
-      FKeyDownValidStack.Pop;
+    FKeyDownValidStack.Push(Pointer(True));
   end
   else
   begin
-    FKeyDownValidStack.Push(Pointer(True));
+    if FKeyDownValidStack.Count > 0 then
+      FKeyDownValidStack.Pop;
   end;
 end;
 
