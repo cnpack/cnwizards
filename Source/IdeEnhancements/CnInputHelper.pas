@@ -1606,7 +1606,6 @@ begin
   else
   begin
     Timer.Enabled := False;
-    SetKeyDownValid(False);
     if AutoPopup and ((FKeyCount < DispOnlyAtLeastKey - 1) or CurrBlockIsEmpty) and
       (IsValidCharKey(Key, ScanCode) or IsValidDelelteKey(Key) or IsValidDotKey(Key)
        or IsValidCppPopupKey(Key, ScanCode)) then
@@ -1621,7 +1620,10 @@ begin
       SetKeyDownValid(True);
     end
     else
+    begin
+      SetKeyDownValid(False);
       FKeyCount := 0;
+    end;
   end;
 end;
 
