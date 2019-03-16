@@ -808,7 +808,7 @@ function CnOtaMovePosInCurSource(Pos: TInsertPos; OffsetRow, OffsetCol: Integer)
 function CnOtaGetCurrPos(SourceEditor: IOTASourceEditor = nil): Integer;
 {* 返回 SourceEditor 当前光标位置的线性地址，均为 0 开始的 Ansi/Utf8/Utf8，
   本来在 Unicode 环境下当前位置之前有宽字符时 CharPosToPos 其值不靠谱，但函数中
-  做了处理，当前行的 Utf8 偏移量单独计算了，凑合着保证了 Unicode 环境下的 Utf8}
+  做了处理，将当前行的 Utf8 偏移量单独计算了，凑合着保证了 Unicode 环境下的 Utf8}
 
 function CnOtaGetCurrCharPos(SourceEditor: IOTASourceEditor = nil): TOTACharPos;
 {* 返回 SourceEditor 当前光标位置}
@@ -6061,7 +6061,7 @@ begin
   end;
 end;
 
-// 返回 SourceEditor 当前光标位置的线性地址，均为 0 开始的 Ansi/Utf8/Ansi
+// 返回 SourceEditor 当前光标位置的线性地址，均为 0 开始的 Ansi/Utf8/Utf8
 function CnOtaGetCurrPos(SourceEditor: IOTASourceEditor): Integer;
 var
   CharPos: TOTACharPos;

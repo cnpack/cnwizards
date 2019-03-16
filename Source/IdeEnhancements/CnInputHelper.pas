@@ -1790,7 +1790,7 @@ begin
 
   Stream := TMemoryStream.Create;
   try
-    CurrPos := CnOtaGetCurrPos(View.Buffer);
+    CurrPos := CnOtaGetCurrPos(View.Buffer); // 得到较为准确的线性偏移 Ansi/Utf8/Utf8
     if View.CursorPos.Line > csMaxProcessLines then
     begin
       // CnOtaEditPosToLinePos 在大文件时会很慢，此处直接使用线性位置来计算
@@ -1806,8 +1806,8 @@ begin
         Inc(P);
       end;
 
-      // BDS 下但是取出的内容必须做 Utf8->Ansi转换以免注释解析出错等问题，
-      // 放 ParsePasCodePosInfo/ParseCppCodePosInfo 内部处理
+      // 注意 ParsePasCodePosInfo/ParseCppCodePosInfo 内部只支持 Ansi，
+      // BDS 下取出的内容由其做 Utf8->Ansi转换以免注释解析出错等问题，
       if IsPascalFile then
       begin
         FPosInfo := ParsePasCodePosInfo(P, CurrPos - StartPos, False, True);

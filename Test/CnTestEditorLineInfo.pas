@@ -86,6 +86,29 @@ uses
 
 {$R *.DFM}
 
+// 用 CharPosToPos 计算线性偏移的函数，Unicode 环境下遇到宽字符时有偏差
+function CnOtaOldGetCurrPos(SourceEditor: IOTASourceEditor = nil): Integer;
+var
+  CharPos: TOTACharPos;
+  IEditView: IOTAEditView;
+  EditPos: TOTAEditPos;
+begin
+  if not Assigned(SourceEditor) then
+    SourceEditor := CnOtaGetCurrentSourceEditor;
+  if SourceEditor.EditViewCount > 0 then
+  begin
+    IEditView := CnOtaGetTopMostEditView(SourceEditor);
+    Assert(IEditView <> nil);
+    EditPos := IEditView.CursorPos;
+    IEditView.ConvertPos(True, EditPos, CharPos);
+    Result := IEditView.CharPosToPos(CharPos);
+    if Result < 0 then
+      Result := 0;
+  end
+  else
+    Result := 0;
+end;
+
 //==============================================================================
 // 测试编辑器行与光标信息的测试用专家
 //==============================================================================
@@ -241,8 +264,12 @@ begin
     EditPos.Col, CharPos.Line, CharPos.CharIndex]));
 
   lstInfo.Items.Add(SEP);
-  CurrPos := CnOtaGetCurrPos;
+  CurrPos := CnOtaGetCurrPos; // 取到的线性偏移基本准确
   lstInfo.Items.Add(Format('CnOtaGetCurrPos Linear %d.', [CurrPos]));
+{$IFDEF UNICODE}
+  CurrPos := CnOtaOldGetCurrPos;
+  lstInfo.Items.Add(Format('CnOtaGetCurrPos Linear %d from ToolsAPI.', [CurrPos]));
+{$ENDIF}
 
   Stream := TMemoryStream.Create;
   Lex := TmwPasLex.Create;
