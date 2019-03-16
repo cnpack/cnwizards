@@ -806,17 +806,20 @@ function CnOtaMovePosInCurSource(Pos: TInsertPos; OffsetRow, OffsetCol: Integer)
  |</PRE>}
 
 function CnOtaGetCurrPos(SourceEditor: IOTASourceEditor = nil): Integer;
-{* 返回 SourceEditor 当前光标位置的线性地址，均为 0 开始的 Ansi/Utf8/Ansi混合Utf8，
-  在 Unicode 环境下有宽字符时其值不靠谱}
+{* 返回 SourceEditor 当前光标位置的线性地址，均为 0 开始的 Ansi/Utf8/Utf8，
+  本来在 Unicode 环境下当前位置之前有宽字符时 CharPosToPos 其值不靠谱，但函数中
+  做了处理，当前行的 Utf8 偏移量单独计算了，凑合着保证了 Unicode 环境下的 Utf8}
 
 function CnOtaGetCurrCharPos(SourceEditor: IOTASourceEditor = nil): TOTACharPos;
 {* 返回 SourceEditor 当前光标位置}
 
 function CnOtaEditPosToLinePos(EditPos: TOTAEditPos; EditView: IOTAEditView = nil): Integer;
-{* 编辑位置转换为线性位置，在 Unicode 环境下有宽字符时其值不靠谱}
+{* 编辑位置转换为线性位置，均为 0 开始的 Ansi/Utf8/Utf8混合Ansi
+   在 Unicode 环境下该位置之前有宽字符时其值不靠谱}
 
 function CnOtaLinePosToEditPos(LinePos: Integer; EditView: IOTAEditView = nil): TOTAEditPos;
-{* 线性位置转换为编辑位置，在 Unicode 环境下有宽字符时其值不靠谱}
+{* 线性位置转换为编辑位置，线性位置要求为 0 开始的 Ansi/Utf8/Utf8混合Ansi
+   在 Unicode 环境下该位置之前有宽字符时传参没法靠谱}
 
 procedure CnOtaSaveReaderToStream(EditReader: IOTAEditReader; Stream:
   TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
@@ -972,8 +975,9 @@ procedure CnOtaCloseEditView(AModule: IOTAModule);
 procedure CnOtaConvertEditViewCharPosToEditPos(EditViewPtr: Pointer;
   CharPosLine, CharPosCharIndex: Integer; var EditPos: TOTAEditPos);
 {* 将 EditView 中的 CharPos 转为 EditPos，封装并处理了 2009 以上有偏差的问题
-  EditView 使用 Pointer 进行传递以提高效率。2005 以上不使用 ConvertPos，而
-  使用宽字符串结构语法解析器进行预先 Tab 展开}
+  EditView 使用 Pointer 进行传递以提高效率。2005 以上不使用 ConvertPos，从而
+  转换出来的结果在内容中有 Tab 键时不符合实际情况，但由于宽字符串结构语法解析器
+  里已经进行了预先的 Tab 展开，因此正好能用}
 
 {$IFNDEF CNWIZARDS_MINIMUM}
 
@@ -6063,6 +6067,12 @@ var
   CharPos: TOTACharPos;
   IEditView: IOTAEditView;
   EditPos: TOTAEditPos;
+{$IFDEF UNICODE}
+  Text: string;
+  LineNo: Integer;
+  CharIdx: Integer;
+  EditControl: TControl;
+{$ENDIF}
 begin
   if not Assigned(SourceEditor) then
     SourceEditor := CnOtaGetCurrentSourceEditor;
@@ -6071,9 +6081,30 @@ begin
     IEditView := CnOtaGetTopMostEditView(SourceEditor);
     Assert(IEditView <> nil);
     EditPos := IEditView.CursorPos;
+{$IFDEF UNICODE}
+    // Unicode 环境下有宽字符时 ConvertPos 与 CharPosToPos 都不靠谱，只能手工转换
+    // 先将当前行首的内容求线性地址，是正确的 Utf8，再加上本行行首到当前列这段的 Utf8 长度
+    CharPos.Line := EditPos.Line;
+    CharPos.CharIndex := 0;
+
+    Result := IEditView.CharPosToPos(CharPos); // 得到行首的线性位置，以 Utf8 计算
+    EditControl := EditControlWrapper.GetEditControl(IEditView);
+    if EditControl = nil then
+    begin
+      Inc(Result, EditPos.Col - 1);
+      Exit;
+    end;
+
+    CnNtaGetCurrLineTextW(Text, LineNo, CharIdx);
+    Text := Copy(Text, 1, CharIdx); // 拿到光标前的 UTF16 字符串
+    // 转换成 Utf8 并求长度，加到至行首长度上
+    Inc(Result, Length(UTF8Encode(Text)));
+{$ELSE}
     IEditView.ConvertPos(True, EditPos, CharPos);
     Result := IEditView.CharPosToPos(CharPos);
-    if Result < 0 then Result := 0;
+{$ENDIF}
+    if Result < 0 then
+      Result := 0;
   end
   else
     Result := 0;
