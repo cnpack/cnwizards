@@ -28,7 +28,9 @@ unit CnWidePasParser;
 * 开发平台：Win7 + Delphi 2009
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2015.04.25 V1.1
+* 修改记录：2019.03.16 V1.2
+*               优化对换行后的点号的支持以及点号后输入的内容恰好是关键字时的支持
+*           2015.04.25 V1.1
 *               增加 WideString 实现
 *           2015.04.10
 *               创建单元
@@ -1468,6 +1470,7 @@ var
   SavePos: TCodePosKind;
   Lex: TCnPasWideLex;
   ExpandCol: Integer;
+  MyTokenID: TTokenKind;
 
   function LexStillBeforeCursor: Boolean;
   begin
@@ -1548,7 +1551,12 @@ begin
     // 但行相同时，Lex 需要先对这一行进行 Tab 展开
     while (Lex.TokenID <> tkNull) and LexStillBeforeCursor do
     begin
-      case Lex.TokenID of
+      MyTokenID := Lex.TokenID;
+      // 小修补，点号后的短关键字要当成普通标识符，才能保持 pkField
+      if (Lex.LastNoSpace = tkPoint) and (Lex.TokenID in [tkTo, tkIn, tkOf, tkOn, tkIs, tkDo]) then
+        MyTokenID := tkIdentifier;
+
+      case MyTokenID of
         tkUnit:
           begin
             IsProgram := False;
@@ -1647,9 +1655,13 @@ begin
             PosInfo.AreaKind := akEnd;
             PosInfo.PosKind := pkUnknown;
           end
-          else if Lex.LastNoSpace in [tkIdentifier, tkPointerSymbol, {$IFDEF DelphiXE3_UP} tkString, {$ENDIF} // Delphi XE3 Supports function invoke on string
+          else if Lex.LastNoSpaceCRLF in [tkIdentifier, tkPointerSymbol, {$IFDEF DelphiXE3_UP} tkString, {$ENDIF} // Delphi XE3 Supports function invoke on string
             tkSquareClose, tkRoundClose] then
           begin
+            // 这里用 LastNoSpaceCRLF 来判断，是为了避免级联换行的那种语句后的点被误判为 pkProcedure，保证 pkField
+            // 如 GetObject()
+            //      .Hide()
+            //      .Show() 这种
             if not (PosInfo.PosKind in [pkFieldDot, pkField]) then
               SavePos := PosInfo.PosKind;
             PosInfo.PosKind := pkFieldDot;

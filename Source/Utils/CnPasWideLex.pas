@@ -152,6 +152,8 @@ type
     FSquareCountBookmark: Integer;
     FLastIdentPosBookmark: Integer;
     FLineStartOffsetBookmark: Integer;
+    FLastNoSpaceCRLFPosBookmark: Integer;
+    FLastNoSpaceCRLFBookmark: TTokenKind;
   public
     property RunBookmark: LongInt read FRunBookmark write FRunBookmark;
     property LineNumberBookmark: Integer read FLineNumberBookmark write FLineNumberBookmark;
@@ -164,6 +166,8 @@ type
     property LastIdentPosBookmark: Integer read FLastIdentPosBookmark write FLastIdentPosBookmark;
     property LastNoSpaceBookmark: TTokenKind read FLastNoSpaceBookmark write FLastNoSpaceBookmark;
     property LastNoSpacePosBookmark: Integer read FLastNoSpacePosBookmark write FLastNoSpacePosBookmark;
+    property LastNoSpaceCRLFBookmark: TTokenKind read FLastNoSpaceCRLFBookmark write FLastNoSpaceCRLFBookmark;
+    property LastNoSpaceCRLFPosBookmark: Integer read FLastNoSpaceCRLFPosBookmark write FLastNoSpaceCRLFPosBookmark;
     property LineStartOffsetBookmark: Integer read FLineStartOffsetBookmark write FLineStartOffsetBookmark;
     property IsInterfaceBookmark: Boolean read FIsInterfaceBookmark write FIsInterfaceBookmark;
     property IsClassBookmark: Boolean read FIsClassBookmark write FIsClassBookmark;
@@ -1670,9 +1674,11 @@ begin
       FColumn := ColumnBookmark;
       FComment := CommentBookmark;
       FLastNoSpacePos := LastNoSpacePosBookmark;
+      FLastNoSpaceCRLFPos := LastNoSpaceCRLFPosBookmark;
       FStringLen := StringLenBookmark;
       FRoundCount := RoundCountBookmark;
       FLastNoSpace := LastNoSpaceBookmark;
+      FLastNoSpaceCRLF := LastNoSpaceCRLFBookmark;
       FToIdent := ToIdentBookmark;
       FIsClass := IsClassBookmark;
       FTokenID := TokenIDBookmark;
@@ -1876,9 +1882,11 @@ begin
     ColumnBookmark := FColumn;
     CommentBookmark := FComment;
     LastNoSpacePosBookmark := FLastNoSpacePos;
+    LastNoSpaceCRLFPosBookmark := FLastNoSpaceCRLFPos;
     StringLenBookmark := FStringLen;
     RoundCountBookmark := FRoundCount;
     LastNoSpaceBookmark := FLastNoSpace;
+    LastNoSpaceCRLFBookmark := FLastNoSpaceCRLF;
     ToIdentBookmark := FToIdent;
     IsClassBookmark := FIsClass;
     TokenIDBookmark := FTokenID;

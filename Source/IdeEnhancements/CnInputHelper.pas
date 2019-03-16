@@ -1989,7 +1989,7 @@ begin
               (CompareStr(FToken, Name) = 0)) then
             begin
 {$IFDEF DEBUG}
-              CnDebugger.LogFmt('Do NOT ShowList for Full Match: ' + Name);
+              CnDebugger.LogMsg('Do NOT ShowList for Full Match: ' + Name);
 {$ENDIF}
               FKeyCount := DispOnlyAtLeastKey - 1;
               Exit;
