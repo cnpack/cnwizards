@@ -133,6 +133,8 @@ type
     fLastIdentPos: Integer;
     fLastNoSpace: TTokenKind;
     fLastNoSpacePos: Integer;
+    fLastNoSpaceCRLF: TTokenKind;  // Added by LiuXiao
+    fLastNoSpaceCRLFPos: Integer;  // Added by LiuXiao
     fLinePos: Integer;
     fIsInterface: Boolean;
     fIsClass: Boolean;
@@ -264,7 +266,11 @@ type
     property IsClass: Boolean read fIsClass;
     property IsInterface: Boolean read fIsInterface;
     property LastIdentPos: Integer read fLastIdentPos;
+    property LastNoSpaceCRLF: TTokenKind read fLastNoSpaceCRLF;
+    {* 上一个非 Space 与回车换行的 Token，别的都算}
+    property LastNoSpaceCRLFPos: Integer read fLastNoSpaceCRLFPos;
     property LastNoSpace: TTokenKind read fLastNoSpace;
+    {* 上一个非 Space 的 Token，别的都算}
     property LastNoSpacePos: Integer read fLastNoSpacePos;
     property LineNumber: Integer read fLineNumber write fLineNumber;
     {* 当前行号，从 0 开始}
@@ -1437,12 +1443,19 @@ begin
         fLastIdentPos:=fTokenPos;
         fLastNoSpace:=fTokenID;
         fLastNoSpacePos:=fTokenPos;
+        fLastNoSpaceCRLF:=fTokenID;  // Add by liuxiao for fLastNoSpaceCRLF
+        fLastNoSpaceCRLFPos:=fTokenPos;
       end;
     tkSpace: ;
   else
     begin
       fLastNoSpace:=fTokenID;
       fLastNoSpacePos:=fTokenPos;
+      if FTokenID <> tkCRLF then  // Add by liuxiao for fLastNoSpaceCRLF
+      begin
+        fLastNoSpaceCRLF:=fTokenID;
+        fLastNoSpaceCRLFPos:=fTokenPos;
+      end;
     end;
   end;
   fTokenPos:=Run;

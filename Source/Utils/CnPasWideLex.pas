@@ -104,7 +104,9 @@ unit CnPasWideLex;
 * 开发平台：Windows 7 + Delphi XE
 * 兼容测试：PWin9X/2000/XP/7 + Delphi 2009 ~
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 修改记录：2016.07.13 V1.23
+* 修改记录：2019.03.16 V1.4
+*               增加 LastNoSpaceCRLF 属性以指明上一个非空格非换行的 Token
+*           2016.07.13 V1.3
 *               修正一处 Unicode 标识符解析错误的问题
 *           2016.01.13 V1.2
 *               增加 Unicode 标识符的实现，可控制是否支持 Unicode 标识符
@@ -185,6 +187,8 @@ type
     FLastIdentPos: Integer;
     FLastNoSpace: TTokenKind;
     FLastNoSpacePos: Integer;
+    FLastNoSpaceCRLF: TTokenKind;
+    FLastNoSpaceCRLFPos: Integer;
     FLineStartOffset: Integer;
     FIsInterface: Boolean;
     FIsClass: Boolean;
@@ -331,8 +335,13 @@ type
     property IsInterface: Boolean read FIsInterface;
     property LastIdentPos: Integer read FLastIdentPos;
     property LastNoSpace: TTokenKind read FLastNoSpace;
+    {* 上一个非 Space 的 Token，别的都算}
     property LastNoSpacePos: Integer read FLastNoSpacePos;
-
+    {* 上一个非 Space 的 Token 的位置}
+    property LastNoSpaceCRLF: TTokenKind read FLastNoSpaceCRLF;
+    {* 上一个非 Space 与回车换行的 Token，别的都算}
+    property LastNoSpaceCRLFPos: Integer read FLastNoSpaceCRLFPos;
+    {* 上一个非 Space 与回车换行的 Token 的位置}
     property LineNumber: Integer read FLineNumber write FLineNumber;
     {* 当前行号，从 1 开始}
     property ColumnNumber: Integer read FColumnNumber write FColumnNumber;
@@ -2019,6 +2028,8 @@ begin
         FLastIdentPos := FTokenPos;
         FLastNoSpace := FTokenID;
         FLastNoSpacePos := FTokenPos;
+        FLastNoSpaceCRLF := FTokenID;
+        FLastNoSpaceCRLFPos := FTokenPos;
       end;
     tkSpace:
       ;
@@ -2026,6 +2037,11 @@ begin
     begin
       FLastNoSpace := FTokenID;
       FLastNoSpacePos := FTokenPos;
+      if FTokenID <> tkCRLF then
+      begin
+        FLastNoSpaceCRLF := FTokenID;
+        FLastNoSpaceCRLFPos := FTokenPos;
+      end;
     end;
   end;
   FTokenPos := FRun;
