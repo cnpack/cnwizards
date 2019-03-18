@@ -1138,12 +1138,19 @@ var
     if IsDelphi then                     // ÊÇ Delphi
     begin
       Flag := csDelphiFlag;
-      Return := ADelphiReturn;
+      if ADelphiReturn = '' then
+        Return := #13#10
+      else
+        Return := ADelphiReturn;
       s := Return + Flag + Return;
     end
-    else begin
+    else
+    begin
       Flag := csCFlag;
-      Return := ACReturn;
+      if ACReturn = '' then
+        Return := '\n'
+      else
+        Return := ACReturn;
       s := Return + Flag;
     end;
 
