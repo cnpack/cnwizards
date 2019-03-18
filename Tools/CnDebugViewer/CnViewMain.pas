@@ -270,6 +270,7 @@ type
     procedure UpdateStatusBar;
     procedure LogSelfPath;
     function AddToCommaText(const CommaText, ProcessName: string): string;
+    procedure ShowAndHideOtherChildren(ExceptChild: TForm);
     procedure ChooseAChildToDisplay(OldTabIndex: Integer);
     procedure LanguageClick(Sender: TObject);
     procedure LanguageChanged(Sender: TObject);
@@ -317,13 +318,15 @@ type
 
 procedure TCnMainViewer.actNewExecute(Sender: TObject);
 var
+  I: Integer;
   Child: TCnMsgChild;
 begin
   if MDIChildCount >= CnMaxProcessCount then
     Exit;
   Child := TCnMsgChild.Create(Application);
   Child.Parent := pnlChildContainer;
-  Child.Show;
+
+  ShowAndHideOtherChildren(Child);
 end;
 
 procedure TCnMainViewer.UpdateFormInSwitch(AForm: TCustomForm;
@@ -651,17 +654,7 @@ begin
   if (Sender as TTabSet).Tabs.Objects[NewTab] <> nil then
   begin
     FActiveChild := ((Sender as TTabSet).Tabs.Objects[NewTab]) as TCnMsgChild;
-    FActiveChild.Visible := True;
-    FActiveChild.BringToFront;
-
-    for I := 0 to pnlChildContainer.ControlCount - 1 do
-    begin
-      if pnlChildContainer.Controls[I] <> FActiveChild then
-      begin
-        pnlChildContainer.Controls[I].SendToBack;
-        pnlChildContainer.Controls[I].Visible := False;
-      end;
-    end;
+    ShowAndHideOtherChildren(FActiveChild);
   end;
 end;
 
@@ -811,13 +804,14 @@ end;
 
 procedure TCnMainViewer.actOpenExecute(Sender: TObject);
 var
+  I: Integer;
   Child: TCnMsgChild;
 begin
   if dlgOpen.Execute then
   begin
     Child := TCnMsgChild.Create(Application);
     Child.Parent := pnlChildContainer;
-    Child.Show;
+    ShowAndHideOtherChildren(Child);
 
     Child.LoadFromFile(dlgOpen.FileName);
     Child.Store.ProcessID := CnInvalidFileProcId;
@@ -1060,7 +1054,8 @@ begin
   begin
     AChild := TCnMsgChild.Create(Application);
     AChild.Parent := pnlChildContainer;
-    AChild.Show;
+    ShowAndHideOtherChildren(AChild);
+
     AChild.Store := TCnMsgStore(Msg.WParam);
     UpdateFormInSwitch(AChild, fsUpdate);
     AChild.RequireRefreshTime;
@@ -1472,6 +1467,23 @@ begin
 
   if FDbgThread <> nil then
     FDbgThread.Terminate;
+end;
+
+procedure TCnMainViewer.ShowAndHideOtherChildren(ExceptChild: TForm);
+var
+  I: Integer;
+begin
+  ExceptChild.Show;
+  ExceptChild.BringToFront;
+
+  for I := 0 to pnlChildContainer.ControlCount - 1 do
+  begin
+    if pnlChildContainer.Controls[I] <> ExceptChild then
+    begin
+      pnlChildContainer.Controls[I].SendToBack;
+      pnlChildContainer.Controls[I].Visible := False;
+    end;
+  end;
 end;
 
 end.
