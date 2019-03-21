@@ -1247,8 +1247,6 @@ begin
 end;
 
 procedure TCnMsgChild.pnlTreeOnResize(Sender: TObject);
-var
-  i: Integer;
 begin
   if (not Showing) or IsResizing then
     Exit;

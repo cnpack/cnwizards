@@ -3636,8 +3636,11 @@ type
     Description: string;
   end;
 
+const
+  VCF_MAX = 17;
+
 var
-  ClipboardDescriptions: array [1..CF_MAX - 1] of TClipboardFormatEntry = (
+  ClipboardDescriptions: array [1..VCF_MAX - 1] of TClipboardFormatEntry = (
     (ID: CF_TEXT; Description: 'Plain text'),
     (ID: CF_BITMAP; Description: 'Windows bitmap'),
     (ID: CF_METAFILEPICT; Description: 'Windows metafile'),
@@ -3712,7 +3715,7 @@ begin
   // Determine description string of the given format. For predefined formats we need the lookup table because they
   // don't have a description string. For registered formats the description string is the string which was used
   // to register them.
-  if AFormat < CF_MAX then
+  if AFormat < VCF_MAX then
   begin
     for I := 1 to High(ClipboardDescriptions) do
       if ClipboardDescriptions[I].ID = AFormat then
@@ -14504,7 +14507,7 @@ begin
 
             // Allowed drop effects are simulated for VCL dd.
             Result := DROPEFFECT_MOVE or DROPEFFECT_COPY;
-            DragOver(S, ShiftState, TDragState(DragMessage), Pos, Result);
+            DragOver(S, ShiftState, TDragState(DragMessage), Pos, Integer(Result));
             FLastVCLDragTarget := FDropTargetNode;
             FVCLDragEffect := Result;
             if (DragMessage = dmDragLeave) and Assigned(FDropTargetNode) then
@@ -28517,8 +28520,8 @@ procedure TStringEditLink.SetBounds(R: TRect);
 // Sets the outer bounds of the edit control and the actual edit area in the control.
 
 var
-  Offset: Integer;
-  
+  AOffset: Integer;
+
 begin
   if not FStopping then
   begin
@@ -28543,10 +28546,10 @@ begin
       // We have to take out the two pixel border of the edit control as well as a one pixel "edit border" the
       // control leaves around the (selected) text.
       R := FEdit.ClientRect;
-      Offset := 2;
+      AOffset := 2;
       if tsUseThemes in FTree.FStates then
-        Inc(Offset);
-      InflateRect(R, -FTree.FTextMargin + Offset, Offset);
+        Inc(AOffset);
+      InflateRect(R, -FTree.FTextMargin + AOffset, AOffset);
       if not (vsMultiline in FNode.States) then
         OffsetRect(R, 0, FTextBounds.Top - FEdit.Top);
 
@@ -29492,7 +29495,7 @@ begin
       end;
   else
     if Format = CF_CSV then
-      S := ContentToText(Source, ListSeparator) + #0
+      S := ContentToText(Source, ',') + #0
     else
       if (Format = CF_VRTF) or (Format = CF_VRTFNOOBJS) then
         S := ContentToRTF(Source) + #0
