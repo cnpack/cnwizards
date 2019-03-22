@@ -1199,7 +1199,7 @@ var
   SCnPaletteEnhanceWizardComment: string = 'Component Palette & Main Form Enhancements';
   SCnPaletteTabsMenuCaption: string = '&Tabs';
   SCnPaletteMultiLineMenuCaption: string = '&Multi-Line';
-  SCnLockToolbarMenuCaption: string = '&Lock Toolbar';
+  SCnLockToolbarMenuCaption: string = '&Lock Toolbars';
   SCnPaletteMoreCaption: string = '&More...';
   SCnSearchComponent: string = 'Search Component';
   SCnPalSettingsCaption: string = 'Setti&ngs...';

@@ -74,7 +74,7 @@ inherited CnPalEnhanceForm: TCnPalEnhanceForm
       Top = 144
       Width = 457
       Height = 17
-      Caption = 'Lock IDE Toolbar to Disable Drag.'
+      Caption = 'Lock IDE Toolbars to Disable Drag.'
       TabOrder = 6
     end
     object hkCompFilter: THotKey
