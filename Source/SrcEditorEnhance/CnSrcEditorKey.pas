@@ -691,7 +691,7 @@ const
   CppNoIndentTokens: array[0..3] of string = ('private:', 'protected:', 'public:',
     '__published:');
 var
-  Text, Tmp, Prev, FirstLine: string;
+  Text, Tmp, Prev, FirstLine, LastToken: string;
   EditControl: TControl;
   I, Idx, LineNo, CharIndex, PasteCol, Indent: Integer;
   List: TStrings;
@@ -701,14 +701,14 @@ var
   CharPos: TOTACharPos;
   LinePos: LongInt;
 
-  function FirstLineInCppNoIndentList(const FirstLine: string): Boolean;
+  function FirstLineInCppNoIndentList(const AFirstLine: string): Boolean;
   var
     I: Integer;
   begin
     Result := False;
     for I := Low(CppNoIndentTokens) to High(CppNoIndentTokens) do
     begin
-      if Pos(CppNoIndentTokens[I], FirstLine) = 1 then
+      if Pos(CppNoIndentTokens[I], AFirstLine) = 1 then
       begin
         Result := True;
         Exit;
@@ -756,19 +756,22 @@ begin
   // 剪贴板无文本不处理
   if not Clipboard.HasFormat(CF_TEXT) or not Clipboard.HasFormat(CF_UNICODETEXT) then
     Exit;
-  Text := Clipboard.AsText;
-  if Trim(Text) = '' then
-    Exit;
 
-  // 如果当前行不是空，则退出
+  // 如果拿不到当前行，或当前行不是空，则退出
   if not CnNtaGetCurrLineText(Text, LineNo, CharIndex, True) then
     Exit;
   if Trim(Text) <> '' then
     Exit;
 
+  // 剪贴板文本内容为空格则不处理
+  Text := Clipboard.AsText;
+  if Trim(Text) = '' then
+    Exit;
+
+  // 剪贴板文本末尾是否以回车换行结尾
   EndIsCRLF := False;
   if (Length(Text) > 2) and (Text[Length(Text)] = #10) and (Text[Length(Text) - 1] = #13) then
-    EndIsCRLF := False;
+    EndIsCRLF := True;
 
   EditControl := EditControlWrapper.GetEditControl(View);
   if EditControl = nil then
@@ -781,6 +784,67 @@ begin
     if List.Count = 0 then
       Exit;
 
+    Indent := CnOtaGetBlockIndent;
+    IsSingleLine := List.Count = 1;
+    if IsSingleLine then
+    begin
+      // 被粘贴文本是单行，简单地跟上一行对齐
+      FirstLine := Trim(List.Text);
+      PasteCol := View.CursorPos.Col - 1;
+
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('SmartPaste: Paste Single Line. Indent %d. Origin Col (0 Based) %d.', [Indent, PasteCol]);
+{$ENDIF}
+
+      // 判断当前空行的上一行是啥，是否会影响本次缩进，和下文多行的逻辑相同
+      if LineNo > 1 then
+      begin
+        Dec(LineNo);
+        Prev := EditControlWrapper.GetTextAtLine(EditControl, LineNo);
+
+        if Trim(Prev) <> '' then
+        begin
+          PasteCol := GetHeadSpaceCount(Prev);  // 粘贴的起始列默认和上一行的非空字符对齐
+          LastToken := GetLastTokenFromLine(Prev);
+
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('SmartPaste: Single Line. Previous is %s with Space %d.', [LastToken, PasteCol]);
+{$ENDIF}
+
+          if IsCppFile then
+          begin
+            // C/C++ 文件中，private 等无需缩进，其余在 { 下一行需要缩进
+            if (LastToken = '{') and not FirstLineInCppNoIndentList(Trim(FirstLine)) then
+              Inc(PasteCol, Indent);
+          end
+          else if FAutoIndentList.IndexOf(LastToken) >= 0 then // Pascal 文件如果属于自动缩进列表则再进一层
+          begin
+            Inc(PasteCol, Indent);
+          end
+          else
+          begin
+            // 如果待粘贴内容只有一行[]且不是 begin 开头](暂不做)，且 Text 是 then/do 等，或是冒号结尾，也需要缩进
+            LastToken := LowerCase(LastToken);
+            if IsSingleLine and (LastToken = 'then') or (LastToken = 'do') then
+              Inc(PasteCol, Indent)
+            else if (Length(LastToken) >= 1) and (LastToken[Length(LastToken)] = ':') then
+              Inc(PasteCol, Indent);
+          end;
+        end;
+      end;
+
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('SmartPaste: Single Line To Add %d Spaces to Text.', [PasteCol]);
+{$ENDIF}
+
+      // PasteCol 处插入文字就行了
+      View.Buffer.EditPosition.MoveBOL;
+      View.Buffer.EditPosition.InsertText(Spc(PasteCol) + FirstLine);
+      View.Paint;
+      Result := True;
+      Exit;
+    end;
+
     // 剪贴板文本先判断是否其他行的行首空格数比首行少，如果少则不处理。
     // 另外除首行外其他行的空格在都比首行多的情况下，找出最少的，也都删
 
@@ -788,7 +852,6 @@ begin
     MinLineSpaceCount := MaxInt;
     FirstLine := '';
 
-    IsSingleLine := List.Count = 1;
     if List.Count > 1 then
     begin
       for I := 0 to List.Count - 1 do
@@ -824,7 +887,6 @@ begin
       end;
     end;
 
-    Indent := CnOtaGetBlockIndent;
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('SmartPaste: All Clipbard Lines Checked. MinLineSpaceCount(without 1st) %d. IDE Indent %d',
       [MinLineSpaceCount, Indent]);
@@ -904,29 +966,29 @@ begin
       if Trim(Prev) <> '' then
       begin
         PasteCol := GetHeadSpaceCount(Prev);  // 粘贴的起始列默认和上一行的非空字符对齐
-        Text := GetLastTokenFromLine(Prev);
+        LastToken := GetLastTokenFromLine(Prev);
 
 {$IFDEF DEBUG}
-        CnDebugger.LogFmt('SmartPaste: Previous Line is %s with Space %d.', [Text, PasteCol]);
+        CnDebugger.LogFmt('SmartPaste: Previous Line is %s with Space %d.', [LastToken, PasteCol]);
 {$ENDIF}
 
         if IsCppFile then
         begin
           // C/C++ 文件中，private 等无需缩进，其余在 { 下一行需要缩进
-          if (Text = '{') and not FirstLineInCppNoIndentList(Trim(FirstLine)) then
+          if (LastToken = '{') and not FirstLineInCppNoIndentList(Trim(FirstLine)) then
             Inc(PasteCol, Indent);
         end
-        else if FAutoIndentList.IndexOf(Text) >= 0 then // Pascal 文件如果属于自动缩进列表则再进一层
+        else if FAutoIndentList.IndexOf(LastToken) >= 0 then // Pascal 文件如果属于自动缩进列表则再进一层
         begin
           Inc(PasteCol, Indent);
         end
         else
         begin
           // 如果待粘贴内容只有一行[]且不是 begin 开头](暂不做)，且 Text 是 then/do 等，或是冒号结尾，也需要缩进
-          Text := LowerCase(Text);
-          if IsSingleLine and (Text = 'then') or (Text = 'do') then
+          LastToken := LowerCase(LastToken);
+          if IsSingleLine and (LastToken = 'then') or (LastToken = 'do') then
             Inc(PasteCol, Indent)
-          else if (Length(Text) >= 1) and (Text[Length(Text)] = ':') then
+          else if (Length(LastToken) >= 1) and (LastToken[Length(LastToken)] = ':') then
             Inc(PasteCol, Indent);
         end;
       end;
