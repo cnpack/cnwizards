@@ -311,8 +311,8 @@ end;
 
 procedure AssignMsgDescToMsgItem(ADesc: PCnMsgDesc; AItem: TCnMsgItem);
 var
-  ATag: array[0..CnMaxTagLength] of Char;
-  AMsg: array [0..CnMaxMsgLength] of Char;
+  ATag: array[0..CnMaxTagLength] of AnsiChar;
+  AMsg: array [0..CnMaxMsgLength] of AnsiChar;
   Size: Integer;
 
   function HexValueHigh(AChar: Char): Char;
@@ -470,7 +470,11 @@ begin
 
     FillChar(ATag, SizeOf(ATag), 0);
     CopyMemory(@ATag, @(ADesc^.Annex.Tag), CnMaxTagLength);
+{$IFDEF UNICODE}
+    AItem.Tag := string(ATag);
+{$ELSE}
     AItem.Tag := ATag;
+{$ENDIF}
 
     FillChar(AMsg, SizeOf(AMsg), 0);
     Size := ADesc^.Length - SizeOf(ADesc^.Annex) - SizeOf(DWord);
@@ -486,7 +490,13 @@ begin
       end;
     end
     else
+    begin
+{$IFDEF UNICODE}
+      AItem.Msg := string(AMsg);
+{$ELSE}
       AItem.Msg := AMsg;
+{$ENDIF}
+    end;
   end;
 end;
 

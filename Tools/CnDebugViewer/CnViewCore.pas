@@ -415,7 +415,11 @@ begin
   PHeader^.QueueFront := 0;
   PHeader^.QueueTail := 0;
   PHeader^.MapEnabled := CnDebugMapEnabled;
+{$IFDEF UNICODE}
+  CopyMemory(Pointer(PHeader), @CnDebugMagicName[1], Length(CnDebugMagicName) + 1);
+{$ELSE}
   StrCopy(Pointer(PHeader), CnDebugMagicName);
+{$ENDIF}
 
   InitializeCriticalSection(CSMsgStore);
   if not CnViewerOptions.IgnoreODString then

@@ -175,7 +175,7 @@ var
   AStore: TCnMsgStore;
   StoreInited: Boolean;
   VarName, VarValue: string;
-  AMsg: array [0..CnMaxMsgLength] of Char;
+  AMsg: array [0..CnMaxMsgLength] of AnsiChar;
   Size, SplitterIdx: Integer;
 begin
   if not FFilter.FilterProcessId(ADesc.Annex.ProcessId) then

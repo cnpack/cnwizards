@@ -46,7 +46,11 @@ const
   CnMaxMsgLength = 4096;
   CnDebugMagicLength = 8;
   CnDebugMapEnabled = $7F3D92E0; // 随便定义的一个值表示 MapEnable
+{$IFDEF UNICODE}
+  CnDebugMagicName: AnsiString = 'CNDEBUG';
+{$ELSE}
   CnDebugMagicName = 'CNDEBUG';
+{$ENDIF}
 
   SCnDebugPrefix = 'Global\';
 
