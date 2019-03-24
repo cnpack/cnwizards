@@ -20,7 +20,7 @@
 
 library CnWizards_D101B;
 
-{$WEAKLINKRTTI ON} 
+{$WEAKLINKRTTI ON}
 {$RTTI EXPLICIT METHODS([]) PROPERTIES([]) FIELDS([])}
 
 uses
