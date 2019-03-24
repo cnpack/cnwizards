@@ -449,7 +449,6 @@
 			</DCCReference>
 			<DCCReference Include="IdeEnhancements\CnInputSymbolList.pas"/>
 			<DCCReference Include="IdeEnhancements\CnInputIdeSymbolList.pas"/>
-			<DCCReference Include="Utils\CnPasCodeParser.pas"/>
 			<DCCReference Include="Utils\CnWizIdeHooks.pas"/>
 			<DCCReference Include="Utils\CnEditControlWrapper.pas"/>
 			<DCCReference Include="SrcEditorEnhance\CnSrcEditorGutter.pas"/>

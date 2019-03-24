@@ -172,7 +172,6 @@ uses
   CnInputHelperEditFrm in 'IdeEnhancements\CnInputHelperEditFrm.pas' {CnInputHelperEditForm},
   CnInputSymbolList in 'IdeEnhancements\CnInputSymbolList.pas',
   CnInputIdeSymbolList in 'IdeEnhancements\CnInputIdeSymbolList.pas',
-  CnPasCodeParser in 'Utils\CnPasCodeParser.pas',
   CnWizIdeHooks in 'Utils\CnWizIdeHooks.pas',
   CnEditControlWrapper in 'Utils\CnEditControlWrapper.pas',
   CnSrcEditorGutter in 'SrcEditorEnhance\CnSrcEditorGutter.pas',

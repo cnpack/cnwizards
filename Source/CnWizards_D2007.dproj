@@ -446,7 +446,6 @@
     <DCCReference Include="SrcTemplate\CnSrcTemplateEditFrm.pas">
       <Form>CnSrcTemplateEditForm</Form>
     </DCCReference>
-    <DCCReference Include="Utils\CnCppCodeParser.pas" />
     <DCCReference Include="Utils\CnDCU32.pas" />
     <DCCReference Include="Utils\CnEditControlWrapper.pas" />
     <DCCReference Include="Utils\CnFeedParser.pas" />
@@ -456,7 +455,6 @@
     <DCCReference Include="Utils\CnImageProvider_IconFinder.pas" />
     <DCCReference Include="Utils\CnImageProvider_LocalCache.pas" />
     <DCCReference Include="Utils\CnLineParser.pas" />
-    <DCCReference Include="Utils\CnPasCodeParser.pas" />
     <DCCReference Include="Utils\CnPasConvert.pas" />
     <DCCReference Include="Utils\CnSourceCropper.pas" />
     <DCCReference Include="Utils\CnWizControlHook.pas" />
