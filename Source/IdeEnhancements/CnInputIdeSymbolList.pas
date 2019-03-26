@@ -51,21 +51,26 @@ uses
 
 {$IFDEF SUPPORT_IDESymbolList}
 {$IFDEF COMPILER7_UP}
-  {$DEFINE SUPPORT_IOTACodeInsightManager}
+  {$DEFINE SUPPORT_IOTACodeInsightManager}  // D7 及以上支持 IOTACodeInsightManager
 {$ENDIF}
 
 {$IFNDEF COMPILER8_UP}
-  {$DEFINE SUPPORT_KibitzCompile}
+  {$DEFINE SUPPORT_KibitzCompile}           // D567 支持 KibitzCompile
 {$ENDIF}
 
-{$IFDEF SUPPORT_IOTACodeInsightManager} {$IFDEF SUPPORT_KibitzCompile}
-  {$DEFINE SUPPORT_MULTI_IDESymbolList}
-{$ENDIF} {$ENDIF}
+{$IFDEF SUPPORT_IOTACodeInsightManager}
+  {$IFDEF SUPPORT_KibitzCompile}
+    {$DEFINE SUPPORT_MULTI_IDESymbolList}   // D7 俩都支持
+  {$ENDIF}
+{$ENDIF}
+
 {$ENDIF SUPPORT_IDESymbolList}
 
-{$IFDEF IDE_WIDECONTROL} {$IFNDEF UNICODE_STRING}
-  {$DEFINE UTF8_SYMBOL}
-{$ENDIF} {$ENDIF}
+{$IFDEF IDE_WIDECONTROL}
+  {$IFNDEF UNICODE_STRING}
+    {$DEFINE UTF8_SYMBOL}  // D2005/2006/2007 的 Symbol 是 Utf8
+  {$ENDIF}
+{$ENDIF}
 
 {$IFDEF BDS4_UP}
   // BDS 2006 在执行 IOTACodeInsightServices.SetQueryContext(nil, nil)
@@ -293,7 +298,7 @@ var
         if Assigned(SymbolList) then
         begin
         {$IFDEF Debug}
-          CnDebugger.LogInteger(SymbolList.Count, 'SymbolList.Count');
+          CnDebugger.LogInteger(SymbolList.Count, 'IDE SymbolList.Count');
         {$ENDIF Debug}
           try
             try

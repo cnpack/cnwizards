@@ -161,6 +161,7 @@ begin
   pnlTabSet.BevelInner := bvNone;
   pnlTabSet.BevelOuter := bvNone;
   pnlTabSet.Caption := '';
+  pnlTabSet.Name := 'CnEditorTabSetPanel';
   pnlTabSet.Parent := StatusBar;
 
   FTabSet := TTabSet.Create(Self);
@@ -169,6 +170,7 @@ begin
   FTabSet.EndMargin := 0;
   FTabSet.Parent := pnlTabSet;
   FTabSet.OnChange := OnTabSetChange;
+  FTabSet.Name := 'CnEditorTabSet';
 
   StatusBar.OnResize := OnStatusBarResize;
   OnStatusBarResize(StatusBar);
