@@ -79,15 +79,15 @@ type
   {* 放入数据区的每条信息的头描述结构 }
     Level:     Integer;                            // 自定义 Level 数，供用户过滤用
     Indent:    Integer;                            // 缩进数目，由 Enter 和 Leave 控制
-    ProcessId: DWORD;                              // 调用者的进程 ID
-    ThreadId:  DWORD;                              // 调用者的线程 ID
+    ProcessId: LongWord;                           // 调用者的进程 ID
+    ThreadId:  LongWord;                           // 调用者的线程 ID
     Tag: array[0..CnMaxTagLength - 1] of AnsiChar; // 自定义 Tag 值，供用户过滤用
-    MsgType:   DWORD;                              // 消息类型
+    MsgType:   LongWord;                           // 消息类型
     MsgCPInterval: Int64;                          // 计时结束时的 CPU 周期数
-    TimeStampType: DWORD;                          // 消息输出的时间戳类型
+    TimeStampType: LongWord;                       // 消息输出的时间戳类型
     case Integer of
       1: (MsgDateTime:   TDateTime);               // 消息输出的时间戳值 DateTime
-      2: (MsgTickCount:  DWORD);                   // 消息输出的时间戳值 TickCount
+      2: (MsgTickCount:  LongWord);                // 消息输出的时间戳值 TickCount
       3: (MsgCPUPeriod:  Int64);                   // 消息输出的时间戳值 CPU 周期
   end;
 
@@ -105,13 +105,13 @@ type
   {$NODEFINE PCnMapFilter}
   TCnMapFilter = packed record
   {* 用内存映射文件传送数据时的内存区头中的过滤器格式}
-    NeedRefresh: DWORD;                            // 非 0 时需要更新
+    NeedRefresh: LongWord;                         // 非 0 时需要更新
     Enabled: Integer;                              // 非 0 时表示使能
     Level: Integer;                                // 限定的 Level
     Tag: array[0..CnMaxTagLength - 1] of AnsiChar; // 限定的 Tag
     case Integer of
       0: (MsgTypes: TCnMsgTypes);                  // 限定的 MsgTypes
-      1: (DummyPlace: DWORD);
+      1: (DummyPlace: LongWord);
   end;
   PCnMapFilter = ^TCnMapFilter;
 
@@ -120,8 +120,8 @@ type
   TCnMapHeader = packed record
   {* 用内存映射文件传送数据时的内存区头格式}
     MagicName:  array[0..CnDebugMagicLength - 1] of AnsiChar;  // 'CNDEBUG'
-    MapEnabled: DWORD;              // 为一 CnDebugMapEnabled 时，表示区域可用
-    MapSize:    DWORD;              // 整个 Map 的大小，不包括尾保护区
+    MapEnabled: LongWord;              // 为一 CnDebugMapEnabled 时，表示区域可用
+    MapSize:    LongWord;              // 整个 Map 的大小，不包括尾保护区
     DataOffset: Integer;            // 数据区相对于头部的偏移量，目前定为 64
     QueueFront: Integer;            // 队列头指针，是相对于数据区的偏移量
     QueueTail:  Integer;            // 队列尾指针，是相对于数据区的偏移量
