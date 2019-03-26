@@ -72,6 +72,7 @@ type
     FIncludeVer: Boolean;
     FCompileNotifierAdded: Boolean;
     FDateTimeFormat: string;
+    FDateAsVersion: Boolean;
     function GetCompileNotifyEnabled: Boolean;
     procedure SetIncBuild(const Value: Boolean);
     procedure SetLastCompiled(const Value: Boolean);
@@ -102,6 +103,7 @@ type
 
     property LastCompiled: Boolean read FLastCompiled write SetLastCompiled;
     property DateTimeFormat: string read FDateTimeFormat write FDateTimeFormat;
+    property DateAsVersion: Boolean read FDateAsVersion write FDateAsVersion;
     property IncBuild: Boolean read FIncBuild write SetIncBuild;
   end;
 
@@ -129,11 +131,12 @@ const
 
   csLastCompiled = 'LastCompiled';
   csDateTimeFormat = 'DateTimeFormat';
+  csDateAsVersion = 'DateAsVersion';
   csIncBuild = 'IncBuild';
 
-  csDefaultDateTimeFormat = 'yyyy/mm/dd hh:mm:ss';
+  csDefaultDateTimeFormat = 'yyyy/mm/dd hh:nn:ss';
 
-  { TCnVerEnhanceWizard }
+{ TCnVerEnhanceWizard }
 
 {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
 
@@ -242,7 +245,7 @@ begin
       CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [FBeforeBuildNo]));
     // TODO: 以上一句在 2009 或以上可能导致 dpk 源文件被破坏，原因未知，只能禁用
   {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
-    CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, 'VerInfo_Build', IntToStr(FBeforeBuildNo));
+    CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csBuild, IntToStr(FBeforeBuildNo));
     UpdateConfigurationFileVersionAndTime(FIncBuild, False);
   {$ENDIF}
 {$ENDIF}
@@ -277,6 +280,7 @@ var
   Stream: TMemoryStream;
 {$ENDIF}
   Options: IOTAProjectOptions;
+  Y, M, D: Word;
 begin
   if IsCodeInsight then
     Exit;
@@ -309,7 +313,7 @@ begin
 {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
   {$IFNDEF PROJECT_VERSION_NUMBER_BUG}
   // 2009/2010/XE has a bug that below got a wrong value.
-  FBeforeBuildNo := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue(FCurrentProject,'VerInfo_Build'), 0);
+  FBeforeBuildNo := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue(FCurrentProject, csBuild), 0);
   {$ENDIF}
 {$ENDIF}
 {$IFDEF DEBUG}
@@ -324,10 +328,26 @@ begin
   begin
 {$IFDEF COMPILER6_UP} // 只 D6 及以上增加版本号，D5 由于 Bug 而无效
     if CanSetValueWithoutBug(FCurrentProject) then
+    begin
       CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [FBeforeBuildNo + 1]));
+      if FDateAsVersion then
+      begin
+        DecodeDate(Now, Y, M, D);
+        CnOtaSetProjectOptionValue(Options, 'MajorVersion', IntToStr(Y));
+        CnOtaSetProjectOptionValue(Options, 'MinorVersion', IntToStr(M));
+        CnOtaSetProjectOptionValue(Options, 'Release', IntToStr(D));
+      end;
+    end;
     // TODO: 以上一句在 2009 或以上可能导致 dpk 源文件被破坏，原因未知，只能禁用
 {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
-    CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject,'VerInfo_Build', IntToStr(FBeforeBuildNo + 1));
+    CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csBuild, IntToStr(FBeforeBuildNo + 1));
+    if FDateAsVersion then
+    begin
+      DecodeDate(Now, Y, M, D);
+      CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csMajorVer, IntToStr(Y));
+      CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csMinorVer, IntToStr(M));
+      CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csRelease, IntToStr(D));
+    end;
 {$ENDIF}
 {$ENDIF}
 {$IFDEF DEBUG}
@@ -486,6 +506,7 @@ begin
   FLastCompiled := Ini.ReadBool('', csLastCompiled, False);
   FIncBuild := Ini.ReadBool('', csIncBuild, False);
   FDateTimeFormat := Ini.ReadString('', csDateTimeFormat, csDefaultDateTimeFormat);
+  FDateAsVersion := Ini.ReadBool('', csDateAsVersion, False);
   UpdateCompileNotify; // 改为有需要才进行通知器的增加
 end;
 
@@ -494,6 +515,7 @@ begin
   Ini.WriteBool('', csLastCompiled, FLastCompiled);
   Ini.WriteBool('', csIncBuild, FIncBuild);
   Ini.WriteString('', csDateTimeFormat, FDateTimeFormat);
+  Ini.WriteBool('', csDateAsVersion, FDateAsVersion);
 end;
 
 function TCnVerEnhanceWizard.GetCompileNotifyEnabled: Boolean;
