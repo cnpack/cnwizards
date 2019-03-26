@@ -2539,6 +2539,7 @@ TCnVerEnhanceForm.Caption=Version Enhancements Settings
 TCnVerEnhanceForm.btnCancel.Caption=&Cancel
 TCnVerEnhanceForm.btnHelp.Caption=&Help
 TCnVerEnhanceForm.btnOK.Caption=&OK
+TCnVerEnhanceForm.chkDateAsVersion.Caption=Set Current Year.Month.Day as Major.Minor.Release Version.
 TCnVerEnhanceForm.chkIncBuild.Caption=Auto-increment Build Number when Compiling(Delphi 6 Above Only).
 TCnVerEnhanceForm.chkLastCompiled.Caption=Insert Compiling Time into Version Info(Delphi 6 Above Only).
 TCnVerEnhanceForm.grpVerEnh.Caption=&Version Enhancements Settings

@@ -2539,6 +2539,7 @@ TCnVerEnhanceForm.Caption=Настройки Расширения Информа
 TCnVerEnhanceForm.btnCancel.Caption=Отмена
 TCnVerEnhanceForm.btnHelp.Caption=Справка
 TCnVerEnhanceForm.btnOK.Caption=&OK
+TCnVerEnhanceForm.chkDateAsVersion.Caption=Установите Текущий Год.Месяц.День как Major.Minor.Release Version.
 TCnVerEnhanceForm.chkIncBuild.Caption=Авто-инкремент номера билда при компиляции (Delphi 6 и выше)
 TCnVerEnhanceForm.chkLastCompiled.Caption=Добавл. время компиляции в информацию о версии (Delphi 6 и выше)
 TCnVerEnhanceForm.grpVerEnh.Caption=Настройки Расширения Информации о Версии

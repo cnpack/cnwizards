@@ -282,7 +282,9 @@ var
   Stream: TMemoryStream;
 {$ENDIF}
   Options: IOTAProjectOptions;
+{$IFDEF COMPILER6_UP}
   Y, M, D: Word;
+{$ENDIF}
 begin
   if IsCodeInsight then
     Exit;
