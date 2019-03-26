@@ -20,7 +20,7 @@ inherited CnVerEnhanceForm: TCnVerEnhanceForm
       Top = 86
       Width = 306
       Height = 15
-      Caption = '(Note: Both Only Enabled when Include Version Info in Project.)'
+      Caption = '(Note: Options Only Enabled when Include Version Info in Project.)'
     end
     object lblFormat: TLabel
       Left = 24
