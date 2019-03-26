@@ -28,7 +28,9 @@ unit CnVerEnhanceFrm;
 * 开发平台：JWinXPPro + Delphi 7.01
 * 兼容测试：JWinXPPro+ Delphi 7.01
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 修改记录：2005.05.05 V1.0
+* 修改记录：2019.03.26 V1.1 by liuxiao
+*               加入将年月日设为版本号的设置
+*           2005.05.05 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -41,8 +43,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
-  Dialogs, CnWizMultiLang, StdCtrls, CnLangTranslator, CnLangMgr,
-  CnClasses, CnLangStorage, CnHashLangStorage;
+  Dialogs, CnWizMultiLang, StdCtrls;
 
 type
   TCnVerEnhanceForm = class(TCnTranslateForm)
@@ -55,9 +56,11 @@ type
     lblNote: TLabel;
     lblFormat: TLabel;
     cbbFormat: TComboBox;
+    chkDateAsVersion: TCheckBox;
     procedure btnHelpClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure chkLastCompiledClick(Sender: TObject);
+    procedure chkIncBuildClick(Sender: TObject);
   private
     { Private declarations }
   protected
@@ -91,9 +94,11 @@ begin
   chkIncBuild.Enabled := False;
   lblFormat.Enabled := False;
   cbbFormat.Enabled := False;
+  chkDateAsVersion.Enabled := False;
 {$ELSE}
   lblFormat.Enabled := chkLastCompiled.Checked;
   cbbFormat.Enabled := chkLastCompiled.Checked;
+  chkDateAsVersion.Enabled := chkIncBuild.Checked;
 {$ENDIF}
 end;
 
@@ -101,6 +106,11 @@ procedure TCnVerEnhanceForm.chkLastCompiledClick(Sender: TObject);
 begin
   lblFormat.Enabled := chkLastCompiled.Checked;
   cbbFormat.Enabled := chkLastCompiled.Checked;
+end;
+
+procedure TCnVerEnhanceForm.chkIncBuildClick(Sender: TObject);
+begin
+  chkDateAsVersion.Enabled := chkIncBuild.Checked;
 end;
 
 {$ENDIF CNWIZARDS_CNVERENHANCEWIZARD}

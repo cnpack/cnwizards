@@ -28,7 +28,9 @@ unit CnVerEnhancements;
 * 开发平台：JWinXPPro + Delphi 7.01
 * 兼容测试：JWinXPPro ＋Delphi7.０１
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 修改记录：2015.01.05 V1.4 by liuxiao
+* 修改记录：2019.03.26 V1.5 by liuxiao
+*               加入将年月日设为版本号的设置
+*           2015.01.05 V1.4 by liuxiao
 *               加入自定义日期时间格式的设置
 *           2013.05.23 V1.3 by liuxiao
 *               Wiseinfo修正编译工程组时使用当前工程引发错误的问题
@@ -416,12 +418,14 @@ begin
     try
       chkLastCompiled.Checked := FLastCompiled;
       chkIncBuild.Checked := FIncBuild;
+      chkDateAsVersion.Checked := FDateAsVersion;
       cbbFormat.Text := FDateTimeFormat;
 
       if ShowModal = mrOK then
       begin
         LastCompiled := chkLastCompiled.Checked;
         IncBuild := chkIncBuild.Checked;
+        DateAsVersion := chkDateAsVersion.Checked;
         DateTimeFormat := Trim(cbbFormat.Text);
         
         DoSaveSettings;

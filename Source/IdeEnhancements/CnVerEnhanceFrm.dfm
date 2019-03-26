@@ -3,7 +3,7 @@ inherited CnVerEnhanceForm: TCnVerEnhanceForm
   Top = 200
   BorderStyle = bsDialog
   Caption = 'Version Enhancements Settings'
-  ClientHeight = 162
+  ClientHeight = 182
   ClientWidth = 403
   OnCreate = FormCreate
   PixelsPerInch = 96
@@ -12,15 +12,18 @@ inherited CnVerEnhanceForm: TCnVerEnhanceForm
     Left = 8
     Top = 8
     Width = 387
-    Height = 115
+    Height = 135
+    Anchors = [akLeft, akTop, akRight, akBottom]
     Caption = '&Version Enhancements Settings'
     TabOrder = 0
     object lblNote: TLabel
       Left = 24
-      Top = 86
-      Width = 306
-      Height = 15
-      Caption = '(Note: Options Only Enabled when Include Version Info in Project.)'
+      Top = 106
+      Width = 321
+      Height = 13
+      Caption = 
+        '(Note: Options Only Enabled when Include Version Info in Project' +
+        '.)'
     end
     object lblFormat: TLabel
       Left = 24
@@ -47,6 +50,7 @@ inherited CnVerEnhanceForm: TCnVerEnhanceForm
       Height = 19
       Caption = 'Auto-increment Build Number when Compiling(Delphi 6 Above Only).'
       TabOrder = 1
+      OnClick = chkIncBuildClick
     end
     object cbbFormat: TComboBox
       Left = 112
@@ -60,10 +64,18 @@ inherited CnVerEnhanceForm: TCnVerEnhanceForm
         'yyyy-mm-dd hh:mm:ss'
         'yyyy-mm-dd_hh-mm-ss')
     end
+    object chkDateAsVersion: TCheckBox
+      Left = 24
+      Top = 84
+      Width = 321
+      Height = 17
+      Caption = 'Set Current Year.Month.Day as Major.Minor.Release Version.'
+      TabOrder = 3
+    end
   end
   object btnOK: TButton
     Left = 157
-    Top = 133
+    Top = 153
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -74,7 +86,7 @@ inherited CnVerEnhanceForm: TCnVerEnhanceForm
   end
   object btnCancel: TButton
     Left = 239
-    Top = 133
+    Top = 153
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -85,7 +97,7 @@ inherited CnVerEnhanceForm: TCnVerEnhanceForm
   end
   object btnHelp: TButton
     Left = 320
-    Top = 133
+    Top = 153
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
