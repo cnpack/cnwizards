@@ -120,8 +120,8 @@ type
   TCnMapHeader = packed record
   {* 用内存映射文件传送数据时的内存区头格式}
     MagicName:  array[0..CnDebugMagicLength - 1] of AnsiChar;  // 'CNDEBUG'
-    MapEnabled: LongWord;              // 为一 CnDebugMapEnabled 时，表示区域可用
-    MapSize:    LongWord;              // 整个 Map 的大小，不包括尾保护区
+    MapEnabled: LongWord;           // 为一 CnDebugMapEnabled 时，表示区域可用
+    MapSize:    LongWord;           // 整个 Map 的大小，不包括尾保护区
     DataOffset: Integer;            // 数据区相对于头部的偏移量，目前定为 64
     QueueFront: Integer;            // 队列头指针，是相对于数据区的偏移量
     QueueTail:  Integer;            // 队列尾指针，是相对于数据区的偏移量

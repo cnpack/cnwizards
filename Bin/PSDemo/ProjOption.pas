@@ -24,8 +24,9 @@ begin
     Proj := CnOtaGetCurrentProject();
     if Proj <> nil then
     begin
-      Writeln('FrameworkType: ' + Proj.GetFrameworkType());
-      Writeln('Platform: ' + Proj.GetPlatform());
+      // Writeln('FrameworkType: ' + Proj.GetFrameworkType());
+      // Writeln('Platform: ' + Proj.GetPlatform());
+      // Can NOT Compile when NOT Support PROJECT_CONFIGURATION
     end;
   end;
 
