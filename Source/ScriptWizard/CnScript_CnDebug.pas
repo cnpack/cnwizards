@@ -208,6 +208,8 @@ begin
     RegisterMethod('Procedure EvaluateObject( AObject : TObject)');
     RegisterMethod('Procedure EvaluateControlUnderPos( const ScreenPos : TPoint)');
     RegisterMethod('Function ObjectFromInterface(const AIntf : IUnknown): TObject');
+    RegisterMethod('Procedure FindComponent');
+    RegisterMethod('Procedure FindControl');
     RegisterProperty('Channel', 'TCnDebugChannel', iptr);
     RegisterProperty('Filter', 'TCnDebugFilter', iptr);
     RegisterProperty('Active', 'Boolean', iptrw);
@@ -218,6 +220,8 @@ begin
     RegisterProperty('MessageCount', 'Integer', iptr);
     RegisterProperty('PostedMessageCount', 'Integer', iptr);
     RegisterProperty('DiscardedMessageCount', 'Integer', iptr);
+    RegisterProperty('OnFindComponent', 'TCnFindComponentEvent', iptrw);
+    RegisterProperty('OnFindControl', 'TCnFindControlEvent', iptrw);
   end;
 end;
 
@@ -285,6 +289,26 @@ end;
 procedure TCnDebuggerMessageCount_R(Self: TCnDebugger; var T: Integer);
 begin
   T := Self.MessageCount;
+end;
+
+procedure TCnDebuggerOnFindComponent_R(Self: TCnDebugger; var T: TCnFindComponentEvent);
+begin
+  T := Self.OnFindComponent;
+end;
+
+procedure TCnDebuggerOnFindControl_R(Self: TCnDebugger; var T: TCnFindControlEvent);
+begin
+  T := Self.OnFindControl;
+end;
+
+procedure TCnDebuggerOnFindComponent_W(Self: TCnDebugger; const T: TCnFindComponentEvent);
+begin
+  Self.OnFindComponent := T;
+end;
+
+procedure TCnDebuggerOnFindControl_W(Self: TCnDebugger; const T: TCnFindControlEvent);
+begin
+  Self.OnFindControl := T;
 end;
 
 procedure TCnDebuggerAutoStart_W(Self: TCnDebugger; const T: Boolean);
@@ -550,6 +574,8 @@ begin
     RegisterMethod(@TCnDebuggerEvaluateObject_P, 'EvaluateObject');
     RegisterMethod(@TCnDebuggerEvaluateControlUnderPos_P, 'EvaluateControlUnderPos');
     RegisterMethod(@TCnDebugger.ObjectFromInterface, 'ObjectFromInterface');
+    RegisterMethod(@TCnDebugger.FindComponent, 'FindComponent');
+    RegisterMethod(@TCnDebugger.FindControl, 'FindControl');
     RegisterPropertyHelper(@TCnDebuggerChannel_R, nil, 'Channel');
     RegisterPropertyHelper(@TCnDebuggerFilter_R, nil, 'Filter');
     RegisterPropertyHelper(@TCnDebuggerActive_R, @TCnDebuggerActive_W, 'Active');
@@ -560,6 +586,8 @@ begin
     RegisterPropertyHelper(@TCnDebuggerMessageCount_R, nil, 'MessageCount');
     RegisterPropertyHelper(@TCnDebuggerPostedMessageCount_R, nil, 'PostedMessageCount');
     RegisterPropertyHelper(@TCnDebuggerDiscardedMessageCount_R, nil, 'DiscardedMessageCount');
+    RegisterPropertyHelper(@TCnDebuggerOnFindComponent_R, @TCnDebuggerOnFindComponent_W, 'OnFindComponent');
+    RegisterPropertyHelper(@TCnDebuggerOnFindControl_R, @TCnDebuggerOnFindControl_W, 'OnFindControl');
   end;
 end;
 
