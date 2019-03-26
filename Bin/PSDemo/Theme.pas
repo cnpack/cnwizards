@@ -26,4 +26,3 @@ begin
   else
     InfoDlg('Theme NOT Support');
 end.
- 
