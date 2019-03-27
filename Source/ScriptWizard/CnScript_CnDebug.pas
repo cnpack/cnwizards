@@ -247,6 +247,8 @@ begin
     + 'od )');
   SIRegister_TCnDebugFilter(CL);
   CL.AddClass(CL.FindClass('TObject'), TCnDebugChannel);
+  CL.AddTypeS('TCnFindComponentEvent', 'Procedure ( Sender: TObject; AComponent: TComponent; var Cancel: Boolean)');
+  CL.AddTypeS('TCnFindControlEvent', 'Procedure ( Sender: TObject; AControl: TControl; var Cancel: Boolean)');
   SIRegister_TCnDebugger(CL);
   SIRegister_TCnDebugChannel(CL);
   //CL.AddTypeS('TCnDebugChannelClass', 'class of TCnDebugChannel');
@@ -625,7 +627,4 @@ begin
 end;
 
 end.
-
-
-
 
