@@ -318,7 +318,6 @@ type
 
 procedure TCnMainViewer.actNewExecute(Sender: TObject);
 var
-  I: Integer;
   Child: TCnMsgChild;
 begin
   if MDIChildCount >= CnMaxProcessCount then
@@ -648,8 +647,6 @@ end;
 
 procedure TCnMainViewer.tsSwitchChange(Sender: TObject; NewTab: Integer;
   var AllowChange: Boolean);
-var
-  I: Integer;
 begin
   if (Sender as TTabSet).Tabs.Objects[NewTab] <> nil then
   begin
@@ -804,7 +801,6 @@ end;
 
 procedure TCnMainViewer.actOpenExecute(Sender: TObject);
 var
-  I: Integer;
   Child: TCnMsgChild;
 begin
   if dlgOpen.Execute then
