@@ -1072,7 +1072,7 @@ Usage: want [target-name] [-Dname=value]
     </copy>
     <echo input="${tools}/CnTools.template.rc" file="${tools}/CnConfigIO/CnConfigIO.rc" />
     <brcc file="${tools}/CnConfigIO/CnConfigIO.rc" output="${tools}/CnConfigIO/CnConfigIO.res" />
-    <dcc basedir="${tools}/CnConfigIO" source="CnConfigIO.dpr" versions="5" usecfg="true" />
+    <dcc basedir="${tools}/CnConfigIO" source="CnConfigIO.dpr" versions="7" usecfg="true" />
     <delete dir="${tools}/CnConfigIO">
        <include name="CnConfigIO.res" />
        <include name="CnConfigIO.rc" />
@@ -1152,7 +1152,7 @@ Usage: want [target-name] [-Dname=value]
     </copy>
     <echo input="${tools}/CnTools.template.rc" file="${tools}/CnIdeBRTool/CnIdeBRTool.rc" />
     <brcc file="${tools}/CnIdeBRTool/CnIdeBRTool.rc" output="${tools}/CnIdeBRTool/CnIdeBRTool.res" />
-    <dcc basedir="${tools}/CnIdeBRTool" source="CnIdeBRTool.dpr" versions="5" usecfg="true" />
+    <dcc basedir="${tools}/CnIdeBRTool" source="CnIdeBRTool.dpr" versions="7" usecfg="true" />
     <delete dir="${tools}/CnIdeBRTool">
        <include name="CnIdeBRTool.res" />
        <include name="CnIdeBRTool.rc" />
@@ -1172,7 +1172,7 @@ Usage: want [target-name] [-Dname=value]
     </copy>
     <echo input="${tools}/CnTools.template.rc" file="${tools}/CnManageWiz/CnManageWiz.rc" />
     <brcc file="${tools}/CnManageWiz/CnManageWiz.rc" output="${tools}/CnManageWiz/CnManageWiz.res" />
-    <dcc basedir="${tools}/CnManageWiz" source="CnManageWiz.dpr" versions="5" usecfg="true" />
+    <dcc basedir="${tools}/CnManageWiz" source="CnManageWiz.dpr" versions="7" usecfg="true" />
     <delete dir="${tools}/CnManageWiz">
        <include name="CnManageWiz.res" />
        <include name="CnManageWiz.rc" />
@@ -1192,7 +1192,7 @@ Usage: want [target-name] [-Dname=value]
     </copy>
     <echo input="${tools}/CnTools.template.rc" file="${tools}/CnSelectLang/CnSelectLang.rc" />
     <brcc file="${tools}/CnSelectLang/CnSelectLang.rc" output="${tools}/CnSelectLang/CnSelectLang.res" />
-    <dcc basedir="${tools}/CnSelectLang" source="CnSelectLang.dpr" versions="5" usecfg="true" />
+    <dcc basedir="${tools}/CnSelectLang" source="CnSelectLang.dpr" versions="7" usecfg="true" />
     <delete dir="${tools}/CnSelectLang">
        <include name="CnSelectLang.res" />
        <include name="CnSelectLang.rc" />
@@ -1212,7 +1212,7 @@ Usage: want [target-name] [-Dname=value]
     </copy>
     <echo input="${tools}/CnTools.template.rc" file="${tools}/CnSMR/CnSMR.rc" />
     <brcc file="${tools}/CnSMR/CnSMR.rc" output="${tools}/CnSMR/CnSMR.res" />
-    <dcc basedir="${tools}/CnSMR" source="CnSMR.dpr" versions="5" usecfg="true" />
+    <dcc basedir="${tools}/CnSMR" source="CnSMR.dpr" versions="7" usecfg="true" />
     <delete dir="${tools}/CnSMR">
        <include name="CnSMR.res" />
        <include name="CnSMR.rc" />

@@ -32,7 +32,6 @@ uses
   CnWizDfm6To5 in '..\..\Source\Utils\CnWizDfm6To5.pas';
 
 {$R *.RES}
-{$R ..\WindowsXP.RES}
 
 begin
   Application.Initialize;
