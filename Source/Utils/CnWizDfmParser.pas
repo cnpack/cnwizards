@@ -40,7 +40,7 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, SysUtils, Classes, CnCommon,
+  Windows, SysUtils, Classes, CnCommon, CnTree,
 {$IFDEF COMPILER6_UP}
   Variants, RTLConsts,
 {$ELSE}
@@ -75,38 +75,266 @@ type
     property Caption: string read FCaption write FCaption;
   end;
 
+  TCnDfmLeaf = class(TCnLeaf)
+  {* 代表 DFM 中的一个组件}
+  private
+    FElementClass: string;
+    FElementKind: TDfmKind;
+    FProperties: TStrings;
+  public
+    constructor Create(ATree: TCnTree); override;
+    {* 构造方法 }
+    destructor Destroy; override;
+    {* 析构方法 }
+
+    // 用父类的 Text 属性当作 Name
+    property ElementClass: string read FElementClass write FElementClass;
+    property ElementKind: TDfmKind read FElementKind write FElementKind;
+    property Properties: TStrings read FProperties;
+  end;
+
+  TCnDfmTree = class(TCnTree)
+  private
+    FDfmFormat: TDfmFormat;
+    FDfmKind: TDfmKind;
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    property DfmKind: TDfmKind read FDfmKind write FDfmKind;
+    property DfmFormat: TDfmFormat read FDfmFormat write FDfmFormat;
+  end;
+
 const
   SDfmFormats: array[TDfmFormat] of string = ('Unknown', 'Text', 'Binary');
   SDfmKinds: array[TDfmKind] of string = ('Object', 'Inherited', 'Inline');
 
 function ParseDfmStream(Stream: TStream; Info: TDfmInfo): Boolean;
+{* 简单解析 DFM 流读出最外层 Container 的信息}
 
 function ParseDfmFile(const FileName: string; Info: TDfmInfo): Boolean;
+{* 简单解析 DFM 文件读出最外层 Container 的信息}
+
+function LoadDfmStreamToTree(Stream: TStream; Tree: TCnDfmTree): Boolean;
+{* 将 DFM 流解析成树}
+
+function LoadDfmFileToTree(const FileName: string; Tree: TCnDfmTree): Boolean;
+{* 将 DFM 文件解析成树}
 
 implementation
 
 const
   csPropCount = 5;
+  CRLF = #13#10;
+  FILER_SIGNATURE: array[1..4] of AnsiChar = ('T', 'P', 'F', '0');
 
+{$IFNDEF COMPILER6_UP}
+function CombineString(Parser: TParser): string;
+begin
+  Result := Parser.TokenString;
+  while Parser.NextToken = '+' do
+  begin
+    Parser.NextToken;
+    Parser.CheckToken(toString);
+    Result := Result + Parser.TokenString;
+  end;
+end;
+{$ENDIF}
+
+function CombineWideString(Parser: TParser): WideString;
+begin
+  Result := Parser.TokenWideString;
+  while Parser.NextToken = '+' do
+  begin
+    Parser.NextToken;
+    if not CharInSet(Parser.Token, [toString, toWString]) then
+      Parser.CheckToken(toString);
+    Result := Result + Parser.TokenWideString;
+  end;
+end;
+
+function ParseTextOrderModifier(Parser: TParser): Integer;
+begin
+  Result := -1;
+  if Parser.Token = '[' then
+  begin
+    Parser.NextToken;
+    Parser.CheckToken(toInteger);
+    Result := Parser.TokenInt;
+    Parser.NextToken;
+    Parser.CheckToken(']');
+    Parser.NextToken;
+  end;
+end;
+
+function ParseTextPropertyValue(Parser: TParser): string; forward;
+
+procedure ParseTextHeaderToLeaf(Parser: TParser; IsInherited, IsInline: Boolean;
+  Leaf: TCnDfmLeaf); forward;
+
+procedure ParseTextPropertyToLeaf(Parser: TParser; Leaf: TCnDfmLeaf);
+var
+  PropName: string;
+  PropValue: string;
+begin
+  Parser.CheckToken(toSymbol);
+  PropName := Parser.TokenString;
+  Parser.NextToken;
+  while Parser.Token = '.' do
+  begin
+    Parser.NextToken;
+    Parser.CheckToken(toSymbol);
+    PropName := PropName + '.' + Parser.TokenString;
+    Parser.NextToken;
+  end;
+
+  Parser.CheckToken('=');
+  Parser.NextToken;
+  PropValue := ParseTextPropertyValue(Parser);
+
+  Leaf.Properties.Add(PropName + '=' + PropValue);
+end;
+
+function ParseTextPropertyValue(Parser: TParser): string;
+begin
+  Result := '';
+{$IFDEF COMPILER6_UP}
+  if CharInSet(Parser.Token, [toString, toWString]) then
+    Result := CombineWideString(Parser)
+{$ELSE}
+  if Parser.Token = toString then
+    Result := CombineString(Parser)
+  else if Parser.Token = toWString then
+    Result := CombineWideString(Parser)
+{$ENDIF}
+  else
+  begin
+    case Parser.Token of
+      toSymbol:
+        Result := Parser.TokenComponentIdent;
+      toInteger:
+        Result := IntToStr(Parser.TokenInt);
+      toFloat:
+        Result := FloatToStr(Parser.TokenFloat);
+      '[':
+        begin
+          Parser.NextToken;
+          if Parser.Token <> ']' then
+            while True do
+            begin
+              if Parser.Token <> toInteger then
+                Parser.CheckToken(toSymbol);
+              if Parser.NextToken = ']' then Break;
+              Parser.CheckToken(',');
+              Parser.NextToken;
+            end;
+        end;
+      '(':  // 字符串列表
+        begin
+          Result := Parser.TokenString;
+          Parser.NextToken;
+          while Parser.Token <> ')' do
+          begin
+            Result := Result + Parser.TokenString;
+            Parser.NextToken;
+          end;
+          Result := Result + ')';
+        end;
+      '{':  // 二进制数据
+        begin
+          Result := Parser.TokenString;
+          Parser.NextToken;
+          while Parser.Token <> '}' do
+          begin
+            Result := Result + Parser.TokenString;
+            Parser.NextToken;
+          end;
+          Result := Result + '}';
+        end;
+      '<':  // TODO: Collection 的 Items 需要分割处理
+        begin
+          Result := Parser.TokenString;
+          Parser.NextToken;
+          while Parser.Token <> '>' do
+          begin
+            Result := Result + Parser.TokenString;
+            Parser.NextToken;
+          end;
+          Result := Result + '>';
+        end;
+    else
+      Parser.Error(SInvalidProperty);
+    end;
+    Parser.NextToken;
+  end;
+end;
+
+// 递归解析 Object。进入调用时 Parser 停留在 object，Leaf 是个新建的
+procedure ParseTextObjectToLeaf(Parser: TParser; Tree: TCnDfmTree; Leaf: TCnDfmLeaf);
+var
+  InheritedObject: Boolean;
+  InlineObject: Boolean;
+  Child: TCnDfmLeaf;
+begin
+  InheritedObject := False;
+  InlineObject := False;
+  if Parser.TokenSymbolIs('INHERITED') then
+  begin
+    InheritedObject := True;
+    Leaf.ElementKind := dkInherited;
+  end
+  else if Parser.TokenSymbolIs('INLINE') then
+  begin
+    InlineObject := True;
+    Leaf.ElementKind := dkInline;
+  end
+  else
+  begin
+    Parser.CheckTokenSymbol('OBJECT');
+    Leaf.ElementKind := dkObject;
+  end;
+
+  Parser.NextToken;
+  ParseTextHeaderToLeaf(Parser, InheritedObject, InlineObject, Leaf);
+
+  while not Parser.TokenSymbolIs('END') and
+    not Parser.TokenSymbolIs('OBJECT') and
+    not Parser.TokenSymbolIs('INHERITED') and
+    not Parser.TokenSymbolIs('INLINE') do
+    ParseTextPropertyToLeaf(Parser, Leaf);
+
+  while Parser.TokenSymbolIs('OBJECT') or
+    Parser.TokenSymbolIs('INHERITED') or
+    Parser.TokenSymbolIs('INLINE') do
+  begin
+    Child := Tree.AddChild(Leaf) as TCnDfmLeaf;
+    ParseTextObjectToLeaf(Parser, Tree, Child);
+  end;
+  Parser.NextToken; // 过 end
+end;
+
+procedure ParseTextHeaderToLeaf(Parser: TParser; IsInherited, IsInline: Boolean; Leaf: TCnDfmLeaf);
+begin
+  Parser.CheckToken(toSymbol);
+  Leaf.ElementClass := Parser.TokenString;
+  Leaf.Text := '';
+  if Parser.NextToken = ':' then
+  begin
+    Parser.NextToken;
+    Parser.CheckToken(toSymbol);
+    Leaf.Text := Leaf.ElementClass;
+    Leaf.ElementClass := Parser.TokenString;
+    Parser.NextToken;
+  end;
+  ParseTextOrderModifier(Parser);
+end;
+
+// 简单解析 Text 格式的 Dfm 拿到 Info
 function ParseTextDfmStream(Stream: TStream; Info: TDfmInfo): Boolean;
 var
   SaveSeparator: Char;
   Parser: TParser;
   PropCount: Integer;
-
-  function ParseOrderModifier: Integer;
-  begin
-    Result := -1;
-    if Parser.Token = '[' then
-    begin
-      Parser.NextToken;
-      Parser.CheckToken(toInteger);
-      Result := Parser.TokenInt;
-      Parser.NextToken;
-      Parser.CheckToken(']');
-      Parser.NextToken;
-    end;
-  end;
 
   procedure ParseHeader(IsInherited, IsInline: Boolean);
   begin
@@ -121,48 +349,22 @@ var
       Info.FormClass := Parser.TokenString;
       Parser.NextToken;
     end;
-    ParseOrderModifier;
+    ParseTextOrderModifier(Parser);
   end;
 
   procedure ParseProperty(IsForm: Boolean); forward;
 
   function ParseValue: Variant;
-  
-  {$IFNDEF COMPILER6_UP}
-    function CombineString: string;
-    begin
-      Result := Parser.TokenString;
-      while Parser.NextToken = '+' do
-      begin
-        Parser.NextToken;
-        Parser.CheckToken(toString);
-        Result := Result + Parser.TokenString;
-      end;
-    end;
-  {$ENDIF}
-
-    function CombineWideString: WideString;
-    begin
-      Result := Parser.TokenWideString;
-      while Parser.NextToken = '+' do
-      begin
-        Parser.NextToken;
-        if not CharInSet(Parser.Token, [toString, toWString]) then
-          Parser.CheckToken(toString);
-        Result := Result + Parser.TokenWideString;
-      end;
-    end;
-
   begin
     Result := Null;
   {$IFDEF COMPILER6_UP}
     if CharInSet(Parser.Token, [toString, toWString]) then
-      Result := CombineWideString
+      Result := CombineWideString(Parser)
   {$ELSE}
     if Parser.Token = toString then
-      Result := CombineString
+      Result := CombineString(Parser)
     else if Parser.Token = toWString then
-      Result := CombineWideString
+      Result := CombineWideString(Parser)
   {$ENDIF}
     else
     begin
@@ -204,7 +406,7 @@ var
             begin
               Parser.CheckTokenSymbol('item');
               Parser.NextToken;
-              ParseOrderModifier;
+              ParseTextOrderModifier(Parser);
               while not Parser.TokenSymbolIs('end') do ParseProperty(False);
               Parser.NextToken;
             end;
@@ -289,14 +491,14 @@ var
 begin
   try
     Parser := TParser.Create(Stream);
-    SaveSeparator := {$IFDEF DelphiXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator;
-    {$IFDEF DelphiXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := '.';
+    SaveSeparator := {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator;
+    {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := '.';
     try
       PropCount := 0;
       ParseObject;
       Result := True;
     finally
-      {$IFDEF DelphiXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := SaveSeparator;
+      {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := SaveSeparator;
       Parser.Free;
     end;
   except
@@ -304,6 +506,7 @@ begin
   end;
 end;
 
+// 简单解析二进制格式的 Dfm 拿到 Info
 function ParseBinaryDfmStream(Stream: TStream; Info: TDfmInfo): Boolean;
 var
   SaveSeparator: Char;
@@ -448,15 +651,15 @@ var
 begin
   try
     Reader := TReader.Create(Stream, 4096);
-    SaveSeparator := {$IFDEF DelphiXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator;
-    {$IFDEF DelphiXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := '.';
+    SaveSeparator := {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator;
+    {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := '.';
     try
       PropCount := 0;
       Reader.ReadSignature;
       ParseObject;
       Result := True;
     finally
-      {$IFDEF DelphiXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := SaveSeparator;
+      {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := SaveSeparator;
       Reader.Free;
     end;
   except
@@ -465,8 +668,6 @@ begin
 end;
 
 function ParseDfmStream(Stream: TStream; Info: TDfmInfo): Boolean;
-const
-  FilerSignature: array[1..4] of AnsiChar = ('T', 'P', 'F', '0');
 var
   Pos: Integer;
   Signature: Integer;
@@ -501,7 +702,7 @@ begin
       Signature := 0;
       Stream.Read(Signature, SizeOf(Signature));
       Stream.Position := Pos;
-      if Signature = Integer(FilerSignature) then
+      if Signature = Integer(FILER_SIGNATURE) then
       begin
         Info.Format := dfBinary;
         Result := ParseBinaryDfmStream(Stream, Info);
@@ -529,6 +730,126 @@ begin
   except
     Result := False;
   end;
+end;
+
+function LoadTextDfmStreamToTree(Stream: TStream; Tree: TCnDfmTree): Boolean;
+var
+  SaveSeparator: Char;
+  Parser: TParser;
+  StartLeaf: TCnDfmLeaf;
+begin
+  Parser := TParser.Create(Stream);
+  try
+    SaveSeparator := {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator;
+    {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := '.';
+    try
+      StartLeaf := Tree.AddChild(Tree.Root) as TCnDfmLeaf;
+      ParseTextObjectToLeaf(Parser, Tree, StartLeaf as TCnDfmLeaf);
+      Result := True;
+    finally
+      {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := SaveSeparator;
+      Parser.Free;
+    end;
+  except
+    Result := False;
+  end;
+end;
+
+function LoadBinaryDfmStreamToTree(Stream: TStream; Tree: TCnDfmTree): Boolean;
+begin
+  Result := False;
+end;
+
+function LoadDfmStreamToTree(Stream: TStream; Tree: TCnDfmTree): Boolean;
+var
+  Pos: Integer;
+  Signature: Integer;
+  BOM: array[1..3] of AnsiChar;
+begin
+  Pos := Stream.Position;
+  Signature := 0;
+  Stream.Read(Signature, SizeOf(Signature));
+  Stream.Position := Pos;
+  if AnsiChar(Signature) in ['o','O','i','I',' ',#13,#11,#9] then
+  begin
+    Tree.DfmFormat := dfText;
+    Result := LoadTextDfmStreamToTree(Stream, Tree);
+  end
+  else
+  begin
+    Pos := Stream.Position;
+    Signature := 0;
+    Stream.Read(BOM, SizeOf(BOM));
+    Stream.Position := Pos;
+
+    if ((BOM[1] = #$FF) and (BOM[2] = #$FE)) or // UTF8/UTF 16
+      ((BOM[1] = #$EF) and (BOM[2] = #$BB) and (BOM[3] = #$BF)) then
+    begin
+      Tree.DfmFormat := dfText;
+      Result := LoadTextDfmStreamToTree(Stream, Tree); // Only ANSI yet
+    end
+    else
+    begin
+      Stream.ReadResHeader;
+      Pos := Stream.Position;
+      Signature := 0;
+      Stream.Read(Signature, SizeOf(Signature));
+      Stream.Position := Pos;
+      if Signature = Integer(FILER_SIGNATURE) then
+      begin
+        Tree.DfmFormat := dfBinary;
+        Result := LoadBinaryDfmStreamToTree(Stream, Tree);
+      end
+      else
+      begin
+        Tree.DfmFormat := dfUnknown;
+        Result := False;
+      end;
+    end;
+  end;
+end;
+
+function LoadDfmFileToTree(const FileName: string; Tree: TCnDfmTree): Boolean;
+var
+  Stream: TFileStream;
+begin
+  try
+    Stream := TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
+    try
+      Result := LoadDfmStreamToTree(Stream, Tree);
+    finally
+      Stream.Free;
+    end;
+  except
+    Result := False;
+  end;
+end;
+
+{ TCnDfmTree }
+
+constructor TCnDfmTree.Create;
+begin
+  inherited Create(TCnDfmLeaf);
+end;
+
+destructor TCnDfmTree.Destroy;
+begin
+
+  inherited;
+end;
+
+{ TCnDfmLeaf }
+
+constructor TCnDfmLeaf.Create(ATree: TCnTree);
+begin
+  inherited;
+  FProperties := TStringList.Create;
+end;
+
+destructor TCnDfmLeaf.Destroy;
+begin
+  FProperties.Free;
+  inherited;
 end;
 
 end.
