@@ -611,8 +611,9 @@ end;
 
 function TCnAbstractCodeFormatter.CanBeSymbol(Token: TPascalToken): Boolean;
 begin
-  Result := Scaner.Token in ([tokSymbol, tokAmpersand, tokAtSign, tokKeywordFinal, tokKeywordIn, tokKeywordOut,
-    tokKeywordString, tokKeywordAlign, tokKeywordAt] + ComplexTokens + DirectiveTokens);
+  Result := Scaner.Token in ([tokSymbol, tokAmpersand, tokAtSign, tokKeywordFinal,
+    tokKeywordIn, tokKeywordOut, tokKeywordString, tokKeywordAlign, tokKeywordAt]
+    + ComplexTokens + DirectiveTokens);
 end;
 
 function TCnAbstractCodeFormatter.CanKeepLineBreak: Boolean;
@@ -2019,6 +2020,7 @@ begin
     case Scaner.Token of
       tokSymbol, tokAmpersand, tokAtSign, tokKeywordFinal, tokKeywordIn, tokKeywordOut,
       tokKeywordString, tokKeywordAlign, tokKeywordAt, tokInteger, tokFloat,
+      tokKeywordContains, tokKeywordRequires,
       tokDirective_BEGIN..tokDirective_END, // 允许语句以部分关键字以及数字开头，其余和 CanBeSymbol 函数内部实现类似
       tokComplex_BEGIN..tokComplex_END:
         begin
