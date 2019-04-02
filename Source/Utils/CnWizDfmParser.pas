@@ -81,11 +81,20 @@ type
     FElementClass: string;
     FElementKind: TDfmKind;
     FProperties: TStrings;
+    function GetItems(Index: Integer): TCnDfmLeaf;
+    procedure SetItems(Index: Integer; const Value: TCnDfmLeaf);
+  protected
+    procedure AssignTo(Dest: TPersistent); override;
   public
     constructor Create(ATree: TCnTree); override;
     {* 构造方法 }
     destructor Destroy; override;
     {* 析构方法 }
+
+    procedure AppendToStrings(List: TStrings; Tab: Integer = 0);
+    {* 将自身写入一个字符串列表，供保存用，不写末尾的 end}
+
+    property Items[Index: Integer]: TCnDfmLeaf read GetItems write SetItems; default;
 
     // 用父类的 Text 属性当作 Name
     property ElementClass: string read FElementClass write FElementClass;
@@ -94,12 +103,20 @@ type
   end;
 
   TCnDfmTree = class(TCnTree)
+  {* 代表 DFM 树，其中 Root 是根容器}
   private
     FDfmFormat: TDfmFormat;
     FDfmKind: TDfmKind;
+    function GetRoot: TCnDfmLeaf;
+  protected
+    procedure SaveLeafToStrings(Leaf: TCnDfmLeaf; List: TStrings; Tab: Integer = 0);
   public
     constructor Create;
     destructor Destroy; override;
+
+    function SaveToStrings(List: TStrings): Boolean;
+
+    property Root: TCnDfmLeaf read GetRoot;
 
     property DfmKind: TDfmKind read FDfmKind write FDfmKind;
     property DfmFormat: TDfmFormat read FDfmFormat write FDfmFormat;
@@ -121,10 +138,14 @@ function LoadDfmStreamToTree(Stream: TStream; Tree: TCnDfmTree): Boolean;
 function LoadDfmFileToTree(const FileName: string; Tree: TCnDfmTree): Boolean;
 {* 将 DFM 文件解析成树}
 
+function SaveTreeToDfmFile(const FileName: string; Tree: TCnDfmTree): Boolean;
+{* 将树的内容存成 DFM 文本文件}
+
 implementation
 
 const
   csPropCount = 5;
+  csTabWidth = 2;
   CRLF = #13#10;
   FILER_SIGNATURE: array[1..4] of AnsiChar = ('T', 'P', 'F', '0');
 
@@ -329,6 +350,26 @@ begin
   ParseTextOrderModifier(Parser);
 end;
 
+procedure ParseBinaryHeader(Reader: TReader; Leaf: TCnDfmLeaf);
+var
+  Flags: TFilerFlags;
+  Position: Integer;
+begin
+  Reader.ReadPrefix(Flags, Position);
+  Leaf.ElementClass := Reader.ReadStr;
+  Leaf.Text := Reader.ReadStr;
+  if Leaf.Text = '' then
+    Leaf.Text := Leaf.ElementClass;
+end;
+
+procedure ParseBinaryObjectToLeaf(Reader: TReader; Leaf: TCnDfmLeaf);
+begin
+  ParseBinaryHeader(Reader, Leaf);
+  // TODO: Parse Binary Properties and Children to Leaves.
+//  while not Reader.EndOfList do
+//    ParseBinaryPropertyToLeaf(True);
+end;
+
 // 简单解析 Text 格式的 Dfm 拿到 Info
 function ParseTextDfmStream(Stream: TStream; Info: TDfmInfo): Boolean;
 var
@@ -516,7 +557,6 @@ var
 
   procedure ParseHeader;
   var
-    FormClass: string;
     Flags: TFilerFlags;
     Position: Integer;
   begin
@@ -524,7 +564,7 @@ var
     Info.FormClass := Reader.ReadStr;
     Info.Name := Reader.ReadStr;
     if Info.Name = '' then
-      Info.Name := FormClass; 
+      Info.Name := Info.FormClass;
   end;
 
   procedure ParseBinary;
@@ -756,8 +796,27 @@ begin
 end;
 
 function LoadBinaryDfmStreamToTree(Stream: TStream; Tree: TCnDfmTree): Boolean;
+var
+  Reader: TReader;
+  SaveSeparator: Char;
+  StartLeaf: TCnDfmLeaf;
 begin
-  Result := False;
+  try
+    Reader := TReader.Create(Stream, 4096);
+    SaveSeparator := {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator;
+    {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := '.';
+    try
+      Reader.ReadSignature;
+      StartLeaf := Tree.AddChild(Tree.Root) as TCnDfmLeaf;
+      ParseBinaryObjectToLeaf(Reader, StartLeaf);
+      Result := True;
+    finally
+      {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := SaveSeparator;
+      Reader.Free;
+    end;
+  except
+    Result := False;
+  end;
 end;
 
 function LoadDfmStreamToTree(Stream: TStream; Tree: TCnDfmTree): Boolean;
@@ -825,6 +884,23 @@ begin
   end;
 end;
 
+function SaveTreeToDfmFile(const FileName: string; Tree: TCnDfmTree): Boolean;
+var
+  List: TStrings;
+begin
+  Result := False;
+  if (FileName <> '') and (Tree <> nil) then
+  begin
+    List := TStringList.Create;
+    try
+      Result := Tree.SaveToStrings(List);
+      List.SaveToFile(FileName);
+    finally
+      List.Free;
+    end;
+  end;
+end;
+
 { TCnDfmTree }
 
 constructor TCnDfmTree.Create;
@@ -838,7 +914,76 @@ begin
   inherited;
 end;
 
+function TCnDfmTree.GetRoot: TCnDfmLeaf;
+begin
+  Result := TCnDfmLeaf(inherited GetRoot);
+end;
+
+procedure TCnDfmTree.SaveLeafToStrings(Leaf: TCnDfmLeaf; List: TStrings;
+  Tab: Integer);
+var
+  I: Integer;
+begin
+  if Leaf <> nil then
+  begin
+    Leaf.AppendToStrings(List, Tab);
+    for I := 0 to Leaf.Count - 1 do
+      SaveLeafToStrings(Leaf.Items[I], List, Tab + csTabWidth);
+
+    List.Append(Spc(Tab) + 'end');
+  end;
+end;
+
+function TCnDfmTree.SaveToStrings(List: TStrings): Boolean;
+begin
+  Result := False;
+  if List <> nil then
+  begin
+    List.Clear;
+    // Root 本身不存
+    if Root.Count = 1 then
+      SaveLeafToStrings(Root.Items[0], List, 0);
+  end;
+end;
+
 { TCnDfmLeaf }
+
+procedure TCnDfmLeaf.AppendToStrings(List: TStrings; Tab: Integer);
+var
+  I, P: Integer;
+  S, N, V: string;
+begin
+  if Tab < 0 then
+    Tab := 0;
+
+  if List <> nil then
+  begin
+    List.Add(Format('%s%s %s: %s', [Spc(Tab), LowerCase(SDfmKinds[FElementKind]), Text, FElementClass]));
+    for I := 0 to FProperties.Count - 1 do
+    begin
+      S := FProperties[I];
+      P := Pos('=', S);
+      if P > 0 then
+      begin
+        N := Copy(S, 1, P - 1);
+        V := Copy(S, P + 1, MaxInt);
+        if (N <> '') and (V <> '') then
+          List.Add(Format('%s%s = %s', [Spc(Tab + csTabWidth), N, V]));
+      end;
+    end;
+  end;
+end;
+
+procedure TCnDfmLeaf.AssignTo(Dest: TPersistent);
+begin
+  if Dest is TCnDfmLeaf then
+  begin
+    TCnDfmLeaf(Dest).ElementKind := FElementKind;
+    TCnDfmLeaf(Dest).ElementClass := FElementClass;
+    TCnDfmLeaf(Dest).Properties.Assign(FProperties);
+  end;
+  inherited;
+end;
 
 constructor TCnDfmLeaf.Create(ATree: TCnTree);
 begin
@@ -850,6 +995,16 @@ destructor TCnDfmLeaf.Destroy;
 begin
   FProperties.Free;
   inherited;
+end;
+
+function TCnDfmLeaf.GetItems(Index: Integer): TCnDfmLeaf;
+begin
+  Result := TCnDfmLeaf(inherited GetItems(Index));
+end;
+
+procedure TCnDfmLeaf.SetItems(Index: Integer; const Value: TCnDfmLeaf);
+begin
+  inherited SetItems(Index, Value);
 end;
 
 end.

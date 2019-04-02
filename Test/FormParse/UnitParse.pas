@@ -15,13 +15,18 @@ type
     btnBrowse: TButton;
     Bevel1: TBevel;
     tvDfm: TTreeView;
+    btnClone: TButton;
+    btnSave: TButton;
+    dlgSave1: TSaveDialog;
     procedure btnBrowseClick(Sender: TObject);
     procedure btnParseClick(Sender: TObject);
     procedure tvDfmDblClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure btnCloneClick(Sender: TObject);
+    procedure btnSaveClick(Sender: TObject);
   private
-    FTree: TCnDfmTree;
+    FTree, FCloneTree: TCnDfmTree;
     procedure TreeSaveNode(ALeaf: TCnLeaf; ATreeNode: TTreeNode;
       var Valid: Boolean);
   public
@@ -82,18 +87,37 @@ begin
   if tvDfm.Selected <> nil then
   begin
     Leaf := TCnDfmLeaf(tvDfm.Selected.Data);
-    ShowMessage(Leaf.Properties.Text);
+    if Leaf.Tree = FCloneTree then
+      MessageBox(Handle, PChar(Leaf.Properties.Text), 'Clone', MB_OK)
+    else
+      ShowMessage(Leaf.Properties.Text);
   end;
 end;
 
 procedure TParseForm.FormCreate(Sender: TObject);
 begin
   FTree := TCnDfmTree.Create;
+  FCloneTree := TCnDfmTree.Create;
 end;
 
 procedure TParseForm.FormDestroy(Sender: TObject);
 begin
+  FCloneTree.Free;
   FTree.Free;
+end;
+
+procedure TParseForm.btnCloneClick(Sender: TObject);
+begin
+  FCloneTree.Assign(FTree);
+  FCloneTree.OnSaveANode := TreeSaveNode;
+  FCloneTree.SaveToTreeView(tvDfm);
+  tvDfm.Items[0].Expand(True);
+end;
+
+procedure TParseForm.btnSaveClick(Sender: TObject);
+begin
+  if dlgSave1.Execute then
+    SaveTreeToDfmFile(dlgSave1.FileName, FCloneTree);
 end;
 
 end.
