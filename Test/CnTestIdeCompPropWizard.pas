@@ -56,9 +56,11 @@ type
     FSaveVclPropsId: Integer;
     FSaveFmxPropsId: Integer;
     FSaveFmxFilesId: Integer;
+    FSaveFmxEventsId: Integer;
     procedure SaveFmx;
     procedure SaveVcl;
     procedure SaveFmxFiles;
+    procedure SaveFmxEvents;
   protected
     function GetHasConfig: Boolean; override;
     procedure SubActionExecute(Index: Integer); override;
@@ -190,6 +192,8 @@ begin
     'Save Fmx Properties', 'CnTestSaveFmxProps');
   FSaveFmxFilesId := RegisterASubAction('CnTestSaveFmxFiles', 'Save Fmx Files', 0,
     'Save Fmx Files', 'CnTestSaveFmxFiles');
+  FSaveFmxEventsId := RegisterASubAction('CnTestSaveFmxEvents', 'Save Fmx Events', 0,
+    'Save Fmx Events', 'CnTestSaveFmxEvents');
 end;
 
 procedure TCnTestIdeCompPropWizard.Config;
@@ -353,12 +357,87 @@ begin
 {$ENDIF}
 end;
 
+procedure TCnTestIdeCompPropWizard.SaveFmxEvents;
+{$IFDEF SUPPORT_FMX}
+var
+  List: TStringList;
+  I, J: Integer;
+  Clz: TClass;
+  RttiContext: TRttiContext;
+  RttiType: TRttiType;
+  RttiProperty: TRttiProperty;
+  Res: TStringList;
+  PackSvcs: IOTAPackageServices;
+{$ENDIF}
+begin
+{$IFNDEF SUPPORT_FMX}
+  ShowMessage('FMX Not Support.');
+{$ELSE}
+  PropertyMap.Clear;
+  List := TStringList.Create;
+  Res := TStringList.Create;
+  Res.Sorted := True;
+  Res.Duplicates := dupIgnore;
+
+  QuerySvcs(BorlandIDEServices, IOTAPackageServices, PackSvcs);
+  for I := 0 to PackSvcs.PackageCount - 1 do
+  begin
+    // 只取 FMX 组件，dclfmx 开头的包名
+    if LowerCase(PackSvcs.PackageNames[I]).StartsWith('dclfmx') then
+      for J := 0 to PackSvcs.ComponentCount[I] - 1 do
+        List.Add(PackSvcs.ComponentNames[I, J]);
+  end;
+
+  ActivateClassGroup(TFMXObject); // 切到 FMX
+  ShowMessage('FMX Component Counts: ' + IntToStr(List.Count));
+
+  for I := 0 to List.Count - 1 do
+  begin
+    Clz := GetClass(List[I]);
+    if (Clz = nil) or not CnFmxClassIsInheritedFromControl(Clz) then // 只搜集 FMX 的 TControl 子类
+      Continue;
+
+    RttiContext := TRttiContext.Create;
+    try
+      RttiType := RttiContext.GetType(Clz.ClassInfo);
+      if RttiType <> nil then
+      begin
+        for RttiProperty in RttiType.GetProperties do
+        begin
+          if (RttiProperty.Visibility <> mvPublished) or
+            (RttiProperty.PropertyType.TypeKind <> tkMethod) then
+            Continue;
+
+          Res.Add(Format('%s:%s|%s', [RttiProperty.Name,
+            RttiProperty.PropertyType.Name, GetRttiMethodDeclare(RttiProperty)]));
+        end;
+      end;
+    finally
+      RttiContext.Free;
+    end;
+  end;
+
+  with TSaveDialog.Create(nil) do
+  begin
+    Title := 'Save FMX Events List.';
+    if Execute then
+      Res.SaveToFile(FileName);
+    Free;
+  end;
+
+  List.Free;
+  Res.Free;
+{$ENDIF}
+end;
+
 procedure TCnTestIdeCompPropWizard.SaveFmxFiles;
+{$IFDEF SUPPORT_FMX}
 var
   I, J: Integer;
   List, Res: TStringList;
   PackSvcs: IOTAPAckageServices;
   Clz: TClass;
+{$ENDIF}
 begin
 {$IFNDEF SUPPORT_FMX}
   ShowMessage('FMX Not Support.');
@@ -521,7 +600,9 @@ begin
   else if Index = FSaveFmxPropsId then
     SaveFmx
   else if Index = FSaveFmxFilesId then
-    SaveFmxFiles;
+    SaveFmxFiles
+  else if Index = FSaveFmxEventsId then
+    SaveFmxEvents;
 end;
 
 procedure TCnTestIdeCompPropWizard.SubActionUpdate(Index: Integer);
