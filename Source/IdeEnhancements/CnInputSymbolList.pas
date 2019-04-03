@@ -2011,6 +2011,9 @@ begin
     for I := 0 to CTS.CodeObjectCount - 1 do
     begin
       CT := CTS.CodeObjects[I];
+      if CT = nil then // IDE 设置损坏时有可能缺失
+        Continue;
+
       if (PosInfo.IsPascal and (CT.Language = 'Delphi')) or
         (not PosInfo.IsPascal and (CT.Language = 'C++')) then
       begin
