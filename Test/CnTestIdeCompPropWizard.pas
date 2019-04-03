@@ -51,15 +51,22 @@ type
 
 { TCnTestIdeCompPropWizard }
 
-  TCnTestIdeCompPropWizard = class(TCnMenuWizard)
+  TCnTestIdeCompPropWizard = class(TCnSubMenuWizard)
   private
+    FSaveVclPropsId: Integer;
+    FSaveFmxPropsId: Integer;
+    FSaveFmxFilesId: Integer;
     procedure SaveFmx;
     procedure SaveVcl;
+    procedure SaveFmxFiles;
   protected
     function GetHasConfig: Boolean; override;
+    procedure SubActionExecute(Index: Integer); override;
+    procedure SubActionUpdate(Index: Integer); override;
   public
     function GetState: TWizardState; override;
     procedure Config; override;
+    procedure AcquireSubActions; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
@@ -175,6 +182,16 @@ end;
 
 { TCnTestIdeCompPropWizard }
 
+procedure TCnTestIdeCompPropWizard.AcquireSubActions;
+begin
+  FSaveVclPropsId := RegisterASubAction('CnTestSaveVclProps', 'Save Vcl Properties', 0,
+    'Save Vcl Properties', 'CnTestSaveVclProps');
+  FSaveFmxPropsId := RegisterASubAction('CnTestSaveFmxProps', 'Save Fmx Properties', 0,
+    'Save Fmx Properties', 'CnTestSaveFmxProps');
+  FSaveFmxFilesId := RegisterASubAction('CnTestSaveFmxFiles', 'Save Fmx Files', 0,
+    'Save Fmx Files', 'CnTestSaveFmxFiles');
+end;
+
 procedure TCnTestIdeCompPropWizard.Config;
 begin
   ShowMessage('No Option for this Test Case.');
@@ -182,8 +199,7 @@ end;
 
 procedure TCnTestIdeCompPropWizard.Execute;
 begin
-  SaveVcl;
-  SaveFmx;
+
 end;
 
 function TCnTestIdeCompPropWizard.GetCaption: string;
@@ -323,8 +339,10 @@ begin
   PropertyMap.SaveToStrings(List);
   with TSaveDialog.Create(nil) do
   begin
+    Title := 'Save FMX Properties Map.';
     if Execute then
       List.SaveToFile(FileName);
+    Title := 'Save FMX Properties List.';
     if Execute then
       Res.SaveToFile(FileName);
     Free;
@@ -335,13 +353,58 @@ begin
 {$ENDIF}
 end;
 
+procedure TCnTestIdeCompPropWizard.SaveFmxFiles;
+var
+  I, J: Integer;
+  List, Res: TStringList;
+  PackSvcs: IOTAPAckageServices;
+  Clz: TClass;
+begin
+{$IFNDEF SUPPORT_FMX}
+  ShowMessage('FMX Not Support.');
+{$ELSE}
+  List := TStringList.Create;
+  List.Duplicates := dupIgnore;
+  List.Sorted := True;
+  Res := TStringList.Create;
+
+  QuerySvcs(BorlandIDEServices, IOTAPackageServices, PackSvcs);
+  for I := 0 to PackSvcs.PackageCount - 1 do
+  begin
+    // 只取 FMX 组件，dclfmx 开头的包名
+    if LowerCase(PackSvcs.PackageNames[I]).StartsWith('dclfmx') then
+      for J := 0 to PackSvcs.ComponentCount[I] - 1 do
+        List.Add(PackSvcs.ComponentNames[I, J]);
+  end;
+
+  ActivateClassGroup(TFMXObject); // 切到 FMX
+  ShowMessage('FMX Component Counts: ' + IntToStr(List.Count));
+
+  for I := 0 to List.Count - 1 do
+  begin
+    Clz := GetClass(List[I]);
+    if (Clz = nil) or not CnFmxClassIsInheritedFromControl(Clz) then // 只搜集 FMX 的 TControl 子类
+      Continue;
+
+    Res.Add(Clz.ClassName + ':' + Clz.UnitName);
+  end;
+
+  with TSaveDialog.Create(nil) do
+  begin
+    Title := 'Save FMX ClassName/UnitName List.';
+    if Execute then
+      Res.SaveToFile(FileName);
+    Free;
+  end;
+{$ENDIF}
+end;
+
 procedure TCnTestIdeCompPropWizard.SaveSettings(Ini: TCustomIniFile);
 begin
 
 end;
 
 procedure TCnTestIdeCompPropWizard.SaveVcl;
-{$IFDEF SUPPORT_FMX}
 var
   List: TStringList;
   I, J, Idx: Integer;
@@ -352,11 +415,7 @@ var
   Obj: TCnPropertyElement;
   Res: TStrings;
   PackSvcs: IOTAPackageServices;
-{$ENDIF}
 begin
-{$IFNDEF SUPPORT_FMX}
-  ShowMessage('FMX Not Support.');
-{$ELSE}
   PropertyMap.Clear;
   List := TStringList.Create;
   List.Sorted := True;
@@ -440,8 +499,10 @@ begin
   PropertyMap.SaveToStrings(List);
   with TSaveDialog.Create(nil) do
   begin
+    Title := 'Save VCL Properties Map.';
     if Execute then
       List.SaveToFile(FileName);
+    Title := 'Save VCL Properties List.';
     if Execute then
       Res.SaveToFile(FileName);
     Free;
@@ -449,7 +510,24 @@ begin
 
   List.Free;
   Res.Free;
-{$ENDIF}
+end;
+
+procedure TCnTestIdeCompPropWizard.SubActionExecute(Index: Integer);
+begin
+  if not Active then Exit;
+
+  if Index = FSaveVclPropsId then
+    SaveVcl
+  else if Index = FSaveFmxPropsId then
+    SaveFmx
+  else if Index = FSaveFmxFilesId then
+    SaveFmxFiles;
+end;
+
+procedure TCnTestIdeCompPropWizard.SubActionUpdate(Index: Integer);
+begin
+  inherited;
+
 end;
 
 { TCnPropertyElement }
