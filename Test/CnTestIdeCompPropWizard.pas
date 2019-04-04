@@ -29,7 +29,7 @@ unit CnTestIdeCompPropWizard;
 * 兼容测试：XP/7 + Delphi 5/6/7
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式
 * 单元标识：$Id$
-* 修改记录：2017.11.24 V1.0
+* 修改记录：2019.04.04 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -57,10 +57,12 @@ type
     FSaveFmxPropsId: Integer;
     FSaveFmxFilesId: Integer;
     FSaveFmxEventsId: Integer;
+    FSaveVclFmxClassesId: Integer;
     procedure SaveFmx;
     procedure SaveVcl;
     procedure SaveFmxFiles;
     procedure SaveFmxEvents;
+    procedure SaveVclFmxClasses;
   protected
     function GetHasConfig: Boolean; override;
     procedure SubActionExecute(Index: Integer); override;
@@ -80,8 +82,10 @@ type
 
 implementation
 
+{$IFDEF SUPPORT_FMX}
 uses
   FMX.Types;
+{$ENDIF}
 
 type
   TCnPropertyElement = class(TObject)
@@ -194,6 +198,8 @@ begin
     'Save Fmx Files', 'CnTestSaveFmxFiles');
   FSaveFmxEventsId := RegisterASubAction('CnTestSaveFmxEvents', 'Save Fmx Events', 0,
     'Save Fmx Events', 'CnTestSaveFmxEvents');
+  FSaveVclFmxClassesId := RegisterASubAction('CnTestSaveVclFmxClasses', 'Save Vcl/Fmx Classes', 0,
+    'Save Vcl/Fmx Classes', 'CnTestSaveVclFmxClasses');
 end;
 
 procedure TCnTestIdeCompPropWizard.Config;
@@ -591,6 +597,68 @@ begin
   Res.Free;
 end;
 
+procedure TCnTestIdeCompPropWizard.SaveVclFmxClasses;
+var
+  I, J: Integer;
+  Vcls, Fmxs: TStringList;
+  PackSvcs: IOTAPAckageServices;
+  Clz: TClass;
+begin
+  Fmxs := TStringList.Create;
+  Vcls := TStringList.Create;
+  Fmxs.Sorted := True;
+  Vcls.Sorted := True;
+  Fmxs.Duplicates := dupIgnore;
+  Vcls.Duplicates := dupIgnore;
+
+  QuerySvcs(BorlandIDEServices, IOTAPackageServices, PackSvcs);
+  for I := 0 to PackSvcs.PackageCount - 1 do
+  begin
+    // 取所有的
+    for J := 0 to PackSvcs.ComponentCount[I] - 1 do
+      Vcls.Add(PackSvcs.ComponentNames[I, J]);
+    // 只取 FMX 组件，dclfmx 开头的包名
+    if LowerCase(PackSvcs.PackageNames[I]).StartsWith('dclfmx') then
+      for J := 0 to PackSvcs.ComponentCount[I] - 1 do
+        Fmxs.Add(PackSvcs.ComponentNames[I, J]);
+  end;
+
+  for I := Vcls.Count - 1 downto 0 do
+  begin
+    Clz := GetClass(Vcls[I]);
+    if (Clz = nil) or not Clz.InheritsFrom(TControl) then
+    begin
+      // 只搜集 VCL 的 TControl 子类
+      Vcls.Delete(I);
+    end;
+  end;
+
+  ActivateClassGroup(TFmxObject);
+  for I := Fmxs.Count - 1 downto 0 do
+  begin
+    Clz := GetClass(Fmxs[I]);
+    if (Clz = nil) or not CnFmxClassIsInheritedFromControl(Clz) then
+    begin
+      // 只搜集 FMX 的 TControl 子类
+      Fmxs.Delete(I);
+    end;
+  end;
+
+  with TSaveDialog.Create(nil) do
+  begin
+    Title := 'Save VCL Controls.';
+    if Execute then
+      Vcls.SaveToFile(FileName);
+    Title := 'Save FMX Components.';
+    if Execute then
+      Fmxs.SaveToFile(FileName);
+    Free;
+  end;
+
+  Vcls.Free;
+  Fmxs.Free;
+end;
+
 procedure TCnTestIdeCompPropWizard.SubActionExecute(Index: Integer);
 begin
   if not Active then Exit;
@@ -602,7 +670,9 @@ begin
   else if Index = FSaveFmxFilesId then
     SaveFmxFiles
   else if Index = FSaveFmxEventsId then
-    SaveFmxEvents;
+    SaveFmxEvents
+  else if Index = FSaveVclFmxClassesId then
+    SaveVclFmxClasses;
 end;
 
 procedure TCnTestIdeCompPropWizard.SubActionUpdate(Index: Integer);
