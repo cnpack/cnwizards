@@ -836,7 +836,7 @@ begin
     if FToolbarClassComboWidth > 50 then
       Width := FToolbarClassComboWidth
     else
-      Width := 150;
+      Width := 200;
     Height := 21;
     FDisableChange := True;
     Name := csClassComboName;
@@ -865,7 +865,7 @@ begin
     if FToolbarProcComboWidth > 50 then
       Width := FToolbarProcComboWidth
     else
-      Width := 244;
+      Width := 300;
     Height := 21;
     FDisableChange := True;
     Name := csProcComboName;

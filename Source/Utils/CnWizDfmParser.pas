@@ -92,7 +92,7 @@ type
     {* 析构方法 }
 
     procedure AppendToStrings(List: TStrings; Tab: Integer = 0);
-    {* 将自身写入一个字符串列表，供保存用，不写末尾的 end}
+    {* 将自身名字、类名以及属性内容写入一个字符串列表，供保存用，不写末尾的 end}
 
     property Items[Index: Integer]: TCnDfmLeaf read GetItems write SetItems; default;
 
@@ -100,14 +100,16 @@ type
     property ElementClass: string read FElementClass write FElementClass;
     property ElementKind: TDfmKind read FElementKind write FElementKind;
     property Properties: TStrings read FProperties;
+    {* 存储文本属性，格式为 PropName = PropValue，前后无空格}
   end;
 
   TCnDfmTree = class(TCnTree)
-  {* 代表 DFM 树，其中 Root 是根容器}
+  {* 代表 DFM 树，其中 Root 的第一个子节点是根容器}
   private
     FDfmFormat: TDfmFormat;
     FDfmKind: TDfmKind;
     function GetRoot: TCnDfmLeaf;
+    function GetItems(AbsoluteIndex: Integer): TCnDfmLeaf;
   protected
     procedure SaveLeafToStrings(Leaf: TCnDfmLeaf; List: TStrings; Tab: Integer = 0);
   public
@@ -117,6 +119,7 @@ type
     function SaveToStrings(List: TStrings): Boolean;
 
     property Root: TCnDfmLeaf read GetRoot;
+    property Items[AbsoluteIndex: Integer]: TCnDfmLeaf read GetItems;
 
     property DfmKind: TDfmKind read FDfmKind write FDfmKind;
     property DfmFormat: TDfmFormat read FDfmFormat write FDfmFormat;
@@ -213,7 +216,7 @@ begin
   Parser.NextToken;
   PropValue := ParseTextPropertyValue(Parser);
 
-  Leaf.Properties.Add(PropName + '=' + PropValue);
+  Leaf.Properties.Add(PropName + ' = ' + PropValue);
 end;
 
 function ParseTextPropertyValue(Parser: TParser): string;
@@ -237,18 +240,16 @@ begin
         Result := IntToStr(Parser.TokenInt);
       toFloat:
         Result := FloatToStr(Parser.TokenFloat);
-      '[':
+      '[':  // 集合
         begin
+          Result := Parser.TokenString;
           Parser.NextToken;
-          if Parser.Token <> ']' then
-            while True do
-            begin
-              if Parser.Token <> toInteger then
-                Parser.CheckToken(toSymbol);
-              if Parser.NextToken = ']' then Break;
-              Parser.CheckToken(',');
-              Parser.NextToken;
-            end;
+          while Parser.Token <> ']' do
+          begin
+            Result := Result + Parser.TokenString;
+            Parser.NextToken;
+          end;
+          Result := Result + ']';
         end;
       '(':  // 字符串列表
         begin
@@ -912,6 +913,11 @@ destructor TCnDfmTree.Destroy;
 begin
 
   inherited;
+end;
+
+function TCnDfmTree.GetItems(AbsoluteIndex: Integer): TCnDfmLeaf;
+begin
+  Result := TCnDfmLeaf(inherited GetItems(AbsoluteIndex));
 end;
 
 function TCnDfmTree.GetRoot: TCnDfmLeaf;

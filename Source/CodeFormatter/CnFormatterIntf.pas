@@ -26,8 +26,8 @@ unit CnFormatterIntf;
 * 单元作者：CnPack开发组
 * 备    注：该单元实现代码格式化的对外接口
 * 开发平台：WinXP + Delphi 5.0
-* 兼容测试：not test yet
-* 本 地 化：not test hell
+* 兼容测试：各种平台
+* 本 地 化：不需要
 * 修改记录：2015.02.11 V1.0
 *               创建单元。
 ================================================================================
@@ -203,7 +203,7 @@ type
   end;
 
   TCnGetFormatterProvider = function: ICnPascalFormatterIntf; stdcall;
-  {* DLL 中的函数类型}
+  {* DLL 中输出的函数类型}
 
 implementation
 
