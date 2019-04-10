@@ -1023,11 +1023,11 @@ begin
     for I := 0 to FProperties.Count - 1 do
     begin
       S := FProperties[I];
-      P := Pos('=', S);
+      P := Pos(' = ', S);
       if P > 0 then
       begin
         N := Copy(S, 1, P - 1);
-        V := Copy(S, P + 1, MaxInt);
+        V := Copy(S, P + 3, MaxInt);
         if (N <> '') and (V <> '') then
           List.Add(Format('%s%s = %s', [Spc(Tab + csTabWidth), N, V]));
       end;
