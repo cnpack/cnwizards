@@ -165,6 +165,57 @@ begin
 end;
 {$ENDIF}
 
+function ConvertWideStringToDfmString(const W: WideString): WideString;
+const
+  LINE_LENGTH = 1024;
+var
+  L, I, J, K: Integer;
+  LineBreak: Boolean;
+begin
+  L := Length(W);
+
+  if L = 0 then
+    Result := ''''''
+  else
+  begin
+    I := 1;
+    if L > LINE_LENGTH then
+      Result := Result + #13#10;
+    K := I;
+    repeat
+      LineBreak := False;
+      if (W[I] >= ' ') and (W[I] <> '''') and (Ord(W[I]) <= 127) then
+      begin
+        J := I;
+        repeat
+          Inc(I)
+        until (I > L) or (W[I] < ' ') or (W[I] = '''') or
+          ((I - K) >= LINE_LENGTH) or (Ord(W[I]) > 127);
+        if ((I - K) >= LINE_LENGTH) then
+          LineBreak := True;
+        Result := Result + '''';
+        while J < I do
+        begin
+          Result := Result + Char(W[J]);
+          Inc(J);
+        end;
+        Result := Result + '''';
+      end else
+      begin
+        Result := Result + '#' + IntToStr(Ord(W[I]));
+        Inc(I);
+        if ((I - K) >= LINE_LENGTH) then
+          LineBreak := True;
+      end;
+      if LineBreak and (I <= L) then
+      begin
+        Result := Result + ' +' + #13#10;
+        K := I;
+      end;
+    until I > L;
+  end;
+end;
+
 function CombineWideString(Parser: TParser): WideString;
 begin
   Result := Parser.TokenWideString;
@@ -224,12 +275,16 @@ begin
   Result := '';
 {$IFDEF COMPILER6_UP}
   if CharInSet(Parser.Token, [toString, toWString]) then
-    Result := CombineWideString(Parser)
+  begin
+    Result := CombineWideString(Parser);
+    Result := ConvertWideStringToDfmString(Result);
+  end
 {$ELSE}
+  // 会有拼成一行的副作用，但可以先不管
   if Parser.Token = toString then
-    Result := CombineString(Parser)
+    Result := QuotedStr(CombineString(Parser))
   else if Parser.Token = toWString then
-    Result := CombineWideString(Parser)
+    Result := QuotedStr(CombineWideString(Parser))
 {$ENDIF}
   else
   begin

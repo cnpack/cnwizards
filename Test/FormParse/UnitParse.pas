@@ -63,6 +63,7 @@ begin
 
   FTree.Clear;
   if FileExists(edtFile.Text) then
+  begin
     if LoadDfmFileToTree(edtFile.Text, FTree) then
     begin
       ShowMessage(IntToStr(FTree.Count));
@@ -70,6 +71,7 @@ begin
       FTree.SaveToTreeView(tvDfm);
       tvDfm.Items[0].Expand(True);
     end;
+  end;
 end;
 
 procedure TParseForm.TreeSaveNode(ALeaf: TCnLeaf; ATreeNode: TTreeNode;
