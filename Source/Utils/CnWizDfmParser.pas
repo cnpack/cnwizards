@@ -330,7 +330,7 @@ begin
           Parser.NextToken;
           while Parser.Token <> ')' do
           begin
-            Result := Result + #13#10 + GetQuotedStr;
+            Result := Result + #13#10 + '  ' + GetQuotedStr;
             // Parser.NextToken; // GetQuotedStr 内部已经 NextToken 了
           end;
           Result := Result + ')';
