@@ -271,6 +271,24 @@ begin
 end;
 
 function ParseTextPropertyValue(Parser: TParser): string;
+
+  function GetQuotedStr: string;
+  begin
+{$IFDEF COMPILER6_UP}
+    if CharInSet(Parser.Token, [toString, toWString]) then
+    begin
+      Result := CombineWideString(Parser);
+      Result := ConvertWideStringToDfmString(Result);
+    end;
+{$ELSE}
+    // 会有拼成一行的副作用，但可以先不管
+    if Parser.Token = toString then
+      Result := QuotedStr(CombineString(Parser))
+    else if Parser.Token = toWString then
+      Result := QuotedStr(CombineWideString(Parser));
+{$ENDIF}
+  end;
+
 begin
   Result := '';
 {$IFDEF COMPILER6_UP}
@@ -306,14 +324,14 @@ begin
           end;
           Result := Result + ']';
         end;
-      '(':  // 字符串列表
+      '(':  // 字符串列表，不过缩进丢了
         begin
           Result := Parser.TokenString;
           Parser.NextToken;
           while Parser.Token <> ')' do
           begin
-            Result := Result + Parser.TokenString;
-            Parser.NextToken;
+            Result := Result + #13#10 + GetQuotedStr;
+            // Parser.NextToken; // GetQuotedStr 内部已经 NextToken 了
           end;
           Result := Result + ')';
         end;
