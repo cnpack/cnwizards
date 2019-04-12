@@ -37,7 +37,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, Winapi.Windows,
-  FMX.Types, FMX.Edit, FMX.ListBox, FMX.ListView, FMX.StdCtrls, FMX.ExtCtrls,
+  FMX.Types, FMX.Edit, FMX.ListBox, {FMX.ListView, FMX.StdCtrls,} FMX.ExtCtrls,
   FMX.TabControl, FMX.Memo, FMX.Dialogs, CnFmxUtils, CnVclToFmxMap;
 
 type
@@ -276,7 +276,7 @@ class procedure TCnTouchConverter.ProcessProperties(const PropertyName,
   TheClassName, PropertyValue: string; InProperties, OutProperties: TStrings;
   Tab: Integer);
 begin
-  if PropertyName.StartsWith('Touch.') then
+  if Pos('Touch.', PropertyName) = 1 then
     OutProperties.Add(Format('%s = %s', [PropertyName, PropertyValue]));
 end;
 

@@ -1142,7 +1142,7 @@ begin
 
     OutProperties.Add('Fill.Kind = Solid');
   end
-  else if PropertyName.StartsWith('Touch.') then
+  else if Pos('Touch.', PropertyName) = 1 then
   begin
     // Touch 的属性值全盘写入
     OutProperties.Add(Format('%s = %s', [PropertyName, PropertyValue]));
