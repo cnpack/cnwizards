@@ -284,10 +284,10 @@ end;
 
 class procedure TCnGeneralConverter.GetProperties(OutProperties: TStrings);
 begin
-  OutProperties.Add('Action');
+  OutProperties.Add('Action');      // 属性名不变的
   OutProperties.Add('Anchors');
   OutProperties.Add('Cancel');
-  OutProperties.Add('Checked');
+  OutProperties.Add('Checked');     // TRadioButton 是 IsChecked
   OutProperties.Add('Cursor');
   OutProperties.Add('DragMode');
   OutProperties.Add('Default');
@@ -310,13 +310,27 @@ begin
   OutProperties.Add('TabOrder');
   OutProperties.Add('Tag');
   OutProperties.Add('Visible');
+
+  OutProperties.Add('ActivePage');   // 属性名要换的
+  OutProperties.Add('PageIndex');
 end;
 
 class procedure TCnGeneralConverter.ProcessProperties(const PropertyName,
   TheClassName, PropertyValue: string; InProperties, OutProperties: TStrings;
   Tab: Integer);
+var
+  NewPropName: string;
 begin
-  OutProperties.Add(Format('%s = %s', [PropertyName, PropertyValue]));
+  if PropertyName = 'ActivePage' then
+    NewPropName := 'ActiveTab'
+  else if PropertyName = 'PageIndex' then
+    NewPropName := 'Index'
+  else if (PropertyName = 'Checked') and (TheClassName = 'TRadioButton') then
+    NewPropName := 'IsChecked'
+  else
+    NewPropName := PropertyName;
+
+  OutProperties.Add(Format('%s = %s', [NewPropName, PropertyValue]));
 end;
 
 initialization
@@ -325,5 +339,6 @@ initialization
   RegisterCnPropertyConverter(TCnCaptionConverter);
   RegisterCnPropertyConverter(TCnFontConverter);
   RegisterCnPropertyConverter(TCnTouchConverter);
+  RegisterCnPropertyConverter(TCnGeneralConverter);
 
 end.
