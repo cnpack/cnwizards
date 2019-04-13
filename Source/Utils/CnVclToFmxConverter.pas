@@ -177,7 +177,8 @@ class procedure TCnCaptionConverter.ProcessProperties(const PropertyName,
   TheClassName, PropertyValue: string; InProperties, OutProperties: TStrings;
   Tab: Integer);
 begin
-  if PropertyName = 'Caption' then
+  // FMX TPanel 没有 Text 属性
+  if (PropertyName = 'Caption') and (TheClassName <> 'TPanel') then
     OutProperties.Add('Text = ' + PropertyValue);
 end;
 
@@ -239,11 +240,20 @@ class procedure TCnFontConverter.ProcessProperties(const PropertyName,
 var
   V, ScreenLogPixels: Integer;
   DC: HDC;
+  NewStr: string;
 begin
   if PropertyName = 'Font.Charset' then
     // 啥都不做，这属性找不到对应的
   else if PropertyName = 'Font.Color' then
-    OutProperties.Add('TextSettings.FontColor = ' + PropertyValue)
+  begin
+    NewStr := CnConvertEnumValue(PropertyValue);
+    if Length(NewStr) > 0 then
+    begin
+      if NewStr[1] in ['A'..'Z'] then // TextSettings 的 FontColor 值的颜色常量前面要加 cla
+        NewStr := 'cla' + NewStr;
+      OutProperties.Add('TextSettings.FontColor = ' + NewStr);
+    end;
+  end
   else if PropertyName = 'Font.Name' then
     OutProperties.Add('TextSettings.Font.Family = ' + PropertyValue)
   else if PropertyName = 'Font.Height' then
@@ -269,7 +279,8 @@ end;
 
 class procedure TCnTouchConverter.GetProperties(OutProperties: TStrings);
 begin
-  OutProperties.Add('Touch.');
+  if OutProperties <> nil then
+    OutProperties.Add('Touch.');
 end;
 
 class procedure TCnTouchConverter.ProcessProperties(const PropertyName,
@@ -284,36 +295,39 @@ end;
 
 class procedure TCnGeneralConverter.GetProperties(OutProperties: TStrings);
 begin
-  OutProperties.Add('Action');      // 属性名不变的
-  OutProperties.Add('Anchors');
-  OutProperties.Add('Cancel');
-  OutProperties.Add('Checked');     // TRadioButton 是 IsChecked
-  OutProperties.Add('Cursor');
-  OutProperties.Add('DragMode');
-  OutProperties.Add('Default');
-  OutProperties.Add('Enabled');
-  OutProperties.Add('GroupIndex');
-  OutProperties.Add('HelpContext');
-  OutProperties.Add('Hint');
-  OutProperties.Add('ImageIndex');
-  OutProperties.Add('Images');
-  OutProperties.Add('ItemHeight');
-  OutProperties.Add('ItemIndex');
-  OutProperties.Add('Items.Strings');
-  OutProperties.Add('Lines.Strings');
-  OutProperties.Add('ModalResult');
-  OutProperties.Add('ParentShowHint');
-  OutProperties.Add('PopupMenu');
-  OutProperties.Add('ShowHint');
-  OutProperties.Add('ShortCut');
-  OutProperties.Add('TabStop');
-  OutProperties.Add('TabOrder');
-  OutProperties.Add('Tag');
-  OutProperties.Add('Text');
-  OutProperties.Add('Visible');
+  if OutProperties <> nil then
+  begin
+    OutProperties.Add('Action');      // 属性名不变的
+    OutProperties.Add('Anchors');
+    OutProperties.Add('Cancel');
+    OutProperties.Add('Checked');     // TRadioButton 是 IsChecked
+    OutProperties.Add('Cursor');
+    OutProperties.Add('DragMode');
+    OutProperties.Add('Default');
+    OutProperties.Add('Enabled');
+    OutProperties.Add('GroupIndex');
+    OutProperties.Add('HelpContext');
+    OutProperties.Add('Hint');
+    OutProperties.Add('ImageIndex');
+    OutProperties.Add('Images');
+    OutProperties.Add('ItemHeight');
+    OutProperties.Add('ItemIndex');
+    OutProperties.Add('Items.Strings');
+    OutProperties.Add('Lines.Strings');
+    OutProperties.Add('ModalResult');
+    OutProperties.Add('ParentShowHint');
+    OutProperties.Add('PopupMenu');
+    OutProperties.Add('ShowHint');
+    OutProperties.Add('ShortCut');
+    OutProperties.Add('TabStop');
+    OutProperties.Add('TabOrder');
+    OutProperties.Add('Tag');
+    OutProperties.Add('Text');
+    OutProperties.Add('Visible');
 
-  OutProperties.Add('ActivePage');   // 属性名要换的
-  OutProperties.Add('PageIndex');
+    OutProperties.Add('ActivePage');   // 属性名要换的
+    OutProperties.Add('PageIndex');
+  end;
 end;
 
 class procedure TCnGeneralConverter.ProcessProperties(const PropertyName,
@@ -322,6 +336,10 @@ class procedure TCnGeneralConverter.ProcessProperties(const PropertyName,
 var
   NewPropName: string;
 begin
+  // FMX 下 TComboBox 的 Text 属性不存在，忽略
+  if (TheClassName = 'TComboBox') and (PropertyName = 'Text') then
+    Exit;
+
   if PropertyName = 'ActivePage' then
     NewPropName := 'ActiveTab'
   else if PropertyName = 'PageIndex' then

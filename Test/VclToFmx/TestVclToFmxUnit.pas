@@ -114,7 +114,7 @@ begin
   CnConvertPropertiesFromVclToFmx(FTree.Items[1].ElementClass,
     FTree.Items[1].ElementClass, OutClass, FTree.Items[1].Properties,
     FCloneTree.Items[1].Properties, EventIntf, EventImpl, True, 2);
-  FCloneTree.Items[1].ElementClass := OutClass;
+  // FCloneTree.Items[1].ElementClass := OutClass; 容器的类名不变，无需赋值
 
   for I := 2 to FTree.Count - 1 do
   begin
@@ -131,6 +131,8 @@ begin
     if OutClass <> '' then
       Units.Add(OutClass);
   end;
+
+  // ElementClass 为空的代表未转换成功的
 
   // 理论上 FCloneTree 转换完毕了，写到树里
   FCloneTree.OnSaveANode := TreeSaveNode;
@@ -156,8 +158,9 @@ begin
     Add('type');
     Add('  ' + FCloneTree.Items[1].ElementClass + ' = class(TForm)');
     for I := 2 to FCloneTree.Count - 1 do
-      Add('    ' + FCloneTree.Items[I].Text + ': '
-        + FCloneTree.Items[I].ElementClass + ';');
+      if FCloneTree.Items[I].ElementClass <> '' then
+        Add('    ' + FCloneTree.Items[I].Text + ': '
+          + FCloneTree.Items[I].ElementClass + ';');
     AddStrings(EventIntf);
     Add('  private');
     Add('');

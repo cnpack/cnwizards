@@ -50,10 +50,10 @@ type
 
   TCnPropertyConverterClass = class of TCnPropertyConverter;
 
-procedure CnConvertPropertiesFromVclToFmx(const InComponentClass, InContainerClass: string;
+function CnConvertPropertiesFromVclToFmx(const InComponentClass, InContainerClass: string;
   var OutComponentClass: string; InProperties, OutProperties, OutEventsIntf,
-  OutEventsImpl: TStrings; IsContainer: Boolean; Tab: Integer = 0);
-{* 将一个 VCL 组件的属性包括事件转换成 FMX 属性与事件代码}
+  OutEventsImpl: TStrings; IsContainer: Boolean; Tab: Integer = 0): Boolean;
+{* 将一个 VCL 组件的属性包括事件转换成 FMX 属性与事件代码，返回成功与否}
 
 function CnGetFmxUnitNameFromClass(const ComponentClass: string): string;
 {* 返回 FMX 组件所在的单元名}
@@ -63,6 +63,9 @@ function CnGetFmxClassFromVclClass(const ComponentClass: string): string;
 
 function CnIsVclEnumPropertyNeedConvert(const PropertyName: string): Boolean;
 {* 判断某 VCL 属性名的属性值是否需要转换}
+
+function CnConvertEnumValue(const PropertyValue: string): string;
+{* 转换枚举常量值}
 
 procedure RegisterCnPropertyConverter(AClass: TCnPropertyConverterClass);
 {* 供外界注册特定名称的属性的转换器}
@@ -576,7 +579,8 @@ const
 
   // 这些属性名对应的值在 VCL/FMX 中不同，需要用下面的表格进行转换
   VCL_FMX_PROPERTY_ENUM_NAMES: array[0..3] of string = (
-    'BorderStyle', 'FormStyle', 'Position', 'Align' // Color 要转成 Fill.Color，特殊处理
+    'BorderStyle', 'FormStyle', 'Position', 'Align'
+    // Color 要转成 Fill.Color，Font.Color 要转换成 TextSettings.FontColor，特殊处理
   );
 
   // 同性质的枚举类型但不同名的映射关系，属性名由上面决定
@@ -828,7 +832,7 @@ const
 function CnGetFmxClassFromVclClass(const ComponentClass: string): string;
 begin
   if not FVclFmxClassMap.TryGetValue(ComponentClass, Result) then
-    Result := ComponentClass;
+    Result := '';
 end;
 
 function CnIsVclEnumPropertyNeedConvert(const PropertyName: string): Boolean;
@@ -844,6 +848,12 @@ begin
       Exit;
     end;
   end;
+end;
+
+function CnConvertEnumValue(const PropertyValue: string): string;
+begin
+  if not FVclFmxEnumMap.TryGetValue(PropertyValue, Result) then
+    Result := PropertyValue;
 end;
 
 procedure LoadFmxClassUnitMap;
@@ -975,9 +985,9 @@ begin
   Result := IntToStr(IntValue) + '.000000000000000000';
 end;
 
-procedure CnConvertPropertiesFromVclToFmx(const InComponentClass, InContainerClass: string;
+function CnConvertPropertiesFromVclToFmx(const InComponentClass, InContainerClass: string;
   var OutComponentClass: string; InProperties, OutProperties, OutEventsIntf,
-  OutEventsImpl: TStrings; IsContainer: Boolean; Tab: Integer);
+  OutEventsImpl: TStrings; IsContainer: Boolean; Tab: Integer): Boolean;
 var
   P: Integer;
   Converter: TCnPropertyConverterClass;
@@ -1000,8 +1010,13 @@ var
   end;
 
 begin
+  Result := False;
   CheckInitPropertyConverterMap;
   OutComponentClass := CnGetFmxClassFromVclClass(InComponentClass);
+
+  // 非容器组件无对应组件，退出
+  if (InComponentClass <> InContainerClass) and (OutComponentClass = '') then
+    Exit;
 
   if OutProperties <> nil then
     OutProperties.Clear;
@@ -1076,6 +1091,7 @@ begin
     end;
     InProperties.Delete(0);
   end;
+  Result := True;
 end;
 
 function CnGetFmxUnitNameFromClass(const ComponentClass: string): string;

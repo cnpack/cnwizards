@@ -1003,7 +1003,7 @@ procedure TCnDfmTree.SaveLeafToStrings(Leaf: TCnDfmLeaf; List: TStrings;
 var
   I: Integer;
 begin
-  if Leaf <> nil then
+  if (Leaf <> nil) and (Leaf.ElementClass <> '') then
   begin
     Leaf.AppendToStrings(List, Tab);
     for I := 0 to Leaf.Count - 1 do
