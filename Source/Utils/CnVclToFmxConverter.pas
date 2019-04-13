@@ -37,7 +37,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, Winapi.Windows,
-  FMX.Types, FMX.Edit, FMX.ListBox, {FMX.ListView, FMX.StdCtrls,} FMX.ExtCtrls,
+  FMX.Types, FMX.Edit, FMX.ListBox, FMX.ListView, FMX.StdCtrls, FMX.ExtCtrls,
   FMX.TabControl, FMX.Memo, FMX.Dialogs, CnFmxUtils, CnVclToFmxMap;
 
 type
@@ -309,6 +309,7 @@ begin
   OutProperties.Add('TabStop');
   OutProperties.Add('TabOrder');
   OutProperties.Add('Tag');
+  OutProperties.Add('Text');
   OutProperties.Add('Visible');
 
   OutProperties.Add('ActivePage');   // 属性名要换的

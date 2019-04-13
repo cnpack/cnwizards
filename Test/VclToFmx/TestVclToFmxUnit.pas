@@ -163,7 +163,7 @@ begin
     Add('');
     Add('  public');
     Add('');
-    Add('  end');
+    Add('  end;');
     Add('');
     Add('var');
     Add('  ' + FCloneTree.Items[1].Text + ': ' + FCloneTree.Items[1].ElementClass + ';');

@@ -1,7 +1,7 @@
 object FormConvert: TFormConvert
   Left = 0
   Top = 0
-  Caption = 'Convert VCL DFM to FMX XFM'
+  Caption = 'Convert VCL DFM to FMX -- XE4 or above'
   ClientHeight = 480
   ClientWidth = 809
   Color = clBtnFace
@@ -36,6 +36,7 @@ object FormConvert: TFormConvert
     Top = 240
     Width = 23
     Height = 22
+    Caption = '->'
     OnClick = btnConvertTreeClick
   end
   object btnSaveCloneTree: TSpeedButton
@@ -43,6 +44,7 @@ object FormConvert: TFormConvert
     Top = 280
     Width = 23
     Height = 22
+    Caption = 'S'
     OnClick = btnSaveCloneTreeClick
   end
   object edtDfmFile: TEdit
