@@ -29,11 +29,11 @@ object FormConvert: TFormConvert
     Top = 64
     Width = 23
     Height = 22
-    OnClick = btnConvertClick
+    Visible = False
   end
   object btnConvertTree: TSpeedButton
     Left = 384
-    Top = 240
+    Top = 152
     Width = 23
     Height = 22
     Caption = '->'
@@ -41,7 +41,7 @@ object FormConvert: TFormConvert
   end
   object btnSaveCloneTree: TSpeedButton
     Left = 384
-    Top = 280
+    Top = 215
     Width = 23
     Height = 22
     Caption = 'S'
@@ -50,12 +50,12 @@ object FormConvert: TFormConvert
   object edtDfmFile: TEdit
     Left = 74
     Top = 29
-    Width = 543
+    Width = 623
     Height = 21
     TabOrder = 0
   end
   object btnBrowse: TButton
-    Left = 640
+    Left = 712
     Top = 27
     Width = 75
     Height = 25
@@ -68,54 +68,21 @@ object FormConvert: TFormConvert
     Top = 64
     Width = 354
     Height = 145
-    Lines.Strings = (
-      'object Form1: TForm1'
-      '  Left = 34'
-      '  Top = 100'
-      '  HelpContext = 34234'
-      '  VertScrollBar.Color = 10667716'
-      '  VertScrollBar.ParentColor = False'
-      '  Caption = #21507#39277#21917#27700'
-      '  ClientHeight = 377'
-      '  ClientWidth = 663'
-      '  Color = clInfoBk'
-      '  Font.Charset = DEFAULT_CHARSET'
-      '  Font.Color = clWindowText'
-      '  Font.Height = -11'
-      '  Font.Name = '#39'Tahoma'#39
-      '  Font.Style = []'
-      '  FormStyle = fsMDIChild'
-      '  KeyPreview = True'
-      '  OldCreateOrder = False'
-      '  Position = poDefault'
-      '  Visible = True'
-      '  StyleElements = [seFont, seBorder]'
-      '  OnCreate = FormCreate'
-      '  PixelsPerInch = 96'
-      '  TextHeight = 13'
-      'end')
     TabOrder = 2
   end
   object mmoEventIntf: TMemo
     Left = 413
-    Top = 240
+    Top = 64
     Width = 374
-    Height = 89
+    Height = 249
     TabOrder = 3
   end
   object mmoEventImpl: TMemo
     Left = 413
-    Top = 344
+    Top = 328
     Width = 374
-    Height = 89
+    Height = 105
     TabOrder = 4
-  end
-  object mmoFMX: TMemo
-    Left = 413
-    Top = 64
-    Width = 374
-    Height = 145
-    TabOrder = 5
   end
   object tvDfm: TTreeView
     Left = 24
@@ -123,7 +90,7 @@ object FormConvert: TFormConvert
     Width = 354
     Height = 193
     Indent = 19
-    TabOrder = 6
+    TabOrder = 5
     OnDblClick = tvDfmDblClick
   end
   object dlgOpen: TOpenDialog

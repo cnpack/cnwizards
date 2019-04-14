@@ -17,13 +17,11 @@ type
     mmoEventIntf: TMemo;
     mmoEventImpl: TMemo;
     btnConvert: TSpeedButton;
-    mmoFMX: TMemo;
     tvDfm: TTreeView;
     btnConvertTree: TSpeedButton;
     btnSaveCloneTree: TSpeedButton;
     dlgSave: TSaveDialog;
     procedure btnBrowseClick(Sender: TObject);
-    procedure btnConvertClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnConvertTreeClick(Sender: TObject);
@@ -66,24 +64,6 @@ begin
       end;
     end;
   end;
-end;
-
-procedure TFormConvert.btnConvertClick(Sender: TObject);
-var
-  Source: TStrings;
-  Comp: string;
-begin
-  mmoFMX.Lines.Clear;
-  mmoEventIntf.Lines.Clear;
-  mmoEventImpl.Lines.Clear;
-
-  Source := TStringList.Create;
-  Source.Assign(mmoDfm.Lines);
-  Source.Delete(0);
-  Source.Delete(Source.Count - 1);
-  CnConvertPropertiesFromVclToFmx('TForm1', 'TForm1', Comp, Source, mmoFMX.Lines, mmoEventIntf.Lines,
-    mmoEventImpl.Lines, True, 2);
-  Source.Free;
 end;
 
 procedure TFormConvert.btnConvertTreeClick(Sender: TObject);
