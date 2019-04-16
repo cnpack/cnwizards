@@ -1176,12 +1176,15 @@ begin
   end
   else if PropertyName = 'Color' then
   begin
-    if FVclFmxEnumMap.TryGetValue(PropertyValue, NewStr) then
-      OutProperties.Add(Format('%s = %s', ['Fill.Color', NewStr]))
-    else
-      OutProperties.Add(Format('%s = %s', ['Fill.Color', PropertyValue]));
+    if PropertyValue <> 'clBtnFace' then // 不是默认值才需要设置 Fill 属性
+    begin
+      if FVclFmxEnumMap.TryGetValue(PropertyValue, NewStr) then
+        OutProperties.Add(Format('%s = %s', ['Fill.Color', NewStr]))
+      else
+        OutProperties.Add(Format('%s = %s', ['Fill.Color', PropertyValue]));
 
-    OutProperties.Add('Fill.Kind = Solid');
+      OutProperties.Add('Fill.Kind = Solid');
+    end;
   end
   else if Pos('Touch.', PropertyName) = 1 then
   begin

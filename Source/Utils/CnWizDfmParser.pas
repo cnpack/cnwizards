@@ -271,6 +271,15 @@ begin
 end;
 
 function ParseTextPropertyValue(Parser: TParser): string;
+const
+  BYTES_PER_LINE = 32;
+var
+  MultiLine: Boolean;
+  I: Integer;
+  Count: Longint;
+  Buffer: array[0..BYTES_PER_LINE - 1] of Char;
+  Text: array[0..BYTES_PER_LINE * 2 - 1] of Char;
+  Stream: TStream;
 
   function GetQuotedStr: string;
   begin
@@ -338,11 +347,32 @@ begin
       '{':  // 二进制数据
         begin
           Result := Parser.TokenString;
-          Parser.NextToken;
-          while Parser.Token <> '}' do
-          begin
-            Result := Result + Parser.TokenString;
-            Parser.NextToken;
+          // Parser.NextToken; // 无需 NextToken，下面 HexToBinary 会做这一步
+
+          Stream := TMemoryStream.Create;
+          try
+            Parser.HexToBinary(Stream);
+            Stream.Position := 0;
+            Count := Stream.Size;
+            MultiLine := Count >= BYTES_PER_LINE;
+
+            while Count > 0 do
+            begin
+              if MultiLine then
+                Result := Result + #13#10 + ' ';
+
+              if Count >= BYTES_PER_LINE then
+                I := BYTES_PER_LINE
+              else
+                I := Count;
+
+              Stream.Read(Buffer, I);
+              BinToHex(Buffer, Text, I);
+              Result := Result + Copy(Text, 1, I * 2);
+              Dec(Count, I);
+            end;
+          finally
+            Stream.Free;
           end;
           Result := Result + '}';
         end;
@@ -643,11 +673,11 @@ var
 
   procedure ParseBinary;
   const
-    BytesPerLine = 32;
+    BYTES_PER_LINE = 32;
   var
     I: Integer;
     Count: Longint;
-    Buffer: array[0..BytesPerLine - 1] of Char;
+    Buffer: array[0..BYTES_PER_LINE - 1] of Char;
   begin
     Reader.ReadValue;
     Reader.Read(Count, SizeOf(Count));
