@@ -94,10 +94,12 @@ object FormConvert: TFormConvert
     OnDblClick = tvDfmDblClick
   end
   object dlgOpen: TOpenDialog
+    Filter = '*.dfm|*.dfm'
     Left = 312
     Top = 16
   end
   object dlgSave: TSaveDialog
+    Filter = '*.pas|*.pas'
     Left = 384
     Top = 184
   end

@@ -35,6 +35,8 @@ unit CnVclToFmxConverter;
 
 interface
 
+{$I CnPack.inc}
+
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, Winapi.Windows,
   FMX.Types, FMX.Edit, FMX.ListBox, FMX.ListView, FMX.StdCtrls, FMX.ExtCtrls,
@@ -300,7 +302,7 @@ begin
     OutProperties.Add('Action');      // 属性名不变的
     OutProperties.Add('Anchors');
     OutProperties.Add('Cancel');
-    OutProperties.Add('Checked');     // TRadioButton 是 IsChecked
+    OutProperties.Add('Checked');     // TRadioButton/TCheckBox 是 IsChecked
     OutProperties.Add('Cursor');
     OutProperties.Add('DragMode');
     OutProperties.Add('Default');
@@ -344,7 +346,8 @@ begin
     NewPropName := 'ActiveTab'
   else if PropertyName = 'PageIndex' then
     NewPropName := 'Index'
-  else if (PropertyName = 'Checked') and (TheClassName = 'TRadioButton') then
+  else if (PropertyName = 'Checked') and ((TheClassName = 'TRadioButton') or
+    (TheClassName = 'TCheckBox')) then
     NewPropName := 'IsChecked'
   else
     NewPropName := PropertyName;

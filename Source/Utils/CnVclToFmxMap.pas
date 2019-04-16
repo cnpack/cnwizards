@@ -35,6 +35,8 @@ unit CnVclToFmxMap;
 
 interface
 
+{$I CnPack.inc}
+
 uses
   System.SysUtils, System.Classes, System.Generics.Collections;
 
