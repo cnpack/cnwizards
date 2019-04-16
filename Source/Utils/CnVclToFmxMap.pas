@@ -1009,6 +1009,21 @@ var
       OutProperties.Add(Format('%s = %s', [PropName, PropValue]));
   end;
 
+  function ContainsHead(const Head: string; List: TStrings): Boolean;
+  var
+    I: Integer;
+  begin
+    Result := False;
+    for I := 0 to List.Count - 1 do
+    begin
+      if Pos(Head, List[I]) = 1 then
+      begin
+        Result := True;
+        Exit;
+      end;
+    end;
+  end;
+
 begin
   Result := False;
   CheckInitPropertyConverterMap;
@@ -1020,6 +1035,14 @@ begin
 
   if OutProperties <> nil then
     OutProperties.Clear;
+
+  // 提前特殊处理，如 TMemo 没有 WordWrap 属性（默认为 True），则需要写
+  // TextSettings.WordWrap 为 True 到 FMX 中（默认为 False）
+  if InComponentClass = 'TMemo' then
+  begin
+    if not ContainsHead('WordWrap', InProperties) then
+      OutProperties.Add('TextSettings.WordWrap = True');
+  end;
 
   while InProperties.Count > 0 do
   begin
