@@ -302,7 +302,6 @@ begin
     OutProperties.Add('Action');      // 属性名不变的
     OutProperties.Add('Anchors');
     OutProperties.Add('Cancel');
-    OutProperties.Add('Checked');     // TRadioButton/TCheckBox 是 IsChecked
     OutProperties.Add('Cursor');
     OutProperties.Add('DragMode');
     OutProperties.Add('Default');
@@ -319,6 +318,7 @@ begin
     OutProperties.Add('ModalResult');
     OutProperties.Add('ParentShowHint');
     OutProperties.Add('PopupMenu');
+    OutProperties.Add('ReadOnly');
     OutProperties.Add('ShowHint');
     OutProperties.Add('ShortCut');
     OutProperties.Add('TabStop');
@@ -327,8 +327,10 @@ begin
     OutProperties.Add('Text');
     OutProperties.Add('Visible');
 
-    OutProperties.Add('ActivePage');   // 属性名要换的
+    OutProperties.Add('ActivePage');  // 属性名要换的
+    OutProperties.Add('Checked');     // TRadioButton/TCheckBox 是 IsChecked
     OutProperties.Add('PageIndex');
+    OutProperties.Add('ScrollBars');
   end;
 end;
 
@@ -349,6 +351,13 @@ begin
   else if (PropertyName = 'Checked') and ((TheClassName = 'TRadioButton') or
     (TheClassName = 'TCheckBox')) then
     NewPropName := 'IsChecked'
+  else if PropertyName = 'ScrollBars' then
+  begin
+    if PropertyValue = 'ssNone' then
+      OutProperties.Add('ShowScrollBars = False')
+    else
+      OutProperties.Add('ShowScrollBars = True');
+  end
   else
     NewPropName := PropertyName;
 
