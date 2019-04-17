@@ -137,10 +137,7 @@ var
   V: string;
   Cls: TClass;
 begin
-  ActivateClassGroup(TFmxObject);
-  Cls := GetClass(CnGetFmxClassFromVclClass(TheClassName));
-
-  if (Cls = nil) or not CnFmxClassIsInheritedFromControl(Cls) then
+  if not CnIsSupportFMXControl(TheClassName) then
   begin
     // 不是 FMX.TControl 的子类，直接使用原始 Left/Top，不走 Position.X/Y
     OutProperties.Add(Format('%s = %s', [PropertyName, PropertyValue]));

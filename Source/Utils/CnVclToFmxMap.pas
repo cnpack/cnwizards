@@ -72,6 +72,9 @@ function CnConvertEnumValue(const PropertyValue: string): string;
 procedure RegisterCnPropertyConverter(AClass: TCnPropertyConverterClass);
 {* 供外界注册特定名称的属性的转换器}
 
+function CnIsSupportFMXControl(const FMXClass: string): Boolean;
+{* 转换出的 FMX 类名是否是本程序所支持的 FMX 可视组件类}
+
 function GetFloatStringFromInteger(IntValue: Integer): string;
 
 implementation
@@ -154,6 +157,39 @@ const
     'TSaveDialog:TSaveDialog',
     'TTimer:TTimer',
     'TWindowStore:TWindowStore'
+  );
+
+  // 所支持的 FMX 的 TControl 子类，用于 Position 判断
+  FMX_CONTROLS_LIST: array[0..28] of string = (
+    'TButton',        // 可视组件们
+    'TCalendar',
+    'TCheckBox',
+    'TColorBox',
+    'TColorListBox',
+    'TComboBox',
+    'TEdit',
+    'TGroupBox',
+    'THeader',
+    'TImage',
+    'TLabel',
+    'TListBox',
+    'TListView',
+    'TMemo',
+    'TTabControl',
+    'TTabItem',
+    'TPaintBox',
+    'TPanel',
+    'TProgressBar',
+    'TRadioButton',
+    'TScrollBar',
+    'TScrollBox',
+    'TSpeedButton',
+    'TSplitter',
+    'TStatusBar',
+    'TStringGrid',
+    'TToolbar',
+    'TTrackBar',
+    'TTreeView'
   );
 
   // FMX 组件与其所在单元的对应关系，用于对应 Pas 生成
@@ -856,6 +892,21 @@ function CnConvertEnumValue(const PropertyValue: string): string;
 begin
   if not FVclFmxEnumMap.TryGetValue(PropertyValue, Result) then
     Result := PropertyValue;
+end;
+
+function CnIsSupportFMXControl(const FMXClass: string): Boolean;
+var
+  I: Integer;
+begin
+  Result := False;
+  for I := Low(FMX_CONTROLS_LIST) to High(FMX_CONTROLS_LIST) do
+  begin
+    if FMXClass = FMX_CONTROLS_LIST[I] then
+    begin
+      Result := True;
+      Exit;
+    end;
+  end;
 end;
 
 procedure LoadFmxClassUnitMap;
