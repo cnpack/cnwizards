@@ -38,7 +38,7 @@ interface
 {$I CnPack.inc}
 
 uses
-  System.SysUtils, System.Classes, System.Generics.Collections;
+  System.SysUtils, System.Classes, System.Generics.Collections, CnWizDfmParser;
 
 type
   TCnPropertyConverter = class(TObject)
@@ -51,6 +51,20 @@ type
   end;
 
   TCnPropertyConverterClass = class of TCnPropertyConverter;
+
+  TCnComponentConverter = class(TObject)
+  {* 转换某些特定组件的基类}
+  public
+    class procedure GetComponents(OutVclComponents: TStrings); virtual;
+    class procedure ProcessComponents(SourceLeaf, DestLeaf: TCnDfmLeaf; Tab: Integer = 0); virtual;
+    {* 处理指定组件节点，可以给 DestLeaf 添加子节点}
+  end;
+
+  TCnComponentConverterClass = class of TCnComponentConverter;
+
+function CnConvertTreeFromVclToFmx(SourceTree, DestTree: TCnDfmTree; OutEventIntf,
+  OutEventImpl, OutUnits: TStringList): Boolean;
+{* 转换一棵 DFM 树，输入为 SourceTree，输出为 DestTree，同时还输出事件代码与单元列表}
 
 function CnConvertPropertiesFromVclToFmx(const InComponentClass, InContainerClass: string;
   var OutComponentClass: string; InProperties, OutProperties, OutEventsIntf,
@@ -72,6 +86,9 @@ function CnConvertEnumValue(const PropertyValue: string): string;
 procedure RegisterCnPropertyConverter(AClass: TCnPropertyConverterClass);
 {* 供外界注册特定名称的属性的转换器}
 
+procedure RegisterCnComponentConverter(AClass: TCnComponentConverterClass);
+{* 供外界注册特定类名的组件的转换器}
+
 function CnIsSupportFMXControl(const FMXClass: string): Boolean;
 {* 转换出的 FMX 类名是否是本程序所支持的 FMX 可视组件类}
 
@@ -90,11 +107,17 @@ type
   end;
 
 var
-  FConverterClasses: TList<TCnPropertyConverterClass> = nil;
+  FPropertyConverterClasses: TList<TCnPropertyConverterClass> = nil;
+  {* 存储各种属性转换器供外界注册}
+
+  FComponentConverterClasses: TList<TCnComponentConverterClass> = nil;
   {* 存储各种属性转换器供外界注册}
 
   FVclPropertyConverterMap: TDictionary<string, TCnPropertyConverterClass> = nil;
   {* 存储属性名与各种属性转换器的关系}
+
+  FVclComponentConverterMap: TDictionary<string, TCnComponentConverterClass> = nil;
+  {* 存储 VCL 类名与各种组件转换器的关系}
 
   FVclFmxClassMap: TDictionary<string, string> = nil;
   {* 存储 VCL 类与 FMX 类的对应转换关系}
@@ -989,23 +1012,39 @@ begin
   end;
 end;
 
-procedure CheckInitPropertyConverterMap;
+procedure CheckInitConverterMap;
 var
   List: TStrings;
-  Converter: TCnPropertyConverterClass;
+  PC: TCnPropertyConverterClass;
+  CC: TCnComponentConverterClass;
   S: string;
 begin
   if FVclPropertyConverterMap = nil then
   begin
     FVclPropertyConverterMap := TDictionary<string, TCnPropertyConverterClass>.Create();
     List := TStringList.Create;
-    for Converter in FConverterClasses do
+    for PC in FPropertyConverterClasses do
     begin
       List.Clear;
-      Converter.GetProperties(List);
+      PC.GetProperties(List);
       for S in List do
-        FVclPropertyConverterMap.AddOrSetValue(S, Converter);
+        FVclPropertyConverterMap.AddOrSetValue(S, PC);
     end;
+    List.Free;
+  end;
+
+  if FVclComponentConverterMap = nil then
+  begin
+    FVclComponentConverterMap := TDictionary<string, TCnComponentConverterClass>.Create();
+    List := TStringList.Create;
+    for CC in FComponentConverterClasses do
+    begin
+      List.Clear;
+      CC.GetComponents(List);
+      for S in List do
+        FVclComponentConverterMap.AddOrSetValue(S, CC);
+    end;
+    List.Free;
   end;
 end;
 
@@ -1036,6 +1075,84 @@ end;
 function GetFloatStringFromInteger(IntValue: Integer): string;
 begin
   Result := IntToStr(IntValue) + '.000000000000000000';
+end;
+
+function CnConvertTreeFromVclToFmx(SourceTree, DestTree: TCnDfmTree; OutEventIntf,
+  OutEventImpl, OutUnits: TStringList): Boolean;
+var
+  I: Integer;
+  OutClass: string;
+  ComponentConverter: TCnComponentConverterClass;
+  CompsToConvert: TList<Integer>;
+  BackTree: TCnDfmTree;
+begin
+  Result := False;
+  if (SourceTree = nil) or (DestTree = nil) then
+    Exit;
+
+  if SourceTree.Count <= 1 then
+    Exit;
+
+  if (OutEventIntf = nil) or (OutEventImpl = nil) or (OutUnits = nil) then
+    Exit;
+
+  OutEventIntf.Clear;
+  OutEventImpl.Clear;
+  OutUnits.Clear;
+  OutUnits.Sorted := True;
+  OutUnits.Duplicates := dupIgnore;
+  OutUnits.Add('FMX.Types');
+  OutUnits.Add('FMX.Controls');
+  OutUnits.Add('FMX.Forms');
+  OutUnits.Add('FMX.Graphics');
+  OutUnits.Add('FMX.Dialogs');
+
+  DestTree.Assign(SourceTree);
+  BackTree := TCnDfmTree.Create;
+  BackTree.Assign(SourceTree);
+
+  DestTree.Items[1].Text := SourceTree.Items[1].Text;
+  CnConvertPropertiesFromVclToFmx(SourceTree.Items[1].ElementClass,
+    SourceTree.Items[1].ElementClass, OutClass, SourceTree.Items[1].Properties,
+    DestTree.Items[1].Properties, OutEventIntf, OutEventImpl, True, 2);
+  // FCloneTree.Items[1].ElementClass := OutClass; 容器的类名不变，无需赋值
+
+  CompsToConvert := TList<Integer>.Create;
+  for I := 2 to SourceTree.Count - 1 do
+  begin
+    CnConvertPropertiesFromVclToFmx(SourceTree.Items[I].ElementClass,
+      SourceTree.Items[1].ElementClass, OutClass, SourceTree.Items[I].Properties,
+      DestTree.Items[I].Properties, OutEventIntf, OutEventImpl, False,
+      SourceTree.Items[I].Level * 2);
+    DestTree.Items[I].ElementClass := OutClass;
+
+    if FVclComponentConverterMap.TryGetValue(SourceTree.Items[I].ElementClass,
+      ComponentConverter) then
+      CompsToConvert.Add(I);
+  end;
+
+  // CompsToConvert 里头记录的节点是需要特殊处理的
+  for I := CompsToConvert.Count - 1 downto 0 do
+  begin
+    // 根据 SourceTree.Items[I] 处理相应的 DestTree.Items[I]
+    // DestTree.Items[I] 可以添加子节点，不影响比 I 小的节点的对应关系
+    if FVclComponentConverterMap.TryGetValue(SourceTree.Items[CompsToConvert[I]].ElementClass,
+      ComponentConverter) then
+      ComponentConverter.ProcessComponents(BackTree.Items[CompsToConvert[I]],
+        DestTree.Items[CompsToConvert[I]]);
+  end;
+  CompsToConvert.Free;
+
+  for I := 1 to DestTree.Count - 1 do
+  begin
+    OutClass := CnGetFmxUnitNameFromClass(DestTree.Items[I].ElementClass);
+    if OutClass <> '' then
+      OutUnits.Add(OutClass);
+  end;
+
+  // ElementClass 为空的代表未转换成功的
+  BackTree.Free;
+  Result := True;
 end;
 
 function CnConvertPropertiesFromVclToFmx(const InComponentClass, InContainerClass: string;
@@ -1079,7 +1196,7 @@ var
 
 begin
   Result := False;
-  CheckInitPropertyConverterMap;
+  CheckInitConverterMap;
   OutComponentClass := CnGetFmxClassFromVclClass(InComponentClass);
 
   // 非容器组件无对应组件，退出
@@ -1165,6 +1282,9 @@ begin
         end; // 不匹配的属性不写，免得不认识
       end;
     end;
+
+    if InProperties.Objects[0] <> nil then
+      InProperties.Objects[0].Free;
     InProperties.Delete(0);
   end;
   Result := True;
@@ -1193,7 +1313,13 @@ end;
 procedure RegisterCnPropertyConverter(AClass: TCnPropertyConverterClass);
 begin
   if AClass <> nil then
-    FConverterClasses.Add(AClass);
+    FPropertyConverterClasses.Add(AClass);
+end;
+
+procedure RegisterCnComponentConverter(AClass: TCnComponentConverterClass);
+begin
+  if AClass <> nil then
+    FComponentConverterClasses.Add(AClass);
 end;
 
 { TCnContainerConverter }
@@ -1244,6 +1370,19 @@ begin
   end;
 end;
 
+{ TComponentConverter }
+
+class procedure TCnComponentConverter.GetComponents(OutVclComponents: TStrings);
+begin
+
+end;
+
+class procedure TCnComponentConverter.ProcessComponents(SourceLeaf,
+  DestLeaf: TCnDfmLeaf; Tab: Integer);
+begin
+
+end;
+
 initialization
   LoadFmxClassUnitMap;
   LoadFmxEventUnitMap;
@@ -1251,10 +1390,12 @@ initialization
   LoadVclFmxPropNameMap;
   LoadVclFmxEnumMap;
 
-  FConverterClasses := TList<TCnPropertyConverterClass>.Create;
+  FPropertyConverterClasses := TList<TCnPropertyConverterClass>.Create;
+  FComponentConverterClasses := TList<TCnComponentConverterClass>.Create;
 
 finalization
-  FConverterClasses.Free;
+  FComponentConverterClasses.Free;
+  FPropertyConverterClasses.Free;
 
   FVclFmxEnumMap.Free;
   FVclFmxPropNameMap.Free;

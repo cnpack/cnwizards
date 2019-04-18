@@ -40,7 +40,7 @@ interface
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, Winapi.Windows,
   FMX.Types, FMX.Edit, FMX.ListBox, FMX.ListView, FMX.StdCtrls, FMX.ExtCtrls,
-  FMX.TabControl, FMX.Memo, FMX.Dialogs, CnFmxUtils, CnVclToFmxMap;
+  FMX.TabControl, FMX.Memo, FMX.Dialogs, CnFmxUtils, CnVclToFmxMap, CnWizDfmParser;
 
 type
   TCnPositionConverter = class(TCnPropertyConverter)
@@ -97,7 +97,29 @@ type
       Tab: Integer = 0); override;
   end;
 
+  TCnTreeViewConverter = class(TCnComponentConverter)
+  {* 针对性转换 TreeView 的组件转换器}
+  public
+    class procedure GetComponents(OutVclComponents: TStrings); override;
+    class procedure ProcessComponents(SourceLeaf, DestLeaf: TCnDfmLeaf; Tab: Integer = 0); override;
+  end;
+
 implementation
+
+function IndexOfHead(const Head: string; List: TStrings): Integer;
+var
+  I: Integer;
+begin
+  Result := -1;
+  for I := 0 to List.Count - 1 do
+  begin
+    if Pos(Head, List[I]) = 1 then
+    begin
+      Result := I;
+      Exit;
+    end;
+  end;
+end;
 
 function SearchPropertyValueAndRemoveFromStrings(List: TStrings; const PropertyName: string): string;
 var
@@ -361,6 +383,31 @@ begin
   OutProperties.Add(Format('%s = %s', [NewPropName, PropertyValue]));
 end;
 
+{ TCnTreeViewConverter }
+
+class procedure TCnTreeViewConverter.GetComponents(OutVclComponents: TStrings);
+begin
+  if OutVclComponents <> nil then
+    OutVclComponents.Add('TTreeView');
+end;
+
+class procedure TCnTreeViewConverter.ProcessComponents(SourceLeaf,
+  DestLeaf: TCnDfmLeaf; Tab: Integer);
+var
+  Idx: Integer;
+begin
+  // 处理 SourceLeaf 中的 Items.Data 二进制数据，将其转换成子控件添加到对应 DestLeaf 中
+  ShowMessage(SourceLeaf.Properties.Text);
+  Idx := IndexOfHead('Items.Data = ', SourceLeaf.Properties);
+  if Idx >= 0 then
+  begin
+    if SourceLeaf.Properties.Objects[Idx] <> nil then
+    begin
+      // TODO: ShowMessage(IntToStr(TStream(SourceLeaf.Properties.Objects[Idx]).Size));
+    end;
+  end;
+end;
+
 initialization
   RegisterCnPropertyConverter(TCnPositionConverter);
   RegisterCnPropertyConverter(TCnSizeConverter);
@@ -368,5 +415,7 @@ initialization
   RegisterCnPropertyConverter(TCnFontConverter);
   RegisterCnPropertyConverter(TCnTouchConverter);
   RegisterCnPropertyConverter(TCnGeneralConverter);
+
+  RegisterCnComponentConverter(TCnTreeViewConverter);
 
 end.

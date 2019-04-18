@@ -98,9 +98,11 @@ type
 
     // 用父类的 Text 属性当作 Name
     property ElementClass: string read FElementClass write FElementClass;
+    {* ClassName 类名}
     property ElementKind: TDfmKind read FElementKind write FElementKind;
+    {* 元素类型}
     property Properties: TStrings read FProperties;
-    {* 存储文本属性，格式为 PropName = PropValue，前后无空格}
+    {* 存储文本属性，格式为 PropName = PropValue，注意 Objects 属性里可能存 TMemoryStream 的二进制数据}
   end;
 
   TCnDfmTree = class(TCnTree)
@@ -242,7 +244,7 @@ begin
   end;
 end;
 
-function ParseTextPropertyValue(Parser: TParser): string; forward;
+function ParseTextPropertyValue(Parser: TParser; out BinStream: TObject): string; forward;
 
 procedure ParseTextHeaderToLeaf(Parser: TParser; IsInherited, IsInline: Boolean;
   Leaf: TCnDfmLeaf); forward;
@@ -251,6 +253,7 @@ procedure ParseTextPropertyToLeaf(Parser: TParser; Leaf: TCnDfmLeaf);
 var
   PropName: string;
   PropValue: string;
+  Obj: TObject;
 begin
   Parser.CheckToken(toSymbol);
   PropName := Parser.TokenString;
@@ -265,12 +268,16 @@ begin
 
   Parser.CheckToken('=');
   Parser.NextToken;
-  PropValue := ParseTextPropertyValue(Parser);
+  Obj := nil;
+  PropValue := ParseTextPropertyValue(Parser, Obj);
 
-  Leaf.Properties.Add(PropName + ' = ' + PropValue);
+  if Obj <> nil then
+    Leaf.Properties.AddObject(PropName + ' = ' + PropValue, Obj)
+  else
+    Leaf.Properties.Add(PropName + ' = ' + PropValue);
 end;
 
-function ParseTextPropertyValue(Parser: TParser): string;
+function ParseTextPropertyValue(Parser: TParser; out BinStream: TObject): string;
 const
   BYTES_PER_LINE = 32;
 var
@@ -350,31 +357,29 @@ begin
           // Parser.NextToken; // 无需 NextToken，下面 HexToBinary 会做这一步
 
           Stream := TMemoryStream.Create;
-          try
-            Parser.HexToBinary(Stream);
-            Stream.Position := 0;
-            Count := Stream.Size;
-            MultiLine := Count >= BYTES_PER_LINE;
+          Parser.HexToBinary(Stream);
+          Stream.Position := 0;
+          Count := Stream.Size;
+          MultiLine := Count >= BYTES_PER_LINE;
 
-            while Count > 0 do
-            begin
-              if MultiLine then
-                Result := Result + #13#10 + ' ';
+          while Count > 0 do
+          begin
+            if MultiLine then
+              Result := Result + #13#10 + ' ';
 
-              if Count >= BYTES_PER_LINE then
-                I := BYTES_PER_LINE
-              else
-                I := Count;
+            if Count >= BYTES_PER_LINE then
+              I := BYTES_PER_LINE
+            else
+              I := Count;
 
-              Stream.Read(Buffer, I);
-              BinToHex(Buffer, Text, I);
-              Result := Result + Copy(Text, 1, I * 2);
-              Dec(Count, I);
-            end;
-          finally
-            Stream.Free;
+            Stream.Read(Buffer, I);
+            BinToHex(Buffer, Text, I);
+            Result := Result + Copy(Text, 1, I * 2);
+            Dec(Count, I);
           end;
+
           Result := Result + '}';
+          BinStream := Stream; // 将存有二进制数据的流对象传出
         end;
       '<':  // TODO: Collection 的 Items 需要分割处理
         begin
@@ -1084,12 +1089,27 @@ begin
 end;
 
 procedure TCnDfmLeaf.AssignTo(Dest: TPersistent);
+var
+  I: Integer;
+  SourceStream, DestStream: TMemoryStream;
 begin
   if Dest is TCnDfmLeaf then
   begin
     TCnDfmLeaf(Dest).ElementKind := FElementKind;
     TCnDfmLeaf(Dest).ElementClass := FElementClass;
     TCnDfmLeaf(Dest).Properties.Assign(FProperties);
+
+    for I := 0 to FProperties.Count - 1 do
+    begin
+      SourceStream := TMemoryStream(FProperties.Objects[I]);
+      if SourceStream <> nil then
+      begin
+        // 复制二进制内存流
+        DestStream := TMemoryStream.Create;
+        DestStream.LoadFromStream(SourceStream);
+        TCnDfmLeaf(Dest).Properties.Objects[I] := DestStream;
+      end;
+    end;
   end;
   inherited;
 end;
@@ -1101,7 +1121,12 @@ begin
 end;
 
 destructor TCnDfmLeaf.Destroy;
+var
+  I: Integer;
 begin
+  for I := 0 to FProperties.Count - 1 do
+    if FProperties.Objects[I] <> nil then
+      FProperties.Objects[I].Free;
   FProperties.Free;
   inherited;
 end;
