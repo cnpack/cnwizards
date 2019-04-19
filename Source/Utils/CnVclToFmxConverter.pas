@@ -40,7 +40,8 @@ interface
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, Winapi.Windows,
   FMX.Types, FMX.Edit, FMX.ListBox, FMX.ListView, FMX.StdCtrls, FMX.ExtCtrls,
-  FMX.TabControl, FMX.Memo, FMX.Dialogs, CnFmxUtils, CnVclToFmxMap, CnWizDfmParser;
+  FMX.TabControl, FMX.Memo, FMX.Dialogs, Vcl.ComCtrls,
+  CnFmxUtils, CnVclToFmxMap, CnWizDfmParser;
 
 type
   TCnPositionConverter = class(TCnPropertyConverter)
@@ -99,6 +100,8 @@ type
 
   TCnTreeViewConverter = class(TCnComponentConverter)
   {* 针对性转换 TreeView 的组件转换器}
+  private
+    class procedure LoadTreeLeafFromStream(Root, Leaf: TCnDfmLeaf; Stream: TStream);
   public
     class procedure GetComponents(OutVclComponents: TStrings); override;
     class procedure ProcessComponents(SourceLeaf, DestLeaf: TCnDfmLeaf; Tab: Integer = 0); override;
@@ -391,19 +394,54 @@ begin
     OutVclComponents.Add('TTreeView');
 end;
 
+class procedure TCnTreeViewConverter.LoadTreeLeafFromStream(Root, Leaf: TCnDfmLeaf;
+  Stream: TStream);
+var
+  I, Size: Integer;
+  ALeaf: TCnDfmLeaf;
+  Info: TNodeInfo;
+begin
+  Stream.ReadBuffer(Size, SizeOf(Size));
+  Stream.ReadBuffer(Info, Size);
+
+  // 把 Info 内容塞到 Leaf 的 Properties 里
+  Leaf.ElementKind := dkObject;
+  Leaf.ElementClass := 'TTreeViewItem';
+  Leaf.Text := 'TTreeViewItem' + IntToStr(Leaf.GetAbsoluteIndexFromParent(Root));
+  Leaf.Properties.Add('Text = ' + ConvertWideStringToDfmString(Info.Text));
+  Leaf.Properties.Add('ImageIndex = ' + IntToStr(Info.ImageIndex));
+
+  // 递归读并创建子节点
+  for I := 0 to Info.Count - 1 do
+  begin
+    ALeaf := Leaf.Tree.AddChild(Leaf) as TCnDfmLeaf;
+    LoadTreeLeafFromStream(Root, ALeaf, Stream);
+  end;
+end;
+
 class procedure TCnTreeViewConverter.ProcessComponents(SourceLeaf,
   DestLeaf: TCnDfmLeaf; Tab: Integer);
 var
-  Idx: Integer;
+  I, Count: Integer;
+  Stream: TStream;
+  Leaf: TCnDfmLeaf;
 begin
   // 处理 SourceLeaf 中的 Items.Data 二进制数据，将其转换成子控件添加到对应 DestLeaf 中
-  ShowMessage(SourceLeaf.Properties.Text);
-  Idx := IndexOfHead('Items.Data = ', SourceLeaf.Properties);
-  if Idx >= 0 then
+  I := IndexOfHead('Items.Data = ', SourceLeaf.Properties);
+  if I >= 0 then
   begin
-    if SourceLeaf.Properties.Objects[Idx] <> nil then
+    if SourceLeaf.Properties.Objects[I] <> nil then
     begin
-      // TODO: ShowMessage(IntToStr(TStream(SourceLeaf.Properties.Objects[Idx]).Size));
+      // 从 Stream 中读入节点信息
+      Stream := TStream(SourceLeaf.Properties.Objects[I]);
+      Stream.Position := 0;
+      Stream.ReadBuffer(Count, SizeOf(Count));
+      for I := 0 to Count - 1 do
+      begin
+        // 给 DestLeaf 添加一个子节点，并读这个子节点的内容
+        Leaf := DestLeaf.Tree.AddChild(DestLeaf) as TCnDfmLeaf;
+        LoadTreeLeafFromStream(DestLeaf, Leaf, Stream);
+      end;
     end;
   end;
 end;

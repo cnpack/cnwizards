@@ -75,6 +75,8 @@ type
     property Caption: string read FCaption write FCaption;
   end;
 
+  TCnDfmTree = class;
+
   TCnDfmLeaf = class(TCnLeaf)
   {* 代表 DFM 中的一个组件}
   private
@@ -83,6 +85,7 @@ type
     FProperties: TStrings;
     function GetItems(Index: Integer): TCnDfmLeaf;
     procedure SetItems(Index: Integer; const Value: TCnDfmLeaf);
+    function GetTree: TCnDfmTree;
   protected
     procedure AssignTo(Dest: TPersistent); override;
   public
@@ -95,6 +98,7 @@ type
     {* 将自身名字、类名以及属性内容写入一个字符串列表，供保存用，不写末尾的 end}
 
     property Items[Index: Integer]: TCnDfmLeaf read GetItems write SetItems; default;
+    property Tree: TCnDfmTree read GetTree;
 
     // 用父类的 Text 属性当作 Name
     property ElementClass: string read FElementClass write FElementClass;
@@ -145,6 +149,9 @@ function LoadDfmFileToTree(const FileName: string; Tree: TCnDfmTree): Boolean;
 
 function SaveTreeToDfmFile(const FileName: string; Tree: TCnDfmTree): Boolean;
 {* 将树的内容存成 DFM 文本文件}
+
+function ConvertWideStringToDfmString(const W: WideString): WideString;
+{* 将宽字符串转换为 Delphi 7 或以上版本中的 DFM 字符串}
 
 implementation
 
@@ -1134,6 +1141,11 @@ end;
 function TCnDfmLeaf.GetItems(Index: Integer): TCnDfmLeaf;
 begin
   Result := TCnDfmLeaf(inherited GetItems(Index));
+end;
+
+function TCnDfmLeaf.GetTree: TCnDfmTree;
+begin
+  Result := TCnDfmTree(inherited Tree);
 end;
 
 procedure TCnDfmLeaf.SetItems(Index: Integer; const Value: TCnDfmLeaf);
