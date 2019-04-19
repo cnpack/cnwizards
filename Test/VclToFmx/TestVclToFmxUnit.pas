@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Buttons, CnTree, CnWizDfmParser,
-  Vcl.ComCtrls;
+  Vcl.ComCtrls, System.Generics.Collections;
 
 type
   TFormConvert = class(TForm)
@@ -71,6 +71,7 @@ var
   I: Integer;
   OutClass: string;
   EventIntf, EventImpl, Units: TStringList;
+  AdditionalComps: TList<Integer>;
 begin
   // 循环处理 FTree，并把结果给 FCloneTree
   if (FTree.Count <> FCloneTree.Count) or (FTree.Count < 2) then
@@ -90,29 +91,7 @@ begin
   Units.Add('FMX.Graphics');
   Units.Add('FMX.Dialogs');
 
-  FCloneTree.Items[1].Text := FTree.Items[1].Text;
-  CnConvertPropertiesFromVclToFmx(FTree.Items[1].ElementClass,
-    FTree.Items[1].ElementClass, OutClass, FTree.Items[1].Properties,
-    FCloneTree.Items[1].Properties, EventIntf, EventImpl, True, 2);
-  // FCloneTree.Items[1].ElementClass := OutClass; 容器的类名不变，无需赋值
-
-  for I := 2 to FTree.Count - 1 do
-  begin
-    CnConvertPropertiesFromVclToFmx(FTree.Items[I].ElementClass,
-      FTree.Items[1].ElementClass, OutClass, FTree.Items[I].Properties,
-      FCloneTree.Items[I].Properties, EventIntf, EventImpl, False,
-      FTree.Items[I].Level * 2);
-    FCloneTree.Items[I].ElementClass := OutClass;
-  end;
-
-  for I := 1 to FCloneTree.Count - 1 do
-  begin
-    OutClass := CnGetFmxUnitNameFromClass(FCloneTree.Items[I].ElementClass);
-    if OutClass <> '' then
-      Units.Add(OutClass);
-  end;
-
-  // ElementClass 为空的代表未转换成功的
+  CnConvertTreeFromVclToFmx(FTree, FCloneTree, EventIntf, EventImpl, Units);
 
   // 理论上 FCloneTree 转换完毕了，写到树里
   FCloneTree.OnSaveANode := TreeSaveNode;
