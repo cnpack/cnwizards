@@ -40,10 +40,13 @@ interface
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, Winapi.Windows,
   FMX.Types, FMX.Edit, FMX.ListBox, FMX.ListView, FMX.StdCtrls, FMX.ExtCtrls,
-  FMX.TabControl, FMX.Memo, FMX.Dialogs, Vcl.ComCtrls,
+  FMX.TabControl, FMX.Memo, FMX.Dialogs, Vcl.ComCtrls, Vcl.Graphics, Vcl.Imaging.jpeg,
+  Vcl.Imaging.pngimage, Vcl.Imaging.GIFImg, FMX.Graphics,
   CnFmxUtils, CnVclToFmxMap, CnWizDfmParser;
 
 type
+  // === 属性转换器 ===
+
   TCnPositionConverter = class(TCnPropertyConverter)
   {* 把 Left/Top 转换成 Position 属性的转换器}
   public
@@ -98,6 +101,8 @@ type
       Tab: Integer = 0); override;
   end;
 
+  // === 组件转换器 ===
+
   TCnTreeViewConverter = class(TCnComponentConverter)
   {* 针对性转换 TreeView 的组件转换器}
   private
@@ -107,7 +112,17 @@ type
     class procedure ProcessComponents(SourceLeaf, DestLeaf: TCnDfmLeaf; Tab: Integer = 0); override;
   end;
 
+  TCnImageConverter = class(TCnComponentConverter)
+  {* 针对性转换 Image 的组件转换器，主要处理其 Picture.Data 属性}
+  public
+    class procedure GetComponents(OutVclComponents: TStrings); override;
+    class procedure ProcessComponents(SourceLeaf, DestLeaf: TCnDfmLeaf; Tab: Integer = 0); override;
+  end;
+
 implementation
+
+type
+  TGraphicAccess = class(Vcl.Graphics.TGraphic);
 
 function IndexOfHead(const Head: string; List: TStrings): Integer;
 var
@@ -446,6 +461,86 @@ begin
   end;
 end;
 
+{ TCnImageConverter }
+
+function LoadGraphicFromDfmBinStream(Stream: TStream): Vcl.Graphics.TGraphic;
+var
+  ClzName: ShortString;
+  Clz: Vcl.Graphics.TGraphicClass;
+begin
+  Result := nil;
+  if (Stream = nil) or (Stream.Size <= 0) then
+    Exit;
+
+  Stream.Read(ClzName[0], 1);
+  Stream.Read(ClzName[1], Ord(ClzName[0]));
+
+  Clz := Vcl.Graphics.TGraphicClass(FindClass(ClzName));
+  if Clz <> nil then
+  begin
+    Result := Vcl.Graphics.TGraphic(Clz.NewInstance);
+    Result.Create;
+    TGraphicAccess(Result).ReadData(Stream);
+  end;
+end;
+
+class procedure TCnImageConverter.GetComponents(OutVclComponents: TStrings);
+begin
+  if OutVclComponents <> nil then
+    OutVclComponents.Add('TImage');
+end;
+
+class procedure TCnImageConverter.ProcessComponents(SourceLeaf,
+  DestLeaf: TCnDfmLeaf; Tab: Integer);
+var
+  I: Integer;
+  Stream: TStream;
+  TmpStream: TMemoryStream;
+  AGraphic: Vcl.Graphics.TGraphic;
+  VclBitmap: Vcl.Graphics.TBitmap;
+  FmxBitmap: FMX.Graphics.TBitmap;
+begin
+  I := IndexOfHead('Picture.Data = ', SourceLeaf.Properties);
+  if I >= 0 then
+  begin
+    if SourceLeaf.Properties.Objects[I] <> nil then
+    begin
+      // 从 Stream 中读入 Bitmap 信息
+      Stream := TStream(SourceLeaf.Properties.Objects[I]);
+      Stream.Position := 0;
+
+      AGraphic := nil;
+      VclBitmap := nil;
+      FmxBitmap := nil;
+      TmpStream := nil;
+
+      try
+        AGraphic := LoadGraphicFromDfmBinStream(Stream);
+
+        if (AGraphic <> nil) and not AGraphic.Empty then
+        begin
+          TmpStream := TMemoryStream.Create;
+          AGraphic.SaveToStream(TmpStream);
+
+          FmxBitmap := FMX.Graphics.TBitmap.Create;
+          FmxBitmap.LoadFromStream(TmpStream);
+          TmpStream.Clear;
+          FmxBitmap.SaveToStream(TmpStream);
+
+          // TmpStream 中已经是 PNG 的格式了，写入 Bitmap.PNG 信息
+          TmpStream.Position := 0;
+          DestLeaf.Properties.Add('Bitmap.PNG = {' +
+            ConvertStreamToHexDfmString(TmpStream) + '}');
+        end;
+      finally
+        AGraphic.Free;
+        FmxBitmap.Free;
+        TmpStream.Free;
+      end;
+    end;
+  end;
+end;
+
 initialization
   RegisterCnPropertyConverter(TCnPositionConverter);
   RegisterCnPropertyConverter(TCnSizeConverter);
@@ -455,5 +550,8 @@ initialization
   RegisterCnPropertyConverter(TCnGeneralConverter);
 
   RegisterCnComponentConverter(TCnTreeViewConverter);
+  RegisterCnComponentConverter(TCnImageConverter);
+
+  RegisterClasses([TIcon, TBitmap, TMetafile, TWICImage, TJpegImage, TGifImage, TPngImage]);
 
 end.

@@ -146,7 +146,7 @@ const
     'TEdit:TEdit',
     'TGroupBox:TGroupBox',
     'THeader:THeader',
-    'TImage:TImage',
+    'TImage:TImageControl',      // 用 TImageControl 比 TImage 简单
     'TLabel:TLabel',
     'TListBox:TListBox',
     'TListView:TListView',
@@ -183,7 +183,7 @@ const
   );
 
   // 所支持的 FMX 的 TControl 子类，用于 Position 判断
-  FMX_CONTROLS_LIST: array[0..28] of string = (
+  FMX_CONTROLS_LIST: array[0..29] of string = (
     'TButton',        // 可视组件们
     'TCalendar',
     'TCheckBox',
@@ -194,6 +194,7 @@ const
     'TGroupBox',
     'THeader',
     'TImage',
+    'TImageControl',
     'TLabel',
     'TListBox',
     'TListView',

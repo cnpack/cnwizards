@@ -153,6 +153,9 @@ function SaveTreeToDfmFile(const FileName: string; Tree: TCnDfmTree): Boolean;
 function ConvertWideStringToDfmString(const W: WideString): WideString;
 {* 将宽字符串转换为 Delphi 7 或以上版本中的 DFM 字符串}
 
+function ConvertStreamToHexDfmString(Stream: TStream): string;
+{* 将二进制数据转换为 DFM 字符串，不带前后大括号}
+
 implementation
 
 const
@@ -173,6 +176,36 @@ begin
   end;
 end;
 {$ENDIF}
+
+function ConvertStreamToHexDfmString(Stream: TStream): string;
+const
+  BYTES_PER_LINE = 32;
+var
+  I, Count: Integer;
+  MultiLine: Boolean;
+  Buffer: array[0..BYTES_PER_LINE - 1] of AnsiChar;
+  Text: array[0..BYTES_PER_LINE * 2 - 1] of Char;
+begin
+  Result := '';
+  Count := Stream.Size;
+  MultiLine := Count >= BYTES_PER_LINE;
+
+  while Count > 0 do
+  begin
+    if MultiLine then
+      Result := Result + #13#10 + '  ';
+
+    if Count >= BYTES_PER_LINE then
+      I := BYTES_PER_LINE
+    else
+      I := Count;
+
+    Stream.Read(Buffer, I);
+    BinToHex(Buffer, Text, I);
+    Result := Result + Copy(Text, 1, I * 2);
+    Dec(Count, I);
+  end;
+end;
 
 function ConvertWideStringToDfmString(const W: WideString): WideString;
 const
@@ -285,14 +318,7 @@ begin
 end;
 
 function ParseTextPropertyValue(Parser: TParser; out BinStream: TObject): string;
-const
-  BYTES_PER_LINE = 32;
 var
-  MultiLine: Boolean;
-  I: Integer;
-  Count: Longint;
-  Buffer: array[0..BYTES_PER_LINE - 1] of Char;
-  Text: array[0..BYTES_PER_LINE * 2 - 1] of Char;
   Stream: TStream;
 
   function GetQuotedStr: string;
@@ -366,26 +392,8 @@ begin
           Stream := TMemoryStream.Create;
           Parser.HexToBinary(Stream);
           Stream.Position := 0;
-          Count := Stream.Size;
-          MultiLine := Count >= BYTES_PER_LINE;
+          Result := ConvertStreamToHexDfmString(Stream) + '}';
 
-          while Count > 0 do
-          begin
-            if MultiLine then
-              Result := Result + #13#10 + ' ';
-
-            if Count >= BYTES_PER_LINE then
-              I := BYTES_PER_LINE
-            else
-              I := Count;
-
-            Stream.Read(Buffer, I);
-            BinToHex(Buffer, Text, I);
-            Result := Result + Copy(Text, 1, I * 2);
-            Dec(Count, I);
-          end;
-
-          Result := Result + '}';
           BinStream := Stream; // 将存有二进制数据的流对象传出
         end;
       '<':  // TODO: Collection 的 Items 需要分割处理
