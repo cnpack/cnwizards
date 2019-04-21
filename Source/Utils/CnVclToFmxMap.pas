@@ -136,8 +136,9 @@ var
 
 const
   // VCL 与 FMX 组件的对应转换关系，同名优先
-  VCL_FMX_CLASS_PAIRS: array[0..42] of string = (
+  VCL_FMX_CLASS_PAIRS: array[0..43] of string = (
     'TButton:TButton',        // 可视组件们
+    'TBitBtn:TButton',           // 图片会丢失
     'TCalendar:TCalendar',
     'TCheckBox:TCheckBox',
     'TColorBox:TColorBox',
