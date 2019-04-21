@@ -174,12 +174,13 @@ class procedure TCnPositionConverter.ProcessProperties(const PropertyName,
   Tab: Integer);
 var
   X, Y: Integer;
-  V: string;
+  V, OutClassName: string;
   Cls: TClass;
 begin
-  if not CnIsSupportFMXControl(TheClassName) then
+  OutClassName := CnGetFmxClassFromVclClass(TheClassName);
+  if not CnIsSupportFMXControl(OutClassName) then
   begin
-    // 不是 FMX.TControl 的子类，直接使用原始 Left/Top，不走 Position.X/Y
+    // 目标类不是 FMX.TControl 的子类，直接使用原始 Left/Top，不走 Position.X/Y
     OutProperties.Add(Format('%s = %s', [PropertyName, PropertyValue]));
   end
   else

@@ -1096,6 +1096,8 @@ begin
       begin
         N := Copy(S, 1, P - 1);
         V := Copy(S, P + 3, MaxInt);
+        // 在 V 的每个回车后面加上 Tab + csTabWidth 个空格以示缩进
+        V := StringReplace(V, #13#10, #13#10 + Spc(Tab + csTabWidth), [rfReplaceAll]);
         if (N <> '') and (V <> '') then
           List.Add(Format('%s%s = %s', [Spc(Tab + csTabWidth), N, V]));
       end;
