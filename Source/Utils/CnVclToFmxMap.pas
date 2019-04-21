@@ -639,14 +639,14 @@ const
     'Painting:TPageSetupPaintingEvent|procedure (Sender: TObject; const PaperSize: SmallInt; const Orientation: TPrinterOrientation; const PageType: TPageType; var DoneDrawing: Boolean);'
   );
 
-  // 这些属性名对应的值在 VCL/FMX 中不同，需要用下面的表格进行转换
+  // 这些相同属性名对应的值在 VCL/FMX 中不同，需要用下面的表格进行转换，暂时只支持 Form
   VCL_FMX_PROPERTY_ENUM_NAMES: array[0..3] of string = (
     'BorderStyle', 'FormStyle', 'Position', 'Align'
     // Color 要转成 Fill.Color，Font.Color 要转换成 TextSettings.FontColor，特殊处理
   );
 
-  // 同性质的枚举类型但不同名的映射关系，属性名由上面决定
-  VCL_FMX_PROPERTY_ENUM_PAIRS: array[0..219] of string = (
+  // 同性质的枚举类型但不同名的映射关系，属性名由上面决定。外界的转换器也可直接调用查询
+  VCL_FMX_PROPERTY_ENUM_PAIRS: array[0..223] of string = (
     'alNone:None',
     'alTop:Top',
     'alBottom:Bottom',
@@ -866,7 +866,11 @@ const
     'poScreenCenter:ScreenCenter',
     'poDesktopCenter:DesktopCenter',
     'poMainFormCenter:MainFormCenter',
-    'poOwnerFormCenter:OwnerFormCenter'
+    'poOwnerFormCenter:OwnerFormCenter',
+    'tpTop:Top',
+    'tpBottom:Bottom',
+    'tpLeft:None',     // FMX 的 TabControl 不支持左右形式的切换页位置
+    'tpRight:None'
   );
 
   // 窗体的同类型属性转换对应关系，可能不同名

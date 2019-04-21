@@ -337,7 +337,7 @@ class procedure TCnGeneralConverter.GetProperties(OutProperties: TStrings);
 begin
   if OutProperties <> nil then
   begin
-    OutProperties.Add('Action');      // 属性名不变的
+    OutProperties.Add('Action');      // 属性名属性值都不变的
     OutProperties.Add('Anchors');
     OutProperties.Add('Cancel');
     OutProperties.Add('Cursor');
@@ -365,10 +365,11 @@ begin
     OutProperties.Add('Text');
     OutProperties.Add('Visible');
 
-    OutProperties.Add('ActivePage');  // 属性名要换的
-    OutProperties.Add('Checked');     // TRadioButton/TCheckBox 是 IsChecked
+    OutProperties.Add('ActivePage');   // 属性名要换但属性值不变的
+    OutProperties.Add('Checked');      // TRadioButton/TCheckBox 是 IsChecked
     OutProperties.Add('PageIndex');
-    OutProperties.Add('ScrollBars');
+    OutProperties.Add('ScrollBars');   // 属性名属性值都变的
+    OutProperties.Add('TabPosition');  // 属性名不变的但属性值要变的
   end;
 end;
 
@@ -395,6 +396,12 @@ begin
       OutProperties.Add('ShowScrollBars = False')
     else
       OutProperties.Add('ShowScrollBars = True');
+    Exit;    // 属性值变了，写完后退出，不能再写 PropertyValue 了
+  end
+  else if PropertyName = 'TabPosition' then
+  begin
+    OutProperties.Add('TabPosition = ' + CnConvertEnumValue(PropertyValue));
+    Exit;    // 属性值变了，写完后退出，不能再写 PropertyValue 了
   end
   else
     NewPropName := PropertyName;
