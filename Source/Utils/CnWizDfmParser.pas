@@ -123,6 +123,8 @@ type
     destructor Destroy; override;
 
     function SaveToStrings(List: TStrings): Boolean;
+    function GetSameClassIndex(Leaf: TCnDfmLeaf): Integer;
+    {* 在和该 Leaf 的 ElementClass 相同的 Leaf 中找该 Leaf 的 Index，0 开始}
 
     property Root: TCnDfmLeaf read GetRoot;
     property Items[AbsoluteIndex: Integer]: TCnDfmLeaf read GetItems;
@@ -1049,6 +1051,23 @@ end;
 function TCnDfmTree.GetRoot: TCnDfmLeaf;
 begin
   Result := TCnDfmLeaf(inherited GetRoot);
+end;
+
+function TCnDfmTree.GetSameClassIndex(Leaf: TCnDfmLeaf): Integer;
+var
+  I: Integer;
+begin
+  Result := -1;
+  if Leaf.Tree <> Self then
+    Exit;
+
+  for I := 0 to Count - 1 do
+  begin
+    if Items[I].ElementClass = Leaf.ElementClass then
+      Inc(Result);
+    if Items[I] = Leaf then
+      Exit;
+  end;
 end;
 
 procedure TCnDfmTree.SaveLeafToStrings(Leaf: TCnDfmLeaf; List: TStrings;

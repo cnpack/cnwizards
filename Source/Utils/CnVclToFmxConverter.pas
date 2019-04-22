@@ -475,7 +475,7 @@ begin
   // 把 Info 内容塞到 Leaf 的 Properties 里
   Leaf.ElementKind := dkObject;
   Leaf.ElementClass := 'TTreeViewItem';
-  Leaf.Text := 'TTreeViewItem' + IntToStr(Leaf.GetAbsoluteIndexFromParent(Root));
+  Leaf.Text := 'TTreeViewItem' + IntToStr(Leaf.Tree.GetSameClassIndex(Leaf) + 1);
   Leaf.Properties.Add('Text = ' + ConvertWideStringToDfmString(Info.Text));
   Leaf.Properties.Add('ImageIndex = ' + IntToStr(Info.ImageIndex));
 
@@ -605,16 +605,20 @@ end;
 class procedure TCnGridConverter.ProcessComponents(SourceLeaf,
   DestLeaf: TCnDfmLeaf; Tab: Integer);
 var
-  I: Integer;
-  OptionString: string;
+  I, Count: Integer;
+  OptionString, Value: string;
   Options: TStringList;
+  Leaf: TCnDfmLeaf;
 begin
   I := IndexOfHead('Options = ', SourceLeaf.Properties);
   if I >= 0 then
-  begin
-    OptionString := SourceLeaf.Properties[I];
-    Delete(OptionString, 1, Length('Options = ') + 1);
-    Options := TStringList.Create;
+    OptionString := SourceLeaf.Properties[I]
+  else // 默认属性
+    OptionString := '[goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect]';
+
+  Delete(OptionString, 1, Length('Options = '));
+  Options := TStringList.Create;
+  try
     ConvertSetStringToElements(OptionString, Options);
 
     // 转换集合元素，不存在对应关系的则删除
@@ -626,9 +630,31 @@ begin
       else
         Options.Delete(I);
     end;
-    OptionString := ConvertSetElementsToString(Options);
 
+    OptionString := ConvertSetElementsToString(Options);
     DestLeaf.Properties.Add('Options = ' + OptionString);
+  finally
+    Options.Free;
+  end;
+
+  I := IndexOfHead('ColCount = ', SourceLeaf.Properties);
+  if I >= 0 then
+  begin
+    Value := SourceLeaf.Properties[I];
+    Delete(Value, 1, Length('ColCount = '));
+
+    Count := StrToIntDef(Value ,0);
+    if Count > 0 then
+    begin
+      for I := 1 to Count do
+      begin
+        // 给 DestLeaf 添加一个子节点
+        Leaf := DestLeaf.Tree.AddChild(DestLeaf) as TCnDfmLeaf;
+        Leaf.ElementClass := 'TStringColumn';
+        Leaf.ElementKind := dkObject;
+        Leaf.Text := 'StringColumn' + IntToStr(Leaf.Tree.GetSameClassIndex(Leaf) + 1);
+      end;
+    end;
   end;
 end;
 
