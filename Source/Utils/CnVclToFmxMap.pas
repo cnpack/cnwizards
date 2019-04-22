@@ -81,7 +81,10 @@ function CnIsVclEnumPropertyNeedConvert(const PropertyName: string): Boolean;
 {* 判断某 VCL 属性名的属性值是否需要转换}
 
 function CnConvertEnumValue(const PropertyValue: string): string;
-{* 转换枚举常量值}
+{* 转换枚举常量值，无则返回原值}
+
+function CnConvertEnumValueIfExists(const PropertyValue: string): string;
+{* 转换枚举常量值，无则返回空}
 
 procedure RegisterCnPropertyConverter(AClass: TCnPropertyConverterClass);
 {* 供外界注册特定名称的属性的转换器}
@@ -647,7 +650,7 @@ const
   );
 
   // 同性质的枚举类型但不同名的映射关系，属性名由上面决定。外界的转换器也可直接调用查询
-  VCL_FMX_PROPERTY_ENUM_PAIRS: array[0..223] of string = (
+  VCL_FMX_PROPERTY_ENUM_PAIRS: array[0..231] of string = (
     'alNone:None',
     'alTop:Top',
     'alBottom:Bottom',
@@ -860,6 +863,14 @@ const
     'fsMDIForm:Normal',
     'fsMDIChild:Normal',
     'fsStayOnTop:StayOnTop',
+    'goEditing:Editing',
+    'goAlwaysShowEditor:AlwaysShowEditor',
+    'goColSizing:ColumnResize',
+    'goColMoving:ColumnMove',
+    'goVertLine:ColLines',
+    'goHorzLine:RowLines',
+    'goRowSelect:RowSelect',
+    'goTabs:Tabs',
     'poDesigned:Designed',
     'poDefault:Default',
     'poDefaultPosOnly:DefaultPosOnly',
@@ -921,6 +932,12 @@ function CnConvertEnumValue(const PropertyValue: string): string;
 begin
   if not FVclFmxEnumMap.TryGetValue(PropertyValue, Result) then
     Result := PropertyValue;
+end;
+
+function CnConvertEnumValueIfExists(const PropertyValue: string): string;
+begin
+  if not FVclFmxEnumMap.TryGetValue(PropertyValue, Result) then
+    Result := '';
 end;
 
 function CnIsSupportFMXControl(const FMXClass: string): Boolean;

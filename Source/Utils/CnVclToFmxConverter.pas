@@ -119,10 +119,50 @@ type
     class procedure ProcessComponents(SourceLeaf, DestLeaf: TCnDfmLeaf; Tab: Integer = 0); override;
   end;
 
+  TCnGridConverter = class(TCnComponentConverter)
+  {* 针对性转换 Grid 的组件转换器，主要处理其 Options 属性以及列}
+  public
+    class procedure GetComponents(OutVclComponents: TStrings); override;
+    class procedure ProcessComponents(SourceLeaf, DestLeaf: TCnDfmLeaf; Tab: Integer = 0); override;
+  end;
+
 implementation
 
 type
-  TGraphicAccess = class(Vcl.Graphics.TGraphic);
+  TVclGraphicAccess = class(Vcl.Graphics.TGraphic);
+
+// 将 [a, b] 这种集合形式的字符串转换为分离的 a b 集合元素字符串
+procedure ConvertSetStringToElements(const SetString: string; OutElements: TStringList);
+var
+  S: string;
+begin
+  S := SetString;
+  if Length(S) <= 2 then
+    Exit;
+
+  if S[1] = '[' then
+    Delete(S, 1, 1);
+  if S[Length(S)] = ']' then
+    Delete(S, Length(S), 1);
+
+  S := StringReplace(S, ' ', '', [rfReplaceAll]);
+  OutElements.CommaText := S;
+end;
+
+// 将 a b 这种分离的集合元素字符串组合成 [a, b] 这种集合形式的字符串
+function ConvertSetElementsToString(InElements: TStrings): string;
+var
+  I: Integer;
+begin
+  if (InElements = nil) or (InElements.Count = 0) then
+  begin
+    Result := '[]';
+    Exit;
+  end;
+
+  Result := '[' + InElements.CommaText + ']';
+  Result := StringReplace(Result, ',', ', ', [rfReplaceAll]);
+end;
 
 function IndexOfHead(const Head: string; List: TStrings): Integer;
 var
@@ -343,6 +383,7 @@ begin
     OutProperties.Add('Cursor');
     OutProperties.Add('DragMode');
     OutProperties.Add('Default');
+    OutProperties.Add('DefaultDrawing');
     OutProperties.Add('Enabled');
     OutProperties.Add('GroupIndex');
     OutProperties.Add('HelpContext');
@@ -357,6 +398,7 @@ begin
     OutProperties.Add('ParentShowHint');
     OutProperties.Add('PopupMenu');
     OutProperties.Add('ReadOnly');
+    OutProperties.Add('RowCount');
     OutProperties.Add('ShowHint');
     OutProperties.Add('ShortCut');
     OutProperties.Add('TabStop');
@@ -367,6 +409,7 @@ begin
 
     OutProperties.Add('ActivePage');   // 属性名要换但属性值不变的
     OutProperties.Add('Checked');      // TRadioButton/TCheckBox 是 IsChecked
+    OutProperties.Add('DefaultRowHeight'); // StringGrid 改成 RowHeight
     OutProperties.Add('PageIndex');
     OutProperties.Add('ScrollBars');   // 属性名属性值都变的
     OutProperties.Add('TabPosition');  // 属性名不变的但属性值要变的
@@ -390,6 +433,8 @@ begin
   else if (PropertyName = 'Checked') and ((TheClassName = 'TRadioButton') or
     (TheClassName = 'TCheckBox')) then
     NewPropName := 'IsChecked'
+  else if (PropertyName = 'DefaultRowHeight') and (TheClassName = 'TStringGrid') then
+    NewPropName := 'RowHeight'
   else if PropertyName = 'ScrollBars' then
   begin
     if PropertyValue = 'ssNone' then
@@ -488,7 +533,7 @@ begin
   begin
     Result := Vcl.Graphics.TGraphic(Clz.NewInstance);
     Result.Create;
-    TGraphicAccess(Result).ReadData(Stream);
+    TVclGraphicAccess(Result).ReadData(Stream);
   end;
 end;
 
@@ -549,6 +594,44 @@ begin
   end;
 end;
 
+{ TCnGridConverter }
+
+class procedure TCnGridConverter.GetComponents(OutVclComponents: TStrings);
+begin
+  if OutVclComponents <> nil then
+    OutVclComponents.Add('TStringGrid');
+end;
+
+class procedure TCnGridConverter.ProcessComponents(SourceLeaf,
+  DestLeaf: TCnDfmLeaf; Tab: Integer);
+var
+  I: Integer;
+  OptionString: string;
+  Options: TStringList;
+begin
+  I := IndexOfHead('Options = ', SourceLeaf.Properties);
+  if I >= 0 then
+  begin
+    OptionString := SourceLeaf.Properties[I];
+    Delete(OptionString, 1, Length('Options = ') + 1);
+    Options := TStringList.Create;
+    ConvertSetStringToElements(OptionString, Options);
+
+    // 转换集合元素，不存在对应关系的则删除
+    for I := Options.Count - 1 downto 0 do
+    begin
+      OptionString := CnConvertEnumValueIfExists(Options[I]);
+      if OptionString <> '' then
+        Options[I] := OptionString
+      else
+        Options.Delete(I);
+    end;
+    OptionString := ConvertSetElementsToString(Options);
+
+    DestLeaf.Properties.Add('Options = ' + OptionString);
+  end;
+end;
+
 initialization
   RegisterCnPropertyConverter(TCnPositionConverter);
   RegisterCnPropertyConverter(TCnSizeConverter);
@@ -559,6 +642,7 @@ initialization
 
   RegisterCnComponentConverter(TCnTreeViewConverter);
   RegisterCnComponentConverter(TCnImageConverter);
+  RegisterCnComponentConverter(TCnGridConverter);
 
   RegisterClasses([TIcon, TBitmap, TMetafile, TWICImage, TJpegImage, TGifImage, TPngImage]);
 

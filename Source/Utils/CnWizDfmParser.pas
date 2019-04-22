@@ -368,12 +368,15 @@ begin
           Parser.NextToken;
           while Parser.Token <> ']' do
           begin
-            Result := Result + Parser.TokenString;
+            if Parser.Token = ',' then
+              Result := Result + Parser.TokenString + ' '
+            else
+              Result := Result + Parser.TokenString;
             Parser.NextToken;
           end;
           Result := Result + ']';
         end;
-      '(':  // 字符串列表，不过缩进丢了
+      '(':  // 字符串列表，缩进由输出时控制，这里不放缩进
         begin
           Result := Parser.TokenString;
           Parser.NextToken;
