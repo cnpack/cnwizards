@@ -41,10 +41,12 @@ uses
   System.SysUtils, System.Classes, System.Generics.Collections, Winapi.Windows,
   FMX.Types, FMX.Edit, FMX.ListBox, FMX.ListView, FMX.StdCtrls, FMX.ExtCtrls,
   FMX.TabControl, FMX.Memo, FMX.Dialogs, Vcl.ComCtrls, Vcl.Graphics, Vcl.Imaging.jpeg,
-  Vcl.Imaging.pngimage, Vcl.Imaging.GIFImg, FMX.Graphics,
+  Vcl.Imaging.pngimage, Vcl.Imaging.GIFImg, FMX.Graphics, Vcl.Controls, System.TypInfo,
   CnFmxUtils, CnVclToFmxMap, CnWizDfmParser;
 
 type
+  ECnVclFmxConvertException = class(Exception);
+
   // === 属性转换器 ===
 
   TCnPositionConverter = class(TCnPropertyConverter)
@@ -126,10 +128,19 @@ type
     class procedure ProcessComponents(SourceLeaf, DestLeaf: TCnDfmLeaf; Tab: Integer = 0); override;
   end;
 
+  TCnImageListConverter = class(TCnComponentConverter)
+  {* 针对性转换 ImageList 的组件转换器，主要处理其 Bitmap 属性}
+  public
+    class procedure GetComponents(OutVclComponents: TStrings); override;
+    class procedure ProcessComponents(SourceLeaf, DestLeaf: TCnDfmLeaf; Tab: Integer = 0); override;
+  end;
+
 implementation
 
 type
   TVclGraphicAccess = class(Vcl.Graphics.TGraphic);
+
+  TVclImageListAccess = class(Vcl.Controls.TImageList);
 
 // 将 [a, b] 这种集合形式的字符串转换为分离的 a b 集合元素字符串
 procedure ConvertSetStringToElements(const SetString: string; OutElements: TStringList);
@@ -176,6 +187,23 @@ begin
       Result := I;
       Exit;
     end;
+  end;
+end;
+
+// 从一行属性里根据属性名获取一个整形属性值
+function GetIntPropertyValue(const PropertyName, AProp: string): Integer;
+var
+  S: string;
+begin
+  if Pos(PropertyName + ' = ', AProp) <> 1 then
+    raise ECnVclFmxConvertException.Create('NO Property Found: ' + PropertyName);
+
+  S := AProp;
+  Delete(S, 1, Length(PropertyName) + 3);
+  try
+    Result := StrToInt(S);
+  except
+    raise ECnVclFmxConvertException.Create('NOT a Valid Integer Value: ' + S);
   end;
 end;
 
@@ -550,7 +578,6 @@ var
   Stream: TStream;
   TmpStream: TMemoryStream;
   AGraphic: Vcl.Graphics.TGraphic;
-  VclBitmap: Vcl.Graphics.TBitmap;
   FmxBitmap: FMX.Graphics.TBitmap;
 begin
   I := IndexOfHead('Picture.Data = ', SourceLeaf.Properties);
@@ -563,7 +590,6 @@ begin
       Stream.Position := 0;
 
       AGraphic := nil;
-      VclBitmap := nil;
       FmxBitmap := nil;
       TmpStream := nil;
 
@@ -648,11 +674,155 @@ begin
     begin
       for I := 1 to Count do
       begin
-        // 给 DestLeaf 添加一个子节点
+        // 给 DestLeaf 添加一个子节点，没其他属性
         Leaf := DestLeaf.Tree.AddChild(DestLeaf) as TCnDfmLeaf;
         Leaf.ElementClass := 'TStringColumn';
         Leaf.ElementKind := dkObject;
         Leaf.Text := 'StringColumn' + IntToStr(Leaf.Tree.GetSameClassIndex(Leaf) + 1);
+      end;
+    end;
+  end;
+end;
+
+{ TCnImageListConverter }
+
+class procedure TCnImageListConverter.GetComponents(OutVclComponents: TStrings);
+begin
+  if OutVclComponents <> nil then
+    OutVclComponents.Add('TImageList');
+end;
+
+class procedure TCnImageListConverter.ProcessComponents(SourceLeaf,
+  DestLeaf: TCnDfmLeaf; Tab: Integer);
+var
+  I: Integer;
+  Stream: TStream;
+  ImageList: TImageList;
+  ImgStr: string;
+  TmpStream: TMemoryStream;
+  VclBitmap: Vcl.Graphics.TBitmap;
+  FmxBitmap: FMX.Graphics.TBitmap;
+
+
+  procedure TrySetPropertyToImageList(const PropName: string);
+  var
+    Idx: Integer;
+  begin
+    Idx := IndexOfHead(PropName + ' = ', SourceLeaf.Properties);
+    if Idx >= 0 then
+    begin
+      Idx := GetIntPropertyValue(SourceLeaf.Properties[Idx], PropName);
+      SetOrdProp(ImageList, PropName, Idx);
+    end;
+  end;
+
+begin
+  I := IndexOfHead('Bitmap = ', SourceLeaf.Properties);
+  if I >= 0 then
+  begin
+    if SourceLeaf.Properties.Objects[I] <> nil then
+    begin
+      // 从 Stream 中读入 Bitmap 信息
+      Stream := TStream(SourceLeaf.Properties.Objects[I]);
+      Stream.Position := 0;
+
+      ImageList := TImageList.Create(nil);
+      try
+        TrySetPropertyToImageList('Height');
+        TrySetPropertyToImageList('Width');
+        TrySetPropertyToImageList('AllocBy');
+
+        TVclImageListAccess(ImageList).ReadData(Stream);
+
+      // TODO: 从 ImageList 中挨个朝外画
+      // 写   Source = <
+      // 循环写 item
+      //          MultiResBitmap.LoadSize = 0
+      //          MultiResBitmap = <
+      //            item
+      //              Scale = 1.000000000000000000
+      //              Width = 16
+      //              Height = 16
+      //              PNG = {
+      //              }
+      //              FileName = '\\VBOXSVR\Downloads\delphi5_setup\delphi.ico'
+      //            end>
+      //          Name = 'delphi'
+      //        end
+      // 结束循环写 >
+
+        if ImageList.Count > 0 then
+        begin
+          // 写 Source
+          ImgStr := 'Source = <' + #13#10;
+          for I := 0 to ImageList.Count - 1 do
+          begin
+            ImgStr := ImgStr + StringOfChar(' ', 2) + 'item' + #13#10;
+            ImgStr := ImgStr + StringOfChar(' ', 4) + 'MultiResBitmap.LoadSize = 0' + #13#10;
+            ImgStr := ImgStr + StringOfChar(' ', 4) + 'MultiResBitmap = < ' + #13#10;
+            ImgStr := ImgStr + StringOfChar(' ', 6) + 'item' + #13#10;
+            ImgStr := ImgStr + StringOfChar(' ', 8) + 'Scale = 1.000000000000000000' + #13#10;
+            ImgStr := ImgStr + StringOfChar(' ', 8) + 'Width = ' + IntToStr(ImageList.Width) + #13#10;
+            ImgStr := ImgStr + StringOfChar(' ', 8) + 'Height = ' + IntToStr(ImageList.Height) + #13#10;
+            ImgStr := ImgStr + StringOfChar(' ', 8) + 'PNG = {';
+
+            VclBitmap := nil;
+            TmpStream := nil;
+            FmxBitmap := nil;
+            try
+              VclBitmap := Vcl.Graphics.TBitmap.Create;
+              VclBitmap.Width := ImageList.Width;
+              VclBitmap.Height := ImageList.Height;
+              ImageList.Draw(VclBitmap.Canvas, 0, 0, I, True);
+
+              TmpStream := TMemoryStream.Create;
+              VclBitmap.SaveToStream(TmpStream);
+              TmpStream.Position := 0;
+              FmxBitmap := Fmx.Graphics.TBitmap.Create;
+              FmxBitmap.LoadFromStream(TmpStream);
+              TmpStream.Clear;
+              FmxBitmap.SaveToStream(TmpStream);
+
+              TmpStream.Position := 0;
+              ImgStr := ImgStr + ConvertStreamToHexDfmString(TmpStream, 10) + '}' + #13#10;
+            finally
+              VclBitmap.Free;
+              FmxBitmap.Free;
+              TmpStream.Free;
+            end;
+
+            // ImgStr := ImgStr + StringOfChar(' ', 8) + 'FileName = ''''' + #13#10; 没有文件名
+            ImgStr := ImgStr + StringOfChar(' ', 6) + 'end>' + #13#10;
+            ImgStr := ImgStr + StringOfChar(' ', 4) + 'Name = ''Item ' + IntToStr(I) + ''''#13#10;
+
+            // 如果是最后一图，结尾
+            if I = ImageList.Count - 1 then
+              ImgStr := ImgStr + StringOfChar(' ', 2) + 'end>' + #13#10
+            else
+              ImgStr := ImgStr + StringOfChar(' ', 2) + 'end' + #13#10;
+          end;
+
+          // 写 Destination
+          ImgStr := ImgStr + 'Destination = <' + #13#10;
+          for I := 0 to ImageList.Count - 1 do
+          begin
+            ImgStr := ImgStr + StringOfChar(' ', 2) + 'item' + #13#10;
+            ImgStr := ImgStr + StringOfChar(' ', 4) + 'Layers = <' + #13#10;
+            ImgStr := ImgStr + StringOfChar(' ', 6) + 'item' + #13#10;
+            ImgStr := ImgStr + StringOfChar(' ', 8) + 'Name = ''Item ' + IntToStr(I) + ''''#13#10;
+            ImgStr := ImgStr + StringOfChar(' ', 6) + 'end>' + #13#10;
+
+            // 如果是最后一图，结尾
+            if I = ImageList.Count - 1 then
+              ImgStr := ImgStr + StringOfChar(' ', 2) + 'end>'
+            else
+              ImgStr := ImgStr + StringOfChar(' ', 2) + 'end' + #13#10;
+          end;
+
+          DestLeaf.Properties.Add(ImgStr);
+        end;
+      finally
+        ImageList.Free;
       end;
     end;
   end;
@@ -669,6 +839,7 @@ initialization
   RegisterCnComponentConverter(TCnTreeViewConverter);
   RegisterCnComponentConverter(TCnImageConverter);
   RegisterCnComponentConverter(TCnGridConverter);
+  RegisterCnComponentConverter(TCnImageListConverter);
 
   RegisterClasses([TIcon, TBitmap, TMetafile, TWICImage, TJpegImage, TGifImage, TPngImage]);
 

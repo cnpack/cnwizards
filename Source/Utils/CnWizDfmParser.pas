@@ -155,7 +155,7 @@ function SaveTreeToDfmFile(const FileName: string; Tree: TCnDfmTree): Boolean;
 function ConvertWideStringToDfmString(const W: WideString): WideString;
 {* 将宽字符串转换为 Delphi 7 或以上版本中的 DFM 字符串}
 
-function ConvertStreamToHexDfmString(Stream: TStream): string;
+function ConvertStreamToHexDfmString(Stream: TStream; Tab: Integer = 2): string;
 {* 将二进制数据转换为 DFM 字符串，不带前后大括号}
 
 implementation
@@ -179,7 +179,7 @@ begin
 end;
 {$ENDIF}
 
-function ConvertStreamToHexDfmString(Stream: TStream): string;
+function ConvertStreamToHexDfmString(Stream: TStream; Tab: Integer): string;
 const
   BYTES_PER_LINE = 32;
 var
@@ -191,11 +191,13 @@ begin
   Result := '';
   Count := Stream.Size;
   MultiLine := Count >= BYTES_PER_LINE;
+  if Tab < 0 then
+    Tab := 0;
 
   while Count > 0 do
   begin
     if MultiLine then
-      Result := Result + #13#10 + '  ';
+      Result := Result + #13#10 + StringOfChar(' ', Tab);
 
     if Count >= BYTES_PER_LINE then
       I := BYTES_PER_LINE
