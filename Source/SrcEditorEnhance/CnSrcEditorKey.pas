@@ -2556,7 +2556,7 @@ begin
               NewCode := NewName
             else
             begin
-              // 从上一 Token 的尾巴，到现任 Token 的头，再加替换后的文字，都用 AnsiString 来计算
+              // 从上一 Token 的尾巴，到现任 Token 的头，再加替换后的文字
               LastTokenPos := LastToken.TokenPos + Length(LastToken.Token);
               NewCode := NewCode + Copy(Parser.Source, LastTokenPos + 1,
                 TCnWidePasToken(CurTokens[I]).TokenPos - LastTokenPos) + NewName;
@@ -2809,7 +2809,7 @@ begin
               NewCode := NewName
             else
             begin
-              // 从上一 Token 的尾巴，到现任 Token 的头，再加替换后的文字，都用 AnsiString 来计算
+              // 从上一 Token 的尾巴，到现任 Token 的头，再加替换后的文字
               LastTokenPos := LastToken.TokenPos + Length(LastToken.Token);
               NewCode := NewCode + Copy(CParser.Source, LastTokenPos + 1,
                 TCnWideCppToken(CurTokens[I]).TokenPos - LastTokenPos) + NewName;
@@ -2944,10 +2944,10 @@ begin
             NewCode := NewName
           else
           begin
-            // 从上一 Token 的尾巴，到现任 Token 的头，再加替换后的文字，都用 AnsiString 来计算
+            // 从上一 Token 的尾巴，到现任 Token 的头，再加替换后的文字
             LastTokenPos := LastToken.TokenPos + Length(LastToken.Token);
-            NewCode := NewCode + string(Copy(AnsiString(CParser.Source), LastTokenPos + 1,
-              TCnWideCppToken(CurTokens[I]).TokenPos - LastTokenPos)) + NewName;
+            NewCode := NewCode + Copy(CParser.Source, LastTokenPos + 1,
+              TCnWideCppToken(CurTokens[I]).TokenPos - LastTokenPos) + NewName;
           end;
   {$IFDEF DEBUG}
           CnDebugger.LogMsg('Cpp Another NewCode: ' + NewCode);

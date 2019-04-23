@@ -1,11 +1,11 @@
 inherited CnIdentRenameForm: TCnIdentRenameForm
   Left = 352
   Top = 202
-  Width = 251
-  Height = 262
+  Width = 255
+  Height = 266
   Caption = 'Rename Identifier'
-  Constraints.MinHeight = 262
-  Constraints.MinWidth = 251
+  Constraints.MinHeight = 266
+  Constraints.MinWidth = 255
   Icon.Data = {
     0000010001001010000001000800680500001600000028000000100000002000
     0000010008000000000040010000000000000000000000000000000000000000
@@ -51,6 +51,7 @@ inherited CnIdentRenameForm: TCnIdentRenameForm
     000000000000002F3C243025000000000000000000000000000000000000FFFF
     0000C1FF000081DF000081870000810300008101000083B10000FFFB0000DFFF
     00008DC1000080810000C0810000E1810000FB810000FF830000FFFF0000}
+  OldCreateOrder = True
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
@@ -71,7 +72,7 @@ inherited CnIdentRenameForm: TCnIdentRenameForm
     object rbCurrentProc: TRadioButton
       Left = 8
       Top = 20
-      Width = 185
+      Width = 209
       Height = 17
       Caption = 'Current Procedure(&1)'
       TabOrder = 0
@@ -79,7 +80,7 @@ inherited CnIdentRenameForm: TCnIdentRenameForm
     object rbCurrentInnerProc: TRadioButton
       Left = 8
       Top = 44
-      Width = 185
+      Width = 209
       Height = 17
       Caption = 'Nested Inner Procedure(&2)'
       TabOrder = 1
@@ -87,7 +88,7 @@ inherited CnIdentRenameForm: TCnIdentRenameForm
     object rbUnit: TRadioButton
       Left = 8
       Top = 68
-      Width = 161
+      Width = 209
       Height = 17
       Caption = 'Whole Unit(&3)'
       TabOrder = 2
@@ -95,7 +96,7 @@ inherited CnIdentRenameForm: TCnIdentRenameForm
     object rbCppHPair: TRadioButton
       Left = 8
       Top = 92
-      Width = 161
+      Width = 209
       Height = 17
       Caption = 'Whole Cpp/H Files Pair(&4)'
       TabOrder = 3
