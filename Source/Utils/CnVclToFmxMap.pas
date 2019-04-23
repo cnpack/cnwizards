@@ -41,6 +41,8 @@ uses
   System.SysUtils, System.Classes, System.Generics.Collections, CnWizDfmParser;
 
 type
+  ECnVclFmxConvertException = class(Exception);
+
   TCnPropertyConverter = class(TObject)
   {* 转换某些特定属性的基类}
   public
@@ -95,6 +97,14 @@ procedure RegisterCnComponentConverter(AClass: TCnComponentConverterClass);
 function CnIsSupportFMXControl(const FMXClass: string): Boolean;
 {* 转换出的 FMX 类名是否是本程序所支持的 FMX 可视组件类}
 
+function GetIntPropertyValue(const PropertyName, AProp: string): Integer;
+{* 从一行属性里根据属性名获取一个整形属性值，无则抛异常}
+
+function GetStringPropertyValue(const PropertyName, AProp: string): string;
+{* 从一行属性里根据属性名获取一个字符串属性值，无则返回空}
+
+function IndexOfHead(const Head: string; List: TStrings): Integer;
+
 function GetFloatStringFromInteger(IntValue: Integer): string;
 
 implementation
@@ -139,7 +149,7 @@ var
 
 const
   // VCL 与 FMX 组件的对应转换关系，同名优先
-  VCL_FMX_CLASS_PAIRS: array[0..43] of string = (
+  VCL_FMX_CLASS_PAIRS: array[0..44] of string = (
     'TButton:TButton',        // 可视组件们
     'TBitBtn:TButton',           // 图片会丢失
     'TCalendar:TCalendar',
@@ -167,7 +177,8 @@ const
     'TSplitter:TSplitter',
     'TStatusBar:TStatusBar',
     'TStringGrid:TStringGrid',
-    'TToolbar:TToolbar',
+    'TToolBar:TGridLayout',
+    'TToolButton:TSpeedButton',
     'TTrackBar:TTrackBar',
     'TTreeView:TTreeView',
     'TAction:TAction',         // 不可视组件们
@@ -187,7 +198,7 @@ const
   );
 
   // 所支持的 FMX 的 TControl 子类，用于 Position 判断
-  FMX_CONTROLS_LIST: array[0..29] of string = (
+  FMX_CONTROLS_LIST: array[0..30] of string = (
     'TButton',        // 可视组件们
     'TCalendar',
     'TCheckBox',
@@ -196,6 +207,7 @@ const
     'TComboBox',
     'TEdit',
     'TGroupBox',
+    'TGridLayout',
     'THeader',
     'TImage',
     'TImageControl',
@@ -1100,6 +1112,55 @@ begin
   Result := IntToStr(IntValue) + '.000000000000000000';
 end;
 
+// 从一行属性里根据属性名获取一个整形属性值
+function GetIntPropertyValue(const PropertyName, AProp: string): Integer;
+var
+  S: string;
+begin
+  if Pos(PropertyName + ' = ', AProp) <> 1 then
+    raise ECnVclFmxConvertException.Create('NO Property Found: ' + PropertyName);
+
+  S := AProp;
+  Delete(S, 1, Length(PropertyName) + 3);
+  try
+    Result := StrToInt(S);
+  except
+    raise ECnVclFmxConvertException.Create('NOT a Valid Integer Value: ' + S);
+  end;
+end;
+
+function GetStringPropertyValue(const PropertyName, AProp: string): string;
+var
+  S: string;
+begin
+  Result := '';
+  if Pos(PropertyName + ' = ', AProp) = 1 then
+  begin
+    Result := AProp;
+    Delete(Result, 1, Length(PropertyName) + 3);
+  end;
+end;
+
+function IndexOfHead(const Head: string; List: TStrings): Integer;
+var
+  I: Integer;
+begin
+  Result := -1;
+  for I := 0 to List.Count - 1 do
+  begin
+    if Pos(Head, List[I]) = 1 then
+    begin
+      Result := I;
+      Exit;
+    end;
+  end;
+end;
+
+function ContainsHead(const Head: string; List: TStrings): Boolean;
+begin
+  Result := IndexOfHead(Head, List) >= 0;
+end;
+
 function CnConvertTreeFromVclToFmx(SourceTree, DestTree: TCnDfmTree; OutEventIntf,
   OutEventImpl, OutUnits: TStringList): Boolean;
 var
@@ -1202,21 +1263,6 @@ var
       OutProperties.Add(Format('%s = %s', [PropName, PropValue]));
   end;
 
-  function ContainsHead(const Head: string; List: TStrings): Boolean;
-  var
-    I: Integer;
-  begin
-    Result := False;
-    for I := 0 to List.Count - 1 do
-    begin
-      if Pos(Head, List[I]) = 1 then
-      begin
-        Result := True;
-        Exit;
-      end;
-    end;
-  end;
-
 begin
   Result := False;
   CheckInitConverterMap;
@@ -1229,12 +1275,43 @@ begin
   if OutProperties <> nil then
     OutProperties.Clear;
 
-  // 提前特殊处理，如 TMemo 没有 WordWrap 属性（默认为 True），则需要写
-  // TextSettings.WordWrap 为 True 到 FMX 中（默认为 False）
+  // 提前特殊处理
   if InComponentClass = 'TMemo' then
   begin
+    // 如 TMemo 没有 WordWrap 属性（默认为 True），则需要写
+    // TextSettings.WordWrap 为 True 到 FMX 中（默认为 False）
     if not ContainsHead('WordWrap', InProperties) then
       OutProperties.Add('TextSettings.WordWrap = True');
+  end
+  else if InComponentClass = 'TToolButton' then
+  begin
+    // 如 ToolButton 没有 Width/Height 的话说明是默认的 23/22，得先写入
+    if not ContainsHead('Width', InProperties) then
+      InProperties.Add('Width = 23');
+    if not ContainsHead('Height', InProperties) then
+      InProperties.Add('Height = 22');
+
+    // 如果 ToolButton 的 Style 是 tbsSeparator 则要把 ImageIndex 设为 -1
+    P := IndexOfHead('Style', InProperties);
+    if P >= 0 then
+    begin
+      PropValue := GetStringPropertyValue('Style', InProperties[P]);
+      if PropValue = 'tbsSeparator' then
+      begin
+        // 删掉 ImageIndex，让其恢复默认的 -1
+        P := IndexOfHead('ImageIndex', InProperties);
+        if P >= 0 then
+          InProperties.Delete(P);
+      end;
+    end;
+  end
+  else if InComponentClass = 'TToolBar' then
+  begin
+    // 如 ToolBar 没有 ButtonWidth/ButtonHeight 的话说明是默认的 23/22
+    if not ContainsHead('ButtonWidth', InProperties) then
+      InProperties.Add('ButtonWidth = 23');
+    if not ContainsHead('ButtonHeight', InProperties) then
+      InProperties.Add('ButtonHeight = 22');
   end;
 
   while InProperties.Count > 0 do

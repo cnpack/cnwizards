@@ -45,8 +45,6 @@ uses
   CnFmxUtils, CnVclToFmxMap, CnWizDfmParser;
 
 type
-  ECnVclFmxConvertException = class(Exception);
-
   // === 属性转换器 ===
 
   TCnPositionConverter = class(TCnPropertyConverter)
@@ -135,6 +133,13 @@ type
     class procedure ProcessComponents(SourceLeaf, DestLeaf: TCnDfmLeaf; Tab: Integer = 0); override;
   end;
 
+  TCnToolBarConverter = class(TCnComponentConverter)
+  {* 针对性转换 ToolBar 的组件转换器，主要处理其 Images 属性给内部的 Button}
+  public
+    class procedure GetComponents(OutVclComponents: TStrings); override;
+    class procedure ProcessComponents(SourceLeaf, DestLeaf: TCnDfmLeaf; Tab: Integer = 0); override;
+  end;
+
 implementation
 
 type
@@ -173,38 +178,6 @@ begin
 
   Result := '[' + InElements.CommaText + ']';
   Result := StringReplace(Result, ',', ', ', [rfReplaceAll]);
-end;
-
-function IndexOfHead(const Head: string; List: TStrings): Integer;
-var
-  I: Integer;
-begin
-  Result := -1;
-  for I := 0 to List.Count - 1 do
-  begin
-    if Pos(Head, List[I]) = 1 then
-    begin
-      Result := I;
-      Exit;
-    end;
-  end;
-end;
-
-// 从一行属性里根据属性名获取一个整形属性值
-function GetIntPropertyValue(const PropertyName, AProp: string): Integer;
-var
-  S: string;
-begin
-  if Pos(PropertyName + ' = ', AProp) <> 1 then
-    raise ECnVclFmxConvertException.Create('NO Property Found: ' + PropertyName);
-
-  S := AProp;
-  Delete(S, 1, Length(PropertyName) + 3);
-  try
-    Result := StrToInt(S);
-  except
-    raise ECnVclFmxConvertException.Create('NOT a Valid Integer Value: ' + S);
-  end;
 end;
 
 function SearchPropertyValueAndRemoveFromStrings(List: TStrings; const PropertyName: string): string;
@@ -285,8 +258,9 @@ class procedure TCnCaptionConverter.ProcessProperties(const PropertyName,
   TheClassName, PropertyValue: string; InProperties, OutProperties: TStrings;
   Tab: Integer);
 begin
-  // FMX TPanel 没有 Text 属性
-  if (PropertyName = 'Caption') and (TheClassName <> 'TPanel') then
+  // FMX TPanel / TToolBar 对应的 TGridLayout / ToolButton 对应的 SpeedButton 没有 Text 属性
+  if (PropertyName = 'Caption') and ((TheClassName <> 'TPanel') and
+    (TheClassName <> 'TToolBar') and (TheClassName <> 'TToolButton')) then
     OutProperties.Add('Text = ' + PropertyValue);
 end;
 
@@ -436,6 +410,8 @@ begin
     OutProperties.Add('Visible');
 
     OutProperties.Add('ActivePage');   // 属性名要换但属性值不变的
+    OutProperties.Add('ButtonHeight'); // ToolBar 的 ButtonHeight/ButtonWidth
+    OutProperties.Add('ButtonWidth');  // 要改成 TGridLayout 的 ItemHeight/ItemWidth
     OutProperties.Add('Checked');      // TRadioButton/TCheckBox 是 IsChecked
     OutProperties.Add('DefaultRowHeight'); // StringGrid 改成 RowHeight
     OutProperties.Add('PageIndex');
@@ -463,6 +439,14 @@ begin
     NewPropName := 'IsChecked'
   else if (PropertyName = 'DefaultRowHeight') and (TheClassName = 'TStringGrid') then
     NewPropName := 'RowHeight'
+  else if (PropertyName = 'ButtonWidth') and (TheClassName = 'TToolBar') then
+  begin
+    NewPropName := 'ItemWidth'
+  end
+  else if (PropertyName = 'ButtonHeight') and (TheClassName = 'TToolBar') then
+  begin
+    NewPropName := 'ItemHeight'
+  end
   else if PropertyName = 'ScrollBars' then
   begin
     if PropertyValue = 'ssNone' then
@@ -703,7 +687,6 @@ var
   VclBitmap: Vcl.Graphics.TBitmap;
   FmxBitmap: FMX.Graphics.TBitmap;
 
-
   procedure TrySetPropertyToImageList(const PropName: string);
   var
     Idx: Integer;
@@ -828,6 +811,36 @@ begin
   end;
 end;
 
+{ TCnToolBarConverter }
+
+class procedure TCnToolBarConverter.GetComponents(OutVclComponents: TStrings);
+begin
+  if OutVclComponents <> nil then
+    OutVclComponents.Add('TToolBar');
+end;
+
+class procedure TCnToolBarConverter.ProcessComponents(SourceLeaf,
+  DestLeaf: TCnDfmLeaf; Tab: Integer);
+var
+  I: Integer;
+  S: string;
+  Leaf: TCnDfmLeaf;
+begin
+  I := IndexOfHead('Images = ', DestLeaf.Properties);
+  if I >= 0 then
+  begin
+    S := DestLeaf.Properties[I];
+    Delete(S, 1, Length('Images = '));
+    DestLeaf.Properties.Delete(I);
+
+    for I := 0 to DestLeaf.Count - 1 do
+    begin
+      if IndexOfHead('Images = ', DestLeaf.Items[I].Properties) < 0 then
+        DestLeaf.Items[I].Properties.Add('Images = ' + S);
+    end;
+  end;
+end;
+
 initialization
   RegisterCnPropertyConverter(TCnPositionConverter);
   RegisterCnPropertyConverter(TCnSizeConverter);
@@ -840,6 +853,7 @@ initialization
   RegisterCnComponentConverter(TCnImageConverter);
   RegisterCnComponentConverter(TCnGridConverter);
   RegisterCnComponentConverter(TCnImageListConverter);
+  RegisterCnComponentConverter(TCnToolBarConverter);
 
   RegisterClasses([TIcon, TBitmap, TMetafile, TWICImage, TJpegImage, TGifImage, TPngImage]);
 
