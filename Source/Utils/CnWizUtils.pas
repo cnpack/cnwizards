@@ -4474,6 +4474,7 @@ end;
 //   也可以直接根据 CharIndex 处理 Text，但要注意双字节字符变成了仨字节
 // Unicode IDE 下取得的是 UTF16 字符串，CharIndex 是 CursorPos.Col（编辑器中状态栏的 Col）- 1，和编辑器中状态栏显示的一致
 //   如果要根据 CharIndex 处理 Text，则需要将 Text 转换为 AnsiString
+// AnsiString[CharIndex] 字符是光标左边那个字符
 {
   以如下表格为准：
                       获取的 Text 格式   CharIndex(CursorPos.Col - 1) 编辑器状态栏的真实列状况（Ansi）   ConvertPos 得到的 TOTACharPos

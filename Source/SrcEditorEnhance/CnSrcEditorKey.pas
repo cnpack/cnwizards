@@ -685,6 +685,12 @@ begin
 
     if not Handled and (AChar = ')') then
     begin
+      if CanIgnoreFromIME then // 输入法下的括号不算
+      begin
+        Result := False;
+        Exit;
+      end;
+
       // if / else if / until / while 这种，表达式出现单个右括号时，前补左小括号
       // 先数 AnsiLine 最前面几个空格
       ACount := 0;
@@ -709,7 +715,7 @@ begin
       if LeftBracketIndex >= 0 then
       begin
 {$IFDEF DEBUG}
-        CnDebugger.LogMsg('Possible Should Add LeftBracket for if/else if/while/until Line at ' + IntToStr(LeftBracketIndex));
+        CnDebugger.LogMsg('Possible Should Add LeftBracket for if/else if/while/until Line at Ansi ' + IntToStr(LeftBracketIndex));
 {$ENDIF}
         // 是符合要求的行，查左边到光标位置的小括号配对数是否相同，不考虑字符串内有小括号的情况
         ACount := 0;
@@ -726,10 +732,23 @@ begin
 {$IFDEF DEBUG}
         CnDebugger.LogMsg('Bracket Count is ' + IntToStr(ACount));
 {$ENDIF}
-        if ACount = 0 then
+        if (ACount = 0) and (CharIndex > LeftBracketIndex) then
         begin
           // 当前右括号尚未输入，并且左边没左右括号，光标移动过去输入左括号再移动过来
+{$IFDEF UNICODE}
+          // Left 和 CharIndex 都是 Ansi/Utf8Ansi/Ansi 位置，能相减。
+          // 但 Move 的则要求 Ansi/Utf8/Utf8，在 Unicode 环境下不一致，需要转换
+          // LeftBracket 之前没有双字节字符，只要转 CharIndex 就行
+          ACount := -CalcUtf8LengthFromWideString(PWideChar(string(Copy(AnsiLine,
+            LeftBracketIndex + 1, CharIndex - LeftBracketIndex))));
+{$ELSE}
           ACount := LeftBracketIndex - CharIndex;
+{$ENDIF}
+
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('Should Move Back and Forward: ' + IntToStr(ACount));
+{$ENDIF}
+
           CnOtaMovePosInCurSource(ipCur, 0, ACount);
           CnOtaInsertTextToCurSource('(');
           CnOtaMovePosInCurSource(ipCur, 0, -ACount);
