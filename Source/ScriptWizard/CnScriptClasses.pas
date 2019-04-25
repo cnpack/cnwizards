@@ -46,7 +46,6 @@ uses
   CnCommon, uPSComponent, uPSCompiler, uPSRuntime;
 
 type
-
   TCnPSPlugin = class(TPSPlugin)
   public
     procedure CompOnUses1(CompExec: TPSScript); virtual;

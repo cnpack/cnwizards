@@ -538,10 +538,10 @@ var
   AChar, Char1, Char2: Char;
   Line: string;
   AnsiLine: AnsiString;
-  LineNo, CharIndex: Integer;
+  LineNo, CharIndex, ACount, LeftBracketIndex, MaxLen: Integer;
   NeedAutoMatch: Boolean;
   EditControl: TControl;
-  Element, LineFlag: Integer;
+  I, Element, LineFlag: Integer;
   KeyIsLeft: Boolean;
   ACharSet: TAnsiCharSet;
 begin
@@ -680,6 +680,61 @@ begin
 {$ENDIF}
         CnOtaEditDelete(1);
         Handled := False;
+      end;
+    end;
+
+    if not Handled and (AChar = ')') then
+    begin
+      // if / else if / until / while 这种，表达式出现单个右括号时，前补左小括号
+      // 先数 AnsiLine 最前面几个空格
+      ACount := 0;
+      for I := 1 to Length(AnsiLine) do
+      begin
+        if AnsiLine[I] = ' ' then
+          Inc(ACount)
+        else
+          Break;
+      end;
+
+      LeftBracketIndex := -1;
+      if Pos('if ', AnsiLine) = ACount + 1 then
+        LeftBracketIndex := ACount + Length('if ')
+      else if Pos('else if ', AnsiLine) = ACount + 1 then
+        LeftBracketIndex := ACount + Length('else if ')
+      else if Pos('while ', AnsiLine) = ACount + 1 then
+        LeftBracketIndex := ACount + Length('while ')
+      else if Pos('until ', AnsiLine) = ACount + 1 then
+        LeftBracketIndex := ACount + Length('until ');
+
+      if LeftBracketIndex >= 0 then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('Possible Should Add LeftBracket for if/else if/while/until Line at ' + IntToStr(LeftBracketIndex));
+{$ENDIF}
+        // 是符合要求的行，查左边到光标位置的小括号配对数是否相同，不考虑字符串内有小括号的情况
+        ACount := 0;
+        MaxLen := CharIndex + 1;
+        if MaxLen > Length(AnsiLine) then
+          MaxLen := Length(AnsiLine);
+
+        for I := 1 to MaxLen do
+        begin
+          if (AnsiLine[I] = '(') or (AnsiLine[I] = ')') then
+            Inc(ACount)
+        end;
+
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('Bracket Count is ' + IntToStr(ACount));
+{$ENDIF}
+        if ACount = 0 then
+        begin
+          // 当前右括号尚未输入，并且左边没左右括号，光标移动过去输入左括号再移动过来
+          ACount := LeftBracketIndex - CharIndex;
+          CnOtaMovePosInCurSource(ipCur, 0, ACount);
+          CnOtaInsertTextToCurSource('(');
+          CnOtaMovePosInCurSource(ipCur, 0, -ACount);
+          View.Paint;
+        end;
       end;
     end;
   end;
@@ -3248,7 +3303,7 @@ begin
     btQuote:   CnOtaInsertTextToCurSource('''');
     btDitto:   CnOtaInsertTextToCurSource('"');
   end;
-  
+
   CnOtaMovePosInCurSource(ipCur, 0, -1);
   IOTAEditView(FRepaintView).Paint;
 end;
