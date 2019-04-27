@@ -4594,7 +4594,6 @@ var
   I: Integer;
 {$IFDEF IDE_STRING_ANSI_UTF8}
   Utf8Text: AnsiString;
-  WideText: WideString;
 {$ENDIF}
 
   function _IsValidIdentChar(C: AnsiChar; First: Boolean): Boolean;
