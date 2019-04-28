@@ -5285,7 +5285,11 @@ end;
 }
 procedure TCnGoalCodeFormatter.FormatInitSection(PreSpaceCount: Byte);
 begin
-  Match(tokKeywordInitialization);
+  if Scaner.Token = tokKeywordInitialization then
+    Match(tokKeywordInitialization)
+  else if Scaner.Token = tokKeywordBegin then
+    Match(tokKeywordBegin);
+
   Writeln;
   if Scaner.Token = tokKeywordFinalization then // Empty initialization
   begin
@@ -5457,7 +5461,7 @@ begin
   FormatImplementationSection(PreSpaceCount);
   WriteLine;
 
-  if Scaner.Token = tokKeywordInitialization then
+  if Scaner.Token in [tokKeywordInitialization, tokKeywordBegin] then // begin Ò²ÐÐ
   begin
     FormatInitSection(PreSpaceCount);
     WriteBlankLineByPrevCondition;
