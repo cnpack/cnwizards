@@ -841,6 +841,7 @@ var
   CompressorCommand, ListFileName, ExecCommand, VerStr: string;
   List: TStrings;
   Comment: AnsiString;
+  SrcList, ArcList: TStrings;
 begin
   if lvFileView.Items.Count = 0 then
   begin
@@ -956,9 +957,38 @@ begin
           try
             CnWizStartZip(_CnPChar(SaveFileName), _CnPChar(Password), RemovePath);
 
-            for I := 0 to Self.lvFileView.Items.Count - 1 do
-              if Self.lvFileView.Items[I].Data <> nil then
-                CnWizZipAddFile(_CnPChar(TCnBackupFileInfo(Self.lvFileView.Items[I].Data).FullFileName));
+            if FRemovePath then
+            begin
+              for I := 0 to Self.lvFileView.Items.Count - 1 do
+                if Self.lvFileView.Items[I].Data <> nil then
+                  CnWizZipAddFile(_CnPChar(TCnBackupFileInfo(Self.lvFileView.Items[I].Data).FullFileName), nil);
+            end
+            else
+            begin
+              // 拿到文件名列表，抽取掉前面的公共部分再传入
+              SrcList := TStringList.Create;
+              ArcList := TStringList.Create;
+              try
+                for I := 0 to Self.lvFileView.Items.Count - 1 do
+                  if Self.lvFileView.Items[I].Data <> nil then
+                    SrcList.Add(TCnBackupFileInfo(Self.lvFileView.Items[I].Data).FullFileName);
+
+                // 删除掉公共目录头后，添加进去
+                if CombineCommonPath(SrcList, ArcList) then
+                begin
+                  for I := 0 to SrcList.Count - 1 do
+                    CnWizZipAddFile(_CnPChar(SrcList[I]), _CnPChar(ArcList[I]));
+                end
+                else // 无齐头并进的公共目录，原样添加
+                begin
+                  for I := 0 to SrcList.Count - 1 do
+                    CnWizZipAddFile(_CnPChar(SrcList[I]), nil);
+                end;
+              finally
+                ArcList.Free;
+                SrcList.Free;
+              end;
+            end;
 
             if mmoComments.Lines.Text <> '' then
             begin

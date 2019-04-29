@@ -46,8 +46,9 @@ procedure CnWizStartZip(const SaveFileName: PAnsiChar; const Password: PAnsiChar
   RemovePath: Boolean); stdcall;
 {* 开始一个 Zip，创建内部对象，指明文件名、密码等}
 
-procedure CnWizZipAddFile(FileName: PAnsiChar); stdcall;
-{* 添加文件到 Zip}
+procedure CnWizZipAddFile(FileName, ArchiveFileName: PAnsiChar); stdcall;
+{* 添加文件到 Zip，参数为真实文件名以及要写入 Zip 文件的文件名
+  如果 ArchiveFileName 传 nil，则使用 FileName 并受 RemovePath 选项控制}
 
 procedure CnWizZipSetComment(Comment: PAnsiChar); stdcall;
 {* 设置 Zip 文件注释}
@@ -76,10 +77,10 @@ begin
   FWriter.CreateZipFile(SaveFileName);
 end;
 
-procedure CnWizZipAddFile(FileName: PAnsiChar); stdcall;
+procedure CnWizZipAddFile(FileName, ArchiveFileName: PAnsiChar); stdcall;
 begin
   if FWriter <> nil then
-    FWriter.AddFile(FileName);
+    FWriter.AddFile(FileName, ArchiveFileName);
 end;
 
 procedure CnWizZipSetComment(Comment: PAnsiChar); stdcall;
