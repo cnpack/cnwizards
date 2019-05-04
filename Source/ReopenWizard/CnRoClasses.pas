@@ -34,7 +34,9 @@ unit CnRoClasses;
 * 开发平台：PWin2000Pro + Delphi 5.02
 * 兼容测试：PWin2000 + Delphi 5/6/7
 * 本 地 化：该窗体中的字符串支持本地化处理方式
-* 修改记录：2012-09-19 by shenloqi
+* 修改记录：2019-05-04 by liuxiao
+*               修正高版本的 Delphi 下 Ini 读出的 Objects 里无 Strings 的问题
+*           2012-09-19 by shenloqi
 *               移植到Delphi XE3
 *           2004-12-12 V1.1
 *               去除TMyStringList，改用TList来管理。
@@ -693,19 +695,31 @@ begin
   Sections := TStringList.Create;
   try
     FIniFile.ReadSections(Sections);
-  
+
     Strings.BeginUpdate;
     try
       Strings.Clear;
       I := Sections.IndexOf(ASection);
       if I < 0 then Exit;
-  
-      SectionStrings := TStrings(Sections.Objects[I]);
-      for J := 0 to SectionStrings.Count - 1 do
-      begin
-        S := SectionStrings.Names[J];
-        S := Copy(SectionStrings[J], Length(S) + 2, MaxInt);
-        Strings.Add(S);
+
+      SectionStrings := TStringList.Create;
+      try
+        FIniFile.ReadSection(ASection, SectionStrings);
+
+        // SectionStrings := TStrings(Sections.Objects[I]);
+        // Sections.Objects 在高版本 Delphi 中不再是包含 Section 的所有内容的 Strings 了
+        // 必须手工读
+        for J := 0 to SectionStrings.Count - 1 do
+        begin
+          S := FIniFile.ReadString(ASection, SectionStrings[J], '');
+          if S <> '' then
+            Strings.Add(S);
+          // S := SectionStrings.Names[J];
+          // S := Copy(SectionStrings[J], Length(S) + 2, MaxInt);
+          // Strings.Add(S);
+        end;
+      finally
+        SectionStrings.Free;
       end;
     finally
       Strings.EndUpdate;
