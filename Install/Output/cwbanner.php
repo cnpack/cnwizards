@@ -16,7 +16,7 @@
         <a href="http://www.cnpack.org/index.php?lang=zh-cn" target="_blank"><img src="images/logo.gif" width="220" height="70" border=0 align="center"></a>
       </td>
       <td valign="middle" height="100%" class="pnlbody"><p>欢迎下载使用 CnPack 开发组的作品 CnWizards，这是由国人开发的开源免费的 IDE 增强工具，支持 Delphi / C++Builder / BDS / RAD Studio。<br>
-        <a href="http://www.cnpack.org/showdetail.php?id=842&lang=zh-cn" target="_blank">2019 年 1 月 14 日，CnWizards 发布新版 1.1.6!</a><img border="0" src="images/new.gif"></p>
+        <a href="http://www.cnpack.org/showdetail.php?id=848&lang=zh-cn" target="_blank">2019 年 1 月 14 日，CnWizards 发布新版 1.1.7!</a><img border="0" src="images/new.gif"></p>
       </td>
     </tr>
   </table>
