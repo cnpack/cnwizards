@@ -57,8 +57,8 @@ uses
 function IsIdeVersionLatest: Boolean;
 {* 返回当前是否最新 IDE 版本}
 
-function IsDelphi10Dot2GEDot3: Boolean;
-{* 返回是否 Delphi 10.2.3 或更高的子版本，用于主题判断}
+function IsDelphi10Dot2GEDot2: Boolean;
+{* 返回是否 Delphi 10.2.2 或更高的子版本，用于主题判断}
 
 var
   CnIdeVersionDetected: Boolean = False;
@@ -332,7 +332,7 @@ end;
 function IsDelphi102TIdeVersionLatest: Boolean;
 const
   CoreIdeLatest: TVersionNumber =
-    (Major: 25; Minor: 0; Release: 31059; Build: 3231); // 10.2.3
+    (Major: 25; Minor: 0; Release: 31059; Build: 3231); // 10.2.3 存在更新的版本，其实应该叫 10.2.4
 var
   ReadFileVersion: TVersionNumber;
 begin
@@ -340,11 +340,11 @@ begin
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
 end;
 
-function IsDelphi10Dot2GEDot3: Boolean;
+function IsDelphi10Dot2GEDot2: Boolean;
 {$IFDEF DELPHI102_TOKYO}
 const
   CoreIdeLatest: TVersionNumber =
-    (Major: 25; Minor: 0; Release: 29899; Build: 2631); // 10.2.3
+    (Major: 25; Minor: 0; Release: 29039; Build: 2004); // 10.2.2
 var
   ReadFileVersion: TVersionNumber;
 {$ENDIF}

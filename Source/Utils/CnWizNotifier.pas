@@ -913,7 +913,7 @@ begin
   FDebuggerNotifierIndex := IDebuggerService.AddNotifier(FCnWizDebuggerNotifier as IOTADebuggerNotifier);
 {$IFDEF IDE_SUPPORT_THEMING}
 {$IFNDEF CNWIZARDS_MINIMUM}
-  if Supports(BorlandIDEServices, StringToGUID(GUID_IOTAIDETHEMINGSERVICES), ThemingService) then
+  if Supports(BorlandIDEServices, StringToGUID(GUID_IOTAIDETHEMINGSERVICES), ThemingService) then // 貌似 10.2.2 或以上支持，10.2.1 未知
   begin
     FCnIDEThemingServicesNotifier := TCnIDEThemingServicesNotifier.Create(Self);
     FThemingNotifierIndex := ThemingService.AddNotifier(FCnIDEThemingServicesNotifier);
@@ -2265,7 +2265,7 @@ end;
 initialization
 {$IFDEF DELPHI102_TOKYO}
 {$IFNDEF CNWIZARDS_MINIMUM}
-  if IsDelphi10Dot2GEDot3 then
+  if IsDelphi10Dot2GEDot2 then
     ChangeIntfGUID(TCnIDEThemingServicesNotifier, ICnNTAIDEThemingServicesNotifier,
       StringToGUID(GUID_INTAIDETHEMINGSERVICESNOTIFIER));
 {$ENDIF}
