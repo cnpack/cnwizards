@@ -7448,9 +7448,13 @@ var
 begin
   Result := '';
 {$IFDEF IDE_SUPPORT_THEMING}
-  if Supports(BorlandIDEServices, StringToGUID(GUID_IOTAIDETHEMINGSERVICES), Theming) then
-    if Theming <> nil then
-      Result := Theming.ActiveTheme;
+  try
+    if Supports(BorlandIDEServices, StringToGUID(GUID_IOTAIDETHEMINGSERVICES), Theming) then
+      if Theming <> nil then
+        Result := Theming.ActiveTheme;
+  except
+    ; // 可能出错，只能屏蔽
+  end;
 {$ENDIF}
 end;
 
