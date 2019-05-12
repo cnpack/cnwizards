@@ -105,7 +105,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Width = 137
           Height = 19
           HotKey = 32833
-          InvalidKeys = [hcNone, hcShift]
+          InvalidKeys = [hcNone]
           Modifiers = [hkAlt]
           TabOrder = 7
         end
@@ -695,7 +695,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Width = 73
           Height = 19
           HotKey = 32833
-          InvalidKeys = [hcNone, hcShift]
+          InvalidKeys = [hcNone]
           Modifiers = [hkAlt]
           TabOrder = 3
         end

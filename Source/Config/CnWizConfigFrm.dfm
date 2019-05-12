@@ -153,7 +153,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
           Width = 169
           Height = 19
           HotKey = 0
-          InvalidKeys = [hcNone, hcShift]
+          InvalidKeys = [hcNone]
           Modifiers = []
           TabOrder = 0
           OnExit = HotKeyWizardExit

@@ -185,7 +185,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
       Width = 361
       Height = 19
       HotKey = 0
-      InvalidKeys = [hcNone, hcShift]
+      InvalidKeys = [hcNone]
       Modifiers = []
       TabOrder = 1
       OnExit = ControlChanged

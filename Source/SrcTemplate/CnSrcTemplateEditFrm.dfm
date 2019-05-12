@@ -112,7 +112,7 @@ inherited CnSrcTemplateEditForm: TCnSrcTemplateEditForm
       Height = 19
       Anchors = [akLeft, akTop, akRight]
       HotKey = 0
-      InvalidKeys = [hcNone, hcShift]
+      InvalidKeys = [hcNone]
       Modifiers = []
       TabOrder = 2
     end

@@ -323,7 +323,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Width = 129
       Height = 19
       HotKey = 32833
-      InvalidKeys = [hcNone, hcShift]
+      InvalidKeys = [hcNone]
       Modifiers = [hkAlt]
       TabOrder = 17
     end

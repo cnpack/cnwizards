@@ -158,7 +158,7 @@ inherited CnSrcEditorGroupReplaceForm: TCnSrcEditorGroupReplaceForm
       Width = 393
       Height = 19
       HotKey = 0
-      InvalidKeys = [hcNone, hcShift]
+      InvalidKeys = [hcNone]
       Modifiers = []
       TabOrder = 1
       OnExit = ControlChanged

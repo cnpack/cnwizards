@@ -162,7 +162,7 @@ inherited CnEditorToolsForm: TCnEditorToolsForm
       Width = 169
       Height = 19
       HotKey = 0
-      InvalidKeys = [hcNone, hcShift]
+      InvalidKeys = [hcNone]
       Modifiers = []
       TabOrder = 1
       OnExit = HotKeyExit

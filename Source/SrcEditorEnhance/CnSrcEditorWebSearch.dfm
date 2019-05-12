@@ -118,7 +118,7 @@ inherited CnSrcEditorWebSearchForm: TCnSrcEditorWebSearchForm
       Width = 121
       Height = 19
       HotKey = 0
-      InvalidKeys = [hcNone, hcShift]
+      InvalidKeys = [hcNone]
       Modifiers = []
       TabOrder = 8
       OnExit = ControlChanged

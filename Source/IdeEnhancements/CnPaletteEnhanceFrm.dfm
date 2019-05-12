@@ -83,7 +83,7 @@ inherited CnPalEnhanceForm: TCnPalEnhanceForm
       Width = 121
       Height = 19
       HotKey = 32833
-      InvalidKeys = [hcNone, hcShift]
+      InvalidKeys = [hcNone]
       Modifiers = [hkAlt]
       TabOrder = 5
     end

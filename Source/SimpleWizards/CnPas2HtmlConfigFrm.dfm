@@ -103,7 +103,7 @@ inherited CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
           Width = 177
           Height = 19
           HotKey = 0
-          InvalidKeys = [hcNone, hcShift]
+          InvalidKeys = [hcNone]
           Modifiers = []
           TabOrder = 0
         end
@@ -113,7 +113,7 @@ inherited CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
           Width = 177
           Height = 19
           HotKey = 0
-          InvalidKeys = [hcNone, hcShift]
+          InvalidKeys = [hcNone]
           Modifiers = []
           TabOrder = 1
         end
@@ -123,7 +123,7 @@ inherited CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
           Width = 177
           Height = 19
           HotKey = 0
-          InvalidKeys = [hcNone, hcShift]
+          InvalidKeys = [hcNone]
           Modifiers = []
           TabOrder = 4
         end
@@ -133,7 +133,7 @@ inherited CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
           Width = 177
           Height = 19
           HotKey = 0
-          InvalidKeys = [hcNone, hcShift]
+          InvalidKeys = [hcNone]
           Modifiers = []
           TabOrder = 5
         end
@@ -143,7 +143,7 @@ inherited CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
           Width = 177
           Height = 19
           HotKey = 0
-          InvalidKeys = [hcNone, hcShift]
+          InvalidKeys = [hcNone]
           Modifiers = []
           TabOrder = 3
         end
@@ -153,7 +153,7 @@ inherited CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
           Width = 177
           Height = 19
           HotKey = 0
-          InvalidKeys = [hcNone, hcShift]
+          InvalidKeys = [hcNone]
           Modifiers = []
           TabOrder = 2
         end

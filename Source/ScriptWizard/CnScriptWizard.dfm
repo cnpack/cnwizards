@@ -334,7 +334,7 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
       Width = 177
       Height = 19
       HotKey = 0
-      InvalidKeys = [hcNone, hcShift]
+      InvalidKeys = [hcNone]
       Modifiers = []
       TabOrder = 5
       OnExit = OnControlChanged

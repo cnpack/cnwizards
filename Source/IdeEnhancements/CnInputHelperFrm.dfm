@@ -158,7 +158,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 289
           Height = 19
           HotKey = 32833
-          InvalidKeys = [hcNone, hcShift]
+          InvalidKeys = [hcNone]
           Modifiers = [hkAlt]
           TabOrder = 8
         end
@@ -168,7 +168,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Width = 289
           Height = 19
           HotKey = 32833
-          InvalidKeys = [hcNone, hcShift]
+          InvalidKeys = [hcNone]
           Modifiers = [hkAlt]
           TabOrder = 9
         end
