@@ -59,7 +59,7 @@ uses
   {$IFDEF OTA_CODE_TEMPLATE_API} CodeTemplateAPI, {$ENDIF}
   CnConsts, CnCommon, CnWizClasses, CnWizConsts, CnWizUtils, CnWizIdeUtils,
   CnInputSymbolList, CnInputIdeSymbolList, CnIni, CnWizMultiLang, CnWizNotifier,
-  CnPasCodeParser, CnCppCodeParser,
+  CnPasCodeParser, CnCppCodeParser, CnEventBus,
   {$IFDEF UNICODE} CnWidePasParser, CnWideCppParser, {$ENDIF}
   CnWizShareImages, CnWizShortCut, CnWizOptions, CnFloatWindow,
   CnEditControlWrapper, CnWizMethodHook, CnPopupMenu, CnStrings;
@@ -314,6 +314,7 @@ type
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
     procedure OnActionUpdate(Sender: TObject); override;
+    procedure BroadcastShortCut;
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -1257,6 +1258,7 @@ begin
   end;
   
   SymbolListMgr.GetValidCharSet(FirstSet, CharSet, FPosInfo);
+  BroadcastShortCut;
 end;
 
 //------------------------------------------------------------------------------
@@ -3111,6 +3113,7 @@ begin
   CreateMenuItem;
   
   DoSaveSettings;
+  BroadcastShortCut;
 end;
 
 procedure TCnInputHelper.Config;
@@ -3361,6 +3364,14 @@ begin
     if FKeyDownValidStack.Count > 0 then
       FKeyDownValidStack.Pop;
   end;
+end;
+
+procedure TCnInputHelper.BroadcastShortCut;
+begin
+  EventBus.PostEvent(EVENT_INPUTHELPER_POPUP_SHORTCUT_CHANGED, Pointer(GetPopupKey));
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('InputHelper Broadcast ShortCut: ' + ShortCutToText(GetPopupKey));
+{$ENDIF}
 end;
 
 initialization

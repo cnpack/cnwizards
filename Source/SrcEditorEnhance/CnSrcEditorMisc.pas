@@ -45,9 +45,21 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Dialogs, ToolsAPI,
   Contnrs, IniFiles, Forms, ExtCtrls, Menus, ComCtrls, TypInfo, Math, FileCtrl,
   Clipbrd, CnCommon, CnWizUtils, CnConsts, CnWizIdeUtils, CnWizConsts, CnWizManager,
-  CnMenuHook, CnWizNotifier, CnEditControlWrapper, CnShellUtils, CnWizClasses;
+  CnMenuHook, CnWizNotifier, CnEditControlWrapper, CnShellUtils, CnWizClasses,
+  CnEventBus;
 
 type
+  TCnSrcEditorMisc = class;
+
+  TCnInputHelperShortCutReceiver = class(TInterfacedObject, ICnEventBusReceiver)
+  private
+    FMisc: TCnSrcEditorMisc;
+  public
+    constructor Create(AMisc: TCnSrcEditorMisc);
+    destructor Destroy; override;
+
+    procedure OnEvent(Event: TCnEvent);
+  end;
 
 //==============================================================================
 // 代码编辑器扩展其它功能
@@ -83,6 +95,7 @@ type
     FTabModifyTimer: TTimer;
     FDblClickClosePage: Boolean;
     FRClickShellMenu: Boolean;
+    FInputHelperReceiver: ICnEventBusReceiver;
     FChangeCodeComKey: Boolean;
     FCodeCompletionKey: TShortCut;
     FAutoReadOnly: Boolean;
@@ -124,7 +137,7 @@ type
     procedure SetAutoReadOnly(const Value: Boolean);
     procedure SetReadOnlyDirs(const Value: TStrings);
     procedure SynchronizeDirs;
-    procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm; 
+    procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm;
       Operation: TOperation);
     procedure OnAppMessage(var Msg: TMsg; var Handled: Boolean);
     procedure DoUpdateTabControlCaption(ClearFlag: Boolean);
@@ -158,6 +171,9 @@ type
     procedure CheckAndHideOrigToolbar(Sender: TObject);
     procedure OrigToolbarClose(Sender: TObject);
 {$ENDIF}
+
+    // Called by Event Bus
+    procedure CheckCodeCompDisabled(InputHelperKey: TShortCut);
 
     property DblClickClosePage: Boolean read FDblClickClosePage write FDblClickClosePage;
     property RClickShellMenu: Boolean read FRClickShellMenu write FRClickShellMenu;
@@ -243,6 +259,9 @@ begin
   EditControlWrapper.AddEditControlNotifier(EditControlNotify);
   UpdateInstall;
 
+  FInputHelperReceiver := TCnInputHelperShortCutReceiver.Create(Self);
+  EventBus.RegisterReceiver(FInputHelperReceiver, EVENT_INPUTHELPER_POPUP_SHORTCUT_CHANGED);
+
   CnWizNotifierServices.ExecuteOnApplicationIdle(RegisterMenuExecutor);
 end;
 
@@ -252,6 +271,7 @@ begin
   CnWizNotifierServices.RemoveApplicationMessageNotifier(OnAppMessage);
   CnWizNotifierServices.RemoveSourceEditorNotifier(OnSourceEditorNotify);
 
+  EventBus.UnRegisterReceiver(FInputHelperReceiver);
   FTabModifyTimer.Free;
   FAutoSaveTimer.Free;
   FActualDirs.Free;
@@ -1372,6 +1392,34 @@ begin
   Wizard := (CnWizardMgr.WizardByClass(TCnSrcEditorEnhance)) as TCnSrcEditorEnhance;
   if Wizard <> nil then
     MenuItem.Checked := Wizard.Thumbnail.ShowThumbnail;
+end;
+
+procedure TCnSrcEditorMisc.CheckCodeCompDisabled(InputHelperKey: TShortCut);
+begin
+{$IFDEF DEBUG}
+  Cndebugger.LogBoolean(InputHelperKey = FCodeCompletionKey, 'Get Input Helper ShortCut. Equal?');
+{$ENDIF}
+  if InputHelperKey = FCodeCompletionKey then
+    ChangeCodeComKey := False;
+end;
+
+{ TCnInputHelperShortcutReceiver }
+
+constructor TCnInputHelperShortCutReceiver.Create(AMisc: TCnSrcEditorMisc);
+begin
+  inherited Create;
+  FMisc := AMisc;
+end;
+
+destructor TCnInputHelperShortCutReceiver.Destroy;
+begin
+  inherited;
+
+end;
+
+procedure TCnInputHelperShortCutReceiver.OnEvent(Event: TCnEvent);
+begin
+  FMisc.CheckCodeCompDisabled(TShortCut(Event.EventData));
 end;
 
 {$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}
