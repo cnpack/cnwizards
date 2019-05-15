@@ -852,6 +852,7 @@ function TScaner.NextToken: TPascalToken;
 var
   BlankStr: string;
   S: string;
+  Idx: Integer;
 
   procedure SkipTo(var P: PChar; TargetChar: Char);
   begin
@@ -866,6 +867,23 @@ var
           Break;
       end;
     end;
+  end;
+
+  function IsStringStartWithSpacesCRLF(const Str: string): Boolean;
+  var
+    I, P: Integer;
+  begin
+    Result := False;
+    P := Pos(#13#10, Str);
+    if P <= 0 then  // 无回车返回 False
+      Exit;
+
+    for I := 1 to P - 1 do
+    begin
+      if not (Str[I] in [' ', #9]) then
+        Exit;
+    end;
+    Result := True;
   end;
 
 var
@@ -1401,7 +1419,16 @@ begin
           if BlankStr <> '' then
           begin
             FCodeGen.BackSpaceLastSpaces;
-            FCodeGen.WriteBlank(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
+            // 如果当前是保留换行模式，则 BlankStr 开头的空格回车要省略
+            if FKeepOneBlankLine and IsStringStartWithSpacesCRLF(BlankStr) then
+            begin
+              Idx := Pos(#13#10, BlankStr);
+              if Idx > 0 then
+                Delete(BlankStr, 1, Idx + 1); // -1 + #13#10 的长度 2
+              FCodeGen.WriteBlank(BlankStr); // 省略前面的空格与回车
+            end
+            else
+              FCodeGen.WriteBlank(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
           end;
         end;
 
@@ -1483,7 +1510,7 @@ begin
       if FInDirectiveNestSearch then // In a Nested search for ENDIF/IFEND
         Exit;
 
-      // 当前是 Comment，或非ELSE编译指令，当普通注释处理
+      // 当前是 Comment，或非 ELSE 编译指令，当普通注释处理
       if Assigned(FCodeGen) then
       begin
         if not InIgnoreArea then
@@ -1492,7 +1519,16 @@ begin
           if BlankStr <> '' then
           begin
             FCodeGen.BackSpaceLastSpaces;
-            FCodeGen.WriteBlank(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
+            // 如果当前是保留换行模式，则 BlankStr 开头的空格与回车要省略
+            if FKeepOneBlankLine and IsStringStartWithSpacesCRLF(BlankStr) then
+            begin
+              Idx := Pos(#13#10, BlankStr);
+              if Idx > 0 then
+                Delete(BlankStr, 1, Idx + 1); // -1 + #13#10 的长度 2
+              FCodeGen.WriteBlank(BlankStr); // 省略前面的空格与回车
+            end
+            else
+              FCodeGen.WriteBlank(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
           end;
         end;
 

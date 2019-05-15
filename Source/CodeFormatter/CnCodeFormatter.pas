@@ -121,7 +121,7 @@ type
     procedure ErrorExpected(Str: string);
     procedure ErrorNotSurpport(FurtureStr: string);
 
-    function CanKeepLineBreak: Boolean; // 返回当前能否保留用户的换行
+    function CanKeepLineBreak: Boolean; // 返回当前能否保留用户的换行，受全局选项以及当前代码位置控制
 
     procedure CheckHeadComments;
     {* 处理代码开始之前的注释}
@@ -6140,6 +6140,9 @@ begin
 
   if LineBreak then
   begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('On Scaner Line Break, to Write a CRLF.');
+{$ENDIF}
     FCodeGen.Writeln;
     // 在原有缩进上前进 Tab 后回车
     if FCurrentTab > 0 then
