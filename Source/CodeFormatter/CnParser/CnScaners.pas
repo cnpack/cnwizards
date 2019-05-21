@@ -133,7 +133,7 @@ type
     {* SkipBlanks 时遇到连续换行时被调用}
     function ErrorTokenString: string;
     procedure NewLine(ImmediatelyDoBreak: Boolean = True);
-    function IsStatementEnd: Boolean;
+    function IsInStatement: Boolean;
 {$IFDEF UNICODE}
     procedure FixStreamBom;
 {$ENDIF}
@@ -817,10 +817,12 @@ begin
   Result := FBlankStringEnd - FBlankStringBegin;
 end;
 
-function TAbstractScaner.IsStatementEnd: Boolean;
+function TAbstractScaner.IsInStatement: Boolean;
 begin
-  // 判定当前位置是否语句结尾，上一个是分号或下一个是 end/else，但未处理 end/else 之前有注释的情况
-  Result := (FPrevToken = tokSemicolon) or (ForwardToken() in [tokKeywordEnd, tokKeywordElse]);
+  // 判定当前位置是否语句内部，作为语句内换行的额外判断补充。
+  // 上一个是分号或组合语句、下一个是 end/else，但未处理 end/else 之前有注释的情况
+  Result := (FPrevToken in [tokSemicolon] + StructStmtTokens)
+    or (ForwardToken() in [tokKeywordEnd, tokKeywordElse]);
 end;
 
 { TScaner }
@@ -1432,7 +1434,7 @@ begin
           begin
             FCodeGen.BackSpaceLastSpaces;
             // 如果当前是保留换行模式，且不是语句结尾，则 BlankStr 开头的空格回车要省略
-            if FKeepOneBlankLine and not IsStatementEnd and IsStringStartWithSpacesCRLF(BlankStr) then
+            if FKeepOneBlankLine and not IsInStatement and IsStringStartWithSpacesCRLF(BlankStr) then
             begin
               Idx := Pos(#13#10, BlankStr);
               if Idx > 0 then
@@ -1533,7 +1535,7 @@ begin
           begin
             FCodeGen.BackSpaceLastSpaces;
             // 如果当前是保留换行模式，且不是语句结尾，则 BlankStr 开头的空格与回车要省略
-            if FKeepOneBlankLine and not IsStatementEnd and IsStringStartWithSpacesCRLF(BlankStr) then
+            if FKeepOneBlankLine and not IsInStatement and IsStringStartWithSpacesCRLF(BlankStr) then
             begin
               Idx := Pos(#13#10, BlankStr);
               if Idx > 0 then
