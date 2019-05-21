@@ -67,8 +67,10 @@ type
     FInIgnoreAreaBookmark: Boolean;
     FNewSourceColBookmark: Integer;
     FOldSourceColPtrBookmark: PChar;
+    FPrevTokenBookmark: TPascalToken;
   protected
     property OriginBookmark: Longint read FOriginBookmark write FOriginBookmark;
+    property PrevTokenBookmark: TPascalToken read FPrevTokenBookmark write FPrevTokenBookmark;
     property TokenBookmark: TPascalToken read FTokenBookmark write FTokenBookmark;
     property TokenPtrBookmark: PChar read FTokenPtrBookmark write FTokenPtrBookmark;
     property SourcePtrBookmark: PChar read FSourcePtrBookmark write FSourcePtrBookmark;
@@ -101,6 +103,7 @@ type
     FStringPtr: PChar;
     FSourceLine: Integer;
     FSaveChar: Char;
+    FPrevToken: TPascalToken;
     FToken: TPascalToken;
     FFloatType: Char;
     FWideStr: WideString;
@@ -130,7 +133,7 @@ type
     {* SkipBlanks 时遇到连续换行时被调用}
     function ErrorTokenString: string;
     procedure NewLine(ImmediatelyDoBreak: Boolean = True);
-
+    function IsStatementEnd: Boolean;
 {$IFDEF UNICODE}
     procedure FixStreamBom;
 {$ENDIF}
@@ -678,6 +681,7 @@ begin
         FSourcePtr := SourcePtrBookmark;
         FTokenPtr := TokenPtrBookmark;
         FOldSourceColPtr := OldSourceColPtrBookmark;
+        FPrevToken := PrevTokenBookmark;
         FToken := TokenBookmark;
         FSourceLine := SourceLineBookmark;
         FSourceCol := SourceColBookmark;
@@ -705,6 +709,7 @@ begin
   begin
     OriginBookmark := FOrigin;
     SourcePtrBookmark := FSourcePtr;
+    PrevTokenBookmark := FPrevToken;
     TokenBookmark := FToken;
     TokenPtrBookmark := FTokenPtr;
     OldSourceColPtrBookmark := FOldSourceColPtr;
@@ -810,6 +815,12 @@ end;
 function TAbstractScaner.BlankStringLength: Integer;
 begin
   Result := FBlankStringEnd - FBlankStringBegin;
+end;
+
+function TAbstractScaner.IsStatementEnd: Boolean;
+begin
+  // 判定当前位置是否语句结尾，上一个是分号或下一个是 end/else，但未处理 end/else 之前有注释的情况
+  Result := (FPrevToken = tokSemicolon) or (ForwardToken() in [tokKeywordEnd, tokKeywordElse]);
 end;
 
 { TScaner }
@@ -1393,6 +1404,7 @@ begin
   end;
 
   FSourcePtr := P;
+  FPrevToken := FToken;
   FToken := Result;
 
   Inc(FNewSourceCol, FSourcePtr - FOldSourceColPtr);
@@ -1419,8 +1431,8 @@ begin
           if BlankStr <> '' then
           begin
             FCodeGen.BackSpaceLastSpaces;
-            // 如果当前是保留换行模式，则 BlankStr 开头的空格回车要省略
-            if FKeepOneBlankLine and IsStringStartWithSpacesCRLF(BlankStr) then
+            // 如果当前是保留换行模式，且不是语句结尾，则 BlankStr 开头的空格回车要省略
+            if FKeepOneBlankLine and not IsStatementEnd and IsStringStartWithSpacesCRLF(BlankStr) then
             begin
               Idx := Pos(#13#10, BlankStr);
               if Idx > 0 then
@@ -1478,7 +1490,7 @@ begin
 
       if FPreviousIsComment then // 上一个是 Comment，记录这个到 上一个Comment的空行数
       begin
-        // 最后一块注释的在递归最外层赋值，因此FBlankLinesAfter会被层层覆盖，
+        // 最后一块注释的在递归最外层赋值，因此 FBlankLinesAfter 会被层层覆盖，
         // 代表最后一块注释后的空行数
         FBlankLinesAfter := FBlankLines + FBlankLinesAfterComment;
       end
@@ -1498,6 +1510,7 @@ begin
       else if Result = tokSymbol then
         Result := StringToToken(TokenString);
 
+      FPrevToken := FToken;
       FToken := Result;
       FBackwardToken := FToken;
     end;
@@ -1519,8 +1532,8 @@ begin
           if BlankStr <> '' then
           begin
             FCodeGen.BackSpaceLastSpaces;
-            // 如果当前是保留换行模式，则 BlankStr 开头的空格与回车要省略
-            if FKeepOneBlankLine and IsStringStartWithSpacesCRLF(BlankStr) then
+            // 如果当前是保留换行模式，且不是语句结尾，则 BlankStr 开头的空格与回车要省略
+            if FKeepOneBlankLine and not IsStatementEnd and IsStringStartWithSpacesCRLF(BlankStr) then
             begin
               Idx := Pos(#13#10, BlankStr);
               if Idx > 0 then
@@ -1642,6 +1655,7 @@ begin
           TmpToken := TokenString;
         end;
         Result := tokEOF;
+        FPrevToken := FToken;
         FToken := Result;
       finally
         FInDirectiveNestSearch := False;
@@ -1674,6 +1688,7 @@ begin
       else if Result = tokSymbol then
         Result := StringToToken(TokenString);
 
+      FPrevToken := FToken;
       FToken := Result;
       FBackwardToken := FToken;
     end;
