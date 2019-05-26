@@ -1788,7 +1788,14 @@ begin
             // end 之前的语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
             CheckKeepLineBreakWriteln;
           end;
-          Match(tokKeywordEnd, PreSpaceCount);
+
+          // 组合语句的 end 是不需要 padding 的，需要特意指明
+          SpecifyElementType(pfetCompoundEnd);
+          try
+            Match(tokKeywordEnd, PreSpaceCount);
+          finally
+            RestoreElementType;
+          end;
         end;
 
       tokKeywordAsm:
