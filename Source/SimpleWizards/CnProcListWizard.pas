@@ -3080,7 +3080,7 @@ end;
 procedure TCnProcListForm.FontChanged(AFont: TFont);
 begin
   inherited;
-  // mmoContent.Font := AFont;
+  mmoContent.Font := AFont;  // 之前注释掉了，可能字体改变会引发其他问题但不确定，现暂时放开
 end;
 
 procedure TCnProcListForm.cbbMatchSearchChange(Sender: TObject);
