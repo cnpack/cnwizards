@@ -341,6 +341,7 @@ type
     FClassComboWidth: Integer;
     FToolbarClassComboWidth: Integer;
     FToolbarProcComboWidth: Integer;
+    FFileIndex: Integer;
     function GetToolBarObjFromEditControl(EditControl: TControl): TCnProcToolBarObj;
     procedure RemoveToolBarObjFromEditControl(EditControl: TControl);
     procedure ToolBarCanShow(Sender: TObject; APage: TCnSrcEditorPage; var ACanShow: Boolean);
@@ -408,6 +409,8 @@ type
     {* 预览窗口中的行数量}
     property HistoryCount: Integer read FHistoryCount write FHistoryCount;
     {* 历史记录的数量}
+    property FileIndex: Integer read FFileIndex write FFileIndex;
+    {* 下拉框里选中的文件范围}
 
     // 下拉框的尺寸
     property ProcComboHeight: Integer read FProcComboHeight write FProcComboHeight;
@@ -1082,7 +1085,6 @@ begin
     with TCnProcListForm.Create(nil) do
     try
       Wizard := Self;
-
       ShowHint := WizOptions.ShowHint;
       FileName := TmpFileName;
       // Current Filename
@@ -1100,6 +1102,14 @@ begin
       actHookIDE.Enabled := IsSourceModule(FFileName) or IsInc(FFileName);
       if actHookIDE.Enabled then
         actHookIDE.Checked := UseEditorToolBar;
+
+      if (FFileIndex >= 0) and (FFileIndex < cbbFiles.Items.Count) then
+      begin
+        cbbFiles.ItemIndex := Wizard.FileIndex;
+        if cbbFiles.ItemIndex > 0 then
+          cbbFiles.OnChange(cbbFiles);
+      end;
+
       if ShowModal = mrOK then
       begin
         // BringIdeEditorFormToFront;
@@ -3339,7 +3349,10 @@ begin
   LoadObjectCombobox(FObjectList);
   UpdateItemPosition;
   UpdateStatusBar;
-  cbbMatchSearch.SetFocus;
+
+  if Visible then
+    cbbMatchSearch.SetFocus;
+  Wizard.FileIndex := cbbFiles.ItemIndex;
 end;
 
 procedure TCnProcListForm.lvListKeyDown(Sender: TObject; var Key: Word;

@@ -971,9 +971,6 @@ var
   end;
 
 begin
-  if DataList.Count = 0 then
-    Exit;
-
   MatchSearchText := edtMatchSearch.Text;
   ToSelIndex := 0;
   ToSels := TStringList.Create;
