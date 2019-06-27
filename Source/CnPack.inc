@@ -2720,7 +2720,8 @@
   {$DEFINE SUPPORT_GENERIC}      // Ö§³Ö·ºÐÍ
   {$DEFINE IDE_MAINFORM_EAT_MOUSEWHEEL}
   // MainForm of 2009 or Above will eat Message in MouseWheelHandler
-
+  {$DEFINE IDE_CODEINSIGHT_AUTOINVOKE}
+  // IDE Code Insight has Auto Invoke Option
   {$DEFINE EDITVIEW_CONVERTPOS_BUG}
   // 2009 or Above IEditView.ConvertPos Incorrect when Meeting Unicode Chars.
 
