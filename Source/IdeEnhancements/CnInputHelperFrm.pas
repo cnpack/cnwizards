@@ -836,6 +836,7 @@ end;
 procedure TCnInputHelperForm.btnDisableCompletionClick(Sender: TObject);
 const
   SCnCodeCompletionKey = 'CodeCompletion';
+  SCnCodeInsightAutoInvokeKey = 'CodeInsightAutoInvoke';
 var
   Options: IOTAEnvironmentOptions;
 begin
@@ -844,6 +845,9 @@ begin
     Exit;
 
   Options.SetOptionValue(SCnCodeCompletionKey, 0);
+{$IFDEF IDE_CODEINSIGHT_AUTOINVOKE}
+  Options.SetOptionValue(SCnCodeInsightAutoInvokeKey, 0);
+{$ENDIF}
   InfoDlg(SCnInputHelperDisableCodeCompletionSucc);
 end;
 
