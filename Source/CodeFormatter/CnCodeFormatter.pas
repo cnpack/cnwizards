@@ -1261,7 +1261,7 @@ begin
         Match(tokKeywordInherited);
         // 处理 if True then Result := inherited else Result := False; 这种
         if Scaner.Token <> tokKeywordElse then
-          FormatExpression;
+          FormatExpression(0, IndentForAnonymous); // 为啥这里要用 IndentForAnonymous 而不是其他的 PreSpaceCount？
       end;
 
     tokChar, tokWString, tokString, tokInteger, tokFloat, tokTrue, tokFalse:
@@ -1835,20 +1835,20 @@ begin
     tokAssign:
       begin
         MatchOperator(tokAssign);
-        FormatExpression;
+        FormatExpression(0, PreSpaceCount);
 
         if Scaner.Token in [tokKeywordTo, tokKeywordDownTo] then
           Match(Scaner.Token)
         else
           ErrorFmt(CN_ERRCODE_PASCAL_SYMBOL_EXP, ['to/downto', TokenToString(Scaner.Token)]);
 
-        FormatExpression;
+        FormatExpression(0, PreSpaceCount);
       end;
 
     tokKeywordIn:
       begin
         Match(tokKeywordIn, 1, 1);
-        FormatExpression;
+        FormatExpression(0, PreSpaceCount);
         { DONE: surport "for .. in .. do .." statment parser }
       end;
 
@@ -3692,7 +3692,7 @@ begin
     else if Scaner.Token = tokAssign then // 匹配 OLE 调用的情形
     begin
       MatchOperator(tokAssign);
-      FormatExpression;
+      FormatExpression(0, PreSpaceCount);
     end;
   end;
 
