@@ -768,7 +768,7 @@ end;
 
 procedure TCnAbstractCodeFormatter.EnsureWriteln;
 begin
-  if not FCodeGen.IsLastLineEmpty then
+  if not FCodeGen.IsLastLineEmpty and not FScaner.InIgnoreArea then // 忽略区不主动写换行
     FCodeGen.Writeln;
 end;
 
