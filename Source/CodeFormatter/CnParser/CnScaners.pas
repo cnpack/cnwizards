@@ -126,6 +126,7 @@ type
     FInIgnoreArea: Boolean;
     FOnLineBreak: TNotifyEvent;
     FIdentContainsDot: Boolean;
+    FIsForwarding: Boolean;
     procedure ReadBuffer;
     procedure SetOrigin(AOrigin: Longint);
     procedure SkipBlanks; // 越过空白和回车换行
@@ -739,12 +740,16 @@ begin
   Result := Token;
 
   SaveBookmark(Bookmark);
-
-  for I := 0 to Count - 1 do
-  begin
-    Result := NextToken;
-    if Result = tokEOF then
-      Exit;
+  FIsForwarding := True;
+  try
+    for I := 0 to Count - 1 do
+    begin
+      Result := NextToken;
+      if Result = tokEOF then
+        Exit;
+    end;
+  finally
+    FIsForwarding := False;
   end;
 
   LoadBookmark(Bookmark);
@@ -821,8 +826,12 @@ function TAbstractScaner.IsInStatement: Boolean;
 begin
   // 判定当前位置是否语句内部，作为语句内换行的额外判断补充。
   // 上一个是分号或组合语句、下一个是 end/else，但未处理 end/else 之前有注释的情况
-  Result := (FPrevToken in [tokSemicolon] + StructStmtTokens)
-    or (ForwardToken() in [tokKeywordEnd, tokKeywordElse]);
+  if not FIsForwarding then
+    Result := (FPrevToken in [tokSemicolon] + StructStmtTokens)
+      or (ForwardToken() in [tokKeywordEnd, tokKeywordElse])
+  else
+    Result := FPrevToken in [tokSemicolon] + StructStmtTokens;
+  // 在 ForwardToken 调用中不要再重入了
 end;
 
 { TScaner }
