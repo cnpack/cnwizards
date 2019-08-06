@@ -737,7 +737,7 @@ function TCnPrefixWizard.GetRuleComponentName(Component: TComponent;
   const CompText: string; var NewName: string; FormEditor: IOTAFormEditor;
   UserMode: Boolean; FromObjectInspector: Boolean): Boolean;
 var
-  OldName: string;
+  OldName, UniqueOld: string;
   OldClassName, AClassName, RootName: string;
   Action: TBasicAction;
   Prefix: string;
@@ -816,6 +816,10 @@ begin
 
   AClassName := OldClassName; // 恢复
 
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('GetRuleComponentName. Prefix: ' + Prefix);
+{$ENDIF}
+
   if Prefix <> '' then
   begin
     DoRename := True;
@@ -846,6 +850,9 @@ begin
 
       // 取新的名称
       NewName := GetNewName(AClassName, Prefix, OldName);
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('GetRuleComponentName. Has Prefix. Get New Name: ' + NewName);
+{$ENDIF}
 
       if NeedFieldRename(Component) then
       begin
@@ -866,7 +873,18 @@ begin
 
       // 取一个唯一的名字
       if NewName = Prefix then
+      begin
+        UniqueOld := NewName;
         NewName := (FormEditor as INTAFormEditor).FormDesigner.UniqueName(NewName);
+        // 这句除了加 1 这种行为之外，可能会删去 NewName 前面的 T，补回来
+
+        if (Length(UniqueOld) > 1) and (UniqueOld[1] = 'T') then
+        begin
+          Delete(UniqueOld, 1, 1);
+          if Pos(UniqueOld, NewName) = 1 then
+            NewName := 'T' + NewName;
+        end;
+      end;
 
       // 不用 IDE 来取，避免出现 pnl_11 之类的前缀。
       SeparateStrAndNum(NewName, OutStr, OutNum);
@@ -894,6 +912,10 @@ begin
     begin
       Exit;
     end;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('GetRuleComponentName. Calc New Name: ' + NewName);
+{$ENDIF}
 
     // 弹出改名窗口
     if AutoPopSuggestDlg or UserMode then
