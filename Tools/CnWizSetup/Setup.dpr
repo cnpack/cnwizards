@@ -47,6 +47,7 @@ uses
   Windows,
   SysUtils,
   Registry,
+  FileCtrl,
   CnCommon,
   CnLangTranslator,
   CnLangStorage,
@@ -249,10 +250,48 @@ var
   ParamNoMsg: Boolean;
   ParamCmdHelp :Boolean;
 
-// 取专家DLL文件名
+// 取专家 DLL 文件名
 function GetDllName(Compiler: TCompilerName): string;
+const
+  RIO_10_3_2: TVersionNumber =
+    (Major: 26; Minor: 0; Release: 34749; Build: 6593); // 10.3.2
+var
+  IDE: string;
+  Reg: TRegistry;
+  Version: TVersionNumber;
 begin
   Result := _CnExtractFilePath(ParamStr(0)) + csDllNames[Compiler];
+  // 10.3 下动态判断文件名的版本确定究竟用哪个 DLL
+  if Compiler = cb103R then
+  begin
+    // 10.3.2 使用最新 DLL，但 10.3.1 或以下版本使用另一个 DLL
+    // 读 HKEY_CURRENT_USER\Software\Embarcadero\BDS\20.0 下的 RootDir 得到安装目录
+    IDE := 'C:\Program Files\Embarcadero\Studio\20.0\';
+    Reg := nil;
+
+    try
+      Reg := TRegistry.Create;
+      if Reg.OpenKey('\Software\Embarcadero\BDS\20.0', False) then
+        IDE := Reg.ReadString('RootDir');
+    finally
+      Reg.Free;
+    end;
+
+    if not DirectoryExists(IDE) then
+      Exit;
+
+    IDE := IncludeTrailingPathDelimiter(IDE) + 'bin\bds.exe';
+    if not FileExists(IDE) then
+      Exit;
+
+    // 读 bds.exe 的版本号
+    Version := GetFileVersionNumber(IDE);
+    if (Version.Major <> 26) or (Version.Minor <> 0) then
+      Exit;
+
+    if Version.Release < RIO_10_3_2.Release then
+      Result := _CnExtractFilePath(ParamStr(0)) + 'CnWizards_D103R1.DLL';
+  end;
 end;
 
 // 取专家名
@@ -261,7 +300,7 @@ begin
   Result := _CnChangeFileExt(csDllNames[Compiler], '');
 end;
 
-// 判断专家DLL是否存在
+// 判断专家 DLL 是否存在
 function WizardExists(Compiler: TCompilerName): Boolean;
 begin
   Result := FileExists(GetDllName(Compiler));
