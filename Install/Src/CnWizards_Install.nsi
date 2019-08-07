@@ -547,6 +547,10 @@ FileLoop:
   FileOpen $0 "$INSTDIR\CnWizards_D103R.dll" a
   IfErrors FileInUse
   FileClose $0
+  IfFileExists "$INSTDIR\CnWizards_D103R1.dll" 0 +4
+  FileOpen $0 "$INSTDIR\CnWizards_D103R1.dll" a
+  IfErrors FileInUse
+  FileClose $0
 !endif
 
 !endif
@@ -868,6 +872,7 @@ SectionEnd
 Section "RAD Studio 10.3 Rio" SecD103R
   SectionIn 1 2
   SetOutPath $INSTDIR
+  File "..\..\Bin\CnWizards_D103R1.dll"
   File "..\..\Bin\CnWizards_D103R.dll"
   ; 写入专家注册键值
   WriteRegStr HKCU "Software\Embarcadero\BDS\20.0\Experts" "CnWizards_D103R" "$INSTDIR\CnWizards_D103R.dll"
