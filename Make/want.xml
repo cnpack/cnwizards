@@ -61,6 +61,7 @@ See http://www.suigeneris.org/want/ for details.
   <property name="exe.D10S"       value="${ProgramFiles}\Embarcadero\Studio\17.0\Bin\DCC32.EXE" unless="env.D10S" />
   <property name="exe.D101B"      value="${ProgramFiles}\Embarcadero\Studio\18.0\Bin\DCC32.EXE" unless="env.D101B" />
   <property name="exe.D102T"      value="${ProgramFiles}\Embarcadero\Studio\19.0\Bin\DCC32.EXE" unless="env.D102T" />
+  <property name="exe.D103R1"     value="${ProgramFiles}\Embarcadero\Studio\20.0_1\Bin\DCC32.EXE" unless="env.D103R1" />
   <property name="exe.D103R"      value="${ProgramFiles}\Embarcadero\Studio\20.0\Bin\DCC32.EXE" unless="env.D103R" />
   <property name="exe.brcc32"     value="%{BRCC32}" />
   <property name="exe.git"        value="%{env.git}" if="env.git" />
@@ -75,7 +76,7 @@ See http://www.suigeneris.org/want/ for details.
   <property name="release.pro"    value=""          if="full" />
   <property name="release.pro"    value="_Lite"     if="lite" />
 
-  <property name="cnwizards_list" value="-d5,-d6,-d7,-d2005,-d2006,-d2007,-d2009,-d2010,-dxe,-dxe2,-dxe3,-dxe4,-dxe5,-dxe6,-dxe7,-dxe8,-d10s,-d101b,-d102t,-d103r,-cb5,-cb6" unless="lite" />
+  <property name="cnwizards_list" value="-d5,-d6,-d7,-d2005,-d2006,-d2007,-d2009,-d2010,-dxe,-dxe2,-dxe3,-dxe4,-dxe5,-dxe6,-dxe7,-dxe8,-d10s,-d101b,-d102t,-d103r1,-d103r,-cb5,-cb6" unless="lite" />
   <property name="cnwizards_list" value="-d6,-d7,-d2006,-d2007,-cb6" if="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cndfm6to5,cnascii,cnidebr,cnmanagewiz,cnselectlang,cnsmr,cnwizsetup" unless="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cnwizsetup" if="lite" />
@@ -203,7 +204,7 @@ Usage: want [target-name] [-Dname=value]
     clean      - Clean output and temp files.
     gitpull    - Update all files.
     d5         - Compile CnWizards for Delphi 5.
-                 (d6, d7, d2005, d2006, d2007, d2009, d2010, dxe, dxe2, dxe3, dxe4, dxe5, dxe6, dxe7, dxe8, d10s, d101b, d102t, 103r, cb5, cb6 also)
+                 (d6, d7, d2005, d2006, d2007, d2009, d2010, dxe, dxe2, dxe3, dxe4, dxe5, dxe6, dxe7, dxe8, d10s, d101b, d102t, d103r1, d103r, cb5, cb6 also)
     cnwizards  - Compile all CnWizards DLLs (D5, D6, etc.).
     resdll     - Compile CnWizards Resource DLL.
     cnwizhelperdll - Compile CnWizards Helper DLL.
@@ -350,6 +351,7 @@ Usage: want [target-name] [-Dname=value]
   <target name="d10s" depends="-d10s,-cw_final" description="Compile CnWizards for RAD Studio 10 Seattle." />
   <target name="d101b" depends="-d101b,-cw_final" description="Compile CnWizards for RAD Studio 10.1 Berlin." />
   <target name="d102t" depends="-d102t,-cw_final" description="Compile CnWizards for RAD Studio 10.2 Tokyo." />
+  <target name="d103r1" depends="-d103r1,-cw_final" description="Compile CnWizards for RAD Studio 10.3.1 Rio or below." />
   <target name="d103r" depends="-d103r,-cw_final" description="Compile CnWizards for RAD Studio 10.3 Rio." />
   <target name="cb5" depends="-cb5,-cw_final" description="Compile CnWizards for C++Builder 5." />
   <target name="cb6" depends="-cb6,-cw_final" description="Compile CnWizards for C++Builder 6." />
@@ -797,6 +799,28 @@ Usage: want [target-name] [-Dname=value]
     </delete>
     <move tofile="${src}/CnWizards_D102T.res" >
        <include name="${src}/CnWizards_D102T.res.old" />
+    </move>
+  </target>
+
+  <target name="-d103r1" depends="-cw_prepare" >
+    <property name="Ver.FileDescription"  value="CnWizards For RAD Studio 10.3.1 Rio or below" />
+    <property name="Ver.InternalName"     value="CnWizards_D103R1" />
+    <property name="Ver.OriginalFilename" value="CnWizards_D103R1.DLL" />
+    <copy tofile="${src}/CnWizards_D103R1.res.old" >
+       <include name="${src}/CnWizards_D103R1.res" />
+    </copy>
+    <echo input="${src}/CnWizards.template.rc" file="${src}/CnWizards_D103R1.rc" />
+    <brcc file="${src}/CnWizards_D103R1.rc" exename="${exe.brcc32}" output="${src}/CnWizards_D103R1.res" />
+    <dcc basedir="${src}" source="CnWizards_D103R1.dpr" exename="${exe.D103R1}" usecfg="true" arguments="${dcc_arg}" >
+      <define name="${define.add}" />
+    </dcc>
+    <delete dir="${src}">
+       <include name="CnWizards_D103R1.res" />
+       <include name="CnWizards_D103R1.rc" />
+       <include name="CnWizards_D103R1.drc" />
+    </delete>
+    <move tofile="${src}/CnWizards_D103R1.res" >
+       <include name="${src}/CnWizards_D103R1.res.old" />
     </move>
   </target>
 
