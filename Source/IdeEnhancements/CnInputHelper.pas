@@ -488,8 +488,8 @@ const
   csUnitSymbolKind = [skUnit, skCompDirect];
   csDeclearSymbolKind = csAllSymbolKind - [skUnknown, skLabel];
   csDefineSymbolKind = csAllSymbolKind - [skUnknown, skUnit, skLabel];
-  csCodeSymbolKind = csAllSymbolKind;
-  csFieldSymbolKind = csAllSymbolKind - [skUnknown, skConstant, skType,
+  csCodeSymbolKind = csAllSymbolKind;                // 2005 后支持 class constant 和 class type
+  csFieldSymbolKind = csAllSymbolKind - [skUnknown, {$IFDEF BDS} skConstant, skType, {$ENDIF}
     skUnit, skLabel, skInterface, skKeyword, skClass, skUser];
 
   // BCB 中不易区分 Field，干脆就等同于Code。
