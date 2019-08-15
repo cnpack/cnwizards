@@ -750,7 +750,7 @@ end;
 procedure TCnSrcEditorEnhance.EditorChanged(Editor: TEditorObject;
   ChangeType: TEditorChangeTypes);
 begin
-  if Active and (ChangeType * [ctTopEditorChanged] <> []) then
+  if Active and (ChangeType * [ctTopEditorChanged {$IFDEF DELPHI103_RIO_UP}, ctView{$ENDIF}] <> []) then
   begin
     FToolbarMgr.CheckToolBarEnable;
 {$IFDEF DELPHI103_RIO_UP}

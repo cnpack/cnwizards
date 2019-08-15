@@ -958,12 +958,12 @@ var
     Result := False;
   end;
 
-  function GetNewCaption(const ACaption: string; IsModified: Boolean): string;
+  function GetNewCaption(const ACaption: string; AIsModified: Boolean): string;
   begin
     Result := Trim(ACaption);
-    if IsModified and (StrRight(Result, 1) <> '*') then
+    if AIsModified and (StrRight(Result, 1) <> '*') then
       Result := Result + '*'
-    else if not IsModified and (StrRight(Result, 1) = '*') then
+    else if not AIsModified and (StrRight(Result, 1) = '*') then
       Delete(Result, Length(Result), 1);
   end;
 
