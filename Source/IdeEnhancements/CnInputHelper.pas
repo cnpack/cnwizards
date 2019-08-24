@@ -488,9 +488,10 @@ const
   csUnitSymbolKind = [skUnit, skCompDirect];
   csDeclearSymbolKind = csAllSymbolKind - [skUnknown, skLabel];
   csDefineSymbolKind = csAllSymbolKind - [skUnknown, skUnit, skLabel];
-  csCodeSymbolKind = csAllSymbolKind;                // 2005 后支持 class constant 和 class type
-  csFieldSymbolKind = csAllSymbolKind - [skUnknown, {$IFDEF BDS} skConstant, skType, {$ENDIF}
+  csCodeSymbolKind = csAllSymbolKind;
+  csFieldSymbolKind = csAllSymbolKind - [skUnknown,
     skUnit, skLabel, skInterface, skKeyword, skClass, skUser];
+  // 2005 后支持 class constant 和 class type，所以不能去除 skConstant, skType,
 
   // BCB 中不易区分 Field，干脆就等同于Code。
   csCppFieldSymbolKind = csAllSymbolKind;
@@ -2335,7 +2336,7 @@ begin
   try
     if FRemoveSame then
       HashList := TCnSymbolHashList.Create(csHashListCount);
-    
+
     for I := 0 to SymbolListMgr.Count - 1 do
     begin
       SymbolList := SymbolListMgr.List[I];
