@@ -2875,7 +2875,7 @@ begin
     Canvas.FillRect(Rect);
     dmCnSharedImages.SymbolImages.Draw(Canvas, Rect.Left + 2, Rect.Top, Kind);
     Canvas.Brush.Style := bsClear;
-    Canvas.Font.Style := [fsBold];
+    Canvas.Font.Style := Canvas.Font.Style + [fsBold];
 
     AText := SymbolItem.GetKeywordText(KeywordStyle);
     if FMatchMode in [mmStart, mmAnywhere] then
@@ -2885,7 +2885,7 @@ begin
         csMatchColor, SymbolItem.FuzzyMatchIndexes);
 
     TextWith := Canvas.TextWidth(AText);
-    Canvas.Font.Style := [];
+    Canvas.Font.Style := Canvas.Font.Style - [fsBold];
     if odSelected in State then
     begin
       Canvas.Font.Color := clHighlightText;
