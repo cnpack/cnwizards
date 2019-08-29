@@ -1502,8 +1502,8 @@ begin
   CnDebugger.LogFmt('TCnInputHelper.HandleKeyDown, Key: %d, ScanCode: %d', [Key, ScanCode]);
 {$ENDIF}
 
-  // 按下 Alt 或 Ctrl 时关闭
-  if Shift * [ssAlt, ssCtrl] <> [] then
+  // 按下 Alt 时关闭，单纯按 Ctrl 或 Shift 则不关
+  if Shift * [ssAlt] <> [] then
   begin
     HideAndClearList;
     Exit;
