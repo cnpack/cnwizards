@@ -1674,17 +1674,19 @@ begin
     begin
       FNeedUpdate := True;
     end
-    else if IsValidSymbolChar(Char(Key), False) then
-    begin
-      FNeedUpdate := True;
-    end
-    else if (FSpcComplete and (Key = ' ')) or (Pos(Char(Key), FCompleteChars) > 0) then
+    else if (FSpcComplete and (Key = ' ')) or  // 先判断输入用的键，但要剔除 Pascal 中编译指令中遇到 +- 的情况，
+      ((Pos(Char(Key), FCompleteChars) > 0) and not  // 也就是保证 Pascal 编译指令里 +- 不用于输入当前条目，即使 FCompleteChars 里有也不行
+      (FPosInfo.IsPascal and (FPosInfo.PosKind = pkCompDirect) and (Char(Key) in ['+', '-']))) then
     begin
       SendSymbolToIDE(SelMidMatchByEnterOnly, False, False, Key, Result);
 
       // 空格输入后，如果忽略，则空格本身不再送入编辑器，与 IDE 自动完成相符合
       if FSpcComplete and FIgnoreSpc and (Key = ' ') then
         Result := True;
+    end
+    else if IsValidSymbolChar(Char(Key), False) then
+    begin
+      FNeedUpdate := True;
     end
     else
     begin
