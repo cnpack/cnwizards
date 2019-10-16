@@ -38,7 +38,8 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, CheckLst, Buttons, ImgList, CnCommon, CnWizLangID,
-  CnLangTranslator, CnLangMgr, CnClasses, CnLangStorage, CnHashLangStorage;
+  CnLangTranslator, CnLangMgr, CnClasses, CnLangStorage, CnHashLangStorage,
+  System.ImageList;
 
 type
   TCnCustBuildForm = class(TForm)
@@ -231,7 +232,11 @@ var
       AWizardName := FWizardConstMap.Values[AWizardName];
 
     AName := 'S' + AWizardName + ASubfix;
+{$IFDEF UNICODE}
+    Result := Langs.Values[AName]; // TStrings 在 Unicode 环境下自动识别为 Unicode了，并非 Utf8
+{$ELSE}
     Result := CnUtf8ToAnsi(Langs.Values[AName]);
+{$ENDIF}
     if Result = '' then  // 原名不存在就去掉Wizard看看
     begin
       if StrRight(AWizardName, Length('Wizard')) = 'Wizard' then
@@ -239,7 +244,11 @@ var
         Result := AWizardName;
         Delete(Result, Length(Result) - Length('Wizard') + 1, Length('Wizard'));
         AName := 'S' + Result + ASubfix;
+{$IFDEF UNICODE}
+        Result := Langs.Values[AName];
+{$ELSE}
         Result := CnUtf8ToAnsi(Langs.Values[AName]);
+{$ENDIF}
       end;
     end;
   end;
@@ -253,6 +262,7 @@ begin
   begin
     Langs := TStringList.Create;
     try
+      // D2009 或以上的 Unicode 环境下能识别为 Unicode，而不是 Utf8
       Langs.LoadFromFile(IncludeTrailingBackslash(FLangDir) + SCnWizardsLangName);
       for I := 0 to FWizardIds.Count - 1 do
       begin
