@@ -557,7 +557,7 @@ begin
     DoNormalReplace(_CnExtractFileName(FileName));
   BookMarkList := nil;
 
-  if FOutStream.Size > 0 then  // 执行过替换
+  if FOutStream.Size > 0 then  // 执行过替换，FOutStream 里一直是 Ansi 的内容，没有 Utf8/Utf16 内容
   begin
     if FOpenInIDE then
     begin
@@ -582,13 +582,14 @@ begin
 
               try
 {$IFDEF IDE_WIDECONTROL}
+                // BDS 下需要做 Utf8 转换
                 Text := CnAnsiToUtf8(PAnsiChar(FOutStream.Memory));
                 FOutStream.Size := Length(Text) + 1;
                 FOutStream.Position := 0;
                 FOutStream.Write(PAnsiChar(Text)^, Length(Text) + 1);
 {$ENDIF}
                 IWriter.DeleteTo(MaxInt);
-                IWriter.Insert(FOutStream.Memory);
+                IWriter.Insert(FOutStream.Memory); // Writer 写入的内容要求Ansi/Utf8/Utf8
 
                 Inc(FFileCount);
                 Inc(FFoundCount, FCurrCount);

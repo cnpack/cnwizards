@@ -1,7 +1,7 @@
 DelphiIDE编辑器文本格式与偏移说明
 
 CnPack开发组
-2019.02.22
+2019.11.28
 
 Delphi IDE 分三种：Delphi 5 6 7 的 纯 Ansi 版，Delphi 2005 ~ 2007 的 Utf8 版，以及 Delphi 2009 及其以上的 Unicode 版本。
 这三种 IDE 的编辑器控件各不相同，所涉及的 OpenTools API 与其他原生接口有很大的不同。
@@ -19,6 +19,9 @@ GetTextAtLine 方法          Tab 已展开             Tab 已展开               Tab 
 -----------------------------------------------------------------------------------------------------
 IOTAEditReader 接口的       AnsiString             AnsiString + Utf8        AnsiString + Utf8
 GetText 方法                Tab 未展开             Tab 未展开               Tab 未展开
+-----------------------------------------------------------------------------------------------------
+IOTAEditWriter 接口的       AnsiString             AnsiString + Utf8        AnsiString + Utf8
+Insert 方法的 PChar 参数
 -----------------------------------------------------------------------------------------------------
 IOTAEditBlock 接口的        AnsiString             AnsiString + Utf8        UnicodeString（Utf16）
 Text 属性/GetText 方法      Tab 未展开             Tab 未展开               Tab 未展开
