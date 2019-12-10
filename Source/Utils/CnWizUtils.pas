@@ -84,9 +84,6 @@ type
 
   TFormType = (ftBinary, ftText, ftUnknown);
 
-  // 匹配模式，开头匹配，中间匹配，全范围模糊匹配
-  TCnMatchMode = (mmStart, mmAnywhere, mmFuzzy);
-
 {$IFNDEF COMPILER6_UP}
   IDesigner = IFormDesigner;
 {$ENDIF}

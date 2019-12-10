@@ -43,7 +43,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   CheckLst, StdCtrls, ComCtrls, ExtCtrls, Menus, CnConsts, CnCommon, IniFiles,
   ToolsAPI, CnWizMultiLang, CnSpin, CnWizConsts, CnInputHelper, CnInputSymbolList,
-  CnInputIdeSymbolList, CnInputHelperEditFrm, CnWizMacroText, CnWizUtils;
+  CnInputIdeSymbolList, CnInputHelperEditFrm, CnWizMacroText, CnWizUtils, CnWizOptions;
 
 type
 

@@ -70,7 +70,7 @@ uses
   mwBCBTokenList, Contnrs, Clipbrd, CnEditControlWrapper, CnPasCodeParser, CnWizUtils,
   {$IFDEF USE_CUSTOMIZED_SPLITTER} CnSplitter, {$ENDIF} CnWidePasParser, CnWideCppParser,
   CnPopupMenu, CnWizIdeUtils, CnCppCodeParser, CnStrings, CnEdit, RegExpr,
-  CnFrmMatchButton, CnWizMenuAction;
+  CnFrmMatchButton, CnWizMenuAction, CnWizOptions;
 
 type
   TCnSourceLanguageType = (ltUnknown, ltPas, ltCpp);
@@ -430,7 +430,7 @@ implementation
 {$IFDEF CNWIZARDS_CNPROCLISTWIZARD}
 
 uses
-  CnConsts, CnWizConsts, CnWizOptions, CnWizMacroUtils, CnCommon,
+  CnConsts, CnWizConsts, CnWizMacroUtils, CnCommon,
   CnLangMgr, CnSrcEditorToolBar, CnWizNotifier, CnWizShareImages, CnPasWideLex,
   CnBCBWideTokenList
   {$IFDEF DEBUG}, CnDebug {$ENDIF};

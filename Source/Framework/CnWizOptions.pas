@@ -40,8 +40,10 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, Messages, Classes, Graphics, Controls, SysUtils, ToolsAPI, IniFiles,
-  FileCtrl, Forms, Registry{$IFDEF COMPILER6_UP}, SHFolder{$ENDIF};
+  Windows, Messages, Classes, Graphics, Controls, SysUtils, IniFiles,
+  FileCtrl, Forms, Registry
+  {$IFNDEF STAND_ALONE}, ToolsAPI {$ENDIF}
+  {$IFDEF COMPILER6_UP}, SHFolder {$ENDIF};
 
 const
   csLargeButtonWidth = 32;
@@ -52,6 +54,8 @@ const
   csLargeToolbarButtonHeight = 30;
 
 type
+  // 匹配模式，开头匹配，中间匹配，全范围模糊匹配
+  TCnMatchMode = (mmStart, mmAnywhere, mmFuzzy);
 
 //==============================================================================
 // 专家公共参数类
@@ -67,6 +71,8 @@ type
 
   TCnWizSizeEnlarge = (wseOrigin, wsOneQuarter, wseAddHalf, wseDouble, wseDoubleHalf, wseTriple);
   {* 屏幕字体放大倍数，1、1.25、1.5、2、2.5、3}
+
+{$IFNDEF STAND_ALONE}
 
   TCnWizOptions = class(TObject)
   {* 专家环境参数类}
@@ -266,6 +272,8 @@ var
 
 function GetFactorFromSizeEnlarge(Enlarge: TCnWizSizeEnlarge): Single;
 
+{$ENDIF}
+
 implementation
 
 uses
@@ -274,6 +282,8 @@ uses
 {$ENDIF}
   CnWizUtils, CnWizConsts, CnCommon, CnWizManager, CnConsts, CnWizCompilerConst,
   CnNativeDecl;
+
+{$IFNDEF STAND_ALONE}
 
 function GetFactorFromSizeEnlarge(Enlarge: TCnWizSizeEnlarge): Single;
 begin
@@ -287,6 +297,7 @@ begin
     wseTriple:      Result := 3.0;
   end;
 end;
+
 //==============================================================================
 // 专家公共参数类
 //==============================================================================
@@ -830,5 +841,7 @@ begin
     FUseLargeIcon := Value;
   end;
 end;
+
+{$ENDIF}
 
 end.
