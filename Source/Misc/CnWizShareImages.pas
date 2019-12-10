@@ -39,7 +39,8 @@ interface
 
 uses
   SysUtils, Windows, Classes, Graphics, Forms, ImgList, Buttons, Controls,
-  CnWizUtils, CnGraphUtils, CnWizOptions, CnWizIdeUtils;
+  {$IFNDEF STAND_ALONE} CnWizUtils,  CnWizOptions, CnWizIdeUtils, {$ENDIF}
+  CnGraphUtils;
 
 type
   TdmCnSharedImages = class(TDataModule)
@@ -63,6 +64,7 @@ type
     { Public declarations }
     property IdxUnknown: Integer read FIdxUnknown;
     property IdxUnknownInIDE: Integer read FIdxUnknownInIDE;
+{$IFNDEF STAND_ALONE}
     procedure GetSpeedButtonGlyph(Button: TSpeedButton; ImageList: TImageList; 
       EmptyIdx: Integer);
 
@@ -71,6 +73,7 @@ type
 
     function GetMixedImageList: TCustomImageList;
     function CalcMixedImageIndex(ImageIndex: Integer): Integer;
+{$ENDIF}
   end;
 
 var
@@ -85,37 +88,8 @@ uses
 
 {$R *.dfm}
 
-function TdmCnSharedImages.CalcMixedImageIndex(
-  ImageIndex: Integer): Integer;
-begin
-  if FCopied and (ImageIndex >= 0) then
-    Result := ImageIndex + FIDEOffset
-  else
-    Result := ImageIndex;
-end;
-
-procedure TdmCnSharedImages.CopyToIDEMainImageList;
-var
-  IDEs: TCustomImageList;
-  Cnt: Integer;
-begin
-  if FCopied then
-    Exit;
-
-  IDEs := GetIDEImageList;
-  if (IDEs <> nil) and (IDEs.Width = Images.Width) and (IDEs.Height = Images.Height) then
-  begin
-    Cnt := IDEs.Count;
-    IDEs.AddImages(Images);
-    FIDEOffset := Cnt;
-    FCopied := True;
-{$IFDEF DEBUG}
-    CnDebugger.LogFmt('Add %d Images to IDE Main ImageList. Offset %d.', [Images.Count, FIDEOffset]);
-{$ENDIF}
-  end;
-end;
-
 procedure TdmCnSharedImages.DataModuleCreate(Sender: TObject);
+{$IFNDEF STAND_ALONE}
 const
   MaskColor = clBtnFace;
 var
@@ -124,7 +98,9 @@ var
   Save: TColor;
   Rs, Rd: TRect;
   I: Integer;
+{$ENDIF}
 begin
+{$IFNDEF STAND_ALONE}
   FIdxUnknown := 66;
   ImgLst := GetIDEImageList;
   Bmp := TBitmap.Create;
@@ -169,6 +145,18 @@ begin
       Dst.Free;
     end;
   end;
+{$ENDIF}
+end;
+
+{$IFNDEF STAND_ALONE}
+
+function TdmCnSharedImages.CalcMixedImageIndex(
+  ImageIndex: Integer): Integer;
+begin
+  if FCopied and (ImageIndex >= 0) then
+    Result := ImageIndex + FIDEOffset
+  else
+    Result := ImageIndex;
 end;
 
 function TdmCnSharedImages.GetMixedImageList: TCustomImageList;
@@ -177,6 +165,27 @@ begin
     Result := GetIDEImageList
   else
     Result := Images;
+end;
+
+procedure TdmCnSharedImages.CopyToIDEMainImageList;
+var
+  IDEs: TCustomImageList;
+  Cnt: Integer;
+begin
+  if FCopied then
+    Exit;
+
+  IDEs := GetIDEImageList;
+  if (IDEs <> nil) and (IDEs.Width = Images.Width) and (IDEs.Height = Images.Height) then
+  begin
+    Cnt := IDEs.Count;
+    IDEs.AddImages(Images);
+    FIDEOffset := Cnt;
+    FCopied := True;
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('Add %d Images to IDE Main ImageList. Offset %d.', [Images.Count, FIDEOffset]);
+{$ENDIF}
+  end;
 end;
 
 procedure TdmCnSharedImages.GetSpeedButtonGlyph(Button: TSpeedButton;
@@ -197,5 +206,7 @@ begin
   AdjustButtonGlyph(Button.Glyph);
   Button.NumGlyphs := 2;
 end;
+
+{$ENDIF}
 
 end.
