@@ -45,10 +45,10 @@ uses
 {$IFDEF COMPILER6_UP}
   StrUtils,
 {$ENDIF COMPILER6_UP}
-  ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles, ToolsAPI,
-  CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnWizUtils, CnIni, CnWizIdeUtils,
-  CnWizMultiLang, CnWizShareImages, CnWizNotifier, CnIniStrUtils, RegExpr,
-  CnStrings;
+  ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles,
+{$IFNDEF STAND_ALONE} ToolsAPI, CnWizUtils, CnWizIdeUtils, CnWizNotifier, {$ENDIF}
+  CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnIni, CnWizMultiLang,
+  CnWizShareImages, CnIniStrUtils, RegExpr, CnStrings;
 
 type
 
@@ -183,10 +183,12 @@ type
   private
     FSortIndex: Integer;
     FSortDown: Boolean;
-    FListViewWidthStr: string;
     FUpArrow: TBitmap;
     FDownArrow: TBitmap;
     FNoArrow: TBitmap;
+{$IFNDEF STAND_ALONE}
+    FListViewWidthStr: string;
+{$ENDIF}
     function GetMatchAny: Boolean;
     procedure SetMatchAny(const Value: Boolean);
 
@@ -196,7 +198,9 @@ type
     procedure InitArrowBitmaps;
     procedure ClearColumnArrow;
     procedure ChangeColumnArrow;
+{$IFNDEF STAND_ALONE}
     procedure ChangeIconToIDEImageList;
+{$ENDIF}
   protected
     FRegExpr: TRegExpr;
     NeedInitProjectControls: Boolean;
@@ -334,8 +338,9 @@ begin
     FDownArrow := TBitmap.Create;
     FNoArrow := TBitmap.Create;
     InitArrowBitmaps;
+{$IFNDEF STAND_ALONE}
     ChangeIconToIDEImageList;
-
+{$ENDIF}
     lvList.DoubleBuffered := True;
     ProjectList := TObjectList.Create;
     NeedInitProjectControls := True;
@@ -361,12 +366,16 @@ begin
 {$IFDEF BDS}
   SetListViewWidthString(lvList, FListViewWidthStr, GetFactorFromSizeEnlarge(Enlarge));
 {$ENDIF}
+{$IFNDEF STAND_ALONE}
   CnWizNotifierServices.ExecuteOnApplicationIdle(FirstUpdate);
+{$ENDIF}
 end;
 
 procedure TCnProjectViewBaseForm.FormDestroy(Sender: TObject);
 begin
+{$IFNDEF STAND_ALONE}
   CnWizNotifierServices.StopExecuteOnApplicationIdle(DoSelectItemChanged);
+{$ENDIF}
   ProjectList.Free;
   GlobalSortCompareEvent := nil;
   ClearDataList;
@@ -662,10 +671,11 @@ begin
 
     Width := ReadInteger(aSection, csWidth, Width);
     Height := ReadInteger(aSection, csHeight, Height);
+{$IFNDEF STAND_ALONE}
     CenterForm(Self);
-
     FListViewWidthStr := ReadString(aSection, csListViewWidth, '');
     SetListViewWidthString(lvList, FListViewWidthStr, GetFactorFromSizeEnlarge(Enlarge));
+{$ENDIF}
   finally
     Free;
   end;
@@ -691,8 +701,10 @@ begin
 
     WriteInteger(aSection, csWidth, Width);
     WriteInteger(aSection, csHeight, Height);
+{$IFNDEF STAND_ALONE}
     WriteString(aSection, csListViewWidth,
       GetListViewWidthString(lvList, GetFactorFromSizeEnlarge(Enlarge)));
+{$ENDIF}
   finally
     Free;
   end;
@@ -782,7 +794,11 @@ end;
 procedure TCnProjectViewBaseForm.lvListSelectItem(Sender: TObject;
   Item: TListItem; Selected: Boolean);
 begin
+{$IFNDEF STAND_ALONE}
   CnWizNotifierServices.ExecuteOnApplicationIdle(DoSelectItemChanged);
+{$ELSE}
+  DoSelectItemChanged(Sender);
+{$ENDIF}
 end;
 
 procedure TCnProjectViewBaseForm.SelectItemByIndex(AIndex: Integer);
@@ -1079,13 +1095,16 @@ begin
 end;
 
 procedure TCnProjectViewBaseForm.PrepareSearchRange;
+{$IFNDEF STAND_ALONE}
 var
   I: Integer;
   AProjectInfo: TCnProjectInfo;
+{$ENDIF}
 begin
   ProjectInfoSearch := nil;
   FProjectListSelectedAllProject := False;
 
+{$IFNDEF STAND_ALONE}
   if not cbbProjectList.Visible or (cbbProjectList.ItemIndex <= 0) then  // nil means All Project
   begin
 {$IFDEF DEBUG}
@@ -1128,7 +1147,7 @@ begin
       end;
     end;
   end;
-
+{$ENDIF}
 end;
 
 procedure TCnProjectViewBaseForm.DoUpdateListView;
@@ -1321,6 +1340,8 @@ begin
   // 基类啥都不改，按默认绘制
 end;
 
+{$IFNDEF STAND_ALONE}
+
 procedure TCnProjectViewBaseForm.ChangeIconToIDEImageList;
 var
   I: Integer;
@@ -1344,6 +1365,8 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 { TCnBaseElementInfo }
 
 constructor TCnBaseElementInfo.Create;
@@ -1358,3 +1381,4 @@ begin
 end;
 
 end.
+
