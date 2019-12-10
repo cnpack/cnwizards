@@ -28,7 +28,9 @@ unit CnProjectViewBaseFrm;
 * 开发平台：PWin2000Pro + Delphi 5.5
 * 兼容测试：PWin2000 + Delphi 5/6/7
 * 本 地 化：该窗体中的字符串支持本地化处理方式
-* 修改记录：2004.02.22 V1.1
+* 修改记录：2019.12.10 V1.2
+*               支持 STAND_ALONE 单独编译模式
+*           2004.02.22 V1.1
 *               重写所有代码
 *           2004.02.08 V1.0
 *               创建单元
@@ -192,13 +194,13 @@ type
     function GetMatchAny: Boolean;
     procedure SetMatchAny(const Value: Boolean);
 
-    procedure FirstUpdate(Sender: TObject);
     function GetMatchMode: TCnMatchMode;
     procedure SetMatchMode(const Value: TCnMatchMode);
     procedure InitArrowBitmaps;
     procedure ClearColumnArrow;
     procedure ChangeColumnArrow;
 {$IFNDEF STAND_ALONE}
+    procedure FirstUpdate(Sender: TObject);
     procedure ChangeIconToIDEImageList;
 {$ENDIF}
   protected
@@ -913,7 +915,7 @@ procedure TCnProjectViewBaseForm.lvListKeyDown(Sender: TObject;
 begin
   if Key in [VK_BACK] then
   begin
-    //PostMessage(edtMatchSearch.Handle, WM_CHAR, Integer(Key), 0);
+    // PostMessage(edtMatchSearch.Handle, WM_CHAR, Integer(Key), 0);
     try
       edtMatchSearch.SetFocus;
     except
@@ -921,6 +923,8 @@ begin
     end;
   end;
 end;
+
+{$IFNDEF STAND_ALONE}
 
 procedure TCnProjectViewBaseForm.FirstUpdate(Sender: TObject);
 var
@@ -943,6 +947,8 @@ begin
   end;
   lvList.Update;
 end;
+
+{$ENDIF}
 
 function TCnProjectViewBaseForm.GetMatchMode: TCnMatchMode;
 begin
