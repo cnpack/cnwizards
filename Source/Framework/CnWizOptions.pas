@@ -280,8 +280,10 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnWizUtils, CnWizConsts, CnCommon, CnWizManager, CnConsts, CnWizCompilerConst,
-  CnNativeDecl;
+{$IFNDEF STAND_ALONE}
+  CnWizUtils, CnWizManager,
+{$ENDIF}
+  CnWizConsts, CnCommon,  CnConsts, CnWizCompilerConst, CnNativeDecl;
 
 {$IFNDEF STAND_ALONE}
 

@@ -1091,11 +1091,6 @@ function RegExpContainsText(ARegExpr: TRegExpr; const AText: string;
   APattern: string; IsMatchStart: Boolean = False): Boolean;
 {* 判断正则表达式匹配}
 
-function CompareTextWithPos(const ASubText, AText1, AText2: string;
-  Reverse: Boolean): TValueRelationship;
-{* 比较 SubText 在两个字符串中出现的位置的大小，位置不反序，
-   相等则比较字符串本身，本身可反序，忽略大小写 }
-
 {$IFNDEF CNWIZARDS_MINIMUM}
 procedure TranslateFormFromLangFile(AForm: TCustomForm; const ALangDir, ALangFile: string;
   LangID: Cardinal);
@@ -7703,43 +7698,6 @@ begin
     Result := ARegExpr.Exec(AText);
   except
     Result := False;
-  end;
-end;
-
-function CompareTextWithPos(const ASubText, AText1, AText2: string;
-  Reverse: Boolean): TValueRelationship;
-var
-  P1, P2: Integer;
-begin
-  Result := 0;
-  if ASubText <> '' then
-  begin
-    P1 := Pos(UpperCase(ASubText), UpperCase(AText1));
-    P2 := Pos(UpperCase(ASubText), UpperCase(AText2));
-
-    if P1 = P2 then // 子串位置相同或都没有，比较字符串本身，可反序
-    begin
-      Result := CompareStr(AText1, AText2);
-      if Reverse then
-        Result := -Result;
-    end
-    else if (P1 = 0) or (P2 = 0) then // 一个有一个没有，无需反序，有的必然靠前
-    begin
-      if P1 = 0 then
-        Result := 1
-      else if P2 = 0 then
-        Result := -1;
-    end
-    else // 都有但不同，比较子串位置，无需反序
-    begin
-      Result := P1 - P2;
-    end;
-  end
-  else // 子串为空，纯比较字符串，可反序
-  begin
-    Result := CompareStr(AText1, AText2);
-    if Reverse then
-      Result := -Result;
   end;
 end;
 
