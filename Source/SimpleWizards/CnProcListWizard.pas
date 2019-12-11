@@ -185,8 +185,8 @@ type
     FIsObjNone: Boolean;
     FObjectList: TStringList; // 和 DataList 类似，存储本窗体打开时解析出的类名
     procedure SetFileName(const Value: string);
-{$IFNDEF STAND_ALONE}
     procedure LoadObjectCombobox(ObjectList: TStringList);
+{$IFNDEF STAND_ALONE}
     procedure InitFileComboBox;
     procedure LoadFileComboBox;
 {$ENDIF}
@@ -404,7 +404,6 @@ type
     procedure ClearList;
     procedure CheckCurrentFile(Sender: TObject);
     function CheckReparse: Boolean;
-    procedure ClearObjectStrings(ObjectList: TStringList);
 
     procedure CurrentGotoLineAndFocusEditControl(Info: TCnElementInfo); overload;
     procedure CurrentGotoLineAndFocusEditControl(Line: Integer); overload;
@@ -415,6 +414,7 @@ type
     procedure DoIdleComboChange(Sender: TObject);
     procedure AfterThemeChange(Sender: TObject);
 {$ENDIF}
+    procedure ClearObjectStrings(ObjectList: TStringList);
 {$IFDEF IDE_SUPPORT_THEMING}
     procedure DoThemeChange(Sender: TObject);
 {$ENDIF}
@@ -670,12 +670,6 @@ begin
   end;
 end;
 
-procedure TCnProcListWizard.ClearObjectStrings(ObjectList: TStringList);
-begin
-  ObjectList.Clear;
-  ObjectList.Add(SCnProcListObjsAll);
-end;
-
 procedure TCnProcListWizard.ClassComboDropDown(Sender: TObject);
 var
   ClassCombo: TCnProcListComboBox;
@@ -789,6 +783,12 @@ begin
   FreeAndNil(FCurrCppParser);
   FreeAndNil(FCurrStream);
   inherited;
+end;
+
+procedure TCnProcListWizard.ClearObjectStrings(ObjectList: TStringList);
+begin
+  ObjectList.Clear;
+  ObjectList.Add(SCnProcListObjsAll);
 end;
 
 {$IFNDEF STAND_ALONE}
@@ -1168,10 +1168,8 @@ begin
 {$ENDIF}
       LoadElements(DataList, ObjectList, FFileName);
       UpdateListView;
-
-{$IFNDEF STAND_ALONE}
       LoadObjectComboBox(ObjectList);
-{$ENDIF}
+
       Caption := Caption + ' - ' + _CnExtractFileName(FFileName);
       StatusBar.Panels[1].Text := Trim(IntToStr(lvList.Items.Count));
 
@@ -1587,7 +1585,9 @@ begin
   NeedInitProjectControls := False;
   FOldCaption := Caption;
 
-{$IFNDEF STAND_ALONE}
+{$IFDEF STAND_ALONE}
+  MatchMode := mmFuzzy;
+{$ELSE}
   InitFileComboBox;
   actHookIDE.Visible := CnEditorToolBarService <> nil;
 {$ENDIF}
@@ -2700,9 +2700,7 @@ begin
 
       Screen.Cursor := crHourGlass;
       try
-{$IFNDEF STAND_ALONE}
         ClearObjectStrings(ObjectList);
-{$ENDIF}
 
         if ToClear then
         begin
@@ -3012,15 +3010,11 @@ begin
     FLanguage := ltCpp;
 end;
 
-{$IFNDEF STAND_ALONE}
-
 procedure TCnProcListForm.LoadObjectComboBox(ObjectList: TStringList);
 begin
   cbbProjectList.Items.Assign(ObjectList);
   cbbProjectList.ItemIndex := cbbProjectList.Items.IndexOf(SCnProcListObjsAll);
 end;
-
-{$ENDIF}
 
 procedure TCnProcListWizard.AddElement(ElementList: TStringList; ElementInfo: TCnElementInfo);
 begin
