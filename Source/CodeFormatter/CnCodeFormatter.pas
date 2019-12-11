@@ -234,7 +234,7 @@ type
     procedure FormatTypeID(PreSpaceCount: Byte = 0);
     procedure FormatIdent(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = True);
     procedure FormatIdentList(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = True);
-    procedure FormatConstExpr(PreSpaceCount: Byte = 0);
+    procedure FormatConstExpr(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
     procedure FormatConstExprInType(PreSpaceCount: Byte = 0);
     procedure FormatSetConstructor(PreSpaceCount: Byte = 0);
 
@@ -299,7 +299,7 @@ type
     procedure FormatConstantDecl(PreSpaceCount: Byte = 0);
     procedure FormatVarSection(PreSpaceCount: Byte = 0);
     procedure FormatVarDecl(PreSpaceCount: Byte = 0);
-    procedure FormatInlineVarDecl(PreSpaceCount: Byte = 0);
+    procedure FormatInlineVarDecl(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
     procedure FormatProcedureDeclSection(PreSpaceCount: Byte = 0);
     procedure FormatSingleAttribute(PreSpaceCount: Byte = 0; LineEndSpaceCount: Byte = 0);
     procedure FormatType(PreSpaceCount: Byte = 0; IgnoreDirective: Boolean = False);
@@ -961,7 +961,7 @@ begin
 end;
 
 { ConstExpr -> <constant-expression> }
-procedure TCnBasePascalFormatter.FormatConstExpr(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatConstExpr(PreSpaceCount, IndentForAnonymous: Byte);
 begin
   SpecifyElementType(pfetConstExpr);
   try
@@ -970,7 +970,7 @@ begin
     FNeedKeepLineBreak := True;
     try
       // 从 FormatExpression 复制而来，为了区分来源
-      FormatSimpleExpression(PreSpaceCount, PreSpaceCount);
+      FormatSimpleExpression(PreSpaceCount, IndentForAnonymous);
     finally
       FNeedKeepLineBreak := Boolean(FLineBreakKeepStack.Pop);
     end;
@@ -1112,13 +1112,11 @@ begin
               RestoreElementType;
           end;
         end;
-
       tokHat: // ^
         begin
           { DONE: deal with pointer derefrence }
           Match(tokHat);
         end;
-
       tokPlus, tokMinus:
         begin
           MatchOperator(Scaner.Token);
@@ -2119,7 +2117,7 @@ begin
       tokKeywordVar:
         begin
           Match(Scaner.Token, PreSpaceCount);
-          FormatInlineVarDecl;
+          FormatInlineVarDecl(0, PreSpaceCount); // var 语句后面无需缩进，但 var 里头的匿名函数需要缩进
         end;
       tokKeywordConst:
         begin
@@ -5109,7 +5107,7 @@ begin
 end;
 
 { InlineVarDecl -> IdentList ':' Type [(ABSOLUTE (Ident | ConstExpr)) | ':=' TypedConstant] }
-procedure TCnBasePascalFormatter.FormatInlineVarDecl(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatInlineVarDecl(PreSpaceCount, IndentForAnonymous: Byte);
 var
   OldStoreIdent: Boolean;
 begin
@@ -5135,7 +5133,7 @@ begin
     if Scaner.Token in ConstTokens + [tokAtSign, tokPlus, tokMinus, tokHat, tokSLB, tokLB] then
       FormatTypedConstant
     else
-      FormatConstExpr;
+      FormatConstExpr(0, IndentForAnonymous);
   end
   else if Scaner.TokenSymbolIs('ABSOLUTE') then
   begin
