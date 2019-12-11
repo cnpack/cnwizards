@@ -5131,7 +5131,11 @@ begin
   if Scaner.Token = tokAssign then  // 注意 InlineVar 此处与 var 不同
   begin
     Match(Scaner.Token, 1, 1);
-    FormatTypedConstant;
+    // var F := not A 这种，走不了 TypedConstant，得走 ConstExpr
+    if Scaner.Token in ConstTokens + [tokAtSign, tokPlus, tokMinus, tokHat, tokSLB, tokLB] then
+      FormatTypedConstant
+    else
+      FormatConstExpr;
   end
   else if Scaner.TokenSymbolIs('ABSOLUTE') then
   begin
