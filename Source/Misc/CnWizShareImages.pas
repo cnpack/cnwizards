@@ -58,8 +58,10 @@ type
     { Private declarations }
     FIdxUnknownInIDE: Integer;
     FIdxUnknown: Integer;
+{$IFNDEF STAND_ALONE}
     FIDEOffset: Integer;
     FCopied: Boolean;
+{$ENDIF}
   public
     { Public declarations }
     property IdxUnknown: Integer read FIdxUnknown;

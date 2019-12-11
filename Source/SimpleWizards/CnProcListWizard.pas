@@ -65,12 +65,15 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ComCtrls, ToolWin, StdCtrls, ExtCtrls, IniFiles, ToolsAPI, Math, Menus, ActnList,
-  CnProjectViewBaseFrm, CnWizClasses, CnWizManager, CnIni, CnWizEditFiler, mPasLex,
-  mwBCBTokenList, Contnrs, Clipbrd, CnEditControlWrapper, CnPasCodeParser, CnWizUtils,
+  ComCtrls, ToolWin, StdCtrls, ExtCtrls, IniFiles, Math, Menus, ActnList,
+  CnProjectViewBaseFrm, CnIni, mPasLex,  mwBCBTokenList, Contnrs, Clipbrd, CnPasCodeParser,
   {$IFDEF USE_CUSTOMIZED_SPLITTER} CnSplitter, {$ENDIF} CnWidePasParser, CnWideCppParser,
-  CnPopupMenu, CnWizIdeUtils, CnCppCodeParser, CnStrings, CnEdit, RegExpr,
-  CnFrmMatchButton, CnWizMenuAction, CnWizOptions;
+  CnPopupMenu, CnCppCodeParser, CnStrings, CnEdit, RegExpr,
+{$IFNDEF STAND_ALONE}
+  ToolsAPI, CnWizClasses, CnWizManager, CnWizEditFiler, CnEditControlWrapper, CnWizUtils,
+  CnWizMenuAction, CnWizIdeUtils,
+{$ENDIF}
+  CnFrmMatchButton, CnWizOptions;
 
 type
   TCnSourceLanguageType = (ltUnknown, ltPas, ltCpp);
@@ -112,6 +115,30 @@ type
 
   TCnProcListWizard = class;
 
+{$IFDEF STAND_ALONE} // 独立运行时重新声明一些框架内的东西
+  TCnMenuWizard = class(TObject);
+
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+  TCnIdeTokenString = WideString; // WideString for Utf8 Conversion
+  PCnIdeTokenChar = PWideChar;
+  {$ELSE}
+  TCnIdeTokenString = string;     // Ansi/Utf16
+  PCnIdeTokenChar = PChar;
+  {$ENDIF}
+
+  {$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}  // 2005 以上
+  TCnGeneralPasToken = TCnWidePasToken;
+  TCnGeneralCppToken = TCnWideCppToken;
+  TCnGeneralPasStructParser = TCnWidePasStructParser;
+  TCnGeneralCppStructParser = TCnWideCppStructParser;
+  {$ELSE}                               // 5 6 7
+  TCnGeneralPasToken = TCnPasToken;
+  TCnGeneralCppToken = TCnCppToken;
+  TCnGeneralPasStructParser = TCnPasStructureParser;
+  TCnGeneralCppStructParser = TCnCppStructureParser;
+  {$ENDIF}
+{$ENDIF}
+
 {$IFDEF USE_CUSTOMIZED_SPLITTER}
   TCnCustomizedSplitter = TCnSplitter;
 {$ELSE}
@@ -145,8 +172,10 @@ type
   private
     { Private declarations }
     FFileName: string;
+{$IFNDEF STAND_ALONE}
     FFiler: TCnEditFiler;
     FFilesGot: Boolean;
+{$ENDIF}
     FCurrentFile: string;
     FSelIsCurFile: Boolean;
     FWizard: TCnProcListWizard;
@@ -156,9 +185,11 @@ type
     FIsObjNone: Boolean;
     FObjectList: TStringList; // 和 DataList 类似，存储本窗体打开时解析出的类名
     procedure SetFileName(const Value: string);
+{$IFNDEF STAND_ALONE}
     procedure LoadObjectCombobox(ObjectList: TStringList);
     procedure InitFileComboBox;
     procedure LoadFileComboBox;
+{$ENDIF}
     function SelectImageIndex(ProcInfo: TCnElementInfo): Integer;
     function GetMethodName(const ProcName: string): string;
   protected
@@ -202,6 +233,8 @@ type
 
   TCnItemHintEvent = procedure (Sender: TObject; Index: Integer;
     var HintStr: string) of object;
+
+{$IFNDEF STAND_ALONE}
 
   // 工具栏中的下拉列表框的下拉列表
   TCnProcDropDownBox = class(TCustomListBox)
@@ -320,28 +353,33 @@ type
     property PopupMenu: TPopupMenu read FPopupMenu write FPopupMenu;
   end;
 
+{$ENDIF}
+
   TCnProcListWizard = class(TCnMenuWizard)
   private
-    FEditorToolBarType: string;
-    FUseEditorToolBar: Boolean;
-    FToolBarTimer: TTimer;
     FNeedReParse: Boolean;
     FCurrPasParser: TCnGeneralPasStructParser;
     FCurrCppParser: TCnGeneralCppStructParser;
     FCurrStream: TMemoryStream;
+{$IFNDEF STAND_ALONE}
+    FEditorToolBarType: string;
+    FUseEditorToolBar: Boolean;
+    FToolBarTimer: TTimer;
     FProcToolBarObjects: TList;
     FComboToSearch: TCnProcListComboBox;
-    FPreviewLineCount: Integer;
-    FHistoryCount: Integer;
-    FElementList: TStringList; // 存储当前 ProcToolbar 的原始元素列表
-    FObjStrings: TStringList;  // 存储当前 ProcToolbar 的类元素列表
     FProcComboHeight: Integer;
     FClassComboHeight: Integer;
     FProcComboWidth: Integer;
     FClassComboWidth: Integer;
     FToolbarClassComboWidth: Integer;
     FToolbarProcComboWidth: Integer;
+    FHistoryCount: Integer;
     FFileIndex: Integer;
+{$ENDIF}
+    FPreviewLineCount: Integer;
+    FElementList: TStringList; // 存储当前 ProcToolbar 的原始元素列表
+    FObjStrings: TStringList;  // 存储当前 ProcToolbar 的类元素列表
+{$IFNDEF STAND_ALONE}
     function GetToolBarObjFromEditControl(EditControl: TControl): TCnProcToolBarObj;
     procedure RemoveToolBarObjFromEditControl(EditControl: TControl);
     procedure ToolBarCanShow(Sender: TObject; APage: TCnSrcEditorPage; var ACanShow: Boolean);
@@ -349,12 +387,6 @@ type
     procedure CreateProcToolBar(ToolBarType: string; EditControl: TControl; ToolBar: TToolBar);
     procedure InitProcToolBar(ToolBarType: string; EditControl: TControl; ToolBar: TToolBar);
     procedure RemoveProcToolBar(ToolBarType: string; EditControl: TControl; ToolBar: TToolBar);
-    procedure EditorChange(Editor: TEditorObject; ChangeType:
-      TEditorChangeTypes);
-    procedure AfterThemeChange(Sender: TObject);
-{$IFDEF IDE_SUPPORT_THEMING}
-    procedure DoThemeChange(Sender: TObject);
-{$ENDIF}
     procedure OnToolBarTimer(Sender: TObject);
     procedure PopupCloseItemClick(Sender: TObject);
     procedure PopupSubItemSortByClick(Sender: TObject);
@@ -364,6 +396,9 @@ type
 
     procedure EditorToolBarEnable(const Value: Boolean);
     procedure SetUseEditorToolBar(const Value: Boolean);
+
+    procedure EditorChange(Editor: TEditorObject; ChangeType:
+      TEditorChangeTypes);
 
     procedure ParseCurrent;
     procedure ClearList;
@@ -378,12 +413,20 @@ type
     procedure ClassComboDropDown(Sender: TObject);
     procedure ProcComboDropDown(Sender: TObject);
     procedure DoIdleComboChange(Sender: TObject);
+    procedure AfterThemeChange(Sender: TObject);
+{$ENDIF}
+{$IFDEF IDE_SUPPORT_THEMING}
+    procedure DoThemeChange(Sender: TObject);
+{$ENDIF}
   protected
+{$IFNDEF STAND_ALONE}
     procedure SetActive(Value: Boolean); override;
     function GetHasConfig: Boolean; override;
+{$ENDIF}
   public
-    constructor Create; override;
+    constructor Create; {$IFNDEF STAND_ALONE} override; {$ENDIF}
     destructor Destroy; override;
+{$IFNDEF STAND_ALONE}
     procedure Config; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
@@ -392,7 +435,10 @@ type
     function GetCaption: string; override;
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
-    procedure Execute; override;
+
+    function GetCurrentToolBarObj: TCnProcToolBarObj;
+{$ENDIF}
+    procedure Execute; {$IFNDEF STAND_ALONE} override; {$ENDIF}
 
     procedure LoadElements(ElementList, ObjectList: TStringList; aFileName: string;
       ToClear: Boolean = True);
@@ -400,13 +446,14 @@ type
       ElementInfo: TCnElementInfo; IsIntf: Boolean);
     procedure AddElement(ElementList: TStringList;
       ElementInfo: TCnElementInfo);
-    function GetCurrentToolBarObj: TCnProcToolBarObj;
 
     // 注：有其他的设置在 Form 的属性中，不完全在此地
-    property UseEditorToolBar: Boolean read FUseEditorToolBar write SetUseEditorToolBar;
-    {* 是否显示编辑器中的过程函数列表工具栏}
     property PreviewLineCount: Integer read FPreviewLineCount write FPreviewLineCount;
     {* 预览窗口中的行数量}
+
+{$IFNDEF STAND_ALONE}
+    property UseEditorToolBar: Boolean read FUseEditorToolBar write SetUseEditorToolBar;
+    {* 是否显示编辑器中的过程函数列表工具栏}
     property HistoryCount: Integer read FHistoryCount write FHistoryCount;
     {* 历史记录的数量}
     property FileIndex: Integer read FFileIndex write FFileIndex;
@@ -421,6 +468,7 @@ type
     // 工具栏列表框宽度
     property ToolbarClassComboWidth: Integer read FToolbarClassComboWidth write FToolbarClassComboWidth;
     property ToolbarProcComboWidth: Integer read FToolbarProcComboWidth write FToolbarProcComboWidth;
+{$ENDIF}
   end;
 
 {$ENDIF CNWIZARDS_CNPROCLISTWIZARD}
@@ -430,9 +478,9 @@ implementation
 {$IFDEF CNWIZARDS_CNPROCLISTWIZARD}
 
 uses
-  CnConsts, CnWizConsts, CnWizMacroUtils, CnCommon,
-  CnLangMgr, CnSrcEditorToolBar, CnWizNotifier, CnWizShareImages, CnPasWideLex,
-  CnBCBWideTokenList
+  CnConsts, CnWizConsts, CnCommon, CnLangMgr,
+  {$IFNDEF STAND_ALONE} CnWizMacroUtils, CnSrcEditorToolBar, CnWizNotifier, {$ENDIF}
+  CnWizShareImages, CnPasWideLex, CnBCBWideTokenList
   {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 {$R *.DFM}
@@ -494,6 +542,8 @@ var
 
   FWizard: TCnProcListWizard = nil;
 
+{$IFNDEF STAND_ALONE}
+
 function GetMatchMode(Obj: TCnProcToolBarObj): TCnMatchMode;
 begin
   if Obj <> nil then
@@ -502,7 +552,35 @@ begin
     Result := mmFuzzy;
 end;
 
+{$ENDIF}
+
+function InfoCompare(List: TStringList; Index1, Index2: Integer): Integer;
+begin
+  Result := 0;
+  case GListSortIndex of
+  0:
+    begin
+      Result := CompareText(List[Index1], List[Index2]);
+    end;
+  1:
+    begin
+      if (List.Objects[Index1] <> nil) and (List.Objects[Index2] <> nil) then
+      begin
+        Result := CompareValue(TCnElementInfo(List.Objects[Index1]).LineNo,
+          TCnElementInfo(List.Objects[Index2]).LineNo);
+      end;
+    end;
+  else
+    Result := CompareValue(Index1, Index2);
+  end;
+
+  if GListSortReverse then
+    Result := -Result;
+end;
+
 { TCnProcListWizard }
+
+{$IFNDEF STAND_ALONE}
 
 procedure TCnProcListWizard.CheckCurrentFile(Sender: TObject);
 var
@@ -534,30 +612,6 @@ begin
       Obj.ToolBtnJumpImpl.Enabled := False;
     end;
   end;
-end;
-
-function InfoCompare(List: TStringList; Index1, Index2: Integer): Integer;
-begin
-  Result := 0;
-  case GListSortIndex of
-  0:
-    begin
-      Result := CompareText(List[Index1], List[Index2]);
-    end;
-  1:
-    begin
-      if (List.Objects[Index1] <> nil) and (List.Objects[Index2] <> nil) then
-      begin
-        Result := CompareValue(TCnElementInfo(List.Objects[Index1]).LineNo,
-          TCnElementInfo(List.Objects[Index2]).LineNo);
-      end;
-    end;
-  else
-    Result := CompareValue(Index1, Index2);
-  end;
-
-  if GListSortReverse then
-    Result := -Result;
 end;
 
 function TCnProcListWizard.CheckReparse: Boolean;
@@ -691,28 +745,60 @@ begin
 
 end;
 
+{$ENDIF}
+
 constructor TCnProcListWizard.Create;
 begin
   inherited;
-  FProcToolBarObjects := TList.Create;
-
   FElementList := TStringList.Create;
   FObjStrings := TStringList.Create;
   FObjStrings.Sorted := True;
   FObjStrings.Duplicates := dupIgnore;
 
+{$IFNDEF STAND_ALONE}
+  FProcToolBarObjects := TList.Create;
   EditControlWrapper.AddEditorChangeNotifier(EditorChange);
   CnWizNotifierServices.AddAfterThemeChangeNotifier(AfterThemeChange);
+{$ENDIF}
   FNeedReParse := True;
   FWizard := Self;
 end;
+
+destructor TCnProcListWizard.Destroy;
+var
+  I: Integer;
+begin
+  FWizard := nil;
+{$IFNDEF STAND_ALONE}
+  CnWizNotifierServices.RemoveAfterThemeChangeNotifier(AfterThemeChange);
+  EditControlWrapper.RemoveEditorChangeNotifier(EditorChange);
+  for I := 0 to FProcToolBarObjects.Count - 1 do
+    TObject(FProcToolBarObjects).Free;
+  FreeAndNil(FProcToolBarObjects);
+
+  FreeAndNil(FToolBarTimer);
+{$ENDIF}
+  FObjStrings.Free;
+  for I := 0 to FElementList.Count - 1 do
+    if FElementList.Objects[I] <> nil then
+      FElementList.Objects[I].Free;
+
+  FElementList.Free;
+
+  FreeAndNil(FCurrPasParser);
+  FreeAndNil(FCurrCppParser);
+  FreeAndNil(FCurrStream);
+  inherited;
+end;
+
+{$IFNDEF STAND_ALONE}
 
 procedure TCnProcListWizard.ToolBarCanShow(Sender: TObject;
   APage: TCnSrcEditorPage; var ACanShow: Boolean);
 begin
   ACanShow := Active and (APage in [epCode]);
 end;
-  
+
 procedure TCnProcListWizard.SplitterMoved(Sender: TObject);
 var
   AComp, AToolbar: TComponent;
@@ -1005,32 +1091,6 @@ begin
 {$ENDIF}
 end;
 
-destructor TCnProcListWizard.Destroy;
-var
-  I: Integer;
-begin
-  FWizard := nil;
-  CnWizNotifierServices.RemoveAfterThemeChangeNotifier(AfterThemeChange);
-  EditControlWrapper.RemoveEditorChangeNotifier(EditorChange);
-  for I := 0 to FProcToolBarObjects.Count - 1 do
-    TObject(FProcToolBarObjects).Free;
-  FreeAndNil(FProcToolBarObjects);
-
-  FreeAndNil(FToolBarTimer);
-
-  FObjStrings.Free;
-  for I := 0 to FElementList.Count - 1 do
-    if FElementList.Objects[I] <> nil then
-      FElementList.Objects[I].Free;
-
-  FElementList.Free;
-
-  FreeAndNil(FCurrPasParser);
-  FreeAndNil(FCurrCppParser);
-  FreeAndNil(FCurrStream);
-  inherited;
-end;
-
 procedure TCnProcListWizard.EditorChange(Editor: TEditorObject;
   ChangeType: TEditorChangeTypes);
 var
@@ -1067,38 +1127,57 @@ begin
   end;  
 end;
 
+{$ENDIF}
+
 procedure TCnProcListWizard.Execute;
 var
+{$IFNDEF STAND_ALONE}
   Ini: TCustomIniFile;
+{$ENDIF}
   TmpFileName: string;
 begin
+{$IFDEF STAND_ALONE}
+  TmpFileName := ParamStr(1);
+{$ELSE}
   TmpFileName := CnOtaGetCurrentSourceFileName;
+{$ENDIF}
   if TmpFileName = '' then
   begin
     ErrorDlg(SCnProcListErrorFileType);
     Exit;
   end;
 
+{$IFNDEF STAND_ALONE}
   Ini := CreateIniFile;
+{$ENDIF}
   try
     // ClearList;
     with TCnProcListForm.Create(nil) do
     try
       Wizard := Self;
+{$IFNDEF STAND_ALONE}
       ShowHint := WizOptions.ShowHint;
+{$ENDIF}
       FileName := TmpFileName;
       // Current Filename
       CurrentFile := TmpFileName;
       FIsCurrentFile := True;
 
+{$IFNDEF STAND_ALONE}
       LoadSettings(Ini, '');
+{$ENDIF}
       LoadElements(DataList, ObjectList, FFileName);
       UpdateListView;
 
+{$IFNDEF STAND_ALONE}
       LoadObjectComboBox(ObjectList);
+{$ENDIF}
       Caption := Caption + ' - ' + _CnExtractFileName(FFileName);
       StatusBar.Panels[1].Text := Trim(IntToStr(lvList.Items.Count));
 
+{$IFDEF STAND_ALONE}
+      actHookIDE.Enabled := False;
+{$ELSE}
       actHookIDE.Enabled := IsSourceModule(FFileName) or IsInc(FFileName);
       if actHookIDE.Enabled then
         actHookIDE.Checked := UseEditorToolBar;
@@ -1109,24 +1188,33 @@ begin
         if cbbFiles.ItemIndex > 0 then
           cbbFiles.OnChange(cbbFiles);
       end;
+{$ENDIF}
 
       if ShowModal = mrOK then
       begin
         // BringIdeEditorFormToFront;
+{$IFNDEF STAND_ALONE}
         CnOtaMakeSourceVisible(CurrentFile);
+{$ENDIF}
       end;
 
+{$IFNDEF STAND_ALONE}
       if actHookIDE.Enabled then
         UseEditorToolBar := actHookIDE.Checked;
       SaveSettings(Ini, '');
       DoSaveSettings;
+{$ENDIF}
     finally
       Free;
     end;
   finally
+{$IFNDEF STAND_ALONE}
     Ini.Free;
+{$ENDIF}
   end;
 end;
+
+{$IFNDEF STAND_ALONE}
 
 function TCnProcListWizard.GetCaption: string;
 begin
@@ -1485,21 +1573,29 @@ begin
   Ini.WriteInteger('', csToolbarProcComboWidth, ToolbarProcComboWidth);
 end;
 
+{$ENDIF}
+
 { TCnProcListFrm }
 
 procedure TCnProcListForm.FormCreate(Sender: TObject);
+{$IFNDEF STAND_ALONE}
 var
   EditorCanvas: TCanvas;
+{$ENDIF}
 begin
   inherited;
   NeedInitProjectControls := False;
-  InitFileComboBox;
   FOldCaption := Caption;
+
+{$IFNDEF STAND_ALONE}
+  InitFileComboBox;
   actHookIDE.Visible := CnEditorToolBarService <> nil;
+{$ENDIF}
   FObjectList := TStringList.Create;
   FObjectList.Sorted := True;
   FObjectList.Duplicates := dupIgnore;
 
+{$IFNDEF STAND_ALONE}
   EditorCanvas := EditControlWrapper.GetEditControlCanvas(CnOtaGetCurrentEditControl);
   if EditorCanvas <> nil then
   begin
@@ -1508,6 +1604,7 @@ begin
     mmoContent.Font.Size := EditorCanvas.Font.Size;
     mmoContent.Font.Style := EditorCanvas.Font.Style - [fsUnderline, fsStrikeOut, fsItalic];
   end;
+{$ENDIF}
 
   {$IFDEF COMPILER6_UP}
   cbbMatchSearch.AutoComplete := False;
@@ -1570,9 +1667,17 @@ var
 {$ENDIF}
   end;
 
+  function IsDprOrInc(const AFile: string): Boolean;
+  var
+    FileExt: string;
+  begin
+    FileExt := UpperCase(_CnExtractFileExt(AFile));
+    Result := (FileExt = '.INC') or (FileExt = '.DPR');
+  end;
+
   function MoveToImplementation: Boolean;
   begin
-    if IsDpr(aFileName) or (IsInc(aFileName)) then
+    if IsDprOrInc(aFileName) then
     begin
       Result := True;
       Exit;
@@ -2562,24 +2667,31 @@ begin
 {$ENDIF}
   end;
 
+{$IFNDEF STAND_ALONE}
   if FIsCurrentFile and (FLanguage = ltPas) then
     FCurElement := EdtGetProcName
   else
+{$ENDIF}
     FCurElement := '';
 
   try
     MemStream := TMemoryStream.Create;
     try
+{$IFDEF STAND_ALONE}
+      // TODO: 判断编码
+      MemStream.LoadFromFile(aFileName);
+{$ELSE}
       with TCnEditFiler.Create(aFileName) do
       try
-{$IFDEF UNICODE}
+  {$IFDEF UNICODE}
         SaveToStreamW(MemStream);
-{$ELSE}
+  {$ELSE}
         SaveToStream(MemStream, True);
-{$ENDIF}
+  {$ENDIF}
       finally
         Free;
       end;
+{$ENDIF}
 
       case FLanguage of
         ltPas: PasParser.Origin := MemStream.Memory;
@@ -2588,7 +2700,9 @@ begin
 
       Screen.Cursor := crHourGlass;
       try
+{$IFNDEF STAND_ALONE}
         ClearObjectStrings(ObjectList);
+{$ENDIF}
 
         if ToClear then
         begin
@@ -2599,7 +2713,7 @@ begin
           ElementList.Clear;
         end;
 
-        FindElements(IsDpr(aFileName) or IsInc(aFileName));
+        FindElements(IsDprOrInc(aFileName));
       finally
         Screen.Cursor := crDefault;
       end;
@@ -2620,15 +2734,19 @@ procedure TCnProcListForm.LoadSettings(Ini: TCustomIniFile;
   aSection: string);
 var
   S: string;
+{$IFNDEF STAND_ALONE}
   I: Integer;
+{$ENDIF}
 begin
   inherited;
   S := Ini.ReadString(aSection, csDropDown, '');
   S := StringReplace(S, csSep, csCRLF, [rfReplaceAll, rfIgnoreCase]);
   cbbMatchSearch.Items.Text := S;
+{$IFNDEF STAND_ALONE}
   if cbbMatchSearch.Items.Count > Wizard.HistoryCount then
     for I := cbbMatchSearch.Items.Count - 1 downto Wizard.HistoryCount do
       cbbMatchSearch.Items.Delete(I);
+{$ENDIF}
 
   btnShowPreview.Down := Ini.ReadBool(aSection, csShowPreview, True);
   FPreviewHeight := Ini.ReadInteger(aSection, csPreviewHeight, 0);
@@ -2638,13 +2756,16 @@ begin
 end;
 
 procedure TCnProcListForm.OpenSelect;
+{$IFNDEF STAND_ALONE}
 var
   ProcInfo: TCnElementInfo;
   Module: IOTAModule;
   SourceEditor: IOTASourceEditor;  
   View: IOTAEditView;
   I: Integer;
+{$ENDIF}
 begin
+{$IFNDEF STAND_ALONE}
   if lvList.Selected <> nil then
   begin
     ProcInfo := lvList.Selected.Data;
@@ -2712,6 +2833,7 @@ begin
       end;
     end;
   end;
+{$ENDIF}
 end;
 
 procedure TCnProcListForm.SaveSettings(Ini: TCustomIniFile;
@@ -2741,6 +2863,7 @@ begin
 end;
 
 procedure TCnProcListForm.UpdateStatusBar;
+{$IFNDEF STAND_ALONE}
 const
   CnBeforeLine = 1;
 var
@@ -2781,8 +2904,9 @@ var
       mmoContent.SelLength := Length(mmoContent.Lines[CnBeforeLine]);
     end;
   end;
-
+{$ENDIF}
 begin
+{$IFNDEF STAND_ALONE}
   ProcInfo := nil;
   if lvList.Selected <> nil then
     ProcInfo := lvList.Selected.Data;
@@ -2847,6 +2971,7 @@ begin
     StatusBar.Panels[1].Text := Format('%d/%d', [0, 0]);
     mmoContent.Clear;
   end;
+{$ENDIF}
 end;
 
 procedure TCnProcListForm.FormDestroy(Sender: TObject);
@@ -2855,7 +2980,9 @@ var
 begin
   inherited;
 
+{$IFNDEF STAND_ALONE}
   FFiler.Free;
+{$ENDIF}
   FObjectList.Free;
 
   for I := 0 to cbbFiles.Items.Count - 1 do
@@ -2867,20 +2994,33 @@ begin
 end;
 
 procedure TCnProcListForm.SetFileName(const Value: string);
+
+  function IsDprOrPasOrInc(const AFile: string): Boolean;
+  var
+    FileExt: string;
+  begin
+    FileExt := UpperCase(_CnExtractFileExt(AFile));
+    Result := (FileExt = '.INC') or (FileExt = '.DPR') or (FileExt = '.PAS');
+  end;
+
 begin
   FFileName := Value;
   FIsCurrentFile := False;
-  if IsPas(Value) or IsDpr(Value) or IsInc(Value) then
+  if IsDprOrPasOrInc(Value) then
     FLanguage := ltPas
   else
     FLanguage := ltCpp;
 end;
+
+{$IFNDEF STAND_ALONE}
 
 procedure TCnProcListForm.LoadObjectComboBox(ObjectList: TStringList);
 begin
   cbbProjectList.Items.Assign(ObjectList);
   cbbProjectList.ItemIndex := cbbProjectList.Items.IndexOf(SCnProcListObjsAll);
 end;
+
+{$ENDIF}
 
 procedure TCnProcListWizard.AddElement(ElementList: TStringList; ElementInfo: TCnElementInfo);
 begin
@@ -2893,7 +3033,9 @@ var
   TempStr: string;
   i, j: Integer;
 begin
+{$IFNDEF STAND_ALONE}
   ElementInfo.Name := CompressWhiteSpace(ElementInfo.Name);
+{$ENDIF}
   case FLanguage of
     ltPas:
       begin
@@ -3068,7 +3210,9 @@ begin
       Item.SubItems.Add(ElementInfo.ElementTypeStr);
       Item.SubItems.Add(IntToStr(ElementInfo.LineNo));
       Item.SubItems.Add(ElementInfo.FileName);
+{$IFNDEF STAND_ALONE}
       RemoveListViewSubImages(Item);
+{$ENDIF}
       Item.Data := ElementInfo;
     end;
   end;
@@ -3179,12 +3323,16 @@ end;
 
 procedure TCnProcListForm.cbbFilesDropDown(Sender: TObject);
 begin
+{$IFNDEF STAND_ALONE}
   if not FFilesGot then
   begin
     LoadFileComboBox;
     FFilesGot := True;
   end;
+{$ENDIF}
 end;
+
+{$IFNDEF STAND_ALONE}
 
 procedure TCnProcListForm.InitFileComboBox;
 begin
@@ -3251,7 +3399,10 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 procedure TCnProcListForm.cbbFilesChange(Sender: TObject);
+{$IFNDEF STAND_ALONE}
 var
   I, J: Integer;
   aFile: string;
@@ -3260,7 +3411,9 @@ var
   ModuleInfo: IOTAModuleInfo;
   ModuleServices: IOTAModuleServices;
   FirstFile: Boolean;
+{$ENDIF}
 begin
+{$IFNDEF STAND_ALONE}
   FirstFile := True;
   if cbbFiles.Items.Objects[cbbFiles.ItemIndex] <> nil then
   begin
@@ -3353,6 +3506,7 @@ begin
   if Visible then
     cbbMatchSearch.SetFocus;
   Wizard.FileIndex := cbbFiles.ItemIndex;
+{$ENDIF}
 end;
 
 procedure TCnProcListForm.lvListKeyDown(Sender: TObject; var Key: Word;
@@ -3399,6 +3553,26 @@ var
   ProcName: string;
   IsObject: Boolean;
   Offset, I: Integer;
+
+{$IFDEF STAND_ALONE}
+  // 搬移过来的判断正则表达式匹配
+  function RegExpContainsText(ARegExpr: TRegExpr; const AText: string;
+    APattern: string; IsMatchStart: Boolean = False): Boolean;
+  begin
+    Result := True;
+    if (APattern = '') or (ARegExpr = nil) then Exit;
+
+    if IsMatchStart and (APattern[1] <> '^') then // 额外的从头匹配
+      APattern := '^' + APattern;
+
+    ARegExpr.Expression := APattern;
+    try
+      Result := ARegExpr.Exec(AText);
+    except
+      Result := False;
+    end;
+  end;
+{$ENDIF}
 begin
   Result := False;
   if (AMatchStr = '') and FIsObjAll then
@@ -3502,7 +3676,34 @@ begin
     Result := -Result;
 end;
 
+procedure TCnProcListForm.SplitterMoved(Sender: TObject);
+begin
+  FPreviewHeight := mmoContent.Height;
+  UpdateStatusBar;
+end;
+
+procedure TCnProcListForm.UpdateMemoHeight(Sender: TObject);
+const
+  csStep = 5;
+var
+  I, Steps, Distance: Integer;
+begin
+  if FPreviewHeight > 0 then
+  begin
+    Distance := mmoContent.Height - FPreviewHeight;
+    Steps := Abs(Distance div csStep);
+    if Distance > 0 then
+      for I := 1 to Steps do
+        mmoContent.Height := mmoContent.Height - csStep
+    else
+      for I := 1 to Steps do
+        mmoContent.Height := mmoContent.Height + csStep;
+   end;
+end;
+
 { TCnProcListWizard }
+
+{$IFNDEF STAND_ALONE}
 
 procedure TCnProcListWizard.SetUseEditorToolBar(const Value: Boolean);
 begin
@@ -3689,31 +3890,6 @@ procedure TCnProcListWizard.SetActive(Value: Boolean);
 begin
   inherited;
   EditorToolBarEnable(Active and FUseEditorToolBar);
-end;
-
-procedure TCnProcListForm.SplitterMoved(Sender: TObject);
-begin
-  FPreviewHeight := mmoContent.Height;
-  UpdateStatusBar;
-end;
-
-procedure TCnProcListForm.UpdateMemoHeight(Sender: TObject);
-const
-  csStep = 5;
-var
-  I, Steps, Distance: Integer;
-begin
-  if FPreviewHeight > 0 then
-  begin
-    Distance := mmoContent.Height - FPreviewHeight;
-    Steps := Abs(Distance div csStep);
-    if Distance > 0 then
-      for I := 1 to Steps do
-        mmoContent.Height := mmoContent.Height - csStep
-    else
-      for I := 1 to Steps do
-        mmoContent.Height := mmoContent.Height + csStep;
-   end;
 end;
 
 procedure TCnProcDropDownBox.ListDrawItem(Control: TWinControl;
@@ -4020,6 +4196,8 @@ begin
 {$ENDIF}
 end;
 
+{$ENDIF}
+
 {$IFDEF IDE_SUPPORT_THEMING}
 
 procedure TCnProcListWizard.DoThemeChange(Sender: TObject);
@@ -4052,6 +4230,8 @@ begin
 end;
 
 {$ENDIF}
+
+{$IFNDEF STAND_ALONE}
 
 { TCnProcListComboBox }
 
@@ -4361,6 +4541,7 @@ end;
 initialization
   RegisterCnWizard(TCnProcListWizard); // 注册专家
 
+{$ENDIF}
 {$ENDIF CNWIZARDS_CNPROCLISTWIZARD}
 end.
 

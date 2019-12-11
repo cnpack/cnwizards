@@ -39,7 +39,7 @@ interface
 
 uses 
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  Menus, ComCtrls, ToolWin, CnWizUtils, CnWizOptions;
+  Menus, ComCtrls, ToolWin, CnWizOptions;
 
 type
   TCnMatchButtonFrame = class(TFrame)
