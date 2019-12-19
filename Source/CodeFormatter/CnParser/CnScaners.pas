@@ -827,7 +827,7 @@ begin
   // 判定当前位置是否语句内部，作为语句内换行的额外判断补充。
   // 上一个是分号或组合语句、下一个是 end/else，但未处理 end/else 之前有注释的情况
   if not FIsForwarding then
-    Result := (FPrevToken in [tokSemicolon] + StructStmtTokens)
+    Result := (FPrevToken in [tokSemicolon, tokKeywordFinally, tokKeywordExcept] + StructStmtTokens)
       or (ForwardToken() in [tokKeywordEnd, tokKeywordElse])
   else
     Result := FPrevToken in [tokSemicolon] + StructStmtTokens;
