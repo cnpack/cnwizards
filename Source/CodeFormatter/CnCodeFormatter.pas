@@ -3816,7 +3816,12 @@ begin
 
     if (Scaner.Token = tokSemicolon) and
       (Scaner.ForwardToken() in DirectiveTokens) then
+    begin
       Match(tokSemicolon);
+      IsSemicolon := True;
+    end
+    else
+      IsSemicolon := False;
 
     // leave one semicolon for procedure type define at last.
   end;
