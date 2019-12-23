@@ -4592,28 +4592,37 @@ end;
   FIXED:       -> Ident ':' Type '=' TypedConstant [DIRECTIVE/..]
 }
 procedure TCnBasePascalFormatter.FormatConstantDecl(PreSpaceCount: Byte);
+var
+  OldKeepOneBlankLine: Boolean;
 begin
   FormatIdent(PreSpaceCount);
 
-  case Scaner.Token of
-    tokEQUAL:
-      begin
-        Match(Scaner.Token, 1); // 等号前空一格
-        FCurrentTab := PreSpaceCount; // 记录当前缩进供常量表达式内部保留换行处理
-        FormatConstExpr(1); // 等号后只空一格
-      end;
+  OldKeepOneBlankLine := Scaner.KeepOneBlankLine;
+  Scaner.KeepOneBlankLine := True;
 
-    tokColon: // 无法直接区分 record/array/普通常量方式的初始化，需要内部解析
-      begin
-        Match(Scaner.Token);
+  try
+    case Scaner.Token of
+      tokEQUAL:
+        begin
+          Match(Scaner.Token, 1); // 等号前空一格
+          FCurrentTab := PreSpaceCount; // 记录当前缩进供常量表达式内部保留换行处理
+          FormatConstExpr(1); // 等号后只空一格
+        end;
 
-        FormatType;
-        Match(tokEQUAL, 1, 1); // 等号前后空一格
+      tokColon: // 无法直接区分 record/array/普通常量方式的初始化，需要内部解析
+        begin
+          Match(Scaner.Token);
 
-        FormatTypedConstant; // 等号后空一格
-      end;
-  else
-    Error(CN_ERRCODE_PASCAL_NO_EQUALCOLON);
+          FormatType;
+          Match(tokEQUAL, 1, 1); // 等号前后空一格
+
+          FormatTypedConstant; // 等号后空一格
+        end;
+    else
+      Error(CN_ERRCODE_PASCAL_NO_EQUALCOLON);
+    end;
+  finally
+    Scaner.KeepOneBlankLine := OldKeepOneBlankLine;
   end;
 
   while Scaner.Token in DirectiveTokens do
@@ -5080,6 +5089,7 @@ end;
 procedure TCnBasePascalFormatter.FormatVarDecl(PreSpaceCount: Byte);
 var
   OldStoreIdent: Boolean;
+  OldKeepOneBlankLine: Boolean;
 begin
   OldStoreIdent := FStoreIdent;
   try
@@ -5098,8 +5108,15 @@ begin
 
   if Scaner.Token = tokEQUAL then
   begin
-    Match(Scaner.Token, 1, 1);
-    FormatTypedConstant;
+    FCurrentTab := PreSpaceCount;
+    OldKeepOneBlankLine := Scaner.KeepOneBlankLine;
+    Scaner.KeepOneBlankLine := True;  // var 的赋值语句也要求保持换行
+    try
+      Match(Scaner.Token, 1, 1);
+      FormatTypedConstant;
+    finally
+      Scaner.KeepOneBlankLine := OldKeepOneBlankLine;
+    end;
   end
   else if Scaner.TokenSymbolIs('ABSOLUTE') then
   begin
