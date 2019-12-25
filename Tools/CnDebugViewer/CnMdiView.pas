@@ -1254,6 +1254,24 @@ begin
   DoTreeResize;
 end;
 
+function SelectionCompare(Item1, Item2: Pointer): Integer;
+var
+  N1, N2: PVirtualNode;
+begin
+  if (Item1 <> nil) and (Item2 = nil) then
+    Result := 1
+  else if (Item1 = nil) and (Item2 <> nil) then
+    Result := -1
+  else if (Item1 = nil) and (Item2 = nil) then
+    Result := 0
+  else // ¶¼²»Îª nil
+  begin
+    N1 := PVirtualNode(Item1);
+    N2 := PVirtualNode(Item2);
+    Result := N1^.AbsoluteIndex - N2^.AbsoluteIndex;
+  end;
+end;
+
 function TCnMsgChild.GetSelectedContent: string;
 var
   I, Index: Integer;
@@ -1272,6 +1290,7 @@ begin
     List := TList.Create;
     try
       FMsgTree.ObtainSelections(List);
+      List.Sort(SelectionCompare);
 
       for I := 0 to List.Count - 1 do
       begin
@@ -1307,6 +1326,7 @@ begin
   List := TList.Create;
   try
     FMsgTree.ObtainSelections(List);
+    List.Sort(SelectionCompare);
 
     for I := 0 to List.Count - 1 do
     begin
