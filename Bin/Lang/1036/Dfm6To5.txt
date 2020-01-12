@@ -31,4 +31,4 @@ SSucc=Conversion complétée avec succès.
 SOpenFail=Éeche de l'ouverture.
 SSaveFail=Échec de la sauvegarde.
 SInvalidFormat=Format de fichier invalide.
-SAbout=Outil de Conversion DFM<BR><BR>Cet outil peut être utilisé pour convertir les fiches générées par Delphi 6/7<BR>ou C++Builder 6 vers Delphi 5 or C++ Builder 5 Format.<BR>Les formats Texte et Binaire sont ous deux supportés.<BR><BR>Auteur: Zhou JingYu (zjy@cnpack.org)<BR>Multilang: LiuXiao (liuxiao@cnpack.org)<BR>Tous Droits Réservés (C)2001-2019 Équipe CnPack
+SAbout=Outil de Conversion DFM<BR><BR>Cet outil peut être utilisé pour convertir les fiches générées par Delphi 6/7<BR>ou C++Builder 6 vers Delphi 5 or C++ Builder 5 Format.<BR>Les formats Texte et Binaire sont ous deux supportés.<BR><BR>Auteur: Zhou JingYu (zjy@cnpack.org)<BR>Multilang: LiuXiao (liuxiao@cnpack.org)<BR>Tous Droits Réservés (C)2001-2020 Équipe CnPack
