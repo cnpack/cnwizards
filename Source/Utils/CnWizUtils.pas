@@ -3883,7 +3883,6 @@ function CnOtaGetEditOptions: IOTAEditOptions;
 var
   Svcs: IOTAEditorServices;
 begin
-  Result := nil;
   QuerySvcs(BorlandIDEServices, IOTAEditorServices, Svcs);
   if Assigned(Svcs) then
   begin
@@ -3891,11 +3890,15 @@ begin
     if Assigned(Svcs.GetTopBuffer) then
       Result := Svcs.GetTopBuffer.EditOptions
     else if Svcs.EditOptionsCount > 0 then
-      Result := Svcs.GetEditOptionsIndex(0);
+      Result := Svcs.GetEditOptionsIndex(0)
+    else
+      Result := nil;
   {$ELSE}
     Result := Svcs.GetEditOptions;
   {$ENDIF}
-  end;
+  end
+  else
+    Result := nil;
 end;
 
 // 取当前工程选项
