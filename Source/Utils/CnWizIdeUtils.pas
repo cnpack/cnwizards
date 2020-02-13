@@ -621,6 +621,7 @@ type
 
 type
   TGetCodeMode = (smLine, smSelText, smSource);
+  // 选择区扩展到整行（未选则当前行）、选择区、整个文件
 
 function DoGetEditorSrcInfo(Mode: TGetCodeMode; View: IOTAEditView;
   var StartPos, EndPos, NewRow, NewCol, BlockStartLine, BlockEndLine: Integer): Boolean;
@@ -641,6 +642,12 @@ begin
     NewCol := 0;
     if Mode = smLine then
     begin
+{$IFDEF DEBUG}
+      if Block = nil then
+        CnDebugger.LogMsg('DoGetEditorSrcInfo: Block is nil.')
+      else if Block.IsValid then
+        CnDebugger.LogMsg('DoGetEditorSrcInfo: Block is Valid.');
+{$ENDIF}
       if (Block <> nil) and Block.IsValid then
       begin             // 选择文本扩大到整行
         BlockStartLine := Block.StartingRow;
@@ -726,7 +733,11 @@ begin
     if not DoGetEditorSrcInfo(Mode, View, StartPos, EndPos, NewRow, NewCol,
       BlockStartLine, BlockEndLine) then
       Exit;
-      
+
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('DoGetEditorLines: StartPos %d, EndPos %d.', [StartPos, EndPos]);
+{$ENDIF}
+
     Len := EndPos - StartPos;
     Assert(Len >= 0);
     SetLength(Text, Len);
@@ -754,7 +765,16 @@ begin
     Res := ConvertEditorTextToText(Text);
     {$ENDIF}
 
+    // 10.3 下的脚本专家创建的 TStringList，其 LineBreak 属性会莫名其妙变空，补一下
+{$IFDEF DELPHI103_RIO_UP}
+    if Lines.LineBreak <> sLineBreak then
+      Lines.LineBreak := sLineBreak;
+{$ENDIF}
+
     Lines.Text := Res;
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('DoGetEditorLines Get %d Lines.', [Lines.Count]);
+{$ENDIF}
     Result := Text <> '';
   end;
 end;

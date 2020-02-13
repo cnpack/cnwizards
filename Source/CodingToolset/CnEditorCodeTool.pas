@@ -129,6 +129,9 @@ begin
   Lines := TStringList.Create;
   try
     Lines.Text := Text;
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('TCnEditorCodeTool.ProcessText Default %d Lines.', [Lines.Count]);
+{$ENDIF}
     for i := 0 to Lines.Count - 1 do
       Lines[i] := ProcessLine(Lines[i]);
     Result := Lines.Text;
@@ -168,6 +171,12 @@ begin
     NewCol := 0;
     if GetStyle = csLine then
     begin
+{$IFDEF DEBUG}
+      if Block = nil then
+        CnDebugger.LogMsg('TCnEditorCodeTool.Execute: Block is nil.')
+      else if Block.IsValid then
+        CnDebugger.LogMsg('TCnEditorCodeTool.Execute: Block is Valid.');
+{$ENDIF}
       if (Block <> nil) and Block.IsValid then
       begin             // 选择文本扩大到整行
         BlockStartLine := Block.StartingRow;
@@ -259,6 +268,9 @@ begin
     begin
       // Reader 读出的是 Ansi/Utf8/Utf8
       Len := EndPos - StartPos;
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('TCnEditorCodeTool.Execute StartPos %d, EndPos %d.', [StartPos, EndPos]);
+{$ENDIF}
       Assert(Len >= 0);
       SetLength(OrigText, Len);
       Buf := Pointer(OrigText);

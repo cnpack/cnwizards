@@ -1724,6 +1724,7 @@ initialization
 
 {$IFDEF IDE_SUPPORT_THEMING}
 {$IFDEF DEBUG}
+  CnDebugger.LogMsg('CnLoadIconProc To get Active Theme');
   CnDebugger.LogMsg('CnLoadIconProc get Active Theme: ' + CnOtaGetActiveThemeName);
 {$ENDIF}
   if CnOtaGetActiveThemeName = 'Dark' then // 暗黑主题下注册图标处理事件，不支持动态切换主题
