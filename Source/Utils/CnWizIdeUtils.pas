@@ -765,8 +765,8 @@ begin
     Res := ConvertEditorTextToText(Text);
     {$ENDIF}
 
-    // 10.3 下的脚本专家创建的 TStringList，其 LineBreak 属性会莫名其妙变空，补一下
-{$IFDEF DELPHI103_RIO_UP}
+    // 10.1 或以上的脚本专家创建的 TStringList，其 LineBreak 属性会莫名其妙变空，补一下
+{$IFDEF DELPHI101_BERLIN_UP}
     if Lines.LineBreak <> sLineBreak then
       Lines.LineBreak := sLineBreak;
 {$ENDIF}
