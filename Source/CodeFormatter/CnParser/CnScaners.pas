@@ -196,6 +196,9 @@ type
     property ASMMode: Boolean read FASMMode write FASMMode;
     {* 用来控制是否将回车当作空白以及其他解析，asm 块中需要此选项}
 
+    property IsForwarding: Boolean read FIsForwarding;
+    {* Scanner 是否在脱离真实输出的情形下往前找}
+
     property BlankLinesBefore: Integer read FBlankLinesBefore write FBlankLinesBefore;
     {* SkipBlank 碰到一注释时，注释和前面有效内容隔的行数，用来控制分行。
       0 表示在同一行，1 表示注释在紧邻的下一行，2 表示注释和前面的内容隔一个空行}
@@ -824,11 +827,11 @@ end;
 
 function TAbstractScaner.IsInStatement: Boolean;
 begin
-  // 判定当前位置是否语句内部，作为语句内换行的额外判断补充。
-  // 上一个是分号或组合语句、下一个是 end/else，但未处理 end/else 之前有注释的情况
+  // 判定当前位置是否语句内部，上一个是分号或组合语句，作为语句内换行的额外判断补充。
+  // 下一个是 end/else 的条件暂无需处理，外面似乎已代劳
   if not FIsForwarding then
     Result := (FPrevToken in [tokSemicolon, tokKeywordFinally, tokKeywordExcept] + StructStmtTokens)
-      or (ForwardToken() in [tokKeywordEnd, tokKeywordElse])
+      // or (ForwardToken() in [tokKeywordEnd, tokKeywordElse])
   else
     Result := FPrevToken in [tokSemicolon] + StructStmtTokens;
   // 在 ForwardToken 调用中不要再重入了
@@ -1443,7 +1446,7 @@ begin
           if BlankStr <> '' then
           begin
             FCodeGen.BackSpaceLastSpaces;
-            // 如果当前是保留换行模式，且不是语句结尾，则 BlankStr 开头的空格回车要省略
+            // 如果当前是保留换行模式，且不是语句中，则 BlankStr 开头的空格回车要省略
             if FKeepOneBlankLine and not IsInStatement and IsStringStartWithSpacesCRLF(BlankStr) then
             begin
               Idx := Pos(#13#10, BlankStr);
@@ -1544,7 +1547,7 @@ begin
           if BlankStr <> '' then
           begin
             FCodeGen.BackSpaceLastSpaces;
-            // 如果当前是保留换行模式，且不是语句结尾，则 BlankStr 开头的空格与回车要省略
+            // 如果当前是保留换行模式，且不是语句中，则 BlankStr 开头的空格与回车要省略
             if FKeepOneBlankLine and not IsInStatement and IsStringStartWithSpacesCRLF(BlankStr) then
             begin
               Idx := Pos(#13#10, BlankStr);

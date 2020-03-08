@@ -90,7 +90,7 @@ type
     FDisableCorrectName: Boolean;
     FInputLineMarks: TList;         // 源与结果的行映射关系中的源行
     FOutputLineMarks: TList;        // 源与结果的行映射关系中的结果行
-    FNeedKeepLineBreak: Boolean;    // 控制当前区域是否属于可保留换行的区域
+    FNeedKeepLineBreak: Boolean;    // 控制当前区域是否属于可保留换行的区域，为 True 时表示遇到换行事件时会照例写入换行，一般在分号后会切回 False
     FCurrentTab: Integer;           // 保留换行时记录当前语句应该的缩进
     FLineBreakKeepStack: TStack;    // 保留换行标记的栈
     function ErrorTokenString: string;
@@ -6166,8 +6166,13 @@ procedure TCnBasePascalFormatter.ScanerLineBreak(Sender: TObject);
 var
   LineBreak: Boolean;
 begin
+  if FScaner.IsForwarding then
+    Exit;
+
   LineBreak := CanKeepLineBreak;
   FCodeGen.KeepLineBreak := LineBreak;
+
+  // 注意不能调用 FScaner.ForwardToken 因为事件是在 SkipBlanks 里触发的
 
   if LineBreak then
   begin
