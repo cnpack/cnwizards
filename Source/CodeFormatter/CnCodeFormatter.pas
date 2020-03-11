@@ -6173,8 +6173,9 @@ begin
   FCodeGen.KeepLineBreak := LineBreak;
 
   // 注意不能调用 FScaner.ForwardToken 因为事件是在 SkipBlanks 里触发的
+  // 另外，Lock 住时表示在往前回溯，是要回来的，无需做下面的事
 
-  if LineBreak then
+  if LineBreak and (FCodeGen.LockedCount <= 0) then
   begin
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('On Scaner Line Break, to Write a CRLF.');
