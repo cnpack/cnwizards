@@ -467,12 +467,12 @@ begin
     x := R.Left + 42;
     y := R.Top + 2;
     Canvas.TextOut(x, y, SCnWizardNameStr + Wizard.WizardName);
-    Inc(y, FDrawTextHeight);
+    Inc(y, FDrawTextHeight + 2);
     if FActives[Idx] then
       Canvas.TextOut(x, y, SCnWizardStateStr + SCnWizardActiveStr)
     else
       Canvas.TextOut(x, y, SCnWizardStateStr + SCnWizardDisActiveStr);
-    Inc(y, FDrawTextHeight);
+    Inc(y, FDrawTextHeight + 2);
     Canvas.TextOut(x, y, SCnWizardShortCutStr + ShortCutToText(FShortCuts[Idx]));
 
     BitBlt(ListBox.Canvas.Handle, Rect.Left, Rect.Top, Bmp.Width, Bmp.Height,
@@ -703,7 +703,7 @@ begin
     x := R.Left + 5;
     y := R.Top + 2;
     Canvas.TextOut(x, y, SCnDesignEditorNameStr + Info.Name);
-    Inc(y, FDrawTextHeight);
+    Inc(y, FDrawTextHeight + 2);
 
     if FEditorActives[Idx] then
       Canvas.TextOut(x, y, SCnDesignEditorStateStr + SCnWizardActiveStr)

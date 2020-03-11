@@ -202,7 +202,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
           Width = 313
           Height = 386
           Align = alClient
-          ItemHeight = 45
+          ItemHeight = 51
           Style = lbOwnerDrawFixed
           TabOrder = 0
           OnClick = lbWizardsClick
@@ -425,7 +425,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
           Width = 313
           Height = 386
           Align = alClient
-          ItemHeight = 32
+          ItemHeight = 36
           Style = lbOwnerDrawFixed
           TabOrder = 0
           OnClick = lbDesignEditorsClick
