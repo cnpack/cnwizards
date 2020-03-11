@@ -1621,7 +1621,7 @@ begin
 end;
 
 initialization
-  RegisterCnWizard(TCnFeedReaderWizard);
+  // RegisterCnWizard(TCnFeedReaderWizard); 久不维护，禁用之。
 
 {$ENDIF CNWIZARDS_CNFEEDREADERWIZARD}
 
