@@ -40,6 +40,18 @@ begin
   if EditControl is TEdit then
   begin
     Writeln('Current Selected Property Value is: ' + TEdit(EditControl).Text);
-  end;  
+  end;
+
+  // 自定义 Object Inspector 列表的条目高度与文字尺寸
+  if PropList is TCustomListBox then
+  begin
+    if QueryDlg('Do you want to Enlarge Object Inspector List Size?', True) then
+    begin
+      SetPropValue(PropList, 'ItemHeight', 50);
+      F := GetObjectProp(PropList, 'Font');
+      if (F <> nil) and (F is TFont) then
+        TFont(F).Size := 14;
+    end;
+  end;
 end.
  
