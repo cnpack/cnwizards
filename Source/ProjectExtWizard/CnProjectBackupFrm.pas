@@ -175,7 +175,8 @@ type
     FExecCmdAfterBackup: Boolean;
     FExecCmdFile: string;
     FExecCmdString: string;
-
+    FDialogWidth: Integer;
+    FDialogHeight: Integer;
     procedure OnAppMessage(var Msg: Tmsg; var Handled: Boolean);
     procedure CreateProjectList;
     procedure InitComboBox;
@@ -190,13 +191,9 @@ type
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
     procedure LoadSettings(Ini: TCustomIniFile);
     procedure SaveSettings(Ini: TCustomIniFile);
   end;
-
-var
-  CnProjectBackupForm: TCnProjectBackupForm;
 
 function ShowProjectBackupForm(Ini: TCustomIniFile): Boolean;
 
@@ -236,6 +233,8 @@ const
   csWidth = 'Width';
   csHeight = 'Height';
   csListViewWidth = 'ListViewWidth';
+  csDialogWidth = 'DialogWidth';
+  csDialogHeight = 'DialogHeight';
 
   csCmdCompress = '<compress.exe>';
   csCmdBackupFile = '<BackupFile>';
@@ -484,6 +483,9 @@ begin
   Height := Ini.ReadInteger(csBackupSection, csHeight, Height);
   CenterForm(Self);
 
+  FDialogWidth := Ini.ReadInteger(csBackupSection, csDialogWidth, 0);
+  FDialogHeight := Ini.ReadInteger(csBackupSection, csDialogHeight, 0);
+
   FListViewWidthStr := Ini.ReadString(csBackupSection, csListViewWidth, '');
   SetListViewWidthString(lvFileView, FListViewWidthStr, GetFactorFromSizeEnlarge(Enlarge));
 end;
@@ -516,6 +518,9 @@ begin
 
   Ini.WriteInteger(csBackupSection, csWidth, Width);
   Ini.WriteInteger(csBackupSection, csHeight, Height);
+  Ini.WriteInteger(csBackupSection, csDialogWidth, FDialogWidth);
+  Ini.WriteInteger(csBackupSection, csDialogHeight, FDialogHeight);
+
   Ini.WriteString(csBackupSection, csListViewWidth,
     GetListViewWidthString(lvFileView, GetFactorFromSizeEnlarge(Enlarge)));
 end;
@@ -842,6 +847,7 @@ var
   List: TStrings;
   Comment: AnsiString;
   SrcList, ArcList: TStrings;
+  SaveForm: TCnProjectBackupSaveForm;
 begin
   if lvFileView.Items.Count = 0 then
   begin
@@ -849,181 +855,191 @@ begin
     Exit;
   end;
 
-  with TCnProjectBackupSaveForm.Create(nil) do
+  SaveForm := TCnProjectBackupSaveForm.Create(nil);
+  if FDialogWidth > 0 then
+    SaveForm.Width := FDialogWidth;
+  if FDialogHeight > 0 then
+    SaveForm.Height := FDialogHeight;
+
   try
-    RemovePath := FRemovePath;
-    RememberPass := FRememberPass;
-    ShowPass := FShowPass;
-    UsePassword := FUsePassword;
-    UseExternal := FUseExternal;
-    Compressor := FCompressor;
-    CompressCmd := FCompressCmd;
-    ExecAfterFile := FExecCmdFile;
-    ExecAfter := FExecCmdAfterBackup;
-    AfterCmd := FExecCmdString;
-
-    if RememberPass then
-      Password := FPassword;
-      
-    cbbTimeFormat.ItemIndex := FTimeFormatIndex;
-    SavePath := MakePath(FSavePath);
-    CurrentName := _CnChangeFileExt(_CnExtractFileName(FCurrentName), '');
-
-    if not FUseExternal then
-      SaveFileName := SavePath + CurrentName + FormatDateTime('_' + cbbTimeFormat.Items[FTimeFormatIndex], Date + Time) + '.zip'
-    else
+    with SaveForm  do
     begin
-      FExt := GetExtFromCompressor(FCompressor);
-      if FExt = '' then
-        FExt := '.zip';
-      SaveFileName := SavePath + CurrentName + FormatDateTime('_' + cbbTimeFormat.Items[FTimeFormatIndex], Date + Time) + FExt;
-    end;
+      RemovePath := FRemovePath;
+      RememberPass := FRememberPass;
+      ShowPass := FShowPass;
+      UsePassword := FUsePassword;
+      UseExternal := FUseExternal;
+      Compressor := FCompressor;
+      CompressCmd := FCompressCmd;
+      ExecAfterFile := FExecCmdFile;
+      ExecAfter := FExecCmdAfterBackup;
+      AfterCmd := FExecCmdString;
 
-    if ShowModal = mrOK then
-    begin
-      Update;
+      if RememberPass then
+        Password := FPassword;
 
-      FRemovePath := RemovePath;
-      FUsePassword := UsePassword;
-      FRememberPass := RememberPass;
-      FShowPass := ShowPass;
-      FUseExternal := UseExternal;
-      FCompressor := Compressor;
-      FCompressCmd := CompressCmd;
+      cbbTimeFormat.ItemIndex := FTimeFormatIndex;
+      SavePath := MakePath(FSavePath);
+      CurrentName := _CnChangeFileExt(_CnExtractFileName(FCurrentName), '');
 
-      FExecCmdAfterBackup := ExecAfter;
-      FExecCmdFile := ExecAfterFile;
-      FExecCmdString := AfterCmd;
-
-      if FRememberPass then
-        FPassword := Password
-      else
-        FPassword := '';
-        
-      FSavePath := _CnExtractFilePath(SaveFileName);
-      FTimeFormatIndex := cbbTimeFormat.ItemIndex;
-
-      SaveFileName := LinkPath(_CnExtractFilePath(FCurrentName), SaveFileName);
-
-      if FileExists(SaveFileName) and not Confirmed then
-        if not QueryDlg(SCnOverwriteQuery) then
-          Exit;
-
-      // 处理 Version 信息来生成 VerStr
-      VerStr := CnOtaGetProjectVersion;
-      if FUseExternal then
-      begin
-        ListFileName := MakePath(GetWindowsTempPath) + 'BackupList.txt';
-        List := TStringList.Create;
-        try
-          for I := 0 to Self.lvFileView.Items.Count - 1 do
-            if Self.lvFileView.Items[I].Data <> nil then
-              List.Add(TCnBackupFileInfo(Self.lvFileView.Items[I].Data).FullFileName);
-
-          List.SaveToFile(ListFileName);
-        finally
-          List.Free;
-        end;
-
-        // 构造命令行
-        CompressorCommand := StringReplace(FCompressCmd, csCmdCompress, '"' + FCompressor + '"', [rfReplaceAll]);
-        CompressorCommand := StringReplace(CompressorCommand, csCmdBackupFile, '"' + SaveFileName + '"', [rfReplaceAll]);
-        CompressorCommand := StringReplace(CompressorCommand, csCmdListFile, '"' + ListFileName + '"', [rfReplaceAll]);
-        CompressorCommand := StringReplace(CompressorCommand, csVersionInfo, '"' + VerStr + '"', [rfReplaceAll]);
-        CompressorCommand := StringReplace(CompressorCommand, csComments, '"' + Comments + '"', [rfReplaceAll]);
-        if FUsePassword then
-          CompressorCommand := StringReplace(CompressorCommand, csCmdPassword, '"' + Password + '"', [rfReplaceAll])
-        else
-        begin
-          CompressorCommand := StringReplace(CompressorCommand, '-p' + csCmdPassword, '', [rfReplaceAll]);
-          CompressorCommand := StringReplace(CompressorCommand, '-s' + csCmdPassword, '', [rfReplaceAll]);
-          CompressorCommand := StringReplace(CompressorCommand, csCmdPassword, '', [rfReplaceAll]);
-        end;
-          
-        WinExecAndWait32(CompressorCommand);
-      end
+      if not FUseExternal then
+        SaveFileName := SavePath + CurrentName + FormatDateTime('_' + cbbTimeFormat.Items[FTimeFormatIndex], Date + Time) + '.zip'
       else
       begin
-        // 调用 CnWizards 自带的外部 DLL 来实现压缩
-        if not CnWizHelperZipValid then
-        begin
-          ErrorDlg(SCnProjExtBackupDllMissCorrupt);
-          Exit;
-        end;
-
-        Screen.Cursor := crHourGlass;
-        try
-          DeleteFile(SaveFileName);
-          try
-            CnWizStartZip(_CnPChar(SaveFileName), _CnPChar(Password), RemovePath);
-
-            if FRemovePath then
-            begin
-              for I := 0 to Self.lvFileView.Items.Count - 1 do
-                if Self.lvFileView.Items[I].Data <> nil then
-                  CnWizZipAddFile(_CnPChar(TCnBackupFileInfo(Self.lvFileView.Items[I].Data).FullFileName), nil);
-            end
-            else
-            begin
-              // 拿到文件名列表，抽取掉前面的公共部分再传入
-              SrcList := TStringList.Create;
-              ArcList := TStringList.Create;
-              try
-                for I := 0 to Self.lvFileView.Items.Count - 1 do
-                  if Self.lvFileView.Items[I].Data <> nil then
-                    SrcList.Add(TCnBackupFileInfo(Self.lvFileView.Items[I].Data).FullFileName);
-
-                // 删除掉公共目录头后，添加进去
-                if CombineCommonPath(SrcList, ArcList) then
-                begin
-                  for I := 0 to SrcList.Count - 1 do
-                    CnWizZipAddFile(_CnPChar(SrcList[I]), _CnPChar(ArcList[I]));
-                end
-                else // 无齐头并进的公共目录，原样添加
-                begin
-                  for I := 0 to SrcList.Count - 1 do
-                    CnWizZipAddFile(_CnPChar(SrcList[I]), nil);
-                end;
-              finally
-                ArcList.Free;
-                SrcList.Free;
-              end;
-            end;
-
-            if mmoComments.Lines.Text <> '' then
-            begin
-              Comment := AnsiString(mmoComments.Lines.Text);
-              CnWizZipSetComment(PAnsiChar(Comment));
-            end;
-
-            if CnWizZipSaveAndClose then
-              InfoDlg(Format(SCnProjExtBackupSuccFmt, [SaveFileName]));
-          except
-            ErrorDlg(SCnProjExtBackupFail);
-          end;
-        finally
-          Screen.Cursor := crDefault;
-        end;
+        FExt := GetExtFromCompressor(FCompressor);
+        if FExt = '' then
+          FExt := '.zip';
+        SaveFileName := SavePath + CurrentName + FormatDateTime('_' + cbbTimeFormat.Items[FTimeFormatIndex], Date + Time) + FExt;
       end;
 
-      // 备份后调外部程序进行通知
-      if FExecCmdAfterBackup and (Trim(FExecCmdFile) <> '') then
+      if ShowModal = mrOK then
       begin
-        if FileExists(FExecCmdFile) then
-        begin
-          ExecCommand := StringReplace(FExecCmdString,
-            csAfterCmd, '"' + FExecCmdFile + '"', [rfReplaceAll]);
-          ExecCommand := StringReplace(ExecCommand,
-            csCmdBackupFile, '"' + SaveFileName + '"', [rfReplaceAll]);
-          ExecCommand := StringReplace(ExecCommand,
-            csVersionInfo, '"' + VerStr + '"', [rfReplaceAll]);
+        Update;
 
-          WinExec(PAnsiChar(AnsiString(ExecCommand)), SW_SHOW);
+        FRemovePath := RemovePath;
+        FUsePassword := UsePassword;
+        FRememberPass := RememberPass;
+        FShowPass := ShowPass;
+        FUseExternal := UseExternal;
+        FCompressor := Compressor;
+        FCompressCmd := CompressCmd;
+
+        FExecCmdAfterBackup := ExecAfter;
+        FExecCmdFile := ExecAfterFile;
+        FExecCmdString := AfterCmd;
+
+        if FRememberPass then
+          FPassword := Password
+        else
+          FPassword := '';
+
+        FSavePath := _CnExtractFilePath(SaveFileName);
+        FTimeFormatIndex := cbbTimeFormat.ItemIndex;
+
+        SaveFileName := LinkPath(_CnExtractFilePath(FCurrentName), SaveFileName);
+
+        if FileExists(SaveFileName) and not Confirmed then
+          if not QueryDlg(SCnOverwriteQuery) then
+            Exit;
+
+        // 处理 Version 信息来生成 VerStr
+        VerStr := CnOtaGetProjectVersion;
+        if FUseExternal then
+        begin
+          ListFileName := MakePath(GetWindowsTempPath) + 'BackupList.txt';
+          List := TStringList.Create;
+          try
+            for I := 0 to Self.lvFileView.Items.Count - 1 do
+              if Self.lvFileView.Items[I].Data <> nil then
+                List.Add(TCnBackupFileInfo(Self.lvFileView.Items[I].Data).FullFileName);
+
+            List.SaveToFile(ListFileName);
+          finally
+            List.Free;
+          end;
+
+          // 构造命令行
+          CompressorCommand := StringReplace(FCompressCmd, csCmdCompress, '"' + FCompressor + '"', [rfReplaceAll]);
+          CompressorCommand := StringReplace(CompressorCommand, csCmdBackupFile, '"' + SaveFileName + '"', [rfReplaceAll]);
+          CompressorCommand := StringReplace(CompressorCommand, csCmdListFile, '"' + ListFileName + '"', [rfReplaceAll]);
+          CompressorCommand := StringReplace(CompressorCommand, csVersionInfo, '"' + VerStr + '"', [rfReplaceAll]);
+          CompressorCommand := StringReplace(CompressorCommand, csComments, '"' + Comments + '"', [rfReplaceAll]);
+          if FUsePassword then
+            CompressorCommand := StringReplace(CompressorCommand, csCmdPassword, '"' + Password + '"', [rfReplaceAll])
+          else
+          begin
+            CompressorCommand := StringReplace(CompressorCommand, '-p' + csCmdPassword, '', [rfReplaceAll]);
+            CompressorCommand := StringReplace(CompressorCommand, '-s' + csCmdPassword, '', [rfReplaceAll]);
+            CompressorCommand := StringReplace(CompressorCommand, csCmdPassword, '', [rfReplaceAll]);
+          end;
+          
+          WinExecAndWait32(CompressorCommand);
+        end
+        else
+        begin
+          // 调用 CnWizards 自带的外部 DLL 来实现压缩
+          if not CnWizHelperZipValid then
+          begin
+            ErrorDlg(SCnProjExtBackupDllMissCorrupt);
+            Exit;
+          end;
+
+          Screen.Cursor := crHourGlass;
+          try
+            DeleteFile(SaveFileName);
+            try
+              CnWizStartZip(_CnPChar(SaveFileName), _CnPChar(Password), RemovePath);
+
+              if FRemovePath then
+              begin
+                for I := 0 to Self.lvFileView.Items.Count - 1 do
+                  if Self.lvFileView.Items[I].Data <> nil then
+                    CnWizZipAddFile(_CnPChar(TCnBackupFileInfo(Self.lvFileView.Items[I].Data).FullFileName), nil);
+              end
+              else
+              begin
+                // 拿到文件名列表，抽取掉前面的公共部分再传入
+                SrcList := TStringList.Create;
+                ArcList := TStringList.Create;
+                try
+                  for I := 0 to Self.lvFileView.Items.Count - 1 do
+                    if Self.lvFileView.Items[I].Data <> nil then
+                      SrcList.Add(TCnBackupFileInfo(Self.lvFileView.Items[I].Data).FullFileName);
+
+                  // 删除掉公共目录头后，添加进去
+                  if CombineCommonPath(SrcList, ArcList) then
+                  begin
+                    for I := 0 to SrcList.Count - 1 do
+                      CnWizZipAddFile(_CnPChar(SrcList[I]), _CnPChar(ArcList[I]));
+                  end
+                  else // 无齐头并进的公共目录，原样添加
+                  begin
+                    for I := 0 to SrcList.Count - 1 do
+                      CnWizZipAddFile(_CnPChar(SrcList[I]), nil);
+                  end;
+                finally
+                  ArcList.Free;
+                  SrcList.Free;
+                end;
+              end;
+
+              if mmoComments.Lines.Text <> '' then
+              begin
+                Comment := AnsiString(mmoComments.Lines.Text);
+                CnWizZipSetComment(PAnsiChar(Comment));
+              end;
+
+              if CnWizZipSaveAndClose then
+                InfoDlg(Format(SCnProjExtBackupSuccFmt, [SaveFileName]));
+            except
+              ErrorDlg(SCnProjExtBackupFail);
+            end;
+          finally
+            Screen.Cursor := crDefault;
+          end;
         end;
-      end;  
+
+        // 备份后调外部程序进行通知
+        if FExecCmdAfterBackup and (Trim(FExecCmdFile) <> '') then
+        begin
+          if FileExists(FExecCmdFile) then
+          begin
+            ExecCommand := StringReplace(FExecCmdString,
+              csAfterCmd, '"' + FExecCmdFile + '"', [rfReplaceAll]);
+            ExecCommand := StringReplace(ExecCommand,
+              csCmdBackupFile, '"' + SaveFileName + '"', [rfReplaceAll]);
+            ExecCommand := StringReplace(ExecCommand,
+              csVersionInfo, '"' + VerStr + '"', [rfReplaceAll]);
+
+            WinExec(PAnsiChar(AnsiString(ExecCommand)), SW_SHOW);
+          end;
+        end;
+      end;
     end;
   finally
-    Free;
+    FDialogWidth := SaveForm.Width;
+    FDialogHeight := SaveForm.Height;
+    SaveForm.Free;
   end;
 end;
 
