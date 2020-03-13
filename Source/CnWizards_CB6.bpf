@@ -84,7 +84,6 @@ USEFORMNS("SrcEditorEnhance\CnSrcEditorWebSearch.pas", Cnsrceditorwebsearch, CnS
 USEFORMNS("DesignEditors\CnPropEditorCustomizeFrm.pas", Cnpropeditorcustomizefrm, CnPropEditorCustomizeForm);
 USEFORMNS("ScriptWizard\CnScriptFrm.pas", Cnscriptfrm, CnScriptForm);
 USEFORMNS("ScriptWizard\CnScriptWizard.pas", Cnscriptwizard, CnScriptWizardForm);
-USEFORMNS("SimpleWizards\CnFeedWizardFrm.pas", Cnfeedwizardfrm, CnFeedWizardForm);
 USEFORMNS("DesignEditors\CnImageListEditorFrm.pas", Cnimagelisteditorfrm, CnImageListEditorForm);
 //---------------------------------------------------------------------------
 This file is used by the project manager only and should be treated like the project file

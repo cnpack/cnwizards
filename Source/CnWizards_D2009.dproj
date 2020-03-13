@@ -469,11 +469,6 @@
 			</DCCReference>
 			<DCCReference Include="ScriptWizard\CnScriptClasses.pas"/>
 			<DCCReference Include="ScriptWizard\CnScriptRegister.pas"/>
-			<DCCReference Include="SimpleWizards\CnFeedWizard.pas"/>
-			<DCCReference Include="Utils\CnFeedParser.pas"/>
-			<DCCReference Include="SimpleWizards\CnFeedWizardFrm.pas">
-				<Form>CnFeedWizardForm</Form>
-			</DCCReference>
 			<DCCReference Include="DesignEditors\CnImageListEditorFrm.pas">
 				<Form>CnImageListEditorForm</Form>
 			</DCCReference>

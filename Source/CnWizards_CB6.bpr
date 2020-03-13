@@ -87,7 +87,6 @@
       ..\Dcu\CnIdeBRWizard.obj ..\Dcu\CnPropEditorCustomizeFrm.obj 
       ..\Dcu\CnScriptClasses.obj ..\Dcu\CnScriptRegister.obj 
       ..\Dcu\CnScriptFrm.obj ..\Dcu\CnScriptWizard.obj 
-      ..\Dcu\CnFeedWizardFrm.obj ..\Dcu\CnFeedWizard.obj ..\Dcu\CnFeedParser.obj 
       ..\Dcu\CnImageListEditor.obj ..\Dcu\CnImageListEditorFrm.obj 
       ..\Dcu\CnImageProvider_IconFinder.obj ..\Dcu\CnImageProviderMgr.obj 
       ..\Dcu\CnImageProvider_FindIcons.obj ..\Dcu\CnImageProvider_LocalCache.obj 
@@ -151,7 +150,7 @@
       IdeEnhancements\CnInputHelperFrm.dfm 
       SrcEditorEnhance\CnSrcEditorWebSearch.dfm 
       DesignEditors\CnPropEditorCustomizeFrm.dfm ScriptWizard\CnScriptFrm.dfm 
-      ScriptWizard\CnScriptWizard.dfm SimpleWizards\CnFeedWizardFrm.dfm 
+      ScriptWizard\CnScriptWizard.dfm 
       DesignEditors\CnImageListEditorFrm.dfm"/>
     <LIBFILES value=""/>
     <LIBRARIES value="bcb2kaxserver.lib indy.lib dclocx.lib dbxcds.lib soaprtl.lib bcbie.lib 
@@ -385,9 +384,6 @@
       <FILE FILENAME="ScriptWizard\CnScriptRegister.pas" FORMNAME="" UNITNAME="CnScriptRegister.pas" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="ScriptWizard\CnScriptFrm.pas" FORMNAME="CnScriptForm" UNITNAME="CnScriptFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="ScriptWizard\CnScriptWizard.pas" FORMNAME="CnScriptWizardForm" UNITNAME="CnScriptWizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="SimpleWizards\CnFeedWizardFrm.pas" FORMNAME="CnFeedWizardForm" UNITNAME="CnFeedWizardFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="SimpleWizards\CnFeedWizard.pas" FORMNAME="" UNITNAME="CnFeedWizard.pas" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="Utils\CnFeedParser.pas" FORMNAME="" UNITNAME="CnFeedParser" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="DesignEditors\CnImageListEditor.pas" FORMNAME="" UNITNAME="CnImageListEditor.pas" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="DesignEditors\CnImageListEditorFrm.pas" FORMNAME="CnImageListEditorForm" UNITNAME="CnImageListEditorFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnImageProvider_IconFinder.pas" FORMNAME="" UNITNAME="CnImageProvider_IconFinder.pas" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>

@@ -88,7 +88,6 @@
       ..\Dcu\CnInputSymbolList.obj ..\Dcu\CnInputHelper.obj 
       ..\Dcu\CnInputHelperEditFrm.obj ..\Dcu\CnInputHelperFrm.obj 
       ..\Dcu\CnInputIdeSymbolList.obj ..\Dcu\CnInputBcbIdeSymbolList.obj 
-      ..\Dcu\CnFeedWizardFrm.obj ..\Dcu\CnFeedWizard.obj ..\Dcu\CnFeedParser.obj 
       ..\Dcu\CnImageListEditor.obj ..\Dcu\CnImageListEditorFrm.obj 
       ..\Dcu\CnImageProvider_IconFinder.obj ..\Dcu\CnImageProviderMgr.obj 
       ..\Dcu\CnImageProvider_FindIcons.obj ..\Dcu\CnImageProvider_LocalCache.obj 
@@ -153,7 +152,7 @@
       SrcEditorEnhance\CnSrcEditorWebSearch.dfm 
       DesignEditors\CnPropEditorCustomizeFrm.dfm 
       IdeEnhancements\CnInputHelperEditFrm.dfm 
-      IdeEnhancements\CnInputHelperFrm.dfm SimpleWizards\CnFeedWizardFrm.dfm 
+      IdeEnhancements\CnInputHelperFrm.dfm 
       DesignEditors\CnImageListEditorFrm.dfm"/>
     <LIBFILES value=""/>
     <LIBRARIES value="Inet50.lib vclie50.lib wininet.lib"/>

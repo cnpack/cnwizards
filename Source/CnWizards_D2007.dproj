@@ -366,10 +366,6 @@
     <DCCReference Include="SimpleWizards\CnCompToCodeFrm.pas">
       <Form>CnCompToCodeForm</Form>
     </DCCReference>
-    <DCCReference Include="SimpleWizards\CnFeedWizard.pas" />
-    <DCCReference Include="SimpleWizards\CnFeedWizardFrm.pas">
-      <Form>CnFeedWizardForm</Form>
-    </DCCReference>
     <DCCReference Include="SimpleWizards\CnIdeBRWizard.pas" />
     <DCCReference Include="SimpleWizards\CnListCompFrm.pas">
       <Form>CnListCompForm</Form>
@@ -448,7 +444,6 @@
     </DCCReference>
     <DCCReference Include="Utils\CnDCU32.pas" />
     <DCCReference Include="Utils\CnEditControlWrapper.pas" />
-    <DCCReference Include="Utils\CnFeedParser.pas" />
     <DCCReference Include="Utils\CnGroupReplace.pas" />
     <DCCReference Include="Utils\CnImageProviderMgr.pas" />
     <DCCReference Include="Utils\CnImageProvider_FindIcons.pas" />
