@@ -15,6 +15,7 @@ uses
 var
   ObjectInspectorForm: TCustomForm;
   PropList, EditControl: TComponent;
+  F: TObject;
 begin
   ObjectInspectorForm := GetObjectInspectorForm;
   if ObjectInspectorForm = nil then
