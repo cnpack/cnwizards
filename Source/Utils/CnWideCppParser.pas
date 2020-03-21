@@ -222,6 +222,7 @@ var
   CParser: TCnBCBWideTokenList;
   Token: TCnWideCppToken;
   Layer: Integer;
+  PrevRunID: TCTokenKind;
   BraceStack: TStack;
   Brace1Stack: TStack;
   Brace2Stack: TStack;
@@ -385,6 +386,8 @@ begin
     CParser.SetOrigin(ASource, Size);
 
     Layer := 0; // 初始层次，最外层为 0
+    PrevRunID := ctkNull;
+
     while CParser.RunID <> ctknull do
     begin
       case CParser.RunID of
@@ -392,6 +395,8 @@ begin
           begin
             Inc(Layer);
             NewToken;
+            if PrevRunID = ctknamespace then
+              Token.Tag := 1; // 用 Tag 等于 1 来表示是 namespace
 
             if CompareLineCol(CParser.LineNumber, CurrLine,
               CParser.ColumnNumber, CurCol) <= 0 then // 在光标前

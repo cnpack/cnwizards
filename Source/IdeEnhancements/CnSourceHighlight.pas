@@ -1929,6 +1929,13 @@ begin
 
             Pair := TBlockLinePair(FStack.Pop);
 
+            // 解析器里把 namespace 的左括号设成了 Tag = 1
+            if GlobalIgnoreClass and (Pair.StartToken.Tag = 1) then
+            begin
+              Pair.Free;
+              Continue;
+            end;
+
             Pair.EndToken := CToken;
             Pair.EndLeft := CToken.EditCol;
             if Pair.Left > CToken.EditCol then // Left 取两者间较小的

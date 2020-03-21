@@ -1864,6 +1864,7 @@ begin
   FIsMethodClose := False;
   FIsBlockStart := False;
   FIsBlockClose := False;
+  FTag := 0;
 end;
 
 function TCnWidePasToken.GetToken: PWideChar;
