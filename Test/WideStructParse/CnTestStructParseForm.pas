@@ -141,9 +141,9 @@ begin
     for I := 0 to Parser.Count - 1 do
     begin
       Token := Parser.Tokens[I];
-      mmoPasResult.Lines.Add(Format('%3.3d Token. Line: %d, Col(A/W) %2.2d/%2.2d, Position %4.4d. TokenKind %s, Token: %s',
-        [I, Token.LineNumber, Token.AnsiIndex, Token.CharIndex, Token.TokenPos, GetEnumName(TypeInfo(TTokenKind), Ord(Token.TokenID)), Token.Token]
-      ));
+      mmoPasResult.Lines.Add(Format('%3.3d Token. Line: %d, Col(A/W) %2.2d/%2.2d, Position %4.4d. Tag %d. TokenKind %s, Token: %s',
+        [I, Token.LineNumber, Token.AnsiIndex, Token.CharIndex, Token.TokenPos, Token.Tag,
+        GetEnumName(TypeInfo(TTokenKind), Ord(Token.TokenID)), Token.Token]));
     end;
     mmoPasResult.Lines.Add('');
 

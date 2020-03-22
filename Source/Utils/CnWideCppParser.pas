@@ -222,7 +222,7 @@ var
   CParser: TCnBCBWideTokenList;
   Token: TCnWideCppToken;
   Layer: Integer;
-  PrevRunID: TCTokenKind;
+  HasNamespace: Boolean;
   BraceStack: TStack;
   Brace1Stack: TStack;
   Brace2Stack: TStack;
@@ -386,17 +386,29 @@ begin
     CParser.SetOrigin(ASource, Size);
 
     Layer := 0; // 初始层次，最外层为 0
-    PrevRunID := ctkNull;
+    HasNamespace := False;
 
     while CParser.RunID <> ctknull do
     begin
       case CParser.RunID of
+        ctknamespace:
+          begin
+            HasNamespace := True; // 记录遇到了 namespace
+          end;
+        ctksemicolon:
+          begin
+            if HasNamespace then
+              HasNamespace := False; // 如果有分号则表示不是 namespace 声明
+          end;
         ctkbraceopen:
           begin
             Inc(Layer);
             NewToken;
-            if PrevRunID = ctknamespace then
+            if HasNamespace then
+            begin
               Token.Tag := 1; // 用 Tag 等于 1 来表示是 namespace
+              HasNamespace := False;
+            end;
 
             if CompareLineCol(CParser.LineNumber, CurrLine,
               CParser.ColumnNumber, CurCol) <= 0 then // 在光标前

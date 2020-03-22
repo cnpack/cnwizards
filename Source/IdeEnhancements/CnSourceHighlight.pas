@@ -1933,16 +1933,17 @@ begin
             if GlobalIgnoreClass and (Pair.StartToken.Tag = 1) then
             begin
               Pair.Free;
-              Continue;
+            end
+            else
+            begin
+              Pair.EndToken := CToken;
+              Pair.EndLeft := CToken.EditCol;
+              if Pair.Left > CToken.EditCol then // Left 取两者间较小的
+                Pair.Left := CToken.EditCol;
+              Pair.Bottom := CToken.EditLine;
+
+              LineInfo.AddPair(Pair);
             end;
-
-            Pair.EndToken := CToken;
-            Pair.EndLeft := CToken.EditCol;
-            if Pair.Left > CToken.EditCol then // Left 取两者间较小的
-              Pair.Left := CToken.EditCol;
-            Pair.Bottom := CToken.EditLine;
-
-            LineInfo.AddPair(Pair);
           end;
         end;
         LineInfo.ConvertLineList;

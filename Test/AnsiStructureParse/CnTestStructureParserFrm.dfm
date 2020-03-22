@@ -1,6 +1,6 @@
 object CnTestStructureForm: TCnTestStructureForm
-  Left = 35
-  Top = 29
+  Left = 156
+  Top = 126
   Width = 973
   Height = 648
   Caption = 'Test Pascal/C++ Unit Structure and Token Parsing'
@@ -290,7 +290,9 @@ object CnTestStructureForm: TCnTestStructureForm
     end
   end
   object dlgOpen1: TOpenDialog
-    Filter = 'Pascal Files(*.pas)|*.pas'
+    Filter = 
+      'Pascal Files(*.pas)|*.pas|C/C++ Files(*.c;*.h;*.hpp;*.cpp)|*.c;*' +
+      '.cpp;*.h;*.hpp|All Files(*.*)|*.*'
     Left = 144
     Top = 16
   end
