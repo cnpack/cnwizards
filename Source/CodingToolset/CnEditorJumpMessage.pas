@@ -680,7 +680,7 @@ begin
     end;
 
     BlockMatchInfo.IsCppSource := CurIsCpp;
-    BlockMatchInfo.CheckLineMatch(EditView, False);
+    BlockMatchInfo.CheckLineMatch(EditView, False, False);
     BlockMatchInfo.CheckCompDirectiveMatch(EditView);
 
     // 解析完毕，准备定位
