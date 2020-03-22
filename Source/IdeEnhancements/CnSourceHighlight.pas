@@ -250,7 +250,7 @@ type
     procedure UpdateCurTokenList;      // 找出和光标下相同的标识符
     procedure UpdateCompDirectiveList; // 找出编译指令
 
-    procedure CheckLineMatch(View: IOTAEditView; IgnoreClass: Boolean);
+    procedure CheckLineMatch(View: IOTAEditView; IgnoreClass, IgnoreNamespace: Boolean);
     procedure CheckCompDirectiveMatch(View: IOTAEditView);
     procedure ConvertLineList;          // 将解析出的关键字与当前标识符转换成按行方式快速访问的
     procedure ConvertIdLineList;        // 将解析出的标识符转换成按行方式快速访问的
@@ -455,6 +455,7 @@ type
     FBlockMatchLineLimit: Boolean;
     FBlockMatchLineWidth: Integer;
     FBlockMatchLineClass: Boolean;
+    FBlockMatchLineNamespace: Boolean;
     FBlockMatchHighlight: Boolean;
     FBlockMatchBackground: TColor;
     FCurrentTokenHighlight: Boolean;
@@ -557,6 +558,7 @@ type
     procedure SetFlowStatementForeground(const Value: TColor);
     procedure SetCompDirectiveBackground(const Value: TColor);
     procedure SetHighlightCompDirective(const Value: Boolean);
+    procedure SetBlockMatchLineNamespace(const Value: Boolean);
   protected
     procedure DoEnhConfig;
     procedure SetActive(Value: Boolean); override;
@@ -627,7 +629,9 @@ type
     {* 是否将行首第一个关键字作为画线起始点，以减少部分竖线可能从代码中穿过的情况}
 
     property BlockMatchLineClass: Boolean read FBlockMatchLineClass write SetBlockMatchLineClass;
-    {* 是否画线匹配 class/record/interface 等的声明}
+    {* Pascal 中是否画线匹配 class/record/interface 等的声明}
+    property BlockMatchLineNamespace: Boolean read FBlockMatchLineNamespace write SetBlockMatchLineNamespace;
+    {* C/C++ 中是否画线匹配 namespace 的大括号}
 {$IFNDEF BDS}
     property HighLightCurrentLine: Boolean read FHighLightCurrentLine write SetHighLightCurrentLine;
     {* 是否高亮当前行的背景}
@@ -754,6 +758,7 @@ const
   csBlockMatchLineWidth = 'BlockMatchLineWidth';
   csBlockMatchLineStyle = 'BlockMatchLineStyle';
   csBlockMatchLineClass = 'BlockMatchLineClass';
+  csBlockMatchLineNamespace = 'BlockMatchLineNamespace';
   csBlockMatchLineEnd = 'BlockMatchLineEnd';
   csBlockMatchLineHori = 'BlockMatchLineHori';
   csBlockMatchLineHoriDot = 'BlockMatchLineHoriDot';
@@ -784,6 +789,7 @@ const
 var
   FHighlight: TCnSourceHighlight = nil;
   GlobalIgnoreClass: Boolean = False;
+  GlobalIgnoreNamespace: Boolean = False;
 {$IFNDEF BDS}
   CanDrawCurrentLine: Boolean = False;
   PaintingControl: TControl = nil;
@@ -1326,7 +1332,7 @@ begin
       ConvertLineList;
       if LineInfo <> nil then
       begin
-        CheckLineMatch(EditView, GlobalIgnoreClass);
+        CheckLineMatch(EditView, GlobalIgnoreClass, GlobalIgnoreNamespace);
     {$IFDEF DEBUG}
         CnDebugger.LogInteger(LineInfo.Count, 'HighLight Cpp LinePairs Count.');
     {$ENDIF}
@@ -1435,7 +1441,7 @@ begin
 
     if LineInfo <> nil then
     begin
-      CheckLineMatch(EditView, GlobalIgnoreClass);
+      CheckLineMatch(EditView, GlobalIgnoreClass, GlobalIgnoreNamespace);
     {$IFDEF DEBUG}
       CnDebugger.LogInteger(LineInfo.Count, 'HighLight Pas LinePairs Count.');
     {$ENDIF}
@@ -1893,7 +1899,8 @@ begin
     FHighLight.EditorMarkLineDirty(TCnGeneralPasToken(FCompDirectiveTokenList[I]).EditLine);
 end;
 
-procedure TBlockMatchInfo.CheckLineMatch(View: IOTAEditView; IgnoreClass: Boolean);
+procedure TBlockMatchInfo.CheckLineMatch(View: IOTAEditView; IgnoreClass,
+  IgnoreNamespace: Boolean);
 var
   I: Integer;
   Pair, PrevPair, IfThenPair: TBlockLinePair;
@@ -1930,7 +1937,7 @@ begin
             Pair := TBlockLinePair(FStack.Pop);
 
             // 解析器里把 namespace 的左括号设成了 Tag = 1
-            if GlobalIgnoreClass and (Pair.StartToken.Tag = 1) then
+            if IgnoreNamespace and (Pair.StartToken.Tag = 1) then
             begin
               Pair.Free;
             end
@@ -2520,6 +2527,7 @@ begin
   FBlockMatchDrawLine := True; // 默认画线
   FBlockMatchLineWidth := 1;
   FBlockMatchLineClass := False;
+  FBlockMatchLineNamespace := True;
   FBlockMatchLineHori := True;
   FBlockExtendLeft := True;
   // FBlockMatchLineStyle := lsTinyDot;
@@ -3668,6 +3676,7 @@ begin
 
   if FIsChecking then Exit;
   GlobalIgnoreClass := not FBlockMatchLineClass;
+  GlobalIgnoreNamespace := not FBlockMatchLineNamespace;
 
   FIsChecking := True;
   try
@@ -3700,6 +3709,8 @@ begin
   if FIsChecking then Exit;
   FIsChecking := True;
   GlobalIgnoreClass := not FBlockMatchLineClass;
+  GlobalIgnoreNamespace := not FBlockMatchLineNamespace;
+
   try
     begin
       for i := 0 to FBlockMatchList.Count - 1 do
@@ -4805,6 +4816,7 @@ begin
       Ord(bsNow)));
     FBlockMatchDrawLine := ReadBool('', csBlockMatchDrawLine, True);
     FBlockMatchLineClass := ReadBool('', csBlockMatchLineClass, False);
+    FBlockMatchLineNamespace := ReadBool('', csBlockMatchLineNamespace, True);
     FBlockMatchLineStyle := TCnLineStyle(ReadInteger('', csBlockMatchLineStyle,
       Ord(lsSolid)));
     FBlockMatchLineEnd := ReadBool('', csBlockMatchLineEnd, False);
@@ -4871,6 +4883,7 @@ begin
     WriteInteger('', csBlockMatchLineWidth, FBlockMatchLineWidth);
     WriteInteger('', csBlockMatchLineStyle, Ord(FBlockMatchLineStyle));
     WriteBool('', csBlockMatchLineClass, FBlockMatchLineClass);
+    WriteBool('', csBlockMatchLineNamespace, FBlockMatchLineNamespace);
     WriteBool('', csBlockMatchLineEnd, FBlockMatchLineEnd);
     WriteBool('', csBlockMatchLineHori, FBlockMatchLineHori);
     WriteBool('', csBlockMatchLineHoriDot, FBlockMatchLineHoriDot);
@@ -5302,6 +5315,12 @@ begin
     Info := TBlockMatchInfo(FBlockMatchList[I]);
     Info.Control.Invalidate;
   end;
+end;
+
+procedure TCnSourceHighlight.SetBlockMatchLineNamespace(const Value: Boolean);
+begin
+  FBlockMatchLineNamespace := Value;
+  GlobalIgnoreNamespace := not Value;
 end;
 
 { TBlockLinePair }

@@ -57,6 +57,7 @@ type
     chkLineClass: TCheckBox;
     chkLineHori: TCheckBox;
     chkLineHoriDot: TCheckBox;
+    chkLineNamespace: TCheckBox;
     procedure cbbLineTypeDrawItem(Control: TWinControl; Index: Integer;
       Rect: TRect; State: TOwnerDrawState);
     procedure chkLineHoriClick(Sender: TObject);

@@ -340,6 +340,7 @@ begin
     chkLineHori.Checked := AWizard.BlockMatchLineHori;
     chkLineHoriDot.Checked := AWizard.BlockMatchLineHoriDot;
     chkLineClass.Checked := not AWizard.BlockMatchLineClass;
+    chkLineNamespace.Checked := not AWizard.BlockMatchLineNamespace;
 
     if ShowModal = mrOK then
     begin
@@ -349,6 +350,7 @@ begin
       AWizard.BlockMatchLineHori := chkLineHori.Checked;
       AWizard.BlockMatchLineHoriDot := chkLineHoriDot.Checked;
       AWizard.BlockMatchLineClass := not chkLineClass.Checked;
+      AWizard.BlockMatchLineNamespace := not chkLineNamespace.Checked;
 
       AWizard.DoSaveSettings;
       AWizard.RepaintEditors;

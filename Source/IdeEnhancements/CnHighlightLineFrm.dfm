@@ -1,9 +1,9 @@
 inherited CnHighlightLineForm: TCnHighlightLineForm
-  Left = 289
-  Top = 249
+  Left = 710
+  Top = 339
   BorderStyle = bsDialog
   Caption = 'Line Settings'
-  ClientHeight = 200
+  ClientHeight = 220
   ClientWidth = 363
   OnCreate = FormCreate
   PixelsPerInch = 96
@@ -12,7 +12,7 @@ inherited CnHighlightLineForm: TCnHighlightLineForm
     Left = 8
     Top = 8
     Width = 345
-    Height = 152
+    Height = 172
     Caption = 'Highlight &Line Settings'
     TabOrder = 0
     object lblLineWidth: TLabel
@@ -67,7 +67,7 @@ inherited CnHighlightLineForm: TCnHighlightLineForm
       Top = 116
       Width = 321
       Height = 17
-      Caption = 'Ignore class/interface/record Declaration in Lines'
+      Caption = 'Ignore class/interface/record Declaration in Pascal'
       TabOrder = 5
     end
     object chkLineHori: TCheckBox
@@ -87,10 +87,18 @@ inherited CnHighlightLineForm: TCnHighlightLineForm
       Caption = 'Use Tiny Dot to Draw the Horizontal Lines'
       TabOrder = 4
     end
+    object chkLineNamespace: TCheckBox
+      Left = 16
+      Top = 136
+      Width = 321
+      Height = 17
+      Caption = 'Ignore namespace Brackets in C++'
+      TabOrder = 6
+    end
   end
   object btnOK: TButton
     Left = 118
-    Top = 168
+    Top = 188
     Width = 75
     Height = 21
     Caption = '&OK'
@@ -100,7 +108,7 @@ inherited CnHighlightLineForm: TCnHighlightLineForm
   end
   object btnCancel: TButton
     Left = 198
-    Top = 168
+    Top = 188
     Width = 75
     Height = 21
     Cancel = True
@@ -110,7 +118,7 @@ inherited CnHighlightLineForm: TCnHighlightLineForm
   end
   object btnHelp: TButton
     Left = 278
-    Top = 168
+    Top = 188
     Width = 75
     Height = 21
     Caption = '&Help'
