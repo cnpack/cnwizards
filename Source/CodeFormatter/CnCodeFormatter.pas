@@ -4601,19 +4601,32 @@ begin
     case Scaner.Token of
       tokEQUAL:
         begin
-          Match(Scaner.Token, 1); // 等号前空一格
-          FCurrentTab := PreSpaceCount; // 记录当前缩进供常量表达式内部保留换行处理
-          FormatConstExpr(1); // 等号后只空一格
+          // 常量表达式从等号起就允许保持内部换行
+          FLineBreakKeepStack.Push(Pointer(FNeedKeepLineBreak));
+          FNeedKeepLineBreak := True;
+          try
+            Match(Scaner.Token, 1); // 等号前空一格
+            FCurrentTab := PreSpaceCount; // 记录当前缩进供常量表达式内部保留换行处理
+            FormatConstExpr(1); // 等号后只空一格
+          finally
+            FNeedKeepLineBreak := Boolean(FLineBreakKeepStack.Pop);
+          end;
         end;
-
       tokColon: // 无法直接区分 record/array/普通常量方式的初始化，需要内部解析
         begin
           Match(Scaner.Token);
-
           FormatType;
-          Match(tokEQUAL, 1, 1); // 等号前后空一格
 
-          FormatTypedConstant; // 等号后空一格
+          // 类型表达式从冒号起就允许保持内部换行
+          FLineBreakKeepStack.Push(Pointer(FNeedKeepLineBreak));
+          FNeedKeepLineBreak := True;
+          try
+            FCurrentTab := PreSpaceCount;
+            Match(tokEQUAL, 1, 1); // 等号前后空一格
+            FormatTypedConstant; // 等号后空一格
+          finally
+            FNeedKeepLineBreak := Boolean(FLineBreakKeepStack.Pop);
+          end;
         end;
     else
       Error(CN_ERRCODE_PASCAL_NO_EQUALCOLON);
