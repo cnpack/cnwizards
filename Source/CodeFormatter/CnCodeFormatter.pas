@@ -1842,14 +1842,12 @@ begin
 
         FormatExpression(0, PreSpaceCount);
       end;
-
     tokKeywordIn:
       begin
         Match(tokKeywordIn, 1, 1);
         FormatExpression(0, PreSpaceCount);
         { DONE: surport "for .. in .. do .." statment parser }
       end;
-
   else
     ErrorExpected(':= or in');
   end;
@@ -2621,28 +2619,27 @@ end;
 
 { ArrayConstant -> '(' TypedConstant/','... ')' }
 procedure TCnBasePascalFormatter.FormatArrayConstant(PreSpaceCount: Byte);
+var
+  OldKeepOneBlankLine: Boolean;
 begin
   Match(tokLB);
-
+  OldKeepOneBlankLine := Scaner.KeepOneBlankLine;
+  Scaner.KeepOneBlankLine := False; // 嵌套数组声明中无需保留原有内部的至少一行换行的模式
+                                    // 不等于保留换行的选项
   SpecifyElementType(pfetArrayConstant);
+
   try
     FormatTypedConstant(PreSpaceCount);
-
-  //  if Scaner.Token = tokLB then // 数组的括号可能嵌套
-  //    FormatArrayConstant(PreSpaceCount)
-  //  else
 
     while Scaner.Token = tokComma do
     begin
       Match(Scaner.Token);
       FormatTypedConstant(PreSpaceCount);
-  //    if Scaner.Token = tokLB then // 数组的括号可能嵌套
-  //      FormatArrayConstant(PreSpaceCount)
-  //    else
     end;
 
     Match(tokRB);
   finally
+    Scaner.KeepOneBlankLine := OldKeepOneBlankLine;
     RestoreElementType;
   end;
 end;
@@ -4446,7 +4443,7 @@ begin
     FIsTypeID := Old;
   end;
 
-  // 加入对<>泛型的支持
+  // 加入对 <> 泛型的支持
   GreatEqual := False;
   if Scaner.Token = tokLess then
   begin
