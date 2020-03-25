@@ -92,7 +92,7 @@ type
 function GetNewComponentName(const FormName, ComponentClass, ComponentText,
   OldName: string; var Prefix, NewName: string; HideMode: Boolean;
   var IgnoreComp, AutoPopSuggestDlg, WizardActive: Boolean; UseUnderLine: Boolean;
-  const RootName: string = ''): Boolean;
+  const RootName: string = ''; AWizard: TObject = nil): Boolean;
 
 {$ENDIF CNWIZARDS_CNPREFIXWIZARD}
 
@@ -101,7 +101,7 @@ implementation
 {$IFDEF CNWIZARDS_CNPREFIXWIZARD}
 
 uses
-  CnPrefixNewFrm, CnWizNotifier;
+  CnPrefixNewFrm, CnPrefixWizard, CnWizNotifier;
 
 {$R *.DFM}
 
@@ -111,10 +111,22 @@ uses
 function GetNewComponentName(const FormName, ComponentClass, ComponentText,
   OldName: string; var Prefix, NewName: string; HideMode: Boolean;
   var IgnoreComp, AutoPopSuggestDlg, WizardActive: Boolean; UseUnderLine: Boolean;
-  const RootName: string): Boolean;
+  const RootName: string; AWizard: TObject): Boolean;
+var
+  Wizard: TCnPrefixWizard;
 begin
+  Result := False;
+  if not (AWizard is TCnPrefixWizard) then
+    Exit;
+
+  Wizard := AWizard as TCnPrefixWizard;
   with TCnPrefixEditForm.Create(nil) do
   try
+    if Wizard.EditDialogWidth > 0 then
+      Width := Wizard.EditDialogWidth;
+    if  Wizard.EditDialogHeight > 0 then
+      Height := Wizard.EditDialogHeight;
+
     lblFormName.Caption := FormName;
     lblClassName.Caption := ComponentClass;
     lblText.Caption := ComponentText;
@@ -140,6 +152,8 @@ begin
     IgnoreComp := cbIgnoreComp.Checked;
     AutoPopSuggestDlg := not cbNeverDisp.Checked;
     WizardActive := not chkDisablePrefix.Checked;
+    Wizard.EditDialogWidth := Width;
+    Wizard.EditDialogHeight := Height;
 
     if not WizardActive then
       Result := False;

@@ -97,6 +97,8 @@ type
     FSetValueHook: TCnMethodHook;
     FF2Rename: Boolean;
     FRenameAction: TCnWizAction;
+    FEditDialogWidth: Integer;
+    FEditDialogHeight: Integer;
     procedure OnConfig(Sender: TObject);
     procedure AddFormToList(const ProjectName: string; FormEditor: IOTAFormEditor;
       List: TCompList);
@@ -166,6 +168,8 @@ type
     property CompKind: TPrefixCompKind read FCompKind write FCompKind;
     property PrefixCaseSensitive: Boolean read FPrefixCaseSensitive write FPrefixCaseSensitive;
     property F2Rename: Boolean read FF2Rename write SetF2Rename;
+    property EditDialogWidth: Integer read FEditDialogWidth write FEditDialogWidth;
+    property EditDialogHeight: Integer read FEditDialogHeight write FEditDialogHeight;
 
     property PrefixList: TPrefixList read FPrefixList;
     property FormNotifierList: TStringList read FFormNotifierList;
@@ -929,7 +933,7 @@ begin
         // 修改的是 TForm1 这种类型的前缀，需要修复，
         Succ := GetNewComponentName(_CnExtractFileName(FormEditor.GetFileName),
           AClassName, CompText, OldName, Prefix, NewName, UserMode, Ignore,
-          FAutoPopSuggestDlg, WizardActive, FUseUnderLine, RootName);
+          FAutoPopSuggestDlg, WizardActive, FUseUnderLine, RootName, Self);
 
         // 允许用户禁用专家
         if WizardActive <> Active then
@@ -1075,7 +1079,7 @@ begin
               if GetNewComponentName(_CnExtractFileName(FormEditor.GetFileName),
                 Component.ClassName, CnGetComponentText(Component),
                 OldName, APrefix, ANewName, True, AIgnore, AAutoDlg, WizardActive,
-                FUseUnderLine) then
+                FUseUnderLine, '', Self) then
               begin
                 Prefix := APrefix;
                 NewName := ANewName;
@@ -1390,6 +1394,8 @@ const
   csPrefixCaseSensitive = 'PrefixCaseSensitive';
   csCompKind = 'CompKind';
   csF2Rename = 'F2Rename';
+  csEditDialogWidth = 'EditDialogWidth';
+  csEditDialogHeight = 'EditDialogHeight';
 
 procedure TCnPrefixWizard.LoadSettings(Ini: TCustomIniFile);
 begin
@@ -1406,7 +1412,9 @@ begin
   FWatchFieldLink := Ini.ReadBool('', csWatchFieldLink, True);
   FCompKind := TPrefixCompKind(Ini.ReadInteger('', csCompKind, 0));
   FPrefixCaseSensitive := Ini.ReadBool('', csPrefixCaseSensitive, True);
-  F2Rename := Ini.ReadBool('', csF2Rename, True);
+  FF2Rename := Ini.ReadBool('', csF2Rename, True);
+  FEditDialogWidth := Ini.ReadInteger('', csEditDialogWidth, 0);
+  FEditDialogHeight := Ini.ReadInteger('', csEditDialogHeight, 0);
 
   FPrefixList.LoadFromFile(WizOptions.GetUserFileName(SCnPrefixDataName, True));
 end;
@@ -1427,6 +1435,9 @@ begin
   Ini.WriteInteger('', csCompKind, Ord(FCompKind));
   Ini.WriteBool('', csPrefixCaseSensitive, FPrefixCaseSensitive);
   Ini.WriteBool('', csF2Rename, FF2Rename);
+  Ini.WriteInteger('', csEditDialogWidth, FEditDialogWidth);
+  Ini.WriteInteger('', csEditDialogHeight, FEditDialogHeight);
+
   FPrefixList.SaveToFile(WizOptions.GetUserFileName(SCnPrefixDataName, False));
   WizOptions.CheckUserFile(SCnPrefixDataName);
 end;
