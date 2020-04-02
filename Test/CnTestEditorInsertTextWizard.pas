@@ -54,6 +54,7 @@ type
     FIdInsertTextIntoEditor: Integer;
     FIdInsertLineIntoEditor: Integer;
     FIdReplaceCurrentSelection: Integer;
+    FIdInsertTextToCurSource: Integer;
   protected
     function GetHasConfig: Boolean; override;
     procedure SubActionExecute(Index: Integer); override;
@@ -100,6 +101,9 @@ begin
   FIdReplaceCurrentSelection := RegisterASubAction('CnOtaReplaceCurrentSelection',
     'Test CnOtaReplaceCurrentSelection', 0, 'Test CnOtaReplaceCurrentSelection',
     'CnOtaReplaceCurrentSelection');
+  FIdInsertTextToCurSource := RegisterASubAction('CnOtaInsertTextToCurSource',
+    'Test CnOtaInsertTextToCurSource', 0, 'Test CnOtaInsertTextToCurSource',
+    'CnOtaInsertTextToCurSource');
 end;
 
 function TCnTestEditorInsertTextWizard.GetCaption: string;
@@ -143,8 +147,7 @@ end;
 procedure TCnTestEditorInsertTextWizard.SubActionExecute(Index: Integer);
 var
   S: string;
-  Line, Col: Integer;
-  EditView: IOTAEditView;
+  APos: TOTAEditPos;
 begin
   if not Active then Exit;
 
@@ -162,6 +165,13 @@ begin
   begin
     S := CnInputBox('Enter Text', 'Enter Text:', '{³Ô·¹Ë¯¾õ}');
     CnOtaReplaceCurrentSelection(S, True, True);
+  end
+  else if Index = FIdInsertTextToCurSource then
+  begin
+    S := CnInputBox('Enter Text', 'Enter Text:', '{³Ô·¹Ë¯¾õ}');
+    APos.Line := 27; APos.Col := 31;
+    CnOtaGetTopMostEditView.CursorPos := APos;
+    CnOtaInsertTextToCurSource(S);
   end;
 end;
 
