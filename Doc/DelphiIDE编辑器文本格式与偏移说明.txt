@@ -67,7 +67,7 @@ CnPack的 Pascal 结构        列 Ansi                列有 Ansi/Wide           同右
 CnPack的 Cpp 结构           列 Ansi                列有 Ansi/Wide           同右     
 解析器所使用的行列          行列均 0 开始          行列均 0 开始，可展开 Tab          
 -----------------------------------------------------------------------------------------------------
-CnPack的 Pas/Cpp 结构       不展开 ab              根据设置宽度展开 Tab     根据设置宽度展开 Tab
+CnPack的 Pas/Cpp 结构       不展开 Tab             根据设置宽度展开 Tab     根据设置宽度展开 Tab
 解析器是否自行展开 Tab      Tab 由 ConvertPos 处理      
 -----------------------------------------------------------------------------------------------------
 Pas/Cpp Token 的            1 开始的 TOTAEditPos   1 开始的 TOTAEditPos     1 开始的 TOTAEditPos
@@ -80,4 +80,6 @@ CharPos 到 EditPos 的转换实际上是起始 0/1 的变换以及 Tab 键展开（D2005~2007 下还
 另外，代码高亮中需要根据 Token 进行重画时，计算重画区域的 EditCol 应该全部使用 Ansi 的（视觉要求），但 D2005~2007 的 EditPos 的 Col 是 Utf8，所以 D2005~2007 下不能直接用 EditCol，另开了一个属性 EditAnsiCol 存储 Ansi 偏移，专门用来重画。
 
 另外，EditControl 的 LineText 属性表示光标所在的当前行的内容，但当本行为空时，无论光标在哪儿，LineText 均返回空，而不是一串空格。
+
+D2009/2010下，给 EditView 设置 CursorPos 后，如立刻调用其 EditPosition.InsertText，文本的 Col 会有偏差，具体说会比应当插入的位置往左靠 n 个字符，n 等于光标左边的双字节字符数。
 
