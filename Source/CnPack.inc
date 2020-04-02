@@ -2712,6 +2712,11 @@
   {$DEFINE IDE_HAS_EDITOR_SEARCHPANEL}     // Editor has a Search Panel
 {$ENDIF}
 
+{$IFDEF BDS2010}
+  // 2010 下 EditView 设置 CursorPos 后调用 EditPosition.InsertText 会有列偏差
+  {$DEFINE EDITVIEW_SETCURSORPOS_BUG}
+{$ENDIF}
+
 {$IFDEF BDS2009_UP}
   {$DEFINE UNICODE_STRING}
   {$DEFINE OBJECT_HAS_TOSTRING}  // TObject.ToString Function
@@ -2733,9 +2738,11 @@
   // Set an Option Value to DPK Project Options maybe cause DPK Source Corrupt.
 {$ENDIF}
 
-{$IFDEF COMPILER12}
-  // RAD Studio 2009 下 CreateParams 中可能导致死循环
+{$IFDEF BDS2009}
+  // 2009 下 CreateParams 中可能导致死循环
   {$DEFINE CREATE_PARAMS_BUG}
+  // 2009 下 EditView 设置 CursorPos 后调用 EditPosition.InsertText 会有列偏差
+  {$DEFINE EDITVIEW_SETCURSORPOS_BUG}
 {$ENDIF}
 
 {$IFDEF BDS2007_UP}

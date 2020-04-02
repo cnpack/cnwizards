@@ -2781,6 +2781,7 @@ begin
         begin
           Handled := Key in [' ', #13, '(', ';'];
           FSavePos := Buffer.TopView.CursorPos;
+
           if ((Item.Kind in [skFunction]) or not CursorIsEOL) and (Key <> ';') then
             FBracketText := '()'
           else
@@ -2805,11 +2806,35 @@ end;
 procedure TCnInputHelper.AutoCompFunc(Sender: TObject);
 var
   Buffer: IOTAEditBuffer;
+{$IFDEF EDITVIEW_SETCURSORPOS_BUG}
+  EditControl: TControl;
+  Text: string;
+  Utf8Text: AnsiString;
+  Utf8Len, AnsiLen: Integer;
+{$ENDIF}
 begin
   Buffer := CnOtaGetEditBuffer;
   if Assigned(Buffer) and Assigned(Buffer.TopView) and
     Assigned(Buffer.EditPosition) then
   begin
+{$IFDEF EDITVIEW_SETCURSORPOS_BUG}
+    // D2009/2010 下，设置 CursorPos 后再 InsertText 会有列偏差，要根据当前行的双字节字符数额外往右调整
+    EditControl := CnOtaGetCurrentEditControl;
+    if EditControl <> nil then
+    begin
+      Text := EditControlWrapper.GetTextAtLine(EditControl, FSavePos.Line);
+      Utf8Text := UTF8Encode(Text);
+      Utf8Text := Copy(Utf8Text, 1, FSavePos.Col);
+      Utf8Len := Length(Utf8Text);  // 得到有 Bug 时的 Utf8 插入位置
+      Text := UTF8Decode(Utf8Text); // 转回 Utf16，看位置差
+      AnsiLen := CalcAnsiLengthFromWideString(PWideChar(Text)); // 得到 Utf16 转 Ansi 后的长度
+
+      // 补上差值
+      if Utf8Len > AnsiLen then
+        FSavePos.Col := FSavePos.Col + (Utf8Len - AnsiLen);
+    end;
+{$ENDIF}
+
     Buffer.TopView.CursorPos := FSavePos;
     Buffer.EditPosition.InsertText(FBracketText);
     if not FNoActualParaminCpp then // C/C++ 函数必须括号，但如无参数，光标便不用移动回来
