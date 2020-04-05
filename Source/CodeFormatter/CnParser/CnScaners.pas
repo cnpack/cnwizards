@@ -1636,6 +1636,17 @@ begin
           begin
             if not InIgnoreArea then
               FCodeGen.Write(BlankString);
+
+            // 特殊处理，{$ENDIF} 这种末尾的换行不写
+            if (Pos('{$ENDIF', UpperCase(TmpToken)) = 1) or
+              (Pos('{$IFEND', UpperCase(TmpToken)) = 1) then
+            begin
+              if TmpToken[Length(TmpToken)] = #$A then
+                Delete(TmpToken, Length(TmpToken), 1);
+              if TmpToken[Length(TmpToken)] = #$D then
+                Delete(TmpToken, Length(TmpToken), 1);
+            end;
+
             FCodeGen.Write(TmpToken);
           end;
 
