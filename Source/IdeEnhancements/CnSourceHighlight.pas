@@ -3783,6 +3783,20 @@ var
   CanvasSaved: Boolean;
 {$IFDEF BDS}
   WidePaintBuf: array[0..1] of WideChar;
+  AnsiCharWidthLimit: Integer;
+
+  function WideCharIsWideLengthOnCanvas(AChar: WideChar): Boolean;
+  var
+    CW: Integer;
+  begin
+    if AnsiCharWidthLimit <= 2 then
+      Result := WideCharIsWideLength(AChar)
+    else
+    begin
+      CW := EditCanvas.TextWidth(AChar);
+      Result := CW > AnsiCharWidthLimit; // 字符宽度大于 1.5 倍的窄字符宽度就认为宽
+    end;
+  end;
 {$ENDIF}
 
   // 根据 Token 的 EditPos 的 Col（Ansi/Utf8/Ansi）返回给 GetAttributeAtPos 使用的 Col（Ansi/Utf8/Utf8）
@@ -4057,6 +4071,10 @@ begin
                 EditPos.Col := EditPosColBaseForAttribute;
                 EditPos.Line := Token.EditLine;
                 WidePaintBuf[1] := #0;
+
+                AnsiCharWidthLimit := TextWidth('a'); // 先准备一个窄字符的宽度的 1.5 倍备用
+                AnsiCharWidthLimit := AnsiCharWidthLimit + AnsiCharWidthLimit shr 1;
+
                 for J := 0 to Length(Token.Token) - 1 do
                 begin
                   EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False,
@@ -4075,7 +4093,8 @@ begin
                     {$ENDIF}
                   end;
 
-                  if WideCharIsWideLength(Token.Token[J]) then
+                  // 标识符支持 Unicode，直接用 WideCharIsWideLength 的判断可能不准，需要画出宽度来衡量
+                  if WideCharIsWideLengthOnCanvas(Token.Token[J]) then
                   begin
                     Inc(R.Left, CharSize.cx * SizeOf(WideChar));
                     Inc(R.Right, CharSize.cx * SizeOf(WideChar));
