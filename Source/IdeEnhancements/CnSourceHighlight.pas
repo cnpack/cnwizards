@@ -3789,12 +3789,14 @@ var
   var
     CW: Integer;
   begin
-    if AnsiCharWidthLimit <= 2 then
+    if (Ord(AChar) < $FF) then
+      Result := False
+    else if AnsiCharWidthLimit <= 2 then
       Result := WideCharIsWideLength(AChar)
     else
     begin
       CW := EditCanvas.TextWidth(AChar);
-      Result := CW > AnsiCharWidthLimit; // 字符宽度大于 1.5 倍的窄字符宽度就认为宽
+      Result := CW > AnsiCharWidthLimit; // 双字节字符绘制出的宽度大于 1.5 倍的窄字符宽度就认为宽
     end;
   end;
 {$ENDIF}
@@ -3803,7 +3805,7 @@ var
   function CalcTokenEditColForAttribute(AToken: TCnGeneralPasToken): Integer;
   begin
     Result := Token.EditCol;
-    // D567与D2005~2007下分别是Ansi/Utf8，符合GetAttributeAtPos的要求
+    // D567 与 D2005~2007 下分别是 Ansi/Utf8，符合 GetAttributeAtPos 的要求
 {$IFDEF UNICODE}
     // D2009 或以上 GetAttributeAtPos 需要的是 UTF8 的Pos，因此进行 Col 的 UTF8 转换
     if FRawLineText <> '' then

@@ -254,6 +254,7 @@ type
     FSaveFontSize: Integer;
 
     FBpClickQueue: TQueue;
+    FEditorBaseFont: TFont;
     procedure ScrollAndClickEditControl(Sender: TObject);
 
     procedure AddNotifier(List: TList; Notifier: TMethod);
@@ -457,6 +458,8 @@ type
 
     property MouseNotifyAvailable: Boolean read FMouseNotifyAvailable;
     {* 返回编辑器的鼠标事件通知服务是否可用 }
+    property EditorBaseFont: TFont read FEditorBaseFont;
+    {* 一个 TFont 对象，持有编辑器的基础字体供外界使用}
   end;
 
 function EditControlWrapper: TCnEditControlWrapper;
@@ -819,6 +822,7 @@ begin
 
   FHighlights := TStringList.Create;
   FBpClickQueue := TQueue.Create;
+  FEditorBaseFont := TFont.Create;
 
   CnWizNotifierServices.AddSourceEditorNotifier(OnSourceEditorNotify);
   CnWizNotifierServices.AddActiveFormNotifier(OnActiveFormChange);
@@ -845,6 +849,7 @@ begin
   CnWizNotifierServices.RemoveApplicationMessageNotifier(ApplicationMessage);
   CnWizNotifierServices.RemoveApplicationIdleNotifier(OnIdle);
 
+  FEditorBaseFont.Free;
   while FBpClickQueue.Count > 0 do
     TObject(FBpClickQueue.Pop).Free;
   FBpClickQueue.Free;
@@ -1448,9 +1453,14 @@ begin
 
     FSaveFontName := Option.FontName;
     FSaveFontSize := Option.FontSize;
-    
+
     FontName := Option.FontName;
     FontHeight := -MulDiv(Option.FontSize, Screen.PixelsPerInch, 72);
+
+    // 保留一份编辑器字体对象供使用
+    FEditorBaseFont.Name := Option.FontName;
+    FEditorBaseFont.Size := Option.FontSize;
+
     if not SameText(FontName, LogFont.lfFaceName) or (FontHeight <> LogFont.lfHeight) then
     begin
       // 调整为系统设置的字体
@@ -1459,6 +1469,9 @@ begin
     {$IFDEF DEBUG}
       CnDebugger.LogFmt('Adjust FontName: %s Height: %d', [FontName, FontHeight]);
     {$ENDIF}
+      // 再保留一份编辑器字体对象供使用
+      FEditorBaseFont.Name := FontName;
+      FEditorBaseFont.Height := FontHeight;
     end;
 
     DC := CreateCompatibleDC(0);
