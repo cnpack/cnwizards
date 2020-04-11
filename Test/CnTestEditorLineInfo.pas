@@ -196,6 +196,9 @@ var
   AToken: AnsiString;
   HasTab: Boolean;
   PosInfo: TCodePosInfo;
+  CurToken: TCnIdeTokenString;
+  CurrIndex: Integer;
+  Canvas: TCanvas;
 
   function HasTabChar(const ALine: AnsiString): Boolean;
   var
@@ -262,6 +265,27 @@ begin
   lstInfo.Items.Add('CursorPos/EditPos(1/1) CharPos(1/0) Conversion.');
   lstInfo.Items.Add(Format('EditPos %d:%d, CharPos %d:%d.', [EditPos.Line,
     EditPos.Col, CharPos.Line, CharPos.CharIndex]));
+
+  lstInfo.Items.Add(SEP);
+  CnOtaGeneralGetCurrPosToken(CurToken, CurrIndex, True, [], [], EditView);
+  lstInfo.Items.Add(Format('CnOtaGeneralGetCurrPosToken: Index %d Token: %s',
+    [CurrIndex, CurToken]));
+
+{$IFDEF UNICODE}
+  lstInfo.Items.Add(SEP);
+  CnNtaGetCurrLineTextW(CurToken, LineNo, CurrIndex);
+  lstInfo.Items.Add(Format('CnNtaGetCurrLineTextW no PreciseMode: Line %d, Index %d',
+    [LineNo, CurrIndex]));
+
+  Canvas := EditControlWrapper.GetEditControlCanvas(CnOtaGetCurrentEditControl);
+  if Canvas <> nil then
+  begin
+    lstInfo.Items.Add(SEP);
+    CnNtaGetCurrLineTextW(CurToken, LineNo, CurrIndex, True);
+    lstInfo.Items.Add(Format('CnNtaGetCurrLineTextW with PreciseMode: Line %d, Index %d',
+      [LineNo, CurrIndex]));
+  end;
+{$ENDIF}
 
   lstInfo.Items.Add(SEP);
   CurrPos := CnOtaGetCurrPos; // 取到的线性偏移基本准确
