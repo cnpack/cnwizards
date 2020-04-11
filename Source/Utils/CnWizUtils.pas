@@ -584,11 +584,12 @@ function CnNtaGetCurrLineText(var Text: string; var LineNo: Integer;
 
 {$IFDEF UNICODE}
 function CnNtaGetCurrLineTextW(var Text: string; var LineNo: Integer;
-  var CharIndex: Integer): Boolean;
+  var Utf16CharIndex: Integer; PreciseMode: Boolean = False): Boolean;
 {* 使用 NTA 方法取当前行源代码的纯 Unicode 版本。速度快，但取回的文本是将 Tab 扩展成空格的。
-   不适用于 ConvertPos 转成 EditPos。只能将 CharIndex 转成 Ansi 后 + 1
-   赋值给 EditPos.Col。CharIndex 是当前光标在 Text 中的 Utf16 真实位置，0 开始。
-   Unicode IDE 下取得的是 UTF16 字符串与 UTF16 的偏移量}
+   不适用于 ConvertPos 转成 EditPos。只能将 CharIndex 转成 Ansi 后 + 1 赋给 EditPos.Col。
+   Utf16CharIndex 是当前光标在 Text 中的 Utf16 真实位置，0 开始，+ 1 便可下标
+   PreciseMode 为 True 时使用 Canvas.TextWidth 来衡量宽字符的实际宽度，准确但略慢
+   为 False 时直接判断字符是否大于 $FF 来决定其是一字符宽还是二字符宽，碰上部分古怪 Unicode 字符会产生偏差}
 {$ENDIF}
 
 function CnOtaGetCurrLineInfo(var LineNo, CharIndex, LineLen: Integer): Boolean;
@@ -613,10 +614,12 @@ function CnOtaGetCurrPosTokenUtf8(var Token: WideString; var CurrIndex: Integer;
 {$IFDEF UNICODE}
 function CnOtaGetCurrPosTokenW(var Token: string; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TCharSet = [];
-  CharSet: TCharSet = []; EditView: IOTAEditView = nil;
-  SupportUnicodeIdent: Boolean = False; IndexUsingWide: Boolean = False): Boolean;
+  CharSet: TCharSet = []; EditView: IOTAEditView = nil; SupportUnicodeIdent: Boolean = False;
+  IndexUsingWide: Boolean = False; PreciseMode: Boolean = False): Boolean;
 {* 取当前光标下的标识符及光标在标识符中的索引号的 Unicode 版本，允许 Unicode 标识符，
-  可用于 2009 或以上。CurrIndex 0 开始，根据 IndexUsingWide 参数返回 Ansi 或 Wide 偏移}
+  可用于 2009 或以上。CurrIndex 0 开始，根据 IndexUsingWide 参数返回 Ansi 或 Wide 偏移
+  PreciseMode 为 True 时使用 Canvas.TextWidth 来衡量宽字符的实际宽度，准确但略慢
+   为 False 时直接判断字符是否大于 $FF 来决定其是一字符宽还是二字符宽，碰上部分古怪 Unicode 字符会产生偏差}
 {$ENDIF}
 
 function CnOtaGeneralGetCurrPosToken(var Token: TCnIdeTokenString; var CurrIndex: Integer;
@@ -4521,15 +4524,61 @@ end;
 
 {$IFDEF UNICODE}
 
+var
+  VirtualEditControlBitmap: TBitmap = nil;
+
+// 使用 Canvas 的 TextWidth 来更精准计算宽字符串的 Ansi 子串长度
+function CalcWideStringLengthFromAnsiOffsetOnCanvas(Text: PWideChar;
+  AnsiOffset: Integer): Integer;
+var
+  C: array[0..1] of WideChar;
+  Idx, WidthLimit: Integer;
+begin
+  Result := 0;
+  if (Text <> nil) and (AnsiOffset > 0) then
+  begin
+    Idx := 0;
+
+    // 同步编辑器字体过来
+    if VirtualEditControlBitmap = nil then
+    begin
+      VirtualEditControlBitmap := TBitmap.Create;
+      VirtualEditControlBitmap.Canvas.Font := EditControlWrapper.EditorBaseFont;
+    end
+    else
+    begin
+      if (VirtualEditControlBitmap.Canvas.Font.Name <> EditControlWrapper.EditorBaseFont.Name)
+        or (VirtualEditControlBitmap.Canvas.Font.Size <> EditControlWrapper.EditorBaseFont.Size) then
+        VirtualEditControlBitmap.Canvas.Font := EditControlWrapper.EditorBaseFont;
+    end;
+
+    WidthLimit := VirtualEditControlBitmap.Canvas.TextWidth('a');
+    WidthLimit := WidthLimit + (WidthLimit shr 1);
+    C[1] := #0;
+
+    while (Text^ <> #0) and (Idx < AnsiOffset) do
+    begin
+      C[0] := Text^;
+      if (Ord(C[0]) > $FF) and (VirtualEditControlBitmap.Canvas.TextWidth(C) > WidthLimit) then
+        Inc(Idx, SizeOf(WideChar))
+      else
+        Inc(Idx, SizeOf(AnsiChar));
+
+      Inc(Text);
+      Inc(Result);
+    end;
+  end;
+end;
+
 //  使用 NTA 方法取当前行源代码的纯 Unicode 版本。速度快，但取回的文本是将 Tab 扩展成空格的。
 //  不适用于 ConvertPos 转成 EditPos。只能将 CharIndex 转成 Ansi 后 + 1
-//  赋值给 EditPos.Col。CharIndex 是当前光标在 Text 中的 Utf16 真实位置，0 开始。
-//  Unicode IDE 下取得的是 UTF16 字符串与 UTF16 的偏移量
+//  赋值给 EditPos.Col。Utf16CharIndex 是当前光标在 Text 中的 Utf16 真实位置，0 开始。
 function CnNtaGetCurrLineTextW(var Text: string; var LineNo: Integer;
-  var CharIndex: Integer): Boolean;
+  var Utf16CharIndex: Integer; PreciseMode: Boolean): Boolean;
 var
   EditControl: TControl;
   View: IOTAEditView;
+  AnsiCharIndex: Integer;
 begin
   Result := False;
   EditControl := GetCurrentEditControl;
@@ -4538,9 +4587,14 @@ begin
   begin
     Text := GetStrProp(EditControl, 'LineText');
 
-    // CursorPos 在 Unicode IDE 下反映的是 Ansi （非UTF8）方式的列，
+    // CursorPos 在 Unicode IDE 下反映的是 Ansi（非UTF8）方式的列，
     // 需要把 string 转成 Ansi 后才能得到光标对应到 Text 中的真实位置
-    CharIndex := CalcWideStringLengthFromAnsiOffset(PWideChar(Text), View.CursorPos.Col - 1);
+    AnsiCharIndex := View.CursorPos.Col - 1;
+    if not PreciseMode then
+      Utf16CharIndex := CalcWideStringLengthFromAnsiOffset(PWideChar(Text), AnsiCharIndex)
+    else
+      Utf16CharIndex := CalcWideStringLengthFromAnsiOffsetOnCanvas(PWideChar(Text),
+        AnsiCharIndex);
 
     LineNo := View.CursorPos.Line;
     Result := True;
@@ -4754,7 +4808,8 @@ end;
 // 取当前光标下的标识符及光标在标识符中的索引号的 Unicode 版本，允许 Unicode 标识符
 function CnOtaGetCurrPosTokenW(var Token: string; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean; FirstSet, CharSet: TCharSet;
-  EditView: IOTAEditView; SupportUnicodeIdent: Boolean; IndexUsingWide: Boolean): Boolean;
+  EditView: IOTAEditView; SupportUnicodeIdent: Boolean;
+  IndexUsingWide: Boolean; PreciseMode: Boolean): Boolean;
 var
   LineNo: Integer;
   CharIndex: Integer;
@@ -4800,8 +4855,8 @@ begin
   if not Assigned(EditView) then
     EditView := CnOtaGetTopMostEditView;
 
-  if (EditView <> nil) and CnNtaGetCurrLineTextW(LineText, LineNo, CharIndex) and
-    (LineText <> '') then
+  if (EditView <> nil) and CnNtaGetCurrLineTextW(LineText, LineNo, CharIndex,
+     PreciseMode) and (LineText <> '') then
   begin
     if CheckCursorOutOfLineEnd then
     begin
@@ -4866,7 +4921,7 @@ function CnOtaGeneralGetCurrPosToken(var Token: TCnIdeTokenString; var CurrIndex
 begin
 {$IFDEF UNICODE}
   Result := CnOtaGetCurrPosTokenW(Token, CurrIndex, CheckCursorOutOfLineEnd,
-    FirstSet, CharSet, EditView, _SUPPORT_WIDECHAR_IDENTIFIER, True);
+    FirstSet, CharSet, EditView, _SUPPORT_WIDECHAR_IDENTIFIER, True, True); // 使用精确模式来计算字符宽度
 {$ELSE}
   {$IFDEF IDE_STRING_ANSI_UTF8}
   Result := CnOtaGetCurrPosTokenUtf8(Token, CurrIndex, CheckCursorOutOfLineEnd,
@@ -7765,6 +7820,10 @@ finalization
 {$IFDEF Debug}
   CnDebugger.LogEnter('CnWizUtils finalization.');
 {$ENDIF Debug}
+
+{$IFDEF UNICODE}
+  VirtualEditControlBitmap.Free;
+{$ENDIF}
 
   RegisterNoIconProc := OldRegisterNoIconProc;
   FreeAndNil(CnNoIconList);
