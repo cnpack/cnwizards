@@ -102,6 +102,7 @@
         <DCCReference Include="Framework\CnWizClasses.pas"/>
         <DCCReference Include="Framework\CnWizManager.pas"/>
         <DCCReference Include="Framework\CnWizOptions.pas"/>
+        <DCCReference Include="Framework\CnWizSplash.pas"/>
         <DCCReference Include="Misc\CnWizTipOfDayFrm.pas">
             <Form>CnWizTipOfDayForm</Form>
         </DCCReference>
@@ -359,6 +360,9 @@
         <DCCReference Include="RepositoryWiz\CnMemProfWizard.pas">
             <Form>CnMemProfForm</Form>
         </DCCReference>
+        <DCCReference Include="RepositoryWiz\CnTestWizard.pas">
+            <Form>CnTestWizardForm</Form>
+        </DCCReference>
         <DCCReference Include="Utils\CnWizMethodHook.pas"/>
         <DCCReference Include="Utils\CnWizIdeDock.pas">
             <Form>CnIdeDockForm</Form>
@@ -430,6 +434,9 @@
             <Form>CnSrcEditorCodeWrapForm</Form>
         </DCCReference>
         <DCCReference Include="Utils\CnGroupReplace.pas"/>
+        <DCCReference Include="SrcEditorEnhance\CnSrcEditorReplaceInBlock.pas">
+            <Form>CnSrcEditorReplaceInBlockForm</Form>
+        </DCCReference>
         <DCCReference Include="SrcEditorEnhance\CnSrcEditorGroupReplace.pas">
             <Form>CnSrcEditorGroupReplaceForm</Form>
         </DCCReference>
