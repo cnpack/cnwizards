@@ -1057,6 +1057,7 @@ var
   SCnSrcBlockWrap: string = '&Surround With';
   SCnSrcBlockWrapBy: string = 'Surround with "%s"';
   SCnSrcBlockReplace: string = 'Group Re&place';
+  SCnSrcBlockReplaceInBlock: string = '&Replace in Block...';
   SCnSrcBlockSearch: string = '&Web Search';
   SCnWebSearchFileDef: string = 'WebSearch_ENU.xml';
   SCnSrcBlockMisc: string = '&Others';

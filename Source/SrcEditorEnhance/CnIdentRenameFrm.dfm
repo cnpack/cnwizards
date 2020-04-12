@@ -1,7 +1,7 @@
 inherited CnIdentRenameForm: TCnIdentRenameForm
   Left = 352
   Top = 202
-  Width = 255
+  Width = 330
   Height = 266
   Caption = 'Rename Identifier'
   Constraints.MinHeight = 266
@@ -63,7 +63,7 @@ inherited CnIdentRenameForm: TCnIdentRenameForm
   object grpBrowse: TGroupBox
     Left = 8
     Top = 72
-    Width = 225
+    Width = 300
     Height = 121
     Anchors = [akLeft, akTop, akRight]
     Caption = 'Replace &Range'
@@ -104,14 +104,14 @@ inherited CnIdentRenameForm: TCnIdentRenameForm
   object edtRename: TEdit
     Left = 8
     Top = 40
-    Width = 225
+    Width = 300
     Height = 21
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 0
     OnKeyDown = edtRenameKeyDown
   end
   object btnOK: TButton
-    Left = 78
+    Left = 153
     Top = 204
     Width = 75
     Height = 21
@@ -122,7 +122,7 @@ inherited CnIdentRenameForm: TCnIdentRenameForm
     TabOrder = 2
   end
   object btnCancel: TButton
-    Left = 158
+    Left = 233
     Top = 204
     Width = 75
     Height = 21

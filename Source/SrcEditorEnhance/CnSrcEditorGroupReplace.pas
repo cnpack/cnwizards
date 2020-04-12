@@ -29,7 +29,7 @@ unit CnSrcEditorGroupReplace;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 修改记录：2013.09.01
-*               修正Unicode环境下可能乱码的问题
+*               修正 Unicode 环境下可能乱码的问题
 *           2005.06.14
 *               创建单元
 ================================================================================
@@ -48,7 +48,6 @@ uses
   OmniXMLPersistent, CnGroupReplace;
 
 type
-
   TCnXMLGroupReplacements = class(TCnGroupReplacements)
   public
     function LoadFromFile(const FileName: string; Append: Boolean = False): Boolean;
@@ -117,7 +116,6 @@ type
     procedure lvItemsMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
   private
-    { Private declarations }
     List: TCnXMLGroupReplacements;
     IsUpdating: Boolean;
     IsItemUpdating: Boolean;
@@ -129,7 +127,6 @@ type
     procedure SetItemDataToControls;
     procedure GetItemDataFromControls;
   public
-    { Public declarations }
     function GetHelpTopic: string; override;
   end;
 
@@ -158,10 +155,11 @@ implementation
 
 {$IFDEF CNWIZARDS_CNSRCEDITORENHANCE}
 
-{$IFDEF DEBUG}
 uses
-  CnDebug;
-{$ENDIF}
+  {$IFDEF DEBUG} CnDebug, {$ENDIF} CnSrcEditorReplaceInBlock;
+
+const
+  TAG_REPLACE_IN_BLOCK = -1;
 
 {$R *.DFM}
 
@@ -169,7 +167,7 @@ function TCnXMLGroupReplacements.LoadFromFile(const FileName: string;
   Append: Boolean): Boolean;
 var
   Col: TCnXMLGroupReplacements;
-  i: Integer;
+  I: Integer;
 begin
   Result := False;
   if not FileExists(FileName) then
@@ -182,7 +180,7 @@ begin
     Col := TCnXMLGroupReplacements.Create;
     try
       TOmniXMLReader.LoadFromFile(Col, FileName);
-      for i := 0 to Col.Count - 1 do
+      for I := 0 to Col.Count - 1 do
         Add.Assign(Col.Items[I]);
       Result := True;
     finally
@@ -280,7 +278,7 @@ begin
 {$ELSE}
     BlockText := Item.Execute(ConvertEditorTextToText(EditView.Block.Text));
 {$ENDIF}
-    
+
     EditView.Block.Delete;
 {$IFDEF UNICODE}
     CnOtaInsertTextIntoEditorAtPosW(BlockText, StartPos, EditView.Buffer);
@@ -294,17 +292,19 @@ end;
 
 procedure TCnSrcEditorGroupReplaceTool.InitMenuItems(AMenu: TMenuItem);
 var
-  i: Integer;
+  I: Integer;
 begin
   WizShortCutMgr.BeginUpdate;
   try
     FMenu := AMenu;
     Clear;
 
-    for i := 0 to Items.Count - 1 do
+    AddMenuItem(AMenu, SCnSrcBlockReplaceInBlock, OnMenuItemClick, nil, 0, '', TAG_REPLACE_IN_BLOCK);
+    AddSepMenuItem(AMenu);
+    for I := 0 to Items.Count - 1 do
     begin
-      AddMenuItem(AMenu, Items[i].Caption, OnMenuItemClick, nil,
-        Items[i].ShortCut, '', i);
+      AddMenuItem(AMenu, Items[I].Caption, OnMenuItemClick, nil,
+        Items[I].ShortCut, '', I);
 
 //      不能加WizShortCutMgr的处理，免得热键弹出右键菜单后出未知错误。2007.12.13 by LiuXiao
 //      if (Items[i].Caption <> '-') and (Items[i].ShortCut <> 0) then
@@ -326,12 +326,65 @@ end;
 procedure TCnSrcEditorGroupReplaceTool.OnMenuItemClick(Sender: TObject);
 var
   Item: TCnGroupReplacement;
+  Rule: TCnReplacement;
+  ASource: string;
+  ADest: string;
+  Inverse, Save: Boolean;
 begin
   if Sender is TMenuItem then
   begin
-    Item := Items[TMenuItem(Sender).Tag];
-    if Item <> nil then
-      Execute(Item);
+    if TMenuItem(Sender).Tag = TAG_REPLACE_IN_BLOCK then
+    begin
+      with TCnSrcEditorReplaceInBlockForm.Create(nil) do
+      begin
+        try
+          if ShowModal = mrOK then
+          begin
+            ASource := edtFrom.Text;
+            ADest := edtTo.Text;
+            if ASource = '' then
+              Exit;
+
+            Inverse := chkInverse.Checked;
+            Save := chkSaveToItem.Checked;
+
+            // 创建临时 Item 并执行
+            Item := FItems.Add;
+            Rule := Item.Items.Add;
+            Rule.Source := ASource;
+            Rule.Dest := ADest;
+            Rule.WholeWord := False;
+
+            // 如果是双向
+            if Inverse and (ADest <> '') then
+            begin
+              Rule := Item.Items.Add;
+              Rule.Source := ADest;
+              Rule.Dest := ASource;
+              Rule.WholeWord := False;
+
+              Item.Caption := ASource + ' <==> ' + ADest;
+            end
+            else
+              Item.Caption := ASource + ' ==> ' + ADest;
+
+            Execute(Item);
+
+            // 不保存就删掉
+            if not Save then
+              FItems.Delete(Item.Index);
+          end;
+        finally
+          Free;
+        end;
+      end;
+    end
+    else
+    begin
+      Item := Items[TMenuItem(Sender).Tag];
+      if Item <> nil then
+        Execute(Item);
+    end;
   end;
 end;
 
