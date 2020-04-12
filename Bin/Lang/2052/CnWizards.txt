@@ -3102,6 +3102,7 @@ SCnSrcBlockComment=代码注释(&M)
 SCnSrcBlockWrap=代码嵌入(&B)
 SCnSrcBlockWrapBy=嵌入到 %s 中
 SCnSrcBlockReplace=组替换(&P)
+SCnSrcBlockReplaceInBlock=在选择区中替换(&R)...
 SCnSrcBlockSearch=Web 搜索(&W)
 SCnWebSearchFileDef=WebSearch_CHS.xml
 SCnSrcBlockMisc=其它(&O)

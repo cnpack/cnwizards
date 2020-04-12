@@ -3102,6 +3102,7 @@ SCnSrcBlockComment=Co&mment
 SCnSrcBlockWrap=&Surround With
 SCnSrcBlockWrapBy=Surround with "%s"
 SCnSrcBlockReplace=Group Re&place
+SCnSrcBlockReplaceInBlock=&Replace in Selection...
 SCnSrcBlockSearch=&Web Search
 SCnWebSearchFileDef=WebSearch_ENU.xml
 SCnSrcBlockMisc=&Others

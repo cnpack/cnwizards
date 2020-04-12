@@ -3102,6 +3102,7 @@ SCnSrcBlockComment=Комментарий
 SCnSrcBlockWrap=Заключить в
 SCnSrcBlockWrapBy=Заключить в "%s"
 SCnSrcBlockReplace=Групповая замена
+SCnSrcBlockReplaceInBlock=Заменить в области выбора...
 SCnSrcBlockSearch=Веб-поиск
 SCnWebSearchFileDef=WebSearch_RU.xml
 SCnSrcBlockMisc=Другое
