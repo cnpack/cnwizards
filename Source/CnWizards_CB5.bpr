@@ -55,7 +55,7 @@
       ..\Dcu\CnMultiLineEdtUserFmtFrm.obj ..\Dcu\CnObjInspectorEnhancements.obj 
       ..\Dcu\CnRepositoryMenu.obj ..\Dcu\CnDUnitWizard.obj 
       ..\Dcu\CnDUnitSetFrm.obj ..\Dcu\CnIniFilerFrm.obj 
-      ..\Dcu\CnIniFilerWizard.obj ..\Dcu\CnOTACreators.obj 
+      ..\Dcu\CnIniFilerWizard.obj ..\Dcu\CnTestWizard.obj ..\Dcu\CnOTACreators.obj 
       ..\Dcu\CnProjectDelTempFrm.obj ..\Dcu\CnWizIdeDock.obj 
       ..\Dcu\CnExplore.obj ..\Dcu\CnExploreDirectory.obj 
       ..\Dcu\CnExploreFilter.obj ..\Dcu\CnExploreFilterEditor.obj 
@@ -78,7 +78,7 @@
       ..\Dcu\CnWizMacroUtils.obj ..\Dcu\CnSrcEditorCodeWrap.obj 
       ..\Dcu\CnSrcEditorGroupReplace.obj ..\Dcu\CnEditorInsertColor.obj 
       ..\Dcu\CnEditorInsertTime.obj ..\Dcu\CnEditorCollector.obj 
-      ..\Dcu\CnGroupReplace.obj ..\Dcu\CnEditorSortLines.obj 
+      ..\Dcu\CnGroupReplace.obj ..\Dcu\CnSrcEditorReplaceInBlock.obj ..\Dcu\CnEditorSortLines.obj 
       ..\Dcu\CnEditorToggleUses.obj ..\Dcu\CnEditorJumpMessage.obj 
       ..\Dcu\CnSrcEditorKey.obj ..\Dcu\CnIdentRenameFrm.obj 
       ..\Dcu\CnIdeEnhanceMenu.obj ..\Dcu\CnIdeBRWizard.obj 
@@ -146,6 +146,8 @@
       SrcEditorEnhance\CnSrcEditorGroupReplace.dfm 
       CodingToolset\CnEditorInsertTime.dfm CodingToolset\CnEditorCollector.dfm 
       SrcEditorEnhance\CnIdentRenameFrm.dfm 
+      SrcEditorEnhance\CnSrcEditorCodeWrap.dfm 
+      SrcEditorEnhance\CnSrcEditorReplaceInBlock.dfm 
       IdeEnhancements\CnSourceHighlightFrm.dfm 
       IdeEnhancements\CnHighlightLineFrm.dfm 
       IdeEnhancements\CnHighlightSeparateLineFrm.dfm 

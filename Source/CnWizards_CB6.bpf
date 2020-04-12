@@ -54,6 +54,7 @@ USEFORMNS("DesignEditors\CnMultiLineEdtToolOptFrm.pas", Cnmultilineedttooloptfrm
 USEFORMNS("DesignEditors\CnMultiLineEdtUserFmtFrm.pas", Cnmultilineedtuserfmtfrm, CnMultiLineEditorUserFmtFrm);
 USEFORMNS("RepositoryWiz\CnDUnitSetFrm.pas", Cndunitsetfrm, CnDUnitSetForm);
 USEFORMNS("RepositoryWiz\CnIniFilerFrm.pas", Cninifilerfrm, CnIniFilerForm);
+USEFORMNS("RepositoryWiz\CnTestWizard.pas", Cntestwizard, CnTestWizardForm);
 USEFORMNS("ProjectExtWizard\CnProjectDelTempFrm.pas", Cnprojectdeltempfrm, CnProjectDelTempForm);
 USEFORMNS("Utils\CnWizIdeDock.pas", Cnwizidedock, CnIdeDockForm);
 USEFORMNS("ExplorerWizard\CnExplore.pas", Cnexplore, CnExploreForm);
@@ -72,6 +73,7 @@ USEFORMNS("IdeEnhancements\CnVerEnhanceFrm.pas", Cnverenhancefrm, CnVerEnhanceFo
 USEFORMNS("Utils\CnWizMacroFrm.pas", Cnwizmacrofrm, CnWizMacroForm);
 USEFORMNS("ProjectExtWizard\CnProjectDirImportFrm.pas", Cnprojectdirimportfrm, CnImportDirForm);
 USEFORMNS("SrcEditorEnhance\CnSrcEditorGroupReplace.pas", Cnsrceditorgroupreplace, CnSrcEditorGroupReplaceForm);
+USEFORMNS("SrcEditorEnhance\CnSrcEditorReplaceInBlock.pas", Cnsrceditorreplaceinblock, CnSrcEditorReplaceInBlockForm);
 USEFORMNS("CodingToolset\CnEditorInsertTime.pas", Cneditorinserttime, CnEditorInsertTimeForm);
 USEFORMNS("CodingToolset\CnEditorCollector.pas", Cneditorcollector, CnEditorCollectorForm);
 USEFORMNS("SrcEditorEnhance\CnIdentRenameFrm.pas", Cnidentrenamefrm, CnIdentRenameForm);

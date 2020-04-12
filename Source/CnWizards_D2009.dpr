@@ -29,6 +29,7 @@ uses
   CnWizClasses in 'Framework\CnWizClasses.pas',
   CnWizManager in 'Framework\CnWizManager.pas',
   CnWizOptions in 'Framework\CnWizOptions.pas',
+  CnWizSplash in 'Misc\CnWizSplash.pas',
   CnWizTipOfDayFrm in 'Misc\CnWizTipOfDayFrm.pas' {CnWizTipOfDayForm},
   CnWizAbout in 'Misc\CnWizAbout.pas',
   CnWizAboutFrm in 'Misc\CnWizAboutFrm.pas' {CnWizAboutForm},
@@ -143,6 +144,7 @@ uses
   CnIniFilerWizard in 'RepositoryWiz\CnIniFilerWizard.pas',
   CnIniFilerFrm in 'RepositoryWiz\CnIniFilerFrm.pas' {CnIniFilerForm},
   CnMemProfWizard in 'RepositoryWiz\CnMemProfWizard.pas' {CnMemProfForm},
+  CnTestWizard in 'RepositoryWiz\CnTestWizard.pas' {CnTestWizardForm},
   CnWizMethodHook in 'Utils\CnWizMethodHook.pas',
   CnWizIdeDock in 'Utils\CnWizIdeDock.pas' {CnIdeDockForm},
   CnExplore in 'ExplorerWizard\CnExplore.pas' {CnExploreForm},
@@ -179,6 +181,7 @@ uses
   CnSrcEditorBlockTools in 'SrcEditorEnhance\CnSrcEditorBlockTools.pas',
   CnSrcEditorCodeWrap in 'SrcEditorEnhance\CnSrcEditorCodeWrap.pas' {CnSrcEditorCodeWrapForm},
   CnGroupReplace in 'Utils\CnGroupReplace.pas',
+  CnSrcEditorReplaceInBlock in 'SrcEditorEnhance\CnSrcEditorReplaceInBlock.pas', {CnSrcEditorReplaceInBlockForm}
   CnSrcEditorGroupReplace in 'SrcEditorEnhance\CnSrcEditorGroupReplace.pas' {CnSrcEditorGroupReplaceForm},
   CnSrcEditorWebSearch in 'SrcEditorEnhance\CnSrcEditorWebSearch.pas' {CnSrcEditorWebSearchForm},
   CnSrcEditorKey in 'SrcEditorEnhance\CnSrcEditorKey.pas',
