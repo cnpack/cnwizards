@@ -742,6 +742,7 @@ begin
   TranslateStr(SCnSrcBlockWrap, 'SCnSrcBlockWrap');
   TranslateStr(SCnSrcBlockWrapBy, 'SCnSrcBlockWrapBy');
   TranslateStr(SCnSrcBlockReplace, 'SCnSrcBlockReplace');
+  TranslateStr(SCnSrcBlockReplaceInBlock, 'SCnSrcBlockReplaceInBlock');
   TranslateStr(SCnSrcBlockSearch, 'SCnSrcBlockSearch');
   TranslateStr(SCnWebSearchFileDef, 'SCnWebSearchFileDef');
   TranslateStr(SCnSrcBlockMisc, 'SCnSrcBlockMisc');
