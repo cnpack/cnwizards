@@ -187,7 +187,7 @@ begin
           (THackPropertyEditor(ASelf).GetOrdValue <> THackPropertyEditor(ASelf).GetPropInfo.default)) or
         ((THackPropertyEditor(ASelf).GetPropType.Kind in [tkFloat]) and
           (THackPropertyEditor(ASelf).GetFloatValue <> 0)) or
-        ((THackPropertyEditor(ASelf).GetPropType.Kind in [tkString, tkLString, tkWString{$IFDEF UNICODE_STRING}, tkUString{$ENDIF}]) and
+        ((THackPropertyEditor(ASelf).GetPropType.Kind in [tkString, tkLString, tkWString{$IFDEF UNICODE}, tkUString{$ENDIF}]) and
           (THackPropertyEditor(ASelf).GetStrValue <> '') and (THackPropertyEditor(ASelf).GetName <> 'Name')) or
         ((THackPropertyEditor(ASelf).GetPropType.Kind in [tkInt64]) and
           (THackPropertyEditor(ASelf).GetInt64Value <> THackPropertyEditor(ASelf).GetPropInfo.default)) or

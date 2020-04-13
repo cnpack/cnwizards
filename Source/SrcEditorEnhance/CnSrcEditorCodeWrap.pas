@@ -450,7 +450,7 @@ begin
       StartPos := CnOtaEditPosToLinePos(OTAEditPos(EditView.Block.StartingColumn,
         EditView.Block.StartingRow), EditView);
 
-{$IFDEF UNICODE_STRING}
+{$IFDEF UNICODE}
       BlockText := EditView.Block.Text; // Unicode 环境下无需转换
 {$ELSE}
       BlockText := ConvertEditorTextToText(EditView.Block.Text);

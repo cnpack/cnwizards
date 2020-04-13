@@ -2283,7 +2283,7 @@ var
   begin
     Result := False;
     PInfo := GetPropInfo(Component, PropName, [tkString, tkLString, tkWString
-      {$IFDEF UNICODE_STRING}, tkUString{$ENDIF}]);
+      {$IFDEF UNICODE}, tkUString{$ENDIF}]);
     if PInfo <> nil then
     begin
       AText := GetStrProp(Component, PInfo);
@@ -4412,7 +4412,7 @@ begin
       Result := string(ConvertEditorTextToText(OutStr));
       {$ENDIF}
 
-    {$IFDEF UNICODE_STRING}
+    {$IFDEF UNICODE}
       // 此函数在 D2009 下 Result 长度不对，需要 TrimRight
       Result := TrimRight(Result);
     {$ENDIF}
@@ -5995,7 +5995,7 @@ end;
 // 在 EditPosition 中插入一段文本，支持 D2005 下使用 utf-8 格式
 procedure CnOtaPositionInsertText(EditPosition: IOTAEditPosition; const Text: string);
 begin
-{$IFDEF UNICODE_STRING}
+{$IFDEF UNICODE}
   EditPosition.InsertText(Text); // InsertText 在 Unicode 环境里使用 Unicode 字符串，无需 Utf8 转换
 {$ELSE}
   EditPosition.InsertText(ConvertTextToEditorText(Text));
@@ -6719,7 +6719,7 @@ begin
   EditWriter := CnOtaGetEditWriterForSourceEditor(nil);
   try
     EditWriter.DeleteTo(MaxInt);
-  {$IFDEF UNICODE_STRING}
+  {$IFDEF UNICODE}
     EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW(Text)));
   {$ELSE}
     EditWriter.Insert(PAnsiChar(ConvertTextToEditorText(Text)));
@@ -6830,7 +6830,7 @@ begin
   EditWriter := CnOtaGetEditWriterForSourceEditor(SourceEditor);
   try
     EditWriter.CopyTo(Position);
-  {$IFDEF UNICODE_STRING}
+  {$IFDEF UNICODE}
     EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW(Text)));
   {$ELSE}
     EditWriter.Insert(PAnsiChar(ConvertTextToEditorText(Text)));

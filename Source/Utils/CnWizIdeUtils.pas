@@ -798,7 +798,7 @@ begin
       BlockStartLine, BlockEndLine) then
       Exit;
 
-  {$IFDEF UNICODE_STRING}
+  {$IFDEF UNICODE}
     Text := AnsiString(StringReplace(Lines.Text, #0, ' ', [rfReplaceAll]));
   {$ELSE}
     Text := StringReplace(Lines.Text, #0, ' ', [rfReplaceAll]);

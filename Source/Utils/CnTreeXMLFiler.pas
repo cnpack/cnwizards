@@ -374,7 +374,7 @@ begin
     PropType := PPropInfo(PropInfo)^.PropType^;
     case PropType^.Kind of
       tkInteger, tkChar, tkEnumeration, tkSet: ReadOrdProp;
-      tkString, tkLString, tkWString{$IFDEF UNICODE_STRING}, tkUString{$ENDIF}: ReadStrProp;
+      tkString, tkLString, tkWString{$IFDEF UNICODE}, tkUString{$ENDIF}: ReadStrProp;
       tkFloat:
         if (PropType = System.TypeInfo(TDateTime)) or (PropType = System.TypeInfo(TTime)) or (PropType = System.TypeInfo(TDate)) then
           ReadDateTimeProp
@@ -539,7 +539,7 @@ begin
     PropType := PropInfo^.PropType^;
     case PropType^.Kind of
       tkInteger, tkChar, tkEnumeration, tkSet: WriteOrdProp;
-      tkString, tkLString, tkWString{$IFDEF UNICODE_STRING}, tkUString{$ENDIF}: WriteStrProp;
+      tkString, tkLString, tkWString{$IFDEF UNICODE}, tkUString{$ENDIF}: WriteStrProp;
       tkFloat:
         if (PropType = System.TypeInfo(TDateTime)) or
          (PropType = System.TypeInfo(TTime)) or (PropType = System.TypeInfo(TDate)) then

@@ -1632,12 +1632,12 @@ begin
 end;
 
 procedure TCnSourceConversion.WriteStringToStream(const AString: string);
-{$IFDEF UNICODE_STRING}
+{$IFDEF UNICODE}
 var
   TempStr: AnsiString;
 {$ENDIF}  
 begin
-{$IFDEF UNICODE_STRING}
+{$IFDEF UNICODE}
   TempStr := AnsiString(AString);
   FOutStream.WriteBuffer(PAnsiChar(TempStr)^, Length(TempStr));
   Inc(FSize, Length(TempStr));

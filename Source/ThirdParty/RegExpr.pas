@@ -2300,7 +2300,7 @@ function TRegExpr.ParseAtom (var flagp : integer) : PRegExprChar;
                {$IFDEF UniCode} //###0.935
                if (ord ((regparse + 1)^) < 256)
                   and (
-                  {$IFDEF UNICODE_STRING}
+                  {$IFDEF UNICODE}
                   CharInSet(char ((regparse + 1)^), ['d', 'D', 's', 'S', 'w', 'W'])
                   {$ELSE}
                   char ((regparse + 1)^) in ['d', 'D', 's', 'S', 'w', 'W']
@@ -3687,7 +3687,7 @@ function TRegExpr.Substitute (const ATemplate : RegExprString) : RegExprString;
      while (p < TemplateEnd) and
       {$IFDEF UniCode} //###0.935
       (ord (p^) < 256) and (
-      {$IFDEF UNICODE_STRING}
+      {$IFDEF UNICODE}
       CharInSet(p^, Digits)
       {$ELSE}
       char (p^) in Digits

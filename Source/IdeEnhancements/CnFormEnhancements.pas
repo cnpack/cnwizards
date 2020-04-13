@@ -495,10 +495,10 @@ const
   IdxFreq = 87;
   
   csTypeInfoSimple = [tkInteger, tkChar, tkEnumeration, tkFloat, tkString,
-    tkWChar, tkLString, tkWString, tkSet, tkVariant, tkInt64{$IFDEF UNICODE_STRING}, tkUString{$ENDIF}];
+    tkWChar, tkLString, tkWString, tkSet, tkVariant, tkInt64{$IFDEF UNICODE}, tkUString{$ENDIF}];
 
   csTypeInfoHistory = [tkInteger, tkChar, tkFloat, tkString, tkWChar,
-    tkLString, tkWString, tkVariant, tkInt64{$IFDEF UNICODE_STRING}, tkUString{$ENDIF}];
+    tkLString, tkWString, tkVariant, tkInt64{$IFDEF UNICODE}, tkUString{$ENDIF}];
 
 //==============================================================================
 // 窗体浮动面板控件
@@ -1875,7 +1875,7 @@ begin
       V := '[' + V + ']';
 
     IsStr := (FTypeInfo^.Kind in [tkWChar, tkString, tkLString, tkWString
-      {$IFDEF UNICODE_STRING}, tkUString{$ENDIF}]) and (PropName <> 'Name');
+      {$IFDEF UNICODE}, tkUString{$ENDIF}]) and (PropName <> 'Name');
       
     if not TextOnly then
     begin

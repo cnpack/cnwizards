@@ -273,7 +273,7 @@ begin
     RegisterProperty('Anchors', 'TAnchors', iptrw);
     RegisterProperty('BiDiMode', 'TBiDiMode', iptrw);
     RegisterProperty('BoundsRect', 'TRect', iptrw);
-{$IFDEF UNICODE_STRING}
+{$IFDEF UNICODE}
     // D2009 下 Caption 不会自动注册
     RegisterProperty('Caption', 'TCaption', iptrw);
 {$ENDIF}
@@ -1004,7 +1004,7 @@ begin
   T := Self.ClientHeight;
 end;
 
-{$IFDEF UNICODE_STRING}
+{$IFDEF UNICODE}
 procedure TControlCaption_W(Self: TControl; const T: TCaption);
 begin
   TControlAccess(Self).Caption := T;
@@ -1384,7 +1384,7 @@ begin
     RegisterPropertyHelper(@TControlAnchors_R, @TControlAnchors_W, 'Anchors');
     RegisterPropertyHelper(@TControlBiDiMode_R, @TControlBiDiMode_W, 'BiDiMode');
     RegisterPropertyHelper(@TControlBoundsRect_R, @TControlBoundsRect_W, 'BoundsRect');
-  {$IFDEF UNICODE_STRING}
+  {$IFDEF UNICODE}
     RegisterPropertyHelper(@TControlCaption_R, @TControlCaption_W, 'Caption');
   {$ENDIF}
     RegisterPropertyHelper(@TControlClientHeight_R, @TControlClientHeight_W, 'ClientHeight');

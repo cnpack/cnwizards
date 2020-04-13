@@ -113,7 +113,7 @@ begin
     RegisterMethod('Procedure HookMainWindow( Hook : TWindowHook)');
     RegisterMethod('Procedure Initialize');
     RegisterMethod('Function IsRightToLeft : Boolean');
-  {$IFDEF UNICODE_STRING}
+  {$IFDEF UNICODE}
     RegisterMethod('Function MessageBox( const Text, Caption : string; Flags : Longint) : Integer');
   {$ELSE}
     RegisterMethod('Function MessageBox( const Text, Caption : PChar; Flags : Longint) : Integer');

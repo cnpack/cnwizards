@@ -129,7 +129,7 @@ const
 
 { Generic routines }
 
-{$IFDEF UNICODE_STRING}
+{$IFDEF UNICODE}
 function StrAlloc(Size: Cardinal): PAnsiChar;
 begin
   Result := AnsiStrAlloc(Size);

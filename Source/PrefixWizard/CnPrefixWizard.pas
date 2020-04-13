@@ -655,7 +655,7 @@ begin
     PropInfo := GetPropInfo(Component, csDataField);
     if (PropInfo <> nil) and (PropInfo.PropType <> nil) and
       (PropInfo.PropType^.Kind in [tkString, tkLString, tkWString
-      {$IFDEF UNICODE_STRING}, tkUString{$ENDIF}]) then
+      {$IFDEF UNICODE}, tkUString{$ENDIF}]) then
     begin
       Field := ExtractIdentName(GetStrProp(Component, csDataField));
       if Field <> '' then
@@ -678,7 +678,7 @@ begin
           PropInfo := GetPropInfo(Binding, csDataField);
           if (PropInfo <> nil) and (PropInfo.PropType <> nil) and
             (PropInfo.PropType^.Kind in [tkString, tkLString, tkWString
-            {$IFDEF UNICODE_STRING}, tkUString{$ENDIF}]) then
+            {$IFDEF UNICODE}, tkUString{$ENDIF}]) then
           begin
             Field := ExtractIdentName(GetStrProp(Binding, csDataField));
             if Field <> '' then
