@@ -375,6 +375,8 @@ type
     FToolbarProcComboWidth: Integer;
     FHistoryCount: Integer;
     FFileIndex: Integer;
+{$ELSE}
+    FLines: TStringList;
 {$ENDIF}
     FPreviewLineCount: Integer;
     FElementList: TStringList; // 存储当前 ProcToolbar 的原始元素列表
@@ -753,6 +755,8 @@ begin
   FProcToolBarObjects := TList.Create;
   EditControlWrapper.AddEditorChangeNotifier(EditorChange);
   CnWizNotifierServices.AddAfterThemeChangeNotifier(AfterThemeChange);
+{$ELSE}
+  FLines := TStringList.Create;
 {$ENDIF}
   FNeedReParse := True;
   FWizard := Self;
@@ -771,6 +775,8 @@ begin
   FreeAndNil(FProcToolBarObjects);
 
   FreeAndNil(FToolBarTimer);
+{$ELSE}
+  FLines.Free;
 {$ENDIF}
   FObjStrings.Free;
   for I := 0 to FElementList.Count - 1 do
@@ -1587,6 +1593,7 @@ begin
 
 {$IFDEF STAND_ALONE}
   MatchMode := mmFuzzy;
+  btnShowPreview.Down := True;
 {$ELSE}
   InitFileComboBox;
   actHookIDE.Visible := CnEditorToolBarService <> nil;
@@ -2680,6 +2687,7 @@ begin
 {$IFDEF STAND_ALONE}
       // TODO: 判断编码
       MemStream.LoadFromFile(aFileName);
+      FLines.LoadFromStream(MemStream);
 {$ELSE}
       with TCnEditFiler.Create(aFileName) do
       try
@@ -2861,16 +2869,19 @@ begin
 end;
 
 procedure TCnProcListForm.UpdateStatusBar;
-{$IFNDEF STAND_ALONE}
 const
   CnBeforeLine = 1;
 var
   ProcInfo: TCnElementInfo;
+  AfterLine: Integer;
+{$IFDEF STAND_ALONE}
+  K, ML: Integer;
+{$ELSE}
   Module: IOTAModule;
   SourceEditor: IOTASourceEditor;
   EditView: IOTAEditView;
   Buffer: IOTAEditBuffer;
-  AfterLine: Integer;
+{$ENDIF}
 
   procedure SetMemoSelection;
   var
@@ -2902,9 +2913,8 @@ var
       mmoContent.SelLength := Length(mmoContent.Lines[CnBeforeLine]);
     end;
   end;
-{$ENDIF}
+
 begin
-{$IFNDEF STAND_ALONE}
   ProcInfo := nil;
   if lvList.Selected <> nil then
     ProcInfo := lvList.Selected.Data;
@@ -2925,6 +2935,7 @@ begin
     if AfterLine <= 0 then
       AfterLine := 4;
 
+{$IFNDEF STAND_ALONE}
     FSelIsCurFile := ProcInfo.AllName = CurrentFile;
     if not FSelIsCurFile then // 别的打开的文件
     begin
@@ -2962,6 +2973,22 @@ begin
         nil, CnBeforeLine + AfterLine);
       SetMemoSelection;
     end;
+{$ELSE}
+    mmoContent.Lines.Clear;
+    if Wizard.FLines.Count > ProcInfo.LineNo then
+    begin
+      ML := Wizard.FLines.Count - 1;
+      if ML > ProcInfo.LineNo + AfterLine then
+        ML := ProcInfo.LineNo + AfterLine;
+
+      mmoContent.Lines.BeginUpdate;
+      for K := ProcInfo.LineNo - CnBeforeLine - 1 to ML do
+        mmoContent.Lines.Add(Wizard.FLines[K]);
+      mmoContent.Lines.EndUpdate;
+
+      SetMemoSelection;
+    end;
+{$ENDIF}
   end
   else
   begin
@@ -2969,7 +2996,6 @@ begin
     StatusBar.Panels[1].Text := Format('%d/%d', [0, 0]);
     mmoContent.Clear;
   end;
-{$ENDIF}
 end;
 
 procedure TCnProcListForm.FormDestroy(Sender: TObject);
