@@ -1010,7 +1010,10 @@ begin
               end;
 
               if CnWizZipSaveAndClose then
+              begin
                 InfoDlg(Format(SCnProjExtBackupSuccFmt, [SaveFileName]));
+                Close;
+              end;
             except
               ErrorDlg(SCnProjExtBackupFail);
             end;
