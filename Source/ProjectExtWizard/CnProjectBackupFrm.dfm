@@ -76,6 +76,7 @@ inherited CnProjectBackupForm: TCnProjectBackupForm
     0003000000030000000F0000000F0000000F0000000FF000000FF000000FF000
     000FF000000FF000000FF000000FF000000FF000000FFFFFFFFFFFFFFFFF}
   KeyPreview = True
+  OldCreateOrder = True
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
@@ -264,7 +265,7 @@ inherited CnProjectBackupForm: TCnProjectBackupForm
       OnExecute = actAddOpenedExecute
     end
     object actAddDir: TAction
-      Caption = 'Add From Directory'
+      Caption = 'Add From Directory...'
       Hint = 'Add All Files From a Directory Tree'
       ImageIndex = 96
       OnExecute = actAddDirExecute
