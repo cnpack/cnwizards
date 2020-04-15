@@ -978,6 +978,7 @@ begin
   TranslateStr(SCnProjExtFileReopenCaption, 'SCnProjExtFileReopenCaption');
   TranslateStr(SCnProjExtFileReopenHint, 'SCnProjExtFileReopenHint');
   TranslateStr(SCnProjExtCustomBackupFile, 'SCnProjExtCustomBackupFile');
+  TranslateStr(SCnProjExtBackupAddFile, 'SCnProjExtBackupAddFile');
   TranslateStr(SCnProjExtDirBuilderCaption, 'SCnProjExtDirBuilderCaption');
   TranslateStr(SCnProjExtDirBuilderHint, 'SCnProjExtDirBuilderHint');
   TranslateStr(SCnProjExtConfirmOverrideTemplet, 'SCnProjExtConfirmOverrideTemplet');

@@ -140,6 +140,10 @@ type
     btn1: TToolButton;
     actZip: TAction;
     dlgOpen: TOpenDialog;
+    actAddOpened: TAction;
+    actAddDir: TAction;
+    btnAddOpened: TToolButton;
+    btnAddDir: TToolButton;
     procedure actCloseExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure cbbProjectListChange(Sender: TObject);
@@ -154,6 +158,8 @@ type
     procedure lvFileViewKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure FormShow(Sender: TObject);
+    procedure actAddOpenedExecute(Sender: TObject);
+    procedure actAddDirExecute(Sender: TObject);
   private
     { Private declarations }
     CustomFiles: TCnBackupProjectInfo;
@@ -181,13 +187,16 @@ type
     procedure CreateProjectList;
     procedure InitComboBox;
     procedure UpdateStatusBar;
-    procedure AddBackupFile(const ProjectName: string; FileInfo: TCnBackupFileInfo);
+    function AddBackupFile(const ProjectName: string; FileInfo: TCnBackupFileInfo): Boolean;
+    // 返回添加是否成功。如未成功，FileInfo 需要调用者自行释放
     procedure AddBackupFiles(ProjectInfo: TCnBackupProjectInfo);
     procedure UpdateBackupFileView(ProjectName: string);
     function FindBackupFile(const FileName: string): Integer;
 
     procedure SimpleDecode(var Pass: string);
     procedure SimpleEncode(var Pass: string);
+    procedure DoFindFile(const FileName: string; const Info: TSearchRec;
+      var Abort: Boolean);
   protected
     function GetHelpTopic: string; override;
   public
@@ -243,6 +252,9 @@ const
   csCmdPassword = '<Password>';
   csComments = '<Comments>';
   csAfterCmd = '<externfile.exe>';
+
+var
+  FileList: TStrings = nil;
 
 function ShowProjectBackupForm(Ini: TCustomIniFile): Boolean;
 begin
@@ -592,10 +604,12 @@ begin
         Continue;
 
       FileInfo := TCnBackupFileInfo.Create;
-      FileInfo.SetFileInfo( DroppedFilename, True );
-      CustomFiles.Add( FileInfo );
+      FileInfo.SetFileInfo(DroppedFilename, True);
 
-      AddBackupFile( SCnProjExtCustomBackupFile, FileInfo );
+      if AddBackupFile(SCnProjExtCustomBackupFile, FileInfo) then
+        CustomFiles.Add(FileInfo)
+      else
+        FileInfo.Free;
     end;
 
     DragFinish(Msg.WParam);
@@ -718,15 +732,16 @@ begin
   end;
 end;
 
-procedure TCnProjectBackupForm.AddBackupFile(const ProjectName: string;
-  FileInfo: TCnBackupFileInfo);
+function TCnProjectBackupForm.AddBackupFile(const ProjectName: string;
+  FileInfo: TCnBackupFileInfo): Boolean;
 begin
+  Result := False;
   if (FileInfo.Name = '') or FileInfo.Hidden then
     Exit;
 
   // 该文件是否已经被添中到备份文件视图中，因为一个文件可能存在于多个工程中，
-  // 所以在TCnProjectInfo中可能保存多个同名文件，该步处理是非常有必要的！
-  if FindBackupFile( FileInfo.FullFileName ) <> -1 then
+  // 所以在 TCnProjectInfo 中可能保存多个同名文件，该步处理是非常有必要的！
+  if FindBackupFile(FileInfo.FullFileName) <> -1 then
     Exit;
 
   with lvFileView.Items.Add do
@@ -738,18 +753,19 @@ begin
     Data := FileInfo;
     ImageIndex := GetFileIconIndex(FileInfo.FullFileName);
   end;
+  Result := True;
 end;
 
 procedure TCnProjectBackupForm.AddBackupFiles(ProjectInfo: TCnBackupProjectInfo);
 var
-  i: Integer;
+  I: Integer;
 begin
-  { 对于用户自添加的文件列表，则Name值为空 }
-  if (ProjectInfo.Name <> '') then
+  { 对于用户自添加的文件列表，则 Name 值为空 }
+  if ProjectInfo.Name <> '' then
     AddBackupFile(ProjectInfo.Name, ProjectInfo);
 
-  for i := 0 to ProjectInfo.Count - 1 do
-    AddBackupFile(ProjectInfo.Name, ProjectInfo.Items[i]);
+  for I := 0 to ProjectInfo.Count - 1 do
+    AddBackupFile(ProjectInfo.Name, ProjectInfo.Items[I]);
 end;
 
 { 该函数由 GExperts 移植而来 }
@@ -764,7 +780,7 @@ begin
   try
     lvFileView.Items.Clear;
 
-    if (ProjectName = SCnProjExtProjectAll) then // 备份全部的工程项
+    if ProjectName = SCnProjExtProjectAll then // 备份全部的工程项
     begin
       IProjectGroup := CnOtaGetProjectGroup;
       if (IProjectGroup <> nil) and (IProjectGroup.ProjectCount > 1) then
@@ -781,7 +797,7 @@ begin
       if (ProjectName = SCnProjExtCurrentProject) then  // 备份当前工程项
       begin
         IProject := CnOtaGetCurrentProject;
-        if (IProject = nil) then
+        if IProject = nil then
           Exit;
 
         ProjectName := _CnExtractFileName(IProject.FileName);
@@ -790,9 +806,9 @@ begin
 
       for I := 0 to ProjectList.Count - 1 do
       begin
-        if (CompareText(ProjectList.Items[i].Name, ProjectName) = 0) then
+        if (CompareText(ProjectList.Items[I].Name, ProjectName) = 0) then
         begin
-          FCurrentName := ProjectList.Items[i].GetFullFileName;
+          FCurrentName := ProjectList.Items[I].GetFullFileName;
           AddBackupFiles(ProjectList.Items[I]);
         end;
       end;
@@ -1111,10 +1127,12 @@ begin
     for I := 0 to Self.dlgOpen.Files.Count - 1 do
     begin
       FileInfo := TCnBackupFileInfo.Create;
-      FileInfo.SetFileInfo( Self.dlgOpen.Files[I], True );
-      CustomFiles.Add( FileInfo );
+      FileInfo.SetFileInfo(Self.dlgOpen.Files[I], True);
 
-      AddBackupFile( SCnProjExtCustomBackupFile, FileInfo );
+      if AddBackupFile(SCnProjExtCustomBackupFile, FileInfo) then
+        CustomFiles.Add(FileInfo)
+      else
+        FileInfo.Free;
     end;
     UpdateBackupFileView(cbbProjectList.Text);
   end;
@@ -1193,6 +1211,112 @@ begin
 {$IFDEF BDS}
   SetListViewWidthString(lvFileView, FListViewWidthStr, GetFactorFromSizeEnlarge(Enlarge));
 {$ENDIF}
+end;
+
+procedure TCnProjectBackupForm.actAddOpenedExecute(Sender: TObject);
+var
+  I, J, Cnt: Integer;
+  SName: string;
+  MS: IOTAModuleServices;
+  MO: IOTAModule;
+  FileInfo: TCnBackupFileInfo;
+begin
+  QuerySvcs(BorlandIDEServices, IOTAModuleServices, MS);
+  Cnt := 0;
+
+  for I := 0 to MS.GetModuleCount - 1 do
+  begin
+    MO := MS.GetModule(I);
+    SName := CnOtaGetFileNameOfModule(MO);
+    if not FileExists(SName) then
+      Continue;
+
+    FileInfo := TCnBackupFileInfo.Create;
+    FileInfo.SetFileInfo(SName, True);
+
+    if AddBackupFile(SCnProjExtCustomBackupFile, FileInfo) then
+    begin
+      CustomFiles.Add(FileInfo);
+      Inc(Cnt);
+    end
+    else
+      FileInfo.Free;
+
+    // 得包括 dfm 与其他工程文件
+    for J := 0 to MO.GetModuleFileCount - 1 do
+    begin
+      SName := MO.GetModuleFileEditor(J).FileName;
+      if not FileExists(SName) then
+        Continue;
+
+//      T := ExtractUpperFileExt(SName);
+//      if (T = '.DPR') or (T = '.BPR') or (T = '.DPROJ') or (T = '.BDSPROJ')
+//        or (T = '.BPG') then
+//        Continue;
+
+      FileInfo := TCnBackupFileInfo.Create;
+      FileInfo.SetFileInfo(SName, True);
+
+      if AddBackupFile(SCnProjExtCustomBackupFile, FileInfo) then
+      begin
+        CustomFiles.Add(FileInfo);
+        Inc(Cnt);
+      end
+      else
+        FileInfo.Free;
+    end;
+  end;
+  // Cnt 个文件
+  InfoDlg(Format(SCnProjExtBackupAddFile, [Cnt]));
+end;
+
+
+procedure TCnProjectBackupForm.actAddDirExecute(Sender: TObject);
+var
+  S: string;
+  I, Cnt: Integer;
+  FileInfo: TCnBackupFileInfo;
+begin
+  if GetDirectory(SCnSelectDirCaption, S) then
+  begin
+    FileList := TStringList.Create;
+    FindFile(MakePath(S), '*.*', DoFindFile, nil, True, True);
+
+    Cnt := 0;
+    for I := 0 to FileList.Count - 1 do
+    begin
+      S := FileList[I];
+      if not FileExists(S) then
+        Continue;
+
+      FileInfo := TCnBackupFileInfo.Create;
+      FileInfo.SetFileInfo(S, True);
+
+      if AddBackupFile(SCnProjExtCustomBackupFile, FileInfo) then
+      begin
+        CustomFiles.Add(FileInfo);
+        Inc(Cnt);
+      end
+      else
+        FileInfo.Free;
+    end;
+
+    FreeAndNil(FileList);
+    InfoDlg(Format(SCnProjExtBackupAddFile, [Cnt]));
+  end;
+end;
+
+procedure TCnProjectBackupForm.DoFindFile(const FileName: string;
+  const Info: TSearchRec; var Abort: Boolean);
+var
+  Ext: string;
+begin
+  if (FileName = '.') or (FileName = '..') then
+    Exit;
+
+  Ext := ExtractUpperFileExt(FileName);
+  if Pos('.~', Ext) <= 0 then  // 不收集带 ~ 的临时文件
+    FileList.Add(FileName);
 end;
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}

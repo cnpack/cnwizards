@@ -1285,6 +1285,7 @@ var
   SCnProjExtFileReopenCaption: string = '&Open Historical Files...';
   SCnProjExtFileReopenHint: string = 'Open Historical Files';
   SCnProjExtCustomBackupFile: string = 'Customized Files';
+  SCnProjExtBackupAddFile: string = '%d File(s) Added.';
   SCnProjExtDirBuilderCaption: string = 'Project Dir Bui&lder...';
   SCnProjExtDirBuilderHint: string = 'Open Project Dir Builder';
   SCnProjExtConfirmOverrideTemplet: string = 'Template "%s" already Exists, Overwrite?';

@@ -1,6 +1,6 @@
 inherited CnProjectBackupForm: TCnProjectBackupForm
-  Left = 329
-  Top = 252
+  Left = 433
+  Top = 392
   Width = 669
   Height = 483
   Caption = 'Project Backup'
@@ -150,39 +150,49 @@ inherited CnProjectBackupForm: TCnProjectBackupForm
       ParentShowHint = False
       ShowHint = True
     end
-    object btnRemoveFile: TToolButton
+    object btnAddOpened: TToolButton
       Left = 23
+      Top = 0
+      Action = actAddOpened
+    end
+    object btnAddDir: TToolButton
+      Left = 46
+      Top = 0
+      Action = actAddDir
+    end
+    object btnRemoveFile: TToolButton
+      Left = 69
       Top = 0
       Action = actRemoveFile
       ParentShowHint = False
       ShowHint = True
     end
     object btn1: TToolButton
-      Left = 46
+      Left = 92
       Top = 0
       Width = 8
       ImageIndex = 1
       Style = tbsSeparator
     end
     object btnZip: TToolButton
-      Left = 54
+      Left = 100
       Top = 0
       Action = actZip
     end
     object btnSprt1: TToolButton
-      Left = 77
+      Left = 123
       Top = 0
       Width = 8
       ImageIndex = 16
       Style = tbsSeparator
     end
     object btnHelp: TToolButton
-      Left = 85
+      Left = 131
       Top = 0
       Action = actHelp
     end
     object btnClose: TToolButton
-      Left = 108
+      Left = 154
       Top = 0
       Action = actClose
     end
@@ -218,7 +228,7 @@ inherited CnProjectBackupForm: TCnProjectBackupForm
     Left = 24
     Top = 88
     object actAddFile: TAction
-      Caption = 'Add Files'
+      Caption = 'Add Files...'
       Hint = 'Add Files to List'
       ImageIndex = 14
       OnExecute = actAddFileExecute
@@ -246,6 +256,18 @@ inherited CnProjectBackupForm: TCnProjectBackupForm
       Hint = 'Close this Window and Exit'
       ImageIndex = 0
       OnExecute = actCloseExecute
+    end
+    object actAddOpened: TAction
+      Caption = 'Add All Opened Files'
+      Hint = 'Add All Opened Files in IDE'
+      ImageIndex = 95
+      OnExecute = actAddOpenedExecute
+    end
+    object actAddDir: TAction
+      Caption = 'Add From Directory'
+      Hint = 'Add All Files From a Directory Tree'
+      ImageIndex = 96
+      OnExecute = actAddDirExecute
     end
   end
   object dlgOpen: TOpenDialog

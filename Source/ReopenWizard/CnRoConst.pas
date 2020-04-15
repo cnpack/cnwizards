@@ -72,7 +72,7 @@ const
   SDataFormat = 'yyyy-mm-dd hh:nn:ss';
 
   PageSize = 1024;
-  iDefaultFileQty = 20;
+  iDefaultFileQty = 30;
   LowFileType = 0;
   HighFileType = 5;
   FileType: array[LowFileType..HighFileType] of string =
