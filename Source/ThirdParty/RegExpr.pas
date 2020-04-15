@@ -2301,7 +2301,7 @@ function TRegExpr.ParseAtom (var flagp : integer) : PRegExprChar;
                if (ord ((regparse + 1)^) < 256)
                   and (
                   {$IFDEF DELPHI2009_UP}
-                  char ((regparse + 1)^) in ['d', 'D', 's', 'S', 'w', 'W'])
+                  CharInSet(char ((regparse + 1)^), ['d', 'D', 's', 'S', 'w', 'W'])
                   {$ELSE}
                   char ((regparse + 1)^) in ['d', 'D', 's', 'S', 'w', 'W']
                   {$ENDIF}) then begin
