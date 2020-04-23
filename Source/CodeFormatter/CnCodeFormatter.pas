@@ -3121,6 +3121,9 @@ begin
     if Scaner.Token in ClassVisibilityTokens then
       FormatClassVisibility(BackTab(PreSpaceCount));
 
+    if Scaner.Token = tokKeywordCase then // 如果出现 public case 的场合，要跳出处理 case
+      Break;
+
     if Scaner.Token in [tokKeywordProcedure, tokKeywordFunction,
       tokKeywordConstructor, tokKeywordDestructor, tokKeywordClass] then
     begin
