@@ -1210,6 +1210,7 @@ procedure TCnProjectBackupForm.FormShow(Sender: TObject);
 begin
 {$IFDEF BDS}
   SetListViewWidthString(lvFileView, FListViewWidthStr, GetFactorFromSizeEnlarge(Enlarge));
+  DragAcceptFiles(lvFileView.Handle, True);
 {$ENDIF}
 end;
 
