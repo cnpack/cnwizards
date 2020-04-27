@@ -97,7 +97,6 @@ inherited CnExploreFilterForm: TCnExploreFilterForm
     Height = 67
     Align = alBottom
     BevelOuter = bvNone
-    Caption = 'Panel1'
     TabOrder = 2
     object grp: TGroupBox
       Left = 8

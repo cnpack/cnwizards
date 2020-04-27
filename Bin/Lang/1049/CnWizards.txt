@@ -1794,7 +1794,6 @@ TCnExploreDirctoryForm.btnNew.Hint=Новое
 TCnExploreDirctoryForm.stat.Panels.Item0.Text=Текущая папка:
 TCnExploreDirctoryForm.tlb.Caption=tlb
 TCnExploreFilterForm.Caption=Настройки Фильтра
-TCnExploreFilterForm.Panel1.Caption=Panel1
 TCnExploreFilterForm.btn3.Caption=btn3
 TCnExploreFilterForm.btn4.Caption=btn4
 TCnExploreFilterForm.btnClear.Caption=Фильтровать

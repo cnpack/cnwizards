@@ -1794,7 +1794,6 @@ TCnExploreDirctoryForm.btnNew.Hint=New
 TCnExploreDirctoryForm.stat.Panels.Item0.Text=Current Folder:
 TCnExploreDirctoryForm.tlb.Caption=tlb
 TCnExploreFilterForm.Caption=Filters Setting
-TCnExploreFilterForm.Panel1.Caption=Panel1
 TCnExploreFilterForm.btn3.Caption=btn3
 TCnExploreFilterForm.btn4.Caption=btn4
 TCnExploreFilterForm.btnClear.Caption=Filtrate

@@ -1794,7 +1794,6 @@ TCnExploreDirctoryForm.btnNew.Hint=neu
 TCnExploreDirctoryForm.stat.Panels.Item0.Text=aktuelles Verzeichnis:
 TCnExploreDirctoryForm.tlb.Caption=tlb
 TCnExploreFilterForm.Caption=Filter Einstellungen
-TCnExploreFilterForm.Panel1.Caption=Panel1
 TCnExploreFilterForm.btn3.Caption=btn3
 TCnExploreFilterForm.btn4.Caption=btn4
 TCnExploreFilterForm.btnClear.Caption=Filtrate

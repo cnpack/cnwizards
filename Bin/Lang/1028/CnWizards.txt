@@ -1794,7 +1794,6 @@ TCnExploreDirctoryForm.btnNew.Hint=新建
 TCnExploreDirctoryForm.stat.Panels.Item0.Text=當前活動檔夾：
 TCnExploreDirctoryForm.tlb.Caption=tlb
 TCnExploreFilterForm.Caption=文件過濾
-TCnExploreFilterForm.Panel1.Caption=Panel1
 TCnExploreFilterForm.btn3.Caption=btn3
 TCnExploreFilterForm.btn4.Caption=btn4
 TCnExploreFilterForm.btnClear.Caption=過濾
