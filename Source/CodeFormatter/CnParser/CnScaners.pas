@@ -956,10 +956,13 @@ begin
         Inc(P);
         Result := tokNoToken;
 
-        // 回溯两步，如果^之前是字母数字或)]^，就表示不是字符串而是Hat
+        // 回溯一下，如果^之前越过空白是字母数字或)]^，就表示不是字符串而是Hat
         if OldP > FBuffer then
         begin
-          Dec(OldP);
+          repeat
+            Dec(OldP);
+          until (not (OldP^ in [' ', #10, #13, #9])) or (OldP <= FBuffer);
+
           if OldP^ in ['A'..'Z', 'a'..'z', '0'..'9', '^', ')', ']'] then
             Result := tokHat;
         end;
