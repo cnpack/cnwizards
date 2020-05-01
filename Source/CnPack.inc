@@ -2708,6 +2708,7 @@
 {$IFDEF BDS2010_UP}
   {$DEFINE SUPPORT_INTERFACE_AS_OBJECT}
   {$DEFINE SUPPORT_ENHANCED_RTTI}          // New enhanced RTTI.
+  {$DEFINE SUPPORT_EXTERNAL_DELAYED}       // External functions can be declared as 'delayed'.
   {$DEFINE IDE_HAS_NEW_COMPONENT_PALETTE}  // IDE has a new style Component Palette.
   {$DEFINE IDE_HAS_EDITOR_SEARCHPANEL}     // Editor has a Search Panel
 {$ENDIF}
