@@ -1,0 +1,127 @@
+<TCnEditorCollection PropFormat="node">
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>0</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOF</InsertPos>
+    <Caption>En-tête d'unité Pascal</Caption>
+    <Content>{*******************************************************}
+{                                                       }
+{       %SoftName%%ColPos57%}
+{                                                       }
+{       Copyright (C) %Year% %Company%%ColPos57%}
+{                                                       }
+{*******************************************************}
+
+</Content>
+    <Hint>En-tête d'unité Pascal</Hint>
+    <ForDelphi>1</ForDelphi>
+    <ForBcb>0</ForBcb>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>0</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOF</InsertPos>
+    <Caption>En-tête d'unité C/C++</Caption>
+    <Content>//*****************************************************//
+//                                                     //
+//      %SoftName%%ColPos56%//
+//                                                     //
+//      Copyright (C) %Year% %Company%%ColPos56%//
+//                                                     //
+//*****************************************************//
+
+</Content>
+    <Hint>en-tête d'unité C/C++</Hint>
+    <ForDelphi>0</ForDelphi>
+    <ForBcb>1</ForBcb>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>0</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipProcHead</InsertPos>
+    <Caption>En-tête de procédure Pascal</Caption>
+    <Content>{-------------------------------------------------------------------------------
+  Procedure: %ProcName%
+  Auteur:    %User%
+  Horodatage:  %Year%.%Month%.%Day%
+  Arguments: %Arguments%
+  Resultats:    %Result%
+-------------------------------------------------------------------------------}
+</Content>
+    <Hint>Commentaire pour les procédures Pascal</Hint>
+    <ForDelphi>1</ForDelphi>
+    <ForBcb>0</ForBcb>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>24764</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOL</InsertPos>
+    <Caption>Bloc de commentaires</Caption>
+    <Content>//==============================================================================
+// %Comment%
+//==============================================================================
+
+</Content>
+    <Hint>Bloc de commentaires</Hint>
+    <ForDelphi>1</ForDelphi>
+    <ForBcb>1</ForBcb>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>24766</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOL</InsertPos>
+    <Caption>Bloc de commentaires 2</Caption>
+    <Content>//------------------------------------------------------------------------------
+// %Comment%
+//------------------------------------------------------------------------------
+
+</Content>
+    <Hint>Bloc de commentaires 2</Hint>
+    <ForDelphi>1</ForDelphi>
+    <ForBcb>1</ForBcb>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>0</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOL</InsertPos>
+    <Caption>Définition de classe Pascal</Caption>
+    <Content>{ %ClassName% }
+
+  %ClassName% = class(TObject)
+  private
+
+  protected
+
+  public
+    constructor Create;
+    destructor Destroy; override;
+  published
+
+  end;
+</Content>
+    <Hint>Nouvelle Définition de classe Pascal</Hint>
+    <ForDelphi>1</ForDelphi>
+    <ForBcb>0</ForBcb>
+  </o>
+  <o>
+    <Enabled>1</Enabled>
+    <ShortCut>0</ShortCut>
+    <SavePos>0</SavePos>
+    <InsertPos>ipBOL</InsertPos>
+    <Caption>Initialisation de l'unité</Caption>
+    <Content>initialization
+
+finalization
+
+</Content>
+    <Hint>initialization</Hint>
+    <ForDelphi>1</ForDelphi>
+    <ForBcb>0</ForBcb>
+  </o>
+</TCnEditorCollection>
