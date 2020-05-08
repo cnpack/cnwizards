@@ -169,7 +169,7 @@ type
     destructor Destroy; override;
 
     procedure ThreadNotify(Reason: TOTANotifyReason);
-    procedure EvaluteComplete(const ExprStr, ResultStr: string; CanModify: Boolean;
+    procedure EvaluateComplete(const ExprStr, ResultStr: string; CanModify: Boolean;
       ResultAddress, ResultSize: LongWord; ReturnCode: Integer);
     procedure ModifyComplete(const ExprStr, ResultStr: string; ReturnCode: Integer);
   end;
@@ -887,7 +887,7 @@ begin
   inherited;
 end;
 
-procedure TCnOTAThreadNotifier.EvaluteComplete(const ExprStr,
+procedure TCnOTAThreadNotifier.EvaluateComplete(const ExprStr,
   ResultStr: string; CanModify: Boolean; ResultAddress,
   ResultSize: LongWord; ReturnCode: Integer);
 begin
