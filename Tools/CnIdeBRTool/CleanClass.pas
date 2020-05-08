@@ -96,7 +96,7 @@ const
      'RAD Studio 2007', 'RAD Studio 2009', 'RAD Studio 2010', 'RAD Studio XE',
      'RAD Studio XE2', 'RAD Studio XE3', 'RAD Studio XE4', 'RAD Studio XE5',
      'RAD Studio XE6', 'RAD Studio XE7', 'RAD Studio XE8', 'RAD Studio 10 Seattle',
-     'RAD Studio 10.1 Berlin', 'RAD Studio 10.2 Tokyo', 'RAD Studio 10.3 Rio',
+     'RAD Studio 10.1 Berlin', 'RAD Studio 10.2 Tokyo', 'RAD Studio 10.3 Rio', 'RAD Studio 10.4 Denali',
      'C++Builder 5', 'C++Builder 6');
 
 procedure CreateIDEHistories;

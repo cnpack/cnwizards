@@ -40,7 +40,7 @@ type
   TAbiType = (atBCB5, atBCB6, atDelphi5, atDelphi6, atDelphi7, atDelphi8,
     atBDS2005, atBDS2006, atDelphi2007, atDelphi2009, atDelphi2010, atDelphiXE,
     atDelphiXE2, atDelphiXE3, atDelphiXE4, atDelphiXE5, atDelphiXE6, atDelphiXE7,
-    atDelphiXE8, atDelphi10S, atDelphi101B, atDelphi102T, atDelphi103R);
+    atDelphiXE8, atDelphi10S, atDelphi101B, atDelphi102T, atDelphi103R, atDelphi104D);
   TAbiTypes = set of TAbiType; // at := [BCB5, BCB6];
 
 var
@@ -51,7 +51,8 @@ var
       'RAD Studio 2009', 'RAD Studio 2010', 'RAD Studio XE', 'RAD Studio XE2',
       'RAD Studio XE3', 'RAD Studio XE4', 'RAD Studio XE5', 'RAD Studio XE6',
       'RAD Studio XE7', 'RAD Studio XE8', 'RAD Studio 10 Seattle',
-      'RAD Studio 10.1 Berlin', 'RAD Studio 10.2 Tokyo', 'RAD Studio 10.3 Rio'
+      'RAD Studio 10.1 Berlin', 'RAD Studio 10.2 Tokyo', 'RAD Studio 10.3 Rio',
+      'RAD Studio 10.4 Denali'
   );
 
   g_strAppAbName: array[0..Integer(High(TAbiType))] of string =
@@ -62,7 +63,7 @@ var
       'RADStudioXE2', 'RADStudioXE3', 'RADStudioXE4',
       'RADStudioXE5', 'RADStudioXE6', 'RADStudioXE7',
       'RADStudioXE8', 'RADStudio10Seattle', 'RADStudio101Berlin',
-      'RADStudio102Tokyo', 'RADStudio103Rio'
+      'RADStudio102Tokyo', 'RADStudio103Rio', 'RADStudio104Denali'
   );
 
   g_strRegPath: array[0..Integer(High(TAbiType))] of string =
@@ -71,7 +72,7 @@ var
       'Delphi\7.0', 'BDS\2.0', 'BDS\3.0', 'BDS\4.0', 'BDS\5.0', 'BDS\6.0',
       'BDS\7.0', 'BDS\8.0', 'BDS\9.0', 'BDS\10.0', 'BDS\11.0', 'BDS\12.0',
       'BDS\14.0', 'BDS\15.0', 'BDS\16.0', 'BDS\17.0', 'BDS\18.0', 'BDS\19.0',
-      'BDS\20.0'
+      'BDS\20.0', 'BDS\21.0'
   );
 
   g_strOpResult: array[0..1] of string =

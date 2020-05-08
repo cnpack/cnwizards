@@ -48,7 +48,7 @@ type
   TCnCompiler = (cnDelphi5, cnDelphi6, cnDelphi7, cnDelphi8, cnDelphi2005,
     cnDelphi2006, cnDelphi2007, cnDelphi2009, cnDelphi2010, cnDelphiXE, cnDelphiXE2,
     cnDelphiXE3, cnDelphiXE4, cnDelphiXE5, cnDelphiXE6, cnDelphiXE7, cnDelphiXE8,
-    cnDelphi10S, cnDelphi101B, cnDelphi102T, cnDelphi103R, cnBCB5, cnBCB6);
+    cnDelphi10S, cnDelphi101B, cnDelphi102T, cnDelphi103R, cnDelphi104D, cnBCB5, cnBCB6);
   TCnCompilers = set of TCnCompiler;
 
 const
@@ -81,6 +81,7 @@ const
   _DELPHI101_BERLIN = {$IFDEF DELPHI101_BERLIN}True{$ELSE}False{$ENDIF};
   _DELPHI102_TOKYO = {$IFDEF DELPHI102_TOKYO}True{$ELSE}False{$ENDIF};
   _DELPHI103_RIO = {$IFDEF DELPHI103_RIO}True{$ELSE}False{$ENDIF};
+  _DELPHI104_DENALI = {$IFDEF DELPHI104_DENALI}True{$ELSE}False{$ENDIF};
 
   _DELPHI1_UP = {$IFDEF DELPHI1_UP}True{$ELSE}False{$ENDIF};
   _DELPHI2_UP = {$IFDEF DELPHI2_UP}True{$ELSE}False{$ENDIF};
@@ -107,6 +108,7 @@ const
   _DELPHI101_BERLIN_UP = {$IFDEF DELPHI101_BERLIN_UP}True{$ELSE}False{$ENDIF};
   _DELPHI102_TOKYO_UP = {$IFDEF DELPHI102_TOKYO_UP}True{$ELSE}False{$ENDIF};
   _DELPHI103_RIO_UP = {$IFDEF DELPHI103_RIO_UP}True{$ELSE}False{$ENDIF};
+  _DELPHI104_DENALI_UP = {$IFDEF DELPHI104_DENALI_UP}True{$ELSE}False{$ENDIF};
 
   _BCB1 = {$IFDEF BCB1}True{$ELSE}False{$ENDIF};
   _BCB3 = {$IFDEF BCB3}True{$ELSE}False{$ENDIF};
@@ -130,6 +132,7 @@ const
   _BCB101_BERLIN = {$IFDEF BCB101_BERLIN}True{$ELSE}False{$ENDIF};
   _BCB102_TOKYO = {$IFDEF BCB102_TOKYO}True{$ELSE}False{$ENDIF};
   _BCB103_RIO = {$IFDEF BCB103_RIO}True{$ELSE}False{$ENDIF};
+  _BCB104_DENALI = {$IFDEF BCB104_DENALI}True{$ELSE}False{$ENDIF};
 
   _BCB1_UP = {$IFDEF BCB1_UP}True{$ELSE}False{$ENDIF};
   _BCB3_UP = {$IFDEF BCB3_UP}True{$ELSE}False{$ENDIF};
@@ -153,6 +156,7 @@ const
   _BCB101_BERLIN_UP = {$IFDEF BCB101_BERLIN_UP}True{$ELSE}False{$ENDIF};
   _BCB102_TOKYO_UP = {$IFDEF BCB102_TOKYO_UP}True{$ELSE}False{$ENDIF};
   _BCB103_RIO_UP = {$IFDEF BCB103_RIO_UP}True{$ELSE}False{$ENDIF};
+  _BCB104_DENALI_UP = {$IFDEF BCB104_DENALI_UP}True{$ELSE}False{$ENDIF};
 
   _KYLIX1 = {$IFDEF KYLIX1}True{$ELSE}False{$ENDIF};
   _KYLIX2 = {$IFDEF KYLIX2}True{$ELSE}False{$ENDIF};
@@ -180,6 +184,7 @@ const
   _BDS18 = {$IFDEF BDS18}True{$ELSE}False{$ENDIF};
   _BDS19 = {$IFDEF BDS19}True{$ELSE}False{$ENDIF};
   _BDS20 = {$IFDEF BDS20}True{$ELSE}False{$ENDIF};
+  _BDS21 = {$IFDEF BDS21}True{$ELSE}False{$ENDIF};
 
   _BDS2_UP = {$IFDEF BDS2_UP}True{$ELSE}False{$ENDIF};
   _BDS3_UP = {$IFDEF BDS3_UP}True{$ELSE}False{$ENDIF};
@@ -199,6 +204,7 @@ const
   _BDS18_UP = {$IFDEF BDS18_UP}True{$ELSE}False{$ENDIF};
   _BDS19_UP = {$IFDEF BDS19_UP}True{$ELSE}False{$ENDIF};
   _BDS20_UP = {$IFDEF BDS20_UP}True{$ELSE}False{$ENDIF};
+  _BDS21_UP = {$IFDEF BDS21_UP}True{$ELSE}False{$ENDIF};
 
   _COMPILER1 = {$IFDEF COMPILER1}True{$ELSE}False{$ENDIF};
   _COMPILER2 = {$IFDEF COMPILER2}True{$ELSE}False{$ENDIF};
@@ -226,6 +232,7 @@ const
   _COMPILER24 = {$IFDEF COMPILER24}True{$ELSE}False{$ENDIF};
   _COMPILER25 = {$IFDEF COMPILER25}True{$ELSE}False{$ENDIF};
   _COMPILER26 = {$IFDEF COMPILER26}True{$ELSE}False{$ENDIF};
+  _COMPILER27 = {$IFDEF COMPILER27}True{$ELSE}False{$ENDIF};
 
   _COMPILER1_UP = {$IFDEF COMPILER1_UP}True{$ELSE}False{$ENDIF};
   _COMPILER2_UP = {$IFDEF COMPILER2_UP}True{$ELSE}False{$ENDIF};
@@ -253,6 +260,7 @@ const
   _COMPILER24_UP = {$IFDEF COMPILER24_UP}True{$ELSE}False{$ENDIF};
   _COMPILER25_UP = {$IFDEF COMPILER25_UP}True{$ELSE}False{$ENDIF};
   _COMPILER26_UP = {$IFDEF COMPILER26_UP}True{$ELSE}False{$ENDIF};
+  _COMPILER27_UP = {$IFDEF COMPILER27_UP}True{$ELSE}False{$ENDIF};
 
   _SUPPORT_OTA_PROJECT_CONFIGURATION = {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}True{$ELSE}False{$ENDIF};
   _SUPPORT_CROSS_PLATFORM = {$IFDEF SUPPORT_CROSS_PLATFORM}True{$ELSE}False{$ENDIF};
@@ -388,19 +396,26 @@ const
                                         CompilerName = 'RAD Studio 103_RIO';
                                         CompilerShortName = 'D103R';
                                         {$ELSE}
-                                          {$IFDEF BCB5}
-                                            Compiler: TCnCompiler = cnBCB5;
-                                            CompilerKind: TCnCompilerKind = ckBCB;
-                                            CompilerName = 'C++BUILDER 5';
-                                            CompilerShortName = 'CB5';
+                                          {$IFDEF DELPHI104_DENALI}
+                                          Compiler: TCnCompiler = cnDelphi104D;
+                                          CompilerKind: TCnCompilerKind = ckDelphi;
+                                          CompilerName = 'RAD Studio 104_DENALI';
+                                          CompilerShortName = 'D104D';
                                           {$ELSE}
-                                            {$IFDEF BCB6}
-                                              Compiler: TCnCompiler = cnBCB6;
+                                            {$IFDEF BCB5}
+                                              Compiler: TCnCompiler = cnBCB5;
                                               CompilerKind: TCnCompilerKind = ckBCB;
-                                              CompilerName = 'C++BUILDER 6';
-                                              CompilerShortName = 'CB6';
+                                              CompilerName = 'C++BUILDER 5';
+                                              CompilerShortName = 'CB5';
                                             {$ELSE}
-                                              {$MESSAGE ERROR 'Unknow Compiler!'}
+                                              {$IFDEF BCB6}
+                                                Compiler: TCnCompiler = cnBCB6;
+                                                CompilerKind: TCnCompilerKind = ckBCB;
+                                                CompilerName = 'C++BUILDER 6';
+                                                CompilerShortName = 'CB6';
+                                              {$ELSE}
+                                                {$MESSAGE ERROR 'Unknow Compiler!'}
+                                              {$ENDIF}
                                             {$ENDIF}
                                           {$ENDIF}
                                         {$ENDIF}
@@ -608,6 +623,14 @@ const
   dccLibName = 'dcc32260.dll';
   {$DEFINE LibNamesDefined}
 {$ENDIF COMPILER26}
+
+{$IFDEF COMPILER27}
+  CorIdeLibName = 'coreide270.bpl';
+  DesignIdeLibName = 'designide270.bpl';
+  DphIdeLibName = 'delphicoreide270.bpl';
+  dccLibName = 'dcc32270.dll';
+  {$DEFINE LibNamesDefined}
+{$ENDIF COMPILER27}
 
 implementation
 
