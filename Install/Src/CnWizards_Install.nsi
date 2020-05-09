@@ -609,6 +609,8 @@ InitOk:
   File "..\..\Bin\Lang\1049\*.*"
   SetOutPath $INSTDIR\Lang\1031
   File "..\..\Bin\Lang\1031\*.*"
+  SetOutPath $INSTDIR\Lang\1036
+  File "..\..\Bin\Lang\1031\*.*"
 !endif
 
 !ifndef LITE_VERSION
