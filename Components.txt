@@ -10,7 +10,7 @@ Script Wizard
 =============
 
 Depend on: RemObjects Pascal Script
-Revision : 157 (For D5-D2007) 
+Revision : 157 (For D5-D2007)
            252 (For D2009 and above)
 
 You'll need to obtain the exact revision from the ROPS Subversion repository:
@@ -23,6 +23,29 @@ Note: 252 is currently latest when XE 2 beta is ready and can be compiled from 2
 
 Also, you'll need to open file CnPack\cnwizards\Source\CnWizards_Def.inc and
 remove or comment this line:
+  {$UNDEF SUPPORT_PASCAL_SCRIPT}
+
+**********************************************************************
+
+Les fonctionnalit¨¦s de suivi d¨¦pendent des composants tiers:
+
+Script Wizard
+=============
+
+Depend on: RemObjects Pascal Script
+Revision : 157 (For D5-D2007)
+           252 (For D2009 and above)
+
+Vous devrez obtenir la r¨¦vision exacte du r¨¦f¨¦rentiel ROPS Subversion:
+
+> cd CnPack\cnwizards\Source\ThirdParty
+> svn checkout -r 157 http://code.remobjects.com/svn/pascalscript/Source PascalScript
+> svn checkout -r 252 http://code.remobjects.com/svn/pascalscript/Source PascalScript_2009
+
+Remarque: 252 est actuellement le dernier lorsque la version b¨ºta de XE 2 est pr¨ºte et peut ¨ºtre compil¨¦e de 2009 ¨¤ XE 2.
+
+Vous devrez ¨¦galement ouvrir le fichier CnPack \ cnwizards \ Source \ CnWizards_Def.inc et
+supprimer ou commenter cette ligne:
   {$UNDEF SUPPORT_PASCAL_SCRIPT}
 
 [EOF]

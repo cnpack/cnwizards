@@ -1,4 +1,4 @@
-**********************************************************************
+﻿**********************************************************************
                      CnPack For Delphi/C++Builder
                 A Free, Open Source Project from China
                  (C)Copyright 2001-2020 CnPack Team
@@ -10,7 +10,7 @@ CnWizards supports multi-language UI. If you want to add new translation
 for CnWizards, please do follow steps:
 
 1.You can get all language files from our GIT.
-* How to access our GIT: 
+* How to access our GIT:
 http://github.com/cnpack
 There are 2 repositories named cnvcl and cnwizards.
 
@@ -42,5 +42,46 @@ cnwizards\Install\Src\Lang\CnWizInst_enu.nsh
 
 8.When you finished, please mail them to master@cnpack.org. You'll see the
 new language in CnWizards and your name in our credits in next build .
+
+**********************************************************************
+
+Comment ajouter une traduction pour CnWizards?
+-------------------------------------
+CnWizards prend en charge l'interface utilisateur multilingue. Si vous souhaitez ajouter une nouvelle traduction
+pour CnWizards, veuillez suivre les étapes suivantes:
+
+1.Vous pouvez obtenir tous les fichiers de langue de notre GIT.
+* Comment accéder à notre GIT:
+http://github.com/cnpack
+Il existe 2 référentiels nommés cnvcl et cnwizards.
+
+2.Nos fichiers de langue sont dans cnwizards \ Bin \ Lang, 1033 est en anglais.
+Le répertoire Lang se trouve également dans notre destination d'installation, comme
+C:\Program Files\CnPack\CnWizards\Lang
+
+3.Pour une nouvelle langue, comme le français, vous pouvez copier le répertoire 1033 (anglais)
+à 1036 (français) et traduire tous les fichiers txt en français.
+
+4.Par exemple, s'il y a une ligne dans CnWizards.txt
+TCnWizAboutForm.Caption = À propos des assistants IDE CnPack
+Vous pouvez le traduire comme:
+TCnWizAboutForm.Caption = (chaîne française)
+
+5.Vous pouvez modifier les informations de base suivantes dans chaque nouveau fichier de langue. Tel que:
+!LanguageID=1036
+!LanguageName=French
+!TranslationAuthor=Your Name
+!TranslationAuthorEmail=Your email
+
+6.Vous pouvez copier un nouveau répertoire de langue dans le répertoire Lang dans CnWizards
+destination de l'installation. Ainsi, vous pouvez voir et sélectionner la nouvelle langue dans IDE.
+
+7.Vous devez traduire les fichiers de suivi dans une nouvelle langue pour le programme d'installation de CnWizards:
+cnwizards\License.enu.txt
+cnwizards\Readme.enu.txt
+cnwizards\Install\Src\Lang\CnWizInst_enu.nsh
+
+8.Lorsque vous avez terminé, veuillez les envoyer par mail à master@cnpack.org. Vous verrez le
+nouvelle langue dans CnWizards et votre nom dans nos crédits dans la prochaine version.
 
 [EOF]
