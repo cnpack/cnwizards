@@ -1378,7 +1378,11 @@ begin
 {$IFDEF DELPHI103_RIO}
   Result := Result + 'Embarcadero\BDS\20.0';
 {$ELSE}
+{$IFDEF DELPHI104_SYDNEY}
+  Result := Result + 'Embarcadero\BDS\21.0';
+{$ELSE}
   Error: Unknown Compiler
+{$ENDIF}
 {$ENDIF}
 {$ENDIF}
 {$ENDIF}
