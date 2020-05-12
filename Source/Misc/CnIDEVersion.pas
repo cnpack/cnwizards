@@ -52,7 +52,10 @@ interface
 {$I CnWizards.inc}
 
 uses
-  CnCommon, CnWizUtils;
+  SysUtils, Forms, CnCommon, CnWizUtils;
+
+function GetIdeExeVersion: string;
+{* 获取 IDE 的 exe 文件的详细版本号}
 
 function IsIdeVersionLatest: Boolean;
 {* 返回当前是否最新 IDE 版本}
@@ -487,6 +490,14 @@ begin
 
   Result := CnIdeVersionIsLatest;
   CnIdeVersionDetected := True;
+end;
+
+function GetIdeExeVersion: string;
+var
+  V: TVersionNumber;
+begin
+  V := GetFileVersionNumber(Application.ExeName);
+  Result := Format('%d.%d.%d.%d', [V.Major, V.Minor, V.Release, V.Build]);
 end;
 
 end.

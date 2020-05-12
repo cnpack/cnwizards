@@ -162,6 +162,9 @@ implementation
 
 {$R *.DFM}
 
+uses
+  CnIDEVersion;
+
 const
   IdType = 0;
   IdDesc = 1;
@@ -810,7 +813,7 @@ begin
   Result := Result + '  OS: ' + GetOSString + SCRLF;
   Result := Result + '  CnWizards: ' + GetCnPackVersionString;
   Result := Result + '  IDE: ' + TypInfo.GetEnumName(TypeInfo(TBorlandIdeVersion),
-    Ord(GetBorlandIdeVersion)) + ' ' + GetIdeEdition + SCRLF;
+    Ord(GetBorlandIdeVersion)) + ' ' + GetIdeEdition + ' - ' + GetIdeExeVersion + SCRLF;
   Result := Result + '  ComCtl32: ' + GetFileVersionStr(MakePath(GetSystemDir)
     + 'comctl32.dll') + SCRLF + SCRLF;
 
