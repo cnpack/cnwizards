@@ -354,6 +354,7 @@ OutFile "..\Output\${INSTALLER_NAME}"
 !include "Lang\CnWizInst_cht.nsh"
 !include "Lang\CnWizInst_ru.nsh"
 !include "Lang\CnWizInst_de.nsh"
+!include "Lang\CnWizInst_fra.nsh"
 
 !verbose 4
 
