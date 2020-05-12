@@ -6,7 +6,7 @@
 ; Fichier en anglais pour le script d'installation de CnWizards
 ; Veuillez utiliser le format ANSI pour enregistrer le fichier de langue.
 
-!insertmacro MUI_LANGUAGE "Français"
+!insertmacro MUI_LANGUAGE "French"
 
 ; CnWizards Name
 LangString APPNAME        1036 "Assitants CnPack pour IDE"
