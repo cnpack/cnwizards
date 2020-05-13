@@ -99,15 +99,6 @@ var
   AWizard: IOTAWizard;
   Reg: Boolean;
 begin
-  if FindCmdLineSwitch(SCnNoCnWizardsSwitch, ['/', '-'], True) then
-  begin
-    Result := True;
-{$IFDEF DEBUG}
-    CnDebugger.LogMsg('Do NOT Load CnWizards');
-{$ENDIF}
-    Exit;
-  end;
-
   if FindCmdLineSwitch(SCnNoServiceCnWizardsSwitch, ['/', '-'], True) then
   begin
     Reg := False;
