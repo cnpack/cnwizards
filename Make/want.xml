@@ -77,8 +77,8 @@ See http://www.suigeneris.org/want/ for details.
   <property name="release.pro"    value=""          if="full" />
   <property name="release.pro"    value="_Lite"     if="lite" />
 
-  <property name="cnwizards_list" value="-d5,-d6,-d7,-d2005,-d2006,-d2007,-d2009,-d2010,-dxe,-dxe2,-dxe3,-dxe4,-dxe5,-dxe6,-dxe7,-dxe8,-d10s,-d101b,-d102t,-d103r1,-d103r,-cb5,-cb6" unless="lite" />
-  <property name="cnwizards_list" value="-d6,-d7,-d2006,-d2007,-cb6" if="lite" />
+  <property name="cnwizards_list" value="-cnwizloader,-d5,-d6,-d7,-d2005,-d2006,-d2007,-d2009,-d2010,-dxe,-dxe2,-dxe3,-dxe4,-dxe5,-dxe6,-dxe7,-dxe8,-d10s,-d101b,-d102t,-d103r1,-d103r,-cb5,-cb6" unless="lite" />
+  <property name="cnwizards_list" value="-cnwizloader,-d6,-d7,-d2006,-d2007,-cb6" if="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cndfm6to5,cnascii,cnidebr,cnmanagewiz,cnselectlang,cnsmr,cnwizsetup" unless="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cnwizsetup" if="lite" />
   <property name="all_list"       value="cnwizards,resdll,cnwizhelperdll,cnziputilsdll,cnpnglib,cnformatlib,cnformatlibw,tools,makehelp,makeinst" unless="lite" />
@@ -204,6 +204,7 @@ Usage: want [target-name] [-Dname=value]
     cleanobj   - Clean temp files.
     clean      - Clean output and temp files.
     gitpull    - Update all files.
+    cnwizloader  - Compile CnWizards Loader DLL.
     d5         - Compile CnWizards for Delphi 5.
                  (d6, d7, d2005, d2006, d2007, d2009, d2010, dxe, dxe2, dxe3, dxe4, dxe5, dxe6, dxe7, dxe8, d10s, d101b, d102t, d103r1, d103r, d104s, cb5, cb6 also)
     cnwizards  - Compile all CnWizards DLLs (D5, D6, etc.).
@@ -332,7 +333,7 @@ Usage: want [target-name] [-Dname=value]
 
   <!-- 编译 CnWizards DLLs -->
   <target name="cnwizards" depends="-cw_prepare,${cnwizards_list},-cw_final" description="Compile all CnWizards DLLs (D5, D6, etc.)." />
-
+  <target name="cnwizloader" depends="-cnwizloader,-cw_final" description="Compile CnWizards Loader." />
   <target name="d5" depends="-d5,-cw_final" description="Compile CnWizards for Delphi 5." />
   <target name="d6" depends="-d6,-cw_final" description="Compile CnWizards for Delphi 6." />
   <target name="d7" depends="-d7,-cw_final" description="Compile CnWizards for Delphi 7." />
@@ -383,6 +384,27 @@ Usage: want [target-name] [-Dname=value]
     </delete>
     <move tofile="${src}/Version.inc" unless="ismaster" >
        <include name="${src}/Version.inc.old" />
+    </move>
+  </target>
+  
+  <!-- 编译 CnWizards Loader DLL -->
+  <target name="-cnwizloader" depends="-cw_prepare" description="Compile CnWizards Loader DLL." >
+    <property name="Ver.FileDescription"  value="CnWizards Loader DLL" />
+    <property name="Ver.InternalName"     value="CnWizLoader" />
+    <property name="Ver.OriginalFilename" value="CnWizLoader.DLL" />
+    <copy tofile="${tools}/CnWizLoader/CnWizLoader.res.old" >
+       <include name="${tools}/CnWizLoader/CnWizLoader.res" />
+    </copy>
+    <echo input="${tools}/CnDll.template.rc" file="${tools}/CnWizLoader/CnWizLoader.rc" />
+    <brcc file="${tools}/CnWizLoader/CnWizLoader.rc" output="${tools}/CnWizLoader/CnWizLoader.res" />
+    <dcc basedir="${tools}/CnWizLoader" source="CnWizLoader.dpr" versions="7" usecfg="true" arguments="${dcc_arg}"/>
+    <delete dir="${tools}/CnWizLoader">
+       <include name="CnWizLoader.res" />
+       <include name="CnWizLoader.rc" />
+       <include name="CnWizLoader.drc" />
+    </delete>
+    <move tofile="${tools}/CnWizLoader/CnWizLoader.res" >
+       <include name="${tools}/CnWizLoader/CnWizLoader.res.old" />
     </move>
   </target>
 
