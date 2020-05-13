@@ -147,6 +147,9 @@ const
     'CnWizards_CB5.DLL',
     'CnWizards_CB6.DLL');
 
+  csDllLoaderName = 'CnWizLoader.DLL';
+  csDllLoaderKey = 'CnWizards_Loader';
+
   csLangDir = 'Lang\';
   csExperts = '\Experts';
   csLangFile = 'Setup.txt';
@@ -263,7 +266,7 @@ var
   Reg: TRegistry;
   Version: TVersionNumber;
 begin
-  Result := _CnExtractFilePath(ParamStr(0)) + csDllNames[Compiler];
+  Result := _CnExtractFilePath(ParamStr(0)) + csDllLoaderName;
   // 10.3 下动态判断文件名的版本确定究竟用哪个 DLL
   if Compiler = cb103R then
   begin
@@ -297,8 +300,8 @@ begin
   end;
 end;
 
-// 取专家名
-function GetDllValue(Compiler: TCompilerName): string;
+// 取旧的专家名作为 Key
+function GetDllOldValue(Compiler: TCompilerName): string;
 begin
   Result := _CnChangeFileExt(csDllNames[Compiler], '');
 end;
@@ -309,7 +312,22 @@ begin
   Result := FileExists(GetDllName(Compiler));
 end;
 
-// 判断是否安装
+// 判断是否安装旧版专家 DLL
+function IsOldInstalled: Boolean;
+var
+  Compiler: TCompilerName;
+begin
+  Result := True;
+  for Compiler := Low(Compiler) to High(Compiler) do
+    if WizardExists(Compiler) and RegKeyExists(csRegPaths[Compiler]) and
+      not RegValueExists(csRegPaths[Compiler] + csExperts, GetDllOldValue(Compiler)) then
+    begin
+      Result := False;
+      Exit;
+    end;
+end;
+
+// 判断是否安装了 Loader
 function IsInstalled: Boolean;
 var
   Compiler: TCompilerName;
@@ -317,7 +335,7 @@ begin
   Result := True;
   for Compiler := Low(Compiler) to High(Compiler) do
     if WizardExists(Compiler) and RegKeyExists(csRegPaths[Compiler]) and
-      not RegValueExists(csRegPaths[Compiler] + csExperts, GetDllValue(Compiler)) then
+      not RegValueExists(csRegPaths[Compiler] + csExperts, csDllLoaderKey) then
     begin
       Result := False;
       Exit;
@@ -345,7 +363,12 @@ begin
         RegCloseKey(Key);
       end;
 
-      if RegWriteStr(csRegPaths[Compiler] + csExperts, GetDllValue(Compiler),
+      // 删掉旧格式
+      if RegValueExists(csRegPaths[Compiler] + csExperts, GetDllOldValue(Compiler)) then
+        RegDeleteValue(csRegPaths[Compiler] + csExperts, GetDllOldValue(Compiler));
+
+      // 写新格式
+      if RegWriteStr(csRegPaths[Compiler] + csExperts, csDllLoaderKey,
         GetDllName(Compiler)) then
         S := S + #13#10 + ' - ' + csCompilerNames[Compiler];
     end;
@@ -367,25 +390,32 @@ end;
 // 反安装专家
 procedure UnInstallWizards;
 var
-  s: string;
+  S: string;
   Compiler: TCompilerName;
 begin
-  s := csUnInstallSucc;
+  S := csUnInstallSucc;
   for Compiler := Low(Compiler) to High(Compiler) do
-    if RegValueExists(csRegPaths[Compiler] + csExperts, GetDllValue(Compiler)) and
-      RegDeleteValue(csRegPaths[Compiler] + csExperts, GetDllValue(Compiler)) then
-      s := s + #13#10 + ' - ' + csCompilerNames[Compiler];
+  begin
+    // 删掉旧的
+    if RegValueExists(csRegPaths[Compiler] + csExperts, GetDllOldValue(Compiler)) then
+      RegDeleteValue(csRegPaths[Compiler] + csExperts, GetDllOldValue(Compiler));
+
+    // 删掉新的
+    if RegValueExists(csRegPaths[Compiler] + csExperts, csDllLoaderKey) and
+      RegDeleteValue(csRegPaths[Compiler] + csExperts, csDllLoaderKey) then
+      S := S + #13#10 + ' - ' + csCompilerNames[Compiler];
+  end;
 
   if not ParamNoMsg then
   begin
-    if s <> csUnInstallSucc then
+    if S <> csUnInstallSucc then
     begin
       if not ParamUnInstall then
-        s := s + #13#10#13#10 + csUnInstallSuccEnd;
+        S := S + #13#10#13#10 + csUnInstallSuccEnd;
     end
     else
-      s := csUnInstallFail;
-    MessageBox(0, PChar(s), PChar(csHintStr), MB_OK + MB_ICONWARNING);
+      S := csUnInstallFail;
+    MessageBox(0, PChar(S), PChar(csHintStr), MB_OK + MB_ICONWARNING);
   end;
 end;
 
