@@ -1,0 +1,201 @@
+{******************************************************************************}
+{                       CnPack For Delphi/C++Builder                           }
+{                     中国人自己的开放源码第三方开发包                         }
+{                   (C)Copyright 2001-2020 CnPack 开发组                       }
+{                   ------------------------------------                       }
+{                                                                              }
+{            本开发包是开源的自由软件，您可以遵照 CnPack 的发布协议来修        }
+{        改和重新发布这一程序。                                                }
+{                                                                              }
+{            发布这一开发包的目的是希望它有用，但没有任何担保。甚至没有        }
+{        适合特定目的而隐含的担保。更详细的情况请参阅 CnPack 发布协议。        }
+{                                                                              }
+{            您应该已经和开发包一起收到一份 CnPack 发布协议的副本。如果        }
+{        还没有，可访问我们的网站：                                            }
+{                                                                              }
+{            网站地址：http://www.cnpack.org                                   }
+{            电子邮件：master@cnpack.org                                       }
+{                                                                              }
+{******************************************************************************}
+
+library CnWizLoader;
+{* |<PRE>
+================================================================================
+* 软件名称：CnPack IDE 专家包
+* 单元名称：CnWizard 专家 DLL 加载器实现单元
+* 单元作者：刘啸 (liuxiao@cnpack.org)
+* 备    注：
+* 开发平台：PWin7 + Delphi 5.0
+* 兼容测试：所有版本的 Delphi
+* 本 地 化：该单元无需本地化
+* 修改记录：2020.05.13 V1.0
+*               创建单元
+================================================================================
+|</PRE>}
+
+uses
+  SysUtils, Classes, Windows, Forms, ToolsAPI;
+
+{$R *.RES}
+
+const
+  SCnNoCnWizardsSwitch = 'nocn';
+
+type
+  TWizardEntryPoint = function (const BorlandIDEServices: IBorlandIDEServices;
+    RegisterProc: TWizardRegisterProc; var Terminate: TWizardTerminateProc): Boolean; stdcall;
+
+  TVersionNumber = packed record
+  {* 文件版本号}
+    Major: Word;
+    Minor: Word;
+    Release: Word;
+    Build: Word;
+  end;
+
+var
+  LoaderTerminateProc: TWizardTerminateProc = nil;
+  DllInst: HINST = 0;
+
+// 取文件版本号
+function GetFileVersionNumber(const FileName: string): TVersionNumber;
+var
+  VersionInfoBufferSize: DWORD;
+  dummyHandle: DWORD;
+  VersionInfoBuffer: Pointer;
+  FixedFileInfoPtr: PVSFixedFileInfo;
+  VersionValueLength: UINT;
+begin
+  FillChar(Result, SizeOf(Result), 0);
+  if not FileExists(FileName) then
+    Exit;
+
+  VersionInfoBufferSize := GetFileVersionInfoSize(PChar(FileName), dummyHandle);
+  if VersionInfoBufferSize = 0 then
+    Exit;
+
+  GetMem(VersionInfoBuffer, VersionInfoBufferSize);
+  try
+    try
+      Win32Check(GetFileVersionInfo(PChar(FileName), dummyHandle,
+        VersionInfoBufferSize, VersionInfoBuffer));
+      Win32Check(VerQueryValue(VersionInfoBuffer, '\',
+        Pointer(FixedFileInfoPtr), VersionValueLength));
+    except
+      Exit;
+    end;
+    Result.Major := FixedFileInfoPtr^.dwFileVersionMS shr 16;
+    Result.Minor := FixedFileInfoPtr^.dwFileVersionMS;
+    Result.Release := FixedFileInfoPtr^.dwFileVersionLS shr 16;
+    Result.Build := FixedFileInfoPtr^.dwFileVersionLS;
+  finally
+    FreeMem(VersionInfoBuffer);
+  end;
+end;
+
+function GetWizardDll: string;
+const
+  RIO_13_2_RELEASE = 34749;
+var
+  FullPath: array[0..MAX_PATH - 1] of AnsiChar;
+  Dir, Exe: string;
+  V: TVersionNumber;
+begin
+  GetModuleFileNameA(HInstance, @FullPath[0], MAX_PATH);
+  Dir := ExtractFilePath(FullPath);
+
+  // 判断 IDE 类型与版本号
+  V := GetFileVersionNumber(Application.ExeName);
+  Exe := LowerCase(ExtractFileName(Application.ExeName));
+
+  case V.Major of
+    5:
+      begin
+        if Pos('bcb', Exe) = 1 then
+          Result := Dir + 'CnWizards_CB5.DLL'
+        else
+          Result := Dir + 'CnWizards_D5.DLL'
+      end;
+    6:
+      begin
+        if Pos('bcb', Exe) = 1 then
+          Result := Dir + 'CnWizards_CB6.DLL'
+        else
+          Result := Dir + 'CnWizards_D6.DLL'
+      end;
+    7: Result := Dir + 'CnWizards_D7.DLL';
+    9: Result := Dir + 'CnWizards_D2005.DLL';
+    10: Result := Dir + 'CnWizards_D2006.DLL';
+    11: Result := Dir + 'CnWizards_D2007.DLL';
+    12: Result := Dir + 'CnWizards_D2009.DLL';
+    14: Result := Dir + 'CnWizards_D2010.DLL';
+    15: Result := Dir + 'CnWizards_DXE.DLL';
+    16: Result := Dir + 'CnWizards_DXE2.DLL';
+    17: Result := Dir + 'CnWizards_DXE3.DLL';
+    18: Result := Dir + 'CnWizards_DXE4.DLL';
+    19: Result := Dir + 'CnWizards_DXE5.DLL';
+    20: Result := Dir + 'CnWizards_DXE6.DLL';
+    21: Result := Dir + 'CnWizards_DXE7.DLL';
+    22: Result := Dir + 'CnWizards_DXE8.DLL';
+    23: Result := Dir + 'CnWizards_D10S.DLL';
+    24: Result := Dir + 'CnWizards_D101B.DLL';
+    25: Result := Dir + 'CnWizards_D102T.DLL';
+    26:
+      begin
+        if V.Release < RIO_13_2_RELEASE then  // 10.3.1 或以下采用另一个 DLL
+          Result := Dir + 'CnWizards_D103R1.DLL'
+        else
+          Result := Dir + 'CnWizards_D103R.DLL';
+      end;
+    27: Result := Dir + 'CnWizards_D104S.DLL';
+  end;
+end;
+
+// 加载器 DLL 卸载函数，执行专家包 DLL 的卸载过程并卸载专家包 DLL
+procedure LoaderTerminate;
+begin
+  if Assigned(LoaderTerminateProc) then
+    LoaderTerminateProc();
+  FreeLibrary(DllInst);
+  DllInst := 0;
+end;
+
+// 加载器 DLL 初始化入口函数，加载对应版本的专家包 DLL
+function InitWizard(const BorlandIDEServices: IBorlandIDEServices;
+  RegisterProc: TWizardRegisterProc;
+  var Terminate: TWizardTerminateProc): Boolean; stdcall;
+var
+  Dll: string;
+  Entry: TWizardEntryPoint;
+begin
+  if FindCmdLineSwitch(SCnNoCnWizardsSwitch, ['/', '-'], True) then
+  begin
+    Result := True;
+    Exit;
+  end;
+
+  Result := False;
+  Dll := GetWizardDll;
+
+  if (Dll <> '') and FileExists(Dll) then
+  begin
+    DllInst := LoadLibraryA(PAnsiChar(Dll));
+    if DllInst <> 0 then
+    begin
+      Entry := TWizardEntryPoint(GetProcAddress(DllInst, WizardEntryPoint));
+      if Assigned(Entry) then
+      begin
+        // 调用真正的 DLL 初始化，并接收其卸载过程的指针
+        Result := Entry(BorlandIDEServices, RegisterProc, LoaderTerminateProc);
+        // IDE 的卸载过程则指给我们的
+        Terminate := LoaderTerminate;
+      end;
+    end;
+  end;
+end;
+
+exports
+  InitWizard name WizardEntryPoint;
+
+begin
+end.
