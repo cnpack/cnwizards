@@ -169,8 +169,13 @@ type
     destructor Destroy; override;
 
     procedure ThreadNotify(Reason: TOTANotifyReason);
+{$IFDEF DELPHI104_SYDNEY_UP}  // The typo is fixed in D104S
+    procedure EvaluateComplete(const ExprStr, ResultStr: string; CanModify: Boolean;
+      ResultAddress, ResultSize: LongWord; ReturnCode: Integer);
+{$ELSE}
     procedure EvaluteComplete(const ExprStr, ResultStr: string; CanModify: Boolean;
       ResultAddress, ResultSize: LongWord; ReturnCode: Integer);
+{$ENDIF}
     procedure ModifyComplete(const ExprStr, ResultStr: string; ReturnCode: Integer);
   end;
 
@@ -887,9 +892,15 @@ begin
   inherited;
 end;
 
+{$IFDEF DELPHI104_SYDNEY_UP}
+procedure TCnOTAThreadNotifier.EvaluateComplete(const ExprStr,
+  ResultStr: string; CanModify: Boolean; ResultAddress,
+  ResultSize: LongWord; ReturnCode: Integer);
+{$ELSE}
 procedure TCnOTAThreadNotifier.EvaluteComplete(const ExprStr,
   ResultStr: string; CanModify: Boolean; ResultAddress,
   ResultSize: LongWord; ReturnCode: Integer);
+{$ENDIF}
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('EvaluateExpression Result Returned. %s.', [ExprStr]);
