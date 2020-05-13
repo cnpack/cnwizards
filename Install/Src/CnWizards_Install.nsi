@@ -583,6 +583,7 @@ InitOk:
   ; 设置输出路径，每次使用都会改变
   SetOutPath $INSTDIR
   File "..\..\Bin\Setup.exe"
+  File "..\..\Bin\CnWizLoader.dll"
   File "..\..\Bin\CnWizRes.dll"
   File "..\..\Bin\CnPngLib.dll"
   File "..\..\Bin\CnFormatLib.dll"
@@ -686,7 +687,8 @@ Section "Delphi 5" SecD5
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_D5.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Borland\Delphi\5.0\Experts" "CnWizards_D5" "$INSTDIR\CnWizards_D5.dll"
+  DeleteRegValue HKCU "Software\Borland\Delphi\5.0\Experts" "CnWizards_D5"
+  WriteRegStr HKCU "Software\Borland\Delphi\5.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
 SectionEnd
 !endif
 
@@ -696,7 +698,8 @@ Section "Delphi 6" SecD6
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_D6.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Borland\Delphi\6.0\Experts" "CnWizards_D6" "$INSTDIR\CnWizards_D6.dll"
+  DeleteRegValue HKCU "Software\Borland\Delphi\6.0\Experts" "CnWizards_D6"
+  WriteRegStr HKCU "Software\Borland\Delphi\6.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
 SectionEnd
 !endif
 
@@ -706,7 +709,8 @@ Section "Delphi 7" SecD7
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_D7.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Borland\Delphi\7.0\Experts" "CnWizards_D7" "$INSTDIR\CnWizards_D7.dll"
+  DeleteRegValue HKCU "Software\Borland\Delphi\7.0\Experts" "CnWizards_D7"
+  WriteRegStr HKCU "Software\Borland\Delphi\7.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
 SectionEnd
 !endif
 
@@ -717,7 +721,8 @@ Section "BDS 2005" SecD2005
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_D2005.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Borland\BDS\3.0\Experts" "CnWizards_D2005" "$INSTDIR\CnWizards_D2005.dll"
+  DeleteRegValue HKCU "Software\Borland\BDS\3.0\Experts" "CnWizards_D2005"
+  WriteRegStr HKCU "Software\Borland\BDS\3.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
 SectionEnd
 !endif
 
@@ -727,7 +732,8 @@ Section "BDS 2006" SecD2006
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_D2006.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Borland\BDS\4.0\Experts" "CnWizards_D2006" "$INSTDIR\CnWizards_D2006.dll"
+  DeleteRegValue HKCU "Software\Borland\BDS\4.0\Experts" "CnWizards_D2006"
+  WriteRegStr HKCU "Software\Borland\BDS\4.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
 SectionEnd
 !endif
 
@@ -737,7 +743,8 @@ Section "RAD Studio 2007" SecD2007
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_D2007.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Borland\BDS\5.0\Experts" "CnWizards_D2007" "$INSTDIR\CnWizards_D2007.dll"
+  DeleteRegValue HKCU "Software\Borland\BDS\5.0\Experts" "CnWizards_D2007"
+  WriteRegStr HKCU "Software\Borland\BDS\5.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
 SectionEnd
 !endif
 
@@ -747,7 +754,8 @@ Section "RAD Studio 2009" SecD2009
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_D2009.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\CodeGear\BDS\6.0\Experts" "CnWizards_D2009" "$INSTDIR\CnWizards_D2009.dll"
+  DeleteRegValue HKCU "Software\CodeGear\BDS\6.0\Experts" "CnWizards_D2009"
+  WriteRegStr HKCU "Software\CodeGear\BDS\6.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
 SectionEnd
 !endif
 
@@ -757,7 +765,8 @@ Section "RAD Studio 2010" SecD2010
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_D2010.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\CodeGear\BDS\7.0\Experts" "CnWizards_D2010" "$INSTDIR\CnWizards_D2010.dll"
+  DeleteRegValue HKCU "Software\CodeGear\BDS\7.0\Experts" "CnWizards_D2010"
+  WriteRegStr HKCU "Software\CodeGear\BDS\7.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
 SectionEnd
 !endif
 
@@ -767,7 +776,8 @@ Section "RAD Studio XE" SecDXE
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_DXE.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Embarcadero\BDS\8.0\Experts" "CnWizards_DXE" "$INSTDIR\CnWizards_DXE.dll"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\8.0\Experts" "CnWizards_DXE"
+  WriteRegStr HKCU "Software\Embarcadero\BDS\8.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
 SectionEnd
 !endif
 
@@ -777,7 +787,8 @@ Section "RAD Studio XE2" SecDXE2
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_DXE2.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Embarcadero\BDS\9.0\Experts" "CnWizards_DXE2" "$INSTDIR\CnWizards_DXE2.dll"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\9.0\Experts" "CnWizards_DXE2"
+  WriteRegStr HKCU "Software\Embarcadero\BDS\9.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
 SectionEnd
 !endif
 
@@ -787,7 +798,8 @@ Section "RAD Studio XE3" SecDXE3
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_DXE3.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Embarcadero\BDS\10.0\Experts" "CnWizards_DXE3" "$INSTDIR\CnWizards_DXE3.dll"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\10.0\Experts" "CnWizards_DXE3"
+  WriteRegStr HKCU "Software\Embarcadero\BDS\10.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
 SectionEnd
 !endif
 
@@ -797,7 +809,8 @@ Section "RAD Studio XE4" SecDXE4
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_DXE4.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Embarcadero\BDS\11.0\Experts" "CnWizards_DXE4" "$INSTDIR\CnWizards_DXE4.dll"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\11.0\Experts" "CnWizards_DXE4"
+  WriteRegStr HKCU "Software\Embarcadero\BDS\11.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
 SectionEnd
 !endif
 
@@ -807,7 +820,8 @@ Section "RAD Studio XE5" SecDXE5
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_DXE5.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Embarcadero\BDS\12.0\Experts" "CnWizards_DXE5" "$INSTDIR\CnWizards_DXE5.dll"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\12.0\Experts" "CnWizards_DXE5"
+  WriteRegStr HKCU "Software\Embarcadero\BDS\12.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
 SectionEnd
 !endif
 
@@ -817,7 +831,8 @@ Section "RAD Studio XE6" SecDXE6
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_DXE6.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Embarcadero\BDS\14.0\Experts" "CnWizards_DXE6" "$INSTDIR\CnWizards_DXE6.dll"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\14.0\Experts" "CnWizards_DXE6"
+  WriteRegStr HKCU "Software\Embarcadero\BDS\14.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
 SectionEnd
 !endif
 
@@ -827,7 +842,8 @@ Section "RAD Studio XE7" SecDXE7
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_DXE7.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Embarcadero\BDS\15.0\Experts" "CnWizards_DXE7" "$INSTDIR\CnWizards_DXE7.dll"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\15.0\Experts" "CnWizards_DXE7"
+  WriteRegStr HKCU "Software\Embarcadero\BDS\15.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
 SectionEnd
 !endif
 
@@ -837,7 +853,8 @@ Section "RAD Studio XE8" SecDXE8
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_DXE8.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Embarcadero\BDS\16.0\Experts" "CnWizards_DXE8" "$INSTDIR\CnWizards_DXE8.dll"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\16.0\Experts" "CnWizards_DXE8"
+  WriteRegStr HKCU "Software\Embarcadero\BDS\16.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
 SectionEnd
 !endif
 
@@ -847,7 +864,8 @@ Section "RAD Studio 10 Seattle" SecD10S
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_D10S.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Embarcadero\BDS\17.0\Experts" "CnWizards_D10S" "$INSTDIR\CnWizards_D10S.dll"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\17.0\Experts" "CnWizards_D10S"
+  WriteRegStr HKCU "Software\Embarcadero\BDS\17.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
 SectionEnd
 !endif
 
@@ -857,7 +875,8 @@ Section "RAD Studio 10.1 Berlin" SecD101B
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_D101B.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Embarcadero\BDS\18.0\Experts" "CnWizards_D101B" "$INSTDIR\CnWizards_D101B.dll"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\18.0\Experts" "CnWizards_D101B"
+  WriteRegStr HKCU "Software\Embarcadero\BDS\18.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
 SectionEnd
 !endif
 
@@ -867,7 +886,8 @@ Section "RAD Studio 10.2 Tokyo" SecD102T
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_D102T.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Embarcadero\BDS\19.0\Experts" "CnWizards_D102T" "$INSTDIR\CnWizards_D102T.dll"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\19.0\Experts" "CnWizards_D102T"
+  WriteRegStr HKCU "Software\Embarcadero\BDS\19.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
 SectionEnd
 !endif
 
@@ -878,7 +898,8 @@ Section "RAD Studio 10.3 Rio" SecD103R
   File "..\..\Bin\CnWizards_D103R1.dll"
   File "..\..\Bin\CnWizards_D103R.dll"
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Embarcadero\BDS\20.0\Experts" "CnWizards_D103R" "$INSTDIR\CnWizards_D103R.dll"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\20.0\Experts" "CnWizards_D103R"
+  WriteRegStr HKCU "Software\Embarcadero\BDS\20.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
 SectionEnd
 !endif
 
@@ -893,7 +914,8 @@ Section "C++Builder 5" SecCB5
   File "..\..\Bin\CnWizards_CB5.map"
 !endif
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Borland\C++Builder\5.0\Experts" "CnWizards_CB5" "$INSTDIR\CnWizards_CB5.dll"
+  DeleteRegValue HKCU "Software\Borland\C++Builder\5.0\Experts" "CnWizards_CB5"
+  WriteRegStr HKCU "Software\Borland\C++Builder\5.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
 SectionEnd
 !endif
 
@@ -906,7 +928,8 @@ Section "C++Builder 6" SecCB6
   File "..\..\Bin\CnWizards_CB6.map"
 !endif
   ; 写入专家注册键值
-  WriteRegStr HKCU "Software\Borland\C++Builder\6.0\Experts" "CnWizards_CB6" "$INSTDIR\CnWizards_CB6.dll"
+  DeleteRegValue HKCU "Software\Borland\C++Builder\6.0\Experts" "CnWizards_CB6"
+  WriteRegStr HKCU "Software\Borland\C++Builder\6.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
 SectionEnd
 !endif
 
@@ -1196,72 +1219,94 @@ Section "Uninstall"
 
 !ifdef IDE_VERSION_D5
   DeleteRegValue HKCU "Software\Borland\Delphi\5.0\Experts" "CnWizards_D5"
+  DeleteRegValue HKCU "Software\Borland\Delphi\5.0\Experts" "CnWizards_Loader"
 !endif
 !ifdef IDE_VERSION_D6
   DeleteRegValue HKCU "Software\Borland\Delphi\6.0\Experts" "CnWizards_D6"
+  DeleteRegValue HKCU "Software\Borland\Delphi\6.0\Experts" "CnWizards_Loader"
 !endif
 !ifdef IDE_VERSION_D7
   DeleteRegValue HKCU "Software\Borland\Delphi\7.0\Experts" "CnWizards_D7"
+  DeleteRegValue HKCU "Software\Borland\Delphi\7.0\Experts" "CnWizards_Loader"
 !endif
 
   DeleteRegValue HKCU "Software\Borland\BDS\2.0\Experts" "CnWizards_D8"
 
 !ifdef IDE_VERSION_D2005
   DeleteRegValue HKCU "Software\Borland\BDS\3.0\Experts" "CnWizards_D2005"
+  DeleteRegValue HKCU "Software\Borland\BDS\3.0\Experts" "CnWizards_Loader"
 !endif
 !ifdef IDE_VERSION_D2006
   DeleteRegValue HKCU "Software\Borland\BDS\4.0\Experts" "CnWizards_D2006"
+  DeleteRegValue HKCU "Software\Borland\BDS\4.0\Experts" "CnWizards_Loader"
 !endif
 !ifdef IDE_VERSION_D2007
   DeleteRegValue HKCU "Software\Borland\BDS\5.0\Experts" "CnWizards_D2007"
+  DeleteRegValue HKCU "Software\Borland\BDS\5.0\Experts" "CnWizards_Loader"
 !endif
 !ifdef IDE_VERSION_D2009
   DeleteRegValue HKCU "Software\CodeGear\BDS\6.0\Experts" "CnWizards_D2009"
+  DeleteRegValue HKCU "Software\CodeGear\BDS\6.0\Experts" "CnWizards_Loader"
 !endif
 !ifdef IDE_VERSION_D2010
   DeleteRegValue HKCU "Software\CodeGear\BDS\7.0\Experts" "CnWizards_D2010"
+  DeleteRegValue HKCU "Software\CodeGear\BDS\7.0\Experts" "CnWizards_Loader"
 !endif
 !ifdef IDE_VERSION_DXE
   DeleteRegValue HKCU "Software\Embarcadero\BDS\8.0\Experts" "CnWizards_DXE"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\8.0\Experts" "CnWizards_Loader"
 !endif
 !ifdef IDE_VERSION_DXE2
   DeleteRegValue HKCU "Software\Embarcadero\BDS\9.0\Experts" "CnWizards_DXE2"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\9.0\Experts" "CnWizards_Loader"
 !endif
 !ifdef IDE_VERSION_DXE3
   DeleteRegValue HKCU "Software\Embarcadero\BDS\10.0\Experts" "CnWizards_DXE3"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\10.0\Experts" "CnWizards_Loader"
 !endif
 !ifdef IDE_VERSION_DXE4
   DeleteRegValue HKCU "Software\Embarcadero\BDS\11.0\Experts" "CnWizards_DXE4"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\11.0\Experts" "CnWizards_Loader"
 !endif
 !ifdef IDE_VERSION_DXE5
   DeleteRegValue HKCU "Software\Embarcadero\BDS\12.0\Experts" "CnWizards_DXE5"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\12.0\Experts" "CnWizards_Loader"
 !endif
 !ifdef IDE_VERSION_DXE6
   DeleteRegValue HKCU "Software\Embarcadero\BDS\14.0\Experts" "CnWizards_DXE6"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\14.0\Experts" "CnWizards_Loader"
 !endif
 !ifdef IDE_VERSION_DXE7
   DeleteRegValue HKCU "Software\Embarcadero\BDS\15.0\Experts" "CnWizards_DXE7"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\15.0\Experts" "CnWizards_Loader"
 !endif
 !ifdef IDE_VERSION_DXE8
   DeleteRegValue HKCU "Software\Embarcadero\BDS\16.0\Experts" "CnWizards_DXE8"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\16.0\Experts" "CnWizards_Loader"
 !endif
 !ifdef IDE_VERSION_D10S
   DeleteRegValue HKCU "Software\Embarcadero\BDS\17.0\Experts" "CnWizards_D10S"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\17.0\Experts" "CnWizards_Loader"
 !endif
 !ifdef IDE_VERSION_D101B
   DeleteRegValue HKCU "Software\Embarcadero\BDS\18.0\Experts" "CnWizards_D101B"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\18.0\Experts" "CnWizards_Loader"
 !endif
 !ifdef IDE_VERSION_D102T
   DeleteRegValue HKCU "Software\Embarcadero\BDS\19.0\Experts" "CnWizards_D102T"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\19.0\Experts" "CnWizards_Loader"
 !endif
 !ifdef IDE_VERSION_D103R
   DeleteRegValue HKCU "Software\Embarcadero\BDS\20.0\Experts" "CnWizards_D103R"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\20.0\Experts" "CnWizards_Loader"
 !endif
 !ifdef IDE_VERSION_CB5
   DeleteRegValue HKCU "Software\Borland\C++Builder\5.0\Experts" "CnWizards_CB5"
+  DeleteRegValue HKCU "Software\Borland\C++Builder\5.0\Experts" "CnWizards_Loader"
 !endif
 !ifdef IDE_VERSION_CB6
   DeleteRegValue HKCU "Software\Borland\C++Builder\6.0\Experts" "CnWizards_CB6"
+  DeleteRegValue HKCU "Software\Borland\C++Builder\6.0\Experts" "CnWizards_Loader"
 !endif
 
   ; 提示用户是否删除数据文件
