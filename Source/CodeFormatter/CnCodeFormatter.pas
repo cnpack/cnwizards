@@ -1732,12 +1732,18 @@ begin
     HasElse := True;
     if FLastToken = tokKeywordEnd then
       Writeln;
-    // else 前可不需要空一行
+    // else 前不需要空一行
     Match(tokKeywordElse, PreSpaceCount, 1);
     Writeln;
-    // FormatStatement(Tab(PreSpaceCount, False)); 
-    // 此处修改成匹配多个语句
-    FormatStmtList(Tab(PreSpaceCount, False));
+
+    // else 是空块的情况下，避免多出一个换行
+    if Scaner.Token <> tokKeywordEnd then
+    begin
+      // 匹配多个语句
+      FormatStmtList(Tab(PreSpaceCount, False));
+      // end 之前的语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
+      CheckKeepLineBreakWriteln;
+    end;
   end;
 
   if Scaner.Token = tokSemicolon then
