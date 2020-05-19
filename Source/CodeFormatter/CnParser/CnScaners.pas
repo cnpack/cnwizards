@@ -210,7 +210,8 @@ type
     {* 记录上一次是否输出了连续空行合并成的一个空行}
 
     property KeepOneBlankLine: Boolean read FKeepOneBlankLine write FKeepOneBlankLine;
-    {* 由外界设置是否在格式化的过程中保持空行，无须用 Bookmark 保存}
+    {* 由外界设置是否在格式化的过程中保持语句间的空行，无须用 Bookmark 保存
+       注意该标志并不等于保留换行}
 
     property IdentContainsDot: Boolean read FIdentContainsDot write FIdentContainsDot;
     {* 由外界设置是否允许标识符里含有点号，用于单元名，无须用 Bookmark 保存}
@@ -830,7 +831,8 @@ begin
   // 判定当前位置是否语句内部，上一个是分号或组合语句，作为语句内换行的额外判断补充。
   // 下一个是 end/else 的条件暂无需处理，外面似乎已代劳
   if not FIsForwarding then
-    Result := (FPrevToken in [tokSemicolon, tokKeywordFinally, tokKeywordExcept] + StructStmtTokens)
+    Result := (FPrevToken in [tokSemicolon, tokKeywordFinally, tokKeywordExcept,
+      tokKeywordOf, tokKeywordElse, tokKeywordDo] + StructStmtTokens)
       // or (ForwardToken() in [tokKeywordEnd, tokKeywordElse])
   else
     Result := FPrevToken in [tokSemicolon] + StructStmtTokens;
@@ -1449,7 +1451,8 @@ begin
           if BlankStr <> '' then
           begin
             FCodeGen.BackSpaceLastSpaces;
-            // 如果当前是保留换行模式，且不是语句中，则 BlankStr 开头的空格回车要省略
+            // 如果当前是保留单个空行模式，且不是语句中，则 BlankStr 开头的空格与回车要省略，避免出现多余的换行
+            // 如语句中的判断有误，则可能出现该换行的行注释拼到同一行的情况
             if FKeepOneBlankLine and not IsInStatement and IsStringStartWithSpacesCRLF(BlankStr) then
             begin
               Idx := Pos(#13#10, BlankStr);
@@ -1550,7 +1553,8 @@ begin
           if BlankStr <> '' then
           begin
             FCodeGen.BackSpaceLastSpaces;
-            // 如果当前是保留换行模式，且不是语句中，则 BlankStr 开头的空格与回车要省略
+            // 如果当前是保留单个空行模式，且不是语句中，则 BlankStr 开头的空格与回车要省略，避免出现多余的换行
+            // 如语句中的判断有误，则可能出现该换行的行注释拼到同一行的情况
             if FKeepOneBlankLine and not IsInStatement and IsStringStartWithSpacesCRLF(BlankStr) then
             begin
               Idx := Pos(#13#10, BlankStr);
