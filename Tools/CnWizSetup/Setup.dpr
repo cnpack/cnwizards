@@ -95,7 +95,7 @@ const
     'C++Builder 5',
     'C++Builder 6');
 
-  csRegPaths: array[TCompilerName] of string = (
+  csIDERegPaths: array[TCompilerName] of string = (
     '\Software\Borland\Delphi\5.0',
     '\Software\Borland\Delphi\6.0',
     '\Software\Borland\Delphi\7.0',
@@ -256,8 +256,8 @@ var
   ParamNoMsg: Boolean;
   ParamCmdHelp :Boolean;
 
-// 取专家 DLL 文件名
-function GetDllName(Compiler: TCompilerName): string;
+// 取专家 DLL 完整文件名
+function GetDllFullPathName(Compiler: TCompilerName): string;
 const
   RIO_10_3_2: TVersionNumber =
     (Major: 26; Minor: 0; Release: 34749; Build: 6593); // 10.3.2
@@ -300,8 +300,8 @@ begin
   end;
 end;
 
-// 取旧的专家名作为 Key
-function GetDllOldValue(Compiler: TCompilerName): string;
+// 取旧的专家名作为旧 Key
+function GetDllOldKeyName(Compiler: TCompilerName): string;
 begin
   Result := _CnChangeFileExt(csDllNames[Compiler], '');
 end;
@@ -309,7 +309,7 @@ end;
 // 判断专家 DLL 是否存在
 function WizardExists(Compiler: TCompilerName): Boolean;
 begin
-  Result := FileExists(GetDllName(Compiler));
+  Result := FileExists(GetDllFullPathName(Compiler));
 end;
 
 // 判断是否安装旧版专家 DLL
@@ -319,8 +319,8 @@ var
 begin
   Result := True;
   for Compiler := Low(Compiler) to High(Compiler) do
-    if WizardExists(Compiler) and RegKeyExists(csRegPaths[Compiler]) and
-      not RegValueExists(csRegPaths[Compiler] + csExperts, GetDllOldValue(Compiler)) then
+    if WizardExists(Compiler) and RegKeyExists(csIDERegPaths[Compiler]) and
+      not RegValueExists(csIDERegPaths[Compiler] + csExperts, GetDllOldKeyName(Compiler)) then
     begin
       Result := False;
       Exit;
@@ -334,8 +334,8 @@ var
 begin
   Result := True;
   for Compiler := Low(Compiler) to High(Compiler) do
-    if WizardExists(Compiler) and RegKeyExists(csRegPaths[Compiler]) and
-      not RegValueExists(csRegPaths[Compiler] + csExperts, csDllLoaderKey) then
+    if WizardExists(Compiler) and RegKeyExists(csIDERegPaths[Compiler]) and
+      not RegValueExists(csIDERegPaths[Compiler] + csExperts, csDllLoaderKey) then
     begin
       Result := False;
       Exit;
@@ -355,21 +355,21 @@ begin
     if Compiler = cvD8 then // 不安装 D8 的
       Continue;
 
-    if WizardExists(Compiler) and RegKeyExists(csRegPaths[Compiler]) then
+    if WizardExists(Compiler) and RegKeyExists(csIDERegPaths[Compiler]) then
     begin
-      if not RegKeyExists(csRegPaths[Compiler] + csExperts) then
+      if not RegKeyExists(csIDERegPaths[Compiler] + csExperts) then
       begin
-        RegCreateKey(HKEY_CURRENT_USER, PChar(csRegPaths[Compiler] + csExperts), Key);
+        RegCreateKey(HKEY_CURRENT_USER, PChar(csIDERegPaths[Compiler] + csExperts), Key);
         RegCloseKey(Key);
       end;
 
       // 删掉旧格式
-      if RegValueExists(csRegPaths[Compiler] + csExperts, GetDllOldValue(Compiler)) then
-        RegDeleteValue(csRegPaths[Compiler] + csExperts, GetDllOldValue(Compiler));
+      if RegValueExists(csIDERegPaths[Compiler] + csExperts, GetDllOldKeyName(Compiler)) then
+        RegDeleteValue(csIDERegPaths[Compiler] + csExperts, GetDllOldKeyName(Compiler));
 
       // 写新格式
-      if RegWriteStr(csRegPaths[Compiler] + csExperts, csDllLoaderKey,
-        GetDllName(Compiler)) then
+      if RegWriteStr(csIDERegPaths[Compiler] + csExperts, csDllLoaderKey,
+        GetDllFullPathName(Compiler)) then
         S := S + #13#10 + ' - ' + csCompilerNames[Compiler];
     end;
   end;
@@ -397,12 +397,12 @@ begin
   for Compiler := Low(Compiler) to High(Compiler) do
   begin
     // 删掉旧的
-    if RegValueExists(csRegPaths[Compiler] + csExperts, GetDllOldValue(Compiler)) then
-      RegDeleteValue(csRegPaths[Compiler] + csExperts, GetDllOldValue(Compiler));
+    if RegValueExists(csIDERegPaths[Compiler] + csExperts, GetDllOldKeyName(Compiler)) then
+      RegDeleteValue(csIDERegPaths[Compiler] + csExperts, GetDllOldKeyName(Compiler));
 
     // 删掉新的
-    if RegValueExists(csRegPaths[Compiler] + csExperts, csDllLoaderKey) and
-      RegDeleteValue(csRegPaths[Compiler] + csExperts, csDllLoaderKey) then
+    if RegValueExists(csIDERegPaths[Compiler] + csExperts, csDllLoaderKey) and
+      RegDeleteValue(csIDERegPaths[Compiler] + csExperts, csDllLoaderKey) then
       S := S + #13#10 + ' - ' + csCompilerNames[Compiler];
   end;
 
