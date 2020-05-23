@@ -179,7 +179,7 @@ type
 
     // 专家 DLL 属性
     property DllName: string read FDllName;
-    {* 专家 DLL 文件名}
+    {* 专家 DLL 完整文件名}
     property DllPath: string read FDllPath;
     {* 专家 DLL 所在的目录}
     property CompilerPath: string read FCompilerPath;
