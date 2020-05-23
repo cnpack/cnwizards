@@ -1007,8 +1007,12 @@ begin
 end;
 
 procedure TCnScriptWizard.LoadSettings(Ini: TCustomIniFile);
+var
+  S: string;
 begin
-  Scripts.LoadFromFile(WizOptions.GetUserFileName(SCnScriptFileName, True));
+  S := WizOptions.GetUserFileName(SCnScriptFileName, True);
+  if FileExists(S) then
+    Scripts.LoadFromFile(S);
   FSearchPath.CommaText := Ini.ReadString('', csSearchPath, FSearchPath.CommaText);
 end;
 
