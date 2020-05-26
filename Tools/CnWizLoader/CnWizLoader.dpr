@@ -96,6 +96,7 @@ end;
 function GetWizardDll: string;
 const
   RIO_13_2_RELEASE = 34749;
+  XE2_UPDATE4_HOTFIX1_RELEASE = 48759;
 var
   FullPath: array[0..MAX_PATH - 1] of AnsiChar;
   Dir, Exe: string;
@@ -130,7 +131,13 @@ begin
     12: Result := Dir + 'CnWizards_D2009.DLL';
     14: Result := Dir + 'CnWizards_D2010.DLL';
     15: Result := Dir + 'CnWizards_DXE.DLL';
-    16: Result := Dir + 'CnWizards_DXE2.DLL';
+    16:
+      begin
+        if V.Release < XE2_UPDATE4_HOTFIX1_RELEASE then  // XE2 Update 4 Hotfix 1 不兼容以前的版本
+          Result := Dir + 'CnWizards_DXE2.DLL'  // TODO: Compile a XE2 Update 4 DLL
+        else
+          Result := Dir + 'CnWizards_DXE2.DLL';
+      end;
     17: Result := Dir + 'CnWizards_DXE3.DLL';
     18: Result := Dir + 'CnWizards_DXE4.DLL';
     19: Result := Dir + 'CnWizards_DXE5.DLL';
