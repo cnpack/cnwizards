@@ -2341,7 +2341,11 @@ begin
                     {$IFDEF VER330}
                       List[I] := ExportItem;
                     {$ELSE}
-                      List^[I] := ExportItem;
+                      {$IFDEF VER340}
+                        List[I] := ExportItem;
+                      {$ELSE}
+                        List^[I] := ExportItem;
+                      {$ENDIF}
                     {$ENDIF}
                   {$ENDIF}
                 {$ENDIF}
