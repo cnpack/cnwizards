@@ -115,7 +115,12 @@ procedure SIRegister_IOTAIDEInsightNotifier(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAIDEInsightCategory(CL: TPSPascalCompiler);
 procedure SIRegister_INTAIDEInsightItem(CL: TPSPascalCompiler);
 procedure SIRegister_IOTACodeInsightServices(CL: TPSPascalCompiler);
+procedure SIRegister_IOTACodeInsightServices270(CL: TPSPascalCompiler);
 procedure SIRegister_IOTACodeInsightServices60(CL: TPSPascalCompiler);
+procedure SIRegister_IOTACodeInsightUIOverride(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAAsyncCodeInsightManager(CL: TPSPascalCompiler);
+procedure SIRegister_IOTACodeInsightSelection(CL: TPSPascalCompiler);
+procedure SIRegister_IOTACodeInsightManagerEnvOptions(CL: TPSPascalCompiler);
 procedure SIRegister_INTACustomDrawCodeInsightViewer(CL: TPSPascalCompiler);
 procedure SIRegister_IOTACodeInsightViewer(CL: TPSPascalCompiler);
 procedure SIRegister_IOTACodeInsightViewer90(CL: TPSPascalCompiler);
@@ -1226,8 +1231,18 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_IOTACodeInsightServices(CL: TPSPascalCompiler);
 begin
-  //with RegInterfaceS(CL,'IOTACodeInsightServices60', 'IOTACodeInsightServices') do
-  with CL.AddInterface(CL.FindInterface('IOTACodeInsightServices60'),IOTACodeInsightServices, 'IOTACodeInsightServices') do
+  //with RegInterfaceS(CL,'IOTACodeInsightServices270', 'IOTACodeInsightServices') do
+  with CL.AddInterface(CL.FindInterface('IOTACodeInsightServices270'),IOTACodeInsightServices, 'IOTACodeInsightServices') do
+  begin
+    RegisterMethod('Function HandlesFile( const AFileName, AIDString : string) : Boolean)', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTACodeInsightServices270(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTACodeInsightServices60', 'IOTACodeInsightServices270') do
+  with CL.AddInterface(CL.FindInterface('IOTACodeInsightServices60'),IOTACodeInsightServices270, 'IOTACodeInsightServices270') do
   begin
     RegisterMethod('Procedure SetQueryContext( const EditView : IOTAEditView; const CodeInsightManager : IOTACodeInsightManager)', cdRegister);
   end;
@@ -1248,6 +1263,70 @@ begin
     RegisterMethod('Procedure InsertText( const Str : string; Replace : Boolean)', cdRegister);
     RegisterMethod('Function GetCodeInsightManagerCount : Integer', cdRegister);
     RegisterMethod('Function GetCodeInsightManager( Index : Integer) : IOTACodeInsightManager', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTACodeInsightUIOverride(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IUNKNOWN', 'IOTACodeInsightUIOverride') do
+  with CL.AddInterface(CL.FindInterface('IUNKNOWN'),IOTACodeInsightUIOverride, 'IOTACodeInsightUIOverride') do
+  begin
+    RegisterMethod('Procedure EnableTooltip( const AFileName : string; AElement : Integer; ATooltipPos : TOTAEditPos; var AEnabled : Boolean)', cdRegister);
+    RegisterMethod('Procedure EnableGotoDefinition( const AEditView : IOTAEditView; AElement : Integer; ATooltipPos : TOTAEditPos; var AEnabled : Boolean)', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAAsyncCodeInsightManager(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IUNKNOWN', 'IOTAAsyncCodeInsightManager') do
+  with CL.AddInterface(CL.FindInterface('IUNKNOWN'),IOTAAsyncCodeInsightManager, 'IOTAAsyncCodeInsightManager') do
+  begin
+    RegisterMethod('Procedure AsyncAllowCodeInsight( var AAllow : Boolean; const AKey : Char)', cdRegister);
+    RegisterMethod('Function AsyncCanInvoke( AInsightType : TOTACodeInsightType) : Boolean', cdRegister);
+    RegisterMethod('Function AsyncEnabled : Boolean', cdRegister);
+    RegisterMethod('Function AsyncInvokeCodeCompletion( AHowInvoked : TOTAInvokeType; var AStr : string; ALine, ACharIndex : Integer; ACallback : TOTACodeCompleteCallBack) : Integer', cdRegister);
+    RegisterMethod('Function AsyncInvokeParameterCodeInsight( HowInvoked : TOTAInvokeType; const AFileName : string; ALine, ACharIndex : Integer; ACallback : TOTAParametersCallBack) : Integer', cdRegister);
+    RegisterMethod('Function AsyncGetHintText( HintLine, HintCol : Integer; ACallBack : TOTAHintTextCallBack) : Integer', cdRegister);
+    RegisterMethod('Function AsyncGotoDefinition( const AFileName : string; ALine, ACharIndex : Integer; ACallBack : TOTAGotoDefinitionCallBack) : Integer', cdRegister);
+    RegisterMethod('Procedure AsyncParameterCodeInsightParamIndex( const AFileName : string; ALine, ACharIndex : Integer; ACallBack : TOTAParamIndexCallBack)', cdRegister);
+    RegisterMethod('Procedure AsyncOperationCanceled( AId : Integer)', cdRegister);
+    RegisterMethod('Function ShowCalculating : Boolean', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTACodeInsightSelection(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IUNKNOWN', 'IOTACodeInsightSelection') do
+  with CL.AddInterface(CL.FindInterface('IUNKNOWN'),IOTACodeInsightSelection, 'IOTACodeInsightSelection') do
+  begin
+    RegisterMethod('Function GetDisplayName : string', cdRegister);
+    RegisterMethod('Function GetIDString : string', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTACodeInsightManagerEnvOptions(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IUnknown', 'IOTACodeInsightManagerEnvOptions') do
+  with CL.AddInterface(CL.FindInterface('IUnknown'),IOTACodeInsightManagerEnvOptions, 'IOTACodeInsightManagerEnvOptions') do
+  begin
+    RegisterMethod('Function IsEnableErrorInsightVisible : Boolean', cdRegister);
+    RegisterMethod('Function IsCodeCompleteAutoParensVisible : Boolean', cdRegister);
+    RegisterMethod('Function IsCodeCompleteAutoInvokeVisible : Boolean', cdRegister);
+    RegisterMethod('Function IsCodeCompleteHistoryVisible : Boolean', cdRegister);
+    RegisterMethod('Function IsCodeCompleteShowReservedWordsVisible : Boolean', cdRegister);
+    RegisterMethod('Function IsCodeParametersVisible : Boolean', cdRegister);
+    RegisterMethod('Function IsEvalHintsVisible : Boolean', cdRegister);
+    RegisterMethod('Function IsDeclInfoVisible : Boolean', cdRegister);
+    RegisterMethod('Function IsToolTipHelpInsightVisible : Boolean', cdRegister);
+    RegisterMethod('Function IsEnableAutoCompletionVisible : Boolean', cdRegister);
+    RegisterMethod('Function IsBlockWrapStyleVisible : Boolean', cdRegister);
+    RegisterMethod('Function GetCodeInsightUIName : string', cdRegister);
+    RegisterMethod('Procedure ManagerDisabled', cdRegister);
+    RegisterMethod('Procedure ManagerEnabled', cdRegister);
   end;
 end;
 
@@ -3280,7 +3359,7 @@ begin
   //with RegInterfaceS(CL,'IOTAThreadNotifier', 'IOTAThreadNotifier160') do
   with CL.AddInterface(CL.FindInterface('IOTAThreadNotifier'),IOTAThreadNotifier160, 'IOTAThreadNotifier160') do
   begin
-    RegisterMethod('Procedure EvaluateComplete( const ExprStr, ResultStr : string; CanModify : Boolean; ResultAddress : TOTAAddress; ResultSize : LongWord; ReturnCode : Integer)', cdRegister);
+    RegisterMethod('Procedure EvaluateComplete1( const ExprStr, ResultStr : string; CanModify : Boolean; ResultAddress : TOTAAddress; ResultSize : LongWord; ReturnCode : Integer)', cdRegister);
   end;
 end;
 
@@ -3291,7 +3370,7 @@ begin
   with CL.AddInterface(CL.FindInterface('IOTANotifier'),IOTAThreadNotifier, 'IOTAThreadNotifier') do
   begin
     RegisterMethod('Procedure ThreadNotify( Reason : TOTANotifyReason)', cdRegister);
-    RegisterMethod('Procedure EvaluteComplete( const ExprStr, ResultStr : string; CanModify : Boolean; ResultAddress, ResultSize : LongWord; ReturnCode : Integer)', cdRegister);
+    RegisterMethod('Procedure EvaluateComplete( const ExprStr, ResultStr : string; CanModify : Boolean; ResultAddress, ResultSize : LongWord; ReturnCode : Integer)', cdRegister);
     RegisterMethod('Procedure ModifyComplete( const ExprStr, ResultStr : string; ReturnCode : Integer)', cdRegister);
   end;
 end;
@@ -4554,15 +4633,17 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_INTAEditViewNotifier(CL: TPSPascalCompiler);
 begin
-  // INTAEditViewNotifier HAS NO GUID so comment it.
+  // INTAEditViewNotifier HAS GUID in 10.4 so Restore it.
   //with RegInterfaceS(CL,'IOTANotifier', 'INTAEditViewNotifier') do
-//  with CL.AddInterface(CL.FindInterface('IOTANotifier'),INTAEditViewNotifier, 'INTAEditViewNotifier') do
-//  begin
-//    RegisterMethod('Procedure EditorIdle( const View : IOTAEditView)', cdRegister);
-//    RegisterMethod('Procedure BeginPaint( const View : IOTAEditView; var FullRepaint : Boolean)', cdRegister);
-//    RegisterMethod('Procedure PaintLine( const View : IOTAEditView; LineNumber : Integer; const LineText : PAnsiChar; const TextWidth : Word; const LineAttributes : TOTAAttributeArray; const Canvas : TCanvas; const TextRect : TRect; const LineRect : TRect; const CellSize : TSize)', cdRegister);
-//    RegisterMethod('Procedure EndPaint( const View : IOTAEditView)', cdRegister);
-//  end;
+  with CL.AddInterface(CL.FindInterface('IOTANotifier'),INTAEditViewNotifier, 'INTAEditViewNotifier') do
+  begin
+    RegisterMethod('Procedure EditorIdle( const View : IOTAEditView)', cdRegister);
+    RegisterMethod('Procedure BeginPaint( const View : IOTAEditView; var FullRepaint : Boolean)', cdRegister);
+    RegisterMethod('Procedure PaintLine( const View : IOTAEditView; LineNumber : Integer; const LineText : PAnsiChar;' 
+      + ' const TextWidth : Word; const LineAttributes : TOTAAttributeArray; const Canvas : TCanvas; const TextRect :'
+      + ' TRect; const LineRect : TRect; const CellSize : TSize)', cdRegister);
+    RegisterMethod('Procedure EndPaint( const View : IOTAEditView)', cdRegister);
+  end;
 end;
 
 (*----------------------------------------------------------------------------*)
@@ -5154,6 +5235,7 @@ begin
  CL.AddConstantN('atIllegal','LongInt').SetInt( 12);
  CL.AddConstantN('atAssembler','LongInt').SetInt( 13);
  CL.AddConstantN('SyntaxOff','LongInt').SetInt( 14);
+ CL.AddConstantN('atOverridable','LongWord').SetUInt( $8000);
  CL.AddConstantN('MarkedBlock','LongInt').SetInt( 15);
  CL.AddConstantN('SearchMatch','LongInt').SetInt( 16);
  CL.AddConstantN('atHotLink','LongInt').SetInt( 17);
@@ -5502,6 +5584,14 @@ begin
  CL.AddConstantN('pmmpUserReorder','LongInt').SetInt( 9500000);
  CL.AddConstantN('pmmpUserOptions','LongInt').SetInt( 10500000);
  CL.AddConstantN('pmmpUserBuildConfig','LongInt').SetInt( 11500000);
+ CL.AddConstantN('icNameChanged','LongWord').SetUInt( $0001);
+ CL.AddConstantN('icExecutableChanged','LongWord').SetUInt( $0002);
+ CL.AddConstantN('icLanguageChanged','LongWord').SetUInt( $0004);
+ CL.AddConstantN('icTimeoutChanged','LongWord').SetUInt( $0008);
+ CL.AddConstantN('icInitOptionChanged','LongWord').SetUInt( $0010);
+ CL.AddConstantN('icExtChanged','LongWord').SetUInt( $0020);
+ CL.AddConstantN('icEnabled','LongWord').SetUInt( $0040);
+ CL.AddConstantN('icDisabled','LongWord').SetUInt( $0080);
   CL.AddClassN(CL.FindClass('TOBJECT'),'ENonAIRException');
   CL.AddClassN(CL.FindClass('TOBJECT'),'EPersonalityException');
   CL.AddTypeS('TOTACompileMode', '( cmOTAMake, cmOTABuild, cmOTACheck, cmOTAMak'
@@ -5629,7 +5719,7 @@ begin
   CL.AddTypeS('TOTARegions', 'array of TOTARegion');
   SIRegister_IOTAModuleRegions(CL);
   CL.AddTypeS('TOTAError', 'record Text : string; Start : TOTACharPos; Stop : T'
-   +'OTACharPos; end');
+   +'OTACharPos; Severity : Integer; end');
   CL.AddTypeS('TOTAErrors', 'array of TOTAError');
   SIRegister_IOTAModuleErrors(CL);
   SIRegister_IOTAAdditionalModuleFiles(CL);
@@ -5768,7 +5858,9 @@ begin
   CL.AddTypeS('TOTAFileNotification', '( ofnFileOpening, ofnFileOpened, ofnFile'
    +'Closing, ofnDefaultDesktopLoad, ofnDefaultDesktopSave, ofnProjectDesktopLo'
    +'ad, ofnProjectDesktopSave, ofnPackageInstalled, ofnPackageUninstalled, ofn'
-   +'ActiveProjectChanged, ofnProjectOpenedFromTemplate )');
+   +'ActiveProjectChanged, ofnProjectOpenedFromTemplate, ofnBeginProjectGroupOp'
+   +'en, ofnEndProjectGroupOpen, ofnBeginProjectGroupClose, ofnEndProjectGroupC'
+   +'lose )');
   SIRegister_IOTAIDENotifier(CL);
   SIRegister_IOTAIDENotifier50(CL);
   SIRegister_IOTAIDENotifier80(CL);
@@ -5897,6 +5989,7 @@ begin
   SIRegister_IOTACodeInsightParameterList(CL);
   SIRegister_IOTACodeInsightParameterList100(CL);
   SIRegister_IOTACodeInsightManager100(CL);
+  SIRegister_IOTACodeInsightManagerEnvOptions(CL);
   SIRegister_IOTACodeBrowsePreview(CL);
   SIRegister_IOTACodeInsightManager90(CL);
   SIRegister_IOTACodeInsightManager(CL);
@@ -5909,7 +6002,9 @@ begin
   SIRegister_IOTACodeInsightViewer(CL);
   SIRegister_INTACustomDrawCodeInsightViewer(CL);
   SIRegister_IOTACodeInsightServices60(CL);
+  SIRegister_IOTACodeInsightServices270(CL);
   SIRegister_IOTACodeInsightServices(CL);
+  SIRegister_IOTACodeInsightSelection(CL);
   SIRegister_INTAIDEInsightItem(CL);
   CL.AddTypeS('INTAIDEInsightItemArray', 'array of INTAIDEInsightItem');
   SIRegister_IOTAIDEInsightCategory(CL);
@@ -5990,6 +6085,19 @@ begin
   SIRegister_TModuleNotifierObject(CL);
   SIRegister_TOTAFile(CL);
   SIRegister_TOTAStringsAdapter(CL);
+  CL.AddTypeS('TOTACodeCompleteCallBack', 'Procedure ( Sender : TObject; AId : '
+   +'Integer; AError : Boolean; const AMessage : string)');
+  CL.AddTypeS('TOTAParametersCallBack', 'Procedure ( Sender : TObject; AId, ASe'
+   +'lectIndex : Integer; AError : Boolean; const AMessage : string)');
+  CL.AddTypeS('TOTAHintTextCallBack', 'Procedure ( Sender : TObject; AId : Inte'
+   +'ger; const AHint : string; AError : Boolean; const AMessage : string)');
+  CL.AddTypeS('TOTAGotoDefinitionCallBack', 'Procedure ( Sender : TObject; AId '
+   +': Integer; const AFileName : string; ALine : Integer; AError : Boolean; co'
+   +'nst AMessage : string)');
+  CL.AddTypeS('TOTAParamIndexCallBack', 'Procedure ( Sender : TObject; AParamIn'
+   +'dex : Integer)');
+  SIRegister_IOTAAsyncCodeInsightManager(CL);
+  SIRegister_IOTACodeInsightUIOverride(CL);
  CL.AddDelphiFunction('Procedure RegisterPackageWizard( const Wizard : IOTAWizard)');
  CL.AddDelphiFunction('Function StringToIOTAFile( const CodeString : string) : IOTAFile');
  CL.AddDelphiFunction('Function GetActiveProject : IOTAProject');
