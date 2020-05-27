@@ -5,9 +5,9 @@
 **********************************************************************
 
                          CnPack IDE Wizards
-                           Version 1.1.9
+                           Version 1.2.0
                        =======================
-                         CnPack Team 2020.03
+                         CnPack Team 2020.06
 
 
 ======================================================================
@@ -23,7 +23,7 @@ gesteigert werden kann.
     CnWizards wurde entworfen, um Programmierern die mit Delphi 5 6 7,
 C++Builder 5 6 oder BDS 2005 2006 oder RAD Studio 2007 2009 2010, XE,
 XE2, XE3, XE4, XE5, XE6, XE7, XE8, 10 Seattle, 10.1 Berlin, 10.2 Tokyo,
-10.3 Rio arbeiten, die Arbeit zu erleichtern.
+10.3 Rio, 10.4 Sydney arbeiten, die Arbeit zu erleichtern.
 
     Die offizielle Version der CnWizards beinhalt folgende Sprachen: 
 Simplified Chinese, Traditional Chinese, Englisch, Russisch und Deutsch.
