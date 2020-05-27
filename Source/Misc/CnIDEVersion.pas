@@ -38,8 +38,8 @@ unit CnIDEVersion;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2018.11.07 by liuxiao
-*               持续移植，到 Delphi 10.3 RIO
+* 修改记录：2020.05.27 by liuxiao
+*               持续移植，到 Delphi 10.4 Sydney
 *           2012.09.19 by shenloqi
 *               移植到 Delphi XE3
 *           2003.04.29 V1.0
@@ -374,7 +374,7 @@ end;
 function IsDelphi104SIdeVersionLatest: Boolean;
 const
   CoreIdeLatest: TVersionNumber =
-    (Major: 27; Minor: 0; Release: 0; Build: 0); // 10.4.0
+    (Major: 27; Minor: 0; Release: 37889; Build: 9797); // 10.4.0
 var
   ReadFileVersion: TVersionNumber;
 begin
