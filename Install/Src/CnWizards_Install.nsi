@@ -478,6 +478,10 @@ FileLoop:
   FileOpen $0 "$INSTDIR\CnWizards_DXE2.dll" a
   IfErrors FileInUse
   FileClose $0
+  IfFileExists "$INSTDIR\CnWizards_DXE21.dll" 0 +4
+  FileOpen $0 "$INSTDIR\CnWizards_DXE21.dll" a
+  IfErrors FileInUse
+  FileClose $0
 !endif
 
 !ifdef IDE_VERSION_DXE3
@@ -786,6 +790,7 @@ Section "RAD Studio XE2" SecDXE2
   SectionIn 1 2
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_DXE2.dll"
+  File "..\..\Bin\CnWizards_DXE21.dll"
   ; 写入专家注册键值
   DeleteRegValue HKCU "Software\Embarcadero\BDS\9.0\Experts" "CnWizards_DXE2"
   WriteRegStr HKCU "Software\Embarcadero\BDS\9.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
