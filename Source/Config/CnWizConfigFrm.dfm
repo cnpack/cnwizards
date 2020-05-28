@@ -1,12 +1,12 @@
 inherited CnWizConfigForm: TCnWizConfigForm
   Left = 351
   Top = 66
-  Width = 529
-  Height = 528
+  ClientWidth = 521
+  ClientHeight = 501
   BorderIcons = [biSystemMenu]
   Caption = 'CnPack IDE Wizards Settings'
-  Constraints.MinHeight = 510
-  Constraints.MinWidth = 528
+  Constraints.MinHeight = 540
+  Constraints.MinWidth = 537
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnResize = FormResize
