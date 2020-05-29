@@ -436,6 +436,8 @@
         </DCCReference>
         <DCCReference Include="Utils\CnGroupReplace.pas"/>
         <DCCReference Include="SrcEditorEnhance\CnSrcEditorReplaceInBlock.pas">
+            <Form>CnSrcEditorReplaceInBlockForm</Form>
+        </DCCReference>
         <DCCReference Include="SrcEditorEnhance\CnSrcEditorGroupReplace.pas">
             <Form>CnSrcEditorGroupReplaceForm</Form>
         </DCCReference>
