@@ -164,6 +164,9 @@ const
     clNavy, clPurple, clTeal, clLtGray, clDkGray, clRed, clLime,
     clYellow, clBlue, clFuchsia, clAqua, clWhite);
 
+  csDarkBackgroundColor = $2E2F33;  // Dark 模式下的背景色
+  csDarkFontColor = $FFFFFF;        // Dark 模式下的文字颜色
+
 type
 {$IFDEF BDS}
   {$IFDEF BDS2006_UP}
@@ -438,8 +441,7 @@ type
   TCnPaletteWrapper = class(TObject)
   {* 封装了控件板各个属性的类，大部分只支持低版本控件板
      高版本控件板由上下两个 Panel 组成，上面 Panel 容纳 TGradientTab 与 ToolbarSearch
-     下面 Panel 容纳滚动按钮以及多个 TPalItemSpeedButton 的控件图标按钮
-   }
+     下面 Panel 容纳滚动按钮以及多个 TPalItemSpeedButton 的控件图标按钮}
   private
     FPalTab: TWinControl;  // 低版本指大的 TabControl 容器，高版本指上半部分的 TGradientTabSet
     FPalette: TWinControl; // 低版本指大的 TabControl 内的组件容器，高版本指下半部分的组件容器
@@ -526,10 +528,9 @@ type
     {* 控件板是否可见，支持高版本的新控件板 }
     property Enabled: Boolean read GetEnabled write SetEnabled;
     {* 控件板是否使能，支持高版本的新控件板 }
-
   end;
 
-{TCnMessageViewWrapper}
+{ TCnMessageViewWrapper }
 
   TCnMessageViewWrapper = class(TObject)
   {* 封装了消息显示窗口的各个属性的类 }
@@ -583,9 +584,33 @@ type
     {* '编辑'菜单项}
   end;
 
+{$IFDEF IDE_SUPPORT_THEMING}
+
+  TCnThemeWrapper = class(TObject)
+  {* 封装了主题信息的工具类}
+  private
+    FActiveThemeName: string;
+    FCurrentIsDark: Boolean;
+    procedure ThemeChanged(Sender: TObject);
+  public
+    constructor Create; virtual;
+    destructor Destroy; override;
+
+    property ActiveThemeName: string read FActiveThemeName;
+    property CurrentIsDark: Boolean read FCurrentIsDark;
+  end;
+
+{$ENDIF}
+
 function CnPaletteWrapper: TCnPaletteWrapper;
 
 function CnMessageViewWrapper: TCnMessageViewWrapper;
+
+{$IFDEF IDE_SUPPORT_THEMING}
+
+function CnThemeWrapper: TCnThemeWrapper;
+
+{$ENDIF}
 
 implementation
 
@@ -2201,9 +2226,6 @@ begin
     inherited;
 end;
 
-var
-  FCnMessageViewWrapper: TCnMessageViewWrapper = nil;
-
 //==============================================================================
 // 组件面板封装类
 //==============================================================================
@@ -2986,7 +3008,14 @@ begin
     FPalTab.Visible := Value;
 end;
 
+//==============================================================================
+// 消息输出窗口封装类
+//==============================================================================
+
 { TCnMessageViewWrapper }
+
+var
+  FCnMessageViewWrapper: TCnMessageViewWrapper = nil;
 
 function CnMessageViewWrapper: TCnMessageViewWrapper;
 begin
@@ -3114,6 +3143,43 @@ begin
   end;
 end;
 
+{$IFDEF IDE_SUPPORT_THEMING}
+
+var
+  FThemeWrapper: TCnThemeWrapper = nil;
+
+function CnThemeWrapper: TCnThemeWrapper;
+begin
+  if FThemeWrapper = nil then
+    FThemeWrapper := TCnThemeWrapper.Create;
+  Result := FThemeWrapper;
+end;
+
+{ TCnThemeWrapper }
+
+constructor TCnThemeWrapper.Create;
+begin
+  inherited;
+  FActiveThemeName := CnOtaGetActiveThemeName;
+  FCurrentIsDark := FActiveThemeName = 'Dark';
+
+  CnWizNotifierServices.AddAfterThemeChangeNotifier(ThemeChanged);
+end;
+
+destructor TCnThemeWrapper.Destroy;
+begin
+  CnWizNotifierServices.RemoveAfterThemeChangeNotifier(ThemeChanged);
+  inherited;
+end;
+
+procedure TCnThemeWrapper.ThemeChanged(Sender: TObject);
+begin
+  FActiveThemeName := CnOtaGetActiveThemeName;
+  FCurrentIsDark := FActiveThemeName = 'Dark';
+end;
+
+{$ENDIF}
+
 initialization
   // 使用此全局变量可以避免频繁调用 IdeGetIsEmbeddedDesigner 函数
   IdeIsEmbeddedDesigner := IdeGetIsEmbeddedDesigner;
@@ -3133,6 +3199,11 @@ finalization
 
   if FCnMessageViewWrapper <> nil then
     FreeAndNil(FCnMessageViewWrapper);
+
+{$IFDEF IDE_SUPPORT_THEMING}
+  if FThemeWrapper <> nil then
+    FreeAndNil(FThemeWrapper);
+{$ENDIF}
 
   FreeIDEBigImageList;
   FinalIdeAPIs;
