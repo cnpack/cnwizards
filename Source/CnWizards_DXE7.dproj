@@ -103,7 +103,7 @@
         <DCCReference Include="Framework\CnWizClasses.pas"/>
         <DCCReference Include="Framework\CnWizManager.pas"/>
         <DCCReference Include="Framework\CnWizOptions.pas"/>
-        <DCCReference Include="Framework\CnWizSplash.pas"/>
+        <DCCReference Include="Misc\CnWizSplash.pas"/>
         <DCCReference Include="Misc\CnWizTipOfDayFrm.pas">
             <Form>CnWizTipOfDayForm</Form>
         </DCCReference>
