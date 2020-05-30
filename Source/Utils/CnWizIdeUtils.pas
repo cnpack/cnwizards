@@ -584,33 +584,27 @@ type
     {* '编辑'菜单项}
   end;
 
-{$IFDEF IDE_SUPPORT_THEMING}
-
   TCnThemeWrapper = class(TObject)
   {* 封装了主题信息的工具类}
   private
     FActiveThemeName: string;
     FCurrentIsDark: Boolean;
+    FSupportTheme: Boolean;
     procedure ThemeChanged(Sender: TObject);
   public
     constructor Create; virtual;
     destructor Destroy; override;
 
+    property SupportTheme: Boolean read FSupportTheme;
     property ActiveThemeName: string read FActiveThemeName;
     property CurrentIsDark: Boolean read FCurrentIsDark;
   end;
-
-{$ENDIF}
 
 function CnPaletteWrapper: TCnPaletteWrapper;
 
 function CnMessageViewWrapper: TCnMessageViewWrapper;
 
-{$IFDEF IDE_SUPPORT_THEMING}
-
 function CnThemeWrapper: TCnThemeWrapper;
-
-{$ENDIF}
 
 implementation
 
@@ -3143,8 +3137,6 @@ begin
   end;
 end;
 
-{$IFDEF IDE_SUPPORT_THEMING}
-
 var
   FThemeWrapper: TCnThemeWrapper = nil;
 
@@ -3160,6 +3152,9 @@ end;
 constructor TCnThemeWrapper.Create;
 begin
   inherited;
+{$IFDEF IDE_SUPPORT_THEMING}
+  FSupportTheme := True;
+{$ENDIF}
   FActiveThemeName := CnOtaGetActiveThemeName;
   FCurrentIsDark := FActiveThemeName = 'Dark';
 
@@ -3177,8 +3172,6 @@ begin
   FActiveThemeName := CnOtaGetActiveThemeName;
   FCurrentIsDark := FActiveThemeName = 'Dark';
 end;
-
-{$ENDIF}
 
 initialization
   // 使用此全局变量可以避免频繁调用 IdeGetIsEmbeddedDesigner 函数
@@ -3200,10 +3193,8 @@ finalization
   if FCnMessageViewWrapper <> nil then
     FreeAndNil(FCnMessageViewWrapper);
 
-{$IFDEF IDE_SUPPORT_THEMING}
   if FThemeWrapper <> nil then
     FreeAndNil(FThemeWrapper);
-{$ENDIF}
 
   FreeIDEBigImageList;
   FinalIdeAPIs;
