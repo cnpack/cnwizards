@@ -259,12 +259,24 @@ var
     Allow: Boolean;
     ValidChars: TSysCharSet;
     Name: string;
+ {$IFDEF IDE_SUPPORT_LSP}
+    AsyncManager: IOTAAsyncCodeInsightManager;
+ {$ENDIF}
   begin
-    if not Assigned(Manager) or not Manager.Enabled then
+    if not Assigned(Manager) or not Manager.Enabled then   // 未启用
       Exit;
 
-    if not Manager.HandlesFile(Editor.FileName) then
+    if not Manager.HandlesFile(Editor.FileName) then       // 不能处理当前文件
       Exit;
+
+  {$IFDEF IDE_SUPPORT_LSP}
+    if Supports(Manager, IOTAAsyncCodeInsightManager, AsyncManager) then
+    begin
+    {$IFDEF DEBUG}
+      CnDebugger.LogMsg('Is an IOTAAsyncCodeInsightManager.');
+    {$ENDIF}
+    end;
+  {$ENDIF}
 
   {$IFDEF SYMBOL_LOCKHOOK}
     if DphIdeModule1 = 0 then
@@ -289,6 +301,7 @@ var
 
       if not MyInvokeCodeCompletion(Manager) then
         Exit;
+
       try
         SymbolList := nil;
       {$IFDEF Debug}
@@ -368,10 +381,22 @@ begin
   CodeInsightServices := (BorlandIDEServices as IOTACodeInsightServices);
   if CodeInsightServices <> nil then
   begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('IDE SymbolList Reload: CodeInsightManager Count '
+      + IntToStr(CodeInsightServices.CodeInsightManagerCount));
+{$ENDIF}
+
   {$IFDEF IDE_SetQueryContext_Bug}
     for Index := 0 to CodeInsightServices.CodeInsightManagerCount - 1 do
     begin
       CodeInsightManager := CodeInsightServices.CodeInsightManager[Index];
+      if CodeInsightManager = nil then
+        Continue;
+
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('IDE SymbolList Reload: Add From CodeInsightManager: %d. Enabled: %d - %s - %s',
+        [Index, Integer(CodeInsightManager.Enabled), CodeInsightManager.GetIDString, CodeInsightManager.Name]);
+{$ENDIF}
       AddToSymbolList(CodeInsightManager);
     end;
 
@@ -392,12 +417,18 @@ begin
     begin
       for Index := 0 to CodeInsightServices.CodeInsightManagerCount - 1 do
       begin
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('IDE SymbolList Reload: Current is NIL. Add From CodeInsightManager: Index ' + IntToStr(Index));
+{$ENDIF}
         CodeInsightManager := CodeInsightServices.CodeInsightManager[Index];
         AddToSymbolList(CodeInsightManager);
       end;
     end
     else
     begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('IDE SymbolList Reload: Add From Current CodeInsightManager.');
+{$ENDIF}
       AddToSymbolList(CodeInsightManager);
     end;
   {$ENDIF}

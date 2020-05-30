@@ -1183,12 +1183,10 @@ procedure TCnExternalEditorToolBarMgr.DoUpdateToolbarTheme(
 var
   I: Integer;
   ToolBar: TToolBar;
-  Obj: TCnEditorToolBarObj;
 begin
   for I := 0 to FToolBarTypes.Count - 1 do
   begin
     ToolBar := TToolBar(EditWindow.FindComponent(FToolBarTypes[I]));
-    Obj := TCnEditorToolBarObj(FToolBarTypes.Objects[I]);
 
     if ToolBar <> nil then
       ApplyThemeOnToolBar(ToolBar);
