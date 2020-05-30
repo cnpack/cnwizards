@@ -145,6 +145,7 @@ type
       Operation: TOperation);
     procedure SetWrapable(Value: Boolean);
   protected
+    procedure ThemeChanged(Sender: TObject);
     procedure DoEnhConfig;
     function CanShowToolBar: Boolean;
     function CanShowDesignToolBar: Boolean;
@@ -271,8 +272,11 @@ type
     FToolBarTypes: TStrings;
     procedure DoInstallToolBars(EditWindow: TCustomForm; EditControl: TControl;
       Context: Pointer);
+    procedure DoUpdateToolbarTheme(EditWindow: TCustomForm; EditControl: TControl;
+      Context: Pointer);
     function GetToolBarObj(ToolBarType: string): TCnEditorToolBarObj;
   protected
+    procedure ThemeChanged(Sender: TObject);
     procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm;
       Operation: TOperation);
   public
@@ -325,6 +329,8 @@ begin
   ShowHint := True;
   EdgeBorders := [ebBottom];
   Flat := True;
+  ApplyThemeOnToolbar(Self);
+
 {$IFDEF BDS2006_UP}
   barStdTool := (BorlandIDEServices as INTAServices).ToolBar[sStandardToolBar];
   if Assigned(barStdTool) then
@@ -588,6 +594,7 @@ constructor TCnSrcEditorToolBarMgr.Create;
 begin
   inherited;
   CnSrcEditorToolBarMgr := Self;
+
   FWrapable := True;
   FShowToolBar := True;
   FShowDesignToolBar := True;
@@ -596,19 +603,22 @@ begin
   FToolBarActions := TStringList.Create;
   FDesignToolBarActions := TStringList.Create;
   FList := TList.Create;
-  
+
+  CnWizNotifierServices.AddAfterThemeChangeNotifier(ThemeChanged);
   EditControlWrapper.AddEditControlNotifier(EditControlNotify);
   InstallToolBars;
 end;
 
 destructor TCnSrcEditorToolBarMgr.Destroy;
 var
-  i: Integer;
+  I: Integer;
 begin
   CnSrcEditorToolBarMgr := nil;
+  CnWizNotifierServices.RemoveAfterThemeChangeNotifier(ThemeChanged);
   EditControlWrapper.RemoveEditControlNotifier(EditControlNotify);
-  for i := FList.Count - 1 downto 0 do
-    TCnSrcEditorToolBar(FList[i]).Free;
+  for I := FList.Count - 1 downto 0 do
+    TCnSrcEditorToolBar(FList[I]).Free;
+
   FList.Free;
   FToolBarActions.Free;
   FDesignToolBarActions.Free;
@@ -964,6 +974,14 @@ begin
   end;
 end;
 
+procedure TCnSrcEditorToolBarMgr.ThemeChanged(Sender: TObject);
+var
+  I: Integer;
+begin
+  for I := 0 to Count - 1 do
+    ApplyThemeOnToolbar(ToolBars[I]);
+end;
+
 { TCnExternalEditorToolBarMgr }
 
 constructor TCnExternalEditorToolBarMgr.Create;
@@ -972,6 +990,7 @@ begin
   ExternalEditorToolBarMgr := Self;
   FToolBarTypes := TStringList.Create;
 
+  CnWizNotifierServices.AddAfterThemeChangeNotifier(ThemeChanged);
   EditControlWrapper.AddEditControlNotifier(EditControlNotify);
   InstallToolBars;
 end;
@@ -981,6 +1000,7 @@ var
   I: Integer;
 begin
   ExternalEditorToolBarMgr := nil;
+  CnWizNotifierServices.RemoveAfterThemeChangeNotifier(ThemeChanged);
   EditControlWrapper.RemoveEditControlNotifier(EditControlNotify);
   
   for I := FToolBarTypes.Count - 1 downto 0 do
@@ -1132,7 +1152,7 @@ begin
       Obj.ToolBars[I].Free;
     Obj.Free;
   end;
-  FToolBarTypes.Delete(FToolBarTypes.IndexOf(ToolBarType));  
+  FToolBarTypes.Delete(FToolBarTypes.IndexOf(ToolBarType));
 end;
 
 procedure TCnExternalEditorToolBarMgr.SetVisible(const ToolBarType: string;
@@ -1151,6 +1171,28 @@ begin
   end;
   if CnSrcEditorToolBarMgr <> nil then
     CnSrcEditorToolBarMgr.CheckToolBarEnable;
+end;
+
+procedure TCnExternalEditorToolBarMgr.ThemeChanged(Sender: TObject);
+begin
+  EnumEditControl(DoUpdateToolbarTheme, nil);
+end;
+
+procedure TCnExternalEditorToolBarMgr.DoUpdateToolbarTheme(
+  EditWindow: TCustomForm; EditControl: TControl; Context: Pointer);
+var
+  I: Integer;
+  ToolBar: TToolBar;
+  Obj: TCnEditorToolBarObj;
+begin
+  for I := 0 to FToolBarTypes.Count - 1 do
+  begin
+    ToolBar := TToolBar(EditWindow.FindComponent(FToolBarTypes[I]));
+    Obj := TCnEditorToolBarObj(FToolBarTypes.Objects[I]);
+
+    if ToolBar <> nil then
+      ApplyThemeOnToolbar(ToolBar);
+  end;
 end;
 
 { TCnEditorToolBarObj }
