@@ -329,7 +329,7 @@ begin
   ShowHint := True;
   EdgeBorders := [ebBottom];
   Flat := True;
-  ApplyThemeOnToolbar(Self);
+  ApplyThemeOnToolBar(Self);
 
 {$IFDEF BDS2006_UP}
   barStdTool := (BorlandIDEServices as INTAServices).ToolBar[sStandardToolBar];
@@ -979,7 +979,7 @@ var
   I: Integer;
 begin
   for I := 0 to Count - 1 do
-    ApplyThemeOnToolbar(ToolBars[I]);
+    ApplyThemeOnToolBar(ToolBars[I]);
 end;
 
 { TCnExternalEditorToolBarMgr }
@@ -1191,7 +1191,7 @@ begin
     Obj := TCnEditorToolBarObj(FToolBarTypes.Objects[I]);
 
     if ToolBar <> nil then
-      ApplyThemeOnToolbar(ToolBar);
+      ApplyThemeOnToolBar(ToolBar);
   end;
 end;
 

@@ -419,7 +419,7 @@ function ConvertIDETreeNodeToTreeNode(Node: TObject): TTreeNode;
 function ConvertIDETreeNodesToTreeNodes(Nodes: TObject): TTreeNodes;
 {* 将 IDE 内部使用的 TTreeControl的 Items 属性值的 TreeNodes 强行转换成公用的 TreeNodes}
 
-procedure ApplyThemeOnToolbar(ToolBar: TToolBar);
+procedure ApplyThemeOnToolBar(ToolBar: TToolBar; Recursive: Boolean = True);
 {* 为工具栏应用主题，只在支持主题的 Delphi 版本中有效}
 
 //==============================================================================
@@ -2204,7 +2204,11 @@ begin
   Result := TTreeNodes(Nodes);
 end;
 
-procedure ApplyThemeOnToolbar(ToolBar: TToolBar);
+procedure ApplyThemeOnToolBar(ToolBar: TToolBar; Recursive: Boolean);
+{$IFDEF IDE_SUPPORT_THEMING}
+var
+  I: Integer;
+{$ENDIF}
 begin
 {$IFDEF IDE_SUPPORT_THEMING}
   if CnThemeWrapper.CurrentIsDark then
@@ -2218,6 +2222,11 @@ begin
     ToolBar.DrawingStyle := TTBDrawingStyle.dsNormal;
     ToolBar.Color := clBtnface;
   end;
+
+  if Recursive then
+    for I := 0 to ToolBar.ControlCount - 1 do
+      if ToolBar.Controls[I] is TToolBar then
+        ApplyThemeOnToolbar(ToolBar.Controls[I] as TToolBar);
 {$ENDIF}
 end;
 
