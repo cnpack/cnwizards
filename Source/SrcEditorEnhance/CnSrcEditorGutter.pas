@@ -172,6 +172,7 @@ type
     procedure SetShowModifier(const Value: Boolean);
     procedure SetTenMode(const Value: Boolean);
   protected
+    procedure ThemeChanged(Sender: TObject);
     procedure DoUpdateGutters(EditWindow: TCustomForm; EditControl: TControl; Context: 
       Pointer);
     procedure DoEnhConfig;
@@ -240,6 +241,13 @@ const
 
   csDefaultModifiedColor = clYellow;
   csDefaultModifiedSavedColor = clGreen;
+  csTotalLineBackgroundColor = clNavy;
+  csTotalLineNumberColor = clWhite;
+
+  csDefaultLineNumberColor = clNavy;
+  csDefaultCurrentLineNumberColor = clRed;
+  csDarkTotalLineNumberBackgroundColor = clNavy;
+  csDarkTotalLineNumberColor = clYellow;
 
   csGutter = 'Gutter';
 {$IFDEF BDS}
@@ -278,6 +286,10 @@ begin
   Width := 10;
   Align := alLeft;
   DoubleBuffered := True;
+
+  // 暗黑模式下用暗黑色
+  if CnThemeWrapper.CurrentIsDark then
+    Color := csDarkBackgroundColor;
 
   FMenu := TPopupMenu.Create(Self);
   FMenu.Images := dmCnSharedImages.GetMixedImageList;
@@ -441,9 +453,10 @@ begin
       if MaxRow <= 0 then
         Exit;
 
-      OldColor := Canvas.Brush.Color;
-
       Canvas.Pen.Style := psClear;
+
+      OldColor := Canvas.Brush.Color;
+      // 暗黑模式下的背景色由 Color 属性决定，不在此处修改
       Canvas.Brush.Color := $00B0B0B0;
       Canvas.Brush.Style := bsSolid;
 
@@ -483,9 +496,16 @@ begin
       begin
         Idx := EditorObj.ViewLineNumber[I];
         if Idx <> FPosInfo.CaretY then
-          Canvas.Font := FGutterMgr.Font
+        begin
+          Canvas.Font := FGutterMgr.Font;
+          // 暗黑模式下调整默认字体颜色
+          if CnThemeWrapper.CurrentIsDark and (Canvas.Font.Color = csDefaultLineNumberColor) then
+            Canvas.Font.Color := csDarkFontColor;
+        end
         else
+        begin
           Canvas.Font := FGutterMgr.CurrFont;
+        end;
 
         Canvas.Brush.Style := bsClear;
         R := Rect(1, I * FLineHeight, Width - csBevelWidth, (I + 1) * FLineHeight);
@@ -534,9 +554,18 @@ begin
       begin
         R := GetLineCountRect;
         Canvas.Font := FGutterMgr.Font;
-        Canvas.Font.Color := clWhite;
+        if CnThemeWrapper.CurrentIsDark then
+        begin
+          Canvas.Font.Color := csDarkTotalLineNumberColor;
+          Canvas.Brush.Color := csDarkTotalLineNumberBackgroundColor;
+        end
+        else
+        begin
+          Canvas.Font.Color := csTotalLineNumberColor;
+          Canvas.Brush.Color := csTotalLineBackgroundColor;
+        end;
+
         StrNum := IntToStr(FPosInfo.LineCount);
-        Canvas.Brush.Color := clNavy;
         if FGutterMgr.ShowModifier then
           R.Right := R.Right - csModifierWidth;
 
@@ -1112,10 +1141,10 @@ begin
   FCurrFont := TFont.Create;
   FFont.Name := 'Verdana';
   FFont.Size := 9;
-  FFont.Color := clNavy;
+  FFont.Color := csDefaultLineNumberColor;
   FCurrFont.Name := 'Verdana';
   FCurrFont.Size := 9;
-  FCurrFont.Color := clRed;
+  FCurrFont.Color := csDefaultCurrentLineNumberColor;
   
   FActive := True;
   FShowLineNumber := True;
@@ -1129,6 +1158,7 @@ begin
   FClickSelectLine := False;       // 默认不启用单击选行
   FDragSelectLines := True;        // 默认启用拖动选择行
 
+  CnWizNotifierServices.AddAfterThemeChangeNotifier(ThemeChanged);
   EditControlWrapper.AddEditControlNotifier(EditControlNotify);
   UpdateGutters;
 end;
@@ -1137,6 +1167,7 @@ destructor TCnSrcEditorGutterMgr.Destroy;
 var
   I: Integer;
 begin
+  CnWizNotifierServices.RemoveAfterThemeChangeNotifier(ThemeChanged);
   EditControlWrapper.RemoveEditControlNotifier(EditControlNotify);
   for I := FList.Count - 1 downto 0 do
     TCnSrcEditorGutter(FList[I]).Free;
@@ -1344,6 +1375,23 @@ begin
   begin
     FTenMode := Value;
     UpdateGutters;
+  end;
+end;
+
+procedure TCnSrcEditorGutterMgr.ThemeChanged(Sender: TObject);
+var
+  I: Integer;
+begin
+  for I := 0 to Count - 1 do
+  begin
+    try
+      if CnThemeWrapper.CurrentIsDark then
+        Gutters[I].Color := csDarkBackgroundColor
+      else
+        Gutters[I].Color := clBtnface;
+    except
+      ;
+    end;
   end;
 end;
 
