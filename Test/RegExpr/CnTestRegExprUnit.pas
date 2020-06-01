@@ -14,7 +14,9 @@ type
     edtContent: TEdit;
     btnCheck: TButton;
     chkCase: TCheckBox;
+    btnCheckUpperW: TButton;
     procedure btnCheckClick(Sender: TObject);
+    procedure btnCheckUpperWClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -56,6 +58,20 @@ begin
     ShowMessage('Matched.')
   else
     ShowMessage('Not Matched.');
+end;
+
+procedure TTestRegExprForm.btnCheckUpperWClick(Sender: TObject);
+{$IFDEF UNICODE}
+var
+  W, R: WideChar;
+{$ENDIF}
+begin
+{$IFDEF UNICODE}
+  W := 'C';
+  R := WideChar(CharUpper(PChar(W)));
+
+  R := CharUpper(W);
+{$ENDIF}
 end;
 
 end.

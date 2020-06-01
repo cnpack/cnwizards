@@ -1,9 +1,9 @@
 object TestRegExprForm: TTestRegExprForm
   Left = 192
   Top = 130
-  Width = 447
-  Height = 199
   Caption = 'Test RegExpr'
+  ClientHeight = 210
+  ClientWidth = 431
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -60,5 +60,14 @@ object TestRegExprForm: TTestRegExprForm
     Height = 17
     Caption = 'Case Sensitive'
     TabOrder = 3
+  end
+  object btnCheckUpperW: TButton
+    Left = 80
+    Top = 160
+    Width = 249
+    Height = 25
+    Caption = 'Check CharUpperW'
+    TabOrder = 4
+    OnClick = btnCheckUpperWClick
   end
 end
