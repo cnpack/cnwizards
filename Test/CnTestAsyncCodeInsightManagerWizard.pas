@@ -39,7 +39,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ToolsAPI, IniFiles, CnWizClasses, CnWizUtils, CnWizConsts;
+  ToolsAPI, IniFiles, CnWizClasses, CnWizUtils, CnWizConsts, CnWizCompilerConst;
 
 type
 
@@ -51,11 +51,16 @@ type
 
   TCnTestAsyncCodeInsightManagerWizard = class(TCnMenuWizard)
   private
+    FLSPH: THandle;
+    FManager: TObject;
     procedure AsyncCodeCompletionCallBack(Sender: TObject; AId: Integer;
       AError: Boolean; const AMessage: string);
   protected
     function GetHasConfig: Boolean; override;
   public
+    constructor Create; override;
+    destructor Destroy; override;
+
     function GetState: TWizardState; override;
     procedure Config; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
@@ -72,6 +77,15 @@ implementation
 uses
   CnDebug;
 
+const
+  SLspGetSymbolList = '@Lspcodcmplt@TLSPKibitzManager@GetSymbolList$qqrr61System@%DelphiInterface$34Toolsapi@IOTACodeInsightSymbolList%';
+
+type
+  TLSPKibitzManagerGetSymbolList = procedure (ASelf: TObject; var SymbolList: IOTACodeInsightSymbolList);
+
+var
+  LspGetSymbolList: TLSPKibitzManagerGetSymbolList = nil;
+
 //==============================================================================
 // CnTestAsyncCodeInsightManagerWizard ²Ëµ¥×¨¼Ò
 //==============================================================================
@@ -80,7 +94,18 @@ uses
 
 procedure TCnTestAsyncCodeInsightManagerWizard.AsyncCodeCompletionCallBack(
   Sender: TObject; AId: Integer; AError: Boolean; const AMessage: string);
+var
+  SymbolList: IOTACodeInsightSymbolList;
 begin
+  CnDebugger.TraceCurrentStack;
+
+  if (FManager <> nil) and Assigned(LspGetSymbolList) then
+  begin
+    LspGetSymbolList(FManager, SymbolList);
+    // Get some Count in Async call back
+    CnDebugger.LogMsg('Call back LspGetSymbolList Returns Count ' + IntToStr(SymbolList.Count));
+  end;
+
   ShowMessage(Format('CallBack AId: %d. Error %d. Message %s',
     [AId, Integer(AError), AMessage]));
 end;
@@ -88,6 +113,20 @@ end;
 procedure TCnTestAsyncCodeInsightManagerWizard.Config;
 begin
   ShowMessage('No Option for this Test Case.');
+end;
+
+constructor TCnTestAsyncCodeInsightManagerWizard.Create;
+begin
+  inherited;
+  FLSPH := GetModuleHandle(IdeLspLibName);
+  if FLSPH <> 0 then
+    LspGetSymbolList := TLSPKibitzManagerGetSymbolList(GetProcAddress(FLSPH, SLspGetSymbolList));
+end;
+
+destructor TCnTestAsyncCodeInsightManagerWizard.Destroy;
+begin
+
+  inherited;
 end;
 
 procedure TCnTestAsyncCodeInsightManagerWizard.Execute;
@@ -99,6 +138,7 @@ var
   CIS: IOTACodeInsightServices;
   CIM: IOTACodeInsightManager;
   ACIM: IOTAAsyncCodeInsightManager;
+  SymbolList: IOTACodeInsightSymbolList;
 begin
   View := CnOtaGetTopMostEditView;
   if View = nil then
@@ -135,10 +175,19 @@ begin
         Continue;
       end;
 
+      // CnDebugger.LogInterface(ACIM);
       Str := '';
       ACIM.AsyncInvokeCodeCompletion(itManual, Str, View.CursorPos.Line,
         View.CursorPos.Col, AsyncCodeCompletionCallBack);
       CnDebugger.LogMsg('AsyncInvokeCodeCompletion Called.');
+
+      FManager := ACIM as TObject;
+      if (FManager <> nil) and Assigned(LspGetSymbolList) then
+      begin
+        LspGetSymbolList(FManager, SymbolList);
+        // Get 0 Count for Async
+        CnDebugger.LogMsg('Call LspGetSymbolList Returns Count ' + IntToStr(SymbolList.Count));
+      end;
     end;
   end;
 end;

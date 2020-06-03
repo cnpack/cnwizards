@@ -629,6 +629,8 @@ const
   DesignIdeLibName = 'designide270.bpl';
   DphIdeLibName = 'delphicoreide270.bpl';
   dccLibName = 'dcc32270.dll';
+
+  IdeLspLibName = 'IDELSP270.bpl'; // 10.4 ∫Û÷ß≥÷ LSP
   {$DEFINE LibNamesDefined}
 {$ENDIF COMPILER27}
 
