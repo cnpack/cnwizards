@@ -82,6 +82,10 @@ uses
   {$DEFINE SYMBOL_LOCKHOOK}
 {$ENDIF}
 
+{$IFDEF IDE_SUPPORT_LSP}
+  {$UNDEF SYMBOL_LOCKHOOK}
+{$ENDIF}
+
 {$IFDEF BDS}
   {$DEFINE IDE_SYMBOL_HAS_SYSTEM} // 2005 或以上，符号列表中有 System 单元
 {$ENDIF}
@@ -96,6 +100,13 @@ type
 
   TIDESymbolList = class(TSymbolList)
   private
+  {$IFDEF IDE_SUPPORT_LSP}
+     FAsyncResultGot: Boolean;
+     FAsyncManagerObj: TObject;
+     FSymbolList: IOTACodeInsightSymbolList;
+     procedure AsyncCodeCompletionCallBack(Sender: TObject; AId: Integer;
+       AError: Boolean; const AMessage: string);
+  {$ENDIF}
   {$IFDEF SUPPORT_IOTACodeInsightManager}
     function Reload_CodeInsightManager(Editor: IOTAEditBuffer;
       const InputText: string; PosInfo: TCodePosInfo): Boolean;
@@ -156,6 +167,18 @@ uses
 const
   csCIMgrNames = ';pascal;';
 
+{$IFDEF IDE_SUPPORT_LSP}
+const
+  SLspGetSymbolList = '@Lspcodcmplt@TLSPKibitzManager@GetSymbolList$qqrr61System@%DelphiInterface$34Toolsapi@IOTACodeInsightSymbolList%';
+
+type
+  TLSPKibitzManagerGetSymbolList = procedure (ASelf: TObject; var SymbolList: IOTACodeInsightSymbolList);
+
+var
+  FLspHandle: THandle = 0;
+  LspGetSymbolList: TLSPKibitzManagerGetSymbolList = nil;
+{$ENDIF}
+
 //==============================================================================
 // 从 IDE 中获得的标识符列表
 //==============================================================================
@@ -197,6 +220,23 @@ procedure MyComtypesLock; stdcall;
 begin
 end;
 {$ENDIF SYMBOL_LOCKHOOK}
+
+{$IFDEF IDE_SUPPORT_LSP}
+
+procedure TIDESymbolList.AsyncCodeCompletionCallBack(Sender: TObject; AId: Integer;
+  AError: Boolean; const AMessage: string);
+begin
+  FAsyncResultGot := True;
+  if Assigned(FAsyncManagerObj) and Assigned(LspGetSymbolList) then
+  begin
+    FSymbolList := nil;
+    LspGetSymbolList(FAsyncManagerObj, FSymbolList);
+    // Get some Count in Async call back
+    CnDebugger.LogMsg('Callback LspGetSymbolList Returns Count ' + IntToStr(FSymbolList.Count));
+  end;
+end;
+
+{$ENDIF}
 
 // Invoke delphi code completion, load symbol list
 function TIDESymbolList.Reload_CodeInsightManager(Editor: IOTAEditBuffer;
@@ -252,7 +292,7 @@ var
   procedure AddToSymbolList(Manager: IOTACodeInsightManager);
   var
     DisplayParams: Boolean;
-    i, Idx: Integer;
+    I, Idx: Integer;
     SymbolList: IOTACodeInsightSymbolList;
     Desc: string;
     Kind: TSymbolKind;
@@ -260,23 +300,97 @@ var
     ValidChars: TSysCharSet;
     Name: string;
  {$IFDEF IDE_SUPPORT_LSP}
+    Filter: string;
+    Tick: Cardinal;
     AsyncManager: IOTAAsyncCodeInsightManager;
  {$ENDIF}
   begin
-    if not Assigned(Manager) or not Manager.Enabled then   // 未启用
-      Exit;
-
-    if not Manager.HandlesFile(Editor.FileName) then       // 不能处理当前文件
-      Exit;
-
-  {$IFDEF IDE_SUPPORT_LSP}
+{$IFDEF IDE_SUPPORT_LSP}
     if Supports(Manager, IOTAAsyncCodeInsightManager, AsyncManager) then
     begin
     {$IFDEF DEBUG}
       CnDebugger.LogMsg('Is an IOTAAsyncCodeInsightManager.');
     {$ENDIF}
+      if not Assigned(AsyncManager) or not AsyncManager.AsyncEnabled then   // 未启用
+        Exit;
+
+      if not Manager.HandlesFile(Editor.FileName) then       // 不能处理当前文件
+        Exit;
+
+      CodeInsightServices.SetQueryContext(EditView, Manager);
+      try
+        Allow := True;
+        AsyncManager.AsyncAllowCodeInsight(Allow, #0);
+        if not Allow then
+          Exit;
+
+        ValidChars := Manager.EditorTokenValidChars(False);
+        Filter := '';
+        FAsyncResultGot := False;
+        FSymbolList := nil;
+        FAsyncManagerObj := AsyncManager as TObject;
+        AsyncManager.AsyncInvokeCodeCompletion(itManual, Filter, EditView.CursorPos.Line,
+          EditView.CursorPos.Col, AsyncCodeCompletionCallBack);
+
+        Tick := GetTickCount;
+        while not FAsyncResultGot and (GetTickCount - Tick < 1000) do //
+          Application.ProcessMessages;
+
+{$IFDEF DEBUG}
+        if not FAsyncResultGot then
+          CnDebugger.LogMsg('Async Result Time out. Fail to get Symbol List.');
+        if FSymbolList = nil then
+          CnDebugger.LogMsg('Async Result Error. Symbol List not Got.');
+{$ENDIF}
+
+        if FAsyncResultGot and (FSymbolList <> nil) then
+        begin
+          try
+            for I := 0 to FSymbolList.Count - 1 do
+            begin
+              // follow code maybe raise exception, but disabled.
+            {$IFDEF UTF8_SYMBOL}
+              Name := string(FastUtf8ToAnsi(AnsiString(FSymbolList.SymbolText[I])));
+            {$ELSE}
+              Name := FSymbolList.SymbolText[I];
+            {$ENDIF}
+              Desc := FSymbolList.SymbolTypeText[I];
+              Kind := SymbolFlagsToKind(FSymbolList.SymbolFlags[I], Desc);
+              // Description is Utf-8 format under BDS.
+              Idx := Add(Name, Kind, Round(MaxInt / FSymbolList.Count * I), Desc, '', True,
+                False, False, {$IFDEF UTF8_SYMBOL}True{$ELSE}False{$ENDIF});
+
+              // 根据源文件的类型设置符号项的适用范围
+              Items[Idx].ForPascal := PosInfo.IsPascal;
+              Items[Idx].ForCpp := not PosInfo.IsPascal;
+            end;
+          except
+          {$IFDEF Debug}
+            on E: Exception do
+            begin
+              CnDebugger.LogMsg('Exception: ' + E.ClassName + ' ' + E.Message);
+            end;
+          {$ENDIF Debug}
+          end;
+          FSymbolList := nil;
+        end;
+
+      finally
+        CodeInsightServices.SetQueryContext(nil, nil);
+      {$IFDEF Debug}
+        CnDebugger.LogMsg('End Async AddToSymbolList');
+      {$ENDIF Debug}
+      end;
+      Exit;
     end;
-  {$ENDIF}
+{$ENDIF}
+
+    // 普通的 CodeInsight
+    if not Assigned(Manager) or not Manager.Enabled then   // 未启用
+      Exit;
+
+    if not Manager.HandlesFile(Editor.FileName) then       // 不能处理当前文件
+      Exit;
 
   {$IFDEF SYMBOL_LOCKHOOK}
     if DphIdeModule1 = 0 then
@@ -313,35 +427,33 @@ var
         {$IFDEF Debug}
           CnDebugger.LogInteger(SymbolList.Count, 'IDE SymbolList.Count');
         {$ENDIF Debug}
-          try
-            try
-              for i := 0 to SymbolList.Count - 1 do
-              begin
-                // follow code maybe raise exception, but disabled.
-              {$IFDEF UTF8_SYMBOL}
-                Name := string(FastUtf8ToAnsi(AnsiString(SymbolList.SymbolText[i])));
-              {$ELSE}
-                Name := SymbolList.SymbolText[i];
-              {$ENDIF}
-                Desc := SymbolList.SymbolTypeText[i];
-                Kind := SymbolFlagsToKind(SymbolList.SymbolFlags[i], Desc);
-                // Description is Utf-8 format under BDS.
-                Idx := Add(Name, Kind, Round(MaxInt / SymbolList.Count * i), Desc, '', True,
-                  False, False, {$IFDEF UTF8_SYMBOL}True{$ELSE}False{$ENDIF});
 
-                // 根据源文件的类型设置符号项的适用范围
-                Items[Idx].ForPascal := PosInfo.IsPascal;
-                Items[Idx].ForCpp := not PosInfo.IsPascal;
-              end;
-            except
-            {$IFDEF Debug}
-              on E: Exception do
-              begin
-                CnDebugger.LogMsg('Exception: ' + E.ClassName + ' ' + E.Message);
-              end;
-            {$ENDIF Debug}
+          try
+            for I := 0 to SymbolList.Count - 1 do
+            begin
+              // follow code maybe raise exception, but disabled.
+            {$IFDEF UTF8_SYMBOL}
+              Name := string(FastUtf8ToAnsi(AnsiString(SymbolList.SymbolText[I])));
+            {$ELSE}
+              Name := SymbolList.SymbolText[I];
+            {$ENDIF}
+              Desc := SymbolList.SymbolTypeText[I];
+              Kind := SymbolFlagsToKind(SymbolList.SymbolFlags[I], Desc);
+              // Description is Utf-8 format under BDS.
+              Idx := Add(Name, Kind, Round(MaxInt / SymbolList.Count * I), Desc, '', True,
+                False, False, {$IFDEF UTF8_SYMBOL}True{$ELSE}False{$ENDIF});
+
+              // 根据源文件的类型设置符号项的适用范围
+              Items[Idx].ForPascal := PosInfo.IsPascal;
+              Items[Idx].ForCpp := not PosInfo.IsPascal;
             end;
-          finally
+          except
+          {$IFDEF Debug}
+            on E: Exception do
+            begin
+              CnDebugger.LogMsg('Exception: ' + E.ClassName + ' ' + E.Message);
+            end;
+          {$ENDIF Debug}
           end;
         end;
       finally
@@ -963,6 +1075,12 @@ initialization
 {$IFNDEF BCB5}  // 支持BCB5/6的IDE符号列表差异较大，放另外一个单元。
 {$IFNDEF BCB6}
   RegisterSymbolList(TIDESymbolList);
+
+  {$IFDEF IDE_SUPPORT_LSP}
+  FLspHandle := GetModuleHandle(IdeLspLibName);
+  if FLspHandle <> 0 then
+    LspGetSymbolList := TLSPKibitzManagerGetSymbolList(GetProcAddress(FLspHandle, SLspGetSymbolList));
+  {$ENDIF}
 {$ENDIF}
 {$ENDIF}
 {$ENDIF}
