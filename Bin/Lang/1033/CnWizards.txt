@@ -2059,6 +2059,7 @@ TCnInputHelperForm.chkAutoInsertEnter.Caption=Auto Line Feed after Keyword when 
 TCnInputHelperForm.chkAutoPopup.Caption=Auto Popup Input Helper.
 TCnInputHelperForm.chkCheckImmRun.Caption=Disable Input Helper when IME Opened.
 TCnInputHelperForm.chkDispOnIDECompDisabled.Caption=Replace Code Completion when Later is Disabled.
+TCnInputHelperForm.chkIgnoreDot.Caption=Allow Inputting Current Item by Pressing Dot.
 TCnInputHelperForm.chkIgnoreSpace.Caption=Ignore Space Char after Inputting Current Item.
 TCnInputHelperForm.chkKeySeq.Caption=Auto Popup after Key Sequences:
 TCnInputHelperForm.chkRemoveSame.Caption=Remove Duplicate Symbols.

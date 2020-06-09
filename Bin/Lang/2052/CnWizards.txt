@@ -2059,6 +2059,7 @@ TCnInputHelperForm.chkAutoInsertEnter.Caption=对关键字回车自动换行。
 TCnInputHelperForm.chkAutoPopup.Caption=自动弹出输入助手。
 TCnInputHelperForm.chkCheckImmRun.Caption=输入法开启时不弹出输入助手。
 TCnInputHelperForm.chkDispOnIDECompDisabled.Caption=如果禁用 IDE 的代码完成，则自动取代。
+TCnInputHelperForm.chkIgnoreDot.Caption=允许使用半角点号来选择当前项。
 TCnInputHelperForm.chkIgnoreSpace.Caption=使用空格键选择当前项后忽略空格本身。
 TCnInputHelperForm.chkKeySeq.Caption=自动弹出列表的按键序列(逗号分隔)：
 TCnInputHelperForm.chkRemoveSame.Caption=过滤重复的列表项。

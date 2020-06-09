@@ -2059,6 +2059,7 @@ TCnInputHelperForm.chkAutoInsertEnter.Caption=automatischer Zeilenumbruch nach S
 TCnInputHelperForm.chkAutoPopup.Caption=Autom. Popup für Eingabe Helfer.
 TCnInputHelperForm.chkCheckImmRun.Caption=Deaktiviere Eingabe Helfer wenn IME geöffnet.
 TCnInputHelperForm.chkDispOnIDECompDisabled.Caption=ersetze Code Completion (in IDE Optionen sparat zu deaktivieren)
+TCnInputHelperForm.chkIgnoreDot.Caption=erlaube das Einfügen des ausgewählten mit der Dot.
 TCnInputHelperForm.chkIgnoreSpace.Caption=Ignoriere Leertaste nach Einfügen des aktiven Items.
 TCnInputHelperForm.chkKeySeq.Caption=autom. PopUp bei Tasten-Sequenz:
 TCnInputHelperForm.chkRemoveSame.Caption=lösche doppelte Symbole.
