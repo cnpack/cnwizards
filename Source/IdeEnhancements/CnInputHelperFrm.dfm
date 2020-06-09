@@ -1,9 +1,9 @@
 inherited CnInputHelperForm: TCnInputHelperForm
-  Left = 260
-  Top = 82
+  Left = 331
+  Top = 101
   BorderStyle = bsDialog
   Caption = 'Input Helper Settings'
-  ClientHeight = 522
+  ClientHeight = 540
   ClientWidth = 592
   KeyPreview = True
   OnActivate = FormActivate
@@ -15,7 +15,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
   TextHeight = 13
   object btnHelp: TButton
     Left = 510
-    Top = 493
+    Top = 511
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -25,7 +25,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
   end
   object btnOK: TButton
     Left = 351
-    Top = 493
+    Top = 511
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -36,7 +36,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
   end
   object btnCancel: TButton
     Left = 431
-    Top = 493
+    Top = 511
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -49,7 +49,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
     Left = 8
     Top = 8
     Width = 577
-    Height = 478
+    Height = 496
     ActivePage = ts1
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
@@ -219,7 +219,8 @@ inherited CnInputHelperForm: TCnInputHelperForm
         Left = 8
         Top = 240
         Width = 553
-        Height = 198
+        Height = 216
+        Anchors = [akLeft, akTop, akBottom]
         Caption = 'O&utput Settings'
         TabOrder = 1
         object lbl9: TLabel
@@ -266,19 +267,19 @@ inherited CnInputHelperForm: TCnInputHelperForm
         end
         object chkSelMidMatchByEnterOnly: TCheckBox
           Left = 8
-          Top = 132
-          Width = 529
-          Height = 17
-          Caption = 'Select and Input Middle-Matched Symbol Only when Pressing Enter.'
-          TabOrder = 6
-        end
-        object chkAutoInsertEnter: TCheckBox
-          Left = 8
           Top = 150
           Width = 529
           Height = 17
-          Caption = 'Auto Line Feed after Keyword when Pressing Enter.'
+          Caption = 'Select and Input Middle-Matched Symbol Only when Pressing Enter.'
           TabOrder = 7
+        end
+        object chkAutoInsertEnter: TCheckBox
+          Left = 8
+          Top = 168
+          Width = 529
+          Height = 17
+          Caption = 'Auto Line Feed after Keyword when Pressing Enter.'
+          TabOrder = 8
         end
         object chkSpcComplete: TCheckBox
           Left = 8
@@ -291,11 +292,11 @@ inherited CnInputHelperForm: TCnInputHelperForm
         end
         object chkAutoCompParam: TCheckBox
           Left = 8
-          Top = 168
+          Top = 186
           Width = 529
           Height = 17
           Caption = 'Auto Insert Brackets for Function Having Parameters.'
-          TabOrder = 8
+          TabOrder = 9
         end
         object edtFilterSymbols: TEdit
           Left = 248
@@ -320,6 +321,14 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Caption = 'Allow Inputting Current Item by Pressing Tab.'
           TabOrder = 4
           OnClick = chkSpcCompleteClick
+        end
+        object chkIgnoreDot: TCheckBox
+          Left = 8
+          Top = 132
+          Width = 361
+          Height = 17
+          Caption = 'Allow Inputting Current Item by Pressing Dot.'
+          TabOrder = 6
         end
       end
     end
@@ -455,7 +464,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
         Left = 8
         Top = 214
         Width = 553
-        Height = 224
+        Height = 242
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Conten&t Settings'
         TabOrder = 1
@@ -477,7 +486,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Left = 8
           Top = 40
           Width = 369
-          Height = 173
+          Height = 191
           Anchors = [akLeft, akTop, akBottom]
           ItemHeight = 13
           TabOrder = 0
@@ -486,7 +495,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Left = 384
           Top = 40
           Width = 161
-          Height = 173
+          Height = 191
           Anchors = [akLeft, akTop, akBottom]
           ItemHeight = 13
           TabOrder = 1
@@ -500,7 +509,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
         Left = 8
         Top = 8
         Width = 553
-        Height = 430
+        Height = 448
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Cus&tomize Symbols'
         TabOrder = 0
@@ -565,7 +574,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Left = 8
           Top = 240
           Width = 465
-          Height = 182
+          Height = 200
           Anchors = [akLeft, akTop, akRight, akBottom]
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText

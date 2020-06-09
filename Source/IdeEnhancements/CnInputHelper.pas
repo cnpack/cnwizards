@@ -373,7 +373,7 @@ type
     {* 空格是否可用来完成选择 }
     property TabComplete: Boolean read FTabComplete write FTabComplete default True;
     {* Tab 是否可用来完成选择 }
-    property IgnoreDot: Boolean read FIgnoreDot write FIngoreDot default False;
+    property IgnoreDot: Boolean read FIgnoreDot write FIgnoreDot default False;
     {* 是否禁用点号的输入当前条目的功能，满足特殊需求尤其是没有候选列表时。默认当然不禁用}
     property IgnoreSpc: Boolean read FIgnoreSpc write FIgnoreSpc default False;
     {* 空格完成选择时，空格自身是否忽略，默认不忽略}

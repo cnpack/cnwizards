@@ -129,6 +129,7 @@ type
     cbbMatchMode: TComboBox;
     lblMatchMode: TLabel;
     chkTabComplete: TCheckBox;
+    chkIgnoreDot: TCheckBox;
     procedure FormShow(Sender: TObject);
     procedure PaintBoxPaint(Sender: TObject);
     procedure btnFontClick(Sender: TObject);
@@ -301,6 +302,7 @@ begin
     edtAutoSymbols.Text := AutoSymbols.CommaText;
     chkSpcComplete.Checked := SpcComplete;
     chkTabComplete.Checked := TabComplete;
+    chkIgnoreDot.Checked := not IgnoreDot;
     chkIgnoreSpace.Checked:= IgnoreSpc;
     chkIgnoreSpace.Enabled := chkSpcComplete.Checked;
     cbbOutputStyle.ItemIndex := Ord(OutputStyle);
@@ -411,6 +413,7 @@ begin
     AutoSymbols.CommaText := edtAutoSymbols.Text;
     SpcComplete := chkSpcComplete.Checked;
     TabComplete := chkTabComplete.Checked;
+    IgnoreDot := not chkIgnoreDot.Checked;
     IgnoreSpc := chkIgnoreSpace.Checked;
     OutputStyle := TCnOutputStyle(cbbOutputStyle.ItemIndex);
     SelMidMatchByEnterOnly := chkSelMidMatchByEnterOnly.Checked;
