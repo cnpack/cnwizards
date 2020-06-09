@@ -325,7 +325,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
         object chkIgnoreDot: TCheckBox
           Left = 8
           Top = 132
-          Width = 361
+          Width = 529
           Height = 17
           Caption = 'Allow Inputting Current Item by Pressing Dot.'
           TabOrder = 6
