@@ -234,6 +234,7 @@ type
     FDispOnIDECompDisabled: Boolean;
     FSpcComplete: Boolean;
     FTabComplete: Boolean;
+    FIgnoreDot: Boolean;
     FIgnoreSpc: Boolean;
     FAutoAdjustScope: Boolean;
     FDispKindSet: TSymbolKindSet;
@@ -352,17 +353,17 @@ type
     property MatchMode: TCnMatchMode read FMatchMode write FMatchMode;
     {* 标识符匹配模式}
     property DispDelay: Cardinal read FDispDelay write FDispDelay default csDefDispDelay;
-    {* 列表弹出延时ms数}
+    {* 列表弹出延时 ms 数}
     property DispOnIDECompDisabled: Boolean read FDispOnIDECompDisabled write
       FDispOnIDECompDisabled default True;
-    {* 当禁用 IDE 的自动完成时，自动在输入 .号后弹出}
+    {* 当禁用 IDE 的自动完成时，自动在输入 . 号后弹出}
     property AutoAdjustScope: Boolean read FAutoAdjustScope write FAutoAdjustScope
       default True;
     {* 自动调整显示优先级 }
     property RemoveSame: Boolean read FRemoveSame write FRemoveSame;
     {* 只显示唯一的符号，过滤重复出现的项目 }
     property CompleteChars: string read FCompleteChars write FCompleteChars;
-    {* 可用来完成当前项选择的字符列表}
+    {* 可用来完成当前项选择的字符列表。注意这里不包括 . 号，因为点号涉及 IDE 的自动完成需要另外处理}
     property FilterSymbols: TStrings read FFilterSymbols;
     {* 禁止自动弹出列表的符号}
     property EnableAutoSymbols: Boolean read FEnableAutoSymbols write FEnableAutoSymbols default False;
@@ -372,6 +373,8 @@ type
     {* 空格是否可用来完成选择 }
     property TabComplete: Boolean read FTabComplete write FTabComplete default True;
     {* Tab 是否可用来完成选择 }
+    property IgnoreDot: Boolean read FIgnoreDot write FIngoreDot default False;
+    {* 是否禁用点号的输入当前条目的功能，满足特殊需求尤其是没有候选列表时。默认当然不禁用}
     property IgnoreSpc: Boolean read FIgnoreSpc write FIgnoreSpc default False;
     {* 空格完成选择时，空格自身是否忽略，默认不忽略}
     property AutoInsertEnter: Boolean read FAutoInsertEnter write FAutoInsertEnter
@@ -456,6 +459,7 @@ const
   csAutoSymbols = 'AutoSymbols';
   csSpcComplete = 'SpcComplete';
   csTabComplete = 'TabComplete';
+  csIgnoreDot = 'IgnoreDot';
   csIgnoreSpc = 'IgnoreSpc';
   csAutoInsertEnter = 'AutoInsertEnter';
   csAutoCompParam = 'AutoCompParam';
@@ -1529,7 +1533,8 @@ begin
         end;
       VK_TAB, VK_DECIMAL, 190: // '.'
         begin
-          ShouldIgnore := (Key = VK_TAB) and not FTabComplete;
+          ShouldIgnore := ((Key = VK_TAB) and not FTabComplete) or
+            ((Key = 190) and FIgnoreDot);
 {$IFDEF IDE_SYNC_EDIT_BLOCK}
           // 块编辑模式时，Tab 用于输入后应该吃掉，免得造成额外跳转
           ShouldEatTab := (Key = VK_TAB) and IsCurrentEditorInSyncMode;
@@ -3193,6 +3198,7 @@ begin
   {$ENDIF}
     FSpcComplete := ReadBool('', csSpcComplete, True);
     FTabComplete := ReadBool('', csTabComplete, True);
+    FIgnoreDot := ReadBool('', csIgnoreDot, False);
     FIgnoreSpc := ReadBool('', csIgnoreSpc, False);
     FAutoInsertEnter := ReadBool('', csAutoInsertEnter, True);
     FAutoCompParam := ReadBool('', csAutoCompParam, True);
@@ -3255,6 +3261,7 @@ begin
       WriteString('', csAutoSymbols, FAutoSymbols.CommaText);
     WriteBool('', csSpcComplete, FSpcComplete);
     WriteBool('', csTabComplete, FTabComplete);
+    WriteBool('', csIgnoreDot, FIgnoreDot);
     WriteBool('', csIgnoreSpc, FIgnoreSpc);
     WriteBool('', csAutoInsertEnter, FAutoInsertEnter);
     WriteBool('', csAutoCompParam, FAutoCompParam);
