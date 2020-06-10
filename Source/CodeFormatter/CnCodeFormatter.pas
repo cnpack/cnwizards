@@ -3744,8 +3744,13 @@ end;
 { PointerType -> '^' TypeId }
 procedure TCnBasePascalFormatter.FormatPointerType(PreSpaceCount: Byte);
 begin
-  Match(tokHat);
-  FormatTypeID;
+  if Scaner.Token = tokHat then  // ^T 这种会被认成 string、需要额外处理一下
+  begin
+    Match(tokHat);
+    FormatTypeID;
+  end
+  else if (Scaner.Token = tokString) and (Length(Scaner.TokenString) = 2) and (Scaner.TokenString[1] = '^') then
+    Match(Scaner.Token);
 end;
 
 { ProcedureHeading -> [CLASS] PROCEDURE Ident [FormalParameters] }
@@ -4205,11 +4210,16 @@ begin
     Match(tokKeywordTo);
   end;
 
-  case Scaner.Token of // 此三类无需换行，因此无需传入 PreSpaceCount
-    tokKeywordProcedure, tokKeywordFunction: FormatProcedureType();
-    tokHat: FormatPointerType();
-    tokKeywordClass: FormatClassRefType();
+  // 此三类无需换行，因此无需传入 PreSpaceCount
+  if Scaner.Token in [tokKeywordProcedure, tokKeywordFunction] then
+    FormatProcedureType
+  else if Scaner.Token = tokKeywordClass then
+    FormatClassRefType
+  else if (Scaner.Token = tokHat) or  // ^T 这种会被认成 string、需要额外处理一下
+   ( (Scaner.Token = tokString) and (Length(Scaner.TokenString) = 2) and (Scaner.TokenString[1] = '^')) then
+    FormatPointerType
   else
+  begin
     // StructType
     if Scaner.Token in StructTypeTokens then
     begin
