@@ -585,7 +585,7 @@ begin
       begin
         // 当前位置后是标识符以及左右括号引号时不自动输入括号
         ACharSet := ['_', 'A'..'Z', 'a'..'z', '0'..'9', '(', ')', '''', '[', ']'];
-        if CharInSet(AChar, ['''', '"']) then // 但引号在右括号前，是需要自动输入的
+        if CharInSet(AChar, ['''', '"', '(', '[']) then // 但引号，左括号在右括号前，是需要自动输入的
           ACharSet := ACharSet - [')', ']'];
 
         NeedAutoMatch := not CharInSet(Char(AnsiLine[CharIndex + 1]), ACharSet);
