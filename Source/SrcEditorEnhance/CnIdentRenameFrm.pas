@@ -56,6 +56,7 @@ type
     btnOK: TButton;
     btnCancel: TButton;
     rbCppHPair: TRadioButton;
+    rbCurrentBlock: TRadioButton;
     procedure FormShow(Sender: TObject);
     procedure edtRenameKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);

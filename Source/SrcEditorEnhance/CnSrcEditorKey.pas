@@ -62,10 +62,10 @@ uses
 type
   TCnAutoMatchType = (btNone, btBracket, btSquare, btCurly, btQuote, btDitto); // () [] {} '' ""
 
-  TCnRenameIdentifierType = (ritInvalid, ritUnit, ritCurrentProc, ritInnerProc, ritCppHPair);
-  // Pascal： 整个文件、当前最外层过程、当前最内层过程
+  TCnRenameIdentifierType = (ritInvalid, ritUnit, ritCurrentProc, ritInnerProc, ritCppHPair, ritCurrentBlock);
+  // Pascal： 整个文件、当前最外层过程、当前最内层过程、当前 Block
   // C/C++：  整个文件、当前最外层大括号（如果非namespace）或次外层（最外是namespace)
-              // 当前最内层大括号、整个 Cpp 以及相应的 H文 件。
+              // 当前最内层大括号、整个 Cpp 以及相应的 H文 件、当前大括号。
 
 //==============================================================================
 // 代码编辑器按键扩展功能
@@ -1861,6 +1861,17 @@ begin
         end;
       end;
       if Rit = ritInvalid then
+      begin
+        if Assigned(Parser.InnerBlockStartToken) and
+          Assigned(Parser.InnerBlockCloseToken) then
+        begin
+          if (TCnPasToken(CurTokens[0]).ItemIndex >= Parser.InnerBlockStartToken.ItemIndex)
+            and (TCnPasToken(CurTokens[CurTokens.Count - 1]).ItemIndex
+            <= Parser.InnerBlockCloseToken.ItemIndex) then
+            Rit := ritCurrentBlock;
+        end;
+      end;
+      if Rit = ritInvalid then
         Rit := ritUnit;
 
       // 弹出对话框，设置其替换范围，并根据是否有当前 Method/Child 等控制界面使能
@@ -1896,6 +1907,8 @@ begin
             Rit := ritCurrentProc
           else if rbCurrentInnerProc.Checked then
             Rit := ritInnerProc
+          else if rbCurrentBlock.Checked then
+            Rit := ritCurrentBlock
           else
             Rit := ritUnit;
         finally
@@ -1931,6 +1944,11 @@ begin
         begin
           StartToken := Parser.ChildMethodStartToken;
           EndToken := Parser.ChildMethodCloseToken;
+        end
+        else if Rit = ritCurrentBlock then
+        begin
+          StartToken := Parser.InnerBlockStartToken;
+          EndToken := Parser.InnerBlockCloseToken;
         end;
 
         if (StartToken = nil) or (EndToken = nil) then Exit;
@@ -2067,7 +2085,7 @@ begin
       end;
 
       // 如果当前光标下的 Token 在 InnerBlock 之间，并且所有的 Token 都在
-      // InnerBlock 之间，并且 InnerBlock 不是 CurFunc，则 RIT 为 InnerProc
+      // InnerBlock 之间，并且 InnerBlock 不是 CurFunc，则 RIT 为 CurrentBlock
       // 如果当前光标下的 Token 在 CurFunc 之间，并且所有的 Token 都在
       // CurFun 之间，则 RIT 为 CurrentProc
       // 俩都不是时，RIT 为 Unit
@@ -2079,9 +2097,8 @@ begin
         if (TCnPasToken(CurTokens[0]).ItemIndex >= CParser.InnerBlockStartToken.ItemIndex)
           and (TCnPasToken(CurTokens[CurTokens.Count - 1]).ItemIndex
           <= CParser.InnerBlockCloseToken.ItemIndex) then
-          Rit := ritInnerProc;
+          Rit := ritCurrentBlock;
       end;
-
       if (Rit = ritInvalid) and (CurFuncStartToken <> nil) and (CurFuncEndToken <> nil) then
       begin
         if (TCnPasToken(CurTokens[0]).ItemIndex >= CurFuncStartToken.ItemIndex)
@@ -2089,7 +2106,6 @@ begin
           <= CurFuncEndToken.ItemIndex) then
           Rit := ritCurrentProc;
       end;
-
       if Rit = ritInvalid then
         Rit := ritUnit;
 
@@ -2136,6 +2152,8 @@ begin
             Rit := ritInnerProc
           else if rbUnit.Checked then
             Rit := ritUnit
+          else if rbCurrentBlock.Checked then
+            Rit := ritCurrentBlock
           else
             Rit := ritCppHPair;
         finally
@@ -2527,6 +2545,17 @@ begin
         end;
       end;
       if Rit = ritInvalid then
+      begin
+        if Assigned(Parser.InnerBlockStartToken) and
+          Assigned(Parser.InnerBlockCloseToken) then
+        begin
+          if (TCnWidePasToken(CurTokens[0]).ItemIndex >= Parser.InnerBlockStartToken.ItemIndex)
+            and (TCnWidePasToken(CurTokens[CurTokens.Count - 1]).ItemIndex
+            <= Parser.InnerBlockCloseToken.ItemIndex) then
+            Rit := ritCurrentBlock;
+        end;
+      end;
+      if Rit = ritInvalid then
         Rit := ritUnit;
 
       // 弹出对话框，设置其替换范围，并根据是否有当前 Method/Child 等控制界面使能
@@ -2561,6 +2590,8 @@ begin
             Rit := ritCurrentProc
           else if rbCurrentInnerProc.Checked then
             Rit := ritInnerProc
+          else if rbCurrentBlock.Checked then
+            Rit := ritCurrentBlock
           else
             Rit := ritUnit;
         finally
@@ -2596,7 +2627,12 @@ begin
         begin
           StartToken := Parser.ChildMethodStartToken;
           EndToken := Parser.ChildMethodCloseToken;
-        end;
+        end
+        else if Rit = ritCurrentBlock then
+        begin
+          StartToken := Parser.InnerBlockStartToken;
+          EndToken := Parser.InnerBlockCloseToken;
+        end
 
         if (StartToken = nil) or (EndToken = nil) then Exit;
 
@@ -2747,7 +2783,7 @@ begin
       end;
 
       // 如果当前光标下的 Token 在 InnerBlock 之间，并且所有的 Token 都在
-      // InnerBlock 之间，并且 InnerBlock 不是 CurFunc，则 RIT 为 InnerProc
+      // InnerBlock 之间，并且 InnerBlock 不是 CurFunc，则 RIT 为 CurrentBlock
       // 如果当前光标下的 Token 在 CurFunc 之间，并且所有的 Token 都在
       // CurFun 之间，则 RIT 为 CurrentProc
       // 俩都不是时，RIT 为 Unit
@@ -2759,7 +2795,7 @@ begin
         if (TCnWideCppToken(CurTokens[0]).ItemIndex >= CParser.InnerBlockStartToken.ItemIndex)
           and (TCnWideCppToken(CurTokens[CurTokens.Count - 1]).ItemIndex
           <= CParser.InnerBlockCloseToken.ItemIndex) then
-          Rit := ritInnerProc;
+          Rit := ritCurrentBlock;
       end;
 
       if (Rit = ritInvalid) and (CurFuncStartToken <> nil) and (CurFuncEndToken <> nil) then
@@ -2787,18 +2823,19 @@ begin
             UpperHeadCur[1] := WideChar(Chr(Ord(UpperHeadCur[1]) - 32));
           edtRename.Text := UpperHeadCur;
 
+          rbCurrentInnerProc.Enabled := False;
           rbCurrentProc.Enabled := Assigned(CurFuncStartToken) and
             Assigned(CurFuncEndToken);
-          rbCurrentInnerProc.Enabled := Assigned(CParser.InnerBlockStartToken) and
+          rbCurrentBlock.Enabled := Assigned(CParser.InnerBlockStartToken) and
             Assigned(CParser.InnerBlockCloseToken) and
             (CParser.InnerBlockStartToken <> CurFuncStartToken) and
             (CParser.InnerBlockCloseToken <> CurFuncEndToken);
 
-          if rbCurrentProc.Enabled and (Rit <> ritUnit) then // 标识符范围超出 CurFunc 时，默认不选中外层函数这项
-            rbCurrentProc.Checked := True;
-          if rbCurrentInnerProc.Enabled and (Rit = ritInnerProc) then // 标识符只在最内层内时，选中最内层选项
-            rbCurrentInnerProc.Checked := True;
-          if (not rbCurrentProc.Checked) and (not rbCurrentInnerProc.Checked) then
+          if rbCurrentBlock.Enabled and (Rit <> ritUnit) then // 标识符范围超出 CurFunc 时，默认不选中外层函数这项
+            rbCurrentBlock.Checked := True;
+          if rbCurrentBlock.Enabled and (Rit = ritCurrentBlock) then // 标识符只在最内层内时，选中最内层选项
+            rbCurrentBlock.Checked := True;
+          if (not rbCurrentProc.Checked) and (not rbCurrentBlock.Checked) then
             rbUnit.Checked := True;
 
           F := EditView.Buffer.FileName;

@@ -1,8 +1,8 @@
 inherited CnIdentRenameForm: TCnIdentRenameForm
-  Left = 352
-  Top = 202
+  Left = 406
+  Top = 215
   Width = 330
-  Height = 266
+  Height = 290
   Caption = 'Rename Identifier'
   Constraints.MinHeight = 266
   Constraints.MinWidth = 255
@@ -64,14 +64,14 @@ inherited CnIdentRenameForm: TCnIdentRenameForm
     Left = 8
     Top = 72
     Width = 300
-    Height = 121
-    Anchors = [akLeft, akTop, akRight]
+    Height = 145
+    Anchors = [akLeft, akTop, akRight, akBottom]
     Caption = 'Replace &Range'
     TabOrder = 1
     object rbCurrentProc: TRadioButton
       Left = 8
       Top = 20
-      Width = 209
+      Width = 281
       Height = 17
       Caption = 'Current Procedure(&1)'
       TabOrder = 0
@@ -79,7 +79,7 @@ inherited CnIdentRenameForm: TCnIdentRenameForm
     object rbCurrentInnerProc: TRadioButton
       Left = 8
       Top = 44
-      Width = 209
+      Width = 281
       Height = 17
       Caption = 'Nested Inner Procedure(&2)'
       TabOrder = 1
@@ -87,7 +87,7 @@ inherited CnIdentRenameForm: TCnIdentRenameForm
     object rbUnit: TRadioButton
       Left = 8
       Top = 68
-      Width = 209
+      Width = 281
       Height = 17
       Caption = 'Whole Unit(&3)'
       TabOrder = 2
@@ -95,10 +95,18 @@ inherited CnIdentRenameForm: TCnIdentRenameForm
     object rbCppHPair: TRadioButton
       Left = 8
       Top = 92
-      Width = 209
+      Width = 281
       Height = 17
       Caption = 'Whole Cpp/H Files Pair(&4)'
       TabOrder = 3
+    end
+    object rbCurrentBlock: TRadioButton
+      Left = 8
+      Top = 116
+      Width = 281
+      Height = 17
+      Caption = 'Current Code Block(&5)'
+      TabOrder = 4
     end
   end
   object edtRename: TEdit
@@ -112,7 +120,7 @@ inherited CnIdentRenameForm: TCnIdentRenameForm
   end
   object btnOK: TButton
     Left = 153
-    Top = 204
+    Top = 228
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -123,7 +131,7 @@ inherited CnIdentRenameForm: TCnIdentRenameForm
   end
   object btnCancel: TButton
     Left = 233
-    Top = 204
+    Top = 228
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
