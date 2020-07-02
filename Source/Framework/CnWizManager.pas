@@ -916,7 +916,7 @@ begin
     end;
   end;
 
-//初始化偏移量
+  // 初始化偏移量
   FOffSet[0] := FWizards.Count;
   FOffSet[1] := FOffSet[0] + FMenuWizards.Count;
   FOffSet[2] := FOffSet[1] + FIDEEnhanceWizards.Count;

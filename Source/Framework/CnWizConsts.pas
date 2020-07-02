@@ -1069,7 +1069,7 @@ var
   // CnSrcEditorKey
   SCnRenameVarCaption: string = 'Rename Identifier';
   SCnRenameVarHintFmt: string = 'Replace %s To:';
-  SCnRenameErrorValid: string = 'Invalid Identifier. Abort Replacing.';
+  SCnRenameErrorValid: string = 'Invalid Identifier. Still Replace?';
   
   // CnFormEnhancements
   SCnFormEnhanceWizardName: string = 'Form Designer Enhancements';

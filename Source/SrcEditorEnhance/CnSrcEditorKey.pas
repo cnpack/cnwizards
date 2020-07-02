@@ -1923,8 +1923,8 @@ begin
       begin
         if not IsValidRenameIdent(NewName) then
         begin
-          ErrorDlg(SCnRenameErrorValid);
-          Exit;
+          if not QueryDlg(SCnRenameErrorValid) then
+            Exit;
         end;
 
         StartToken := nil;
@@ -2170,8 +2170,8 @@ begin
       begin
         if not IsValidRenameIdent(NewName) then
         begin
-          ErrorDlg(SCnRenameErrorValid);
-          Exit;
+          if not QueryDlg(SCnRenameErrorValid) then
+            Exit;
         end;
 
         StartToken := nil;
@@ -2611,8 +2611,8 @@ begin
       begin
         if not IsValidRenameIdent(NewName) then
         begin
-          ErrorDlg(SCnRenameErrorValid);
-          Exit;
+          if not QueryDlg(SCnRenameErrorValid) then
+            Exit;
         end;
 
         StartToken := nil;
@@ -2873,8 +2873,8 @@ begin
       begin
         if not IsValidRenameIdent(NewName) then
         begin
-          ErrorDlg(SCnRenameErrorValid);
-          Exit;
+          if not QueryDlg(SCnRenameErrorValid) then
+            Exit;
         end;
 
         StartToken := nil;
