@@ -1900,6 +1900,9 @@ begin
           rbCppHPair.Enabled := False;
           rbCppHPair.Checked := False;
 
+          rbCurrentBlock.Enabled := Assigned(Parser.InnerBlockStartToken) and
+            Assigned(Parser.InnerBlockCloseToken);
+
           FrmModalResult := ShowModal = mrOk;
           NewName := edtRename.Text;
 
@@ -2126,16 +2129,18 @@ begin
 
           rbCurrentProc.Enabled := Assigned(CurFuncStartToken) and
             Assigned(CurFuncEndToken);
-          rbCurrentInnerProc.Enabled := Assigned(CParser.InnerBlockStartToken) and
+          rbCurrentInnerProc.Enabled := False;
+
+          rbCurrentBlock.Enabled := Assigned(CParser.InnerBlockStartToken) and
             Assigned(CParser.InnerBlockCloseToken) and
             (CParser.InnerBlockStartToken <> CurFuncStartToken) and
             (CParser.InnerBlockCloseToken <> CurFuncEndToken);
 
           if rbCurrentProc.Enabled and (Rit <> ritUnit) then // 标识符范围超出 CurFunc 时，默认不选中外层函数这项
             rbCurrentProc.Checked := True;
-          if rbCurrentInnerProc.Enabled and (Rit = ritInnerProc) then // 标识符只在最内层内时，选中最内层选项
-            rbCurrentInnerProc.Checked := True;
-          if (not rbCurrentProc.Checked) and (not rbCurrentInnerProc.Checked) then
+          if rbCurrentBlock.Enabled and (Rit = ritCurrentBlock) then // 标识符只在最内层内时，选中最内层选项
+            rbCurrentBlock.Checked := True;
+          if (not rbCurrentProc.Checked) and (not rbCurrentBlock.Checked) then
             rbUnit.Checked := True;
 
           F := EditView.Buffer.FileName;
@@ -2149,7 +2154,7 @@ begin
           if rbCurrentProc.Checked then
             Rit := ritCurrentProc
           else if rbCurrentInnerProc.Checked then
-            Rit := ritInnerProc
+            Rit := ritInnerProc                   // 这里进不来
           else if rbUnit.Checked then
             Rit := ritUnit
           else if rbCurrentBlock.Checked then
@@ -2182,7 +2187,7 @@ begin
           StartToken := CurFuncStartToken;
           EndToken := CurFuncEndToken;
         end
-        else if Rit = ritInnerProc then
+        else if Rit = ritCurrentBlock then
         begin
           StartToken := CParser.InnerBlockStartToken;
           EndToken := CParser.InnerBlockCloseToken;
@@ -2583,6 +2588,9 @@ begin
           rbCppHPair.Enabled := False;
           rbCppHPair.Checked := False;
 
+          rbCurrentBlock.Enabled := Assigned(Parser.InnerBlockStartToken) and
+            Assigned(Parser.InnerBlockCloseToken);
+
           FrmModalResult := ShowModal = mrOk;
           NewName := edtRename.Text;
 
@@ -2632,7 +2640,7 @@ begin
         begin
           StartToken := Parser.InnerBlockStartToken;
           EndToken := Parser.InnerBlockCloseToken;
-        end
+        end;
 
         if (StartToken = nil) or (EndToken = nil) then Exit;
 
@@ -2849,9 +2857,11 @@ begin
           if rbCurrentProc.Checked then
             Rit := ritCurrentProc
           else if rbCurrentInnerProc.Checked then
-            Rit := ritInnerProc
+            Rit := ritInnerProc                   // 这里不会进
           else if rbUnit.Checked then
             Rit := ritUnit
+          else if rbCurrentBlock.Checked then
+            Rit := ritCurrentBlock
           else
             Rit := ritCppHPair;
         finally
@@ -2881,7 +2891,7 @@ begin
           StartToken := CurFuncStartToken;
           EndToken := CurFuncEndToken;
         end
-        else if Rit = ritInnerProc then
+        else if Rit = ritCurrentBlock then
         begin
           StartToken := CParser.InnerBlockStartToken;
           EndToken := CParser.InnerBlockCloseToken;

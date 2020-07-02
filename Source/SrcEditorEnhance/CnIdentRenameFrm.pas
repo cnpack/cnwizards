@@ -104,7 +104,14 @@ begin
     else if rbCurrentInnerProc.Checked then
       NextRadioButton := rbCurrentProc
     else if rbCppHPair.Checked and rbCppHPair.Enabled then
-      NextRadioButton := rbUnit;
+      NextRadioButton := rbUnit
+    else if rbCurrentBlock.Checked then
+    begin
+      if rbCppHPair.Enabled then
+        NextRadioButton := rbCppHPair
+      else
+        NextRadioButton := rbUnit;
+    end;
 
     Key := 0;
   end
@@ -119,8 +126,10 @@ begin
     end
     else if rbCurrentInnerProc.Checked then
       NextRadioButton := rbUnit
-    else if rbUnit.Checked then
-      NextRadioButton := rbCppHPair;
+    else if rbUnit.Checked and rbCppHPair.Enabled then
+      NextRadioButton := rbCppHPair
+    else if rbUnit.Checked and rbCurrentBlock.Enabled then
+      NextRadioButton := rbCurrentBlock;
 
     Key := 0;
   end
