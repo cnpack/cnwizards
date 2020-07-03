@@ -232,7 +232,9 @@ begin
     FSymbolList := nil;
     LspGetSymbolList(FAsyncManagerObj, FSymbolList);
     // Get some Count in Async call back
+{$IFDEF DEBUG}
     CnDebugger.LogMsg('Callback LspGetSymbolList Returns Count ' + IntToStr(FSymbolList.Count));
+{$ENDIF}
   end;
 end;
 
