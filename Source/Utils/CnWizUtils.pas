@@ -772,7 +772,8 @@ type
 
 function CnOtaInsertTextToCurSource(const Text: string; InsertPos: TInsertPos
   = ipCur): Boolean;
-{* 插入一段文本到当前正在编辑的源文件中，返回成功标志
+{* 插入一段文本到当前正在编辑的源文件中，返回成功标志。
+  注意插入多行文本时可能出现不必要的缩进，是 EditPosition.InsertText 的局限
  |<PRE>
    Text: string           - 文本内容
    InsertPos: TInsertPos  - 插入位置，默认为 ipCurr 当前位置
@@ -917,7 +918,8 @@ procedure CnOtaInsertSingleLine(Line: Integer; const Text: string;
 {* 插入一行文本当前 IOTASourceEditor，Line 为行号，Text 为单行 }
 
 procedure CnOtaInsertTextIntoEditor(const Text: string);
-{* 插入文本到当前 IOTASourceEditor，允许多行文本。}
+{* 插入文本到当前 IOTASourceEditor 的当前光标位置，允许多行文本。
+  注意该方法内部使用了当前光标的线性位置，线性位置转换结果有不会超过行尾的限制，因此该方法插入文本时会往当前行的左边靠。}
 
 procedure CnOtaInsertTextIntoEditorUtf8(const Utf8Text: AnsiString);
 {* 插入文本到当前 IOTASourceEditor，允许多行文本。
@@ -928,17 +930,20 @@ function CnOtaGetEditWriterForSourceEditor(SourceEditor: IOTASourceEditor = nil)
 
 procedure CnOtaInsertTextIntoEditorAtPos(const Text: string; Position: Longint;
   SourceEditor: IOTASourceEditor = nil);
-{* 在指定位置处插入文本，内部会根据需要做 Utf8 转换，如果 SourceEditor 为空使用当前值。}
+{* 在指定位置处插入文本，内部会根据需要做 Utf8 转换，如果 SourceEditor 为空使用当前值。
+  Position 线性位置可由光标位置 ConvertPos 以及 CharPosToPos 转换而来，注意转换结果不会超过行尾。}
 
 procedure CnOtaInsertTextIntoEditorAtPosUtf8(const Utf8Text: AnsiString; Position: Longint;
   SourceEditor: IOTASourceEditor = nil);
 {* 在指定位置处插入 Utf8 字符串，如果 SourceEditor 为空使用当前值。
-  可在 D2005~2007 下替代上面的 CnOtaInsertTextIntoEditorAtPos 以避免转成 Ansi 而可能丢字符的问题}
+  可在 D2005~2007 下替代上面的 CnOtaInsertTextIntoEditorAtPos 以避免转成 Ansi 而可能丢字符的问题。
+  Position 线性位置可由光标位置 ConvertPos 以及 CharPosToPos 转换而来，注意转换结果不会超过行尾。}
 
 {$IFDEF UNICODE}
 procedure CnOtaInsertTextIntoEditorAtPosW(const Text: string; Position: Longint;
   SourceEditor: IOTASourceEditor = nil);
-{* 在指定位置处插入文本，如果 SourceEditor 为空使用当前值，D2009 以上使用。}
+{* 在指定位置处插入文本，如果 SourceEditor 为空使用当前值，D2009 以上使用。
+  Position 线性位置可由光标位置 ConvertPos 以及 CharPosToPos 转换而来，注意转换结果不会超过行尾。}
 {$ENDIF}
 
 {$IFNDEF CNWIZARDS_MINIMUM}

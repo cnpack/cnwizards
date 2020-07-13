@@ -454,7 +454,7 @@ var
   Position: Integer;
   CharPos: TOTACharPos;
   EditPos: TOTAEditPos;
-  LineText: string;
+  LineText, S: string;
   DummyIdx1, DummyIdx2: Integer;
 
   procedure MovePosToProcHead;
@@ -525,35 +525,22 @@ begin
   Position := EditView.CharPosToPos(CharPos);
 
   // 当光标在空行非行首时，Position 指向空行行首，会造成偏差，需要纠正
-  // 但 ipCurrPos 时 CnOtaInsertTextIntoEditor 已经考虑到了这种情况，因此不需要纠正
-  if (InsertPos <> ipCurrPos) and CnNtaGetCurrLineText(LineText, DummyIdx1, DummyIdx2) then
+  S := AContent;
+  if (EditPos.Col > 1) and CnNtaGetCurrLineText(LineText, DummyIdx1, DummyIdx2) then
   begin
     if Trim(LineText) = '' then
     begin
-      // 空行，需要纠正
-      if EditPos.Col > 1 then
-        Inc(Position, (EditPos.Col -1));
+      // 空行，需要纠正，也就是增加空格。注意不能加 Position，会跑到下一行去
+      S := Spc(EditPos.Col - 1) + S;
     end;
   end;
 
-  if InsertPos = ipCurrPos then
-  begin
+  // EditPosition.InsertText 对于多行文本插入会出现不必要的缩进，得换成 CnOtaInsertTextIntoEditorAtPos
 {$IFDEF UNICODE}
-//  EditView.Buffer.EditPosition.InsertText(string(ConvertTextToEditorText(AnsiString(AContent))));
+  CnOtaInsertTextIntoEditorAtPosW(S, Position);
 {$ELSE}
-//  EditView.Buffer.EditPosition.InsertText(ConvertTextToEditorText(AContent));
+  CnOtaInsertTextIntoEditorAtPos(S, Position);
 {$ENDIF}
-    // EditPosition.InsertText 对于多行文本插入会出现不必要的缩进，得换
-    CnOtaInsertTextIntoEditor(AContent);
-  end
-  else
-  begin
-{$IFDEF UNICODE}
-    CnOtaInsertTextIntoEditorAtPosW(AContent, Position);
-{$ELSE}
-    CnOtaInsertTextIntoEditorAtPos(AContent, Position);
-{$ENDIF}
-  end;
 
   if ASavePos then
     CnOtaGotoPosition(SavePos)
