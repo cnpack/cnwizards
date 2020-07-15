@@ -339,7 +339,7 @@ end;
 
 procedure TCnSourceCropper.ProcessToLineEnd;
 begin
-  while not (FCurChar in [#0, #13]) do
+  while not (FCurChar in [#0, #13, #10]) do
   begin
     if ((FCropOption = coExAscii) and (FCurChar < #128))
       or (FCurTokenKind = skTodoList) then
@@ -347,6 +347,7 @@ begin
     FCurChar := GetCurChar;
   end;
 
+  // 当前是 #13 或 #10
   if FCurChar = #13 then
     repeat
       WriteChar(FCurChar);   // 回车总是要写的。
@@ -356,7 +357,7 @@ begin
   if FCurChar = #10 then
     WriteChar(FCurChar);
 
-  // 返回后，FCurChar指向#10或#0，也就是最后一个被处理的字符。
+  // 返回后，FCurChar 指向 #10 或 #0，也就是最后一个被处理的字符。
   FCurTokenKind := skUndefined;
 end;
 
