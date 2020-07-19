@@ -122,10 +122,11 @@ begin
   Wizard := AWizard as TCnPrefixWizard;
   with TCnPrefixEditForm.Create(nil) do
   try
+    // 加载保存的未缩放尺寸并缩放
     if Wizard.EditDialogWidth > 0 then
-      Width := Wizard.EditDialogWidth;
+      Width := CalcIntEnlargedValue(Wizard.EditDialogWidth);
     if  Wizard.EditDialogHeight > 0 then
-      Height := Wizard.EditDialogHeight;
+      Height := CalcIntEnlargedValue(Wizard.EditDialogHeight);
 
     lblFormName.Caption := FormName;
     lblClassName.Caption := ComponentClass;
@@ -152,8 +153,10 @@ begin
     IgnoreComp := cbIgnoreComp.Checked;
     AutoPopSuggestDlg := not cbNeverDisp.Checked;
     WizardActive := not chkDisablePrefix.Checked;
-    Wizard.EditDialogWidth := Width;
-    Wizard.EditDialogHeight := Height;
+
+    // 保存未缩放后的尺寸
+    Wizard.EditDialogWidth := CalcIntUnEnlargedValue(Width);
+    Wizard.EditDialogHeight := CalcIntUnEnlargedValue(Height);
 
     if not WizardActive then
       Result := False;

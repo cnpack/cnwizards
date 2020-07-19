@@ -168,8 +168,11 @@ type
     property CompKind: TPrefixCompKind read FCompKind write FCompKind;
     property PrefixCaseSensitive: Boolean read FPrefixCaseSensitive write FPrefixCaseSensitive;
     property F2Rename: Boolean read FF2Rename write SetF2Rename;
+
     property EditDialogWidth: Integer read FEditDialogWidth write FEditDialogWidth;
+    {* 弹出的改名框的窗体宽度，注意是存缩放之前的}
     property EditDialogHeight: Integer read FEditDialogHeight write FEditDialogHeight;
+    {* 弹出的改名框的窗体高度，注意是存缩放之前的}
 
     property PrefixList: TPrefixList read FPrefixList;
     property FormNotifierList: TStringList read FFormNotifierList;

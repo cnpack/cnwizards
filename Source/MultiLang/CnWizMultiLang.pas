@@ -147,8 +147,15 @@ type
 {$IFNDEF STAND_ALONE}
     procedure EnlargeListViewColumns(ListView: TListView);
     {* 如果子类中有 ListView，可以用此方法来放大 ListView 的列宽}
+
+    function CalcIntEnlargedValue(Value: Integer): Integer;
+    {* 根据原始尺寸计算放大后的尺寸，给子类用的}
+    function CalcIntUnEnlargedValue(Value: Integer): Integer;
+    {* 根据放大后的尺寸计算原始尺寸，给子类用的}
+
     property Enlarge: TCnWizSizeEnlarge read FEnlarge;
     {* 供专家包子类窗口使用的缩放比例}
+
 {$ENDIF}
   public
     constructor Create(AOwner: TComponent); override;
@@ -849,6 +856,23 @@ begin
     if ListView.Columns[I].Width > 0 then
       ListView.Columns[I].Width := Round(ListView.Columns[I].Width * GetFactorFromSizeEnlarge(FEnlarge));
 end;
+
+function TCnTranslateForm.CalcIntEnlargedValue(Value: Integer): Integer;
+begin
+  if FEnlarge = wseOrigin then
+    Result := Value
+  else
+    Result := Trunc(Value * GetFactorFromSizeEnlarge(FEnlarge));
+end;
+
+function TCnTranslateForm.CalcIntUnEnlargedValue(Value: Integer): Integer;
+begin
+  if FEnlarge = wseOrigin then
+    Result := Value
+  else
+    Result := Trunc(Value / GetFactorFromSizeEnlarge(FEnlarge));
+end;
+
 {$ENDIF}
 
 constructor TCnTranslateForm.Create(AOwner: TComponent);
