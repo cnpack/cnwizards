@@ -177,6 +177,11 @@ type
     {* 保存字符串列表到用户文件 }
     procedure DoFixThreadLocale;
 
+    class function CalcIntEnlargedValue(AEnlarge: TCnWizSizeEnlarge; Value: Integer): Integer;
+    {* 根据原始尺寸与放大倍数计算放大后的尺寸，给子类用的}
+    class function CalcIntUnEnlargedValue(AEnlarge: TCnWizSizeEnlarge;Value: Integer): Integer;
+    {* 根据放大后的尺寸与放大倍数计算原始尺寸，给子类用的}
+
     // 专家 DLL 属性
     property DllName: string read FDllName;
     {* 专家 DLL 完整文件名}
@@ -842,6 +847,24 @@ begin
   begin
     FUseLargeIcon := Value;
   end;
+end;
+
+class function TCnWizOptions.CalcIntEnlargedValue(AEnlarge: TCnWizSizeEnlarge;
+  Value: Integer): Integer;
+begin
+  if AEnlarge = wseOrigin then
+    Result := Value
+  else
+    Result := Trunc(Value * GetFactorFromSizeEnlarge(AEnlarge));
+end;
+
+class function TCnWizOptions.CalcIntUnEnlargedValue(AEnlarge: TCnWizSizeEnlarge;
+  Value: Integer): Integer;
+begin
+  if AEnlarge = wseOrigin then
+    Result := Value
+  else
+    Result := Trunc(Value / GetFactorFromSizeEnlarge(AEnlarge));
 end;
 
 {$ENDIF}

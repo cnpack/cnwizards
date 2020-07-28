@@ -859,18 +859,12 @@ end;
 
 function TCnTranslateForm.CalcIntEnlargedValue(Value: Integer): Integer;
 begin
-  if FEnlarge = wseOrigin then
-    Result := Value
-  else
-    Result := Trunc(Value * GetFactorFromSizeEnlarge(FEnlarge));
+  Result := WizOptions.CalcIntEnlargedValue(FEnlarge, Value);
 end;
 
 function TCnTranslateForm.CalcIntUnEnlargedValue(Value: Integer): Integer;
 begin
-  if FEnlarge = wseOrigin then
-    Result := Value
-  else
-    Result := Trunc(Value / GetFactorFromSizeEnlarge(FEnlarge));
+  Result := WizOptions.CalcIntUnEnlargedValue(FEnlarge, Value);
 end;
 
 {$ENDIF}
