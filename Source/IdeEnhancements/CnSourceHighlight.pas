@@ -1557,7 +1557,7 @@ begin
   begin
     if Assigned(PasParser) then
     begin
-      if not FCurrentBlockSearched then   // 找当前块，供转换Token位置
+      if not FCurrentBlockSearched then   // 找当前块，供转换 Token 位置
       begin
         // 解析后再查找当前光标所在的块，不直接使用 CursorPos，因为 Parser 所需偏移可能不同
         CnOtaGetCurrentCharPosFromCursorPosForParser(CharPos);
@@ -2022,7 +2022,7 @@ begin
                 FIfThenStack.Push(Pair);
               if (Pair.StartToken.TokenID = tkOn) and (Pair.EndToken.TokenID = tkDo) then
                 FIfThenStack.Push(Pair);
-              // 记下if then 块，让后面的 else 来配。注意同时也处理 on Exception do 块
+              // 记下 if then 块，让后面的 else 来配。注意同时也处理 on Exception do 块
             end;
           end
           else
@@ -2667,6 +2667,8 @@ var
       Result := CharSize.cx
     else
       Result := Round(EditCanvas.TextWidth(AChar) / CharSize.cx) * CharSize.cx;
+      // 这里怕是也有错，TextWidth 可能因为字体不存在等原因返回单个字符长，
+      // 但 IDE 有可能会刻意让此字符保持两个字符宽度，无法确定其逻辑
   end;
 {$ENDIF}
 

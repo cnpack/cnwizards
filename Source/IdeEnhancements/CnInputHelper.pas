@@ -184,6 +184,7 @@ type
   TCnInputHelper = class(TCnActionWizard)
   private
     List: TCnInputListBox;
+    FListFont: TFont;      // 供设置用的字体
     Timer: TTimer;
     AppEvents: TApplicationEvents;
     Menu: TPopupMenu;
@@ -298,7 +299,6 @@ type
     function CalcFirstSet(Orig: TAnsiCharSet; IsPascal: Boolean): TAnsiCharSet;
     function CalcCharSet(Orig: TAnsiCharSet; PosInfo: PCodePosInfo): TAnsiCharSet;
     procedure AutoCompFunc(Sender: TObject);
-    function GetListFont: TFont;
     procedure ConfigChanged;
     // 以下函数用堆栈来重新实现 FKeyDownValid 的机制以避免用户敲快了导致
     // 连来俩 KeyDown 再来俩 Up 从而第二个 Up 不起作用的问题
@@ -307,6 +307,7 @@ type
 
     function GetPopupKey: TShortCut;
     procedure SetPopupKey(const Value: TShortCut);
+    procedure SetListFont(const Value: TFont);
   protected
     procedure SetActive(Value: Boolean); override;
     function GetHasConfig: Boolean; override;
@@ -332,7 +333,7 @@ type
     procedure DebugComand(Cmds: TStrings; Results: TStrings); override;
 
     property IsShowing: Boolean read GetIsShowing;
-    property ListFont: TFont read GetListFont;
+    property ListFont: TFont read FListFont write SetListFont;
     property HitCountMgr: TCnSymbolHitCountMgr read FHitCountMgr;
     property SymbolListMgr: TSymbolListMgr read FSymbolListMgr;
   
@@ -680,10 +681,10 @@ begin
   Visible := False;
   Style := lbOwnerDrawFixed;
   DoubleBuffered := True;
-  Constraints.MinHeight := ItemHeight * csMinDispItems + 4;
-  Constraints.MinWidth := csMinDispWidth;
-  Height := ItemHeight * csDefDispItems + 8;
-  Width := csDefDispWidth;
+  Constraints.MinHeight := WizOptions.CalcIntEnlargedValue(WizOptions.SizeEnlarge, ItemHeight * csMinDispItems + 4);
+  Constraints.MinWidth := WizOptions.CalcIntEnlargedValue(WizOptions.SizeEnlarge, csMinDispWidth);
+  Height := WizOptions.CalcIntEnlargedValue(WizOptions.SizeEnlarge, ItemHeight * csDefDispItems + 8);
+  Width := WizOptions.CalcIntEnlargedValue(WizOptions.SizeEnlarge, csDefDispWidth);
   ShowHint := True;
   Font.Name := 'Tahoma';
   Font.Size := 8;
@@ -1176,6 +1177,7 @@ var
 {$ENDIF}
 begin
   inherited;
+  FListFont := TFont.Create;
   List := TCnInputListBox.Create(nil);
   List.Parent := Application.MainForm;
   List.OnDrawItem := ListDrawItem;
@@ -1241,6 +1243,7 @@ begin
   Timer.Free;
   Menu.Free;
   List.Free;
+  FListFont.Free;
   inherited;
 end;
 
@@ -3114,9 +3117,27 @@ begin
   AutoPopup := not AutoPopup;
 end;
 
-function TCnInputHelper.GetListFont: TFont;
+procedure TCnInputHelper.SetListFont(const Value: TFont);
+var
+  H: Integer;
 begin
-  Result := List.Font;
+  if Value <> nil then
+  begin
+    FListFont.Assign(Value);
+
+    List.Font.Assign(FListFont);
+    if WizOptions.SizeEnlarge <> wseOrigin then
+      List.Font.Size := WizOptions.CalcIntEnlargedValue(WizOptions.SizeEnlarge, List.Font.Size);
+
+    try
+      // 根据字号动态调整 ItemHeight
+      H := List.Canvas.TextHeight('A');
+      if H > 16 then
+        List.ItemHeight := H + 2;
+    except
+      ;
+    end;
+  end;
 end;
 
 function TCnInputHelper.GetCaption: string;
@@ -3177,7 +3198,9 @@ begin
   try
     List.Width := ReadInteger('', csWidth, List.Width);
     List.Height := ReadInteger('', csHeight, List.Height);
-    List.Font := ReadFont('', csFont, List.Font);
+    ListFont := ReadFont('', csFont, FListFont);
+    // 读取设置后 SetListFont 中会根据需要放大字号显示
+
     List.DispButtons := ReadBool('', csDispButtons, True);
 
     AutoPopup := ReadBool('', csAutoPopup, True);
@@ -3234,7 +3257,7 @@ begin
   try
     WriteInteger('', csWidth, List.Width);
     WriteInteger('', csHeight, List.Height);
-    WriteFont('', csFont, List.Font);
+    WriteFont('', csFont, FListFont);
     WriteBool('', csDispButtons, List.DispButtons);
 
     WriteBool('', csAutoPopup, FAutoPopup);

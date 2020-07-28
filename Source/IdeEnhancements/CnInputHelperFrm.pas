@@ -421,7 +421,7 @@ begin
     AutoCompParam := chkAutoCompParam.Checked;
     DispOnIDECompDisabled := chkDispOnIDECompDisabled.Checked;
     EnableAutoSymbols := chkKeySeq.Checked;
-    ListFont.Assign(FontDialog.Font);
+    ListFont := FontDialog.Font; // 不能 Assign，要用赋值触发 SetListFont 以更新列表字体
 
     for i := 0 to SymbolListMgr.Count - 1 do
     begin
