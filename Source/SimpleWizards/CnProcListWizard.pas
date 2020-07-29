@@ -267,6 +267,7 @@ type
     procedure SetCount(const Value: Integer);
     procedure SetPos(X, Y: Integer);
     procedure CloseUp;
+    procedure UpdateListFont;
     procedure Popup;
     procedure SavePosition;
 
@@ -504,6 +505,7 @@ const
   CN_SPLITTER_WIDTH = 3;
   csDefHistoryCount = 8;
   csDefPreviewLineCount = 4;
+  csDefProcDropDownBoxFontSize = 8;
 
 type
   TCnFileInfo = class(TObject)
@@ -4101,7 +4103,7 @@ begin
   Width := csDefDispWidth;
   ShowHint := True;
   Font.Name := 'Tahoma';
-  Font.Size := 8;
+  Font.Size := csDefProcDropDownBoxFontSize;
   FLastItem := -1;
 
   FDisplayItems := TStringList.Create;
@@ -4170,6 +4172,68 @@ begin
       end;
     end;
   end;
+end;
+
+procedure TCnProcDropDownBox.UpdateListFont;
+var
+  S: Integer;
+
+  procedure AdjustListItemHeight;
+  var
+    O: Integer;
+  begin
+    try
+      // 根据字号变化动态调整 ItemHeight
+      O := Canvas.Font.Size;
+      Canvas.Font.Size := Font.Size;
+      S := Canvas.TextHeight('Aj');
+      Canvas.Font.Size := O;
+
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('ProcDropDownBox AdjustListItemHeight. Calc Font Size %d', [S]);
+{$ENDIF}
+
+      if S > 16 then
+        S := S + 2
+      else
+        S := 16; // 最小 16
+
+      if S <> ItemHeight then
+      begin
+        ItemHeight := S;
+
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('ProcDropDownBox List ItemHeight Changed to %d', [ItemHeight]);
+{$ENDIF}
+      end;
+    except
+      ;
+    end;
+  end;
+
+begin
+  if WizOptions.SizeEnlarge <> wseOrigin then
+  begin
+    S := WizOptions.CalcIntEnlargedValue(WizOptions.SizeEnlarge, csDefProcDropDownBoxFontSize);
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('ProcDropDownBox Enlarge Mode. Should Set Font Size to %d', [S]);
+{$ENDIF}
+    if Font.Size <> S then
+    begin
+      Font.Size := S;
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('ProcDropDownBox List Font Change Size to %d', [Font.Size]);
+{$ENDIF}
+    end;
+  end
+  else if Font.Size <> csDefProcDropDownBoxFontSize then
+  begin
+    Font.Size := csDefProcDropDownBoxFontSize;
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('Input Helper List Font Size Restored to %d', [Font.Size]);
+{$ENDIF}
+  end;
+  AdjustListItemHeight;
 end;
 
 procedure TCnProcDropDownBox.Popup;
@@ -4475,6 +4539,7 @@ end;
 procedure TCnProcListComboBox.ShowDropBox;
 begin
   UpdateDropPosition;
+  FDropDownList.UpdateListFont;
   FDropDownList.Popup;
 end;
 
