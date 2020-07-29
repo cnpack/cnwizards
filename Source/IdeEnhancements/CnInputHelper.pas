@@ -317,6 +317,7 @@ type
     function GetDefShortCut: TShortCut; override;
     procedure OnActionUpdate(Sender: TObject); override;
     procedure BroadcastShortCut;
+    procedure UpdateListFont;
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -2026,7 +2027,10 @@ begin
         else
           Top := Max(Pt.y - List.Height - csLineHeight div 2, WorkRect.Top);
         List.SetPos(Left, Top);
-        List.Popup;
+
+        // 判断是否需要根据放大倍数修正显示字号
+        UpdateListFont;
+        List.Popup;   // 真正显示
       {$IFDEF ADJUST_CodeParamWindow}
         AdjustCodeParamWindowPos;
       {$ENDIF}
@@ -3118,25 +3122,13 @@ begin
 end;
 
 procedure TCnInputHelper.SetListFont(const Value: TFont);
-var
-  H: Integer;
 begin
   if Value <> nil then
   begin
     FListFont.Assign(Value);
 
     List.Font.Assign(FListFont);
-    if WizOptions.SizeEnlarge <> wseOrigin then
-      List.Font.Size := WizOptions.CalcIntEnlargedValue(WizOptions.SizeEnlarge, List.Font.Size);
-
-    try
-      // 根据字号动态调整 ItemHeight
-      H := List.Canvas.TextHeight('A');
-      if H > 16 then
-        List.ItemHeight := H + 2;
-    except
-      ;
-    end;
+    UpdateListFont;
   end;
 end;
 
@@ -3430,6 +3422,68 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('InputHelper Broadcast ShortCut: ' + ShortCutToText(GetPopupKey));
 {$ENDIF}
+end;
+
+procedure TCnInputHelper.UpdateListFont;
+var
+  S: Integer;
+
+  procedure AdjustListItemHeight;
+  var
+    O: Integer;
+  begin
+    try
+      // 根据字号变化动态调整 ItemHeight
+      O := List.Canvas.Font.Size;
+      List.Canvas.Font.Size := List.Font.Size;
+      S := List.Canvas.TextHeight('Aj');
+      List.Canvas.Font.Size := O;
+
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('Input Helper AdjustListItemHeight. Calc Font Size %d', [S]);
+{$ENDIF}
+
+      if S > 16 then
+        S := S + 2
+      else
+        S := 16; // 最小 16
+
+      if S <> List.ItemHeight then
+      begin
+        List.ItemHeight := S;
+
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('Input Helper List ItemHeight Changed to %d', [List.ItemHeight]);
+{$ENDIF}
+      end;
+    except
+      ;
+    end;
+  end;
+
+begin
+  if WizOptions.SizeEnlarge <> wseOrigin then
+  begin
+    S := WizOptions.CalcIntEnlargedValue(WizOptions.SizeEnlarge, FListFont.Size);
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('Input Helper Enlarge Mode. Should Set Font Size to %d', [S]);
+{$ENDIF}
+    if List.Font.Size <> S then
+    begin
+      List.Font.Size := S;
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('Input Helper List Font Change Size to %d', [List.Font.Size]);
+{$ENDIF}
+    end;
+  end
+  else if List.Font.Size <> FListFont.Size then
+  begin
+    List.Font.Size := FListFont.Size;
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('Input Helper List Font Size Restored to %d', [List.Font.Size]);
+{$ENDIF}
+  end;
+  AdjustListItemHeight;
 end;
 
 initialization
