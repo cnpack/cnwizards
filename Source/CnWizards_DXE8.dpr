@@ -186,7 +186,7 @@ uses
   CnSrcEditorBlockTools in 'SrcEditorEnhance\CnSrcEditorBlockTools.pas',
   CnSrcEditorCodeWrap in 'SrcEditorEnhance\CnSrcEditorCodeWrap.pas' {CnSrcEditorCodeWrapForm},
   CnGroupReplace in 'Utils\CnGroupReplace.pas',
-  CnSrcEditorReplaceInBlock in 'SrcEditorEnhance\CnSrcEditorReplaceInBlock.pas', {CnSrcEditorReplaceInBlockForm}
+  CnSrcEditorReplaceInBlock in 'SrcEditorEnhance\CnSrcEditorReplaceInBlock.pas' {CnSrcEditorReplaceInBlockForm},
   CnSrcEditorGroupReplace in 'SrcEditorEnhance\CnSrcEditorGroupReplace.pas' {CnSrcEditorGroupReplaceForm},
   CnSrcEditorWebSearch in 'SrcEditorEnhance\CnSrcEditorWebSearch.pas' {CnSrcEditorWebSearchForm},
   CnSrcEditorKey in 'SrcEditorEnhance\CnSrcEditorKey.pas',
