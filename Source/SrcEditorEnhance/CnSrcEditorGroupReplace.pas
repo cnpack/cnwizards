@@ -370,9 +370,11 @@ begin
 
             Execute(Item);
 
-            // 不保存就删掉
+            // 不保存就删掉，保存则更新菜单
             if not Save then
-              FItems.Delete(Item.Index);
+              FItems.Delete(Item.Index)
+            else if FMenu <> nil then
+              InitMenuItems(FMenu);
           end;
         finally
           Free;
