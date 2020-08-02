@@ -145,13 +145,13 @@ type
     function Space(Count: Word): string;
     {* 返回指定数目空格的字符串 }
     procedure Writeln;
-    {* 格式结果换行 }
+    {* 格式结果换行，有各种复杂逻辑 }
     procedure EnsureWriteln;
-    {* 格式结果保证换且只换一行}
+    {* 不在忽略区里的话，根据格式结果上一行是否为空的内容，保证换且只换一行}
     procedure CheckKeepLineBreakWriteln;
     {* 根据是否保留换行的选项决定是硬换一行还是保证换且只换一行}
     procedure WriteLine;
-    {* 格式结果加一空行 }
+    {* 格式结果加一空行，也就是连续两个换行}
     procedure EnsureOneEmptyLine;
     {* 格式结果保证当前出现一空行}
     procedure WriteBlankLineByPrevCondition;
@@ -379,6 +379,7 @@ type
     procedure FormatExportsDecl(PreSpaceCount: Byte = 0);
 
     procedure ScanerLineBreak(Sender: TObject);
+    {* Scaner 扫描到源文件中的换行时触发的事件，根据需要写回车到输出中}
   public
     constructor Create(AStream: TStream; AMatchedInStart: Integer = CN_MATCHED_INVALID;
       AMatchedInEnd: Integer = CN_MATCHED_INVALID;
@@ -4000,8 +4001,17 @@ begin
     if Scaner.Token = tokSemicolon then Match(Scaner.Token);
   end;
 
-  // 右括号前如果有回车符，保留换行时会同样输出，此处无需多换一行
-  CheckKeepLineBreakWriteln;
+  // 保留换行时，右括号之前的上一行如果因为保留换行而多输出了空格缩进，此处要删除，以让下面的换行正确处理，避免多出来一行
+  if CnPascalCodeForRule.KeepUserLineBreak then
+  begin
+    FCodeGen.TrimLastEmptyLine;
+
+    // 右括号前源文件里如果有回车符，保留换行时会同样输出，此处不能用 Writeln 多换一行
+    CheckKeepLineBreakWriteln;
+  end
+  else
+    Writeln; // 不保留换行时，最后的右括号之前要换行
+
   Match(tokRB, PreSpaceCount);
 end;
 
