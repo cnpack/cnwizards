@@ -1753,7 +1753,8 @@ begin
   if HasElse then
   begin
     // end 之前的语句可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
-    CheckKeepLineBreakWriteln;
+    if CnPascalCodeForRule.KeepUserLineBreak then  // 非保留换行模式下这里无需多写一个回车，else 后的 Writeln 已写了
+      CheckKeepLineBreakWriteln;
   end;
   Match(tokKeywordEnd, PreSpaceCount);
 end;
