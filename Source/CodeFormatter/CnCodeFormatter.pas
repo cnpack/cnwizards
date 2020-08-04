@@ -3991,14 +3991,17 @@ procedure TCnBasePascalFormatter.FormatRecordConstant(PreSpaceCount: Byte);
 begin
   Match(tokLB);
 
-  Writeln;
+  CheckKeepLineBreakWriteln;
   FormatRecordFieldConstant(Tab(PreSpaceCount));
   if Scaner.Token = tokSemicolon then Match(Scaner.Token);
 
   while Scaner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens) do // 标识符允许此等名字
   begin
     Writeln;
-    FormatRecordFieldConstant(Tab(PreSpaceCount));
+    if CnPascalCodeForRule.KeepUserLineBreak then // 保留换行时后续排版的缩进在同一行内得是 1
+      FormatRecordFieldConstant()
+    else
+      FormatRecordFieldConstant(Tab(PreSpaceCount));
     if Scaner.Token = tokSemicolon then Match(Scaner.Token);
   end;
 
