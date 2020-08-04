@@ -3991,7 +3991,11 @@ procedure TCnBasePascalFormatter.FormatRecordConstant(PreSpaceCount: Byte);
 begin
   Match(tokLB);
 
+  // 保留换行时，右括号之前的上一行如果因为保留换行而多输出了空格缩进，此处要删除，以让下面的换行正确处理，避免多出来一行
+  if CnPascalCodeForRule.KeepUserLineBreak then
+    FCodeGen.TrimLastEmptyLine;
   CheckKeepLineBreakWriteln;
+
   FormatRecordFieldConstant(Tab(PreSpaceCount));
   if Scaner.Token = tokSemicolon then Match(Scaner.Token);
 
@@ -4440,7 +4444,16 @@ begin
             end;
           end
           else if TypedConstantType = tcRecord then
-            FormatRecordConstant(Tab(PreSpaceCount))
+          begin
+            // 记录常量表达式允许保持内部换行
+            FLineBreakKeepStack.Push(Pointer(FNeedKeepLineBreak));
+            FNeedKeepLineBreak := True;
+            try
+              FormatRecordConstant(Tab(PreSpaceCount));
+            finally
+              FNeedKeepLineBreak := Boolean(FLineBreakKeepStack.Pop);
+            end;
+          end
           else if Scaner.Token in ConstTokens
             + [tokAtSign, tokPlus, tokMinus, tokLB, tokRB] then // 有可能初始化的值以这些开头
             FormatConstExpr(PreSpaceCount)
