@@ -3128,7 +3128,7 @@ begin
     FListFont.Assign(Value);
 
     List.Font.Assign(FListFont);
-    UpdateListFont;
+    // UpdateListFont 由宿主调 Popup 前也就是显示前调用
   end;
 end;
 
