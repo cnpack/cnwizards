@@ -91,7 +91,7 @@ type
 
     FEnableWizMenu: Boolean;
     FWizMenuNames: TStringList;
-    FWizMenu: TMenuItem;
+    FWizMenu: TMenuItem;          // 一个用来挂着其他菜单的较为临时的项，需要时才插入主菜单
     FWizOptionMenu: TMenuItem;
     FWizSepMenu: TMenuItem;
 
@@ -183,10 +183,10 @@ type
   {$ENDIF}
     procedure DoConfig(Sender: TObject);
     procedure OnConfig(Sender: TObject);
-    function GetMenuInsertIndex: Integer;
+    function GetMenuInsertIndex: Integer;  // 返回 Tools 菜单的位置后面
     procedure InitWizMenus;
     procedure FinalWizMenus;
-    procedure RestoreWizMenus;
+    procedure RestoreWizMenus;  // 将 FWizMenu 从主菜单里摘出，先搁着
     procedure AdjustMainMenuBar;
     procedure UpdateWizMenus;
     procedure InitControlBarMenu;
@@ -979,11 +979,11 @@ begin
   if Assigned(MainMenu) and Active and FEnableWizMenu and
     (FWizMenuNames.Count > 0) then
   begin
-    for i := FWizMenuNames.Count - 1 downto 0 do
+    for i := FWizMenuNames.Count - 1 downto 0 do    // 把设置中要独立出来的菜单项先挑出来挂 FWizMenu 下
     begin
       DoInsertMenu(FWizMenu, FWizMenuNames[i]);
     end;
-    MainMenu.Items.Insert(GetMenuInsertIndex + 1, FWizMenu);
+    MainMenu.Items.Insert(GetMenuInsertIndex + 1, FWizMenu); // 再把 FWizMenu 挂主菜单下
 
     AdjustMainMenuBar; // 菜单调整后会露空，要把菜单栏同样高度的右边控件往左挤
   end;
@@ -1028,6 +1028,8 @@ begin
   FEnableWizMenu := Ini.ReadBool(WizOptions.CompilerID, csEnableWizMenu, FEnableWizMenu);
   FWizMenuNames.CommaText := Ini.ReadString(WizOptions.CompilerID, csWizMenuNames, FWizMenuNames.CommaText);
   FWizMenu.Caption := Ini.ReadString(WizOptions.CompilerID, csWizMenuCaption, FWizMenu.Caption);
+  if Trim(FWizMenu.Caption) = '' then
+    FWizMenu.Caption := SCnDefWizMenuCaption; // 防止空的
 
   UpdateCompPalette;
   if FLockToolbar then
@@ -1134,6 +1136,9 @@ begin
 
       FEnableWizMenu := chkMoveWizMenus.Checked;
       FWizMenu.Caption := edtMoveToUser.Text;
+      if Trim(FWizMenu.Caption) = '' then
+        FWizMenu.Caption := SCnDefWizMenuCaption; // 防止空的
+
       GetWizMenuNames(FWizMenuNames);
 
       DoSaveSettings;

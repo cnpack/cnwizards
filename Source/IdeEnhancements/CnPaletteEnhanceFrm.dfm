@@ -169,7 +169,7 @@ inherited CnPalEnhanceForm: TCnPalEnhanceForm
       Top = 16
       Width = 401
       Height = 17
-      Caption = 'Move Following Menu Items into Sub Menu.'
+      Caption = 'Move Following Menu Items into New Sub Menu.'
       TabOrder = 0
       OnClick = UpdateControls
     end
