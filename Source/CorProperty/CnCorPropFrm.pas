@@ -102,6 +102,8 @@ type
     grpResult: TGroupBox;
     lvResult: TListView;
     rbOpened: TRadioButton;
+    btnSelected: TButton;
+    actConfirmSelected: TAction;
     procedure actCorrectExecute(Sender: TObject);
     procedure btnConfigClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -117,6 +119,8 @@ type
     procedure btnAllClick(Sender: TObject);
     procedure actUndoCorrectUpdate(Sender: TObject);
     procedure actUndoCorrectExecute(Sender: TObject);
+    procedure actConfirmSelectedExecute(Sender: TObject);
+    procedure actConfirmSelectedUpdate(Sender: TObject);
   private
     FPropDefList: TObjectList;
     FCorrectItemList: TObjectList;
@@ -834,6 +838,34 @@ begin
       end;
     end;
   end;
+end;
+
+procedure TCnCorPropForm.actConfirmSelectedExecute(Sender: TObject);
+var
+  AItem: TCorrectItem;
+  I: Integer;
+begin
+  //更新选中的属性
+  for I := 0 to lvResult.Items.Count - 1 do
+  begin
+    AItem := TCorrectItem(FCorrectItemList.Items[I]);
+    if (lvResult.Items[I].ImageIndex <> 0) and lvResult.Items[I].Selected then
+    begin
+      if SetPropValueIncludeSub(AItem.CorrComp, AItem.PropName, AItem.PropDef.ToValue, AItem.CorrComp.Owner) then
+      begin
+        with lvResult.Items[I] do
+        begin
+          ImageIndex := 0;
+          Caption := SCnCorrectPropertyStateCorrected;
+        end;
+      end;
+    end;
+  end;
+end;
+
+procedure TCnCorPropForm.actConfirmSelectedUpdate(Sender: TObject);
+begin
+  (Sender as TAction).Enabled := Assigned(lvResult.Selected);
 end;
 
 procedure TCnCorPropForm.DoLanguageChanged(Sender: TObject);
