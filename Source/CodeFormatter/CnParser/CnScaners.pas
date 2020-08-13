@@ -581,7 +581,7 @@ begin
       #33..#255:
         begin
           FBlankStringEnd := FSourcePtr;
-          DoBlankLinesWhenSkip(EmptyLines);
+          DoBlankLinesWhenSkip(EmptyLines);  // 这里容易多输出回车
 
           Exit;
         end;

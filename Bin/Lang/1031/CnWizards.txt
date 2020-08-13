@@ -1303,6 +1303,7 @@ TCnCorPropForm.Caption=Eigenschafen Korrektor
 TCnCorPropForm.CorrectPropertyValue1.Caption=Bestätigen und &Modifizieren
 TCnCorPropForm.GroupBox1.Caption=Such &Range
 TCnCorPropForm.LocateComponent1.Caption=Komponente &lokalisieren
+TCnCorPropForm.actConfirmSelected.Caption=&zustimmen ausgewählt
 TCnCorPropForm.actCorrect.Caption=&suchen
 TCnCorPropForm.actCorrectComp.Caption=Bestätigen und &Modifizieren
 TCnCorPropForm.actLocateComp.Caption=&Komponente lokalisieren

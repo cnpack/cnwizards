@@ -1303,6 +1303,7 @@ TCnCorPropForm.Caption=Корректор Свойств
 TCnCorPropForm.CorrectPropertyValue1.Caption=Подтвердить изменение
 TCnCorPropForm.GroupBox1.Caption=Область поиска
 TCnCorPropForm.LocateComponent1.Caption=Показать компонент
+TCnCorPropForm.actConfirmSelected.Caption=Подтв. выбор
 TCnCorPropForm.actCorrect.Caption=Найти
 TCnCorPropForm.actCorrectComp.Caption=Подтвердить изменение
 TCnCorPropForm.actLocateComp.Caption=Показать компонент

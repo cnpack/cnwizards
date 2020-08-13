@@ -1303,6 +1303,7 @@ TCnCorPropForm.Caption=批量属性修改器
 TCnCorPropForm.CorrectPropertyValue1.Caption=确认修改(&M)
 TCnCorPropForm.GroupBox1.Caption=查找范围(&R)
 TCnCorPropForm.LocateComponent1.Caption=定位该控件(&L)
+TCnCorPropForm.actConfirmSelected.Caption=确认选中(&S)
 TCnCorPropForm.actCorrect.Caption=查找(&F)
 TCnCorPropForm.actCorrectComp.Caption=确认修改(&M)
 TCnCorPropForm.actLocateComp.Caption=定位该控件(&L)

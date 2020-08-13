@@ -1303,6 +1303,7 @@ TCnCorPropForm.Caption=Property Corrector
 TCnCorPropForm.CorrectPropertyValue1.Caption=Confirm &Modify
 TCnCorPropForm.GroupBox1.Caption=Search &Range
 TCnCorPropForm.LocateComponent1.Caption=&Locate the Component
+TCnCorPropForm.actConfirmSelected.Caption=Confirm &Selected
 TCnCorPropForm.actCorrect.Caption=&Find
 TCnCorPropForm.actCorrectComp.Caption=Confirm &Modify
 TCnCorPropForm.actLocateComp.Caption=&Locate the Component
