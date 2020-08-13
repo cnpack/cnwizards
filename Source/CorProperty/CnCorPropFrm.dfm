@@ -171,23 +171,23 @@ inherited CnCorPropForm: TCnCorPropForm
       Columns = <
         item
           Caption = 'Status'
-          Width = 70
+          Width = 90
         end
         item
           Caption = 'Current File'
-          Width = 108
+          Width = 140
         end
         item
           Caption = 'Name'
-          Width = 98
+          Width = 130
         end
         item
           Caption = 'Value'
-          Width = 108
+          Width = 135
         end
         item
           Caption = 'Modify to'
-          Width = 108
+          Width = 135
         end>
       HideSelection = False
       MultiSelect = True
