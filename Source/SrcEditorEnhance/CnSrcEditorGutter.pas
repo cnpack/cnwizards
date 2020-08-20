@@ -374,7 +374,11 @@ var
   begin
     Result := Canvas.TextWidth(IntToStrEx(0, Len));
   end;
+
 begin
+  if not ClassNameIs('TCnSrcEditorGutter') then // 非常奇怪的补丁，不加的话据报告会引起 D7 设计器的某些 TEdit 的 Visible 随机变化
+    Exit;
+
   if not FActive then
   begin
     Visible := False;
