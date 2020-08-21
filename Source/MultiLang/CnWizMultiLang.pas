@@ -117,6 +117,9 @@ type
     procedure AdjustRightBottomMargin;
 
     procedure ProcessSizeEnlarge;
+{$IFNDEF STAND_ALONE}
+    function GetEnlarged: Boolean;
+{$ENDIF}
 {$ENDIF TEST_APP}
   protected
 {$IFNDEF TEST_APP}
@@ -155,7 +158,8 @@ type
 
     property Enlarge: TCnWizSizeEnlarge read FEnlarge;
     {* 供专家包子类窗口使用的缩放比例}
-
+    property Enlarged: Boolean read GetEnlarged;
+    {* 是否有缩放}
 {$ENDIF}
   public
     constructor Create(AOwner: TComponent); override;
@@ -485,7 +489,7 @@ begin
   inherited;
   FScaler := TCnFormScaler.Create(Self);
 {$IFNDEF STAND_ALONE}
-  if FEnlarge = wseOrigin then // 不放大时才处理
+  if not GetEnlarged then // 不放大时才处理
     FScaler.DoEffects;
 {$ELSE}
   FScaler.DoEffects;
@@ -815,7 +819,7 @@ var
 {$ENDIF}
 begin
 {$IFNDEF STAND_ALONE}
-  if FEnlarge <> wseOrigin then
+  if Enlarged then
   begin
     // 判断单显示器情况下，当前的放大倍数是否会超出 Screen 的尺寸，超则降档
     Factor := GetFactorFromSizeEnlarge(FEnlarge);
@@ -876,6 +880,11 @@ begin
 {$ENDIF}
   inherited;
   // 避免 Loaded 时还未获得 FEnlarge 值
+end;
+
+function TCnTranslateForm.GetEnlarged: Boolean;
+begin
+  Result := FEnlarge <> wseOrigin;
 end;
 
 initialization

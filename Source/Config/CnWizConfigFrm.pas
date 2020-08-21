@@ -287,7 +287,7 @@ begin
 
   //自画高度调整
   FDrawTextHeight := 12;
-  if Enlarge <> wseOrigin then
+  if Enlarged then
   begin
     FDrawTextHeight := Round(FDrawTextHeight * GetFactorFromSizeEnlarge(Enlarge));
     lbWizards.ItemHeight := Round(lbWizards.ItemHeight * GetFactorFromSizeEnlarge(Enlarge));

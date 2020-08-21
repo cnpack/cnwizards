@@ -126,7 +126,6 @@ type
     procedure FDShow(Sender: TObject);
     procedure RDShow(Sender: TObject);
   private
-    { Private declarations }
     function DoFind(const Str: string; const UpperCase: Boolean; const Dlg:
       Boolean = True): Boolean;
   protected
@@ -176,10 +175,18 @@ begin
   Memos[1] := memLong;
   with TCnIniFile.Create(CreateEditorIniFile, True) do
   try
+    // 读入原始值，FormCreate 后会自动进行放大
     Height := ReadInteger(csHintEditor, csHeight, Height);
     Width := ReadInteger(csHintEditor, csWidth, Width);
+
+    // 读入旧值进行放大
     Memos[0].Font := ReadFont(csHintEditor, csFontShort, Memos[0].Font);
     Memos[1].Font := ReadFont(csHintEditor, csFontLong, Memos[1].Font);
+    if Enlarged then
+    begin
+      Memos[0].Font.Size := CalcIntEnlargedValue(Memos[0].Font.Size);
+      Memos[1].Font.Size := CalcIntEnlargedValue(Memos[1].Font.Size);
+    end;
   finally
     Free;
   end;
@@ -218,9 +225,14 @@ begin
   try
     if WindowState <> wsMaximized then // 最大化时不保存位置
     begin
-      WriteInteger(csHintEditor, csHeight, Height);
-      WriteInteger(csHintEditor, csWidth, Width);
+      // 如有缩放，写入原始尺寸
+      WriteInteger(csHintEditor, csHeight, CalcIntUnEnlargedValue(Height));
+      WriteInteger(csHintEditor, csWidth, CalcIntUnEnlargedValue(Width));
     end;
+
+    // 恢复放大前的尺寸
+    Memos[0].Font.Size := CalcIntUnEnlargedValue(Memos[0].Font.Size);
+    Memos[1].Font.Size := CalcIntUnEnlargedValue(Memos[1].Font.Size);
 
     WriteFont(csHintEditor, csFontShort, Memos[0].Font);
     WriteFont(csHintEditor, csFontLong, Memos[1].Font);

@@ -82,6 +82,7 @@ type
   TCnIdeDockForm = class(TDockableForm)
   private
     FEnlarge: TCnWizSizeEnlarge;
+    function GetEnlarged: Boolean;
   protected
     FNeedRestore: Boolean;
     FRestoreRect: TRect;
@@ -135,6 +136,8 @@ type
     {* 如果子类中有 ListView，可以用此方法来放大 ListView 的列宽}
     property Enlarge: TCnWizSizeEnlarge read FEnlarge;
     {* 供专家包子类窗口使用的缩放比例}
+    property Enlarged: Boolean read GetEnlarged;
+    {* 是否有缩放}
 
     // 以下复制自 TCnTranslateForm 以实现多语
     procedure Translate; virtual;
@@ -534,6 +537,11 @@ begin
   for I := 0 to ListView.Columns.Count - 1 do
     if ListView.Columns[I].Width > 0 then
       ListView.Columns[I].Width := Round(ListView.Columns[I].Width * GetFactorFromSizeEnlarge(FEnlarge));
+end;
+
+function TCnIdeDockForm.GetEnlarged: Boolean;
+begin
+  Result := FEnlarge <> wseOrigin;
 end;
 
 { TDummyPopupMenu }
