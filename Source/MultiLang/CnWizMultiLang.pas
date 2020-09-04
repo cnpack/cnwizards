@@ -882,10 +882,14 @@ begin
   // 避免 Loaded 时还未获得 FEnlarge 值
 end;
 
+{$IFNDEF STAND_ALONE}
+
 function TCnTranslateForm.GetEnlarged: Boolean;
 begin
   Result := FEnlarge <> wseOrigin;
 end;
+
+{$ENDIF}
 
 initialization
 {$IFDEF STAND_ALONE}
