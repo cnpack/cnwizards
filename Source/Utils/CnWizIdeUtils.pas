@@ -1109,10 +1109,14 @@ var
 {$ENDIF}
 begin
 {$IFDEF BDS}
+  {$IFDEF DELPHI104_SYDNEY_UP} // 10.4.1 以上，无嵌入式设计器选项，默认都嵌入了
+  Result := True;
+  {$ELSE}
   S := CnOtaGetEnvironmentOptions.Values['EmbeddedDesigner'];
   Result := S = 'True';
+  {$ENDIF}
 {$ELSE}
-  Result := False;
+  Result := False;  // D7 或以下不支持嵌入
 {$ENDIF}
 end;
 
