@@ -97,6 +97,7 @@ function GetWizardDll: string;
 const
   RIO_13_2_RELEASE = 34749;
   XE2_UPDATE4_HOTFIX1_RELEASE = 4504;
+  SYDNEY_14_1_RELEASE = 38860
 var
   FullPath: array[0..MAX_PATH - 1] of AnsiChar;
   Dir, Exe: string;
@@ -154,7 +155,13 @@ begin
         else
           Result := Dir + 'CnWizards_D103R.DLL';
       end;
-    27: Result := Dir + 'CnWizards_D104S.DLL';
+    27:
+      begin
+        if V.Release < SYDNEY_14_1_RELEASE then  // 10.4.0 采用另一个 DLL
+          Result := Dir + 'CnWizards_D104S1.DLL'
+        else
+          Result := Dir + 'CnWizards_D104S.DLL';
+      end;
   end;
 end;
 

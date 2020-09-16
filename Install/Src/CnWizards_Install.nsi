@@ -571,6 +571,10 @@ FileLoop:
   FileOpen $0 "$INSTDIR\CnWizards_D104S.dll" a
   IfErrors FileInUse
   FileClose $0
+  IfFileExists "$INSTDIR\CnWizards_D104S1.dll" 0 +4
+  FileOpen $0 "$INSTDIR\CnWizards_D104S1.dll" a
+  IfErrors FileInUse
+  FileClose $0
 !endif
 
 !endif
@@ -927,6 +931,7 @@ SectionEnd
 Section "RAD Studio 10.4 Sydney" SecD104S
   SectionIn 1 2
   SetOutPath $INSTDIR
+  File "..\..\Bin\CnWizards_D104S1.dll"
   File "..\..\Bin\CnWizards_D104S.dll"
   ; 写入专家注册键值
   DeleteRegValue HKCU "Software\Embarcadero\BDS\21.0\Experts" "CnWizards_D104S"
