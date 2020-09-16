@@ -1059,22 +1059,29 @@ begin
 end;
 
 procedure TCnMainViewer.actExportExecute(Sender: TObject);
+const
+  CRLF = #13#10;
 var
   S: TFileName;
-  FileStrs: TStringList;
+  FS: TFileStream;
+
+  procedure WriteStrToFileStream(const FSMsg: string);
+  begin
+    if FSMsg <> '' then
+      FS.Write(FSMsg[1], Length(FSMsg) * SizeOf(Char));
+    FS.Write(CRLF, 2);
+  end;
 
   procedure ExportToTextFile(AStore: TCnMsgStore; AFileName: string);
   var
     I: Integer;
   begin
-    FileStrs.Clear;
     for I := 0 to AStore.MsgCount - 1 do
     begin
-      FileStrs.Add('--------------------------------------------------------------------------------');
-      FileStrs.Add(CurrentChild.DescriptionOfMsg(I, AStore.Msgs[I]));
-      FileStrs.Add('');
+      WriteStrToFileStream('--------------------------------------------------------------------------------');
+      WriteStrToFileStream(CurrentChild.DescriptionOfMsg(I, AStore.Msgs[I]));
+      WriteStrToFileStream('');
     end;
-    FileStrs.SaveToFile(AFileName);
   end;
 
   procedure ExportToCSVFile(AStore: TCnMsgStore; AFileName: string);
@@ -1083,8 +1090,7 @@ var
     Msg: string;
     AMsgItem: TCnMsgItem;
   begin
-    FileStrs.Clear;
-    FileStrs.Add(SCnCSVFormatHeader);
+    WriteStrToFileStream(SCnCSVFormatHeader);
     for I := 0 to AStore.MsgCount - 1 do
     begin
       AMsgItem := AStore.Msgs[I];
@@ -1092,11 +1098,10 @@ var
       Msg := StringReplace(AMsgItem.Msg, #13#10, ' ', [rfIgnoreCase, rfReplaceAll]);
       Msg := StringReplace(Msg, ',', ' ', [rfIgnoreCase, rfReplaceAll]);
 
-      FileStrs.Add(Format('%d,%d,%s,$%x,$%x,%s,%s,%s', [I + 1, AMsgItem.Level,
+      WriteStrToFileStream(Format('%d,%d,%s,$%x,$%x,%s,%s,%s', [I + 1, AMsgItem.Level,
         SCnMsgTypeDescArray[AMsgItem.MsgType]^, AMsgItem.ThreadId, AMsgItem.ProcessId,
         AMsgItem.Tag, GetLongTimeDesc(AMsgItem), Msg]));
     end;
-    FileStrs.SaveToFile(AFileName);
   end;
 
   procedure ExportToHTMFile(AStore: TCnMsgStore; AFileName: string);
@@ -1105,9 +1110,8 @@ var
     Msg: string;
     AMsgItem: TCnMsgItem;
   begin
-    FileStrs.Clear;
-    FileStrs.Add(Format(SCnHTMFormatHeader, [SCnHTMFormatStyle, AFileName, SCnHTMFormatCharset]));
-    FileStrs.Add(SCnHTMFormatTableHead);
+    WriteStrToFileStream(Format(SCnHTMFormatHeader, [SCnHTMFormatStyle, AFileName, SCnHTMFormatCharset]));
+    WriteStrToFileStream(SCnHTMFormatTableHead);
     for I := 0 to AStore.MsgCount - 1 do
     begin
       AMsgItem := AStore.Msgs[I];
@@ -1117,12 +1121,11 @@ var
       Msg := StringReplace(AMsgItem.Msg, '>', '&gt;', [rfIgnoreCase, rfReplaceAll]);
       Msg := StringReplace(AMsgItem.Msg, #13#10, '<BR>', [rfIgnoreCase, rfReplaceAll]);
 
-      FileStrs.Add(Format(SCnHTMFormatLine, [I + 1, AMsgItem.Level,
+      WriteStrToFileStream(Format(SCnHTMFormatLine, [I + 1, AMsgItem.Level,
         SCnMsgTypeDescArray[AMsgItem.MsgType]^, AMsgItem.ThreadId, AMsgItem.ProcessId, AMsgItem.Tag,
         GetLongTimeDesc(AMsgItem), Msg]));
     end;
-    FileStrs.Add(SCnHTMFormatEnd);
-    FileStrs.SaveToFile(AFileName);
+    WriteStrToFileStream(SCnHTMFormatEnd);
   end;
 begin
   if CurrentChild = nil then Exit;
@@ -1132,7 +1135,7 @@ begin
     S := dlgSaveExport.FileName;
 
     try
-      FileStrs := TStringList.Create;
+      FS := TFileStream.Create(S, fmCreate or fmOpenWrite);
       case dlgSaveExport.FilterIndex of
         1: // TXT
           begin
@@ -1156,7 +1159,7 @@ begin
           end;
       end;
     finally
-      FileStrs.Free;
+      FS.Free;
     end;
   end;
 end;
