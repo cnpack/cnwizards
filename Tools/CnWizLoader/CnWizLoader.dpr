@@ -97,7 +97,7 @@ function GetWizardDll: string;
 const
   RIO_13_2_RELEASE = 34749;
   XE2_UPDATE4_HOTFIX1_RELEASE = 4504;
-  SYDNEY_14_1_RELEASE = 38860
+  SYDNEY_14_1_RELEASE = 38860;
 var
   FullPath: array[0..MAX_PATH - 1] of AnsiChar;
   Dir, Exe: string;
