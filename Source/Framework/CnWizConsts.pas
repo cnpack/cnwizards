@@ -1176,6 +1176,8 @@ var
   SCnSelectRootHint: string = 'Select Current Form in Current Designer';
   SCnCopyCompNameCaption: string = 'Copy Component''s Name';
   SCnCopyCompNameHint: string = 'Copy Selected Component''s Name to Clipboard';
+  SCnCopyCompClassCaption: string = 'Copy Component''s ClassName';
+  SCnCopyCompClassHint: string = 'Copy Selected Component''s ClassName to Clipboard';
   SCnNonArrangeCaption: string = 'Arrange Non-visual...';
   SCnNonArrangeHint: string = 'Arrange the Non-visual Components';
   SCnListCompCaption: string = 'Locate Components...';

@@ -1870,6 +1870,14 @@ procedure CnOtaCopyCurrFormSelectionsName;
 begin
 end;
 
+procedure CnOtaGetCurrFormSelectionsClassName(List: TStrings);
+begin
+end;
+
+procedure CnOtaCopyCurrFormSelectionsClassName;
+begin
+end;
+
 function CnOtaIDESupportsTheming: Boolean;
 begin
 end;

@@ -90,7 +90,7 @@ type
     asMakeMinHeight, asMakeMaxHeight, asMakeSameHeight, asMakeSameSize,
     asParentHCenter, asParentVCenter, asBringToFront, asSendToBack,
     asSnapToGrid, {$IFDEF IDE_HAS_GUIDE_LINE} asUseGuidelines, {$ENDIF} asAlignToGrid,
-    asSizeToGrid, asLockControls, asSelectRoot, asCopyCompName,
+    asSizeToGrid, asLockControls, asSelectRoot, asCopyCompName, asCopyCompClass,
     asHideComponent,
     asNonArrange, asListComp, asCompToCode, asCompRename, asShowFlatForm);
 
@@ -268,7 +268,7 @@ const
   // Action 生效需要选择的最小控件数
   csAlignNeedControls: array[TAlignSizeStyle] of Integer = (2, 2, 2, 2, 2, 2,
     3, 2, 2, 2, 2, 3, 2, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 0,
-    {$IFDEF IDE_HAS_GUIDE_LINE} 0, {$ENDIF} 1, 1, -1, -1, -1,
+    {$IFDEF IDE_HAS_GUIDE_LINE} 0, {$ENDIF} 1, 1, -1, -1, -1, -1,
     0, 0, 0, 0, 1, -1);
 
   csAlignNeedSepMenu: set of TAlignSizeStyle =
@@ -285,7 +285,7 @@ const
     'CnParentVCenter', 'CnBringToFront', 'CnSendToBack', 'CnSnapToGrid',
     {$IFDEF IDE_HAS_GUIDE_LINE} 'CnUseGuidelines', {$ENDIF}
     'CnAlignToGrid', 'CnSizeToGrid', 'CnLockControls', 'CnSelectRoot',
-    'CnCopyCompName', 'CnHideComponent',
+    'CnCopyCompName', 'CnCopyCompClass', 'CnHideComponent',
     'CnNonArrange', 'CnListComp', 'CnCompToCode', 'CnCompRename', 'CnShowFlatForm');
 
   csAlignSizeCaptions: array[TAlignSizeStyle] of PString = (
@@ -300,7 +300,7 @@ const
     @SCnBringToFrontCaption, @SCnSendToBackCaption, @SCnSnapToGridCaption,
     {$IFDEF IDE_HAS_GUIDE_LINE} @SCnUseGuidelinesCaption, {$ENDIF}
     @SCnAlignToGridCaption, @SCnSizeToGridCaption, @SCnLockControlsCaption,
-    @SCnSelectRootCaption, @SCnCopyCompNameCaption,
+    @SCnSelectRootCaption, @SCnCopyCompNameCaption, @SCnCopyCompClassCaption,
     @SCnHideComponentCaption,
     @SCnNonArrangeCaption, @SCnListCompCaption, @SCnCompToCodeCaption,
     @SCnFloatPropBarRenameCaption, @SCnShowFlatFormCaption);
@@ -317,7 +317,7 @@ const
     @SCnBringToFrontHint, @SCnSendToBackHint, @SCnSnapToGridHint,
     {$IFDEF IDE_HAS_GUIDE_LINE} @SCnUseGuidelinesHint, {$ENDIF}
     @SCnAlignToGridHint, @SCnSizeToGridHint, @SCnLockControlsHint,
-    @SCnSelectRootHint, @SCnCopyCompNameHint,
+    @SCnSelectRootHint, @SCnCopyCompNameHint, @SCnCopyCompClassHint,
     @SCnHideComponentHint,
     @SCnNonArrangeHint, @SCnListCompHint, @SCnCompToCodeHint,
     @SCnFloatPropBarRenameCaption, @SCnShowFlatFormHint);
@@ -721,10 +721,13 @@ begin
           CnOtaSetCurrFormSelectRoot;
           IsModified := False;
         end;
-      asCopyCompName:
+      asCopyCompName, asCopyCompClass:
         begin
-          CnOtaCopyCurrFormSelectionsName;
-          
+          if AlignSizeStyle = asCopyCompName then
+            CnOtaCopyCurrFormSelectionsName
+          else
+            CnOtaCopyCurrFormSelectionsClassName;
+
           GetKeyboardState(KeyState);
           if (KeyState[VK_SHIFT] and $80) = 0 then // 按 Shift 不跳
           begin

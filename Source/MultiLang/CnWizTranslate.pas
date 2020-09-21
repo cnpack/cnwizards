@@ -862,6 +862,8 @@ begin
   TranslateStr(SCnSelectRootHint, 'SCnSelectRootHint');
   TranslateStr(SCnCopyCompNameCaption, 'SCnCopyCompNameCaption');
   TranslateStr(SCnCopyCompNameHint, 'SCnCopyCompNameHint');
+  TranslateStr(SCnCopyCompClassCaption, 'SCnCopyCompClassCaption');
+  TranslateStr(SCnCopyCompClassHint, 'SCnCopyCompClassHint');
   TranslateStr(SCnNonArrangeCaption, 'SCnNonArrangeCaption');
   TranslateStr(SCnNonArrangeHint, 'SCnNonArrangeHint');
   TranslateStr(SCnListCompCaption, 'SCnListCompCaption');

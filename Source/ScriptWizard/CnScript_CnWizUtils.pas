@@ -528,6 +528,8 @@ begin
   CL.AddDelphiFunction('Procedure CnOtaSetCurrFormSelectRoot');
   CL.AddDelphiFunction('Procedure CnOtaGetCurrFormSelectionsName( List : TStrings)');
   CL.AddDelphiFunction('Procedure CnOtaCopyCurrFormSelectionsName');
+  CL.AddDelphiFunction('Procedure CnOtaGetCurrFormSelectionsClassName( List : TStrings)');
+  CL.AddDelphiFunction('Procedure CnOtaCopyCurrFormSelectionsClassName');
   CL.AddDelphiFunction('Function CnOtaIDESupportsTheming : Boolean');
   CL.AddDelphiFunction('Function CnOtaGetIDEThemingEnabled : Boolean');
   CL.AddDelphiFunction('Function CnOtaGetActiveThemeName : string');
@@ -786,6 +788,8 @@ begin
   S.RegisterDelphiFunction(@CnOtaSetCurrFormSelectRoot, 'CnOtaSetCurrFormSelectRoot', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetCurrFormSelectionsName, 'CnOtaGetCurrFormSelectionsName', cdRegister);
   S.RegisterDelphiFunction(@CnOtaCopyCurrFormSelectionsName, 'CnOtaCopyCurrFormSelectionsName', cdRegister);
+  S.RegisterDelphiFunction(@CnOtaGetCurrFormSelectionsClassName, 'CnOtaGetCurrFormSelectionsClassName', cdRegister);
+  S.RegisterDelphiFunction(@CnOtaCopyCurrFormSelectionsClassName, 'CnOtaCopyCurrFormSelectionsClassName', cdRegister);
   S.RegisterDelphiFunction(@CnOtaIDESupportsTheming, 'CnOtaIDESupportsTheming', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetIDEThemingEnabled, 'CnOtaGetIDEThemingEnabled', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetActiveThemeName, 'CnOtaGetActiveThemeName', cdRegister);
