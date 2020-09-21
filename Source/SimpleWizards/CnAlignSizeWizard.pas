@@ -1418,7 +1418,7 @@ begin
     else
       Actn.Checked := FHideNonVisual;
   end
-  else if Index = Indexes[asCopyCompName] then
+  else if (Index = Indexes[asCopyCompName]) or (Index = Indexes[asCopyCompClass]) then
   begin
     Actn.Enabled := not CnOtaIsCurrFormSelectionsEmpty;
   end
