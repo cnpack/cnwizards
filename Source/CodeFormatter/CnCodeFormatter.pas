@@ -2942,7 +2942,7 @@ begin
     if Scaner.Token = tokSemicolon then
       Match(tokSemicolon);
   until Scaner.Token in ClassMethodTokens + ClassVisibilityTokens + [tokKeywordEnd,
-    tokEOF, tokKeywordCase, tokKeywordConst];
+    tokEOF, tokKeywordCase, tokKeywordConst, tokKeywordProperty];
     // 出现这些，认为 class var 区结束，包括 record 可能出现的 case
 end;
 
