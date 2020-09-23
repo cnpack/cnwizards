@@ -467,10 +467,12 @@ begin
   FKeywordsValidArray[tokComplexName] := [pfetDirective];
   FKeywordsValidArray[tokKeywordAlign] := [pfetRecordEnd];
 
-  // Requires/Contains 只在 dpk 里算关键字
+  // requires/contains 只在 dpk 里算关键字
   FKeywordsValidArray[tokKeywordRequires] := [pfetPackageBlock];
   FKeywordsValidArray[tokKeywordContains] := [pfetPackageBlock];
 
+  // at 只在 raise 后面才算关键字
+  FKeywordsValidArray[tokKeywordAt] := [pfetRaiseAt];
   // 未列出的关键字，表示在哪都是关键字
 end;
 
