@@ -846,7 +846,7 @@ begin
   begin
     // 两个标识符之间以空格分离，前提是本行未被注释等分行从而隔开 FLastToken
     if not FCodeGen.NextOutputWillbeLineHead and
-      ((FLastToken in IdentTokens) and (Token in IdentTokens + [tokAtSign])) then
+      ((FLastToken in IdentTokens) and (Token in IdentTokens + [tokAtSign, tokAmpersand])) then
       WriteOneSpace
     else if ((BeforeSpaceCount = 0) and (FLastToken = tokGreat) and
       (CurrentContainElementType([pfetInGeneric]) or (FLastElementType = pfetInGeneric))
@@ -5228,7 +5228,7 @@ end;
 { VarSection -> VAR | THREADVAR (VarDecl ';')... }
 procedure TCnBasePascalFormatter.FormatVarSection(PreSpaceCount: Byte);
 const
-  IsVarStartTokens = [tokSymbol, tokSLB] + ComplexTokens + DirectiveTokens
+  IsVarStartTokens = [tokSymbol, tokSLB, tokAmpersand] + ComplexTokens + DirectiveTokens
     + KeywordTokens - NOTExpressionTokens;
 begin
   if Scaner.Token in [tokKeywordVar, tokKeywordThreadvar] then
