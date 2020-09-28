@@ -846,7 +846,7 @@ begin
   begin
     // 两个标识符之间以空格分离，前提是本行未被注释等分行从而隔开 FLastToken
     if not FCodeGen.NextOutputWillbeLineHead and
-      ((FLastToken in IdentTokens) and (Token in IdentTokens + [tokAtSign, tokAmpersand])) then
+      ((FLastToken in IdentTokens) and (Token in IdentTokens + [tokAtSign])) then
       WriteOneSpace
     else if ((BeforeSpaceCount = 0) and (FLastToken = tokGreat) and
       (CurrentContainElementType([pfetInGeneric]) or (FLastElementType = pfetInGeneric))
@@ -3857,6 +3857,7 @@ end;
 procedure TCnBasePascalFormatter.FormatPropertyList(PreSpaceCount: Byte);
 begin
   Match(tokKeywordProperty, PreSpaceCount);
+  FormatPossibleAmpersand(CnPascalCodeForRule.SpaceBeforeOperator);
   FormatIdent;
 
   if Scaner.Token in [tokSLB, tokColon] then
@@ -5701,6 +5702,7 @@ end;
 procedure TCnBasePascalFormatter.FormatClassProperty(PreSpaceCount: Byte);
 begin
   Match(tokKeywordProperty, PreSpaceCount);
+  FormatPossibleAmpersand(CnPascalCodeForRule.SpaceBeforeOperator);
   FormatIdent;
 
   if Scaner.Token in [tokSLB, tokColon] then
