@@ -1462,10 +1462,18 @@ end;
 procedure TCnMainViewer.TerminateThread;
 begin
   if FThread <> nil then
+  begin
     FThread.Terminate;
+    FThread.WaitFor;
+    FThread := nil;
+  end;
 
   if FDbgThread <> nil then
+  begin
     FDbgThread.Terminate;
+    FDbgThread.WaitFor;
+    FDbgThread := nil;
+  end;
 end;
 
 procedure TCnMainViewer.ShowAndHideOtherChildren(ExceptChild: TForm);
