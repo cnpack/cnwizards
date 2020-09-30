@@ -321,7 +321,7 @@ type
     function FormatFieldList(PreSpaceCount: Byte = 0; IgnoreFirst: Boolean = False): Boolean; // 返回结构的内部是否包含 case 变体
     procedure FormatTypeSection(PreSpaceCount: Byte = 0);
     procedure FormatTypeDecl(PreSpaceCount: Byte = 0);
-    procedure FormatTypedConstant(PreSpaceCount: Byte = 0);
+    procedure FormatTypedConstant(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
 
     procedure FormatArrayConstant(PreSpaceCount: Byte = 0);
     procedure FormatRecordConstant(PreSpaceCount: Byte = 0);
@@ -2122,7 +2122,7 @@ begin
             FormatDesignatorAndOthers(PreSpaceCount);
           end;
         end;
-      tokKeywordVar:
+      tokKeywordVar: // 新语法，inline var
         begin
           Match(Scaner.Token, PreSpaceCount);
           FormatInlineVarDecl(0, PreSpaceCount); // var 语句后面无需缩进，但 var 里头的匿名函数需要缩进
@@ -4331,7 +4331,8 @@ begin
 end;
 
 { TypedConstant -> (ConstExpr | SetConstructor | ArrayConstant | RecordConstant) }
-procedure TCnBasePascalFormatter.FormatTypedConstant(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatTypedConstant(PreSpaceCount: Byte;
+  IndentForAnonymous: Byte);
 type
   TCnTypedConstantType = (tcConst, tcArray, tcRecord);
 var
@@ -4464,7 +4465,7 @@ begin
       end;
   else // 不是括号开头，说明是简单的常量，直接处理
     if Scaner.Token in ConstTokens + [tokAtSign, tokPlus, tokMinus, tokHat] then // 有可能初始化的值以这些开头
-      FormatConstExpr(PreSpaceCount)
+      FormatConstExpr(PreSpaceCount, IndentForAnonymous)
     else if Scaner.Token <> tokRB then
       Error(CN_ERRCODE_PASCAL_NO_TYPEDCONSTANT);
   end;
@@ -5212,7 +5213,7 @@ begin
     Match(Scaner.Token, 1, 1);
     // var F := not A 这种，走不了 TypedConstant，得走 ConstExpr
     if Scaner.Token in ConstTokens + [tokAtSign, tokPlus, tokMinus, tokHat, tokSLB, tokLB] then
-      FormatTypedConstant
+      FormatTypedConstant(0, IndentForAnonymous)
     else
       FormatConstExpr(0, IndentForAnonymous);
   end
