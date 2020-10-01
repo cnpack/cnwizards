@@ -107,7 +107,7 @@ type
     // 上层与当前是否包含指定的几个 ElementType 之一
 
     procedure ResetElementType;
-    function CalcNeedPadding: Boolean;
+    function CalcNeedPadding: Boolean; // 判断是否因为碰到行注释导致额外换行时需要和上一行对齐
     function CalcNeedPaddingAndUnIndent: Boolean;
     procedure WriteOneSpace;
   protected
@@ -280,7 +280,7 @@ type
     procedure FormatLabel(PreSpaceCount: Byte = 0);
     procedure FormatSimpleStatement(PreSpaceCount: Byte = 0);
     procedure FormatStructStmt(PreSpaceCount: Byte = 0);
-    procedure FormatIfStmt(PreSpaceCount: Byte = 0; IgnorePreSpace: Boolean = False);
+    procedure FormatIfStmt(PreSpaceCount: Byte = 0; AfterElseIgnorePreSpace: Boolean = False);
     {* IgnorePreSpace 是为了控制 else if 的情形}
     procedure FormatCaseLabel(PreSpaceCount: Byte = 0);
     procedure FormatCaseSelector(PreSpaceCount: Byte = 0);
@@ -1877,15 +1877,22 @@ begin
 end;
 
 { IfStmt -> IF Expression THEN Statement [ELSE Statement] }
-procedure TCnBasePascalFormatter.FormatIfStmt(PreSpaceCount: Byte; IgnorePreSpace: Boolean);
+procedure TCnBasePascalFormatter.FormatIfStmt(PreSpaceCount: Byte; AfterElseIgnorePreSpace: Boolean);
 var
   OldKeepOneBlankLine, ElseAfterThen: Boolean;
 begin
-  if IgnorePreSpace then
-    Match(tokKeywordIF)
+  if AfterElseIgnorePreSpace then // 是 else if，这个 if 紧跟 else，无需额外缩进
+  begin
+    SpecifyElementType(pfetIfAfterElse); // 但要考虑行注释后造成额外换行时的缩进
+    try
+      Match(tokKeywordIf);
+    finally
+      RestoreElementType;
+    end;
+  end
   else
   begin
-    Match(tokKeywordIF, PreSpaceCount);
+    Match(tokKeywordIf, PreSpaceCount);
     FCurrentTab := PreSpaceCount;
   end;
 
@@ -6116,11 +6123,11 @@ begin
   Result := (FElementType in [pfetExpression, pfetEnumList,pfetArrayConstant,
     pfetSetConstructor, pfetFormalParameters, pfetUsesList, pfetFieldDecl, pfetClassField,
     pfetThen, pfetDo, pfetExprListRightBracket, pfetFormalParametersRightBracket,
-    pfetRecVarFieldListRightBracket])
+    pfetRecVarFieldListRightBracket, pfetIfAfterElse])
     or ((FElementType in [pfetConstExpr]) and not UpperContainElementType([pfetCaseLabel])) // Case Label 的无需跟随上面一行注释缩进
     or UpperContainElementType([pfetFormalParameters, pfetArrayConstant, pfetCaseLabelList]);
   // 暂且表达式内部与枚举定义内部等一系列元素内部，或者在参数列表、uses 中
-  // 碰到注释导致的换行时，才要求自动和上一行对齐
+  // 碰到注释导致的换行时，才要求自动和上一行对齐，并进一步缩进
   // 还要求在本来不换行的组合语句里，比如 if then ，while do 里，for do 里
   // 严格来讲 then/do 这种还不同，不需要进一步缩进，不过暂时当作进一步缩进处理。
 end;
