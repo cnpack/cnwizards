@@ -754,10 +754,14 @@ end;
 
 destructor TCnInputListBox.Destroy;
 begin
+  try
 {$IFDEF IDE_MAINFORM_EAT_MOUSEWHEEL}
-  FMethodHook.Free;
+    FMethodHook.Free;
 {$ENDIF}
-  inherited;
+    inherited;
+  except
+    ;  // 试图抓住 No Parent Window 的 Exception，不弹框
+  end;
 end;
 
 procedure TCnInputListBox.MouseMove(Shift: TShiftState; X, Y: Integer);
@@ -1180,6 +1184,7 @@ begin
   inherited;
   FListFont := TFont.Create;
   List := TCnInputListBox.Create(nil);
+  List.Name := 'CnInputListBox';
   List.Parent := Application.MainForm;
   List.OnDrawItem := ListDrawItem;
   List.OnDblClick := ListDblClick;
