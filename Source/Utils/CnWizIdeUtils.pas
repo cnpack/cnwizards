@@ -164,8 +164,10 @@ const
     clNavy, clPurple, clTeal, clLtGray, clDkGray, clRed, clLime,
     clYellow, clBlue, clFuchsia, clAqua, clWhite);
 
-  csDarkBackgroundColor = $2E2F33;  // Dark 模式下的背景色
-  csDarkFontColor = $FFFFFF;        // Dark 模式下的文字颜色
+  csDarkBackgroundColor = $2E2F33;  // Dark 模式下的未选中的背景色
+  csDarkFontColor = $FFFFFF;        // Dark 模式下的未选中的文字颜色
+  csDarkHighlightBkColor = $8E6535; // Dark 模式下的选中状态下的高亮背景色
+  csDarkHighlightFontColor = $FFFFFF; // Dark 模式下的选中状态下的高亮文字颜色
 
 type
 {$IFDEF BDS}

@@ -85,6 +85,7 @@ type
 
   TCnInputListBox = class(TCustomListBox)
   private
+    FBackColor: TColor;
     FLastItem: Integer;
     FOnItemHint: TCnItemHintEvent;
     FOnButtonClick: TBtnClickEvent;
@@ -433,6 +434,10 @@ const
   csKeywordColor = clBlue;
   csTypeColor = clNavy;
 
+  csDarkMatchColor = $006060FF;   // 浅红
+  csDarkKeywordColor = $0000C0FF; // 浅橙
+  csDarkTypeColor = clAqua;       // 浅蓝
+
   csDataFile = 'SymbolHitCount.dat';
   csMaxHitCount = 8;
   csDecHitCountDays = 1;
@@ -565,9 +570,11 @@ const
 //  );
 //{$ENDIF}
 
+type
+  TControlHack = class(TControl);
+
 {$IFNDEF SUPPORT_IDESymbolList}
 
-type
   TSCppKibitzManagerCCError = procedure (Rec: PResStringRec); // TResStringRec
 
 procedure MyCCError(Rec: PResStringRec);
@@ -586,6 +593,11 @@ begin
 end;
 
 {$ENDIF}
+
+function IsUnderDarkTheme: Boolean;
+begin
+  Result := CnThemeWrapper.SupportTheme and CnThemeWrapper.CurrentIsDark;
+end;
 
 //==============================================================================
 // 输入列表框
@@ -654,9 +666,14 @@ begin
     Canvas.Brush := Brush;
     if (Integer(itemID) >= 0) and (odSelected in State) then
     begin
-      Canvas.Brush.Color := clHighlight;
-      Canvas.Font.Color := clHighlightText
+      Canvas.Brush.Color := FBackColor; // 适应编辑器背景色
+
+      if IsUnderDarkTheme then  // 暗黑主题换暗黑主题的颜色
+        Canvas.Font.Color := csDarkHighlightFontColor
+      else
+        Canvas.Font.Color := clHighlightText;
     end;
+
     if Integer(itemID) >= 0 then
     begin
       if Assigned(OnDrawItem) then
@@ -681,6 +698,7 @@ begin
   inherited;
   Visible := False;
   Style := lbOwnerDrawFixed;
+  FBackColor := clWindow; // 默认弹窗未选中条目的背景色，主题状态下会感知主题
   DoubleBuffered := True;
   Constraints.MinHeight := WizOptions.CalcIntEnlargedValue(WizOptions.SizeEnlarge, ItemHeight * csMinDispItems + 4);
   Constraints.MinWidth := WizOptions.CalcIntEnlargedValue(WizOptions.SizeEnlarge, csMinDispWidth);
@@ -825,7 +843,17 @@ begin
 end;
 
 procedure TCnInputListBox.Popup;
+var
+  Control: TControl;
 begin
+  // TODO: 拿编辑器背景色给 FBackColor
+  Control := GetCurrentEditControl;
+  if Control <> nil then
+    FBackColor := TControlHack(Control).Color;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogColor(FBackColor, 'TCnInputListBox Get Editor Background Color');
+{$ENDIF}
   Visible := True;
   UpdateExtraFormLang;
   UpdateExtraForm;
@@ -2883,33 +2911,50 @@ var
   SymbolItem: TSymbolItem;
   TextWith: Integer;
   Kind: Integer;
+  ColorFont, ColorBrush, ColorMatch: TColor;
 
   function GetHighlightColor(Kind: TSymbolKind): TColor;
   begin
-    case Kind of
-      skKeyword: Result := csKeywordColor;
-      skType: Result := csTypeColor;
+    if IsUnderDarkTheme then
+    begin
+      case Kind of
+        skKeyword: Result := csDarkKeywordColor;
+        skType: Result := csDarkTypeColor;
+      else
+        Result := csDarkFontColor;
+      end;
+    end
     else
-      Result := clWindowText;
+    begin
+      case Kind of
+        skKeyword: Result := csKeywordColor;
+        skType: Result := csTypeColor;
+      else
+        Result := clWindowText;
+      end;
     end;
   end;
 
 begin
-  // 自画ListBox中的SymbolList
+  // 自画 ListBox 中的 SymbolList
   with List do
   begin
     SymbolItem := TSymbolItem(FItems.Objects[Index]);
     Canvas.Font := Font;
-    if odSelected in State then
+
+    if odSelected in State then  // 根据主题，指定选中/非选中状态下的文字色
     begin
-      Canvas.Font.Color := clHighlightText;
-      Canvas.Brush.Color := clHighlight;
+      ColorBrush := csDarkHighlightBkColor;
+      ColorFont := clHighlightText;
     end
     else
     begin
-      Canvas.Brush.Color := clWindow;
-      Canvas.Font.Color := GetHighlightColor(SymbolItem.Kind);
+      ColorBrush := FBackColor;
+      ColorFont := GetHighlightColor(SymbolItem.Kind);
     end;
+
+    Canvas.Brush.Color := ColorBrush;
+    Canvas.Font.Color := ColorFont;
 
     if Ord(SymbolItem.Kind) < dmCnSharedImages.SymbolImages.Count then
       Kind := Ord(SymbolItem.Kind)
@@ -2922,19 +2967,29 @@ begin
     Canvas.Font.Style := Canvas.Font.Style + [fsBold];
 
     AText := SymbolItem.GetKeywordText(KeywordStyle);
+    if IsUnderDarkTheme then
+      ColorMatch := csDarkMatchColor
+    else
+      ColorMatch := csMatchColor; // 根据主题，指定匹配文字的颜色
+
     if FMatchMode in [mmStart, mmAnywhere] then
-      DrawMatchText(Canvas, FMatchStr, AText, Rect.Left + LEFT_ICON, Rect.Top, csMatchColor)
+      DrawMatchText(Canvas, FMatchStr, AText, Rect.Left + LEFT_ICON, Rect.Top, ColorMatch)
     else
       DrawMatchText(Canvas, FMatchStr, AText, Rect.Left + LEFT_ICON, Rect.Top,
-        csMatchColor, SymbolItem.FuzzyMatchIndexes);
+        ColorMatch, SymbolItem.FuzzyMatchIndexes);
 
     TextWith := Canvas.TextWidth(AText);
     Canvas.Font.Style := Canvas.Font.Style - [fsBold];
-    if odSelected in State then
+
+    Canvas.Brush.Color := ColorBrush;
+    if not (odSelected in State) then // 普通绘制描述文字，注意未选中时和 ColorFont 有不同不能直接套用
     begin
-      Canvas.Font.Color := clHighlightText;
-      Canvas.Brush.Color := clHighlight;
+      if IsUnderDarkTheme then
+        Canvas.Font.Color := csDarkFontColor
+      else
+        Canvas.Font.Color := clWindowText;
     end;
+
     Canvas.TextOut(Rect.Left + DESC_INTERVAL + TextWith, Rect.Top, SymbolItem.Description);
   end;
 end;
