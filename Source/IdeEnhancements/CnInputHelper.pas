@@ -86,6 +86,7 @@ type
   TCnInputListBox = class(TCustomListBox)
   private
     FBackColor: TColor;
+    FFontColor: TColor;
     FLastItem: Integer;
     FOnItemHint: TCnItemHintEvent;
     FOnButtonClick: TBtnClickEvent;
@@ -698,7 +699,8 @@ begin
   inherited;
   Visible := False;
   Style := lbOwnerDrawFixed;
-  FBackColor := clWindow; // 默认弹窗未选中条目的背景色，主题状态下会感知主题
+  FBackColor := clWindow;       // 默认弹窗未选中条目的背景色，主题状态下会感知主题
+  FFontColor := clWindowText;   // 默认弹窗未选中条目的文字颜色，主题状态下会感知主题
   DoubleBuffered := True;
   Constraints.MinHeight := WizOptions.CalcIntEnlargedValue(WizOptions.SizeEnlarge, ItemHeight * csMinDispItems + 4);
   Constraints.MinWidth := WizOptions.CalcIntEnlargedValue(WizOptions.SizeEnlarge, csMinDispWidth);
@@ -846,13 +848,17 @@ procedure TCnInputListBox.Popup;
 var
   Control: TControl;
 begin
-  // TODO: 拿编辑器背景色给 FBackColor
+  // 拿编辑器背景色给 FBackColor，文字色给 FFontColor
   Control := GetCurrentEditControl;
   if Control <> nil then
+  begin
     FBackColor := TControlHack(Control).Color;
+    FFontColor := TControlHack(Control).Font.Color;
+  end;
 
 {$IFDEF DEBUG}
   CnDebugger.LogColor(FBackColor, 'TCnInputListBox Get Editor Background Color');
+  CnDebugger.LogColor(FFontColor, 'TCnInputListBox Get Editor Background Color');
 {$ENDIF}
   Visible := True;
   UpdateExtraFormLang;
@@ -2930,7 +2936,7 @@ var
         skKeyword: Result := csKeywordColor;
         skType: Result := csTypeColor;
       else
-        Result := clWindowText;
+        Result := List.FFontColor; // clWindowText;
       end;
     end;
   end;
@@ -2987,7 +2993,7 @@ begin
       if IsUnderDarkTheme then
         Canvas.Font.Color := csDarkFontColor
       else
-        Canvas.Font.Color := clWindowText;
+        Canvas.Font.Color := List.FFontColor;
     end;
 
     Canvas.TextOut(Rect.Left + DESC_INTERVAL + TextWith, Rect.Top, SymbolItem.Description);
