@@ -360,8 +360,6 @@ type
 
 procedure ConvertHTMLToClipBoardHtml(inStream, outStream: TMemoryStream);
 {* 将 HTML 源码转换成剪贴板格式 }
-procedure WideStringToUTF8(Buf: WideString; Len: Integer; outStream: TStream);
-{* 将字符串转换成 UTF8 格式，注意 Len 必须是 WideString 的长度 }
 
 {$ENDIF CNWIZARDS_CNPAS2HTMLWIZARD}
 
@@ -401,6 +399,78 @@ const
   PosLength = 9;                        // 写入的长度。
 
   SCnUtf8Encoding = 'utf-8';
+
+{-------------------------------------------------------------------------------
+  过程名:    WideStringToUTF8
+  作者:      Administrator
+  日期:      2003.02.20
+  参数:      Buf: WideString; Len: Integer; outStream: TStream
+  返回值:    无
+  备注:      参考 JclUnicode 库，将字符串转换成 UTF8 格式，注意 Len 必须是 WideString 的长度
+
+-------------------------------------------------------------------------------}
+procedure WideStringToUTF8(Buf: WideString; Len: Integer; outStream: TStream);
+const
+  FirstByteMark: array[0..6] of Byte = ($00, $00, $C0, $E0, $F0, $F8, $FC);
+  ReplacementCharacter: Cardinal = $0000FFFD;
+  MaximumUCS2: Cardinal = $0000FFFF;
+  MaximumUTF16: Cardinal = $0010FFFF;
+  MaximumUCS4: Cardinal = $7FFFFFFF;
+var
+  Ch: Cardinal;
+  L, J, T, BytesToWrite: Cardinal;
+  ByteMask: Cardinal;
+  ByteMark: Cardinal;
+  R: AnsiString;
+begin
+  if Len = 0 then
+    R := ''
+  else
+  begin
+    SetLength(R, Len * 6);
+    T := 1;
+    ByteMask := $BF;
+    ByteMark := $80;
+
+    for J := 1 to Len do
+    begin
+      Ch := Cardinal(Buf[J]);
+
+      if Ch < $80 then
+        BytesToWrite := 1
+      else
+        if Ch < $800 then
+          BytesToWrite := 2
+        else
+          if Ch < $10000 then
+            BytesToWrite := 3
+          else
+            if Ch < $200000 then
+              BytesToWrite := 4
+            else
+              if Ch < $4000000 then
+                BytesToWrite := 5
+              else
+                if Ch <= MaximumUCS4 then
+                  BytesToWrite := 6
+                else
+                begin
+                  BytesToWrite := 2;
+                  Ch := ReplacementCharacter;
+                end;
+
+      for L := BytesToWrite downto 2 do
+      begin
+        R[T + L - 1] := AnsiChar((Ch or ByteMark) and ByteMask);
+        Ch := Ch shr 6;
+      end;
+      R[T] := AnsiChar(Ch or FirstByteMark[BytesToWrite]);
+      Inc(T, BytesToWrite);
+    end;
+    SetLength(R, T - 1);
+    outStream.Write(R[1], Length(R));
+  end;
+end;
 
 {-------------------------------------------------------------------------------
   过程名:    ConvertHTMLToClipBoardHtml
@@ -488,77 +558,6 @@ begin
       PosLength);
 
     tmpoutStream.Free;
-  end;
-end;
-
-{-------------------------------------------------------------------------------
-  过程名:    WideStringToUTF8
-  作者:      Administrator
-  日期:      2003.02.20
-  参数:      Buf: WideString; Len: Integer; outStream: TStream
-  返回值:    无
-  备注:      参考JclUnicode库
--------------------------------------------------------------------------------}
-procedure WideStringToUTF8(Buf: WideString; Len: Integer; outStream: TStream);
-const
-  FirstByteMark: array[0..6] of Byte = ($00, $00, $C0, $E0, $F0, $F8, $FC);
-  ReplacementCharacter: Cardinal = $0000FFFD;
-  MaximumUCS2: Cardinal = $0000FFFF;
-  MaximumUTF16: Cardinal = $0010FFFF;
-  MaximumUCS4: Cardinal = $7FFFFFFF;
-var
-  Ch: Cardinal;
-  L, J, T, BytesToWrite: Cardinal;
-  ByteMask: Cardinal;
-  ByteMark: Cardinal;
-  R: AnsiString;
-begin
-  if Len = 0 then
-    R := ''
-  else
-  begin
-    SetLength(R, Len * 6);
-    T := 1;
-    ByteMask := $BF;
-    ByteMark := $80;
-
-    for J := 1 to Len do
-    begin
-      Ch := Cardinal(Buf[J]);
-
-      if Ch < $80 then
-        BytesToWrite := 1
-      else
-        if Ch < $800 then
-          BytesToWrite := 2
-        else
-          if Ch < $10000 then
-            BytesToWrite := 3
-          else
-            if Ch < $200000 then
-              BytesToWrite := 4
-            else
-              if Ch < $4000000 then
-                BytesToWrite := 5
-              else
-                if Ch <= MaximumUCS4 then
-                  BytesToWrite := 6
-                else
-                begin
-                  BytesToWrite := 2;
-                  Ch := ReplacementCharacter;
-                end;
-
-      for L := BytesToWrite downto 2 do
-      begin
-        R[T + L - 1] := AnsiChar((Ch or ByteMark) and ByteMask);
-        Ch := Ch shr 6;
-      end;
-      R[T] := AnsiChar(Ch or FirstByteMark[BytesToWrite]);
-      Inc(T, BytesToWrite);
-    end;
-    SetLength(R, T - 1);
-    outStream.Write(R[1], Length(R));
   end;
 end;
 
