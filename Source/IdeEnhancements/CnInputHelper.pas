@@ -853,7 +853,8 @@ begin
   if Control <> nil then
   begin
     FBackColor := TControlHack(Control).Color;
-    FFontColor := TControlHack(Control).Font.Color;
+    // 不能直接用 TControlHack(Control).Font.Color，不符合实际情况，得用高亮设置里的普通标识符颜色
+    FFontColor := EditControlWrapper.FontIdentifier.Color;
   end;
 
 {$IFDEF DEBUG}
