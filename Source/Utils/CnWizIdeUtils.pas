@@ -605,10 +605,13 @@ type
   end;
 
 function CnPaletteWrapper: TCnPaletteWrapper;
+{* 控件板封装处理}
 
 function CnMessageViewWrapper: TCnMessageViewWrapper;
+{* 消息栏封装处理}
 
 function CnThemeWrapper: TCnThemeWrapper;
+{* 主题封装处理}
 
 implementation
 
@@ -1744,8 +1747,10 @@ const
   SCnIDEBold = 'Bold';
   {$IFDEF COMPILER7_UP}
   SCnIDEForeColor = 'Foreground Color New';
+  SCnIDEBackColor = 'Background Color New'; // 暂未读取
   {$ELSE}
   SCnIDEForeColor = 'Foreground Color';
+  SCnIDEBackColor = 'Background Color';
   {$ENDIF}
   SCnIDEItalic = 'Italic';
   SCnIDEUnderline = 'Underline';
@@ -1774,6 +1779,7 @@ var
       end;
     end;
   end;
+
 begin
   // 从某项注册表中载入某项字体并赋值给 AFont
   Result := False; 
