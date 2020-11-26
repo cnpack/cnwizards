@@ -595,6 +595,7 @@ end;
 
 {$ENDIF}
 
+// 判断暗黑主题，更精确应该改为判断编辑器背景色是否够黑
 function IsUnderDarkTheme: Boolean;
 begin
   Result := CnThemeWrapper.SupportTheme and CnThemeWrapper.CurrentIsDark;
@@ -668,11 +669,7 @@ begin
     if (Integer(itemID) >= 0) and (odSelected in State) then
     begin
       Canvas.Brush.Color := FBackColor; // 适应编辑器背景色
-
-      if IsUnderDarkTheme then  // 暗黑主题换暗黑主题的颜色
-        Canvas.Font.Color := csDarkHighlightFontColor
-      else
-        Canvas.Font.Color := clHighlightText;
+      Canvas.Font.Color := FFontColor;
     end;
 
     if Integer(itemID) >= 0 then
@@ -848,7 +845,7 @@ procedure TCnInputListBox.Popup;
 var
   Control: TControl;
 begin
-  // 拿编辑器背景色给 FBackColor，文字色给 FFontColor
+  // 拿编辑器背景色给 FBackColor，普通标识符文字色给 FFontColor
   Control := GetCurrentEditControl;
   if Control <> nil then
   begin
@@ -861,6 +858,8 @@ begin
   CnDebugger.LogColor(FBackColor, 'TCnInputListBox Get Editor Background Color');
   CnDebugger.LogColor(FFontColor, 'TCnInputListBox Get Editor Background Color');
 {$ENDIF}
+  Color := FBackColor;
+
   Visible := True;
   UpdateExtraFormLang;
   UpdateExtraForm;
@@ -2922,7 +2921,7 @@ var
 
   function GetHighlightColor(Kind: TSymbolKind): TColor;
   begin
-    if IsUnderDarkTheme then
+    if IsUnderDarkTheme then // 编辑器背景够黑时应该用这种配色
     begin
       case Kind of
         skKeyword: Result := csDarkKeywordColor;
