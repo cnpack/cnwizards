@@ -134,7 +134,8 @@ type
 
 implementation
 
-uses CnWizCompilerConst;
+uses
+  CnWizCompilerConst, CnEditControlWrapper;
 
 {$R *.dfm}
 
@@ -142,15 +143,15 @@ uses CnWizCompilerConst;
 
 procedure TCnPas2HtmlConfigForm.FormCreate(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := Low(Self.FFontArray) to High(FFontArray) do
-    FFontArray[i] := TFont.Create;
+  for I := Low(FFontArray) to High(FFontArray) do
+    FFontArray[I] := TFont.Create;
 end;
 
 procedure TCnPas2HtmlConfigForm.FormShow(Sender: TObject);
 begin
-  Self.PageControl.ActivePageIndex := 0;
+  PageControl.ActivePageIndex := 0;
   if ComboBoxFont.ItemIndex < 0 then
     ComboBoxFont.ItemIndex := 0;
   ComboBoxFont.OnChange(ComboBoxFont);
@@ -158,16 +159,15 @@ end;
 
 procedure TCnPas2HtmlConfigForm.FormDestroy(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := Low(Self.FFontArray) to High(FFontArray) do
-    if Assigned(FFontArray[i]) then
-      FFontArray[i].Free;
+  for I := Low(FFontArray) to High(FFontArray) do
+    FFontArray[I].Free;
 end;
 
 function TCnPas2HtmlConfigForm.GetDispGauge: Boolean;
 begin
-  Result := Self.CheckBoxDispGauge.Checked;
+  Result := CheckBoxDispGauge.Checked;
 end;
 
 function TCnPas2HtmlConfigForm.GetFonts(const Index: Integer): TFont;
@@ -192,7 +192,7 @@ end;
 
 procedure TCnPas2HtmlConfigForm.SetDispGauge(const Value: Boolean);
 begin
-  Self.CheckBoxDispGauge.Checked := Value;
+  CheckBoxDispGauge.Checked := Value;
 end;
 
 procedure TCnPas2HtmlConfigForm.SetFonts(const Index: Integer;
@@ -223,26 +223,26 @@ end;
 
 procedure TCnPas2HtmlConfigForm.DispFontText;
 var
-  s: string;
+  S: string;
 begin
-  s := Format('%s, %d', [FFontArray[ComboBoxFont.ItemIndex].Name,
+  S := Format('%s, %d', [FFontArray[ComboBoxFont.ItemIndex].Name,
     FFontArray[ComboBoxFont.ItemIndex].Size]);
   if fsBold in FFontArray[ComboBoxFont.ItemIndex].Style then
-    s := s + ', Bold';
+    S := S + ', Bold';
   if fsItalic in FFontArray[ComboBoxFont.ItemIndex].Style then
-    s := s + ', Italic';
-  Self.LabelFontDisp.Caption := s;
+    S := S + ', Italic';
+  LabelFontDisp.Caption := S;
 end;
 
 procedure TCnPas2HtmlConfigForm.ChangeFontActionExecute(Sender: TObject);
 begin
-  Self.FontDialog.Font := FFontArray[ComboBoxFont.ItemIndex];
-  if Self.FontDialog.Execute then
+  FontDialog.Font := FFontArray[ComboBoxFont.ItemIndex];
+  if FontDialog.Execute then
   begin
-    FFontArray[ComboBoxFont.ItemIndex].Assign(Self.FontDialog.Font);
+    FFontArray[ComboBoxFont.ItemIndex].Assign(FontDialog.Font);
     PanelDisp.Font := FFontArray[ComboBoxFont.ItemIndex];
     if ComboBoxFont.ItemIndex = 0 then
-      Self.ResetFontsFromBasic(FFontArray[0]);
+      ResetFontsFromBasic(FFontArray[0]);
     DispFontText;
   end;
 end;
@@ -254,7 +254,7 @@ begin
   TempFont := TFont.Create;
   TempFont.Name := 'Courier New';  {Do NOT Localize}
   TempFont.Size := 10;
-  Self.ResetFontsFromBasic(TempFont);
+  ResetFontsFromBasic(TempFont);
   TempFont.Free;
   ComboBoxFont.ItemIndex := 0;
   ComboBoxFont.OnChange(ComboBoxFont);
@@ -267,36 +267,36 @@ begin
   TempFont := TFont.Create;
   try
     TempFont.Assign(ABasicFont);
-    Self.FontBasic := TempFont;
+    FontBasic := TempFont;
     
     TempFont.Color := clRed;
-    Self.FontAssembler := TempFont;
+    FontAssembler := TempFont;
 
     TempFont.Color := clNavy;
     TempFont.Style := [fsItalic];
-    Self.FontComment := TempFont;
+    FontComment := TempFont;
 
     TempFont.Style := [];
     TempFont.Color := clBlack;
-    Self.FontIdentifier := TempFont;
+    FontIdentifier := TempFont;
 
     TempFont.Color := clGreen;
-    Self.FontDirective := TempFont;
+    FontDirective := TempFont;
 
     TempFont.Color := clBlack;
     TempFont.Style := [fsBold];
-    Self.FontKeyWord := TempFont;
+    FontKeyWord := TempFont;
 
     TempFont.Style := [];
-    Self.FontNumber := TempFont;
+    FontNumber := TempFont;
 
-    Self.FontSpace := TempFont;
+    FontSpace := TempFont;
 
     TempFont.Color := clBlue;
-    Self.FontString := TempFont;
+    FontString := TempFont;
 
     TempFont.Color := clBlack;
-    Self.FontSymbol := TempFont;
+    FontSymbol := TempFont;
   finally
     TempFont.Free;
   end;
@@ -318,33 +318,20 @@ begin
 end;
 
 procedure TCnPas2HtmlConfigForm.actLoadExecute(Sender: TObject);
-const
-  arrRegItems: array [0..9] of string = ('', 'Assembler', 'Comment', 'Preprocessor',
-    'Identifier', 'Reserved word', 'Number', 'Whitespace', 'String', 'Symbol');
-var
-  I: Integer;
-  AFont: TFont;
 begin
-// 从注册表中载入 IDE 的字体
-  AFont := TFont.Create;
-  AFont.Name := 'Courier New';  {Do NOT Localize}
-  AFont.Size := 10;
+  // 从封装好的注册表读取类中直接载入 IDE 的字体
+  FFontArray[0].Assign(EditControlWrapper.FontBasic);
+  FFontArray[1].Assign(EditControlWrapper.FontAssembler);
+  FFontArray[2].Assign(EditControlWrapper.FontComment);
+  FFontArray[3].Assign(EditControlWrapper.FontDirective);
+  FFontArray[4].Assign(EditControlWrapper.FontIdentifier);
+  FFontArray[5].Assign(EditControlWrapper.FontKeyWord);
+  FFontArray[6].Assign(EditControlWrapper.FontNumber);
+  FFontArray[7].Assign(EditControlWrapper.FontSpace);
+  FFontArray[8].Assign(EditControlWrapper.FontString);
+  FFontArray[9].Assign(EditControlWrapper.FontSymbol);
 
-  if GetIDERegistryFont(arrRegItems[0], AFont) then
-    ResetFontsFromBasic(AFont);
-
-  for I := Low(FFontArray) + 1 to High(FFontArray) do
-  begin
-    try
-      if GetIDERegistryFont(arrRegItems[I], AFont) then
-        FFontArray[I].Assign(AFont);
-    except
-      Continue;
-    end;
-  end;
-  
   ComboBoxFontChange(ComboBoxFont);
-  AFont.Free;
 end;
 
 end.
