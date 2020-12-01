@@ -88,6 +88,9 @@ type
   private
     FBackColor: TColor;
     FFontColor: TColor;
+    FMatchColor: TColor;
+    FSelectBackColor: TColor;
+    FSelectFontColor: TColor;
     FLastItem: Integer;
     FOnItemHint: TCnItemHintEvent;
     FOnButtonClick: TBtnClickEvent;
@@ -697,8 +700,13 @@ begin
   inherited;
   Visible := False;
   Style := lbOwnerDrawFixed;
+
   FBackColor := clWindow;       // 默认弹窗未选中条目的背景色，主题状态下会感知主题
   FFontColor := clWindowText;   // 默认弹窗未选中条目的文字颜色，主题状态下会感知主题
+  FSelectBackColor := clHighlight;      // 选中条目的背景色
+  FSelectFontColor := clHighlightText;  // 选中条目的文字色
+  FMatchColor := csMatchColor;          // 匹配色
+
   DoubleBuffered := True;
   Constraints.MinHeight := WizOptions.CalcIntEnlargedValue(WizOptions.SizeEnlarge, ItemHeight * csMinDispItems + 4);
   Constraints.MinWidth := WizOptions.CalcIntEnlargedValue(WizOptions.SizeEnlarge, csMinDispWidth);
@@ -853,6 +861,18 @@ begin
     FBackColor := TControlHack(Control).Color;
     // 不能直接用 TControlHack(Control).Font.Color，不符合实际情况，得用高亮设置里的普通标识符颜色
     FFontColor := EditControlWrapper.FontIdentifier.Color;
+    if IsUnderDarkTheme then
+    begin
+      FSelectBackColor := csDarkHighlightBkColor;
+      FSelectFontColor := csDarkHighlightFontColor;
+      FMatchColor := csDarkMatchColor;
+    end
+    else
+    begin
+      FSelectBackColor := clHighlight;
+      FSelectFontColor := clHighlightText;
+      FMatchColor := csMatchColor;
+    end;
   end;
 
 {$IFDEF DEBUG}
@@ -2923,17 +2943,16 @@ var
   SymbolItem: TSymbolItem;
   TextWith: Integer;
   Kind: Integer;
-  ColorFont, ColorBrush, ColorMatch: TColor;
+  ColorFont, ColorBrush: TColor;
 
   function GetHighlightColor(Kind: TSymbolKind): TColor;
   begin
+    Result := List.FFontColor;
     if IsUnderDarkTheme then // 编辑器背景够黑时应该用这种配色
     begin
       case Kind of
         skKeyword: Result := csDarkKeywordColor;
         skType: Result := csDarkTypeColor;
-      else
-        Result := csDarkFontColor;
       end;
     end
     else
@@ -2941,8 +2960,6 @@ var
       case Kind of
         skKeyword: Result := csKeywordColor;
         skType: Result := csTypeColor;
-      else
-        Result := List.FFontColor; // clWindowText;
       end;
     end;
   end;
@@ -2956,8 +2973,8 @@ begin
 
     if odSelected in State then  // 根据主题，指定选中/非选中状态下的文字色
     begin
-      ColorBrush := csDarkHighlightBkColor;
-      ColorFont := clHighlightText;
+      ColorBrush := FSelectBackColor;
+      ColorFont := FSelectFontColor;
     end
     else
     begin
@@ -2979,16 +2996,11 @@ begin
     Canvas.Font.Style := Canvas.Font.Style + [fsBold];
 
     AText := SymbolItem.GetKeywordText(KeywordStyle);
-    if IsUnderDarkTheme then
-      ColorMatch := csDarkMatchColor
-    else
-      ColorMatch := csMatchColor; // 根据主题，指定匹配文字的颜色
-
     if FMatchMode in [mmStart, mmAnywhere] then
-      DrawMatchText(Canvas, FMatchStr, AText, Rect.Left + LEFT_ICON, Rect.Top, ColorMatch)
+      DrawMatchText(Canvas, FMatchStr, AText, Rect.Left + LEFT_ICON, Rect.Top, FMatchColor)
     else
       DrawMatchText(Canvas, FMatchStr, AText, Rect.Left + LEFT_ICON, Rect.Top,
-        ColorMatch, SymbolItem.FuzzyMatchIndexes);
+        FMatchColor, SymbolItem.FuzzyMatchIndexes);
 
     TextWith := Canvas.TextWidth(AText);
     Canvas.Font.Style := Canvas.Font.Style - [fsBold];
