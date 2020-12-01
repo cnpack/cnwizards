@@ -56,6 +56,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ComCtrls, ExtCtrls, ImgList, Menus, ToolsApi, IniFiles, Math,
   Buttons, TypInfo, mPasLex, AppEvnts, Contnrs,
+  {$IFDEF DELPHI104_SYDNEY_UP} Vcl.Themes, {$ENDIF}
   {$IFDEF OTA_CODE_TEMPLATE_API} CodeTemplateAPI, {$ENDIF}
   CnConsts, CnCommon, CnWizClasses, CnWizConsts, CnWizUtils, CnWizIdeUtils,
   CnInputSymbolList, CnInputIdeSymbolList, CnIni, CnWizMultiLang, CnWizNotifier,
@@ -1256,6 +1257,11 @@ begin
       FCCErrorHook := TCnMethodHook.Create(GetBplMethodAddress(GetProcAddress
         (DphIdeModule, SCppKibitzManagerCCError)), @MyCCError);
   end;
+{$ENDIF}
+
+{$IFDEF DELPHI104_SYDNEY_UP}
+  // 10.4 下主题混乱，不得不禁用下拉框的主题
+  TStyleManager.Engine.RegisterStyleHook(TCnInputListBox, TStyleHook);
 {$ENDIF}
 
   CnWizNotifierServices.AddApplicationMessageNotifier(ApplicationMessage);
