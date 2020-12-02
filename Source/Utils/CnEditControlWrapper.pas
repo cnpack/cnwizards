@@ -476,7 +476,7 @@ type
     {* 一个 TFont 对象，持有编辑器的基础字体供外界使用}
 
     // 以下是维护的注册表中的编辑器各类元素的字体，和 Highlights 有一定重叠，但无背景色属性
-    property FontBasic: TFont index 0 read GetFonts write SetFonts;
+    property FontBasic: TFont index 0 read GetFonts write SetFonts; // 基本字体无前景色
     property FontAssembler: TFont index 1 read GetFonts write SetFonts;
     property FontComment: TFont index 2 read GetFonts write SetFonts;
     property FontDirective: TFont index 3 read GetFonts write SetFonts;

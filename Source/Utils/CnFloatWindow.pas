@@ -39,7 +39,8 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Classes, Windows, Controls, SysUtils, Messages, CnCommon;
+  Classes, Windows, Controls, SysUtils, Messages, Graphics, StdCtrls, Math,
+  CnCommon {$IFNDEF STAND_ALONE}, CnWizIdeUtils, CnEditControlWrapper {$ENDIF};
 
 const
   CS_DROPSHADOW = $20000;
@@ -48,6 +49,7 @@ type
 { TCnFloatWindow }
 
   TCnFloatWindow = class(TCustomControl)
+  {* 浮动窗体实现类}
   private
     FOnPaint: TNotifyEvent;
   protected
@@ -58,7 +60,53 @@ type
     property OnPaint: TNotifyEvent read FOnPaint write FOnPaint;
   end;
 
+  TCnFloatListBox = class(TCustomListBox)
+  {* 浮动列表框实现类}
+  private
+    FSelectFontColor: TColor;
+    FFontColor: TColor;
+    FBackColor: TColor;
+    FMatchColor: TColor;
+    FSelectBackColor: TColor;
+    function AdjustHeight(AHeight: Integer): Integer;
+    procedure CNDrawItem(var Message: TWMDrawItem); message CN_DRAWITEM;
+    procedure CNMeasureItem(var Message: TWMMeasureItem); message CN_MEASUREITEM;
+    procedure CNCancelMode(var Message: TMessage); message CM_CANCELMODE;
+  protected
+    procedure CreateParams(var Params: TCreateParams); override;
+    procedure CreateWnd; override;
+
+    function CanResize(var NewWidth, NewHeight: Integer): Boolean; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+    procedure UpdateColor;
+    procedure SetCount(const Value: Integer);
+
+    procedure SetPos(X, Y: Integer); virtual;
+    procedure CloseUp; virtual;
+    procedure Popup; virtual;
+
+    property BackColor: TColor read FBackColor write FBackColor;
+    property FontColor: TColor read FFontColor write FFontColor;
+    property MatchColor: TColor read FMatchColor write FMatchColor;
+    property SelectBackColor: TColor read FSelectBackColor write FSelectBackColor;
+    property SelectFontColor: TColor read FSelectFontColor write FSelectFontColor;
+  end;
+
 implementation
+
+{$IFDEF DEBUG}
+uses
+  CnDebug;
+{$ENDIF}
+
+const
+  csMatchColor = clRed;
+  csDarkMatchColor = $006060FF;   // 浅红
+
+type
+  TControlHack = class(TControl);
 
 //==============================================================================
 // 浮动窗体
@@ -88,6 +136,173 @@ procedure TCnFloatWindow.Paint;
 begin
   if Assigned(FOnPaint) then
     FOnPaint(Self);
+end;
+
+//==============================================================================
+// 浮动列表框
+//==============================================================================
+
+{ TCnFloatListBox }
+
+function TCnFloatListBox.AdjustHeight(AHeight: Integer): Integer;
+var
+  BorderSize: Integer;
+begin
+  BorderSize := Height - ClientHeight;
+  Result := Max((AHeight - BorderSize) div ItemHeight, 4) * ItemHeight + BorderSize;
+end;
+
+function TCnFloatListBox.CanResize(var NewWidth,
+  NewHeight: Integer): Boolean;
+begin
+  NewHeight := AdjustHeight(NewHeight);
+  Result := True;
+end;
+
+procedure TCnFloatListBox.CloseUp;
+begin
+  Visible := False;
+end;
+
+procedure TCnFloatListBox.CNCancelMode(var Message: TMessage);
+begin
+  CloseUp;
+end;
+
+procedure TCnFloatListBox.CNDrawItem(var Message: TWMDrawItem);
+var
+  State: TOwnerDrawState;
+begin
+  with Message.DrawItemStruct^ do
+  begin
+    State := TOwnerDrawState(LongRec(itemState).Lo);
+    Canvas.Handle := hDC;
+    Canvas.Font := Font;
+    Canvas.Brush := Brush;
+    if (Integer(itemID) >= 0) and (odSelected in State) then
+    begin
+      Canvas.Brush.Color := FBackColor;
+      Canvas.Font.Color := FFontColor;
+    end;
+
+    if Integer(itemID) >= 0 then
+    begin
+      if Assigned(OnDrawItem) then
+        OnDrawItem(Self, itemID, rcItem, State);
+    end
+    else
+      Canvas.FillRect(rcItem);
+    Canvas.Handle := 0;
+  end;
+end;
+
+procedure TCnFloatListBox.CNMeasureItem(var Message: TWMMeasureItem);
+begin
+  Message.MeasureItemStruct^.itemHeight := ItemHeight;
+end;
+
+constructor TCnFloatListBox.Create(AOwner: TComponent);
+begin
+  inherited;
+  Visible := False;
+  Style := lbOwnerDrawFixed;
+
+  FBackColor := clWindow;       // 默认弹窗未选中条目的背景色，主题状态下会感知主题
+  FFontColor := clWindowText;   // 默认弹窗未选中条目的文字颜色，主题状态下会感知主题
+  FSelectBackColor := clHighlight;      // 选中条目的背景色
+  FSelectFontColor := clHighlightText;  // 选中条目的文字色
+  FMatchColor := csMatchColor;          // 匹配色
+
+  ShowHint := True;
+  Font.Name := 'Tahoma';
+  Font.Size := 8;
+end;
+
+procedure TCnFloatListBox.CreateParams(var Params: TCreateParams);
+begin
+  inherited;
+  Params.Style := (Params.Style or WS_CHILDWINDOW or WS_SIZEBOX or WS_MAXIMIZEBOX
+    or LBS_NODATA or LBS_OWNERDRAWFIXED) and not (LBS_SORT or LBS_HASSTRINGS);
+  Params.ExStyle := WS_EX_TOOLWINDOW or WS_EX_WINDOWEDGE;
+  if CheckWinXP then
+    Params.WindowClass.style := CS_DBLCLKS or CS_DROPSHADOW
+  else
+    Params.WindowClass.style := CS_DBLCLKS;
+end;
+
+procedure TCnFloatListBox.CreateWnd;
+begin
+  inherited;
+  Windows.SetParent(Handle, 0);
+  CallWindowProc(DefWndProc, Handle, WM_SETFOCUS, 0, 0);
+  Height := AdjustHeight(Height);
+end;
+
+destructor TCnFloatListBox.Destroy;
+begin
+
+  inherited;
+end;
+
+procedure TCnFloatListBox.Popup;
+begin
+  UpdateColor;
+  Visible := True;
+end;
+
+procedure TCnFloatListBox.SetCount(const Value: Integer);
+var
+  Error: Integer;
+begin
+{$IFDEF DEBUG}
+  if Value <> 0 then
+    CnDebugger.LogInteger(Value, 'TCnFloatListBox.SetCount');
+{$ENDIF}
+  // Limited to 32767 on Win95/98 as per Win32 SDK
+  Error := SendMessage(Handle, LB_SETCOUNT, Min(Value, 32767), 0);
+  if (Error = LB_ERR) or (Error = LB_ERRSPACE) then
+  begin
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsgWithType('TCnFloatListBox.SetCount Error: ' + IntToStr(Error), cmtError);
+  {$ENDIF}
+  end;
+end;
+
+procedure TCnFloatListBox.SetPos(X, Y: Integer);
+begin
+  SetWindowPos(Handle, HWND_TOPMOST, X, Y, 0, 0, SWP_NOACTIVATE or SWP_NOSIZE);
+end;
+
+procedure TCnFloatListBox.UpdateColor;
+{$IFNDEF STAND_ALONE}
+var
+  Control: TControl;
+{$ENDIF}
+begin
+{$IFNDEF STAND_ALONE}
+  // 拿编辑器背景色给 FBackColor，普通标识符文字色给 FFontColor
+  Control := GetCurrentEditControl;
+  if Control <> nil then
+  begin
+    FBackColor := TControlHack(Control).Color;
+    // 不能直接用 TControlHack(Control).Font.Color，不符合实际情况，得用高亮设置里的普通标识符颜色
+    FFontColor := EditControlWrapper.FontIdentifier.Color;
+    if CnThemeWrapper.IsUnderDarkTheme then
+    begin
+      FSelectBackColor := csDarkHighlightBkColor;
+      FSelectFontColor := csDarkHighlightFontColor;
+      FMatchColor := csDarkMatchColor;
+    end
+    else
+    begin
+      FSelectBackColor := clHighlight;
+      FSelectFontColor := clHighlightText;
+      FMatchColor := csMatchColor;
+    end;
+  end;
+
+  Color := FBackColor;
+{$ENDIF}
 end;
 
 end.

@@ -71,7 +71,7 @@ uses
   CnPopupMenu, CnCppCodeParser, CnStrings, CnEdit, RegExpr,
 {$IFNDEF STAND_ALONE}
   ToolsAPI, CnWizClasses, CnWizManager, CnWizEditFiler, CnEditControlWrapper, CnWizUtils,
-  CnWizMenuAction, CnWizIdeUtils,
+  CnWizMenuAction, CnWizIdeUtils, CnFloatWindow,
 {$ENDIF}
   CnFrmMatchButton, CnWizOptions;
 
@@ -237,7 +237,7 @@ type
 {$IFNDEF STAND_ALONE}
 
   // 工具栏中的下拉列表框的下拉列表
-  TCnProcDropDownBox = class(TCustomListBox)
+  TCnProcDropDownBox = class(TCnFloatListBox)
   private
     FRegExpr: TRegExpr;
     FLastItem: Integer;
@@ -247,28 +247,19 @@ type
     FMatchMode: TCnMatchMode;
     FInfoItems: TStrings; // 存储原始列表内容
     FDisableClickFlag: Boolean;
-    procedure CNDrawItem(var Message: TWMDrawItem); message CN_DRAWITEM;
-    procedure CNMeasureItem(var Message: TWMMeasureItem); message CN_MEASUREITEM;
-    procedure CNCancelMode(var Message: TMessage); message CM_CANCELMODE;
     procedure CMHintShow(var Message: TMessage); message CM_HINTSHOW;
-    function AdjustHeight(AHeight: Integer): Integer;
     procedure ListDrawItem(Control: TWinControl; Index: Integer;
       Rect: TRect; State: TOwnerDrawState);
     procedure SetMatchStr(const Value: string);
   protected
-    procedure CreateParams(var Params: TCreateParams); override;
-    procedure CreateWnd; override;
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
-    function CanResize(var NewWidth, NewHeight: Integer): Boolean; override;
     procedure UpdateDisplay;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    procedure SetCount(const Value: Integer);
-    procedure SetPos(X, Y: Integer);
-    procedure CloseUp;
+    procedure CloseUp; override;
+
     procedure UpdateListFont;
-    procedure Popup;
     procedure SavePosition;
 
     property OnItemHint: TCnItemHintEvent read FOnItemHint write FOnItemHint;
@@ -3920,6 +3911,7 @@ var
   AText: string;
   Info: TCnElementInfo;
   MatchedIndexesRef: TList;
+  ColorFont, ColorBrush: TColor;
 
   function GetListImageIndex(Info: TCnElementInfo): Integer;
   begin
@@ -3941,20 +3933,23 @@ begin
   if Index >= FDisplayItems.Count then
     Exit;
 
-  // 自画ListBox中的 List
+  // 自画 ListBox 中的 List
   with Control as TCnProcDropDownBox do
   begin
     Canvas.Font := Font;
     if odSelected in State then
     begin
-      Canvas.Font.Color := clHighlightText;
-      Canvas.Brush.Color := clHighlight;
+      ColorBrush := SelectBackColor;
+      ColorFont := SelectFontColor;
     end
     else
     begin
-      Canvas.Brush.Color := clWindow;
-      Canvas.Font.Color := clWindowText;
+      ColorBrush := BackColor;
+      ColorFont := FontColor;
     end;
+
+    Canvas.Brush.Color := ColorBrush;
+    Canvas.Font.Color := ColorFont;
 
     Info := TCnElementInfo(FDisplayItems.Objects[Index]);
     Canvas.FillRect(Rect);
@@ -3973,7 +3968,7 @@ begin
     end;
 
     DrawMatchText(Canvas, MatchStr, FDisplayItems[Index], Rect.Left + 22, Rect.Top,
-      clRed, MatchedIndexesRef);
+      MatchColor, MatchedIndexesRef);
   end;
 end;
 
@@ -3983,28 +3978,12 @@ end;
 
 { TCnProcDrowDownBox }
 
-function TCnProcDropDownBox.AdjustHeight(AHeight: Integer): Integer;
-var
-  BorderSize: Integer;
-begin
-  BorderSize := Height - ClientHeight;
-  Result := Max((AHeight - BorderSize) div ItemHeight, 4) * ItemHeight + BorderSize;
-end;
-
-function TCnProcDropDownBox.CanResize(var NewWidth,
-  NewHeight: Integer): Boolean;
-begin
-  NewHeight := AdjustHeight(NewHeight);
-  Result := True;
-end;
-
 procedure TCnProcDropDownBox.CloseUp;
 begin
   if Visible then
-  begin
-    Visible := False;
     SavePosition;
-  end;
+
+  inherited;
 end;
 
 procedure TCnProcDropDownBox.SavePosition;
@@ -4047,45 +4026,6 @@ begin
   end;
 end;
 
-procedure TCnProcDropDownBox.CNCancelMode(var Message: TMessage);
-begin
-  CloseUp;
-end;
-
-procedure TCnProcDropDownBox.CNDrawItem(var Message: TWMDrawItem);
-var
-  State: TOwnerDrawState;
-begin
-  with Message.DrawItemStruct^ do
-  begin
-    State := TOwnerDrawState(LongRec(itemState).Lo);
-    Canvas.Handle := hDC;
-    Canvas.Font := Font;
-    Canvas.Brush := Brush;
-    if (Integer(itemID) >= 0) and (odSelected in State) then
-    begin
-      Canvas.Brush.Color := clHighlight;
-      Canvas.Font.Color := clHighlightText
-    end;
-    if Integer(itemID) >= 0 then
-    begin
-      if Assigned(OnDrawItem) then
-        OnDrawItem(Self, itemID, rcItem, State);
-    end
-    else
-      Canvas.FillRect(rcItem);
-    Canvas.Handle := 0;
-  end;
-end;
-
-procedure TCnProcDropDownBox.CNMeasureItem(var Message: TWMMeasureItem);
-begin
-  with Message.MeasureItemStruct^ do
-  begin
-    itemHeight := Self.ItemHeight;
-  end;
-end;
-
 constructor TCnProcDropDownBox.Create(AOwner: TComponent);
 const
   csMinDispItems = 6;
@@ -4094,15 +4034,11 @@ const
   csDefDispWidth = 300;
 begin
   inherited;
-  Visible := False;
-  Style := lbOwnerDrawFixed;
-  DoubleBuffered := True;
+
   Constraints.MinHeight := ItemHeight * csMinDispItems + 4;
   Constraints.MinWidth := csMinDispWidth;
   Height := ItemHeight * csDefDispItems + 8;
   Width := csDefDispWidth;
-  ShowHint := True;
-  Font.Name := 'Tahoma';
   Font.Size := csDefProcDropDownBoxFontSize;
   FLastItem := -1;
 
@@ -4112,28 +4048,6 @@ begin
 
   FRegExpr := TRegExpr.Create;
   FRegExpr.ModifierI := True;
-end;
-
-procedure TCnProcDropDownBox.CreateParams(var Params: TCreateParams);
-const
-  CS_DROPSHADOW = $20000;
-begin
-  inherited;
-  Params.Style := (Params.Style or WS_CHILDWINDOW or WS_SIZEBOX or WS_MAXIMIZEBOX
-    or LBS_NODATA or LBS_OWNERDRAWFIXED) and not (LBS_SORT or LBS_HASSTRINGS);
-  Params.ExStyle := WS_EX_TOOLWINDOW or WS_EX_WINDOWEDGE;
-  if CheckWinXP then
-    Params.WindowClass.style := CS_DBLCLKS or CS_DROPSHADOW
-  else
-    Params.WindowClass.style := CS_DBLCLKS;
-end;
-
-procedure TCnProcDropDownBox.CreateWnd;
-begin
-  inherited;
-  Windows.SetParent(Handle, 0);
-  CallWindowProc(DefWndProc, Handle, WM_SETFOCUS, 0, 0);
-  Height := AdjustHeight(Height);
 end;
 
 destructor TCnProcDropDownBox.Destroy;
@@ -4234,34 +4148,6 @@ begin
 {$ENDIF}
   end;
   AdjustListItemHeight;
-end;
-
-procedure TCnProcDropDownBox.Popup;
-begin
-  Visible := True;
-end;
-
-procedure TCnProcDropDownBox.SetCount(const Value: Integer);
-var
-  Error: Integer;
-begin
-{$IFDEF DEBUG}
-  if Value <> 0 then
-    CnDebugger.LogInteger(Value, 'TCnProcDrowDownBox.SetCount');
-{$ENDIF}
-  // Limited to 32767 on Win95/98 as per Win32 SDK
-  Error := SendMessage(Handle, LB_SETCOUNT, Min(Value, 32767), 0);
-  if (Error = LB_ERR) or (Error = LB_ERRSPACE) then
-  begin
-  {$IFDEF DEBUG}
-    CnDebugger.LogMsgWithType('TCnProcDrowDownBox.SetCount Error: ' + IntToStr(Error), cmtError);
-  {$ENDIF}
-  end;
-end;
-
-procedure TCnProcDropDownBox.SetPos(X, Y: Integer);
-begin
-  SetWindowPos(Handle, HWND_TOPMOST, X, Y, 0, 0, SWP_NOACTIVATE or SWP_NOSIZE);  
 end;
 
 procedure TCnProcListWizard.PopupEditorEnhanceConfigItemClick(Sender: TObject);

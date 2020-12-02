@@ -599,6 +599,8 @@ type
     constructor Create; virtual;
     destructor Destroy; override;
 
+    function IsUnderDarkTheme: Boolean;
+
     property SupportTheme: Boolean read FSupportTheme;
     property ActiveThemeName: string read FActiveThemeName;
     property CurrentIsDark: Boolean read FCurrentIsDark;
@@ -1791,7 +1793,7 @@ begin
       Reg := TRegistry.Create;
       Reg.RootKey := HKEY_CURRENT_USER;
       try
-        if RegItem = '' then // 是基本字体
+        if RegItem = '' then // 是基本字体，没有读颜色设置
         begin
           if Reg.OpenKeyReadOnly(WizOptions.CompilerRegPath + '\Editor\Options') then
           begin
@@ -1809,7 +1811,7 @@ begin
           end;
           Result := True; // 不存在则用默认字体
         end
-        else  // 是高亮字体
+        else  // 是高亮字体，有前景色读取，但没读背景色，因为 TFont 没有背景色
         begin
           AFont.Style := [];
           if Reg.OpenKeyReadOnly(Format(WizOptions.CompilerRegPath
@@ -3205,6 +3207,11 @@ destructor TCnThemeWrapper.Destroy;
 begin
   CnWizNotifierServices.RemoveAfterThemeChangeNotifier(ThemeChanged);
   inherited;
+end;
+
+function TCnThemeWrapper.IsUnderDarkTheme: Boolean;
+begin
+  Result := FSupportTheme and FCurrentIsDark;
 end;
 
 procedure TCnThemeWrapper.ThemeChanged(Sender: TObject);
