@@ -69,6 +69,7 @@ type
     FBackColor: TColor;
     FMatchColor: TColor;
     FSelectBackColor: TColor;
+    FKeywordColor: TColor;
     function AdjustHeight(AHeight: Integer): Integer;
     procedure CNDrawItem(var Message: TWMDrawItem); message CN_DRAWITEM;
     procedure CNMeasureItem(var Message: TWMMeasureItem); message CN_MEASUREITEM;
@@ -93,6 +94,7 @@ type
     property MatchColor: TColor read FMatchColor write FMatchColor;
     property SelectBackColor: TColor read FSelectBackColor write FSelectBackColor;
     property SelectFontColor: TColor read FSelectFontColor write FSelectFontColor;
+    property KeywordColor: TColor read FKeywordColor write FKeywordColor;
   end;
 
 implementation
@@ -213,6 +215,7 @@ begin
   FSelectBackColor := clHighlight;      // 选中条目的背景色
   FSelectFontColor := clHighlightText;  // 选中条目的文字色
   FMatchColor := csMatchColor;          // 匹配色
+  FKeywordColor := clBlue;              // 关键字颜色
 
   ShowHint := True;
   Font.Name := 'Tahoma';
@@ -288,6 +291,8 @@ begin
     FBackColor := TControlHack(Control).Color;
     // 不能直接用 TControlHack(Control).Font.Color，不符合实际情况，得用高亮设置里的普通标识符颜色
     FFontColor := EditControlWrapper.FontIdentifier.Color;
+    FKeywordColor := EditControlWrapper.FontKeyWord.Color;
+
     if CnThemeWrapper.IsUnderDarkTheme then
     begin
       FSelectBackColor := csDarkHighlightBkColor;

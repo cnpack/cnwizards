@@ -422,7 +422,6 @@ const
 
   csMaxProcessLines = 1000;
 
-  csKeywordColor = clBlue;
   csTypeColor = clNavy;
   csDarkKeywordColor = $0000C0FF; // 浅橙
   csDarkTypeColor = clAqua;       // 浅蓝
@@ -2786,19 +2785,14 @@ var
   function GetHighlightColor(Kind: TSymbolKind): TColor;
   begin
     Result := List.FontColor;
-    if CnThemeWrapper.IsUnderDarkTheme then // 编辑器背景够黑时应该用这种配色
+    if Kind = skKeyword then
+      Result := List.KeywordColor
+    else if Kind = skType then // Type 额外整色
     begin
-      case Kind of
-        skKeyword: Result := csDarkKeywordColor;
-        skType: Result := csDarkTypeColor;
-      end;
-    end
-    else
-    begin
-      case Kind of
-        skKeyword: Result := csKeywordColor;
-        skType: Result := csTypeColor;
-      end;
+      if CnThemeWrapper.IsUnderDarkTheme then
+        Result := csDarkTypeColor
+      else
+        Result := csTypeColor;
     end;
   end;
 
