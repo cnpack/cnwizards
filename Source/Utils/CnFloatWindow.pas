@@ -40,7 +40,8 @@ interface
 
 uses
   Classes, Windows, Controls, SysUtils, Messages, Graphics, StdCtrls, Math,
-  CnCommon {$IFNDEF STAND_ALONE}, CnWizIdeUtils, CnEditControlWrapper {$ENDIF};
+  CnCommon {$IFNDEF STAND_ALONE} , {$IFDEF DELPHI104_SYDNEY_UP} Vcl.Themes, {$ENDIF}
+  CnWizIdeUtils, CnEditControlWrapper {$ENDIF};
 
 const
   CS_DROPSHADOW = $20000;
@@ -304,5 +305,11 @@ begin
   Color := FBackColor;
 {$ENDIF}
 end;
+
+initialization
+{$IFDEF DELPHI104_SYDNEY_UP}
+  // 10.4 下主题混乱，不得不禁用下拉框的主题
+  TStyleManager.Engine.RegisterStyleHook(TCnFloatListBox, TStyleHook);
+{$ENDIF}
 
 end.
