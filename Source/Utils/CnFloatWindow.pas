@@ -71,6 +71,7 @@ type
     FSelectBackColor: TColor;
     FKeywordColor: TColor;
     FUseEditorColor: Boolean;
+    procedure InitOriginalColors;
     function AdjustHeight(AHeight: Integer): Integer;
     procedure CNDrawItem(var Message: TWMDrawItem); message CN_DRAWITEM;
     procedure CNMeasureItem(var Message: TWMMeasureItem); message CN_MEASUREITEM;
@@ -220,12 +221,7 @@ begin
   Style := lbOwnerDrawFixed;
 
   FUseEditorColor := True;
-  FBackColor := clWindow;       // 默认弹窗未选中条目的背景色，主题状态下会感知主题
-  FFontColor := clWindowText;   // 默认弹窗未选中条目的文字颜色，主题状态下会感知主题
-  FSelectBackColor := clHighlight;      // 选中条目的背景色
-  FSelectFontColor := clHighlightText;  // 选中条目的文字色
-  FMatchColor := csMatchColor;          // 匹配色
-  FKeywordColor := clBlue;              // 关键字颜色
+  InitOriginalColors;
 
   ShowHint := True;
   Font.Name := 'Tahoma';
@@ -256,6 +252,16 @@ destructor TCnFloatListBox.Destroy;
 begin
 
   inherited;
+end;
+
+procedure TCnFloatListBox.InitOriginalColors;
+begin
+  FBackColor := clWindow;       // 默认弹窗未选中条目的背景色，主题状态下会感知主题
+  FFontColor := clWindowText;   // 默认弹窗未选中条目的文字颜色，主题状态下会感知主题
+  FSelectBackColor := clHighlight;      // 选中条目的背景色
+  FSelectFontColor := clHighlightText;  // 选中条目的文字色
+  FMatchColor := csMatchColor;          // 匹配色
+  FKeywordColor := clBlue;              // 关键字颜色
 end;
 
 procedure TCnFloatListBox.Popup;
@@ -299,7 +305,10 @@ var
 {$ENDIF}
 begin
   if not FUseEditorColor then
+  begin
+    InitOriginalColors;
     Exit;
+  end;
 
 {$IFNDEF STAND_ALONE}
   // 拿编辑器背景色给 FBackColor，普通标识符文字色给 FFontColor
