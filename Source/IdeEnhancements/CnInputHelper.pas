@@ -234,6 +234,7 @@ type
     FDispKindSet: TSymbolKindSet;
     FRemoveSame: Boolean;
     FKeywordStyle: TCnKeywordStyle;
+    FUseEditorColor: Boolean;
 {$IFNDEF SUPPORT_IDESymbolList}
     // 如果不支持 IDE 符号列表，需要挂掉 Cppcodcmplt::TCppKibitzManager::CCError
     FCCErrorHook: TCnMethodHook;
@@ -301,6 +302,7 @@ type
     function GetPopupKey: TShortCut;
     procedure SetPopupKey(const Value: TShortCut);
     procedure SetListFont(const Value: TFont);
+    procedure SetUseEditorColor(const Value: Boolean);
   protected
     procedure SetActive(Value: Boolean); override;
     function GetHasConfig: Boolean; override;
@@ -391,6 +393,8 @@ type
     {* 只使用回车键来选择不是从头开始匹配的文本}
     property CheckImmRun: Boolean read FCheckImmRun write FCheckImmRun default False;
     {* 如果系统输入法开启时，自动禁用专家}
+    property UseEditorColor: Boolean read FUseEditorColor write SetUseEditorColor;
+    {* 是否自动使用编辑器配色}
   end;
 
 const
@@ -469,6 +473,7 @@ const
   csAutoAdjustScope = 'AutoAdjustScope';
   csRemoveSame = 'RemoveSame';
   csListActive = 'ListActive';
+  csUseEditorColor = 'UseEditorColor';
 
 {$IFDEF COMPILER6_UP}
   csKibitzWindowClass = 'TCodeCompleteListView';
@@ -1079,6 +1084,8 @@ var
 {$ENDIF}
 begin
   inherited;
+  FUseEditorColor := True;
+
   FListFont := TFont.Create;
   List := TCnInputListBox.Create(nil);
   List.Name := 'CnInputListBox';
@@ -1087,6 +1094,8 @@ begin
   List.OnDblClick := ListDblClick;
   List.OnItemHint := ListItemHint;
   List.OnButtonClick := OnBtnClick;
+  List.UseEditorColor := FUseEditorColor;
+
   Menu := TPopupMenu.Create(nil);
   Menu.OnPopup := OnPopupMenu;
   CreateMenuItem;
@@ -2789,10 +2798,19 @@ var
       Result := List.KeywordColor
     else if Kind = skType then // Type 额外整色
     begin
-      if CnThemeWrapper.IsUnderDarkTheme then
-        Result := csDarkTypeColor
-      else
+{$IFDEF IDE_SUPPORT_THEMING}
+      // 使用编辑器配色时无专门的 Type 色，按以下逻辑处理：
+      // Light 默认模式时，无论是否使用编辑器色，都额外整浅蓝的 Type 色
+      // 不使用编辑器配色时，也用额外浅蓝的配色
+      // 使用编辑器配色且是黑色模式时，用暗黑 Type 配色
+      if CnThemeWrapper.IsUnderLightTheme or not FUseEditorColor then
         Result := csTypeColor;
+      if FUseEditorColor and CnThemeWrapper.IsUnderDarkTheme then
+        Result := csDarkTypeColor;
+      // 否则沿用 List.FontColor
+{$ELSE}
+      Result := csTypeColor; // 不支持主题的 IDE，用固定的配色
+{$ENDIF}
     end;
   end;
 
@@ -3110,6 +3128,7 @@ begin
     // 读取设置后 SetListFont 中会根据需要放大字号显示
 
     List.DispButtons := ReadBool('', csDispButtons, True);
+    UseEditorColor := ReadBool('', csUseEditorColor, FUseEditorColor);
 
     AutoPopup := ReadBool('', csAutoPopup, True);
     FListOnlyAtLeastLetter := ReadInteger('', csListOnlyAtLeastLetter, 1);
@@ -3167,6 +3186,7 @@ begin
     WriteInteger('', csHeight, List.Height);
     WriteFont('', csFont, FListFont);
     WriteBool('', csDispButtons, List.DispButtons);
+    WriteBool('', csUseEditorColor, FUseEditorColor);
 
     WriteBool('', csAutoPopup, FAutoPopup);
     WriteInteger('', csListOnlyAtLeastLetter, FListOnlyAtLeastLetter);
@@ -3400,6 +3420,12 @@ begin
 {$ENDIF}
   end;
   AdjustListItemHeight;
+end;
+
+procedure TCnInputHelper.SetUseEditorColor(const Value: Boolean);
+begin
+  FUseEditorColor := Value;
+  List.UseEditorColor := Value;
 end;
 
 initialization

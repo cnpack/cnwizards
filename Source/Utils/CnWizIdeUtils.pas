@@ -593,6 +593,7 @@ type
   private
     FActiveThemeName: string;
     FCurrentIsDark: Boolean;
+    FCurrentIsLight: Boolean;
     FSupportTheme: Boolean;
     procedure ThemeChanged(Sender: TObject);
   public
@@ -600,10 +601,12 @@ type
     destructor Destroy; override;
 
     function IsUnderDarkTheme: Boolean;
+    function IsUnderLightTheme: Boolean;
 
     property SupportTheme: Boolean read FSupportTheme;
     property ActiveThemeName: string read FActiveThemeName;
     property CurrentIsDark: Boolean read FCurrentIsDark;
+    property CurrentIsLight: Boolean read FCurrentIsLight;
   end;
 
 function CnPaletteWrapper: TCnPaletteWrapper;
@@ -3214,10 +3217,16 @@ begin
   Result := FSupportTheme and FCurrentIsDark;
 end;
 
+function TCnThemeWrapper.IsUnderLightTheme: Boolean;
+begin
+  Result := FSupportTheme and FCurrentIsLight;
+end;
+
 procedure TCnThemeWrapper.ThemeChanged(Sender: TObject);
 begin
   FActiveThemeName := CnOtaGetActiveThemeName;
   FCurrentIsDark := FActiveThemeName = 'Dark';
+  FCurrentIsLight := FActiveThemeName = 'Light';
 end;
 
 initialization

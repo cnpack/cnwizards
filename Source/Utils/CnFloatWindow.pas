@@ -70,10 +70,12 @@ type
     FMatchColor: TColor;
     FSelectBackColor: TColor;
     FKeywordColor: TColor;
+    FUseEditorColor: Boolean;
     function AdjustHeight(AHeight: Integer): Integer;
     procedure CNDrawItem(var Message: TWMDrawItem); message CN_DRAWITEM;
     procedure CNMeasureItem(var Message: TWMMeasureItem); message CN_MEASUREITEM;
     procedure CNCancelMode(var Message: TMessage); message CM_CANCELMODE;
+    procedure SetUseEditorColor(const Value: Boolean);
   protected
     procedure CreateParams(var Params: TCreateParams); override;
     procedure CreateWnd; override;
@@ -89,12 +91,19 @@ type
     procedure CloseUp; virtual;
     procedure Popup; virtual;
 
+    property UseEditorColor: Boolean read FUseEditorColor write SetUseEditorColor;
+    {* 是否使用编辑器配色，也即是否自动将编辑器的配色设置同步到下面的属性中
+      注意是否绘制时使用以下配色取决于子类的 OnDrawItem 事件，不在本类中控制}
+
+    // 以下仨使用编辑器配色
     property BackColor: TColor read FBackColor write FBackColor;
     property FontColor: TColor read FFontColor write FFontColor;
+    property KeywordColor: TColor read FKeywordColor write FKeywordColor;
+
+    // 以下仨没用编辑器颜色，根据主题生硬切换
     property MatchColor: TColor read FMatchColor write FMatchColor;
     property SelectBackColor: TColor read FSelectBackColor write FSelectBackColor;
     property SelectFontColor: TColor read FSelectFontColor write FSelectFontColor;
-    property KeywordColor: TColor read FKeywordColor write FKeywordColor;
   end;
 
 implementation
@@ -210,6 +219,7 @@ begin
   Visible := False;
   Style := lbOwnerDrawFixed;
 
+  FUseEditorColor := True;
   FBackColor := clWindow;       // 默认弹窗未选中条目的背景色，主题状态下会感知主题
   FFontColor := clWindowText;   // 默认弹窗未选中条目的文字颜色，主题状态下会感知主题
   FSelectBackColor := clHighlight;      // 选中条目的背景色
@@ -277,12 +287,20 @@ begin
   SetWindowPos(Handle, HWND_TOPMOST, X, Y, 0, 0, SWP_NOACTIVATE or SWP_NOSIZE);
 end;
 
+procedure TCnFloatListBox.SetUseEditorColor(const Value: Boolean);
+begin
+  FUseEditorColor := Value;
+end;
+
 procedure TCnFloatListBox.UpdateColor;
 {$IFNDEF STAND_ALONE}
 var
   Control: TControl;
 {$ENDIF}
 begin
+  if not FUseEditorColor then
+    Exit;
+
 {$IFNDEF STAND_ALONE}
   // 拿编辑器背景色给 FBackColor，普通标识符文字色给 FFontColor
   Control := GetCurrentEditControl;
@@ -292,6 +310,10 @@ begin
     // 不能直接用 TControlHack(Control).Font.Color，不符合实际情况，得用高亮设置里的普通标识符颜色
     FFontColor := EditControlWrapper.FontIdentifier.Color;
     FKeywordColor := EditControlWrapper.FontKeyWord.Color;
+
+    // 关键字和普通字都是黑色时，关键字搞成蓝色以示区分
+    if (ColorToRGB(FFontColor) = clBlack) and (ColorToRGB(FKeywordColor) = clBlack) then
+      FKeywordColor := clBlue;
 
     if CnThemeWrapper.IsUnderDarkTheme then
     begin
