@@ -69,8 +69,6 @@ See http://www.suigeneris.org/want/ for details.
   <property name="exe.brcc32"     value="%{BRCC32}" />
   <property name="exe.git"        value="%{env.git}" if="env.git" />
   <property name="exe.git"        value="${ProgramFiles}\Git\bin\git.exe" unless="env.git" />
-  <property name="exe.svn"        value="%{env.svn}" if="env.svn" />
-  <property name="exe.svn"        value="${ProgramFiles}\Subversion\bin\svn.exe" unless="env.svn" />
   <property name="exe.python"     value="%{env.python}" if="env.python" />
   <property name="exe.python"     value="C:\Python26\python.exe" unless="env.python" />
 
@@ -293,20 +291,6 @@ Usage: want [target-name] [-Dname=value]
     <delete dir="${help}" >
        <include name="**/_errorlog.txt" />
     </delete>
-  </target>
-
-  <!-- 更新 svn 源码，目前暂不用了 -->
-  <target name="svnupdate" ifndef="nosvn" description="Update all files. (Now NOT used)." >
-    <exec basedir="${root}" errorlevel="1" defaultfilters="true"
-          executable="${exe.svn}" if="ismaster" >
-      <arg value="-R" />
-      <arg value="revert" />
-      <arg value="*.*" />
-    </exec>
-    <exec basedir="${root}" errorlevel="1" defaultfilters="true"
-          executable="${exe.svn}" >
-      <arg value="update" />
-    </exec>
   </target>
 
   <!-- 更新 git 源码 -->
