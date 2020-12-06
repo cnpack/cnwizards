@@ -130,6 +130,7 @@ type
     lblMatchMode: TLabel;
     chkTabComplete: TCheckBox;
     chkIgnoreDot: TCheckBox;
+    chkUseEditorColor: TCheckBox;
     procedure FormShow(Sender: TObject);
     procedure PaintBoxPaint(Sender: TObject);
     procedure btnFontClick(Sender: TObject);
@@ -274,6 +275,7 @@ begin
 
   with InputHelper do
   begin
+    chkUseEditorColor.Checked := UseEditorColor;
     chkUseCodeInsightMgr.Enabled := SupportMultiIDESymbolList;
     if SupportMultiIDESymbolList then
       chkUseCodeInsightMgr.Checked := UseCodeInsightMgr;
@@ -386,11 +388,12 @@ end;
 
 procedure TCnInputHelperForm.btnOKClick(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
   SymbolKind: TSymbolKind;
 begin
   with InputHelper do
   begin
+    UseEditorColor := chkUseEditorColor.Checked;
     if SupportMultiIDESymbolList then
       UseCodeInsightMgr := chkUseCodeInsightMgr.Checked;
     if SupportKibitzCompileThread then
@@ -423,9 +426,9 @@ begin
     EnableAutoSymbols := chkKeySeq.Checked;
     ListFont := FontDialog.Font; // 不能 Assign，要用赋值触发 SetListFont 以更新列表字体
 
-    for i := 0 to SymbolListMgr.Count - 1 do
+    for I := 0 to SymbolListMgr.Count - 1 do
     begin
-      SymbolListMgr.List[i].Active := chklstSymbol.Checked[i];
+      SymbolListMgr.List[I].Active := chklstSymbol.Checked[I];
     end;
 
     DispKindSet := [];
@@ -506,13 +509,13 @@ end;
 
 procedure TCnInputHelperForm.UpdateListView(SelOnly: Boolean);
 var
-  i: Integer;
+  I: Integer;
 begin
   if SelOnly then
     UpdateListItem(lvList.Selected)
   else
-    for i := 0 to lvList.Items.Count - 1 do
-      UpdateListItem(lvList.Items[i]);
+    for I := 0 to lvList.Items.Count - 1 do
+      UpdateListItem(lvList.Items[I]);
 end;
 
 procedure TCnInputHelperForm.UpdateListControls(Sender: TObject);

@@ -459,6 +459,14 @@ inherited CnInputHelperForm: TCnInputHelperForm
             'Middle Match'
             'Fuzzy Match')
         end
+        object chkUseEditorColor: TCheckBox
+          Left = 432
+          Top = 88
+          Width = 97
+          Height = 17
+          Caption = 'Use Editor Colors'
+          TabOrder = 9
+        end
       end
       object grp4: TGroupBox
         Left = 8
