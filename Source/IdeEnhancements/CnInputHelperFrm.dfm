@@ -462,7 +462,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
         object chkUseEditorColor: TCheckBox
           Left = 432
           Top = 88
-          Width = 97
+          Width = 113
           Height = 17
           Caption = 'Use Editor Colors'
           TabOrder = 9
