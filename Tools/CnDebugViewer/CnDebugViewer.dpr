@@ -25,7 +25,7 @@ program CnDebugViewer;
 {$ENDIF}
 
 uses
-  Sysutils,
+  SysUtils,
   Forms,
   CnViewMain in 'CnViewMain.pas' {CnMainViewer},
   CnDebugIntf in 'CnDebugIntf.pas',

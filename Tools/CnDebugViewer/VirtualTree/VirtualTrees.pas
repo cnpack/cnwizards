@@ -2,9 +2,9 @@ unit VirtualTrees;
 
 // LiuXiao Added 'AbsoluteIndex' Field of Node. And Adjusted AddChild function.
 // Only suitable for add node from Last. If insert into middle, AbsoluteIndex
-// will be confused.
-// FRoot has AbsoluteIndex of 0
-// CnPack 2005-01-23
+// will be confused. FRoot has AbsoluteIndex of 0
+// LiuXiao Added some WIN64 Definitions
+// CnPack 2005-01-23 ~ 2020-12-13
 //
 // Version 4.0.17
 //
@@ -3215,7 +3215,7 @@ const
 
   // Do not modify the copyright in any way! Usage of this unit is prohibited without the copyright notice
   // in the compiled binary file.
-  Copyright: string = 'Virtual Treeview © 1999, 2003 Mike Lischke';
+  Copyright: string = 'Virtual Treeview ?1999, 2003 Mike Lischke';
 
 var
   StandardOLEFormat: TFormatEtc = (
@@ -4147,6 +4147,8 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
+{$IFNDEF WIN64}
+
 procedure AlphaBlendLineConstant(Source, Destination: Pointer; Count: Integer; ConstantAlpha, Bias: Integer);
 
 // Blends a line of Count pixels from Source to Destination using a constant alpha value.
@@ -4437,6 +4439,8 @@ asm
         DB      $0F, $77               /// EMMS
 end;
 
+{$ENDIF}
+
 //----------------------------------------------------------------------------------------------------------------------
 
 function GetBitmapBitsFromDeviceContext(DC: HDC; var Width, Height: Integer): Pointer;
@@ -4478,7 +4482,11 @@ begin
   if Height > 0 then  // bottom-up DIB
     Row := Height - Row - 1;
   // Return DWORD aligned address of the requested scanline.
+{$IFDEF WIN64}
+  NativeInt(Result) := NativeInt(Bits) + Row * ((Width * 32 + 31) and not 31) div 8;
+{$ELSE}
   Integer(Result) := Integer(Bits) + Row * ((Width * 32 + 31) and not 31) div 8;
+{$ENDIF}
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -4531,10 +4539,14 @@ begin
               Inc(SourceRun, 4 * R.Left);
               TargetRun := CalculateScanline(DestBits, DestWidth, DestHeight, Y + Target.Y);
               Inc(TargetRun, 4 * Target.X);
+{$IFNDEF WIN64}
               AlphaBlendLineConstant(SourceRun, TargetRun, R.Right - R.Left, ConstantAlpha, Bias);
+{$ENDIF}
             end;
           end;
+{$IFNDEF WIN64}
           EMMS;
+{$ENDIF}
         end;
       bmPerPixelAlpha:
         begin
@@ -4548,10 +4560,14 @@ begin
               Inc(SourceRun, 4 * R.Left);
               TargetRun := CalculateScanline(DestBits, DestWidth, DestHeight, Y + Target.Y);
               Inc(TargetRun, 4 * Target.X);
+{$IFNDEF WIN64}
               AlphaBlendLinePerPixel(SourceRun, TargetRun, R.Right - R.Left, Bias);
+{$ENDIF}
             end;
           end;
+{$IFNDEF WIN64}
           EMMS;
+{$ENDIF}
         end;
       bmMasterAlpha:
         begin
@@ -4564,10 +4580,14 @@ begin
               SourceRun := CalculateScanline(SourceBits, SourceWidth, SourceHeight, Y + R.Top);
               Inc(SourceRun, 4 * Target.X);
               TargetRun := CalculateScanline(DestBits, DestWidth, DestHeight, Y + Target.Y);
+{$IFNDEF WIN64}
               AlphaBlendLineMaster(SourceRun, TargetRun, R.Right - R.Left, ConstantAlpha, Bias);
+{$ENDIF}
             end;
           end;
+{$IFNDEF WIN64}
           EMMS;
+{$ENDIF}
         end;
       bmConstantAlphaAndColor:
         begin
@@ -4579,10 +4599,14 @@ begin
             begin
               TargetRun := CalculateScanline(DestBits, DestWidth, DestHeight, Y + R.Top);
               Inc(TargetRun, 4 * R.Left);
+{$IFNDEF WIN64}
               AlphaBlendLineMasterAndColor(TargetRun, R.Right - R.Left, ConstantAlpha, Bias);
+{$ENDIF}
             end;
           end;
+{$IFNDEF WIN64}
           EMMS;
+{$ENDIF}
         end;
     end;
   end;
@@ -4771,6 +4795,14 @@ begin
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
+{$IFDEF WIN64}
+
+function HasMMX: Boolean;
+begin
+  Result := False;
+end;
+
+{$ELSE}
 
 function HasMMX: Boolean;
 
@@ -4804,7 +4836,9 @@ asm
 @1:
         POP     EBX
 end;
- 
+
+{$ENDIF}
+
 //----------------------------------------------------------------------------------------------------------------------
 
 procedure PrtStretchDrawDIB(Canvas: TCanvas; DestRect: TRect; ABitmap: TBitmap);
@@ -12952,6 +12986,30 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
+{$IFDEF WIN64}
+
+function TBaseVirtualTree.PackArray(TheArray: TNodeArray; Count: Integer): Integer;
+var
+  i, l: Integer;
+begin
+  Result := -1;
+
+  if Count = 0 then
+    Exit;
+
+  l := 0;
+  for i := 0 to Count - 1 do begin
+    if vsSelected in TheArray[i]^.States then begin
+      TheArray[l] := TheArray[i];
+      Inc(l);
+    end;
+  end;
+
+  Result := l;     // return length
+end;
+
+{$ELSE}
+
 function TBaseVirtualTree.PackArray(TheArray: TNodeArray; Count: Integer): Integer; assembler;
 
 // Removes all entries from the selection array which are no longer in use. The selection array must be sorted for this
@@ -13005,6 +13063,8 @@ asm
         POP     EDI
         POP     EBX
 end;
+
+{$ENDIF}
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -14470,7 +14530,9 @@ var
   ShiftState: Integer;
   P: TPoint;
   Formats: TFormatArray;
-
+{$IFDEF WIN64}
+  R: Integer;
+{$ENDIF}
 begin
   with Message, DragRec^ do
   begin
@@ -14507,7 +14569,13 @@ begin
 
             // Allowed drop effects are simulated for VCL dd.
             Result := DROPEFFECT_MOVE or DROPEFFECT_COPY;
+{$IFDEF WIN64}
+            R := Result;
+            DragOver(S, ShiftState, TDragState(DragMessage), Pos, R);
+            Result := R;
+{$ELSE}
             DragOver(S, ShiftState, TDragState(DragMessage), Pos, Integer(Result));
+{$ENDIF}
             FLastVCLDragTarget := FDropTargetNode;
             FVCLDragEffect := Result;
             if (DragMessage = dmDragLeave) and Assigned(FDropTargetNode) then
@@ -20529,7 +20597,13 @@ begin
       if ([vsSelected, vsDisabled] * NewItems[I].States <> []) or
          (Constrained and (Cardinal(FLastSelectionLevel) <> GetNodeLevel(NewItems[I]))) or
          (SiblingConstrained and (FRangeAnchor.Parent <> NewItems[I].Parent)) then
-        Inc(Cardinal(NewItems[I]))
+      begin
+{$IFDEF WIN64}
+        Inc(NativeUInt(NewItems[I]));
+{$ELSE}
+        Inc(Cardinal(NewItems[I]));
+{$ENDIF}
+      end
       else
         Include(NewItems[I].States, vsSelected);
   end;
@@ -20915,7 +20989,11 @@ begin
   if FindNodeInSelection(Node, Index, -1, -1) then
   begin
     Exclude(Node.States, vsSelected);
+{$IFDEF WIN64}
+    Inc(NativeUInt(FSelection[Index]));
+{$ELSE}
     Inc(Cardinal(FSelection[Index]));
+{$ENDIF}
   end;
 end;
 
