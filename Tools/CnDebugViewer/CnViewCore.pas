@@ -579,26 +579,31 @@ begin
   Hp := OpenProcess(PROCESS_QUERY_INFORMATION or PROCESS_VM_READ, False, ProcessID);
   if Hp <> 0 then
   begin
-    ENumProcessModules(Hp, @HM, Sizeof(HM), N);
-    if GetModuleFileNameEx(Hp, HM, ModName, Sizeof(ModName)) > 0 then
-      Result := ModName;
-  end
-  else
-  begin
-    HSnap := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-    Pe.dwSize := SizeOf(Pe);
-    Next := Process32First(HSnap, Pe);
-    while (Next) do
+    if EnumProcessModules(Hp, @HM, Sizeof(HM), N) then
     begin
-      if Pe.th32ProcessID = ProcessID then
+      if GetModuleFileNameEx(Hp, HM, ModName, Sizeof(ModName)) > 0 then
       begin
-        Result := Pe.szExeFile;
-        Break;
+        Result := ModName;
+        CloseHandle(Hp);
+        Exit;
       end;
-      Next := Process32Next(HSnap, Pe);
     end;
-    CloseHandle(HSnap);
+    CloseHandle(Hp);
   end;
+
+  HSnap := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+  Pe.dwSize := SizeOf(Pe);
+  Next := Process32First(HSnap, Pe);
+  while Next do
+  begin
+    if Pe.th32ProcessID = ProcessID then
+    begin
+      Result := Pe.szExeFile;
+      Break;
+    end;
+    Next := Process32Next(HSnap, Pe);
+  end;
+  CloseHandle(HSnap);
 end;
 
 procedure LoadOptions(const FileName: string);
