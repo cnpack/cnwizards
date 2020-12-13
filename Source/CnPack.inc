@@ -2864,10 +2864,11 @@
 {$ENDIF}
 
 {$IFDEF DELPHI104_SYDNEY_UP}
-  {$DEFINE IDE_SUPPORT_LSP}         // Sydney 10.4 或以上支持 LSP 语言服务器
+  {$DEFINE IDE_SUPPORT_LSP}             // Sydney 10.4 或以上支持 LSP 语言服务器
 {$ENDIF}
 
 {$IFDEF DELPHI102_TOKYO_UP}
+  {$DEFINE SUPPORT_LINUX64}             // Tokyo 10.2 或以上支持 Linux 64 位 Server
   {$DEFINE IDE_SUPPORT_THEMING}         // Tokyo 10.2.2 或以上支持 IDE 主题切换
 {$ENDIF}
 
@@ -2878,6 +2879,7 @@
 {$ENDIF}
 
 {$IFDEF DELPHIXE2_UP}
+  {$DEFINE SUPPORT_WIN64}                      // XE2 Supports Win64
   {$DEFINE SUPPORT_UNITNAME_DOT}
   {$DEFINE SUPPORT_ENHANCED_INDEXEDPROPERTY}   // XE2 New RTTI Supports IndexedProperty
   {$DEFINE SUPPORT_ZLIB_WINDOWBITS}            // XE2 ZLib Supports WindowBits
@@ -2888,7 +2890,7 @@
 {$ENDIF}
 
 {$IFDEF BDS2012_UP}               // 2012 = XE2
-  {$DEFINE SUPPORT_32_AND_64}
+  {$DEFINE SUPPORT_32_AND_64}              // XE2 Support Win32 and Win64
   {$IFNDEF DISABLE_FMX}
     {$DEFINE SUPPORT_FMX}
   {$ENDIF}
