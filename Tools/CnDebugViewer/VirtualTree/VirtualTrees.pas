@@ -1,6 +1,6 @@
 unit VirtualTrees;
 
-// LiuXiao Added 'AbsoluteIndex' Field of Node. And Adjusted AddChild function.
+// LiuXiao Added 'AbsoluteIndex' Field of Node. And Adjusted SetChildCount function.
 // Only suitable for add node from Last. If insert into middle, AbsoluteIndex
 // will be confused.
 // FRoot has AbsoluteIndex of 0

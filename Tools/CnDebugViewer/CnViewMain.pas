@@ -40,7 +40,8 @@ uses
   ExtCtrls, Menus, ComCtrls, ActnList, ImgList, ToolWin, Clipbrd, Registry, 
   Tabs, VirtualTrees, CnMdiView, CnLangMgr, CnWizLangID, CnTabSet,
   CnLangStorage, CnHashLangStorage, CnClasses, CnMsgClasses, CnTrayIcon,
-  CnWizCfgUtils, CnUDP, CnDebugIntf, CnCRC32;
+  CnWizCfgUtils, CnUDP, CnDebugIntf, CnCRC32
+  {$IFDEF WIN64}, System.ImageList, System.Actions {$ENDIF};
 
 const
   WM_TAB_MAKE_VISIBLE = WM_USER + $108;
@@ -397,6 +398,9 @@ var
   Res: TCnCoreInitResults;
   S: string;
 begin
+{$IFDEF WIN64}
+  Caption := Caption + '64';
+{$ENDIF}
   if not IsLocalMode then
     Caption := Caption + '- (Global)' // 显示为全局模式
   else
@@ -878,8 +882,14 @@ end;
 
 procedure TCnMainViewer.actAboutExecute(Sender: TObject);
 begin
+{$IFDEF WIN64}
+  MessageBox(Application.Handle, PChar(StringReplace(SCnDebugViewerAbout,
+    'CnDebugViewer', 'CnDebugViewer 64-Bit', [rfReplaceAll])),
+    PChar(SCnDebugViewerAboutCaption), MB_OK or MB_ICONINFORMATION);
+{$ELSE}
   MessageBox(Application.Handle, PChar(SCnDebugViewerAbout),
     PChar(SCnDebugViewerAboutCaption), MB_OK or MB_ICONINFORMATION);
+{$ENDIF}
 end;
 
 procedure TCnMainViewer.actGotoPrevLineExecute(Sender: TObject);
@@ -1339,6 +1349,9 @@ end;
 
 procedure TCnMainViewer.OnSetCaptionGlobalLocal(var Message: TMessage);
 begin
+{$IFDEF WIN64}
+  Caption := Caption + '64';
+{$ENDIF}
   if not IsLocalMode then
     Caption := Caption + '- (Global)' // 显示为全局模式
   else
@@ -1482,6 +1495,9 @@ var
 begin
   ExceptChild.Show;
   ExceptChild.BringToFront;
+{$IFDEF WIN64}
+  ExceptChild.Realign;
+{$ENDIF}
 
   for I := 0 to pnlChildContainer.ControlCount - 1 do
   begin
