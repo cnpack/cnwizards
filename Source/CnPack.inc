@@ -2916,9 +2916,10 @@
 
 {$IFDEF BDS2009_UP}
   {$DEFINE UNICODE_STRING}
-  {$DEFINE SUPPORT_PUINT64}      // Has Pointer of UInt64
-  {$DEFINE OBJECT_HAS_TOSTRING}  // TObject.ToString Function
-  {$DEFINE OBJECT_HAS_EQUAL}     // TObject.Equal Function
+  {$DEFINE SUPPORT_PUINT64}         // Has Pointer of UInt64
+  {$DEFINE OBJECT_HAS_TOSTRING}     // TObject.ToString Function
+  {$DEFINE OBJECT_HAS_EQUAL}        // TObject.Equal Function
+  {$DEFINE OBJECT_HAS_GETHASHCODE}  // TObject.GetHashCode Function
   {$DEFINE SUPPORT_OTA_PROJECT_CONFIGURATION}
   {$DEFINE SUPPORT_GENERIC}      // Ö§³Ö·ºÐÍ
   {$DEFINE IDE_MAINFORM_EAT_MOUSEWHEEL}
