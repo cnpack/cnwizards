@@ -2878,8 +2878,13 @@
   {$ENDIF}
 {$ENDIF}
 
+{$IFDEF DELPHIXE3_UP}
+  {$DEFINE SUPPORT_ATOMIC}              // XE3 has Atomic Routines
+{$ENDIF}
+
 {$IFDEF DELPHIXE2_UP}
   {$DEFINE SUPPORT_WIN64}                      // XE2 Supports Win64
+  {$DEFINE SUPPORT_MACOS32}                    // XE2 Supports MacOS 32
   {$DEFINE SUPPORT_UNITNAME_DOT}
   {$DEFINE SUPPORT_ENHANCED_INDEXEDPROPERTY}   // XE2 New RTTI Supports IndexedProperty
   {$DEFINE SUPPORT_ZLIB_WINDOWBITS}            // XE2 ZLib Supports WindowBits
@@ -2894,7 +2899,7 @@
   {$IFNDEF DISABLE_FMX}
     {$DEFINE SUPPORT_FMX}
   {$ENDIF}
-  {$DEFINE SUPPORT_CROSS_PLATFORM}
+  {$DEFINE SUPPORT_CROSS_PLATFORM}         // XE2 支持跨平台
   {$DEFINE VERSIONINFO_PER_CONFIGURATION}  // Every Configuruation can have a Version Info.
   {$DEFINE OTA_ENVOPTIONS_PLATFORM_BUG}
     // A Bug Can't get Correct Env Option Values for Current Platform.
