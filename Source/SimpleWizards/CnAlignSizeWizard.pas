@@ -919,6 +919,8 @@ end;
 function SortByClassNameProc(Item1, Item2: Pointer): Integer;
 begin
   Result := CompareText(TComponent(Item1).ClassName, TComponent(Item2).ClassName);
+  if Result = 0 then // 类名相同时用控件名比较
+    Result := CompareText(TComponent(Item1).Name, TComponent(Item2).Name);
 end;
 
 procedure TCnAlignSizeWizard.ArrangeNonVisualComponents;
