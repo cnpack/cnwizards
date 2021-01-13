@@ -10,8 +10,6 @@ IDE Wizards'. It's a free plug-in tools set used in Delphi/C++Builder
 
 CnWizards enters Embarcadero Delphi XE Partner DVD in Sep. 2010.
 
-Related Links: https://www.embarcadero.com/
-
 # 2. Who can use CnWizards?
 
 CnWizards is designed to face the programmers who use Delphi/C++Builder/BDS/RAD Studio.
@@ -67,3 +65,8 @@ CnPack becomes Embarcadero Technology Partner in 2009.
  * CnPack Website: http://www.cnpack.org
  * CnPack BBS:     http://bbs.cnpack.org
  * Email:          master@cnpack.org
+
+# 5. Related Links
+
+ * https://www.embarcadero.com/
+ * https://learndelphi.org/
