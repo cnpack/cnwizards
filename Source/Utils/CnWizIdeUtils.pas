@@ -152,6 +152,12 @@ const
   SCnTreeMessageViewClassName = 'TTreeMessageView';
 {$ENDIF}
 
+  // XE5 或以上版本有 IDE Insight 搜索框 
+{$IFDEF IDE_HAS_INSIGHT}
+  SCnIDEInsightBarClassName = 'TButtonEdit';
+  SCnIDEInsightBarName = 'beIDEInsight';
+{$ENDIF}
+
   // 引用单元功能的 Action 名称
 {$IFDEF DELPHI}
   SCnUseUnitActionName = 'FileUseUnitCommand';
@@ -286,6 +292,9 @@ function GetComponentPalettePopupMenu: TPopupMenu;
 
 function GetComponentPaletteControlBar: TControlBar;
 {* 返回组件面板所在的 ControlBar，可能为空}
+
+function GetIdeInsightBar: TWinControl;
+{* 返回 IDE Insight 搜索框控件对象}
 
 function GetMainMenuItemHeight: Integer;
 {* 返回主菜单项高度 }
@@ -1284,6 +1293,25 @@ begin
 {$IFDEF DEBUG}
   if Result = nil then
     CnDebugger.LogMsgError('Unable to Find ControlBar!');
+{$ENDIF}
+end;
+
+function GetIdeInsightBar: TWinControl;
+{$IFDEF IDE_HAS_INSIGHT}
+var
+  MainForm: TCustomForm;
+  AComp: TComponent;
+{$ENDIF}
+begin
+  Result := nil;
+{$IFDEF IDE_HAS_INSIGHT}
+  MainForm := GetIdeMainForm;
+  if MainForm <> nil then
+  begin
+    AComp := MainForm.FindComponent(SCnIDEInsightBarName);
+    if (AComp is TWinControl) and (AComp.ClassNameIs(SCnIDEInsightBarClassName)) then
+      Result := TWinControl(AComp);
+  end;
 {$ENDIF}
 end;
 
