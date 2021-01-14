@@ -154,7 +154,7 @@ const
 
   // XE5 或以上版本有 IDE Insight 搜索框 
 {$IFDEF IDE_HAS_INSIGHT}
-  SCnIDEInsightBarClassName = 'TButtonEdit';
+  SCnIDEInsightBarClassName = 'TButtonedEdit';
   SCnIDEInsightBarName = 'beIDEInsight';
 {$ENDIF}
 
