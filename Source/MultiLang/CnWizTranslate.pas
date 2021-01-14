@@ -412,6 +412,11 @@ begin
   TranslateStr(SCnEditorJumpNextIdentMenuHint, 'SCnEditorJumpNextIdentMenuHint');
   TranslateStr(SCnEditorJumpNextIdentName, 'SCnEditorJumpNextIdentName');
 
+  // CnEditorJumpIDEInsight
+  TranslateStr(SCnEditorJumpIDEInsightMenuCaption, 'SCnEditorJumpIDEInsightMenuCaption');
+  TranslateStr(SCnEditorJumpIDEInsightMenuHint, 'SCnEditorJumpIDEInsightMenuHint');
+  TranslateStr(SCnEditorJumpIDEInsightName, 'SCnEditorJumpIDEInsightName');
+
   // CnEditorFontInc
   TranslateStr(SCnEditorFontIncMenuCaption, 'SCnEditorFontIncMenuCaption');
   TranslateStr(SCnEditorFontIncMenuHint, 'SCnEditorFontIncMenuHint');

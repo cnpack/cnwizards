@@ -744,6 +744,11 @@ var
   SCnEditorJumpNextIdentMenuHint: string = 'Jump to Next Identifier under Cursor';
   SCnEditorJumpNextIdentName: string = 'Jump to Next Identifier Tool';
 
+  // CnEditorJumpIDEInsight
+  SCnEditorJumpIDEInsightMenuCaption: string = 'Search in IDE Insight';
+  SCnEditorJumpIDEInsightMenuHint: string = 'Search Text under Cursor in IDE Insight';
+  SCnEditorJumpIDEInsightName: string = 'Search in IDE Insight';
+
   // CnEditorFontInc
   SCnEditorFontIncMenuCaption: string = 'Zoom &Larger Font';
   SCnEditorFontIncMenuHint: string = 'Zoom Larger Editor Font';

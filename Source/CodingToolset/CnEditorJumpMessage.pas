@@ -178,6 +178,26 @@ type
     procedure Execute; override;
   end;
 
+{$IFDEF IDE_HAS_INSIGHT}
+
+  TCnEditorJumpIDEInsight = class(TCnBaseCodingToolset)
+  private
+
+  public
+    constructor Create(AOwner: TCnEditorToolsetWizard); override;
+    destructor Destroy; override;
+    procedure LoadSettings(Ini: TCustomIniFile); override;
+    procedure SaveSettings(Ini: TCustomIniFile); override;
+    function GetCaption: string; override;
+    function GetHint: string; override;
+    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    function GetState: TWizardState; override;
+    function GetDefShortCut: TShortCut; override;
+    procedure Execute; override;
+  end;
+
+{$ENDIF}
+
 {$ENDIF CNWIZARDS_CNSOURCEHIGHLIGHT}
 
 {$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
@@ -1129,6 +1149,87 @@ begin
 
 end;
 
+{$IFDEF IDE_HAS_INSIGHT}
+
+{ TCnEditorJumpIDEInsight }
+
+constructor TCnEditorJumpIDEInsight.Create(AOwner: TCnEditorToolsetWizard);
+begin
+  inherited;
+
+end;
+
+destructor TCnEditorJumpIDEInsight.Destroy;
+begin
+  inherited;
+
+end;
+
+procedure TCnEditorJumpIDEInsight.Execute;
+var
+  S: string;
+  Idx: Integer;
+  Bar: TWinControl;
+begin
+  S := CnOtaGetCurrentSelection;
+  if S = '' then
+    CnOtaGetCurrPosToken(S, Idx);
+
+  if S <> '' then
+  begin
+    Bar := GetIdeInsightBar;
+    if (Bar <> nil) and (Bar is TCustomEdit) then
+    begin
+      (Bar as TCustomEdit).Text := S;
+      Bar.SetFocus;
+    end;
+  end;
+end;
+
+function TCnEditorJumpIDEInsight.GetCaption: string;
+begin
+  Result := SCnEditorJumpIDEInsightMenuCaption;
+end;
+
+function TCnEditorJumpIDEInsight.GetDefShortCut: TShortCut;
+begin
+  Result := TextToShortCut('Alt+F6');
+end;
+
+procedure TCnEditorJumpIDEInsight.GetEditorInfo(var Name, Author,
+  Email: string);
+begin
+  Name := SCnEditorJumpIDEInsightName;
+  Author := SCnPack_LiuXiao;
+  Email := SCnPack_LiuXiaoEmail;
+end;
+
+function TCnEditorJumpIDEInsight.GetHint: string;
+begin
+  Result := SCnEditorJumpIDEInsightMenuHint;
+end;
+
+function TCnEditorJumpIDEInsight.GetState: TWizardState;
+begin
+  Result := inherited GetState;
+  if not CurrentIsSource then
+    Result := []
+end;
+
+procedure TCnEditorJumpIDEInsight.LoadSettings(Ini: TCustomIniFile);
+begin
+  inherited;
+
+end;
+
+procedure TCnEditorJumpIDEInsight.SaveSettings(Ini: TCustomIniFile);
+begin
+  inherited;
+
+end;
+
+{$ENDIF}
+
 {$ENDIF CNWIZARDS_CNSOURCEHIGHLIGHT}
 
 initialization
@@ -1143,6 +1244,10 @@ initialization
   RegisterCnCodingToolset(TCnEditorJumpPrevIdent);
   RegisterCnCodingToolset(TCnEditorJumpNextIdent);
 {$ENDIF CNWIZARDS_CNSOURCEHIGHLIGHT}
+
+{$IFDEF IDE_HAS_INSIGHT}
+  RegisterCnCodingToolset(TCnEditorJumpIDEInsight);
+{$ENDIF}
 
 {$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 end.
