@@ -68,7 +68,8 @@ type
     btIndent, btIndentEx, btUnindent, btUnindentEx,
     btCommentCode, btUnCommentCode, btToggleComment, btCommentCropper,
     btFormatCode, btCodeSwap, btCodeToString, btInsertColor, btInsertDateTime,
-    btSortLines, btBlockMoveUp, btBlockMoveDown, btBlockDelLines, btDisableHighlight,
+    btSortLines, {$IFDEF IDE_HAS_INSIGHT} btSearchInsight, {$ENDIF}
+    btBlockMoveUp, btBlockMoveDown, btBlockDelLines, btDisableHighlight,
     btShortCutConfig);
 
   TCnSrcEditorBlockTools = class(TObject)
@@ -833,7 +834,10 @@ begin
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorInsertColor', btInsertColor);
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorInsertTime', btInsertDateTime);
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorSortLines', btSortLines);
-  
+{$IFDEF IDE_HAS_INSIGHT}
+  AddMenuItemWithAction(FMiscMenu, 'actCnEditorJumpIDEInsight', btSearchInsight);
+{$ENDIF}
+
 {$IFDEF BDS} // Only for BDS because of bug. ;-(
   DoAddMenuItem(FMiscMenu, SCnSrcBlockMoveUp, btBlockMoveUp, GetShortCut(FBlockMoveUpShortCut));
   DoAddMenuItem(FMiscMenu, SCnSrcBlockMoveDown, btBlockMoveDown, GetShortCut(FBlockMoveDownShortCut));
