@@ -2872,6 +2872,10 @@
   {$DEFINE IDE_SUPPORT_THEMING}         // Tokyo 10.2.2 或以上支持 IDE 主题切换
 {$ENDIF}
 
+{$IFDEF DELPHIXE5_UP}
+  {$DEFINE IDE_HAS_INSIGHT}             // XE5 has IDE Insight Bar
+{$ENDIF}
+
 {$IFDEF DELPHIXE4_UP}
   {$IFNDEF DISABLE_FMX}
     {$DEFINE SUPPORT_FMX_FRAME}         // XE4 FMX Supports FMX Frame
