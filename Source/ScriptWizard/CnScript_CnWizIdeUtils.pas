@@ -134,6 +134,7 @@ begin
   CL.AddDelphiFunction('Function GetObjectInspectorForm : TCustomForm');
   CL.AddDelphiFunction('Function GetComponentPalettePopupMenu : TPopupMenu');
   CL.AddDelphiFunction('Function GetComponentPaletteControlBar : TControlBar');
+  CL.AddDelphiFunction('Function GetIdeInsightBar : TWinControl');
   CL.AddDelphiFunction('Function GetMainMenuItemHeight : Integer');
   CL.AddDelphiFunction('Function IsIdeEditorForm( AForm : TCustomForm) : Boolean');
   CL.AddDelphiFunction('Function IsIdeDesignForm( AForm : TCustomForm) : Boolean');
@@ -386,6 +387,7 @@ begin
   S.RegisterDelphiFunction(@GetObjectInspectorForm, 'GetObjectInspectorForm', cdRegister);
   S.RegisterDelphiFunction(@GetComponentPalettePopupMenu, 'GetComponentPalettePopupMenu', cdRegister);
   S.RegisterDelphiFunction(@GetComponentPaletteControlBar, 'GetComponentPaletteControlBar', cdRegister);
+  S.RegisterDelphiFunction(@GetIdeInsightBar, 'GetIdeInsightBar', cdRegister);
   S.RegisterDelphiFunction(@GetMainMenuItemHeight, 'GetMainMenuItemHeight', cdRegister);
   S.RegisterDelphiFunction(@IsIdeEditorForm, 'IsIdeEditorForm', cdRegister);
   S.RegisterDelphiFunction(@IsIdeDesignForm, 'IsIdeDesignForm', cdRegister);
