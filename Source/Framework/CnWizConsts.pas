@@ -747,7 +747,7 @@ var
   // CnEditorJumpIDEInsight
   SCnEditorJumpIDEInsightMenuCaption: string = 'Search in IDE Insight';
   SCnEditorJumpIDEInsightMenuHint: string = 'Search Text under Cursor in IDE Insight';
-  SCnEditorJumpIDEInsightName: string = 'Search in IDE Insight';
+  SCnEditorJumpIDEInsightName: string = 'Search in IDE Insight Tool';
 
   // CnEditorFontInc
   SCnEditorFontIncMenuCaption: string = 'Zoom &Larger Font';
