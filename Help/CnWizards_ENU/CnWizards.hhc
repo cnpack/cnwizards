@@ -298,6 +298,10 @@
 				<param name="Local" value="wizards\editors\editorjumpnextident.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Search in IDE Insight">
+				<param name="Local" value="wizards\editors\editorjumpideinsight.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Increase Font Size Tool">
 				<param name="Local" value="wizards\editors\editorfontinc.htm">
 				</OBJECT>
