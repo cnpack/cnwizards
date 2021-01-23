@@ -1,7 +1,7 @@
 ﻿**********************************************************************
                      CnPack For Delphi/C++Builder
                 A Free, Open Source Project from China
-                 (C)Copyright 2001-2020 CnPack Team
+                 (C)Copyright 2001-2021 CnPack Team
 **********************************************************************
 
                          CnPack IDE Wizards
