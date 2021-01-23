@@ -1369,6 +1369,16 @@ var
       for I := StartToken.ItemIndex + 1 to CloseToken.ItemIndex do
       begin
         Token := Tokens[I];
+        if I = StartToken.ItemIndex + 1 then
+        begin
+          // 判断 procedure/function 后第一个是否是 ( var begin asm ;之类的，如果是，说明是匿名函数
+          if Token.TokenID in [tkVar, tkBegin, tkAsm, tkRoundOpen, tkSemiColon] then
+          begin
+            Result := '<anonymous>';
+            Exit;
+          end;
+        end;
+
         if (Token.Token^ = '(') or (Token.Token^ = ':') or (Token.Token^ = ';') then
           Break;
         Result := Result + WideTrim(Token.Token);

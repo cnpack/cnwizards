@@ -35,6 +35,7 @@ type
     chkWideIdentCpp: TCheckBox;
     OpenDialog1: TOpenDialog;
     btnPasPosInfo: TButton;
+    chkIsDpr: TCheckBox;
     procedure btnLoadPasClick(Sender: TObject);
     procedure btnParsePasClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -166,7 +167,7 @@ begin
     mmoPas.Lines.SaveToStream(Stream);
     NilChar := 0;
     Stream.Write(NilChar, SizeOf(NilChar));
-    Parser.ParseSource(Stream.Memory, False, False);
+    Parser.ParseSource(Stream.Memory, chkIsDpr.Checked, False);
     Parser.FindCurrentBlock(mmoPas.CaretPos.Y + 1, mmoPas.CaretPos.X + 1);
 
     for I := 0 to Parser.Count - 1 do
@@ -239,6 +240,11 @@ begin
       mmoParsePas.Lines.Add(Format('ChildMethodCloseToken: Line: %2.2d, Col %2.2d. M/I Layer: %d,%d. Token: %s',
        [Parser.ChildMethodCloseToken.LineNumber, Parser.ChildMethodCloseToken.CharIndex,
         Parser.ChildMethodCloseToken.MethodLayer, Parser.ChildMethodCloseToken.ItemLayer, Parser.ChildMethodCloseToken.Token]));
+
+    if Parser.CurrentMethod <> '' then
+      mmoParsePas.Lines.Add('CurrentMethod: ' + Parser.CurrentMethod);
+    if Parser.CurrentChildMethod <> '' then
+      mmoParsePas.Lines.Add('CurrentChildMethod: ' + Parser.CurrentMethod);
 
     mmoParsePas.Lines.Add('');
     mmoParsePas.Lines.Add('Seperate Lines:');

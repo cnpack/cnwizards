@@ -24,8 +24,8 @@ object CnTestStructureForm: TCnTestStructureForm
     object tsPascal: TTabSheet
       Caption = 'Pascal'
       object lblPasPos: TLabel
-        Left = 136
-        Top = 24
+        Left = 128
+        Top = 22
         Width = 3
         Height = 13
       end
@@ -177,6 +177,14 @@ object CnTestStructureForm: TCnTestStructureForm
         Caption = 'PosInfo'
         TabOrder = 8
         OnClick = btnPasPosInfoClick
+      end
+      object chkIsDpr: TCheckBox
+        Left = 332
+        Top = 20
+        Width = 73
+        Height = 17
+        Caption = 'Is Program'
+        TabOrder = 9
       end
     end
     object tsCpp: TTabSheet

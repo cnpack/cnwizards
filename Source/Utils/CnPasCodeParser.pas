@@ -1426,13 +1426,23 @@ var
 
   function _GetMethodName(StartToken, CloseToken: TCnPasToken): AnsiString;
   var
-    i: Integer;
+    I: Integer;
   begin
     Result := '';
     if Assigned(StartToken) and Assigned(CloseToken) then
-      for i := StartToken.ItemIndex + 1 to CloseToken.ItemIndex do
+      for I := StartToken.ItemIndex + 1 to CloseToken.ItemIndex do
       begin
-        Token := Tokens[i];
+        Token := Tokens[I];
+        if I = StartToken.ItemIndex + 1 then
+        begin
+          // 判断 procedure/function 后第一个是否是 ( var begin asm ;之类的，如果是，说明是匿名函数
+          if Token.TokenID in [tkVar, tkBegin, tkAsm, tkRoundOpen, tkSemiColon] then
+          begin
+            Result := '<anonymous>';
+            Exit;
+          end;
+        end;
+
         if (Token.Token = '(') or (Token.Token = ':') or (Token.Token = ';') then
           Break;
         Result := Result + AnsiTrim(Token.Token);
