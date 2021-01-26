@@ -52,6 +52,58 @@ type
   TCnCompilers = set of TCnCompiler;
 
 const
+  SCnCompilerNames: array[TCnCompiler] of string = (
+    'Delphi 5',
+    'Delphi 6',
+    'Delphi 7',
+    'Delphi 8',
+    'BDS 2005',
+    'BDS 2006',
+    'RAD Studio 2007',
+    'RAD Studio 2009',
+    'RAD Studio 2010',
+    'RAD Studio XE',
+    'RAD Studio XE2',
+    'RAD Studio XE3',
+    'RAD Studio XE4',
+    'RAD Studio XE5',
+    'RAD Studio XE6',
+    'RAD Studio XE7',
+    'RAD Studio XE8',
+    'RAD Studio 10 Seattle',
+    'RAD Studio 10.1 Berlin',
+    'RAD Studio 10.2 Tokyo',
+    'RAD Studio 10.3 Rio',
+    'RAD Studio 10.4 Sydney',
+    'C++Builder 5',
+    'C++Builder 6');
+
+  SCnIDERegPaths: array[TCnCompiler] of string = (
+    '\Software\Borland\Delphi\5.0',
+    '\Software\Borland\Delphi\6.0',
+    '\Software\Borland\Delphi\7.0',
+    '\Software\Borland\BDS\2.0',
+    '\Software\Borland\BDS\3.0',
+    '\Software\Borland\BDS\4.0',
+    '\Software\Borland\BDS\5.0',
+    '\Software\CodeGear\BDS\6.0',
+    '\Software\CodeGear\BDS\7.0',
+    '\Software\Embarcadero\BDS\8.0',
+    '\Software\Embarcadero\BDS\9.0',
+    '\Software\Embarcadero\BDS\10.0',
+    '\Software\Embarcadero\BDS\11.0',
+    '\Software\Embarcadero\BDS\12.0',
+    '\Software\Embarcadero\BDS\14.0',
+    '\Software\Embarcadero\BDS\15.0',
+    '\Software\Embarcadero\BDS\16.0',
+    '\Software\Embarcadero\BDS\17.0',
+    '\Software\Embarcadero\BDS\18.0',
+    '\Software\Embarcadero\BDS\19.0',
+    '\Software\Embarcadero\BDS\20.0',
+    '\Software\Embarcadero\BDS\21.0',
+    '\Software\Borland\C++Builder\5.0',
+    '\Software\Borland\C++Builder\6.0');
+
   _DELPHI = {$IFDEF DELPHI}True{$ELSE}False{$ENDIF};
   _BCB = {$IFDEF BCB}True{$ELSE}False{$ENDIF};
   _BDS = {$IFDEF BDS}True{$ELSE}False{$ENDIF};

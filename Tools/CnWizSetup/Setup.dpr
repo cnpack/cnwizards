@@ -63,65 +63,8 @@ uses
 {$R WindowsXP.res}
 {$ENDIF}
 
-type
-  TCompilerName = (cvD5, cvD6, cvD7, cvD8, cbD2005, cbD2006, cbD2007, cbD2009,
-    cbD2010, cbDXE, cbDXE2, cbDXE3, cbDXE4, cbDXE5, cbDXE6, cbDXE7, cbXE8, cb10S,
-    cb101B, cb102T, cb103R, cb104S, cvCB5, cvCB6);
-
 const
-  csCompilerNames: array[TCompilerName] of string = (
-    'Delphi 5',
-    'Delphi 6',
-    'Delphi 7',
-    'Delphi 8',
-    'BDS 2005',
-    'BDS 2006',
-    'RAD Studio 2007',
-    'RAD Studio 2009',
-    'RAD Studio 2010',
-    'RAD Studio XE',
-    'RAD Studio XE2',
-    'RAD Studio XE3',
-    'RAD Studio XE4',
-    'RAD Studio XE5',
-    'RAD Studio XE6',
-    'RAD Studio XE7',
-    'RAD Studio XE8',
-    'RAD Studio 10 Seattle',
-    'RAD Studio 10.1 Berlin',
-    'RAD Studio 10.2 Tokyo',
-    'RAD Studio 10.3 Rio',
-    'RAD Studio 10.4 Sydney',
-    'C++Builder 5',
-    'C++Builder 6');
-
-  csIDERegPaths: array[TCompilerName] of string = (
-    '\Software\Borland\Delphi\5.0',
-    '\Software\Borland\Delphi\6.0',
-    '\Software\Borland\Delphi\7.0',
-    '\Software\Borland\BDS\2.0',
-    '\Software\Borland\BDS\3.0',
-    '\Software\Borland\BDS\4.0',
-    '\Software\Borland\BDS\5.0',
-    '\Software\CodeGear\BDS\6.0',
-    '\Software\CodeGear\BDS\7.0',
-    '\Software\Embarcadero\BDS\8.0',
-    '\Software\Embarcadero\BDS\9.0',
-    '\Software\Embarcadero\BDS\10.0',
-    '\Software\Embarcadero\BDS\11.0',
-    '\Software\Embarcadero\BDS\12.0',
-    '\Software\Embarcadero\BDS\14.0',
-    '\Software\Embarcadero\BDS\15.0',
-    '\Software\Embarcadero\BDS\16.0',
-    '\Software\Embarcadero\BDS\17.0',
-    '\Software\Embarcadero\BDS\18.0',
-    '\Software\Embarcadero\BDS\19.0',
-    '\Software\Embarcadero\BDS\20.0',
-    '\Software\Embarcadero\BDS\21.0',
-    '\Software\Borland\C++Builder\5.0',
-    '\Software\Borland\C++Builder\6.0');
-
-  csDllNames: array[TCompilerName] of string = (
+  csDllNames: array[TCnCompiler] of string = (
     'CnWizards_D5.DLL',
     'CnWizards_D6.DLL',
     'CnWizards_D7.DLL',
@@ -256,8 +199,8 @@ var
   ParamNoMsg: Boolean;
   ParamCmdHelp :Boolean;
 
-// 取专家 DLL 完整文件名
-function GetDllFullPathName(Compiler: TCompilerName): string;
+// 取专家 DLL 完整文件名，有部分动态机制供删除旧版使用，不全也没关系
+function GetDllFullPathName(Compiler: TCnCompiler): string;
 const
   RIO_10_3_2: TVersionNumber =
     (Major: 26; Minor: 0; Release: 34749; Build: 6593); // 10.3.2
@@ -268,7 +211,7 @@ var
 begin
   Result := _CnExtractFilePath(ParamStr(0)) + csDllLoaderName;
   // 10.3 下动态判断文件名的版本确定究竟用哪个 DLL
-  if Compiler = cb103R then
+  if Compiler = cnDelphi103R then
   begin
     // 10.3.2 使用最新 DLL，但 10.3.1 或以下版本使用另一个 DLL
     // 读 HKEY_CURRENT_USER\Software\Embarcadero\BDS\20.0 下的 RootDir 得到安装目录
@@ -301,13 +244,13 @@ begin
 end;
 
 // 取旧的专家名作为旧 Key
-function GetDllOldKeyName(Compiler: TCompilerName): string;
+function GetDllOldKeyName(Compiler: TCnCompiler): string;
 begin
   Result := _CnChangeFileExt(csDllNames[Compiler], '');
 end;
 
 // 判断专家 DLL 是否存在
-function WizardExists(Compiler: TCompilerName): Boolean;
+function WizardExists(Compiler: TCnCompiler): Boolean;
 begin
   Result := FileExists(GetDllFullPathName(Compiler));
 end;
@@ -315,12 +258,12 @@ end;
 // 判断是否安装旧版专家 DLL
 function IsOldInstalled: Boolean;
 var
-  Compiler: TCompilerName;
+  Compiler: TCnCompiler;
 begin
   Result := True;
   for Compiler := Low(Compiler) to High(Compiler) do
-    if WizardExists(Compiler) and RegKeyExists(csIDERegPaths[Compiler]) and
-      not RegValueExists(csIDERegPaths[Compiler] + csExperts, GetDllOldKeyName(Compiler)) then
+    if WizardExists(Compiler) and RegKeyExists(SCnIDERegPaths[Compiler]) and
+      not RegValueExists(SCnIDERegPaths[Compiler] + csExperts, GetDllOldKeyName(Compiler)) then
     begin
       Result := False;
       Exit;
@@ -330,12 +273,12 @@ end;
 // 判断是否安装了 Loader
 function IsInstalled: Boolean;
 var
-  Compiler: TCompilerName;
+  Compiler: TCnCompiler;
 begin
   Result := True;
   for Compiler := Low(Compiler) to High(Compiler) do
-    if WizardExists(Compiler) and RegKeyExists(csIDERegPaths[Compiler]) and
-      not RegValueExists(csIDERegPaths[Compiler] + csExperts, csDllLoaderKey) then
+    if WizardExists(Compiler) and RegKeyExists(SCnIDERegPaths[Compiler]) and
+      not RegValueExists(SCnIDERegPaths[Compiler] + csExperts, csDllLoaderKey) then
     begin
       Result := False;
       Exit;
@@ -346,31 +289,31 @@ end;
 procedure InstallWizards;
 var
   S: string;
-  Compiler: TCompilerName;
+  Compiler: TCnCompiler;
   Key: HKEY;
 begin
   S := csInstallSucc;
   for Compiler := Low(Compiler) to High(Compiler) do
   begin
-    if Compiler = cvD8 then // 不安装 D8 的
+    if Compiler = cnDelphi8 then // 不安装 D8 的
       Continue;
 
-    if WizardExists(Compiler) and RegKeyExists(csIDERegPaths[Compiler]) then
+    if WizardExists(Compiler) and RegKeyExists(SCnIDERegPaths[Compiler]) then
     begin
-      if not RegKeyExists(csIDERegPaths[Compiler] + csExperts) then
+      if not RegKeyExists(SCnIDERegPaths[Compiler] + csExperts) then
       begin
-        RegCreateKey(HKEY_CURRENT_USER, PChar(csIDERegPaths[Compiler] + csExperts), Key);
+        RegCreateKey(HKEY_CURRENT_USER, PChar(SCnIDERegPaths[Compiler] + csExperts), Key);
         RegCloseKey(Key);
       end;
 
-      // 删掉旧格式
-      if RegValueExists(csIDERegPaths[Compiler] + csExperts, GetDllOldKeyName(Compiler)) then
-        RegDeleteValue(csIDERegPaths[Compiler] + csExperts, GetDllOldKeyName(Compiler));
+      // 删掉旧格式的 DLL
+      if RegValueExists(SCnIDERegPaths[Compiler] + csExperts, GetDllOldKeyName(Compiler)) then
+        RegDeleteValue(SCnIDERegPaths[Compiler] + csExperts, GetDllOldKeyName(Compiler));
 
-      // 写新格式
-      if RegWriteStr(csIDERegPaths[Compiler] + csExperts, csDllLoaderKey,
+      // 写新格式的 Loader
+      if RegWriteStr(SCnIDERegPaths[Compiler] + csExperts, csDllLoaderKey,
         GetDllFullPathName(Compiler)) then
-        S := S + #13#10 + ' - ' + csCompilerNames[Compiler];
+        S := S + #13#10 + ' - ' + SCnCompilerNames[Compiler];
     end;
   end;
 
@@ -391,19 +334,19 @@ end;
 procedure UnInstallWizards;
 var
   S: string;
-  Compiler: TCompilerName;
+  Compiler: TCnCompiler;
 begin
   S := csUnInstallSucc;
   for Compiler := Low(Compiler) to High(Compiler) do
   begin
-    // 删掉旧的
-    if RegValueExists(csIDERegPaths[Compiler] + csExperts, GetDllOldKeyName(Compiler)) then
-      RegDeleteValue(csIDERegPaths[Compiler] + csExperts, GetDllOldKeyName(Compiler));
+    // 删掉旧的 Dll
+    if RegValueExists(SCnIDERegPaths[Compiler] + csExperts, GetDllOldKeyName(Compiler)) then
+      RegDeleteValue(SCnIDERegPaths[Compiler] + csExperts, GetDllOldKeyName(Compiler));
 
-    // 删掉新的
-    if RegValueExists(csIDERegPaths[Compiler] + csExperts, csDllLoaderKey) and
-      RegDeleteValue(csIDERegPaths[Compiler] + csExperts, csDllLoaderKey) then
-      S := S + #13#10 + ' - ' + csCompilerNames[Compiler];
+    // 删掉新的 Loader
+    if RegValueExists(SCnIDERegPaths[Compiler] + csExperts, csDllLoaderKey) and
+      RegDeleteValue(SCnIDERegPaths[Compiler] + csExperts, csDllLoaderKey) then
+      S := S + #13#10 + ' - ' + SCnCompilerNames[Compiler];
   end;
 
   if not ParamNoMsg then
