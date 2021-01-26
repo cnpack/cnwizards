@@ -45,84 +45,6 @@ uses
   CnClasses, CnLangMgr, CnWizLangID, CnWizHelp;
 
 const
-  csIDENames: array[TCnCompiler] of string = (
-    'Delphi 5',
-    'Delphi 6',
-    'Delphi 7',
-    'Delphi 8',
-    'BDS 2005',
-    'BDS 2006',
-    'RAD Studio 2007',
-    'RAD Studio 2009',
-    'RAD Studio 2010',
-    'RAD Studio XE',
-    'RAD Studio XE2',
-    'RAD Studio XE3',
-    'RAD Studio XE4',
-    'RAD Studio XE5',
-    'RAD Studio XE6',
-    'RAD Studio XE7',
-    'RAD Studio XE8',
-    'RAD Studio 10 Seattle',
-    'RAD Studio 10.1 Berlin',
-    'RAD Studio 10.2 Tokyo',
-    'RAD Studio 10.3 Rio',
-    'RAD Studio 10.4 Sydney',
-    'C++Builder 5',
-    'C++Builder 6');
-
-  csCmdShortIDENames: array[TCnCompiler] of string = (
-    'Delphi5',
-    'Delphi6',
-    'Delphi7',
-    'Delphi8',
-    'BDS2005',
-    'BDS2006',
-    'RADStudio2007',
-    'RADStudio2009',
-    'RADStudio2010',
-    'RADStudioXE',
-    'RADStudioXE2',
-    'RADStudioXE3',
-    'RADStudioXE4',
-    'RADStudioXE5',
-    'RADStudioXE6',
-    'RADStudioXE7',
-    'RADStudioXE8',
-    'RADStudio10S',
-    'RADStudio101B',
-    'RADStudio102T',
-    'RADStudio103R',
-    'RADStudio104S',
-    'BCB5',
-    'BCB6');
-
-  csRegPaths: array[TCnCompiler] of string = (
-    '\Software\Borland\Delphi\5.0',
-    '\Software\Borland\Delphi\6.0',
-    '\Software\Borland\Delphi\7.0',
-    '\Software\Borland\BDS\2.0',
-    '\Software\Borland\BDS\3.0',
-    '\Software\Borland\BDS\4.0',
-    '\Software\Borland\BDS\5.0',
-    '\Software\CodeGear\BDS\6.0',
-    '\Software\CodeGear\BDS\7.0',
-    '\Software\Embarcadero\BDS\8.0',
-    '\Software\Embarcadero\BDS\9.0',
-    '\Software\Embarcadero\BDS\10.0',
-    '\Software\Embarcadero\BDS\11.0',
-    '\Software\Embarcadero\BDS\12.0',
-    '\Software\Embarcadero\BDS\14.0',
-    '\Software\Embarcadero\BDS\15.0',
-    '\Software\Embarcadero\BDS\16.0',
-    '\Software\Embarcadero\BDS\17.0',
-    '\Software\Embarcadero\BDS\18.0',
-    '\Software\Embarcadero\BDS\19.0',
-    '\Software\Embarcadero\BDS\20.0',
-    '\Software\Embarcadero\BDS\21.0',
-    '\Software\Borland\C++Builder\5.0',
-    '\Software\Borland\C++Builder\6.0');
-
   csCnPackRegPath = '\Software\CnPack\CnWizards\';
 
   csCnPackDisabledExperts = 'DisabledExperts\';
@@ -299,7 +221,7 @@ begin
   Result := '';
   Reg := TRegistry.Create; // 创建操作注册表对象
   Reg.RootKey := HKEY_LOCAL_MACHINE;
-  if Reg.OpenKey(csRegPaths[IDE], False) then
+  if Reg.OpenKey(SCnIDERegPaths[IDE], False) then
   begin
     if Reg.ValueExists('App') then
     begin
@@ -326,7 +248,7 @@ begin
   begin
     IDE := TCnCompiler(lstIDEs.ItemIndex);
     if not IDEWizardsChanged[IDE] or
-       (Application.MessageBox(PChar(Format(SCnChangedRefreshFmt,[csIDENames[IDE]])),
+       (Application.MessageBox(PChar(Format(SCnChangedRefreshFmt,[SCnCompilerNames[IDE]])),
         PChar(SCnMessageHint), MB_YESNO + MB_ICONQUESTION) = IDYES) then
     begin
       if lvWizards.Selected <> nil then
@@ -365,11 +287,11 @@ begin
     if IDEWizardsChanged[IDE] then
     begin
       // 删除原有的，逐个保存
-      ClearIDEWizardsRoot(Reg, csRegPaths[IDE] + '\Experts');
+      ClearIDEWizardsRoot(Reg, SCnIDERegPaths[IDE] + '\Experts');
       ClearIDEWizardsRoot(Reg, csCnPackRegPath + csCnPackDisabledExperts
-        + csIDENames[IDE]);
+        + SCnCompilerNames[IDE]);
 
-      if Reg.OpenKey(csRegPaths[IDE] + '\Experts', True) then
+      if Reg.OpenKey(SCnIDERegPaths[IDE] + '\Experts', True) then
       begin
         for I := 0 to IDEWizardsList[IDE].Count - 1 do // 写使能的
         begin
@@ -381,7 +303,7 @@ begin
       end;
 
       if Reg.OpenKey(csCnPackRegPath + csCnPackDisabledExperts
-        + csIDENames[IDE], True) then
+        + SCnCompilerNames[IDE], True) then
       begin
         for I := 0 to IDEWizardsList[IDE].Count - 1 do // 写禁用的
         begin
@@ -497,7 +419,7 @@ var
 begin
   lstIDEs.Clear;
   for Kind := Low(TCnCompiler) to High(TCnCompiler) do
-    lstIDEs.Items.Add(csIDENames[Kind]);
+    lstIDEs.Items.Add(SCnCompilerNames[Kind]);
 
   if not IDEInstalled[CmdSelected] then
   begin
@@ -549,7 +471,7 @@ begin
   // 画文字
   Margin := (ListBox.ItemHeight - TextH) div 2;
   ListBox.Canvas.TextOut(Rect.Left + ListBox.ItemHeight + 2, Rect.Top + Margin,
-    csIDENames[TCnCompiler(Index {ImgIdx} )]);    // use Index instead of ImgIdx
+    SCnCompilerNames[TCnCompiler(Index {ImgIdx} )]);    // use Index instead of ImgIdx
 
   // 根据是否 Enable 画图标
   Margin := (ListBox.ItemHeight - ilIDEs.Height) div 2;
@@ -563,7 +485,7 @@ var
 begin
   for Kind := Low(TCnCompiler) to High(TCnCompiler) do
   begin
-    if FindCmdLineSwitch('I' + csCmdShortIDENames[Kind], ['-', '/'], True) then
+    if FindCmdLineSwitch('I' + SCnCompilerShortNames[Kind], ['-', '/'], True) then
     begin
       CmdSelected := Kind;
       Exit;
@@ -633,9 +555,9 @@ begin
   Reg := TRegistry.Create; // 创建操作注册表对象
   Reg.RootKey := HKEY_CURRENT_USER;
 
-  LoadIDEWizardsFromRoot(Reg, csRegPaths[IDE] + '\Experts', True, IDE);
+  LoadIDEWizardsFromRoot(Reg, SCnIDERegPaths[IDE] + '\Experts', True, IDE);
   LoadIDEWizardsFromRoot(Reg, csCnPackRegPath + csCnPackDisabledExperts
-    + csIDENames[IDE], False, IDE);
+    + SCnCompilerNames[IDE], False, IDE);
 
   FreeAndNil(Reg);
   DeleteDuplicated;
@@ -855,7 +777,7 @@ begin
     for Kind := Low(TCnCompiler) to High(TCnCompiler) do
     begin
       if IDEWizardsChanged[Kind] then
-        IDENames.Add(csIDENames[Kind]);
+        IDENames.Add(SCnCompilerNames[Kind]);
     end;
 
     case Application.MessageBox(PChar(SCnWizardChangedFmt + IDENames.Text),

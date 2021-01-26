@@ -78,6 +78,32 @@ const
     'C++Builder 5',
     'C++Builder 6');
 
+  SCnCompilerShortNames: array[TCnCompiler] of string = (
+    'Delphi5',
+    'Delphi6',
+    'Delphi7',
+    'Delphi8',
+    'BDS2005',
+    'BDS2006',
+    'RADStudio2007',
+    'RADStudio2009',
+    'RADStudio2010',
+    'RADStudioXE',
+    'RADStudioXE2',
+    'RADStudioXE3',
+    'RADStudioXE4',
+    'RADStudioXE5',
+    'RADStudioXE6',
+    'RADStudioXE7',
+    'RADStudioXE8',
+    'RADStudio10S',
+    'RADStudio101B',
+    'RADStudio102T',
+    'RADStudio103R',
+    'RADStudio104S',
+    'BCB5',
+    'BCB6');
+
   SCnIDERegPaths: array[TCnCompiler] of string = (
     '\Software\Borland\Delphi\5.0',
     '\Software\Borland\Delphi\6.0',
