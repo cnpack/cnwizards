@@ -27,6 +27,7 @@ LangString SHELP          1049 "Справка"
 LangString SHELPCHM       1049 "CnWizards_ENU.chm"
 LangString SENABLE        1049 "Включить CnPack IDE-Мастер"
 LangString SDISABLE       1049 "Отключить CnPack IDE-Мастер"
+LangString SFIXSTART      1049 Ў°CnWizards §і§в§Ц§Х§г§д§У§а §Ъ§г§б§в§С§У§Э§Ц§Я§Ъ§с §Щ§С§б§е§г§Ь§СЎ±
 LangString SCONFIGIO      1049 "Сохр. и восст. настроек CnPack IDE-Мастера"
 LangString SCLEANIDEHIS   1049 "Очистка истории IDE"
 LangString SASCIICHART    1049 "ASCII-таблица"
