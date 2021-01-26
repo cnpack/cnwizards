@@ -699,6 +699,7 @@ InitOk:
   CreateDirectory "$SMPROGRAMS\${APPNAMEDIR}"
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SENABLE).lnk" "$INSTDIR\Setup.exe" "-i" "$INSTDIR\Setup.exe" 1
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SDISABLE).lnk" "$INSTDIR\Setup.exe" "-u" "$INSTDIR\Setup.exe" 2
+  CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SFIXSTART).lnk" "$INSTDIR\CnFixStart.exe"
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SUNINSTALL) $(APPNAME).lnk" "$INSTDIR\uninst.exe"
 
   ; 写入生成卸载程序
