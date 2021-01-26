@@ -4,12 +4,13 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls, ComCtrls, Buttons, Contnrs, Registry,
-  CnCommon, CnWizCompilerConst, ImgList;
+  StdCtrls, ExtCtrls, ComCtrls, Buttons, Contnrs, Registry, CnCommon,
+  CnWizCompilerConst, ImgList;
 
 const
   KEY_MAPPING_DELPHI_START: TCnCompiler = cnDelphiXE8;  // 从 XE8 起就可能有 KeyMapping 的毛病
-  KEY_MAPPING_DELPHI_END: TCnCompiler = TCnCompiler(Integer(High(TCnCompiler)) - 2); // 去掉 BCB5/6
+  KEY_MAPPING_DELPHI_END: TCnCompiler = TCnCompiler(Integer(High(TCnCompiler)) -
+    2); // 去掉 BCB5/6
 
 type
   TCnKeyMappingCheckResult = class
@@ -46,17 +47,23 @@ type
     lblKeyMappingProblemFound: TLabel;
     bvl1: TBevel;
     lblKeyMappingDescription: TLabel;
+    lblKeyMappingNote: TLabel;
     procedure btnCloseClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure lstInstalledKeyMappnigListDrawItem(Control: TWinControl;
-      Index: Integer; Rect: TRect; State: TOwnerDrawState);
+    procedure lstInstalledKeyMappnigListDrawItem(Control: TWinControl; Index:
+      Integer; Rect: TRect; State: TOwnerDrawState);
+    procedure btnKeyMappingFixClick(Sender: TObject);
+    procedure btnAboutClick(Sender: TObject);
   private
     FKeyMappingOK: Boolean;
     FKeyMappingRegs: TObjectList;
+    function LoadKeyMappingResult(IDE: TCnCompiler; List: TStrings;
+      Objects: TObjectList): Boolean;
     procedure LoadKeyMappingResults;
     procedure CheckKeyMappingOK;
     procedure UpdateMappingOKUI;
+    procedure FixKeyMapping;
   public
     { Public declarations }
   end;
@@ -70,9 +77,19 @@ implementation
 
 const
   KEY_MAPPING_REG = '\Editor\Options\Known Editor Enhancements';
+  CNPACK_KEYNAME = 'CnPack';
+  PRIORITY_KEY = 'Priority';
 
-  SCnNoKeyMappingProblemFound = 'NO Key Mapping Problem Found. Everything is OK.';
-  SCnKeyMappingProblemFound = 'Possible Key Mapping Problem Found.';
+var
+  SCnNoKeyMappingProblemFound: string = 'NO Key Mapping Problem Found. Everything is OK.';
+  SCnKeyMappingProblemFound: string = 'Possible Key Mapping Problem Found.';
+  SCnKeyMappingProblemFixed: string = 'Key Mapping Problem Fixed. Please Try to Start Delphi.';
+  SCnKeyMappingNoProblemNeedFix: string = 'NO Key Mapping Problem Needs to Fix.';
+  SCnFixToolAbout: string =
+    'CnPack IDE Wizards Starting-Up Fix Tool 1.0' + #13#10#13#10 +
+    'This Tool is Used to Try to Fix Delphi Starting-Up Problem when Installed CnPack.' + #13#10#13#10 +
+    'Author: Liu Xiao (liuxiao@cnpack.org)' + #13#10 +
+    'Copyright (C) 2001-2021 CnPack Team';
 
 procedure TFormStartFix.btnCloseClick(Sender: TObject);
 begin
@@ -105,107 +122,104 @@ begin
   FKeyMappingRegs.Free;
 end;
 
+function TFormStartFix.LoadKeyMappingResult(IDE: TCnCompiler; List: TStrings;
+  Objects: TObjectList): Boolean;
+var
+  Contain: Boolean;
+  I, CnPackIdx, MaxIdx, MinValue, MaxValue: Integer;
+  Reg: TRegistry;
+  Res: TCnKeyMappingCheckResult;
+begin
+  Result := False;
+  if GetKeysInRegistryKey(SCnIDERegPaths[IDE] + KEY_MAPPING_REG, List) then
+  begin
+    if List.Count >= 1 then
+    begin
+      // 有该 IDE 并且该 IDE 下有多个 KeyMapping，List 中已经存了每个 KeyMapping 的名字
+      // 让 List 的 Objects 里头存每个 KeyMapping 的 Priority 值
+      for I := 0 to List.Count - 1 do
+      begin
+        List.Objects[I] := Pointer(-1);
+        Reg := TRegistry.Create(KEY_READ);
+        try
+          if Reg.OpenKey(SCnIDERegPaths[IDE] + KEY_MAPPING_REG + '\' + List[I],
+            False) then
+          begin
+            List.Objects[I] := Pointer(Reg.ReadInteger(PRIORITY_KEY));
+          end;
+        finally
+          Reg.Free;
+        end;
+      end;
+
+      // 读完后检查 List 中是否有 CnPack 并且是否最大
+      Contain := False;
+      CnPackIdx := -1;
+      for I := 0 to List.Count - 1 do
+      begin
+        if Pos(CNPACK_KEYNAME, List[I]) > 0 then
+        begin
+          Contain := True;
+          CnPackIdx := I;
+          Break;
+        end;
+      end;
+
+      if not Contain then
+        Exit;
+
+      MaxIdx := 0;
+      MinValue := Integer(List.Objects[0]);
+      MaxValue := Integer(List.Objects[0]);
+      for I := 0 to List.Count - 1 do
+      begin
+        if Integer(List.Objects[I]) < MinValue then
+        begin
+          MinValue := Integer(List.Objects[I]);
+        end;
+
+        if Integer(List.Objects[I]) > MaxValue then
+        begin
+          MaxIdx := I;
+          MaxValue := Integer(List.Objects[I]);
+        end;
+      end;
+
+      Res := TCnKeyMappingCheckResult.Create;
+      Res.Correct := MaxIdx = CnPackIdx; // CnPack 键盘映射顺序已在最下面。
+      Res.IDE := IDE;
+
+      Objects.Add(Res);
+      Result := True;
+    end;
+  end;
+end;
+
 procedure TFormStartFix.LoadKeyMappingResults;
 var
   J: Integer;
   List: TStrings;
-
-  procedure LoadKeyMappingResult(IDE: TCnCompiler);
-  const
-    PRIORITY_KEY = 'Priority';
-    CNPACK_KEYNAME = 'CnPack';
-  var
-    Contain: Boolean;
-    I, CnPackIdx, MaxIdx, MinValue, MaxValue: Integer;
-    Reg: TRegistry;
-    Res: TCnKeyMappingCheckResult;
-  begin
-    if GetKeysInRegistryKey(SCnIDERegPaths[IDE] + KEY_MAPPING_REG, List) then
-    begin
-      if List.Count >= 1 then
-      begin
-        // 有该 IDE 并且该 IDE 下有多个 KeyMapping，List 中已经存了每个 KeyMapping 的名字
-        // 让 List 的 Objects 里头存每个 KeyMapping 的 Priority 值
-        for I := 0 to List.Count - 1 do
-        begin
-          List.Objects[I] := Pointer(-1);
-          Reg := TRegistry.Create(KEY_READ);
-          try
-            if Reg.OpenKey(SCnIDERegPaths[IDE] + KEY_MAPPING_REG + '\' + List[I], False) then
-            begin
-              List.Objects[I] := Pointer(Reg.ReadInteger(PRIORITY_KEY));
-            end;
-          finally
-            Reg.Free;
-          end;
-  {$IFDEF DEBUG}
-          CnDebugger.LogFmt('Key Mapping: %s: Priority %d.', [List[I], Integer(List.Objects[I])]);
-  {$ENDIF}
-        end;
-
-        // 读完后检查 List 中是否有 CnPack 并且是否最大
-        Contain := False;
-        CnPackIdx := -1;
-        for I := 0 to List.Count - 1 do
-        begin
-          if Pos(CNPACK_KEYNAME, List[I]) > 0 then
-          begin
-            Contain := True;
-            CnPackIdx := I;
-            Break;
-          end;
-        end;
-
-        if not Contain then
-          Exit;
-
-        MaxIdx := 0;
-        MinValue := Integer(List.Objects[0]);
-        MaxValue := Integer(List.Objects[0]);
-        for I := 0 to List.Count - 1 do
-        begin
-          if Integer(List.Objects[I]) < MinValue then
-          begin
-            //MinIdx := I;
-            MinValue := Integer(List.Objects[I]);
-          end;
-
-          if Integer(List.Objects[I]) > MaxValue then
-          begin
-            MaxIdx := I;
-            MaxValue := Integer(List.Objects[I]);
-          end;
-        end;
-
-        Res := TCnKeyMappingCheckResult.Create;
-        Res.Correct := MaxIdx = CnPackIdx; // CnPack 键盘映射顺序已在最下面。
-        Res.IDE := IDE;
-
-        FKeyMappingRegs.Add(Res);
-      end;
-    end;
-  end;
-
 begin
+  FKeyMappingRegs.Clear;
   List := TStringList.Create;
   try
     for J := Ord(KEY_MAPPING_DELPHI_START) to Ord(KEY_MAPPING_DELPHI_END) do
-      LoadKeyMappingResult(TCnCompiler(J));
+      LoadKeyMappingResult(TCnCompiler(J), List, FKeyMappingRegs);
   finally
     List.Free;
   end;
 
   lstInstalledKeyMappnigList.Clear;
   for J := 0 to FKeyMappingRegs.Count - 1 do
-    lstInstalledKeyMappnigList.Items.Add(SCnCompilerNames[TCnKeyMappingCheckResult(FKeyMappingRegs[J]).IDE]);
+    lstInstalledKeyMappnigList.Items.Add(SCnCompilerNames[TCnKeyMappingCheckResult
+      (FKeyMappingRegs[J]).IDE]);
 
   CheckKeyMappingOK;
   UpdateMappingOKUI;
 end;
 
-procedure TFormStartFix.lstInstalledKeyMappnigListDrawItem(
-  Control: TWinControl; Index: Integer; Rect: TRect;
-  State: TOwnerDrawState);
+procedure TFormStartFix.lstInstalledKeyMappnigListDrawItem(Control: TWinControl;
+  Index: Integer; Rect: TRect; State: TOwnerDrawState);
 var
   Reg: TCnKeyMappingCheckResult;
   ListBox: TListBox;
@@ -223,7 +237,8 @@ begin
   ListBox.Canvas.FillRect(Rect);
 
   ilImage.Draw(ListBox.Canvas, Rect.Left + 2, Rect.Top + 2, Integer(Reg.Correct));
-  ListBox.Canvas.TextOut(Rect.Left + ilImage.Width + 4, Rect.Top + 4, ListBox.Items[Index]);
+  ListBox.Canvas.TextOut(Rect.Left + ilImage.Width + 4, Rect.Top + 4, ListBox.Items
+    [Index]);
 end;
 
 procedure TFormStartFix.UpdateMappingOKUI;
@@ -232,6 +247,7 @@ begin
   imgKeyMappingNOK.Visible := not FKeyMappingOK;
 
   btnKeyMappingFix.Visible := not FKeyMappingOK;
+  lblKeyMappingNote.Visible := not FKeyMappingOK;
 
   if FKeyMappingOK then
     lblKeyMappingProblemFound.Caption := SCnNoKeyMappingProblemFound
@@ -239,4 +255,86 @@ begin
     lblKeyMappingProblemFound.Caption := SCnKeyMappingProblemFound;
 end;
 
+procedure TFormStartFix.btnKeyMappingFixClick(Sender: TObject);
+begin
+  FixKeyMapping;
+  LoadKeyMappingResults;
+end;
+
+function ListCompare(List: TStringList; Index1, Index2: Integer): Integer;
+begin
+  if Pos(CNPACK_KEYNAME, List[Index1]) > 0 then
+    Result := 1
+  else if Pos(CNPACK_KEYNAME, List[Index2]) > 0 then
+    Result := -1
+  else
+    Result := Integer(List.Objects[Index1]) - Integer(List.Objects[Index2]);
+end;
+
+procedure TFormStartFix.FixKeyMapping;
+var
+  I, J, P: Integer;
+  List: TStringList;
+  Objects: TObjectList;
+  Res: TCnKeyMappingCheckResult;
+  Reg: TRegistry;
+  Fixed: Boolean;
+begin
+  List := TStringList.Create;
+  Objects := TObjectList.Create;
+  Fixed := False;
+  try
+    for J := Ord(KEY_MAPPING_DELPHI_START) to Ord(KEY_MAPPING_DELPHI_END) do
+    begin
+      if LoadKeyMappingResult(TCnCompiler(J), List, Objects) then
+      begin
+        // 有该 IDE 的数据，拿到结果
+        Res := TCnKeyMappingCheckResult(Objects[Objects.Count - 1]);
+        if not Res.Correct then
+        begin
+          // CnPack 项不是最大的 Priority，需要将 List 里的内容排序调整
+          // 确保无论 Priority 值如何，CnPack 都在最后
+          List.CustomSort(ListCompare);
+
+          // 排序排好后，直接赋值 0 到 Count - 1
+          for I := 0 to List.Count - 1 do
+            List.Objects[I] := TObject(I);
+
+          // 写入注册表值
+          for I := 0 to List.Count - 1 do
+          begin
+            Reg := TRegistry.Create(KEY_READ or KEY_WRITE);
+            try
+              if Reg.OpenKey(SCnIDERegPaths[Res.IDE] + KEY_MAPPING_REG + '\' + List[I],
+                False) then
+              begin
+                P := Reg.ReadInteger(PRIORITY_KEY);
+                if P <> Integer(List.Objects[I]) then
+                  Reg.WriteInteger(PRIORITY_KEY, Integer(List.Objects[I]));
+              end;
+            finally
+              Reg.Free;
+            end;
+          end;
+          Fixed := True;
+        end;
+      end;
+    end;
+
+    if Fixed then
+      InfoDlg(SCnKeyMappingProblemFixed)
+    else
+      InfoDlg(SCnKeyMappingNoProblemNeedFix);
+  finally
+    Objects.Free;
+    List.Free;
+  end;
+end;
+
+procedure TFormStartFix.btnAboutClick(Sender: TObject);
+begin
+  InfoDlg(SCnFixToolAbout);
+end;
+
 end.
+

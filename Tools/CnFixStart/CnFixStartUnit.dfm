@@ -5,12 +5,13 @@ object FormStartFix: TFormStartFix
   Height = 509
   Caption = 'CnPack IDE Wizards Starting-Up Fix Tool'
   Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
+  Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
-  Font.Name = 'MS Sans Serif'
+  Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  Position = poScreenCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   PixelsPerInch = 96
@@ -155,7 +156,7 @@ object FormStartFix: TFormStartFix
     object lblDesc: TLabel
       Left = 48
       Top = 35
-      Width = 374
+      Width = 372
       Height = 13
       Caption = 
         'If Delphi can'#39't Start when installed CnPack IDE Wizards, Please ' +
@@ -170,6 +171,7 @@ object FormStartFix: TFormStartFix
     Anchors = [akLeft, akBottom]
     Caption = '&About'
     TabOrder = 1
+    OnClick = btnAboutClick
     NumGlyphs = 2
   end
   object btnHelp: TBitBtn
@@ -180,6 +182,7 @@ object FormStartFix: TFormStartFix
     Anchors = [akLeft, akBottom]
     Caption = '&Help'
     TabOrder = 2
+    Visible = False
     NumGlyphs = 2
   end
   object btnClose: TBitBtn
@@ -207,7 +210,7 @@ object FormStartFix: TFormStartFix
       object lblInstalledKeyMapping: TLabel
         Left = 16
         Top = 16
-        Width = 112
+        Width = 114
         Height = 13
         Caption = 'Installed Key Mappings:'
       end
@@ -332,15 +335,27 @@ object FormStartFix: TFormStartFix
         Left = 224
         Top = 104
         Width = 353
-        Height = 145
+        Height = 97
         AutoSize = False
         Caption = 
           'A Possible Reason which causes Delphi Can'#39't Start and Popups'#13#10'Ac' +
           'cess Violation Dialog Comes from the Wrong Priority Order in'#13#10'De' +
           'lphi'#39's Key Mapping Setting in XE8 or above.'#13#10#13#10'This Tool can Try' +
           ' to Adjust the KeyMapping Order to make'#13#10'CnPack to be a Lowest P' +
-          'riority to avoid this Problem.'#13#10#13#10'Note: If your Delphi can Start' +
-          ' Normally, Do NOT Touch here!'
+          'riority to avoid this Problem.'
+      end
+      object lblKeyMappingNote: TLabel
+        Left = 224
+        Top = 216
+        Width = 347
+        Height = 13
+        Caption = 'Note: If your Delphi can Start Normally, Do NOT Touch here!'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
       end
       object lstInstalledKeyMappnigList: TListBox
         Left = 16
@@ -359,6 +374,7 @@ object FormStartFix: TFormStartFix
         Height = 25
         Caption = 'Fix Key Mapping Problem'
         TabOrder = 1
+        OnClick = btnKeyMappingFixClick
       end
     end
   end
