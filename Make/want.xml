@@ -79,7 +79,7 @@ See http://www.suigeneris.org/want/ for details.
 
   <property name="cnwizards_list" value="-cnwizloader,-d5,-d6,-d7,-d2005,-d2006,-d2007,-d2009,-d2010,-dxe,-dxe21,-dxe2,-dxe3,-dxe4,-dxe5,-dxe6,-dxe7,-dxe8,-d10s,-d101b,-d102t,-d103r1,-d103r,-d104s1,-d104s,-cb5,-cb6" unless="lite" />
   <property name="cnwizards_list" value="-cnwizloader,-d6,-d7,-d2006,-d2007,-cb6" if="lite" />
-  <property name="tools_list"     value="cnconfigio,cndebugviewer,cndfm6to5,cnascii,cnidebr,cnmanagewiz,cnselectlang,cnsmr,cnwizsetup" unless="lite" />
+  <property name="tools_list"     value="cnconfigio,cndebugviewer,cndfm6to5,cnascii,cnidebr,cnmanagewiz,cnselectlang,cnsmr,cnwizsetup,cnfixstart" unless="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cnwizsetup" if="lite" />
   <property name="all_list"       value="cnwizards,resdll,cnwizhelperdll,cnziputilsdll,cnpnglib,cnformatlib,cnformatlibw,tools,makehelp,makeinst" unless="lite" />
   <property name="all_list"       value="cnwizards,resdll,cnpnglib,cnformatlib,cnformatlibw,tools,makeinst" if="lite" />
@@ -223,6 +223,7 @@ Usage: want [target-name] [-Dname=value]
     cnselectlang  - Compile CnSelectLang.
     cnsmr         - Compile Relation Analyzer.
     cnwizsetup - Compile CnWizards Setup.
+    cnfixstart - Compile CnWizards Fix Starting-Up Tool
     tools      - Compile Tools (CnDfm6To5, CnWizSetup, etc.).
     help_chs   - Compile Chinese chm help (GB2312).
     help_cht   - Compile Chinese chm help (BIG5).
@@ -1342,6 +1343,26 @@ Usage: want [target-name] [-Dname=value]
     </delete>
     <move tofile="${tools}/CnWizSetup/Setup.res" >
        <include name="${tools}/CnWizSetup/Setup.res.old" />
+    </move>
+  </target>
+
+  <target name="cnfixstart" depends="-prepare" description="Compile CnWizards Fix Starting-Up Tool." >
+    <property name="Ver.FileDescription"  value="CnWizards Fix Starting-Up Tool" />
+    <property name="Ver.InternalName"     value="CnFixStart" />
+    <property name="Ver.OriginalFilename" value="CnFixStart.EXE" />
+    <copy tofile="${tools}/CnFixStart/CnFixStart.res.old" >
+       <include name="${tools}/CnFixStart/CnFixStart.res" />
+    </copy>
+    <echo input="${tools}/CnTools.template.rc" file="${tools}/CnFixStart/CnFixStart.rc" />
+    <brcc file="${tools}/CnFixStart/CnFixStart.rc" output="${tools}/CnFixStart/CnFixStart.res" />
+    <dcc basedir="${tools}/CnFixStart" source="CnFixStart.dpr" versions="7" usecfg="true" />
+    <delete dir="${tools}/CnFixStart">
+       <include name="CnFixStart.res" />
+       <include name="CnFixStart.rc" />
+       <include name="CnFixStart.drc" />
+    </delete>
+    <move tofile="${tools}/CnFixStart/CnFixStart.res" >
+       <include name="${tools}/CnFixStart/CnFixStart.res.old" />
     </move>
   </target>
 
