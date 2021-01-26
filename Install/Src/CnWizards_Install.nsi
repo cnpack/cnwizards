@@ -606,6 +606,7 @@ InitOk:
   ; 设置输出路径，每次使用都会改变
   SetOutPath $INSTDIR
   File "..\..\Bin\Setup.exe"
+  File "..\..\Bin\CnFixStart.exe"
   File "..\..\Bin\CnWizLoader.dll"
   File "..\..\Bin\CnWizRes.dll"
   File "..\..\Bin\CnPngLib.dll"
