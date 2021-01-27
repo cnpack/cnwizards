@@ -774,4 +774,19 @@ object FormStartFix: TFormStartFix
       FFFFFFFF00000000FFFFFFFF0000000000000000000000000000000000000000
       000000000000}
   end
+  object lm1: TCnLangManager
+    LanguageStorage = hfs1
+    TranslationMode = tmByComponents
+    AutoTransOptions = [atApplication, atForms, atDataModules]
+    Left = 256
+    Top = 414
+  end
+  object hfs1: TCnHashLangFileStorage
+    StorageMode = smByDirectory
+    Languages = <>
+    ListLength = 1024
+    IncSize = 2
+    Left = 296
+    Top = 414
+  end
 end

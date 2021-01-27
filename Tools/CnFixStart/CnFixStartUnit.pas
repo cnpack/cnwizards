@@ -5,7 +5,8 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, ComCtrls, Buttons, Contnrs, Registry, CnCommon,
-  CnWizCompilerConst, ImgList;
+  CnWizCompilerConst, ImgList, CnLangStorage, CnHashLangStorage, CnClasses,
+  CnLangMgr, CnWizLangID;
 
 const
   KEY_MAPPING_DELPHI_START: TCnCompiler = cnDelphiXE8;  // 从 XE8 起就可能有 KeyMapping 的毛病
@@ -48,6 +49,8 @@ type
     bvl1: TBevel;
     lblKeyMappingDescription: TLabel;
     lblKeyMappingNote: TLabel;
+    lm1: TCnLangManager;
+    hfs1: TCnHashLangFileStorage;
     procedure btnCloseClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -64,6 +67,9 @@ type
     procedure CheckKeyMappingOK;
     procedure UpdateMappingOKUI;
     procedure FixKeyMapping;
+    procedure TranslateStrings;
+  protected
+    procedure DoCreate; override;
   public
     { Public declarations }
   end;
@@ -76,6 +82,7 @@ implementation
 {$R *.DFM}
 
 const
+  csLangPath = 'Lang\';
   KEY_MAPPING_REG = '\Editor\Options\Known Editor Enhancements';
   CNPACK_KEYNAME = 'CnPack';
   PRIORITY_KEY = 'Priority';
@@ -334,6 +341,41 @@ end;
 procedure TFormStartFix.btnAboutClick(Sender: TObject);
 begin
   InfoDlg(SCnFixToolAbout);
+end;
+
+procedure TFormStartFix.DoCreate;
+var
+  I: Integer;
+  LangID: DWORD;
+begin
+  if CnLanguageManager <> nil then
+  begin
+    hfs1.LanguagePath := _CnExtractFilePath(ParamStr(0)) + csLangPath;
+    CnLanguageManager.LanguageStorage := hfs1;
+
+    LangID := GetWizardsLanguageID;
+    for I := 0 to CnLanguageManager.LanguageStorage.LanguageCount - 1 do
+    begin
+      if CnLanguageManager.LanguageStorage.Languages[I].LanguageID = LangID then
+      begin
+        CnLanguageManager.CurrentLanguageIndex := I;
+        TranslateStrings;
+        CnLanguageManager.TranslateForm(Self);
+        Break;
+      end;
+    end;
+  end;
+
+  inherited;
+end;
+
+procedure TFormStartFix.TranslateStrings;
+begin
+  TranslateStr(SCnNoKeyMappingProblemFound, 'SCnNoKeyMappingProblemFound');
+  TranslateStr(SCnKeyMappingProblemFound, 'SCnKeyMappingProblemFound');
+  TranslateStr(SCnKeyMappingProblemFixed, 'SCnKeyMappingProblemFixed');
+  TranslateStr(SCnKeyMappingNoProblemNeedFix, 'SCnKeyMappingNoProblemNeedFix');
+  TranslateStr(SCnFixToolAbout, 'SCnFixToolAbout');
 end;
 
 end.
