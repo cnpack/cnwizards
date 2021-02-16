@@ -824,7 +824,7 @@ const
   SCnOtaBatchSize = $7FFF;
 var
   View: IOTAEditView;
-  Text: AnsiString;
+  Text: string;
   BlockStartLine, BlockEndLine: Integer;
   StartPos, EndPos: Integer;
   Writer: IOTAEditWriter;
@@ -838,15 +838,15 @@ begin
       BlockStartLine, BlockEndLine) then
       Exit;
 
-  {$IFDEF UNICODE}
-    Text := AnsiString(StringReplace(Lines.Text, #0, ' ', [rfReplaceAll]));
-  {$ELSE}
     Text := StringReplace(Lines.Text, #0, ' ', [rfReplaceAll]);
-  {$ENDIF}
     Writer := View.Buffer.CreateUndoableWriter;
     try
       Writer.CopyTo(StartPos);
+  {$IFDEF UNICODE}
+      Writer.Insert(PAnsiChar(ConvertTextToEditorTextW(Text)));
+  {$ELSE}
       Writer.Insert(PAnsiChar(ConvertTextToEditorText(Text)));
+  {$ENDIF}
       Writer.DeleteTo(EndPos);
     finally
       Writer := nil;

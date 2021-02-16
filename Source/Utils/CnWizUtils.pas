@@ -5874,10 +5874,10 @@ end;
 function ConvertTextToEditorText(const Text: AnsiString): AnsiString;
 begin
 {$IFDEF IDE_WIDECONTROL}
-  // 只适合于非 Unicode 环境的 BDS。Unicode 环境下，直接用其 string 即可
+  // 只适合于非 Unicode 环境的 BDS。
   Result := CnAnsiToUtf8(Text);
 {$ELSE}
-  Result := Text;
+  Result := Text;  // D567 环境下直接使用即可，但 Unicode 环境下，直接用其 string 似乎不行？存疑
 {$ENDIF}
 end;
 
