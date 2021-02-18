@@ -43,7 +43,7 @@ OutputDir=
 UnitOutputDir=
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=..\..\Source;..\..\..\cnvcl\Source\Common;..\..\Source\ThirdParty\JCL
+SearchPath=..\..\Source;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\Source\ThirdParty\JCL
 Packages=Vcl50;Vclx50;VclSmp50;Vcldb50;vclado50;ibevnt50;Vclbde50;vcldbx50;Qrpt50;TeeUI50;TeeDB50;Tee50;Dss50;TeeQR50;VCLIB50;Vclmid50;vclie50;Inetdb50;Inet50;NMFast50;webmid50;dclocx50;dclaxserver50;CnPack_D5
 Conditionals=DEBUG
 DebugSourceDirs=
@@ -88,6 +88,6 @@ Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlSearchPath]
 Count=4
-Item0=..\..\Source;..\..\..\cnvcl\Source\Common;..\..\Source\ThirdParty\JCL
-Item1=..\..\Source;..\..\..\cnvcl\Source\Common
+Item0=..\..\Source;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\Source\ThirdParty\JCL
+Item1=..\..\Source;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto
 Item2=..\..\Source

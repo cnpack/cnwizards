@@ -43,7 +43,7 @@ OutputDir=
 UnitOutputDir=..\DCU
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=$(DELPHI)\Lib;..\..;..\..\..\..\cnvcl\Source\Common
+SearchPath=$(DELPHI)\Lib;..\..;..\..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto
 Packages=Vcl50;Vclx50;VclSmp50;Vcldb50;vclado50;Vclbde50;vcldbx50;TeeDB50;Tee50;Vclmid50;vclie50;dclocx50;dxMasterViewD5;dxcomnD5;dxBarD5;dxBarDBNavD5;dxBarExtItemsD5;dxBarExtDBItemsD5;dxsbd5;EQTLD5;dxEdtrD5;ECQDBCD5;EQDBTLD5;EQGridD5;dxGrEdD5;dxExELD5;dxELibD5;dxPSCored5;dxPSPrVwAdvD5;dxPSLnksD5;dxPSTLLnkD5;dxPSdxDBTLLnkD5;dxPSdxDBCtrlLnkd5;dxPSdxDBGrLnkD5;dxPSTeeChartD5;dxPSDBTeeChartD5;dxPSdxMVLnkD5;dxDBEdD5;dxInsD5;dxExRwD5;dxObjInsD5;Rz30Ctls50;Rz30DBCtls50
 Conditionals=
 DebugSourceDirs=
@@ -88,7 +88,7 @@ Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlSearchPath]
 Count=4
-Item0=$(DELPHI)\Lib;..\..;..\..\..\..\cnvcl\Source\Common
+Item0=$(DELPHI)\Lib;..\..;..\..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto
 Item1=$(DELPHI)\Lib\Debug;..\..
 Item2=..\..
 [HistoryLists\hlUnitOutputDirectory]
