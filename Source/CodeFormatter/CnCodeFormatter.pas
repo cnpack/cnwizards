@@ -5400,11 +5400,16 @@ begin
     Exit;
   end
   else
+  begin
     FormatStmtList(Tab);
+  end;
 
   if Scaner.Token = tokKeywordFinalization then
   begin
-    WriteBlankLineByPrevCondition;
+    // 语句结尾可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
+    CheckKeepLineBreakWriteln;
+    Writeln;
+
     Match(Scaner.Token);
 
     if Scaner.Token <> tokKeywordEnd then // Do not New a Line when Empty finalization
@@ -5562,7 +5567,9 @@ begin
   if Scaner.Token in [tokKeywordInitialization, tokKeywordBegin] then // begin 也行
   begin
     FormatInitSection(PreSpaceCount);
-    WriteBlankLineByPrevCondition;
+    // 语句结尾可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
+    CheckKeepLineBreakWriteln;
+    Writeln;
   end;
 
   Match(tokKeywordEnd, PreSpaceCount);
