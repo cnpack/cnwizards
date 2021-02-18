@@ -191,7 +191,7 @@
       -ICodingToolset -IUtils -IFramework -I$(BCB)\include -I$(BCB)\include\vcl 
       -I$(BCB)\source\toolsapi -Ithirdparty -Ithirdparty\tpabbrevia 
       -Ithirdparty\ddetours -Ithirdparty\jcl -Ithirdparty\fastcode 
-      -Ithirdparty\pascalscript -I..\dcu -I..\..\cnvcl\source\common 
+      -Ithirdparty\pascalscript -I..\dcu -I..\..\cnvcl\source\common -I..\..\cnvcl\source\crypto 
       -I..\..\cnvcl\source\nonvisual -I..\..\cnvcl\source\graphics 
       -I..\..\cnvcl\source\netcomm -I..\..\cnvcl\source\multilang 
       -I..\..\cnvcl\source\objrep -src_suffix cpp -boa"/>
