@@ -42,8 +42,7 @@ ExeDescription=
 OutputDir=..\..\Bin
 UnitOutputDir=..\..\Dcu
 PackageDLLOutputDir=
-..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto=
-SearchPath=..\..\Source;..\..\Source\Framework;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\MultiLang;..\..\Source\MultiLang;..\..\Source\Utils
+SearchPath=..\..\Source;..\..\Source\Framework;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto..\..\..\cnvcl\Source\MultiLang;..\..\Source\MultiLang;..\..\Source\Utils
 Packages=Vcl50;Vclx50;VclSmp50;Vcldb50;vclado50;Vclbde50;vcldbx50;Qrpt50;TeeUI50;TeeDB50;Tee50;Dss50;TeeQR50;VCLIB50;Vclmid50;vclie50;Inetdb50;Inet50;NMFast50;webmid50;dclocx50;dclaxserver50
 Conditionals=
 DebugSourceDirs=
@@ -85,8 +84,8 @@ Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlSearchPath]
 Count=5
-Item0=..\..\Source;..\..\Source\Framework;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\MultiLang;..\..\Source\MultiLang
-Item1=..\..\Source;..\..\Source\Framework;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\MultiLang
+Item0=..\..\Source;..\..\Source\Framework;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto..\..\..\cnvcl\Source\MultiLang;..\..\Source\MultiLang
+Item1=..\..\Source;..\..\Source\Framework;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto..\..\..\cnvcl\Source\MultiLang
 Item2=..\..\Source;..\..\Source\Framework;..\..\..\cnvcl\Source\Common
 Item3=..\..\Source;..\..\Source\Framework
 Item4=..\..\Source

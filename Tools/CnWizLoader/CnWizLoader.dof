@@ -93,7 +93,6 @@ ExeDescription=
 OutputDir=..\..\Bin
 UnitOutputDir=..\..\Dcu
 PackageDLLOutputDir=
-..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto=
 SearchPath=$(DELPHI)\Source\Toolsapi
 Packages=
 Conditionals=

@@ -42,7 +42,6 @@ ExeDescription=
 OutputDir=
 UnitOutputDir=
 PackageDLLOutputDir=
-..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto=
 SearchPath=
 Packages=
 Conditionals=
