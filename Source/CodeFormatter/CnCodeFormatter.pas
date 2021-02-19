@@ -150,6 +150,8 @@ type
     {* 不在忽略区里的话，根据格式结果上一行是否为空的内容，保证换且只换一行}
     procedure CheckKeepLineBreakWriteln;
     {* 根据是否保留换行的选项决定是硬换一行还是保证换且只换一行}
+    procedure EnsureWriteLine;
+    {* 不在忽略区里的话，根据格式结果上一行是否为空的内容，保证只生成一空行}
     procedure WriteLine;
     {* 格式结果加一空行，也就是连续两个换行}
     procedure EnsureOneEmptyLine;
@@ -5569,7 +5571,7 @@ begin
     FormatInitSection(PreSpaceCount);
     // 语句结尾可能没有分号，保留换行时会多写行尾回车，因此这里要保证不多写回车
     CheckKeepLineBreakWriteln;
-    Writeln;
+    EnsureWriteLine;
   end;
 
   Match(tokKeywordEnd, PreSpaceCount);
@@ -6263,6 +6265,20 @@ begin
       FCodeGen.KeepLineBreakIndentWritten := True;
     end;
   end;
+end;
+
+procedure TCnAbstractCodeFormatter.EnsureWriteLine;
+begin
+  if FScaner.InIgnoreArea then
+    Exit;
+
+  // 如果已经连续俩空行了就不写
+  if FCodeGen.IsLast2LineEmpty then
+    // 啥都不做
+  else if FCodeGen.IsLastLineEmpty then // 有一个空行了就写一个
+    Writeln
+  else // 啥都没有就写俩
+    WriteLine;
 end;
 
 initialization

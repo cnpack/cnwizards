@@ -124,6 +124,8 @@ type
     {* 如果最后一行是全空格，则清除此行的所有空格，用于保留换行的场合}
     function IsLastLineEmpty: Boolean;
     {* 最后一行是否就一个回车}
+    function IsLast2LineEmpty: Boolean;
+    {* 最后两行是否就两个回车，如果行数不够也返回 False}
 
     procedure LockOutput;
     procedure UnLockOutput;
@@ -985,6 +987,13 @@ begin
   Old := FJustWrittenCommentEndLn;
   Write(' ');
   FJustWrittenCommentEndLn := Old;
+end;
+
+function TCnCodeGenerator.IsLast2LineEmpty: Boolean;
+begin
+  Result := False;
+  if FCode.Count > 1 then
+    Result := (FCode[FCode.Count - 1] = '') and (FCode[FCode.Count - 2] = '');
 end;
 
 end.
