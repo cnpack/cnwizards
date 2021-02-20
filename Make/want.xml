@@ -134,7 +134,7 @@ See http://www.suigeneris.org/want/ for details.
   <property name="define.add"       value="AUTO_BUILD${define._debug}${define._lite}${define._master}"/>
 
   <!-- 定义是否需要包括帮助文件的条件 -->
-  <property name="install_arg"  value="/DNO_HELP" if="unstable"/>
+  <property name="install_arg"  value="/DMINI_HELP" if="unstable"/>
   <property name="install_arg"  value=""          unless="unstable"/>
   <property name="install_arg"  value="/DNO_HELP" if="debug"/>
   <property name="install_arg"  value=""          if="helpfile"/>

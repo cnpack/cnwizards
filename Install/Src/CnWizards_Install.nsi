@@ -34,7 +34,8 @@
 ;    IDE_VERSION_D104S
 ;    IDE_VERSION_CB5
 ;    IDE_VERSION_CB6
-;    NO_HELP
+;    NO_HELP  -- 定义时不打任何帮助文件
+;    MINI_HELP -- 未定义NO_HELP时，如定义了MINI_HELP，则只打入英文帮助文件
 ;******************************************************************************
 
 !include "Sections.nsh"
@@ -976,8 +977,13 @@ SectionEnd
 Section "$(HELPFILE)" SecHelp
   SectionIn 1
   SetOutPath $INSTDIR\Help
+  !ifndef MINI_HELP
   File "..\..\Bin\Help\CnWizards_*.chm"
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SHELP).lnk" "$INSTDIR\Help\$(SHELPCHM)"
+  !else
+  File "..\..\Bin\Help\CnWizards_CHS.chm"
+  File "..\..\Bin\Help\CnWizards_ENU.chm"
+  !endif
 SectionEnd
 !endif
 
