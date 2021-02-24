@@ -399,7 +399,7 @@ begin
     chktvMode.Items.Clear;
     for Mode := Low(Mode) to High(Mode) do
     begin
-      Node := chktvMode.Items.AddChild(nil, csScriptModeTextArray[Mode]);
+      Node := chktvMode.Items.AddChild(nil, csScriptModeTextArray[Mode]^);
       case Mode of
         smFileNotify:
           begin

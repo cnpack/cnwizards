@@ -1,11 +1,11 @@
 inherited CnScriptWizardForm: TCnScriptWizardForm
-  Left = 236
-  Top = 161
+  Left = 280
+  Top = 162
   BorderIcons = [biSystemMenu, biMaximize]
   BorderStyle = bsDialog
   Caption = 'Script Library'
-  ClientHeight = 443
-  ClientWidth = 678
+  ClientHeight = 519
+  ClientWidth = 805
   Icon.Data = {
     0000010001002020000001001800A80C00001600000028000000200000004000
     00000100180000000000800C0000000000000000000000000000000000000000
@@ -118,7 +118,7 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
   object tlb1: TToolBar
     Left = 0
     Top = 0
-    Width = 678
+    Width = 805
     Height = 26
     AutoSize = True
     BorderWidth = 1
@@ -202,7 +202,8 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
     Left = 8
     Top = 28
     Width = 193
-    Height = 405
+    Height = 480
+    Anchors = [akLeft, akTop, akBottom]
     Columns = <
       item
         Caption = 'Script Name'
@@ -224,8 +225,9 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
   object grp1: TGroupBox
     Left = 208
     Top = 24
-    Width = 465
+    Width = 592
     Height = 233
+    Anchors = [akLeft, akTop, akRight]
     Caption = '&Script Item'
     TabOrder = 1
     object lbl2: TLabel
@@ -250,7 +252,7 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
       Caption = 'Desc:'
     end
     object btnOpen: TSpeedButton
-      Left = 212
+      Left = 244
       Top = 114
       Width = 20
       Height = 20
@@ -280,7 +282,7 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
       Caption = 'Filename:'
     end
     object btnFileName: TSpeedButton
-      Left = 212
+      Left = 244
       Top = 81
       Width = 20
       Height = 20
@@ -298,7 +300,7 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
     object edtName: TEdit
       Left = 56
       Top = 16
-      Width = 177
+      Width = 209
       Height = 21
       TabOrder = 0
       OnChange = OnControlChanged
@@ -306,9 +308,9 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
     object edtIcon: TEdit
       Left = 56
       Top = 114
-      Width = 153
+      Width = 185
       Height = 21
-      TabOrder = 4
+      TabOrder = 3
       OnChange = OnControlChanged
     end
     object chkEnabled: TCheckBox
@@ -317,26 +319,26 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
       Width = 161
       Height = 17
       Caption = 'Script Enabled'
-      TabOrder = 6
+      TabOrder = 5
       OnClick = OnControlChanged
     end
     object edtComment: TEdit
       Left = 56
       Top = 49
-      Width = 177
+      Width = 209
       Height = 21
-      TabOrder = 2
+      TabOrder = 1
       OnChange = OnControlChanged
     end
     object hkShortCut: THotKey
       Left = 56
       Top = 147
-      Width = 177
+      Width = 209
       Height = 19
       HotKey = 0
       InvalidKeys = [hcNone]
       Modifiers = []
-      TabOrder = 5
+      TabOrder = 4
       OnExit = OnControlChanged
     end
     object chkExecConfirm: TCheckBox
@@ -345,25 +347,26 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
       Width = 161
       Height = 17
       Caption = 'Confirm when Manual Run'
-      TabOrder = 7
+      TabOrder = 6
       OnClick = OnControlChanged
     end
     object edtFileName: TEdit
       Left = 56
       Top = 81
-      Width = 153
+      Width = 185
       Height = 21
-      TabOrder = 3
+      TabOrder = 2
       OnChange = OnControlChanged
     end
     object chktvMode: TCnCheckTreeView
-      Left = 240
+      Left = 272
       Top = 16
-      Width = 217
+      Width = 312
       Height = 209
+      Anchors = [akLeft, akTop, akRight, akBottom]
       Indent = 19
       ReadOnly = True
-      TabOrder = 1
+      TabOrder = 7
       CanDisableNode = False
       OnStateChange = chktvModeStateChange
     end
@@ -371,8 +374,9 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
   object grp2: TGroupBox
     Left = 208
     Top = 264
-    Width = 465
-    Height = 169
+    Width = 592
+    Height = 245
+    Anchors = [akLeft, akTop, akRight, akBottom]
     Caption = '&Global Settings'
     TabOrder = 3
     object lbl6: TLabel
@@ -385,8 +389,9 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
     object mmoSearchPath: TMemo
       Left = 8
       Top = 32
-      Width = 449
-      Height = 129
+      Width = 576
+      Height = 205
+      Anchors = [akLeft, akTop, akRight, akBottom]
       ScrollBars = ssBoth
       TabOrder = 0
       WordWrap = False
