@@ -51,7 +51,7 @@ uses
 type
   TCnScriptMode = (smManual, smIDELoaded, smFileNotify, smBeforeCompile,
     smAfterCompile, smSourceEditorNotify, smFormEditorNotify, smApplicationEvent,
-    smActiveFormChanged);
+    smActiveFormChanged, smEditorFlatButton);
   TCnScriptModeSet = set of TCnScriptMode;
 
 {$M+} // Generate RTTI

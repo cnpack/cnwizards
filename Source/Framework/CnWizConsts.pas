@@ -1563,6 +1563,17 @@ var
   SCnScriptMenuDemoCaption: string = '&Demos';
   SCnScriptMenuDemoHint: string = 'Script Demos';
 
+  SCnScriptModeManual: string = 'Manually Run';
+  SCnScriptModeIDELoaded: string = 'Trigger after IDE Loaded';
+  SCnScriptModeFileNotify: string = 'Trigger by File Notification';
+  SCnScriptModeBeforeCompile: string = 'Trigger before Compile';
+  SCnScriptModeAfterCompile: string = 'Trigger after Compile';
+  SCnScriptModeSourceEditorNotify: string = 'Trigger by Source Editor Notification';
+  SCnScriptModeFormEditorNotify: string = 'Trigger by Designer Notification';
+  SCnScriptModeApplicationEvent: string = 'Trigger by Application Event';
+  SCnScriptModeActiveFormChanged: string = 'Trigger after Active Form Changed';
+  SCnScriptModeEditorFlatButton: string = 'Attach to Editor Flat Button Menu';
+
   // CnFeedReaderWizard
   SCnFeedReaderWizardName: string = 'FeedReader Wizard';
   SCnFeedReaderWizardComment: string = 'Display Feed Content in Status Bar';

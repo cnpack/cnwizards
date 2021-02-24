@@ -1326,6 +1326,16 @@ begin
   TranslateStr(SCnScriptExecConfirm, 'SCnScriptExecConfirm');
   TranslateStr(SCnScriptMenuDemoCaption, 'SCnScriptMenuDemoCaption');
   TranslateStr(SCnScriptMenuDemoHint, 'SCnScriptMenuDemoHint');
+  TranslateStr(SCnScriptModeManual, 'SCnScriptModeManual');
+  TranslateStr(SCnScriptModeIDELoaded, 'SCnScriptModeIDELoaded');
+  TranslateStr(SCnScriptModeFileNotify, 'SCnScriptModeFileNotify');
+  TranslateStr(SCnScriptModeBeforeCompile, 'SCnScriptModeBeforeCompile');
+  TranslateStr(SCnScriptModeAfterCompile, 'SCnScriptModeAfterCompile');
+  TranslateStr(SCnScriptModeSourceEditorNotify, 'SCnScriptModeSourceEditorNotify');
+  TranslateStr(SCnScriptModeFormEditorNotify, 'SCnScriptModeFormEditorNotify');
+  TranslateStr(SCnScriptModeApplicationEvent, 'SCnScriptModeApplicationEvent');
+  TranslateStr(SCnScriptModeActiveFormChanged, 'SCnScriptModeActiveFormChanged');
+  TranslateStr(SCnScriptModeEditorFlatButton, 'SCnScriptModeEditorFlatButton');
 
   // CnFeedReaderWizard
   TranslateStr(SCnFeedReaderWizardName, 'SCnFeedReaderWizardName');

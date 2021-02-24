@@ -265,6 +265,13 @@ uses
 const
   csSearchPath = 'SearchPath';
 
+  csScriptModeTextArray: array[TCnScriptMode] of PString = (
+    @SCnScriptModeManual, @SCnScriptModeIDELoaded,
+    @SCnScriptModeFileNotify, @SCnScriptModeBeforeCompile,
+    @SCnScriptModeAfterCompile, @SCnScriptModeSourceEditorNotify,
+    @SCnScriptModeFormEditorNotify, @SCnScriptModeApplicationEvent,
+    @SCnScriptModeActiveFormChanged, @SCnScriptModeEditorFlatButton);
+
 { TCnScriptItem }
 
 constructor TCnScriptItem.Create(Collection: TCollection);
@@ -392,8 +399,7 @@ begin
     chktvMode.Items.Clear;
     for Mode := Low(Mode) to High(Mode) do
     begin
-      Node := chktvMode.Items.AddChild(nil, GetEnumName(TypeInfo(TCnScriptMode),
-        Ord(Mode)));
+      Node := chktvMode.Items.AddChild(nil, csScriptModeTextArray[Mode]);
       case Mode of
         smFileNotify:
           begin
