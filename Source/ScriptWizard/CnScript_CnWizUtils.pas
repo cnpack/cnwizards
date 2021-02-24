@@ -540,7 +540,8 @@ begin
   CL.AddDelphiFunction('Function HWndIsNonvisualComponent( hWnd : HWND) : Boolean');
   CL.AddDelphiFunction('Procedure TranslateFormFromLangFile( AForm: TCustomForm; const ALangDir, ALangFile: string; LangID: Cardinal)');
   // CnWizSearch
-  CL.AddDelphiFunction('Function CheckFileCRLF(const FileName: string; var CRLFCount, LFCount: Integer) : Boolean');
+  CL.AddDelphiFunction('Function CheckFileCRLF(const FileName: string; out CRLFCount, LFCount: Integer) : Boolean');
+  CL.AddDelphiFunction('Function CorrectFileCRLF(const FileName: string; out CorrectCount: Integer) : Boolean');
 end;
 
 (* === run-time registration functions === *)
@@ -803,6 +804,7 @@ begin
   S.RegisterDelphiFunction(@TranslateFormFromLangFile, 'TranslateFormFromLangFile', cdRegister);
   // CnWizSearch
   S.RegisterDelphiFunction(@CheckFileCRLF, 'CheckFileCRLF', cdRegister);
+  S.RegisterDelphiFunction(@CorrectFileCRLF, 'CorrectFileCRLF', cdRegister);
 end;
 
 { TPSImport_CnWizUtils }

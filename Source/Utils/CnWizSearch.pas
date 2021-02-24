@@ -105,8 +105,12 @@ type
     property OnStartSearch: TNotifyEvent read FOnStartSearch write FOnStartSearch;
   end;
 
-function CheckFileCRLF(const FileName: string; var CRLFCount, LFCount: Integer): Boolean;
+function CheckFileCRLF(const FileName: string; out CRLFCount, LFCount: Integer): Boolean;
 {* 检查一个文件中有多少 CRLF，以及有多少单独的 LF，返回检测是否成功}
+
+function CorrectFileCRLF(const FileName: string; out CorrectCount: Integer): Boolean;
+{* 修复一个文件中的 CRLF，也即将 LF 全转变为 CRLF，返回转换是否成功，
+  注意如果返回的 CorrectCount 是 0，将不实施保存动作，但返回值仍是成功}
 
 implementation
 
@@ -665,7 +669,7 @@ begin
       FEditReaderPos);
 end;
 
-function CheckFileCRLF(const FileName: string; var CRLFCount, LFCount: Integer): Boolean;
+function CheckFileCRLF(const FileName: string; out CRLFCount, LFCount: Integer): Boolean;
 var
   Stream: TMemoryStream;
   P, PP: PByte;
@@ -713,6 +717,71 @@ begin
     end;
   finally
     Stream.Free;
+  end;
+end;
+
+function CorrectFileCRLF(const FileName: string; out CorrectCount: Integer): Boolean;
+var
+  SourceStream, DestStream: TMemoryStream;
+  P, PP: PByte;
+  CCR, CLF: AnsiChar;
+begin
+  Result := False;
+  SourceStream := nil;
+  DestStream := nil;
+
+  try
+    try
+      SourceStream := TMemoryStream.Create;
+      EditFilerSaveFileToStream(FileName, SourceStream, True); // 读出原始格式，Ansi
+
+      if SourceStream.Size = 0 then
+        Exit;
+
+      DestStream := TMemoryStream.Create;
+      CorrectCount := 0;
+      CCR := #$0D;
+      CLF := #$0A;
+
+      if SourceStream.Size = 1 then
+      begin
+        if PByte(SourceStream.Memory)^ = $0A then
+        begin
+          DestStream.Write(CCR, 1);
+          DestStream.Write(CLF, 1);
+        end;
+      end
+      else
+      begin
+        PP := PByte(SourceStream.Memory);
+        P := PP;
+        Inc(P);
+        DestStream.Write(PP^, 1);
+
+        while P^ <> 0 do
+        begin
+          if P^ = $0A then
+          begin
+            if PP^ <> $0D then
+            begin
+              DestStream.Write(CCR, 1);
+              Inc(CorrectCount);
+            end;
+          end;
+          DestStream.Write(P^, 1);
+          Inc(P);
+          Inc(PP);
+        end;
+      end;
+
+      if CorrectCount > 0 then
+        EditFilerReadStreamToFile(FileName, DestStream, True); // 写原始格式
+      Result := True;
+    except
+      ;
+    end;
+  finally
+    SourceStream.Free;
   end;
 end;
 

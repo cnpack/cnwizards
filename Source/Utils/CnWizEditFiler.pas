@@ -91,7 +91,7 @@ type
     procedure ShowForm;
 {$IFDEF UNICODE}
     procedure SaveToStreamW(Stream: TStream);
-    // 没 BOM 的 UTF16 格式，尾部 #0
+    // 将文件内容存入流中，没 BOM 的 UTF16 格式，尾部 #0
 {$ENDIF}
     procedure SaveToStream(Stream: TStream; CheckUtf8: Boolean = False);
     // 读出均为无 BOM 的 Ansi 或 Utf8 格式，尾部 #0。
@@ -99,8 +99,13 @@ type
     // D5/6/7 中只支持 Ansi
     procedure SaveToStreamFromPos(Stream: TStream);
     procedure SaveToStreamToPos(Stream: TStream);
+
     // LiuXiao 添加三个读入流函数。
     procedure ReadFromStream(Stream: TStream; CheckUtf8: Boolean = False);
+    // 从 Stream 整个写到文件或缓冲中，覆盖原有内容，与 Stream 的 Position 和光标位置无关，
+    // 要求流中是 Ansi 或 Utf8，无 BOM，不要求 Stream 尾 #0
+    // 写文件时不进行转换。写缓冲时如果是 BDS 且 Stream 是 MemoryStream，
+    // 则可由 CheckUtf8 设为 True 来进行 Ansi 到 Utf8 的转换以适合编辑器缓冲
     procedure ReadFromStreamInPos(Stream: TStream);
     procedure ReadFromStreamInsertToPos(Stream: TStream);
 
@@ -117,6 +122,11 @@ procedure EditFilerSaveFileToStream(const FileName: string; Stream: TStream; Che
   原始格式：BDS 里，当 CheckUtf8 是 True 并且是 MemoryStream 时，Utf8 会转换成 Ansi，否则保持 Utf8
   D5/6/7 中只支持 Ansi}
 
+procedure EditFilerReadStreamToFile(const FileName: string; Stream: TStream; CheckUtf8: Boolean = False);
+{* 封装的用流写入 Filer 的文件内容，要求流中无 BOM，尾部无需 #0。
+  写文件时不进行转换。写缓冲时如果是 BDS 且 Stream 是 MemoryStream，
+  则可由 CheckUtf8 设为 True 来进行 Ansi 到 Utf8 的转换以适合编辑器缓冲，D5/6/7 中不会转换}
+
 implementation
 
 uses
@@ -130,6 +140,16 @@ begin
   with TCnEditFiler.Create(FileName) do
   try
     SaveToStream(Stream, CheckUtf8);
+  finally
+    Free;
+  end;
+end;
+
+procedure EditFilerReadStreamToFile(const FileName: string; Stream: TStream; CheckUtf8: Boolean);
+begin
+  with TCnEditFiler.Create(FileName) do
+  try
+    ReadFromStream(Stream, CheckUtf8);
   finally
     Free;
   end;
@@ -705,8 +725,8 @@ begin
   FModuleNotifier := nil;
 end;
 
-// 从Stream整个写到文件或缓冲中，覆盖原有内容，与Stream的Position和光标位置无关。
-procedure TCnEditFiler.ReadFromStream(Stream: TStream; CheckUtf8: Boolean );
+// 从 Stream 整个写到文件或缓冲中，覆盖原有内容，与 Stream 的 Position 和光标位置无关。
+procedure TCnEditFiler.ReadFromStream(Stream: TStream; CheckUtf8: Boolean);
 var
   Size: Integer;
 {$IFDEF IDE_WIDECONTROL}

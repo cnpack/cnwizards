@@ -18,10 +18,23 @@ uses
   CnWizShortCut, CnWizOptions;
 
 var
-  C1, C2: Integer;
+  CRC, LFC: Integer;
   S: string;
 begin
   S := CnOtaGetCurrentSourceFile;
-  if CheckFileCRLF(S, C1, C2) then
-    InfoDlg('Current File: ' + S + ' has ' + IntToStr(C1) + ' CRLF. ' + IntToStr(C2) + ' Single LF.');
+  if CheckFileCRLF(S, CRC, LFC) then
+  begin
+    if LFC = 0 then
+      InfoDlg('Current File: ' + #13#10 + S + #13#10 + 'has ' + IntToStr(CRC) + ' CRLF(s). '
+        + 'NO Single LF.' + #13#10#13#10 + 'Seems OK.')
+    else
+    begin
+      if QueryDlg('Current File: ' + #13#10 + S + #13#10 + 'has ' + IntToStr(CRC) + ' CRLF(s). '
+        + IntToStr(LFC) + ' Single LF(s).' + #13#10#13#10 + 'Correct it?', False) then
+      begin
+        if CorrectFileCRLF(S, LFC) then
+        InfoDlg('Correct LF(s) ' + IntToStr(LFC));
+      end;
+    end;
+  end;
 end.
