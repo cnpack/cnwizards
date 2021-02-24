@@ -40,7 +40,7 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, SysUtils, Classes, ToolsAPI, CnWizUtils, CnWizCompilerConst,
+  Windows, SysUtils, Classes, ToolsAPI, CnWizUtils, CnWizCompilerConst, CnWizSearch,
   uPSComponent, uPSRuntime, uPSCompiler;
 
 type
@@ -539,6 +539,8 @@ begin
   CL.AddDelphiFunction('Function SameCharPos( Pos1, Pos2 : TOTACharPos) : Boolean');
   CL.AddDelphiFunction('Function HWndIsNonvisualComponent( hWnd : HWND) : Boolean');
   CL.AddDelphiFunction('Procedure TranslateFormFromLangFile( AForm: TCustomForm; const ALangDir, ALangFile: string; LangID: Cardinal)');
+  // CnWizSearch
+  CL.AddDelphiFunction('Function CheckFileCRLF(const FileName: string; var CRLFCount, LFCount: Integer) : Boolean');
 end;
 
 (* === run-time registration functions === *)
@@ -799,6 +801,8 @@ begin
   S.RegisterDelphiFunction(@SameCharPos, 'SameCharPos', cdRegister);
   S.RegisterDelphiFunction(@HWndIsNonvisualComponent, 'HWndIsNonvisualComponent', cdRegister);
   S.RegisterDelphiFunction(@TranslateFormFromLangFile, 'TranslateFormFromLangFile', cdRegister);
+  // CnWizSearch
+  S.RegisterDelphiFunction(@CheckFileCRLF, 'CheckFileCRLF', cdRegister);
 end;
 
 { TPSImport_CnWizUtils }

@@ -38,7 +38,9 @@ unit CnWizSearch;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 修改记录：2003.03.03 V1.0
+* 修改记录：2021.02.24 V1.1
+*               增加检查 CRLF 的函数
+*           2003.03.03 V1.0
 *               移植单元
 ================================================================================
 |</PRE>}
@@ -48,10 +50,9 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, SysUtils, Classes, CnCommon, CnWizConsts;
+  Windows, SysUtils, Classes, CnCommon, CnWizConsts, CnWizEditFiler;
 
 type
-
   TSearchOption = (soCaseSensitive, soWholeWord, soRegEx);
 
   TSearchOptions = set of TSearchOption;
@@ -103,6 +104,9 @@ type
     property OnFound: TFoundEvent read FOnFound write FOnFound;
     property OnStartSearch: TNotifyEvent read FOnStartSearch write FOnStartSearch;
   end;
+
+function CheckFileCRLF(const FileName: string; var CRLFCount, LFCount: Integer): Boolean;
+{* 检查一个文件中有多少 CRLF，以及有多少单独的 LF，返回检测是否成功}
 
 implementation
 
@@ -659,6 +663,57 @@ begin
   if Assigned(FOnFound) then
     FOnFound(Self, LineNo, FLineStartPos, Line, SPos,
       FEditReaderPos);
+end;
+
+function CheckFileCRLF(const FileName: string; var CRLFCount, LFCount: Integer): Boolean;
+var
+  Stream: TMemoryStream;
+  P, PP: PByte;
+begin
+  Result := False;
+  Stream := nil;
+
+  try
+    try
+      Stream := TMemoryStream.Create;
+      EditFilerSaveFileToStream(FileName, Stream); // 读出原始格式，Ansi 或 Utf8
+
+      if Stream.Size = 0 then
+        Exit;
+
+      CRLFCount := 0;
+      LFCount := 0;
+      if Stream.Size = 1 then
+      begin
+        if PByte(Stream.Memory)^ = $0A then
+          Inc(LFCount);
+      end
+      else
+      begin
+        PP := PByte(Stream.Memory);
+        P := PP;
+        Inc(P);
+
+        while P^ <> 0 do
+        begin
+          if P^ = $0A then
+          begin
+            if PP^ = $0D then
+              Inc(CRLFCount)
+            else
+              Inc(LFCount)
+          end;
+          Inc(P);
+          Inc(PP);
+        end;
+        Result := True;
+      end;
+    except
+      ;
+    end;
+  finally
+    Stream.Free;
+  end;
 end;
 
 end.

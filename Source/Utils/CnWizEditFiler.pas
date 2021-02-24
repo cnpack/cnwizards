@@ -90,9 +90,13 @@ type
     procedure ShowSource;
     procedure ShowForm;
 {$IFDEF UNICODE}
-    procedure SaveToStreamW(Stream: TStream); // Used in Unicode Evn. Stream stores UTF16 and #0
+    procedure SaveToStreamW(Stream: TStream);
+    // 没 BOM 的 UTF16 格式，尾部 #0
 {$ENDIF}
-    procedure SaveToStream(Stream: TStream; CheckUtf8: Boolean = False); // 读出均为 Ansi 格式，BDS 上有 Utf8 可转换成 Ansi
+    procedure SaveToStream(Stream: TStream; CheckUtf8: Boolean = False);
+    // 读出均为无 BOM 的 Ansi 或 Utf8 格式，尾部 #0。
+    // BDS 里，当 CheckUtf8 是 True 并且是 MemoryStream 时，Utf8 会转换成 Ansi，否则保持 Utf8
+    // D5/6/7 中只支持 Ansi
     procedure SaveToStreamFromPos(Stream: TStream);
     procedure SaveToStreamToPos(Stream: TStream);
     // LiuXiao 添加三个读入流函数。
@@ -109,6 +113,9 @@ type
   end;
 
 procedure EditFilerSaveFileToStream(const FileName: string; Stream: TStream; CheckUtf8: Boolean = False);
+{* 封装的用 Filer 读出文件内容至流，流中均为无 BOM 的原始格式，尾部 #0。
+  原始格式：BDS 里，当 CheckUtf8 是 True 并且是 MemoryStream 时，Utf8 会转换成 Ansi，否则保持 Utf8
+  D5/6/7 中只支持 Ansi}
 
 implementation
 
