@@ -132,7 +132,7 @@ begin
   inherited;
   Params.Style := Params.Style or WS_CHILDWINDOW or WS_MAXIMIZEBOX;
   Params.ExStyle := WS_EX_TOOLWINDOW or WS_EX_WINDOWEDGE;
-  if CheckWinXP then
+  if {$IFDEF DELPHI104_SYDNEY_UP} False and {$ENDIF} CheckWinXP then
     Params.WindowClass.style := CS_DBLCLKS or CS_DROPSHADOW
   else
     Params.WindowClass.style := CS_DBLCLKS;
@@ -234,7 +234,7 @@ begin
   Params.Style := (Params.Style or WS_CHILDWINDOW or WS_SIZEBOX or WS_MAXIMIZEBOX
     or LBS_NODATA or LBS_OWNERDRAWFIXED) and not (LBS_SORT or LBS_HASSTRINGS);
   Params.ExStyle := WS_EX_TOOLWINDOW or WS_EX_WINDOWEDGE;
-  if CheckWinXP then
+  if {$IFDEF DELPHI104_SYDNEY_UP} False and {$ENDIF} CheckWinXP then
     Params.WindowClass.style := CS_DBLCLKS or CS_DROPSHADOW
   else
     Params.WindowClass.style := CS_DBLCLKS;
