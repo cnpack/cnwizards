@@ -364,6 +364,8 @@ resourcestring
   EVENT_CNWIZARDS_SETTING_CHANGED = 'CnWizardsSettingChanged';
   // Input Helper ShortCut Changed Event used to Avoid Conflict Popup
   EVENT_INPUTHELPER_POPUP_SHORTCUT_CHANGED = 'InputHeperPopupShortcutChanged';
+  // Script Library Settings Changed
+  EVENT_SCRIPT_SETTING_CHANGED = 'CnScriptSettingChanged';
 
 //==============================================================================
 // Need to Localize

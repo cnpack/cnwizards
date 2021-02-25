@@ -421,8 +421,9 @@ begin
     TreeView.Items.Clear;
   finally
     TreeView.EndUpdate;
-  end;   
+  end;
 
+  UpdateStatusBar;
   CheckBox.Checked := False;
   Memo.Clear;
   FTempletSaved := True;
