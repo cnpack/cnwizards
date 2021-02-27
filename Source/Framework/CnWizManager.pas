@@ -796,12 +796,12 @@ end;
 // 根据专家名称返回专家实例，如果找不到专家，返回为 nil
 function TCnWizardMgr.WizardByName(const WizardName: string): TCnBaseWizard;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to WizardCount - 1 do
-    if SameText(Wizards[i].WizardName, WizardName) then
+  for I := 0 to WizardCount - 1 do
+    if SameText(Wizards[I].WizardName, WizardName) then
     begin
-      Result := Wizards[i];
+      Result := Wizards[I];
       Exit;
     end;
   Result := nil;

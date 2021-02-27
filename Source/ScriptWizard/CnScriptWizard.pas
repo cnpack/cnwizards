@@ -240,6 +240,7 @@ type
     function GetHint: string; override;
     
     procedure AddScript(const Lines: string);
+    procedure ExecuteScriptByIndex(ItemIndex: Integer; AEvent: TCnScriptEvent);
 
     property Scripts: TCnScriptCollection read FScripts;
     property SearchPath: TStringList read FSearchPath;
@@ -257,10 +258,9 @@ implementation
 
 {$R *.DFM}
 
-{$IFDEF DEBUG}
+
 uses
-  CnDebug;
-{$ENDIF}
+  CnEventBus {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 const
   csSearchPath = 'SearchPath';
@@ -909,7 +909,7 @@ begin
             DoExecute(FScripts[I], Event);
           finally
             Event.Free;
-          end;                                  
+          end;
         end;
         Exit;
       end;
@@ -967,7 +967,9 @@ begin
     FSearchPath.Assign(mmoSearchPath.Lines);
     UpdateScriptActions;
     FMgr.ClearEngineList;
-    
+
+    // 通知外界脚本库发生了改变
+    EventBus.PostEvent(EVENT_SCRIPT_SETTING_CHANGED);
     DoSaveSettings;
   finally
     Free;
@@ -982,6 +984,19 @@ end;
 procedure TCnScriptWizard.AddScript(const Lines: string);
 begin
   DoConfig(Lines);
+end;
+
+procedure TCnScriptWizard.ExecuteScriptByIndex(ItemIndex: Integer; AEvent: TCnScriptEvent);
+begin
+  if (ItemIndex < 0) or (ItemIndex >= FScripts.Count) then
+    Exit;
+
+  if FScripts[ItemIndex].Enabled then
+  begin
+    if not FScripts[ItemIndex].Confirm or QueryDlg(Format(SCnScriptExecConfirm,
+      [FScripts[ItemIndex].Name])) then
+      DoExecute(FScripts[ItemIndex], AEvent);
+  end;
 end;
 
 function TCnScriptWizard.GetCaption: string;

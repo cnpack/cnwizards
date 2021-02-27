@@ -155,6 +155,11 @@ type
     constructor Create;
   end;
 
+  TCnScriptEditorFlatButton = class(TCnScriptEvent)
+  public
+    constructor Create;
+  end;
+
   TCnScriptCreator = class(TCnTemplateModuleCreator)
   protected
     function GetTemplateFile(FileType: TCnSourceType): string; override;
@@ -372,6 +377,13 @@ end;
 constructor TCnScriptActiveFormChanged.Create;
 begin
   inherited Create(smActiveFormChanged);
+end;
+
+{ TCnScriptEditorFlatButton }
+
+constructor TCnScriptEditorFlatButton.Create;
+begin
+  inherited Create(smEditorFlatButton);
 end;
 
 { TCnScriptCreator }
