@@ -61,7 +61,7 @@ interface
 uses
   Windows, Messages, Classes, Controls, SysUtils, Graphics, Forms, Tabs,
   Menus, Buttons, ComCtrls, StdCtrls, ExtCtrls, TypInfo, ToolsAPI, ImgList,
-  {$IFDEF OTA_PALETTE_API} PaletteAPI, {$ENDIF}
+  Variants, {$IFDEF OTA_PALETTE_API} PaletteAPI, {$ENDIF}
   {$IFDEF COMPILER6_UP}
   DesignIntf, DesignEditors, ComponentDesigner,
   {$ELSE}
@@ -174,6 +174,17 @@ const
   csDarkFontColor = $FFFFFF;        // Dark 模式下的未选中的文字颜色
   csDarkHighlightBkColor = $8E6535; // Dark 模式下的选中状态下的高亮背景色
   csDarkHighlightFontColor = $FFFFFF; // Dark 模式下的选中状态下的高亮文字颜色
+
+  // 10.4.2 后的 Error Insight 绘制类型，会影响行高
+  SCnErrorInsightRenderStyleKeyName = 'ErrorInsightMarks';
+  csErrorInsightRenderStyleNotSupport = -1;
+  csErrorInsightRenderStyleClassic = 0;
+  csErrorInsightRenderStyleSmoothWave = 1;
+  csErrorInsightRenderStyleSolid = 2;
+  csErrorInsightRenderStyleDot = 3;
+
+  // Smooth Wave时行高有 3 像素的固定偏差
+  csErrorInsightCharHeightOffset = 3;
 
 type
 {$IFDEF BDS}
@@ -432,6 +443,10 @@ function ConvertIDETreeNodesToTreeNodes(Nodes: TObject): TTreeNodes;
 
 procedure ApplyThemeOnToolBar(ToolBar: TToolBar; Recursive: Boolean = True);
 {* 为工具栏应用主题，只在支持主题的 Delphi 版本中有效}
+
+function GetErrorInsightRenderStyle: Integer;
+{* 返回 ErrorInsight 的当前类型，返回值为 csErrorInsightRenderStyle* 系列常数
+   -1 为不支持，1 时会影响编辑器行高，影响程度和显示 Leve 以及是否侧边栏显示均无关}
 
 //==============================================================================
 // 扩展控件
@@ -2272,6 +2287,23 @@ begin
     for I := 0 to ToolBar.ControlCount - 1 do
       if ToolBar.Controls[I] is TToolBar then
         ApplyThemeOnToolbar(ToolBar.Controls[I] as TToolBar);
+{$ENDIF}
+end;
+
+function GetErrorInsightRenderStyle: Integer;
+{$IFDEF IDE_HAS_ERRORINSIGHT}
+var
+  V: Variant;
+{$ENDIF}
+begin
+  // Env Options 里的 ErrorInsightMarks 值
+  Result := csErrorInsightRenderStyleNotSupport;
+{$IFDEF IDE_HAS_ERRORINSIGHT}
+  V := CnOtaGetEnvironmentOptionValue(SCnErrorInsightRenderStyleKeyName);
+  if VarToStr(V) = '' then
+    Result := csErrorInsightRenderStyleNotSupport
+  else
+    Result := V;
 {$ENDIF}
 end;
 

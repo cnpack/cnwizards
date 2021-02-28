@@ -51,7 +51,8 @@ interface
 
 uses
   Windows, Messages, Classes, Controls, SysUtils, Graphics, ToolsAPI, ExtCtrls,
-  ComCtrls, TypInfo, Forms, Tabs, Registry, Contnrs, {$IFDEF COMPILER6_UP}Variants, {$ENDIF}
+  ComCtrls, TypInfo, Forms, Tabs, Registry, Contnrs,
+  {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
   {$IFDEF SUPPORT_ENHANCED_RTTI} Rtti, {$ENDIF}
   CnCommon, CnWizMethodHook, CnWizUtils, CnWizCompilerConst, CnWizNotifier,
   CnWizIdeUtils, CnWizOptions;
@@ -260,6 +261,9 @@ type
     FOptionDlgVisible: Boolean;
     FSaveFontName: string;
     FSaveFontSize: Integer;
+{$IFDEF IDE_HAS_ERRORINSIGHT}
+    FSaveErrorInsightIsSmoothWave: Boolean;
+{$ENDIF}
     FFontArray: array[0..9] of TFont;
 
     FBpClickQueue: TQueue;
@@ -1271,13 +1275,20 @@ var
   OptionType: TEditorChangeTypes;
   ChangeType: TEditorChangeTypes;
   Option: IOTAEditOptions;
+{$IFDEF IDE_HAS_ERRORINSIGHT}
+  IsSmoothWave: Boolean;
+{$ENDIF}
 begin
   OptionType := [];
   
   Option := CnOtaGetEditOptions;
   if Option <> nil then
   begin
-    if not SameText(Option.FontName, FSaveFontName) or (Option.FontSize <> FSaveFontSize) then
+{$IFDEF IDE_HAS_ERRORINSIGHT}
+    IsSmoothWave := GetErrorInsightRenderStyle = csErrorInsightRenderStyleSmoothWave;
+{$ENDIF}
+    if not SameText(Option.FontName, FSaveFontName) or (Option.FontSize <> FSaveFontSize)
+      {$IFDEF IDE_HAS_ERRORINSIGHT} or IsSmoothWave <> FSaveErrorInsightIsSmoothWave {$ENDIF} then
     begin
       FOptionChanged := True;
     end;
@@ -1286,7 +1297,7 @@ begin
   if FOptionChanged then
   begin
     Include(OptionType, ctOptionChanged);
-    if UpdateCharSize then             // 重新读取高亮颜色
+    if UpdateCharSize then             // 重新读取高亮颜色，会更新 FSave 系列变量供下次对比
       Include(OptionType, ctFont);
 
     LoadFontFromRegistry;              // 重新读取高亮字体
@@ -1496,6 +1507,9 @@ begin
 
     FSaveFontName := Option.FontName;
     FSaveFontSize := Option.FontSize;
+  {$IFDEF IDE_HAS_ERRORINSIGHT}
+    FSaveErrorInsightIsSmoothWave := GetErrorInsightRenderStyle = csErrorInsightRenderStyleSmoothWave;
+  {$ENDIF}
 
     FontName := Option.FontName;
     FontHeight := -MulDiv(Option.FontSize, Screen.PixelsPerInch, 72);
