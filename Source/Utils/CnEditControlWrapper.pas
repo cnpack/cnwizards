@@ -28,7 +28,9 @@ unit CnEditControlWrapper;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2018.03.20 V1.6
+* 修改记录：2021.02.28 V1.7
+*               适应 10.4.2 下 ErroInsight 导致行距与字符高度改变以及通知
+*           2018.03.20 V1.6
 *               增加主题改变时的通知与字体重算
 *           2016.07.16 V1.5
 *               增加 Tab 键属性的封装
@@ -272,6 +274,7 @@ type
 
     procedure AddNotifier(List: TList; Notifier: TMethod);
     function CalcCharSize: Boolean;
+    // 计算字符串尺寸，核心思想是从注册表里拿各种高亮设置计算，取其大者
     procedure GetHighlightFromReg;
     procedure ClearAndFreeList(var List: TList);
     function IndexOf(List: TList; Notifier: TMethod): Integer;
@@ -1565,7 +1568,17 @@ begin
         AFont.lfItalic := 1;
         CalcFont('Italic', AFont);
       end;
-      
+
+      // 判断 ErrorInsight 是否导致 y 尺寸改变
+      if GetErrorInsightRenderStyle = csErrorInsightRenderStyleSmoothWave then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('GetEditControlCharHeight: Smooth Wave Found.',
+          [csErrorInsightCharHeightOffset]);
+{$ENDIF}
+        Inc(FCharSize.cy, csErrorInsightCharHeightOffset);
+      end;
+
       Result := (FCharSize.cx > 0) and (FCharSize.cy > 0);
     finally
       SaveFont := SelectObject(DC, SaveFont);
