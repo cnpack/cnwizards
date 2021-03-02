@@ -956,6 +956,10 @@ end;
 
 procedure TCnScriptWizard.DoExecute(Item: TCnScriptItem; AEvent: TCnScriptEvent);
 begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Script Wizard Do Execute:' + Item.FileName);
+{$ENDIF}
+
   if FileExists(Item.FileName) then
   begin
     FMgr.ExecuteScript(Item.FileName, AEvent);
@@ -1267,8 +1271,8 @@ begin
   for I := AInternalFrom.Count - 1 downto 0 do
   begin
     Item := TCnScriptItem(ATo.Insert(0));
+    Item.IsInternal := True;       // 必须先设置 True 以正确拿到文件名
     Item.Assign(AInternalFrom[I]);
-    Item.IsInternal := True;
   end;
 end;
 

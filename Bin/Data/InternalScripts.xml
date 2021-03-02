@@ -1,0 +1,9 @@
+<TCnScriptCollection PropFormat="node">
+  <o>
+    <Name>Check CRLF</Name>
+    <Confirm>0</Confirm>
+    <Mode>[smEditorFlatButton]</Mode>
+    <ShortCut>32819</ShortCut>
+    <RelFileName>..\PSDemo\CheckCRLF.pas</RelFileName>
+  </o>
+</TCnScriptCollection>
