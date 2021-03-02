@@ -63,7 +63,7 @@ uses
   Menus, Buttons, ComCtrls, StdCtrls, ExtCtrls, TypInfo, ToolsAPI, ImgList,
   {$IFDEF OTA_PALETTE_API} PaletteAPI, {$ENDIF}
   {$IFDEF COMPILER6_UP}
-  DesignIntf, DesignEditors, ComponentDesigner, Variants£¬
+  DesignIntf, DesignEditors, ComponentDesigner, Variants,
   {$ELSE}
   DsgnIntf, LibIntf,
   {$ENDIF}
