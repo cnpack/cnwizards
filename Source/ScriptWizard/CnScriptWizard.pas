@@ -70,12 +70,14 @@ type
     FSourceEditorNotifyType: TCnWizSourceEditorNotifyTypeSet;
     FFileNotifyCode: TOTAFileNotificationSet;
     FAppEventType: TCnWizAppEventTypeSet;
+    FIsInternal: Boolean;
     function GetRelFileName: string;
     procedure SetRelFileName(const Value: string);
   public
     constructor Create(Collection: TCollection); override;
     property ActionIndex: Integer read FActionIndex write FActionIndex;
     property FileName: string read FFileName write FFileName;
+    property IsInternal: Boolean read FIsInternal write FIsInternal; // 内部的不展示
   published
     property Name: string read FName write FName;
     property Comment: string read FComment write FComment;
@@ -97,15 +99,17 @@ type
 
   TCnScriptCollection = class(TCollection)
   private
+    FIsInternal: Boolean;
     function GetItem(Index: Integer): TCnScriptItem;
     procedure SetItem(Index: Integer; const Value: TCnScriptItem);
   public
-    constructor Create;
+    constructor Create(AInternal: Boolean = False);
     function Add: TCnScriptItem;
     function LoadFromFile(const FileName: string; Append: Boolean = False): Boolean;
     function SaveToFile(const FileName: string): Boolean;
     function GetNewName: string;
     function IndexOfName(const AName: string): Integer;
+    property IsInternal: Boolean read FIsInternal;
     property Items[Index: Integer]: TCnScriptItem read GetItem write SetItem; default;
   end;
 
@@ -179,6 +183,7 @@ type
       OldState, NewState: TCheckBoxState);
     procedure FormKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
+    procedure FormDestroy(Sender: TObject);
   private
     { Private declarations }
     FUpdating: Boolean;
@@ -190,7 +195,7 @@ type
     function GetHelpTopic: string; override;
   public
     { Public declarations }
-    Scripts: TCnScriptCollection;
+    TempScripts: TCnScriptCollection;
     procedure AddNewScript(const Script: string);
   end;
 
@@ -201,9 +206,14 @@ type
     IdForm: Integer;
     IdConfig: Integer;
     IdBrowseDemo: Integer;
+    FInternalScripts: TCnScriptCollection; // 放预置的脚本，加载完成后会先加入 Fscripts
     FScripts: TCnScriptCollection;
     FMgr: TCnScriptFormMgr;
     FSearchPath: TStringList;
+    procedure RemoveInternalItems(AScripts: TCnScriptCollection);
+    // 删除 AScripts 中的所有 Internal 的条目
+    procedure MergeCollectionsTo(AInternalFrom, ATo: TCnScriptCollection);
+    // 将 AInternalFrom、ATo 条目合并至 ATo 中，AInternalFrom 中的内容不变
     procedure UpdateScriptActions;
     procedure DoExecute(Item: TCnScriptItem; AEvent: TCnScriptEvent); overload;
     procedure DoExecute(AEvent: TCnScriptEvent); overload;
@@ -289,12 +299,18 @@ end;
 
 function TCnScriptItem.GetRelFileName: string;
 begin
-  Result := ExtractRelativePath(WizOptions.UserPath, FFileName);
+  if FIsInternal then
+    Result := ExtractRelativePath(WizOptions.DataPath, FFileName)
+  else
+    Result := ExtractRelativePath(WizOptions.UserPath, FFileName);
 end;
 
 procedure TCnScriptItem.SetRelFileName(const Value: string);
 begin
-  FFileName := LinkPath(WizOptions.UserPath, Value);
+  if FIsInternal then
+    FFileName := LinkPath(WizOptions.DataPath, Value)
+  else
+    FFileName := LinkPath(WizOptions.UserPath, Value);
 end;
 
 { TCnScriptCollection }
@@ -302,6 +318,8 @@ end;
 function TCnScriptCollection.Add: TCnScriptItem;
 begin
   Result := TCnScriptItem(inherited Add);
+  if FIsInternal then
+    Result.IsInternal := True;
 end;
 
 constructor TCnScriptCollection.Create;
@@ -392,6 +410,7 @@ var
   AppEventType: TCnWizAppEventType;
 begin
   inherited;
+  TempScripts := TCnScriptCollection.Create;
   EnlargeListViewColumns(lvList);
 
   chktvMode.BeginUpdate;
@@ -445,7 +464,7 @@ end;
 
 procedure TCnScriptWizardForm.UpdateList;
 begin
-  lvList.Items.Count := Scripts.Count;
+  lvList.Items.Count := TempScripts.Count;
   lvList.Invalidate;
   if (lvList.Items.Count > 0) and (lvList.Selected = nil) then
     lvList.Selected := lvList.Items[0];
@@ -458,7 +477,7 @@ var
 begin
   if Item <> nil then
   begin
-    Script := Scripts[Item.Index];
+    Script := TempScripts[Item.Index];
     Item.Caption := Script.Name;
     Item.SubItems.Clear;
     Item.SubItems.Add(BoolToStr(Script.Enabled, True));
@@ -472,18 +491,18 @@ var
 begin
   HasSel := lvList.Selected <> nil;
   actDelete.Enabled := HasSel;
-  actClear.Enabled := Scripts.Count > 0;
+  actClear.Enabled := TempScripts.Count > 0;
   actMoveUp.Enabled := HasSel and (lvList.Selected.Index > 0);
-  actMoveDown.Enabled := HasSel and (lvList.Selected.Index < Scripts.Count - 1);
+  actMoveDown.Enabled := HasSel and (lvList.Selected.Index < TempScripts.Count - 1);
 
   Handled := True;
 end;
 
 procedure TCnScriptWizardForm.actAddExecute(Sender: TObject);
 begin
-  Scripts.Add;
+  TempScripts.Add;
   UpdateList;
-  lvList.Selected := lvList.Items[Scripts.Count - 1];
+  lvList.Selected := lvList.Items[TempScripts.Count - 1];
 end;
 
 procedure TCnScriptWizardForm.actDeleteExecute(Sender: TObject);
@@ -493,10 +512,10 @@ begin
   if (lvList.Selected <> nil) and QueryDlg(SCnDeleteConfirm) then
   begin
     Idx := lvList.Selected.Index;
-    Scripts.Delete(Idx);
+    TempScripts.Delete(Idx);
     UpdateList;
-    if Scripts.Count > 0 then
-      lvList.Selected := lvList.Items[TrimInt(Idx, 0, Scripts.Count - 1)];
+    if TempScripts.Count > 0 then
+      lvList.Selected := lvList.Items[TrimInt(Idx, 0, TempScripts.Count - 1)];
   end;
 end;
 
@@ -504,7 +523,7 @@ procedure TCnScriptWizardForm.actClearExecute(Sender: TObject);
 begin
   if QueryDlg(SCnClearConfirm) then
   begin
-    Scripts.Clear;
+    TempScripts.Clear;
     UpdateList;
   end;  
 end;
@@ -516,7 +535,7 @@ begin
   if (lvList.Selected <> nil) and (lvList.Selected.Index > 0) then
   begin
     Idx := lvList.Selected.Index;
-    Scripts[Idx].Index := Idx - 1;
+    TempScripts[Idx].Index := Idx - 1;
     lvList.Selected := lvList.Items[Idx - 1];
     lvList.Invalidate;
   end;  
@@ -526,10 +545,10 @@ procedure TCnScriptWizardForm.actMoveDownExecute(Sender: TObject);
 var
   Idx: Integer;
 begin
-  if (lvList.Selected <> nil) and (lvList.Selected.Index < Scripts.Count - 1) then
+  if (lvList.Selected <> nil) and (lvList.Selected.Index < TempScripts.Count - 1) then
   begin
     Idx := lvList.Selected.Index;
-    Scripts[Idx].Index := Idx + 1;
+    TempScripts[Idx].Index := Idx + 1;
     lvList.Selected := lvList.Items[Idx + 1];
     lvList.Invalidate;
   end;  
@@ -538,7 +557,7 @@ end;
 procedure TCnScriptWizardForm.actExportExecute(Sender: TObject);
 begin
   if dlgSave.Execute then
-    if not Scripts.SaveToFile(dlgSave.FileName) then
+    if not TempScripts.SaveToFile(dlgSave.FileName) then
       ErrorDlg(SCnExportError);
 end;
 
@@ -546,7 +565,7 @@ procedure TCnScriptWizardForm.actImportExecute(Sender: TObject);
 begin
   if dlgOpen.Execute then
   begin
-    if not Scripts.LoadFromFile(dlgOpen.FileName, QueryDlg(SCnImportAppend)) then
+    if not TempScripts.LoadFromFile(dlgOpen.FileName, QueryDlg(SCnImportAppend)) then
       ErrorDlg(SCnImportError);
     UpdateList;
   end;
@@ -726,7 +745,7 @@ begin
     if FUpdating then Exit;
     FUpdating := True;
     try
-      GetItemFromControls(Scripts[lvList.Selected.Index]);
+      GetItemFromControls(TempScripts[lvList.Selected.Index]);
     finally
       FUpdating := False;
     end;
@@ -749,7 +768,7 @@ begin
       chkEnabled.Enabled := True;
       chkExecConfirm.Enabled := True;
       chktvMode.Enabled := True;
-      SetItemToControls(Scripts[lvList.Selected.Index]);
+      SetItemToControls(TempScripts[lvList.Selected.Index]);
     end
     else
     begin
@@ -802,6 +821,8 @@ begin
   inherited;
   FSearchPath := TStringList.Create;
   FScripts := TCnScriptCollection.Create;
+  FInternalScripts := TCnScriptCollection.Create(True);
+
   FMgr := TCnScriptFormMgr.Create;
   CnWizNotifierServices.AddFileNotifier(OnFileNotify);
   CnWizNotifierServices.AddBeforeCompileNotifier(OnBeforeCompile);
@@ -822,6 +843,7 @@ begin
   CnWizNotifierServices.RemoveAppEventNotifier(OnAppEventNotify);
   CnWizNotifierServices.RemoveActiveFormNotifier(OnActiveFormNotify);
   FMgr.Free;
+  FInternalScripts.Free;
   FScripts.Free;
   FSearchPath.Free;
   inherited;
@@ -955,7 +977,9 @@ procedure TCnScriptWizard.DoConfig(const NewScript: string);
 begin
   with TCnScriptWizardForm.Create(nil) do
   try
-    Scripts := Self.FScripts;
+    TempScripts.Assign(FScripts);
+    RemoveInternalItems(TempScripts);
+
     mmoSearchPath.Lines.Assign(Self.FSearchPath);
     UpdateList;
     
@@ -963,6 +987,10 @@ begin
       AddNewScript(NewScript);
 
     ShowModal;
+
+    // 把修改后的 TempScript 塞回 FScripts
+    FScripts.Assign(TempScripts);
+    MergeCollectionsTo(FInternalScripts, FScripts);
 
     FSearchPath.Assign(mmoSearchPath.Lines);
     UpdateScriptActions;
@@ -1031,15 +1059,23 @@ procedure TCnScriptWizard.LoadSettings(Ini: TCustomIniFile);
 var
   S: string;
 begin
+  S := MakePath(WizOptions.DataPath + SCnScriptInternalFileName);
+  if FileExists(S) then
+    FInternalScripts.LoadFromFile(S);
+
   S := WizOptions.GetUserFileName(SCnScriptFileName, True);
   if FileExists(S) then
-    Scripts.LoadFromFile(S);
+    FScripts.LoadFromFile(S);
+
+  MergeCollectionsTo(FInternalScripts, FScripts);
   FSearchPath.CommaText := Ini.ReadString('', csSearchPath, FSearchPath.CommaText);
 end;
 
 procedure TCnScriptWizard.SaveSettings(Ini: TCustomIniFile);
 begin
-  Scripts.SaveToFile(WizOptions.GetUserFileName(SCnScriptFileName, False));
+  RemoveInternalItems(FScripts);
+
+  FScripts.SaveToFile(WizOptions.GetUserFileName(SCnScriptFileName, False));
   WizOptions.CheckUserFile(SCnScriptFileName);
   Ini.WriteString('', csSearchPath, FSearchPath.CommaText);
 end;
@@ -1184,6 +1220,38 @@ begin
     UpdateControls;
     Close;
   end;
+end;
+
+procedure TCnScriptWizard.MergeCollectionsTo(AInternalFrom,
+  ATo: TCnScriptCollection);
+var
+  I: Integer;
+  Item: TCnScriptItem;
+begin
+  if AInternalFrom.Count = 0 then
+    Exit;
+
+  for I := AInternalFrom.Count - 1 downto 0 do
+  begin
+    Item := TCnScriptItem(ATo.Insert(0));
+    Item.Assign(AInternalFrom[I]);
+    Item.IsInternal := True;
+  end;
+end;
+
+procedure TCnScriptWizard.RemoveInternalItems(
+  AScripts: TCnScriptCollection);
+var
+  I: Integer;
+begin
+  for I := AScripts.Count - 1 downto 0 do
+    if AScripts[I].IsInternal then
+      AScripts.Delete(I);
+end;
+
+procedure TCnScriptWizardForm.FormDestroy(Sender: TObject);
+begin
+  TempScripts.Free;
 end;
 
 initialization

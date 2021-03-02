@@ -112,6 +112,7 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
   KeyPreview = True
   OnClose = FormClose
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
   PixelsPerInch = 96
   TextHeight = 13

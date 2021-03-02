@@ -343,6 +343,7 @@ resourcestring
   SCnScriptFormCommand = 'CnScriptForm';
   SCnScriptBrowseDemoCommand = 'CnScriptBrowseDemo';
   SCnScriptTemplateFileName = 'CnScript.pas';
+  SCnScriptInternalFileName = 'InternalScripts.xml';
   SCnScriptFileName = 'Scripts.xml';
   SCnScriptItem = 'CnScriptItem';
   SCnScriptDeclDir = 'PSDecl';

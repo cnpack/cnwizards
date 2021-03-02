@@ -61,9 +61,9 @@ interface
 uses
   Windows, Messages, Classes, Controls, SysUtils, Graphics, Forms, Tabs,
   Menus, Buttons, ComCtrls, StdCtrls, ExtCtrls, TypInfo, ToolsAPI, ImgList,
-  Variants, {$IFDEF OTA_PALETTE_API} PaletteAPI, {$ENDIF}
+  {$IFDEF OTA_PALETTE_API} PaletteAPI, {$ENDIF}
   {$IFDEF COMPILER6_UP}
-  DesignIntf, DesignEditors, ComponentDesigner,
+  DesignIntf, DesignEditors, ComponentDesigner, Variants£¬
   {$ELSE}
   DsgnIntf, LibIntf,
   {$ENDIF}
