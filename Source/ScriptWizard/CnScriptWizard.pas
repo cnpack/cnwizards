@@ -322,9 +322,10 @@ begin
     Result.IsInternal := True;
 end;
 
-constructor TCnScriptCollection.Create;
+constructor TCnScriptCollection.Create(AInternal: Boolean);
 begin
   inherited Create(TCnScriptItem);
+  FIsInternal := AInternal;
 end;
 
 function TCnScriptCollection.LoadFromFile(const FileName: string;
@@ -871,7 +872,7 @@ begin
       DeleteSubAction(IdBrowseDemo + 1);
     for I := 0 to FScripts.Count - 1 do
       with FScripts[I] do
-        if Enabled and (smManual in Mode) then
+        if Enabled and not IsInternal and (smManual in Mode) then
         begin
           ActionIndex := RegisterASubAction(SCnScriptItem + IntToStr(I),
             Name, ShortCut, Comment, IconName);
@@ -921,7 +922,8 @@ begin
   else
   begin
     for I := 0 to FScripts.Count - 1 do
-      if FScripts[I].Enabled and (FScripts[I].ActionIndex = Index) then
+    begin
+      if FScripts[I].Enabled and not FScripts[I].IsInternal and (FScripts[I].ActionIndex = Index) then
       begin
         if not FScripts[I].Confirm or QueryDlg(Format(SCnScriptExecConfirm,
           [FScripts[I].Name])) then
@@ -935,6 +937,7 @@ begin
         end;
         Exit;
       end;
+    end;
   end;
 end;
 
@@ -974,11 +977,23 @@ begin
 end;
 
 procedure TCnScriptWizard.DoConfig(const NewScript: string);
+var
+  I: Integer;
 begin
   with TCnScriptWizardForm.Create(nil) do
   try
-    TempScripts.Assign(FScripts);
-    RemoveInternalItems(TempScripts);
+    TempScripts.Assign(FScripts);    // 注意没有复制 IsInternal 属性，不能直接 RemoveInternalItems
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('ScriptWizard Config Start. Internal %d External %d. Duplicated Temp %d.',
+      [FInternalScripts.Count, FScripts.Count, TempScripts.Count]);
+{$ENDIF}
+
+    for I := 0 to FInternalScripts.Count - 1 do
+      TempScripts.Delete(0);
+
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('ScriptWizard Config. Show %d Scripts for Setting.', [TempScripts.Count]);
+{$ENDIF}
 
     mmoSearchPath.Lines.Assign(Self.FSearchPath);
     UpdateList;
@@ -991,6 +1006,11 @@ begin
     // 把修改后的 TempScript 塞回 FScripts
     FScripts.Assign(TempScripts);
     MergeCollectionsTo(FInternalScripts, FScripts);
+
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('ScriptWizard Config End. Internal %d External %d.',
+      [FInternalScripts.Count, FScripts.Count]);
+{$ENDIF}
 
     FSearchPath.Assign(mmoSearchPath.Lines);
     UpdateScriptActions;
@@ -1059,15 +1079,24 @@ procedure TCnScriptWizard.LoadSettings(Ini: TCustomIniFile);
 var
   S: string;
 begin
-  S := MakePath(WizOptions.DataPath + SCnScriptInternalFileName);
+  S := MakePath(WizOptions.DataPath) + SCnScriptInternalFileName;
   if FileExists(S) then
     FInternalScripts.LoadFromFile(S);
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('ScriptWizard Load %d Internal Items from %s', [FInternalScripts.Count, S]);
+{$ENDIF}
 
   S := WizOptions.GetUserFileName(SCnScriptFileName, True);
   if FileExists(S) then
     FScripts.LoadFromFile(S);
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('ScriptWizard Load %d Items from %s', [FScripts.Count, S]);
+{$ENDIF}
 
   MergeCollectionsTo(FInternalScripts, FScripts);
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('ScriptWizard Merge to %d Items', [FScripts.Count]);
+{$ENDIF}
   FSearchPath.CommaText := Ini.ReadString('', csSearchPath, FSearchPath.CommaText);
 end;
 
@@ -1075,9 +1104,13 @@ procedure TCnScriptWizard.SaveSettings(Ini: TCustomIniFile);
 begin
   RemoveInternalItems(FScripts);
 
+  // 删除内部的，只保存外部的
   FScripts.SaveToFile(WizOptions.GetUserFileName(SCnScriptFileName, False));
   WizOptions.CheckUserFile(SCnScriptFileName);
   Ini.WriteString('', csSearchPath, FSearchPath.CommaText);
+
+  // 保存完毕后再把内部的加进来
+  MergeCollectionsTo(FInternalScripts, FScripts);
 end;
 
 procedure TCnScriptWizard.SetActive(Value: Boolean);

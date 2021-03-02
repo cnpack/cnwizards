@@ -72,7 +72,7 @@ type
     btBlockMoveUp, btBlockMoveDown, btBlockDelLines, btDisableHighlight,
     btShortCutConfig);
 
-  TCnSrcEditorBlockTools = class(TInterfacedObject, ICnEventBusReceiver)
+  TCnSrcEditorBlockTools = class
   private
     FIcon: TIcon;
     FCodeWrap: TCnSrcEditorCodeWrapTool;
@@ -100,6 +100,7 @@ type
 {$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
 {$IFDEF SUPPORT_PASCAL_SCRIPT}
     FScriptMenu: TMenuItem;
+    FScriptSettingChangedReceiver: ICnEventBusReceiver;
 {$ENDIF}
 {$ENDIF}
     FHideStructMenu: TMenuItem;
@@ -135,7 +136,6 @@ type
     procedure SetShowColor(const Value: Boolean);
     procedure CreateShortCuts;   // 创建快捷键对象，可重复调用
     procedure DestroyShortCuts;  // 销毁快捷键对象，可重复调用
-    procedure OnEvent(Event: TCnEvent);
   protected
     function CanShowButton: Boolean;
     function CanShowDisableStructuralHighlight: Boolean;
@@ -161,6 +161,20 @@ type
     property PopupMenu: TPopupMenu read FPopupMenu;
     property OnEnhConfig: TNotifyEvent read FOnEnhConfig write FOnEnhConfig;
   end;
+
+{$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
+{$IFDEF SUPPORT_PASCAL_SCRIPT}
+  TCnScriptSettingChangedReceiver = class(TInterfacedObject, ICnEventBusReceiver)
+  private
+    FBlock: TCnSrcEditorBlockTools;
+  public
+    constructor Create(ABlock: TCnSrcEditorBlockTools);
+    destructor Destroy; override;
+
+    procedure OnEvent(Event: TCnEvent);
+  end;
+{$ENDIF}
+{$ENDIF}
 
 {$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}
 
@@ -215,11 +229,6 @@ begin
   WizShortCutMgr.DeleteShortCut(FDupShortCut);
 end;
 
-procedure TCnSrcEditorBlockTools.OnEvent(Event: TCnEvent);
-begin
-  UpdateMenu(FPopupMenu.Items);
-end;
-
 constructor TCnSrcEditorBlockTools.Create;
 begin
   inherited;
@@ -245,12 +254,22 @@ begin
   EditControlWrapper.AddKeyDownNotifier(EditControlKeyDown);
   EditControlWrapper.AddEditorChangeNotifier(EditorChanged);
 
-  EventBus.RegisterReceiver(Self as ICnEventBusReceiver, EVENT_SCRIPT_SETTING_CHANGED);
+{$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
+{$IFDEF SUPPORT_PASCAL_SCRIPT}
+  FScriptSettingChangedReceiver := TCnScriptSettingChangedReceiver.Create(Self);
+  EventBus.RegisterReceiver(FScriptSettingChangedReceiver, EVENT_SCRIPT_SETTING_CHANGED);
+{$ENDIF}
+{$ENDIF}
 end;
 
 destructor TCnSrcEditorBlockTools.Destroy;
 begin
-  EventBus.UnRegisterReceiver(Self as ICnEventBusReceiver);
+{$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
+{$IFDEF SUPPORT_PASCAL_SCRIPT}
+  EventBus.UnRegisterReceiver(FScriptSettingChangedReceiver);
+  FScriptSettingChangedReceiver := nil;
+{$ENDIF}
+{$ENDIF}
 
   EditControlWrapper.RemoveKeyDownNotifier(EditControlKeyDown);
   EditControlWrapper.RemoveEditorChangeNotifier(EditorChanged);
@@ -876,6 +895,30 @@ begin
   FWebSearchMenu := AddMenuItem(Items, SCnSrcBlockSearch, nil);
   FWebSearch.InitMenuItems(FWebSearchMenu);
 
+{$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
+{$IFDEF SUPPORT_PASCAL_SCRIPT}
+  // 脚本菜单
+  SW := CnWizardMgr.WizardByClassName('TCnScriptWizard') as TCnScriptWizard;
+  if SW <> nil then
+  begin
+    FScriptMenu := AddMenuItem(Items, SCnScriptWizardMenuCaption, nil);
+    for I := 0 to SW.Scripts.Count - 1 do
+    begin
+      if smEditorFlatButton in SW.Scripts[I].Mode then
+      begin
+        Item := AddMenuItem(FScriptMenu, SW.Scripts[I].Name, OnScriptExecute);
+        Item.Enabled := SW.Scripts[I].Enabled;
+        Item.tag := I;
+      end;
+    end;
+    FScriptMenu.Visible := FScriptMenu.Count > 0;
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('SrcEditor Block Tools Script Items: %d', [FScriptMenu.Count]);
+{$ENDIF}
+  end;
+{$ENDIF}
+{$ENDIF}
+
   // 其它菜单
   FMiscMenu := AddMenuItem(Items, SCnSrcBlockMisc, nil);
   AddMenuItemWithAction(FMiscMenu, 'actCnCodeFormatterWizardFormatCurrent', btFormatCode);
@@ -896,26 +939,6 @@ begin
 
 {$IFDEF IDE_HAS_OWN_STRUCTUAL_HIGHLIGHT}
   FHideStructMenu := DoAddMenuItem(FMiscMenu, SCnSrcBlockDisableStructualHighlight, btDisableHighlight);
-{$ENDIF}
-
-{$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
-{$IFDEF SUPPORT_PASCAL_SCRIPT}
-  SW := CnWizardMgr.WizardByClassName('TCnScriptWizard') as TCnScriptWizard;
-  if SW <> nil then
-  begin
-    FScriptMenu := AddMenuItem(Items, SCnScriptWizardMenuCaption, nil);
-    for I := 0 to SW.Scripts.Count - 1 do
-    begin
-      if smEditorFlatButton in SW.Scripts[I].Mode then
-      begin
-        Item := AddMenuItem(FScriptMenu, SW.Scripts[I].Name, OnScriptExecute);
-        Item.Enabled := SW.Scripts[I].Enabled;
-        Item.tag := I;
-      end;
-    end;
-    FScriptMenu.Visible := FScriptMenu.Count > 0;
-  end;
-{$ENDIF}
 {$ENDIF}
 
   AddSepMenuItem(FMiscMenu);
@@ -1270,6 +1293,33 @@ begin
   EditControlWrapper.RepaintEditControls;
 {$ENDIF}
 end;
+
+{$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
+{$IFDEF SUPPORT_PASCAL_SCRIPT}
+
+{ TCnScriptSettingChangedReceiver }
+
+constructor TCnScriptSettingChangedReceiver.Create(
+  ABlock: TCnSrcEditorBlockTools);
+begin
+  inherited Create;
+  FBlock := ABlock;
+end;
+
+destructor TCnScriptSettingChangedReceiver.Destroy;
+begin
+  inherited;
+
+end;
+
+procedure TCnScriptSettingChangedReceiver.OnEvent(Event: TCnEvent);
+begin
+  if FBlock <> nil then
+    FBlock.UpdateMenu(FBlock.FPopupMenu.Items);
+end;
+
+{$ENDIF}
+{$ENDIF}
 
 {$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}
 end.
