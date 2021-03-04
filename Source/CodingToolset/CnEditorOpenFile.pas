@@ -28,7 +28,9 @@ unit CnEditorOpenFile;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 修改记录：2011.11.03 V1.2
+* 修改记录：2021.03.04 V1.3
+*               加入对前缀的支持
+*           2011.11.03 V1.2
 *               优化对文件名中带多个点的文件的支持
 *           2003.03.06 V1.1
 *               扩展了路径搜索范围，支持工程搜索路径
@@ -74,8 +76,10 @@ type
     procedure Execute; override;
     procedure GetEditorInfo(var Name, Author, Email: string); override;
 
-    class function SearchAndOpenFile(FileName: string): Boolean;
+    class function SearchAndOpenFile(FileName: string; Prefixes: TStrings = nil): Boolean;
+    {* 根据精确的文件名和可能的前缀在各种目录中搜索文件}
     function SearchFileList(FileName: string): Boolean;
+    {* 包含式地模糊搜索文件，返回多个可能的结果}
   end;
 
 {$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
@@ -198,7 +202,9 @@ begin
 end;
 
 class function TCnEditorOpenFile.SearchAndOpenFile(
-  FileName: string): Boolean;
+  FileName: string; Prefixes: TStrings): Boolean;
+var
+  J: Integer;
 
   function SearchAFile(F: string): Boolean;
   var
@@ -220,6 +226,7 @@ class function TCnEditorOpenFile.SearchAndOpenFile(
       SrcFile := F;
       DstFile := '';
       Found := False;
+
       FindFile(MakePath(GetInstallDir) + 'Source\', '*.*', DoFindFile, nil, True, True);
       if Found and DoOpenFile(DstFile) then
         Exit
@@ -241,11 +248,33 @@ begin
 
   // 有点但没找到，或没点，就加扩展名
   if IsDelphiRuntime then
-    FileName := FileName + '.pas'
+    Result := SearchAFile(FileName + '.pas')
   else
-    FileName := FileName + '.cpp';
+    Result := SearchAFile(FileName + '.cpp');
 
-  Result := SearchAFile(FileName);
+  // 再根据可能的前缀加上并搜索
+  if not Result and (Prefixes <> nil) then
+  begin
+    for J := 0 to Prefixes.Count - 1 do
+    begin
+      if Trim(Prefixes[J]) <> '' then
+      begin
+        if IsDelphiRuntime then
+          Result := SearchAFile(Prefixes[J] + '.' + FileName + '.pas')
+        else
+          Result := SearchAFile(Prefixes[J] + '.' + FileName + '.cpp');
+
+        if Result then
+          Exit
+        else
+        begin
+          Result := SearchAFile(Prefixes[J] + '.' + FileName);
+          if Result then
+            Exit;
+        end;
+      end;
+    end;
+  end;
 end;
 
 function TCnEditorOpenFile.SearchFileList(FileName: string): Boolean;

@@ -216,6 +216,11 @@ procedure TCnProjectListUsedForm.OpenSelect;
 var
   I: Integer;
   Error: Boolean;
+{$IFDEF SUPPORT_UNITNAME_DOT}
+  Prefix: string;
+  Prefixes: TStrings;
+  PO: IOTAProjectOptions;
+{$ENDIF}
 begin
   Error := False;
   if lvList.SelCount > 0 then
@@ -224,13 +229,36 @@ begin
       if not QueryDlg(SCnProjExtOpenUnitWarning, False, SCnInformation) then
         Exit;
 
-    for I := 0 to lvList.Items.Count - 1 do
-      if lvList.Items[I].Selected then
-        if not TCnEditorOpenFile.SearchAndOpenFile(lvList.Items[I].Caption) then
+{$IFDEF SUPPORT_UNITNAME_DOT}
+    Prefixes := TStringList.Create;
+    try
+      PO := CnOtaGetActiveProjectOptions;
+      if PO <> nil then
+      begin
+        Prefix := PO.Values['NamespacePrefix'];
+        if Trim(Prefix) <> '' then
+          ExtractStrings([';'], [' '], PChar(Prefix), Prefixes);
+      end;
+{$ENDIF}
+
+      for I := 0 to lvList.Items.Count - 1 do
+      begin
+        if lvList.Items[I].Selected then
         begin
-          Error := True;
-          ErrorDlg(SCnEditorOpenFileNotFind);
+          if not TCnEditorOpenFile.SearchAndOpenFile(lvList.Items[I].Caption
+            {$IFDEF SUPPORT_UNITNAME_DOT}, Prefixes {$ENDIF}) then
+          begin
+            Error := True;
+            ErrorDlg(SCnEditorOpenFileNotFind);
+          end;
         end;
+      end;
+
+{$IFDEF SUPPORT_UNITNAME_DOT}
+    finally
+      Prefixes.Free;
+    end;
+{$ENDIF}
 
     if not Error then
       ModalResult := mrOK;    
