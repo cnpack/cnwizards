@@ -61,7 +61,10 @@ function IsIdeVersionLatest: Boolean;
 {* 返回当前是否最新 IDE 版本}
 
 function IsDelphi10Dot2GEDot2: Boolean;
-{* 返回是否 Delphi 10.2.2 或更高的子版本，用于主题判断}
+{* 返回是否 Delphi 10.2.2 或 10.2 的更高的子版本，用于主题判断}
+
+function IsDelphi10Dot4GEDot2: Boolean;
+{* 返回是否 Delphi 10.4.2 或 10.4 的更高的子版本，用于某些古怪判断}
 
 var
   CnIdeVersionDetected: Boolean = False;
@@ -380,6 +383,23 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide270.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+end;
+
+function IsDelphi10Dot4GEDot2: Boolean;
+{$IFDEF DELPHI104_SYDNEY}
+const
+  CoreIdeLatest: TVersionNumber =
+    (Major: 27; Minor: 0; Release: 40680; Build: 4203); // 10.4.2
+var
+  ReadFileVersion: TVersionNumber;
+{$ENDIF}
+begin
+{$IFDEF DELPHI104_SYDNEY}
+  ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide270.bpl');
+  Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+{$ELSE}
+  Result := False;
+{$ENDIF}
 end;
 
 function IsIdeVersionLatest: Boolean;

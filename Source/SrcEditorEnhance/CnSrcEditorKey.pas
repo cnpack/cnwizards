@@ -2818,7 +2818,7 @@ begin
         Rit := ritUnit;
 
 {$IFDEF DEBUG}
-      CnDebugger.LogMsg('Cpp F2 Rename. Calc Rit to ' + IntToStr(Ord(Rit)));
+      CnDebugger.LogMsg('Cpp F2 RenameW. Calc Rit to ' + IntToStr(Ord(Rit)));
 {$ENDIF}
 
       // µ¯³ö¶Ô»°¿ò
