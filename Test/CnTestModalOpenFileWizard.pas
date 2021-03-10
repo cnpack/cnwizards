@@ -49,7 +49,10 @@ type
     btnOpenFile: TButton;
     lbl1: TLabel;
     lbl2: TLabel;
+    btnOpen: TButton;
+    dlgOpen1: TOpenDialog;
     procedure btnOpenFileClick(Sender: TObject);
+    procedure btnOpenClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -108,7 +111,7 @@ end;
 procedure TCnTestModalOpenFile1042Wizard.Execute;
 begin
   FTestForm.ShowModal;
-  // CnOtaOpenFile(FTestForm.edtFileName.Text); 放这里就没啥问题
+  CnOtaOpenFile(FTestForm.edtFileName.Text); // 放这里就没啥问题
 end;
 
 function TCnTestModalOpenFile1042Wizard.GetCaption: string;
@@ -154,10 +157,16 @@ begin
 
 end;
 
+procedure TTestModalOpenFileForm.btnOpenClick(Sender: TObject);
+begin
+  if dlgOpen1.Execute(Handle) then
+    edtFileName.Text := dlgOpen1.FileName;
+end;
+
 procedure TTestModalOpenFileForm.btnOpenFileClick(Sender: TObject);
 begin
-  CnOtaOpenFile(edtFileName.Text);
-  // 这句放这里，先打开文件再关闭窗口，10.4.2 下会导致切换到后台
+  //CnOtaOpenFile(edtFileName.Text);
+  // 上面这句放这里，先打开文件再关闭窗口，10.4.2 下会导致大概率切换到后台
 end;
 
 initialization

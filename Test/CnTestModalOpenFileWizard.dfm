@@ -49,4 +49,17 @@ object TestModalOpenFileForm: TTestModalOpenFileForm
     TabOrder = 1
     OnClick = btnOpenFileClick
   end
+  object btnOpen: TButton
+    Left = 455
+    Top = 46
+    Width = 51
+    Height = 25
+    Caption = 'Open'
+    TabOrder = 2
+    OnClick = btnOpenClick
+  end
+  object dlgOpen1: TOpenDialog
+    Left = 248
+    Top = 16
+  end
 end
