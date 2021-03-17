@@ -3364,6 +3364,10 @@ finalization
   CnDebugger.LogEnter('CnWizIdeUtils finalization.');
 {$ENDIF}
 
+{$IFDEF IDE_SWITCH_BUG}
+  FWaitDialogHook.Free;
+{$ENDIF}
+
   if FCnPaletteWrapper <> nil then
     FreeAndNil(FCnPaletteWrapper);
 
