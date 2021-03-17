@@ -67,7 +67,7 @@ uses
   {$ELSE}
   DsgnIntf, LibIntf,
   {$ENDIF}
-  CnPasCodeParser, CnWidePasParser,
+  CnPasCodeParser, CnWidePasParser, CnIDEVersion, CnWizMethodHook,
   CnWizUtils, CnWizEditFiler, CnCommon, CnWizOptions, CnWizCompilerConst;
 
 //==============================================================================
@@ -642,6 +642,12 @@ function CnMessageViewWrapper: TCnMessageViewWrapper;
 function CnThemeWrapper: TCnThemeWrapper;
 {* 主题封装处理}
 
+procedure DisableWaitDialogShow;
+{* 以 Hook 方式禁用 WaitDialog}
+
+procedure EnableWaitDialogShow;
+{* 以解除 Hook 方式启用 WaitDialog}
+
 implementation
 
 uses
@@ -653,6 +659,9 @@ uses
 const
   SSyncButtonName = 'SyncButton';
   SCodeTemplateListBoxName = 'CodeTemplateListBox';
+{$IFDEF IDE_SWITCH_BUG}
+  SWaitDialogShow = '@Waitdialog@TIDEWaitDialog@Show$qqrx20System@UnicodeStringt1o';
+{$ENDIF}
 
 {$IFDEF BDS4_UP}
 const
@@ -662,6 +671,24 @@ const
 var
   BeginBatchOpenCloseProc: TProcedure = nil;
   EndBatchOpenCloseProc: TProcedure = nil;
+{$ENDIF}
+
+{$IFDEF IDE_SWITCH_BUG}
+type
+  TCnWaitDialogShowProc = procedure (ASelfClass: Pointer; const Caption: string;
+    const TitleMessage: string; LockDrawing: Boolean);
+
+var
+  FDesignIdeHandle: THandle = 0;
+  FWaitDialogHook: TCnMethodHook = nil;
+  OldWaitDialogShow: TCnWaitDialogShowProc = nil;
+
+procedure MyWaitDialogShow(ASelfClass: Pointer; const Caption: string; const TitleMessage: string; LockDrawing: Boolean);
+begin
+  // 啥都不做
+  CnDebugger.LogMsg('MyWaitDialogShow Called. Do Nothing.');
+end;
+
 {$ENDIF}
 
 var
@@ -1369,14 +1396,16 @@ end;
 // 将源码编辑器设为活跃
 procedure BringIdeEditorFormToFront;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to Screen.CustomFormCount - 1 do
-    if IsIdeEditorForm(Screen.CustomForms[i]) then
+  for I := 0 to Screen.CustomFormCount - 1 do
+  begin
+    if IsIdeEditorForm(Screen.CustomForms[I]) then
     begin
-      Screen.CustomForms[i].BringToFront;
+      Screen.CustomForms[I].BringToFront;
       Exit;
     end;
+  end;
 end;
 
 // 判断 IDE 是否是当前的活动窗口
@@ -3287,6 +3316,36 @@ begin
   FActiveThemeName := CnOtaGetActiveThemeName;
   FCurrentIsDark := FActiveThemeName = 'Dark';
   FCurrentIsLight := FActiveThemeName = 'Light';
+end;
+
+procedure DisableWaitDialogShow;
+begin
+{$IFDEF IDE_SWITCH_BUG}
+  if not CnIsDelphi10Dot4GEDot2 then
+    Exit;
+
+  if FWaitDialogHook = nil then
+  begin
+    FDesignIdeHandle := GetModuleHandle(DesignIdeLibName);
+    if FDesignIdeHandle <> 0 then
+    begin
+      OldWaitDialogShow := GetBplMethodAddress(GetProcAddress(FDesignIdeHandle, SWaitDialogShow));
+      FWaitDialogHook := TCnMethodHook.Create(@OldWaitDialogShow, @MyWaitDialogShow);
+    end;
+  end;
+  FWaitDialogHook.HookMethod;
+{$ENDIF}
+end;
+
+procedure EnableWaitDialogShow;
+begin
+{$IFDEF IDE_SWITCH_BUG}
+  if not CnIsDelphi10Dot4GEDot2 then
+    Exit;
+
+  if FWaitDialogHook <> nil then
+    FWaitDialogHook.UnhookMethod;
+{$ENDIF}
 end;
 
 initialization

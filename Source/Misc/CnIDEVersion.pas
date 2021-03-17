@@ -70,6 +70,9 @@ var
   CnIdeVersionDetected: Boolean = False;
   CnIdeVersionIsLatest: Boolean = False;
 
+  CnIsDelphi10Dot2GEDot2: Boolean = False;
+  CnIsDelphi10Dot4GEDot2: Boolean = False;
+
 implementation
 
 {$IFDEF DEBUG}
@@ -409,6 +412,7 @@ begin
     Result := CnIdeVersionIsLatest;
     Exit;
   end;
+
   // 碰上不支持的 IDE，返回 True
   CnIdeVersionIsLatest := True;
 
@@ -510,6 +514,10 @@ begin
 
   Result := CnIdeVersionIsLatest;
   CnIdeVersionDetected := True;
+
+  // 初始化一些额外的变量
+  CnIsDelphi10Dot2GEDot2 := IsDelphi10Dot2GEDot2;
+  CnIsDelphi10Dot4GEDot2 := IsDelphi10Dot4GEDot2;
 end;
 
 function GetIdeExeVersion: string;

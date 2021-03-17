@@ -5335,7 +5335,16 @@ begin
   try
     ActionServices := BorlandIDEServices as IOTAActionServices;
     if ActionServices <> nil then
-      Result := ActionServices.OpenFile(FileName);
+    begin
+      try
+        DisableWaitDialogShow;
+        // 10.4.2 下打开文件时可能 IDE 会被莫名其妙塞到后台
+        // 需要通过 Hook 掉 WaitDialogService 的方式去掉
+        Result := ActionServices.OpenFile(FileName);
+      finally
+        EnableWaitDialogShow; // 恢复 WaitDialogService
+      end;
+    end;
   except
     ;
   end;
