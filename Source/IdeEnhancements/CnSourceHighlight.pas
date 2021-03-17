@@ -2513,7 +2513,7 @@ begin
   FDefaultHighLightLineColor := FHighLightLineColor; // 用来判断与保存
 {$ENDIF}
   FCurrentTokenHighlight := True;    // 默认打开标识符高亮
-  FCurrentTokenDelay := 500;
+  FCurrentTokenDelay := csShortDelay;
   FCurrentTokenBackground := csDefCurTokenColorBg;
   FCurrentTokenForeground := csDefCurTokenColorFg;
   FCurrentTokenBorderColor := csDefCurTokenColorBd;
