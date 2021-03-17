@@ -686,7 +686,9 @@ var
 procedure MyWaitDialogShow(ASelfClass: Pointer; const Caption: string; const TitleMessage: string; LockDrawing: Boolean);
 begin
   // É¶¶¼²»×ö
+{$IFDEF DEBUG}
   CnDebugger.LogMsg('MyWaitDialogShow Called. Do Nothing.');
+{$ENDIF}
 end;
 
 {$ENDIF}
