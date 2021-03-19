@@ -30,7 +30,9 @@ unit CnMsdnWizard;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 修改记录：2008.08.04 V1.5
+* 修改记录：2021.03.19 V1.6
+*               10.4.2 下因为 ControlBar 里的主题绘制问题导致崩溃，不得不禁用 MSDN 工具栏
+*           2008.08.04 V1.5
 *               Alan 增加对 MSDN2008 的支持。
 *           2003.11.29 V1.4
 *               Alan 修正最小化 IDE 恢复时出现异常的问题。
@@ -58,7 +60,7 @@ uses
 {$ENDIF}
   StdCtrls, ComCtrls, ExtCtrls, ToolWin, ShellAPI, ToolsAPI, ComObj, Contnrs,
   Controls, IniFiles, CnConsts, CnWizClasses, CnWizConsts, CnIni, CnCommon,
-  CnSpin, CnWizOptions, CnWizUtils, CnWizMultiLang, CnWizIdeUtils;
+  CnSpin, CnWizOptions, CnWizUtils, CnWizMultiLang, CnWizIdeUtils, CnIDEVersion;
 
 {$DEFINE RUN_ON_SAME_THREAD}
 
@@ -132,17 +134,17 @@ type
     FMsdnDotNetInstalled: Boolean;
     FMsdnList: TObjectList;
 
-    m_barControl: TControlBar;
-    m_barMsdn: TToolBar;
-    m_actViewMsdn: TAction;
-    m_cboKeywords: TComboBox;
-    m_btnOpenMsdn: TToolButton;
+    FBarControl: TControlBar;
+    FBarMsdn: TToolBar;
+    FActViewMsdn: TAction;
+    FCboKeywords: TComboBox;
+    FBtnOpenMsdn: TToolButton;
 
-    m_MaxHistory: Integer;
-    m_QueryMode: TQueryMode;
-    m_SelectedCaption: string;
-    m_MsdnCollections: string;
-    m_URL: string;
+    FMaxHistory: Integer;
+    FQueryMode: TQueryMode;
+    FSelectedCaption: string;
+    FMsdnCollections: string;
+    FURL: string;
     FMsdnDotNetDefCaption: string;
 
     FHtmlHelpInited: Boolean;
@@ -344,56 +346,59 @@ const
 type
   TToolBarClass = class of TToolBar;
 var
-  barStdTool, barDskTool: TToolBar;
-  actViewStd: TAction;
+  BarStdTool, BarDskTool: TToolBar;
+  ActViewStd: TAction;
 begin
-  { ControlBar - m_barControl }
-  barStdTool := (BorlandIDEServices as INTAServices).ToolBar[sStandardToolBar];
-  if not Assigned(barStdTool) then
+  { ControlBar - FBarControl }
+  BarStdTool := (BorlandIDEServices as INTAServices).ToolBar[sStandardToolBar];
+  if not Assigned(BarStdTool) then
     Exit;
-  m_barControl := barStdTool.Parent as TControlBar;
+  FBarControl := BarStdTool.Parent as TControlBar;
 
-  { Toolbar - m_barMsdn }
-  m_barMsdn := TToolBarClass(barStdTool.ClassType).Create(nil);
-  with m_barMsdn do
+  { Toolbar - FBarMsdn }
+  FBarMsdn := TToolBarClass(BarStdTool.ClassType).Create(nil);
+  with FBarMsdn do
   begin
-    Parent := barStdTool.Parent;
+    if CnIsDelphi10Dot4GEDot2 then  // 10.4.2 下绘制带主题的新工具栏会 Crash，只能禁用
+      Visible := False;
+
+    Parent := BarStdTool.Parent;
     Name := SToolbarName;
     Caption := SCnMsdnToolBarCaption;
     EdgeInner := esNone;
     EdgeOuter := esNone;
     Flat := True;
     Images := (BorlandIDEServices as INTAServices).ImageList;
-    Constraints.MinHeight := barStdTool.Constraints.MinHeight;
-    Constraints.MinWidth := barStdTool.Constraints.MinWidth;
-    DockSite := barStdTool.DockSite;
-    DragKind := barStdTool.DragKind;
-    DragMode := barStdTool.DragMode;
-    PopupMenu := barStdTool.PopupMenu;
-    ShowHint := barStdTool.ShowHint;
-    ShowCaptions := barStdTool.ShowCaptions;
-    OnGetSiteInfo := barStdTool.OnGetSiteInfo;
-    OnStartDock := barStdTool.OnStartDock;
-    OnStartDrag := barStdTool.OnStartDrag;
-    OnEndDock := barStdTool.OnEndDock;
-    OnEndDrag := barStdTool.OnEndDrag;
+    Constraints.MinHeight := BarStdTool.Constraints.MinHeight;
+    Constraints.MinWidth := BarStdTool.Constraints.MinWidth;
+    DockSite := BarStdTool.DockSite;
+    DragKind := BarStdTool.DragKind;
+    DragMode := BarStdTool.DragMode;
+    PopupMenu := BarStdTool.PopupMenu;
+    ShowHint := BarStdTool.ShowHint;
+    ShowCaptions := BarStdTool.ShowCaptions;
+    OnGetSiteInfo := BarStdTool.OnGetSiteInfo;
+    OnStartDock := BarStdTool.OnStartDock;
+    OnStartDrag := BarStdTool.OnStartDrag;
+    OnEndDock := BarStdTool.OnEndDock;
+    OnEndDrag := BarStdTool.OnEndDrag;
 
-    barDskTool := (BorlandIDEServices as INTAServices).ToolBar[sDesktopToolBar];
-    if Assigned(barDskTool) then
+    BarDskTool := (BorlandIDEServices as INTAServices).ToolBar[sDesktopToolBar];
+    if Assigned(BarDskTool) then
     begin
-      Left := barDskTool.Left + barDskTool.Width;
-      Top := barDskTool.Top;
+      Left := BarDskTool.Left + BarDskTool.Width;
+      Top := BarDskTool.Top;
     end;
   end;
 
-  { Action - m_actViewMsdn }
-  actViewStd := TAction(Application.MainForm.FindComponent(SViewStdCmd));
-  if Assigned(actViewStd) then
+  { Action - FActViewMsdn }
+  ActViewStd := TAction(Application.MainForm.FindComponent(SViewStdCmd));
+  if Assigned(ActViewStd) then
   begin
-    m_actViewMsdn := TAction.Create(nil);
-    with m_actViewMsdn do
+    FActViewMsdn := TAction.Create(nil);
+    with FActViewMsdn do
     begin
-      ActionList := actViewStd.ActionList;
+      ActionList := ActViewStd.ActionList;
       Name := 'actCnMsdnWizardView'; // DO NOT LOCALIZE
       Caption := '&' + SCnMsdnToolBarCaption;
       OnExecute := actViewMSDNWizardExecute;
@@ -401,11 +406,11 @@ begin
     end;
   end
   else
-    m_actViewMsdn := nil;
+    FActViewMsdn := nil;
 
-  { Combox - m_cboKeywords }
-  m_cboKeywords := TCnToolBarComboBox.Create(m_barMsdn);
-  with m_cboKeywords do
+  { Combox - FCboKeywords }
+  FCboKeywords := TCnToolBarComboBox.Create(FBarMsdn);
+  with FCboKeywords do
   begin
     Visible := True;
     Hint := SCnMsdnSelectKeywordHint;
@@ -413,42 +418,42 @@ begin
     OnKeyPress := OnComboBoxKeyPress;
     Width := csKeywordComboBoxWidth;
 
-    m_barMsdn.InsertControl(m_cboKeywords);
+    FBarMsdn.InsertControl(FCboKeywords);
 
     Left := 0;
     Top := 0;
   end;
 
-  { ToolButton - m_btnOpenMsdn }
-  m_btnOpenMsdn := TToolButton.Create(m_barMsdn);
-  with m_btnOpenMsdn do
+  { ToolButton - FBtnOpenMsdn }
+  FBtnOpenMsdn := TToolButton.Create(FBarMsdn);
+  with FBtnOpenMsdn do
   begin
     Visible := True;
     Action := Self.Action;
     OnClick := OnMsdnBtnClick;
 
-    m_barMsdn.InsertControl(m_btnOpenMsdn);
+    FBarMsdn.InsertControl(FBtnOpenMsdn);
 
-    Left := m_cboKeywords.Width;
+    Left := FCboKeywords.Width;
     Top := 0;
   end;
 
-  { Toolbar - m_barMsdn }
-  m_barMsdn.AutoSize := True;
+  { Toolbar - FBarMsdn }
+  FBarMsdn.AutoSize := True;
 end;
 
 procedure TCnMsdnWizard.FreeBar;
 begin
-  if Assigned(m_actViewMsdn) then
+  if Assigned(FActViewMsdn) then
   begin
-    m_actViewMsdn.ActionList := nil; // Remove from the ActionList
-    FreeAndNil(m_actViewMsdn);
+    FActViewMsdn.ActionList := nil; // Remove from the ActionList
+    FreeAndNil(FActViewMsdn);
   end;
 
-  if Assigned(m_barMsdn) then
+  if Assigned(FBarMsdn) then
   begin
-    m_barControl.RemoveControl(m_barMsdn);
-    FreeAndNil(m_barMsdn);
+    FBarControl.RemoveControl(FBarMsdn);
+    FreeAndNil(FBarMsdn);
   end;
 end;
 
@@ -500,7 +505,7 @@ end;
 procedure TCnMsdnWizard.OnComboBoxKeyPress(Sender: TObject; var Key: Char);
 begin
   if Key = #13 then
-    if (m_cboKeywords.Focused) and (Trim(m_cboKeywords.Text) <> '') then
+    if (FCboKeywords.Focused) and (Trim(FCboKeywords.Text) <> '') then
     begin
       Key := #0;
       RunMsdnHelp;
@@ -529,10 +534,10 @@ begin
       DExplore.Connect;
     end;
 
-    if m_SelectedCaption = '' then
+    if FSelectedCaption = '' then
       SetCollections(FMsdnDotNetDefCaption, '')
     else
-      SetCollections(m_SelectedCaption, '');
+      SetCollections(FSelectedCaption, '');
       
     Result := True;
   except
@@ -562,12 +567,12 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnMsdnWizard.RunMsdnHelp');
 {$ENDIF}
-  if (m_cboKeywords.Focused) and (Trim(m_cboKeywords.Text) <> '') then
-    QueryStr := Trim(m_cboKeywords.Text)
+  if (FCboKeywords.Focused) and (Trim(FCboKeywords.Text) <> '') then
+    QueryStr := Trim(FCboKeywords.Text)
   else
     CnOtaGetCurrPosToken(QueryStr, Idx, False);
 
-  case m_QueryMode of
+  case FQueryMode of
     qmDefault:
       begin
         if MsdnDotNetInstalled then
@@ -575,17 +580,17 @@ begin
         else if MsdnInstalled then
           RunMsdn(QueryStr)
         else
-          RunWeb(QueryStr, m_URL);
+          RunWeb(QueryStr, FURL);
       end;
     qmCustom:
       begin
-        if m_SelectedCaption = '' then
+        if FSelectedCaption = '' then
         begin
           ErrorDlg(SCnMsdnNoMsdnInstalled);
           Exit;
         end;
 
-        if IsSelectOldMsdn(m_SelectedCaption) then
+        if IsSelectOldMsdn(FSelectedCaption) then
         begin
           Disconnect;
           RunMsdn(QueryStr);
@@ -594,7 +599,7 @@ begin
           RunMsdnDotNet(QueryStr);
       end;
     qmWeb:
-      RunWeb(QueryStr, m_URL);
+      RunWeb(QueryStr, FURL);
   end;
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('TCnMsdnWizard.RunMsdnHelp');
@@ -609,7 +614,7 @@ procedure TCnMsdnWizard.RunMsdnSearch;
     try
       if MsdnInstalled then
       begin
-        ShowWindow(DoHtmlHelp(0, PAnsiChar(AnsiString(m_MsdnCollections)), HH_DISPLAY_SEARCH,
+        ShowWindow(DoHtmlHelp(0, PAnsiChar(AnsiString(FMsdnCollections)), HH_DISPLAY_SEARCH,
           0), SW_SHOWMAXIMIZED);
         Result := True;
       end;
@@ -637,7 +642,7 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnMsdnWizard.RunMsdnSearch');
 {$ENDIF}
-  case m_QueryMode of
+  case FQueryMode of
     qmDefault:  // Msdn.net
       begin
         if MsdnDotNetInstalled then
@@ -649,7 +654,7 @@ begin
       end;
     qmCustom:
       begin
-        if IsSelectOldMsdn(m_SelectedCaption) then
+        if IsSelectOldMsdn(FSelectedCaption) then
         begin
           Disconnect;
           DoMsdnSearch;
@@ -690,11 +695,11 @@ begin
     Link.pszMsgTitle := nil;
     Link.pszWindow := nil;
     Link.fIndexOnFail := True;
-    ShowWindow(DoHtmlHelp(0, PAnsiChar(AnsiString(m_MsdnCollections)), HH_KEYWORD_LOOKUP,
+    ShowWindow(DoHtmlHelp(0, PAnsiChar(AnsiString(FMsdnCollections)), HH_KEYWORD_LOOKUP,
       DWORD(@Link)), SW_SHOWMAXIMIZED);
   end
   else
-    ShowWindow(DoHtmlHelp(0, PAnsiChar(AnsiString(m_MsdnCollections)), HH_DISPLAY_INDEX,
+    ShowWindow(DoHtmlHelp(0, PAnsiChar(AnsiString(FMsdnCollections)), HH_DISPLAY_INDEX,
       0), SW_SHOWMAXIMIZED);
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('TCnMsdnWizard.RunMsdn');
@@ -742,9 +747,9 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnMsdnWizard.RunWeb');
 {$ENDIF}
-  if AnsiContainsText(m_URL, SWildcard) then
+  if AnsiContainsText(FURL, SWildcard) then
   begin
-    URLText := Format(m_URL, [Token]);
+    URLText := Format(FURL, [Token]);
     if Trim(URLText) <> '' then
     begin
       OpenUrl(URLText);
@@ -789,16 +794,16 @@ begin
   if KeyWord = '' then
     Exit;
 
-  if Assigned(m_barMsdn) then
+  if Assigned(FBarMsdn) then
   begin
-    m_cboKeywords.ItemIndex := m_cboKeywords.Items.IndexOf(KeyWord);
-    if m_cboKeywords.ItemIndex = -1 then
+    FCboKeywords.ItemIndex := FCboKeywords.Items.IndexOf(KeyWord);
+    if FCboKeywords.ItemIndex = -1 then
     begin
-      if m_cboKeywords.Items.Count >= m_MaxHistory then
-        m_cboKeywords.Items.Delete(m_cboKeywords.Items.Count - 1);
-      m_cboKeywords.Items.Insert(0, KeyWord);
+      if FCboKeywords.Items.Count >= FMaxHistory then
+        FCboKeywords.Items.Delete(FCboKeywords.Items.Count - 1);
+      FCboKeywords.Items.Insert(0, KeyWord);
     end;
-    m_cboKeywords.Text := '';
+    FCboKeywords.Text := '';
   end;
 end;
 
@@ -839,8 +844,6 @@ end;
 const
   csHistory = 'History';
   vsMaxHistory = 'MaxHistory';
-//  vsBarLeft = 'Toolbar_Left';
-//  vsBarTop = 'Toolbar_Top';
   vsBarVisible = 'Toolbar_Visible';
   vsQueryMode = 'QueryMode';
   vsURL = 'URL1';  // Change Load/Save Key for default URL changed.
@@ -852,21 +855,23 @@ begin
   CnDebugger.LogEnter('TCnMsdnWizard.LoadSettings');
 {$ENDIF}
   inherited;
-  if Assigned(m_barMsdn) then
+  if Assigned(FBarMsdn) then
   begin
-{    m_barMsdn.Left := Ini.ReadInteger(WizOptions.CompilerID, vsBarLeft, m_barMsdn.Left);
-    m_barMsdn.Top := Ini.ReadInteger(WizOptions.CompilerID, vsBarTop, m_barMsdn.Top);}
-    m_barMsdn.Visible := Ini.ReadBool(WizOptions.CompilerID, vsBarVisible, True);
-    m_MaxHistory := Ini.ReadInteger(WizOptions.CompilerID, vsMaxHistory, 10);
+    if CnIsDelphi10Dot4GEDot2 then   // 10.4.2 下绘制带主题的新工具栏会 Crash，只能禁用
+      FBarMsdn.Visible := False
+    else
+      FBarMsdn.Visible := Ini.ReadBool(WizOptions.CompilerID, vsBarVisible, True);
+
+    FMaxHistory := Ini.ReadInteger(WizOptions.CompilerID, vsMaxHistory, 10);
     ReadStringsFromIni(Ini, WizOptions.CompilerID + '\' + csHistory,
-      m_cboKeywords.Items);
+      FCboKeywords.Items);
     case Ini.ReadInteger(WizOptions.CompilerID, vsQueryMode, 0) of
-      0: m_QueryMode := qmDefault;
-      1: m_QueryMode := qmCustom;
-      2: m_QueryMode := qmWeb;
+      0: FQueryMode := qmDefault;
+      1: FQueryMode := qmCustom;
+      2: FQueryMode := qmWeb;
     end;
-    m_SelectedCaption := Ini.ReadString(WizOptions.CompilerID, vsSelectedMsdn, '');
-    m_URL := Ini.ReadString(WizOptions.CompilerID, vsURL, SOnlineWeb);
+    FSelectedCaption := Ini.ReadString(WizOptions.CompilerID, vsSelectedMsdn, '');
+    FURL := Ini.ReadString(WizOptions.CompilerID, vsURL, SOnlineWeb);
   end;
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('TCnMsdnWizard.LoadSettings');
@@ -879,21 +884,19 @@ begin
   CnDebugger.LogEnter('TCnMsdnWizard.SaveSettings');
 {$ENDIF}
   inherited;
-  if Assigned(m_barMsdn) then
+  if Assigned(FBarMsdn) then
   begin
-{    Ini.WriteInteger(WizOptions.CompilerID, vsBarLeft, m_barMsdn.Left);
-    Ini.WriteInteger(WizOptions.CompilerID, vsBarTop, m_barMsdn.Top);}
-    Ini.WriteBool(WizOptions.CompilerID, vsBarVisible, m_barMsdn.Visible);
-    Ini.WriteInteger(WizOptions.CompilerID, vsMaxHistory, m_MaxHistory);
+    Ini.WriteBool(WizOptions.CompilerID, vsBarVisible, FBarMsdn.Visible);
+    Ini.WriteInteger(WizOptions.CompilerID, vsMaxHistory, FMaxHistory);
     WriteStringsToIni(Ini, WizOptions.CompilerID + '\' + csHistory,
-      m_cboKeywords.Items);
-    case m_QueryMode of
+      FCboKeywords.Items);
+    case FQueryMode of
       qmDefault: Ini.WriteInteger(WizOptions.CompilerID, vsQueryMode, 0);
       qmCustom: Ini.WriteInteger(WizOptions.CompilerID, vsQueryMode, 1);
       qmWeb: Ini.WriteInteger(WizOptions.CompilerID, vsQueryMode, 2);
     end;
-    Ini.WriteString(WizOptions.CompilerID, vsSelectedMsdn, m_SelectedCaption);
-    Ini.WriteString(WizOptions.CompilerID, vsURL, m_URL);
+    Ini.WriteString(WizOptions.CompilerID, vsSelectedMsdn, FSelectedCaption);
+    Ini.WriteString(WizOptions.CompilerID, vsURL, FURL);
   end;
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('TCnMsdnWizard.SaveSettings');
@@ -923,7 +926,7 @@ end;
 procedure TCnMsdnWizard.LanguageChanged(Sender: TObject);
 begin
   inherited;
-  m_cboKeywords.Hint := SCnMsdnSelectKeywordHint;
+  FCboKeywords.Hint := SCnMsdnSelectKeywordHint;
 end;
 
 function TCnMsdnWizard.GetHasConfig: Boolean;
@@ -933,14 +936,14 @@ end;
 
 procedure TCnMsdnWizard.actViewMSDNWizardExecute(Sender: TObject);
 begin
-  if Assigned(m_barMsdn) then
-    m_barMsdn.Visible := not m_barMsdn.Visible;
+  if Assigned(FBarMsdn) then
+    FBarMsdn.Visible := not FBarMsdn.Visible;
 end;
 
 procedure TCnMsdnWizard.actViewMSDNWizardUpdate(Sender: TObject);
 begin
-  if Assigned(m_barMsdn) then
-    TAction(Sender).Checked := m_barMsdn.Visible
+  if Assigned(FBarMsdn) then
+    TAction(Sender).Checked := FBarMsdn.Visible
   else
     TAction(Sender).Checked := False;
 end;
@@ -985,7 +988,7 @@ begin
   inherited;
   if not Active then
   begin
-    m_barMsdn.Visible := Value;
+    FBarMsdn.Visible := Value;
     Disconnect;
   end;
 end;
@@ -994,13 +997,13 @@ procedure TCnMsdnWizard.RunMsdnConfig;
 var
   FMsdnNameList: TStringList;
   MsdnInfo: TCnMsdnInfo;
-  i: Integer;
+  I: Integer;
 begin
   FMsdnNameList := TStringList.Create;
   try
-    for i := 0 to FMsdnList.Count - 1 do
+    for I := 0 to FMsdnList.Count - 1 do
     begin
-      MsdnInfo := TCnMsdnInfo(FMsdnList.Items[i]);
+      MsdnInfo := TCnMsdnInfo(FMsdnList.Items[I]);
       FMsdnNameList.Add(MsdnInfo.Caption);
     end;
 
@@ -1008,52 +1011,60 @@ begin
     try
       FCnMsdnWizard := Self;
       ShowHint := WizOptions.ShowHint;
-      cbShowToolbar.Checked := m_barMsdn.Visible;
-      seMaxHistory.Value := m_MaxHistory;
-      case m_QueryMode of
+
+      if CnIsDelphi10Dot4GEDot2 then
+      begin
+        cbShowToolbar.Checked := False;
+        cbShowToolbar.Enabled := False;
+      end
+      else
+        cbShowToolbar.Checked := FBarMsdn.Visible;
+
+      seMaxHistory.Value := FMaxHistory;
+      case FQueryMode of
         qmDefault: rbDefault.Checked := True;
         qmCustom: rbFollow.Checked := True;
         qmWeb: rbWeb.Checked := True;
       end;
       lstMsdn.Items := FMsdnNameList;
-      edtWeb.Text := Trim(m_URL);
-      FSelectedMsdn := m_SelectedCaption;
+      edtWeb.Text := Trim(FURL);
+      FSelectedMsdn := FSelectedCaption;
 
       if ShowModal = mrOK then
       begin
         Disconnect;
 
-        m_barMsdn.Visible := cbShowToolbar.Checked;
-        m_barMsdn.Refresh;
-        m_MaxHistory := seMaxHistory.Value;
+        FBarMsdn.Visible := cbShowToolbar.Checked;
+        FBarMsdn.Refresh;
+        FMaxHistory := seMaxHistory.Value;
 
         if rbDefault.Checked then
         begin
-          m_QueryMode := qmDefault;
-          m_SelectedCaption := '';
+          FQueryMode := qmDefault;
+          FSelectedCaption := '';
         end
         else
         if rbFollow.Checked then
         begin
-          m_QueryMode := qmCustom;
+          FQueryMode := qmCustom;
         end
         else
         if rbWeb.Checked then
         begin
-          m_QueryMode := qmWeb;
-          m_SelectedCaption := '';
+          FQueryMode := qmWeb;
+          FSelectedCaption := '';
         end;
 
-        for i := 0 to lstMsdn.Items.Count - 1 do
+        for I := 0 to lstMsdn.Items.Count - 1 do
         begin
-          if lstMsdn.Selected[i] then
+          if lstMsdn.Selected[I] then
           begin
-            m_SelectedCaption := lstMsdn.Items.Strings[i];
+            FSelectedCaption := lstMsdn.Items.Strings[I];
             Break;
           end;
         end;
         if Trim(edtWeb.Text) <> '' then
-          m_URL := edtWeb.Text;
+          FURL := edtWeb.Text;
 
         DoSaveSettings;
       end;
@@ -1176,7 +1187,7 @@ begin
         MsdnInfo := TCnMsdnInfo.Create;
         MsdnInfo.FCaption := ReadString('');
         MsdnInfo.FCollection := ReadString(valFilename);
-        m_MsdnCollections := MsdnInfo.Collection;
+        FMsdnCollections := MsdnInfo.Collection;
         FMsdnList.Add(MsdnInfo);
         FMsdnInstalled := True;
       end;
