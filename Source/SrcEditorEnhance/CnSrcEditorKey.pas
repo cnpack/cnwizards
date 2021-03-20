@@ -3413,7 +3413,9 @@ begin
   SearchWrap := Ini.ReadBool(csEditorKey, csSearchWrap, True);
   FHomeExt := Ini.ReadBool(csEditorKey, csHomeExt, True);
   FHomeFirstChar := Ini.ReadBool(csEditorKey, csHomeFirstChar, False);
+{$IFNDEF DELPHI104_SYDNEY_UP}  // 10.4 无法支持光标行尾
   FCursorBeforeEOL := Ini.ReadBool(csEditorKey, csCursorBeforeEOL, False);
+{$ENDIF}
   FLeftLineWrap := Ini.ReadBool(csEditorKey, csLeftLineWrap, False);
   FRightLineWrap := Ini.ReadBool(csEditorKey, csRightLineWrap, False);
   FAutoBracket := Ini.ReadBool(csEditorKey, csAutoBracket, False);
