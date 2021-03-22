@@ -250,7 +250,7 @@ var
   Element, LineFlag: Integer;
   Index: Integer;
 
-  function SymbolFlagsToKind(Flags: TOTAViewerSymbolFlags; Description: string):
+  function SymbolFlagsToKind(Flags: TOTAViewerSymbolFlags; const Description: string):
     TSymbolKind;
   begin
     Result := TSymbolKind(Flags);
@@ -262,6 +262,46 @@ var
         Result := skInterface;
     end;
   end;
+
+{$IFDEF IDE_SUPPORT_LSP}
+
+  function SymbolClassTextToKind(const ClassText: string): TSymbolKind;
+  begin
+    Result := skUnknown;
+    if Length(ClassText) >= 2 then
+    begin
+      case Ord(ClassText[1]) of
+        107: // k eyword
+          Result := skKeyword;
+        114, 115: // r eference / s truct
+          Result := skType;
+        118: // v ariable
+          Result := skVariable;
+        102, 109: // f unction / m ethod
+          Result := skFunction;
+        112: // p roperty
+          Result := skProperty;
+        105: // i nterface
+          Result := skInterface;
+        99:  // c onstant / c lass
+          begin
+            if ClassText[2] = 'o' then
+              Result := skConstant
+            else
+              Result := skClass
+          end;
+        101: // e vent / e num / e numM
+          begin
+            if ClassText[2] = 'v' then
+              Result := skEvent
+            else
+              Result := skConstant;
+          end;
+      end;
+    end;
+  end;
+
+{$ENDIF}
 
   function MyInvokeCodeCompletion(Manager: IOTACodeInsightManager): Boolean;
   var
@@ -356,8 +396,10 @@ var
             {$ELSE}
               Name := FSymbolList.SymbolText[I];
             {$ENDIF}
-              Desc := FSymbolList.SymbolTypeText[I];
-              Kind := SymbolFlagsToKind(FSymbolList.SymbolFlags[I], Desc);
+              Desc := FSymbolList.SymbolClassText[I];
+              // LSP 的类型不在 SymbolFlags 里，而在 ClassText 里，此处复用 Desc
+              Kind := SymbolClassTextToKind(Desc);
+
               // Description is Utf-8 format under BDS.
               Idx := Add(Name, Kind, Round(MaxInt / FSymbolList.Count * I), Desc, '', True,
                 False, False, {$IFDEF UTF8_SYMBOL}True{$ELSE}False{$ENDIF});
