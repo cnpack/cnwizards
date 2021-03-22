@@ -95,6 +95,7 @@ var
 procedure TCnTestAsyncCodeInsightManagerWizard.AsyncCodeCompletionCallBack(
   Sender: TObject; AId: Integer; AError: Boolean; const AMessage: string);
 var
+  I: Integer;
   SymbolList: IOTACodeInsightSymbolList;
 begin
   CnDebugger.TraceCurrentStack;
@@ -104,6 +105,13 @@ begin
     LspGetSymbolList(FManager, SymbolList);
     // Get some Count in Async call back
     CnDebugger.LogMsg('Call back LspGetSymbolList Returns Count ' + IntToStr(SymbolList.Count));
+
+    for I := 0 to SymbolList.Count - 1  do
+    begin
+      CnDebugger.LogFmt('#%d: %s - %s : %s | Flag %d', [I, SymbolList.SymbolText[I],
+        SymbolList.SymbolTypeText[I], SymbolList.SymbolClassText[I],
+        Integer(SymbolList.SymbolFlags[I])]);
+    end;
   end;
 
   ShowMessage(Format('CallBack AId: %d. Error %d. Message %s',
@@ -157,6 +165,16 @@ begin
     if not CIM.Enabled then
       Continue;
 
+    if not CIM.HandlesFile(View.Buffer.FileName) then       // 不能处理当前文件
+    begin
+      CnDebugger.LogFmt('CodeInsightManager %d - %s Can NOT Handle - %s',
+        [I, CIM.GetIDString, View.Buffer.FileName]);
+
+      Continue;
+    end;
+
+    CIS.SetQueryContext(View, CIM);
+
     if Supports(CIM, IOTAAsyncCodeInsightManager, ACIM) then
     begin
       CnDebugger.LogFmt('CodeInsightManager: %d Is Async.', [I]);
@@ -189,6 +207,8 @@ begin
         CnDebugger.LogMsg('Call LspGetSymbolList Returns Count ' + IntToStr(SymbolList.Count));
       end;
     end;
+
+    CIS.SetQueryContext(nil, nil);
   end;
 end;
 
