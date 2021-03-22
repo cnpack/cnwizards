@@ -268,7 +268,7 @@ var
   function SymbolClassTextToKind(const ClassText: string): TSymbolKind;
   begin
     Result := skUnknown;
-    if Length(ClassText) >= 2 then
+    if Length(ClassText) >= 3 then
     begin
       case Ord(ClassText[1]) of
         107: // k eyword
@@ -290,12 +290,17 @@ var
           Result := skProperty;
         105: // i nterface
           Result := skInterface;
-        99:  // c onstant / c lass
+        99:  // c lass / const ant / const ructor
           begin
-            if ClassText[2] = 'o' then
-              Result := skConstant
-            else
+            if ClassText[2] = 'l' then
               Result := skClass
+            else if Length(ClassText) >= 6 then
+            begin
+              if ClassText[6] = 'a' then
+                Result := skConstant
+              else
+                Result := skConstructor;
+            end;
           end;
         101: // e vent / e num / e numM
           begin
