@@ -52,6 +52,7 @@ type
   TCnTestAsyncCodeInsightManagerWizard = class(TCnMenuWizard)
   private
     FLSPH: THandle;
+    FAsyncManager: TObject;
     FManager: TObject;
     procedure AsyncCodeCompletionCallBack(Sender: TObject; AId: Integer;
       AError: Boolean; const AMessage: string);
@@ -97,12 +98,22 @@ procedure TCnTestAsyncCodeInsightManagerWizard.AsyncCodeCompletionCallBack(
 var
   I: Integer;
   SymbolList: IOTACodeInsightSymbolList;
+  SL80: IOTACodeInsightSymbolList80;
+  CIPL: IOTACodeInsightParameterList;
+  Mgr: IOTACodeInsightManager;
 begin
   CnDebugger.TraceCurrentStack;
 
-  if (FManager <> nil) and Assigned(LspGetSymbolList) then
+  if (FManager <> nil) and Supports(FManager, IOTACodeInsightManager, Mgr) then
   begin
-    LspGetSymbolList(FManager, SymbolList);
+    Mgr.GetParameterList(CIPL); // 还是返回 0
+    CnDebugger.LogMsg('Call back GetParameterList Returns Proc Count ' + IntToStr(CIPL.GetProcedureCount));
+
+  end;
+
+  if (FAsyncManager <> nil) and Assigned(LspGetSymbolList) then
+  begin
+    LspGetSymbolList(FAsyncManager, SymbolList);
     // Get some Count in Async call back
     CnDebugger.LogMsg('Call back LspGetSymbolList Returns Count ' + IntToStr(SymbolList.Count));
 
@@ -112,6 +123,15 @@ begin
         SymbolList.SymbolTypeText[I], SymbolList.SymbolClassText[I],
         Integer(SymbolList.SymbolFlags[I])]);
     end;
+
+    if Supports(SymbolList, IOTACodeInsightSymbolList80, SL80) then
+    begin
+      CnDebugger.LogSeparator;
+      for I := 0 to SL80.Count - 1 do
+        CnDebugger.LogFmt('#%d: Documentation: %s', [I, SL80.SymbolDocumentation[I]]);
+    end
+    else
+      CnDebugger.LogMsg('NOT 80'); // 会到这里
   end;
 
   ShowMessage(Format('CallBack AId: %d. Error %d. Message %s',
@@ -147,6 +167,7 @@ var
   CIM: IOTACodeInsightManager;
   ACIM: IOTAAsyncCodeInsightManager;
   SymbolList: IOTACodeInsightSymbolList;
+  CIPL: IOTACodeInsightParameterList;
 begin
   View := CnOtaGetTopMostEditView;
   if View = nil then
@@ -174,6 +195,7 @@ begin
     end;
 
     CIS.SetQueryContext(View, CIM);
+    FManager := CIM as TObject;
 
     if Supports(CIM, IOTAAsyncCodeInsightManager, ACIM) then
     begin
@@ -199,12 +221,15 @@ begin
         View.CursorPos.Col, AsyncCodeCompletionCallBack);
       CnDebugger.LogMsg('AsyncInvokeCodeCompletion Called.');
 
-      FManager := ACIM as TObject;
-      if (FManager <> nil) and Assigned(LspGetSymbolList) then
+      FAsyncManager := ACIM as TObject;
+      if (FAsyncManager <> nil) and Assigned(LspGetSymbolList) then
       begin
-        LspGetSymbolList(FManager, SymbolList);
+        LspGetSymbolList(FAsyncManager, SymbolList);
         // Get 0 Count for Async
         CnDebugger.LogMsg('Call LspGetSymbolList Returns Count ' + IntToStr(SymbolList.Count));
+
+        CIM.GetParameterList(CIPL); // 返回 0
+        CnDebugger.LogMsg('Call GetParameterList Returns Proc Count ' + IntToStr(CIPL.ProcedureCount));
       end;
     end;
 

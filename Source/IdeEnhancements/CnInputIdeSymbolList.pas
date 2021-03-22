@@ -277,7 +277,14 @@ var
           Result := skType;
         118: // v ariable
           Result := skVariable;
-        102, 109: // f unction / m ethod
+        102: // f unction / f ile
+          begin
+            if ClassText[2] = 'u' then
+              Result := skFunction
+            else
+              Result := skUnit;
+          end;
+        109: // m ethod
           Result := skFunction;
         112: // p roperty
           Result := skProperty;
@@ -309,9 +316,9 @@ var
     Filter: string;
   begin
     try
-    {$IFDEF Debug}
+    {$IFDEF DEBUG}
       CnDebugger.LogMsg('Before InvokeCodeCompletion');
-    {$ENDIF Debug}
+    {$ENDIF}
       // IDE 在无法进行 CodeInsight 时会弹出一个错误框（不是异常）
       // 此处临时替换掉显示错误框的函数 MessageDlgPosHelp，使之不显示出来
       // 待调用完成后再恢复。
@@ -323,9 +330,9 @@ var
       finally
         Hook.Free;
       end;
-    {$IFDEF Debug}
+    {$IFDEF DEBUG}
       CnDebugger.LogBoolean(Result, 'After InvokeCodeCompletion');
-    {$ENDIF Debug}
+    {$ENDIF}
     except
       Result := False;
     end;
@@ -397,7 +404,7 @@ var
               Name := FSymbolList.SymbolText[I];
             {$ENDIF}
               Desc := FSymbolList.SymbolClassText[I];
-              // LSP 的类型不在 SymbolFlags 里，而在 ClassText 里，此处复用 Desc
+              // LSP 的类型不在 SymbolFlags 里（全 0），而在 ClassText 里，此处复用 Desc
               Kind := SymbolClassTextToKind(Desc);
 
               // Description is Utf-8 format under BDS.
@@ -409,12 +416,12 @@ var
               Items[Idx].ForCpp := not PosInfo.IsPascal;
             end;
           except
-          {$IFDEF Debug}
+          {$IFDEF DEBUG}
             on E: Exception do
             begin
               CnDebugger.LogMsg('Exception: ' + E.ClassName + ' ' + E.Message);
             end;
-          {$ENDIF Debug}
+          {$ENDIF}
           end;
           FSymbolList := nil;
         end;
