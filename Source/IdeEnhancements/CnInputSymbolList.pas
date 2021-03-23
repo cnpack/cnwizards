@@ -164,7 +164,7 @@ type
 
   TSymbolList = class(TObject)
   private
-    FList: TObjectList;
+    FList: TObjectList; // 持有符号对象的实例们
     FActive: Boolean;
     function GetCount: Integer;
     function GetItem(Index: Integer): TSymbolItem;
@@ -182,12 +182,12 @@ type
       TCodePosInfo): Boolean; virtual;
     procedure GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet; 
       PosInfo: TCodePosInfo); virtual;
-    function Add(AItem: TSymbolItem): Integer; overload;
-    function Add(const AName: string; AKind: TSymbolKind; AScope: Integer; const 
+    function Add(AItem: TSymbolItem): Integer; overload; virtual;
+    function Add(const AName: string; AKind: TSymbolKind; AScope: Integer; const
       ADescription: string = ''; const AText: string = ''; AAutoIndent: Boolean = 
       True; AMatchFirstOnly: Boolean = False; AAlwaysDisp: Boolean = False;
-      ADescIsUtf8: Boolean = False): Integer; overload;
-    procedure Clear;
+      ADescIsUtf8: Boolean = False): Integer; overload; virtual;
+    procedure Clear; virtual;
     procedure Delete(Index: Integer);
     procedure Remove(AItem: TSymbolItem);
     function IndexOf(const AName: string; AKind: TSymbolKind): Integer;

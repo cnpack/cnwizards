@@ -42,7 +42,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, Controls, ToolsApi, Math, Dialogs, Contnrs, TypInfo,
-  Forms, CnCommon, CnWizConsts, CnWizCompilerConst, CnWizUtils, CnWizMethodHook,
+  Forms, IniFiles, CnCommon, CnWizConsts, CnWizCompilerConst, CnWizUtils, CnWizMethodHook,
   CnPasCodeParser, CnInputSymbolList, CnEditControlWrapper, CnWizNotifier;
 
 {$IFDEF DELPHI}
@@ -101,9 +101,11 @@ type
   TIDESymbolList = class(TSymbolList)
   private
   {$IFDEF IDE_SUPPORT_LSP}
+     FKeepUnique: False; // Name 是否可重复
+     FHashList: THashedStringList;
      FAsyncResultGot: Boolean;
      FAsyncManagerObj: TObject;
-     FSymbolList: IOTACodeInsightSymbolList;
+     FSymbolListIntf: IOTACodeInsightSymbolList;
      procedure AsyncCodeCompletionCallBack(Sender: TObject; AId: Integer;
        AError: Boolean; const AMessage: string);
   {$ENDIF}
@@ -120,9 +122,17 @@ type
   public
     constructor Create; override;
     destructor Destroy; override;
+
     class function GetListName: string; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
       TCodePosInfo): Boolean; override;
+
+    // 以下俩函数在 LSP 模式下会做防重处理，注意 Add(Item: TSymbolItem) 未做
+    function Add(const AName: string; AKind: TSymbolKind; AScope: Integer; const
+      ADescription: string = ''; const AText: string = ''; AAutoIndent: Boolean = 
+      True; AMatchFirstOnly: Boolean = False; AAlwaysDisp: Boolean = False;
+      ADescIsUtf8: Boolean = False): Integer; overload; override;
+    procedure Clear; override;
   end;
 
 const
@@ -229,11 +239,11 @@ begin
   FAsyncResultGot := True;
   if Assigned(FAsyncManagerObj) and Assigned(LspGetSymbolList) then
   begin
-    FSymbolList := nil;
-    LspGetSymbolList(FAsyncManagerObj, FSymbolList);
+    FSymbolListIntf := nil;
+    LspGetSymbolList(FAsyncManagerObj, FSymbolListIntf);
     // Get some Count in Async call back
 {$IFDEF DEBUG}
-    CnDebugger.LogMsg('Callback LspGetSymbolList Returns Count ' + IntToStr(FSymbolList.Count));
+    CnDebugger.LogMsg('Callback LspGetSymbolList Returns Count ' + IntToStr(FSymbolListIntf.Count));
 {$ENDIF}
   end;
 end;
@@ -277,12 +287,14 @@ var
           Result := skType;
         118: // v ariable
           Result := skVariable;
-        102: // f unction / f ile
+        102: // f unction / fi le / fi eld
           begin
             if ClassText[2] = 'u' then
               Result := skFunction
+            else if ClassText[3] = 'l' then
+              Result := skUnit
             else
-              Result := skUnit;
+              Result := skVariable; // Field
           end;
         109: // m ethod
           Result := skFunction;
@@ -381,8 +393,10 @@ var
         ValidChars := Manager.EditorTokenValidChars(False);
         Filter := '';
         FAsyncResultGot := False;
-        FSymbolList := nil;
+        FSymbolListIntf := nil;
         FAsyncManagerObj := AsyncManager as TObject;
+
+        FKeepUnique := True;
         AsyncManager.AsyncInvokeCodeCompletion(itManual, Filter, EditView.CursorPos.Line,
           EditView.CursorPos.Col, AsyncCodeCompletionCallBack);
 
@@ -393,27 +407,27 @@ var
 {$IFDEF DEBUG}
         if not FAsyncResultGot then
           CnDebugger.LogMsg('Async Result Time out. Fail to get Symbol List.');
-        if FSymbolList = nil then
+        if FSymbolListIntf = nil then
           CnDebugger.LogMsg('Async Result Error. Symbol List not Got.');
 {$ENDIF}
 
-        if FAsyncResultGot and (FSymbolList <> nil) then
+        if FAsyncResultGot and (FSymbolListIntf <> nil) then
         begin
           try
-            for I := 0 to FSymbolList.Count - 1 do
+            for I := 0 to FSymbolListIntf.Count - 1 do
             begin
               // follow code maybe raise exception, but disabled.
             {$IFDEF UTF8_SYMBOL}
-              Name := string(FastUtf8ToAnsi(AnsiString(FSymbolList.SymbolText[I])));
+              Name := string(FastUtf8ToAnsi(AnsiString(FSymbolListIntf.SymbolText[I])));
             {$ELSE}
-              Name := FSymbolList.SymbolText[I];
+              Name := FSymbolListIntf.SymbolText[I];
             {$ENDIF}
-              Desc := FSymbolList.SymbolClassText[I];
+              Desc := FSymbolListIntf.SymbolClassText[I];
               // LSP 的类型不在 SymbolFlags 里（全 0），而在 ClassText 里，此处复用 Desc
               Kind := SymbolClassTextToKind(Desc);
 
               // Description is Utf-8 format under BDS.
-              Idx := Add(Name, Kind, Round(MaxInt / FSymbolList.Count * I), Desc, '', True,
+              Idx := Add(Name, Kind, Round(MaxInt / FSymbolListIntf.Count * I), Desc, '', True,
                 False, False, {$IFDEF UTF8_SYMBOL}True{$ELSE}False{$ENDIF});
 
               // 根据源文件的类型设置符号项的适用范围
@@ -428,14 +442,14 @@ var
             end;
           {$ENDIF}
           end;
-          FSymbolList := nil;
+          FSymbolListIntf := nil;
         end;
 
       finally
         CodeInsightServices.SetQueryContext(nil, nil);
-      {$IFDEF Debug}
+      {$IFDEF DEBUG}
         CnDebugger.LogMsg('End Async AddToSymbolList');
-      {$ENDIF Debug}
+      {$ENDIF}
       end;
       Exit;
     end;
@@ -466,6 +480,7 @@ var
       if not Allow then
         Exit;
 
+      FKeepUnique := False; // 无需去重
       // Not used, but the IDE calls it in this order, and the calling order might be important.
       ValidChars := Manager.EditorTokenValidChars(False);
 
@@ -970,7 +985,7 @@ var
           AKind := skKeyword;        // '??? '
       else
         begin
-        {$IFDEF Debug}
+        {$IFDEF DEBUG}
           CnDebugger.LogMsg('Unknown decl: ' + AText);
         {$ENDIF}
           AKind := skUnknown;
@@ -1077,6 +1092,11 @@ end;
 constructor TIDESymbolList.Create;
 begin
   inherited;
+{$IFDEF IDE_SUPPORT_LSP}
+  FHashList := THashedStringList.Create;
+  FHashList.CaseSensitive := True;
+{$ENDIF}
+
 {$IFDEF SUPPORT_KibitzCompile}
   KibitzEnabled := KibitzInitialize;
   InitializeCriticalSection(HookCS);
@@ -1091,6 +1111,10 @@ begin
   CnWizNotifierServices.RemoveFileNotifier(OnFileNotify);
   KibitzFinalize;
 {$ENDIF SUPPORT_KibitzCompile}
+
+{$IFDEF IDE_SUPPORT_LSP}
+  FHashList.Free;
+{$ENDIF}
   inherited;
 end;
 
@@ -1124,6 +1148,29 @@ begin
 {$ELSE}
   Result := False;
 {$ENDIF SUPPORT_IDESymbolList}
+end;
+
+function TIDESymbolList.Add(const AName: string; AKind: TSymbolKind;
+  AScope: Integer; const ADescription, AText: string; AAutoIndent,
+  AMatchFirstOnly, AAlwaysDisp, ADescIsUtf8: Boolean): Integer;
+begin
+{$IFDEF IDE_SUPPORT_LSP}
+  Result := -1;
+  if FKeepUnique and FHashList.IndexOf(AName) >= 0 then
+    Exit;
+  FHashList.Add(AName);
+{$ENDIF}
+
+  Result := inherited Add(AName, AKind, AScope, ADescription, AText, AAutoIndent,
+    AMatchFirstOnly, AAlwaysDisp, ADescIsUtf8);
+end;
+
+procedure TIDESymbolList.Clear;
+begin
+{$IFDEF IDE_SUPPORT_LSP}
+  FHashList.Clear;
+{$ENDIF}
+  inherited;
 end;
 
 initialization
