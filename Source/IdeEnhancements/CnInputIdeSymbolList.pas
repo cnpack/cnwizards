@@ -42,7 +42,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, Controls, ToolsApi, Math, Dialogs, Contnrs, TypInfo,
-  Forms, IniFiles, CnCommon, CnWizConsts, CnWizCompilerConst, CnWizUtils, CnWizMethodHook,
+  Forms, CnHashMap, CnCommon, CnWizConsts, CnWizCompilerConst, CnWizUtils, CnWizMethodHook,
   CnPasCodeParser, CnInputSymbolList, CnEditControlWrapper, CnWizNotifier;
 
 {$IFDEF DELPHI}
@@ -101,8 +101,8 @@ type
   TIDESymbolList = class(TSymbolList)
   private
   {$IFDEF IDE_SUPPORT_LSP}
-     FKeepUnique: False; // Name 是否可重复
-     FHashList: THashedStringList;
+     FKeepUnique: Boolean; // Name 是否可重复
+     FHashList: TCnStrToStrHashMap;
      FAsyncResultGot: Boolean;
      FAsyncManagerObj: TObject;
      FSymbolListIntf: IOTACodeInsightSymbolList;
@@ -179,6 +179,7 @@ const
 
 {$IFDEF IDE_SUPPORT_LSP}
 const
+  HashSize = 4096;
   SLspGetSymbolList = '@Lspcodcmplt@TLSPKibitzManager@GetSymbolList$qqrr61System@%DelphiInterface$34Toolsapi@IOTACodeInsightSymbolList%';
 
 type
@@ -431,8 +432,11 @@ var
                 False, False, {$IFDEF UTF8_SYMBOL}True{$ELSE}False{$ENDIF});
 
               // 根据源文件的类型设置符号项的适用范围
-              Items[Idx].ForPascal := PosInfo.IsPascal;
-              Items[Idx].ForCpp := not PosInfo.IsPascal;
+              if Idx >= 0 then
+              begin
+                Items[Idx].ForPascal := PosInfo.IsPascal;
+                Items[Idx].ForCpp := not PosInfo.IsPascal;
+              end;
             end;
           except
           {$IFDEF DEBUG}
@@ -1093,8 +1097,7 @@ constructor TIDESymbolList.Create;
 begin
   inherited;
 {$IFDEF IDE_SUPPORT_LSP}
-  FHashList := THashedStringList.Create;
-  FHashList.CaseSensitive := True;
+  FHashList := TCnStrToStrHashMap.Create(HashSize);
 {$ENDIF}
 
 {$IFDEF SUPPORT_KibitzCompile}
@@ -1153,12 +1156,22 @@ end;
 function TIDESymbolList.Add(const AName: string; AKind: TSymbolKind;
   AScope: Integer; const ADescription, AText: string; AAutoIndent,
   AMatchFirstOnly, AAlwaysDisp, ADescIsUtf8: Boolean): Integer;
+{$IFDEF IDE_SUPPORT_LSP}
+var
+  Res: string;
+{$ENDIF}
 begin
 {$IFDEF IDE_SUPPORT_LSP}
   Result := -1;
-  if FKeepUnique and FHashList.IndexOf(AName) >= 0 then
+  if FKeepUnique and FHashList.Find(AName, Res) then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('IDE SymbolList Found Duplicated: %s. Do NOT Add.',
+      [AName]);
+{$ENDIF}
     Exit;
-  FHashList.Add(AName);
+  end;
+  FHashList.Add(AName, AName);
 {$ENDIF}
 
   Result := inherited Add(AName, AKind, AScope, ADescription, AText, AAutoIndent,
@@ -1168,7 +1181,8 @@ end;
 procedure TIDESymbolList.Clear;
 begin
 {$IFDEF IDE_SUPPORT_LSP}
-  FHashList.Clear;
+  FHashList.Free;
+  FHashList := TCnStrToStrHashMap.Create(HashSize);
 {$ENDIF}
   inherited;
 end;
