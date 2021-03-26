@@ -309,6 +309,7 @@ type
     function GetSubActionCount: Integer;
     function GetSubMenus(Index: Integer): TMenuItem;
   protected
+    procedure SetActive(Value: Boolean); override;
     procedure OnActionUpdate(Sender: TObject); override;
     function CreateAction: TCnWizAction; override;
     procedure Click(Sender: TObject); override;
@@ -1113,9 +1114,13 @@ end;
 // 刷新子 Action ，如被重载，可不 inherited 以阻止被刷新。
 procedure TCnSubMenuWizard.RefreshSubActions;
 begin
-//  ClearSubActions;
-  AcquireSubActions;
-  WizActionMgr.ArrangeMenuItems(Menu);
+  if FActive then
+  begin
+    AcquireSubActions;
+    WizActionMgr.ArrangeMenuItems(Menu);
+  end
+  else
+    ClearSubActions;
 end;
 
 // 登记一个子 Action，返回索引号
@@ -1322,6 +1327,15 @@ begin
 {$ELSE}
   Result := False;
 {$ENDIF}
+end;
+
+procedure TCnSubMenuWizard.SetActive(Value: Boolean);
+begin
+  if FActive <> Value then
+  begin
+    inherited;
+    RefreshSubActions;
+  end;
 end;
 
 procedure TCnSubMenuWizard.OnActionUpdate(Sender: TObject);
