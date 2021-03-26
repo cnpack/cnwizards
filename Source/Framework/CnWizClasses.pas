@@ -349,6 +349,8 @@ type
     {* 调试时打印子菜单以及 Action 等的信息}
     procedure Execute; override;
     {* 执行体什么都不做 }
+    function EnableShortCut: Boolean; override;
+    {* 返回是否可以用快捷键调用 False }
     procedure AcquireSubActions; virtual;
     {* 子类重载此过程，内部调用 RegisterASubAction 创建子菜单项。
         此过程在多语切换时会被重复调用。 }
@@ -1087,10 +1089,16 @@ begin
   TCnWizMenuAction(Result).Menu.ImageIndex := -1; // 带子菜单的项不显示位图
 end;
 
-// 执行体什么也不做
+// 执行体
 procedure TCnSubMenuWizard.Execute;
 begin
 // 执行体什么都不做
+end;
+
+// 子菜单专家不允许用快捷键调用本身
+function TCnSubMenuWizard.EnableShortCut: Boolean;
+begin
+  Result := False;
 end;
 
 // 带子菜单专家在刷新 Action 的时候，重载，顺便把子 Action 也刷新一下。
