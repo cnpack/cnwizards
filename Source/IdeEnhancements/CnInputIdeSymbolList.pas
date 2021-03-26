@@ -484,7 +484,10 @@ var
       if not Allow then
         Exit;
 
+{$IFDEF IDE_SUPPORT_LSP}
       FKeepUnique := False; // 无需去重
+{$ENDIF}
+
       // Not used, but the IDE calls it in this order, and the calling order might be important.
       ValidChars := Manager.EditorTokenValidChars(False);
 
@@ -493,15 +496,15 @@ var
 
       try
         SymbolList := nil;
-      {$IFDEF Debug}
+      {$IFDEF DEBUG}
         CnDebugger.LogMsg('Before Manager.GetSymbolList');
-      {$ENDIF Debug}
+      {$ENDIF}
         Manager.GetSymbolList(SymbolList);
         if Assigned(SymbolList) then
         begin
-        {$IFDEF Debug}
+        {$IFDEF DEBUG}
           CnDebugger.LogInteger(SymbolList.Count, 'IDE SymbolList.Count');
-        {$ENDIF Debug}
+        {$ENDIF}
 
           try
             for I := 0 to SymbolList.Count - 1 do
@@ -523,12 +526,12 @@ var
               Items[Idx].ForCpp := not PosInfo.IsPascal;
             end;
           except
-          {$IFDEF Debug}
+          {$IFDEF DEBUG}
             on E: Exception do
             begin
               CnDebugger.LogMsg('Exception: ' + E.ClassName + ' ' + E.Message);
             end;
-          {$ENDIF Debug}
+          {$ENDIF}
           end;
         end;
       finally
@@ -543,9 +546,9 @@ var
     {$ENDIF SYMBOL_LOCKHOOK}
 
       CodeInsightServices.SetQueryContext(nil, nil);
-    {$IFDEF Debug}
+    {$IFDEF DEBUG}
       CnDebugger.LogMsg('End AddToSymbolList');
-    {$ENDIF Debug}
+    {$ENDIF}
     end;
   end;
 
