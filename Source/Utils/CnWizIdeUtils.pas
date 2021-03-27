@@ -1861,7 +1861,9 @@ var
 
 begin
   // 从某项注册表中载入某项字体并赋值给 AFont
-  Result := False; 
+  Result := False;
+  if WizOptions = nil then
+    Exit;
 
   if AFont <> nil then
   begin

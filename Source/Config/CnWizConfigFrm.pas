@@ -334,7 +334,8 @@ begin
       begin
         CnWizardMgr[I].Active := FActives[I];
         if CnWizardMgr[I] is TCnActionWizard then
-          TCnActionWizard(CnWizardMgr[I]).Action.ShortCut := FShortCuts[I];
+          if TCnActionWizard(CnWizardMgr[I]).Action <> nil then // 如果 Action 为 nil 就无法设置快捷键
+            TCnActionWizard(CnWizardMgr[I]).Action.ShortCut := FShortCuts[I];
       end;
     finally
       WizShortCutMgr.EndUpdate;

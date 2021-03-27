@@ -1365,6 +1365,9 @@ var
   end;
 
 begin
+  if WizOptions = nil then
+    Exit;
+
   ClearHighlights;
   Reg := nil;
   Names := nil;
