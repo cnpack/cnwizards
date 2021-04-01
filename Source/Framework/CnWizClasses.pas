@@ -354,7 +354,7 @@ type
     procedure AcquireSubActions; virtual;
     {* 子类重载此过程，内部调用 RegisterASubAction 创建子菜单项。
         此过程在多语切换时会被重复调用。 }
-    procedure ClearSubActions;
+    procedure ClearSubActions; virtual;
     {* 删除所有的子 Action，包括子菜单中的分隔线 }
     procedure RefreshAction; override;
     {* 重载的刷新 Action 的方法，除了继承刷新菜单项外，还刷新子菜单 Action }
@@ -540,11 +540,11 @@ end;
 // 根据专家类名取指定的专家类引用
 function GetCnWizardClass(const ClassName: string): TCnWizardClass;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to CnWizardClassList.Count - 1 do
+  for I := 0 to CnWizardClassList.Count - 1 do
   begin
-    Result := CnWizardClassList[i];
+    Result := CnWizardClassList[I];
     if Result.ClassNameIs(ClassName) then Exit;
   end;
   Result := nil;
@@ -811,6 +811,9 @@ end;
 procedure TCnBaseWizard.SetActive(Value: Boolean);
 begin
   FActive := Value;
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg(ClassName + ' SetActive to ' + IntToStr(Integer(Value)));
+{$ENDIF}
 end;
 
 //------------------------------------------------------------------------------
@@ -1122,6 +1125,9 @@ end;
 // 刷新子 Action ，如被重载，可不 inherited 以阻止被刷新。
 procedure TCnSubMenuWizard.RefreshSubActions;
 begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg(ClassName + ' to RefreshSubActions.');
+{$ENDIF}
   if FActive then
   begin
     AcquireSubActions;
@@ -1192,6 +1198,9 @@ procedure TCnSubMenuWizard.ClearSubActions;
 var
   WizAction: TCnWizAction;
 begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg(ClassName + ' to ClearSubActions.');
+{$ENDIF}
   while FList.Count > 0 do
   begin
     WizAction := SubActions[0];
@@ -1246,13 +1255,13 @@ end;
 // 返回指定子 Action 在列表中的索引号
 function TCnSubMenuWizard.IndexOf(SubAction: TCnWizMenuAction): Integer;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := -1;
-  for i := 0 to FList.Count - 1 do
-    if SubActions[i] = SubAction then
+  for I := 0 to FList.Count - 1 do
+    if SubActions[I] = SubAction then
     begin
-      Result := i;
+      Result := I;
       Exit;
     end;
 end;
@@ -1281,28 +1290,28 @@ end;
 // Action 执行体
 procedure TCnSubMenuWizard.OnExecute(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
   if not Active or FExecuting then Exit;
   FExecuting := True;
   try
-    for i := 0 to FList.Count - 1 do
-      if TObject(FList[i]) = Sender then
+    for I := 0 to FList.Count - 1 do
+      if TObject(FList[I]) = Sender then
       begin
         // 防止通过快捷键调用无效的工具
-        SubActions[i].Update;
-        if SubActions[i].Enabled then
+        SubActions[I].Update;
+        if SubActions[I].Enabled then
         begin
           try
             // 内部专家不提示
             if IsInternalWizard {$IFNDEF CNWIZARDS_MINIMUM} or ShowCnWizCommentForm(WizardName + ' - ' +
-              GetCaptionOrgStr(SubActions[i].Caption), SubActions[i].Icon,
-              SubActions[i].Command) {$ENDIF} then
-              SubActionExecute(i);
+              GetCaptionOrgStr(SubActions[I].Caption), SubActions[I].Icon,
+              SubActions[I].Command) {$ENDIF} then
+              SubActionExecute(I);
           except
             on E: Exception do
               DoHandleException(Format('%s.SubActions[%d].Execute: %s - %s',
-                [ClassName, i, E.ClassName, E.Message]));
+                [ClassName, I, E.ClassName, E.Message]));
           end;
         end;
 
@@ -1316,13 +1325,13 @@ end;
 // Action 更新
 procedure TCnSubMenuWizard.OnUpdate(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
   OnActionUpdate(nil);
-  for i := 0 to FList.Count - 1 do
-    if TObject(FList[i]) = Sender then
+  for I := 0 to FList.Count - 1 do
+    if TObject(FList[I]) = Sender then
     begin
-      SubActionUpdate(i);
+      SubActionUpdate(I);
       Exit;
     end;
 end;

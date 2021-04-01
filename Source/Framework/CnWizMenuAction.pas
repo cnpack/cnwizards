@@ -277,12 +277,15 @@ var
   NotifyEvent: TNotifyEvent;
 begin
   if FUpdating then Exit;
-  
-  // 防止继承来的快捷键被修改
-  if inherited ShortCut <> ShortCut then
+
+  if Assigned(FWizShortCut) then
   begin
-    SetInheritedShortCut;
-    Exit;
+    // 防止继承来的快捷键被修改
+    if inherited ShortCut <> ShortCut then
+    begin
+      SetInheritedShortCut;
+      Exit;
+    end;
   end;
 
   inherited Change;

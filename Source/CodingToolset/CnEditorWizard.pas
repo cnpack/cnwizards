@@ -47,7 +47,7 @@ uses
 
 type
 
-{ TCnEditorForm }
+{ TCnEditorToolsForm }
 
   TCnEditorToolsetWizard = class;
 
@@ -86,7 +86,7 @@ type
     { Public declarations }
   end;
 
-{ TCnBaseEditorTool }
+{ TCnBaseCodingToolset }
 
 {$M+}
 
@@ -94,7 +94,7 @@ type
   private
     FActive: Boolean;
     FOwner: TCnEditorToolsetWizard;
-    FAction: TCnWizMenuAction;
+    FAction: TCnWizMenuAction;  // 对菜单 Action 的引用
     FDefaultsMap: TCnStrToVariantHashMap;
   protected
     function GetIDStr: string;
@@ -168,6 +168,7 @@ type
     constructor Create; override;
     destructor Destroy; override;
     procedure AcquireSubActions; override;
+    procedure ClearSubActions; override;
     procedure RefreshSubActions; override;
     procedure Execute; override;
     procedure Config; override;
@@ -223,12 +224,12 @@ end;
 // 根据编辑器工具类名取指定的编辑器工具类引用
 function GetCnEditorToolClass(const ClassName: string): TCnCodingToolsetClass;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := nil;
-  for i := 0 to CnEditorClassList.Count - 1 do
+  for I := 0 to CnEditorClassList.Count - 1 do
   begin
-    Result := CnEditorClassList[i];
+    Result := CnEditorClassList[I];
     if Result.ClassNameIs(ClassName) then Exit;
   end;
 end;
@@ -376,7 +377,7 @@ end;
 
 constructor TCnEditorToolsetWizard.Create;
 var
-  i: Integer;
+  I: Integer;
   Editor: TCnBaseCodingToolset;
   ActiveIni: TCustomIniFile;
 begin
@@ -385,13 +386,13 @@ begin
   ActiveIni := CreateIniFile;
   try
     Editor := nil;
-    for i := 0 to GetCnEditorToolClassCount - 1 do
+    for I := 0 to GetCnEditorToolClassCount - 1 do
     begin
     {$IFDEF DEBUG}
-      CnDebugger.LogMsg('EditorTool Creating: ' + GetCnEditorToolClassByIndex(i).ClassName);
+      CnDebugger.LogMsg('EditorTool Creating: ' + GetCnEditorToolClassByIndex(I).ClassName);
     {$ENDIF}
       try
-        Editor := GetCnEditorToolClassByIndex(i).Create(Self);
+        Editor := GetCnEditorToolClassByIndex(I).Create(Self);
       except
         on E: Exception do
         begin
@@ -403,7 +404,7 @@ begin
         Editor.GetIDStr, Editor.Active);
       FEditorTools.Add(Editor);
     {$IFDEF DEBUG}
-      CnDebugger.LogMsg('EditorTool Created: ' + GetCnEditorToolClassByIndex(i).ClassName);
+      CnDebugger.LogMsg('EditorTool Created: ' + GetCnEditorToolClassByIndex(I).ClassName);
     {$ENDIF}
     end;
   finally
@@ -413,13 +414,13 @@ end;
 
 destructor TCnEditorToolsetWizard.Destroy;
 var
-  i: Integer;
+  I: Integer;
   ActiveIni: TCustomIniFile;
 begin
   ActiveIni := CreateIniFile;
   try
-    for i := 0 to EditorToolCount - 1 do
-    with EditorTools[i] do
+    for I := 0 to EditorToolCount - 1 do
+    with EditorTools[I] do
     begin
       ActiveIni.WriteBool(SCnActiveSection, GetIDStr, Active);
       Free;
@@ -438,11 +439,11 @@ end;
 
 procedure TCnEditorToolsetWizard.Loaded;
 var
-  i: Integer;
+  I: Integer;
 begin
   inherited;
-  for i := 0 to EditorToolCount - 1 do
-    EditorTools[i].Loaded;
+  for I := 0 to EditorToolCount - 1 do
+    EditorTools[I].Loaded;
 end;
 
 function TCnEditorToolsetWizard.GetCaption: string;
@@ -489,16 +490,16 @@ end;
 
 procedure TCnEditorToolsetWizard.LoadSettings(Ini: TCustomIniFile);
 var
-  i: Integer;
+  I: Integer;
   AIni: TCustomIniFile;
 begin
   inherited;
 
-  for i := 0 to EditorToolCount - 1 do
+  for I := 0 to EditorToolCount - 1 do
   begin
-    AIni := EditorTools[i].CreateIniFile;
+    AIni := EditorTools[I].CreateIniFile;
     try
-      EditorTools[i].LoadSettings(AIni);
+      EditorTools[I].LoadSettings(AIni);
     finally
       AIni.Free;
     end;
@@ -507,16 +508,16 @@ end;
 
 procedure TCnEditorToolsetWizard.SaveSettings(Ini: TCustomIniFile);
 var
-  i: Integer;
+  I: Integer;
   AIni: TCustomIniFile;
 begin
   inherited;
 
-  for i := 0 to EditorToolCount - 1 do
+  for I := 0 to EditorToolCount - 1 do
   begin
-    AIni := EditorTools[i].CreateIniFile;
+    AIni := EditorTools[I].CreateIniFile;
     try
-      EditorTools[i].SaveSettings(AIni);
+      EditorTools[I].SaveSettings(AIni);
     finally
       AIni.Free;
     end;
@@ -525,7 +526,7 @@ end;
 
 procedure TCnEditorToolsetWizard.SubActionExecute(Index: Integer);
 var
-  i: Integer;
+  I: Integer;
 begin
   inherited;
   if Index = FConfigIndex then
@@ -534,8 +535,8 @@ begin
   end
   else
   begin
-    for i := 0 to EditorToolCount - 1 do
-      with EditorTools[i] do
+    for I := 0 to EditorToolCount - 1 do
+      with EditorTools[I] do
         if Active and (FAction = SubActions[Index]) then
         begin
           Execute;
@@ -546,15 +547,15 @@ end;
 
 procedure TCnEditorToolsetWizard.SubActionUpdate(Index: Integer);
 var
-  i: Integer;
+  I: Integer;
   State: TWizardState;
 begin
-  for i := 0 to EditorToolCount - 1 do
+  for I := 0 to EditorToolCount - 1 do
   begin
-    if EditorTools[i].FAction = SubActions[Index] then
+    if EditorTools[I].FAction = SubActions[Index] then
     begin
-      State := EditorTools[i].GetState;
-      SubActions[Index].Visible := Active and EditorTools[i].Active;
+      State := EditorTools[I].GetState;
+      SubActions[Index].Visible := Active and EditorTools[I].Active;
       SubActions[Index].Enabled := Action.Enabled and (wsEnabled in State);
       SubActions[Index].Checked := wsChecked in State;
       Exit;
@@ -565,7 +566,7 @@ end;
 
 procedure TCnEditorToolsetWizard.AcquireSubActions;
 var
-  i: Integer;
+  I: Integer;
 begin
   WizShortCutMgr.BeginUpdate;
   try
@@ -575,8 +576,8 @@ begin
     if EditorToolCount > 0 then
       AddSepMenu;
     FEditorIndex := FConfigIndex + 1;
-    for i := 0 to EditorToolCount - 1 do
-      with EditorTools[i] do
+    for I := 0 to EditorToolCount - 1 do
+      with EditorTools[I] do
       begin
         FAction := SubActions[RegisterASubAction(GetIDStr, GetCaption, GetDefShortCut, GetHint)];
         FAction.Visible := Self.Active and Active;
@@ -589,10 +590,10 @@ end;
 
 procedure TCnEditorToolsetWizard.RefreshSubActions;
 var
-  i: Integer;
+  I: Integer;
 begin // 处理方法有稍许不同，因此不能 inherited 来用 AcquireSubActions。
-  for i := 0 to GetEditorToolCount - 1 do
-    EditorTools[i].RefreshAction;
+  for I := 0 to GetEditorToolCount - 1 do
+    EditorTools[I].RefreshAction;
 
   inherited;
   UpdateActions;
@@ -600,10 +601,11 @@ end;
 
 procedure TCnEditorToolsetWizard.UpdateActions;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to EditorToolCount - 1 do
-    EditorTools[i].FAction.Visible := Active and EditorTools[i].Active;
+  for I := 0 to EditorToolCount - 1 do
+    if EditorTools[I].FAction <> nil then
+      EditorTools[I].FAction.Visible := Active and EditorTools[I].Active;
 end;
 
 procedure TCnEditorToolsetWizard.SetActive(Value: Boolean);
@@ -613,9 +615,19 @@ begin
   if Value <> Active then
   begin
     inherited;
-    for i := 0 to EditorToolCount - 1 do
-      EditorTools[i].ParentActiveChanged(Active);
+    for I := 0 to EditorToolCount - 1 do
+      EditorTools[I].ParentActiveChanged(Active);
   end;
+end;
+
+procedure TCnEditorToolsetWizard.ClearSubActions;
+var
+  I: Integer;
+begin
+  inherited;
+  // 清除 Action 时要清除引用
+  for I := 0 to GetEditorToolCount - 1 do
+    EditorTools[I].FAction := nil;
 end;
 
 { TCnEditorToolsForm }
@@ -647,13 +659,13 @@ end;
 
 procedure TCnEditorToolsForm.InitTools;
 var
-  i: Integer;
+  I: Integer;
 begin
   lvTools.Items.Clear;
-  for i := 0 to FWizard.EditorToolCount - 1 do
+  for I := 0 to FWizard.EditorToolCount - 1 do
   begin
     lvTools.Items.Add;
-    UpdateToolItem(i);
+    UpdateToolItem(I);
   end;
   lvTools.Selected := lvTools.TopItem;
   lvTools.OnChange(lvTools, lvTools.TopItem, ctState);

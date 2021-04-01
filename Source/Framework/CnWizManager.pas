@@ -1021,6 +1021,9 @@ begin
       if MenuWizards[I] is TCnSubMenuWizard then
       begin
         (MenuWizards[I] as TCnSubMenuWizard).ClearSubActions;
+{$IFDEF DEBUG}
+         CnDebugger.LogFmt('%d %s to AcquireSubActions.', [I, MenuWizards[I].ClassName]);
+{$ENDIF}
         (MenuWizards[I] as TCnSubMenuWizard).AcquireSubActions;
       end;
     end;
