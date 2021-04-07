@@ -13,7 +13,7 @@
       ..\Dcu\CnWizAbout.obj ..\Dcu\CnIDEVersion.obj ..\Dcu\CnWizMultiLang.obj 
       ..\Dcu\CnWizConfigFrm.obj ..\Dcu\CnWizSubActionShortCutFrm.obj 
       ..\Dcu\CnWizMenuSortFrm.obj ..\Dcu\CnWizUtils.obj 
-      ..\Dcu\CnAlignSizeWizard.obj ..\Dcu\CnEditorWizard.obj 
+      ..\Dcu\CnAlignSizeWizard.obj ..\Dcu\CnEditorToolsetWizard.obj 
       ..\Dcu\CnListCompFrm.obj ..\Dcu\CnCompToCodeFrm.obj 
       ..\Dcu\CnMessageBoxWizard.obj ..\Dcu\CnComponentSelector.obj 
       ..\Dcu\CnTabOrderWizard.obj ..\Dcu\CnWizDfm6To5.obj 
@@ -100,7 +100,7 @@
       Misc\CnWizUpgradeFrm.dfm Misc\CnWizShareImages.dfm 
       MultiLang\CnWizMultiLang.dfm Config\CnWizConfigFrm.dfm 
       Config\CnWizSubActionShortCutFrm.dfm Config\CnWizMenuSortFrm.dfm 
-      SimpleWizards\CnAlignSizeWizard.dfm CodingToolset\CnEditorWizard.dfm 
+      SimpleWizards\CnAlignSizeWizard.dfm CodingToolset\CnEditorToolsetWizard.dfm 
       SimpleWizards\CnListCompFrm.dfm SimpleWizards\CnCompToCodeFrm.dfm 
       SimpleWizards\CnMessageBoxWizard.dfm SimpleWizards\CnComponentSelector.dfm 
       SimpleWizards\CnTabOrderWizard.dfm SimpleWizards\CnBookmarkWizard.dfm 

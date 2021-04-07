@@ -50,7 +50,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   Grids, CnConsts, ExtCtrls, StdCtrls, ComCtrls, Clipbrd, Buttons, ActnList,
 {$IFNDEF STAND_ALONE}
-  CnEditorWizard, CnWizIdeDock, CnWizUtils,
+  CnEditorToolsetWizard, CnWizIdeDock, CnWizUtils,
 {$ENDIF}
   CnSpin, CnWizConsts, CnWizMultiLang;
 

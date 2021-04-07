@@ -62,7 +62,7 @@ uses
   CnAlignPropEditor in 'DesignEditors\CnAlignPropEditor.pas',
   CnFastCodeWizard in 'IdeEnhancements\CnFastCodeWizard.pas',
   CnAlignSizeWizard in 'SimpleWizards\CnAlignSizeWizard.pas' {CnNonArrangeForm},
-  CnEditorWizard in 'CodingToolset\CnEditorWizard.pas' {CnEditorToolsForm},
+  CnEditorToolsetWizard in 'CodingToolset\CnEditorToolsetWizard.pas' {CnEditorToolsForm},
   CnListCompFrm in 'SimpleWizards\CnListCompFrm.pas' {CnListCompForm},
   CnCompToCodeFrm in 'SimpleWizards\CnCompToCodeFrm.pas' {CnCompToCodeForm},
   CnMessageBoxWizard in 'SimpleWizards\CnMessageBoxWizard.pas' {CnMessageBoxForm},

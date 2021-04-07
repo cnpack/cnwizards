@@ -275,7 +275,7 @@ begin
   TranslateStr(SCnBookmarkAllUnit, 'SCnBookmarkAllUnit');
   TranslateStr(SCnBookmarkFileCount, 'SCnBookmarkFileCount');
   
-  // CnEditorWizard
+  // CnEditorToolsetWizard
   TranslateStr(SCnEditorToolsetWizardMenuCaption, 'SCnEditorToolsetWizardMenuCaption');
   TranslateStr(SCnEditorToolsetWizardMenuHint, 'SCnEditorToolsetWizardMenuHint');
   TranslateStr(SCnEditorToolsetWizardName, 'SCnEditorToolsetWizardName');

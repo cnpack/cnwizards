@@ -61,7 +61,7 @@ uses
   CnMultiLineEdtToolOptFrm in 'DesignEditors\CnMultiLineEdtToolOptFrm.pas' {CnMultiLineEditorToolsOptionForm},
   CnAlignPropEditor in 'DesignEditors\CnAlignPropEditor.pas',
   CnAlignSizeWizard in 'SimpleWizards\CnAlignSizeWizard.pas' {CnNonArrangeForm},
-  CnEditorWizard in 'CodingToolset\CnEditorWizard.pas' {CnEditorToolsForm},
+  CnEditorToolsetWizard in 'CodingToolset\CnEditorToolsetWizard.pas' {CnEditorToolsForm},
   CnListCompFrm in 'SimpleWizards\CnListCompFrm.pas' {CnListCompForm},
   CnCompToCodeFrm in 'SimpleWizards\CnCompToCodeFrm.pas' {CnCompToCodeForm},
   CnMessageBoxWizard in 'SimpleWizards\CnMessageBoxWizard.pas' {CnMessageBoxForm},

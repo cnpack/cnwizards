@@ -171,7 +171,7 @@
         <DCCReference Include="SimpleWizards\CnAlignSizeWizard.pas">
             <Form>CnNonArrangeForm</Form>
         </DCCReference>
-        <DCCReference Include="CodingToolset\CnEditorWizard.pas">
+        <DCCReference Include="CodingToolset\CnEditorToolsetWizard.pas">
             <Form>CnEditorToolsForm</Form>
         </DCCReference>
         <DCCReference Include="SimpleWizards\CnListCompFrm.pas">

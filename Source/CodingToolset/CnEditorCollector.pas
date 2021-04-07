@@ -43,7 +43,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, IniFiles, CnWizUtils, CnConsts, CnCommon, CnEditorWizard,
+  StdCtrls, IniFiles, CnWizUtils, CnConsts, CnCommon, CnEditorToolsetWizard,
   CnWizConsts, CnEditorCodeTool, CnIni, CnWizIdeDock, ComCtrls, Menus, Clipbrd,
   StdActns, ActnList, ToolWin, Tabs, CnWizShareImages, CnDesignEditorConsts,
   CnWizOptions;

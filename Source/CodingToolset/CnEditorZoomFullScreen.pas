@@ -48,7 +48,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, IniFiles, ToolsAPI, CnWizIdeUtils, CnConsts, CnCommon,
-  CnWizConsts, CnEditorWizard, CnWizUtils, CnWizMultiLang;
+  CnWizConsts, CnEditorToolsetWizard, CnWizUtils, CnWizMultiLang;
 
 type
   TCnEditorZoomFullScreenForm = class(TCnTranslateForm)

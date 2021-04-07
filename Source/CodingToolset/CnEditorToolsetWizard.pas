@@ -18,7 +18,7 @@
 {                                                                              }
 {******************************************************************************}
 
-unit CnEditorWizard;
+unit CnEditorToolsetWizard;
 {* |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包
@@ -714,7 +714,7 @@ end;
 
 function TCnEditorToolsForm.GetHelpTopic: string;
 begin
-  Result := 'CnEditorWizard';
+  Result := 'CnEditorToolsetWizard';
 end;
 
 procedure TCnEditorToolsForm.lvToolsChange(Sender: TObject; Item: TListItem;
@@ -743,13 +743,13 @@ initialization
 
 finalization
 {$IFDEF DEBUG}
-  CnDebugger.LogEnter('CnEditorWizard finalization.');
+  CnDebugger.LogEnter('CnEditorToolsetWizard finalization.');
 {$ENDIF}
 
   FreeAndNil(CnEditorClassList);
 
 {$IFDEF DEBUG}
-  CnDebugger.LogLeave('CnEditorWizard finalization.');
+  CnDebugger.LogLeave('CnEditorToolsetWizard finalization.');
 {$ENDIF}
 
 {$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
