@@ -29,7 +29,6 @@ unit CnTestCppPosKindWizard;
 * 开发平台：WinXP + BCB 5/6
 * 兼容测试：PWin9X/2000/XP + C++Builder 5/6
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式
-* 单元标识：$Id: CnTestCppPosKindWizard.pas 1146 2012-10-24 06:25:41Z liuxiaoshanzhashu@gmail.com $
 * 修改记录：2013.07.16 V1.0
 *               创建单元
 ================================================================================

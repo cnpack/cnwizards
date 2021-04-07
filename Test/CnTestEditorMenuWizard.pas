@@ -28,7 +28,6 @@ unit CnTestEditorMenuWizard;
 * 开发平台：WinXP + Delphi 7
 * 兼容测试：PWin9X/2000/XP + Delphi 7 以上
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式
-* 单元标识：$Id:  CnTestEditorMenuWizard 1146 2012-10-24 06:25:41Z liuxiaoshanzhashu@gmail.com $
 * 修改记录：2015.08.17 V1.0
 *               创建单元
 ================================================================================

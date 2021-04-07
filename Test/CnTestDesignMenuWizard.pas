@@ -28,7 +28,6 @@ unit CnTestDesignMenuWizard;
 * 开发平台：WinXP + Delphi 7
 * 兼容测试：PWin9X/2000/XP + Delphi 7 以上
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式
-* 单元标识：$Id:  CnTestDesignMenuWizard 1146 2012-10-24 06:25:41Z liuxiaoshanzhashu@gmail.com $
 * 修改记录：2015.05.20 V1.0
 *               创建单元
 ================================================================================
@@ -188,7 +187,7 @@ end;
 
 function TCnTestDesignMenu1.GetCaption: string;
 begin
-  Result := 'Hidden Caption';
+  Result := 'Hidden Caption - ' + DateTimeToStr(Now);
 end;
 
 function TCnTestDesignMenu1.GetEnabled: Boolean;
@@ -211,7 +210,7 @@ end;
 
 function TCnTestDesignMenu2.GetCaption: string;
 begin
-  Result := 'Disabled Caption'
+  Result := 'Disabled Caption - ' + DateTimeToStr(Now);
 end;
 
 function TCnTestDesignMenu2.GetEnabled: Boolean;
@@ -234,7 +233,7 @@ end;
 
 function TCnTestDesignMenu3.GetCaption: string;
 begin
-  Result := 'Enabled Caption';
+  Result := 'Enabled Caption - ' + DateTimeToStr(Now);
 end;
 
 function TCnTestDesignMenu3.GetEnabled: Boolean;
