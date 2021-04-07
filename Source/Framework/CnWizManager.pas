@@ -246,8 +246,17 @@ procedure RegisterBaseDesignMenuExecutor(Executor: TCnBaseMenuExecutor);
 procedure RegisterDesignMenuExecutor(Executor: TCnContextMenuExecutor);
 {* 注册一个设计器右键菜单的执行对象实例的另一形式}
 
+procedure UnregisterBaseDesignMenuExecutor(Executor: TCnBaseMenuExecutor);
+{* 反注册一个设计器右键菜单的执行对象实例，反注册后 Executor 被自动释放}
+
+procedure UnregisterDesignMenuExecutor(Executor: TCnContextMenuExecutor);
+{* 反注册一个设计器右键菜单的执行对象实例的另一形式，反注册后 Executor 被自动释放}
+
 procedure RegisterEditorMenuExecutor(Executor: TCnContextMenuExecutor);
 {* 注册一个编辑器右键菜单的执行对象实例，应该在专家创建时注册}
+
+procedure UnregisterEditorMenuExecutor(Executor: TCnContextMenuExecutor);
+{* 反注册一个编辑器右键菜单的执行对象实例，反注册后 Executor 被自动释放}
 
 function GetEditorMenuExecutorCount: Integer;
 {* 返回已注册的编辑器右键菜单条目数量，供编辑器扩展实现自定义编辑器菜单用}
@@ -292,12 +301,32 @@ begin
   RegisterBaseDesignMenuExecutor(Executor);
 end;
 
+// 反注册一个设计器右键菜单的执行对象实例，反注册后 Executor 被自动释放
+procedure UnregisterBaseDesignMenuExecutor(Executor: TCnBaseMenuExecutor);
+begin
+  Assert(CnDesignExecutorList <> nil, 'CnDesignExecutorList is nil!');
+  CnDesignExecutorList.Remove(Executor);
+end;
+
+// 反注册一个设计器右键菜单的执行对象实例的另一形式，反注册后 Executor 被自动释放
+procedure UnregisterDesignMenuExecutor(Executor: TCnContextMenuExecutor);
+begin
+  UnregisterBaseDesignMenuExecutor(Executor);
+end;
+
 // 注册一个编辑器右键菜单的执行对象实例，应该在专家创建时注册
 procedure RegisterEditorMenuExecutor(Executor: TCnContextMenuExecutor);
 begin
   Assert(CnEditorExecutorList <> nil, 'CnEditorExecutorList is nil!');
   if CnEditorExecutorList.IndexOf(Executor) < 0 then
     CnEditorExecutorList.Add(Executor);
+end;
+
+// 反注册一个编辑器右键菜单的执行对象实例，反注册后 Executor 被自动释放
+procedure UnregisterEditorMenuExecutor(Executor: TCnContextMenuExecutor);
+begin
+  Assert(CnEditorExecutorList <> nil, 'CnEditorExecutorList is nil!');
+  CnEditorExecutorList.Remove(Executor);
 end;
 
 // 返回已注册的编辑器右键菜单条目数量，供编辑器扩展实现自定义编辑器菜单用

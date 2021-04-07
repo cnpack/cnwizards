@@ -28,7 +28,9 @@ unit CnTestDesignMenuWizard;
 * 开发平台：WinXP + Delphi 7
 * 兼容测试：PWin9X/2000/XP + Delphi 7 以上
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式
-* 修改记录：2015.05.20 V1.0
+* 修改记录：2021.04.07 V1.1
+*               可以删除右键菜单条目
+*           2015.05.20 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -52,6 +54,7 @@ type
   TCnTestDesignMenuWizard = class(TCnMenuWizard)
   private
     FExecutor: TCnContextMenuExecutor;
+    FE1, FE2, FE3: TCnBaseMenuExecutor;
     procedure Executor2Execute(Sender: TObject);
   protected
     function GetHasConfig: Boolean; override;
@@ -106,11 +109,30 @@ end;
 
 procedure TCnTestDesignMenuWizard.Execute;
 begin
-  RegisterBaseDesignMenuExecutor(TCnTestDesignMenu1.Create(Self));
-  RegisterBaseDesignMenuExecutor(TCnTestDesignMenu2.Create(Self));
-  RegisterBaseDesignMenuExecutor(TCnTestDesignMenu3.Create(Self));
-  ShowMessage('3 Menu Items Registered using TCnBaseMenuExecutor.' + #13#10
-    + '1 Hidden, 1 Disabled and 1 Enabled. Please Check Designer Context Menu.');
+  if FE1 = nil then
+  begin
+    FE1 := TCnTestDesignMenu1.Create(Self);
+    FE2 := TCnTestDesignMenu2.Create(Self);
+    FE3 := TCnTestDesignMenu3.Create(Self);
+
+    RegisterBaseDesignMenuExecutor(FE1);
+    RegisterBaseDesignMenuExecutor(FE2);
+    RegisterBaseDesignMenuExecutor(FE3);
+
+    ShowMessage('3 Menu Items Registered using TCnBaseMenuExecutor.' + #13#10
+      + '1 Hidden, 1 Disabled and 1 Enabled. Please Check Designer Context Menu.');
+  end
+  else
+  begin
+    UnregisterBaseDesignMenuExecutor(FE1);
+    UnregisterBaseDesignMenuExecutor(FE2);
+    UnregisterBaseDesignMenuExecutor(FE3);
+    FE1 := nil;
+    FE2 := nil;
+    FE3 := nil;
+
+    ShowMessage('3 Menu Items UnRegistered using TCnBaseMenuExecutor.');
+  end;
 
   if FExecutor = nil then
   begin
@@ -121,6 +143,11 @@ begin
     FExecutor.Hint := '2 Hint';
     FExecutor.OnExecute := Executor2Execute;
     RegisterDesignMenuExecutor(FExecutor);
+  end
+  else
+  begin
+    UnregisterDesignMenuExecutor(FExecutor);
+    FExecutor := nil;
   end;
 end;
 
