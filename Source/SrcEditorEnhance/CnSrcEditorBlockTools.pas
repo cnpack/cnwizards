@@ -162,20 +162,6 @@ type
     property OnEnhConfig: TNotifyEvent read FOnEnhConfig write FOnEnhConfig;
   end;
 
-{$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
-{$IFDEF SUPPORT_PASCAL_SCRIPT}
-  TCnScriptSettingChangedReceiver = class(TInterfacedObject, ICnEventBusReceiver)
-  private
-    FBlock: TCnSrcEditorBlockTools;
-  public
-    constructor Create(ABlock: TCnSrcEditorBlockTools);
-    destructor Destroy; override;
-
-    procedure OnEvent(Event: TCnEvent);
-  end;
-{$ENDIF}
-{$ENDIF}
-
 {$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}
 
 implementation
@@ -193,6 +179,21 @@ const
   csShowBlockTools = 'ShowBlockTools';
   csShowColor = 'ShowColor';
   csTabIndent = 'TabIndent';
+
+{$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
+{$IFDEF SUPPORT_PASCAL_SCRIPT}
+type
+  TCnSrcEditorScriptSettingChangedReceiver = class(TInterfacedObject, ICnEventBusReceiver)
+  private
+    FBlock: TCnSrcEditorBlockTools;
+  public
+    constructor Create(ABlock: TCnSrcEditorBlockTools);
+    destructor Destroy; override;
+
+    procedure OnEvent(Event: TCnEvent);
+  end;
+{$ENDIF}
+{$ENDIF}
 
 { TCnSrcEditorBlockTools }
 
@@ -256,7 +257,7 @@ begin
 
 {$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
 {$IFDEF SUPPORT_PASCAL_SCRIPT}
-  FScriptSettingChangedReceiver := TCnScriptSettingChangedReceiver.Create(Self);
+  FScriptSettingChangedReceiver := TCnSrcEditorScriptSettingChangedReceiver.Create(Self);
   EventBus.RegisterReceiver(FScriptSettingChangedReceiver, EVENT_SCRIPT_SETTING_CHANGED);
 {$ENDIF}
 {$ENDIF}
@@ -1297,22 +1298,22 @@ end;
 {$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
 {$IFDEF SUPPORT_PASCAL_SCRIPT}
 
-{ TCnScriptSettingChangedReceiver }
+{ TCnSrcEditorScriptSettingChangedReceiver }
 
-constructor TCnScriptSettingChangedReceiver.Create(
+constructor TCnSrcEditorScriptSettingChangedReceiver.Create(
   ABlock: TCnSrcEditorBlockTools);
 begin
   inherited Create;
   FBlock := ABlock;
 end;
 
-destructor TCnScriptSettingChangedReceiver.Destroy;
+destructor TCnSrcEditorScriptSettingChangedReceiver.Destroy;
 begin
   inherited;
 
 end;
 
-procedure TCnScriptSettingChangedReceiver.OnEvent(Event: TCnEvent);
+procedure TCnSrcEditorScriptSettingChangedReceiver.OnEvent(Event: TCnEvent);
 begin
   if FBlock <> nil then
     FBlock.UpdateMenu(FBlock.FPopupMenu.Items);

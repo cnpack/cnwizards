@@ -1630,28 +1630,6 @@ begin
       ShowSimpleCommentForm('', Format(SCnKeyMappingConflictsHint, [WizOptions.CompilerRegPath + KEY_MAPPING_REG]),
         SCnCheckKeyMappingEnhModulesSequence + CompilerShortName, False);
 {$ENDIF}
-
-      // 交换最大的值和 CnPack 的值。但未必有效，先不这么整。
-//      Reg := TRegistry.Create(KEY_WRITE);
-//      try
-//        if Reg.OpenKey(WizOptions.CompilerRegPath + KEY_MAPPING_REG + '\' + List[CnPackIdx], False) then
-//        begin
-//          Reg.WriteInteger(PRIORITY_KEY, Integer(List.Objects[MaxIdx]));
-//          Reg.CloseKey;
-//        end;
-//        if Reg.OpenKey(WizOptions.CompilerRegPath + KEY_MAPPING_REG + '\' + List[MaxIdx], False) then
-//        begin
-//          Reg.WriteInteger(PRIORITY_KEY, Integer(List.Objects[CnPackIdx]));
-//          Reg.CloseKey;
-//        end;
-//{$IFDEF DEBUG}
-//        CnDebugger.LogFmt('Key Mapping Exchange Priority: %s to %d; %s to %d.',
-//          [List[MaxIdx], Integer(List.Objects[CnPackIdx]),
-//          List[CnPackIdx], Integer(List.Objects[MaxIdx])]);
-//{$ENDIF}
-//      finally
-//        Reg.Free;
-//      end;
     end;
   finally
     List.Free;

@@ -1336,6 +1336,7 @@ begin
   TranslateStr(SCnScriptModeApplicationEvent, 'SCnScriptModeApplicationEvent');
   TranslateStr(SCnScriptModeActiveFormChanged, 'SCnScriptModeActiveFormChanged');
   TranslateStr(SCnScriptModeEditorFlatButton, 'SCnScriptModeEditorFlatButton');
+  TranslateStr(SCnScriptModeDesignerContextMenu, 'SCnScriptModeDesignerContextMenu');
 
   // CnFeedReaderWizard
   TranslateStr(SCnFeedReaderWizardName, 'SCnFeedReaderWizardName');

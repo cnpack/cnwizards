@@ -65,10 +65,10 @@ interface
 
 uses
   Windows, SysUtils, Messages, Classes, Forms, IniFiles, ToolsAPI, Controls,
-  Dialogs, Math, ActnList, Graphics,
+  Dialogs, Math, ActnList, Graphics, Contnrs,
 {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, {$ELSE} DsgnIntf, {$ENDIF}
 {$IFDEF IDE_ACTION_UPDATE_DELAY} ActnMenus, ActnMan, {$ENDIF}
-  Buttons, Menus, CnWizClasses, CnWizMenuAction, CnWizUtils,
+  Buttons, Menus, CnWizClasses, CnWizMenuAction, CnWizUtils, CnEventBus,
   CnConsts, CnWizNotifier, CnWizConsts, CnWizManager, CnVclFmxMixed,
   StdCtrls, CnSpin, CnWizIdeUtils, CnCommon, CnWizMultiLang;
 
@@ -115,6 +115,12 @@ type
     FEditMenuActionControl: TCustomActionControl;
 {$ENDIF}
 
+{$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
+{$IFDEF SUPPORT_PASCAL_SCRIPT}
+    FScriptsDesignExecutors: TObjectList;
+    FScriptSettingChangedReceiver: ICnEventBusReceiver;
+{$ENDIF}
+{$ENDIF}
     procedure ControlListSortByPos(List: TList; IsVert: Boolean;
       Desc: Boolean = False);
     procedure ControlListSortByProp(List: TList; ProName: string;
@@ -132,6 +138,12 @@ type
     procedure RequestLockControlsMenuUpdate(Sender: TObject);
     procedure RequestNonvisualsMenuUpdate(Sender: TObject);
 
+{$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
+{$IFDEF SUPPORT_PASCAL_SCRIPT}
+    procedure SyncScriptsDesignMenus;
+    procedure ScriptExecute(Sender: TObject);
+{$ENDIF}
+{$ENDIF}
     procedure ShowFlatForm;
     procedure NonVisualArrange;
     procedure ArrangeNonVisualComponents;
@@ -221,8 +233,8 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  TypInfo, CnFormEnhancements, CnListCompFrm, CnCompToCodeFrm,
-  CnDesignEditorConsts, CnPrefixExecuteFrm, CnGraphUtils;
+  TypInfo, CnFormEnhancements, CnListCompFrm, CnCompToCodeFrm, CnScriptWizard,
+  CnDesignEditorConsts, CnPrefixExecuteFrm, CnGraphUtils, CnScriptFrm;
 
 {$R *.dfm}
 
@@ -235,6 +247,7 @@ resourcestring
   SOptionGridSizeY = 'GridSizeY';
   SIDELockControlsMenuName = 'EditLockControlsItem';
   SIDELockControlsActionName = 'EditLockControlsCommand';
+
   // 10 Seattle 后才自带以下俩功能
   SIDEHideNonvisualsMenuName = 'ToggleNonVisualComponentVisibilityItem';
   SIDEHideNonvisualsActionName = 'ToggleNonVisualComponentVisibilityCommand';
@@ -322,6 +335,23 @@ const
     @SCnNonArrangeHint, @SCnListCompHint, @SCnCompToCodeHint,
     @SCnFloatPropBarRenameCaption, @SCnShowFlatFormHint);
 
+{$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
+{$IFDEF SUPPORT_PASCAL_SCRIPT}
+
+type
+  TCnDesignScriptSettingChangedReceiver = class(TInterfacedObject, ICnEventBusReceiver)
+  private
+    FWizard: TCnAlignSizeWizard;
+  public
+    constructor Create(AWizard: TCnAlignSizeWizard);
+    destructor Destroy; override;
+
+    procedure OnEvent(Event: TCnEvent);
+  end;
+
+{$ENDIF}
+{$ENDIF}
+
 //==============================================================================
 // Align Size 设置工具
 //==============================================================================
@@ -331,12 +361,28 @@ const
 constructor TCnAlignSizeWizard.Create;
 begin
   inherited;
+{$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
+{$IFDEF SUPPORT_PASCAL_SCRIPT}
+  FScriptsDesignExecutors := TObjectList.Create(False);
+  SyncScriptsDesignMenus;
+
+  FScriptSettingChangedReceiver := TCnDesignScriptSettingChangedReceiver.Create(Self);
+  EventBus.RegisterReceiver(FScriptSettingChangedReceiver, EVENT_SCRIPT_SETTING_CHANGED);
+{$ENDIF}
+{$ENDIF}
   CnWizNotifierServices.AddFormEditorNotifier(FormEditorNotifier);
 end;
 
 destructor TCnAlignSizeWizard.Destroy;
 begin
   CnWizNotifierServices.RemoveFormEditorNotifier(FormEditorNotifier);
+{$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
+{$IFDEF SUPPORT_PASCAL_SCRIPT}
+  EventBus.UnRegisterReceiver(FScriptSettingChangedReceiver);
+  FScriptSettingChangedReceiver := nil;
+  FScriptsDesignExecutors.Free;
+{$ENDIF}
+{$ENDIF}
   inherited;
 end;
 
@@ -1589,6 +1635,65 @@ begin
 {$ENDIF}
 end;
 
+{$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
+{$IFDEF SUPPORT_PASCAL_SCRIPT}
+
+procedure TCnAlignSizeWizard.ScriptExecute(Sender: TObject);
+var
+  Idx: Integer;
+  SW: TCnScriptWizard;
+  AEvent: TCnScriptDesignerContextMenu;
+begin
+  Idx := -1;
+  if Sender is TCnContextMenuExecutor then
+    Idx := (Sender as TCnContextMenuExecutor).Tag;
+
+  SW := CnWizardMgr.WizardByClassName('TCnScriptWizard') as TCnScriptWizard;
+  if (SW <> nil) and (Idx >= 0) then
+  begin
+    AEvent := TCnScriptDesignerContextMenu.Create;
+    try
+      SW.ExecuteScriptByIndex(Idx, AEvent);
+    finally
+      AEvent.Free;
+    end;
+  end;
+end;
+
+procedure TCnAlignSizeWizard.SyncScriptsDesignMenus;
+var
+  I: Integer;
+  Ext: TCnContextMenuExecutor;
+  SW: TCnScriptWizard;
+begin
+  // 根据 Scripts 里的内容创建 FScriptsDesignExecutors 并挨个注册
+  for I := 0 to FScriptsDesignExecutors.Count - 1 do
+    UnregisterDesignMenuExecutor(TCnContextMenuExecutor(FScriptsDesignExecutors[I]));
+  FScriptsDesignExecutors.Clear;
+
+  SW := CnWizardMgr.WizardByClassName('TCnScriptWizard') as TCnScriptWizard;
+  if SW <> nil then
+  begin
+    for I := 0 to SW.Scripts.Count - 1 do
+    begin
+      if smDesignerContextMenu in SW.Scripts[I].Mode then
+      begin
+        Ext := TCnContextMenuExecutor.Create;
+        Ext.Caption := SW.Scripts[I].Name;
+        Ext.Active := SW.Scripts[I].Enabled;
+        Ext.Tag := I;
+        Ext.OnExecute := ScriptExecute;
+
+        RegisterDesignMenuExecutor(Ext);
+        FScriptsDesignExecutors.Add(Ext); // 保存一个引用供清除时用
+      end;
+    end;
+  end;
+end;
+
+{$ENDIF}
+{$ENDIF}
+
 procedure TCnAlignSizeWizard.Loaded;
 begin
   inherited;
@@ -1722,6 +1827,38 @@ begin
   end;
 end;
 
+{$ENDIF}
+
+{$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
+{$IFDEF SUPPORT_PASCAL_SCRIPT}
+
+{ TCnDesignScriptSettingChangedReceiver }
+
+constructor TCnDesignScriptSettingChangedReceiver.Create(
+  AWizard: TCnAlignSizeWizard);
+begin
+  inherited Create;
+  FWizard := AWizard;
+end;
+
+destructor TCnDesignScriptSettingChangedReceiver.Destroy;
+begin
+
+  inherited;
+end;
+
+procedure TCnDesignScriptSettingChangedReceiver.OnEvent(Event: TCnEvent);
+begin
+  if FWizard <> nil then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('AlignSizeWizard Design Got Script Setting Changed.');
+{$ENDIF}
+    FWizard.SyncScriptsDesignMenus;
+  end;
+end;
+
+{$ENDIF}
 {$ENDIF}
 
 initialization

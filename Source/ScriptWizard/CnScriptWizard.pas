@@ -280,7 +280,8 @@ const
     @SCnScriptModeFileNotify, @SCnScriptModeBeforeCompile,
     @SCnScriptModeAfterCompile, @SCnScriptModeSourceEditorNotify,
     @SCnScriptModeFormEditorNotify, @SCnScriptModeApplicationEvent,
-    @SCnScriptModeActiveFormChanged, @SCnScriptModeEditorFlatButton);
+    @SCnScriptModeActiveFormChanged, @SCnScriptModeEditorFlatButton,
+    @SCnScriptModeDesignerContextMenu);
 
 { TCnScriptItem }
 

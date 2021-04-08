@@ -431,6 +431,7 @@ type
   TCnBaseMenuExecutor = class(TObject)
   {* 设计器或编辑器右键菜单执行条目的基类，可从属于某一专家实例}
   private
+    FTag: Integer;
     FWizard: TCnBaseWizard;
   public
     constructor Create(OwnWizard: TCnBaseWizard); virtual;
@@ -451,6 +452,8 @@ type
 
     property Wizard: TCnBaseWizard read FWizard;
     {* 所属 Wizard 实例}
+    property Tag: Integer read FTag write FTag;
+    {* 挂一个 Tag}
   end;
 
 //==============================================================================

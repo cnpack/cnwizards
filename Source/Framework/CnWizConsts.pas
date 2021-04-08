@@ -1576,6 +1576,7 @@ var
   SCnScriptModeApplicationEvent: string = 'Trigger by Application Event';
   SCnScriptModeActiveFormChanged: string = 'Trigger after Active Form Changed';
   SCnScriptModeEditorFlatButton: string = 'Attach to Editor Flat Button Menu';
+  SCnScriptModeDesignerContextMenu: string = 'Attach to Designer Context Menu';
 
   // CnFeedReaderWizard
   SCnFeedReaderWizardName: string = 'FeedReader Wizard';

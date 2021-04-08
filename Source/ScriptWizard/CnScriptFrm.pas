@@ -51,7 +51,7 @@ uses
 type
   TCnScriptMode = (smManual, smIDELoaded, smFileNotify, smBeforeCompile,
     smAfterCompile, smSourceEditorNotify, smFormEditorNotify, smApplicationEvent,
-    smActiveFormChanged, smEditorFlatButton);
+    smActiveFormChanged, smEditorFlatButton, smDesignerContextMenu);
   TCnScriptModeSet = set of TCnScriptMode;
 
 {$M+} // Generate RTTI
@@ -156,6 +156,11 @@ type
   end;
 
   TCnScriptEditorFlatButton = class(TCnScriptEvent)
+  public
+    constructor Create;
+  end;
+
+  TCnScriptDesignerContextMenu = class(TCnScriptEvent)
   public
     constructor Create;
   end;
@@ -384,6 +389,13 @@ end;
 constructor TCnScriptEditorFlatButton.Create;
 begin
   inherited Create(smEditorFlatButton);
+end;
+
+{ TCnScriptDesignerContextMenu }
+
+constructor TCnScriptDesignerContextMenu.Create;
+begin
+  inherited Create(smDesignerContextMenu);
 end;
 
 { TCnScriptCreator }
@@ -964,4 +976,5 @@ end;
 {$ENDIF}
 
 {$ENDIF CNWIZARDS_CNSCRIPTWIZARD}
+
 end.
