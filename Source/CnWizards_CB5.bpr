@@ -100,8 +100,8 @@
       Misc\CnWizUpgradeFrm.dfm Misc\CnWizShareImages.dfm 
       MultiLang\CnWizMultiLang.dfm Config\CnWizConfigFrm.dfm 
       Config\CnWizSubActionShortCutFrm.dfm Config\CnWizMenuSortFrm.dfm 
-      SimpleWizards\CnAlignSizeWizard.dfm CodingToolset\CnEditorToolsetWizard.dfm 
-      SimpleWizards\CnListCompFrm.dfm SimpleWizards\CnCompToCodeFrm.dfm 
+      DesignWizard\CnAlignSizeWizard.dfm CodingToolset\CnEditorToolsetWizard.dfm 
+      DesignWizard\CnListCompFrm.dfm DesignWizard\CnCompToCodeFrm.dfm 
       SimpleWizards\CnMessageBoxWizard.dfm SimpleWizards\CnComponentSelector.dfm 
       SimpleWizards\CnTabOrderWizard.dfm SimpleWizards\CnBookmarkWizard.dfm 
       SimpleWizards\CnBookmarkConfigFrm.dfm SrcTemplate\CnSrcTemplate.dfm 

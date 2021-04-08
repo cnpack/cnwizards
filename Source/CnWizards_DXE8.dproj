@@ -170,16 +170,16 @@
         </DCCReference>
         <DCCReference Include="DesignEditors\CnAlignPropEditor.pas"/>
         <DCCReference Include="IdeEnhancements\CnFastCodeWizard.pas"/>
-        <DCCReference Include="SimpleWizards\CnAlignSizeWizard.pas">
+        <DCCReference Include="DesignWizard\CnAlignSizeWizard.pas">
             <Form>CnNonArrangeForm</Form>
         </DCCReference>
         <DCCReference Include="CodingToolset\CnEditorToolsetWizard.pas">
             <Form>CnEditorToolsForm</Form>
         </DCCReference>
-        <DCCReference Include="SimpleWizards\CnListCompFrm.pas">
+        <DCCReference Include="DesignWizard\CnListCompFrm.pas">
             <Form>CnListCompForm</Form>
         </DCCReference>
-        <DCCReference Include="SimpleWizards\CnCompToCodeFrm.pas">
+        <DCCReference Include="DesignWizard\CnCompToCodeFrm.pas">
             <Form>CnCompToCodeForm</Form>
         </DCCReference>
         <DCCReference Include="SimpleWizards\CnMessageBoxWizard.pas">

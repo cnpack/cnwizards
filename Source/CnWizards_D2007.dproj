@@ -348,7 +348,7 @@
     <DCCReference Include="ScriptWizard\CnScriptWizard.pas">
       <Form>CnScriptWizardForm</Form>
     </DCCReference>
-    <DCCReference Include="SimpleWizards\CnAlignSizeWizard.pas">
+    <DCCReference Include="DesignWizard\CnAlignSizeWizard.pas">
       <Form>CnNonArrangeForm</Form>
     </DCCReference>
     <DCCReference Include="SimpleWizards\CnBookmarkConfigFrm.pas">
@@ -363,11 +363,11 @@
     <DCCReference Include="SimpleWizards\CnComponentSelector.pas">
       <Form>CnComponentSelectorForm</Form>
     </DCCReference>
-    <DCCReference Include="SimpleWizards\CnCompToCodeFrm.pas">
+    <DCCReference Include="DesignWizard\CnCompToCodeFrm.pas">
       <Form>CnCompToCodeForm</Form>
     </DCCReference>
     <DCCReference Include="SimpleWizards\CnIdeBRWizard.pas" />
-    <DCCReference Include="SimpleWizards\CnListCompFrm.pas">
+    <DCCReference Include="DesignWizard\CnListCompFrm.pas">
       <Form>CnListCompForm</Form>
     </DCCReference>
     <DCCReference Include="SimpleWizards\CnMessageBoxWizard.pas">
