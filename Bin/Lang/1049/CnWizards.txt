@@ -3655,6 +3655,7 @@ SCnScriptModeFormEditorNotify=Запуск по уведомлению диза�
 SCnScriptModeApplicationEvent=Запуск по событию приложения
 SCnScriptModeActiveFormChanged=Триггер после изменения активной формы
 SCnScriptModeEditorFlatButton=Присоединить к меню плоских кнопок редактора
+SCnScriptModeDesignerContextMenu=Присоединиться к контекстному меню дизайнера
 SCnFeedReaderWizardName=Мастер подписки
 SCnFeedReaderWizardComment=Отображает содержимое подписки в строке состояния
 SCnFeedPrevFeedCaption=Предыдущая

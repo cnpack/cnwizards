@@ -3655,6 +3655,7 @@ SCnScriptModeFormEditorNotify=Auslöser durch Designer-Benachrichtigung
 SCnScriptModeApplicationEvent=Auslöser nach Anwendungsereignis
 SCnScriptModeActiveFormChanged=Auslöser nach geänderter aktiver Form
 SCnScriptModeEditorFlatButton=Zum Flat-Button-Menü des Editors anhängen
+SCnScriptModeDesignerContextMenu=Zum Designer-Kontextmenü anhängen
 SCnFeedReaderWizardName=FeedReader Werkzeug
 SCnFeedReaderWizardComment=zeigt Inhalte von Feeds in der Status Bar
 SCnFeedPrevFeedCaption=vorhergehender Eintrag

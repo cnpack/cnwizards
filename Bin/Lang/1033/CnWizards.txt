@@ -3655,6 +3655,7 @@ SCnScriptModeFormEditorNotify=Trigger by Designer Notification
 SCnScriptModeApplicationEvent=Trigger by Application Event
 SCnScriptModeActiveFormChanged=Trigger after Active Form Changed
 SCnScriptModeEditorFlatButton=Attach to Editor Flat Button Menu
+SCnScriptModeDesignerContextMenu=Attach to Designer Context Menu
 SCnFeedReaderWizardName=FeedReader Wizard
 SCnFeedReaderWizardComment=Display Feed Content in Status Bar
 SCnFeedPrevFeedCaption=&Previous Item

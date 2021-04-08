@@ -3655,6 +3655,7 @@ SCnScriptModeFormEditorNotify=设计器改变时触发
 SCnScriptModeApplicationEvent=Application事件触发
 SCnScriptModeActiveFormChanged=窗体切换后触发
 SCnScriptModeEditorFlatButton=置于编辑器浮动按钮菜单
+SCnScriptModeDesignerContextMenu=置于设计器右键菜单
 SCnFeedReaderWizardName=源阅读专家
 SCnFeedReaderWizardComment=在状态栏上显示源内容
 SCnFeedPrevFeedCaption=上一条(&P)
