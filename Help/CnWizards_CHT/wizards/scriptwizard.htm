@@ -108,15 +108,15 @@
   <li>
 <p class="text" align="left"><b>腳本通知選項</b>：腳本運行有兩種方式，一是手動調用，二是事件觸發運行。該樹形復選框可設置當前腳本在 IDE 觸發哪些事件時被調用運行。</p>
 <ul>
-  <li><p class="text" align="left"><b>smManual</b>：被手工調用。</p>
+  <li><p class="text" align="left"><b>手動運行</b>：被手工調用。</p>
   </li>
-  <li><p class="text" align="left"><b>smIDELoaded</b>：當 IDE 啟動完成時調用。</p>
+  <li><p class="text" align="left"><b>IDE加載完畢後觸發</b>：當 IDE 啟動完成時調用。</p>
   </li>
-  <li><p class="text" align="left"><b>smBeforeCompile</b>：編譯前調用。</p>
+  <li><p class="text" align="left"><b>編譯前觸發</b>：編譯前調用。</p>
   </li>
-  <li><p class="text" align="left"><b>smAfterCompile</b>：編譯後調用。</p>
+  <li><p class="text" align="left"><b>編譯後觸發</b>：編譯後調用。</p>
   </li>
-  <li><p class="text" align="left"><b>smFileNotify</b>：文件事件觸發時調用，包括以下事件：</p>
+  <li><p class="text" align="left"><b>文件通知觸發</b>：文件事件觸發時調用，包括以下事件：</p>
   <ul>
   	<li><p class="text" align="left"><b>ofnFileOpening</b>：某文件即將打開時觸發的事件。</p></li>
   	<li><p class="text" align="left"><b>ofnFileOpened</b>：某文件打開後觸發的事件。</p></li>
@@ -129,7 +129,7 @@
   	<li><p class="text" align="left"><b>ofnPackageUninstalled</b>：包文件卸載後觸發的事件。</p></li>
   </ul>
   </li>
-  <li><p class="text" align="left"><b>smSourceEditorNotify</b>：源碼編輯器事件觸發時調用，包括以下事件：</p>
+  <li><p class="text" align="left"><b>編輯器改變時觸發</b>：源碼編輯器事件觸發時調用，包括以下事件：</p>
   <ul>
   	<li><p class="text" align="left"><b>setOpened</b>：源碼編輯器打開一文件時觸發的事件。</p></li>
   	<li><p class="text" align="left"><b>setClosing</b>：源碼編輯器關閉一文件時觸發的事件。</p></li>
@@ -139,7 +139,7 @@
   	<li><p class="text" align="left"><b>setEditViewActivated</b>：源碼編輯器的某 EditView 變為活動時觸發的事件。</p></li>
   </ul>
   </li>
-  <li><p class="text" align="left"><b>smFormEditorNotify</b>：窗體編輯器事件觸發時調用，包括以下事件：</p>
+  <li><p class="text" align="left"><b>設計器改變時觸發</b>：窗體編輯器事件觸發時調用，包括以下事件：</p>
   <ul>
   <li><p class="text" align="left"><b>fetOpened</b>：打開一窗體編輯器後觸發的事件。</p></li>
   <li><p class="text" align="left"><b>fetClosing</b>：關閉一窗體編輯器前觸發的事件。</p></li>
@@ -152,7 +152,7 @@
   <li><p class="text" align="left"><b>fetComponentRenamed</b>：窗體編輯器上組件改名時觸發的事件。</p></li>
   </ul>
   </li>
-  <li><p class="text" align="left"><b>smApplicationEvent</b>：Application對象的指定事件觸發時調用，包括以下事件：</p>
+  <li><p class="text" align="left"><b>Application事件觸發</b>：Application對象的指定事件觸發時調用，包括以下事件：</p>
   <ul>
   <li><p class="text" align="left"><b>aeActivate</b>：IDE 切換至前台時觸發的事件。</p></li>
   <li><p class="text" align="left"><b>aeDeactivate</b>：IDE 切換至後台時觸發的事件。</p></li>
@@ -161,7 +161,13 @@
   <li><p class="text" align="left"><b>aeHint</b>：顯示Hint時觸發的事件。</p></li>
   </ul>
   </li>
-  <li><p class="text" align="left"><b>smActiveFormChanged</b>：IDE 內窗體切換時觸發的事件。</p>
+  <li><p class="text" align="left"><b>窗體切換後觸發</b>：IDE 內窗體切換時觸發的事件。</p>
+  </li>
+  </li>
+  <li><p class="text" align="left"><b>置於編輯器浮動按鈕菜單</b>：勾選此選項後，該腳本將出現在編輯器的浮動按鈕的下拉菜單中。</p>
+  </li>
+  </li>
+  <li><p class="text" align="left"><b>置於設計器右鍵菜單</b>：勾選此選項後，該腳本將出現在設計器的右鍵菜單中。</p>
   </li>
 </ul>
   </li>

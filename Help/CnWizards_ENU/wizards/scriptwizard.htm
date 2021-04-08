@@ -108,15 +108,15 @@
   <li>
 <p class="text" align="left"><b>Select Events</b>: You can select the IDE triggers/events in the treeview to run current script item.</p>
 <ul>
-  <li><p class="text" align="left"><b>smManual</b>: Called manually.</p>
+  <li><p class="text" align="left"><b>Manually Run</b>: Called manually.</p>
   </li>
-  <li><p class="text" align="left"><b>smIDELoaded</b>: Event after IDE starting.</p>
+  <li><p class="text" align="left"><b>Trigger after IDE Loaded</b>: Event after IDE starting.</p>
   </li>
-  <li><p class="text" align="left"><b>smBeforeCompile</b>: Event before compiling.</p>
+  <li><p class="text" align="left"><b>Trigger before Compile</b>: Event before compiling.</p>
   </li>
-  <li><p class="text" align="left"><b>smAfterCompile</b>: Event after compiling.</p>
+  <li><p class="text" align="left"><b>Trigger after Compile</b>: Event after compiling.</p>
   </li>
-  <li><p class="text" align="left"><b>smFileNotify</b>: Event of File operations, include below: </p>
+  <li><p class="text" align="left"><b>Trigger by File Notification</b>: Event of File operations, include below: </p>
   <ul>
   	<li><p class="text" align="left"><b>ofnFileOpening</b>: Event of opening a file.</p></li>
   	<li><p class="text" align="left"><b>ofnFileOpened</b>: Event after opening a file.</p></li>
@@ -129,7 +129,7 @@
   	<li><p class="text" align="left"><b>ofnPackageUninstalled</b>: Event after a package uninstalled.</p></li>
   </ul>
   </li>
-  <li><p class="text" align="left"><b>smSourceEditorNotify</b>: Event of Source Editor operations, include below:</p>
+  <li><p class="text" align="left"><b>Trigger by Source Editor Notification</b>: Event of Source Editor operations, include below:</p>
   <ul>
   	<li><p class="text" align="left"><b>setOpened</b>: Event after a source editor open a file.</p></li>
   	<li><p class="text" align="left"><b>setClosing</b>: Event before a source editor close a file.</p></li>
@@ -139,7 +139,7 @@
   	<li><p class="text" align="left"><b>setEditViewActivated</b>: Event when activate an EditView in source editor.</p></li>
   </ul>
   </li>
-  <li><p class="text" align="left"><b>smFormEditorNotify</b>: Event of Form Editor operations, include below:</p>
+  <li><p class="text" align="left"><b>Trigger by Designer Notify</b>: Event of Form Editor operations, include below:</p>
   <ul>
   <li><p class="text" align="left"><b>fetOpened</b>: Event after a form editor open a form file.</p></li>
   <li><p class="text" align="left"><b>fetClosing</b>: Event before a form editor close a form file.</p></li>
@@ -152,7 +152,7 @@
   <li><p class="text" align="left"><b>fetComponentRenamed</b>: Event when renaming a component in form editor.</p></li>
   </ul>
   </li>
-  <li><p class="text" align="left"><b>smApplicationEvent</b>: Event of Application Object's Events, include below:</p>
+  <li><p class="text" align="left"><b>Trigger by Application Event</b>: Event of Application Object's Events, include below:</p>
   <ul>
   <li><p class="text" align="left"><b>aeActivate</b>: Event when IDE Activated.</p></li>
   <li><p class="text" align="left"><b>aeDeactivate</b>: Event when IDE Deactivated.</p></li>
@@ -161,7 +161,13 @@
   <li><p class="text" align="left"><b>aeHint</b>: Event when showing Hint.</p></li>
   </ul>
   </li>
-  <li><p class="text" align="left"><b>smActiveFormChanged</b>: Event when acitve Form changed in IDE.</p>
+  <li><p class="text" align="left"><b>Trigger after Active Form Changed</b>: Event when acitve Form changed in IDE.</p>
+  </li>
+  </li>
+  <li><p class="text" align="left"><b>Attach to Editor Flat Button</b>: If checked, this script will be shown at the Dropdown Menu of Editor Flat Button.</p>
+  </li>
+  </li>
+  <li><p class="text" align="left"><b>Attach to Designer Context Menu</b>: If checked, this script will be shown at the Context Menu of Designer.</p>
   </li>
 </ul>
   </li>
