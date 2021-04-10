@@ -564,6 +564,8 @@ var
     InImplementation: Boolean;
     FoundNonEmptyType: Boolean;
     IdentifierNeeded: Boolean;
+    IsExternal: Boolean;
+    ProcEndSemicolon: Boolean;
     ElementInfo: TCnElementInfo;
     BeginProcHeaderPosition: Longint;
     j, k: Integer;
@@ -722,7 +724,7 @@ var
                       ElementInfo.ElementTypeStr := 'interface function'
                     else
                       ElementInfo.ElementTypeStr := 'interface member';
-                      
+
                     ElementInfo.ElementType := etIntfMember;
                     ElementInfo.OwnerClass := IntfName;
                   end
@@ -737,7 +739,98 @@ var
                   ElementInfo.AllName := 'Unknown Filename';
                   AddProcedure(ElementInfo, InIntfDeclaration);
                 end;
-              end;
+              end
+              else if not InImplementation and not InTypeDeclaration and not InIntfDeclaration
+                and (PasParser.TokenID in [tkFunction, tkProcedure]) then
+              begin
+                // interface 部分的 function 与 procedure 要考虑 extnernal 的情况
+                IdentifierNeeded := True;
+                // interface 部分不会有匿名函数
+                IsExternal := False;
+                ProcEndSemicolon := False;
+
+                ProcType := PasParser.TokenID;
+                Line := GetPasParserLineNumber;
+                ProcLine := '';
+
+                // 此循环获得整个 Proc 的声明
+                while not (PasParser.TokenId in [tkNull]) do
+                begin
+                  case PasParser.TokenID of
+                    tkIdentifier, tkRegister:
+                      IdentifierNeeded := False;
+
+                    tkRoundOpen:
+                      begin
+                        // Did we run into an identifier already?
+                        // This prevents
+                        //    AProcedure = procedure() of object
+                        // from being recognised as a procedure
+                        if IdentifierNeeded then
+                          Break;
+                        InParenthesis := True;
+                      end;
+
+                    tkRoundClose:
+                      InParenthesis := False;
+
+                  else
+                    // nothing
+                  end; // case
+
+                  if (not InParenthesis) and (PasParser.TokenID in [tkImplementation,
+                    tkVar, tkBegin, tkType, tkConst, tkUses]) then // 不能只判断分号，暂且以这些关键字来判断
+                    Break;
+
+                  if not (PasParser.TokenID in [tkCRLF, tkCRLFCo]) and not ProcEndSemicolon then
+                    ProcLine := ProcLine + string(PasParser.Token);
+
+                  if (not InParenthesis) and (PasParser.TokenID = tkSemicolon) then
+                    ProcEndSemicolon := True;
+
+                  PasParser.Next;
+
+                  if PasParser.TokenID = tkExternal then
+                  begin
+                    IsExternal := True;
+                    Break;
+                  end;
+                end; // while
+
+                // 得到整个 Proc 的声明，ProcLine
+                if PasParser.TokenID = tkSemicolon then
+                  ProcLine := ProcLine + ';';
+                if ClassLast then
+                  ProcLine := 'class ' + ProcLine; // Do not localize.
+
+                if IsExternal then
+                begin
+                  ElementInfo := TCnElementInfo.Create;
+                  ElementInfo.Name := ProcLine;
+                  if InIntfDeclaration then
+                  begin
+                    if ProcType = tkProcedure then
+                      ElementInfo.ElementTypeStr := 'interface procedure'
+                    else if ProcType = tkFunction then
+                      ElementInfo.ElementTypeStr := 'interface function'
+                    else
+                      ElementInfo.ElementTypeStr := 'interface member';
+
+                    ElementInfo.ElementType := etIntfMember;
+                    ElementInfo.OwnerClass := IntfName;
+                  end
+                  else
+                  begin
+                    ElementInfo.ElementTypeStr := GetProperProcName(ProcType, ClassLast);
+                    ElementInfo.ElementType := GetProperElementType(ProcType, ClassLast);
+                  end;
+
+                  ElementInfo.LineNo := Line;
+                  ElementInfo.FileName := ExtractFileName('Unknown Filename');
+                  ElementInfo.AllName := 'Unknown Filename';
+                  AddProcedure(ElementInfo, InIntfDeclaration);
+                end;
+              end;  // 针对 External 判断完成
 
               if not InIntfDeclaration and (PasParser.TokenID = tkIdentifier) then
                 IntfName := string(PasParser.Token);
