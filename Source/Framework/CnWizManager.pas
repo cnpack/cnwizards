@@ -1669,9 +1669,13 @@ var
   Executor: TCnBaseMenuExecutor;
 begin
   Executor := TCnBaseMenuExecutor(CnDesignExecutorList[Index]);
+  if (Executor <> nil) and ((Executor.Wizard = nil) or Executor.Wizard.Active) then
+    Executor.Prepare;
+
   AItem.Visible := (Executor <> nil) and
     ((Executor.Wizard = nil) or Executor.Wizard.Active)
     and Executor.GetActive;
+
   if AItem.Visible then
     AItem.Enabled := Executor.GetEnabled;
 end;

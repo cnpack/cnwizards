@@ -1206,6 +1206,9 @@ var
   SCnNonNonVisualNotSupport: string = 'Only VCL Designer Supported.';
   SCnSpacePrompt: string = 'Please Enter the Space:';
   SCnMustDigital: string = 'Please Enter a Digital Value.';
+  SCnPropertyCompareSelectCaptionFmt: string = 'Select %s:%s to Compare';
+  SCnPropertyCompareToComponentsFmt: string = 'Compare to %s:%s';
+  SCnPropertyCompareTwoComponentsFmt: string = 'Compare %s:%s with %s:%s';
 
   // CnPaletteEnhanceWizard
   SCnPaletteEnhanceWizardName: string = 'IDE Main Form Enhancements';

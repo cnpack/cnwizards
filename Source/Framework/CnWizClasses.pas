@@ -440,13 +440,15 @@ type
     {* 类析构器 }
 
     function GetActive: Boolean; virtual;
-    {* 控制条目是否显示}
+    {* 控制条目是否显示，调用顺序排第三}
     function GetCaption: string; virtual;
-    {* 条目显示的标题}
+    {* 条目显示的标题，调用顺序排第一}
     function GetHint: string; virtual;
     {* 条目的提示}
     function GetEnabled: Boolean; virtual;
-    {* 控制条目是否使能}
+    {* 控制条目是否使能，调用顺序排第四}
+    procedure Prepare; virtual;
+    {* PrepareItem 时被调用，调用顺序排第二}
     function Execute: Boolean; virtual;
     {* 条目执行方法，基类默认什么都不做}
 
@@ -1518,6 +1520,12 @@ destructor TCnBaseMenuExecutor.Destroy;
 begin
 
   inherited;
+end;
+
+// PrepareItem 时被调用，基类默认什么都不做
+procedure TCnBaseMenuExecutor.Prepare;
+begin
+
 end;
 
 // 条目执行方法，基类默认什么都不做
