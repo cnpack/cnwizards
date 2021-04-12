@@ -120,6 +120,8 @@ procedure ClearElements;
 var
   I: Integer;
 begin
+  FIntfLine := 0;
+  FImplLine := 0;
   if FElementList <> nil then
     for I := 0 to FElementList.Count - 1 do
       FElementList.Objects[I].Free;
@@ -744,6 +746,7 @@ var
                 and (PasParser.TokenID in [tkFunction, tkProcedure]) then
               begin
                 // interface 部分的 function 与 procedure 要考虑 extnernal 的情况
+                // 但这处判断 class 里的 procedure/function 也会进去，可能多出很多无谓判断
                 IdentifierNeeded := True;
                 // interface 部分不会有匿名函数
                 IsExternal := False;
@@ -778,9 +781,13 @@ var
                     // nothing
                   end; // case
 
-                  if (not InParenthesis) and (PasParser.TokenID in [tkImplementation,
+                  if (not InParenthesis) and (PasParser.TokenID in [tkEnd, tkImplementation,
                     tkVar, tkBegin, tkType, tkConst, tkUses]) then // 不能只判断分号，暂且以这些关键字来判断
                     Break;
+
+                  // 这里可能碰到 implementation，必须记录行号
+                  if (PasParser.TokenID = tkImplementation) and (FImplLine = 0) then
+                    FImplLine := GetPasParserLineNumber;
 
                   if not (PasParser.TokenID in [tkCRLF, tkCRLFCo]) and not ProcEndSemicolon then
                     ProcLine := ProcLine + string(PasParser.Token);
@@ -861,7 +868,7 @@ var
                 end;
               end;
 
-              if (PasParser.TokenID = tkClass) and PasParser.IsClass then
+              if (PasParser.TokenID = tkClass) and PasParser.IsClass then // 进入类中
               begin
                 InTypeDeclaration := True;
                 InIntfDeclaration := False;
