@@ -810,6 +810,7 @@ begin
     lvList.Selected := nil;
     lvList.Selected := lvList.Items[AIndex];
     lvList.ItemFocused := lvList.Selected;
+    lvList.Selected.MakeVisible(True);
   end;
 end;
 
@@ -1291,7 +1292,7 @@ begin
 
     if (Item.ImageIndex >= 0) and (LV.SmallImages <> nil) then
       LV.SmallImages.Draw(Bmp.Canvas, 1, (Bmp.Height - LV.SmallImages.Height) div 2, Item.ImageIndex);
-
+                                         // 图标在竖直方向上在 Bmp 中居中
     if LV.SmallImages <> nil then
       X := LV.SmallImages.Width + 2
     else
