@@ -53,12 +53,12 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF TEST_APP}
+{$IFDEF TEST_APP}           // 是独立测试程序，必然是独立应用，本单元这里补一个
   {$DEFINE STAND_ALONE}
 {$ENDIF}
 
 // TEST_APP    表示编译成独立应用的测试程序
-// STAND_ALONE 表示编译成独立应用
+// STAND_ALONE 表示编译成独立应用，应该包含测试程序的情况，工程选项里应该注意
 
 uses
   Windows, Messages, SysUtils, Classes, Forms, ActnList, Controls, Menus, Contnrs,
@@ -66,17 +66,18 @@ uses
 {$IFNDEF STAND_ALONE}
   CnConsts, CnWizClasses, CnWizManager, CnWizUtils, CnWizOptions, CnDesignEditor,
   CnWizTranslate, CnLangUtils, CnWizScaler,
+  {$IFDEF IDE_SUPPORT_THEMING} ToolsAPI, CnIDEMirrorIntf, {$ENDIF}
 {$ELSE}
   CnWizLangID,
 {$ENDIF}
   CnWizConsts, CnCommon, CnLangMgr, CnHashLangStorage, CnLangStorage, CnWizHelp,
   CnFormScaler, CnWizIni, CnLangCollection,
 {$ENDIF}
-  StdCtrls, ComCtrls, IniFiles {$IFDEF IDE_SUPPORT_THEMING}, ToolsAPI, CnIDEMirrorIntf {$ENDIF};
+  StdCtrls, ComCtrls, IniFiles;
 
 type
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF STAND_ALONE}  // 非独立模式才定义 TCnWizMultiLang
 
 { TCnWizMultiLang }
 
@@ -120,7 +121,7 @@ type
 {$IFNDEF STAND_ALONE}
     function GetEnlarged: Boolean;
 {$ENDIF}
-{$ENDIF TEST_APP}
+{$ENDIF}
   protected
 {$IFNDEF TEST_APP}
     FScaler: TCnFormScaler;
@@ -129,7 +130,7 @@ type
     procedure DoCreate; override;
     procedure DoDestroy; override;
     procedure ReadState(Reader: TReader); override;
-{$ENDIF TEST_APP}
+{$ENDIF}
 
 {$IFDEF CREATE_PARAMS_BUG}
     procedure CreateParams(var Params: TCreateParams); override;
@@ -809,6 +810,15 @@ begin
   Result := False;
 end;
 
+constructor TCnTranslateForm.Create(AOwner: TComponent);
+begin
+{$IFNDEF STAND_ALONE}
+  FEnlarge := WizOptions.SizeEnlarge;
+{$ENDIF}
+  inherited;
+  // 避免 Loaded 时还未获得 FEnlarge 值
+end;
+
 {$IFNDEF TEST_APP}
 
 procedure TCnTranslateForm.ProcessSizeEnlarge;
@@ -872,15 +882,6 @@ begin
 end;
 
 {$ENDIF}
-
-constructor TCnTranslateForm.Create(AOwner: TComponent);
-begin
-{$IFNDEF STAND_ALONE}
-  FEnlarge := WizOptions.SizeEnlarge;
-{$ENDIF}
-  inherited;
-  // 避免 Loaded 时还未获得 FEnlarge 值
-end;
 
 {$IFNDEF STAND_ALONE}
 
