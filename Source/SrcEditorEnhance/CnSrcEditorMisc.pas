@@ -214,7 +214,8 @@ uses
 {$IFDEF DELPHIXE2_UP}
   Rtti,
 {$ENDIF}
-  CnSrcEditorEnhance, CnWizOptions, CnWizShortCut, CnNativeDecl;
+  CnSrcEditorEnhance, {$IFDEF CNWIZARDS_CNPROCLISTWIZARD} CnProcListWizard, {$ENDIF}
+  CnWizOptions, CnWizShortCut, CnNativeDecl;
 
 const
   SCnCodeCompletion = 'CnCodeCompletion';
@@ -797,6 +798,9 @@ var
   Parent: TWinControl;
   Popup: TPopupMenu;
   CloseItem: TMenuItem;
+{$IFDEF CNWIZARDS_CNPROCLISTWIZARD}
+  ProcWizard: TCnProcListWizard;
+{$ENDIF}
 begin
   Control := CnOtaGetCurrentEditControl;
   if Control = nil then
@@ -809,6 +813,13 @@ begin
   Parent := Parent.Parent;   // CodePanel
   if Parent = nil then
     Exit;
+
+  // 检查编辑器工具栏里是否有函数列表工具栏启用，如果有就啥都不做
+{$IFDEF CNWIZARDS_CNPROCLISTWIZARD}
+  ProcWizard := TCnProcListWizard(CnWizardMgr.WizardByName(SCnProcListWizardName));
+  if (ProcWizard = nil) or not ProcWizard.Active or not ProcWizard.UseEditorToolBar then
+    Exit;
+{$ENDIF}
 
 {$IFDEF DELPHI103_RIO_UP}
   // 10.3 里 EditorNavigationToolbar 外面还有个没名字的 Panel
