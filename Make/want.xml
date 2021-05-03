@@ -232,9 +232,8 @@ Usage: want [target-name] [-Dname=value]
     makeinst   - Build CnWizards Installer.
     all        - All above tasks except gitpull.
     allgit     - All above tasks.
-    upload     - Upload Installer to Server (Master only).
     incbuild   - Increase build and commit (Master only).
-    publish    - Publish a new version (Master only).
+    publish    - Publish a new version (Master only. Need Manually Upload).
 
   where name=value may:
     unstable=true - Make unstable version (default).
@@ -1430,13 +1429,14 @@ Usage: want [target-name] [-Dname=value]
   <target name="allgit" depends="-prepare,clean,gitpull,${all_list}" description="All above tasks." >
   </target>
 
-  <!-- FTP 上传服务器 -->
+  <!-- FTP 上传服务器
   <target name="upload_ftp" depends="-prepare" if="ismaster" description="Upload Installer to FTP Server (Master only)." >
     <ftp server="www.cnpack.org" userid="?{${master.ini}:Master:ftpuser}" password="?{${master.ini}:Master:ftppass}" >
       <cd dir="${ftpdir}" />
       <put basedir="${install.output}" src="${Installer.Name}" />
     </ftp>
   </target>
+  -->
 
   <!-- 上传到 Google Code 服务器
   <target name="upload_google" depends="-prepare" if="ismaster" description="Upload Installer to Google Code Server (Master only)." >
@@ -1458,7 +1458,9 @@ Usage: want [target-name] [-Dname=value]
   </target>
   -->
 
-  <target name="upload" depends="-prepare,upload_ftp" if="ismaster" description="Upload Installer to FTP and Google Code Servers (Master only)." />
+  <!--
+  <target name="upload" depends="-prepare" if="ismaster" description="Upload Installer to FTP and Google Code Servers (Master only)." />
+  -->
 
   <!-- 更新 build 号及提交文件 -->
   <target name="incbuild" depends="-prepare" if="ismaster" description="Increase build and commit (Master only)." >
@@ -1488,6 +1490,6 @@ Usage: want [target-name] [-Dname=value]
   </target>
 
   <!-- 完整构建并发布 -->
-  <target name="publish" depends="allgit,incbuild,upload" description="Publish a new version (Master only)." >
+  <target name="publish" depends="allgit,incbuild" description="Publish a new version (Master only)." >
   </target>
 </project>
