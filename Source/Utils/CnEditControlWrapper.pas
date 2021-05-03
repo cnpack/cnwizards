@@ -28,7 +28,9 @@ unit CnEditControlWrapper;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2021.02.28 V1.7
+* 修改记录：2021.05.03 V1.8
+*               用新 RTTI 办法更精准地获取编辑器字符长宽
+*           2021.02.28 V1.7
 *               适应 10.4.2 下 ErroInsight 导致行距与字符高度改变以及通知
 *           2018.03.20 V1.6
 *               增加主题改变时的通知与字体重算
@@ -1442,7 +1444,13 @@ var
   FontName: string;
   FontHeight: Integer;
   Size: TSize;
-  i: Integer;
+  I: Integer;
+{$IFDEF SUPPORT_ENHANCED_RTTI}
+  RttiContext: TRttiContext;
+  RttiType: TRttiType;
+  RttiProperty: TRttiProperty;
+  V: Integer;
+{$ENDIF}
 
   procedure CalcFont(const AName: string; ALogFont: TLogFont);
   var
@@ -1505,6 +1513,7 @@ begin
 
   if GetObject(Control.Font.Handle, SizeOf(LogFont), @LogFont) <> 0 then
   begin
+    // 坑一：EditControl.Font 一般是默认的 MS Sans Serif，不代表真实情况
   {$IFDEF DEBUG}
     CnDebugger.LogMsg('TCnEditControlWrapper.CalcCharSize');
     CnDebugger.LogFmt('FontName: %s Height: %d Width: %d',
@@ -1517,6 +1526,7 @@ begin
     FSaveErrorInsightIsSmoothWave := GetErrorInsightRenderStyle = csErrorInsightRenderStyleSmoothWave;
   {$ENDIF}
 
+    // 坑二：在编辑器设置对话框里选了字体再取消，Options 里会被更新成选择后的字体，导致和实际情况不符
     FontName := Option.FontName;
     FontHeight := -MulDiv(Option.FontSize, Screen.PixelsPerInch, 72);
 
@@ -1542,16 +1552,16 @@ begin
       SaveFont := 0;
       if HighlightCount > 0 then
       begin
-        for i := 0 to HighlightCount - 1 do
+        for I := 0 to HighlightCount - 1 do
         begin
           AFont := LogFont;
-          if Highlights[i].Bold then
+          if Highlights[I].Bold then
             AFont.lfWeight := FW_BOLD;
-          if Highlights[i].Italic then
+          if Highlights[I].Italic then
             AFont.lfItalic := 1;
-          if Highlights[i].Underline then
+          if Highlights[I].Underline then
             AFont.lfUnderline := 1;
-          CalcFont(HighlightNames[i], AFont);
+          CalcFont(HighlightNames[I], AFont);
         end;
       {$IFDEF DEBUG}
         CnDebugger.LogFmt('CharSize from registry: X = %d Y = %d',
@@ -1583,6 +1593,49 @@ begin
       end;
 
       Result := (FCharSize.cx > 0) and (FCharSize.cy > 0);
+
+      // 兜底办法，拿 EditControl 的 CharHeight 和 CharWidth 属性，注意普通办法拿不到
+      // --- 拿到后，覆盖上面所有的字符长宽计算结果！---
+{$IFDEF SUPPORT_ENHANCED_RTTI}
+      RttiContext := TRttiContext.Create;
+      try
+        RttiType := RttiContext.GetType(Control.ClassType);
+        try
+          RttiProperty := RttiType.GetProperty('CharHeight');
+          V := RttiProperty.GetValue(Control).AsInteger;
+          if (V > 1) and (V <> FCharSize.cy) then
+          begin
+            FCharSize.cy := V;
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('RTTI EditControl CharHeight %d.', [V]);
+{$ENDIF}
+          end;
+        except
+          ;
+        end;
+
+        try
+          RttiProperty := RttiType.GetProperty('CharWidth');
+          V := RttiProperty.GetValue(Control).AsInteger;
+          if (V > 1) and (V <> FCharSize.cx) then
+          begin
+            FCharSize.cx := V;
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('RTTI EditControl CharWidth %d.', [V]);
+{$ENDIF}
+          end;
+        except
+          ;
+        end;
+      finally
+        RttiContext.Free;
+      end;
+{$ENDIF}
+
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('Finally Get FCharSize: x %d, y %d.',
+        [FCharSize.cx, FCharSize.cy]);
+{$ENDIF}
     finally
       SaveFont := SelectObject(DC, SaveFont);
       if SaveFont <> 0 then
