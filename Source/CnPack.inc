@@ -2886,6 +2886,7 @@
 
 {$IFDEF DELPHIXE3_UP}
   {$DEFINE SUPPORT_ATOMIC}              // XE3 has Atomic Routines
+  {$DEFINE IDE_NP_FMX_DESIGN_BUG}       // XE3 FMX Designer Cut/Copy/Paste cause AV Bug for -np switch
 {$ENDIF}
 
 {$IFDEF DELPHIXE2_UP}
