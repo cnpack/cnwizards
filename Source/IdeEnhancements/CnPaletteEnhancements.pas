@@ -1696,7 +1696,7 @@ end;
 function TCnPaletteEnhanceWizard.CheckNPFmxDesignClipboardBugExists: Boolean;
 begin
   // 判断命令行里有无 -np 选项，可能还有其他判断
-  Result := FindCmdLineSwitch(np, ['/', '-'], True);
+  Result := FindCmdLineSwitch('np', ['/', '-'], True);
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('IDE Main Form Enhancement. CheckNPFmxDesignCopyPasteBugExists: Has -np Switch.');
 {$ENDIF}
