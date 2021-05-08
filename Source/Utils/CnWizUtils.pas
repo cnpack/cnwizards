@@ -198,6 +198,8 @@ function GetIDEToolsMenu: TMenuItem;
 {* 取得 IDE 主菜单下的 Tools 菜单}
 function GetIDEActionList: TCustomActionList;
 {* 取得 IDE 主 ActionList}
+function GetIDEActionFromName(const AName: string): TCustomAction;
+{* 取得 IDE 主 ActionList 中指定名称的 Action}
 function GetIDEActionFromShortCut(ShortCut: TShortCut): TCustomAction;
 {* 取得 IDE 主 ActionList 中指定快捷键的 Action}
 function GetIdeRootDirectory: string;
@@ -1838,6 +1840,24 @@ var
 begin
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   Result := Svcs40.ActionList;
+end;
+
+// 取得 IDE 主 ActionList 中指定名称的 Action
+function GetIDEActionFromName(const AName: string): TCustomAction;
+var
+  I: Integer;
+  ActionList: TCustomActionList;
+begin
+  Result := nil;
+  ActionList := GetIDEActionList;
+  if ActionList <> nil then
+    for I := 0 to ActionList.ActionCount - 1 do
+      if ActionList.Actions[I] is TCustomAction then
+        if TCustomAction(ActionList.Actions[I]).Name = AName then
+        begin
+          Result := TCustomAction(ActionList.Actions[I]);
+          Exit;
+        end;
 end;
 
 // 取得 IDE 主 ActionList 中指定快捷键的 Action
