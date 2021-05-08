@@ -22,13 +22,16 @@ unit CnPaletteEnhancements;
 { |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包
-* 单元名称：组件面板扩展单元
+* 单元名称：主窗体扩展专家（原组件面板扩展）单元
 * 单元作者：刘啸（LiuXiao）
 * 备    注：
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 修改记录：2014.10.07 V1.5 by LiuXiao
+* 修改记录：2021.05.08 V1.6 by LiuXiao
+*               XE3 后的 FMX 设计器所支持的复制粘贴等功能在 -np 关闭启动画面时
+*               会出 AV，进行 Hook 处理，以标准 Action 的调用代替快捷键调用。
+*           2014.10.07 V1.5 by LiuXiao
 *               增加退出时延迟改名 %TEMP%\EditorLineEnds.ttr 的功能以躲过 IDE 的
 *               和某些 Windows Update 包冲突从而无法启动问题。
 *           2006.09.11 V1.4 by LiuXiao
@@ -56,15 +59,21 @@ interface
   {$DEFINE FIX_EDITORLINEENDS_BUG}
 {$ENDIF}
 
+{$IFDEF IDE_NP_FMX_DESIGN_BUG}
+  {$DEFINE FIX_NP_FMX_DESIGN_CLIPBOARD_BUG}
+  // 用 -np 开关启动 IDE 时，FMX 设计器窗体按 Ctrl+X/C/V 会出现 AV
+{$ENDIF}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, ToolsAPI, IniFiles,
-  Forms, ExtCtrls, Menus, ComCtrls, Contnrs, StdCtrls, Buttons,
+  Forms, ExtCtrls, Menus, ComCtrls, Contnrs, StdCtrls, Buttons, ActnList,
+  CnWizMethodHook,
   CnCommon, CnWizUtils, CnWizNotifier, CnWizIdeUtils, CnWizConsts, CnMenuHook,
-  CnConsts, CnCompUtils, CnWizClasses, CnWizMenuAction, CnWizManager,
+  CnConsts, CnCompUtils, CnWizClasses, CnWizMenuAction, CnWizManager, 
   {$IFDEF COMPILER7_UP}
   ActnMenus,
   {$ENDIF}
-  CnWizOptions;
+  CnWizCompilerConst, CnWizOptions;
 
 type
 
@@ -97,6 +106,10 @@ type
 
   {$IFDEF FIX_EDITORLINEENDS_BUG}
     FFixEditorLineEndsBug: Boolean;
+  {$ENDIF}
+
+  {$IFDEF FIX_NP_FMX_DESIGN_CLIPBOARD_BUG}
+    FFixNPFmxDesignCopyPasteBug: Boolean;
   {$ENDIF}
 
 {$IFDEF SUPPORT_PALETTE_ENHANCE}
@@ -181,6 +194,10 @@ type
   {$IFDEF FIX_EDITORLINEENDS_BUG}
     procedure SetFixEditorLineEndsBug(const Value: Boolean);
   {$ENDIF}
+{$IFDEF FIX_NP_FMX_DESIGN_CLIPBOARD_BUG}
+    procedure SetFixNPFmxDesignCopyPasteBug(const Value: Boolean);
+    function CheckNPFmxDesignClipboardBugExists: Boolean;
+{$ENDIF}
     procedure DoConfig(Sender: TObject);
     procedure OnConfig(Sender: TObject);
     function GetMenuInsertIndex: Integer;  // 返回 Tools 菜单的位置后面
@@ -195,6 +212,7 @@ type
     procedure UpdateToolbarLock;
     procedure MainControlBarOnMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+
   protected
     procedure SetActive(Value: Boolean); override;
     function GetHasConfig: Boolean; override;
@@ -236,8 +254,12 @@ type
     property AutoSelect: Boolean read FAutoSelect write FAutoSelect;
 {$ENDIF}
 
-  {$IFDEF COMPILER8_UP}
+  {$IFDEF FIX_EDITORLINEENDS_BUG}
     property FixEditorLineEndsBug: Boolean read FFixEditorLineEndsBug write SetFixEditorLineEndsBug;
+  {$ENDIF}
+
+  {$IFDEF FIX_NP_FMX_DESIGN_CLIPBOARD_BUG}
+    property FixNPFmxDesignCopyPasteBug: Boolean read FFixNPFmxDesignCopyPasteBug write SetFixNPFmxDesignCopyPasteBug;
   {$ENDIF}
     property MenuLine: Boolean read FMenuLine write FMenuLine;
     property LockToolbar: Boolean read FLockToolbar write SetLockToolbar;
@@ -297,12 +319,137 @@ const
   CompFilterDef = True;
 {$ENDIF}
 
+{$IFDEF FIX_NP_FMX_DESIGN_CLIPBOARD_BUG}
+  SCnEditorActionsTEditorActionListsEditCutItemExecute = '@Editoractions@TEditorActionLists@EditCutItemExecute$qqrp14System@TObject';
+  SCnEditorActionsTEditorActionListsEditCopyItemExecute = '@Editoractions@TEditorActionLists@EditCopyItemExecute$qqrp14System@TObject';
+  SCnEditorActionsTEditorActionListsEditPasteItemExecute = '@Editoractions@TEditorActionLists@EditPasteItemExecute$qqrp14System@TObject';
+
+  SCnEditCutCommand = 'EditCutCommand';
+  SCnEditCopyCommand = 'EditCopyCommand';
+  SCnEditPasteCommand = 'EditPasteCommand';
+{$ENDIF}
+
 type
   TControlHack = class(TControl);
+
+{$IFDEF FIX_NP_FMX_DESIGN_CLIPBOARD_BUG}
+  TCnEditClipboardProc = procedure(ASelf, ASender: TObject);
+{$ENDIF}
+
+{$IFDEF FIX_NP_FMX_DESIGN_CLIPBOARD_BUG}
+var
+  EditCutProc: TCnEditClipboardProc = nil;
+  EditCopyProc: TCnEditClipboardProc = nil;
+  EditPasteProc: TCnEditClipboardProc = nil;
+
+  FCutMethodHook: TCnMethodHook = nil;
+  FCopyMethodHook: TCnMethodHook = nil;
+  FPasteMethodHook: TCnMethodHook = nil;
+{$ENDIF}
 
 {$IFDEF FIX_EDITORLINEENDS_BUG}
 var
   FixEditorLineEndsBugGlobal: Boolean = True;
+{$ENDIF}
+
+{$IFDEF FIX_NP_FMX_DESIGN_CLIPBOARD_BUG}
+
+procedure MyEditCut(ASelf, ASender: TObject);
+var
+  A: TCustomAction;
+begin
+  if FCutMethodHook <> nil then
+  begin
+    FCutMethodHook.UnhookMethod;
+    try
+      try
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('IDE Main Form Enhancement. Hook Enter Cut.');
+{$ENDIF}
+        EditCutProc(ASelf, ASender);
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('IDE Main Form Enhancement. Hook Cut Execute OK.');
+{$ENDIF}
+      except
+        // FMX 下可能出错到这里
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('IDE Main Form Enhancement. Cut Exception! Call Alternative Action.');
+{$ENDIF}
+        A := GetIDEActionFromName(SCnEditCutCommand);
+        if A <> nil then
+          A.Execute;
+      end;
+    finally
+      FCutMethodHook.HookMethod;
+    end;
+  end;
+end;
+
+procedure MyEditCopy(ASelf, ASender: TObject);
+var
+  A: TCustomAction;
+begin
+  if FCopyMethodHook <> nil then
+  begin
+    FCopyMethodHook.UnhookMethod;
+    try
+      try
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('IDE Main Form Enhancement. Hook Enter Copy.');
+{$ENDIF}
+        EditCopyProc(ASelf, ASender);
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('IDE Main Form Enhancement. Hook Copy Execute OK.');
+{$ENDIF}
+      except
+        // FMX 下可能出错到这里
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('IDE Main Form Enhancement. Copy Exception! Call Alternative Action.');
+{$ENDIF}
+        A := GetIDEActionFromName(SCnEditCopyCommand);
+        if A <> nil then
+          A.Execute;
+      end;
+    finally
+      FCopyMethodHook.HookMethod;
+    end;
+  end;
+end;
+
+procedure MyEditPaste(ASelf, ASender: TObject);
+var
+  A: TCustomAction;
+begin
+  if FPasteMethodHook <> nil then
+  begin
+    FPasteMethodHook.UnhookMethod;
+    try
+      try
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('IDE Main Form Enhancement. Hook Enter Paste.');
+{$ENDIF}
+        EditPasteProc(ASelf, ASender);
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('IDE Main Form Enhancement. Hook Paste Execute OK.');
+{$ENDIF}
+      except
+        // FMX 下可能出错到这里
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('IDE Main Form Enhancement. Paste Exception! Call Alternative Action.');
+{$ENDIF}
+        A := GetIDEActionFromName(SCnEditPasteCommand);
+        if A <> nil then
+          A.Execute;
+      end;
+    finally
+      FPasteMethodHook.HookMethod;
+    end;
+  end;
+end;
+
+{$ENDIF}
+
+{$IFDEF FIX_EDITORLINEENDS_BUG}
 
 procedure FixEditorLineEndsTtrBug;
 var
@@ -369,6 +516,10 @@ begin
 {$IFDEF FIX_EDITORLINEENDS_BUG}
   FixEditorLineEndsBug := True;
 {$ENDIF}
+
+{$IFDEF FIX_NP_FMX_DESIGN_CLIPBOARD_BUG}
+  FixNPFmxDesignCopyPasteBug := CheckNPFmxDesignClipboardBugExists;
+{$ENDIF}
   CnWizNotifierServices.AddApplicationIdleNotifier(OnIdle);
 end;
 
@@ -388,6 +539,7 @@ begin
   if FCompFilterAction <> nil then
     WizActionMgr.DeleteAction(FCompFilterAction);
 {$ENDIF}
+
   FControlBarMenuHook.Free;
   FinalWizMenus;
   inherited;
@@ -1498,16 +1650,81 @@ begin
 end;
 {$ENDIF}
 
+{$IFDEF FIX_NP_FMX_DESIGN_CLIPBOARD_BUG}
+
+procedure InitEditorClipboardsProcs;
+var
+  H: THandle;
+begin
+  H := GetModuleHandle(CorIdeLibName);
+  if H <> 0 then
+  begin
+    EditCutProc := GetBplMethodAddress(GetProcAddress(H, SCnEditorActionsTEditorActionListsEditCutItemExecute));
+    EditCopyProc := GetBplMethodAddress(GetProcAddress(H, SCnEditorActionsTEditorActionListsEditCopyItemExecute));
+    EditPasteProc := GetBplMethodAddress(GetProcAddress(H, SCnEditorActionsTEditorActionListsEditPasteItemExecute));
+  end;
+end;
+
+procedure TCnPaletteEnhanceWizard.SetFixNPFmxDesignCopyPasteBug(
+  const Value: Boolean);
+begin
+  FFixNPFmxDesignCopyPasteBug := Value;
+  if FFixNPFmxDesignCopyPasteBug then
+  begin
+    if FCutMethodHook = nil then
+      FCutMethodHook := TCnMethodHook.Create(@EditCutProc, @MyEditCut);
+    if FCopyMethodHook = nil then
+      FCopyMethodHook := TCnMethodHook.Create(@EditCopyProc, @MyEditCopy);
+    if FPasteMethodHook = nil then
+      FPasteMethodHook := TCnMethodHook.Create(@EditPasteProc, @MyEditPaste);
+
+    FCutMethodHook.HookMethod;
+    FCopyMethodHook.HookMethod;
+    FPasteMethodHook.HookMethod;
+  end
+  else
+  begin
+    if FCutMethodHook <> nil then
+      FCutMethodHook.UnhookMethod;
+    if FCopyMethodHook <> nil then
+      FCopyMethodHook.UnhookMethod;
+    if FPasteMethodHook <> nil then
+      FPasteMethodHook.UnhookMethod;
+  end;
+end;
+
+function TCnPaletteEnhanceWizard.CheckNPFmxDesignClipboardBugExists: Boolean;
+begin
+  // 判断命令行里有无 -np 选项，可能还有其他判断
+  Result := FindCmdLineSwitch(np, ['/', '-'], True);
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('IDE Main Form Enhancement. CheckNPFmxDesignCopyPasteBugExists: Has -np Switch.');
+{$ENDIF}
+end;
+
+{$ENDIF}
+
 initialization
   RegisterCnWizard(TCnPaletteEnhanceWizard);
 
-{$IFDEF FIX_EDITORLINEENDS_BUG}
+{$IFDEF FIX_NP_FMX_DESIGN_CLIPBOARD_BUG}
+  InitEditorClipboardsProcs;
+{$ENDIF};
+
 finalization
+
+{$IFDEF FIX_EDITORLINEENDS_BUG}
   try
     FixEditorLineEndsTtrBug;
   except
     ;
   end;
+{$ENDIF}
+
+{$IFDEF FIX_NP_FMX_DESIGN_CLIPBOARD_BUG}
+  FreeAndNil(FCutMethodHook);
+  FreeAndNil(FCopyMethodHook);
+  FreeAndNil(FPasteMethodHook);
 {$ENDIF}
 
 {$ENDIF CNWIZARDS_CNPALETTEENHANCEWIZARD}

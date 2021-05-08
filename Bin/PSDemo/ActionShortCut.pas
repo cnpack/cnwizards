@@ -18,25 +18,19 @@ uses
 var
   ActionList: TCustomActionList;
   I: Integer;
-  List: TStrings;
   Action: TContainedAction;
 
 begin
   // Print All Action Names and Captions.
   ActionList := GetIDEActionList;
-  List := TStringList.Create;
-  try
-    for I := 0 to ActionList.ActionCount - 1 do
-      if ActionList.Actions[I] is TCustomAction then
-        List.Add(ActionList.Actions[I].Name + ' | ' + TCustomAction(ActionList.Actions[I]).Caption +
-          ' | ' + ShortCutToText(TCustomAction(ActionList.Actions[I]).ShortCut))
-      else
-        List.Add(ActionList.Actions[I].Name);
 
-    Writeln(List.Text);
-  finally
-    List.Free;
-  end;
+  for I := 0 to ActionList.ActionCount - 1 do
+    if ActionList.Actions[I] is TCustomAction then
+      Writeln(ActionList.Actions[I].ClassName + ' | ' + ActionList.Actions[I].Name +
+        ' | ' + TCustomAction(ActionList.Actions[I]).Caption +
+        ' | ' + ShortCutToText(TCustomAction(ActionList.Actions[I]).ShortCut))
+    else
+      Writeln(ActionList.Actions[I].ClassName + ' | ' + ActionList.Actions[I].Name);
 
   // Change shortcut of 'View AlignPalette' in View Menu.
   Action := FindIDEAction('ViewAlignPaletteCommand');
