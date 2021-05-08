@@ -5337,12 +5337,16 @@ begin
     if ActionServices <> nil then
     begin
       try
+{$IFNDEF CNWIZARDS_MINIMUM}
         DisableWaitDialogShow;
+{$ENDIF}
         // 10.4.2 下打开文件时可能 IDE 会被莫名其妙塞到后台
         // 需要通过 Hook 掉 WaitDialogService 的方式去掉
         Result := ActionServices.OpenFile(FileName);
       finally
+{$IFNDEF CNWIZARDS_MINIMUM}
         EnableWaitDialogShow; // 恢复 WaitDialogService
+{$ENDIF}
       end;
     end;
   except
@@ -6152,12 +6156,16 @@ begin
     Assert(IEditView <> nil);
     EditPos := IEditView.CursorPos;
 {$IFDEF UNICODE}
-    // Unicode 环境下有宽字符时 ConvertPos 与 CharPosToPos 都不靠谱，只能手工转换
-    // 先将当前行首的内容求线性地址，是正确的 Utf8，再加上本行行首到当前列这段的 Utf8 长度
     CharPos.Line := EditPos.Line;
     CharPos.CharIndex := 0;
 
     Result := IEditView.CharPosToPos(CharPos); // 得到行首的线性位置，以 Utf8 计算
+
+  {$IFDEF CNWIZARDS_MINIMUM}
+    Inc(Result, EditPos.Col - 1);
+  {$ELSE}
+    // Unicode 环境下有宽字符时 ConvertPos 与 CharPosToPos 都不靠谱，只能手工转换
+    // 先将当前行首的内容求线性地址，是正确的 Utf8，再加上本行行首到当前列这段的 Utf8 长度
     EditControl := EditControlWrapper.GetEditControl(IEditView);
     if EditControl = nil then
     begin
@@ -6169,6 +6177,7 @@ begin
     Text := Copy(Text, 1, CharIdx); // 拿到光标前的 UTF16 字符串
     // 转换成 Utf8 并求长度，加到至行首长度上
     Inc(Result, Length(UTF8Encode(Text)));
+  {$ENDIF}
 {$ELSE}
     IEditView.ConvertPos(True, EditPos, CharPos);
     Result := IEditView.CharPosToPos(CharPos);
@@ -7877,8 +7886,10 @@ finalization
   CnDebugger.LogEnter('CnWizUtils finalization.');
 {$ENDIF Debug}
 
+{$IFNDEF CNWIZARDS_MINIMUM}
 {$IFDEF UNICODE}
   VirtualEditControlBitmap.Free;
+{$ENDIF}
 {$ENDIF}
 
   RegisterNoIconProc := OldRegisterNoIconProc;

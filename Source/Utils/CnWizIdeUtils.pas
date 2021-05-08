@@ -67,7 +67,8 @@ uses
   {$ELSE}
   DsgnIntf, LibIntf,
   {$ENDIF}
-  CnPasCodeParser, CnWidePasParser, CnIDEVersion, CnWizMethodHook,
+  {$IFNDEF CNWIZARDS_MINIMUM} CnIDEVersion, {$ENDIF}
+  CnPasCodeParser, CnWidePasParser, CnWizMethodHook,
   CnWizUtils, CnWizEditFiler, CnCommon, CnWizOptions, CnWizCompilerConst;
 
 //==============================================================================
