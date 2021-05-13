@@ -781,13 +781,13 @@ var
                     // nothing
                   end; // case
 
-                  if (not InParenthesis) and (PasParser.TokenID in [tkEnd, tkImplementation,
-                    tkVar, tkBegin, tkType, tkConst, tkUses]) then // 不能只判断分号，暂且以这些关键字来判断
-                    Break;
-
                   // 这里可能碰到 implementation，必须记录行号
                   if (PasParser.TokenID = tkImplementation) and (FImplLine = 0) then
                     FImplLine := GetPasParserLineNumber;
+
+                  if (not InParenthesis) and (PasParser.TokenID in [tkEnd, tkImplementation,
+                    tkVar, tkBegin, tkType, tkConst, tkUses]) then // 不能只判断分号，暂且以这些关键字来判断
+                    Break;
 
                   if not (PasParser.TokenID in [tkCRLF, tkCRLFCo]) and not ProcEndSemicolon then
                     ProcLine := ProcLine + string(PasParser.Token);
