@@ -2958,7 +2958,8 @@
 
 {$IFDEF BDS2007_UP}
   {$DEFINE IDE_CONF_MANAGER}
-  {$DEFINE TBYTES_DEFINED} // 2007 Defined TBytes = array of Byte;
+  {$DEFINE IDE_EDITOR_ELIDE}  // 2007 或以上编辑器支持折叠
+  {$DEFINE TBYTES_DEFINED}    // 2007 Defined TBytes = array of Byte;
 {$ENDIF}
 
 {$IFDEF BDS2007}
