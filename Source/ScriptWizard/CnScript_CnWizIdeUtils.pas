@@ -38,8 +38,8 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, SysUtils, Classes, Buttons, Menus, Tabs, Forms, ToolsAPI, Controls,
-  CnWizIdeUtils, uPSComponent, uPSRuntime, uPSCompiler;
+  Windows, SysUtils, Classes, Buttons, Menus, Tabs, Forms, Graphics, ToolsAPI, Controls,
+  CnWizIdeUtils, CnEditControlWrapper, uPSComponent, uPSRuntime, uPSCompiler;
 
 type
 
@@ -52,11 +52,20 @@ type
 { compile-time registration functions }
 procedure SIRegister_TCnPaletteWrapper(CL: TPSPascalCompiler);
 procedure SIRegister_CnWizIdeUtils(CL: TPSPascalCompiler);
+procedure SIRegister_THighlightItem(CL: TPSPascalCompiler);
+procedure SIRegister_TEditorObject(CL: TPSPascalCompiler);
+procedure SIRegister_CnEditControlWrapper(CL: TPSPascalCompiler);
 
 { run-time registration functions }
 procedure RIRegister_TCnPaletteWrapper(CL: TPSRuntimeClassImporter);
 procedure RIRegister_CnWizIdeUtils(CL: TPSRuntimeClassImporter);
 procedure RIRegister_CnWizIdeUtils_Routines(S: TPSExec);
+procedure RIRegister_CnEditControlWrapper_Routines(S: TPSExec);
+procedure RIRegister_TCnEditControlWrapper(CL: TPSRuntimeClassImporter);
+procedure RIRegister_TCnBreakPointClickItem(CL: TPSRuntimeClassImporter);
+procedure RIRegister_THighlightItem(CL: TPSRuntimeClassImporter);
+procedure RIRegister_TEditorObject(CL: TPSRuntimeClassImporter);
+procedure RIRegister_CnEditControlWrapper(CL: TPSRuntimeClassImporter);
 
 implementation
 
@@ -425,17 +434,560 @@ begin
   RIRegister_TCnMessageViewWrapper(CL);
 end;
 
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_TCnEditControlWrapper(CL: TPSPascalCompiler);
+begin
+  //with RegClassS(CL,'TComponent', 'TCnEditControlWrapper') do
+  with CL.AddClassN(CL.FindClass('TComponent'),'TCnEditControlWrapper') do
+  begin
+    RegisterMethod('Function IndexOfEditor1( EditControl : TControl) : Integer;');
+    RegisterMethod('Function IndexOfEditor2( EditView : IOTAEditView) : Integer;');
+    RegisterMethod('Function GetEditorObject( EditControl : TControl) : TEditorObject');
+    RegisterProperty('Editors', 'TEditorObject Integer', iptr);
+    RegisterProperty('EditorCount', 'Integer', iptr);
+    RegisterMethod('Function IndexOfHighlight( const Name : string) : Integer');
+    RegisterProperty('HighlightCount', 'Integer', iptr);
+    RegisterProperty('HighlightNames', 'string Integer', iptr);
+    RegisterProperty('Highlights', 'THighlightItem Integer', iptr);
+    RegisterMethod('Function GetCharHeight : Integer');
+    RegisterMethod('Function GetCharWidth : Integer');
+    RegisterMethod('Function GetCharSize : TSize');
+    RegisterMethod('Function GetEditControlInfo( EditControl : TControl) : TEditControlInfo');
+    RegisterMethod('Function GetEditControlCharHeight( EditControl : TControl) : Integer');
+    RegisterMethod('Function GetEditControlSupportsSyntaxHighlight( EditControl : TControl) : Boolean');
+    RegisterMethod('Function GetEditControlCanvas( EditControl : TControl) : TCanvas');
+    RegisterMethod('Function GetEditView( EditControl : TControl) : IOTAEditView');
+    RegisterMethod('Function GetEditControl( EditView : IOTAEditView) : TControl');
+    RegisterMethod('Function GetTopMostEditControl : TControl');
+    RegisterMethod('Function GetEditViewFromTabs( TabControl : TXTabControl; Index : Integer) : IOTAEditView');
+    RegisterMethod('Procedure GetAttributeAtPos( EditControl : TControl; const EdPos : TOTAEditPos; IncludeMargin : Boolean; var Element, LineFlag : Integer)');
+    RegisterMethod('Function GetLineIsElided( EditControl : TControl; LineNum : Integer) : Boolean');
+{$IFDEF BDS}
+    RegisterMethod('Function GetPointFromEdPos( EditControl : TControl; APos : TOTAEditPos) : TPoint');
+{$ENDIF}
+    RegisterMethod('Function GetLineFromPoint( Point : TPoint; EditControl : TControl; EditView : IOTAEditView) : Integer');
+    RegisterMethod('Procedure MarkLinesDirty( EditControl : TControl; Line : Integer; Count : Integer)');
+    RegisterMethod('Procedure EditorRefresh( EditControl : TControl; DirtyOnly : Boolean)');
+    RegisterMethod('Function GetTextAtLine( EditControl : TControl; LineNum : Integer) : string');
+    RegisterMethod('Function IndexPosToCurPos( EditControl : TControl; Col, Line : Integer) : Integer');
+    RegisterMethod('Procedure RepaintEditControls');
+    RegisterMethod('Function GetUseTabKey : Boolean');
+    RegisterMethod('Function GetTabWidth : Integer');
+    RegisterMethod('Function ClickBreakpointAtActualLine( ActualLineNum : Integer; EditControl : TControl) : Boolean');
+    RegisterMethod('Procedure AddKeyDownNotifier( Notifier : TKeyMessageNotifier)');
+    RegisterMethod('Procedure RemoveKeyDownNotifier( Notifier : TKeyMessageNotifier)');
+    RegisterMethod('Procedure AddKeyUpNotifier( Notifier : TKeyMessageNotifier)');
+    RegisterMethod('Procedure RemoveKeyUpNotifier( Notifier : TKeyMessageNotifier)');
+    RegisterMethod('Procedure AddBeforePaintLineNotifier( Notifier : TEditorPaintLineNotifier)');
+    RegisterMethod('Procedure RemoveBeforePaintLineNotifier( Notifier : TEditorPaintLineNotifier)');
+    RegisterMethod('Procedure AddAfterPaintLineNotifier( Notifier : TEditorPaintLineNotifier)');
+    RegisterMethod('Procedure RemoveAfterPaintLineNotifier( Notifier : TEditorPaintLineNotifier)');
+    RegisterMethod('Procedure AddEditControlNotifier( Notifier : TEditorNotifier)');
+    RegisterMethod('Procedure RemoveEditControlNotifier( Notifier : TEditorNotifier)');
+    RegisterMethod('Procedure AddEditorChangeNotifier( Notifier : TEditorChangeNotifier)');
+    RegisterMethod('Procedure RemoveEditorChangeNotifier( Notifier : TEditorChangeNotifier)');
+    RegisterProperty('PaintNotifyAvailable', 'Boolean', iptr);
+    RegisterMethod('Procedure AddEditorMouseUpNotifier( Notifier : TEditorMouseUpNotifier)');
+    RegisterMethod('Procedure RemoveEditorMouseUpNotifier( Notifier : TEditorMouseUpNotifier)');
+    RegisterMethod('Procedure AddEditorMouseDownNotifier( Notifier : TEditorMouseDownNotifier)');
+    RegisterMethod('Procedure RemoveEditorMouseDownNotifier( Notifier : TEditorMouseDownNotifier)');
+    RegisterMethod('Procedure AddEditorMouseMoveNotifier( Notifier : TEditorMouseMoveNotifier)');
+    RegisterMethod('Procedure RemoveEditorMouseMoveNotifier( Notifier : TEditorMouseMoveNotifier)');
+    RegisterMethod('Procedure AddEditorMouseLeaveNotifier( Notifier : TEditorMouseLeaveNotifier)');
+    RegisterMethod('Procedure RemoveEditorMouseLeaveNotifier( Notifier : TEditorMouseLeaveNotifier)');
+    RegisterMethod('Procedure AddEditorNcPaintNotifier( Notifier : TEditorNcPaintNotifier)');
+    RegisterMethod('Procedure RemoveEditorNcPaintNotifier( Notifier : TEditorNcPaintNotifier)');
+    RegisterMethod('Procedure AddEditorVScrollNotifier( Notifier : TEditorVScrollNotifier)');
+    RegisterMethod('Procedure RemoveEditorVScrollNotifier( Notifier : TEditorVScrollNotifier)');
+    RegisterProperty('MouseNotifyAvailable', 'Boolean', iptr);
+    RegisterProperty('EditorBaseFont', 'TFont', iptr);
+    RegisterProperty('FontBasic', 'TFont', iptrw);
+    RegisterProperty('FontAssembler', 'TFont', iptrw);
+    RegisterProperty('FontComment', 'TFont', iptrw);
+    RegisterProperty('FontDirective', 'TFont', iptrw);
+    RegisterProperty('FontIdentifier', 'TFont', iptrw);
+    RegisterProperty('FontKeyWord', 'TFont', iptrw);
+    RegisterProperty('FontNumber', 'TFont', iptrw);
+    RegisterProperty('FontSpace', 'TFont', iptrw);
+    RegisterProperty('FontString', 'TFont', iptrw);
+    RegisterProperty('FontSymbol', 'TFont', iptrw);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_TCnBreakPointClickItem(CL: TPSPascalCompiler);
+begin
+  //with RegClassS(CL,'TOBJECT', 'TCnBreakPointClickItem') do
+  with CL.AddClassN(CL.FindClass('TOBJECT'),'TCnBreakPointClickItem') do
+  begin
+    RegisterProperty('BpEditControl', 'TControl', iptrw);
+    RegisterProperty('BpEditView', 'IOTAEditView', iptrw);
+    RegisterProperty('BpPosY', 'Integer', iptrw);
+    RegisterProperty('BpDeltaLine', 'Integer', iptrw);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_THighlightItem(CL: TPSPascalCompiler);
+begin
+  //with RegClassS(CL,'TOBJECT', 'THighlightItem') do
+  with CL.AddClassN(CL.FindClass('TOBJECT'),'THighlightItem') do
+  begin
+    RegisterProperty('Bold', 'Boolean', iptrw);
+    RegisterProperty('ColorBk', 'TColor', iptrw);
+    RegisterProperty('ColorFg', 'TColor', iptrw);
+    RegisterProperty('Italic', 'Boolean', iptrw);
+    RegisterProperty('Underline', 'Boolean', iptrw);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_TEditorObject(CL: TPSPascalCompiler);
+begin
+  //with RegClassS(CL,'TOBJECT', 'TEditorObject') do
+  with CL.AddClassN(CL.FindClass('TOBJECT'),'TEditorObject') do
+  begin
+    RegisterMethod('Constructor Create( AEditControl : TControl; AEditView : IOTAEditView)');
+    RegisterMethod('Function EditorIsOnTop : Boolean');
+    RegisterMethod('Procedure IDEShowLineNumberChanged');
+    RegisterProperty('Context', 'TEditorContext', iptr);
+    RegisterProperty('EditControl', 'TControl', iptr);
+    RegisterProperty('EditWindow', 'TCustomForm', iptr);
+    RegisterProperty('EditView', 'IOTAEditView', iptr);
+    RegisterProperty('GutterWidth', 'Integer', iptr);
+    RegisterProperty('TopControl', 'TControl', iptr);
+    RegisterProperty('ViewLineCount', 'Integer', iptr);
+    RegisterProperty('ViewLineNumber', 'Integer Integer', iptr);
+    RegisterProperty('ViewBottomLine', 'Integer', iptr);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_CnEditControlWrapper(CL: TPSPascalCompiler);
+begin
+  CL.AddTypeS('TEditControlInfo', 'record TopLine : Integer; LinesInWindow : In'
+   +'teger; LineCount : Integer; CaretX : Integer; CaretY : Integer; CharXIndex'
+   +' : Integer; LineDigit : Integer; end');
+  CL.AddTypeS('TEditorChangeType', '( ctView, ctWindow, ctCurrLine, ctCurrCol, '
+   +'ctFont, ctVScroll, ctHScroll, ctBlock, ctModified, ctTopEditorChanged, ctL'
+   +'ineDigit, ctElided, ctUnElided, ctOptionChanged )');
+  CL.AddTypeS('TEditorChangeTypes', 'set of TEditorChangeType');
+  CL.AddTypeS('TEditorContext', 'record TopRow : Integer; BottomRow : Integer; '
+   +'LeftColumn : Integer; CurPos : TOTAEditPos; LineCount : Integer; LineText '
+   +': string; ModTime : TDateTime; BlockValid : Boolean; BlockSize : Integer; '
+   +'BlockStartingColumn : Integer; BlockStartingRow : Integer; BlockEndingColu'
+   +'mn : Integer; BlockEndingRow : Integer; EditView : Pointer; LineDigit : In'
+   +'teger; end');
+  SIRegister_TEditorObject(CL);
+  SIRegister_THighlightItem(CL);
+  CL.AddTypeS('TEditorPaintLineNotifier', 'Procedure ( Editor : TEditorObject; '
+   +'LineNum, LogicLineNum : Integer)');
+  CL.AddTypeS('TEditorPaintNotifier', 'Procedure ( EditControl : TControl; Edit'
+   +'View : IOTAEditView)');
+  CL.AddTypeS('TEditorNotifier', 'Procedure ( EditControl : TControl; EditWindo'
+   +'w : TCustomForm; Operation : TOperation)');
+  CL.AddTypeS('TEditorChangeNotifier', 'Procedure ( Editor : TEditorObject; Cha'
+   +'ngeType : TEditorChangeTypes)');
+  CL.AddTypeS('TKeyMessageNotifier', 'Procedure ( Key, ScanCode : Word; Shift :'
+   +' TShiftState; var Handled : Boolean)');
+  CL.AddTypeS('TEditorMouseUpNotifier', 'Procedure ( Editor : TEditorObject; Bu'
+   +'tton : TMouseButton; Shift : TShiftState; X, Y : Integer; IsNC : Boolean)');
+  CL.AddTypeS('TEditorMouseDownNotifier', 'Procedure ( Editor : TEditorObject; '
+   +'Button : TMouseButton; Shift : TShiftState; X, Y : Integer; IsNC : Boolean'
+   +')');
+  CL.AddTypeS('TEditorMouseMoveNotifier', 'Procedure ( Editor : TEditorObject; '
+   +'Shift : TShiftState; X, Y : Integer; IsNC : Boolean)');
+  CL.AddTypeS('TEditorMouseLeaveNotifier', 'Procedure ( Editor : TEditorObject;'
+   +' IsNC : Boolean)');
+  CL.AddTypeS('TEditorNcPaintNotifier', 'Procedure ( Editor : TEditorObject)');
+  CL.AddTypeS('TEditorVScrollNotifier', 'Procedure ( Editor : TEditorObject)');
+  SIRegister_TCnBreakPointClickItem(CL);
+  SIRegister_TCnEditControlWrapper(CL);
+ CL.AddDelphiFunction('Function EditControlWrapper : TCnEditControlWrapper');
+end;
+
+(* === run-time registration functions === *)
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperFontSymbol_W(Self: TCnEditControlWrapper; const T: TFont);
+begin Self.FontSymbol := T; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperFontSymbol_R(Self: TCnEditControlWrapper; var T: TFont);
+begin T := Self.FontSymbol; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperFontString_W(Self: TCnEditControlWrapper; const T: TFont);
+begin Self.FontString := T; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperFontString_R(Self: TCnEditControlWrapper; var T: TFont);
+begin T := Self.FontString; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperFontSpace_W(Self: TCnEditControlWrapper; const T: TFont);
+begin Self.FontSpace := T; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperFontSpace_R(Self: TCnEditControlWrapper; var T: TFont);
+begin T := Self.FontSpace; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperFontNumber_W(Self: TCnEditControlWrapper; const T: TFont);
+begin Self.FontNumber := T; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperFontNumber_R(Self: TCnEditControlWrapper; var T: TFont);
+begin T := Self.FontNumber; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperFontKeyWord_W(Self: TCnEditControlWrapper; const T: TFont);
+begin Self.FontKeyWord := T; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperFontKeyWord_R(Self: TCnEditControlWrapper; var T: TFont);
+begin T := Self.FontKeyWord; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperFontIdentifier_W(Self: TCnEditControlWrapper; const T: TFont);
+begin Self.FontIdentifier := T; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperFontIdentifier_R(Self: TCnEditControlWrapper; var T: TFont);
+begin T := Self.FontIdentifier; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperFontDirective_W(Self: TCnEditControlWrapper; const T: TFont);
+begin Self.FontDirective := T; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperFontDirective_R(Self: TCnEditControlWrapper; var T: TFont);
+begin T := Self.FontDirective; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperFontComment_W(Self: TCnEditControlWrapper; const T: TFont);
+begin Self.FontComment := T; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperFontComment_R(Self: TCnEditControlWrapper; var T: TFont);
+begin T := Self.FontComment; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperFontAssembler_W(Self: TCnEditControlWrapper; const T: TFont);
+begin Self.FontAssembler := T; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperFontAssembler_R(Self: TCnEditControlWrapper; var T: TFont);
+begin T := Self.FontAssembler; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperFontBasic_W(Self: TCnEditControlWrapper; const T: TFont);
+begin Self.FontBasic := T; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperFontBasic_R(Self: TCnEditControlWrapper; var T: TFont);
+begin T := Self.FontBasic; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperEditorBaseFont_R(Self: TCnEditControlWrapper; var T: TFont);
+begin T := Self.EditorBaseFont; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperMouseNotifyAvailable_R(Self: TCnEditControlWrapper; var T: Boolean);
+begin T := Self.MouseNotifyAvailable; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperPaintNotifyAvailable_R(Self: TCnEditControlWrapper; var T: Boolean);
+begin T := Self.PaintNotifyAvailable; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperHighlights_R(Self: TCnEditControlWrapper; var T: THighlightItem; const t1: Integer);
+begin T := Self.Highlights[t1]; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperHighlightNames_R(Self: TCnEditControlWrapper; var T: string; const t1: Integer);
+begin T := Self.HighlightNames[t1]; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperHighlightCount_R(Self: TCnEditControlWrapper; var T: Integer);
+begin T := Self.HighlightCount; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperEditorCount_R(Self: TCnEditControlWrapper; var T: Integer);
+begin T := Self.EditorCount; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnEditControlWrapperEditors_R(Self: TCnEditControlWrapper; var T: TEditorObject; const t1: Integer);
+begin T := Self.Editors[t1]; end;
+
+(*----------------------------------------------------------------------------*)
+Function TCnEditControlWrapperIndexOfEditor2_P(Self: TCnEditControlWrapper;  EditView : IOTAEditView) : Integer;
+Begin Result := Self.IndexOfEditor(EditView); END;
+
+(*----------------------------------------------------------------------------*)
+Function TCnEditControlWrapperIndexOfEditor1_P(Self: TCnEditControlWrapper;  EditControl : TControl) : Integer;
+Begin Result := Self.IndexOfEditor(EditControl); END;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnBreakPointClickItemBpDeltaLine_W(Self: TCnBreakPointClickItem; const T: Integer);
+begin Self.BpDeltaLine := T; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnBreakPointClickItemBpDeltaLine_R(Self: TCnBreakPointClickItem; var T: Integer);
+begin T := Self.BpDeltaLine; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnBreakPointClickItemBpPosY_W(Self: TCnBreakPointClickItem; const T: Integer);
+begin Self.BpPosY := T; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnBreakPointClickItemBpPosY_R(Self: TCnBreakPointClickItem; var T: Integer);
+begin T := Self.BpPosY; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnBreakPointClickItemBpEditView_W(Self: TCnBreakPointClickItem; const T: IOTAEditView);
+begin Self.BpEditView := T; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnBreakPointClickItemBpEditView_R(Self: TCnBreakPointClickItem; var T: IOTAEditView);
+begin T := Self.BpEditView; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnBreakPointClickItemBpEditControl_W(Self: TCnBreakPointClickItem; const T: TControl);
+begin Self.BpEditControl := T; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TCnBreakPointClickItemBpEditControl_R(Self: TCnBreakPointClickItem; var T: TControl);
+begin T := Self.BpEditControl; end;
+
+(*----------------------------------------------------------------------------*)
+procedure THighlightItemUnderline_W(Self: THighlightItem; const T: Boolean);
+begin Self.Underline := T; end;
+
+(*----------------------------------------------------------------------------*)
+procedure THighlightItemUnderline_R(Self: THighlightItem; var T: Boolean);
+begin T := Self.Underline; end;
+
+(*----------------------------------------------------------------------------*)
+procedure THighlightItemItalic_W(Self: THighlightItem; const T: Boolean);
+begin Self.Italic := T; end;
+
+(*----------------------------------------------------------------------------*)
+procedure THighlightItemItalic_R(Self: THighlightItem; var T: Boolean);
+begin T := Self.Italic; end;
+
+(*----------------------------------------------------------------------------*)
+procedure THighlightItemColorFg_W(Self: THighlightItem; const T: TColor);
+begin Self.ColorFg := T; end;
+
+(*----------------------------------------------------------------------------*)
+procedure THighlightItemColorFg_R(Self: THighlightItem; var T: TColor);
+begin T := Self.ColorFg; end;
+
+(*----------------------------------------------------------------------------*)
+procedure THighlightItemColorBk_W(Self: THighlightItem; const T: TColor);
+begin Self.ColorBk := T; end;
+
+(*----------------------------------------------------------------------------*)
+procedure THighlightItemColorBk_R(Self: THighlightItem; var T: TColor);
+begin T := Self.ColorBk; end;
+
+(*----------------------------------------------------------------------------*)
+procedure THighlightItemBold_W(Self: THighlightItem; const T: Boolean);
+begin Self.Bold := T; end;
+
+(*----------------------------------------------------------------------------*)
+procedure THighlightItemBold_R(Self: THighlightItem; var T: Boolean);
+begin T := Self.Bold; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TEditorObjectViewBottomLine_R(Self: TEditorObject; var T: Integer);
+begin T := Self.ViewBottomLine; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TEditorObjectViewLineNumber_R(Self: TEditorObject; var T: Integer; const t1: Integer);
+begin T := Self.ViewLineNumber[t1]; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TEditorObjectViewLineCount_R(Self: TEditorObject; var T: Integer);
+begin T := Self.ViewLineCount; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TEditorObjectTopControl_R(Self: TEditorObject; var T: TControl);
+begin T := Self.TopControl; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TEditorObjectGutterWidth_R(Self: TEditorObject; var T: Integer);
+begin T := Self.GutterWidth; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TEditorObjectEditView_R(Self: TEditorObject; var T: IOTAEditView);
+begin T := Self.EditView; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TEditorObjectEditWindow_R(Self: TEditorObject; var T: TCustomForm);
+begin T := Self.EditWindow; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TEditorObjectEditControl_R(Self: TEditorObject; var T: TControl);
+begin T := Self.EditControl; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TEditorObjectContext_R(Self: TEditorObject; var T: TEditorContext);
+begin T := Self.Context; end;
+
+(*----------------------------------------------------------------------------*)
+procedure RIRegister_CnEditControlWrapper_Routines(S: TPSExec);
+begin
+ S.RegisterDelphiFunction(@EditControlWrapper, 'EditControlWrapper', cdRegister);
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure RIRegister_TCnEditControlWrapper(CL: TPSRuntimeClassImporter);
+begin
+  with CL.Add(TCnEditControlWrapper) do
+  begin
+    RegisterMethod(@TCnEditControlWrapperIndexOfEditor1_P, 'IndexOfEditor1');
+    RegisterMethod(@TCnEditControlWrapperIndexOfEditor2_P, 'IndexOfEditor2');
+    RegisterMethod(@TCnEditControlWrapper.GetEditorObject, 'GetEditorObject');
+    RegisterPropertyHelper(@TCnEditControlWrapperEditors_R,nil,'Editors');
+    RegisterPropertyHelper(@TCnEditControlWrapperEditorCount_R,nil,'EditorCount');
+    RegisterMethod(@TCnEditControlWrapper.IndexOfHighlight, 'IndexOfHighlight');
+    RegisterPropertyHelper(@TCnEditControlWrapperHighlightCount_R,nil,'HighlightCount');
+    RegisterPropertyHelper(@TCnEditControlWrapperHighlightNames_R,nil,'HighlightNames');
+    RegisterPropertyHelper(@TCnEditControlWrapperHighlights_R,nil,'Highlights');
+    RegisterMethod(@TCnEditControlWrapper.GetCharHeight, 'GetCharHeight');
+    RegisterMethod(@TCnEditControlWrapper.GetCharWidth, 'GetCharWidth');
+    RegisterMethod(@TCnEditControlWrapper.GetCharSize, 'GetCharSize');
+    RegisterMethod(@TCnEditControlWrapper.GetEditControlInfo, 'GetEditControlInfo');
+    RegisterMethod(@TCnEditControlWrapper.GetEditControlCharHeight, 'GetEditControlCharHeight');
+    RegisterMethod(@TCnEditControlWrapper.GetEditControlSupportsSyntaxHighlight, 'GetEditControlSupportsSyntaxHighlight');
+    RegisterMethod(@TCnEditControlWrapper.GetEditControlCanvas, 'GetEditControlCanvas');
+    RegisterMethod(@TCnEditControlWrapper.GetEditView, 'GetEditView');
+    RegisterMethod(@TCnEditControlWrapper.GetEditControl, 'GetEditControl');
+    RegisterMethod(@TCnEditControlWrapper.GetTopMostEditControl, 'GetTopMostEditControl');
+    RegisterMethod(@TCnEditControlWrapper.GetEditViewFromTabs, 'GetEditViewFromTabs');
+    RegisterMethod(@TCnEditControlWrapper.GetAttributeAtPos, 'GetAttributeAtPos');
+    RegisterMethod(@TCnEditControlWrapper.GetLineIsElided, 'GetLineIsElided');
+{$IFDEF BDS}
+    RegisterMethod(@TCnEditControlWrapper.GetPointFromEdPos, 'GetPointFromEdPos');
+{$ENDIF}
+    RegisterMethod(@TCnEditControlWrapper.GetLineFromPoint, 'GetLineFromPoint');
+    RegisterMethod(@TCnEditControlWrapper.MarkLinesDirty, 'MarkLinesDirty');
+    RegisterMethod(@TCnEditControlWrapper.EditorRefresh, 'EditorRefresh');
+    RegisterMethod(@TCnEditControlWrapper.GetTextAtLine, 'GetTextAtLine');
+    RegisterMethod(@TCnEditControlWrapper.IndexPosToCurPos, 'IndexPosToCurPos');
+    RegisterMethod(@TCnEditControlWrapper.RepaintEditControls, 'RepaintEditControls');
+    RegisterMethod(@TCnEditControlWrapper.GetUseTabKey, 'GetUseTabKey');
+    RegisterMethod(@TCnEditControlWrapper.GetTabWidth, 'GetTabWidth');
+    RegisterMethod(@TCnEditControlWrapper.ClickBreakpointAtActualLine, 'ClickBreakpointAtActualLine');
+    RegisterMethod(@TCnEditControlWrapper.AddKeyDownNotifier, 'AddKeyDownNotifier');
+    RegisterMethod(@TCnEditControlWrapper.RemoveKeyDownNotifier, 'RemoveKeyDownNotifier');
+    RegisterMethod(@TCnEditControlWrapper.AddKeyUpNotifier, 'AddKeyUpNotifier');
+    RegisterMethod(@TCnEditControlWrapper.RemoveKeyUpNotifier, 'RemoveKeyUpNotifier');
+    RegisterMethod(@TCnEditControlWrapper.AddBeforePaintLineNotifier, 'AddBeforePaintLineNotifier');
+    RegisterMethod(@TCnEditControlWrapper.RemoveBeforePaintLineNotifier, 'RemoveBeforePaintLineNotifier');
+    RegisterMethod(@TCnEditControlWrapper.AddAfterPaintLineNotifier, 'AddAfterPaintLineNotifier');
+    RegisterMethod(@TCnEditControlWrapper.RemoveAfterPaintLineNotifier, 'RemoveAfterPaintLineNotifier');
+    RegisterMethod(@TCnEditControlWrapper.AddEditControlNotifier, 'AddEditControlNotifier');
+    RegisterMethod(@TCnEditControlWrapper.RemoveEditControlNotifier, 'RemoveEditControlNotifier');
+    RegisterMethod(@TCnEditControlWrapper.AddEditorChangeNotifier, 'AddEditorChangeNotifier');
+    RegisterMethod(@TCnEditControlWrapper.RemoveEditorChangeNotifier, 'RemoveEditorChangeNotifier');
+    RegisterPropertyHelper(@TCnEditControlWrapperPaintNotifyAvailable_R,nil,'PaintNotifyAvailable');
+    RegisterMethod(@TCnEditControlWrapper.AddEditorMouseUpNotifier, 'AddEditorMouseUpNotifier');
+    RegisterMethod(@TCnEditControlWrapper.RemoveEditorMouseUpNotifier, 'RemoveEditorMouseUpNotifier');
+    RegisterMethod(@TCnEditControlWrapper.AddEditorMouseDownNotifier, 'AddEditorMouseDownNotifier');
+    RegisterMethod(@TCnEditControlWrapper.RemoveEditorMouseDownNotifier, 'RemoveEditorMouseDownNotifier');
+    RegisterMethod(@TCnEditControlWrapper.AddEditorMouseMoveNotifier, 'AddEditorMouseMoveNotifier');
+    RegisterMethod(@TCnEditControlWrapper.RemoveEditorMouseMoveNotifier, 'RemoveEditorMouseMoveNotifier');
+    RegisterMethod(@TCnEditControlWrapper.AddEditorMouseLeaveNotifier, 'AddEditorMouseLeaveNotifier');
+    RegisterMethod(@TCnEditControlWrapper.RemoveEditorMouseLeaveNotifier, 'RemoveEditorMouseLeaveNotifier');
+    RegisterMethod(@TCnEditControlWrapper.AddEditorNcPaintNotifier, 'AddEditorNcPaintNotifier');
+    RegisterMethod(@TCnEditControlWrapper.RemoveEditorNcPaintNotifier, 'RemoveEditorNcPaintNotifier');
+    RegisterMethod(@TCnEditControlWrapper.AddEditorVScrollNotifier, 'AddEditorVScrollNotifier');
+    RegisterMethod(@TCnEditControlWrapper.RemoveEditorVScrollNotifier, 'RemoveEditorVScrollNotifier');
+    RegisterPropertyHelper(@TCnEditControlWrapperMouseNotifyAvailable_R,nil,'MouseNotifyAvailable');
+    RegisterPropertyHelper(@TCnEditControlWrapperEditorBaseFont_R,nil,'EditorBaseFont');
+    RegisterPropertyHelper(@TCnEditControlWrapperFontBasic_R,@TCnEditControlWrapperFontBasic_W,'FontBasic');
+    RegisterPropertyHelper(@TCnEditControlWrapperFontAssembler_R,@TCnEditControlWrapperFontAssembler_W,'FontAssembler');
+    RegisterPropertyHelper(@TCnEditControlWrapperFontComment_R,@TCnEditControlWrapperFontComment_W,'FontComment');
+    RegisterPropertyHelper(@TCnEditControlWrapperFontDirective_R,@TCnEditControlWrapperFontDirective_W,'FontDirective');
+    RegisterPropertyHelper(@TCnEditControlWrapperFontIdentifier_R,@TCnEditControlWrapperFontIdentifier_W,'FontIdentifier');
+    RegisterPropertyHelper(@TCnEditControlWrapperFontKeyWord_R,@TCnEditControlWrapperFontKeyWord_W,'FontKeyWord');
+    RegisterPropertyHelper(@TCnEditControlWrapperFontNumber_R,@TCnEditControlWrapperFontNumber_W,'FontNumber');
+    RegisterPropertyHelper(@TCnEditControlWrapperFontSpace_R,@TCnEditControlWrapperFontSpace_W,'FontSpace');
+    RegisterPropertyHelper(@TCnEditControlWrapperFontString_R,@TCnEditControlWrapperFontString_W,'FontString');
+    RegisterPropertyHelper(@TCnEditControlWrapperFontSymbol_R,@TCnEditControlWrapperFontSymbol_W,'FontSymbol');
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure RIRegister_TCnBreakPointClickItem(CL: TPSRuntimeClassImporter);
+begin
+  with CL.Add(TCnBreakPointClickItem) do
+  begin
+    RegisterPropertyHelper(@TCnBreakPointClickItemBpEditControl_R,@TCnBreakPointClickItemBpEditControl_W,'BpEditControl');
+    RegisterPropertyHelper(@TCnBreakPointClickItemBpEditView_R,@TCnBreakPointClickItemBpEditView_W,'BpEditView');
+    RegisterPropertyHelper(@TCnBreakPointClickItemBpPosY_R,@TCnBreakPointClickItemBpPosY_W,'BpPosY');
+    RegisterPropertyHelper(@TCnBreakPointClickItemBpDeltaLine_R,@TCnBreakPointClickItemBpDeltaLine_W,'BpDeltaLine');
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure RIRegister_THighlightItem(CL: TPSRuntimeClassImporter);
+begin
+  with CL.Add(THighlightItem) do
+  begin
+    RegisterPropertyHelper(@THighlightItemBold_R,@THighlightItemBold_W,'Bold');
+    RegisterPropertyHelper(@THighlightItemColorBk_R,@THighlightItemColorBk_W,'ColorBk');
+    RegisterPropertyHelper(@THighlightItemColorFg_R,@THighlightItemColorFg_W,'ColorFg');
+    RegisterPropertyHelper(@THighlightItemItalic_R,@THighlightItemItalic_W,'Italic');
+    RegisterPropertyHelper(@THighlightItemUnderline_R,@THighlightItemUnderline_W,'Underline');
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure RIRegister_TEditorObject(CL: TPSRuntimeClassImporter);
+begin
+  with CL.Add(TEditorObject) do
+  begin
+    RegisterConstructor(@TEditorObject.Create, 'Create');
+    RegisterMethod(@TEditorObject.EditorIsOnTop, 'EditorIsOnTop');
+    RegisterMethod(@TEditorObject.IDEShowLineNumberChanged, 'IDEShowLineNumberChanged');
+    RegisterPropertyHelper(@TEditorObjectContext_R,nil,'Context');
+    RegisterPropertyHelper(@TEditorObjectEditControl_R,nil,'EditControl');
+    RegisterPropertyHelper(@TEditorObjectEditWindow_R,nil,'EditWindow');
+    RegisterPropertyHelper(@TEditorObjectEditView_R,nil,'EditView');
+    RegisterPropertyHelper(@TEditorObjectGutterWidth_R,nil,'GutterWidth');
+    RegisterPropertyHelper(@TEditorObjectTopControl_R,nil,'TopControl');
+    RegisterPropertyHelper(@TEditorObjectViewLineCount_R,nil,'ViewLineCount');
+    RegisterPropertyHelper(@TEditorObjectViewLineNumber_R,nil,'ViewLineNumber');
+    RegisterPropertyHelper(@TEditorObjectViewBottomLine_R,nil,'ViewBottomLine');
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure RIRegister_CnEditControlWrapper(CL: TPSRuntimeClassImporter);
+begin
+  RIRegister_TEditorObject(CL);
+  RIRegister_THighlightItem(CL);
+  RIRegister_TCnBreakPointClickItem(CL);
+  RIRegister_TCnEditControlWrapper(CL);
+end;
+
 { TPSImport_CnWizIdeUtils }
 
 procedure TPSImport_CnWizIdeUtils.CompileImport1(CompExec: TPSScript);
 begin
   SIRegister_CnWizIdeUtils(CompExec.Comp);
+  SIRegister_CnEditControlWrapper(CompExec.Comp);
 end;
 
 procedure TPSImport_CnWizIdeUtils.ExecImport1(CompExec: TPSScript; const ri: TPSRuntimeClassImporter);
 begin
   RIRegister_CnWizIdeUtils(ri);
   RIRegister_CnWizIdeUtils_Routines(CompExec.Exec); // comment it if no routines
+  RIRegister_CnEditControlWrapper(ri);
+  RIRegister_CnEditControlWrapper_Routines(CompExec.Exec); // comment it if no routines
 end;
 
 end.
