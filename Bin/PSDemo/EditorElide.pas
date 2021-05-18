@@ -9,12 +9,16 @@
 
 program EditorElide;
 
+// Note: Only run in BDS for IOTAElideActions
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs;
 
 var
   EditView: IOTAEditView;
   ElideActions: IOTAElideActions;
+  EditControl: TControl;
+  I: Integer;
 begin
   EditView := CnOtaGetTopMostEditView(nil);
   if EditView = nil then
@@ -23,7 +27,19 @@ begin
     Exit;
   end;
 
+  EditControl := CnOtaGetCurrentEditControl;
+  if EditControl <> nil then
+  begin
+    for I := 1 to 100 do
+
+    if EditControlWrapper.GetLineIsElided(EditControl, I) then
+      Writeln(Format('Line %d:  Elided', [I]))
+    else
+      Writeln(Format('Line %d:  Not Elided', [I]));
+  end;
+
   ElideActions := IOTAElideActions(EditView);
   ElideActions.UnElideAllBlocks;
+  EditView.Paint;
 end.
  
