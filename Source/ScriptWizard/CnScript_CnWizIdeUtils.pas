@@ -462,6 +462,10 @@ begin
     RegisterMethod('Function GetEditViewFromTabs( TabControl : TXTabControl; Index : Integer) : IOTAEditView');
     RegisterMethod('Procedure GetAttributeAtPos( EditControl : TControl; const EdPos : TOTAEditPos; IncludeMargin : Boolean; var Element, LineFlag : Integer)');
     RegisterMethod('Function GetLineIsElided( EditControl : TControl; LineNum : Integer) : Boolean');
+{$IFDEF IDE_EDITOR_ELIDE}
+    RegisterMethod('Procedure ElideLine( EditControl : TControl; LineNum : Integer)');
+    RegisterMethod('Procedure UnElideLine( EditControl : TControl; LineNum : Integer)');
+{$ENDIF}
 {$IFDEF BDS}
     RegisterMethod('Function GetPointFromEdPos( EditControl : TControl; APos : TOTAEditPos) : TPoint');
 {$ENDIF}
@@ -868,6 +872,10 @@ begin
     RegisterMethod(@TCnEditControlWrapper.GetEditViewFromTabs, 'GetEditViewFromTabs');
     RegisterMethod(@TCnEditControlWrapper.GetAttributeAtPos, 'GetAttributeAtPos');
     RegisterMethod(@TCnEditControlWrapper.GetLineIsElided, 'GetLineIsElided');
+{$IFDEF IDE_EDITOR_ELIDE}
+    RegisterMethod(@TCnEditControlWrapper.ElideLine, 'ElideLine');
+    RegisterMethod(@TCnEditControlWrapper.UnElideLine, 'UnElideLine');
+{$ENDIF}
 {$IFDEF BDS}
     RegisterMethod(@TCnEditControlWrapper.GetPointFromEdPos, 'GetPointFromEdPos');
 {$ENDIF}

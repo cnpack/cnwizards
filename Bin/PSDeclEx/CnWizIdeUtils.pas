@@ -647,10 +647,13 @@ type
     {* 返回指定行是否折叠，不包括折叠的头尾，也就是返回是否隐藏。
        只对 BDS 有效，其余情况返回 False}
 
-{$IFDEF BDS}
+    procedure ElideLine(EditControl: TControl; LineNum: Integer);
+    {* 折叠某行，行号必须是可折叠区的首行}
+    procedure UnElideLine(EditControl: TControl; LineNum: Integer);
+    {* 展开某行，行号必须是可折叠区的首行}
+
     function GetPointFromEdPos(EditControl: TControl; APos: TOTAEditPos): TPoint;
     {* 返回 BDS 中编辑器控件某字符位置处的座标，只在 BDS 下有效}
-{$ENDIF}
 
     function GetLineFromPoint(Point: TPoint; EditControl: TControl;
       EditView: IOTAEditView = nil): Integer;
@@ -1396,6 +1399,12 @@ begin
 
 end;
 
+procedure TCnEditControlWrapper.ElideLine(EditControl: TControl;
+  LineNum: Integer);
+begin
+
+end;
+
 procedure TCnEditControlWrapper.GetAttributeAtPos(EditControl: TControl;
   const EdPos: TOTAEditPos; IncludeMargin: Boolean; var Element,
   LineFlag: Integer);
@@ -1724,6 +1733,12 @@ end;
 
 procedure TCnEditControlWrapper.SetFonts(const Index: Integer;
   const Value: TFont);
+begin
+
+end;
+
+procedure TCnEditControlWrapper.UnElideLine(EditControl: TControl;
+  LineNum: Integer);
 begin
 
 end;

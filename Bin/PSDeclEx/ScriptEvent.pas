@@ -133,13 +133,22 @@ type
 
   end;
 
-function Event: TCnScriptEvent; overload;
+  TCnScriptEditorFlatButton = class(TCnScriptEvent)
+
+  end;
+
+  TCnScriptDesignerContextMenu = class(TCnScriptEvent)
+
+  end;
+
+function Event: TCnScriptEvent;
 
 implementation
 
-function Event: TCnScriptEvent; overload;
+function Event: TCnScriptEvent;
 begin
 
-end;  
+end;
+
 
 end.
