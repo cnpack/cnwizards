@@ -758,8 +758,12 @@ function CnOtaGetCurrentSourceFile: string;
 function CnOtaGetCurrentSourceFileName: string;
 {* 取当前编辑的 Pascal 或 C 源文件，判断限制较多}
 
-// 在 EditPosition 中插入一段文本，支持 D2005 下使用 utf-8 格式
 procedure CnOtaPositionInsertText(EditPosition: IOTAEditPosition; const Text: string);
+{* 在 EditPosition 中插入一段文本，支持 D2005 下使用 utf-8 格式}
+
+function CnOtaGetLinesElideInfo(Infos: TList; EditControl: TControl = nil): Boolean;
+{* 拿一编辑器中的行折叠信息，Infos 这个 List 里顺序放入折叠的开始行和结束行
+  无折叠或不支持折叠时返回 False，注意暂时无法区分紧邻的两个折叠块}
 
 type
   TInsertPos = (ipCur, ipFileHead, ipFileEnd, ipLineHead, ipLineEnd);
@@ -6044,6 +6048,40 @@ begin
 {$ELSE}
   EditPosition.InsertText(ConvertTextToEditorText(Text));
 {$ENDIF}
+end;
+
+// 拿一编辑器中的行折叠信息，Infos 这个 List 里顺序放入折叠的开始行和结束行，无折叠或不支持折叠时返回 False
+function CnOtaGetLinesElideInfo(Infos: TList; EditControl: TControl): Boolean;
+var
+  I: Integer;
+  Obj: TEditorObject;
+  Old, B: Boolean;
+begin
+  Result := False;
+  if EditControl = nil then
+    EditControl := CnOtaGetCurrentEditControl;
+
+  if EditControl = nil then
+    Exit;
+
+  Obj := EditControlWrapper.GetEditorObject(EditControl);
+  Old := False;
+  Infos.Clear;
+
+  for I := 1 to Obj.Context.LineCount do
+  begin
+    B := EditControlWrapper.GetLineIsElided(EditControl, I);
+    if B <> Old then
+    begin
+      Infos.Add(Pointer(I - 1));
+      Old := B;
+    end;
+  end;
+
+  if (Infos.Count mod 2) <> 0 then
+    Infos.Add(Pointer(Obj.Context.LineCount));
+
+  Result := Infos.Count > 0;
 end;
 
 // 插入一段文本到当前正在编辑的源文件中，返回成功标志

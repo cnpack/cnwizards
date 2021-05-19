@@ -104,11 +104,11 @@ type
   TEditorChangeTypes = set of TEditorChangeType;
 
   TEditorContext = record
-    TopRow: Integer;
-    BottomRow: Integer;
+    TopRow: Integer;               // 视觉上第一行的行号
+    BottomRow: Integer;            // 视觉上最下面一行的行号
     LeftColumn: Integer;
     CurPos: TOTAEditPos;
-    LineCount: Integer;
+    LineCount: Integer;            // 记录编辑器里的文字总行数
     LineText: string;
     ModTime: TDateTime;
     BlockValid: Boolean;

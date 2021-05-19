@@ -56,8 +56,10 @@ type
   private
     FIdAttrib: Integer;
     FIdLine: Integer;
+    FIdElide: Integer;
     procedure TestAttributeAtCursor;
     procedure TestAttributeLine;
+    procedure TestLinesElideInfo;
   protected
     function GetHasConfig: Boolean; override;
   public
@@ -82,8 +84,11 @@ uses
 const
   SCnAttribCommand = 'CnAttribCommand';
   SCnLineAttribCommand = 'CnLineAttribCommand';
+  SCnLineElideInfoCommand = 'CnLineElideInfoCommand';
+
   SCnAttribCaption = 'Show Attribute at Cursor';
   SCnLineAttribCaption = 'Show Attribute in Whole Line';
+  SCnLineElideInfoCaption = 'Show Lines Elide Info.';
 
 //==============================================================================
 // 编辑器属性获取子菜单专家
@@ -95,6 +100,7 @@ procedure TCnTestEditorAttribWizard.AcquireSubActions;
 begin
   FIdAttrib := RegisterASubAction(SCnAttribCommand, SCnAttribCaption);
   FIdLine := RegisterASubAction(SCnLineAttribCommand, SCnLineAttribCaption);
+  FIdElide := RegisterASubAction(SCnLineElideInfoCommand, SCnLineElideInfoCaption);
 end;
 
 procedure TCnTestEditorAttribWizard.Config;
@@ -231,7 +237,9 @@ begin
   if Index = FIdAttrib then
     TestAttributeAtCursor
   else if Index = FIdLine then
-    TestAttributeLine;
+    TestAttributeLine
+  else if Index = FIdElide then
+    TestLinesElideInfo;
 end;
 
 procedure TCnTestEditorAttribWizard.TestAttributeLine;
@@ -321,6 +329,30 @@ begin
     end;
   end;
   ShowMessage('Information Sent to CnDebugViewer for Current Line.');
+end;
+
+procedure TCnTestEditorAttribWizard.TestLinesElideInfo;
+var
+  List: TList;
+  S: string;
+  I: Integer;
+begin
+  List := TList.Create;
+  if CnOtaGetLinesElideInfo(List) then
+  begin
+    S := '';
+    for I := 0 to List.Count - 1 do
+    begin
+      if I = 0 then
+        S := IntToStr(Integer(List[I]))
+      else
+        S := S + ', ' + IntToStr(Integer(List[I]));
+    end;
+    ShowMessage(S);
+  end
+  else
+  ShowMessage('NO Elide Lines or NOT Support Elide.');
+  List.Free;
 end;
 
 initialization
