@@ -57,9 +57,13 @@ type
     FIdAttrib: Integer;
     FIdLine: Integer;
     FIdElide: Integer;
+    FIdLineElide: Integer;
+    FIdLineUnElide: Integer;
     procedure TestAttributeAtCursor;
     procedure TestAttributeLine;
     procedure TestLinesElideInfo;
+    procedure TestElideLine;
+    procedure TestUnElideLine;
   protected
     function GetHasConfig: Boolean; override;
   public
@@ -85,10 +89,14 @@ const
   SCnAttribCommand = 'CnAttribCommand';
   SCnLineAttribCommand = 'CnLineAttribCommand';
   SCnLineElideInfoCommand = 'CnLineElideInfoCommand';
+  SCnElideLineCommand = 'SCnElideLineCommand';
+  SCnUnElideLineCommand = 'SCnUnElideLineCommand';
 
   SCnAttribCaption = 'Show Attribute at Cursor';
   SCnLineAttribCaption = 'Show Attribute in Whole Line';
   SCnLineElideInfoCaption = 'Show Lines Elide Info.';
+  SCnElideLineCaption = 'Elide a Line Number...';
+  SCnUnElideLineCaption = 'UnElide a Line Number...';
 
 //==============================================================================
 // 编辑器属性获取子菜单专家
@@ -101,6 +109,8 @@ begin
   FIdAttrib := RegisterASubAction(SCnAttribCommand, SCnAttribCaption);
   FIdLine := RegisterASubAction(SCnLineAttribCommand, SCnLineAttribCaption);
   FIdElide := RegisterASubAction(SCnLineElideInfoCommand, SCnLineElideInfoCaption);
+  FIdLineElide := RegisterASubAction(SCnElideLineCommand, SCnElideLineCaption);
+  FIdLineUnElide := RegisterASubAction(SCnUnElideLineCommand, SCnUnElideLineCaption);
 end;
 
 procedure TCnTestEditorAttribWizard.Config;
@@ -239,7 +249,11 @@ begin
   else if Index = FIdLine then
     TestAttributeLine
   else if Index = FIdElide then
-    TestLinesElideInfo;
+    TestLinesElideInfo
+  else if Index = FIdLineElide then
+    TestElideLine
+  else if Index = FIdLineUnElide then
+    TestUnElideLine
 end;
 
 procedure TCnTestEditorAttribWizard.TestAttributeLine;
@@ -331,6 +345,19 @@ begin
   ShowMessage('Information Sent to CnDebugViewer for Current Line.');
 end;
 
+procedure TCnTestEditorAttribWizard.TestElideLine;
+var
+  L: Integer;
+  Control: TControl;
+begin
+  Control := CnOtaGetCurrentEditControl;
+  if Control = nil then
+    Exit;
+
+  L := StrToInt(CnInputBox('Hint', 'Enter a Line Number', '1'));
+  EditControlWrapper.ElideLine(Control, L);
+end;
+
 procedure TCnTestEditorAttribWizard.TestLinesElideInfo;
 var
   List: TList;
@@ -353,6 +380,19 @@ begin
   else
   ShowMessage('NO Elide Lines or NOT Support Elide.');
   List.Free;
+end;
+
+procedure TCnTestEditorAttribWizard.TestUnElideLine;
+var
+  L: Integer;
+  Control: TControl;
+begin
+  Control := CnOtaGetCurrentEditControl;
+  if Control = nil then
+    Exit;
+
+  L := StrToInt(CnInputBox('Hint', 'Enter a Line Number', '1'));
+  EditControlWrapper.UnElideLine(Control, L);
 end;
 
 initialization

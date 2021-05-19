@@ -100,7 +100,7 @@ type
     ctUnElided,               // 编辑器行展开，有限支持
     ctOptionChanged           // 编辑器设置对话框曾经打开过
     );
-    
+
   TEditorChangeTypes = set of TEditorChangeType;
 
   TEditorContext = record
@@ -347,7 +347,7 @@ type
     property HighlightCount: Integer read GetHighlightCount;
     property HighlightNames[Index: Integer]: string read GetHighlightName;
     property Highlights[Index: Integer]: THighlightItem read GetHighlight;
-    
+
     function GetCharHeight: Integer;
     {* 返回编辑器行高 }
     function GetCharWidth: Integer;
@@ -381,6 +381,13 @@ type
     function GetLineIsElided(EditControl: TControl; LineNum: Integer): Boolean;
     {* 返回指定行是否折叠，不包括折叠的头尾，也就是返回是否隐藏。
        只对 BDS 有效，其余情况返回 False}
+
+{$IFDEF IDE_EDITOR_ELIDE}
+    procedure ElideLine(EditControl: TControl; LineNum: Integer);
+    {* 折叠某行，行号必须是可折叠区的首行}
+    procedure UnElideLine(EditControl: TControl; LineNum: Integer);
+    {* 展开某行，行号必须是可折叠区的首行}
+{$ENDIF}
 
 {$IFDEF BDS}
     function GetPointFromEdPos(EditControl: TControl; APos: TOTAEditPos): TPoint;
@@ -684,6 +691,11 @@ const
 {$ENDIF}
 {$ENDIF}
 
+{$IFDEF IDE_EDITOR_ELIDE}
+  SEditControlElideName = '@Editorcontrol@TCustomEditControl@Elide$qqri';
+  SEditControlUnElideName = '@Editorcontrol@TCustomEditControl@unElide$qqri';
+{$ENDIF}
+
 type
   TControlHack = class(TControl);
 {$IFDEF DELPHI10_SEATTLE_UP}
@@ -713,6 +725,11 @@ type
     var Element, LineFlag: Integer; B1: Boolean);
 {$ENDIF}
 
+{$IFDEF IDE_EDITOR_ELIDE}
+  TEditControlElideProc = procedure(Self: TObject; Line: Integer);
+  TEditControlUnElideProc = procedure(Self: TObject; Line: Integer);
+{$ENDIF}
+
 var
   PaintLine: TPaintLineProc = nil;
 {$IFDEF DELPHI10_SEATTLE_UP}
@@ -728,6 +745,10 @@ var
 {$IFDEF BDS}
   PointFromEdPos: TPointFromEdPosProc = nil;
   IndexPosToCurPosProc: TIndexPosToCurPosProc = nil;
+{$ENDIF}
+{$IFDEF IDE_EDITOR_ELIDE}
+  EditControlElide: TEditControlElideProc = nil;
+  EditControlUnElide: TEditControlUnElideProc = nil;
 {$ENDIF}
 
   PaintLineLock: TRTLCriticalSection;
@@ -958,31 +979,40 @@ begin
     DoGetTextAtLine := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SGetTextAtLineName));
     CnWizAssert(Assigned(DoGetTextAtLine), 'Failed to load GetTextAtLine from FCorIdeModule');
 
-  {$IFDEF BDS}
-    // BDS 下才有效
+{$IFDEF IDE_EDITOR_ELIDE}
     LineIsElided := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SLineIsElidedName));
     CnWizAssert(Assigned(LineIsElided), 'Failed to load LineIsElided from FCorIdeModule');
 
+    EditControlElide := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SEditControlElideName));
+    CnWizAssert(Assigned(EditControlElide), 'Failed to load EditControlElide from FCorIdeModule');
+
+    EditControlUnElide := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SEditControlUnElideName));
+    CnWizAssert(Assigned(EditControlUnElide), 'Failed to load EditControlUnElide from FCorIdeModule');
+{$ENDIF}
+
+{$IFDEF BDS}
+    // BDS 下才有效
     PointFromEdPos := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SPointFromEdPosName));
     CnWizAssert(Assigned(PointFromEdPos), 'Failed to load PointFromEdPos from FCorIdeModule');
 
     IndexPosToCurPosProc := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SIndexPosToCurPosName));
     CnWizAssert(Assigned(IndexPosToCurPosProc), 'Failed to load IndexPosToCurPos from FCorIdeModule');
-  {$ENDIF}
+{$ENDIF}
+
 
     SetEditView := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SSetEditViewName));
     CnWizAssert(Assigned(SetEditView), 'Failed to load SetEditView from FCorIdeModule');
 
     FPaintLineHook := TCnMethodHook.Create(@PaintLine, @MyPaintLine);
 
-  {$IFDEF DEBUG}
+{$IFDEF DEBUG}
     CnDebugger.LogMsg('EditControl.PaintLine Hooked');
-  {$ENDIF}
+{$ENDIF}
 
     FSetEditViewHook := TCnMethodHook.Create(@SetEditView, @MySetEditView);
-  {$IFDEF DEBUG}
+{$IFDEF DEBUG}
     CnDebugger.LogMsg('EditControl.SetEditView Hooked');
-  {$ENDIF}
+{$ENDIF}
 
     FPaintNotifyAvailable := True;
   except
@@ -2981,6 +3011,24 @@ begin
   if Value <> nil then
     FFontArray[Index].Assign(Value);
 end;
+
+{$IFDEF IDE_EDITOR_ELIDE}
+
+procedure TCnEditControlWrapper.ElideLine(EditControl: TControl;
+  LineNum: Integer);
+begin
+  if Assigned(EditControlElide) then
+    EditControlElide(EditControl, LineNum);
+end;
+
+procedure TCnEditControlWrapper.UnElideLine(EditControl: TControl;
+  LineNum: Integer);
+begin
+  if Assigned(EditControlUnElide) then
+    EditControlUnElide(EditControl, LineNum);
+end;
+
+{$ENDIF}
 
 initialization
   InitializeCriticalSection(PaintLineLock);
