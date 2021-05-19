@@ -2958,7 +2958,6 @@
 
 {$IFDEF BDS2007_UP}
   {$DEFINE IDE_CONF_MANAGER}
-  {$DEFINE IDE_EDITOR_ELIDE}  // 2007 或以上编辑器支持折叠
   {$DEFINE TBYTES_DEFINED}    // 2007 Defined TBytes = array of Byte;
 {$ENDIF}
 
@@ -2978,6 +2977,7 @@
 {$ENDIF}
 
 {$IFDEF BDS2005_UP}
+  {$DEFINE IDE_EDITOR_ELIDE}  // 2005 或以上编辑器支持折叠
   {$DEFINE OTA_PALETTE_API} // 2005 and above Provides PaletteAPI.
 {$ENDIF}
 
