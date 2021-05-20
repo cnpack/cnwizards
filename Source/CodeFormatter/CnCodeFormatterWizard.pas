@@ -41,8 +41,9 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ToolsAPI, IniFiles, StdCtrls, ComCtrls, Menus, TypInfo, Contnrs, mPasLex, CnSpin,
-  CnConsts, CnCommon, CnWizConsts, CnWizClasses, CnWizMultiLang, CnWizOptions,
+  ToolsAPI, IniFiles, StdCtrls, ComCtrls, Menus, TypInfo, Contnrs, mPasLex,
+  CnSpin, CnConsts, CnCommon, CnWizConsts, CnWizClasses, CnWizMultiLang,
+  CnWizOptions,
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
   CnWizManager, CnInputHelper, CnInputSymbolList, CnInputIdeSymbolList,
 {$ENDIF}
@@ -54,7 +55,6 @@ type
   private
     FIdOptions: Integer;
     FIdFormatCurrent: Integer;
-
     FLibHandle: THandle;
     FGetProvider: TCnGetFormatterProvider;
 
@@ -73,10 +73,10 @@ type
     FKeywordStyle: TKeywordStyle;
     FWrapMode: TCodeWrapMode;
     FWrapNewLineWidth: Integer;
-
     FUseIDESymbols: Boolean;
     FBreakpoints: TObjectList;
     FBookmarks: TObjectList;
+    FElideLines: TList;
 
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
     FInputHelper: TCnInputHelper;
@@ -88,10 +88,17 @@ type
 
     // 获取指定文件中的断点信息
     procedure ObtainBreakpointsByFile(const FileName: string);
+    // 获取行的折叠信息
+    procedure ObtainLineElideInfo(List: TList);
+
     // 根据 DWORD 数组还原断点信息，碰到 0 或超过 Count 时结束
     procedure RestoreBreakpoints(LineMarks: PDWORD; Count: Integer = MaxInt);
     // 根据 DWORD 数组以及之前存储的 FBookmarks 还原书签信息
     procedure RestoreBookmarks(EditView: IOTAEditView; LineMarks: PDWORD);
+{$IFDEF IDE_EDITOR_ELIDE}
+    // 根据 DWORD 数组以及折叠行数量还原折叠状态
+    procedure RestoreElideLines(LineMarks: PDWORD);
+{$ENDIF}
 
     function PutPascalFormatRules: Boolean;
     function CheckSelectionPosition(StartPos: TOTACharPos; EndPos: TOTACharPos;
@@ -114,19 +121,20 @@ type
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
     procedure AcquireSubActions; override;
-
     property DirectiveMode: TCompDirectiveMode read FDirectiveMode write FDirectiveMode;
     property KeywordStyle: TKeywordStyle read FKeywordStyle write FKeywordStyle;
     property BeginStyle: TBeginStyle read FBeginStyle write FBeginStyle;
     property WrapMode: TCodeWrapMode read FWrapMode write FWrapMode;
     property TabSpaceCount: Byte read FTabSpaceCount write FTabSpaceCount;
-    property SpaceBeforeOperator: Byte read FSpaceBeforeOperator write FSpaceBeforeOperator;
+    property SpaceBeforeOperator: Byte read FSpaceBeforeOperator write
+      FSpaceBeforeOperator;
     property SpaceAfterOperator: Byte read FSpaceAfterOperator write FSpaceAfterOperator;
     property SpaceBeforeASM: Byte read FSpaceBeforeASM write FSpaceBeforeASM;
     property SpaceTabASMKeyword: Byte read FSpaceTabASMKeyword write FSpaceTabASMKeyword;
     property WrapWidth: Integer read FWrapWidth write FWrapWidth;
     property WrapNewLineWidth: Integer read FWrapNewLineWidth write FWrapNewLineWidth;
-    property UsesUnitSingleLine: Boolean read FUsesUnitSingleLine write FUsesUnitSingleLine;
+    property UsesUnitSingleLine: Boolean read FUsesUnitSingleLine write
+      FUsesUnitSingleLine;
     property UseIgnoreArea: Boolean read FUseIgnoreArea write FUseIgnoreArea;
     property KeepUserLineBreak: Boolean read FKeepUserLineBreak write FKeepUserLineBreak;
     property UseIDESymbols: Boolean read FUseIDESymbols write FUseIDESymbols;
@@ -232,8 +240,8 @@ begin
     SCnCodeFormatterWizardConfigCaption, 0, SCnCodeFormatterWizardConfigHint);
 end;
 
-function TCnCodeFormatterWizard.CheckSelectionPosition(StartPos,
-  EndPos: TOTACharPos; View: IOTAEditView): Boolean;
+function TCnCodeFormatterWizard.CheckSelectionPosition(StartPos, EndPos:
+  TOTACharPos; View: IOTAEditView): Boolean;
 const
   InvalidTokens: set of TTokenKind =
     [tkBorComment, tkAnsiComment];
@@ -245,6 +253,7 @@ var
   NS, NE: Integer;
 
   // 1 > = < 2 分别返回 1 0 -1
+
   function CompareCharPos(Pos1, Pos2: TOTACharPos): Integer;
   begin
     if Pos1.Line > Pos2.Line then
@@ -276,7 +285,8 @@ begin
     NowPos.Line := 0;
 
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('CheckSelectionPosition. StartPos %d:%d. EndPos %d:%d', [StartPos.Line, StartPos.CharIndex,
+    CnDebugger.LogFmt('CheckSelectionPosition. StartPos %d:%d. EndPos %d:%d', [StartPos.Line,
+      StartPos.CharIndex,
       EndPos.Line, EndPos.CharIndex]);
 {$ENDIF}
 
@@ -289,7 +299,6 @@ begin
 //    CnDebugger.LogFmt('Now Pos %d:%d. Token %s', [NowPos.Line, NowPos.CharIndex,
 //      GetEnumName(TypeInfo(TTokenKind), Ord(Lex.TokenID))]);
 {$ENDIF}
-
       // 当前 Token 是注释、位置等于光标位置且前一 Token 是 CRLFCo
       NS := CompareCharPos(NowPos, StartPos);
       if (NS = 0) and (PrevToken = tkCRLFCo) and (Lex.TokenID in InvalidTokens) then
@@ -370,7 +379,7 @@ begin
       FDirectiveMode := TCompDirectiveMode(cbbDirectiveMode.ItemIndex);
       FKeepUserLineBreak := chkKeepUserLineBreak.Checked;
     end;
-    
+
     Free;
   end;
 end;
@@ -380,9 +389,11 @@ begin
   inherited;
   FBreakpoints := TObjectList.Create(True);
   FBookmarks := TObjectList.Create(True);
+  FElideLines := TList.Create;
   FLibHandle := LoadLibrary(PChar(MakePath(WizOptions.DllPath) + DLLName));
   if FLibHandle <> 0 then
-    FGetProvider := TCnGetFormatterProvider(GetProcAddress(FLibHandle, 'GetCodeFormatterProvider'));
+    FGetProvider := TCnGetFormatterProvider(GetProcAddress(FLibHandle,
+      'GetCodeFormatterProvider'));
 end;
 
 destructor TCnCodeFormatterWizard.Destroy;
@@ -392,6 +403,7 @@ begin
   SetLength(FPreNamesArray, 0);
 {$ENDIF}
 
+  FElideLines.Free;
   FBookmarks.Free;
   FBreakpoints.Free;
   FreeLibrary(FLibHandle);
@@ -483,8 +495,8 @@ begin
     Result := [];
 end;
 
-class procedure TCnCodeFormatterWizard.GetWizardInfo(var Name, Author,
-  Email, Comment: string);
+class procedure TCnCodeFormatterWizard.GetWizardInfo(var Name, Author, Email,
+  Comment: string);
 begin
   Name := SCnCodeFormatterWizardName;
   Author := SCnPack_GuYueChunQiu + ';' + SCnPack_LiuXiao;
@@ -494,20 +506,27 @@ end;
 
 procedure TCnCodeFormatterWizard.LoadSettings(Ini: TCustomIniFile);
 begin
-  FUsesUnitSingleLine := Ini.ReadBool('', csUsesUnitSingleLine, CnPascalCodeForVCLRule.UsesUnitSingleLine);
+  FUsesUnitSingleLine := Ini.ReadBool('', csUsesUnitSingleLine,
+    CnPascalCodeForVCLRule.UsesUnitSingleLine);
   FUseIgnoreArea := Ini.ReadBool('', csUseIgnoreArea, CnPascalCodeForVCLRule.UseIgnoreArea);
-  FSpaceAfterOperator := Ini.ReadInteger('', csSpaceAfterOperator, CnPascalCodeForVCLRule.SpaceAfterOperator);
-  FSpaceBeforeOperator := Ini.ReadInteger('', csSpaceBeforeOperator, CnPascalCodeForVCLRule.SpaceBeforeOperator);
-  FSpaceBeforeASM := Ini.ReadInteger('', csSpaceBeforeASM, CnPascalCodeForVCLRule.SpaceBeforeASM);
+  FSpaceAfterOperator := Ini.ReadInteger('', csSpaceAfterOperator,
+    CnPascalCodeForVCLRule.SpaceAfterOperator);
+  FSpaceBeforeOperator := Ini.ReadInteger('', csSpaceBeforeOperator,
+    CnPascalCodeForVCLRule.SpaceBeforeOperator);
+  FSpaceBeforeASM := Ini.ReadInteger('', csSpaceBeforeASM,
+    CnPascalCodeForVCLRule.SpaceBeforeASM);
   FTabSpaceCount := Ini.ReadInteger('', csTabSpaceCount, CnPascalCodeForVCLRule.TabSpaceCount);
-  FSpaceTabASMKeyword := Ini.ReadInteger('', csSpaceTabASMKeyword, CnPascalCodeForVCLRule.SpaceTabASMKeyword);
+  FSpaceTabASMKeyword := Ini.ReadInteger('', csSpaceTabASMKeyword,
+    CnPascalCodeForVCLRule.SpaceTabASMKeyword);
   FWrapWidth := Ini.ReadInteger('', csWrapWidth, CnPascalCodeForVCLRule.WrapWidth);
-  FWrapNewLineWidth := Ini.ReadInteger('', csWrapNewLineWidth, CnPascalCodeForVCLRule.WrapNewLineWidth);
+  FWrapNewLineWidth := Ini.ReadInteger('', csWrapNewLineWidth,
+    CnPascalCodeForVCLRule.WrapNewLineWidth);
   FWrapMode := TCodeWrapMode(Ini.ReadInteger('', csWrapMode, Ord(CnPascalCodeForVCLRule.CodeWrapMode)));
   FBeginStyle := TBeginStyle(Ini.ReadInteger('', csBeginStyle, Ord(CnPascalCodeForVCLRule.BeginStyle)));
   FKeywordStyle := TKeywordStyle(Ini.ReadInteger('', csKeywordStyle, Ord(CnPascalCodeForVCLRule.KeywordStyle)));
   FDirectiveMode := TCompDirectiveMode(Ini.ReadInteger('', csDirectiveMode, Ord(CnPascalCodeForVCLRule.CompDirectiveMode)));
-  FKeepUserLineBreak := Ini.ReadBool('', csKeepUserLineBreak, CnPascalCodeForVCLRule.KeepUserLineBreak);
+  FKeepUserLineBreak := Ini.ReadBool('', csKeepUserLineBreak,
+    CnPascalCodeForVCLRule.KeepUserLineBreak);
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
   FUseIDESymbols := Ini.ReadBool('', csUseIDESymbols, False);
 {$ENDIF}
@@ -562,7 +581,8 @@ begin
     IDESymbols.Reload(Buffer, '', PosInfo);
 
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('TCnCodeFormatterWizard IDE Symbols Got Count: ' + IntToStr(IDESymbols.Count));
+    CnDebugger.LogMsg('TCnCodeFormatterWizard IDE Symbols Got Count: ' +
+      IntToStr(IDESymbols.Count));
 {$ENDIF}
   end;
 
@@ -574,7 +594,8 @@ begin
     UnitNames.Reload(Buffer, '', PosInfo);
 
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('TCnCodeFormatterWizard Unit Names Got Count: ' + IntToStr(UnitNames.Count));
+    CnDebugger.LogMsg('TCnCodeFormatterWizard Unit Names Got Count: ' + IntToStr
+      (UnitNames.Count));
 {$ENDIF}
   end;
 
@@ -633,7 +654,7 @@ begin
     Exit;
   Intf := FGetProvider();
 
-  if Intf = nil then    
+  if Intf = nil then
     Exit;
 
   ADirectiveMode := CN_RULE_DIRECTIVE_MODE_DEFAULT;
@@ -660,8 +681,10 @@ begin
 
   ABeginStyle := CN_RULE_BEGIN_STYLE_DEFAULT;
   case FBeginStyle of
-    bsNextLine: ABeginStyle := CN_RULE_BEGIN_STYLE_NEXTLINE;
-    bsSameLine: ABeginStyle := CN_RULE_BEGIN_STYLE_SAMELINE;
+    bsNextLine:
+      ABeginStyle := CN_RULE_BEGIN_STYLE_NEXTLINE;
+    bsSameLine:
+      ABeginStyle := CN_RULE_BEGIN_STYLE_SAMELINE;
   end;
 
   ATabSpace := FTabSpaceCount;
@@ -680,8 +703,10 @@ begin
         ALineWrapWidth := 512;
         ANewLineWrapWidth := 768;
       end;
-    cwmSimple: AWrapMode := CN_RULE_CODE_WRAP_MODE_SIMPLE;
-    cwmAdvanced: AWrapMode := CN_RULE_CODE_WRAP_MODE_ADVANCED;
+    cwmSimple:
+      AWrapMode := CN_RULE_CODE_WRAP_MODE_SIMPLE;
+    cwmAdvanced:
+      AWrapMode := CN_RULE_CODE_WRAP_MODE_ADVANCED;
   end;
 
   AUsesSingleLine := LongBool(FUsesUnitSingleLine);
@@ -723,16 +748,18 @@ var
   View: IOTAEditView;
   Src: string;
   Res: PChar;
-  I, ErrCode, SourceLine, SourceCol, SourcePos: Integer;
+  I, Idx, ErrCode, SourceLine, SourceCol, SourcePos: Integer;
   CurrentToken: PAnsiChar;
   Block: IOTAEditBlock;
   StartPos, EndPos, StartPosIn, EndPosIn: Integer;
   StartRec, EndRec: TOTACharPos;
+  EP: TOTAEditPos;
   ErrLine: string;
   BpBmLineMarks: array of DWORD;
   OutLineMarks: PDWORD;
 
   // 将解析器中返回的出错列转换成 IDE 里内部使用的列供定位，BDS 以上是 Utf8
+
   function ConvertToEditorCol(const Line: string; Col: Integer): Integer;
 {$IFDEF BDS}
   var
@@ -792,12 +819,13 @@ begin
     if not Assigned(View) then
       Exit;
 
-    // 记录断点信息
+    // 记录断点、书签、折叠行、光标信息
     ObtainBreakpointsByFile(CnOtaGetCurrentSourceFileName);
     SaveBookMarksToObjectList(View, FBookmarks);
-    if (FBreakpoints.Count = 0) and (FBookmarks.Count = 0) then
-      Formatter.SetInputLineMarks(nil);
+    ObtainLineElideInfo(FElideLines);
 
+//    if (FBreakpoints.Count = 0) and (FBookmarks.Count = 0) then
+//      Formatter.SetInputLineMarks(nil);
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
     CheckObtainIDESymbols;
     if Length(FPreNamesArray) > 0 then
@@ -813,19 +841,48 @@ begin
       try
         Screen.Cursor := crHourGlass;
 
-        // 传递断点与书签的行号
-        if FBreakpoints.Count + FBookmarks.Count > 0 then
-        begin
-          SetLength(BpBmLineMarks, FBreakpoints.Count + FBookmarks.Count + 1); // 末尾多一个 0
-          for I := 0 to FBreakpoints.Count - 1 do
-            BpBmLineMarks[I] := DWORD(TCnBreakpointDescriptor(FBreakpoints[I]).LineNumber);
-          for I := 0 to FBookmarks.Count - 1 do
-            BpBmLineMarks[I + FBreakpoints.Count] := DWORD(TCnBookmarkObject(FBookmarks[I]).Line);
-          BpBmLineMarks[FBreakpoints.Count + FBookmarks.Count] := 0;
+        // 传递当前光标的行号、断点、书签、折叠开始的行号
+        SetLength(BpBmLineMarks, 1 + FBreakpoints.Count + FBookmarks.Count
+          + FElideLines.Count + 1); // 末尾多一个 0
 
-          Formatter.SetInputLineMarks(@(BpBmLineMarks[0]));
+        EP := View.CursorPos;
+        BpBmLineMarks[0] := EP.Line;
+        Idx := 1;
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('Before Format. Cursor Line: %d', [EP.Line]);
+{$ENDIF}
+
+        if FBreakpoints.Count > 0 then
+        begin
+          for I := 0 to FBreakpoints.Count - 1 do
+            BpBmLineMarks[I + Idx] := DWORD(TCnBreakpointDescriptor(FBreakpoints
+              [I]).LineNumber);
+          Inc(Idx, FBreakpoints.Count);
         end;
-        SetLength(BpBmLineMarks, 0);
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('Before Format. Breakpoint Count: %d', [FBreakpoints.Count]);
+{$ENDIF}
+
+        if FBookmarks.Count > 0 then
+        begin
+          for I := 0 to FBookmarks.Count - 1 do
+            BpBmLineMarks[I + Idx] := DWORD(TCnBookmarkObject(FBookmarks[I]).Line);
+          Inc(Idx, FBookmarks.Count);
+        end;
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('Before Format. Bookmark Count: %d', [FBookmarks.Count]);
+{$ENDIF}
+
+        if FElideLines.Count > 0 then
+        begin
+          for I := 0 to FElideLines.Count - 1 do
+            BpBmLineMarks[I + Idx] := DWORD(FElideLines[I]);
+        end;
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('Before Format. Elide Line Count: %d', [FElideLines.Count]);
+{$ENDIF}
+
+        Formatter.SetInputLineMarks(@(BpBmLineMarks[0]));
 
 {$IFDEF UNICODE}
         // Src/Res Utf16
@@ -871,18 +928,45 @@ begin
           CnOtaSetCurrentEditorSource(string(Res));
   {$ENDIF}
 {$ENDIF}
-
-          // 恢复断点与书签信息
+          // 恢复光标、断点、书签与折叠信息
           OutLineMarks := Formatter.RetrieveOutputLinkMarks;
-          if FBookmarks.Count = 0 then
-            RestoreBreakpoints(OutLineMarks)
-          else
+
+          // 恢复光标位置
+          EP.Line := OutLineMarks^;
+          View.SetCursorPos(EP);
+          Inc(OutLineMarks);
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('After Format. Restore Cursor Line: %d', [EP.Line]);
+{$ENDIF}
+
+          // 恢复断点
+          Idx := FBreakpoints.Count;
+          if Idx > 0 then
           begin
-            RestoreBreakpoints(OutLineMarks, FBreakpoints.Count);
-            // 恢复书签
-            Inc(OutLineMarks, FBreakpoints.Count);
-            RestoreBookmarks(View, OutLineMarks);
+            RestoreBreakpoints(OutLineMarks, Idx);
+            Inc(OutLineMarks, Idx);
           end;
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('After Format. Restore Breakpoints: %d', [Idx]);
+{$ENDIF}
+          // 恢复书签
+          Idx := FBookmarks.Count;
+          if Idx > 0 then
+          begin
+            RestoreBookmarks(View, OutLineMarks); // 内部最多只处理 FBookmarks.Count 个
+            Inc(OutLineMarks, Idx);
+          end;
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('After Format. Restore Bookmarks: %d', [Idx]);
+{$ENDIF}
+
+{$IFDEF IDE_EDITOR_ELIDE}
+          // 恢复折叠状态
+          RestoreElideLines(OutLineMarks);
+{$ENDIF}
+
+          View.MoveViewToCursor;
+          View.Paint;
         end
         else
         begin
@@ -891,8 +975,10 @@ begin
           Screen.Cursor := crDefault;
 
           ErrLine := CnOtaGetLineText(SourceLine, View.Buffer);
-          CnOtaGotoEditPos(OTAEditPos(ConvertToEditorCol(ErrLine, SourceCol), SourceLine));
-          ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine, ConvertToVisibleCol(ErrLine, SourceCol),
+          CnOtaGotoEditPos(OTAEditPos(ConvertToEditorCol(ErrLine, SourceCol),
+            SourceLine));
+          ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine,
+            ConvertToVisibleCol(ErrLine, SourceCol),
             GetErrorStr(ErrCode), CurrentToken]));
         end;
       finally
@@ -953,11 +1039,13 @@ begin
 
             if FBreakpoints.Count + FBookmarks.Count > 0 then
             begin
-              SetLength(BpBmLineMarks, FBreakpoints.Count + FBookmarks.Count + 1); // 末尾多一个 0
+              SetLength(BpBmLineMarks, FBreakpoints.Count + FBookmarks.Count + 1);
+                // 末尾多一个 0
               for I := 0 to FBreakpoints.Count - 1 do
                 BpBmLineMarks[I] := DWORD(TCnBreakpointDescriptor(FBreakpoints[I]).LineNumber);
               for I := 0 to FBookmarks.Count - 1 do
-                BpBmLineMarks[I + FBreakpoints.Count] := DWORD(TCnBookmarkObject(FBookmarks[I]).Line);
+                BpBmLineMarks[I + FBreakpoints.Count] := DWORD(TCnBookmarkObject
+                  (FBookmarks[I]).Line);
 
               BpBmLineMarks[FBreakpoints.Count + FBookmarks.Count] := 0;
               Formatter.SetInputLineMarks(@(BpBmLineMarks[0]));
@@ -966,8 +1054,10 @@ begin
               Formatter.SetInputLineMarks(nil);
             SetLength(BpBmLineMarks, 0);
 
-            StartPos := CnOtaEditPosToLinePos(OTAEditPos(StartRec.CharIndex, StartRec.Line), View);
-            EndPos := CnOtaEditPosToLinePos(OTAEditPos(EndRec.CharIndex, EndRec.Line), View);
+            StartPos := CnOtaEditPosToLinePos(OTAEditPos(StartRec.CharIndex,
+              StartRec.Line), View);
+            EndPos := CnOtaEditPosToLinePos(OTAEditPos(EndRec.CharIndex, EndRec.Line),
+              View);
 
 {$IFDEF DEBUG}
             CnDebugger.LogRawString('Format Selection To Process: ' + Src);
@@ -977,7 +1067,8 @@ begin
             // Src/Res Utf16，俩 LinearPos 是 Utf8 的偏移量，需要转换
             StartPosIn := Length(UTF8Decode(Copy(Utf8Encode(Src), 1, StartPos + 1))) - 1;
             EndPosIn := Length(UTF8Decode(Copy(Utf8Encode(Src), 1, EndPos + 1))) - 1;
-            Res := Formatter.FormatPascalBlockW(PChar(Src), Length(Src), StartPosIn, EndPosIn);
+            Res := Formatter.FormatPascalBlockW(PChar(Src), Length(Src),
+              StartPosIn, EndPosIn);
 
             // Remove FF FE BOM if exists
             if (Res <> nil) and (StrLen(Res) > 1) and (Res[0] = #$FEFF) then
@@ -987,7 +1078,8 @@ begin
             // Src/Res Utf8
             StartPosIn := StartPos;
             EndPosIn := EndPos;
-            Res := Formatter.FormatPascalBlockUtf8(PAnsiChar(Src), Length(Src), StartPosIn, EndPosIn);
+            Res := Formatter.FormatPascalBlockUtf8(PAnsiChar(Src), Length(Src),
+              StartPosIn, EndPosIn);
 
             // Remove EF BB BF BOM if exist
             if (Res <> nil) and (StrLen(Res) > 3) and
@@ -998,10 +1090,10 @@ begin
             StartPosIn := StartPos;
             EndPosIn := EndPos;
             // IDE 内的线性 Pos 是 0 开始的，使用 Src 来 Copy 时的下标以 1 开始，因此需要加 1
-            Res := Formatter.FormatPascalBlock(PAnsiChar(Src), Length(Src), StartPosIn, EndPosIn);
+            Res := Formatter.FormatPascalBlock(PAnsiChar(Src), Length(Src),
+              StartPosIn, EndPosIn);
   {$ENDIF}
 {$ENDIF}
-
 {$IFDEF DEBUG}
             CnDebugger.LogFmt('Format StartPos %d, EndPos %d.', [StartPosIn, EndPosIn]);
 {$ENDIF}
@@ -1017,7 +1109,6 @@ begin
               // Ansi/Unicode 均可用
               CnOtaReplaceCurrentSelection(Res, True, True, True);
               {$ENDIF}
-
               // 恢复断点与书签信息
               OutLineMarks := Formatter.RetrieveOutputLinkMarks;
               if FBookmarks.Count = 0 then
@@ -1037,8 +1128,10 @@ begin
               Screen.Cursor := crDefault;
 
               ErrLine := CnOtaGetLineText(SourceLine, View.Buffer);
-              CnOtaGotoEditPos(OTAEditPos(ConvertToEditorCol(ErrLine, SourceCol), SourceLine));
-              ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine, ConvertToVisibleCol(ErrLine, SourceCol),
+              CnOtaGotoEditPos(OTAEditPos(ConvertToEditorCol(ErrLine, SourceCol),
+                SourceLine));
+              ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine,
+                ConvertToVisibleCol(ErrLine, SourceCol),
                 GetErrorStr(ErrCode), CurrentToken]));
             end;
           end;
@@ -1086,8 +1179,7 @@ begin
     FWizard.DoSaveSettings;
 end;
 
-procedure TCnCodeFormatterForm.FormCloseQuery(Sender: TObject;
-  var CanClose: Boolean);
+procedure TCnCodeFormatterForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   if seNewLine.Value < seWrapLine.Value then
   begin
@@ -1106,15 +1198,15 @@ begin
   ShowFormHelp;
 end;
 
-procedure TCnCodeFormatterWizard.ObtainBreakpointsByFile(
-  const FileName: string);
+procedure TCnCodeFormatterWizard.ObtainBreakpointsByFile(const FileName: string);
 var
   DS: IOTADebuggerServices;
   SB: IOTASourceBreakpoint;
   BD: TCnBreakpointDescriptor;
   I: Integer;
 
-  function CheckDuplicated(const AFileName: string; ALineNumber: Integer): TCnBreakpointDescriptor;
+  function CheckDuplicated(const AFileName: string; ALineNumber: Integer):
+    TCnBreakpointDescriptor;
   var
     I: Integer;
     B: TCnBreakpointDescriptor;
@@ -1143,7 +1235,7 @@ begin
     begin
       BD := CheckDuplicated(SB.FileName, SB.LineNumber);
       if BD <> nil then
-        BD.Enabled := sb.Enabled
+        BD.Enabled := SB.Enabled
       else
       begin
         BD := TCnBreakpointDescriptor.Create;
@@ -1213,7 +1305,8 @@ begin
 {$ENDIF}
 end;
 
-procedure TCnCodeFormatterWizard.RestoreBookmarks(EditView: IOTAEditView; LineMarks: PDWORD);
+procedure TCnCodeFormatterWizard.RestoreBookmarks(EditView: IOTAEditView;
+  LineMarks: PDWORD);
 var
   I: Integer;
 begin
@@ -1234,12 +1327,47 @@ begin
   ReplaceBookMarksFromObjectList(EditView, FBookmarks);
 end;
 
+procedure TCnCodeFormatterWizard.ObtainLineElideInfo(List: TList);
+var
+  I: Integer;
+begin
+  CnOtaGetLinesElideInfo(List);
+
+  if List.Count > 0 then
+    for I := List.Count - 1 downto 0 do
+      if (I and 1) <> 0 then // 奇项要删除，只留折叠块开始的行号
+        List.Delete(I);
+end;
+
+{$IFDEF IDE_EDITOR_ELIDE}
+
+procedure TCnCodeFormatterWizard.RestoreElideLines(LineMarks: PDWORD);
+var
+  I: Integer;
+  Control: TControl;
+begin
+  Control := CnOtaGetCurrentEditControl;
+  if (LineMarks = nil) or (Control = nil) then
+    Exit;
+
+  while LineMarks^ <> 0 do
+  begin
+    EditControlWrapper.ElideLine(Control, LineMarks^);
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('RestoreElideLines Line: %d', [LineMarks^]);
+{$ENDIF}
+    Inc(LineMarks);
+  end;
+end;
+
+{$ENDIF}
+
 initialization
 {$IFNDEF BCB5}  // 目前只支持 Delphi。
 {$IFNDEF BCB6}
   RegisterCnWizard(TCnCodeFormatterWizard);
 {$ENDIF}
 {$ENDIF}
-
 {$ENDIF CNWIZARDS_CNCODEFORMATTERWIZARD}
 end.
+
