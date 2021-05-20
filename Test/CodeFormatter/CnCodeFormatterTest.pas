@@ -182,7 +182,7 @@ begin
       CnPascalCodeForRule.CompDirectiveMode);
     FCodeFor.SpecifyIdentifiers(@Names[0]);
 
-    Marks[0] := SrcMemo.CaretPos.y;
+    Marks[0] := SrcMemo.CaretPos.y + 1; // Memo Caret 行号 0 开始，格式化的行号 1 开始
     Marks[1] := 0;
     FCodeFor.SpecifyLineMarks(@Marks[0]);
 
@@ -196,10 +196,11 @@ begin
         OutMarks := nil;
         FCodeFor.SaveOutputLineMarks(OutMarks);
 
-        if OutMarks <> nil then
+        if (OutMarks <> nil) and (OutMarks^ <> 0) then // 恢复成 0 开始
         begin
-          DesMemo.SelStart := DesMemo.Perform(EM_LINEINDEX, OutMarks^, 0);
+          DesMemo.SelStart := DesMemo.Perform(EM_LINEINDEX, OutMarks^ - 1, 0);
           DesMemo.SetFocus;
+          ShowMessage(IntToStr(OutMarks^) + ' (1 Based)');
         end;
         FreeMemory(OutMarks);
       end;

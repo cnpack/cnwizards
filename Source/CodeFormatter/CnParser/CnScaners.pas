@@ -1135,7 +1135,7 @@ begin
             // ASM 模式下，换行作为语句结束符，不在注释内处理，所以这也不加
             if not FASMMode then
             begin
-              if not FKeepOneBlankLine then // 保留换行时，块注释末尾的换行要忽略
+              if not FKeepOneBlankLine then // 保持语句间的空行时，块注释末尾的换行要忽略
                 NewLine;
               Inc(FBlankLinesAfterComment);
               Inc(P);

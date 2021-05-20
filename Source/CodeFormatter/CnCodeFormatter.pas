@@ -184,14 +184,16 @@ type
     procedure SpecifyIdentifiers(Names: TStrings); overload;
     {* 以 TStrings 方式传入的字符串，用来指定特定符号的大小写}
     procedure SpecifyLineMarks(Marks: PDWORD);
-    {* 以 PDWORD 指向数组的方式传入的源文件的行映射的行}
+    {* 以 PDWORD 指向数组的方式传入的源文件的行映射的行，内部复制数组内容保存，
+      行号以 1 开始}
 
     procedure FormatCode(PreSpaceCount: Byte = 0); virtual; abstract;
     procedure SaveToFile(FileName: string);
     procedure SaveToStream(Stream: TStream);
     procedure SaveToStrings(AStrings: TStrings);
     procedure SaveOutputLineMarks(var Marks: PDWORD);
-    {* 将格式化结果中的行映射结果复制到数组中，数组指针须在外界释放}
+    {* 将格式化结果中的行映射结果复制到数组中，数组指针在过程内创建，
+      须在外界释放，行号以 1 开始}
 
     property SliceMode: Boolean read FSliceMode write FSliceMode;
     {* 片段模式，供外界控制。为 True 时碰到 EOF 应该平常退出而不报错}
@@ -5973,7 +5975,7 @@ begin
   begin
     for I := 0 to FInputLineMarks.Count - 1 do
     begin
-      if Scaner.SourceLine = Integer(FInputLineMarks[I]) then
+      if Scaner.SourceLine >= Integer(FInputLineMarks[I]) then
         if Integer(FOutputLineMarks[I]) = 0 then // 第一回匹配
           FOutputLineMarks[I] := Pointer(TCnCodeGenerator(Sender).ActualRow);
     end;
