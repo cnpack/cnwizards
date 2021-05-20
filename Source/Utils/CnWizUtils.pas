@@ -5968,7 +5968,9 @@ function CnOtaGetCurrentSourceFile: string;
 var
   iModule: IOTAModule;
   iEditor: IOTAEditor;
+{$ENDIF}
 begin
+{$IFDEF COMPILER6_UP}
   iModule := CnOtaGetCurrentModule;
   if iModule <> nil then
   begin
@@ -5981,17 +5983,15 @@ begin
     end;
   end;
   Result := '';
-{$IFDEF BCB}  // BCB 下可能存在无法获得当前工程的cpp文件的问题，特此加上此功能
+  {$IFDEF BCB}  // BCB 下可能存在无法获得当前工程的cpp文件的问题，特此加上此功能
   if (Result = '') and (CnOtaGetEditBuffer <> nil) then
     Result := CnOtaGetEditBuffer.FileName;
-{$ENDIF}
-end;
+  {$ENDIF}
 {$ELSE}
-begin
   // Delphi5/BCB5/K1 下仍然要采用旧的方式
   Result := ToolServices.GetCurrentFile;
-end;
 {$ENDIF}
+end;
 
 // 取当前编辑的 Pascal 或 C 源文件，判断限制较多
 function CnOtaGetCurrentSourceFileName: string;
@@ -6052,21 +6052,24 @@ end;
 
 // 拿一编辑器中的行折叠信息，Infos 这个 List 里顺序放入折叠的开始行和结束行，无折叠或不支持折叠时返回 False
 function CnOtaGetLinesElideInfo(Infos: TList; EditControl: TControl): Boolean;
+{$IFDEF IDE_EDITOR_ELIDE}
 var
   I: Integer;
   Obj: TEditorObject;
   Old, B: Boolean;
+{$ENDIF}
 begin
   Result := False;
   if EditControl = nil then
     EditControl := CnOtaGetCurrentEditControl;
 
+  Infos.Clear;
   if EditControl = nil then
     Exit;
 
+{$IFDEF IDE_EDITOR_ELIDE}
   Obj := EditControlWrapper.GetEditorObject(EditControl);
   Old := False;
-  Infos.Clear;
 
   for I := 1 to Obj.Context.LineCount do
   begin
@@ -6080,6 +6083,7 @@ begin
 
   if (Infos.Count mod 2) <> 0 then
     Infos.Add(Pointer(Obj.Context.LineCount));
+{$ENDIF}
 
   Result := Infos.Count > 0;
 end;
