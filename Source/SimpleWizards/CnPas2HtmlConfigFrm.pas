@@ -28,8 +28,10 @@ unit CnPas2HtmlConfigFrm;
 * 开发平台：PWin98SE + Delphi 6
 * 兼容测试：暂无（PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6）
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 修改记录：2004.06.29 V1.3
-*               加入尝试从注册表中载入IDE高亮设置的功能。
+* 修改记录：2021.05.22 V1.4
+*               加入尝试从注册表中载入 IDE 高亮设置的功能。
+*           2004.06.29 V1.3
+*               加入尝试从注册表中载入 IDE 高亮设置的功能。
 *           2003.03.09 V1.2
 *               加入所有打开文件转换热键。
 *           2003.02.28 V1.1
@@ -43,10 +45,12 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_CNPAS2HTMLWIZARD}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Registry,
   Dialogs, StdCtrls, ComCtrls, ActnList, ExtCtrls, CnWizUtils, CnWizMultiLang,
-  CnWizIdeUtils;
+  CnWizManager, CnWizIdeUtils;
 
 type
 
@@ -96,6 +100,7 @@ type
     procedure FormShow(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure actLoadExecute(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
   private
     FFontArray: array[0..9] of TFont;
     
@@ -132,10 +137,14 @@ type
     property FontSymbol: TFont index 9 read GetFonts write SetFonts;
   end;
 
+{$ENDIF CNWIZARDS_CNPAS2HTMLWIZARD}
+
 implementation
 
+{$IFDEF CNWIZARDS_CNPAS2HTMLWIZARD}
+
 uses
-  CnWizCompilerConst, CnEditControlWrapper;
+  CnWizCompilerConst, CnEditControlWrapper, CnPas2HtmlWizard;
 
 {$R *.dfm}
 
@@ -334,4 +343,35 @@ begin
   ComboBoxFontChange(ComboBoxFont);
 end;
 
+procedure TCnPas2HtmlConfigForm.FormCloseQuery(Sender: TObject;
+  var CanClose: Boolean);
+var
+  I: Integer;
+  Wizard: TCnPas2HtmlWizard;
+begin
+  CanClose := True;
+  if ModalResult <> mrOK then
+    Exit;
+
+  Wizard := nil;
+  if CnWizardMgr.WizardByClass(TCnPas2HtmlWizard) <> nil then
+    if CnWizardMgr.WizardByClass(TCnPas2HtmlWizard) is TCnPas2HtmlWizard then
+      Wizard := TCnPas2HtmlWizard(CnWizardMgr.WizardByClass(TCnPas2HtmlWizard));
+
+  if Wizard = nil then
+    Exit;
+
+  for I := 0 to 5 do
+  begin
+    // 对于每一个快捷键，都要判断是否没重复，或者有重复但用户选择了忽略，才能关闭
+    if CheckQueryShortCutDuplicated(GetShortCut(I),
+      TCustomAction(Wizard.SubActions[I])) = sdDuplicatedStop then
+    begin
+      CanClose := False;
+      Exit;
+    end;
+  end;
+end;
+
+{$ENDIF CNWIZARDS_CNPAS2HTMLWIZARD}
 end.

@@ -220,7 +220,8 @@ function FindIDEActionByShortCut(AShortCut: TShortCut): TCustomAction;
 {* 根据快捷键返回 IDE 对应的 Action 对象}
 function CheckQueryShortCutDuplicated(AShortCut: TShortCut;
   OriginalAction: TCustomAction): TShortCutDuplicated;
-{* 判断快捷键是否和现有其他 Action 冲突，有冲突则弹框询问，返回无冲突、有冲突但用户同意、有冲突用户停止}
+{* 判断快捷键是否和现有其他 Action 冲突，排除 OriginalAction
+  有冲突则弹框询问，返回无冲突、有冲突但用户同意、有冲突用户停止}
 function ExecuteIDEAction(const ActionName: string): Boolean;
 {* 根据 IDE Action 名，执行它}
 function AddMenuItem(Menu: TMenuItem; const Caption: string;

@@ -40,9 +40,9 @@ interface
 {$IFDEF CNWIZARDS_CNSRCTEMPLATE}
 
 uses
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, ActnList,
   StdCtrls, ComCtrls, Buttons, CnSrcTemplate, CnWizConsts, CnCommon, CnWizUtils,
-  CnWizMacroText, CnWizOptions, CnWizMultiLang, CnWizMacroUtils;
+  CnWizManager, CnWizMacroText, CnWizOptions, CnWizMultiLang, CnWizMacroUtils;
 
 type
   TCnSrcTemplateEditForm = class(TCnTranslateForm)
@@ -76,12 +76,14 @@ type
     procedure btnOKClick(Sender: TObject);
     procedure btnOpenClick(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
   private
-    { Private declarations }
+    FItemIndex: Integer;
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+    property ItemIndex: Integer read FItemIndex write FItemIndex;
+    {* 该项对应的 EditorItem 的索引，用来寻找对应 Action}
   end;
 
 function ShowEditorEditForm(EditorItem: TCnEditorItem): Boolean; overload;
@@ -106,6 +108,7 @@ begin
   Assert(EditorItem <> nil);
   with TCnSrcTemplateEditForm.Create(nil) do
   try
+    ItemIndex := EditorItem.Index;
     ShowHint := WizOptions.ShowHint;
     edtCaption.Text := EditorItem.Caption;
     edtHint.Text := EditorItem.Hint;
@@ -180,6 +183,7 @@ var
   InsertPos: TEditorInsertPos;
   Macro: TCnWizMacro;
 begin
+  ItemIndex := -1;
   cbbInsertPos.Clear;
   for InsertPos := Low(InsertPos) to High(InsertPos) do
     cbbInsertPos.Items.Add(csEditorInsertPosDescs[InsertPos]^);
@@ -230,6 +234,42 @@ end;
 function TCnSrcTemplateEditForm.GetHelpTopic: string;
 begin
   Result := 'CnSrcTemplate';
+end;
+
+procedure TCnSrcTemplateEditForm.FormCloseQuery(Sender: TObject;
+  var CanClose: Boolean);
+var
+  Wizard: TCnSrcTemplate;
+begin
+  CanClose := True;
+  if ModalResult <> mrOK then
+    Exit;
+
+  Wizard := nil;
+  if CnWizardMgr.WizardByClass(TCnSrcTemplate) <> nil then
+    if CnWizardMgr.WizardByClass(TCnSrcTemplate) is TCnSrcTemplate then
+      Wizard := TCnSrcTemplate(CnWizardMgr.WizardByClass(TCnSrcTemplate));
+
+  if Wizard = nil then
+    Exit;
+
+  if ItemIndex < 0 then // 表示无原始 Action，是新建内容
+  begin
+    if CheckQueryShortCutDuplicated(HotKey.HotKey, nil) = sdDuplicatedStop then
+    begin
+      CanClose := False;
+      Exit;
+    end;
+  end
+  else
+  begin
+    if CheckQueryShortCutDuplicated(HotKey.HotKey, // 菜单项中最前面有一项“设置”，有 1 的偏移量
+      TCustomAction(Wizard.SubActions[ItemIndex + 1])) = sdDuplicatedStop then
+    begin
+      CanClose := False;
+      Exit;
+    end;
+  end;
 end;
 
 {$ENDIF CNWIZARDS_CNSRCTEMPLATE}
