@@ -53,8 +53,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Dialogs, ToolsAPI,
-  IniFiles, Forms, Menus, ActnList, Math,
-  {$IFDEF DELPHIXE3_UP}Actions,{$ENDIF}
+  IniFiles, Forms, Menus, ActnList, Math, {$IFDEF DELPHIXE3_UP} Actions, {$ENDIF}
   CnCommon, CnWizUtils, CnWizIdeUtils, CnWizConsts, CnEditControlWrapper,
   CnWizFlatButton, CnConsts, CnWizNotifier, CnWizShortCut, CnPopupMenu,
   CnSrcEditorCodeWrap, CnSrcEditorGroupReplace, CnSrcEditorWebSearch,
@@ -82,9 +81,11 @@ type
     FLowerCaseShortCut: TCnWizShortCut;
     FUpperCaseShortCut: TCnWizShortCut;
     FToggleCaseShortCut: TCnWizShortCut;
+{$IFDEF BDS}
     FBlockMoveUpShortCut: TCnWizShortCut;
     FBlockMoveDownShortCut: TCnWizShortCut;
     FBlockDelLinesShortCut: TCnWizShortCut;
+{$ENDIF}
     FActive: Boolean;
     FOnEnhConfig: TNotifyEvent;
     FShowBlockTools: Boolean;
@@ -208,6 +209,7 @@ begin
     FUpperCaseShortCut := WizShortCutMgr.Add('CnEditUpperCase', 0, OnEditUpperCase);
   if FToggleCaseShortCut = nil then
     FToggleCaseShortCut := WizShortCutMgr.Add('CnEditToggleCase', 0, OnEditToggleCase);
+{$IFDEF BDS}
   if FBlockMoveUpShortCut = nil then
     FBlockMoveUpShortCut := WizShortCutMgr.Add('CnEditBlockMoveUp',
       ShortCut(Word('U'), [ssCtrl, ssAlt, ssShift]), OnEditBlockMoveUp);
@@ -217,13 +219,16 @@ begin
   if FBlockDelLinesShortCut = nil then
     FBlockDelLinesShortCut := WizShortCutMgr.Add('CnEditBlockDeleteLines',
       ShortCut(Word('D'), [ssCtrl, ssShift]), OnEditBlockDelLines);
+{$ENDIF}
 end;
 
 procedure TCnSrcEditorBlockTools.DestroyShortCuts;
 begin
+{$IFDEF BDS}
   WizShortCutMgr.DeleteShortCut(FBlockDelLinesShortCut);
   WizShortCutMgr.DeleteShortCut(FBlockMoveDownShortCut);
   WizShortCutMgr.DeleteShortCut(FBlockMoveUpShortCut);
+{$ENDIF}
   WizShortCutMgr.DeleteShortCut(FToggleCaseShortCut);
   WizShortCutMgr.DeleteShortCut(FUpperCaseShortCut);
   WizShortCutMgr.DeleteShortCut(FLowerCaseShortCut);
