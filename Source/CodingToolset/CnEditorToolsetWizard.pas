@@ -682,8 +682,12 @@ var
 begin
   if not Assigned(lvTools.Selected) then Exit;
   Idx := lvTools.Selected.Index;
-  FWizard.EditorTools[Idx].FAction.ShortCut := HotKey.HotKey;
-  UpdateToolItem(Idx);
+  if CheckQueryShortCutDuplicated(HotKey.HotKey,
+    FWizard.EditorTools[Idx].FAction) <> sdDuplicatedStop then
+  begin
+    FWizard.EditorTools[Idx].FAction.ShortCut := HotKey.HotKey;
+    UpdateToolItem(Idx);
+  end;
 end;
 
 procedure TCnEditorToolsForm.chkEnabledClick(Sender: TObject);
