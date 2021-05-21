@@ -80,6 +80,7 @@ resourcestring
   SCnPackKeyboard = 'CnPack_Keyboard';
   SCnActiveSection = 'Active';
   SCnMenuOrderSection = 'MenuOrder';
+  SCnNoName = '<NoName>';
 
   // ±£¥Ê¥∞ÃÂŒª÷√
   SCnFormPosition = 'FormPosition';
@@ -515,6 +516,7 @@ var
 
   // CnShortcut
   SCnDuplicateShortCutName: string = 'Duplicated Shortcut: %s';
+  SCnShortCutUsingByActionQuery: string = 'ShortCut %s already Occupied by ''%s'', Continue and Overwrite?';
 
   // CnMenuAction
   SCnDuplicateCommand: string = 'Duplicated Command: %s';
@@ -1512,7 +1514,7 @@ var
   SCnUsesCleanerMenuHint: string = 'Clean Unused Units Reference';
   SCnUsesCleanerName: string = 'Uses Units Cleaner';
   SCnUsesCleanerComment: string = 'Clean Unused Units Reference';
-  SCnUsesCleanerCompileFail: string = 'Compile Error. Cleaner can NOT continue.';
+  SCnUsesCleanerCompileFail: string = 'Compile Error. Cleaner can NOT Continue.';
   SCnUsesCleanerUnitError: string = 'Processing %s Failed.' + #13#10#13#10 + 'Perhaps the Format is NOT supported, Please contact CnPack Team. ';
   SCnUsesCleanerProcessError: string = 'Failed when Processing file %s , Continue?';
   SCnUsesCleanerHasInitSection: string = 'Including initialization';

@@ -83,6 +83,8 @@ type
   ECnEmptyCommand = class(ECnWizardException);
 
   TFormType = (ftBinary, ftText, ftUnknown);
+  TShortCutDuplicated = (sdNoDuplicated, sdDuplicatedIgnore, sdDuplicatedStop);
+  // 快捷键冲突的三种状态
 
 {$IFNDEF COMPILER6_UP}
   IDesigner = IFormDesigner;
@@ -214,6 +216,10 @@ procedure SaveProjectOptionsNameToFile(const FileName: string);
 {* 保存当前工程环境设置变量名到指定文件}
 function FindIDEAction(const ActionName: string): TContainedAction;
 {* 根据 IDE Action 名，返回对象}
+function FindIDEActionByShortCut(AShortCut: TShortCut): TCustomAction;
+{* 根据快捷键返回 IDE 对应的 Action 对象}
+function CheckQueryShortCutDuplicated(AShortCut: TShortCut): TShortCutDuplicated;
+{* 判断快捷键是否和现有 Action 冲突，有冲突则弹框询问，返回无冲突、有冲突但用户同意、有冲突用户停止}
 function ExecuteIDEAction(const ActionName: string): Boolean;
 {* 根据 IDE Action 名，执行它}
 function AddMenuItem(Menu: TMenuItem; const Caption: string;
@@ -2002,7 +2008,7 @@ function FindIDEAction(const ActionName: string): TContainedAction;
 var
   Svcs40: INTAServices40;
   ActionList: TCustomActionList;
-  i: Integer;
+  I: Integer;
 begin
   if ActionName = '' then
   begin
@@ -2012,11 +2018,11 @@ begin
 
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   ActionList := Svcs40.ActionList;
-  for i := 0 to ActionList.ActionCount - 1 do
+  for I := 0 to ActionList.ActionCount - 1 do
   begin
-    if SameText(ActionList.Actions[i].Name, ActionName) then
+    if SameText(ActionList.Actions[I].Name, ActionName) then
     begin
-      Result := ActionList.Actions[i];
+      Result := ActionList.Actions[I];
       Exit;
     end;
   end;
@@ -2024,6 +2030,55 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsgError('FindIDEAction can NOT find ' + ActionName);
 {$ENDIF}
+end;
+
+// 根据快捷键返回 IDE 对应的 Action 对象
+function FindIDEActionByShortCut(AShortCut: TShortCut): TCustomAction;
+var
+  ActionList: TCustomActionList;
+  I: Integer;
+begin
+  REsult := nil;
+  if AShortCut = 0 then
+    Exit;
+
+  ActionList := GetIDEActionList;
+  if ActionList = nil then
+    Exit;
+
+  for I := 0 to ActionList.ActionCount - 1 do
+  begin
+    if (ActionList.Actions[I] is TCustomAction) and
+      ((ActionList.Actions[I] as TCustomAction).ShortCut = AShortCut) then
+    begin
+      Result := TCustomAction(ActionList.Actions[I]);
+      Exit;
+    end;
+  end;
+end;
+
+// 判断快捷键是否和现有 Action 冲突，有冲突则弹框询问，返回无冲突、有冲突但用户同意、有冲突用户停止
+function CheckQueryShortCutDuplicated(AShortCut: TShortCut): TShortCutDuplicated;
+var
+  Action: TCustomAction;
+  S: string;
+begin
+  Result := sdNoDuplicated;
+  Action := FindIDEActionByShortCut(AShortCut);
+  if Action = nil then
+    Exit;
+
+  S := Action.Caption;
+  if S = '' then
+    S := Action.Name;
+
+  if S = '' then
+    S := SCnNoName;
+
+  if QueryDlg(Format(SCnShortCutUsingByActionQuery, [ShortCutToText(AShortCut), S])) then
+    Result := sdDuplicatedIgnore
+  else
+    Result := sdDuplicatedStop;
 end;
 
 // 根据 IDE Action 名，执行它
