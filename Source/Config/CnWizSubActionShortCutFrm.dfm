@@ -5,6 +5,7 @@ inherited CnWizSubActionShortCutForm: TCnWizSubActionShortCutForm
   Caption = 'Sub-menu Shortcut Settings'
   ClientHeight = 331
   ClientWidth = 351
+  OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow

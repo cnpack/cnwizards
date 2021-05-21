@@ -28,7 +28,9 @@ unit CnWizSubActionShortCutFrm;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2003.05.02 V1.0
+* 修改记录：2021.05.21 V1.1
+*               加入关闭时检测快捷键是否和 IDE 中重复的机制
+*           2003.05.02 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -39,8 +41,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ComCtrls, Menus, CnWizClasses, CnWizUtils, CnWizShortCut,
-  CnWizMenuAction, CnWizConsts, CnWizMultiLang;
+  StdCtrls, ComCtrls, Menus, ActnList, CnWizMultiLang, CnWizClasses, CnWizUtils,
+  CnWizShortCut, CnWizMenuAction, CnWizConsts;
 
 type
   TCnShortCutHolder = class(TObject)
@@ -73,6 +75,7 @@ type
       Change: TItemChange);
     procedure HotKeyExit(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
   private
     { Private declarations }
     FWizard: TCnSubMenuWizard;
@@ -83,14 +86,14 @@ type
     FShortCuts: array of TShortCut;
     procedure GetShortCutsFromWizard;
     procedure GetShortCutsFromHolders;
-    procedure SetShortCutsToWizard;
-    procedure SetShortCutsToHolders;
     function GetShortCut(Index: Integer): TShortCut;
     procedure SetShortCut(Index: Integer; const Value: TShortCut);
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+    procedure SetShortCutsToWizard;
+    procedure SetShortCutsToHolders;
+
     property Wizard: TCnSubMenuWizard read FWizard;
     property ShortCuts[Index: Integer]: TShortCut read GetShortCut write SetShortCut;
   end;
@@ -119,6 +122,12 @@ begin
     if HelpStr <> '' then
       FHelpStr := HelpStr;
     Result := ShowModal = mrOk;
+
+    if Result then
+    begin
+      SetShortCutsToWizard;
+      SetShortCutsToHolders;
+    end;
   finally
     Free;
   end;
@@ -136,6 +145,12 @@ begin
     if HelpStr <> '' then
       FHelpStr := HelpStr;
     Result := ShowModal = mrOk;
+
+    if Result then
+    begin
+      SetShortCutsToWizard;
+      SetShortCutsToHolders;
+    end;
   finally
     Free;
   end;
@@ -173,11 +188,6 @@ end;
 
 procedure TCnWizSubActionShortCutForm.btnOKClick(Sender: TObject);
 begin
-  if FWizard <> nil then
-    SetShortCutsToWizard
-  else if FHolders <> nil then
-    SetShortCutsToHolders;
-
   ModalResult := mrOk;
 end;
 
@@ -227,6 +237,9 @@ procedure TCnWizSubActionShortCutForm.SetShortCutsToWizard;
 var
   I: Integer;
 begin
+  if FWizard = nil then
+    Exit;
+
   WizShortCutMgr.BeginUpdate;
   try
     for I := 0 to ListView.Items.Count - 1 do
@@ -273,6 +286,9 @@ procedure TCnWizSubActionShortCutForm.SetShortCutsToHolders;
 var
   I: Integer;
 begin
+  if FHolders = nil then
+    Exit;
+
   WizShortCutMgr.BeginUpdate;
   try
     for I := 0 to ListView.Items.Count - 1 do
@@ -297,6 +313,27 @@ destructor TCnShortCutHolder.Destroy;
 begin
 
   inherited;
+end;
+
+procedure TCnWizSubActionShortCutForm.FormCloseQuery(Sender: TObject;
+  var CanClose: Boolean);
+var
+  I: Integer;
+begin
+  CanClose := True;
+  if (ModalResult <> mrOK) or (Length(FShortCuts) = 0) then
+    Exit;
+
+  for I := Low(FShortCuts) to High(FShortCuts) do
+  begin
+    // 对于每一个快捷键，都要判断是否没重复，或者有重复但用户选择了忽略，才能关闭
+    if CheckQueryShortCutDuplicated(FShortCuts[I],
+      TCustomAction(ListView.Items[I].Data)) = sdDuplicatedStop then
+    begin
+      CanClose := False;
+      Exit;
+    end;
+  end;
 end;
 
 end.

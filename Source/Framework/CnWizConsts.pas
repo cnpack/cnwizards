@@ -516,7 +516,7 @@ var
 
   // CnShortcut
   SCnDuplicateShortCutName: string = 'Duplicated Shortcut: %s';
-  SCnShortCutUsingByActionQuery: string = 'ShortCut %s already Occupied by ''%s'', Continue and Overwrite?';
+  SCnShortCutUsingByActionQuery: string = 'ShortCut %s already Occupied by ''%s'', Continue?';
 
   // CnMenuAction
   SCnDuplicateCommand: string = 'Duplicated Command: %s';
