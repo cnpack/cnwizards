@@ -111,6 +111,7 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
     0000000000000000000000000000FFFF0003FFFF0003FFFFC00FFFFFC00F}
   KeyPreview = True
   OnClose = FormClose
+  OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
@@ -340,7 +341,7 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
       InvalidKeys = [hcNone]
       Modifiers = []
       TabOrder = 4
-      OnExit = OnControlChanged
+      OnExit = hkShortCutExit
     end
     object chkExecConfirm: TCheckBox
       Left = 56
