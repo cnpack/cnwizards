@@ -828,6 +828,7 @@ var
 begin
   // 判断快捷键是否重复，不重复或允许之后，再更新条目
   // 如果是手动运行类型的就找其 Action（可能是 nil），如果是其他，也以 nil 找
+  Result := True;
   Wizard := nil;
   if CnWizardMgr.WizardByClass(TCnScriptWizard) <> nil then
     if CnWizardMgr.WizardByClass(TCnScriptWizard) is TCnScriptWizard then
