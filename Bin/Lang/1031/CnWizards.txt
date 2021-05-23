@@ -2672,6 +2672,7 @@ SCnWizardForPasOrDprOnly=Nur für .pas und .dpr Dateien
 SCnWizardForPasOrIncOnly=Nur für .pas und .inc Dateien
 SCnWizardForDprOrPasOrIncOnly=Nur für .pas, .dpr und .inc Dateien
 SCnDuplicateShortCutName=doppeltes Tastaturkürzel: %s
+SCnShortCutUsingByActionQuery=ShortCut %s bereits mit "%s" belegt, Weiter?
 SCnDuplicateCommand=Doppeltes Kommando: %s
 SCnWizSubActionShortCutFormCaption=%s - Hotkey Konfiguration
 SCnWizConfigCaption=&Optionen...

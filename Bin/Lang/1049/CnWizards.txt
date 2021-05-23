@@ -2672,6 +2672,7 @@ SCnWizardForPasOrDprOnly=Только для .pas и .dpr файлов
 SCnWizardForPasOrIncOnly=Только для .pas и .inc файлов
 SCnWizardForDprOrPasOrIncOnly=Только для .pas, .dpr и .inc файлов
 SCnDuplicateShortCutName=Повт. гор. клавиша: %s
+SCnShortCutUsingByActionQuery=клавиша %s уже занят «% s», продолжить?
 SCnDuplicateCommand=Повт. команда: %s
 SCnWizSubActionShortCutFormCaption=%s - Горячие клавиши
 SCnWizConfigCaption=Настройки...

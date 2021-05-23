@@ -2672,6 +2672,7 @@ SCnWizardForPasOrDprOnly=Uniquement aux fichiers .pas et .dpr
 SCnWizardForPasOrIncOnly=Uniquement pour les fichiers .pas et .inc
 SCnWizardForDprOrPasOrIncOnly=Uniquement pour les fichiers .pas, .dpr et .inc
 SCnDuplicateShortCutName=Raccourci dupliqué:%s
+SCnShortCutUsingByActionQuery=Raccourci %s déjà occupé par «% s», continuer?
 SCnDuplicateCommand=Commande dupliquée:%s
 SCnWizSubActionShortCutFormCaption=%s - Configuration Raccourci clavier 
 SCnWizConfigCaption=Options...
