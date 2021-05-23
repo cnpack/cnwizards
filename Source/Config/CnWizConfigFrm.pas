@@ -28,8 +28,10 @@ unit CnWizConfigFrm;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2012.11.30 V1.7
-*               去除使用FormScaler重新调整文字的机制
+* 修改记录：2021.05.23 V1.8
+*               加入检测快捷键是否冲突的机制
+*           2012.11.30 V1.7
+*               去除使用 FormScaler 重新调整文字的机制
 *           2012.09.19 by shenloqi
 *               移植到Delphi XE3
 *           2012.06.21 V1.5
@@ -53,8 +55,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  Menus, ExtCtrls, ComCtrls, ToolWin, StdCtrls, CnDesignEditor, CnWizMultiLang,
-  CnWizClasses, CnDesignEditorConsts, ImgList, Buttons;
+  Menus, ExtCtrls, ComCtrls, ToolWin, StdCtrls, ImgList, Buttons,
+  CnDesignEditor, CnWizMultiLang, CnWizClasses, CnDesignEditorConsts, CnWizMenuAction;
 
 type
 
@@ -545,10 +547,23 @@ end;
 procedure TCnWizConfigForm.HotKeyWizardExit(Sender: TObject);
 var
   Idx: Integer;
+  Wizard: TCnBaseWizard;
+  WizardAction: TCnWizAction;
 begin
   Idx := CalcSelectedWizardIndex();
+  WizardAction := nil;
+  if lbWizards.ItemIndex >= 0 then
+  begin
+    Wizard := TCnBaseWizard(lbWizards.Items.Objects[lbWizards.ItemIndex]);
+    if (Wizard <> nil) and (Wizard is TCnActionWizard) then
+      WizardAction := (Wizard as TCnActionWizard).Action;
+  end;
+
   if Idx >= 0 then
-    FShortCuts[Idx] := HotKeyWizard.HotKey;
+    if CheckQueryShortCutDuplicated(HotKeyWizard.HotKey, WizardAction) <> sdDuplicatedStop then
+      FShortCuts[Idx] := HotKeyWizard.HotKey
+    else
+      HotKeyWizard.SetFocus;
 end;
 
 // 设置专家活跃
