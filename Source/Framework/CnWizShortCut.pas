@@ -174,10 +174,12 @@ type
        的管理器实例。}
     destructor Destroy; override;
     {* 类析构器。}
-    function IndexOfShortCut(AWizShortCut: TCnWizShortCut): Integer;
-    {* 根据 IDE 快捷键对象查找索引号，参数为快捷键对象，如果不存在返回-1。}
+    function IndexOfShortCut(AShortCut: TShortCut): Integer; overload;
+    {* 根据实际快捷键查索引号，参数为快捷键，如果不存在则返回 -1}
+    function IndexOfShortCut(AWizShortCut: TCnWizShortCut): Integer; overload;
+    {* 根据 IDE 快捷键对象查找索引号，参数为快捷键对象，如果不存在则返回 -1}
     function IndexOfName(const AName: string): Integer; 
-    {* 根据快捷键名称查找索引号，如果不存在返回-1。}
+    {* 根据快捷键对象名称查找索引号，如果不存在返回-1。}
     function Add(const AName: string; AShortCut: TShortCut; AKeyProc:
       TNotifyEvent; const AMenuName: string = ''; ATag: Integer = 0): TCnWizShortCut;
     {* 新增一个快捷键定义
@@ -567,34 +569,51 @@ begin
   RemoveKeyBinding;
 end;
 
-// 取快捷键名称对应的索引号
+// 取快捷键对象名称对应的索引号
 function TCnWizShortCutMgr.IndexOfName(const AName: string): Integer;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := -1;
   if AName = '' then Exit;
-  for i := 0 to Count - 1 do
-    if ShortCuts[i].Name = AName then
+  for I := 0 to Count - 1 do
+    if ShortCuts[I].Name = AName then
     begin
-      Result := i;
+      Result := I;
       Exit;
     end;
 end;
 
-// 取快捷键对象对应的索引号
-function TCnWizShortCutMgr.IndexOfShortCut(AWizShortCut: TCnWizShortCut): 
-    Integer;
+// 取快捷键对应的索引号
+function TCnWizShortCutMgr.IndexOfShortCut(AShortCut: TShortCut): Integer;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := -1;
-  for i := 0 to Count - 1 do
-    if ShortCuts[i] = AWizShortCut then
+  for I := 0 to Count - 1 do
+  begin
+    if ShortCuts[I].ShortCut = AShortCut then
     begin
-      Result := i;
+      Result := I;
       Exit;
     end;
+  end;
+end;
+
+// 取快捷键对象对应的索引号
+function TCnWizShortCutMgr.IndexOfShortCut(AWizShortCut: TCnWizShortCut): Integer;
+var
+  I: Integer;
+begin
+  Result := -1;
+  for I := 0 to Count - 1 do
+  begin
+    if ShortCuts[I] = AWizShortCut then
+    begin
+      Result := I;
+      Exit;
+    end;
+  end;
 end;
 
 //------------------------------------------------------------------------------
@@ -607,16 +626,16 @@ end;
 
 procedure TCnWizShortCutMgr.DoRestoreMainMenuShortCuts(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
   FreeAndNil(FMenuTimer);
 
-  for i := 0 to FSaveMenus.Count - 1 do
+  for I := 0 to FSaveMenus.Count - 1 do
   begin
-    TMenuItem(FSaveMenus[i]).ShortCut := TShortCut(FSaveShortCuts[i]);
+    TMenuItem(FSaveMenus[I]).ShortCut := TShortCut(FSaveShortCuts[I]);
   {$IFDEF Debug}
     CnDebugger.LogMsg(Format('MenuItem ShortCut Restored: %s (%s)',
-      [TMenuItem(FSaveMenus[i]).Caption, ShortCutToText(TShortCut(FSaveShortCuts[i]))]));
+      [TMenuItem(FSaveMenus[I]).Caption, ShortCutToText(TShortCut(FSaveShortCuts[I]))]));
   {$ENDIF Debug}
   end;
 

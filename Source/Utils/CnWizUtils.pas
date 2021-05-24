@@ -216,8 +216,8 @@ procedure SaveProjectOptionsNameToFile(const FileName: string);
 {* 保存当前工程环境设置变量名到指定文件}
 function FindIDEAction(const ActionName: string): TContainedAction;
 {* 根据 IDE Action 名，返回对象}
-function FindIDEActionByShortCut(AShortCut: TShortCut): TCustomAction;
-{* 根据快捷键返回 IDE 对应的 Action 对象}
+procedure FindIDEActionByShortCut(AShortCut: TShortCut; Actions: TObjectList);
+{* 根据快捷键返回 IDE 对应的 Action 对象，可能有多个}
 function CheckQueryShortCutDuplicated(AShortCut: TShortCut;
   OriginalAction: TCustomAction): TShortCutDuplicated;
 {* 判断快捷键是否和现有其他 Action 冲突，排除 OriginalAction
@@ -1140,7 +1140,7 @@ uses
   Math, CnWizOptions, CnGraphUtils
 {$IFNDEF CNWIZARDS_MINIMUM}
   , CnWizMultiLang, CnLangMgr, CnWizIdeUtils, CnWizDebuggerNotifier, CnEditControlWrapper,
-  CnLangStorage, CnHashLangStorage, CnWizHelp
+  CnLangStorage, CnHashLangStorage, CnWizHelp, CnWizShortCut
 {$ENDIF}
   ;
 
@@ -2034,13 +2034,12 @@ begin
 {$ENDIF}
 end;
 
-// 根据快捷键返回 IDE 对应的 Action 对象
-function FindIDEActionByShortCut(AShortCut: TShortCut): TCustomAction;
+// 根据快捷键返回 IDE 对应的 Action 对象，可能有多个
+procedure FindIDEActionByShortCut(AShortCut: TShortCut; Actions: TObjectList);
 var
   ActionList: TCustomActionList;
   I: Integer;
 begin
-  REsult := nil;
   if AShortCut = 0 then
     Exit;
 
@@ -2048,14 +2047,12 @@ begin
   if ActionList = nil then
     Exit;
 
+  Actions.Clear;
   for I := 0 to ActionList.ActionCount - 1 do
   begin
     if (ActionList.Actions[I] is TCustomAction) and
       ((ActionList.Actions[I] as TCustomAction).ShortCut = AShortCut) then
-    begin
-      Result := TCustomAction(ActionList.Actions[I]);
-      Exit;
-    end;
+      Actions.Add(ActionList.Actions[I]);
   end;
 end;
 
@@ -2063,17 +2060,38 @@ end;
 function CheckQueryShortCutDuplicated(AShortCut: TShortCut;
   OriginalAction: TCustomAction): TShortCutDuplicated;
 var
-  Action: TCustomAction;
+  Actions: TObjectList;
   S: string;
+  Idx: Integer;
+  WS: TCnWizShortCut;
 begin
   Result := sdNoDuplicated;
-  Action := FindIDEActionByShortCut(AShortCut);
-  if (Action = nil) or (Action = OriginalAction) then
-    Exit;
+  Actions := TObjectList.Create(False);
+  try
+    FindIDEActionByShortCut(AShortCut, Actions);
+    Actions.Remove(OriginalAction); // 删除自身
 
-  S := Action.Caption;
-  if S = '' then
-    S := Action.Name;
+    if Actions.Count > 0 then // 有不同于自己的目标 Action
+    begin
+      S := TCustomAction(Actions[0]).Caption;
+      if S = '' then
+        S := TCustomAction(Actions[0]).Name;
+    end
+    else
+    begin
+      // 目标 Action 不存在，再去快捷键管理器里查单纯的 ShortCuts
+      Idx := WizShortCutMgr.IndexOfShortCut(AShortCut);
+      if Idx < 0 then    // 快捷键管理器里也没有
+        Exit;
+
+      WS := WizShortCutMgr.ShortCuts[Idx];
+      S := WS.MenuName;
+      if S = '' then
+        S := WS.Name;
+    end;
+  finally
+    Actions.Free;
+  end;
 
   if S = '' then
     S := SCnNoName;
