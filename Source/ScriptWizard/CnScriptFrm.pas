@@ -608,7 +608,7 @@ procedure TCnScriptForm.pmOpenPopup(Sender: TObject);
 var
   Wizard: TCnScriptWizard;
   Menu: TMenuItem;
-  i: Integer;
+  I: Integer;
 
   procedure LoadDemoNamesToMenu(Menu: TMenuItem);
   var
@@ -654,12 +654,16 @@ begin
     Menu := TMenuItem.Create(pmOpen.Items);
     Menu.Caption := '-';
     pmOpen.Items.Add(Menu);
-    for i := 0 to Wizard.Scripts.Count - 1 do
+
+    for I := 0 to Wizard.Scripts.Count - 1 do
     begin
+      if Wizard.Scripts[I].IsInternal then // 不显示内部条目
+        Continue;
+
       Menu := TMenuItem.Create(pmOpen.Items);
-      Menu.Caption := Wizard.Scripts[i].Name;
-      Menu.Hint := Wizard.Scripts[i].Comment;
-      Menu.Tag := i;
+      Menu.Caption := Wizard.Scripts[I].Name;
+      Menu.Hint := Wizard.Scripts[I].Comment;
+      Menu.Tag := I;
       Menu.OnClick := OnOpenFile;
       pmOpen.Items.Add(Menu);
     end;

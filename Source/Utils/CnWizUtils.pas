@@ -2066,7 +2066,11 @@ var
   WS: TCnWizShortCut;
 begin
   Result := sdNoDuplicated;
+  if AShortCut = 0 then  // 0 表示无快捷键，不判断，统统返回不重复
+    Exit;
+
   Actions := TObjectList.Create(False);
+
   try
     FindIDEActionByShortCut(AShortCut, Actions);
     Actions.Remove(OriginalAction); // 删除自身
