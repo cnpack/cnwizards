@@ -57,7 +57,7 @@ type
 
   TCnCpuWinEnhanceWizard = class(TCnIDEEnhanceWizard)
   private
-    FMenuHook: TCnMenuHook;
+    FDisamMenuHook: TCnMenuHook;
     FCopy30Menu: TCnMenuItemDef;
     FCopyMenu: TCnMenuItemDef;
 
@@ -75,7 +75,7 @@ type
     procedure OnCopy30Lines(Sender: TObject);
     procedure OnCopyLines(Sender: TObject);
     procedure GlobalCopyMethod;
-    function Call_Disassemble(Line: Integer; CopyFrom: TCopyFrom): string;
+    function CallDisassemble(Line: Integer; CopyFrom: TCopyFrom): string;
   protected
     procedure SetActive(Value: Boolean); override;
     function GetHasConfig: Boolean; override;
@@ -112,16 +112,16 @@ uses
 //==============================================================================
 
 const
-  Str_TDisassemblerViewClass = 'TDisassemblerView';
-  Str_DisassemblyViewClass = 'TDisassemblyView';
-  Str_Delphi32AppClass = 'TAppBuilder';
-  Str_DisasEvent = 'OnDisassemble';
-  Str_ExecuteCpuWin = 'OnExecute';
-  Str_CPUPaneMenu = 'CPUPaneMenu';
-  Str_CpuCommandAction = 'DebugCPUCommand';
-  Str_SelectedAddress = 'SelectedAddress';
-  Str_TopAddress = 'TopAddress';
-  Str_SelectedSource = 'SelectedSource';
+  SCnDisassemblerViewClass = 'TDisassemblerView';
+  SCnDisassemblyViewClass = 'TDisassemblyView';
+  SCnDisasEvent = 'OnDisassemble';
+  SCnExecuteCpuWin = 'OnExecute';
+  SCnCPUPaneMenu = 'CPUPaneMenu';
+  SCnDumpPopupMenu = 'DumpPopupMenu';
+  SCnCpuCommandAction = 'DebugCPUCommand';
+  SCnSelectedAddress = 'SelectedAddress';
+  SCnTopAddress = 'TopAddress';
+  SCnSelectedSource = 'SelectedSource';
 
 { TCnCpuWinEnhanceWizard }
 
@@ -132,7 +132,7 @@ begin
   FCopyTo := ctClipboard;
   FCopyLineCount := 30;
   FSettingToAll := False;
-  FMenuHook := TCnMenuHook.Create(nil);
+  FDisamMenuHook := TCnMenuHook.Create(nil);
   RegisterUserMenuItems;
   CnWizNotifierServices.AddActiveFormNotifier(OnActiveFormChanged);
 end;
@@ -140,7 +140,7 @@ end;
 destructor TCnCpuWinEnhanceWizard.Destroy;
 begin
   CnWizNotifierServices.RemoveActiveFormNotifier(OnActiveFormChanged);
-  FMenuHook.Free;
+  FDisamMenuHook.Free;
   inherited;
 end;
 
@@ -150,15 +150,17 @@ end;
 
 function TCnCpuWinEnhanceWizard.FindCpuForm: TCustomForm;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := nil;
-  for i := 0 to Screen.CustomFormCount - 1 do
-    if Screen.CustomForms[i].ClassNameIs(Str_DisassemblyViewClass) then
+  for I := 0 to Screen.CustomFormCount - 1 do
+  begin
+    if Screen.CustomForms[I].ClassNameIs(SCnDisassemblyViewClass) then
     begin
-      Result := Screen.CustomForms[i];
+      Result := Screen.CustomForms[I];
       Exit;
     end;
+  end;
 end;
 
 procedure TCnCpuWinEnhanceWizard.OnActiveFormChanged(Sender: TObject);
@@ -169,15 +171,15 @@ begin
   CpuForm := FindCpuForm;
   if CpuForm <> nil then
   begin
-    PopupMenu := TPopupMenu(CpuForm.FindComponent(Str_CPUPaneMenu));
+    PopupMenu := TPopupMenu(CpuForm.FindComponent(SCnCPUPaneMenu));
     Assert(Assigned(PopupMenu));
 
     // ¹Ò½Ó CPU ´°¿ÚÓÒ¼ü²Ëµ¥
-    if not FMenuHook.IsHooked(PopupMenu) then
+    if not FDisamMenuHook.IsHooked(PopupMenu) then
     begin
-      FMenuHook.HookMenu(PopupMenu);
+      FDisamMenuHook.HookMenu(PopupMenu);
     {$IFDEF DEBUG}
-      CnDebugger.LogMsg('Hooked a cpu window''s PopupMenu.');
+      CnDebugger.LogMsg('Hooked a CPU Window''s PopupMenu.');
     {$ENDIF}
     end;
   end;
@@ -185,18 +187,18 @@ end;
 
 procedure TCnCpuWinEnhanceWizard.RegisterUserMenuItems;
 begin
-  FMenuHook.AddMenuItemDef(TCnSepMenuItemDef.Create(ipLast, ''));
+  FDisamMenuHook.AddMenuItemDef(TCnSepMenuItemDef.Create(ipLast, ''));
 
   FCopy30Menu := TCnMenuItemDef.Create(SCnMenuCopy30LinesName,
     SCnMenuCopyLinesToClipboard, OnCopy30Lines, ipLast);
   FCopy30Menu.OnCreated := OnCopy30LinesMenuCreated;
-  FMenuHook.AddMenuItemDef(FCopy30Menu);
+  FDisamMenuHook.AddMenuItemDef(FCopy30Menu);
 
   FCopyMenu := TCnMenuItemDef.Create(SCnMenuCopyLinesName,
     SCnMenuCopyLinesCaption, OnCopyLines, ipLast);
   FCopyMenu.OnCreated := OnCopyMenuCreated;
 
-  FMenuHook.AddMenuItemDef(FCopyMenu);
+  FDisamMenuHook.AddMenuItemDef(FCopyMenu);
 end;
 
 procedure TCnCpuWinEnhanceWizard.OnCopy30LinesMenuCreated(Sender: TObject;
@@ -222,66 +224,64 @@ type
   TOnDisassemble = procedure (Sender: TObject; var Address: Integer;
     var Result: String; var InstSize: Integer) of object;
 
-function TCnCpuWinEnhanceWizard.Call_Disassemble(Line: Integer; CopyFrom: TCopyFrom): string;
+function TCnCpuWinEnhanceWizard.CallDisassemble(Line: Integer; CopyFrom: TCopyFrom): string;
 var
-  S_ASM: string;
-  S_Source: string;
-  i: Integer;
-
-  Old_P: Integer;
-  Old_TopP: Integer;
-
+  SASM: string;
+  SSource: string;
+  I: Integer;
+  OldP: Integer;
+  OldTopP: Integer;
   FDisassemble: TOnDisassemble;
   DisComp: TWinControl;
-
   P: Integer;
   L: Integer;
-
   CpuForm: TCustomForm;
 begin
   CpuForm := FindCpuForm;
   if CpuForm <> nil then
   begin
     DisComp := nil;
-    for i := 0 to CpuForm.ComponentCount - 1 do
-      if CpuForm.Components[i].ClassNameIs(Str_TDisassemblerViewClass) then
+    for I := 0 to CpuForm.ComponentCount - 1 do
+    begin
+      if CpuForm.Components[I].ClassNameIs(SCnDisassemblerViewClass) then
       begin
-        DisComp := TWinControl(CpuForm.Components[i]);
+        DisComp := TWinControl(CpuForm.Components[I]);
         Break;
       end;
+    end;
     Assert(Assigned(DisComp));
 
-    TMethod(FDisassemble) := GetMethodProp(DisComp, GetPropInfo(DisComp, Str_DisasEvent));
+    TMethod(FDisassemble) := GetMethodProp(DisComp, GetPropInfo(DisComp, SCnDisasEvent));
     Assert(Assigned(FDisassemble));
 
-    Old_P := GetOrdProp(DisComp, GetPropInfo(DisComp, Str_SelectedAddress));
-    Old_TopP := GetOrdProp(DisComp, GetPropInfo(DisComp, Str_TopAddress));
+    OldP := GetOrdProp(DisComp, GetPropInfo(DisComp, SCnSelectedAddress));
+    OldTopP := GetOrdProp(DisComp, GetPropInfo(DisComp, SCnTopAddress));
     if CopyFrom = cfTopAddr then
-      P := Old_TopP
+      P := OldTopP
     else
-      P := Old_P;
+      P := OldP;
 
     while Line > 0 do
     begin
-      SetOrdProp(DisComp, GetPropInfo(DisComp, Str_TopAddress), P);
-      SetOrdProp(DisComp, GetPropInfo(DisComp, Str_SelectedAddress), P);
-      S_Source := GetStrProp(DisComp, GetPropInfo(DisComp, Str_SelectedSource));
+      SetOrdProp(DisComp, GetPropInfo(DisComp, SCnTopAddress), P);
+      SetOrdProp(DisComp, GetPropInfo(DisComp, SCnSelectedAddress), P);
+      SSource := GetStrProp(DisComp, GetPropInfo(DisComp, SCnSelectedSource));
 
-      //Get Next Address To P, and Get ASM Code to S_ASM
-      FDisassemble(DisComp, P, S_ASM, L);
+      // Get Next Address To P, and Get ASM Code to SASM
+      FDisassemble(DisComp, P, SASM, L);
       Application.ProcessMessages;
 
-      if S_Source <> '' then
-        Result := Result + S_Source + #13#10;
-      Result := Result + S_ASM + #13#10;
+      if SSource <> '' then
+        Result := Result + SSource + #13#10;
+      Result := Result + SASM + #13#10;
       Dec(Line);
     end;
 
     if Result <> '' then
       SetLength(Result, Length(Result) - 2);
 
-    SetOrdProp(DisComp, GetPropInfo(DisComp, Str_TopAddress), Old_TopP);
-    SetOrdProp(DisComp, GetPropInfo(DisComp, Str_SelectedAddress), Old_P);
+    SetOrdProp(DisComp, GetPropInfo(DisComp, SCnTopAddress), OldTopP);
+    SetOrdProp(DisComp, GetPropInfo(DisComp, SCnSelectedAddress), OldP);
   end;
 end;
 
@@ -289,7 +289,7 @@ procedure TCnCpuWinEnhanceWizard.GlobalCopyMethod;
 var
   Code: string;
 begin
-  Code := Call_Disassemble(FCopyLineCount, FCopyFrom);
+  Code := CallDisassemble(FCopyLineCount, FCopyFrom);
 
   if FCopyTo = ctClipboard then
     Clipboard.SetTextBuf(PChar(Code))
@@ -322,7 +322,7 @@ begin
     GlobalCopyMethod
   else
   begin
-    Code := Call_Disassemble(FCopyLineCount, cfTopAddr);
+    Code := CallDisassemble(FCopyLineCount, cfTopAddr);
     Clipboard.SetTextBuf(PChar(Code));
   end;
 end;
@@ -346,7 +346,7 @@ end;
 procedure TCnCpuWinEnhanceWizard.SetActive(Value: Boolean);
 begin
   inherited;
-  Self.FMenuHook.Active := Value;
+  FDisamMenuHook.Active := Value;
 end;
 
 function TCnCpuWinEnhanceWizard.GetHasConfig: Boolean;
