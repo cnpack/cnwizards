@@ -610,6 +610,7 @@ var
   SCnBookmarkWizardName: string = 'BookMark Browser';
   SCnBookmarkWizardComment: string = 'Browsing BookMarks of All Opening Files';
   SCnBookmarkAllUnit: string = '<All Units>';
+  SCnBookmarkCurrentUnit: string = '<Current Unit>';
   SCnBookmarkFileCount: string = 'Units Count: %d';
 
   // CnEditorToolsetWizard

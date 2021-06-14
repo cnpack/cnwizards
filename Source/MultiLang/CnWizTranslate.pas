@@ -273,6 +273,7 @@ begin
   TranslateStr(SCnBookmarkWizardName, 'SCnBookmarkWizardName');
   TranslateStr(SCnBookmarkWizardComment, 'SCnBookmarkWizardComment');
   TranslateStr(SCnBookmarkAllUnit, 'SCnBookmarkAllUnit');
+  TranslateStr(SCnBookmarkCurrentUnit, 'SCnBookmarkCurrentUnit');
   TranslateStr(SCnBookmarkFileCount, 'SCnBookmarkFileCount');
   
   // CnEditorToolsetWizard
