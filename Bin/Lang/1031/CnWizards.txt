@@ -2750,6 +2750,7 @@ SCnBookmarkWizardMenuHint=Bookmarks von allen öffnen Dateien untersuchen
 SCnBookmarkWizardName=Positionsmarken Browser
 SCnBookmarkWizardComment=Anzeigen der Positionsmarken aller geöffneten Dateien
 SCnBookmarkAllUnit=<alle Units>
+SCnBookmarkCurrentUnit=<derzeitige Unit>
 SCnBookmarkFileCount=Anzahl Units: %d
 SCnEditorToolsetWizardMenuCaption=Quelltext &Editor Werkzeug
 SCnEditorToolsetWizardMenuHint=Quelltext Editor Werkzeug

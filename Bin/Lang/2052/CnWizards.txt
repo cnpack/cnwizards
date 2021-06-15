@@ -2750,6 +2750,7 @@ SCnBookmarkWizardMenuHint=浏览当前打开文件中所有的书签
 SCnBookmarkWizardName=书签浏览专家
 SCnBookmarkWizardComment=浏览当前打开文件中所有的书签。
 SCnBookmarkAllUnit=<全部单元>
+SCnBookmarkCurrentUnit=<当前单元>
 SCnBookmarkFileCount=单元总数：%d
 SCnEditorToolsetWizardMenuCaption=编码工具集(&E)
 SCnEditorToolsetWizardMenuHint=代码编辑器增强工具集

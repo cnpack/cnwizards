@@ -2750,6 +2750,7 @@ SCnBookmarkWizardMenuHint=Parcourir Signets de tous les fichiers ouvert
 SCnBookmarkWizardName=Navigateur de signets
 SCnBookmarkWizardComment=Parcourir Signets de tous les fichiers ouvert
 SCnBookmarkAllUnit=<Toutes les unités>
+SCnBookmarkCurrentUnit=<unité actuelle>
 SCnBookmarkFileCount=Nombre d'unités: %d
 SCnEditorToolsetWizardMenuCaption=Outils de codage
 SCnEditorToolsetWizardMenuHint=Ensemble d'outils de l'éditeur de code

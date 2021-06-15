@@ -2750,6 +2750,7 @@ SCnBookmarkWizardMenuHint=Browsing BookMarks of All Opening Files
 SCnBookmarkWizardName=BookMark Browser
 SCnBookmarkWizardComment=Browsing BookMarks of All Opening Files
 SCnBookmarkAllUnit=<All Units>
+SCnBookmarkCurrentUnit=<Current Unit>
 SCnBookmarkFileCount=Units Count: %d
 SCnEditorToolsetWizardMenuCaption=Coding Tools&et
 SCnEditorToolsetWizardMenuHint=Code Editor Toolset

@@ -2750,6 +2750,7 @@ SCnBookmarkWizardMenuHint=Отображает закладки открытых
 SCnBookmarkWizardName=Браузер закладок
 SCnBookmarkWizardComment=Отображает закладки открытых модулей
 SCnBookmarkAllUnit=<Все модули>
+SCnBookmarkCurrentUnit=<текущая модули>
 SCnBookmarkFileCount=Кол-во модулей: %d
 SCnEditorToolsetWizardMenuCaption=Мастер кода
 SCnEditorToolsetWizardMenuHint=Утилиты Мастера Кода

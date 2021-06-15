@@ -2750,6 +2750,7 @@ SCnBookmarkWizardMenuHint=流覽當前打開檔中所有的書籤
 SCnBookmarkWizardName=書籤流覽專家
 SCnBookmarkWizardComment=流覽當前打開檔中所有的書籤。
 SCnBookmarkAllUnit=<全部單元>
+SCnBookmarkCurrentUnit=<當前單元>
 SCnBookmarkFileCount=單元總數：%d
 SCnEditorToolsetWizardMenuCaption=編碼工具集(&E)
 SCnEditorToolsetWizardMenuHint=代碼編輯器增強工具集
