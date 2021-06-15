@@ -304,6 +304,8 @@ resourcestring
   // CnCpuWinEnhancements
   SCnMenuCopy30LinesName = 'CnCopy30Lines';
   SCnMenuCopyLinesName = 'CnCopyLines';
+  SCnDumpViewCopyName = 'CnDumpViewCopy';
+  SCnDumpViewCopyCaption = '&Copy';   // DO NOT Localize and Translate
 
   // CnWizMultiLang
   SCnWizMultiLangName = 'Language Switch';

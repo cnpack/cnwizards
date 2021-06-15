@@ -58,9 +58,10 @@ type
   TCnCpuWinEnhanceWizard = class(TCnIDEEnhanceWizard)
   private
     FDisamMenuHook: TCnMenuHook;
+    FDumpViewMenuHook: TCnMenuHook;
     FCopy30Menu: TCnMenuItemDef;
     FCopyMenu: TCnMenuItemDef;
-
+    FDumpViewCopy: TCnMenuItemDef;
     FCopyFrom: TCopyFrom;
     FCopyTo: TCopyTo;
     FCopyLineCount: Integer;
@@ -74,6 +75,7 @@ type
     procedure OnCopyMenuCreated(Sender: TObject; MenuItem: TMenuItem);
     procedure OnCopy30Lines(Sender: TObject);
     procedure OnCopyLines(Sender: TObject);
+    procedure OnDumpViewCopy(Sender: TObject);
     procedure GlobalCopyMethod;
     function CallDisassemble(Line: Integer; CopyFrom: TCopyFrom): string;
   protected
@@ -118,6 +120,8 @@ const
   SCnExecuteCpuWin = 'OnExecute';
   SCnCPUPaneMenu = 'CPUPaneMenu';
   SCnDumpPopupMenu = 'DumpPopupMenu';
+  SCnDumpViewClass = 'TDumpView';
+  SCnDumpViewName = 'DumpView';
   SCnCpuCommandAction = 'DebugCPUCommand';
   SCnSelectedAddress = 'SelectedAddress';
   SCnTopAddress = 'TopAddress';
@@ -133,6 +137,8 @@ begin
   FCopyLineCount := 30;
   FSettingToAll := False;
   FDisamMenuHook := TCnMenuHook.Create(nil);
+  FDumpViewMenuHook := TCnMenuHook.Create(nil);
+
   RegisterUserMenuItems;
   CnWizNotifierServices.AddActiveFormNotifier(OnActiveFormChanged);
 end;
@@ -140,6 +146,7 @@ end;
 destructor TCnCpuWinEnhanceWizard.Destroy;
 begin
   CnWizNotifierServices.RemoveActiveFormNotifier(OnActiveFormChanged);
+  FDumpViewMenuHook.Free;
   FDisamMenuHook.Free;
   inherited;
 end;
@@ -174,12 +181,24 @@ begin
     PopupMenu := TPopupMenu(CpuForm.FindComponent(SCnCPUPaneMenu));
     Assert(Assigned(PopupMenu));
 
-    // 挂接 CPU 窗口右键菜单
+    // 挂接 CPU 窗口汇编区右键菜单
     if not FDisamMenuHook.IsHooked(PopupMenu) then
     begin
       FDisamMenuHook.HookMenu(PopupMenu);
     {$IFDEF DEBUG}
-      CnDebugger.LogMsg('Hooked a CPU Window''s PopupMenu.');
+      CnDebugger.LogMsg('Hooked a CPU Window''s DisASM PopupMenu.');
+    {$ENDIF}
+    end;
+
+    PopupMenu := TPopupMenu(CpuForm.FindComponent(SCnDumpPopupMenu));
+    Assert(Assigned(PopupMenu));
+
+    // 挂接 CPU 窗口内存区右键菜单
+    if not FDumpViewMenuHook.IsHooked(PopupMenu) then
+    begin
+      FDumpViewMenuHook.HookMenu(PopupMenu);
+    {$IFDEF DEBUG}
+      CnDebugger.LogMsg('Hooked a CPU Window''s DumpView PopupMenu.');
     {$ENDIF}
     end;
   end;
@@ -199,6 +218,10 @@ begin
   FCopyMenu.OnCreated := OnCopyMenuCreated;
 
   FDisamMenuHook.AddMenuItemDef(FCopyMenu);
+
+  FDumpViewCopy := TCnMenuItemDef.Create(SCnDumpViewCopyName, SCnDumpViewCopyCaption,
+    OnDumpViewCopy, ipLast);
+  FDumpViewMenuHook.AddMenuItemDef(FDumpViewCopy);
 end;
 
 procedure TCnCpuWinEnhanceWizard.OnCopy30LinesMenuCreated(Sender: TObject;
@@ -347,6 +370,7 @@ procedure TCnCpuWinEnhanceWizard.SetActive(Value: Boolean);
 begin
   inherited;
   FDisamMenuHook.Active := Value;
+  FDumpViewMenuHook.Active := Value;
 end;
 
 function TCnCpuWinEnhanceWizard.GetHasConfig: Boolean;
@@ -361,6 +385,36 @@ begin
   Author := SCnPack_Aimingoo + ';' + SCnPack_Zjy;
   Email := SCnPack_AimingooEmail + ';' + SCnPack_ZjyEmail;
   Comment := SCnCpuWinEnhanceWizardComment;
+end;
+
+procedure TCnCpuWinEnhanceWizard.OnDumpViewCopy(Sender: TObject);
+var
+  I: Integer;
+  CpuForm: TCustomForm;
+  DumpView: TWinControl;
+  S: string;
+begin
+  CpuForm := FindCpuForm;
+  if CpuForm <> nil then
+  begin
+    DumpView := nil;
+    for I := 0 to CpuForm.ComponentCount - 1 do
+    begin
+      if CpuForm.Components[I].ClassNameIs(SCnDumpViewClass)
+        and (CpuForm.Components[I].Name = SCnDumpViewName)
+        and (CpuForm.Components[I] is TWinControl) then
+      begin
+        DumpView := TWinControl(CpuForm.Components[I]);
+        Break;
+      end;
+    end;
+    Assert(Assigned(DumpView));
+
+    // Copy Selected Memory Content
+    S := GetStrProp(DumpView, 'SelectedData');
+    if S <> '' then
+      Clipboard.AsText := S;
+  end;
 end;
 
 initialization
