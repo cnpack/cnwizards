@@ -115,7 +115,8 @@ type
     FList: TObjectList;
     FUpdateCount: Integer;
     FWizard: TCnBookmarkWizard;
-    FSaveAllUnit: Boolean;
+    FSavedAllUnit: Boolean;
+    FSavedCurrentUnit: Boolean;
     FSavedFileName: string;
     FSavedBookmark: Integer;
     procedure SortList(AList: TObjectList);
@@ -158,6 +159,7 @@ type
     FRichEditHeight: Integer;
     FWidthString: string;
     FCurrentSource: string;
+    FSourceFileChanged: Boolean;
     procedure SourceEditorNotifier(SourceEditor: IOTASourceEditor;
       NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
     procedure LoadBookmark(SourceEditor: IOTASourceEditor);
@@ -421,7 +423,6 @@ procedure TCnBookmarkWizard.SourceEditorNotifier(SourceEditor: IOTASourceEditor;
   NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
 var
   S: string;
-  CanNotify: Boolean;
 begin
   if not Active then
     Exit;
@@ -434,7 +435,7 @@ begin
       SaveBookmark(SourceEditor);
   end;
 
-  CanNotify := False; // 当前源文件发生改变时也通知
+  FSourceFileChanged := False; // 当前源文件发生改变时也通知
   if NotifyType in [setOpened, setClosing, setEditViewRemove, setEditViewActivated] then
   begin
     S := CnOtaGetCurrentSourceFile;
@@ -444,7 +445,7 @@ begin
       CnDebugger.LogFmt('Bookmark Notify Source from %s to %s', [FCurrentSource, S]);
 {$ENDIF}
       FCurrentSource := S;
-      CanNotify := True;
+      FSourceFileChanged := True;
     end;
   end;
 
@@ -454,7 +455,7 @@ begin
   // 虽然可能多造成些不必要的保存，但代价不大。
 
   if Assigned(CnBookmarkForm) and
-    (CanNotify or (NotifyType in [setOpened, setEditViewRemove, setClosing])) then
+    (FSourceFileChanged or (NotifyType in [setOpened, setEditViewRemove, setClosing])) then
     CnWizNotifierServices.ExecuteOnApplicationIdle(CnBookmarkForm.UpdateAll);
 end;
 
@@ -799,11 +800,14 @@ begin
     cbbUnit.Items.Add(SCnBookmarkCurrentUnit);
 
     Idx := 0;
+    if FSavedCurrentUnit then
+      Idx := 1;
+
     for I := 0 to FList.Count - 1 do
     begin
       Editor := TCnEditorObj(FList[I]);
       cbbUnit.Items.Add(_CnExtractFileName(Editor.FileName));
-      if not FSaveAllUnit and (CompareText(Editor.FileName, FSavedFileName) = 0) then
+      if not FSavedAllUnit and not FSavedCurrentUnit and (CompareText(Editor.FileName, FSavedFileName) = 0) then
         Idx := I + 2; // 前面有两项
     end;
     cbbUnit.ItemIndex := Idx;
@@ -975,7 +979,9 @@ end;
 
 procedure TCnBookmarkForm.UpdateAll(Sender: TObject);
 begin
-  FSaveAllUnit := cbbUnit.ItemIndex <= 0;
+  FSavedAllUnit := cbbUnit.ItemIndex <= 0;
+  FSavedCurrentUnit := cbbUnit.ItemIndex = 1;
+
   if ListView.Selected <> nil then
   begin
     with TCnBookmarkObj(ListView.Selected.Data) do
@@ -994,8 +1000,12 @@ begin
     UpdateComboBox;
 
   // 单纯切文件，没有书签更新时也需要更新
-  UpdateListView;
-  UpdateStatusBar;
+  if FWizard.FSourceFileChanged then
+  begin
+    FWizard.FSourceFileChanged := False;
+    UpdateListView;
+    UpdateStatusBar;
+  end;
 end;
 
 procedure TCnBookmarkForm.ListViewDblClick(Sender: TObject);
