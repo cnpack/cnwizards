@@ -769,40 +769,84 @@ end;
 
 procedure TCnImageListEditorForm.AddBmp(FileName: string; Bmp: TBitmap; IsSearch: Boolean);
 var
-  i, j, cols, rows: Integer;
-  mask: TColor;
+  I, J, Cols, Rows: Integer;
+  Mask: TColor;
+  YAll, NAll: Boolean;
+
+  function QuerySepBmp: Boolean;
+  var
+    Res: TCnDlgResult;
+  begin
+    if YAll then
+    begin
+      Result := True;
+      Exit;
+    end
+    else if NAll then
+    begin
+      Result := False;
+      Exit;
+    end;
+
+    Res := MultiButtonsDlg(Format(SCnImageListSepBmp, [_CnExtractFileName(FileName), Cols * Rows]),
+      [cdbYes, cdbNo, cdbYesToAll, cdbNoToAll]);
+    case Res of
+      cdrYesToAll:
+        begin
+          Result := True;
+          YAll := True;
+        end;
+      cdrNoToAll:
+        begin
+          Result := False;
+          NAll := True;
+        end;
+      cdrYes:
+        begin
+          Result := True;
+        end;
+      cdrNo:
+        begin
+          Result := False;
+        end;
+    end;
+  end;
+
 begin
   try
     // 如果图像四周点和中心点任一为默认透明色，则使用默认透明色
-    mask := clNone;
+    Mask := clNone;
     if (Bmp.Canvas.Pixels[0, 0] = csTransColor) or
        (Bmp.Canvas.Pixels[Bmp.Width - 1, 0] = csTransColor) or
        (Bmp.Canvas.Pixels[0, Bmp.Height - 1] = csTransColor) or
        (Bmp.Canvas.Pixels[Bmp.Width - 1, Bmp.Height - 1] = csTransColor) or
        (Bmp.Canvas.Pixels[Bmp.Width div 2, Bmp.Height div 2] = csTransColor) then
-      mask := csTransColor;
+      Mask := csTransColor;
 
     if not IsSearch and ((Bmp.Width >= ilList.Width * 2) or
       (Bmp.Height >= ilList.Height * 2)) then
     begin
-      cols := Max(1, Bmp.Width div ilList.Width);
-      rows := Max(1, Bmp.Height div ilList.Height);
-      if QueryDlg(Format(SCnImageListSepBmp, [_CnExtractFileName(FileName), cols * rows])) then
+      Cols := Max(1, Bmp.Width div ilList.Width);
+      Rows := Max(1, Bmp.Height div ilList.Height);
+      YAll := False;
+      NAll := False;
+
+      if QuerySepBmp then // 判断是否 All
       begin
-        for i := 0 to rows - 1 do
-          for j := 0 to cols - 1 do
-            DoAddBmp(i, j, Bmp, ioCrop, True, mask);
+        for I := 0 to Rows - 1 do
+          for J := 0 to Cols - 1 do
+            DoAddBmp(I, J, Bmp, ioCrop, True, Mask);
         // 拆成多个图标时，释放原始的图片
         Bmp.Free;
       end
       else
       begin
-        DoAddBmp(0, 0, Bmp, ioStrech, False, mask);
+        DoAddBmp(0, 0, Bmp, ioStrech, False, Mask);
       end;
     end
     else
     begin
-      DoAddBmp(0, 0, Bmp, GetDefaultOption(Bmp), IsSearch, mask);
+      DoAddBmp(0, 0, Bmp, GetDefaultOption(Bmp), IsSearch, Mask);
     end;
   except
     ;
