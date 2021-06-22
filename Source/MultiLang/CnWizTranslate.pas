@@ -100,6 +100,10 @@ begin
   TranslateStr(SCnDisabled, 'SCnDisabled');
   TranslateStr(SCnMsgDlgOK, 'SCnMsgDlgOK');
   TranslateStr(SCnMsgDlgCancel, 'SCnMsgDlgCancel');
+  TranslateStr(SCnMsgDlgYes, 'SCnMsgDlgYes');
+  TranslateStr(SCnMsgDlgNo, 'SCnMsgDlgNo');
+  TranslateStr(SCnMsgDlgYesToAll, 'SCnMsgDlgYesToAll');
+  TranslateStr(SCnMsgDlgNoToAll, 'SCnMsgDlgNoToAll');
   
   //----------------------------------------------------------------------------
   //  Feedback
