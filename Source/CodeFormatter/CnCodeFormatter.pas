@@ -3306,7 +3306,9 @@ begin
     if Scaner.Token in [tokKeywordFunction, tokKeywordOperator] then
       Match(Scaner.Token, PreSpaceCount);
   end;
-  
+
+  FormatPossibleAmpersand(CnPascalCodeForRule.SpaceBeforeOperator);
+
   {!! Fixed. e.g. "const proc: procedure = nil;" }
   if Scaner.Token in [tokSymbol, tokAmpersand] + ComplexTokens + DirectiveTokens
     + KeywordTokens then // 函数名允许出现关键字
@@ -3779,6 +3781,8 @@ begin
   end
   else
     Match(Scaner.Token, PreSpaceCount);
+
+  FormatPossibleAmpersand(CnPascalCodeForRule.SpaceBeforeOperator);
 
   { !! Fixed. e.g. "const proc: procedure = nil;" }
   if Scaner.Token in [tokSymbol] + ComplexTokens + DirectiveTokens
