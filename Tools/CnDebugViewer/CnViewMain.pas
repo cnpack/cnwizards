@@ -520,19 +520,7 @@ end;
 
 procedure TCnMainViewer.DestroyThread;
 begin
-  if FThread <> nil then
-  begin
-    FThread.Terminate;
-    FThread.WaitFor;
-    FThread := nil;
-  end;
-
-  if FDbgThread <> nil then
-  begin
-    FDbgThread.Terminate;
-    FDbgThread.WaitFor;
-    FDbgThread := nil;
-  end;
+  TerminateThread;
 
   FRunningState := rsStopped;
   UpdateStatusBar;
@@ -1477,14 +1465,22 @@ begin
   if FThread <> nil then
   begin
     FThread.Terminate;
-    FThread.WaitFor;
+    try
+      FThread.WaitFor;
+    except
+      ;
+    end;
     FThread := nil;
   end;
 
   if FDbgThread <> nil then
   begin
     FDbgThread.Terminate;
-    FDbgThread.WaitFor;
+    try
+      FDbgThread.WaitFor;
+    except
+      ;
+    end;
     FDbgThread := nil;
   end;
 end;
