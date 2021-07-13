@@ -1501,6 +1501,14 @@ begin
           HideAndClearList;
           Result := True;
         end;
+      86:  // V
+        begin
+          if ssCtrl in Shift then // 粘贴前取消弹出
+          begin
+            HideAndClearList;
+            Result := False;
+          end;
+        end;
       VK_UP, VK_DOWN, VK_PRIOR, VK_NEXT:
         begin
           SendMessage(List.Handle, Msg.message, Msg.wParam, Msg.lParam);
