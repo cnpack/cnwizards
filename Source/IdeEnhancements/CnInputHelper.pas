@@ -1501,9 +1501,9 @@ begin
           HideAndClearList;
           Result := True;
         end;
-      86:  // V
+      86, 90:  // V Z
         begin
-          if ssCtrl in Shift then // 粘贴前取消弹出
+          if ssCtrl in Shift then // 粘贴或撤销前取消弹出
           begin
             HideAndClearList;
             Result := False;
