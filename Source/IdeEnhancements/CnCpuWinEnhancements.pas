@@ -86,6 +86,7 @@ type
     destructor Destroy; override;
 
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
+    function GetSearchContent: string; override;
     procedure Config; override;
   published
     property CopyFrom: TCopyFrom read FCopyFrom write FCopyFrom default cfTopAddr;
@@ -415,6 +416,11 @@ begin
     if S <> '' then
       Clipboard.AsText := S;
   end;
+end;
+
+function TCnCpuWinEnhanceWizard.GetSearchContent: string;
+begin
+  Result := inherited GetSearchContent + 'ÄÚ´æ,»ã±à,¸´ÖÆ,memory,asm,copy,';
 end;
 
 initialization

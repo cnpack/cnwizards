@@ -85,6 +85,7 @@ type
 
     function GetState: TWizardState; override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
+    function GetSearchContent: string; override;
     function GetCaption: string; override;
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
@@ -735,6 +736,11 @@ begin
     if CnStatForm <> nil then
       FreeAndNil(CnStatForm);
   end;
+end;
+
+function TCnStatWizard.GetSearchContent: string;
+begin
+  Result := inherited GetSearchContent + 'º∆À„,––∫≈,count,line,';
 end;
 
 initialization

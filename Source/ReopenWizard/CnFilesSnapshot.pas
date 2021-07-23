@@ -91,6 +91,7 @@ type
     function GetState: TWizardState; override;
     procedure AcquireSubActions; override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
+    function GetSearchContent: string; override;
     function GetCaption: string; override;
     function GetHint: string; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
@@ -481,6 +482,11 @@ begin
       FormOpened := False;
     end;
   end;
+end;
+
+function TCnFilesSnapshotWizard.GetSearchContent: string;
+begin
+  Result := inherited GetSearchContent + ' ’≤ÿ,favorite';
 end;
 
 initialization

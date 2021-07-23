@@ -426,6 +426,7 @@ type
     procedure SaveSettings(Ini: TCustomIniFile); override;
     function GetState: TWizardState; override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
+    function GetSearchContent: string; override;
     function GetCaption: string; override;
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
@@ -1268,6 +1269,11 @@ begin
   Author := SCnPack_LiuXiao + ';GExperts Team';
   Email := SCnPack_LiuXiaoEmail;
   Comment := SCnProcListWizardComment;
+end;
+
+function TCnProcListWizard.GetSearchContent: string;
+begin
+  Result := inherited GetSearchContent + 'ÊôÐÔ,ÔªËØ,property,function,element,';
 end;
 
 procedure TCnProcListWizard.InitProcToolBar(ToolBarType: string;

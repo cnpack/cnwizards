@@ -149,6 +149,7 @@ type
     procedure SaveSettings(Ini: TCustomIniFile); override;
     procedure ResetSettings(Ini: TCustomIniFile); override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
+    function GetSearchContent: string; override;
     function GetCaption: string; override;
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
@@ -1543,6 +1544,11 @@ begin
   FF2Rename := Value;
   if FRenameAction <> nil then
     FRenameAction.Enabled := Value;
+end;
+
+function TCnPrefixWizard.GetSearchContent: string;
+begin
+  Result := inherited GetSearchContent + '批量,重命名,batch,rename,';
 end;
 
 initialization

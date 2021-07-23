@@ -164,7 +164,6 @@ type
     procedure btnExportClick(Sender: TObject);
     procedure btnImportClick(Sender: TObject);
   private
-    { Private declarations }
     FIni: TCustomIniFile;
     FPrjIni: TMemIniFile;
     FConfigOnly: Boolean;
@@ -222,7 +221,6 @@ type
     property Ini: TCustomIniFile read FIni;
     property ConfigOnly: Boolean read FConfigOnly;
   public
-    { Public declarations }
     constructor CreateEx(AOwner: TComponent; AIni: TCustomIniFile; AConfigOnly: Boolean);
     procedure LoadProject(Ini: TMemIniFile; const Section: string); virtual;
     procedure SaveProject(Ini: TMemIniFile; const Section: string); virtual;
@@ -273,6 +271,7 @@ type
     procedure Config; override;
     function GetState: TWizardState; override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
+    function GetSearchContent: string; override;
     function GetCaption: string; override;
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
@@ -1656,6 +1655,12 @@ begin
         (gbResult.Controls[I] as TCheckBox).Caption := MsgBoxResultStrs[TCnMsgBoxResultKind(I)];
     end;
   end;
+end;
+
+function TCnMessageBoxWizard.GetSearchContent: string;
+begin
+  Result := inherited GetSearchContent + '弹窗,信息,提示框,' +
+    'messagedlg,info,query,warning,error,yesno,ok,cancel,abort,retry,ignore,';
 end;
 
 initialization

@@ -62,6 +62,7 @@ type
 
     class procedure GetWizardInfo(var Name, Author, Email,
       Comment: string); override;
+    function GetSearchContent: string; override;
   end;
 
 {$ENDIF}
@@ -134,6 +135,12 @@ begin
   Author := 'FastCode Project' + ';' + SCnPack_Zjy;
   Email := '' + ';' + SCnPack_ZjyEmail;
   Comment := SCnFastCodeWizardComment;
+end;
+
+function TCnFastCodeWizard.GetSearchContent: string;
+begin
+  Result := inherited GetSearchContent;
+  Result := '加速,优化,快速,' + 'fastcode,';
 end;
 
 initialization

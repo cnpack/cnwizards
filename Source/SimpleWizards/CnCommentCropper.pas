@@ -164,6 +164,7 @@ type
     procedure Config; override;
     function GetState: TWizardState; override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
+    function GetSearchContent: string; override;
     function GetCaption: string; override;
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
@@ -889,6 +890,11 @@ begin
     Exit;
   end;
   CanClose := True;
+end;
+
+function TCnCommentCropperWizard.GetSearchContent: string;
+begin
+  Result := inherited GetSearchContent + '¿ÕÐÐ,delete,blankline,';
 end;
 
 initialization

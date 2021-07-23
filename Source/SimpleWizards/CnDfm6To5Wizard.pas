@@ -61,6 +61,7 @@ type
   public
     function GetState: TWizardState; override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
+    function GetSearchContent: string; override;
     function GetCaption: string; override;
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
@@ -146,6 +147,11 @@ end;
 function TCnDfm6To5Wizard.GetHint: string;
 begin
   Result := SCnDfm6To5WizardMenuHint;
+end;
+
+function TCnDfm6To5Wizard.GetSearchContent: string;
+begin
+  Result := inherited GetSearchContent + 'dfm,';
 end;
 
 function TCnDfm6To5Wizard.GetState: TWizardState;

@@ -92,6 +92,7 @@ type
     procedure Config; override;
     function GetState: TWizardState; override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
+    function GetSearchContent: string; override;
     function GetCaption: string; override;
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
@@ -319,6 +320,11 @@ begin
   Author := SCnPack_LiuXiao + ';' + SCnPack_PanYing;
   Email := SCnPack_LiuXiaoEmail + ';' + SCnPack_PanYingEmail;
   Comment := SCnPas2HtmlWizardComment;
+end;
+
+function TCnPas2HtmlWizard.GetSearchContent: string;
+begin
+  Result := inherited GetSearchContent + '¸»ÎÄ±¾,rtf,';
 end;
 
 procedure TCnPas2HtmlWizard.SubActionExecute(Index: Integer);

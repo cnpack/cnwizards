@@ -58,6 +58,7 @@ type
     procedure Config; override;
     function GetState: TWizardState; override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
+    function GetSearchContent: string; override;
     function GetCaption: string; override;
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
@@ -338,6 +339,11 @@ procedure TCnCorPropWizard.LanguageChanged(Sender: TObject);
 begin
   ActionStr[paWarn] := SCnCorrectPropertyActionWarn;
   ActionStr[paCorrect] := SCnCorrectPropertyActionAutoCorrect;
+end;
+
+function TCnCorPropWizard.GetSearchContent: string;
+begin
+  Result := inherited GetSearchContent + 'ÅúÁ¿,batch,modify';
 end;
 
 { TCnPropDef }

@@ -281,6 +281,7 @@ uses
 const
   csCnWizFreeMutex = 'CnWizFreeMutex';
   csMaxWaitFreeTick = 5000;
+  SCN_DBG_CMD_SEARCH = 'search';
 
 var
   CnDesignExecutorList: TObjectList = nil; // 设计器右键菜单执行对象列表
@@ -1463,13 +1464,13 @@ begin
     if Cmds.Count = 0 then
       Exit;
 
-    LocalCmd := Cmds[0];
+    LocalCmd := LowerCase(Cmds[0]);
     Matched := False;
     Wizard := nil;
     for I := 0 to GetWizardCount - 1 do
     begin
       Wizard := GetWizards(I);
-      ID := Wizard.GetIDStr;
+      ID := LowerCase(Wizard.GetIDStr);
       if Pos(LocalCmd, ID) > 0 then
       begin
         Matched := True;
@@ -1480,12 +1481,19 @@ begin
     if Matched and (Wizard <> nil) then
     begin
       Cmds.Delete(0);
-      Wizard.DebugComand(Cmds, Results);
-      Exit;
-    end;
+      // 先处理针对 Wizard 的通用命令
+      if (Cmds.Count = 1) and (LowerCase(Cmds[0]) = SCN_DBG_CMD_SEARCH) then
+        Results.Add(Wizard.GetSearchContent)
+      else
+        Wizard.DebugComand(Cmds, Results);
+    end
+    else
+    begin
+      // TODO: 处理一些不针对 Wizard 的全局命令
 
-    // No Wizard can process this debug command, do other stuff
-    Results.Add('Unknown Debug Command ' + Cmd);
+      // No Wizard can process this debug command, do other stuff
+      Results.Add('Unknown Debug Command ' + Cmd);
+    end;
   finally
     Cmds.Free;
   end;

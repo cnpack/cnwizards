@@ -129,6 +129,7 @@ type
     procedure ResetSettings(Ini: TCustomIniFile); override;
     function GetState: TWizardState; override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
+    function GetSearchContent: string; override;
     function GetCaption: string; override;
     function GetHint: string; override;
     property Collection: TCnEditorCollection read FCollection;
@@ -533,6 +534,11 @@ begin
   finally
     WizShortCutMgr.EndUpdate;
   end;
+end;
+
+function TCnSrcTemplate.GetSearchContent: string;
+begin
+  Result := inherited GetSearchContent + 'ºê,macro';
 end;
 
 { TCnSrcTemplateForm }

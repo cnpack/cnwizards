@@ -171,6 +171,7 @@ type
     procedure SaveSettings(Ini: TCustomIniFile); override;
     function GetState: TWizardState; override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
+    function GetSearchContent: string; override;
     function GetCaption: string; override;
     function GetHint: string; override;
 
@@ -1553,6 +1554,14 @@ begin
   Email := SCnPack_Wyb_starMail + ';' + SCnPack_ZjyEmail + ';'
     + SCnPack_LiuXiaoEmail + ';' + SCnPack_LicwingEmail;
   Comment := SCnAlignSizeComment;
+end;
+
+function TCnAlignSizeWizard.GetSearchContent: string;
+begin
+  Result := inherited GetSearchContent;
+  Result := Result + '窗体,设计,对齐,排列,组件,浮动工具面板,缩放,尺寸,栅格,水平,垂直,高度,宽度,' +
+    'form,design,align,arrange,component,control,flat,float,toolbar,enlarge,size,grid,' +
+    'horizontal,vertical,height,width,';
 end;
 
 {$IFDEF IDE_ACTION_UPDATE_DELAY}

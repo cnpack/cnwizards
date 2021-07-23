@@ -319,6 +319,7 @@ type
     procedure Config; override;
     procedure Loaded; override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
+    function GetSearchContent: string; override;
     procedure LanguageChanged(Sender: TObject); override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
@@ -3434,6 +3435,11 @@ procedure TCnInputHelper.SetUseEditorColor(const Value: Boolean);
 begin
   FUseEditorColor := Value;
   List.UseEditorColor := Value;
+end;
+
+function TCnInputHelper.GetSearchContent: string;
+begin
+  Result := inherited GetSearchContent + '自动弹出,标识符,列表,symbol,list,pascal,c++,';
 end;
 
 initialization

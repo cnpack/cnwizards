@@ -138,7 +138,6 @@ type
     procedure actMoveDownExecute(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
   private
-    { Private declarations }
     FIni: TCustomIniFile;
     FSourceList, FDestList: IDesignerSelections;
     FContainerWindow: TWinControl;
@@ -158,7 +157,6 @@ type
     property CurrList: TStrings read FCurrList;
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
     constructor CreateEx(AOwner: TComponent; AIni: TCustomIniFile; ASourceList,
       ADestList: IDesignerSelections; AContainerWindow: TWinControl);
     procedure LoadSettings(Ini: TCustomIniFile; const Section: string); virtual;
@@ -179,6 +177,7 @@ type
   public
     function GetState: TWizardState; override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
+    function GetSearchContent: string; override;
     function GetCaption: string; override;
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
@@ -996,6 +995,11 @@ begin
 end;
 
 // 返回专家状态
+function TCnComponentSelector.GetSearchContent: string;
+begin
+  Result := inherited GetSearchContent + '选择,selection,';
+end;
+
 function TCnComponentSelector.GetState: TWizardState;
 begin
   if CurrentIsForm then

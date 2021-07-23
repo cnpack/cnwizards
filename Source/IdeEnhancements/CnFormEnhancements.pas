@@ -367,7 +367,7 @@ type
 
     procedure LanguageChanged(Sender: TObject); override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
-
+    function GetSearchContent: string; override;
     property PropBar: TCnFormFloatPropBar read FPropBar;
     property FlatToolBars[Index: Integer]: TCnFormFloatToolBar read GetFlatToolBar;
     property FlatToolBarCount: Integer read GetFlatToolBarCount;
@@ -2543,6 +2543,11 @@ begin
   Author := SCnPack_Zjy + ';' + SCnPack_LiuXiao;
   Email := SCnPack_ZjyEmail + ';' + SCnPack_LiuXiaoEmail;
   Comment := SCnFormEnhanceWizardComment;
+end;
+
+function TCnFormEnhanceWizard.GetSearchContent: string;
+begin
+  Result := inherited GetSearchContent + '浮动,面板,工具栏,floatbar,propertybar,';
 end;
 
 //==============================================================================
