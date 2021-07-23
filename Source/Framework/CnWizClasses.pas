@@ -245,7 +245,7 @@ type
     function GetCaption: string; virtual; abstract;
     {* 返回专家的标题 }
     function GetHint: string; virtual;
-    {* 返回专家的Hint提示 }
+    {* 返回专家的 Hint 提示 }
     function GetDefShortCut: TShortCut; virtual;
     {* 返回专家的默认快捷键，实际使用时专家的快捷键会可能由管理器来设定，这里
        只需要返回默认的就行了。 }
@@ -254,6 +254,8 @@ type
     {* 类构造器 }
     destructor Destroy; override;
     {* 类析构器 }
+    function GetSearchContent: string; override;
+    {* 返回供搜索的字符串，把标题与 Hint 塞进去 }
     property ImageIndex: Integer read GetImageIndex;
     {* 专家图标在 IDE 的主 ImageList 中的索引号 }
     property Action: TCnWizAction read FAction;
@@ -282,6 +284,7 @@ type
     function CreateAction: TCnWizAction; override;
   public
     constructor Create; override;
+
     function EnableShortCut: Boolean; override;
     {* 返回专家是否可以用快捷键调用 }
     property Menu: TMenuItem read GetMenu;
@@ -349,6 +352,8 @@ type
     {* 类构造器 }
     destructor Destroy; override;
     {* 类析构器 }
+    function GetSearchContent: string; override;
+    {* 返回供搜索的字符串，把所有子菜单的标题与 Hint 塞进去 }
     procedure DebugComand(Cmds: TStrings; Results: TStrings); override;
     {* 调试时打印子菜单以及 Action 等的信息}
     procedure Execute; override;
@@ -977,10 +982,15 @@ begin
   Result := True;
 end;
 
-// 取Hint提示方法
+// 取 Hint 提示方法
 function TCnActionWizard.GetHint: string;
 begin
   Result := ''
+end;
+
+function TCnActionWizard.GetSearchContent: string;
+begin
+  Result := GetCaption + ',' + GetHint + ',';
 end;
 
 //------------------------------------------------------------------------------
@@ -1079,6 +1089,19 @@ begin
   FPopupMenu.Free;
   FList.Free;
   inherited;
+end;
+
+function TCnSubMenuWizard.GetSearchContent: string;
+var
+  I: Integer;
+  Act: TCnWizAction;
+begin
+  Result := inherited GetSearchContent;
+  for I := 0 to SubActionCount - 1 do
+  begin
+    Act := SubActions[I];
+    Result := Result + Act.Caption + ',' + Act.Hint + ',';
+  end;
 end;
 
 procedure TCnSubMenuWizard.DebugComand(Cmds: TStrings; Results: TStrings);
