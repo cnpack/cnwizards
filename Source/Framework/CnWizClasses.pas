@@ -119,7 +119,11 @@ type
     class function WizardName: string;
     {* 取专家名称，可以是支持本地化的字符串 }
     function GetAuthor: string; virtual;
+    {* 返回作者}
     function GetComment: string; virtual;
+    {* 返回注释}
+    function GetSearchContent: string; virtual;
+    {* 返回供搜索的字符串，可以是以半角逗号分割的中英文关键词}
     procedure DebugComand(Cmds: TStrings; Results: TStrings); virtual;
     {* 处理 Debug 输出命令并将结果放置入 Results 中，供内部调试用}
 
@@ -654,6 +658,12 @@ var
   Name, Author, Email: string;
 begin
   GetWizardInfo(Name, Author, Email, Result);
+end;
+
+// 返回供搜索的字符串，可以是以半角逗号分割的中英文关键词
+function TCnBaseWizard.GetSearchContent: string;
+begin
+  Result := '';
 end;
 
 // 该专家是否属于内部专家，不显示、不可配置

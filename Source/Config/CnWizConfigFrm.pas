@@ -948,7 +948,8 @@ var
 
     if (Pos(FilterText, Wizard.WizardName) > 0)
       or (Pos(FilterText, Wizard.GetIDStr) > 0)
-      or (Pos(FilterText, Wizard.GetAuthor) > 0) then
+      or (Pos(FilterText, Wizard.GetAuthor) > 0)
+      or (Pos(FilterText, Wizard.GetSearchContent) > 0) then
       Result := True
     else // ²éÕÒÆ´ÒôÊ××ÖÄ¸
     begin
