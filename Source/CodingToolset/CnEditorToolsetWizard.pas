@@ -428,7 +428,7 @@ begin
   finally
     ActiveIni.Free;
   end;
-  FEditorTools.Free;
+  FreeAndNil(FEditorTools);
   inherited;
 end;
 
@@ -626,8 +626,9 @@ var
 begin
   inherited;
   // 清除 Action 时要清除引用
-  for I := 0 to GetEditorToolCount - 1 do
-    EditorTools[I].FAction := nil;
+  if FEditorTools <> nil then
+    for I := 0 to GetEditorToolCount - 1 do
+      EditorTools[I].FAction := nil;
 end;
 
 { TCnEditorToolsForm }
