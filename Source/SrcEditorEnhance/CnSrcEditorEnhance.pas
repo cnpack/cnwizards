@@ -815,9 +815,9 @@ end;
 function TCnSrcEditorEnhance.GetSearchContent: string;
 begin
   Result := inherited GetSearchContent +
-    '行号,工具栏,前进,后退,右键,菜单,只读,浮动,按钮,f2,快捷键,热键,括号,标签,缩进,自动保存,' +
+    '行号,工具栏,前进,后退,右键,菜单,只读,浮动,按钮,f2,快捷键,热键,括号,标签,缩进,自动保存,缩略图,' +
     'linenumber,toolbar,front,back,popupmenu,readonly,float,button,shortcut,hotkey,' +
-    'bracket,tab,indent,autosave';
+    'bracket,tab,indent,autosave,thumbnail,gutter,';
 end;
 
 initialization

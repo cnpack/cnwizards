@@ -571,6 +571,7 @@ type
     destructor Destroy; override;
 
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
+    function GetSearchContent: string; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
     procedure Config; override;
@@ -5344,6 +5345,12 @@ procedure TCnSourceHighlight.SetBlockMatchLineNamespace(const Value: Boolean);
 begin
   FBlockMatchLineNamespace := Value;
   GlobalIgnoreNamespace := not Value;
+end;
+
+function TCnSourceHighlight.GetSearchContent: string;
+begin
+  Result := inherited GetSearchContent + '括号,匹配,标识符,关键字,划线,画线,空行,分隔,结构,编译指令,行号,'
+    + 'bracket,match,identifier,keyword,line,draw,structure,blank,compiler,directive,';
 end;
 
 { TBlockLinePair }
