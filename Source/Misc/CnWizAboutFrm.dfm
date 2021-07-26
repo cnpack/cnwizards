@@ -29,7 +29,6 @@ inherited CnWizAboutForm: TCnWizAboutForm
     Font.Name = 'Tahoma'
     Font.Style = [fsBold]
     ParentFont = False
-    OnDblClick = Label2DblClick
   end
   object Label4: TLabel
     Left = 96
@@ -928,6 +927,7 @@ inherited CnWizAboutForm: TCnWizAboutForm
         0000}
       RandomBlob = 200
       TrackBlob = 80
+      OnMouseUp = CnWaterImage1MouseUp
     end
   end
   object btnLicense: TButton

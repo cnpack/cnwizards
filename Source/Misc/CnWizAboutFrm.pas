@@ -28,10 +28,12 @@ unit CnWizAboutFrm;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2002.09.28 V1.0
-*               创建单元
+* 修改记录：2021.07.26 V1.2
+*               加入调试命令窗口
 *           2003.03.10 V1.1
 *               添加左侧图片
+*           2002.09.28 V1.0
+*               创建单元
 ================================================================================
 |</PRE>}
 
@@ -72,11 +74,10 @@ type
     procedure btnLicenseClick(Sender: TObject);
     procedure imgDonationClick(Sender: TObject);
     procedure lblSourceClick(Sender: TObject);
-    procedure Label2DblClick(Sender: TObject);
+    procedure CnWaterImage1MouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
   private
-{$IFDEF DEBUG}
     procedure DbgEditKeyPress(Sender: TObject; var Key: Char);
-{$ENDIF}
   protected
     function GetHelpTopic: string; override;
   public
@@ -157,57 +158,6 @@ begin
   Result := 'License';
 end;
 
-procedure TCnWizAboutForm.Label2DblClick(Sender: TObject);
-{$IFDEF DEBUG}
-var
-  Edit: TEdit;
-  Memo: TMemo;
-{$ENDIF}
-begin
-{$IFDEF DEBUG}
-  Close;
-
-  if DbgFrm <> nil then
-  begin
-    DbgFrm.Show;
-  end
-  else
-  begin
-    DbgFrm := TForm.Create(Application);
-    with DbgFrm do
-    begin
-      Width := 550;
-      Height := 400;
-      Position := poScreenCenter;
-      Caption := 'CnPack IDE Wizard Debug Command Window';
-      BorderIcons := [biSystemMenu];
-    end;
-
-    Edit := TEdit.Create(DbgFrm);
-    with Edit do
-    begin
-      Parent := DbgFrm;
-      Align := alTop;
-      OnKeyPress := DbgEditKeyPress;
-    end;
-
-    Memo := TMemo.Create(DbgFrm);
-    with Memo do
-    begin
-      Parent := DbgFrm;
-      Align := alClient;
-      ReadOnly := True;
-      ScrollBars := ssBoth;
-      Text := '';
-    end;
-
-    Edit.Tag := Integer(Memo);
-    DbgFrm.Show;
-  end;
-{$ENDIF}
-end;
-
-{$IFDEF DEBUG}
 procedure TCnWizAboutForm.DbgEditKeyPress(Sender: TObject; var Key: Char);
 var
   List: TStrings;
@@ -238,6 +188,60 @@ begin
     Key := #0;
   end;
 end;
-{$ENDIF}
+
+procedure TCnWizAboutForm.CnWaterImage1MouseUp(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+  Edit: TEdit;
+  Memo: TMemo;
+begin
+  if not (Button in [mbLeft, mbRight]) then
+    Exit;
+
+  // Ctrl/Shift/Alt 都得按下
+  if not (ssShift in Shift) or not (ssCtrl in Shift) or not (ssAlt in Shift) then
+    Exit;
+
+  Close;
+
+  if DbgFrm <> nil then
+  begin
+    DbgFrm.Show;
+  end
+  else
+  begin
+    DbgFrm := TForm.Create(Application);
+    with DbgFrm do
+    begin
+      Width := 550;
+      Height := 400;
+      Position := poScreenCenter;
+      BorderStyle := bsSizeToolWin;
+      Caption := 'CnPack IDE Wizard Debug Command Window';
+      BorderIcons := [biSystemMenu];
+    end;
+
+    Edit := TEdit.Create(DbgFrm);
+    with Edit do
+    begin
+      Parent := DbgFrm;
+      Align := alTop;
+      OnKeyPress := DbgEditKeyPress;
+    end;
+
+    Memo := TMemo.Create(DbgFrm);
+    with Memo do
+    begin
+      Parent := DbgFrm;
+      Align := alClient;
+      ReadOnly := True;
+      ScrollBars := ssBoth;
+      Text := '';
+    end;
+
+    Edit.Tag := Integer(Memo);
+    DbgFrm.Show;
+  end;
+end;
 
 end.
