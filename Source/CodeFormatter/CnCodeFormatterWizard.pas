@@ -114,6 +114,7 @@ type
     procedure Config; override;
     function GetState: TWizardState; override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
+    function GetSearchContent: string; override;
     function GetCaption: string; override;
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
@@ -502,6 +503,14 @@ begin
   Author := SCnPack_GuYueChunQiu + ';' + SCnPack_LiuXiao;
   Email := SCnPack_GuYueChunQiuEmail + ';' + SCnPack_LiuXiaoEmail;
   Comment := SCnCodeFormatterWizardComment;
+end;
+
+function TCnCodeFormatterWizard.GetSearchContent: string;
+begin
+  Result := inherited GetSearchContent +
+    '关键字,大小写,缩进,自动换行,前后,编译指令,注释,保留,独占,汇编,行首,宽度,' +
+    'keyword,case,sensitive,indent,linebreak,compile,directive,comment,' +
+    'keep,asm,head,uses,width,';
 end;
 
 procedure TCnCodeFormatterWizard.LoadSettings(Ini: TCustomIniFile);
