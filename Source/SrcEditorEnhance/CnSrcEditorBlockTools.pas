@@ -980,6 +980,7 @@ var
   X, Y, E: Integer;
   StartingRow, EndingRow: Integer;
   S: string;
+  PosChanged: Boolean;
 {$IFDEF BDS}
   ElidedStartingRows, ElidedEndingRows, I, RowEnd: Integer;
 {$ENDIF}
@@ -999,12 +1000,14 @@ begin
       Button.DropdownMenu := FPopupMenu;
       Button.AutoDropdown := False;
       Button.Hint := SCnSrcBlockToolsHint;
+
       // BDS 下 Parent 在 EditControl.Parent 上可能导致 ModelMaker Explorer
       // 工具栏自动隐藏判断错误
       // D5 下 Parent 在 EditControl 上可能导致按钮刷新不正确
       // 所以两边分开处理
     {$IFDEF BDS}
       Button.Parent := TWinControl(EditControl);
+      Button.Alpha := True;
     {$ELSE}
       Button.Parent := EditControl.Parent;
     {$ENDIF}
@@ -1073,10 +1076,21 @@ begin
       EditControl.ClientHeight - Button.Height);
     X := EditControl.Left + csLeftKeep;
 {$ENDIF}
+
+    PosChanged := False;
     if Y <> Button.Top then
+    begin
       Button.Top := Y;
+      PosChanged := True;
+    end;
     if X <> Button.Left then
+    begin
       Button.Left := X;
+      PosChanged := True;
+    end;
+
+    if Button.Alpha and PosChanged then
+      Button.Invalidate;
 
     // 判断选择区是否有颜色，有则设置预览
     if FShowColor then

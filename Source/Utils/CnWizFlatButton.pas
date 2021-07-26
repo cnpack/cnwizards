@@ -28,7 +28,9 @@ unit CnWizFlatButton;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2018.07.30 V1.1
+* 修改记录：2021.07.26 V1.2
+*               增加半透明的支持，但不太有效
+*           2018.07.30 V1.1
 *               增加显示色块的功能
 *           2005.01.06 V1.0
 *               创建单元，实现功能
@@ -41,7 +43,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Graphics, Classes, Controls, ExtCtrls, Forms,
-  Menus, CnPopupMenu;
+  Menus, CnPopupMenu, CnGraphics;
 
 type
   TFlatButtonState = (bsHide, bsNormal, bsEnter, bsDropdown);
@@ -56,6 +58,7 @@ type
     FAutoDropdown: Boolean;
     FShowColor: Boolean;
     FDisplayColor: TColor;
+    FAlpha: Boolean;
     procedure SetImage(Value: TGraphic);
     procedure ImageChange(Sender: TObject);
     procedure OnTimer(Sender: TObject);
@@ -92,6 +95,8 @@ type
     {* 是否显示颜色区域}
     property DisplayColor: TColor read FDisplayColor write SetDisplayColor;
     {* 颜色区域的显示颜色}
+    property Alpha: Boolean read FAlpha write FAlpha;
+    {* 是否半透明绘制}
 
     property IsDropdown: Boolean read FIsDropdown write SetIsDropdown;
     property IsMouseEnter: Boolean read FIsMouseEnter write SetIsMouseEnter;
@@ -177,36 +182,94 @@ begin
 end;
 
 procedure TCnWizFlatButton.Paint;
+const
+  csAlphaValue = 160;
+type
+  PRGBTripleArray = ^TRGBTripleArray;
+  TRGBTripleArray = array [Byte] of TRGBTriple;
 var
-  R: TRect;
+  Rc: TRect;
   OldColor: TColor;
   X, Y: Integer;
   State: TFlatButtonState;
+  Bmp: TBitmap;
+  R, B, G: Byte;
+  AAlpha: DWORD;
+  PRGB: PRGBTripleArray;
 begin
   State := GetState;
   with Canvas do
   begin
-    Brush.Color := csBkColors[State];
-    FillRect(ClientRect);
-    Brush.Color := csBorderColors[State];
-    FrameRect(ClientRect);
-    if (FImage <> nil) and not FImage.Empty then
-      Draw(csBorderWidths[State], csBorderWidths[State], FImage);
+    if FAlpha then
+    begin
+      // 画半透明的复制来的背景并与前景色混合
+      Bmp := TBitmap.Create;
+      try
+        Bmp.PixelFormat := pf24bit;
+        Bmp.Width := Width;
+        Bmp.Height := Height;
 
+        CopyControlParentImageToCanvas(Self, Bmp.Canvas);
+
+        // 半透明混合色
+        R := GetRValue(csBkColors[State]);                // 色彩分量
+        G := GetGValue(csBkColors[State]);
+        B := GetBValue(csBkColors[State]);
+        AAlpha := csAlphaValue;       // 规定一个前景透明度运算系数（0 到 256 范围）
+
+        for Y := 0 to Bmp.Height - 1 do
+        begin
+          PRGB := Bmp.ScanLine[Y];
+          for X := 0 to Bmp.Width - 1 do
+          begin
+            // 混合
+            Inc(PRGB^[X].rgbtBlue, AAlpha * (B - PRGB^[X].rgbtBlue) shr 8);
+            Inc(PRGB^[X].rgbtGreen, AAlpha * (G - PRGB^[X].rgbtGreen) shr 8);
+            Inc(PRGB^[X].rgbtRed, AAlpha * (R - PRGB^[X].rgbtRed) shr 8);
+          end;
+        end;
+
+        // Bmp 上画边框与图标
+        Bmp.Canvas.Brush.Color := csBorderColors[State];
+        Bmp.Canvas.FrameRect(ClientRect);
+        Bmp.Canvas.Brush.Style := bsClear;
+        if (FImage <> nil) and not FImage.Empty then
+          Bmp.Canvas.Draw(csBorderWidths[State], csBorderWidths[State], FImage);
+
+        BitBlt(Handle, 0, 0, Width, Height, Bmp.Canvas.Handle, 0, 0, SRCCOPY);
+      finally
+        Bmp.Free;
+      end;
+    end
+    else
+    begin
+      // 先自己画个不透明背景
+      Brush.Color := csBkColors[State];
+      FillRect(ClientRect);
+
+      // 自己画边框与图标
+      Brush.Color := csBorderColors[State];
+      FrameRect(ClientRect);
+      if (FImage <> nil) and not FImage.Empty then
+        Draw(csBorderWidths[State], csBorderWidths[State], FImage);
+    end;
+
+    // 画小色块
     if FShowColor and (State in [bsHide, bsNormal]) then
     begin
-      R.Left := Width - csBorderWidths[State] - (csArrowWidths[State] div 2) - csColorWidth + 2;
-      R.Top := 5;
-      R.Bottom := ClientRect.Bottom - 5;
-      R.Right := R.Left + csColorWidth - 4;
+      Rc.Left := Width - csBorderWidths[State] - (csArrowWidths[State] div 2) - csColorWidth + 2;
+      Rc.Top := 5;
+      Rc.Bottom := ClientRect.Bottom - 5;
+      Rc.Right := Rc.Left + csColorWidth - 4;
 
       OldColor := Brush.Color;
       Brush.Color := FDisplayColor;
-      FillRect(R);
+      FillRect(Rc);
       Brush.Color := OldColor;
     end;
 
-    if csArrowWidths[State] > 0 then  // 画箭头
+    // 画下拉箭头
+    if csArrowWidths[State] > 0 then
     begin
       Pen.Color := csArrowColor;
       X := Width - csBorderWidths[State] - csArrowWidths[State] div 2;
