@@ -28,7 +28,9 @@ unit CnComponentSelector;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串支持本地化处理方式
-* 修改记录：2003.04.16 V1.2
+* 修改记录：2021.07.27 V1.3
+*               增加一独立函数可供调用以返回选择控件
+*           2003.04.16 V1.2
 *               修正切换 Tag 范围类型为“介于”时，第二个 SpinEdit 不能显示的错误
 *           2003.03.12 V1.1
 *               修正不支持默认排序的问题
@@ -51,8 +53,8 @@ uses
   {$ELSE}
   DsgnIntf,
   {$ENDIF}
-  ActnList, TypInfo, CnConsts, CnWizClasses, CnWizConsts, CnWizUtils, CnCommon,
-  CnSpin, CnWizOptions, CnWizMultiLang;
+  ActnList, TypInfo, Contnrs, CnConsts, CnWizClasses, CnWizConsts, CnWizUtils,
+  CnCommon, CnSpin, CnWizOptions, CnWizMultiLang, CnWizManager;
 
 type
 
@@ -184,6 +186,9 @@ type
     procedure Execute; override;
   end;
 
+function SelectComponentsWithSelector(Selections: TComponentList): Boolean;
+{* 供外界单独调用，用来选择组件并将实例返回于 Selections 里，返回是否选择成功}
+
 {$ENDIF CNWIZARDS_CNCOMPONENTSELECTOR}
 
 implementation
@@ -220,7 +225,8 @@ procedure TCnComponentSelectorForm.FormCreate(Sender: TObject);
 begin
   FCurrList := TStringList.Create;
   InitControls;
-  LoadSettings(Ini, '');
+  if Ini <> nil then
+    LoadSettings(Ini, '');
   UpdateControls;
   UpdateList;
 end;
@@ -228,31 +234,32 @@ end;
 // 窗体释放
 procedure TCnComponentSelectorForm.FormDestroy(Sender: TObject);
 begin
-  SaveSettings(Ini, '');
+  if Ini <> nil then
+    SaveSettings(Ini, '');
   FCurrList.Free;
 end;
 
 // 确定返回选择结果
 procedure TCnComponentSelectorForm.btnOKClick(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
   if lbDest.Items.Count > 0 then       // 选择列表不为空
   begin
-    for i := 0 to lbDest.Items.Count - 1 do
+    for I := 0 to lbDest.Items.Count - 1 do
     {$IFDEF COMPILER6_UP}
-      DestList.Add(TComponent(lbDest.Items.Objects[i]));
+      DestList.Add(TComponent(lbDest.Items.Objects[I]));
     {$ELSE}
-      DestList.Add(MakeIPersistent(TComponent(lbDest.Items.Objects[i])));
+      DestList.Add(MakeIPersistent(TComponent(lbDest.Items.Objects[I])));
     {$ENDIF}
   end
   else if cbDefaultSelAll.Checked then // 无选择结果时自动返回所有内容
   begin
-    for i := 0 to lbSource.Items.Count - 1 do
+    for I := 0 to lbSource.Items.Count - 1 do
     {$IFDEF COMPILER6_UP}
-      DestList.Add(TComponent(lbSource.Items.Objects[i]));
+      DestList.Add(TComponent(lbSource.Items.Objects[I]));
     {$ELSE}
-      DestList.Add(MakeIPersistent(TComponent(lbSource.Items.Objects[i])));
+      DestList.Add(MakeIPersistent(TComponent(lbSource.Items.Objects[I])));
     {$ENDIF}
   end;
   ModalResult := mrOk;
@@ -281,7 +288,7 @@ begin
   GetMem(PropList, Count * SizeOf(PPropInfo));
   try
     GetPropList(AObj.ClassInfo, [tkMethod], PropList);
-    for i := 0 to Count - 1 do
+    for I := 0 to Count - 1 do
     begin
       Value := GetMethodProp(AObj, PropList[I]);
       if Value.Code <> nil then
@@ -299,7 +306,7 @@ end;
 // 初始化控件
 procedure TCnComponentSelectorForm.InitControls;
 var
-  i: Integer;
+  I: Integer;
   WinControl: TWinControl;
   SelIsEmpty: Boolean;
   Component: TComponent;
@@ -307,12 +314,12 @@ var
 begin
   // 检查当前选择的组件列表是否包含子控件
   SelIsEmpty := True;
-  for i := 0 to SourceList.Count - 1 do
+  for I := 0 to SourceList.Count - 1 do
   begin
   {$IFDEF COMPILER6_UP}
-    Component := TComponent(SourceList[i]);
+    Component := TComponent(SourceList[I]);
   {$ELSE}
-    Component := TryExtractComponent(SourceList[i]);
+    Component := TryExtractComponent(SourceList[I]);
   {$ENDIF}
     if Component = ContainerWindow then Break; // 选择部分包含窗体本身
     if (Component is TWinControl) and (TWinControl(Component).ControlCount > 0) then
@@ -326,11 +333,11 @@ begin
     rbCurrForm.Checked := True;
   // 初始化容器控件列表
   cbbFilterControl.Items.Clear;
-  for i := 0 to ContainerWindow.ComponentCount - 1 do
+  for I := 0 to ContainerWindow.ComponentCount - 1 do
   begin
-    if ContainerWindow.Components[i] is TControl then
+    if ContainerWindow.Components[I] is TControl then
     begin
-      WinControl := TControl(ContainerWindow.Components[i]).Parent;
+      WinControl := TControl(ContainerWindow.Components[I]).Parent;
       if (WinControl <> nil) and (WinControl <> ContainerWindow) and
         (WinControl.Name <> '') and
         (cbbFilterControl.Items.IndexOfObject(WinControl) < 0) then
@@ -340,16 +347,16 @@ begin
   rbSpecControl.Enabled := cbbFilterControl.Items.Count > 0;
   // 初始化类列表
   cbbByClass.Items.Clear;
-  for i := 0 to ContainerWindow.ComponentCount - 1 do
-    with ContainerWindow.Components[i] do
+  for I := 0 to ContainerWindow.ComponentCount - 1 do
+    with ContainerWindow.Components[I] do
       if cbbByClass.Items.IndexOf(ClassName) < 0 then
         cbbByClass.Items.AddObject(ClassName, Pointer(ClassType));
   cbbByEvent.Items.Clear;
   List := TStringList.Create;
   try
     List.Sorted := True;
-    for i := 0 to ContainerWindow.ComponentCount - 1 do
-      GetEventList(ContainerWindow.Components[i], List);
+    for I := 0 to ContainerWindow.ComponentCount - 1 do
+      GetEventList(ContainerWindow.Components[I], List);
     cbbByEvent.Items.Assign(List);
   finally
     List.Free;
@@ -359,7 +366,7 @@ end;
 // 更新当前过滤列表
 procedure TCnComponentSelectorForm.UpdateList;
 var
-  i, j: Integer;
+  I, j: Integer;
   SelStrs: TStrings;
   Component: TComponent;
   WinControl: TWinControl;
@@ -424,7 +431,7 @@ var
   procedure AddItem(AComponent: TComponent; IncludeChildren: Boolean = False);
   var
     s: string;
-    i: Integer;
+    I: Integer;
   begin
     // 判断是否匹配
     if (AComponent.Name <> '') and MatchName(AComponent.Name) and MatchClass(AComponent)
@@ -439,32 +446,32 @@ var
     // 递归增加子控件
     if IncludeChildren and (AComponent is TWinControl) then
       with TWinControl(AComponent) do
-        for i := 0 to ControlCount - 1 do
-          AddItem(Controls[i], True);
+        for I := 0 to ControlCount - 1 do
+          AddItem(Controls[I], True);
   end;
 begin
   BeginUpdateList;
   try
     SelStrs := TStringList.Create;
     try
-      for i := 0 to lbSource.Items.Count - 1 do // 保存当前已选择的列表
-        if lbSource.Selected[i] then
-          SelStrs.Add(lbSource.Items[i]);
+      for I := 0 to lbSource.Items.Count - 1 do // 保存当前已选择的列表
+        if lbSource.Selected[I] then
+          SelStrs.Add(lbSource.Items[I]);
       CurrList.Clear;
       lbSource.Clear;
       if rbCurrForm.Checked then       // 窗体上所有组件
       begin
-        for i := 0 to ContainerWindow.ComponentCount - 1 do
-          AddItem(ContainerWindow.Components[i]);
+        for I := 0 to ContainerWindow.ComponentCount - 1 do
+          AddItem(ContainerWindow.Components[I]);
       end
       else if rbCurrControl.Checked then // 当前选择控件的子控件
       begin
-        for i := 0 to SourceList.Count - 1 do
+        for I := 0 to SourceList.Count - 1 do
         begin
         {$IFDEF COMPILER6_UP}
-          Component := TComponent(SourceList[i]);
+          Component := TComponent(SourceList[I]);
         {$ELSE}
-          Component := TryExtractComponent(SourceList[i]);
+          Component := TryExtractComponent(SourceList[I]);
         {$ENDIF}
           if Component is TWinControl then
           begin
@@ -479,12 +486,12 @@ begin
         if cbbFilterControl.ItemIndex >= 0 then
         begin
           WinControl := TWinControl(cbbFilterControl.Items.Objects[cbbFilterControl.ItemIndex]);
-            for i := 0 to WinControl.ControlCount - 1 do
-              AddItem(WinControl.Controls[i], cbIncludeChildren.Checked);
+            for I := 0 to WinControl.ControlCount - 1 do
+              AddItem(WinControl.Controls[I], cbIncludeChildren.Checked);
         end;
       end;
-      for i := 0 to lbSource.Items.Count - 1 do // 恢复保存的选择列表
-        lbSource.Selected[i] := SelStrs.IndexOf(lbSource.Items[i]) >= 0;
+      for I := 0 to lbSource.Items.Count - 1 do // 恢复保存的选择列表
+        lbSource.Selected[I] := SelStrs.IndexOf(lbSource.Items[I]) >= 0;
     finally
       SelStrs.Free;
     end;
@@ -557,21 +564,21 @@ procedure DoSortListBox(ListBox: TCustomListBox);
 var
   SelStrs: TStrings;
   OrderStrs: TStrings;
-  i: Integer;
+  I: Integer;
 begin
   SelStrs := nil;
   OrderStrs := nil;
   try
     SelStrs := TStringList.Create;
     OrderStrs := TStringList.Create;
-    for i := 0 to ListBox.Items.Count - 1 do // 保存选择的条目
-      if ListBox.Selected[i] then
-        SelStrs.Add(ListBox.Items[i]);       // ListBox.Items 是 ListBoxStrings 类型
+    for I := 0 to ListBox.Items.Count - 1 do // 保存选择的条目
+      if ListBox.Selected[I] then
+        SelStrs.Add(ListBox.Items[I]);       // ListBox.Items 是 ListBoxStrings 类型
     OrderStrs.Assign(ListBox.Items);         // 不能直接排序，通过 TStringList 来进行
     TStringList(OrderStrs).CustomSort(DoSortProc);
     ListBox.Items.Assign(OrderStrs);
-    for i := 0 to ListBox.Items.Count - 1 do // 恢复选择的条目
-      ListBox.Selected[i] := SelStrs.IndexOf(ListBox.Items[i]) >= 0;
+    for I := 0 to ListBox.Items.Count - 1 do // 恢复选择的条目
+      ListBox.Selected[I] := SelStrs.IndexOf(ListBox.Items[I]) >= 0;
   finally
     if SelStrs <> nil then SelStrs.Free;
     if OrderStrs <> nil then OrderStrs.Free;
@@ -652,12 +659,12 @@ end;
 procedure TCnComponentSelectorForm.SaveSettings(Ini: TCustomIniFile;
   const Section: string);
 var
-  i: Integer;
+  I: Integer;
 begin
-  if rbCurrControl.Checked then i := 1
-  else if rbSpecControl.Checked then i := 2
-  else i := 0;
-  Ini.WriteInteger(Section, csContainerFilter, i);
+  if rbCurrControl.Checked then I := 1
+  else if rbSpecControl.Checked then I := 2
+  else I := 0;
+  Ini.WriteInteger(Section, csContainerFilter, I);
   Ini.WriteString(Section, csFilterControl, cbbFilterControl.Text);
   Ini.WriteBool(Section, csIncludeChildren, cbIncludeChildren.Checked);
   Ini.WriteBool(Section, csByName, cbByName.Checked);
@@ -751,16 +758,16 @@ end;
 // 增加选择
 procedure TCnComponentSelectorForm.actAddExecute(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
   BeginUpdateList;
   try
-    for i := 0 to lbSource.Items.Count - 1 do
-      if lbSource.Selected[i] then
-        lbDest.Items.AddObject(lbSource.Items[i], lbSource.Items.Objects[i]);
-    for i := lbSource.Items.Count - 1 downto 0 do
-      if lbSource.Selected[i] then
-        lbSource.Items.Delete(i);
+    for I := 0 to lbSource.Items.Count - 1 do
+      if lbSource.Selected[I] then
+        lbDest.Items.AddObject(lbSource.Items[I], lbSource.Items.Objects[I]);
+    for I := lbSource.Items.Count - 1 downto 0 do
+      if lbSource.Selected[I] then
+        lbSource.Items.Delete(I);
   finally
     EndUpdateList;
   end;
@@ -781,16 +788,16 @@ end;
 // 删除选择
 procedure TCnComponentSelectorForm.actDeleteExecute(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
   BeginUpdateList;
   try
-    for i := 0 to lbDest.Items.Count - 1 do // 只有当前过滤列表中有的才加入到左边
-      if lbDest.Selected[i] and (CurrList.IndexOf(lbDest.Items[i]) >= 0) then
-        lbSource.Items.AddObject(lbDest.Items[i], lbDest.Items.Objects[i]);
-    for i := lbDest.Items.Count - 1 downto 0 do
-      if lbDest.Selected[i] then
-        lbDest.Items.Delete(i);
+    for I := 0 to lbDest.Items.Count - 1 do // 只有当前过滤列表中有的才加入到左边
+      if lbDest.Selected[I] and (CurrList.IndexOf(lbDest.Items[I]) >= 0) then
+        lbSource.Items.AddObject(lbDest.Items[I], lbDest.Items.Objects[I]);
+    for I := lbDest.Items.Count - 1 downto 0 do
+      if lbDest.Selected[I] then
+        lbDest.Items.Delete(I);
   finally
     UpdateSourceOrders;
     EndUpdateList;
@@ -800,13 +807,13 @@ end;
 // 删除全部选择
 procedure TCnComponentSelectorForm.actDeleteAllExecute(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
   BeginUpdateList;
   try
-    for i := 0 to lbDest.Items.Count - 1 do // 只有当前过滤列表中有的才加入到左边
-      if CurrList.IndexOf(lbDest.Items[i]) >= 0 then
-        lbSource.Items.AddObject(lbDest.Items[i], lbDest.Items.Objects[i]);
+    for I := 0 to lbDest.Items.Count - 1 do // 只有当前过滤列表中有的才加入到左边
+      if CurrList.IndexOf(lbDest.Items[I]) >= 0 then
+        lbSource.Items.AddObject(lbDest.Items[I], lbDest.Items.Objects[I]);
     lbDest.Items.Clear;
   finally
     UpdateSourceOrders;
@@ -817,42 +824,42 @@ end;
 // 选择全部
 procedure TCnComponentSelectorForm.actSelAllExecute(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to lbSource.Items.Count - 1 do
-    lbSource.Selected[i] := True;
+  for I := 0 to lbSource.Items.Count - 1 do
+    lbSource.Selected[I] := True;
 end;
 
 // 取消选择
 procedure TCnComponentSelectorForm.actSelNoneExecute(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to lbSource.Items.Count - 1 do
-    lbSource.Selected[i] := False;
+  for I := 0 to lbSource.Items.Count - 1 do
+    lbSource.Selected[I] := False;
 end;
 
 // 反转选择
 procedure TCnComponentSelectorForm.actSelInvertExecute(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to lbSource.Items.Count - 1 do
-    lbSource.Selected[i] := not lbSource.Selected[i];
+  for I := 0 to lbSource.Items.Count - 1 do
+    lbSource.Selected[I] := not lbSource.Selected[I];
 end;
 
 // 移动到顶部
 procedure TCnComponentSelectorForm.actMoveToTopExecute(Sender: TObject);
 var
-  i, j: Integer;
+  I, j: Integer;
 begin
   BeginUpdateList;
   try
     j := 0;
-    for i := 0 to lbDest.Items.Count - 1 do
-      if lbDest.Selected[i] then
+    for I := 0 to lbDest.Items.Count - 1 do
+      if lbDest.Selected[I] then
       begin
-        lbDest.Items.Move(i, j);
+        lbDest.Items.Move(I, j);
         lbDest.Selected[j] := True;
         Inc(j);
       end;
@@ -864,15 +871,15 @@ end;
 // 移动到底部
 procedure TCnComponentSelectorForm.actMoveToBottomExecute(Sender: TObject);
 var
-  i, j: Integer;
+  I, j: Integer;
 begin
   BeginUpdateList;
   try
     j := lbDest.Items.Count - 1;
-    for i := lbDest.Items.Count - 1 downto 0 do
-      if lbDest.Selected[i] then
+    for I := lbDest.Items.Count - 1 downto 0 do
+      if lbDest.Selected[I] then
       begin
-        lbDest.Items.Move(i, j);
+        lbDest.Items.Move(I, j);
         lbDest.Selected[j] := True;
         Dec(j);
       end;
@@ -884,15 +891,15 @@ end;
 // 上移一格
 procedure TCnComponentSelectorForm.actMoveUpExecute(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
   BeginUpdateList;
   try
-    for i := 1 to lbDest.Items.Count - 1 do
-      if lbDest.Selected[i] and not lbDest.Selected[i - 1] then
+    for I := 1 to lbDest.Items.Count - 1 do
+      if lbDest.Selected[I] and not lbDest.Selected[I - 1] then
       begin
-        lbDest.Items.Move(i, i - 1);
-        lbDest.Selected[i - 1] := True;
+        lbDest.Items.Move(I, I - 1);
+        lbDest.Selected[I - 1] := True;
       end;
   finally
     EndUpdateList;
@@ -902,18 +909,79 @@ end;
 // 下移一格
 procedure TCnComponentSelectorForm.actMoveDownExecute(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
   BeginUpdateList;
   try
-    for i := lbDest.Items.Count - 2 downto 0 do
-      if lbDest.Selected[i] and not lbDest.Selected[i + 1] then
+    for I := lbDest.Items.Count - 2 downto 0 do
+      if lbDest.Selected[I] and not lbDest.Selected[I + 1] then
       begin
-        lbDest.Items.Move(i, i + 1);
-        lbDest.Selected[i + 1] := True;
+        lbDest.Items.Move(I, I + 1);
+        lbDest.Selected[I + 1] := True;
       end;
   finally
     EndUpdateList;
+  end;
+end;
+
+// 供外界单独调用，用来选择组件并将实例返回于 Selections 里，返回是否选择成功
+function SelectComponentsWithSelector(Selections: TComponentList): Boolean;
+var
+  Ini: TCustomIniFile;
+  Root: TComponent;
+  FormDesigner: IDesigner;
+  SourceList, DestList: IDesignerSelections;
+  I: Integer;
+  Component: TComponent;
+  Wizard: TCnComponentSelector;
+begin
+  Result := False;
+  FormDesigner := CnOtaGetFormDesigner;
+  if FormDesigner = nil then
+    Exit;
+
+  Wizard := TCnComponentSelector(CnWizardMgr.WizardByClass(TCnComponentSelector));
+  if Wizard <> nil then
+    Ini := Wizard.CreateIniFile
+  else
+    Ini := nil;
+
+  try
+    Root := CnOtaGetRootComponentFromEditor(CnOtaGetCurrentFormEditor);
+{$IFDEF DEBUG}
+    if Root <> nil then
+      CnDebugger.LogFmt('SelectComponents GetRoot %s: %s', [Root.ClassName, Root.Name]);
+    CnDebugger.LogFmt('SelectComponents Root Class: %s', [FormDesigner.GetRootClassName]);
+{$ENDIF}
+
+    SourceList := CreateSelectionList;
+    DestList := CreateSelectionList;
+    // FormDesigner.GetSelections(SourceList); // 手工选择时无需提前拎出被选择控件
+
+    with TCnComponentSelectorForm.CreateEx(nil, Ini, SourceList, DestList,
+      TWinControl(Root)) do
+    try
+      ShowHint := WizOptions.ShowHint;
+      if ShowModal = mrOK then
+      begin
+        Selections.Clear;
+
+        for I := 0 to DestList.Count - 1 do
+        begin
+{$IFDEF COMPILER6_UP}
+          Component := TComponent(DestList[I]);
+{$ELSE}
+          Component := TryExtractComponent(DestList[I]);
+{$ENDIF}
+          Selections.Add(Component);
+        end;
+        Result := Selections.Count > 0;
+      end;
+    finally
+      Free;
+    end;
+  finally
+    Ini.Free;
   end;
 end;
 
@@ -933,19 +1001,20 @@ var
 begin
   if not Active and not Action.Enabled then
     Exit;
-    
+
   Ini := CreateIniFile;
   try
     Root := CnOtaGetRootComponentFromEditor(CnOtaGetCurrentFormEditor);
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('%s: %s', [Root.ClassName, Root.Name]);
+    if Root <> nil then
+      CnDebugger.LogFmt('ComponentSelector GetRoot %s: %s', [Root.ClassName, Root.Name]);
 {$ENDIF}
 
     FormDesigner := CnOtaGetFormDesigner;
     if FormDesigner = nil then Exit;
 
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('Root Class: %s', [FormDesigner.GetRootClassName]);
+    CnDebugger.LogFmt('ComponentSelector Root Class: %s', [FormDesigner.GetRootClassName]);
 {$ENDIF}
 
     SourceList := CreateSelectionList;
