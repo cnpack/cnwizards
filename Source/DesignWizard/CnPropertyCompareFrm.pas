@@ -40,9 +40,9 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, Contnrs,
   TypInfo, CnConsts, CnWizConsts, CnWizMultiLang, CnPropSheetFrm, {$IFNDEF STAND_ALONE}
-  CnWizClasses, CnWizUtils, CnWizIdeUtils, CnWizManager, {$ENDIF}
+  CnWizClasses, CnWizUtils, CnWizIdeUtils, CnWizManager, CnComponentSelector, {$ENDIF}
   {$IFDEF SUPPORT_ENHANCED_RTTI} Rtti, {$ENDIF}
-  StdCtrls, ComCtrls, ToolWin, Menus, ExtCtrls;
+  StdCtrls, ComCtrls, ToolWin, Menus, ExtCtrls, ActnList, CommCtrl;
 
 const
   WM_SYNC_SELECT = WM_USER + $30;
@@ -125,10 +125,24 @@ type
     pbPos: TPaintBox;
     lvLeft: TListView;
     lvRight: TListView;
+    actlstPropertyCompare: TActionList;
+    actExit: TAction;
+    actSelectLeft: TAction;
+    actSelectRight: TAction;
+    actPropertyToRight: TAction;
+    actPropertyToLeft: TAction;
+    pmListView: TPopupMenu;
+    actRefresh: TAction;
+    actPrevDiff: TAction;
+    actNextDiff: TAction;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure ListViewChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
+    procedure lvCustomDrawItem(Sender: TCustomListView;
+      Item: TListItem; State: TCustomDrawState; var DefaultDraw: Boolean);
+    procedure actSelectLeftExecute(Sender: TObject);
+    procedure actSelectRightExecute(Sender: TObject);
   private
     FLeftComponet: TComponent;
     FRightComponent: TComponent;
@@ -158,6 +172,9 @@ uses
   CnDebug;
 {$ENDIF}
 
+const
+  LIST_LEFT_MARGIN = 8;
+
 function PropInfoName(PropInfo: PPropInfo): string;
 begin
   Result := string(PropInfo^.Name);
@@ -175,6 +192,55 @@ begin
     CompareForm.LoadProperties;
     CompareForm.ShowProperties;
     CompareForm.Show;
+  end;
+end;
+
+procedure DrawTinyDotLine(Canvas: TCanvas; X1, X2, Y1, Y2: Integer);
+var
+  XStep, YStep, I: Integer;
+begin
+  with Canvas do
+  begin
+    if X1 = X2 then
+    begin
+      YStep := Abs(Y2 - Y1) div 2; // Y 方向总步数，正值
+      if Y1 < Y2 then
+      begin
+        for I := 0 to YStep - 1 do
+        begin
+          MoveTo(X1, Y1 + (2 * I + 1));
+          LineTo(X1, Y1 + (2 * I + 2));
+        end;
+      end
+      else
+      begin
+        for I := 0 to YStep - 1 do
+        begin
+          MoveTo(X1, Y1 - (2 * I + 1));
+          LineTo(X1, Y1 - (2 * I + 2));
+        end;
+      end;
+    end
+    else if Y1 = Y2 then
+    begin
+      XStep := Abs(X2 - X1) div 2; // X 方向总步数
+      if X1 < X2 then
+      begin
+        for I := 0 to XStep - 1 do
+        begin
+          MoveTo(X1 + (2 * I + 1), Y1);
+          LineTo(X1 + (2 * I + 2), Y1);
+        end;
+      end
+      else
+      begin
+        for I := 0 to XStep - 1 do
+        begin
+          MoveTo(X1 - (2 * I + 1), Y1);
+          LineTo(X1 - (2 * I + 2), Y1);
+        end;
+      end;
+    end;
   end;
 end;
 
@@ -429,6 +495,9 @@ procedure TCnPropertyCompareForm.FormCreate(Sender: TObject);
 begin
   FLeftProperties := TObjectList.Create(True);
   FRightProperties := TObjectList.Create(True);
+
+  ShowScrollBar(lvLeft.Handle, SB_BOTH, False);
+  ShowScrollBar(lvRight.Handle, SB_BOTH, False);
 end;
 
 procedure TCnPropertyCompareForm.LoadProperty(List: TObjectList;
@@ -730,6 +799,135 @@ begin
       Result := True;
       Exit;
     end;
+  end;
+end;
+
+procedure TCnPropertyCompareForm.lvCustomDrawItem(
+  Sender: TCustomListView; Item: TListItem; State: TCustomDrawState;
+  var DefaultDraw: Boolean);
+var
+  R: TRect;
+  LV: TListView;
+  I, BmpLeft, BmpTop: Integer;
+  S: string;
+  Bmp: TBitmap;
+begin
+  LV := Sender as TListView;
+  R := Item.DisplayRect(drBounds);
+  BmpLeft := R.Left;
+  BmpTop := R.Top;
+
+  Bmp := TBitmap.Create;
+  try
+    Bmp.PixelFormat := pf24bit;
+    Bmp.Width := R.Right - R.Left;
+    Bmp.Height := R.Bottom - R.Top;
+    Bmp.Canvas.Brush.Style := bsSolid;
+
+    // 填充背景
+    Bmp.Canvas.FillRect(Rect(0, 0, Bmp.Width, Bmp.Height - 1));
+    Bmp.Canvas.Brush.Color := clBtnFace;
+    R := Item.DisplayRect(drLabel);
+    Bmp.Canvas.FillRect(Rect(0, 0, R.Right - R.Left, R.Bottom - R.Top));
+
+    // 输出文字
+    Bmp.Canvas.Font.Assign(LV.Font);
+    Bmp.Canvas.TextOut(LIST_LEFT_MARGIN, 0, Item.Caption);
+
+    // 画点分隔线
+    Bmp.Canvas.Pen.Color := clBtnText;
+    Bmp.Canvas.Pen.Style := psSolid;
+
+    DrawTinyDotLine(Bmp.Canvas, 0, Bmp.Width, Bmp.Height - 1, Bmp.Height - 1);
+
+    // 画竖线
+    R := Item.DisplayRect(drLabel);
+    I := R.Right - R.Left;
+    Bmp.Canvas.MoveTo(I, 0);
+    Bmp.Canvas.LineTo(I, Bmp.Height);
+    Bmp.Canvas.Pen.Color := clWhite;
+    Bmp.Canvas.MoveTo(I + 1, 0);
+    Bmp.Canvas.LineTo(I + 1, Bmp.Height);
+
+    // 绘制 SubItem 其它列
+    Bmp.Canvas.Brush.Color := clWhite; // 根据比对，设置不同色
+    for I := 0 to Item.SubItems.Count - 1 do
+    begin
+      ListView_GetSubItemRect(LV.Handle, Item.Index, I + 1, LVIR_BOUNDS, @R);
+
+      R.Bottom := R.Bottom - R.Top - 1;
+      R.Top := 0;
+      R.Left := R.Left - BmpLeft;
+      R.Right := R.Right - BmpLeft;
+
+      Bmp.Canvas.Brush.Style := bsSolid;
+      Bmp.Canvas.FillRect(R);
+
+      S := Item.SubItems[I];
+      if S <> '' then
+      begin
+        Bmp.Canvas.Brush.Style := bsClear;
+        Bmp.Canvas.TextOut(R.Left + LIST_LEFT_MARGIN, R.Top, S);
+      end;
+    end;
+
+    BitBlt(LV.Canvas.Handle, BmpLeft, BmpTop, Bmp.Width, Bmp.Height,
+        Bmp.Canvas.Handle, 0, 0, SRCCOPY);
+  finally
+    Bmp.Free;
+  end;
+  DefaultDraw := False;
+end;
+
+procedure TCnPropertyCompareForm.actSelectLeftExecute(Sender: TObject);
+var
+  List: TComponentList;
+begin
+  List := TComponentList.Create(False);
+  try
+    if SelectComponentsWithSelector(List) then
+    begin
+      if List.Count = 1 then
+        LeftComponet := List[0]
+      else if List.Count > 1 then
+      begin
+        LeftComponet := List[0];   // 选了俩或俩以上，先左后右
+        RightComponent := List[1];
+      end
+      else
+        Exit;
+
+      LoadProperties;
+      ShowProperties;
+    end;
+  finally
+    List.Free;
+  end;
+end;
+
+procedure TCnPropertyCompareForm.actSelectRightExecute(Sender: TObject);
+var
+  List: TComponentList;
+begin
+  List := TComponentList.Create(False);
+  try
+    if SelectComponentsWithSelector(List) then
+    begin
+      if List.Count = 1 then
+        RightComponent := List[0]
+      else if List.Count > 1 then
+      begin
+        RightComponent := List[0];  // 选了俩或俩以上，先右后左
+        LeftComponet := List[1];
+      end
+      else
+        Exit;
+
+      LoadProperties;
+      ShowProperties;
+    end;
+  finally
+    List.Free;
   end;
 end;
 

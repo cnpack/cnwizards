@@ -1,12 +1,11 @@
 inherited CnPropertyCompareForm: TCnPropertyCompareForm
   Left = 246
-  Top = 112
+  Top = 70
   Width = 970
   Height = 665
   Caption = 'Compare Properties'
   Font.Name = 'MS Sans Serif'
   Menu = mmMain
-  OldCreateOrder = True
   OnCreate = FormCreate
   OnResize = FormResize
   PixelsPerInch = 96
@@ -65,13 +64,16 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
             AutoSize = True
             Caption = 'Values'
           end>
-        GridLines = True
+        FlatScrollBars = True
         HideSelection = False
+        OwnerDraw = True
         ReadOnly = True
         RowSelect = True
+        ShowColumnHeaders = False
         TabOrder = 0
         ViewStyle = vsReport
         OnChange = ListViewChange
+        OnCustomDrawItem = lvCustomDrawItem
       end
     end
     object pnlRight: TPanel
@@ -97,13 +99,15 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
             AutoSize = True
             Caption = 'Values'
           end>
-        GridLines = True
         HideSelection = False
+        OwnerDraw = True
         ReadOnly = True
         RowSelect = True
+        ShowColumnHeaders = False
         TabOrder = 0
         ViewStyle = vsReport
         OnChange = ListViewChange
+        OnCustomDrawItem = lvCustomDrawItem
       end
     end
     object pnlDisplay: TPanel
@@ -145,5 +149,39 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
         Caption = '&Exit'
       end
     end
+  end
+  object actlstPropertyCompare: TActionList
+    Left = 32
+    Top = 501
+    object actExit: TAction
+      Caption = 'actExit'
+    end
+    object actSelectLeft: TAction
+      Caption = 'actSelectLeft'
+      OnExecute = actSelectLeftExecute
+    end
+    object actSelectRight: TAction
+      Caption = 'actSelectRight'
+      OnExecute = actSelectRightExecute
+    end
+    object actPropertyToRight: TAction
+      Caption = 'actPropertyToRight'
+    end
+    object actPropertyToLeft: TAction
+      Caption = 'actPropertyToLeft'
+    end
+    object actRefresh: TAction
+      Caption = 'actRefresh'
+    end
+    object actPrevDiff: TAction
+      Caption = 'actPrevDiff'
+    end
+    object actNextDiff: TAction
+      Caption = 'actNextDiff'
+    end
+  end
+  object pmListView: TPopupMenu
+    Left = 128
+    Top = 501
   end
 end
