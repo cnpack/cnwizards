@@ -1071,7 +1071,15 @@ begin
     '$':
       begin
         Inc(P);
-        while P^ in ['0'..'9', 'A'..'F', 'a'..'f'] do
+        while P^ in ['0'..'9', 'A'..'F', 'a'..'f', '_'] do  // D11 新增 _ 代替分节号
+          Inc(P);
+        Result := tokInteger;
+      end;
+
+    '%':  // D11 新增二进制语法 %100001 这种，以及 _ 代替分节号
+      begin
+        Inc(P);
+        while P^ in ['0', '1', '-'] do
           Inc(P);
         Result := tokInteger;
       end;
@@ -1355,7 +1363,7 @@ begin
         else
         begin
           Inc(P);
-          while P^ in ['0'..'9'] do Inc(P);
+          while P^ in ['0'..'9', '_'] do Inc(P); // D11 新增 _ 代替分节号
           Result := tokInteger;
         end;
 
@@ -1364,7 +1372,7 @@ begin
           OldP := P;
           Inc(P);
           FloatCount := 0;
-          while P^ in ['0'..'9'] do
+          while P^ in ['0'..'9', '_'] do // D11 新增 _ 代替分节号
           begin
             Inc(FloatCount);
             Inc(P);
