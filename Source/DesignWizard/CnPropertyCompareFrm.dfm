@@ -49,31 +49,23 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       Align = alLeft
       BevelOuter = bvNone
       TabOrder = 0
-      object lvLeft: TListView
+      OnResize = pnlResize
+      object gridLeft: TStringGrid
         Left = 0
         Top = 0
         Width = 465
         Height = 590
         Align = alClient
-        Columns = <
-          item
-            Caption = 'Properties'
-            Width = 120
-          end
-          item
-            AutoSize = True
-            Caption = 'Values'
-          end>
-        FlatScrollBars = True
-        HideSelection = False
-        OwnerDraw = True
-        ReadOnly = True
-        RowSelect = True
-        ShowColumnHeaders = False
+        ColCount = 2
+        DefaultRowHeight = 18
+        DefaultDrawing = False
+        FixedRows = 0
+        Options = [goColSizing, goRowSelect]
+        ScrollBars = ssVertical
         TabOrder = 0
-        ViewStyle = vsReport
-        OnChange = ListViewChange
-        OnCustomDrawItem = lvCustomDrawItem
+        OnDrawCell = gridDrawCell
+        OnSelectCell = gridSelectCell
+        OnTopLeftChanged = gridTopLeftChanged
       end
     end
     object pnlRight: TPanel
@@ -84,30 +76,23 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 1
-      object lvRight: TListView
+      OnResize = pnlResize
+      object gridRight: TStringGrid
         Left = 0
         Top = 0
         Width = 475
         Height = 590
         Align = alClient
-        Columns = <
-          item
-            Caption = 'Properties'
-            Width = 120
-          end
-          item
-            AutoSize = True
-            Caption = 'Values'
-          end>
-        HideSelection = False
-        OwnerDraw = True
-        ReadOnly = True
-        RowSelect = True
-        ShowColumnHeaders = False
+        ColCount = 2
+        DefaultRowHeight = 18
+        DefaultDrawing = False
+        FixedRows = 0
+        Options = [goColSizing, goRowSelect]
+        ScrollBars = ssVertical
         TabOrder = 0
-        ViewStyle = vsReport
-        OnChange = ListViewChange
-        OnCustomDrawItem = lvCustomDrawItem
+        OnDrawCell = gridDrawCell
+        OnSelectCell = gridSelectCell
+        OnTopLeftChanged = gridTopLeftChanged
       end
     end
     object pnlDisplay: TPanel

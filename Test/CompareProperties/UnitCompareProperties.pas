@@ -31,7 +31,7 @@ uses
 
 procedure TFormTestCompare.btnCompareClick(Sender: TObject);
 begin
-  CompareTwoComponents(Button1, CheckBox1);
+  CompareTwoObjects(Button1, CheckBox1);
 end;
 
 end.
