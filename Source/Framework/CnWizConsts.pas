@@ -911,7 +911,7 @@ var
   SCnSourceDiffUpdateFile: string = '&Refresh Current File';
   SCnDiskFile: string = 'File';
   SCnEditorBuff: string = 'Mem';
-  SCnBakFile: string = 'Bak';
+  SCnBackupFile: string = 'Backup';
 
   // CnStatWizard
   SCnStatWizardMenuCaption: string = 'So&urce Statistics...';

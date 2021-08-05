@@ -882,7 +882,7 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
       RadioItem = True
       OnClick = pmiDiskFile1Click
     end
-    object pmiBakFile1: TMenuItem
+    object pmiBackupFile1: TMenuItem
       Tag = 2
       Caption = '&Backup File'
       RadioItem = True
@@ -918,7 +918,7 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
       RadioItem = True
       OnClick = pmiDiskFile2Click
     end
-    object pmiBakFile2: TMenuItem
+    object pmiBackupFile2: TMenuItem
       Tag = 2
       Caption = '&Backup File'
       RadioItem = True

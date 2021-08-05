@@ -588,7 +588,7 @@ begin
   TranslateStr(SCnSourceDiffUpdateFile, 'SCnSourceDiffUpdateFile');
   TranslateStr(SCnDiskFile, 'SCnDiskFile');
   TranslateStr(SCnEditorBuff, 'SCnEditorBuff');
-  TranslateStr(SCnBakFile, 'SCnBakFile');
+  TranslateStr(SCnBackupFile, 'SCnBackupFile');
   
   // CnStatWizard
   TranslateStr(SCnStatWizardMenuCaption, 'SCnStatWizardMenuCaption');
