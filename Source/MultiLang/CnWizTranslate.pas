@@ -895,6 +895,11 @@ begin
   TranslateStr(SCnNonNonVisualNotSupport, 'SCnNonNonVisualNotSupport');
   TranslateStr(SCnSpacePrompt, 'SCnSpacePrompt');
   TranslateStr(SCnMustDigital, 'SCnMustDigital');
+  TranslateStr(SCnPropertyCompareSelectCaptionFmt, 'SCnPropertyCompareSelectCaptionFmt');
+  TranslateStr(SCnPropertyCompareToComponentsFmt, 'SCnPropertyCompareToComponentsFmt');
+  TranslateStr(SCnPropertyCompareTwoComponentsFmt, 'SCnPropertyCompareTwoComponentsFmt');
+  TranslateStr(SCnPropertyCompareNoPrevDiff, 'SCnPropertyCompareNoPrevDiff');
+  TranslateStr(SCnPropertyCompareNoNextDiff, 'SCnPropertyCompareNoNextDiff');
 
   // CnPaletteEnhanceWizard
   TranslateStr(SCnPaletteEnhanceWizardName, 'SCnPaletteEnhanceWizardName');

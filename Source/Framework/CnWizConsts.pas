@@ -1214,6 +1214,8 @@ var
   SCnPropertyCompareSelectCaptionFmt: string = 'Select %s:%s to Compare';
   SCnPropertyCompareToComponentsFmt: string = 'Compare to %s:%s';
   SCnPropertyCompareTwoComponentsFmt: string = 'Compare %s:%s with %s:%s';
+  SCnPropertyCompareNoPrevDiff: string = 'NO Previous Different Property.';
+  SCnPropertyCompareNoNextDiff: string = 'NO Next Different Property.';
 
   // CnPaletteEnhanceWizard
   SCnPaletteEnhanceWizardName: string = 'IDE Main Form Enhancements';

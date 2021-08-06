@@ -39,12 +39,12 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, Contnrs,
-  TypInfo, CnConsts, CnWizConsts, CnWizMultiLang, CnPropSheetFrm, CnWizShareImages,
+  TypInfo, StdCtrls, ComCtrls, ToolWin, Menus, ExtCtrls, ActnList, CommCtrl, Grids,
   {$IFNDEF STAND_ALONE}
   CnWizClasses, CnWizUtils, CnWizIdeUtils, CnWizManager, CnComponentSelector,
   {$ENDIF}
   {$IFDEF SUPPORT_ENHANCED_RTTI} Rtti, {$ENDIF}
-  StdCtrls, ComCtrls, ToolWin, Menus, ExtCtrls, ActnList, CommCtrl, Grids;
+  CnConsts, CnWizConsts, CnWizMultiLang, CnCommon, CnPropSheetFrm, CnWizShareImages;
 
 const
   WM_SYNC_SELECT = WM_USER + $30;
@@ -178,6 +178,10 @@ type
     btnNextDiff: TToolButton;
     btn3: TToolButton;
     btnHelp: TToolButton;
+    actOptions: TAction;
+    N2: TMenuItem;
+    Options1: TMenuItem;
+    btnOptions: TToolButton;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure actSelectLeftExecute(Sender: TObject);
@@ -193,6 +197,13 @@ type
     procedure actNewCompareExecute(Sender: TObject);
     procedure actPropertyToRightExecute(Sender: TObject);
     procedure actPropertyToLeftExecute(Sender: TObject);
+    procedure actlstPropertyCompareUpdate(Action: TBasicAction;
+      var Handled: Boolean);
+    procedure actPrevDiffExecute(Sender: TObject);
+    procedure actNextDiffExecute(Sender: TObject);
+    procedure gridDblClick(Sender: TObject);
+    procedure actCompareObjPropExecute(Sender: TObject);
+    procedure actHelpExecute(Sender: TObject);
   private
     FLeftObject: TObject;
     FRightObject: TObject;
@@ -202,8 +213,10 @@ type
     procedure TransferProperty(PFrom, PTo: TCnDiffPropertyObject; FromObj, ToObj: TObject);
     procedure SelectGridRow(Grid: TStringGrid; ARow: Integer);
     procedure LoadProperty(List: TObjectList; AObject: TObject);
-    procedure MakeAlignList;
-    procedure MakeSingleMarks;
+    procedure MakeAlignList;   // 两组属性互相对齐，中间插入空白
+    procedure MakeSingleMarks; // 给两组属性标注对方是否为空
+    procedure GetGridSelectObjects(var SelectLeft, SelectRight: Integer;
+      var LeftObj, RightObj: TCnDiffPropertyObject);
     procedure OnSyncSelect(var Msg: TMessage); message WM_SYNC_SELECT;
   public
     procedure LoadProperties;
@@ -785,6 +798,18 @@ begin
 
       Inc(R);
     end;
+
+    // 尾部不等的话，补上
+    if FLeftProperties.Count > FRightProperties.Count then
+    begin
+      for L := 0 to FLeftProperties.Count - FRightProperties.Count - 1 do
+        FRightProperties.Add(nil);
+    end
+    else if FRightProperties.Count > FLeftProperties.Count then
+    begin
+      for L := 0 to FRightProperties.Count - FLeftProperties.Count - 1 do
+        FLeftProperties.Add(nil);
+    end;
   finally
     Merge.Free;
   end;
@@ -1204,6 +1229,125 @@ begin
   Sel.Right := Grid.ColCount - 1;
 
   Grid.Selection := Sel;
+
+  // 滚到 ARow 可见
+  if ARow < Grid.TopRow then
+    Grid.TopRow := ARow
+  else if ARow > (Grid.TopRow + Grid.VisibleRowCount - 1) then
+    Grid.TopRow := ARow - Grid.VisibleRowCount + 1;
+end;
+
+procedure TCnPropertyCompareForm.actlstPropertyCompareUpdate(
+  Action: TBasicAction; var Handled: Boolean);
+var
+  Sl, Sr: Integer;
+  Pl, Pr: TCnDiffPropertyObject;
+begin
+  GetGridSelectObjects(Sl, Sr, Pl, Pr);
+
+  if Action = actPropertyToLeft then
+    (Action as TCustomAction).Enabled := (Pr <> nil) and not Pr.IsSingle
+  else if Action = actPropertyToRight then
+    (Action as TCustomAction).Enabled := (Pl <> nil) and not Pl.IsSingle
+  else if Action = actCompareObjProp then
+    (Action as TCustomAction).Enabled := (Pl <> nil) and Pl.IsObjOrIntf
+     and (Pr <> nil) and Pr.IsObjOrIntf and ((Pl.ObjValue <> nil) or (Pr.ObjValue <> nil));
+end;
+
+procedure TCnPropertyCompareForm.actPrevDiffExecute(Sender: TObject);
+var
+  I, Sl, Sr: Integer;
+  Pl, Pr: TCnDiffPropertyObject;
+begin
+  GetGridSelectObjects(Sl, Sr, Pl, Pr);
+
+  if (Sl > 0) and (Sr > 0) then
+  begin
+    for I := Sl - 1 downto 0 do
+    begin
+      Pl := TCnDiffPropertyObject(FLeftProperties[I]);
+      Pr := TCnDiffPropertyObject(FRightProperties[I]);
+      if (Pl <> nil) and (Pr <> nil) then
+      begin
+        if Pl.DisplayValue <> Pr.DisplayValue then
+        begin
+          SelectGridRow(gridLeft, I);
+          SelectGridRow(gridRight, I);
+          Exit;
+        end;
+      end;
+    end;
+  end;
+
+  ErrorDlg(SCnPropertyCompareNoPrevDiff);
+end;
+
+procedure TCnPropertyCompareForm.GetGridSelectObjects(var SelectLeft,
+  SelectRight: Integer; var LeftObj, RightObj: TCnDiffPropertyObject);
+begin
+  SelectLeft := gridLeft.Selection.Top;
+  SelectRight := gridRight.Selection.Top;
+
+  if (SelectLeft >= 0) and (SelectLeft < FLeftProperties.Count) then
+    LeftObj := TCnDiffPropertyObject(FLeftProperties[SelectLeft])
+  else
+    LeftObj := nil;
+
+  if (SelectRight >= 0) and (SelectRight < FRightProperties.Count) then
+    RightObj := TCnDiffPropertyObject(FRightProperties[SelectRight])
+  else
+    RightObj := nil;
+end;
+
+procedure TCnPropertyCompareForm.actNextDiffExecute(Sender: TObject);
+var
+  I, Sl, Sr: Integer;
+  Pl, Pr: TCnDiffPropertyObject;
+begin
+  GetGridSelectObjects(Sl, Sr, Pl, Pr);
+
+  if (Sl < FLeftProperties.Count) and (Sr < FRightProperties.Count) then
+  begin
+    for I := Sl + 1 to FLeftProperties.Count - 1 do
+    begin
+      Pl := TCnDiffPropertyObject(FLeftProperties[I]);
+      Pr := TCnDiffPropertyObject(FRightProperties[I]);
+      if (Pl <> nil) and (Pr <> nil) then
+      begin
+        if Pl.DisplayValue <> Pr.DisplayValue then
+        begin
+          SelectGridRow(gridLeft, I);
+          SelectGridRow(gridRight, I);
+          Exit;
+        end;
+      end;
+    end;
+  end;
+
+  ErrorDlg(SCnPropertyCompareNoNextDiff);
+end;
+
+procedure TCnPropertyCompareForm.gridDblClick(Sender: TObject);
+begin
+  actCompareObjProp.Execute;
+end;
+
+procedure TCnPropertyCompareForm.actCompareObjPropExecute(Sender: TObject);
+var
+  Sl, Sr: Integer;
+  Pl, Pr: TCnDiffPropertyObject;
+begin
+  GetGridSelectObjects(Sl, Sr, Pl, Pr);
+  if (Pl <> nil) and (Pr <> nil) then
+  begin
+    if Pl.IsObjOrIntf and Pr.IsObjOrIntf then
+      CompareTwoObjects(Pl.ObjValue, Pr.ObjValue);
+  end;
+end;
+
+procedure TCnPropertyCompareForm.actHelpExecute(Sender: TObject);
+begin
+  ShowFormHelp;
 end;
 
 end.

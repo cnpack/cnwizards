@@ -31,8 +31,13 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       Top = 0
       Action = actRefresh
     end
-    object btn1: TToolButton
+    object btnOptions: TToolButton
       Left = 46
+      Top = 0
+      Action = actOptions
+    end
+    object btn1: TToolButton
+      Left = 69
       Top = 0
       Width = 8
       Caption = 'btn1'
@@ -40,17 +45,17 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       Style = tbsSeparator
     end
     object btnSelectLeft: TToolButton
-      Left = 54
+      Left = 77
       Top = 0
       Action = actSelectLeft
     end
     object btnSelectRight: TToolButton
-      Left = 77
+      Left = 100
       Top = 0
       Action = actSelectRight
     end
     object btn2: TToolButton
-      Left = 100
+      Left = 123
       Top = 0
       Width = 8
       Caption = 'btn2'
@@ -58,27 +63,27 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       Style = tbsSeparator
     end
     object btnPropertyToLeft: TToolButton
-      Left = 108
+      Left = 131
       Top = 0
       Action = actPropertyToLeft
     end
     object btnPropertyToRight: TToolButton
-      Left = 131
+      Left = 154
       Top = 0
       Action = actPropertyToRight
     end
     object btnAllToLeft: TToolButton
-      Left = 154
+      Left = 177
       Top = 0
       Action = actAllToLeft
     end
     object btnAllToRight: TToolButton
-      Left = 177
+      Left = 200
       Top = 0
       Action = actAllToRight
     end
     object btn7: TToolButton
-      Left = 200
+      Left = 223
       Top = 0
       Width = 8
       Caption = 'btn7'
@@ -86,17 +91,17 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       Style = tbsSeparator
     end
     object btnPrevDiff: TToolButton
-      Left = 208
+      Left = 231
       Top = 0
       Action = actPrevDiff
     end
     object btnNextDiff: TToolButton
-      Left = 231
+      Left = 254
       Top = 0
       Action = actNextDiff
     end
     object btn3: TToolButton
-      Left = 254
+      Left = 277
       Top = 0
       Width = 8
       Caption = 'btn3'
@@ -104,7 +109,7 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       Style = tbsSeparator
     end
     object btnHelp: TToolButton
-      Left = 262
+      Left = 285
       Top = 0
       Action = actHelp
     end
@@ -143,11 +148,13 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
         ColCount = 2
         DefaultRowHeight = 18
         DefaultDrawing = False
+        FixedCols = 0
         FixedRows = 0
         Options = [goColSizing, goRowSelect]
         PopupMenu = pmGrid
         ScrollBars = ssVertical
         TabOrder = 0
+        OnDblClick = gridDblClick
         OnDrawCell = gridDrawCell
         OnSelectCell = gridSelectCell
         OnTopLeftChanged = gridTopLeftChanged
@@ -171,11 +178,13 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
         ColCount = 2
         DefaultRowHeight = 18
         DefaultDrawing = False
+        FixedCols = 0
         FixedRows = 0
         Options = [goColSizing, goRowSelect]
         PopupMenu = pmGrid
         ScrollBars = ssVertical
         TabOrder = 0
+        OnDblClick = gridDblClick
         OnDrawCell = gridDrawCell
         OnSelectCell = gridSelectCell
         OnTopLeftChanged = gridTopLeftChanged
@@ -223,6 +232,12 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       object Refresh1: TMenuItem
         Action = actRefresh
       end
+      object Options1: TMenuItem
+        Action = actOptions
+      end
+      object N2: TMenuItem
+        Caption = '-'
+      end
       object Exit1: TMenuItem
         Action = actExit
       end
@@ -269,6 +284,7 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
   end
   object actlstPropertyCompare: TActionList
     Images = dmCnSharedImages.Images
+    OnUpdate = actlstPropertyCompareUpdate
     Left = 32
     Top = 501
     object actExit: TAction
@@ -311,11 +327,13 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       Caption = '&Previous Different'
       Hint = 'Go to Previous Different Property'
       ImageIndex = 44
+      OnExecute = actPrevDiffExecute
     end
     object actNextDiff: TAction
       Caption = '&Next Different'
       Hint = 'Go to Next Different Property'
       ImageIndex = 45
+      OnExecute = actNextDiffExecute
     end
     object actNewCompare: TAction
       Caption = '&New Compare...'
@@ -326,6 +344,7 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
     object actCompareObjProp: TAction
       Caption = 'actCompareObjProp'
       ImageIndex = 43
+      OnExecute = actCompareObjPropExecute
     end
     object actAllToLeft: TAction
       Caption = 'All To Left'
@@ -337,10 +356,15 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       Hint = 'Assign All Left Properties to Right'
       ImageIndex = 102
     end
+    object actOptions: TAction
+      Caption = '&Options...'
+      ImageIndex = 2
+    end
     object actHelp: TAction
       Caption = '&Help'
       Hint = 'Display Help'
       ImageIndex = 1
+      OnExecute = actHelpExecute
     end
   end
   object pmGrid: TPopupMenu
