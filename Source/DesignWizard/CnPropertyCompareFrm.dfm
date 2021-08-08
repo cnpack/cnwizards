@@ -7,6 +7,7 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
   Font.Name = 'MS Sans Serif'
   Menu = mmMain
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnResize = FormResize
   PixelsPerInch = 96
   TextHeight = 13
@@ -20,6 +21,8 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
     EdgeBorders = [ebLeft, ebTop, ebRight]
     Flat = True
     Images = dmCnSharedImages.Images
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 1
     object btnNewCompare: TToolButton
       Left = 0
@@ -113,6 +116,11 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       Top = 0
       Action = actHelp
     end
+    object btnExit: TToolButton
+      Left = 308
+      Top = 0
+      Action = actExit
+    end
   end
   object pnlMain: TPanel
     Left = 0
@@ -199,8 +207,7 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       BevelInner = bvRaised
       BevelOuter = bvLowered
       TabOrder = 2
-      Visible = False
-      object pbFile: TPaintBox
+      object pbCompare: TPaintBox
         Left = 8
         Top = 2
         Width = 9
@@ -208,6 +215,8 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
         Align = alClient
         Color = clBtnFace
         ParentColor = False
+        OnMouseDown = pbCompareMouseDown
+        OnPaint = pbComparePaint
       end
       object pbPos: TPaintBox
         Left = 2
@@ -217,6 +226,7 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
         Align = alLeft
         Color = clBtnFace
         ParentColor = False
+        OnPaint = pbPosPaint
       end
     end
   end
@@ -289,7 +299,7 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
     Top = 501
     object actExit: TAction
       Caption = 'E&xit'
-      Hint = 'Exit'
+      Hint = 'Close This Window'
       ImageIndex = 0
       OnExecute = actExitExecute
     end
@@ -350,11 +360,13 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       Caption = 'All To Left'
       Hint = 'Assign All Right Properties to Left'
       ImageIndex = 101
+      OnExecute = actAllToLeftExecute
     end
     object actAllToRight: TAction
       Caption = 'All To Right'
       Hint = 'Assign All Left Properties to Right'
       ImageIndex = 102
+      OnExecute = actAllToRightExecute
     end
     object actOptions: TAction
       Caption = '&Options...'

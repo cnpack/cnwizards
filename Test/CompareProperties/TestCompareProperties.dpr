@@ -4,7 +4,8 @@ uses
   Forms,
   CnPropertyCompareFrm in '..\..\Source\DesignWizard\CnPropertyCompareFrm.pas' {CnPropertyCompareForm},
   UnitCompareProperties in 'UnitCompareProperties.pas' {FormTestCompare},
-  CnWizShareImages in '..\..\Source\Misc\CnWizShareImages.pas' {dmCnSharedImages: TDataModule};
+  CnWizShareImages in '..\..\Source\Misc\CnWizShareImages.pas' {dmCnSharedImages: TDataModule},
+  CnSampleComponent in '..\..\Source\Examples\CnSampleComponent.pas';
 
 {$R *.RES}
 

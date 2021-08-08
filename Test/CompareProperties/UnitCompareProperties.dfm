@@ -22,28 +22,37 @@ object FormTestCompare: TFormTestCompare
     Cursor = crHSplit
   end
   object Button1: TButton
-    Left = 32
-    Top = 32
+    Left = 16
+    Top = 16
     Width = 75
     Height = 25
     Caption = 'Button1'
     TabOrder = 0
   end
   object CheckBox1: TCheckBox
-    Left = 192
-    Top = 40
+    Left = 104
+    Top = 16
     Width = 97
     Height = 17
     Caption = 'CheckBox1'
     TabOrder = 1
   end
   object btnCompare: TButton
-    Left = 32
-    Top = 136
-    Width = 337
-    Height = 137
+    Left = 16
+    Top = 56
+    Width = 169
+    Height = 57
     Caption = 'Compare'
     TabOrder = 2
     OnClick = btnCompareClick
+  end
+  object btnCompare2: TButton
+    Left = 240
+    Top = 56
+    Width = 113
+    Height = 33
+    Caption = 'Compare 2'
+    TabOrder = 3
+    OnClick = btnCompare2Click
   end
 end

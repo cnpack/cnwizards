@@ -43,7 +43,7 @@ uses
   {$IFNDEF STAND_ALONE}
   CnWizClasses, CnWizUtils, CnWizIdeUtils, CnWizManager, CnComponentSelector,
   {$ENDIF}
-  {$IFDEF SUPPORT_ENHANCED_RTTI} Rtti, {$ENDIF}
+  {$IFDEF SUPPORT_ENHANCED_RTTI} Rtti, {$ENDIF} IniFiles,
   CnConsts, CnWizConsts, CnWizMultiLang, CnCommon, CnPropSheetFrm, CnWizShareImages;
 
 const
@@ -82,11 +82,14 @@ type
     FLeftComponent: TComponent;
     FRightObject: TComponent;
     FSelection: TList;
+    FSameType: Boolean;
+    FIgnoreProperties: TStringList;
     procedure SetLeftComponent(const Value: TComponent);
     procedure SetRightComponent(const Value: TComponent);
     function GetSelectionCount: Integer;
     procedure SelectExecute(Sender: TObject);
     procedure CompareExecute(Sender: TObject);
+    procedure SetIgnoreProperties(const Value: TStringList);
   protected
     procedure Notification(AComponent: TComponent;
       Operation: TOperation); override;
@@ -94,9 +97,17 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
+    procedure LoadSettings(Ini: TCustomIniFile);
+    procedure SaveSettings(Ini: TCustomIniFile);
+
     property LeftComponent: TComponent read FLeftComponent write SetLeftComponent;
     property RightObject: TComponent read FRightObject write SetRightComponent;
     property SelectionCount: Integer read GetSelectionCount;
+
+    property SameType: Boolean read FSameType write FSameType;
+    {* 比较时是否要属性名与类型都相同才算相同，否则类型名相同即可}
+    property IgnoreProperties: TStringList read FIgnoreProperties write SetIgnoreProperties;
+    {* 全部赋值时要忽略的属性列表，如 Name 等}
   end;
 
 {$ENDIF}
@@ -123,7 +134,7 @@ type
     pnlLeft: TPanel;
     pnlRight: TPanel;
     pnlDisplay: TPanel;
-    pbFile: TPaintBox;
+    pbCompare: TPaintBox;
     pbPos: TPaintBox;
     actlstPropertyCompare: TActionList;
     actExit: TAction;
@@ -182,6 +193,7 @@ type
     N2: TMenuItem;
     Options1: TMenuItem;
     btnOptions: TToolButton;
+    btnExit: TToolButton;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure actSelectLeftExecute(Sender: TObject);
@@ -204,20 +216,31 @@ type
     procedure gridDblClick(Sender: TObject);
     procedure actCompareObjPropExecute(Sender: TObject);
     procedure actHelpExecute(Sender: TObject);
+    procedure actAllToLeftExecute(Sender: TObject);
+    procedure actAllToRightExecute(Sender: TObject);
+    procedure pbPosPaint(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure pbComparePaint(Sender: TObject);
+    procedure pbCompareMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
   private
     FLeftObject: TObject;
     FRightObject: TObject;
     FLeftProperties: TObjectList;
     FRightProperties: TObjectList;
+    FCompareBmp: TBitmap;
     function ListContainsProperty(const APropName: string; List: TObjectList): Boolean;
     procedure TransferProperty(PFrom, PTo: TCnDiffPropertyObject; FromObj, ToObj: TObject);
     procedure SelectGridRow(Grid: TStringGrid; ARow: Integer);
     procedure LoadProperty(List: TObjectList; AObject: TObject);
-    procedure MakeAlignList;   // 两组属性互相对齐，中间插入空白
+    procedure MakeAlignList(SameType: Boolean = False);   // 两组属性互相对齐，中间插入空白
     procedure MakeSingleMarks; // 给两组属性标注对方是否为空
     procedure GetGridSelectObjects(var SelectLeft, SelectRight: Integer;
       var LeftObj, RightObj: TCnDiffPropertyObject);
+    procedure UpdateCompareBmp;
     procedure OnSyncSelect(var Msg: TMessage); message WM_SYNC_SELECT;
+  protected
+    function GetHelpTopic: string; override;
   public
     procedure LoadProperties;
     procedure ShowProperties(IsRefresh: Boolean = False);
@@ -238,8 +261,22 @@ uses
 {$ENDIF}
 
 const
+  POS_SCROLL_COLOR = $00FFC0C0;
+  PROP_DIFF_COLOR = $00C0C0FF;
+  GUTTER_DIFF_COLOR = $008080FF;
+  PROP_SINGLE_COLOR = clWhite;
+
   PROPNAME_LEFT_MARGIN = 16;
   PROP_NAME_MIN_WIDTH = 60;
+  DEF_IGNORE_PROP = 'Name,Left,Top,TabOrder';
+
+  csSameType = 'SameType';
+  csIgnoreProperties = 'IgnoreProperties';
+
+{$IFNDEF STAND_ALONE}
+var
+  FManager: TCnPropertyCompareManager = nil;
+{$ENDIF}
 
 function PropInfoName(PropInfo: PPropInfo): string;
 begin
@@ -350,7 +387,9 @@ end;
 constructor TCnPropertyCompareManager.Create(AOwner: TComponent);
 begin
   inherited;
+  FManager := Self;
   FSelection := TList.Create;
+  FIgnoreProperties := TStringList.Create;
 
   FSelectExtutor := TCnSelectCompareExecutor.Create;
   FCompareExecutor := TCnDoCompareExecutor.Create;
@@ -367,6 +406,7 @@ end;
 
 destructor TCnPropertyCompareManager.Destroy;
 begin
+  FIgnoreProperties.Free;
   FSelection.Free;
   inherited;
 end;
@@ -374,6 +414,12 @@ end;
 function TCnPropertyCompareManager.GetSelectionCount: Integer;
 begin
   Result := FSelection.Count;
+end;
+
+procedure TCnPropertyCompareManager.LoadSettings(Ini: TCustomIniFile);
+begin
+  FSameType := Ini.ReadBool('', csSameType, FSameType);
+  FIgnoreProperties.CommaText := Ini.ReadString('', csIgnoreProperties, DEF_IGNORE_PROP);
 end;
 
 procedure TCnPropertyCompareManager.Notification(AComponent: TComponent;
@@ -399,6 +445,12 @@ begin
   end;
 end;
 
+procedure TCnPropertyCompareManager.SaveSettings(Ini: TCustomIniFile);
+begin
+  Ini.WriteBool('', csSameType, FSameType);
+  Ini.WriteString('', csIgnoreProperties, FIgnoreProperties.CommaText);
+end;
+
 procedure TCnPropertyCompareManager.SelectExecute(Sender: TObject);
 var
   Comp: TComponent;
@@ -409,6 +461,12 @@ begin
     if Comp <> nil then
       LeftComponent := Comp;
   end;
+end;
+
+procedure TCnPropertyCompareManager.SetIgnoreProperties(
+  const Value: TStringList);
+begin
+  FIgnoreProperties.Assign(Value);
 end;
 
 procedure TCnPropertyCompareManager.SetLeftComponent(
@@ -555,7 +613,7 @@ begin
   FRightProperties.Sort(PropertyListCompare);
 
   // 根据属性对齐，以达到两列表数量一致
-  MakeAlignList;
+  MakeAlignList({$IFNDEF STAND_ALONE}FManager.SameType{$ENDIF});
   MakeSingleMarks;
 end;
 
@@ -567,10 +625,8 @@ begin
   pnlLeft.OnResize(pnlLeft);
   pnlRight.OnResize(pnlRight);
 
-//  FOldLeftGridWindowProc := gridLeft.WindowProc;
-//  FOldRightGridWindowProc := gridRight.WindowProc;
-//  gridLeft.WindowProc := LeftGridWindowProc;
-//  gridRight.WindowProc := RightGridWindowProc;
+  FCompareBmp := TBitmap.Create;
+  FCompareBmp.Canvas.Brush.Color := clWindow;
 end;
 
 procedure TCnPropertyCompareForm.LoadProperty(List: TObjectList;
@@ -669,7 +725,11 @@ begin
       AProp.CanModify := (PropInfo^.SetProc <> nil) and (PropInfo^.PropType^^.Kind
         in CnCanModifyPropTypes);
 
-      AProp.PropValue := GetPropValue(AObject, PropInfoName(PropInfo));
+      try
+        AProp.PropValue := GetPropValue(AObject, PropInfoName(PropInfo));
+      except
+        ;
+      end;
 
       AProp.ObjValue := nil;
       AProp.IntfValue := nil;
@@ -724,9 +784,10 @@ procedure TCnPropertyCompareForm.ShowProperties(IsRefresh: Boolean);
 begin
   FillGridWithProperties(gridLeft, FLeftProperties);
   FillGridWithProperties(gridRight, FRightProperties);
+  UpdateCompareBmp;
 end;
 
-procedure TCnPropertyCompareForm.MakeAlignList;
+procedure TCnPropertyCompareForm.MakeAlignList(SameType: Boolean);
 var
   L, R, C: Integer;
   PL, PR: TCnPropertyObject;
@@ -746,18 +807,36 @@ begin
       C := CompareStr(PL.PropName, PR.PropName);
       if C = 0 then
       begin
+        // 如果需要，并且碰上属性名相同但类型不同，则重新算 C
+        if SameType and (PL.PropType <> PR.PropType) then
+          C := Ord(PL.PropType) - Ord(PR.PropType);
+      end;
+
+      // 相等
+      if C = 0 then
+      begin
         Inc(L);
         Inc(R);
-        Merge.Add(PL.PropName);
+
+        if SameType then
+         Merge.Add(PL.PropName + IntToStr(Ord(PL.PropType)))
+        else
+          Merge.Add(PL.PropName);
       end
       else if C < 0 then // 左比右小
       begin
-        Merge.Add(PL.PropName);
+        if SameType then
+          Merge.Add(PL.PropName + IntToStr(Ord(PL.PropType)))
+        else
+          Merge.Add(PL.PropName);
         Inc(L);
       end
-      else // 右比左小
+      else if C > 0 then // 右比左小
       begin
-        Merge.Add(PR.PropName);
+        if SameType then
+          Merge.Add(PR.PropName + IntToStr(Ord(PR.PropType)))
+        else
+          Merge.Add(PR.PropName);
         Inc(R);
       end;
     end;
@@ -767,7 +846,10 @@ begin
     while L < FLeftProperties.Count do
     begin
       PL := TCnPropertyObject(FLeftProperties[L]);
-      R := Merge.IndexOf(PL.PropName);
+      if SameType then
+        R := Merge.IndexOf(PL.PropName + IntToStr(Ord(PL.PropType)))
+      else
+        R := Merge.IndexOf(PL.PropName);
 
       // R 一定会 >= L
       if R > L then
@@ -785,7 +867,10 @@ begin
     while R < FRightProperties.Count do
     begin
       PR := TCnPropertyObject(FRightProperties[R]);
-      L := Merge.IndexOf(PR.PropName);
+      if SameType then
+        L := Merge.IndexOf(PR.PropName + IntToStr(Ord(PR.PropType)))
+      else
+        L := Merge.IndexOf(PR.PropName);
 
       // L 一定会 >= R
       if L > R then
@@ -817,7 +902,7 @@ end;
 
 procedure TCnPropertyCompareForm.FormResize(Sender: TObject);
 begin
-  pnlLeft.Width := pnlLeft.Parent.Width div 2 - 5;
+  pnlLeft.Width := pnlLeft.Parent.Width div 2 - 5 - pnlDisplay.Width;
 end;
 
 procedure TCnPropertyCompareForm.OnSyncSelect(var Msg: TMessage);
@@ -1038,7 +1123,7 @@ begin
   begin
     if (P2 <> nil) and P2.IsSingle then // 自己没有对方有（白底）
     begin
-      G.Canvas.Brush.Color := clWhite;
+      G.Canvas.Brush.Color := PROP_SINGLE_COLOR;
     end
     else
     begin
@@ -1057,12 +1142,12 @@ begin
     end
     else if (P2 <> nil) and P2.IsSingle then // 自己没有对方有（白底）
     begin
-      G.Canvas.Brush.Color := clWhite;
+      G.Canvas.Brush.Color := PROP_SINGLE_COLOR;
     end
     else if (P1 <> nil) and (P2 <> nil) then
     begin
       if P1.DisplayValue <> P2.DisplayValue then  // 都有且不同（淡红底）
-        G.Canvas.Brush.Color := $00C0C0FF;
+        G.Canvas.Brush.Color := PROP_DIFF_COLOR;
     end;
     // 都有且相同（普通灰底）
   end;
@@ -1131,6 +1216,7 @@ begin
     G := gridLeft;
 
   G.TopRow := (Sender as TStringGrid).TopRow;
+  pbPos.Invalidate;
 end;
 
 procedure TCnPropertyCompareForm.actRefreshExecute(Sender: TObject);
@@ -1178,11 +1264,12 @@ procedure TCnPropertyCompareForm.TransferProperty(PFrom,
   PTo: TCnDiffPropertyObject; FromObj, ToObj: TObject);
 var
   V: Variant;
+  Obj: TObject;
 begin
   if (PFrom = nil) or (PTo = nil) or (FromObj = nil) or (ToObj = nil) then
     Exit;
 
-  if PFrom.PropName <> PTo.PropName then
+  if (PFrom.PropName <> PTo.PropName) or not PTo.CanModify then
     Exit;
 
 {$IFDEF SUPPORT_ENHANCED_RTTI}
@@ -1194,9 +1281,22 @@ begin
   end;
 {$ENDIF}
 
-  // TODO: Object 单独处理
-  V := GetPropValue(FromObj, PFrom.PropName);
-  SetPropValue(ToObj, PTo.PropName, V);
+  // Object 单独处理
+  if PFrom.PropType <> PTo.PropType then // 类型不相等只能用 Variant 强行处理
+  begin
+    V := GetPropValue(FromObj, PFrom.PropName);
+    SetPropValue(ToObj, PTo.PropName, V);
+  end
+  else if PFrom.PropType in [tkClass, tkInterface] then
+  begin
+    Obj := GetObjectProp(FromObj, PFrom.PropName);
+    SetObjectProp(ToObj, PTo.PropName, Obj);
+  end
+  else // 其余相同的类型也用 Variant 过渡
+  begin
+    V := GetPropValue(FromObj, PFrom.PropName);
+    SetPropValue(ToObj, PTo.PropName, V);
+  end;
 end;
 
 procedure TCnPropertyCompareForm.actPropertyToLeftExecute(Sender: TObject);
@@ -1247,8 +1347,10 @@ begin
 
   if Action = actPropertyToLeft then
     (Action as TCustomAction).Enabled := (Pr <> nil) and not Pr.IsSingle
+      and (Pl <> nil) and Pl.CanModify
   else if Action = actPropertyToRight then
     (Action as TCustomAction).Enabled := (Pl <> nil) and not Pl.IsSingle
+      and (Pr <> nil) and Pr.CanModify
   else if Action = actCompareObjProp then
     (Action as TCustomAction).Enabled := (Pl <> nil) and Pl.IsObjOrIntf
      and (Pr <> nil) and Pr.IsObjOrIntf and ((Pl.ObjValue <> nil) or (Pr.ObjValue <> nil));
@@ -1348,6 +1450,206 @@ end;
 procedure TCnPropertyCompareForm.actHelpExecute(Sender: TObject);
 begin
   ShowFormHelp;
+end;
+
+function TCnPropertyCompareForm.GetHelpTopic: string;
+begin
+  Result := 'CnAlignSizeConfig';
+end;
+
+procedure TCnPropertyCompareForm.actAllToLeftExecute(Sender: TObject);
+var
+  I: Integer;
+  Pl, Pr: TCnDiffPropertyObject;
+begin
+  try
+    for I := 0 to FRightProperties.Count - 1 do
+    begin
+      Pl := TCnDiffPropertyObject(FLeftProperties[I]);
+      Pr := TCnDiffPropertyObject(FRightProperties[I]);
+
+      if (Pl = nil) or (Pr = nil) then
+        Continue;
+      if Pl.IsSingle or Pr.IsSingle then
+        Continue;
+
+      if Pl.DisplayValue = Pr.DisplayValue then
+        Continue;
+
+{$IFNDEF STAND_ALONE}
+      if FManager.IgnoreProperties.IndexOf(Pr.PropName) >= 0 then
+        Continue;
+{$ENDIF}
+
+      TransferProperty(Pr, Pl, FRightObject, FLeftObject);
+    end;
+  finally
+    LoadProperties;
+    ShowProperties(True);
+  end;
+end;
+
+procedure TCnPropertyCompareForm.actAllToRightExecute(Sender: TObject);
+var
+  I: Integer;
+  Pl, Pr: TCnDiffPropertyObject;
+begin
+  try
+    for I := 0 to FRightProperties.Count - 1 do
+    begin
+      Pl := TCnDiffPropertyObject(FLeftProperties[I]);
+      Pr := TCnDiffPropertyObject(FRightProperties[I]);
+
+      if (Pl = nil) or (Pr = nil) then
+        Continue;
+      if Pl.IsSingle or Pr.IsSingle then
+        Continue;
+
+      if Pl.DisplayValue = Pr.DisplayValue then
+        Continue;
+
+{$IFNDEF STAND_ALONE}
+      if FManager.IgnoreProperties.IndexOf(Pl.PropName) >= 0 then
+        Continue;
+{$ENDIF}
+
+      TransferProperty(Pl, Pr, FLeftObject, FRightObject);
+    end;
+  finally
+    LoadProperties;
+    ShowProperties(True);
+  end;
+end;
+
+procedure TCnPropertyCompareForm.pbPosPaint(Sender: TObject);
+var
+  Y1, Y2: Integer;
+begin
+  with pbPos do
+  begin
+    Canvas.Brush.Color := clWindow;
+    Canvas.FillRect(ClientRect);
+    if (gridLeft.RowCount = 0) or (gridRight.RowCount = 0) then
+      Exit;
+
+    Y1 := gridLeft.TopRow;
+    Y1 := ClientHeight * Y1 div gridLeft.RowCount;
+
+    Y2 := gridLeft.TopRow + gridLeft.VisibleRowCount;
+    Y2 := ClientHeight * Y2 div gridLeft.RowCount;
+
+    Canvas.Brush.Color := POS_SCROLL_COLOR;
+    Canvas.FillRect(Rect(0, Y1, ClientWidth, Y2));
+  end;
+end;
+
+procedure TCnPropertyCompareForm.FormDestroy(Sender: TObject);
+begin
+  FRightProperties.Free;
+  FLeftProperties.Free;
+  FCompareBmp.Free;
+end;
+
+procedure TCnPropertyCompareForm.UpdateCompareBmp;
+var
+  I, J, Y1, Y2: Integer;
+  AColor: TColor;
+  HeightRatio: single;
+
+  function GetPaintColor(ARow: Integer): TColor;
+  var
+    Pl, Pr: TCnDiffPropertyObject;
+  begin
+    // 根据第 ARow 行的比较结果，返回颜色，分相同，不同，缺失三种，相同则不用重画
+    Result := clNone;
+
+    if (ARow < 0) or (ARow >= FLeftProperties.Count) then
+      Exit;
+    if (ARow < 0) or (ARow >= FRightProperties.Count) then
+      Exit;
+
+    Pl := TCnDiffPropertyObject(FLeftProperties[ARow]);
+    Pr := TCnDiffPropertyObject(FRightProperties[ARow]);
+
+    if (Pl = nil) or (Pr = nil) then
+      Result := PROP_SINGLE_COLOR
+    else if Pl.IsSingle or Pr.IsSingle then
+      Result := PROP_SINGLE_COLOR
+    else if Pl.DisplayValue <> Pr.DisplayValue then
+      Result := GUTTER_DIFF_COLOR;
+  end;
+
+begin
+  if (gridLeft.RowCount = 0) or (gridRight.RowCount = 0) then
+    Exit;
+
+  HeightRatio := Screen.Height / gridLeft.RowCount;
+
+  FCompareBmp.Height := Screen.Height;
+  FCompareBmp.Width := pbCompare.ClientWidth;
+  FCompareBmp.Canvas.Pen.Width := 2;
+  FCompareBmp.Canvas.Brush.Color := clBtnFace;
+  FCompareBmp.Canvas.FillRect(Rect(0, 0, FCompareBmp.Width, FCompareBmp.Height));
+
+  I := 0;
+  while I < gridLeft.RowCount do
+  begin
+    AColor := GetPaintColor(I);
+
+    if AColor = clNone then
+      Inc(I)
+    else
+    begin
+      J := I + 1;
+      while (J < gridLeft.RowCount) and (GetPaintColor(J) = AColor) do
+        Inc(J);
+
+      FCompareBmp.Canvas.Brush.Color := AColor;
+      Y1 := Trunc(I * HeightRatio);
+      Y2 := Trunc(J * HeightRatio);
+      FCompareBmp.Canvas.FillRect(Rect(0, Y1, FCompareBmp.Width, Y2));
+      I := J;
+    end;
+  end;
+  pbCompare.Invalidate;
+end;
+
+procedure TCnPropertyCompareForm.pbComparePaint(Sender: TObject);
+begin
+  with pbCompare do
+    Canvas.StretchDraw(Rect(0, 0, Width, Height), FCompareBmp);
+end;
+
+procedure TCnPropertyCompareForm.pbCompareMouseDown(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+const
+  GAP = 4;
+var
+  R: Integer;
+begin
+  if Button = mbLeft then
+  begin
+    R := Trunc(Y / pbCompare.Height *
+      (gridLeft.RowCount - 1)) - gridLeft.ClientHeight div
+      gridLeft.DefaultRowHeight div 2;
+
+    if R < 0 then
+      R := 0;
+
+    gridLeft.TopRow := R;
+
+    // Sel: Y: 4 -> 0, ClientHeight - 4 -> RowCount - 1
+    Y := Y - GAP;
+    if Y < 0 then
+      Y := 0;
+
+    R := Trunc(Y * gridLeft.RowCount / (pbCompare.Height - GAP * 2));
+    if R >= gridLeft.RowCount then
+      R := gridLeft.RowCount - 1;
+
+    SelectGridRow(gridLeft, R);
+    SelectGridRow(gridRight, R);
+  end;
 end;
 
 end.
