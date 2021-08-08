@@ -2,8 +2,7 @@
 !LanguageName=繁體中文
 !TranslationAuthor=LiuXiao
 !TranslationAuthorEmail=liuxiao@cnpack.org
-!TranslationDefaultFont=Tahoma,8,,,,
-TFormStartFix.!Font=Tahoma,8,,0,clWindowText,ANSI_CHARSET
+!TranslationDefaultFont=Tahoma,8,,,,CHINESEBIG5_CHARSET
 TFormStartFix.btnAbout.Caption=關於(&A)
 TFormStartFix.btnClose.Caption=關閉(&C)
 TFormStartFix.btnHelp.Caption=幫助(&H)

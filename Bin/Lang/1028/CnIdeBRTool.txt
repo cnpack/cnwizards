@@ -2,7 +2,7 @@
 !LanguageName=繁體中文
 !TranslationAuthor=LiuXiao
 !TranslationAuthorEmail=liuxiao@cnpack.org
-!TranslationDefaultFont=Tahoma,8,,,,
+!TranslationDefaultFont=Tahoma,8,,,,CHINESEBIG5_CHARSET
 TCnIdeBRMainForm.btnAbout.Caption=關於(&A)
 TCnIdeBRMainForm.btnClose.Caption=關閉(&C)
 TCnIdeBRMainForm.btnHelp.Caption=說明(&H)
