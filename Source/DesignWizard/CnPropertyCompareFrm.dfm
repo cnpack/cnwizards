@@ -371,6 +371,7 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
     object actOptions: TAction
       Caption = '&Options...'
       ImageIndex = 2
+      OnExecute = actOptionsExecute
     end
     object actHelp: TAction
       Caption = '&Help'

@@ -223,13 +223,16 @@ type
     procedure pbComparePaint(Sender: TObject);
     procedure pbCompareMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+    procedure actOptionsExecute(Sender: TObject);
   private
     FLeftObject: TObject;
     FRightObject: TObject;
     FLeftProperties: TObjectList;
     FRightProperties: TObjectList;
     FCompareBmp: TBitmap;
+{$IFDEF SUPPORT_ENHANCED_RTTI}
     function ListContainsProperty(const APropName: string; List: TObjectList): Boolean;
+{$ENDIF}
     procedure TransferProperty(PFrom, PTo: TCnDiffPropertyObject; FromObj, ToObj: TObject);
     procedure SelectGridRow(Grid: TStringGrid; ARow: Integer);
     procedure LoadProperty(List: TObjectList; AObject: TObject);
@@ -255,12 +258,11 @@ implementation
 
 {$R *.DFM}
 
-{$IFDEF DEBUG}
 uses
-  CnDebug;
-{$ENDIF}
+  {$IFDEF DEBUG} CnDebug, {$ENDIF} CnPropertyCompConfigFrm;
 
 const
+  POS_SELECT_COLOR = clNavy;
   POS_SCROLL_COLOR = $00FFC0C0;
   PROP_DIFF_COLOR = $00C0C0FF;
   GUTTER_DIFF_COLOR = $008080FF;
@@ -966,6 +968,8 @@ begin
   end;
 end;
 
+{$IFDEF SUPPORT_ENHANCED_RTTI}
+
 function TCnPropertyCompareForm.ListContainsProperty(
   const APropName: string; List: TObjectList): Boolean;
 var
@@ -983,6 +987,8 @@ begin
     end;
   end;
 end;
+
+{$ENDIF}
 
 procedure TCnPropertyCompareForm.actSelectLeftExecute(Sender: TObject);
 {$IFNDEF STAND_ALONE}
@@ -1204,6 +1210,7 @@ begin
     G := gridLeft;
 
   PostMessage(Handle, WM_SYNC_SELECT, Integer(G), ARow);
+  pbPos.Invalidate;
 end;
 
 procedure TCnPropertyCompareForm.gridTopLeftChanged(Sender: TObject);
@@ -1265,6 +1272,11 @@ procedure TCnPropertyCompareForm.TransferProperty(PFrom,
 var
   V: Variant;
   Obj: TObject;
+{$IFDEF SUPPORT_ENHANCED_RTTI}
+  RttiContext: TRttiContext;
+  RttiTypeFrom, RttiTypeTo: TRttiType;
+  RttiPropertyFrom, RttiPropertyTo: TRttiProperty;
+{$ENDIF}
 begin
   if (PFrom = nil) or (PTo = nil) or (FromObj = nil) or (ToObj = nil) then
     Exit;
@@ -1273,12 +1285,32 @@ begin
     Exit;
 
 {$IFDEF SUPPORT_ENHANCED_RTTI}
+
   if PFrom.IsNewRTTI and PTo.IsNewRTTI then
   begin
+    RttiContext := TRttiContext.Create;
+    try
+      RttiTypeFrom := RttiContext.GetType(FromObj.ClassInfo);
+      RttiTypeTo := RttiContext.GetType(ToObj.ClassInfo);
 
+      if (RttiTypeFrom = nil) or (RttiTypeTo = nil) then
+        Exit;
+
+      RttiPropertyFrom := RttiTypeFrom.GetProperty(PFrom.PropName);
+      RttiPropertyTo := RttiTypeTo.GetProperty(PTo.PropName);
+
+      if (RttiPropertyFrom = nil) or (RttiPropertyTo = nil) then
+        Exit;
+
+      // 直接通过 TValue 赋值
+      RttiPropertyTo.SetValue(ToObj, RttiPropertyFrom.GetValue(FromObj));
+    finally
+      RttiContext.Free;
+    end;
 
     Exit;
   end;
+
 {$ENDIF}
 
   // Object 单独处理
@@ -1540,6 +1572,17 @@ begin
 
     Canvas.Brush.Color := POS_SCROLL_COLOR;
     Canvas.FillRect(Rect(0, Y1, ClientWidth, Y2));
+
+    Y1 := gridLeft.Selection.Top;
+    if Y1 < 0 then
+      Y1 := gridRight.Selection.Top;
+
+    Y1 := ClientHeight * Y1 div gridLeft.RowCount + 3;
+
+    Canvas.Pen.Color := POS_SELECT_COLOR;
+    Canvas.Pen.Width := 3;
+    Canvas.MoveTo(0, Y1);
+    Canvas.LineTo(ClientWidth, Y1);
   end;
 end;
 
@@ -1649,6 +1692,27 @@ begin
 
     SelectGridRow(gridLeft, R);
     SelectGridRow(gridRight, R);
+  end;
+end;
+
+procedure TCnPropertyCompareForm.actOptionsExecute(Sender: TObject);
+begin
+  with TCnPropertyCompConfigForm.Create(nil) do
+  begin
+{$IFNDEF STAND_ALONE}
+    chkSameType.Checked := not FManager.SameType;
+    mmoIgnoreProperties.Lines.Assign(FManager.IgnoreProperties);
+{$ENDIF}
+
+    if ShowModal = mrOK then
+    begin
+{$IFNDEF STAND_ALONE}
+      FManager.SameType := not chkSameType.Checked;
+      FManager.IgnoreProperties.Assign(mmoIgnoreProperties.Lines);
+{$ENDIF}
+    end;
+
+    Free;
   end;
 end;
 

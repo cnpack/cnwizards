@@ -82,6 +82,7 @@ type
     FReadOnlyWideAccChar: WideChar;
     FReadOnlyWideHint: WideString;
     FReadOnlyPoint: TPoint;
+    FReadOnlyFont: TFont;
 {$IFDEF UNICODE}
     FReadOnlyUniStr: string;
 {$ENDIF}
@@ -138,6 +139,7 @@ type
     property ReadOnlyPoint: TPoint read FReadOnlyPoint;
     property ReadOnlyIntfValue: IUnknown read FReadOnlyIntfValue;
     property ReadOnlyInt64Value: Int64 read FReadOnlyInt64Value;
+    property ReadOnlyFont: TFont read FReadOnlyFont;
 {$IFDEF UNICODE}
     property ReadOnlyUniStr: string read FReadOnlyUniStr write FReadOnlyUniStr;
 {$ENDIF}
@@ -178,12 +180,14 @@ begin
   FWideHint := 'Wide Hint';
   FPoint.x := 10;
   FPoint.y := 20;
+
+  FReadOnlyFont := TFont.Create;
 end;
 
 destructor TCnSampleComponent.Destroy;
 begin
+  FReadOnlyFont.Free;
   inherited;
-
 end;
 
 end.
