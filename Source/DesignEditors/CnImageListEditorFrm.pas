@@ -777,6 +777,7 @@ var
   var
     Res: TCnDlgResult;
   begin
+    Result := False;
     if YAll then
     begin
       Result := True;

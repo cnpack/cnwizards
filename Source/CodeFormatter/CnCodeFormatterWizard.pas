@@ -1352,7 +1352,6 @@ end;
 
 procedure TCnCodeFormatterWizard.RestoreElideLines(LineMarks: PDWORD);
 var
-  I: Integer;
   Control: TControl;
 begin
   Control := CnOtaGetCurrentEditControl;

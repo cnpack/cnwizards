@@ -323,7 +323,6 @@ end;
 procedure GetherSearchPanelOptions(AOwner: TComponent);
 var
   Comp: TComponent;
-  Box: TCustomCheckBox;
   I: Integer;
   F1, F2, F3: Boolean;
 begin
