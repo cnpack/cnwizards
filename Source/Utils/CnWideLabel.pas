@@ -42,9 +42,21 @@ uses
   StdCtrls {$IFDEF COMPILER7_UP}, Themes{$ENDIF};
 
 type
-  TCnWideLabel = class(TGraphicControl)
+  TWideGraphicControl = class(TGraphicControl)
   private
     FCaption: WideString;
+    procedure SetCaption(const Value: WideString);
+    function GetText: WideString;
+    function GetWindowText: PWideChar;
+    procedure SetText(const Value: WideString);
+  public
+    property Caption: WideString read FCaption write SetCaption;
+    property Text: WideString read GetText write SetText;
+    property WindowText: PWideChar read GetWindowText;
+  end;
+
+  TCnWideLabel = class(TWideGraphicControl)
+  private
     FFocusControl: TWinControl;
     FAlignment: TAlignment;
     FAutoSize: Boolean;
@@ -53,7 +65,7 @@ type
     FShowAccelChar: Boolean;
     FOnMouseLeave: TNotifyEvent;
     FOnMouseEnter: TNotifyEvent;
-    FTransparentSet: Boolean;    
+    FTransparentSet: Boolean;
     function GetTransparent: Boolean;
     procedure SetAlignment(Value: TAlignment);
     procedure SetFocusControl(Value: TWinControl);
@@ -66,7 +78,6 @@ type
     procedure CMDialogChar(var Message: TCMDialogChar); message CM_DIALOGCHAR;
     procedure CMMouseEnter(var Message: TMessage); message CM_MOUSEENTER;
     procedure CMMouseLeave(var Message: TMessage); message CM_MOUSELEAVE;
-    procedure SetCaption(const Value: WideString);
   protected
     procedure AdjustBounds; dynamic;
     procedure DoDrawText(var Rect: TRect; Flags: Longint); dynamic;
@@ -91,10 +102,10 @@ type
     property OnMouseEnter: TNotifyEvent read FOnMouseEnter write FOnMouseEnter;
     property OnMouseLeave: TNotifyEvent read FOnMouseLeave write FOnMouseLeave;
 
-    property Caption: WideString read FCaption write SetCaption;
     property Align;
     property Anchors;
     property BiDiMode;
+    property Caption;
     property Color nodefault;
     property Constraints;
     property DragCursor;
@@ -124,6 +135,32 @@ type
   end;
 
 implementation
+
+{ TWideGraphicControl }
+
+function TWideGraphicControl.GetText: WideString;
+begin
+  Result := FCaption;
+end;
+
+function TWideGraphicControl.GetWindowText: PWideChar;
+begin
+  Result := PWideChar(FCaption);
+end;
+
+procedure TWideGraphicControl.SetCaption(const Value: WideString);
+begin
+  if FCaption <> Value then
+  begin
+    FCaption := Value;
+    Perform(CM_TEXTCHANGED, 0, 0);
+  end;
+end;
+
+procedure TWideGraphicControl.SetText(const Value: WideString);
+begin
+  Caption := Value;
+end;
 
 constructor TCnWideLabel.Create(AOwner: TComponent);
 begin
@@ -347,15 +384,6 @@ begin
   inherited;
   if Assigned(FOnMouseLeave) then
     FOnMouseLeave(Self);
-end;
-
-procedure TCnWideLabel.SetCaption(const Value: WideString);
-begin
-  if FCaption <> Value then
-  begin
-    FCaption := Value;
-    Perform(CM_TEXTCHANGED, 0, 0);
-  end;
 end;
 
 end.

@@ -38,8 +38,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, CheckLst, Buttons, ImgList, CnCommon, CnWizLangID,
-  CnLangTranslator, CnLangMgr, CnClasses, CnLangStorage, CnHashLangStorage,
-  System.ImageList;
+  CnLangTranslator, CnLangMgr, CnClasses, CnLangStorage, CnHashLangStorage;
 
 type
   TCnCustBuildForm = class(TForm)
