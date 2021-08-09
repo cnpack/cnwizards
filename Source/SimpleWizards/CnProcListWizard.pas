@@ -1074,6 +1074,10 @@ begin
   // Owner 为 nil 的 PopupMenu 无法被找到的问题。
 {$IFDEF DELPHI103_RIO_UP}
   Obj.MatchFrame := TCnMatchButtonFrame.Create(GetIdeMainForm);
+  Obj.MatchFrame.Name := Obj.MatchFrame.Name + FormatDateTime('yyyyMMddhhmmss', Now);
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Create ProcToolbar: MatchFrame Name: ' + Obj.MatchFrame.Name);
+{$ENDIF}
 {$ELSE}
   Obj.MatchFrame := TCnMatchButtonFrame.Create(ToolBar);
 {$ENDIF}
