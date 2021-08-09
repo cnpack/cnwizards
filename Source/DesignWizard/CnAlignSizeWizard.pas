@@ -1766,7 +1766,7 @@ end;
 procedure CnAfterLoadIcon(ABigIcon: TIcon; ASmallIcon: TIcon; const IconName: string);
 var
   AStyle: TAlignSizeStyle;
-  BigBmp, SmallBmp: TBitmap;
+  SmallBmp: TBitmap;
   X, Y: Integer;
   P: PRGBArray;
   Rep: Boolean;
