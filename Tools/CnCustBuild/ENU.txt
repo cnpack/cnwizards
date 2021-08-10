@@ -1,9 +1,8 @@
-!LanguageID=1033
+﻿!LanguageID=1033
 !LanguageName=English
 !TranslationAuthor=Liu Xiao
 !TranslationAuthorEmail=liuxiao@cnpack.org
 !TranslationDefaultFont=Tahoma,8,,,,
-TCnCustBuildForm.!Font=Tahoma,8,,,,
 TCnCustBuildForm.btnAbout.Caption=&About
 TCnCustBuildForm.btnClose.Caption=&Close
 TCnCustBuildForm.btnDeselAll.Hint=Deselect All

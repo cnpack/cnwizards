@@ -38,9 +38,13 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, CheckLst, Buttons, ImgList, CnCommon, CnWizLangID,
-  CnLangTranslator, CnLangMgr, CnClasses, CnLangStorage, CnHashLangStorage;
+  CnLangTranslator, CnLangMgr, CnClasses, CnLangStorage, CnHashLangStorage,
+  CnWideCtrls;
 
 type
+
+{$I WideCtrls.inc}
+
   TCnCustBuildForm = class(TForm)
     pnlTop: TPanel;
     bvlLineTop: TBevel;
@@ -77,7 +81,6 @@ type
     procedure btnInvertClick(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
   private
-    { Private declarations }
     FLangDir: string;
     FSaved: Boolean;
     FLangId: Cardinal;
@@ -98,7 +101,6 @@ type
     procedure DoCreate; override;
     procedure TranslateStrings;
   public
-    { Public declarations }
     procedure LoadWizards;
   end;
 
