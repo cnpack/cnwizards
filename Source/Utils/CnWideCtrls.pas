@@ -42,20 +42,40 @@ uses
   StdCtrls {$IFDEF COMPILER7_UP}, Themes{$ENDIF};
 
 type
-  TWideGraphicControl = class(TGraphicControl)
+  TCnWideControl = class(TControl)
   private
-    FCaption: WideString;
-    procedure SetCaption(const Value: WideString);
+    FHint: WideString;
+    FText: PWideChar;
     function GetText: WideString;
-    function GetWindowText: PWideChar;
     procedure SetText(const Value: WideString);
-  public
-    property Caption: WideString read FCaption write SetCaption;
+    function IsCaptionStored: Boolean;
+  protected
     property Text: WideString read GetText write SetText;
-    property WindowText: PWideChar read GetWindowText;
+    property Caption: WideString read GetText write SetText stored IsCaptionStored;
+  public
+    procedure DefaultHandler(var Message); override;
+    procedure SetTextBuf(Buffer: PWideChar);
+    function GetTextBuf(Buffer: PWideChar; BufSize: Integer): Integer;
+    function GetTextLen: Integer;
+    {* ·µ»Ø×Ö·ûÊý}
+
+    property WindowText: PWideChar read FText write FText;
+    property Hint: WideString read FHint write FHint;
   end;
 
-  TCnWideLabel = class(TWideGraphicControl)
+  TCnWideGraphicControl = class(TCnWideControl)
+  private
+    FCanvas: TCanvas;
+    procedure WMPaint(var Message: TWMPaint); message WM_PAINT;
+  protected
+    procedure Paint; virtual;
+    property Canvas: TCanvas read FCanvas;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+  end;
+
+  TCnWideLabel = class(TCnWideGraphicControl)
   private
     FFocusControl: TWinControl;
     FAlignment: TAlignment;
@@ -136,30 +156,124 @@ type
 
 implementation
 
-{ TWideGraphicControl }
+type
+  THackControlActionLink = class(TControlActionLink);
 
-function TWideGraphicControl.GetText: WideString;
+{ TCnWideControl }
+
+procedure TCnWideControl.DefaultHandler(var Message);
+var
+  P: PWideChar;
+  L: Integer;
 begin
-  Result := FCaption;
+  with TMessage(Message) do
+    case Msg of
+      WM_GETTEXT:
+        begin
+          if FText <> nil then P := FText else P := '';
+          Result := lstrlenW(lstrcpynW(PWideChar(LParam), P, WParam - 1));
+        end;
+      WM_GETTEXTLENGTH:
+        if FText = nil then Result := 0 else Result := lstrlenW(FText);
+      WM_SETTEXT:
+        begin
+          FreeMem(FText);
+          L := lstrlenW(PWideChar(LParam));
+          if L > 0 then
+          begin
+            GetMem(P, L * SizeOf(WideChar));
+            lstrcpynW(P, PWideChar(LParam), L);
+          end
+          else
+            P := nil;
+          FText := P;
+          SendDockNotification(Msg, WParam, LParam);
+        end;
+    end;
 end;
 
-function TWideGraphicControl.GetWindowText: PWideChar;
+function TCnWideControl.GetText: WideString;
+var
+  Len: Integer;
 begin
-  Result := PWideChar(FCaption);
-end;
+  Len := GetTextLen;
+  SetLength(Result, Len);
 
-procedure TWideGraphicControl.SetCaption(const Value: WideString);
-begin
-  if FCaption <> Value then
+  if Len <> 0 then
   begin
-    FCaption := Value;
-    Perform(CM_TEXTCHANGED, 0, 0);
+    Len := Len - GetTextBuf(PWideChar(Result), Len + 1);
+    if Len > 0 then
+      SetLength(Result, Length(Result) - Len);
   end;
 end;
 
-procedure TWideGraphicControl.SetText(const Value: WideString);
+function TCnWideControl.GetTextBuf(Buffer: PWideChar;
+  BufSize: Integer): Integer;
 begin
-  Caption := Value;
+  Result := Perform(WM_GETTEXT, BufSize, Longint(Buffer));
+end;
+
+function TCnWideControl.GetTextLen: Integer;
+begin
+  Result := Perform(WM_GETTEXTLENGTH, 0, 0);
+end;
+
+function TCnWideControl.IsCaptionStored: Boolean;
+begin
+  Result := (ActionLink = nil) or not
+    THackControlActionLink(ActionLink).IsCaptionLinked;
+end;
+
+procedure TCnWideControl.SetText(const Value: WideString);
+begin
+  if GetText <> Value then
+    SetTextBuf(PWideChar(Value));
+end;
+
+procedure TCnWideControl.SetTextBuf(Buffer: PWideChar);
+begin
+  Perform(WM_SETTEXT, 0, Longint(Buffer));
+  Perform(CM_TEXTCHANGED, 0, 0);
+end;
+
+{ TCnWideGraphicControl }
+
+constructor TCnWideGraphicControl.Create(AOwner: TComponent);
+begin
+  inherited;
+  FCanvas := TControlCanvas.Create;
+  TControlCanvas(FCanvas).Control := Self;
+end;
+
+destructor TCnWideGraphicControl.Destroy;
+begin
+  if GetCaptureControl = Self then
+    SetCaptureControl(nil);
+  FCanvas.Free;
+  inherited;
+end;
+
+procedure TCnWideGraphicControl.WMPaint(var Message: TWMPaint);
+begin
+  if Message.DC <> 0 then
+  begin
+    Canvas.Lock;
+    try
+      Canvas.Handle := Message.DC;
+      try
+        Paint;
+      finally
+        Canvas.Handle := 0;
+      end;
+    finally
+      Canvas.Unlock;
+    end;
+  end;
+end;
+
+procedure TCnWideGraphicControl.Paint;
+begin
+
 end;
 
 constructor TCnWideLabel.Create(AOwner: TComponent);
