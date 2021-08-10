@@ -427,7 +427,7 @@ begin
     lm.CurrentLanguageIndex := hfs.Languages.Find(FLangId)
   else
     lm.CurrentLanguageIndex := hfs.Languages.Find(1033);
-  CnLanguageManager.TranslateForm(Self);
+
   TranslateStrings;
   inherited;  
 end;

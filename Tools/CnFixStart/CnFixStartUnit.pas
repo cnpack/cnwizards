@@ -360,7 +360,6 @@ begin
       begin
         CnLanguageManager.CurrentLanguageIndex := I;
         TranslateStrings;
-        CnLanguageManager.TranslateForm(Self);
         Break;
       end;
     end;
