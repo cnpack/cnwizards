@@ -43,10 +43,13 @@ interface
 {$ENDIF}
 
 uses
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, Buttons, ExtCtrls, ComCtrls, Menus, CnCommon;
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  StdCtrls, Buttons, ExtCtrls, ComCtrls, Menus, CnCommon, CnWideCtrls;
 
 type
+
+{$I WideCtrls.inc}
+
   TCnDirListForm = class(TForm)
     Panel1: TPanel;
     edtDir: TEdit;

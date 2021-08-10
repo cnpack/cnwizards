@@ -40,9 +40,13 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Registry,
   Dialogs, ExtCtrls, StdCtrls, Buttons, CnAppBuilderInfo, ComCtrls, CheckLst,
   ImgList, ShellApi, CleanClass, CnCommon, CnWizCompilerConst, CnWizMultiLang, 
-  CnBHConst, CnLangMgr, CnLangStorage, CnHashLangStorage, CnClasses, CnWizLangID;
+  CnBHConst, CnLangMgr, CnLangStorage, CnHashLangStorage, CnClasses, CnWizLangID,
+  CnWideCtrls;
 
 type
+
+{$I WideCtrls.inc}
+
   TCnIdeBRMainForm = class(TCnTranslateForm)
     btnNext: TBitBtn;
     btnAbout: TBitBtn;

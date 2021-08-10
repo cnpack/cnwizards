@@ -6,7 +6,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, ComCtrls, Buttons, Contnrs, Registry, CnCommon,
   CnWizCompilerConst, ImgList, CnLangStorage, CnHashLangStorage, CnClasses,
-  CnLangMgr, CnWizLangID;
+  CnLangMgr, CnWizLangID, CnWideCtrls;
 
 const
   KEY_MAPPING_DELPHI_START: TCnCompiler = cnDelphiXE8;  // 从 XE8 起就可能有 KeyMapping 的毛病
@@ -14,6 +14,9 @@ const
     2); // 去掉 BCB5/6
 
 type
+
+{$I WideCtrls.inc}
+
   TCnKeyMappingCheckResult = class
   {* 一个 IDE 的 KeyMapping 优先级结果}
   private

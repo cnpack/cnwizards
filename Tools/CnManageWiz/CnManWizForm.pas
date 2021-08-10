@@ -42,7 +42,7 @@ uses
   ExtCtrls, StdCtrls, Buttons, ComCtrls, ToolWin, ActnList, ImgList, Registry,
   Contnrs, ShellAPI, Menus, IniFiles, ActiveX,
   CnCommon, CnWizCompilerConst, CnShellUtils, CnLangStorage, CnHashLangStorage,
-  CnClasses, CnLangMgr, CnWizLangID, CnWizHelp;
+  CnClasses, CnLangMgr, CnWizLangID, CnWizHelp, CnWideCtrls;
 
 const
   csCnPackRegPath = '\Software\CnPack\CnWizards\';
@@ -57,6 +57,9 @@ var
   IDEWizardsChanged: array[TCnCompiler] of Boolean;
 
 type
+
+{$I WideCtrls.inc}
+
   TCnWizardItem = class(TPersistent)
   {* 描述一专家条目}
   private

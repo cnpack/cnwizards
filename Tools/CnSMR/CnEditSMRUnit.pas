@@ -37,17 +37,12 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Grids, ADODB,
-  Dialogs, Menus, StdCtrls, Buttons, ExtCtrls, DB, DBCtrls, DBGrids, CnCommon,
-  CnMainUnit, CnSMRBplUtils, CnBaseUtils, CnSMRUtils, ActnList, AppEvnts;
+  Dialogs, Menus, StdCtrls, Buttons, ExtCtrls, DB, DBCtrls, DBGrids, ActnList,
+  AppEvnts, CnCommon, CnMainUnit, CnSMRBplUtils, CnBaseUtils, CnSMRUtils, CnWideCtrls;
 
 type
-{
-  TStringGrid = class(Grids.TStringGrid)
-  protected
-    function GetEditStyle(ACol, ARow: Longint): TEditStyle; override;
-    function CreateEditor: TInplaceEdit; override;
-  end;
-//}
+
+{$I WideCtrls.inc}
 
   TCnEditSMRForm = class(TForm, IUIInitializable)
     lblOpenedFile: TLabel;

@@ -44,11 +44,13 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, Buttons, ExtCtrls, ComCtrls, Menus, IniFiles, 
-  CnLangMgr, CnClasses, CnLangStorage, CnHashLangStorage, CnWizLangID,
-  ActnList;
+  StdCtrls, Buttons, ExtCtrls, ComCtrls, Menus, IniFiles, ActnList,
+  CnLangMgr, CnClasses, CnLangStorage, CnHashLangStorage, CnWizLangID, CnWideCtrls;
 
 type
+
+{$I WideCtrls.inc}
+
   TGetOpenedFilesProc = procedure (Sender: TObject; Files: TStrings; AllFiles: Boolean);
   TGetOpenedFilesProcObject = procedure (Files: TStrings; AllFiles: Boolean) of object;
   TPrevNextProc = procedure (const s: string) of object;

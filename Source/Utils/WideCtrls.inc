@@ -1,0 +1,3 @@
+
+  TLabel = class(TCnWideLabel)
+  end;

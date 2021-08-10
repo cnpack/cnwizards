@@ -37,9 +37,13 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Buttons,
-  Dialogs, StdCtrls, ExtCtrls, ComCtrls, Menus, CnSMRBplUtils, CnMainUnit;
+  Dialogs, StdCtrls, ExtCtrls, ComCtrls, Menus, CnSMRBplUtils, CnMainUnit,
+  CnWideCtrls;
 
 type
+
+{$I WideCtrls.inc}
+
   TCnEditARFForm = class(TForm, IUIInitializable)
     odOpenFiles: TOpenDialog;
     sdAnalyseResults: TSaveDialog;

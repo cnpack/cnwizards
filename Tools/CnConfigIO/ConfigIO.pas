@@ -41,7 +41,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   Registry, ExtCtrls, StdCtrls, FileCtrl, CnCommon, CnConsts, CnWizLangID,
   CnLangTranslator, CnLangStorage, CnHashLangStorage, CnLangMgr, CnClasses,
-  CnWizCfgUtils;
+  CnWizCfgUtils, CnWideCtrls;
 
 const
   SCnWizardsReg = 'CnWizards.reg';
@@ -79,6 +79,9 @@ var
     'Copyright (C) 2001-2021 CnPack Team';
 
 type
+
+{$I WideCtrls.inc}
+
   TFrmConfigIO = class(TForm)
     Label1: TLabel;
     Bevel1: TBevel;
@@ -101,7 +104,6 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
   private
-    { Private declarations }
     FDone: Boolean;
     FRegPath: string;
     FRegFile: string;
@@ -122,7 +124,6 @@ type
     procedure DoCreate; override;
     procedure TranslateStrings;
   public
-    { Public declarations }
     procedure BackupToFile(const FileName: string);
     procedure RestoreFromFile(const FileName: string);
     procedure RestoreDef;

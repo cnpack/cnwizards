@@ -40,9 +40,12 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, Buttons, ComCtrls, FileCtrl, CnLangTranslator, CnLangStorage,
-  CnHashLangStorage, CnLangMgr, CnClasses;
+  CnHashLangStorage, CnLangMgr, CnClasses, CnWideCtrls;
 
 type
+
+{$I WideCtrls.inc}
+
   TCnDTMainForm = class(TForm)
     GroupBox1: TGroupBox;
     rbFile: TRadioButton;

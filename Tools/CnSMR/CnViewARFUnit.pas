@@ -38,9 +38,12 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Menus,
   Dialogs, StdCtrls, Buttons, ExtCtrls, ComCtrls,
-  CnMainUnit, CnSMRBplUtils, CnBaseUtils;
+  CnMainUnit, CnSMRBplUtils, CnBaseUtils, CnWideCtrls;
 
 type
+
+{$I WideCtrls.inc}
+
   TCnViewARFForm = class(TForm, IUIInitializable)
     sbLeft: TScrollBox;
     gpAnalyseBtns: TPanel;

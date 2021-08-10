@@ -36,10 +36,13 @@ unit CnViewSMRUnit;
 interface
 
 uses
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
-  Dialogs, CnMainUnit, StdCtrls, Buttons, ExtCtrls, CnSMRUtils, Menus;
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Menus,
+  Dialogs, StdCtrls, Buttons, ExtCtrls, CnSMRUtils, CnMainUnit, CnWideCtrls;
 
 type
+
+{$I WideCtrls.inc}
+
   TCnViewSMRForm = class(TForm, IUIInitializable)
     gpAnalyse: TPanel;
     pnlImpAffectModules: TPanel;

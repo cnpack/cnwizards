@@ -37,9 +37,12 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, Menus, CnCommon;
+  Dialogs, StdCtrls, Menus, CnCommon, CnWideCtrls;
 
 type
+
+{$I WideCtrls.inc}
+
   TCnSelectMaskForm = class(TForm)
     btnOK: TButton;
     btnCancel: TButton;

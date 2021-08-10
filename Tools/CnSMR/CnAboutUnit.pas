@@ -38,9 +38,12 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
   Dialogs, CnMainUnit, StdCtrls, ExtCtrls, CnClasses, CnLangStorage,
-  CnHashLangStorage, Buttons, CnCommon;
+  CnHashLangStorage, Buttons, CnCommon, CnWideCtrls;
 
 type
+
+{$I WideCtrls.inc}
+
   TCnAboutForm = class(TForm)
     GridPanel1: TPanel;
     Label2: TLabel;
