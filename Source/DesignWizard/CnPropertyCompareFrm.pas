@@ -289,15 +289,12 @@ procedure CompareTwoObjects(ALeft: TObject; ARight: TObject);
 var
   CompareForm: TCnPropertyCompareForm;
 begin
-  if (ALeft <> nil) and (ARight <> nil) and (ALeft <> ARight) then
-  begin
-    CompareForm := TCnPropertyCompareForm.Create(Application);
-    CompareForm.LeftObject := ALeft;
-    CompareForm.RightObject := ARight;
-    CompareForm.LoadProperties;
-    CompareForm.ShowProperties;
-    CompareForm.Show;
-  end;
+  CompareForm := TCnPropertyCompareForm.Create(Application);
+  CompareForm.LeftObject := ALeft;
+  CompareForm.RightObject := ARight;
+  CompareForm.LoadProperties;
+  CompareForm.ShowProperties;
+  CompareForm.Show;
 end;
 
 procedure DrawTinyDotLine(Canvas: TCanvas; X1, X2, Y1, Y2: Integer);
@@ -1379,10 +1376,10 @@ begin
 
   if Action = actPropertyToLeft then
     (Action as TCustomAction).Enabled := (Pr <> nil) and not Pr.IsSingle
-      and (Pl <> nil) and Pl.CanModify
+      and (Pl <> nil) and Pl.CanModify and (Pl.DisplayValue <> Pr.DisplayValue)
   else if Action = actPropertyToRight then
     (Action as TCustomAction).Enabled := (Pl <> nil) and not Pl.IsSingle
-      and (Pr <> nil) and Pr.CanModify
+      and (Pr <> nil) and Pr.CanModify and (Pl.DisplayValue <> Pr.DisplayValue)
   else if Action = actCompareObjProp then
     (Action as TCustomAction).Enabled := (Pl <> nil) and Pl.IsObjOrIntf
      and (Pr <> nil) and Pr.IsObjOrIntf and ((Pl.ObjValue <> nil) or (Pr.ObjValue <> nil));

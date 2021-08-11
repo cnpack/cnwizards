@@ -1195,6 +1195,8 @@ var
   SCnNonArrangeHint: string = 'Arrange the Non-visual Components';
   SCnListCompCaption: string = 'Locate Components...';
   SCnListCompHint: string = 'Search and Locate Components in Designer';
+  SCnComparePropertyCaption: string = 'Compare Properties...';
+  SCnComparePropertyHint: string = 'Compare Properties for Selected Components';
   SCnCompToCodeCaption: string = 'Convert to Code...';
   SCnCompToCodeHint: string = 'Convert Selected Components to Creating Code';
   SCnHideComponentCaption: string = 'Hide Non-visual';

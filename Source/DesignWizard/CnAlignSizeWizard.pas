@@ -31,7 +31,9 @@ unit CnAlignSizeWizard;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin2000 + Delphi 5
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2011.10.03 by LiuXiao
+* 修改记录：2021.08.11 by LiuXiao
+*               增加组件比较的入口
+*           2011.10.03 by LiuXiao
 *               使用一批封装 Control 操作的函数以支持 FMX 框架
 *           2004.12.04 by 周劲羽
 *               大量修改和重构，支持更多的功能
@@ -70,7 +72,7 @@ uses
 {$IFDEF IDE_ACTION_UPDATE_DELAY} ActnMenus, ActnMan, {$ENDIF}
   Buttons, Menus, CnWizClasses, CnWizMenuAction, CnWizUtils, CnEventBus,
   CnConsts, CnWizNotifier, CnWizConsts, CnWizManager, CnVclFmxMixed,
-  StdCtrls, CnSpin, CnWizIdeUtils, CnCommon, CnWizMultiLang;
+  StdCtrls, CnSpin, CnWizIdeUtils, CnCommon, CnWizMultiLang, CnPropertyCompareFrm;
 
 type
 
@@ -91,8 +93,8 @@ type
     asParentHCenter, asParentVCenter, asBringToFront, asSendToBack,
     asSnapToGrid, {$IFDEF IDE_HAS_GUIDE_LINE} asUseGuidelines, {$ENDIF} asAlignToGrid,
     asSizeToGrid, asLockControls, asSelectRoot, asCopyCompName, asCopyCompClass,
-    asHideComponent,
-    asNonArrange, asListComp, asCompToCode, asCompRename, asShowFlatForm);
+    asHideComponent, asNonArrange, asListComp, asCompareProp, asCompToCode, 
+    asCompRename, asShowFlatForm);
 
   TNonArrangeStyle = (asRow, asCol);
   TNonMoveStyle = (msLeftTop, msRightTop, msLeftBottom, msRightBottom, msCenter);
@@ -109,6 +111,7 @@ type
     FSizeSpace: Integer;
     FIDELockControlsMenu: TMenuItem;
     FIDEHideNonvisualsMenu: TMenuItem;
+    FPropertyCompare: TCnPropertyCompareManager;
 
 {$IFDEF IDE_ACTION_UPDATE_DELAY}
     FIDEMenuBar: TCustomActionMenuBar;
@@ -217,11 +220,11 @@ type
     procedure UpdateControls(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
   private
-    { Private declarations }
+
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+
   end;
 
 {$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}
@@ -283,7 +286,7 @@ const
   csAlignNeedControls: array[TAlignSizeStyle] of Integer = (2, 2, 2, 2, 2, 2,
     3, 2, 2, 2, 2, 3, 2, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 0,
     {$IFDEF IDE_HAS_GUIDE_LINE} 0, {$ENDIF} 1, 1, -1, -1, -1, -1,
-    0, 0, 0, 0, 1, -1);
+    0, 0, 0, 0, 0, 1, -1);
 
   csAlignNeedSepMenu: set of TAlignSizeStyle =
     [asAlignVCenter, asSpaceRemoveV, asMakeSameSize, asParentVCenter,
@@ -299,8 +302,8 @@ const
     'CnParentVCenter', 'CnBringToFront', 'CnSendToBack', 'CnSnapToGrid',
     {$IFDEF IDE_HAS_GUIDE_LINE} 'CnUseGuidelines', {$ENDIF}
     'CnAlignToGrid', 'CnSizeToGrid', 'CnLockControls', 'CnSelectRoot',
-    'CnCopyCompName', 'CnCopyCompClass', 'CnHideComponent',
-    'CnNonArrange', 'CnListComp', 'CnCompToCode', 'CnCompRename', 'CnShowFlatForm');
+    'CnCopyCompName', 'CnCopyCompClass', 'CnHideComponent', 'CnNonArrange',
+    'CnListComp', 'CompareProp', 'CnCompToCode', 'CnCompRename', 'CnShowFlatForm');
 
   csAlignSizeCaptions: array[TAlignSizeStyle] of PString = (
     @SCnAlignLeftCaption, @SCnAlignRightCaption, @SCnAlignTopCaption,
@@ -315,8 +318,8 @@ const
     {$IFDEF IDE_HAS_GUIDE_LINE} @SCnUseGuidelinesCaption, {$ENDIF}
     @SCnAlignToGridCaption, @SCnSizeToGridCaption, @SCnLockControlsCaption,
     @SCnSelectRootCaption, @SCnCopyCompNameCaption, @SCnCopyCompClassCaption,
-    @SCnHideComponentCaption,
-    @SCnNonArrangeCaption, @SCnListCompCaption, @SCnCompToCodeCaption,
+    @SCnHideComponentCaption, @SCnNonArrangeCaption,
+    @SCnListCompCaption, @SCnComparePropertyCaption, @SCnCompToCodeCaption,
     @SCnFloatPropBarRenameCaption, @SCnShowFlatFormCaption);
 
   csAlignSizeHints: array[TAlignSizeStyle] of PString = (
@@ -332,8 +335,8 @@ const
     {$IFDEF IDE_HAS_GUIDE_LINE} @SCnUseGuidelinesHint, {$ENDIF}
     @SCnAlignToGridHint, @SCnSizeToGridHint, @SCnLockControlsHint,
     @SCnSelectRootHint, @SCnCopyCompNameHint, @SCnCopyCompClassHint,
-    @SCnHideComponentHint,
-    @SCnNonArrangeHint, @SCnListCompHint, @SCnCompToCodeHint,
+    @SCnHideComponentHint, @SCnNonArrangeHint, @SCnListCompHint,
+    @SCnComparePropertyHint, @SCnCompToCodeHint,
     @SCnFloatPropBarRenameCaption, @SCnShowFlatFormHint);
 
 {$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
@@ -362,6 +365,7 @@ type
 constructor TCnAlignSizeWizard.Create;
 begin
   inherited;
+  FPropertyCompare := TCnPropertyCompareManager.Create(nil);
 {$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
 {$IFDEF SUPPORT_PASCAL_SCRIPT}
   FScriptsDesignExecutors := TObjectList.Create(False);
@@ -384,6 +388,7 @@ begin
   FScriptsDesignExecutors.Free;
 {$ENDIF}
 {$ENDIF}
+  FPropertyCompare.Free;
   inherited;
 end;
 
@@ -436,10 +441,10 @@ end;
 procedure TCnAlignSizeWizard.DoAlignSize(AlignSizeStyle: TAlignSizeStyle);
 var
   I, AWidth, AHeight, ALeft, ATop: Integer;
-  AParent: TComponent;
+  AParent, ALeftComp, ARightComp: TComponent;
   Count, Value: Integer;
   Curr: Double;
-  ControlList: TList;
+  ControlList, CompList: TList;
   AList: TList;
   R1, R2, R3: TRect;
   GridSizeX, GridSizeY: Integer;
@@ -801,7 +806,7 @@ begin
         end;
       asListComp:
         begin
-          //  弹出列表供选择
+          // 弹出列表供选择
           Ini := CreateIniFile();
           try
             CnListComponent(Ini);
@@ -809,7 +814,20 @@ begin
             Ini.Free;
           end;
           IsModified := False;
-        end;  
+        end;
+      asCompareProp:
+        begin
+          // 有选择一个就比一个，没选择就空弹
+          CompList := TList.Create;
+          CnOtaGetSelectedComponentFromCurrentForm(CompList);
+          ALeftComp := nil;
+          ARightComp := nil;
+          if CompList.Count > 0 then
+            ALeftComp := TComponent(CompList[0]);
+          if CompList.Count > 1 then
+            ARightComp := TComponent( CompList[1]);
+          CompareTwoObjects(ALeftComp, ARightComp);
+        end;
       asCompToCode:
         begin
           ShowCompToCodeForm.RefreshCode;
@@ -1501,6 +1519,8 @@ begin
   FPerColCount := Ini.ReadInteger('', csPerColCount, csDefPerColCount);
   FSortByClassName := Ini.ReadBool('', csSortByClassName, True);
   FSizeSpace := Ini.ReadInteger('', csSizeSpace, csDefSizeSpace);
+
+  FPropertyCompare.LoadSettings(Ini);
 end;
 
 // 保存专家设置
@@ -1515,6 +1535,8 @@ begin
   Ini.WriteInteger('', csPerColCount, FPerColCount);
   Ini.WriteBool('', csSortByClassName, FSortByClassName);
   Ini.WriteInteger('', csSizeSpace, FSizeSpace);
+
+  FPropertyCompare.SaveSettings(Ini);
 end;
 
 // 取专家菜单标题

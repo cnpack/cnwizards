@@ -878,13 +878,14 @@ begin
   TranslateStr(SCnNonArrangeHint, 'SCnNonArrangeHint');
   TranslateStr(SCnListCompCaption, 'SCnListCompCaption');
   TranslateStr(SCnListCompHint, 'SCnListCompHint');
+  TranslateStr(SCnComparePropertyCaption, 'SCnComparePropertyCaption');
+  TranslateStr(SCnComparePropertyHint, 'SCnComparePropertyHint');
   TranslateStr(SCnCompToCodeCaption, 'SCnCompToCodeCaption');
   TranslateStr(SCnCompToCodeHint, 'SCnCompToCodeHint');
   TranslateStr(SCnHideComponentCaption, 'SCnHideComponentCaption');
   TranslateStr(SCnHideComponentHint, 'SCnHideComponentHint');
   TranslateStr(SCnShowFlatFormCaption, 'SCnShowFlatFormCaption');
   TranslateStr(SCnShowFlatFormHint, 'SCnShowFlatFormHint');
-
   TranslateStr(SCnListComponentCount, 'SCnListComponentCount');
   TranslateStr(SCnCompToCodeEnvNotSupport, 'SCnCompToCodeEnvNotSupport');
   TranslateStr(SCnCompToCodeProcCopiedFmt, 'SCnCompToCodeProcCopiedFmt');
