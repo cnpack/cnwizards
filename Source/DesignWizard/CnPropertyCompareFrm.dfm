@@ -331,6 +331,7 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       Caption = '&Refresh'
       Hint = 'Refresh Properties'
       ImageIndex = 64
+      ShortCut = 116
       OnExecute = actRefreshExecute
     end
     object actPrevDiff: TAction
@@ -377,10 +378,12 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       Caption = '&Help'
       Hint = 'Display Help'
       ImageIndex = 1
+      ShortCut = 112
       OnExecute = actHelpExecute
     end
   end
   object pmGrid: TPopupMenu
+    Images = dmCnSharedImages.Images
     Left = 128
     Top = 501
     object ToLeft1: TMenuItem

@@ -1707,6 +1707,9 @@ var
         for j := 0 to FFreqProp.Count - 1 do
         begin
           PInfo := GetPropInfoIncludeSub(AObj, FFreqProp[j], csTypeInfoSimple);
+          if PInfo = nil then
+            Continue;
+
           if SameText(FFreqProp[j], PList[i]) and
             (PInfo.PropType^^.Kind = PTypeInfo(PList.Objects[i])^.Kind) and
             SameText(TypeInfoName(PInfo.PropType^), TypeInfoName(PTypeInfo(PList.Objects[i]))) then
@@ -1715,6 +1718,7 @@ var
             Break;
           end;
         end;
+
         if not PropValid then
           PList.Delete(i);
       end;
