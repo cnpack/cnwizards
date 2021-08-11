@@ -8,6 +8,10 @@ USEFORMNS("Config\CnWizSubActionShortCutFrm.pas", Cnwizsubactionshortcutfrm, CnW
 USEFORMNS("Config\CnWizMenuSortFrm.pas", Cnwizmenusortfrm, CnMenuSortFrm);
 USEFORMNS("DesignWizard\CnAlignSizeWizard.pas", Cnalignsizewizard, CnNonArrangeForm);
 USEFORMNS("CodingToolset\CnEditorToolsetWizard.pas", Cneditortoolsetwizard, CnEditorToolsForm);
+USEFORMNS("DesignWizard\CnListCompFrm.pas", Cnlistcompfrm, CnListCompForm);
+USEFORMNS("DesignWizard\CnPropertyCompareFrm.pas", Cnpropertycomparefrm, CnPropertyCompareForm);
+USEFORMNS("DesignWizard\CnPropertyCompConfigFrm.pas", Cnpropertycompconfigfrm, CnPropertyCompConfigForm);
+USEFORMNS("DesignWizard\CnCompToCodeFrm.pas", Cncomptocodefrm, CnCompToCodeForm);
 USEFORMNS("SimpleWizards\CnMessageBoxWizard.pas", Cnmessageboxwizard, CnMessageBoxForm);
 USEFORMNS("SimpleWizards\CnComponentSelector.pas", Cncomponentselector, CnComponentSelectorForm);
 USEFORMNS("SimpleWizards\CnTabOrderWizard.pas", Cntaborderwizard, CnTabOrderForm);
@@ -87,6 +91,7 @@ USEFORMNS("DesignEditors\CnPropEditorCustomizeFrm.pas", Cnpropeditorcustomizefrm
 USEFORMNS("ScriptWizard\CnScriptFrm.pas", Cnscriptfrm, CnScriptForm);
 USEFORMNS("ScriptWizard\CnScriptWizard.pas", Cnscriptwizard, CnScriptWizardForm);
 USEFORMNS("DesignEditors\CnImageListEditorFrm.pas", Cnimagelisteditorfrm, CnImageListEditorForm);
+USEFORMNS("CodeFormatter\CnCodeFormatterWizard.pas", Cncodeformatterwizard, CnCodeFormatterForm);
 //---------------------------------------------------------------------------
 This file is used by the project manager only and should be treated like the project file
 

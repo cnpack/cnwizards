@@ -23,6 +23,8 @@ USEUNIT("Utils\CnWizUtils.pas");
 USEFORMNS("DesignWizard\CnAlignSizeWizard.pas", Cnalignsizewizard, CnNonArrangeForm);
 USEFORMNS("CodingToolset\CnEditorToolsetWizard.pas", Cneditortoolsetwizard, CnEditorToolsForm);
 USEFORMNS("DesignWizard\CnListCompFrm.pas", Cnlistcompfrm, CnListCompForm);
+USEFORMNS("DesignWizard\CnPropertyCompareFrm.pas", Cnpropertycomparefrm, CnPropertyCompareForm);
+USEFORMNS("DesignWizard\CnPropertyCompConfigFrm.pas", Cnpropertycompconfigfrm, CnPropertyCompConfigForm);
 USEFORMNS("DesignWizard\CnCompToCodeFrm.pas", Cncomptocodefrm, CnCompToCodeForm);
 USEFORMNS("SimpleWizards\CnMessageBoxWizard.pas", Cnmessageboxwizard, CnMessageBoxForm);
 USEFORMNS("SimpleWizards\CnComponentSelector.pas", Cncomponentselector, CnComponentSelectorForm);
@@ -184,6 +186,7 @@ USEUNIT("Utils\CnImageProviderMgr.pas");
 USEUNIT("Utils\CnImageProvider_FindIcons.pas");
 USEUNIT("Utils\CnImageProvider_LocalCache.pas");
 USEUNIT("CodeFormatter\CnFormatterIntf.pas");
+USEFORMNS("CodeFormatter\CnCodeFormatterWizard.pas", Cncodeformatterwizard, CnCodeFormatterForm);
 //---------------------------------------------------------------------------
 This file is used by the project manager only and should be treated like the project file
 

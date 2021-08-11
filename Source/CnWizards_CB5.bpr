@@ -14,7 +14,8 @@
       ..\Dcu\CnWizConfigFrm.obj ..\Dcu\CnWizSubActionShortCutFrm.obj 
       ..\Dcu\CnWizMenuSortFrm.obj ..\Dcu\CnWizUtils.obj 
       ..\Dcu\CnAlignSizeWizard.obj ..\Dcu\CnEditorToolsetWizard.obj 
-      ..\Dcu\CnListCompFrm.obj ..\Dcu\CnCompToCodeFrm.obj 
+      ..\Dcu\CnListCompFrm.obj ..\Dcu\CnPropertyCompareFrm.obj 
+      ..\Dcu\CnPropertyCompConfigFrm.obj ..\Dcu\CnCompToCodeFrm.obj 
       ..\Dcu\CnMessageBoxWizard.obj ..\Dcu\CnComponentSelector.obj 
       ..\Dcu\CnTabOrderWizard.obj ..\Dcu\CnWizDfm6To5.obj 
       ..\Dcu\CnDfm6To5Wizard.obj ..\Dcu\CnBookmarkWizard.obj 
@@ -91,7 +92,8 @@
       ..\Dcu\CnImageListEditor.obj ..\Dcu\CnImageListEditorFrm.obj 
       ..\Dcu\CnImageProvider_IconFinder.obj ..\Dcu\CnImageProviderMgr.obj 
       ..\Dcu\CnImageProvider_FindIcons.obj ..\Dcu\CnImageProvider_LocalCache.obj 
-      ..\Dcu\CnFormatterIntf.obj ..\Dcu\CnWizards_CB5.obj"/>
+      ..\Dcu\CnFormatterIntf.obj ..\Dcu\CnCodeFormatterWizard.obj 
+      ..\Dcu\CnWizards_CB5.obj"/>
     <RESFILES value="CnWizards_CB5.res"/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
@@ -101,7 +103,8 @@
       MultiLang\CnWizMultiLang.dfm Config\CnWizConfigFrm.dfm 
       Config\CnWizSubActionShortCutFrm.dfm Config\CnWizMenuSortFrm.dfm 
       DesignWizard\CnAlignSizeWizard.dfm CodingToolset\CnEditorToolsetWizard.dfm 
-      DesignWizard\CnListCompFrm.dfm DesignWizard\CnCompToCodeFrm.dfm 
+      DesignWizard\CnListCompFrm.dfm DesignWizard\CnPropertyCompareFrm.dfm 
+      DesignWizard\CnPropertyCompConfigFrm.dfm DesignWizard\CnCompToCodeFrm.dfm 
       SimpleWizards\CnMessageBoxWizard.dfm SimpleWizards\CnComponentSelector.dfm 
       SimpleWizards\CnTabOrderWizard.dfm SimpleWizards\CnBookmarkWizard.dfm 
       SimpleWizards\CnBookmarkConfigFrm.dfm SrcTemplate\CnSrcTemplate.dfm 
@@ -155,7 +158,8 @@
       DesignEditors\CnPropEditorCustomizeFrm.dfm 
       IdeEnhancements\CnInputHelperEditFrm.dfm 
       IdeEnhancements\CnInputHelperFrm.dfm 
-      DesignEditors\CnImageListEditorFrm.dfm"/>
+      DesignEditors\CnImageListEditorFrm.dfm
+      CodeFormatter\CnCodeFormatterWizard.dfm"/>
     <LIBFILES value=""/>
     <LIBRARIES value="Inet50.lib vclie50.lib wininet.lib"/>
     <SPARELIBS value="vcl50.lib vclx50.lib wininet.lib dsnide50.lib vclie50.lib Inet50.lib"/>

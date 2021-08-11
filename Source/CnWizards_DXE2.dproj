@@ -179,6 +179,12 @@
 			<DCCReference Include="DesignWizard\CnListCompFrm.pas">
 				<Form>CnListCompForm</Form>
 			</DCCReference>
+			<DCCReference Include="DesignWizard\CnPropertyCompareFrm.pas">
+            <Form>CnPropertyCompareForm</Form>
+        </DCCReference>
+        <DCCReference Include="DesignWizard\CnPropertyCompConfigFrm.pas">
+            <Form>CnPropertyCompConfigForm</Form>
+        </DCCReference>
 			<DCCReference Include="DesignWizard\CnCompToCodeFrm.pas">
 				<Form>CnCompToCodeForm</Form>
 			</DCCReference>

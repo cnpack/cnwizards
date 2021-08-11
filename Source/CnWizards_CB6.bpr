@@ -15,6 +15,7 @@
       ..\Dcu\CnWizMenuSortFrm.obj ..\Dcu\CnWizUtils.obj 
       ..\Dcu\CnFastCodeWizard.obj ..\Dcu\CnAlignSizeWizard.obj 
       ..\Dcu\CnEditorToolsetWizard.obj ..\Dcu\CnListCompFrm.obj 
+      ..\Dcu\CnPropertyCompareFrm.obj ..\Dcu\CnPropertyCompConfigFrm.obj 
       ..\Dcu\CnCompToCodeFrm.obj ..\Dcu\CnMessageBoxWizard.obj 
       ..\Dcu\CnComponentSelector.obj ..\Dcu\CnTabOrderWizard.obj 
       ..\Dcu\CnBookmarkWizard.obj ..\Dcu\CnWizNotifier.obj 
@@ -90,7 +91,7 @@
       ..\Dcu\CnImageListEditor.obj ..\Dcu\CnImageListEditorFrm.obj 
       ..\Dcu\CnImageProvider_IconFinder.obj ..\Dcu\CnImageProviderMgr.obj 
       ..\Dcu\CnImageProvider_FindIcons.obj ..\Dcu\CnImageProvider_LocalCache.obj 
-      ..\Dcu\CnFormatterIntf.obj"/>
+      ..\Dcu\CnFormatterIntf.obj ..\Dcu\CnCodeFormatterWizard.obj"/>
     <RESFILES value="CnWizards_CB6.res"/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
@@ -100,6 +101,8 @@
       MultiLang\CnWizMultiLang.dfm Config\CnWizConfigFrm.dfm 
       Config\CnWizSubActionShortCutFrm.dfm Config\CnWizMenuSortFrm.dfm 
       DesignWizard\CnAlignSizeWizard.dfm CodingToolset\CnEditorToolsetWizard.dfm 
+      DesignWizard\CnListCompFrm.dfm DesignWizard\CnPropertyCompareFrm.dfm 
+      DesignWizard\CnPropertyCompConfigFrm.dfm DesignWizard\CnCompToCodeFrm.dfm 
       SimpleWizards\CnMessageBoxWizard.dfm SimpleWizards\CnComponentSelector.dfm 
       SimpleWizards\CnTabOrderWizard.dfm SimpleWizards\CnBookmarkWizard.dfm 
       SimpleWizards\CnBookmarkConfigFrm.dfm SrcTemplate\CnSrcTemplate.dfm 
@@ -153,7 +156,8 @@
       SrcEditorEnhance\CnSrcEditorWebSearch.dfm 
       DesignEditors\CnPropEditorCustomizeFrm.dfm ScriptWizard\CnScriptFrm.dfm 
       ScriptWizard\CnScriptWizard.dfm 
-      DesignEditors\CnImageListEditorFrm.dfm"/>
+      DesignEditors\CnImageListEditorFrm.dfm
+      CodeFormatter\CnCodeFormatterWizard.dfm"/>
     <LIBFILES value=""/>
     <LIBRARIES value="bcb2kaxserver.lib indy.lib dclocx.lib dbxcds.lib soaprtl.lib bcbie.lib 
       nmfast.lib dbexpress.lib inetdbxpress.lib inetdbbde.lib bcbsmp.lib 
@@ -237,6 +241,8 @@
       <FILE FILENAME="DesignWizard\CnAlignSizeWizard.pas" FORMNAME="CnNonArrangeForm" UNITNAME="CnAlignSizeWizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="CodingToolset\CnEditorToolsetWizard.pas" FORMNAME="CnEditorToolsForm" UNITNAME="Cneditortoolsetwizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="DesignWizard\CnListCompFrm.pas" FORMNAME="" UNITNAME="CnListCompFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="DesignWizard\CnPropertyCompareFrm.pas" FORMNAME="CnPropertyCompareForm" UNITNAME="CnPropertyCompareFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="DesignWizard\CnPropertyCompConfigFrm.pas" FORMNAME="CnPropertyCompConfigForm" UNITNAME="CnPropertyCompConfigFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="DesignWizard\CnCompToCodeFrm.pas" FORMNAME="" UNITNAME="CnCompToCodeFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="SimpleWizards\CnMessageBoxWizard.pas" FORMNAME="CnMessageBoxForm" UNITNAME="Cnmessageboxwizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="SimpleWizards\CnComponentSelector.pas" FORMNAME="CnComponentSelectorForm" UNITNAME="Cncomponentselector" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
@@ -394,6 +400,7 @@
       <FILE FILENAME="Utils\CnImageProvider_FindIcons.pas" FORMNAME="" UNITNAME="CnImageProvider_FindIcons" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnImageProvider_LocalCache.pas" FORMNAME="" UNITNAME="CnImageProvider_LocalCache" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="CodeFormatter\CnFormatterIntf.pas" FORMNAME="" UNITNAME="CnFormatterIntf" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="CodeFormatter\CnCodeFormatterWizard.pas" FORMNAME="CnCodeFormatterForm" UNITNAME="CnCodeFormatterWizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
   </FILELIST>
   <BUILDTOOLS>
   </BUILDTOOLS>

@@ -64,6 +64,8 @@ uses
   CnAlignSizeWizard in 'DesignWizard\CnAlignSizeWizard.pas' {CnNonArrangeForm},
   CnEditorToolsetWizard in 'CodingToolset\CnEditorToolsetWizard.pas' {CnEditorToolsForm},
   CnListCompFrm in 'DesignWizard\CnListCompFrm.pas' {CnListCompForm},
+  CnPropertyCompareFrm in 'DesignWizard\CnPropertyCompareFrm.pas' {CnPropertyCompareForm},
+  CnPropertyCompConfigFrm in 'DesignWizard\CnPropertyCompConfigFrm.pas' {CnPropertyCompConfigForm},
   CnCompToCodeFrm in 'DesignWizard\CnCompToCodeFrm.pas' {CnCompToCodeForm},
   CnMessageBoxWizard in 'SimpleWizards\CnMessageBoxWizard.pas' {CnMessageBoxForm},
   CnComponentSelector in 'SimpleWizards\CnComponentSelector.pas' {CnComponentSelectorForm},
