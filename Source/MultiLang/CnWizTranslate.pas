@@ -84,6 +84,76 @@ procedure CnTranslateConsts(Sender: TObject);
     TranslateStr(SCnPack_dejoy, 'SCnPack_dejoy');
   end;
 
+  procedure CnTranslateDesignConsts;
+  begin
+    //----------------------------------------------------------------------------
+    //  Design Editors
+    //----------------------------------------------------------------------------
+
+    // Design Editors Name
+    TranslateStr(SCnPropertyEditor, 'SCnPropertyEditor');
+    TranslateStr(SCnComponentEditor, 'SCnComponentEditor');
+    TranslateStr(SCnDesignEditorNameStr, 'SCnDesignEditorNameStr');
+    TranslateStr(SCnDesignEditorStateStr, 'SCnDesignEditorStateStr');
+    TranslateStr(SCnPropEditorConfigFormCaption, 'SCnPropEditorConfigFormCaption');
+    TranslateStr(SCnCompEditorCustomizeCaption, 'SCnCompEditorCustomizeCaption');
+    TranslateStr(SCnCompEditorCustomizeCaption1, 'SCnCompEditorCustomizeCaption1');
+    TranslateStr(SCnCompEditorCustomizeDesc, 'SCnCompEditorCustomizeDesc');
+
+    // Editors Name
+    TranslateStr(SCnStringPropEditorName, 'SCnStringPropEditorName');
+    TranslateStr(SCnHintPropEditorName, 'sCnHintPropEditorName');
+    TranslateStr(SCnStringsPropEditorName, 'SCnStringsPropEditorName');
+    TranslateStr(SCnFileNamePropEditorName, 'SCnFileNamePropEditorName');
+    TranslateStr(SCnSizeConstraintsPropEditorName, 'SCnSizeConstraintsPropEditorName');
+    TranslateStr(SCnFontPropEditorName, 'SCnFontPropEditorName');
+    TranslateStr(SCnControlScrollBarPropEditorName, 'SCnControlScrollBarPropEditorName');
+    TranslateStr(SCnBooleanPropEditorName, 'SCnBooleanPropEditorName');
+    TranslateStr(SCnAlignPropEditorName, 'SCnAlignPropEditorName');
+    TranslateStr(SCnSetPropEditorName, 'SCnSetPropEditorName');
+    TranslateStr(SCnNamePropEditorName, 'SCnNamePropEditorName');
+    TranslateStr(SCnImageListCompEditorName, 'SCnImageListCompEditorName');
+
+    // Editors Comment
+    TranslateStr(SCnStringPropEditorComment, 'SCnStringPropEditorComment');
+    TranslateStr(SCnHintPropEditorComment, 'sCnHintPropEditorComment');
+    TranslateStr(SCnStringsPropEditorComment, 'SCnStringsPropEditorComment');
+    TranslateStr(SCnFileNamePropEditorComment, 'SCnFileNamePropEditorComment');
+    TranslateStr(SCnSizeConstraintsPropEditorComment, 'SCnSizeConstraintsPropEditorComment');
+    TranslateStr(SCnFontPropEditorComment, 'SCnFontPropEditorComment');
+    TranslateStr(SCnControlScrollBarPropEditorComment, 'SCnControlScrollBarPropEditorComment');
+    TranslateStr(SCnBooleanPropEditorComment, 'SCnBooleanPropEditorComment');
+    TranslateStr(SCnAlignPropEditorComment, 'SCnAlignPropEditorComment');
+    TranslateStr(SCnSetPropEditorComment, 'SCnSetPropEditorComment');
+    TranslateStr(SCnNamePropEditorComment, 'SCnNamePropEditorComment');
+    TranslateStr(SCnImageListCompEditorComment, 'SCnImageListCompEditorComment');
+
+    // TCnMultiLineEditorForm
+    TranslateStr(SCnPropEditorNoMatch, 'SCnPropEditorNoMatch');
+    TranslateStr(SCnPropEditorReplaceOK, 'SCnPropEditorReplaceOK');
+    TranslateStr(SCnPropEditorCursorPos, 'SCnPropEditorCursorPos');
+    TranslateStr(SCnPropEditorSaveText, 'SCnPropEditorSaveText');
+
+    // TCnSizeConstraintsEditorForm
+    TranslateStr(SCnSizeConsInputError, 'SCnSizeConsInputError');
+    TranslateStr(SCnSizeConsInputNeg, 'SCnSizeConsInputNeg');
+
+    // TCnNamePropEditor
+    TranslateStr(SCnPrefixWizardNotExist, 'SCnPrefixWizardNotExist');
+
+    // TCnImageListEditor
+    TranslateStr(SCnImageListChangeSize, 'SCnImageListChangeSize');
+    TranslateStr(SCnImageListChangeXPStyle, 'SCnImageListChangeXPStyle');
+    TranslateStr(SCnImageListSearchFailed, 'SCnImageListSearchFailed');
+    TranslateStr(SCnImageListInvalidFile, 'SCnImageListInvalidFile');
+    TranslateStr(SCnImageListSepBmp, 'SCnImageListSepBmp');
+    TranslateStr(SCnImageListNoPngLib, 'SCnImageListNoPngLib');
+    TranslateStr(SCnImageListExportFailed, 'SCnImageListExportFailed');
+    TranslateStr(SCnImageListXPStyleNotSupport, 'SCnImageListXPStyleNotSupport');
+    TranslateStr(SCnImageListSearchIconsetFailed, 'SCnImageListSearchIconsetFailed');
+    TranslateStr(SCnImageListGotoPage, 'SCnImageListGotoPage');
+    TranslateStr(SCnImageListGotoPagePrompt, 'SCnImageListGotoPagePrompt');
+  end;
 begin
   // 如当前无语言，则不翻译
   if (CnLanguageManager = nil) or (CnLanguageManager.LanguageStorage = nil)
@@ -1050,74 +1120,6 @@ begin
   TranslateStr(SCnMenuCopyLinesToFile, 'SCnMenuCopyLinesToFile');
   TranslateStr(SCnMenuCopyLinesCaption, 'SCnMenuCopyLinesCaption');
 
-  //----------------------------------------------------------------------------
-  //  Design Editors
-  //----------------------------------------------------------------------------
-
-  // Design Editors Name
-  TranslateStr(SCnPropertyEditor, 'SCnPropertyEditor');
-  TranslateStr(SCnComponentEditor, 'SCnComponentEditor');
-  TranslateStr(SCnDesignEditorNameStr, 'SCnDesignEditorNameStr');
-  TranslateStr(SCnDesignEditorStateStr, 'SCnDesignEditorStateStr');
-  TranslateStr(SCnPropEditorConfigFormCaption, 'SCnPropEditorConfigFormCaption');
-  TranslateStr(SCnCompEditorCustomizeCaption, 'SCnCompEditorCustomizeCaption');
-  TranslateStr(SCnCompEditorCustomizeCaption1, 'SCnCompEditorCustomizeCaption1');
-  TranslateStr(SCnCompEditorCustomizeDesc, 'SCnCompEditorCustomizeDesc');
-
-  // Editors Name
-  TranslateStr(SCnStringPropEditorName, 'SCnStringPropEditorName');
-  TranslateStr(SCnHintPropEditorName, 'sCnHintPropEditorName');
-  TranslateStr(SCnStringsPropEditorName, 'SCnStringsPropEditorName');
-  TranslateStr(SCnFileNamePropEditorName, 'SCnFileNamePropEditorName');
-  TranslateStr(SCnSizeConstraintsPropEditorName, 'SCnSizeConstraintsPropEditorName');
-  TranslateStr(SCnFontPropEditorName, 'SCnFontPropEditorName');
-  TranslateStr(SCnControlScrollBarPropEditorName, 'SCnControlScrollBarPropEditorName');
-  TranslateStr(SCnBooleanPropEditorName, 'SCnBooleanPropEditorName');
-  TranslateStr(SCnAlignPropEditorName, 'SCnAlignPropEditorName');
-  TranslateStr(SCnSetPropEditorName, 'SCnSetPropEditorName');
-  TranslateStr(SCnNamePropEditorName, 'SCnNamePropEditorName');
-  TranslateStr(SCnImageListCompEditorName, 'SCnImageListCompEditorName');
-
-  // Editors Comment
-  TranslateStr(SCnStringPropEditorComment, 'SCnStringPropEditorComment');
-  TranslateStr(SCnHintPropEditorComment, 'sCnHintPropEditorComment');
-  TranslateStr(SCnStringsPropEditorComment, 'SCnStringsPropEditorComment');
-  TranslateStr(SCnFileNamePropEditorComment, 'SCnFileNamePropEditorComment');
-  TranslateStr(SCnSizeConstraintsPropEditorComment, 'SCnSizeConstraintsPropEditorComment');
-  TranslateStr(SCnFontPropEditorComment, 'SCnFontPropEditorComment');
-  TranslateStr(SCnControlScrollBarPropEditorComment, 'SCnControlScrollBarPropEditorComment');
-  TranslateStr(SCnBooleanPropEditorComment, 'SCnBooleanPropEditorComment');
-  TranslateStr(SCnAlignPropEditorComment, 'SCnAlignPropEditorComment');
-  TranslateStr(SCnSetPropEditorComment, 'SCnSetPropEditorComment');
-  TranslateStr(SCnNamePropEditorComment, 'SCnNamePropEditorComment');
-  TranslateStr(SCnImageListCompEditorComment, 'SCnImageListCompEditorComment');
-
-  // TCnMultiLineEditorForm
-  TranslateStr(SCnPropEditorNoMatch, 'SCnPropEditorNoMatch');
-  TranslateStr(SCnPropEditorReplaceOK, 'SCnPropEditorReplaceOK');
-  TranslateStr(SCnPropEditorCursorPos, 'SCnPropEditorCursorPos');
-  TranslateStr(SCnPropEditorSaveText, 'SCnPropEditorSaveText');
-
-  // TCnSizeConstraintsEditorForm
-  TranslateStr(SCnSizeConsInputError, 'SCnSizeConsInputError');
-  TranslateStr(SCnSizeConsInputNeg, 'SCnSizeConsInputNeg');
-
-  // TCnNamePropEditor
-  TranslateStr(SCnPrefixWizardNotExist, 'SCnPrefixWizardNotExist');
-
-  // TCnImageListEditor
-  TranslateStr(SCnImageListChangeSize, 'SCnImageListChangeSize');
-  TranslateStr(SCnImageListChangeXPStyle, 'SCnImageListChangeXPStyle');
-  TranslateStr(SCnImageListSearchFailed, 'SCnImageListSearchFailed');
-  TranslateStr(SCnImageListInvalidFile, 'SCnImageListInvalidFile');
-  TranslateStr(SCnImageListSepBmp, 'SCnImageListSepBmp');
-  TranslateStr(SCnImageListNoPngLib, 'SCnImageListNoPngLib');
-  TranslateStr(SCnImageListExportFailed, 'SCnImageListExportFailed');
-  TranslateStr(SCnImageListXPStyleNotSupport, 'SCnImageListXPStyleNotSupport');
-  TranslateStr(SCnImageListSearchIconsetFailed, 'SCnImageListSearchIconsetFailed');
-  TranslateStr(SCnImageListGotoPage, 'SCnImageListGotoPage');
-  TranslateStr(SCnImageListGotoPagePrompt, 'SCnImageListGotoPagePrompt');
-
   // CnResourceMgrWizard
   TranslateStr(SCnResMgrWizardMenuCaption, 'SCnResMgrWizardMenuCaption');
   TranslateStr(SCnResMgrWizardMenuHint, 'SCnResMgrWizardMenuHint');
@@ -1403,6 +1405,8 @@ begin
   TranslateStr(SCnMatchButtonFrameMenuAnyHint, 'SCnMatchButtonFrameMenuAnyHint');
   TranslateStr(SCnMatchButtonFrameMenuFuzzyCaption, 'SCnMatchButtonFrameMenuFuzzyCaption');
   TranslateStr(SCnMatchButtonFrameMenuFuzzyHint, 'SCnMatchButtonFrameMenuFuzzyHint');
+
+  CnTranslateDesignConsts;
 end;
 
 end.
