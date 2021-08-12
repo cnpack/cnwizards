@@ -303,7 +303,7 @@ const
     {$IFDEF IDE_HAS_GUIDE_LINE} 'CnUseGuidelines', {$ENDIF}
     'CnAlignToGrid', 'CnSizeToGrid', 'CnLockControls', 'CnSelectRoot',
     'CnCopyCompName', 'CnCopyCompClass', 'CnHideComponent', 'CnNonArrange',
-    'CnListComp', 'CompareProp', 'CnCompToCode', 'CnCompRename', 'CnShowFlatForm');
+    'CnListComp', 'CnCompareProp', 'CnCompToCode', 'CnCompRename', 'CnShowFlatForm');
 
   csAlignSizeCaptions: array[TAlignSizeStyle] of PString = (
     @SCnAlignLeftCaption, @SCnAlignRightCaption, @SCnAlignTopCaption,
