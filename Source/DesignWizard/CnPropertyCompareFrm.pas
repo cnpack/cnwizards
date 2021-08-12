@@ -1382,7 +1382,10 @@ begin
       and (Pr <> nil) and Pr.CanModify and (Pl.DisplayValue <> Pr.DisplayValue)
   else if Action = actCompareObjProp then
     (Action as TCustomAction).Enabled := (Pl <> nil) and Pl.IsObjOrIntf
-     and (Pr <> nil) and Pr.IsObjOrIntf and ((Pl.ObjValue <> nil) or (Pr.ObjValue <> nil));
+     and (Pr <> nil) and Pr.IsObjOrIntf and ((Pl.ObjValue <> nil) or (Pr.ObjValue <> nil))
+  else if (Action = actAllToLeft) or (Action = actAllToRight) or (Action = actPrevDiff)
+    or (Action = actNextDiff) then
+    (Action as TCustomAction).Enabled := (Pl <> nil) and (Pr <> nil);
 end;
 
 procedure TCnPropertyCompareForm.actPrevDiffExecute(Sender: TObject);
