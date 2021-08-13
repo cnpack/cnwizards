@@ -28,7 +28,9 @@ unit CnListCompFrm;
 * 开发平台：PWinXPPro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 修改记录：2018.03.24 V1.1
+* 修改记录：2021.08.13 V1.1
+*               增加一独立调用供外界选择组件
+*           2018.03.24 V1.1
 *               跟随基类重构
 *           2008.03.17 V1.0
 *               创建单元
@@ -84,10 +86,14 @@ type
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer; var StartOffset: Integer; MatchedIndexes: TList): Boolean; override;
   public
-    { Public declarations }
+
   end;
 
 function CnListComponent(Ini: TCustomIniFile): Boolean;
+{* 弹出选择界面并选中一个或多个组件}
+
+function CnListComponentForOne(Ini: TCustomIniFile): TComponent;
+{* 供外界调用以弹出界面并返回一个当前设计器上的组件}
 
 {$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}
 
@@ -109,13 +115,11 @@ type
   TCnCompInfo = class(TCnBaseElementInfo)
   private
     FCompClass: string;
-    // FCompName: string;
     FCaptionText: string;
     FComponent: TComponent;
     FIsControl: Boolean;
     FIsMenuItem: Boolean;
   public
-    // property CompName: string read FCompName write FCompName;
     property CompClass: string read FCompClass write FCompClass;
     property CaptionText: string read FCaptionText write FCaptionText;
     property IsControl: Boolean read FIsControl write FIsControl;
@@ -127,7 +131,6 @@ type
 
 var
   FDestList: IDesignerSelections;
-  FSourceList: IDesignerSelections;
 
 function CnListComponent(Ini: TCustomIniFile): Boolean;
 var
@@ -138,13 +141,10 @@ begin
   if FormDesigner = nil then Exit;
 
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('Root Class: %s', [FormDesigner.GetRootClassName]);
+  CnDebugger.LogFmt('ListComponent Root Class: %s', [FormDesigner.GetRootClassName]);
 {$ENDIF}
 
-  FSourceList := CreateSelectionList;
   FDestList := CreateSelectionList;
-  FormDesigner.GetSelections(FSourceList);
-
   with TCnListCompForm.Create(nil) do
   begin
     try
@@ -156,8 +156,46 @@ begin
       if Result then
         FormDesigner.SetSelections(FDestList);
     finally
-      FSourceList := nil; // 确保释放接口
-      FDestList := nil;
+      FDestList := nil;  // 确保释放接口
+      Free;
+    end;
+  end;
+end;
+
+function CnListComponentForOne(Ini: TCustomIniFile): TComponent;
+var
+  FormDesigner: IDesigner;
+begin
+  Result := nil;
+  FormDesigner := CnOtaGetFormDesigner;
+  if FormDesigner = nil then Exit;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('ListComponentForOne Root Class: %s', [FormDesigner.GetRootClassName]);
+{$ENDIF}
+
+  FDestList := CreateSelectionList;
+  with TCnListCompForm.Create(nil) do
+  begin
+    try
+      ShowHint := WizOptions.ShowHint;
+      LoadSettings(Ini, csListComp);
+      btnHookIDE.Visible := False;
+
+      if ShowModal = mrOk then
+      begin
+        if FDestList.Count > 0 then
+        begin
+{$IFDEF COMPILER6_UP}
+          Result := TComponent(FDestList[0]);
+{$ELSE}
+          Result := TComponent(ExtractPersistent(FDestList[0]));
+{$ENDIF}
+        end;
+      end;
+      SaveSettings(Ini, csListComp);
+    finally
+      FDestList := nil;  // 确保释放接口
       Free;
     end;
   end;
