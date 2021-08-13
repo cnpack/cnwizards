@@ -324,6 +324,15 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
     end
     object Select1: TMenuItem
       Caption = '&Select'
+      object SelectLeftComponent2: TMenuItem
+        Action = actListLeft
+      end
+      object SelectRightComponent1: TMenuItem
+        Action = actListRight
+      end
+      object N3: TMenuItem
+        Caption = '-'
+      end
       object SelectLeftComponent1: TMenuItem
         Action = actSelectLeft
       end
@@ -374,14 +383,18 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       OnExecute = actExitExecute
     end
     object actSelectLeft: TAction
-      Caption = 'Select &Left Component...'
-      Hint = 'Select Left Component from Current Designer to Compare'
+      Caption = 'Run Component Selector for Left...'
+      Hint = 
+        'Select Left Component with Component Selector from Current Desig' +
+        'ner to Compare'
       ImageIndex = 97
       OnExecute = actSelectLeftExecute
     end
     object actSelectRight: TAction
-      Caption = 'Select &Right Component...'
-      Hint = 'Select Right Component from Current Designer to Compare'
+      Caption = 'Run Component Selector for Right...'
+      Hint = 
+        'Select Right Component with Component Selector from Current Desi' +
+        'gner to Compare'
       ImageIndex = 98
       OnExecute = actSelectRightExecute
     end
@@ -450,6 +463,16 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       ImageIndex = 1
       ShortCut = 112
       OnExecute = actHelpExecute
+    end
+    object actListLeft: TAction
+      Caption = 'Select &Left Component...'
+      Hint = 'Select Left Component from Current Designer to Compare'
+      OnExecute = actListLeftExecute
+    end
+    object actListRight: TAction
+      Caption = 'Select &Right Component...'
+      Hint = 'Select Right Component from Current Designer to Compare'
+      OnExecute = actListRightExecute
     end
   end
   object pmGrid: TPopupMenu

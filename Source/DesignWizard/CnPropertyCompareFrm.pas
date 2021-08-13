@@ -35,7 +35,9 @@ unit CnPropertyCompareFrm;
 
 interface
 
-{$I CnPack.inc}
+{$I CnWizards.inc}
+
+{$IFDEF CNWIZARDS_CNALIGNSIZEWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, Contnrs,
@@ -194,6 +196,11 @@ type
     Options1: TMenuItem;
     btnOptions: TToolButton;
     btnExit: TToolButton;
+    actListLeft: TAction;
+    actListRight: TAction;
+    SelectLeftComponent2: TMenuItem;
+    SelectRightComponent1: TMenuItem;
+    N3: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure actSelectLeftExecute(Sender: TObject);
@@ -224,6 +231,8 @@ type
     procedure pbCompareMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure actOptionsExecute(Sender: TObject);
+    procedure actListLeftExecute(Sender: TObject);
+    procedure actListRightExecute(Sender: TObject);
   private
     FLeftObject: TObject;
     FRightObject: TObject;
@@ -254,12 +263,16 @@ type
 
 procedure CompareTwoObjects(ALeft: TObject; ARight: TObject);
 
+{$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}
+
 implementation
+
+{$IFDEF CNWIZARDS_CNALIGNSIZEWIZARD}
 
 {$R *.DFM}
 
 uses
-  {$IFDEF DEBUG} CnDebug, {$ENDIF} CnPropertyCompConfigFrm;
+  {$IFDEF DEBUG} CnDebug, {$ENDIF} CnPropertyCompConfigFrm, CnListCompFrm;
 
 const
   POS_SELECT_COLOR = clNavy;
@@ -1716,4 +1729,31 @@ begin
   end;
 end;
 
+procedure TCnPropertyCompareForm.actListLeftExecute(Sender: TObject);
+var
+  R: TObject;
+begin
+  R := CnListComponentForOne(nil);
+  if R <> nil then
+  begin
+    LeftObject := R;
+    LoadProperties;
+    ShowProperties;
+  end;
+end;
+
+procedure TCnPropertyCompareForm.actListRightExecute(Sender: TObject);
+var
+  R: TObject;
+begin
+  R := CnListComponentForOne(nil);
+  if R <> nil then
+  begin
+    RightObject := R;
+    LoadProperties;
+    ShowProperties;
+  end;
+end;
+
+{$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}
 end.

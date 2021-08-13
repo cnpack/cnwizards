@@ -35,7 +35,9 @@ unit CnPropertyCompConfigFrm;
 
 interface
 
-{$I CnPack.inc}
+{$I CnWizards.inc}
+
+{$IFDEF CNWIZARDS_CNALIGNSIZEWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
@@ -63,7 +65,11 @@ type
 var
   CnPropertyCompConfigForm: TCnPropertyCompConfigForm;
 
+{$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}
+
 implementation
+
+{$IFDEF CNWIZARDS_CNALIGNSIZEWIZARD}
 
 {$R *.DFM}
 
@@ -79,4 +85,5 @@ begin
   ShowFormHelp;
 end;
 
+{$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}
 end.

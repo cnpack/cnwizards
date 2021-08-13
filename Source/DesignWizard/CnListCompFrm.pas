@@ -149,10 +149,12 @@ begin
   begin
     try
       ShowHint := WizOptions.ShowHint;
-      LoadSettings(Ini, csListComp);
+      if Ini <> nil then
+        LoadSettings(Ini, csListComp);
 
       Result := ShowModal = mrOk;
-      SaveSettings(Ini, csListComp);
+      if Ini <> nil then
+        SaveSettings(Ini, csListComp);
       if Result then
         FormDesigner.SetSelections(FDestList);
     finally
@@ -179,7 +181,8 @@ begin
   begin
     try
       ShowHint := WizOptions.ShowHint;
-      LoadSettings(Ini, csListComp);
+      if Ini <> nil then
+        LoadSettings(Ini, csListComp);
       btnHookIDE.Visible := False;
 
       if ShowModal = mrOk then
@@ -193,7 +196,9 @@ begin
 {$ENDIF}
         end;
       end;
-      SaveSettings(Ini, csListComp);
+
+      if Ini <> nil then
+        SaveSettings(Ini, csListComp);
     finally
       FDestList := nil;  // 确保释放接口
       Free;
