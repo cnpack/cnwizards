@@ -69,6 +69,7 @@ type
     procedure actHookIDEExecute(Sender: TObject);
     procedure FormShow(Sender: TObject);
   private
+    FSingleMode: Boolean;
 
   protected
     function DoSelectOpenedItem: string; override;
@@ -86,7 +87,7 @@ type
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer; var StartOffset: Integer; MatchedIndexes: TList): Boolean; override;
   public
-
+    property SingleMode: Boolean read FSingleMode write FSingleMode;
   end;
 
 function CnListComponent(Ini: TCustomIniFile): Boolean;
@@ -180,10 +181,11 @@ begin
   with TCnListCompForm.Create(nil) do
   begin
     try
+      SingleMode := True;
+
       ShowHint := WizOptions.ShowHint;
       if Ini <> nil then
         LoadSettings(Ini, csListComp);
-      btnHookIDE.Visible := False;
 
       if ShowModal = mrOk then
       begin
@@ -339,7 +341,7 @@ end;
 
 procedure TCnListCompForm.UpdateComboBox;
 begin
-// Do nothing for Combo Hidden.
+  // Do nothing for Combo Hidden.
 end;
 
 function TCnListCompForm.DoSelectOpenedItem: string;
@@ -380,7 +382,17 @@ end;
 procedure TCnListCompForm.FormShow(Sender: TObject);
 begin
   inherited;
-  actHookIDE.Checked := False;
+
+  if FSingleMode then
+  begin
+    actHookIDE.Visible := False;
+    actSelectAll.Visible := False;
+    actSelectNone.Visible := False;
+    actSelectInvert.Visible := False;
+    actOpen.Visible := False;
+  end
+  else
+    actHookIDE.Checked := False;
 end;
 
 function TCnListCompForm.CanMatchDataByIndex(const AMatchStr: string;

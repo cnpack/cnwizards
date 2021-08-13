@@ -201,6 +201,8 @@ type
     SelectLeftComponent2: TMenuItem;
     SelectRightComponent1: TMenuItem;
     N3: TMenuItem;
+    btnListLeft: TToolButton;
+    btnListRight: TToolButton;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure actSelectLeftExecute(Sender: TObject);
@@ -251,6 +253,7 @@ type
       var LeftObj, RightObj: TCnDiffPropertyObject);
     procedure UpdateCompareBmp;
     procedure OnSyncSelect(var Msg: TMessage); message WM_SYNC_SELECT;
+    function CreateWizardIni: TCustomIniFile;
   protected
     function GetHelpTopic: string; override;
   public
@@ -272,7 +275,8 @@ implementation
 {$R *.DFM}
 
 uses
-  {$IFDEF DEBUG} CnDebug, {$ENDIF} CnPropertyCompConfigFrm, CnListCompFrm;
+  {$IFDEF DEBUG} CnDebug, {$ENDIF} CnPropertyCompConfigFrm
+  {$IFNDEF STAND_ALONE}, CnListCompFrm {$ENDIF};
 
 const
   POS_SELECT_COLOR = clNavy;
@@ -1730,29 +1734,63 @@ begin
 end;
 
 procedure TCnPropertyCompareForm.actListLeftExecute(Sender: TObject);
+{$IFNDEF STAND_ALONE}
 var
   R: TObject;
+  Ini: TCustomIniFile;
+{$ENDIF}
 begin
-  R := CnListComponentForOne(nil);
-  if R <> nil then
-  begin
-    LeftObject := R;
-    LoadProperties;
-    ShowProperties;
+{$IFNDEF STAND_ALONE}
+  Ini := CreateWizardIni;
+  try
+    R := CnListComponentForOne(Ini);
+    if R <> nil then
+    begin
+      LeftObject := R;
+      LoadProperties;
+      ShowProperties;
+    end;
+  finally
+    Ini.Free;
   end;
+{$ENDIF}
 end;
 
 procedure TCnPropertyCompareForm.actListRightExecute(Sender: TObject);
+{$IFNDEF STAND_ALONE}
 var
   R: TObject;
+  Ini: TCustomIniFile;
+{$ENDIF}
 begin
-  R := CnListComponentForOne(nil);
-  if R <> nil then
-  begin
-    RightObject := R;
-    LoadProperties;
-    ShowProperties;
+{$IFNDEF STAND_ALONE}
+  Ini := CreateWizardIni;
+  try
+    R := CnListComponentForOne(Ini);
+    if R <> nil then
+    begin
+      RightObject := R;
+      LoadProperties;
+      ShowProperties;
+    end;
+  finally
+    Ini.Free;
   end;
+{$ENDIF}
+end;
+
+function TCnPropertyCompareForm.CreateWizardIni: TCustomIniFile;
+{$IFNDEF STAND_ALONE}
+var
+  Wizard: TCnBaseWizard;
+{$ENDIF}
+begin
+  Result := nil;
+{$IFNDEF STAND_ALONE}
+  Wizard := CnWizardMgr.WizardByClassName('TCnAlignSizeWizard');
+  if Wizard <> nil then
+    Result := Wizard.CreateIniFile;
+{$ENDIF}
 end;
 
 {$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}
