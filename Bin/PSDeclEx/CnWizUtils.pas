@@ -550,6 +550,8 @@ function CnOtaGetDesignContainerFromEditor(FormEditor: IOTAFormEditor): TWinCont
 {* 取得窗体编辑器的容器控件}
 function CnOtaGetCurrentDesignContainer: TWinControl;
 {* 取得当前窗体编辑器的容器控件}
+function CnOtaGetSelectedComponentFromCurrentForm(List: TList): Boolean;
+{* 取得当前窗体编辑器的已选择的组件}
 function CnOtaGetSelectedControlFromCurrentForm(List: TList): Boolean;
 {* 取得当前窗体编辑器的已选择的控件}
 function CnOtaShowFormForModule(const Module: IOTAModule): Boolean;
@@ -1374,6 +1376,10 @@ begin
 end;
 
 function CnOtaGetCurrentDesignContainer: TWinControl;
+begin
+end;
+
+function CnOtaGetSelectedComponentFromCurrentForm(List: TList): Boolean;
 begin
 end;
 

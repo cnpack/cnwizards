@@ -836,16 +836,6 @@ var
     end;
   end;
 
-  function _IsCurrentToken(AView: Pointer; AControl: TControl;
-    Token: TCnGeneralPasToken): Boolean;
-  begin
-{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
-    Result := IsCurrentTokenW(AView, AControl, Token);
-{$ELSE}
-    Result := IsCurrentToken(AView, AControl, Token);
-{$ENDIF}
-  end;
-
 begin
   EditControl := CnOtaGetCurrentEditControl;
   if EditControl = nil then
@@ -908,7 +898,7 @@ begin
         PasParser.Tokens[I].EditLine := EditPos.Line;
 
         if (PasParser.Tokens[I].TokenID = tkIdentifier) and // 此处判断不支持双字节字符
-          _IsCurrentToken(Pointer(EditView), EditControl, PasParser.Tokens[I]) then
+          IsGeneralCurrentToken(Pointer(EditView), EditControl, PasParser.Tokens[I]) then
         begin
           if CurrentToken = nil then
           begin
@@ -971,7 +961,7 @@ begin
         CppParser.Tokens[I].EditLine := EditPos.Line;
 
         if (CppParser.Tokens[I].CppTokenKind = ctkidentifier) and
-          _IsCurrentToken(Pointer(EditView), EditControl, CppParser.Tokens[I]) then
+          IsGeneralCurrentToken(Pointer(EditView), EditControl, CppParser.Tokens[I]) then
         begin
           if CurrentToken = nil then
           begin

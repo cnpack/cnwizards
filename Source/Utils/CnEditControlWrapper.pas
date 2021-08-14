@@ -90,7 +90,7 @@ type
     ctFont,                   // 字体变更
     ctVScroll,                // 编辑器垂直滚动
     ctHScroll,                // 编辑器横向滚动
-    ctBlock,                  // 块变更
+    ctBlock,                  // 块变更，也就是选择范围或状态有变化
     ctModified,               // 编辑内容修改
     ctTopEditorChanged,       // 当前显示的上层编辑器变更
 {$IFDEF BDS}

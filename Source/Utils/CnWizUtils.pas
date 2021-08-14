@@ -5081,7 +5081,6 @@ begin
 {$ENDIF}
 end;
 
-
 // 取当前光标下的字符，允许偏移量
 function CnOtaGetCurrChar(OffsetX: Integer = 0; View: IOTAEditView = nil): Char;
 var
@@ -7470,7 +7469,8 @@ begin
   AToken.EditCol := EditPos.Col;
   AToken.EditLine := EditPos.Line;
 {$IFDEF IDE_STRING_ANSI_UTF8}
-  // D2005~2007下EditPos的Col是Utf8的，但绘制需要Ansi的，所以额外开个属性使用其AnsiIndex
+  // D2005~2007 下 EditPos 的 Col 是 Utf8 的，但绘制需要 Ansi 的，
+  // 所以额外开个属性使用其 AnsiIndex
   AToken.EditAnsiCol := AToken.AnsiIndex + 1;
 {$ENDIF}
 end;

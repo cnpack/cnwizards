@@ -252,6 +252,10 @@ function IsCurrentToken(AView: Pointer; AControl: TControl; Token: TCnPasToken):
 function IsCurrentTokenW(AView: Pointer; AControl: TControl; Token: TCnWidePasToken): Boolean;
 {* 判断标识符是否在光标下，同上，但使用 WideToken，可供 Unicode/Utf8 环境下调用}
 
+function IsGeneralCurrentToken(AView: Pointer; AControl: TControl;
+    Token: TCnGeneralPasToken): Boolean;
+{* 判断标识符是否在光标下，囊括以上两种情况}
+
 //==============================================================================
 // IDE 窗体编辑器功能函数
 //==============================================================================
@@ -1026,6 +1030,17 @@ begin
     Source.SaveToFile(FileName);
   Result := True;
 end;  
+
+// 判断标识符是否在光标下
+function IsGeneralCurrentToken(AView: Pointer; AControl: TControl;
+  Token: TCnGeneralPasToken): Boolean;
+begin
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+  Result := IsCurrentTokenW(AView, AControl, Token);
+{$ELSE}
+  Result := IsCurrentToken(AView, AControl, Token);
+{$ENDIF}
+end;
 
 // 判断标识符是否在光标下，各版本均可使用
 function IsCurrentToken(AView: Pointer; AControl: TControl; Token: TCnPasToken): Boolean;
@@ -2188,7 +2203,7 @@ begin
 {$ENDIF}
 end;
 
-// 当前是否在键盘宏的录制或D回放，不支持或不在返回 False
+// 当前是否在键盘宏的录制或回放，不支持或不在返回 False
 function IsKeyMacroRunning: Boolean;
 var
   Key: IOTAKeyboardServices;
