@@ -149,7 +149,7 @@ const
 type
   TCnLineStyle = (lsSolid, lsDot, lsSmallDot, lsTinyDot);
 
-  TBracketInfo = class
+  TCnBracketInfo = class
   {* 每个 EditControl 对应一个，管理本编辑器中的一个括号配对高亮信息}
   private
     FTokenStr: AnsiString;
@@ -184,12 +184,12 @@ type
 
   TBlockHighlightStyle = (bsNow, bsDelay, bsHotkey);
 
-  TBlockLineInfo = class;
+  TCnBlockLineInfo = class;
 
-  TCompDirectiveInfo = class;
+  TCnCompDirectiveInfo = class;
 
-  TBlockMatchInfo = class(TObject)
-  {* 每个 EditControl 对应一个，解析并管理本编辑器中所有的结构高亮信息}
+  TCnBlockMatchInfo = class(TObject)
+  {* 每个 EditControl 对应一个，解析并管理本编辑器中所有的结构高亮信息，注意 Tokens 均是引用}
   private
     FControl: TControl;
     FModified: Boolean;
@@ -199,12 +199,12 @@ type
     FCppParser: TCnGeneralCppStructParser;
 
     // *TokenList 容纳初步解析结果
-    FKeyTokenList: TCnList;           // 容纳解析出来的关键字 Tokens
-    FCurTokenList: TCnList;           // 容纳解析出来的与光标当前词相同的 Tokens
+    FKeyTokenList: TCnList;           // 容纳解析出来的关键字 Tokens 的引用
+    FCurTokenList: TCnList;           // 容纳解析出来的与光标当前词相同的 Tokens 的引用
     FCurTokenListEditLine: TCnList;   // 容纳解析出来的光标当前词相同的词的行数
     FCurTokenListEditCol: TCnList;    // 容纳解析出来的光标当前词相同的词的列数
-    FFlowTokenList: TCnList;          // 容纳解析出来的流程控制标识符的 Tokens
-    FCompDirectiveTokenList: TCnList; // 容纳解析出来的编译指令 Tokens
+    FFlowTokenList: TCnList;          // 容纳解析出来的流程控制标识符的 Tokens 的引用
+    FCompDirectiveTokenList: TCnList; // 容纳解析出来的编译指令 Tokens 的引用
 
     // *LineList 容纳快速访问结果
     FKeyLineList: TCnObjectList;      // 容纳按行方式存储的快速访问的关键字内容
@@ -213,8 +213,8 @@ type
     FSeparateLineList: TCnList;       // 容纳行方式存储的快速访问的分界空行信息
     FCompDirectiveLineList: TCnObjectList;  // 容纳行方式存储的快速访问的编译指令信息
 
-    FLineInfo: TBlockLineInfo;              // 容纳解析出来的 Tokens 配对信息
-    FCompDirectiveInfo: TCompDirectiveInfo; // 容纳解析出来的编译指令配对信息
+    FLineInfo: TCnBlockLineInfo;              // 容纳解析出来的 Tokens 配对信息
+    FCompDirectiveInfo: TCnCompDirectiveInfo; // 容纳解析出来的编译指令配对信息
 
     FStack: TStack;  // 解析关键字配对时以及解析 C 括号配对时以及 C 编译指令配对时以及 Pascal 编译指令配对时使用
     FIfThenStack: TStack;
@@ -304,13 +304,13 @@ type
     property PasParser: TCnGeneralPasStructParser read FPasParser;
     property CppParser: TCnGeneralCppStructParser read FCppParser;
 
-    property LineInfo: TBlockLineInfo read FLineInfo write FLineInfo;
+    property LineInfo: TCnBlockLineInfo read FLineInfo write FLineInfo;
     {* 画线高亮的配对信息，解析关键字高亮时顺便也解析}
-    property CompDirectiveInfo: TCompDirectiveInfo read FCompDirectiveInfo write FCompDirectiveInfo;
+    property CompDirectiveInfo: TCnCompDirectiveInfo read FCompDirectiveInfo write FCompDirectiveInfo;
     {* 编译指令的配对信息，解析关键字高亮时顺便也解析}
   end;
 
-  TBlockLinePair = class(TObject)
+  TCnBlockLinePair = class(TObject)
   {* 描述一根配对的线所对应的多个 Token 标记}
   private
     FTop: Integer;
@@ -336,7 +336,7 @@ type
     property StartToken: TCnGeneralPasToken read FStartToken write FStartToken;
     property EndToken: TCnGeneralPasToken read FEndToken write FEndToken;
     //property EndIsFirstTokenInLine: Boolean read FEndIsFirstTokenInLine write FEndIsFirstTokenInLine;
-    //{* 末尾是否是第一个Token}
+    //{* 末尾是否是第一个 Token}
 
     property StartLeft: Integer read FStartLeft write FStartLeft;
     {* 配对起始 Token 的 Column}
@@ -362,21 +362,21 @@ type
     {* 控制是否需要画竖线}
   end;
 
-  TCompDirectivePair = class(TBlockLinePair)
+  TCnCompDirectivePair = class(TCnBlockLinePair)
   {* 描述一组配对的编译指令所对应的多个 Token 标记，复用 TBlockLinePair}
   end;
 
-  TBlockLineInfo = class(TObject)
+  TCnBlockLineInfo = class(TObject)
   {* 每个 EditControl 对应一个，由对应的 BlockMatchInfo 转换而来，包括多个
-     LinePair.}
+     TCnBlockLinePair.}
   private
     FControl: TControl;
-    FPairList: TCnObjectList;
-    FKeyLineList: TCnObjectList;
-    FCurrentPair: TBlockLinePair;
+    FPairList: TCnObjectList;        // 容纳解析出来的 Pair 对象并管理
+    FKeyLineList: TCnObjectList;     // 容纳按行方式存储的快速访问的 Pair 对象并管理
+    FCurrentPair: TCnBlockLinePair;
     FCurrentToken: TCnGeneralPasToken;
     function GetCount: Integer;
-    function GetPairs(Index: Integer): TBlockLinePair;
+    function GetPairs(Index: Integer): TCnBlockLinePair;
     function GetLineCount: Integer;
     function GetLines(LineNum: Integer): TCnList;
     procedure ConvertLineList; // 转换成按行快速访问的
@@ -384,21 +384,21 @@ type
     constructor Create(AControl: TControl);
     destructor Destroy; override;
     procedure Clear;
-    procedure AddPair(Pair: TBlockLinePair);
+    procedure AddPair(Pair: TCnBlockLinePair);
     procedure FindCurrentPair(View: IOTAEditView; IsCppModule: Boolean = False); virtual;
     {* 寻找其中一个标识符在光标下的一组关键字对，使用 Ansi 模式，直接拿当前光标值
        与当前行文字计算而来，不涉及到语法解析，输出为 FCurrentPair 与 FCurrentToken。
        注意对 Unicode 标识符可能有问题。}
     property Control: TControl read FControl;
     property Count: Integer read GetCount;
-    property Pairs[Index: Integer]: TBlockLinePair read GetPairs;
+    property Pairs[Index: Integer]: TCnBlockLinePair read GetPairs;
     property LineCount: Integer read GetLineCount;
     property Lines[LineNum: Integer]: TCnList read GetLines;
-    property CurrentPair: TBlockLinePair read FCurrentPair;
+    property CurrentPair: TCnBlockLinePair read FCurrentPair;
     property CurrentToken: TCnGeneralPasToken read FCurrentToken;
   end;
 
-  TCompDirectiveInfo = class(TBlockLineInfo)
+  TCnCompDirectiveInfo = class(TCnBlockLineInfo)
   {* 每个 EditControl 对应一个，由对应的 BlockMatchInfo 转换而来，包括多个
      TCompDirectivePair. 实现上沿用 TBlockLineInfo，但输出的 TBlockLinePair
      实际上是 TCompDirectivePair}
@@ -406,7 +406,7 @@ type
     {* 寻找其中一个编译指令在光标下的一组编译指令对，使用 Ansi 模式}
   end;
 
-  TCurLineInfo = class(TObject)
+  TCnCurLineInfo = class(TObject)
   {* 每个 EditControl 对应一个，记录高亮当前行的信息}
   private
     FCurrentLine: Integer;
@@ -506,7 +506,7 @@ type
       AColor, AColorBk, AColorBd: TColor; ABold, AItalic, AUnderline: Boolean);
     function IndexOfBracket(EditControl: TControl): Integer;
     function GetBracketMatch(EditView: IOTAEditView; EditBuffer: IOTAEditBuffer;
-      EditControl: TControl; AInfo: TBracketInfo): Boolean;
+      EditControl: TControl; AInfo: TCnBracketInfo): Boolean;
     procedure CheckBracketMatch(Editor: TEditorObject);
 
     function IndexOfBlockMatch(EditControl: TControl): Integer;
@@ -525,7 +525,7 @@ type
     procedure EndUpdateEditor(Editor: TEditorObject);
     // 标记一行代码需要重画，只有在 BeginUpdateEditor 和 EndUpdateEditor 之间调用有效
     procedure EditorMarkLineDirty(LineNum: Integer);
-    procedure RefreshCurrentTokens(Info: TBlockMatchInfo);
+    procedure RefreshCurrentTokens(Info: TCnBlockMatchInfo);
     procedure UpdateHighlight(Editor: TEditorObject; ChangeType: TEditorChangeTypes);
     procedure ActiveFormChanged(Sender: TObject);
     procedure AfterCompile(Succeeded: Boolean; IsCodeInsight: Boolean);
@@ -1139,34 +1139,35 @@ end;
 function TokenIsMethodOrClassName(const Token, Name: string): Boolean;
 var
   I: Integer;
-  s, sName: string;
+  S, sName: string;
 begin
   Result := False;
   sName := Name;
   I := LastDelimiter('.', sName);
   if I > 0 then
-    s := Copy(sName, I + 1, MaxInt)
+    S := Copy(sName, I + 1, MaxInt)
   else
-    s := sName;
+    S := sName;
 
-  if AnsiSameText(Token, s) then
+  if AnsiSameText(Token, S) then
     Result := True;
+
   while (not Result) and (I > 0) do
   begin
     sName := Copy(sName, 1, I - 1);
     I := LastDelimiter('.', sName);
     if I > 0 then
-      s := Copy(sName, I + 1, MaxInt)
+      S := Copy(sName, I + 1, MaxInt)
     else
-      s := sName;
-    if AnsiSameText(Token, s) then
+      S := sName;
+    if AnsiSameText(Token, S) then
       Result := True;
   end;
 end;
 
 { TBracketInfo }
 
-constructor TBracketInfo.Create(AControl: TControl);
+constructor TCnBracketInfo.Create(AControl: TControl);
 begin
   inherited Create;
   FControl := AControl;
@@ -1175,7 +1176,7 @@ end;
 { TBlockMatchInfo }
 
 // 分析检查本 EditControl 中的结构高亮信息
-function TBlockMatchInfo.CheckBlockMatch(
+function TCnBlockMatchInfo.CheckBlockMatch(
   BlockHighlightRange: TBlockHighlightRange): Boolean;
 var
   EditView: IOTAEditView;
@@ -1467,7 +1468,7 @@ begin
   Modified := False;
 end;
 
-procedure TBlockMatchInfo.UpdateSeparateLineList;
+procedure TCnBlockMatchInfo.UpdateSeparateLineList;
 var
   MaxLine, I, J, LastSepLine, LastMethodCloseIdx: Integer;
   StateInMethodCloseStart: Boolean;
@@ -1530,7 +1531,7 @@ begin
   end;
 end;
 
-procedure TBlockMatchInfo.UpdateFlowTokenList;
+procedure TCnBlockMatchInfo.UpdateFlowTokenList;
 var
   EditView: IOTAEditView;
   CharPos: TOTACharPos;
@@ -1658,7 +1659,7 @@ begin
     FHighLight.EditorMarkLineDirty(TCnGeneralPasToken(FFlowTokenList[I]).EditLine);
 end;
 
-procedure TBlockMatchInfo.UpdateCurTokenList;
+procedure TCnBlockMatchInfo.UpdateCurTokenList;
 var
   EditView: IOTAEditView;
   CharPos: TOTACharPos;
@@ -1835,7 +1836,7 @@ begin
     FHighLight.EditorMarkLineDirty(TCnGeneralPasToken(FCurTokenList[I]).EditLine);
 end;
 
-procedure TBlockMatchInfo.UpdateCompDirectiveList;
+procedure TCnBlockMatchInfo.UpdateCompDirectiveList;
 var
   EditView: IOTAEditView;
   I: Integer;
@@ -1900,11 +1901,11 @@ begin
     FHighLight.EditorMarkLineDirty(TCnGeneralPasToken(FCompDirectiveTokenList[I]).EditLine);
 end;
 
-procedure TBlockMatchInfo.CheckLineMatch(View: IOTAEditView; IgnoreClass,
+procedure TCnBlockMatchInfo.CheckLineMatch(View: IOTAEditView; IgnoreClass,
   IgnoreNamespace: Boolean);
 var
   I: Integer;
-  Pair, PrevPair, IfThenPair: TBlockLinePair;
+  Pair, PrevPair, IfThenPair: TCnBlockLinePair;
   Token: TCnGeneralPasToken;
   CToken: TCnGeneralCppToken;
   IfThenSameLine, Added: Boolean;
@@ -1921,7 +1922,7 @@ begin
           CToken := TCnGeneralCppToken(FKeyTokenList[I]);
           if CToken.CppTokenKind = ctkbraceopen then
           begin
-            Pair := TBlockLinePair.Create;
+            Pair := TCnBlockLinePair.Create;
             Pair.StartToken := CToken;
             Pair.Top := CToken.EditLine;
             Pair.StartLeft := CToken.EditCol;
@@ -1935,7 +1936,7 @@ begin
             if FStack.Count = 0 then
               Continue;
 
-            Pair := TBlockLinePair(FStack.Pop);
+            Pair := TCnBlockLinePair(FStack.Pop);
 
             // 解析器里把 namespace 的左括号设成了 Tag = 1
             if IgnoreNamespace and (Pair.StartToken.Tag = 1) then
@@ -1958,7 +1959,7 @@ begin
         LineInfo.FindCurrentPair(View, FIsCppSource);
       finally
         for I := 0 to FStack.Count - 1 do
-          TBlockLinePair(FStack.Pop).Free;
+          TCnBlockLinePair(FStack.Pop).Free;
       end;
     end
     else // Pascal 的语法配对处理，复杂得多
@@ -1969,7 +1970,7 @@ begin
           Token := TCnGeneralPasToken(FKeyTokenList[I]);
           if Token.IsBlockStart then
           begin
-            Pair := TBlockLinePair.Create;
+            Pair := TCnBlockLinePair.Create;
             Pair.StartToken := Token;
             Pair.Top := Token.EditLine;
             Pair.StartLeft := Token.EditCol;
@@ -1983,7 +1984,7 @@ begin
             if FStack.Count = 0 then
               Continue;
 
-            Pair := TBlockLinePair(FStack.Pop);
+            Pair := TCnBlockLinePair(FStack.Pop);
 
             Pair.EndToken := Token;
             Pair.EndLeft := Token.EditCol;
@@ -2012,7 +2013,7 @@ begin
               // 判断已经有的 if then 块，如本层次比其底，说明 if then 块已经结束，需要剔除
               while FIfThenStack.Count > 0 do
               begin
-                IfThenPair := TBlockLinePair(FIfThenStack.Peek);
+                IfThenPair := TCnBlockLinePair(FIfThenStack.Peek);
                 if IfThenPair.Layer > Pair.Layer then
                   FIfThenStack.Pop
                 else
@@ -2034,7 +2035,7 @@ begin
               // 处理几个中间带高亮语句的情形
               if FStack.Count > 0 then
               begin
-                Pair := TBlockLinePair(FStack.Peek);
+                Pair := TCnBlockLinePair(FStack.Peek);
                 if Pair <> nil then
                 begin
                   if Pair.Layer = Token.ItemLayer - 1 then
@@ -2050,11 +2051,11 @@ begin
             if not Added and (Token.TokenID = tkElse) and (FIfThenStack.Count > 0) then
             begin
               // 有 Else 并且上面没处理掉的话，找最近的一个同层的 if then 并重新配对，无需更高层的
-              Pair := TBlockLinePair(FIfThenStack.Pop);
+              Pair := TCnBlockLinePair(FIfThenStack.Pop);
               while (FIfThenStack.Count > 0) and (Pair <> nil) and
                 (Pair.Layer > Token.ItemLayer - 1) do
               begin
-                Pair := TBlockLinePair(FIfThenStack.Pop);
+                Pair := TCnBlockLinePair(FIfThenStack.Pop);
               end;
 
               if (Pair <> nil) and (Pair.Layer = Token.ItemLayer - 1) then
@@ -2090,18 +2091,18 @@ begin
         for I := 0 to FIfThenStack.Count - 1 do
           FIfThenStack.Pop;
         for I := 0 to FStack.Count - 1 do
-          TBlockLinePair(FStack.Pop).Free;
+          TCnBlockLinePair(FStack.Pop).Free;
       end;
     end;
   end;
 end;
 
-procedure TBlockMatchInfo.CheckCompDirectiveMatch(View: IOTAEditView);
+procedure TCnBlockMatchInfo.CheckCompDirectiveMatch(View: IOTAEditView);
 var
   I: Integer;
   PToken: TCnGeneralPasToken;
   CToken: TCnGeneralCppToken;
-  Pair: TCompDirectivePair;
+  Pair: TCnCompDirectivePair;
 begin
   if (CompDirectiveInfo = nil) or (FCompDirectiveTokenList.Count <= 1) then
     Exit;
@@ -2119,7 +2120,7 @@ begin
 {$ENDIF}
         if CToken.CppTokenKind in [ctkdirif, ctkdirifdef, ctkdirifndef] then
         begin
-          Pair := TCompDirectivePair.Create;
+          Pair := TCnCompDirectivePair.Create;
           Pair.StartToken := CToken;
           Pair.Top := CToken.EditLine;
           Pair.StartLeft := CToken.EditCol;
@@ -2132,7 +2133,7 @@ begin
         begin
           if FStack.Count > 0 then
           begin
-            Pair := TCompDirectivePair(FStack.Peek);
+            Pair := TCnCompDirectivePair(FStack.Peek);
             if Pair <> nil then
               Pair.AddMidToken(CToken, CToken.EditCol);
           end;
@@ -2142,7 +2143,7 @@ begin
           if FStack.Count = 0 then
             Continue;
 
-          Pair := TCompDirectivePair(FStack.Pop);
+          Pair := TCnCompDirectivePair(FStack.Pop);
 
           Pair.EndToken := CToken;
           Pair.EndLeft := CToken.EditCol;
@@ -2157,7 +2158,7 @@ begin
       CompDirectiveInfo.FindCurrentPair(View, FIsCppSource);
     finally
       for I := 0 to FStack.Count - 1 do
-        TCompDirectivePair(FStack.Pop).Free;
+        TCnCompDirectivePair(FStack.Pop).Free;
     end;
   end
   else
@@ -2172,7 +2173,7 @@ begin
 {$ENDIF}
         if PToken.CompDirectivtType in [ctIf, ctIfDef, ctIfNDef] then
         begin
-          Pair := TCompDirectivePair.Create;
+          Pair := TCnCompDirectivePair.Create;
           Pair.StartToken := PToken;
           Pair.Top := PToken.EditLine;
           Pair.StartLeft := PToken.EditCol;
@@ -2185,7 +2186,7 @@ begin
         begin
           if FStack.Count > 0 then
           begin
-            Pair := TCompDirectivePair(FStack.Peek);
+            Pair := TCnCompDirectivePair(FStack.Peek);
             if Pair <> nil then
               Pair.AddMidToken(PToken, PToken.EditCol);
           end;
@@ -2195,7 +2196,7 @@ begin
           if FStack.Count = 0 then
             Continue;
 
-          Pair := TCompDirectivePair(FStack.Pop);
+          Pair := TCnCompDirectivePair(FStack.Pop);
 
           Pair.EndToken := PToken;
           Pair.EndLeft := PToken.EditCol;
@@ -2210,7 +2211,7 @@ begin
       CompDirectiveInfo.FindCurrentPair(View, FIsCppSource);
     finally
       for I := 0 to FStack.Count - 1 do
-        TCompDirectivePair(FStack.Pop).Free;
+        TCnCompDirectivePair(FStack.Pop).Free;
     end;
   end;
 {$IFDEF DEBUG}
@@ -2218,7 +2219,7 @@ begin
 {$ENDIF}
 end;
 
-procedure TBlockMatchInfo.Clear;
+procedure TCnBlockMatchInfo.Clear;
 begin
   FKeyTokenList.Clear;
   FCurTokenList.Clear;
@@ -2239,27 +2240,27 @@ begin
     CompDirectiveInfo.Clear;
 end;
 
-procedure TBlockMatchInfo.AddToKeyList(AToken: TCnGeneralPasToken);
+procedure TCnBlockMatchInfo.AddToKeyList(AToken: TCnGeneralPasToken);
 begin
   FKeyTokenList.Add(AToken);
 end;
 
-procedure TBlockMatchInfo.AddToCurrList(AToken: TCnGeneralPasToken);
+procedure TCnBlockMatchInfo.AddToCurrList(AToken: TCnGeneralPasToken);
 begin
   FCurTokenList.Add(AToken);
 end;
 
-procedure TBlockMatchInfo.AddToFlowList(AToken: TCnGeneralPasToken);
+procedure TCnBlockMatchInfo.AddToFlowList(AToken: TCnGeneralPasToken);
 begin
   FFlowTokenList.Add(AToken);
 end;
 
-procedure TBlockMatchInfo.AddToCompDirectiveList(AToken: TCnGeneralPasToken);
+procedure TCnBlockMatchInfo.AddToCompDirectiveList(AToken: TCnGeneralPasToken);
 begin
   FCompDirectiveTokenList.Add(AToken);
 end;
 
-constructor TBlockMatchInfo.Create(AControl: TControl);
+constructor TCnBlockMatchInfo.Create(AControl: TControl);
 begin
   inherited Create;
   FControl := AControl;
@@ -2286,7 +2287,7 @@ begin
   FChanged := True;
 end;
 
-destructor TBlockMatchInfo.Destroy;
+destructor TCnBlockMatchInfo.Destroy;
 begin
   Clear;
   FStack.Free;
@@ -2310,88 +2311,88 @@ begin
   inherited;
 end;
 
-function TBlockMatchInfo.GetKeyCount: Integer;
+function TCnBlockMatchInfo.GetKeyCount: Integer;
 begin
   Result := FKeyTokenList.Count;
 end;
 
-function TBlockMatchInfo.GetKeyTokens(Index: Integer): TCnGeneralPasToken;
+function TCnBlockMatchInfo.GetKeyTokens(Index: Integer): TCnGeneralPasToken;
 begin
   Result := TCnGeneralPasToken(FKeyTokenList[Index]);
 end;
 
-function TBlockMatchInfo.GetCurTokens(Index: Integer): TCnGeneralPasToken;
+function TCnBlockMatchInfo.GetCurTokens(Index: Integer): TCnGeneralPasToken;
 begin
   Result := TCnGeneralPasToken(FCurTokenList[Index]);
 end;
 
-function TBlockMatchInfo.GetCurTokenCount: Integer;
+function TCnBlockMatchInfo.GetCurTokenCount: Integer;
 begin
   Result := FCurTokenList.Count;
 end;
 
-function TBlockMatchInfo.GetFlowTokenCount: Integer;
+function TCnBlockMatchInfo.GetFlowTokenCount: Integer;
 begin
   Result := FFlowTokenList.Count;
 end;
 
-function TBlockMatchInfo.GetCompDirectiveTokenCount: Integer;
+function TCnBlockMatchInfo.GetCompDirectiveTokenCount: Integer;
 begin
   Result := FCompDirectiveTokenList.Count;
 end;
 
-function TBlockMatchInfo.GetFlowTokens(LineNum: Integer): TCnGeneralPasToken;
+function TCnBlockMatchInfo.GetFlowTokens(LineNum: Integer): TCnGeneralPasToken;
 begin
   Result := TCnGeneralPasToken(FFlowTokenList[LineNum]);
 end;
 
-function TBlockMatchInfo.GetCompDirectiveTokens(
+function TCnBlockMatchInfo.GetCompDirectiveTokens(
   LineNum: Integer): TCnGeneralPasToken;
 begin
   Result := TCnGeneralPasToken(FCompDirectiveTokenList[LineNum]);
 end;
 
-function TBlockMatchInfo.GetLineCount: Integer;
+function TCnBlockMatchInfo.GetLineCount: Integer;
 begin
   Result := FKeyLineList.Count;
 end;
 
-function TBlockMatchInfo.GetIdLineCount: Integer;
+function TCnBlockMatchInfo.GetIdLineCount: Integer;
 begin
   Result := FIdLineList.Count;
 end;
 
-function TBlockMatchInfo.GetFlowLineCount: Integer;
+function TCnBlockMatchInfo.GetFlowLineCount: Integer;
 begin
   Result := FFlowLineList.Count;
 end;
 
-function TBlockMatchInfo.GetCompDirectiveLineCount: Integer;
+function TCnBlockMatchInfo.GetCompDirectiveLineCount: Integer;
 begin
   Result := FCompDirectiveLineList.Count;
 end;
 
-function TBlockMatchInfo.GetLines(LineNum: Integer): TCnList;
+function TCnBlockMatchInfo.GetLines(LineNum: Integer): TCnList;
 begin
   Result := TCnList(FKeyLineList[LineNum]);
 end;
 
-function TBlockMatchInfo.GetIdLines(LineNum: Integer): TCnList;
+function TCnBlockMatchInfo.GetIdLines(LineNum: Integer): TCnList;
 begin
   Result := TCnList(FIdLineList[LineNum]);
 end;
 
-function TBlockMatchInfo.GetFlowLines(LineNum: Integer): TCnList;
+function TCnBlockMatchInfo.GetFlowLines(LineNum: Integer): TCnList;
 begin
   Result := TCnList(FFlowLineList[LineNum]);
 end;
 
-function TBlockMatchInfo.GetCompDirectiveLines(LineNum: Integer): TCnList;
+function TCnBlockMatchInfo.GetCompDirectiveLines(LineNum: Integer): TCnList;
 begin
   Result := TCnList(FCompDirectiveLineList[LineNum]);
 end;
 
-procedure TBlockMatchInfo.ConvertLineList;
+procedure TCnBlockMatchInfo.ConvertLineList;
 var
   I: Integer;
   Token: TCnGeneralPasToken;
@@ -2416,7 +2417,7 @@ begin
   ConvertIdLineList;
 end;
 
-procedure TBlockMatchInfo.ConvertIdLineList;
+procedure TCnBlockMatchInfo.ConvertIdLineList;
 var
   I: Integer;
   Token: TCnGeneralPasToken;
@@ -2440,7 +2441,7 @@ begin
   end;
 end;
 
-procedure TBlockMatchInfo.ConvertFlowLineList;
+procedure TCnBlockMatchInfo.ConvertFlowLineList;
 var
   I: Integer;
   Token: TCnGeneralPasToken;
@@ -2464,7 +2465,7 @@ begin
   end;
 end;
 
-procedure TBlockMatchInfo.ConvertCompDirectiveLineList;
+procedure TCnBlockMatchInfo.ConvertCompDirectiveLineList;
 var
   I: Integer;
   Token: TCnGeneralPasToken;
@@ -2815,7 +2816,7 @@ var
   i: Integer;
 begin
   for i := 0 to FBracketList.Count - 1 do
-    if TBracketInfo(FBracketList[i]).Control = EditControl then
+    if TCnBracketInfo(FBracketList[i]).Control = EditControl then
     begin
       Result := i;
       Exit;
@@ -2827,7 +2828,7 @@ end;
 // 因为使用 EditView.CharPosToPos 转换线性位置在大文件时很慢
 // 由于 GetTextAtLine 取得的文本是将 Tab 扩展成空格的，故不再使用 ConvertPos 来转换
 function TCnSourceHighlight.GetBracketMatch(EditView: IOTAEditView;
-  EditBuffer: IOTAEditBuffer; EditControl: TControl; AInfo: TBracketInfo):
+  EditBuffer: IOTAEditBuffer; EditControl: TControl; AInfo: TCnBracketInfo):
   Boolean;
 var
   i: Integer;
@@ -3300,7 +3301,7 @@ end;
 procedure TCnSourceHighlight.CheckBracketMatch(Editor: TEditorObject);
 var
   IsMatch: Boolean;
-  Info: TBracketInfo;
+  Info: TCnBracketInfo;
 begin
   if FIsChecking then Exit;
   FIsChecking := True;
@@ -3308,10 +3309,10 @@ begin
   with Editor do
   try
     if IndexOfBracket(EditControl) >= 0 then
-      Info := TBracketInfo(FBracketList[IndexOfBracket(EditControl)])
+      Info := TCnBracketInfo(FBracketList[IndexOfBracket(EditControl)])
     else
     begin
-      Info := TBracketInfo.Create(EditControl);
+      Info := TCnBracketInfo.Create(EditControl);
       FBracketList.Add(Info);
     end;
 
@@ -3353,13 +3354,13 @@ procedure TCnSourceHighlight.PaintBracketMatch(Editor: TEditorObject;
   LineNum, LogicLineNum: Integer; AElided: Boolean);
 var
   R: TRect;
-  Info: TBracketInfo;
+  Info: TCnBracketInfo;
 begin
   with Editor do
   begin
     if IndexOfBracket(EditControl) >= 0 then
     begin
-      Info := TBracketInfo(FBracketList[IndexOfBracket(EditControl)]);
+      Info := TCnBracketInfo(FBracketList[IndexOfBracket(EditControl)]);
       if Info.IsMatch then
       begin
         if (LogicLineNum = Info.TokenPos.Line) and EditorGetTextRect(Editor,
@@ -3385,7 +3386,7 @@ var
   i: Integer;
 begin
   for i := 0 to FBlockMatchList.Count - 1 do
-    if TBlockMatchInfo(FBlockMatchList[i]).Control = EditControl then
+    if TCnBlockMatchInfo(FBlockMatchList[i]).Control = EditControl then
     begin
       Result := i;
       Exit;
@@ -3398,7 +3399,7 @@ var
   I: Integer;
 begin
   for I := 0 to FBlockLineList.Count - 1 do
-    if TBlockLineInfo(FBlockLineList[I]).Control = EditControl then
+    if TCnBlockLineInfo(FBlockLineList[I]).Control = EditControl then
     begin
       Result := I;
       Exit;
@@ -3411,7 +3412,7 @@ var
   I: Integer;
 begin
   for I := 0 to FCompDirectiveList.Count - 1 do
-    if TCompDirectiveInfo(FCompDirectiveList[I]).Control = EditControl then
+    if TCnCompDirectiveInfo(FCompDirectiveList[I]).Control = EditControl then
     begin
       Result := I;
       Exit;
@@ -3426,7 +3427,7 @@ begin
   Index := IndexOfBlockMatch(Editor.EditControl);
   if Index >= 0 then
   begin
-    with TBlockMatchInfo(FBlockMatchList[Index]) do
+    with TCnBlockMatchInfo(FBlockMatchList[Index]) do
     begin
       FKeyTokenList.Clear;
       FKeyLineList.Clear;
@@ -3440,21 +3441,21 @@ begin
 
   Index := IndexOfBlockLine(Editor.EditControl);
   if Index >= 0 then
-    with TBlockLineInfo(FBlockLineList[Index]) do
+    with TCnBlockLineInfo(FBlockLineList[Index]) do
     begin
       Clear;
     end;
 
   Index := IndexOfCompDirectiveLine(Editor.EditControl);
   if Index >= 0 then
-    with TCompDirectiveInfo(FCompDirectiveList[Index]) do
+    with TCnCompDirectiveInfo(FCompDirectiveList[Index]) do
     begin
       Clear;
     end;
 
   Index := IndexOfBracket(Editor.EditControl);
   if Index >= 0 then
-    with TBracketInfo(FBracketList[Index]) do
+    with TCnBracketInfo(FBracketList[Index]) do
     begin
       IsMatch := False;
     end;
@@ -3464,12 +3465,12 @@ end;
 procedure TCnSourceHighlight.UpdateHighlight(Editor: TEditorObject;
   ChangeType: TEditorChangeTypes);
 var
-  OldPair, NewPair: TBlockLinePair;
-  Info: TBlockMatchInfo;
-  Line: TBlockLineInfo;
-  CompDirective: TCompDirectiveInfo;
+  OldPair, NewPair: TCnBlockLinePair;
+  Info: TCnBlockMatchInfo;
+  Line: TCnBlockLineInfo;
+  CompDirective: TCnCompDirectiveInfo;
 {$IFNDEF BDS}
-  CurLine: TCurLineInfo;
+  CurLine: TCnCurLineInfo;
 {$ENDIF}
   I: Integer;
   CurTokenRefreshed: Boolean;
@@ -3478,10 +3479,10 @@ begin
   begin
     // 一个 EditControl 对应一个 TBlockMatchInfo，都放 FBlockMatchList 中
     if IndexOfBlockMatch(EditControl) >= 0 then
-      Info := TBlockMatchInfo(FBlockMatchList[IndexOfBlockMatch(EditControl)])
+      Info := TCnBlockMatchInfo(FBlockMatchList[IndexOfBlockMatch(EditControl)])
     else
     begin
-      Info := TBlockMatchInfo.Create(EditControl);
+      Info := TCnBlockMatchInfo.Create(EditControl);
       FBlockMatchList.Add(Info);
     end;
 
@@ -3498,10 +3499,10 @@ begin
     begin
       // 如果画线结构高亮，则同时生成画线结构高亮的对象
       if IndexOfBlockLine(EditControl) >= 0 then
-        Line := TBlockLineInfo(FBlockLineList[IndexOfBlockLine(EditControl)])
+        Line := TCnBlockLineInfo(FBlockLineList[IndexOfBlockLine(EditControl)])
       else
       begin
-        Line := TBlockLineInfo.Create(EditControl);
+        Line := TCnBlockLineInfo.Create(EditControl);
         FBlockLineList.Add(Line);
       end;
     end;
@@ -3511,10 +3512,10 @@ begin
     begin
       // 生成编译指令配对对象
       if IndexOfCompDirectiveLine(EditControl) >= 0 then
-        CompDirective := TCompDirectiveInfo(FCompDirectiveList[IndexOfCompDirectiveLine(EditControl)])
+        CompDirective := TCnCompDirectiveInfo(FCompDirectiveList[IndexOfCompDirectiveLine(EditControl)])
       else
       begin
-        CompDirective := TCompDirectiveInfo.Create(EditControl);
+        CompDirective := TCnCompDirectiveInfo.Create(EditControl);
         FCompDirectiveList.Add(CompDirective);
       end;
     end;
@@ -3524,10 +3525,10 @@ begin
     begin
       // 如果高亮当前行的背景，则同时生成高亮背景的对象
       if IndexOfCurLine(EditControl) >= 0 then
-        CurLine := TCurLineInfo(FCurLineList[IndexOfCurLine(EditControl)])
+        CurLine := TCnCurLineInfo(FCurLineList[IndexOfCurLine(EditControl)])
       else
       begin
-        CurLine := TCurLineInfo.Create(EditControl);
+        CurLine := TCnCurLineInfo.Create(EditControl);
         FCurLineList.Add(CurLine);
       end;
     end;
@@ -3673,7 +3674,7 @@ end;
 procedure TCnSourceHighlight.OnHighlightTimer(Sender: TObject);
 var
   i: Integer;
-  Info: TBlockMatchInfo;
+  Info: TCnBlockMatchInfo;
 begin
   FStructureTimer.Enabled := False;
 
@@ -3685,7 +3686,7 @@ begin
   try
     for i := 0 to FBlockMatchList.Count - 1 do
     begin
-      Info := TBlockMatchInfo(FBlockMatchList[i]);
+      Info := TCnBlockMatchInfo(FBlockMatchList[i]);
 
       // CheckBlockMatch 时会设置 FChanged
       if Info.FChanged then
@@ -3705,9 +3706,9 @@ end;
 procedure TCnSourceHighlight.OnHighlightExec(Sender: TObject);
 var
   i: Integer;
-  Info: TBlockMatchInfo;
-  Line: TBlockLineInfo;
-  CompDirective: TCompDirectiveInfo;
+  Info: TCnBlockMatchInfo;
+  Line: TCnBlockLineInfo;
+  CompDirective: TCnCompDirectiveInfo;
 begin
   if FIsChecking then Exit;
   FIsChecking := True;
@@ -3719,18 +3720,18 @@ begin
       for i := 0 to FBlockMatchList.Count - 1 do
       begin
         try
-          Info := TBlockMatchInfo(FBlockMatchList[i]);
+          Info := TCnBlockMatchInfo(FBlockMatchList[i]);
           if (FBlockMatchDrawLine or FBlockMatchHighlight) and (Info.LineInfo = nil) then
           begin
             // 如果画线结构高亮但之前无画线对象，则同时生成画线结构高亮的对象
-            Line := TBlockLineInfo.Create(Info.Control);
+            Line := TCnBlockLineInfo.Create(Info.Control);
             FBlockLineList.Add(Line);
             Info.LineInfo := Line;
           end;
           if FHighlightCompDirective and (Info.CompDirectiveInfo = nil) then
           begin
             // 如果画线结构高亮但之前无编译指令配对对象，则同时生成编译指令配对的对象
-            CompDirective := TCompDirectiveInfo.Create(Info.Control);
+            CompDirective := TCnCompDirectiveInfo.Create(Info.Control);
             FCompDirectiveList.Add(CompDirective);
             Info.CompDirectiveInfo := CompDirective;
           end;
@@ -3765,16 +3766,16 @@ procedure TCnSourceHighlight.PaintBlockMatchKeyword(Editor: TEditorObject;
 var
   R, R1: TRect;
   I, J, Layer: Integer;
-  Info: TBlockMatchInfo;
-  LineInfo: TBlockLineInfo;
-  CompDirectiveInfo: TCompDirectiveInfo;
+  Info: TCnBlockMatchInfo;
+  LineInfo: TCnBlockLineInfo;
+  CompDirectiveInfo: TCnCompDirectiveInfo;
   Token: TCnGeneralPasToken;
   EditPos: TOTAEditPos;
   EditPosColBaseForAttribute: Integer;
   ColorFg, ColorBk: TColor;
   Element, LineFlag: Integer;
-  KeyPair: TBlockLinePair;
-  CompDirectivePair: TCompDirectivePair;
+  KeyPair: TCnBlockLinePair;
+  CompDirectivePair: TCnCompDirectivePair;
   SavePenColor, SaveBrushColor, SaveFontColor: TColor;
   SavePenStyle: TPenStyle;
   SaveBrushStyle: TBrushStyle;
@@ -3822,7 +3823,7 @@ begin
     if IndexOfBlockMatch(EditControl) >= 0 then
     begin
       // 找到该 EditControl对应的BlockMatch列表
-      Info := TBlockMatchInfo(FBlockMatchList[IndexOfBlockMatch(EditControl)]);
+      Info := TCnBlockMatchInfo(FBlockMatchList[IndexOfBlockMatch(EditControl)]);
 
       CanvasSaved := False;
       SavePenColor := clNone;
@@ -3868,7 +3869,7 @@ begin
         begin
           if IndexOfBlockLine(EditControl) >= 0 then
           begin
-            LineInfo := TBlockLineInfo(FBlockLineList[IndexOfBlockLine(EditControl)]);
+            LineInfo := TCnBlockLineInfo(FBlockLineList[IndexOfBlockLine(EditControl)]);
             if (LineInfo <> nil) and (LineInfo.CurrentPair <> nil) and ((LineInfo.CurrentPair.Top = LogicLineNum)
               or (LineInfo.CurrentPair.Bottom = LogicLineNum)
               or (LineInfo.CurrentPair.IsInMiddle(LogicLineNum))) then
@@ -3884,13 +3885,13 @@ begin
         begin
           if IndexOfCompDirectiveLine(EditControl) >= 0 then
           begin
-            CompDirectiveInfo := TCompDirectiveInfo(FCompDirectiveList[IndexOfCompDirectiveLine(EditControl)]);
+            CompDirectiveInfo := TCnCompDirectiveInfo(FCompDirectiveList[IndexOfCompDirectiveLine(EditControl)]);
             if (CompDirectiveInfo <> nil) and (CompDirectiveInfo.CurrentPair <> nil) and ((CompDirectiveInfo.CurrentPair.Top = LogicLineNum)
               or (CompDirectiveInfo.CurrentPair.Bottom = LogicLineNum)
               or (CompDirectiveInfo.CurrentPair.IsInMiddle(LogicLineNum))) then
             begin
               // 寻找当前行已经配对的条件编译指令 Pair
-              CompDirectivePair := TCompDirectivePair(CompDirectiveInfo.CurrentPair);
+              CompDirectivePair := TCnCompDirectivePair(CompDirectiveInfo.CurrentPair);
             end;
           end;
         end;
@@ -4341,11 +4342,11 @@ end;
 procedure TCnSourceHighlight.PaintBlockMatchLine(Editor: TEditorObject;
   LineNum, LogicLineNum: Integer; AElided: Boolean);
 var
-  LineInfo: TBlockLineInfo;
-  Info: TBlockMatchInfo;
+  LineInfo: TCnBlockLineInfo;
+  Info: TCnBlockMatchInfo;
   I, J: Integer;
   R1, R2: TRect;
-  Pair: TBlockLinePair;
+  Pair: TCnBlockLinePair;
   SavePenColor: TColor;
   SavePenWidth: Integer;
   SavePenStyle: TPenStyle;
@@ -4376,9 +4377,9 @@ begin
   begin
     if IndexOfBlockLine(EditControl) >= 0 then
     begin
-      LineInfo := TBlockLineInfo(FBlockLineList[IndexOfBlockLine(EditControl)]);
+      LineInfo := TCnBlockLineInfo(FBlockLineList[IndexOfBlockLine(EditControl)]);
       if IndexOfBlockMatch(EditControl) >= 0 then
-        Info := TBlockMatchInfo(FBlockMatchList[IndexOfBlockMatch(EditControl)])
+        Info := TCnBlockMatchInfo(FBlockMatchList[IndexOfBlockMatch(EditControl)])
       else
         Info := nil;
 
@@ -4398,7 +4399,7 @@ begin
             for I := 0 to LineInfo.Lines[LogicLineNum].Count - 1 do
             begin
               // 一个 EditControl 的 LineInfo 中有多个配对画线的信息 LinePair
-              Pair := TBlockLinePair(LineInfo.Lines[LogicLineNum][I]);
+              Pair := TCnBlockLinePair(LineInfo.Lines[LogicLineNum][I]);
               EditorCanvas.Pen.Color := GetColorFg(Pair.Layer);
 
               if FBlockExtendLeft and (Info <> nil) and (LogicLineNum = Pair.Top)
@@ -4934,7 +4935,7 @@ procedure TCnSourceHighlight.RepaintEditors;
 var
   i: Integer;
   EditControl: TControl;
-  Info: TBlockMatchInfo;
+  Info: TCnBlockMatchInfo;
 begin
   if not Active then
   begin
@@ -4952,7 +4953,7 @@ begin
       EditControl := EditControlWrapper.Editors[i].EditControl;
       if IndexOfBlockMatch(EditControl) < 0 then
       begin
-        Info := TBlockMatchInfo.Create(EditControl);
+        Info := TCnBlockMatchInfo.Create(EditControl);
         FBlockMatchList.Add(Info);
       end;
     end;
@@ -5093,7 +5094,7 @@ begin
   end;
 end;
 
-procedure TCnSourceHighlight.RefreshCurrentTokens(Info: TBlockMatchInfo);
+procedure TCnSourceHighlight.RefreshCurrentTokens(Info: TCnBlockMatchInfo);
 var
   I: Integer;
 begin
@@ -5170,7 +5171,7 @@ end;
 procedure TCnSourceHighlight.BeforePaintLine(Editor: TEditorObject;
   LineNum, LogicLineNum: Integer);
 var
-  CurLine: TCurLineInfo;
+  CurLine: TCnCurLineInfo;
   EditPos: TOTAEditPos;
   Element, LineFlag: Integer;
   StartRow, EndRow: Integer;
@@ -5180,7 +5181,7 @@ begin
   // 避免 PaintLine 之外的地方调用 SetForeAndBackColor 导致额外副作用
   CanDrawCurrentLine := False;
   if IndexOfCurLine(Editor.EditControl) >= 0 then
-    CurLine := TCurLineInfo(FCurLineList[IndexOfCurLine(Editor.EditControl)])
+    CurLine := TCnCurLineInfo(FCurLineList[IndexOfCurLine(Editor.EditControl)])
   else
     Exit;
 
@@ -5234,7 +5235,7 @@ var
   I: Integer;
 begin
   for I := 0 to FCurLineList.Count - 1 do
-    if TCurLineInfo(FCurLineList[i]).Control = EditControl then
+    if TCnCurLineInfo(FCurLineList[i]).Control = EditControl then
     begin
       Result := I;
       Exit;
@@ -5330,13 +5331,13 @@ end;
 procedure TCnSourceHighlight.OnCurrentTokenValidateTimer(Sender: TObject);
 var
   I: Integer;
-  Info: TBlockMatchInfo;
+  Info: TCnBlockMatchInfo;
 begin
   FCurrentTokenValidateTimer.Enabled := False;
   FCurrentTokenInvalid := False;
   for I := 0 to FBlockMatchList.Count - 1 do
   begin
-    Info := TBlockMatchInfo(FBlockMatchList[I]);
+    Info := TCnBlockMatchInfo(FBlockMatchList[I]);
     Info.Control.Invalidate;
   end;
 end;
@@ -5355,7 +5356,7 @@ end;
 
 { TBlockLinePair }
 
-procedure TBlockLinePair.AddMidToken(const Token: TCnGeneralPasToken;
+procedure TCnBlockLinePair.AddMidToken(const Token: TCnGeneralPasToken;
   const LineLeft: Integer);
 begin
   if Token <> nil then
@@ -5366,23 +5367,23 @@ begin
   end;
 end;
 
-constructor TBlockLinePair.Create;
+constructor TCnBlockLinePair.Create;
 begin
   FMiddleTokens := TList.Create;
 end;
 
-destructor TBlockLinePair.Destroy;
+destructor TCnBlockLinePair.Destroy;
 begin
   FMiddleTokens.Free;
   inherited;
 end;
 
-function TBlockLinePair.GetMiddleCount: Integer;
+function TCnBlockLinePair.GetMiddleCount: Integer;
 begin
   Result := FMiddleTokens.Count;
 end;
 
-function TBlockLinePair.GetMiddleToken(Index: Integer): TCnGeneralPasToken;
+function TCnBlockLinePair.GetMiddleToken(Index: Integer): TCnGeneralPasToken;
 begin
   if (Index >= 0) and (Index < FMiddleTokens.Count) then
     Result := TCnGeneralPasToken(FMiddleTokens[Index])
@@ -5390,13 +5391,13 @@ begin
     Result := nil;
 end;
 
-function TBlockLinePair.IndexOfMiddleToken(
+function TCnBlockLinePair.IndexOfMiddleToken(
   const Token: TCnGeneralPasToken): Integer;
 begin
   Result := FMiddleTokens.IndexOf(Token);
 end;
 
-function TBlockLinePair.IsInMiddle(const LineNum: Integer): Boolean;
+function TCnBlockLinePair.IsInMiddle(const LineNum: Integer): Boolean;
 var
   I: Integer;
 begin
@@ -5411,18 +5412,18 @@ end;
 
 { TBlockLineInfo }
 
-procedure TBlockLineInfo.AddPair(Pair: TBlockLinePair);
+procedure TCnBlockLineInfo.AddPair(Pair: TCnBlockLinePair);
 begin
   FPairList.Add(Pair);
 end;
 
-procedure TBlockLineInfo.Clear;
+procedure TCnBlockLineInfo.Clear;
 begin
   FPairList.Clear;
   FKeyLineList.Clear;
 end;
 
-constructor TBlockLineInfo.Create(AControl: TControl);
+constructor TCnBlockLineInfo.Create(AControl: TControl);
 begin
   inherited Create;
   FControl := AControl;
@@ -5430,7 +5431,7 @@ begin
   FKeyLineList := TCnObjectList.Create;
 end;
 
-destructor TBlockLineInfo.Destroy;
+destructor TCnBlockLineInfo.Destroy;
 begin
   Clear;
   FPairList.Free;
@@ -5438,13 +5439,13 @@ begin
   inherited;
 end;
 
-procedure TBlockLineInfo.FindCurrentPair(View: IOTAEditView;
+procedure TCnBlockLineInfo.FindCurrentPair(View: IOTAEditView;
   IsCppModule: Boolean);
 var
   I: Integer;
   Col: SmallInt;
   Line: TCnList;
-  Pair: TBlockLinePair;
+  Pair: TCnBlockLinePair;
   Text: AnsiString;
   LineNo, CharIndex, Len: Integer;
   StartIndex, EndIndex: Integer;
@@ -5473,7 +5474,7 @@ var
   end;
 
   // 判断一个 Pair 是否有 Middle 的 Token 在光标下
-  function IndexOfCurrentMiddleToken(Pair: TBlockLinePair): Integer;
+  function IndexOfCurrentMiddleToken(Pair: TCnBlockLinePair): Integer;
   var
     I: Integer;
   begin
@@ -5551,7 +5552,7 @@ begin
     Line := Lines[LineNo];
     for I := 0 to Line.Count - 1 do
     begin
-      Pair := TBlockLinePair(Line[I]);
+      Pair := TCnBlockLinePair(Line[I]);
       if InternalIsCurrentToken(Pair.StartToken) then
       begin
         FCurrentPair := Pair;
@@ -5578,30 +5579,30 @@ begin
   end;
 end;
 
-function TBlockLineInfo.GetCount: Integer;
+function TCnBlockLineInfo.GetCount: Integer;
 begin
   Result := FPairList.Count;
 end;
 
-function TBlockLineInfo.GetLineCount: Integer;
+function TCnBlockLineInfo.GetLineCount: Integer;
 begin
   Result := FKeyLineList.Count;
 end;
 
-function TBlockLineInfo.GetLines(LineNum: Integer): TCnList;
+function TCnBlockLineInfo.GetLines(LineNum: Integer): TCnList;
 begin
   Result := TCnList(FKeyLineList[LineNum]);
 end;
 
-function TBlockLineInfo.GetPairs(Index: Integer): TBlockLinePair;
+function TCnBlockLineInfo.GetPairs(Index: Integer): TCnBlockLinePair;
 begin
-  Result := TBlockLinePair(FPairList[Index]);
+  Result := TCnBlockLinePair(FPairList[Index]);
 end;
 
-procedure TBlockLineInfo.ConvertLineList;
+procedure TCnBlockLineInfo.ConvertLineList;
 var
   I, J: Integer;
-  Pair: TBlockLinePair;
+  Pair: TCnBlockLinePair;
   MaxLine: Integer;
 begin
   MaxLine := 0;
@@ -5626,12 +5627,12 @@ end;
 
 { TCurLineInfo }
 
-constructor TCurLineInfo.Create(AControl: TControl);
+constructor TCnCurLineInfo.Create(AControl: TControl);
 begin
   FControl := AControl;
 end;
 
-destructor TCurLineInfo.Destroy;
+destructor TCnCurLineInfo.Destroy;
 begin
   inherited;
 
@@ -5639,13 +5640,13 @@ end;
 
 { TCompDirectiveInfo }
 
-procedure TCompDirectiveInfo.FindCurrentPair(View: IOTAEditView;
+procedure TCnCompDirectiveInfo.FindCurrentPair(View: IOTAEditView;
   IsCppModule: Boolean);
 var
   I: Integer;
   Col: SmallInt;
   Line: TCnList;
-  Pair: TBlockLinePair;
+  Pair: TCnBlockLinePair;
   Text: AnsiString;
   LineNo, CharIndex: Integer;
   PairIndex: Integer;
@@ -5673,7 +5674,7 @@ var
   end;
 
   // 判断一个 Pair 是否有 Middle 的 Token 在光标下
-  function IndexOfCurrentMiddleToken(Pair: TBlockLinePair): Integer;
+  function IndexOfCurrentMiddleToken(Pair: TCnBlockLinePair): Integer;
   var
     I: Integer;
   begin
@@ -5726,7 +5727,7 @@ begin
     Line := Lines[LineNo];
     for I := 0 to Line.Count - 1 do
     begin
-      Pair := TBlockLinePair(Line[I]);
+      Pair := TCnBlockLinePair(Line[I]);
       if InternalIsCurrentToken(Pair.StartToken) then
       begin
         FCurrentPair := Pair;

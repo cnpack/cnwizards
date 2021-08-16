@@ -556,9 +556,9 @@ end;
 
 procedure TCnEditorJumpMatchedKeyword.Execute;
 var
-  BlockMatchInfo: TBlockMatchInfo;
-  LineInfo: TBlockLineInfo;
-  CompDirectiveInfo: TCompDirectiveInfo;
+  BlockMatchInfo: TCnBlockMatchInfo;
+  LineInfo: TCnBlockLineInfo;
+  CompDirectiveInfo: TCnCompDirectiveInfo;
   EditControl: TControl;
   EditView: IOTAEditView;
   PasParser: TCnGeneralPasStructParser;
@@ -634,9 +634,9 @@ begin
   end;
 
   try
-    BlockMatchInfo := TBlockMatchInfo.Create(EditControl);
-    LineInfo := TBlockLineInfo.Create(EditControl);
-    CompDirectiveInfo := TCompDirectiveInfo.Create(EditControl);
+    BlockMatchInfo := TCnBlockMatchInfo.Create(EditControl);
+    LineInfo := TCnBlockLineInfo.Create(EditControl);
+    CompDirectiveInfo := TCnCompDirectiveInfo.Create(EditControl);
     BlockMatchInfo.LineInfo := LineInfo;
     BlockMatchInfo.CompDirectiveInfo := CompDirectiveInfo;
 
@@ -818,7 +818,7 @@ var
   CharPos: TOTACharPos;
   I: Integer;
   CurrentToken: TCnGeneralPasToken;
-  CurrentTokenName: AnsiString;
+  CurrentTokenName: TCnIdeTokenString;
   CurIsPas, CurIsCpp: Boolean;
   CurrentTokenIndex, StartIdx, EndIdx: Integer;
 
