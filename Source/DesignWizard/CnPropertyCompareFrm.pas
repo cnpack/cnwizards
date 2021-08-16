@@ -203,6 +203,10 @@ type
     N3: TMenuItem;
     btnListLeft: TToolButton;
     btnListRight: TToolButton;
+    actOnlyDiff: TAction;
+    N4: TMenuItem;
+    OnlyShowDifferentProperties1: TMenuItem;
+    btnOnlyDiff: TToolButton;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure actSelectLeftExecute(Sender: TObject);
@@ -235,7 +239,9 @@ type
     procedure actOptionsExecute(Sender: TObject);
     procedure actListLeftExecute(Sender: TObject);
     procedure actListRightExecute(Sender: TObject);
+    procedure actOnlyDiffExecute(Sender: TObject);
   private
+    FOnlyDiff: Boolean;
     FLeftObject: TObject;
     FRightObject: TObject;
     FLeftProperties: TObjectList;
@@ -244,11 +250,24 @@ type
 {$IFDEF SUPPORT_ENHANCED_RTTI}
     function ListContainsProperty(const APropName: string; List: TObjectList): Boolean;
 {$ENDIF}
-    procedure TransferProperty(PFrom, PTo: TCnDiffPropertyObject; FromObj, ToObj: TObject);
+    function TransferProperty(PFrom, PTo: TCnDiffPropertyObject; FromObj, ToObj: TObject): Boolean;
+    {* 对象间同名属性赋值，返回赋值是否成功}
     procedure SelectGridRow(Grid: TStringGrid; ARow: Integer);
+{$IFDEF SUPPORT_ENHANCED_RTTI}
+    procedure LoadOneRttiProp(var AProp: TCnDiffPropertyObject; AObject: TObject;
+      RttiProperty: TRttiProperty);
+    {* 以新 RTTI 方式加载对象的一个属性，输出 AProp，如传入的 AProp 为 nil 则内部创建}
+{$ENDIF}
+    procedure LoadOneClassicProp(var AProp: TCnDiffPropertyObject; AObject: TObject; PropInfo: PPropInfo);
+    {* 以旧的方式加载对象的一个属性，输出 AProp，如传入的 AProp 为 nil 则内部创建}
+    procedure LoadOneProp(var AProp: TCnDiffPropertyObject; AObject: TObject; const PropName: string);
+    {* 笼统加载对象的一个属性，视情况调用上述两个方法}
     procedure LoadProperty(List: TObjectList; AObject: TObject);
-    procedure MakeAlignList(SameType: Boolean = False);   // 两组属性互相对齐，中间插入空白
-    procedure MakeSingleMarks; // 给两组属性标注对方是否为空
+    {* 以先新、无新再旧的方式加载一个对象的所有属性}
+    procedure MakeAlignList(SameType: Boolean = False);
+    {* 两组属性互相对齐，中间插入空白}
+    procedure MakeSingleMarks;
+    {* 给两组属性标注对方是否为空}
     procedure GetGridSelectObjects(var SelectLeft, SelectRight: Integer;
       var LeftObj, RightObj: TCnDiffPropertyObject);
     procedure UpdateCompareBmp;
@@ -257,9 +276,10 @@ type
   protected
     function GetHelpTopic: string; override;
   public
-    procedure LoadProperties;
+    procedure LoadListProperties;
+    {* 加载左右俩对象的属性列表并整理}
     procedure ShowProperties(IsRefresh: Boolean = False);
-
+    {* 从属性列表中显示内容至界面上}
     property LeftObject: TObject read FLeftObject write FLeftObject;
     property RightObject: TObject read FRightObject write FRightObject;
   end;
@@ -309,7 +329,7 @@ begin
   CompareForm := TCnPropertyCompareForm.Create(Application);
   CompareForm.LeftObject := ALeft;
   CompareForm.RightObject := ARight;
-  CompareForm.LoadProperties;
+  CompareForm.LoadListProperties;
   CompareForm.ShowProperties;
   CompareForm.Show;
 end;
@@ -615,7 +635,10 @@ end;
 
 { TCnPropertyCompareForm }
 
-procedure TCnPropertyCompareForm.LoadProperties;
+procedure TCnPropertyCompareForm.LoadListProperties;
+var
+  I: Integer;
+  Pl, Pr: TCnDiffPropertyObject;
 begin
   FLeftProperties.Clear;
   FRightProperties.Clear;
@@ -631,6 +654,32 @@ begin
   // 根据属性对齐，以达到两列表数量一致
   MakeAlignList({$IFNDEF STAND_ALONE}FManager.SameType{$ENDIF});
   MakeSingleMarks;
+
+  // 如需要，删掉相同的，或不对应的，只留不同的
+  if FOnlyDiff then
+  begin
+    for I := FLeftProperties.Count - 1 downto 0 do
+    begin
+      Pl := TCnDiffPropertyObject(FLeftProperties[I]);
+      Pr := TCnDiffPropertyObject(FRightProperties[I]);
+
+      if (Pl = nil) or (Pr = nil) then
+      begin
+        FLeftProperties.Delete(I);
+        FRightProperties.Delete(I);
+      end
+      else if Pl.IsSingle or Pr.IsSingle then
+      begin
+        FLeftProperties.Delete(I);
+        FRightProperties.Delete(I);
+      end
+      else if Pl.DisplayValue = Pr.DisplayValue then
+      begin
+        FLeftProperties.Delete(I);
+        FRightProperties.Delete(I);
+      end;
+    end;
+  end;
 end;
 
 procedure TCnPropertyCompareForm.FormCreate(Sender: TObject);
@@ -645,10 +694,121 @@ begin
   FCompareBmp.Canvas.Brush.Color := clWindow;
 end;
 
+{$IFDEF SUPPORT_ENHANCED_RTTI}
+
+procedure TCnPropertyCompareForm.LoadOneRttiProp(var AProp: TCnDiffPropertyObject;
+  AObject: TObject; RttiProperty: TRttiProperty);
+begin
+  if RttiProperty.Visibility <> mvPublished then // 只拿 published 的
+    Exit;
+
+  if AProp = nil then
+    AProp := TCnDiffPropertyObject.Create;
+  AProp.IsNewRTTI := True;
+
+  AProp.PropName := RttiProperty.Name;
+  AProp.PropType := RttiProperty.PropertyType.TypeKind;
+  AProp.IsObjOrIntf := AProp.PropType in [tkClass, tkInterface];
+
+  // 有写入权限，并且指定类型，才可修改，否则界面上没法整
+  AProp.CanModify := (RttiProperty.IsWritable) and (RttiProperty.PropertyType.TypeKind
+    in CnCanModifyPropTypes);
+
+  if RttiProperty.IsReadable then
+  begin
+    try
+      AProp.PropRttiValue := RttiProperty.GetValue(AObject)
+    except
+      // Getting Some Property causes Exception. Catch it.
+      AProp.PropRttiValue := nil;
+    end;
+
+    AProp.ObjValue := nil;
+    AProp.IntfValue := nil;
+    try
+      if AProp.IsObjOrIntf and RttiProperty.GetValue(AObject).IsObject then
+        AProp.ObjValue := RttiProperty.GetValue(AObject).AsObject
+      else if AProp.IsObjOrIntf and (RttiProperty.GetValue(AObject).TypeInfo <> nil) and
+        (RttiProperty.GetValue(AObject).TypeInfo^.Kind = tkInterface) then
+        AProp.IntfValue := RttiProperty.GetValue(AObject).AsInterface;
+    except
+      // Getting Some Property causes Exception. Catch it.;
+    end;
+  end
+  else
+    AProp.PropRttiValue := SCnCanNotReadValue;
+
+  AProp.DisplayValue := GetRttiPropValueStr(AObject, RttiProperty);
+end;
+
+{$ENDIF}
+
+procedure TCnPropertyCompareForm.LoadOneClassicProp(var AProp: TCnDiffPropertyObject;
+  AObject: TObject; PropInfo: PPropInfo);
+begin
+  if AProp = nil then
+    AProp := TCnDiffPropertyObject.Create;
+
+  AProp.PropName := PropInfoName(PropInfo);
+  AProp.PropType := PropInfo^.PropType^^.Kind;
+  AProp.IsObjOrIntf := AProp.PropType in [tkClass, tkInterface];
+
+  // 有写入权限，并且指定类型，才可修改，否则界面上没法整
+  AProp.CanModify := (PropInfo^.SetProc <> nil) and (PropInfo^.PropType^^.Kind
+    in CnCanModifyPropTypes);
+
+  try
+    AProp.PropValue := GetPropValue(AObject, PropInfoName(PropInfo));
+  except
+    ;
+  end;
+
+  AProp.ObjValue := nil;
+  AProp.IntfValue := nil;
+  if AProp.IsObjOrIntf then
+  begin
+    if AProp.PropType = tkClass then
+      AProp.ObjValue := GetObjectProp(AObject, PropInfo)
+    else
+      AProp.IntfValue := IUnknown(GetOrdProp(AObject, PropInfo));
+  end;
+
+  AProp.DisplayValue := GetPropValueStr(AObject, PropInfo);
+end;
+
+procedure TCnPropertyCompareForm.LoadOneProp(var AProp: TCnDiffPropertyObject;
+  AObject: TObject; const PropName: string);
+var
+{$IFDEF SUPPORT_ENHANCED_RTTI}
+  RttiContext: TRttiContext;
+  RttiType: TRttiType;
+  RttiProperty: TRttiProperty;
+{$ELSE}
+  PropInfo:PPropInfo;
+{$ENDIF}
+begin
+{$IFDEF SUPPORT_ENHANCED_RTTI}
+  RttiContext := TRttiContext.Create;
+  try
+    RttiType := RttiContext.GetType(AObject.ClassInfo);
+    if RttiType <> nil then
+    begin
+      RttiProperty := RttiType.GetProperty(PropName);
+      LoadOneRttiProp(AProp, AObject, RttiProperty);
+    end;
+  finally
+    RttiContext.Free;
+  end;
+{$ELSE}
+  PropInfo := GetPropInfo(AObject, PropName);
+  LoadOneClassicProp(AProp, AObject, PropInfo);
+{$ENDIF}
+end;
+
 procedure TCnPropertyCompareForm.LoadProperty(List: TObjectList;
   AObject: TObject);
 var
-  AProp: TCnPropertyObject;
+  AProp: TCnDiffPropertyObject;
 {$IFDEF SUPPORT_ENHANCED_RTTI}
   RttiContext: TRttiContext;
   RttiType: TRttiType;
@@ -670,49 +830,13 @@ begin
       begin
         if RttiProperty.PropertyType.TypeKind in tkProperties then
         begin
-          if RttiProperty.Visibility <> mvPublished then // 只拿 published 的
-            Continue;
-
           if ListContainsProperty(RttiProperty.Name, List) then // 子类、父类可能有相同的属性
             Continue;
 
-          AProp := TCnDiffPropertyObject.Create;
-          AProp.IsNewRTTI := True;
-
-          AProp.PropName := RttiProperty.Name;
-          AProp.PropType := RttiProperty.PropertyType.TypeKind;
-          AProp.IsObjOrIntf := AProp.PropType in [tkClass, tkInterface];
-
-          // 有写入权限，并且指定类型，才可修改，否则界面上没法整
-          AProp.CanModify := (RttiProperty.IsWritable) and (RttiProperty.PropertyType.TypeKind
-            in CnCanModifyPropTypes);
-
-          if RttiProperty.IsReadable then
-          begin
-            try
-              AProp.PropRttiValue := RttiProperty.GetValue(AObject)
-            except
-              // Getting Some Property causes Exception. Catch it.
-              AProp.PropRttiValue := nil;
-            end;
-
-            AProp.ObjValue := nil;
-            AProp.IntfValue := nil;
-            try
-              if AProp.IsObjOrIntf and RttiProperty.GetValue(AObject).IsObject then
-                AProp.ObjValue := RttiProperty.GetValue(AObject).AsObject
-              else if AProp.IsObjOrIntf and (RttiProperty.GetValue(AObject).TypeInfo <> nil) and
-                (RttiProperty.GetValue(AObject).TypeInfo^.Kind = tkInterface) then
-                AProp.IntfValue := RttiProperty.GetValue(AObject).AsInterface;
-            except
-              // Getting Some Property causes Exception. Catch it.;
-            end;
-          end
-          else
-            AProp.PropRttiValue := SCnCanNotReadValue;
-
-          AProp.DisplayValue := GetRttiPropValueStr(AObject, RttiProperty);
-          List.Add(AProp);
+          AProp := nil;
+          LoadOneRttiProp(AProp, AObject, RttiProperty);
+          if AProp <> nil then
+            List.Add(AProp);
         end;
       end;
     end;
@@ -723,44 +847,29 @@ begin
 {$ELSE}
 
   APropCount := GetTypeData(PTypeInfo(AObject.ClassInfo))^.PropCount;
+  if APropCount <= 0 then
+    Exit;
+
   GetMem(PropListPtr, APropCount * SizeOf(Pointer));
-  GetPropList(PTypeInfo(AObject.ClassInfo), tkAny, PropListPtr);
+  try
+    GetPropList(PTypeInfo(AObject.ClassInfo), tkAny, PropListPtr);
 
-  for I := 0 to APropCount - 1 do
-  begin
-    PropInfo := PropListPtr^[I];
-    if PropInfo^.PropType^^.Kind in tkProperties then
+    for I := 0 to APropCount - 1 do
     begin
-      AProp := TCnDiffPropertyObject.Create;
-
-      AProp.PropName := PropInfoName(PropInfo);
-      AProp.PropType := PropInfo^.PropType^^.Kind;
-      AProp.IsObjOrIntf := AProp.PropType in [tkClass, tkInterface];
-
-      // 有写入权限，并且指定类型，才可修改，否则界面上没法整
-      AProp.CanModify := (PropInfo^.SetProc <> nil) and (PropInfo^.PropType^^.Kind
-        in CnCanModifyPropTypes);
-
-      try
-        AProp.PropValue := GetPropValue(AObject, PropInfoName(PropInfo));
-      except
-        ;
-      end;
-
-      AProp.ObjValue := nil;
-      AProp.IntfValue := nil;
-      if AProp.IsObjOrIntf then
+      PropInfo := PropListPtr^[I];
+      if PropInfo^.PropType^^.Kind in tkProperties then
       begin
-        if AProp.PropType = tkClass then
-          AProp.ObjValue := GetObjectProp(AObject, PropInfo)
-        else
-          AProp.IntfValue := IUnknown(GetOrdProp(AObject, PropInfo));
-      end;
+        AProp := nil;
+        LoadOneClassicProp(AProp, AObject, PropInfo);
 
-      AProp.DisplayValue := GetPropValueStr(AObject, PropInfo);;
-      List.Add(AProp);
+        if AProp <> nil then
+          List.Add(AProp);
+      end;
     end;
+  finally
+    FreeMem(PropListPtr);
   end;
+
 {$ENDIF}
 end;
 
@@ -793,6 +902,11 @@ procedure TCnPropertyCompareForm.ShowProperties(IsRefresh: Boolean);
           G.Cells[0, I] := P.PropName;
           G.Cells[1, I] := P.DisplayValue;
         end;
+      end
+      else
+      begin
+        G.Cells[0, I] := '';
+        G.Cells[1, I] := '';
       end;
     end;
   end;
@@ -1025,7 +1139,7 @@ begin
       else
         Exit;
 
-      LoadProperties;
+      LoadListProperties;
       ShowProperties;
     end;
   finally
@@ -1055,7 +1169,7 @@ begin
       else
         Exit;
 
-      LoadProperties;
+      LoadListProperties;
       ShowProperties;
     end;
   finally
@@ -1242,7 +1356,10 @@ end;
 
 procedure TCnPropertyCompareForm.actRefreshExecute(Sender: TObject);
 begin
-  LoadProperties;
+  FOnlyDiff := False;
+  actOnlyDiff.Checked := FOnlyDiff;
+
+  LoadListProperties;
   ShowProperties(True);
 end;
 
@@ -1256,9 +1373,30 @@ var
   CompareForm: TCnPropertyCompareForm;
 begin
   CompareForm := TCnPropertyCompareForm.Create(Application);;
-  CompareForm.LoadProperties;
+  CompareForm.LoadListProperties;
   CompareForm.ShowProperties;
   CompareForm.Show;
+end;
+
+procedure TCnPropertyCompareForm.actPropertyToLeftExecute(Sender: TObject);
+var
+  ARow: Integer;
+  POne, PAnother: TCnDiffPropertyObject;
+begin
+  ARow := gridRight.Selection.Top;
+  if (ARow < 0) or (ARow >= FRightProperties.Count) then
+    Exit;
+
+  POne := TCnDiffPropertyObject(FRightProperties[ARow]);
+  PAnother := TCnDiffPropertyObject(FLeftProperties[ARow]);
+
+  if TransferProperty(POne, PAnother, FRightObject, FLeftObject) then
+  begin
+    // 只更新 PAnother 的
+    LoadOneProp(PAnother, FLeftObject, PAnother.PropName);
+    ShowProperties(True);
+    SelectGridRow(gridRight, ARow);
+  end;
 end;
 
 procedure TCnPropertyCompareForm.actPropertyToRightExecute(
@@ -1274,15 +1412,17 @@ begin
   POne := TCnDiffPropertyObject(FLeftProperties[ARow]);
   PAnother := TCnDiffPropertyObject(FRightProperties[ARow]);
 
-  TransferProperty(POne, PAnother, FLeftObject, FRightObject);
-
-  LoadProperties;
-  ShowProperties(True);
-  SelectGridRow(gridLeft, ARow);
+  if TransferProperty(POne, PAnother, FLeftObject, FRightObject) then
+  begin
+    // 只更新 PAnother 的
+    LoadOneProp(PAnother, FRightObject, PAnother.PropName);
+    ShowProperties(True);
+    SelectGridRow(gridLeft, ARow);
+  end;
 end;
 
-procedure TCnPropertyCompareForm.TransferProperty(PFrom,
-  PTo: TCnDiffPropertyObject; FromObj, ToObj: TObject);
+function TCnPropertyCompareForm.TransferProperty(PFrom,
+  PTo: TCnDiffPropertyObject; FromObj, ToObj: TObject): Boolean;
 var
   V: Variant;
   Obj: TObject;
@@ -1292,6 +1432,7 @@ var
   RttiPropertyFrom, RttiPropertyTo: TRttiProperty;
 {$ENDIF}
 begin
+  Result := False;
   if (PFrom = nil) or (PTo = nil) or (FromObj = nil) or (ToObj = nil) then
     Exit;
 
@@ -1318,6 +1459,7 @@ begin
 
       // 直接通过 TValue 赋值
       RttiPropertyTo.SetValue(ToObj, RttiPropertyFrom.GetValue(FromObj));
+      Result := True;
     finally
       RttiContext.Free;
     end;
@@ -1343,25 +1485,7 @@ begin
     V := GetPropValue(FromObj, PFrom.PropName);
     SetPropValue(ToObj, PTo.PropName, V);
   end;
-end;
-
-procedure TCnPropertyCompareForm.actPropertyToLeftExecute(Sender: TObject);
-var
-  ARow: Integer;
-  POne, PAnother: TCnDiffPropertyObject;
-begin
-  ARow := gridRight.Selection.Top;
-  if (ARow < 0) or (ARow >= FRightProperties.Count) then
-    Exit;
-
-  POne := TCnDiffPropertyObject(FRightProperties[ARow]);
-  PAnother := TCnDiffPropertyObject(FLeftProperties[ARow]);
-
-  TransferProperty(POne, PAnother, FRightObject, FLeftObject);
-
-  LoadProperties;
-  ShowProperties(True);
-  SelectGridRow(gridRight, ARow);
+  Result := True;
 end;
 
 procedure TCnPropertyCompareForm.SelectGridRow(Grid: TStringGrid;
@@ -1533,7 +1657,7 @@ begin
       TransferProperty(Pr, Pl, FRightObject, FLeftObject);
     end;
   finally
-    LoadProperties;
+    LoadListProperties;
     ShowProperties(True);
   end;
 end;
@@ -1565,7 +1689,7 @@ begin
       TransferProperty(Pl, Pr, FLeftObject, FRightObject);
     end;
   finally
-    LoadProperties;
+    LoadListProperties;
     ShowProperties(True);
   end;
 end;
@@ -1747,7 +1871,7 @@ begin
     if R <> nil then
     begin
       LeftObject := R;
-      LoadProperties;
+      LoadListProperties;
       ShowProperties;
     end;
   finally
@@ -1770,7 +1894,7 @@ begin
     if R <> nil then
     begin
       RightObject := R;
-      LoadProperties;
+      LoadListProperties;
       ShowProperties;
     end;
   finally
@@ -1791,6 +1915,15 @@ begin
   if Wizard <> nil then
     Result := Wizard.CreateIniFile;
 {$ENDIF}
+end;
+
+procedure TCnPropertyCompareForm.actOnlyDiffExecute(Sender: TObject);
+begin
+  FOnlyDiff := not FOnlyDiff;
+  actOnlyDiff.Checked := FOnlyDiff;
+
+  LoadListProperties;
+  ShowProperties;
 end;
 
 {$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}

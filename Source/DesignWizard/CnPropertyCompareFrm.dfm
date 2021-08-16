@@ -183,8 +183,13 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       Top = 0
       Action = actNextDiff
     end
-    object btn3: TToolButton
+    object btnOnlyDiff: TToolButton
       Left = 323
+      Top = 0
+      Action = actOnlyDiff
+    end
+    object btn3: TToolButton
+      Left = 346
       Top = 0
       Width = 8
       Caption = 'btn3'
@@ -192,12 +197,12 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       Style = tbsSeparator
     end
     object btnHelp: TToolButton
-      Left = 331
+      Left = 354
       Top = 0
       Action = actHelp
     end
     object btnExit: TToolButton
-      Left = 354
+      Left = 377
       Top = 0
       Action = actExit
     end
@@ -373,6 +378,12 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       object NextDifferent1: TMenuItem
         Action = actNextDiff
       end
+      object N4: TMenuItem
+        Caption = '-'
+      end
+      object OnlyShowDifferentProperties1: TMenuItem
+        Action = actOnlyDiff
+      end
     end
     object Help1: TMenuItem
       Caption = '&Help'
@@ -485,6 +496,12 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       Hint = 'Select Right Component from Current Designer to Compare'
       ImageIndex = 104
       OnExecute = actListRightExecute
+    end
+    object actOnlyDiff: TAction
+      Caption = 'Only Show Different'
+      Hint = 'Only Show Different Properties'
+      ImageIndex = 105
+      OnExecute = actOnlyDiffExecute
     end
   end
   object pmGrid: TPopupMenu
