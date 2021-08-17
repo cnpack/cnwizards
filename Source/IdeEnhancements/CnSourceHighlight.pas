@@ -216,8 +216,8 @@ type
     FLineInfo: TCnBlockLineInfo;              // 容纳解析出来的 Tokens 配对信息
     FCompDirectiveInfo: TCnCompDirectiveInfo; // 容纳解析出来的编译指令配对信息
 
-    FStack: TStack;  // 解析关键字配对时以及解析 C 括号配对时以及 C 编译指令配对时以及 Pascal 编译指令配对时使用
-    FIfThenStack: TStack;
+    FStack: TStack;  // 解析关键字配对时以及解析 C 括号配对时以及 C 编译指令配对时以及 Pascal 编译指令配对时使用，存储 Pair 对象的栈
+    FIfThenStack: TStack; // 为了 if then 而存储 Pair 的引用的栈
     FCurrentToken: TCnGeneralPasToken;
     FCurMethodStartToken, FCurMethodCloseToken: TCnGeneralPasToken;
     FCurrentTokenName: TCnIdeTokenString; // D567/2005~2007/2009 分别是 AnsiString/WideString/UnicodeString
@@ -311,7 +311,7 @@ type
   end;
 
   TCnBlockLinePair = class(TObject)
-  {* 描述一根配对的线所对应的多个 Token 标记}
+  {* 描述一根配对的线所对应的多个 Token 标记，Token 均为引用}
   private
     FTop: Integer;
     FLeft: Integer;
@@ -329,6 +329,7 @@ type
     constructor Create; virtual;
     destructor Destroy; override;
 
+    procedure Clear;
     procedure AddMidToken(const Token: TCnGeneralPasToken; const LineLeft: Integer);
     function IsInMiddle(const LineNum: Integer): Boolean;
     function IndexOfMiddleToken(const Token: TCnGeneralPasToken): Integer;
@@ -805,6 +806,37 @@ var
   // CurrentLineNum: Integer = -1;
   {$ENDIF}
 {$ENDIF}
+
+  PairPool: TCnList = nil;
+
+// 用池方式来管理 TCnBlockLinePair 以提高性能
+function CreateLinePair: TCnBlockLinePair;
+begin
+  if PairPool.Count > 0 then
+  begin
+    Result := TCnBlockLinePair(PairPool.Last);
+    PairPool.Delete(PairPool.Count - 1);
+  end
+  else
+    Result := TCnBlockLinePair.Create;
+end;
+
+procedure FreeLinePair(Pair: TCnBlockLinePair);
+begin
+  if Pair <> nil then
+  begin
+    Pair.Clear;
+    PairPool.Add(Pair);
+  end;
+end;
+
+procedure ClearPairPool;
+var
+  I: Integer;
+begin
+  for I := 0 to PairPool.Count - 1 do
+    TObject(PairPool[I]).Free;
+end;
 
 function CheckIsFlowToken(AToken: TCnGeneralPasToken; IsCpp: Boolean): Boolean;
 var
@@ -1922,7 +1954,7 @@ begin
           CToken := TCnGeneralCppToken(FKeyTokenList[I]);
           if CToken.CppTokenKind = ctkbraceopen then
           begin
-            Pair := TCnBlockLinePair.Create;
+            Pair := CreateLinePair;
             Pair.StartToken := CToken;
             Pair.Top := CToken.EditLine;
             Pair.StartLeft := CToken.EditCol;
@@ -1959,7 +1991,7 @@ begin
         LineInfo.FindCurrentPair(View, FIsCppSource);
       finally
         for I := 0 to FStack.Count - 1 do
-          TCnBlockLinePair(FStack.Pop).Free;
+          FreeLinePair(FStack.Pop);
       end;
     end
     else // Pascal 的语法配对处理，复杂得多
@@ -1970,7 +2002,7 @@ begin
           Token := TCnGeneralPasToken(FKeyTokenList[I]);
           if Token.IsBlockStart then
           begin
-            Pair := TCnBlockLinePair.Create;
+            Pair := CreateLinePair;
             Pair.StartToken := Token;
             Pair.Top := Token.EditLine;
             Pair.StartLeft := Token.EditCol;
@@ -2004,7 +2036,7 @@ begin
               if not IgnoreClass then // 碰到 class record interface 时，需要画才添加进去
                 LineInfo.AddPair(Pair)
               else
-                Pair.Free;
+                FreeLinePair(Pair);
             end
             else
             begin
@@ -2091,7 +2123,7 @@ begin
         for I := 0 to FIfThenStack.Count - 1 do
           FIfThenStack.Pop;
         for I := 0 to FStack.Count - 1 do
-          TCnBlockLinePair(FStack.Pop).Free;
+          FreeLinePair(FStack.Pop);
       end;
     end;
   end;
@@ -5367,6 +5399,19 @@ begin
   end;
 end;
 
+procedure TCnBlockLinePair.Clear;
+begin
+  FMiddleTokens.Clear;
+  FStartToken := nil;
+  FEndToken := nil;
+  FStartLeft := 0;
+  FEndLeft := 0;
+  FTop := 0;
+  FBottom := 0;
+  FLeft := 0;
+  FLayer := 0;
+end;
+
 constructor TCnBlockLinePair.Create;
 begin
   FMiddleTokens := TList.Create;
@@ -5756,6 +5801,11 @@ end;
 
 initialization
   RegisterCnWizard(TCnSourceHighlight);
+  PairPool := TCnList.Create;
+
+finalization
+  ClearPairPool;
+  FreeAndNil(PairPool);
 
 {$ENDIF CNWIZARDS_CNSOURCEHIGHLIGHT}
 end.
