@@ -271,6 +271,7 @@ type
     procedure GetGridSelectObjects(var SelectLeft, SelectRight: Integer;
       var LeftObj, RightObj: TCnDiffPropertyObject);
     procedure UpdateCompareBmp;
+    procedure FillGridWithProperties(G: TStringGrid; Props: TObjectList; IsRefresh: Boolean);
     procedure OnSyncSelect(var Msg: TMessage); message WM_SYNC_SELECT;
     function CreateWizardIni: TCustomIniFile;
   protected
@@ -873,47 +874,66 @@ begin
 {$ENDIF}
 end;
 
-procedure TCnPropertyCompareForm.ShowProperties(IsRefresh: Boolean);
+procedure TCnPropertyCompareForm.FillGridWithProperties(G: TStringGrid;
+  Props: TObjectList; IsRefresh: Boolean);
+var
+  I: Integer;
+  P: TCnPropertyObject;
+begin
+  if (G = nil) or (Props = nil) then
+    Exit;
 
-  procedure FillGridWithProperties(G: TStringGrid; Props: TObjectList);
-  var
-    I: Integer;
-    P: TCnPropertyObject;
+  if not IsRefresh then // 更新时行数不变
   begin
-    if (G = nil) or (Props = nil) then
-      Exit;
-
-    if not IsRefresh then // 更新时行数不变
+    try
       G.RowCount := 0;
-    G.RowCount := Props.Count;
+    except
+      ;
+    end;
+  end;
+  if G.RowCount <> Props.Count then
+  begin
+    try
+      G.RowCount := Props.Count;
+    except
+      ;
+    end;
+  end;  
 
-    for I := 0 to Props.Count - 1 do
+
+  for I := 0 to Props.Count - 1 do
+  begin
+    P := TCnPropertyObject(Props[I]);
+    if P <> nil then
     begin
-      P := TCnPropertyObject(Props[I]);
-      if P <> nil then
+      if IsRefresh then
       begin
-        if IsRefresh then
-        begin
-          if G.Cells[1, I] <> P.DisplayValue then
-            G.Cells[1, I] := P.DisplayValue;
-        end
-        else
-        begin
+        if G.Cells[0, I] <> P.PropName then
           G.Cells[0, I] := P.PropName;
+        if G.Cells[1, I] <> P.DisplayValue then
           G.Cells[1, I] := P.DisplayValue;
-        end;
       end
       else
       begin
-        G.Cells[0, I] := '';
-        G.Cells[1, I] := '';
+        G.Cells[0, I] := P.PropName;
+        G.Cells[1, I] := P.DisplayValue;
       end;
+    end
+    else
+    begin
+      G.Cells[0, I] := '';
+      G.Cells[1, I] := '';
     end;
   end;
+end;
 
+procedure TCnPropertyCompareForm.ShowProperties(IsRefresh: Boolean);
 begin
-  FillGridWithProperties(gridLeft, FLeftProperties);
-  FillGridWithProperties(gridRight, FRightProperties);
+  FillGridWithProperties(gridLeft, FLeftProperties, IsRefresh);
+  FillGridWithProperties(gridRight, FRightProperties, IsRefresh);
+
+  gridLeft.Invalidate;
+  gridRight.Invalidate;
   UpdateCompareBmp;
 end;
 
