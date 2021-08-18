@@ -40,17 +40,18 @@ interface
 {$IFDEF CNWIZARDS_CNUSESCLEANER}
 
 uses
-  Windows, Classes, SysUtils, DCURecs, DCU32, DCU_Out, ToolsAPI, Contnrs,
-  CnWizUtils, CnPasCodeParser, CnWizConsts;
+  Windows, Classes, SysUtils, Contnrs, DCURecs, DCU32, DCU_Out
+  {$IFNDEF STAND_ALONE}, ToolsAPI, CnWizUtils, CnPasCodeParser, CnWizConsts {$ENDIF};
 
 type
 
 { TCnUnitUsesInfo }
 
   TCnUnitUsesInfo = class(TUnit)
+  {* 描述从 DCU 中解析出来的 Uses 内容}
   private
-    FIntfUses: TStringList;
-    FImplUses: TStringList;
+    FIntfUses: TStringList;  // 存储 interface 部分的 uses 单元，以及每个单元对应的导入类名
+    FImplUses: TStringList;  // 存储 implementation 部分的 uses 单元，以及每个单元对应的导入类名
     function GetImplUse(Index: Integer): string;
     function GetImplUsesCount: Integer;
     function GetImplUsesImport(Index: Integer): TStrings;
@@ -65,21 +66,27 @@ type
     procedure Sort;
     
     property IntfUsesCount: Integer read GetIntfUsesCount;
+    {* interface 部分有多少个 uses}
     property IntfUses[Index: Integer]: string read GetIntfUse;
+    {* interface 部分的每一个 uses}
     property IntfUsesImport[Index: Integer]: TStrings read GetIntfUsesImport;
-
+    {* interface 部分每一个 uses 单元导入的类名列表}
     property ImplUsesCount: Integer read GetImplUsesCount;
+    {* implementation 部分有多少个 uses}
     property ImplUses[Index: Integer]: string read GetImplUse;
+    {* implementation 部分的每一个 uses}
     property ImplUsesImport[Index: Integer]: TStrings read GetImplUsesImport;
+    {* implementation 部分每一个 uses 单元导入的类名列表}
   end;
-
-{ TCnUsesItem }
 
   TCnUsesKind = (ukHasInitSection, ukHasRegProc, ukInCleanList, ukInIgnoreList,
     ukNoSource, tkCompRef);
   TCnUsesKinds = set of TCnUsesKind;
 
+{ TCnUsesItem }
+
   TCnUsesItem = class
+  {* 描述一项 uses 项}
   private
     FChecked: Boolean;
     FKinds: TCnUsesKinds;
@@ -93,9 +100,12 @@ type
 { TCnEmptyUsesInfo }
 
   TCnEmptyUsesInfo = class
+  {* 描述一所需处理的文件处理类}
   private
     FSourceFileName: string;
+{$IFNDEF STAND_ALONE}
     FProject: IOTAProject;
+{$ENDIF}
     FDcuName: string;
     FIntfItems: TObjectList;
     FImplItems: TObjectList;
@@ -105,15 +115,17 @@ type
     function GetIntfCount: Integer;
     function GetIntfItem(Index: Integer): TCnUsesItem;
   public
-    constructor Create(const ADcuName, ASourceFileName: string;
-      AProject: IOTAProject);
+    constructor Create(const ADcuName, ASourceFileName: string {$IFNDEF STAND_ALONE};
+      AProject: IOTAProject {$ENDIF});
     destructor Destroy; override;
-
+{$IFNDEF STAND_ALONE}
     function Process: Boolean;
-
+{$ENDIF}
     property DcuName: string read FDcuName;
     property SourceFileName: string read FSourceFileName;
+{$IFNDEF STAND_ALONE}
     property Project: IOTAProject read FProject;
+{$ENDIF}
     property IntfCount: Integer read GetIntfCount;
     property IntfItems[Index: Integer]: TCnUsesItem read GetIntfItem;
     property ImplCount: Integer read GetImplCount;
@@ -126,8 +138,10 @@ implementation
 
 {$IFDEF CNWIZARDS_CNUSESCLEANER}
 
+{$IFNDEF STAND_ALONE}
 uses
   CnWizEditFiler;
+{$ENDIF}
 
 { TCnUnitUsesInfo }
 
@@ -238,15 +252,17 @@ end;
 
 { TCnEmptyUsesInfo }
 
-constructor TCnEmptyUsesInfo.Create(const ADcuName, ASourceFileName: string;
-  AProject: IOTAProject);
+constructor TCnEmptyUsesInfo.Create(const ADcuName, ASourceFileName: string
+  {$IFNDEF STAND_ALONE}; AProject: IOTAProject {$ENDIF});
 begin
   inherited Create;
   FIntfItems := TObjectList.Create;
   FImplItems := TObjectList.Create;
   FDcuName := ADcuName;
   FSourceFileName := ASourceFileName;
+{$IFNDEF STAND_ALONE}
   FProject := AProject;
+{$ENDIF}
 end;
 
 destructor TCnEmptyUsesInfo.Destroy;
@@ -256,13 +272,15 @@ begin
   inherited;
 end;
 
+{$IFNDEF STAND_ALONE}
+
 function TCnEmptyUsesInfo.Process: Boolean;
 var
-  Info: TCnUnitUsesInfo;
-  UsesList: TStringList;
+  Info: TCnUnitUsesInfo; // 存储 DCU 文件中解析出来的 uses 内容列表
+  UsesList: TStringList; // 存储源码中解析出来的 uses 内容列表
   Stream: TMemoryStream;
   Item: TCnUsesItem;
-  i: Integer;
+  I: Integer;
 begin
   Result := False;
   try
@@ -274,30 +292,32 @@ begin
         Stream := TMemoryStream.Create;
         try
           EditFilerSaveFileToStream(FSourceFileName, Stream);
-          // CnOtaSaveEditorToStream(Buffer, Stream);
           ParseUnitUses(PAnsiChar(Stream.Memory), UsesList);
         finally
           Stream.Free;
         end;
 
-        for i := 0 to Info.IntfUsesCount - 1 do
-          if (Info.IntfUsesImport[i].Count = 0) and
-            (UsesList.IndexOf(Info.IntfUses[i]) >= 0) then
+        for I := 0 to Info.IntfUsesCount - 1 do
+        begin
+          if (Info.IntfUsesImport[I].Count = 0) and
+            (UsesList.IndexOf(Info.IntfUses[I]) >= 0) then
           begin
             Item := TCnUsesItem.Create;
-            Item.Name := Info.IntfUses[i];
+            Item.Name := Info.IntfUses[I];
             FIntfItems.Add(Item);
           end;
+        end;
 
-        for i := 0 to Info.ImplUsesCount - 1 do
-          if (Info.ImplUsesImport[i].Count = 0) and
-            (UsesList.IndexOf(Info.ImplUses[i]) >= 0) then
+        for I := 0 to Info.ImplUsesCount - 1 do
+        begin
+          if (Info.ImplUsesImport[I].Count = 0) and
+            (UsesList.IndexOf(Info.ImplUses[I]) >= 0) then
           begin
             Item := TCnUsesItem.Create;
-            Item.Name := Info.ImplUses[i];
+            Item.Name := Info.ImplUses[I];
             FImplItems.Add(Item);
           end;
-
+        end;
         Result := True;
       finally
         UsesList.Free;
@@ -310,6 +330,8 @@ begin
       DoHandleException(E.Message);
   end;
 end;
+
+{$ENDIF}
 
 function TCnEmptyUsesInfo.GetImplCount: Integer;
 begin

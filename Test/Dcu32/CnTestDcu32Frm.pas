@@ -4,18 +4,21 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls;
+  StdCtrls, TypInfo, Clipbrd, ExtCtrls;
 
 type
-  TForm1 = class(TForm)
+  TFormDcu32 = class(TForm)
     lbl1: TLabel;
-    Edit1: TEdit;
+    edtDcuFile: TEdit;
     btnOpen: TButton;
     Button1: TButton;
     lblNote: TLabel;
     OpenDialog1: TOpenDialog;
+    btnCnDcu32: TButton;
+    mmoDcu: TMemo;
     procedure btnOpenClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
+    procedure btnCnDcu32Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -23,12 +26,12 @@ type
   end;
 
 var
-  Form1: TForm1;
+  FormDcu32: TFormDcu32;
 
 implementation
 
 uses
-  DCU32, DCURecs, DCU_Out;
+  DCU32, DCURecs, DCU_Out, CnDCU32;
 
 type
   TTestUnit = class(TUnit)
@@ -37,13 +40,13 @@ type
 
 {$R *.DFM}
 
-procedure TForm1.btnOpenClick(Sender: TObject);
+procedure TFormDcu32.btnOpenClick(Sender: TObject);
 begin
   if OpenDialog1.Execute then
-    Edit1.Text := OpenDialog1.FileName;
+    edtDcuFile.Text := OpenDialog1.FileName;
 end;
 
-procedure TForm1.Button1Click(Sender: TObject);
+procedure TFormDcu32.Button1Click(Sender: TObject);
 var
   U: TTestUnit;
   I: Integer;
@@ -52,7 +55,7 @@ var
   S, N: string;
   HasExcept: Boolean;
 begin
-  if not FileExists(Edit1.Text) then
+  if not FileExists(edtDcuFile.Text) then
   begin
     ShowMessage('Error Open File.');
     Exit;
@@ -63,7 +66,7 @@ begin
   U := TTestUnit.Create;
   try
     try
-      U.Load(Edit1.Text, 0, False, nil);
+      U.Load(edtDcuFile.Text, 0, False, nil);
     except
       HasExcept := True;
     end;
@@ -94,6 +97,33 @@ begin
       ShowMessage('Error Getting Detailed Declaration, but OK for UsesCleaner.' );
   finally
     U.Free;
+  end;
+end;
+
+procedure TFormDcu32.btnCnDcu32Click(Sender: TObject);
+var
+  Info: TCnUnitUsesInfo;
+  S: string;
+  I: Integer;
+begin
+  if FileExists(edtDcuFile.Text) then
+  begin
+    Info := TCnUnitUsesInfo.Create(edtDcuFile.Text);
+
+    mmoDcu.Lines.Clear;
+    mmoDcu.Lines.Add('interface:');
+    for I := 0 to Info.IntfUsesCount - 1 do
+    begin
+      mmoDcu.Lines.Add(Info.IntfUses[I]);
+      mmoDcu.Lines.Add(Info.IntfUsesImport[I].Text);
+    end;
+    mmoDcu.Lines.Add('implementation:');
+    for I := 0 to Info.ImplUsesCount - 1 do
+    begin
+      mmoDcu.Lines.Add(Info.ImplUses[I]);
+      mmoDcu.Lines.Add(Info.ImplUsesImport[I].Text);
+    end;
+    Info.Free;
   end;
 end;
 

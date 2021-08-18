@@ -2,7 +2,7 @@ program CnTestDcu32;
 
 uses
   Forms,
-  CnTestDcu32Frm in 'CnTestDcu32Frm.pas' {Form1},
+  CnTestDcu32Frm in 'CnTestDcu32Frm.pas' {FormDcu32},
   DasmUtil in '..\..\Source\ThirdParty\DCU32\DAsmUtil.pas',
   DasmX86 in '..\..\Source\ThirdParty\DCU32\DasmX86.pas',
   DCP in '..\..\Source\ThirdParty\DCU32\DCP.pas',
@@ -15,12 +15,13 @@ uses
   op in '..\..\Source\ThirdParty\DCU32\op.pas',
   DasmCF in '..\..\Source\ThirdParty\DCU32\DasmCF.pas',
   DasmDefs in '..\..\Source\ThirdParty\DCU32\DasmDefs.pas',
-  DasmMSIL in '..\..\Source\ThirdParty\DCU32\DasmMSIL.pas';
+  DasmMSIL in '..\..\Source\ThirdParty\DCU32\DasmMSIL.pas',
+  CnDCU32 in '..\..\Source\Utils\CnDCU32.pas';
 
 {$R *.RES}
 
 begin
   Application.Initialize;
-  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TFormDcu32, FormDcu32);
   Application.Run;
 end.

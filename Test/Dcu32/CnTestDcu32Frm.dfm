@@ -1,9 +1,9 @@
-object Form1: TForm1
+object FormDcu32: TFormDcu32
   Left = 240
   Top = 201
   BorderStyle = bsDialog
   Caption = 'Test Dcu32 Intf Parsing'
-  ClientHeight = 142
+  ClientHeight = 442
   ClientWidth = 496
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -31,7 +31,7 @@ object Form1: TForm1
       'Note: This Test Should Run OK from Delphi 5 ~ Above all. Parse O' +
       'K for Delphi 5 ~ Above all Units.'
   end
-  object Edit1: TEdit
+  object edtDcuFile: TEdit
     Left = 80
     Top = 24
     Width = 305
@@ -50,11 +50,29 @@ object Form1: TForm1
   object Button1: TButton
     Left = 24
     Top = 96
-    Width = 451
+    Width = 257
     Height = 25
     Caption = 'Parse Dcu!'
     TabOrder = 2
     OnClick = Button1Click
+  end
+  object btnCnDcu32: TButton
+    Left = 328
+    Top = 96
+    Width = 145
+    Height = 25
+    Caption = 'CnDcu32'
+    TabOrder = 3
+    OnClick = btnCnDcu32Click
+  end
+  object mmoDcu: TMemo
+    Left = 24
+    Top = 144
+    Width = 449
+    Height = 281
+    ReadOnly = True
+    ScrollBars = ssVertical
+    TabOrder = 4
   end
   object OpenDialog1: TOpenDialog
     Filter = '*.DCU|*.dcu'

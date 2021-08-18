@@ -24,20 +24,20 @@ unit CnPasCodeParser;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：Pas 源代码分析器
 * 单元作者：周劲羽 zjy@cnpack.org
-* 备    注：
+* 备    注：解析器解析过程中会从 Token 池里拿 PasToken 对象，释放时将它们返回到池中
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 修改记录：2019.03.16 V1.2
 *               优化对换行后的点号的支持以及点号后输入的内容恰好是关键字时的支持
 *           2012.02.07
-*               UTF8的位置转换去除后仍有问题，恢复之
+*               UTF8 的位置转换去除后仍有问题，恢复之
 *           2011.11.29
-*               XE/XE2 的位置解析无需UTF8的位置转换
+*               XE/XE2 的位置解析无需 UTF8 的位置转换
 *           2011.11.03
 *               优化对带点的引用单元名的支持
 *           2011.05.29
-*               修正BDS下对汉字UTF8未处理而导致解析出错的问题
+*               修正 BDS 下对汉字 UTF8 未处理而导致解析出错的问题
 *           2004.11.07
 *               创建单元
 ================================================================================
@@ -58,6 +58,7 @@ type
   TCnCompDirectiveType = (ctNone, ctIf, ctIfDef, ctIfNDef, ctElse, ctEndIf, ctIfEnd);
 
   TCnUseToken = class(TObject)
+  {* 描述一 uses 结构信息}
   private
     FIsImpl: Boolean;
     FTokenPos: Integer;
@@ -444,7 +445,7 @@ begin
     TObject(TokenPool[I]).Free;
 end;
 
-// NextNoJunk仅仅只跳过注释，而没跳过编译指令的情况。加此函数可过编译指令
+// NextNoJunk 仅仅只跳过注释，而没跳过编译指令的情况。加此函数可过编译指令
 procedure LexNextNoJunkWithoutCompDirect(Lex: TmwPasLex);
 begin
   repeat

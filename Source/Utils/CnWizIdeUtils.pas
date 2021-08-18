@@ -1056,6 +1056,7 @@ begin
     Result := False;
     Exit;
   end;
+
   View := IOTAEditView(AView);
   LineNo := View.CursorPos.Line;
   Col := View.CursorPos.Col;
@@ -1083,7 +1084,7 @@ begin
   Result := (Col >= Token.EditCol) and (Col <= Token.EditCol + Length(Token.Token));
 end;
 
-{* 判断标识符是否在光标下，使用 WideToken，可供 Unicode/Utf8 环境下调用}
+// 判断标识符是否在光标下，使用 WideToken，可供 Unicode/Utf8 环境下调用
 function IsCurrentTokenW(AView: Pointer; AControl: TControl; Token: TCnWidePasToken): Boolean;
 var
   LineNo, Col: Integer;
@@ -1094,6 +1095,7 @@ begin
     Result := False;
     Exit;
   end;
+
   View := IOTAEditView(AView);
   LineNo := View.CursorPos.Line;
   Col := View.CursorPos.Col;

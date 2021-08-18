@@ -24,14 +24,16 @@ unit CnUsesCleaner;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：引用单元清理工具单元
 * 单元作者：周劲羽 (zjy@cnpack.org)
-* 备    注：
+* 备    注：原理：编译好的 DCU 文件里记录了 interface 部分以及 implementation 部
+*           分导入的每一个单元名，以及对应的单元导入标识符，如果某个单元的标识符
+*           数量为 0，表示没有用到其内容，可以考虑修改源码剔除之。
 * 开发平台：PWinXP SP2 + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串支持本地化处理方式
 * 修改记录：2016.08.02 V1.2
 *               加入自动保存并关闭处理结果的选项以应对大项目
 *           2011.11.05 V1.1
-*               完善对XE2风格的带点的单元名的支持
+*               完善对 XE2 风格的带点的单元名的支持
 *           2005.08.11 V1.0
 *               创建单元
 ================================================================================
@@ -80,11 +82,11 @@ type
     procedure btnHelpClick(Sender: TObject);
     procedure rbCurrUnitClick(Sender: TObject);
   private
-    { Private declarations }
+
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+
   end;
 
 { TCnUsesCleaner }
@@ -108,10 +110,13 @@ type
     function ShowKindForm(var AKind: TCnUsesCleanKind): Boolean;
     function CompileUnits(AKind: TCnUsesCleanKind): Boolean;
     function ProcessUnits(AKind: TCnUsesCleanKind; List: TObjectList): Boolean;
+    {* 总体的单元解析查找处理函数}
     procedure ParseUnitKind(const FileName: string; var Kinds: TCnUsesKinds);
+    {* 解析各 unit 源码获取其有无 init、有无 Register 函数等信息}
     procedure GetCompRefUnits(AModule: IOTAModule; AProject: IOTAProject; Units:
       TStrings);
     procedure CheckUnits(List: TObjectList);
+    {* 总体的单元清理函数}
     function DoCleanUnit(Buffer: IOTAEditBuffer; Intf, Impl: TStrings): Boolean;
     procedure CleanUnitUses(List: TObjectList);
   public
@@ -220,9 +225,7 @@ begin
 
         CheckUnits(List);
         if ShowUsesCleanResultForm(List) then
-        begin
           CleanUnitUses(List);
-        end;
       end;
     finally
       List.Free;
@@ -453,6 +456,7 @@ var
       Result := _CnChangeFileExt(ADcuPath + _CnExtractFileName(ASourceFileName), csDcuExt);
   end;
 
+  // 单独处理单个单元
   function ProcessAUnit(const ADcuName, ASourceFileName: string;
     AProject: IOTAProject; var AInfo: TCnEmptyUsesInfo): Boolean;
   begin

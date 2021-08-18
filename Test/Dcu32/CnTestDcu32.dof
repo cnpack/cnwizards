@@ -43,9 +43,9 @@ OutputDir=
 UnitOutputDir=
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto
+SearchPath=$(DELPHI)\Source\Toolsapi;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\Source;..\..\Source\Utils;..\..\Source\Framework
 Packages=Vcl50;Vclx50;VclSmp50;Vcldb50;vclado50;Vclbde50;vcldbx50;Qrpt50;TeeUI50;TeeDB50;Tee50;Dss50;TeeQR50;VCLIB50;Vclmid50;vclie50;Inetdb50;Inet50;NMFast50;webmid50;dclocx50;dclaxserver50
-Conditionals=
+Conditionals=STAND_ALONE
 DebugSourceDirs=
 UsePackages=0
 [Parameters]
@@ -56,7 +56,7 @@ ActiveLang=
 ProjectLang=$00000409
 RootDir=
 [Version Info]
-IncludeVerInfo=0
+IncludeVerInfo=1
 AutoIncBuild=0
 MajorVer=1
 MinorVer=0
@@ -71,12 +71,25 @@ Locale=1033
 CodePage=1252
 [Version Info Keys]
 CompanyName=
-FileDescription=
+FileDescription=CnTestDcu32
 FileVersion=1.0.0.0
 InternalName=
 LegalCopyright=
 LegalTrademarks=
 OriginalFilename=
-ProductName=
+ProductName=CnTestDcu32
 ProductVersion=1.0.0.0
-Comments=
+ProgramID=com.embarcadero.CnTestDcu32
+[HistoryLists\hlConditionals]
+Count=1
+Item0=STAND_ALONE
+[HistoryLists\hlUnitAliases]
+Count=1
+Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
+[HistoryLists\hlSearchPath]
+Count=5
+Item0=$(DELPHI)\Source\Toolsapi;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\Source;..\..\Source\Utils;..\..\Source\Framework
+Item1=$(DELPHI)\Source\Toolsapi;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\Source;..\..\Source\Utils
+Item2=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\Source;..\..\Source\Utils
+Item3=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\Source
+Item4=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\cnwizards\Source
