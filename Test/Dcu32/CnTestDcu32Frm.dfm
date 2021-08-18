@@ -2,7 +2,7 @@ object FormDcu32: TFormDcu32
   Left = 240
   Top = 201
   BorderStyle = bsDialog
-  Caption = 'Test Dcu32 Intf Parsing'
+  Caption = 'Test Dcu32 Intf/Impl Parsing'
   ClientHeight = 442
   ClientWidth = 496
   Color = clBtnFace

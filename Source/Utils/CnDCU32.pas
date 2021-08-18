@@ -41,7 +41,8 @@ interface
 
 uses
   Windows, Classes, SysUtils, Contnrs, DCURecs, DCU32, DCU_Out
-  {$IFNDEF STAND_ALONE}, ToolsAPI, CnWizUtils, CnPasCodeParser, CnWizConsts {$ENDIF};
+  {$IFNDEF STAND_ALONE}, ToolsAPI, CnWizUtils, CnPasCodeParser, CnCommon,
+  CnWizConsts {$ENDIF};
 
 type
 
@@ -281,6 +282,29 @@ var
   Stream: TMemoryStream;
   Item: TCnUsesItem;
   I: Integer;
+
+  function UnitUsesListContainsUnitName({$IFNDEF SUPPORT_UNITNAME_DOT} const
+    {$ENDIF} DcuName: string): Boolean;
+{$IFDEF SUPPORT_UNITNAME_DOT}
+  var
+    K: Integer;
+{$ENDIF}
+  begin
+    Result := UsesList.IndexOf(DcuName) >= 0;
+{$IFDEF SUPPORT_UNITNAME_DOT}
+    // 如果没找到，则判断点号，使用 DcuName 最后一个点的后面部分搜索
+    if not Result then
+    begin
+      K := LastCharPos(DcuName, '.');
+      if K > 0 then
+      begin
+        Delete(DcuName, 1, K);
+        Result := UsesList.IndexOf(DcuName) >= 0;
+      end;
+    end;
+{$ENDIF}
+  end;
+
 begin
   Result := False;
   try
@@ -297,10 +321,12 @@ begin
           Stream.Free;
         end;
 
+        // 注意从源码里 UsesList 解析出来的单元名可能是不带点的，
+        // 而 Dcu 里解析出来的 Info 里的则是带点的，简单匹配不够
         for I := 0 to Info.IntfUsesCount - 1 do
         begin
           if (Info.IntfUsesImport[I].Count = 0) and
-            (UsesList.IndexOf(Info.IntfUses[I]) >= 0) then
+            UnitUsesListContainsUnitName(Info.IntfUses[I]) then
           begin
             Item := TCnUsesItem.Create;
             Item.Name := Info.IntfUses[I];
@@ -311,7 +337,7 @@ begin
         for I := 0 to Info.ImplUsesCount - 1 do
         begin
           if (Info.ImplUsesImport[I].Count = 0) and
-            (UsesList.IndexOf(Info.ImplUses[I]) >= 0) then
+            UnitUsesListContainsUnitName(Info.ImplUses[I]) then
           begin
             Item := TCnUsesItem.Create;
             Item.Name := Info.ImplUses[I];
@@ -355,3 +381,4 @@ end;
 
 {$ENDIF CNWIZARDS_CNUSESCLEANER}
 end.
+
