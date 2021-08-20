@@ -104,7 +104,9 @@ unit CnPasWideLex;
 * 开发平台：Windows 7 + Delphi XE
 * 兼容测试：PWin9X/2000/XP/7 + Delphi 2009 ~
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 修改记录：2019.03.16 V1.4
+* 修改记录：2021.08.20 V1.5
+*               增加对 dpk 中 requires 与 contains 的识别
+*           2019.03.16 V1.4
 *               增加 LastNoSpaceCRLF 属性以指明上一个非空格非换行的 Token
 *           2016.07.13 V1.3
 *               修正一处 Unicode 标识符解析错误的问题
@@ -265,6 +267,7 @@ type
     function Func103: TTokenKind;
     function Func105: TTokenKind;
     function Func106: TTokenKind;
+    function Func112: TTokenKind;
     function Func117: TTokenKind;
     function Func126: TTokenKind;
     function Func129: TTokenKind;
@@ -558,6 +561,8 @@ begin
         FIdentFuncTable[I] := Func105;
       106:
         FIdentFuncTable[I] := Func106;
+      112:
+        FIdentFuncTable[I] := Func112;
       117:
         FIdentFuncTable[I] := Func117;
       126:
@@ -1118,6 +1123,8 @@ function TCnPasWideLex.Func95: TTokenKind;
 begin
   if KeyComp('Absolute') then
     Result := tkAbsolute
+  else if KeyComp('Contains') then
+    Result := tkContains
   else
     Result := tkIdentifier;
 end;
@@ -1217,6 +1224,14 @@ begin
     else
       Result := tkProtected
   end
+  else
+    Result := tkIdentifier;
+end;
+
+function TCnPasWideLex.Func112: TTokenKind;
+begin
+  if KeyComp('Requires') then
+    Result := tkRequires
   else
     Result := tkIdentifier;
 end;

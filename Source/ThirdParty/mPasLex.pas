@@ -89,7 +89,7 @@ type
   TTokenKind=(tkAbsolute, tkAbstract, tkAddressOp, tkAmpersand, tkAnd, tkAnsiComment,
     tkArray, tkAs, tkAt, tkAsciiChar, tkAsm, tkAssembler, tkAssign, tkAutomated,
     tkBegin, tkBadString, tkBorComment, tkCase, tkCdecl, tkClass, tkColon,
-    tkComma, tkCompDirect, tkConst, tkConstructor, tkCRLF, tkCRLFCo, tkDefault,
+    tkComma, tkCompDirect, tkContains, tkConst, tkConstructor, tkCRLF, tkCRLFCo, tkDefault,
     tkDestructor, tkDispid, tkDispinterface, tkDiv, tkDo, tkDoubleAddressOp,
     tkDotDot, tkDownto, tkDynamic, tkElse, tkEnd, tkEqual, tkError, tkExcept,
     tkExport, tkExports, tkExternal, tkFar, tkFile, tkFinalization, tkFinally,
@@ -101,7 +101,7 @@ type
     tkNumber, tkObject, tkOf, tkOn, tkOr, tkOut, tkOverload, tkOverride,
     tkPacked, tkPascal, tkPlus, tkPoint, tkPointerSymbol, tkPrivate, tkProcedure,
     tkProgram, tkProperty, tkProtected, tkPublic, tkPublished, tkRaise, tkRead,
-    tkReadonly, tkRecord, tkRegister, tkReintroduce, tkRepeat, tkResident,
+    tkReadonly, tkRecord, tkRegister, tkReintroduce, tkRepeat, tkRequires, tkResident,
     tkResourcestring, tkRoundClose, tkRoundOpen, tkSafecall, tkSealed, tkSemiColon, tkSet,
     tkShl, tkShr, tkSlash, tkSlashesComment, tkSquareClose, tkSquareOpen,
     tkSpace, tkStar, tkStdcall, tkStored, tkString, tkStringresource, tkSymbol,
@@ -199,6 +199,7 @@ type
     function Func103: TTokenKind;
     function Func105: TTokenKind;
     function Func106: TTokenKind;
+    function Func112: TTokenKind; // Added by LiuXiao
     function Func117: TTokenKind;
     function Func126: TTokenKind;
     function Func129: TTokenKind;
@@ -380,6 +381,7 @@ begin
       103: fIdentFuncTable[I]:=Func103;
       105: fIdentFuncTable[I]:=Func105;
       106: fIdentFuncTable[I]:=Func106;
+      112: fIdentFuncTable[I]:=Func112;
       117: fIdentFuncTable[I]:=Func117;
       126: fIdentFuncTable[I]:=Func126;
       129: fIdentFuncTable[I]:=Func129;
@@ -742,7 +744,8 @@ end;
 
 function TmwPasLex.Func95: TTokenKind;
 begin
-  if KeyComp('Absolute')then Result:=tkAbsolute else Result:=tkIdentifier;
+  if KeyComp('Absolute')then Result:=tkAbsolute else
+    if KeyComp('Contains')then Result:=tkContains else Result:=tkIdentifier; // Added by LiuXiao
 end;
 
 function TmwPasLex.Func96: TTokenKind;
@@ -807,6 +810,12 @@ begin
     if inSymbols(CharAhead(fStringLen))then Result:=tkIdentifier else
       Result:=tkProtected
   end else Result:=tkIdentifier;
+end;
+
+// Added by LiuXiao
+function TmwPasLex.Func112: TTokenKind;
+begin
+  if KeyComp('Requires')then Result:=tkRequires else Result:=tkIdentifier;
 end;
 
 function TmwPasLex.Func117: TTokenKind;

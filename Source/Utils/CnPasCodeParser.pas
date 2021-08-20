@@ -1867,7 +1867,7 @@ begin
     Lex.Origin := PAnsiChar(Source);
     while Lex.TokenID <> tkNull do
     begin
-      if Lex.TokenID = tkUses then
+      if Lex.TokenID in [tkUses, tkContains] then
       begin
         while not (Lex.TokenID in [tkNull, tkSemiColon]) do
         begin
