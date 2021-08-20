@@ -204,6 +204,9 @@ type
   TXTreeView = TTreeView;
 {$ENDIF BDS}
 
+  TCnModuleSearchType = (mstInvalid, mstProject, mstProjectSearch, mstSystemSearch);
+  {* 搜索到的源码位置类型：非法、工程内、工程搜索目录内、系统搜索目录内}
+
 //==============================================================================
 // IDE 代码编辑器功能函数
 //==============================================================================
@@ -344,6 +347,10 @@ procedure GetProjectLibPath(Paths: TStrings);
 
 function GetFileNameFromModuleName(AName: string; AProject: IOTAProject = nil): string;
 {* 根据模块名获得完整文件名}
+
+function GetFileNameSearchTypeFromModuleName(AName: string;
+  var SearchType: TCnModuleSearchType; AProject: IOTAProject = nil): string;
+{* 根据模块名获得完整文件名以及处于哪一类搜索目录中，无扩展名时默认搜 pas}
 
 function CnOtaGetVersionInfoKeys(Project: IOTAProject = nil): TStrings;
 {* 获取当前项目中的版本信息键值}
@@ -1735,11 +1742,12 @@ begin
 {$ENDIF}
 end;
 
-// 根据模块名获得完整文件名
-function GetFileNameFromModuleName(AName: string; AProject: IOTAProject = nil): string;
+// 根据模块名获得完整文件名以及处于哪一类搜索目录中
+function GetFileNameSearchTypeFromModuleName(AName: string;
+  var SearchType: TCnModuleSearchType; AProject: IOTAProject = nil): string;
 var
   Paths: TStringList;
-  i: Integer;
+  I, ProjectSrcIdx: Integer;
   Ext, ProjectPath: string;
 begin
   if AProject = nil then
@@ -1750,13 +1758,16 @@ begin
     AName := AName + '.pas';
 
   Result := '';
+  SearchType := mstInvalid;
+
   // 在工程模块中查找
   if AProject <> nil then
   begin
-    for i := 0 to AProject.GetModuleCount - 1 do
-      if SameFileName(_CnExtractFileName(AProject.GetModule(i).FileName), AName) then
+    for I := 0 to AProject.GetModuleCount - 1 do
+      if SameFileName(_CnExtractFileName(AProject.GetModule(I).FileName), AName) then
       begin
-        Result := AProject.GetModule(i).FileName;
+        Result := AProject.GetModule(I).FileName;
+        SearchType := mstProject;
         Exit;
       end;
 
@@ -1764,29 +1775,45 @@ begin
     if FileExists(ProjectPath + AName) then
     begin
       Result := ProjectPath + AName;
+      SearchType := mstProject;
       Exit;
     end;
   end;
 
   Paths := TStringList.Create;
   try
-    if Assigned(AProject) then
-    begin
-      // 在工程搜索路径里查找
+    if Assigned(AProject) then  // 加入工程搜索路径
       AddProjectPath(AProject, Paths, 'SrcDir');
-    end;
 
-    // 在系统搜索路径里查找
+    ProjectSrcIdx := Paths.Count; // 前 ProjectSrcIdx 个，也就是 0 到 ProjectSrcIdx - 1 是工程搜索路径
+
+    // 加入系统搜索路径
     GetLibraryPath(Paths, False);
-    for i := 0 to Paths.Count - 1 do
-      if FileExists(MakePath(Paths[i]) + AName) then
+
+    for I := 0 to Paths.Count - 1 do
+    begin
+      if FileExists(MakePath(Paths[I]) + AName) then
       begin
-        Result := MakePath(Paths[i]) + AName;
+        Result := MakePath(Paths[I]) + AName;
+        if I >= ProjectSrcIdx then        // 系统路径里找到的
+          SearchType := mstSystemSearch
+        else
+          SearchType := mstProjectSearch; // 工程路径里找到的
         Exit;
       end;
+    end;
   finally
     Paths.Free;
   end;
+end;
+
+// 根据模块名获得完整文件名
+function GetFileNameFromModuleName(AName: string; AProject: IOTAProject = nil): string;
+var
+  SearchType: TCnModuleSearchType;
+begin
+  SearchType := mstInvalid;
+  Result := GetFileNameSearchTypeFromModuleName(AName, SearchType, AProject);
 end;
 
 // 取组件定义所在的单元名
