@@ -2961,6 +2961,7 @@
 {$IFDEF BDS2007_UP}
   {$DEFINE IDE_CONF_MANAGER}
   {$DEFINE TBYTES_DEFINED}    // 2007 Defined TBytes = array of Byte;
+  {$DEFINE PROJECT_FILENAME_DPROJ} // Project File is .dproj
 {$ENDIF}
 
 {$IFDEF BDS2007}
@@ -2981,6 +2982,14 @@
 {$IFDEF BDS2005_UP}
   {$DEFINE IDE_EDITOR_ELIDE}  // 2005 或以上编辑器支持折叠
   {$DEFINE OTA_PALETTE_API}   // 2005 and above Provides PaletteAPI.
+{$ENDIF}
+
+{$IFDEF BDS2006}
+  {$DEFINE PROJECT_FILENAME_BDSPROJ} // Project File is .bdsproj
+{$ENDIF}
+
+{$IFDEF BDS2005}
+  {$DEFINE PROJECT_FILENAME_BDSPROJ} // Project File is .bdsproj
 {$ENDIF}
 
 {$IFDEF COMPILER6_UP}
