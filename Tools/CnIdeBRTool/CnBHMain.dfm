@@ -1,6 +1,6 @@
 object CnIdeBRMainForm: TCnIdeBRMainForm
-  Left = 323
-  Top = 94
+  Left = 398
+  Top = 147
   ActiveControl = btnNext
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
@@ -353,6 +353,9 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
     object tsOther: TTabSheet
       ImageIndex = 6
       OnShow = TabSheetShow
+      DesignSize = (
+        561
+        357)
       object lbl10: TLabel
         Left = 8
         Top = 32
@@ -391,7 +394,7 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
       end
       object btnSelAllIDE: TSpeedButton
         Left = 104
-        Top = 72
+        Top = 88
         Width = 23
         Height = 22
         Hint = 'Select All'
@@ -429,10 +432,11 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
       end
       object btnSelAllProj: TSpeedButton
         Left = 536
-        Top = 72
+        Top = 88
         Width = 23
         Height = 22
         Hint = 'Select All'
+        Anchors = [akTop, akRight]
         Flat = True
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
@@ -471,6 +475,7 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
         Width = 23
         Height = 22
         Hint = 'Select All'
+        Anchors = [akTop, akRight]
         Flat = True
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
@@ -507,7 +512,7 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
         Left = 8
         Top = 112
         Width = 121
-        Height = 228
+        Height = 233
         OnClickCheck = lstIDEsClickCheck
         ItemHeight = 13
         TabOrder = 1
@@ -519,6 +524,7 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
         Width = 420
         Height = 73
         OnClickCheck = lstProjectsClickCheck
+        Anchors = [akLeft, akTop, akRight]
         ItemHeight = 13
         TabOrder = 0
       end
@@ -526,8 +532,9 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
         Left = 136
         Top = 212
         Width = 420
-        Height = 128
+        Height = 133
         OnClickCheck = lstFilesClickCheck
+        Anchors = [akLeft, akTop, akRight, akBottom]
         ItemHeight = 13
         TabOrder = 2
       end
@@ -563,6 +570,9 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
     BevelOuter = bvNone
     Color = clWhite
     TabOrder = 0
+    DesignSize = (
+      579
+      73)
     object bvlLineTop: TBevel
       Left = 0
       Top = 31
@@ -713,18 +723,18 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
   object dlgOpen: TOpenDialog
     DefaultExt = '*.bic'
     Filter = 'Borland IDE Configuration(*.bic)|*.bic'
-    Left = 312
+    Left = 360
     Top = 15
   end
   object dlgSave: TSaveDialog
     DefaultExt = '*.bic'
     Filter = 'Borland IDE Configuration(*.bic)|*.bic'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
-    Left = 344
+    Left = 392
     Top = 15
   end
   object il16: TImageList
-    Left = 280
+    Left = 328
     Top = 16
     Bitmap = {
       494C01011C001D00040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
