@@ -586,6 +586,8 @@ function CnOtaGetProjectGroup: IOTAProjectGroup;
 {* 取当前工程组}
 function CnOtaGetProjectGroupFileName: string;
 {* 取当前工程组文件名}
+function CnOtaGetProjectSourceFileName(Project: IOTAProject): string;
+{* 取工程的源码文件 dpr/dpk}
 function CnOtaGetProjectResource(Project: IOTAProject): IOTAProjectResource;
 {* 取工程资源}
 function CnOtaGetProjectVersion(Project: IOTAProject): string;
@@ -861,6 +863,9 @@ procedure CnOtaClosePage(EditView: IOTAEditView);
 
 procedure CnOtaCloseEditView(AModule: IOTAModule);
 {* 仅关闭模块的视图，而不关闭模块}
+
+procedure ParseUnitUsesFromFileName(const FileName: string; UsesList: TStrings);
+{* 分析源代码中引用的单元，FileName 是完整文件名}
 
 //==============================================================================
 // 窗体操作相关函数
@@ -1451,6 +1456,10 @@ function CnOtaGetProjectGroupFileName: string;
 begin
 end;
 
+function CnOtaGetProjectSourceFileName(Project: IOTAProject): string;
+begin
+end;
+
 function CnOtaGetProjectResource(Project: IOTAProject): IOTAProjectResource;
 begin
 end;
@@ -1836,6 +1845,10 @@ begin
 end;
 
 procedure CnOtaCloseEditView(AModule: IOTAModule);
+begin
+end;
+
+procedure ParseUnitUsesFromFileName(const FileName: string; UsesList: TStrings);
 begin
 end;
 

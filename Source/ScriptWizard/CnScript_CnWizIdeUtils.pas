@@ -410,6 +410,7 @@ begin
 {$ENDIF}
   S.RegisterDelphiFunction(@GetProjectLibPath, 'GetProjectLibPath', cdRegister);
   S.RegisterDelphiFunction(@GetFileNameFromModuleName, 'GetFileNameFromModuleName', cdRegister);
+  S.RegisterDelphiFunction(@GetFileNameSearchTypeFromModuleName, 'GetFileNameSearchTypeFromModuleName', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetVersionInfoKeys, 'CnOtaGetVersionInfoKeys', cdRegister);
   S.RegisterDelphiFunction(@GetLibraryPath, 'GetLibraryPath', cdRegister);
   S.RegisterDelphiFunction(@GetComponentUnitName, 'GetComponentUnitName', cdRegister);

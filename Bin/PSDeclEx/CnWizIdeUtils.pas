@@ -52,6 +52,10 @@ uses
 {$ENDIF}
   ToolsAPI;
 
+type
+  TCnModuleSearchType = (mstInvalid, mstProject, mstProjectSearch, mstSystemSearch);
+  {* 搜索到的源码位置类型：非法、工程内、工程搜索目录内、系统搜索目录内}
+
 //==============================================================================
 // IDE 代码编辑器功能函数
 //==============================================================================
@@ -902,6 +906,11 @@ begin
 end;
 
 function GetFileNameFromModuleName(AName: string; AProject: IOTAProject = nil): string;
+begin
+end;
+
+function GetFileNameSearchTypeFromModuleName(AName: string;
+  var SearchType: TCnModuleSearchType; AProject: IOTAProject = nil): string;
 begin
 end;
 

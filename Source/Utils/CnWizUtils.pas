@@ -1040,7 +1040,7 @@ function GetTokenAnsiEditCol(AToken: TCnGeneralPasToken): Integer;
 {* 获取一个 GeneralPasToken 的 AnsiCol}
 
 procedure ParseUnitUsesFromFileName(const FileName: string; UsesList: TStrings);
-{* 分析源代码中引用的单元，Source 是完整文件名}
+{* 分析源代码中引用的单元，FileName 是完整文件名}
 
 //==============================================================================
 // 窗体操作相关函数

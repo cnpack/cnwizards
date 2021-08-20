@@ -1742,6 +1742,15 @@ begin
 {$ENDIF}
 end;
 
+// 根据模块名获得完整文件名
+function GetFileNameFromModuleName(AName: string; AProject: IOTAProject = nil): string;
+var
+  SearchType: TCnModuleSearchType;
+begin
+  SearchType := mstInvalid;
+  Result := GetFileNameSearchTypeFromModuleName(AName, SearchType, AProject);
+end;
+
 // 根据模块名获得完整文件名以及处于哪一类搜索目录中
 function GetFileNameSearchTypeFromModuleName(AName: string;
   var SearchType: TCnModuleSearchType; AProject: IOTAProject = nil): string;
@@ -1805,15 +1814,6 @@ begin
   finally
     Paths.Free;
   end;
-end;
-
-// 根据模块名获得完整文件名
-function GetFileNameFromModuleName(AName: string; AProject: IOTAProject = nil): string;
-var
-  SearchType: TCnModuleSearchType;
-begin
-  SearchType := mstInvalid;
-  Result := GetFileNameSearchTypeFromModuleName(AName, SearchType, AProject);
 end;
 
 // 取组件定义所在的单元名
