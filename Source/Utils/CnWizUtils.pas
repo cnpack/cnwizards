@@ -1039,6 +1039,9 @@ procedure ConvertGeneralTokenPos(EditView: Pointer; AToken: TCnGeneralPasToken);
 function GetTokenAnsiEditCol(AToken: TCnGeneralPasToken): Integer;
 {* 获取一个 GeneralPasToken 的 AnsiCol}
 
+procedure ParseUnitUsesFromFileName(const FileName: string; UsesList: TStrings);
+{* 分析源代码中引用的单元，Source 是完整文件名}
+
 //==============================================================================
 // 窗体操作相关函数
 //==============================================================================
@@ -1141,7 +1144,7 @@ uses
 {$IFDEF SUPPORT_FMX}
   CnFmxUtils,
 {$ENDIF}
-  Math, CnWizOptions, CnGraphUtils
+  Math, CnWizOptions, CnWizEditFiler, CnGraphUtils
 {$IFNDEF CNWIZARDS_MINIMUM}
   , CnWizMultiLang, CnLangMgr, CnWizIdeUtils, CnWizDebuggerNotifier, CnEditControlWrapper,
   CnLangStorage, CnHashLangStorage, CnWizHelp, CnWizShortCut
@@ -7516,6 +7519,20 @@ begin
 {$ELSE}
   Result := AToken.EditCol;
 {$ENDIF}
+end;
+
+// 分析源代码中引用的单元，FileName 是完整文件名
+procedure ParseUnitUsesFromFileName(const FileName: string; UsesList: TStrings);
+var
+  Stream: TMemoryStream;
+begin
+  Stream := TMemoryStream.Create;
+  try
+    EditFilerSaveFileToStream(FileName, Stream);
+    ParseUnitUses(PAnsiChar(Stream.Memory), UsesList);
+  finally
+    Stream.Free;
+  end;
 end;
 
 //==============================================================================

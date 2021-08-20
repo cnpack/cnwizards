@@ -308,7 +308,7 @@ function ParsePasCodePosInfo(const Source: AnsiString; CurrPos: Integer;
   另外注意 D567/BCB56 下 SourceIsUtf8 参数不起作用}
 
 procedure ParseUnitUses(const Source: AnsiString; UsesList: TStrings);
-{* 分析源代码中引用的单元}
+{* 分析源代码中引用的单元，Source 是文件内容}
 
 implementation
 
@@ -1851,7 +1851,7 @@ begin
   end;
 end;
 
-// 分析源代码中引用的单元
+// 分析源代码中引用的单元，Source 是文件内容
 procedure ParseUnitUses(const Source: AnsiString; UsesList: TStrings);
 var
   Lex: TmwPasLex;

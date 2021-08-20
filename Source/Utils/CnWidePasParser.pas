@@ -228,7 +228,7 @@ procedure ParsePasCodePosInfoW(const Source: string; Line, Col: Integer;
 
 procedure ParseUnitUsesW(const Source: CnWideString; UsesList: TStrings;
   SupportUnicodeIdent: Boolean = False);
-{* 分析源代码中引用的单元}
+{* 分析源代码中引用的单元，Soure 是 UTF16 格式的文件内容，暂未使用}
 
 implementation
 

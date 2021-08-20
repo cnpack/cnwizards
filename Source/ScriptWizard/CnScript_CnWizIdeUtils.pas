@@ -121,6 +121,7 @@ end;
 
 procedure SIRegister_CnWizIdeUtils(CL: TPSPascalCompiler);
 begin
+  CL.AddTypeS('TCnModuleSearchType', '( mstInvalid, mstProject, mstProjectSearch, mstSystemSearch )');
   CL.AddDelphiFunction('Function IdeGetEditorSelectedLines( Lines : TStringList) : Boolean');
   CL.AddDelphiFunction('Function IdeGetEditorSelectedText( Lines : TStringList) : Boolean');
   CL.AddDelphiFunction('Function IdeGetEditorSourceLines( Lines : TStringList) : Boolean');
@@ -155,6 +156,7 @@ begin
 {$ENDIF}
   CL.AddDelphiFunction('Procedure GetProjectLibPath( Paths : TStrings)');
   CL.AddDelphiFunction('Function GetFileNameFromModuleName( AName : string; AProject : IOTAProject) : string');
+  CL.AddDelphiFunction('Function GetFileNameSearchTypeFromModuleName( AName: string; var SearchType : TCnModuleSearchType; AProject : IOTAProject): string');
   CL.AddDelphiFunction('Function CnOtaGetVersionInfoKeys(Project: IOTAProject) : TStrings');
   CL.AddDelphiFunction('Procedure GetLibraryPath( Paths : TStrings; IncludeProjectPath : Boolean)');
   CL.AddDelphiFunction('Function GetComponentUnitName( const ComponentName : string) : string');

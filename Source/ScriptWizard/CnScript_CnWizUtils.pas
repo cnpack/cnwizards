@@ -420,6 +420,7 @@ begin
   CL.AddDelphiFunction('Function CnOtaGetUnitName( Editor : IOTASourceEditor) : string');
   CL.AddDelphiFunction('Function CnOtaGetProjectGroup : IOTAProjectGroup');
   CL.AddDelphiFunction('Function CnOtaGetProjectGroupFileName : string');
+  CL.AddDelphiFunction('Function CnOtaGetProjectSourceFileName( Project : IOTAProject) : string');
   CL.AddDelphiFunction('Function CnOtaGetProjectResource( Project : IOTAProject) : IOTAProjectResource');
   CL.AddDelphiFunction('Function CnOtaGetProjectVersion( Project : IOTAProject) : string');
   CL.AddDelphiFunction('Function CnOtaGetCurrentProject : IOTAProject');
@@ -520,6 +521,7 @@ begin
   CL.AddDelphiFunction('Function CnOtaGetBlockIndent : Integer');
   CL.AddDelphiFunction('Procedure CnOtaClosePage( EditView : IOTAEditView)');
   CL.AddDelphiFunction('Procedure CnOtaCloseEditView( AModule : IOTAModule)');
+  CL.AddDelphiFunction('Procedure ParseUnitUsesFromFileName( const FileName : string; UsesList : TStrings)');
   CL.AddDelphiFunction('Function CnOtaGetCurrDesignedForm( var AForm : TCustomForm; Selections : TList; ExcludeForm : Boolean) : Boolean');
   CL.AddDelphiFunction('Function CnOtaGetCurrFormSelectionsCount : Integer');
   CL.AddDelphiFunction('Function CnOtaIsCurrFormSelectionsEmpty : Boolean');
@@ -686,6 +688,7 @@ begin
   S.RegisterDelphiFunction(@CnOtaGetUnitName, 'CnOtaGetUnitName', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetProjectGroup, 'CnOtaGetProjectGroup', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetProjectGroupFileName, 'CnOtaGetProjectGroupFileName', cdRegister);
+  S.RegisterDelphiFunction(@CnOtaGetProjectSourceFileName, 'CnOtaGetProjectSourceFileName', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetProjectResource, 'CnOtaGetProjectResource', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetProjectVersion, 'CnOtaGetProjectVersion', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetCurrentProject, 'CnOtaGetCurrentProject', cdRegister);
@@ -784,6 +787,7 @@ begin
   S.RegisterDelphiFunction(@CnOtaGetBlockIndent, 'CnOtaGetBlockIndent', cdRegister);
   S.RegisterDelphiFunction(@CnOtaClosePage, 'CnOtaClosePage', cdRegister);
   S.RegisterDelphiFunction(@CnOtaCloseEditView, 'CnOtaCloseEditView', cdRegister);
+  S.RegisterDelphiFunction(@ParseUnitUsesFromFileName, 'ParseUnitUsesFromFileName', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetCurrDesignedForm, 'CnOtaGetCurrDesignedForm', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetCurrFormSelectionsCount, 'CnOtaGetCurrFormSelectionsCount', cdRegister);
   S.RegisterDelphiFunction(@CnOtaIsCurrFormSelectionsEmpty, 'CnOtaIsCurrFormSelectionsEmpty', cdRegister);
