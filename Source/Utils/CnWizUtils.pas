@@ -471,6 +471,8 @@ function CnOtaGetProjectGroup: IOTAProjectGroup;
 {* 取当前工程组}
 function CnOtaGetProjectGroupFileName: string;
 {* 取当前工程组文件名}
+function CnOtaGetProjectSourceFileName(Project: IOTAProject): string;
+{* 取工程的源码文件 dpr/dpk}
 function CnOtaGetProjectResource(Project: IOTAProject): IOTAProjectResource;
 {* 取工程资源}
 function CnOtaGetProjectVersion(Project: IOTAProject = nil): string;
@@ -510,9 +512,9 @@ procedure CnOtaGetPlatformsFromBuildConfiguration(BuildConfig: IOTABuildConfigur
 procedure CnOtaGetProjectList(const List: TInterfaceList);
 {* 取得所有工程列表}
 function CnOtaGetCurrentProjectName: string;
-{* 取当前工程名称}
+{* 取当前工程名称，无扩展名}
 function CnOtaGetCurrentProjectFileName: string;
-{* 取当前工程文件名称}
+{* 取当前工程文件名称，扩展名可能是 dpr/bdsproj/dproj}
 function CnOtaGetCurrentProjectFileNameEx: string;
 {* 取当前工程文件名称扩展}
 function CnOtaGetCurrentFormName: string;
@@ -3529,15 +3531,46 @@ begin
     Result := IModule.FileName;
 end;
 
+// 取工程的源码文件 dpr/dpk
+function CnOtaGetProjectSourceFileName(Project: IOTAProject): string;
+{$IFNDEF PROJECT_FILENAME_DPR}
+var
+  I: Integer;
+{$ENDIF}
+begin
+  Result := '';
+  if Project = nil then
+    Project := CnOtaGetCurrentProject;
+  if Project = nil then
+    Exit;
+
+{$IFDEF PROJECT_FILENAME_DPR}
+  // D567 下 Project 的 FileName 就是 dpr/dpk
+  if IsDpr(Project.FileName) or IsDpk(Project.FileName) then
+    Result := Project.FileName;
+{$ELSE}
+  // 跳过 bdsproj/dproj，找 dpr/dpk
+  for I := 0 to Project.GetModuleFileCount - 1 do
+  begin
+    if IsDpr(Project.GetModuleFileEditor(I).FileName) or
+      IsDpk(Project.GetModuleFileEditor(I).FileName) then
+    begin
+      Result := Project.GetModuleFileEditor(I).FileName;
+      Exit;
+    end;
+  end;
+{$ENDIF}
+end;
+
 // 取工程资源
 function CnOtaGetProjectResource(Project: IOTAProject): IOTAProjectResource;
 var
-  i: Integer;
+  I: Integer;
   IEditor: IOTAEditor;
 begin
-  for i:= 0 to (Project.GetModuleFileCount - 1) do
+  for I:= 0 to Project.GetModuleFileCount - 1 do
   begin
-    IEditor := Project.GetModuleFileEditor(i);
+    IEditor := Project.GetModuleFileEditor(I);
     if Supports(IEditor, IOTAProjectResource, Result) then
       Exit;
   end;
@@ -3868,7 +3901,7 @@ begin
     end;
 end;
 
-// 取当前工程名称
+// 取当前工程名称，无扩展名
 function CnOtaGetCurrentProjectName: string;
 var
   IProject: IOTAProject;
@@ -3883,7 +3916,7 @@ begin
   end;
 end;
 
-// 取当前工程文件名称
+// 取当前工程文件名称，扩展名可能是 dpr/bdsproj/dproj
 function CnOtaGetCurrentProjectFileName: string;
 var
   CurrentProject: IOTAProject;

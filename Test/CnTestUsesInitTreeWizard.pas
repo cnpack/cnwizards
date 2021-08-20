@@ -117,8 +117,10 @@ begin
   FTree.Clear;
   FFileNames.Clear;
 
-  FTree.Root.Text := Proj.FileName;
-  SearchAUnit(Proj.FileName, FFileNames, FTree.Root, FTree, Proj);
+  CnDebugger.Active := False;
+  FTree.Root.Text := CnOtaGetProjectSourceFileName(Proj);
+  SearchAUnit(FTree.Root.Text, FFileNames, FTree.Root, FTree, Proj);
+  CnDebugger.Active := True;
 
   // ´òÓ¡³öÊ÷ÄÚÈÝ
   for I := 0 to FTree.Count - 1 do
