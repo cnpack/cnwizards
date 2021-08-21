@@ -40,7 +40,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ToolsAPI, IniFiles, CnWizClasses, CnWizUtils, CnWizConsts, CnWizIdeUtils,
-  CnPasCodeParser, CnWizEditFiler, CnTree;
+  CnPasCodeParser, CnWizEditFiler, CnTree, CnCommon;
 
 type
 
@@ -53,10 +53,10 @@ type
   TCnTestUsesInitTreeWizard = class(TCnMenuWizard)
   private
     FTree: TCnTree;
-    FFileNames: TStringList;
-
-    procedure SearchAUnit(const AFullUnitName: string; ProcessedFiles: TStrings;
-      UnitLeaf: TCnLeaf; Tree: TCnTree; AProject: IOTAProject = nil);
+    FFileNames, FLibPaths: TStringList;
+    FDcuPath: string;
+    procedure SearchAUnit(const AFullDcuName, AFullSourceName: string; ProcessedFiles: TStrings;
+      UnitLeaf: TCnLeaf; Tree: TCnTree; AProject: IOTAProject);
     {* 递归调用，分析并查找 AUnitName 对应源码的 Uses 列表并加入到树中的 UnitLeaf 的子节点中}
   protected
     function GetHasConfig: Boolean; override;
@@ -78,7 +78,45 @@ type
 implementation
 
 uses
-  CnDebug;
+  CnDebug, CnDCU32;
+
+const
+  csDcuExt = '.dcu';
+
+type
+  TCnUsesLeaf = class(TCnLeaf)
+  private
+    FIsImpl: Boolean;
+    FDcuName: string;
+    FSearchType: TCnModuleSearchType;
+  public
+    property DcuName: string read FDcuName write FDcuName;
+    property SearchType: TCnModuleSearchType read FSearchType write FSearchType;
+    property IsImpl: Boolean read FIsImpl write FIsImpl;
+  end;
+
+function GetProjectDcuPath(AProject: IOTAProject): string;
+begin
+  if (AProject <> nil) and (AProject.ProjectOptions <> nil) then
+  begin
+    Result := ReplaceToActualPath(AProject.ProjectOptions.Values['UnitOutputDir'], AProject);
+    if Result <> '' then
+      Result := MakePath(LinkPath(_CnExtractFilePath(AProject.FileName), Result));
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('GetProjectDcuPath: ' + Result);
+  {$ENDIF}
+  end
+  else
+    Result := '';
+end;
+
+function GetDcuName(const ADcuPath, ASourceFileName: string): string;
+begin
+  if ADcuPath = '' then
+    Result := _CnChangeFileExt(ASourceFileName, csDcuExt)
+  else
+    Result := _CnChangeFileExt(ADcuPath + _CnExtractFileName(ASourceFileName), csDcuExt);
+end;
 
 //==============================================================================
 // CnTestUsesInitTreeWizard 菜单专家
@@ -95,12 +133,14 @@ constructor TCnTestUsesInitTreeWizard.Create;
 begin
   inherited;
   FFileNames := TStringList.Create;
-  FTree := TCnTree.Create;
+  FLibPaths := TStringList.Create;
+  FTree := TCnTree.Create(TCnUsesLeaf);
 end;
 
 destructor TCnTestUsesInitTreeWizard.Destroy;
 begin
   FTree.Free;
+  FLibPaths.Free;
   FFileNames.Free;
   inherited;
 end;
@@ -109,6 +149,7 @@ procedure TCnTestUsesInitTreeWizard.Execute;
 var
   Proj: IOTAProject;
   I: Integer;
+  ProjDcu, S: string;
 begin
   Proj := CnOtaGetCurrentProject;
   if (Proj = nil) or not IsDelphiProject(Proj) then
@@ -116,17 +157,31 @@ begin
 
   FTree.Clear;
   FFileNames.Clear;
+  FDcuPath := GetProjectDcuPath(Proj);
+  GetLibraryPath(FLibPaths, False);
 
   CnDebugger.Active := False;
   FTree.Root.Text := CnOtaGetProjectSourceFileName(Proj);
-  SearchAUnit(FTree.Root.Text, FFileNames, FTree.Root, FTree, Proj);
+  ProjDcu := GetDcuName(FDcuPath, FTree.Root.Text);
+
+  SearchAUnit(ProjDcu, FTree.Root.Text, FFileNames, FTree.Root, FTree, Proj);
   CnDebugger.Active := True;
 
   // 打印出树内容
   for I := 0 to FTree.Count - 1 do
   begin
-    CnDebugger.LogFmt('%s%s | %d', [StringOfChar('-', FTree.Items[I].Level),
-      FTree.Items[I].Text, FTree.Items[I].Data]);
+    S := StringOfChar('-', FTree.Items[I].Level) + FTree.Items[I].Text;
+
+    case (FTree.Items[I] as TCnUsesLeaf).SearchType of
+      mstProject: S := S + ' | (In Project)';
+      mstProjectSearch: S := S + ' | (In Project Search Path)';
+      mstSystemSearch: S := S + ' | (In System Path)';
+    end;
+
+    if (FTree.Items[I] as TCnUsesLeaf).IsImpl then
+      S := S + ' | impl';
+
+    CnDebugger.LogMsg(S);
   end;
 end;
 
@@ -173,47 +228,76 @@ begin
 
 end;
 
-procedure TCnTestUsesInitTreeWizard.SearchAUnit(const AFullUnitName: string;
+procedure TCnTestUsesInitTreeWizard.SearchAUnit(const AFullDcuName, AFullSourceName: string;
   ProcessedFiles: TStrings; UnitLeaf: TCnLeaf; Tree: TCnTree; AProject: IOTAProject);
 var
   St: TCnModuleSearchType;
-  AFileName: string;
+  ASourceFileName, ADcuFileName: string;
   UsesList: TStringList;
-  I: Integer;
+  I, J: Integer;
   Leaf: TCnLeaf;
-  Stream: TMemoryStream;
+  Info: TCnUnitUsesInfo;
 begin
-  // 根据 AUnitName 搜到具体源码路径，
-  // 分析源码得到 intf 与 impl 的引用列表，并加入至 UnitLeaf 的直属子节点
+  // 分析 DCU 或源码得到 intf 与 impl 的引用列表，并加入至 UnitLeaf 的直属子节点
   // 递归调用该方法，处理每个引用列表中的引用单元名
-
-  if AFullUnitName = '' then
+  if  not FileExists(AFullDcuName) and not FileExists(AFullSourceName) then
     Exit;
 
   UsesList := TStringList.Create;
   try
-    Stream := TMemoryStream.Create;
-    try
-      EditFilerSaveFileToStream(AFullUnitName, Stream);
-      ParseUnitUses(PAnsiChar(Stream.Memory), UsesList);
-    finally
-      Stream.Free;
+    if FileExists(AFullDcuName) then // 有 DCU 就解析 DCU
+    begin
+      Info := TCnUnitUsesInfo.Create(AFullDcuName);
+      try
+        for I := 0 to Info.IntfUsesCount - 1 do
+          UsesList.Add(Info.IntfUses[I]);
+        for I := 0 to Info.ImplUsesCount - 1 do
+          UsesList.AddObject(Info.ImplUses[I], TObject(True));
+      finally
+        Info.Free;
+      end;
+    end
+    else // 否则解析源码
+    begin
+      ParseUnitUsesFromFileName(AFullSourceName, UsesList);
     end;
 
-    // UsesList 里拿到各引用名，无路径
+    // UsesList 里拿到各引用名，无路径，需找到源文件与编译后的 dcu
     for I := 0 to UsesList.Count - 1 do
     begin
-      AFileName := GetFileNameSearchTypeFromModuleName(UsesList[I], St, AProject);
-      if (AFileName = '') or (ProcessedFiles.IndexOf(AFileName) >= 0) then
+      // 找到源文件
+      ASourceFileName := GetFileNameSearchTypeFromModuleName(UsesList[I], St, AProject);
+      if (ASourceFileName = '') or (ProcessedFiles.IndexOf(ASourceFileName) >= 0) then
         Continue;
 
-      // AFileName 存在且未处理过，新建一个 Leaf，挂当前 Leaf 下面
-      Leaf := Tree.AddChild(UnitLeaf);
-      Leaf.Text := AFileName;
-      Leaf.Data := Ord(St) shl 8 + Ord(Boolean(UsesList.Objects[I]));
-      ProcessedFiles.Add(AFileName);
+      // 再找编译后的 dcu，可能在工程输出目录里，也可能在系统的 LibraryPath 里
+      ADcuFileName := GetDcuName(FDcuPath, ASourceFileName);
+      if not FileExists(ADcuFileName) then
+      begin
+        // 在系统的多个 LibraryPath 里找
+        for J := 0 to FLibPaths.Count - 1 do
+        begin
+          if FileExists(MakePath(FLibPaths[J]) + UsesList[I] + csDcuExt) then
+          begin
+            ADcuFileName := MakePath(FLibPaths[J]) + UsesList[I] + csDcuExt;
+            Break;
+          end;
+        end;
+      end;
 
-      SearchAUnit(AFileName, ProcessedFiles, Leaf, Tree, AProject);
+      if not FileExists(ADcuFileName) then
+        Continue;
+
+      // ASourceFileName 存在且未处理过，新建一个 Leaf，挂当前 Leaf 下面
+      Leaf := Tree.AddChild(UnitLeaf);
+      Leaf.Text := ASourceFileName;
+      (Leaf as TCnUsesLeaf).DcuName := ADcuFileName;
+      (Leaf as TCnUsesLeaf).SearchType := St;
+      (Leaf as TCnUsesLeaf).IsImpl := UsesList.Objects[I] <> nil;
+
+      ProcessedFiles.Add(ASourceFileName);
+
+      SearchAUnit(ADcuFileName, ASourceFileName, ProcessedFiles, Leaf, Tree, AProject);
     end;
   finally
     UsesList.Free;
