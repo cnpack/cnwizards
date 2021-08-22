@@ -215,6 +215,9 @@ function IsKeyMacroRunning: Boolean;
 function GetCurrentCompilingProject: IOTAProject;
 {* 返回当前正在编译的工程，注意不一定是当前工程}
 
+function CompileProject(AProject: IOTAProject): Boolean;
+{* 编译工程，返回编译是否成功}
+
 //==============================================================================
 // 组件面板封装类
 //==============================================================================
@@ -967,6 +970,10 @@ begin
 end;
 
 function GetCurrentCompilingProject: IOTAProject;
+begin
+end;
+
+function CompileProject(AProject: IOTAProject): Boolean;
 begin
 end;
 

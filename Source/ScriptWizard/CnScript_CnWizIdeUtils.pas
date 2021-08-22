@@ -171,6 +171,7 @@ begin
   CL.AddDelphiFunction('Function IsCurrentEditorInSyncMode : Boolean');
   CL.AddDelphiFunction('Function IsKeyMacroRunning : Boolean');
   CL.AddDelphiFunction('Function GetCurrentCompilingProject : IOTAProject');
+  CL.AddDelphiFunction('Function CompileProject(AProject: IOTAProject) : Boolean');
   CL.AddDelphiFunction('Function ConvertIDETreeNodeToTreeNode(Node: TObject) : TTreeNode');
   CL.AddDelphiFunction('Function ConvertIDETreeNodesToTreeNodes(Nodes: TObject) : TTreeNodes');
   SIRegister_TCnPaletteWrapper(CL);
@@ -425,6 +426,7 @@ begin
   S.RegisterDelphiFunction(@IsCurrentEditorInSyncMode, 'IsCurrentEditorInSyncMode', cdRegister);
   S.RegisterDelphiFunction(@IsKeyMacroRunning, 'IsKeyMacroRunning', cdRegister);
   S.RegisterDelphiFunction(@GetCurrentCompilingProject, 'GetCurrentCompilingProject', cdRegister);
+  S.RegisterDelphiFunction(@CompileProject, 'CompileProject', cdRegister);
   S.RegisterDelphiFunction(@ConvertIDETreeNodeToTreeNode, 'ConvertIDETreeNodeToTreeNode', cdRegister);
   S.RegisterDelphiFunction(@ConvertIDETreeNodesToTreeNodes, 'ConvertIDETreeNodesToTreeNodes', cdRegister);
   S.RegisterDelphiFunction(@CnPaletteWrapper, 'CnPaletteWrapper', cdRegister);
