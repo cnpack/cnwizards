@@ -1,0 +1,430 @@
+{******************************************************************************}
+{                       CnPack For Delphi/C++Builder                           }
+{                     中国人自己的开放源码第三方开发包                         }
+{                   (C)Copyright 2001-2021 CnPack 开发组                       }
+{                   ------------------------------------                       }
+{                                                                              }
+{            本开发包是开源的自由软件，您可以遵照 CnPack 的发布协议来修        }
+{        改和重新发布这一程序。                                                }
+{                                                                              }
+{            发布这一开发包的目的是希望它有用，但没有任何担保。甚至没有        }
+{        适合特定目的而隐含的担保。更详细的情况请参阅 CnPack 发布协议。        }
+{                                                                              }
+{            您应该已经和开发包一起收到一份 CnPack 发布协议的副本。如果        }
+{        还没有，可访问我们的网站：                                            }
+{                                                                              }
+{            网站地址：http://www.cnpack.org                                   }
+{            电子邮件：master@cnpack.org                                       }
+{                                                                              }
+{******************************************************************************}
+
+unit CnUsesInitTreeFrm;
+{ |<PRE>
+================================================================================
+* 软件名称：CnPack IDE 专家包
+* 单元名称：工程引用树分析单元
+* 单元作者：刘啸 (liuxiao@cnpack.org)
+* 备    注：原理：编译好的 DCU 文件里记录了 interface 部分以及 implementation 部
+*           分导入的每一个单元名，以及对应的单元导入标识符，如果某个单元的标识符
+*           数量为 0，表示没有用到其内容，可以考虑修改源码剔除之。
+* 开发平台：PWin7 + Delphi 5.01
+* 兼容测试：PWin7/10 + Delphi 5/6/7 + C++Builder 5/6
+* 本 地 化：该窗体中的字符串支持本地化处理方式
+* 修改记录：2021.08.21 V1.0
+*               创建单元
+================================================================================
+|</PRE>}
+
+interface
+
+{$I CnWizards.inc}
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  ComCtrls, StdCtrls, ToolWin, ExtCtrls, ActnList, ToolsAPI,
+  CnTree, CnCommon, CnWizMultiLang, CnWizConsts, CnWizUtils, CnWizIdeUtils;
+
+type
+  TCnUsesInitTreeForm = class(TCnTranslateForm)
+    grpFilter: TGroupBox;
+    chkProjectPath: TCheckBox;
+    chkSystemPath: TCheckBox;
+    grpTree: TGroupBox;
+    tvTree: TTreeView;
+    pnlTop: TPanel;
+    lblProject: TLabel;
+    cbbProject: TComboBox;
+    tlbUses: TToolBar;
+    btnGenerateUsesTree: TToolButton;
+    grpInfo: TGroupBox;
+    actlstUses: TActionList;
+    actGenerateUsesTree: TAction;
+    actHelp: TAction;
+    actExit: TAction;
+    btn1: TToolButton;
+    btnHelp: TToolButton;
+    btnExit: TToolButton;
+    lblSourceFile: TLabel;
+    lblDcuFile: TLabel;
+    lblSearchType: TLabel;
+    lblUsesType: TLabel;
+    lblSourceFileText: TLabel;
+    lblDcuFileText: TLabel;
+    lblSearchTypeText: TLabel;
+    lblUsesTypeText: TLabel;
+    actExport: TAction;
+    actSearch: TAction;
+    btnSearch: TToolButton;
+    btnExport: TToolButton;
+    btn2: TToolButton;
+    procedure actGenerateUsesTreeExecute(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure chkSystemPathClick(Sender: TObject);
+    procedure tvTreeChange(Sender: TObject; Node: TTreeNode);
+    procedure actExitExecute(Sender: TObject);
+    procedure actHelpExecute(Sender: TObject);
+  private
+    FTree: TCnTree;
+    FFileNames: TStringList;
+    FLibPaths: TStringList;
+    FDcuPath: string;
+    FProjectList: TInterfaceList;
+    procedure InitProjectList;
+    procedure TreeSaveANode(ALeaf: TCnLeaf; ATreeNode: TTreeNode; var Valid: Boolean);
+    procedure SearchAUnit(const AFullDcuName, AFullSourceName: string; ProcessedFiles: TStrings;
+      UnitLeaf: TCnLeaf; Tree: TCnTree; AProject: IOTAProject);
+    {* 递归调用，分析并查找对应 dcu 或源码的 Uses 列表并加入到树中的 UnitLeaf 的子节点中}
+    procedure UpdateTreeView;
+    procedure UpdateInfo(Leaf: TCnLeaf);
+  public
+
+  end;
+
+implementation
+
+{$R *.DFM}
+
+uses
+  CnWizShareImages, CnDCU32;
+
+const
+  csDcuExt = '.dcu';
+  csSearchTypeStrings: array[Low(TCnModuleSearchType)..High(TCnModuleSearchType)] of PString =
+    (nil, @SCnUsesInitTreeSearchInProject, @SCnUsesInitTreeSearchInProjectSearch,
+    @SCnUsesInitTreeSearchInSystemSearch);
+
+type
+  TCnUsesLeaf = class(TCnLeaf)
+  private
+    FIsImpl: Boolean;
+    FDcuName: string;
+    FSearchType: TCnModuleSearchType;
+    FSourceName: string;
+  public
+    property SourceName: string read FSourceName write FSourceName;
+    {* 源文件完整路径名}
+    property DcuName: string read FDcuName write FDcuName;
+    {* Dcu 文件完整路径名}
+    property SearchType: TCnModuleSearchType read FSearchType write FSearchType;
+    {* 哪种引用类型}
+    property IsImpl: Boolean read FIsImpl write FIsImpl;
+    {* 引用是否在 implementation 部分}
+  end;
+
+function GetDcuName(const ADcuPath, ASourceFileName: string): string;
+begin
+  if ADcuPath = '' then
+    Result := _CnChangeFileExt(ASourceFileName, csDcuExt)
+  else
+    Result := _CnChangeFileExt(ADcuPath + _CnExtractFileName(ASourceFileName), csDcuExt);
+end;
+
+procedure TCnUsesInitTreeForm.actGenerateUsesTreeExecute(Sender: TObject);
+var
+  Proj, P: IOTAProject;
+  I: Integer;
+  ProjDcu, S: string;
+begin
+  Proj := nil;
+  if cbbProject.ItemIndex <= 0 then // 当前工程
+  begin
+    Proj := CnOtaGetCurrentProject;
+    if (Proj = nil) or not IsDelphiProject(Proj) then
+      Exit;
+  end
+  else
+  begin
+    // 特定名称的工程
+    for I := 0 to FProjectList.Count - 1 do
+    begin
+      P := FProjectList[I] as IOTAProject;
+      if cbbProject.Items[cbbProject.ItemIndex] = _CnExtractFileName(P.FileName) then
+      begin
+        Proj := P;
+        Break;
+      end;
+    end;
+  end;
+
+  if (Proj = nil) or not IsDelphiProject(Proj) then
+    Exit;
+
+  // 编译工程
+  if not CompileProject(Proj) then
+  begin
+    Close;
+    ErrorDlg(SCnUsesCleanerCompileFail);
+    Exit;
+  end;
+
+  FTree.Clear;
+  FFileNames.Clear;
+  FDcuPath := GetProjectDcuPath(Proj);
+  GetLibraryPath(FLibPaths, False);
+
+  (FTree.Root as TCnUsesLeaf).SourceName := CnOtaGetProjectSourceFileName(Proj);;
+  (FTree.Root as TCnUsesLeaf).DcuName := ProjDcu;
+  (FTree.Root as TCnUsesLeaf).SearchType := mstInProject;
+  (FTree.Root as TCnUsesLeaf).IsImpl := False;
+  (FTree.Root as TCnUsesLeaf).Text := _CnExtractFileName((FTree.Root as TCnUsesLeaf).SourceName);
+  ProjDcu := GetDcuName(FDcuPath, (FTree.Root as TCnUsesLeaf).SourceName);
+
+  Screen.Cursor := crHourGlass;
+  try
+    SearchAUnit(ProjDcu, FTree.Root.Text, FFileNames, FTree.Root, FTree, Proj);
+  finally
+    Screen.Cursor := crDefault;
+  end;
+
+  UpdateTreeView;
+end;
+
+procedure TCnUsesInitTreeForm.FormCreate(Sender: TObject);
+begin
+  FFileNames := TStringList.Create;
+  FLibPaths := TStringList.Create;
+  FTree := TCnTree.Create(TCnUsesLeaf);
+  FProjectList := TInterfaceList.Create;
+
+  FTree.OnSaveANode := TreeSaveANode;
+
+  InitProjectList;
+end;
+
+procedure TCnUsesInitTreeForm.FormDestroy(Sender: TObject);
+begin
+  FProjectList.Free;
+  FTree.Free;
+  FLibPaths.Free;
+  FFileNames.Free;
+end;
+
+procedure TCnUsesInitTreeForm.InitProjectList;
+var
+  I: Integer;
+  Proj: IOTAProject;
+{$IFDEF BDS}
+  PG: IOTAProjectGroup;
+{$ENDIF}
+begin
+  CnOtaGetProjectList(FProjectList);
+  cbbProject.Items.Clear;
+
+  if FProjectList.Count <= 0 then
+    Exit;
+
+  for I := 0 to FProjectList.Count - 1 do
+  begin
+    Proj := IOTAProject(FProjectList[I]);
+    if Proj.FileName = '' then
+      Continue;
+
+{$IFDEF BDS}
+    // BDS 后，ProjectGroup 也支持 Project 接口，因此需要去掉
+    if Supports(Proj, IOTAProjectGroup, PG) then
+      Continue;
+{$ENDIF}
+
+    if not IsDelphiProject(Proj) then
+      Continue;
+
+    cbbProject.Items.Add(_CnExtractFileName(Proj.FileName));
+  end;
+
+  if cbbProject.Items.Count > 0 then
+  begin
+    cbbProject.Items.Insert(0, SCnProjExtCurrentProject);
+    cbbProject.ItemIndex := 0;
+  end;
+end;
+
+procedure TCnUsesInitTreeForm.SearchAUnit(const AFullDcuName,
+  AFullSourceName: string; ProcessedFiles: TStrings; UnitLeaf: TCnLeaf;
+  Tree: TCnTree; AProject: IOTAProject);
+var
+  St: TCnModuleSearchType;
+  ASourceFileName, ADcuFileName: string;
+  UsesList: TStringList;
+  I, J: Integer;
+  Leaf: TCnUsesLeaf;
+  Info: TCnUnitUsesInfo;
+begin
+  // 分析 DCU 或源码得到 intf 与 impl 的引用列表，并加入至 UnitLeaf 的直属子节点
+  // 递归调用该方法，处理每个引用列表中的引用单元名
+  if  not FileExists(AFullDcuName) and not FileExists(AFullSourceName) then
+    Exit;
+
+  UsesList := TStringList.Create;
+  try
+    if FileExists(AFullDcuName) then // 有 DCU 就解析 DCU
+    begin
+      Info := TCnUnitUsesInfo.Create(AFullDcuName);
+      try
+        for I := 0 to Info.IntfUsesCount - 1 do
+          UsesList.Add(Info.IntfUses[I]);
+        for I := 0 to Info.ImplUsesCount - 1 do
+          UsesList.AddObject(Info.ImplUses[I], TObject(True));
+      finally
+        Info.Free;
+      end;
+    end
+    else // 否则解析源码
+    begin
+      ParseUnitUsesFromFileName(AFullSourceName, UsesList);
+    end;
+
+    // UsesList 里拿到各引用名，无路径，需找到源文件与编译后的 dcu
+    for I := 0 to UsesList.Count - 1 do
+    begin
+      // 找到源文件
+      ASourceFileName := GetFileNameSearchTypeFromModuleName(UsesList[I], St, AProject);
+      if (ASourceFileName = '') or (ProcessedFiles.IndexOf(ASourceFileName) >= 0) then
+        Continue;
+
+      // 再找编译后的 dcu，可能在工程输出目录里，也可能在系统的 LibraryPath 里
+      ADcuFileName := GetDcuName(FDcuPath, ASourceFileName);
+      if not FileExists(ADcuFileName) then
+      begin
+        // 在系统的多个 LibraryPath 里找
+        for J := 0 to FLibPaths.Count - 1 do
+        begin
+          if FileExists(MakePath(FLibPaths[J]) + UsesList[I] + csDcuExt) then
+          begin
+            ADcuFileName := MakePath(FLibPaths[J]) + UsesList[I] + csDcuExt;
+            Break;
+          end;
+        end;
+      end;
+
+      if not FileExists(ADcuFileName) then
+        Continue;
+
+      // ASourceFileName 存在且未处理过，新建一个 Leaf，挂当前 Leaf 下面
+      Leaf := Tree.AddChild(UnitLeaf) as TCnUsesLeaf;
+      Leaf.Text := _CnExtractFileName(_CnChangeFileExt(ASourceFileName, ''));
+      Leaf.SourceName := ASourceFileName;
+      Leaf.DcuName := ADcuFileName;
+      Leaf.SearchType := St;
+      Leaf.IsImpl := UsesList.Objects[I] <> nil;
+
+      ProcessedFiles.Add(ASourceFileName);
+      SearchAUnit(ADcuFileName, ASourceFileName, ProcessedFiles, Leaf, Tree, AProject);
+    end;
+  finally
+    UsesList.Free;
+  end;
+end;
+
+procedure TCnUsesInitTreeForm.UpdateTreeView;
+var
+  Node: TTreeNode;
+  I: Integer;
+  Leaf: TCnUsesLeaf;
+begin
+  tvTree.Items.Clear;
+  Node := tvTree.Items.AddObject(nil,
+    _CnExtractFileName(_CnChangeFileExt(FTree.Root.Text, '')), FTree.Root);
+
+  FTree.SaveToTreeView(tvTree, Node);
+
+  if chkSystemPath.Checked and chkProjectPath.Checked then
+  begin
+    if tvTree.Items.Count > 0 then
+      tvTree.Items[0].Expand(True);
+    Exit;
+  end;
+
+  for I := tvTree.Items.Count - 1 downto 0 do
+  begin
+    Node := tvTree.Items[I];
+    Leaf := TCnUsesLeaf(Node.Data);
+
+    if not chkSystemPath.Checked and (Leaf.SearchType = mstSystemSearch) then
+      tvTree.Items.Delete(Node)
+    else if not chkProjectPath.Checked and (Leaf.SearchType = mstProjectSearch) then
+      tvTree.Items.Delete(Node);
+  end;
+
+  if tvTree.Items.Count > 0 then
+    tvTree.Items[0].Expand(True);
+end;
+
+procedure TCnUsesInitTreeForm.chkSystemPathClick(Sender: TObject);
+begin
+  UpdateTreeView;
+end;
+
+procedure TCnUsesInitTreeForm.TreeSaveANode(ALeaf: TCnLeaf;
+  ATreeNode: TTreeNode; var Valid: Boolean);
+begin
+  ATreeNode.Text := ALeaf.Text;
+  ATreeNode.Data := ALeaf;
+end;
+
+procedure TCnUsesInitTreeForm.tvTreeChange(Sender: TObject;
+  Node: TTreeNode);
+var
+  Leaf: TCnUsesLeaf;
+begin
+  if Node <> nil then
+  begin
+    Leaf := TCnUsesLeaf(Node.Data);
+    if Leaf <> nil then
+      UpdateInfo(Leaf);
+  end;
+end;
+
+procedure TCnUsesInitTreeForm.UpdateInfo(Leaf: TCnLeaf);
+var
+  ALeaf: TCnUsesLeaf;
+begin
+  ALeaf := TCnUsesLeaf(Leaf);
+
+  lblSourceFileText.Caption := ALeaf.SourceName;
+  lblDcuFileText.Caption := ALeaf.DcuName;
+  if ALeaf.SearchType <> mstInvalid then
+    lblSearchTypeText.Caption := csSearchTypeStrings[ALeaf.SearchType]^
+  else
+    lblSearchTypeText.Caption := SCnUnknownNameResult;
+
+  if ALeaf.IsImpl then
+    lblUsesTypeText.Caption := 'implementation'
+  else if not IsDpr(ALeaf.SourceName) and not IsDpk(ALeaf.SourceName) then
+    lblUsesTypeText.Caption := 'interface'
+  else
+    lblUsesTypeText.Caption := '';
+end;
+
+procedure TCnUsesInitTreeForm.actExitExecute(Sender: TObject);
+begin
+  Close;
+end;
+
+procedure TCnUsesInitTreeForm.actHelpExecute(Sender: TObject);
+begin
+  //
+end;
+
+end.
+
