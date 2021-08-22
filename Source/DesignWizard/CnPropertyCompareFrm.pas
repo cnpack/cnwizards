@@ -891,6 +891,7 @@ begin
       ;
     end;
   end;
+
   if G.RowCount <> Props.Count then
   begin
     try
@@ -898,8 +899,7 @@ begin
     except
       ;
     end;
-  end;  
-
+  end;
 
   for I := 0 to Props.Count - 1 do
   begin

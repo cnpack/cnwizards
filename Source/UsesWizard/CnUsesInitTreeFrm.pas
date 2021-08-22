@@ -24,9 +24,7 @@ unit CnUsesInitTreeFrm;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：工程引用树分析单元
 * 单元作者：刘啸 (liuxiao@cnpack.org)
-* 备    注：原理：编译好的 DCU 文件里记录了 interface 部分以及 implementation 部
-*           分导入的每一个单元名，以及对应的单元导入标识符，如果某个单元的标识符
-*           数量为 0，表示没有用到其内容，可以考虑修改源码剔除之。
+* 备    注：
 * 开发平台：PWin7 + Delphi 5.01
 * 兼容测试：PWin7/10 + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串支持本地化处理方式
@@ -42,7 +40,8 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ComCtrls, StdCtrls, ToolWin, ExtCtrls, ActnList, ToolsAPI,
-  CnTree, CnCommon, CnWizMultiLang, CnWizConsts, CnWizUtils, CnWizIdeUtils;
+  CnTree, CnCommon, CnWizMultiLang, CnWizConsts, CnWizUtils, CnWizIdeUtils,
+  Menus;
 
 type
   TCnUsesInitTreeForm = class(TCnTranslateForm)
@@ -77,6 +76,17 @@ type
     btnSearch: TToolButton;
     btnExport: TToolButton;
     btn2: TToolButton;
+    actOpen: TAction;
+    btnOpen: TToolButton;
+    actLocateSource: TAction;
+    btnLocateSource: TToolButton;
+    pmTree: TPopupMenu;
+    Open1: TMenuItem;
+    OpeninExplorer1: TMenuItem;
+    ExportTree1: TMenuItem;
+    Search1: TMenuItem;
+    N1: TMenuItem;
+    N2: TMenuItem;
     procedure actGenerateUsesTreeExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -84,6 +94,10 @@ type
     procedure tvTreeChange(Sender: TObject; Node: TTreeNode);
     procedure actExitExecute(Sender: TObject);
     procedure actHelpExecute(Sender: TObject);
+    procedure actOpenExecute(Sender: TObject);
+    procedure actlstUsesUpdate(Action: TBasicAction; var Handled: Boolean);
+    procedure actExportExecute(Sender: TObject);
+    procedure actSearchExecute(Sender: TObject);
   private
     FTree: TCnTree;
     FFileNames: TStringList;
@@ -423,7 +437,40 @@ end;
 
 procedure TCnUsesInitTreeForm.actHelpExecute(Sender: TObject);
 begin
-  //
+  ShowFormHelp;
+end;
+
+procedure TCnUsesInitTreeForm.actOpenExecute(Sender: TObject);
+var
+  Leaf: TCnUsesLeaf;
+begin
+  if tvTree.Selected <> nil then
+  begin
+    Leaf := TCnUsesLeaf(tvTree.Selected.Data);
+    if (Leaf <> nil) and (Leaf.SourceName <> '') then
+      CnOtaOpenFile(Leaf.SourceName);
+  end;
+end;
+
+procedure TCnUsesInitTreeForm.actlstUsesUpdate(Action: TBasicAction;
+  var Handled: Boolean);
+begin
+  if (Action = actOpen) or (Action = actLocateSource) then
+    TCustomAction(Action).Enabled := tvTree.Selected <> nil
+  else if (Action = actExport) or (Action = actSearch) then
+    TCustomAction(Action).Enabled := tvTree.Items.Count > 1
+  else if Action = actGenerateUsesTree then
+    TCustomAction(Action).Enabled := cbbProject.Items.Count > 0;
+end;
+
+procedure TCnUsesInitTreeForm.actExportExecute(Sender: TObject);
+begin
+  // Save Tree to File
+end;
+
+procedure TCnUsesInitTreeForm.actSearchExecute(Sender: TObject);
+begin
+  // Search Content in Tree
 end;
 
 end.

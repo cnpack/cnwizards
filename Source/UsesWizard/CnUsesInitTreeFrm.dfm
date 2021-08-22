@@ -3,13 +3,19 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
   Top = 143
   Width = 791
   Height = 570
-  Caption = 'Uses Initialization'
-  Color = clBtnFace
+  Caption = 'Uses Initialization Tree'
   Font.Charset = ANSI_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
+  Icon.Data = {
+    0000010001001010100000000000280100001600000028000000100000002000
+    00000100040000000000C0000000000000000000000000000000000000000000
+    000000008000008000000080800080000000800080008080000080808000C0C0
+    C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF000000
+    0000000000000000000CCC0000000000000CFC0000000000000CCC0000000000
+    000000000000000000000000066600000000000006F600000000000006660000
+    000000000000000000011100000000000001F100000000000001110000000000
+    000000000000044400000000000004F40000000000000444000000000000FFFF
+    0000FE3F0000C23F0000DE3F0000DFFF0000DFF80000DF080000DF780000DFFF
+    0000DE3F0000C23F0000DE3F0000FFFF00008FFF00008FFF00008FFF0000}
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   PixelsPerInch = 96
@@ -84,9 +90,9 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
       Top = 8
       Width = 145
       Height = 21
+      Style = csDropDownList
       ItemHeight = 13
       TabOrder = 0
-      Text = 'cbbProject'
     end
     object tlbUses: TToolBar
       Left = 224
@@ -111,18 +117,28 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
         ImageIndex = 35
         Style = tbsSeparator
       end
-      object btnSearch: TToolButton
+      object btnOpen: TToolButton
         Left = 31
+        Top = 0
+        Action = actOpen
+      end
+      object btnSearch: TToolButton
+        Left = 54
         Top = 0
         Action = actSearch
       end
       object btnExport: TToolButton
-        Left = 54
+        Left = 77
         Top = 0
         Action = actExport
       end
+      object btnLocateSource: TToolButton
+        Left = 100
+        Top = 0
+        Action = actLocateSource
+      end
       object btn2: TToolButton
-        Left = 77
+        Left = 123
         Top = 0
         Width = 8
         Caption = 'btn2'
@@ -130,12 +146,12 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
         Style = tbsSeparator
       end
       object btnHelp: TToolButton
-        Left = 85
+        Left = 131
         Top = 0
         Action = actHelp
       end
       object btnExit: TToolButton
-        Left = 108
+        Left = 154
         Top = 0
         Action = actExit
       end
@@ -218,6 +234,7 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
   end
   object actlstUses: TActionList
     Images = dmCnSharedImages.Images
+    OnUpdate = actlstUsesUpdate
     Left = 32
     Top = 480
     object actGenerateUsesTree: TAction
@@ -239,14 +256,50 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
       OnExecute = actExitExecute
     end
     object actExport: TAction
-      Caption = '&Export Tree...'
+      Caption = 'Export &Tree...'
       Hint = 'Export Uses Tree to File'
       ImageIndex = 6
+      OnExecute = actExportExecute
     end
     object actSearch: TAction
       Caption = '&Search...'
       Hint = 'Search Unit in Tree'
       ImageIndex = 16
+      OnExecute = actSearchExecute
+    end
+    object actOpen: TAction
+      Caption = '&Open'
+      Hint = 'Open Source File'
+      ImageIndex = 3
+      OnExecute = actOpenExecute
+    end
+    object actLocateSource: TAction
+      Caption = 'Open in &Explorer'
+      Hint = 'Open Selected Source File in Windows Explorer'
+      ImageIndex = 24
+    end
+  end
+  object pmTree: TPopupMenu
+    Images = dmCnSharedImages.Images
+    Left = 72
+    Top = 480
+    object Open1: TMenuItem
+      Action = actOpen
+    end
+    object OpeninExplorer1: TMenuItem
+      Action = actLocateSource
+    end
+    object N1: TMenuItem
+      Caption = '-'
+    end
+    object ExportTree1: TMenuItem
+      Action = actExport
+    end
+    object N2: TMenuItem
+      Caption = '-'
+    end
+    object Search1: TMenuItem
+      Action = actSearch
     end
   end
 end
