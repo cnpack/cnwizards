@@ -204,7 +204,7 @@ type
   TXTreeView = TTreeView;
 {$ENDIF BDS}
 
-  TCnModuleSearchType = (mstInvalid, mstProject, mstProjectSearch, mstSystemSearch);
+  TCnModuleSearchType = (mstInvalid, mstInProject, mstProjectSearch, mstSystemSearch);
   {* 搜索到的源码位置类型：非法、工程内、工程搜索目录内、系统搜索目录内}
 
 //==============================================================================
@@ -345,6 +345,9 @@ function GetBDSUserDataDir: string;
 procedure GetProjectLibPath(Paths: TStrings);
 {* 取当前工程组的相关 Path 内容}
 
+function GetProjectDcuPath(AProject: IOTAProject): string;
+{* 取当前工程的输出目录}
+
 function GetFileNameFromModuleName(AName: string; AProject: IOTAProject = nil): string;
 {* 根据模块名获得完整文件名}
 
@@ -434,6 +437,9 @@ function IsKeyMacroRunning: Boolean;
 
 function GetCurrentCompilingProject: IOTAProject;
 {* 返回当前正在编译的工程，注意不一定是当前工程}
+
+function CompileProject(AProject: IOTAProject): Boolean;
+{* 编译工程，返回编译是否成功}
 
 type
   TCnSrcEditorPage = (epCode, epDesign, epCPU, epWelcome, epOthers);
@@ -1742,6 +1748,21 @@ begin
 {$ENDIF}
 end;
 
+function GetProjectDcuPath(AProject: IOTAProject): string;
+begin
+  if (AProject <> nil) and (AProject.ProjectOptions <> nil) then
+  begin
+    Result := ReplaceToActualPath(AProject.ProjectOptions.Values['UnitOutputDir'], AProject);
+    if Result <> '' then
+      Result := MakePath(LinkPath(_CnExtractFilePath(AProject.FileName), Result));
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('GetProjectDcuPath: ' + Result);
+  {$ENDIF}
+  end
+  else
+    Result := '';
+end;
+
 // 根据模块名获得完整文件名
 function GetFileNameFromModuleName(AName: string; AProject: IOTAProject = nil): string;
 var
@@ -1776,7 +1797,7 @@ begin
       if SameFileName(_CnExtractFileName(AProject.GetModule(I).FileName), AName) then
       begin
         Result := AProject.GetModule(I).FileName;
-        SearchType := mstProject;
+        SearchType := mstInProject;
         Exit;
       end;
 
@@ -1784,7 +1805,7 @@ begin
     if FileExists(ProjectPath + AName) then
     begin
       Result := ProjectPath + AName;
-      SearchType := mstProject;
+      SearchType := mstInProject;
       Exit;
     end;
   end;
@@ -2245,6 +2266,13 @@ begin
     if Rec <> nil then
       Result := Rec.IsPlaying or Rec.IsRecording;
   end;
+end;
+
+// 编译工程，返回编译是否成功
+function CompileProject(AProject: IOTAProject): Boolean;
+begin
+  Result := not AProject.ProjectBuilder.ShouldBuild or
+    AProject.ProjectBuilder.BuildProject(cmOTAMake, False);
 end;
 
 // 返回当前正在编译的工程，注意不一定是当前工程

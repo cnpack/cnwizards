@@ -305,12 +305,6 @@ var
   ProjectGroup: IOTAProjectGroup;
   i: Integer;
 
-  function DoCompileProject(AProject: IOTAProject): Boolean;
-  begin
-    Result := not AProject.ProjectBuilder.ShouldBuild or
-      AProject.ProjectBuilder.BuildProject(cmOTAMake, False);
-  end;
-
   function DoBuildProjectAction: Boolean;
   var
     Action: TContainedAction;
@@ -368,7 +362,7 @@ begin
             Module := CnOtaGetCurrentModule;
             Assert(Assigned(Module) and (Module.OwnerCount > 0));
             Project := GetProjectFromModule(Module);
-            Result := DoCompileProject(Project);
+            Result := CompileProject(Project);
           end;
         end;
       ukCurrProject:
@@ -378,7 +372,7 @@ begin
           if FUseBuildAction then
             Result := DoBuildProjectAction
           else
-            Result := DoCompileProject(Project);
+            Result := CompileProject(Project);
         end;
     else
       begin
@@ -392,7 +386,7 @@ begin
           Assert(Assigned(ProjectGroup));
           for i := 0 to ProjectGroup.ProjectCount - 1 do
           begin
-            Result := DoCompileProject(ProjectGroup.Projects[i]);
+            Result := CompileProject(ProjectGroup.Projects[i]);
             if not Result then
               Break;
           end;
@@ -431,21 +425,6 @@ var
             Exit;
           end;
     Result := False;
-  end;
-
-  function GetProjectDcuPath(AProject: IOTAProject): string;
-  begin
-    if (AProject <> nil) and (AProject.ProjectOptions <> nil) then
-    begin
-      Result := ReplaceToActualPath(AProject.ProjectOptions.Values['UnitOutputDir'], AProject);
-      if Result <> '' then
-        Result := MakePath(LinkPath(_CnExtractFilePath(AProject.FileName), Result));
-    {$IFDEF DEBUG}
-      CnDebugger.LogMsg('GetProjectDcuPath: ' + Result);
-    {$ENDIF}
-    end
-    else
-      Result := '';    
   end;
 
   function GetDcuName(const ADcuPath, ASourceFileName: string): string;
