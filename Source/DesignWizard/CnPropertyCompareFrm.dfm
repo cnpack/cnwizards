@@ -404,7 +404,7 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       OnExecute = actExitExecute
     end
     object actSelectLeft: TAction
-      Caption = 'Run Component Selector for Left...'
+      Caption = '&Run Component Selector for Left...'
       Hint = 
         'Select Left Component with Component Selector from Current Desig' +
         'ner to Compare'
@@ -412,7 +412,7 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       OnExecute = actSelectLeftExecute
     end
     object actSelectRight: TAction
-      Caption = 'Run Component Selector for Right...'
+      Caption = 'Run &Component Selector for Right...'
       Hint = 
         'Select Right Component with Component Selector from Current Desi' +
         'gner to Compare'
@@ -420,13 +420,13 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       OnExecute = actSelectRightExecute
     end
     object actPropertyToLeft: TAction
-      Caption = 'To Left'
+      Caption = 'To &Left'
       Hint = 'Assign Selected Right Property to Left'
       ImageIndex = 99
       OnExecute = actPropertyToLeftExecute
     end
     object actPropertyToRight: TAction
-      Caption = 'To Right'
+      Caption = 'To &Right'
       Hint = 'Assign Selected Left Property to Right'
       ImageIndex = 100
       OnExecute = actPropertyToRightExecute
@@ -457,18 +457,19 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       OnExecute = actNewCompareExecute
     end
     object actCompareObjProp: TAction
-      Caption = 'actCompareObjProp'
+      Caption = 'Compare &Object Property...'
+      Hint = 'Open New Window to Compare Object Property'
       ImageIndex = 43
       OnExecute = actCompareObjPropExecute
     end
     object actAllToLeft: TAction
-      Caption = 'All To Left'
+      Caption = '&All To Left'
       Hint = 'Assign All Right Properties to Left'
       ImageIndex = 101
       OnExecute = actAllToLeftExecute
     end
     object actAllToRight: TAction
-      Caption = 'All To Right'
+      Caption = 'A&ll To Right'
       Hint = 'Assign All Left Properties to Right'
       ImageIndex = 102
       OnExecute = actAllToRightExecute
@@ -498,7 +499,7 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       OnExecute = actListRightExecute
     end
     object actOnlyDiff: TAction
-      Caption = 'Only Show Different'
+      Caption = 'Only Show &Different'
       Hint = 'Only Show Different Properties'
       ImageIndex = 105
       OnExecute = actOnlyDiffExecute
