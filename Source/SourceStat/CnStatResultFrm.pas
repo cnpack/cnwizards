@@ -24,7 +24,7 @@ unit CnStatResultFrm;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：统计显示主窗体
 * 单元作者：刘啸(LiuXiao) liuxiao@cnpack.org
-* 备    注：模块
+* 备    注：右侧的 GroupBox 由运行期计算位置
 * 开发平台：Windows 98 + Delphi 6
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
@@ -34,7 +34,7 @@ unit CnStatResultFrm;
 *           2003.03.30 V1.1
 *               修改重复统计错误和工程文件添加错误
 *           2003.03.27 V1.0
-*               创建单元，实现功能，包括CSV输出支持
+*               创建单元，实现功能，包括 CSV 输出支持
 ================================================================================
 |</PRE>}
 
@@ -173,7 +173,6 @@ type
     FCnStatWizard: TCnStatWizard;
     FStaticEnd: Boolean;
     procedure SetStatStyle(const Value: TStatStyle);
-    { Private declarations }
   protected
     procedure DoLanguageChanged(Sender: TObject); override;
     function GetHelpTopic: string; override;
@@ -201,7 +200,6 @@ type
 
     property StatStyle: TStatStyle read FStatStyle write SetStatStyle;
     property StaticEnd: Boolean read FStaticEnd write FStaticEnd;
-    { Public declarations }
   end;
 
 var
@@ -217,14 +215,14 @@ uses
  {$IFDEF DEBUG}
   CnDebug,
  {$ENDIF}
-  CnStatFrm, CnWizShareImages;
+  CnStatFrm, CnWizShareImages, CnWizOptions;
 
 {$R *.dfm}
 
 const
   ResultMargin: Integer = 10;
   MarginDelta: Integer = 3;
-  // 窗体内部使用，用以调整GroupBox位置大小。
+  // 窗体内部使用，用以调整 GroupBox 位置大小。
 
 { TCnStatResultForm }
 
@@ -468,6 +466,14 @@ end;
 procedure TCnStatResultForm.FormCreate(Sender: TObject);
 begin
   FCnStatWizard := TCnStatWizard(CnWizardMgr.WizardByName(SCnStatWizardName));
+  if WizOptions.UseLargeIcon then
+  begin
+    ToolBar.ButtonWidth := csLargeButtonWidth;
+    ToolBar.ButtonHeight := csLargeButtonWidth;
+    ToolBar.Images := dmCnSharedImages.LargeImages;
+    ToolBar.DisabledImages := dmCnSharedImages.DisabledLargeImages;
+    ToolBar.Height := Toolbar.ButtonHeight + 8;
+  end;
 end;
 
 procedure TCnStatResultForm.StatActionExecute(Sender: TObject);
