@@ -88,7 +88,7 @@ USEFORMNS("ScriptWizard\CnScriptWizard.pas", Cnscriptwizard, CnScriptWizardForm)
 USEFORMNS("IdeEnhancements\CnCompFilterFrm.pas", Cncompfilterfrm, CnCompFilterForm);
 USEFORMNS("CorProperty\CnCorPropCfgFrm.pas", Cncorpropcfgfrm, CnCorPropCfgForm);
 USEFORMNS("CorProperty\CnCorPropFrm.pas", Cncorpropfrm, CnCorPropForm);
-USEFORMNS("CorProperty\CnCorPropRulesFrm.pas", Cncorproprulesfrm, CorPropRuleForm);
+USEFORMNS("CorProperty\CnCorPropRulesFrm.pas", Cncorproprulesfrm, CnCorPropRuleForm);
 USEUNIT("CorProperty\CnCorPropWizard.pas");
 USEUNIT("ProjectExtWizard\CnProjectExtWizard.pas");
 USEFORMNS("ProjectExtWizard\CnProjectViewFormsFrm.pas", Cnprojectviewformsfrm, CnProjectViewFormsForm);
@@ -96,7 +96,7 @@ USEFORMNS("ProjectExtWizard\CnProjectViewUnitsFrm.pas", Cnprojectviewunitsfrm, C
 USEFORMNS("ProjectExtWizard\CnProjectUseUnitsFrm.pas", Cnprojectuseunitsfrm, CnProjectUseUnitsForm);
 USEFORMNS("ProjectExtWizard\CnProjectFramesFrm.pas", Cnprojectframesfrm, CnProjectFramesForm);
 USEFORMNS("ProjectExtWizard\CnProjectListUsedFrm.pas", Cnprojectlistusedfrm, CnProjectListUsedForm);
-USEFORMNS("SimpleWizards\CnCommentCropper.pas", Cncommentcropper, CommentCropFrm);
+USEFORMNS("SimpleWizards\CnCommentCropper.pas", Cncommentcropper, CnCommentCropFrm);
 USEUNIT("Utils\CnSourceCropper.pas");
 USEUNIT("IdeEnhancements\CnCpuWinEnhancements.pas");
 USEUNIT("IdeEnhancements\CnCpuWinEnhanceFrm.pas");

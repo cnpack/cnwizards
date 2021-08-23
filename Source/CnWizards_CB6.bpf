@@ -47,13 +47,13 @@ USEFORMNS("IdeEnhancements\CnPaletteEnhanceFrm.pas", Cnpaletteenhancefrm, CnPalE
 USEFORMNS("IdeEnhancements\CnCompFilterFrm.pas", Cncompfilterfrm, CnCompFilterForm);
 USEFORMNS("CorProperty\CnCorPropCfgFrm.pas", Cncorpropcfgfrm, CnCorPropCfgForm);
 USEFORMNS("CorProperty\CnCorPropFrm.pas", Cncorpropfrm, CnCorPropForm);
-USEFORMNS("CorProperty\CnCorPropRulesFrm.pas", Cncorproprulesfrm, CorPropRuleForm);
+USEFORMNS("CorProperty\CnCorPropRulesFrm.pas", Cncorproprulesfrm, CnCorPropRuleForm);
 USEFORMNS("ProjectExtWizard\CnProjectViewFormsFrm.pas", Cnprojectviewformsfrm, CnProjectViewFormsForm);
 USEFORMNS("ProjectExtWizard\CnProjectViewUnitsFrm.pas", Cnprojectviewunitsfrm, CnProjectViewUnitsForm);
 USEFORMNS("ProjectExtWizard\CnProjectUseUnitsFrm.pas", Cnprojectuseunitsfrm, CnProjectUseUnitsForm);
 USEFORMNS("ProjectExtWizard\CnProjectFramesFrm.pas", Cnprojectframesfrm, CnProjectFramesForm);
 USEFORMNS("ProjectExtWizard\CnProjectListUsedFrm.pas", Cnprojectlistusedfrm, CnProjectListUsedForm);
-USEFORMNS("SimpleWizards\CnCommentCropper.pas", Cncommentcropper, CommentCropFrm);
+USEFORMNS("SimpleWizards\CnCommentCropper.pas", Cncommentcropper, CnCommentCropFrm);
 USEFORMNS("DesignEditors\CnMultiLineEdtToolOptFrm.pas", Cnmultilineedttooloptfrm, CnMultiLineEditorToolsOptionFrm);
 USEFORMNS("DesignEditors\CnMultiLineEdtUserFmtFrm.pas", Cnmultilineedtuserfmtfrm, CnMultiLineEditorUserFmtFrm);
 USEFORMNS("RepositoryWiz\CnDUnitSetFrm.pas", Cndunitsetfrm, CnDUnitSetForm);

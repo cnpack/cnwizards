@@ -300,7 +300,7 @@
       <FILE FILENAME="IdeEnhancements\CnCompFilterFrm.pas" FORMNAME="CnCompFilterForm" UNITNAME="Cncompfilterfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="CorProperty\CnCorPropCfgFrm.pas" FORMNAME="CnCorPropCfgForm" UNITNAME="Cncorpropcfgfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="CorProperty\CnCorPropFrm.pas" FORMNAME="CnCorPropForm" UNITNAME="Cncorpropfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="CorProperty\CnCorPropRulesFrm.pas" FORMNAME="CorPropRuleForm" UNITNAME="Cncorproprulesfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="CorProperty\CnCorPropRulesFrm.pas" FORMNAME="CnCorPropRuleForm" UNITNAME="Cncorproprulesfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="CorProperty\CnCorPropWizard.pas" FORMNAME="" UNITNAME="CnCorPropWizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="ProjectExtWizard\CnProjectExtWizard.pas" FORMNAME="" UNITNAME="CnProjectExtWizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="ProjectExtWizard\CnProjectViewFormsFrm.pas" FORMNAME="CnProjectViewFormsForm" UNITNAME="Cnprojectviewformsfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
@@ -308,7 +308,7 @@
       <FILE FILENAME="ProjectExtWizard\CnProjectUseUnitsFrm.pas" FORMNAME="CnProjectUseUnitsForm" UNITNAME="Cnprojectuseunitsfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="ProjectExtWizard\CnProjectFramesFrm.pas" FORMNAME="CnProjectFramesForm" UNITNAME="Cnprojectframesfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="ProjectExtWizard\CnProjectListUsedFrm.pas" FORMNAME="CnProjectListUsedForm" UNITNAME="Cnprojectlistusedfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="SimpleWizards\CnCommentCropper.pas" FORMNAME="CommentCropFrm" UNITNAME="Cncommentcropper" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="SimpleWizards\CnCommentCropper.pas" FORMNAME="CnCommentCropFrm" UNITNAME="Cncommentcropper" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnSourceCropper.pas" FORMNAME="" UNITNAME="CnSourceCropper" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="IdeEnhancements\CnCpuWinEnhancements.pas" FORMNAME="" UNITNAME="CnCpuWinEnhancements" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="IdeEnhancements\CnCpuWinEnhanceFrm.pas" FORMNAME="" UNITNAME="CnCpuWinEnhanceFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>

@@ -323,7 +323,7 @@
             <Form>CnCorPropCfgForm</Form>
         </DCCReference>
         <DCCReference Include="CorProperty\CnCorPropRulesFrm.pas">
-            <Form>CorPropRuleForm</Form>
+            <Form>CnCorPropRuleForm</Form>
         </DCCReference>
         <DCCReference Include="ProjectExtWizard\CnProjectExtWizard.pas"/>
         <DCCReference Include="ProjectExtWizard\CnProjectViewBaseFrm.pas">
@@ -346,7 +346,7 @@
         </DCCReference>
         <DCCReference Include="Utils\CnWizDfmParser.pas"/>
         <DCCReference Include="SimpleWizards\CnCommentCropper.pas">
-            <Form>CommentCropForm</Form>
+            <Form>CnCommentCropForm</Form>
         </DCCReference>
         <DCCReference Include="Utils\CnSourceCropper.pas"/>
         <DCCReference Include="IdeEnhancements\CnCpuWinEnhancements.pas"/>

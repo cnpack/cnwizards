@@ -94,7 +94,7 @@
       <Form>CnCorPropForm</Form>
     </DCCReference>
     <DCCReference Include="CorProperty\CnCorPropRulesFrm.pas">
-      <Form>CorPropRuleForm</Form>
+      <Form>CnCorPropRuleForm</Form>
     </DCCReference>
     <DCCReference Include="CorProperty\CnCorPropWizard.pas" />
     <DCCReference Include="DesignEditors\CnAlignPropEditor.pas" />
@@ -358,7 +358,7 @@
       <Form>CnBookmarkForm</Form>
     </DCCReference>
     <DCCReference Include="SimpleWizards\CnCommentCropper.pas">
-      <Form>CommentCropForm</Form>
+      <Form>CnCommentCropForm</Form>
     </DCCReference>
     <DCCReference Include="SimpleWizards\CnComponentSelector.pas">
       <Form>CnComponentSelectorForm</Form>
