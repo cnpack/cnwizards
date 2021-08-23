@@ -175,6 +175,51 @@ Some functions are only enabled when one or more components are selected. And so
   </li>
 </ul>
 <p class="text" align="left">&nbsp;</p>
+<p class="title">Compare Properties</p>
+<p class="text">This tool is used to compare properties of selected 2 components in current designer. Related menu items are also added to designer context menu. When this tool run, the main window is as below with menu, toolbar and properties list. The different value for same properties are shown in red background. If one property does not exist, it shows a blank line.</p>
+<p align="center" class="text"><img src="propertycompare.png"></p>
+<ul>
+	<li> 
+    <p class="text" align="left"><b>New Compare</b>: Create a new, empty compare window. You can select components to compare.</li>
+  <li> 
+    <p class="text" align="left"><b>Refresh</b>: Reload and re-compare properties from components in Designer.</li>
+  <li> 
+    <p class="text" align="left"><b>Options</b>: Open Settings dialog.</li>
+    <p align="center" class="text"><img src="propertycompconfig.png"></p>
+    <ul>
+    	<li> 
+        <p class="text" align="left"><b>Only Check Property Names</b>: This option determines how to know  two properties can be treated comparable. If checked, only needs same property names, otherwise needs same property names and types.</li>
+      <li> 
+        <p class="text" align="left"><b>Ignore Properties when Assign All</b>: You can specify which property names to ignore when assign all. Write one property name on each line.</li>
+    </ul>
+  <li> 
+    <p class="text" align="left"><b>Exit</b>: Close this window.</li>
+  <li> 
+    <p class="text" align="left"><b>Select Left Component</b>: Use "Locate Components" to select a component in current designer for left to compare.</li>
+  <li> 
+    <p class="text" align="left"><b>Select Right Component</b>: Use "Locate Components" to select a component in current designer for right to compare.</li>
+  <li> 
+    <p class="text" align="left"><b>Run Component Selector for Left</b>: Use "Component Selector" to select a component in current designer for left to compare.</li>
+  <li> 
+    <p class="text" align="left"><b>Run Component Selector for Right</b>: Use "Component Selector" to select a component in current designer for right to compare.</li>
+  <li> 
+    <p class="text" align="left"><b>To Left</b>: Assign selected property value of right component to the one of left component and update in designer.</li>
+  <li> 
+    <p class="text" align="left"><b>To Right</b>: Assign selected property value of left component to the one of right component and update in designer.</li>
+  <li> 
+    <p class="text" align="left"><b>All to Left</b>: Assign all property values of right component to left component and update in designer. Some properties will be ignored according to settings. If a right property does not exists in left, just ignore.</li>
+  <li> 
+    <p class="text" align="left"><b>All to Right</b>: Assign all property values of left component to right component and update in designer. Some properties will be ignored according to settings. If a left property does not exists in right, just ignore.</li>
+  <li> 
+    <p class="text" align="left"><b>Previous Different</b>: Search and select the previous different property in list.</li>
+  <li> 
+    <p class="text" align="left"><b>Next Different</b>: Search and select the next different property in list.</li>
+  <li> 
+    <p class="text" align="left"><b>Only Show Different</b>: If checked, only different properties are visible in list, otherwise show all.</li>
+  <li> 
+    <p class="text" align="left"><b>Help</b>: Show this Help.</li>
+</ul>
+<p class="text" align="left">&nbsp;</p>
 <p class="title">Convert to Code</p>
 <p class="text">This function can be used to convert selected component(s) to creation code. Delphi and C++Builder are supported. The window is shown as below. The code is divided into two part: var declaration and initialization code.
 </p>

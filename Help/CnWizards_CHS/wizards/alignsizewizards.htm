@@ -175,6 +175,51 @@
   </li>
 </ul>
 <p class="text" align="left">　</p>
+<p class="title">比较属性</p>
+<p class="text">该功能用来比较当前设计器上选中的两个组件的属性，同时设计器菜单上也有选择与比较的菜单项。单击该菜单项后弹出如下窗口，上部是菜单与工具栏，中部是左右组件的属性列表与比较，右侧是异同情况的缩略图与导航栏。左右属性列表中，属性相同但值不同的属性以红色底色显示，如某属性对方不存在，则对方显示为空白行。</p>
+<p align="center" class="text"><img src="propertycompare.png"></p>
+<ul>
+	<li> 
+    <p class="text" align="left"><b>新建比较</b>：新建空白比较窗口，用户可以在新窗口里选择需要比较的控件。</li>
+  <li> 
+    <p class="text" align="left"><b>刷新</b>：从设计器中重新读入组件的属性值并重新比较。</li>
+  <li> 
+    <p class="text" align="left"><b>设置</b>：打开属性比较的设置窗口。</li>
+    <p align="center" class="text"><img src="propertycompconfig.png"></p>
+    <ul>
+    	<li> 
+        <p class="text" align="left"><b>只判断属性名</b>：如何判断两个组件的两个属性是否可比较。如勾选，当属性名相同时便可比较，如未勾选，则属性名与属性类型均需相同才可比较。</li>
+      <li> 
+        <p class="text" align="left"><b>全部赋值时忽略以下属性</b>：部分属性无需或不能从其他组件赋值过来如 Name 等，这里指定了全部赋值时要忽略的属性，每一个属性名单独占一行。注意该选项对单独赋值无效。</li>
+    </ul>
+  <li> 
+    <p class="text" align="left"><b>关闭</b>：关闭本窗口。</li>
+  <li> 
+    <p class="text" align="left"><b>选择左侧组件</b>：使用“组件列表”功能选择当前设计器上的单个组件作为左侧待比较组件。</li>
+  <li> 
+    <p class="text" align="left"><b>选择右侧组件</b>：使用“组件列表”功能选择当前设计器上的单个组件作为右侧待比较组件。</li>
+  <li> 
+    <p class="text" align="left"><b>高级选择左侧组件</b>：使用“组件选择器”功能选择当前设计器上的单个组件作为左侧待比较组件。</li>
+  <li> 
+    <p class="text" align="left"><b>高级选择右侧组件</b>：使用“组件选择器”功能选择当前设计器上的单个组件作为右侧待比较组件。</li>
+  <li> 
+    <p class="text" align="left"><b>赋值至左</b>：将右侧组件的当前选中属性的属性值赋值给左侧组件的同名属性，设计器内组件同步更新。</li>
+  <li> 
+    <p class="text" align="left"><b>赋值至右</b>：将左侧组件的当前选中属性的属性值赋值给右侧组件的同名属性，设计器内组件同步更新。</li>
+  <li> 
+    <p class="text" align="left"><b>全部至左</b>：将右侧组件的所有属性的属性值赋值给左侧组件的同名属性，设计器内组件同步更新。该机制会跳过设置中的部分指定属性，如果对方同名属性不存在则忽略。</li>
+  <li> 
+    <p class="text" align="left"><b>全部至右</b>：将左侧组件的所有属性的属性值赋值给右侧组件的同名属性，设计器内组件同步更新。该机制会跳过设置中的部分指定属性，如果对方同名属性不存在则忽略。</li>
+  <li> 
+    <p class="text" align="left"><b>上一处不同</b>：在属性列表中寻找并定位当前选中属性之前的不同属性。</li>
+  <li> 
+    <p class="text" align="left"><b>下一处不同</b>：在属性列表中寻找并定位当前选中属性之后的不同属性。</li>
+  <li> 
+    <p class="text" align="left"><b>只显示不同属性</b>：选中此项后，属性列表中只显示值不同的属性，否则全部显示。</li>
+  <li> 
+    <p class="text" align="left"><b>帮助</b>：显示此帮助。</li>
+</ul>
+<p class="text" align="left">　</p>
 <p class="title">转换成代码</p>
 <p class="text">该功能用来将当前窗体上选中的组件转换成创建代码，语法支持 Delphi 和 C++Builder。单击该菜单项后弹出如下窗口，上部是工具栏，中部是组件变量声明，下部是组件创建和属性赋值的代码。</p>
 <p align="center" class="text"><img src="comptocode.png"></p>
