@@ -48,7 +48,7 @@ uses
   CnWizMultiLang;
 
 type
-  TCorPropRuleForm = class(TCnTranslateForm)
+  TCnCorPropRuleForm = class(TCnTranslateForm)
     btnOK: TButton;
     btnCancel: TButton;
     btnHelp: TButton;
@@ -74,11 +74,9 @@ type
     FPropDef: TCnPropDef;
     procedure SetPropDef(const Value: TCnPropDef);
     function GetPropDef: TCnPropDef;
-    { Private declarations }
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
     procedure ClearAll;
     procedure AddUniqueToCombo(Combo: TComboBox);
     property PropDef: TCnPropDef read GetPropDef write SetPropDef;
@@ -86,7 +84,7 @@ type
   end;
 
 var
-  CorPropRuleForm: TCorPropRuleForm = nil;
+  CorPropRuleForm: TCnCorPropRuleForm = nil;
 
 {$ENDIF CNWIZARDS_CNCORPROPWIZARD}
 
@@ -99,20 +97,20 @@ uses
 
 {$R *.DFM}
 
-procedure TCorPropRuleForm.FormCreate(Sender: TObject);
+procedure TCnCorPropRuleForm.FormCreate(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
   FPropDef := TCnPropDef.Create(nil);
   cbbCondition.Items.Clear;
   cbbAction.Items.Clear;
-  for i := Ord(Low(CompareStr)) to Ord(High(CompareStr)) do
-    cbbCondition.Items.Add(CompareStr[TCompareOper(i)]);
+  for I := Ord(Low(CompareStr)) to Ord(High(CompareStr)) do
+    cbbCondition.Items.Add(CompareStr[TCompareOper(I)]);
 
   ActionStr[paWarn] := SCnCorrectPropertyActionWarn;
   ActionStr[paCorrect] := SCnCorrectPropertyActionAutoCorrect;
-  for i := Ord(Low(ActionStr)) to Ord(High(ActionStr)) do
-    cbbAction.Items.Add(ActionStr[TPropAction(i)]);
+  for I := Ord(Low(ActionStr)) to Ord(High(ActionStr)) do
+    cbbAction.Items.Add(ActionStr[TPropAction(I)]);
 
   {$IFDEF COMPILER6_UP}
   cbbComponent.AutoComplete := True;
@@ -125,7 +123,7 @@ begin
   cbbAction.ItemIndex := 0;
 end;
 
-procedure TCorPropRuleForm.SetPropDef(const Value: TCnPropDef);
+procedure TCnCorPropRuleForm.SetPropDef(const Value: TCnPropDef);
 begin
   if not Assigned(Value) then Exit;
   with Value do
@@ -141,12 +139,12 @@ begin
   FPropDef.Assign(Value);
 end;
 
-procedure TCorPropRuleForm.FormDestroy(Sender: TObject);
+procedure TCnCorPropRuleForm.FormDestroy(Sender: TObject);
 begin
   FreeAndNil(FPropDef);
 end;
 
-function TCorPropRuleForm.GetPropDef: TCnPropDef;
+function TCnCorPropRuleForm.GetPropDef: TCnPropDef;
 begin
   if FPropDef <> nil then with FPropDef do
   begin
@@ -161,7 +159,7 @@ begin
   Result := FPropDef;
 end;
 
-procedure TCorPropRuleForm.ClearAll;
+procedure TCnCorPropRuleForm.ClearAll;
 begin
   cbbComponent.Text := '';
   cbbProperty.Text := '';
@@ -170,7 +168,7 @@ begin
   chkActive.Checked := True;
 end;
 
-procedure TCorPropRuleForm.AddUniqueToCombo(Combo: TComboBox);
+procedure TCnCorPropRuleForm.AddUniqueToCombo(Combo: TComboBox);
 begin
   if (Combo <> nil) and
      (Combo.Style <> csDropDownList) and
@@ -181,7 +179,7 @@ begin
   end;
 end;
 
-procedure TCorPropRuleForm.FormCloseQuery(Sender: TObject;
+procedure TCnCorPropRuleForm.FormCloseQuery(Sender: TObject;
   var CanClose: Boolean);
 var
   AClass: TPersistentClass;
@@ -239,7 +237,7 @@ begin
   end;
 end;
 
-procedure TCorPropRuleForm.FormShow(Sender: TObject);
+procedure TCnCorPropRuleForm.FormShow(Sender: TObject);
 var
   I: Integer;
 begin
@@ -252,12 +250,12 @@ begin
   end;
 end;
 
-procedure TCorPropRuleForm.btnHelpClick(Sender: TObject);
+procedure TCnCorPropRuleForm.btnHelpClick(Sender: TObject);
 begin
   ShowFormHelp;
 end;
 
-function TCorPropRuleForm.GetHelpTopic: string;
+function TCnCorPropRuleForm.GetHelpTopic: string;
 begin
   Result := 'CnCorrectProperty';
 end;

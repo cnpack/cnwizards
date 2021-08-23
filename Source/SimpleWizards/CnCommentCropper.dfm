@@ -1,4 +1,4 @@
-inherited CommentCropForm: TCommentCropForm
+inherited CnCommentCropForm: TCnCommentCropForm
   Left = 235
   Top = 155
   BorderStyle = bsDialog

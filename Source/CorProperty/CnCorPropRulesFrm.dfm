@@ -1,4 +1,4 @@
-inherited CorPropRuleForm: TCorPropRuleForm
+inherited CnCorPropRuleForm: TCnCorPropRuleForm
   Left = 203
   Top = 252
   BorderStyle = bsDialog

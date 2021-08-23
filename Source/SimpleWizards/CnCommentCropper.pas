@@ -57,7 +57,7 @@ type
     csCropProjectGroup, csDirectory);
 
 type
-  TCommentCropForm = class(TCnTranslateForm)
+  TCnCommentCropForm = class(TCnTranslateForm)
     gbKind: TGroupBox;
     rbSelEdit: TRadioButton;
     rbCurrUnit: TRadioButton;
@@ -404,7 +404,7 @@ end;
 
 procedure TCnCommentCropperWizard.Execute;
 begin
-  with TCommentCropForm.Create(nil) do
+  with TCnCommentCropForm.Create(nil) do
   begin
     CropOption := Self.CropOption;
     CropDirective := Self.CropDirective;
@@ -523,19 +523,19 @@ end;
 
 { TCommentCropForm }
 
-function TCommentCropForm.GetCropDirective: Boolean;
+function TCnCommentCropForm.GetCropDirective: Boolean;
 begin
   Result := Self.chkCropDirective.Checked;
 end;
 
-function TCommentCropForm.GetCropOption: TCropOption;
+function TCnCommentCropForm.GetCropOption: TCropOption;
 begin
   if Self.rbExAscii.Checked then
     Result := coExAscii
   else Result := coAll;
 end;
 
-function TCommentCropForm.GetCropStyle: TCropStyle;
+function TCnCommentCropForm.GetCropStyle: TCropStyle;
 begin
   if Self.rbSelEdit.Checked then
     Result := csCropSelected
@@ -551,17 +551,17 @@ begin
     Result := csCropProjectGroup;
 end;
 
-function TCommentCropForm.GetCropTodoList: Boolean;
+function TCnCommentCropForm.GetCropTodoList: Boolean;
 begin
   Result := Self.chkCropTodo.Checked;
 end;
 
-procedure TCommentCropForm.SetCropDirective(const Value: Boolean);
+procedure TCnCommentCropForm.SetCropDirective(const Value: Boolean);
 begin
   Self.chkCropDirective.Checked := Value;
 end;
 
-procedure TCommentCropForm.SetCropOption(const Value: TCropOption);
+procedure TCnCommentCropForm.SetCropOption(const Value: TCropOption);
 begin
   case Value of
     coAll:     Self.rbCropComment.Checked := True;
@@ -569,7 +569,7 @@ begin
   end;
 end;
 
-procedure TCommentCropForm.SetCropStyle(const Value: TCropStyle);
+procedure TCnCommentCropForm.SetCropStyle(const Value: TCropStyle);
 begin
   case Value of
     csCropSelected:       rbSelEdit.Checked := True;
@@ -581,12 +581,12 @@ begin
   end;
 end;
 
-procedure TCommentCropForm.SetCropTodoList(const Value: Boolean);
+procedure TCnCommentCropForm.SetCropTodoList(const Value: Boolean);
 begin
   Self.chkCropTodo.Checked := Value;
 end;
 
-procedure TCommentCropForm.FormCreate(Sender: TObject);
+procedure TCnCommentCropForm.FormCreate(Sender: TObject);
 begin
   Self.rbSelEdit.Enabled := False;
   if CurrentIsSource then
@@ -641,52 +641,52 @@ begin
   end;
 end;
 
-procedure TCommentCropForm.btnHelpClick(Sender: TObject);
+procedure TCnCommentCropForm.btnHelpClick(Sender: TObject);
 begin
   ShowFormHelp;
 end;
 
-function TCommentCropForm.GetHelpTopic: string;
+function TCnCommentCropForm.GetHelpTopic: string;
 begin
   Result := 'CnCommentCropperWizard';
 end;
 
-function TCommentCropForm.GetReserve: Boolean;
+function TCnCommentCropForm.GetReserve: Boolean;
 begin
   Result := Self.chkReserve.Checked;
 end;
 
-procedure TCommentCropForm.SetReserve(const Value: Boolean);
+procedure TCnCommentCropForm.SetReserve(const Value: Boolean);
 begin
   Self.chkReserve.Checked := Value;
 end;
 
-function TCommentCropForm.GetReserveStr: string;
+function TCnCommentCropForm.GetReserveStr: string;
 begin
   Result := Trim(edReserveStr.Text);
 end;
 
-procedure TCommentCropForm.SetReserveStr(const Value: string);
+procedure TCnCommentCropForm.SetReserveStr(const Value: string);
 begin
   Self.edReserveStr.Text := Value;
 end;
 
-procedure TCommentCropForm.chkReserveClick(Sender: TObject);
+procedure TCnCommentCropForm.chkReserveClick(Sender: TObject);
 begin
   Self.edReserveStr.Enabled := Self.chkReserve.Checked;
 end;
 
-function TCommentCropForm.GetCropProjectSrc: Boolean;
+function TCnCommentCropForm.GetCropProjectSrc: Boolean;
 begin
   Result := Self.chkCropProjectSrc.Checked;
 end;
 
-procedure TCommentCropForm.SetCropProjectSrc(const Value: Boolean);
+procedure TCnCommentCropForm.SetCropProjectSrc(const Value: Boolean);
 begin
   Self.chkCropProjectSrc.Checked := Value;
 end;
 
-procedure TCommentCropForm.UpdateClick(Sender: TObject);
+procedure TCnCommentCropForm.UpdateClick(Sender: TObject);
 var
   I: Integer;
 begin
@@ -697,7 +697,7 @@ begin
     grpDir.Controls[I].Enabled := rbDirectory.Checked;
 end;
 
-procedure TCommentCropForm.btnSelectDirClick(Sender: TObject);
+procedure TCnCommentCropForm.btnSelectDirClick(Sender: TObject);
 var
   NewDir: string;
 begin
@@ -706,12 +706,12 @@ begin
     cbbDir.Text := NewDir;
 end;
 
-function TCommentCropForm.GetMergeBlank: Boolean;
+function TCnCommentCropForm.GetMergeBlank: Boolean;
 begin
   Result := chkMergeBlank.Checked;
 end;
 
-procedure TCommentCropForm.SetMergeBlank(const Value: Boolean);
+procedure TCnCommentCropForm.SetMergeBlank(const Value: Boolean);
 begin
   chkMergeBlank.Checked := Value;
 end;
@@ -725,32 +725,32 @@ begin
   FindFile(Dir, '*.*', OnFindFile, nil, IncludeSubDirs);
 end;
 
-function TCommentCropForm.GetIncludeSubDirs: Boolean;
+function TCnCommentCropForm.GetIncludeSubDirs: Boolean;
 begin
   Result := chkSubDirs.Checked;
 end;
 
-procedure TCommentCropForm.SetIncludeSubDirs(const Value: Boolean);
+procedure TCnCommentCropForm.SetIncludeSubDirs(const Value: Boolean);
 begin
   chkSubDirs.Checked := Value;
 end;
 
-function TCommentCropForm.GetDir: string;
+function TCnCommentCropForm.GetDir: string;
 begin
   Result := Trim(cbbDir.Text);
 end;
 
-function TCommentCropForm.GetFileMask: string;
+function TCnCommentCropForm.GetFileMask: string;
 begin
   Result := Trim(cbbMask.Text);
 end;
 
-procedure TCommentCropForm.SetDir(const Value: string);
+procedure TCnCommentCropForm.SetDir(const Value: string);
 begin
   cbbDir.Text := Trim(Value);
 end;
 
-procedure TCommentCropForm.SetFileMask(const Value: string);
+procedure TCnCommentCropForm.SetFileMask(const Value: string);
 begin
   cbbMask.Text := Trim(Value);
 end;
@@ -846,7 +846,7 @@ begin
   end;
 end;
 
-procedure TCommentCropForm.FormClose(Sender: TObject;
+procedure TCnCommentCropForm.FormClose(Sender: TObject;
   var Action: TCloseAction);
 
   procedure CheckAndInsertComboItems(cb: TComboBox; const Text: string);
@@ -868,7 +868,7 @@ begin
   end;
 end;
 
-procedure TCommentCropForm.FormCloseQuery(Sender: TObject;
+procedure TCnCommentCropForm.FormCloseQuery(Sender: TObject;
   var CanClose: Boolean);
 begin
   if (ModalResult <> mrOK) or not rbDirectory.Checked then

@@ -354,7 +354,7 @@ begin
   if Self.ListView.Selected <> nil then
   begin
     if not Assigned(CorPropRuleForm) then
-      CorPropRuleForm := TCorPropRuleForm.Create(nil);
+      CorPropRuleForm := TCnCorPropRuleForm.Create(nil);
     with CorPropRuleForm do
     begin
       PropDef := TCnPropDef(Self.FPropDefList[Self.ListView.Selected.Index]);
@@ -380,7 +380,7 @@ var
   APropDef: TCnPropDef;
 begin
   if not Assigned(CorPropRuleForm) then
-    CorPropRuleForm := TCorPropRuleForm.Create(nil);
+    CorPropRuleForm := TCnCorPropRuleForm.Create(nil);
   with CorPropRuleForm do
   begin
     ClearAll;
