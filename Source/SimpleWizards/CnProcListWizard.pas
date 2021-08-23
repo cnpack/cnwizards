@@ -204,6 +204,7 @@ type
     procedure UpdateListView; override;
     procedure UpdateItemPosition;
     procedure FontChanged(AFont: TFont); override;
+    function DisableLargeIcons: Boolean; override;
 
     procedure PrepareSearchRange; override;
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
@@ -4615,6 +4616,11 @@ begin
     FProcCombo.Text := '';
   if FClassCombo <> nil then
     FClassCombo.Text := '';
+end;
+
+function TCnProcListForm.DisableLargeIcons: Boolean;
+begin
+  Result := False;
 end;
 
 initialization
