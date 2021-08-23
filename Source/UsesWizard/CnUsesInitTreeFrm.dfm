@@ -302,4 +302,9 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
       Action = actSearch
     end
   end
+  object dlgSave: TSaveDialog
+    Filter = 'Text File(*.txt)|*.txt|All Files(*.*)|*.*'
+    Left = 112
+    Top = 480
+  end
 end

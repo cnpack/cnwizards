@@ -87,6 +87,7 @@ type
     Search1: TMenuItem;
     N1: TMenuItem;
     N2: TMenuItem;
+    dlgSave: TSaveDialog;
     procedure actGenerateUsesTreeExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -464,8 +465,24 @@ begin
 end;
 
 procedure TCnUsesInitTreeForm.actExportExecute(Sender: TObject);
+var
+  I: Integer;
+  L: TStringList;
 begin
-  // Save Tree to File
+  if dlgSave.Execute then
+  begin
+    L := TStringList.Create;
+    try
+      for I := 0 to tvTree.Items.Count - 1 do
+      begin
+        L.Add(Format('%2.2d:%s%s',[I + 1, StringOfChar(' ', tvTree.Items[I].Level),
+          tvTree.Items[I].Text]));
+      end;
+      L.SaveToFile(dlgSave.FileName);
+    finally
+      L.Free;
+    end;
+  end;
 end;
 
 procedure TCnUsesInitTreeForm.actSearchExecute(Sender: TObject);
