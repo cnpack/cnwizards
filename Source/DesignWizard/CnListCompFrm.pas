@@ -80,6 +80,7 @@ type
     procedure UpdateComboBox; override;
     procedure UpdateStatusBar; override;
     procedure DoLanguageChanged(Sender: TObject); override;
+    function DisableLargeIcons: Boolean; override;
 
     function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
       const S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer; override;
@@ -462,6 +463,11 @@ begin
   else
     Result := 0;
   end;
+end;
+
+function TCnListCompForm.DisableLargeIcons: Boolean;
+begin
+  Result := True;
 end;
 
 {$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}

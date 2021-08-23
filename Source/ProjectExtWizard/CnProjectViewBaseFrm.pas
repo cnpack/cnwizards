@@ -211,6 +211,7 @@ type
     ProjectInfoSearch: TCnProjectInfo;  // 标记待限定的 Project 搜索范围
     DataList: TStringList;        // 供子类存储原始需要搜索的列表名字以及 Object
     DisplayList: TStringList;     // 供子类容纳过滤后需要显示的列表名字以及 Object（引用）
+    function DisableLargeIcons: Boolean; virtual; // 供子类重载以因为特殊原因禁用大图标，默认跟着设置走
     function DoSelectOpenedItem: string; virtual; abstract;
     procedure DoSelectItemChanged(Sender: TObject); virtual;
     procedure DoUpdateListView; virtual;
@@ -1347,6 +1348,11 @@ begin
   // 基类啥都不改，按默认绘制
 end;
 
+function TCnProjectViewBaseForm.DisableLargeIcons: Boolean;
+begin
+  Result := False;
+end;
+
 {$IFNDEF STAND_ALONE}
 
 procedure TCnProjectViewBaseForm.ChangeIconToIDEImageList;
@@ -1354,8 +1360,19 @@ var
   I: Integer;
   Act: TCustomAction;
 begin
-  ActionList.Images := dmCnSharedImages.GetMixedImageList;
-  ToolBar.Images := dmCnSharedImages.GetMixedImageList;
+  if WizOptions.UseLargeIcon and not DisableLargeIcons then
+  begin
+    ToolBar.ButtonWidth := csLargeButtonWidth;
+    ToolBar.ButtonHeight := csLargeButtonHeight;
+    ActionList.Images := dmCnSharedImages.GetMixedImageList;
+    ToolBar.Images := dmCnSharedImages.GetMixedImageList;
+  end
+  else  // 强制小图标
+  begin
+    ActionList.Images := dmCnSharedImages.GetMixedImageList(True);
+    ToolBar.Images := dmCnSharedImages.GetMixedImageList(True);
+  end;
+
   for I := 0 to ActionList.ActionCount - 1 do
   begin
     if ActionList.Actions[I] is TCustomAction then

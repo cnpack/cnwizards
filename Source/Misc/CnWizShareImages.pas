@@ -75,7 +75,7 @@ type
     procedure CopyToIDEMainImageList;
     // Images 会被复制进 IDE 的 ImageList 供图标被同时使用的场合，FIDEOffset 表示偏移量
 
-    function GetMixedImageList: TCustomImageList;
+    function GetMixedImageList(ForceSmall: Boolean = False): TCustomImageList;
     function CalcMixedImageIndex(ImageIndex: Integer): Integer;
 {$ENDIF}
   end;
@@ -173,11 +173,11 @@ begin
     Result := ImageIndex;
 end;
 
-function TdmCnSharedImages.GetMixedImageList: TCustomImageList;
+function TdmCnSharedImages.GetMixedImageList(ForceSmall: Boolean): TCustomImageList;
 begin
   if FCopied then
   begin
-    if WizOptions.UseLargeIcon then
+    if WizOptions.UseLargeIcon and not ForceSmall then
       Result := IDELargeImages
     else
       Result := GetIDEImageList;
