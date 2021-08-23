@@ -1142,7 +1142,13 @@ end;
 
 procedure TCnBookmarkForm.FormCreate(Sender: TObject);
 begin
-//  EnlargeListViewColumns(ListView);
+  if WizOptions.UseLargeIcon then
+  begin
+    ToolBar.ButtonWidth := csLargeButtonWidth;
+    ToolBar.ButtonHeight := csLargeButtonHeight;
+    ToolBar.Images := dmCnSharedImages.LargeImages;
+    ToolBar.DisabledImages := dmCnSharedImages.DisabledLargeImages;
+  end;
 end;
 
 initialization

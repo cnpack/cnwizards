@@ -4620,7 +4620,7 @@ end;
 
 function TCnProcListForm.DisableLargeIcons: Boolean;
 begin
-  Result := False;
+  Result := True;
 end;
 
 initialization
