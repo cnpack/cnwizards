@@ -23,7 +23,7 @@ unit CnWizShareImages;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：共享 ImageList 单元
-* 单元作者：CnPack开发组
+* 单元作者：CnPack 开发组
 * 备    注：该单元定义了 CnPack IDE 专家包共享的工具栏 ImageList 
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
@@ -53,17 +53,18 @@ type
     ilBackForwardBDS: TImageList;
     ilProcToolbarLarge: TImageList;
     ilColumnHeader: TImageList;
+    LargeImages: TImageList;
+    IDELargeImages: TImageList;
     procedure DataModuleCreate(Sender: TObject);
   private
-    { Private declarations }
     FIdxUnknownInIDE: Integer;
     FIdxUnknown: Integer;
 {$IFNDEF STAND_ALONE}
     FIDEOffset: Integer;
     FCopied: Boolean;
 {$ENDIF}
+    procedure CopyToLarge(SrcImageList, DstImageList: TCustomImageList);
   public
-    { Public declarations }
     property IdxUnknown: Integer read FIdxUnknown;
     property IdxUnknownInIDE: Integer read FIdxUnknownInIDE;
 {$IFNDEF STAND_ALONE}
@@ -71,7 +72,7 @@ type
       EmptyIdx: Integer);
 
     procedure CopyToIDEMainImageList;
-    // Images 会被复制进 IDE 的 ImageList 供统一处理，FIDEOffset 表示偏移量
+    // Images 会被复制进 IDE 的 ImageList 供图标被同时使用的场合，FIDEOffset 表示偏移量
 
     function GetMixedImageList: TCustomImageList;
     function CalcMixedImageIndex(ImageIndex: Integer): Integer;
@@ -90,22 +91,56 @@ uses
 
 {$R *.dfm}
 
-procedure TdmCnSharedImages.DataModuleCreate(Sender: TObject);
-{$IFNDEF STAND_ALONE}
+procedure TdmCnSharedImages.CopyToLarge(SrcImageList,
+  DstImageList: TCustomImageList);
 const
   MaskColor = clBtnFace;
 var
-  ImgLst: TCustomImageList;
-  Bmp, Src, Dst: TBitmap;
-  Save: TColor;
+  Src, Dst: TBitmap;
   Rs, Rd: TRect;
   I: Integer;
+begin
+  // 从小的 ImageList 中拉扯绘制，把 16*16 扩展到 24* 24
+  Src := nil;
+  Dst := nil;
+  try
+    Src := CreateEmptyBmp24(16, 16, MaskColor);
+    Dst := CreateEmptyBmp24(24, 24, MaskColor);
+
+    Rs := Rect(0, 0, Src.Width, Src.Height);
+    Rd := Rect(0, 0, Dst.Width, Dst.Height);
+
+    Src.Canvas.Brush.Color := MaskColor;
+    Src.Canvas.Brush.Style := bsSolid;
+    Dst.Canvas.Brush.Color := clFuchsia;
+    Dst.Canvas.Brush.Style := bsSolid;
+
+    for I := 0 to SrcImageList.Count - 1 do
+    begin
+      Src.Canvas.FillRect(Rs);
+      SrcImageList.GetBitmap(I, Src);
+      Dst.Canvas.FillRect(Rd);
+      Dst.Canvas.StretchDraw(Rd, Src);
+      DstImageList.AddMasked(Dst, MaskColor);
+    end;
+  finally
+    Src.Free;
+    Dst.Free;
+  end;
+end;
+
+procedure TdmCnSharedImages.DataModuleCreate(Sender: TObject);
+{$IFNDEF STAND_ALONE}
+var
+  ImgLst: TCustomImageList;
+  Bmp: TBitmap;
+  Save: TColor;
 {$ENDIF}
 begin
 {$IFNDEF STAND_ALONE}
   FIdxUnknown := 66;
   ImgLst := GetIDEImageList;
-  Bmp := TBitmap.Create;
+  Bmp := TBitmap.Create;        // 给 IDE 的主 List 加个 Unknown 的图标
   try
     Bmp.PixelFormat := pf24bit;
     Save := Images.BkColor;
@@ -119,33 +154,8 @@ begin
 
   if WizOptions.UseLargeIcon then
   begin
-    // 从小的 ImageList 中拉扯绘制，把 16*16 扩展到 24* 24
-    Src := nil;
-    Dst := nil;
-    try
-      Src := CreateEmptyBmp24(16, 16, MaskColor);
-      Dst := CreateEmptyBmp24(24, 24, MaskColor);
-
-      Rs := Rect(0, 0, Src.Width, Src.Height);
-      Rd := Rect(0, 0, Dst.Width, Dst.Height);
-
-      Src.Canvas.Brush.Color := MaskColor;
-      Src.Canvas.Brush.Style := bsSolid;
-      Dst.Canvas.Brush.Color := clFuchsia;
-      Dst.Canvas.Brush.Style := bsSolid;
-
-      for I := 0 to ilProcToolbar.Count - 1 do
-      begin
-        Src.Canvas.FillRect(Rs);
-        ilProcToolbar.GetBitmap(I, Src);
-        Dst.Canvas.FillRect(Rd);
-        Dst.Canvas.StretchDraw(Rd, Src);
-        ilProcToolbarLarge.AddMasked(Dst, MaskColor);
-      end;
-    finally
-      Src.Free;
-      Dst.Free;
-    end;
+    CopyToLarge(ilProcToolbar, ilProcToolbarLarge);
+    CopyToLarge(Images, LargeImages);
   end;
 {$ENDIF}
 end;
@@ -164,7 +174,12 @@ end;
 function TdmCnSharedImages.GetMixedImageList: TCustomImageList;
 begin
   if FCopied then
-    Result := GetIDEImageList
+  begin
+    if WizOptions.UseLargeIcon then
+      Result := IDELargeImages
+    else
+      Result := GetIDEImageList;
+  end
   else
     Result := Images;
 end;
@@ -187,6 +202,12 @@ begin
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('Add %d Images to IDE Main ImageList. Offset %d.', [Images.Count, FIDEOffset]);
 {$ENDIF}
+
+    if WizOptions.UseLargeIcon then
+    begin
+      // 大尺寸下，再把 IDE 的 ImageList 复制一个超大型的
+      CopyToLarge(IDEs, IDELargeImages);
+    end;
   end;
 end;
 
@@ -210,5 +231,4 @@ begin
 end;
 
 {$ENDIF}
-
 end.

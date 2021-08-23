@@ -460,8 +460,6 @@ uses
   CnMultiLineEditorFrm;
 
 const
-  csButtonWidth = 20;
-  csButtonHeight = 20;
   csTitleWidth = 12;
   csUpdateInterval = 100;
 

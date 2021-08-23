@@ -2,8 +2,8 @@ inherited CnProjectListUsedForm: TCnProjectListUsedForm
   Left = 289
   Top = 188
   Caption = 'Used Unit List'
-  ClientHeight = 349
-  ClientWidth = 424
+  ClientHeight = 386
+  ClientWidth = 527
   Icon.Data = {
     0000010001001010100000000000280100001600000028000000100000002000
     00000100040000000000C0000000000000000000000000000000000000000000
@@ -18,12 +18,12 @@ inherited CnProjectListUsedForm: TCnProjectListUsedForm
   PixelsPerInch = 96
   TextHeight = 13
   inherited pnlHeader: TPanel
-    Width = 424
+    Width = 527
     inherited lblProject: TLabel
       Visible = False
     end
     inherited edtMatchSearch: TEdit
-      Width = 298
+      Width = 401
       Anchors = [akLeft, akTop, akRight]
     end
     inherited cbbProjectList: TComboBox
@@ -31,12 +31,12 @@ inherited CnProjectListUsedForm: TCnProjectListUsedForm
     end
   end
   inherited lvList: TListView
-    Width = 424
-    Height = 264
+    Width = 527
+    Height = 301
     Columns = <
       item
         Caption = 'Unit Name'
-        Width = 250
+        Width = 350
       end
       item
         Caption = 'Uses Type'
@@ -46,8 +46,8 @@ inherited CnProjectListUsedForm: TCnProjectListUsedForm
     OnData = lvListData
   end
   inherited StatusBar: TStatusBar
-    Top = 330
-    Width = 424
+    Top = 367
+    Width = 527
     Panels = <
       item
         Style = psOwnerDraw
@@ -59,7 +59,7 @@ inherited CnProjectListUsedForm: TCnProjectListUsedForm
       end>
   end
   inherited ToolBar: TToolBar
-    Width = 424
+    Width = 527
     inherited btnSep1: TToolButton
       Visible = False
     end

@@ -46,6 +46,8 @@ uses
   {$IFDEF COMPILER6_UP}, SHFolder {$ENDIF};
 
 const
+  csButtonWidth = 20;
+  csButtonHeight = 20;
   csLargeButtonWidth = 32;
   csLargeButtonHeight = 32;
   csLargeComboFontSize = 14;

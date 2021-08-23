@@ -8050,4 +8050,16 @@ object dmCnSharedImages: TdmCnSharedImages
       E3C07FE000000000F7FFFFE000000000FFFFFFE000000000FFFFFFE000000000
       00000000000000000000000000000000000000000000}
   end
+  object LargeImages: TImageList
+    Height = 24
+    Width = 24
+    Left = 104
+    Top = 152
+  end
+  object IDELargeImages: TImageList
+    Height = 24
+    Width = 24
+    Left = 184
+    Top = 152
+  end
 end
