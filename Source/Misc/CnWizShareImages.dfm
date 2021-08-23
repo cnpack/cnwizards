@@ -8056,10 +8056,16 @@ object dmCnSharedImages: TdmCnSharedImages
     Left = 104
     Top = 152
   end
-  object IDELargeImages: TImageList
+  object DisabledLargeImages: TImageList
     Height = 24
     Width = 24
     Left = 184
+    Top = 152
+  end
+  object IDELargeImages: TImageList
+    Height = 24
+    Width = 24
+    Left = 264
     Top = 152
   end
 end

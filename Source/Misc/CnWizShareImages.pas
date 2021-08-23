@@ -54,6 +54,7 @@ type
     ilProcToolbarLarge: TImageList;
     ilColumnHeader: TImageList;
     LargeImages: TImageList;
+    DisabledLargeImages: TImageList;
     IDELargeImages: TImageList;
     procedure DataModuleCreate(Sender: TObject);
   private
@@ -156,6 +157,7 @@ begin
   begin
     CopyToLarge(ilProcToolbar, ilProcToolbarLarge);
     CopyToLarge(Images, LargeImages);
+    CopyToLarge(DisabledImages, DisabledLargeImages);
   end;
 {$ENDIF}
 end;
