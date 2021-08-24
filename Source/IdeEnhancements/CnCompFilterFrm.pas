@@ -665,10 +665,21 @@ begin
   FRegExpr := TRegExpr.Create;
   FRegExpr.ModifierI := True;
   FMatchButtonFrame := TCnMatchButtonFrame.Create(Self);
+  FMatchButtonFrame.Anchors := FMatchButtonFrame.Anchors + [akBottom];
   FMatchButtonFrame.Parent := pnlHdr;
   FMatchButtonFrame.Left := 8;
   InitButtonFrame;
   FMatchButtonFrame.OnModeChange := MatchModeChange;
+
+  WizOptions.ResetToolbarWithLargeIcons(ToolBar1);
+  WizOptions.ResetToolbarWithLargeIcons(FMatchButtonFrame.tlb1);
+  if WizOptions.UseLargeIcon then
+  begin
+    FMatchButtonFrame.Width := FMatchButtonFrame.Width + csLargeToolbarHeightDelta;
+    FMatchButtonFrame.tlb1.Width := FMatchButtonFrame.tlb1.Width + csLargeToolbarHeightDelta;
+    edtSearch.Font.Size := csLargeComboFontSize;
+    pnlHdr.Height := pnlHdr.Height + csLargeToolbarHeightDelta;
+  end;
 
   CnWizNotifierServices.AddFileNotifier(FileNotify);
   CnWizNotifierServices.AddFormEditorNotifier(FormEditorNotify);

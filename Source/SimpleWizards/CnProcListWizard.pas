@@ -1081,6 +1081,14 @@ begin
 {$ELSE}
   Obj.MatchFrame := TCnMatchButtonFrame.Create(ToolBar);
 {$ENDIF}
+
+  WizOptions.ResetToolbarWithLargeIcons(Obj.MatchFrame.tlb1);
+  if WizOptions.UseLargeIcon then
+  begin
+    Obj.MatchFrame.Width := Obj.MatchFrame.Width + csLargeToolbarHeightDelta;
+    Obj.MatchFrame.tlb1.Width := Obj.MatchFrame.tlb1.Width + csLargeToolbarHeightDelta;
+  end;
+
   with Obj.MatchFrame do
   begin
     Parent := ToolBar;

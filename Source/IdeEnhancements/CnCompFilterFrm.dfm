@@ -1,8 +1,8 @@
 inherited CnCompFilterForm: TCnCompFilterForm
   Left = 525
   Top = 206
-  Width = 220
-  Height = 364
+  Width = 267
+  Height = 406
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSizeToolWin
   BorderWidth = 1
@@ -18,8 +18,8 @@ inherited CnCompFilterForm: TCnCompFilterForm
   object Panel1: TPanel
     Left = 0
     Top = 0
-    Width = 210
-    Height = 314
+    Width = 257
+    Height = 356
     Align = alClient
     BevelOuter = bvNone
     ParentShowHint = False
@@ -28,7 +28,7 @@ inherited CnCompFilterForm: TCnCompFilterForm
     object pnlHdr: TPanel
       Left = 0
       Top = 0
-      Width = 210
+      Width = 257
       Height = 25
       Align = alTop
       BevelOuter = bvNone
@@ -67,9 +67,9 @@ inherited CnCompFilterForm: TCnCompFilterForm
         OnMouseUp = imgHdrMouseUp
       end
       object edtSearch: TEdit
-        Left = 50
+        Left = 58
         Top = 1
-        Width = 111
+        Width = 119
         Height = 21
         TabOrder = 0
         OnChange = edtSearchChange
@@ -77,9 +77,9 @@ inherited CnCompFilterForm: TCnCompFilterForm
         OnKeyPress = edtSearchKeyPress
       end
       object ToolBar1: TToolBar
-        Left = 163
+        Left = 179
         Top = 0
-        Width = 49
+        Width = 70
         Height = 25
         Align = alNone
         Caption = 'tlb1'
@@ -191,8 +191,8 @@ inherited CnCompFilterForm: TCnCompFilterForm
   end
   object tbst1: TTabSet
     Left = 0
-    Top = 314
-    Width = 210
+    Top = 356
+    Width = 257
     Height = 21
     Align = alBottom
     Font.Charset = DEFAULT_CHARSET
