@@ -1555,6 +1555,7 @@ TCnProjectDelTempForm.btnRemove.Caption=&löschen
 TCnProjectDelTempForm.btnRemoveExt.Caption=löschen
 TCnProjectDelTempForm.cbbSelectType.Items.Text=aktives Projekt<BR>aktives Projekt, inklusive Binär Verzeichnis<BR>aktive Projektgruppe<BR>aktive Projektgruppe, inklusive Binär Verzeichnis<BR>
 TCnProjectDelTempForm.chkCheckSource.Caption=behalte Obj/Dcu Dateien wenn KEINE solche Source Datei existiert.
+TCnProjectDelTempForm.chkRemoveHistory.Caption=Entfernen Sie die Verzeichnisse __history und __recovery.
 TCnProjectDelTempForm.grpFileList.Caption=Datei Liste
 TCnProjectDelTempForm.grpFileType.Caption=Datei &Typ
 TCnProjectDelTempForm.grpPath.Caption=&Verzeichnis

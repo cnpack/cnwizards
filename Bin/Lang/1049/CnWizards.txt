@@ -1555,6 +1555,7 @@ TCnProjectDelTempForm.btnRemove.Caption=Удалить
 TCnProjectDelTempForm.btnRemoveExt.Caption=Удалить
 TCnProjectDelTempForm.cbbSelectType.Items.Text=Текущий проект<BR>Текущий проект, включая bin-директорию<BR>Текущая группа проектов<BR>Текущая группа проектов, включая bin-директорию<BR>
 TCnProjectDelTempForm.chkCheckSource.Caption=Не удалять Obj/Dcu-файлы, если нет соотв. pas-файлов.
+TCnProjectDelTempForm.chkRemoveHistory.Caption=Удалите каталоги __history и __recovery.
 TCnProjectDelTempForm.grpFileList.Caption=Список файлов
 TCnProjectDelTempForm.grpFileType.Caption=Тип файла
 TCnProjectDelTempForm.grpPath.Caption=Путь

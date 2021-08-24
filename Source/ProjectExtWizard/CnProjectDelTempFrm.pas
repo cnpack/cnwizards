@@ -109,6 +109,7 @@ type
     CleanExtList: TStrings;
     FAbort: Boolean;
     FCheckSource: Boolean;
+    FCheckDirs: Boolean;
     procedure CheckButton;
     procedure UpdateControls;
     procedure FillProjectDirectoriesList;
@@ -117,12 +118,14 @@ type
     procedure DoFindFile(const FileName: string; const Info: TSearchRec;
       var Abort: Boolean);
     procedure SetCheckSource(const Value: Boolean);
+    procedure SetCheckDirs(const Value: Boolean);
   protected
     function GetHelpTopic: string; override;
   public
     procedure LoadSettings(Ini: TCustomIniFile);
     procedure SaveSettings(Ini: TCustomIniFile);
     property CheckSource: Boolean read FCheckSource write SetCheckSource;
+    property CheckDirs: Boolean read FCheckDirs write SetCheckDirs;
   end;
 
 function ShowProjectDelTempForm(Ini: TCustomIniFile): Boolean;
@@ -144,6 +147,8 @@ const
   csSelExeList = 'SelExeList';
   csSelectType = 'SelectType';
   csCheckSource = 'CheckSource';
+  csCheckDirs = 'CheckDirs';
+
   csDelHistory = '__history';
   csDelRecovery = '__recovery';
 
@@ -159,10 +164,14 @@ begin
     ShowHint := WizOptions.ShowHint;
     LoadSettings(Ini);
     chkCheckSource.Checked := CheckSource;
+    chkRemoveHistory.Checked := CheckDirs;
+
     Result := ShowModal = mrOk;
     if Result then
     begin
       CheckSource := chkCheckSource.Checked;
+      CheckDirs := chkRemoveHistory.Checked;
+
       SaveSettings(Ini);
     end;
   finally
@@ -211,9 +220,11 @@ begin
   finally
     List.Free;
   end;
+
   cbbSelectType.ItemIndex := Ini.ReadInteger(csDelTemp, csSelectType, 0);
   FillProjectDirectoriesList;
-  FCheckSource := Ini.ReadBool(csDelTemp, csCheckSource, False);
+  FCheckSource := Ini.ReadBool(csDelTemp, csCheckSource, True);
+  FCheckDirs := Ini.ReadBool(csDelTemp, csCheckDirs, False);
 end;
 
 procedure TCnProjectDelTempForm.SaveSettings(Ini: TCustomIniFile);
@@ -231,8 +242,10 @@ begin
   finally
     List.Free;
   end;
+
   Ini.WriteInteger(csDelTemp, csSelectType, cbbSelectType.ItemIndex);
   Ini.WriteBool(csDelTemp, csCheckSource, FCheckSource);
+  Ini.WriteBool(csDelTemp, csCheckDirs, FCheckDirs);
 end;
 
 procedure TCnProjectDelTempForm.FillProjectDirectoriesList;
@@ -654,6 +667,11 @@ end;
 procedure TCnProjectDelTempForm.SetCheckSource(const Value: Boolean);
 begin
   FCheckSource := Value;
+end;
+
+procedure TCnProjectDelTempForm.SetCheckDirs(const Value: Boolean);
+begin
+  FCheckDirs := Value;
 end;
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}

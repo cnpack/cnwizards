@@ -1,6 +1,6 @@
 inherited CnProjectDelTempForm: TCnProjectDelTempForm
   Left = 320
-  Top = 166
+  Top = 169
   Width = 583
   Height = 477
   BorderIcons = [biSystemMenu]
@@ -229,7 +229,7 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
           object chkCheckSource: TCheckBox
             Left = 8
             Top = 209
-            Width = 345
+            Width = 425
             Height = 17
             Anchors = [akLeft, akBottom]
             Caption = 'Keep Obj/Dcu Files when NO Same Source Files Exist.'
@@ -238,7 +238,7 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
           object chkRemoveHistory: TCheckBox
             Left = 8
             Top = 188
-            Width = 345
+            Width = 425
             Height = 17
             Anchors = [akLeft, akBottom]
             Caption = 'Remove __history and __recovery Directories.'

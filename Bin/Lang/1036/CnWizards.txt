@@ -1555,6 +1555,7 @@ TCnProjectDelTempForm.btnRemove.Caption=&Retirer
 TCnProjectDelTempForm.btnRemoveExt.Caption=Retirer
 TCnProjectDelTempForm.cbbSelectType.Items.Text=Projet en cours<BR>Projet en cours, y compris le répertoire binaire<BR>Gropupe de Projet en cours<BR>Projet en cours Groupe, y compris le répertoire binaire<BR>
 TCnProjectDelTempForm.chkCheckSource.Caption=Conserver les fichiers Obj/Dcu lorsque AUCUN fichier source n'existe.
+TCnProjectDelTempForm.chkRemoveHistory.Caption=Supprimez les répertoires __history et __recovery.
 TCnProjectDelTempForm.grpFileList.Caption=Liste des fichiers
 TCnProjectDelTempForm.grpFileType.Caption=&Type Fichiers
 TCnProjectDelTempForm.grpPath.Caption=&Chemin
