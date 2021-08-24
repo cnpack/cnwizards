@@ -1,8 +1,8 @@
 inherited CnProjectDelTempForm: TCnProjectDelTempForm
-  Left = 289
-  Top = 169
-  Width = 539
-  Height = 446
+  Left = 320
+  Top = 166
+  Width = 583
+  Height = 477
   BorderIcons = [biSystemMenu]
   Caption = 'Clean Project Temporary Files'
   Constraints.MinHeight = 376
@@ -84,8 +84,8 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
   object nb: TNotebook
     Left = 8
     Top = 8
-    Width = 514
-    Height = 370
+    Width = 558
+    Height = 401
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
     object TPage
@@ -95,15 +95,15 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
       object pnlDelCond: TPanel
         Left = 0
         Top = 0
-        Width = 514
-        Height = 370
+        Width = 558
+        Height = 401
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 0
         object grpPath: TGroupBox
           Left = 0
           Top = 0
-          Width = 514
+          Width = 558
           Height = 161
           Align = alTop
           Caption = '&Path'
@@ -113,7 +113,7 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
             Top = 142
             Width = 260
             Height = 13
-            Caption = 'Checking the Checkbox before Path means Recursive.'
+            Caption = 'Checking the Checkbox before Path Means Recursive.'
           end
           object lblpe: TLabel
             Left = 8
@@ -125,7 +125,7 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
           object chklstDirs: TCheckListBox
             Left = 8
             Top = 41
-            Width = 414
+            Width = 458
             Height = 98
             Anchors = [akLeft, akTop, akRight, akBottom]
             ItemHeight = 13
@@ -135,7 +135,7 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
             OnKeyPress = chklstDirsKeyPress
           end
           object btnAdd: TButton
-            Left = 429
+            Left = 473
             Top = 40
             Width = 75
             Height = 21
@@ -145,7 +145,7 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
             OnClick = btnAddClick
           end
           object btnRemove: TButton
-            Left = 429
+            Left = 473
             Top = 65
             Width = 75
             Height = 21
@@ -158,7 +158,7 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
           object cbbSelectType: TComboBox
             Left = 48
             Top = 16
-            Width = 374
+            Width = 418
             Height = 21
             Style = csDropDownList
             Anchors = [akLeft, akTop, akRight]
@@ -175,8 +175,8 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
         object grpFileType: TGroupBox
           Left = 0
           Top = 168
-          Width = 514
-          Height = 202
+          Width = 558
+          Height = 233
           Align = alBottom
           Anchors = [akLeft, akTop, akRight, akBottom]
           Caption = 'File &Type'
@@ -184,8 +184,8 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
           object chklstExtensions: TCheckListBox
             Left = 8
             Top = 16
-            Width = 414
-            Height = 157
+            Width = 458
+            Height = 164
             Anchors = [akLeft, akTop, akRight, akBottom]
             Columns = 3
             ItemHeight = 13
@@ -196,7 +196,7 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
             OnKeyPress = chklstExtensionsKeyPress
           end
           object btnAddExt: TButton
-            Left = 429
+            Left = 473
             Top = 16
             Width = 75
             Height = 21
@@ -206,7 +206,7 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
             OnClick = btnAddExtClick
           end
           object btnRemoveExt: TButton
-            Left = 429
+            Left = 473
             Top = 40
             Width = 75
             Height = 21
@@ -217,8 +217,8 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
             OnClick = btnRemoveExtClick
           end
           object btnDefault: TButton
-            Left = 429
-            Top = 152
+            Left = 473
+            Top = 159
             Width = 75
             Height = 21
             Anchors = [akRight, akBottom]
@@ -228,11 +228,20 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
           end
           object chkCheckSource: TCheckBox
             Left = 8
-            Top = 178
+            Top = 209
             Width = 345
             Height = 17
             Anchors = [akLeft, akBottom]
             Caption = 'Keep Obj/Dcu Files when NO Same Source Files Exist.'
+            TabOrder = 5
+          end
+          object chkRemoveHistory: TCheckBox
+            Left = 8
+            Top = 188
+            Width = 345
+            Height = 17
+            Anchors = [akLeft, akBottom]
+            Caption = 'Remove __history and __recovery Directories.'
             TabOrder = 4
           end
         end
@@ -245,24 +254,24 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
       object pnlDelList: TPanel
         Left = 0
         Top = 0
-        Width = 514
-        Height = 370
+        Width = 558
+        Height = 401
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 0
         object grpFileList: TGroupBox
           Left = 0
           Top = 0
-          Width = 514
-          Height = 370
+          Width = 558
+          Height = 401
           Align = alClient
           Caption = 'File List'
           TabOrder = 0
           object chklstFileList: TCheckListBox
             Left = 8
             Top = 24
-            Width = 497
-            Height = 337
+            Width = 541
+            Height = 368
             Anchors = [akLeft, akTop, akRight, akBottom]
             ItemHeight = 13
             TabOrder = 0
@@ -272,8 +281,8 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
     end
   end
   object btnFinish: TButton
-    Left = 447
-    Top = 390
+    Left = 491
+    Top = 421
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -283,8 +292,8 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
     OnClick = btnFinishClick
   end
   object btnNext: TButton
-    Left = 367
-    Top = 390
+    Left = 411
+    Top = 421
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -293,8 +302,8 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
     OnClick = btnNextClick
   end
   object btnPrio: TButton
-    Left = 287
-    Top = 390
+    Left = 331
+    Top = 421
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -304,7 +313,7 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
   end
   object btnCancel: TButton
     Left = 8
-    Top = 390
+    Top = 421
     Width = 75
     Height = 21
     Anchors = [akLeft, akBottom]
@@ -315,7 +324,7 @@ inherited CnProjectDelTempForm: TCnProjectDelTempForm
   end
   object btnHelp: TButton
     Left = 88
-    Top = 390
+    Top = 421
     Width = 75
     Height = 21
     Anchors = [akLeft, akBottom]

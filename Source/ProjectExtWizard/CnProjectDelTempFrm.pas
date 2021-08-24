@@ -29,7 +29,8 @@ unit CnProjectDelTempFrm;
 * 开发平台：PWin2000Pro + Delphi 7
 * 兼容测试：未测试
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 修改记录：
+* 修改记录：2021.08.24
+*               加入删除 __history 和 __recovery 目录的选项
 ================================================================================
 |</PRE>}
 
@@ -84,6 +85,7 @@ type
     cbbSelectType: TComboBox;
     btnHelp: TButton;
     chkCheckSource: TCheckBox;
+    chkRemoveHistory: TCheckBox;
     procedure btnAddClick(Sender: TObject);
     procedure btnRemoveClick(Sender: TObject);
     procedure btnAddExtClick(Sender: TObject);
@@ -102,17 +104,15 @@ type
     procedure btnCancelClick(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
   private
-    { Private declarations }
     FTotalBytesCleaned: Integer;
     FTotalFilesCleaned: Integer;
     CleanExtList: TStrings;
     FAbort: Boolean;
     FCheckSource: Boolean;
-
     procedure CheckButton;
     procedure UpdateControls;
     procedure FillProjectDirectoriesList;
-    procedure DeleteFoundFile(const FileName: string);
+    procedure DeleteFoundFileOrDir(const FileName: string);
     procedure GetDelFile;
     procedure DoFindFile(const FileName: string; const Info: TSearchRec;
       var Abort: Boolean);
@@ -120,7 +120,6 @@ type
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
     procedure LoadSettings(Ini: TCustomIniFile);
     procedure SaveSettings(Ini: TCustomIniFile);
     property CheckSource: Boolean read FCheckSource write SetCheckSource;
@@ -145,6 +144,8 @@ const
   csSelExeList = 'SelExeList';
   csSelectType = 'SelectType';
   csCheckSource = 'CheckSource';
+  csDelHistory = '__history';
+  csDelRecovery = '__recovery';
 
 resourcestring
   SCnProjExtDefaultCleanExts =
@@ -175,15 +176,15 @@ type
 procedure SetListBoxChecked(CheckList: TCheckListBox; Action:
   TListBoxCheckAction);
 var
-  i: Integer;
+  I: Integer;
 begin
   Assert(Assigned(CheckList));
-  for i := 0 to CheckList.Items.Count - 1 do
+  for I := 0 to CheckList.Items.Count - 1 do
   begin
     case Action of
-      chAll: CheckList.Checked[i] := True;
-      chNone: CheckList.Checked[i] := False;
-      chInvert: CheckList.Checked[i] := not CheckList.Checked[i];
+      chAll: CheckList.Checked[I] := True;
+      chNone: CheckList.Checked[I] := False;
+      chInvert: CheckList.Checked[I] := not CheckList.Checked[I];
     end;
   end;
 end;
@@ -196,7 +197,7 @@ end;
 
 procedure TCnProjectDelTempForm.LoadSettings(Ini: TCustomIniFile);
 var
-  i: Integer;
+  I: Integer;
   List: TStrings;
 begin
   List := TStringList.Create;
@@ -205,8 +206,8 @@ begin
       Ini.ReadString(csDelTemp, csCleanExtList, SCnProjExtDefaultCleanExts);
     List.CommaText :=
       Ini.ReadString(csDelTemp, csSelExeList, SCnProjExtDefaultCleanExts);
-    for i := 0 to chklstExtensions.Items.Count - 1 do
-      chklstExtensions.Checked[i] := List.IndexOf(chklstExtensions.Items[i]) >= 0;
+    for I := 0 to chklstExtensions.Items.Count - 1 do
+      chklstExtensions.Checked[I] := List.IndexOf(chklstExtensions.Items[I]) >= 0;
   finally
     List.Free;
   end;
@@ -217,15 +218,15 @@ end;
 
 procedure TCnProjectDelTempForm.SaveSettings(Ini: TCustomIniFile);
 var
-  i: Integer;
+  I: Integer;
   List: TStrings;
 begin
   List := TStringList.Create;
   try
     Ini.WriteString(csDelTemp, csCleanExtList, chklstExtensions.Items.CommaText);
-    for i := 0 to chklstExtensions.Items.Count - 1 do
-      if chklstExtensions.Checked[i] then
-        List.Add(chklstExtensions.Items[i]);
+    for I := 0 to chklstExtensions.Items.Count - 1 do
+      if chklstExtensions.Checked[I] then
+        List.Add(chklstExtensions.Items[I]);
     Ini.WriteString(csDelTemp, csSelExeList, List.CommaText);
   finally
     List.Free;
@@ -364,17 +365,17 @@ end;
 
 procedure TCnProjectDelTempForm.btnRemoveClick(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
   OldIndex: Integer;
 begin
-  i := 0;
+  I := 0;
   OldIndex := chklstDirs.ItemIndex;
-  while i <= chklstDirs.Items.Count - 1 do
+  while I <= chklstDirs.Items.Count - 1 do
   begin
-    if chklstDirs.Selected[i] then
-      chklstDirs.Items.Delete(i)
+    if chklstDirs.Selected[I] then
+      chklstDirs.Items.Delete(I)
     else
-      Inc(i);
+      Inc(I);
   end;
   if (OldIndex > -1) and (chklstDirs.Items.Count > 0) then
     chklstDirs.ItemIndex := Min(OldIndex, chklstDirs.Items.Count - 1);
@@ -404,19 +405,19 @@ end;
 
 procedure TCnProjectDelTempForm.btnRemoveExtClick(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
-  i := chklstExtensions.ItemIndex;
-  if i < 0 then
+  I := chklstExtensions.ItemIndex;
+  if I < 0 then
     Exit;
 
-  chklstExtensions.Checked[i] := False;
-  chklstExtensions.Items.Delete(i);
+  chklstExtensions.Checked[I] := False;
+  chklstExtensions.Items.Delete(I);
 
   UpdateControls;
 end;
 
-procedure TCnProjectDelTempForm.CheckButton();
+procedure TCnProjectDelTempForm.CheckButton;
 begin
   btnPrio.Enabled := not (nb.ActivePage = 'DelCondition');
   btnNext.Enabled := not btnPrio.Enabled;
@@ -473,21 +474,59 @@ begin
   UpdateControls;
 end;
 
-procedure TCnProjectDelTempForm.DeleteFoundFile(const FileName: string);
+procedure TCnProjectDelTempForm.DeleteFoundFileOrDir(const FileName: string);
 var
   TempFileSize: Integer;
+  FS: TStringList;
+  I: Integer;
 begin
-  TempFileSize := GetFileSize(FileName);
-  if DeleteFile(FileName) then
+  if DirectoryExists(FileName) then
   begin
-    Inc(FTotalFilesCleaned);
-    FTotalBytesCleaned := FTotalBytesCleaned + TempFileSize;
+    // 是目录，先统计目录里文件大小，暂不递归搜索子目录，但删除会全删
+    FS := TStringList.Create;
+    try
+      GetDirFiles(FileName, FS);
+      for I := 0 to FS.Count - 1 do
+      begin
+        TempFileSize := GetFileSize(MakePath(FileName) + FS[I]);
+        if DeleteFile(MakePath(FileName) + FS[I]) then
+        begin
+          Inc(FTotalFilesCleaned);
+          FTotalBytesCleaned := FTotalBytesCleaned + TempFileSize;
+        end;
+      end;
+      RemoveDir(FileName);
+    finally
+      FS.Free;
+    end;
+  end
+  else
+  begin
+    TempFileSize := GetFileSize(FileName);
+    if DeleteFile(FileName) then
+    begin
+      Inc(FTotalFilesCleaned);
+      FTotalBytesCleaned := FTotalBytesCleaned + TempFileSize;
+    end;
   end;
 end;
 
 procedure TCnProjectDelTempForm.GetDelFile;
 var
-  i: Integer;
+  I: Integer;
+  S: string;
+
+  procedure CheckDirAndAdd(const Dir: string);
+  var
+    Index: Integer;
+  begin
+    if DirectoryExists(Dir) then
+    begin
+      Index := chklstFileList.Items.Add(Dir);
+      chklstFileList.Checked[Index] := True;
+    end;
+  end;
+
 begin
   FTotalBytesCleaned := 0;
   FTotalFilesCleaned := 0;
@@ -496,14 +535,23 @@ begin
   btnFinish.Enabled := False;
   btnNext.Enabled := False;
   btnPrio.Enabled := False;
+
   CleanExtList := TStringList.Create;
   try
-    for i := 0 to chklstExtensions.Items.Count - 1 do
-      if chklstExtensions.Checked[i] then
-        CleanExtList.Add(chklstExtensions.Items[i]);
+    for I := 0 to chklstExtensions.Items.Count - 1 do
+      if chklstExtensions.Checked[I] then
+        CleanExtList.Add(chklstExtensions.Items[I]);
 
-    for i := 0 to chklstDirs.Items.Count - 1 do
-      FindFile(chklstDirs.Items[i], '*.*', DoFindFile, nil, chklstDirs.Checked[i]);
+    for I := 0 to chklstDirs.Items.Count - 1 do
+    begin
+      FindFile(chklstDirs.Items[I], '*.*', DoFindFile, nil, chklstDirs.Checked[I]);
+
+      if chkRemoveHistory.Checked then
+      begin
+        CheckDirAndAdd(MakePath(chklstDirs.Items[I]) + csDelHistory);
+        CheckDirAndAdd(MakePath(chklstDirs.Items[I]) + csDelRecovery);
+      end;
+    end;
   finally
     FreeAndNil(CleanExtList);
     FAbort := True;
@@ -515,7 +563,7 @@ end;
 procedure TCnProjectDelTempForm.DoFindFile(const FileName: string;
   const Info: TSearchRec; var Abort: Boolean);
 var
-  i: Integer;
+  I: Integer;
   Index: Integer;
   Ext: string;
   ToDelete: Boolean;
@@ -523,10 +571,10 @@ begin
   Abort := FAbort;
   if Abort then Exit;
 
-  for i := 0 to CleanExtList.Count - 1 do
+  for I := 0 to CleanExtList.Count - 1 do
   begin
     ToDelete := True;
-    if WildcardCompare('*' + CleanExtList.Strings[i], Info.Name) then
+    if WildcardCompare('*' + CleanExtList.Strings[I], Info.Name) then
     begin
       if chklstFileList.Items.IndexOf(FileName) < 0 then
       begin
@@ -534,6 +582,7 @@ begin
         if FCheckSource and ((Ext = '.DCU') or (Ext = '.OBJ')) then
         begin
           ToDelete := False;
+
           // 如果待清理的目标文件无对应源文件，则不删除
           if FileExists(_CnChangeFileExt(FileName, '.pas')) then
             ToDelete := True
@@ -567,19 +616,18 @@ end;
 
 procedure TCnProjectDelTempForm.btnFinishClick(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
   if btnNext.Enabled then
     GetDelFile;
-  for i := 0 to chklstFileList.Items.Count - 1 do
+  for I := 0 to chklstFileList.Items.Count - 1 do
   begin
-    if chklstFileList.Checked[i] then
-      DeleteFoundFile(chklstFileList.Items.Strings[i]);
+    if chklstFileList.Checked[I] then
+      DeleteFoundFileOrDir(chklstFileList.Items.Strings[I]);
   end;
   if FTotalFilesCleaned > 0 then
     InfoDlg(Format(SCnProjExtCleaningComplete,
       [FTotalFilesCleaned, IntToStrSp(FTotalBytesCleaned)]));
-  // FormatFloat('#,;;0', FTotalBytesCleaned)]));
 end;
 
 procedure TCnProjectDelTempForm.btnDefaultClick(Sender: TObject);
