@@ -62,7 +62,8 @@ type
     FIdxUnknown: Integer;
 {$IFNDEF STAND_ALONE}
     FIDEOffset: Integer;
-    FCopied: Boolean;
+    FCopied: Boolean;       // 记录我们的 ImageList 有无塞到 IDE 的 ImageList 中
+    FLargeCopied: Boolean;  // 记录 IDE 的 ImageList 有无复制一份大的
 {$ENDIF}
     procedure CopyToLarge(SrcImageList, DstImageList: TCustomImageList);
   public
@@ -74,6 +75,8 @@ type
 
     procedure CopyToIDEMainImageList;
     // Images 会被复制进 IDE 的 ImageList 供图标被同时使用的场合，FIDEOffset 表示偏移量
+    procedure CopyLargeIDEImageList;
+    // 由专家全部初始化后调用，把 IDE 的 ImageList 再复制一份大的
 
     function GetMixedImageList(ForceSmall: Boolean = False): TCustomImageList;
     function CalcMixedImageIndex(ImageIndex: Integer): Integer;
@@ -175,7 +178,7 @@ function TdmCnSharedImages.GetMixedImageList(ForceSmall: Boolean): TCustomImageL
 begin
   if FCopied then
   begin
-    if WizOptions.UseLargeIcon and not ForceSmall then
+    if WizOptions.UseLargeIcon and not ForceSmall and FLargeCopied then
       Result := IDELargeImages
     else
       Result := GetIDEImageList;
@@ -202,12 +205,6 @@ begin
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('Add %d Images to IDE Main ImageList. Offset %d.', [Images.Count, FIDEOffset]);
 {$ENDIF}
-
-    if WizOptions.UseLargeIcon then
-    begin
-      // 大尺寸下，再把 IDE 的 ImageList 复制一个超大型的
-      CopyToLarge(IDEs, IDELargeImages);
-    end;
   end;
 end;
 
@@ -228,6 +225,22 @@ begin
   // 调整按钮位图以解决有些按钮 Disabled 时无图标的问题
   AdjustButtonGlyph(Button.Glyph);
   Button.NumGlyphs := 2;
+end;
+
+procedure TdmCnSharedImages.CopyLargeIDEImageList;
+var
+  IDEs: TCustomImageList;
+begin
+  if FLargeCopied then
+    Exit;
+
+  IDEs := GetIDEImageList;
+  if IDEs = nil then
+    Exit;
+
+  // 再把 IDE 的 ImageList 复制一个超大型的供大尺寸下使用
+  CopyToLarge(IDEs, IDELargeImages);
+  FLargeCopied := True;
 end;
 
 {$ENDIF}

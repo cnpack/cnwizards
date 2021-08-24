@@ -374,6 +374,10 @@ begin
   CreateIDEMenu;
 
   InstallWizards;
+{$IFNDEF CNWIZARDS_MINIMUM}
+  // 专家创建完毕后 IDE 的主 ImageList 中才有专家图标，这时候复制才能保证不漏
+  dmCnSharedImages.CopyLargeIDEImageList;
+{$ENDIF}
 
   LoadSettings;
 
