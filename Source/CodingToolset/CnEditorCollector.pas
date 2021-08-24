@@ -294,12 +294,7 @@ procedure TCnEditorCollectorForm.FormCreate(Sender: TObject);
 begin
   inherited;
   Assert(Collector <> nil);
-  if WizOptions.UseLargeIcon then
-  begin
-    tlbMain.ButtonWidth := csButtonWidth;
-    tlbMain.ButtonHeight := csButtonHeight;
-    tlbMain.Images := dmCnSharedImages.LargeImages;
-  end;
+  WizOptions.ResetToolbarWithLargeIcons(tlbMain);
 
   Ini := Collector.CreateIniFile;
   FPath := MakePath(WizOptions.UserPath + SCnEditorToolsetCollectorDir);

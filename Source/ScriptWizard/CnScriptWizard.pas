@@ -139,8 +139,9 @@ type
     btnClose: TToolButton;
     dlgOpen: TOpenDialog;
     dlgSave: TSaveDialog;
-    lvList: TListView;
     dlgOpenIcon: TOpenDialog;
+    dlgOpenFile: TOpenDialog;
+    pnl1: TPanel;
     grp1: TGroupBox;
     lbl2: TLabel;
     lbl3: TLabel;
@@ -156,11 +157,11 @@ type
     hkShortCut: THotKey;
     chkExecConfirm: TCheckBox;
     edtFileName: TEdit;
+    chktvMode: TCnCheckTreeView;
     grp2: TGroupBox;
     lbl6: TLabel;
     mmoSearchPath: TMemo;
-    dlgOpenFile: TOpenDialog;
-    chktvMode: TCnCheckTreeView;
+    lvList: TListView;
     procedure actAddExecute(Sender: TObject);
     procedure actDeleteExecute(Sender: TObject);
     procedure actClearExecute(Sender: TObject);
@@ -414,6 +415,8 @@ var
   AppEventType: TCnWizAppEventType;
 begin
   inherited;
+  WizOptions.ResetToolbarWithLargeIcons(tlb1);
+
   TempScripts := TCnScriptCollection.Create;
   EnlargeListViewColumns(lvList);
 

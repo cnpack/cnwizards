@@ -1142,13 +1142,9 @@ end;
 
 procedure TCnBookmarkForm.FormCreate(Sender: TObject);
 begin
+  WizOptions.ResetToolbarWithLargeIcons(ToolBar);
   if WizOptions.UseLargeIcon then
-  begin
-    ToolBar.ButtonWidth := csLargeButtonWidth;
-    ToolBar.ButtonHeight := csLargeButtonHeight;
-    ToolBar.Images := dmCnSharedImages.LargeImages;
-    ToolBar.DisabledImages := dmCnSharedImages.DisabledLargeImages;
-  end;
+    cbbUnit.Font.Size := csLargeComboFontSize;
 end;
 
 initialization

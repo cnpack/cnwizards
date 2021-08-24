@@ -121,7 +121,7 @@ implementation
 {$R *.DFM}
 
 uses
-  ToolsAPI, CnCommon, CnRoWizard, CnLangMgr;
+  ToolsAPI, CnCommon, CnRoWizard, CnLangMgr, CnWizOptions;
 
 {***************************** TCnFilesListForm *******************************}
 
@@ -265,6 +265,8 @@ procedure TCnFilesListForm.FormCreate(Sender: TObject);
 var
   I: Integer;
 begin
+  WizOptions.ResetToolbarWithLargeIcons(tlb1);
+
   ReadFiles(frBPG, SProjectGroup);
   ReadFiles(frDPR, SProject);
   ReadFiles(frPAS, SUnt);

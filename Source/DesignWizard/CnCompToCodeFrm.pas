@@ -1199,13 +1199,7 @@ end;
 
 procedure TCnCompToCodeForm.FormCreate(Sender: TObject);
 begin
-  if WizOptions.UseLargeIcon then
-  begin
-    ToolBar.ButtonWidth := csLargeButtonWidth;
-    ToolBar.ButtonHeight := csLargeToolbarButtonHeight;
-    ToolBar.Images := dmCnSharedImages.LargeImages;
-    ToolBar.DisabledImages := dmCnSharedImages.DisabledLargeImages;
-  end;
+  WizOptions.ResetToolbarWithLargeIcons(ToolBar);
 end;
 
 initialization

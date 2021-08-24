@@ -451,6 +451,7 @@ end;
 procedure TCnScriptForm.FormCreate(Sender: TObject);
 begin
   inherited;
+  WizOptions.ResetToolbarWithLargeIcons(tlb1);
   FEngineList := TObjectList.Create(True);
 end;
 

@@ -694,6 +694,7 @@ end;
 
 procedure TCnProjectDirBuilderForm.FormCreate(Sender: TObject);
 begin
+  WizOptions.ResetToolbarWithLargeIcons(ToolBar);
   FDataFilePath := MakePath(WizOptions.DataPath) + csTempletFileName;
   FUserFilePath := MakePath(WizOptions.UserPath) + csTempletFileName;
   FCnDirTree := TCnDirTree.Create(TCnDirLeaf);

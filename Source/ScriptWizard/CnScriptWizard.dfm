@@ -1,11 +1,11 @@
 inherited CnScriptWizardForm: TCnScriptWizardForm
-  Left = 280
-  Top = 162
+  Left = 270
+  Top = 149
   BorderIcons = [biSystemMenu, biMaximize]
   BorderStyle = bsDialog
   Caption = 'Script Library'
-  ClientHeight = 519
-  ClientWidth = 805
+  ClientHeight = 520
+  ClientWidth = 819
   Icon.Data = {
     0000010001002020000001001800A80C00001600000028000000200000004000
     00000100180000000000800C0000000000000000000000000000000000000000
@@ -120,7 +120,7 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
   object tlb1: TToolBar
     Left = 0
     Top = 0
-    Width = 805
+    Width = 819
     Height = 26
     AutoSize = True
     BorderWidth = 1
@@ -200,203 +200,212 @@ inherited CnScriptWizardForm: TCnScriptWizardForm
       Action = actClose
     end
   end
-  object lvList: TListView
-    Left = 8
-    Top = 28
-    Width = 193
-    Height = 480
-    Anchors = [akLeft, akTop, akBottom]
-    Columns = <
-      item
-        Caption = 'Script Name'
-        Width = 120
-      end
-      item
-        Caption = 'Enabled'
-        Width = 52
-      end>
-    HideSelection = False
-    OwnerData = True
-    ReadOnly = True
-    RowSelect = True
-    TabOrder = 2
-    ViewStyle = vsReport
-    OnChange = lvListChange
-    OnData = lvListData
-  end
-  object grp1: TGroupBox
-    Left = 208
-    Top = 24
-    Width = 592
-    Height = 233
-    Anchors = [akLeft, akTop, akRight]
-    Caption = '&Script Item'
+  object pnl1: TPanel
+    Left = 0
+    Top = 26
+    Width = 819
+    Height = 494
+    Align = alClient
+    BevelOuter = bvNone
     TabOrder = 1
-    object lbl2: TLabel
-      Left = 8
-      Top = 20
-      Width = 31
-      Height = 13
-      Caption = 'Name:'
-    end
-    object lbl3: TLabel
-      Left = 8
-      Top = 118
-      Width = 25
-      Height = 13
-      Caption = 'Icon:'
-    end
-    object lbl1: TLabel
-      Left = 8
-      Top = 52
-      Width = 27
-      Height = 13
-      Caption = 'Desc:'
-    end
-    object btnOpen: TSpeedButton
-      Left = 244
-      Top = 114
-      Width = 20
-      Height = 20
-      Glyph.Data = {
-        DE000000424DDE0000000000000076000000280000000D0000000D0000000100
-        0400000000006800000000000000000000001000000000000000000000000000
-        8000008000000080800080000000800080008080000080808000C0C0C0000000
-        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00FFFFFFFFFFFF
-        F000F000000000FFF00000888888880FF000080FBFBFBF0FFA5F080BFBFBFBF0
-        F0000880BFBFBFB0F0000880FBFBFBFB0000088800000000000008888888880F
-        F0000888800000FFF000F0000FFFFFFFF000FFFFFFFFFFFFF000FFFFFFFFFFFF
-        F000}
-      OnClick = btnOpenClick
-    end
-    object lbl4: TLabel
-      Left = 8
-      Top = 150
-      Width = 45
-      Height = 13
-      Caption = 'Shortcut:'
-    end
-    object lbl5: TLabel
-      Left = 8
-      Top = 85
-      Width = 46
-      Height = 13
-      Caption = 'Filename:'
-    end
-    object btnFileName: TSpeedButton
-      Left = 244
-      Top = 81
-      Width = 20
-      Height = 20
-      Glyph.Data = {
-        DE000000424DDE0000000000000076000000280000000D0000000D0000000100
-        0400000000006800000000000000000000001000000000000000000000000000
-        8000008000000080800080000000800080008080000080808000C0C0C0000000
-        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00FFFFFFFFFFFF
-        F000F000000000FFF00000888888880FF000080FBFBFBF0FFA5F080BFBFBFBF0
-        F0000880BFBFBFB0F0000880FBFBFBFB0000088800000000000008888888880F
-        F0000888800000FFF000F0000FFFFFFFF000FFFFFFFFFFFFF000FFFFFFFFFFFF
-        F000}
-      OnClick = btnFileNameClick
-    end
-    object edtName: TEdit
-      Left = 56
-      Top = 16
-      Width = 209
-      Height = 21
+    object grp1: TGroupBox
+      Left = 208
+      Top = 4
+      Width = 602
+      Height = 233
+      Anchors = [akLeft, akTop, akRight]
+      Caption = '&Script Item'
       TabOrder = 0
-      OnChange = OnControlChanged
+      object lbl2: TLabel
+        Left = 8
+        Top = 20
+        Width = 31
+        Height = 13
+        Caption = 'Name:'
+      end
+      object lbl3: TLabel
+        Left = 8
+        Top = 118
+        Width = 25
+        Height = 13
+        Caption = 'Icon:'
+      end
+      object lbl1: TLabel
+        Left = 8
+        Top = 52
+        Width = 27
+        Height = 13
+        Caption = 'Desc:'
+      end
+      object btnOpen: TSpeedButton
+        Left = 244
+        Top = 114
+        Width = 20
+        Height = 20
+        Glyph.Data = {
+          DE000000424DDE0000000000000076000000280000000D0000000D0000000100
+          0400000000006800000000000000000000001000000000000000000000000000
+          8000008000000080800080000000800080008080000080808000C0C0C0000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00FFFFFFFFFFFF
+          F000F000000000FFF00000888888880FF000080FBFBFBF0FFA5F080BFBFBFBF0
+          F0000880BFBFBFB0F0000880FBFBFBFB0000088800000000000008888888880F
+          F0000888800000FFF000F0000FFFFFFFF000FFFFFFFFFFFFF000FFFFFFFFFFFF
+          F000}
+        OnClick = btnOpenClick
+      end
+      object lbl4: TLabel
+        Left = 8
+        Top = 150
+        Width = 45
+        Height = 13
+        Caption = 'Shortcut:'
+      end
+      object lbl5: TLabel
+        Left = 8
+        Top = 85
+        Width = 46
+        Height = 13
+        Caption = 'Filename:'
+      end
+      object btnFileName: TSpeedButton
+        Left = 244
+        Top = 81
+        Width = 20
+        Height = 20
+        Glyph.Data = {
+          DE000000424DDE0000000000000076000000280000000D0000000D0000000100
+          0400000000006800000000000000000000001000000000000000000000000000
+          8000008000000080800080000000800080008080000080808000C0C0C0000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00FFFFFFFFFFFF
+          F000F000000000FFF00000888888880FF000080FBFBFBF0FFA5F080BFBFBFBF0
+          F0000880BFBFBFB0F0000880FBFBFBFB0000088800000000000008888888880F
+          F0000888800000FFF000F0000FFFFFFFF000FFFFFFFFFFFFF000FFFFFFFFFFFF
+          F000}
+        OnClick = btnFileNameClick
+      end
+      object edtName: TEdit
+        Left = 56
+        Top = 16
+        Width = 209
+        Height = 21
+        TabOrder = 0
+        OnChange = OnControlChanged
+      end
+      object edtIcon: TEdit
+        Left = 56
+        Top = 114
+        Width = 185
+        Height = 21
+        TabOrder = 3
+        OnChange = OnControlChanged
+      end
+      object chkEnabled: TCheckBox
+        Left = 56
+        Top = 177
+        Width = 161
+        Height = 17
+        Caption = 'Script Enabled'
+        TabOrder = 5
+        OnClick = OnControlChanged
+      end
+      object edtComment: TEdit
+        Left = 56
+        Top = 49
+        Width = 209
+        Height = 21
+        TabOrder = 1
+        OnChange = OnControlChanged
+      end
+      object hkShortCut: THotKey
+        Left = 56
+        Top = 147
+        Width = 209
+        Height = 19
+        HotKey = 0
+        InvalidKeys = [hcNone]
+        Modifiers = []
+        TabOrder = 4
+        OnExit = hkShortCutExit
+      end
+      object chkExecConfirm: TCheckBox
+        Left = 56
+        Top = 206
+        Width = 161
+        Height = 17
+        Caption = 'Confirm when Manual Run'
+        TabOrder = 6
+        OnClick = OnControlChanged
+      end
+      object edtFileName: TEdit
+        Left = 56
+        Top = 81
+        Width = 185
+        Height = 21
+        TabOrder = 2
+        OnChange = OnControlChanged
+      end
+      object chktvMode: TCnCheckTreeView
+        Left = 272
+        Top = 16
+        Width = 322
+        Height = 209
+        Anchors = [akLeft, akTop, akRight, akBottom]
+        Indent = 19
+        ReadOnly = True
+        TabOrder = 7
+        CanDisableNode = False
+        OnStateChange = chktvModeStateChange
+      end
     end
-    object edtIcon: TEdit
-      Left = 56
-      Top = 114
-      Width = 185
-      Height = 21
-      TabOrder = 3
-      OnChange = OnControlChanged
-    end
-    object chkEnabled: TCheckBox
-      Left = 56
-      Top = 177
-      Width = 161
-      Height = 17
-      Caption = 'Script Enabled'
-      TabOrder = 5
-      OnClick = OnControlChanged
-    end
-    object edtComment: TEdit
-      Left = 56
-      Top = 49
-      Width = 209
-      Height = 21
+    object grp2: TGroupBox
+      Left = 208
+      Top = 243
+      Width = 602
+      Height = 242
+      Anchors = [akLeft, akTop, akRight, akBottom]
+      Caption = '&Global Settings'
       TabOrder = 1
-      OnChange = OnControlChanged
+      object lbl6: TLabel
+        Left = 8
+        Top = 16
+        Width = 92
+        Height = 13
+        Caption = 'Script Search Path:'
+      end
+      object mmoSearchPath: TMemo
+        Left = 8
+        Top = 32
+        Width = 586
+        Height = 202
+        Anchors = [akLeft, akTop, akRight, akBottom]
+        ScrollBars = ssBoth
+        TabOrder = 0
+        WordWrap = False
+      end
     end
-    object hkShortCut: THotKey
-      Left = 56
-      Top = 147
-      Width = 209
-      Height = 19
-      HotKey = 0
-      InvalidKeys = [hcNone]
-      Modifiers = []
-      TabOrder = 4
-      OnExit = hkShortCutExit
-    end
-    object chkExecConfirm: TCheckBox
-      Left = 56
-      Top = 206
-      Width = 161
-      Height = 17
-      Caption = 'Confirm when Manual Run'
-      TabOrder = 6
-      OnClick = OnControlChanged
-    end
-    object edtFileName: TEdit
-      Left = 56
-      Top = 81
-      Width = 185
-      Height = 21
-      TabOrder = 2
-      OnChange = OnControlChanged
-    end
-    object chktvMode: TCnCheckTreeView
-      Left = 272
-      Top = 16
-      Width = 312
-      Height = 209
-      Anchors = [akLeft, akTop, akRight, akBottom]
-      Indent = 19
+    object lvList: TListView
+      Left = 8
+      Top = 8
+      Width = 193
+      Height = 477
+      Anchors = [akLeft, akTop, akBottom]
+      Columns = <
+        item
+          Caption = 'Script Name'
+          Width = 120
+        end
+        item
+          Caption = 'Enabled'
+          Width = 52
+        end>
+      HideSelection = False
+      OwnerData = True
       ReadOnly = True
-      TabOrder = 7
-      CanDisableNode = False
-      OnStateChange = chktvModeStateChange
-    end
-  end
-  object grp2: TGroupBox
-    Left = 208
-    Top = 264
-    Width = 592
-    Height = 245
-    Anchors = [akLeft, akTop, akRight, akBottom]
-    Caption = '&Global Settings'
-    TabOrder = 3
-    object lbl6: TLabel
-      Left = 8
-      Top = 16
-      Width = 92
-      Height = 13
-      Caption = 'Script Search Path:'
-    end
-    object mmoSearchPath: TMemo
-      Left = 8
-      Top = 32
-      Width = 576
-      Height = 205
-      Anchors = [akLeft, akTop, akRight, akBottom]
-      ScrollBars = ssBoth
-      TabOrder = 0
-      WordWrap = False
+      RowSelect = True
+      TabOrder = 2
+      ViewStyle = vsReport
+      OnChange = lvListChange
+      OnData = lvListData
     end
   end
   object ActionList: TActionList

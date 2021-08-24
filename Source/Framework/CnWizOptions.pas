@@ -41,7 +41,7 @@ interface
 
 uses
   Windows, Messages, Classes, Graphics, Controls, SysUtils, IniFiles,
-  FileCtrl, Forms, Registry
+  FileCtrl, Forms, Registry, ComCtrls
   {$IFNDEF STAND_ALONE}, ToolsAPI {$ENDIF}
   {$IFDEF COMPILER6_UP}, SHFolder {$ENDIF};
 
@@ -50,6 +50,7 @@ const
   csButtonHeight = 20;
   csLargeButtonWidth = 32;
   csLargeButtonHeight = 32;
+  csLargeToolbarHeightDelta = 8;
   csLargeComboFontSize = 14;
   csLargeToolbarHeight = 33;
   csLargeToolbarButtonWidth = 31;
@@ -134,6 +135,9 @@ type
     destructor Destroy; override;
     procedure LoadSettings;
     procedure SaveSettings;
+
+    procedure ResetToolbarWithLargeIcons(AToolBar: TToolBar);
+    {* 封装的根据是否使用大图标来调整工具栏的方法}
 
     // 参数读写方法
     function CreateRegIniFile: TCustomIniFile; overload;
@@ -288,7 +292,7 @@ uses
   CnDebug,
 {$ENDIF}
 {$IFNDEF STAND_ALONE}
-  CnWizUtils, CnWizManager,
+  CnWizUtils, CnWizManager, CnWizShareImages,
 {$ENDIF}
   CnWizConsts, CnCommon,  CnConsts, CnWizCompilerConst, CnNativeDecl;
 
@@ -869,6 +873,21 @@ begin
     Result := Trunc(Value / GetFactorFromSizeEnlarge(AEnlarge));
 end;
 
-{$ENDIF}
+procedure TCnWizOptions.ResetToolbarWithLargeIcons(AToolBar: TToolBar);
+begin
+  if (AToolBar = nil) or not FUseLargeIcon then
+    Exit;
 
+  AToolBar.ButtonHeight := csLargeButtonHeight;
+  AToolBar.ButtonWidth := csLargeButtonWidth;
+  if AToolBar.Images = dmCnSharedImages.Images then
+    AToolBar.Images := dmCnSharedImages.LargeImages;
+  if AToolBar.DisabledImages = dmCnSharedImages.DisabledImages then
+    AToolBar.DisabledImages := dmCnSharedImages.DisabledLargeImages;
+
+  if AToolBar.Height <= AToolBar.ButtonHeight then
+    AToolBar.Height := AToolBar.ButtonHeight + csLargeToolbarHeightDelta;
+end;
+
+{$ENDIF}
 end.

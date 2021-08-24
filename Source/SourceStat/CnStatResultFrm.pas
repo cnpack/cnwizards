@@ -466,14 +466,7 @@ end;
 procedure TCnStatResultForm.FormCreate(Sender: TObject);
 begin
   FCnStatWizard := TCnStatWizard(CnWizardMgr.WizardByName(SCnStatWizardName));
-  if WizOptions.UseLargeIcon then
-  begin
-    ToolBar.ButtonWidth := csLargeButtonWidth;
-    ToolBar.ButtonHeight := csLargeButtonWidth;
-    ToolBar.Images := dmCnSharedImages.LargeImages;
-    ToolBar.DisabledImages := dmCnSharedImages.DisabledLargeImages;
-    ToolBar.Height := Toolbar.ButtonHeight + 8;
-  end;
+  WizOptions.ResetToolbarWithLargeIcons(ToolBar);
 end;
 
 procedure TCnStatResultForm.StatActionExecute(Sender: TObject);

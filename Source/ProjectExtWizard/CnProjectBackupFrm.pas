@@ -441,6 +441,8 @@ var
   FileInfo: TSHFileInfo;
 begin
   inherited;
+  WizOptions.ResetToolbarWithLargeIcons(tlbMain);
+
   Screen.Cursor := crHourGlass;
   try
     ProjectList := TCnBackupProjectList.Create;
