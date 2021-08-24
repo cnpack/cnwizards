@@ -153,12 +153,10 @@ begin
     Bmp.Free;
   end;
 
-  if WizOptions.UseLargeIcon then
-  begin
-    CopyToLarge(ilProcToolbar, ilProcToolbarLarge);
-    CopyToLarge(Images, LargeImages);
-    CopyToLarge(DisabledImages, DisabledLargeImages);
-  end;
+  // 为大图标版做好准备
+  CopyToLarge(ilProcToolbar, ilProcToolbarLarge);
+  CopyToLarge(Images, LargeImages);
+  CopyToLarge(DisabledImages, DisabledLargeImages);
 {$ENDIF}
 end;
 

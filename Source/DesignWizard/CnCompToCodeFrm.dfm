@@ -108,6 +108,7 @@ inherited CnCompToCodeForm: TCnCompToCodeForm
     0000F0000000C0000000C0000000C0000003C0000003C000000FC000000FC000
     FFFFC000FFFFF003FFFFF003FFFFFC0FFFFFFC0FFFFFFF3FFFFFFF3FFFFF}
   KeyPreview = True
+  OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
   PixelsPerInch = 96
@@ -127,6 +128,7 @@ inherited CnCompToCodeForm: TCnCompToCodeForm
     Height = 30
     AutoSize = True
     BorderWidth = 1
+    DisabledImages = dmCnSharedImages.DisabledImages
     EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
     Flat = True
     Images = dmCnSharedImages.Images

@@ -44,11 +44,11 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, ComCtrls, ToolWin, ActnList, Clipbrd, ToolsAPI, Contnrs,
-  TypInfo, Menus, CnWizConsts, CnWizMultiLang, CnCommon,
+  TypInfo, Menus, CnWizConsts, CnWizMultiLang, CnCommon, CnWizOptions,
 {$IFDEF SUPPORT_FMX}
   CnFmxUtils,
 {$ENDIF}
-  CnWizUtils;
+  CnWizShareImages, CnWizUtils;
 
 type
   TCnCompToCodeForm = class(TCnTranslateForm)
@@ -89,8 +89,8 @@ type
     procedure actCopyProcExecute(Sender: TObject);
     procedure actlst1Update(Action: TBasicAction; var Handled: Boolean);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure FormCreate(Sender: TObject);
   private
-    { Private declarations }
     FComps: TComponentList;
     FUniqueComps: TComponentList;
     FPropNames: TStrings;
@@ -119,7 +119,6 @@ type
     function GetHelpTopic: string; override;
     procedure DoLanguageChanged(Sender: TObject); override;
   public
-    { Public declarations }
     procedure RefreshCode;
 
     procedure GetComponentStrings(AComp: TComponent; Texts: TStrings);
@@ -130,7 +129,7 @@ type
 var
   CnCompToCodeForm: TCnCompToCodeForm = nil;
 
-function ShowCompToCodeForm(): TCnCompToCodeForm;
+function ShowCompToCodeForm: TCnCompToCodeForm;
 
 {$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}
 
@@ -148,7 +147,7 @@ uses
 const
   CreateProcName = 'CreateComponents';
 
-function ShowCompToCodeForm(): TCnCompToCodeForm;
+function ShowCompToCodeForm: TCnCompToCodeForm;
 begin
   if CnCompToCodeForm = nil then
     CnCompToCodeForm := TCnCompToCodeForm.Create(nil);
@@ -1195,6 +1194,17 @@ begin
       mmoVar.SelectAll;
       mmoImpl.SelectAll;
     end;
+  end;
+end;
+
+procedure TCnCompToCodeForm.FormCreate(Sender: TObject);
+begin
+  if WizOptions.UseLargeIcon then
+  begin
+    ToolBar.ButtonWidth := csLargeButtonWidth;
+    ToolBar.ButtonHeight := csLargeToolbarButtonHeight;
+    ToolBar.Images := dmCnSharedImages.LargeImages;
+    ToolBar.DisabledImages := dmCnSharedImages.DisabledLargeImages;
   end;
 end;
 
