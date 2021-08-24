@@ -2982,6 +2982,7 @@
 {$IFDEF BDS2005_UP}
   {$DEFINE IDE_EDITOR_ELIDE}  // 2005 或以上编辑器支持折叠
   {$DEFINE OTA_PALETTE_API}   // 2005 and above Provides PaletteAPI.
+  {$DEFINE IDE_FILE_HISTORY}  // 2005 或以上版本会存储文件历史版本
 {$ENDIF}
 
 {$IFDEF BDS2006}
