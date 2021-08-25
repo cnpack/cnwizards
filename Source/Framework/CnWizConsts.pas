@@ -767,6 +767,11 @@ var
   SCnEditorFontDecMenuHint: string = 'Zoom Smaller Editor Font';
   SCnEditorFontDecName: string = 'Zoom Smaller Editor Font Tool';
 
+  // CnEditorExtendingSelect
+  SCnEditorExtendingSelectMenuCaption: string = 'Extending Select';
+  SCnEditorExtendingSelectMenuHint: string = 'Select Content with Extending Mode';
+  SCnEditorExtendingSelectName: string = 'Extending Select Tool';
+
   // CnSrcTemplate
   SCnSrcTemplateMenuCaption: string = 'Source Te&mplates';
   SCnSrcTemplateMenuHint: string = 'Source and Comment Templates';
@@ -1532,6 +1537,16 @@ var
   SCnUsesCleanerNotSource: string = 'NO Source Code.';
   SCnUsesCleanerNoneResult: string = 'Nothing to Process.';
   SCnUsesCleanerReport: string = 'Clean Complete!' + #13#10 + '%d Unused Reference Units Removed from %d Units.' + #13#10#13#10 + 'Do you want to view log?';
+
+  // CnUsesInitTree
+  SCnUsesInitTreeMenuCaption: string = '&Initialization Tree...';
+  SCnUsesInitTreeMenuHint: string = 'Show Uses Units Initialization Tree';
+  SCnUsesInitTreeName: string = 'Uses Initialization Tree';
+  SCnUsesInitTreeComment: string = 'Show Uses Initialization Tree';
+  SCnUsesInitTreeSearchInProject: string = 'In Project';
+  SCnUsesInitTreeSearchInProjectSearch: string = 'In Project Search Path';
+  SCnUsesInitTreeSearchInSystemSearch: string = 'In System Search Path';
+  SCnUsesInitTreeNotFound: string = 'Search Text Not Found.';
 
   // CnIdeEnhanceMenu
   SCnIdeEnhanceMenuCaption: string = '&IDE Enhancements Settings';

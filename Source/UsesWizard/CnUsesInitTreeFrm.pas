@@ -121,7 +121,7 @@ type
     {* 递归调用，分析并查找对应 dcu 或源码的 Uses 列表并加入到树中的 UnitLeaf 的子节点中}
     procedure UpdateTreeView;
     procedure UpdateInfo(Leaf: TCnLeaf);
-    function SearchText(const Text: string; ToDown, WholeWord: Boolean): Boolean;
+    function SearchText(const Text: string; ToDown, IgnoreCase, WholeWord: Boolean): Boolean;
   public
 
   end;
@@ -522,23 +522,36 @@ procedure TCnUsesInitTreeForm.dlgFindFind(Sender: TObject);
 begin
   // 根据 dlgFind.FindText 以及查找选项（上下等）进行 TreeView 内的 Node 的 Text 搜索
   if not SearchText(dlgFind.FindText, frDown in dlgFind.Options,
-    frWholeWord in dlgFind.Options) then
+    not (frMatchCase in dlgFind.Options), frWholeWord in dlgFind.Options) then
     ErrorDlg(SCnUsesInitTreeNotFound);
 end;
 
 function TCnUsesInitTreeForm.SearchText(const Text: string; ToDown,
-  WholeWord: Boolean): Boolean;
+  IgnoreCase, WholeWord: Boolean): Boolean;
 var
   StartNode: TTreeNode;
   I, Idx, FindIdx: Integer;
   Found: Boolean;
 
   function MatchNode(ANode: TTreeNode): Boolean;
+  var
+    S1, S2: string;
   begin
     Result := False;
-    if WholeWord and (ANode.Text = Text) then
+    if IgnoreCase then // 忽略大小写，都用小写比较
+    begin
+      S1 := LowerCase(Text);
+      S2 := LowerCase(ANode.Text);
+    end
+    else // 匹配大小写
+    begin
+      S1 := Text;
+      S2 := ANode.Text;
+    end;
+
+    if WholeWord and (S1 = S2) then
       Result := True
-    else if not WholeWord and (Pos(Text, ANode.Text) >= 1) then
+    else if not WholeWord and (Pos(S1, S2) >= 1) then
       Result := True;
   end;
 
@@ -626,7 +639,7 @@ begin
   if FOldSearchStr = '' then
     dlgFind.Execute
   else if not SearchText(dlgFind.FindText, frDown in dlgFind.Options,
-    frWholeWord in dlgFind.Options) then
+    not (frMatchCase in dlgFind.Options), frWholeWord in dlgFind.Options) then
     ErrorDlg(SCnUsesInitTreeNotFound);
 end;
 

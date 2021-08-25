@@ -1295,6 +1295,16 @@ begin
   TranslateStr(SCnUsesCleanerNoneResult, 'SCnUsesCleanerNoneResult');
   TranslateStr(SCnUsesCleanerReport, 'SCnUsesCleanerReport');
 
+  // CnUsesInitTree
+  TranslateStr(SCnUsesInitTreeMenuCaption, 'SCnUsesInitTreeMenuCaption');
+  TranslateStr(SCnUsesInitTreeMenuHint, 'SCnUsesInitTreeMenuHint');
+  TranslateStr(SCnUsesInitTreeName, 'SCnUsesInitTreeName');
+  TranslateStr(SCnUsesInitTreeComment, 'SCnUsesInitTreeComment');
+  TranslateStr(SCnUsesInitTreeSearchInProject, 'SCnUsesInitTreeSearchInProject');
+  TranslateStr(SCnUsesInitTreeSearchInProjectSearch, 'SCnUsesInitTreeSearchInProjectSearch');
+  TranslateStr(SCnUsesInitTreeSearchInSystemSearch, 'SCnUsesInitTreeSearchInSystemSearch');
+  TranslateStr(SCnUsesInitTreeNotFound, 'SCnUsesInitTreeNotFound');
+
   // CnIdeEnhanceMenu
   TranslateStr(SCnIdeEnhanceMenuCaption, 'SCnIdeEnhanceMenuCaption');
   TranslateStr(SCnIdeEnhanceMenuHint, 'SCnIdeEnhanceMenuHint');

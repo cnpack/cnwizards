@@ -63,6 +63,7 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
       Width = 401
       Height = 468
       Anchors = [akLeft, akTop, akRight, akBottom]
+      HideSelection = False
       Indent = 19
       ReadOnly = True
       RightClickSelect = True
