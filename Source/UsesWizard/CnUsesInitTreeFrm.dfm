@@ -74,20 +74,20 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
     Left = 0
     Top = 0
     Width = 783
-    Height = 33
+    Height = 28
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 2
     object lblProject: TLabel
       Left = 12
-      Top = 12
+      Top = 8
       Width = 38
       Height = 13
       Caption = 'Project:'
     end
     object cbbProject: TComboBox
       Left = 64
-      Top = 8
+      Top = 4
       Width = 145
       Height = 21
       Style = csDropDownList
@@ -95,11 +95,12 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
       TabOrder = 0
     end
     object tlbUses: TToolBar
-      Left = 224
-      Top = 8
+      Left = 230
+      Top = 0
       Width = 521
-      Height = 29
+      Height = 28
       Align = alNone
+      BorderWidth = 1
       EdgeBorders = []
       Flat = True
       Images = dmCnSharedImages.Images
@@ -117,28 +118,41 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
         ImageIndex = 35
         Style = tbsSeparator
       end
-      object btnOpen: TToolButton
-        Left = 31
-        Top = 0
-        Action = actOpen
-      end
       object btnSearch: TToolButton
-        Left = 54
+        Left = 31
         Top = 0
         Action = actSearch
       end
-      object btnExport: TToolButton
+      object btnSearchNext: TToolButton
+        Left = 54
+        Top = 0
+        Action = actSearchNext
+      end
+      object btn4: TToolButton
         Left = 77
         Top = 0
-        Action = actExport
+        Width = 8
+        Caption = 'btn4'
+        ImageIndex = 1
+        Style = tbsSeparator
+      end
+      object btnOpen: TToolButton
+        Left = 85
+        Top = 0
+        Action = actOpen
       end
       object btnLocateSource: TToolButton
-        Left = 100
+        Left = 108
         Top = 0
         Action = actLocateSource
       end
+      object btnExport: TToolButton
+        Left = 131
+        Top = 0
+        Action = actExport
+      end
       object btn2: TToolButton
-        Left = 123
+        Left = 154
         Top = 0
         Width = 8
         Caption = 'btn2'
@@ -146,12 +160,12 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
         Style = tbsSeparator
       end
       object btnHelp: TToolButton
-        Left = 131
+        Left = 162
         Top = 0
         Action = actHelp
       end
       object btnExit: TToolButton
-        Left = 154
+        Left = 185
         Top = 0
         Action = actExit
       end
@@ -159,9 +173,9 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
   end
   object grpInfo: TGroupBox
     Left = 432
-    Top = 128
+    Top = 120
     Width = 342
-    Height = 404
+    Height = 412
     Anchors = [akTop, akRight, akBottom]
     Caption = 'Unit &Info'
     TabOrder = 3
@@ -277,6 +291,13 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
       Caption = 'Open in &Explorer'
       Hint = 'Open Selected Source File in Windows Explorer'
       ImageIndex = 24
+      OnExecute = actLocateSourceExecute
+    end
+    object actSearchNext: TAction
+      Caption = 'Search &Next...'
+      Hint = 'Search Next Unit'
+      ImageIndex = 17
+      OnExecute = actSearchNextExecute
     end
   end
   object pmTree: TPopupMenu
@@ -303,8 +324,14 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
     end
   end
   object dlgSave: TSaveDialog
-    Filter = 'Text File(*.txt)|*.txt|All Files(*.*)|*.*'
+    Filter = 'Text File(*.txt)|*.txt'
     Left = 112
+    Top = 480
+  end
+  object dlgFind: TFindDialog
+    OnClose = dlgFindClose
+    OnFind = dlgFindFind
+    Left = 152
     Top = 480
   end
 end

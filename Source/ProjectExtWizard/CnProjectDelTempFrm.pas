@@ -527,7 +527,6 @@ end;
 procedure TCnProjectDelTempForm.GetDelFile;
 var
   I: Integer;
-  S: string;
 
   procedure CheckDirAndAdd(const Dir: string);
   var

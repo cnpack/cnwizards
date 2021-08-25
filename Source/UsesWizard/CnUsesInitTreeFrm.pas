@@ -88,6 +88,10 @@ type
     N1: TMenuItem;
     N2: TMenuItem;
     dlgSave: TSaveDialog;
+    actSearchNext: TAction;
+    btnSearchNext: TToolButton;
+    btn4: TToolButton;
+    dlgFind: TFindDialog;
     procedure actGenerateUsesTreeExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -99,12 +103,17 @@ type
     procedure actlstUsesUpdate(Action: TBasicAction; var Handled: Boolean);
     procedure actExportExecute(Sender: TObject);
     procedure actSearchExecute(Sender: TObject);
+    procedure dlgFindClose(Sender: TObject);
+    procedure dlgFindFind(Sender: TObject);
+    procedure actSearchNextExecute(Sender: TObject);
+    procedure actLocateSourceExecute(Sender: TObject);
   private
     FTree: TCnTree;
     FFileNames: TStringList;
     FLibPaths: TStringList;
     FDcuPath: string;
     FProjectList: TInterfaceList;
+    FOldSearchStr: string;
     procedure InitProjectList;
     procedure TreeSaveANode(ALeaf: TCnLeaf; ATreeNode: TTreeNode; var Valid: Boolean);
     procedure SearchAUnit(const AFullDcuName, AFullSourceName: string; ProcessedFiles: TStrings;
@@ -112,6 +121,7 @@ type
     {* 递归调用，分析并查找对应 dcu 或源码的 Uses 列表并加入到树中的 UnitLeaf 的子节点中}
     procedure UpdateTreeView;
     procedure UpdateInfo(Leaf: TCnLeaf);
+    function SearchText(const Text: string; ToDown, WholeWord: Boolean): Boolean;
   public
 
   end;
@@ -121,10 +131,12 @@ implementation
 {$R *.DFM}
 
 uses
-  CnWizShareImages, CnDCU32;
+  CnWizShareImages, CnDCU32, CnWizOptions;
 
 const
   csDcuExt = '.dcu';
+  csExploreCmdLine = 'EXPLORER.EXE /e, /select, "%s"';
+
   csSearchTypeStrings: array[Low(TCnModuleSearchType)..High(TCnModuleSearchType)] of PString =
     (nil, @SCnUsesInitTreeSearchInProject, @SCnUsesInitTreeSearchInProjectSearch,
     @SCnUsesInitTreeSearchInSystemSearch);
@@ -225,6 +237,13 @@ begin
   FTree.OnSaveANode := TreeSaveANode;
 
   InitProjectList;
+  WizOptions.ResetToolbarWithLargeIcons(tlbUses);
+  if WizOptions.UseLargeIcon then
+  begin
+    cbbProject.Font.Size := csLargeComboFontSize;
+    tlbUses.Height := tlbUses.Height + csLargeToolbarHeightDelta;
+    pnlTop.Height := pnlTop.Height + csLargeToolbarHeightDelta;
+  end;
 end;
 
 procedure TCnUsesInitTreeForm.FormDestroy(Sender: TObject);
@@ -458,7 +477,7 @@ procedure TCnUsesInitTreeForm.actlstUsesUpdate(Action: TBasicAction;
 begin
   if (Action = actOpen) or (Action = actLocateSource) then
     TCustomAction(Action).Enabled := tvTree.Selected <> nil
-  else if (Action = actExport) or (Action = actSearch) then
+  else if (Action = actExport) or (Action = actSearch) or (Action = actSearchNext) then
     TCustomAction(Action).Enabled := tvTree.Items.Count > 1
   else if Action = actGenerateUsesTree then
     TCustomAction(Action).Enabled := cbbProject.Items.Count > 0;
@@ -478,7 +497,7 @@ begin
         L.Add(Format('%2.2d:%s%s',[I + 1, StringOfChar(' ', tvTree.Items[I].Level),
           tvTree.Items[I].Text]));
       end;
-      L.SaveToFile(dlgSave.FileName);
+      L.SaveToFile(_CnChangeFileExt(dlgSave.FileName, '.txt'));
     finally
       L.Free;
     end;
@@ -487,7 +506,151 @@ end;
 
 procedure TCnUsesInitTreeForm.actSearchExecute(Sender: TObject);
 begin
-  // Search Content in Tree
+  if tvTree.Items.Count <= 0 then
+    Exit;
+
+  dlgFind.FindText := FOldSearchStr;
+  dlgFind.Execute;
+end;
+
+procedure TCnUsesInitTreeForm.dlgFindClose(Sender: TObject);
+begin
+  FOldSearchStr := dlgFind.FindText;
+end;
+
+procedure TCnUsesInitTreeForm.dlgFindFind(Sender: TObject);
+begin
+  // 根据 dlgFind.FindText 以及查找选项（上下等）进行 TreeView 内的 Node 的 Text 搜索
+  if not SearchText(dlgFind.FindText, frDown in dlgFind.Options,
+    frWholeWord in dlgFind.Options) then
+    ErrorDlg(SCnUsesInitTreeNotFound);
+end;
+
+function TCnUsesInitTreeForm.SearchText(const Text: string; ToDown,
+  WholeWord: Boolean): Boolean;
+var
+  StartNode: TTreeNode;
+  I, Idx, FindIdx: Integer;
+  Found: Boolean;
+
+  function MatchNode(ANode: TTreeNode): Boolean;
+  begin
+    Result := False;
+    if WholeWord and (ANode.Text = Text) then
+      Result := True
+    else if not WholeWord and (Pos(Text, ANode.Text) >= 1) then
+      Result := True;
+  end;
+
+begin
+  Result := False;
+  StartNode := tvTree.Selected;
+  if StartNode = nil then
+  begin
+    if ToDown then
+      StartNode := tvTree.Items[0]
+    else
+      StartNode := tvTree.Items[tvTree.Items.Count - 1];
+  end;
+
+  if StartNode = nil then
+    Exit;
+
+  Idx := StartNode.AbsoluteIndex;
+  Found := False;
+  FindIdx := -1;
+
+  if ToDown then
+  begin
+    for I := Idx to tvTree.Items.Count - 1 do
+    begin
+      if MatchNode(tvTree.Items[I]) then
+      begin
+        Found := True;
+        FindIdx := I;
+        Break;
+      end;
+    end;
+
+    if not Found then
+    begin
+      for I := 0 to Idx do
+      begin
+        if MatchNode(tvTree.Items[I]) then
+        begin
+          Found := True;
+          FindIdx := I;
+          Break;
+        end;
+      end;
+    end;
+  end
+  else
+  begin
+    for I := Idx downto 0 do
+    begin
+      if MatchNode(tvTree.Items[I]) then
+      begin
+        Found := True;
+        FindIdx := I;
+        Break;
+      end;
+    end;
+
+    if not Found then
+    begin
+      for I := tvTree.Items.Count - 1 downto Idx do
+      begin
+        if MatchNode(tvTree.Items[I]) then
+        begin
+          Found := True;
+          FindIdx := I;
+          Break;
+        end;
+      end;
+    end;
+  end;
+
+  if Found then
+  begin
+    tvTree.Selected := tvTree.Items[FindIdx];
+    tvTree.Selected.MakeVisible;
+    Result := True;
+  end
+  else
+    Result := False;
+end;
+
+procedure TCnUsesInitTreeForm.actSearchNextExecute(Sender: TObject);
+begin
+  if FOldSearchStr = '' then
+    dlgFind.Execute
+  else if not SearchText(dlgFind.FindText, frDown in dlgFind.Options,
+    frWholeWord in dlgFind.Options) then
+    ErrorDlg(SCnUsesInitTreeNotFound);
+end;
+
+procedure TCnUsesInitTreeForm.actLocateSourceExecute(Sender: TObject);
+var
+  strExecute: string;
+  Leaf: TCnUsesLeaf;
+begin
+  if tvTree.Selected = nil then
+    Exit;
+
+  Leaf := TCnUsesLeaf(tvTree.Selected.Data);
+  if Leaf = nil then
+    Exit;
+
+  if FileExists(Leaf.SourceName) then
+  begin
+    strExecute := Format(csExploreCmdLine, [Leaf.SourceName]);
+{$IFDEF UNICODE}
+    WinExecute(strExecute, SW_SHOWNORMAL);
+{$ELSE}
+    WinExec(PAnsiChar(strExecute), SW_SHOWNORMAL);
+{$ENDIF}
+  end;
 end;
 
 end.
