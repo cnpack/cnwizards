@@ -808,6 +808,9 @@ end;
 procedure TAbstractScaner.NewLine(ImmediatelyDoBreak: Boolean);
 begin
   Inc(FSourceLine);
+{$IFDEF DEBUG}
+//  CnDebugger.LogMsg('Scaner NewLine: SourceLine: ' + IntToStr(FSourceLine));
+{$ENDIF}
   FNewSourceCol := 1;
   if ImmediatelyDoBreak then
     DoLineBreak;
@@ -1143,8 +1146,11 @@ begin
             // ASM 模式下，换行作为语句结束符，不在注释内处理，所以这也不加
             if not FASMMode then
             begin
-              if not FKeepOneBlankLine then // 保持语句间的空行时，块注释末尾的换行要忽略
-                NewLine;
+              if not FKeepOneBlankLine then // 保持语句间的空行时，块注释末尾的换行要忽略，
+                NewLine
+              else
+                NewLine(False);             // 但也必须参与换行计数，否则源目标行数对应会错乱
+
               Inc(FBlankLinesAfterComment);
               Inc(P);
               FOldSourceColPtr := P;
