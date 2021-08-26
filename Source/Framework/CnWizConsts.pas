@@ -244,7 +244,7 @@ resourcestring
   SCnFilesSnapshotAdd = 'CnFilesSnapshotAdd';
   SCnFilesSnapshotManage = 'CnFilesSnapshotManage';
   SCnFilesSnapshotsItem = 'CnFilesSnapshotsItem';
-  SCnFileSnapshotReopen = 'CnFileSnapshotReopen';
+  SCnFilesSnapshotReopen = 'CnFilesSnapshotReopen';
 
   // CnWizAbout
   SCnWizAboutHelp = 'CnWizAboutHelp';
@@ -1309,8 +1309,6 @@ var
   SCnProjExtAddExtension: string = 'Add File Extension';
   SCnProjExtAddNewText: string = 'Enter a File Extension:';
   SCnProjExtCleaningComplete: string = 'Cleaning complete. ' + #13#10 + 'Total delete %d files, ' + #13#10 + '%s bytes.';
-  SCnProjExtFileReopenCaption: string = '&Open Historical Files...';
-  SCnProjExtFileReopenHint: string = 'Open Historical Files';
   SCnProjExtCustomBackupFile: string = 'Customized Files';
   SCnProjExtBackupAddFile: string = '%d File(s) Added.';
   SCnProjExtDirBuilderCaption: string = 'Project Dir Bui&lder...';
@@ -1336,6 +1334,8 @@ var
   SCnFilesSnapshotAddHint: string = 'Create a Snapshot of Opened Files';
   SCnFilesSnapshotManageCaption: string = '&Manage Snapshot List...';
   SCnFilesSnapshotManageHint: string = 'Manage Snapshot List';
+  SCnFilesSnapshotReopenCaption: string = '&Open Historical Files...';
+  SCnFilesSnapshotReopenHint: string = 'Open Historical Files';
   SCnFilesSnapshotManageFrmCaptionManage: string = 'Manage File List Snapshots';
   SCnFilesSnapshotManageFrmCaptionAdd: string = 'Create a File List Snapshot';
   SCnFilesSnapshotManageFrmLblSnapshotsCaptionManage: string = 'Select a Snapshot:';

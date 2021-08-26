@@ -1063,8 +1063,6 @@ begin
   TranslateStr(SCnProjExtAddExtension, 'SCnProjExtAddExtension');
   TranslateStr(SCnProjExtAddNewText, 'SCnProjExtAddNewText');
   TranslateStr(SCnProjExtCleaningComplete, 'SCnProjExtCleaningComplete');
-  TranslateStr(SCnProjExtFileReopenCaption, 'SCnProjExtFileReopenCaption');
-  TranslateStr(SCnProjExtFileReopenHint, 'SCnProjExtFileReopenHint');
   TranslateStr(SCnProjExtCustomBackupFile, 'SCnProjExtCustomBackupFile');
   TranslateStr(SCnProjExtBackupAddFile, 'SCnProjExtBackupAddFile');
   TranslateStr(SCnProjExtDirBuilderCaption, 'SCnProjExtDirBuilderCaption');
@@ -1090,7 +1088,8 @@ begin
   TranslateStr(SCnFilesSnapshotAddHint, 'SCnFilesSnapshotAddHint');
   TranslateStr(SCnFilesSnapshotManageCaption, 'SCnFilesSnapshotManageCaption');
   TranslateStr(SCnFilesSnapshotManageHint, 'SCnFilesSnapshotManageHint');
-
+  TranslateStr(SCnFilesSnapshotReopenCaption, 'SCnFilesSnapshotReopenCaption');
+  TranslateStr(SCnFilesSnapshotReopenHint, 'SCnFilesSnapshotReopenHint');
   TranslateStr(SCnFilesSnapshotManageFrmCaptionManage, 'SCnFilesSnapshotManageFrmCaptionManage');
   TranslateStr(SCnFilesSnapshotManageFrmCaptionAdd, 'SCnFilesSnapshotManageFrmCaptionAdd');
   TranslateStr(SCnFilesSnapshotManageFrmLblSnapshotsCaptionManage, 'SCnFilesSnapshotManageFrmLblSnapshotsCaptionManage');

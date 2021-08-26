@@ -196,9 +196,9 @@ begin
     SCnFilesSnapshotManageHint, SCnFilesSnapshotManage);
   AddSepMenu;
 
-  IdReopen := RegisterASubAction(SCnFileSnapshotReopen,
-    SCnProjExtFileReopenCaption, FReOpener.GetDefShortCut,
-    SCnProjExtFileReopenHint, SCnFileSnapshotReopen);
+  IdReopen := RegisterASubAction(SCnFilesSnapshotReopen,
+    SCnFilesSnapshotReopenCaption, FReOpener.GetDefShortCut,
+    SCnFilesSnapshotReopenHint, SCnFilesSnapshotReopen);
 end;
 
 function TCnFilesSnapshotWizard.GetCaption: string;
