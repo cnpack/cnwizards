@@ -92,6 +92,20 @@ type
     btnSearchNext: TToolButton;
     btn4: TToolButton;
     dlgFind: TFindDialog;
+    mmInit: TMainMenu;
+    File1: TMenuItem;
+    Edit1: TMenuItem;
+    Search2: TMenuItem;
+    Help1: TMenuItem;
+    Exit1: TMenuItem;
+    AnalyseProject1: TMenuItem;
+    ExportTree2: TMenuItem;
+    Search3: TMenuItem;
+    SearchNext1: TMenuItem;
+    N3: TMenuItem;
+    Open2: TMenuItem;
+    OpeninExplorer2: TMenuItem;
+    Help2: TMenuItem;
     procedure actGenerateUsesTreeExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -575,7 +589,7 @@ begin
 
   if ToDown then
   begin
-    for I := Idx to tvTree.Items.Count - 1 do
+    for I := Idx + 1 to tvTree.Items.Count - 1 do
     begin
       if MatchNode(tvTree.Items[I]) then
       begin
@@ -600,7 +614,7 @@ begin
   end
   else
   begin
-    for I := Idx downto 0 do
+    for I := Idx - 1 downto 0 do
     begin
       if MatchNode(tvTree.Items[I]) then
       begin

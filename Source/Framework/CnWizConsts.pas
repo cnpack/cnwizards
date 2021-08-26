@@ -335,6 +335,10 @@ resourcestring
   // CnInputHelper
   SCnInputHelperPopup = 'CnInputHelperPopup';
 
+  // CnUsesTools
+  SCnUsesToolsCleaner = 'CnUsesToolsCleaner';
+  SCnUsesToolsInitTree = 'CnUsesToolsInitTree';
+
   // CnIdeEnhanceMenu
   SCnIdeEnhanceMenuCommand = 'CnIdeEnhanceMenu';
 

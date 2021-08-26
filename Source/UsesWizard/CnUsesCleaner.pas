@@ -30,7 +30,9 @@ unit CnUsesCleaner;
 * 开发平台：PWinXP SP2 + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串支持本地化处理方式
-* 修改记录：2016.08.02 V1.2
+* 修改记录：2021.08.26 V1.3
+*               改成子菜单专家以添加引用树功能
+*           2016.08.02 V1.2
 *               加入自动保存并关闭处理结果的选项以应对大项目
 *           2011.11.05 V1.1
 *               完善对 XE2 风格的带点的单元名的支持
@@ -50,10 +52,7 @@ uses
   StdCtrls, ToolsAPI, IniFiles, Contnrs, CnWizMultiLang, CnWizClasses, CnWizConsts,
   CnCommon, CnConsts, CnWizUtils, CnDCU32, CnWizIdeUtils, CnWizEditFiler,
   CnWizOptions, mPasLex, Math, TypInfo, RegExpr, ActnList
-  {$IFDEF DELPHIXE3_UP}
-  , System.Actions
-  {$ENDIF}
-  ;
+  {$IFDEF DELPHIXE3_UP}, System.Actions {$ENDIF};
 
 type
 
@@ -93,8 +92,10 @@ type
 
   TCnUsesCleanKind = (ukCurrUnit, ukOpenedUnits, ukCurrProject, ukProjectGroup);
 
-  TCnUsesCleaner = class(TCnMenuWizard)
+  TCnUsesCleaner = class(TCnSubMenuWizard)
   private
+    FIdCleaner: Integer;
+    FIdInitTree: Integer;
     FIgnoreInit: Boolean;
     FIgnoreReg: Boolean;
     FIgnoreNoSrc: Boolean;
@@ -119,6 +120,12 @@ type
     {* 总体的单元清理函数}
     function DoCleanUnit(Buffer: IOTAEditBuffer; Intf, Impl: TStrings): Boolean;
     procedure CleanUnitUses(List: TObjectList);
+
+    procedure CleanExecute;
+    procedure InitTreeExecute;
+  protected
+    procedure SubActionExecute(Index: Integer); override;
+    procedure SubActionUpdate(Index: Integer); override;
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -130,7 +137,9 @@ type
     function GetCaption: string; override;
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
+
     procedure Execute; override;
+    procedure AcquireSubActions; override;
   end;
 
 {$ENDIF CNWIZARDS_CNUSESCLEANER}
@@ -143,7 +152,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnUsesCleanResultFrm;
+  CnUsesCleanResultFrm, CnUsesInitTreeFrm;
 
 {$R *.DFM}
 
@@ -191,6 +200,11 @@ begin
 end;
 
 procedure TCnUsesCleaner.Execute;
+begin
+
+end;
+
+procedure TCnUsesCleaner.CleanExecute;
 var
   Kind: TCnUsesCleanKind;
   List: TObjectList;
@@ -1311,7 +1325,7 @@ end;
 
 function TCnUsesCleaner.GetCaption: string;
 begin
-  Result := SCnUsesCleanerMenuCaption;
+  Result := SCnUsesToolsMenuCaption;
 end;
 
 function TCnUsesCleaner.GetDefShortCut: TShortCut;
@@ -1321,7 +1335,7 @@ end;
 
 function TCnUsesCleaner.GetHint: string;
 begin
-  Result := SCnUsesCleanerMenuHint;
+  Result := SCnUsesToolsMenuHint;
 end;
 
 function TCnUsesCleaner.GetState: TWizardState;
@@ -1335,10 +1349,10 @@ end;
 class procedure TCnUsesCleaner.GetWizardInfo(var Name, Author, Email,
   Comment: string);
 begin
-  Name := SCnUsesCleanerName;
+  Name := SCnUsesToolsName;
   Author := SCnPack_Zjy;
   Email := SCnPack_ZjyEmail;
-  Comment := SCnUsesCleanerComment;
+  Comment := SCnUsesToolsComment;
 end;
 
 function TCnUsesCleaner.MatchInListWithExpr(List: TStrings;
@@ -1357,6 +1371,38 @@ begin
       Result := True;
       Exit;
     end;
+  end;
+end;
+
+procedure TCnUsesCleaner.AcquireSubActions;
+begin
+  FIdCleaner := RegisterASubAction(SCnUsesToolsCleaner, SCnUsesCleanerMenuCaption,
+    0, SCnUsesCleanerMenuHint);
+  FIdInitTree := RegisterASubAction(SCnUsesToolsInitTree, SCnUsesInitTreeMenuCaption,
+    0, SCnUsesInitTreeMenuHint);
+end;
+
+procedure TCnUsesCleaner.SubActionExecute(Index: Integer);
+begin
+  if Index = FIdCleaner then
+    CleanExecute
+  else if Index = FIdInitTree then
+    InitTreeExecute;
+end;
+
+procedure TCnUsesCleaner.SubActionUpdate(Index: Integer);
+begin
+  if (Index = FIdCleaner) or (Index = FIdInitTree) then
+    SubActions[Index].Enabled := CnOtaGetProjectGroup <> nil;
+end;
+
+procedure TCnUsesCleaner.InitTreeExecute;
+begin
+  with TCnUsesInitTreeForm.Create(Application) do
+  begin
+    ShowModal;
+    Free;
+    Exit;
   end;
 end;
 

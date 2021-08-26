@@ -16,6 +16,7 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
     000000000000044400000000000004F40000000000000444000000000000FFFF
     0000FE3F0000C23F0000DE3F0000DFFF0000DFF80000DF080000DF780000DFFF
     0000DE3F0000C23F0000DE3F0000FFFF00008FFF00008FFF00008FFF0000}
+  Menu = mmInit
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   PixelsPerInch = 96
@@ -53,7 +54,7 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
     Left = 8
     Top = 40
     Width = 417
-    Height = 492
+    Height = 473
     Anchors = [akLeft, akTop, akRight, akBottom]
     Caption = 'Initialization Tree'
     TabOrder = 1
@@ -61,7 +62,7 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
       Left = 8
       Top = 16
       Width = 401
-      Height = 468
+      Height = 449
       Anchors = [akLeft, akTop, akRight, akBottom]
       HideSelection = False
       Indent = 19
@@ -176,7 +177,7 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
     Left = 432
     Top = 120
     Width = 342
-    Height = 412
+    Height = 393
     Anchors = [akTop, akRight, akBottom]
     Caption = 'Unit &Info'
     TabOrder = 3
@@ -251,9 +252,9 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
     Images = dmCnSharedImages.Images
     OnUpdate = actlstUsesUpdate
     Left = 32
-    Top = 480
+    Top = 472
     object actGenerateUsesTree: TAction
-      Caption = 'Analyse Project'
+      Caption = '&Analyse Project'
       Hint = 'Analyse Uses Initialization Tree for Selected Project'
       ImageIndex = 34
       OnExecute = actGenerateUsesTreeExecute
@@ -262,6 +263,7 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
       Caption = '&Help'
       Hint = 'Display Help'
       ImageIndex = 1
+      ShortCut = 112
       OnExecute = actHelpExecute
     end
     object actExit: TAction
@@ -280,6 +282,7 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
       Caption = '&Search...'
       Hint = 'Search Unit in Tree'
       ImageIndex = 16
+      ShortCut = 16454
       OnExecute = actSearchExecute
     end
     object actOpen: TAction
@@ -298,13 +301,14 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
       Caption = 'Search &Next...'
       Hint = 'Search Next Unit'
       ImageIndex = 17
+      ShortCut = 114
       OnExecute = actSearchNextExecute
     end
   end
   object pmTree: TPopupMenu
     Images = dmCnSharedImages.Images
     Left = 72
-    Top = 480
+    Top = 472
     object Open1: TMenuItem
       Action = actOpen
     end
@@ -327,12 +331,59 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
   object dlgSave: TSaveDialog
     Filter = 'Text File(*.txt)|*.txt'
     Left = 112
-    Top = 480
+    Top = 472
   end
   object dlgFind: TFindDialog
     OnClose = dlgFindClose
     OnFind = dlgFindFind
     Left = 152
-    Top = 480
+    Top = 472
+  end
+  object mmInit: TMainMenu
+    Images = dmCnSharedImages.Images
+    Left = 192
+    Top = 472
+    object File1: TMenuItem
+      Caption = '&File'
+      object Exit1: TMenuItem
+        Action = actExit
+      end
+    end
+    object Edit1: TMenuItem
+      Caption = '&Edit'
+      Hint = 'Analyse Uses Initialization Tree for Selected Project'
+      ImageIndex = 34
+      OnClick = actGenerateUsesTreeExecute
+      object AnalyseProject1: TMenuItem
+        Action = actGenerateUsesTree
+      end
+      object ExportTree2: TMenuItem
+        Action = actExport
+      end
+      object N3: TMenuItem
+        Caption = '-'
+      end
+      object Open2: TMenuItem
+        Action = actOpen
+      end
+      object OpeninExplorer2: TMenuItem
+        Action = actLocateSource
+      end
+    end
+    object Search2: TMenuItem
+      Caption = '&Search'
+      object Search3: TMenuItem
+        Action = actSearch
+      end
+      object SearchNext1: TMenuItem
+        Action = actSearchNext
+      end
+    end
+    object Help1: TMenuItem
+      Caption = '&Help'
+      object Help2: TMenuItem
+        Action = actHelp
+      end
+    end
   end
 end
