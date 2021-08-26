@@ -377,7 +377,6 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
       Caption = '&Edit'
       Hint = 'Analyse Uses Initialization Tree for Selected Project'
       ImageIndex = 34
-      OnClick = actGenerateUsesTreeExecute
       object AnalyseProject1: TMenuItem
         Action = actGenerateUsesTree
       end
