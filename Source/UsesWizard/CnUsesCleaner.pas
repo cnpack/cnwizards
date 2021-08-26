@@ -45,7 +45,7 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNUSESCLEANER}
+{$IFDEF CNWIZARDS_CNUSESTOOLS}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
@@ -92,7 +92,7 @@ type
 
   TCnUsesCleanKind = (ukCurrUnit, ukOpenedUnits, ukCurrProject, ukProjectGroup);
 
-  TCnUsesCleaner = class(TCnSubMenuWizard)
+  TCnUsesToolsWizard = class(TCnSubMenuWizard)
   private
     FIdCleaner: Integer;
     FIdInitTree: Integer;
@@ -142,11 +142,11 @@ type
     procedure AcquireSubActions; override;
   end;
 
-{$ENDIF CNWIZARDS_CNUSESCLEANER}
+{$ENDIF CNWIZARDS_CNUSESTOOLS}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNUSESCLEANER}
+{$IFDEF CNWIZARDS_CNUSESTOOLS}
 
 uses
 {$IFDEF DEBUG}
@@ -174,7 +174,7 @@ const
 
 { TCnUsesCleaner }
 
-constructor TCnUsesCleaner.Create;
+constructor TCnUsesToolsWizard.Create;
 begin
   inherited;
   FIgnoreInit := True;
@@ -191,7 +191,7 @@ begin
   FRegExpr.ModifierI := True;
 end;
 
-destructor TCnUsesCleaner.Destroy;
+destructor TCnUsesToolsWizard.Destroy;
 begin
   FRegExpr.Free;
   FCleanList.Free;
@@ -199,12 +199,12 @@ begin
   inherited;
 end;
 
-procedure TCnUsesCleaner.Execute;
+procedure TCnUsesToolsWizard.Execute;
 begin
 
 end;
 
-procedure TCnUsesCleaner.CleanExecute;
+procedure TCnUsesToolsWizard.CleanExecute;
 var
   Kind: TCnUsesCleanKind;
   List: TObjectList;
@@ -247,7 +247,7 @@ begin
   end;
 end;
 
-function TCnUsesCleaner.ShowKindForm(var AKind: TCnUsesCleanKind): Boolean;
+function TCnUsesToolsWizard.ShowKindForm(var AKind: TCnUsesCleanKind): Boolean;
 var
   Module: IOTAModule;
 begin
@@ -299,7 +299,7 @@ begin
   end;
 end;
 
-function TCnUsesCleaner.GetProjectFromModule(AModule: IOTAModule): IOTAProject;
+function TCnUsesToolsWizard.GetProjectFromModule(AModule: IOTAModule): IOTAProject;
 var
   i: Integer;
 begin
@@ -312,7 +312,7 @@ begin
     end;
 end;
 
-function TCnUsesCleaner.CompileUnits(AKind: TCnUsesCleanKind): Boolean;
+function TCnUsesToolsWizard.CompileUnits(AKind: TCnUsesCleanKind): Boolean;
 var
   Module: IOTAModule;
   Project: IOTAProject;
@@ -413,7 +413,7 @@ begin
   end;
 end;
 
-function TCnUsesCleaner.ProcessUnits(AKind: TCnUsesCleanKind;
+function TCnUsesToolsWizard.ProcessUnits(AKind: TCnUsesCleanKind;
   List: TObjectList): Boolean;
 var
   Module: IOTAModule;
@@ -688,7 +688,7 @@ begin
   end;
 end;
 
-procedure TCnUsesCleaner.ParseUnitKind(const FileName: string;
+procedure TCnUsesToolsWizard.ParseUnitKind(const FileName: string;
   var Kinds: TCnUsesKinds);
 var
   Stream: TMemoryStream;
@@ -734,7 +734,7 @@ begin
   end;
 end;
 
-procedure TCnUsesCleaner.GetCompRefUnits(AModule: IOTAModule; AProject:
+procedure TCnUsesToolsWizard.GetCompRefUnits(AModule: IOTAModule; AProject:
   IOTAProject; Units: TStrings);
 var
   FormEditor: IOTAFormEditor;
@@ -832,7 +832,7 @@ begin
   end;   
 end;
 
-procedure TCnUsesCleaner.CheckUnits(List: TObjectList);
+procedure TCnUsesToolsWizard.CheckUnits(List: TObjectList);
 var
   UnitList, CompRef: TStringList;
   i, j, k, u: Integer;
@@ -957,7 +957,7 @@ type
     SpaceAfter: Boolean;
   end;
 
-function TCnUsesCleaner.DoCleanUnit(Buffer: IOTAEditBuffer; Intf, Impl:
+function TCnUsesToolsWizard.DoCleanUnit(Buffer: IOTAEditBuffer; Intf, Impl:
   TStrings): Boolean;
 var
   SrcStream: TMemoryStream;
@@ -1195,7 +1195,7 @@ begin
   end;          
 end;
 
-procedure TCnUsesCleaner.CleanUnitUses(List: TObjectList);
+procedure TCnUsesToolsWizard.CleanUnitUses(List: TObjectList);
 
   function GetEditBuffer(const aUsesInfo: TCnEmptyUsesInfo; out ABuffer: IOTAEditBuffer): Boolean;
   var
@@ -1295,7 +1295,7 @@ begin
   end;
 end;
 
-procedure TCnUsesCleaner.LoadSettings(Ini: TCustomIniFile);
+procedure TCnUsesToolsWizard.LoadSettings(Ini: TCustomIniFile);
 begin
   inherited;
   FIgnoreInit := Ini.ReadBool('', csIgnoreInit, FIgnoreInit);
@@ -1309,7 +1309,7 @@ begin
   WizOptions.LoadUserFile(FCleanList, csCleanList);
 end;
 
-procedure TCnUsesCleaner.SaveSettings(Ini: TCustomIniFile);
+procedure TCnUsesToolsWizard.SaveSettings(Ini: TCustomIniFile);
 begin
   inherited;
   Ini.WriteBool('', csIgnoreInit, FIgnoreInit);
@@ -1323,22 +1323,22 @@ begin
   WizOptions.SaveUserFile(FCleanList, csCleanList);
 end;
 
-function TCnUsesCleaner.GetCaption: string;
+function TCnUsesToolsWizard.GetCaption: string;
 begin
   Result := SCnUsesToolsMenuCaption;
 end;
 
-function TCnUsesCleaner.GetDefShortCut: TShortCut;
+function TCnUsesToolsWizard.GetDefShortCut: TShortCut;
 begin
   Result := 0;
 end;
 
-function TCnUsesCleaner.GetHint: string;
+function TCnUsesToolsWizard.GetHint: string;
 begin
   Result := SCnUsesToolsMenuHint;
 end;
 
-function TCnUsesCleaner.GetState: TWizardState;
+function TCnUsesToolsWizard.GetState: TWizardState;
 begin
   if CnOtaGetProjectGroup <> nil then
     Result := [wsEnabled]
@@ -1346,7 +1346,7 @@ begin
     Result := [];
 end;
 
-class procedure TCnUsesCleaner.GetWizardInfo(var Name, Author, Email,
+class procedure TCnUsesToolsWizard.GetWizardInfo(var Name, Author, Email,
   Comment: string);
 begin
   Name := SCnUsesToolsName;
@@ -1355,7 +1355,7 @@ begin
   Comment := SCnUsesToolsComment;
 end;
 
-function TCnUsesCleaner.MatchInListWithExpr(List: TStrings;
+function TCnUsesToolsWizard.MatchInListWithExpr(List: TStrings;
   const Str: string): Boolean;
 var
   I: Integer;
@@ -1374,7 +1374,7 @@ begin
   end;
 end;
 
-procedure TCnUsesCleaner.AcquireSubActions;
+procedure TCnUsesToolsWizard.AcquireSubActions;
 begin
   FIdCleaner := RegisterASubAction(SCnUsesToolsCleaner, SCnUsesCleanerMenuCaption,
     0, SCnUsesCleanerMenuHint);
@@ -1382,7 +1382,7 @@ begin
     0, SCnUsesInitTreeMenuHint);
 end;
 
-procedure TCnUsesCleaner.SubActionExecute(Index: Integer);
+procedure TCnUsesToolsWizard.SubActionExecute(Index: Integer);
 begin
   if Index = FIdCleaner then
     CleanExecute
@@ -1390,13 +1390,13 @@ begin
     InitTreeExecute;
 end;
 
-procedure TCnUsesCleaner.SubActionUpdate(Index: Integer);
+procedure TCnUsesToolsWizard.SubActionUpdate(Index: Integer);
 begin
   if (Index = FIdCleaner) or (Index = FIdInitTree) then
     SubActions[Index].Enabled := CnOtaGetProjectGroup <> nil;
 end;
 
-procedure TCnUsesCleaner.InitTreeExecute;
+procedure TCnUsesToolsWizard.InitTreeExecute;
 begin
   with TCnUsesInitTreeForm.Create(Application) do
   begin
@@ -1424,7 +1424,7 @@ begin
 end;
 
 initialization
-  RegisterCnWizard(TCnUsesCleaner); // 注册专家
+  RegisterCnWizard(TCnUsesToolsWizard); // 注册专家
 
-{$ENDIF CNWIZARDS_CNUSESCLEANER}
+{$ENDIF CNWIZARDS_CNUSESTOOLS}
 end.

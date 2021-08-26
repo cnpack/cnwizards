@@ -184,30 +184,54 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
     object lblSourceFile: TLabel
       Left = 16
       Top = 24
-      Width = 56
+      Width = 64
       Height = 13
       Caption = 'Source File:'
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
     end
     object lblDcuFile: TLabel
       Left = 16
       Top = 128
-      Width = 41
+      Width = 46
       Height = 13
       Caption = 'Dcu File:'
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
     end
     object lblSearchType: TLabel
       Left = 16
       Top = 224
-      Width = 71
+      Width = 82
       Height = 13
       Caption = 'Location Type:'
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
     end
     object lblUsesType: TLabel
       Left = 16
       Top = 304
-      Width = 54
+      Width = 61
       Height = 13
       Caption = 'Uses Type:'
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
     end
     object lblSourceFileText: TLabel
       Left = 16

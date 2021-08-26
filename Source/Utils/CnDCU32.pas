@@ -37,7 +37,7 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNUSESCLEANER}
+{$IFDEF CNWIZARDS_CNUSESTOOLS}
 
 uses
   Windows, Classes, SysUtils, Contnrs, DCURecs, DCU32, DCU_Out
@@ -133,11 +133,11 @@ type
     property ImplItems[Index: Integer]: TCnUsesItem read GetImplItem;
   end;
 
-{$ENDIF CNWIZARDS_CNUSESCLEANER}
+{$ENDIF CNWIZARDS_CNUSESTOOLS}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNUSESCLEANER}
+{$IFDEF CNWIZARDS_CNUSESTOOLS}
 
 {$IFNDEF STAND_ALONE}
 uses
@@ -379,6 +379,6 @@ begin
   Result := TCnUsesItem(FIntfItems[Index]);
 end;
 
-{$ENDIF CNWIZARDS_CNUSESCLEANER}
+{$ENDIF CNWIZARDS_CNUSESTOOLS}
 end.
 

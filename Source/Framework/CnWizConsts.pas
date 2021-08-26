@@ -1549,10 +1549,8 @@ var
   SCnUsesCleanerReport: string = 'Clean Complete!' + #13#10 + '%d Unused Reference Units Removed from %d Units.' + #13#10#13#10 + 'Do you want to view log?';
 
   // CnUsesInitTree
-  SCnUsesInitTreeMenuCaption: string = '&Initialization Tree...';
+  SCnUsesInitTreeMenuCaption: string = 'Show &Initialization Tree...';
   SCnUsesInitTreeMenuHint: string = 'Show Uses Units Initialization Tree';
-  SCnUsesInitTreeName: string = 'Uses Initialization Tree';
-  SCnUsesInitTreeComment: string = 'Show Uses Initialization Tree';
   SCnUsesInitTreeSearchInProject: string = 'In Project';
   SCnUsesInitTreeSearchInProjectSearch: string = 'In Project Search Path';
   SCnUsesInitTreeSearchInSystemSearch: string = 'In System Search Path';

@@ -37,7 +37,7 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNUSESCLEANER}
+{$IFDEF CNWIZARDS_CNUSESTOOLS}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
@@ -95,11 +95,11 @@ type
 
 function ShowUsesCleanResultForm(AList: TObjectList): Boolean;
 
-{$ENDIF CNWIZARDS_CNUSESCLEANER}
+{$ENDIF CNWIZARDS_CNUSESTOOLS}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNUSESCLEANER}
+{$IFDEF CNWIZARDS_CNUSESTOOLS}
 
 {$R *.DFM}
 
@@ -352,6 +352,6 @@ begin
   ShowFormHelp;
 end;
 
-{$ENDIF CNWIZARDS_CNUSESCLEANER}
+{$ENDIF CNWIZARDS_CNUSESTOOLS}
 end.
 
