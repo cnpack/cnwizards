@@ -169,14 +169,14 @@ begin
   begin
     // 创建快照菜单项
     i := 0;
-    IdFilesSnapshotsFirst := RegisterASubAction(SCnProjExtFilesSnapshotsItem +
+    IdFilesSnapshotsFirst := RegisterASubAction(SCnFilesSnapshotsItem +
       IntToStr(i), FFilesSnapshots[i], 0, FFilesSnapshots[i],
-      SCnProjExtFilesSnapshotsItem + IntToStr(i));
+      SCnFilesSnapshotsItem + IntToStr(i));
     IdFilesSnapshotsLast := IdFilesSnapshotsFirst; // 避免下面被跳过而没赋值，LiuXiao
     for i := 1 to FFilesSnapshots.Count - 1 do
-      IdFilesSnapshotsLast := RegisterASubAction(SCnProjExtFilesSnapshotsItem +
+      IdFilesSnapshotsLast := RegisterASubAction(SCnFilesSnapshotsItem +
         IntToStr(i), FFilesSnapshots[i], 0, FFilesSnapshots[i],
-        SCnProjExtFilesSnapshotsItem + IntToStr(i));
+        SCnFilesSnapshotsItem + IntToStr(i));
 
     AddSepMenu;
   end
@@ -187,18 +187,18 @@ begin
   end;
 
   // 创建其余的子菜单项
-  IdFilesSnapshotAdd := RegisterASubAction(SCnProjExtFilesSnapshotAdd,
+  IdFilesSnapshotAdd := RegisterASubAction(SCnFilesSnapshotAdd,
     SCnFilesSnapshotAddCaption, ShortCut(Word('W'), [ssCtrl, ssShift]),
-    SCnFilesSnapshotAddHint, SCnProjExtFilesSnapshotAdd);
+    SCnFilesSnapshotAddHint, SCnFilesSnapshotAdd);
 
-  IdFilesSnapshotManage := RegisterASubAction(SCnProjExtFilesSnapshotManage,
+  IdFilesSnapshotManage := RegisterASubAction(SCnFilesSnapshotManage,
     SCnFilesSnapshotManageCaption, 0,
-    SCnFilesSnapshotManageHint, SCnProjExtFilesSnapshotManage);
+    SCnFilesSnapshotManageHint, SCnFilesSnapshotManage);
   AddSepMenu;
 
-  IdReopen := RegisterASubAction(SCnProjExtFileReopen,
+  IdReopen := RegisterASubAction(SCnFileSnapshotReopen,
     SCnProjExtFileReopenCaption, FReOpener.GetDefShortCut,
-    SCnProjExtFileReopenHint, SCnProjExtFileReopen);
+    SCnProjExtFileReopenHint, SCnFileSnapshotReopen);
 end;
 
 function TCnFilesSnapshotWizard.GetCaption: string;

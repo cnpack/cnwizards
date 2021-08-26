@@ -233,7 +233,6 @@ resourcestring
   SCnProjExtListUsed = 'CnProjExtListUsed';
   SCnProjExtBackup = 'CnProjExtBackup';
   SCnProjExtDelTemp = 'CnProjExtDelTemp';
-  SCnProjExtFileReopen = 'CnProjExtFileReopen';
   SCnProjExtDirBuilder = 'CnProjExtDirBuilder';
 
   SCnProjExtPasIntf = 'interface';
@@ -242,9 +241,10 @@ resourcestring
   SCnProjExtCppSource = 'cpp';
 
   // CnFilesSnapshotWizard
-  SCnProjExtFilesSnapshotAdd = 'CnProjExtFilesSnapshotAdd';
-  SCnProjExtFilesSnapshotManage = 'CnProjExtFilesSnapshotManage';
-  SCnProjExtFilesSnapshotsItem = 'CnProjExtFilesSnapshotsItem';
+  SCnFilesSnapshotAdd = 'CnFilesSnapshotAdd';
+  SCnFilesSnapshotManage = 'CnFilesSnapshotManage';
+  SCnFilesSnapshotsItem = 'CnFilesSnapshotsItem';
+  SCnFileSnapshotReopen = 'CnFileSnapshotReopen';
 
   // CnWizAbout
   SCnWizAboutHelp = 'CnWizAboutHelp';
@@ -1520,6 +1520,12 @@ var
     'in Procedure List Dialog.';
   SCnProcListErrorNoIntf: string = 'Interface NOT Found.';
   SCnProcListErrorNoImpl: string = 'Implementation NOT Found.';
+
+  // CnUsesTools
+  SCnUsesToolsMenuCaption: string = '&Uses Tools';
+  SCnUsesToolsMenuHint: string = 'Uses Tools';
+  SCnUsesToolsName: string = 'Uses Tools';
+  SCnUsesToolsComment: string = 'Uses Units Tools';
 
   // CnUsesCleaner
   SCnUsesCleanerMenuCaption: string = '&Uses Cleaner...';
