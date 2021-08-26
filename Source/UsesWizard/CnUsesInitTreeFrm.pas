@@ -37,6 +37,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_CNUSESTOOLS}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ComCtrls, StdCtrls, ToolWin, ExtCtrls, ActnList, ToolsAPI,
@@ -136,11 +138,17 @@ type
     procedure UpdateTreeView;
     procedure UpdateInfo(Leaf: TCnLeaf);
     function SearchText(const Text: string; ToDown, IgnoreCase, WholeWord: Boolean): Boolean;
+  protected
+    function GetHelpTopic: string; override;
   public
 
   end;
 
+{$ENDIF CNWIZARDS_CNUSESTOOLS}
+
 implementation
+
+{$IFDEF CNWIZARDS_CNUSESTOOLS}
 
 {$R *.DFM}
 
@@ -680,5 +688,11 @@ begin
   end;
 end;
 
+function TCnUsesInitTreeForm.GetHelpTopic: string;
+begin
+  Result := 'CnUsesCleaner';
+end;
+
+{$ENDIF CNWIZARDS_CNUSESTOOLS}
 end.
 
