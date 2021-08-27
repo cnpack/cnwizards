@@ -1526,9 +1526,9 @@ var
   SCnProcListErrorNoImpl: string = 'Implementation NOT Found.';
 
   // CnUsesTools
-  SCnUsesToolsMenuCaption: string = '&Uses Tools';
-  SCnUsesToolsMenuHint: string = 'Uses Tools';
-  SCnUsesToolsName: string = 'Uses Tools';
+  SCnUsesToolsMenuCaption: string = '&Uses Units Tools';
+  SCnUsesToolsMenuHint: string = 'Uses Units Tools';
+  SCnUsesToolsName: string = 'Uses Units Tools';
   SCnUsesToolsComment: string = 'Uses Units Tools';
 
   // CnUsesCleaner

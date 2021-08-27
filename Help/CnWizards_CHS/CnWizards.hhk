@@ -381,7 +381,7 @@
 		<param name="Local" value="wizards\projext\uselist.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="引用单元清理专家">
+		<param name="Name" value="引用单元工具">
 		<param name="Local" value="wizards\cnusescleaner.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
