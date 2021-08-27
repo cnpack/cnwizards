@@ -465,6 +465,9 @@
 			<DCCReference Include="UsesWizard\CnUsesCleanResultFrm.pas">
 				<Form>CnUsesCleanResultForm</Form>
 			</DCCReference>
+			<DCCReference Include="UsesWizard\CnUsesInitTreeFrm.pas">
+				<Form>CnUsesInitTreeForm</Form>
+			</DCCReference>
 			<DCCReference Include="IdeEnhancements\CnIdeEnhanceMenu.pas"/>
 			<DCCReference Include="SimpleWizards\CnIdeBRWizard.pas"/>
 			<DCCReference Include="ScriptWizard\CnScriptWizard.pas">

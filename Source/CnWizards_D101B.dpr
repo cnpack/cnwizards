@@ -206,6 +206,7 @@ uses
   CnDCU32 in 'Utils\CnDCU32.pas',
   CnUsesCleaner in 'UsesWizard\CnUsesCleaner.pas' {CnUsesCleanerForm},
   CnUsesCleanResultFrm in 'UsesWizard\CnUsesCleanResultFrm.pas' {CnUsesCleanResultForm},
+  CnUsesInitTreeFrm in 'UsesWizard\CnUsesInitTreeFrm.pas' {CnUsesInitTreeForm},
   CnIdeEnhanceMenu in 'IdeEnhancements\CnIdeEnhanceMenu.pas',
   CnIdeBRWizard in 'SimpleWizards\CnIdeBRWizard.pas',
   CnScriptWizard in 'ScriptWizard\CnScriptWizard.pas' {CnScriptWizardForm},

@@ -88,9 +88,9 @@ type
 
   end;
 
-{ TCnUsesCleaner }
-
   TCnUsesCleanKind = (ukCurrUnit, ukOpenedUnits, ukCurrProject, ukProjectGroup);
+
+{ TCnUsesToolsWizard }
 
   TCnUsesToolsWizard = class(TCnSubMenuWizard)
   private
@@ -1410,7 +1410,7 @@ end;
 
 function TCnUsesCleanerForm.GetHelpTopic: string;
 begin
-  Result := 'CnUsesCleaner';
+  Result := 'CnUsesTools';
 end;
 
 procedure TCnUsesCleanerForm.btnHelpClick(Sender: TObject);

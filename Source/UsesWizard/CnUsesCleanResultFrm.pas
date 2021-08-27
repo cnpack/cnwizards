@@ -344,7 +344,7 @@ end;
 
 function TCnUsesCleanResultForm.GetHelpTopic: string;
 begin
-  Result := 'CnUsesCleaner';
+  Result := 'CnUsesTools';
 end;
 
 procedure TCnUsesCleanResultForm.btnHelpClick(Sender: TObject);
