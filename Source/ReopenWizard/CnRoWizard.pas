@@ -122,7 +122,7 @@ var
 begin
   if not Assigned(FReopener) then
   begin
-    FReopener := GetReopener();
+    FReopener := CreateReopener;
     if Supports(FReopener, ICnRoOptions, Ini) then
     begin
       if Ini.AutoSaveInterval > 0 then

@@ -64,13 +64,7 @@ type
     ClosingTime: string;
   end;
 
-function GetNodeManager(ANodeSize: Cardinal): ICnNodeManager;
-
-function GetStrIntfMap(): ICnStrIntfMap;
-
-function GetRoFiles(ADefaultCap: Integer = iDefaultFileQty): ICnRoFiles;
-
-function GetReopener(): ICnReopener;
+function CreateReopener: ICnReopener;
 
 {$ENDIF CNWIZARDS_CNFILESSNAPSHOTWIZARD}
 
@@ -101,10 +95,10 @@ type
     destructor Destroy; override;
     function AllocNode: Pointer;
     function AllocNodeClear: Pointer;
-    procedure FreeNode(aNode: Pointer);
+    procedure FreeNode(ANode: Pointer);
   end;
 
-  TCnBaseClass = class(TInterfacedObject)
+  TCnBaseNode = class(TInterfacedObject)
   private
     FNodeMgr: ICnNodeManager;
   protected
@@ -120,7 +114,7 @@ type
     Value: IUnknown;
   end;
 
-  TCnStrIntfMap = class(TCnBaseClass, ICnStrIntfMap)
+  TCnStrIntfMap = class(TCnBaseNode, ICnStrIntfMap)
   private
     FItems: TList;
   protected
@@ -135,7 +129,7 @@ type
     destructor Destroy; override;
   end;
 
-  TCnRoFiles = class(TCnBaseClass, ICnRoFiles)
+  TCnRoFiles = class(TCnBaseNode, ICnRoFiles)
   private
     FCapacity: Integer;
     FColumnSorting: string;
@@ -210,7 +204,7 @@ type
     constructor Create;
     destructor Destroy; override;
   end;
-  
+
 function GetCurrTime(ALocalData: Boolean): string;
 var
   S: string;
@@ -235,6 +229,11 @@ end;
 function CompareOpenedTime(Item1, Item2: Pointer): Integer;
 begin
   Result := AnsiCompareStr(PCnRoFileEntry(Item1)^.OpenedTime, PCnRoFileEntry(Item2)^.OpenedTime);
+end;
+
+function CreateReopener: ICnReopener;
+begin
+  Result := TCnIniContainer.Create;
 end;
 
 constructor TCnNodeManager.Create(aNodeSize: Cardinal);
@@ -302,20 +301,22 @@ begin
   FillChar(Result^, FNodeSize, 0);
 end;
 
-procedure TCnNodeManager.FreeNode(aNode: Pointer);
+procedure TCnNodeManager.FreeNode(ANode: Pointer);
 begin
-  if (aNode = nil) then Exit;
-  PCnGenericNode(aNode)^.gnNext := FFreeList;
-  FFreeList := aNode;
+  if ANode = nil then
+    Exit;
+
+  PCnGenericNode(ANode)^.gnNext := FFreeList;
+  FFreeList := ANode;
 end;
 
-constructor TCnBaseClass.Create(ANodeSize: Integer);
+constructor TCnBaseNode.Create(ANodeSize: Integer);
 begin
   inherited Create;
-  FNodeMgr := GetNodeManager(ANodeSize);
+  FNodeMgr := TCnNodeManager.Create(ANodeSize);
 end;
 
-destructor TCnBaseClass.Destroy;
+destructor TCnBaseNode.Destroy;
 begin
   FNodeMgr := nil;
   inherited Destroy;
@@ -355,7 +356,7 @@ begin
     Temp.Key := '';
     Temp.Value := nil;
     NodeMgr.FreeNode(Temp);
-  end; //end for
+  end;
   FItems.Clear;
 end;
 
@@ -371,7 +372,7 @@ begin
       Result := PCnStrIntfMapEntry(FItems[I]).Value;
       Exit;
     end;
-  end; //end for
+  end;
 end;
 
 function TCnStrIntfMap.IsEmpty: Boolean;
@@ -634,10 +635,10 @@ procedure TCnIniContainer.CreateRoFilesList;
 var
   I: Integer;
 begin
-  FRoFilesList := GetStrIntfMap;
+  FRoFilesList := TCnStrIntfMap.Create(SizeOf(TCnStrIntfMapEntry));
   with FRoFilesList do
     for I := LowFileType to HighFileType do
-      Add(FileType[I], GetRoFiles(iDefaultFileQty));
+      Add(FileType[I], TCnRoFiles.Create(iDefaultFileQty));
 end;
 
 procedure TCnIniContainer.DestroyRoFilesList;
@@ -943,28 +944,6 @@ begin
       WriteString(ASection, SFilePrefix + IntToStr(I), GetString(I));
     end;
   end;
-end;
-
-{******************************************************************************}
-
-function GetNodeManager(ANodeSize: Cardinal): ICnNodeManager;
-begin
-  Result := TCnNodeManager.Create(ANodeSize);
-end;
-
-function GetStrIntfMap(): ICnStrIntfMap;
-begin
-  Result := TCnStrIntfMap.Create(SizeOf(TCnStrIntfMapEntry));
-end;
-
-function GetRoFiles(ADefaultCap: Integer = iDefaultFileQty): ICnRoFiles;
-begin
-  Result := TCnRoFiles.Create(ADefaultCap);
-end;
-
-function GetReopener(): ICnReopener;
-begin
-  Result := TCnIniContainer.Create;
 end;
 
 function TCnIniContainer.GetAutoSaveInterval: Cardinal;

@@ -24,11 +24,12 @@ unit CnRoInterfaces;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：打开历史文件的接口单元
 * 单元作者：Leeon (real-like@163.com); John Howe
-* 备    注：
+* 备    注：结构给整得太复杂了导致维护极其困难
+*
 *           - INodeManager: 节点管理器接口
-*           - IStrIntfMap : 字符串对应接口Map接口
+*           - IStrIntfMap : 字符串对应接口 Map 接口
 *           - IRoFiles    : 记录保存文件接口
-*           - IReopener   : Reopener调用接口
+*           - IReopener   : Reopener 调用接口
 *           - IRoOptions  : 选项接口
 *
 * 开发平台：PWin2000Pro + Delphi 5.02
