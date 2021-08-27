@@ -130,7 +130,7 @@
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Uses Units Tools">
-			<param name="Local" value="wizards\cnusescleaner.htm">
+			<param name="Local" value="wizards\cnusestools.htm">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="IDE Config Backup Restore Tool">

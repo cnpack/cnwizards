@@ -130,7 +130,7 @@
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="引用單元工具">
-			<param name="Local" value="wizards\cnusescleaner.htm">
+			<param name="Local" value="wizards\cnusestools.htm">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="IDE 配置備份恢復工具">
