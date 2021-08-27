@@ -1480,19 +1480,19 @@ var
   SCnInputHelperUnitNameList: string = 'Unit Names in uses Statement Area';
   SCnInputHelperUnitUsesList: string = 'Used Unit Names in Source Code Area';
   SCnInputHelperIDECodeTemplateList: string = 'IDE''s Code Templates';
-  SCnInputHelperIDESymbolList: string = 'Symbols getting from System Compiler';
+  SCnInputHelperIDESymbolList: string = 'Symbols Getting from System Compiler';
   SCnInputHelperUserSymbolList: string = 'User-defined Symbols and Code Templates';
   SCnInputHelperXMLCommentList: string = 'Code Comments in XML Style';
   SCnInputHelperJavaDocList: string = 'Code Comments in JavaDoc Style';
   SCnInputHelperSymbolNameIsEmpty: string = 'Symbol Name can NOT be Empty!';
-  SCnInputHelperSymbolKindError: string = 'Please select the Symbol Type!';
+  SCnInputHelperSymbolKindError: string = 'Please Select the Symbol Type!';
   SCnInputHelperUserMacroCaption: string = 'User-defined Macro';
   SCnInputHelperUserMacroPrompt: string = 'Please Input Macro Name:';
   SCnInputHelperDisableCodeCompletionSucc: string = 'IDE Code Completion Disabled.';
   SCnKeywordDefault: string = 'Unchange';
-  SCnKeywordLower: string = 'Lower case';
-  SCnKeywordUpper: string = 'Upper case';
-  SCnKeywordFirstUpper: string = 'Only first up';
+  SCnKeywordLower: string = 'Lower Case';
+  SCnKeywordUpper: string = 'Upper Case';
+  SCnKeywordFirstUpper: string = 'Only First Up';
 
   // CnProcListWizard
   SCnProcListWizardName: string = 'Procedure List Wizard';
