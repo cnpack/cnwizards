@@ -3602,6 +3602,7 @@ SCnInputHelperSortByScope=Automatique (&1)
 SCnInputHelperSortByText=par texte (&2)
 SCnInputHelperSortByLength=par longueur (&3)
 SCnInputHelperSortByKind=par type (&4)
+SCnInputHelperCopy=&Copie
 SCnInputHelperAddSymbol=Ajouter un &symbole défini par l'utilisateur...
 SCnInputHelperHelp=Aide et outil d'aide à la saisie
 SCnInputHelperKibitzCompileRunning=Récupération des symboles en arrière-plan

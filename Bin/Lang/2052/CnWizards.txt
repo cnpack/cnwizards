@@ -3606,6 +3606,7 @@ SCnInputHelperSortByScope=自动排序(&1)
 SCnInputHelperSortByText=按文本排序(&2)
 SCnInputHelperSortByLength=按长度排序(&3)
 SCnInputHelperSortByKind=按类型排序(&4)
+SCnInputHelperCopy=复制(&C)
 SCnInputHelperAddSymbol=添加自定义符号(&S)...
 SCnInputHelperHelp=输入助手帮助(&H)
 SCnInputHelperKibitzCompileRunning=正在后台获取标识符列表

@@ -3602,6 +3602,7 @@ SCnInputHelperSortByScope=Автоматически(&1)
 SCnInputHelperSortByText=По тексту(&2)
 SCnInputHelperSortByLength=По длине(&3)
 SCnInputHelperSortByKind=По типу(&4)
+SCnInputHelperCopy=Скопировать
 SCnInputHelperAddSymbol=Добавить идентификатор...
 SCnInputHelperHelp=Справка помощника ввода
 SCnInputHelperKibitzCompileRunning=Фоновое получение идентификаторов

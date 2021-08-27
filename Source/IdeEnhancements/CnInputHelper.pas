@@ -55,7 +55,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ComCtrls, ExtCtrls, ImgList, Menus, ToolsApi, IniFiles, Math,
-  Buttons, TypInfo, mPasLex, AppEvnts, Contnrs,
+  Buttons, TypInfo, mPasLex, AppEvnts, Contnrs, Clipbrd,
   {$IFDEF OTA_CODE_TEMPLATE_API} CodeTemplateAPI, {$ENDIF}
   CnConsts, CnCommon, CnWizClasses, CnWizConsts, CnWizUtils, CnWizIdeUtils,
   CnInputSymbolList, CnInputIdeSymbolList, CnIni, CnWizMultiLang, CnWizNotifier,
@@ -278,6 +278,7 @@ type
     procedure SetAutoPopup(Value: Boolean);
     procedure OnDispBtnMenu(Sender: TObject);
     procedure OnConfigMenu(Sender: TObject);
+    procedure OnCopyMenu(Sender: TObject);
     procedure OnAddSymbolMenu(Sender: TObject);
     procedure OnSortKindMenu(Sender: TObject);
     procedure OnIconMenu(Sender: TObject);
@@ -2927,6 +2928,7 @@ var
     Result.RadioItem := ARadioItem;
     Result.ImageIndex := AImageIndex;
   end;
+
 begin
   Menu.Images := dmCnSharedImages.SymbolImages;
   Menu.Items.Clear;
@@ -2951,8 +2953,9 @@ begin
     IconMenuItem.Add(NewMenuItem(GetSymbolKindName(Kind), OnIconMenu,
       Ord(Kind), Ord(Kind)));
   Menu.Items.Add(IconMenuItem);
-  
+
   Menu.Items.Add(NewMenuItem('-', nil));
+  Menu.Items.Add(NewMenuItem(SCnInputHelperCopy, OnCopyMenu));
   Menu.Items.Add(NewMenuItem(SCnInputHelperAddSymbol, OnAddSymbolMenu));
   Menu.Items.Add(NewMenuItem(SCnInputHelperConfig, OnConfigMenu));
 end;
@@ -2977,6 +2980,18 @@ end;
 procedure TCnInputHelper.OnConfigMenu(Sender: TObject);
 begin
   Config;
+end;
+
+procedure TCnInputHelper.OnCopyMenu(Sender: TObject);
+var
+  SymbolItem: TSymbolItem;
+begin
+  if List.ItemIndex >= 0 then
+  begin
+    SymbolItem := TSymbolItem(FItems.Objects[List.ItemIndex]);
+    if SymbolItem <> nil then
+      Clipboard.AsText := SymbolItem.Name + ' ' + SymbolItem.Description;
+  end;
 end;
 
 procedure TCnInputHelper.OnAddSymbolMenu(Sender: TObject);

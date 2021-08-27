@@ -1471,6 +1471,7 @@ var
   SCnInputHelperSortByText: string = 'by Text(&2)';
   SCnInputHelperSortByLength: string = 'by Length(&3)';
   SCnInputHelperSortByKind: string = 'by Type(&4)';
+  SCnInputHelperCopy: string = '&Copy';
   SCnInputHelperAddSymbol: string = 'Add a User-defined &Symbol...';
   SCnInputHelperHelp: string = 'Input Helper Tool &Help';
   SCnInputHelperKibitzCompileRunning: string = 'Retrieving Symbols in Background';

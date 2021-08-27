@@ -3602,6 +3602,7 @@ SCnInputHelperSortByScope=automatisch(&1)
 SCnInputHelperSortByText=nach Text(&2)
 SCnInputHelperSortByLength=nach Länge(&3)
 SCnInputHelperSortByKind=nach Typ(&4)
+SCnInputHelperCopy=&kopieren
 SCnInputHelperAddSymbol=Benutzer definiertes &Symbol hinzufügen...
 SCnInputHelperHelp=Eingabe Helfer Werkzeug &Hilfe
 SCnInputHelperKibitzCompileRunning=Hole Symbole im Hintergrund

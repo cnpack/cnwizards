@@ -1221,6 +1221,7 @@ begin
   TranslateStr(SCnInputHelperSortByText, 'SCnInputHelperSortByText');
   TranslateStr(SCnInputHelperSortByLength, 'SCnInputHelperSortByLength');
   TranslateStr(SCnInputHelperSortByKind, 'SCnInputHelperSortByKind');
+  TranslateStr(SCnInputHelperCopy, 'SCnInputHelperCopy');
   TranslateStr(SCnInputHelperAddSymbol, 'SCnInputHelperAddSymbol');
   TranslateStr(SCnInputHelperHelp, 'SCnInputHelperHelp');
   TranslateStr(SCnInputHelperKibitzCompileRunning, 'SCnInputHelperKibitzCompileRunning');
