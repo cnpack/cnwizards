@@ -2896,6 +2896,7 @@
   {$DEFINE SUPPORT_ENHANCED_INDEXEDPROPERTY}   // XE2 New RTTI Supports IndexedProperty
   {$DEFINE SUPPORT_ZLIB_WINDOWBITS}            // XE2 ZLib Supports WindowBits
   {$DEFINE SUPPORT_GDIPLUS}                    // XE2 Supports GDI+
+  {$DEFINE SUPPORT_INT64ARRAY}                 // XE2 Defined Int64Array
 {$ENDIF}
 
 {$IFDEF DELPHIXE_UP}
