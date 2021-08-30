@@ -108,6 +108,7 @@ type
     Open2: TMenuItem;
     OpeninExplorer2: TMenuItem;
     Help2: TMenuItem;
+    SearchNext2: TMenuItem;
     procedure actGenerateUsesTreeExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);

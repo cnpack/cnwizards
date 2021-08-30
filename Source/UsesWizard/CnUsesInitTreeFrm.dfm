@@ -66,6 +66,7 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
       Anchors = [akLeft, akTop, akRight, akBottom]
       HideSelection = False
       Indent = 19
+      PopupMenu = pmTree
       ReadOnly = True
       RightClickSelect = True
       TabOrder = 0
@@ -350,6 +351,9 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
     end
     object Search1: TMenuItem
       Action = actSearch
+    end
+    object SearchNext2: TMenuItem
+      Action = actSearchNext
     end
   end
   object dlgSave: TSaveDialog
