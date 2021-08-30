@@ -1278,6 +1278,12 @@ begin
   TranslateStr(SCnProcListErrorNoIntf, 'SCnProcListErrorNoIntf');
   TranslateStr(SCnProcListErrorNoImpl, 'SCnProcListErrorNoImpl');
 
+  // CnUsesTools
+  TranslateStr(SCnUsesToolsMenuCaption, 'SCnUsesToolsMenuCaption');
+  TranslateStr(SCnUsesToolsMenuHint, 'SCnUsesToolsMenuHint');
+  TranslateStr(SCnUsesToolsName, 'SCnUsesToolsName');
+  TranslateStr(SCnUsesToolsComment, 'SCnUsesToolsComment');
+
   // CnUsesCleaner
   TranslateStr(SCnUsesCleanerMenuCaption, 'SCnUsesCleanerMenuCaption');
   TranslateStr(SCnUsesCleanerMenuHint, 'SCnUsesCleanerMenuHint');

@@ -1,8 +1,8 @@
 inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
-  Left = 296
+  Left = 263
   Top = 143
-  Width = 791
-  Height = 570
+  Width = 830
+  Height = 578
   Caption = 'Uses Initialization Tree'
   Font.Charset = ANSI_CHARSET
   Icon.Data = {
@@ -22,7 +22,7 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
   PixelsPerInch = 96
   TextHeight = 13
   object grpFilter: TGroupBox
-    Left = 432
+    Left = 471
     Top = 40
     Width = 342
     Height = 81
@@ -53,16 +53,16 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
   object grpTree: TGroupBox
     Left = 8
     Top = 40
-    Width = 417
-    Height = 473
+    Width = 456
+    Height = 481
     Anchors = [akLeft, akTop, akRight, akBottom]
     Caption = 'Initialization Tree'
     TabOrder = 1
     object tvTree: TTreeView
       Left = 8
       Top = 16
-      Width = 401
-      Height = 449
+      Width = 440
+      Height = 457
       Anchors = [akLeft, akTop, akRight, akBottom]
       HideSelection = False
       Indent = 19
@@ -75,7 +75,7 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
   object pnlTop: TPanel
     Left = 0
     Top = 0
-    Width = 783
+    Width = 822
     Height = 28
     Align = alTop
     BevelOuter = bvNone
@@ -174,10 +174,10 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
     end
   end
   object grpInfo: TGroupBox
-    Left = 432
+    Left = 471
     Top = 120
     Width = 342
-    Height = 393
+    Height = 401
     Anchors = [akTop, akRight, akBottom]
     Caption = 'Unit &Info'
     TabOrder = 3
@@ -375,8 +375,6 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
     end
     object Edit1: TMenuItem
       Caption = '&Edit'
-      Hint = 'Analyse Uses Initialization Tree for Selected Project'
-      ImageIndex = 34
       object AnalyseProject1: TMenuItem
         Action = actGenerateUsesTree
       end
