@@ -193,7 +193,7 @@ procedure TCnUsesInitTreeForm.actGenerateUsesTreeExecute(Sender: TObject);
 var
   Proj, P: IOTAProject;
   I: Integer;
-  ProjDcu, S: string;
+  ProjDcu: string;
 begin
   Proj := nil;
   if cbbProject.ItemIndex <= 0 then // 当前工程
