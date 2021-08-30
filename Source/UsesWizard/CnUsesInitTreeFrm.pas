@@ -241,7 +241,8 @@ begin
 
   Screen.Cursor := crHourGlass;
   try
-    SearchAUnit(ProjDcu, FTree.Root.Text, FFileNames, FTree.Root, FTree, Proj);
+    SearchAUnit(ProjDcu, (FTree.Root as TCnUsesLeaf).SourceName, FFileNames,
+      FTree.Root, FTree, Proj);
   finally
     Screen.Cursor := crDefault;
   end;
@@ -328,7 +329,8 @@ var
 begin
   // 分析 DCU 或源码得到 intf 与 impl 的引用列表，并加入至 UnitLeaf 的直属子节点
   // 递归调用该方法，处理每个引用列表中的引用单元名
-  if  not FileExists(AFullDcuName) and not FileExists(AFullSourceName) then
+  if  not FileExists(AFullDcuName) and not FileExists(AFullSourceName)
+    and not CnOtaIsFileOpen(AFullSourceName) then // 还没保存并且还没编译的情况也要处理
     Exit;
 
   UsesList := TStringList.Create;
