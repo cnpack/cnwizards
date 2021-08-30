@@ -256,6 +256,7 @@ begin
   FLibPaths := TStringList.Create;
   FTree := TCnTree.Create(TCnUsesLeaf);
   FProjectList := TInterfaceList.Create;
+  tlbUses.ShowHint := WizOptions.ShowHint;
 
   FTree.OnSaveANode := TreeSaveANode;
 
