@@ -176,9 +176,9 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
   end
   object grpInfo: TGroupBox
     Left = 471
-    Top = 120
+    Top = 124
     Width = 342
-    Height = 401
+    Height = 397
     Anchors = [akTop, akRight, akBottom]
     Caption = 'Unit &Info'
     TabOrder = 3

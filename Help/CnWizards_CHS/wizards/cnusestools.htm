@@ -84,6 +84,37 @@ IDE 仍会自动添加上去。另外还可能包含工程中其它的窗体单元，这些窗体上的部分组件被
   <li>
 <p class="text"><b>帮助</b>：显示此帮助信息。</p></li>
 </ul>
+<p class="text" align="left"></p>
+<p class="title">　</p>
+<p class="title">引用单元初始化顺序</p>
+<p class="text" align="left">本功能能够分析当前工程中所有 Unit 的初始化顺序，并将其列为树状显示，同时可区分单元类型与引用类型等。</p>
+<p class="text" align="left">本功能执行后界面如下图。左边是初始化树显示区域，右边是显示过滤设置，以及文件详细信息。</p>
+<p class="text" align="center">　<img src="usesinittree.png"></p>
+<p class="text" align="left">
+<ul>
+  <li>
+<p class="text"><b>关闭</b>：关闭此窗口。</p></li>
+  <li>
+<p class="text"><b>工程</b>：下拉框列表，可在此选择需要处理的工程，默认为当前工程。</p></li>
+	<li>
+<p class="text"><b>分析工程</b>：点击此按钮将编译当前工程，如果编译成功，则分析编译后的 dcu 文件以生成初始化树。</p></li>
+  <li>
+<p class="text"><b>导出</b>：将初始化树的内容导出成文本文件。</p></li>
+	<li>
+<p class="text"><b>打开</b>：在 IDE 中打开所选中的源文件。</p></li>
+  <li>
+<p class="text"><b>在资源管理器中打开</b>：打开资源管理器并定位选中的源文件。</p></li>
+  <li>
+<p class="text"><b>查找</b>：弹出查找对话框，供在初始化树中根据文本查找单元节点。</p></li>
+  <li>
+<p class="text"><b>查找下一个</b>：重复上一次查找。</p></li>
+	<li>
+<p class="text"><b>帮助</b>：显示此帮助信息。</p></li>
+	<li>
+<p class="text"><b>显示工程搜索路径中的单元</b>：是否在初始化树中显示处于工程搜索路径中的单元。</p></li>
+	<li>
+<p class="text"><b>显示系统搜索路径中的单元</b>：是否在初始化树中显示处于系统搜索路径中的单元。</p></li>
+</ul>
 <p class="title" align="left">　<p class="title" align="left">相关主题<p class="text" align="left">
 <a href="wizards.htm">IDE 专家基本操作</a><p class="text" align="left">
 <a href="../options/wizconfig.htm">IDE 专家设置</a><p class="text" align="left">
