@@ -69,8 +69,6 @@ type
     lblDcuFile: TLabel;
     lblSearchType: TLabel;
     lblUsesType: TLabel;
-    lblSourceFileText: TLabel;
-    lblDcuFileText: TLabel;
     lblSearchTypeText: TLabel;
     lblUsesTypeText: TLabel;
     actExport: TAction;
@@ -109,6 +107,8 @@ type
     OpeninExplorer2: TMenuItem;
     Help2: TMenuItem;
     SearchNext2: TMenuItem;
+    mmoSourceFileText: TMemo;
+    mmoDcuFileText: TMemo;
     procedure actGenerateUsesTreeExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -461,8 +461,8 @@ var
 begin
   ALeaf := TCnUsesLeaf(Leaf);
 
-  lblSourceFileText.Caption := ALeaf.SourceName;
-  lblDcuFileText.Caption := ALeaf.DcuName;
+  mmoSourceFileText.Lines.Text := ALeaf.SourceName;
+  mmoDcuFileText.Lines.Text := ALeaf.DcuName;
   if ALeaf.SearchType <> mstInvalid then
     lblSearchTypeText.Caption := csSearchTypeStrings[ALeaf.SearchType]^
   else
@@ -694,7 +694,7 @@ end;
 
 function TCnUsesInitTreeForm.GetHelpTopic: string;
 begin
-  Result := 'CnUsesCleaner';
+  Result := 'CnUsesUnitsTools';
 end;
 
 {$ENDIF CNWIZARDS_CNUSESTOOLS}

@@ -234,26 +234,6 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
       Font.Style = [fsBold]
       ParentFont = False
     end
-    object lblSourceFileText: TLabel
-      Left = 16
-      Top = 40
-      Width = 318
-      Height = 73
-      Anchors = [akLeft, akTop, akRight]
-      AutoSize = False
-      ShowAccelChar = False
-      WordWrap = True
-    end
-    object lblDcuFileText: TLabel
-      Left = 16
-      Top = 144
-      Width = 318
-      Height = 73
-      Anchors = [akLeft, akTop, akRight]
-      AutoSize = False
-      ShowAccelChar = False
-      WordWrap = True
-    end
     object lblSearchTypeText: TLabel
       Left = 16
       Top = 240
@@ -271,6 +251,26 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
       Anchors = [akLeft, akTop, akRight]
       AutoSize = False
       ShowAccelChar = False
+    end
+    object mmoSourceFileText: TMemo
+      Left = 16
+      Top = 48
+      Width = 313
+      Height = 65
+      BorderStyle = bsNone
+      Color = clBtnFace
+      ReadOnly = True
+      TabOrder = 0
+    end
+    object mmoDcuFileText: TMemo
+      Left = 16
+      Top = 152
+      Width = 313
+      Height = 65
+      BorderStyle = bsNone
+      Color = clBtnFace
+      ReadOnly = True
+      TabOrder = 1
     end
   end
   object actlstUses: TActionList
