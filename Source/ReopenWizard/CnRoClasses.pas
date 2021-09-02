@@ -210,7 +210,7 @@ var
   S: string;
 begin
   if (ALocalData) then
-    S := {$IFDEF DelphiXE3_UP}FormatSettings.{$ENDIF}LongTimeFormat
+    S := {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}LongTimeFormat
   else
     S := SDataFormat;
   Result := FormatDateTime(S, Now);
@@ -295,7 +295,9 @@ end;
 
 function TCnNodeManager.AllocNodeClear: Pointer;
 begin
-  if (FFreeList = nil) then AllocNewPage;
+  if (FFreeList = nil) then
+    AllocNewPage;
+
   Result := FFreeList;
   FFreeList := PCnGenericNode(FFreeList)^.gnNext;
   FillChar(Result^, FNodeSize, 0);
@@ -313,7 +315,7 @@ end;
 constructor TCnBaseNode.Create(ANodeSize: Integer);
 begin
   inherited Create;
-  FNodeMgr := TCnNodeManager.Create(ANodeSize);
+  FNodeMgr := TCnNodeManager.Create(ANodeSize) as ICnNodeManager;
 end;
 
 destructor TCnBaseNode.Destroy;
@@ -325,7 +327,7 @@ end;
 constructor TCnStrIntfMap.Create(ANodeSize: Integer);
 begin
   inherited Create(ANodeSize);
-  FItems := TList.Create();
+  FItems := TList.Create;
 end;
 
 destructor TCnStrIntfMap.Destroy;
@@ -391,7 +393,7 @@ begin
       Result := PCnStrIntfMapEntry(FItems[I]).Key;
       Exit;
     end;
-  end; //end for
+  end;
 end;
 
 procedure TCnStrIntfMap.Remove(const Key: string);
@@ -410,7 +412,7 @@ begin
       FItems.Delete(I);
       Exit;
     end;
-  end; //end for
+  end;
 end;
 
 constructor TCnRoFiles.Create(ADefaultCap: Integer);
@@ -453,7 +455,7 @@ begin
   for I := FItems.Count - 1 downto 0 do
   begin
     Delete(I);
-  end; //end for
+  end;
 end;
 
 function TCnRoFiles.Count: Integer;
@@ -496,13 +498,14 @@ begin
   with PCnRoFileEntry(FItems[Index])^ do
   begin
     Result := FileName + SSeparator + OpenedTime + SSeparator + ClosingTime + SSeparator;
-  end; //end with
+  end;
 end;
 
 function TCnRoFiles.IndexOf(AFileName: string): Integer;
 begin
   for Result := 0 to FItems.Count - 1 do
-    if (AnsiSameText(PCnRoFileEntry(GetNodes(Result))^.FileName, AFileName)) then Exit;
+    if (AnsiSameText(PCnRoFileEntry(GetNodes(Result))^.FileName, AFileName))
+      then Exit;
   Result := -1;
 end;
 
@@ -522,7 +525,8 @@ var
   AParam: array[0..2] of string;
   P, Start: PChar;
 begin
-  if (AnsiPos(SSeparator, AValue) = 0) then Exit;
+  if (AnsiPos(SSeparator, AValue) = 0) then
+    Exit;
   
   P := Pointer(AValue);
   I := 0;
@@ -533,14 +537,16 @@ begin
     System.SetString(AParam[I], Start, P - Start);
     Inc(I);
     if P^ = SSeparator then Inc(P);
-  end; //end while
+  end;
 
-  if (not FileExists(AParam[0])) then Exit;
+  if (not FileExists(AParam[0])) then
+    Exit;
   
   if (Index > Count - 1) or (Index < 0) then
   begin
     AddFileAndTime(AParam[0], AParam[1], AParam[2]);
-  end else
+  end
+  else
   begin
     PCnRoFileEntry(FItems[Index])^.FileName := AParam[0];
     PCnRoFileEntry(FItems[Index])^.OpenedTime:= AParam[1];
@@ -555,12 +561,14 @@ end;
 
 procedure TCnRoFiles.UpdateTime(AIndex: Integer; AOpenedTime, AClosingTime: string);
 begin
-  if (AIndex < 0) then Exit;
+  if (AIndex < 0) then
+    Exit;
+
   with PCnRoFileEntry(FItems[AIndex])^ do
   begin
     if (AOpenedTime <> '') then OpenedTime := AOpenedTime;
     if (AClosingTime <> '') then ClosingTime := AClosingTime;
-  end; //end with
+  end;
 end;
 
 constructor TCnIniContainer.Create;
@@ -595,7 +603,9 @@ var
   end;
   
 begin
-  if FileExists(GetIniFileName) then Exit;
+  if FileExists(GetIniFileName) then
+    Exit;
+
   Assign(F, GetIniFileName);
   Rewrite(F);
   Writeln(F, Format(SSection, [SCapacity]));
@@ -609,8 +619,7 @@ begin
   Writeln(F, Format(SSection, [SDefaults]));
   Writeln(F, AddBool(SIgnoreDefaultUnits, True));
   Writeln(F, AddNum(SDefaultPage, 2));
-  //  Writeln(F, AddBool(SFormPersistance, True));
-  //  Writeln(F, AddBool(SColumnPersistance, False));
+
   Writeln(F, AddBool(SSortPersistance, True));
   Writeln(F, AddBool(SLocalDate, False));
   
@@ -635,10 +644,10 @@ procedure TCnIniContainer.CreateRoFilesList;
 var
   I: Integer;
 begin
-  FRoFilesList := TCnStrIntfMap.Create(SizeOf(TCnStrIntfMapEntry));
+  FRoFilesList := TCnStrIntfMap.Create(SizeOf(TCnStrIntfMapEntry)) as ICnStrIntfMap;
   with FRoFilesList do
     for I := LowFileType to HighFileType do
-      Add(FileType[I], TCnRoFiles.Create(iDefaultFileQty));
+      Add(FileType[I], TCnRoFiles.Create(iDefaultFileQty) as ICnRoFiles);
 end;
 
 procedure TCnIniContainer.DestroyRoFilesList;
@@ -791,7 +800,9 @@ begin
     ASetTime(vFiles, I, GetLocalDate);
   end else
   begin
-    if (GetIgnoreDefaultUnits) and (IsDefaultUnit(AFileName)) then Exit;
+    if (GetIgnoreDefaultUnits) and (IsDefaultUnit(AFileName)) then
+      Exit;
+
     if vFiles.Count = vFiles.Capacity then
       vFiles.Delete(0)
     else if vFiles.Capacity < vFiles.Count then
@@ -819,8 +830,7 @@ begin
     SetLocalDate(ReadBool(SDefaults, SLocalDate, False));
     SetSortPersistance(ReadBool(SDefaults, SSortPersistance, False));
     SetAutoSaveInterval(ReadInteger(SDefaults, SAutoSaveInterval, 5));
-    //SetColumnPersistance(ReadBool(SDefaults, SColumnPersistance, False));
-    //SetFormPersistance(ReadBool(SDefaults, SFormPersistance, True));
+
     for I := LowFileType to HighFileType do
     begin
       Files[FileType[I]].Capacity := ReadInteger(SCapacity, FileType[I], iDefaultFileQty);
