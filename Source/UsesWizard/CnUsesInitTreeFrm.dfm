@@ -54,7 +54,7 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
     Left = 8
     Top = 40
     Width = 456
-    Height = 481
+    Height = 465
     Anchors = [akLeft, akTop, akRight, akBottom]
     Caption = 'Initialization Tree'
     TabOrder = 1
@@ -62,7 +62,7 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
       Left = 8
       Top = 16
       Width = 440
-      Height = 457
+      Height = 441
       Anchors = [akLeft, akTop, akRight, akBottom]
       HideSelection = False
       Indent = 19
@@ -178,7 +178,7 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
     Left = 471
     Top = 124
     Width = 342
-    Height = 397
+    Height = 381
     Anchors = [akTop, akRight, akBottom]
     Caption = 'Unit &Info'
     TabOrder = 3
@@ -272,6 +272,14 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
       ReadOnly = True
       TabOrder = 1
     end
+  end
+  object statUses: TStatusBar
+    Left = 0
+    Top = 513
+    Width = 822
+    Height = 19
+    Panels = <>
+    SimplePanel = True
   end
   object actlstUses: TActionList
     Images = dmCnSharedImages.Images

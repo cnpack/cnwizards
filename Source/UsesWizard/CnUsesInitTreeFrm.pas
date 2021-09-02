@@ -109,6 +109,7 @@ type
     SearchNext2: TMenuItem;
     mmoSourceFileText: TMemo;
     mmoDcuFileText: TMemo;
+    statUses: TStatusBar;
     procedure actGenerateUsesTreeExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -230,6 +231,8 @@ begin
 
   FTree.Clear;
   FFileNames.Clear;
+  statUses.SimpleText := '';
+
   FDcuPath := GetProjectDcuPath(Proj);
   GetLibraryPath(FLibPaths, False);
 
@@ -339,6 +342,7 @@ begin
   try
     if FileExists(AFullDcuName) then // 有 DCU 就解析 DCU
     begin
+      statUses.SimpleText := AFullDcuName;
       Info := TCnUnitUsesInfo.Create(AFullDcuName);
       try
         for I := 0 to Info.IntfUsesCount - 1 do
@@ -351,8 +355,10 @@ begin
     end
     else // 否则解析源码
     begin
+      statUses.SimpleText := AFullSourceName;
       ParseUnitUsesFromFileName(AFullSourceName, UsesList);
     end;
+    Application.ProcessMessages;
 
     // UsesList 里拿到各引用名，无路径，需找到源文件与编译后的 dcu
     for I := 0 to UsesList.Count - 1 do
@@ -412,6 +418,8 @@ begin
   begin
     if tvTree.Items.Count > 0 then
       tvTree.Items[0].Expand(True);
+
+    statUses.SimpleText := Format(SCnBookmarkFileCount, [tvTree.Items.Count]);
     Exit;
   end;
 
@@ -428,6 +436,8 @@ begin
 
   if tvTree.Items.Count > 0 then
     tvTree.Items[0].Expand(True);
+
+  statUses.SimpleText := Format(SCnBookmarkFileCount, [tvTree.Items.Count]);
 end;
 
 procedure TCnUsesInitTreeForm.chkSystemPathClick(Sender: TObject);
