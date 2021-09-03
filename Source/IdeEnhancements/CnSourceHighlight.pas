@@ -37,7 +37,9 @@ unit CnSourceHighlight;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 修改记录：2016.05.22
+* 修改记录：2021.09.03
+*               加入对区域折叠标记的高亮配对显示。
+*           2016.05.22
 *               修正纯英文环境下 Unicode IDE 内的宽字节字符转换成 Ansi 有误的问题
 *               全文解析时允许将普通宽字节字符替换成单个或两个空格，从而避免直接
 *               转换时被半角问号代替导致计算偏差。
@@ -95,7 +97,7 @@ interface
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms,
   ToolsAPI, IniFiles, Contnrs, ExtCtrls, TypInfo, Math,
-  {$IFDEF COMPILER6_UP}Variants, {$ENDIF}
+  {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
   CnWizClasses, CnEditControlWrapper, CnWizNotifier, CnIni, CnWizUtils, CnCommon,
   CnConsts, CnWizConsts, CnWizIdeUtils, CnWizShortCut, mPasLex, CnPasWideLex,
   mwBCBTokenList, CnBCBWideTokenList, CnPasCodeParser, CnWidePasParser,
@@ -137,11 +139,11 @@ const
   csCppFlowTokenKinds: TIdentDirect = [ctkgoto, ctkreturn, ctkcontinue, ctkbreak];
   // If change here, CppCodeParser also need change.
 
-  csPasCompDirectiveTokenStr: array[0..5] of AnsiString =
-    ('{$IF ', '{$IFDEF ', '{$IFNDEF ', '{$ELSE', '{$ENDIF', '{$IFEND');
+  csPasCompDirectiveTokenStr: array[0..7] of AnsiString =
+    ('{$IF ', '{$IFDEF ', '{$IFNDEF ', '{$ELSE', '{$ENDIF', '{$IFEND', '{$REGION', '{$ENDREGION');
 
-  csPasCompDirectiveTypes: array[0..5] of TCnCompDirectiveType =
-    (ctIf, ctIfDef, ctIfNDef, ctElse, ctEndIf, ctIfEnd);
+  csPasCompDirectiveTypes: array[0..7] of TCnCompDirectiveType =
+    (ctIf, ctIfDef, ctIfNDef, ctElse, ctEndIf, ctIfEnd, ctRegion, ctEndRegion);
 
   csCppCompDirectiveKinds: TIdentDirect = [ctkdirif, ctkdirifdef, ctkdirifndef,
     ctkdirelif, ctkdirelse, ctkdirendif];
@@ -218,6 +220,7 @@ type
 
     FStack: TStack;  // 解析关键字配对时以及解析 C 括号配对时以及 C 编译指令配对时以及 Pascal 编译指令配对时使用，存储 Pair 对象的栈
     FIfThenStack: TStack; // 为了 if then 而存储 Pair 的引用的栈
+    FRegionStack: TStack; // 为了 $REGION 和 $ENDREGION 配对而存储 Pair 的引用的栈
     FCurrentToken: TCnGeneralPasToken;
     FCurMethodStartToken, FCurMethodCloseToken: TCnGeneralPasToken;
     FCurrentTokenName: TCnIdeTokenString; // D567/2005~2007/2009 分别是 AnsiString/WideString/UnicodeString
@@ -2203,7 +2206,7 @@ begin
 {$IFDEF DEBUG}
 //      CnDebugger.LogFmt('CompDirectiveInfo Check CompDirectivtType: %d', [Ord(PToken.CompDirectivtType)]);
 {$ENDIF}
-        if PToken.CompDirectivtType in [ctIf, ctIfDef, ctIfNDef] then
+        if PToken.CompDirectivtType in [ctIf, ctIfDef, ctIfNDef, ctRegion] then
         begin
           Pair := TCnCompDirectivePair.Create;
           Pair.StartToken := PToken;
@@ -2212,7 +2215,10 @@ begin
           Pair.Left := PToken.EditCol;
           Pair.Layer := PToken.ItemLayer - 1;
 
-          FStack.Push(Pair);
+          if PToken.CompDirectivtType <> ctRegion then
+            FStack.Push(Pair)
+          else
+            FRegionStack.Push(Pair);
         end
         else if PToken.CompDirectivtType = ctElse then
         begin
@@ -2223,12 +2229,20 @@ begin
               Pair.AddMidToken(PToken, PToken.EditCol);
           end;
         end
-        else if PToken.CompDirectivtType in [ctEndIf, ctIfEnd] then
+        else if PToken.CompDirectivtType in [ctEndIf, ctIfEnd, ctEndRegion] then
         begin
-          if FStack.Count = 0 then
-            Continue;
-
-          Pair := TCnCompDirectivePair(FStack.Pop);
+          if PToken.CompDirectivtType = ctEndRegion then
+          begin
+            if FRegionStack.Count = 0 then
+              Continue;
+            Pair := TCnCompDirectivePair(FRegionStack.Pop);
+          end
+          else
+          begin
+            if FStack.Count = 0 then
+              Continue;
+            Pair := TCnCompDirectivePair(FStack.Pop);
+          end;
 
           Pair.EndToken := PToken;
           Pair.EndLeft := PToken.EditCol;
@@ -2244,6 +2258,8 @@ begin
     finally
       for I := 0 to FStack.Count - 1 do
         TCnCompDirectivePair(FStack.Pop).Free;
+      for I := 0 to FRegionStack.Count - 1 do
+        TCnCompDirectivePair(FRegionStack.Pop).Free;
     end;
   end;
 {$IFDEF DEBUG}
@@ -2314,6 +2330,7 @@ begin
 
   FStack := TStack.Create;
   FIfThenStack := TStack.Create;
+  FRegionStack := TStack.Create;
 
   FModified := True;
   FChanged := True;
@@ -2324,6 +2341,7 @@ begin
   Clear;
   FStack.Free;
   FIfThenStack.Free;
+  FRegionStack.Free;
 
   FKeyLineList.Free;
   FIdLineList.Free;
