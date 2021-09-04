@@ -1638,7 +1638,25 @@ begin
       if Assigned(FCodeGen) then
       begin
         if not InIgnoreArea then
-          FCodeGen.Write(BlankString);
+        begin
+          BlankStr := TrimBlank(BlankString);
+          if BlankStr <> '' then
+          begin
+            FCodeGen.BackSpaceLastSpaces;
+            // 如果当前是保留单个空行模式，且不是语句中，则 BlankStr 开头的空格与回车要省略，避免出现多余的换行
+            // 如语句中的判断有误，则可能出现该换行的行注释拼到同一行的情况
+            if FKeepOneBlankLine and not IsInStatement and IsStringStartWithSpacesCRLF(BlankStr) then
+            begin
+              Idx := Pos(#13#10, BlankStr);
+              if Idx > 0 then
+                Delete(BlankStr, 1, Idx + 1); // -1 + #13#10 的长度 2
+              FCodeGen.WriteBlank(BlankStr); // 省略前面的空格与回车
+            end
+            else
+              FCodeGen.WriteBlank(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
+          end;
+        end;
+
         FCodeGen.Write(TokenString); // Write ELSE/ELSEIF itself
       end;
 
@@ -1656,7 +1674,24 @@ begin
           if Assigned(FCodeGen) then
           begin
             if not InIgnoreArea then
-              FCodeGen.Write(BlankString);
+            begin
+              BlankStr := TrimBlank(BlankString);
+              if BlankStr <> '' then
+              begin
+                FCodeGen.BackSpaceLastSpaces;
+                // 如果当前是保留单个空行模式，且不是语句中，则 BlankStr 开头的空格与回车要省略，避免出现多余的换行
+                // 如语句中的判断有误，则可能出现该换行的行注释拼到同一行的情况
+                if FKeepOneBlankLine and not IsInStatement and IsStringStartWithSpacesCRLF(BlankStr) then
+                begin
+                  Idx := Pos(#13#10, BlankStr);
+                  if Idx > 0 then
+                    Delete(BlankStr, 1, Idx + 1); // -1 + #13#10 的长度 2
+                  FCodeGen.WriteBlank(BlankStr); // 省略前面的空格与回车
+                end
+                else
+                  FCodeGen.WriteBlank(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
+              end;
+            end;
 
             // 特殊处理，{$ENDIF} 这种末尾的换行不写
             if (Pos('{$ENDIF', UpperCase(TmpToken)) = 1) or
