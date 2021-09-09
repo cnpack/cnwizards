@@ -43,7 +43,7 @@ interface
 uses
   Windows, SysUtils, Messages, Classes, Graphics, Forms, Controls, StdCtrls,
   Buttons, ExtCtrls, CheckLst, IniFiles, Menus, ActnList, FileCtrl, ToolsAPI,
-  CnCommon, CnWizConsts, CnWizMultiLang, CnPopupMenu;
+  CnCommon, CnWizConsts, CnWizMultiLang, CnWizIdeUtils, CnPopupMenu;
 
 type
   TCnProjectDelTempForm = class(TCnTranslateForm)
@@ -86,6 +86,8 @@ type
     btnHelp: TButton;
     chkCheckSource: TCheckBox;
     chkRemoveHistory: TCheckBox;
+    btnSelAllDirs: TSpeedButton;
+    btnSelAllExts: TSpeedButton;
     procedure btnAddClick(Sender: TObject);
     procedure btnRemoveClick(Sender: TObject);
     procedure btnAddExtClick(Sender: TObject);
@@ -103,6 +105,9 @@ type
     procedure cbbSelectTypeChange(Sender: TObject);
     procedure btnCancelClick(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
+    procedure chkCheckSourceClick(Sender: TObject);
+    procedure btnSelAllDirsClick(Sender: TObject);
+    procedure btnSelAllExtsClick(Sender: TObject);
   private
     FTotalBytesCleaned: Integer;
     FTotalFilesCleaned: Integer;
@@ -139,7 +144,7 @@ implementation
 {$R *.dfm}
 
 uses
-  {$IFDEF COMPILER6_UP}Variants, {$ENDIF} CnWizUtils, CnWizOptions, Math;
+  {$IFDEF COMPILER6_UP}Variants, {$ENDIF} CnWizUtils, CnDebug, CnWizOptions, Math;
 
 const
   csDelTemp = 'DelTemp';
@@ -264,21 +269,26 @@ var
   var
     DirectoryVariant: Variant;
     Directory: string;
-    ProjectDir: string;
+    ProjectDir, S: string;
   begin
-    if CnOtaGetActiveProjectOption(OptionName, DirectoryVariant) then
-      if (VarType(DirectoryVariant) = varString) or
-        (VarType(DirectoryVariant) = varOleStr) then
+    S := '';
+    if Project.ProjectOptions <> nil then
+      S := VarToStr(Project.ProjectOptions.GetOptionValue(OptionName));
+
+    if S = '' then
+      S := CnOtaGetProjectCurrentBuildConfigurationValue(nil, OptionName);
+
+    if S <> '' then
+    begin
+      Directory := ReplaceToActualPath(S, Project);
+      ProjectDir := _CnExtractFileDir(Project.FileName);
+      if Trim(Directory) <> '' then
       begin
-        Directory := ReplaceToActualPath(DirectoryVariant, Project);
-        ProjectDir := _CnExtractFileDir(Project.FileName);
-        if Trim(Directory) <> '' then
-        begin
-          Directory := LinkPath(ProjectDir, Directory);
-          if DirectoryExists(Directory) then
-            AddPathToStrings(Directory);
-        end;
+        Directory := LinkPath(ProjectDir, Directory);
+        if DirectoryExists(Directory) then
+          AddPathToStrings(Directory);
       end;
+    end;
   end;
 
   procedure AddProjectToList(Project: IOTAProject; NeedBin: Boolean);
@@ -295,10 +305,17 @@ var
       TempPathString := _CnExtractFileDir(ModuleInfo.FileName);
       AddPathToStrings(TempPathString);
     end;
+
     if NeedBin then
     begin
-      AddProjectDir(Project, 'OutputDir');
-      AddProjectDir(Project, 'UnitOutputDir');
+      TempPathString := CnOtaGetProjectOutputDirectory(Project);
+      if DirectoryExists(TempPathString) then
+        AddPathToStrings(TempPathString);
+
+      TempPathString := GetProjectDcuPath(Project);
+      if DirectoryExists(TempPathString) then
+        AddPathToStrings(TempPathString);
+
       AddProjectDir(Project, 'PkgDcpDir');
     end;
   end;
@@ -581,7 +598,8 @@ var
   ToDelete: Boolean;
 begin
   Abort := FAbort;
-  if Abort then Exit;
+  if Abort then
+    Exit;
 
   for I := 0 to CleanExtList.Count - 1 do
   begin
@@ -671,6 +689,27 @@ end;
 procedure TCnProjectDelTempForm.SetCheckDirs(const Value: Boolean);
 begin
   FCheckDirs := Value;
+end;
+
+procedure TCnProjectDelTempForm.chkCheckSourceClick(Sender: TObject);
+begin
+  CheckSource := chkCheckSource.Checked;
+end;
+
+procedure TCnProjectDelTempForm.btnSelAllDirsClick(Sender: TObject);
+var
+  I: Integer;
+begin
+  for I := 0 to chklstDirs.Items.Count - 1 do
+    chklstDirs.Checked[I] := True;
+end;
+
+procedure TCnProjectDelTempForm.btnSelAllExtsClick(Sender: TObject);
+var
+  I: Integer;
+begin
+  for I := 0 to chklstExtensions.Items.Count - 1 do
+    chklstExtensions.Checked[I] := True;
 end;
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}
