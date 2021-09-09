@@ -29,12 +29,14 @@ unit CnProjectExtWizard;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2012.09.19 by shenloqi
-*               移植到Delphi XE3
+* 修改记录：2021.09.09 by LiuXiao
+*               抽出获取工程输出目录的函数
+*           2012.09.19 by shenloqi
+*               移植到 Delphi XE3
 *           2005.05.10
 *               Alan 新增工程目录创建器
 *           2005.05.03
-*               hubdog 将大部分的ExploreDir调用改成ExploreFile调用
+*               hubdog 将大部分的 ExploreDir 调用改成 ExploreFile 调用
 *           2004.12.31 V3.0
 *               qsoft 新加项目备份向导
 *           2004.07.22 V2.0
@@ -75,7 +77,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, Dialogs, ActnList,
   ToolsAPI, IniFiles, ShellAPI, Menus, FileCtrl, {$IFDEF BDS} Variants, {$ENDIF}
-  {$IFDEF DelphiXE3_UP}Actions,{$ENDIF}
+  {$IFDEF DelphiXE3_UP} Actions,{$ENDIF}
   CnCommon, CnWizClasses, CnWizUtils, CnConsts, CnWizConsts, CnProjectViewUnitsFrm,
   CnProjectViewFormsFrm, CnProjectListUsedFrm, CnProjectDelTempFrm, CnIni,
   CnWizCompilerConst, CnProjectBackupFrm, CnProjectDirBuilderFrm, CnWizMethodHook,
@@ -120,7 +122,6 @@ type
     FOldViewDialogExecute: Pointer;
     FPasUnitNameList: TUnitNameList;
     FCppUnitNameList: TUnitNameList;
-    function GetOutputDir: string;
   {$IFNDEF BDS}
     procedure RunSeparately;
   {$ENDIF}
@@ -244,45 +245,11 @@ end;
 // 功能执行
 //------------------------------------------------------------------------------
 
-function TCnProjectExtWizard.GetOutputDir: string;
-var
-  ProjectDir: string;
-{$IFNDEF DELPHI2011_UP}
-  OutputDir: Variant;
-{$ENDIF}
-begin
-  ProjectDir := _CnExtractFileDir(CnOtaGetCurrentProjectFileName);
-{$IFDEF DELPHI2011_UP}
-  if CnOtaGetActiveProjectOptions <> nil then
-  begin
-    Result := _CnExtractFilePath(CnOtaGetActiveProjectOptions.TargetName);
-  end
-  else
-  begin
-    Result := ProjectDir;
-  end;
-{$ELSE}
-  if CnOtaGetActiveProjectOption('OutputDir', OutputDir) then
-  begin
-    // D2011 下 OutputDir 是 $(Config)/$(Platform) 的形式，Replace替换不到 Config，会出错
-    Result := LinkPath(ProjectDir, ReplaceToActualPath(OutputDir))
-  end
-  else
-  begin
-    Result := ProjectDir;
-  end;
-{$ENDIF}
-
-{$IFDEF DEBUG}
-  CnDebugger.LogMsg('OutputDir: ' + Result);
-{$ENDIF}
-end;
-
 procedure TCnProjectExtWizard.ExploreExe;
 var
   Project: IOTAProject;
   Dir, ProjectFileName, OutName: string;
-{$IFNDEF DELPHI2011_UP}
+{$IFNDEF DELPHIXE_UP}
   OutExt, IntermediaDir: string;
   Val: Variant;
 {$ENDIF}
@@ -294,10 +261,10 @@ begin
   ProjectFileName := Project.GetFileName;
   if ProjectFileName <> '' then
   begin
-    Dir := GetOutputDir;
+    Dir := CnOtaGetProjectOutputDirectory(Project);
     if Dir <> '' then
     begin
-{$IFDEF DELPHI2011_UP}
+{$IFDEF DELPHIXE_UP}
       if CnOtaGetActiveProjectOptions <> nil then
         OutName := CnOtaGetActiveProjectOptions.TargetName;
 {$ELSE}
@@ -392,6 +359,7 @@ begin
 end;
 
 {$IFNDEF BDS}
+
 procedure TCnProjectExtWizard.RunSeparately;
 var
   Project: IOTAProject;
@@ -433,7 +401,7 @@ begin
   // 无宿主程序
   if ExeName = '' then
   begin
-    OutputDir := GetOutputDir;
+    OutputDir := CnOtaGetProjectOutputDirectory(Project);
     ExeName := MakePath(OutputDir) + _CnChangeFileExt(_CnExtractFileName(ProjectFileName), '.exe');
   end;
 
@@ -446,6 +414,7 @@ begin
     ShellExecute(0, 'open', PChar(ExeName), PChar(Params),
       PChar(_CnExtractFileDir(ExeName)), SW_SHOWNORMAL);
 end;
+
 {$ENDIF}
 
 //------------------------------------------------------------------------------
