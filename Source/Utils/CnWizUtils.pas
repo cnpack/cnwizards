@@ -509,6 +509,8 @@ procedure CnOtaGetPlatformsFromBuildConfiguration(BuildConfig: IOTABuildConfigur
 {* 获取 BuildConfiguration 的 Platforms 至 TStrings 中，以避免低版本与脚本不支持泛型的问题}
 {$ENDIF}
 
+function CnOtaGetProjectOutputDirectory(Project: IOTAProject): string;
+{* 获得项目的二进制文件输出目录}
 procedure CnOtaGetProjectList(const List: TInterfaceList);
 {* 取得所有工程列表}
 function CnOtaGetCurrentProjectName: string;
@@ -3881,6 +3883,45 @@ begin
     Result := CnOtaGetProjectGroup.GetProject(Index)
   else
     Result := nil;
+end;
+
+// 获得项目的二进制文件输出目录
+function CnOtaGetProjectOutputDirectory(Project: IOTAProject): string;
+var
+  Options: IOTAProjectOptions;
+  ProjectDir: string;
+{$IFNDEF DELPHIXE_UP}
+  Dir: Variant;
+  OutputDir: string;
+{$ENDIF}
+begin
+  Result := '';
+  if Project = nil then
+    Project := CnOtaGetCurrentProject;
+  if Project = nil then
+    Exit;
+
+  ProjectDir := _CnExtractFileDir(Project.FileName);
+  Options := Project.ProjectOptions;
+
+{$IFDEF DELPHIXE_UP}  // XE 以上直接走 TargetName，要验证是否和当前 Configuration 的目录一致
+  if Options <> nil then
+    Result := _CnExtractFilePath(Options.TargetName)
+  else
+    Result := ProjectDir;
+{$ELSE}
+  if Options <> nil then
+  begin
+    Dir := Options.GetOptionValue('OutputDir');
+    OutputDir := VarToStr(Dir);
+
+    if OutputDir <> '' then // $(Config)/$(Platform) 的形式，需要替换
+      Result := LinkPath(ProjectDir, ReplaceToActualPath(OutputDir));
+  end;
+
+  if Result = '' then
+    Result := ProjectDir;
+{$ENDIF}
 end;
 
 // 取得所有工程列表

@@ -49,4 +49,7 @@ begin
   end;
 
   Strs.Free;
+
+  Writeln('');
+  Writeln('Output Directory: ' + CnOtaGetProjectOutputDirectory(nil));
 end.

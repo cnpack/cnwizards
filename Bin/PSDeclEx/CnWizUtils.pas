@@ -615,6 +615,8 @@ function CnOtaGetProjectCurrentBuildConfigurationValue(Project: IOTAProject; con
 procedure CnOtaSetProjectCurrentBuildConfigurationValue(Project: IOTAProject; const APropName,
   AValue: string);
 {* 设置项目的当前BuildConfiguration中的属性值，如不支持此特性则什么都不做}
+function CnOtaGetProjectOutputDirectory(Project: IOTAProject): string;
+{* 获得项目的二进制文件输出目录}
 procedure CnOtaGetProjectList(const List: TInterfaceList);
 {* 取得所有工程列表}
 function CnOtaGetCurrentProjectName: string;
@@ -1508,6 +1510,10 @@ end;
 
 procedure CnOtaSetProjectCurrentBuildConfigurationValue(const APropName,
   AValue: string);
+begin
+end;
+
+function CnOtaGetProjectOutputDirectory(Project: IOTAProject): string;
 begin
 end;
 

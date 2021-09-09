@@ -438,6 +438,7 @@ begin
   CL.AddDelphiFunction('Function CnOtaGetProjectCurrentBuildConfigurationValue(Project: IOTAProject; const APropName : string) : string');
   CL.AddDelphiFunction('Procedure CnOtaSetProjectCurrentBuildConfigurationValue(Project: IOTAProject; const APropName, AValue : string)');
 {$ENDIF}
+  CL.AddDelphiFunction('Function CnOtaGetProjectOutputDirectory( Project : IOTAProject) : string');
   CL.AddDelphiFunction('Procedure CnOtaGetProjectList( const List : TInterfaceList)');
   CL.AddDelphiFunction('Function CnOtaGetCurrentProjectName : string');
   CL.AddDelphiFunction('Function CnOtaGetCurrentProjectFileName : string');
@@ -706,6 +707,7 @@ begin
   S.RegisterDelphiFunction(@CnOtaGetProjectCurrentBuildConfigurationValue, 'CnOtaGetProjectCurrentBuildConfigurationValue', cdRegister);
   S.RegisterDelphiFunction(@CnOtaSetProjectCurrentBuildConfigurationValue, 'CnOtaSetProjectCurrentBuildConfigurationValue', cdRegister);
 {$ENDIF}
+  S.RegisterDelphiFunction(@CnOtaGetProjectOutputDirectory, 'CnOtaGetProjectOutputDirectory', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetProjectList, 'CnOtaGetProjectList', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetCurrentProjectName, 'CnOtaGetCurrentProjectName', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetCurrentProjectFileName, 'CnOtaGetCurrentProjectFileName', cdRegister);
