@@ -1,8 +1,8 @@
 object CnTranslateForm: TCnTranslateForm
   Left = 192
   Top = 107
-  ClientHeight = 441
-  ClientWidth = 680
+  Width = 700
+  Height = 480
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
