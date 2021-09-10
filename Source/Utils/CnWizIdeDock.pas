@@ -336,7 +336,7 @@ end;
 procedure TCnIdeDockForm.ReadState(Reader: TReader);
 begin
   inherited;
-  {$IFNDEF DELPHI110_OLYMPUS_UP}
+  {$IFNDEF NO_OLDCREATEORDER}
   OldCreateOrder := False;
   {$ENDIF}
 end;

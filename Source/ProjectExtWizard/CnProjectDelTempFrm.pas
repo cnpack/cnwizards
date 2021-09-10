@@ -267,7 +267,6 @@ var
   
   procedure AddProjectDir(Project: IOTAProject; const OptionName: string);
   var
-    DirectoryVariant: Variant;
     Directory: string;
     ProjectDir, S: string;
   begin

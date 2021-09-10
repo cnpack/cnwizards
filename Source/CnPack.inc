@@ -3055,6 +3055,10 @@
   {$ENDIF}
 {$ENDIF}
 
+{$IFDEF DELPHI110_OLYMPUS_UP}
+  {$DEFINE NO_OLDCREATEORDER}           // Olympus 11 removed OldCreateOrder
+{$ENDIF}
+
 {$IFDEF DELPHI104_SYDNEY_UP}
   {$DEFINE IDE_SUPPORT_LSP}             // Sydney 10.4 或以上支持 LSP 语言服务器
   {$DEFINE IDE_HAS_ERRORINSIGHT}        // Sydney 10.4.2 或以上支持编辑器侧栏的 ErrorInsight

@@ -736,7 +736,7 @@ const
   DphIdeLibName = 'delphicoreide280.bpl';
   dccLibName = 'dcc32280.dll';
 
-  IdeLspLibName = 'IDELSP280.bpl'; // 10.4 ∫Û÷ß≥÷ LSP
+  IdeLspLibName = 'IDELSP280.bpl';
   {$DEFINE LibNamesDefined}
 {$ENDIF COMPILER28}
 

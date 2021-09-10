@@ -1032,6 +1032,8 @@ begin
   T := Self.OnCreate;
 end;
 
+{$IFNDEF NO_OLDCREATEORDER}
+
 procedure TDataModuleOldCreateOrder_W(Self: TDataModule; const T: Boolean);
 begin
   Self.OldCreateOrder := T;
@@ -1041,6 +1043,8 @@ procedure TDataModuleOldCreateOrder_R(Self: TDataModule; var T: Boolean);
 begin
   T := Self.OldCreateOrder;
 end;
+
+{$ENDIF}
 
 procedure TDataModuleDesignSize_W(Self: TDataModule; const T: TPoint);
 begin
@@ -1349,7 +1353,9 @@ begin
     RegisterVirtualConstructor(@TDataModule.CreateNew, 'CreateNew');
     RegisterPropertyHelper(@TDataModuleDesignOffset_R, @TDataModuleDesignOffset_W, 'DesignOffset');
     RegisterPropertyHelper(@TDataModuleDesignSize_R, @TDataModuleDesignSize_W, 'DesignSize');
+{$IFNDEF NO_OLDCREATEORDER}
     RegisterPropertyHelper(@TDataModuleOldCreateOrder_R, @TDataModuleOldCreateOrder_W, 'OldCreateOrder');
+{$ENDIF}
     RegisterPropertyHelper(@TDataModuleOnCreate_R, @TDataModuleOnCreate_W, 'OnCreate');
     RegisterPropertyHelper(@TDataModuleOnDestroy_R, @TDataModuleOnDestroy_W, 'OnDestroy');
   end;
