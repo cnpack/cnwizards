@@ -6334,8 +6334,13 @@ initialization
                       InternalDecimalSeparator := FormatSettings.DecimalSeparator;
                       InternalThousandSeparator := FormatSettings.ThousandSeparator;
                     {$ELSE}
-                      InternalDecimalSeparator := DecimalSeparator;
-                      InternalThousandSeparator := ThousandSeparator;
+                      {$IFDEF VER350}
+                        InternalDecimalSeparator := FormatSettings.DecimalSeparator;
+                        InternalThousandSeparator := FormatSettings.ThousandSeparator;
+                      {$ELSE}
+                        InternalDecimalSeparator := DecimalSeparator;
+                        InternalThousandSeparator := ThousandSeparator;
+                      {$ENDIF}
                     {$ENDIF}
                   {$ENDIF}
                 {$ENDIF}
