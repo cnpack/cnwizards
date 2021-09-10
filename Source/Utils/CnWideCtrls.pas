@@ -170,8 +170,11 @@ begin
     case Msg of
       WM_GETTEXT:
         begin
-          if FText <> nil then P := FText else P := '';
-          Result := lstrlenW(lstrcpynW(PWideChar(LParam), P, WParam - 1));
+          if FText <> nil then
+            P := FText
+          else
+            P := '';
+          Result := lstrlenW(lstrcpynW(PWideChar(LParam), P, WParam));
         end;
       WM_GETTEXTLENGTH:
         if FText = nil then Result := 0 else Result := lstrlenW(FText);
@@ -181,8 +184,8 @@ begin
           L := lstrlenW(PWideChar(LParam));
           if L > 0 then
           begin
-            GetMem(P, L * SizeOf(WideChar));
-            lstrcpynW(P, PWideChar(LParam), L);
+            GetMem(P, (L + 1) * SizeOf(WideChar));
+            lstrcpynW(P, PWideChar(LParam), L + 1);
           end
           else
             P := nil;
