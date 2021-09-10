@@ -32,6 +32,7 @@
 ;    IDE_VERSION_D102T
 ;    IDE_VERSION_D103R
 ;    IDE_VERSION_D104S
+;    IDE_VERSION_D110O
 ;    IDE_VERSION_CB5
 ;    IDE_VERSION_CB6
 ;    NO_HELP  -- 定义时不打任何帮助文件
@@ -110,6 +111,7 @@ RequestExecutionLevel admin
 !ifndef IDE_VERSION_D102T
 !ifndef IDE_VERSION_D103R
 !ifndef IDE_VERSION_D104S
+!ifndef IDE_VERSION_D110O
 !ifndef IDE_VERSION_CB5
 !ifndef IDE_VERSION_CB6
 
@@ -148,10 +150,12 @@ RequestExecutionLevel admin
   !define IDE_VERSION_D102T "1"
   !define IDE_VERSION_D103R "1"
   !define IDE_VERSION_D104S "1"
+  !define IDE_VERSION_D110O "1"
   !define IDE_VERSION_CB5 "1"
   !define IDE_VERSION_CB6 "1"
 !endif
 
+!endif
 !endif
 !endif
 !endif
@@ -263,6 +267,10 @@ RequestExecutionLevel admin
   !ifdef IDE_VERSION_D104S
     !define IDE_SHORT_NAME "D104S"
     !define IDE_LONG_NAME "RAD Studio 10.4 Sydney"
+  !endif
+  !ifdef IDE_VERSION_D110O
+    !define IDE_SHORT_NAME "D110O"
+    !define IDE_LONG_NAME "RAD Studio 11 Olympus"
   !endif
   !ifdef IDE_VERSION_CB5
     !define IDE_SHORT_NAME "CB5"
@@ -574,6 +582,13 @@ FileLoop:
   FileClose $0
   IfFileExists "$INSTDIR\CnWizards_D104S1.dll" 0 +4
   FileOpen $0 "$INSTDIR\CnWizards_D104S1.dll" a
+  IfErrors FileInUse
+  FileClose $0
+!endif
+
+!ifdef IDE_VERSION_D110O
+  IfFileExists "$INSTDIR\CnWizards_D110O.dll" 0 +4
+  FileOpen $0 "$INSTDIR\CnWizards_D110O.dll" a
   IfErrors FileInUse
   FileClose $0
 !endif
@@ -942,6 +957,17 @@ Section "RAD Studio 10.4 Sydney" SecD104S
 SectionEnd
 !endif
 
+!ifdef IDE_VERSION_D110O
+Section "RAD Studio 11 Olympus" SecD110O
+  SectionIn 1 2
+  SetOutPath $INSTDIR
+  File "..\..\Bin\CnWizards_D110O.dll"
+  ; 写入专家注册键值
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\22.0\Experts" "CnWizards_D110O"
+  WriteRegStr HKCU "Software\Embarcadero\BDS\22.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
+SectionEnd
+!endif
+
 !endif
 
 !ifdef IDE_VERSION_CB5
@@ -1133,6 +1159,10 @@ Function .onMouseOverSection
     ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio 10.4 Sydney" "+" $R0
     !insertmacro MUI_DESCRIPTION_TEXT ${SecD104S} $R0
   !endif
+  !ifdef IDE_VERSION_D110O
+    ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio 11 Olympus" "+" $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecD110O} $R0
+  !endif
 !endif
   !ifdef IDE_VERSION_CB5
     ${WordReplace} "$(DESDLL)" "#DLL#" "C++Builder 5" "+" $R0
@@ -1238,6 +1268,9 @@ Function SetCheckBoxes
 !endif
 !ifdef IDE_VERSION_D104S
   !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\21.0" "RootDir" ${SecD104S}
+!endif
+!ifdef IDE_VERSION_D104S
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\22.0" "RootDir" ${SecD110O}
 !endif
 !endif
 !ifdef IDE_VERSION_CB5
@@ -1354,6 +1387,10 @@ Section "Uninstall"
 !ifdef IDE_VERSION_D104S
   DeleteRegValue HKCU "Software\Embarcadero\BDS\21.0\Experts" "CnWizards_D104S"
   DeleteRegValue HKCU "Software\Embarcadero\BDS\21.0\Experts" "CnWizards_Loader"
+!endif
+!ifdef IDE_VERSION_D110O
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\22.0\Experts" "CnWizards_D110O"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\22.0\Experts" "CnWizards_Loader"
 !endif
 !ifdef IDE_VERSION_CB5
   DeleteRegValue HKCU "Software\Borland\C++Builder\5.0\Experts" "CnWizards_CB5"
