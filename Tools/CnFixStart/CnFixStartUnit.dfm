@@ -1,7 +1,7 @@
 object FormStartFix: TFormStartFix
   Left = 332
   Top = 167
-  Width = 645
+  Width = 663
   Height = 509
   Caption = 'CnPack IDE Wizards Starting-Up Fix Tool'
   Color = clBtnFace
@@ -130,32 +130,32 @@ object FormStartFix: TFormStartFix
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   DesignSize = (
-    637
+    655
     482)
   PixelsPerInch = 96
   TextHeight = 13
   object pnlTop: TPanel
     Left = 0
     Top = 0
-    Width = 637
+    Width = 655
     Height = 73
     Align = alTop
     BevelOuter = bvNone
     Color = clWhite
     TabOrder = 0
     DesignSize = (
-      637
+      655
       73)
     object bvlLineTop: TBevel
       Left = 0
       Top = 31
-      Width = 637
+      Width = 655
       Height = 42
       Align = alBottom
       Shape = bsBottomLine
     end
     object imgIcon: TImage
-      Left = 586
+      Left = 604
       Top = 16
       Width = 32
       Height = 32
@@ -307,7 +307,7 @@ object FormStartFix: TFormStartFix
     NumGlyphs = 2
   end
   object btnClose: TBitBtn
-    Left = 545
+    Left = 563
     Top = 444
     Width = 75
     Height = 21
@@ -322,12 +322,16 @@ object FormStartFix: TFormStartFix
   object pgc1: TPageControl
     Left = 16
     Top = 88
-    Width = 604
+    Width = 622
     Height = 337
     ActivePage = tsKeyMapping
+    Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 4
     object tsKeyMapping: TTabSheet
       Caption = 'Fix &Key Mapping'
+      DesignSize = (
+        614
+        309)
       object lblInstalledKeyMapping: TLabel
         Left = 16
         Top = 16
@@ -436,8 +440,9 @@ object FormStartFix: TFormStartFix
       object lblKeyMappingProblemFound: TLabel
         Left = 280
         Top = 32
-        Width = 5
-        Height = 13
+        Width = 313
+        Height = 17
+        AutoSize = False
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
@@ -448,15 +453,17 @@ object FormStartFix: TFormStartFix
       object bvl1: TBevel
         Left = 224
         Top = 80
-        Width = 353
+        Width = 371
         Height = 17
+        Anchors = [akLeft, akTop, akRight]
         Shape = bsTopLine
       end
       object lblKeyMappingDescription: TLabel
         Left = 224
         Top = 104
-        Width = 353
+        Width = 371
         Height = 97
+        Anchors = [akLeft, akTop, akRight]
         AutoSize = False
         Caption = 
           'A Possible Reason which causes Delphi Can'#39't Start and Popups'#13#10'Ac' +
@@ -484,15 +491,17 @@ object FormStartFix: TFormStartFix
         Width = 185
         Height = 249
         Style = lbOwnerDrawFixed
+        Anchors = [akLeft, akTop, akBottom]
         ItemHeight = 20
         TabOrder = 0
         OnDrawItem = lstInstalledKeyMappnigListDrawItem
       end
       object btnKeyMappingFix: TButton
-        Left = 432
+        Left = 450
         Top = 264
         Width = 147
         Height = 25
+        Anchors = [akRight, akBottom]
         Caption = 'Fix Key Mapping Problem'
         TabOrder = 1
         OnClick = btnKeyMappingFixClick
