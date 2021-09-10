@@ -48,7 +48,7 @@ type
   TCnCompiler = (cnDelphi5, cnDelphi6, cnDelphi7, cnDelphi8, cnDelphi2005,
     cnDelphi2006, cnDelphi2007, cnDelphi2009, cnDelphi2010, cnDelphiXE, cnDelphiXE2,
     cnDelphiXE3, cnDelphiXE4, cnDelphiXE5, cnDelphiXE6, cnDelphiXE7, cnDelphiXE8,
-    cnDelphi10S, cnDelphi101B, cnDelphi102T, cnDelphi103R, cnDelphi104S, cnBCB5, cnBCB6);
+    cnDelphi10S, cnDelphi101B, cnDelphi102T, cnDelphi103R, cnDelphi104S, cnDelphi110O, cnBCB5, cnBCB6);
   TCnCompilers = set of TCnCompiler;
 
 const
@@ -75,6 +75,7 @@ const
     'RAD Studio 10.2 Tokyo',
     'RAD Studio 10.3 Rio',
     'RAD Studio 10.4 Sydney',
+    'RAD Studio 11.0 Olympus',
     'C++Builder 5',
     'C++Builder 6');
 
@@ -101,6 +102,7 @@ const
     'RADStudio102T',
     'RADStudio103R',
     'RADStudio104S',
+    'RADStudio110O',
     'BCB5',
     'BCB6');
 
@@ -127,6 +129,7 @@ const
     '\Software\Embarcadero\BDS\19.0',
     '\Software\Embarcadero\BDS\20.0',
     '\Software\Embarcadero\BDS\21.0',
+    '\Software\Embarcadero\BDS\22.0',
     '\Software\Borland\C++Builder\5.0',
     '\Software\Borland\C++Builder\6.0');
 
@@ -160,6 +163,7 @@ const
   _DELPHI102_TOKYO = {$IFDEF DELPHI102_TOKYO}True{$ELSE}False{$ENDIF};
   _DELPHI103_RIO = {$IFDEF DELPHI103_RIO}True{$ELSE}False{$ENDIF};
   _DELPHI104_SYDNEY = {$IFDEF DELPHI104_SYDNEY}True{$ELSE}False{$ENDIF};
+  _DELPHI110_OLYMPUS = {$IFDEF DELPHI110_OLYMPUS}True{$ELSE}False{$ENDIF};
 
   _DELPHI1_UP = {$IFDEF DELPHI1_UP}True{$ELSE}False{$ENDIF};
   _DELPHI2_UP = {$IFDEF DELPHI2_UP}True{$ELSE}False{$ENDIF};
@@ -187,6 +191,7 @@ const
   _DELPHI102_TOKYO_UP = {$IFDEF DELPHI102_TOKYO_UP}True{$ELSE}False{$ENDIF};
   _DELPHI103_RIO_UP = {$IFDEF DELPHI103_RIO_UP}True{$ELSE}False{$ENDIF};
   _DELPHI104_SYDNEY_UP = {$IFDEF DELPHI104_SYDNEY_UP}True{$ELSE}False{$ENDIF};
+  _DELPHI110_OLYMPUS_UP = {$IFDEF DELPHI110_OLYMPUS_UP}True{$ELSE}False{$ENDIF};
 
   _BCB1 = {$IFDEF BCB1}True{$ELSE}False{$ENDIF};
   _BCB3 = {$IFDEF BCB3}True{$ELSE}False{$ENDIF};
@@ -211,6 +216,7 @@ const
   _BCB102_TOKYO = {$IFDEF BCB102_TOKYO}True{$ELSE}False{$ENDIF};
   _BCB103_RIO = {$IFDEF BCB103_RIO}True{$ELSE}False{$ENDIF};
   _BCB104_SYDNEY = {$IFDEF BCB104_SYDNEY}True{$ELSE}False{$ENDIF};
+  _BCB110_OLYMPUS = {$IFDEF BCB110_OLYMPUS}True{$ELSE}False{$ENDIF};
 
   _BCB1_UP = {$IFDEF BCB1_UP}True{$ELSE}False{$ENDIF};
   _BCB3_UP = {$IFDEF BCB3_UP}True{$ELSE}False{$ENDIF};
@@ -235,6 +241,7 @@ const
   _BCB102_TOKYO_UP = {$IFDEF BCB102_TOKYO_UP}True{$ELSE}False{$ENDIF};
   _BCB103_RIO_UP = {$IFDEF BCB103_RIO_UP}True{$ELSE}False{$ENDIF};
   _BCB104_SYDNEY_UP = {$IFDEF BCB104_SYDNEY_UP}True{$ELSE}False{$ENDIF};
+  _BCB110_OLYMPUS_UP = {$IFDEF BCB110_OLYMPUS_UP}True{$ELSE}False{$ENDIF};
 
   _KYLIX1 = {$IFDEF KYLIX1}True{$ELSE}False{$ENDIF};
   _KYLIX2 = {$IFDEF KYLIX2}True{$ELSE}False{$ENDIF};
@@ -263,6 +270,7 @@ const
   _BDS19 = {$IFDEF BDS19}True{$ELSE}False{$ENDIF};
   _BDS20 = {$IFDEF BDS20}True{$ELSE}False{$ENDIF};
   _BDS21 = {$IFDEF BDS21}True{$ELSE}False{$ENDIF};
+  _BDS22 = {$IFDEF BDS22}True{$ELSE}False{$ENDIF};
 
   _BDS2_UP = {$IFDEF BDS2_UP}True{$ELSE}False{$ENDIF};
   _BDS3_UP = {$IFDEF BDS3_UP}True{$ELSE}False{$ENDIF};
@@ -283,6 +291,7 @@ const
   _BDS19_UP = {$IFDEF BDS19_UP}True{$ELSE}False{$ENDIF};
   _BDS20_UP = {$IFDEF BDS20_UP}True{$ELSE}False{$ENDIF};
   _BDS21_UP = {$IFDEF BDS21_UP}True{$ELSE}False{$ENDIF};
+  _BDS22_UP = {$IFDEF BDS22_UP}True{$ELSE}False{$ENDIF};
 
   _COMPILER1 = {$IFDEF COMPILER1}True{$ELSE}False{$ENDIF};
   _COMPILER2 = {$IFDEF COMPILER2}True{$ELSE}False{$ENDIF};
@@ -311,6 +320,7 @@ const
   _COMPILER25 = {$IFDEF COMPILER25}True{$ELSE}False{$ENDIF};
   _COMPILER26 = {$IFDEF COMPILER26}True{$ELSE}False{$ENDIF};
   _COMPILER27 = {$IFDEF COMPILER27}True{$ELSE}False{$ENDIF};
+  _COMPILER28 = {$IFDEF COMPILER28}True{$ELSE}False{$ENDIF};
 
   _COMPILER1_UP = {$IFDEF COMPILER1_UP}True{$ELSE}False{$ENDIF};
   _COMPILER2_UP = {$IFDEF COMPILER2_UP}True{$ELSE}False{$ENDIF};
@@ -339,6 +349,7 @@ const
   _COMPILER25_UP = {$IFDEF COMPILER25_UP}True{$ELSE}False{$ENDIF};
   _COMPILER26_UP = {$IFDEF COMPILER26_UP}True{$ELSE}False{$ENDIF};
   _COMPILER27_UP = {$IFDEF COMPILER27_UP}True{$ELSE}False{$ENDIF};
+  _COMPILER28_UP = {$IFDEF COMPILER28_UP}True{$ELSE}False{$ENDIF};
 
   _SUPPORT_OTA_PROJECT_CONFIGURATION = {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}True{$ELSE}False{$ENDIF};
   _SUPPORT_CROSS_PLATFORM = {$IFDEF SUPPORT_CROSS_PLATFORM}True{$ELSE}False{$ENDIF};
@@ -480,19 +491,26 @@ const
                                           CompilerName = 'RAD Studio 104_SYDNEY';
                                           CompilerShortName = 'D104S';
                                           {$ELSE}
-                                            {$IFDEF BCB5}
-                                              Compiler: TCnCompiler = cnBCB5;
-                                              CompilerKind: TCnCompilerKind = ckBCB;
-                                              CompilerName = 'C++BUILDER 5';
-                                              CompilerShortName = 'CB5';
+                                            {$IFDEF DELPHI110_OLYMPUS}
+                                            Compiler: TCnCompiler = cnDelphi110O;
+                                            CompilerKind: TCnCompilerKind = ckDelphi;
+                                            CompilerName = 'RAD Studio 110_OLYMPUS';
+                                            CompilerShortName = 'D110O';
                                             {$ELSE}
-                                              {$IFDEF BCB6}
-                                                Compiler: TCnCompiler = cnBCB6;
+                                              {$IFDEF BCB5}
+                                                Compiler: TCnCompiler = cnBCB5;
                                                 CompilerKind: TCnCompilerKind = ckBCB;
-                                                CompilerName = 'C++BUILDER 6';
-                                                CompilerShortName = 'CB6';
+                                                CompilerName = 'C++BUILDER 5';
+                                                CompilerShortName = 'CB5';
                                               {$ELSE}
-                                                {$MESSAGE ERROR 'Unknow Compiler!'}
+                                                {$IFDEF BCB6}
+                                                  Compiler: TCnCompiler = cnBCB6;
+                                                  CompilerKind: TCnCompilerKind = ckBCB;
+                                                  CompilerName = 'C++BUILDER 6';
+                                                  CompilerShortName = 'CB6';
+                                                {$ELSE}
+                                                  {$MESSAGE ERROR 'Unknow Compiler!'}
+                                                {$ENDIF}
                                               {$ENDIF}
                                             {$ENDIF}
                                           {$ENDIF}
@@ -711,6 +729,16 @@ const
   IdeLspLibName = 'IDELSP270.bpl'; // 10.4 后支持 LSP
   {$DEFINE LibNamesDefined}
 {$ENDIF COMPILER27}
+
+{$IFDEF COMPILER28}
+  CorIdeLibName = 'coreide280.bpl';
+  DesignIdeLibName = 'designide280.bpl';
+  DphIdeLibName = 'delphicoreide280.bpl';
+  dccLibName = 'dcc32280.dll';
+
+  IdeLspLibName = 'IDELSP280.bpl'; // 10.4 后支持 LSP
+  {$DEFINE LibNamesDefined}
+{$ENDIF COMPILER28}
 
 implementation
 

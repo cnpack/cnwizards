@@ -336,7 +336,9 @@ end;
 procedure TCnIdeDockForm.ReadState(Reader: TReader);
 begin
   inherited;
+  {$IFNDEF DELPHI110_OLYMPUS_UP}
   OldCreateOrder := False;
+  {$ENDIF}
 end;
 
 {$IFDEF CREATE_PARAMS_BUG}
