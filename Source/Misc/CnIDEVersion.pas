@@ -405,7 +405,7 @@ begin
 {$ENDIF}
 end;
 
-function IsDelphi110OIdeVersionLatest: Boolean;
+function IsDelphi110AIdeVersionLatest: Boolean;
 const
   CoreIdeLatest: TVersionNumber =
     (Major: 28; Minor: 0; Release: 42600; Build: 6491); // 11.0
@@ -523,8 +523,8 @@ begin
   CnIdeVersionIsLatest := IsDelphi104SIdeVersionLatest;
 {$ENDIF}
 
-{$IFDEF DELPHI110_OLYMPUS}
-  CnIdeVersionIsLatest := IsDelphi110OIdeVersionLatest;
+{$IFDEF DELPHI110_ALEXANDRIA}
+  CnIdeVersionIsLatest := IsDelphi110AIdeVersionLatest;
 {$ENDIF}
 
   Result := CnIdeVersionIsLatest;

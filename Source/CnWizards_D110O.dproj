@@ -1,7 +1,7 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <ProjectGuid>{1C6A547D-B315-484B-B7DB-08723731B6D1}</ProjectGuid>
-        <MainSource>CnWizards_D110O.dpr</MainSource>
+        <MainSource>CnWizards_D110A.dpr</MainSource>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Release</Config>
         <TargetedPlatforms>1</TargetedPlatforms>
@@ -46,7 +46,7 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
-        <SanitizedProjectName>CnWizards_D110O</SanitizedProjectName>
+        <SanitizedProjectName>CnWizards_D110A</SanitizedProjectName>
         <DCC_K>false</DCC_K>
         <DCC_ImageBase>00400000</DCC_ImageBase>
         <DCC_N>false</DCC_N>
@@ -539,7 +539,7 @@
         <BorlandProject>
             <Delphi.Personality>
                 <Source>
-                    <Source Name="MainSource">CnWizards_D110O.dpr</Source>
+                    <Source Name="MainSource">CnWizards_D110A.dpr</Source>
                 </Source>
                 <VersionInfo>
                     <VersionInfo Name="IncludeVerInfo">False</VersionInfo>
@@ -619,9 +619,9 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="..\Bin\CnWizards_D110O.dll" Configuration="Release" Class="ProjectOutput">
+                <DeployFile LocalName="..\Bin\CnWizards_D110A.dll" Configuration="Release" Class="ProjectOutput">
                     <Platform Name="Win32">
-                        <RemoteName>CnWizards_D110O.dll</RemoteName>
+                        <RemoteName>CnWizards_D110A.dll</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

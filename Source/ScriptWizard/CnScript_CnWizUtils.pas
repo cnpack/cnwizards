@@ -67,7 +67,7 @@ begin
   CL.AddTypeS('TCnCompiler', '( cnDelphi5, cnDelphi6, cnDelphi7, cnDelphi8, cnDelphi2005, '
     + 'cnDelphi2006, cnDelphi2007, cnDelphi2009, cnDelphi2010, cnDelphiXE, cnDelphiXE2, cnDelphiXE3, '
     + 'cnDelphiXE4, cnDelphiXE5, cnDelphiXE6, cnDelphiXE7, cnDelphiXE8, cnDelphi10S, '
-    + 'cnDelphi101B, cnDelphi102T, cnDelphi103R, cnDelphi104S, cnDelphi110O, cnBCB5, cnBCB6 )');
+    + 'cnDelphi101B, cnDelphi102T, cnDelphi103R, cnDelphi104S, cnDelphi110A, cnBCB5, cnBCB6 )');
   CL.AddConstantN('Compiler', 'TCnCompiler').SetInt(Ord(Compiler));
   CL.AddConstantN('CompilerKind', 'TCnCompilerKind').SetInt(Ord(CompilerKind));
   CL.AddConstantN('CompilerName', 'String').SetString(CompilerName);
@@ -101,7 +101,7 @@ begin
   CL.AddConstantN('_DELPHI102_TOKYO', 'Boolean').SetUInt(Ord(_DELPHI102_TOKYO));
   CL.AddConstantN('_DELPHI103_RIO', 'Boolean').SetUInt(Ord(_DELPHI103_RIO));
   CL.AddConstantN('_DELPHI104_SYDNEY', 'Boolean').SetUInt(Ord(_DELPHI104_SYDNEY));
-  CL.AddConstantN('_DELPHI110_OLYMPUS', 'Boolean').SetUInt(Ord(_DELPHI110_OLYMPUS));
+  CL.AddConstantN('_DELPHI110_ALEXANDRIA', 'Boolean').SetUInt(Ord(_DELPHI110_ALEXANDRIA));
 
   CL.AddConstantN('_DELPHI1_UP', 'Boolean').SetUInt(Ord(_DELPHI1_UP));
   CL.AddConstantN('_DELPHI2_UP', 'Boolean').SetUInt(Ord(_DELPHI2_UP));
@@ -129,7 +129,7 @@ begin
   CL.AddConstantN('_DELPHI102_TOKYO_UP', 'Boolean').SetUInt(Ord(_DELPHI102_TOKYO_UP));
   CL.AddConstantN('_DELPHI103_RIO_UP', 'Boolean').SetUInt(Ord(_DELPHI103_RIO_UP));
   CL.AddConstantN('_DELPHI104_SYDNEY_UP', 'Boolean').SetUInt(Ord(_DELPHI104_SYDNEY_UP));
-  CL.AddConstantN('_DELPHI110_OLYMPUS_UP', 'Boolean').SetUInt(Ord(_DELPHI110_OLYMPUS_UP));
+  CL.AddConstantN('_DELPHI110_ALEXANDRIA_UP', 'Boolean').SetUInt(Ord(_DELPHI110_ALEXANDRIA_UP));
 
   CL.AddConstantN('_BCB1', 'Boolean').SetUInt(Ord(_BCB1));
   CL.AddConstantN('_BCB3', 'Boolean').SetUInt(Ord(_BCB3));
@@ -154,7 +154,7 @@ begin
   CL.AddConstantN('_BCB102_TOKYO', 'Boolean').SetUInt(Ord(_BCB102_TOKYO));
   CL.AddConstantN('_BCB103_RIO', 'Boolean').SetUInt(Ord(_BCB103_RIO));
   CL.AddConstantN('_BCB104_SYDNEY', 'Boolean').SetUInt(Ord(_BCB104_SYDNEY));
-  CL.AddConstantN('_BCB110_OLYMPUS', 'Boolean').SetUInt(Ord(_BCB110_OLYMPUS));
+  CL.AddConstantN('_BCB110_ALEXANDRIA', 'Boolean').SetUInt(Ord(_BCB110_ALEXANDRIA));
 
   CL.AddConstantN('_BCB1_UP', 'Boolean').SetUInt(Ord(_BCB1_UP));
   CL.AddConstantN('_BCB3_UP', 'Boolean').SetUInt(Ord(_BCB3_UP));
@@ -179,7 +179,7 @@ begin
   CL.AddConstantN('_BCB102_TOKYO_UP', 'Boolean').SetUInt(Ord(_BCB102_TOKYO_UP));
   CL.AddConstantN('_BCB103_RIO_UP', 'Boolean').SetUInt(Ord(_BCB103_RIO_UP));
   CL.AddConstantN('_BCB104_SYDNEY_UP', 'Boolean').SetUInt(Ord(_BCB104_SYDNEY_UP));
-  CL.AddConstantN('_BCB110_OLYMPUS_UP', 'Boolean').SetUInt(Ord(_BCB110_OLYMPUS_UP));
+  CL.AddConstantN('_BCB110_ALEXANDRIA_UP', 'Boolean').SetUInt(Ord(_BCB110_ALEXANDRIA_UP));
 
   CL.AddConstantN('_KYLIX1', 'Boolean').SetUInt(Ord(_KYLIX1));
   CL.AddConstantN('_KYLIX2', 'Boolean').SetUInt(Ord(_KYLIX2));

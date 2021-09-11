@@ -162,7 +162,7 @@ begin
         else
           Result := Dir + 'CnWizards_D104S.DLL';
       end;
-    28: Result := Dir + 'CnWizards_D110O.DLL';
+    28: Result := Dir + 'CnWizards_D110A.DLL';
   end;
 end;
 

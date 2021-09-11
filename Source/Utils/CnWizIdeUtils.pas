@@ -1521,7 +1521,7 @@ begin
 {$IFDEF DELPHI104_SYDNEY}
   Result := Result + 'Embarcadero\BDS\21.0';
 {$ELSE}
-{$IFDEF DELPHI110_OLYMPUS}
+{$IFDEF DELPHI110_ALEXANDRIA}
   Result := Result + 'Embarcadero\BDS\22.0';
 {$ELSE}
   Error: Unknown Compiler

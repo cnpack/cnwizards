@@ -48,7 +48,7 @@ type
   TCnCompiler = (cnDelphi5, cnDelphi6, cnDelphi7, cnDelphi8, cnDelphi2005,
     cnDelphi2006, cnDelphi2007, cnDelphi2009, cnDelphi2010, cnDelphiXE, cnDelphiXE2,
     cnDelphiXE3, cnDelphiXE4, cnDelphiXE5, cnDelphiXE6, cnDelphiXE7, cnDelphiXE8,
-    cnDelphi10S, cnDelphi101B, cnDelphi102T, cnDelphi103R, cnDelphi104S, cnDelphi110O,
+    cnDelphi10S, cnDelphi101B, cnDelphi102T, cnDelphi103R, cnDelphi104S, cnDelphi110A,
     cnBCB5, cnBCB6);
   TCnCompilers = set of TCnCompiler;
 
@@ -76,7 +76,7 @@ const
     'RAD Studio 10.2 Tokyo',
     'RAD Studio 10.3 Rio',
     'RAD Studio 10.4 Sydney',
-    'RAD Studio 11.0 Olympus',
+    'RAD Studio 11.0 Alexandria',
     'C++Builder 5',
     'C++Builder 6');
 
@@ -103,7 +103,7 @@ const
     'RADStudio102T',
     'RADStudio103R',
     'RADStudio104S',
-    'RADStudio110O',
+    'RADStudio110A',
     'BCB5',
     'BCB6');
 
@@ -164,7 +164,7 @@ const
   _DELPHI102_TOKYO = {$IFDEF DELPHI102_TOKYO}True{$ELSE}False{$ENDIF};
   _DELPHI103_RIO = {$IFDEF DELPHI103_RIO}True{$ELSE}False{$ENDIF};
   _DELPHI104_SYDNEY = {$IFDEF DELPHI104_SYDNEY}True{$ELSE}False{$ENDIF};
-  _DELPHI110_OLYMPUS = {$IFDEF DELPHI110_OLYMPUS}True{$ELSE}False{$ENDIF};
+  _DELPHI110_ALEXANDRIA = {$IFDEF DELPHI110_ALEXANDRIA}True{$ELSE}False{$ENDIF};
 
   _DELPHI1_UP = {$IFDEF DELPHI1_UP}True{$ELSE}False{$ENDIF};
   _DELPHI2_UP = {$IFDEF DELPHI2_UP}True{$ELSE}False{$ENDIF};
@@ -192,7 +192,7 @@ const
   _DELPHI102_TOKYO_UP = {$IFDEF DELPHI102_TOKYO_UP}True{$ELSE}False{$ENDIF};
   _DELPHI103_RIO_UP = {$IFDEF DELPHI103_RIO_UP}True{$ELSE}False{$ENDIF};
   _DELPHI104_SYDNEY_UP = {$IFDEF DELPHI104_SYDNEY_UP}True{$ELSE}False{$ENDIF};
-  _DELPHI110_OLYMPUS_UP = {$IFDEF DELPHI110_OLYMPUS_UP}True{$ELSE}False{$ENDIF};
+  _DELPHI110_ALEXANDRIA_UP = {$IFDEF DELPHI110_ALEXANDRIA_UP}True{$ELSE}False{$ENDIF};
 
   _BCB1 = {$IFDEF BCB1}True{$ELSE}False{$ENDIF};
   _BCB3 = {$IFDEF BCB3}True{$ELSE}False{$ENDIF};
@@ -217,7 +217,7 @@ const
   _BCB102_TOKYO = {$IFDEF BCB102_TOKYO}True{$ELSE}False{$ENDIF};
   _BCB103_RIO = {$IFDEF BCB103_RIO}True{$ELSE}False{$ENDIF};
   _BCB104_SYDNEY = {$IFDEF BCB104_SYDNEY}True{$ELSE}False{$ENDIF};
-  _BCB110_OLYMPUS = {$IFDEF BCB110_OLYMPUS}True{$ELSE}False{$ENDIF};
+  _BCB110_ALEXANDRIA = {$IFDEF BCB110_ALEXANDRIA}True{$ELSE}False{$ENDIF};
 
   _BCB1_UP = {$IFDEF BCB1_UP}True{$ELSE}False{$ENDIF};
   _BCB3_UP = {$IFDEF BCB3_UP}True{$ELSE}False{$ENDIF};
@@ -242,7 +242,7 @@ const
   _BCB102_TOKYO_UP = {$IFDEF BCB102_TOKYO_UP}True{$ELSE}False{$ENDIF};
   _BCB103_RIO_UP = {$IFDEF BCB103_RIO_UP}True{$ELSE}False{$ENDIF};
   _BCB104_SYDNEY_UP = {$IFDEF BCB104_SYDNEY_UP}True{$ELSE}False{$ENDIF};
-  _BCB110_OLYMPUS_UP = {$IFDEF BCB110_OLYMPUS_UP}True{$ELSE}False{$ENDIF};
+  _BCB110_ALEXANDRIA_UP = {$IFDEF BCB110_ALEXANDRIA_UP}True{$ELSE}False{$ENDIF};
 
   _KYLIX1 = {$IFDEF KYLIX1}True{$ELSE}False{$ENDIF};
   _KYLIX2 = {$IFDEF KYLIX2}True{$ELSE}False{$ENDIF};
@@ -492,11 +492,11 @@ const
                                           CompilerName = 'RAD Studio 104_SYDNEY';
                                           CompilerShortName = 'D104S';
                                           {$ELSE}
-                                            {$IFDEF DELPHI110_OLYMPUS}
-                                            Compiler: TCnCompiler = cnDelphi110O;
+                                            {$IFDEF DELPHI110_ALEXANDRIA}
+                                            Compiler: TCnCompiler = cnDelphi110A;
                                             CompilerKind: TCnCompilerKind = ckDelphi;
-                                            CompilerName = 'RAD Studio 110_OLYMPUS';
-                                            CompilerShortName = 'D110O';
+                                            CompilerName = 'RAD Studio 110_ALEXANDRIA';
+                                            CompilerShortName = 'D110A';
                                             {$ELSE}
                                               {$IFDEF BCB5}
                                                 Compiler: TCnCompiler = cnBCB5;

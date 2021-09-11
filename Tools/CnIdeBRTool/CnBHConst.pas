@@ -40,7 +40,7 @@ type
   TAbiType = (atBCB5, atBCB6, atDelphi5, atDelphi6, atDelphi7, atDelphi8,
     atBDS2005, atBDS2006, atDelphi2007, atDelphi2009, atDelphi2010, atDelphiXE,
     atDelphiXE2, atDelphiXE3, atDelphiXE4, atDelphiXE5, atDelphiXE6, atDelphiXE7,
-    atDelphiXE8, atDelphi10S, atDelphi101B, atDelphi102T, atDelphi103R, atDelphi104S, atDelphi110O);
+    atDelphiXE8, atDelphi10S, atDelphi101B, atDelphi102T, atDelphi103R, atDelphi104S, atDelphi110A);
   TAbiTypes = set of TAbiType; // at := [BCB5, BCB6];
 
 var
@@ -52,7 +52,7 @@ var
       'RAD Studio XE3', 'RAD Studio XE4', 'RAD Studio XE5', 'RAD Studio XE6',
       'RAD Studio XE7', 'RAD Studio XE8', 'RAD Studio 10 Seattle',
       'RAD Studio 10.1 Berlin', 'RAD Studio 10.2 Tokyo', 'RAD Studio 10.3 Rio',
-      'RAD Studio 10.4 Sydney', 'RAD Studio 11.0 Olympus'
+      'RAD Studio 10.4 Sydney', 'RAD Studio 11.0 Alexandria'
   );
 
   g_strAppAbName: array[0..Integer(High(TAbiType))] of string =
@@ -64,7 +64,7 @@ var
       'RADStudioXE5', 'RADStudioXE6', 'RADStudioXE7',
       'RADStudioXE8', 'RADStudio10Seattle', 'RADStudio101Berlin',
       'RADStudio102Tokyo', 'RADStudio103Rio', 'RADStudio104Sydney',
-      'RADStudio110Olympus'
+      'RADStudio110Alexandria'
   );
 
   g_strRegPath: array[0..Integer(High(TAbiType))] of string =

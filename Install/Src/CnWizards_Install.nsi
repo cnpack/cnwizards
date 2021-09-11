@@ -32,7 +32,7 @@
 ;    IDE_VERSION_D102T
 ;    IDE_VERSION_D103R
 ;    IDE_VERSION_D104S
-;    IDE_VERSION_D110O
+;    IDE_VERSION_D110A
 ;    IDE_VERSION_CB5
 ;    IDE_VERSION_CB6
 ;    NO_HELP  -- 定义时不打任何帮助文件
@@ -111,7 +111,7 @@ RequestExecutionLevel admin
 !ifndef IDE_VERSION_D102T
 !ifndef IDE_VERSION_D103R
 !ifndef IDE_VERSION_D104S
-!ifndef IDE_VERSION_D110O
+!ifndef IDE_VERSION_D110A
 !ifndef IDE_VERSION_CB5
 !ifndef IDE_VERSION_CB6
 
@@ -150,7 +150,7 @@ RequestExecutionLevel admin
   !define IDE_VERSION_D102T "1"
   !define IDE_VERSION_D103R "1"
   !define IDE_VERSION_D104S "1"
-  !define IDE_VERSION_D110O "1"
+  !define IDE_VERSION_D110A "1"
   !define IDE_VERSION_CB5 "1"
   !define IDE_VERSION_CB6 "1"
 !endif
@@ -268,9 +268,9 @@ RequestExecutionLevel admin
     !define IDE_SHORT_NAME "D104S"
     !define IDE_LONG_NAME "RAD Studio 10.4 Sydney"
   !endif
-  !ifdef IDE_VERSION_D110O
-    !define IDE_SHORT_NAME "D110O"
-    !define IDE_LONG_NAME "RAD Studio 11 Olympus"
+  !ifdef IDE_VERSION_D110A
+    !define IDE_SHORT_NAME "D110A"
+    !define IDE_LONG_NAME "RAD Studio 11 Alexandria"
   !endif
   !ifdef IDE_VERSION_CB5
     !define IDE_SHORT_NAME "CB5"
@@ -586,9 +586,9 @@ FileLoop:
   FileClose $0
 !endif
 
-!ifdef IDE_VERSION_D110O
-  IfFileExists "$INSTDIR\CnWizards_D110O.dll" 0 +4
-  FileOpen $0 "$INSTDIR\CnWizards_D110O.dll" a
+!ifdef IDE_VERSION_D110A
+  IfFileExists "$INSTDIR\CnWizards_D110A.dll" 0 +4
+  FileOpen $0 "$INSTDIR\CnWizards_D110A.dll" a
   IfErrors FileInUse
   FileClose $0
 !endif
@@ -957,13 +957,13 @@ Section "RAD Studio 10.4 Sydney" SecD104S
 SectionEnd
 !endif
 
-!ifdef IDE_VERSION_D110O
-Section "RAD Studio 11 Olympus" SecD110O
+!ifdef IDE_VERSION_D110A
+Section "RAD Studio 11 Alexandria" SecD110A
   SectionIn 1 2
   SetOutPath $INSTDIR
-  File "..\..\Bin\CnWizards_D110O.dll"
+  File "..\..\Bin\CnWizards_D110A.dll"
   ; 写入专家注册键值
-  DeleteRegValue HKCU "Software\Embarcadero\BDS\22.0\Experts" "CnWizards_D110O"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\22.0\Experts" "CnWizards_D110A"
   WriteRegStr HKCU "Software\Embarcadero\BDS\22.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
 SectionEnd
 !endif
@@ -1159,9 +1159,9 @@ Function .onMouseOverSection
     ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio 10.4 Sydney" "+" $R0
     !insertmacro MUI_DESCRIPTION_TEXT ${SecD104S} $R0
   !endif
-  !ifdef IDE_VERSION_D110O
-    ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio 11 Olympus" "+" $R0
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecD110O} $R0
+  !ifdef IDE_VERSION_D110A
+    ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio 11 Alexandria" "+" $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecD110A} $R0
   !endif
 !endif
   !ifdef IDE_VERSION_CB5
@@ -1270,7 +1270,7 @@ Function SetCheckBoxes
   !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\21.0" "RootDir" ${SecD104S}
 !endif
 !ifdef IDE_VERSION_D104S
-  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\22.0" "RootDir" ${SecD110O}
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\22.0" "RootDir" ${SecD110A}
 !endif
 !endif
 !ifdef IDE_VERSION_CB5
@@ -1388,8 +1388,8 @@ Section "Uninstall"
   DeleteRegValue HKCU "Software\Embarcadero\BDS\21.0\Experts" "CnWizards_D104S"
   DeleteRegValue HKCU "Software\Embarcadero\BDS\21.0\Experts" "CnWizards_Loader"
 !endif
-!ifdef IDE_VERSION_D110O
-  DeleteRegValue HKCU "Software\Embarcadero\BDS\22.0\Experts" "CnWizards_D110O"
+!ifdef IDE_VERSION_D110A
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\22.0\Experts" "CnWizards_D110A"
   DeleteRegValue HKCU "Software\Embarcadero\BDS\22.0\Experts" "CnWizards_Loader"
 !endif
 !ifdef IDE_VERSION_CB5
