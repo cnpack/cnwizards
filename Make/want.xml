@@ -1,4 +1,4 @@
-<!--
+﻿<!--
   WANT - A build management tool.
   Copyright (c) 2001-2003 Juancarlo Anez, Caracas, Venezuela.
   All rights reserved.
@@ -78,7 +78,7 @@ See http://www.suigeneris.org/want/ for details.
   <property name="release.pro"    value=""          if="full" />
   <property name="release.pro"    value="_Lite"     if="lite" />
 
-  <property name="cnwizards_list" value="-cnwizloader,-d5,-d6,-d7,-d2005,-d2006,-d2007,-d2009,-d2010,-dxe,-dxe21,-dxe2,-dxe3,-dxe4,-dxe5,-dxe6,-dxe7,-dxe8,-d10s,-d101b,-d102t,-d103r1,-d103r,-d104s1,-d104s,-d110A,-cb5,-cb6" unless="lite" />
+  <property name="cnwizards_list" value="-cnwizloader,-d5,-d6,-d7,-d2005,-d2006,-d2007,-d2009,-d2010,-dxe,-dxe21,-dxe2,-dxe3,-dxe4,-dxe5,-dxe6,-dxe7,-dxe8,-d10s,-d101b,-d102t,-d103r1,-d103r,-d104s1,-d104s,-d110a,-cb5,-cb6" unless="lite" />
   <property name="cnwizards_list" value="-cnwizloader,-d6,-d7,-d2006,-d2007,-cb6" if="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cndfm6to5,cnascii,cnidebr,cnmanagewiz,cnselectlang,cnsmr,cnwizsetup,cnfixstart" unless="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cnwizsetup" if="lite" />
@@ -207,7 +207,7 @@ Usage: want [target-name] [-Dname=value]
     gitpull    - Update all files.
     cnwizloader  - Compile CnWizards Loader DLL.
     d5         - Compile CnWizards for Delphi 5.
-                 (d6, d7, d2005, d2006, d2007, d2009, d2010, dxe, dxe21, dxe2, dxe3, dxe4, dxe5, dxe6, dxe7, dxe8, d10s, d101b, d102t, d103r1, d103r, d104s1, d104s, d110A, cb5, cb6 also)
+                 (d6, d7, d2005, d2006, d2007, d2009, d2010, dxe, dxe21, dxe2, dxe3, dxe4, dxe5, dxe6, dxe7, dxe8, d10s, d101b, d102t, d103r1, d103r, d104s1, d104s, d110a, cb5, cb6 also)
     cnwizards  - Compile all CnWizards DLLs (D5, D6, etc.).
     resdll     - Compile CnWizards Resource DLL.
     cnwizhelperdll - Compile CnWizards Helper DLL.
@@ -345,7 +345,7 @@ Usage: want [target-name] [-Dname=value]
   <target name="d103r" depends="-d103r,-cw_final" description="Compile CnWizards for RAD Studio 10.3 Rio." />
   <target name="d104s1" depends="-d104s,-cw_final" description="Compile CnWizards for RAD Studio 10.4.0 Sydney or below." />
   <target name="d104s" depends="-d104s,-cw_final" description="Compile CnWizards for RAD Studio 10.4 Sydney." />
-  <target name="d110A" depends="-d110A,-cw_final" description="Compile CnWizards for RAD Studio 11.0 Alexandria." />
+  <target name="d110a" depends="-d110a,-cw_final" description="Compile CnWizards for RAD Studio 11.0 Alexandria." />
   <target name="cb5" depends="-cb5,-cw_final" description="Compile CnWizards for C++Builder 5." />
   <target name="cb6" depends="-cb6,-cw_final" description="Compile CnWizards for C++Builder 6." />
 
@@ -926,8 +926,8 @@ Usage: want [target-name] [-Dname=value]
     </move>
   </target>
 
-  <target name="-d110A" depends="-cw_prepare" >
-    <property name="Ver.FileDescription"  value="CnWizards For RAD Studio 10.4 Sydney" />
+  <target name="-d110a" depends="-cw_prepare" >
+    <property name="Ver.FileDescription"  value="CnWizards For RAD Studio 11 Alexandria" />
     <property name="Ver.InternalName"     value="CnWizards_D110A" />
     <property name="Ver.OriginalFilename" value="CnWizards_D110A.DLL" />
     <copy tofile="${src}/CnWizards_D110A.res.old" >
