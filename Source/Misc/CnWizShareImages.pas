@@ -65,7 +65,8 @@ type
     FCopied: Boolean;       // 记录我们的 ImageList 有无塞到 IDE 的 ImageList 中
     FLargeCopied: Boolean;  // 记录 IDE 的 ImageList 有无复制一份大的
 {$ENDIF}
-    procedure CopyToLarge(SrcImageList, DstImageList: TCustomImageList);
+    procedure StretchCopyToLarge(SrcImageList, DstImageList: TCustomImageList);
+    procedure CenterCopyTo(SrcImageList, DstImageList: TCustomImageList);
   public
     property IdxUnknown: Integer read FIdxUnknown;
     property IdxUnknownInIDE: Integer read FIdxUnknownInIDE;
@@ -95,10 +96,11 @@ uses
 
 {$R *.dfm}
 
-procedure TdmCnSharedImages.CopyToLarge(SrcImageList,
-  DstImageList: TCustomImageList);
 const
   MaskColor = clBtnFace;
+
+procedure TdmCnSharedImages.StretchCopyToLarge(SrcImageList,
+  DstImageList: TCustomImageList);
 var
   Src, Dst: TBitmap;
   Rs, Rd: TRect;
@@ -133,6 +135,42 @@ begin
   end;
 end;
 
+procedure TdmCnSharedImages.CenterCopyTo(SrcImageList,
+  DstImageList: TCustomImageList);
+var
+  Src, Dst: TBitmap;
+  Rs, Rd: TRect;
+  I: Integer;
+begin
+  // 从小的 ImageList 中拉扯绘制，把 16*16 居中画到大的 20* 20 中
+  Src := nil;
+  Dst := nil;
+  try
+    Src := CreateEmptyBmp24(SrcImageList.Width, SrcImageList.Height, MaskColor);
+    Dst := CreateEmptyBmp24(DstImageList.Width, DstImageList.Height, MaskColor);
+
+    Rs := Rect(0, 0, Src.Width, Src.Height);
+    Rd := Rect(0, 0, Dst.Width, Dst.Height);
+
+    Src.Canvas.Brush.Color := MaskColor;
+    Src.Canvas.Brush.Style := bsSolid;
+    Dst.Canvas.Brush.Color := clFuchsia;
+    Dst.Canvas.Brush.Style := bsSolid;
+
+    for I := 0 to SrcImageList.Count - 1 do
+    begin
+      Src.Canvas.FillRect(Rs);
+      SrcImageList.GetBitmap(I, Src);
+      Dst.Canvas.FillRect(Rd);
+      Dst.Canvas.Draw((Dst.Width - Src.Width) div 2, (Dst.Height - Src.Height) div 2, Src);
+      DstImageList.AddMasked(Dst, MaskColor);
+    end;
+  finally
+    Src.Free;
+    Dst.Free;
+  end;
+end;
+
 procedure TdmCnSharedImages.DataModuleCreate(Sender: TObject);
 {$IFNDEF STAND_ALONE}
 var
@@ -157,9 +195,9 @@ begin
   end;
 
   // 为大图标版做好准备
-  CopyToLarge(ilProcToolbar, ilProcToolbarLarge);
-  CopyToLarge(Images, LargeImages);
-  CopyToLarge(DisabledImages, DisabledLargeImages);
+  StretchCopyToLarge(ilProcToolbar, ilProcToolbarLarge);
+  StretchCopyToLarge(Images, LargeImages);
+  StretchCopyToLarge(DisabledImages, DisabledLargeImages);
 {$ENDIF}
 end;
 
@@ -196,15 +234,25 @@ begin
     Exit;
 
   IDEs := GetIDEImageList;
-  if (IDEs <> nil) and (IDEs.Width = Images.Width) and (IDEs.Height = Images.Height) then
+  if IDEs <> nil then
   begin
     Cnt := IDEs.Count;
-    IDEs.AddImages(Images);
+    if (IDEs.Width = Images.Width) and (IDEs.Height = Images.Height) then
+    begin
+      IDEs.AddImages(Images);
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('Add %d Images to IDE Main 16x16 ImageList. Offset %d.', [Images.Count, Cnt]);
+{$ENDIF}
+    end
+    else // D11 及其以后，IDE 的主 ImageList 变 20x20 了
+    begin
+      CenterCopyTo(Images, IDEs);
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('Add %d Images to IDE Main 20x20 ImageList. Offset %d.', [Images.Count, Cnt]);
+{$ENDIF}
+    end;
     FIDEOffset := Cnt;
     FCopied := True;
-{$IFDEF DEBUG}
-    CnDebugger.LogFmt('Add %d Images to IDE Main ImageList. Offset %d.', [Images.Count, FIDEOffset]);
-{$ENDIF}
   end;
 end;
 
@@ -221,7 +269,8 @@ begin
     ImageList.BkColor := clFuchsia;
     ImageList.GetBitmap(EmptyIdx, Button.Glyph);
     ImageList.BkColor := Save;
-  end;    
+  end;
+
   // 调整按钮位图以解决有些按钮 Disabled 时无图标的问题
   AdjustButtonGlyph(Button.Glyph);
   Button.NumGlyphs := 2;
@@ -239,7 +288,7 @@ begin
     Exit;
 
   // 再把 IDE 的 ImageList 复制一个超大型的供大尺寸下使用
-  CopyToLarge(IDEs, IDELargeImages);
+  StretchCopyToLarge(IDEs, IDELargeImages);
   FLargeCopied := True;
 end;
 
