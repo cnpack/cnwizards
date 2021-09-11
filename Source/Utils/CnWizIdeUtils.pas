@@ -3402,8 +3402,10 @@ end;
 procedure DisableWaitDialogShow;
 begin
 {$IFDEF IDE_SWITCH_BUG}
+  {$IFNDEF DELPHI110_ALEXANDRIA_UP}
   if not CnIsDelphi10Dot4GEDot2 then
     Exit;
+  {$ENDIF}
 
   if FWaitDialogHook = nil then
   begin
@@ -3421,8 +3423,10 @@ end;
 procedure EnableWaitDialogShow;
 begin
 {$IFDEF IDE_SWITCH_BUG}
+  {$IFNDEF DELPHI110_ALEXANDRIA_UP}
   if not CnIsDelphi10Dot4GEDot2 then
     Exit;
+  {$ENDIF}
 
   if FWaitDialogHook <> nil then
     FWaitDialogHook.UnhookMethod;
