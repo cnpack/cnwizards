@@ -527,6 +527,9 @@ function GetCnWizardTypeNameFromClass(AClass: TClass): string;
 function GetCnWizardTypeName(AWizard: TCnBaseWizard): string;
 {* 根据专家实例名取指定的专家类引用 }
 
+procedure GetCnWizardInfoStrs(AWizard: TCnBaseWizard; Infos: TStrings);
+{* 获取专家实例的描述字符串列表，供信息输出用}
+
 implementation
 
 uses
@@ -579,7 +582,7 @@ begin
 end;
 
 // 根据专家类名取专家类型名称
-function GetCnWizardTypeNameFromClass(AClass: TClass): String;
+function GetCnWizardTypeNameFromClass(AClass: TClass): string;
 begin
   if AClass.InheritsFrom(TCnProjectWizard) then
     Result := SCnProjectWizardName
@@ -602,9 +605,32 @@ begin
 end;
 
 // 根据专家实例名取指定的专家类引用
-function GetCnWizardTypeName(AWizard: TCnBaseWizard): String;
+function GetCnWizardTypeName(AWizard: TCnBaseWizard): string;
 begin
   Result := GetCnWizardTypeNameFromClass(AWizard.ClassType);
+end;
+
+procedure GetCnWizardInfoStrs(AWizard: TCnBaseWizard; Infos: TStrings);
+begin
+  if (AWizard <> nil) and (Infos <> nil) then
+  begin
+    Infos.Add('ClassName: ' + AWizard.ClassName);
+    Infos.Add('IDString: ' + AWizard.GetIDString);
+    Infos.Add('WizardName: ' + AWizard.WizardName);
+    Infos.Add('Comment: ' + AWizard.GetComment);
+
+    if AWizard is TCnIconWizard then
+    begin
+      // 打印 Icon 信息，暂无
+    end;
+    if AWizard is TCnActionWizard then
+    begin
+      Infos.Add('Action Caption: ' + (AWizard as TCnActionWizard).Action.Caption);
+      Infos.Add('Action Hint: ' + (AWizard as TCnActionWizard).Action.Hint);
+      Infos.Add('Action ImageIndex: ' + IntToStr((AWizard as TCnActionWizard).Action.ImageIndex));
+      Infos.Add('Action ShortCut: ' + ShortCutToText((AWizard as TCnActionWizard).Action.ShortCut));
+    end;
+  end;
 end;
 
 //==============================================================================

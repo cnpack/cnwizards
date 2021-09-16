@@ -282,6 +282,7 @@ const
   csCnWizFreeMutex = 'CnWizFreeMutex';
   csMaxWaitFreeTick = 5000;
   SCN_DBG_CMD_SEARCH = 'search';
+  SCN_DBG_CMD_DUMP = 'dump';
 
 var
   CnDesignExecutorList: TObjectList = nil; // 设计器右键菜单执行对象列表
@@ -1493,7 +1494,21 @@ begin
     end
     else
     begin
-      // TODO: 处理一些不针对 Wizard 的全局命令
+      // 处理一些不针对单个 Wizard 的全局命令
+      if LowerCase(Cmds[0]) = SCN_DBG_CMD_DUMP then
+      begin
+        // 循环打印每个 Wizard 的基本信息
+        for I := 0 to GetWizardCount - 1 do
+        begin
+          Wizard := GetWizards(I);
+          if Wizard <> nil then
+          begin
+            Results.Add('#' + IntToStr(I) + ':');
+            GetCnWizardInfoStrs(Wizard, Results);
+            Results.Add('');
+          end;
+        end;
+      end;
 
       // No Wizard can process this debug command, do other stuff
       Results.Add('Unknown Debug Command ' + Cmd);

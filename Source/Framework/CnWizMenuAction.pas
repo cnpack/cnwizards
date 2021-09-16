@@ -46,7 +46,9 @@ interface
 
 uses
   Windows, Messages, Classes, SysUtils, Graphics, Menus, Forms, ActnList, ToolsAPI, 
-  {$IFDEF DELPHIXE3_UP} Actions,{$ENDIF} CnCommon, CnWizConsts, CnWizShortCut;
+  {$IFDEF DELPHIXE3_UP} Actions,{$ENDIF}
+  {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList, {$ENDIF}
+  CnCommon, CnWizConsts, CnWizShortCut;
 
 type
 //==============================================================================
@@ -471,10 +473,17 @@ begin
   AWizAction.ActionList := Svcs40.ActionList;
   if CnWizLoadIcon(AWizAction.FIcon, AWizAction.FSmallIcon, IcoName, UseDefaultIcon) then
   begin
+{$IFDEF IDE_SUPPORT_HDPI}
+    if AWizAction.FSmallIcon.Empty then // IDE 主 ImageList 尽量使用 16*16 的图标
+      AWizAction.ImageIndex := AddGraphicToVirtualImageList(AWizAction.FIcon, Svcs40.ImageList as TVirtualImageList)
+    else
+      AWizAction.ImageIndex := AddGraphicToVirtualImageList(AWizAction.FSmallIcon, Svcs40.ImageList as TVirtualImageList);
+{$ELSE}
     if AWizAction.FSmallIcon.Empty then // IDE 主 ImageList 尽量使用 16*16 的图标
       AWizAction.ImageIndex := AddIconToImageList(AWizAction.FIcon, Svcs40.ImageList)
     else
       AWizAction.ImageIndex := AddIconToImageList(AWizAction.FSmallIcon, Svcs40.ImageList, False);
+{$ENDIF}
   end
   else
     AWizAction.ImageIndex := -1;
