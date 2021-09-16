@@ -44,12 +44,12 @@ unit CnWizUtils;
 * 修改记录：2015.04 by liuxiao
 *               加入一批 Unicode 版本的函数
 *           2012.10.01 by shenloqi
-*               修复CnOtaGetCurrLineText不能获取最后一行和未TrimRight的BUG
-*               修复CnOtaInsertSingleLine不能正确在第一行插入的BUG
+*               修复 CnOtaGetCurrLineText 不能获取最后一行和未 TrimRight 的 BUG
+*               修复 CnOtaInsertSingleLine 不能正确在第一行插入的 BUG
 *           2012.09.19 by shenloqi
-*               移植到Delphi XE3
+*               移植到 Delphi XE3
 *           2005.05.06 by hubdog
-*               追加设置项目属性值的函数，修改CnOtaGetActiveProjectOptions
+*               追加设置项目属性值的函数，修改 CnOtaGetActiveProjectOptions
 *           2005.05.04 by hubdog
 *               复制控件名称后，自动切换到代码模式
 *           2002.09.17 V1.0
@@ -64,12 +64,11 @@ interface
 uses
   Windows, Messages, Classes, Graphics, Controls, SysUtils, Menus, ActnList,
   Forms, ImgList, ExtCtrls, ExptIntf, ToolsAPI, ComObj, IniFiles, FileCtrl,
-  {$IFDEF COMPILER6_UP}
-  DesignIntf, DesignEditors, ComponentDesigner, Variants, Types,
-  {$ELSE}
-  DsgnIntf, LibIntf,
-  {$ENDIF}
+  {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, ComponentDesigner, Variants, Types,
+  {$ELSE} DsgnIntf, LibIntf,{$ENDIF}
   {$IFDEF DELPHIXE3_UP} Actions,{$ENDIF}
+  {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList,
+  Vcl.BaseImageCollection, Vcl.ImageCollection, {$ENDIF}
   {$IFDEF IDE_SUPPORT_THEMING} CnIDEMirrorIntf, {$ENDIF}
   mPasLex, mwBCBTokenList, CnPasWideLex, CnBCBWideTokenList,
   Clipbrd, TypInfo, ComCtrls, StdCtrls, Imm, Contnrs, RegExpr, CnWizCompilerConst,
@@ -170,6 +169,18 @@ function CnWizLoadBitmap(ABitmap: TBitmap; const ResName: string): Boolean;
 function AddIconToImageList(AIcon: TIcon; ImageList: TCustomImageList;
   Stretch: Boolean = True): Integer;
 {* 增加图标到 ImageList 中，可使用平滑处理}
+
+{$IFDEF IDE_SUPPORT_HDPI}
+
+procedure CopyImageListToVirtual(SrcImageList: TCustomImageList;
+  DstVirtual: TVirtualImageList; const ANamePrefix: string = '');
+{* 将传统的 ImageList 复制进 TVirtualImageList}
+function AddGraphicToVirtualImageList(Graphic: TGraphic; DstVirtual: TVirtualImageList;
+  const ANamePrefix: string = ''): Integer;
+{* 将普通的 TGraphic 复制进 TVirtualImageList}
+
+{$ENDIF}
+
 function CreateDisabledBitmap(Glyph: TBitmap): TBitmap;
 {* 创建一个 Disabled 的位图，返回对象需要调用方释放}
 procedure AdjustButtonGlyph(Glyph: TBitmap);
@@ -1159,6 +1170,7 @@ const
 
 type
   TControlAccess = class(TControl);
+  TGraphicHack = class(TGraphic);
 
 var
 {$IFDEF COMPILER7_UP}
@@ -1534,6 +1546,97 @@ begin
   else
     Result := -1;
 end;
+
+{$IFDEF IDE_SUPPORT_HDPI}
+
+procedure CopyImageListToVirtual(SrcImageList: TCustomImageList;
+  DstVirtual: TVirtualImageList; const ANamePrefix: string = '');
+var
+  I, C1, C2: Integer;
+  Bmp: TBitmap;
+  Mem: TMemoryStream;
+  Collection: TImageCollection;
+begin
+  if (SrcImageList = nil) or (DstVirtual = nil) or
+    (DstVirtual.ImageCollection = nil) then
+    Exit;
+
+  if DstVirtual.ImageCollection is TImageCollection then
+    Collection := DstVirtual.ImageCollection as TImageCollection
+  else
+    Exit;
+
+  C1 := Collection.Count;
+  Mem := TMemoryStream.Create;
+  try
+    for I := 0 to SrcImageList.Count - 1 do
+    begin
+      Bmp := TBitmap.Create;
+      try
+        Bmp.PixelFormat := pf32bit;
+        Bmp.AlphaFormat := afIgnored;
+        SrcImageList.GetBitmap(I, Bmp);
+
+        Mem.Clear;
+        Bmp.SaveToStream(Mem);
+      finally
+        Bmp.Free;
+      end;
+      Collection.Add(ANamePrefix + IntToStr(I), Mem);
+    end;
+  finally
+    Mem.Free;
+  end;
+  C2 := Collection.Count;
+
+  DstVirtual.Add('', C1 - 1, C2 - 1, False);
+end;
+
+function AddGraphicToVirtualImageList(Graphic: TGraphic; DstVirtual: TVirtualImageList;
+  const ANamePrefix: string = ''): Integer;
+var
+  C: Integer;
+  R: TRect;
+  Bmp: TBitmap;
+  Mem: TMemoryStream;
+  Collection: TImageCollection;
+begin
+  Result := -1;
+  if (Graphic = nil) or (DstVirtual = nil) then
+    Exit;
+
+  if DstVirtual.ImageCollection is TImageCollection then
+    Collection := DstVirtual.ImageCollection as TImageCollection
+  else
+    Exit;
+
+  C := Collection.Count;
+  Mem := TMemoryStream.Create;
+  try
+    Bmp := TBitmap.Create;
+    try
+      Bmp.PixelFormat := pf32bit;
+      Bmp.AlphaFormat := afIgnored;
+      Bmp.Width := Graphic.Width;
+      Bmp.Height := Graphic.Height;
+      R := Rect(0, 0, Bmp.Width, Bmp.Height);
+      TGraphicHack(Graphic).Draw(Bmp.Canvas, R);
+
+      Mem.Clear;
+      Bmp.SaveToStream(Mem);
+    finally
+      Bmp.Free;
+    end;
+    Collection.Add(ANamePrefix + IntToStr(C), Mem);
+  finally
+    Mem.Free;
+  end;
+
+  DstVirtual.Add('', C, C, False);
+  Result := DstVirtual.Count - 1;
+end;
+
+{$ENDIF}
 
 // 创建一个 Disabled 的位图，返回对象需要调用方释放
 function CreateDisabledBitmap(Glyph: TBitmap): TBitmap;
