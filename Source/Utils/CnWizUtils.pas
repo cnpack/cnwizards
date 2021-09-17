@@ -1553,7 +1553,7 @@ procedure CopyImageListToVirtual(SrcImageList: TCustomImageList;
   DstVirtual: TVirtualImageList; const ANamePrefix: string = '');
 var
   I, C1, C2: Integer;
-  Bmp: TBitmap;
+  Ico: TIcon;
   Mem: TMemoryStream;
   Collection: TImageCollection;
 begin
@@ -1571,16 +1571,13 @@ begin
   try
     for I := 0 to SrcImageList.Count - 1 do
     begin
-      Bmp := TBitmap.Create;
+      Ico := TIcon.Create;
       try
-        Bmp.PixelFormat := pf32bit;
-        Bmp.AlphaFormat := afIgnored;
-        SrcImageList.GetBitmap(I, Bmp);
-
+        SrcImageList.GetIcon(I, Ico);
         Mem.Clear;
-        Bmp.SaveToStream(Mem);
+        Ico.SaveToStream(Mem);
       finally
-        Bmp.Free;
+        Ico.Free;
       end;
       Collection.Add(ANamePrefix + IntToStr(I), Mem);
     end;
@@ -1613,19 +1610,32 @@ begin
   C := Collection.Count;
   Mem := TMemoryStream.Create;
   try
-    Bmp := TBitmap.Create;
-    try
-      Bmp.PixelFormat := pf32bit;
-      Bmp.AlphaFormat := afIgnored;
-      Bmp.Width := Graphic.Width;
-      Bmp.Height := Graphic.Height;
-      R := Rect(0, 0, Bmp.Width, Bmp.Height);
-      TGraphicHack(Graphic).Draw(Bmp.Canvas, R);
-
+    if Graphic is TIcon then // 是 Icon 则直接存避免丢失透明度
+    begin
       Mem.Clear;
-      Bmp.SaveToStream(Mem);
-    finally
-      Bmp.Free;
+      (Graphic as TIcon).SaveToStream(Mem);
+    end
+    else if Graphic is TBitmap then
+    begin
+      Mem.Clear;
+      (Graphic as TBitmap).SaveToStream(Mem);
+    end
+    else
+    begin
+      Bmp := TBitmap.Create;
+      try
+        Bmp.PixelFormat := pf32bit;
+        Bmp.AlphaFormat := afIgnored;
+        Bmp.Width := Graphic.Width;
+        Bmp.Height := Graphic.Height;
+        R := Rect(0, 0, Bmp.Width, Bmp.Height);
+        TGraphicHack(Graphic).Draw(Bmp.Canvas, R);
+
+        Mem.Clear;
+        Bmp.SaveToStream(Mem);
+      finally
+        Bmp.Free;
+      end;
     end;
     Collection.Add(ANamePrefix + IntToStr(C), Mem);
   finally
