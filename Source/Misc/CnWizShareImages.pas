@@ -28,7 +28,9 @@ unit CnWizShareImages;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2003.04.18 V1.0
+* 修改记录：2021.09.15 V1.1
+*               支持 HDPI 可变分辨率组件
+*           2003.04.18 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -39,7 +41,8 @@ interface
 
 uses
   SysUtils, Windows, Classes, Graphics, Forms, ImgList, Buttons, Controls,
-  {$IFNDEF STAND_ALONE} CnWizUtils,  CnWizOptions, CnWizIdeUtils, {$ENDIF}
+  {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList, Vcl.ImageCollection, {$ENDIF}
+  {$IFNDEF STAND_ALONE} CnWizUtils, CnWizOptions, CnWizIdeUtils, {$ENDIF}
   CnGraphUtils;
 
 type
@@ -60,6 +63,10 @@ type
   private
     FIdxUnknownInIDE: Integer;
     FIdxUnknown: Integer;
+{$IFDEF IDE_SUPPORT_HDPI}
+    FVirtualImages: TVirtualImageList;   // 对应 Images 与 DisabledImages
+    FImageCollection: TImageCollection;
+{$ENDIF}
 {$IFNDEF STAND_ALONE}
     FIDEOffset: Integer;
     FCopied: Boolean;       // 记录我们的 ImageList 有无塞到 IDE 的 ImageList 中
@@ -142,12 +149,19 @@ var
   Rs, Rd: TRect;
   I: Integer;
 begin
-  // 从小的 ImageList 中拉扯绘制，把 16*16 居中画到大的 20* 20 中
+  // 从小的 ImageList 中拉扯绘制，把小图居中画到大的
   Src := nil;
   Dst := nil;
   try
-    Src := CreateEmptyBmp24(SrcImageList.Width, SrcImageList.Height, MaskColor);
-    Dst := CreateEmptyBmp24(DstImageList.Width, DstImageList.Height, MaskColor);
+    Src := TBitmap.Create;
+    Src.Width := SrcImageList.Width;
+    Src.Height := SrcImageList.Height;
+    Src.PixelFormat := pf24bit;
+
+    Dst := TBitmap.Create;
+    Dst.Width := DstImageList.Width;
+    Dst.Height := DstImageList.Height;
+    Dst.PixelFormat := pf24bit;
 
     Rs := Rect(0, 0, Src.Width, Src.Height);
     Rd := Rect(0, 0, Dst.Width, Dst.Height);
@@ -175,13 +189,28 @@ procedure TdmCnSharedImages.DataModuleCreate(Sender: TObject);
 {$IFNDEF STAND_ALONE}
 var
   ImgLst: TCustomImageList;
+{$IFDEF IDE_SUPPORT_HDPI}
+  Ico: TIcon;
+{$ELSE}
   Bmp: TBitmap;
+{$ENDIF}
   Save: TColor;
 {$ENDIF}
 begin
 {$IFNDEF STAND_ALONE}
   FIdxUnknown := 66;
   ImgLst := GetIDEImageList;
+
+{$IFDEF IDE_SUPPORT_HDPI}
+  Ico := TIcon.Create;
+  try
+    Images.GetIcon(IdxUnknown, Ico);
+    FIdxUnknownInIDE := AddGraphicToVirtualImageList(Ico,
+      ImgLst as TVirtualImageList, 'CnWizardsUnknown');
+  finally
+    Ico.Free;
+  end;
+{$ELSE}
   Bmp := TBitmap.Create;        // 给 IDE 的主 List 加个 Unknown 的图标
   try
     Bmp.PixelFormat := pf24bit;
@@ -193,6 +222,7 @@ begin
   finally
     Bmp.Free;
   end;
+{$ENDIF}
 
   // 为大图标版做好准备
   StretchCopyToLarge(ilProcToolbar, ilProcToolbarLarge);
@@ -237,6 +267,13 @@ begin
   if IDEs <> nil then
   begin
     Cnt := IDEs.Count;
+{$IFDEF IDE_SUPPORT_HDPI}
+    // D11 及其以后，IDE 的主 ImageList 变 VirtualImageList 了
+    CopyImageListToVirtual(Images, IDEs as TVirtualImageList, 'CnWizardsItem');
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('Add %d Images to IDE Main VirtualImageList. Offset %d.', [Images.Count, Cnt]);
+{$ENDIF}
+{$ELSE}
     if (IDEs.Width = Images.Width) and (IDEs.Height = Images.Height) then
     begin
       IDEs.AddImages(Images);
@@ -244,13 +281,15 @@ begin
       CnDebugger.LogFmt('Add %d Images to IDE Main 16x16 ImageList. Offset %d.', [Images.Count, Cnt]);
 {$ENDIF}
     end
-    else // D11 及其以后，IDE 的主 ImageList 变 20x20 了
+    else // 实际上走不到这里，D11 的是 20x20 但要靠上面额外处理
     begin
       CenterCopyTo(Images, IDEs);
 {$IFDEF DEBUG}
       CnDebugger.LogFmt('Add %d Images to IDE Main 20x20 ImageList. Offset %d.', [Images.Count, Cnt]);
 {$ENDIF}
     end;
+{$ENDIF}
+
     FIDEOffset := Cnt;
     FCopied := True;
   end;
