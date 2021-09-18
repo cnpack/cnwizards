@@ -487,6 +487,10 @@ var
   I: Integer;
 {$ENDIF}
 begin
+{$IFDEF IDE_SUPPORT_HDPI}
+  Scaled := True;
+{$ENDIF}
+
   inherited;
   FScaler := TCnFormScaler.Create(Self);
 {$IFNDEF STAND_ALONE}
