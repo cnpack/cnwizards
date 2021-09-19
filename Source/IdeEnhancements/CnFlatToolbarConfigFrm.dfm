@@ -1,8 +1,8 @@
 inherited CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
-  Left = 223
-  Top = 171
-  Width = 541
-  Height = 370
+  Left = 284
+  Top = 184
+  Width = 695
+  Height = 485
   BorderIcons = [biSystemMenu]
   Caption = 'Toolbar Settings'
   Constraints.MinHeight = 340
@@ -82,15 +82,15 @@ inherited CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
   TextHeight = 13
   object pnlButtons: TPanel
     Left = 0
-    Top = 312
-    Width = 533
+    Top = 427
+    Width = 687
     Height = 31
     Align = alBottom
     BevelOuter = bvNone
     FullRepaint = False
     TabOrder = 1
     object btnHelp: TButton
-      Left = 451
+      Left = 605
       Top = 3
       Width = 75
       Height = 21
@@ -100,7 +100,7 @@ inherited CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
       OnClick = btnHelpClick
     end
     object btnOK: TButton
-      Left = 291
+      Left = 445
       Top = 3
       Width = 75
       Height = 21
@@ -112,7 +112,7 @@ inherited CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
       OnClick = btnOKClick
     end
     object btnCancel: TButton
-      Left = 371
+      Left = 525
       Top = 3
       Width = 75
       Height = 21
@@ -126,14 +126,14 @@ inherited CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
   object pnlContent: TPanel
     Left = 0
     Top = 0
-    Width = 533
-    Height = 312
+    Width = 687
+    Height = 427
     Align = alClient
     BevelOuter = bvNone
     FullRepaint = False
     TabOrder = 0
     object lblAvailable: TLabel
-      Left = 120
+      Left = 152
       Top = 8
       Width = 87
       Height = 13
@@ -149,7 +149,7 @@ inherited CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
       FocusControl = lbCategories
     end
     object lblToolbar: TLabel
-      Left = 336
+      Left = 474
       Top = 8
       Width = 80
       Height = 13
@@ -158,8 +158,8 @@ inherited CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
       FocusControl = lbToolbar
     end
     object pnlEditor: TPanel
-      Left = 336
-      Top = 264
+      Left = 490
+      Top = 379
       Width = 191
       Height = 41
       Anchors = [akRight, akBottom]
@@ -176,10 +176,10 @@ inherited CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
       end
     end
     object lbAvailable: TListBox
-      Left = 120
+      Left = 152
       Top = 24
-      Width = 184
-      Height = 281
+      Width = 281
+      Height = 396
       Anchors = [akLeft, akTop, akRight, akBottom]
       DragMode = dmAutomatic
       ItemHeight = 21
@@ -196,18 +196,18 @@ inherited CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
     object lbCategories: TListBox
       Left = 8
       Top = 24
-      Width = 105
-      Height = 281
+      Width = 137
+      Height = 396
       Anchors = [akLeft, akTop, akBottom]
       ItemHeight = 13
       TabOrder = 0
       OnClick = lbCategoriesClick
     end
     object lbToolbar: TListBox
-      Left = 335
+      Left = 472
       Top = 24
-      Width = 191
-      Height = 234
+      Width = 208
+      Height = 349
       Anchors = [akTop, akRight, akBottom]
       DragMode = dmAutomatic
       ItemHeight = 21
@@ -222,7 +222,7 @@ inherited CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
       OnStartDrag = lbToolbarStartDrag
     end
     object btnAdd: TBitBtn
-      Left = 309
+      Left = 443
       Top = 47
       Width = 21
       Height = 21
@@ -242,7 +242,7 @@ inherited CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
         7000}
     end
     object btnDown: TBitBtn
-      Left = 309
+      Left = 443
       Top = 128
       Width = 21
       Height = 21
@@ -262,7 +262,7 @@ inherited CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
         7000}
     end
     object btnRemove: TBitBtn
-      Left = 309
+      Left = 443
       Top = 72
       Width = 21
       Height = 21
@@ -282,7 +282,7 @@ inherited CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
         7000}
     end
     object btnUp: TBitBtn
-      Left = 309
+      Left = 443
       Top = 103
       Width = 21
       Height = 21
@@ -302,7 +302,7 @@ inherited CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
         7000}
     end
     object btnReset: TBitBtn
-      Left = 309
+      Left = 443
       Top = 160
       Width = 21
       Height = 21
@@ -322,9 +322,9 @@ inherited CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
         9888888889888988888888888898988888888888888988888888}
     end
     object pnlForm: TPanel
-      Left = 336
-      Top = 264
-      Width = 191
+      Left = 472
+      Top = 379
+      Width = 215
       Height = 41
       Anchors = [akRight, akBottom]
       BevelOuter = bvNone
@@ -337,7 +337,7 @@ inherited CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
         Caption = 'Button Rows:'
       end
       object seLineCount: TCnSpinEdit
-        Left = 87
+        Left = 103
         Top = 1
         Width = 105
         Height = 22
@@ -350,7 +350,7 @@ inherited CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
       object chkVertOrder: TCheckBox
         Left = 0
         Top = 26
-        Width = 193
+        Width = 209
         Height = 17
         Caption = 'Arrange Button by Top-Bottom First'
         TabOrder = 1
