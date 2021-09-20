@@ -1586,7 +1586,7 @@ begin
   end;
   C2 := Collection.Count;
 
-  DstVirtual.Add('', C1 - 1, C2 - 1, False);
+  DstVirtual.Add('', C1, C2 - 1, False);
 end;
 
 function AddGraphicToVirtualImageList(Graphic: TGraphic; DstVirtual: TVirtualImageList;
