@@ -1624,9 +1624,16 @@ begin
   end;
 {$ENDIF}
 
-  {$IFDEF COMPILER6_UP}
+{$IFDEF COMPILER6_UP}
   cbbMatchSearch.AutoComplete := False;
-  {$ENDIF}
+{$ENDIF}
+
+{$IFDEF DELPHI110_ALEXANDRIA_UP}
+  actQuery.Visible := True;
+  actQuery.Enabled := False;
+  btnQuery.Visible := True;
+  btnQuery.Enabled := False;
+{$ENDIF}
 end;
 
 procedure TCnProcListForm.FormShow(Sender: TObject);
@@ -1634,6 +1641,10 @@ begin
   inherited;
   UpdateItemPosition;
   UpdateMemoHeight(nil);
+{$IFDEF DELPHI110_ALEXANDRIA_UP}
+  btnClose.Down := False;
+  btnQuery.Visible := False;
+{$ENDIF}
 end;
 
 procedure TCnProcListForm.CreateList;
