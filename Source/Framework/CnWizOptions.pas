@@ -184,9 +184,9 @@ type
     procedure DoFixThreadLocale;
 
     class function CalcIntEnlargedValue(AEnlarge: TCnWizSizeEnlarge; Value: Integer): Integer;
-    {* 根据原始尺寸与放大倍数计算放大后的尺寸，给子类用的}
+    {* 根据原始尺寸与放大倍数计算放大后的尺寸，给子类用的，得保证和下面对应}
     class function CalcIntUnEnlargedValue(AEnlarge: TCnWizSizeEnlarge;Value: Integer): Integer;
-    {* 根据放大后的尺寸与放大倍数计算原始尺寸，给子类用的}
+    {* 根据放大后的尺寸与放大倍数计算原始尺寸，给子类用的，得保证和上面对应}
 
     // 专家 DLL 属性
     property DllName: string read FDllName;
@@ -861,7 +861,7 @@ begin
   if AEnlarge = wseOrigin then
     Result := Value
   else
-    Result := Trunc(Value * GetFactorFromSizeEnlarge(AEnlarge));
+    Result := Round(Value * GetFactorFromSizeEnlarge(AEnlarge));
 end;
 
 class function TCnWizOptions.CalcIntUnEnlargedValue(AEnlarge: TCnWizSizeEnlarge;
@@ -870,7 +870,7 @@ begin
   if AEnlarge = wseOrigin then
     Result := Value
   else
-    Result := Trunc(Value / GetFactorFromSizeEnlarge(AEnlarge));
+    Result := Round(Value / GetFactorFromSizeEnlarge(AEnlarge));
 end;
 
 procedure TCnWizOptions.ResetToolbarWithLargeIcons(AToolBar: TToolBar);
