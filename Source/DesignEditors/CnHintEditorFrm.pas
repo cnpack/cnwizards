@@ -179,14 +179,9 @@ begin
     Height := ReadInteger(csHintEditor, csHeight, Height);
     Width := ReadInteger(csHintEditor, csWidth, Width);
 
-    // 读入旧值进行放大
+    // 读入旧值，基类会自动进行放大，此处无需再次调用 CalcIntEnlargedValue 放大
     Memos[0].Font := ReadFont(csHintEditor, csFontShort, Memos[0].Font);
     Memos[1].Font := ReadFont(csHintEditor, csFontLong, Memos[1].Font);
-    if Enlarged then
-    begin
-      Memos[0].Font.Size := CalcIntEnlargedValue(Memos[0].Font.Size);
-      Memos[1].Font.Size := CalcIntEnlargedValue(Memos[1].Font.Size);
-    end;
   finally
     Free;
   end;
