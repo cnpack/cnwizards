@@ -3293,19 +3293,12 @@ procedure TCnBasePascalFormatter.FormatFunctionHeading(PreSpaceCount: Byte;
 var
   IsOperator: Boolean;
 begin
-  IsOperator := Scaner.Token = tokKeywordOperator;
-
   if Scaner.Token = tokKeywordClass then
-  begin
     Match(tokKeywordClass, PreSpaceCount); // class 后无需再手工加空格
-    if Scaner.Token in [tokKeywordFunction, tokKeywordOperator] then
-      Match(Scaner.Token);
-  end
-  else
-  begin
-    if Scaner.Token in [tokKeywordFunction, tokKeywordOperator] then
-      Match(Scaner.Token, PreSpaceCount);
-  end;
+
+  IsOperator := Scaner.Token = tokKeywordOperator;
+  if Scaner.Token in [tokKeywordFunction, tokKeywordOperator] then
+    Match(Scaner.Token);
 
   FormatPossibleAmpersand(CnPascalCodeForRule.SpaceBeforeOperator);
 
