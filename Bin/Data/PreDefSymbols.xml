@@ -866,6 +866,16 @@
     <ForCpp>0</ForCpp>
   </Item>
   <Item>
+    <Name>operator</Name>
+    <Kind>skKeyword</Kind>
+    <Text>operator</Text>
+    <ScopeRate>14</ScopeRate>
+    <AutoIndent>1</AutoIndent>
+    <AlwaysDisp>0</AlwaysDisp>
+    <ForPascal>1</ForPascal>
+    <ForCpp>0</ForCpp>
+  </Item>
+  <Item>
     <Name>or</Name>
     <Kind>skKeyword</Kind>
     <Text>or</Text>
