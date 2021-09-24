@@ -3291,14 +3291,20 @@ end;
 procedure TCnBasePascalFormatter.FormatFunctionHeading(PreSpaceCount: Byte;
   AllowEqual: Boolean);
 var
-  IsOperator: Boolean;
+  IsOperator, IsClass: Boolean;
 begin
-  if Scaner.Token = tokKeywordClass then
+  IsClass := Scaner.Token = tokKeywordClass;
+  if IsClass then
     Match(tokKeywordClass, PreSpaceCount); // class 后无需再手工加空格
 
   IsOperator := Scaner.Token = tokKeywordOperator;
   if Scaner.Token in [tokKeywordFunction, tokKeywordOperator] then
-    Match(Scaner.Token);
+  begin
+    if IsClass then
+      Match(Scaner.Token)
+    else
+      Match(Scaner.Token, PreSpaceCount); // 没有 class，这个要缩进
+  end;
 
   FormatPossibleAmpersand(CnPascalCodeForRule.SpaceBeforeOperator);
 
@@ -5683,7 +5689,8 @@ begin
       FormatMethodHeading
     else
       FormatMethodHeading(PreSpaceCount, True);
-  end else if Scaner.Token in [tokKeywordVar, tokKeywordThreadVar] then
+  end
+  else if Scaner.Token in [tokKeywordVar, tokKeywordThreadVar] then
   begin
     FormatMethodHeading(PreSpaceCount, False);
   end
