@@ -481,11 +481,11 @@ const
   csCompD5 = 'D5';
   csCompD6 = 'D6';
   csCompD7 = 'D7';
-  csCompD8 = 'D8';
-  csCompD9 = 'D9';
-  csCompD10 = 'D10';
-  csCompD11 = 'D11';
-  csCompD12 = 'D12';
+
+  csCompD2005 = 'D2005';
+  csCompD2006 = 'D2006';
+  csCompD2007 = 'D2007';
+  csCompD2009 = 'D2009';
   csCompD2010 = 'D2010';
   csCompDXE = 'DXE';
   csCompDXE2 = 'DXE2';
@@ -1123,11 +1123,11 @@ begin
   {$IFDEF DELPHI5_UP} AddSection(Ini, csCompD5); {$ENDIF}
   {$IFDEF DELPHI6_UP} AddSection(Ini, csCompD6); {$ENDIF}
   {$IFDEF DELPHI7_UP} AddSection(Ini, csCompD7); {$ENDIF}
-  {$IFDEF DELPHI8_UP} AddSection(Ini, csCompD8); {$ENDIF}
-  {$IFDEF DELPHI9_UP} AddSection(Ini, csCompD9); {$ENDIF}
-  {$IFDEF DELPHI10_UP} AddSection(Ini, csCompD10); {$ENDIF}
-  {$IFDEF DELPHI11_UP} AddSection(Ini, csCompD11); {$ENDIF}
-  {$IFDEF DELPHI12_UP} AddSection(Ini, csCompD12); {$ENDIF}
+
+  {$IFDEF DELPHI2005_UP} AddSection(Ini, csCompD2005); {$ENDIF}
+  {$IFDEF DELPHI2006_UP} AddSection(Ini, csCompD2006); {$ENDIF}
+  {$IFDEF DELPHI2007_UP} AddSection(Ini, csCompD2007); {$ENDIF}
+  {$IFDEF DELPHI2009_UP} AddSection(Ini, csCompD2009); {$ENDIF}
   {$IFDEF DELPHI2010_UP} AddSection(Ini, csCompD2010); {$ENDIF}
   {$IFDEF DELPHIXE_UP} AddSection(Ini, csCompDXE); {$ENDIF}
   {$IFDEF DELPHIXE2_UP} AddSection(Ini, csCompDXE2); {$ENDIF}
