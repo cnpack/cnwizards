@@ -436,7 +436,11 @@ begin
   Top := -1;
   Align := alTop;
   Images := GetIDEImageList;
+{$IFDEF IDE_SUPPORT_HDPI}
+  InitSizeIfLargeIcon(Self, TImageList(dmCnSharedImages.IDELargeVirtualImages));
+{$ELSE}
   InitSizeIfLargeIcon(Self, dmCnSharedImages.IDELargeImages);
+{$ENDIF}
 
   InitPopupMenu;
   Wrapable := FToolBarMgr.Wrapable;

@@ -71,6 +71,8 @@ type
     FIDELargeVirtualImages: TVirtualImageList;   // 对应 IDELargeImages 与 IDELargeDisabledImages
     FIDELargeImageCollection: TImageCollection;
     FLargeIDEOffset: Integer; // D110A 之后大图标偏移值不同
+    FLargeProcToolbarVirtualImages: TVirtualImageList; // 对应 ilProcToolbarLarge
+    FLargeProcToolbarImageCollection: TImageCollection;
 {$ENDIF}
 {$IFNDEF STAND_ALONE}
     FIDEOffset: Integer;      // D110A 之前，无论是否大图标都用这个值
@@ -101,6 +103,8 @@ type
     {* 大尺寸下的 D110A 或以上，普通工具栏禁用状态用这个}
     property IDELargeVirtualImages: TVirtualImageList read FIDELargeVirtualImages;
     {* 大尺寸下的 D110A 或以上，编辑器工具栏等需要 IDE 的用这个}
+    property LargeProcToolbarVirtualImages: TVirtualImageList read FLargeProcToolbarVirtualImages;
+    {* 大尺寸下的 D110A 或以上，函数列表工具栏需要用这个}
 {$ENDIF}
 {$ENDIF}
   end;
@@ -258,8 +262,15 @@ begin
   FIDELargeVirtualImages.Width := csLargeImageListWidth;
   FIDELargeVirtualImages.Height := csLargeImageListHeight;
 
+  FLargeProcToolbarVirtualImages := TVirtualImageList.Create(Self);
+  FLargeProcToolbarImageCollection := TImageCollection.Create(Self);
+  FLargeProcToolbarVirtualImages.ImageCollection := FLargeProcToolbarImageCollection;
+  FLargeProcToolbarVirtualImages.Width := csLargeImageListWidth;
+  FLargeProcToolbarVirtualImages.Height := csLargeImageListHeight;
+
   CopyImageListToVirtual(Images, FLargeVirtualImages);
   CopyImageListToVirtual(DisabledImages, FDisabledLargeVirtualImages);
+  CopyImageListToVirtual(ilProcToolbar, FLargeProcToolbarVirtualImages);
 {$ELSE}
   StretchCopyToLarge(ilProcToolbar, ilProcToolbarLarge);
   StretchCopyToLarge(Images, LargeImages);

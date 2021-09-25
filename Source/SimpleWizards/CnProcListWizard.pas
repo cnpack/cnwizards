@@ -989,7 +989,11 @@ begin
     ShowHint := True;
     Transparent := False;
     Images := dmCnSharedImages.ilProcToolBar;
+{$IFDEF IDE_SUPPORT_HDPI}
+    InitSizeIfLargeIcon(Obj.InternalToolBar2, TImageList(dmCnSharedImages.LargeProcToolbarVirtualImages));
+{$ELSE}
     InitSizeIfLargeIcon(Obj.InternalToolBar2, dmCnSharedImages.ilProcToolbarLarge);
+{$ENDIF}
     PopupMenu := Obj.PopupMenu;
   end;
 
@@ -1030,7 +1034,11 @@ begin
     ShowHint := True;
     Transparent := False;
     Images := GetIDEImageList;
+{$IFDEF IDE_SUPPORT_HDPI}
+    InitSizeIfLargeIcon(Obj.InternalToolBar1, TImageList(dmCnSharedImages.IDELargeVirtualImages));
+{$ELSE}
     InitSizeIfLargeIcon(Obj.InternalToolBar1, dmCnSharedImages.IDELargeImages);
+{$ENDIF}
     PopupMenu := Obj.PopupMenu;
   end;
 

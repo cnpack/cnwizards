@@ -1095,7 +1095,7 @@ var
         // 如果大图模式，则手工复制大图
         if WizOptions.UseLargeIcon and (Actn is TCustomAction) then
         begin
-          BigImg := GetIDEBigImageList;
+          BigImg := dmCnSharedImages.IDELargeImages;
           Btn.Glyph.Width := BigImg.Width;
           Btn.Glyph.Height := BigImg.Height;
           Btn.Glyph.Canvas.Brush.Color := clFuchsia;
