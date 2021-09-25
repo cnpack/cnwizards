@@ -1030,7 +1030,7 @@ begin
     ShowHint := True;
     Transparent := False;
     Images := GetIDEImageList;
-    InitSizeIfLargeIcon(Obj.InternalToolBar1, GetIDEBigImageList);
+    InitSizeIfLargeIcon(Obj.InternalToolBar1, dmCnSharedImages.IDELargeImages);
     PopupMenu := Obj.PopupMenu;
   end;
 

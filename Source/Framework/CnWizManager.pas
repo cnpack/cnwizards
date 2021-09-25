@@ -374,16 +374,20 @@ begin
 
   CreateIDEMenu;
 
+  // 创建所有专家
   InstallWizards;
-{$IFNDEF CNWIZARDS_MINIMUM}
-  // 专家创建完毕后 IDE 的主 ImageList 中才有专家图标，这时候复制才能保证不漏
-  dmCnSharedImages.CopyLargeIDEImageList;
-{$ENDIF}
 
+  // 加载所有专家设置并创建子菜单
   LoadSettings;
 
-  // 根据 MenuOrder 来进行排序然后插入菜单
+  // 创建杂项子菜单，菜单排序在外面后面做
   CreateMiscMenu;
+
+{$IFNDEF CNWIZARDS_MINIMUM}
+  // 专家创建完毕并加载设置完毕后，主图标与子菜单图标才被塞进 IDE 的 ImageList 中，
+  // 此时复制大号到 IDE 的主 ImageList 中才能保证不漏
+  dmCnSharedImages.CopyLargeIDEImageList;
+{$ENDIF}
 
   // 创建完菜单项后再插入到 IDE 中，以解决 D7 下菜单点需要点击才能下拉的问题
   InstallIDEMenu;
@@ -609,7 +613,7 @@ procedure TCnWizardMgr.InstallIDEMenu;
 var
   MainMenu: TMainMenu;
 begin
-  MainMenu := GetIDEMainMenu; // IDE主菜单
+  MainMenu := GetIDEMainMenu; // IDE 主菜单
   if MainMenu <> nil then
   begin
     FToolsMenu := GetIDEToolsMenu;

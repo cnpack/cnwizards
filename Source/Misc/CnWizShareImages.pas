@@ -64,11 +64,16 @@ type
     FIdxUnknownInIDE: Integer;
     FIdxUnknown: Integer;
 {$IFDEF IDE_SUPPORT_HDPI}
-    FVirtualImages: TVirtualImageList;   // 对应 Images 与 DisabledImages
-    FImageCollection: TImageCollection;
+    FLargeVirtualImages: TVirtualImageList;   // 对应 Images
+    FLargeImageCollection: TImageCollection;
+    FDisabledLargeVirtualImages: TVirtualImageList;   // 对应 DisabledImages
+    FDisabledLargeImageCollection: TImageCollection;
+    FIDELargeVirtualImages: TVirtualImageList;   // 对应 IDELargeImages 与 IDELargeDisabledImages
+    FIDELargeImageCollection: TImageCollection;
+    FLargeIDEOffset: Integer; // D110A 之后大图标偏移值不同
 {$ENDIF}
 {$IFNDEF STAND_ALONE}
-    FIDEOffset: Integer;
+    FIDEOffset: Integer;      // D110A 之前，无论是否大图标都用这个值
     FCopied: Boolean;       // 记录我们的 ImageList 有无塞到 IDE 的 ImageList 中
     FLargeCopied: Boolean;  // 记录 IDE 的 ImageList 有无复制一份大的
 {$ENDIF}
@@ -84,10 +89,19 @@ type
     procedure CopyToIDEMainImageList;
     // Images 会被复制进 IDE 的 ImageList 供图标被同时使用的场合，FIDEOffset 表示偏移量
     procedure CopyLargeIDEImageList;
-    // 由专家全部初始化后调用，把 IDE 的 ImageList 再复制一份大的
+    // 由专家全部创建并加载菜单项后调用，把 IDE 的 ImageList 再复制一份大的
 
     function GetMixedImageList(ForceSmall: Boolean = False): TCustomImageList;
     function CalcMixedImageIndex(ImageIndex: Integer): Integer;
+
+{$IFDEF IDE_SUPPORT_HDPI}
+    property LargeVirtualImages: TVirtualImageList read FLargeVirtualImages;
+    {* 大尺寸下的 D110A 或以上，普通工具栏用这个}
+    property DisabledLargeVirtualImages: TVirtualImageList read FDisabledLargeVirtualImages;
+    {* 大尺寸下的 D110A 或以上，普通工具栏禁用状态用这个}
+    property IDELargeVirtualImages: TVirtualImageList read FIDELargeVirtualImages;
+    {* 大尺寸下的 D110A 或以上，编辑器工具栏等需要 IDE 的用这个}
+{$ENDIF}
 {$ENDIF}
   end;
 
@@ -225,9 +239,32 @@ begin
 {$ENDIF}
 
   // 为大图标版做好准备
+{$IFDEF IDE_SUPPORT_HDPI}
+  FLargeVirtualImages := TVirtualImageList.Create(Self);
+  FLargeImageCollection := TImageCollection.Create(Self);
+  FLargeVirtualImages.ImageCollection := FLargeImageCollection;
+  FLargeVirtualImages.Width := csLargeImageListWidth;
+  FLargeVirtualImages.Height := csLargeImageListHeight;
+
+  FDisabledLargeVirtualImages := TVirtualImageList.Create(Self);
+  FDisabledLargeImageCollection := TImageCollection.Create(Self);
+  FDisabledLargeVirtualImages.ImageCollection := FDisabledLargeImageCollection;
+  FDisabledLargeVirtualImages.Width := csLargeImageListWidth;
+  FDisabledLargeVirtualImages.Height := csLargeImageListHeight;
+
+  FIDELargeVirtualImages := TVirtualImageList.Create(Self);
+  FIDELargeImageCollection := TImageCollection.Create(Self);
+  FIDELargeVirtualImages.ImageCollection := FIDELargeImageCollection;
+  FIDELargeVirtualImages.Width := csLargeImageListWidth;
+  FIDELargeVirtualImages.Height := csLargeImageListHeight;
+
+  CopyImageListToVirtual(Images, FLargeVirtualImages);
+  CopyImageListToVirtual(DisabledImages, FDisabledLargeVirtualImages);
+{$ELSE}
   StretchCopyToLarge(ilProcToolbar, ilProcToolbarLarge);
   StretchCopyToLarge(Images, LargeImages);
   StretchCopyToLarge(DisabledImages, DisabledLargeImages);
+{$ENDIF}
 {$ENDIF}
 end;
 
@@ -237,7 +274,13 @@ function TdmCnSharedImages.CalcMixedImageIndex(
   ImageIndex: Integer): Integer;
 begin
   if FCopied and (ImageIndex >= 0) then
-    Result := ImageIndex + FIDEOffset
+  begin
+    Result := ImageIndex + FIDEOffset;
+{$IFDEF IDE_SUPPORT_HDPI}
+    if WizOptions.UseLargeIcon then
+      Result := ImageIndex + FLargeIDEOffset;
+{$ENDIF}
+  end
   else
     Result := ImageIndex;
 end;
@@ -247,7 +290,13 @@ begin
   if FCopied then
   begin
     if WizOptions.UseLargeIcon and not ForceSmall and FLargeCopied then
-      Result := IDELargeImages
+    begin
+{$IFDEF IDE_SUPPORT_HDPI}
+      Result := FIDELargeVirtualImages;
+{$ELSE}
+      Result := IDELargeImages;
+{$ENDIF}
+    end
     else
       Result := GetIDEImageList;
   end
@@ -268,10 +317,14 @@ begin
   begin
     Cnt := IDEs.Count;
 {$IFDEF IDE_SUPPORT_HDPI}
-    // D11 及其以后，IDE 的主 ImageList 变 VirtualImageList 了
+    // D11 及其以后，IDE 的主 ImageList 变 VirtualImageList 了，而且由于分辨率变化，FLargeOffset 得另求
+    CopyVirtualImageList(IDEs as TVirtualImageList, FIDELargeVirtualImages);
+    FLargeIDEOffset := FIDELargeVirtualImages.Count;
+    FIDELargeVirtualImages.Clear;   // 这段只用来求 FIDELargeOffset
+
     CopyImageListToVirtual(Images, IDEs as TVirtualImageList, 'CnWizardsItem');
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('Add %d Images to IDE Main VirtualImageList. Offset %d.', [Images.Count, Cnt]);
+    CnDebugger.LogFmt('Add %d Images to IDE Main VirtualImageList. Offset %d. LargeOffset %d', [Images.Count, Cnt, FLargeIDEOffset]);
 {$ENDIF}
 {$ELSE}
     if (IDEs.Width = Images.Width) and (IDEs.Height = Images.Height) then
@@ -279,13 +332,6 @@ begin
       IDEs.AddImages(Images);
 {$IFDEF DEBUG}
       CnDebugger.LogFmt('Add %d Images to IDE Main 16x16 ImageList. Offset %d.', [Images.Count, Cnt]);
-{$ENDIF}
-    end
-    else // 实际上走不到这里，D11 的是 20x20 但要靠上面额外处理
-    begin
-      CenterCopyTo(Images, IDEs);
-{$IFDEF DEBUG}
-      CnDebugger.LogFmt('Add %d Images to IDE Main 20x20 ImageList. Offset %d.', [Images.Count, Cnt]);
 {$ENDIF}
     end;
 {$ENDIF}
@@ -327,6 +373,9 @@ begin
     Exit;
 
   // 再把 IDE 的 ImageList 复制一个超大型的供大尺寸下使用
+{$IFDEF IDE_SUPPORT_HDPI}
+  CopyVirtualImageList(IDEs as TVirtualImageList, FIDELargeVirtualImages);
+{$ENDIF}
   StretchCopyToLarge(IDEs, IDELargeImages);
   FLargeCopied := True;
 end;

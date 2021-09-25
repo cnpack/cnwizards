@@ -373,12 +373,6 @@ function GetIDERegistryFont(const RegItem: string; AFont: TFont): Boolean;
     'Identifier', 'Reserved word', 'Number', 'Whitespace', 'String', 'Symbol'
     等注册表里头已经定义了的键值}
 
-function GetIDEBigImageList: TImageList;
-{* 获取一个大尺寸的 IDE 的 ImageList 引用，从 IDE 的 ImageList 拉扯而来}
-
-procedure ClearIDEBigImageList;
-{* 清空大尺寸的 IDE 的 ImageList，供通知重建而使用}
-
 function IsDesignControl(AControl: TControl): Boolean;
 {* 判断一 Control 是否是设计期 WinControl}
 
@@ -710,9 +704,6 @@ begin
 end;
 
 {$ENDIF}
-
-var
-  FIDEBigImageList: TImageList = nil;
 
 type
   TCustomControlHack = class(TCustomControl);
@@ -2006,77 +1997,6 @@ begin
       Reg.Free;
     end;
   end;
-end;
-
-function GetIDEBigImageList: TImageList;
-const
-  MaskColor = clBtnFace;
-var
-  I: Integer;
-  Img: TCustomImageList;
-  SrcBmp, DstBmp: TBitmap;
-  Rs, Rd: TRect;
-begin
-  Result := nil;
-  if not WizOptions.UseLargeIcon then
-    Exit;
-
-  if (FIDEBigImageList = nil) or (FIDEBigImageList.Count = 0) then
-  begin
-    Img := GetIDEImageList;
-    if Img <> nil then
-    begin
-      if FIDEBigImageList = nil then
-      begin
-        FIDEBigImageList := TImageList.Create(nil);
-        FIDEBigImageList.Height := 24;
-        FIDEBigImageList.Width := 24;
-      end;
-
-      // 从 IDE 的 ImageList 中拉扯绘制，把 16*16 扩展到 24* 24
-      SrcBmp := nil;
-      DstBmp := nil;
-      try
-        SrcBmp := CreateEmptyBmp24(16, 16, MaskColor);
-        DstBmp := CreateEmptyBmp24(24, 24, MaskColor);
-
-        Rs := Rect(0, 0, SrcBmp.Width, SrcBmp.Height);
-        Rd := Rect(0, 0, DstBmp.Width, DstBmp.Height);
-
-        SrcBmp.Canvas.Brush.Color := MaskColor;
-        SrcBmp.Canvas.Brush.Style := bsSolid;
-        DstBmp.Canvas.Brush.Color := clFuchsia;
-        DstBmp.Canvas.Brush.Style := bsSolid;
-
-        for I := 0 to Img.Count - 1 do
-        begin
-          SrcBmp.Canvas.FillRect(Rs);
-          Img.GetBitmap(I, SrcBmp);
-          DstBmp.Canvas.FillRect(Rd);
-          DstBmp.Canvas.StretchDraw(Rd, SrcBmp);
-          FIDEBigImageList.AddMasked(DstBmp, MaskColor);
-        end;
-      finally
-        SrcBmp.Free;
-        DstBmp.Free;
-      end;
-    end;
-  end;
-  Result := FIDEBigImageList;
-end;
-
-procedure ClearIDEBigImageList;
-begin
-  if FIDEBigImageList <> nil then
-  begin
-    FIDEBigImageList.Clear;
-    GetIDEBigImageList;
-  end;
-end;
-
-procedure FreeIDEBigImageList;
-begin
-  FreeAndNil(FIDEBigImageList);
 end;
 
 // 判断一 Control 是否是设计期 Control
@@ -3460,7 +3380,6 @@ finalization
   if FThemeWrapper <> nil then
     FreeAndNil(FThemeWrapper);
 
-  FreeIDEBigImageList;
   FinalIdeAPIs;
 
 {$IFDEF DEBUG}

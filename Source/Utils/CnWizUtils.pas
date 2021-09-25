@@ -173,11 +173,15 @@ function AddIconToImageList(AIcon: TIcon; ImageList: TCustomImageList;
 {$IFDEF IDE_SUPPORT_HDPI}
 
 procedure CopyImageListToVirtual(SrcImageList: TCustomImageList;
-  DstVirtual: TVirtualImageList; const ANamePrefix: string = '');
+  DstVirtual: TVirtualImageList; const ANamePrefix: string = '';
+  Disabled: Boolean = False);
 {* 将传统的 ImageList 复制进 TVirtualImageList}
 function AddGraphicToVirtualImageList(Graphic: TGraphic; DstVirtual: TVirtualImageList;
-  const ANamePrefix: string = ''): Integer;
+  const ANamePrefix: string = ''; Disabled: Boolean = False): Integer;
 {* 将普通的 TGraphic 复制进 TVirtualImageList}
+procedure CopyVirtualImageList(SrcVirtual, DstVirtual: TVirtualImageList;
+  Disabled: Boolean = False);
+{* 将 TVirtualImageListImageList 复制进 TVirtualImageList}
 
 {$ENDIF}
 
@@ -1550,7 +1554,7 @@ end;
 {$IFDEF IDE_SUPPORT_HDPI}
 
 procedure CopyImageListToVirtual(SrcImageList: TCustomImageList;
-  DstVirtual: TVirtualImageList; const ANamePrefix: string = '');
+  DstVirtual: TVirtualImageList; const ANamePrefix: string; Disabled: Boolean);
 var
   I, C1, C2: Integer;
   Ico: TIcon;
@@ -1586,11 +1590,11 @@ begin
   end;
   C2 := Collection.Count;
 
-  DstVirtual.Add('', C1, C2 - 1, False);
+  DstVirtual.Add('', C1, C2 - 1, Disabled);
 end;
 
 function AddGraphicToVirtualImageList(Graphic: TGraphic; DstVirtual: TVirtualImageList;
-  const ANamePrefix: string = ''): Integer;
+  const ANamePrefix: string; Disabled: Boolean): Integer;
 var
   C: Integer;
   R: TRect;
@@ -1642,8 +1646,24 @@ begin
     Mem.Free;
   end;
 
-  DstVirtual.Add('', C, C, False);
+  DstVirtual.Add('', C, C, Disabled);
   Result := DstVirtual.Count - 1;
+end;
+
+procedure CopyVirtualImageList(SrcVirtual, DstVirtual: TVirtualImageList;
+  Disabled: Boolean);
+begin
+  if (SrcVirtual = nil) or (DstVirtual = nil) then
+    Exit;
+
+  if (SrcVirtual.ImageCollection = nil) or (DstVirtual.ImageCollection = nil) then
+    Exit;
+
+  if SrcVirtual.ImageCollection = DstVirtual.ImageCollection then
+    Exit;
+
+  DstVirtual.ImageCollection.Assign(SrcVirtual.ImageCollection);
+  DstVirtual.Add('', -1, -1, Disabled);
 end;
 
 {$ENDIF}

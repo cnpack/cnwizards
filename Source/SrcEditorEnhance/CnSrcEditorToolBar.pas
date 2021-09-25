@@ -308,6 +308,12 @@ begin
     Toolbar.ButtonHeight := csLargeToolbarButtonHeight;
     if LargeImageList <> nil then
       Toolbar.Images := LargeImageList;
+
+{$IFDEF DEBUG}
+    if LargeImageList <> nil then
+      CnDebugger.LogMsg('SrcEditorToolbar InitSizeIfLargeIcon. LargeIcons: '
+        + IntToStr(LargeImageList.Count));
+{$ENDIF}
   end;
 end;
 
@@ -430,7 +436,7 @@ begin
   Top := -1;
   Align := alTop;
   Images := GetIDEImageList;
-  InitSizeIfLargeIcon(Self, GetIDEBigImageList);
+  InitSizeIfLargeIcon(Self, dmCnSharedImages.IDELargeImages);
 
   InitPopupMenu;
   Wrapable := FToolBarMgr.Wrapable;

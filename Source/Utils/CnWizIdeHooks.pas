@@ -42,9 +42,6 @@ interface
 {$I CnWizards.inc}
 
 uses
-{$IFDEF Debug}
-  CnDebug,
-{$ENDIF Debug}
   Windows, Classes, SysUtils, Controls, ImgList, ActnList, CnWizMethodHook,
   CnWizUtils, CnWizIdeUtils;
 
@@ -55,6 +52,11 @@ procedure CnListBeginUpdate;
 procedure CnListEndUpdate;
 
 implementation
+
+{$IFDEF DEBUG}
+uses
+  CnDebug;
+{$ENDIF}
 
 type
   TImageListAccess = class(TCustomImageList);
@@ -91,8 +93,9 @@ begin
     Self.FreeNotification(FCnListComponent);
     FImageLists.Add(Self);
 
-    if Self = GetIDEImageList then
-      ClearIDEBigImageList;
+// 此通知机制已去除，IDE 的主 ImageList 后面如更新，得不到通知了
+//    if Self = GetIDEImageList then
+//      ClearIDEBigImageList;
   end;
 end;
 
@@ -133,10 +136,10 @@ end;
 
 procedure CnListEndUpdate;
 var
-  i: Integer;
+  I: Integer;
 begin
   Dec(FUpdateCount);
-  
+
   if FUpdateCount = 0 then
   begin
     FreeAndNil(FImageListHook);
@@ -145,16 +148,16 @@ begin
 
     with FImageLists.LockList do
     try
-      for i := Count - 1 downto 0 do
-        TImageListAccess(Items[i]).Change;
+      for I := Count - 1 downto 0 do
+        TImageListAccess(Items[I]).Change;
     finally
       FImageLists.UnlockList;
     end;
 
     with FActionLists.LockList do
     try
-      for i := Count - 1 downto 0 do
-        TActionListAccess(Items[i]).Change;
+      for I := Count - 1 downto 0 do
+        TActionListAccess(Items[I]).Change;
     finally
       FActionLists.UnlockList;
     end;

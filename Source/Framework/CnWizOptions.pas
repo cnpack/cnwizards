@@ -46,6 +46,8 @@ uses
   {$IFDEF COMPILER6_UP}, SHFolder {$ENDIF};
 
 const
+  csLargeImageListHeight = 24;
+  csLargeImageListWidth = 24;
   csButtonWidth = 20;
   csButtonHeight = 20;
   csLargeButtonWidth = 32;
@@ -880,10 +882,17 @@ begin
 
   AToolBar.ButtonHeight := csLargeButtonHeight;
   AToolBar.ButtonWidth := csLargeButtonWidth;
+{$IFDEF IDE_SUPPORT_HDPI}
+  if AToolBar.Images = dmCnSharedImages.Images then
+    AToolBar.Images := dmCnSharedImages.LargeVirtualImages;
+  if AToolBar.DisabledImages = dmCnSharedImages.DisabledImages then
+    AToolBar.DisabledImages := dmCnSharedImages.DisabledLargeVirtualImages;
+{$ELSE}
   if AToolBar.Images = dmCnSharedImages.Images then
     AToolBar.Images := dmCnSharedImages.LargeImages;
   if AToolBar.DisabledImages = dmCnSharedImages.DisabledImages then
     AToolBar.DisabledImages := dmCnSharedImages.DisabledLargeImages;
+{$ENDIF}
 
   if AToolBar.Height <= AToolBar.ButtonHeight then
     AToolBar.Height := AToolBar.ButtonHeight + csLargeToolbarHeightDelta;
