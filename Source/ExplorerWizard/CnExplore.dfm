@@ -157,8 +157,8 @@ inherited CnExploreForm: TCnExploreForm
     end
   end
   object il: TImageList
-    Left = 192
-    Top = 6
+    Left = 200
+    Top = 38
     Bitmap = {
       494C010105000900040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
@@ -795,5 +795,11 @@ inherited CnExploreForm: TCnExploreForm
       ImageIndex = 4
       OnExecute = actCreateDirExecute
     end
+  end
+  object ilLarge: TImageList
+    Height = 24
+    Width = 24
+    Left = 200
+    Top = 78
   end
 end

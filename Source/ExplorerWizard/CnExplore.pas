@@ -153,6 +153,7 @@ type
     mnuitmFCurFile: TMenuItem;
     btnCreateDir: TToolButton;
     actCreateDir: TAction;
+    ilLarge: TImageList;
     procedure btnUpClick(Sender: TObject);
     procedure btnFilterClick(Sender: TObject);
     procedure btnListIconClick(Sender: TObject);
@@ -272,7 +273,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnCommon, CnIni, CnWizUtils, CnWizOptions, {StrUtils,}
+  CnCommon, CnIni, CnWizUtils, CnWizOptions, CnWizShareImages,
   CnExploreDirectory, CnExploreFilter;
 
 {$R *.dfm}
@@ -744,7 +745,11 @@ begin
     shltv.Path := CurPath;
 
   if WizOptions.UseLargeIcon then
+  begin
     pnlToolBar.Height := pnlToolBar.Height + csLargeToolbarHeightDelta;
+    dmCnSharedImages.StretchCopyToLarge(il, ilLarge);
+    ToolBar.Images := ilLarge;
+  end;
   WizOptions.ResetToolbarWithLargeIcons(ToolBar);
 end;
 

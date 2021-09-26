@@ -80,8 +80,6 @@ type
     FCopied: Boolean;       // 记录我们的 ImageList 有无塞到 IDE 的 ImageList 中
     FLargeCopied: Boolean;  // 记录 IDE 的 ImageList 有无复制一份大的
 {$ENDIF}
-    procedure StretchCopyToLarge(SrcImageList, DstImageList: TCustomImageList);
-    procedure CenterCopyTo(SrcImageList, DstImageList: TCustomImageList);
     function GetIdxUnknownInIDE: Integer;
   public
     property IdxUnknown: Integer read FIdxUnknown;
@@ -89,7 +87,10 @@ type
 {$IFNDEF STAND_ALONE}
     procedure GetSpeedButtonGlyph(Button: TSpeedButton; ImageList: TImageList; 
       EmptyIdx: Integer);
-
+    procedure CenterCopyTo(SrcImageList, DstImageList: TCustomImageList);
+    {* 供将小尺寸 ImageList 原尺寸居中绘制到大的 ImageList 上}
+    procedure StretchCopyToLarge(SrcImageList, DstImageList: TCustomImageList);
+    {* 内外都使用，供将小尺寸 ImageList 拉伸绘制到大的 ImageList 上}
     procedure CopyToIDEMainImageList;
     // Images 会被复制进 IDE 的 ImageList 供图标被同时使用的场合，FIDEOffset 表示偏移量
     procedure CopyLargeIDEImageList;
