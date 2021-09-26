@@ -64,6 +64,7 @@ type
     FIdxUnknownInIDE: Integer;
     FIdxUnknown: Integer;
 {$IFDEF IDE_SUPPORT_HDPI}
+    FIdxUnknownLargeInIDE: Integer;
     FLargeVirtualImages: TVirtualImageList;   // 对应 Images
     FLargeImageCollection: TImageCollection;
     FDisabledLargeVirtualImages: TVirtualImageList;   // 对应 DisabledImages
@@ -81,9 +82,10 @@ type
 {$ENDIF}
     procedure StretchCopyToLarge(SrcImageList, DstImageList: TCustomImageList);
     procedure CenterCopyTo(SrcImageList, DstImageList: TCustomImageList);
+    function GetIdxUnknownInIDE: Integer;
   public
     property IdxUnknown: Integer read FIdxUnknown;
-    property IdxUnknownInIDE: Integer read FIdxUnknownInIDE;
+    property IdxUnknownInIDE: Integer read GetIdxUnknownInIDE;
 {$IFNDEF STAND_ALONE}
     procedure GetSpeedButtonGlyph(Button: TSpeedButton; ImageList: TImageList; 
       EmptyIdx: Integer);
@@ -375,6 +377,9 @@ end;
 procedure TdmCnSharedImages.CopyLargeIDEImageList;
 var
   IDEs: TCustomImageList;
+{$IFDEF IDE_SUPPORT_HDPI}
+  Ico: TIcon;
+{$ENDIF}
 begin
   if FLargeCopied then
     Exit;
@@ -386,9 +391,31 @@ begin
   // 再把 IDE 的 ImageList 复制一个超大型的供大尺寸下使用
 {$IFDEF IDE_SUPPORT_HDPI}
   CopyVirtualImageList(IDEs as TVirtualImageList, FIDELargeVirtualImages);
+
+  Ico := TIcon.Create;
+  try
+    Images.GetIcon(IdxUnknown, Ico);
+    FIdxUnknownLargeInIDE := AddGraphicToVirtualImageList(Ico,
+      FIDELargeVirtualImages, 'CnWizardsLargeUnknown');
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('Add an Unknown Icon to IDE Large Index %d',
+      [FIdxUnknownLargeInIDE]);
+{$ENDIF}
+  finally
+    Ico.Free;
+  end;
 {$ENDIF}
   StretchCopyToLarge(IDEs, IDELargeImages);
   FLargeCopied := True;
+end;
+
+function TdmCnSharedImages.GetIdxUnknownInIDE: Integer;
+begin
+  Result := FIdxUnknownInIDE;
+{$IFDEF IDE_SUPPORT_HDPI}
+  if WizOptions.UseLargeIcon then
+    Result := FIdxUnknownLargeInIDE;
+{$ENDIF}
 end;
 
 {$ENDIF}
