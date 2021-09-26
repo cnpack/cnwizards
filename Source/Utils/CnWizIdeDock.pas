@@ -261,6 +261,10 @@ var
   Ini: TCustomIniFile;
   I: Integer;
 begin
+{$IFDEF IDE_SUPPORT_HDPI}
+  Scaled := True;
+{$ENDIF}
+
   inherited Loaded;
   FScaler := TCnFormScaler.Create(Self);
   FScaler.DoEffects;
