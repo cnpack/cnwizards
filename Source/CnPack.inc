@@ -3219,6 +3219,14 @@
   // 101B Re-opens "Embedded Designer" Option and Gives a New Container.
 {$ENDIF}
 
+{$IFDEF BCB5}
+  {$DEFINE BCB5OR6}  // 定义一个 BCB5OR6 以方便 BCB5 或 BCB6 使用
+{$ENDIF}
+
+{$IFDEF BCB6}
+  {$DEFINE BCB5OR6}
+{$ENDIF}
+
 //==============================================================================
 // 调试设置
 //==============================================================================
