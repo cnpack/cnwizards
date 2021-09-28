@@ -139,6 +139,10 @@ begin
   Src := nil;
   Dst := nil;
 
+{$IFNDEF SUPPORT_GDIPLUS}
+  CnStartUpGdiPlus;
+{$ENDIF}
+
   try
     Src := CreateEmptyBmp24(16, 16, MaskColor);
     Dst := CreateEmptyBmp24(24, 24, MaskColor);
@@ -160,6 +164,9 @@ begin
       DstImageList.AddMasked(Dst, MaskColor);
     end;
   finally
+{$IFNDEF SUPPORT_GDIPLUS}
+    CnShutDownGdiPlus;
+{$ENDIF}
     Src.Free;
     Dst.Free;
   end;
