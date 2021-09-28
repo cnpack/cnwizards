@@ -134,18 +134,10 @@ var
   Src, Dst: TBitmap;
   Rs, Rd: TRect;
   I: Integer;
-{$IFDEF SUPPORT_GDIPLUS}
-  Bmp: TGPBitmap;
-  GP: TGPGraphics;
-  Rf: TGPRectF;
-{$ENDIF}
 begin
   // 从小的 ImageList 中拉扯绘制，把 16*16 扩展到 24* 24
   Src := nil;
   Dst := nil;
-{$IFDEF SUPPORT_GDIPLUS}
-  GP := nil;
-{$ENDIF}
 
   try
     Src := CreateEmptyBmp24(16, 16, MaskColor);
@@ -159,40 +151,15 @@ begin
     Dst.Canvas.Brush.Color := clFuchsia;
     Dst.Canvas.Brush.Style := bsSolid;
 
-{$IFDEF SUPPORT_GDIPLUS}
-    GP := TGPGraphics.Create(Dst.Canvas.Handle);
-    GP.SetSmoothingMode(SmoothingModeAntiAlias);
-
-    Rf.X := 0;
-    Rf.Y := 0;
-    Rf.Width := Dst.Width;
-    Rf.Height := Dst.Height;
-{$ENDIF}
-
     for I := 0 to SrcImageList.Count - 1 do
     begin
       Src.Canvas.FillRect(Rs);
       SrcImageList.GetBitmap(I, Src);
 
-{$IFDEF SUPPORT_GDIPLUS}
-      // 把 Src 上的内容平滑拉伸绘制到 Dst 上
-      Bmp := TGPBitmap.Create(Src.Handle, Src.Palette);
-      try
-        GP.DrawImage(Bmp, Rf);
-      finally
-        Bmp.Free;
-      end;
-{$ELSE}
-      Dst.Canvas.FillRect(Rd);
-      Dst.Canvas.StretchDraw(Rd, Src);
-{$ENDIF}
-
+      StretchDrawBmp(Src, Dst);
       DstImageList.AddMasked(Dst, MaskColor);
     end;
   finally
-{$IFDEF SUPPORT_GDIPLUS}
-    GP.Free;
-{$ENDIF}
     Src.Free;
     Dst.Free;
   end;
