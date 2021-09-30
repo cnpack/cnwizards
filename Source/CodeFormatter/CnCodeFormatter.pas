@@ -301,7 +301,8 @@ type
     procedure FormatLabelDeclSection(PreSpaceCount: Byte = 0);
     procedure FormatConstSection(PreSpaceCount: Byte = 0);
     procedure FormatConstantDecl(PreSpaceCount: Byte = 0);
-    procedure FormatVarSection(PreSpaceCount: Byte = 0);
+    procedure FormatVarSection(PreSpaceCount: Byte = 0; IsGlobal: Boolean = False);
+    // IsGlobal 表示是全局的 interface 部分或 implementation 部分的 var，还是局部的 var
     procedure FormatVarDecl(PreSpaceCount: Byte = 0);
     procedure FormatInlineVarDecl(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
     procedure FormatProcedureDeclSection(PreSpaceCount: Byte = 0);
@@ -4534,7 +4535,7 @@ const
 var
   FirstType: Boolean;
 begin
-  Match(tokKeywordType, PreSpaceCount);
+  Match(tokKeywordType, PreSpaceCount); // type 区不需要 Scaner.KeepOneBlankLine := True; 因为自己已经用空行隔开了
   Writeln;
 
   FirstType := True;
@@ -4713,19 +4714,27 @@ procedure TCnBasePascalFormatter.FormatConstSection(PreSpaceCount: Byte);
 const
   IsConstStartTokens = [tokSymbol, tokSLB] + ComplexTokens + DirectiveTokens
     + KeywordTokens - NOTExpressionTokens;
+var
+  OldKeepOneBlankLine: Boolean;
 begin
   if Scaner.Token in [tokKeywordConst, tokKeywordResourcestring] then
     Match(Scaner.Token, PreSpaceCount);
 
-  while Scaner.Token in IsConstStartTokens do // 这些关键字不宜做变量名但也不好处理，只有先写上
-  begin
-    // 如果是[，就要越过其属性，找到]后的第一个，确定它是否还是 const，如果不是，就跳出
-    if (Scaner.Token = tokSLB) and not IsTokenAfterAttributesInSet(IsConstStartTokens) then
-      Exit;
+  OldKeepOneBlankLine := Scaner.KeepOneBlankLine;
+  Scaner.KeepOneBlankLine := True;
+  try
+    while Scaner.Token in IsConstStartTokens do // 这些关键字不宜做变量名但也不好处理，只有先写上
+    begin
+      // 如果是[，就要越过其属性，找到]后的第一个，确定它是否还是 const，如果不是，就跳出
+      if (Scaner.Token = tokSLB) and not IsTokenAfterAttributesInSet(IsConstStartTokens) then
+        Exit;
 
-    Writeln;
-    FormatConstantDecl(Tab(PreSpaceCount));
-    Match(tokSemicolon);
+      Writeln;
+      FormatConstantDecl(Tab(PreSpaceCount));
+      Match(tokSemicolon);
+    end;
+  finally
+    Scaner.KeepOneBlankLine := OldKeepOneBlankLine;
   end;
 end;
 
@@ -4774,7 +4783,7 @@ begin
         end;
       tokKeywordVar, tokKeywordThreadvar:
         begin
-          FormatVarSection(PreSpaceCount);
+          FormatVarSection(PreSpaceCount, True);
           LastIsInternalProc := False;
         end;
       tokKeywordExports:
@@ -5242,23 +5251,32 @@ begin
 end;
 
 { VarSection -> VAR | THREADVAR (VarDecl ';')... }
-procedure TCnBasePascalFormatter.FormatVarSection(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatVarSection(PreSpaceCount: Byte; IsGlobal: Boolean);
 const
   IsVarStartTokens = [tokSymbol, tokSLB, tokAmpersand] + ComplexTokens + DirectiveTokens
     + KeywordTokens - NOTExpressionTokens;
+var
+  OldKeepOneBlankLine: Boolean;
 begin
   if Scaner.Token in [tokKeywordVar, tokKeywordThreadvar] then
     Match(Scaner.Token, PreSpaceCount);
 
-  while Scaner.Token in IsVarStartTokens do // 这些关键字不宜做变量名但也不好处理，只有先写上
-  begin
-    // 如果是[，就要越过其属性，找到]后的第一个，确定它是否还是 var，如果不是，就跳出
-    if (Scaner.Token = tokSLB) and not IsTokenAfterAttributesInSet(IsVarStartTokens) then
-      Exit;
+  OldKeepOneBlankLine := Scaner.KeepOneBlankLine;
+  Scaner.KeepOneBlankLine := True;
 
-    Writeln;
-    FormatVarDecl(Tab(PreSpaceCount));
-    Match(tokSemicolon);
+  try
+    while Scaner.Token in IsVarStartTokens do // 这些关键字不宜做变量名但也不好处理，只有先写上
+    begin
+      // 如果是[，就要越过其属性，找到]后的第一个，确定它是否还是 var，如果不是，就跳出
+      if (Scaner.Token = tokSLB) and not IsTokenAfterAttributesInSet(IsVarStartTokens) then
+        Exit;
+
+      Writeln;
+      FormatVarDecl(Tab(PreSpaceCount));
+      Match(tokSemicolon);
+    end;
+  finally
+    Scaner.KeepOneBlankLine := OldKeepOneBlankLine;
   end;
 end;
 
@@ -5446,7 +5464,7 @@ begin
       tokKeywordUses: FormatUsesClause(PreSpaceCount, CnPascalCodeForRule.UsesUnitSingleLine); // 加入 uses 的处理以提高容错性
       tokKeywordConst, tokKeywordResourcestring: FormatConstSection(PreSpaceCount);
       tokKeywordType: FormatTypeSection(PreSpaceCount);
-      tokKeywordVar, tokKeywordThreadvar: FormatVarSection(PreSpaceCount);
+      tokKeywordVar, tokKeywordThreadvar: FormatVarSection(PreSpaceCount, True);
       tokKeywordProcedure, tokKeywordFunction: FormatExportedHeading(PreSpaceCount);
       tokKeywordExports: FormatExportsSection(PreSpaceCount);
       tokSLB: FormatSingleAttribute(PreSpaceCount);
@@ -5659,19 +5677,27 @@ end;
 { ClassMemberList -> ([ClassVisibility] [ClassMember]) ... }
 procedure TCnBasePascalFormatter.FormatClassMemberList(
   PreSpaceCount: Byte);
+var
+  OldKeepOneBlankLine: Boolean;
 begin
-  while Scaner.Token in ClassVisibilityTokens + ClassMemberSymbolTokens do
-  begin
-    if Scaner.Token in ClassVisibilityTokens then
+  OldKeepOneBlankLine := Scaner.KeepOneBlankLine;
+  Scaner.KeepOneBlankLine := True;
+  try
+    while Scaner.Token in ClassVisibilityTokens + ClassMemberSymbolTokens do
     begin
-      FormatClassVisibility(PreSpaceCount);
-      // 应该：如果下一个还是，就空一行
-      // if Scaner.Token in ClassVisibilityTokens + [tokKeywordEnd] then
-      //  Writeln;
-    end;
+      if Scaner.Token in ClassVisibilityTokens then
+      begin
+        FormatClassVisibility(PreSpaceCount);
+        // 应该：如果下一个还是，就空一行
+        // if Scaner.Token in ClassVisibilityTokens + [tokKeywordEnd] then
+        //  Writeln;
+      end;
 
-    if Scaner.Token in ClassMemberSymbolTokens then
-      FormatClassMember(Tab(PreSpaceCount));
+      if Scaner.Token in ClassMemberSymbolTokens then
+        FormatClassMember(Tab(PreSpaceCount));
+    end;
+  finally
+    Scaner.KeepOneBlankLine := OldKeepOneBlankLine;
   end;
 end;
 
