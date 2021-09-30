@@ -1292,6 +1292,10 @@ begin
   CnDebugger.LogEnter('OnIdleLoaded');
 {$ENDIF}
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+  dmCnSharedImages.CopyLargeIDEImageList(True); // 再复制一次大尺寸图标
+{$ENDIF}
+
   WizShortCutMgr.BeginUpdate;
 {$IFNDEF CNWIZARDS_MINIMUM}
   CnListBeginUpdate;

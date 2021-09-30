@@ -80,6 +80,7 @@ type
     FIDEOffset: Integer;      // D110A 之前，无论是否大图标都用这个值
     FCopied: Boolean;       // 记录我们的 ImageList 有无塞到 IDE 的 ImageList 中
     FLargeCopied: Boolean;  // 记录 IDE 的 ImageList 有无复制一份大的
+    FLargeCopiedCount: Integer; // 记录 IDE 的 ImageList 复制一份大的数量
 {$ENDIF}
     function GetIdxUnknownInIDE: Integer;
   public
@@ -94,8 +95,10 @@ type
     {* 内外都使用，供将小尺寸 ImageList 拉伸绘制到大的 ImageList 上}
     procedure CopyToIDEMainImageList;
     // Images 会被复制进 IDE 的 ImageList 供图标被同时使用的场合，FIDEOffset 表示偏移量
-    procedure CopyLargeIDEImageList;
+    procedure CopyLargeIDEImageList(Force: Boolean = False);
     // 由专家全部创建并加载菜单项后调用，把 IDE 的 ImageList 再复制一份大的
+    // 注意这个会被至少重复调两次，一次靠前以初始化专家管理器相关，一次 IDE 加载完成以反映最新图标
+    // Force 为 True 时表示在 FLargeCopied 为 True 时判断数量，不等则再进行一次复制
 
     function GetMixedImageList(ForceSmall: Boolean = False): TCustomImageList;
     function CalcMixedImageIndex(ImageIndex: Integer): Integer;
@@ -384,23 +387,32 @@ begin
   Button.NumGlyphs := 2;
 end;
 
-procedure TdmCnSharedImages.CopyLargeIDEImageList;
+procedure TdmCnSharedImages.CopyLargeIDEImageList(Force: Boolean);
 var
   IDEs: TCustomImageList;
 {$IFDEF IDE_SUPPORT_HDPI}
   Ico: TIcon;
 {$ENDIF}
 begin
-  if FLargeCopied then
+  if FLargeCopied and not Force then // 已经复制了，不 Force 时则退出
     Exit;
 
   IDEs := GetIDEImageList;
   if IDEs = nil then
     Exit;
 
-  // 再把 IDE 的 ImageList 复制一个超大型的供大尺寸下使用
+  // 是 Force 时判断 IDE 的 ImageList 的数量是否相等，相等则不复制
+  if Force and (FLargeCopiedCount = IDEs.Count) then
+    Exit;
+
+  // 真正把 IDE 的 ImageList 复制一个超大型的供大尺寸下使用
 {$IFDEF IDE_SUPPORT_HDPI}
+  FIDELargeVirtualImages.Clear;
   CopyVirtualImageList(IDEs as TVirtualImageList, FIDELargeVirtualImages);
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('Copy IDE ImageList %d to a Large Virtual ImageList %d',
+    [IDEs.Count, FIDELargeVirtualImages.Count]);
+{$ENDIF}
 
   Ico := TIcon.Create;
   try
@@ -415,7 +427,14 @@ begin
     Ico.Free;
   end;
 {$ENDIF}
+
+  IDELargeImages.Clear;
   StretchCopyToLarge(IDEs, IDELargeImages);
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('Copy IDE ImageList %d to a Large ImageList %d',
+    [IDEs.Count, IDELargeImages.Count]);
+{$ENDIF}
+  FLargeCopiedCount := IDEs.Count;
   FLargeCopied := True;
 end;
 
