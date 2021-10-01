@@ -3135,86 +3135,93 @@ end;
 function TCnBasePascalFormatter.FormatFieldList(PreSpaceCount: Byte;
   IgnoreFirst: Boolean): Boolean;
 var
-  First, AfterIsRB: Boolean;
+  First, AfterIsRB, OldKeepOneBlankLine: Boolean;
 begin
   First := True;
-  while not (Scaner.Token in [tokKeywordEnd, tokKeywordCase, tokRB]) do
-  begin
-    if Scaner.Token in ClassVisibilityTokens then
-      FormatClassVisibility(BackTab(PreSpaceCount));
 
-    if Scaner.Token = tokKeywordCase then // 如果出现 public case 的场合，要跳出处理 case
-      Break;
+  OldKeepOneBlankLine := Scaner.KeepOneBlankLine;
+  Scaner.KeepOneBlankLine := True;
+  try
+    while not (Scaner.Token in [tokKeywordEnd, tokKeywordCase, tokRB]) do
+    begin
+      if Scaner.Token in ClassVisibilityTokens then
+        FormatClassVisibility(BackTab(PreSpaceCount));
 
-    if Scaner.Token in [tokKeywordProcedure, tokKeywordFunction,
-      tokKeywordConstructor, tokKeywordDestructor, tokKeywordClass] then
-    begin
-      FormatClassMethod(PreSpaceCount);
-      Writeln;
-      First := False;
-    end
-    else if Scaner.Token = tokKeywordProperty then
-    begin
-      FormatClassProperty(PreSpaceCount);
-      Writeln;
-      First := False;
-    end
-    else if Scaner.Token = tokKeywordType then
-    begin
-      FormatClassTypeSection(PreSpaceCount);
-      Writeln;
-      First := False;
-    end
-    else if Scaner.Token in [tokKeywordVar, tokKeywordThreadVar] then
-    begin
-      FormatVarSection(PreSpaceCount);
-      Writeln;
-      First := False;
-    end
-    else if Scaner.Token = tokKeywordConst then
-    begin
-      FormatClassConstSection(PreSpaceCount);
-      Writeln;
-      First := False;
-    end
-    else if Scaner.Token <> tokKeywordEnd then
-    begin
-      if First and IgnoreFirst then
-        FormatFieldDecl
-      else
-        FormatFieldDecl(PreSpaceCount);
-      First := False;
-
-      if Scaner.Token = tokSemicolon then
-      begin
-        AfterIsRB := Scaner.ForwardToken in [tokRB];
-        FTrimAfterSemicolon := AfterIsRB; // 后面没内容了，本分号后面不需要输出空格
-        Match(Scaner.Token);
-        FTrimAfterSemicolon := False;
-        if not AfterIsRB then // 后面还有别的内容才写换行并准备再开一个 Field
-          Writeln;
-      end
-      else if Scaner.Token = tokKeywordEnd then // 最后一项无分号时也可以
-      begin
-        Writeln;
+      if Scaner.Token = tokKeywordCase then // 如果出现 public case 的场合，要跳出处理 case
         Break;
+
+      if Scaner.Token in [tokKeywordProcedure, tokKeywordFunction,
+        tokKeywordConstructor, tokKeywordDestructor, tokKeywordClass] then
+      begin
+        FormatClassMethod(PreSpaceCount);
+        Writeln;
+        First := False;
+      end
+      else if Scaner.Token = tokKeywordProperty then
+      begin
+        FormatClassProperty(PreSpaceCount);
+        Writeln;
+        First := False;
+      end
+      else if Scaner.Token = tokKeywordType then
+      begin
+        FormatClassTypeSection(PreSpaceCount);
+        Writeln;
+        First := False;
+      end
+      else if Scaner.Token in [tokKeywordVar, tokKeywordThreadVar] then
+      begin
+        FormatVarSection(PreSpaceCount);
+        Writeln;
+        First := False;
+      end
+      else if Scaner.Token = tokKeywordConst then
+      begin
+        FormatClassConstSection(PreSpaceCount);
+        Writeln;
+        First := False;
+      end
+      else if Scaner.Token <> tokKeywordEnd then
+      begin
+        if First and IgnoreFirst then
+          FormatFieldDecl
+        else
+          FormatFieldDecl(PreSpaceCount);
+        First := False;
+
+        if Scaner.Token = tokSemicolon then
+        begin
+          AfterIsRB := Scaner.ForwardToken in [tokRB];
+          FTrimAfterSemicolon := AfterIsRB; // 后面没内容了，本分号后面不需要输出空格
+          Match(Scaner.Token);
+          FTrimAfterSemicolon := False;
+          if not AfterIsRB then // 后面还有别的内容才写换行并准备再开一个 Field
+            Writeln;
+        end
+        else if Scaner.Token = tokKeywordEnd then // 最后一项无分号时也可以
+        begin
+          Writeln;
+          Break;
+        end;
       end;
     end;
+
+    if First and not (Scaner.Token = tokKeywordCase) then // 没有声明则先换行，case 除外
+      Writeln;
+
+    Result := False;
+    if Scaner.Token = tokKeywordCase then
+    begin
+      FormatVariantSection(PreSpaceCount);
+      Writeln;
+      Result := True;
+    end;
+
+    if Scaner.Token = tokSemicolon then
+      Match(Scaner.Token);
+  finally
+    Scaner.KeepOneBlankLine := OldKeepOneBlankLine;
   end;
-
-  if First and not (Scaner.Token = tokKeywordCase) then // 没有声明则先换行，case 除外
-    Writeln;
-
-  Result := False;
-  if Scaner.Token = tokKeywordCase then
-  begin
-    FormatVariantSection(PreSpaceCount);
-    Writeln;
-    Result := True;
-  end;
-
-  if Scaner.Token = tokSemicolon then
-    Match(Scaner.Token);
 end;
 
 { FileType -> FILE [OF TypeId] }
