@@ -1614,9 +1614,9 @@ begin
       if FSpcComplete and FIgnoreSpc and (Key = ' ') then
         Result := True;
     end
-    else if IsValidSymbolChar(Char(Key), False) then
+    else if IsValidSymbolChar(Char(Key), False) or ((FMatchStr = '') and (Key = '{')) then
     begin
-      FNeedUpdate := True;
+      FNeedUpdate := True;  // 如果是此次刚输入的头一个 {，也要保持列表是弹出状态以输入编译指令，而不是隐藏
     end
     else
     begin
@@ -1650,7 +1650,7 @@ begin
 //    CnDebugger.LogFmt('Input Helper. Line: %d, Len %d. CurLine %d, CurLen %d', [LineNo, Len, FCurrLineNo, FCurrLineLen]);
 {$ENDIF}
     // 如果此次按键对当前行作了修改才认为是有效按键，以处理增量查找等问题
-    // XE4的BCB环境中，空行默认长度都是4，后以空格填充，因此不能简单比较长度，得比内容
+    // XE4 的 BCB 环境中，空行默认长度都是 4，后以空格填充，因此不能简单比较长度，得比内容
     if (LineNo = FCurrLineNo) and ((Len <> FCurrLineLen) or (LineText <> FCurrLineText)) then
     begin
       Inc(FKeyCount);
