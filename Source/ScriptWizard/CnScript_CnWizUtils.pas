@@ -483,6 +483,7 @@ begin
   CL.AddDelphiFunction('Function CnOtaDeleteCurrTokenLeft( FirstSet : TCnCharSet; CharSet : TCnCharSet) : Boolean');
   CL.AddDelphiFunction('Function CnOtaDeleteCurrTokenRight( FirstSet : TCnCharSet; CharSet : TCnCharSet) : Boolean');
   CL.AddDelphiFunction('Function CnOtaIsEditPosOutOfLine( EditPos : TOTAEditPos; View : IOTAEditView) : Boolean');
+  CL.AddDelphiFunction('Function CnOtaSelectCurrentToken(FirstSet: TAnsiCharSet; CharSet: TAnsiCharSet): Boolean');
   CL.AddDelphiFunction('Procedure CnOtaSelectBlock( const Editor : IOTASourceEditor; const Start, After : TOTACharPos)');
   CL.AddDelphiFunction('Function CnOtaMoveAndSelectLine( LineNum: Integer; View: IOTAEditView) : Boolean');
   CL.AddDelphiFunction('Function CnOtaMoveAndSelectLines( StartLineNum, EndLineNum: Integer; View: IOTAEditView): Boolean');
@@ -752,6 +753,7 @@ begin
   S.RegisterDelphiFunction(@CnOtaDeleteCurrTokenLeft, 'CnOtaDeleteCurrTokenLeft', cdRegister);
   S.RegisterDelphiFunction(@CnOtaDeleteCurrTokenRight, 'CnOtaDeleteCurrTokenRight', cdRegister);
   S.RegisterDelphiFunction(@CnOtaIsEditPosOutOfLine, 'CnOtaIsEditPosOutOfLine', cdRegister);
+  S.RegisterDelphiFunction(@CnOtaSelectCurrentToken, 'CnOtaSelectCurrentToken', cdRegister);
   S.RegisterDelphiFunction(@CnOtaSelectBlock, 'CnOtaSelectBlock', cdRegister);
   S.RegisterDelphiFunction(@CnOtaMoveAndSelectLine, 'CnOtaMoveAndSelectLine', cdRegister);
   S.RegisterDelphiFunction(@CnOtaMoveAndSelectLines, 'CnOtaMoveAndSelectLines', cdRegister);

@@ -423,9 +423,9 @@ function FindControlByClassName(AParent: TWinControl; const AClassName: string):
 function QuerySvcs(const Instance: IUnknown; const Intf: TGUID; out Inst): Boolean;
 {* 查询输入的服务接口并返回一个指定接口实例，如果失败，返回 False}
 function CnOtaGetEditBuffer: IOTAEditBuffer;
-{* 取IOTAEditBuffer接口}
+{* 取 IOTAEditBuffer 接口}
 function CnOtaGetEditPosition: IOTAEditPosition;
-{* 取IOTAEditPosition接口}
+{* 取 IOTAEditPosition 接口}
 function CnOtaGetTopOpenedEditViewFromFileName(const FileName: string; ForceOpen: Boolean = True): IOTAEditView;
 {* 根据文件名返回编辑器中打开的第一个 EditView，未打开时如 ForceOpen 为 True 则尝试打开，否则返回 nil}
 function CnOtaGetTopMostEditView: IOTAEditView; overload;
@@ -676,6 +676,9 @@ function CnOtaIsEditPosOutOfLine(EditPos: TOTAEditPos; View: IOTAEditView = nil)
 procedure CnOtaGetCurrentBreakpoints(Results: TList);
 {* 使用 CnWizDebuggerNotifierServices 获取当前源文件内的断点，
    List 中返回 TCnBreakpointDescriptor 实例}
+function CnOtaSelectCurrentToken(FirstSet: TAnsiCharSet = [];
+  CharSet: TAnsiCharSet = []): Boolean;
+{* 选中当前光标下的标识符，如果光标下没有标识符则返回 False}
 
 {$ENDIF}
 
@@ -3067,7 +3070,7 @@ begin
 {$ENDIF Debug}
 end;
 
-// 取IOTAEditBuffer接口
+// 取 IOTAEditBuffer 接口
 function CnOtaGetEditBuffer: IOTAEditBuffer;
 var
   iEditorServices: IOTAEditorServices;
@@ -3081,7 +3084,7 @@ begin
   Result := nil;
 end;
 
-// 取IOTAEditPosition接口
+// 取 IOTAEditPosition 接口
 function CnOtaGetEditPosition: IOTAEditPosition;
 var
   iEditBuffer: IOTAEditBuffer;
@@ -5338,7 +5341,7 @@ begin
     // 2005 以上的，包括 2009，移动光标都要求 UTF8 偏移量，删除字符都要求 WideChar 偏移量
     MoveToRightCount := CalcUtf8LengthFromWideString(PWideChar(Copy(Token, CurrIndex + 1, MaxInt)));
 {$ELSE}
-    // D567下标识符无双字节字符，直接运算就行
+    // D567 下标识符无双字节字符，直接运算就行
     MoveToRightCount := Length(Token) - CurrIndex;
 {$ENDIF}
     BkspDelLeftCount := CurrIndex;
@@ -5450,6 +5453,58 @@ procedure CnOtaGetCurrentBreakpoints(Results: TList);
 begin
   if Results <> nil then
     CnWizDebuggerNotifierServices.RetrieveBreakpoints(Results, CnOtaGetCurrentSourceFileName);
+end;
+
+// 选中当前光标下的标识符，如果光标下没有标识符则返回 False
+function CnOtaSelectCurrentToken(FirstSet: TAnsiCharSet = [];
+  CharSet: TAnsiCharSet = []): Boolean;
+var
+  View: IOTAEditView;
+  Token: TCnIdeTokenString; // Ansi/Wide/Wide
+  CurrIndex: Integer;       // Ansi/Wide/Wide
+  EditPos: IOTAEditPosition;
+  Block: IOTAEditBlock;
+  MoveToRightCount: Integer;    // 从光标处移至右端所需的 Col，不用移到左
+begin
+  Result := False;
+  if CnOtaGeneralGetCurrPosToken(Token, CurrIndex, True, FirstSet, CharSet, nil) then
+  begin
+    View := CnOtaGetTopMostEditView;
+    if View = nil then
+      Exit;
+
+    Block := View.Block;
+    if Block = nil then
+      Exit;
+
+    EditPos := CnOtaGetEditPosition;
+    if not Assigned(EditPos) then
+      Exit;
+
+{$IFDEF BDS}
+    // CurrIndex 是 0 开始的 Ansi/Wide/Wide，用来移动光标时需要转成 0 开始的 Ansi/Utf8/Utf8
+    CurrIndex := CalcUtf8LengthFromWideString(PWideChar(Copy(Token, 1, CurrIndex)));
+    // MoveToRightCount 用来移动光标到标识符尾，是 0 开始的 Ansi/Utf8/Utf8
+    MoveToRightCount := CalcUtf8LengthFromWideString(PWideChar(Token));
+{$ELSE}
+    // D567 下标识符无双字节字符，直接计算 Token 长度
+    MoveToRightCount := Length(Token);
+{$ENDIF}
+
+    // 往前移动 CurrIndex，开始选中并朝后移动 MoveToRightCount，再结束选择
+    // MoveRelative: 0  Ansi/Utf8/Utf8
+
+    EditPos.MoveRelative(0, -CurrIndex);
+
+    Block.Reset;
+    Block.Style := btNonInclusive;
+    Block.BeginBlock;
+
+    EditPos.MoveRelative(0, MoveToRightCount);
+
+    Block.EndBlock;
+    Result := True;
+  end;
 end;
 
 {$ENDIF}

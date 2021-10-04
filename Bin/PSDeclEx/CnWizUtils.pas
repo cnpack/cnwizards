@@ -700,6 +700,8 @@ function CnOtaDeleteCurrTokenRight(FirstSet: TCnCharSet = [];
 {* 删除当前光标下的标识符右半部分}
 function CnOtaIsEditPosOutOfLine(EditPos: TOTAEditPos; View: IOTAEditView = nil): Boolean;
 {* 判断位置是否超出行尾了 }
+function CnOtaSelectCurrentToken(FirstSet: TAnsiCharSet = []; CharSet: TAnsiCharSet = []): Boolean;
+{* 选中当前光标下的标识符，如果光标下没有标识符则返回 False}
 procedure CnOtaSelectBlock(const Editor: IOTASourceEditor; const Start, After: TOTACharPos);
 {* 选择一个代码块}
 function CnOtaMoveAndSelectLine(LineNum: Integer; View: IOTAEditView = nil): Boolean;
@@ -1667,6 +1669,10 @@ begin
 end;
 
 function CnOtaIsEditPosOutOfLine(EditPos: TOTAEditPos; View: IOTAEditView = nil): Boolean;
+begin
+end;
+
+function CnOtaSelectCurrentToken(FirstSet: TAnsiCharSet = []; CharSet: TAnsiCharSet = []): Boolean;
 begin
 end;
 
