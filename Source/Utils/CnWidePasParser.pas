@@ -59,6 +59,7 @@ type
     FTag: Integer;
     FBracketLayer: Integer;
     function GetToken: PWideChar;
+    function GetEditEndCol: Integer;
   protected
     FCppTokenKind: TCTokenKind;
     FCompDirectiveType: TCnCompDirectiveType;
@@ -92,11 +93,13 @@ type
     {* 从本行开始数的 Ansi 字符位置，从零开始，计算而来}
 
     property EditCol: Integer read FEditCol write FEditCol;
-    {* 所在列，从一开始，由外界转换而来，一般对应 EditPos}
+    {* Token 起始位置所在列，从一开始，由外界转换而来，一般对应 EditPos}
     property EditLine: Integer read FEditLine write FEditLine;
     {* 所在行，从一开始，由外界转换而来，一般对应 EditPos}
     property EditAnsiCol: Integer read FEditAnsiCol write FEditAnsiCol;
-    {* 所在 Ansi 列，从一开始，由外界转换而来，用于绘制的场合}
+    {* Token 起始位置所在 Ansi 列，从一开始，由外界转换而来，用于绘制的场合}
+    property EditEndCol: Integer read GetEditEndCol;
+    {* Token 结束位置所在列，EditCol 转换成功后才有意义}
 
     property ItemIndex: Integer read FItemIndex;
     {* 在整个 Parser 中的序号 }
@@ -127,7 +130,7 @@ type
        是否位于上一层 function/procedure 的 begin 后的实现部分。
        无上一层，或在上一层的 begin 之前时为 False，表示是定义，
        而不是语句部分中的匿名函数。所以此属性为 True 可以代表是匿名函数。}
-    property CompDirectivtType: TCnCompDirectiveType read FCompDirectiveType write FCompDirectiveType;
+    property CompDirectiveType: TCnCompDirectiveType read FCompDirectiveType write FCompDirectiveType;
     {* 当其类型是 Pascal 编译指令时，此域代表其详细类型，但不解析，由外部按需解析}
     property Tag: Integer read FTag write FTag;
     {* Tag 标记，供外界特殊场合使用}
@@ -1875,6 +1878,11 @@ begin
   FIsBlockStart := False;
   FIsBlockClose := False;
   FTag := 0;
+end;
+
+function TCnWidePasToken.GetEditEndCol: Integer;
+begin
+  Result := EditCol + Length(Token); // TODO: 照理要 Ansi/Utf8/Ansi 的，不能像现在这样直接 Wide 的
 end;
 
 function TCnWidePasToken.GetToken: PWideChar;

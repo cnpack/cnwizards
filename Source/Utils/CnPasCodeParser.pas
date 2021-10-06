@@ -78,6 +78,7 @@ type
     FTag: Integer;
     FBracketLayer: Integer;
     function GetToken: PAnsiChar;
+    function GetEditEndCol: Integer;
   protected
     FCppTokenKind: TCTokenKind;
     FCompDirectiveType: TCnCompDirectiveType;
@@ -108,9 +109,11 @@ type
     {* 从本行开始数的字符位置，从零开始，由 ParseSource 计算而来 }
 
     property EditCol: Integer read FEditCol write FEditCol;
-    {* 所在列，从一开始，由外界转换而来，一般对应 EditPos }
+    {* Token 起始位置所在列，从一开始，由外界转换而来，一般对应 EditPos }
     property EditLine: Integer read FEditLine write FEditLine;
     {* 所在行，从一开始，由外界转换而来，一般对应 EditPos }
+    property EditEndCol: Integer read GetEditEndCol;
+    {* Token 结束位置所在列，EditCol 转换成功后才有意义}
 
     property ItemIndex: Integer read FItemIndex;
     {* 在整个 Parser 中的序号 }
@@ -1920,6 +1923,11 @@ begin
   FIsBlockStart := False;
   FIsBlockClose := False;
   FTag := 0;
+end;
+
+function TCnPasToken.GetEditEndCol: Integer;
+begin
+  Result := EditCol + StrLen(Token); // Ansi 基本符合 EditPos 所需
 end;
 
 function TCnPasToken.GetToken: PAnsiChar;

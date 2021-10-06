@@ -308,9 +308,9 @@ type
     property CppParser: TCnGeneralCppStructParser read FCppParser;
 
     property LineInfo: TCnBlockLineInfo read FLineInfo write FLineInfo;
-    {* 画线高亮的配对信息，解析关键字高亮时顺便也解析}
+    {* 画线高亮的配对信息，解析关键字高亮时顺便也解析，由外界设置与释放}
     property CompDirectiveInfo: TCnCompDirectiveInfo read FCompDirectiveInfo write FCompDirectiveInfo;
-    {* 编译指令的配对信息，解析关键字高亮时顺便也解析}
+    {* 编译指令的配对信息，解析关键字高亮时顺便也解析，由外界设置与释放}
   end;
 
   TCnBlockLinePair = class(TObject)
@@ -399,6 +399,7 @@ type
     property LineCount: Integer read GetLineCount;
     property Lines[LineNum: Integer]: TCnList read GetLines;
     property CurrentPair: TCnBlockLinePair read FCurrentPair;
+    {* 代表光标下的标识符是块分界标识符，并非光标在块的内部}
     property CurrentToken: TCnGeneralPasToken read FCurrentToken;
   end;
 
@@ -3670,7 +3671,7 @@ begin
         if (Line <> nil) and (EditView <> nil) then
         begin
           OldPair := Line.CurrentPair;
-          Line.FindCurrentPair(EditView); // 暂时不处理C/C++的情况
+          Line.FindCurrentPair(EditView); // 暂时不处理 C/C++ 的情况
           NewPair := Line.CurrentPair;
           if OldPair <> NewPair then
           begin
@@ -3694,7 +3695,7 @@ begin
         if (CompDirective <> nil) and (EditView <> nil) then
         begin
           OldPair := CompDirective.CurrentPair;
-          CompDirective.FindCurrentPair(EditView); // 暂时不处理C/C++的情况
+          CompDirective.FindCurrentPair(EditView); // 暂时不处理 C/C++ 的情况
           NewPair := CompDirective.CurrentPair;
           if OldPair <> NewPair then
           begin
@@ -3732,20 +3733,21 @@ end;
 // 上面的延时到时间了，开始解析
 procedure TCnSourceHighlight.OnHighlightTimer(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
   Info: TCnBlockMatchInfo;
 begin
   FStructureTimer.Enabled := False;
 
-  if FIsChecking then Exit;
+  if FIsChecking then
+    Exit;
   GlobalIgnoreClass := not FBlockMatchLineClass;
   GlobalIgnoreNamespace := not FBlockMatchLineNamespace;
 
   FIsChecking := True;
   try
-    for i := 0 to FBlockMatchList.Count - 1 do
+    for I := 0 to FBlockMatchList.Count - 1 do
     begin
-      Info := TCnBlockMatchInfo(FBlockMatchList[i]);
+      Info := TCnBlockMatchInfo(FBlockMatchList[I]);
 
       // CheckBlockMatch 时会设置 FChanged
       if Info.FChanged then
@@ -3764,22 +3766,23 @@ end;
 
 procedure TCnSourceHighlight.OnHighlightExec(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
   Info: TCnBlockMatchInfo;
   Line: TCnBlockLineInfo;
   CompDirective: TCnCompDirectiveInfo;
 begin
-  if FIsChecking then Exit;
+  if FIsChecking then
+    Exit;
   FIsChecking := True;
   GlobalIgnoreClass := not FBlockMatchLineClass;
   GlobalIgnoreNamespace := not FBlockMatchLineNamespace;
 
   try
     begin
-      for i := 0 to FBlockMatchList.Count - 1 do
+      for I := 0 to FBlockMatchList.Count - 1 do
       begin
         try
-          Info := TCnBlockMatchInfo(FBlockMatchList[i]);
+          Info := TCnBlockMatchInfo(FBlockMatchList[I]);
           if (FBlockMatchDrawLine or FBlockMatchHighlight) and (Info.LineInfo = nil) then
           begin
             // 如果画线结构高亮但之前无画线对象，则同时生成画线结构高亮的对象
@@ -3815,7 +3818,8 @@ end;
 
 function TCnSourceHighlight.GetColorFg(ALayer: Integer): TColor;
 begin
-  if ALayer < 0 then ALayer := -1;
+  if ALayer < 0 then
+    ALayer := -1;
   Result := FHighLightColors[ ALayer mod 6 ];
    // HSLToRGB(ALayer / 7, 1, 0.5);
 end;
