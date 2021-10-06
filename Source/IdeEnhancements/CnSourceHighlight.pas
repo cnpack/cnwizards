@@ -2235,6 +2235,7 @@ begin
         end
         else if PToken.CompDirectivtType in [ctEndIf, ctIfEnd, ctEndRegion] then
         begin
+          Pair := nil;
           if PToken.CompDirectivtType = ctEndRegion then
           begin
             if FRegionStack.Count = 0 then
@@ -2248,13 +2249,16 @@ begin
             Pair := TCnCompDirectivePair(FStack.Pop);
           end;
 
-          Pair.EndToken := PToken;
-          Pair.EndLeft := PToken.EditCol;
-          if Pair.Left > PToken.EditCol then // Left 取两者间较小的
-            Pair.Left := PToken.EditCol;
-          Pair.Bottom := PToken.EditLine;
+          if Pair <> nil then
+          begin
+            Pair.EndToken := PToken;
+            Pair.EndLeft := PToken.EditCol;
+            if Pair.Left > PToken.EditCol then // Left 取两者间较小的
+              Pair.Left := PToken.EditCol;
+            Pair.Bottom := PToken.EditLine;
 
-          CompDirectiveInfo.AddPair(Pair);
+            CompDirectiveInfo.AddPair(Pair);
+          end;
         end;
       end;
       CompDirectiveInfo.ConvertLineList;

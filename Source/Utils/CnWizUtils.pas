@@ -2263,7 +2263,7 @@ begin
   begin
     Result := False;
 {$IFDEF DEBUG}
-    CnDebugger.LogMsgError('ExecuteIDEAction can NOT find ' + ActionName);
+    CnDebugger.LogMsgError('ExecuteIDEAction can NOT Find ' + ActionName);
 {$ENDIF}
   end;
 end;
@@ -2297,24 +2297,26 @@ end;
 // 根据 TCnMenuWizard 列表中的 MenuOrder 值进行由小到大的排序
 procedure SortListByMenuOrder(List: TList);
 var
-  i, j: Integer;
+  I, J: Integer;
   P: Pointer;
 begin
   // 冒泡排序
   if List.Count = 1 then
     Exit;
 
-  for i := List.Count - 2 downto 0 do
-    for j := 0 to i do
+  for I := List.Count - 2 downto 0 do
+  begin
+    for J := 0 to I do
     begin
-      if TCnMenuWizard(List.Items[j]).MenuOrder >
-        TCnMenuWizard(List.Items[j + 1]).MenuOrder then  // 大头在后边
+      if TCnMenuWizard(List.Items[J]).MenuOrder >
+        TCnMenuWizard(List.Items[J + 1]).MenuOrder then  // 大头在后边
         begin
-          P := List.Items[j];
-          List.Items[j] := List.Items[j + 1];
-          List.Items[j + 1] := P;
+          P := List.Items[J];
+          List.Items[J] := List.Items[J + 1];
+          List.Items[J + 1] := P;
         end;
     end;
+  end;
 end;
 
 // 返回 DFM 文件是否文本格式
@@ -4822,7 +4824,6 @@ begin
   {$ENDIF}
   Result := True;
 end;
-
 
 // 使用 NTA 方法取当前行源代码。速度快，但取回的文本是将 Tab 扩展成空格的。
 // 如果使用 ConvertPos 来转换成 EditPos 可能会有问题。直接将 CharIndex + 1

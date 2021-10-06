@@ -1927,7 +1927,7 @@ end;
 
 function TCnPasToken.GetEditEndCol: Integer;
 begin
-  Result := EditCol + StrLen(Token); // Ansi 基本符合 EditPos 所需
+  Result := EditCol + Integer(StrLen(Token)); // Ansi 基本符合 EditPos 所需
 end;
 
 function TCnPasToken.GetToken: PAnsiChar;
