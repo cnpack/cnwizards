@@ -477,7 +477,10 @@ type
     FBlockMatchLineStyle: TCnLineStyle;
     FKeywordHighlight: THighlightItem;
     FIdentifierHighlight: THighlightItem;
-    FCompDirectiveHighlight: THighlightItem;
+    FCompDirectiveHighlight: THighlightItem; // 注意 Pascal 和 C++ 的都用这同一个，在D56/BCB56 里会有不一致的问题所以还需要一个
+{$IFNDEF COMPILER7_UP}
+    FCompDirectiveOtherHighlight: THighlightItem; // D56/BCB56 下需要另一个，用来分别指示 C++/Pascal 的内容
+{$ENDIF}
     FDirtyList: TList;
     FViewChangedList: TList;
     FViewFileNameIsPascalList: TList;
@@ -2588,6 +2591,9 @@ begin
   FKeywordHighlight := THighlightItem.Create;
   FIdentifierHighlight := THighlightItem.Create;
   FCompDirectiveHighlight := THighlightItem.Create;
+{$IFNDEF COMPILER7_UP}
+  FCompDirectiveOtherHighlight := THighlightItem.Create;
+{$ENDIF}
   FKeywordHighlight.Bold := True;
 
   FHilightSeparateLine := True;  // 默认画函数间的空行分隔线
@@ -2662,6 +2668,9 @@ begin
   FLineMapList.Free;
   FKeywordHighlight.Free;
   FIdentifierHighlight.Free;
+{$IFNDEF COMPILER7_UP}
+  FCompDirectiveOtherHighlight.Free;
+{$ENDIF}
   FCompDirectiveHighlight.Free;
   FDirtyList.Free;
   FCustomIdentifiers.Free;
@@ -3835,6 +3844,7 @@ var
   CanDrawToken: Boolean;
   RectGot: Boolean;
   CanvasSaved: Boolean;
+  CompDirectiveHighlightRef: THighlightItem;
 {$IFDEF BDS}
   WidePaintBuf: array[0..1] of WideChar;
   AnsiCharWidthLimit: Integer;
@@ -4318,6 +4328,18 @@ begin
 
               if CanDrawToken then
               begin
+                CompDirectiveHighlightRef := FCompDirectiveHighlight;
+{$IFNDEF COMPILER7_UP}
+  {$IFDEF DELPHI5OR6}
+                if Info.IsCppSource then // D5/6 下的 C++ 文件编译指令换格式
+                  CompDirectiveHighlightRef := FCompDirectiveOtherHighlight;
+  {$ENDIF}
+
+  {$IFDEF BCB5OR6}
+                if not Info.IsCppSource then // BCB5/6 下的 Pascal 文件编译指令换格式
+                  CompDirectiveHighlightRef := FCompDirectiveOtherHighlight;
+  {$ENDIF}
+{$ENDIF}
                 // 在位置上根据条件画背景高亮的编译指令
                 with EditCanvas do
                 begin
@@ -4327,12 +4349,12 @@ begin
                   FillRect(R1);
 
                   Font.Style := [];
-                  Font.Color := FCompDirectiveHighlight.ColorFg;
-                  if FCompDirectiveHighlight.Bold then
+                  Font.Color := CompDirectiveHighlightRef.ColorFg;
+                  if CompDirectiveHighlightRef.Bold then
                     Font.Style := Font.Style + [fsBold];
-                  if FCompDirectiveHighlight.Italic then
+                  if CompDirectiveHighlightRef.Italic then
                     Font.Style := Font.Style + [fsItalic];
-                  if FCompDirectiveHighlight.Underline then
+                  if CompDirectiveHighlightRef.Underline then
                     Font.Style := Font.Style + [fsUnderline];
 {$IFDEF BDS}
                   // BDS 下需要挨个绘制字符，因为 BDS 自身采用的是加粗的字符间距绘制
@@ -5128,20 +5150,28 @@ begin
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('No IDE Font Found in Registry: ' + csCompDirective + '. Use Default.');
 {$ENDIF}
-{$IFDEF DELPHI5}
+{$IFDEF DELPHI5OR6}
     // Delphi 5/6 编译指令格式与注释一样
     FCompDirectiveHighlight.ColorFg := clNavy;
     FCompDirectiveHighlight.Italic := True;
 {$ELSE}
-  {$IFDEF DELPHI6}
-    FCompDirectiveHighlight.ColorFg := clNavy;
-    FCompDirectiveHighlight.Italic := True;
-  {$ELSE}
     // D7 及以上及 C/C++ 代码的均是不斜的绿色
     FCompDirectiveHighlight.ColorFg := clGreen;
-  {$ENDIF}
 {$ENDIF}
   end;
+
+{$IFNDEF COMPILER7_UP}
+{$IFDEF DELPHI5OR6}
+    // Delphi 5/6 下 C++ 的编译指令
+    FCompDirectiveOtherHighlight.ColorFg := clGreen;
+{$ELSE}
+  {$IFDEF BCB5OR6}
+    // BCB5/6 下的 Pascal 编译指令
+    FCompDirectiveOtherHighlight.ColorFg := clNavy;
+    FCompDirectiveOtherHighlight.Italic := True;
+  {$ENDIF}
+{$ENDIF}
+{$ENDIF}
 end;
 
 procedure TCnSourceHighlight.RefreshCurrentTokens(Info: TCnBlockMatchInfo);
