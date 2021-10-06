@@ -483,7 +483,7 @@ begin
   CL.AddDelphiFunction('Function CnOtaDeleteCurrTokenLeft( FirstSet : TCnCharSet; CharSet : TCnCharSet) : Boolean');
   CL.AddDelphiFunction('Function CnOtaDeleteCurrTokenRight( FirstSet : TCnCharSet; CharSet : TCnCharSet) : Boolean');
   CL.AddDelphiFunction('Function CnOtaIsEditPosOutOfLine( EditPos : TOTAEditPos; View : IOTAEditView) : Boolean');
-  CL.AddDelphiFunction('Function CnOtaSelectCurrentToken(FirstSet: TAnsiCharSet; CharSet: TAnsiCharSet): Boolean');
+  CL.AddDelphiFunction('Function CnOtaSelectCurrentToken(FirstSet: TCnCharSet; CharSet: TCnCharSet): Boolean');
   CL.AddDelphiFunction('Procedure CnOtaSelectBlock( const Editor : IOTASourceEditor; const Start, After : TOTACharPos)');
   CL.AddDelphiFunction('Function CnOtaMoveAndSelectLine( LineNum: Integer; View: IOTAEditView) : Boolean');
   CL.AddDelphiFunction('Function CnOtaMoveAndSelectLines( StartLineNum, EndLineNum: Integer; View: IOTAEditView): Boolean');
