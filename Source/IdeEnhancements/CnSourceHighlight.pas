@@ -1060,7 +1060,7 @@ begin
 
         if Result then
         begin
-          AToken.CompDirectivtType := csPasCompDirectiveTypes[I];
+          AToken.CompDirectiveType := csPasCompDirectiveTypes[I];
 {$IFDEF DEBUG}
 //        CnDebugger.LogFmt('Pascal is CompDirective. TokenType %d, Token: %s', [Integer(AToken.TokenID), AToken.Token]);
 {$ENDIF}
@@ -2210,7 +2210,7 @@ begin
 {$IFDEF DEBUG}
 //      CnDebugger.LogFmt('CompDirectiveInfo Check CompDirectivtType: %d', [Ord(PToken.CompDirectivtType)]);
 {$ENDIF}
-        if PToken.CompDirectivtType in [ctIf, ctIfDef, ctIfNDef, ctRegion] then
+        if PToken.CompDirectiveType in [ctIf, ctIfDef, ctIfNDef, ctRegion] then
         begin
           Pair := TCnCompDirectivePair.Create;
           Pair.StartToken := PToken;
@@ -2219,12 +2219,12 @@ begin
           Pair.Left := PToken.EditCol;
           Pair.Layer := PToken.ItemLayer - 1;
 
-          if PToken.CompDirectivtType <> ctRegion then
+          if PToken.CompDirectiveType <> ctRegion then
             FStack.Push(Pair)
           else
             FRegionStack.Push(Pair);
         end
-        else if PToken.CompDirectivtType = ctElse then
+        else if PToken.CompDirectiveType = ctElse then
         begin
           if FStack.Count > 0 then
           begin
@@ -2233,10 +2233,10 @@ begin
               Pair.AddMidToken(PToken, PToken.EditCol);
           end;
         end
-        else if PToken.CompDirectivtType in [ctEndIf, ctIfEnd, ctEndRegion] then
+        else if PToken.CompDirectiveType in [ctEndIf, ctIfEnd, ctEndRegion] then
         begin
           Pair := nil;
-          if PToken.CompDirectivtType = ctEndRegion then
+          if PToken.CompDirectiveType = ctEndRegion then
           begin
             if FRegionStack.Count = 0 then
               Continue;
