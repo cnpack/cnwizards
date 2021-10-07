@@ -257,40 +257,43 @@ begin
   end;
 {$ENDIF}
 
-  // 为大图标版做好准备
+  if WizOptions.UseLargeIcon then
+  begin
+    // 为大图标版做好准备
 {$IFDEF IDE_SUPPORT_HDPI}
-  FLargeVirtualImages := TVirtualImageList.Create(Self);
-  FLargeImageCollection := TImageCollection.Create(Self);
-  FLargeVirtualImages.ImageCollection := FLargeImageCollection;
-  FLargeVirtualImages.Width := csLargeImageListWidth;
-  FLargeVirtualImages.Height := csLargeImageListHeight;
+    FLargeVirtualImages := TVirtualImageList.Create(Self);
+    FLargeImageCollection := TImageCollection.Create(Self);
+    FLargeVirtualImages.ImageCollection := FLargeImageCollection;
+    FLargeVirtualImages.Width := csLargeImageListWidth;
+    FLargeVirtualImages.Height := csLargeImageListHeight;
 
-  FDisabledLargeVirtualImages := TVirtualImageList.Create(Self);
-  FDisabledLargeImageCollection := TImageCollection.Create(Self);
-  FDisabledLargeVirtualImages.ImageCollection := FDisabledLargeImageCollection;
-  FDisabledLargeVirtualImages.Width := csLargeImageListWidth;
-  FDisabledLargeVirtualImages.Height := csLargeImageListHeight;
+    FDisabledLargeVirtualImages := TVirtualImageList.Create(Self);
+    FDisabledLargeImageCollection := TImageCollection.Create(Self);
+    FDisabledLargeVirtualImages.ImageCollection := FDisabledLargeImageCollection;
+    FDisabledLargeVirtualImages.Width := csLargeImageListWidth;
+    FDisabledLargeVirtualImages.Height := csLargeImageListHeight;
 
-  FIDELargeVirtualImages := TVirtualImageList.Create(Self);
-  FIDELargeImageCollection := TImageCollection.Create(Self);
-  FIDELargeVirtualImages.ImageCollection := FIDELargeImageCollection;
-  FIDELargeVirtualImages.Width := csLargeImageListWidth;
-  FIDELargeVirtualImages.Height := csLargeImageListHeight;
+    FIDELargeVirtualImages := TVirtualImageList.Create(Self);
+    FIDELargeImageCollection := TImageCollection.Create(Self);
+    FIDELargeVirtualImages.ImageCollection := FIDELargeImageCollection;
+    FIDELargeVirtualImages.Width := csLargeImageListWidth;
+    FIDELargeVirtualImages.Height := csLargeImageListHeight;
 
-  FLargeProcToolbarVirtualImages := TVirtualImageList.Create(Self);
-  FLargeProcToolbarImageCollection := TImageCollection.Create(Self);
-  FLargeProcToolbarVirtualImages.ImageCollection := FLargeProcToolbarImageCollection;
-  FLargeProcToolbarVirtualImages.Width := csLargeImageListWidth;
-  FLargeProcToolbarVirtualImages.Height := csLargeImageListHeight;
+    FLargeProcToolbarVirtualImages := TVirtualImageList.Create(Self);
+    FLargeProcToolbarImageCollection := TImageCollection.Create(Self);
+    FLargeProcToolbarVirtualImages.ImageCollection := FLargeProcToolbarImageCollection;
+    FLargeProcToolbarVirtualImages.Width := csLargeImageListWidth;
+    FLargeProcToolbarVirtualImages.Height := csLargeImageListHeight;
 
-  CopyImageListToVirtual(Images, FLargeVirtualImages);
-  CopyImageListToVirtual(DisabledImages, FDisabledLargeVirtualImages);
-  CopyImageListToVirtual(ilProcToolbar, FLargeProcToolbarVirtualImages);
+    CopyImageListToVirtual(Images, FLargeVirtualImages);
+    CopyImageListToVirtual(DisabledImages, FDisabledLargeVirtualImages);
+    CopyImageListToVirtual(ilProcToolbar, FLargeProcToolbarVirtualImages);
 {$ELSE}
-  StretchCopyToLarge(ilProcToolbar, ilProcToolbarLarge);
-  StretchCopyToLarge(Images, LargeImages);
-  StretchCopyToLarge(DisabledImages, DisabledLargeImages);
+    StretchCopyToLarge(ilProcToolbar, ilProcToolbarLarge);
+    StretchCopyToLarge(Images, LargeImages);
+    StretchCopyToLarge(DisabledImages, DisabledLargeImages);
 {$ENDIF}
+  end;
 {$ENDIF}
 end;
 
@@ -343,11 +346,13 @@ begin
   begin
     Cnt := IDEs.Count;
 {$IFDEF IDE_SUPPORT_HDPI}
-    // D11 及其以后，IDE 的主 ImageList 变 VirtualImageList 了，而且由于分辨率变化，FLargeOffset 得另求
-    CopyVirtualImageList(IDEs as TVirtualImageList, FIDELargeVirtualImages);
-    FLargeIDEOffset := FIDELargeVirtualImages.Count;
-    FIDELargeVirtualImages.Clear;   // 这段只用来求 FIDELargeOffset
-
+    if WizOptions.UseLargeIcon then
+    begin
+      // D11 及其以后，IDE 的主 ImageList 变 VirtualImageList 了，而且由于分辨率变化，FLargeOffset 得另求
+      CopyVirtualImageList(IDEs as TVirtualImageList, FIDELargeVirtualImages);
+      FLargeIDEOffset := FIDELargeVirtualImages.Count;
+      FIDELargeVirtualImages.Clear;   // 这段只用来求 FIDELargeOffset
+    end;
     CopyImageListToVirtual(Images, IDEs as TVirtualImageList, 'CnWizardsItem');
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('Add %d Images to IDE Main VirtualImageList. Offset %d. LargeOffset %d', [Images.Count, Cnt, FLargeIDEOffset]);
@@ -394,6 +399,9 @@ var
   Ico: TIcon;
 {$ENDIF}
 begin
+  if not WizOptions.UseLargeIcon then
+    Exit;
+
   if FLargeCopied and not Force then // 已经复制了，不 Force 时则退出
     Exit;
 
