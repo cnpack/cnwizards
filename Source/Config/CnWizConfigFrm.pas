@@ -56,7 +56,8 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   Menus, ExtCtrls, ComCtrls, ToolWin, StdCtrls, ImgList, Buttons,
-  CnDesignEditor, CnWizMultiLang, CnWizClasses, CnDesignEditorConsts, CnWizMenuAction;
+  CnDesignEditor, CnWizMultiLang, CnWizClasses, CnDesignEditorConsts, CnWizMenuAction,
+  System.ImageList;
 
 type
 
@@ -321,6 +322,7 @@ procedure TCnWizConfigForm.FormDestroy(Sender: TObject);
 var
   I: Integer;
   Changes: DWORD;
+  OldUseLargeIcon: Boolean;
 begin
   if ModalResult = mrOK then
   begin
@@ -369,6 +371,8 @@ begin
     WizOptions.ShowWizComment := cbShowWizComment.Checked;
     WizOptions.UseOneCPUCore := chkUseOneCPUCore.Checked;
     WizOptions.FixThreadLocale := chkFixThreadLocale.Checked;
+
+    OldUseLargeIcon := WizOptions.UseLargeIcon;
     WizOptions.UseLargeIcon := chkUseLargeIcon.Checked;
 
     // 升级设置
@@ -387,7 +391,9 @@ begin
     
     WizOptions.WriteInteger(SCnOptionSection, csLastSelectedItem, lbWizards.ItemIndex);
 
-    WizOptions.SaveSettings;
+    WizOptions.SaveSettings(True);
+    WizOptions.UseLargeIcon := OldUseLargeIcon; // 保存后迅速恢复原值，确保下次启动才生效
+
     CnWizardMgr.SaveSettings;
 
     // 通知外界专家包的设置对话框关闭并且设置改变了

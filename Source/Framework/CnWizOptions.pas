@@ -136,7 +136,8 @@ type
     constructor Create;
     destructor Destroy; override;
     procedure LoadSettings;
-    procedure SaveSettings;
+    procedure SaveSettings(Manual: Boolean = False);
+    // Manual 为 True 时表示从界面保存而不是结束时自动保存
 
     procedure ResetToolbarWithLargeIcons(AToolBar: TToolBar);
     {* 封装的根据是否使用大图标来调整工具栏的方法}
@@ -267,9 +268,9 @@ type
     property FixThreadLocale: Boolean read FFixThreadLocale write SetFixThreadLocale;
     {* 使用 SetThreadLocale 修正 Vista / Win7 下中文乱码问题}
     property UseOneCPUCore: Boolean read FUseOneCPUCore write SetUseOneCPUCore;
-    {* 在多CPU中只使用一个CPU内核，以解决兼容性问题}
+    {* 在多 CPU 中只使用一个 CPU 内核，以解决兼容性问题}
     property UseLargeIcon: Boolean read FUseLargeIcon write SetUseLargeIcon;
-    {* 是否在工具栏等处使用大尺寸图标}
+    {* 是否在工具栏等处使用大尺寸图标，注意运行期除了设置窗口外不要改变此值，避免与大图标不一致。}
     property SizeEnlarge: TCnWizSizeEnlarge read FSizeEnlarge write FSizeEnlarge;
     {* 窗体的字号与尺寸放大倍数枚举}
 
@@ -510,7 +511,7 @@ begin
   end;
 end;
 
-procedure TCnWizOptions.SaveSettings;
+procedure TCnWizOptions.SaveSettings(Manual: Boolean);
 begin
   with CreateRegIniFile do
   try
@@ -522,7 +523,10 @@ begin
     WriteString(SCnOptionSection, csCExt, FCExt);
     WriteBool(SCnOptionSection, csUseToolsMenu, FUseToolsMenu);
     WriteBool(SCnOptionSection, csFixThreadLocale, FFixThreadLocale);
-    WriteBool(SCnOptionSection, csUseLargeIcon, FUseLargeIcon);
+
+    if Manual then // 该选项只在手工保存时保存
+      WriteBool(SCnOptionSection, csUseLargeIcon, FUseLargeIcon);
+
     WriteInteger(SCnOptionSection, csSizeEnlarge, Ord(FSizeEnlarge));
     WriteBool(SCnOptionSection, csUseCustomUserDir, FUseCustomUserDir);
     if not FUseCmdUserDir then // 不是命令行中指定目录时才保存目录名，避免命令行指定的目录覆盖掉设置目录
