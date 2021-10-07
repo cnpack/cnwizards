@@ -144,7 +144,7 @@ type
        是否位于上一层 function/procedure 的 begin 后的实现部分。
        无上一层，或在上一层的 begin 之前时为 False，表示是定义，
        而不是语句部分中的匿名函数。所以此属性为 True 可以代表是匿名函数。}
-    property CompDirectivtType: TCnCompDirectiveType read FCompDirectiveType write FCompDirectiveType;
+    property CompDirectiveType: TCnCompDirectiveType read FCompDirectiveType write FCompDirectiveType;
     {* 当其类型是 Pascal 编译指令时，此域代表其详细类型，但不解析，由外部按需解析}
     property Tag: Integer read FTag write FTag;
     {* Tag 标记，供外界特殊场合使用}
