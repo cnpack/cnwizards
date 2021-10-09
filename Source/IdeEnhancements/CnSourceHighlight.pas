@@ -149,7 +149,7 @@ const
     ctkdirelif, ctkdirelse, ctkdirendif];
   // 还有 pragma 后的 region 与 end_region 要额外判断
 
-  csCppCompDirectiveRegionTokenStr: array[0..1] of AnsiString =
+  csCppCompDirectiveRegionTokenStr: array[0..1] of TCnIdeTokenString =
     ('region', 'end_region');
 
   CPP_PAS_REGION_TYPE_OFFSET = 6;
@@ -1080,7 +1080,7 @@ begin
       // 检查 NextToken 是否是 region 与 end_region
       for I := Low(csCppCompDirectiveRegionTokenStr) to High(csCppCompDirectiveRegionTokenStr) do
       begin
-        Result := StartWithIdeToken(@(csCppCompDirectiveRegionTokenStr[I][1]), NextToken.Token, True);
+        Result := EqualIdeToken(@(csCppCompDirectiveRegionTokenStr[I][1]), NextToken.Token, True);
 
         if Result then
         begin
