@@ -95,7 +95,7 @@ var
   CurrentToken: TCnGeneralPasToken;
   CurrentTokenName: TCnIdeTokenString;
   CurIsPas, CurIsCpp: Boolean;
-  CurrentTokenIndex, StartIdx, EndIdx: Integer;
+  CurrentTokenIndex: Integer;
   BlockMatchInfo: TCnBlockMatchInfo;
   MaxInnerLayer, MinOutLayer: Integer;
   Pair: TCnBlockLinePair;

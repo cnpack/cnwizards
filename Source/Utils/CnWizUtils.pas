@@ -92,10 +92,19 @@ type
 {$IFDEF IDE_STRING_ANSI_UTF8}
   TCnIdeTokenString = WideString; // WideString for Utf8 Conversion
   PCnIdeTokenChar = PWideChar;
+  TCnIdeTokenChar = WideChar;
+  TCnIdeTokenInt = Word;
 {$ELSE}
   TCnIdeTokenString = string;     // Ansi/Utf16
   PCnIdeTokenChar = PChar;
+  TCnIdeTokenChar = Char;
+  {$IFDEF UNICODE}
+  TCnIdeTokenInt = Word;
+  {$ELSE}
+  TCnIdeTokenInt = Byte;
+  {$ENDIF}
 {$ENDIF}
+  PCnIdeTokenInt = ^TCnIdeTokenInt;
 
 {$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}  // 2005 ртио
   TCnGeneralPasToken = TCnWidePasToken;

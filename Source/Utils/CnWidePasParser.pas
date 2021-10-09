@@ -1862,6 +1862,7 @@ end;
 procedure TCnWidePasToken.Clear;
 begin
   FCppTokenKind := TCTokenKind(0);
+  FCompDirectiveType := TCnCompDirectiveType(0);
   FCharIndex := 0;
   FAnsiIndex := 0;
   FEditCol := 0;

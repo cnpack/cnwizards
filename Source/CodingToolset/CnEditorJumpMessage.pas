@@ -918,7 +918,7 @@ begin
           for I := StartIdx downto EndIdx do // Search for previous
           begin
             if (PasParser.Tokens[I].TokenID = tkIdentifier) and
-              CheckTokenMatch(PasParser.Tokens[I].Token, CurrentTokenName, False) then
+              CheckTokenMatch(PasParser.Tokens[I].Token, PCnIdeTokenChar(CurrentTokenName), False) then
             begin
               // Found. Jump here and Exit;
               CnOtaGotoEditPosAndRepaint(EditView, PasParser.Tokens[I].EditLine, PasParser.Tokens[I].EditCol);
@@ -931,7 +931,7 @@ begin
           for I := StartIdx to EndIdx do // Search for Next
           begin
             if (PasParser.Tokens[I].TokenID = tkIdentifier) and
-              CheckTokenMatch(PasParser.Tokens[I].Token, CurrentTokenName, False) then
+              CheckTokenMatch(PasParser.Tokens[I].Token, PCnIdeTokenChar(CurrentTokenName), False) then
             begin
               // Found. Jump here and Exit;
               CnOtaGotoEditPosAndRepaint(EditView, PasParser.Tokens[I].EditLine, PasParser.Tokens[I].EditCol);
@@ -981,7 +981,7 @@ begin
           for I := StartIdx downto EndIdx do // Search for previous
           begin
             if (CppParser.Tokens[I].CppTokenKind = ctkidentifier) and
-              CheckTokenMatch(CppParser.Tokens[I].Token, CurrentTokenName, True) then
+              CheckTokenMatch(CppParser.Tokens[I].Token, PCnIdeTokenChar(CurrentTokenName), True) then
             begin
               // Found. Jump here and Exit;
               CnOtaGotoEditPosAndRepaint(EditView, CppParser.Tokens[I].EditLine, CppParser.Tokens[I].EditCol);
@@ -994,7 +994,7 @@ begin
           for I := StartIdx to EndIdx do // Search for Next
           begin
             if (CppParser.Tokens[I].CppTokenKind = ctkidentifier) and
-              CheckTokenMatch(CppParser.Tokens[I].Token, CurrentTokenName, True) then
+              CheckTokenMatch(CppParser.Tokens[I].Token, PCnIdeTokenChar(CurrentTokenName), True) then
             begin
               // Found. Jump here and Exit;
               CnOtaGotoEditPosAndRepaint(EditView, CppParser.Tokens[I].EditLine, CppParser.Tokens[I].EditCol);

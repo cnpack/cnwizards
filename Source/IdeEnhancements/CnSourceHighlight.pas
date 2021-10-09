@@ -128,18 +128,18 @@ const
     tkCase, tkOf,
     tkRepeat, tkUntil];
 
-  csPasFlowTokenStr: array[0..3] of AnsiString =
+  csPasFlowTokenStr: array[0..3] of TCnIdeTokenString =
     ('exit', 'continue', 'break', 'abort');
 
   csPasFlowTokenKinds: set of TTokenKind = [tkGoto, tkRaise];
 
-  csCppFlowTokenStr: array[0..1] of AnsiString =
+  csCppFlowTokenStr: array[0..1] of TCnIdeTokenString =
     ('abort', 'exit');
 
   csCppFlowTokenKinds: TIdentDirect = [ctkgoto, ctkreturn, ctkcontinue, ctkbreak];
   // If change here, CppCodeParser also need change.
 
-  csPasCompDirectiveTokenStr: array[0..7] of AnsiString =
+  csPasCompDirectiveTokenStr: array[0..7] of TCnIdeTokenString = // 并非全匹配而是开头匹配
     ('{$IF ', '{$IFDEF ', '{$IFNDEF ', '{$ELSE', '{$ENDIF', '{$IFEND', '{$REGION', '{$ENDREGION');
 
   csPasCompDirectiveTypes: array[0..7] of TCnCompDirectiveType =
@@ -147,6 +147,12 @@ const
 
   csCppCompDirectiveKinds: TIdentDirect = [ctkdirif, ctkdirifdef, ctkdirifndef,
     ctkdirelif, ctkdirelse, ctkdirendif];
+  // 还有 pragma 后的 region 与 end_region 要额外判断
+
+  csCppCompDirectiveRegionTokenStr: array[0..1] of AnsiString =
+    ('region', 'end_region');
+
+  CPP_PAS_REGION_TYPE_OFFSET = 6;
 
 type
   TCnLineStyle = (lsSolid, lsDot, lsSmallDot, lsTinyDot);
@@ -681,11 +687,12 @@ procedure HighlightCanvasLine(ACanvas: TCanvas; X1, Y1, X2, Y2: Integer;
   AStyle: TCnLineStyle);
 {* 高亮专用的画线函数，TinyDot 时不画斜线}
 
-function CheckTokenMatch(const T1, T2: TCnIdeTokenString; CaseSensitive: Boolean): Boolean;
-{* 判断是否俩Identifer相等}
+function CheckTokenMatch(const T1, T2: PCnIdeTokenChar; CaseSensitive: Boolean): Boolean;
+{* 判断是否俩 Identifer 相等}
 
-function CheckIsCompDirectiveToken(AToken: TCnGeneralPasToken; IsCpp: Boolean): Boolean;
-{* 判断是否是条件编译指令}
+function CheckIsCompDirectiveToken(AToken: TCnGeneralPasToken; IsCpp: Boolean;
+  NextToken: TCnGeneralPasToken = nil): Boolean;
+{* 判断是否是条件编译指令，NextToken 用于 #pragma region/end_region 的情形}
 
 {$IFNDEF BDS}
 procedure MyEditorsCustomEditControlSetForeAndBackColor(ASelf: TObject;
@@ -845,10 +852,30 @@ begin
     TObject(PairPool[I]).Free;
 end;
 
+function EqualIdeToken(S1, S2: PCnIdeTokenChar; CaseSensitive: Boolean = False): Boolean;
+  {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
+begin
+  if CaseSensitive then
+  begin
+{$IFDEF BDS}
+    Result := lstrcmpW(S1, S2) = 0;
+{$ELSE}
+    Result := lstrcmpA(S1, S2) = 0;
+{$ENDIF}
+  end
+  else
+  begin
+{$IFDEF BDS}
+    Result := lstrcmpiW(S1, S2) = 0;
+{$ELSE}
+    Result := lstrcmpiA(S1, S2) = 0;
+{$ENDIF}
+  end;
+end;
+
 function CheckIsFlowToken(AToken: TCnGeneralPasToken; IsCpp: Boolean): Boolean;
 var
   I: Integer;
-  T: AnsiString;
 begin
   Result := False;
   if AToken = nil then
@@ -866,10 +893,9 @@ begin
     end
     else
     begin
-      T := AToken.Token;
       for I := Low(csCppFlowTokenStr) to High(csCppFlowTokenStr) do
       begin
-        if T = csCppFlowTokenStr[I] then
+        if EqualIdeToken(AToken.Token, @((csCppFlowTokenStr[I])[1]), True) then
         begin
 {$IFDEF DEBUG}
 //        CnDebugger.LogFmt('Cpp is Flow. TokenType %d, Token: %s', [Integer(AToken.CppTokenKind), AToken.Token]);
@@ -882,7 +908,7 @@ begin
 
     for I := 0 to FHighlight.FCustomIdentifiers.Count - 1 do
     begin
-      if AToken.Token = FHighlight.FCustomIdentifiers[I] then
+      if EqualIdeToken(AToken.Token, @((FHighlight.FCustomIdentifiers[I])[1]), True) then
       begin
         Result := True;
         Exit;
@@ -901,15 +927,9 @@ begin
     end
     else
     begin
-      T := AToken.Token;
       for I := Low(csPasFlowTokenStr) to High(csPasFlowTokenStr) do
       begin
-        {$IFDEF UNICODE}
-        // Unicode 时直接调用 API 比较以避免生成临时字符串而影响性能
-        Result := lstrcmpiA(@T[1], @((csPasFlowTokenStr[I])[1])) = 0;
-        {$ELSE}
-        Result := LowerCase(T) = csPasFlowTokenStr[I];
-       {$ENDIF}
+        Result := EqualIdeToken(AToken.Token, @((csPasFlowTokenStr[I])[1]));
 
         if Result then
         begin
@@ -921,15 +941,9 @@ begin
       end;
     end;
 
-    T := AToken.Token;
     for I := 0 to FHighlight.FCustomIdentifiers.Count - 1 do
     begin
-      {$IFDEF UNICODE}
-      // Unicode 时直接调用 API 比较以避免生成临时字符串而影响性能
-      Result := lstrcmpiA(@T[1], @((FHighlight.FCustomIdentifiers[I])[1])) = 0;
-      {$ELSE}
-      Result := LowerCase(T) = LowerCase(FHighlight.FCustomIdentifiers[I]);
-     {$ENDIF}
+      Result := EqualIdeToken(AToken.Token,@((FHighlight.FCustomIdentifiers[I])[1]));
 
       if Result then
         Exit;
@@ -971,21 +985,25 @@ begin
 {$ENDIF}
 end;
 
-{$IFDEF UNICODE}
-
-function StartWithIgnoreCase(Pattern: PAnsiChar; Content: PAnsiChar): Boolean; inline;
+function StartWithIdeToken(Pattern, Content: PCnIdeTokenChar; CaseSensitive: Boolean = False): Boolean;
+  {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
 var
-  PP, PC: PAnsiChar;
+  PP, PC: PCnIdeTokenChar;
 
-  function AnsiCharEqualIgnoreCase(P, C: Byte): Boolean; inline;
+  function IdeCharEqualIgnoreCase(P, C: TCnIdeTokenChar): Boolean; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
+  var
+    CI: TCnIdeTokenInt;
   begin
     Result := P = C;
     if not Result then
     begin
       // Assume Pattern already uppercase.
-      if C in [97..122] then  // if a..z to A..Z
-        Dec(C, 32);
-      Result := P = C;
+      CI := TCnIdeTokenInt(C);
+      if (CI >= 97) and (CI <= 122) then  // if a..z to A..Z
+      begin
+        Dec(CI, 32);
+        Result := P = TCnIdeTokenChar(CI);
+      end;
     end;
   end;
 
@@ -993,16 +1011,33 @@ begin
   PP := Pattern;
   PC := Content;
 
-  while (PP^ <> #0) and (PC^ <> #0) do
+  if CaseSensitive then
   begin
-    Result := AnsiCharEqualIgnoreCase(Ord(PP^), Ord(PC^));
-    if not Result then
-      Exit;
-    Inc(PP);
-    Inc(PC);
+    while (PP^ <> #0) and (PC^ <> #0) do
+    begin
+      Result := PP^ = PC^;
+      if not Result then
+        Exit;
+      Inc(PP);
+      Inc(PC);
+    end;
+    Result := PP^ = #0;
+  end
+  else
+  begin
+    while (PP^ <> #0) and (PC^ <> #0) do
+    begin
+      Result := IdeCharEqualIgnoreCase(PP^, PC^);
+      if not Result then
+        Exit;
+      Inc(PP);
+      Inc(PC);
+    end;
+    Result := PP^ = #0;
   end;
-  Result := PP^ = #0;
 end;
+
+{$IFDEF UNICODE}
 
 // 此函数非 Unicode 环境下不应该被调用
 function ConvertUtf8PositionToAnsi(const Utf8Text: AnsiString; Utf8Col: Integer): Integer;
@@ -1021,10 +1056,10 @@ end;
 
 {$ENDIF}
 
-function CheckIsCompDirectiveToken(AToken: TCnGeneralPasToken; IsCpp: Boolean): Boolean;
+function CheckIsCompDirectiveToken(AToken: TCnGeneralPasToken; IsCpp: Boolean;
+  NextToken: TCnGeneralPasToken): Boolean;
 var
   I: Integer;
-  T: AnsiString;
 begin
   Result := False;
   if AToken = nil then
@@ -1033,12 +1068,29 @@ begin
   if IsCpp then
   begin
 {$IFDEF DEBUG}
-//  CnDebugger.LogFmt('Cpp check. TokenType %d, Token: %s', [Integer(AToken.CppTokenKind), AToken.Token]);
+  CnDebugger.LogFmt('Cpp check. TokenType %d, Token: %s', [Integer(AToken.CppTokenKind), AToken.Token]);
 {$ENDIF}
     if AToken.CppTokenKind in csCppCompDirectiveKinds then // 比关键字
     begin
       Result := True;
       Exit;
+    end
+    else if (NextToken <> nil) and (AToken.CppTokenKind = ctkdirpragma) then
+    begin
+      // 检查 NextToken 是否是 region 与 end_region
+      for I := Low(csCppCompDirectiveRegionTokenStr) to High(csCppCompDirectiveRegionTokenStr) do
+      begin
+        Result := StartWithIdeToken(@(csCppCompDirectiveRegionTokenStr[I][1]), NextToken.Token, True);
+
+        if Result then
+        begin
+          AToken.CompDirectiveType := csPasCompDirectiveTypes[I + CPP_PAS_REGION_TYPE_OFFSET];
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('Cpp is CompDirective. TokenType %d, Token: %s', [Integer(AToken.TokenID), AToken.Token]);
+{$ENDIF}
+          Exit;
+        end;
+      end;
     end;
   end
   else // 不区分大小写
@@ -1048,15 +1100,9 @@ begin
 {$ENDIF}
     if AToken.TokenID = tkCompDirect then // 也先比关键字
     begin
-      T := AToken.Token;
       for I := Low(csPasCompDirectiveTokenStr) to High(csPasCompDirectiveTokenStr) do
       begin
-        {$IFDEF UNICODE}
-        // Unicode 时要考虑性能问题
-        Result := StartWithIgnoreCase(@(csPasCompDirectiveTokenStr[I][1]), @T[1]);
-        {$ELSE}
-        Result := Pos(csPasCompDirectiveTokenStr[I], UpperCase(T)) = 1;
-        {$ENDIF}
+        Result := StartWithIdeToken(@(csPasCompDirectiveTokenStr[I][1]), AToken.Token);
 
         if Result then
         begin
@@ -1072,18 +1118,22 @@ begin
   Result := False;
 end;
 
-function CheckTokenMatch(const T1, T2: TCnIdeTokenString; CaseSensitive: Boolean): Boolean;
+function CheckTokenMatch(const T1, T2: PCnIdeTokenChar; CaseSensitive: Boolean): Boolean;
 begin
   if CaseSensitive then
-    Result := T1 = T2
+  begin
+{$IFDEF BDS}
+    Result := lstrcmpW(T1, T2) = 0;
+{$ELSE}
+    Result := lstrcmpA(T1, T2) = 0;
+{$ENDIF}
+  end
   else
   begin
-    // TCnIdeTokenString 在 BDS 以上是 Wide 的，567 是 Ansi
 {$IFDEF BDS}
-    // Wide 时直接调用 API 比较以避免生成临时字符串而影响性能
-    Result := lstrcmpiW(@T1[1], @T2[1]) = 0;
+    Result := lstrcmpiW(T1, T2) = 0;
 {$ELSE}
-    Result := lstrcmpiA(@T1[1], @T2[1]) = 0;
+    Result := lstrcmpiA(T1, T2) = 0;
 {$ENDIF}
   end;
 end;
@@ -1781,7 +1831,7 @@ begin
         begin
           AToken := PasParser.Tokens[I];
           if (AToken.TokenID = tkIdentifier) and // 此处判断支持双字节字符
-            CheckTokenMatch(AToken.Token, FCurrentTokenName, CaseSensitive) then
+            CheckTokenMatch(AToken.Token, PCnIdeTokenChar(FCurrentTokenName), CaseSensitive) then
           begin
             ConvertGeneralTokenPos(Pointer(EditView), AToken);
 
@@ -1831,7 +1881,7 @@ begin
       begin
         AToken := CppParser.Tokens[I];
         if (AToken.CppTokenKind = ctkIdentifier) and
-          CheckTokenMatch(AToken.Token, FCurrentTokenName, CaseSensitive) then
+          CheckTokenMatch(AToken.Token, PCnIdeTokenChar(FCurrentTokenName), CaseSensitive) then
         begin
           ConvertGeneralTokenPos(Pointer(EditView), AToken);
 
@@ -1879,6 +1929,7 @@ procedure TCnBlockMatchInfo.UpdateCompDirectiveList;
 var
   EditView: IOTAEditView;
   I: Integer;
+  NextToken: TCnGeneralPasToken;
 begin
   if FControl = nil then Exit;
 
@@ -1921,7 +1972,12 @@ begin
     // 将解析出的条件编译的 Token 按范围规定加入 FCompDirectiveTokenList
     for I := 0 to CppParser.Count - 1 do
     begin
-      if not CheckIsCompDirectiveToken(CppParser.Tokens[I], FIsCppSource) then
+      if I = CppParser.Count - 1 then
+        NextToken := nil
+      else
+        NextToken := CppParser.Tokens[I + 1];
+
+      if not CheckIsCompDirectiveToken(CppParser.Tokens[I], FIsCppSource, NextToken) then
         Continue;
 
       ConvertGeneralTokenPos(Pointer(EditView), CppParser.Tokens[I]);
@@ -2157,7 +2213,8 @@ begin
 {$IFDEF DEBUG}
 //      CnDebugger.LogFmt('CompDirectiveInfo Check CompDirectivtType: %d', [Ord(CToken.CppTokenKind)]);
 {$ENDIF}
-        if CToken.CppTokenKind in [ctkdirif, ctkdirifdef, ctkdirifndef] then
+        if (CToken.CppTokenKind in [ctkdirif, ctkdirifdef, ctkdirifndef])
+          or (CToken.CompDirectiveType = ctRegion) then
         begin
           Pair := TCnCompDirectivePair.Create;
           Pair.StartToken := CToken;
@@ -2166,7 +2223,10 @@ begin
           Pair.Left := CToken.EditCol;
           Pair.Layer := CToken.ItemLayer - 1;
 
-          FStack.Push(Pair);
+          if CToken.CompDirectiveType <> ctRegion then
+            FStack.Push(Pair)
+          else
+            FRegionStack.Push(Pair);
         end
         else if CToken.CppTokenKind in [ctkdirelse, ctkdirelif] then
         begin
@@ -2177,20 +2237,32 @@ begin
               Pair.AddMidToken(CToken, CToken.EditCol);
           end;
         end
-        else if CToken.CppTokenKind = ctkdirendif then
+        else if (CToken.CppTokenKind = ctkdirendif) or (CToken.CompDirectiveType = ctEndRegion) then
         begin
-          if FStack.Count = 0 then
-            Continue;
+          Pair := nil;
+          if CToken.CompDirectiveType = ctEndRegion then
+          begin
+            if FRegionStack.Count = 0 then
+              Continue;
+            Pair := TCnCompDirectivePair(FRegionStack.Pop);
+          end
+          else
+          begin
+            if FStack.Count = 0 then
+              Continue;
+            Pair := TCnCompDirectivePair(FStack.Pop);
+          end;
 
-          Pair := TCnCompDirectivePair(FStack.Pop);
+          if Pair <> nil then
+          begin
+            Pair.EndToken := CToken;
+            Pair.EndLeft := CToken.EditCol;
+            if Pair.Left > CToken.EditCol then // Left 取两者间较小的
+              Pair.Left := CToken.EditCol;
+            Pair.Bottom := CToken.EditLine;
 
-          Pair.EndToken := CToken;
-          Pair.EndLeft := CToken.EditCol;
-          if Pair.Left > CToken.EditCol then // Left 取两者间较小的
-            Pair.Left := CToken.EditCol;
-          Pair.Bottom := CToken.EditLine;
-
-          CompDirectiveInfo.AddPair(Pair);
+            CompDirectiveInfo.AddPair(Pair);
+          end;
         end;
       end;
       CompDirectiveInfo.ConvertLineList;
