@@ -1068,7 +1068,7 @@ begin
   if IsCpp then
   begin
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('Cpp check. TokenType %d, Token: %s', [Integer(AToken.CppTokenKind), AToken.Token]);
+//  CnDebugger.LogFmt('Cpp check. TokenType %d, Token: %s', [Integer(AToken.CppTokenKind), AToken.Token]);
 {$ENDIF}
     if AToken.CppTokenKind in csCppCompDirectiveKinds then // ±È¹Ø¼ü×Ö
     begin
@@ -1086,7 +1086,7 @@ begin
         begin
           AToken.CompDirectiveType := csPasCompDirectiveTypes[I + CPP_PAS_REGION_TYPE_OFFSET];
 {$IFDEF DEBUG}
-        CnDebugger.LogFmt('Cpp is CompDirective. TokenType %d, Token: %s', [Integer(AToken.TokenID), AToken.Token]);
+//        CnDebugger.LogFmt('Cpp is CompDirective. TokenType %d, Token: %s', [Integer(AToken.CppTokenKind), AToken.Token]);
 {$ENDIF}
           Exit;
         end;

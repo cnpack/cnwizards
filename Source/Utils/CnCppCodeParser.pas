@@ -313,7 +313,7 @@ var
     end;
   end;
 
-  // 碰到<>时往回越过
+  // 碰到 <> 时往回越过
   procedure SkipTemplateArgs;
   var
     TemplateCount: Integer;
@@ -392,7 +392,7 @@ begin
               else if Layer = 2 then
                 Brace2Stack.Push(Token);
             end
-            else // 一旦在光标后了，就可以判断Start了
+            else // 一旦在光标后了，就可以判断 Start 了
             begin
               if (FInnerBlockStartToken = nil) and (BraceStack.Count > 0) then
                 FInnerBlockStartToken := TCnCppToken(BraceStack.Pop);
@@ -449,7 +449,7 @@ begin
             NewToken;
           end;
         ctkdirif, ctkdirifdef, // Need these for conditional compile directive
-        ctkdirifndef, ctkdirelif, ctkdirelse, ctkdirendif:
+        ctkdirifndef, ctkdirelif, ctkdirelse, ctkdirendif, ctkdirpragma:
           begin
             NewToken;
           end;
