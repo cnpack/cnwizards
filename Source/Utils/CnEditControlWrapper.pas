@@ -74,11 +74,11 @@ type
     TopLine: Integer;         // 顶行号
     LinesInWindow: Integer;   // 窗口显示行数
     LineCount: Integer;       // 代码缓冲区总行数
-    CaretX: Integer;          // 光标X位置
-    CaretY: Integer;          // 光标Y位置
+    CaretX: Integer;          // 光标 X 位置
+    CaretY: Integer;          // 光标 Y 位置
     CharXIndex: Integer;      // 字符序号
 {$IFDEF BDS}
-    LineDigit: Integer;       // 编辑器总行数的位数，如100行为3, 计算而来
+    LineDigit: Integer;       // 编辑器总行数的位数，如 100 行为 3, 计算而来
 {$ENDIF}
   end;
 
@@ -94,7 +94,7 @@ type
     ctModified,               // 编辑内容修改
     ctTopEditorChanged,       // 当前显示的上层编辑器变更
 {$IFDEF BDS}
-    ctLineDigit,              // 编辑器总行数位数变化，如99到100
+    ctLineDigit,              // 编辑器总行数位数变化，如 99 到 100
 {$ENDIF}
     ctElided,                 // 编辑器行折叠，有限支持
     ctUnElided,               // 编辑器行展开，有限支持
@@ -119,7 +119,7 @@ type
     BlockEndingRow: Integer;
     EditView: Pointer;
 {$IFDEF BDS}
-    LineDigit: Integer;       // 编辑器总行数的位数，如100行为3, 计算而来
+    LineDigit: Integer;       // 编辑器总行数的位数，如 100 行为 3, 计算而来
 {$ENDIF}
   end;
 
@@ -251,7 +251,7 @@ type
     FMouseNotifyAvailable: Boolean;
     FPaintLineHook: TCnMethodHook;
     FSetEditViewHook: TCnMethodHook;
-
+    FCmpLines: TList;
     FMouseUpNotifiers: TList;
     FMouseDownNotifiers: TList;
     FMouseMoveNotifiers: TList;
@@ -289,7 +289,7 @@ type
     procedure UpdateEditControlList;
     procedure CheckOptionDlg;
     function GetEditorContext(Editor: TEditorObject): TEditorContext;
-    function CheckViewLines(Editor: TEditorObject; Context: TEditorContext): Boolean;
+    function CheckViewLinesElide(Editor: TEditorObject; Context: TEditorContext): Boolean;
     function CheckEditorChanges(Editor: TEditorObject): TEditorChangeTypes;
     procedure OnActiveFormChange(Sender: TObject);
     procedure AfterThemeChange(Sender: TObject);
@@ -862,6 +862,7 @@ begin
   inherited;
   FOptionChanged := True;
 
+  FCmpLines := TList.Create;
   FBeforePaintLineNotifiers := TList.Create;
   FAfterPaintLineNotifiers := TList.Create;
   FEditControlNotifiers := TList.Create;
@@ -947,6 +948,8 @@ begin
   ClearAndFreeList(FEditorChangeNotifiers);
   ClearAndFreeList(FKeyDownNotifiers);
   ClearAndFreeList(FKeyUpNotifiers);
+
+  FCmpLines.Free;
   inherited;
 end;
 
@@ -1143,61 +1146,58 @@ begin
   Result := -1;
 end;
 
-function TCnEditControlWrapper.CheckViewLines(Editor: TEditorObject;
+function TCnEditControlWrapper.CheckViewLinesElide(Editor: TEditorObject;
   Context: TEditorContext): Boolean;
 var
   I, Idx, LineCount: Integer;
-  Lines: TList;
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('TCnEditControlWrapper.CheckViewLines');
 {$ENDIF}
   Result := False;
-  Lines := TList.Create;
-  try
-    LineCount := Context.LineCount;
-    Idx := Context.TopRow;
-    Editor.FLastTop := Idx;
-    Editor.FLastBottomElided := GetLineIsElided(Editor.EditControl, LineCount);
-    for I := Context.TopRow to Context.BottomRow do
-    begin
-      Lines.Add(Pointer(Idx));
-      repeat
-        Inc(Idx);
-        if Idx > LineCount then
-          Break;
-      until not GetLineIsElided(Editor.EditControl, Idx);
+  FCmpLines.Clear;
 
+  LineCount := Context.LineCount;
+  Idx := Context.TopRow;
+  Editor.FLastTop := Idx;
+  Editor.FLastBottomElided := GetLineIsElided(Editor.EditControl, LineCount);
+  for I := Context.TopRow to Context.BottomRow do
+  begin
+    FCmpLines.Add(Pointer(Idx));
+    repeat
+      Inc(Idx);
       if Idx > LineCount then
         Break;
-    end;
+    until not GetLineIsElided(Editor.EditControl, Idx);
 
-    if Lines.Count <> Editor.FLines.Count then
-      Result := True
-    else
-    begin
-      for i := 0 to Lines.Count - 1 do
-        if Lines[i] <> Editor.FLines[i] then
-        begin
-          Result := True;
-          Break;
-        end;
-    end;
+    if Idx > LineCount then
+      Break;
+  end;
 
-    if Result then
-    begin
-      Editor.FLines.Count := Lines.Count;
-      for i := 0 to Lines.Count - 1 do
-        Editor.FLines[i] := Lines[i];
-    {$IFDEF DEBUG}
-      CnDebugger.LogMsg('Lines Changed');
-    {$ENDIF}
-    end;
+  if FCmpLines.Count <> Editor.FLines.Count then
+    Result := True
+  else
+  begin
+    for I := 0 to FCmpLines.Count - 1 do
+      if FCmpLines[I] <> Editor.FLines[I] then
+      begin
+        Result := True;
+        Break;
+      end;
+  end;
 
-    Editor.FLinesChanged := False;
-  finally
-    Lines.Free;
-  end;          
+  if Result then
+  begin
+    Editor.FLines.Count := FCmpLines.Count;
+    for I := 0 to FCmpLines.Count - 1 do
+      Editor.FLines[I] := FCmpLines[I];
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('Lines Changed');
+  {$ENDIF}
+  end;
+
+  Editor.FLinesChanged := False;
+  FCmpLines.Clear;
 end;
 
 function TCnEditControlWrapper.CheckEditorChanges(Editor: TEditorObject):
@@ -1270,7 +1270,7 @@ begin
     (Editor.FLastBottomElided <> GetLineIsElided(Editor.EditControl,
     Context.LineCount)) then
   begin
-    if CheckViewLines(Editor, Context) then
+    if CheckViewLinesElide(Editor, Context) then
       if Result * [ctWindow, ctView] = [] then
         Result := Result + [ctElided, ctUnElided];
   end;
