@@ -40,6 +40,6 @@ begin
 
   CnDebugger.LogObject(Application.MainForm);
   
-  CnDebugger.EvaluateObject(Application.MainForm);
+  CnDebugger.EvaluateControlUnderPos(Mouse.CursorPos);
 end.
  

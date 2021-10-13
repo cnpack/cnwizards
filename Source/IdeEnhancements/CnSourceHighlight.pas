@@ -3597,7 +3597,7 @@ begin
     end;
 end;
 
-// Editor 内容改变时被调用，进行语法分析
+// Editor 情况发生变化时被调用，如果内容改变，则重新进行语法分析
 procedure TCnSourceHighlight.UpdateHighlight(Editor: TEditorObject;
   ChangeType: TEditorChangeTypes);
 var
@@ -3655,6 +3655,7 @@ begin
         FCompDirectiveList.Add(CompDirective);
       end;
     end;
+
 {$IFNDEF BDS}
     CurLine := nil;
     if FHighLightCurrentLine then
@@ -3676,6 +3677,12 @@ begin
       CurLine.CurrentLine := Editor.EditView.CursorPos.Line;
       EditorMarkLineDirty(CurLine.CurrentLine);
     end;
+{$ENDIF}
+
+{$IFDEF IDE_EDITOR_ELIDE}
+    // C/C++ 代码折叠时原始划线会莫名消失，此处强行重新解析并绘制
+    if Info.IsCppSource and (ChangeType = [ctElided, ctUnElided]) then
+      Include(ChangeType, ctModified);
 {$ENDIF}
 
     if (ChangeType * [ctView, ctModified {$IFDEF IDE_EDITOR_ELIDE}, ctElided, ctUnElided {$ENDIF}] <> []) or
