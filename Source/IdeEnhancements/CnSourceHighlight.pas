@@ -3678,7 +3678,7 @@ begin
     end;
 {$ENDIF}
 
-    if (ChangeType * [ctView, ctModified, ctElided, ctUnElided] <> []) or
+    if (ChangeType * [ctView, ctModified {$IFDEF IDE_EDITOR_ELIDE}, ctElided, ctUnElided {$ENDIF}] <> []) or
       ((FBlockHighlightRange <> brAll) and (ChangeType * [ctCurrLine, ctCurrCol] <> [])) then
     begin
       FStructureTimer.Enabled := False;
@@ -5085,7 +5085,7 @@ end;
 
 procedure TCnSourceHighlight.RepaintEditors;
 var
-  i: Integer;
+  I: Integer;
   EditControl: TControl;
   Info: TCnBlockMatchInfo;
 begin
@@ -5098,11 +5098,11 @@ begin
   end
   else
   begin
-    // 检查编辑器，可能编辑器的Info未创建
+    // 检查编辑器，可能编辑器的 Info 未创建
     ReloadIDEFonts;
-    for i := 0 to EditControlWrapper.EditorCount - 1 do
+    for I := 0 to EditControlWrapper.EditorCount - 1 do
     begin
-      EditControl := EditControlWrapper.Editors[i].EditControl;
+      EditControl := EditControlWrapper.Editors[I].EditControl;
       if IndexOfBlockMatch(EditControl) < 0 then
       begin
         Info := TCnBlockMatchInfo.Create(EditControl);

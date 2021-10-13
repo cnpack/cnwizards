@@ -96,8 +96,10 @@ type
 {$IFDEF BDS}
     ctLineDigit,              // 编辑器总行数位数变化，如 99 到 100
 {$ENDIF}
+{$IFDEF IDE_EDITOR_ELIDE}
     ctElided,                 // 编辑器行折叠，有限支持
     ctUnElided,               // 编辑器行展开，有限支持
+{$ENDIF}
     ctOptionChanged           // 编辑器设置对话框曾经打开过
     );
 
@@ -289,7 +291,8 @@ type
     procedure UpdateEditControlList;
     procedure CheckOptionDlg;
     function GetEditorContext(Editor: TEditorObject): TEditorContext;
-    function CheckViewLinesElide(Editor: TEditorObject; Context: TEditorContext): Boolean;
+    function CheckViewLinesChange(Editor: TEditorObject; Context: TEditorContext): Boolean;
+    // 检查某个 View 中的具体行号分布有无改变，包括纵向滚动、纵向伸缩、折叠等，不包括单行内改动
     function CheckEditorChanges(Editor: TEditorObject): TEditorChangeTypes;
     procedure OnActiveFormChange(Sender: TObject);
     procedure AfterThemeChange(Sender: TObject);
@@ -312,8 +315,10 @@ type
   protected
     procedure DoAfterPaintLine(Editor: TEditorObject; LineNum, LogicLineNum: Integer);
     procedure DoBeforePaintLine(Editor: TEditorObject; LineNum, LogicLineNum: Integer);
+{$IFDEF IDE_EDITOR_ELIDE}
     procedure DoAfterElide(EditControl: TControl);   // 暂不支持
     procedure DoAfterUnElide(EditControl: TControl); // 暂不支持
+{$ENDIF}
     procedure DoEditControlNotify(EditControl: TControl; Operation: TOperation);
     procedure DoEditorChange(Editor: TEditorObject; ChangeType: TEditorChangeTypes);
 
@@ -1146,13 +1151,13 @@ begin
   Result := -1;
 end;
 
-function TCnEditControlWrapper.CheckViewLinesElide(Editor: TEditorObject;
+function TCnEditControlWrapper.CheckViewLinesChange(Editor: TEditorObject;
   Context: TEditorContext): Boolean;
 var
   I, Idx, LineCount: Integer;
 begin
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('TCnEditControlWrapper.CheckViewLines');
+  CnDebugger.LogMsg('TCnEditControlWrapper.CheckViewLinesChange');
 {$ENDIF}
   Result := False;
   FCmpLines.Clear;
@@ -1250,12 +1255,16 @@ begin
   if (Context.TopRow <> OldContext.TopRow) or
     (Context.BottomRow <> OldContext.BottomRow) then
     Include(Result, ctWindow);
+
   if (Context.LeftColumn <> OldContext.LeftColumn) then
     Include(Result, ctHScroll);
+
   if Context.CurPos.Line <> OldContext.CurPos.Line then
     Include(Result, ctCurrLine);
+
   if Context.CurPos.Col <> OldContext.CurPos.Col then
     Include(Result, ctCurrCol);
+
   if (Context.BlockValid <> OldContext.BlockValid) or
     (Context.BlockSize <> OldContext.BlockSize) or
     (Context.BlockStartingColumn <> OldContext.BlockStartingColumn) or
@@ -1263,17 +1272,21 @@ begin
     (Context.BlockEndingColumn <> OldContext.BlockEndingColumn) or
     (Context.BlockEndingRow <> OldContext.BlockEndingRow) then
     Include(Result, ctBlock);
+
   if Context.EditView <> OldContext.EditView then
     Include(Result, ctView);
 
+{$IFDEF IDE_EDITOR_ELIDE}
   if Editor.FLinesChanged or (Result * [ctWindow, ctView] <> []) or
     (Editor.FLastBottomElided <> GetLineIsElided(Editor.EditControl,
     Context.LineCount)) then
   begin
-    if CheckViewLinesElide(Editor, Context) then
+    // 如果首尾行分布发生变化，又不是因为 Window 改变或 View 改变，则认为折叠改变了
+    if CheckViewLinesChange(Editor, Context) then
       if Result * [ctWindow, ctView] = [] then
         Result := Result + [ctElided, ctUnElided];
   end;
+{$ENDIF}
 
 {$IFDEF BDS}
   if Context.LineDigit <> OldContext.LineDigit then
@@ -2343,6 +2356,8 @@ begin
   end;
 end;
 
+{$IFDEF IDE_EDITOR_ELIDE}
+
 procedure TCnEditControlWrapper.DoAfterElide(EditControl: TControl);
 var
   I: Integer;
@@ -2360,6 +2375,8 @@ begin
   if I >= 0 then
     DoEditorChange(Editors[I], [ctUnElided]);
 end;
+
+{$ENDIF}
 
 //------------------------------------------------------------------------------
 // 编辑器控件通知
