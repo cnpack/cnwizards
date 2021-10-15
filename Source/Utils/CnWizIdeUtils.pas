@@ -242,7 +242,8 @@ function IdeGetBlockIndent: Integer;
 {* 获得当前编辑器块缩进宽度 }
 
 function IdeGetSourceByFileName(const FileName: string): string;
-{* 根据文件名取得内容。如果文件在 IDE 中打开，返回编辑器中的内容，否则返回文件内容。}
+{* 根据文件名取得内容。如果文件在 IDE 中打开，返回编辑器中的内容，否则返回文件内容。
+  内容应该是无 BOM 头的 Ansi/Ansi/Utf16}
 
 function IdeSetSourceByFileName(const FileName: string; Source: TStrings;
   OpenInIde: Boolean): Boolean;
@@ -998,8 +999,13 @@ begin
   Strm := TMemoryStream.Create;
   try
     EditFilerSaveFileToStream(FileName, Strm, True);
+{$IFDEF UNICODE}
+    // 得到 UnicodeString 内容，转成 string
+    Result := string(PChar(Strm.Memory));
+{$ELSE}
     // 得到 AnsiString 内容，转成 string
     Result := string(PAnsiChar(Strm.Memory));
+{$ENDIF}
   finally
     Strm.Free;
   end;

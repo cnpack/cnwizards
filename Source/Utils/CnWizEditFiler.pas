@@ -120,7 +120,7 @@ type
 procedure EditFilerSaveFileToStream(const FileName: string; Stream: TStream; CheckUtf8: Boolean = False);
 {* 封装的用 Filer 读出文件内容至流，流中均为无 BOM 的原始格式，尾部 #0。
   原始格式：BDS 里，当 CheckUtf8 是 True 并且是 MemoryStream 时，Utf8 会转换成 Ansi，否则保持 Utf8
-  D5/6/7 中只支持 Ansi}
+  Unicode 环境下会忽略 CheckUtf8，D5/6/7 中只支持 Ansi}
 
 procedure EditFilerReadStreamToFile(const FileName: string; Stream: TStream; CheckUtf8: Boolean = False);
 {* 封装的用流写入 Filer 的文件内容，要求流中无 BOM，尾部无需 #0。
@@ -139,7 +139,11 @@ procedure EditFilerSaveFileToStream(const FileName: string; Stream: TStream; Che
 begin
   with TCnEditFiler.Create(FileName) do
   try
+{$IFDEF UNICODE}
+    SaveToStreamW(Stream);
+{$ELSE}
     SaveToStream(Stream, CheckUtf8);
+{$ENDIF}
   finally
     Free;
   end;
