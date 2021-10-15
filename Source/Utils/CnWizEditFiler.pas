@@ -130,9 +130,9 @@ procedure EditFilerReadStreamToFile(const FileName: string; Stream: TStream; Che
 implementation
 
 uses
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebug,
-{$ENDIF Debug}
+{$ENDIF}
   CnWizUtils;
 
 procedure EditFilerSaveFileToStream(const FileName: string; Stream: TStream; CheckUtf8: Boolean);

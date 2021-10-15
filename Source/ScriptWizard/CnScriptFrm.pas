@@ -219,7 +219,6 @@ type
     procedure btnClearClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
   private
-    { Private declarations }
     FDemoFiles: TStrings;
     FEngineList: TObjectList;
     procedure DemoFindCallBack(const FileName: string; const Info: TSearchRec;
@@ -240,7 +239,6 @@ type
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
     procedure OnReadln(const Prompt: string; var Text: string);
     procedure OnWriteln(const Text: string);
     function CreateEngine: TCnScriptExec;
@@ -714,7 +712,7 @@ var
   Engine: TCnScriptExec;
   ScriptText: string;
   NeedCompile: Boolean;
-  i: Integer;
+  I: Integer;
 
   procedure AddLog(const Msg: string; ManualOnly: Boolean = True);
   begin
@@ -723,26 +721,30 @@ var
   end;
 begin
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('Exec Script: %s', [AFileName]);
-  CnDebugger.LogObject(AScriptEvent);
+  CnDebugger.LogFmt('Exec Script: %s with Event: %s', [AFileName, AScriptEvent.ClassName]);
 {$ENDIF}
   if AScriptEvent.Mode = smManual then
     mmoOut.Lines.Clear;
 
   Engine := nil;
-  for i := 0 to FEngineList.Count - 1 do
+  for I := 0 to FEngineList.Count - 1 do
   begin
-    if SameFileName(TCnScriptExec(FEngineList[i]).ScripFile, AFileName) then
+    if SameFileName(TCnScriptExec(FEngineList[I]).ScripFile, AFileName) then
     begin
-      Engine := TCnScriptExec(FEngineList[i]);
+      Engine := TCnScriptExec(FEngineList[I]);
       Break;
     end;
   end;
 
   if Engine = nil then
   begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('No Script Engine for this File. Create it.');
+{$ENDIF}
+
     Engine := CreateEngine;
     Engine.Engine.Script.Text := string(IdeGetSourceByFileName(AFileName));
+
     Engine.ScripFile := AFileName;
     FEngineList.Add(Engine);
     NeedCompile := True;
@@ -758,7 +760,7 @@ begin
     finally
       Free;
     end;
-    
+
     if (Engine.Engine.Script.Text = '') or
       not AnsiSameStr(ScriptText, Engine.Engine.Script.Text) then
     begin
@@ -771,6 +773,10 @@ begin
 
   if NeedCompile then
   begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('Exec Script Need Compile.');
+{$ENDIF}
+
     AddLog(SCnScriptCompiling);
     try
       CompileSucc := Engine.Engine.Compile;
@@ -784,16 +790,22 @@ begin
 
     if CompileSucc then
     begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('Exec Script Compile Success.');
+{$ENDIF}
       if AScriptEvent.Mode = smManual then
         OutputMessages(Engine, AFileName);
       AddLog(SCnScriptCompiledSucc);
     end
     else
     begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('Exec Script Compile Fail.');
+{$ENDIF}
       Engine.Engine.Script.Clear;
       IdeDockManager.ShowForm(CnScriptForm);
-      if AScriptEvent.Mode = smManual then
-        OutputMessages(Engine, AFileName);
+      // if AScriptEvent.Mode = smManual then
+      OutputMessages(Engine, AFileName); // 其他模式也输出错误信息
       AddLog(SCnScriptCompilingFailed);
       Exit;
     end;
