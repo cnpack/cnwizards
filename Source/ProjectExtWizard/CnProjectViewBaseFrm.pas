@@ -190,6 +190,7 @@ type
     FNoArrow: TBitmap;
 {$IFNDEF STAND_ALONE}
     FListViewWidthStr: string;
+    FListViewWidthOldStr: string;
 {$ENDIF}
     function GetMatchAny: Boolean;
     procedure SetMatchAny(const Value: Boolean);
@@ -676,8 +677,11 @@ begin
     Height := ReadInteger(aSection, csHeight, Height);
 {$IFNDEF STAND_ALONE}
     CenterForm(Self);
+    if FListViewWidthOldStr = '' then // 保留旧宽度供判断是否改变过
+      FListViewWidthOldStr := GetListViewWidthString(lvList, GetFactorFromSizeEnlarge(Enlarge));
     FListViewWidthStr := ReadString(aSection, csListViewWidth, '');
-    SetListViewWidthString(lvList, FListViewWidthStr, GetFactorFromSizeEnlarge(Enlarge));
+    if FListViewWidthStr <> '' then
+      SetListViewWidthString(lvList, FListViewWidthStr, GetFactorFromSizeEnlarge(Enlarge));
 {$ENDIF}
   finally
     Free;
@@ -688,6 +692,10 @@ begin
 end;
 
 procedure TCnProjectViewBaseForm.SaveSettings(Ini: TCustomIniFile; aSection: string);
+{$IFNDEF STAND_ALONE}
+var
+  S: string;
+{$ENDIF}
 begin
   with TCnIniFile.Create(Ini) do
   try
@@ -705,8 +713,9 @@ begin
     WriteInteger(aSection, csWidth, Width);
     WriteInteger(aSection, csHeight, Height);
 {$IFNDEF STAND_ALONE}
-    WriteString(aSection, csListViewWidth,
-      GetListViewWidthString(lvList, GetFactorFromSizeEnlarge(Enlarge)));
+    S := GetListViewWidthString(lvList, GetFactorFromSizeEnlarge(Enlarge));
+    if S <> FListViewWidthOldStr then // 只变化了才保存
+      WriteString(aSection, csListViewWidth, S);
 {$ENDIF}
   finally
     Free;
