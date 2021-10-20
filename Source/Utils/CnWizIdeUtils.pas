@@ -661,6 +661,12 @@ procedure DisableWaitDialogShow;
 procedure EnableWaitDialogShow;
 {* 以解除 Hook 方式启用 WaitDialog}
 
+function IdeGetScaledPixelsFromOrigin(APixels: Integer; AControl: TControl): Integer;
+{* IDE 中根据 DPI 与缩放设置，计算原始像素数的真实所需像素数用于绘制
+  支持 Windows 中的缩放比，支持 IDE 运行在 DPI Ware/Unware 下
+  也就是说：Windows 缩放比是 100% 也就是原始大小时，无论 IDE 运行模式如何都返回原始数据
+  缩放比不为 100% 时，DPI Ware 才返回 APixels * HDPI 比例，Unware 无论啥设置仍返回原始数据}
+
 implementation
 
 uses
@@ -3356,6 +3362,20 @@ begin
 
   if FWaitDialogHook <> nil then
     FWaitDialogHook.UnhookMethod;
+{$ENDIF}
+end;
+
+function IdeGetScaledPixelsFromOrigin(APixels: Integer; AControl: TControl): Integer;
+begin
+{$IFDEF IDE_SUPPORT_HDPI}
+  if AControl = nil then
+    Result := APixels
+  else
+  begin
+    Result := MulDiv(APixels, AControl.CurrentPPI, Windows.USER_DEFAULT_SCREEN_DPI);
+  end;
+{$ELSE}
+  Result := APixels; // IDE 不支持 HDPI 时原封不动地返回，交给 OS 处理
 {$ENDIF}
 end;
 

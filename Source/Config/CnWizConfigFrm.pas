@@ -206,6 +206,9 @@ const
 
   csLastSelectedItem = 'LastSelectedItem';
 
+  CN_ITEM_DRAW_HEIGHT = 12;
+  CN_ITEM_ICON_WIDTH = 42;
+
 type
   TCnActionWizardHack = class(TCnActionWizard);
 
@@ -288,7 +291,7 @@ begin
   cbUpgradeReleaseOnly.Checked := WizOptions.UpgradeReleaseOnly;
 
   //自画高度调整
-  FDrawTextHeight := 12;
+  FDrawTextHeight := IdeGetScaledPixelsFromOrigin(CN_ITEM_DRAW_HEIGHT, lbWizards);
   if Enlarged then
   begin
     FDrawTextHeight := Round(FDrawTextHeight * GetFactorFromSizeEnlarge(Enlarge));
@@ -472,7 +475,7 @@ begin
     if Wizard.Icon <> nil then
       Canvas.Draw(R.Left + 4, R.Top + (R.Bottom - R.Top - Wizard.Icon.Height) div 2, Wizard.Icon);
 
-    x := R.Left + 42;
+    x := R.Left + IdeGetScaledPixelsFromOrigin(CN_ITEM_ICON_WIDTH, Control);
     y := R.Top + 2;
     Canvas.TextOut(x, y, SCnWizardNameStr + Wizard.WizardName);
     Inc(y, FDrawTextHeight + 2);
