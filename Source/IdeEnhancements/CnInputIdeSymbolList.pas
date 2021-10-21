@@ -830,36 +830,35 @@ end;
 function ParseProjectBegin(var FileName: AnsiString; var X, Y: Integer): Boolean;
 var
   Stream: TMemoryStream;
-  Source: AnsiString;
-  Lex: TmwPasLex;
+  Lex: TCnGeneralPasLex;
 begin
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogMsg('ParseProjectBegin');
 {$ENDIF}
 
   Result := False;
   FileName := CnOtaGetCurrentProjectFileName;
-  Stream := TMemoryStream.Create;
-  try
-    EditFilerSaveFileToStream(FileName, Stream, False);
-    Source := PAnsiChar(Stream.Memory);
-  finally
-    Stream.Free;
-  end;
+  Stream := nil;
+  Lex := nil;
 
-{$IFDEF Debug}
-  CnDebugger.LogMsg(FileName + #13#10 + Source);
-{$ENDIF}
-  Lex := TmwPasLex.Create;
   try
-    Lex.Origin := PAnsiChar(Source);
+    Stream := TMemoryStream.Create;
+    EditFilerSaveFileToStream(FileName, Stream, False);
+
+    Lex := TCnGeneralPasLex.Create;
+    Lex.Origin := PChar(Stream.Memory);
+
     while Lex.TokenID <> tkNull do
     begin
       if Lex.TokenID = tkBegin then
       begin
         Lex.Next;
         X := 0;
+{$IFDEF UNICODE}
+        Y := Lex.LineNumber; // Wide 的 Lex 的行号本来就从 1 开始
+{$ELSE}
         Y := Lex.LineNumber + 1;
+{$ENDIF}
         Result := True;
         Break;
       end;
@@ -867,6 +866,7 @@ begin
     end;
   finally
     Lex.Free;
+    Stream.Free;
   end;
 end;
 
@@ -876,7 +876,7 @@ var
   FileName: AnsiString;
   X, Y: Integer;
 begin
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogMsg('CreateKibitzThread');
 {$ENDIF}
   if not SupportKibitzCompileThread or not UseKibitzCompileThread or KibitzCompileThreadRunning then
@@ -884,7 +884,7 @@ begin
 
   if ParseProjectBegin(FileName, X, Y) then
   begin
-  {$IFDEF Debug}
+  {$IFDEF DEBUG}
     CnDebugger.LogFmt('FileName: %s X: %d Y: %d', [FileName, X, Y]);
   {$ENDIF}
   

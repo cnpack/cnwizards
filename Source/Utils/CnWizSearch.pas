@@ -672,7 +672,7 @@ end;
 function CheckFileCRLF(const FileName: string; out CRLFCount, LFCount: Integer): Boolean;
 var
   Stream: TMemoryStream;
-  P, PP: PByte;
+  P, PP: PChar;
 begin
   Result := False;
   Stream := nil;
@@ -680,29 +680,29 @@ begin
   try
     try
       Stream := TMemoryStream.Create;
-      EditFilerSaveFileToStream(FileName, Stream); // 读出原始格式，Ansi 或 Utf8
+      EditFilerSaveFileToStream(FileName, Stream, True); // 读出原始格式，Ansi/Ansi/Utf16
 
       if Stream.Size = 0 then
         Exit;
 
       CRLFCount := 0;
       LFCount := 0;
-      if Stream.Size = 1 then
+      if Stream.Size = SizeOf(Char) then
       begin
-        if PByte(Stream.Memory)^ = $0A then
+        if PChar(Stream.Memory)^ = #$0A then
           Inc(LFCount);
       end
       else
       begin
-        PP := PByte(Stream.Memory);
+        PP := PChar(Stream.Memory);
         P := PP;
         Inc(P);
 
-        while P^ <> 0 do
+        while P^ <> #0 do
         begin
-          if P^ = $0A then
+          if P^ = #$0A then
           begin
-            if PP^ = $0D then
+            if PP^ = #$0D then
               Inc(CRLFCount)
             else
               Inc(LFCount)
@@ -723,8 +723,11 @@ end;
 function CorrectFileCRLF(const FileName: string; out CorrectCount: Integer): Boolean;
 var
   SourceStream, DestStream: TMemoryStream;
-  P, PP: PByte;
-  CCR, CLF: AnsiChar;
+  P, PP: PChar;
+  CCR, CLF, CZ: AnsiChar;
+{$IFDEF UNICODE}
+  Text: AnsiString;
+{$ENDIF}
 begin
   Result := False;
   SourceStream := nil;
@@ -733,7 +736,7 @@ begin
   try
     try
       SourceStream := TMemoryStream.Create;
-      EditFilerSaveFileToStream(FileName, SourceStream, True); // 读出原始格式，Ansi
+      EditFilerSaveFileToStream(FileName, SourceStream, True); // 读出 Ansi/Ansi/Utf16
 
       if SourceStream.Size = 0 then
         Exit;
@@ -742,40 +745,59 @@ begin
       CorrectCount := 0;
       CCR := #$0D;
       CLF := #$0A;
+      CZ := #0;
 
-      if SourceStream.Size = 1 then
+      if SourceStream.Size = SizeOf(Char) then
       begin
-        if PByte(SourceStream.Memory)^ = $0A then
+        if PChar(SourceStream.Memory)^ = #$0A then
         begin
           DestStream.Write(CCR, 1);
+{$IFDEF UNICODE}
+          DestStream.Write(CZ, 1);
+{$ENDIF}
           DestStream.Write(CLF, 1);
+{$IFDEF UNICODE}
+          DestStream.Write(CZ, 1);
+{$ENDIF}
         end;
       end
       else
       begin
-        PP := PByte(SourceStream.Memory);
+        PP := PChar(SourceStream.Memory);
         P := PP;
         Inc(P);
-        DestStream.Write(PP^, 1);
+        DestStream.Write(PP^, SizeOf(Char));
 
-        while P^ <> 0 do
+        while P^ <> #0 do
         begin
-          if P^ = $0A then
+          if P^ = #$0A then
           begin
-            if PP^ <> $0D then
+            if PP^ <> #$0D then
             begin
               DestStream.Write(CCR, 1);
+{$IFDEF UNICODE}
+              DestStream.Write(CZ, 1);
+{$ENDIF}
               Inc(CorrectCount);
             end;
           end;
-          DestStream.Write(P^, 1);
+          DestStream.Write(P^, SizeOf(Char));
           Inc(P);
           Inc(PP);
         end;
       end;
 
-      if CorrectCount > 0 then
+      if CorrectCount > 0 then  // 需要 Ansi/Ansi/Utf8
+      begin
+{$IFDEF UNICODE}
+        // DestStream 里做一次 Utf16 到 Utf8 的转换
+        Text := Utf8Encode(PChar(DestStream.Memory));
+        DestStream.Size := Length(Text) + 1;
+        DestStream.Position := 0;
+        DestStream.Write(PAnsiChar(Text)^, Length(Text) + 1);
+{$ENDIF}
         EditFilerReadStreamToFile(FileName, DestStream, True); // 写原始格式
+      end;
       Result := True;
     except
       ;

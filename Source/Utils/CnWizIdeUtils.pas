@@ -1004,14 +1004,9 @@ var
 begin
   Strm := TMemoryStream.Create;
   try
-    EditFilerSaveFileToStream(FileName, Strm, True);
-{$IFDEF UNICODE}
-    // 得到 UnicodeString 内容，转成 string
+    EditFilerSaveFileToStream(FileName, Strm, True); // Ansi/Ansi/Utf16
+    // 得到 Ansi/Ansi/Utf16 内容，对应直接转成 string
     Result := string(PChar(Strm.Memory));
-{$ELSE}
-    // 得到 AnsiString 内容，转成 string
-    Result := string(PAnsiChar(Strm.Memory));
-{$ENDIF}
   finally
     Strm.Free;
   end;

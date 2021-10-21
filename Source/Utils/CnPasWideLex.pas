@@ -350,7 +350,7 @@ type
     property LastNoSpaceCRLFPos: Integer read FLastNoSpaceCRLFPos;
     {* 上一个非 Space 与回车换行的 Token 的位置}
     property LineNumber: Integer read FLineNumber write FLineNumber;
-    {* 当前行号，从 1 开始}
+    {* 当前行号，从 1 开始。注意！这里和 TmwPasLex 的 0 开始不一样！}
     property ColumnNumber: Integer read FColumnNumber write FColumnNumber;
     {* 当前直观列号，从 1 开始，类似于 Ansi，不展开 Tab}
     property WideColumnNumber: Integer read GetWideColumnNumber;

@@ -118,6 +118,12 @@ type
   TCnGeneralCppStructParser = TCnCppStructureParser;
 {$ENDIF}
 
+{$IFDEF UNICODE}
+  TCnGeneralPasLex = TCnPasWideLex; // 2005~2007 œ¬»‘”√ TmwPasLex
+{$ELSE}
+  TCnGeneralPasLex = TmwPasLex;
+{$ENDIF}
+
   TCnBookmarkObject = class
   private
     FLine: Integer;
@@ -7768,7 +7774,11 @@ begin
   Stream := TMemoryStream.Create;
   try
     EditFilerSaveFileToStream(FileName, Stream);
+{$IFDEF UNICODE}
+    ParseUnitUsesW(PChar(Stream.Memory), UsesList);
+{$ELSE}
     ParseUnitUses(PAnsiChar(Stream.Memory), UsesList);
+{$ENDIF}
   finally
     Stream.Free;
   end;

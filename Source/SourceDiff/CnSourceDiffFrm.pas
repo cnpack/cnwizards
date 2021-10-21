@@ -654,8 +654,8 @@ begin
     begin                               // ±à¼­Æ÷»º³åÇø
       Stream := TMemoryStream.Create;
       try
-        EditFilerSaveFileToStream(FileName, Stream, True);
-        Lines1.Text := string(PAnsiChar(Stream.Memory));
+        EditFilerSaveFileToStream(FileName, Stream, True); // Ansi/Ansi/Utf16
+        Lines1.Text := string(PChar(Stream.Memory));
       finally
         Stream.Free;
       end;
@@ -673,8 +673,8 @@ begin
     begin                               // ±à¼­Æ÷»º³åÇø
       Stream := TMemoryStream.Create;
       try
-        EditFilerSaveFileToStream(FileName, Stream, True);
-        Lines2.Text := string(PAnsiChar(Stream.Memory));
+        EditFilerSaveFileToStream(FileName, Stream, True); // Ansi/Ansi/Utf16
+        Lines2.Text := string(PChar(Stream.Memory));
       finally
         Stream.Free;
       end;

@@ -41,7 +41,8 @@ interface
 
 uses
   Windows, Classes, SysUtils, Contnrs, DCURecs, DCU32, DCU_Out
-  {$IFNDEF STAND_ALONE}, ToolsAPI, CnWizUtils, CnPasCodeParser, CnCommon,
+  {$IFNDEF STAND_ALONE}, ToolsAPI, CnWizUtils, CnPasCodeParser
+  {$IFDEF UNICODE}, CnWidePasParser {$ENDIF}, CnCommon,
   CnWizConsts {$ENDIF};
 
 type
@@ -315,8 +316,12 @@ begin
       try
         Stream := TMemoryStream.Create;
         try
-          EditFilerSaveFileToStream(FSourceFileName, Stream);
+          EditFilerSaveFileToStream(FSourceFileName, Stream, True);
+{$IFDEF UNICODE}
+          ParseUnitUsesW(PChar(Stream.Memory), UsesList);
+{$ELSE}
           ParseUnitUses(PAnsiChar(Stream.Memory), UsesList);
+{$ENDIF}
         finally
           Stream.Free;
         end;
