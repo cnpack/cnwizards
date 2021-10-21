@@ -129,9 +129,7 @@ type
   private
     FLines: TList;
     FLastTop: Integer;
-{$IFDEF IDE_EDITOR_ELIDE}
     FLastBottomElided: Boolean;
-{$ENDIF}
     FLinesChanged: Boolean;
     FTopControl: TControl;
     FContext: TEditorContext;
@@ -293,11 +291,9 @@ type
     procedure UpdateEditControlList;
     procedure CheckOptionDlg;
     function GetEditorContext(Editor: TEditorObject): TEditorContext;
-{$IFDEF IDE_EDITOR_ELIDE}
     function CheckViewLinesChange(Editor: TEditorObject; Context: TEditorContext): Boolean;
     // 检查某个 View 中的具体行号分布有无改变，包括纵向滚动、纵向伸缩、折叠等，不包括单行内改动
-    // 暂时只用于折叠检查，故此用条件编译括起来
-{$ENDIF}
+
     function CheckEditorChanges(Editor: TEditorObject): TEditorChangeTypes;
     procedure OnActiveFormChange(Sender: TObject);
     procedure AfterThemeChange(Sender: TObject);
@@ -1156,8 +1152,6 @@ begin
   Result := -1;
 end;
 
-{$IFDEF IDE_EDITOR_ELIDE}
-
 function TCnEditControlWrapper.CheckViewLinesChange(Editor: TEditorObject;
   Context: TEditorContext): Boolean;
 var
@@ -1211,8 +1205,6 @@ begin
   Editor.FLinesChanged := False;
   FCmpLines.Clear;
 end;
-
-{$ENDIF}
 
 function TCnEditControlWrapper.CheckEditorChanges(Editor: TEditorObject):
   TEditorChangeTypes;
@@ -1285,17 +1277,19 @@ begin
   if Context.EditView <> OldContext.EditView then
     Include(Result, ctView);
 
-{$IFDEF IDE_EDITOR_ELIDE}
   if Editor.FLinesChanged or (Result * [ctWindow, ctView] <> []) or
     (Editor.FLastBottomElided <> GetLineIsElided(Editor.EditControl,
     Context.LineCount)) then
   begin
     // 如果首尾行分布发生变化，又不是因为 Window 改变或 View 改变，则认为折叠改变了
     if CheckViewLinesChange(Editor, Context) then
+    begin
+{$IFDEF IDE_EDITOR_ELIDE}
       if Result * [ctWindow, ctView] = [] then
         Result := Result + [ctElided, ctUnElided];
-  end;
 {$ENDIF}
+    end;
+  end;
 
 {$IFDEF BDS}
   if Context.LineDigit <> OldContext.LineDigit then

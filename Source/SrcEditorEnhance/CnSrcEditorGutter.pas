@@ -348,7 +348,7 @@ begin
     if ChangeType * [ctView, ctTopEditorChanged] <> [] then
       CnWizNotifierServices.ExecuteOnApplicationIdle(UpdateStatusOnIdle)
     else if ChangeType * [ctWindow, ctCurrLine, ctFont, ctVScroll
-      {$IFDEF IDE_EDITOR_ELIDE} ,ctElided, ctUnElided {$ENDIF}] <> [] then
+      {$IFDEF IDE_EDITOR_ELIDE}, ctElided, ctUnElided {$ENDIF}] <> [] then
       Repaint;
 
     if ChangeType * [ctView, ctFont, ctOptionChanged] <> [] then
@@ -554,6 +554,7 @@ begin
         end;
       end;
 
+      // »­×ÜÐÐÊý
       if FGutterMgr.ShowLineCount then
       begin
         R := GetLineCountRect;
