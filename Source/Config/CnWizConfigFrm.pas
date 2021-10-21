@@ -33,11 +33,11 @@ unit CnWizConfigFrm;
 *           2012.11.30 V1.7
 *               去除使用 FormScaler 重新调整文字的机制
 *           2012.09.19 by shenloqi
-*               移植到Delphi XE3
+*               移植到 Delphi XE3
 *           2012.06.21 V1.5
 *               加入搜索框，允许按首字母搜索专家与属性组件编辑器
 *           2004.11.18 V1.4
-*               修正listbox自画不适合120DPI的小问题 (shenloqi)
+*               修正 listbox 自画不适合 120DPI 的小问题 (shenloqi)
 *           2003.06.25 V1.3
 *               移除 IDE 扩展设置界面 (LiuXiao)
 *           2003.05.01 V1.2
@@ -299,12 +299,9 @@ begin
     lbDesignEditors.ItemHeight := Round(lbDesignEditors.ItemHeight * GetFactorFromSizeEnlarge(Enlarge));
   end;
 
-//  if Scaled then
-//  begin
-//    FDrawTextHeight := FScaler.MultiPPI(FDrawTextHeight, Self);
-//    lbWizards.ItemHeight := FScaler.MultiPPI(lbWizards.ItemHeight, Self);
-//    lbDesignEditors.ItemHeight := FScaler.MultiPPI(lbDesignEditors.ItemHeight, Self);
-//  end;
+{$IFDEF IDE_SUPPORT_HDPI}
+  imgIcon.Stretch := True;
+{$ENDIF}
 
   chkUserDir.Checked := WizOptions.UseCustomUserDir;
   edtUserDir.Text := WizOptions.CustomUserDir;
@@ -473,7 +470,18 @@ begin
     end;
     Canvas.RoundRect(R.Left, R.Top, R.Right, R.Bottom, 8, 8);
     if Wizard.Icon <> nil then
+    begin
+{$IFDEF IDE_SUPPORT_HDPI}
+      ARect.Left := R.Left + 4;
+      ARect.Top := R.Top + (R.Bottom - R.Top - IdeGetScaledPixelsFromOrigin(Wizard.Icon.Height, lbWizards)) div 2;
+      ARect.Right := ARect.Left + IdeGetScaledPixelsFromOrigin(Wizard.Icon.Width, lbWizards);
+      ARect.Bottom := ARect.Top + IdeGetScaledPixelsFromOrigin(Wizard.Icon.Height, lbWizards);
+
+      Canvas.StretchDraw(ARect, Wizard.Icon);
+{$ELSE}
       Canvas.Draw(R.Left + 4, R.Top + (R.Bottom - R.Top - Wizard.Icon.Height) div 2, Wizard.Icon);
+{$ENDIF}
+    end;
 
     x := R.Left + IdeGetScaledPixelsFromOrigin(CN_ITEM_ICON_WIDTH, Control);
     y := R.Top + 2;

@@ -495,6 +495,9 @@ const
   csClassComboName = 'ClassCombo';
 
   CN_SPLITTER_WIDTH = 3;
+  CN_INIT_CLASSCOMBO_WIDTH = 250;
+  CN_INIT_PROCCOMBO_WIDTH = 350;
+
   csDefHistoryCount = 8;
   csDefPreviewLineCount = 4;
   csDefProcDropDownBoxFontSize = 8;
@@ -925,7 +928,7 @@ begin
     if FToolbarClassComboWidth > 50 then
       Width := FToolbarClassComboWidth
     else
-      Width := 200;
+      Width := IdeGetScaledPixelsFromOrigin(CN_INIT_CLASSCOMBO_WIDTH, Obj.ClassCombo);
     Height := 21;
     FDisableChange := True;
     Name := csClassComboName;
@@ -954,7 +957,7 @@ begin
     if FToolbarProcComboWidth > 50 then
       Width := FToolbarProcComboWidth
     else
-      Width := 300;
+      Width := IdeGetScaledPixelsFromOrigin(CN_INIT_CLASSCOMBO_WIDTH, Obj.ProcCombo);
     Height := 21;
     FDisableChange := True;
     Name := csProcComboName;
@@ -1312,6 +1315,9 @@ begin
 {$ENDIF}
 
   InitSizeIfLargeIcon(ToolBar, dmCnSharedImages.ilProcToolbarLarge);
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('ProcList: ClassCombo Font Size %d', [Obj.ClassCombo.Font.Size]);
+{$ENDIF}
   if WizOptions.UseLargeIcon then
   begin
     Obj.ClassCombo.Font.Size := csLargeComboFontSize;

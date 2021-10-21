@@ -43,7 +43,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Graphics, Classes, Controls, ExtCtrls, Forms,
-  Menus, CnPopupMenu, CnGraphics;
+  Menus, CnPopupMenu, CnGraphics, CnWizIdeUtils;
 
 type
   TFlatButtonState = (bsHide, bsNormal, bsEnter, bsDropdown);
@@ -309,10 +309,11 @@ var
   State: TFlatButtonState;
 begin
   State := GetState;
-  Width := csBorderWidths[State] * 2 + csArrowWidths[State] + csImageWidth;
+  Width := csBorderWidths[State] * 2 + csArrowWidths[State] + IdeGetScaledPixelsFromOrigin(csImageWidth, Self);
   if FShowColor and (State in [bsHide, bsNormal]) then
-    Width := Width + csColorWidth;
-  Height := csBorderWidths[State] * 2 + csImageHeight;
+    Width := Width + IdeGetScaledPixelsFromOrigin(csColorWidth, Self);
+  Height := csBorderWidths[State] * 2 + IdeGetScaledPixelsFromOrigin(csImageHeight, Self);
+
   if Visible then
     Repaint;
 end;
