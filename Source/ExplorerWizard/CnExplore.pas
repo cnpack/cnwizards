@@ -73,8 +73,9 @@ interface
 
 uses
   Forms, SysUtils, Messages, Windows, Classes, Controls, ExtCtrls, ComCtrls,
-  IniFiles, StdCtrls, Menus, ToolWin, ActnList, ImgList, CnWizIdeDock, CnShellCtrls,
-  CnWizClasses, ToolsAPI, CnConsts, CnWizConsts, CnPopupMenu;
+  IniFiles, StdCtrls, Menus, ToolWin, ActnList, ImgList,
+  {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList, Vcl.ImageCollection, {$ENDIF}
+  CnWizIdeDock, CnShellCtrls, CnWizClasses, ToolsAPI, CnConsts, CnWizConsts, CnPopupMenu;
 
 //==============================================================================
 // Explore 工具窗体
@@ -96,7 +97,6 @@ type
     stat: TStatusBar;
     btnCurrProj: TToolButton;
     spl: TSplitter;
-    pnlToolBar: TPanel;
     pnlClient: TPanel;
     shltv: TCnShellTreeView;
     shlst: TCnShellListView;
@@ -183,25 +183,28 @@ type
   private
     FWizard: TCnExplorerWizard;
 
-    FDockState: TDockState; //窗口Dock状态
-    FFileFilterKey: string; //过滤字符Key
-    FFileFilterVal: string; //过滤字符Value
-    FFileFilterList: TStringList; //文件过滤类型列表,数据处理使用
-    FDirectoryList: TStringList; //收藏文件夹列表，保存使用
-    FFileFilterMenu: TStringList; //文件过滤类型列表,菜单使用
-    FDirectoryMenu: TStringList; //收藏文件夹列表，菜单使用
-
+    FDockState: TDockState; // 窗口 Dock 状态
+    FFileFilterKey: string; // 过滤字符 Key
+    FFileFilterVal: string; // 过滤字符 Value
+    FFileFilterList: TStringList; // 文件过滤类型列表,数据处理使用
+    FDirectoryList: TStringList;  // 收藏文件夹列表，保存使用
+    FFileFilterMenu: TStringList; // 文件过滤类型列表,菜单使用
+    FDirectoryMenu: TStringList;  // 收藏文件夹列表，菜单使用
+{$IFDEF IDE_SUPPORT_HDPI}
+    FVirtualImages: TVirtualImageList;
+    FImageCollection: TImageCollection;
+{$ENDIF}
     function GetBoolean(const Index: Integer): Boolean;
     procedure SetBoolean(const Index: Integer; const Value: Boolean);
 
-    procedure ChangeListViewStyle(Index: Integer); //改变ListView的ViewStype
-    function GetListViewStyle(): Integer; //得到ListView的ViewStype
+    procedure ChangeListViewStyle(Index: Integer); // 改变 ListView 的 ViewStype
+    function GetListViewStyle(): Integer; // 得到 ListView 的 ViewStype
     function ChangeMenu(aValue: string; aStrList: TStringList): Boolean;
     procedure PopupMenu(Sender: TObject; PopMenu: TPopupMenu);
-    procedure SetFilter(aValue, aKey: string);  //设置文件过滤
-    procedure LoadFileFilterState;              //加载FileFilter菜单
-    procedure LoadFolderState;                  //加载Folder过滤菜单
-    procedure ChangeShlstSet;  //改变Shlsh的ObjectTypes设置
+    procedure SetFilter(aValue, aKey: string);  // 设置文件过滤
+    procedure LoadFileFilterState;              // 加载 FileFilter 菜单
+    procedure LoadFolderState;                  // 加载 Folder 过滤菜单
+    procedure ChangeShlstSet;  //改变 Shlsh 的 ObjectTypes 设置
   protected
     function GetHelpTopic: string; override;
   public
@@ -273,7 +276,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnCommon, CnIni, CnWizUtils, CnWizOptions, CnWizShareImages,
+  CnCommon, CnIni, CnWizUtils, CnWizIdeUtils, CnWizOptions, CnWizShareImages,
   CnExploreDirectory, CnExploreFilter;
 
 {$R *.dfm}
@@ -744,11 +747,34 @@ begin
   if CurPath <> '' then
     shltv.Path := CurPath;
 
+{$IFDEF IDE_SUPPORT_HDPI}
+  FVirtualImages := TVirtualImageList.Create(Self);
+  FImageCollection := TImageCollection.Create(Self);
+  FVirtualImages.ImageCollection := FImageCollection;
+{$ENDIF}
+
+  WizOptions.ResetToolbarWithLargeIcons(ToolBar);
   if WizOptions.UseLargeIcon then
   begin
-    pnlToolBar.Height := pnlToolBar.Height + csLargeToolbarHeightDelta;
+{$IFDEF IDE_SUPPORT_HDPI}
+    FVirtualImages.Width := IdeGetScaledPixelsFromOrigin(csLargeImageListWidth);
+    FVirtualImages.Height := IdeGetScaledPixelsFromOrigin(csLargeImageListHeight);
+    CopyImageListToVirtual(il, FVirtualImages);
+    ToolBar.Images := FVirtualImages;
+{$ELSE}
     dmCnSharedImages.StretchCopyToLarge(il, ilLarge);
     ToolBar.Images := ilLarge;
+{$ENDIF}
+  end
+  else
+  begin
+{$IFDEF IDE_SUPPORT_HDPI}
+    // 普通模式下，用适配了 HDPI 尺寸的 FVirtualImages 代替原 ImageList
+    FVirtualImages.Width := IdeGetScaledPixelsFromOrigin(iL.Width);
+    FVirtualImages.Height := IdeGetScaledPixelsFromOrigin(iL.Height);
+    CopyImageListToVirtual(il, FVirtualImages);
+    ToolBar.Images := FVirtualImages;
+{$ENDIF}
   end;
   WizOptions.ResetToolbarWithLargeIcons(ToolBar);
 end;

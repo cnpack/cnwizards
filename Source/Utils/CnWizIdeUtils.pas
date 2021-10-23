@@ -661,7 +661,7 @@ procedure DisableWaitDialogShow;
 procedure EnableWaitDialogShow;
 {* 以解除 Hook 方式启用 WaitDialog}
 
-function IdeGetScaledPixelsFromOrigin(APixels: Integer; AControl: TControl): Integer;
+function IdeGetScaledPixelsFromOrigin(APixels: Integer; AControl: TControl = nil): Integer;
 {* IDE 中根据 DPI 与缩放设置，计算原始像素数的真实所需像素数用于绘制
   支持 Windows 中的缩放比，支持 IDE 运行在 DPI Ware/Unware 下
   也就是说：Windows 缩放比是 100% 也就是原始大小时，无论 IDE 运行模式如何都返回原始数据
@@ -670,8 +670,8 @@ function IdeGetScaledPixelsFromOrigin(APixels: Integer; AControl: TControl): Int
 procedure IdeSetReverseScaledFontSize(AControl: TControl);
 {* IDE 中根据 DPI 与缩放设置，反推计算某字号的原始尺寸，以便 Scale 时恢复原始尺寸。暂不使用。}
 
-procedure IdeScaleComboFontSize(Combo: TControl);
-{* 统一根据当前 HDPI 与缩放设置等设置字号}
+procedure IdeScaleToolbarComboFontSize(Combo: TControl);
+{* 统一根据当前 HDPI 与缩放设置等设置 Toolbar 中的 Combobox 的字号}
 
 implementation
 
@@ -3371,6 +3371,9 @@ function IdeGetScaledPixelsFromOrigin(APixels: Integer; AControl: TControl): Int
 begin
 {$IFDEF IDE_SUPPORT_HDPI}
   if AControl = nil then
+    AControl := Application.MainForm;
+
+  if AControl = nil then
     Result := APixels
   else
   begin
@@ -3394,16 +3397,11 @@ begin
 {$ENDIF}
 end;
 
-procedure IdeScaleComboFontSize(Combo: TControl);
+procedure IdeScaleToolbarComboFontSize(Combo: TControl);
 begin
-{$IFDEF IDE_SUPPORT_HDPI}
-  // 高 DPI 下原始不缩放我们才缩放
-  if WizOptions.UseLargeIcon and (Combo.CurrentPPI = Windows.USER_DEFAULT_SCREEN_DPI) then
-    TControlHack(Combo).Font.Size := csLargeComboFontSize;
-{$ELSE}
+  // 高 DPI 下 Toolbar 中的 ComboBox 似乎会被自动放大，因此这里无需 IdeGetScaledPixelsFromOrigin
   if WizOptions.UseLargeIcon then
     TControlHack(Combo).Font.Size := csLargeComboFontSize;
-{$ENDIF}
 end;
 
 initialization

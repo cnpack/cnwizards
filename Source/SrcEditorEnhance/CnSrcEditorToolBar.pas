@@ -209,7 +209,7 @@ var
   {* 创建编辑器工具栏服务的入口}
 
 procedure InitSizeIfLargeIcon(Toolbar: TToolBar; LargeImageList: TImageList);
-{* 根据是否大尺寸而设置工具栏尺寸}
+{* 根据是否大尺寸而设置编辑器工具栏的尺寸，不用于其他工具栏}
 
 implementation
 
@@ -303,9 +303,9 @@ procedure InitSizeIfLargeIcon(Toolbar: TToolBar; LargeImageList: TImageList);
 begin
   if (Toolbar <> nil) and WizOptions.UseLargeIcon then
   begin
-    Toolbar.Height := csLargeToolbarHeight;
-    Toolbar.ButtonWidth := csLargeToolbarButtonWidth;
-    Toolbar.ButtonHeight := csLargeToolbarButtonHeight;
+    Toolbar.Height := IdeGetScaledPixelsFromOrigin(csLargeToolbarHeight, Toolbar);
+    Toolbar.ButtonWidth := IdeGetScaledPixelsFromOrigin(csLargeToolbarButtonWidth, Toolbar);
+    Toolbar.ButtonHeight := IdeGetScaledPixelsFromOrigin(csLargeToolbarButtonHeight, Toolbar);
     if LargeImageList <> nil then
       Toolbar.Images := LargeImageList;
 
@@ -1286,6 +1286,11 @@ begin
   AutoSize := True;
   Align := alTop;
   Images := GetIDEImageList;
+{$IFDEF IDE_SUPPORT_HDPI}
+  InitSizeIfLargeIcon(Self, TImageList(dmCnSharedImages.IDELargeVirtualImages));
+{$ELSE}
+  InitSizeIfLargeIcon(Self, dmCnSharedImages.IDELargeImages);
+{$ENDIF}
 end;
 
 function TCnExternalSrcEditorToolBar.CanShow(APage: TCnSrcEditorPage): Boolean; 

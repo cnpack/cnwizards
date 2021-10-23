@@ -58,6 +58,7 @@ type
   protected
     procedure DoModeChange; virtual;
   public
+    constructor Create(AOwner: TComponent); override;
     procedure SyncButtonHint;
 
     property MatchMode: TCnMatchMode read GetMatchMode write SetMatchMode;
@@ -68,10 +69,8 @@ implementation
 
 {$R *.DFM}
 
-{$IFDEF DEBUG}
 uses
-  CnDebug;
-{$ENDIF}
+  {$IFDEF DEBUG} CnDebug, {$ENDIF} CnWizShareImages;
 
 { TCnMatchButtonFrame }
 
@@ -144,6 +143,20 @@ begin
   Idx := Ord(MatchMode);
   if (Idx >= 0) and (Idx < pmMatchMode.Items.Count) then
     btnMatchMode.Hint := pmMatchMode.Items.Items[Idx].Hint;
+end;
+
+constructor TCnMatchButtonFrame.Create(AOwner: TComponent);
+begin
+  inherited;
+{$IFDEF IDE_SUPPORT_HDPI}
+  if WizOptions.UseLargeIcon then
+    pmMatchMode.Images := dmCnSharedImages.LargeVirtualImages
+  else
+    pmMatchMode.Images := dmCnSharedImages.VirtualImages;
+{$ELSE}
+  if WizOptions.UseLargeIcon then
+    pmMatchMode.Images := dmCnSharedImages.LargeImages;
+{$ENDIF}
 end;
 
 end.

@@ -66,15 +66,21 @@ type
     FIdxUnknown: Integer;
 {$IFDEF IDE_SUPPORT_HDPI}
     FIdxUnknownLargeInIDE: Integer;
-    FLargeVirtualImages: TVirtualImageList;   // 对应 Images
+    FVirtualImages: TVirtualImageList;        // 对应普通尺寸的 Images
+    FImageCollection: TImageCollection;
+    FLargeVirtualImages: TVirtualImageList;   // 对应大尺寸的 Images，非放大时不创建
     FLargeImageCollection: TImageCollection;
-    FDisabledLargeVirtualImages: TVirtualImageList;   // 对应 DisabledImages
+    FDisabledVirtualImages: TVirtualImageList;   // 对应普通尺寸的 DisabledImages
+    FDisabledImageCollection: TImageCollection;
+    FDisabledLargeVirtualImages: TVirtualImageList;   // 对应大尺寸 DisabledImages，非放大时不创建
     FDisabledLargeImageCollection: TImageCollection;
-    FIDELargeVirtualImages: TVirtualImageList;   // 对应 IDELargeImages 与 IDELargeDisabledImages
+    FProcToolbarVirtualImages: TVirtualImageList;     // 对应普通尺寸的 ilProcToolbarLarge
+    FProcToolbarImageCollection: TImageCollection;
+    FLargeProcToolbarVirtualImages: TVirtualImageList; // 对应大尺寸的 ilProcToolbarLarge，非放大时不创建
+    FLargeProcToolbarImageCollection: TImageCollection;
+    FIDELargeVirtualImages: TVirtualImageList;   // 对应 IDELargeImages 与 IDELargeDisabledImages，非放大时不创建
     FIDELargeImageCollection: TImageCollection;
     FLargeIDEOffset: Integer; // D110A 之后大图标偏移值不同
-    FLargeProcToolbarVirtualImages: TVirtualImageList; // 对应 ilProcToolbarLarge
-    FLargeProcToolbarImageCollection: TImageCollection;
 {$ENDIF}
 {$IFNDEF STAND_ALONE}
     FIDEOffset: Integer;      // D110A 之前，无论是否大图标都用这个值
@@ -104,14 +110,18 @@ type
     function CalcMixedImageIndex(ImageIndex: Integer): Integer;
 
 {$IFDEF IDE_SUPPORT_HDPI}
+    property VirtualImages: TVirtualImageList read FVirtualImages;
     property LargeVirtualImages: TVirtualImageList read FLargeVirtualImages;
-    {* 大尺寸下的 D110A 或以上，普通工具栏用这个}
+    {* D110A 或以上，因为 IDE 中没有，故普通工具栏用这个，普通尺寸和大尺寸}
+    property DisabledVirtualImages: TVirtualImageList read FDisabledVirtualImages;
     property DisabledLargeVirtualImages: TVirtualImageList read FDisabledLargeVirtualImages;
-    {* 大尺寸下的 D110A 或以上，普通工具栏禁用状态用这个}
+    {* D110A 或以上，因为 IDE 中没有，普通工具栏禁用状态用这个，普通尺寸和大尺寸}
+    property ProcToolbarVirtualImages: TVirtualImageList read FProcToolbarVirtualImages;
+    property LargeProcToolbarVirtualImages: TVirtualImageList read FLargeProcToolbarVirtualImages;
+    {* D110A 或以上，因为 IDE 中没有，故函数列表工具栏需要用这个，普通尺寸和大尺寸}
+
     property IDELargeVirtualImages: TVirtualImageList read FIDELargeVirtualImages;
     {* 大尺寸下的 D110A 或以上，编辑器工具栏等需要 IDE 的用这个}
-    property LargeProcToolbarVirtualImages: TVirtualImageList read FLargeProcToolbarVirtualImages;
-    {* 大尺寸下的 D110A 或以上，函数列表工具栏需要用这个}
 {$ENDIF}
 {$ENDIF}
   end;
@@ -261,29 +271,29 @@ begin
   begin
     // 为大图标版做好准备
 {$IFDEF IDE_SUPPORT_HDPI}
+    FIDELargeVirtualImages := TVirtualImageList.Create(Self);
+    FIDELargeImageCollection := TImageCollection.Create(Self);
+    FIDELargeVirtualImages.ImageCollection := FIDELargeImageCollection;
+    FIDELargeVirtualImages.Width := IdeGetScaledPixelsFromOrigin(csLargeImageListWidth);
+    FIDELargeVirtualImages.Height := IdeGetScaledPixelsFromOrigin(csLargeImageListHeight);
+
     FLargeVirtualImages := TVirtualImageList.Create(Self);
     FLargeImageCollection := TImageCollection.Create(Self);
     FLargeVirtualImages.ImageCollection := FLargeImageCollection;
-    FLargeVirtualImages.Width := csLargeImageListWidth;
-    FLargeVirtualImages.Height := csLargeImageListHeight;
+    FLargeVirtualImages.Width := IdeGetScaledPixelsFromOrigin(csLargeImageListWidth);
+    FLargeVirtualImages.Height := IdeGetScaledPixelsFromOrigin(csLargeImageListHeight);
 
     FDisabledLargeVirtualImages := TVirtualImageList.Create(Self);
     FDisabledLargeImageCollection := TImageCollection.Create(Self);
     FDisabledLargeVirtualImages.ImageCollection := FDisabledLargeImageCollection;
-    FDisabledLargeVirtualImages.Width := csLargeImageListWidth;
-    FDisabledLargeVirtualImages.Height := csLargeImageListHeight;
-
-    FIDELargeVirtualImages := TVirtualImageList.Create(Self);
-    FIDELargeImageCollection := TImageCollection.Create(Self);
-    FIDELargeVirtualImages.ImageCollection := FIDELargeImageCollection;
-    FIDELargeVirtualImages.Width := csLargeImageListWidth;
-    FIDELargeVirtualImages.Height := csLargeImageListHeight;
+    FDisabledLargeVirtualImages.Width := IdeGetScaledPixelsFromOrigin(csLargeImageListWidth);
+    FDisabledLargeVirtualImages.Height := IdeGetScaledPixelsFromOrigin(csLargeImageListHeight);
 
     FLargeProcToolbarVirtualImages := TVirtualImageList.Create(Self);
     FLargeProcToolbarImageCollection := TImageCollection.Create(Self);
     FLargeProcToolbarVirtualImages.ImageCollection := FLargeProcToolbarImageCollection;
-    FLargeProcToolbarVirtualImages.Width := csLargeImageListWidth;
-    FLargeProcToolbarVirtualImages.Height := csLargeImageListHeight;
+    FLargeProcToolbarVirtualImages.Width := IdeGetScaledPixelsFromOrigin(csLargeImageListWidth);
+    FLargeProcToolbarVirtualImages.Height := IdeGetScaledPixelsFromOrigin(csLargeImageListHeight);
 
     CopyImageListToVirtual(Images, FLargeVirtualImages);
     CopyImageListToVirtual(DisabledImages, FDisabledLargeVirtualImages);
@@ -294,6 +304,31 @@ begin
     StretchCopyToLarge(DisabledImages, DisabledLargeImages);
 {$ENDIF}
   end;
+
+{$IFDEF IDE_SUPPORT_HDPI}
+  FVirtualImages := TVirtualImageList.Create(Self);
+  FImageCollection := TImageCollection.Create(Self);
+  FVirtualImages.ImageCollection := FImageCollection;
+  FVirtualImages.Width := IdeGetScaledPixelsFromOrigin(Images.Width);
+  FVirtualImages.Height := IdeGetScaledPixelsFromOrigin(Images.Height);
+
+  FDisabledVirtualImages := TVirtualImageList.Create(Self);
+  FDisabledImageCollection := TImageCollection.Create(Self);
+  FDisabledVirtualImages.ImageCollection := FDisabledImageCollection;
+  FDisabledVirtualImages.Width := IdeGetScaledPixelsFromOrigin(DisabledImages.Width);
+  FDisabledVirtualImages.Height := IdeGetScaledPixelsFromOrigin(DisabledImages.Height);
+
+  FProcToolbarVirtualImages := TVirtualImageList.Create(Self);
+  FProcToolbarImageCollection := TImageCollection.Create(Self);
+  FProcToolbarVirtualImages.ImageCollection := FProcToolbarImageCollection;
+  FProcToolbarVirtualImages.Width := IdeGetScaledPixelsFromOrigin(ilProcToolbar.Width);
+  FProcToolbarVirtualImages.Height := IdeGetScaledPixelsFromOrigin(ilProcToolbar.Height);
+
+  CopyImageListToVirtual(Images, FVirtualImages);
+  CopyImageListToVirtual(DisabledImages, FDisabledVirtualImages);
+  CopyImageListToVirtual(ilProcToolbar, FProcToolbarVirtualImages);
+{$ENDIF}
+
 {$ENDIF}
 end;
 

@@ -991,10 +991,11 @@ begin
     DockSite := False;
     ShowHint := True;
     Transparent := False;
-    Images := dmCnSharedImages.ilProcToolBar;
 {$IFDEF IDE_SUPPORT_HDPI}
+    Images := TImageList(dmCnSharedImages.ProcToolbarVirtualImages);
     InitSizeIfLargeIcon(Obj.InternalToolBar2, TImageList(dmCnSharedImages.LargeProcToolbarVirtualImages));
 {$ELSE}
+    Images := dmCnSharedImages.ilProcToolBar;
     InitSizeIfLargeIcon(Obj.InternalToolBar2, dmCnSharedImages.ilProcToolbarLarge);
 {$ENDIF}
     PopupMenu := Obj.PopupMenu;
@@ -1094,11 +1095,14 @@ begin
 {$ENDIF}
 
   WizOptions.ResetToolbarWithLargeIcons(Obj.MatchFrame.tlb1);
+
+{$IFNDEF IDE_SUPPORT_HDPI}
   if WizOptions.UseLargeIcon then
   begin
     Obj.MatchFrame.Width := Obj.MatchFrame.Width + csLargeToolbarHeightDelta;
     Obj.MatchFrame.tlb1.Width := Obj.MatchFrame.tlb1.Width + csLargeToolbarHeightDelta;
   end;
+{$ENDIF}
 
   with Obj.MatchFrame do
   begin
@@ -1314,13 +1318,18 @@ begin
   CnDebugger.LogFmt('ProcList: Obj found from EditControl %8.8x', [Integer(Obj)]);
 {$ENDIF}
 
+{$IFDEF IDE_SUPPORT_HDPI}
+  InitSizeIfLargeIcon(ToolBar, TImageList(dmCnSharedImages.LargeProcToolbarVirtualImages));
+{$ELSE}
   InitSizeIfLargeIcon(ToolBar, dmCnSharedImages.ilProcToolbarLarge);
+{$ENDIF}
+
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('ProcList: ClassCombo Font Size %d', [Obj.ClassCombo.Font.Size]);
 {$ENDIF}
 
-  IdeScaleComboFontSize(Obj.ClassCombo);
-  IdeScaleComboFontSize(Obj.ProcCombo);
+  IdeScaleToolbarComboFontSize(Obj.ClassCombo);
+  IdeScaleToolbarComboFontSize(Obj.ProcCombo);
 
   Obj.ToolBtnProcList.Action := FindIDEAction('act' + Copy(ClassName, 2, MaxInt)); // ȥ T
   Obj.ToolBtnProcList.Visible := Action <> nil;

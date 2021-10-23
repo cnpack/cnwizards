@@ -266,7 +266,7 @@ begin
 
   InitProjectList;
   WizOptions.ResetToolbarWithLargeIcons(tlbUses);
-  IdeScaleComboFontSize(cbbProject);
+  IdeScaleToolbarComboFontSize(cbbProject);
 
   if WizOptions.UseLargeIcon then
   begin

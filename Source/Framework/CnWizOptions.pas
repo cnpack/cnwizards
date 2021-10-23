@@ -140,7 +140,7 @@ type
     // Manual 为 True 时表示从界面保存而不是结束时自动保存
 
     procedure ResetToolbarWithLargeIcons(AToolBar: TToolBar);
-    {* 封装的根据是否使用大图标来调整工具栏的方法}
+    {* 封装的根据是否使用大图标来调整普通窗体上部的工具栏的方法，不用于编辑器工具栏}
 
     // 参数读写方法
     function CreateRegIniFile: TCustomIniFile; overload;
@@ -295,7 +295,7 @@ uses
   CnDebug,
 {$ENDIF}
 {$IFNDEF STAND_ALONE}
-  CnWizUtils, CnWizManager, CnWizShareImages,
+  CnWizUtils, CnWizIdeUtils, CnWizManager, CnWizShareImages,
 {$ENDIF}
   CnWizConsts, CnCommon,  CnConsts, CnWizCompilerConst, CnNativeDecl;
 
@@ -881,24 +881,41 @@ end;
 
 procedure TCnWizOptions.ResetToolbarWithLargeIcons(AToolBar: TToolBar);
 begin
-  if (AToolBar = nil) or not FUseLargeIcon then
+  if AToolBar = nil then
     Exit;
 
-  AToolBar.ButtonHeight := csLargeButtonHeight;
-  AToolBar.ButtonWidth := csLargeButtonWidth;
+  if FUseLargeIcon then
+  begin
+    AToolBar.ButtonHeight := IdeGetScaledPixelsFromOrigin(csLargeButtonHeight, AToolBar);
+    AToolBar.ButtonWidth := IdeGetScaledPixelsFromOrigin(csLargeButtonWidth, AToolBar);
+  end;
+
 {$IFDEF IDE_SUPPORT_HDPI}
   if AToolBar.Images = dmCnSharedImages.Images then
-    AToolBar.Images := dmCnSharedImages.LargeVirtualImages;
+  begin
+    if FUseLargeIcon then
+      AToolBar.Images := dmCnSharedImages.LargeVirtualImages
+    else
+      AToolBar.Images := dmCnSharedImages.VirtualImages;
+  end;
   if AToolBar.DisabledImages = dmCnSharedImages.DisabledImages then
-    AToolBar.DisabledImages := dmCnSharedImages.DisabledLargeVirtualImages;
+  begin
+    if FUseLargeIcon then
+      AToolBar.DisabledImages := dmCnSharedImages.DisabledLargeVirtualImages
+    else
+      AToolBar.DisabledImages := dmCnSharedImages.DisabledVirtualImages;
+  end;
 {$ELSE}
-  if AToolBar.Images = dmCnSharedImages.Images then
-    AToolBar.Images := dmCnSharedImages.LargeImages;
-  if AToolBar.DisabledImages = dmCnSharedImages.DisabledImages then
-    AToolBar.DisabledImages := dmCnSharedImages.DisabledLargeImages;
+  if FUseLargeIcon then
+  begin
+    if AToolBar.Images = dmCnSharedImages.Images then
+      AToolBar.Images := dmCnSharedImages.LargeImages;
+    if AToolBar.DisabledImages = dmCnSharedImages.DisabledImages then
+      AToolBar.DisabledImages := dmCnSharedImages.DisabledLargeImages;
+  end;
 {$ENDIF}
 
-  if AToolBar.Height <= AToolBar.ButtonHeight then
+  if FUseLargeIcon and (AToolBar.Height <= AToolBar.ButtonHeight) then
     AToolBar.Height := AToolBar.ButtonHeight + csLargeToolbarHeightDelta;
 end;
 
