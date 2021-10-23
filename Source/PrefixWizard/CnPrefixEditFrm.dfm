@@ -1,11 +1,12 @@
 inherited CnPrefixEditForm: TCnPrefixEditForm
   Left = 412
   Top = 232
-  Width = 348
-  Height = 278
   ActiveControl = edtName
+  AutoScroll = False
   BorderIcons = [biSystemMenu]
   Caption = 'Edit Component'#39's Name'
+  ClientHeight = 239
+  ClientWidth = 332
   Constraints.MinHeight = 255
   Constraints.MinWidth = 344
   Icon.Data = {

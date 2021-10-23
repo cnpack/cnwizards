@@ -1,9 +1,10 @@
 inherited CnIdentRenameForm: TCnIdentRenameForm
   Left = 406
   Top = 215
-  Width = 330
-  Height = 290
+  AutoScroll = False
   Caption = 'Rename Identifier'
+  ClientHeight = 251
+  ClientWidth = 314
   Constraints.MinHeight = 266
   Constraints.MinWidth = 255
   Icon.Data = {

@@ -24,7 +24,11 @@ unit CnWizShareImages;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：共享 ImageList 单元
 * 单元作者：CnPack 开发组
-* 备    注：该单元定义了 CnPack IDE 专家包共享的工具栏 ImageList 
+* 备    注：该单元定义了 CnPack IDE 专家包共享的工具栏 ImageList
+*           注意：D11 以及之之后的 IDE 支持 HDPI，不能直接用 ImageList 了
+*          （因为尺寸固定为物理像素不可变导致绘制太小），普通尺寸模式下全得用
+*           经过 HDPI 放大过后的像素大小的 VirtualImageList，大尺寸模式下更得用
+*           经过 HDPI 放大过后的大尺寸像素大小的 VirtualImageList。
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
