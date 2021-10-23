@@ -2219,6 +2219,9 @@ end;
 // 判断快捷键是否和现有 Action 冲突，有冲突则弹框询问，返回无冲突、有冲突但用户同意、有冲突用户停止
 function CheckQueryShortCutDuplicated(AShortCut: TShortCut;
   OriginalAction: TCustomAction): TShortCutDuplicated;
+const
+  SCN_ACTION = 'Action: ';
+  SCN_MENU = 'Menu: ';
 var
   Actions: TObjectList;
   S: string;
@@ -2240,6 +2243,9 @@ begin
       S := TCustomAction(Actions[0]).Caption;
       if S = '' then
         S := TCustomAction(Actions[0]).Name;
+
+      if S <> '' then
+        S := SCN_ACTION + S;
     end
     else
     begin
@@ -2249,9 +2255,15 @@ begin
         Exit;
 
       WS := WizShortCutMgr.ShortCuts[Idx];
+      if WS.Action = OriginalAction then // 有但属于该 Action 也不算
+        Exit;
+
       S := WS.MenuName;
       if S = '' then
         S := WS.Name;
+
+      if S <> '' then
+        S := SCN_MENU + S;
     end;
   finally
     Actions.Free;

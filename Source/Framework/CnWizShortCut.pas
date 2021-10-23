@@ -57,7 +57,7 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, Messages, Classes, SysUtils, Menus, ExtCtrls, ToolsAPI,
+  Windows, Messages, Classes, SysUtils, Menus, ExtCtrls, ToolsAPI, ActnList,
   CnWizConsts, CnCommon;
 
 type
@@ -80,6 +80,7 @@ type
     FShortCut: TShortCut;
     FKeyProc: TNotifyEvent;
     FMenuName: string;
+    FAction: TAction;
     FName: string;
     FTag: Integer;
     procedure SetKeyProc(const Value: TNotifyEvent);
@@ -108,6 +109,8 @@ type
     {* 快捷键通知事件，当快捷键被按下时调用该事件}
     property MenuName: string read FMenuName write SetMenuName;
     {* 与快捷键关联的 IDE 菜单项的名字}
+    property Action: TAction read FAction write FAction;
+    {* 与快捷键关联的 Action 引用}
     property Tag: Integer read FTag write FTag;
     {* 快捷键标签}
   end;
@@ -181,13 +184,15 @@ type
     function IndexOfName(const AName: string): Integer; 
     {* 根据快捷键对象名称查找索引号，如果不存在返回-1。}
     function Add(const AName: string; AShortCut: TShortCut; AKeyProc:
-      TNotifyEvent; const AMenuName: string = ''; ATag: Integer = 0): TCnWizShortCut;
+      TNotifyEvent; const AMenuName: string = ''; ATag: Integer = 0;
+      AnAction: TAction = nil): TCnWizShortCut;
     {* 新增一个快捷键定义
      |<PRE>
        AName: string           - 快捷键名称，如果为空串则该快捷键不保存到注册表中
        AShortCut: TShortCut    - 快捷键默认键值，如果 AName 有效，实际使用的键值是从注册表中读取的
        AKeyProc: TNotifyEvent  - 快捷键通知事件
        AMenuName: string       - 快捷键对应的 IDE 主菜单项命令，如果没有可以为空
+       AnAction: TAction       - 快捷键所属的 Action，用来判断重复与否
        Result: Integer;        - 返回新增加的快捷键索引号，如果要定义的快捷键已存在返回-1
      |</PRE>}
     procedure Delete(Index: Integer);
@@ -514,16 +519,21 @@ end;
 
 // 增加一个快捷键定义，返回快捷键对象实例
 function TCnWizShortCutMgr.Add(const AName: string; AShortCut: TShortCut;
-  AKeyProc: TNotifyEvent; const AMenuName: string; ATag: Integer): TCnWizShortCut;
+  AKeyProc: TNotifyEvent; const AMenuName: string; ATag: Integer;
+  AnAction: TAction): TCnWizShortCut;
 begin
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogFmt('TCnWizShortCutMgr.Add: %s (%s)', [AName,
     ShortCutToText(AShortCut)]);
-{$ENDIF Debug}
+{$ENDIF}
+
   if IndexOfName(AName) >= 0 then // 重名，如果为空则忽略
     raise ECnDuplicateShortCutName.CreateFmt(SCnDuplicateShortCutName, [AName]);
+
   Result := TCnWizShortCut.Create(Self, AName, AShortCut, AKeyProc, AMenuName, ATag);
+  Result.Action := AnAction;
   FShortCuts.Add(Result);
+
   if Result.FShortCut <> 0 then   // 存在快捷键时才重新绑定
     UpdateBinding;
 end;

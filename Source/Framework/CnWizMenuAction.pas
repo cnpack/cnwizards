@@ -34,7 +34,7 @@ unit CnWizMenuAction;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 修改记录：2012.09.19 by shenloqi
-*               移植到Delphi XE3
+*               移植到 Delphi XE3
 *           2002.09.17 V1.0
 *               创建单元，实现功能
 ================================================================================
@@ -72,7 +72,7 @@ type
     procedure SetInheritedShortCut;
     function GetShortCut: TShortCut;
     procedure {$IFDEF DelphiXE3_UP}_CnSetShortCut{$ELSE}SetShortCut{$ENDIF}(const Value: TShortCut);
-    {* Delphi XE3引入了SetShortCut基方法，为避免同名带入的问题，故将此方法改名}
+    {* Delphi XE3 引入了 SetShortCut 基方法，为避免同名带入的问题，故将此方法改名}
     procedure OnShortCut(Sender: TObject);
   protected
     procedure Change; override;
@@ -506,6 +506,7 @@ begin
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   Result := TCnWizMenuAction.Create(Svcs40.ActionList);
   Result.FreeNotification(Self);
+
   Result.FUpdating := True;         // 开始更新
   try
     InitAction(Result, ACommand, ACaption, OnExecute, nil, IcoName, AHint, UseDefaultIcon);
@@ -515,7 +516,8 @@ begin
     Result.FMenu.Action := Result;
     Result.FMenu.AutoHotkeys := maManual;
     Result.FWizShortCut := WizShortCutMgr.Add(ACommand, AShortCut, Result.OnShortCut,
-      AMenuName);
+      AMenuName, 0, Result);
+
     Result.SetInheritedShortCut;
     FWizMenuActions.Add(Result);
   finally
@@ -542,10 +544,11 @@ begin
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   Result := TCnWizAction.Create(Svcs40.ActionList);
   Result.FreeNotification(Self);
+
   Result.FUpdating := True;         // 开始更新
   try
     InitAction(Result, ACommand, ACaption, OnExecute, nil, IcoName, AHint, UseDefaultIcon);
-    Result.FWizShortCut := WizShortCutMgr.Add(ACommand, AShortCut, Result.OnShortCut);
+    Result.FWizShortCut := WizShortCutMgr.Add(ACommand, AShortCut, Result.OnShortCut, '', 0, Result);
     Result.SetInheritedShortCut;
     FWizActions.Add(Result);
   finally

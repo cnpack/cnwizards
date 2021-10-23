@@ -197,7 +197,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnIni, CnWizUtils, CnWizConsts, CnConsts, CnCommon, CnWizOptions,
+  CnIni, CnWizUtils, CnWizConsts, CnConsts, CnCommon, CnWizOptions, CnWizIdeUtils,
   CnBookmarkConfigFrm, CnWizShareImages, CnWizManager;
 
 {$R *.DFM}
@@ -1143,8 +1143,7 @@ end;
 procedure TCnBookmarkForm.FormCreate(Sender: TObject);
 begin
   WizOptions.ResetToolbarWithLargeIcons(ToolBar);
-  if WizOptions.UseLargeIcon then
-    cbbUnit.Font.Size := csLargeComboFontSize;
+  IdeScaleToolbarComboFontSize(cbbUnit);
 end;
 
 initialization

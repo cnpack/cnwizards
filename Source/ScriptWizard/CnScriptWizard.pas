@@ -827,7 +827,7 @@ var
   I, Idx: Integer;
   Wizard: TCnScriptWizard;
   ScriptAction: TCustomAction;
-  AScript: TCnScriptItem;
+  AScript, BScript: TCnScriptItem;
 begin
   // 判断快捷键是否重复，不重复或允许之后，再更新条目
   // 如果是手动运行类型的就找其 Action（可能是 nil），如果是其他，也以 nil 找
@@ -840,23 +840,24 @@ begin
   if Wizard = nil then
     Exit;
 
-  Idx := 3; // 脚本专家菜单的脚本列表前面有仨菜单项
+  Idx := 2; // 脚本专家菜单的脚本列表前面有仨菜单项，0 1 2
   ScriptAction := nil;
 
   // 要寻找 lvList 中的选中项有无对应的下拉菜单的 Action
   if lvList.Selected <> nil then
   begin
     AScript := TempScripts[lvList.Selected.Index];
+
     if AScript.Enabled and not AScript.IsInternal and (smManual in AScript.Mode) then
     begin
       // 被选中项应有对应菜单项，需要找 Action
       for I := 0 to TempScripts.Count - 1 do
       begin
-        AScript := TempScripts[I];
-        if AScript.Enabled and not AScript.IsInternal and (smManual in AScript.Mode) then
+        BScript := TempScripts[I];
+        if BScript.Enabled and not BScript.IsInternal and (smManual in BScript.Mode) then
           Inc(Idx);
 
-        if AScript = TempScripts[lvList.Selected.Index] then
+        if BScript = AScript then
           ScriptAction := Wizard.SubActions[Idx];
       end;
     end;
