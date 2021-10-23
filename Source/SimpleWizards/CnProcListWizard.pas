@@ -1318,11 +1318,9 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('ProcList: ClassCombo Font Size %d', [Obj.ClassCombo.Font.Size]);
 {$ENDIF}
-  if WizOptions.UseLargeIcon then
-  begin
-    Obj.ClassCombo.Font.Size := csLargeComboFontSize;
-    Obj.ProcCombo.Font.Size := csLargeComboFontSize;
-  end;
+
+  IdeScaleComboFontSize(Obj.ClassCombo);
+  IdeScaleComboFontSize(Obj.ProcCombo);
 
   Obj.ToolBtnProcList.Action := FindIDEAction('act' + Copy(ClassName, 2, MaxInt)); // ȥ T
   Obj.ToolBtnProcList.Visible := Action <> nil;

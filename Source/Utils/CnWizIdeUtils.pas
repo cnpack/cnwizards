@@ -667,6 +667,12 @@ function IdeGetScaledPixelsFromOrigin(APixels: Integer; AControl: TControl): Int
   也就是说：Windows 缩放比是 100% 也就是原始大小时，无论 IDE 运行模式如何都返回原始数据
   缩放比不为 100% 时，DPI Ware 才返回 APixels * HDPI 比例，Unware 无论啥设置仍返回原始数据}
 
+procedure IdeSetReverseScaledFontSize(AControl: TControl);
+{* IDE 中根据 DPI 与缩放设置，反推计算某字号的原始尺寸，以便 Scale 时恢复原始尺寸。暂不使用。}
+
+procedure IdeScaleComboFontSize(Combo: TControl);
+{* 统一根据当前 HDPI 与缩放设置等设置字号}
+
 implementation
 
 uses
@@ -713,6 +719,7 @@ end;
 {$ENDIF}
 
 type
+  TControlHack = class(TControl);
   TCustomControlHack = class(TCustomControl);
 
 //==============================================================================
@@ -3371,6 +3378,31 @@ begin
   end;
 {$ELSE}
   Result := APixels; // IDE 不支持 HDPI 时原封不动地返回，交给 OS 处理
+{$ENDIF}
+end;
+
+procedure IdeSetReverseScaledFontSize(AControl: TControl);
+begin
+{$IFDEF IDE_SUPPORT_HDPI}
+  if AControl <> nil then
+  begin
+  if not TControlHack(AControl).ParentFont and
+    (sfFont in TControlHack(AControl).DefaultScalingFlags) then
+    TControlHack(AControl).Font.Height := MulDiv(TControlHack(AControl).Font.Height,
+      Windows.USER_DEFAULT_SCREEN_DPI, AControl.CurrentPPI);
+  end;
+{$ENDIF}
+end;
+
+procedure IdeScaleComboFontSize(Combo: TControl);
+begin
+{$IFDEF IDE_SUPPORT_HDPI}
+  // 高 DPI 下原始不缩放我们才缩放
+  if WizOptions.UseLargeIcon and (Combo.CurrentPPI = Windows.USER_DEFAULT_SCREEN_DPI) then
+    TControlHack(Combo).Font.Size := csLargeComboFontSize;
+{$ELSE}
+  if WizOptions.UseLargeIcon then
+    TControlHack(Combo).Font.Size := csLargeComboFontSize;
 {$ENDIF}
 end;
 

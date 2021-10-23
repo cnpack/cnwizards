@@ -266,9 +266,10 @@ begin
 
   InitProjectList;
   WizOptions.ResetToolbarWithLargeIcons(tlbUses);
+  IdeScaleComboFontSize(cbbProject);
+
   if WizOptions.UseLargeIcon then
   begin
-    cbbProject.Font.Size := csLargeComboFontSize;
     tlbUses.Height := tlbUses.Height + csLargeToolbarHeightDelta;
     pnlTop.Height := pnlTop.Height + csLargeToolbarHeightDelta;
   end;
