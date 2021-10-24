@@ -1,9 +1,10 @@
 inherited CnProjectBackupForm: TCnProjectBackupForm
   Left = 433
   Top = 392
-  Width = 669
-  Height = 483
+  AutoScroll = False
   Caption = 'Project Backup'
+  ClientHeight = 444
+  ClientWidth = 653
   Icon.Data = {
     0000010001002020000001000800A80800001600000028000000200000004000
     0000010008000000000000040000000000000000000000010000000100000000

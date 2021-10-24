@@ -1,9 +1,10 @@
 inherited CnPropertyCompareForm: TCnPropertyCompareForm
   Left = 227
   Top = 150
-  Width = 970
-  Height = 665
+  AutoScroll = False
   Caption = 'Compare Properties'
+  ClientHeight = 606
+  ClientWidth = 954
   Icon.Data = {
     0000010001002020000001000800A80800001600000028000000200000004000
     0000010008000000000080040000000000000000000000010000000000000000
@@ -84,7 +85,7 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
   object tlbMain: TToolBar
     Left = 0
     Top = 0
-    Width = 962
+    Width = 954
     Height = 29
     BorderWidth = 1
     Caption = 'tlbMain'
@@ -210,8 +211,8 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
   object pnlMain: TPanel
     Left = 0
     Top = 29
-    Width = 962
-    Height = 590
+    Width = 954
+    Height = 577
     Align = alClient
     BevelOuter = bvNone
     Caption = 'pnlMain'
@@ -220,14 +221,14 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       Left = 465
       Top = 0
       Width = 3
-      Height = 590
+      Height = 577
       Cursor = crHSplit
     end
     object pnlLeft: TPanel
       Left = 0
       Top = 0
       Width = 465
-      Height = 590
+      Height = 577
       Align = alLeft
       BevelOuter = bvNone
       TabOrder = 0
@@ -236,7 +237,7 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
         Left = 0
         Top = 0
         Width = 465
-        Height = 590
+        Height = 577
         Align = alClient
         ColCount = 2
         DefaultRowHeight = 18
@@ -256,8 +257,8 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
     object pnlRight: TPanel
       Left = 468
       Top = 0
-      Width = 475
-      Height = 590
+      Width = 467
+      Height = 577
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 1
@@ -265,8 +266,8 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       object gridRight: TStringGrid
         Left = 0
         Top = 0
-        Width = 475
-        Height = 590
+        Width = 467
+        Height = 577
         Align = alClient
         ColCount = 2
         DefaultRowHeight = 18
@@ -284,10 +285,10 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       end
     end
     object pnlDisplay: TPanel
-      Left = 943
+      Left = 935
       Top = 0
       Width = 19
-      Height = 590
+      Height = 577
       Align = alRight
       BevelInner = bvRaised
       BevelOuter = bvLowered
@@ -296,7 +297,7 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
         Left = 8
         Top = 2
         Width = 9
-        Height = 586
+        Height = 573
         Align = alClient
         Color = clBtnFace
         ParentColor = False
@@ -307,7 +308,7 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
         Left = 2
         Top = 2
         Width = 6
-        Height = 586
+        Height = 573
         Align = alLeft
         Color = clBtnFace
         ParentColor = False

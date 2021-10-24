@@ -190,10 +190,6 @@ type
     FDirectoryList: TStringList;  // 收藏文件夹列表，保存使用
     FFileFilterMenu: TStringList; // 文件过滤类型列表,菜单使用
     FDirectoryMenu: TStringList;  // 收藏文件夹列表，菜单使用
-{$IFDEF IDE_SUPPORT_HDPI}
-    FVirtualImages: TVirtualImageList;
-    FImageCollection: TImageCollection;
-{$ENDIF}
     function GetBoolean(const Index: Integer): Boolean;
     procedure SetBoolean(const Index: Integer; const Value: Boolean);
 
@@ -747,35 +743,14 @@ begin
   if CurPath <> '' then
     shltv.Path := CurPath;
 
-{$IFDEF IDE_SUPPORT_HDPI}
-  FVirtualImages := TVirtualImageList.Create(Self);
-  FImageCollection := TImageCollection.Create(Self);
-  FVirtualImages.ImageCollection := FImageCollection;
-{$ENDIF}
-
   WizOptions.ResetToolbarWithLargeIcons(ToolBar);
+{$IFNDEF IDE_SUPPORT_HDPI}
   if WizOptions.UseLargeIcon then
   begin
-{$IFDEF IDE_SUPPORT_HDPI}
-    FVirtualImages.Width := IdeGetScaledPixelsFromOrigin(csLargeImageListWidth);
-    FVirtualImages.Height := IdeGetScaledPixelsFromOrigin(csLargeImageListHeight);
-    CopyImageListToVirtual(il, FVirtualImages);
-    ToolBar.Images := FVirtualImages;
-{$ELSE}
     dmCnSharedImages.StretchCopyToLarge(il, ilLarge);
     ToolBar.Images := ilLarge;
-{$ENDIF}
-  end
-  else
-  begin
-{$IFDEF IDE_SUPPORT_HDPI}
-    // 普通模式下，用适配了 HDPI 尺寸的 FVirtualImages 代替原 ImageList
-    FVirtualImages.Width := IdeGetScaledPixelsFromOrigin(iL.Width);
-    FVirtualImages.Height := IdeGetScaledPixelsFromOrigin(iL.Height);
-    CopyImageListToVirtual(il, FVirtualImages);
-    ToolBar.Images := FVirtualImages;
-{$ENDIF}
   end;
+{$ENDIF}
   WizOptions.ResetToolbarWithLargeIcons(ToolBar);
 end;
 

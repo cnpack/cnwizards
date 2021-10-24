@@ -1,9 +1,11 @@
 inherited CnProjectDirBuilderForm: TCnProjectDirBuilderForm
   Left = 225
   Top = 173
-  Width = 675
+  AutoScroll = False
   BorderIcons = [biSystemMenu, biMaximize]
   Caption = 'Project Dir Builder'
+  ClientHeight = 400
+  ClientWidth = 675
   Constraints.MinHeight = 300
   Constraints.MinWidth = 450
   Icon.Data = {

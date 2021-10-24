@@ -296,7 +296,7 @@ implementation
 {$R *.DFM}
 
 uses
-  {$IFDEF DEBUG} CnDebug, {$ENDIF} CnPropertyCompConfigFrm
+  {$IFDEF DEBUG} CnDebug, {$ENDIF} CnPropertyCompConfigFrm, CnWizOptions
   {$IFNDEF STAND_ALONE}, CnListCompFrm {$ENDIF};
 
 const
@@ -685,6 +685,8 @@ end;
 
 procedure TCnPropertyCompareForm.FormCreate(Sender: TObject);
 begin
+  WizOptions.ResetToolbarWithLargeIcons(tlbMain);
+
   FLeftProperties := TObjectList.Create(True);
   FRightProperties := TObjectList.Create(True);
 

@@ -880,6 +880,10 @@ begin
 end;
 
 procedure TCnWizOptions.ResetToolbarWithLargeIcons(AToolBar: TToolBar);
+{$IFDEF IDE_SUPPORT_HDPI}
+var
+  NeedNew: Boolean;
+{$ENDIF}
 begin
   if AToolBar = nil then
     Exit;
@@ -891,12 +895,14 @@ begin
   end;
 
 {$IFDEF IDE_SUPPORT_HDPI}
+  NeedNew := True;
   if AToolBar.Images = dmCnSharedImages.Images then
   begin
     if FUseLargeIcon then
       AToolBar.Images := dmCnSharedImages.LargeVirtualImages
     else
       AToolBar.Images := dmCnSharedImages.VirtualImages;
+    NeedNew := False;
   end;
   if AToolBar.DisabledImages = dmCnSharedImages.DisabledImages then
   begin
@@ -904,7 +910,14 @@ begin
       AToolBar.DisabledImages := dmCnSharedImages.DisabledLargeVirtualImages
     else
       AToolBar.DisabledImages := dmCnSharedImages.DisabledVirtualImages;
+    NeedNew := False;
   end;
+
+  if NeedNew and (AToolBar.Images <> nil) and (AToolBar.Owner = AToolBar.Images.Owner) then
+    AToolBar.Images := IdeGetVirtualImageListFromOrigin(AToolBar.Images);
+  if (AToolBar.DisabledImages <> nil) and (AToolBar.Owner = AToolBar.DisabledImages.Owner) then
+    AToolBar.DisabledImages := IdeGetVirtualImageListFromOrigin(AToolBar.DisabledImages);
+
 {$ELSE}
   if FUseLargeIcon then
   begin

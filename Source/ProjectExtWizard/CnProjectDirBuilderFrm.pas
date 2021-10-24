@@ -225,7 +225,8 @@ implementation
 
 {$R *.DFM}
 
-uses CnProjectDirImportFrm;
+uses
+  CnWizIdeUtils, CnProjectDirImportFrm;
 
 var
   CnProjectDirBuilderForm: TCnProjectDirBuilderForm = nil;
@@ -695,6 +696,7 @@ end;
 procedure TCnProjectDirBuilderForm.FormCreate(Sender: TObject);
 begin
   WizOptions.ResetToolbarWithLargeIcons(ToolBar);
+  IdeScaleToolbarComboFontSize(cbbDirList);
   FDataFilePath := MakePath(WizOptions.DataPath) + csTempletFileName;
   FUserFilePath := MakePath(WizOptions.UserPath) + csTempletFileName;
   FCnDirTree := TCnDirTree.Create(TCnDirLeaf);

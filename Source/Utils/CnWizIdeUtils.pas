@@ -42,7 +42,7 @@ unit CnWizIdeUtils;
 * 修改记录：2016.04.04 by liuxiao
 *               增加 2010 以上版本的新风格控件板的支持
 *           2012.09.19 by shenloqi
-*               移植到Delphi XE3
+*               移植到 Delphi XE3
 *           2005.05.06 V1.3
 *               hubdog 增加 获取版本信息的函数
 *           2004.03.19 V1.2
@@ -59,9 +59,10 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, Messages, Classes, Controls, SysUtils, Graphics, Forms, Tabs,
+  Windows, Messages, Classes, Controls, SysUtils, Graphics, Forms, Tabs, Contnrs,
   Menus, Buttons, ComCtrls, StdCtrls, ExtCtrls, TypInfo, ToolsAPI, ImgList,
   {$IFDEF OTA_PALETTE_API} PaletteAPI, {$ENDIF}
+  {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList, Vcl.ImageCollection, {$ENDIF}
   {$IFDEF COMPILER6_UP}
   DesignIntf, DesignEditors, ComponentDesigner, Variants,
   {$ELSE}
@@ -673,6 +674,14 @@ procedure IdeSetReverseScaledFontSize(AControl: TControl);
 procedure IdeScaleToolbarComboFontSize(Combo: TControl);
 {* 统一根据当前 HDPI 与缩放设置等设置 Toolbar 中的 Combobox 的字号}
 
+{$IFDEF IDE_SUPPORT_HDPI}
+
+function IdeGetVirtualImageListFromOrigin(Origin: TCustomImageList;
+  AControl: TControl = nil): TVirtualImageList;
+{* 统一根据当前 HDPI 与缩放设置等，从原始 TImageList 创建一个 TVirtualImageList，无需释放}
+
+{$ENDIF}
+
 implementation
 
 uses
@@ -696,6 +705,13 @@ const
 var
   BeginBatchOpenCloseProc: TProcedure = nil;
   EndBatchOpenCloseProc: TProcedure = nil;
+{$ENDIF}
+
+{$IFDEF IDE_SUPPORT_HDPI}
+var
+  FOriginImages: TObjectList = nil;
+  FVirtualImages: TObjectList = nil;
+  FImageCollections: TObjectList = nil;
 {$ENDIF}
 
 {$IFDEF IDE_SWITCH_BUG}
@@ -3404,10 +3420,70 @@ begin
     TControlHack(Combo).Font.Size := csLargeComboFontSize;
 end;
 
+{$IFDEF IDE_SUPPORT_HDPI}
+
+function IdeGetVirtualImageListFromOrigin(Origin: TCustomImageList;
+  AControl: TControl): TVirtualImageList;
+var
+  Idx: Integer;
+  AVL: TVirtualImageList;
+  AIC: TImageCollection;
+begin
+  Result := nil;
+  if Origin = nil then
+    Exit;
+
+  if Origin.Count = 0 then
+    Exit;
+
+  Idx := FOriginImages.IndexOf(Origin);
+  if (Idx >= 0) and (Idx < FVirtualImages.Count) then
+  begin
+    Result := TVirtualImageList(FVirtualImages[Idx]);
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('IdeGetVirtualImageListFromOrigin Existing Result Index %d', [Idx]);
+{$ENDIF}
+    Exit;
+  end;
+
+  AVL := TVirtualImageList.Create(Application);
+  AIC := TImageCollection.Create(Application);
+  AVL.ImageCollection := AIC;
+
+  FOriginImages.Add(Origin);
+  FVirtualImages.Add(AVL);
+  FImageCollections.Add(AIC);
+
+  if WizOptions.UseLargeIcon then
+  begin
+    AVL.Width := IdeGetScaledPixelsFromOrigin(csLargeImageListWidth, AControl);
+    AVL.Height := IdeGetScaledPixelsFromOrigin(csLargeImageListHeight, AControl);
+  end
+  else
+  begin
+    AVL.Width := IdeGetScaledPixelsFromOrigin(Origin.Width, AControl);
+    AVL.Height := IdeGetScaledPixelsFromOrigin(Origin.Height, AControl);
+  end;
+
+  CopyImageListToVirtual(Origin, AVL);
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('IdeGetVirtualImageListFromOrigin New Result Index %d', [FVirtualImages.Count - 1]);
+{$ENDIF}
+  Result := AVL;
+end;
+
+{$ENDIF}
+
 initialization
   // 使用此全局变量可以避免频繁调用 IdeGetIsEmbeddedDesigner 函数
   IdeIsEmbeddedDesigner := IdeGetIsEmbeddedDesigner;
   InitIdeAPIs;
+
+{$IFDEF IDE_SUPPORT_HDPI}
+  FOriginImages := TObjectList.Create(False);
+  FVirtualImages := TObjectList.Create(False);
+  FImageCollections := TObjectList.Create(False);
+{$ENDIF}
 
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('Initialization Done: CnWizIdeUtils.');
@@ -3416,6 +3492,12 @@ initialization
 finalization
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('CnWizIdeUtils finalization.');
+{$ENDIF}
+
+{$IFDEF IDE_SUPPORT_HDPI}
+  FImageCollections.Free;
+  FVirtualImages.Free;
+  FOriginImages.Free;
 {$ENDIF}
 
 {$IFDEF IDE_SWITCH_BUG}

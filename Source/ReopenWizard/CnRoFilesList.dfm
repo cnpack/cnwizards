@@ -1,8 +1,9 @@
 inherited CnFilesListForm: TCnFilesListForm
   Top = 131
-  Width = 786
-  Height = 568
   Anchors = [akLeft, akTop, akRight, akBottom]
+  AutoScroll = False
+  ClientHeight = 529
+  ClientWidth = 770
   Caption = 'Open Historical Files'
   Icon.Data = {
     0000010001002020100000000000E80200001600000028000000200000004000
