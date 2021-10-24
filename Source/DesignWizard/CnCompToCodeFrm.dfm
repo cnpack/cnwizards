@@ -1,9 +1,10 @@
 inherited CnCompToCodeForm: TCnCompToCodeForm
   Left = 439
   Top = 170
-  Width = 623
-  Height = 553
+  AutoScroll = False
   Caption = 'Convert Selected Components to Code'
+  ClientHeight = 526
+  ClientWidth = 615
   Icon.Data = {
     0000010001002020000001001800A80C00001600000028000000200000004000
     00000100180000000000800C0000000000000000000000000000000000000000

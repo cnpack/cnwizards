@@ -1,8 +1,9 @@
 inherited CnStatResultForm: TCnStatResultForm
   Top = 85
-  Width = 791
-  Height = 513
+  AutoScroll = False
   Caption = 'Source Code Statistic Wizard'
+  ClientHeight = 467
+  ClientWidth = 783
   Constraints.MinHeight = 450
   Constraints.MinWidth = 600
   Menu = MainMenu
