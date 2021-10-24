@@ -186,8 +186,16 @@ implementation
 
 {$R *.DFM}
 
+{$IFNDEF STAND_ALONE}
 uses
-  {$IFDEF DEBUG} CnDebug, {$ENDIF} CnWizShareImages;
+  CnWizShareImages {$IFDEF DEBUG}, CnDebug {$ENDIF};
+{$ELSE}
+{$IFDEF DEBUG}
+uses
+  CnDebug;
+{$ENDIF}
+{$ENDIF}
+
 
 type
   TControlHack = class(TControl);
@@ -445,12 +453,14 @@ begin
   end;
 {$ENDIF}
 
+{$IFNDEF STAND_ALONE}
 {$IFDEF IDE_SUPPORT_HDPI}
   if Menu <> nil then
   begin
     if Menu.Images = dmCnSharedImages.Images then
       Menu.Images := dmCnSharedImages.VirtualImages;
   end;
+{$ENDIF}
 {$ENDIF}
 
   ProcessSizeEnlarge;
