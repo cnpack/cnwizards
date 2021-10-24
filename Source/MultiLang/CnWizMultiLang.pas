@@ -26,6 +26,7 @@ unit CnWizMultiLang;
 * 单元作者：刘啸（LiuXiao） liuxiao@cnpack.org
 * 备    注：OldCreateOrder 必须为 False，才能正常调整边距
 *           AutoScroll 必须为 False，才能正常缩放
+*           所以要检查凡是 Sizable 的 Form，AutoScroll自动为 True，要手工改回来。
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
@@ -185,10 +186,8 @@ implementation
 
 {$R *.DFM}
 
-{$IFDEF DEBUG}
 uses
-  CnDebug;
-{$ENDIF}
+  {$IFDEF DEBUG} CnDebug, {$ENDIF} CnWizShareImages;
 
 type
   TControlHack = class(TControl);
@@ -443,6 +442,14 @@ begin
 {$IFDEF DEBUG}
     CnDebugger.LogMsg(ClassName + ' Apply Theme Error!');
 {$ENDIF}
+  end;
+{$ENDIF}
+
+{$IFDEF IDE_SUPPORT_HDPI}
+  if Menu <> nil then
+  begin
+    if Menu.Images = dmCnSharedImages.Images then
+      Menu.Images := dmCnSharedImages.VirtualImages;
   end;
 {$ENDIF}
 

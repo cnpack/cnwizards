@@ -1,9 +1,10 @@
 inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
   Left = 263
   Top = 143
-  Width = 830
-  Height = 578
+  AutoScroll = False
   Caption = 'Uses Initialization Tree'
+  ClientHeight = 519
+  ClientWidth = 814
   Font.Charset = ANSI_CHARSET
   Icon.Data = {
     0000010001001010100000000000280100001600000028000000100000002000
@@ -76,7 +77,7 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
   object pnlTop: TPanel
     Left = 0
     Top = 0
-    Width = 822
+    Width = 814
     Height = 28
     Align = alTop
     BevelOuter = bvNone
@@ -275,8 +276,8 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
   end
   object statUses: TStatusBar
     Left = 0
-    Top = 513
-    Width = 822
+    Top = 500
+    Width = 814
     Height = 19
     Panels = <>
     SimplePanel = True

@@ -1,9 +1,10 @@
 inherited CnSourceDiffForm: TCnSourceDiffForm
   Left = 244
   Top = 100
-  Width = 768
-  Height = 539
+  AutoScroll = False
   Caption = 'Source Code Compare'
+  ClientHeight = 480
+  ClientWidth = 752
   Menu = MainMenu
   OnClose = FormClose
   OnCreate = FormCreate
@@ -15,7 +16,7 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
     Left = 733
     Top = 30
     Width = 19
-    Height = 432
+    Height = 431
     Align = alRight
     BevelInner = bvRaised
     BevelOuter = bvLowered
@@ -25,7 +26,7 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
       Left = 8
       Top = 2
       Width = 9
-      Height = 428
+      Height = 427
       Align = alClient
       Color = clBtnFace
       ParentColor = False
@@ -36,7 +37,7 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
       Left = 2
       Top = 2
       Width = 6
-      Height = 428
+      Height = 427
       Align = alLeft
       Color = clBtnFace
       ParentColor = False
@@ -47,14 +48,14 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
     Left = 0
     Top = 30
     Width = 733
-    Height = 432
+    Height = 431
     Align = alClient
     BevelOuter = bvNone
     Caption = 'Panel1'
     TabOrder = 1
     object Splitter2: TSplitter
       Left = 0
-      Top = 350
+      Top = 349
       Width = 733
       Height = 3
       Cursor = crVSplit
@@ -64,7 +65,7 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
       Left = 0
       Top = 0
       Width = 733
-      Height = 350
+      Height = 349
       Align = alClient
       BevelOuter = bvNone
       Caption = 'pnlMain'
@@ -73,14 +74,14 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
         Left = 361
         Top = 0
         Width = 3
-        Height = 350
+        Height = 349
         Cursor = crHSplit
       end
       object pnlLeft: TPanel
         Left = 0
         Top = 0
         Width = 361
-        Height = 350
+        Height = 349
         Align = alLeft
         BevelOuter = bvNone
         Caption = 'pnlLeft'
@@ -203,7 +204,7 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
         Left = 364
         Top = 0
         Width = 369
-        Height = 350
+        Height = 349
         Align = alClient
         BevelOuter = bvNone
         Caption = 'pnlRight'
@@ -325,7 +326,7 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
     end
     object pnlMerge: TPanel
       Left = 0
-      Top = 353
+      Top = 352
       Width = 733
       Height = 79
       Align = alBottom
@@ -337,7 +338,7 @@ inherited CnSourceDiffForm: TCnSourceDiffForm
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Top = 462
+    Top = 461
     Width = 752
     Height = 19
     Panels = <
