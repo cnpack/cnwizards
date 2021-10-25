@@ -626,10 +626,10 @@ begin
   inherited;
   FLastItem := -1;
 
-  Constraints.MinHeight := WizOptions.CalcIntEnlargedValue(WizOptions.SizeEnlarge, ItemHeight * csMinDispItems + 4);
-  Constraints.MinWidth := WizOptions.CalcIntEnlargedValue(WizOptions.SizeEnlarge, csMinDispWidth);
-  Height := WizOptions.CalcIntEnlargedValue(WizOptions.SizeEnlarge, ItemHeight * csDefDispItems + 8);
-  Width := WizOptions.CalcIntEnlargedValue(WizOptions.SizeEnlarge, csDefDispWidth);
+  Constraints.MinHeight := IdeGetScaledPixelsFromOrigin(WizOptions.CalcIntEnlargedValue(WizOptions.SizeEnlarge, ItemHeight * csMinDispItems + 4));
+  Constraints.MinWidth := IdeGetScaledPixelsFromOrigin(WizOptions.CalcIntEnlargedValue(WizOptions.SizeEnlarge, csMinDispWidth));
+  Height := IdeGetScaledPixelsFromOrigin(WizOptions.CalcIntEnlargedValue(WizOptions.SizeEnlarge, ItemHeight * csDefDispItems + 8));
+  Width := IdeGetScaledPixelsFromOrigin(WizOptions.CalcIntEnlargedValue(WizOptions.SizeEnlarge, csDefDispWidth));
 
   CreateExtraForm;
 {$IFDEF IDE_MAINFORM_EAT_MOUSEWHEEL}
@@ -2852,7 +2852,11 @@ begin
       Kind := dmCnSharedImages.SymbolImages.Count - 1;
 
     Canvas.FillRect(Rect);
+{$IFDEF IDE_SUPPORT_HDPI}
+    Menu.Images.Draw(Canvas, Rect.Left + 2, Rect.Top, Kind);
+{$ELSE}
     dmCnSharedImages.SymbolImages.Draw(Canvas, Rect.Left + 2, Rect.Top, Kind);
+{$ENDIF}
     Canvas.Brush.Style := bsClear;
     Canvas.Font.Style := Canvas.Font.Style + [fsBold];
 
@@ -2934,7 +2938,11 @@ var
   end;
 
 begin
+{$IFDEF IDE_SUPPORT_HDPI}
   Menu.Images := IdeGetVirtualImageListFromOrigin(dmCnSharedImages.SymbolImages);
+{$ELSE}
+  Menu.Images := dmCnSharedImages.SymbolImages;
+{$ENDIF}
   Menu.Items.Clear;
 
   AutoMenuItem := NewMenuItem(SCnInputHelperAutoPopup, Click);
@@ -3411,6 +3419,10 @@ var
         S := S + 2
       else
         S := 16; // ื๎ะก 16
+
+{$IFDEF IDE_SUPPORT_HDPI}
+      Inc(S, 2);
+{$ENDIF}
 
       if S <> List.ItemHeight then
       begin
