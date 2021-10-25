@@ -646,13 +646,14 @@ begin
   FBtnForm := TCnFloatWindow.Create(Self);
   BtnForm.Parent := Application.MainForm;
   BtnForm.Visible := False;
-  BtnForm.Width := csBtnWidth;
-  BtnForm.Height := csBtnHeight * (Ord(High(TCnInputButton)) + 1);
+  BtnForm.Width := IdeGetScaledPixelsFromOrigin(csBtnWidth);
+  BtnForm.Height := IdeGetScaledPixelsFromOrigin(csBtnHeight * (Ord(High(TCnInputButton)) + 1));
   for Btn := Low(Btn) to High(Btn) do
   begin
     SpeedBtn := TSpeedButton.Create(BtnForm);
     SpeedBtn.Parent := BtnForm;
-    SpeedBtn.SetBounds(0, Ord(Btn) * csBtnHeight, csBtnWidth, csBtnHeight);
+    SpeedBtn.SetBounds(0, IdeGetScaledPixelsFromOrigin(Ord(Btn) * csBtnHeight),
+      IdeGetScaledPixelsFromOrigin(csBtnWidth), IdeGetScaledPixelsFromOrigin(csBtnHeight));
     SpeedBtn.Tag := Ord(Btn);
     SpeedBtn.ShowHint := True;
     SpeedBtn.Hint := StripHotkey(SCnInputButtonHints[Btn]^);
@@ -2857,9 +2858,11 @@ begin
 
     AText := SymbolItem.GetKeywordText(KeywordStyle);
     if FMatchMode in [mmStart, mmAnywhere] then
-      DrawMatchText(Canvas, FMatchStr, AText, Rect.Left + LEFT_ICON, Rect.Top, MatchColor)
+      DrawMatchText(Canvas, FMatchStr, AText, Rect.Left +
+        IdeGetScaledPixelsFromOrigin(LEFT_ICON, Control), Rect.Top, MatchColor)
     else
-      DrawMatchText(Canvas, FMatchStr, AText, Rect.Left + LEFT_ICON, Rect.Top,
+      DrawMatchText(Canvas, FMatchStr, AText, Rect.Left +
+        IdeGetScaledPixelsFromOrigin(LEFT_ICON, Control), Rect.Top,
         MatchColor, SymbolItem.FuzzyMatchIndexes);
 
     TextWith := Canvas.TextWidth(AText);
@@ -2874,7 +2877,8 @@ begin
         Canvas.Font.Color := List.FontColor;
     end;
 
-    Canvas.TextOut(Rect.Left + DESC_INTERVAL + TextWith, Rect.Top, SymbolItem.Description);
+    Canvas.TextOut(Rect.Left + IdeGetScaledPixelsFromOrigin(DESC_INTERVAL, Control)
+      + TextWith, Rect.Top, SymbolItem.Description);
   end;
 end;
 
@@ -2930,7 +2934,7 @@ var
   end;
 
 begin
-  Menu.Images := dmCnSharedImages.SymbolImages;
+  Menu.Images := IdeGetVirtualImageListFromOrigin(dmCnSharedImages.SymbolImages);
   Menu.Items.Clear;
 
   AutoMenuItem := NewMenuItem(SCnInputHelperAutoPopup, Click);
