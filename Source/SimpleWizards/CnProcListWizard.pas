@@ -3023,38 +3023,6 @@ var
   EditView: IOTAEditView;
   Buffer: IOTAEditBuffer;
 {$ENDIF}
-
-  procedure SetMemoSelection;
-  var
-    L, I: Integer;
-{$IFDEF DELPHI2007}
-    J, Len: Integer;
-{$ENDIF}
-  begin
-    if mmoContent.Lines.Count > CnBeforeLine then // 有待显示内容
-    begin
-      L := 0;
-      for I := 0 to CnBeforeLine - 1 do
-      begin
-{$IFDEF DELPHI2007}
-        Len := Length(mmoContent.Lines[I]);
-        for J := 0 to Length(mmoContent.Lines[I]) - 1 do
-        begin
-          if Ord(mmoContent.Lines[I][J]) < 128 then
-            Inc(Len);
-        end;
-        Len := Len div 2;
-        L := L + Len + 2;
-{$ELSE}
-        L := L + Length(mmoContent.Lines[I]) + 2;
-{$ENDIF}
-      end;
-
-      mmoContent.SelStart := L;
-      mmoContent.SelLength := Length(mmoContent.Lines[CnBeforeLine]);
-    end;
-  end;
-
 begin
   ProcInfo := nil;
   if lvList.Selected <> nil then
@@ -3098,7 +3066,7 @@ begin
                 // 此方法不适于未打开的工程源文件
                 mmoContent.Lines.Text := CnOtaGetLineText(ProcInfo.LineNo - CnBeforeLine,
                   Buffer, CnBeforeLine + AfterLine);
-                SetMemoSelection;
+                SelectMemoOneLine(mmoContent, CnBeforeLine);
                 Exit;
               end;
             end;
@@ -3112,7 +3080,7 @@ begin
     begin
       mmoContent.Lines.Text := CnOtaGetLineText(ProcInfo.LineNo - CnBeforeLine,
         nil, CnBeforeLine + AfterLine);
-      SetMemoSelection;
+      SelectMemoOneLine(mmoContent, CnBeforeLine);
     end;
 {$ELSE}
     mmoContent.Lines.Clear;
@@ -3127,7 +3095,7 @@ begin
         mmoContent.Lines.Add(Wizard.FLines[K]);
       mmoContent.Lines.EndUpdate;
 
-      SetMemoSelection;
+      SelectMemoOneLine(mmoContent, CnBeforeLine);
     end;
 {$ENDIF}
   end
