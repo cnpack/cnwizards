@@ -28,10 +28,12 @@ unit CnBookmarkWizard;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 修改记录：2008.06.28 V1.2
+* 修改记录：2021.10.29 V1.3
+*               将 RichEdit 换成 Memo
+*           2008.06.28 V1.2
 *               综合处理 Close all 时与关闭标签页时通知的问题，感谢 Chide Ng
 *           2002.12.10 V1.2
-*               修正98/Me下RichEdit闪烁的问题
+*               修正 98/Me 下 RichEdit 闪烁的问题
 *           2002.11.23 V1.1
 *               源代码允许高亮显示书签行
 *           2002.11.20 V1.0
@@ -85,7 +87,7 @@ type
     Panel1: TPanel;
     Splitter: TSplitter;
     ListView: TListView;
-    RichEdit: TRichEdit;
+    mmoPreview: TMemo;
     tbConfig: TToolButton;
     ToolButton3: TToolButton;
     btnRefresh: TToolButton;
@@ -135,7 +137,6 @@ type
     procedure DoSaveWindowState(Desktop: TCustomIniFile; IsProject: Boolean); override;
     procedure DoLanguageChanged(Sender: TObject); override;
   public
-    { Public declarations }
     procedure UpdateConfig;
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -623,7 +624,7 @@ begin
   FWizard := TCnBookmarkWizard(CnWizardMgr.WizardByClass(TCnBookmarkWizard));
   Icon := FWizard.Icon;
   ShowHint := WizOptions.ShowHint;
-  RichEdit.Height := FWizard.FRichEditHeight;
+  mmoPreview.Height := FWizard.FRichEditHeight;
   if FWizard.FListFont.Name <> '' then
     ListView.Font := FWizard.FListFont;
   SetListViewWidthString(ListView, FWizard.FWidthString, GetFactorFromSizeEnlarge(Enlarge));
@@ -917,12 +918,13 @@ end;
 procedure TCnBookmarkForm.UpdatePreview;
 var
   Line1, Line2, Line3: string;
+  FromLine: Integer;
   Buffer: IOTAEditBuffer;
 begin
   if FUpdateCount > 0 then Exit;
-  RichEdit.Perform(WM_SETREDRAW, 0, 0);
+  mmoPreview.Perform(WM_SETREDRAW, 0, 0);
   try
-    RichEdit.Clear;
+    mmoPreview.Clear;
     if Assigned(ListView.Selected) then
     with TCnBookmarkObj(ListView.Selected.Data) do
     begin
@@ -934,37 +936,16 @@ begin
         Line2 := CnOtaGetLineText(Pos.Line, Buffer, 1);
         Line3 := CnOtaGetLineText(Pos.Line + 1, Buffer, FWizard.FDispLines);
 
-        if Length(Line1) > 0 then
-        begin
-          RichEdit.SelAttributes.Assign(FWizard.FSourceFont);
-          try
-            RichEdit.Lines.Add(Line1);
-          except
-            ;
-          end;
-        end;
-
-        RichEdit.SelAttributes.Assign(FWizard.FHighlightFont);
-        try
-          RichEdit.Lines.Add(Line2);
-        except
-          ;
-        end;
-
-        if Length(Line3) > 0 then
-        begin
-          RichEdit.SelAttributes.Assign(FWizard.FSourceFont);
-          try
-            RichEdit.Lines.Add(Line3);
-          except
-            ;
-          end;
-        end;
+        mmoPreview.Lines.Add(Line1);
+        FromLine := mmoPreview.Lines.Count;
+        mmoPreview.Lines.Add(Line2);
+        mmoPreview.Lines.Add(Line3);
+        SelectMemoOneLine(mmoPreview, FromLine);
       end;
     end;
   finally
-    RichEdit.Perform(WM_SETREDRAW, 1, 0);
-    RichEdit.Invalidate;
+    mmoPreview.Perform(WM_SETREDRAW, 1, 0);
+    mmoPreview.Invalidate;
   end;
 end;
 
@@ -1086,7 +1067,7 @@ end;
 procedure TCnBookmarkForm.DoLoadWindowState(Desktop: TCustomIniFile);
 begin
   inherited;
-  RichEdit.Height := Desktop.ReadInteger(csBrowseForm, csEditHeight, RichEdit.Height);
+  mmoPreview.Height := Desktop.ReadInteger(csBrowseForm, csEditHeight, mmoPreview.Height);
   SetListViewWidthString(ListView, Desktop.ReadString(csBrowseForm, csColumnWidth, ''),
     GetFactorFromSizeEnlarge(Enlarge));
 end;
@@ -1095,7 +1076,7 @@ procedure TCnBookmarkForm.DoSaveWindowState(Desktop: TCustomIniFile;
   IsProject: Boolean);
 begin
   inherited;
-  Desktop.WriteInteger(csBrowseForm, csEditHeight, RichEdit.Height);
+  Desktop.WriteInteger(csBrowseForm, csEditHeight, mmoPreview.Height);
   Desktop.WriteString(csBrowseForm, csColumnWidth, GetListViewWidthString(ListView, GetFactorFromSizeEnlarge(Enlarge)));
 end;
 
@@ -1131,7 +1112,7 @@ end;
 
 procedure TCnBookmarkForm.SyncSettings;
 begin
-  FWizard.FRichEditHeight := RichEdit.Height;
+  FWizard.FRichEditHeight := mmoPreview.Height;
   FWizard.FWidthString := GetListViewWidthString(ListView, GetFactorFromSizeEnlarge(Enlarge));
 end;
 

@@ -171,19 +171,19 @@ inherited CnBookmarkForm: TCnBookmarkForm
       OnChange = ListViewChange
       OnDblClick = ListViewDblClick
     end
-    object RichEdit: TRichEdit
+    object mmoPreview: TMemo
       Left = 0
       Top = 248
       Width = 507
       Height = 99
       Align = alBottom
+      Constraints.MinHeight = 30
       Font.Charset = GB2312_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
       Font.Name = 'Tahoma'
       Font.Style = []
-      HideScrollBars = False
-      Constraints.MinHeight = 30
+      HideSelection = False
       ParentFont = False
       ReadOnly = True
       ScrollBars = ssBoth
