@@ -505,6 +505,9 @@ procedure WarningDlg(Mess: string); overload;
 function QueryDlg(Mess: string; DefaultNo: Boolean): Boolean; overload;
 {* 显示查询是否窗口}
 
+procedure LongMessageDlg(const Mess: string; AutoWrap: Boolean; const Caption: string);
+{* 用 Memo 显示长字符串或多行字符串}
+
 function CnInputQuery(const ACaption, APrompt: string;
   var Value: string; Ini: TCustomIniFile; const Section: string): Boolean;
 {* 输入对话框}
@@ -1240,6 +1243,10 @@ begin
 end;
 
 function QueryDlg(Mess: string; DefaultNo: Boolean): Boolean; overload;
+begin
+end;
+
+procedure LongMessageDlg(const Mess: string; AutoWrap: Boolean; const Caption: string);
 begin
 end;
 

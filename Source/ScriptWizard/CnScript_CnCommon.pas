@@ -193,11 +193,12 @@ begin
   CL.AddDelphiFunction('Function IsNumLockDown : Boolean');
   CL.AddDelphiFunction('Function IsScrollLockDown : Boolean');
   CL.AddDelphiFunction('Function RemoveClassPrefix( const ClassName : string) : string');
-  CL.AddDelphiFunction('Procedure InfoDlg( Mess : string);');
-  CL.AddDelphiFunction('Function InfoOk( Mess : string) : Boolean;');
-  CL.AddDelphiFunction('Procedure ErrorDlg( Mess : string);');
-  CL.AddDelphiFunction('Procedure WarningDlg( Mess : string);');
-  CL.AddDelphiFunction('Function QueryDlg( Mess : string; DefaultNo : Boolean) : Boolean;');
+  CL.AddDelphiFunction('Procedure InfoDlg( Mess : string)');
+  CL.AddDelphiFunction('Function InfoOk( Mess : string) : Boolean');
+  CL.AddDelphiFunction('Procedure ErrorDlg( Mess : string)');
+  CL.AddDelphiFunction('Procedure WarningDlg( Mess : string)');
+  CL.AddDelphiFunction('Function QueryDlg( Mess : string; DefaultNo : Boolean) : Boolean');
+  CL.AddDelphiFunction('procedure LongMessageDlg( const Mess : string; AutoWrap : Boolean; const Caption : string)');
   CL.AddDelphiFunction('Function CnInputQuery( const ACaption, APrompt : string; var Value : string; Ini : TCustomIniFile; const Section : string) : Boolean');
   CL.AddDelphiFunction('Function CnInputBox( const ACaption, APrompt, ADefault : string; Ini : TCustomIniFile; const Section : string) : string');
   CL.AddDelphiFunction('Function GetYear( Date : TDate) : Integer');
@@ -441,6 +442,7 @@ begin
   S.RegisterDelphiFunction(@ErrorDlg_P, 'ErrorDlg', cdRegister);
   S.RegisterDelphiFunction(@WarningDlg_P, 'WarningDlg', cdRegister);
   S.RegisterDelphiFunction(@QueryDlg_P, 'QueryDlg', cdRegister);
+  S.RegisterDelphiFunction(@LongMessageDlg, 'LongMessageDlg', cdRegister);
   S.RegisterDelphiFunction(@CnInputQuery, 'CnInputQuery', cdRegister);
   S.RegisterDelphiFunction(@CnInputBox, 'CnInputBox', cdRegister);
   S.RegisterDelphiFunction(@GetYear, 'GetYear', cdRegister);
