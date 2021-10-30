@@ -18,7 +18,7 @@
 {                                                                              }
 {******************************************************************************}
 
-unit CnTestUsesInitTreeWizard;
+unit CnTestUsesToolsWizard;
 { |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包测试用例
@@ -45,12 +45,12 @@ uses
 type
 
 //==============================================================================
-// CnTestUsesInitTreeWizard 菜单专家
+// CnTestUsesToolsWizard 菜单专家
 //==============================================================================
 
-{ TCnTestUsesInitTreeWizard }
+{ TCnTestUsesToolsWizard }
 
-  TCnTestUsesInitTreeWizard = class(TCnSubMenuWizard)
+  TCnTestUsesToolsWizard = class(TCnSubMenuWizard)
   private
     FTreeId: Integer;
     FEnumId: Integer;
@@ -112,17 +112,17 @@ begin
 end;
 
 //==============================================================================
-// CnTestUsesInitTreeWizard 子菜单专家
+// CnTestUsesToolsWizard 子菜单专家
 //==============================================================================
 
-{ TCnTestUsesInitTreeWizard }
+{ TCnTestUsesToolsWizard }
 
-procedure TCnTestUsesInitTreeWizard.Config;
+procedure TCnTestUsesToolsWizard.Config;
 begin
   ShowMessage('No Option for this Test Case.');
 end;
 
-constructor TCnTestUsesInitTreeWizard.Create;
+constructor TCnTestUsesToolsWizard.Create;
 begin
   inherited;
   FFileNames := TStringList.Create;
@@ -130,7 +130,7 @@ begin
   FTree := TCnTree.Create(TCnUsesLeaf);
 end;
 
-destructor TCnTestUsesInitTreeWizard.Destroy;
+destructor TCnTestUsesToolsWizard.Destroy;
 begin
   FTree.Free;
   FLibPaths.Free;
@@ -138,7 +138,7 @@ begin
   inherited;
 end;
 
-procedure TCnTestUsesInitTreeWizard.InitTreeExecute;
+procedure TCnTestUsesToolsWizard.InitTreeExecute;
 var
   Proj: IOTAProject;
   I: Integer;
@@ -185,50 +185,50 @@ begin
   end;
 end;
 
-function TCnTestUsesInitTreeWizard.GetCaption: string;
+function TCnTestUsesToolsWizard.GetCaption: string;
 begin
-  Result := 'Test Uses Init Tree';
+  Result := 'Test Uses Tools';
 end;
 
-function TCnTestUsesInitTreeWizard.GetDefShortCut: TShortCut;
+function TCnTestUsesToolsWizard.GetDefShortCut: TShortCut;
 begin
   Result := 0;
 end;
 
-function TCnTestUsesInitTreeWizard.GetHasConfig: Boolean;
+function TCnTestUsesToolsWizard.GetHasConfig: Boolean;
 begin
   Result := True;
 end;
 
-function TCnTestUsesInitTreeWizard.GetHint: string;
+function TCnTestUsesToolsWizard.GetHint: string;
 begin
   Result := 'Test Hint';
 end;
 
-function TCnTestUsesInitTreeWizard.GetState: TWizardState;
+function TCnTestUsesToolsWizard.GetState: TWizardState;
 begin
   Result := [wsEnabled];
 end;
 
-class procedure TCnTestUsesInitTreeWizard.GetWizardInfo(var Name, Author, Email, Comment: string);
+class procedure TCnTestUsesToolsWizard.GetWizardInfo(var Name, Author, Email, Comment: string);
 begin
-  Name := 'Test Uses Init Tree Menu Wizard';
+  Name := 'Test Uses Tools Wizard';
   Author := 'CnPack IDE Wizards';
   Email := 'master@cnpack.org';
   Comment := '';
 end;
 
-procedure TCnTestUsesInitTreeWizard.LoadSettings(Ini: TCustomIniFile);
+procedure TCnTestUsesToolsWizard.LoadSettings(Ini: TCustomIniFile);
 begin
 
 end;
 
-procedure TCnTestUsesInitTreeWizard.SaveSettings(Ini: TCustomIniFile);
+procedure TCnTestUsesToolsWizard.SaveSettings(Ini: TCustomIniFile);
 begin
 
 end;
 
-procedure TCnTestUsesInitTreeWizard.SearchAUnit(const AFullDcuName, AFullSourceName: string;
+procedure TCnTestUsesToolsWizard.SearchAUnit(const AFullDcuName, AFullSourceName: string;
   ProcessedFiles: TStrings; UnitLeaf: TCnLeaf; Tree: TCnTree; AProject: IOTAProject);
 var
   St: TCnModuleSearchType;
@@ -304,7 +304,7 @@ begin
   end;
 end;
 
-procedure TCnTestUsesInitTreeWizard.SubActionExecute(Index: Integer);
+procedure TCnTestUsesToolsWizard.SubActionExecute(Index: Integer);
 begin
   if Index =   FTreeId then
     InitTreeExecute
@@ -312,13 +312,13 @@ begin
     EnumExecute;
 end;
 
-procedure TCnTestUsesInitTreeWizard.AcquireSubActions;
+procedure TCnTestUsesToolsWizard.AcquireSubActions;
 begin
   FTreeId := RegisterASubAction('TestUsesInitTree', 'Test Uses Init Tree');
   FEnumId := RegisterASubAction('TestEnumUses', 'Test Enum Uses');
 end;
 
-procedure TCnTestUsesInitTreeWizard.EnumExecute;
+procedure TCnTestUsesToolsWizard.EnumExecute;
 var
   Sl, OldNames: TStringList;
   I, Idx: Integer;
@@ -358,7 +358,7 @@ begin
   Sl.Free;
 end;
 
-procedure TCnTestUsesInitTreeWizard.UsesCallback(
+procedure TCnTestUsesToolsWizard.UsesCallback(
   const AUnitFullName: string; Exists: Boolean; FileType: TCnUsesFileType;
   ModuleSearchType: TCnModuleSearchType);
 const
@@ -380,6 +380,6 @@ begin
 end;
 
 initialization
-  RegisterCnWizard(TCnTestUsesInitTreeWizard); // 注册此测试专家
+  RegisterCnWizard(TCnTestUsesToolsWizard); // 注册此测试专家
 
 end.
