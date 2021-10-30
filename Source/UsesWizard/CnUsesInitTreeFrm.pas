@@ -163,8 +163,7 @@ const
 
   csSearchTypeStrings: array[Low(TCnModuleSearchType)..High(TCnModuleSearchType)] of PString =
     (nil, @SCnUsesInitTreeSearchInProject, @SCnUsesInitTreeSearchInProjectSearch,
-    @SCnUsesInitTreeSearchInSystemSearch, @SCnUsesInitTreeSearchInSystemSearch);
-    // 系统设置搜索路径与系统安装搜索路径搁一块
+    @SCnUsesInitTreeSearchInSystemSearch);
 
 type
   TCnUsesLeaf = class(TCnLeaf)
@@ -430,7 +429,7 @@ begin
     Node := tvTree.Items[I];
     Leaf := TCnUsesLeaf(Node.Data);
 
-    if not chkSystemPath.Checked and (Leaf.SearchType in [mstSystemSearch, mstSystemLib]) then
+    if not chkSystemPath.Checked and (Leaf.SearchType = mstSystemSearch) then
       tvTree.Items.Delete(Node)
     else if not chkProjectPath.Checked and (Leaf.SearchType = mstProjectSearch) then
       tvTree.Items.Delete(Node);

@@ -175,7 +175,7 @@ begin
     case (FTree.Items[I] as TCnUsesLeaf).SearchType of
       mstInProject: S := S + ' | (In Project)';
       mstProjectSearch: S := S + ' | (In Project Search Path)';
-      mstSystemSearch, mstSystemLib: S := S + ' | (In System Path)';
+      mstSystemSearch: S := S + ' | (In System Path)';
     end;
 
     if (FTree.Items[I] as TCnUsesLeaf).IsImpl then
@@ -320,8 +320,8 @@ end;
 
 procedure TCnTestUsesInitTreeWizard.EnumExecute;
 var
-  Sl: TStringList;
-  I: Integer;
+  Sl, OldNames: TStringList;
+  I, Idx: Integer;
 begin
   FUnits := TStringList.Create;
   FSysDcus := TStringList.Create;
@@ -331,20 +331,26 @@ begin
   FUnits.Free;
 
   Sl := TStringList.Create;
+  OldNames := TStringList.Create;
+
+  FSysDcus.Sort;
 
   for I := 0 to FSysDcus.Count - 1 do
   begin
     Sl.Add(_CnExtractFilePath(FSysDcus[I]));
     FSysDcus[I] := _CnChangeFileExt(_CnExtractFileName(FSysDcus[I]), '');
+    OldNames.Add(FSysDcus[I]); // 拆分保留原有的路径与文件名
   end;
-  LongMessageDlg(FSysDcus.Text);
+    LongMessageDlg(FSysDcus.Text);
 
-  FSysDcus.Sorted := True;
-  CorrectCaseFromIdeModules(FSysDcus); // 只支持纯文件名
+  CorrectCaseFromIdeModules(FSysDcus); // 只支持纯文件名，还会给你排好序
   FSysDcus.Sorted := False;
 
   for I := 0 to FSysDcus.Count - 1 do
-    FSysDcus[I] := MakePath(Sl[I]) + FSysDcus[I] + '.dcu';
+  begin
+    Idx := OldNames.IndexOf(FSysDcus[I]); // 根据更改后的文件名找到原来对应的路径
+    FSysDcus[I] := MakePath(Sl[Idx]) + FSysDcus[I] + '.dcu';
+  end;
 
   LongMessageDlg(FSysDcus.Text);
 
@@ -359,7 +365,7 @@ const
   USES_FILE_TYPES: array[TCnUsesFileType] of string =
     ('Invalid', 'Pascal Source', 'Pascal Dcu', 'Cpp Header');
   MODULE_SEARCH_TYPES: array[TCnModuleSearchType] of string =
-    ('Invalid', 'In ProjectGroup', 'In Project Search Paths', 'In System Paths', 'In System Library');
+    ('Invalid', 'In ProjectGroup', 'In Project Search Paths', 'In System Paths');
 var
   S: string;
 begin
@@ -369,7 +375,7 @@ begin
   S := S + ' | ' + USES_FILE_TYPES[FileType] + ' | ' + MODULE_SEARCH_TYPES[ModuleSearchType];
   FUnits.Add(S);
 
-  if (FileType = uftPascalDcu) and (ModuleSearchType = mstSystemLib) then
+  if (FileType = uftPascalDcu) and (ModuleSearchType = mstSystemSearch) then
     FSysDcus.Add(AUnitFullName);
 end;
 

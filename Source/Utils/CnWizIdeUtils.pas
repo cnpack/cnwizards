@@ -205,8 +205,8 @@ type
   TXTreeView = TTreeView;
 {$ENDIF BDS}
 
-  TCnModuleSearchType = (mstInvalid, mstInProject, mstProjectSearch, mstSystemSearch, mstSystemLib);
-  {* 搜索到的源码位置类型：非法、工程内、工程搜索目录内、系统搜索目录内、安装目录的系统库内}
+  TCnModuleSearchType = (mstInvalid, mstInProject, mstProjectSearch, mstSystemSearch);
+  {* 搜索到的源码位置类型：非法、工程内、工程搜索目录内、系统搜索目录内（包括安装目录的系统库）}
 
   TCnModuleSearchTypes = set of TCnModuleSearchType;
 
@@ -478,7 +478,7 @@ function GetErrorInsightRenderStyle: Integer;
    -1 为不支持，1 时会影响编辑器行高，影响程度和显示 Leve 以及是否侧边栏显示均无关}
 
 function IdeEnumUsesIncludeUnits(UnitCallback: TCnUnitCallback; IsCpp: Boolean = False;
-  SearchTypes: TCnModuleSearchTypes = [mstInProject, mstProjectSearch, mstSystemSearch, mstSystemLib]): Boolean;
+  SearchTypes: TCnModuleSearchTypes = [mstInProject, mstProjectSearch, mstSystemSearch]): Boolean;
 {* 遍历 Uses 单元，可根据 SearchTypes 指定范围。返回的文件名可能是 IDE 中打开的还未保存的
   Delphi 会遍历 pas 和 dcu，C++Builder 会遍历 h/hpp，均会在 UnitCallback 中指明}
 
@@ -2497,10 +2497,12 @@ begin
     TMethod(FindCallBack).Code := @InternalDoFindFile;
     TMethod(FindCallBack).Data := nil;
 
-    if mstSystemLib in SearchTypes then
+    if mstSystemSearch in SearchTypes then
     begin
       Paths.Clear;
-      FCurrSearchType := mstSystemLib;
+      FCurrSearchType := mstSystemSearch;
+      GetLibraryPath(Paths, False);
+
       if IsCpp then
         Paths.Add(MakePath(GetInstallDir) + 'Include\')
       else
@@ -2508,14 +2510,7 @@ begin
         Paths.Add(MakePath(GetInstallDir) + 'Lib\');
         Paths.Objects[Paths.Count - 1] := TObject(True); // 标记只搜 dcu
       end;
-      EnumPaths(Paths);
-    end;
 
-    if mstSystemSearch in SearchTypes then
-    begin
-      Paths.Clear;
-      FCurrSearchType := mstSystemSearch;
-      GetLibraryPath(Paths, False);
       EnumPaths(Paths);
     end;
 
