@@ -205,8 +205,23 @@ type
   TXTreeView = TTreeView;
 {$ENDIF BDS}
 
-  TCnModuleSearchType = (mstInvalid, mstInProject, mstProjectSearch, mstSystemSearch);
-  {* 搜索到的源码位置类型：非法、工程内、工程搜索目录内、系统搜索目录内}
+  TCnModuleSearchType = (mstInvalid, mstInProject, mstProjectSearch, mstSystemSearch, mstSystemLib);
+  {* 搜索到的源码位置类型：非法、工程内、工程搜索目录内、系统搜索目录内、安装目录的系统库内}
+
+  TCnModuleSearchTypes = set of TCnModuleSearchType;
+
+  TCnUsesFileType = (uftInvalid, uftPascalSource, uftPascalDcu, uftCppHeader);
+
+  TCnUnitCallback = procedure(const AUnitFullName: string; Exists: Boolean;
+    FileType: TCnUsesFileType; ModuleSearchType: TCnModuleSearchType) of object;
+
+type
+  PCnUnitsInfoRec = ^TCnUnitsInfoRec;
+  TCnUnitsInfoRec = record
+    IsCppMode: Boolean;
+    Sorted: TStringList;
+    Unsorted: TStringList;
+  end;
 
 //==============================================================================
 // IDE 代码编辑器功能函数
@@ -461,6 +476,16 @@ procedure ApplyThemeOnToolBar(ToolBar: TToolBar; Recursive: Boolean = True);
 function GetErrorInsightRenderStyle: Integer;
 {* 返回 ErrorInsight 的当前类型，返回值为 csErrorInsightRenderStyle* 系列常数
    -1 为不支持，1 时会影响编辑器行高，影响程度和显示 Leve 以及是否侧边栏显示均无关}
+
+function IdeEnumUsesIncludeUnits(UnitCallback: TCnUnitCallback; IsCpp: Boolean = False;
+  SearchTypes: TCnModuleSearchTypes = [mstInProject, mstProjectSearch, mstSystemSearch, mstSystemLib]): Boolean;
+{* 遍历 Uses 单元，可根据 SearchTypes 指定范围。返回的文件名可能是 IDE 中打开的还未保存的
+  Delphi 会遍历 pas 和 dcu，C++Builder 会遍历 h/hpp，均会在 UnitCallback 中指明}
+
+procedure CorrectCaseFromIdeModules(UnitFilesList: TStringList; IsCpp: Boolean = False);
+{* 根据文件名获得的系统 Uses 的单元名大小写可能不正确，此处通过遍历 IDE 模块来更新
+  UnitFilesList 是不带 dcu 扩展名的文件名列表，注意不是完整路径名列表，
+  且跑完后 UnitFilesList.Sorted 会被设为 True}
 
 //==============================================================================
 // 扩展控件
@@ -1180,7 +1205,7 @@ end;
 function IdeGetFormSelection(Selections: TList; Designer: IDesigner = nil;
   ExcludeForm: Boolean = True): Boolean;
 var
-  i: Integer;
+  I: Integer;
   AObj: TPersistent;
   AList: IDesignerSelections;
 begin
@@ -1195,12 +1220,12 @@ begin
       Selections.Clear;
       AList := CreateSelectionList;
       Designer.GetSelections(AList);
-      for i := 0 to AList.Count - 1 do
+      for I := 0 to AList.Count - 1 do
       begin
       {$IFDEF COMPILER6_UP}
-        AObj := TPersistent(AList[i]);
+        AObj := TPersistent(AList[I]);
       {$ELSE}
-        AObj := TryExtractPersistent(AList[i]);
+        AObj := TryExtractPersistent(AList[I]);
       {$ENDIF}
         if AObj <> nil then // perhaps is nil when disabling packages in the IDE
           Selections.Add(AObj);
@@ -1373,16 +1398,16 @@ end;
 function GetComponentPaletteControlBar: TControlBar;
 var
   MainForm: TCustomForm;
-  i: Integer;
+  I: Integer;
 begin
   Result := nil;
 
   MainForm := GetIdeMainForm;
   if MainForm <> nil then
-    for i := 0 to MainForm.ComponentCount - 1 do
-      if MainForm.Components[i] is TControlBar then
+    for I := 0 to MainForm.ComponentCount - 1 do
+      if MainForm.Components[I] is TControlBar then
       begin
-        Result := MainForm.Components[i] as TControlBar;
+        Result := MainForm.Components[I] as TControlBar;
         Break;
       end;
       
@@ -1600,11 +1625,11 @@ var
   procedure AddList(AList: TStrings);
   var
     S: string;
-    i: Integer;
+    I: Integer;
   begin
-    for i := 0 to List.Count - 1 do
+    for I := 0 to List.Count - 1 do
     begin
-      S := Trim(MakePath(List[i]));
+      S := Trim(MakePath(List[I]));
       if (S <> '') and (Paths.IndexOf(S) < 0) then
         Paths.Add(S);
     end;
@@ -1678,7 +1703,7 @@ procedure AddProjectPath(Project: IOTAProject; Paths: TStrings; IDStr: string);
 var
   APath: string;
   APaths: TStrings;
-  i: Integer;
+  I: Integer;
 begin
   if not Assigned(Project.ProjectOptions) then
     Exit;
@@ -1697,11 +1722,11 @@ begin
     APaths := TStringList.Create;
     try
       APaths.Text := StringReplace(APath, ';', #13#10, [rfReplaceAll]);
-      for i := 0 to APaths.Count - 1 do
+      for I := 0 to APaths.Count - 1 do
       begin
-        if Trim(APaths[i]) <> '' then   // 无效目录
+        if Trim(APaths[I]) <> '' then   // 无效目录
         begin
-          APath := MakePath(Trim(APaths[i]));
+          APath := MakePath(Trim(APaths[I]));
           if (Length(APath) > 2) and (APath[2] = ':') then // 全路径目录
           begin
             if Paths.IndexOf(APath) < 0 then
@@ -1727,7 +1752,7 @@ var
   ProjectGroup: IOTAProjectGroup;
   Project: IOTAProject;
   Path: string;
-  i, j: Integer;
+  I, j: Integer;
   APaths: TStrings;
 begin
   Paths.Clear;
@@ -1742,9 +1767,9 @@ begin
   begin
     APaths := TStringList.Create;
     try
-      for i := 0 to ProjectGroup.GetProjectCount - 1 do
+      for I := 0 to ProjectGroup.GetProjectCount - 1 do
       begin
-        Project := ProjectGroup.Projects[i];
+        Project := ProjectGroup.Projects[I];
         if Assigned(Project) then
         begin
           // 增加工程搜索路径
@@ -1889,7 +1914,7 @@ end;
 procedure GetInstalledComponents(Packages, Components: TStrings);
 var
   PackSvcs: IOTAPackageServices;
-  i, j: Integer;
+  I, j: Integer;
 begin
   QuerySvcs(BorlandIDEServices, IOTAPackageServices, PackSvcs);
   if Assigned(Packages) then
@@ -1897,13 +1922,13 @@ begin
   if Assigned(Components) then
     Components.Clear;
     
-  for i := 0 to PackSvcs.PackageCount - 1 do
+  for I := 0 to PackSvcs.PackageCount - 1 do
   begin
     if Assigned(Packages) then
-      Packages.Add(PackSvcs.PackageNames[i]);
+      Packages.Add(PackSvcs.PackageNames[I]);
     if Assigned(Components) then
-      for j := 0 to PackSvcs.ComponentCount[i] - 1 do
-        Components.Add(PackSvcs.ComponentNames[i, j]);
+      for j := 0 to PackSvcs.ComponentCount[I] - 1 do
+        Components.Add(PackSvcs.ComponentNames[I, j]);
   end;
 end;
 
@@ -2134,15 +2159,15 @@ end;
 function EnumEditControl(Proc: TEnumEditControlProc; Context: Pointer;
   EditorMustExists: Boolean): Integer;
 var
-  i: Integer;
+  I: Integer;
   EditWindow: TCustomForm;
   EditControl: TControl;
 begin
   Result := 0;
-  for i := 0 to Screen.CustomFormCount - 1 do
-    if IsIdeEditorForm(Screen.CustomForms[i]) then
+  for I := 0 to Screen.CustomFormCount - 1 do
+    if IsIdeEditorForm(Screen.CustomForms[I]) then
     begin
-      EditWindow := Screen.CustomForms[i];
+      EditWindow := Screen.CustomForms[I];
       EditControl := GetEditControlFromEditorForm(EditWindow);
       if Assigned(EditControl) or not EditorMustExists then
       begin
@@ -2365,6 +2390,219 @@ begin
   else
     Result := V;
 {$ENDIF}
+end;
+
+procedure GetInfoProc(const Name: string; NameType: TNameType; Flags: Byte;
+  Param: Pointer);
+var
+  Idx: Integer;
+  Cpp: Boolean;
+begin
+  // 将单元名或头文件名替换成正确的大小写格式
+  if NameType = ntContainsUnit then
+  begin
+    Cpp := PCnUnitsInfoRec(Param).IsCppMode;
+    if not Cpp then
+    begin
+      Idx := PCnUnitsInfoRec(Param).Sorted.IndexOf(Name);
+      if Idx >= 0 then
+        PCnUnitsInfoRec(Param).Unsorted[Idx] := Name;
+    end
+    else
+    begin
+      Idx := PCnUnitsInfoRec(Param).Sorted.IndexOf(Name + '.hpp');
+      if Idx >= 0 then
+        PCnUnitsInfoRec(Param).Unsorted[Idx] := Name + '.hpp'
+      else
+      begin
+        Idx := PCnUnitsInfoRec(Param).Sorted.IndexOf(Name + '.h');
+        if Idx >= 0 then
+          PCnUnitsInfoRec(Param).Unsorted[Idx] := Name + '.h'
+      end;
+    end;
+  end;
+end;
+
+function GetModuleProc(HInstance: THandle; Data: Pointer): Boolean;
+var
+  Flags: Integer;
+begin
+  Result := True;
+  try
+    if FindResource(HInstance, 'PACKAGEINFO', RT_RCDATA) <> 0 then
+      GetPackageInfo(HInstance, Data, Flags, GetInfoProc);
+  except
+    ;
+  end;
+end;
+
+var
+  FCurrFileType: TCnUsesFileType;
+  FCurrSearchType: TCnModuleSearchType;
+  FUnitCallback: TCnUnitCallback = nil;
+
+procedure InternalDoFindFile(ASelf: TObject; const FileName: string; const Info:
+  TSearchRec; var Abort: Boolean);
+begin
+  FUnitCallback(FileName, True, FCurrFileType, FCurrSearchType);
+end;
+
+function IdeEnumUsesIncludeUnits(UnitCallback: TCnUnitCallback; IsCpp: Boolean;
+  SearchTypes: TCnModuleSearchTypes): Boolean;
+var
+  Paths: TStringList;
+  ProjectGroup: IOTAProjectGroup;
+  Project: IOTAProject;
+  FileName: string;
+  I, J: Integer;
+  FindCallBack: TFindCallback;
+  A, B: Boolean;
+
+  procedure EnumPaths(APaths: TStringList);
+  var
+    K: Integer;
+  begin
+    if IsCpp then
+    begin
+      FCurrFileType := uftCppHeader;
+      for K := 0 to APaths.Count - 1 do
+        FindFile(APaths[K], '*.h*', FindCallBack, nil, False, False);
+    end
+    else
+    begin
+      for K := 0 to APaths.Count - 1 do
+      begin
+        if APaths.Objects[K] = nil then // 有标记的话不搜 pas，譬如 Lib 目录
+        begin
+          FCurrFileType := uftPascalSource;
+          FindFile(APaths[K], '*.pas', FindCallBack, nil, False, False);
+        end;
+        FCurrFileType := uftPascalDcu;
+        FindFile(APaths[K], '*.dcu', FindCallBack, nil, False, False);
+      end;
+    end;
+  end;
+
+begin
+  Result := False;
+  if not Assigned(UnitCallback) then
+    Exit;
+
+  Paths := nil;
+  try
+    Paths := TStringList.Create;
+    Paths.Sorted := True;
+
+    FUnitCallback := UnitCallback;
+    TMethod(FindCallBack).Code := @InternalDoFindFile;
+    TMethod(FindCallBack).Data := nil;
+
+    if mstSystemLib in SearchTypes then
+    begin
+      Paths.Clear;
+      FCurrSearchType := mstSystemLib;
+      if IsCpp then
+        Paths.Add(MakePath(GetInstallDir) + 'Include\')
+      else
+      begin
+        Paths.Add(MakePath(GetInstallDir) + 'Lib\');
+        Paths.Objects[Paths.Count - 1] := TObject(True); // 标记只搜 dcu
+      end;
+      EnumPaths(Paths);
+    end;
+
+    if mstSystemSearch in SearchTypes then
+    begin
+      Paths.Clear;
+      FCurrSearchType := mstSystemSearch;
+      GetLibraryPath(Paths, False);
+      EnumPaths(Paths);
+    end;
+
+    if mstProjectSearch in SearchTypes then
+    begin
+      Paths.Clear;
+      FCurrSearchType := mstProjectSearch;
+
+      GetProjectLibPath(Paths);
+      EnumPaths(Paths);
+    end;
+
+    if mstInProject in SearchTypes then
+    begin
+      FCurrSearchType := mstInProject;
+      ProjectGroup := CnOtaGetProjectGroup;
+      if not Assigned(ProjectGroup) then
+        Exit;
+
+      for I := 0 to ProjectGroup.GetProjectCount - 1 do
+      begin
+        Project := ProjectGroup.Projects[I];
+        if not Assigned(Project) then
+          Continue;
+
+        for J := 0 to Project.GetModuleCount - 1 do
+        begin
+          FileName := Project.GetModule(J).FileName;
+          if IsCpp then
+          begin
+            FileName := _CnChangeFileExt(FileName, '.h');
+            A := FileExists(FileName);
+            B := CnOtaIsFileOpen(FileName);
+            if A or B then
+              UnitCallback(FileName, A, uftCppHeader, mstInProject)
+            else
+            begin
+              FileName := _CnChangeFileExt(FileName, '.hpp');
+              A := FileExists(FileName);
+              B := CnOtaIsFileOpen(FileName);
+              if A or B then
+                UnitCallback(FileName, A, uftCppHeader, mstInProject);
+            end;
+          end
+          else
+          begin
+            A := FileExists(FileName);
+            B := CnOtaIsFileOpen(FileName);
+
+            if A or B then ; // 只 Pas 或 Dcu 通知 Callback
+            begin
+              if IsPas(FileName) then
+                UnitCallback(FileName, A, uftPascalSource, mstInProject)
+              else if IsDcu(FileName) then
+                UnitCallback(FileName, A, uftPascalDcu, mstInProject);
+            end;
+          end;
+        end;
+      end;
+    end;
+    Result := True;
+  finally
+    Paths.Free;
+  end;
+end;
+
+procedure CorrectCaseFromIdeModules(UnitFilesList: TStringList; IsCpp: Boolean);
+var
+  Data: TCnUnitsInfoRec;
+begin
+  { Use a sorted StringList for searching and copy this list to an unsorted list
+    which is manipulated in GetInfoProc(). After that the unsorted list is
+    copied back to the original sorted list. BinSearch is a lot faster than
+    linear search. (by AHUser) }
+  Data.IsCppMode := IsCpp;
+  Data.Sorted := UnitFilesList;
+  Data.Unsorted := TStringList.Create;
+  try
+    Data.Unsorted.Assign(UnitFilesList);
+    Data.Unsorted.Sorted := False; // added to avoid exception
+    EnumModules(GetModuleProc, @Data);
+  finally
+    UnitFilesList.Sorted := False;
+    UnitFilesList.Assign(Data.Unsorted);
+    UnitFilesList.Sorted := True;
+    Data.Unsorted.Free;
+  end;
 end;
 
 //==============================================================================

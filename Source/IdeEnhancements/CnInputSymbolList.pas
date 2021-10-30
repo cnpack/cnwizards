@@ -343,7 +343,6 @@ type
     procedure LoadFromSysPath;
     procedure LoadFromProjectPath;
     procedure LoadFromCurrProject;
-    procedure UpdateCaseFromModules(AList: TStringList);
     procedure UpdatePathsSequence(Names, Paths: TStringList);
   public
     constructor Create; overload; override;
@@ -1445,7 +1444,7 @@ begin
           False, False);
       end;
 
-      UpdateCaseFromModules(FSysUnitsName);
+      CorrectCaseFromIdeModules(FSysUnitsName, FCppMode);
       UpdatePathsSequence(FSysUnitsName, FSysUnitsPath);
       FSysPath := Paths.Text;
 
@@ -1495,7 +1494,7 @@ begin
         for I := 0 to Paths.Count - 1 do
           FindFile(Paths[I], '*.pas', DoFindFile, nil, False, False);
 
-      UpdateCaseFromModules(FProjectUnitsName);
+      CorrectCaseFromIdeModules(FProjectUnitsName, FCppMode);
       UpdatePathsSequence(FProjectUnitsName, FProjectUnitsPath);
       FProjectPath := Paths.Text;
 
@@ -1513,82 +1512,6 @@ begin
     Added := AddUnit(FProjectUnitsName[I]);
     if FUseFullPath and Added then
       AddUnitFullNameWithPath(FProjectUnitsPath[I]);
-  end;
-end;
-
-type
-  PUnitsInfoRec = ^TUnitsInfoRec;
-  TUnitsInfoRec = record
-    IsCppMode: Boolean;
-    Sorted: TStringList;
-    Unsorted: TStringList;
-  end;
-
-procedure GetInfoProc(const Name: string; NameType: TNameType; Flags: Byte;
-  Param: Pointer);
-var
-  Idx: Integer;
-  Cpp: Boolean;
-begin
-  // 将单元名或头文件名替换成正确的大小写格式
-  if NameType = ntContainsUnit then
-  begin
-    Cpp := PUnitsInfoRec(Param).IsCppMode;
-    if not Cpp then
-    begin
-      Idx := PUnitsInfoRec(Param).Sorted.IndexOf(Name);
-      if Idx >= 0 then
-        PUnitsInfoRec(Param).Unsorted[Idx] := Name;
-    end
-    else
-    begin
-      Idx := PUnitsInfoRec(Param).Sorted.IndexOf(Name + '.hpp');
-      if Idx >= 0 then
-        PUnitsInfoRec(Param).Unsorted[Idx] := Name + '.hpp'
-      else
-      begin
-        Idx := PUnitsInfoRec(Param).Sorted.IndexOf(Name + '.h');
-        if Idx >= 0 then
-          PUnitsInfoRec(Param).Unsorted[Idx] := Name + '.h'
-      end;
-    end;
-  end;
-end;
-
-function GetModuleProc(HInstance: THandle; Data: Pointer): Boolean;
-var
-  Flags: Integer;
-begin
-  Result := True;
-  try
-    if FindResource(HInstance, 'PACKAGEINFO', RT_RCDATA) <> 0 then
-      GetPackageInfo(HInstance, Data, Flags, GetInfoProc);
-  except
-    ;
-  end;
-end;
-
-// 根据文件名获得的单元名大小写可能不正确，此处通过遍历 IDE 模块来更新
-procedure TUnitNameList.UpdateCaseFromModules(AList: TStringList);
-var
-  Data: TUnitsInfoRec;
-begin
-  { Use a sorted StringList for searching and copy this list to an unsorted list
-    which is manipulated in GetInfoProc(). After that the unsorted list is
-    copied back to the original sorted list. BinSearch is a lot faster than
-    linear search. (by AHUser) }
-  Data.IsCppMode := FCppMode;
-  Data.Sorted := AList;
-  Data.Unsorted := TStringList.Create;
-  try
-    Data.Unsorted.Assign(AList);
-    Data.Unsorted.Sorted := False; // added to avoid exception
-    EnumModules(GetModuleProc, @Data);
-  finally
-    AList.Sorted := False;
-    AList.Assign(Data.Unsorted);
-    AList.Sorted := True;
-    Data.Unsorted.Free;
   end;
 end;
 

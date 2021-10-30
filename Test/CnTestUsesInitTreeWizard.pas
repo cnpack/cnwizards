@@ -40,7 +40,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ToolsAPI, IniFiles, CnWizClasses, CnWizUtils, CnWizConsts, CnWizIdeUtils,
-  CnPasCodeParser, CnWizEditFiler, CnTree, CnCommon;
+  CnPasCodeParser, CnWizEditFiler, CnTree, CnCommon, CnUsesInitTreeFrm;
 
 type
 
@@ -50,16 +50,22 @@ type
 
 { TCnTestUsesInitTreeWizard }
 
-  TCnTestUsesInitTreeWizard = class(TCnMenuWizard)
+  TCnTestUsesInitTreeWizard = class(TCnSubMenuWizard)
   private
+    FTreeId: Integer;
+    FEnumId: Integer;
+    FUnits, FSysDcus: TStringList;
     FTree: TCnTree;
     FFileNames, FLibPaths: TStringList;
     FDcuPath: string;
     procedure SearchAUnit(const AFullDcuName, AFullSourceName: string; ProcessedFiles: TStrings;
       UnitLeaf: TCnLeaf; Tree: TCnTree; AProject: IOTAProject);
     {* 递归调用，分析并查找 AUnitName 对应源码的 Uses 列表并加入到树中的 UnitLeaf 的子节点中}
+    procedure UsesCallback(const AUnitFullName: string; Exists: Boolean;
+      FileType: TCnUsesFileType; ModuleSearchType: TCnModuleSearchType);
   protected
     function GetHasConfig: Boolean; override;
+    procedure SubActionExecute(Index: Integer); override;
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -72,7 +78,9 @@ type
     function GetCaption: string; override;
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
-    procedure Execute; override;
+    procedure InitTreeExecute;
+    procedure EnumExecute;
+    procedure AcquireSubActions; override;
   end;
 
 implementation
@@ -95,21 +103,6 @@ type
     property IsImpl: Boolean read FIsImpl write FIsImpl;
   end;
 
-function GetProjectDcuPath(AProject: IOTAProject): string;
-begin
-  if (AProject <> nil) and (AProject.ProjectOptions <> nil) then
-  begin
-    Result := ReplaceToActualPath(AProject.ProjectOptions.Values['UnitOutputDir'], AProject);
-    if Result <> '' then
-      Result := MakePath(LinkPath(_CnExtractFilePath(AProject.FileName), Result));
-  {$IFDEF DEBUG}
-    CnDebugger.LogMsg('GetProjectDcuPath: ' + Result);
-  {$ENDIF}
-  end
-  else
-    Result := '';
-end;
-
 function GetDcuName(const ADcuPath, ASourceFileName: string): string;
 begin
   if ADcuPath = '' then
@@ -119,7 +112,7 @@ begin
 end;
 
 //==============================================================================
-// CnTestUsesInitTreeWizard 菜单专家
+// CnTestUsesInitTreeWizard 子菜单专家
 //==============================================================================
 
 { TCnTestUsesInitTreeWizard }
@@ -145,12 +138,19 @@ begin
   inherited;
 end;
 
-procedure TCnTestUsesInitTreeWizard.Execute;
+procedure TCnTestUsesInitTreeWizard.InitTreeExecute;
 var
   Proj: IOTAProject;
   I: Integer;
   ProjDcu, S: string;
 begin
+  with TCnUsesInitTreeForm.Create(Application) do
+  begin
+    ShowModal;
+    Free;
+    Exit;
+  end;
+
   Proj := CnOtaGetCurrentProject;
   if (Proj = nil) or not IsDelphiProject(Proj) then
     Exit;
@@ -173,9 +173,9 @@ begin
     S := StringOfChar('-', FTree.Items[I].Level) + FTree.Items[I].Text;
 
     case (FTree.Items[I] as TCnUsesLeaf).SearchType of
-      mstProject: S := S + ' | (In Project)';
+      mstInProject: S := S + ' | (In Project)';
       mstProjectSearch: S := S + ' | (In Project Search Path)';
-      mstSystemSearch: S := S + ' | (In System Path)';
+      mstSystemSearch, mstSystemLib: S := S + ' | (In System Path)';
     end;
 
     if (FTree.Items[I] as TCnUsesLeaf).IsImpl then
@@ -302,6 +302,75 @@ begin
   finally
     UsesList.Free;
   end;
+end;
+
+procedure TCnTestUsesInitTreeWizard.SubActionExecute(Index: Integer);
+begin
+  if Index =   FTreeId then
+    InitTreeExecute
+  else if Index = FEnumId then
+    EnumExecute;
+end;
+
+procedure TCnTestUsesInitTreeWizard.AcquireSubActions;
+begin
+  FTreeId := RegisterASubAction('TestUsesInitTree', 'Test Uses Init Tree');
+  FEnumId := RegisterASubAction('TestEnumUses', 'Test Enum Uses');
+end;
+
+procedure TCnTestUsesInitTreeWizard.EnumExecute;
+var
+  Sl: TStringList;
+  I: Integer;
+begin
+  FUnits := TStringList.Create;
+  FSysDcus := TStringList.Create;
+
+  if IdeEnumUsesIncludeUnits(UsesCallback) then
+    LongMessageDlg(FUnits.Text);
+  FUnits.Free;
+
+  Sl := TStringList.Create;
+
+  for I := 0 to FSysDcus.Count - 1 do
+  begin
+    Sl.Add(_CnExtractFilePath(FSysDcus[I]));
+    FSysDcus[I] := _CnChangeFileExt(_CnExtractFileName(FSysDcus[I]), '');
+  end;
+  LongMessageDlg(FSysDcus.Text);
+
+  FSysDcus.Sorted := True;
+  CorrectCaseFromIdeModules(FSysDcus); // 只支持纯文件名
+  FSysDcus.Sorted := False;
+
+  for I := 0 to FSysDcus.Count - 1 do
+    FSysDcus[I] := MakePath(Sl[I]) + FSysDcus[I] + '.dcu';
+
+  LongMessageDlg(FSysDcus.Text);
+
+  FSysDcus.Free;
+  Sl.Free;
+end;
+
+procedure TCnTestUsesInitTreeWizard.UsesCallback(
+  const AUnitFullName: string; Exists: Boolean; FileType: TCnUsesFileType;
+  ModuleSearchType: TCnModuleSearchType);
+const
+  USES_FILE_TYPES: array[TCnUsesFileType] of string =
+    ('Invalid', 'Pascal Source', 'Pascal Dcu', 'Cpp Header');
+  MODULE_SEARCH_TYPES: array[TCnModuleSearchType] of string =
+    ('Invalid', 'In ProjectGroup', 'In Project Search Paths', 'In System Paths', 'In System Library');
+var
+  S: string;
+begin
+  S := AUnitFullName;
+  if not Exists then
+    S := S + ' * ';
+  S := S + ' | ' + USES_FILE_TYPES[FileType] + ' | ' + MODULE_SEARCH_TYPES[ModuleSearchType];
+  FUnits.Add(S);
+
+  if (FileType = uftPascalDcu) and (ModuleSearchType = mstSystemLib) then
+    FSysDcus.Add(AUnitFullName);
 end;
 
 initialization
