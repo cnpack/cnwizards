@@ -63,7 +63,7 @@ type
     procedure GetUsesList(AList: TStringList; AFlag: TUnitImpFlags);
     procedure ClearUsesList(AList: TStringList);
   public
-    constructor Create(const DcuName: string);
+    constructor Create(const DcuName: string; UseOnly: Boolean = True);
     destructor Destroy; override;
     procedure Sort;
     
@@ -159,14 +159,14 @@ begin
     end;
 end;
 
-constructor TCnUnitUsesInfo.Create(const DcuName: string);
+constructor TCnUnitUsesInfo.Create(const DcuName: string; UseOnly: Boolean);
 begin
   InitOut;
   FIntfUses := TStringList.Create;
   FImplUses := TStringList.Create;
   inherited Create;
   try
-    Load(DcuName, 0, False, nil, True);
+    Load(DcuName, 0, False, nil, UseOnly);
   except
     {$IFNDEF DELPHI2009_UP}
     raise;

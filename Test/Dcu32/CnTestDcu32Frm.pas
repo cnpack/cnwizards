@@ -105,10 +105,11 @@ var
   Info: TCnUnitUsesInfo;
   S: string;
   I: Integer;
+  Decl: TNameDecl;
 begin
   if FileExists(edtDcuFile.Text) then
   begin
-    Info := TCnUnitUsesInfo.Create(edtDcuFile.Text);
+    Info := TCnUnitUsesInfo.Create(edtDcuFile.Text, False);
 
     mmoDcu.Lines.Clear;
     mmoDcu.Lines.Add('interface:');
@@ -122,6 +123,15 @@ begin
     begin
       mmoDcu.Lines.Add(Info.ImplUses[I]);
       mmoDcu.Lines.Add(Info.ImplUsesImport[I].Text);
+    end;
+
+    mmoDcu.Lines.Add('Declare List:');
+    Decl := Info.DeclList;
+    while Decl <> nil do
+    begin
+      S := GetEnumName(TypeInfo(TDeclSecKind), Ord(Decl.GetSecKind));
+      mmoDcu.Lines.Add(Decl.Name^ + ' | ' + S);
+      Decl := Decl.Next as TNameDecl;
     end;
     Info.Free;
   end;
