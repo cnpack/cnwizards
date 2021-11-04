@@ -30,11 +30,55 @@ uses
   DasmDefs,FixUp;
 
 type
+//ECMA-335 standard Common Language Infrastructure
   PMSILHeader = ^TMSILHeader;
   TMSILHeader = packed record
-    F,F1: Word;
-    CodeSz: Cardinal;
-    L1: LongInt;
+   //The Fat format - always used (the Tiny one was never observed)
+    Flags: Word;
+    MaxStack: Word; //Maximum number of items on the operand stack
+    CodeSz: Cardinal; //Size in bytes of the actual method body
+    LocalVarSigTok: LongInt; //Meta Data token for a signature describing the layout
+      //of the local variables for the method.
+      //0 means there are no local variables present
+  end ;
+
+const
+  CorILMethod_Sect_EHTable    =  $1; //Exception handling data.
+  CorILMethod_Sect_OptILTable =  $2; //Reserved, shall be 0.
+  CorILMethod_Sect_FatFormat  = $40; //Data format is of the fat variety, meaning there is a 3-
+                                     //byte length least-significant byte first format. If not
+                                     //set, the header is small with a  1-byte length
+  CorILMethod_Sect_MoreSects  = $80; //Another data section occurs after this current section
+
+const
+  COR_ILEXCEPTION_CLAUSE_EXCEPTION = $0000; //A typed exception clause
+  COR_ILEXCEPTION_CLAUSE_FILTER = $0001; //An exception filter and handler clause
+  COR_ILEXCEPTION_CLAUSE_FINALLY = $0002; //A finally clause
+  COR_ILEXCEPTION_CLAUSE_FAULT = $0004; //Fault clause (finally that is called on exception only)
+
+type
+  PMSILSmallExcClause = ^TMSILSmallExcClause;
+  TMSILSmallExcClause = packed record
+    Flags: Word;
+    TryOffset: Word; //Offset in bytes of try block from start of method body.
+    TryLength: Byte;  //Length in bytes of the try block
+    HandlerOffset: Word; //Location of the handler for this try block
+    HandlerLength: Byte; //Size of the handler code in bytes
+    case Integer of
+     0:(ClassToken: LongInt); //Meta data token for a type-based exception handler
+     1:(FilterOffset: LongInt); //Offset in method body for filter-based exception handler
+  end ;
+
+  PMSILFatExcClause = ^TMSILFatExcClause;
+  TMSILFatExcClause = packed record
+    Flags: LongInt;
+    TryOffset: LongInt; //Offset in bytes of try block from start of method body.
+    TryLength: LongInt;  //Length in bytes of the try block
+    HandlerOffset: LongInt; //Location of the handler for this try block
+    HandlerLength: LongInt; //Size of the handler code in bytes
+    case Integer of
+     0:(ClassToken: LongInt); //Meta data token for a type-based exception handler
+     1:(FilterOffset: LongInt); //Offset in method body for filter-based exception handler
   end ;
 
 procedure SetMSILDisassembler;
@@ -555,27 +599,35 @@ end ;
 procedure ShowCmdPart(CI: PCmdInfo; DP: Pointer; IP: Pointer);
 var
   Cnt,D: integer;
-  Sep: Char;
+  Sep: AnsiChar;
   Fix: PFixupRec;
   Fixed: boolean;
 begin
-  PutS(CI^.Name);
+  PutKW(CI^.Name);
   case CI^.F and atMask of
    atU1: PutSFmt(' $%2.2x',[Byte(DP^)]);
    atU2: PutSFmt(' $%4.4x',[Word(DP^)]);
    atU4: PutSFmt(' $%8.8x',[Cardinal(DP^)]);
    atI1: PutSFmt(' %d',[ShortInt(DP^)]);
    atI4: PutSFmt(' %d',[Integer(DP^)]);
-   atI8: PutSFmt(' $%x%8.8x',[Integer(Pointer(PChar(DP)+4)^),Integer(DP^)]);
-   atR4: PutSFmt(' %g',[Single(DP^)]);
-   atR8: PutSFmt(' %g',[Double(DP^)]);
+   atI8: PutSFmt(' $%x%8.8x',[Integer(Pointer(TIncPtr(DP)+4)^),Integer(DP^)]);
+   atR4: begin
+     PutSpace;
+     PutS(FixFloatToStr(Single(DP^)));
+     //PutSFmt(' %g',[Single(DP^)]); //it is better to use FloatToStr to fix the bug of DT+
+    end ;
+   atR8: begin
+     PutSpace;
+     PutS(FixFloatToStr(Double(DP^)));
+     //PutSFmt(' %g',[Double(DP^)]);
+    end ;
    atMetadata: begin
      PutS(' ');
      D := Integer(DP^);
      Fix := Nil;
      Fixed := false;
      if GetFixupFor(DP,SizeOf(integer),false,Fix)and(Fix<>Nil) then begin
-       Fixed := ReportFixup(Fix,D);
+       Fixed := ReportFixup(Fix,D,ShowHeuristicRefs);
      end ;
      if (D=0)and(Fix<>Nil) then
        Exit;
@@ -593,7 +645,7 @@ begin
      Puts(' ');
      Sep := '[';
      while Cnt>0 do begin
-       Inc(PChar(DP),SizeOf(integer));
+       Inc(TIncPtr(DP),SizeOf(integer));
        PutSFmt('%s$%x',[Sep,(CodePtr-CodeBase)+LongInt(DP^)]);
        Sep := ',';
        Dec(Cnt);
@@ -628,19 +680,19 @@ begin
      atJmpofs1: begin
        if Res<0 then
          Res := crJCond;
-       RegRef(LongInt(CmdOfs)+ShortInt(DP^),Res,IPRegRef);
+       RegRef(CmdOfs+ShortInt(DP^),Res,IPRegRef);
       end ;
      atJmpofs4: begin
        if Res<0 then
          Res := crJCond;
-       RegRef(LongInt(CmdOfs)+LongInt(DP^),Res,IPRegRef);
+       RegRef(CmdOfs+LongInt(DP^),Res,IPRegRef);
       end ;
      atJmpofs4tbl: begin
        Res := crJCond;
        Cnt := integer(DP^);
        while Cnt>0 do begin
-         Inc(PChar(DP),SizeOf(integer));
-         RegRef(LongInt(CmdOfs)+LongInt(DP^),Res,IPRegRef);
+         Inc(TIncPtr(DP),SizeOf(integer));
+         RegRef(CmdOfs+LongInt(DP^),Res,IPRegRef);
          Dec(Cnt);
        end ;
       end ;

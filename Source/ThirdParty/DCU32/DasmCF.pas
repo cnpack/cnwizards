@@ -27,8 +27,6 @@ freely, subject to the following restrictions:
 
 interface
 
-{$I CnPack.inc}
-
 uses
   Classes;
 
@@ -51,6 +49,8 @@ TCmdSeqRef = record
   NextSrc: PCmdSeqRef;
 end ;
 
+TCmdSeqClass = class of TCmdSeq;
+
 TCmdSeq = class(TList)
 protected
   FStart,FSize: Cardinal;
@@ -58,13 +58,13 @@ protected
   FNextCond: PCmdSeqRef;
   Refs: PCmdSeqRef;
 public
-  constructor Create(AStart: integer);
+  constructor Create(AStart: integer); virtual;
   destructor Destroy; override;
   procedure SetNext(ATgt: TCmdSeq);
   procedure SetCondNext(ATgt: TCmdSeq);
   function GetCmdNumByOfs(AOfs: Cardinal): integer;
   function GetCmdByOfs(AOfs: Cardinal): TCmd;
-  function SplitAt(AOfs: Cardinal): TCmdSeq;
+  function SplitAt(AOfs: Cardinal): TCmdSeq;virtual;
   function AddCmd(AStart,ASize: Cardinal): TCmd;
   property Start: Cardinal read FStart;
   property Size: Cardinal read FSize;
@@ -88,6 +88,9 @@ public
   property Start: Cardinal read FStart;
   property Size: Cardinal read FSize;
 end ;
+
+var
+  DefaultCmdSeqClass: TCmdSeqClass = TCmdSeq; //Allows to extend the class if required
 
 implementation
 
@@ -193,17 +196,12 @@ begin
   Cmd := TCmd(Items[i]);
   if Cmd.FOfs<>AOfs then
     Exit; //Reference inside the command
-  Result := TCmdSeq.Create(FStart);
+  Result := DefaultCmdSeqClass{TCmdSeq}.Create(FStart);
   for j:=0 to i-1 do
     Result.Add(Items[j]);
   Result.FSize := AOfs-FStart;
   Count := Count-i;
-{$IFDEF LIST_NEW_POINTER}
   System.move(List[i],List[0],Count*SizeOf(Pointer));
-{$ELSE}
-  System.move(List^[i],List^,Count*SizeOf(Pointer));
-{$ENDIF}
-
   FStart := AOfs;
   Dec(FSize,Result.FSize);
   i := Count or $7;
@@ -232,7 +230,7 @@ begin
   inherited Create;
   FStart := AStart;
   FSize := ASize;
-  Add(TCmdSeq.Create(AStart));
+  Add(DefaultCmdSeqClass{CmdSeq}.Create(AStart));
 end ;
 
 destructor TProc.Destroy;
@@ -258,7 +256,7 @@ begin
     Exit;
   end ;
   if S.Start+S.Size<=AStart then begin
-    Result := TCmdSeq.Create(AStart);
+    Result := DefaultCmdSeqClass{TCmdSeq}.Create(AStart);
     Inc(i);
     Insert(i,Result);
     if i<FNextSeq then

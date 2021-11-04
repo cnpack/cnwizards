@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, TypInfo, Clipbrd, ExtCtrls;
+  StdCtrls, TypInfo, Clipbrd, ExtCtrls, FileCtrl;
 
 type
   TFormDcu32 = class(TForm)
@@ -16,11 +16,13 @@ type
     OpenDialog1: TOpenDialog;
     btnCnDcu32: TButton;
     mmoDcu: TMemo;
+    btnScanDir: TButton;
     procedure btnOpenClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure btnCnDcu32Click(Sender: TObject);
+    procedure btnScanDirClick(Sender: TObject);
   private
-    { Private declarations }
+    procedure DumpADcu(const AFileName: string; ALines: TStrings);
   public
     { Public declarations }
   end;
@@ -31,7 +33,7 @@ var
 implementation
 
 uses
-  DCU32, DCURecs, DCU_Out, CnDCU32;
+  DCU32, DCURecs, DCU_Out, CnDCU32, CnCommon;
 
 type
   TTestUnit = class(TUnit)
@@ -61,12 +63,12 @@ begin
     Exit;
   end;
 
-  InitOut;
+  //InitOut('');
   HasExcept := False;
   U := TTestUnit.Create;
   try
     try
-      U.Load(edtDcuFile.Text, 0, False, nil);
+      U.Load(edtDcuFile.Text, 0, False, dcuplWin32, nil);
     except
       HasExcept := True;
     end;
@@ -74,7 +76,7 @@ begin
     for I := 0 to U.FUnitImp.Count - 1 do
     begin
       PRec := U.FUnitImp[i];
-      N := N + PRec^.Name^ + #13#10;
+      N := N + PRec^.Name^.GetStr + #13#10;
 
       if not HasExcept then
       begin
@@ -82,9 +84,9 @@ begin
         while Decl <> nil do
         begin
           if Decl is TImpDef then
-            S := S + (TImpDef(Decl).ik + ':' + Decl.Name^) + #13#10
+            S := S + (TImpDef(Decl).ik + ':' + Decl.Name^.GetStr) + #13#10
           else
-            S := S + (Decl.Name^) + #13#10;
+            S := S + (Decl.Name^.GetStr) + #13#10;
           Decl := Decl.Next as TBaseDef;
         end;
       end;
@@ -101,36 +103,61 @@ begin
 end;
 
 procedure TFormDcu32.btnCnDcu32Click(Sender: TObject);
+begin
+  mmoDcu.Lines.Clear;
+  DumpADcu(edtDcuFile.Text, mmoDcu.Lines);
+end;
+
+procedure TFormDcu32.btnScanDirClick(Sender: TObject);
+var
+  S: string;
+  I: Integer;
+  FS: TStrings;
+begin
+  if SelectDirectory('', '', {ExtractFilePath(Application.ExeName),} S) then
+  begin
+    FS := TStringList.Create;
+    try
+      GetDirFiles(S, FS);
+      for I := 0 to FS.Count - 1 do
+        DumpADcu(MakePath(S) + FS[I], mmoDcu.Lines);
+    finally
+      FS.Free;
+    end;
+  end;
+end;
+
+procedure TFormDcu32.DumpADcu(const AFileName: string; ALines: TStrings);
 var
   Info: TCnUnitUsesInfo;
   S: string;
   I: Integer;
-  Decl: TNameDecl;
+  Decl: TDCURec;
 begin
-  if FileExists(edtDcuFile.Text) then
+  if FileExists(AFileName) then
   begin
-    Info := TCnUnitUsesInfo.Create(edtDcuFile.Text, False);
+    Info := TCnUnitUsesInfo.Create(AFileName, False);
 
-    mmoDcu.Lines.Clear;
-    mmoDcu.Lines.Add('interface:');
+    ALines.Add('=================== ' + AFileName);
+    ALines.Add('interface:');
     for I := 0 to Info.IntfUsesCount - 1 do
     begin
-      mmoDcu.Lines.Add(Info.IntfUses[I]);
-      mmoDcu.Lines.Add(Info.IntfUsesImport[I].Text);
+      ALines.Add(Info.IntfUses[I]);
+      ALines.Add(Info.IntfUsesImport[I].Text);
     end;
-    mmoDcu.Lines.Add('implementation:');
+    ALines.Add('implementation:');
     for I := 0 to Info.ImplUsesCount - 1 do
     begin
-      mmoDcu.Lines.Add(Info.ImplUses[I]);
-      mmoDcu.Lines.Add(Info.ImplUsesImport[I].Text);
+      ALines.Add(Info.ImplUses[I]);
+      ALines.Add(Info.ImplUsesImport[I].Text);
     end;
 
-    mmoDcu.Lines.Add('Declare List:');
+    ALines.Add('Declare List:');
     Decl := Info.DeclList;
     while Decl <> nil do
     begin
       S := GetEnumName(TypeInfo(TDeclSecKind), Ord(Decl.GetSecKind));
-      mmoDcu.Lines.Add(Decl.Name^ + ' | ' + S);
+      ALines.Add(Decl.Name^.GetStr + ' | ' + S);
       Decl := Decl.Next as TNameDecl;
     end;
     Info.Free;

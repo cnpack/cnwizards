@@ -36,7 +36,8 @@ type
 
 { Debug info for register usage: }
 type
-  TRegVarInfoProc = function(ProcOfs: integer; hReg: THBMName; Ofs: integer): String of object;
+  TRegVarInfoProc = function(ProcOfs: integer; hReg: THBMName; Ofs,Size: integer;
+    var hDecl: integer): AnsiString of object;
 
 const
   GetRegVarInfo: TRegVarInfoProc = Nil;
@@ -60,8 +61,11 @@ type
     CheckCommandRefs: TCheckCommandRefsProc;
   end ;
 
+type
+  TIncPtr = PAnsiChar;
+
 var
-  CodePtr, PrevCodePtr: PChar;
+  CodePtr, PrevCodePtr: TIncPtr;
 
 var
   Disassembler: TDisassembler;

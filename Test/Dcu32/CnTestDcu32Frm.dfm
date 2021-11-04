@@ -50,14 +50,14 @@ object FormDcu32: TFormDcu32
   object Button1: TButton
     Left = 24
     Top = 96
-    Width = 257
+    Width = 129
     Height = 25
     Caption = 'Parse Dcu!'
     TabOrder = 2
     OnClick = Button1Click
   end
   object btnCnDcu32: TButton
-    Left = 328
+    Left = 176
     Top = 96
     Width = 145
     Height = 25
@@ -73,6 +73,16 @@ object FormDcu32: TFormDcu32
     ReadOnly = True
     ScrollBars = ssVertical
     TabOrder = 4
+    WantReturns = False
+  end
+  object btnScanDir: TButton
+    Left = 344
+    Top = 96
+    Width = 129
+    Height = 25
+    Caption = 'Scan Dir'
+    TabOrder = 5
+    OnClick = btnScanDirClick
   end
   object OpenDialog1: TOpenDialog
     Filter = '*.DCU|*.dcu'

@@ -1,5 +1,5 @@
 The DCU32INT utility by Alexei Hmelnov.
-Version 1.10.0
+Version 1.20.1
 
 ----------------------------------------------------------------------------
 E-Mail: alex@icc.ru
@@ -9,19 +9,121 @@ http://hmelnov.icc.ru/DCU/
 Purpose.
 --------
 
-Parse Delphi 2.0-8.0, 2005(.net and WIN32), 2006(WIN32 only), Kylix 1.0-3.0
-units (DCU) and convert their information into the close to Pascal form.
+Parse Delphi 2.0-8.0, 2005-2006/Turbo Delphi (.net and WIN32), 
+2007-2010 (WIN32), XE (WIN32), XE2-XE3 (WIN32,WIN64,OSX32), 
+XE4 (WIN32,WIN64,OSX32,iOS simulator, iOS device (no code)), 
+XE5 (WIN32,WIN64,OSX32,iOS simulator, iOS device (no code),Android (no code)),
+Kylix 1.0-3.0 units (DCU) and convert their information into the close to 
+Pascal form.
 
-DCU32INT stands for DCU32 INTerface, because this program can't extract 
-the complete Pascal source, but the extracted unit interface is almost 
+DCU32INT stands for DCU32 INTerface, because this program can't extract
+the complete Pascal source, but the extracted unit interface is almost
 correct (see Compiler Information Loss Limitations section for exceptions).
 
-This program is a by-product of the FlexT project (see 
-http://hmelnov.icc.ru/FlexT/ for details), but 
+This program is a by-product of the FlexT project (see
+http://hmelnov.icc.ru/FlexT/ for details), but
 I have done my best to make it useful.
+
 
 Changes from the version 1.0.
 -----------------------------
+
+Version 1.18.1:
+1. Units of Delphi XE5 are supported now. No file format changes since XE4
+  besides from that in magic numbers were observed.
+2. The actual code for an Android device unit is also contained in the 
+  corresponding .o file (the same situation as that for the iOS device units).
+  So *.o (ELF object file format) processing is required to completly 
+  support Android device units in DCU32INT. This capability is not 
+  implemented yet.
+
+Version 1.17.1:
+1. Units of Delphi XE4 are supported now.
+2. The actual code for an iOS device unit is contained in the corresponding
+  .o file (which, I believe, is produced by LLVM back end AFTER creation of 
+  the corresponding .dcu file by Delphi front end, so the iOS device 
+  DCU can`t contain addresses in .o memory, and the correspondence between 
+  the DCU records and .o sections is mantained by mangled section names only).
+  So *.o (Mach-o object file format) processing is required to completly 
+  support iOS device units in DCU32INT. This capability is not implemented yet.
+3. The -Q command line switch have been added. It allows to output the tables 
+  of class fields (with the corresponding object memory offsets) and virtual 
+  methods (with the corresponding VMT offsets). The tables may be used to 
+  alleviate manual disassembled code analysis, when static disassembler can`t
+  determine the data types of a register contents.
+4. The UnicodeString constants are shown correctly now.
+
+Version 1.16.1:
+1. Units of Delphi XE3 are supported now.
+2. The source code od DCU32INT has been successfully ported from D3 to XE2
+  (i.e. Unicode Delphi versions can now be used to compile it).
+3. More correct processing of embedded lists 
+  (tags drEmbeddedProcStart/drEmbeddedProcEnd) - 
+  thanx to Crypto for the message about this bug.
+4. The source files references are now decoded by source file index search 
+  instead of source file ordinal numbers.
+
+Version 1.15.1:
+1. Units of Delphi XE2 are supported now.
+2. Intel 64 disassembler has been added, 
+  and the units for WIN64 and OSX32 are supported now.
+3. PName was changed from PShortString to the data structure TNameRec 
+  describing long strings (longer than 255 bytes), which can happen as 
+  a result of mangling or template instantiation starting from D2009.
+4. Aux fields for properties of the kind 
+  property X: Integer read FP.X
+  detection and replacing by the corresponding qualifiers.
+5. Added library autodetection flag -U*, which is turned on by default 
+  (use -U or -U with some different path to turn it off). This flag allows
+  to automatically detect the library path for a Delphi version installed
+  on the computer where dcu32int runs.
+
+Version 1.14.1:
+1. Units of Delphi XE are supported now.
+2. XE DCUs store information about data types defined inside procedures
+  separately from the procedure declaration. I'll call this situation 
+  "orphaned types problem". To fix the problem somehow the method
+  TDCURec.EnumUsedTypes has been implemented for the most part of objects,
+  which may refer to data types (some elements of class declarations were
+  skipped, cause the classes can't be local). So, once a local data type 
+  was used, e.g. to declare a local variable, this information allows to 
+  find the place, where the data type belong. But, when a local data type 
+  was used, e.g.  for typecasting only, no evidence for its usage will 
+  remain in the DCU. The orphaned data types which were not bound to their 
+  procedures by this process, are placed by DCU32INT in the list of global 
+  declarations.
+ 
+
+Version 1.13.1:
+1. Units of Delphi 2009 and 2010 are supported now.
+2. Processing of some units of older versions was fixed by taking into 
+  account the fact that some structures may sometimes contain forward 
+  references to addresses, which are not defined yet. The drProcAddInfo tag 
+  will be used then to specify the correct index of the referenced address.
+
+Version 1.10.2:
+
+1. Added HTML output (use the -FH flag to turn it on) with syntax markup and
+  hyperlinks. Should be improved later (not all definitions (e.g. procedure
+  arguments) are marked by <A NAME=...> tags yet).
+2. Improved compileability of the code generation and fixed some errors (thanx
+  to Josef Grosch):
+  - class member visibility for versions 8 up;
+  - corrected overload and inline procedures modifier for versions 9 up;
+  - class member visibility for interfaces is now commented out or not shown;
+  - resourcestring declarations are shown now according to correct Pascal syntax;
+  - class field declarations after method or property declarations with the
+    same visibility are now prepended with additional visibility marker;
+  - DecimalSeparator is now '.' .
+
+Version 1.10.1:
+
+1. Added displaying of possible inline string constants (use -SH
+  to turn it off).
+2. The Self arguments of methods and 2nd call flags of constructors
+  and destructors are hidden now. To show them as before use -SS option.
+3. Auxiliary fake procedures, which hold the values of huge string
+  typed constants are marked now by the JustData flag and not disassembled.
 
 Version 1.10.0:
 
@@ -114,17 +216,19 @@ Destination file may contain * to be replaced by the unit name or name and
 extension. If * is the last char in the name, it will be replaced by 
 <Unit name>.int, else - by <Unit name>.
 Destination file = "-" => write to stdout.
-
+Flags (start with "/" or "-"):
  -S<show flag>* - Show flags (-S - show all), default: (+) - on, (-) - off
     A(-) - show Address table
     C(-) - don't resolve Constant values
     D(-) - show Data block
     d(-) - show dot types
     F(-) - show Fixups
+    H(+) - show Heuristic strings
     I(+) - show Imported names
     L(-) - show table of Local variables
     M(-) - don't resolve class Methods
     O(-) - show file Offsets
+    S(-) - show Self arguments of methods and 2nd call flags of `structors
     T(-) - show Type table
     U(-) - show Units of imported names
     V(-) - show auxiliary Values
@@ -132,12 +236,16 @@ Destination file = "-" => write to stdout.
  -O<option>* - code generation options, default: (+) - on, (-) - off
     V(-) - typed constants as variables
  -I - interface part only
- -U<paths> - Unit directories
+ -U<paths> - Unit directories, * means autodetect by unit version
  -P<paths> - Pascal source directories (just "-P" means: "seek for *.pas in
     the unit directory"). Without this parameter src lines won't be reported
  -R<Alias>=<unit>[;<Alias>=<unit>]* - set unit aliases
+ -F<FMT> - output format (T - text (default), H-HTML)
  -N<Prefix> - No Name Prefix ("%" - Scope char)
  -D<Prefix> - Dot Name Prefix ("%" - Scope char)
+ -Q<Query flag> - Query additional information.
+    F(-) - class fields
+    V(-) - class virtual methods
  -A<Mode> - disAssembler mode
     S(+) - simple Sequential (all memory is a sequence of ops)
     C(-) - control flow
@@ -297,8 +405,8 @@ some simplifications, which cause information loss.
 
 Examples:
 
-1. Identifiers declared in implementation part and subroutines are discarded
-  if the debug info checkbox doesn't checked.
+1. Identifiers declared in implementation part and in subroutines are
+  discarded if the debug info checkbox doesn't checked.
 
 2. Evaluation of expressions. Constant expressions are replaced by their
   values, so one can't determine, e.g. that CDM_FIRST = WM_USER+100,
@@ -350,6 +458,35 @@ browser and evaluator (those utilities are also limited by them).
 
 So, the extracted Pascal code can cause some problems, if used in other
 version of Delphi, than that, which produced the DCU.
+
+Code templates and inline encoding.
+-----------------------------------
+
+Delphi 2009 and higher Delphi versions support inline procedures and code 
+templates. The information required to call inline procedure by inserting 
+its code into the place where it is called is encoded in the drConstAddInfo
+records. All I know by now about this encoding is how to skip its data safely.
+We can easily ignore the inline encoding because the compiler may decide
+to call inline procedure as a regular procedure, so the inline procedures
+are also provided with the regular code, it is this code which is used by 
+DCU32INT to show the procedure algorithm.
+
+But the algorithms of template code are stored in DCU using the inline 
+encoding or something like this only, without regular code. The files 
+Generics.Collections.dcu and Generics.Defaults.dcu contain the examples 
+of this kind. So, the template algorithms can't be shown by the current 
+version of DCU32INT. It would be interesting to explore the inline 
+encoding by drConstAddInfo in more details. I would greatly appreciate if
+somebody will do this analysis.
+
+Besides from the templates the DCU will contain all the instantiations of
+the templates after data type substitutions, which are used in the file.
+The types of templates with parameters substituted are denoted by the names 
+with "`" and digits, which replace the template parameters in the "<>" braces.
+It would be better to hide the data types of this kind, to be more close 
+to the original source, but the current version of DCU32INT shows them all, 
+because I think that all this stuff is very interesting and helps to 
+understand how the templates work.
 
 Home page.
 ----------
@@ -403,6 +540,10 @@ develop myself in the nearest future:
   the close to C++ Builder syntax form (C++ syntax + Borland's extensions) 
   instead of Pascal. This program could be used to partially transfer
   programs frop Pascal to C through DCU.
+
+6. The encoding of inline procedures is ignored now. To be able to show
+  template code it is required to understand it in more details (see 
+  "Code templates and inline encoding").
   
 ------------------------------------------------------------------------
 

@@ -1,8 +1,5 @@
 unit DCU_Out;
 
-{$WARNINGS OFF}
-{$HINTS OFF}
-
 interface
 (*
 The output module of the DCU32INT utility by Alexei Hmelnov.
@@ -30,10 +27,16 @@ freely, subject to the following restrictions:
    distribution.
 *)
 uses
-  SysUtils, FixUp;
+  {$IFDEF UNICODE}AnsiStrings,{$ENDIF}SysUtils, FixUp;
 
 type
+  TIncPtr = PAnsiChar;
   TDasmMode = (dasmSeq,dasmCtlFlow);
+  TOutFmt = (ofmtText,ofmtHTM);
+
+const
+  DefaultExt: array[TOutFmt] of String = ('.int','.htm');
+
 
 { Options: }
 var
@@ -49,52 +52,192 @@ var
   ResolveMethods: boolean=true;
   ResolveConsts: boolean=true;
   ShowDotTypes: boolean=false;
+  ShowSelf: boolean=false;
   ShowVMT: boolean=false;
+  ShowHeuristicRefs: boolean=true;
   ShowImpNamesUnits: boolean=false;
   DasmMode: TDasmMode = dasmSeq;
-
-var
-  AuxLevel: integer=0;
+  OutFmt: TOutFmt = ofmtText;
 
 var
   GenVarCAsVars: boolean = false;
 
 var
-  NoNamePrefix: String = '_N%_';
-  DotNamePrefix: String = '_D%_';
+  NoNamePrefix: AnsiString = '_N%_';
+  DotNamePrefix: AnsiString = '_D%_';
 
 procedure SetShowAll;
 
-procedure PutS(S: String);
-procedure PutSFmt(Fmt: String; Args: array of const);
+procedure PutCh(ch: AnsiChar);
+procedure PutS(const S: AnsiString);
+procedure PutSFmt(const Fmt: AnsiString; const Args: array of const);
+function ShiftNLOfs(d: Integer): Integer{Old NLOfs};
 procedure NL;
+procedure NLAux;
 procedure SoftNL;
-procedure InitOut;
-procedure FlushOut;
+procedure PutSpace;
+
+procedure SetShowAuxValues(V: Boolean);
+procedure OpenAux;
+procedure CloseAux;
+
+procedure RemOpen0;
+procedure RemOpen;
+procedure RemClose0;
+procedure RemClose;
+procedure AuxRemOpen;
+procedure AuxRemClose;
+procedure PutSFmtRem(const Fmt: AnsiString; const Args: array of const);
+procedure PutSFmtRemAux(const Fmt: AnsiString; const Args: array of const);
+
+procedure PutKW(const S: AnsiString);
+procedure PutKWSp(const S: AnsiString);
+
+procedure PutStrConst(const S: AnsiString);
+procedure PutStrConstQ(const S: AnsiString);
+
+procedure PutAddrDefStr(const S: AnsiString; hDef: integer);
+procedure PutMemRefStr(const S: AnsiString; Ofs: integer);
+
+procedure MarkDefStart(hDef: integer);
+procedure MarkMemOfs(Ofs: integer);
 
 function CharDumpStr(var V;N : integer): ShortString;
-function DumpStr(var V;N : integer): String;
+function DumpStr(var V;N : integer): AnsiString;
 
-function IntLStr(DP: Pointer; Sz: Cardinal; Neg: boolean): String;
+function IntLStr(DP: Pointer; Sz: Cardinal; Neg: boolean): AnsiString;
 
-function CharStr(Ch: Char): String;
-function WCharStr(WCh: WideChar): String;
-function BoolStr(DP: Pointer; DS: Cardinal): String;
-function StrConstStr(CP: PChar; L: integer): String;
+function CharStr(Ch: AnsiChar): AnsiString;
+function WCharStr(WCh: WideChar): AnsiString;
+function BoolStr(DP: Pointer; DS: Cardinal): AnsiString;
+function StrConstStr(CP: PAnsiChar; L: integer): AnsiString;
+function ShowStrConst(DP: Pointer; DS: Cardinal): integer {Size used};
+function ShowUnicodeStrConst(DP: Pointer; DS: Cardinal): integer {Size used}; //Ver >=verD12
+function ShowUnicodeResStrConst(DP: Pointer; DS: Cardinal): integer {Size used}; //Ver >=verD12
+function TryShowPCharConst(DP: PAnsiChar; DS: Cardinal): integer {Size used};
+function FixFloatToStr(const E: Extended): AnsiString;
 
 const
   cSoftNL=#0;
   MaxOutWidth: Cardinal = 75;
   MaxNLOfs: Cardinal = 31 {Should be < Ord(' ')};
 
-var
-  NLOfs: cardinal;
-  OutLineNum: integer = 0 {Read only};
-  FRes: TextFile;
+type
+  TStrInfoRec = packed record
+    Ofs: Word;
+    Inf: SmallInt;
+    DP: Pointer;
+  end ;
 
-procedure ShowDump(DP,DPFile0: PChar; FileSize,SizeDispl,Size: Cardinal;
+type
+  TBaseWriter = class
+   protected
+    FAuxLevel: integer;
+    FRemLevel: integer;
+    FOutLineNum: integer;
+    FNLOfs: cardinal;
+    BufNLOfs: Cardinal;
+    BufLen: cardinal;
+    WasSoftNL: Boolean;
+    StrInfoCnt: integer;
+    StrInfoOfsLast: integer;
+    Buf: array[0..$800-1] of AnsiChar;
+    StrInfoTbl: array[0..$7F] of TStrInfoRec;
+    procedure PutStrInfo(Info: integer; Data: Pointer);
+    function GetSoftNLOfs(var ResNLOfs: Cardinal): integer;
+    procedure FlushBufRange(Start,W: integer);
+    procedure FlushStrInfo(Info: integer; Data: Pointer);
+    procedure FillNL(ANLOfs: Cardinal);
+    procedure FlushBufPart(W,ANLOfs: integer);
+    function FlushSoftNL(W: Cardinal): boolean;
+    procedure BufChars(CP: PAnsiChar; Len: integer);
+   protected
+    FInfo: integer; FData: Pointer;
+    FStarted: Boolean;
+    procedure WriteStart; virtual;
+    procedure WriteEnd; virtual;
+    procedure WriteCP(CP: PAnsiChar; Len: integer); virtual; abstract;
+    procedure NL; virtual; abstract;
+    function OpenStrInfo(Info: integer; Data: Pointer): boolean; virtual;
+    procedure CloseStrInfo; virtual;
+    procedure MarkDefStart(hDef: integer); virtual;
+    procedure MarkMemOfs(Ofs: integer); virtual;
+    procedure Flush; virtual;
+   public
+    constructor Create;
+    destructor Destroy; override;
+    procedure Reset; virtual;
+    property OutLineNum: integer read FOutLineNum;
+    property AuxLevel: integer read FAuxLevel;
+    property RemLevel: integer read FRemLevel;
+    property NLOfs: cardinal read FNLOfs write FNLOfs;
+  end ;
+
+  TTextFileWriter = class(TBaseWriter)
+   protected
+    FRes: TextFile;
+    procedure WriteCP(CP: PAnsiChar; Len: integer); override;
+    procedure NL; override;
+    procedure Flush; override;
+   public
+    constructor Create(const FNRes: String);
+    destructor Destroy; override;
+  end ;
+
+  THTMWriter = class(TTextFileWriter)
+   protected
+    FWasStr: boolean;
+    procedure WriteStart; override;
+    procedure WriteEnd; override;
+    procedure WriteCP(CP: PAnsiChar; Len: integer); override;
+    procedure NL; override;
+    function OpenStrInfo(Info: integer; Data: Pointer): boolean; override;
+    procedure CloseStrInfo; override;
+    procedure MarkDefStart(hDef: integer); override;
+    procedure MarkMemOfs(Ofs: integer); override;
+  end ;
+
+  TStringWriter = class(TBaseWriter)
+   protected
+    FPrev: TBaseWriter;
+    FBuf: AnsiString;
+    FPos: Integer;
+    procedure WriteCP(CP: PAnsiChar; Len: integer); override;
+    procedure NL; override;
+   public
+    function GetResult: AnsiString;
+    procedure Reset; override;
+  end ;
+
+
+var
+  Writer: TBaseWriter = Nil;
+
+function InitOut(const FNRes: String): TBaseWriter;
+//procedure DoneOut;
+procedure FlushOut;
+procedure ReportExc(const Msg: AnsiString);
+
+function ReplaceWriter(W: TBaseWriter): TBaseWriter;
+function SetStringWriter: TStringWriter;
+procedure RestorePrevWriter;
+
+
+const
+  siEnd = 0;
+  siRem = 1;
+  siKeyWord = 2;
+  siStrConst = 3;
+  siAddrDef = 4;
+  siMemRef = 5;
+  siMaxRange = 5;
+  siDefStart = 6;
+  siMemOfs = 7;
+  siMax = 8;
+
+procedure ShowDump(DP,DPFile0: TIncPtr; FileSize,SizeDispl,Size: Cardinal;
   Ofs0Displ,Ofs0,WMin: Cardinal; FixCnt: integer; FixTbl: PFixupTbl;
-  FixUpNames: boolean);
+  FixUpNames,ShowFileOfs: boolean);
 
 implementation
 
@@ -114,33 +257,106 @@ begin
   ResolveMethods := true;
   ResolveConsts := true;
   ShowDotTypes := true;
+  ShowSelf := true;
   ShowVMT := true;
   ShowImpNamesUnits := true;
 end ;
 
-var
-  BufNLOfs: Cardinal;
-  BufLen: cardinal;
-  Buf: array[0..$800-1] of Char;
-
-procedure FillNL(NLOfs: Cardinal);
-var
-  S: ShortString;
-  W: integer;
+{ TBaseWriter. }
+constructor TBaseWriter.Create;
 begin
-  W := NLOfs;
-  if W<0 then
-    W := 0
-  else if W>MaxNLOfs then
-    W := MaxNLOfs;
-  S[0] := AnsiChar(Chr(W));
-  FillChar(S[1],W,' ');
-  Write(FRes,S);
+  inherited Create;
+  Reset;
 end ;
 
-function GetSoftNLOfs(var ResNLOfs: Cardinal): integer;
+destructor TBaseWriter.Destroy;
+begin
+  if FStarted then
+    WriteEnd;
+  inherited Destroy;
+end ;
+
+procedure TBaseWriter.Reset;
+//Restore the initial state of the writer (as if it was just created)
+begin
+  FNLOfs := 0;
+  BufLen := 0;
+  BufNLOfs := FNLOfs;
+  FOutLineNum := 0;
+  WasSoftNL := false;
+
+  FAuxLevel := 0;
+  FRemLevel := 0;
+  StrInfoCnt := 0;
+  StrInfoOfsLast := 0;
+  FInfo := 0;
+  FData := Nil;
+  FStarted := false;
+end ;
+
+procedure TBaseWriter.WriteStart;
+begin
+  FStarted := true;
+end ;
+
+procedure TBaseWriter.WriteEnd;
+begin
+  FStarted := false;
+end ;
+
+function TBaseWriter.OpenStrInfo(Info: integer; Data: Pointer): boolean;
+begin
+  if Info<=siMaxRange then begin
+    FInfo := Info;
+    FData := Data;
+    Result := true;
+    Exit;
+  end ;
+  Result := false;
+  case Info of
+    siDefStart: MarkDefStart(Integer(Data));
+    siMemOfs: MarkMemOfs(Integer(Data));
+  end ;
+end ;
+
+procedure TBaseWriter.CloseStrInfo;
+begin
+  FInfo := 0;
+  FData := Nil;
+end ;
+
+procedure TBaseWriter.MarkDefStart(hDef: integer);
+begin
+end ;
+
+procedure TBaseWriter.MarkMemOfs(Ofs: integer);
+begin
+end ;
+
+procedure TBaseWriter.Flush;
+begin
+end ;
+
+{-----}
+
+procedure TBaseWriter.PutStrInfo(Info: integer; Data: Pointer);
+begin
+  if (RemLevel>0)and(Info<=siMaxRange{Embedded ranges are not allowed}) then
+    Exit;
+  if StrInfoCnt>High(StrInfoTbl) then
+    Exit;
+  with StrInfoTbl[StrInfoCnt] do begin
+    Ofs := BufLen-StrInfoOfsLast;
+    Inf := Info;
+    DP := Data;
+  end ;
+  StrInfoOfsLast := BufLen;
+  Inc(StrInfoCnt);
+end ;
+
+function TBaseWriter.GetSoftNLOfs(var ResNLOfs: Cardinal): integer;
 var
-  i,iMin: integer;
+  i: integer;
   MinOfs,Ofs: integer;
 begin
   MinOfs := Ord(' ');
@@ -155,15 +371,74 @@ begin
   if MinOfs<Ord(' ') then
     ResNLOfs := MinOfs
   else
-    ResNLOfs := NLOfs;
+    ResNLOfs := FNLOfs;
 end ;
 
-procedure FlushBufPart(W,NLOfs: integer);
+procedure TBaseWriter.FlushBufRange(Start,W: integer);
 var
-  i: integer;
-//  S: String;
-  SaveCh: Char;
+  DP: PAnsiChar;
+  SaveCh: AnsiChar;
 begin
+  if W<=0 then
+    Exit;
+  DP := Buf+Start;
+  SaveCh := DP[W];
+  DP[W] := #0;
+  WriteCP(DP,W); // Write(FRes,DP);
+  DP[W] := SaveCh;
+end ;
+
+procedure TBaseWriter.FlushStrInfo(Info: integer; Data: Pointer);
+begin
+  if Info=0 then
+    CloseStrInfo
+  else
+    OpenStrInfo(Info,Data);
+end ;
+
+procedure TBaseWriter.FillNL(ANLOfs: Cardinal);
+var
+  S: array[Byte]of AnsiChar{ShortString};
+  W: integer;
+begin
+  W := ANLOfs;
+  if W<0 then
+    W := 0
+  else if W>MaxNLOfs then
+    W := MaxNLOfs;
+  {S[0] := Chr(W);
+  FillChar(S[1],W,' ');}
+  FillChar(S[0],W,' ');
+  S[W] := #0;
+  WriteCP(S,W);
+end ;
+
+procedure TBaseWriter.FlushBufPart(W,ANLOfs: integer);
+var
+  i,hSI: integer;
+//  S: String;
+  SIOfs{,SIW}: integer;
+
+  procedure FlushSI(Skip: boolean);
+  var
+    SIW: integer;
+  begin
+    while hSI<StrInfoCnt do begin
+      SIW := StrInfoTbl[hSI].Ofs;
+      if SIOfs+SIW>W then
+        break;
+      if not Skip then
+        FlushBufRange(SIOfs,SIW);
+      Inc(SIOfs,SIW);
+      with StrInfoTbl[hSI] do
+        FlushStrInfo(Inf,DP);
+      Inc(hSI);
+    end ;
+  end ;
+
+begin
+  SIOfs := 0;
+  hSI := 0;
   if W>0 then begin
     for i:=0 to W-1 do
      if Buf[i]<' ' then
@@ -171,41 +446,54 @@ begin
     FillNL(BufNLOfs);
 //    SetString(S,Buf,W);
 //    Write(FRes,S);
-    SaveCh := Buf[W];
-    Buf[W] := #0;
-    Write(FRes,Buf);
-    Buf[W] := SaveCh;
+    FlushSI(false{Skip});
+    if SIOfs<W then
+      FlushBufRange(SIOfs,W-SIOfs);
   end ;
-  Writeln(FRes);
-  Inc(OutLineNum);
+  NL; //Writeln(FRes);
+  Inc(FOutLineNum);
   while (W<BufLen)and(Buf[W]<=' ') do
     Inc(W);
+  FlushSI(true{Skip});
   if W<BufLen then
     move(Buf[W],Buf,BufLen-W);
   BufLen := BufLen-W;
-  BufNLOfs := NLOfs;
+  BufNLOfs := ANLOfs;
+  if hSI>=StrInfoCnt then
+    StrInfoCnt := 0
+  else begin
+    if hSI>0 then begin
+      Dec(StrInfoCnt,hSI);
+      move(StrInfoTbl[hSI],StrInfoTbl[0],StrInfoCnt*SizeOf(TStrInfoRec));
+    end ;
+    if StrInfoCnt>0 then
+      Dec(StrInfoTbl[0].Ofs,W-SIOfs);
+  end ;
+  if StrInfoCnt>0 then
+    Dec(StrInfoOfsLast,W)
+  else
+    StrInfoOfsLast := 0;
 end ;
 
-function FlushSoftNL(W: Cardinal): boolean;
+function TBaseWriter.FlushSoftNL(W: Cardinal): boolean;
 var
   Split: integer;
   ResNLOfs: Cardinal;
 begin
-  Result := false;
   while ((BufNLOfs+BufLen+W)>MaxOutWidth)and(BufLen>0) do begin
     Split := GetSoftNLOfs(ResNLOfs);
    {Break only at the soft NL splits: }
     if Split>=BufLen then
       Break;
     FlushBufPart(Split,ResNLOfs);
+    WasSoftNL := true;
   end ;
   Result := (BufNLOfs+BufLen+W)<= MaxOutWidth;
 end ;
 
-procedure BufChars(CP: PChar; Len: integer);
+procedure TBaseWriter.BufChars(CP: PAnsiChar; Len: integer);
 var
-  i: integer;
-  ch: Char;
+  ch: AnsiChar;
 begin
 //  FlushSoftNL(Len);
   While Len>0 do begin
@@ -215,10 +503,10 @@ begin
     Inc(CP);
     Dec(Len);
     if ch<' ' then begin
-      if NLOfs>MaxNLOfs then
-        Ch := Chr(MaxNLOfs)
+      if FNLOfs>MaxNLOfs then
+        Ch := AnsiChar(MaxNLOfs)
       else
-        Ch := Chr(NLOfs);
+        Ch := AnsiChar(FNLOfs);
     end ;
     Buf[BufLen] := Ch;
     Inc(BufLen);
@@ -239,63 +527,331 @@ begin
   end ;}
 end ;
 
-procedure PutS(S: String);
+
+{ TTextFileWriter. }
+constructor TTextFileWriter.Create(const FNRes: String);
 begin
-  if AuxLevel>0 then
+  inherited Create;
+  AssignFile(FRes,FNRes);
+  TTextRec(FRes).Mode := fmClosed;
+  Rewrite(FRes); //Test whether the FNRes is a correct file name
+end ;
+
+destructor TTextFileWriter.Destroy;
+begin
+  if TTextRec(FRes).Mode<>fmClosed then begin
+    WriteEnd;
+    Close(FRes);
+  end ;
+  inherited Destroy;
+end ;
+
+procedure TTextFileWriter.WriteCP(CP: PAnsiChar; Len: integer);
+begin
+  Write(FRes,CP);
+end ;
+
+procedure TTextFileWriter.NL;
+begin
+  Writeln(FRes);
+end ;
+
+procedure TTextFileWriter.Flush;
+begin
+  System.Flush(FRes);
+end ;
+
+
+{ THTMWriter. }
+procedure THTMWriter.WriteStart;
+begin
+  inherited WriteStart;
+  Writeln(FRes,'<HTML><HEAD><STYLE TYPE="text/css"> I {color: #008080} '+
+    'EM {color: #008000} A:link, A:visited, A:active {text-decoration: none; color: #800000} '+
+    'A:hover { text-decoration: underline; color: #C08000 }</STYLE></HEAD><BODY><PRE>');
+end ;
+
+procedure THTMWriter.WriteEnd;
+begin
+  Writeln(FRes,'</PRE></BODY></HTML>');
+  inherited WriteEnd;
+end ;
+
+procedure THTMWriter.WriteCP(CP: PAnsiChar; Len: integer);
+const
+  sTags: array[1..siMaxRange]of String = ('<I>','<B>','<EM>','','');
+var
+  S: String;
+var
+  Buf: ShortString;
+  i,j: integer;
+  Ch: AnsiChar;
+
+  procedure FlushBuf;
+  begin
+    Buf[0] := AnsiChar(j);
+    Write(FRes,Buf);
+    j := 0;
+  end ;
+
+  procedure PutS(C: PAnsiChar);
+  begin
+    while C^<>#0 do begin
+      Inc(j);
+      Buf[j] := C^;
+      Inc(C);
+    end ;
+  end ;
+
+begin
+  if not FWasStr and(CP^<>#0)and(FInfo>0) then begin
+    case FInfo of
+      siAddrDef: S := Format('<A HREF="#A%d">',[integer(FData)]);
+      siMemRef: S := Format('<A HREF="#M%x">',[integer(FData)]);
+    else
+      S := sTags[FInfo];
+    end ;
+    Write(FRes,S);
+    FWasStr := true;
+  end ;
+  j := 0;
+  for i:=0 to Len-1 do begin
+    Ch := CP[i];
+    case Ch of
+      '<': PutS('&lt;');
+      '>': PutS('&gt;');
+      '&': PutS('&amp;');
+      '"': PutS('&quot;');
+    else
+      Inc(j);
+      Buf[j] := Ch;
+    end;
+    if j>240 then
+      FlushBuf;
+  end ;
+  FlushBuf;
+ // inherited WriteCP(CP,Len);
+end ;
+
+procedure THTMWriter.NL;
+begin
+  Writeln(FRes);
+end ;
+
+function THTMWriter.OpenStrInfo(Info: integer; Data: Pointer): boolean;
+begin
+  Result := inherited OpenStrInfo(Info,Data);
+  if Result then
+    FWasStr := false;
+end ;
+
+procedure THTMWriter.CloseStrInfo;
+const
+  sTags: array[1..siMaxRange]of String = ('</I>','</B>','</EM>','</A>','</A>');
+begin
+  if FWasStr and(FInfo>0) then
+    Write(FRes,sTags[FInfo]);
+  inherited CloseStrInfo;
+  FWasStr := false;
+end ;
+
+procedure THTMWriter.MarkDefStart(hDef: integer);
+begin
+  Write(FRes,Format('<A NAME=A%d>',[hDef]));
+end ;
+
+procedure THTMWriter.MarkMemOfs(Ofs: integer);
+begin
+  Write(FRes,Format('<A NAME=M%x>',[Ofs]));
+end ;
+
+
+{ TStringWriter. }
+procedure TStringWriter.Reset;
+begin
+  inherited Reset;
+  FPos := 0;
+end ;
+
+procedure TStringWriter.WriteCP(CP: PAnsiChar; Len: integer);
+var
+  P: Integer;
+begin
+  if Len<=0 then
+    Exit;
+  P := FPos+Len;
+  if P>Length(FBuf) then begin
+    P := P*2;
+    if P<256 then
+      P := 256;
+    SetLength(FBuf,P);
+  end ;
+  move(CP^,FBuf[FPos+1],Len*SizeOf(AnsiChar));
+  Inc(FPos,Len);
+end ;
+
+procedure TStringWriter.NL;
+begin
+  WriteCP(' ',1); {replace by space}
+end ;
+
+function TStringWriter.GetResult: AnsiString;
+begin
+  FlushOut; //!!!
+  if FPos<=0 then
+    Result := ''
+  else
+    SetString(Result,PAnsiChar(FBuf),FPos-1{Remove last NL});
+end ;
+
+
+procedure PutStrInfoEnd;
+begin
+  Writer.PutStrInfo(0,Nil);
+end ;
+
+procedure PutCh(ch: AnsiChar);
+begin
+  if Writer.AuxLevel>0 then
+    Exit;
+  Writer.BufChars(@Ch,1);
+end ;
+
+procedure PutS(const S: AnsiString);
+begin
+  if Writer.AuxLevel>0 then
     Exit;
   if S='' then
     Exit;
-  BufChars(PChar(S),Length(S));
+  Writer.BufChars(PAnsiChar(S),Length(S));
 end ;
 
-procedure PutSFmt(Fmt: String; Args: array of const);
+procedure PutSFmt(const Fmt: AnsiString; const Args: array of const);
 begin
-  if AuxLevel>0 then
+  if Writer.AuxLevel>0 then
     Exit;
-  PutS(Format(Fmt,Args));
+  PutS({$IFDEF UNICODE}AnsiStrings.{$ENDIF}Format(Fmt,Args));
 end ;
 
 procedure FlushOut;
 begin
-  FlushBufPart(BufLen,NLOfs);
+  Writer.FlushBufPart(Writer.BufLen,Writer.NLOfs);
+end ;
+
+procedure ReportExc(const Msg: AnsiString);
+begin
+  if Writer=Nil then
+    Exit;
+  Writer.NL;
+  Writer.WriteCP(PAnsiChar(Msg),Length(Msg));
+  Writer.NL;
+  Writer.Flush;
+end ;
+
+function ReplaceWriter(W: TBaseWriter): TBaseWriter;
+begin
+  Result := Writer;
+  Writer := W;
+end ;
+
+var
+  StringWriterList: TStringWriter = Nil;
+
+function SetStringWriter: TStringWriter;
+begin
+  if StringWriterList=Nil then
+    Result := TStringWriter.Create
+  else begin
+    Result := StringWriterList;
+    StringWriterList := TStringWriter(StringWriterList.FPrev);
+    Result.Reset;
+  end ;
+  Result.FPrev := ReplaceWriter(Result);
+end ;
+
+procedure RestorePrevWriter;
+var
+  SW: TStringWriter;
+begin
+  if (Writer=Nil)or not(Writer is TStringWriter) then
+    raise Exception.Create('Error restoring previous writer');
+  SW := TStringWriter(ReplaceWriter(TStringWriter(Writer).FPrev));
+  SW.FPrev := StringWriterList;
+  StringWriterList := SW;
+end ;
+
+procedure FreeStringWriterList;
+var
+  SW: TStringWriter;
+begin
+  while StringWriterList<>Nil do begin
+    SW := StringWriterList;
+    StringWriterList := TStringWriter(StringWriterList.FPrev);
+    SW.Free;
+  end ;
+end ;
+
+function ShiftNLOfs(d: Integer): Integer{Old NLOfs};
+begin
+  Result := Writer.FNLOfs;
+  Writer.FNLOfs := Result+d;
 end ;
 
 procedure NL;
 begin
-  if AuxLevel>0 then
+  if Writer.AuxLevel>0 then
     Exit;
-  FlushOut;
+  if not Writer.WasSoftNL or(Writer.BufLen>0) then
+    FlushOut
+  else
+    Writer.BufNLOfs := Writer.NLOfs;
+  Writer.WasSoftNL := false;
+end ;
+
+procedure NLAux;
+begin
+  Inc(Writer.FAuxLevel);
+  NL;
+  Dec(Writer.FAuxLevel);
 end ;
 
 procedure SoftNL;
-var
-  Ch: Char;
 begin
-  if AuxLevel>0 then
-    Exit;
-  Ch := cSoftNL;
-  BufChars(@Ch,1);
+  PutCh(cSoftNL);
 end ;
 
-procedure InitOut;
+function InitOut(const FNRes: String): TBaseWriter;
 begin
-  NLOfs := 0;
-  BufLen := 0;
-  BufNLOfs := NLOfs;
-  OutLineNum := 0;
+  if Writer=Nil then begin
+    case OutFmt of
+      ofmtHTM: Writer := THTMWriter.Create(FNRes);
+    else
+      Writer := TTextFileWriter.Create(FNRes);
+    end ;
+    Writer.WriteStart;
+  end ;
+  Result := Writer;
 end ;
+
+{
+procedure DoneOut;
+begin
+  if Writer<>Nil then begin
+    Writer.WriteEnd;
+    Writer.Free;
+    Writer := Nil;
+  end ;
+end ;
+}
 
 function CharDumpStr(var V;N : integer): ShortString;
 var
   C : array[1..255]of AnsiChar absolute V;
-  i : integer ;
-  S: ShortString;
-  Ch: Char;
-  TstAbs: byte absolute S;
+  i : integer;
 begin
   if N>255 then
     N := 255;
-  CharDumpStr[0] := AnsiChar(Chr(N));
+  CharDumpStr[0] := AnsiChar(N);
   for i := 1 to N do
     if C[i] < ' ' then
       CharDumpStr[i] := '.'
@@ -303,7 +859,7 @@ begin
       CharDumpStr[i] := C[i] ;
 end ;
 
-function CharNStr(Ch: Char;N : integer): ShortString;
+function CharNStr(Ch: AnsiChar; N : integer): ShortString;
 begin
   SetLength(Result,N);
   FillChar(Result[1],N,Ch);
@@ -313,7 +869,7 @@ type
   TByteChars = packed record Ch0,Ch1: AnsiChar end;
 
 const
-  Digit : array[0..15] of AnsiChar = AnsiString('0123456789ABCDEF');
+  Digit : array[0..15] of AnsiChar = '0123456789ABCDEF';
 
 function ByteChars(B: Byte): Word;
 var
@@ -324,24 +880,28 @@ begin
   ByteChars := Word(Ch);
 end ;
 
-function DumpStr(var V;N : integer): String;
+function DumpStr(var V;N : integer): AnsiString;
 var
   i : integer ;
   BP: ^Byte;
   P: Pointer;
 begin
+  if N<=0 then begin
+    Result := '';
+    Exit;
+  end ;
   SetLength(Result,N*3-1);
   P := @Result[1];
   BP := @V;
   for i := 1 to N do begin
     Word(P^) := ByteChars(BP^);
-    Inc(Cardinal(P),2);
-    Char(P^) := ' ';
-    Inc(Cardinal(P));
-    Inc(Cardinal(BP));
+    Inc(TIncPtr(P),2);
+    AnsiChar(P^) := ' ';
+    Inc(TIncPtr(P));
+    Inc(TIncPtr(BP));
   end ;
-  Dec(Cardinal(P));
-  Char(P^) := #0;
+  Dec(TIncPtr(P));
+  AnsiChar(P^) := #0;
 end ;
 
 const
@@ -357,43 +917,43 @@ begin
   end ;
 end ;
 
-procedure SetHexFmtNumDigits(var FmtS: String; p: integer; Sz: Cardinal);
+procedure SetHexFmtNumDigits(var FmtS: AnsiString; p: integer; Sz: Cardinal);
 var
   N: Cardinal;
-  LCh: Char;
+  LCh: AnsiChar;
 begin
   N := GetNumHexDigits(Sz);
-  LCh := Chr(Ord('0')+N);
+  LCh := AnsiChar(Ord('0')+N);
   FmtS[p] := LCh;
   FmtS[p+2] := LCh;
 end ;
 
 procedure ShowDump(DP, {File 0 address, show file offsets if present}
-  DPFile0: PChar; {Dump address}
+  DPFile0: TIncPtr; {Dump address}
   FileSize,SizeDispl {used to calculate display offset digits},
   Size {Dump size}: Cardinal;
   Ofs0Displ {initial display offset},
   Ofs0 {offset in DCU data block - for fixups},
   WMin{Minimal dump width (in bytes)}: Cardinal;
   FixCnt: integer; FixTbl: PFixupTbl;
-  FixUpNames: boolean);
+  FixUpNames,ShowFileOfs: boolean);
 var
-  LP: PChar;
-  LS,W: Cardinal;
-  FmtS,DS,FixS,FS,DumpFmt: String;
-  DSP,CP: PChar;
-  Sz,LSz,dOfs: Cardinal;
-  Ch: Char;
+  LP: TIncPtr;
+  {LS,}W: Cardinal;
+  FmtS,DS,FixS,FS,DumpFmt: AnsiString;
+  DSP,CP: PAnsiChar;
+  {Sz,}LSz,dOfs: Cardinal;
+//  Ch: Char;
 //  IsBig: boolean;
   FP: PFixupRec;
   K: Byte;
-  N: PName;
+  //N: PName;
 begin
   if integer(Size)<=0 then begin
     PutS('[]');
     Exit;
   end ;
-  if DPFile0=Nil then
+  if not ShowFileOfs{DPFile0=Nil} then
     FmtS := OfsFmtS
   else begin
     FmtS := FileOfsFmtS;
@@ -421,11 +981,12 @@ begin
     LSz := W;
     if LSz>Size then
       LSz := Size;
+    MarkMemOfs(LP-DPFile0);
     PutSFmt(FmtS,[Ofs0Displ+(LP-DP),LP-DPFile0,CharDumpStr(LP^,LSz)]);
     if (LSz<W){and IsBig} then
       PutS(CharNStr(' ',W-LSz));
-    DS := Format(DumpFmt{'|%s|'},[DumpStr(LP^,LSz)]);
-    DSP := PChar(DS);
+    DS := {$IFDEF UNICODE}AnsiStrings.{$ENDIF}Format(DumpFmt{'|%s|'},[DumpStr(LP^,LSz)]);
+    DSP := PAnsiChar(DS);
     if FixUpNames then
       FixS := '';
     while FixCnt>0 do begin
@@ -440,11 +1001,11 @@ begin
         '(','[': CP^ := '{';
       end ;
       if FixUpNames then begin
-        FS := Format('K%x %s',[K,CurUnit.GetAddrStr(FP^.NDX,true)]);
+        FS := {$IFDEF UNICODE}AnsiStrings.{$ENDIF}Format('K%x %s',[K,CurUnit.GetAddrStr(FP^.NDX,true)]);
         if FixS='' then
           FixS := FS
         else
-          FixS := Format('%s, %s',[FixS,FS]);
+          FixS := {$IFDEF UNICODE}AnsiStrings.{$ENDIF}Format('%s, %s',[FixS,FS]);
       end ;
       Dec(FixCnt);
       Inc(FP);
@@ -464,7 +1025,8 @@ begin
   until Size<=0;
 end ;
 
-function IntLStr(DP: Pointer; Sz: Cardinal; Neg: boolean): String;
+
+function IntLStr(DP: Pointer; Sz: Cardinal; Neg: boolean): AnsiString;
 var
   i : integer;
   BP: ^Byte;
@@ -482,7 +1044,7 @@ begin
       Ok := false;
       if Sz=8 then begin
         V := LongInt(DP^);
-        Inc(PChar(DP),4);
+        Inc(TIncPtr(DP),4);
         NDXHi := LongInt(DP^);
         Result := NDXToStr(V);
         Exit;
@@ -490,41 +1052,45 @@ begin
     end ;
     if Ok then begin
       //Result := IntToStr(V);
+     //!!!Добавить проверку на более простую запись в десятичном виде
       if V>=0 then
-        Result := Format('$%x',[V])
+        Result := {$IFDEF UNICODE}AnsiStrings.{$ENDIF}Format('$%x',[V])
       else
-        Result := Format('-$%x',[-V]);
+        Result := {$IFDEF UNICODE}AnsiStrings.{$ENDIF}Format('-$%x',[-V]);
       Exit;
     end ;
   end ;
-  Pointer(BP) := PChar(DP)+Sz-1;
+  Pointer(BP) := TIncPtr(DP)+Sz-1;
   SetLength(Result,Sz*2+1);
-  P := PChar(Result);
-  Char(P^) := '$';
-  Inc(PChar(P));
+  P := PAnsiChar(Result);
+  AnsiChar(P^) := '$';
+  Inc(PAnsiChar(P));
   for i := 1 to Sz do begin
     Word(P^) := ByteChars(BP^);
-    Inc(PChar(P),2);
-    Dec(PChar(BP));
+    Inc(PAnsiChar(P),2);
+    Dec(TIncPtr(BP));
   end ;
 end ;
 
-function CharStr(Ch: Char): String;
+function CharStr(Ch: AnsiChar): AnsiString;
 begin
   if Ch<' ' then
-    Result := Format('#%d',[Byte(Ch)])
-  else
-    Result := Format('''%s''{#$%x}',[Ch,Byte(Ch)])
+    Result := {$IFDEF UNICODE}AnsiStrings.{$ENDIF}Format('#%d',[Byte(Ch)])
+  else begin
+    Result := {$IFDEF UNICODE}AnsiStrings.{$ENDIF}Format('''%s''{#$%x}',[Ch,Byte(Ch)])
+    //Result := Format('''*''{#$%x}',[Byte(Ch)]);
+    //Result[2] := Ch; //Format works wrong with Ch when Unicode strings are on
+  end ;
 end ;
 
-function WCharStr(WCh: WideChar): String;
+function WCharStr(WCh: WideChar): AnsiString;
 var
   WStr: array[0..1]of WideChar;
-  S: String;
-  Ch: Char;
+  S: AnsiString;
+  Ch: AnsiChar;
 begin
   if Word(WCh)<$100 then
-    Ch := Char(WCh)
+    Ch := AnsiChar(WCh)
   else begin
     WStr[0] := WCh;
     Word(WStr[1]) := 0;
@@ -535,21 +1101,19 @@ begin
       Ch := '.';
   end ;
   if Ch<' ' then
-    Result := Format('#%d',[Word(WCh)])
+    Result := {$IFDEF UNICODE}AnsiStrings.{$ENDIF}Format('#%d',[Word(WCh)])
   else
-    Result := Format('''%s''{#$%x}',[Ch,Word(WCh)])
+    Result := {$IFDEF UNICODE}AnsiStrings.{$ENDIF}Format('''%s''{#$%x}',[Ch,Word(WCh)])
 end ;
 
-function BoolStr(DP: Pointer; DS: Cardinal): String;
+function BoolStr(DP: Pointer; DS: Cardinal): AnsiString;
 var
-  S: String;
-  CP: PChar;
-  All0: boolean;
+  CP: PAnsiChar;
 begin
-  CP := PChar(DP)+DS-1;
-  while (CP>PChar(DP))and(CP^=#0)do
+  CP := PAnsiChar(DP)+DS-1;
+  while (CP>PAnsiChar(DP))and(CP^=#0)do
     Dec(CP);
-  if (CP=PChar(DP)) then begin
+  if (CP=PAnsiChar(DP)) then begin
     if CP^=#0 then begin
       Result := 'false';
       Exit;
@@ -559,22 +1123,22 @@ begin
       Exit;
     end ;
   end ;
-  Result := Format('true{%s}',[IntLStr(DP,DS,false)]);
+  Result := {$IFDEF UNICODE}AnsiStrings.{$ENDIF}Format('true{%s}',[IntLStr(DP,DS,false)]);
 end ;
 
-function StrConstStr(CP: PChar; L: integer): String;
+function StrConstStr(CP: PAnsiChar; L: integer): AnsiString;
 var
   WasCode,Code: boolean;
-  ch: Char;
+  ch: AnsiChar;
   LRes: integer;
 
-  procedure PutCh(ch: Char);
+  procedure PutCh(ch: AnsiChar);
   begin
     Inc(LRes);
     Result[LRes] := ch;
   end ;
 
-  procedure PutStr(S: String);
+  procedure PutStr(const S: AnsiString);
   begin
     move(S[1],Result[LRes+1],Length(S));
     Inc(LRes,Length(S));
@@ -613,4 +1177,277 @@ begin
     SetLength(Result,LRes);
 end ;
 
+function ShowStrConst(DP: Pointer; DS: Cardinal): integer {Size used};
+var
+  L: integer;
+  VP: Pointer;
+begin
+  Result := -1;
+  if DS<9 {Min size} then
+    Exit;
+  if integer(DP^)<>-1 then
+    Exit {Reference count,-1 => ~infinity};
+  VP := TIncPtr(DP)+SizeOf(integer);
+  L := integer(VP^);
+  if (DS-9<L)or(L<0) then
+    Exit;
+  Inc(TIncPtr(VP),SizeOf(integer));
+  if (PAnsiChar(VP)+L)^<>#0 then
+    Exit;
+  Result := L+9;
+  PutStrConst(StrConstStr(VP,L));
+end ;
+
+function ShowUnicodeStrConst(DP: Pointer; DS: Cardinal): integer {Size used};
+//The unicode string support for ver>=verD12
+//New string header:
+//  -12:2 - Code page
+//  -10:2 - string item size
+//  -8:4 - reference count
+//  -4:4 - Length in terms of the string item size
+var
+  ElSz: integer;
+  VP: Pointer;
+begin
+  Result := -1;
+  if DS<13 {Min size} then
+    Exit;
+  VP := TIncPtr(DP)+SizeOf(word);
+  ElSz := word(VP^);
+  if ElSz=SizeOf(AnsiChar) then begin //Try to show it as an AnsiString (!!!the code page is ignored by now)
+    Result := ShowStrConst(TIncPtr(DP)+2*SizeOf(Word),DS-2*SizeOf(Word));
+    if Result>0 then
+      Inc(Result,2*SizeOf(Word));
+    Exit;
+  end ;
+  if ElSz<>SizeOf(WideChar) then
+    Exit;
+  VP := TIncPtr(DP)+SizeOf(integer);
+  if integer(VP^)<>-1 then
+    Exit {Reference count,-1 => ~infinity};
+  Inc(TIncPtr(VP),SizeOf(integer));
+  Result := ShowUnicodeResStrConst(VP,DS-2*SizeOf(integer));
+  if Result<0 then
+    Exit;
+  Inc(Result,2*SizeOf(integer));
+end ;
+
+function ShowUnicodeResStrConst(DP: Pointer; DS: Cardinal): integer {Size used};
+var
+  L: integer;
+  WS: WideString;
+  S: AnsiString;
+begin
+  Result := -1;
+  L := integer(DP^);
+  if (DS-6<L*SizeOf(WideChar))or(L<0) then
+    Exit;
+  Inc(TIncPtr(DP),SizeOf(integer));
+  if (PWideChar(DP)+L)^<>#0 then
+    Exit;
+  SetString(WS,PWideChar(DP),L);
+  S := WS;
+  Result := L*SizeOf(WideChar)+6;
+  PutStrConst(StrConstStr(PAnsiChar(S),L));
+end ;
+
+function TryShowPCharConst(DP: PAnsiChar; DS: Cardinal): integer {Size used};
+{ This function should check whether DP points to some valid text
+  I know that this algorithm is wrong for multibyte encoding.
+  Dear Asian colleagues, Please send me your versions. }
+const
+  ValidChars = [#9,#13,#10,' '..#255];
+var
+  CP,EP: PAnsiChar;
+begin
+  EP := DP+DS;
+  Result := -1;
+  CP := (DP);
+  while (CP<EP)and(CP^in ValidChars) do
+    Inc(CP);
+  if (CP>=EP)or(CP^<>#0) then
+    Exit;
+  if (DP^=#$E9)and(CP=DP+1) then {JMP 0 - got tired of those wrong strings for TRY}
+    Exit;
+  Result := CP-DP;
+  PutS(StrConstStr(DP,Result));
+  Inc(Result);
+end ;
+
+{$IFDEF VER100}
+{$DEFINE D3or4}
+{$ENDIF}
+{$IFDEF VER120}
+{$DEFINE D3or4}
+{$ENDIF}
+function FixFloatToStr(const E: Extended): AnsiString;
+type
+  TExtBytes = array[0..9]of ShortInt;
+begin
+  Result := FloatToStr(E);
+  {$IFDEF D3or4}
+  if (Result[1]='I')and(TExtBytes(E)[9]<0) then
+    Result := '-'+Result;
+  {$ENDIF}
+end ;
+
+
+procedure SetShowAuxValues(V: Boolean);
+begin
+  if V then
+    Writer.FAuxLevel := -MaxInt
+  else
+    Writer.FAuxLevel := 0;
+end ;
+
+procedure OpenAux;
+begin
+  Inc(Writer.FAuxLevel);
+end ;
+
+procedure CloseAux;
+begin
+  Dec(Writer.FAuxLevel);
+end ;
+
+
+procedure RemOpen0;
+begin
+  if Writer.AuxLevel>0 then
+    Exit;
+  if Writer.RemLevel=0 then
+    Writer.PutStrInfo(siRem,Nil);
+  Inc(Writer.FRemLevel);
+end ;
+
+procedure RemOpen;
+const
+  RemCh: array[boolean]of AnsiChar = '{(';
+begin
+  if Writer.AuxLevel>0 then
+    Exit;
+  if Writer.RemLevel=0 then
+    Writer.PutStrInfo(siRem,Nil);
+  PutCh(RemCh[Writer.RemLevel>0]);
+  Inc(Writer.FRemLevel);
+end ;
+
+procedure RemClose0;
+begin
+  if Writer.AuxLevel>0 then
+    Exit;
+  Dec(Writer.FRemLevel);
+  if Writer.RemLevel=0 then
+    PutStrInfoEnd;
+end ;
+
+procedure RemClose;
+const
+  RemCh: array[boolean]of AnsiChar = '})';
+begin
+  if Writer.AuxLevel>0 then
+    Exit;
+  Dec(Writer.FRemLevel);
+  PutCh(RemCh[Writer.RemLevel>0]);
+  if Writer.RemLevel=0 then
+    PutStrInfoEnd;
+end ;
+
+procedure AuxRemOpen;
+begin
+  Inc(Writer.FAuxLevel);
+  RemOpen;
+end ;
+
+procedure AuxRemClose;
+begin
+  RemClose;
+  Dec(Writer.FAuxLevel);
+end ;
+
+procedure PutSFmtRem(const Fmt: AnsiString; const Args: array of const);
+begin
+  RemOpen;
+  PutSFmt(Fmt,Args);
+  RemClose;
+end ;
+
+procedure PutSFmtRemAux(const Fmt: AnsiString; const Args: array of const);
+begin
+  Inc(Writer.FAuxLevel);
+  PutSFmtRem(Fmt,Args);
+  Dec(Writer.FAuxLevel);
+end ;
+
+procedure PutSpace;
+begin
+  PutCh(' ');
+end ;
+
+procedure PutKW(const S: AnsiString);
+begin
+  Writer.PutStrInfo(siKeyword,Nil);
+  PutS(S);
+  PutStrInfoEnd;
+end ;
+
+procedure PutKWSp(const S: AnsiString);
+begin
+  PutKW(S);
+  PutSpace;
+end ;
+
+procedure PutStrConst(const S: AnsiString);
+begin
+  Writer.PutStrInfo(siStrConst,Nil);
+  PutS(S);
+  PutStrInfoEnd;
+end ;
+
+procedure PutStrConstQ(const S: AnsiString);
+begin
+  PutStrConst({$IFDEF UNICODE}AnsiStrings.{$ENDIF}AnsiQuotedStr(S,'''')
+  {Format('''%s''',[S])});
+end ;
+
+procedure PutAddrDefStr(const S: AnsiString; hDef: integer);
+begin
+  if hDef>0 then
+    Writer.PutStrInfo(siAddrDef,Pointer(hDef));
+  PutS(S);
+  if hDef>0 then
+    PutStrInfoEnd;
+end ;
+
+procedure PutMemRefStr(const S: AnsiString; Ofs: integer);
+begin
+  if Ofs>=0 then
+    Writer.PutStrInfo(siMemRef,Pointer(Ofs));
+  PutS(S);
+  if Ofs>=0 then
+    PutStrInfoEnd;
+end ;
+
+procedure MarkDefStart(hDef: integer);
+begin
+  if hDef<0 then
+    Exit;
+  if Writer.AuxLevel>0 then
+    Exit;
+  Writer.PutStrInfo(siDefStart,Pointer(hDef));
+end ;
+
+procedure MarkMemOfs(Ofs: integer);
+begin
+  if Ofs<0 then
+    Exit;
+  if Writer.AuxLevel>0 then
+    Exit;
+  Writer.PutStrInfo(siMemOfs,Pointer(Ofs));
+end ;
+
+initialization
+finalization
+  FreeStringWriterList;
 end.
+
