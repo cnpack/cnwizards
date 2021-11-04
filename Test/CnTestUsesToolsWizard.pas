@@ -40,7 +40,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ToolsAPI, IniFiles, CnWizClasses, CnWizUtils, CnWizConsts, CnWizIdeUtils,
-  CnPasCodeParser, CnWizEditFiler, CnTree, CnCommon, CnUsesInitTreeFrm;
+  CnPasCodeParser, CnWizEditFiler, CnTree, CnCommon, CnUsesInitTreeFrm, CnHashMap;
 
 type
 
@@ -54,7 +54,9 @@ type
   private
     FTreeId: Integer;
     FEnumId: Integer;
-    FUnits, FSysDcus: TStringList;
+    FUnits: TStringList;
+    FSysDcus: TStringList;
+    FUnitsMap: TCnStrToStrHashMap;
     FTree: TCnTree;
     FFileNames, FLibPaths: TStringList;
     FDcuPath: string;
@@ -86,7 +88,7 @@ type
 implementation
 
 uses
-  CnDebug, CnDCU32;
+  CnDebug, CnDCU32, DCURecs;
 
 const
   csDcuExt = '.dcu';
@@ -322,6 +324,9 @@ procedure TCnTestUsesToolsWizard.EnumExecute;
 var
   Sl, OldNames: TStringList;
   I, Idx: Integer;
+  Info: TCnUnitUsesInfo;
+  Decl: TDCURec;
+  S, AKey: string;
 begin
   FUnits := TStringList.Create;
   FSysDcus := TStringList.Create;
@@ -353,6 +358,38 @@ begin
   end;
 
   LongMessageDlg(FSysDcus.Text);
+
+  // 拿到了系统库中的所有 dcu，分析其输出
+  if FUnitsMap <> nil then
+    FreeAndNil(FUnitsMap);
+  FUnitsMap := TCnStrToStrHashMap.Create;
+
+  for I := 0 to FSysDcus.Count - 1 do
+  begin
+    Info := TCnUnitUsesInfo.Create(FSysDcus[I]);
+    Decl := Info.DeclList;
+    while Decl <> nil do
+    begin
+      S := Decl.Name^.GetStr;
+      if S <> '' then
+        FUnitsMap.Add(S, FSysDcus[I]);
+      Decl := Decl.Next;
+    end;
+
+    Info.Free;
+  end;
+
+  ShowMessage(IntToStr(FUnitsMap.Size));
+  if FUnitsMap.Size > 0 then
+  begin
+    Sl.Clear;
+    FUnitsMap.StartEnum;
+    while FUnitsMap.GetNext(AKey, S) do
+    begin
+      Sl.Add(AKey + ' | ' + S);
+    end;
+    Sl.SaveToFile('C:\Temp\Units.txt');
+  end;
 
   FSysDcus.Free;
   Sl.Free;
