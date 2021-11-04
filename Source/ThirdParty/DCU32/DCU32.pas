@@ -60,6 +60,13 @@ const {My own (AX) codes for Delphi/Kylix versions}
   verD_XE6 = 19; //XE6
   //verAppMethod=20; //AppMethod
   verD_XE7 = 20; //XE7&AppMethod
+  verD_XE8 = 21; // Added by LiuXiao Begin.
+  verD_10S = 22;
+  verD_101B = 23;
+  verD_102T = 24;
+  verD_103R = 25;
+  verD_104S = 26;
+  verD_110A = 27; // Added by LiuXiao End.
   verK1 = 100; //Kylix 1.0
   verK2 = 101; //Kylix 2.0
   verK3 = 102; //Kylix 3.0
@@ -4365,6 +4372,239 @@ begin
       //The drCBlock section is missing here, all the memory is in the corresponding
       //*.o file. Or inline info decoding is required
       end;
+
+    // Added by LiuXiao Begin.
+    $1D00034D:
+      FVer := verD_XE8;
+    $1D00234D:
+      begin
+        FVer := verD_XE8;
+        FPlatform := dcuplWin64;
+        FPtrSize := 8;
+      end;
+    $1D00044D:
+      begin
+        FVer := verD_XE8;
+        FPlatform := dcuplOsx32;
+      end;
+    $1D00144D:
+      begin
+        FVer := verD_XE8;
+        FPlatform := dcuplIOSEmulator;
+      end;
+    $1D00764D:
+      begin
+        FVer := verD_XE8;
+        FPlatform := dcuplIOSDevice;
+      //The drCBlock section is missing here, all the memory is in the corresponding
+      //*.o file. Or inline info decoding is required
+      end;
+    $1D00774D:
+      begin
+        FVer := verD_XE8;
+        FPlatform := dcuplAndroid;
+      //The drCBlock section is missing here, all the memory is in the corresponding
+      //*.o file. Or inline info decoding is required
+      end;
+
+    $1E00034D:
+      FVer := verD_10S;
+    $1E00234D:
+      begin
+        FVer := verD_10S;
+        FPlatform := dcuplWin64;
+        FPtrSize := 8;
+      end;
+    $1E00044D:
+      begin
+        FVer := verD_10S;
+        FPlatform := dcuplOsx32;
+      end;
+    $1E00144D:
+      begin
+        FVer := verD_10S;
+        FPlatform := dcuplIOSEmulator;
+      end;
+    $1E00764D:
+      begin
+        FVer := verD_10S;
+        FPlatform := dcuplIOSDevice;
+      //The drCBlock section is missing here, all the memory is in the corresponding
+      //*.o file. Or inline info decoding is required
+      end;
+    $1E00774D:
+      begin
+        FVer := verD_10S;
+        FPlatform := dcuplAndroid;
+      //The drCBlock section is missing here, all the memory is in the corresponding
+      //*.o file. Or inline info decoding is required
+      end;
+
+    $1F00034D:
+      FVer := verD_101B;
+    $1F00234D:
+      begin
+        FVer := verD_101B;
+        FPlatform := dcuplWin64;
+        FPtrSize := 8;
+      end;
+    $1F00044D:
+      begin
+        FVer := verD_101B;
+        FPlatform := dcuplOsx32;
+      end;
+    $1F00144D:
+      begin
+        FVer := verD_101B;
+        FPlatform := dcuplIOSEmulator;
+      end;
+    $1F00764D:
+      begin
+        FVer := verD_101B;
+        FPlatform := dcuplIOSDevice;
+      //The drCBlock section is missing here, all the memory is in the corresponding
+      //*.o file. Or inline info decoding is required
+      end;
+    $1F00774D:
+      begin
+        FVer := verD_101B;
+        FPlatform := dcuplAndroid;
+      //The drCBlock section is missing here, all the memory is in the corresponding
+      //*.o file. Or inline info decoding is required
+      end;
+
+    $2000034D:
+      FVer := verD_102T;
+    $2000234D:
+      begin
+        FVer := verD_102T;
+        FPlatform := dcuplWin64;
+        FPtrSize := 8;
+      end;
+    $2000044D:
+      begin
+        FVer := verD_102T;
+        FPlatform := dcuplOsx32;
+      end;
+    $2000144D:
+      begin
+        FVer := verD_102T;
+        FPlatform := dcuplIOSEmulator;
+      end;
+    $2000764D:
+      begin
+        FVer := verD_102T;
+        FPlatform := dcuplIOSDevice;
+      //The drCBlock section is missing here, all the memory is in the corresponding
+      //*.o file. Or inline info decoding is required
+      end;
+    $2000774D:
+      begin
+        FVer := verD_102T;
+        FPlatform := dcuplAndroid;
+      //The drCBlock section is missing here, all the memory is in the corresponding
+      //*.o file. Or inline info decoding is required
+      end;
+
+    $2100034D:
+      FVer := verD_103R;
+    $2100234D:
+      begin
+        FVer := verD_103R;
+        FPlatform := dcuplWin64;
+        FPtrSize := 8;
+      end;
+    $2100044D:
+      begin
+        FVer := verD_103R;
+        FPlatform := dcuplOsx32;
+      end;
+    $2100144D:
+      begin
+        FVer := verD_103R;
+        FPlatform := dcuplIOSEmulator;
+      end;
+    $2100764D:
+      begin
+        FVer := verD_103R;
+        FPlatform := dcuplIOSDevice;
+      //The drCBlock section is missing here, all the memory is in the corresponding
+      //*.o file. Or inline info decoding is required
+      end;
+    $2100774D:
+      begin
+        FVer := verD_103R;
+        FPlatform := dcuplAndroid;
+      //The drCBlock section is missing here, all the memory is in the corresponding
+      //*.o file. Or inline info decoding is required
+      end;
+
+    $2200034D:
+      FVer := verD_104S;
+    $2200234D:
+      begin
+        FVer := verD_104S;
+        FPlatform := dcuplWin64;
+        FPtrSize := 8;
+      end;
+    $2200044D:
+      begin
+        FVer := verD_104S;
+        FPlatform := dcuplOsx32;
+      end;
+    $2200144D:
+      begin
+        FVer := verD_104S;
+        FPlatform := dcuplIOSEmulator;
+      end;
+    $2200764D:
+      begin
+        FVer := verD_104S;
+        FPlatform := dcuplIOSDevice;
+      //The drCBlock section is missing here, all the memory is in the corresponding
+      //*.o file. Or inline info decoding is required
+      end;
+    $2200774D:
+      begin
+        FVer := verD_104S;
+        FPlatform := dcuplAndroid;
+      //The drCBlock section is missing here, all the memory is in the corresponding
+      //*.o file. Or inline info decoding is required
+      end;
+
+    $2300034D:
+      FVer := verD_110A;
+    $2300234D:
+      begin
+        FVer := verD_110A;
+        FPlatform := dcuplWin64;
+        FPtrSize := 8;
+      end;
+    $2300044D:
+      begin
+        FVer := verD_110A;
+        FPlatform := dcuplOsx32;
+      end;
+    $2300144D:
+      begin
+        FVer := verD_110A;
+        FPlatform := dcuplIOSEmulator;
+      end;
+    $2300764D:
+      begin
+        FVer := verD_110A;
+        FPlatform := dcuplIOSDevice;
+      //The drCBlock section is missing here, all the memory is in the corresponding
+      //*.o file. Or inline info decoding is required
+      end;
+    $2300774D:
+      begin
+        FVer := verD_110A;
+        FPlatform := dcuplAndroid;
+      //The drCBlock section is missing here, all the memory is in the corresponding
+      //*.o file. Or inline info decoding is required
+      end;
+    // Added by LiuXiao End.
 
     ulong($F21F148C):
       FVer := verK1; //Kylix 1.0
