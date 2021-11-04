@@ -1,10 +1,11 @@
 inherited CnUsesCleanResultForm: TCnUsesCleanResultForm
   Left = 241
   Top = 65
-  Width = 516
-  Height = 426
+  AutoScroll = False
   BorderIcons = [biSystemMenu]
   Caption = 'Uses Units Cleaner Scan Result'
+  ClientHeight = 399
+  ClientWidth = 508
   Constraints.MinHeight = 350
   Constraints.MinWidth = 450
   Icon.Data = {
