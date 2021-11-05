@@ -174,7 +174,7 @@ function CnGetClassParentFromClass(AClass: Integer): Integer;
 {* 供 Pascal Script 使用的从整型的类信息获取父类信息的函数}
 
 function CnWizLoadIcon(AIcon: TIcon; ASmallIcon: TIcon; const ResName: string;
-  UseDefault: Boolean = False): Boolean;
+  UseDefault: Boolean = False; IgnoreDisabled: Boolean = False): Boolean;
 {* 从资源或文件中装载图标，执行时先从图标目录中查找，如果失败再从资源中查找，
    返回结果为 AIcon 图标装载成功标志。参数 ResName 请不要带 .ico 扩展名。
    AIcon 加载系统默认尺寸一般是32*32，ASmallIcon 加载 16*16 如果有的话，否则为空}
@@ -1311,7 +1311,7 @@ end;
 
 // 从资源或文件中装载图标
 function CnWizLoadIcon(AIcon: TIcon; ASmallIcon: TIcon; const ResName: string;
-  UseDefault: Boolean): Boolean;
+  UseDefault: Boolean; IgnoreDisabled: Boolean): Boolean;
 var
   FileName: string;
   Handle: HICON;
@@ -1340,6 +1340,8 @@ var
 
 begin
   Result := False;
+  if WizOptions.DisableIcons and not IgnoreDisabled then // 参数可强制忽略 WizOptions.DisableIcons
+    Exit;
 
   // 从文件中装载
   try
@@ -1478,6 +1480,8 @@ var
   FileName: string;
 begin
   Result := False;
+  // if WizOptions.DisableIcons then // Bitmap 较少，不省略
+  //   Exit;
 
   // 从文件中装载
   try

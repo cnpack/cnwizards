@@ -120,6 +120,7 @@ type
     FUseOneCPUCore: Boolean;
     FUseLargeIcon: Boolean;
     FSizeEnlarge: TCnWizSizeEnlarge;
+    FDisableIcons: Boolean;
     procedure SetCurrentLangID(const Value: Cardinal);
     function GetUpgradeCheckDate: TDateTime;
     procedure SetUpgradeCheckDate(const Value: TDateTime);
@@ -273,6 +274,8 @@ type
     {* 是否在工具栏等处使用大尺寸图标，注意运行期除了设置窗口外不要改变此值，避免与大图标不一致。}
     property SizeEnlarge: TCnWizSizeEnlarge read FSizeEnlarge write FSizeEnlarge;
     {* 窗体的字号与尺寸放大倍数枚举}
+    property DisableIcons: Boolean read FDisableIcons write FDisableIcons;
+    {* 禁用图标以减少 GDI 资源占用}
 
     property UseCustomUserDir: Boolean read FUseCustomUserDir write SetUseCustomUserDir;
     {* 是否使用指定的 User 目录}
@@ -332,6 +335,7 @@ const
   csUseOneCPUCore = 'UseOneCPUCore';
   csUseLargeIcon = 'UseLargeIcon';
   csSizeEnlarge = 'SizeEnlarge';
+  csDisableIcons = 'DisableIcons';
 {$IFDEF BDS}
   csUseOneCPUDefault = False;
 {$ELSE}
@@ -456,6 +460,7 @@ begin
     FixThreadLocale := ReadBool(SCnOptionSection, csFixThreadLocale, False);
     FUseLargeIcon := ReadBool(SCnOptionSection, csUseLargeIcon, False);
     FSizeEnlarge := TCnWizSizeEnlarge(ReadInteger(SCnOptionSection, csSizeEnlarge, Ord(FSizeEnlarge)));
+    FDisableIcons := ReadBool(SCnOptionSection, csDisableIcons, False);
 
     FUseCustomUserDir := ReadBool(SCnOptionSection, csUseCustomUserDir, CheckWinVista);
     SHGetFolderPath(0, CSIDL_PERSONAL or CSIDL_FLAG_CREATE, 0, 0, SHUserDir);
@@ -528,6 +533,8 @@ begin
       WriteBool(SCnOptionSection, csUseLargeIcon, FUseLargeIcon);
 
     WriteInteger(SCnOptionSection, csSizeEnlarge, Ord(FSizeEnlarge));
+    WriteBool(SCnOptionSection, csDisableIcons, FDisableIcons);
+
     WriteBool(SCnOptionSection, csUseCustomUserDir, FUseCustomUserDir);
     if not FUseCmdUserDir then // 不是命令行中指定目录时才保存目录名，避免命令行指定的目录覆盖掉设置目录
       WriteString(SCnOptionSection, csCustomUserDir, FCustomUserDir);
