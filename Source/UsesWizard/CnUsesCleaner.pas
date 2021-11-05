@@ -51,7 +51,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ToolsAPI, IniFiles, Contnrs, CnWizMultiLang, CnWizClasses, CnWizConsts,
   CnCommon, CnConsts, CnWizUtils, CnDCU32, CnWizIdeUtils, CnWizEditFiler,
-  CnWizOptions, mPasLex, Math, TypInfo, RegExpr, ActnList
+  CnWizOptions, CnHashMap, mPasLex, Math, TypInfo, RegExpr, ActnList
   {$IFDEF DELPHIXE3_UP}, System.Actions {$ENDIF};
 
 type
@@ -96,6 +96,7 @@ type
   private
     FIdCleaner: Integer;
     FIdInitTree: Integer;
+    FIdFromIdent: Integer;
     FIgnoreInit: Boolean;
     FIgnoreReg: Boolean;
     FIgnoreNoSrc: Boolean;
@@ -106,6 +107,10 @@ type
     FIgnoreList: TStringList;
     FCleanList: TStringList;
     FRegExpr: TRegExpr;
+    FUnitsMap: TCnStrToStrHashMap;
+    FSysUnits: TStringList;
+    FSysPath: string;
+    FCurrProject: string;
     function MatchInListWithExpr(List: TStrings; const Str: string): Boolean;
     function GetProjectFromModule(AModule: IOTAModule): IOTAProject;
     function ShowKindForm(var AKind: TCnUsesCleanKind): Boolean;
@@ -121,8 +126,14 @@ type
     function DoCleanUnit(Buffer: IOTAEditBuffer; Intf, Impl: TStrings): Boolean;
     procedure CleanUnitUses(List: TObjectList);
 
+    procedure UsesEnumCallback(const AUnitFullName: string; Exists: Boolean;
+      FileType: TCnUsesFileType; ModuleSearchType: TCnModuleSearchType);
+    procedure CheckReLoadUnitsMap;
+    procedure LoadSysUnitsToMap;
+
     procedure CleanExecute;
     procedure InitTreeExecute;
+    procedure FromIdentExecute;
   protected
     procedure SubActionExecute(Index: Integer); override;
     procedure SubActionUpdate(Index: Integer); override;
@@ -152,7 +163,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnUsesCleanResultFrm, CnUsesInitTreeFrm;
+  CnUsesCleanResultFrm, CnUsesInitTreeFrm, DCURecs;
 
 {$R *.DFM}
 
@@ -196,6 +207,8 @@ begin
   FRegExpr.Free;
   FCleanList.Free;
   FIgnoreList.Free;
+  FUnitsMap.Free;
+  FSysUnits.Free;
   inherited;
 end;
 
@@ -1380,6 +1393,8 @@ begin
     0, SCnUsesCleanerMenuHint);
   FIdInitTree := RegisterASubAction(SCnUsesToolsInitTree, SCnUsesInitTreeMenuCaption,
     0, SCnUsesInitTreeMenuHint);
+//  FIdFromIdent := RegisterASubAction(ScnUsesToolsFromIdent, SCnUsesUnitFromIdentMenuCaption,
+//    0, SCnUsesUnitFromIdentMenuHint);
 end;
 
 procedure TCnUsesToolsWizard.SubActionExecute(Index: Integer);
@@ -1387,7 +1402,9 @@ begin
   if Index = FIdCleaner then
     CleanExecute
   else if Index = FIdInitTree then
-    InitTreeExecute;
+    InitTreeExecute
+  else if Index = FIdFromIdent then
+    FromIdentExecute;
 end;
 
 procedure TCnUsesToolsWizard.SubActionUpdate(Index: Integer);
@@ -1403,6 +1420,184 @@ begin
     ShowModal;
     Free;
     Exit;
+  end;
+end;
+
+procedure TCnUsesToolsWizard.CheckReLoadUnitsMap;
+var
+  ToReload: Boolean;
+  Paths: TStringList;
+  S: string;
+begin
+  ToReload := False;
+  if FUnitsMap = nil then
+  begin
+    FUnitsMap := TCnStrToStrHashMap.Create;
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('First Init. To Reload Dcus.');
+{$ENDIF}
+    ToReload := True;
+  end
+  else
+  begin
+    // 检查是否要重新载入系统 Units，条件为如果当前工程发生改变，或系统路径发生改变
+    S := CnOtaGetCurrentProjectFileName;
+    if S <> FCurrProject then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('Current Project Changed from %s to %s. To Reload Dcus.', [FCurrProject, S]);
+{$ENDIF}
+      ToReload := True;
+      FCurrProject := S;
+    end;
+
+    if not ToReload then
+    begin
+      Paths := TStringList.Create;
+      try
+        GetLibraryPath(Paths, False);
+        if FSysPath <> Paths.Text then
+        begin
+          ToReload := True;
+          FSysPath := Paths.Text; // 先保存
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('System Library Paths Changed. To Reload Dcus.');
+{$ENDIF}
+        end;
+      finally
+        Paths.Free;
+      end;
+    end;
+  end;
+
+  if ToReload then
+  begin
+    Screen.Cursor := crHourGlass;
+    try
+      LoadSysUnitsToMap;
+    finally
+      Screen.Cursor := crDefault;
+    end;
+  end;
+end;
+
+procedure TCnUsesToolsWizard.LoadSysUnitsToMap;
+var
+  I, Idx: Integer;
+  Info: TCnUnitUsesInfo;
+  Decl: TDCURec;
+  S: string;
+  OldPaths, OldNames: TStringList;
+begin
+  if FSysUnits = nil then
+    FSysUnits := TStringList.Create
+  else
+    FSysUnits.Clear;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Prepare to Call IdeEnumUsesIncludeUnits');
+{$ENDIF}
+
+  if IdeEnumUsesIncludeUnits(UsesEnumCallback) then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('After Call IdeEnumUsesIncludeUnits. Get %d', [FSysUnits.Count]);
+{$ENDIF}
+
+    // 取到了名字，更正大小写
+    if FSysUnits.Count > 0 then
+    begin
+      OldNames := TStringList.Create;
+      OldPaths := TStringList.Create;
+      FSysUnits.Sort;
+
+      try
+        for I := 0 to FSysUnits.Count - 1 do
+        begin
+          OldPaths.Add(_CnExtractFilePath(FSysUnits[I]));
+          FSysUnits[I] := _CnChangeFileExt(_CnExtractFileName(FSysUnits[I]), '');
+          OldNames.Add(FSysUnits[I]); // 拆分保留原有的路径与文件名
+        end;
+
+        CorrectCaseFromIdeModules(FSysUnits); // 只支持纯文件名，还会给你排好序
+        FSysUnits.Sorted := False;
+
+        for I := 0 to FSysUnits.Count - 1 do
+        begin
+          Idx := OldNames.IndexOf(FSysUnits[I]); // 根据更改后的文件名找到原来对应的路径
+          FSysUnits[I] := MakePath(OldPaths[Idx]) + FSysUnits[I] + '.dcu';
+        end;
+      finally
+        OldPaths.Free;
+        OldNames.Free;
+      end;
+
+      // 大小写更正完毕，加入 HashMap
+      for I := 0 to FSysUnits.Count - 1 do
+      begin
+        Info := TCnUnitUsesInfo.Create(FSysUnits[I]);
+        try
+          Decl := Info.DeclList;
+          while Decl <> nil do
+          begin
+            S := Decl.Name^.GetStr;
+            if S <> '' then
+            begin
+              // 如果有 {Generics.Collection} 这种开头，要去掉，如果有点号，则取最后一个点号后面的
+              Idx := LastCharPos(S, '.');
+              if Idx > 0 then
+                S := Copy(S, Idx + 1, MaxInt);
+              Idx := LastCharPos(S, '}');
+              if Idx > 0 then
+                S := Copy(S, Idx + 1, MaxInt);
+
+              if S <> '' then
+                FUnitsMap.Add(LowerCase(S), FSysUnits[I]);
+            end;
+            Decl := Decl.Next;
+          end;
+        finally
+          Info.Free;
+        end;
+      end;
+    end;
+    FreeAndNil(FSysUnits); // 清除掉一点点内存
+  end;
+end;
+
+procedure TCnUsesToolsWizard.UsesEnumCallback(const AUnitFullName: string;
+  Exists: Boolean; FileType: TCnUsesFileType;
+  ModuleSearchType: TCnModuleSearchType);
+var
+  S: string;
+  I: Integer;
+begin
+  if FileType = uftPascalDcu then
+    FSysUnits.Add(AUnitFullName);
+end;
+
+procedure TCnUsesToolsWizard.FromIdentExecute;
+var
+  Token: TCnIdeTokenString;
+  Idx: Integer;
+  S, UnitName: string;
+begin
+  CheckReLoadUnitsMap;
+
+  if not CurrentIsSource or not CnOtaGeneralGetCurrPosToken(Token, Idx) then
+  begin
+    if not CnInputQuery(SCnInformation, SCnUsesUnitEnterIdent, S)then
+      Exit;
+  end
+  else
+    S := string(Token);
+
+  if S <> '' then
+  begin
+    if FUnitsMap.Find(LowerCase(S), UnitName) then
+      ShowMessage(UnitName)
+    else
+      ErrorDlg(Format(SCNUsesUnitFromIdentErrorFmt, [S]));
   end;
 end;
 

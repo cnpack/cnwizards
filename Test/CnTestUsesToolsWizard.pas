@@ -392,6 +392,7 @@ begin
   end;
 
   FSysDcus.Free;
+  OldNames.Free;
   Sl.Free;
 end;
 

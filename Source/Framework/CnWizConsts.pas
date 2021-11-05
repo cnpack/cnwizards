@@ -339,6 +339,7 @@ resourcestring
   // CnUsesTools
   SCnUsesToolsCleaner = 'CnUsesToolsCleaner';
   SCnUsesToolsInitTree = 'CnUsesToolsInitTree';
+  ScnUsesToolsFromIdent = 'ScnUsesToolsFromIdent';
 
   // CnIdeEnhanceMenu
   SCnIdeEnhanceMenuCommand = 'CnIdeEnhanceMenu';
@@ -1557,6 +1558,12 @@ var
   SCnUsesInitTreeSearchInProjectSearch: string = 'In Project Search Path';
   SCnUsesInitTreeSearchInSystemSearch: string = 'In System Search Path';
   SCnUsesInitTreeNotFound: string = 'Search Text Not Found.';
+
+  // CnUsesFromIdent
+  SCnUsesUnitFromIdentMenuCaption: string = 'Uses Unit from Identifier...';
+  SCnUsesUnitFromIdentMenuHint: string = 'Search and Uses Unit from Identifier under Cursor';
+  SCnUsesUnitEnterIdent: string = 'Please Enter an Identifier to Search in Units:';
+  SCNUsesUnitFromIdentErrorFmt: string = 'Can NOT Find %s in Searching Units';
 
   // CnIdeEnhanceMenu
   SCnIdeEnhanceMenuCaption: string = '&IDE Enhancements Settings';
