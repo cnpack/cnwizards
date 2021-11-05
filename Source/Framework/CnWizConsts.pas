@@ -105,6 +105,7 @@ resourcestring
   SCnShowBootFormSwitch = 'swcn';
   SCnUserRegSwitch = 'cnreg';
   SCnUserDirSwitch = 'cnuserdir';
+  SCnNoIcons = 'noico';
 
   SCnWizardsPage = 'CnPack';
   SCnWizardsNamePrefix = 'CnPack';

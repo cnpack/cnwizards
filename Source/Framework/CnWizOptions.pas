@@ -121,6 +121,7 @@ type
     FUseLargeIcon: Boolean;
     FSizeEnlarge: TCnWizSizeEnlarge;
     FDisableIcons: Boolean;
+    FTempForceDisableIco: Boolean;
     procedure SetCurrentLangID(const Value: Cardinal);
     function GetUpgradeCheckDate: TDateTime;
     procedure SetUpgradeCheckDate(const Value: TDateTime);
@@ -408,6 +409,9 @@ begin
   FHelpPath := MakePath(FDllPath + SCnWizHelpPath);
 
   FRegBase := SCnPackRegPath;
+  if FindCmdLineSwitch(SCnNoIcons, ['/', '-'], True) then
+    FTempForceDisableIco := True;
+
   for I := 1 to ParamCount do
   begin
     S := ParamStr(I);
@@ -422,7 +426,7 @@ begin
     begin
       FUseCmdUserDir := True;
       FCustomUserDir := Copy(S, Length(SCnUserDirSwitch) + 2, MaxInt);
-    end
+    end;
   end;
 
 {$IFDEF DEBUG}
@@ -461,6 +465,8 @@ begin
     FUseLargeIcon := ReadBool(SCnOptionSection, csUseLargeIcon, False);
     FSizeEnlarge := TCnWizSizeEnlarge(ReadInteger(SCnOptionSection, csSizeEnlarge, Ord(FSizeEnlarge)));
     FDisableIcons := ReadBool(SCnOptionSection, csDisableIcons, False);
+    if FTempForceDisableIco then
+      FDisableIcons := True;
 
     FUseCustomUserDir := ReadBool(SCnOptionSection, csUseCustomUserDir, CheckWinVista);
     SHGetFolderPath(0, CSIDL_PERSONAL or CSIDL_FLAG_CREATE, 0, 0, SHUserDir);
@@ -533,7 +539,8 @@ begin
       WriteBool(SCnOptionSection, csUseLargeIcon, FUseLargeIcon);
 
     WriteInteger(SCnOptionSection, csSizeEnlarge, Ord(FSizeEnlarge));
-    WriteBool(SCnOptionSection, csDisableIcons, FDisableIcons);
+    if not FTempForceDisableIco then
+      WriteBool(SCnOptionSection, csDisableIcons, FDisableIcons);
 
     WriteBool(SCnOptionSection, csUseCustomUserDir, FUseCustomUserDir);
     if not FUseCmdUserDir then // 不是命令行中指定目录时才保存目录名，避免命令行指定的目录覆盖掉设置目录
