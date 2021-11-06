@@ -72,13 +72,12 @@ uses
 
 type
   TCnFormInfo = class(TCnBaseElementInfo)
-  {* 需要解析 DFM，暂无法继承自 TCnBaseElementInfo，只能先整几个同名属性过来}
+  {* 需要解析 DFM}
   private
     FDesignClass: string;
     FFileName: string;
     FProject: string;
     FSize: Integer;
-    FImageIndex: Integer;
     FIsOpened: Boolean;
     FDfmInfo: TDfmInfo;
     function GetDesignClassText: string;
@@ -92,7 +91,6 @@ type
     property FileName: string read FFileName write FFileName;
     property Project: string read FProject write FProject;
     property Size: Integer read FSize write FSize;
-    property ImageIndex: Integer read FImageIndex write FImageIndex;
     property IsOpened: Boolean read FIsOpened write FIsOpened;
     property DesignClassText: string read GetDesignClassText;
   end;

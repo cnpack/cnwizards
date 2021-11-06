@@ -76,6 +76,7 @@ type
     FParentProject: TCnProjectInfo;
     FFuzzyScore: Integer;
     FStartOffset: Integer;
+    FImageIndex: Integer;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -88,6 +89,8 @@ type
     {* 模糊匹配 Text 的下标}
     property ParentProject: TCnProjectInfo read FParentProject write FParentProject;
     {* 该元素从属的 Project，无则为 nil}
+    property ImageIndex: Integer read FImageIndex write FImageIndex;
+    {* 显示时用来存 ImageIndex 图标序号，多个子类需要，因此提至父类中}
   published
     property Text: string read FText write FText;
     {* Text 表示第一列显示的文字}
@@ -213,7 +216,7 @@ type
     DataList: TStringList;        // 供子类存储原始需要搜索的列表名字以及 Object
     DisplayList: TStringList;     // 供子类容纳过滤后需要显示的列表名字以及 Object（引用）
     function DisableLargeIcons: Boolean; virtual; // 供子类重载以因为特殊原因禁用大图标，默认跟着设置走
-    function DoSelectOpenedItem: string; virtual; abstract;
+    function DoSelectOpenedItem: string; virtual;
     procedure DoSelectItemChanged(Sender: TObject); virtual;
     procedure DoUpdateListView; virtual;
 
@@ -1037,6 +1040,9 @@ begin
           ToSels.Add(DataList[I]);
       end;
     end;
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('ViewBase Form, Get %d to Display from %d.', [DisplayList.Count, DataList.Count]);
+{$ENDIF}
 
     DoSortListView;
     lvList.Items.Count := DisplayList.Count;
@@ -1360,6 +1366,11 @@ end;
 function TCnProjectViewBaseForm.DisableLargeIcons: Boolean;
 begin
   Result := False;
+end;
+
+function TCnProjectViewBaseForm.DoSelectOpenedItem: string;
+begin
+  Result := '';
 end;
 
 {$IFNDEF STAND_ALONE}

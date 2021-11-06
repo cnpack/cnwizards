@@ -279,7 +279,7 @@ begin
     (Item.Index < DisplayList.Count) then
   begin
     Item.Caption := DisplayList[Item.Index];
-    Item.ImageIndex := 78;
+    Item.ImageIndex := 78; // Unit
     if FIsDpr then
       Item.SubItems.Add('project')
     else if FIsC then

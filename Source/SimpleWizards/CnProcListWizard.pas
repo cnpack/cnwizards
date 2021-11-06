@@ -190,7 +190,6 @@ type
     procedure InitFileComboBox;
     procedure LoadFileComboBox;
 {$ENDIF}
-    function SelectImageIndex(ProcInfo: TCnElementInfo): Integer;
     function GetMethodName(const ProcName: string): string;
   protected
     procedure DoLanguageChanged(Sender: TObject); override;
@@ -437,6 +436,7 @@ type
 
     procedure LoadElements(ElementList, ObjectList: TStringList; aFileName: string;
       ToClear: Boolean = True);
+    procedure UpdateDataListImageIndex(ADataList: TStringList);
     procedure AddProcedure(ElementList, ObjectList: TStringList;
       ElementInfo: TCnElementInfo; IsIntf: Boolean);
     procedure AddElement(ElementList: TStringList;
@@ -577,6 +577,53 @@ begin
     Result := -Result;
 end;
 
+function CalcSelectImageIndex(ProcInfo: TCnElementInfo; Lang: TCnSourceLanguageType): Integer;
+var
+  ProcName: string;
+begin
+  // 返回图标编号
+  Result := 20;
+  if ProcInfo = nil then
+    Exit;
+
+  case Lang of
+  ltPas:
+    begin
+      ProcName := UpperCase(ProcInfo.Name);
+      if Pos('.', ProcName) <> 0 then
+        Result := 41    // 方法
+      else
+        Result := 20;   // 独立
+      if Pos('CONSTRUCTOR', ProcName) <> 0 then // Do not localize.
+        Result := 12;   // 构造
+      if Pos('DESTRUCTOR', ProcName) <> 0 then // Do not localize.
+        Result := 31;   // 析构
+
+      case ProcInfo.ElementType of
+        etClass:     Result := 90;
+        etRecord:    Result := 36;
+        etInterface: Result := 91;
+        etProperty : Result := 92;
+      else
+        // nochange;
+      end;
+    end;
+  ltCpp:
+    begin
+      case ProcInfo.ElementType of
+        etClassFunc:      Result := 41;   // 方法
+        etSingleFunction: Result := 20;   // 独立
+        etConstructor:    Result := 12;   // 构造
+        etDestructor:     Result := 31;   // 析构
+        etClass:          Result := 90;
+        etInterface:      Result := 91;
+        etProperty :      Result := 92;
+        etRecord:         Result := 36;
+      end;
+    end;
+  end;
+end;
+
 { TCnProcListWizard }
 
 {$IFNDEF STAND_ALONE}
@@ -656,6 +703,7 @@ begin
   begin
     ClearList;
     LoadElements(FElementList, FObjStrings, CnOtaGetCurrentSourceFileName);
+    UpdateDataListImageIndex(FElementList);
 
     FElementList.Sort;
     RemoveForward; // 去除重复的前向声明
@@ -1194,6 +1242,8 @@ begin
       LoadSettings(Ini, '');
 {$ENDIF}
       LoadElements(DataList, ObjectList, FFileName);
+      UpdateDataListImageIndex(DataList);
+
       UpdateListView;
       LoadObjectComboBox(ObjectList);
 
@@ -2877,6 +2927,19 @@ begin
   end;
 end;
 
+procedure TCnProcListWizard.UpdateDataListImageIndex(ADataList: TStringList);
+var
+  I: Integer;
+  Ele: TCnElementInfo;
+begin
+  for I := 0 to ADataList.Count - 1 do
+  begin
+    Ele := TCnElementInfo(ADataList.Objects[I]);
+    if Ele <> nil then
+      Ele.ImageIndex := CalcSelectImageIndex(Ele, FLanguage);
+  end;
+end;
+
 procedure TCnProcListForm.LoadSettings(Ini: TCustomIniFile;
   aSection: string);
 var
@@ -3245,52 +3308,6 @@ begin
   end; //case Language
 end;
 
-function TCnProcListForm.SelectImageIndex(ProcInfo: TCnElementInfo): Integer;
-var
-  ProcName: string;
-begin
-  // 返回图标编号
-  Result := 20;
-  if ProcInfo = nil then Exit;
-
-  case FLanguage of
-  ltPas:
-    begin
-      ProcName := UpperCase(ProcInfo.Name);
-      if Pos('.', ProcName) <> 0 then
-        Result := 41    // 方法
-      else
-        Result := 20;   // 独立
-      if Pos('CONSTRUCTOR', ProcName) <> 0 then // Do not localize.
-        Result := 12;   // 构造
-      if Pos('DESTRUCTOR', ProcName) <> 0 then // Do not localize.
-        Result := 31;   // 析构
-
-      case ProcInfo.ElementType of
-        etClass:     Result := 90;
-        etRecord:    Result := 36;
-        etInterface: Result := 91;
-        etProperty : Result := 92;
-      else
-        // nochange;
-      end;
-    end;
-  ltCpp:
-    begin
-      case ProcInfo.ElementType of
-        etClassFunc:      Result := 41;   // 方法
-        etSingleFunction: Result := 20;   // 独立
-        etConstructor:    Result := 12;   // 构造
-        etDestructor:     Result := 31;   // 析构
-        etClass:          Result := 90;
-        etInterface:      Result := 91;
-        etProperty :      Result := 92;
-        etRecord:         Result := 36;
-      end;
-    end;
-  end;
-end;
-
 function TCnProcListForm.GetMethodName(const ProcName: string): string;
 var
   CharPos, LTPos: Integer;
@@ -3335,7 +3352,7 @@ begin
     if ElementInfo <> nil then
     begin
       Item.Caption := ElementInfo.Text;
-      Item.ImageIndex := SelectImageIndex(ElementInfo);
+      Item.ImageIndex := ElementInfo.ImageIndex;
       Item.SubItems.Add(ElementInfo.ElementTypeStr);
       Item.SubItems.Add(IntToStr(ElementInfo.LineNo));
       Item.SubItems.Add(ElementInfo.FileName);
@@ -3549,6 +3566,7 @@ begin
     FIsCurrentFile := TCnFileInfo(cbbFiles.Items.Objects[cbbFiles.ItemIndex]).AllName = CurrentFile;
     aFile := TCnFileInfo(cbbFiles.Items.Objects[cbbFiles.ItemIndex]).AllName;
     Wizard.LoadElements(DataList, FObjectList, aFile);
+    Wizard.UpdateDataListImageIndex(DataList);
   end
   else
   begin
@@ -3557,6 +3575,7 @@ begin
       begin
         FIsCurrentFile := True;
         Wizard.LoadElements(DataList, FObjectList, CnOtaGetCurrentSourceFileName);
+        Wizard.UpdateDataListImageIndex(DataList);
       end;
     1: // 当前工程
       begin
@@ -3574,6 +3593,7 @@ begin
                 or IsTypeLibrary(aFile) or IsInc(aFile) then
               begin
                 Wizard.LoadElements(DataList, FObjectList, aFile, FirstFile);
+                Wizard.UpdateDataListImageIndex(DataList);
                 FirstFile := False;
               end;
             end;
@@ -3601,6 +3621,7 @@ begin
                     or IsTypeLibrary(aFile) or IsInc(aFile) then
                   begin
                     Wizard.LoadElements(DataList, FObjectList, aFile, FirstFile);
+                    Wizard.UpdateDataListImageIndex(DataList);
                     FirstFile := False;
                   end;
                 end;
@@ -3620,6 +3641,7 @@ begin
             or IsTypeLibrary(aFile) or IsInc(aFile) then
           begin
             Wizard.LoadElements(DataList, FObjectList, aFile, FirstFile);
+            Wizard.UpdateDataListImageIndex(DataList);
             FirstFile := False;
           end;
         end;

@@ -59,7 +59,6 @@ type
     IsInProject: Boolean;
     IsOpened: Boolean;
     IsSaved: Boolean;
-    ImageIndex: Integer;
   end;
 
 //==============================================================================
