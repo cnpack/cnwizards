@@ -1179,29 +1179,31 @@ end;
 // 全部重绘 Tab Order
 procedure TCnTabOrderWizard.UpdateDraw;
 var
-  i, j: Integer;
+  I, J: Integer;
   FormEditor: IOTAFormEditor;
   ModuleServices: IOTAModuleServices;
   Root: TComponent;
 begin
-  if not Active then Exit;
+  if not Active then
+    Exit;
 
   QuerySvcs(BorlandIDEServices, IOTAModuleServices, ModuleServices);
-  for i := 0 to ModuleServices.GetModuleCount - 1 do
+  for I := 0 to ModuleServices.GetModuleCount - 1 do
   begin
-    FormEditor := CnOtaGetFormEditorFromModule(ModuleServices.GetModule(i));
+    FormEditor := CnOtaGetFormEditorFromModule(ModuleServices.GetModule(I));
     if Assigned(FormEditor) then
     begin
       Root := CnOtaGetRootComponentFromEditor(FormEditor);
-      if (Root <> nil) and (Root is TWinControl) then
+      if Root <> nil then   then
       begin
-        for j := 0 to Root.ComponentCount - 1 do
-          if Root.Components[j] is TWinControl then
-            TWinControl(Root.Components[j]).Invalidate;
-      end;
+        if Root is TWinControl then
+        for J := 0 to Root.ComponentCount - 1 do
+          if Root.Components[J] is TWinControl then
+            TWinControl(Root.Components[J]).Invalidate;
 {$IFDEF TABORDER_FMX}
-      UpdateFMXDraw(Root);
+        UpdateFMXDraw(Root);  // Thanks Vitaliy Grabchuk for this correction
 {$ENDIF}
+      end;
     end;
   end;
 end;
@@ -1209,12 +1211,12 @@ end;
 // 重绘指定窗口控件 Tab Order
 procedure TCnTabOrderWizard.UpdateDrawDesignForm(DesignForm: TWinControl);
 var
-  i: Integer;
+  I: Integer;
 begin
   if Assigned(DesignForm) then
-    for i := 0 to DesignForm.ComponentCount - 1 do
-      if DesignForm.Components[i] is TWinControl then
-        DrawControlTabOrder(TWinControl(DesignForm.Components[i]));
+    for I := 0 to DesignForm.ComponentCount - 1 do
+      if DesignForm.Components[I] is TWinControl then
+        DrawControlTabOrder(TWinControl(DesignForm.Components[I]));
 end;
 
 // 绘制控件 Tab Order
@@ -1231,17 +1233,17 @@ var
   // 根据控件嵌套级数计算背景颜色值
   function GetBkColor(Control: TWinControl): TColor;
   var
-    i: Integer;
+    I: Integer;
     H, S, L: Double;
   begin
-    i := 0;
+    I := 0;
     while (Control <> nil) and not (Control.Parent is TCustomForm) do
     begin
-      Inc(i);
+      Inc(I);
       Control := Control.Parent;
     end;
     RGBToHSL(FBkColor, H, S, L);
-    Result := HSLToRGB(H + i / csMaxLevel, 0.7, 0.7);
+    Result := HSLToRGB(H + I / csMaxLevel, 0.7, 0.7);
   end;
 begin
   if Active and FDispTabOrder and WinControl.HandleAllocated and
