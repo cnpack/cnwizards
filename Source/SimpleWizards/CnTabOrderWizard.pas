@@ -1194,12 +1194,12 @@ begin
     if Assigned(FormEditor) then
     begin
       Root := CnOtaGetRootComponentFromEditor(FormEditor);
-      if Root <> nil then   then
+      if Root <> nil then
       begin
         if Root is TWinControl then
-        for J := 0 to Root.ComponentCount - 1 do
-          if Root.Components[J] is TWinControl then
-            TWinControl(Root.Components[J]).Invalidate;
+          for J := 0 to Root.ComponentCount - 1 do
+            if Root.Components[J] is TWinControl then
+              TWinControl(Root.Components[J]).Invalidate;
 {$IFDEF TABORDER_FMX}
         UpdateFMXDraw(Root);  // Thanks Vitaliy Grabchuk for this correction
 {$ENDIF}
