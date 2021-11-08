@@ -107,8 +107,9 @@ type
     FIgnoreList: TStringList;
     FCleanList: TStringList;
     FRegExpr: TRegExpr;
-    FUnitsMap: TCnStrToStrHashMap;
-    FSysUnits: TStringList;
+    FUnitsMap: TCnStrToStrHashMap; // 用来去重
+    FUnitIdents: TStringList;
+    FUnitNames: TStringList; // 存储搜索出来的不重复的完整 dcu 们的路径文件名供中间使用
     FSysPath: string;
     FCurrProject: string;
     function MatchInListWithExpr(List: TStrings; const Str: string): Boolean;
@@ -129,7 +130,7 @@ type
     procedure UsesEnumCallback(const AUnitFullName: string; Exists: Boolean;
       FileType: TCnUsesFileType; ModuleSearchType: TCnModuleSearchType);
     procedure CheckReLoadUnitsMap;
-    procedure LoadSysUnitsToMap;
+    procedure LoadSysUnitsToList(DataList: TStringList);
 
     procedure CleanExecute;
     procedure InitTreeExecute;
@@ -163,7 +164,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnUsesCleanResultFrm, CnUsesInitTreeFrm, DCURecs;
+  CnUsesCleanResultFrm, CnUsesInitTreeFrm, DCURecs, CnUsesIdentFrm;
 
 {$R *.DFM}
 
@@ -208,7 +209,8 @@ begin
   FCleanList.Free;
   FIgnoreList.Free;
   FUnitsMap.Free;
-  FSysUnits.Free;
+  FUnitIdents.Free;
+  FUnitNames.Free;
   inherited;
 end;
 
@@ -1419,7 +1421,6 @@ begin
   begin
     ShowModal;
     Free;
-    Exit;
   end;
 end;
 
@@ -1437,6 +1438,16 @@ begin
     CnDebugger.LogMsg('First Init. To Reload Dcus.');
 {$ENDIF}
     ToReload := True;
+
+    // 都记录下来备用
+    FCurrProject := CnOtaGetCurrentProjectFileName;
+    Paths := TStringList.Create;
+    try
+      GetLibraryPath(Paths, False);
+      FSysPath := Paths.Text;
+    finally
+      Paths.Free;
+    end;
   end
   else
   begin
@@ -1474,25 +1485,134 @@ begin
   begin
     Screen.Cursor := crHourGlass;
     try
-      LoadSysUnitsToMap;
+      if CnUsesIdentForm <> nil then
+        FreeAndNil(CnUsesIdentForm);
+
+      CnUsesIdentForm := TCnUsesIdentForm.Create(Application);
+      LoadSysUnitsToList(CnUsesIdentForm.GetDataList);
     finally
       Screen.Cursor := crDefault;
     end;
   end;
 end;
 
-procedure TCnUsesToolsWizard.LoadSysUnitsToMap;
+procedure TCnUsesToolsWizard.LoadSysUnitsToList(DataList: TStringList);
 var
-  I, Idx: Integer;
+  I: Integer;
   Info: TCnUnitUsesInfo;
   Decl: TDCURec;
-  S: string;
-  OldPaths, OldNames: TStringList;
+  S, V: string;
+  IdentPair: TCnIdentUnitInfo;
+
+  procedure CorrectCase;
+  var
+    J, Idx: Integer;
+    OldPaths, OldNames: TStringList;
+  begin
+    OldNames := TStringList.Create;
+    OldPaths := TStringList.Create;
+    FUnitNames.Sort;
+
+    try
+      for J := 0 to FUnitNames.Count - 1 do
+      begin
+        OldPaths.Add(_CnExtractFilePath(FUnitNames[J]));
+        FUnitNames[J] := _CnChangeFileExt(_CnExtractFileName(FUnitNames[J]), '');
+        OldNames.Add(FUnitNames[J]); // 拆分保留原有的路径与文件名
+      end;
+
+      CorrectCaseFromIdeModules(FUnitNames); // 只支持纯文件名，还会给你排好序
+      FUnitNames.Sorted := False;
+
+      for J := 0 to FUnitNames.Count - 1 do
+      begin
+        Idx := OldNames.IndexOf(FUnitNames[J]); // 根据更改后的文件名找到原来对应的路径
+        FUnitNames[J] := MakePath(OldPaths[Idx]) + FUnitNames[J] + '.dcu';
+      end;
+    finally
+      OldPaths.Free;
+      OldNames.Free;
+    end;
+  end;
+
+  function ExtractSymbol(const Symbol: string): string;
+  var
+    K, Idx, C, Front, Back: Integer;
+  begin
+    // 不符合规范的 Symbol，返回空字符串，否则从 Symbol 中去除冗余内容
+    Result := '';
+
+    // 大体规则：是 initialization 与 finalization 要去掉，是分号数字要去掉，
+    // 再从后往前，泛型 <> 里的要去掉，{} 里的要去掉，最后一个点号后的
+    if (Symbol = '') or IsInt(Symbol) then
+      Exit;
+
+    if (lstrcmpi(PChar(Symbol), 'initialization') = 0) or
+      (lstrcmpi(PChar(Symbol), 'finalization') = 0) then
+      Exit;
+
+    Result := Symbol;
+    if Result[1] in [':', '.'] then
+      Delete(Result, 1, 1);
+    if IsInt(Result) then
+    begin
+      Result := '';
+      Exit;
+    end;
+
+    // 简明起见，去掉开头到 } 的部分
+    Idx := LastCharPos(Result, '}');
+    if Idx > 0 then
+      Result := Copy(Result, Idx + 1, MaxInt);
+
+    // 然后从尾部反复扫描泛型 <>，注意可能嵌套并且有多个
+    while Pos('<', Result) > 0 do
+    begin
+      C := 0;
+      Front := 0;
+      Back := 0;
+
+      for K := Length(Result) downto 1 do
+      begin
+        if Result[K] = '>' then
+        begin
+          if C = 0 then
+            Back := K;
+          Inc(C);
+        end
+        else if Result[K] = '<' then
+        begin
+          Dec(C);
+          if C = 0 then
+          begin
+            Front := K;
+            if (Back > 0) and (Front > 0) and (Back > Front) then
+            begin
+              Delete(Result, Front, Back - Front + 1);
+              Break;
+            end;
+          end;
+        end;
+      end;
+      // Break 到这，拿到一个最后面的最外层配对 <> 然后删掉
+    end;
+
+    // 最后找最后一个点号后的
+    Idx := LastCharPos(Result, '.');
+    if Idx > 0 then
+      Result := Copy(Result, Idx + 1, MaxInt);
+  end;
+
 begin
-  if FSysUnits = nil then
-    FSysUnits := TStringList.Create
+  if FUnitNames = nil then
+    FUnitNames := TStringList.Create
   else
-    FSysUnits.Clear;
+    FUnitNames.Clear;
+
+  if FUnitIdents = nil then
+    FUnitIdents := TStringList.Create
+  else
+    FUnitIdents.Clear;
 
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('Prepare to Call IdeEnumUsesIncludeUnits');
@@ -1501,58 +1621,48 @@ begin
   if IdeEnumUsesIncludeUnits(UsesEnumCallback) then
   begin
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('After Call IdeEnumUsesIncludeUnits. Get %d', [FSysUnits.Count]);
+    CnDebugger.LogFmt('After Call IdeEnumUsesIncludeUnits. Get %d', [FUnitNames.Count]);
 {$ENDIF}
 
     // 取到了名字，更正大小写
-    if FSysUnits.Count > 0 then
+    if FUnitNames.Count > 0 then
     begin
-      OldNames := TStringList.Create;
-      OldPaths := TStringList.Create;
-      FSysUnits.Sort;
-
-      try
-        for I := 0 to FSysUnits.Count - 1 do
-        begin
-          OldPaths.Add(_CnExtractFilePath(FSysUnits[I]));
-          FSysUnits[I] := _CnChangeFileExt(_CnExtractFileName(FSysUnits[I]), '');
-          OldNames.Add(FSysUnits[I]); // 拆分保留原有的路径与文件名
-        end;
-
-        CorrectCaseFromIdeModules(FSysUnits); // 只支持纯文件名，还会给你排好序
-        FSysUnits.Sorted := False;
-
-        for I := 0 to FSysUnits.Count - 1 do
-        begin
-          Idx := OldNames.IndexOf(FSysUnits[I]); // 根据更改后的文件名找到原来对应的路径
-          FSysUnits[I] := MakePath(OldPaths[Idx]) + FSysUnits[I] + '.dcu';
-        end;
-      finally
-        OldPaths.Free;
-        OldNames.Free;
-      end;
+      CorrectCase;
 
       // 大小写更正完毕，加入 HashMap
-      for I := 0 to FSysUnits.Count - 1 do
+      for I := 0 to FUnitNames.Count - 1 do
       begin
-        Info := TCnUnitUsesInfo.Create(FSysUnits[I]);
+        Info := TCnUnitUsesInfo.Create(FUnitNames[I]);
         try
           Decl := Info.DeclList;
           while Decl <> nil do
           begin
             S := Decl.Name^.GetStr;
-            if S <> '' then
+            if (S <> '') and (Decl.GetSecKind <> skNone) then
             begin
-              // 如果有 {Generics.Collection} 这种开头，要去掉，如果有点号，则取最后一个点号后面的
-              Idx := LastCharPos(S, '.');
-              if Idx > 0 then
-                S := Copy(S, Idx + 1, MaxInt);
-              Idx := LastCharPos(S, '}');
-              if Idx > 0 then
-                S := Copy(S, Idx + 1, MaxInt);
+              S := ExtractSymbol(S);
+              if S = '' then
+              begin
+                Decl := Decl.Next;
+                Continue;
+              end;
 
-              if S <> '' then
-                FUnitsMap.Add(LowerCase(S), FSysUnits[I]);
+              // 针对 DataList 里的 S 与 FUnitNames[I]，得去重
+              if FUnitsMap.Find(S, V) then
+              begin
+                if V = FUnitNames[I] then
+                begin
+                  Decl := Decl.Next;
+                  Continue;
+                end;
+              end;
+              FUnitsMap.Add(S, FUnitNames[I]);
+
+              IdentPair := TCnIdentUnitInfo.Create;
+              IdentPair.Text := S;
+              IdentPair.FullNameWithPath := FUnitNames[I];
+              IdentPair.ImageIndex := 78; // Units
+              DataList.AddObject(S, IdentPair);
             end;
             Decl := Decl.Next;
           end;
@@ -1560,20 +1670,21 @@ begin
           Info.Free;
         end;
       end;
+      FUnitNames.Clear;
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('Ident Unit Form DataList Count %d', [DataList.Count]);
+{$ENDIF}
     end;
-    FreeAndNil(FSysUnits); // 清除掉一点点内存
+    FreeAndNil(FUnitNames); // 清除掉一点点内存
   end;
 end;
 
 procedure TCnUsesToolsWizard.UsesEnumCallback(const AUnitFullName: string;
   Exists: Boolean; FileType: TCnUsesFileType;
   ModuleSearchType: TCnModuleSearchType);
-var
-  S: string;
-  I: Integer;
 begin
   if FileType = uftPascalDcu then
-    FSysUnits.Add(AUnitFullName);
+    FUnitNames.Add(AUnitFullName);
 end;
 
 procedure TCnUsesToolsWizard.FromIdentExecute;
@@ -1581,24 +1692,49 @@ var
   Token: TCnIdeTokenString;
   Idx: Integer;
   S, UnitName: string;
+  Ini: TCustomIniFile;
 begin
   CheckReLoadUnitsMap;
-
-  if not CurrentIsSource or not CnOtaGeneralGetCurrPosToken(Token, Idx) then
-  begin
-    if not CnInputQuery(SCnInformation, SCnUsesUnitEnterIdent, S)then
-      Exit;
-  end
-  else
+  S := '';
+  if CurrentIsSource and CnOtaGeneralGetCurrPosToken(Token, Idx) then
     S := string(Token);
+
+  Ini := CreateIniFile;
+  try
+    CnUsesIdentForm.LoadSettings(Ini, '');
+  finally
+    Ini.Free;
+  end;
 
   if S <> '' then
   begin
-    if FUnitsMap.Find(LowerCase(S), UnitName) then
-      ShowMessage(UnitName)
-    else
+    CnUsesIdentForm.edtMatchSearch.Text := S;
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('Set Text %s to Search, Got Result %d',
+      [S, CnUsesIdentForm.lvList.Items.Count]);
+{$ENDIF}
+
+    if CnUsesIdentForm.lvList.Items.Count = 0 then
+    begin
       ErrorDlg(Format(SCNUsesUnitFromIdentErrorFmt, [S]));
+      Exit;
+    end
   end;
+
+  if CnUsesIdentForm.ShowModal = mrOk then
+  begin
+
+  end;
+
+//    if FUnitsMap.Find(LowerCase(S), UnitName) then
+//    begin
+//      ShowMessage(UnitName);
+//
+//      //
+//    end
+//    else
+//  ErrorDlg(Format(SCNUsesUnitFromIdentErrorFmt, [S]));
+
 end;
 
 { TCnUsesCleanerForm }

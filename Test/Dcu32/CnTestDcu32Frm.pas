@@ -154,11 +154,11 @@ begin
 
     ALines.Add('Declare List:');
     Decl := Info.DeclList;
-    while Decl <> nil do
+    while (Decl <> nil) and (Decl.GetSecKind <> skNone) do
     begin
       S := GetEnumName(TypeInfo(TDeclSecKind), Ord(Decl.GetSecKind));
       ALines.Add(Decl.Name^.GetStr + ' | ' + S);
-      Decl := Decl.Next as TNameDecl;
+      Decl := Decl.Next;
     end;
     Info.Free;
   end;
