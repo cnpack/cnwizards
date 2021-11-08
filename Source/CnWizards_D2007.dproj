@@ -400,7 +400,7 @@
     <DCCReference Include="SimpleWizards\CnTabOrderWizard.pas">
       <Form>CnTabOrderForm</Form>
     </DCCReference>
-    <DCCReference Include="UsesWizard\CnUsesCleaner.pas">
+    <DCCReference Include="UsesWizard\CnUsesToolsWizard.pas">
       <Form>CnUsesCleanerForm</Form>
     </DCCReference>
     <DCCReference Include="UsesWizard\CnUsesCleanResultFrm.pas">

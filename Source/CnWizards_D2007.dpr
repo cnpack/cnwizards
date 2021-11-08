@@ -200,7 +200,7 @@ uses
   CnProjectDirBuilderFrm in 'ProjectExtWizard\CnProjectDirBuilderFrm.pas' {CnProjectDirBuilderForm},
   CnProjectDirImportFrm in 'ProjectExtWizard\CnProjectDirImportFrm.pas' {CnImportDirForm},
   CnDCU32 in 'Utils\CnDCU32.pas',
-  CnUsesCleaner in 'UsesWizard\CnUsesCleaner.pas' {CnUsesCleanerForm},
+  CnUsesToolsWizard in 'UsesWizard\CnUsesToolsWizard.pas' {CnUsesCleanerForm},
   CnUsesCleanResultFrm in 'UsesWizard\CnUsesCleanResultFrm.pas' {CnUsesCleanResultForm},
   CnUsesInitTreeFrm in 'UsesWizard\CnUsesInitTreeFrm.pas' {CnUsesInitTreeForm},
   CnIdeEnhanceMenu in 'IdeEnhancements\CnIdeEnhanceMenu.pas',

@@ -490,7 +490,7 @@
             <Form>CnImportDirForm</Form>
         </DCCReference>
         <DCCReference Include="Utils\CnDCU32.pas"/>
-        <DCCReference Include="UsesWizard\CnUsesCleaner.pas">
+        <DCCReference Include="UsesWizard\CnUsesToolsWizard.pas">
             <Form>CnUsesCleanerForm</Form>
         </DCCReference>
         <DCCReference Include="UsesWizard\CnUsesCleanResultFrm.pas">
