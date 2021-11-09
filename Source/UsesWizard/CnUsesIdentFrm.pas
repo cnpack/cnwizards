@@ -51,6 +51,9 @@ type
   end;
 
   TCnUsesIdentForm = class(TCnProjectViewBaseForm)
+    rbImpl: TRadioButton;
+    rbIntf: TRadioButton;
+    lblAddTo: TLabel;
     procedure lvListData(Sender: TObject; Item: TListItem);
   private
 

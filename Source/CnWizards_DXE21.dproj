@@ -489,8 +489,8 @@
 				<Form>CnUsesInitTreeForm</Form>
 			</DCCReference>
 			<DCCReference Include="UsesWizard\CnUsesIdentFrm.pas">
-			  <Form>CnUsesIdentForm</Form>
-      </DCCReference>
+				<Form>CnUsesIdentForm</Form>
+			</DCCReference>
 			<DCCReference Include="IdeEnhancements\CnIdeEnhanceMenu.pas"/>
 			<DCCReference Include="SimpleWizards\CnIdeBRWizard.pas"/>
 			<DCCReference Include="ScriptWizard\CnScriptWizard.pas">

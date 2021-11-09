@@ -1490,6 +1490,9 @@ begin
 
       CnUsesIdentForm := TCnUsesIdentForm.Create(Application);
       LoadSysUnitsToList(CnUsesIdentForm.GetDataList);
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('LoadSysUnitsToList Complete.');
+{$ENDIF}
     finally
       Screen.Cursor := crDefault;
     end;
