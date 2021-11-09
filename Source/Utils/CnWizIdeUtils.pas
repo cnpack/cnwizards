@@ -69,8 +69,9 @@ uses
   DsgnIntf, LibIntf,
   {$ENDIF}
   {$IFNDEF CNWIZARDS_MINIMUM} CnIDEVersion, {$ENDIF}
-  CnPasCodeParser, CnWidePasParser, CnWizMethodHook,
-  CnWizUtils, CnWizEditFiler, CnCommon, CnWizOptions, CnWizCompilerConst;
+  CnPasCodeParser, CnWidePasParser, CnWizMethodHook, mPasLex, CnPasWideLex,
+  mwBCBTokenList, CnBCBWideTokenList, CnWizUtils, CnWizEditFiler, CnCommon,
+  CnWizOptions, CnWizCompilerConst;
 
 //==============================================================================
 // IDE 中的常量定义
@@ -706,6 +707,20 @@ function IdeGetVirtualImageListFromOrigin(Origin: TCustomImageList;
 {* 统一根据当前 HDPI 与缩放设置等，从原始 TImageList 创建一个 TVirtualImageList，无需释放}
 
 {$ENDIF}
+
+function SearchUsesInsertPosInCurrentPas(IsIntf: Boolean; out HasUses: Boolean;
+  out CharPos: TOTACharPos): Boolean;
+{* 在当前编辑的 Pascal 源文件中搜索 uses 待插入的位置，IsIntf 指明搜索的是 interface 处的 uses
+  还是 implemetation 的，返回是否成功，成功时返回位置，以及该处是否已有 uses}
+
+function SearchUsesInsertPosInCurrentCpp(out CharPos: TOTACharPos;
+  SourceEditor: IOTASourceEditor = nil): Boolean;
+{* 在编辑的 C++ 源文件中搜索 include 待插入的位置，返回是否成功，成功时返回位置}
+
+function JoinUsesOrInclude(IsCpp, FileHasUses: Boolean; IsHFromSystem: Boolean;
+  const IncFiles: TStrings): string;
+{* 根据源码类型与待插入的文件名列表得到插入的 uses 或 include 字符串，
+  FileHasUses 只对 Pascal 代码有效、IsHFromSystem 只对 Cpp 文件有效}
 
 implementation
 
@@ -2983,7 +2998,7 @@ begin
   if S <> '' then
   begin
     AClass := GetClass(S);
-    if (AClass <> nil) and (PTypeInfo(AClass.ClassInfo).Kind = tkClass) then
+    if (AClass <> nil) and (PTypeInfo(AClass.ClassInfo).Kind = TypInfo.tkClass) then
       Result := string(GetTypeData(PTypeInfo(AClass.ClassInfo)).UnitName);
 
     // 新型组件板下由于 FMX 等无法获得 Class 的，得另外想办法
@@ -3105,7 +3120,7 @@ var
 begin
   Result := '';
   AClass := GetClass(AClassName);
-  if (AClass <> nil) and (PTypeInfo(AClass.ClassInfo).Kind = tkClass) then
+  if (AClass <> nil) and (PTypeInfo(AClass.ClassInfo).Kind = TypInfo.tkClass) then
     Result := string(GetTypeData(PTypeInfo(AClass.ClassInfo)).UnitName);
 
 {$IFDEF DEBUG}
@@ -3706,6 +3721,237 @@ begin
 end;
 
 {$ENDIF}
+
+function SearchUsesInsertPosInCurrentPas(IsIntf: Boolean; out HasUses: Boolean;
+  out CharPos: TOTACharPos): Boolean;
+var
+  Stream: TMemoryStream;
+{$IFDEF UNICODE}
+  Lex: TCnPasWideLex;
+  LineText: string;
+  S: AnsiString;
+{$ELSE}
+  Lex: TmwPasLex;
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+  LineText: string;
+  S: AnsiString;
+  {$ENDIF}
+{$ENDIF}
+  InIntf: Boolean;
+  MeetIntf: Boolean;
+  InImpl: Boolean;
+  MeetImpl: Boolean;
+  IntfLine, ImplLine: Integer;
+begin
+  Result := False;
+  Stream := TMemoryStream.Create;
+
+{$IFDEF UNICODE}
+  Lex := TCnPasWideLex.Create;
+  CnOtaSaveCurrentEditorToStreamW(Stream, False);
+{$ELSE}
+  Lex := TmwPasLex.Create;
+  CnOtaSaveCurrentEditorToStream(Stream, False);
+{$ENDIF}
+
+  InIntf := False;
+  InImpl := False;
+  MeetIntf := False;
+  MeetImpl := False;
+
+  HasUses := False;
+  IntfLine := 0;
+  ImplLine := 0;
+
+  CharPos.Line := 0;
+  CharPos.CharIndex := -1;
+
+  try
+{$IFDEF UNICODE}
+    Lex.Origin := PWideChar(Stream.Memory);
+{$ELSE}
+    Lex.Origin := PAnsiChar(Stream.Memory);
+{$ENDIF}
+
+    while Lex.TokenID <> tkNull do
+    begin
+      case Lex.TokenID of
+      tkUses:
+        begin
+          if (IsIntf and InIntf) or (not IsIntf and InImpl) then
+          begin
+            HasUses := True; // 到达了自己需要的 uses 处
+            while not (Lex.TokenID in [tkNull, tkSemiColon]) do
+              Lex.Next;
+
+            if Lex.TokenID = tkSemiColon then
+            begin
+              // 插入位置就在分号前
+              Result := True;
+{$IFDEF UNICODE}
+              CharPos.Line := Lex.LineNumber;
+              CharPos.CharIndex := Lex.TokenPos - Lex.LineStartOffset;
+
+              LineText := CnOtaGetLineText(CharPos.Line);
+              S := AnsiString(Copy(LineText, 1, CharPos.CharIndex));
+
+              CharPos.CharIndex := Length(CnAnsiToUtf8(S));  // 不明白 Unicode 环境里的 TOTACharPos 为什么也需要做 Utf8 转换
+{$ELSE}
+              CharPos.Line := Lex.LineNumber + 1;
+              CharPos.CharIndex := Lex.TokenPos - Lex.LinePos;
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+              LineText := CnOtaGetLineText(CharPos.Line);
+              S := AnsiString(Copy(LineText, 1, CharPos.CharIndex));
+
+              CharPos.CharIndex := Length(CnAnsiToUtf8(S));
+  {$ENDIF}
+{$ENDIF}
+              Exit;
+            end
+            else // uses 后找不着分号，出错
+            begin
+              Result := False;
+              Exit;
+            end;
+          end;
+        end;
+      tkInterface:
+        begin
+          MeetIntf := True;
+          InIntf := True;
+          InImpl := False;
+{$IFDEF UNICODE}
+          IntfLine := Lex.LineNumber;
+{$ELSE}
+          IntfLine := Lex.LineNumber + 1;
+{$ENDIF}
+        end;
+      tkImplementation:
+        begin
+          MeetImpl := True;
+          InIntf := False;
+          InImpl := True;
+{$IFDEF UNICODE}
+          ImplLine := Lex.LineNumber;
+{$ELSE}
+          ImplLine := Lex.LineNumber + 1;
+{$ENDIF}
+        end;
+      end;
+      Lex.Next;
+    end;
+
+    // 解析完毕，到此处是没有 uses 的情形
+    if IsIntf and MeetIntf then    // 曾经遇到过 interface 就以 interface 为插入点
+    begin
+      Result := True;
+      CharPos.Line := IntfLine;
+      CharPos.CharIndex := Length('interface');
+    end
+    else if not IsIntf and MeetImpl then // 曾经遇到过 interface 就以 interface 为插入点
+    begin
+      Result := True;
+      CharPos.Line := ImplLine;
+      CharPos.CharIndex := Length('implementation');
+    end;
+  finally
+    Lex.Free;
+    Stream.Free;
+  end;
+end;
+
+function SearchUsesInsertPosInCurrentCpp(out CharPos: TOTACharPos;
+  SourceEditor: IOTASourceEditor = nil): Boolean;
+var
+  Stream: TMemoryStream;
+  LastIncLine: Integer;
+{$IFDEF UNICODE}
+  CParser: TCnBCBWideTokenList;
+{$ELSE}
+  CParser: TBCBTokenList;
+{$ENDIF}
+begin
+  // 插在最后一个 include 前面。如无 include，h 文件和 cpp 处理还不同。
+  Result := False;
+  Stream := nil;
+  CParser := nil;
+
+  try
+    Stream := TMemoryStream.Create;
+
+{$IFDEF UNICODE}
+    CParser := TCnBCBWideTokenList.Create;
+    CParser.DirectivesAsComments := False;
+    CnOtaSaveEditorToStreamW(SourceEditor, Stream, False);
+    CParser.SetOrigin(PWideChar(Stream.Memory), Stream.Size div SizeOf(Char));
+{$ELSE}
+    CParser := TBCBTokenList.Create;
+    CParser.DirectivesAsComments := False;
+    CnOtaSaveEditorToStream(SourceEditor, Stream, False);
+    CParser.SetOrigin(PAnsiChar(Stream.Memory), Stream.Size);
+{$ENDIF}
+
+    LastIncLine := -1;
+    while CParser.RunID <> ctknull do
+    begin
+      if CParser.RunID = ctkdirinclude then
+      begin
+{$IFDEF UNICODE}
+        LastIncLine := CParser.LineNumber;
+{$ELSE}
+        LastIncLine := CParser.RunLineNumber;
+{$ENDIF}
+      end;
+      CParser.NextNonJunk;
+    end;
+
+    if LastIncLine >= 0 then
+    begin
+      Result := True;
+      CharPos.Line := LastIncLine + 1; // 最后一个 inc 的行首
+      CharPos.CharIndex := 0;
+    end;
+  finally
+    CParser.Free;
+    Stream.Free;
+  end;
+end;
+
+function JoinUsesOrInclude(IsCpp, FileHasUses: Boolean; IsHFromSystem: Boolean;
+  const IncFiles: TStrings): string;
+var
+  I: Integer;
+begin
+  Result := '';
+  if (IncFiles = nil) or (IncFiles.Count = 0) then
+    Exit;
+
+  if IsCpp then
+  begin
+    for I := 0 to IncFiles.Count - 1 do
+    begin
+      if IsHFromSystem then
+        Result := Result + Format('#include <%s>' + #13#10, [IncFiles[I]])
+      else
+        Result := Result + Format('#include "%s"' + #13#10, [IncFiles[I]]);
+    end;
+  end
+  else
+  begin
+    if FileHasUses then
+    begin
+      for I := 0 to IncFiles.Count - 1 do
+        Result := Result + ', ' + IncFiles[I];
+    end
+    else
+    begin
+      Result := #13#10#13#10 + 'uses' + #13#10 + Spc(CnOtaGetBlockIndent) + IncFiles[0];
+      for I := 1 to IncFiles.Count - 1 do
+        Result := Result + ', ' + IncFiles[I];
+      Result := Result + ';';
+    end;
+  end;
+end;
 
 initialization
   // 使用此全局变量可以避免频繁调用 IdeGetIsEmbeddedDesigner 函数
