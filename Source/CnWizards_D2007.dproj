@@ -409,6 +409,9 @@
     <DCCReference Include="UsesWizard\CnUsesInitTreeFrm.pas">
       <Form>CnUsesInitTreeForm</Form>
     </DCCReference>
+    <DCCReference Include="UsesWizard\CnUsesIdentFrm.pas">
+      <Form>CnUsesIdentForm</Form>
+    </DCCReference>
     <DCCReference Include="SourceDiff\CnDiffEditorFrm.pas">
       <Form>CnDiffEditorForm</Form>
     </DCCReference>

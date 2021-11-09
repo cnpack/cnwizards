@@ -203,6 +203,7 @@ uses
   CnUsesToolsWizard in 'UsesWizard\CnUsesToolsWizard.pas' {CnUsesCleanerForm},
   CnUsesCleanResultFrm in 'UsesWizard\CnUsesCleanResultFrm.pas' {CnUsesCleanResultForm},
   CnUsesInitTreeFrm in 'UsesWizard\CnUsesInitTreeFrm.pas' {CnUsesInitTreeForm},
+  CnUsesIdentFrm in 'UsesWizard\CnUsesIdentFrm.pas' {CnUsesIdentForm},
   CnIdeEnhanceMenu in 'IdeEnhancements\CnIdeEnhanceMenu.pas',
   CnIdeBRWizard in 'SimpleWizards\CnIdeBRWizard.pas',
   CnScriptWizard in 'ScriptWizard\CnScriptWizard.pas' {CnScriptWizardForm},
