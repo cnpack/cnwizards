@@ -111,7 +111,8 @@ type
     FUnitIdents: TStringList;
     FUnitNames: TStringList; // 存储搜索出来的不重复的完整 dcu 们的路径文件名供中间使用
     FSysPath: string;
-    FCurrProject: string;
+    FCurrProject: string;    // TODO: 要改成 FCurrentPlatform
+    FJustCreated: Boolean;
     function MatchInListWithExpr(List: TStrings; const Str: string): Boolean;
     function GetProjectFromModule(AModule: IOTAModule): IOTAProject;
     function ShowKindForm(var AKind: TCnUsesCleanKind): Boolean;
@@ -1431,6 +1432,8 @@ var
   S: string;
 begin
   ToReload := False;
+  FJustCreated := False;
+
   if FUnitsMap = nil then
   begin
     FUnitsMap := TCnStrToStrHashMap.Create;
@@ -1451,7 +1454,8 @@ begin
   end
   else
   begin
-    // 检查是否要重新载入系统 Units，条件为如果当前工程发生改变，或系统路径发生改变
+    // 检查是否要重新载入系统 Units，条件为如果当前工程发生改变（支持跨平台时），或系统路径发生改变
+{$IFDEF SUPPORT_CROSS_PLATFORM}
     S := CnOtaGetCurrentProjectFileName;
     if S <> FCurrProject then
     begin
@@ -1461,6 +1465,7 @@ begin
       ToReload := True;
       FCurrProject := S;
     end;
+{$ENDIF}
 
     if not ToReload then
     begin
@@ -1489,6 +1494,8 @@ begin
         FreeAndNil(CnUsesIdentForm);
 
       CnUsesIdentForm := TCnUsesIdentForm.Create(Application);
+      FJustCreated := True;
+
       LoadSysUnitsToList(CnUsesIdentForm.GetDataList);
 {$IFDEF DEBUG}
       CnDebugger.LogMsg('LoadSysUnitsToList Complete.');
@@ -1621,7 +1628,7 @@ begin
   CnDebugger.LogMsg('Prepare to Call IdeEnumUsesIncludeUnits');
 {$ENDIF}
 
-  if IdeEnumUsesIncludeUnits(UsesEnumCallback) then
+  if IdeEnumUsesIncludeUnits(UsesEnumCallback, False, [mstSystemSearch]) then
   begin
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('After Call IdeEnumUsesIncludeUnits. Get %d', [FUnitNames.Count]);
@@ -1702,16 +1709,20 @@ begin
   if CurrentIsSource and CnOtaGeneralGetCurrPosToken(Token, Idx) then
     S := string(Token);
 
-  Ini := CreateIniFile;
-  try
-    CnUsesIdentForm.LoadSettings(Ini, '');
-  finally
-    Ini.Free;
+  if FJustCreated then // 如果上面 CheckReLoadUnitsMap 刚创建了 Form，则加载设置
+  begin
+    Ini := CreateIniFile;
+    try
+      CnUsesIdentForm.LoadSettings(Ini, '');
+    finally
+      Ini.Free;
+    end;
   end;
 
   if S <> '' then
   begin
     CnUsesIdentForm.edtMatchSearch.Text := S;
+    CnUsesIdentForm.edtMatchSearch.SelStart := Length(S);
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('Set Text %s to Search, Got Result %d',
       [S, CnUsesIdentForm.lvList.Items.Count]);

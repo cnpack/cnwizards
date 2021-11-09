@@ -42,7 +42,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   CnProjectViewBaseFrm, ActnList, ComCtrls, ToolWin, StdCtrls, ExtCtrls,
-  CnCommon, CnWizUtils;
+  ToolsAPI, CnWizConsts, CnCommon, CnWizUtils, CnWizIdeUtils;
 
 type
   TCnIdentUnitInfo = class(TCnBaseElementInfo)
@@ -55,8 +55,14 @@ type
     rbIntf: TRadioButton;
     lblAddTo: TLabel;
     procedure lvListData(Sender: TObject; Item: TListItem);
+    procedure edtMatchSearchKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure rbIntfDblClick(Sender: TObject);
   private
 
+  protected
+    procedure UpdateStatusBar; override;
+    procedure OpenSelect; override;
   public
     function GetDataList: TStringList;
   end;
@@ -94,14 +100,81 @@ begin
     begin
       Add(_CnChangeFileExt(_CnExtractFileName(Info.FullNameWithPath), ''));
       Add(_CnExtractFileDir(Info.FullNameWithPath));
-//      if Info.IsInProject then
-//        Add(SProject)
-//      else
-//        Add('');
     end;
     RemoveListViewSubImages(Item);
   end;
 
+end;
+
+procedure TCnUsesIdentForm.edtMatchSearchKeyDown(Sender: TObject;
+  var Key: Word; Shift: TShiftState);
+begin
+  inherited;
+  if Key = VK_RIGHT then
+  begin
+    if edtMatchSearch.SelStart = Length(edtMatchSearch.Text) then
+    begin
+      if rbIntf.Checked then
+      begin
+        rbIntf.Checked := False;
+        rbImpl.Checked := True;
+        rbImpl.SetFocus;
+      end
+      else
+      begin
+        rbIntf.Checked := True;
+        rbImpl.Checked := False;
+        rbIntf.SetFocus;
+      end;
+    end;
+  end;
+end;
+
+procedure TCnUsesIdentForm.UpdateStatusBar;
+begin
+  StatusBar.Panels[1].Text := Format(SCnProjExtUnitsFileCount, [lvList.Items.Count]);
+end;
+
+procedure TCnUsesIdentForm.OpenSelect;
+var
+  CharPos: TOTACharPos;
+  IsIntfOrH: Boolean;
+  IsFromSystem: Boolean;
+  EditView: IOTAEditView;
+  HasUses: Boolean;
+  LinearPos: LongInt;
+  Sl: TStrings;
+  I: Integer;
+begin
+  if lvList.SelCount > 0 then
+  begin
+    ModalResult := mrOk;
+    Sl := TStringList.Create;
+    for I := 0 to lvList.Items.Count - 1 do
+      if lvList.Items[I].Selected then
+        Sl.Add(lvList.Items[I].SubItems[0]);
+
+    IsIntfOrH := rbIntf.Checked;
+    EditView := CnOtaGetTopMostEditView;
+    if EditView = nil then
+      Exit;
+
+    // Pascal 只需要使用当前文件的 EditView 插入 uses，还得处理无 uses 的情况
+    if not SearchUsesInsertPosInCurrentPas(IsIntfOrH, HasUses, CharPos) then
+    begin
+      ErrorDlg(SCnProjExtUsesNoPasPosition);
+      Exit;
+    end;
+
+    // 已经得到行 1 列 0 开始的 CharPos，用 EditView.CharPosToPos(CharPos) 转换为线性;
+    LinearPos := EditView.CharPosToPos(CharPos);
+    CnOtaInsertTextIntoEditorAtPos(JoinUsesOrInclude(False, HasUses, False, Sl), LinearPos);
+  end;
+end;
+
+procedure TCnUsesIdentForm.rbIntfDblClick(Sender: TObject);
+begin
+  OpenSelect;
 end;
 
 {$ENDIF CNWIZARDS_CNUSESTOOLS}

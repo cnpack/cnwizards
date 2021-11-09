@@ -17,6 +17,9 @@ inherited CnUsesIdentForm: TCnUsesIdentForm
       Height = 13
       Caption = '&Add to:'
     end
+    inherited edtMatchSearch: TEdit
+      AutoSelect = False
+    end
     inherited cbbProjectList: TComboBox
       Left = 672
       Width = 51
@@ -29,6 +32,7 @@ inherited CnUsesIdentForm: TCnUsesIdentForm
       Height = 17
       Caption = 'Implementation'
       TabOrder = 3
+      OnDblClick = rbIntfDblClick
     end
     object rbIntf: TRadioButton
       Left = 388
@@ -39,6 +43,7 @@ inherited CnUsesIdentForm: TCnUsesIdentForm
       Checked = True
       TabOrder = 2
       TabStop = True
+      OnDblClick = rbIntfDblClick
     end
   end
   inherited lvList: TListView
@@ -47,19 +52,15 @@ inherited CnUsesIdentForm: TCnUsesIdentForm
     Columns = <
       item
         Caption = 'Identifier'
-        Width = 210
+        Width = 220
       end
       item
         Caption = 'Unit'
-        Width = 140
+        Width = 160
       end
       item
         Caption = 'Path'
-        Width = 260
-      end
-      item
-        Caption = 'Project'
-        Width = 90
+        Width = 320
       end>
     OwnerData = True
     OnData = lvListData
@@ -79,6 +80,9 @@ inherited CnUsesIdentForm: TCnUsesIdentForm
   inherited ToolBar: TToolBar
     Width = 730
     inherited btnSep3: TToolButton
+      Visible = False
+    end
+    inherited btnSep4: TToolButton
       Visible = False
     end
   end
