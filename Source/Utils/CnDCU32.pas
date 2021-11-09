@@ -79,6 +79,9 @@ type
     {* implementation 部分的每一个 uses}
     property ImplUsesImport[Index: Integer]: TStrings read GetImplUsesImport;
     {* implementation 部分每一个 uses 单元导入的类名列表}
+
+    property ExportedNames: TStringList read FExportNames;
+    {* 导出的名字们}
   end;
 
   TCnUsesKind = (ukHasInitSection, ukHasRegProc, ukInCleanList, ukInIgnoreList,

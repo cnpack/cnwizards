@@ -127,6 +127,74 @@ begin
   end;
 end;
 
+function ExtractSymbol(const Symbol: string): string;
+var
+  K, Idx, C, Front, Back: Integer;
+begin
+  // 不符合规范的 Symbol，返回空字符串，否则从 Symbol 中去除冗余内容
+  Result := '';
+
+  // 大体规则：是 initialization 与 finalization 要去掉，是分号数字要去掉，
+  // 再从后往前，泛型 <> 里的要去掉，{} 里的要去掉，最后一个点号后的
+  if (Symbol = '') or IsInt(Symbol) then
+    Exit;
+
+  if (lstrcmpi(PChar(Symbol), 'initialization') = 0) or
+    (lstrcmpi(PChar(Symbol), 'finalization') = 0) then
+    Exit;
+
+  Result := Symbol;
+  if Result[1] in [':', '.'] then
+    Delete(Result, 1, 1);
+  if IsInt(Result) then
+  begin
+    Result := '';
+    Exit;
+  end;
+
+  // 简明起见，去掉开头到 } 的部分
+  Idx := LastCharPos(Result, '}');
+  if Idx > 0 then
+    Result := Copy(Result, Idx + 1, MaxInt);
+
+  // 然后从尾部反复扫描泛型 <>，注意可能嵌套并且有多个
+  while Pos('<', Result) > 0 do
+  begin
+    C := 0;
+    Front := 0;
+    Back := 0;
+
+    for K := Length(Result) downto 1 do
+    begin
+      if Result[K] = '>' then
+      begin
+        if C = 0 then
+          Back := K;
+        Inc(C);
+      end
+      else if Result[K] = '<' then
+      begin
+        Dec(C);
+        if C = 0 then
+        begin
+          Front := K;
+          if (Back > 0) and (Front > 0) and (Back > Front) then
+          begin
+            Delete(Result, Front, Back - Front + 1);
+            Break;
+          end;
+        end;
+      end;
+    end;
+    // Break 到这，拿到一个最后面的最外层配对 <> 然后删掉
+  end;
+
+  // 最后找最后一个点号后的
+  Idx := LastCharPos(Result, '.');
+  if Idx > 0 then
+    Result := Copy(Result, Idx + 1, MaxInt);
+end;
+
 procedure TFormDcu32.DumpADcu(const AFileName: string; ALines: TStrings);
 var
   Info: TCnUnitUsesInfo;
@@ -152,13 +220,27 @@ begin
       ALines.Add(Info.ImplUsesImport[I].Text);
     end;
 
-    ALines.Add('Declare List:');
+    ALines.Add('===Declare List:');
     Decl := Info.DeclList;
-    while (Decl <> nil) and (Decl.GetSecKind <> skNone) do
+    while Decl <> nil do
     begin
-      S := GetEnumName(TypeInfo(TDeclSecKind), Ord(Decl.GetSecKind));
-      ALines.Add(Decl.Name^.GetStr + ' | ' + S);
+      if Decl.GetSecKind <> skNone then
+      begin
+        S := GetEnumName(TypeInfo(TDeclSecKind), Ord(Decl.GetSecKind));
+        ALines.Add(Decl.Name^.GetStr + ' | ' + ExtractSymbol(Decl.Name^.GetStr) + ' | ' + S + ' | ' + Decl.ClassName);
+      end;
       Decl := Decl.Next;
+    end;
+
+    ALines.Add('===Export Names:');
+    for I := 0 to Info.ExportedNames.Count - 1 do
+    begin
+      Decl := TDCURec(Info.ExportedNames.Objects[I]);
+      if Decl.GetSecKind <> skNone then
+      begin
+        S := GetEnumName(TypeInfo(TDeclSecKind), Ord(Decl.GetSecKind));
+        ALines.Add(ExtractSymbol(Decl.Name^.GetStr) + ' | ' + Decl.Name^.GetStr + ' | ' + S);
+      end;
     end;
     Info.Free;
   end;

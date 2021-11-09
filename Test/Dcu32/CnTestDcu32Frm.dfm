@@ -74,6 +74,7 @@ object FormDcu32: TFormDcu32
     ScrollBars = ssVertical
     TabOrder = 4
     WantReturns = False
+    WordWrap = False
   end
   object btnScanDir: TButton
     Left = 344

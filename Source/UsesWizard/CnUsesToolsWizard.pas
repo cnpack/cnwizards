@@ -111,7 +111,9 @@ type
     FUnitIdents: TStringList;
     FUnitNames: TStringList; // 存储搜索出来的不重复的完整 dcu 们的路径文件名供中间使用
     FSysPath: string;
-    FCurrProject: string;    // TODO: 要改成 FCurrentPlatform
+{$IFDEF SUPPORT_CROSS_PLATFORM}
+    FCurrPlatform: string;    // 工程的 Platform 发生变化时 lib 库会变，需要重新解析
+{$ENDIF}
     FJustCreated: Boolean;
     function MatchInListWithExpr(List: TStrings; const Str: string): Boolean;
     function GetProjectFromModule(AModule: IOTAModule): IOTAProject;
@@ -1443,7 +1445,10 @@ begin
     ToReload := True;
 
     // 都记录下来备用
-    FCurrProject := CnOtaGetCurrentProjectFileName;
+{$IFDEF SUPPORT_CROSS_PLATFORM}
+    FCurrPlatform := CnOtaGetProjectPlatform;
+{$ENDIF}
+
     Paths := TStringList.Create;
     try
       GetLibraryPath(Paths, False);
@@ -1454,16 +1459,16 @@ begin
   end
   else
   begin
-    // 检查是否要重新载入系统 Units，条件为如果当前工程发生改变（支持跨平台时），或系统路径发生改变
+    // 检查是否要重新载入系统 Units，条件为如果当前工程的平台发生改变（支持跨平台时），或系统路径发生改变
 {$IFDEF SUPPORT_CROSS_PLATFORM}
-    S := CnOtaGetCurrentProjectFileName;
-    if S <> FCurrProject then
+    S := CnOtaGetProjectPlatform;
+    if S <> FCurrPlatform then
     begin
 {$IFDEF DEBUG}
-      CnDebugger.LogFmt('Current Project Changed from %s to %s. To Reload Dcus.', [FCurrProject, S]);
+      CnDebugger.LogFmt('Current Platform Changed from %s to %s. To Reload Dcus.', [FCurrPlatform, S]);
 {$ENDIF}
       ToReload := True;
-      FCurrProject := S;
+      FCurrPlatform := S;
     end;
 {$ENDIF}
 
