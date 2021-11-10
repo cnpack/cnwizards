@@ -502,6 +502,11 @@ begin
   TranslateStr(SCnEditorFontDecMenuHint, 'SCnEditorFontDecMenuHint');
   TranslateStr(SCnEditorFontDecName, 'SCnEditorFontDecName');
 
+  // CnEditorExtendingSelect
+  TranslateStr(SCnEditorExtendingSelectMenuCaption, 'SCnEditorExtendingSelectMenuCaption');
+  TranslateStr(SCnEditorExtendingSelectMenuHint, 'SCnEditorExtendingSelectMenuHint');
+  TranslateStr(SCnEditorExtendingSelectName, 'SCnEditorExtendingSelectName');
+
   // CnSrcTemplate
   TranslateStr(SCnSrcTemplateMenuCaption, 'SCnSrcTemplateMenuCaption');
   TranslateStr(SCnSrcTemplateMenuHint, 'SCnSrcTemplateMenuHint');
@@ -1308,6 +1313,12 @@ begin
   TranslateStr(SCnUsesInitTreeSearchInProjectSearch, 'SCnUsesInitTreeSearchInProjectSearch');
   TranslateStr(SCnUsesInitTreeSearchInSystemSearch, 'SCnUsesInitTreeSearchInSystemSearch');
   TranslateStr(SCnUsesInitTreeNotFound, 'SCnUsesInitTreeNotFound');
+
+  // CnUsesFromIdent
+  TranslateStr(SCnUsesUnitFromIdentMenuCaption, 'SCnUsesUnitFromIdentMenuCaption');
+  TranslateStr(SCnUsesUnitFromIdentMenuHint, 'SCnUsesUnitFromIdentMenuHint');
+  TranslateStr(SCnUsesUnitAnalyzeWaiting, 'SCnUsesUnitAnalyzeWaiting');
+  TranslateStr(SCNUsesUnitFromIdentErrorFmt, 'SCNUsesUnitFromIdentErrorFmt');
 
   // CnIdeEnhanceMenu
   TranslateStr(SCnIdeEnhanceMenuCaption, 'SCnIdeEnhanceMenuCaption');
