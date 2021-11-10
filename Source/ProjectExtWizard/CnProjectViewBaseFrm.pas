@@ -238,7 +238,8 @@ type
 
     // 默认匹配的实现，只匹配 DataList 中的字符串，不处理其 Object 所代表的内容
     function DefaultMatchHandler(const AMatchStr: string; AMatchMode: TCnMatchMode;
-      DataListIndex: Integer; var StartOffset: Integer; MatchedIndexes: TList): Boolean;
+      DataListIndex: Integer; var StartOffset: Integer; MatchedIndexes: TList;
+      CaseSensitive: Boolean = False): Boolean;
     // 默认允许优先选择最头上匹配的项
     function DefaultSelectHandler(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer): Boolean;
@@ -1084,7 +1085,7 @@ end;
 
 function TCnProjectViewBaseForm.DefaultMatchHandler(const AMatchStr: string;
   AMatchMode: TCnMatchMode; DataListIndex: Integer; var StartOffset: Integer;
-  MatchedIndexes: TList): Boolean;
+  MatchedIndexes: TList; CaseSensitive: Boolean): Boolean;
 var
   S: string;
 begin
@@ -1095,10 +1096,22 @@ begin
 
   S := DataList[DataListIndex];
   StartOffset := 0;
-  case AMatchMode of
-    mmStart:    Result := Pos(AMatchStr, S) = 1;
-    mmAnywhere: Result := Pos(AMatchStr, S) > 0;
-    mmFuzzy:    Result := FuzzyMatchStr(AMatchStr, S, MatchedIndexes);
+
+  if CaseSensitive then
+  begin
+    case AMatchMode of
+      mmStart:    Result := Pos(AMatchStr, S) = 1;
+      mmAnywhere: Result := Pos(AMatchStr, S) > 0;
+      mmFuzzy:    Result := FuzzyMatchStr(AMatchStr, S, MatchedIndexes);
+    end
+  end
+  else
+  begin
+    case AMatchMode of
+      mmStart:    Result := Pos(UpperCase(AMatchStr), UpperCase(S)) = 1;
+      mmAnywhere: Result := Pos(UpperCase(AMatchStr), UpperCase(S)) > 0;
+      mmFuzzy:    Result := FuzzyMatchStr(AMatchStr, S, MatchedIndexes);
+    end
   end;
 end;
 
