@@ -167,7 +167,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnUsesCleanResultFrm, CnUsesInitTreeFrm, DCURecs, CnUsesIdentFrm;
+  CnUsesCleanResultFrm, CnUsesInitTreeFrm, DCURecs, CnUsesIdentFrm, CnProgressFrm;
 
 {$R *.DFM}
 
@@ -1398,8 +1398,8 @@ begin
     0, SCnUsesCleanerMenuHint);
   FIdInitTree := RegisterASubAction(SCnUsesToolsInitTree, SCnUsesInitTreeMenuCaption,
     0, SCnUsesInitTreeMenuHint);
-//  FIdFromIdent := RegisterASubAction(ScnUsesToolsFromIdent, SCnUsesUnitFromIdentMenuCaption,
-//    0, SCnUsesUnitFromIdentMenuHint);
+  FIdFromIdent := RegisterASubAction(ScnUsesToolsFromIdent, SCnUsesUnitFromIdentMenuCaption,
+    0, SCnUsesUnitFromIdentMenuHint);
 end;
 
 procedure TCnUsesToolsWizard.SubActionExecute(Index: Integer);
@@ -1501,19 +1501,21 @@ begin
 
     Screen.Cursor := crHourGlass;
     try
+      ShowProgress(SCnUsesUnitAnalyzeWaiting);
       LoadSysUnitsToList(CnUsesIdentForm.GetDataList);
 {$IFDEF DEBUG}
       CnDebugger.LogMsg('LoadSysUnitsToList Complete.');
 {$ENDIF}
     finally
       Screen.Cursor := crDefault;
+      HideProgress;
     end;
   end;
 end;
 
 procedure TCnUsesToolsWizard.LoadSysUnitsToList(DataList: TStringList);
 var
-  I: Integer;
+  I, T, H: Integer;
   Info: TCnUnitUsesInfo;
   Decl: TDCURec;
   S, V: string;
@@ -1656,9 +1658,18 @@ begin
       CorrectCase;
 
       // 大小写更正完毕，加入 HashMap
+      H := -1;
       for I := 0 to FUnitNames.Count - 1 do
       begin
         Info := TCnUnitUsesInfo.Create(FUnitNames[I]);
+
+        T := (100 * I) div FUnitNames.Count;
+        if T <> H then
+        begin
+          H := T;
+          UpdateProgress(H);
+        end;
+
 {$IFDEF DEBUG}
 //        CnDebugger.LogMsg(FUnitNames[I]);
 {$ENDIF}

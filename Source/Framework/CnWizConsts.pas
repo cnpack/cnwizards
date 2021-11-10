@@ -1562,7 +1562,7 @@ var
   // CnUsesFromIdent
   SCnUsesUnitFromIdentMenuCaption: string = 'Uses Unit from Identifier...';
   SCnUsesUnitFromIdentMenuHint: string = 'Search and Uses Unit from Identifier under Cursor';
-  SCnUsesUnitEnterIdent: string = 'Please Enter an Identifier to Search in Units:';
+  SCnUsesUnitAnalyzeWaiting: string = 'Analyzing Library Files...';
   SCNUsesUnitFromIdentErrorFmt: string = 'Can NOT Find %s in Searching Units';
 
   // CnIdeEnhanceMenu
