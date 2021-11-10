@@ -58,6 +58,7 @@ type
     procedure edtMatchSearchKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure rbIntfDblClick(Sender: TObject);
+    procedure edtMatchSearchChange(Sender: TObject);
   private
 
   protected
@@ -175,6 +176,17 @@ end;
 procedure TCnUsesIdentForm.rbIntfDblClick(Sender: TObject);
 begin
   OpenSelect;
+end;
+
+procedure TCnUsesIdentForm.edtMatchSearchChange(Sender: TObject);
+var
+  L: Integer;
+begin
+  L := Length(edtMatchSearch.Text);
+  if L in [1..2] then
+    Exit;
+
+  inherited;
 end;
 
 {$ENDIF CNWIZARDS_CNUSESTOOLS}

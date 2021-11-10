@@ -1620,10 +1620,17 @@ var
         Break;
     end;
 
-    // 没有删的动作，然后删最后一个　< 后的内容，防止出现不配对的情况
+    // 没有删的动作，然后删最后一个 < 后的内容，防止出现不配对的情况
     Idx := LastCharPos(Result, '<');
     if Idx > 0 then
-      Result := Copy(Result, Idx + 1, MaxInt);
+      Result := Copy(Result, 1, Idx - 1);
+
+{$IFDEF SUPPORT_GENERIC}
+    // 删最后一个 ` 号后的
+    Idx := LastCharPos(Result, '`');
+    if Idx > 0 then
+      Result := Copy(Result, 1, Idx - 1);
+{$ENDIF}
 
     // 最后找最后一个点号后的
     Idx := LastCharPos(Result, '.');
