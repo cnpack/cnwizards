@@ -238,6 +238,7 @@ begin
   TranslateStr(SCnInputFile, 'SCnInputFile');
   TranslateStr(SCnDoublePasswordError, 'SCnDoublePasswordError');
   TranslateStr(SCnMoreMenu, 'SCnMoreMenu');
+  TranslateStr(SCnCountFmt, 'SCnCountFmt');
 
   // CnWizUpgrade
   TranslateStr(SCnWizNoUpgrade, 'SCnWizNoUpgrade');

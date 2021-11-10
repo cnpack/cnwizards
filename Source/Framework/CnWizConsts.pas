@@ -399,6 +399,7 @@ var
   SCnInputFile: string = 'Please Enter the Filename.';
   SCnDoublePasswordError: string = 'Password Error or Mismatch, Please Enter again.';
   SCnMoreMenu: string = 'More...';
+  SCnCountFmt: string = 'Count: %d';
 
   // ·´À¡Ïòµ¼
   STypeDescription: string =

@@ -1674,18 +1674,15 @@ begin
 //        CnDebugger.LogMsg(FUnitNames[I]);
 {$ENDIF}
         try
-          Decl := Info.DeclList;
-          while Decl <> nil do
+          for T := 0 to Info.ExportedNames.Count - 1 do
           begin
+            Decl := TDCURec(Info.ExportedNames.Objects[T]);
             S := Decl.Name^.GetStr;
             if (S <> '') and (Decl.GetSecKind <> skNone) then
             begin
               S := ExtractSymbol(S);
               if S = '' then
-              begin
-                Decl := Decl.Next;
                 Continue;
-              end;
 
               // 针对 DataList 里的 S 与 FUnitNames[I]，得去重
               if FUnitsMap.Find(S, V) then
@@ -1704,7 +1701,6 @@ begin
               IdentPair.ImageIndex := 78; // Units
               DataList.AddObject(S, IdentPair);
             end;
-            Decl := Decl.Next;
           end;
         finally
           Info.Free;

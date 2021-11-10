@@ -132,7 +132,7 @@ end;
 
 procedure TCnUsesIdentForm.UpdateStatusBar;
 begin
-  StatusBar.Panels[1].Text := Format(SCnProjExtUnitsFileCount, [lvList.Items.Count]);
+  StatusBar.Panels[1].Text := Format(SCnCountFmt, [lvList.Items.Count]);
 end;
 
 procedure TCnUsesIdentForm.OpenSelect;
