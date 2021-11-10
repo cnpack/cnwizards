@@ -3,8 +3,8 @@ object FormDcu32: TFormDcu32
   Top = 201
   BorderStyle = bsDialog
   Caption = 'Test Dcu32 Intf/Impl Parsing'
-  ClientHeight = 442
-  ClientWidth = 496
+  ClientHeight = 512
+  ClientWidth = 622
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -34,12 +34,12 @@ object FormDcu32: TFormDcu32
   object edtDcuFile: TEdit
     Left = 80
     Top = 24
-    Width = 305
+    Width = 441
     Height = 21
     TabOrder = 0
   end
   object btnOpen: TButton
-    Left = 400
+    Left = 528
     Top = 24
     Width = 75
     Height = 21
@@ -57,7 +57,7 @@ object FormDcu32: TFormDcu32
     OnClick = Button1Click
   end
   object btnCnDcu32: TButton
-    Left = 176
+    Left = 168
     Top = 96
     Width = 145
     Height = 25
@@ -68,8 +68,8 @@ object FormDcu32: TFormDcu32
   object mmoDcu: TMemo
     Left = 24
     Top = 144
-    Width = 449
-    Height = 281
+    Width = 577
+    Height = 345
     ReadOnly = True
     ScrollBars = ssVertical
     TabOrder = 4
@@ -77,13 +77,22 @@ object FormDcu32: TFormDcu32
     WordWrap = False
   end
   object btnScanDir: TButton
-    Left = 344
+    Left = 328
     Top = 96
     Width = 129
     Height = 25
     Caption = 'Scan Dir'
     TabOrder = 5
     OnClick = btnScanDirClick
+  end
+  object btnExtract: TButton
+    Left = 472
+    Top = 96
+    Width = 129
+    Height = 25
+    Caption = 'Test Extract'
+    TabOrder = 6
+    OnClick = btnExtractClick
   end
   object OpenDialog1: TOpenDialog
     Filter = '*.DCU|*.dcu'

@@ -1446,7 +1446,7 @@ begin
 
     // 都记录下来备用
 {$IFDEF SUPPORT_CROSS_PLATFORM}
-    FCurrPlatform := CnOtaGetProjectPlatform;
+    FCurrPlatform := CnOtaGetProjectPlatform(nil);
 {$ENDIF}
 
     Paths := TStringList.Create;
@@ -1461,7 +1461,7 @@ begin
   begin
     // 检查是否要重新载入系统 Units，条件为如果当前工程的平台发生改变（支持跨平台时），或系统路径发生改变
 {$IFDEF SUPPORT_CROSS_PLATFORM}
-    S := CnOtaGetProjectPlatform;
+    S := CnOtaGetProjectPlatform(nil);
     if S <> FCurrPlatform then
     begin
 {$IFDEF DEBUG}
@@ -1493,14 +1493,14 @@ begin
 
   if ToReload then
   begin
+    if CnUsesIdentForm <> nil then
+      FreeAndNil(CnUsesIdentForm);
+
+    CnUsesIdentForm := TCnUsesIdentForm.Create(Application);
+    FJustCreated := True;
+
     Screen.Cursor := crHourGlass;
     try
-      if CnUsesIdentForm <> nil then
-        FreeAndNil(CnUsesIdentForm);
-
-      CnUsesIdentForm := TCnUsesIdentForm.Create(Application);
-      FJustCreated := True;
-
       LoadSysUnitsToList(CnUsesIdentForm.GetDataList);
 {$IFDEF DEBUG}
       CnDebugger.LogMsg('LoadSysUnitsToList Complete.');
@@ -1553,6 +1553,7 @@ var
   function ExtractSymbol(const Symbol: string): string;
   var
     K, Idx, C, Front, Back: Integer;
+    Deled: Boolean;
   begin
     // 不符合规范的 Symbol，返回空字符串，否则从 Symbol 中去除冗余内容
     Result := '';
@@ -1586,6 +1587,7 @@ var
       C := 0;
       Front := 0;
       Back := 0;
+      Deled := False;
 
       for K := Length(Result) downto 1 do
       begin
@@ -1603,14 +1605,23 @@ var
             Front := K;
             if (Back > 0) and (Front > 0) and (Back > Front) then
             begin
-              Delete(Result, Front, Back - Front + 1);
+              Delete(Result, Front, Back - Front + 1);  // 拿到一个最后面的最外层配对 <> 然后删掉
+              Deled := True;
               Break;
             end;
           end;
         end;
       end;
-      // Break 到这，拿到一个最后面的最外层配对 <> 然后删掉
+
+      // Break 到这，如果本次没删说明没的删了
+      if not Deled then
+        Break;
     end;
+
+    // 没有删的动作，然后删最后一个　< 后的内容，防止出现不配对的情况
+    Idx := LastCharPos(Result, '<');
+    if Idx > 0 then
+      Result := Copy(Result, Idx + 1, MaxInt);
 
     // 最后找最后一个点号后的
     Idx := LastCharPos(Result, '.');
@@ -1648,6 +1659,9 @@ begin
       for I := 0 to FUnitNames.Count - 1 do
       begin
         Info := TCnUnitUsesInfo.Create(FUnitNames[I]);
+{$IFDEF DEBUG}
+//        CnDebugger.LogMsg(FUnitNames[I]);
+{$ENDIF}
         try
           Decl := Info.DeclList;
           while Decl <> nil do
@@ -1738,22 +1752,14 @@ begin
       ErrorDlg(Format(SCNUsesUnitFromIdentErrorFmt, [S]));
       Exit;
     end
-  end;
+  end
+  else
+    CnUsesIdentForm.edtMatchSearch.Text := '';
 
   if CnUsesIdentForm.ShowModal = mrOk then
   begin
 
   end;
-
-//    if FUnitsMap.Find(LowerCase(S), UnitName) then
-//    begin
-//      ShowMessage(UnitName);
-//
-//      //
-//    end
-//    else
-//  ErrorDlg(Format(SCNUsesUnitFromIdentErrorFmt, [S]));
-
 end;
 
 { TCnUsesCleanerForm }

@@ -17,11 +17,14 @@ type
     btnCnDcu32: TButton;
     mmoDcu: TMemo;
     btnScanDir: TButton;
+    btnExtract: TButton;
     procedure btnOpenClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure btnCnDcu32Click(Sender: TObject);
     procedure btnScanDirClick(Sender: TObject);
+    procedure btnExtractClick(Sender: TObject);
   private
+    function ExtractSymbol(const Symbol: string): string;
     procedure DumpADcu(const AFileName: string; ALines: TStrings);
   public
     { Public declarations }
@@ -120,16 +123,18 @@ begin
     try
       GetDirFiles(S, FS);
       for I := 0 to FS.Count - 1 do
-        DumpADcu(MakePath(S) + FS[I], mmoDcu.Lines);
+        if LowerCase(ExtractFileExt(FS[I])) = '.dcu' then
+          DumpADcu(MakePath(S) + FS[I], mmoDcu.Lines);
     finally
       FS.Free;
     end;
   end;
 end;
 
-function ExtractSymbol(const Symbol: string): string;
+function TFormDcu32.ExtractSymbol(const Symbol: string): string;
 var
   K, Idx, C, Front, Back: Integer;
+  Deled: Boolean;
 begin
   // 不符合规范的 Symbol，返回空字符串，否则从 Symbol 中去除冗余内容
   Result := '';
@@ -157,12 +162,13 @@ begin
   if Idx > 0 then
     Result := Copy(Result, Idx + 1, MaxInt);
 
-  // 然后从尾部反复扫描泛型 <>，注意可能嵌套并且有多个
-  while Pos('<', Result) > 0 do
+  // 然后从尾部反复扫描泛型 <>，注意可能嵌套并且有多个，并且可能不配对
+  while Pos('<', Result) > 0 do //
   begin
     C := 0;
     Front := 0;
     Back := 0;
+    Deled := False;
 
     for K := Length(Result) downto 1 do
     begin
@@ -180,14 +186,23 @@ begin
           Front := K;
           if (Back > 0) and (Front > 0) and (Back > Front) then
           begin
-            Delete(Result, Front, Back - Front + 1);
+            Delete(Result, Front, Back - Front + 1); // 拿到一个最后面的最外层配对 <> 然后删掉
+            Deled := True;
             Break;
           end;
         end;
       end;
     end;
-    // Break 到这，拿到一个最后面的最外层配对 <> 然后删掉
+
+    // Break 到这，如果本次没删说明没的删了
+    if not Deled then
+      Break;
   end;
+
+  // 没有删的动作，然后删最后一个　< 后的内容，防止出现不配对的情况
+  Idx := LastCharPos(Result, '<');
+  if Idx > 0 then
+    Result := Copy(Result, Idx + 1, MaxInt);
 
   // 最后找最后一个点号后的
   Idx := LastCharPos(Result, '.');
@@ -244,6 +259,13 @@ begin
     end;
     Info.Free;
   end;
+end;
+
+procedure TFormDcu32.btnExtractClick(Sender: TObject);
+const
+  S = '{System.Generics.Collections}TEnumerator<System.Generics.Collections.TPair<System.string,System.Generics.Collections.TDictionary<Data.Bind.ObjectScope.TGeneratorFieldType,Data.Bind.ObjectScope.TValueGeneratorDescription>>>';
+begin
+  mmoDcu.Lines.Add(ExtractSymbol(S));
 end;
 
 end.
