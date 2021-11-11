@@ -157,7 +157,6 @@ uses
   CnExploreFilterEditor in 'ExplorerWizard\CnExploreFilterEditor.pas' {CnExploreFilterEditorForm},
   CnProjectDelTempFrm in 'ProjectExtWizard\CnProjectDelTempFrm.pas' {CnProjectDelTempForm},
   CnRoClasses in 'ReopenWizard\CnRoClasses.pas',
-  CnRoConst in 'ReopenWizard\CnRoConst.pas',
   CnRoFrmFileList in 'ReopenWizard\CnRoFrmFileList.pas' {RecentFilesFrame: TFrame},
   CnRoInterfaces in 'ReopenWizard\CnRoInterfaces.pas',
   CnRoWizard in 'ReopenWizard\CnRoWizard.pas',

@@ -314,7 +314,6 @@
       <Form>CnProjectFilesSnapshotManageForm</Form>
     </DCCReference>
     <DCCReference Include="ReopenWizard\CnRoClasses.pas" />
-    <DCCReference Include="ReopenWizard\CnRoConst.pas" />
     <DCCReference Include="ReopenWizard\CnRoFilesList.pas">
       <Form>CnFilesListForm</Form>
     </DCCReference>

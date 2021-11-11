@@ -401,7 +401,6 @@
             <Form>CnProjectDelTempForm</Form>
         </DCCReference>
         <DCCReference Include="ReopenWizard\CnRoClasses.pas"/>
-        <DCCReference Include="ReopenWizard\CnRoConst.pas"/>
         <DCCReference Include="ReopenWizard\CnRoFrmFileList.pas">
             <Form>RecentFilesFrame</Form>
             <DesignClass>TFrame</DesignClass>
