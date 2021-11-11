@@ -1636,6 +1636,16 @@ var
     Idx := LastCharPos(Result, '.');
     if Idx > 0 then
       Result := Copy(Result, Idx + 1, MaxInt);
+
+{$IFDEF SUPPORT_CLASS_CONSTRUCTOR}
+    if Result = '$ClassInitFlag' then
+      Result := '';
+{$ENDIF}
+
+    if (Length(Result) >= 1) and (Result[1] = ':') then // È¥³ı TAClass.:-1 ÕâÖÖ
+      Delete(Result, 1, 1);
+    if IsInt(Result) then
+      Result := '';
   end;
 
 begin
