@@ -1561,8 +1561,8 @@ var
   SCnUsesInitTreeNotFound: string = 'Search Text Not Found.';
 
   // CnUsesFromIdent
-  SCnUsesUnitFromIdentMenuCaption: string = 'Uses Unit from Identifier...';
-  SCnUsesUnitFromIdentMenuHint: string = 'Search and Uses Unit from Identifier under Cursor';
+  SCnUsesUnitFromIdentMenuCaption: string = 'Use Unit from Identifier...';
+  SCnUsesUnitFromIdentMenuHint: string = 'Search and Use Unit from Identifier under Cursor';
   SCnUsesUnitAnalyzeWaiting: string = 'Analyzing Library Files...';
   SCNUsesUnitFromIdentErrorFmt: string = 'Can NOT Find %s in Searching Units';
 

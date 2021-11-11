@@ -1,5 +1,5 @@
 inherited CnUsesIdentForm: TCnUsesIdentForm
-  Caption = 'Search Identifier in Units to Uses'
+  Caption = 'Search Identifier in Units to Use'
   ClientHeight = 491
   ClientWidth = 730
   PixelsPerInch = 96
