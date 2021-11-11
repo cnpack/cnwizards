@@ -29,7 +29,7 @@ unit CnRoFilesList;
 * 兼容测试：PWin2000 + Delphi 5/6/7
 * 本 地 化：该窗体中的字符串支持本地化处理方式
 * 修改记录：2004-12-12 V1.1
-*               去除TIniContainer处理，改为用IRoOptions接口处理。
+*               去除 TIniContainer 处理，改为用 IRoOptions 接口处理。
 *           2004-03-02 V1.0
 *               创建并移植单元
 ================================================================================
@@ -46,7 +46,7 @@ uses
   StdCtrls, Buttons, ComCtrls, ToolWin, ExtCtrls, IniFiles, ImgList, ActnList,
   Menus,
   CnWizMultiLang, CnWizShareImages, CnRoOptions, CnRoFrmFileList,CnRoClasses,
-  CnRoInterfaces, CnRoConst;
+  CnRoInterfaces;
 
 type
 

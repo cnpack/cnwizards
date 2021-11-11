@@ -54,7 +54,23 @@ interface
 {$IFDEF CNWIZARDS_CNFILESSNAPSHOTWIZARD}
 
 uses
-  Windows, SysUtils, Classes, IniFiles, CnRoConst, CnRoInterfaces, CnWizIni;
+  Windows, SysUtils, Classes, IniFiles, CnRoInterfaces, CnWizIni;
+
+const
+  SProjectGroup = 'bpg';
+  SFavorite = 'fav';
+  SOther = 'oth';
+{$IFDEF DELPHI}
+  SCnRecentFile = 'RecentFiles.ini';
+  SProject = 'dpr';
+  SPackge = 'dpk';
+  SUnt = 'pas';
+{$ELSE}
+  SCnRecentFile = 'RecentFiles_BCB.ini';
+  SProject = 'bpr';
+  SPackge = 'bpk';
+  SUnt = 'cpp';
+{$ENDIF}
 
 type
   PCnRoFileEntry = ^TCnRoFileEntry;
@@ -75,13 +91,39 @@ implementation
 uses
   CnWizOptions, CnCommon;
 
+const
+  SSeparator = '|';
+  SFilePrefix = 'No';
+  SSection = '[%s]';
+  SCapacity = 'Capacity';
+  SDefaults = 'Defaults';
+  SPersistance = 'Persistance';
+
+  SIgnoreDefaultUnits = 'IgnoreDefaultUnits';
+  SDefaultPage = 'DefaultPage';
+  SFormPersistance = 'FormPersistance';
+  SSortPersistance = 'SortPersistance';
+  SColumnPersistance = 'ColumnPersistance';
+  SLocalDate = 'LocalDate';
+  SAutoSaveInterval = 'AutoSaveInterval';
+
+  SColumnSorting = 'ColumnSorting';
+  SDataFormat = 'yyyy-mm-dd hh:nn:ss';
+
+  PageSize = 1024;
+  iDefaultFileQty = 30;
+  LowFileType = 0;
+  HighFileType = 5;
+  FileType: array[LowFileType..HighFileType] of string =
+    (SProjectGroup, SProject, SPackge, SUnt, SFavorite, SOther);
+
 type
   PCnGenericNode = ^TCnGenericNode;
   TCnGenericNode = packed record
     gnNext: PCnGenericNode;
     gnData: record end;
   end;
-  
+
   TCnNodeManager = class(TInterfacedObject, ICnNodeManager)
   private
     FFreeList: Pointer;

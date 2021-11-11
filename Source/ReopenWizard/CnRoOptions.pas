@@ -89,7 +89,7 @@ implementation
 {$R *.DFM}
 
 uses
-  CnRoWizard, CnRoConst, CnRoFilesList;
+  CnRoWizard, CnRoFilesList, CnRoClasses;
 
 {******************************* TCnRoOptionsDlg ******************************}
 
