@@ -107,7 +107,7 @@ var
   SCnImageListSearchFailed: string = 'Search image failed!';
   SCnImageListInvalidFile: string = 'The file is not a valid image file: ';
   SCnImageListSepBmp: string = 'Image dimensions for %s are greater than imagelist dimensions. Separate into %d separate bitmaps?';
-  SCnImageListNoPngLib: string = 'CnPngLib.dll not found! Please reinstall CnWizards.';
+  SCnImageListNoPngLib: string = 'CnPngLib.dll NOT found! Please Reinstall CnWizards.';
   SCnImageListExportFailed: string = 'Export images failed!';
   SCnImageListXPStyleNotSupport: string = 'The ImageList uses XP Style images, but your IDE doesn''t support XPManifest! Do you want to convert images to normal style?';
   SCnImageListSearchIconsetFailed: string = 'Search icon set failed!';

@@ -937,7 +937,7 @@ var
   SCnStatusBarFindFileFmt: string = '%s Files Found...';
   SCnStatClearResult: string = 'Preparing for New Statistics...';
   SCnErrorNoFile: string = 'File NOT Exists.';
-  SCnErrorNoFind: string = 'String not Found: %s';
+  SCnErrorNoFind: string = 'String NOT Found: %s';
   SCnStatBytesFmtStr: string = '%s Bytes, Code %s Bytes, Comment %s Blocks, %s Bytes.';
   SCnStatLinesFmtStr: string = '%s Lines, Code %s Lines, Comment %s Lines, Blank %s Lines, Effective %s Lines.';
   SCnStatFilesCaption: string = 'Files Information';
@@ -1261,8 +1261,8 @@ var
   SCnCorrectPropertyErrNoForm: string = 'No Form to Process.';
   SCnCorrectPropertyErrNoResult: string = 'No Property Found.';
   SCnCorrectPropertyErrNoModuleFound: string = 'Component NOT Exists, Perhaps Deleted or the Form has Closed.';
-  SCnCorrectPropertyErrClassFmt: string = 'Can not Find the Class %s ,Continue?';
-  SCnCorrectPropertyErrClassCreate: string = 'Can not Create the Class %s to Verify the Property, Continue?¡H';
+  SCnCorrectPropertyErrClassFmt: string = 'Can NOT Find the Class %s ,Continue?';
+  SCnCorrectPropertyErrClassCreate: string = 'Can NOT Create the Class %s to Verify the Property, Continue?¡H';
   SCnCorrectPropertyErrPropFmt: string = 'In %s, There''s No %s Property, Maybe only Exist in Decend Classes, Continue?';
   SCnCorrPropSetPropValueErrorFmt: string = 'Error Occurred when Processing the %s Property, Please Check Rules.' + #13#10#13#10;
 
@@ -1305,7 +1305,7 @@ var
   SCnProjExtUnitsFileCount: string = 'Units Count: %d';
   SCnProjExtFramesFileCount: string = 'Frames Count: %d';
   SCnProjExtNotSave: string = '(Not Saved)';
-  SCnProjExtFileNotExistOrNotSave: string = 'The File NOT Exists or Not Saved!';
+  SCnProjExtFileNotExistOrNotSave: string = 'The File NOT Exists or NOT Saved!';
   SCnProjExtOpenFormWarning: string = 'You Selected More than One Forms, Continue?';
   SCnProjExtOpenUnitWarning: string = 'You Selected More than One Units, Continue?';
   SCnProjExtFileIsReadOnly: string = 'The File is ReadOnly, Set its Attribute to Normal and Continue to Convert It?';
@@ -1558,7 +1558,7 @@ var
   SCnUsesInitTreeSearchInProject: string = 'In Project';
   SCnUsesInitTreeSearchInProjectSearch: string = 'In Project Search Path';
   SCnUsesInitTreeSearchInSystemSearch: string = 'In System Search Path';
-  SCnUsesInitTreeNotFound: string = 'Search Text Not Found.';
+  SCnUsesInitTreeNotFound: string = 'Search Text NOT Found.';
 
   // CnUsesFromIdent
   SCnUsesUnitFromIdentMenuCaption: string = 'Use Unit from Identifier...';
